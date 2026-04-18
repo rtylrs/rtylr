@@ -44,6 +44,9 @@ CREATE TABLE IF NOT EXISTS seat_periods (
     INDEX idx_sp_owner_month (owner_id, billing_month)
 );
 
+-- Add paddle_price_id to plans (idempotent — ignored if column already exists)
+ALTER TABLE plans ADD COLUMN IF NOT EXISTS paddle_price_id VARCHAR(100) NULL AFTER trial_days;
+
 INSERT IGNORE INTO plans (name, slug, apps, price_per_seat_cents, trial_days) VALUES
   ('Flow Solo',        'flow_solo',   '["flow"]',                                           400,  14),
   ('Finance Solo',     'finance_solo','["finance"]',                                         300,  14),

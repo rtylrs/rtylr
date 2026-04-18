@@ -30,4 +30,11 @@ func RegisterRoutes(ctx context.Context, router *chi.Mux, service *application.S
 		ctx, router, handlers.UpsertSubscriptionRoutes(),
 		&handlers.UpsertSubscriptionHandler{Service: service},
 	)
+	serverHttp.RegisterPOSTWithValidation[handlers.CheckoutRequest, handlers.CheckoutResponse](
+		ctx, router, handlers.CheckoutRoutes(),
+		&handlers.CheckoutHandler{Service: service},
+	)
+
+	// Webhook uses a raw handler — body must be read before any JSON decoding for HMAC verification.
+	router.Post("/subscriptions/paddle-webhook", handlers.PaddleWebhookHTTPHandler(service))
 }

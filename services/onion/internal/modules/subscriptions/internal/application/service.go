@@ -2,10 +2,12 @@ package application
 
 import (
 	"context"
+	"fmt"
 	"time"
 
 	"github.com/voxire/onion/internal/modules/subscriptions/internal/domain"
 	"github.com/voxire/onion/internal/modules/subscriptions/internal/infrastructure"
+	paddlePkg "github.com/voxire/onion/internal/platform/paddle"
 )
 
 type Service struct {
@@ -156,4 +158,51 @@ func computeLineItem(seatCount, pricePerSeatCents int, start time.Time, end *tim
 		PricePerSeatCents: pricePerSeatCents,
 		AmountCents:       amount,
 	}
+}
+
+// ── Paddle ─────────────────────────────────────────────────────────────────────
+
+// CreateCheckout creates a Paddle transaction for the given plan and returns the checkout URL.
+func (s *Service) CreateCheckout(ctx context.Context, ownerID int64, planSlug string, ownerEmail string) (string, error) {
+	plan, err := s.repo.GetPlanBySlug(ctx, planSlug)
+	if err != nil {
+		return "", err
+	}
+
+	if plan.PaddlePriceID == "" {
+		return "", fmt.Errorf("plan %s has no Paddle price configured", planSlug)
+	}
+
+	return paddlePkg.CreateTransaction(ctx, ownerID, plan.PaddlePriceID, ownerEmail)
+}
+
+// HandlePaddleWebhook processes a verified Paddle webhook event.
+// It updates the subscription record based on the event type.
+func (s *Service) HandlePaddleWebhook(ctx context.Context, event paddlePkg.WebhookEvent, data paddlePkg.SubscriptionData) error {
+	// Map Paddle subscription ID → owner ID
+	ownerID, err := s.repo.GetOwnerIDByPaddleSubscription(ctx, data.ID)
+	if err != nil {
+		// Subscription might not exist yet (first webhook before our DB is updated)
+		ownerIDRaw := data.CustomData["owner_id"]
+		if ownerIDRaw == "" {
+			return fmt.Errorf("cannot resolve owner from paddle subscription %s", data.ID)
+		}
+		_, scanErr := fmt.Sscanf(ownerIDRaw, "%d", &ownerID)
+		if scanErr != nil || ownerID == 0 {
+			return fmt.Errorf("invalid owner_id in custom_data: %s", ownerIDRaw)
+		}
+	}
+
+	// Map Paddle status to our status
+	status := "active"
+	switch data.Status {
+	case "canceled":
+		status = "cancelled"
+	case "paused":
+		status = "cancelled"
+	case "trialing":
+		status = "trial"
+	}
+
+	return s.repo.UpdatePaddleSubscription(ctx, ownerID, data.ID, data.CustomerID, status)
 }

@@ -18,6 +18,7 @@ type Plan struct {
 	Apps              []string  `json:"apps"`
 	PricePerSeatCents int       `json:"price_per_seat_cents"`
 	TrialDays         int       `json:"trial_days"`
+	PaddlePriceID     string    `json:"paddle_price_id,omitempty"`
 	IsActive          bool      `json:"is_active"`
 	CreatedAt         time.Time `json:"created_at"`
 }
@@ -100,4 +101,6 @@ type Repository interface {
 	OpenPeriod(ctx context.Context, subscriptionID, ownerID int64, seatCount, pricePerSeatCents int, periodStart, billingMonth time.Time) error
 	UpdateSeatCount(ctx context.Context, ownerID int64, seatCount int) error
 	GetBillingHistory(ctx context.Context, ownerID int64, limit int) ([]BillingHistoryMonth, error)
+	UpdatePaddleSubscription(ctx context.Context, ownerID int64, paddleSubID, paddleCustID, status string) error
+	GetOwnerIDByPaddleSubscription(ctx context.Context, paddleSubID string) (int64, error)
 }

@@ -2,7 +2,10 @@ package handlers
 
 import (
 	"context"
+	"encoding/json"
 	"errors"
+	"fmt"
+	"io"
 	"net/http"
 	"time"
 
@@ -10,6 +13,8 @@ import (
 	"github.com/voxire/onion/internal/modules/subscriptions/internal/domain"
 	authPkg "github.com/voxire/onion/internal/platform/auth"
 	errorModels "github.com/voxire/onion/internal/platform/errors"
+	"github.com/voxire/onion/internal/platform/logger"
+	paddlePkg "github.com/voxire/onion/internal/platform/paddle"
 )
 
 // ─── List Plans ───────────────────────────────────────────────────────────────
@@ -298,4 +303,117 @@ func (h *UpsertSubscriptionHandler) Serve(ctx context.Context, req *UpsertSubscr
 	}
 
 	return UpsertSubscriptionResponse{Message: "Subscription updated"}, nil
+}
+
+// ─── Checkout ─────────────────────────────────────────────────────────────────
+
+func CheckoutRoutes() []string { return []string{"/subscriptions/checkout"} }
+
+type CheckoutHandler struct{ Service *application.Service }
+
+type CheckoutRequest struct {
+	PlanSlug string `json:"plan_slug"`
+	Email    string `json:"email,omitempty"`
+}
+
+type CheckoutResponse struct {
+	CheckoutURL string `json:"checkout_url"`
+}
+
+func (h *CheckoutHandler) Validate(_ context.Context, req *CheckoutRequest) *errorModels.ServerError {
+	if req.PlanSlug == "" {
+		return &errorModels.ServerError{
+			HTTPCode: http.StatusBadRequest,
+			Code:     http.StatusBadRequest,
+			Message:  "plan_slug is required",
+		}
+	}
+	return nil
+}
+
+func (h *CheckoutHandler) Serve(ctx context.Context, req *CheckoutRequest) (CheckoutResponse, *errorModels.ServerError) {
+	device := authPkg.DeviceCtx(ctx)
+	if device.User == nil {
+		return CheckoutResponse{}, errorModels.PermissionDeniedServerError()
+	}
+
+	checkoutURL, err := h.Service.CreateCheckout(ctx, device.User.UserID, req.PlanSlug, req.Email)
+	if err != nil {
+		if errors.Is(err, domain.ErrPlanNotFound) {
+			return CheckoutResponse{}, &errorModels.ServerError{
+				HTTPCode: http.StatusNotFound,
+				Code:     http.StatusNotFound,
+				Message:  "Plan not found",
+			}
+		}
+		logger.Ctx(ctx).Error("failed to create paddle checkout",
+			logger.String("owner_id", fmt.Sprintf("%d", device.User.UserID)),
+			logger.String("plan_slug", req.PlanSlug),
+			logger.Error(err),
+		)
+		return CheckoutResponse{}, &errorModels.ServerError{
+			HTTPCode: http.StatusInternalServerError,
+			Code:     http.StatusInternalServerError,
+			Message:  "Failed to create checkout session",
+		}
+	}
+
+	return CheckoutResponse{CheckoutURL: checkoutURL}, nil
+}
+
+// ─── Paddle Webhook ───────────────────────────────────────────────────────────
+
+// PaddleWebhookHTTPHandler returns a raw http.HandlerFunc for Paddle webhook events.
+// It bypasses the typed handler infrastructure so that the raw request body can be read
+// for HMAC-SHA256 signature verification before any JSON parsing occurs.
+func PaddleWebhookHTTPHandler(service *application.Service) http.HandlerFunc {
+	return func(w http.ResponseWriter, r *http.Request) {
+		ctx := r.Context()
+
+		rawBody, err := io.ReadAll(r.Body)
+		if err != nil {
+			http.Error(w, `{"error":"failed to read request body"}`, http.StatusBadRequest)
+			return
+		}
+
+		// Verify webhook signature
+		sig := r.Header.Get("Paddle-Signature")
+		if verifyErr := paddlePkg.VerifyWebhookSignature(rawBody, sig); verifyErr != nil {
+			http.Error(w, `{"error":"invalid webhook signature"}`, http.StatusUnauthorized)
+			return
+		}
+
+		var event paddlePkg.WebhookEvent
+		if parseErr := json.Unmarshal(rawBody, &event); parseErr != nil {
+			http.Error(w, `{"error":"failed to parse webhook payload"}`, http.StatusBadRequest)
+			return
+		}
+
+		// Only handle subscription events
+		switch event.EventType {
+		case "subscription.created", "subscription.updated", "subscription.activated",
+			"subscription.cancelled", "subscription.paused":
+		default:
+			// Unhandled event type — acknowledge and ignore
+			w.WriteHeader(http.StatusOK)
+			return
+		}
+
+		var data paddlePkg.SubscriptionData
+		if parseErr := json.Unmarshal(event.Data, &data); parseErr != nil {
+			http.Error(w, `{"error":"failed to parse subscription data"}`, http.StatusBadRequest)
+			return
+		}
+
+		if handleErr := service.HandlePaddleWebhook(ctx, event, data); handleErr != nil {
+			logger.Ctx(ctx).Error("paddle webhook processing failed",
+				logger.String("event_type", event.EventType),
+				logger.String("subscription_id", data.ID),
+				logger.Error(handleErr),
+			)
+			// Return 200 to prevent Paddle retries for business logic errors
+		}
+
+		w.WriteHeader(http.StatusOK)
+	}
 }

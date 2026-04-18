@@ -22,7 +22,8 @@ func NewRepository(_ context.Context) *Repository {
 
 func (r *Repository) ListPlans(ctx context.Context) ([]domain.Plan, error) {
 	rows, err := r.db.QueryContext(ctx,
-		`SELECT id, name, slug, apps, price_per_seat_cents, trial_days, is_active, created_at
+		`SELECT id, name, slug, apps, price_per_seat_cents, trial_days,
+		        COALESCE(paddle_price_id, ''), is_active, created_at
 		 FROM plans WHERE is_active = TRUE ORDER BY id ASC`)
 	if err != nil {
 		return nil, err
@@ -33,7 +34,8 @@ func (r *Repository) ListPlans(ctx context.Context) ([]domain.Plan, error) {
 	for rows.Next() {
 		var p domain.Plan
 		var appsJSON string
-		if err := rows.Scan(&p.ID, &p.Name, &p.Slug, &appsJSON, &p.PricePerSeatCents, &p.TrialDays, &p.IsActive, &p.CreatedAt); err != nil {
+		if err := rows.Scan(&p.ID, &p.Name, &p.Slug, &appsJSON, &p.PricePerSeatCents,
+			&p.TrialDays, &p.PaddlePriceID, &p.IsActive, &p.CreatedAt); err != nil {
 			return nil, err
 		}
 		if jsonErr := json.Unmarshal([]byte(appsJSON), &p.Apps); jsonErr != nil {
@@ -49,9 +51,11 @@ func (r *Repository) GetPlanBySlug(ctx context.Context, slug string) (*domain.Pl
 	var p domain.Plan
 	var appsJSON string
 	err := r.db.QueryRowContext(ctx,
-		`SELECT id, name, slug, apps, price_per_seat_cents, trial_days, is_active, created_at
+		`SELECT id, name, slug, apps, price_per_seat_cents, trial_days,
+		        COALESCE(paddle_price_id, ''), is_active, created_at
 		 FROM plans WHERE slug = ? AND is_active = TRUE`,
-		slug).Scan(&p.ID, &p.Name, &p.Slug, &appsJSON, &p.PricePerSeatCents, &p.TrialDays, &p.IsActive, &p.CreatedAt)
+		slug).Scan(&p.ID, &p.Name, &p.Slug, &appsJSON, &p.PricePerSeatCents,
+		&p.TrialDays, &p.PaddlePriceID, &p.IsActive, &p.CreatedAt)
 	if err != nil {
 		if err == sql.ErrNoRows {
 			return nil, domain.ErrPlanNotFound
@@ -68,9 +72,11 @@ func (r *Repository) GetPlanByID(ctx context.Context, id int64) (*domain.Plan, e
 	var p domain.Plan
 	var appsJSON string
 	err := r.db.QueryRowContext(ctx,
-		`SELECT id, name, slug, apps, price_per_seat_cents, trial_days, is_active, created_at
+		`SELECT id, name, slug, apps, price_per_seat_cents, trial_days,
+		        COALESCE(paddle_price_id, ''), is_active, created_at
 		 FROM plans WHERE id = ?`,
-		id).Scan(&p.ID, &p.Name, &p.Slug, &appsJSON, &p.PricePerSeatCents, &p.TrialDays, &p.IsActive, &p.CreatedAt)
+		id).Scan(&p.ID, &p.Name, &p.Slug, &appsJSON, &p.PricePerSeatCents,
+		&p.TrialDays, &p.PaddlePriceID, &p.IsActive, &p.CreatedAt)
 	if err != nil {
 		if err == sql.ErrNoRows {
 			return nil, domain.ErrPlanNotFound
@@ -346,4 +352,29 @@ func computeLineItem(seatCount, pricePerSeatCents int, start time.Time, end *tim
 		PricePerSeatCents: pricePerSeatCents,
 		AmountCents:       amount,
 	}
+}
+
+// ── Paddle ─────────────────────────────────────────────────────────────────────
+
+// UpdatePaddleSubscription writes the Paddle subscription ID, customer ID, and status
+// to the subscriptions row for the given owner.
+func (r *Repository) UpdatePaddleSubscription(ctx context.Context, ownerID int64, paddleSubID, paddleCustID, status string) error {
+	_, err := r.db.ExecContext(ctx,
+		`UPDATE subscriptions
+		 SET paddle_subscription_id = ?, paddle_customer_id = ?, status = ?, updated_at = CURRENT_TIMESTAMP
+		 WHERE owner_id = ?`,
+		paddleSubID, paddleCustID, status, ownerID)
+	return err
+}
+
+// GetOwnerIDByPaddleSubscription returns the owner_id for a given Paddle subscription ID.
+func (r *Repository) GetOwnerIDByPaddleSubscription(ctx context.Context, paddleSubID string) (int64, error) {
+	var ownerID int64
+	err := r.db.QueryRowContext(ctx,
+		`SELECT owner_id FROM subscriptions WHERE paddle_subscription_id = ? LIMIT 1`,
+		paddleSubID).Scan(&ownerID)
+	if err != nil {
+		return 0, err
+	}
+	return ownerID, nil
 }
