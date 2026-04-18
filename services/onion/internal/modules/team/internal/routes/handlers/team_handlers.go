@@ -380,6 +380,55 @@ func (h *DeactivateUserHandler) Serve(ctx context.Context, req *DeactivateUserRe
 	return DeactivateUserResponse{Message: "User deactivated"}, nil
 }
 
+// ─── Deactivate Member by Path ID ─────────────────────────────────────────────
+// POST /team/members/{id}/deactivate — convenience endpoint used by per-app UIs
+
+func DeactivateMemberRoutes() []string { return []string{"/team/members/{id}/deactivate"} }
+
+type DeactivateMemberHandler struct{ Service *application.Service }
+
+type DeactivateMemberRequest struct{}
+
+type DeactivateMemberResponse struct {
+	Message string `json:"message"`
+}
+
+func (h *DeactivateMemberHandler) Serve(ctx context.Context, _ *DeactivateMemberRequest) (DeactivateMemberResponse, *errorModels.ServerError) {
+	device := authPkg.DeviceCtx(ctx)
+	if device.User == nil {
+		return DeactivateMemberResponse{}, errorModels.PermissionDeniedServerError()
+	}
+
+	memberIDRaw := chi.URLParamFromCtx(ctx, "id")
+	memberID, err := strconv.ParseInt(memberIDRaw, 10, 64)
+	if err != nil || memberID <= 0 {
+		return DeactivateMemberResponse{}, &errorModels.ServerError{
+			HTTPCode: http.StatusBadRequest,
+			Code:     http.StatusBadRequest,
+			Message:  "Invalid member id",
+		}
+	}
+
+	ownerID := device.User.UserID
+
+	if err := h.Service.DeactivateUser(ctx, ownerID, memberID); err != nil {
+		return DeactivateMemberResponse{}, &errorModels.ServerError{
+			HTTPCode: http.StatusInternalServerError,
+			Code:     http.StatusInternalServerError,
+			Message:  "Failed to deactivate member",
+		}
+	}
+
+	// Record the seat change asynchronously so billing stays accurate.
+	go func() {
+		bgCtx, cancel := context.WithTimeout(context.WithoutCancel(ctx), 10*time.Second)
+		defer cancel()
+		h.Service.RecordSeatChange(bgCtx, ownerID)
+	}()
+
+	return DeactivateMemberResponse{Message: "Member deactivated"}, nil
+}
+
 // ─── Get Me ───────────────────────────────────────────────────────────────────
 
 func MeRoutes() []string { return []string{"/user/me"} }
