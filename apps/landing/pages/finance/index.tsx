@@ -1,4 +1,4 @@
-import React from 'react';
+import React, { useState } from 'react';
 import { motion } from 'motion/react';
 import { useRouter } from 'next/router';
 import {
@@ -18,18 +18,120 @@ import { navigateExternal } from '../../lib/navigation';
 import { blurFadeIn, staggerBlur, viewportOnce } from '../../lib/animations';
 import styles from './finance.module.scss';
 
-// Monthly P&L rows displayed in the hero mockup
-const PL_ROWS = [
-  { label: 'Food & beverage', amount: 184_210, delta: 8.4, positive: true },
-  { label: 'Catering & events', amount: 42_180, delta: 12.1, positive: true },
-  { label: 'Delivery fees', amount: 9_640, delta: -3.2, positive: false },
-  { label: 'Subtotal — Revenue', amount: 236_030, delta: 7.8, positive: true, subtotal: true },
-  { label: 'COGS', amount: -68_420, delta: 2.1, positive: false },
-  { label: 'Labor', amount: -74_890, delta: 0.9, positive: false },
-  { label: 'Rent & utilities', amount: -22_400, delta: 0, positive: false },
-  { label: 'Operating expenses', amount: -18_720, delta: 5.4, positive: false },
-  { label: 'Subtotal — Costs', amount: -184_430, delta: 2.2, positive: false, subtotal: true },
-  { label: 'Net income', amount: 51_600, delta: 18.3, positive: true, total: true },
+// ── P&L data shaped per time range ────────────────────────────────────────
+// Each range defines its own amounts + comparison period label.
+
+type Range = 'week' | 'month' | 'quarter' | 'year';
+
+interface PLRow {
+  label: string;
+  amount: number;
+  delta: number;
+  positive: boolean;
+  subtotal?: boolean;
+  total?: boolean;
+}
+
+interface PLData {
+  label: string;
+  compareLabel: string;
+  net: number;
+  netDelta: number;
+  rows: PLRow[];
+}
+
+const PL_DATA: Record<Range, PLData> = {
+  week: {
+    label: 'Week of April 13 — April 19, 2026',
+    compareLabel: 'vs last week',
+    net: 11_800,
+    netDelta: 9.2,
+    rows: [
+      { label: 'Food & beverage', amount: 42_380, delta: 6.1, positive: true },
+      { label: 'Catering & events', amount: 9_040, delta: 4.8, positive: true },
+      { label: 'Delivery fees', amount: 2_180, delta: -1.4, positive: false },
+      { label: 'Subtotal — Revenue', amount: 53_600, delta: 5.4, positive: true, subtotal: true },
+      { label: 'COGS', amount: -15_620, delta: 1.9, positive: false },
+      { label: 'Labor', amount: -17_140, delta: 0.8, positive: false },
+      { label: 'Rent & utilities', amount: -5_180, delta: 0, positive: false },
+      { label: 'Operating expenses', amount: -3_860, delta: 2.4, positive: false },
+      { label: 'Subtotal — Costs', amount: -41_800, delta: 1.6, positive: false, subtotal: true },
+      { label: 'Net income', amount: 11_800, delta: 9.2, positive: true, total: true },
+    ],
+  },
+  month: {
+    label: 'April 2026',
+    compareLabel: 'vs March',
+    net: 51_600,
+    netDelta: 18.3,
+    rows: [
+      { label: 'Food & beverage', amount: 184_210, delta: 8.4, positive: true },
+      { label: 'Catering & events', amount: 42_180, delta: 12.1, positive: true },
+      { label: 'Delivery fees', amount: 9_640, delta: -3.2, positive: false },
+      { label: 'Subtotal — Revenue', amount: 236_030, delta: 7.8, positive: true, subtotal: true },
+      { label: 'COGS', amount: -68_420, delta: 2.1, positive: false },
+      { label: 'Labor', amount: -74_890, delta: 0.9, positive: false },
+      { label: 'Rent & utilities', amount: -22_400, delta: 0, positive: false },
+      { label: 'Operating expenses', amount: -18_720, delta: 5.4, positive: false },
+      { label: 'Subtotal — Costs', amount: -184_430, delta: 2.2, positive: false, subtotal: true },
+      { label: 'Net income', amount: 51_600, delta: 18.3, positive: true, total: true },
+    ],
+  },
+  quarter: {
+    label: 'Q2 2026 (Apr–Jun to-date)',
+    compareLabel: 'vs Q1',
+    net: 162_400,
+    netDelta: 22.4,
+    rows: [
+      { label: 'Food & beverage', amount: 548_920, delta: 11.6, positive: true },
+      { label: 'Catering & events', amount: 138_440, delta: 18.2, positive: true },
+      { label: 'Delivery fees', amount: 29_180, delta: -5.1, positive: false },
+      { label: 'Subtotal — Revenue', amount: 716_540, delta: 10.9, positive: true, subtotal: true },
+      { label: 'COGS', amount: -206_880, delta: 2.9, positive: false },
+      { label: 'Labor', amount: -226_160, delta: 1.3, positive: false },
+      { label: 'Rent & utilities', amount: -67_200, delta: 0, positive: false },
+      { label: 'Operating expenses', amount: -53_900, delta: 4.8, positive: false },
+      { label: 'Subtotal — Costs', amount: -554_140, delta: 2.4, positive: false, subtotal: true },
+      { label: 'Net income', amount: 162_400, delta: 22.4, positive: true, total: true },
+    ],
+  },
+  year: {
+    label: '2026 year-to-date',
+    compareLabel: 'vs 2025 YTD',
+    net: 428_000,
+    netDelta: 31.8,
+    rows: [
+      { label: 'Food & beverage', amount: 1_420_680, delta: 14.2, positive: true },
+      { label: 'Catering & events', amount: 362_400, delta: 22.6, positive: true },
+      { label: 'Delivery fees', amount: 82_940, delta: -2.8, positive: false },
+      {
+        label: 'Subtotal — Revenue',
+        amount: 1_866_020,
+        delta: 13.9,
+        positive: true,
+        subtotal: true,
+      },
+      { label: 'COGS', amount: -538_100, delta: 3.4, positive: false },
+      { label: 'Labor', amount: -584_820, delta: 1.6, positive: false },
+      { label: 'Rent & utilities', amount: -179_200, delta: 0, positive: false },
+      { label: 'Operating expenses', amount: -135_900, delta: 6.1, positive: false },
+      {
+        label: 'Subtotal — Costs',
+        amount: -1_438_020,
+        delta: 2.8,
+        positive: false,
+        subtotal: true,
+      },
+      { label: 'Net income', amount: 428_000, delta: 31.8, positive: true, total: true },
+    ],
+  },
+};
+
+const RANGE_TABS: { id: Range; label: string }[] = [
+  { id: 'week', label: 'Week' },
+  { id: 'month', label: 'Month' },
+  { id: 'quarter', label: 'Quarter' },
+  { id: 'year', label: 'Year' },
 ];
 
 const PILLARS = [
@@ -62,6 +164,8 @@ const fmt = (n: number): string => {
 
 const FinancePage = (): JSX.Element => {
   const router = useRouter();
+  const [range, setRange] = useState<Range>('month');
+  const data = PL_DATA[range];
 
   const goRegister = (): void => {
     navigateExternal(`${APP_URLS.auth}/register`);
@@ -121,19 +225,43 @@ const FinancePage = (): JSX.Element => {
             >
               <div className={styles.plHeader}>
                 <div>
-                  <div className={styles.plTitle}>Profit &amp; Loss · April 2026</div>
+                  <div className={styles.plTitle}>Profit &amp; Loss · {data.label}</div>
                   <div className={styles.plSubtitle}>
-                    Terrace · monthly view · updated 14:02 EST
+                    Terrace · updated live · click a range to recalculate
                   </div>
                 </div>
                 <div className={styles.plNetBadge}>
-                  <span className={styles.plNetLabel}>Net this month</span>
-                  <span className={styles.plNetValue}>$51,600</span>
+                  <span className={styles.plNetLabel}>Net {range}</span>
+                  <motion.span
+                    key={`net-${range}`}
+                    className={styles.plNetValue}
+                    initial={{ opacity: 0, y: -4 }}
+                    animate={{ opacity: 1, y: 0 }}
+                    transition={{ duration: 0.24 }}
+                  >
+                    {fmt(data.net)}
+                  </motion.span>
                   <span className={styles.plNetDelta}>
-                    <ArrowUp size={12} strokeWidth={2.5} />
-                    +18.3% vs March
+                    <ArrowUp size={12} strokeWidth={2.5} />+{data.netDelta.toFixed(1)}%{' '}
+                    {data.compareLabel}
                   </span>
                 </div>
+              </div>
+
+              {/* Range tabs — live re-computation */}
+              <div className={styles.rangeTabs} role="tablist" aria-label="Time range">
+                {RANGE_TABS.map((t) => (
+                  <button
+                    key={t.id}
+                    type="button"
+                    role="tab"
+                    aria-selected={range === t.id}
+                    onClick={() => setRange(t.id)}
+                    className={`${styles.rangeTab} ${range === t.id ? styles.rangeTabActive : ''}`}
+                  >
+                    {t.label}
+                  </button>
+                ))}
               </div>
 
               <div className={styles.plTableWrap}>
@@ -142,11 +270,16 @@ const FinancePage = (): JSX.Element => {
                     <tr>
                       <th>Line item</th>
                       <th className={styles.colNum}>Amount</th>
-                      <th className={styles.colNum}>vs last month</th>
+                      <th className={styles.colNum}>{data.compareLabel}</th>
                     </tr>
                   </thead>
-                  <tbody>
-                    {PL_ROWS.map((row) => (
+                  <motion.tbody
+                    key={range}
+                    initial={{ opacity: 0 }}
+                    animate={{ opacity: 1 }}
+                    transition={{ duration: 0.28 }}
+                  >
+                    {data.rows.map((row) => (
                       <tr
                         key={row.label}
                         className={`${row.subtotal ? styles.rowSubtotal : ''} ${
@@ -175,7 +308,7 @@ const FinancePage = (): JSX.Element => {
                         </td>
                       </tr>
                     ))}
-                  </tbody>
+                  </motion.tbody>
                 </table>
               </div>
               <div className={styles.plFooter}>

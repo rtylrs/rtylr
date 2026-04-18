@@ -500,7 +500,327 @@
   }
 }
 
-// ── INTEGRATED STORY ────────────────────────────────────────────────────────
+// ── INTERACTIVE SEGMENT BUILDER ────────────────────────────────────────────
+
+.builderSection {
+  padding: 0 32px 120px;
+  max-width: 1280px;
+  margin: 0 auto;
+}
+
+.builderHeader {
+  max-width: 620px;
+  margin-bottom: 40px;
+}
+
+.builderCopy {
+  font-size: 1rem;
+  line-height: 1.65;
+  color: rgba(255, 255, 255, 0.55);
+  margin: 18px 0 0;
+}
+
+.builderGrid {
+  display: grid;
+  grid-template-columns: 320px 1fr;
+  gap: 20px;
+  align-items: stretch;
+}
+
+// Filter panel (left)
+.filterPanel {
+  display: flex;
+  flex-direction: column;
+  background: rgba(255, 255, 255, 0.02);
+  border: 1px solid rgba(255, 255, 255, 0.08);
+  border-radius: 10px;
+  overflow: hidden;
+}
+
+.filterPanelHead {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  padding: 14px 18px;
+  border-bottom: 1px solid rgba(255, 255, 255, 0.06);
+  background: rgba(255, 255, 255, 0.015);
+  font-size: 0.78rem;
+  font-weight: 600;
+  letter-spacing: 0.5px;
+  color: rgba(255, 255, 255, 0.7);
+  text-transform: uppercase;
+
+  svg {
+    color: rgba(214, 184, 142, 0.9);
+  }
+}
+
+.filterClear {
+  margin-left: auto;
+  background: none;
+  border: none;
+  font-size: 0.72rem;
+  font-weight: 600;
+  color: rgba(255, 255, 255, 0.55);
+  cursor: pointer;
+  letter-spacing: 0.4px;
+  text-transform: uppercase;
+
+  &:hover {
+    color: #e8e6e1;
+  }
+}
+
+.filterList {
+  list-style: none;
+  padding: 8px;
+  margin: 0;
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+  flex-grow: 1;
+}
+
+.filterToggle {
+  width: 100%;
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  padding: 10px 12px;
+  background: transparent;
+  border: none;
+  border-radius: 6px;
+  color: rgba(255, 255, 255, 0.75);
+  font-size: 0.88rem;
+  font-family: var(--primary-font);
+  letter-spacing: -0.005em;
+  cursor: pointer;
+  text-align: left;
+  transition:
+    background 0.15s ease,
+    color 0.15s ease;
+
+  &:hover {
+    background: rgba(255, 255, 255, 0.04);
+    color: #e8e6e1;
+  }
+}
+
+.filterToggleActive {
+  background: rgba(214, 184, 142, 0.1);
+  color: #e8e6e1;
+
+  &:hover {
+    background: rgba(214, 184, 142, 0.14);
+  }
+}
+
+.filterCheckbox {
+  width: 14px;
+  height: 14px;
+  border-radius: 3px;
+  border: 1.5px solid rgba(255, 255, 255, 0.2);
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  flex-shrink: 0;
+  transition:
+    border-color 0.15s ease,
+    background 0.15s ease;
+
+  .filterToggleActive & {
+    border-color: #d6b88e;
+    background: #d6b88e;
+  }
+}
+
+.filterCheckDot {
+  width: 6px;
+  height: 6px;
+  border-radius: 1px;
+  background: #1a1612;
+}
+
+.filterFoot {
+  padding: 10px 12px 14px;
+  border-top: 1px solid rgba(255, 255, 255, 0.05);
+}
+
+.filterAddMore {
+  width: 100%;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 6px;
+  padding: 8px 12px;
+  background: transparent;
+  border: 1px dashed rgba(255, 255, 255, 0.12);
+  border-radius: 6px;
+  color: rgba(255, 255, 255, 0.55);
+  font-size: 0.8rem;
+  font-family: var(--primary-font);
+  cursor: pointer;
+  letter-spacing: -0.005em;
+
+  &:hover {
+    border-color: rgba(255, 255, 255, 0.25);
+    color: #e8e6e1;
+  }
+}
+
+// Audience panel (right)
+.audiencePanel {
+  background: #121110;
+  border: 1px solid rgba(255, 255, 255, 0.08);
+  border-radius: 10px;
+  overflow: hidden;
+  display: flex;
+  flex-direction: column;
+}
+
+.audienceHead {
+  display: flex;
+  align-items: center;
+  gap: 16px;
+  padding: 18px 22px;
+  border-bottom: 1px solid rgba(255, 255, 255, 0.06);
+  background: rgba(255, 255, 255, 0.015);
+  flex-wrap: wrap;
+}
+
+.audienceCountBig {
+  font-size: 2rem;
+  font-weight: 700;
+  color: #e8e6e1;
+  letter-spacing: -0.03em;
+  font-variant-numeric: tabular-nums;
+  line-height: 1;
+}
+
+.audienceCountLabel {
+  font-size: 0.82rem;
+  color: rgba(255, 255, 255, 0.5);
+  letter-spacing: -0.005em;
+  flex: 1;
+  min-width: 180px;
+}
+
+.audienceCta {
+  background: #e8e6e1;
+  color: #0a0a0a;
+  border: none;
+  border-radius: 999px;
+  padding: 8px 18px;
+  font-size: 0.82rem;
+  font-weight: 600;
+  font-family: var(--primary-font);
+  letter-spacing: -0.005em;
+  cursor: pointer;
+  transition:
+    background 0.18s ease,
+    transform 0.18s ease;
+
+  &:hover:not(:disabled) {
+    background: #ffffff;
+    transform: translateY(-1px);
+  }
+
+  &:disabled {
+    opacity: 0.4;
+    cursor: not-allowed;
+  }
+}
+
+.audienceList {
+  list-style: none;
+  padding: 8px;
+  margin: 0;
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+  max-height: 420px;
+  overflow-y: auto;
+}
+
+.audienceEmpty {
+  padding: 36px 20px;
+  text-align: center;
+  color: rgba(255, 255, 255, 0.45);
+  font-size: 0.9rem;
+}
+
+.audienceItem {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  padding: 12px 14px;
+  border-radius: 6px;
+  transition: background 0.18s ease;
+
+  &:hover {
+    background: rgba(255, 255, 255, 0.03);
+  }
+}
+
+.audienceAvatar {
+  width: 34px;
+  height: 34px;
+  border-radius: 50%;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 0.76rem;
+  font-weight: 700;
+  color: #1a1612;
+  flex-shrink: 0;
+  letter-spacing: 0.3px;
+}
+
+.audienceMeta {
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+  min-width: 0;
+}
+
+.audienceName {
+  font-size: 0.92rem;
+  font-weight: 600;
+  color: #e8e6e1;
+  letter-spacing: -0.005em;
+}
+
+.audienceSub {
+  font-size: 0.76rem;
+  color: rgba(255, 255, 255, 0.48);
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+.audienceTag {
+  display: inline-flex;
+  align-items: center;
+  gap: 4px;
+  padding: 3px 8px;
+  font-size: 0.64rem;
+  font-weight: 700;
+  letter-spacing: 0.5px;
+  border-radius: 999px;
+  background: rgba(214, 184, 142, 0.14);
+  border: 1px solid rgba(214, 184, 142, 0.3);
+  color: #d6b88e;
+  flex-shrink: 0;
+}
+
+@media (max-width: 900px) {
+  .builderGrid {
+    grid-template-columns: 1fr;
+  }
+}
+
+// ── INTEGRATED STORY (legacy, no longer rendered) ──────────────────────────
 
 .integratedSection {
   padding: 0 32px 120px;

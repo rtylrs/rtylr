@@ -1,7 +1,7 @@
 import React from 'react';
 import { motion } from 'motion/react';
 import { useRouter } from 'next/router';
-import { Receipt, CreditCard, Split, Wifi, WifiOff, Users, Clock, TrendingUp } from 'lucide-react';
+import { Receipt, CreditCard, Split, Wifi, WifiOff } from 'lucide-react';
 import AppLayout from '../../components/Layout/AppLayout';
 import MainLayout from '../../layouts/Main/MainLayout';
 import HelmetContainer from '../../components/HelmetContainer';
@@ -39,13 +39,6 @@ const FEATURES = [
     title: 'Works when the internet doesn\u2019t',
     copy: 'Full offline mode. Queues transactions locally and syncs the moment you\u2019re back online.',
   },
-];
-
-const STATS = [
-  { value: '< 200ms', label: 'Time per checkout' },
-  { value: '99.99%', label: 'Offline reliability' },
-  { value: '12+', label: 'Payment methods' },
-  { value: '7', label: 'Apps connected out of the box' },
 ];
 
 const POSPage = (): JSX.Element => {
@@ -201,73 +194,121 @@ const POSPage = (): JSX.Element => {
             </motion.div>
           </section>
 
-          {/* ── STATS STRIP — matching stats pattern from home ────────────── */}
+          {/* ── COMPARISON TABLE — vs Toast / Square / Shopify POS ────────── */}
           <motion.section
-            className={styles.statsSection}
+            className={styles.compareSection}
             initial="hidden"
             whileInView="visible"
             viewport={viewportOnce}
             variants={staggerBlur}
           >
-            <div className={styles.statsGrid}>
-              {STATS.map((stat) => (
-                <motion.div key={stat.label} className={styles.statCell} variants={blurFadeIn}>
-                  <span className={styles.statValue}>{stat.value}</span>
-                  <span className={styles.statLabel}>{stat.label}</span>
-                </motion.div>
-              ))}
-            </div>
-          </motion.section>
-
-          {/* ── INTEGRATED SECTION — "it talks to everything else" ─────────── */}
-          <motion.section
-            className={styles.integratedSection}
-            initial="hidden"
-            whileInView="visible"
-            viewport={viewportOnce}
-            variants={staggerBlur}
-          >
-            <div className={styles.integratedLeft}>
-              <motion.span className={styles.sectionEyebrow} variants={blurFadeIn}>
-                BUILT INTO THE REST
-              </motion.span>
-              <motion.h2 className={styles.sectionTitle} variants={blurFadeIn}>
-                Every sale hits
+            <motion.div className={styles.compareHeader} variants={blurFadeIn}>
+              <span className={styles.sectionEyebrow}>VS THE OTHERS</span>
+              <h2 className={styles.sectionTitle}>
+                What every other register
                 <br />
-                every other app.
-              </motion.h2>
-              <motion.p className={styles.integratedCopy} variants={blurFadeIn}>
-                Tips flow into HR payroll. Inventory counts down live in ERP. Customer purchases
-                power CRM segments. Revenue rolls up into Finance. No CSV exports, no nightly syncs,
-                no second source of truth.
-              </motion.p>
-            </div>
-            <motion.ul className={styles.integratedList} variants={blurFadeIn}>
-              <li>
-                <Users size={16} strokeWidth={2} />
-                <span>
-                  <strong>HR</strong> — tips, hours, and shift close-out flow into payroll
-                </span>
-              </li>
-              <li>
-                <TrendingUp size={16} strokeWidth={2} />
-                <span>
-                  <strong>ERP</strong> — inventory depletes per menu item in real time
-                </span>
-              </li>
-              <li>
-                <Clock size={16} strokeWidth={2} />
-                <span>
-                  <strong>CRM</strong> — every receipt enriches the customer profile
-                </span>
-              </li>
-              <li>
-                <Receipt size={16} strokeWidth={2} />
-                <span>
-                  <strong>Finance</strong> — cash drawer reconciled against deposits nightly
-                </span>
-              </li>
-            </motion.ul>
+                quietly charges for.
+              </h2>
+            </motion.div>
+
+            <motion.div className={styles.compareTableWrap} variants={blurFadeIn}>
+              <table className={styles.compareTable}>
+                <thead>
+                  <tr>
+                    <th scope="col" />
+                    <th scope="col" className={styles.compareUs}>
+                      <span className={styles.compareHeadLogo}>rtylr POS</span>
+                    </th>
+                    <th scope="col">Toast</th>
+                    <th scope="col">Square</th>
+                    <th scope="col">Shopify POS</th>
+                  </tr>
+                </thead>
+                <tbody>
+                  {[
+                    {
+                      feature: 'Offline mode (full service, no internet)',
+                      values: ['yes', 'no', 'partial', 'partial'],
+                    },
+                    {
+                      feature: 'Per-location monthly fee',
+                      values: ['$0', '$69–165', '$0', '$89/register'],
+                    },
+                    {
+                      feature: 'Payment processing locked in',
+                      values: ['no', 'yes', 'yes', 'yes'],
+                    },
+                    {
+                      feature: 'Hardware you can buy elsewhere',
+                      values: ['yes', 'no', 'partial', 'partial'],
+                    },
+                    {
+                      feature: 'HR + payroll included',
+                      values: ['yes', 'add-on', 'add-on', 'no'],
+                    },
+                    {
+                      feature: 'Inventory depletes per recipe',
+                      values: ['yes', 'add-on', 'no', 'no'],
+                    },
+                    {
+                      feature: 'Real-time CRM tied to receipts',
+                      values: ['yes', 'add-on', 'partial', 'no'],
+                    },
+                    {
+                      feature: 'Public REST API v1',
+                      values: ['yes', 'partial', 'yes', 'yes'],
+                    },
+                  ].map((row) => (
+                    <tr key={row.feature}>
+                      <th scope="row">{row.feature}</th>
+                      {row.values.map((v, i) => {
+                        const isUs = i === 0;
+                        const variant =
+                          v === 'yes'
+                            ? 'yes'
+                            : v === 'no'
+                              ? 'no'
+                              : v === 'partial'
+                                ? 'partial'
+                                : v === 'add-on'
+                                  ? 'addon'
+                                  : 'text';
+                        return (
+                          <td
+                            key={i}
+                            className={`${isUs ? styles.compareUs : ''} ${
+                              variant === 'yes'
+                                ? styles.cellYes
+                                : variant === 'no'
+                                  ? styles.cellNo
+                                  : variant === 'partial'
+                                    ? styles.cellPartial
+                                    : variant === 'addon'
+                                      ? styles.cellAddon
+                                      : styles.cellText
+                            }`}
+                          >
+                            {variant === 'yes'
+                              ? 'Included'
+                              : variant === 'no'
+                                ? '—'
+                                : variant === 'partial'
+                                  ? 'Partial'
+                                  : variant === 'addon'
+                                    ? 'Paid add-on'
+                                    : v}
+                          </td>
+                        );
+                      })}
+                    </tr>
+                  ))}
+                </tbody>
+              </table>
+              <p className={styles.compareFootnote}>
+                Comparison based on publicly available pricing and product documentation, April
+                2026. Something out of date? <a href="mailto:hello@voxire.com">Let us know</a>.
+              </p>
+            </motion.div>
           </motion.section>
 
           {/* ── CTA ──────────────────────────────────────────────────────── */}

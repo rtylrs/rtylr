@@ -436,7 +436,133 @@
   margin: 0;
 }
 
-// ── STATS STRIP ─────────────────────────────────────────────────────────────
+// ── COMPARISON TABLE ───────────────────────────────────────────────────────
+
+.compareSection {
+  padding: 96px 32px 96px;
+  max-width: 1280px;
+  margin: 0 auto;
+}
+
+.compareHeader {
+  max-width: 720px;
+  margin-bottom: 40px;
+}
+
+.compareTableWrap {
+  overflow-x: auto;
+  border: 1px solid #232220;
+  border-radius: 10px;
+  background: #101010;
+}
+
+.compareTable {
+  width: 100%;
+  border-collapse: collapse;
+  font-size: 0.92rem;
+  min-width: 720px;
+
+  thead th {
+    padding: 20px 18px;
+    text-align: center;
+    font-size: 0.78rem;
+    font-weight: 600;
+    color: rgba(255, 255, 255, 0.55);
+    letter-spacing: -0.005em;
+    border-bottom: 1px solid rgba(255, 255, 255, 0.08);
+    background: #171715;
+
+    &:first-child {
+      text-align: left;
+      padding-left: 24px;
+    }
+  }
+
+  tbody th {
+    text-align: left;
+    padding: 16px 24px 16px 24px;
+    font-weight: 500;
+    color: rgba(255, 255, 255, 0.78);
+    letter-spacing: -0.005em;
+    border-bottom: 1px solid rgba(255, 255, 255, 0.05);
+    font-size: 0.92rem;
+  }
+
+  tbody td {
+    padding: 16px 18px;
+    text-align: center;
+    font-size: 0.88rem;
+    border-bottom: 1px solid rgba(255, 255, 255, 0.05);
+    font-variant-numeric: tabular-nums;
+    white-space: nowrap;
+  }
+
+  tbody tr:last-child th,
+  tbody tr:last-child td {
+    border-bottom: none;
+  }
+}
+
+.compareHeadLogo {
+  display: inline-block;
+  font-size: 0.82rem;
+  font-weight: 700;
+  color: #0a0a0a;
+  background: #e8e6e1;
+  padding: 4px 12px;
+  border-radius: 999px;
+  letter-spacing: -0.005em;
+}
+
+.compareUs {
+  background: rgba(232, 230, 225, 0.03);
+  border-left: 1px solid rgba(232, 230, 225, 0.15);
+  border-right: 1px solid rgba(232, 230, 225, 0.15);
+}
+
+// Cell variants
+.cellYes {
+  color: #a2d9af;
+  font-weight: 600;
+  letter-spacing: -0.005em;
+}
+
+.cellNo {
+  color: rgba(255, 255, 255, 0.3);
+}
+
+.cellPartial {
+  color: #ffd166;
+  font-weight: 500;
+}
+
+.cellAddon {
+  color: #e88a8a;
+  font-weight: 500;
+}
+
+.cellText {
+  color: rgba(255, 255, 255, 0.72);
+  font-weight: 500;
+}
+
+.compareFootnote {
+  font-size: 0.78rem;
+  color: rgba(255, 255, 255, 0.4);
+  padding: 16px 24px;
+  border-top: 1px solid rgba(255, 255, 255, 0.05);
+  background: #0c0c0c;
+  margin: 0;
+  text-align: left;
+
+  a {
+    color: rgba(255, 255, 255, 0.7);
+    text-decoration: underline;
+    text-underline-offset: 3px;
+  }
+}
+
+// ── STATS STRIP (retained for back-compat, no longer rendered) ──────────────
 
 .statsSection {
   padding: 0 32px 96px;

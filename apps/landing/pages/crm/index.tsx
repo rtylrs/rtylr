@@ -1,7 +1,7 @@
-import React from 'react';
+import React, { useMemo, useState } from 'react';
 import { motion } from 'motion/react';
 import { useRouter } from 'next/router';
-import { Heart, Mail, Gift, Users, Star, Send, Target, ChevronRight } from 'lucide-react';
+import { Heart, Mail, Gift, Users, Star, Send, Target, ChevronRight, Plus } from 'lucide-react';
 import AppLayout from '../../components/Layout/AppLayout';
 import MainLayout from '../../layouts/Main/MainLayout';
 import HelmetContainer from '../../components/HelmetContainer';
@@ -24,6 +24,198 @@ const SEGMENTS = [
   { name: 'First-time', size: 88, color: '#a89680' },
   { name: 'High-tippers', size: 521, color: '#d6b88e' },
   { name: 'Takeout only', size: 412, color: '#c9a48a' },
+];
+
+// ── Interactive segment builder data ──────────────────────────────────────
+// Each mock guest has the attributes the filter toggles operate on. The
+// audience list updates live as the visitor plays with the checkboxes.
+
+interface Guest {
+  initials: string;
+  name: string;
+  avatar: string;
+  visits: number;
+  lifetime: number;
+  birthdayThisMonth: boolean;
+  highTipper: boolean;
+  takeoutOnly: boolean;
+  lapsed60: boolean;
+  vip: boolean;
+  lastVisit: string;
+}
+
+const GUESTS: Guest[] = [
+  {
+    initials: 'EA',
+    name: 'Eliza Alvarez',
+    avatar: '#d6b88e',
+    visits: 24,
+    lifetime: 1284,
+    birthdayThisMonth: false,
+    highTipper: true,
+    takeoutOnly: false,
+    lapsed60: false,
+    vip: true,
+    lastVisit: 'Apr 14',
+  },
+  {
+    initials: 'JP',
+    name: 'Juno Park',
+    avatar: '#c9a48a',
+    visits: 11,
+    lifetime: 640,
+    birthdayThisMonth: true,
+    highTipper: false,
+    takeoutOnly: false,
+    lapsed60: false,
+    vip: false,
+    lastVisit: 'Apr 09',
+  },
+  {
+    initials: 'MH',
+    name: 'Marcus Hale',
+    avatar: '#b89a8a',
+    visits: 42,
+    lifetime: 3120,
+    birthdayThisMonth: false,
+    highTipper: true,
+    takeoutOnly: false,
+    lapsed60: false,
+    vip: true,
+    lastVisit: 'Apr 12',
+  },
+  {
+    initials: 'SN',
+    name: 'Sasha Nomura',
+    avatar: '#a89680',
+    visits: 3,
+    lifetime: 98,
+    birthdayThisMonth: false,
+    highTipper: false,
+    takeoutOnly: true,
+    lapsed60: false,
+    vip: false,
+    lastVisit: 'Apr 16',
+  },
+  {
+    initials: 'DL',
+    name: 'Dalia Lachman',
+    avatar: '#d6b88e',
+    visits: 18,
+    lifetime: 980,
+    birthdayThisMonth: true,
+    highTipper: true,
+    takeoutOnly: false,
+    lapsed60: false,
+    vip: true,
+    lastVisit: 'Apr 03',
+  },
+  {
+    initials: 'RK',
+    name: 'Rashid Karim',
+    avatar: '#c9a48a',
+    visits: 6,
+    lifetime: 240,
+    birthdayThisMonth: false,
+    highTipper: false,
+    takeoutOnly: true,
+    lapsed60: true,
+    vip: false,
+    lastVisit: 'Feb 08',
+  },
+  {
+    initials: 'TO',
+    name: 'Tamsin Okoye',
+    avatar: '#b89a8a',
+    visits: 29,
+    lifetime: 1850,
+    birthdayThisMonth: false,
+    highTipper: true,
+    takeoutOnly: false,
+    lapsed60: false,
+    vip: true,
+    lastVisit: 'Apr 13',
+  },
+  {
+    initials: 'PV',
+    name: 'Priya Venkat',
+    avatar: '#a89680',
+    visits: 2,
+    lifetime: 62,
+    birthdayThisMonth: true,
+    highTipper: false,
+    takeoutOnly: true,
+    lapsed60: false,
+    vip: false,
+    lastVisit: 'Apr 11',
+  },
+  {
+    initials: 'LQ',
+    name: 'Leo Quintana',
+    avatar: '#d6b88e',
+    visits: 9,
+    lifetime: 410,
+    birthdayThisMonth: false,
+    highTipper: false,
+    takeoutOnly: false,
+    lapsed60: true,
+    vip: false,
+    lastVisit: 'Feb 01',
+  },
+  {
+    initials: 'AR',
+    name: 'Asha Rai',
+    avatar: '#c9a48a',
+    visits: 36,
+    lifetime: 2410,
+    birthdayThisMonth: true,
+    highTipper: true,
+    takeoutOnly: false,
+    lapsed60: false,
+    vip: true,
+    lastVisit: 'Apr 15',
+  },
+  {
+    initials: 'BC',
+    name: 'Ben Cortez',
+    avatar: '#b89a8a',
+    visits: 14,
+    lifetime: 720,
+    birthdayThisMonth: false,
+    highTipper: false,
+    takeoutOnly: false,
+    lapsed60: false,
+    vip: false,
+    lastVisit: 'Apr 10',
+  },
+  {
+    initials: 'NW',
+    name: 'Nadia Weiss',
+    avatar: '#a89680',
+    visits: 4,
+    lifetime: 138,
+    birthdayThisMonth: false,
+    highTipper: false,
+    takeoutOnly: true,
+    lapsed60: true,
+    vip: false,
+    lastVisit: 'Jan 28',
+  },
+];
+
+interface FilterDef {
+  id: string;
+  label: string;
+  test: (g: Guest) => boolean;
+}
+
+const FILTERS: FilterDef[] = [
+  { id: 'vip', label: 'VIP (20+ visits)', test: (g) => g.vip },
+  { id: 'birthday', label: 'Birthday this month', test: (g) => g.birthdayThisMonth },
+  { id: 'highTipper', label: 'High tipper', test: (g) => g.highTipper },
+  { id: 'lapsed60', label: 'Lapsed 60+ days', test: (g) => g.lapsed60 },
+  { id: 'takeoutOnly', label: 'Takeout only', test: (g) => g.takeoutOnly },
+  { id: 'bigSpend', label: 'Lifetime spend > $500', test: (g) => g.lifetime > 500 },
 ];
 
 const CAMPAIGNS = [
@@ -51,6 +243,24 @@ const CAMPAIGNS = [
 
 const CRMPage = (): JSX.Element => {
   const router = useRouter();
+
+  // Segment-builder state — toggle attributes to watch the audience shrink/grow
+  const [activeFilters, setActiveFilters] = useState<Set<string>>(new Set(['vip']));
+
+  const toggleFilter = (id: string): void => {
+    setActiveFilters((prev) => {
+      const next = new Set(prev);
+      if (next.has(id)) next.delete(id);
+      else next.add(id);
+      return next;
+    });
+  };
+
+  const matchingGuests = useMemo(() => {
+    if (activeFilters.size === 0) return GUESTS;
+    const active = FILTERS.filter((f) => activeFilters.has(f.id));
+    return GUESTS.filter((g) => active.every((f) => f.test(g)));
+  }, [activeFilters]);
 
   const goRegister = (): void => {
     navigateExternal(`${APP_URLS.auth}/register`);
@@ -262,25 +472,122 @@ const CRMPage = (): JSX.Element => {
             </motion.div>
           </section>
 
-          {/* ── INTEGRATED STORY ────────────────────────────────────────── */}
+          {/* ── LIVE SEGMENT BUILDER ───────────────────────────────────── */}
           <motion.section
-            className={styles.integratedSection}
+            className={styles.builderSection}
             initial="hidden"
             whileInView="visible"
             viewport={viewportOnce}
             variants={staggerBlur}
           >
-            <motion.div className={styles.integratedInner} variants={blurFadeIn}>
-              <Users size={22} strokeWidth={1.8} className={styles.integratedIcon} />
-              <h2 className={styles.integratedTitle}>
-                The profile gets richer with every tap of the POS.
+            <motion.div className={styles.builderHeader} variants={blurFadeIn}>
+              <span className={styles.sectionEyebrow}>TRY IT — LIVE</span>
+              <h2 className={styles.sectionTitle}>
+                Build a segment.
+                <br />
+                Watch it update.
               </h2>
-              <p className={styles.integratedCopy}>
-                When a guest pays, rtylr CRM catches their card, email, or phone number
-                automatically. Every item they ordered, every modifier, every server who served them
-                — it all flows into the profile. No CRM data entry. No forgotten customers. No
-                &ldquo;do I know this person&rdquo; moments at the door.
+              <p className={styles.builderCopy}>
+                This is a real segment builder. Toggle any attribute and the matching audience
+                updates as you go.
               </p>
+            </motion.div>
+
+            <motion.div className={styles.builderGrid} variants={blurFadeIn}>
+              <div className={styles.filterPanel}>
+                <div className={styles.filterPanelHead}>
+                  <Target size={14} strokeWidth={2} />
+                  <span>Attributes</span>
+                  {activeFilters.size > 0 && (
+                    <button
+                      type="button"
+                      onClick={() => setActiveFilters(new Set())}
+                      className={styles.filterClear}
+                    >
+                      Clear
+                    </button>
+                  )}
+                </div>
+                <ul className={styles.filterList}>
+                  {FILTERS.map((f) => {
+                    const active = activeFilters.has(f.id);
+                    return (
+                      <li key={f.id}>
+                        <button
+                          type="button"
+                          onClick={() => toggleFilter(f.id)}
+                          className={`${styles.filterToggle} ${active ? styles.filterToggleActive : ''}`}
+                          aria-pressed={active}
+                        >
+                          <span className={styles.filterCheckbox}>
+                            {active && <span className={styles.filterCheckDot} />}
+                          </span>
+                          {f.label}
+                        </button>
+                      </li>
+                    );
+                  })}
+                </ul>
+                <div className={styles.filterFoot}>
+                  <button type="button" className={styles.filterAddMore}>
+                    <Plus size={12} strokeWidth={2.2} />
+                    Add another attribute
+                  </button>
+                </div>
+              </div>
+
+              <div className={styles.audiencePanel}>
+                <div className={styles.audienceHead}>
+                  <span className={styles.audienceCountBig}>{matchingGuests.length}</span>
+                  <span className={styles.audienceCountLabel}>
+                    {matchingGuests.length === 1 ? 'guest matches' : 'guests match'} ·{' '}
+                    {GUESTS.length} total
+                  </span>
+                  <button
+                    type="button"
+                    className={styles.audienceCta}
+                    onClick={goRegister}
+                    disabled={matchingGuests.length === 0}
+                  >
+                    Send a campaign →
+                  </button>
+                </div>
+                <ul className={styles.audienceList}>
+                  {matchingGuests.length === 0 ? (
+                    <li className={styles.audienceEmpty}>
+                      No guests match this combination — loosen a filter.
+                    </li>
+                  ) : (
+                    matchingGuests.map((g) => (
+                      <motion.li
+                        key={g.name}
+                        className={styles.audienceItem}
+                        layout
+                        initial={{ opacity: 0, y: 6 }}
+                        animate={{ opacity: 1, y: 0 }}
+                        transition={{ duration: 0.22 }}
+                      >
+                        <div className={styles.audienceAvatar} style={{ background: g.avatar }}>
+                          {g.initials}
+                        </div>
+                        <div className={styles.audienceMeta}>
+                          <span className={styles.audienceName}>{g.name}</span>
+                          <span className={styles.audienceSub}>
+                            {g.visits} visits · ${g.lifetime.toLocaleString()} lifetime · last visit{' '}
+                            {g.lastVisit}
+                          </span>
+                        </div>
+                        {g.vip && (
+                          <span className={styles.audienceTag}>
+                            <Star size={10} fill="currentColor" strokeWidth={0} />
+                            VIP
+                          </span>
+                        )}
+                      </motion.li>
+                    ))
+                  )}
+                </ul>
+              </div>
             </motion.div>
           </motion.section>
 
