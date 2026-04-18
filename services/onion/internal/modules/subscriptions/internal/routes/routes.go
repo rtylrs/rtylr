@@ -18,6 +18,14 @@ func RegisterRoutes(ctx context.Context, router *chi.Mux, service *application.S
 		ctx, router, handlers.MySubscriptionRoutes(),
 		&handlers.MySubscriptionHandler{Service: service},
 	)
+	serverHttp.RegisterGET[handlers.BillingDetailRequest, handlers.BillingDetailResponse](
+		ctx, router, handlers.BillingDetailRoutes(),
+		&handlers.BillingDetailHandler{Service: service},
+	)
+	serverHttp.RegisterGET[handlers.BillingHistoryRequest, handlers.BillingHistoryResponse](
+		ctx, router, handlers.BillingHistoryRoutes(),
+		&handlers.BillingHistoryHandler{Service: service},
+	)
 	serverHttp.RegisterPOSTWithValidation[handlers.UpsertSubscriptionRequest, handlers.UpsertSubscriptionResponse](
 		ctx, router, handlers.UpsertSubscriptionRoutes(),
 		&handlers.UpsertSubscriptionHandler{Service: service},
