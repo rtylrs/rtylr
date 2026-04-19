@@ -203,6 +203,16 @@ const ProjectBoard: React.FC = () => {
 
   const project = projects.find((p) => p.id === projectId);
 
+  // Tasks mapped to Task shape for TaskCard. Computed BEFORE any early
+  // return so the useMemo below always runs in the same hook slot on
+  // every render (React #310 otherwise — conditional hook order).
+  const tasks: Task[] = useMemo(() => apiTasks.map(apiTaskToTask), [apiTasks]);
+
+  // Precompute the ordered lane index across all tasks so every column
+  // renders the same rows in the same order — otherwise empty columns
+  // would silently skip lanes and the swimlane grid misaligns.
+  const laneIndex = useMemo(() => buildLaneIndex(tasks, groupBy), [tasks, groupBy]);
+
   if (!project) {
     return (
       <div className="p-6" style={{ color: 'var(--flow-text-muted)' }}>
@@ -211,23 +221,18 @@ const ProjectBoard: React.FC = () => {
     );
   }
 
-  // Tasks mapped to Task shape for TaskCard
-  const tasks: Task[] = apiTasks.map(apiTaskToTask);
-
   // Bucket tasks by column. Tasks with no sectionId go into first column.
   function tasksForColumn(col: ApiProjectColumn, colIndex: number): Task[] {
     return tasks.filter((t) => {
+      // IDs are both strings on the frontend (ApiProjectColumn.id +
+      // Task.sectionId). The apiTaskToTask mapper stringifies the
+      // numeric wire value so this compares apples-to-apples.
       if (t.sectionId === col.id) return true;
-      // Unsectioned tasks go into first column
+      // Unsectioned tasks go into first column.
       if (colIndex === 0 && !t.sectionId) return true;
       return false;
     });
   }
-
-  // Precompute the ordered lane index across all tasks so every column
-  // renders the same rows in the same order — otherwise empty columns
-  // would silently skip lanes and the swimlane grid misaligns.
-  const laneIndex = useMemo(() => buildLaneIndex(tasks, groupBy), [tasks, groupBy]);
 
   const handleDragStart = (e: React.DragEvent, taskId: string) => {
     e.dataTransfer.setData('text/plain', taskId);

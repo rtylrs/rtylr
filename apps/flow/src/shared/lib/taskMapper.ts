@@ -27,6 +27,12 @@ export function apiTaskToTask(t: ApiTask): Task {
   // prefer whichever the backend sent.
   const assignee = (t as { assigneeName?: string }).assigneeName ?? t.assignee ?? '';
 
+  // sectionId is the column the task lives in on the kanban board.
+  // The wire sends it as a number (or null for unsectioned); the store
+  // keys columns by string id, so stringify.
+  const rawSection = (t as { sectionId?: number | string }).sectionId;
+  const sectionId = rawSection == null || rawSection === 0 ? undefined : String(rawSection);
+
   return {
     id,
     projectId,
@@ -51,5 +57,6 @@ export function apiTaskToTask(t: ApiTask): Task {
     waitingOn: t.waitingOn,
     decisionNote: t.decisionNote,
     focusPin: t.focusPin,
+    sectionId,
   };
 }
