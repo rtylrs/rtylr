@@ -1,8 +1,8 @@
-import React, { useState, useRef, useEffect } from 'react';
+import React, { useEffect, useMemo, useRef, useState } from 'react';
 import { useParams } from 'react-router-dom';
-import { Plus, Trash2 } from 'lucide-react';
+import { ChevronDown, Plus, Trash2 } from 'lucide-react';
 import { useFlowStore } from '../../shared/stores/flowStore';
-import { useUpdateTaskStatus, useTasks } from '../tasks/useTasks';
+import { useTasks } from '../tasks/useTasks';
 import {
   useProjectColumns,
   useCreateColumn,
@@ -18,6 +18,133 @@ import type { ApiProjectColumn } from '../../shared/services/flowApi';
 import type { Task } from '../../shared/stores/flowStore';
 
 const ACCENT = '#64C5B9';
+
+// ── Group-by (swimlanes) ────────────────────────────────────────────────
+// "None" = plain kanban columns. Any other value partitions each column's
+// tasks into horizontal lanes keyed by that attribute (assignee, priority,
+// etc.). The choice persists per-project in localStorage so switching
+// projects doesn't reset it.
+
+type GroupKey = 'none' | 'assignee' | 'priority' | 'due';
+
+const GROUP_OPTIONS: { key: GroupKey; label: string }[] = [
+  { key: 'none', label: 'None' },
+  { key: 'assignee', label: 'Assignee' },
+  { key: 'priority', label: 'Priority' },
+  { key: 'due', label: 'Due window' },
+];
+
+const PRIORITY_ORDER: Task['priority'][] = ['urgent', 'high', 'medium', 'low', 'no_priority'];
+
+const PRIORITY_LABEL: Record<Task['priority'], string> = {
+  urgent: 'Urgent',
+  high: 'High',
+  medium: 'Medium',
+  low: 'Low',
+  no_priority: 'No priority',
+};
+
+interface Lane {
+  key: string;
+  label: string;
+  tasks: Task[];
+}
+
+/**
+ * Partition a column's tasks into lanes. Every column renders the same
+ * set of lane keys in the same order so rows line up horizontally across
+ * columns — this is the "swimlane" effect.
+ */
+function buildLanes(
+  allLaneKeys: { key: string; label: string }[],
+  columnTasks: Task[],
+  groupBy: GroupKey
+): Lane[] {
+  if (groupBy === 'none') {
+    return [{ key: '_all', label: '', tasks: columnTasks }];
+  }
+  const byKey = new Map<string, Task[]>();
+  for (const t of columnTasks) {
+    const k = laneKeyFor(t, groupBy);
+    const bucket = byKey.get(k) ?? [];
+    bucket.push(t);
+    byKey.set(k, bucket);
+  }
+  return allLaneKeys.map(({ key, label }) => ({
+    key,
+    label,
+    tasks: byKey.get(key) ?? [],
+  }));
+}
+
+function laneKeyFor(t: Task, groupBy: GroupKey): string {
+  if (groupBy === 'assignee') return t.assignee || 'Unassigned';
+  if (groupBy === 'priority') return t.priority;
+  if (groupBy === 'due') {
+    if (!t.dueDate) return 'No due date';
+    const d = new Date(t.dueDate);
+    const now = new Date();
+    const days = Math.round((d.getTime() - now.getTime()) / (1000 * 60 * 60 * 24));
+    if (days < 0) return 'Overdue';
+    if (days === 0) return 'Today';
+    if (days <= 7) return 'This week';
+    if (days <= 30) return 'This month';
+    return 'Later';
+  }
+  return '_all';
+}
+
+/**
+ * Derive the deterministic ordered lane list across ALL tasks so every
+ * column shows the same swimlanes in the same order. Without this, empty
+ * columns would skip lanes and rows would misalign.
+ */
+function buildLaneIndex(tasks: Task[], groupBy: GroupKey): { key: string; label: string }[] {
+  if (groupBy === 'none') return [{ key: '_all', label: '' }];
+
+  if (groupBy === 'priority') {
+    return PRIORITY_ORDER.map((p) => ({ key: p, label: PRIORITY_LABEL[p] }));
+  }
+
+  if (groupBy === 'due') {
+    return [
+      { key: 'Overdue', label: 'Overdue' },
+      { key: 'Today', label: 'Today' },
+      { key: 'This week', label: 'This week' },
+      { key: 'This month', label: 'This month' },
+      { key: 'Later', label: 'Later' },
+      { key: 'No due date', label: 'No due date' },
+    ];
+  }
+
+  // assignee — build from data, keep stable order by first-seen.
+  const seen = new Map<string, string>();
+  for (const t of tasks) {
+    const k = laneKeyFor(t, groupBy);
+    if (!seen.has(k)) seen.set(k, k);
+  }
+  return Array.from(seen.values()).map((k) => ({ key: k, label: k }));
+}
+
+function loadGroupBy(projectId: string): GroupKey {
+  try {
+    const raw = localStorage.getItem(`flow:board:groupBy:${projectId}`);
+    if (raw === 'none' || raw === 'assignee' || raw === 'priority' || raw === 'due') {
+      return raw;
+    }
+  } catch {
+    // localStorage unavailable (SSR / private mode) — fall through.
+  }
+  return 'none';
+}
+
+function saveGroupBy(projectId: string, key: GroupKey): void {
+  try {
+    localStorage.setItem(`flow:board:groupBy:${projectId}`, key);
+  } catch {
+    // ignore
+  }
+}
 
 const ProjectBoard: React.FC = () => {
   const { workspaceId = PERSONAL_WORKSPACE_ID, projectId = '' } = useParams<{
@@ -37,6 +164,17 @@ const ProjectBoard: React.FC = () => {
   const [dragOver, setDragOver] = useState<string | null>(null); // column id
   const [addingColumn, setAddingColumn] = useState(false);
   const [newColumnName, setNewColumnName] = useState('');
+  const [groupBy, setGroupByState] = useState<GroupKey>('none');
+
+  // Hydrate group-by from localStorage once the project id is known.
+  useEffect(() => {
+    if (projectId) setGroupByState(loadGroupBy(projectId));
+  }, [projectId]);
+
+  const setGroupBy = (k: GroupKey): void => {
+    setGroupByState(k);
+    if (projectId) saveGroupBy(projectId, k);
+  };
 
   const project = projects.find((p) => p.id === projectId);
 
@@ -60,6 +198,11 @@ const ProjectBoard: React.FC = () => {
       return false;
     });
   }
+
+  // Precompute the ordered lane index across all tasks so every column
+  // renders the same rows in the same order — otherwise empty columns
+  // would silently skip lanes and the swimlane grid misaligns.
+  const laneIndex = useMemo(() => buildLaneIndex(tasks, groupBy), [tasks, groupBy]);
 
   const handleDragStart = (e: React.DragEvent, taskId: string) => {
     e.dataTransfer.setData('text/plain', taskId);
@@ -114,6 +257,7 @@ const ProjectBoard: React.FC = () => {
         projectId={projectId}
         taskCount={tasks.length}
         onNewTask={() => useFlowStore.getState().setQuickCreateOpen(true)}
+        rightSlot={<GroupByPicker groupBy={groupBy} onChange={setGroupBy} />}
       />
 
       {/* Tightened kanban canvas — the previous p-6 / gap-4 combo wasted
@@ -125,7 +269,8 @@ const ProjectBoard: React.FC = () => {
             <KanbanColumn
               key={col.id}
               col={col}
-              colTasks={tasksForColumn(col, i)}
+              lanes={buildLanes(laneIndex, tasksForColumn(col, i), groupBy)}
+              groupBy={groupBy}
               isOver={dragOver === col.id}
               selectedTaskIds={selectedTaskIds}
               onDragOver={() => setDragOver(col.id)}
@@ -207,7 +352,8 @@ const ProjectBoard: React.FC = () => {
 
 const KanbanColumn: React.FC<{
   col: ApiProjectColumn;
-  colTasks: Task[];
+  lanes: Lane[];
+  groupBy: GroupKey;
   isOver: boolean;
   selectedTaskIds: string[];
   onDragOver: () => void;
@@ -220,7 +366,8 @@ const KanbanColumn: React.FC<{
   onDelete: () => void;
 }> = ({
   col,
-  colTasks,
+  lanes,
+  groupBy,
   isOver,
   selectedTaskIds,
   onDragOver,
@@ -245,6 +392,10 @@ const KanbanColumn: React.FC<{
     if (name && name !== col.name) onRename(name);
     setEditing(false);
   };
+
+  // Total count for the column header pill (stays accurate regardless
+  // of group-by — it's the sum of tasks across all lanes).
+  const colTaskCount = lanes.reduce((n, l) => n + l.tasks.length, 0);
 
   return (
     <div
@@ -295,7 +446,7 @@ const KanbanColumn: React.FC<{
           className="text-[10px] px-1.5 py-0.5 rounded-full font-medium shrink-0"
           style={{ background: `${col.color}22`, color: col.color }}
         >
-          {colTasks.length}
+          {colTaskCount}
         </span>
 
         {/* Actions (visible on header hover) */}
@@ -321,30 +472,139 @@ const KanbanColumn: React.FC<{
 
       {/* Cards */}
       <div className="flex flex-col gap-1.5 flex-1 min-h-[80px] overflow-y-auto">
-        {colTasks.map((task) => (
-          <TaskCard
-            key={task.id}
-            task={task}
-            draggable
-            onDragStart={(e) => onDragStart(e, task.id)}
-            selected={selectedTaskIds.includes(task.id)}
-            onSelect={() => onSelect(task.id)}
-          />
-        ))}
-
-        {colTasks.length === 0 && (
-          <button
-            onClick={onAddTask}
-            className="flex-1 flex items-center justify-center rounded text-[11px] min-h-[44px] hover:bg-[var(--flow-hover)] transition-colors"
-            style={{
-              color: 'var(--flow-text-dim)',
-              border: '1px dashed var(--flow-border)',
-            }}
-          >
-            <Plus size={12} className="mr-1" /> Add task
-          </button>
+        {groupBy === 'none' ? (
+          <>
+            {lanes[0]?.tasks.map((task) => (
+              <TaskCard
+                key={task.id}
+                task={task}
+                draggable
+                onDragStart={(e) => onDragStart(e, task.id)}
+                selected={selectedTaskIds.includes(task.id)}
+                onSelect={() => onSelect(task.id)}
+              />
+            ))}
+            {colTaskCount === 0 && (
+              <button
+                onClick={onAddTask}
+                className="flex-1 flex items-center justify-center rounded text-[11px] min-h-[44px] hover:bg-[var(--flow-hover)] transition-colors"
+                style={{
+                  color: 'var(--flow-text-dim)',
+                  border: '1px dashed var(--flow-border)',
+                }}
+              >
+                <Plus size={12} className="mr-1" /> Add task
+              </button>
+            )}
+          </>
+        ) : (
+          // Swimlanes: render each lane with a mini-header + its tasks.
+          // Lanes are rendered in the same order across every column so
+          // rows line up horizontally.
+          lanes.map((lane) => (
+            <div key={lane.key} className="flex flex-col gap-1">
+              <div
+                className="flex items-center gap-1.5 px-1 pt-1.5 pb-0.5 text-[10px] font-semibold uppercase tracking-wider"
+                style={{ color: 'var(--flow-text-dim)' }}
+              >
+                <span className="truncate">{lane.label}</span>
+                <span style={{ color: 'var(--flow-border)' }}>·</span>
+                <span className="tabular-nums">{lane.tasks.length}</span>
+              </div>
+              <div className="flex flex-col gap-1.5">
+                {lane.tasks.map((task) => (
+                  <TaskCard
+                    key={task.id}
+                    task={task}
+                    draggable
+                    onDragStart={(e) => onDragStart(e, task.id)}
+                    selected={selectedTaskIds.includes(task.id)}
+                    onSelect={() => onSelect(task.id)}
+                  />
+                ))}
+                {lane.tasks.length === 0 && (
+                  <div
+                    className="rounded text-[10px] min-h-[28px] flex items-center justify-center"
+                    style={{
+                      color: 'var(--flow-text-dim)',
+                      border: '1px dashed var(--flow-border)',
+                    }}
+                  >
+                    &mdash;
+                  </div>
+                )}
+              </div>
+            </div>
+          ))
         )}
       </div>
+    </div>
+  );
+};
+
+// ── Group-by picker ─────────────────────────────────────────────────────────
+
+const GroupByPicker: React.FC<{
+  groupBy: GroupKey;
+  onChange: (k: GroupKey) => void;
+}> = ({ groupBy, onChange }) => {
+  const [open, setOpen] = useState(false);
+  const ref = useRef<HTMLDivElement>(null);
+
+  useEffect(() => {
+    if (!open) return;
+    const onDoc = (e: MouseEvent): void => {
+      if (ref.current && !ref.current.contains(e.target as Node)) {
+        setOpen(false);
+      }
+    };
+    document.addEventListener('mousedown', onDoc);
+    return () => document.removeEventListener('mousedown', onDoc);
+  }, [open]);
+
+  const current = GROUP_OPTIONS.find((o) => o.key === groupBy)!;
+
+  return (
+    <div ref={ref} className="relative">
+      <button
+        onClick={() => setOpen((v) => !v)}
+        className="flex items-center gap-1.5 h-7 px-2 rounded-md text-[11px] font-medium transition-colors hover:bg-[var(--flow-hover)]"
+        style={{
+          background: 'var(--flow-surface)',
+          border: '1px solid var(--flow-border)',
+          color: 'var(--flow-text-muted)',
+        }}
+      >
+        <span style={{ color: 'var(--flow-text-dim)' }}>Group:</span>
+        <span style={{ color: 'var(--flow-text)' }}>{current.label}</span>
+        <ChevronDown size={11} />
+      </button>
+      {open && (
+        <div
+          className="absolute right-0 top-full mt-1 z-20 min-w-[140px] rounded-md py-1 shadow-md"
+          style={{
+            background: 'var(--flow-card)',
+            border: '1px solid var(--flow-border)',
+          }}
+        >
+          {GROUP_OPTIONS.map((o) => (
+            <button
+              key={o.key}
+              onClick={() => {
+                onChange(o.key);
+                setOpen(false);
+              }}
+              className="w-full text-left px-2.5 py-1.5 text-[11px] transition-colors hover:bg-[var(--flow-hover)]"
+              style={{
+                color: o.key === groupBy ? 'var(--flow-text)' : 'var(--flow-text-muted)',
+                fontWeight: o.key === groupBy ? 600 : 400,
+              }}
+            >
+              {o.label}
+            </button>
+          ))}
+        </div>
+      )}
     </div>
   );
 };
