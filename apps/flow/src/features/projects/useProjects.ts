@@ -21,9 +21,10 @@ export function useCreateProject() {
     mutationFn: (data: { workspaceId: string; name: string; color?: string }) => {
       return unwrap(flowApi.createProject(data));
     },
-    onSuccess: (_data, variables) => {
-      qc.invalidateQueries({ queryKey: ['projects', variables.workspaceId] });
-    },
+    // Invalidate by prefix — the caller's workspaceId may be the "personal"
+    // sentinel while the fetched query keyed with the resolved numeric ID,
+    // so keying the invalidation on variables.workspaceId would miss.
+    onSuccess: () => qc.invalidateQueries({ queryKey: ['projects'] }),
   });
 }
 

@@ -54,6 +54,7 @@ import {
 import { useLifePreferences } from '../shared/lib/lifePreferences';
 import { isDueToday, isQuietNow } from '../shared/lib/lifeRhythm';
 import { useNotifications } from '../features/inbox/useNotifications';
+import { apiProjectToProject, apiWorkspaceToWorkspace } from '../shared/lib/projectMapper';
 
 const ACCENT = '#64C5B9';
 
@@ -249,15 +250,18 @@ const FlowLayout: React.FC<FlowLayoutProps> = ({ children }) => {
   }, [workspaceId, apiWorkspaces, navigate]);
 
   // Hydrate the store so other consumers (tasks, etc.) see fresh data.
+  // IDs from the wire are numeric; the Zustand store keys them as strings
+  // (URL params and active-id comparisons are strings), so always route
+  // through the mapper — never `setWorkspaces(apiWorkspaces as any)`.
   useEffect(() => {
     if (apiWorkspaces && apiWorkspaces.length > 0) {
-      setWorkspaces(apiWorkspaces as any);
+      setWorkspaces(apiWorkspaces.map(apiWorkspaceToWorkspace));
     }
   }, [apiWorkspaces, setWorkspaces]);
 
   useEffect(() => {
     if (apiProjects && apiProjects.length > 0) {
-      setProjects(apiProjects as any);
+      setProjects(apiProjects.map(apiProjectToProject));
     }
   }, [apiProjects, setProjects]);
 
