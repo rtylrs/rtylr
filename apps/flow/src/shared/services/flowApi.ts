@@ -272,7 +272,7 @@ export const flowApi = {
     }),
   // -- Workspaces ---------------------------------------------------------
 
-  getWorkspaces: () => safe.get<ApiWorkspace[]>('/flow/workspaces'),
+  getWorkspaces: () => safe.get<{ workspaces: ApiWorkspace[] }>('/flow/workspaces'),
 
   createWorkspace: (data: { name: string; color: string }) =>
     safe.post<ApiWorkspace>('/flow/workspaces', data),
@@ -283,7 +283,7 @@ export const flowApi = {
   deleteWorkspace: (id: string) => safe.post(`/flow/workspaces/${id}/delete`),
 
   getWorkspaceMembers: (workspaceId: string) =>
-    safe.get<ApiWorkspaceMember[]>('/flow/workspaces/members', {
+    safe.get<{ members: ApiWorkspaceMember[] }>('/flow/workspaces/members', {
       params: { workspace_id: workspaceId },
     }),
 
@@ -299,7 +299,9 @@ export const flowApi = {
   // -- Projects -----------------------------------------------------------
 
   getProjects: (workspaceId: string) =>
-    safe.get<ApiProject[]>('/flow/projects', { params: { workspace_id: workspaceId } }),
+    safe.get<{ projects: ApiProject[] }>('/flow/projects', {
+      params: { workspace_id: workspaceId },
+    }),
 
   // -- Project Columns ----------------------------------------------------
 
@@ -337,7 +339,9 @@ export const flowApi = {
   deleteProject: (id: string) => safe.post(`/flow/projects/${id}/delete`),
 
   getProjectMembers: (projectId: string) =>
-    safe.get<ApiProjectMember[]>('/flow/projects/members', { params: { project_id: projectId } }),
+    safe.get<{ members: ApiProjectMember[] }>('/flow/projects/members', {
+      params: { project_id: projectId },
+    }),
 
   addProjectMember: (data: { project_id: number; user_id: number; role?: string }) =>
     safe.post('/flow/projects/member', data),
@@ -367,10 +371,10 @@ export const flowApi = {
     if (params.workspaceId) q.workspace_id = params.workspaceId;
     if (params.status) q.status = params.status;
     if (params.assigneeId) q.assignee_id = params.assigneeId;
-    return safe.get<ApiTask[]>('/flow/tasks', { params: q });
+    return safe.get<{ tasks: ApiTask[] }>('/flow/tasks', { params: q });
   },
 
-  getMyTasks: () => safe.get<ApiTask[]>('/flow/tasks/my'),
+  getMyTasks: () => safe.get<{ tasks: ApiTask[] }>('/flow/tasks/my'),
 
   searchTasks: (q: string, workspaceId: string) =>
     safe.get<{ tasks: ApiTask[] }>('/flow/tasks/search', {
@@ -409,14 +413,15 @@ export const flowApi = {
 
   // -- Subtasks -----------------------------------------------------------
 
-  getSubtasks: (id: string) => safe.get<ApiSubtask[]>(`/flow/tasks/${id}/subtasks`),
+  getSubtasks: (id: string) => safe.get<{ subtasks: ApiSubtask[] }>(`/flow/tasks/${id}/subtasks`),
 
   createSubtask: (taskId: string, data: { title: string; assigneeId?: string }) =>
     safe.post<ApiSubtask>(`/flow/tasks/${taskId}/subtasks`, data),
 
   // -- Attachments --------------------------------------------------------
 
-  getAttachments: (id: string) => safe.get<ApiAttachment[]>(`/flow/tasks/${id}/attachments`),
+  getAttachments: (id: string) =>
+    safe.get<{ attachments: ApiAttachment[] }>(`/flow/tasks/${id}/attachments`),
 
   // -- Time Logs ----------------------------------------------------------
 
@@ -448,12 +453,12 @@ export const flowApi = {
     safe.put('/flow/tasks/labels', data),
 
   /** @deprecated use listLabels(workspaceId) */
-  getLabels: () => safe.get<ApiLabel[]>('/flow/labels'),
+  getLabels: () => safe.get<{ labels: ApiLabel[] }>('/flow/labels'),
 
   // -- Milestones ---------------------------------------------------------
 
   getMilestones: (projectId?: string) =>
-    safe.get<ApiMilestone[]>('/flow/milestones', {
+    safe.get<{ milestones: ApiMilestone[] }>('/flow/milestones', {
       params: projectId ? { project_id: projectId } : undefined,
     }),
 
@@ -466,7 +471,7 @@ export const flowApi = {
   // -- Cycles -------------------------------------------------------------
 
   getCycles: (workspaceId?: string) =>
-    safe.get<ApiCycle[]>('/flow/cycles', {
+    safe.get<{ cycles: ApiCycle[] }>('/flow/cycles', {
       params: workspaceId ? { workspace_id: workspaceId } : undefined,
     }),
 
@@ -477,7 +482,7 @@ export const flowApi = {
 
   // -- Views --------------------------------------------------------------
 
-  getViews: () => safe.get<ApiView[]>('/flow/views'),
+  getViews: () => safe.get<{ views: ApiView[] }>('/flow/views'),
 
   createView: (data: Partial<ApiView>) => safe.post<ApiView>('/flow/views', data),
 

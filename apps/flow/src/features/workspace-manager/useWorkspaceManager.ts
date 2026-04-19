@@ -1,11 +1,15 @@
 import { unwrap } from '@voxire/api';
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
 import { flowApi, ApiWorkspaceMember } from '../../shared/services/flowApi';
+import { unwrapListResponse } from '../../shared/lib/unwrapListResponse';
 
 export function useWorkspaceMembers(workspaceId?: string) {
-  return useQuery({
+  return useQuery<ApiWorkspaceMember[]>({
     queryKey: ['workspace-members', workspaceId],
-    queryFn: () => unwrap(flowApi.getWorkspaceMembers(workspaceId!)),
+    queryFn: async () => {
+      const res = await unwrap(flowApi.getWorkspaceMembers(workspaceId!));
+      return unwrapListResponse<ApiWorkspaceMember>(res, 'members');
+    },
     enabled: !!workspaceId,
   });
 }

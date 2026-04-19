@@ -3,6 +3,7 @@ import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
 import { toast } from 'sonner';
 import { flowApi, ApiTask } from '../../shared/services/flowApi';
 import { useFlowStore } from '../../shared/stores/flowStore';
+import { unwrapListResponse } from '../../shared/lib/unwrapListResponse';
 
 export function useTasks(params: {
   projectId?: string;
@@ -14,17 +15,23 @@ export function useTasks(params: {
     ...params,
     workspaceId: params.projectId ? undefined : activeWorkspaceId || undefined,
   };
-  return useQuery({
+  return useQuery<ApiTask[]>({
     queryKey: ['tasks', effectiveParams],
-    queryFn: () => unwrap(flowApi.getTasks(effectiveParams)),
+    queryFn: async () => {
+      const res = await unwrap(flowApi.getTasks(effectiveParams));
+      return unwrapListResponse<ApiTask>(res, 'tasks');
+    },
     enabled: !!(effectiveParams.projectId || effectiveParams.workspaceId),
   });
 }
 
 export function useMyTasks() {
-  return useQuery({
+  return useQuery<ApiTask[]>({
     queryKey: ['my-tasks'],
-    queryFn: () => unwrap(flowApi.getMyTasks()),
+    queryFn: async () => {
+      const res = await unwrap(flowApi.getMyTasks());
+      return unwrapListResponse<ApiTask>(res, 'tasks');
+    },
   });
 }
 

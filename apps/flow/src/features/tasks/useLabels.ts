@@ -2,6 +2,7 @@ import { unwrap } from '@voxire/api';
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
 import { flowApi } from '../../shared/services/flowApi';
 import type { ApiLabel } from '../../shared/services/flowApi';
+import { unwrapListResponse } from '../../shared/lib/unwrapListResponse';
 
 export function useLabels(workspaceId?: string) {
   return useQuery<ApiLabel[]>({
@@ -9,9 +10,10 @@ export function useLabels(workspaceId?: string) {
     queryFn: async () => {
       if (workspaceId) {
         const res = await unwrap(flowApi.listLabels(workspaceId));
-        return res.labels;
+        return unwrapListResponse<ApiLabel>(res, 'labels');
       }
-      return unwrap(flowApi.getLabels());
+      const res = await unwrap(flowApi.getLabels());
+      return unwrapListResponse<ApiLabel>(res, 'labels');
     },
   });
 }

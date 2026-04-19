@@ -2,11 +2,16 @@ import { unwrap } from '@voxire/api';
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
 import { toast } from 'sonner';
 import { flowApi } from '../../shared/services/flowApi';
+import type { ApiProjectMember } from '../../shared/services/flowApi';
+import { unwrapListResponse } from '../../shared/lib/unwrapListResponse';
 
 export function useProjectMembers(projectId?: string) {
-  return useQuery({
+  return useQuery<ApiProjectMember[]>({
     queryKey: ['project-members', projectId],
-    queryFn: () => unwrap(flowApi.getProjectMembers(projectId!)),
+    queryFn: async () => {
+      const res = await unwrap(flowApi.getProjectMembers(projectId!));
+      return unwrapListResponse<ApiProjectMember>(res, 'members');
+    },
     enabled: !!projectId,
   });
 }

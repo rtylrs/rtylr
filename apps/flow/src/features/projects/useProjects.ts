@@ -1,11 +1,16 @@
 import { unwrap } from '@voxire/api';
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
 import { flowApi } from '../../shared/services/flowApi';
+import type { ApiProject } from '../../shared/services/flowApi';
+import { unwrapListResponse } from '../../shared/lib/unwrapListResponse';
 
 export function useProjects(workspaceId: string | undefined) {
-  return useQuery({
+  return useQuery<ApiProject[]>({
     queryKey: ['projects', workspaceId],
-    queryFn: () => unwrap(flowApi.getProjects(workspaceId!)),
+    queryFn: async () => {
+      const res = await unwrap(flowApi.getProjects(workspaceId!));
+      return unwrapListResponse<ApiProject>(res, 'projects');
+    },
     enabled: !!workspaceId,
   });
 }
