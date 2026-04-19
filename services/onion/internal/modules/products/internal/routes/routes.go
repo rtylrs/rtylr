@@ -37,4 +37,25 @@ func RegisterRoutes(ctx context.Context, router *chi.Mux, service *application.S
 		handlers.DeleteProductRoutes(),
 		&handlers.DeleteProductHandler{Service: service},
 	)
+
+	http.RegisterGET[handlers.DashboardRequest, handlers.DashboardResponse](
+		ctx,
+		router,
+		handlers.DashboardRoutes(),
+		&handlers.DashboardHandler{Service: service},
+	)
+
+	http.RegisterGET[handlers.ReorderSuggestionsRequest, handlers.ReorderSuggestionsResponse](
+		ctx,
+		router,
+		handlers.ReorderSuggestionsRoutes(),
+		&handlers.ReorderSuggestionsHandler{Service: service},
+	)
+
+	http.RegisterGET[handlers.ExpiryRequest, handlers.ExpiryResponse](
+		ctx,
+		router,
+		handlers.ExpiryRoutes(),
+		&handlers.ExpiryHandler{Service: service},
+	)
 }

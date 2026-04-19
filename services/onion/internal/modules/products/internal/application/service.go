@@ -69,6 +69,21 @@ func (s *Service) GetProduct(ctx context.Context, ownerID, id int64) (domain.Pro
 	return s.repo.GetProduct(ctx, ownerID, id)
 }
 
+func (s *Service) GetDashboard(ctx context.Context, ownerID int64) (domain.DashboardStats, error) {
+	return s.repo.GetDashboard(ctx, ownerID)
+}
+
+func (s *Service) ListReorderSuggestions(ctx context.Context, ownerID int64) ([]domain.ReorderSuggestion, error) {
+	return s.repo.ListReorderSuggestions(ctx, ownerID)
+}
+
+func (s *Service) ListExpiringItems(ctx context.Context, ownerID int64, daysAhead int) ([]domain.ExpiryItem, error) {
+	if daysAhead <= 0 {
+		daysAhead = 30
+	}
+	return s.repo.ListExpiringItems(ctx, ownerID, daysAhead)
+}
+
 func (s *Service) invalidateCache(ctx context.Context, ownerID int64) {
 	prefix := fmt.Sprintf("products:%d:", ownerID)
 	cacher.Of[[]domain.Product]().Invalidate(ctx, []string{prefix})
