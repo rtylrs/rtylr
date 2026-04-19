@@ -223,11 +223,13 @@ const ProjectBoard: React.FC = () => {
 
   // Bucket tasks by column. Tasks with no sectionId go into first column.
   function tasksForColumn(col: ApiProjectColumn, colIndex: number): Task[] {
+    // ApiProjectColumn's TypeScript annotation claims `id: string`, but
+    // the wire sends a JSON number. Coerce on both sides so
+    // `"5" === 5` (which would be false) doesn't make moved tasks
+    // vanish from the board.
+    const colKey = String(col.id);
     return tasks.filter((t) => {
-      // IDs are both strings on the frontend (ApiProjectColumn.id +
-      // Task.sectionId). The apiTaskToTask mapper stringifies the
-      // numeric wire value so this compares apples-to-apples.
-      if (t.sectionId === col.id) return true;
+      if (t.sectionId && String(t.sectionId) === colKey) return true;
       // Unsectioned tasks go into first column.
       if (colIndex === 0 && !t.sectionId) return true;
       return false;
@@ -297,27 +299,27 @@ const ProjectBoard: React.FC = () => {
         <div className="flex h-full min-w-max gap-2 px-3 py-3">
           {columns.map((col, i) => (
             <KanbanColumn
-              key={col.id}
+              key={String(col.id)}
               col={col}
               lanes={buildLanes(laneIndex, tasksForColumn(col, i), groupBy)}
               groupBy={groupBy}
-              isOver={dragOver === col.id}
+              isOver={dragOver === String(col.id)}
               selectedTaskIds={selectedTaskIds}
-              onDragOver={() => setDragOver(col.id)}
+              onDragOver={() => setDragOver(String(col.id))}
               onDragLeave={() => setDragOver(null)}
-              onDrop={(e) => handleDrop(e, col.id)}
+              onDrop={(e) => handleDrop(e, String(col.id))}
               onDragStart={handleDragStart}
               onSelect={toggleSelectTask}
               onAddTask={() => useFlowStore.getState().setQuickCreateOpen(true)}
               onRename={(name) =>
                 updateColumn.mutate({
-                  id: col.id,
+                  id: String(col.id),
                   name,
                   color: col.color,
                   sortOrder: col.sortOrder,
                 })
               }
-              onDelete={() => deleteColumn.mutate(col.id)}
+              onDelete={() => deleteColumn.mutate(String(col.id))}
             />
           ))}
 
