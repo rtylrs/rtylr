@@ -115,17 +115,17 @@ func UpdateWorkspaceMemberRoleRoutes() []string { return []string{"/flow/workspa
 
 type UpdateWorkspaceMemberRoleHandler struct{ FlowService *application.Service }
 type UpdateWorkspaceMemberRoleRequest struct {
-	WorkspaceID int64  `json:"workspace_id"`
-	UserID      int64  `json:"user_id"`
+	WorkspaceID JSONID `json:"workspace_id"`
+	UserID      JSONID `json:"user_id"`
 	Role        string `json:"role"`
 }
 type UpdateWorkspaceMemberRoleResponse struct{ Message string `json:"message"` }
 
 func (h *UpdateWorkspaceMemberRoleHandler) Validate(_ context.Context, req *UpdateWorkspaceMemberRoleRequest) *errorModels.ServerError {
-	if req.WorkspaceID == 0 {
+	if req.WorkspaceID.IsZero() {
 		return &errorModels.ServerError{Code: http.StatusBadRequest, Message: "workspace_id is required"}
 	}
-	if req.UserID == 0 {
+	if req.UserID.IsZero() {
 		return &errorModels.ServerError{Code: http.StatusBadRequest, Message: "user_id is required"}
 	}
 	if req.Role != "manager" && req.Role != "member" && req.Role != "viewer" {
@@ -140,8 +140,8 @@ func (h *UpdateWorkspaceMemberRoleHandler) Serve(ctx context.Context, req *Updat
 	}
 
 	if err := h.FlowService.UpdateWorkspaceMemberRole(ctx, domain.UpdateWorkspaceMemberRoleInput{
-		WorkspaceID: req.WorkspaceID,
-		UserID:      req.UserID,
+		WorkspaceID: req.WorkspaceID.Int64(),
+		UserID:      req.UserID.Int64(),
 		Role:        req.Role,
 	}); err != nil {
 		return UpdateWorkspaceMemberRoleResponse{}, &errorModels.ServerError{Code: http.StatusInternalServerError, Message: "Failed to update role"}
@@ -157,14 +157,14 @@ func ListProjectMembersRoutes() []string { return []string{"/flow/projects/membe
 
 type ListProjectMembersHandler struct{ FlowService *application.Service }
 type ListProjectMembersRequest struct {
-	ProjectID int64 `json:"project_id"`
+	ProjectID JSONID `json:"project_id"`
 }
 type ListProjectMembersResponse struct {
 	Members []ProjectMemberPayload `json:"members"`
 }
 
 func (h *ListProjectMembersHandler) Validate(_ context.Context, req *ListProjectMembersRequest) *errorModels.ServerError {
-	if req.ProjectID == 0 {
+	if req.ProjectID.IsZero() {
 		return &errorModels.ServerError{Code: http.StatusBadRequest, Message: "project_id is required"}
 	}
 	return nil
@@ -175,7 +175,7 @@ func (h *ListProjectMembersHandler) Serve(ctx context.Context, req *ListProjectM
 		return ListProjectMembersResponse{}, errorModels.PermissionDeniedServerError()
 	}
 
-	members, err := h.FlowService.ListProjectMembers(ctx, req.ProjectID)
+	members, err := h.FlowService.ListProjectMembers(ctx, req.ProjectID.Int64())
 	if err != nil {
 		return ListProjectMembersResponse{}, &errorModels.ServerError{Code: http.StatusInternalServerError, Message: "Failed to list project members"}
 	}
@@ -195,17 +195,17 @@ func AddProjectMemberRoutes() []string { return []string{"/flow/projects/member"
 
 type AddProjectMemberHandler struct{ FlowService *application.Service }
 type AddProjectMemberRequest struct {
-	ProjectID int64  `json:"project_id"`
-	UserID    int64  `json:"user_id"`
+	ProjectID JSONID `json:"project_id"`
+	UserID    JSONID `json:"user_id"`
 	Role      string `json:"role"`
 }
 type AddProjectMemberResponse struct{ Message string `json:"message"` }
 
 func (h *AddProjectMemberHandler) Validate(_ context.Context, req *AddProjectMemberRequest) *errorModels.ServerError {
-	if req.ProjectID == 0 {
+	if req.ProjectID.IsZero() {
 		return &errorModels.ServerError{Code: http.StatusBadRequest, Message: "project_id is required"}
 	}
-	if req.UserID == 0 {
+	if req.UserID.IsZero() {
 		return &errorModels.ServerError{Code: http.StatusBadRequest, Message: "user_id is required"}
 	}
 	return nil
@@ -218,8 +218,8 @@ func (h *AddProjectMemberHandler) Serve(ctx context.Context, req *AddProjectMemb
 	}
 
 	if err := h.FlowService.AddProjectMember(ctx, domain.AddProjectMemberInput{
-		ProjectID: req.ProjectID,
-		UserID:    req.UserID,
+		ProjectID: req.ProjectID.Int64(),
+		UserID:    req.UserID.Int64(),
 		Role:      req.Role,
 		AddedBy:   authUser.UserID,
 	}); err != nil {
@@ -236,16 +236,16 @@ func RemoveProjectMemberRoutes() []string { return []string{"/flow/projects/memb
 
 type RemoveProjectMemberHandler struct{ FlowService *application.Service }
 type RemoveProjectMemberRequest struct {
-	ProjectID int64 `json:"project_id"`
-	UserID    int64 `json:"user_id"`
+	ProjectID JSONID `json:"project_id"`
+	UserID    JSONID `json:"user_id"`
 }
 type RemoveProjectMemberResponse struct{ Message string `json:"message"` }
 
 func (h *RemoveProjectMemberHandler) Validate(_ context.Context, req *RemoveProjectMemberRequest) *errorModels.ServerError {
-	if req.ProjectID == 0 {
+	if req.ProjectID.IsZero() {
 		return &errorModels.ServerError{Code: http.StatusBadRequest, Message: "project_id is required"}
 	}
-	if req.UserID == 0 {
+	if req.UserID.IsZero() {
 		return &errorModels.ServerError{Code: http.StatusBadRequest, Message: "user_id is required"}
 	}
 	return nil
@@ -257,8 +257,8 @@ func (h *RemoveProjectMemberHandler) Serve(ctx context.Context, req *RemoveProje
 	}
 
 	if err := h.FlowService.RemoveProjectMember(ctx, domain.RemoveProjectMemberInput{
-		ProjectID: req.ProjectID,
-		UserID:    req.UserID,
+		ProjectID: req.ProjectID.Int64(),
+		UserID:    req.UserID.Int64(),
 	}); err != nil {
 		return RemoveProjectMemberResponse{}, &errorModels.ServerError{Code: http.StatusInternalServerError, Message: "Failed to remove project member"}
 	}
@@ -273,17 +273,17 @@ func UpdateProjectMemberRoleRoutes() []string { return []string{"/flow/projects/
 
 type UpdateProjectMemberRoleHandler struct{ FlowService *application.Service }
 type UpdateProjectMemberRoleRequest struct {
-	ProjectID int64  `json:"project_id"`
-	UserID    int64  `json:"user_id"`
+	ProjectID JSONID `json:"project_id"`
+	UserID    JSONID `json:"user_id"`
 	Role      string `json:"role"`
 }
 type UpdateProjectMemberRoleResponse struct{ Message string `json:"message"` }
 
 func (h *UpdateProjectMemberRoleHandler) Validate(_ context.Context, req *UpdateProjectMemberRoleRequest) *errorModels.ServerError {
-	if req.ProjectID == 0 {
+	if req.ProjectID.IsZero() {
 		return &errorModels.ServerError{Code: http.StatusBadRequest, Message: "project_id is required"}
 	}
-	if req.UserID == 0 {
+	if req.UserID.IsZero() {
 		return &errorModels.ServerError{Code: http.StatusBadRequest, Message: "user_id is required"}
 	}
 	if req.Role != "manager" && req.Role != "member" && req.Role != "viewer" {
@@ -298,8 +298,8 @@ func (h *UpdateProjectMemberRoleHandler) Serve(ctx context.Context, req *UpdateP
 	}
 
 	if err := h.FlowService.UpdateProjectMemberRole(ctx, domain.UpdateProjectMemberRoleInput{
-		ProjectID: req.ProjectID,
-		UserID:    req.UserID,
+		ProjectID: req.ProjectID.Int64(),
+		UserID:    req.UserID.Int64(),
 		Role:      req.Role,
 	}); err != nil {
 		return UpdateProjectMemberRoleResponse{}, &errorModels.ServerError{Code: http.StatusInternalServerError, Message: "Failed to update role"}
@@ -315,16 +315,16 @@ func TransferProjectOwnershipRoutes() []string { return []string{"/flow/projects
 
 type TransferProjectOwnershipHandler struct{ FlowService *application.Service }
 type TransferProjectOwnershipRequest struct {
-	ProjectID  int64 `json:"project_id"`
-	NewOwnerID int64 `json:"new_owner_id"`
+	ProjectID  JSONID `json:"project_id"`
+	NewOwnerID JSONID `json:"new_owner_id"`
 }
 type TransferProjectOwnershipResponse struct{ Message string `json:"message"` }
 
 func (h *TransferProjectOwnershipHandler) Validate(_ context.Context, req *TransferProjectOwnershipRequest) *errorModels.ServerError {
-	if req.ProjectID == 0 {
+	if req.ProjectID.IsZero() {
 		return &errorModels.ServerError{Code: http.StatusBadRequest, Message: "project_id is required"}
 	}
-	if req.NewOwnerID == 0 {
+	if req.NewOwnerID.IsZero() {
 		return &errorModels.ServerError{Code: http.StatusBadRequest, Message: "new_owner_id is required"}
 	}
 	return nil
@@ -337,8 +337,8 @@ func (h *TransferProjectOwnershipHandler) Serve(ctx context.Context, req *Transf
 	}
 
 	if err := h.FlowService.TransferProjectOwnership(ctx, domain.TransferProjectOwnershipInput{
-		ProjectID:  req.ProjectID,
-		NewOwnerID: req.NewOwnerID,
+		ProjectID:  req.ProjectID.Int64(),
+		NewOwnerID: req.NewOwnerID.Int64(),
 		CallerID:   authUser.UserID,
 	}); err != nil {
 		return TransferProjectOwnershipResponse{}, &errorModels.ServerError{Code: http.StatusInternalServerError, Message: "Failed to transfer ownership"}
@@ -354,14 +354,14 @@ func InviteProjectMemberByEmailRoutes() []string { return []string{"/flow/projec
 
 type InviteProjectMemberByEmailHandler struct{ FlowService *application.Service }
 type InviteProjectMemberByEmailRequest struct {
-	ProjectID int64  `json:"project_id"`
+	ProjectID JSONID `json:"project_id"`
 	Email     string `json:"email"`
 	Role      string `json:"role"`
 }
 type InviteProjectMemberByEmailResponse struct{ Message string `json:"message"` }
 
 func (h *InviteProjectMemberByEmailHandler) Validate(_ context.Context, req *InviteProjectMemberByEmailRequest) *errorModels.ServerError {
-	if req.ProjectID == 0 {
+	if req.ProjectID.IsZero() {
 		return &errorModels.ServerError{Code: http.StatusBadRequest, Message: "project_id is required"}
 	}
 	if req.Email == "" {
@@ -381,7 +381,7 @@ func (h *InviteProjectMemberByEmailHandler) Serve(ctx context.Context, req *Invi
 		role = "member"
 	}
 
-	found, err := h.FlowService.InviteProjectMemberByEmail(ctx, req.ProjectID, req.Email, role, authUser.UserID)
+	found, err := h.FlowService.InviteProjectMemberByEmail(ctx, req.ProjectID.Int64(), req.Email, role, authUser.UserID)
 	if err != nil {
 		return InviteProjectMemberByEmailResponse{}, &errorModels.ServerError{Code: http.StatusInternalServerError, Message: "Failed to invite member"}
 	}

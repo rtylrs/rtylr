@@ -9,6 +9,8 @@ type Task struct {
 	OwnerID        int64
 	ParentTaskID   *int64
 	SectionID      *int64
+	CycleID        *int64
+	MilestoneID    *int64
 	Title          string
 	Description    string
 	Status         string
@@ -24,6 +26,15 @@ type Task struct {
 	Labels         []int64
 	CreatedAt      time.Time
 	UpdatedAt      time.Time
+
+	// Display projections populated by list/detail reads via JOINs.
+	// Safe to ignore on writes — populated server-side from related tables.
+	Identifier       string // e.g. "T-42"
+	ProjectName      string
+	ProjectColor     string
+	AssigneeName     string
+	AssigneeInitials string
+	SubtaskCount     int32
 }
 
 type ProjectColumn struct {

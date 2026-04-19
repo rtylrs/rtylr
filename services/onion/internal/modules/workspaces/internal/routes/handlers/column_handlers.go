@@ -47,7 +47,7 @@ func ListColumnsRoutes() []string  { return []string{"/flow/projects/columns"} }
 type ListColumnsHandler struct{ FlowService *application.Service }
 
 type ListColumnsRequest struct {
-	ProjectID int64 `json:"project_id"`
+	ProjectID JSONID `json:"project_id"`
 }
 
 type ListColumnsResponse struct {
@@ -55,14 +55,14 @@ type ListColumnsResponse struct {
 }
 
 func (h *ListColumnsHandler) Validate(_ context.Context, req *ListColumnsRequest) *errorModels.ServerError {
-	if req.ProjectID == 0 {
+	if req.ProjectID.IsZero() {
 		return &errorModels.ServerError{Code: http.StatusBadRequest, Message: "project_id is required"}
 	}
 	return nil
 }
 
 func (h *ListColumnsHandler) Serve(ctx context.Context, req *ListColumnsRequest) (ListColumnsResponse, *errorModels.ServerError) {
-	cols, err := h.FlowService.GetColumnsByProject(ctx, req.ProjectID)
+	cols, err := h.FlowService.GetColumnsByProject(ctx, req.ProjectID.Int64())
 	if err != nil {
 		return ListColumnsResponse{}, &errorModels.ServerError{Code: http.StatusInternalServerError, Message: "Failed to list columns"}
 	}
@@ -82,8 +82,8 @@ func CreateColumnRoutes() []string { return []string{"/flow/projects/columns"} }
 type CreateColumnHandler struct{ FlowService *application.Service }
 
 type CreateColumnRequest struct {
-	ProjectID   int64  `json:"project_id"`
-	WorkspaceID int64  `json:"workspace_id"`
+	ProjectID   JSONID `json:"project_id"`
+	WorkspaceID JSONID `json:"workspace_id"`
 	Name        string `json:"name"`
 	Color       string `json:"color"`
 	SortOrder   int    `json:"sort_order"`
@@ -94,7 +94,7 @@ type CreateColumnResponse struct {
 }
 
 func (h *CreateColumnHandler) Validate(_ context.Context, req *CreateColumnRequest) *errorModels.ServerError {
-	if req.ProjectID == 0 {
+	if req.ProjectID.IsZero() {
 		return &errorModels.ServerError{Code: http.StatusBadRequest, Message: "project_id is required"}
 	}
 	if req.Name == "" {
@@ -115,8 +115,8 @@ func (h *CreateColumnHandler) Serve(ctx context.Context, req *CreateColumnReques
 	}
 
 	col, err := h.FlowService.CreateColumn(ctx, domain.ProjectColumnInput{
-		ProjectID:   req.ProjectID,
-		WorkspaceID: req.WorkspaceID,
+		ProjectID:   req.ProjectID.Int64(),
+		WorkspaceID: req.WorkspaceID.Int64(),
 		Name:        req.Name,
 		Color:       color,
 		SortOrder:   req.SortOrder,
@@ -137,7 +137,7 @@ func UpdateColumnRoutes() []string { return []string{"/flow/projects/columns"} }
 type UpdateColumnHandler struct{ FlowService *application.Service }
 
 type UpdateColumnRequest struct {
-	ID        int64  `json:"id"`
+	ID        JSONID `json:"id"`
 	Name      string `json:"name"`
 	Color     string `json:"color"`
 	SortOrder int    `json:"sort_order"`
@@ -148,7 +148,7 @@ type UpdateColumnResponse struct {
 }
 
 func (h *UpdateColumnHandler) Validate(_ context.Context, req *UpdateColumnRequest) *errorModels.ServerError {
-	if req.ID == 0 {
+	if req.ID.IsZero() {
 		return &errorModels.ServerError{Code: http.StatusBadRequest, Message: "id is required"}
 	}
 	if req.Name == "" {
@@ -164,7 +164,7 @@ func (h *UpdateColumnHandler) Serve(ctx context.Context, req *UpdateColumnReques
 	}
 
 	err := h.FlowService.UpdateColumn(ctx, domain.UpdateProjectColumnInput{
-		ID:        req.ID,
+		ID:        req.ID.Int64(),
 		Name:      req.Name,
 		Color:     req.Color,
 		SortOrder: req.SortOrder,
@@ -184,7 +184,7 @@ func DeleteColumnRoutes() []string { return []string{"/flow/projects/columns"} }
 type DeleteColumnHandler struct{ FlowService *application.Service }
 
 type DeleteColumnRequest struct {
-	ID int64 `json:"id"`
+	ID JSONID `json:"id"`
 }
 
 type DeleteColumnResponse struct {
@@ -192,7 +192,7 @@ type DeleteColumnResponse struct {
 }
 
 func (h *DeleteColumnHandler) Validate(_ context.Context, req *DeleteColumnRequest) *errorModels.ServerError {
-	if req.ID == 0 {
+	if req.ID.IsZero() {
 		return &errorModels.ServerError{Code: http.StatusBadRequest, Message: "id is required"}
 	}
 	return nil
@@ -204,7 +204,7 @@ func (h *DeleteColumnHandler) Serve(ctx context.Context, req *DeleteColumnReques
 		return DeleteColumnResponse{}, errorModels.PermissionDeniedServerError()
 	}
 
-	if err := h.FlowService.DeleteColumn(ctx, req.ID); err != nil {
+	if err := h.FlowService.DeleteColumn(ctx, req.ID.Int64()); err != nil {
 		return DeleteColumnResponse{}, &errorModels.ServerError{Code: http.StatusInternalServerError, Message: "Failed to delete column"}
 	}
 	return DeleteColumnResponse{Message: "Column deleted"}, nil
@@ -219,8 +219,8 @@ func MoveTaskToColumnRoutes() []string { return []string{"/flow/projects/columns
 type MoveTaskToColumnHandler struct{ FlowService *application.Service }
 
 type MoveTaskToColumnRequest struct {
-	TaskID   int64 `json:"task_id"`
-	ColumnID int64 `json:"column_id"`
+	TaskID   JSONID `json:"task_id"`
+	ColumnID JSONID `json:"column_id"`
 }
 
 type MoveTaskToColumnResponse struct {
@@ -228,7 +228,7 @@ type MoveTaskToColumnResponse struct {
 }
 
 func (h *MoveTaskToColumnHandler) Validate(_ context.Context, req *MoveTaskToColumnRequest) *errorModels.ServerError {
-	if req.TaskID == 0 {
+	if req.TaskID.IsZero() {
 		return &errorModels.ServerError{Code: http.StatusBadRequest, Message: "task_id is required"}
 	}
 	return nil
@@ -240,7 +240,7 @@ func (h *MoveTaskToColumnHandler) Serve(ctx context.Context, req *MoveTaskToColu
 		return MoveTaskToColumnResponse{}, errorModels.PermissionDeniedServerError()
 	}
 
-	if err := h.FlowService.MoveTaskToColumn(ctx, req.TaskID, req.ColumnID); err != nil {
+	if err := h.FlowService.MoveTaskToColumn(ctx, req.TaskID.Int64(), req.ColumnID.Int64()); err != nil {
 		return MoveTaskToColumnResponse{}, &errorModels.ServerError{Code: http.StatusInternalServerError, Message: "Failed to move task"}
 	}
 	return MoveTaskToColumnResponse{Message: "Task moved"}, nil

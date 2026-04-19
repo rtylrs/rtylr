@@ -5,6 +5,7 @@ import (
 	"database/sql"
 	"encoding/json"
 	"errors"
+	"fmt"
 	"strconv"
 	"time"
 
@@ -182,39 +183,64 @@ func (r *Repository) CreateProject(ctx context.Context, input domain.ProjectInpu
 }
 
 func (r *Repository) GetProjectsByWorkspace(ctx context.Context, workspaceID, ownerID int64) ([]domain.Project, error) {
-	rows, err := r.queries.GetProjectsByWorkspace(ctx, sqlc.GetProjectsByWorkspaceParams{
-		WorkspaceID: workspaceID,
-		OwnerID:     ownerID,
-	})
+	// Enriched projection: task_count, completed_count, and member_count
+	// are computed via correlated subqueries so the list view doesn't
+	// need separate fetches per project.
+	q := `
+		SELECT
+			p.id, p.workspace_id, p.owner_id, p.name,
+			COALESCE(p.description, ''), COALESCE(p.icon, ''), COALESCE(p.color, ''),
+			COALESCE(p.status, 'active'),
+			p.start_date, p.due_date,
+			p.created_by, p.created_at, p.updated_at,
+			COALESCE((SELECT COUNT(*) FROM flow_tasks t WHERE t.project_id = p.id), 0) AS task_count,
+			COALESCE((SELECT COUNT(*) FROM flow_tasks t WHERE t.project_id = p.id AND t.status = 'done'), 0) AS completed_count,
+			COALESCE((SELECT COUNT(*) FROM flow_project_members pm WHERE pm.project_id = p.id), 0) AS member_count
+		FROM flow_projects p
+		WHERE p.workspace_id = ? AND p.owner_id = ?
+		ORDER BY p.created_at DESC`
+
+	rows, err := r.pool.QueryContext(ctx, q, workspaceID, ownerID)
 	if err != nil {
 		logger.Ctx(ctx).Error("GetProjectsByWorkspace failed", logger.Error(err))
 		return nil, err
 	}
+	defer func() {
+		if closeErr := rows.Close(); closeErr != nil {
+			logger.Ctx(ctx).Warn("GetProjectsByWorkspace close failed", logger.Error(closeErr))
+		}
+	}()
 
 	var projects []domain.Project
-	for _, row := range rows {
-		p := domain.Project{
-			ID:          row.ID,
-			WorkspaceID: row.WorkspaceID,
-			OwnerID:     row.OwnerID,
-			Name:        row.Name,
-			Description: row.Description.String,
-			Icon:        row.Icon.String,
-			Color:       row.Color.String,
-			Status:      string(row.Status.FlowProjectsStatus),
-			CreatedBy:   row.CreatedBy,
-			CreatedAt:   row.CreatedAt.Time,
-			UpdatedAt:   row.UpdatedAt.Time,
+	for rows.Next() {
+		var p domain.Project
+		var startDate, dueDate sql.NullTime
+		var createdAt, updatedAt sql.NullTime
+		if scanErr := rows.Scan(
+			&p.ID, &p.WorkspaceID, &p.OwnerID, &p.Name,
+			&p.Description, &p.Icon, &p.Color, &p.Status,
+			&startDate, &dueDate,
+			&p.CreatedBy, &createdAt, &updatedAt,
+			&p.TaskCount, &p.CompletedCount, &p.MemberCount,
+		); scanErr != nil {
+			logger.Ctx(ctx).Error("GetProjectsByWorkspace scan failed", logger.Error(scanErr))
+			return nil, scanErr
 		}
-		if row.StartDate.Valid {
-			p.StartDate = &row.StartDate.Time
+		if startDate.Valid {
+			p.StartDate = &startDate.Time
 		}
-		if row.DueDate.Valid {
-			p.DueDate = &row.DueDate.Time
+		if dueDate.Valid {
+			p.DueDate = &dueDate.Time
+		}
+		if createdAt.Valid {
+			p.CreatedAt = createdAt.Time
+		}
+		if updatedAt.Valid {
+			p.UpdatedAt = updatedAt.Time
 		}
 		projects = append(projects, p)
 	}
-	return projects, nil
+	return projects, rows.Err()
 }
 
 func (r *Repository) UpdateProject(ctx context.Context, input domain.UpdateProjectInput) error {
@@ -291,108 +317,78 @@ func (r *Repository) CreateTask(ctx context.Context, input domain.TaskInput) (in
 }
 
 func (r *Repository) GetTasksByProject(ctx context.Context, filter domain.ListTasksFilter) ([]domain.Task, error) {
-	// sqlc query doesn't support optional filters, so for complex cases
-	// we use the basic query and filter in-memory, or keep raw SQL for status/assignee/priority.
-	if filter.Status != "" || filter.AssigneeID != nil || filter.Priority != "" {
-		return r.getTasksByProjectFiltered(ctx, filter)
-	}
-
-	rows, err := r.queries.GetTasksByProject(ctx, filter.ProjectID)
-	if err != nil {
-		logger.Ctx(ctx).Error("GetTasksByProject failed", logger.Error(err))
-		return nil, err
-	}
-	return tasksFromRows(rows), nil
-}
-
-func (r *Repository) getTasksByProjectFiltered(ctx context.Context, filter domain.ListTasksFilter) ([]domain.Task, error) {
-	query := `SELECT id, project_id, workspace_id, owner_id, parent_task_id, section_id, title, description,
-	           status, priority, assignee_id, reporter_id, due_date, start_date, completed_at,
-	           estimated_hours, actual_hours, sort_order, labels, created_at, updated_at
-	          FROM flow_tasks WHERE project_id = ? AND parent_task_id IS NULL`
+	where := "WHERE t.project_id = ? AND t.parent_task_id IS NULL"
 	args := []interface{}{filter.ProjectID}
 
 	if filter.Status != "" {
-		query += " AND status = ?"
+		where += " AND t.status = ?"
 		args = append(args, filter.Status)
 	}
 	if filter.AssigneeID != nil {
-		query += " AND assignee_id = ?"
+		where += " AND t.assignee_id = ?"
 		args = append(args, *filter.AssigneeID)
 	}
 	if filter.Priority != "" {
-		query += " AND priority = ?"
+		where += " AND t.priority = ?"
 		args = append(args, filter.Priority)
 	}
 
-	query += " ORDER BY sort_order ASC, created_at ASC"
+	where += " ORDER BY t.sort_order ASC, t.created_at ASC"
 
-	rows, err := r.pool.QueryContext(ctx, query, args...)
-	if err != nil {
-		logger.Ctx(ctx).Error("GetTasksByProject filtered failed", logger.Error(err))
-		return nil, err
-	}
-	defer rows.Close()
-
-	return scanTasksRaw(ctx, rows)
+	return r.listEnrichedTasks(ctx, where, args...)
 }
 
 func (r *Repository) GetTasksByWorkspace(ctx context.Context, filter domain.ListTasksFilter) ([]domain.Task, error) {
-	query := `SELECT id, project_id, workspace_id, owner_id, parent_task_id, section_id, title, description,
-	           status, priority, assignee_id, reporter_id, due_date, start_date, completed_at,
-	           estimated_hours, actual_hours, sort_order, labels, created_at, updated_at
-	          FROM flow_tasks WHERE workspace_id = ? AND parent_task_id IS NULL`
+	where := "WHERE t.workspace_id = ? AND t.parent_task_id IS NULL"
 	args := []interface{}{filter.WorkspaceID}
 
 	if filter.Status != "" {
-		query += " AND status = ?"
+		where += " AND t.status = ?"
 		args = append(args, filter.Status)
 	}
 	if filter.AssigneeID != nil {
-		query += " AND assignee_id = ?"
+		where += " AND t.assignee_id = ?"
 		args = append(args, *filter.AssigneeID)
 	}
 	if filter.Priority != "" {
-		query += " AND priority = ?"
+		where += " AND t.priority = ?"
 		args = append(args, filter.Priority)
 	}
 
-	query += " ORDER BY created_at DESC LIMIT 500"
+	where += " ORDER BY t.created_at DESC LIMIT 500"
 
-	rows, err := r.pool.QueryContext(ctx, query, args...)
-	if err != nil {
-		logger.Ctx(ctx).Error("GetTasksByWorkspace failed", logger.Error(err))
-		return nil, err
-	}
-	defer rows.Close()
-
-	return scanTasksRaw(ctx, rows)
+	return r.listEnrichedTasks(ctx, where, args...)
 }
 
 func (r *Repository) GetTaskByID(ctx context.Context, taskID int64) (domain.Task, error) {
-	row, err := r.queries.GetTaskByID(ctx, taskID)
+	tasks, err := r.listEnrichedTasks(ctx, "WHERE t.id = ?", taskID)
 	if err != nil {
 		return domain.Task{}, err
 	}
-	return taskFromFlowTask(row), nil
+	if len(tasks) == 0 {
+		return domain.Task{}, sql.ErrNoRows
+	}
+	return tasks[0], nil
 }
 
 func (r *Repository) GetSubtasks(ctx context.Context, parentTaskID int64) ([]domain.Task, error) {
-	rows, err := r.queries.GetSubtasks(ctx, sql.NullInt64{Int64: parentTaskID, Valid: true})
-	if err != nil {
-		logger.Ctx(ctx).Error("GetSubtasks failed", logger.Error(err))
-		return nil, err
-	}
-	return tasksFromRows(rows), nil
+	return r.listEnrichedTasks(ctx,
+		"WHERE t.parent_task_id = ? ORDER BY t.sort_order ASC, t.created_at ASC",
+		parentTaskID,
+	)
 }
 
 func (r *Repository) GetMyTasks(ctx context.Context, userID int64) ([]domain.Task, error) {
-	rows, err := r.queries.GetMyTasks(ctx, sql.NullInt64{Int64: userID, Valid: true})
-	if err != nil {
-		logger.Ctx(ctx).Error("GetMyTasks failed", logger.Error(err))
-		return nil, err
-	}
-	return tasksFromRows(rows), nil
+	return r.listEnrichedTasks(ctx,
+		`WHERE t.assignee_id = ? AND t.parent_task_id IS NULL
+		 AND t.status NOT IN ('done','cancelled')
+		 ORDER BY
+		   CASE WHEN t.due_date IS NULL THEN 1 ELSE 0 END,
+		   t.due_date ASC,
+		   t.created_at DESC
+		 LIMIT 500`,
+		userID,
+	)
 }
 
 func (r *Repository) UpdateTask(ctx context.Context, input domain.UpdateTaskInput) error {
@@ -862,6 +858,143 @@ func tasksFromRows(rows []sqlc.FlowTask) []domain.Task {
 	return tasks
 }
 
+// enrichedTaskColumns is the column list used by every task read path.
+// It selects the raw flow_tasks row plus the JOINed display projections
+// (project name/color, assignee name, subtask count) so the UI never has
+// to do an N+1 lookup.
+//
+// Keep this const, scanEnrichedTask, and the SELECT + JOIN in
+// listEnrichedTasks in sync.
+const enrichedTaskColumns = `
+	t.id, t.project_id, t.workspace_id, t.owner_id, t.parent_task_id, t.section_id,
+	t.title, t.description, t.status, t.priority,
+	t.assignee_id, t.reporter_id, t.due_date, t.start_date, t.completed_at,
+	t.estimated_hours, t.actual_hours, t.sort_order, t.labels,
+	t.created_at, t.updated_at,
+	COALESCE(p.name, '')  AS project_name,
+	COALESCE(p.color, '') AS project_color,
+	COALESCE(u.full_name, '') AS assignee_name,
+	COALESCE((SELECT COUNT(*) FROM flow_tasks st WHERE st.parent_task_id = t.id), 0) AS subtask_count`
+
+const enrichedTaskJoin = `
+	FROM flow_tasks t
+	LEFT JOIN flow_projects p ON p.id = t.project_id
+	LEFT JOIN users u         ON u.id = t.assignee_id`
+
+// listEnrichedTasks runs an enriched task query. `whereAndRest` is
+// everything after the JOIN clause (e.g. `WHERE t.project_id = ? ORDER BY ...`).
+// All tenant-scope filtering lives in whereAndRest — owner scoping is the
+// caller's responsibility.
+func (r *Repository) listEnrichedTasks(ctx context.Context, whereAndRest string, args ...interface{}) ([]domain.Task, error) {
+	q := "SELECT " + enrichedTaskColumns + enrichedTaskJoin + " " + whereAndRest
+	rows, err := r.pool.QueryContext(ctx, q, args...)
+	if err != nil {
+		logger.Ctx(ctx).Error("listEnrichedTasks failed", logger.Error(err))
+		return nil, err
+	}
+	defer func() {
+		if closeErr := rows.Close(); closeErr != nil {
+			logger.Ctx(ctx).Warn("listEnrichedTasks row close failed", logger.Error(closeErr))
+		}
+	}()
+
+	var tasks []domain.Task
+	for rows.Next() {
+		t, scanErr := scanEnrichedTask(ctx, rows)
+		if scanErr != nil {
+			return nil, scanErr
+		}
+		tasks = append(tasks, t)
+	}
+	return tasks, rows.Err()
+}
+
+// scanEnrichedTask scans one row from a query using enrichedTaskColumns.
+// Returns a fully-populated domain.Task including display projections.
+func scanEnrichedTask(ctx context.Context, rows *sql.Rows) (domain.Task, error) {
+	var t domain.Task
+	var desc sql.NullString
+	var parentID, sectionID, assigneeID sql.NullInt64
+	var dueDate, startDate, completedAt sql.NullTime
+	var estHours, actHours sql.NullFloat64
+	var labelsRaw []byte
+
+	err := rows.Scan(
+		&t.ID, &t.ProjectID, &t.WorkspaceID, &t.OwnerID, &parentID, &sectionID,
+		&t.Title, &desc, &t.Status, &t.Priority,
+		&assigneeID, &t.ReporterID,
+		&dueDate, &startDate, &completedAt,
+		&estHours, &actHours, &t.SortOrder, &labelsRaw,
+		&t.CreatedAt, &t.UpdatedAt,
+		&t.ProjectName, &t.ProjectColor, &t.AssigneeName, &t.SubtaskCount,
+	)
+	if err != nil {
+		logger.Ctx(ctx).Error("scanEnrichedTask row scan failed", logger.Error(err))
+		return domain.Task{}, err
+	}
+
+	t.Description = desc.String
+	if parentID.Valid {
+		t.ParentTaskID = &parentID.Int64
+	}
+	if sectionID.Valid {
+		t.SectionID = &sectionID.Int64
+	}
+	if assigneeID.Valid {
+		t.AssigneeID = &assigneeID.Int64
+	}
+	if dueDate.Valid {
+		t.DueDate = &dueDate.Time
+	}
+	if startDate.Valid {
+		t.StartDate = &startDate.Time
+	}
+	if completedAt.Valid {
+		t.CompletedAt = &completedAt.Time
+	}
+	if estHours.Valid {
+		t.EstimatedHours = &estHours.Float64
+	}
+	if actHours.Valid {
+		t.ActualHours = &actHours.Float64
+	}
+	if len(labelsRaw) > 0 {
+		if unErr := json.Unmarshal(labelsRaw, &t.Labels); unErr != nil {
+			logger.Ctx(ctx).Warn("failed to unmarshal task labels", logger.Error(unErr))
+		}
+	}
+	t.AssigneeInitials = initialsOf(t.AssigneeName)
+	if t.Identifier == "" {
+		t.Identifier = fmt.Sprintf("T-%d", t.ID)
+	}
+	return t, nil
+}
+
+// initialsOf returns uppercase initials for a display name (up to 2 chars).
+func initialsOf(name string) string {
+	if name == "" {
+		return ""
+	}
+	var out []rune
+	prev := ' '
+	for _, r := range name {
+		if (prev == ' ' || prev == '\t') && r != ' ' && r != '\t' {
+			if r >= 'a' && r <= 'z' {
+				r -= 32
+			}
+			out = append(out, r)
+			if len(out) == 2 {
+				break
+			}
+		}
+		prev = r
+	}
+	return string(out)
+}
+
+// scanTasksRaw — legacy bare-row scanner kept for code paths not yet
+// migrated to listEnrichedTasks (e.g. direct-write callbacks returning
+// the inserted row). New callers should use listEnrichedTasks + scanEnrichedTask.
 func scanTasksRaw(ctx context.Context, rows *sql.Rows) ([]domain.Task, error) {
 	var tasks []domain.Task
 	for rows.Next() {
@@ -911,8 +1044,11 @@ func scanTasksRaw(ctx context.Context, rows *sql.Rows) ([]domain.Task, error) {
 			t.ActualHours = &actHours.Float64
 		}
 		if len(labelsRaw) > 0 {
-			_ = json.Unmarshal(labelsRaw, &t.Labels)
+			if unErr := json.Unmarshal(labelsRaw, &t.Labels); unErr != nil {
+				logger.Ctx(ctx).Warn("failed to unmarshal task labels", logger.Error(unErr))
+			}
 		}
+		t.Identifier = fmt.Sprintf("T-%d", t.ID)
 		tasks = append(tasks, t)
 	}
 	return tasks, rows.Err()

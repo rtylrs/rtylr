@@ -16,6 +16,12 @@ type Project struct {
 	CreatedBy   int64
 	CreatedAt   time.Time
 	UpdatedAt   time.Time
+
+	// Display projections populated by list/detail reads.
+	TaskCount      int32
+	CompletedCount int32
+	MemberCount    int32
+	Code           string // e.g. "FLW" — used to build Task.Identifier ("FLW-42")
 }
 
 type ProjectMember struct {

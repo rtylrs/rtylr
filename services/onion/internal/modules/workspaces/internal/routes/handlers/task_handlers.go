@@ -42,7 +42,7 @@ func toTaskPayload(t domain.Task) *flowv1.Task {
 		Id:             t.ID,
 		ProjectId:      t.ProjectID,
 		WorkspaceId:    t.WorkspaceID,
-		OwnerId:       t.OwnerID,
+		OwnerId:        t.OwnerID,
 		ParentTaskId:   t.ParentTaskID,
 		Title:          t.Title,
 		Description:    t.Description,
@@ -56,6 +56,16 @@ func toTaskPayload(t domain.Task) *flowv1.Task {
 		Labels:         labels,
 		CreatedAt:      t.CreatedAt.Format("2006-01-02T15:04:05Z"),
 		UpdatedAt:      t.UpdatedAt.Format("2006-01-02T15:04:05Z"),
+		// Display projections — populated by enriched repository queries.
+		Identifier:       t.Identifier,
+		ProjectName:      t.ProjectName,
+		ProjectColor:     t.ProjectColor,
+		AssigneeName:     t.AssigneeName,
+		AssigneeInitials: t.AssigneeInitials,
+		SubtaskCount:     t.SubtaskCount,
+		SectionId:        t.SectionID,
+		CycleId:          t.CycleID,
+		MilestoneId:      t.MilestoneID,
 	}
 	if t.DueDate != nil {
 		s := t.DueDate.Format("2006-01-02T15:04:05Z")
@@ -175,7 +185,7 @@ type CreateTaskHandler struct {
 }
 
 type CreateTaskRequest struct {
-	ProjectID      int64            `json:"project_id"`
+	ProjectID      JSONID           `json:"project_id"`
 	WorkspaceID    WorkspaceIDField `json:"workspace_id"`
 	ParentTaskID   *int64           `json:"parent_task_id"`
 	Title          string           `json:"title"`
@@ -193,7 +203,7 @@ type CreateTaskResponse struct {
 }
 
 func (h *CreateTaskHandler) Validate(_ context.Context, req *CreateTaskRequest) *errorModels.ServerError {
-	if req.ProjectID == 0 {
+	if req.ProjectID.IsZero() {
 		return &errorModels.ServerError{Code: http.StatusBadRequest, Message: "Project ID is required"}
 	}
 
@@ -223,7 +233,7 @@ func (h *CreateTaskHandler) Serve(ctx context.Context, req *CreateTaskRequest) (
 	}
 
 	input := domain.TaskInput{
-		ProjectID:      req.ProjectID,
+		ProjectID:      req.ProjectID.Int64(),
 		WorkspaceID:    workspaceID,
 		OwnerID:        authUser.UserID,
 		ParentTaskID:   req.ParentTaskID,
@@ -258,7 +268,7 @@ type GetTaskDetailHandler struct {
 }
 
 type GetTaskDetailRequest struct {
-	ID int64 `json:"id"`
+	ID JSONID `json:"id"`
 }
 
 type GetTaskDetailResponse struct {
@@ -269,7 +279,7 @@ type GetTaskDetailResponse struct {
 }
 
 func (h *GetTaskDetailHandler) Validate(_ context.Context, req *GetTaskDetailRequest) *errorModels.ServerError {
-	if req.ID == 0 {
+	if req.ID.IsZero() {
 		return &errorModels.ServerError{Code: http.StatusBadRequest, Message: "Task ID is required"}
 	}
 
@@ -282,7 +292,7 @@ func (h *GetTaskDetailHandler) Serve(ctx context.Context, req *GetTaskDetailRequ
 		return GetTaskDetailResponse{}, errorModels.PermissionDeniedServerError()
 	}
 
-	detail, err := h.FlowService.GetTaskDetail(ctx, req.ID)
+	detail, err := h.FlowService.GetTaskDetail(ctx, req.ID.Int64())
 	if err != nil {
 		return GetTaskDetailResponse{}, &errorModels.ServerError{
 			Code:    http.StatusInternalServerError,
@@ -322,7 +332,7 @@ type UpdateTaskHandler struct {
 }
 
 type UpdateTaskRequest struct {
-	ID          int64      `json:"id"`
+	ID          JSONID     `json:"id"`
 	Title       string     `json:"title"`
 	Description string     `json:"description"`
 	Status      string     `json:"status"`
@@ -338,7 +348,7 @@ type UpdateTaskResponse struct {
 }
 
 func (h *UpdateTaskHandler) Validate(_ context.Context, req *UpdateTaskRequest) *errorModels.ServerError {
-	if req.ID == 0 {
+	if req.ID.IsZero() {
 		return &errorModels.ServerError{Code: http.StatusBadRequest, Message: "Task ID is required"}
 	}
 
@@ -356,7 +366,7 @@ func (h *UpdateTaskHandler) Serve(ctx context.Context, req *UpdateTaskRequest) (
 	}
 
 	input := domain.UpdateTaskInput{
-		ID:          req.ID,
+		ID:          req.ID.Int64(),
 		OwnerID:     authUser.UserID,
 		Title:       req.Title,
 		Description: req.Description,
@@ -387,7 +397,7 @@ type DeleteTaskHandler struct {
 }
 
 type DeleteTaskRequest struct {
-	ID int64 `json:"id"`
+	ID JSONID `json:"id"`
 }
 
 type DeleteTaskResponse struct {
@@ -395,7 +405,7 @@ type DeleteTaskResponse struct {
 }
 
 func (h *DeleteTaskHandler) Validate(_ context.Context, req *DeleteTaskRequest) *errorModels.ServerError {
-	if req.ID == 0 {
+	if req.ID.IsZero() {
 		return &errorModels.ServerError{Code: http.StatusBadRequest, Message: "Task ID is required"}
 	}
 
@@ -408,7 +418,7 @@ func (h *DeleteTaskHandler) Serve(ctx context.Context, req *DeleteTaskRequest) (
 		return DeleteTaskResponse{}, errorModels.PermissionDeniedServerError()
 	}
 
-	if err := h.FlowService.DeleteTask(ctx, req.ID, authUser.UserID); err != nil {
+	if err := h.FlowService.DeleteTask(ctx, req.ID.Int64(), authUser.UserID); err != nil {
 		return DeleteTaskResponse{}, &errorModels.ServerError{
 			Code:    http.StatusInternalServerError,
 			Message: "Failed to delete task",
@@ -427,7 +437,7 @@ type UpdateTaskStatusHandler struct {
 }
 
 type UpdateTaskStatusRequest struct {
-	ID     int64  `json:"id"`
+	ID     JSONID `json:"id"`
 	Status string `json:"status"`
 }
 
@@ -436,7 +446,7 @@ type UpdateTaskStatusResponse struct {
 }
 
 func (h *UpdateTaskStatusHandler) Validate(_ context.Context, req *UpdateTaskStatusRequest) *errorModels.ServerError {
-	if req.ID == 0 {
+	if req.ID.IsZero() {
 		return &errorModels.ServerError{Code: http.StatusBadRequest, Message: "Task ID is required"}
 	}
 
@@ -454,7 +464,7 @@ func (h *UpdateTaskStatusHandler) Serve(ctx context.Context, req *UpdateTaskStat
 	}
 
 	input := domain.UpdateTaskStatusInput{
-		ID:      req.ID,
+		ID:      req.ID.Int64(),
 		OwnerID: authUser.UserID,
 		Status:  req.Status,
 	}
@@ -514,7 +524,7 @@ type AddCommentHandler struct {
 }
 
 type AddCommentRequest struct {
-	TaskID  int64  `json:"task_id"`
+	TaskID  JSONID `json:"task_id"`
 	Content string `json:"content"`
 }
 
@@ -523,7 +533,7 @@ type AddCommentResponse struct {
 }
 
 func (h *AddCommentHandler) Validate(_ context.Context, req *AddCommentRequest) *errorModels.ServerError {
-	if req.TaskID == 0 {
+	if req.TaskID.IsZero() {
 		return &errorModels.ServerError{Code: http.StatusBadRequest, Message: "Task ID is required"}
 	}
 
@@ -540,7 +550,7 @@ func (h *AddCommentHandler) Serve(ctx context.Context, req *AddCommentRequest) (
 		return AddCommentResponse{}, errorModels.PermissionDeniedServerError()
 	}
 
-	comment, err := h.FlowService.AddComment(ctx, req.TaskID, authUser.UserID, req.Content)
+	comment, err := h.FlowService.AddComment(ctx, req.TaskID.Int64(), authUser.UserID, req.Content)
 	if err != nil {
 		return AddCommentResponse{}, &errorModels.ServerError{
 			Code:    http.StatusInternalServerError,
@@ -560,7 +570,7 @@ type DeleteCommentHandler struct {
 }
 
 type DeleteCommentRequest struct {
-	ID int64 `json:"id"`
+	ID JSONID `json:"id"`
 }
 
 type DeleteCommentResponse struct {
@@ -568,7 +578,7 @@ type DeleteCommentResponse struct {
 }
 
 func (h *DeleteCommentHandler) Validate(_ context.Context, req *DeleteCommentRequest) *errorModels.ServerError {
-	if req.ID == 0 {
+	if req.ID.IsZero() {
 		return &errorModels.ServerError{Code: http.StatusBadRequest, Message: "Comment ID is required"}
 	}
 
@@ -581,7 +591,7 @@ func (h *DeleteCommentHandler) Serve(ctx context.Context, req *DeleteCommentRequ
 		return DeleteCommentResponse{}, errorModels.PermissionDeniedServerError()
 	}
 
-	if err := h.FlowService.DeleteComment(ctx, req.ID, authUser.UserID); err != nil {
+	if err := h.FlowService.DeleteComment(ctx, req.ID.Int64(), authUser.UserID); err != nil {
 		return DeleteCommentResponse{}, &errorModels.ServerError{
 			Code:    http.StatusInternalServerError,
 			Message: "Failed to delete comment",

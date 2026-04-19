@@ -143,7 +143,7 @@ type UpdateWorkspaceHandler struct {
 }
 
 type UpdateWorkspaceRequest struct {
-	ID          int64  `json:"id"`
+	ID          JSONID `json:"id"`
 	Name        string `json:"name"`
 	Description string `json:"description"`
 	Icon        string `json:"icon"`
@@ -155,7 +155,7 @@ type UpdateWorkspaceResponse struct {
 }
 
 func (h *UpdateWorkspaceHandler) Validate(_ context.Context, req *UpdateWorkspaceRequest) *errorModels.ServerError {
-	if req.ID == 0 {
+	if req.ID.IsZero() {
 		return &errorModels.ServerError{Code: http.StatusBadRequest, Message: "Workspace ID is required"}
 	}
 
@@ -173,7 +173,7 @@ func (h *UpdateWorkspaceHandler) Serve(ctx context.Context, req *UpdateWorkspace
 	}
 
 	input := domain.UpdateWorkspaceInput{
-		ID:          req.ID,
+		ID:          req.ID.Int64(),
 		OwnerID:     authUser.UserID,
 		Name:        req.Name,
 		Description: req.Description,
@@ -200,7 +200,7 @@ type DeleteWorkspaceHandler struct {
 }
 
 type DeleteWorkspaceRequest struct {
-	ID int64 `json:"id"`
+	ID JSONID `json:"id"`
 }
 
 type DeleteWorkspaceResponse struct {
@@ -208,7 +208,7 @@ type DeleteWorkspaceResponse struct {
 }
 
 func (h *DeleteWorkspaceHandler) Validate(_ context.Context, req *DeleteWorkspaceRequest) *errorModels.ServerError {
-	if req.ID == 0 {
+	if req.ID.IsZero() {
 		return &errorModels.ServerError{Code: http.StatusBadRequest, Message: "Workspace ID is required"}
 	}
 
@@ -221,7 +221,7 @@ func (h *DeleteWorkspaceHandler) Serve(ctx context.Context, req *DeleteWorkspace
 		return DeleteWorkspaceResponse{}, errorModels.PermissionDeniedServerError()
 	}
 
-	if err := h.FlowService.DeleteWorkspace(ctx, req.ID, authUser.UserID); err != nil {
+	if err := h.FlowService.DeleteWorkspace(ctx, req.ID.Int64(), authUser.UserID); err != nil {
 		return DeleteWorkspaceResponse{}, &errorModels.ServerError{
 			Code:    http.StatusInternalServerError,
 			Message: "Failed to delete workspace",
@@ -240,8 +240,8 @@ type AddWorkspaceMemberHandler struct {
 }
 
 type AddWorkspaceMemberRequest struct {
-	WorkspaceID int64  `json:"workspace_id"`
-	UserID      int64  `json:"user_id"`
+	WorkspaceID JSONID `json:"workspace_id"`
+	UserID      JSONID `json:"user_id"`
 	Role        string `json:"role"`
 }
 
@@ -250,11 +250,11 @@ type AddWorkspaceMemberResponse struct {
 }
 
 func (h *AddWorkspaceMemberHandler) Validate(_ context.Context, req *AddWorkspaceMemberRequest) *errorModels.ServerError {
-	if req.WorkspaceID == 0 {
+	if req.WorkspaceID.IsZero() {
 		return &errorModels.ServerError{Code: http.StatusBadRequest, Message: "Workspace ID is required"}
 	}
 
-	if req.UserID == 0 {
+	if req.UserID.IsZero() {
 		return &errorModels.ServerError{Code: http.StatusBadRequest, Message: "User ID is required"}
 	}
 
@@ -268,8 +268,8 @@ func (h *AddWorkspaceMemberHandler) Serve(ctx context.Context, req *AddWorkspace
 	}
 
 	input := domain.AddWorkspaceMemberInput{
-		WorkspaceID: req.WorkspaceID,
-		UserID:      req.UserID,
+		WorkspaceID: req.WorkspaceID.Int64(),
+		UserID:      req.UserID.Int64(),
 		Role:        req.Role,
 	}
 
@@ -292,8 +292,8 @@ type RemoveWorkspaceMemberHandler struct {
 }
 
 type RemoveWorkspaceMemberRequest struct {
-	WorkspaceID int64 `json:"workspace_id"`
-	UserID      int64 `json:"user_id"`
+	WorkspaceID JSONID `json:"workspace_id"`
+	UserID      JSONID `json:"user_id"`
 }
 
 type RemoveWorkspaceMemberResponse struct {
@@ -301,11 +301,11 @@ type RemoveWorkspaceMemberResponse struct {
 }
 
 func (h *RemoveWorkspaceMemberHandler) Validate(_ context.Context, req *RemoveWorkspaceMemberRequest) *errorModels.ServerError {
-	if req.WorkspaceID == 0 {
+	if req.WorkspaceID.IsZero() {
 		return &errorModels.ServerError{Code: http.StatusBadRequest, Message: "Workspace ID is required"}
 	}
 
-	if req.UserID == 0 {
+	if req.UserID.IsZero() {
 		return &errorModels.ServerError{Code: http.StatusBadRequest, Message: "User ID is required"}
 	}
 
@@ -319,8 +319,8 @@ func (h *RemoveWorkspaceMemberHandler) Serve(ctx context.Context, req *RemoveWor
 	}
 
 	input := domain.RemoveWorkspaceMemberInput{
-		WorkspaceID: req.WorkspaceID,
-		UserID:      req.UserID,
+		WorkspaceID: req.WorkspaceID.Int64(),
+		UserID:      req.UserID.Int64(),
 	}
 
 	if err := h.FlowService.RemoveWorkspaceMember(ctx, input); err != nil {

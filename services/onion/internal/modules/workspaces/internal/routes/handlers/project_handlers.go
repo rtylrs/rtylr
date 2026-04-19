@@ -28,17 +28,21 @@ func DeleteProjectRoutes() []string { return []string{"/flow/projects"} }
 
 func toProjectPayload(p domain.Project) *flowv1.Project {
 	proj := &flowv1.Project{
-		Id:          p.ID,
-		WorkspaceId: p.WorkspaceID,
-		OwnerId:    p.OwnerID,
-		Name:        p.Name,
-		Description: p.Description,
-		Icon:        p.Icon,
-		Color:       p.Color,
-		Status:      p.Status,
-		CreatedBy:   p.CreatedBy,
-		CreatedAt:   p.CreatedAt.Format("2006-01-02T15:04:05Z"),
-		UpdatedAt:   p.UpdatedAt.Format("2006-01-02T15:04:05Z"),
+		Id:             p.ID,
+		WorkspaceId:    p.WorkspaceID,
+		OwnerId:        p.OwnerID,
+		Name:           p.Name,
+		Description:    p.Description,
+		Icon:           p.Icon,
+		Color:          p.Color,
+		Status:         p.Status,
+		CreatedBy:      p.CreatedBy,
+		CreatedAt:      p.CreatedAt.Format("2006-01-02T15:04:05Z"),
+		UpdatedAt:      p.UpdatedAt.Format("2006-01-02T15:04:05Z"),
+		TaskCount:      p.TaskCount,
+		CompletedCount: p.CompletedCount,
+		MemberCount:    p.MemberCount,
+		Code:           p.Code,
 	}
 	if p.StartDate != nil {
 		proj.StartDate = p.StartDate.Format("2006-01-02")
@@ -185,7 +189,7 @@ type UpdateProjectHandler struct {
 }
 
 type UpdateProjectRequest struct {
-	ID          int64      `json:"id"`
+	ID          JSONID     `json:"id"`
 	Name        string     `json:"name"`
 	Description string     `json:"description"`
 	Icon        string     `json:"icon"`
@@ -200,7 +204,7 @@ type UpdateProjectResponse struct {
 }
 
 func (h *UpdateProjectHandler) Validate(_ context.Context, req *UpdateProjectRequest) *errorModels.ServerError {
-	if req.ID == 0 {
+	if req.ID.IsZero() {
 		return &errorModels.ServerError{Code: http.StatusBadRequest, Message: "Project ID is required"}
 	}
 
@@ -223,7 +227,7 @@ func (h *UpdateProjectHandler) Serve(ctx context.Context, req *UpdateProjectRequ
 	}
 
 	input := domain.UpdateProjectInput{
-		ID:          req.ID,
+		ID:          req.ID.Int64(),
 		OwnerID:     authUser.UserID,
 		Name:        req.Name,
 		Description: req.Description,
@@ -253,7 +257,7 @@ type DeleteProjectHandler struct {
 }
 
 type DeleteProjectRequest struct {
-	ID int64 `json:"id"`
+	ID JSONID `json:"id"`
 }
 
 type DeleteProjectResponse struct {
@@ -261,7 +265,7 @@ type DeleteProjectResponse struct {
 }
 
 func (h *DeleteProjectHandler) Validate(_ context.Context, req *DeleteProjectRequest) *errorModels.ServerError {
-	if req.ID == 0 {
+	if req.ID.IsZero() {
 		return &errorModels.ServerError{Code: http.StatusBadRequest, Message: "Project ID is required"}
 	}
 
@@ -274,7 +278,7 @@ func (h *DeleteProjectHandler) Serve(ctx context.Context, req *DeleteProjectRequ
 		return DeleteProjectResponse{}, errorModels.PermissionDeniedServerError()
 	}
 
-	if err := h.FlowService.DeleteProject(ctx, req.ID, authUser.UserID); err != nil {
+	if err := h.FlowService.DeleteProject(ctx, req.ID.Int64(), authUser.UserID); err != nil {
 		return DeleteProjectResponse{}, &errorModels.ServerError{
 			Code:    http.StatusInternalServerError,
 			Message: "Failed to delete project",

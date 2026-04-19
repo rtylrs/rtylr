@@ -48,3 +48,59 @@ func (w WorkspaceIDField) String() string { return string(w) }
 
 // IsEmpty is the canonical "was this field provided?" check.
 func (w WorkspaceIDField) IsEmpty() bool { return string(w) == "" }
+
+// ─────────────────────────────────────────────────────────────────────────────
+// JSONID — accepts either a JSON number or a numeric string and unmarshals
+// into an int64. The Flow frontend stringifies DB IDs for URL params + store
+// comparisons, then sends them back in POST bodies as strings. Without this
+// the Go JSON decoder rejects `"1"` → `int64` with "Invalid request" before
+// Validate runs, so the handler never gets a chance to return a helpful
+// message.
+//
+// Use as the JSON-decoded field type; call `.Int64()` to pass downstream:
+//
+//	type CreateTaskRequest struct {
+//	    ProjectID JSONID `json:"project_id"`
+//	}
+//	id := req.ProjectID.Int64()
+// ─────────────────────────────────────────────────────────────────────────────
+
+type JSONID int64
+
+func (j *JSONID) UnmarshalJSON(data []byte) error {
+	if len(data) == 0 || string(data) == "null" {
+		*j = 0
+		return nil
+	}
+	// Number form.
+	var n int64
+	if err := json.Unmarshal(data, &n); err == nil {
+		*j = JSONID(n)
+		return nil
+	}
+	// String form — parse it.
+	var s string
+	if err := json.Unmarshal(data, &s); err != nil {
+		return err
+	}
+	if s == "" {
+		*j = 0
+		return nil
+	}
+	n, err := strconv.ParseInt(s, 10, 64)
+	if err != nil {
+		return err
+	}
+	*j = JSONID(n)
+	return nil
+}
+
+func (j JSONID) MarshalJSON() ([]byte, error) {
+	return json.Marshal(int64(j))
+}
+
+// Int64 returns the underlying numeric value. Zero means unset.
+func (j JSONID) Int64() int64 { return int64(j) }
+
+// IsZero is the canonical "was this field provided?" check.
+func (j JSONID) IsZero() bool { return int64(j) == 0 }
