@@ -1484,6 +1484,23 @@ func (r *Repository) IsWorkspaceMember(ctx context.Context, userID, workspaceID 
 	return exists == 1
 }
 
+// GetInboxProject returns the id of the caller's auto-provisioned Inbox
+// project inside a workspace, or 0 if it doesn't exist yet. The inbox is
+// uniquely identified by (owner_id, workspace_id, name = 'Inbox').
+func (r *Repository) GetInboxProject(ctx context.Context, userID, workspaceID int64) int64 {
+	var id int64
+	err := r.pool.QueryRowContext(ctx,
+		`SELECT id FROM flow_projects
+		 WHERE owner_id = ? AND workspace_id = ? AND name = 'Inbox'
+		 ORDER BY created_at ASC LIMIT 1`,
+		userID, workspaceID,
+	).Scan(&id)
+	if err != nil && !errors.Is(err, sql.ErrNoRows) {
+		logger.Ctx(ctx).Warn("GetInboxProject failed", logger.Error(err))
+	}
+	return id
+}
+
 // GetProjectWorkspace returns the workspace id of the given project, or
 // 0 if the project doesn't exist. Used by the realtime publish paths.
 func (r *Repository) GetProjectWorkspace(ctx context.Context, projectID int64) int64 {

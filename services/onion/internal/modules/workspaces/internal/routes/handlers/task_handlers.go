@@ -232,14 +232,9 @@ type CreateTaskResponse struct {
 }
 
 func (h *CreateTaskHandler) Validate(_ context.Context, req *CreateTaskRequest) *errorModels.ServerError {
-	if req.ProjectID.IsZero() {
-		return &errorModels.ServerError{Code: http.StatusBadRequest, Message: "Project ID is required"}
-	}
-
-	if req.WorkspaceID.IsEmpty() {
-		return &errorModels.ServerError{Code: http.StatusBadRequest, Message: "Workspace ID is required"}
-	}
-
+	// project_id is now optional — if omitted we resolve the caller's
+	// auto-provisioned "Inbox" project (see Serve). workspace_id can be
+	// empty / "personal" / numeric; Serve handles all three.
 	if req.Title == "" {
 		return &errorModels.ServerError{Code: http.StatusBadRequest, Message: "Title is required"}
 	}
@@ -253,7 +248,13 @@ func (h *CreateTaskHandler) Serve(ctx context.Context, req *CreateTaskRequest) (
 		return CreateTaskResponse{}, errorModels.PermissionDeniedServerError()
 	}
 
-	workspaceID, err := h.FlowService.ResolveWorkspaceID(ctx, authUser.UserID, req.WorkspaceID.String())
+	// Resolve workspace: missing or "personal" → the caller's personal
+	// workspace (auto-created). Numeric → use as-is.
+	workspaceRaw := req.WorkspaceID.String()
+	if workspaceRaw == "" {
+		workspaceRaw = "personal"
+	}
+	workspaceID, err := h.FlowService.ResolveWorkspaceID(ctx, authUser.UserID, workspaceRaw)
 	if err != nil || workspaceID == 0 {
 		return CreateTaskResponse{}, &errorModels.ServerError{
 			Code:    http.StatusBadRequest,
@@ -261,8 +262,23 @@ func (h *CreateTaskHandler) Serve(ctx context.Context, req *CreateTaskRequest) (
 		}
 	}
 
+	// Resolve project: missing → the Inbox project in the resolved
+	// workspace (auto-created on first use). This powers "quick create"
+	// flows from My Tasks / the command bar.
+	projectID := req.ProjectID.Int64()
+	if projectID == 0 {
+		inboxID, inboxErr := h.FlowService.EnsureInboxProject(ctx, authUser.UserID, workspaceID)
+		if inboxErr != nil || inboxID == 0 {
+			return CreateTaskResponse{}, &errorModels.ServerError{
+				Code:    http.StatusInternalServerError,
+				Message: "Failed to resolve inbox project",
+			}
+		}
+		projectID = inboxID
+	}
+
 	input := domain.TaskInput{
-		ProjectID:      req.ProjectID.Int64(),
+		ProjectID:      projectID,
 		WorkspaceID:    workspaceID,
 		OwnerID:        authUser.UserID,
 		ParentTaskID:   req.ParentTaskID,
