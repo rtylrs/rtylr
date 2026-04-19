@@ -13,6 +13,7 @@ import {
 } from 'lucide-react';
 import { useFlowStore, Task } from '../../shared/stores/flowStore';
 import { PERSONAL_WORKSPACE_ID } from '../../shared/lib/personalWorkspace';
+import { useProjectRealtime } from '../../shared/lib/useProjectRealtime';
 import { cn, formatDate } from '../../shared/lib/utils';
 import { useTasks, useUpdateTaskStatus } from '../tasks/useTasks';
 import { apiTaskToTask } from '../../shared/lib/taskMapper';
@@ -200,6 +201,8 @@ const ProjectList: React.FC = () => {
     workspaceId: string;
     projectId: string;
   }>();
+
+  useProjectRealtime(projectId);
 
   const { projects, tasks, sections } = useFlowStore();
   const { data: apiTasks } = useTasks({ projectId });

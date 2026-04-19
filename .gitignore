@@ -56,3 +56,4 @@ apps/*/.next
 
 # Turborepo
 .turbo/
+.claude/

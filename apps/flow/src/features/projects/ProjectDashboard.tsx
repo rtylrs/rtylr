@@ -3,6 +3,7 @@ import { useParams } from 'react-router-dom';
 import { useFlowStore } from '../../shared/stores/flowStore';
 import { useTasks } from '../tasks/useTasks';
 import { PERSONAL_WORKSPACE_ID } from '../../shared/lib/personalWorkspace';
+import { useProjectRealtime } from '../../shared/lib/useProjectRealtime';
 import ProjectViewTabs from './ProjectViewTabs';
 
 /**
@@ -19,6 +20,8 @@ const ProjectDashboard: React.FC = () => {
     workspaceId: string;
     projectId: string;
   }>();
+
+  useProjectRealtime(projectId);
 
   const { projects } = useFlowStore();
   const project = projects.find((p) => p.id === projectId);

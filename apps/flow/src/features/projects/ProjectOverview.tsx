@@ -15,6 +15,7 @@ import { AvatarStack } from '../../shared/components/AssigneeAvatar';
 import { formatDate } from '../../shared/lib/utils';
 import ProjectViewTabs from './ProjectViewTabs';
 import { PERSONAL_WORKSPACE_ID } from '../../shared/lib/personalWorkspace';
+import { useProjectRealtime } from '../../shared/lib/useProjectRealtime';
 
 const HEALTH: Record<string, { color: string; label: string }> = {
   on_track: { color: '#22c55e', label: 'On track' },
@@ -27,6 +28,8 @@ const ProjectOverview: React.FC = () => {
     workspaceId: string;
     projectId: string;
   }>();
+  useProjectRealtime(projectId);
+
   const { data, isLoading } = useProjectOverview(projectId);
   const { projects, members } = useFlowStore();
   const project = projects.find((p) => p.id === projectId);
