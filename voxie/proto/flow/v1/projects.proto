@@ -20,6 +20,18 @@ message Project {
   int64 created_by = 11;
   string created_at = 12;
   string updated_at = 13;
+
+  // ── Display projections — populated by list/detail responses.
+  // Ignored on writes.
+
+  // Total task count for this project.
+  int32 task_count = 14;
+  // Number of tasks with status="done".
+  int32 completed_count = 15;
+  // Count of project members, for the "+N" avatar stack.
+  int32 member_count = 16;
+  // Short project code used to build Task.identifier (e.g. "FLW" → "FLW-42").
+  string code = 17;
 }
 
 message ListProjectsRequest {

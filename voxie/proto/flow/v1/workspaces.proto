@@ -17,6 +17,13 @@ message Workspace {
   int64 created_by = 8;
   string created_at = 9;
   string updated_at = 10;
+
+  // ── Display projections — populated on list reads.
+
+  // Count of members in this workspace, for sidebar / picker badges.
+  int32 member_count = 11;
+  // True when this is the caller's auto-created Personal workspace.
+  bool is_personal = 12;
 }
 
 message ListWorkspacesRequest {}

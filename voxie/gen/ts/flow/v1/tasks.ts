@@ -27,6 +27,28 @@ export interface Task {
   labels: number[];
   createdAt: string;
   updatedAt: string;
+  /** Human-readable identifier like "FLOW-42" (project code + sequence). */
+  identifier: string;
+  /** Project name (denormalised from flow_projects.name) for list views. */
+  projectName: string;
+  /** Project color hex for inline badges on cross-project lists. */
+  projectColor: string;
+  /** Assignee display name. Empty if unassigned. */
+  assigneeName: string;
+  /** Two-letter uppercase initials derived from assignee_name. Empty if unassigned. */
+  assigneeInitials: string;
+  /** Number of direct subtasks. Powers the "N subtasks" pill on task rows. */
+  subtaskCount: number;
+  /** Section bucket within a project (e.g. "Backlog", "Sprint 5"). 0 if unbucketed. */
+  sectionId?:
+    | number
+    | undefined;
+  /** Cycle (sprint) this task belongs to, if any. */
+  cycleId?:
+    | number
+    | undefined;
+  /** Milestone this task rolls up to, if any. */
+  milestoneId?: number | undefined;
 }
 
 export interface TaskComment {

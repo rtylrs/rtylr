@@ -20,6 +20,14 @@ export interface Project {
   createdBy: number;
   createdAt: string;
   updatedAt: string;
+  /** Total task count for this project. */
+  taskCount: number;
+  /** Number of tasks with status="done". */
+  completedCount: number;
+  /** Count of project members, for the "+N" avatar stack. */
+  memberCount: number;
+  /** Short project code used to build Task.identifier (e.g. "FLW" → "FLW-42"). */
+  code: string;
 }
 
 export interface ListProjectsRequest {

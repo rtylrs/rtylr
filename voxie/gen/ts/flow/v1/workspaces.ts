@@ -17,6 +17,10 @@ export interface Workspace {
   createdBy: number;
   createdAt: string;
   updatedAt: string;
+  /** Count of members in this workspace, for sidebar / picker badges. */
+  memberCount: number;
+  /** True when this is the caller's auto-created Personal workspace. */
+  isPersonal: boolean;
 }
 
 export interface ListWorkspacesRequest {

@@ -27,6 +27,29 @@ message Task {
   repeated int64 labels = 18;
   string created_at = 19;
   string updated_at = 20;
+
+  // ── Display projections — populated by the backend on list/detail
+  // reads so the UI never has to do N+1 joins or fall back on guesses.
+  // Safe to leave at zero value on writes; backend ignores them on create/update.
+
+  // Human-readable identifier like "FLOW-42" (project code + sequence).
+  string identifier = 21;
+  // Project name (denormalised from flow_projects.name) for list views.
+  string project_name = 22;
+  // Project color hex for inline badges on cross-project lists.
+  string project_color = 23;
+  // Assignee display name. Empty if unassigned.
+  string assignee_name = 24;
+  // Two-letter uppercase initials derived from assignee_name. Empty if unassigned.
+  string assignee_initials = 25;
+  // Number of direct subtasks. Powers the "N subtasks" pill on task rows.
+  int32 subtask_count = 26;
+  // Section bucket within a project (e.g. "Backlog", "Sprint 5"). 0 if unbucketed.
+  optional int64 section_id = 27;
+  // Cycle (sprint) this task belongs to, if any.
+  optional int64 cycle_id = 28;
+  // Milestone this task rolls up to, if any.
+  optional int64 milestone_id = 29;
 }
 
 message TaskComment {
