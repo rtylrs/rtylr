@@ -1,6 +1,8 @@
-import React, { useEffect, useMemo, useRef, useState } from 'react';
+import React, { useCallback, useEffect, useMemo, useRef, useState } from 'react';
 import { useParams } from 'react-router-dom';
 import { ChevronDown, Plus, Trash2 } from 'lucide-react';
+import { useQueryClient } from '@tanstack/react-query';
+import type { RealtimeEvent } from '@voxire/api';
 import { useFlowStore } from '../../shared/stores/flowStore';
 import { useTasks } from '../tasks/useTasks';
 import {
@@ -12,6 +14,8 @@ import {
 } from './useColumns';
 import { PERSONAL_WORKSPACE_ID } from '../../shared/lib/personalWorkspace';
 import { apiTaskToTask } from '../../shared/lib/taskMapper';
+import { useRealtime } from '../../shared/lib/realtime';
+import { getCurrentUserId } from '../../shared/lib/currentUser';
 import TaskCard from '../../shared/components/TaskCard';
 import ProjectViewTabs from './ProjectViewTabs';
 import type { ApiProjectColumn } from '../../shared/services/flowApi';
@@ -154,6 +158,27 @@ const ProjectBoard: React.FC = () => {
 
   const { projects, selectedTaskIds, toggleSelectTask, activeWorkspaceId } = useFlowStore();
   const moveTask = useMoveTaskToColumn();
+  const qc = useQueryClient();
+
+  // Realtime: invalidate tasks + columns on any project-level change.
+  // Skip events that WE caused (actor_id matches the current user) —
+  // react-query's mutation onSuccess already invalidated, so refetching
+  // twice is wasteful.
+  const currentUserId = getCurrentUserId();
+  const onRealtime = useCallback(
+    (e: RealtimeEvent) => {
+      if (e.actor_id && currentUserId && String(e.actor_id) === currentUserId) {
+        return;
+      }
+      if (e.type.startsWith('task.') || e.type.startsWith('column.')) {
+        qc.invalidateQueries({ queryKey: ['tasks'] });
+        qc.invalidateQueries({ queryKey: ['columns', projectId] });
+      }
+    },
+    [qc, projectId, currentUserId]
+  );
+  const realtimeTopics = useMemo(() => (projectId ? [`project:${projectId}`] : []), [projectId]);
+  useRealtime(realtimeTopics, onRealtime);
 
   const { data: apiTasks = [] } = useTasks({ projectId });
   const { data: columns = [], isLoading: columnsLoading } = useProjectColumns(projectId);
