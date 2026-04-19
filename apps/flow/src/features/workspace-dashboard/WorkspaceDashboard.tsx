@@ -344,12 +344,16 @@ const WorkspaceDashboard: React.FC = () => {
                 createBusiness.mutate(
                   { name: newBusinessName.trim() },
                   {
-                    onSuccess: (biz) => {
+                    // Backend returns `{ business: {...} }` — unwrap before use.
+                    onSuccess: (res) => {
                       toast.success('Business created');
                       setNewBusinessName('');
                       setShowNewBusiness(false);
                       if (workspaceId && workspaceId !== PERSONAL_WORKSPACE_ID) {
-                        setWorkspaceBusiness.mutate({ workspaceId, businessId: biz.id });
+                        setWorkspaceBusiness.mutate({
+                          workspaceId,
+                          businessId: res.business.id,
+                        });
                       }
                     },
                     onError: () => toast.error('Failed to create business'),

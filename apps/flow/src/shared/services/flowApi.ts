@@ -275,12 +275,15 @@ export const flowApi = {
   getWorkspaces: () => safe.get<{ workspaces: ApiWorkspace[] }>('/flow/workspaces'),
 
   createWorkspace: (data: { name: string; color: string }) =>
-    safe.post<ApiWorkspace>('/flow/workspaces', data),
+    safe.post<{ workspace: ApiWorkspace }>('/flow/workspaces', data),
 
+  // Backend: PUT /flow/workspaces with id in body (not path-param).
   updateWorkspace: (id: string, data: Partial<{ name: string; color: string }>) =>
-    safe.post<ApiWorkspace>(`/flow/workspaces/${id}`, data),
+    safe.put<{ message: string }>('/flow/workspaces', { id: Number(id), ...data }),
 
-  deleteWorkspace: (id: string) => safe.post(`/flow/workspaces/${id}/delete`),
+  // Backend: DELETE /flow/workspaces with id in body (not /{id}/delete).
+  deleteWorkspace: (id: string) =>
+    safe.delete<{ message: string }>('/flow/workspaces', { data: { id: Number(id) } }),
 
   getWorkspaceMembers: (workspaceId: string) =>
     safe.get<{ members: ApiWorkspaceMember[] }>('/flow/workspaces/members', {
@@ -331,12 +334,15 @@ export const flowApi = {
     }),
 
   createProject: (data: { workspaceId: string; name: string; color?: string }) =>
-    safe.post<ApiProject>('/flow/projects', data),
+    safe.post<{ project: ApiProject }>('/flow/projects', data),
 
+  // Backend: PUT /flow/projects with id in body.
   updateProject: (id: string, data: Partial<{ name: string; color: string }>) =>
-    safe.post<ApiProject>(`/flow/projects/${id}`, data),
+    safe.put<{ message: string }>('/flow/projects', { id: Number(id), ...data }),
 
-  deleteProject: (id: string) => safe.post(`/flow/projects/${id}/delete`),
+  // Backend: DELETE /flow/projects with id in body.
+  deleteProject: (id: string) =>
+    safe.delete<{ message: string }>('/flow/projects', { data: { id: Number(id) } }),
 
   getProjectMembers: (projectId: string) =>
     safe.get<{ members: ApiProjectMember[] }>('/flow/projects/members', {
@@ -391,18 +397,26 @@ export const flowApi = {
     priority?: ApiTask['priority'];
     assigneeId?: string;
     dueDate?: string;
-  }) => safe.post<ApiTask>('/flow/tasks', data),
+  }) => safe.post<{ task: ApiTask }>('/flow/tasks', data),
 
-  updateTask: (id: string, data: Partial<ApiTask>) => safe.post<ApiTask>(`/flow/tasks/${id}`, data),
+  // Backend: PUT /flow/tasks with id in body.
+  updateTask: (id: string, data: Partial<ApiTask>) =>
+    safe.put<{ message: string }>('/flow/tasks', { id: Number(id), ...data }),
 
-  deleteTask: (id: string) => safe.post(`/flow/tasks/${id}/delete`),
+  // Backend: DELETE /flow/tasks with id in body.
+  deleteTask: (id: string) =>
+    safe.delete<{ message: string }>('/flow/tasks', { data: { id: Number(id) } }),
 
+  // Backend: PUT /flow/tasks/status.
   updateTaskStatus: (id: string, status: ApiTask['status']) =>
-    safe.post('/flow/tasks/status', { id, status }),
+    safe.put<{ message: string }>('/flow/tasks/status', { id: Number(id), status }),
 
-  addComment: (data: { taskId: string; content: string }) => safe.post('/flow/tasks/comment', data),
+  addComment: (data: { taskId: string; content: string }) =>
+    safe.post<{ comment: unknown }>('/flow/tasks/comment', data),
 
-  deleteComment: (id: string) => safe.delete(`/flow/tasks/comment/${id}`),
+  // Backend: DELETE /flow/tasks/comment with id in body.
+  deleteComment: (id: string) =>
+    safe.delete<{ message: string }>('/flow/tasks/comment', { data: { id: Number(id) } }),
 
   // -- Task Activity ------------------------------------------------------
 
@@ -415,8 +429,10 @@ export const flowApi = {
 
   getSubtasks: (id: string) => safe.get<{ subtasks: ApiSubtask[] }>(`/flow/tasks/${id}/subtasks`),
 
+  // Backend returns { task_id, message } — not the created subtask itself.
+  // Caller must refetch subtasks to see it appear.
   createSubtask: (taskId: string, data: { title: string; assigneeId?: string }) =>
-    safe.post<ApiSubtask>(`/flow/tasks/${taskId}/subtasks`, data),
+    safe.post<{ task_id: number; message: string }>(`/flow/tasks/${taskId}/subtasks`, data),
 
   // -- Attachments --------------------------------------------------------
 
@@ -442,7 +458,7 @@ export const flowApi = {
     safe.get<{ labels: ApiLabel[] }>('/flow/labels', { params: { workspace_id: workspaceId } }),
 
   createLabel: (data: { workspace_id: number; name: string; color: string }) =>
-    safe.post<ApiLabel>('/flow/labels', data),
+    safe.post<{ label: ApiLabel }>('/flow/labels', data),
 
   updateLabel: (data: { id: number; name: string; color: string }) =>
     safe.put('/flow/labels', data),
@@ -463,10 +479,10 @@ export const flowApi = {
     }),
 
   createMilestone: (data: Partial<ApiMilestone>) =>
-    safe.post<ApiMilestone>('/flow/milestones', data),
+    safe.post<{ milestone: ApiMilestone }>('/flow/milestones', data),
 
   updateMilestone: (id: string, data: Partial<ApiMilestone>) =>
-    safe.put<ApiMilestone>(`/flow/milestones/${id}`, data),
+    safe.put<{ message: string }>(`/flow/milestones/${id}`, data),
 
   // -- Cycles -------------------------------------------------------------
 
@@ -475,18 +491,19 @@ export const flowApi = {
       params: workspaceId ? { workspace_id: workspaceId } : undefined,
     }),
 
-  createCycle: (data: Partial<ApiCycle>) => safe.post<ApiCycle>('/flow/cycles', data),
+  createCycle: (data: Partial<ApiCycle>) => safe.post<{ cycle: ApiCycle }>('/flow/cycles', data),
 
   updateCycle: (id: string, data: Partial<ApiCycle>) =>
-    safe.put<ApiCycle>(`/flow/cycles/${id}`, data),
+    safe.put<{ message: string }>(`/flow/cycles/${id}`, data),
 
   // -- Views --------------------------------------------------------------
 
   getViews: () => safe.get<{ views: ApiView[] }>('/flow/views'),
 
-  createView: (data: Partial<ApiView>) => safe.post<ApiView>('/flow/views', data),
+  createView: (data: Partial<ApiView>) => safe.post<{ view: ApiView }>('/flow/views', data),
 
-  updateView: (id: string, data: Partial<ApiView>) => safe.put<ApiView>(`/flow/views/${id}`, data),
+  updateView: (id: string, data: Partial<ApiView>) =>
+    safe.put<{ message: string }>(`/flow/views/${id}`, data),
 
   deleteView: (id: string) => safe.delete(`/flow/views/${id}`),
 
@@ -546,7 +563,10 @@ export const flowApi = {
     ),
 
   createBusiness: (data: { name: string; color?: string; icon?: string }) =>
-    safe.post<{ id: string; name: string; color: string; icon: string }>('/flow/businesses', data),
+    safe.post<{ business: { id: string; name: string; color: string; icon: string } }>(
+      '/flow/businesses',
+      data
+    ),
 
   setWorkspaceBusiness: (workspaceId: string, businessId: string | null) =>
     safe.put('/flow/workspaces/business', {

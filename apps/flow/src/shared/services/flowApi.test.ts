@@ -43,14 +43,14 @@ describe('flowApi', () => {
     expect(safe.post).toHaveBeenCalledWith('/flow/workspaces', data);
   });
 
-  it('updateWorkspace calls POST /flow/workspaces/:id', () => {
-    flowApi.updateWorkspace('ws-1', { name: 'Updated' });
-    expect(safe.post).toHaveBeenCalledWith('/flow/workspaces/ws-1', { name: 'Updated' });
+  it('updateWorkspace calls PUT /flow/workspaces with id in body', () => {
+    flowApi.updateWorkspace('5', { name: 'Updated' });
+    expect(safe.put).toHaveBeenCalledWith('/flow/workspaces', { id: 5, name: 'Updated' });
   });
 
-  it('deleteWorkspace calls POST /flow/workspaces/:id/delete', () => {
-    flowApi.deleteWorkspace('ws-1');
-    expect(safe.post).toHaveBeenCalledWith('/flow/workspaces/ws-1/delete');
+  it('deleteWorkspace calls DELETE /flow/workspaces with id in body', () => {
+    flowApi.deleteWorkspace('5');
+    expect(safe.delete).toHaveBeenCalledWith('/flow/workspaces', { data: { id: 5 } });
   });
 
   it('addWorkspaceMember calls POST /flow/workspaces/member', () => {
@@ -73,9 +73,9 @@ describe('flowApi', () => {
     expect(safe.post).toHaveBeenCalledWith('/flow/projects', data);
   });
 
-  it('deleteProject calls POST /flow/projects/:id/delete', () => {
-    flowApi.deleteProject('p-1');
-    expect(safe.post).toHaveBeenCalledWith('/flow/projects/p-1/delete');
+  it('deleteProject calls DELETE /flow/projects with id in body', () => {
+    flowApi.deleteProject('7');
+    expect(safe.delete).toHaveBeenCalledWith('/flow/projects', { data: { id: 7 } });
   });
 
   // Tasks
@@ -105,19 +105,19 @@ describe('flowApi', () => {
     expect(safe.post).toHaveBeenCalledWith('/flow/tasks', data);
   });
 
-  it('updateTask calls POST /flow/tasks/:id', () => {
-    flowApi.updateTask('t-1', { title: 'Updated' });
-    expect(safe.post).toHaveBeenCalledWith('/flow/tasks/t-1', { title: 'Updated' });
+  it('updateTask calls PUT /flow/tasks with id in body', () => {
+    flowApi.updateTask('9', { title: 'Updated' });
+    expect(safe.put).toHaveBeenCalledWith('/flow/tasks', { id: 9, title: 'Updated' });
   });
 
-  it('deleteTask calls POST /flow/tasks/:id/delete', () => {
-    flowApi.deleteTask('t-1');
-    expect(safe.post).toHaveBeenCalledWith('/flow/tasks/t-1/delete');
+  it('deleteTask calls DELETE /flow/tasks with id in body', () => {
+    flowApi.deleteTask('9');
+    expect(safe.delete).toHaveBeenCalledWith('/flow/tasks', { data: { id: 9 } });
   });
 
-  it('updateTaskStatus calls POST /flow/tasks/status', () => {
-    flowApi.updateTaskStatus('t-1', 'done');
-    expect(safe.post).toHaveBeenCalledWith('/flow/tasks/status', { id: 't-1', status: 'done' });
+  it('updateTaskStatus calls PUT /flow/tasks/status', () => {
+    flowApi.updateTaskStatus('9', 'done');
+    expect(safe.put).toHaveBeenCalledWith('/flow/tasks/status', { id: 9, status: 'done' });
   });
 
   it('addComment calls POST /flow/tasks/comment', () => {
@@ -126,9 +126,9 @@ describe('flowApi', () => {
     expect(safe.post).toHaveBeenCalledWith('/flow/tasks/comment', data);
   });
 
-  it('deleteComment calls DELETE /flow/tasks/comment/:id', () => {
-    flowApi.deleteComment('c-1');
-    expect(safe.delete).toHaveBeenCalledWith('/flow/tasks/comment/c-1');
+  it('deleteComment calls DELETE /flow/tasks/comment with id in body', () => {
+    flowApi.deleteComment('3');
+    expect(safe.delete).toHaveBeenCalledWith('/flow/tasks/comment', { data: { id: 3 } });
   });
 
   // Labels

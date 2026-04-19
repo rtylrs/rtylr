@@ -85,7 +85,9 @@ export const QuickCreate: React.FC = () => {
     const uid = getCurrentUserId();
 
     try {
-      const task = await createTaskMutation.mutateAsync({
+      // Backend returns { task: ApiTask }. Unwrap before use — direct
+      // access on the envelope would crash at runtime (TS catches it now).
+      const res = await createTaskMutation.mutateAsync({
         title: title.trim(),
         workspaceId: project.workspaceId,
         projectId,
@@ -93,9 +95,11 @@ export const QuickCreate: React.FC = () => {
         dueDate: dueDate || undefined,
         assigneeId: assignToMe ? uid : undefined,
       });
-      toast.success(`Created ${task.identifier ?? task.id}`, { description: task.title });
+      const task = res.task;
+      const taskId = String(task.id);
+      toast.success(`Created ${task.identifier ?? taskId}`, { description: task.title });
       setQuickCreateOpen(false);
-      navigate(`/task/${task.id}`);
+      navigate(`/task/${taskId}`);
     } catch {
       // error toast handled by mutation onError
     }
