@@ -4,7 +4,17 @@ CREATE TABLE IF NOT EXISTS plans (
     slug VARCHAR(50) NOT NULL UNIQUE,
     apps JSON NOT NULL COMMENT 'Array of app IDs included in plan',
     price_per_seat_cents INT NOT NULL DEFAULT 0,
+    paddle_price_id VARCHAR(100) NULL,
     trial_days INT NOT NULL DEFAULT 14,
+    tagline VARCHAR(200) NOT NULL DEFAULT '',
+    annual_price_per_seat_cents INT NOT NULL DEFAULT 0,
+    max_seats INT NULL,
+    max_locations INT NULL,
+    ai_credits_per_month INT NOT NULL DEFAULT 0,
+    features JSON NULL,
+    tier_order INT NOT NULL DEFAULT 100,
+    is_solo BOOLEAN NOT NULL DEFAULT FALSE,
+    is_featured BOOLEAN NOT NULL DEFAULT FALSE,
     is_active BOOLEAN DEFAULT TRUE,
     created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
 );
@@ -43,58 +53,6 @@ CREATE TABLE IF NOT EXISTS seat_periods (
     INDEX idx_sp_subscription (subscription_id),
     INDEX idx_sp_owner_month (owner_id, billing_month)
 );
-
--- ── Rich plan metadata (idempotent for MySQL 8) ──────────────────────────
--- MySQL 8 doesn't support `ADD COLUMN IF NOT EXISTS`, so each ALTER is
--- guarded by a conditional EXECUTE based on information_schema.
-DROP PROCEDURE IF EXISTS add_plan_columns_if_missing;
-DELIMITER $$
-CREATE PROCEDURE add_plan_columns_if_missing()
-BEGIN
-    IF NOT EXISTS (SELECT 1 FROM information_schema.COLUMNS
-                   WHERE TABLE_SCHEMA = DATABASE() AND TABLE_NAME = 'plans' AND COLUMN_NAME = 'paddle_price_id') THEN
-        ALTER TABLE plans ADD COLUMN paddle_price_id VARCHAR(100) NULL AFTER trial_days;
-    END IF;
-    IF NOT EXISTS (SELECT 1 FROM information_schema.COLUMNS
-                   WHERE TABLE_SCHEMA = DATABASE() AND TABLE_NAME = 'plans' AND COLUMN_NAME = 'tagline') THEN
-        ALTER TABLE plans ADD COLUMN tagline VARCHAR(200) NOT NULL DEFAULT '';
-    END IF;
-    IF NOT EXISTS (SELECT 1 FROM information_schema.COLUMNS
-                   WHERE TABLE_SCHEMA = DATABASE() AND TABLE_NAME = 'plans' AND COLUMN_NAME = 'annual_price_per_seat_cents') THEN
-        ALTER TABLE plans ADD COLUMN annual_price_per_seat_cents INT NOT NULL DEFAULT 0;
-    END IF;
-    IF NOT EXISTS (SELECT 1 FROM information_schema.COLUMNS
-                   WHERE TABLE_SCHEMA = DATABASE() AND TABLE_NAME = 'plans' AND COLUMN_NAME = 'max_seats') THEN
-        ALTER TABLE plans ADD COLUMN max_seats INT NULL;
-    END IF;
-    IF NOT EXISTS (SELECT 1 FROM information_schema.COLUMNS
-                   WHERE TABLE_SCHEMA = DATABASE() AND TABLE_NAME = 'plans' AND COLUMN_NAME = 'max_locations') THEN
-        ALTER TABLE plans ADD COLUMN max_locations INT NULL;
-    END IF;
-    IF NOT EXISTS (SELECT 1 FROM information_schema.COLUMNS
-                   WHERE TABLE_SCHEMA = DATABASE() AND TABLE_NAME = 'plans' AND COLUMN_NAME = 'ai_credits_per_month') THEN
-        ALTER TABLE plans ADD COLUMN ai_credits_per_month INT NOT NULL DEFAULT 0;
-    END IF;
-    IF NOT EXISTS (SELECT 1 FROM information_schema.COLUMNS
-                   WHERE TABLE_SCHEMA = DATABASE() AND TABLE_NAME = 'plans' AND COLUMN_NAME = 'features') THEN
-        ALTER TABLE plans ADD COLUMN features JSON NULL;
-    END IF;
-    IF NOT EXISTS (SELECT 1 FROM information_schema.COLUMNS
-                   WHERE TABLE_SCHEMA = DATABASE() AND TABLE_NAME = 'plans' AND COLUMN_NAME = 'tier_order') THEN
-        ALTER TABLE plans ADD COLUMN tier_order INT NOT NULL DEFAULT 100;
-    END IF;
-    IF NOT EXISTS (SELECT 1 FROM information_schema.COLUMNS
-                   WHERE TABLE_SCHEMA = DATABASE() AND TABLE_NAME = 'plans' AND COLUMN_NAME = 'is_solo') THEN
-        ALTER TABLE plans ADD COLUMN is_solo BOOLEAN NOT NULL DEFAULT FALSE;
-    END IF;
-    IF NOT EXISTS (SELECT 1 FROM information_schema.COLUMNS
-                   WHERE TABLE_SCHEMA = DATABASE() AND TABLE_NAME = 'plans' AND COLUMN_NAME = 'is_featured') THEN
-        ALTER TABLE plans ADD COLUMN is_featured BOOLEAN NOT NULL DEFAULT FALSE;
-    END IF;
-END$$
-DELIMITER ;
-CALL add_plan_columns_if_missing();
-DROP PROCEDURE add_plan_columns_if_missing;
 
 -- ── Retire old tier names ─────────────────────────────────────────────────
 UPDATE plans SET is_active = FALSE WHERE slug IN ('starter', 'enterprise');
