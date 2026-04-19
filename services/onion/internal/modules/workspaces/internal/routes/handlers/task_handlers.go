@@ -26,11 +26,38 @@ func publishTaskEvent(eventType string, t *flowv1.Task, actorID int64) {
 	publishTaskEventByProject(eventType, t.ProjectId, t.Id, actorID)
 }
 
+// publishCommentEvent fans a comment-level change out to the task
+// channel only. Board/list/timeline projections don't render comments,
+// so there's no value in fanning to the project topic too.
+func publishCommentEvent(eventType string, taskID, actorID int64) {
+	if taskID == 0 {
+		return
+	}
+	wsbus.Publish(wsbus.Event{
+		Topic:    fmt.Sprintf("task:%d", taskID),
+		Type:     eventType,
+		EntityID: taskID,
+		ActorID:  actorID,
+	})
+}
+
 // publishTaskEventByProject is for the write paths that don't return the
 // full task (delete, status, move) — caller supplies project + task id.
 // We look up the project id first in the handler so this is a pure
 // notification call with no DB access.
+//
+// Events fan out to two topics: the owning project (so board/list/timeline
+// subscribers refresh) and the task itself (so an open TaskDetail screen
+// refreshes even if it isn't subscribed to the whole project firehose).
 func publishTaskEventByProject(eventType string, projectID, taskID, actorID int64) {
+	if taskID != 0 {
+		wsbus.Publish(wsbus.Event{
+			Topic:    fmt.Sprintf("task:%d", taskID),
+			Type:     eventType,
+			EntityID: taskID,
+			ActorID:  actorID,
+		})
+	}
 	if projectID == 0 {
 		return
 	}
@@ -629,6 +656,10 @@ func (h *AddCommentHandler) Serve(ctx context.Context, req *AddCommentRequest) (
 		}
 	}
 
+	// Fan out to the task channel so an open TaskDetail screen refreshes
+	// its comments without polling. We scope to the task topic only —
+	// comment events aren't shown on board/list/timeline projections.
+	publishCommentEvent("comment.added", req.TaskID.Int64(), authUser.UserID)
 	return AddCommentResponse{Comment: toCommentPayload(comment)}, nil
 }
 
@@ -662,6 +693,10 @@ func (h *DeleteCommentHandler) Serve(ctx context.Context, req *DeleteCommentRequ
 		return DeleteCommentResponse{}, errorModels.PermissionDeniedServerError()
 	}
 
+	// Capture the owning task before the row is gone so the realtime
+	// event can route to the correct topic.
+	taskID := h.FlowService.GetCommentTaskID(ctx, req.ID.Int64())
+
 	if err := h.FlowService.DeleteComment(ctx, req.ID.Int64(), authUser.UserID); err != nil {
 		return DeleteCommentResponse{}, &errorModels.ServerError{
 			Code:    http.StatusInternalServerError,
@@ -669,6 +704,7 @@ func (h *DeleteCommentHandler) Serve(ctx context.Context, req *DeleteCommentRequ
 		}
 	}
 
+	publishCommentEvent("comment.deleted", taskID, authUser.UserID)
 	return DeleteCommentResponse{Message: "Comment deleted successfully"}, nil
 }
 

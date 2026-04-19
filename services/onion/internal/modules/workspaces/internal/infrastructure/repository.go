@@ -496,6 +496,18 @@ func (r *Repository) DeleteComment(ctx context.Context, commentID, userID int64)
 	return nil
 }
 
+// GetCommentTaskID returns the task a comment belongs to. Used by the
+// comment handlers to route realtime events to the correct task topic
+// before the row disappears.
+func (r *Repository) GetCommentTaskID(ctx context.Context, commentID int64) (int64, error) {
+	var taskID int64
+	err := dbclient.Pool().QueryRowContext(ctx, "SELECT task_id FROM flow_comments WHERE id = ?", commentID).Scan(&taskID)
+	if err != nil {
+		return 0, err
+	}
+	return taskID, nil
+}
+
 // ─────────────────────────────────────────────
 // Activity
 // ─────────────────────────────────────────────

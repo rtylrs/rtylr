@@ -350,6 +350,17 @@ func (s *Service) DeleteComment(ctx context.Context, commentID, userID int64) er
 	return s.repo.DeleteComment(ctx, commentID, userID)
 }
 
+// GetCommentTaskID returns the task a comment belongs to. Handlers call
+// this before DeleteComment so the realtime event can route to the
+// right topic after the row is gone.
+func (s *Service) GetCommentTaskID(ctx context.Context, commentID int64) int64 {
+	taskID, err := s.repo.GetCommentTaskID(ctx, commentID)
+	if err != nil {
+		return 0
+	}
+	return taskID
+}
+
 // ─────────────────────────────────────────────
 // Dashboard
 // ─────────────────────────────────────────────
