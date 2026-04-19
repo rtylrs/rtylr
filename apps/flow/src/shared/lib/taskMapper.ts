@@ -3,15 +3,53 @@ import type { ApiTask } from '../services/flowApi';
 
 /**
  * Normalises an ApiTask (from the server) into the richer Task shape used
- * by local store consumers and legacy components.  All required Task fields
- * that are optional in ApiTask get safe defaults so callers don't need casts.
+ * by local store consumers and legacy components.
+ *
+ * Two things to watch:
+ *  - The wire sends numeric IDs (proto `int64`); the Zustand Task keys them
+ *    as strings (URL params, find-by-id comparisons). Always stringify.
+ *  - Display fields come from the enriched backend (projectName,
+ *    assigneeName, assigneeInitials, identifier, subtaskCount). Fall back to
+ *    derived values when missing so the UI never renders `undefined`.
+ *
+ * Do NOT shallow-spread the API task (`...t`) — that leaks numeric IDs
+ * through `as any` into a store typed as strings and the bug comes back.
  */
 export function apiTaskToTask(t: ApiTask): Task {
+  // The hand-rolled ApiTask claims `id: string` but the wire actually
+  // sends `id: number` (int64). Coerce defensively until Phase 3 swaps
+  // ApiTask for the proto-generated Task.
+  const id = String(t.id);
+  const projectId = String(t.projectId);
+  const workspaceId = String(t.workspaceId);
+
+  // Proto added `assigneeName` alongside the legacy `assignee` display name;
+  // prefer whichever the backend sent.
+  const assignee = (t as { assigneeName?: string }).assigneeName ?? t.assignee ?? '';
+
   return {
-    ...t,
-    assigneeId: t.assigneeId ?? '',
-    identifier: t.identifier ?? t.id,
+    id,
+    projectId,
+    workspaceId,
+    title: t.title,
+    description: t.description,
+    status: t.status,
+    priority: t.priority,
+    assignee,
+    assigneeInitials: t.assigneeInitials ?? '',
+    assigneeId: t.assigneeId != null ? String(t.assigneeId) : '',
+    dueDate: t.dueDate ?? '',
+    startDate: (t as { startDate?: string }).startDate,
+    subtaskCount: t.subtaskCount ?? 0,
+    projectName: t.projectName ?? '',
+    labels: t.labels,
+    identifier: t.identifier ?? id,
     createdAt: t.createdAt ?? new Date().toISOString(),
     updatedAt: t.updatedAt ?? new Date().toISOString(),
+    estimate: t.estimate,
+    effortMinutes: t.effortMinutes,
+    waitingOn: t.waitingOn,
+    decisionNote: t.decisionNote,
+    focusPin: t.focusPin,
   };
 }
