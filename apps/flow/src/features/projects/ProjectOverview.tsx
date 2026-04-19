@@ -1,5 +1,5 @@
 import React from 'react';
-import { useParams, Link } from 'react-router-dom';
+import { useParams } from 'react-router-dom';
 import { motion } from 'motion/react';
 import {
   Activity,
@@ -8,15 +8,13 @@ import {
   AlertCircle,
   Users,
   Milestone as MilestoneIcon,
-  LayoutGrid,
-  List,
-  Settings as SettingsIcon,
 } from 'lucide-react';
 import { useProjectOverview } from './useProjectOverview';
 import { useFlowStore } from '../../shared/stores/flowStore';
 import { AvatarStack } from '../../shared/components/AssigneeAvatar';
-import Breadcrumbs from '../../shared/components/Breadcrumbs';
 import { formatDate } from '../../shared/lib/utils';
+import ProjectViewTabs from './ProjectViewTabs';
+import { PERSONAL_WORKSPACE_ID } from '../../shared/lib/personalWorkspace';
 
 const HEALTH: Record<string, { color: string; label: string }> = {
   on_track: { color: '#22c55e', label: 'On track' },
@@ -25,7 +23,10 @@ const HEALTH: Record<string, { color: string; label: string }> = {
 };
 
 const ProjectOverview: React.FC = () => {
-  const { projectId } = useParams<{ projectId: string; workspaceId: string }>();
+  const { workspaceId = PERSONAL_WORKSPACE_ID, projectId = '' } = useParams<{
+    workspaceId: string;
+    projectId: string;
+  }>();
   const { data, isLoading } = useProjectOverview(projectId);
   const { projects, members } = useFlowStore();
   const project = projects.find((p) => p.id === projectId);
@@ -57,59 +58,38 @@ const ProjectOverview: React.FC = () => {
 
   return (
     <div className="flex flex-col h-full overflow-auto">
-      <div className="px-6 py-4 shrink-0" style={{ borderBottom: '1px solid var(--flow-border)' }}>
-        <Breadcrumbs
-          items={[{ label: 'Projects', to: `/w/${project.workspaceId}` }, { label: project.name }]}
-        />
-        <div className="flex items-center justify-between mt-2">
-          <div className="flex items-center gap-3">
-            <span className="h-3 w-3 rounded-full" style={{ background: project.color }} />
-            <h1 className="text-[17px] font-bold" style={{ color: 'var(--flow-text)' }}>
-              {project.name}
-            </h1>
-            <span
-              className="text-[11px] px-2 py-0.5 rounded-full font-semibold"
-              style={{
-                background: `${health.color}1a`,
-                color: health.color,
-                border: `1px solid ${health.color}33`,
-              }}
-            >
-              {health.label}
-            </span>
-          </div>
-          <div className="flex items-center gap-1">
-            <Link
-              to={`/w/${project.workspaceId}/p/${project.id}`}
-              className="flex items-center gap-1.5 px-2.5 py-1 rounded text-[11px] hover:bg-[var(--flow-hover)]"
-              style={{ color: 'var(--flow-text-muted)' }}
-            >
-              <LayoutGrid size={11} /> Board
-            </Link>
-            <Link
-              to={`/w/${project.workspaceId}/p/${project.id}/list`}
-              className="flex items-center gap-1.5 px-2.5 py-1 rounded text-[11px] hover:bg-[var(--flow-hover)]"
-              style={{ color: 'var(--flow-text-muted)' }}
-            >
-              <List size={11} /> List
-            </Link>
-            <Link
-              to={`/w/${project.workspaceId}/p/${project.id}/settings`}
-              className="flex items-center gap-1.5 px-2.5 py-1 rounded text-[11px] hover:bg-[var(--flow-hover)]"
-              style={{ color: 'var(--flow-text-muted)' }}
-            >
-              <SettingsIcon size={11} /> Settings
-            </Link>
-          </div>
-        </div>
-        {project.description && (
-          <p className="text-[12px] mt-2" style={{ color: 'var(--flow-text-muted)' }}>
+      <ProjectViewTabs
+        project={project}
+        workspaceId={workspaceId}
+        projectId={projectId}
+        taskCount={stats.total}
+        onNewTask={() => useFlowStore.getState().setQuickCreateOpen(true)}
+        rightSlot={
+          <span
+            className="text-[11px] px-2 py-0.5 rounded-full font-semibold"
+            style={{
+              background: `${health.color}1a`,
+              color: health.color,
+              border: `1px solid ${health.color}33`,
+            }}
+          >
+            {health.label}
+          </span>
+        }
+      />
+
+      {project.description && (
+        <div
+          className="px-5 py-3 shrink-0"
+          style={{ borderBottom: '1px solid var(--flow-border)' }}
+        >
+          <p className="text-[12px]" style={{ color: 'var(--flow-text-muted)' }}>
             {project.description}
           </p>
-        )}
-      </div>
+        </div>
+      )}
 
-      <div className="p-6 space-y-6 max-w-5xl">
+      <div className="p-5 space-y-5 max-w-5xl w-full mx-auto">
         {/* Progress */}
         <motion.section
           initial={{ opacity: 0, y: 4 }}

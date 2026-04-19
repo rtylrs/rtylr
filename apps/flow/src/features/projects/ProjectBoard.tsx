@@ -1,16 +1,8 @@
 import React, { useState, useRef, useEffect } from 'react';
-import { Link, useParams } from 'react-router-dom';
-import {
-  Plus,
-  List,
-  LayoutGrid,
-  Activity,
-  Settings as SettingsIcon,
-  Trash2,
-  Check,
-} from 'lucide-react';
+import { useParams } from 'react-router-dom';
+import { Plus, Trash2 } from 'lucide-react';
 import { useFlowStore } from '../../shared/stores/flowStore';
-import { useUpdateTaskStatus, useCreateTask, useTasks } from '../tasks/useTasks';
+import { useUpdateTaskStatus, useTasks } from '../tasks/useTasks';
 import {
   useProjectColumns,
   useCreateColumn,
@@ -21,7 +13,8 @@ import {
 import { PERSONAL_WORKSPACE_ID } from '../../shared/lib/personalWorkspace';
 import { apiTaskToTask } from '../../shared/lib/taskMapper';
 import TaskCard from '../../shared/components/TaskCard';
-import type { ApiProjectColumn, ApiTask } from '../../shared/services/flowApi';
+import ProjectViewTabs from './ProjectViewTabs';
+import type { ApiProjectColumn } from '../../shared/services/flowApi';
 import type { Task } from '../../shared/stores/flowStore';
 
 const ACCENT = '#64C5B9';
@@ -33,7 +26,6 @@ const ProjectBoard: React.FC = () => {
   }>();
 
   const { projects, selectedTaskIds, toggleSelectTask, activeWorkspaceId } = useFlowStore();
-  const updateTaskStatus = useUpdateTaskStatus();
   const moveTask = useMoveTaskToColumn();
 
   const { data: apiTasks = [] } = useTasks({ projectId });
@@ -98,7 +90,7 @@ const ProjectBoard: React.FC = () => {
   if (columnsLoading) {
     return (
       <div className="flex flex-col h-full">
-        <BoardHeader
+        <ProjectViewTabs
           project={project}
           workspaceId={workspaceId}
           projectId={projectId}
@@ -116,7 +108,7 @@ const ProjectBoard: React.FC = () => {
 
   return (
     <div className="flex flex-col h-full">
-      <BoardHeader
+      <ProjectViewTabs
         project={project}
         workspaceId={workspaceId}
         projectId={projectId}
@@ -124,8 +116,11 @@ const ProjectBoard: React.FC = () => {
         onNewTask={() => useFlowStore.getState().setQuickCreateOpen(true)}
       />
 
+      {/* Tightened kanban canvas — the previous p-6 / gap-4 combo wasted
+          too much room on laptop screens. These values stay reasonable
+          down to narrow viewports because the column snaps to 248px. */}
       <div className="min-h-0 flex-1 overflow-auto">
-        <div className="flex h-full min-w-max gap-3 p-4 sm:gap-4 sm:p-6">
+        <div className="flex h-full min-w-max gap-2 px-3 py-3">
           {columns.map((col, i) => (
             <KanbanColumn
               key={col.id}
@@ -152,10 +147,10 @@ const ProjectBoard: React.FC = () => {
           ))}
 
           {/* Add column */}
-          <div className="w-[260px] shrink-0">
+          <div className="w-[248px] shrink-0">
             {addingColumn ? (
               <div
-                className="rounded-lg p-3"
+                className="rounded-md p-2"
                 style={{ background: 'var(--flow-card)', border: '1px solid var(--flow-border)' }}
               >
                 <input
@@ -167,15 +162,15 @@ const ProjectBoard: React.FC = () => {
                     if (e.key === 'Escape') setAddingColumn(false);
                   }}
                   placeholder="Column name"
-                  className="w-full bg-transparent outline-none text-[13px] font-medium mb-2"
+                  className="w-full bg-transparent outline-none text-[12px] font-medium mb-1.5"
                   style={{ color: 'var(--flow-text)' }}
                 />
-                <div className="flex items-center gap-2">
+                <div className="flex items-center gap-1.5">
                   <button
                     onClick={handleAddColumn}
                     disabled={!newColumnName.trim() || createColumn.isPending}
-                    className="h-6 px-3 rounded text-[11px] font-semibold disabled:opacity-40"
-                    style={{ background: ACCENT, color: '#0a0a0a' }}
+                    className="h-6 px-2.5 rounded text-[11px] font-semibold disabled:opacity-40"
+                    style={{ background: ACCENT, color: '#ffffff' }}
                   >
                     Add
                   </button>
@@ -191,13 +186,13 @@ const ProjectBoard: React.FC = () => {
             ) : (
               <button
                 onClick={() => setAddingColumn(true)}
-                className="w-full flex items-center gap-2 px-3 py-2 rounded-lg text-[12px] transition-colors hover:bg-[var(--flow-hover)]"
+                className="w-full flex items-center gap-1.5 px-2.5 py-1.5 rounded-md text-[11px] transition-colors hover:bg-[var(--flow-hover)]"
                 style={{
                   color: 'var(--flow-text-dim)',
                   border: '1px dashed var(--flow-border)',
                 }}
               >
-                <Plus size={13} />
+                <Plus size={12} />
                 Add column
               </button>
             )}
@@ -259,16 +254,16 @@ const KanbanColumn: React.FC<{
       }}
       onDragLeave={onDragLeave}
       onDrop={onDrop}
-      className="flex w-[min(260px,calc(100vw-2rem))] min-w-[min(260px,calc(100vw-2rem))] flex-col rounded-lg p-2 sm:w-[260px] sm:min-w-[260px]"
+      className="flex w-[min(248px,calc(100vw-1.5rem))] min-w-[min(248px,calc(100vw-1.5rem))] flex-col rounded-md p-1.5 sm:w-[248px] sm:min-w-[248px]"
       style={{
         background: isOver ? `${col.color}12` : 'transparent',
         border: isOver ? `1px dashed ${col.color}` : '1px solid transparent',
         transition: 'background 0.15s, border 0.15s',
       }}
     >
-      {/* Column header */}
-      <div className="flex items-center gap-2 px-2 py-2 mb-2 group/header">
-        <span className="h-2.5 w-2.5 rounded-full shrink-0" style={{ background: col.color }} />
+      {/* Column header — tighter. 24px tall, no wasteful vertical padding. */}
+      <div className="flex items-center gap-1.5 px-1.5 h-7 mb-1.5 group/header">
+        <span className="h-2 w-2 rounded-full shrink-0" style={{ background: col.color }} />
 
         {editing ? (
           <input
@@ -325,7 +320,7 @@ const KanbanColumn: React.FC<{
       </div>
 
       {/* Cards */}
-      <div className="flex flex-col gap-2 flex-1 min-h-[120px] overflow-y-auto">
+      <div className="flex flex-col gap-1.5 flex-1 min-h-[80px] overflow-y-auto">
         {colTasks.map((task) => (
           <TaskCard
             key={task.id}
@@ -338,90 +333,20 @@ const KanbanColumn: React.FC<{
         ))}
 
         {colTasks.length === 0 && (
-          <div
-            className="flex-1 flex items-center justify-center rounded-md text-[11px] min-h-[60px]"
+          <button
+            onClick={onAddTask}
+            className="flex-1 flex items-center justify-center rounded text-[11px] min-h-[44px] hover:bg-[var(--flow-hover)] transition-colors"
             style={{
               color: 'var(--flow-text-dim)',
               border: '1px dashed var(--flow-border)',
             }}
           >
-            Drop here
-          </div>
+            <Plus size={12} className="mr-1" /> Add task
+          </button>
         )}
       </div>
     </div>
   );
 };
-
-// ── Shared board header ─────────────────────────────────────────────────────
-
-const BoardHeader: React.FC<{
-  project: { name: string; color: string };
-  workspaceId: string;
-  projectId: string;
-  taskCount: number;
-  onNewTask: () => void;
-}> = ({ project, workspaceId, projectId, taskCount, onNewTask }) => (
-  <div
-    className="flex flex-col gap-3 px-4 py-3 shrink-0 sm:flex-row sm:items-center sm:justify-between sm:px-6 sm:py-4"
-    style={{ borderBottom: '1px solid var(--flow-border)' }}
-  >
-    <div className="flex min-w-0 items-center gap-3">
-      <span className="h-3 w-3 rounded-full" style={{ background: project.color }} />
-      <h1 className="text-[15px] font-semibold" style={{ color: 'var(--flow-text)' }}>
-        {project.name}
-      </h1>
-      <span
-        className="text-[11px] px-2 py-0.5 rounded-full font-semibold"
-        style={{ background: 'var(--flow-hover)', color: 'var(--flow-text-dim)' }}
-      >
-        {taskCount}
-      </span>
-    </div>
-
-    <div className="flex flex-wrap items-center gap-2">
-      <button
-        onClick={onNewTask}
-        className="flex items-center gap-1.5 h-7 px-2.5 rounded text-[11px] font-semibold"
-        style={{ background: ACCENT, color: '#0a0a0a' }}
-      >
-        <Plus size={11} /> New task
-      </button>
-
-      <div
-        className="flex items-center rounded-lg p-0.5"
-        style={{ background: 'var(--flow-surface)', border: '1px solid var(--flow-border)' }}
-      >
-        <Link
-          to={`/w/${workspaceId}/p/${projectId}/overview`}
-          className="flex items-center gap-1.5 px-2.5 py-1 rounded-md text-[11px] hover:bg-[var(--flow-hover)]"
-          style={{ color: 'var(--flow-text-muted)' }}
-        >
-          <Activity size={11} /> Overview
-        </Link>
-        <button
-          className="flex items-center gap-1.5 px-2.5 py-1 rounded-md text-[11px] font-medium"
-          style={{ background: `${ACCENT}18`, color: ACCENT }}
-        >
-          <LayoutGrid size={11} /> Board
-        </button>
-        <Link
-          to={`/w/${workspaceId}/p/${projectId}/list`}
-          className="flex items-center gap-1.5 px-2.5 py-1 rounded-md text-[11px] hover:bg-[var(--flow-hover)]"
-          style={{ color: 'var(--flow-text-muted)' }}
-        >
-          <List size={11} /> List
-        </Link>
-        <Link
-          to={`/w/${workspaceId}/p/${projectId}/settings`}
-          className="flex items-center gap-1.5 px-2.5 py-1 rounded-md text-[11px] hover:bg-[var(--flow-hover)]"
-          style={{ color: 'var(--flow-text-muted)' }}
-        >
-          <SettingsIcon size={11} />
-        </Link>
-      </div>
-    </div>
-  </div>
-);
 
 export default ProjectBoard;

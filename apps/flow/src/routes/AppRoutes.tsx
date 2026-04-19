@@ -11,6 +11,9 @@ const ProjectBoard = React.lazy(() => import('../features/projects/ProjectBoard'
 const ProjectList = React.lazy(() => import('../features/projects/ProjectList'));
 const ProjectOverview = React.lazy(() => import('../features/projects/ProjectOverview'));
 const ProjectSettings = React.lazy(() => import('../features/projects/ProjectSettings'));
+const ProjectTimeline = React.lazy(() => import('../features/projects/ProjectTimeline'));
+const ProjectCalendar = React.lazy(() => import('../features/projects/ProjectCalendar'));
+const ProjectDashboard = React.lazy(() => import('../features/projects/ProjectDashboard'));
 const Inbox = React.lazy(() => import('../features/inbox/Inbox'));
 const FlowSettings = React.lazy(() => import('../features/settings/FlowSettings'));
 const TaskDetail = React.lazy(() => import('../features/tasks/TaskDetail'));
@@ -59,8 +62,12 @@ const appRoutes: RouteObject[] = [
   { path: '/w/:workspaceId', element: withLayout(<WorkspaceDashboard />) },
   { path: '/w/:workspaceId/members', element: withLayout(<WorkspaceManager />) },
   { path: '/w/:workspaceId/p/:projectId', element: withLayout(<ProjectBoard />) },
+  { path: '/w/:workspaceId/p/:projectId/board', element: withLayout(<ProjectBoard />) },
   { path: '/w/:workspaceId/p/:projectId/list', element: withLayout(<ProjectList />) },
   { path: '/w/:workspaceId/p/:projectId/overview', element: withLayout(<ProjectOverview />) },
+  { path: '/w/:workspaceId/p/:projectId/timeline', element: withLayout(<ProjectTimeline />) },
+  { path: '/w/:workspaceId/p/:projectId/calendar', element: withLayout(<ProjectCalendar />) },
+  { path: '/w/:workspaceId/p/:projectId/dashboard', element: withLayout(<ProjectDashboard />) },
   { path: '/w/:workspaceId/p/:projectId/settings', element: withLayout(<ProjectSettings />) },
   { path: '/task/:id', element: withLayout(<TaskDetail />) },
   { path: '/my-issues', element: withLayout(<MyIssues />) },
