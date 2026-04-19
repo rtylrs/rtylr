@@ -2,6 +2,7 @@ package handlers
 
 import (
 	"context"
+	"fmt"
 	"net/http"
 
 	flowv1 "github.com/voxire/voxie/gen/go/flow/v1"
@@ -10,7 +11,24 @@ import (
 	"github.com/voxire/onion/internal/modules/workspaces/internal/domain"
 	authPkg "github.com/voxire/onion/internal/platform/auth"
 	errorModels "github.com/voxire/onion/internal/platform/errors"
+	"github.com/voxire/onion/internal/platform/wsbus"
 )
+
+// publishWorkspaceMemberEvent fans member add/remove events to the
+// workspace topic so every connected peer refreshes its member list +
+// sidebar avatar stack. The affected user ID is carried in entity_id so
+// the client can also target per-user invalidations if it wants.
+func publishWorkspaceMemberEvent(eventType string, workspaceID, memberUserID, actorID int64) {
+	if workspaceID == 0 {
+		return
+	}
+	wsbus.Publish(wsbus.Event{
+		Topic:    fmt.Sprintf("workspace:%d", workspaceID),
+		Type:     eventType,
+		EntityID: memberUserID,
+		ActorID:  actorID,
+	})
+}
 
 // ─────────────────────────────────────────────
 // Route declarations
@@ -262,7 +280,7 @@ func (h *AddWorkspaceMemberHandler) Validate(_ context.Context, req *AddWorkspac
 }
 
 func (h *AddWorkspaceMemberHandler) Serve(ctx context.Context, req *AddWorkspaceMemberRequest) (AddWorkspaceMemberResponse, *errorModels.ServerError) {
-	_, ok := authPkg.GetAuthUser(ctx)
+	authUser, ok := authPkg.GetAuthUser(ctx)
 	if !ok {
 		return AddWorkspaceMemberResponse{}, errorModels.PermissionDeniedServerError()
 	}
@@ -280,6 +298,12 @@ func (h *AddWorkspaceMemberHandler) Serve(ctx context.Context, req *AddWorkspace
 		}
 	}
 
+	publishWorkspaceMemberEvent(
+		"workspace.member_added",
+		req.WorkspaceID.Int64(),
+		req.UserID.Int64(),
+		authUser.UserID,
+	)
 	return AddWorkspaceMemberResponse{Message: "Member added successfully"}, nil
 }
 
@@ -313,7 +337,7 @@ func (h *RemoveWorkspaceMemberHandler) Validate(_ context.Context, req *RemoveWo
 }
 
 func (h *RemoveWorkspaceMemberHandler) Serve(ctx context.Context, req *RemoveWorkspaceMemberRequest) (RemoveWorkspaceMemberResponse, *errorModels.ServerError) {
-	_, ok := authPkg.GetAuthUser(ctx)
+	authUser, ok := authPkg.GetAuthUser(ctx)
 	if !ok {
 		return RemoveWorkspaceMemberResponse{}, errorModels.PermissionDeniedServerError()
 	}
@@ -330,5 +354,18 @@ func (h *RemoveWorkspaceMemberHandler) Serve(ctx context.Context, req *RemoveWor
 		}
 	}
 
+	publishWorkspaceMemberEvent(
+		"workspace.member_removed",
+		req.WorkspaceID.Int64(),
+		req.UserID.Int64(),
+		authUser.UserID,
+	)
+	// Also notify the evicted user directly so their own UI ejects them.
+	wsbus.Publish(wsbus.Event{
+		Topic:    fmt.Sprintf("user:%d", req.UserID.Int64()),
+		Type:     "workspace.evicted",
+		EntityID: req.WorkspaceID.Int64(),
+		ActorID:  authUser.UserID,
+	})
 	return RemoveWorkspaceMemberResponse{Message: "Member removed successfully"}, nil
 }

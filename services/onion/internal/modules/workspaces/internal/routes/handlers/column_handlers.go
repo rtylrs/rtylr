@@ -223,14 +223,19 @@ func (h *DeleteColumnHandler) Validate(_ context.Context, req *DeleteColumnReque
 }
 
 func (h *DeleteColumnHandler) Serve(ctx context.Context, req *DeleteColumnRequest) (DeleteColumnResponse, *errorModels.ServerError) {
-	_, ok := authPkg.GetAuthUser(ctx)
+	authUser, ok := authPkg.GetAuthUser(ctx)
 	if !ok {
 		return DeleteColumnResponse{}, errorModels.PermissionDeniedServerError()
 	}
 
+	// Snapshot the owning project before the row is gone so the realtime
+	// event can route to the right topic.
+	projectID := h.FlowService.GetColumnProject(ctx, req.ID.Int64())
+
 	if err := h.FlowService.DeleteColumn(ctx, req.ID.Int64()); err != nil {
 		return DeleteColumnResponse{}, &errorModels.ServerError{Code: http.StatusInternalServerError, Message: "Failed to delete column"}
 	}
+	publishColumnEvent("column.deleted", projectID, req.ID.Int64(), authUser.UserID)
 	return DeleteColumnResponse{Message: "Column deleted"}, nil
 }
 
@@ -259,7 +264,7 @@ func (h *MoveTaskToColumnHandler) Validate(_ context.Context, req *MoveTaskToCol
 }
 
 func (h *MoveTaskToColumnHandler) Serve(ctx context.Context, req *MoveTaskToColumnRequest) (MoveTaskToColumnResponse, *errorModels.ServerError) {
-	_, ok := authPkg.GetAuthUser(ctx)
+	authUser, ok := authPkg.GetAuthUser(ctx)
 	if !ok {
 		return MoveTaskToColumnResponse{}, errorModels.PermissionDeniedServerError()
 	}
@@ -267,5 +272,12 @@ func (h *MoveTaskToColumnHandler) Serve(ctx context.Context, req *MoveTaskToColu
 	if err := h.FlowService.MoveTaskToColumn(ctx, req.TaskID.Int64(), req.ColumnID.Int64()); err != nil {
 		return MoveTaskToColumnResponse{}, &errorModels.ServerError{Code: http.StatusInternalServerError, Message: "Failed to move task"}
 	}
+
+	// A move is a task update from the board's perspective — consumers
+	// invalidate their task list and the card re-appears in the new
+	// column. Route to the project the destination column belongs to.
+	projectID := h.FlowService.GetColumnProject(ctx, req.ColumnID.Int64())
+	publishTaskEventByProject("task.updated", projectID, req.TaskID.Int64(), authUser.UserID)
+
 	return MoveTaskToColumnResponse{Message: "Task moved"}, nil
 }

@@ -2,6 +2,7 @@ package handlers
 
 import (
 	"context"
+	"fmt"
 	"net/http"
 	"time"
 
@@ -11,7 +12,24 @@ import (
 	"github.com/voxire/onion/internal/modules/workspaces/internal/domain"
 	authPkg "github.com/voxire/onion/internal/platform/auth"
 	errorModels "github.com/voxire/onion/internal/platform/errors"
+	"github.com/voxire/onion/internal/platform/wsbus"
 )
+
+// publishProjectEvent fans a project-level change out to every client
+// subscribed to the owning workspace. The sidebar subscribes so that
+// creating a project in one tab makes it appear instantly in every
+// other tab / teammate's window.
+func publishProjectEvent(eventType string, workspaceID, projectID, actorID int64) {
+	if workspaceID == 0 {
+		return
+	}
+	wsbus.Publish(wsbus.Event{
+		Topic:    fmt.Sprintf("workspace:%d", workspaceID),
+		Type:     eventType,
+		EntityID: projectID,
+		ActorID:  actorID,
+	})
+}
 
 // ─────────────────────────────────────────────
 // Route declarations
@@ -177,6 +195,7 @@ func (h *CreateProjectHandler) Serve(ctx context.Context, req *CreateProjectRequ
 		}
 	}
 
+	publishProjectEvent("project.created", project.WorkspaceID, project.ID, authUser.UserID)
 	return CreateProjectResponse{Project: toProjectPayload(project)}, nil
 }
 
@@ -245,6 +264,12 @@ func (h *UpdateProjectHandler) Serve(ctx context.Context, req *UpdateProjectRequ
 		}
 	}
 
+	publishProjectEvent(
+		"project.updated",
+		h.FlowService.GetProjectWorkspace(ctx, req.ID.Int64()),
+		req.ID.Int64(),
+		authUser.UserID,
+	)
 	return UpdateProjectResponse{Message: "Project updated successfully"}, nil
 }
 
@@ -278,6 +303,10 @@ func (h *DeleteProjectHandler) Serve(ctx context.Context, req *DeleteProjectRequ
 		return DeleteProjectResponse{}, errorModels.PermissionDeniedServerError()
 	}
 
+	// Capture the owning workspace before archiving so the realtime
+	// event can route to the correct topic.
+	workspaceID := h.FlowService.GetProjectWorkspace(ctx, req.ID.Int64())
+
 	if err := h.FlowService.DeleteProject(ctx, req.ID.Int64(), authUser.UserID); err != nil {
 		return DeleteProjectResponse{}, &errorModels.ServerError{
 			Code:    http.StatusInternalServerError,
@@ -285,5 +314,6 @@ func (h *DeleteProjectHandler) Serve(ctx context.Context, req *DeleteProjectRequ
 		}
 	}
 
+	publishProjectEvent("project.deleted", workspaceID, req.ID.Int64(), authUser.UserID)
 	return DeleteProjectResponse{Message: "Project archived successfully"}, nil
 }

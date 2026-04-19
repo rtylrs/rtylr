@@ -684,6 +684,13 @@ func (s *Service) GetColumnProject(ctx context.Context, columnID int64) int64 {
 	return s.repo.GetColumnProject(ctx, columnID)
 }
 
+// GetProjectWorkspace returns the workspace id the given project belongs
+// to. Used by realtime publish sites that route events to workspace-level
+// subscribers without having to load the full project row.
+func (s *Service) GetProjectWorkspace(ctx context.Context, projectID int64) int64 {
+	return s.repo.GetProjectWorkspace(ctx, projectID)
+}
+
 func (s *Service) SeedDefaultColumns(ctx context.Context, projectID, workspaceID, createdBy int64) error {
 	return s.repo.SeedDefaultColumns(ctx, projectID, workspaceID, createdBy)
 }

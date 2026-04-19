@@ -1484,6 +1484,20 @@ func (r *Repository) IsWorkspaceMember(ctx context.Context, userID, workspaceID 
 	return exists == 1
 }
 
+// GetProjectWorkspace returns the workspace id of the given project, or
+// 0 if the project doesn't exist. Used by the realtime publish paths.
+func (r *Repository) GetProjectWorkspace(ctx context.Context, projectID int64) int64 {
+	var workspaceID int64
+	err := r.pool.QueryRowContext(ctx,
+		`SELECT workspace_id FROM flow_projects WHERE id = ? LIMIT 1`,
+		projectID,
+	).Scan(&workspaceID)
+	if err != nil && !errors.Is(err, sql.ErrNoRows) {
+		logger.Ctx(ctx).Warn("GetProjectWorkspace failed", logger.Error(err))
+	}
+	return workspaceID
+}
+
 // GetColumnProject returns the project id that owns the given column,
 // or 0 if the column is missing. Used by the realtime publish paths to
 // find the correct topic when the handler only has the column id
