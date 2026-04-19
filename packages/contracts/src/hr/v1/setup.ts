@@ -40,6 +40,17 @@ export interface HRCompanyConfigPayload {
   createdAt: number;
   /** Unix timestamp when this config was last updated. */
   updatedAt: number;
+  /**
+   * Enabled clock-in methods for attendance tracking
+   * (values: "app", "pin", "gps", "kiosk"). Empty defaults to ["app"].
+   */
+  clockInMethods: string[];
+  /**
+   * App IDs this tenant is subscribed to (values: "flow", "finance",
+   * "erp", "crm", "pos", "hr"). Drives cross-app UI affordances such as
+   * the "Import from Flow" button on HR timesheets.
+   */
+  subscribedApps: string[];
 }
 
 export interface GetSetupStatusResponse {
