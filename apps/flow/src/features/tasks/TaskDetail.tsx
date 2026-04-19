@@ -37,6 +37,7 @@ import {
 } from './useTasks';
 import { useLabels, useSetTaskLabels } from './useLabels';
 import { useTaskActivity } from './useTaskActivity';
+import { useTaskRealtime } from '../../shared/lib/useTaskRealtime';
 import { useTimeLogs, useLogTime, useDeleteTimeLog } from './useTimeLogs';
 import { useFlowStore, PRIORITY_LABELS, STATUS_LABELS, Task } from '../../shared/stores/flowStore';
 import type { ApiTask, ApiTaskDetail, ApiTaskActivity } from '../../shared/services/flowApi';
@@ -172,6 +173,7 @@ function activityIcon(action: string): React.ComponentType<{ size?: number }> {
 const TaskDetail: React.FC = () => {
   const { id } = useParams<{ id: string }>();
   const navigate = useNavigate();
+  useTaskRealtime(id);
   const { data: taskData, isLoading } = useTask(id);
   const user = useUserStore((s) => s.user);
   const updateTaskMut = useUpdateTask();
