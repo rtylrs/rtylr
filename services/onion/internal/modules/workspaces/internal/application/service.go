@@ -9,6 +9,7 @@ import (
 	"github.com/voxire/onion/internal/modules/workspaces/internal/domain"
 	"github.com/voxire/onion/internal/modules/workspaces/internal/infrastructure"
 	"github.com/voxire/onion/internal/platform/logger"
+	"github.com/voxire/onion/internal/platform/wsbus"
 )
 
 type Service struct {
@@ -616,7 +617,21 @@ func (s *Service) MarkAllNotificationsRead(ctx context.Context, userID int64) er
 }
 
 func (s *Service) CreateNotification(ctx context.Context, input domain.CreateNotificationInput) error {
-	return s.repo.CreateNotification(ctx, input)
+	if err := s.repo.CreateNotification(ctx, input); err != nil {
+		return err
+	}
+	// Push a hint to the recipient's user topic so their inbox badge
+	// and list update in real time. The entity id is the recipient
+	// rather than the notification row — consumers invalidate their
+	// `['notifications']` query rather than patching by id.
+	if input.UserID != 0 {
+		wsbus.Publish(wsbus.Event{
+			Topic:    fmt.Sprintf("user:%d", input.UserID),
+			Type:     "notification.created",
+			EntityID: input.UserID,
+		})
+	}
+	return nil
 }
 
 // ─────────────────────────────────────────────
