@@ -48,8 +48,12 @@ func (h *ListCyclesHandler) Serve(ctx context.Context, r *ListCyclesRequest) (Li
 
 	wsID := authUser.BusinessID
 	if r.WorkspaceID != "" {
-		if id, err := strconv.ParseInt(r.WorkspaceID, 10, 64); err == nil {
-			wsID = id
+		resolved, err := h.FlowService.ResolveWorkspaceID(ctx, authUser.UserID, r.WorkspaceID)
+		if err != nil {
+			return ListCyclesResponse{}, &errorModels.ServerError{Code: http.StatusBadRequest, Message: "Invalid workspace_id"}
+		}
+		if resolved != 0 {
+			wsID = resolved
 		}
 	}
 
@@ -106,8 +110,12 @@ func (h *CreateCycleHandler) Serve(ctx context.Context, r *CreateCycleRequest) (
 
 	wsID := authUser.BusinessID
 	if r.WorkspaceID != "" {
-		if id, err := strconv.ParseInt(r.WorkspaceID, 10, 64); err == nil {
-			wsID = id
+		resolved, err := h.FlowService.ResolveWorkspaceID(ctx, authUser.UserID, r.WorkspaceID)
+		if err != nil {
+			return CreateCycleResponse{}, &errorModels.ServerError{Code: http.StatusBadRequest, Message: "Invalid workspace_id"}
+		}
+		if resolved != 0 {
+			wsID = resolved
 		}
 	}
 

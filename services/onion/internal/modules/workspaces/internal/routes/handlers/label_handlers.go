@@ -45,7 +45,7 @@ type ListLabelsHandler struct {
 }
 
 type ListLabelsRequest struct {
-	WorkspaceID int64 `json:"workspace_id"`
+	WorkspaceID WorkspaceIDField `json:"workspace_id"`
 }
 
 type ListLabelsResponse struct {
@@ -53,7 +53,7 @@ type ListLabelsResponse struct {
 }
 
 func (h *ListLabelsHandler) Validate(_ context.Context, req *ListLabelsRequest) *errorModels.ServerError {
-	if req.WorkspaceID == 0 {
+	if req.WorkspaceID.IsEmpty() {
 		return &errorModels.ServerError{Code: http.StatusBadRequest, Message: "workspace_id is required"}
 	}
 
@@ -61,12 +61,20 @@ func (h *ListLabelsHandler) Validate(_ context.Context, req *ListLabelsRequest) 
 }
 
 func (h *ListLabelsHandler) Serve(ctx context.Context, req *ListLabelsRequest) (ListLabelsResponse, *errorModels.ServerError) {
-	_, ok := authPkg.GetAuthUser(ctx)
+	authUser, ok := authPkg.GetAuthUser(ctx)
 	if !ok {
 		return ListLabelsResponse{}, errorModels.PermissionDeniedServerError()
 	}
 
-	labels, err := h.FlowService.ListLabels(ctx, req.WorkspaceID)
+	workspaceID, err := h.FlowService.ResolveWorkspaceID(ctx, authUser.UserID, req.WorkspaceID.String())
+	if err != nil || workspaceID == 0 {
+		return ListLabelsResponse{}, &errorModels.ServerError{
+			Code:    http.StatusBadRequest,
+			Message: "Invalid workspace_id",
+		}
+	}
+
+	labels, err := h.FlowService.ListLabels(ctx, workspaceID)
 	if err != nil {
 		return ListLabelsResponse{}, &errorModels.ServerError{
 			Code:    http.StatusInternalServerError,
@@ -91,9 +99,9 @@ type CreateLabelHandler struct {
 }
 
 type CreateLabelRequest struct {
-	WorkspaceID int64  `json:"workspace_id"`
-	Name        string `json:"name"`
-	Color       string `json:"color"`
+	WorkspaceID WorkspaceIDField `json:"workspace_id"`
+	Name        string           `json:"name"`
+	Color       string           `json:"color"`
 }
 
 type CreateLabelResponse struct {
@@ -101,7 +109,7 @@ type CreateLabelResponse struct {
 }
 
 func (h *CreateLabelHandler) Validate(_ context.Context, req *CreateLabelRequest) *errorModels.ServerError {
-	if req.WorkspaceID == 0 {
+	if req.WorkspaceID.IsEmpty() {
 		return &errorModels.ServerError{Code: http.StatusBadRequest, Message: "Workspace ID is required"}
 	}
 
@@ -113,19 +121,27 @@ func (h *CreateLabelHandler) Validate(_ context.Context, req *CreateLabelRequest
 }
 
 func (h *CreateLabelHandler) Serve(ctx context.Context, req *CreateLabelRequest) (CreateLabelResponse, *errorModels.ServerError) {
-	_, ok := authPkg.GetAuthUser(ctx)
+	authUser, ok := authPkg.GetAuthUser(ctx)
 	if !ok {
 		return CreateLabelResponse{}, errorModels.PermissionDeniedServerError()
 	}
 
+	workspaceID, err := h.FlowService.ResolveWorkspaceID(ctx, authUser.UserID, req.WorkspaceID.String())
+	if err != nil || workspaceID == 0 {
+		return CreateLabelResponse{}, &errorModels.ServerError{
+			Code:    http.StatusBadRequest,
+			Message: "Invalid workspace_id",
+		}
+	}
+
 	input := domain.LabelInput{
-		WorkspaceID: req.WorkspaceID,
+		WorkspaceID: workspaceID,
 		Name:        req.Name,
 		Color:       req.Color,
 	}
 
-	label, err := h.FlowService.CreateLabel(ctx, input)
-	if err != nil {
+	label, createErr := h.FlowService.CreateLabel(ctx, input)
+	if createErr != nil {
 		return CreateLabelResponse{}, &errorModels.ServerError{
 			Code:    http.StatusInternalServerError,
 			Message: "Failed to create label",

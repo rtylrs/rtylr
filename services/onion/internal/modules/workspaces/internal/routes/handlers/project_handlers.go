@@ -58,7 +58,8 @@ type ListProjectsHandler struct {
 }
 
 type ListProjectsRequest struct {
-	WorkspaceID int64 `json:"workspace_id"`
+	// Accepts a numeric ID, a numeric string, or the sentinel "personal".
+	WorkspaceID WorkspaceIDField `json:"workspace_id"`
 }
 
 type ListProjectsResponse struct {
@@ -66,7 +67,7 @@ type ListProjectsResponse struct {
 }
 
 func (h *ListProjectsHandler) Validate(_ context.Context, req *ListProjectsRequest) *errorModels.ServerError {
-	if req.WorkspaceID == 0 {
+	if req.WorkspaceID.IsEmpty() {
 		return &errorModels.ServerError{Code: http.StatusBadRequest, Message: "workspace_id is required"}
 	}
 
@@ -79,7 +80,15 @@ func (h *ListProjectsHandler) Serve(ctx context.Context, req *ListProjectsReques
 		return ListProjectsResponse{}, errorModels.PermissionDeniedServerError()
 	}
 
-	projects, err := h.FlowService.ListProjects(ctx, req.WorkspaceID, authUser.UserID)
+	workspaceID, err := h.FlowService.ResolveWorkspaceID(ctx, authUser.UserID, req.WorkspaceID.String())
+	if err != nil || workspaceID == 0 {
+		return ListProjectsResponse{}, &errorModels.ServerError{
+			Code:    http.StatusBadRequest,
+			Message: "Invalid workspace_id",
+		}
+	}
+
+	projects, err := h.FlowService.ListProjects(ctx, workspaceID, authUser.UserID)
 	if err != nil {
 		return ListProjectsResponse{}, &errorModels.ServerError{
 			Code:    http.StatusInternalServerError,
@@ -104,8 +113,9 @@ type CreateProjectHandler struct {
 }
 
 type CreateProjectRequest struct {
-	WorkspaceID int64      `json:"workspace_id"`
-	Name        string     `json:"name"`
+	// Accepts a numeric ID, a numeric string, or the sentinel "personal".
+	WorkspaceID WorkspaceIDField `json:"workspace_id"`
+	Name        string           `json:"name"`
 	Description string     `json:"description"`
 	Icon        string     `json:"icon"`
 	Color       string     `json:"color"`
@@ -118,7 +128,7 @@ type CreateProjectResponse struct {
 }
 
 func (h *CreateProjectHandler) Validate(_ context.Context, req *CreateProjectRequest) *errorModels.ServerError {
-	if req.WorkspaceID == 0 {
+	if req.WorkspaceID.IsEmpty() {
 		return &errorModels.ServerError{Code: http.StatusBadRequest, Message: "Workspace ID is required"}
 	}
 
@@ -135,8 +145,16 @@ func (h *CreateProjectHandler) Serve(ctx context.Context, req *CreateProjectRequ
 		return CreateProjectResponse{}, errorModels.PermissionDeniedServerError()
 	}
 
+	workspaceID, err := h.FlowService.ResolveWorkspaceID(ctx, authUser.UserID, req.WorkspaceID.String())
+	if err != nil || workspaceID == 0 {
+		return CreateProjectResponse{}, &errorModels.ServerError{
+			Code:    http.StatusBadRequest,
+			Message: "Invalid workspace_id",
+		}
+	}
+
 	input := domain.ProjectInput{
-		WorkspaceID: req.WorkspaceID,
+		WorkspaceID: workspaceID,
 		OwnerID:     authUser.UserID,
 		Name:        req.Name,
 		Description: req.Description,

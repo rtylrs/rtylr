@@ -26,7 +26,7 @@ type GetDashboardHandler struct {
 }
 
 type GetDashboardRequest struct {
-	WorkspaceID int64 `json:"workspace_id"`
+	WorkspaceID WorkspaceIDField `json:"workspace_id"`
 }
 
 type GetDashboardResponse struct {
@@ -38,7 +38,7 @@ type GetDashboardResponse struct {
 }
 
 func (h *GetDashboardHandler) Validate(_ context.Context, req *GetDashboardRequest) *errorModels.ServerError {
-	if req.WorkspaceID == 0 {
+	if req.WorkspaceID.IsEmpty() {
 		return &errorModels.ServerError{Code: http.StatusBadRequest, Message: "workspace_id is required"}
 	}
 
@@ -51,7 +51,15 @@ func (h *GetDashboardHandler) Serve(ctx context.Context, req *GetDashboardReques
 		return GetDashboardResponse{}, errorModels.PermissionDeniedServerError()
 	}
 
-	stats, err := h.FlowService.GetDashboard(ctx, req.WorkspaceID, authUser.UserID, authUser.UserID)
+	workspaceID, err := h.FlowService.ResolveWorkspaceID(ctx, authUser.UserID, req.WorkspaceID.String())
+	if err != nil || workspaceID == 0 {
+		return GetDashboardResponse{}, &errorModels.ServerError{
+			Code:    http.StatusBadRequest,
+			Message: "Invalid workspace_id",
+		}
+	}
+
+	stats, err := h.FlowService.GetDashboard(ctx, workspaceID, authUser.UserID, authUser.UserID)
 	if err != nil {
 		return GetDashboardResponse{}, &errorModels.ServerError{
 			Code:    http.StatusInternalServerError,

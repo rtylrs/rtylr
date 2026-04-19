@@ -71,25 +71,31 @@ func ListWorkspaceMembersRoutes() []string { return []string{"/flow/workspaces/m
 
 type ListWorkspaceMembersHandler struct{ FlowService *application.Service }
 type ListWorkspaceMembersRequest struct {
-	WorkspaceID int64 `json:"workspace_id"`
+	WorkspaceID WorkspaceIDField `json:"workspace_id"`
 }
 type ListWorkspaceMembersResponse struct {
 	Members []WorkspaceMemberPayload `json:"members"`
 }
 
 func (h *ListWorkspaceMembersHandler) Validate(_ context.Context, req *ListWorkspaceMembersRequest) *errorModels.ServerError {
-	if req.WorkspaceID == 0 {
+	if req.WorkspaceID.IsEmpty() {
 		return &errorModels.ServerError{Code: http.StatusBadRequest, Message: "workspace_id is required"}
 	}
 	return nil
 }
 
 func (h *ListWorkspaceMembersHandler) Serve(ctx context.Context, req *ListWorkspaceMembersRequest) (ListWorkspaceMembersResponse, *errorModels.ServerError) {
-	if _, ok := authPkg.GetAuthUser(ctx); !ok {
+	authUser, ok := authPkg.GetAuthUser(ctx)
+	if !ok {
 		return ListWorkspaceMembersResponse{}, errorModels.PermissionDeniedServerError()
 	}
 
-	members, err := h.FlowService.ListWorkspaceMembers(ctx, req.WorkspaceID)
+	workspaceID, err := h.FlowService.ResolveWorkspaceID(ctx, authUser.UserID, req.WorkspaceID.String())
+	if err != nil || workspaceID == 0 {
+		return ListWorkspaceMembersResponse{}, &errorModels.ServerError{Code: http.StatusBadRequest, Message: "Invalid workspace_id"}
+	}
+
+	members, err := h.FlowService.ListWorkspaceMembers(ctx, workspaceID)
 	if err != nil {
 		return ListWorkspaceMembersResponse{}, &errorModels.ServerError{Code: http.StatusInternalServerError, Message: "Failed to list members"}
 	}

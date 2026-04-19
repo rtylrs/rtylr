@@ -3,6 +3,7 @@ package application
 import (
 	"context"
 	"fmt"
+	"strconv"
 	"time"
 
 	"github.com/voxire/onion/internal/modules/workspaces/internal/domain"
@@ -81,6 +82,20 @@ func (s *Service) UpdateWorkspaceMemberRole(ctx context.Context, input domain.Up
 
 func (s *Service) CreatePersonalWorkspace(ctx context.Context, userID int64) (int64, error) {
 	return s.repo.CreatePersonalWorkspace(ctx, userID)
+}
+
+// ResolveWorkspaceID converts a workspace_id coming from the frontend into
+// a numeric DB ID. The frontend uses the sentinel string "personal" to mean
+// "the user's Personal workspace", which is created on demand. Any numeric
+// string (or empty) is parsed as-is; numbers round-trip unchanged.
+func (s *Service) ResolveWorkspaceID(ctx context.Context, userID int64, raw string) (int64, error) {
+	if raw == "" {
+		return 0, nil
+	}
+	if raw == "personal" {
+		return s.repo.CreatePersonalWorkspace(ctx, userID)
+	}
+	return strconv.ParseInt(raw, 10, 64)
 }
 
 // ─────────────────────────────────────────────

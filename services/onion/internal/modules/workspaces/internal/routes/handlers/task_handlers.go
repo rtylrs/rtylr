@@ -105,11 +105,11 @@ type ListTasksHandler struct {
 }
 
 type ListTasksRequest struct {
-	ProjectID   int64  `json:"project_id"`
-	WorkspaceID int64  `json:"workspace_id"`
-	Status      string `json:"status"`
-	AssigneeID  *int64 `json:"assignee_id"`
-	Priority    string `json:"priority"`
+	ProjectID   int64            `json:"project_id"`
+	WorkspaceID WorkspaceIDField `json:"workspace_id"`
+	Status      string           `json:"status"`
+	AssigneeID  *int64           `json:"assignee_id"`
+	Priority    string           `json:"priority"`
 }
 
 type ListTasksResponse struct {
@@ -117,7 +117,7 @@ type ListTasksResponse struct {
 }
 
 func (h *ListTasksHandler) Validate(_ context.Context, req *ListTasksRequest) *errorModels.ServerError {
-	if req.ProjectID == 0 && req.WorkspaceID == 0 {
+	if req.ProjectID == 0 && req.WorkspaceID.IsEmpty() {
 		return &errorModels.ServerError{Code: http.StatusBadRequest, Message: "project_id or workspace_id is required"}
 	}
 
@@ -125,14 +125,26 @@ func (h *ListTasksHandler) Validate(_ context.Context, req *ListTasksRequest) *e
 }
 
 func (h *ListTasksHandler) Serve(ctx context.Context, req *ListTasksRequest) (ListTasksResponse, *errorModels.ServerError) {
-	_, ok := authPkg.GetAuthUser(ctx)
+	authUser, ok := authPkg.GetAuthUser(ctx)
 	if !ok {
 		return ListTasksResponse{}, errorModels.PermissionDeniedServerError()
 	}
 
+	var workspaceID int64
+	if !req.WorkspaceID.IsEmpty() {
+		resolved, err := h.FlowService.ResolveWorkspaceID(ctx, authUser.UserID, req.WorkspaceID.String())
+		if err != nil {
+			return ListTasksResponse{}, &errorModels.ServerError{
+				Code:    http.StatusBadRequest,
+				Message: "Invalid workspace_id",
+			}
+		}
+		workspaceID = resolved
+	}
+
 	filter := domain.ListTasksFilter{
 		ProjectID:   req.ProjectID,
-		WorkspaceID: req.WorkspaceID,
+		WorkspaceID: workspaceID,
 		Status:      req.Status,
 		AssigneeID:  req.AssigneeID,
 		Priority:    req.Priority,
@@ -163,17 +175,17 @@ type CreateTaskHandler struct {
 }
 
 type CreateTaskRequest struct {
-	ProjectID      int64      `json:"project_id"`
-	WorkspaceID    int64      `json:"workspace_id"`
-	ParentTaskID   *int64     `json:"parent_task_id"`
-	Title          string     `json:"title"`
-	Description    string     `json:"description"`
-	Priority       string     `json:"priority"`
-	AssigneeID     *int64     `json:"assignee_id"`
-	DueDate        *time.Time `json:"due_date"`
-	StartDate      *time.Time `json:"start_date"`
-	EstimatedHours *float64   `json:"estimated_hours"`
-	Labels         []int64    `json:"labels"`
+	ProjectID      int64            `json:"project_id"`
+	WorkspaceID    WorkspaceIDField `json:"workspace_id"`
+	ParentTaskID   *int64           `json:"parent_task_id"`
+	Title          string           `json:"title"`
+	Description    string           `json:"description"`
+	Priority       string           `json:"priority"`
+	AssigneeID     *int64           `json:"assignee_id"`
+	DueDate        *time.Time       `json:"due_date"`
+	StartDate      *time.Time       `json:"start_date"`
+	EstimatedHours *float64         `json:"estimated_hours"`
+	Labels         []int64          `json:"labels"`
 }
 
 type CreateTaskResponse struct {
@@ -185,7 +197,7 @@ func (h *CreateTaskHandler) Validate(_ context.Context, req *CreateTaskRequest) 
 		return &errorModels.ServerError{Code: http.StatusBadRequest, Message: "Project ID is required"}
 	}
 
-	if req.WorkspaceID == 0 {
+	if req.WorkspaceID.IsEmpty() {
 		return &errorModels.ServerError{Code: http.StatusBadRequest, Message: "Workspace ID is required"}
 	}
 
@@ -202,9 +214,17 @@ func (h *CreateTaskHandler) Serve(ctx context.Context, req *CreateTaskRequest) (
 		return CreateTaskResponse{}, errorModels.PermissionDeniedServerError()
 	}
 
+	workspaceID, err := h.FlowService.ResolveWorkspaceID(ctx, authUser.UserID, req.WorkspaceID.String())
+	if err != nil || workspaceID == 0 {
+		return CreateTaskResponse{}, &errorModels.ServerError{
+			Code:    http.StatusBadRequest,
+			Message: "Invalid workspace_id",
+		}
+	}
+
 	input := domain.TaskInput{
 		ProjectID:      req.ProjectID,
-		WorkspaceID:    req.WorkspaceID,
+		WorkspaceID:    workspaceID,
 		OwnerID:        authUser.UserID,
 		ParentTaskID:   req.ParentTaskID,
 		Title:          req.Title,
@@ -218,8 +238,8 @@ func (h *CreateTaskHandler) Serve(ctx context.Context, req *CreateTaskRequest) (
 		Labels:         req.Labels,
 	}
 
-	task, err := h.FlowService.CreateTask(ctx, input)
-	if err != nil {
+	task, createErr := h.FlowService.CreateTask(ctx, input)
+	if createErr != nil {
 		return CreateTaskResponse{}, &errorModels.ServerError{
 			Code:    http.StatusInternalServerError,
 			Message: "Failed to create task",
@@ -580,8 +600,8 @@ type SearchTasksHandler struct {
 }
 
 type SearchTasksRequest struct {
-	Q           string `json:"q"`
-	WorkspaceID int64  `json:"workspace_id"`
+	Q           string           `json:"q"`
+	WorkspaceID WorkspaceIDField `json:"workspace_id"`
 }
 
 type SearchTasksResponse struct {
@@ -589,19 +609,27 @@ type SearchTasksResponse struct {
 }
 
 func (h *SearchTasksHandler) Validate(_ context.Context, req *SearchTasksRequest) *errorModels.ServerError {
-	if req.WorkspaceID == 0 {
+	if req.WorkspaceID.IsEmpty() {
 		return &errorModels.ServerError{Code: http.StatusBadRequest, Message: "workspace_id is required"}
 	}
 	return nil
 }
 
 func (h *SearchTasksHandler) Serve(ctx context.Context, req *SearchTasksRequest) (SearchTasksResponse, *errorModels.ServerError) {
-	_, ok := authPkg.GetAuthUser(ctx)
+	authUser, ok := authPkg.GetAuthUser(ctx)
 	if !ok {
 		return SearchTasksResponse{}, errorModels.PermissionDeniedServerError()
 	}
 
-	tasks, err := h.FlowService.SearchTasks(ctx, req.WorkspaceID, req.Q)
+	workspaceID, err := h.FlowService.ResolveWorkspaceID(ctx, authUser.UserID, req.WorkspaceID.String())
+	if err != nil || workspaceID == 0 {
+		return SearchTasksResponse{}, &errorModels.ServerError{
+			Code:    http.StatusBadRequest,
+			Message: "Invalid workspace_id",
+		}
+	}
+
+	tasks, err := h.FlowService.SearchTasks(ctx, workspaceID, req.Q)
 	if err != nil {
 		return SearchTasksResponse{}, &errorModels.ServerError{
 			Code:    http.StatusInternalServerError,
