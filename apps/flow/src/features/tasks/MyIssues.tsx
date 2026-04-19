@@ -8,8 +8,10 @@ import {
   CalendarDays,
   CalendarRange,
   Layers,
+  Plus,
 } from 'lucide-react';
 import { useMyIssues } from './useMyIssues';
+import { useCreateTask } from './useTasks';
 import { Task, STATUS_LABELS, PRIORITY_ORDER, useFlowStore } from '../../shared/stores/flowStore';
 import { apiTaskToTask } from '../../shared/lib/taskMapper';
 import TaskRow from '../../shared/components/TaskRow';
@@ -119,6 +121,8 @@ const MyIssues: React.FC = () => {
         </div>
       </div>
 
+      <QuickAddRow />
+
       <div className="flex-1 overflow-y-auto">
         {tasks.length === 0 ? (
           <EmptyState
@@ -179,6 +183,69 @@ const MyIssues: React.FC = () => {
           ))
         )}
       </div>
+    </div>
+  );
+};
+
+/**
+ * Inline row that lets the user type a task title, hit Enter, and see it
+ * appear in their list. The backend auto-resolves the caller's Inbox
+ * project inside their Personal workspace — no project picker needed.
+ *
+ * react-query invalidation on `['my-tasks']` pulls the new task into the
+ * list after the POST resolves.
+ */
+const QuickAddRow: React.FC = () => {
+  const [title, setTitle] = useState('');
+  const createTask = useCreateTask();
+
+  const submit = (): void => {
+    const trimmed = title.trim();
+    if (!trimmed) return;
+    // workspaceId + projectId intentionally omitted — the backend
+    // resolves "personal" workspace + the Inbox project automatically.
+    createTask.mutate(
+      {
+        workspaceId: '',
+        projectId: '',
+        title: trimmed,
+      },
+      {
+        onSuccess: () => setTitle(''),
+      }
+    );
+  };
+
+  return (
+    <div
+      className="flex items-center gap-2 px-6 py-2 shrink-0"
+      style={{ borderBottom: '1px solid var(--flow-border)' }}
+    >
+      <Plus size={12} style={{ color: 'var(--flow-text-dim)' }} />
+      <input
+        value={title}
+        onChange={(e) => setTitle(e.target.value)}
+        onKeyDown={(e) => {
+          if (e.key === 'Enter') {
+            e.preventDefault();
+            submit();
+          }
+        }}
+        placeholder="Add a task and press Enter — lands in your Inbox"
+        disabled={createTask.isPending}
+        className="flex-1 bg-transparent outline-none text-[13px] placeholder:opacity-50"
+        style={{ color: 'var(--flow-text)' }}
+      />
+      {title.trim().length > 0 && (
+        <button
+          onClick={submit}
+          disabled={createTask.isPending}
+          className="text-[11px] font-semibold px-2.5 py-1 rounded transition-opacity hover:opacity-90 disabled:opacity-50"
+          style={{ background: '#64C5B9', color: '#ffffff' }}
+        >
+          Add
+        </button>
+      )}
     </div>
   );
 };
