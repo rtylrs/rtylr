@@ -139,6 +139,7 @@ import (
 	"github.com/voxire/onion/internal/platform/logger"
 	"github.com/voxire/onion/internal/platform/server/http"
 	"github.com/voxire/onion/internal/platform/utils/jwtutils"
+	"github.com/voxire/onion/internal/platform/wsbus"
 )
 
 func main() {
@@ -508,8 +509,18 @@ func setupRoutes(ctx context.Context, r *chi.Mux) {
 	modules.HRLeave.RegisterScheduledJobs(ctx)
 	modules.HROvertime.RegisterScheduledJobs(ctx)
 	modules.HRPayroll.RegisterScheduledJobs(ctx)
+
+	// Start the websocket bus. Auth is intentionally permissive for the
+	// MVP — events only carry invalidation hints (topic + entity_id), not
+	// content. Tightening to workspace/project membership checks is a
+	// follow-up when we start publishing events that could leak existence.
+	wsbus.SetDefault(ctx, wsbus.New(func(_ context.Context, _ int64, _ string) bool {
+		return true
+	}))
+
 	accessPolicy := http.NewRouteAccessPolicy()
 	accessPolicy.RegisterAnonymousRoutes("/health")
+	accessPolicy.RegisterAnonymousRoutes("/flow/ws")
 
 	provisionerResolver := authPkg.NewStaticPlatformProvisionerResolver(
 		nil,

@@ -2,6 +2,7 @@ package handlers
 
 import (
 	"context"
+	"fmt"
 	"net/http"
 	"time"
 
@@ -11,7 +12,35 @@ import (
 	"github.com/voxire/onion/internal/modules/workspaces/internal/domain"
 	authPkg "github.com/voxire/onion/internal/platform/auth"
 	errorModels "github.com/voxire/onion/internal/platform/errors"
+	"github.com/voxire/onion/internal/platform/wsbus"
 )
+
+// publishTaskEvent fans out a task-level invalidation hint to every
+// client subscribed to the owning project. The payload is intentionally
+// minimal — the client refetches the canonical entity via REST, keeping
+// the wire format for realtime and HTTP in sync.
+func publishTaskEvent(eventType string, t *flowv1.Task, actorID int64) {
+	if t == nil {
+		return
+	}
+	publishTaskEventByProject(eventType, t.ProjectId, t.Id, actorID)
+}
+
+// publishTaskEventByProject is for the write paths that don't return the
+// full task (delete, status, move) — caller supplies project + task id.
+// We look up the project id first in the handler so this is a pure
+// notification call with no DB access.
+func publishTaskEventByProject(eventType string, projectID, taskID, actorID int64) {
+	if projectID == 0 {
+		return
+	}
+	wsbus.Publish(wsbus.Event{
+		Topic:    fmt.Sprintf("project:%d", projectID),
+		Type:     eventType,
+		EntityID: taskID,
+		ActorID:  actorID,
+	})
+}
 
 // ─────────────────────────────────────────────
 // Route declarations
@@ -256,7 +285,9 @@ func (h *CreateTaskHandler) Serve(ctx context.Context, req *CreateTaskRequest) (
 		}
 	}
 
-	return CreateTaskResponse{Task: toTaskPayload(task)}, nil
+	payload := toTaskPayload(task)
+	publishTaskEvent("task.created", payload, authUser.UserID)
+	return CreateTaskResponse{Task: payload}, nil
 }
 
 // ─────────────────────────────────────────────
@@ -385,6 +416,13 @@ func (h *UpdateTaskHandler) Serve(ctx context.Context, req *UpdateTaskRequest) (
 		}
 	}
 
+	// Broadcast to subscribers of the owning project. We refetch just to
+	// learn the project id — cheap, and avoids plumbing it through the
+	// service return signature.
+	if updated, fetchErr := h.FlowService.GetTaskDetail(ctx, input.ID); fetchErr == nil {
+		publishTaskEventByProject("task.updated", updated.Task.ProjectID, input.ID, authUser.UserID)
+	}
+
 	return UpdateTaskResponse{Message: "Task updated successfully"}, nil
 }
 
@@ -418,6 +456,13 @@ func (h *DeleteTaskHandler) Serve(ctx context.Context, req *DeleteTaskRequest) (
 		return DeleteTaskResponse{}, errorModels.PermissionDeniedServerError()
 	}
 
+	// Capture the project id BEFORE the row is deleted so the realtime
+	// event has a valid topic. If the fetch fails we skip the publish.
+	var projectID int64
+	if existing, fetchErr := h.FlowService.GetTaskDetail(ctx, req.ID.Int64()); fetchErr == nil {
+		projectID = existing.Task.ProjectID
+	}
+
 	if err := h.FlowService.DeleteTask(ctx, req.ID.Int64(), authUser.UserID); err != nil {
 		return DeleteTaskResponse{}, &errorModels.ServerError{
 			Code:    http.StatusInternalServerError,
@@ -425,6 +470,7 @@ func (h *DeleteTaskHandler) Serve(ctx context.Context, req *DeleteTaskRequest) (
 		}
 	}
 
+	publishTaskEventByProject("task.deleted", projectID, req.ID.Int64(), authUser.UserID)
 	return DeleteTaskResponse{Message: "Task deleted successfully"}, nil
 }
 
@@ -474,6 +520,15 @@ func (h *UpdateTaskStatusHandler) Serve(ctx context.Context, req *UpdateTaskStat
 			Code:    http.StatusInternalServerError,
 			Message: "Failed to update task status",
 		}
+	}
+
+	if updated, fetchErr := h.FlowService.GetTaskDetail(ctx, req.ID.Int64()); fetchErr == nil {
+		publishTaskEventByProject(
+			"task.status_changed",
+			updated.Task.ProjectID,
+			req.ID.Int64(),
+			authUser.UserID,
+		)
 	}
 
 	return UpdateTaskStatusResponse{Message: "Task status updated"}, nil
