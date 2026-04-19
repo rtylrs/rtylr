@@ -9,7 +9,12 @@ export function useNotifications() {
       const res = await unwrap(flowApi.getNotifications());
       return res.notifications ?? [];
     },
-    refetchInterval: 30_000, // poll every 30s
+    // Polling removed — the backend pushes `notification.*` events on
+    // the caller's `user:<id>` websocket topic; FlowLayout invalidates
+    // this query on receipt, so the list stays fresh without a 30s
+    // refetch cycle. Kept a long `staleTime` as a backstop — if the
+    // socket is down for a while, a tab refocus still re-fetches.
+    staleTime: 60_000,
   });
 }
 

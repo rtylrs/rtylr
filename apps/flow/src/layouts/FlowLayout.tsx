@@ -284,6 +284,11 @@ const FlowLayout: React.FC<FlowLayoutProps> = ({ children }) => {
         qc.invalidateQueries({ queryKey: ['workspaces'] });
         qc.invalidateQueries({ queryKey: ['workspace-members'] });
       }
+      if (e.type.startsWith('notification.')) {
+        // Refresh the inbox list + header badge. Pushed on the
+        // user:<id> topic so no project context needed.
+        qc.invalidateQueries({ queryKey: ['notifications'] });
+      }
     },
     [qc]
   );
