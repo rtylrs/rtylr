@@ -1457,3 +1457,71 @@ func (r *Repository) SetWorkspaceBusiness(ctx context.Context, workspaceID int64
 	}
 	return err
 }
+
+// ─────────────────────────────────────────────────────────────────────────────
+// Membership checks (used by realtime topic auth).
+// Kept cheap — a single indexed EXISTS query each; callers (the WS hub)
+// run them per subscribe, which is infrequent compared to per-event dispatch.
+// ─────────────────────────────────────────────────────────────────────────────
+
+// IsWorkspaceMember returns true when the user either owns the workspace
+// or has a row in flow_workspace_members.
+func (r *Repository) IsWorkspaceMember(ctx context.Context, userID, workspaceID int64) bool {
+	if userID == 0 || workspaceID == 0 {
+		return false
+	}
+	var exists int
+	err := r.pool.QueryRowContext(ctx, `
+		SELECT 1 FROM flow_workspaces WHERE id = ? AND owner_id = ?
+		UNION
+		SELECT 1 FROM flow_workspace_members WHERE workspace_id = ? AND user_id = ?
+		LIMIT 1`,
+		workspaceID, userID, workspaceID, userID,
+	).Scan(&exists)
+	if err != nil && !errors.Is(err, sql.ErrNoRows) {
+		logger.Ctx(ctx).Warn("IsWorkspaceMember check failed", logger.Error(err))
+	}
+	return exists == 1
+}
+
+// GetColumnProject returns the project id that owns the given column,
+// or 0 if the column is missing. Used by the realtime publish paths to
+// find the correct topic when the handler only has the column id
+// (update/delete).
+func (r *Repository) GetColumnProject(ctx context.Context, columnID int64) int64 {
+	var projectID int64
+	err := r.pool.QueryRowContext(ctx,
+		`SELECT project_id FROM flow_project_columns WHERE id = ? LIMIT 1`,
+		columnID,
+	).Scan(&projectID)
+	if err != nil && !errors.Is(err, sql.ErrNoRows) {
+		logger.Ctx(ctx).Warn("GetColumnProject failed", logger.Error(err))
+	}
+	return projectID
+}
+
+// IsProjectMember returns true when the user can access the project —
+// either because they're listed on flow_project_members or because they
+// belong to the project's workspace. This matches the read-access model
+// the REST endpoints enforce.
+func (r *Repository) IsProjectMember(ctx context.Context, userID, projectID int64) bool {
+	if userID == 0 || projectID == 0 {
+		return false
+	}
+	var exists int
+	err := r.pool.QueryRowContext(ctx, `
+		SELECT 1 FROM flow_project_members WHERE project_id = ? AND user_id = ?
+		UNION
+		SELECT 1
+		FROM flow_projects p
+		LEFT JOIN flow_workspace_members wm
+		  ON wm.workspace_id = p.workspace_id AND wm.user_id = ?
+		WHERE p.id = ? AND (p.owner_id = ? OR wm.user_id IS NOT NULL)
+		LIMIT 1`,
+		projectID, userID, userID, projectID, userID,
+	).Scan(&exists)
+	if err != nil && !errors.Is(err, sql.ErrNoRows) {
+		logger.Ctx(ctx).Warn("IsProjectMember check failed", logger.Error(err))
+	}
+	return exists == 1
+}

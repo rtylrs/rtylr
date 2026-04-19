@@ -19,6 +19,14 @@ func NewModule(ctx context.Context) *Module {
 	}
 }
 
+// Service exposes the module's application service for callers that need
+// to cross module boundaries — specifically the realtime hub authorizer,
+// which consults workspace/project membership to decide subscription
+// eligibility.
+func (m *Module) Service() *application.Service {
+	return m.service
+}
+
 func (m *Module) RegisterRoutes(ctx context.Context, router *chi.Mux, _ ...interface{}) {
 	routes.RegisterRoutes(ctx, router, m.service)
 	// Realtime WebSocket endpoint. Registered as a raw chi handler — the

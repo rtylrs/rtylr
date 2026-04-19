@@ -98,6 +98,20 @@ func (s *Service) ResolveWorkspaceID(ctx context.Context, userID int64, raw stri
 	return strconv.ParseInt(raw, 10, 64)
 }
 
+// IsWorkspaceMember reports whether userID is on the workspace's member
+// roster or owns it. Used by the realtime hub to authorize
+// `workspace:<id>` and `project:<id>` topic subscriptions.
+func (s *Service) IsWorkspaceMember(ctx context.Context, userID, workspaceID int64) bool {
+	return s.repo.IsWorkspaceMember(ctx, userID, workspaceID)
+}
+
+// IsProjectMember reports whether userID can access the project — either
+// because they're a project member, a workspace member of the project's
+// workspace, or its owner. Used for realtime topic auth.
+func (s *Service) IsProjectMember(ctx context.Context, userID, projectID int64) bool {
+	return s.repo.IsProjectMember(ctx, userID, projectID)
+}
+
 // ─────────────────────────────────────────────
 // Projects
 // ─────────────────────────────────────────────
@@ -661,6 +675,13 @@ func (s *Service) DeleteColumn(ctx context.Context, id int64) error {
 
 func (s *Service) MoveTaskToColumn(ctx context.Context, taskID, columnID int64) error {
 	return s.repo.MoveTaskToColumn(ctx, taskID, columnID)
+}
+
+// GetColumnProject returns the project id of the given column, or 0 if
+// the lookup fails. Used by the realtime publish path that needs a topic
+// without the caller supplying the project id.
+func (s *Service) GetColumnProject(ctx context.Context, columnID int64) int64 {
+	return s.repo.GetColumnProject(ctx, columnID)
 }
 
 func (s *Service) SeedDefaultColumns(ctx context.Context, projectID, workspaceID, createdBy int64) error {

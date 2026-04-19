@@ -510,12 +510,35 @@ func setupRoutes(ctx context.Context, r *chi.Mux) {
 	modules.HROvertime.RegisterScheduledJobs(ctx)
 	modules.HRPayroll.RegisterScheduledJobs(ctx)
 
-	// Start the websocket bus. Auth is intentionally permissive for the
-	// MVP — events only carry invalidation hints (topic + entity_id), not
-	// content. Tightening to workspace/project membership checks is a
-	// follow-up when we start publishing events that could leak existence.
-	wsbus.SetDefault(ctx, wsbus.New(func(_ context.Context, _ int64, _ string) bool {
-		return true
+	// Start the websocket bus with topic-level authorization backed by
+	// workspace/project membership checks. The rules:
+	//
+	//   user:<id>        → caller must be that user
+	//   workspace:<id>   → caller must belong to the workspace
+	//   project:<id>     → caller must be a project or workspace member
+	//   task:<id>        → (MVP) allowed; tightening requires a task→
+	//                      project lookup on every subscribe, which we
+	//                      skip until task-detail subscriptions land
+	//
+	// Unknown topic schemes are denied by default.
+	workspacesSvc := modules.Workspaces.Service()
+	wsbus.SetDefault(ctx, wsbus.New(func(ctx context.Context, userID int64, topic string) bool {
+		scope, id, ok := wsbus.ParseTopic(topic)
+		if !ok {
+			return false
+		}
+		switch scope {
+		case "user":
+			return id == userID
+		case "workspace":
+			return workspacesSvc.IsWorkspaceMember(ctx, userID, id)
+		case "project":
+			return workspacesSvc.IsProjectMember(ctx, userID, id)
+		case "task":
+			return true
+		default:
+			return false
+		}
 	}))
 
 	accessPolicy := http.NewRouteAccessPolicy()

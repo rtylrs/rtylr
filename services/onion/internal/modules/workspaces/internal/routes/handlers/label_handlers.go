@@ -52,11 +52,10 @@ type ListLabelsResponse struct {
 	Labels []*flowv1.Label `json:"labels"`
 }
 
-func (h *ListLabelsHandler) Validate(_ context.Context, req *ListLabelsRequest) *errorModels.ServerError {
-	if req.WorkspaceID.IsEmpty() {
-		return &errorModels.ServerError{Code: http.StatusBadRequest, Message: "workspace_id is required"}
-	}
-
+func (h *ListLabelsHandler) Validate(_ context.Context, _ *ListLabelsRequest) *errorModels.ServerError {
+	// Missing workspace_id is OK — we fall back to the caller's personal
+	// workspace below. This matches the ergonomic the frontend already
+	// assumed via the deprecated `getLabels()` barrel method.
 	return nil
 }
 
@@ -66,7 +65,13 @@ func (h *ListLabelsHandler) Serve(ctx context.Context, req *ListLabelsRequest) (
 		return ListLabelsResponse{}, errorModels.PermissionDeniedServerError()
 	}
 
-	workspaceID, err := h.FlowService.ResolveWorkspaceID(ctx, authUser.UserID, req.WorkspaceID.String())
+	// Empty or "personal" → the caller's personal workspace. Explicit
+	// numeric → use it. Anything else is a bad request.
+	raw := req.WorkspaceID.String()
+	if raw == "" {
+		raw = "personal"
+	}
+	workspaceID, err := h.FlowService.ResolveWorkspaceID(ctx, authUser.UserID, raw)
 	if err != nil || workspaceID == 0 {
 		return ListLabelsResponse{}, &errorModels.ServerError{
 			Code:    http.StatusBadRequest,

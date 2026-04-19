@@ -2,13 +2,30 @@ package handlers
 
 import (
 	"context"
+	"fmt"
 	"net/http"
 
 	"github.com/voxire/onion/internal/modules/workspaces/internal/application"
 	"github.com/voxire/onion/internal/modules/workspaces/internal/domain"
 	authPkg "github.com/voxire/onion/internal/platform/auth"
 	errorModels "github.com/voxire/onion/internal/platform/errors"
+	"github.com/voxire/onion/internal/platform/wsbus"
 )
+
+// publishColumnEvent fans a column change to the owning project's topic.
+// Consumers (the kanban board) invalidate `['columns', projectId]` and
+// redraw. Pure notification — no entity data on the wire.
+func publishColumnEvent(eventType string, projectID, columnID, actorID int64) {
+	if projectID == 0 {
+		return
+	}
+	wsbus.Publish(wsbus.Event{
+		Topic:    fmt.Sprintf("project:%d", projectID),
+		Type:     eventType,
+		EntityID: columnID,
+		ActorID:  actorID,
+	})
+}
 
 // ─────────────────────────────────────────────
 // Shared payload
@@ -125,6 +142,7 @@ func (h *CreateColumnHandler) Serve(ctx context.Context, req *CreateColumnReques
 	if err != nil {
 		return CreateColumnResponse{}, &errorModels.ServerError{Code: http.StatusInternalServerError, Message: "Failed to create column"}
 	}
+	publishColumnEvent("column.created", col.ProjectID, col.ID, authUser.UserID)
 	return CreateColumnResponse{Column: toColumnPayload(col)}, nil
 }
 
@@ -158,7 +176,7 @@ func (h *UpdateColumnHandler) Validate(_ context.Context, req *UpdateColumnReque
 }
 
 func (h *UpdateColumnHandler) Serve(ctx context.Context, req *UpdateColumnRequest) (UpdateColumnResponse, *errorModels.ServerError) {
-	_, ok := authPkg.GetAuthUser(ctx)
+	authUser, ok := authPkg.GetAuthUser(ctx)
 	if !ok {
 		return UpdateColumnResponse{}, errorModels.PermissionDeniedServerError()
 	}
@@ -172,6 +190,12 @@ func (h *UpdateColumnHandler) Serve(ctx context.Context, req *UpdateColumnReques
 	if err != nil {
 		return UpdateColumnResponse{}, &errorModels.ServerError{Code: http.StatusInternalServerError, Message: "Failed to update column"}
 	}
+	publishColumnEvent(
+		"column.updated",
+		h.FlowService.GetColumnProject(ctx, req.ID.Int64()),
+		req.ID.Int64(),
+		authUser.UserID,
+	)
 	return UpdateColumnResponse{Message: "Column updated"}, nil
 }
 

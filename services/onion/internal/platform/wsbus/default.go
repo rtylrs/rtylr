@@ -42,3 +42,29 @@ func Publish(e Event) {
 	}
 	h.Publish(e)
 }
+
+// ParseTopic splits a "<scope>:<id>" topic into its parts. Returns
+// (scope, id, true) when the shape matches and id parses as int64;
+// (_, _, false) otherwise. Callers use this to dispatch authorization
+// rules by scope without repeating the parse logic.
+func ParseTopic(topic string) (string, int64, bool) {
+	colon := -1
+	for i := 0; i < len(topic); i++ {
+		if topic[i] == ':' {
+			colon = i
+			break
+		}
+	}
+	if colon <= 0 || colon == len(topic)-1 {
+		return "", 0, false
+	}
+	var id int64
+	for i := colon + 1; i < len(topic); i++ {
+		c := topic[i]
+		if c < '0' || c > '9' {
+			return "", 0, false
+		}
+		id = id*10 + int64(c-'0')
+	}
+	return topic[:colon], id, true
+}
