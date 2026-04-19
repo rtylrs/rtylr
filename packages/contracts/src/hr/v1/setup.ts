@@ -34,10 +34,6 @@ export interface HRCompanyConfigPayload {
   payrollPeriod: string;
   /** How gross pay is calculated (hourly | salary | both). */
   payrollGrossModel: string;
-  /** Enabled clock-in methods (app | qr | gps | pin | facial); absent if not yet configured. */
-  clockInMethods?: string[] | undefined;
-  /** App IDs the company is subscribed to (hub | erp | hr | crm | finance | flow); absent if not loaded. */
-  subscribedApps?: string[] | undefined;
   /** Unix timestamp when the full setup wizard was completed; absent if still in progress. */
   setupCompletedAt?: number | undefined;
   /** Unix timestamp when this config was created. */
