@@ -42,6 +42,13 @@ message HRCompanyConfigPayload {
   int64 created_at = 8;
   // Unix timestamp when this config was last updated.
   int64 updated_at = 9;
+  // Enabled clock-in methods for attendance tracking
+  // (values: "app", "pin", "gps", "kiosk"). Empty defaults to ["app"].
+  repeated string clock_in_methods = 10;
+  // App IDs this tenant is subscribed to (values: "flow", "finance",
+  // "erp", "crm", "pos", "hr"). Drives cross-app UI affordances such as
+  // the "Import from Flow" button on HR timesheets.
+  repeated string subscribed_apps = 11;
 }
 
 // ── Get Setup Status ───────────────────────────────────────────────

@@ -130,9 +130,16 @@ type HRCompanyConfigPayload struct {
 	// Unix timestamp when this config was created.
 	CreatedAt int64 `protobuf:"varint,8,opt,name=created_at,json=createdAt,proto3" json:"created_at,omitempty"`
 	// Unix timestamp when this config was last updated.
-	UpdatedAt     int64 `protobuf:"varint,9,opt,name=updated_at,json=updatedAt,proto3" json:"updated_at,omitempty"`
-	unknownFields protoimpl.UnknownFields
-	sizeCache     protoimpl.SizeCache
+	UpdatedAt int64 `protobuf:"varint,9,opt,name=updated_at,json=updatedAt,proto3" json:"updated_at,omitempty"`
+	// Enabled clock-in methods for attendance tracking
+	// (values: "app", "pin", "gps", "kiosk"). Empty defaults to ["app"].
+	ClockInMethods []string `protobuf:"bytes,10,rep,name=clock_in_methods,json=clockInMethods,proto3" json:"clock_in_methods,omitempty"`
+	// App IDs this tenant is subscribed to (values: "flow", "finance",
+	// "erp", "crm", "pos", "hr"). Drives cross-app UI affordances such as
+	// the "Import from Flow" button on HR timesheets.
+	SubscribedApps []string `protobuf:"bytes,11,rep,name=subscribed_apps,json=subscribedApps,proto3" json:"subscribed_apps,omitempty"`
+	unknownFields  protoimpl.UnknownFields
+	sizeCache      protoimpl.SizeCache
 }
 
 func (x *HRCompanyConfigPayload) Reset() {
@@ -226,6 +233,20 @@ func (x *HRCompanyConfigPayload) GetUpdatedAt() int64 {
 		return x.UpdatedAt
 	}
 	return 0
+}
+
+func (x *HRCompanyConfigPayload) GetClockInMethods() []string {
+	if x != nil {
+		return x.ClockInMethods
+	}
+	return nil
+}
+
+func (x *HRCompanyConfigPayload) GetSubscribedApps() []string {
+	if x != nil {
+		return x.SubscribedApps
+	}
+	return nil
 }
 
 type GetSetupStatusResponse struct {
@@ -395,7 +416,7 @@ const file_hr_v1_setup_proto_rawDesc = "" +
 	"created_at\x18\x05 \x01(\x03R\tcreatedAt\x12\x1d\n" +
 	"\n" +
 	"updated_at\x18\x06 \x01(\x03R\tupdatedAtB\x0f\n" +
-	"\r_completed_at\"\xfd\x02\n" +
+	"\r_completed_at\"\xd0\x03\n" +
 	"\x16HRCompanyConfigPayload\x12\x0e\n" +
 	"\x02id\x18\x01 \x01(\x03R\x02id\x12\x19\n" +
 	"\bowner_id\x18\x02 \x01(\x03R\aownerId\x12.\n" +
@@ -407,7 +428,10 @@ const file_hr_v1_setup_proto_rawDesc = "" +
 	"\n" +
 	"created_at\x18\b \x01(\x03R\tcreatedAt\x12\x1d\n" +
 	"\n" +
-	"updated_at\x18\t \x01(\x03R\tupdatedAtB\x15\n" +
+	"updated_at\x18\t \x01(\x03R\tupdatedAt\x12(\n" +
+	"\x10clock_in_methods\x18\n" +
+	" \x03(\tR\x0eclockInMethods\x12'\n" +
+	"\x0fsubscribed_apps\x18\v \x03(\tR\x0esubscribedAppsB\x15\n" +
 	"\x13_setup_completed_at\"\xa5\x01\n" +
 	"\x16GetSetupStatusResponse\x123\n" +
 	"\x05steps\x18\x01 \x03(\v2\x1d.hr.v1.SetupWizardStepPayloadR\x05steps\x125\n" +
