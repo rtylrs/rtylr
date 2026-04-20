@@ -27,6 +27,9 @@ const DemoPage = (): JSX.Element => {
 
   const [errors, setErrors] = useState<Partial<FormData>>({});
   const [isSubmitting, setIsSubmitting] = useState(false);
+  // Rendered as an inline success block instead of alert() so the
+  // form doesn't yank the user's attention with a native dialog.
+  const [submitted, setSubmitted] = useState(false);
 
   // Generate country options from i18n-iso-countries
   const countryOptions = useMemo(() => {
@@ -105,10 +108,12 @@ const DemoPage = (): JSX.Element => {
 
     setIsSubmitting(true);
 
-    // Simulate API call
+    // TODO: wire to the real demo-request endpoint. For now we
+    // optimistically show the success state after a short delay so
+    // the form isn't a dead button in staging / first-run dev. No
+    // console.log — that would leak the PII fields candidates type.
     setTimeout(() => {
-      console.log('Form submitted:', formData);
-      alert('Thank you! We will contact you shortly to schedule your demo.');
+      setSubmitted(true);
       setIsSubmitting(false);
       // Reset form
       setFormData({
@@ -131,81 +136,98 @@ const DemoPage = (): JSX.Element => {
         <div className={styles.demoPage}>
           <div className={styles.container}>
             <div className={styles.formWrapper}>
-              <h1 className={styles.title}>See rtylr on your data.</h1>
-              <p className={styles.subtitle}>
-                A 30-minute walkthrough with someone who actually built it. Bring your menu, your
-                SKU list, your PDF of invoices, we&apos;ll show you what the switch would look like.
-              </p>
+              {submitted ? (
+                // Inline success state — nicer than a native alert().
+                // Keeps the page branded and tells the user the exact
+                // next step so they're not left wondering.
+                <>
+                  <h1 className={styles.title}>Request received.</h1>
+                  <p className={styles.subtitle}>
+                    Someone from the rtylr team will reach out within one business day to schedule
+                    the walkthrough. Check your inbox (and spam, occasionally) for an email from{' '}
+                    <strong>demo@voxire.com</strong>.
+                  </p>
+                </>
+              ) : (
+                <>
+                  <h1 className={styles.title}>See rtylr on your data.</h1>
+                  <p className={styles.subtitle}>
+                    A 30-minute walkthrough with someone who actually built it. Bring your menu,
+                    your SKU list, your PDF of invoices, we&apos;ll show you what the switch would
+                    look like.
+                  </p>
 
-              <form onSubmit={handleSubmit} className={styles.form}>
-                <div className={styles.formGroup}>
-                  <Input
-                    type="email"
-                    label="WORK EMAIL"
-                    placeholder="Your work email"
-                    value={formData.email}
-                    onChange={(e) => setFormData({ ...formData, email: e.target.value })}
-                    error={!!errors.email}
-                    helperText={errors.email}
-                    required
-                    className={styles.input}
-                  />
-                </div>
+                  <form onSubmit={handleSubmit} className={styles.form}>
+                    <div className={styles.formGroup}>
+                      <Input
+                        type="email"
+                        label="WORK EMAIL"
+                        placeholder="Your work email"
+                        value={formData.email}
+                        onChange={(e) => setFormData({ ...formData, email: e.target.value })}
+                        error={!!errors.email}
+                        helperText={errors.email}
+                        required
+                        className={styles.input}
+                      />
+                    </div>
 
-                <div className={styles.formGroup}>
-                  <Select
-                    label="WHERE ARE YOU LOCATED?"
-                    placeholder="Select your country"
-                    options={countryOptions}
-                    value={formData.country}
-                    onChange={(value) => setFormData({ ...formData, country: value })}
-                    error={!!errors.country}
-                    helperText={errors.country}
-                    required
-                    className={styles.select}
-                  />
-                </div>
+                    <div className={styles.formGroup}>
+                      <Select
+                        label="WHERE ARE YOU LOCATED?"
+                        placeholder="Select your country"
+                        options={countryOptions}
+                        value={formData.country}
+                        onChange={(value) => setFormData({ ...formData, country: value })}
+                        error={!!errors.country}
+                        helperText={errors.country}
+                        required
+                        className={styles.select}
+                      />
+                    </div>
 
-                <div className={styles.formGroup}>
-                  <Select
-                    label="REASON FOR DEMO"
-                    placeholder="Select reason"
-                    options={reasonOptions}
-                    value={formData.reason}
-                    onChange={(value) => setFormData({ ...formData, reason: value })}
-                    error={!!errors.reason}
-                    helperText={errors.reason}
-                    required
-                    className={styles.select}
-                  />
-                </div>
+                    <div className={styles.formGroup}>
+                      <Select
+                        label="REASON FOR DEMO"
+                        placeholder="Select reason"
+                        options={reasonOptions}
+                        value={formData.reason}
+                        onChange={(value) => setFormData({ ...formData, reason: value })}
+                        error={!!errors.reason}
+                        helperText={errors.reason}
+                        required
+                        className={styles.select}
+                      />
+                    </div>
 
-                <div className={styles.formGroup}>
-                  <Select
-                    label="HOW MANY EMPLOYEES WORK AT YOUR COMPANY?"
-                    placeholder="Select company size"
-                    options={companySizeOptions}
-                    value={formData.companySize}
-                    onChange={(value) => setFormData({ ...formData, companySize: value })}
-                    error={!!errors.companySize}
-                    helperText={errors.companySize}
-                    required
-                    className={styles.select}
-                  />
-                </div>
+                    <div className={styles.formGroup}>
+                      <Select
+                        label="HOW MANY EMPLOYEES WORK AT YOUR COMPANY?"
+                        placeholder="Select company size"
+                        options={companySizeOptions}
+                        value={formData.companySize}
+                        onChange={(value) => setFormData({ ...formData, companySize: value })}
+                        error={!!errors.companySize}
+                        helperText={errors.companySize}
+                        required
+                        className={styles.select}
+                      />
+                    </div>
 
-                <p className={styles.privacyText}>
-                  By submitting this form, you agree to our{' '}
-                  <a href="/legal/privacy-policy" target="_blank" rel="noopener noreferrer">
-                    privacy policy
-                  </a>{' '}
-                  and consent to receiving marketing communications from Rtylr.
-                </p>
+                    <p className={styles.privacyText}>
+                      By submitting this form, you agree to our{' '}
+                      <a href="/legal/privacy-policy" target="_blank" rel="noopener noreferrer">
+                        privacy policy
+                      </a>{' '}
+                      and consent to receiving marketing communications from Rtylr.
+                    </p>
 
-                <Button type="submit" variant="soft" disabled={isSubmitting}>
-                  {isSubmitting ? 'SUBMITTING...' : 'BOOK A DEMO'}
-                </Button>
-              </form>
+                    <Button type="submit" variant="soft" disabled={isSubmitting}>
+                      {isSubmitting ? 'SUBMITTING...' : 'BOOK A DEMO'}
+                    </Button>
+                  </form>
+                </>
+              )}
             </div>
           </div>
         </div>

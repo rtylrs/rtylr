@@ -158,3 +158,60 @@ function faqPageSchemaRaw(faqs: FAQEntry[]): Record<string, unknown> {
     })),
   };
 }
+
+/**
+ * pricingPageSchema bundles the product + an AggregateOffer
+ * (listing each tier) + the visible FAQ into a single @graph.
+ * Google's rich-results crawler uses AggregateOffer to render
+ * price ranges in the SERP, and the FAQ feeds AI Overview snippets.
+ *
+ * Prices arrive as strings in the plan's currency so we can express
+ * "0" (Free) and "Custom" (Enterprise) through the same shape without
+ * forcing callers to branch.
+ */
+interface PricingTier {
+  name: string;
+  price: string;
+  priceCurrency?: string;
+  description: string;
+  url?: string;
+}
+
+export function pricingPageSchema(opts: {
+  tiers: PricingTier[];
+  faqs: FAQEntry[];
+}): Record<string, unknown> {
+  const numericPrices = opts.tiers.map((t) => Number(t.price)).filter((n) => Number.isFinite(n));
+  const high = numericPrices.length > 0 ? Math.max(...numericPrices) : 0;
+
+  return {
+    '@context': 'https://schema.org',
+    '@graph': [
+      {
+        '@type': 'Product',
+        name: 'rtylr',
+        description: 'All-in-one business operating system',
+        brand: { '@type': 'Brand', name: 'rtylr' },
+        offers: {
+          '@type': 'AggregateOffer',
+          priceCurrency: 'USD',
+          lowPrice: '0',
+          highPrice: String(high),
+          offerCount: String(opts.tiers.length),
+          offers: opts.tiers.map((t) => {
+            const num = Number(t.price);
+            return {
+              '@type': 'Offer',
+              name: t.name,
+              description: t.description,
+              price: Number.isFinite(num) ? String(num) : t.price,
+              priceCurrency: t.priceCurrency ?? 'USD',
+              ...(t.url ? { url: t.url } : {}),
+            };
+          }),
+        },
+      },
+      faqPageSchemaRaw(opts.faqs),
+    ],
+  };
+}

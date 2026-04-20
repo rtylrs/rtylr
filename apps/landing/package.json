@@ -4,8 +4,11 @@
   "private": true,
   "scripts": {
     "dev": "next dev --port 4200",
-    "build": "next build",
+    "build": "next build && next-sitemap --config next-sitemap.config.js",
     "start": "next start",
     "typecheck": "tsc --noEmit"
+  },
+  "devDependencies": {
+    "next-sitemap": "^4.2.3"
   }
 }

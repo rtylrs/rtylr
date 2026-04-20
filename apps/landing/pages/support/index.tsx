@@ -18,8 +18,6 @@ import {
 import AppLayout from '../../components/Layout/AppLayout';
 import MainLayout from '../../layouts/Main/MainLayout';
 import HelmetContainer from '../../components/HelmetContainer';
-import { faqPageSchema } from '../../lib/structured-data';
-import { GLOBAL_FAQS } from '../../lib/faqs';
 import { blurFadeIn, staggerBlur, viewportOnce } from '../../lib/animations';
 import styles from './support.module.scss';
 
@@ -150,7 +148,6 @@ const SupportPage = (): JSX.Element => {
           title="Help Center | rtylr"
           description="Getting started, billing, team, configuration, integrations, security, everything you need to use rtylr."
           canonical="https://rtylr.com/support/"
-          structuredData={faqPageSchema(GLOBAL_FAQS)}
         />
 
         <div className={styles.page}>

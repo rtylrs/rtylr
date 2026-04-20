@@ -2,15 +2,19 @@ import React from 'react';
 import AppLayout from '../components/Layout/AppLayout';
 import MainLayout from '../layouts/Main/MainLayout';
 import HelmetContainer from '../components/HelmetContainer';
-import HeroSection from './home/HeroSection/HeroSection';
-import ProductsSection from './home/ProductsSection/ProductsSection';
-import ParallaxShowcase from './home/ParallaxShowcase/ParallaxShowcase';
-import FeaturesSection from './home/FeaturesSection/FeaturesSection';
-import HowItWorksSection from './home/HowItWorksSection/HowItWorksSection';
-import PricingSection from './home/PricingSection/PricingSection';
-import TestimonialsSection from './home/TestimonialsSection/TestimonialsSection';
-import IntegrationsSection from './home/IntegrationsSection/IntegrationsSection';
-import CTASection from './home/CTASection/CTASection';
+// Section components live under components/home/ (not pages/home/) so
+// Next.js's file-system router doesn't generate a route for every
+// subfolder — that was dumping /home/HeroSection/... routes into the
+// sitemap and exposing thin-content duplicates of the homepage.
+import HeroSection from '../components/home/HeroSection/HeroSection';
+import ProductsSection from '../components/home/ProductsSection/ProductsSection';
+import ParallaxShowcase from '../components/home/ParallaxShowcase/ParallaxShowcase';
+import FeaturesSection from '../components/home/FeaturesSection/FeaturesSection';
+import HowItWorksSection from '../components/home/HowItWorksSection/HowItWorksSection';
+import PricingSection from '../components/home/PricingSection/PricingSection';
+import TestimonialsSection from '../components/home/TestimonialsSection/TestimonialsSection';
+import IntegrationsSection from '../components/home/IntegrationsSection/IntegrationsSection';
+import CTASection from '../components/home/CTASection/CTASection';
 import styles from './index.module.scss';
 
 const HomePage = (): JSX.Element => {

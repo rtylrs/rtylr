@@ -378,7 +378,7 @@ importers:
         version: 19.2.3(@types/react@19.2.14)
       '@vitejs/plugin-react':
         specifier: ^4.2.0
-        version: 4.7.0(vite@7.3.2(@types/node@20.19.39)(jiti@1.21.7)(sass@1.99.0))
+        version: 4.7.0(vite@7.3.2(@types/node@20.19.39)(jiti@2.4.2)(sass@1.99.0))
       autoprefixer:
         specifier: ^10.4.19
         version: 10.4.27(postcss@8.4.49)
@@ -393,10 +393,10 @@ importers:
         version: 5.5.4
       vite:
         specifier: ^7.2.2
-        version: 7.3.2(@types/node@20.19.39)(jiti@1.21.7)(sass@1.99.0)
+        version: 7.3.2(@types/node@20.19.39)(jiti@2.4.2)(sass@1.99.0)
       vite-plugin-svgr:
         specifier: ^4.2.0
-        version: 4.5.0(rollup@4.60.1)(typescript@5.5.4)(vite@7.3.2(@types/node@20.19.39)(jiti@1.21.7)(sass@1.99.0))
+        version: 4.5.0(rollup@4.60.1)(typescript@5.5.4)(vite@7.3.2(@types/node@20.19.39)(jiti@2.4.2)(sass@1.99.0))
 
   apps/dash:
     dependencies:
@@ -1245,7 +1245,11 @@ importers:
         specifier: ^4.2.0
         version: 4.5.0(rollup@4.60.1)(typescript@5.5.4)(vite@7.3.2(@types/node@20.19.39)(jiti@2.4.2)(sass@1.99.0))
 
-  apps/landing: {}
+  apps/landing:
+    devDependencies:
+      next-sitemap:
+        specifier: ^4.2.3
+        version: 4.2.3(next@15.5.6(@babel/core@7.29.0)(@playwright/test@1.59.1)(react-dom@19.2.0(react@19.2.0))(react@19.2.0)(sass@1.99.0))
 
   apps/menu:
     dependencies:
@@ -1879,6 +1883,9 @@ packages:
 
   '@bufbuild/protoplugin@2.11.0':
     resolution: {integrity: sha512-lyZVNFUHArIOt4W0+dwYBe5GBwbKzbOy8ObaloEqsw9Mmiwv2O48TwddDoHN4itylC+BaEGqFdI1W8WQt2vWJQ==}
+
+  '@corex/deepmerge@4.0.43':
+    resolution: {integrity: sha512-N8uEMrMPL0cu/bdboEWpQYb/0i2K5Qn8eCsxzOmxSggJbbQte7ljMRoXm917AbntqTGOzdTu+vP3KOOzoC70HQ==}
 
   '@dnd-kit/accessibility@3.1.1':
     resolution: {integrity: sha512-2P+YgaXF+gRsIihwwY1gCsQSYnu9Zyj2py8kY5fFvUM1qm2WA2u639R6YNVfU4GWr+ZM5mqEsfHZZLoRONbemw==}
@@ -2738,6 +2745,9 @@ packages:
     engines: {node: '>=14.0.0'}
     peerDependencies:
       react: ^17.0.0 || ^18.0.0 || ^19.0.0
+
+  '@next/env@13.5.11':
+    resolution: {integrity: sha512-fbb2C7HChgM7CemdCY+y3N1n8pcTKdqtQLbC7/EQtPdLvlMUT9JX/dBYl8MMZAtYG4uVMyPFHXckb68q/NRwqg==}
 
   '@next/env@15.5.6':
     resolution: {integrity: sha512-3qBGRW+sCGzgbpc5TS1a0p7eNxnOarGVQhZxfvTdnV0gFI61lX7QNtQ4V1TSREctXzYn5NetbUsLvyqwLFJM6Q==}
@@ -5829,6 +5839,13 @@ packages:
     resolution: {integrity: sha512-kOCT/1MCPAxY5iUV3wytNFUMUolzuwd/VF/1KCx7kf6CutrOsTie+84zTGTpgQycjvfLdBBdvBvFLqFD2c0wkQ==}
     engines: {node: '>=18'}
 
+  next-sitemap@4.2.3:
+    resolution: {integrity: sha512-vjdCxeDuWDzldhCnyFCQipw5bfpl4HmZA7uoo3GAaYGjGgfL4Cxb1CiztPuWGmS+auYs7/8OekRS8C2cjdAsjQ==}
+    engines: {node: '>=14.18'}
+    hasBin: true
+    peerDependencies:
+      next: '*'
+
   next@15.5.6:
     resolution: {integrity: sha512-zTxsnI3LQo3c9HSdSf91O1jMNsEzIXDShXd4wVdg9y5shwLqBXi4ZtUUJyB86KGVSJLZx0PFONvO54aheGX8QQ==}
     engines: {node: ^18.18.0 || ^19.8.0 || >= 20.0.0}
@@ -7469,6 +7486,8 @@ snapshots:
     transitivePeerDependencies:
       - supports-color
 
+  '@corex/deepmerge@4.0.43': {}
+
   '@dnd-kit/accessibility@3.1.1(react@19.2.0)':
     dependencies:
       react: 19.2.0
@@ -8472,6 +8491,8 @@ snapshots:
       use-sync-external-store: 1.6.0(react@19.2.0)
     transitivePeerDependencies:
       - '@types/react'
+
+  '@next/env@13.5.11': {}
 
   '@next/env@15.5.6': {}
 
@@ -10164,18 +10185,6 @@ snapshots:
     dependencies:
       debug: 4.4.3
       typescript: 5.4.5
-    transitivePeerDependencies:
-      - supports-color
-
-  '@vitejs/plugin-react@4.7.0(vite@7.3.2(@types/node@20.19.39)(jiti@1.21.7)(sass@1.99.0))':
-    dependencies:
-      '@babel/core': 7.29.0
-      '@babel/plugin-transform-react-jsx-self': 7.27.1(@babel/core@7.29.0)
-      '@babel/plugin-transform-react-jsx-source': 7.27.1(@babel/core@7.29.0)
-      '@rolldown/pluginutils': 1.0.0-beta.27
-      '@types/babel__core': 7.20.5
-      react-refresh: 0.17.0
-      vite: 7.3.2(@types/node@20.19.39)(jiti@1.21.7)(sass@1.99.0)
     transitivePeerDependencies:
       - supports-color
 
@@ -12130,6 +12139,14 @@ snapshots:
     optionalDependencies:
       '@rollup/rollup-linux-x64-gnu': 4.60.1
 
+  next-sitemap@4.2.3(next@15.5.6(@babel/core@7.29.0)(@playwright/test@1.59.1)(react-dom@19.2.0(react@19.2.0))(react@19.2.0)(sass@1.99.0)):
+    dependencies:
+      '@corex/deepmerge': 4.0.43
+      '@next/env': 13.5.11
+      fast-glob: 3.3.3
+      minimist: 1.2.8
+      next: 15.5.6(@babel/core@7.29.0)(@playwright/test@1.59.1)(react-dom@19.2.0(react@19.2.0))(react@19.2.0)(sass@1.99.0)
+
   next@15.5.6(@babel/core@7.29.0)(@playwright/test@1.59.1)(react-dom@19.2.0(react@19.2.0))(react@19.2.0)(sass@1.99.0):
     dependencies:
       '@next/env': 15.5.6
@@ -13589,17 +13606,6 @@ snapshots:
       - tsx
       - yaml
 
-  vite-plugin-svgr@4.5.0(rollup@4.60.1)(typescript@5.5.4)(vite@7.3.2(@types/node@20.19.39)(jiti@1.21.7)(sass@1.99.0)):
-    dependencies:
-      '@rollup/pluginutils': 5.3.0(rollup@4.60.1)
-      '@svgr/core': 8.1.0(typescript@5.5.4)
-      '@svgr/plugin-jsx': 8.1.0(@svgr/core@8.1.0(typescript@5.9.3))
-      vite: 7.3.2(@types/node@20.19.39)(jiti@1.21.7)(sass@1.99.0)
-    transitivePeerDependencies:
-      - rollup
-      - supports-color
-      - typescript
-
   vite-plugin-svgr@4.5.0(rollup@4.60.1)(typescript@5.5.4)(vite@7.3.2(@types/node@20.19.39)(jiti@2.4.2)(sass@1.99.0)):
     dependencies:
       '@rollup/pluginutils': 5.3.0(rollup@4.60.1)
@@ -13632,20 +13638,6 @@ snapshots:
     transitivePeerDependencies:
       - supports-color
       - typescript
-
-  vite@7.3.2(@types/node@20.19.39)(jiti@1.21.7)(sass@1.99.0):
-    dependencies:
-      esbuild: 0.27.7
-      fdir: 6.5.0(picomatch@4.0.4)
-      picomatch: 4.0.4
-      postcss: 8.4.49
-      rollup: 4.60.1
-      tinyglobby: 0.2.16
-    optionalDependencies:
-      '@types/node': 20.19.39
-      fsevents: 2.3.3
-      jiti: 1.21.7
-      sass: 1.99.0
 
   vite@7.3.2(@types/node@20.19.39)(jiti@2.4.2)(sass@1.99.0):
     dependencies:
