@@ -63,3 +63,71 @@ export function useSubmitApplication() {
       unwrap(safe.post<SubmitApplicationResponse>('/recruit/public/apply', body)),
   });
 }
+
+// Upload flow: ask the backend for a presigned R2 URL, PUT the file
+// directly to R2, then submit the application with the returned key.
+// We intentionally expose this as a plain helper (not a useMutation)
+// because the PUT step talks to Cloudflare, not our backend — the
+// axios client's base URL and auth-cookie logic shouldn't apply.
+
+interface ResumeUploadURLBody {
+  slug: string;
+  careerSlug: string;
+  fileName: string;
+  contentType: string;
+}
+
+export interface ResumeUploadURLResponse {
+  uploadUrl: string;
+  key: string;
+  expiresAt: string;
+  maxBytes: number;
+}
+
+async function requestUploadURL(body: ResumeUploadURLBody): Promise<ResumeUploadURLResponse> {
+  return unwrap(safe.post<ResumeUploadURLResponse>('/recruit/public/resume-upload-url', body));
+}
+
+/**
+ * uploadResume asks the backend for a presigned URL, uploads the file
+ * to R2, and returns the R2 object key on success. Any step that
+ * errors bubbles up with a readable message so the form can render it
+ * inline. We deliberately don't do chunked/multipart uploads — the
+ * hard ceiling is 10 MB and a single PUT is plenty for resumes.
+ */
+export async function uploadResume(args: {
+  file: File;
+  slug: string;
+  careerSlug: string;
+}): Promise<string> {
+  const presigned = await requestUploadURL({
+    slug: args.slug,
+    careerSlug: args.careerSlug,
+    fileName: args.file.name,
+    contentType: args.file.type || 'application/pdf',
+  });
+
+  if (args.file.size > presigned.maxBytes) {
+    throw new Error(
+      `File is ${(args.file.size / 1024 / 1024).toFixed(1)} MB — max is ${(
+        presigned.maxBytes /
+        1024 /
+        1024
+      ).toFixed(0)} MB`
+    );
+  }
+
+  // Direct PUT to R2. Axios would add auth headers we don't want here,
+  // so we drop to fetch. The Content-Type header must match what we
+  // sent to the presigner — R2 signs that value in.
+  const putRes = await fetch(presigned.uploadUrl, {
+    method: 'PUT',
+    body: args.file,
+    headers: { 'Content-Type': args.file.type || 'application/pdf' },
+  });
+  if (!putRes.ok) {
+    throw new Error(`Upload failed (${putRes.status})`);
+  }
+
+  return presigned.key;
+}

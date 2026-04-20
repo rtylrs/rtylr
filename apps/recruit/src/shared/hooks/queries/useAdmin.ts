@@ -120,3 +120,20 @@ export function useUpdateSubmissionStatus() {
     onSuccess: () => qc.invalidateQueries({ queryKey: ['recruit', 'admin', 'submissions'] }),
   });
 }
+
+// Resume links are signed on demand — we never expose the raw R2 URL
+// in the list payload, so a screenshot of the admin table doesn't
+// expose anything persistent. The returned URL is good for one hour.
+interface ResumeDownloadResponse {
+  url: string;
+  expiresAt: string;
+}
+
+export async function fetchResumeURL(submissionId: number): Promise<string> {
+  const res = await unwrap(
+    safe.get<ResumeDownloadResponse>('/recruit/submissions/resume-url', {
+      params: { submission_id: submissionId },
+    })
+  );
+  return res.url;
+}

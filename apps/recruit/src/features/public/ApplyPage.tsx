@@ -1,10 +1,14 @@
-import React, { useEffect, useState } from 'react';
+import React, { useEffect, useRef, useState } from 'react';
 import { Link, useNavigate, useParams } from 'react-router-dom';
 import { toast } from 'sonner';
-import { ArrowLeft, Check } from 'lucide-react';
+import { ArrowLeft, Check, Upload, FileText, X } from 'lucide-react';
 
 import Header from '../../templates/shared/Header';
-import { usePublicCareer, useSubmitApplication } from '../../shared/hooks/queries/usePublic';
+import {
+  usePublicCareer,
+  useSubmitApplication,
+  uploadResume,
+} from '../../shared/hooks/queries/usePublic';
 import { applyBrand } from '../../templates/resolver';
 import NotFound from './NotFound';
 
@@ -39,6 +43,44 @@ const ApplyPage: React.FC = (): React.JSX.Element => {
   const [coverLetter, setCoverLetter] = useState('');
   const [done, setDone] = useState(false);
 
+  // File upload state. `resumeFile` is the picked File, `uploadedKey`
+  // is the R2 object key we got back after a successful upload — the
+  // distinction matters because we want to show "uploaded ✓" state
+  // without re-uploading the same file on every re-render.
+  const [resumeFile, setResumeFile] = useState<File | null>(null);
+  const [uploadedKey, setUploadedKey] = useState<string | null>(null);
+  const [uploading, setUploading] = useState(false);
+  const [uploadError, setUploadError] = useState<string | null>(null);
+  const fileInputRef = useRef<HTMLInputElement>(null);
+
+  async function onPickFile(e: React.ChangeEvent<HTMLInputElement>) {
+    const file = e.target.files?.[0];
+    if (!file) return;
+    setResumeFile(file);
+    setUploadedKey(null);
+    setUploadError(null);
+    setUploading(true);
+    try {
+      const key = await uploadResume({ file, slug, careerSlug });
+      setUploadedKey(key);
+      // Clear the manual URL input — we'll use the uploaded key instead.
+      setResumeUrl('');
+    } catch (err) {
+      const msg = err instanceof Error ? err.message : 'Upload failed';
+      setUploadError(msg);
+      setResumeFile(null);
+    } finally {
+      setUploading(false);
+    }
+  }
+
+  function clearFile() {
+    setResumeFile(null);
+    setUploadedKey(null);
+    setUploadError(null);
+    if (fileInputRef.current) fileInputRef.current.value = '';
+  }
+
   if (isLoading) {
     return (
       <div className="flex min-h-screen items-center justify-center">
@@ -55,6 +97,9 @@ const ApplyPage: React.FC = (): React.JSX.Element => {
 
   const onSubmit = (e: React.FormEvent) => {
     e.preventDefault();
+    // Prefer the uploaded-to-R2 key; fall back to the manually typed
+    // URL for candidates who'd rather link out (Drive, personal site).
+    const resumeRef = uploadedKey ?? (resumeUrl || undefined);
     submit.mutate(
       {
         slug,
@@ -62,7 +107,7 @@ const ApplyPage: React.FC = (): React.JSX.Element => {
         candidateName,
         email,
         phone: phone || undefined,
-        resumeUrl: resumeUrl || undefined,
+        resumeUrl: resumeRef,
         coverLetter: coverLetter || undefined,
       },
       {
@@ -151,19 +196,77 @@ const ApplyPage: React.FC = (): React.JSX.Element => {
               style={{ borderColor: 'var(--recruit-border)' }}
             />
           </Field>
-          <Field
-            label="Resume link"
-            hint="Paste a link to your resume (Google Drive, Dropbox, personal site, etc.)"
-          >
+          <Field label="Resume">
+            {/* Hidden native input; we render a styled dropzone ourselves. */}
             <input
-              type="url"
-              placeholder="https://…"
-              value={resumeUrl}
-              onChange={(e) => setResumeUrl(e.target.value)}
-              className="w-full rounded-md border bg-white px-3 py-2.5 text-base outline-none focus:ring-2"
-              style={{ borderColor: 'var(--recruit-border)' }}
+              ref={fileInputRef}
+              type="file"
+              accept=".pdf,.doc,.docx,application/pdf,application/msword,application/vnd.openxmlformats-officedocument.wordprocessingml.document"
+              onChange={onPickFile}
+              className="hidden"
             />
+            {!resumeFile && !uploadedKey && (
+              <button
+                type="button"
+                onClick={() => fileInputRef.current?.click()}
+                className="flex w-full items-center justify-center gap-2 rounded-md border border-dashed bg-white px-4 py-6 text-sm transition hover:bg-gray-50"
+                style={{ borderColor: 'var(--recruit-border)' }}
+              >
+                <Upload className="h-4 w-4" style={{ color: 'var(--recruit-accent)' }} />
+                <span>Upload your resume</span>
+                <span className="text-xs" style={{ color: 'var(--recruit-muted)' }}>
+                  · PDF or Word, up to 10 MB
+                </span>
+              </button>
+            )}
+            {resumeFile && (
+              <div
+                className="flex items-center gap-3 rounded-md border bg-white px-3 py-2.5 text-sm"
+                style={{ borderColor: 'var(--recruit-border)' }}
+              >
+                <FileText className="h-4 w-4" style={{ color: 'var(--recruit-accent)' }} />
+                <div className="min-w-0 flex-1">
+                  <div className="truncate font-medium">{resumeFile.name}</div>
+                  <div className="text-xs" style={{ color: 'var(--recruit-muted)' }}>
+                    {uploading
+                      ? 'Uploading…'
+                      : uploadedKey
+                        ? 'Uploaded'
+                        : uploadError
+                          ? uploadError
+                          : `${(resumeFile.size / 1024 / 1024).toFixed(1)} MB`}
+                  </div>
+                </div>
+                {uploadedKey && !uploading && (
+                  <Check className="h-4 w-4" style={{ color: 'var(--recruit-accent)' }} />
+                )}
+                <button
+                  type="button"
+                  onClick={clearFile}
+                  className="rounded-md p-1 hover:bg-gray-100"
+                  title="Remove"
+                >
+                  <X className="h-4 w-4" style={{ color: 'var(--recruit-muted)' }} />
+                </button>
+              </div>
+            )}
           </Field>
+
+          {/* Fallback for candidates who'd rather link out. Hidden when
+              a file is picked — two resume sources on one form is
+              confusing. */}
+          {!resumeFile && !uploadedKey && (
+            <Field label="…or paste a link" hint="Google Drive, Dropbox, personal site">
+              <input
+                type="url"
+                placeholder="https://…"
+                value={resumeUrl}
+                onChange={(e) => setResumeUrl(e.target.value)}
+                className="w-full rounded-md border bg-white px-3 py-2.5 text-base outline-none focus:ring-2"
+                style={{ borderColor: 'var(--recruit-border)' }}
+              />
+            </Field>
+          )}
           <Field label="Why you">
             <textarea
               rows={6}
@@ -177,11 +280,15 @@ const ApplyPage: React.FC = (): React.JSX.Element => {
 
           <button
             type="submit"
-            disabled={submit.isPending}
+            disabled={submit.isPending || uploading}
             className="inline-flex w-full items-center justify-center gap-2 rounded-lg px-6 py-3 text-sm font-semibold text-white transition hover:opacity-90 disabled:opacity-50"
             style={{ background: 'var(--recruit-accent)' }}
           >
-            {submit.isPending ? 'Submitting…' : 'Submit application'}
+            {uploading
+              ? 'Uploading resume…'
+              : submit.isPending
+                ? 'Submitting…'
+                : 'Submit application'}
           </button>
         </form>
       </main>

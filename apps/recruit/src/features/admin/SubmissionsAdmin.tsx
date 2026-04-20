@@ -5,6 +5,7 @@ import { Mail, Phone, FileText } from 'lucide-react';
 import {
   useAdminSubmissions,
   useUpdateSubmissionStatus,
+  fetchResumeURL,
 } from '../../shared/hooks/queries/useAdmin';
 
 /**
@@ -82,15 +83,20 @@ const SubmissionsAdmin: React.FC = (): React.JSX.Element => {
                       </span>
                     )}
                     {s.resumeUrl && (
-                      <a
-                        href={s.resumeUrl}
-                        target="_blank"
-                        rel="noreferrer"
+                      <button
+                        onClick={async () => {
+                          try {
+                            const url = await fetchResumeURL(s.id);
+                            window.open(url, '_blank', 'noopener,noreferrer');
+                          } catch {
+                            toast.error("Couldn't open resume");
+                          }
+                        }}
                         className="inline-flex items-center gap-1 hover:text-white"
                       >
                         <FileText className="h-3 w-3" />
                         Resume
-                      </a>
+                      </button>
                     )}
                   </div>
                   {s.coverLetter && (
