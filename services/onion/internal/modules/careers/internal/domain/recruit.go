@@ -54,34 +54,52 @@ type RecruitCareerInput struct {
 // signs up for the recruit product creates exactly one of these; its
 // slug becomes the first path segment on the public careers site
 // (recruit.rtylr.com/<slug>).
+//
+// Palette fields default to empty; the frontend resolver falls back
+// to the selected template's defaults when a value is missing, so a
+// half-configured row still renders coherently.
 type Customization struct {
-	ID           int64
-	OwnerID      int64
-	Slug         string
-	BrandName    string
-	Tagline      string
-	AboutBlurb   string
-	LogoURL      string
-	PrimaryColor string
-	Template     string
-	HeaderHTML   string
-	CreatedAt    time.Time
-	UpdatedAt    time.Time
+	ID             int64
+	OwnerID        int64
+	Slug           string
+	BrandName      string
+	Tagline        string
+	AboutBlurb     string
+	LogoURL        string
+	PrimaryColor   string
+	AccentColor    string
+	BgColor        string
+	TextColor      string
+	MutedTextColor string
+	FontPairing    string
+	HeroImageURL   string
+	FaviconURL     string
+	Template       string
+	HeaderHTML     string
+	CreatedAt      time.Time
+	UpdatedAt      time.Time
 }
 
 // CustomizationInput is the write shape for create/update. Slug is
 // validated by the service — the unique index on the table is the
 // backstop, not the front line.
 type CustomizationInput struct {
-	OwnerID      int64
-	Slug         string
-	BrandName    string
-	Tagline      string
-	AboutBlurb   string
-	LogoURL      string
-	PrimaryColor string
-	Template     string
-	HeaderHTML   string
+	OwnerID        int64
+	Slug           string
+	BrandName      string
+	Tagline        string
+	AboutBlurb     string
+	LogoURL        string
+	PrimaryColor   string
+	AccentColor    string
+	BgColor        string
+	TextColor      string
+	MutedTextColor string
+	FontPairing    string
+	HeroImageURL   string
+	FaviconURL     string
+	Template       string
+	HeaderHTML     string
 }
 
 // Submission is a candidate's application to a career. resume_url is a

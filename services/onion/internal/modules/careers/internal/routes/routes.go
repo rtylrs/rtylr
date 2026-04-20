@@ -87,4 +87,12 @@ func RegisterRoutes(ctx context.Context, router *chi.Mux, careersService *applic
 		ctx, router, handlers.ResumeDownloadURLRoutes(),
 		&handlers.ResumeDownloadURLHandler{CareersService: careersService},
 	)
+
+	// OG card renders PNG bytes, not JSON — it doesn't fit the typed
+	// Request/Response helpers, so we register it as a raw chi handler.
+	// The auth middleware still respects GetAnonymousRoutes below.
+	ogHandler := handlers.PublicOGHandler(careersService)
+	for _, pattern := range handlers.PublicOGRoutes() {
+		router.Get(pattern, ogHandler)
+	}
 }

@@ -126,18 +126,36 @@ func (r *Repository) DeleteCareer(ctx context.Context, ownerID, careerID int64) 
 
 // ── careers_customizations ───────────────────────────────────────────
 
-func (r *Repository) GetCustomizationByOwner(ctx context.Context, ownerID int64) (domain.Customization, error) {
-	q := `SELECT id, owner_id, slug, brand_name,
-	            COALESCE(tagline,''), COALESCE(about_blurb,''),
-	            COALESCE(logo_url,''), COALESCE(primary_color,''),
-	            template, COALESCE(header_html,''),
-	            created_at, updated_at
-	        FROM careers_customizations WHERE owner_id = ? LIMIT 1`
-	row := r.pool.QueryRowContext(ctx, q, ownerID)
+// customizationSelectColumns is shared by both get-by-owner and
+// get-by-slug so the column order stays locked with Scan.
+const customizationSelectColumns = `
+    id, owner_id, slug, brand_name,
+    COALESCE(tagline,''), COALESCE(about_blurb,''),
+    COALESCE(logo_url,''), COALESCE(primary_color,''),
+    COALESCE(accent_color,''), COALESCE(bg_color,''),
+    COALESCE(text_color,''), COALESCE(muted_text_color,''),
+    COALESCE(font_pairing,''), COALESCE(hero_image_url,''),
+    COALESCE(favicon_url,''),
+    template, COALESCE(header_html,''),
+    created_at, updated_at`
+
+func scanCustomization(row interface{ Scan(...interface{}) error }) (domain.Customization, error) {
 	var c domain.Customization
-	if err := row.Scan(&c.ID, &c.OwnerID, &c.Slug, &c.BrandName,
+	err := row.Scan(
+		&c.ID, &c.OwnerID, &c.Slug, &c.BrandName,
 		&c.Tagline, &c.AboutBlurb, &c.LogoURL, &c.PrimaryColor,
-		&c.Template, &c.HeaderHTML, &c.CreatedAt, &c.UpdatedAt); err != nil {
+		&c.AccentColor, &c.BgColor, &c.TextColor, &c.MutedTextColor,
+		&c.FontPairing, &c.HeroImageURL, &c.FaviconURL,
+		&c.Template, &c.HeaderHTML, &c.CreatedAt, &c.UpdatedAt,
+	)
+	return c, err
+}
+
+func (r *Repository) GetCustomizationByOwner(ctx context.Context, ownerID int64) (domain.Customization, error) {
+	q := `SELECT ` + customizationSelectColumns + ` FROM careers_customizations WHERE owner_id = ? LIMIT 1`
+	row := r.pool.QueryRowContext(ctx, q, ownerID)
+	c, err := scanCustomization(row)
+	if err != nil {
 		if errors.Is(err, sql.ErrNoRows) {
 			return domain.Customization{}, ErrCustomizationNotFound
 		}
@@ -147,17 +165,10 @@ func (r *Repository) GetCustomizationByOwner(ctx context.Context, ownerID int64)
 }
 
 func (r *Repository) GetCustomizationBySlug(ctx context.Context, slug string) (domain.Customization, error) {
-	q := `SELECT id, owner_id, slug, brand_name,
-	            COALESCE(tagline,''), COALESCE(about_blurb,''),
-	            COALESCE(logo_url,''), COALESCE(primary_color,''),
-	            template, COALESCE(header_html,''),
-	            created_at, updated_at
-	        FROM careers_customizations WHERE slug = ? LIMIT 1`
+	q := `SELECT ` + customizationSelectColumns + ` FROM careers_customizations WHERE slug = ? LIMIT 1`
 	row := r.pool.QueryRowContext(ctx, q, slug)
-	var c domain.Customization
-	if err := row.Scan(&c.ID, &c.OwnerID, &c.Slug, &c.BrandName,
-		&c.Tagline, &c.AboutBlurb, &c.LogoURL, &c.PrimaryColor,
-		&c.Template, &c.HeaderHTML, &c.CreatedAt, &c.UpdatedAt); err != nil {
+	c, err := scanCustomization(row)
+	if err != nil {
 		if errors.Is(err, sql.ErrNoRows) {
 			return domain.Customization{}, ErrCustomizationNotFound
 		}
@@ -171,8 +182,11 @@ func (r *Repository) UpsertCustomization(ctx context.Context, in domain.Customiz
 	// this to one row per business; the slug index is the backstop
 	// against collisions across tenants.
 	q := `INSERT INTO careers_customizations
-	        (owner_id, slug, brand_name, tagline, about_blurb, logo_url, primary_color, template, header_html)
-	      VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?)
+	        (owner_id, slug, brand_name, tagline, about_blurb, logo_url,
+	         primary_color, accent_color, bg_color, text_color,
+	         muted_text_color, font_pairing, hero_image_url, favicon_url,
+	         template, header_html)
+	      VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
 	      ON DUPLICATE KEY UPDATE
 	        slug = VALUES(slug),
 	        brand_name = VALUES(brand_name),
@@ -180,11 +194,22 @@ func (r *Repository) UpsertCustomization(ctx context.Context, in domain.Customiz
 	        about_blurb = VALUES(about_blurb),
 	        logo_url = VALUES(logo_url),
 	        primary_color = VALUES(primary_color),
+	        accent_color = VALUES(accent_color),
+	        bg_color = VALUES(bg_color),
+	        text_color = VALUES(text_color),
+	        muted_text_color = VALUES(muted_text_color),
+	        font_pairing = VALUES(font_pairing),
+	        hero_image_url = VALUES(hero_image_url),
+	        favicon_url = VALUES(favicon_url),
 	        template = VALUES(template),
 	        header_html = VALUES(header_html)`
 	_, err := r.pool.ExecContext(ctx, q,
 		in.OwnerID, in.Slug, in.BrandName, nullStr(in.Tagline), nullStr(in.AboutBlurb),
-		nullStr(in.LogoURL), nullStr(in.PrimaryColor), in.Template, nullStr(in.HeaderHTML))
+		nullStr(in.LogoURL), nullStr(in.PrimaryColor),
+		nullStr(in.AccentColor), nullStr(in.BgColor),
+		nullStr(in.TextColor), nullStr(in.MutedTextColor),
+		nullStr(in.FontPairing), nullStr(in.HeroImageURL), nullStr(in.FaviconURL),
+		in.Template, nullStr(in.HeaderHTML))
 	return err
 }
 
