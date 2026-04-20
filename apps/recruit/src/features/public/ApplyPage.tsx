@@ -43,6 +43,15 @@ const ApplyPage: React.FC = (): React.JSX.Element => {
   const [coverLetter, setCoverLetter] = useState('');
   const [done, setDone] = useState(false);
 
+  // Answers to the per-role custom fields. Keyed by field id →
+  // string (short_text, long_text, url, single_select) or string[]
+  // (multi_select) or '1'/'' (boolean). We keep the wire shape as a
+  // string/string[] union and let the server store it opaquely.
+  const [answers, setAnswers] = useState<Record<string, string | string[]>>({});
+  function setAnswer(fieldId: number, value: string | string[]) {
+    setAnswers((prev) => ({ ...prev, [String(fieldId)]: value }));
+  }
+
   // File upload state. `resumeFile` is the picked File, `uploadedKey`
   // is the R2 object key we got back after a successful upload — the
   // distinction matters because we want to show "uploaded ✓" state
@@ -94,12 +103,29 @@ const ApplyPage: React.FC = (): React.JSX.Element => {
   if (error || !data) return <NotFound />;
 
   const { career, customization } = data;
+  const customFields = data.fields ?? [];
 
   const onSubmit = (e: React.FormEvent) => {
     e.preventDefault();
+    // Client-side required check before hitting the API — better UX
+    // than a round-trip 400. The backend still accepts whatever it's
+    // given since we can't yet validate kind-specific rules
+    // server-side.
+    for (const f of customFields) {
+      if (!f.required) continue;
+      const v = answers[String(f.id)];
+      const empty = v === undefined || v === '' || (Array.isArray(v) && v.length === 0);
+      if (empty) {
+        toast.error(`"${f.label}" is required`);
+        return;
+      }
+    }
+
     // Prefer the uploaded-to-R2 key; fall back to the manually typed
     // URL for candidates who'd rather link out (Drive, personal site).
     const resumeRef = uploadedKey ?? (resumeUrl || undefined);
+    const answersJson = Object.keys(answers).length > 0 ? JSON.stringify(answers) : undefined;
+
     submit.mutate(
       {
         slug,
@@ -109,6 +135,7 @@ const ApplyPage: React.FC = (): React.JSX.Element => {
         phone: phone || undefined,
         resumeUrl: resumeRef,
         coverLetter: coverLetter || undefined,
+        answersJson,
       },
       {
         onSuccess: () => {
@@ -278,6 +305,17 @@ const ApplyPage: React.FC = (): React.JSX.Element => {
             />
           </Field>
 
+          {/* Custom per-role questions. Rendered in admin-defined order
+              after the baseline fields so the baseline never shifts. */}
+          {customFields.map((f) => (
+            <CustomFieldRenderer
+              key={f.id}
+              field={f}
+              value={answers[String(f.id)] ?? (f.kind === 'multi_select' ? [] : '')}
+              onChange={(v) => setAnswer(f.id, v)}
+            />
+          ))}
+
           <button
             type="submit"
             disabled={submit.isPending || uploading}
@@ -295,6 +333,140 @@ const ApplyPage: React.FC = (): React.JSX.Element => {
     </div>
   );
 };
+
+// CustomFieldRenderer dispatches on the field's kind. The value is
+// kept as a string or string[] union so the rest of the form doesn't
+// need per-kind state. Unknown kinds degrade to a single-line text
+// input so a mis-typed kind on the server still lets the candidate
+// apply.
+interface CustomFieldRendererProps {
+  field: import('../../shared/lib/types').FormField;
+  value: string | string[];
+  onChange: (v: string | string[]) => void;
+}
+const CustomFieldRenderer: React.FC<CustomFieldRendererProps> = ({ field, value, onChange }) => {
+  const options = parseOptions(field.optionsJson);
+  const strValue = Array.isArray(value) ? '' : value;
+  const arrValue = Array.isArray(value) ? value : [];
+
+  switch (field.kind) {
+    case 'long_text':
+      return (
+        <Field label={field.label} required={field.required}>
+          <textarea
+            rows={4}
+            required={field.required}
+            value={strValue}
+            onChange={(e) => onChange(e.target.value)}
+            placeholder={field.placeholder}
+            className="w-full rounded-md border bg-white px-3 py-2.5 text-base leading-relaxed outline-none focus:ring-2"
+            style={{ borderColor: 'var(--recruit-border)' }}
+          />
+        </Field>
+      );
+    case 'url':
+      return (
+        <Field label={field.label} required={field.required}>
+          <input
+            type="url"
+            required={field.required}
+            value={strValue}
+            onChange={(e) => onChange(e.target.value)}
+            placeholder={field.placeholder || 'https://…'}
+            className="w-full rounded-md border bg-white px-3 py-2.5 text-base outline-none focus:ring-2"
+            style={{ borderColor: 'var(--recruit-border)' }}
+          />
+        </Field>
+      );
+    case 'single_select':
+      return (
+        <Field label={field.label} required={field.required}>
+          <select
+            required={field.required}
+            value={strValue}
+            onChange={(e) => onChange(e.target.value)}
+            className="w-full rounded-md border bg-white px-3 py-2.5 text-base outline-none focus:ring-2"
+            style={{ borderColor: 'var(--recruit-border)' }}
+          >
+            <option value="">Select…</option>
+            {options.map((o) => (
+              <option key={o} value={o}>
+                {o}
+              </option>
+            ))}
+          </select>
+        </Field>
+      );
+    case 'multi_select':
+      return (
+        <Field label={field.label} required={field.required}>
+          <div className="flex flex-wrap gap-2">
+            {options.map((o) => {
+              const active = arrValue.includes(o);
+              return (
+                <button
+                  key={o}
+                  type="button"
+                  onClick={() =>
+                    onChange(active ? arrValue.filter((x) => x !== o) : [...arrValue, o])
+                  }
+                  className="rounded-full border px-3 py-1.5 text-sm"
+                  style={{
+                    borderColor: active ? 'var(--recruit-accent)' : 'var(--recruit-border)',
+                    background: active ? 'var(--recruit-accent)' : 'transparent',
+                    color: active ? 'white' : 'var(--recruit-fg)',
+                  }}
+                >
+                  {o}
+                </button>
+              );
+            })}
+          </div>
+        </Field>
+      );
+    case 'boolean':
+      return (
+        <label className="flex cursor-pointer items-center gap-2 py-1">
+          <input
+            type="checkbox"
+            checked={strValue === '1'}
+            onChange={(e) => onChange(e.target.checked ? '1' : '')}
+            className="h-4 w-4"
+            required={field.required}
+          />
+          <span className="text-sm">
+            {field.label}
+            {field.required && <span style={{ color: 'var(--recruit-accent)' }}> *</span>}
+          </span>
+        </label>
+      );
+    case 'short_text':
+    default:
+      return (
+        <Field label={field.label} required={field.required}>
+          <input
+            type="text"
+            required={field.required}
+            value={strValue}
+            onChange={(e) => onChange(e.target.value)}
+            placeholder={field.placeholder}
+            className="w-full rounded-md border bg-white px-3 py-2.5 text-base outline-none focus:ring-2"
+            style={{ borderColor: 'var(--recruit-border)' }}
+          />
+        </Field>
+      );
+  }
+};
+
+function parseOptions(json: string): string[] {
+  if (!json) return [];
+  try {
+    const parsed = JSON.parse(json);
+    return Array.isArray(parsed) ? parsed.map(String) : [];
+  } catch {
+    return [];
+  }
+}
 
 interface FieldProps {
   label: string;

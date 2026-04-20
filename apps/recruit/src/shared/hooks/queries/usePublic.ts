@@ -1,7 +1,7 @@
 import { unwrap } from '@voxire/api';
 import { useMutation, useQuery } from '@tanstack/react-query';
 import { safe } from '../../lib/api';
-import type { Customization, RecruitCareer, Section } from '../../lib/types';
+import type { Customization, FormField, RecruitCareer, Section } from '../../lib/types';
 
 // Public (anonymous) hooks — used by the candidate-facing pages.
 // Every request is scoped by the URL slug so we don't need auth.
@@ -28,6 +28,7 @@ export function useBusinessCareers(slug: string | undefined) {
 interface GetPublicCareerResponse {
   career: RecruitCareer;
   customization: Customization;
+  fields: FormField[];
 }
 
 export function usePublicCareer(slug: string | undefined, careerSlug: string | undefined) {
@@ -51,6 +52,10 @@ interface SubmitApplicationBody {
   phone?: string;
   resumeUrl?: string;
   coverLetter?: string;
+  // Stringified JSON object keyed by form_field_id → answer (string
+  // or string[] for multi_select / boolean). The server stores this
+  // opaquely and the admin decodes it for display.
+  answersJson?: string;
 }
 
 interface SubmitApplicationResponse {

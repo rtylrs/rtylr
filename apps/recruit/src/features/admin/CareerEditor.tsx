@@ -2,6 +2,7 @@ import React, { useEffect, useState } from 'react';
 import { X } from 'lucide-react';
 
 import type { RecruitCareer } from '../../shared/lib/types';
+import FormFieldsEditor from './FormFieldsEditor';
 
 interface CareerFormBody {
   slug: string;
@@ -162,6 +163,12 @@ const CareerEditor: React.FC<Props> = ({ career, onClose, onSave }) => {
             />
             <span className="text-sm">Publish this role to the careers page</span>
           </label>
+
+          {/* Custom application questions — only editable after the
+              role exists. For new roles, the admin saves first, reopens
+              the editor, and then this block shows up. Keeps the
+              form-field CRUD logic tied to a known career_id. */}
+          {career && <FormFieldsEditor careerId={career.id} />}
         </div>
 
         <div

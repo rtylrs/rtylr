@@ -1,7 +1,7 @@
 import { unwrap } from '@voxire/api';
 import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query';
 import { safe } from '../../lib/api';
-import type { Customization, RecruitCareer, Section, Submission } from '../../lib/types';
+import type { Customization, FormField, RecruitCareer, Section, Submission } from '../../lib/types';
 
 // Admin hooks — require auth. Every mutation invalidates the matching
 // list query so the HR team sees edits live without a manual refresh.
@@ -202,5 +202,65 @@ export function useReorderSections() {
     mutationFn: (orderedIds: number[]) =>
       unwrap(safe.put<{ message: string }>('/recruit/sections/reorder', { orderedIds })),
     onSuccess: () => qc.invalidateQueries({ queryKey: ['recruit', 'admin', 'sections'] }),
+  });
+}
+
+// ── form fields ─────────────────────────────────────────────────────
+
+interface ListFormFieldsResponse {
+  fields: FormField[];
+}
+
+export function useAdminFormFields(careerId: number | undefined) {
+  return useQuery({
+    queryKey: ['recruit', 'admin', 'form-fields', careerId],
+    enabled: !!careerId,
+    queryFn: () =>
+      unwrap(
+        safe.get<ListFormFieldsResponse>('/recruit/form-fields', {
+          params: { career_id: careerId },
+        })
+      ),
+  });
+}
+
+export interface FormFieldBody {
+  id?: number;
+  careerId: number;
+  kind: string;
+  label: string;
+  placeholder?: string;
+  required: boolean;
+  optionsJson?: string;
+  position?: number;
+}
+
+export function useCreateFormField() {
+  const qc = useQueryClient();
+  return useMutation({
+    mutationFn: (body: FormFieldBody) =>
+      unwrap(safe.post<{ field: FormField }>('/recruit/form-fields', body)),
+    onSuccess: (_, vars) =>
+      qc.invalidateQueries({ queryKey: ['recruit', 'admin', 'form-fields', vars.careerId] }),
+  });
+}
+
+export function useUpdateFormField() {
+  const qc = useQueryClient();
+  return useMutation({
+    mutationFn: (body: FormFieldBody) =>
+      unwrap(safe.put<{ message: string }>('/recruit/form-fields', body)),
+    onSuccess: (_, vars) =>
+      qc.invalidateQueries({ queryKey: ['recruit', 'admin', 'form-fields', vars.careerId] }),
+  });
+}
+
+export function useDeleteFormField(careerId: number) {
+  const qc = useQueryClient();
+  return useMutation({
+    mutationFn: (id: number) =>
+      unwrap(safe.delete<{ message: string }>('/recruit/form-fields', { data: { id } })),
+    onSuccess: () =>
+      qc.invalidateQueries({ queryKey: ['recruit', 'admin', 'form-fields', careerId] }),
   });
 }

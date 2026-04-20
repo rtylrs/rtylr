@@ -5,8 +5,10 @@ import { Mail, Phone, FileText } from 'lucide-react';
 import {
   useAdminSubmissions,
   useUpdateSubmissionStatus,
+  useAdminFormFields,
   fetchResumeURL,
 } from '../../shared/hooks/queries/useAdmin';
+import type { Submission } from '../../shared/lib/types';
 
 /**
  * SubmissionsAdmin — HR-facing inbox for all candidate applications.
@@ -102,6 +104,12 @@ const SubmissionsAdmin: React.FC = (): React.JSX.Element => {
                   {s.coverLetter && (
                     <p className="mt-3 line-clamp-3 text-sm text-white/70">{s.coverLetter}</p>
                   )}
+
+                  {/* Custom question answers — shown after the cover
+                      letter so the reviewer sees them in reading order.
+                      We render labels only once we've fetched the field
+                      definitions for this submission's career. */}
+                  <CustomAnswers submission={s} />
                 </div>
 
                 <select
@@ -129,6 +137,53 @@ const SubmissionsAdmin: React.FC = (): React.JSX.Element => {
           </ul>
         )}
       </div>
+    </div>
+  );
+};
+
+/**
+ * CustomAnswers renders a submission's per-role custom field answers.
+ * Fetches the field definitions for this career to label each answer;
+ * TanStack Query dedupes the same career_id across all rows on the
+ * page so a batch of submissions for the same role fires one fetch.
+ */
+const CustomAnswers: React.FC<{ submission: Submission }> = ({ submission }) => {
+  const { data } = useAdminFormFields(submission.careerId);
+  if (!submission.answersJson) return null;
+
+  let parsed: Record<string, string | string[]> = {};
+  try {
+    const raw = JSON.parse(submission.answersJson);
+    if (raw && typeof raw === 'object') parsed = raw as Record<string, string | string[]>;
+  } catch {
+    return null;
+  }
+  const ids = Object.keys(parsed);
+  if (ids.length === 0) return null;
+
+  const fields = data?.fields ?? [];
+  const byId = new Map(fields.map((f) => [String(f.id), f]));
+
+  return (
+    <div
+      className="mt-3 space-y-1.5 rounded-md border p-3"
+      style={{ borderColor: '#1f1f1f', background: 'rgba(255,255,255,0.02)' }}
+    >
+      {ids.map((id) => {
+        const field = byId.get(id);
+        const value = parsed[id];
+        const display = Array.isArray(value)
+          ? value.join(', ')
+          : value === '1'
+            ? 'Yes'
+            : String(value);
+        return (
+          <div key={id} className="flex gap-2 text-xs">
+            <span className="min-w-[140px] text-white/50">{field?.label ?? `Question ${id}`}</span>
+            <span className="text-white/80">{display || '—'}</span>
+          </div>
+        );
+      })}
     </div>
   );
 };

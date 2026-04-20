@@ -105,6 +105,32 @@ export interface ValueItem {
   blurb?: string;
 }
 
+// FormFieldKind is the discriminator for custom question types. Kept
+// narrow — the apply form renderer and the builder both switch on
+// this, and allowing arbitrary strings on the client would turn into
+// silent "nothing renders" bugs.
+export type FormFieldKind =
+  | 'short_text'
+  | 'long_text'
+  | 'single_select'
+  | 'multi_select'
+  | 'url'
+  | 'boolean';
+
+export interface FormField {
+  id: number;
+  careerId: number;
+  ownerId: number;
+  kind: FormFieldKind | string;
+  label: string;
+  placeholder: string;
+  required: boolean;
+  optionsJson: string;
+  position: number;
+  createdAt: string;
+  updatedAt: string;
+}
+
 export interface Submission {
   id: number;
   careerId: number;
@@ -115,6 +141,7 @@ export interface Submission {
   resumeUrl: string;
   coverLetter: string;
   status: string;
+  answersJson: string;
   careerTitle: string;
   createdAt: string;
   updatedAt: string;
