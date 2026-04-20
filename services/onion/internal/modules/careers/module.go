@@ -26,5 +26,14 @@ func (m *Module) RegisterRoutes(ctx context.Context, router *chi.Mux, _ ...inter
 }
 
 func (m *Module) GetAnonymousRoutes() []string {
-	return handlers.CareersRoutes()
+	// /careers is the legacy voxire-corporate list. The /recruit/public/*
+	// routes back the candidate-facing careers sites — they resolve the
+	// tenant from the URL slug so auth isn't needed.
+	anon := []string{}
+	anon = append(anon, handlers.CareersRoutes()...)
+	anon = append(anon, handlers.GetPublicBrandingRoutes()...)
+	anon = append(anon, handlers.ListPublicCareersRoutes()...)
+	anon = append(anon, handlers.GetPublicCareerRoutes()...)
+	anon = append(anon, handlers.SubmitApplicationRoutes()...)
+	return anon
 }

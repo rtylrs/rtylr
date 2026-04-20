@@ -1,0 +1,120 @@
+package application
+
+import (
+	"context"
+	"errors"
+	"regexp"
+	"strings"
+
+	"github.com/voxire/onion/internal/modules/careers/internal/domain"
+	"github.com/voxire/onion/internal/modules/careers/internal/infrastructure"
+)
+
+// Recruit extends the careers module with the tenant-scoped recruit
+// product. Keeping it on the existing Service struct means handlers
+// can use a single dependency; the methods below are grouped by the
+// three entities they touch.
+
+// ── careers ──────────────────────────────────────────────────────────
+
+func (s *Service) ListRecruitCareers(ctx context.Context, ownerID int64, publishedOnly bool) ([]domain.RecruitCareer, error) {
+	return s.repo.ListCareers(ctx, ownerID, publishedOnly)
+}
+
+func (s *Service) GetCareerBySlug(ctx context.Context, ownerID int64, slug string) (domain.RecruitCareer, error) {
+	c, err := s.repo.GetCareerBySlug(ctx, ownerID, slug)
+	if err != nil {
+		if errors.Is(err, infrastructure.ErrCareerNotFound) {
+			return domain.RecruitCareer{}, ErrNotFound
+		}
+		return domain.RecruitCareer{}, err
+	}
+	return c, nil
+}
+
+func (s *Service) CreateCareer(ctx context.Context, in domain.RecruitCareerInput) (int64, error) {
+	if in.Slug == "" {
+		in.Slug = slugify(in.Title)
+	}
+	return s.repo.CreateCareer(ctx, in)
+}
+
+func (s *Service) UpdateCareer(ctx context.Context, in domain.RecruitCareerInput) error {
+	if in.Slug == "" {
+		in.Slug = slugify(in.Title)
+	}
+	return s.repo.UpdateCareer(ctx, in)
+}
+
+func (s *Service) DeleteCareer(ctx context.Context, ownerID, careerID int64) error {
+	return s.repo.DeleteCareer(ctx, ownerID, careerID)
+}
+
+// ── customization ────────────────────────────────────────────────────
+
+func (s *Service) GetMyCustomization(ctx context.Context, ownerID int64) (domain.Customization, error) {
+	c, err := s.repo.GetCustomizationByOwner(ctx, ownerID)
+	if err != nil {
+		if errors.Is(err, infrastructure.ErrCustomizationNotFound) {
+			return domain.Customization{}, ErrNotFound
+		}
+		return domain.Customization{}, err
+	}
+	return c, nil
+}
+
+func (s *Service) GetCustomizationBySlug(ctx context.Context, slug string) (domain.Customization, error) {
+	c, err := s.repo.GetCustomizationBySlug(ctx, slug)
+	if err != nil {
+		if errors.Is(err, infrastructure.ErrCustomizationNotFound) {
+			return domain.Customization{}, ErrNotFound
+		}
+		return domain.Customization{}, err
+	}
+	return c, nil
+}
+
+func (s *Service) UpsertCustomization(ctx context.Context, in domain.CustomizationInput) error {
+	in.Slug = slugify(in.Slug)
+	if in.Template == "" {
+		in.Template = "minimal"
+	}
+	return s.repo.UpsertCustomization(ctx, in)
+}
+
+// ── submissions ──────────────────────────────────────────────────────
+
+func (s *Service) CreateSubmission(ctx context.Context, in domain.SubmissionInput) (int64, error) {
+	return s.repo.CreateSubmission(ctx, in)
+}
+
+func (s *Service) ListSubmissions(ctx context.Context, ownerID int64, status string) ([]domain.Submission, error) {
+	return s.repo.ListSubmissions(ctx, ownerID, status)
+}
+
+func (s *Service) UpdateSubmissionStatus(ctx context.Context, ownerID, submissionID int64, status string) error {
+	return s.repo.UpdateSubmissionStatus(ctx, ownerID, submissionID, status)
+}
+
+// ── helpers ──────────────────────────────────────────────────────────
+
+// ErrNotFound is returned from service methods when a row the handler
+// expected to exist isn't in the database. The handler translates this
+// into a 404.
+var ErrNotFound = errors.New("not found")
+
+var slugInvalid = regexp.MustCompile(`[^a-z0-9-]+`)
+var slugCollapse = regexp.MustCompile(`-+`)
+
+// slugify lowercases, strips non-alphanumerics, collapses repeated
+// dashes. Accepts partially-slugged input ("Backend Engineer" →
+// "backend-engineer") so admins can paste a job title and have the
+// URL come out clean.
+func slugify(s string) string {
+	s = strings.ToLower(strings.TrimSpace(s))
+	s = strings.ReplaceAll(s, " ", "-")
+	s = slugInvalid.ReplaceAllString(s, "")
+	s = slugCollapse.ReplaceAllString(s, "-")
+	s = strings.Trim(s, "-")
+	return s
+}

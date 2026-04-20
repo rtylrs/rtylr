@@ -1,0 +1,120 @@
+package domain
+
+import "time"
+
+// RecruitCareer is the tenant-scoped projection of the `careers` table
+// used by the recruit product. The legacy `Career` struct (see
+// career.go) stays wired to the sqlc-generated row for the global
+// /careers endpoint; this struct is populated by hand-written queries
+// in the repository so we don't have to regenerate sqlc every time we
+// add a column.
+type RecruitCareer struct {
+	ID             int64
+	OwnerID        int64
+	Slug           string
+	Title          string
+	Department     string
+	Location       string
+	EmploymentType string
+	WorkMode       string
+	Seniority      string
+	Details        string
+	Requirements   string
+	SalaryMin      float64
+	SalaryMax      float64
+	SalaryCurrency string
+	IsPublished    bool
+	IsActive       bool
+	CreatedAt      time.Time
+	UpdatedAt      time.Time
+}
+
+// RecruitCareerInput is the write shape for create/update. We keep it
+// separate from RecruitCareer so the service can compute IDs and
+// timestamps without the handler having to know about them.
+type RecruitCareerInput struct {
+	ID             int64
+	OwnerID        int64
+	Slug           string
+	Title          string
+	Department     string
+	Location       string
+	EmploymentType string
+	WorkMode       string
+	Seniority      string
+	Details        string
+	Requirements   string
+	SalaryMin      float64
+	SalaryMax      float64
+	SalaryCurrency string
+	IsPublished    bool
+}
+
+// Customization is the per-business branding config. A business that
+// signs up for the recruit product creates exactly one of these; its
+// slug becomes the first path segment on the public careers site
+// (recruit.rtylr.com/<slug>).
+type Customization struct {
+	ID           int64
+	OwnerID      int64
+	Slug         string
+	BrandName    string
+	Tagline      string
+	AboutBlurb   string
+	LogoURL      string
+	PrimaryColor string
+	Template     string
+	HeaderHTML   string
+	CreatedAt    time.Time
+	UpdatedAt    time.Time
+}
+
+// CustomizationInput is the write shape for create/update. Slug is
+// validated by the service — the unique index on the table is the
+// backstop, not the front line.
+type CustomizationInput struct {
+	OwnerID      int64
+	Slug         string
+	BrandName    string
+	Tagline      string
+	AboutBlurb   string
+	LogoURL      string
+	PrimaryColor string
+	Template     string
+	HeaderHTML   string
+}
+
+// Submission is a candidate's application to a career. resume_url is a
+// plain URL for the MVP — we rely on the caller to have uploaded
+// through whatever storage they configured. A proper upload endpoint
+// is a follow-up; storing the URL keeps the schema stable across that
+// change.
+type Submission struct {
+	ID            int64
+	CareerID      int64
+	OwnerID       int64
+	CandidateName string
+	Email         string
+	Phone         string
+	ResumeURL     string
+	CoverLetter   string
+	Status        string
+	CreatedAt     time.Time
+	UpdatedAt     time.Time
+	// CareerTitle is a denormalised display field populated by the
+	// join on ListSubmissions so HR screens don't need a second fetch.
+	CareerTitle string
+}
+
+// SubmissionInput is the write shape for POST /recruit/public/apply.
+// OwnerID is resolved server-side from the customization slug so the
+// candidate never sends a tenant ID.
+type SubmissionInput struct {
+	CareerID      int64
+	OwnerID       int64
+	CandidateName string
+	Email         string
+	Phone         string
+	ResumeURL     string
+	CoverLetter   string
+}
