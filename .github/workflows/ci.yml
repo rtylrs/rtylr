@@ -57,14 +57,13 @@ jobs:
   # ── End-to-end (Playwright) ────────────────────────────────────────
   # Real browser, real Vite dev servers, API stubbed per-test via
   # page.route(). Lives in its own job so Vitest failures don't waste
-  # Playwright's boot time. `continue-on-error: true` for the first
-  # rollout — flip to hard-gate once we're confident the specs are
-  # stable in CI.
+  # Playwright's boot time. Hard-gated now that specs are green — if
+  # a test goes flaky, tighten the selector rather than re-enabling
+  # continue-on-error.
   e2e:
     name: Playwright E2E
     needs: check
     runs-on: ubuntu-latest
-    continue-on-error: true
     steps:
       - uses: actions/checkout@v4
         with:
