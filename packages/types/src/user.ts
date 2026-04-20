@@ -10,7 +10,8 @@ export type AppId =
   | 'flow'
   | 'menu'
   | 'landing'
-  | 'insights';
+  | 'insights'
+  | 'recruit';
 
 export interface User {
   id?: string;

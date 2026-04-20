@@ -1,0 +1,31 @@
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+:root {
+  /* Template tokens — overridden per-business at runtime from the
+     Customization record. Defaults are a neutral editorial palette so a
+     freshly-deployed careers site still looks finished before branding
+     is applied. */
+  --recruit-accent: #111111;
+  --recruit-bg: #fafaf9;
+  --recruit-fg: #18181b;
+  --recruit-muted: #6b7280;
+  --recruit-surface: #ffffff;
+  --recruit-border: #e7e5e4;
+}
+
+html,
+body {
+  background: var(--recruit-bg);
+  color: var(--recruit-fg);
+  font-family: 'Plus Jakarta Sans', Inter, system-ui, sans-serif;
+  -webkit-font-smoothing: antialiased;
+}
+
+/* iOS auto-zoom guard. All inputs are 16px+ by default. */
+input,
+select,
+textarea {
+  font-size: 16px;
+}
