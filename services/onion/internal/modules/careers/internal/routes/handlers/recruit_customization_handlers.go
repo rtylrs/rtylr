@@ -41,15 +41,17 @@ type CustomizationPayload struct {
 	FaviconURL      string `json:"favicon_url"`
 	Template        string `json:"template"`
 	HeaderHTML      string `json:"header_html"`
-	MetaTitle       string `json:"meta_title"`
-	MetaDescription string `json:"meta_description"`
-	PrivacyURL      string `json:"privacy_url"`
-	TermsURL        string `json:"terms_url"`
-	GAMeasurementID string `json:"ga_measurement_id"`
-	MetaPixelID     string `json:"meta_pixel_id"`
-	RequireConsent  bool   `json:"require_consent"`
-	CreatedAt       string `json:"created_at"`
-	UpdatedAt       string `json:"updated_at"`
+	MetaTitle          string `json:"meta_title"`
+	MetaDescription    string `json:"meta_description"`
+	PrivacyURL         string `json:"privacy_url"`
+	TermsURL           string `json:"terms_url"`
+	GAMeasurementID    string `json:"ga_measurement_id"`
+	MetaPixelID        string `json:"meta_pixel_id"`
+	RequireConsent     bool   `json:"require_consent"`
+	NotificationEmail  string `json:"notification_email"`
+	EmailNotifications bool   `json:"email_notifications"`
+	CreatedAt          string `json:"created_at"`
+	UpdatedAt          string `json:"updated_at"`
 }
 
 func toCustomizationPayload(c domain.Customization) *CustomizationPayload {
@@ -71,15 +73,17 @@ func toCustomizationPayload(c domain.Customization) *CustomizationPayload {
 		FaviconURL:     c.FaviconURL,
 		Template:        c.Template,
 		HeaderHTML:      c.HeaderHTML,
-		MetaTitle:       c.MetaTitle,
-		MetaDescription: c.MetaDescription,
-		PrivacyURL:      c.PrivacyURL,
-		TermsURL:        c.TermsURL,
-		GAMeasurementID: c.GAMeasurementID,
-		MetaPixelID:     c.MetaPixelID,
-		RequireConsent:  c.RequireConsent,
-		CreatedAt:       c.CreatedAt.Format(time.RFC3339),
-		UpdatedAt:       c.UpdatedAt.Format(time.RFC3339),
+		MetaTitle:          c.MetaTitle,
+		MetaDescription:    c.MetaDescription,
+		PrivacyURL:         c.PrivacyURL,
+		TermsURL:           c.TermsURL,
+		GAMeasurementID:    c.GAMeasurementID,
+		MetaPixelID:        c.MetaPixelID,
+		RequireConsent:     c.RequireConsent,
+		NotificationEmail:  c.NotificationEmail,
+		EmailNotifications: c.EmailNotifications,
+		CreatedAt:          c.CreatedAt.Format(time.RFC3339),
+		UpdatedAt:          c.UpdatedAt.Format(time.RFC3339),
 	}
 }
 
@@ -143,13 +147,15 @@ type PutCustomizationRequest struct {
 	FaviconURL      string `json:"favicon_url"`
 	Template        string `json:"template"`
 	HeaderHTML      string `json:"header_html"`
-	MetaTitle       string `json:"meta_title"`
-	MetaDescription string `json:"meta_description"`
-	PrivacyURL      string `json:"privacy_url"`
-	TermsURL        string `json:"terms_url"`
-	GAMeasurementID string `json:"ga_measurement_id"`
-	MetaPixelID     string `json:"meta_pixel_id"`
-	RequireConsent  bool   `json:"require_consent"`
+	MetaTitle          string `json:"meta_title"`
+	MetaDescription    string `json:"meta_description"`
+	PrivacyURL         string `json:"privacy_url"`
+	TermsURL           string `json:"terms_url"`
+	GAMeasurementID    string `json:"ga_measurement_id"`
+	MetaPixelID        string `json:"meta_pixel_id"`
+	RequireConsent     bool   `json:"require_consent"`
+	NotificationEmail  string `json:"notification_email"`
+	EmailNotifications bool   `json:"email_notifications"`
 }
 
 type PutCustomizationResponse struct {
@@ -189,13 +195,15 @@ func (h *PutCustomizationHandler) Serve(ctx context.Context, req *PutCustomizati
 		FaviconURL:      req.FaviconURL,
 		Template:        req.Template,
 		HeaderHTML:      req.HeaderHTML,
-		MetaTitle:       req.MetaTitle,
-		MetaDescription: req.MetaDescription,
-		PrivacyURL:      req.PrivacyURL,
-		TermsURL:        req.TermsURL,
-		GAMeasurementID: req.GAMeasurementID,
-		MetaPixelID:     req.MetaPixelID,
-		RequireConsent:  req.RequireConsent,
+		MetaTitle:          req.MetaTitle,
+		MetaDescription:    req.MetaDescription,
+		PrivacyURL:         req.PrivacyURL,
+		TermsURL:           req.TermsURL,
+		GAMeasurementID:    req.GAMeasurementID,
+		MetaPixelID:        req.MetaPixelID,
+		RequireConsent:     req.RequireConsent,
+		NotificationEmail:  req.NotificationEmail,
+		EmailNotifications: req.EmailNotifications,
 	}
 
 	if err := h.CareersService.UpsertCustomization(ctx, input); err != nil {

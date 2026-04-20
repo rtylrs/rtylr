@@ -141,6 +141,7 @@ const customizationSelectColumns = `
     COALESCE(privacy_url,''), COALESCE(terms_url,''),
     COALESCE(ga_measurement_id,''), COALESCE(meta_pixel_id,''),
     require_consent,
+    COALESCE(notification_email,''), email_notifications,
     created_at, updated_at`
 
 func scanCustomization(row interface{ Scan(...interface{}) error }) (domain.Customization, error) {
@@ -155,6 +156,7 @@ func scanCustomization(row interface{ Scan(...interface{}) error }) (domain.Cust
 		&c.PrivacyURL, &c.TermsURL,
 		&c.GAMeasurementID, &c.MetaPixelID,
 		&c.RequireConsent,
+		&c.NotificationEmail, &c.EmailNotifications,
 		&c.CreatedAt, &c.UpdatedAt,
 	)
 	return c, err
@@ -196,8 +198,9 @@ func (r *Repository) UpsertCustomization(ctx context.Context, in domain.Customiz
 	         muted_text_color, font_pairing, hero_image_url, favicon_url,
 	         template, header_html,
 	         meta_title, meta_description, privacy_url, terms_url,
-	         ga_measurement_id, meta_pixel_id, require_consent)
-	      VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
+	         ga_measurement_id, meta_pixel_id, require_consent,
+	         notification_email, email_notifications)
+	      VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
 	      ON DUPLICATE KEY UPDATE
 	        slug = VALUES(slug),
 	        brand_name = VALUES(brand_name),
@@ -220,7 +223,9 @@ func (r *Repository) UpsertCustomization(ctx context.Context, in domain.Customiz
 	        terms_url = VALUES(terms_url),
 	        ga_measurement_id = VALUES(ga_measurement_id),
 	        meta_pixel_id = VALUES(meta_pixel_id),
-	        require_consent = VALUES(require_consent)`
+	        require_consent = VALUES(require_consent),
+	        notification_email = VALUES(notification_email),
+	        email_notifications = VALUES(email_notifications)`
 	_, err := r.pool.ExecContext(ctx, q,
 		in.OwnerID, in.Slug, in.BrandName, nullStr(in.Tagline), nullStr(in.AboutBlurb),
 		nullStr(in.LogoURL), nullStr(in.PrimaryColor),
@@ -231,7 +236,8 @@ func (r *Repository) UpsertCustomization(ctx context.Context, in domain.Customiz
 		nullStr(in.MetaTitle), nullStr(in.MetaDescription),
 		nullStr(in.PrivacyURL), nullStr(in.TermsURL),
 		nullStr(in.GAMeasurementID), nullStr(in.MetaPixelID),
-		in.RequireConsent)
+		in.RequireConsent,
+		nullStr(in.NotificationEmail), in.EmailNotifications)
 	return err
 }
 

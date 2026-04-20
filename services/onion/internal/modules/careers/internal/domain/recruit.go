@@ -89,8 +89,14 @@ type Customization struct {
 	MetaPixelID     string
 	// RequireConsent flips a GDPR consent checkbox on the apply form.
 	RequireConsent bool
-	CreatedAt      time.Time
-	UpdatedAt      time.Time
+	// Email notification config. NotificationEmail is the HR-facing
+	// inbox (often a team alias like jobs@acme.com); empty = no HR
+	// ping on new submissions. EmailNotifications is the master
+	// switch so the admin can pause without wiping the address.
+	NotificationEmail  string
+	EmailNotifications bool
+	CreatedAt          time.Time
+	UpdatedAt          time.Time
 }
 
 // CustomizationInput is the write shape for create/update. Slug is
@@ -113,13 +119,15 @@ type CustomizationInput struct {
 	FaviconURL      string
 	Template        string
 	HeaderHTML      string
-	MetaTitle       string
-	MetaDescription string
-	PrivacyURL      string
-	TermsURL        string
-	GAMeasurementID string
-	MetaPixelID     string
-	RequireConsent  bool
+	MetaTitle          string
+	MetaDescription    string
+	PrivacyURL         string
+	TermsURL           string
+	GAMeasurementID    string
+	MetaPixelID        string
+	RequireConsent     bool
+	NotificationEmail  string
+	EmailNotifications bool
 }
 
 // Submission is a candidate's application to a career. resume_url is a

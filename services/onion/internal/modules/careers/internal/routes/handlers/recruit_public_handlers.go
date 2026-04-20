@@ -290,5 +290,28 @@ func (h *SubmitApplicationHandler) Serve(ctx context.Context, req *SubmitApplica
 			Message: "Failed to submit application",
 		}
 	}
+
+	// Fire-and-forget confirmation + HR notification emails. The
+	// service spawns goroutines and swallows errors; the candidate
+	// should never see their submission fail because Resend had a
+	// bad day.
+	submission := domain.Submission{
+		ID:            id,
+		CareerID:      career.ID,
+		OwnerID:       custom.OwnerID,
+		CandidateName: req.CandidateName,
+		Email:         req.Email,
+		Phone:         req.Phone,
+		ResumeURL:     req.ResumeURL,
+		CoverLetter:   req.CoverLetter,
+		AnswersJSON:   req.AnswersJSON,
+		Status:        "new",
+	}
+	adminURL := "https://recruit.rtylr.com/admin/submissions"
+	h.CareersService.SendSubmissionEmails(
+		ctx, submission, career, custom,
+		req.CandidateName, req.Email, adminURL,
+	)
+
 	return SubmitApplicationResponse{ID: id, Message: "Application received"}, nil
 }
