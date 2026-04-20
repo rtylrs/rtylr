@@ -26,6 +26,15 @@ ALTER TABLE careers ADD COLUMN salary_max DECIMAL(12,2) NULL;
 ALTER TABLE careers ADD COLUMN salary_currency VARCHAR(8) NULL;
 ALTER TABLE careers ADD COLUMN is_published BOOLEAN NOT NULL DEFAULT false;
 CREATE INDEX idx_careers_owner ON careers (owner_id);
+
+-- Backfill slugs for any pre-existing rows. Without this, legacy rows
+-- all default to slug='' and the unique index below would collide on
+-- (owner_id=0, slug='').  Safe to re-run: the WHERE clause only touches
+-- rows that are still empty.
+UPDATE careers
+  SET slug = LOWER(REPLACE(REPLACE(REPLACE(TRIM(title), ' ', '-'), '/', '-'), '.', ''))
+  WHERE slug IS NULL OR slug = '';
+
 CREATE UNIQUE INDEX uk_careers_owner_slug ON careers (owner_id, slug);
 
 -- ── careers_customizations: per-business branding ────────────────────
