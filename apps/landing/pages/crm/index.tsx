@@ -6,6 +6,7 @@ import AppLayout from '../../components/Layout/AppLayout';
 import MainLayout from '../../layouts/Main/MainLayout';
 import HelmetContainer from '../../components/HelmetContainer';
 import { productWithBreadcrumbs } from '../../lib/structured-data';
+import { CRM_FAQS } from '../../lib/faqs';
 import { APP_URLS } from '@voxire/config';
 import { navigateExternal } from '../../lib/navigation';
 import { blurFadeIn, staggerBlur, viewportOnce } from '../../lib/animations';
@@ -281,6 +282,7 @@ const CRMPage = (): JSX.Element => {
           structuredData={productWithBreadcrumbs({
             name: 'CRM',
             path: '/crm/',
+            faqs: CRM_FAQS,
             description:
               'Customer profiles, loyalty programs, and campaign tracking that connect to every other app.',
           })}

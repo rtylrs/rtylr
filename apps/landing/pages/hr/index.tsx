@@ -14,6 +14,7 @@ import AppLayout from '../../components/Layout/AppLayout';
 import MainLayout from '../../layouts/Main/MainLayout';
 import HelmetContainer from '../../components/HelmetContainer';
 import { productWithBreadcrumbs } from '../../lib/structured-data';
+import { HR_FAQS } from '../../lib/faqs';
 import { APP_URLS } from '@voxire/config';
 import { navigateExternal } from '../../lib/navigation';
 import { blurFadeIn, staggerBlur, viewportOnce } from '../../lib/animations';
@@ -135,6 +136,7 @@ const HRPage = (): JSX.Element => {
           structuredData={productWithBreadcrumbs({
             name: 'HR',
             path: '/hr/',
+            faqs: HR_FAQS,
             description:
               'Scheduling, payroll, compliance, and time-off management for modern teams.',
           })}

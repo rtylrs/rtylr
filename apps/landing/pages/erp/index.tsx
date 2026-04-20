@@ -17,6 +17,7 @@ import AppLayout from '../../components/Layout/AppLayout';
 import MainLayout from '../../layouts/Main/MainLayout';
 import HelmetContainer from '../../components/HelmetContainer';
 import { productWithBreadcrumbs } from '../../lib/structured-data';
+import { ERP_FAQS } from '../../lib/faqs';
 import { APP_URLS } from '@voxire/config';
 import { navigateExternal } from '../../lib/navigation';
 import { blurFadeIn, staggerBlur, viewportOnce } from '../../lib/animations';
@@ -132,6 +133,7 @@ const ERPPage = (): JSX.Element => {
           structuredData={productWithBreadcrumbs({
             name: 'ERP',
             path: '/erp/',
+            faqs: ERP_FAQS,
             description:
               'Real-time inventory, suppliers, purchase orders, and warehouse management.',
           })}

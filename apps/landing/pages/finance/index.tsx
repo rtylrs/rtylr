@@ -14,6 +14,7 @@ import AppLayout from '../../components/Layout/AppLayout';
 import MainLayout from '../../layouts/Main/MainLayout';
 import HelmetContainer from '../../components/HelmetContainer';
 import { productWithBreadcrumbs } from '../../lib/structured-data';
+import { FINANCE_FAQS } from '../../lib/faqs';
 import { APP_URLS } from '@voxire/config';
 import { navigateExternal } from '../../lib/navigation';
 import { blurFadeIn, staggerBlur, viewportOnce } from '../../lib/animations';
@@ -242,6 +243,7 @@ const FinancePage = (): JSX.Element => {
           structuredData={productWithBreadcrumbs({
             name: 'Finance',
             path: '/finance/',
+            faqs: FINANCE_FAQS,
             description:
               'Invoices, expenses, tax, and a real P&L in real time. Accounting that keeps up with your business.',
           })}

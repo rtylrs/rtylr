@@ -5,6 +5,8 @@ import { Check, Minus, ChevronDown } from 'lucide-react';
 import AppLayout from '../../components/Layout/AppLayout';
 import MainLayout from '../../layouts/Main/MainLayout';
 import HelmetContainer from '../../components/HelmetContainer';
+import { faqPageSchema } from '../../lib/structured-data';
+import { GLOBAL_FAQS } from '../../lib/faqs';
 import { APP_URLS } from '@voxire/config';
 import { navigateExternal } from '../../lib/navigation';
 import { blurFadeIn, staggerBlur, viewportOnce } from '../../lib/animations';
@@ -117,6 +119,7 @@ const PricingPage = (): JSX.Element => {
           title="Pricing | rtylr"
           description="Simple, transparent pricing for every team. Free to start. No credit card required."
           canonical="https://rtylr.com/pricing/"
+          structuredData={faqPageSchema(GLOBAL_FAQS)}
         />
 
         <div className={styles.pricingPage}>
