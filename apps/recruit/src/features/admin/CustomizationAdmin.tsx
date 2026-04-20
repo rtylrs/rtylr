@@ -1,7 +1,7 @@
 import React, { useEffect, useState } from 'react';
 import { toast } from 'sonner';
 import { APP_URLS } from '@voxire/config';
-import { ExternalLink, RotateCcw, Palette, Type, ImageIcon, Layout } from 'lucide-react';
+import { ExternalLink, RotateCcw, Palette, Type, ImageIcon, Layout, Search } from 'lucide-react';
 
 import { useAdminCustomization, useUpsertCustomization } from '../../shared/hooks/queries/useAdmin';
 import type { TemplateId, FontPairingId } from '../../shared/lib/types';
@@ -66,7 +66,7 @@ const TEMPLATE_DEFAULTS: Record<TemplateId, Record<string, string>> = {
   },
 };
 
-type Tab = 'brand' | 'palette' | 'typography' | 'media';
+type Tab = 'brand' | 'palette' | 'typography' | 'media' | 'seo';
 
 const CustomizationAdmin: React.FC = (): React.JSX.Element => {
   const { data } = useAdminCustomization();
@@ -90,6 +90,13 @@ const CustomizationAdmin: React.FC = (): React.JSX.Element => {
   );
   const [heroImageUrl, setHeroImageUrl] = useState(existing?.heroImageUrl ?? '');
   const [faviconUrl, setFaviconUrl] = useState(existing?.faviconUrl ?? '');
+  const [metaTitle, setMetaTitle] = useState(existing?.metaTitle ?? '');
+  const [metaDescription, setMetaDescription] = useState(existing?.metaDescription ?? '');
+  const [privacyUrl, setPrivacyUrl] = useState(existing?.privacyUrl ?? '');
+  const [termsUrl, setTermsUrl] = useState(existing?.termsUrl ?? '');
+  const [gaMeasurementId, setGaMeasurementId] = useState(existing?.gaMeasurementId ?? '');
+  const [metaPixelId, setMetaPixelId] = useState(existing?.metaPixelId ?? '');
+  const [requireConsent, setRequireConsent] = useState(existing?.requireConsent ?? false);
   const [template, setTemplate] = useState<TemplateId>(
     (existing?.template as TemplateId) ?? 'minimal'
   );
@@ -112,6 +119,13 @@ const CustomizationAdmin: React.FC = (): React.JSX.Element => {
     setFaviconUrl(existing.faviconUrl);
     setTemplate((existing.template as TemplateId) ?? 'minimal');
     setHeaderHtml(existing.headerHtml);
+    setMetaTitle(existing.metaTitle);
+    setMetaDescription(existing.metaDescription);
+    setPrivacyUrl(existing.privacyUrl);
+    setTermsUrl(existing.termsUrl);
+    setGaMeasurementId(existing.gaMeasurementId);
+    setMetaPixelId(existing.metaPixelId);
+    setRequireConsent(existing.requireConsent);
   }, [existing]);
 
   const onSubmit = (e: React.FormEvent) => {
@@ -133,6 +147,13 @@ const CustomizationAdmin: React.FC = (): React.JSX.Element => {
         faviconUrl,
         template,
         headerHtml,
+        metaTitle,
+        metaDescription,
+        privacyUrl,
+        termsUrl,
+        gaMeasurementId,
+        metaPixelId,
+        requireConsent,
       },
       {
         onSuccess: () => toast.success('Careers page saved'),
@@ -201,6 +222,9 @@ const CustomizationAdmin: React.FC = (): React.JSX.Element => {
           </TabButton>
           <TabButton active={tab === 'media'} onClick={() => setTab('media')} icon={<ImageIcon />}>
             Media
+          </TabButton>
+          <TabButton active={tab === 'seo'} onClick={() => setTab('seo')} icon={<Search />}>
+            SEO &amp; legal
           </TabButton>
         </div>
       </div>
@@ -347,6 +371,63 @@ const CustomizationAdmin: React.FC = (): React.JSX.Element => {
                   </button>
                 ))}
               </div>
+            </Section>
+          )}
+
+          {tab === 'seo' && (
+            <Section maxWidth={640}>
+              <div>
+                <div className="text-sm font-semibold">Search &amp; social</div>
+                <div className="text-xs text-white/50">
+                  Override the defaults that LinkedIn, Google, and Twitter show. Blank fields fall
+                  back to your brand name + tagline.
+                </div>
+              </div>
+              <Field label="Meta title" hint="Overrides browser tab + search result title">
+                <Input value={metaTitle} onChange={setMetaTitle} />
+              </Field>
+              <Field label="Meta description" hint="1–2 sentences, under 160 chars">
+                <Textarea value={metaDescription} onChange={setMetaDescription} rows={3} />
+              </Field>
+
+              <div className="pt-4">
+                <div className="text-sm font-semibold">Legal</div>
+                <div className="text-xs text-white/50">
+                  Links shown on the apply form. Useful for GDPR / EEO disclosures.
+                </div>
+              </div>
+              <Row>
+                <Field label="Privacy policy URL">
+                  <Input value={privacyUrl} onChange={setPrivacyUrl} type="url" />
+                </Field>
+                <Field label="Terms URL">
+                  <Input value={termsUrl} onChange={setTermsUrl} type="url" />
+                </Field>
+              </Row>
+              <label className="flex items-center gap-2 pt-1 text-sm">
+                <input
+                  type="checkbox"
+                  checked={requireConsent}
+                  onChange={(e) => setRequireConsent(e.target.checked)}
+                  className="h-4 w-4"
+                />
+                Require explicit consent checkbox on the apply form (GDPR)
+              </label>
+
+              <div className="pt-4">
+                <div className="text-sm font-semibold">Analytics</div>
+                <div className="text-xs text-white/50">
+                  Only loaded when an ID is set. Leave blank to ship zero tracking.
+                </div>
+              </div>
+              <Row>
+                <Field label="GA4 measurement ID" hint="Starts with G-">
+                  <Input value={gaMeasurementId} onChange={setGaMeasurementId} />
+                </Field>
+                <Field label="Meta Pixel ID" hint="Numeric">
+                  <Input value={metaPixelId} onChange={setMetaPixelId} />
+                </Field>
+              </Row>
             </Section>
           )}
 

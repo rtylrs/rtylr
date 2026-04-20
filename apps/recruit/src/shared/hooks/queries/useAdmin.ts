@@ -92,6 +92,13 @@ interface CustomizationBody {
   faviconUrl?: string;
   template: string;
   headerHtml?: string;
+  metaTitle?: string;
+  metaDescription?: string;
+  privacyUrl?: string;
+  termsUrl?: string;
+  gaMeasurementId?: string;
+  metaPixelId?: string;
+  requireConsent?: boolean;
 }
 
 export function useUpsertCustomization() {

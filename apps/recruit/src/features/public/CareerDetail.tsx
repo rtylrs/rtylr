@@ -3,6 +3,7 @@ import { useParams } from 'react-router-dom';
 
 import { usePublicCareer } from '../../shared/hooks/queries/usePublic';
 import { applyBrand, resolveJob } from '../../templates/resolver';
+import { applySEO, loadAnalytics, emitJobPostingJSONLD } from '../../shared/lib/seo';
 import NotFound from './NotFound';
 
 /**
@@ -16,8 +17,12 @@ const CareerDetail: React.FC = (): React.JSX.Element => {
   const { data, isLoading, error } = usePublicCareer(slug, careerSlug);
 
   useEffect(() => {
-    if (data?.customization) applyBrand(data.customization);
-  }, [data?.customization]);
+    if (!data) return;
+    applyBrand(data.customization);
+    applySEO(data.customization, { pageKind: 'career', careerTitle: data.career.title });
+    loadAnalytics(data.customization);
+    emitJobPostingJSONLD(data.career, data.customization);
+  }, [data]);
 
   if (isLoading) {
     return (

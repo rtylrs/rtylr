@@ -10,6 +10,7 @@ import {
   uploadResume,
 } from '../../shared/hooks/queries/usePublic';
 import { applyBrand } from '../../templates/resolver';
+import { applySEO, loadAnalytics } from '../../shared/lib/seo';
 import NotFound from './NotFound';
 
 /**
@@ -33,8 +34,11 @@ const ApplyPage: React.FC = (): React.JSX.Element => {
   const submit = useSubmitApplication();
 
   useEffect(() => {
-    if (data?.customization) applyBrand(data.customization);
-  }, [data?.customization]);
+    if (!data) return;
+    applyBrand(data.customization);
+    applySEO(data.customization, { pageKind: 'career', careerTitle: data.career.title });
+    loadAnalytics(data.customization);
+  }, [data]);
 
   const [candidateName, setCandidateName] = useState('');
   const [email, setEmail] = useState('');
@@ -51,6 +55,11 @@ const ApplyPage: React.FC = (): React.JSX.Element => {
   function setAnswer(fieldId: number, value: string | string[]) {
     setAnswers((prev) => ({ ...prev, [String(fieldId)]: value }));
   }
+
+  // GDPR consent — shown only when the business has require_consent
+  // on. The checkbox is required, which means the form won't submit
+  // without it.
+  const [consented, setConsented] = useState(false);
 
   // File upload state. `resumeFile` is the picked File, `uploadedKey`
   // is the R2 object key we got back after a successful upload — the
@@ -315,6 +324,57 @@ const ApplyPage: React.FC = (): React.JSX.Element => {
               onChange={(v) => setAnswer(f.id, v)}
             />
           ))}
+
+          {/* GDPR / legal consent row. The business's privacy and terms
+              URLs, when set, link out in a new tab. */}
+          {(customization.requireConsent || customization.privacyUrl || customization.termsUrl) && (
+            <label
+              className="flex items-start gap-2 rounded-md border p-3 text-sm"
+              style={{ borderColor: 'var(--recruit-border)' }}
+            >
+              <input
+                type="checkbox"
+                required={customization.requireConsent}
+                checked={consented}
+                onChange={(e) => setConsented(e.target.checked)}
+                className="mt-0.5 h-4 w-4"
+              />
+              <span style={{ color: 'var(--recruit-muted)' }}>
+                I agree to {customization.brandName}'s processing of my application data
+                {customization.privacyUrl && (
+                  <>
+                    {' '}
+                    — see the{' '}
+                    <a
+                      href={customization.privacyUrl}
+                      target="_blank"
+                      rel="noreferrer"
+                      className="underline"
+                      style={{ color: 'var(--recruit-accent)' }}
+                    >
+                      privacy policy
+                    </a>
+                  </>
+                )}
+                {customization.termsUrl && (
+                  <>
+                    {' '}
+                    and{' '}
+                    <a
+                      href={customization.termsUrl}
+                      target="_blank"
+                      rel="noreferrer"
+                      className="underline"
+                      style={{ color: 'var(--recruit-accent)' }}
+                    >
+                      terms
+                    </a>
+                  </>
+                )}
+                .
+              </span>
+            </label>
+          )}
 
           <button
             type="submit"

@@ -54,6 +54,13 @@ export interface Customization {
   faviconUrl: string;
   template: TemplateId | string;
   headerHtml: string;
+  metaTitle: string;
+  metaDescription: string;
+  privacyUrl: string;
+  termsUrl: string;
+  gaMeasurementId: string;
+  metaPixelId: string;
+  requireConsent: boolean;
   createdAt: string;
   updatedAt: string;
 }

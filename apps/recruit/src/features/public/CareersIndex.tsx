@@ -3,6 +3,7 @@ import { useParams } from 'react-router-dom';
 
 import { useBusinessCareers } from '../../shared/hooks/queries/usePublic';
 import { applyBrand, resolveIndex } from '../../templates/resolver';
+import { applySEO, loadAnalytics } from '../../shared/lib/seo';
 import NotFound from './NotFound';
 
 /**
@@ -17,7 +18,10 @@ const CareersIndex: React.FC = (): React.JSX.Element => {
   const { data, isLoading, error } = useBusinessCareers(slug);
 
   useEffect(() => {
-    if (data?.customization) applyBrand(data.customization);
+    if (!data?.customization) return;
+    applyBrand(data.customization);
+    applySEO(data.customization, { pageKind: 'index' });
+    loadAnalytics(data.customization);
   }, [data?.customization]);
 
   if (isLoading) {
