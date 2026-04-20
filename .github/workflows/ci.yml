@@ -8,6 +8,11 @@ on:
   workflow_dispatch:
 
 jobs:
+  # ── Quality gates ──────────────────────────────────────────────────
+  # These stay in the calling repo — they reference this repo's scripts
+  # (pnpm turbo typecheck/lint/build) and there's no duplication across
+  # repos to extract.
+
   check:
     name: Typecheck, Lint & Build
     runs-on: blacksmith-4vcpu-ubuntu-2404
@@ -44,6 +49,10 @@ jobs:
         run: pnpm turbo build
 
   # ── Detect which apps changed ──────────────────────────────────────
+  # dorny/paths-filter emits one boolean per app. A change under
+  # `packages/**` trips every app so shared-lib edits always reship.
+  # A manual workflow_dispatch redeploys everything regardless of diff.
+
   changes:
     name: Detect changed apps
     runs-on: ubuntu-latest
@@ -61,6 +70,7 @@ jobs:
       insights: ${{ github.event_name == 'workflow_dispatch' || steps.filter.outputs.insights }}
       menu: ${{ github.event_name == 'workflow_dispatch' || steps.filter.outputs.menu }}
       docs: ${{ github.event_name == 'workflow_dispatch' || steps.filter.outputs.docs }}
+      recruit: ${{ github.event_name == 'workflow_dispatch' || steps.filter.outputs.recruit }}
     steps:
       - name: Checkout
         uses: actions/checkout@v4
@@ -106,282 +116,141 @@ jobs:
             docs:
               - 'apps/docs/**'
               - 'packages/**'
+            recruit:
+              - 'apps/recruit/**'
+              - 'packages/**'
 
-  # ── Deploy helpers ─────────────────────────────────────────────────
-  # Each job: build the app, deploy via wrangler (direct upload = no CF build minutes used)
+  # ── Deploy jobs ────────────────────────────────────────────────────
+  # Each job is a thin call into voxire/pipelines. All app-identical
+  # build + upload logic lives there; here we only declare the per-app
+  # knobs (pnpm filter, dist dir, Cloudflare project name).
 
   deploy-landing:
-    name: Deploy Landing
     needs: [check, changes]
     if: needs.changes.outputs.landing == 'true'
-    runs-on: ubuntu-latest
-    steps:
-      - uses: actions/checkout@v4
-        with:
-          submodules: recursive
-          token: ${{ secrets.PAT_TOKEN }}
-      - uses: pnpm/action-setup@v4
-      - uses: actions/setup-node@v4
-        with:
-          node-version: 22
-          cache: pnpm
-      - run: pnpm install --frozen-lockfile
-      - run: pnpm --filter @rtylr/landing run build
-      - name: Deploy to Cloudflare Pages
-        run: npx wrangler pages deploy dist/landing --project-name=rtylr-landing
-        env:
-          CLOUDFLARE_API_TOKEN: ${{ secrets.CLOUDFLARE_API_TOKEN }}
-          CLOUDFLARE_ACCOUNT_ID: ${{ secrets.CLOUDFLARE_ACCOUNT_ID }}
+    uses: voxire/pipelines/.github/workflows/deploy-pages.yml@main
+    with:
+      app_filter: '@rtylr/landing'
+      dist_dir: dist/landing
+      project_name: rtylr-landing
+    secrets: inherit
 
   deploy-auth:
-    name: Deploy Auth
     needs: [check, changes]
     if: needs.changes.outputs.auth == 'true'
-    runs-on: ubuntu-latest
-    steps:
-      - uses: actions/checkout@v4
-        with:
-          submodules: recursive
-          token: ${{ secrets.PAT_TOKEN }}
-      - uses: pnpm/action-setup@v4
-      - uses: actions/setup-node@v4
-        with:
-          node-version: 22
-          cache: pnpm
-      - run: pnpm install --frozen-lockfile
-      - run: pnpm --filter @rtylr/auth run build
-      - name: Deploy to Cloudflare Pages
-        run: npx wrangler pages deploy dist/auth --project-name=rtylr-auth
-        env:
-          CLOUDFLARE_API_TOKEN: ${{ secrets.CLOUDFLARE_API_TOKEN }}
-          CLOUDFLARE_ACCOUNT_ID: ${{ secrets.CLOUDFLARE_ACCOUNT_ID }}
+    uses: voxire/pipelines/.github/workflows/deploy-pages.yml@main
+    with:
+      app_filter: '@rtylr/auth'
+      dist_dir: dist/auth
+      project_name: rtylr-auth
+    secrets: inherit
 
   deploy-dash:
-    name: Deploy Dash
     needs: [check, changes]
     if: needs.changes.outputs.dash == 'true'
-    runs-on: ubuntu-latest
-    steps:
-      - uses: actions/checkout@v4
-        with:
-          submodules: recursive
-          token: ${{ secrets.PAT_TOKEN }}
-      - uses: pnpm/action-setup@v4
-      - uses: actions/setup-node@v4
-        with:
-          node-version: 22
-          cache: pnpm
-      - run: pnpm install --frozen-lockfile
-      - run: pnpm --filter dash run build
-      - name: Deploy to Cloudflare Pages
-        run: npx wrangler pages deploy dist/dash --project-name=rtylr-hub
-        env:
-          CLOUDFLARE_API_TOKEN: ${{ secrets.CLOUDFLARE_API_TOKEN }}
-          CLOUDFLARE_ACCOUNT_ID: ${{ secrets.CLOUDFLARE_ACCOUNT_ID }}
+    uses: voxire/pipelines/.github/workflows/deploy-pages.yml@main
+    with:
+      app_filter: dash
+      dist_dir: dist/dash
+      project_name: rtylr-hub
+    secrets: inherit
 
   deploy-pos:
-    name: Deploy POS
     needs: [check, changes]
     if: needs.changes.outputs.pos == 'true'
-    runs-on: ubuntu-latest
-    steps:
-      - uses: actions/checkout@v4
-        with:
-          submodules: recursive
-          token: ${{ secrets.PAT_TOKEN }}
-      - uses: pnpm/action-setup@v4
-      - uses: actions/setup-node@v4
-        with:
-          node-version: 22
-          cache: pnpm
-      - run: pnpm install --frozen-lockfile
-      - run: pnpm --filter vbitez run build
-      - name: Deploy to Cloudflare Pages
-        run: npx wrangler pages deploy dist/vbitez --project-name=rtylr-pos
-        env:
-          CLOUDFLARE_API_TOKEN: ${{ secrets.CLOUDFLARE_API_TOKEN }}
-          CLOUDFLARE_ACCOUNT_ID: ${{ secrets.CLOUDFLARE_ACCOUNT_ID }}
+    uses: voxire/pipelines/.github/workflows/deploy-pages.yml@main
+    with:
+      app_filter: vbitez
+      dist_dir: dist/vbitez
+      project_name: rtylr-pos
+    secrets: inherit
 
   deploy-erp:
-    name: Deploy ERP
     needs: [check, changes]
     if: needs.changes.outputs.erp == 'true'
-    runs-on: ubuntu-latest
-    steps:
-      - uses: actions/checkout@v4
-        with:
-          submodules: recursive
-          token: ${{ secrets.PAT_TOKEN }}
-      - uses: pnpm/action-setup@v4
-      - uses: actions/setup-node@v4
-        with:
-          node-version: 22
-          cache: pnpm
-      - run: pnpm install --frozen-lockfile
-      - run: pnpm --filter @rtylr/erp run build
-      - name: Deploy to Cloudflare Pages
-        run: npx wrangler pages deploy dist/erp --project-name=rtylr-erp
-        env:
-          CLOUDFLARE_API_TOKEN: ${{ secrets.CLOUDFLARE_API_TOKEN }}
-          CLOUDFLARE_ACCOUNT_ID: ${{ secrets.CLOUDFLARE_ACCOUNT_ID }}
+    uses: voxire/pipelines/.github/workflows/deploy-pages.yml@main
+    with:
+      app_filter: '@rtylr/erp'
+      dist_dir: dist/erp
+      project_name: rtylr-erp
+    secrets: inherit
 
   deploy-crm:
-    name: Deploy CRM
     needs: [check, changes]
     if: needs.changes.outputs.crm == 'true'
-    runs-on: ubuntu-latest
-    steps:
-      - uses: actions/checkout@v4
-        with:
-          submodules: recursive
-          token: ${{ secrets.PAT_TOKEN }}
-      - uses: pnpm/action-setup@v4
-      - uses: actions/setup-node@v4
-        with:
-          node-version: 22
-          cache: pnpm
-      - run: pnpm install --frozen-lockfile
-      - run: pnpm --filter @rtylr/crm run build
-      - name: Deploy to Cloudflare Pages
-        run: npx wrangler pages deploy dist/crm --project-name=rtylr-crm
-        env:
-          CLOUDFLARE_API_TOKEN: ${{ secrets.CLOUDFLARE_API_TOKEN }}
-          CLOUDFLARE_ACCOUNT_ID: ${{ secrets.CLOUDFLARE_ACCOUNT_ID }}
+    uses: voxire/pipelines/.github/workflows/deploy-pages.yml@main
+    with:
+      app_filter: '@rtylr/crm'
+      dist_dir: dist/crm
+      project_name: rtylr-crm
+    secrets: inherit
 
   deploy-hr:
-    name: Deploy HR
     needs: [check, changes]
     if: needs.changes.outputs.hr == 'true'
-    runs-on: ubuntu-latest
-    steps:
-      - uses: actions/checkout@v4
-        with:
-          submodules: recursive
-          token: ${{ secrets.PAT_TOKEN }}
-      - uses: pnpm/action-setup@v4
-      - uses: actions/setup-node@v4
-        with:
-          node-version: 22
-          cache: pnpm
-      - run: pnpm install --frozen-lockfile
-      - run: pnpm --filter @rtylr/hr run build
-      - name: Deploy to Cloudflare Pages
-        run: npx wrangler pages deploy dist/hr --project-name=rtylr-hr
-        env:
-          CLOUDFLARE_API_TOKEN: ${{ secrets.CLOUDFLARE_API_TOKEN }}
-          CLOUDFLARE_ACCOUNT_ID: ${{ secrets.CLOUDFLARE_ACCOUNT_ID }}
+    uses: voxire/pipelines/.github/workflows/deploy-pages.yml@main
+    with:
+      app_filter: '@rtylr/hr'
+      dist_dir: dist/hr
+      project_name: rtylr-hr
+    secrets: inherit
 
   deploy-finance:
-    name: Deploy Finance
     needs: [check, changes]
     if: needs.changes.outputs.finance == 'true'
-    runs-on: ubuntu-latest
-    steps:
-      - uses: actions/checkout@v4
-        with:
-          submodules: recursive
-          token: ${{ secrets.PAT_TOKEN }}
-      - uses: pnpm/action-setup@v4
-      - uses: actions/setup-node@v4
-        with:
-          node-version: 22
-          cache: pnpm
-      - run: pnpm install --frozen-lockfile
-      - run: pnpm --filter @rtylr/finance run build
-      - name: Deploy to Cloudflare Pages
-        run: npx wrangler pages deploy dist/finance --project-name=rtylr-finance
-        env:
-          CLOUDFLARE_API_TOKEN: ${{ secrets.CLOUDFLARE_API_TOKEN }}
-          CLOUDFLARE_ACCOUNT_ID: ${{ secrets.CLOUDFLARE_ACCOUNT_ID }}
+    uses: voxire/pipelines/.github/workflows/deploy-pages.yml@main
+    with:
+      app_filter: '@rtylr/finance'
+      dist_dir: dist/finance
+      project_name: rtylr-finance
+    secrets: inherit
 
   deploy-flow:
-    name: Deploy Flow
     needs: [check, changes]
     if: needs.changes.outputs.flow == 'true'
-    runs-on: ubuntu-latest
-    steps:
-      - uses: actions/checkout@v4
-        with:
-          submodules: recursive
-          token: ${{ secrets.PAT_TOKEN }}
-      - uses: pnpm/action-setup@v4
-      - uses: actions/setup-node@v4
-        with:
-          node-version: 22
-          cache: pnpm
-      - run: pnpm install --frozen-lockfile
-      - run: pnpm --filter @rtylr/flow run build
-      - name: Deploy to Cloudflare Pages
-        run: npx wrangler pages deploy dist/flow --project-name=rtylr-flow
-        env:
-          CLOUDFLARE_API_TOKEN: ${{ secrets.CLOUDFLARE_API_TOKEN }}
-          CLOUDFLARE_ACCOUNT_ID: ${{ secrets.CLOUDFLARE_ACCOUNT_ID }}
+    uses: voxire/pipelines/.github/workflows/deploy-pages.yml@main
+    with:
+      app_filter: '@rtylr/flow'
+      dist_dir: dist/flow
+      project_name: rtylr-flow
+    secrets: inherit
 
   deploy-insights:
-    name: Deploy Insights
     needs: [check, changes]
     if: needs.changes.outputs.insights == 'true'
-    runs-on: ubuntu-latest
-    steps:
-      - uses: actions/checkout@v4
-        with:
-          submodules: recursive
-          token: ${{ secrets.PAT_TOKEN }}
-      - uses: pnpm/action-setup@v4
-      - uses: actions/setup-node@v4
-        with:
-          node-version: 22
-          cache: pnpm
-      - run: pnpm install --frozen-lockfile
-      - run: pnpm --filter @rtylr/insights run build
-      - name: Deploy to Cloudflare Pages
-        run: npx wrangler pages deploy dist/insights --project-name=rtylr-insights
-        env:
-          CLOUDFLARE_API_TOKEN: ${{ secrets.CLOUDFLARE_API_TOKEN }}
-          CLOUDFLARE_ACCOUNT_ID: ${{ secrets.CLOUDFLARE_ACCOUNT_ID }}
+    uses: voxire/pipelines/.github/workflows/deploy-pages.yml@main
+    with:
+      app_filter: '@rtylr/insights'
+      dist_dir: dist/insights
+      project_name: rtylr-insights
+    secrets: inherit
 
   deploy-menu:
-    name: Deploy Menu
     needs: [check, changes]
     if: needs.changes.outputs.menu == 'true'
-    runs-on: ubuntu-latest
-    steps:
-      - uses: actions/checkout@v4
-        with:
-          submodules: recursive
-          token: ${{ secrets.PAT_TOKEN }}
-      - uses: pnpm/action-setup@v4
-      - uses: actions/setup-node@v4
-        with:
-          node-version: 22
-          cache: pnpm
-      - run: pnpm install --frozen-lockfile
-      - run: pnpm --filter @rtylr/menu run build
-      - name: Deploy to Cloudflare Pages
-        run: npx wrangler pages deploy dist/menu --project-name=rtylr-menu
-        env:
-          CLOUDFLARE_API_TOKEN: ${{ secrets.CLOUDFLARE_API_TOKEN }}
-          CLOUDFLARE_ACCOUNT_ID: ${{ secrets.CLOUDFLARE_ACCOUNT_ID }}
+    uses: voxire/pipelines/.github/workflows/deploy-pages.yml@main
+    with:
+      app_filter: '@rtylr/menu'
+      dist_dir: dist/menu
+      project_name: rtylr-menu
+    secrets: inherit
 
   deploy-docs:
-    name: Deploy Docs
     needs: [check, changes]
     if: needs.changes.outputs.docs == 'true'
-    runs-on: ubuntu-latest
-    steps:
-      - uses: actions/checkout@v4
-        with:
-          submodules: recursive
-          token: ${{ secrets.PAT_TOKEN }}
-      - uses: pnpm/action-setup@v4
-      - uses: actions/setup-node@v4
-        with:
-          node-version: 22
-          cache: pnpm
-      - run: pnpm install --frozen-lockfile
-      - run: pnpm --filter @rtylr/docs run build
-      - name: Deploy to Cloudflare Pages
-        run: npx wrangler pages deploy dist/docs --project-name=rtylr-docs
-        env:
-          CLOUDFLARE_API_TOKEN: ${{ secrets.CLOUDFLARE_API_TOKEN }}
-          CLOUDFLARE_ACCOUNT_ID: ${{ secrets.CLOUDFLARE_ACCOUNT_ID }}
+    uses: voxire/pipelines/.github/workflows/deploy-pages.yml@main
+    with:
+      app_filter: '@rtylr/docs'
+      dist_dir: dist/docs
+      project_name: rtylr-docs
+    secrets: inherit
+
+  deploy-recruit:
+    needs: [check, changes]
+    if: needs.changes.outputs.recruit == 'true'
+    uses: voxire/pipelines/.github/workflows/deploy-pages.yml@main
+    with:
+      app_filter: '@rtylr/recruit'
+      dist_dir: dist/recruit
+      project_name: rtylr-recruit
+    secrets: inherit
