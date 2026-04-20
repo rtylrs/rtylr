@@ -32,6 +32,7 @@ type SubmissionPayload struct {
 	ResumeURL     string `json:"resume_url"`
 	CoverLetter   string `json:"cover_letter"`
 	Status        string `json:"status"`
+	AnswersJSON   string `json:"answers_json"`
 	CareerTitle   string `json:"career_title"`
 	CreatedAt     string `json:"created_at"`
 	UpdatedAt     string `json:"updated_at"`
@@ -48,6 +49,7 @@ func toSubmissionPayload(s domain.Submission) *SubmissionPayload {
 		ResumeURL:     s.ResumeURL,
 		CoverLetter:   s.CoverLetter,
 		Status:        s.Status,
+		AnswersJSON:   s.AnswersJSON,
 		CareerTitle:   s.CareerTitle,
 		CreatedAt:     s.CreatedAt.Format(time.RFC3339),
 		UpdatedAt:     s.UpdatedAt.Format(time.RFC3339),

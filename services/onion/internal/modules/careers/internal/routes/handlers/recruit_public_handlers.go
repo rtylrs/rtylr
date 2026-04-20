@@ -157,6 +157,10 @@ type GetPublicCareerRequest struct {
 type GetPublicCareerResponse struct {
 	Career        *RecruitCareerPayload `json:"career"`
 	Customization *CustomizationPayload `json:"customization"`
+	// Fields are the custom form questions the HR admin added on this
+	// role. The candidate's browser renders these inline after the
+	// default name/email/resume block.
+	Fields []*FormFieldPayload `json:"fields"`
 }
 
 func (h *GetPublicCareerHandler) Validate(_ context.Context, req *GetPublicCareerRequest) *errorModels.ServerError {
@@ -188,9 +192,22 @@ func (h *GetPublicCareerHandler) Serve(ctx context.Context, req *GetPublicCareer
 			Message: "Role not found",
 		}
 	}
+
+	// Pull custom form fields inline — a broken fetch shouldn't take
+	// down the role page, so we swallow errors and continue.
+	fields, fieldErr := h.CareersService.ListFormFieldsByCareer(ctx, c.ID)
+	if fieldErr != nil {
+		fields = nil
+	}
+	fieldPayloads := make([]*FormFieldPayload, 0, len(fields))
+	for _, f := range fields {
+		fieldPayloads = append(fieldPayloads, toFormFieldPayload(f))
+	}
+
 	return GetPublicCareerResponse{
 		Career:        toRecruitCareerPayload(c),
 		Customization: toCustomizationPayload(custom),
+		Fields:        fieldPayloads,
 	}, nil
 }
 
@@ -210,6 +227,10 @@ type SubmitApplicationRequest struct {
 	Phone         string `json:"phone"`
 	ResumeURL     string `json:"resume_url"`
 	CoverLetter   string `json:"cover_letter"`
+	// AnswersJSON is a JSON-encoded map of field_id → answer for the
+	// custom questions the admin added. The server writes it through
+	// unchanged — the HR inbox decodes it on read.
+	AnswersJSON string `json:"answers_json"`
 }
 
 type SubmitApplicationResponse struct {
@@ -259,6 +280,7 @@ func (h *SubmitApplicationHandler) Serve(ctx context.Context, req *SubmitApplica
 		Phone:         req.Phone,
 		ResumeURL:     req.ResumeURL,
 		CoverLetter:   req.CoverLetter,
+		AnswersJSON:   req.AnswersJSON,
 	}
 
 	id, err := h.CareersService.CreateSubmission(ctx, input)

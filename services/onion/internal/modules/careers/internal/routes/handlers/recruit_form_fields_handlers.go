@@ -1,0 +1,274 @@
+package handlers
+
+import (
+	"context"
+	"errors"
+	"net/http"
+	"time"
+
+	"github.com/voxire/onion/internal/modules/careers/internal/application"
+	"github.com/voxire/onion/internal/modules/careers/internal/domain"
+	authPkg "github.com/voxire/onion/internal/platform/auth"
+	errorModels "github.com/voxire/onion/internal/platform/errors"
+)
+
+// ─────────────────────────────────────────────
+// Route declarations
+// ─────────────────────────────────────────────
+
+func ListFormFieldsRoutes() []string  { return []string{"/recruit/form-fields"} }
+func CreateFormFieldRoutes() []string { return []string{"/recruit/form-fields"} }
+func UpdateFormFieldRoutes() []string { return []string{"/recruit/form-fields"} }
+func DeleteFormFieldRoutes() []string { return []string{"/recruit/form-fields"} }
+
+// ─────────────────────────────────────────────
+// Shared payload
+// ─────────────────────────────────────────────
+
+type FormFieldPayload struct {
+	ID          int64  `json:"id"`
+	CareerID    int64  `json:"career_id"`
+	OwnerID     int64  `json:"owner_id"`
+	Kind        string `json:"kind"`
+	Label       string `json:"label"`
+	Placeholder string `json:"placeholder"`
+	Required    bool   `json:"required"`
+	OptionsJSON string `json:"options_json"`
+	Position    int32  `json:"position"`
+	CreatedAt   string `json:"created_at"`
+	UpdatedAt   string `json:"updated_at"`
+}
+
+func toFormFieldPayload(f domain.FormField) *FormFieldPayload {
+	return &FormFieldPayload{
+		ID:          f.ID,
+		CareerID:    f.CareerID,
+		OwnerID:     f.OwnerID,
+		Kind:        f.Kind,
+		Label:       f.Label,
+		Placeholder: f.Placeholder,
+		Required:    f.Required,
+		OptionsJSON: f.OptionsJSON,
+		Position:    f.Position,
+		CreatedAt:   f.CreatedAt.Format(time.RFC3339),
+		UpdatedAt:   f.UpdatedAt.Format(time.RFC3339),
+	}
+}
+
+// ─────────────────────────────────────────────
+// GET /recruit/form-fields?career_id=...
+// ─────────────────────────────────────────────
+
+type ListFormFieldsHandler struct {
+	CareersService *application.Service
+}
+
+type ListFormFieldsRequest struct {
+	CareerID int64 `json:"career_id"`
+}
+
+type ListFormFieldsResponse struct {
+	Fields []*FormFieldPayload `json:"fields"`
+}
+
+func (h *ListFormFieldsHandler) Validate(_ context.Context, req *ListFormFieldsRequest) *errorModels.ServerError {
+	if req.CareerID == 0 {
+		return &errorModels.ServerError{Code: http.StatusBadRequest, Message: "career_id is required"}
+	}
+	return nil
+}
+
+func (h *ListFormFieldsHandler) Serve(ctx context.Context, req *ListFormFieldsRequest) (ListFormFieldsResponse, *errorModels.ServerError) {
+	authUser, ok := authPkg.GetAuthUser(ctx)
+	if !ok {
+		return ListFormFieldsResponse{}, errorModels.PermissionDeniedServerError()
+	}
+	fields, err := h.CareersService.ListFormFields(ctx, authUser.UserID, req.CareerID)
+	if err != nil {
+		return ListFormFieldsResponse{}, &errorModels.ServerError{
+			Code:    http.StatusInternalServerError,
+			Message: "Failed to list form fields",
+		}
+	}
+	payloads := make([]*FormFieldPayload, 0, len(fields))
+	for _, f := range fields {
+		payloads = append(payloads, toFormFieldPayload(f))
+	}
+	return ListFormFieldsResponse{Fields: payloads}, nil
+}
+
+// ─────────────────────────────────────────────
+// POST /recruit/form-fields
+// ─────────────────────────────────────────────
+
+type CreateFormFieldHandler struct {
+	CareersService *application.Service
+}
+
+type CreateFormFieldRequest struct {
+	CareerID    int64  `json:"career_id"`
+	Kind        string `json:"kind"`
+	Label       string `json:"label"`
+	Placeholder string `json:"placeholder"`
+	Required    bool   `json:"required"`
+	OptionsJSON string `json:"options_json"`
+	Position    int32  `json:"position"`
+}
+
+type CreateFormFieldResponse struct {
+	Field *FormFieldPayload `json:"field"`
+}
+
+func (h *CreateFormFieldHandler) Validate(_ context.Context, req *CreateFormFieldRequest) *errorModels.ServerError {
+	if req.CareerID == 0 {
+		return &errorModels.ServerError{Code: http.StatusBadRequest, Message: "career_id is required"}
+	}
+	if req.Kind == "" {
+		return &errorModels.ServerError{Code: http.StatusBadRequest, Message: "kind is required"}
+	}
+	if req.Label == "" {
+		return &errorModels.ServerError{Code: http.StatusBadRequest, Message: "label is required"}
+	}
+	return nil
+}
+
+func (h *CreateFormFieldHandler) Serve(ctx context.Context, req *CreateFormFieldRequest) (CreateFormFieldResponse, *errorModels.ServerError) {
+	authUser, ok := authPkg.GetAuthUser(ctx)
+	if !ok {
+		return CreateFormFieldResponse{}, errorModels.PermissionDeniedServerError()
+	}
+
+	in := domain.FormFieldInput{
+		CareerID:    req.CareerID,
+		OwnerID:     authUser.UserID,
+		Kind:        req.Kind,
+		Label:       req.Label,
+		Placeholder: req.Placeholder,
+		Required:    req.Required,
+		OptionsJSON: req.OptionsJSON,
+		Position:    req.Position,
+	}
+	if _, err := h.CareersService.CreateFormField(ctx, in); err != nil {
+		return CreateFormFieldResponse{}, &errorModels.ServerError{
+			Code:    http.StatusInternalServerError,
+			Message: "Failed to create field",
+		}
+	}
+
+	// Return the full field list so the client stays in sync without
+	// re-hitting the list endpoint — simpler than juggling the fresh
+	// ID client-side for drag-reorder.
+	fields, _ := h.CareersService.ListFormFields(ctx, authUser.UserID, req.CareerID)
+	if len(fields) == 0 {
+		return CreateFormFieldResponse{Field: nil}, nil
+	}
+	return CreateFormFieldResponse{Field: toFormFieldPayload(fields[len(fields)-1])}, nil
+}
+
+// ─────────────────────────────────────────────
+// PUT /recruit/form-fields
+// ─────────────────────────────────────────────
+
+type UpdateFormFieldHandler struct {
+	CareersService *application.Service
+}
+
+type UpdateFormFieldRequest struct {
+	ID          int64  `json:"id"`
+	CareerID    int64  `json:"career_id"`
+	Kind        string `json:"kind"`
+	Label       string `json:"label"`
+	Placeholder string `json:"placeholder"`
+	Required    bool   `json:"required"`
+	OptionsJSON string `json:"options_json"`
+	Position    int32  `json:"position"`
+}
+
+type UpdateFormFieldResponse struct {
+	Message string `json:"message"`
+}
+
+func (h *UpdateFormFieldHandler) Validate(_ context.Context, req *UpdateFormFieldRequest) *errorModels.ServerError {
+	if req.ID == 0 {
+		return &errorModels.ServerError{Code: http.StatusBadRequest, Message: "id is required"}
+	}
+	if req.Label == "" {
+		return &errorModels.ServerError{Code: http.StatusBadRequest, Message: "label is required"}
+	}
+	return nil
+}
+
+func (h *UpdateFormFieldHandler) Serve(ctx context.Context, req *UpdateFormFieldRequest) (UpdateFormFieldResponse, *errorModels.ServerError) {
+	authUser, ok := authPkg.GetAuthUser(ctx)
+	if !ok {
+		return UpdateFormFieldResponse{}, errorModels.PermissionDeniedServerError()
+	}
+
+	in := domain.FormFieldInput{
+		ID:          req.ID,
+		CareerID:    req.CareerID,
+		OwnerID:     authUser.UserID,
+		Kind:        req.Kind,
+		Label:       req.Label,
+		Placeholder: req.Placeholder,
+		Required:    req.Required,
+		OptionsJSON: req.OptionsJSON,
+		Position:    req.Position,
+	}
+	if err := h.CareersService.UpdateFormField(ctx, in); err != nil {
+		if errors.Is(err, application.ErrNotFound) {
+			return UpdateFormFieldResponse{}, &errorModels.ServerError{
+				Code:    http.StatusNotFound,
+				Message: "Field not found",
+			}
+		}
+		return UpdateFormFieldResponse{}, &errorModels.ServerError{
+			Code:    http.StatusInternalServerError,
+			Message: "Failed to update field",
+		}
+	}
+	return UpdateFormFieldResponse{Message: "Field saved"}, nil
+}
+
+// ─────────────────────────────────────────────
+// DELETE /recruit/form-fields
+// ─────────────────────────────────────────────
+
+type DeleteFormFieldHandler struct {
+	CareersService *application.Service
+}
+
+type DeleteFormFieldRequest struct {
+	ID int64 `json:"id"`
+}
+
+type DeleteFormFieldResponse struct {
+	Message string `json:"message"`
+}
+
+func (h *DeleteFormFieldHandler) Validate(_ context.Context, req *DeleteFormFieldRequest) *errorModels.ServerError {
+	if req.ID == 0 {
+		return &errorModels.ServerError{Code: http.StatusBadRequest, Message: "id is required"}
+	}
+	return nil
+}
+
+func (h *DeleteFormFieldHandler) Serve(ctx context.Context, req *DeleteFormFieldRequest) (DeleteFormFieldResponse, *errorModels.ServerError) {
+	authUser, ok := authPkg.GetAuthUser(ctx)
+	if !ok {
+		return DeleteFormFieldResponse{}, errorModels.PermissionDeniedServerError()
+	}
+	if err := h.CareersService.DeleteFormField(ctx, authUser.UserID, req.ID); err != nil {
+		if errors.Is(err, application.ErrNotFound) {
+			return DeleteFormFieldResponse{}, &errorModels.ServerError{
+				Code:    http.StatusNotFound,
+				Message: "Field not found",
+			}
+		}
+		return DeleteFormFieldResponse{}, &errorModels.ServerError{
+			Code:    http.StatusInternalServerError,
+			Message: "Failed to delete field",
+		}
+	}
+	return DeleteFormFieldResponse{Message: "Field deleted"}, nil
+}

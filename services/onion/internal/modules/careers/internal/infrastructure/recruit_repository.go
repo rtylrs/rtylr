@@ -217,11 +217,12 @@ func (r *Repository) UpsertCustomization(ctx context.Context, in domain.Customiz
 
 func (r *Repository) CreateSubmission(ctx context.Context, in domain.SubmissionInput) (int64, error) {
 	q := `INSERT INTO careers_submissions
-	        (career_id, owner_id, candidate_name, email, phone, resume_url, cover_letter)
-	      VALUES (?, ?, ?, ?, ?, ?, ?)`
+	        (career_id, owner_id, candidate_name, email, phone, resume_url, cover_letter, answers_json)
+	      VALUES (?, ?, ?, ?, ?, ?, ?, ?)`
 	res, err := r.pool.ExecContext(ctx, q,
 		in.CareerID, in.OwnerID, in.CandidateName, in.Email,
-		nullStr(in.Phone), nullStr(in.ResumeURL), nullStr(in.CoverLetter))
+		nullStr(in.Phone), nullStr(in.ResumeURL), nullStr(in.CoverLetter),
+		nullStr(in.AnswersJSON))
 	if err != nil {
 		return 0, err
 	}
@@ -232,6 +233,7 @@ func (r *Repository) ListSubmissions(ctx context.Context, ownerID int64, status 
 	q := `SELECT s.id, s.career_id, s.owner_id, s.candidate_name, s.email,
 	            COALESCE(s.phone,''), COALESCE(s.resume_url,''),
 	            COALESCE(s.cover_letter,''), s.status,
+	            COALESCE(s.answers_json, '') AS answers_json,
 	            s.created_at, s.updated_at,
 	            COALESCE(c.title, '') AS career_title
 	        FROM careers_submissions s
@@ -255,6 +257,7 @@ func (r *Repository) ListSubmissions(ctx context.Context, ownerID int64, status 
 		var s domain.Submission
 		if err := rows.Scan(&s.ID, &s.CareerID, &s.OwnerID, &s.CandidateName,
 			&s.Email, &s.Phone, &s.ResumeURL, &s.CoverLetter, &s.Status,
+			&s.AnswersJSON,
 			&s.CreatedAt, &s.UpdatedAt, &s.CareerTitle); err != nil {
 			return nil, err
 		}

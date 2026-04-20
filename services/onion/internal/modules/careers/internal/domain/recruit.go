@@ -107,6 +107,10 @@ type CustomizationInput struct {
 // through whatever storage they configured. A proper upload endpoint
 // is a follow-up; storing the URL keeps the schema stable across that
 // change.
+//
+// AnswersJSON is a JSON object keyed by form_field_id → answer. The
+// server never introspects it; the admin UI decodes it alongside the
+// field definitions to render the HR inbox.
 type Submission struct {
 	ID            int64
 	CareerID      int64
@@ -117,6 +121,7 @@ type Submission struct {
 	ResumeURL     string
 	CoverLetter   string
 	Status        string
+	AnswersJSON   string
 	CreatedAt     time.Time
 	UpdatedAt     time.Time
 	// CareerTitle is a denormalised display field populated by the
@@ -135,4 +140,5 @@ type SubmissionInput struct {
 	Phone         string
 	ResumeURL     string
 	CoverLetter   string
+	AnswersJSON   string
 }

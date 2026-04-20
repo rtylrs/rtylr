@@ -119,4 +119,23 @@ func RegisterRoutes(ctx context.Context, router *chi.Mux, careersService *applic
 		ctx, router, handlers.ReorderSectionsRoutes(),
 		&handlers.ReorderSectionsHandler{CareersService: careersService},
 	)
+
+	// Per-career form fields. Admin-only endpoints — public apply
+	// receives the field list inline in GetPublicCareerResponse.
+	serverHttp.RegisterGETWithValidation[handlers.ListFormFieldsRequest, handlers.ListFormFieldsResponse](
+		ctx, router, handlers.ListFormFieldsRoutes(),
+		&handlers.ListFormFieldsHandler{CareersService: careersService},
+	)
+	serverHttp.RegisterPOSTWithValidation[handlers.CreateFormFieldRequest, handlers.CreateFormFieldResponse](
+		ctx, router, handlers.CreateFormFieldRoutes(),
+		&handlers.CreateFormFieldHandler{CareersService: careersService},
+	)
+	serverHttp.RegisterPUTWithValidation[handlers.UpdateFormFieldRequest, handlers.UpdateFormFieldResponse](
+		ctx, router, handlers.UpdateFormFieldRoutes(),
+		&handlers.UpdateFormFieldHandler{CareersService: careersService},
+	)
+	serverHttp.RegisterDELETEWithValidation[handlers.DeleteFormFieldRequest, handlers.DeleteFormFieldResponse](
+		ctx, router, handlers.DeleteFormFieldRoutes(),
+		&handlers.DeleteFormFieldHandler{CareersService: careersService},
+	)
 }
