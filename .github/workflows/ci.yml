@@ -45,6 +45,12 @@ jobs:
       - name: Lint
         run: pnpm turbo lint
 
+      # Unit tests run across every workspace via the root vitest
+      # config. Gating here means a broken mapper or schema builder
+      # blocks the merge instead of surfacing in prod.
+      - name: Test
+        run: pnpm test
+
       - name: Build
         run: pnpm turbo build
 
