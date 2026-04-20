@@ -81,6 +81,10 @@ type ListPublicCareersRequest struct {
 type ListPublicCareersResponse struct {
 	Careers       []*RecruitCareerPayload `json:"careers"`
 	Customization *CustomizationPayload   `json:"customization"`
+	// Sections are the content blocks (perks, culture, etc.) a
+	// business has enabled. Returned inline so the public page render
+	// is one request, not three.
+	Sections []*SectionPayload `json:"sections"`
 }
 
 func (h *ListPublicCareersHandler) Validate(_ context.Context, req *ListPublicCareersRequest) *errorModels.ServerError {
@@ -117,9 +121,23 @@ func (h *ListPublicCareersHandler) Serve(ctx context.Context, req *ListPublicCar
 	for _, c := range careers {
 		payloads = append(payloads, toRecruitCareerPayload(c))
 	}
+
+	// Include enabled sections inline. Errors here are non-fatal —
+	// the public page still renders without sections if the fetch
+	// fails, which is better than dropping the whole careers list.
+	sections, secErr := h.CareersService.ListSections(ctx, custom.OwnerID, true)
+	if secErr != nil {
+		sections = nil
+	}
+	sectionPayloads := make([]*SectionPayload, 0, len(sections))
+	for _, s := range sections {
+		sectionPayloads = append(sectionPayloads, toSectionPayload(s))
+	}
+
 	return ListPublicCareersResponse{
 		Careers:       payloads,
 		Customization: toCustomizationPayload(custom),
+		Sections:      sectionPayloads,
 	}, nil
 }
 

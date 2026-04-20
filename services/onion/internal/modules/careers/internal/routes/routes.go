@@ -95,4 +95,28 @@ func RegisterRoutes(ctx context.Context, router *chi.Mux, careersService *applic
 	for _, pattern := range handlers.PublicOGRoutes() {
 		router.Get(pattern, ogHandler)
 	}
+
+	// Content sections (perks, culture, testimonials, etc.). All admin
+	// endpoints — public pages receive sections inline via
+	// ListPublicCareersResponse.
+	serverHttp.RegisterGET[handlers.ListSectionsRequest, handlers.ListSectionsResponse](
+		ctx, router, handlers.ListSectionsRoutes(),
+		&handlers.ListSectionsHandler{CareersService: careersService},
+	)
+	serverHttp.RegisterPOSTWithValidation[handlers.CreateSectionRequest, handlers.CreateSectionResponse](
+		ctx, router, handlers.CreateSectionRoutes(),
+		&handlers.CreateSectionHandler{CareersService: careersService},
+	)
+	serverHttp.RegisterPUTWithValidation[handlers.UpdateSectionRequest, handlers.UpdateSectionResponse](
+		ctx, router, handlers.UpdateSectionRoutes(),
+		&handlers.UpdateSectionHandler{CareersService: careersService},
+	)
+	serverHttp.RegisterDELETEWithValidation[handlers.DeleteSectionRequest, handlers.DeleteSectionResponse](
+		ctx, router, handlers.DeleteSectionRoutes(),
+		&handlers.DeleteSectionHandler{CareersService: careersService},
+	)
+	serverHttp.RegisterPUTWithValidation[handlers.ReorderSectionsRequest, handlers.ReorderSectionsResponse](
+		ctx, router, handlers.ReorderSectionsRoutes(),
+		&handlers.ReorderSectionsHandler{CareersService: careersService},
+	)
 }

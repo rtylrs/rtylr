@@ -1,0 +1,54 @@
+package application
+
+import (
+	"context"
+	"errors"
+
+	"github.com/voxire/onion/internal/modules/careers/internal/domain"
+	"github.com/voxire/onion/internal/modules/careers/internal/infrastructure"
+)
+
+// Sections service — wraps the repository with permission-agnostic
+// business methods. Handlers translate sentinel errors into HTTP
+// codes; callers don't touch sql or infrastructure types.
+
+// ListSections returns all of a tenant's sections. `enabledOnly=true`
+// is used by the public page load so draft sections stay hidden.
+func (s *Service) ListSections(ctx context.Context, ownerID int64, enabledOnly bool) ([]domain.Section, error) {
+	return s.repo.ListSections(ctx, ownerID, enabledOnly)
+}
+
+func (s *Service) CreateSection(ctx context.Context, in domain.SectionInput) (int64, error) {
+	// When position isn't specified we append — count the existing
+	// sections and use that as the new row's position. Callers that
+	// want a specific slot pass their own position.
+	if in.Position == 0 {
+		existing, err := s.repo.ListSections(ctx, in.OwnerID, false)
+		if err == nil {
+			in.Position = int32(len(existing))
+		}
+	}
+	return s.repo.CreateSection(ctx, in)
+}
+
+func (s *Service) UpdateSection(ctx context.Context, in domain.SectionInput) error {
+	if _, err := s.repo.GetSection(ctx, in.OwnerID, in.ID); err != nil {
+		if errors.Is(err, infrastructure.ErrSectionNotFound) {
+			return ErrNotFound
+		}
+		return err
+	}
+	return s.repo.UpdateSection(ctx, in)
+}
+
+func (s *Service) ReorderSections(ctx context.Context, ownerID int64, orderedIDs []int64) error {
+	return s.repo.ReorderSections(ctx, ownerID, orderedIDs)
+}
+
+func (s *Service) DeleteSection(ctx context.Context, ownerID, sectionID int64) error {
+	err := s.repo.DeleteSection(ctx, ownerID, sectionID)
+	if errors.Is(err, infrastructure.ErrSectionNotFound) {
+		return ErrNotFound
+	}
+	return err
+}
