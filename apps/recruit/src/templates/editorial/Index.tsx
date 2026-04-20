@@ -3,12 +3,13 @@ import { Link } from 'react-router-dom';
 import { MapPin } from 'lucide-react';
 
 import Header from '../shared/Header';
+import Sections from '../shared/Sections';
 import type { IndexProps } from '../resolver';
 
 // Editorial — magazine-style. Serif display type, generous whitespace,
 // hero panel with the tagline blown up. For businesses that want their
 // careers page to read like a feature story rather than a job board.
-const EditorialIndex: React.FC<IndexProps> = ({ careers, customization }) => {
+const EditorialIndex: React.FC<IndexProps> = ({ careers, customization, sections }) => {
   return (
     <div className="min-h-screen bg-white">
       <Header customization={customization} />
@@ -77,6 +78,7 @@ const EditorialIndex: React.FC<IndexProps> = ({ careers, customization }) => {
           )}
         </div>
       </section>
+      <Sections sections={sections} />
     </div>
   );
 };

@@ -7,7 +7,7 @@ import EditorialJob from './editorial/Job';
 import BoldIndex from './bold/Index';
 import BoldJob from './bold/Job';
 import { loadFontPairing } from './fonts';
-import type { Customization, RecruitCareer } from '../shared/lib/types';
+import type { Customization, RecruitCareer, Section } from '../shared/lib/types';
 
 // The template a business picks in their Customization record resolves
 // to a component tree here. Each template implements the same two
@@ -18,6 +18,7 @@ import type { Customization, RecruitCareer } from '../shared/lib/types';
 export interface IndexProps {
   careers: RecruitCareer[];
   customization: Customization;
+  sections: Section[];
 }
 
 export interface JobProps {

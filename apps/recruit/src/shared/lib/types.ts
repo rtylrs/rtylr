@@ -58,6 +58,53 @@ export interface Customization {
   updatedAt: string;
 }
 
+// SectionKind is the discriminator for content sections. Templates
+// render a given section by switching on this value; unknown kinds
+// fall through to a plain-text renderer so older clients still show
+// something reasonable if a new kind is shipped before they update.
+export type SectionKind =
+  | 'perks'
+  | 'culture'
+  | 'testimonial'
+  | 'video'
+  | 'faq'
+  | 'values'
+  | 'cta'
+  | string;
+
+export interface Section {
+  id: number;
+  ownerId: number;
+  kind: SectionKind;
+  title: string;
+  body: string;
+  mediaUrl: string;
+  // itemsJson is a pre-serialised JSON string. Templates parse it per
+  // kind; the wire type stays opaque so adding new structured shapes
+  // doesn't require a schema migration on the frontend.
+  itemsJson: string;
+  position: number;
+  enabled: boolean;
+  createdAt: string;
+  updatedAt: string;
+}
+
+// Parsed shapes of items_json per kind — used by both the admin editor
+// and the public template renderers.
+export interface PerkItem {
+  icon?: string; // lucide icon name
+  label: string;
+  blurb?: string;
+}
+export interface FaqItem {
+  question: string;
+  answer: string;
+}
+export interface ValueItem {
+  label: string;
+  blurb?: string;
+}
+
 export interface Submission {
   id: number;
   careerId: number;

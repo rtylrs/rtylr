@@ -1,7 +1,7 @@
 import { unwrap } from '@voxire/api';
 import { useMutation, useQuery } from '@tanstack/react-query';
 import { safe } from '../../lib/api';
-import type { Customization, RecruitCareer } from '../../lib/types';
+import type { Customization, RecruitCareer, Section } from '../../lib/types';
 
 // Public (anonymous) hooks — used by the candidate-facing pages.
 // Every request is scoped by the URL slug so we don't need auth.
@@ -9,6 +9,7 @@ import type { Customization, RecruitCareer } from '../../lib/types';
 interface ListPublicCareersResponse {
   careers: RecruitCareer[];
   customization: Customization;
+  sections: Section[];
 }
 
 export function useBusinessCareers(slug: string | undefined) {

@@ -3,12 +3,13 @@ import { Link } from 'react-router-dom';
 import { ArrowUpRight } from 'lucide-react';
 
 import Header from '../shared/Header';
+import Sections from '../shared/Sections';
 import type { IndexProps } from '../resolver';
 
 // Bold — saturated accent block, oversized type, aggressive hover.
 // For businesses that want the careers page to feel like a campaign
 // landing page. Best paired with a strong primary_color.
-const BoldIndex: React.FC<IndexProps> = ({ careers, customization }) => {
+const BoldIndex: React.FC<IndexProps> = ({ careers, customization, sections }) => {
   return (
     <div className="min-h-screen bg-white">
       <Header customization={customization} />
@@ -75,6 +76,7 @@ const BoldIndex: React.FC<IndexProps> = ({ careers, customization }) => {
           )}
         </div>
       </section>
+      <Sections sections={sections} />
     </div>
   );
 };

@@ -37,7 +37,13 @@ const CareersIndex: React.FC = (): React.JSX.Element => {
   if (error || !data) return <NotFound />;
 
   const Template = resolveIndex(data.customization.template);
-  return <Template careers={data.careers} customization={data.customization} />;
+  return (
+    <Template
+      careers={data.careers}
+      customization={data.customization}
+      sections={data.sections ?? []}
+    />
+  );
 };
 
 export default CareersIndex;

@@ -1,7 +1,7 @@
 import { unwrap } from '@voxire/api';
 import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query';
 import { safe } from '../../lib/api';
-import type { Customization, RecruitCareer, Submission } from '../../lib/types';
+import type { Customization, RecruitCareer, Section, Submission } from '../../lib/types';
 
 // Admin hooks — require auth. Every mutation invalidates the matching
 // list query so the HR team sees edits live without a manual refresh.
@@ -143,4 +143,64 @@ export async function fetchResumeURL(submissionId: number): Promise<string> {
     })
   );
   return res.url;
+}
+
+// ── sections ─────────────────────────────────────────────────────────
+
+interface ListSectionsResponse {
+  sections: Section[];
+}
+
+export function useAdminSections() {
+  return useQuery({
+    queryKey: ['recruit', 'admin', 'sections'],
+    queryFn: () => unwrap(safe.get<ListSectionsResponse>('/recruit/sections')),
+  });
+}
+
+export interface SectionBody {
+  id?: number;
+  kind: string;
+  title?: string;
+  body?: string;
+  mediaUrl?: string;
+  itemsJson?: string;
+  position?: number;
+  enabled: boolean;
+}
+
+export function useCreateSection() {
+  const qc = useQueryClient();
+  return useMutation({
+    mutationFn: (body: SectionBody) =>
+      unwrap(safe.post<{ section: Section }>('/recruit/sections', body)),
+    onSuccess: () => qc.invalidateQueries({ queryKey: ['recruit', 'admin', 'sections'] }),
+  });
+}
+
+export function useUpdateSection() {
+  const qc = useQueryClient();
+  return useMutation({
+    mutationFn: (body: SectionBody) =>
+      unwrap(safe.put<{ message: string }>('/recruit/sections', body)),
+    onSuccess: () => qc.invalidateQueries({ queryKey: ['recruit', 'admin', 'sections'] }),
+  });
+}
+
+export function useDeleteSection() {
+  const qc = useQueryClient();
+  return useMutation({
+    mutationFn: (id: number) =>
+      unwrap(safe.delete<{ message: string }>('/recruit/sections', { data: { id } })),
+    onSuccess: () => qc.invalidateQueries({ queryKey: ['recruit', 'admin', 'sections'] }),
+  });
+}
+
+export function useReorderSections() {
+  const qc = useQueryClient();
+  return useMutation({
+    mutationFn: (orderedIds: number[]) =>
+      unwrap(safe.put<{ message: string }>('/recruit/sections/reorder', { orderedIds })),
+    onSuccess: () => qc.invalidateQueries({ queryKey: ['recruit', 'admin', 'sections'] }),
+  });
 }

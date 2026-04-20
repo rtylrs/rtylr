@@ -12,6 +12,7 @@ import AdminLayout from './features/admin/AdminLayout';
 import CareersAdmin from './features/admin/CareersAdmin';
 import SubmissionsAdmin from './features/admin/SubmissionsAdmin';
 import CustomizationAdmin from './features/admin/CustomizationAdmin';
+import SectionsAdmin from './features/admin/SectionsAdmin';
 
 /**
  * Recruit is a split app: the `/admin/*` routes are the HR back-office
@@ -34,6 +35,7 @@ const AdminShell: React.FC = (): React.JSX.Element => (
         <Route index element={<CareersAdmin />} />
         <Route path="careers" element={<CareersAdmin />} />
         <Route path="submissions" element={<SubmissionsAdmin />} />
+        <Route path="sections" element={<SectionsAdmin />} />
         <Route path="customization" element={<CustomizationAdmin />} />
       </Route>
     </Routes>

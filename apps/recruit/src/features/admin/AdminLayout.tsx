@@ -1,6 +1,6 @@
 import React from 'react';
 import { NavLink, Outlet } from 'react-router-dom';
-import { Briefcase, Inbox, Palette, ArrowLeft } from 'lucide-react';
+import { Briefcase, Inbox, Palette, ArrowLeft, LayoutGrid } from 'lucide-react';
 import { APP_URLS } from '@voxire/config';
 
 /**
@@ -22,6 +22,11 @@ const AdminLayout: React.FC = (): React.JSX.Element => {
             to="/admin/submissions"
             icon={<Inbox className="h-4 w-4" />}
             label="Submissions"
+          />
+          <AdminLink
+            to="/admin/sections"
+            icon={<LayoutGrid className="h-4 w-4" />}
+            label="Page sections"
           />
           <AdminLink
             to="/admin/customization"
