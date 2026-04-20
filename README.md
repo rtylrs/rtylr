@@ -1,28 +1,35 @@
 # rtylr
 
-The all-in-one business operating system for SMBs. 11 apps, 11 shared packages, 1,250+ tests.
+The all-in-one business operating system for SMBs. 13 apps, 13 shared packages.
 
 ## Architecture
 
-Frontend monorepo with 11 apps and 11 shared packages. pnpm workspaces + Turborepo.
+Frontend monorepo with 13 apps and 13 shared packages. pnpm workspaces + Turborepo.
 
-**Stack:** React 19, Vite 7, TypeScript 5.9 (strict), Tailwind CSS, TanStack Query v5, Zustand, neverthrow, motion
+**Stack:** React 19, Vite 7, Next.js 15 (landing), TypeScript 5.9 (strict), Tailwind CSS, TanStack Query v5, Zustand, neverthrow, motion
 
 ## Apps
 
-| App      | Port | Package           | Description                                                |
-| -------- | ---- | ----------------- | ---------------------------------------------------------- |
-| Hub      | 5175 | `hub`             | Owner command center, dashboard, team management, settings |
-| Auth     | 5176 | `@rtylr/auth`     | Login, register, password reset, invite accept             |
-| Menu     | 5177 | `@rtylr/menu`     | Customer-facing digital menu with QR codes                 |
-| POS      | 5178 | `vbitez`          | Point of sale terminal (Tauri v2 desktop)                  |
-| ERP      | 5179 | `@rtylr/erp`      | Inventory, suppliers, purchasing, stock management         |
-| HR       | 5180 | `@rtylr/hr`       | Staff, shifts, payroll, time off, reviews                  |
-| CRM      | 5181 | `@rtylr/crm`      | Customers, loyalty, campaigns, segments                    |
-| Finance  | 5182 | `@rtylr/finance`  | Invoices, expenses, P&L, tax, reconciliation               |
-| Flow     | 5183 | `@rtylr/flow`     | Projects, tasks, roadmaps, cycles, team workload           |
-| Insights | 5187 | `@rtylr/insights` | Cross-app analytics, revenue, operations, reports          |
-| Landing  | 4200 | `@rtylr/landing`  | Marketing site (Next.js 15)                                |
+| App      | Port | Package           | Description                                                    |
+| -------- | ---- | ----------------- | -------------------------------------------------------------- |
+| Dash     | 5175 | `dash`            | Account center — billing, plan, profile. Entry point from auth |
+| Auth     | 5176 | `@rtylr/auth`     | Login, register, password reset, invite accept                 |
+| Menu     | 5177 | `@rtylr/menu`     | Customer-facing digital menu with QR codes                     |
+| POS      | 5178 | `vbitez`          | Point of sale terminal (Tauri v2 desktop)                      |
+| ERP      | 5179 | `@rtylr/erp`      | Inventory, suppliers, purchasing, stock management             |
+| HR       | 5180 | `@rtylr/hr`       | Staff, shifts, payroll, time off, reviews                      |
+| CRM      | 5181 | `@rtylr/crm`      | Customers, loyalty, campaigns, segments                        |
+| Finance  | 5182 | `@rtylr/finance`  | Invoices, expenses, P&L, tax, reconciliation                   |
+| Flow     | 5183 | `@rtylr/flow`     | Projects, tasks, roadmaps, cycles, team workload               |
+| Recruit  | 5184 | `@rtylr/recruit`  | Candidate careers sites + HR submissions inbox                 |
+| Insights | 5187 | `@rtylr/insights` | Cross-app analytics, revenue, operations, reports              |
+| Docs     | 5186 | `@rtylr/docs`     | Internal + public product documentation                        |
+| Landing  | 4200 | `@rtylr/landing`  | Marketing site — rtylr.com (Next.js 15 static export)          |
+
+Apps are standalone — each has its own auth gate (via `@voxire/auth` `AppGuard`),
+its own settings, and its own in-app team/invite flow. Dash is the account
+center, not a hub-of-apps. A business can buy one app and use it without ever
+touching the others.
 
 ## Shared Packages
 
@@ -32,10 +39,12 @@ Frontend monorepo with 11 apps and 11 shared packages. pnpm workspaces + Turbore
 | `@voxire/permissions`     | Typed RBAC with platform roles, POS roles, and 100+ granular capabilities        |
 | `@voxire/config`          | `APP_URLS`, `APP_CONFIG`, theme injection, brand colors                          |
 | `@voxire/types`           | `UserRole`, `AppId`, `User` interface                                            |
+| `@voxire/contracts`       | Generated TypeScript types from voxie protobuf contracts                         |
 | `@voxire/ui`              | Radix-based primitives (Dialog, Select, Switch, etc.)                            |
 | `@voxire/components`      | HelmetContainer, Button, Modal, Spinner, FullScreenLoader                        |
-| `@voxire/auth`            | Cookie helpers, auth guards, user store                                          |
+| `@voxire/auth`            | Cookie helpers, `AppGuard` with per-app `apps[]` gating, user store              |
 | `@voxire/utils`           | `useDebounce`, `useMediaQuery`, `useTheme`, formatting, validation               |
+| `@voxire/i18n`            | Shared i18next setup and translation helpers                                     |
 | `@voxire/assets`          | Shared SCSS variables and static assets                                          |
 | `@voxire/menu`            | Customer-facing menu page components                                             |
 | `@voxire/tailwind-config` | Shared Tailwind CSS preset                                                       |
