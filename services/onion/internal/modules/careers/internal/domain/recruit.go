@@ -76,6 +76,19 @@ type Customization struct {
 	FaviconURL     string
 	Template       string
 	HeaderHTML     string
+	// SEO overrides — defaults are derived from brand_name + tagline
+	// when these are empty.
+	MetaTitle       string
+	MetaDescription string
+	// Legal / consent links surfaced in the apply form. Empty = hide.
+	PrivacyURL string
+	TermsURL   string
+	// Analytics — frontend injects GA / Pixel loaders conditionally on
+	// each ID being non-empty.
+	GAMeasurementID string
+	MetaPixelID     string
+	// RequireConsent flips a GDPR consent checkbox on the apply form.
+	RequireConsent bool
 	CreatedAt      time.Time
 	UpdatedAt      time.Time
 }
@@ -84,22 +97,29 @@ type Customization struct {
 // validated by the service — the unique index on the table is the
 // backstop, not the front line.
 type CustomizationInput struct {
-	OwnerID        int64
-	Slug           string
-	BrandName      string
-	Tagline        string
-	AboutBlurb     string
-	LogoURL        string
-	PrimaryColor   string
-	AccentColor    string
-	BgColor        string
-	TextColor      string
-	MutedTextColor string
-	FontPairing    string
-	HeroImageURL   string
-	FaviconURL     string
-	Template       string
-	HeaderHTML     string
+	OwnerID         int64
+	Slug            string
+	BrandName       string
+	Tagline         string
+	AboutBlurb      string
+	LogoURL         string
+	PrimaryColor    string
+	AccentColor     string
+	BgColor         string
+	TextColor       string
+	MutedTextColor  string
+	FontPairing     string
+	HeroImageURL    string
+	FaviconURL      string
+	Template        string
+	HeaderHTML      string
+	MetaTitle       string
+	MetaDescription string
+	PrivacyURL      string
+	TermsURL        string
+	GAMeasurementID string
+	MetaPixelID     string
+	RequireConsent  bool
 }
 
 // Submission is a candidate's application to a career. resume_url is a

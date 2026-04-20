@@ -24,48 +24,62 @@ func PutRecruitCustomizationRoutes() []string { return []string{"/recruit/custom
 // ─────────────────────────────────────────────
 
 type CustomizationPayload struct {
-	ID             int64  `json:"id"`
-	OwnerID        int64  `json:"owner_id"`
-	Slug           string `json:"slug"`
-	BrandName      string `json:"brand_name"`
-	Tagline        string `json:"tagline"`
-	AboutBlurb     string `json:"about_blurb"`
-	LogoURL        string `json:"logo_url"`
-	PrimaryColor   string `json:"primary_color"`
-	AccentColor    string `json:"accent_color"`
-	BgColor        string `json:"bg_color"`
-	TextColor      string `json:"text_color"`
-	MutedTextColor string `json:"muted_text_color"`
-	FontPairing    string `json:"font_pairing"`
-	HeroImageURL   string `json:"hero_image_url"`
-	FaviconURL     string `json:"favicon_url"`
-	Template       string `json:"template"`
-	HeaderHTML     string `json:"header_html"`
-	CreatedAt      string `json:"created_at"`
-	UpdatedAt      string `json:"updated_at"`
+	ID              int64  `json:"id"`
+	OwnerID         int64  `json:"owner_id"`
+	Slug            string `json:"slug"`
+	BrandName       string `json:"brand_name"`
+	Tagline         string `json:"tagline"`
+	AboutBlurb      string `json:"about_blurb"`
+	LogoURL         string `json:"logo_url"`
+	PrimaryColor    string `json:"primary_color"`
+	AccentColor     string `json:"accent_color"`
+	BgColor         string `json:"bg_color"`
+	TextColor       string `json:"text_color"`
+	MutedTextColor  string `json:"muted_text_color"`
+	FontPairing     string `json:"font_pairing"`
+	HeroImageURL    string `json:"hero_image_url"`
+	FaviconURL      string `json:"favicon_url"`
+	Template        string `json:"template"`
+	HeaderHTML      string `json:"header_html"`
+	MetaTitle       string `json:"meta_title"`
+	MetaDescription string `json:"meta_description"`
+	PrivacyURL      string `json:"privacy_url"`
+	TermsURL        string `json:"terms_url"`
+	GAMeasurementID string `json:"ga_measurement_id"`
+	MetaPixelID     string `json:"meta_pixel_id"`
+	RequireConsent  bool   `json:"require_consent"`
+	CreatedAt       string `json:"created_at"`
+	UpdatedAt       string `json:"updated_at"`
 }
 
 func toCustomizationPayload(c domain.Customization) *CustomizationPayload {
 	return &CustomizationPayload{
-		ID:             c.ID,
-		OwnerID:        c.OwnerID,
-		Slug:           c.Slug,
-		BrandName:      c.BrandName,
-		Tagline:        c.Tagline,
-		AboutBlurb:     c.AboutBlurb,
-		LogoURL:        c.LogoURL,
-		PrimaryColor:   c.PrimaryColor,
-		AccentColor:    c.AccentColor,
-		BgColor:        c.BgColor,
-		TextColor:      c.TextColor,
-		MutedTextColor: c.MutedTextColor,
-		FontPairing:    c.FontPairing,
-		HeroImageURL:   c.HeroImageURL,
+		ID:              c.ID,
+		OwnerID:         c.OwnerID,
+		Slug:            c.Slug,
+		BrandName:       c.BrandName,
+		Tagline:         c.Tagline,
+		AboutBlurb:      c.AboutBlurb,
+		LogoURL:         c.LogoURL,
+		PrimaryColor:    c.PrimaryColor,
+		AccentColor:     c.AccentColor,
+		BgColor:         c.BgColor,
+		TextColor:       c.TextColor,
+		MutedTextColor:  c.MutedTextColor,
+		FontPairing:     c.FontPairing,
+		HeroImageURL:    c.HeroImageURL,
 		FaviconURL:     c.FaviconURL,
-		Template:       c.Template,
-		HeaderHTML:     c.HeaderHTML,
-		CreatedAt:      c.CreatedAt.Format(time.RFC3339),
-		UpdatedAt:      c.UpdatedAt.Format(time.RFC3339),
+		Template:        c.Template,
+		HeaderHTML:      c.HeaderHTML,
+		MetaTitle:       c.MetaTitle,
+		MetaDescription: c.MetaDescription,
+		PrivacyURL:      c.PrivacyURL,
+		TermsURL:        c.TermsURL,
+		GAMeasurementID: c.GAMeasurementID,
+		MetaPixelID:     c.MetaPixelID,
+		RequireConsent:  c.RequireConsent,
+		CreatedAt:       c.CreatedAt.Format(time.RFC3339),
+		UpdatedAt:       c.UpdatedAt.Format(time.RFC3339),
 	}
 }
 
@@ -114,21 +128,28 @@ type PutCustomizationHandler struct {
 }
 
 type PutCustomizationRequest struct {
-	Slug           string `json:"slug"`
-	BrandName      string `json:"brand_name"`
-	Tagline        string `json:"tagline"`
-	AboutBlurb     string `json:"about_blurb"`
-	LogoURL        string `json:"logo_url"`
-	PrimaryColor   string `json:"primary_color"`
-	AccentColor    string `json:"accent_color"`
-	BgColor        string `json:"bg_color"`
-	TextColor      string `json:"text_color"`
-	MutedTextColor string `json:"muted_text_color"`
-	FontPairing    string `json:"font_pairing"`
-	HeroImageURL   string `json:"hero_image_url"`
-	FaviconURL     string `json:"favicon_url"`
-	Template       string `json:"template"`
-	HeaderHTML     string `json:"header_html"`
+	Slug            string `json:"slug"`
+	BrandName       string `json:"brand_name"`
+	Tagline         string `json:"tagline"`
+	AboutBlurb      string `json:"about_blurb"`
+	LogoURL         string `json:"logo_url"`
+	PrimaryColor    string `json:"primary_color"`
+	AccentColor     string `json:"accent_color"`
+	BgColor         string `json:"bg_color"`
+	TextColor       string `json:"text_color"`
+	MutedTextColor  string `json:"muted_text_color"`
+	FontPairing     string `json:"font_pairing"`
+	HeroImageURL    string `json:"hero_image_url"`
+	FaviconURL      string `json:"favicon_url"`
+	Template        string `json:"template"`
+	HeaderHTML      string `json:"header_html"`
+	MetaTitle       string `json:"meta_title"`
+	MetaDescription string `json:"meta_description"`
+	PrivacyURL      string `json:"privacy_url"`
+	TermsURL        string `json:"terms_url"`
+	GAMeasurementID string `json:"ga_measurement_id"`
+	MetaPixelID     string `json:"meta_pixel_id"`
+	RequireConsent  bool   `json:"require_consent"`
 }
 
 type PutCustomizationResponse struct {
@@ -152,22 +173,29 @@ func (h *PutCustomizationHandler) Serve(ctx context.Context, req *PutCustomizati
 	}
 
 	input := domain.CustomizationInput{
-		OwnerID:        authUser.UserID,
-		Slug:           req.Slug,
-		BrandName:      req.BrandName,
-		Tagline:        req.Tagline,
-		AboutBlurb:     req.AboutBlurb,
-		LogoURL:        req.LogoURL,
-		PrimaryColor:   req.PrimaryColor,
-		AccentColor:    req.AccentColor,
-		BgColor:        req.BgColor,
-		TextColor:      req.TextColor,
-		MutedTextColor: req.MutedTextColor,
-		FontPairing:    req.FontPairing,
-		HeroImageURL:   req.HeroImageURL,
-		FaviconURL:     req.FaviconURL,
-		Template:       req.Template,
-		HeaderHTML:     req.HeaderHTML,
+		OwnerID:         authUser.UserID,
+		Slug:            req.Slug,
+		BrandName:       req.BrandName,
+		Tagline:         req.Tagline,
+		AboutBlurb:      req.AboutBlurb,
+		LogoURL:         req.LogoURL,
+		PrimaryColor:    req.PrimaryColor,
+		AccentColor:     req.AccentColor,
+		BgColor:         req.BgColor,
+		TextColor:       req.TextColor,
+		MutedTextColor:  req.MutedTextColor,
+		FontPairing:     req.FontPairing,
+		HeroImageURL:    req.HeroImageURL,
+		FaviconURL:      req.FaviconURL,
+		Template:        req.Template,
+		HeaderHTML:      req.HeaderHTML,
+		MetaTitle:       req.MetaTitle,
+		MetaDescription: req.MetaDescription,
+		PrivacyURL:      req.PrivacyURL,
+		TermsURL:        req.TermsURL,
+		GAMeasurementID: req.GAMeasurementID,
+		MetaPixelID:     req.MetaPixelID,
+		RequireConsent:  req.RequireConsent,
 	}
 
 	if err := h.CareersService.UpsertCustomization(ctx, input); err != nil {

@@ -137,6 +137,10 @@ const customizationSelectColumns = `
     COALESCE(font_pairing,''), COALESCE(hero_image_url,''),
     COALESCE(favicon_url,''),
     template, COALESCE(header_html,''),
+    COALESCE(meta_title,''), COALESCE(meta_description,''),
+    COALESCE(privacy_url,''), COALESCE(terms_url,''),
+    COALESCE(ga_measurement_id,''), COALESCE(meta_pixel_id,''),
+    require_consent,
     created_at, updated_at`
 
 func scanCustomization(row interface{ Scan(...interface{}) error }) (domain.Customization, error) {
@@ -146,7 +150,12 @@ func scanCustomization(row interface{ Scan(...interface{}) error }) (domain.Cust
 		&c.Tagline, &c.AboutBlurb, &c.LogoURL, &c.PrimaryColor,
 		&c.AccentColor, &c.BgColor, &c.TextColor, &c.MutedTextColor,
 		&c.FontPairing, &c.HeroImageURL, &c.FaviconURL,
-		&c.Template, &c.HeaderHTML, &c.CreatedAt, &c.UpdatedAt,
+		&c.Template, &c.HeaderHTML,
+		&c.MetaTitle, &c.MetaDescription,
+		&c.PrivacyURL, &c.TermsURL,
+		&c.GAMeasurementID, &c.MetaPixelID,
+		&c.RequireConsent,
+		&c.CreatedAt, &c.UpdatedAt,
 	)
 	return c, err
 }
@@ -185,8 +194,10 @@ func (r *Repository) UpsertCustomization(ctx context.Context, in domain.Customiz
 	        (owner_id, slug, brand_name, tagline, about_blurb, logo_url,
 	         primary_color, accent_color, bg_color, text_color,
 	         muted_text_color, font_pairing, hero_image_url, favicon_url,
-	         template, header_html)
-	      VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
+	         template, header_html,
+	         meta_title, meta_description, privacy_url, terms_url,
+	         ga_measurement_id, meta_pixel_id, require_consent)
+	      VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
 	      ON DUPLICATE KEY UPDATE
 	        slug = VALUES(slug),
 	        brand_name = VALUES(brand_name),
@@ -202,14 +213,25 @@ func (r *Repository) UpsertCustomization(ctx context.Context, in domain.Customiz
 	        hero_image_url = VALUES(hero_image_url),
 	        favicon_url = VALUES(favicon_url),
 	        template = VALUES(template),
-	        header_html = VALUES(header_html)`
+	        header_html = VALUES(header_html),
+	        meta_title = VALUES(meta_title),
+	        meta_description = VALUES(meta_description),
+	        privacy_url = VALUES(privacy_url),
+	        terms_url = VALUES(terms_url),
+	        ga_measurement_id = VALUES(ga_measurement_id),
+	        meta_pixel_id = VALUES(meta_pixel_id),
+	        require_consent = VALUES(require_consent)`
 	_, err := r.pool.ExecContext(ctx, q,
 		in.OwnerID, in.Slug, in.BrandName, nullStr(in.Tagline), nullStr(in.AboutBlurb),
 		nullStr(in.LogoURL), nullStr(in.PrimaryColor),
 		nullStr(in.AccentColor), nullStr(in.BgColor),
 		nullStr(in.TextColor), nullStr(in.MutedTextColor),
 		nullStr(in.FontPairing), nullStr(in.HeroImageURL), nullStr(in.FaviconURL),
-		in.Template, nullStr(in.HeaderHTML))
+		in.Template, nullStr(in.HeaderHTML),
+		nullStr(in.MetaTitle), nullStr(in.MetaDescription),
+		nullStr(in.PrivacyURL), nullStr(in.TermsURL),
+		nullStr(in.GAMeasurementID), nullStr(in.MetaPixelID),
+		in.RequireConsent)
 	return err
 }
 
