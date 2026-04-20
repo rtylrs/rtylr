@@ -54,7 +54,7 @@ const PRODUCTS_BOTTOM: Product[] = [
     label: 'Flow',
     title: 'Projects & tasks',
     description:
-      'Kanban, automations, and tasks linked to the real invoice, customer, or shift they\u2019re about.',
+      'Kanban, automations, and tasks linked to the actual invoice, customer, or shift they belong to.',
     Icon: Workflow,
   },
   {

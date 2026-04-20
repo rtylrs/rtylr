@@ -399,7 +399,7 @@ const FlowPage = (): JSX.Element => {
               variants={staggerBlur}
             >
               <motion.span className={styles.heroEyebrow} variants={blurFadeIn}>
-                rtylr Flow · try dragging the cards below
+                rtylr Flow · Work OS
               </motion.span>
               <motion.h1 className={styles.heroTitle} variants={blurFadeIn}>
                 Work that moves.
