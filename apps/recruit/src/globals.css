@@ -8,19 +8,28 @@
      freshly-deployed careers site still looks finished before branding
      is applied. */
   --recruit-accent: #111111;
+  --recruit-accent-2: #111111;
   --recruit-bg: #fafaf9;
   --recruit-fg: #18181b;
   --recruit-muted: #6b7280;
   --recruit-surface: #ffffff;
   --recruit-border: #e7e5e4;
+
+  /* Typography — swapped per-business by loadFontPairing(). */
+  --recruit-font-body: 'Plus Jakarta Sans', Inter, system-ui, sans-serif;
+  --recruit-font-display: 'Plus Jakarta Sans', Inter, system-ui, sans-serif;
 }
 
 html,
 body {
   background: var(--recruit-bg);
   color: var(--recruit-fg);
-  font-family: 'Plus Jakarta Sans', Inter, system-ui, sans-serif;
+  font-family: var(--recruit-font-body);
   -webkit-font-smoothing: antialiased;
+}
+
+.font-display {
+  font-family: var(--recruit-font-display);
 }
 
 /* iOS auto-zoom guard. All inputs are 16px+ by default. */

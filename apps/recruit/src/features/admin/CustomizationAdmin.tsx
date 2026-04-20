@@ -1,52 +1,100 @@
 import React, { useEffect, useState } from 'react';
 import { toast } from 'sonner';
 import { APP_URLS } from '@voxire/config';
-import { ExternalLink } from 'lucide-react';
+import { ExternalLink, RotateCcw, Palette, Type, ImageIcon, Layout } from 'lucide-react';
 
 import { useAdminCustomization, useUpsertCustomization } from '../../shared/hooks/queries/useAdmin';
-import type { TemplateId } from '../../shared/lib/types';
+import type { TemplateId, FontPairingId } from '../../shared/lib/types';
+import { FONT_PAIRINGS } from '../../templates/fonts';
 
 /**
- * CustomizationAdmin — edits the business's careers-page branding.
- * Picking a template flips the whole public page layout; the preview
- * link in the header lets the admin open their live page in a new tab
- * as soon as they save.
+ * CustomizationAdmin — edits every knob a business can turn on their
+ * careers page. Laid out as four tabbed sections so the form isn't a
+ * 20-field wall:
+ *
+ *   Brand      — slug, name, tagline, about, logo, favicon, header HTML
+ *   Palette    — template pick + five color fields with a live preview
+ *   Typography — font-pairing picker with sample rendering
+ *   Media      — hero image for bold/editorial templates
+ *
+ * The Save button lives in a sticky footer so it stays reachable
+ * regardless of which tab is open.
  */
+
 const TEMPLATES: { id: TemplateId; name: string; blurb: string }[] = [
   {
     id: 'minimal',
     name: 'Minimal',
-    blurb: 'Calm, single-column list. Works for every business without tuning.',
+    blurb: 'Calm single-column list. Default for every new page.',
   },
   {
     id: 'editorial',
     name: 'Editorial',
-    blurb: 'Magazine-style hero with serif display type and generous whitespace.',
+    blurb: 'Magazine-style hero, serif display, generous whitespace.',
   },
   {
     id: 'bold',
     name: 'Bold',
-    blurb: 'Saturated accent block, oversized type. Pair with a strong brand color.',
+    blurb: 'Saturated hero block, oversized type. Needs a strong color.',
   },
 ];
+
+// TEMPLATE_DEFAULTS mirrors the defaults in templates/resolver.tsx so
+// "Reset palette" can give the admin a sensible starting point that
+// actually matches what the template expects.
+const TEMPLATE_DEFAULTS: Record<TemplateId, Record<string, string>> = {
+  minimal: {
+    primary: '#111111',
+    accent: '#111111',
+    bg: '#fafaf9',
+    fg: '#18181b',
+    muted: '#6b7280',
+  },
+  editorial: {
+    primary: '#d94f2f',
+    accent: '#111827',
+    bg: '#ffffff',
+    fg: '#111827',
+    muted: '#6b7280',
+  },
+  bold: {
+    primary: '#1d4ed8',
+    accent: '#0f172a',
+    bg: '#ffffff',
+    fg: '#0f172a',
+    muted: '#64748b',
+  },
+};
+
+type Tab = 'brand' | 'palette' | 'typography' | 'media';
 
 const CustomizationAdmin: React.FC = (): React.JSX.Element => {
   const { data } = useAdminCustomization();
   const save = useUpsertCustomization();
 
   const existing = data?.customization;
+  const [tab, setTab] = useState<Tab>('brand');
+
   const [slug, setSlug] = useState(existing?.slug ?? '');
   const [brandName, setBrandName] = useState(existing?.brandName ?? '');
   const [tagline, setTagline] = useState(existing?.tagline ?? '');
   const [aboutBlurb, setAboutBlurb] = useState(existing?.aboutBlurb ?? '');
   const [logoUrl, setLogoUrl] = useState(existing?.logoUrl ?? '');
   const [primaryColor, setPrimaryColor] = useState(existing?.primaryColor ?? '#111111');
+  const [accentColor, setAccentColor] = useState(existing?.accentColor ?? '');
+  const [bgColor, setBgColor] = useState(existing?.bgColor ?? '');
+  const [textColor, setTextColor] = useState(existing?.textColor ?? '');
+  const [mutedTextColor, setMutedTextColor] = useState(existing?.mutedTextColor ?? '');
+  const [fontPairing, setFontPairing] = useState<FontPairingId>(
+    (existing?.fontPairing as FontPairingId) ?? 'default'
+  );
+  const [heroImageUrl, setHeroImageUrl] = useState(existing?.heroImageUrl ?? '');
+  const [faviconUrl, setFaviconUrl] = useState(existing?.faviconUrl ?? '');
   const [template, setTemplate] = useState<TemplateId>(
     (existing?.template as TemplateId) ?? 'minimal'
   );
   const [headerHtml, setHeaderHtml] = useState(existing?.headerHtml ?? '');
 
-  // Pull in server state once it arrives (hook is async).
   useEffect(() => {
     if (!existing) return;
     setSlug(existing.slug);
@@ -55,6 +103,13 @@ const CustomizationAdmin: React.FC = (): React.JSX.Element => {
     setAboutBlurb(existing.aboutBlurb);
     setLogoUrl(existing.logoUrl);
     setPrimaryColor(existing.primaryColor || '#111111');
+    setAccentColor(existing.accentColor);
+    setBgColor(existing.bgColor);
+    setTextColor(existing.textColor);
+    setMutedTextColor(existing.mutedTextColor);
+    setFontPairing((existing.fontPairing as FontPairingId) ?? 'default');
+    setHeroImageUrl(existing.heroImageUrl);
+    setFaviconUrl(existing.faviconUrl);
     setTemplate((existing.template as TemplateId) ?? 'minimal');
     setHeaderHtml(existing.headerHtml);
   }, [existing]);
@@ -69,6 +124,13 @@ const CustomizationAdmin: React.FC = (): React.JSX.Element => {
         aboutBlurb,
         logoUrl,
         primaryColor,
+        accentColor,
+        bgColor,
+        textColor,
+        mutedTextColor,
+        fontPairing,
+        heroImageUrl,
+        faviconUrl,
         template,
         headerHtml,
       },
@@ -79,113 +141,313 @@ const CustomizationAdmin: React.FC = (): React.JSX.Element => {
     );
   };
 
+  function resetPalette() {
+    const d = TEMPLATE_DEFAULTS[template];
+    setPrimaryColor(d.primary);
+    setAccentColor(d.accent);
+    setBgColor(d.bg);
+    setTextColor(d.fg);
+    setMutedTextColor(d.muted);
+    toast.success(`Palette reset to ${template} defaults`);
+  }
+
   return (
-    <div className="px-10 py-8">
-      <div className="flex items-baseline justify-between">
-        <div>
-          <h1 className="text-2xl font-semibold tracking-tight">Page branding</h1>
-          <p className="mt-1 text-sm text-white/60">
-            What candidates see at {APP_URLS.recruit}/<span className="text-white">your-slug</span>
-          </p>
+    <div className="flex min-h-screen flex-col">
+      {/* Header — title + preview link. Stays pinned above the tabs. */}
+      <div
+        className="sticky top-0 z-20 border-b px-10 py-6"
+        style={{ borderColor: '#1f1f1f', background: '#0a0a0a' }}
+      >
+        <div className="flex items-baseline justify-between">
+          <div>
+            <h1 className="text-2xl font-semibold tracking-tight">Page branding</h1>
+            <p className="mt-1 text-sm text-white/60">
+              What candidates see at {APP_URLS.recruit}/
+              <span className="text-white">{slug || 'your-slug'}</span>
+            </p>
+          </div>
+          {slug && (
+            <a
+              href={`${APP_URLS.recruit}/${slug}`}
+              target="_blank"
+              rel="noreferrer"
+              className="inline-flex items-center gap-2 rounded-md border border-white/10 px-3 py-2 text-sm hover:bg-white/5"
+            >
+              <ExternalLink className="h-4 w-4" />
+              Preview
+            </a>
+          )}
         </div>
-        {slug && (
-          <a
-            href={`${APP_URLS.recruit}/${slug}`}
-            target="_blank"
-            rel="noreferrer"
-            className="inline-flex items-center gap-2 rounded-md border border-white/10 px-3 py-2 text-sm hover:bg-white/5"
+
+        {/* Tabs. Icon + label so the admin doesn't have to guess what's
+            behind each. */}
+        <div className="mt-6 flex gap-1 text-sm">
+          <TabButton active={tab === 'brand'} onClick={() => setTab('brand')} icon={<Layout />}>
+            Brand
+          </TabButton>
+          <TabButton
+            active={tab === 'palette'}
+            onClick={() => setTab('palette')}
+            icon={<Palette />}
           >
-            <ExternalLink className="h-4 w-4" />
-            Preview
-          </a>
-        )}
+            Palette
+          </TabButton>
+          <TabButton
+            active={tab === 'typography'}
+            onClick={() => setTab('typography')}
+            icon={<Type />}
+          >
+            Typography
+          </TabButton>
+          <TabButton active={tab === 'media'} onClick={() => setTab('media')} icon={<ImageIcon />}>
+            Media
+          </TabButton>
+        </div>
       </div>
 
-      <form onSubmit={onSubmit} className="mt-8 grid grid-cols-1 gap-8 lg:grid-cols-[1fr_340px]">
-        <section className="space-y-5">
-          <Row>
-            <Field label="URL slug" required hint="a–z, 0–9, dashes">
-              <Input value={slug} onChange={setSlug} required />
-            </Field>
-            <Field label="Brand name" required>
-              <Input value={brandName} onChange={setBrandName} required />
-            </Field>
-          </Row>
-
-          <Field label="Tagline">
-            <Input value={tagline} onChange={setTagline} />
-          </Field>
-
-          <Field label="About" hint="Short paragraph shown under the hero">
-            <Textarea value={aboutBlurb} onChange={setAboutBlurb} rows={4} />
-          </Field>
-
-          <Row>
-            <Field label="Logo URL">
-              <Input value={logoUrl} onChange={setLogoUrl} type="url" />
-            </Field>
-            <Field label="Primary color" hint="Hex">
-              <div className="flex gap-2">
-                <input
-                  type="color"
-                  value={primaryColor}
-                  onChange={(e) => setPrimaryColor(e.target.value)}
-                  className="h-10 w-16 rounded-md border"
-                  style={{ borderColor: '#2a2a2a' }}
-                />
-                <Input value={primaryColor} onChange={setPrimaryColor} />
-              </div>
-            </Field>
-          </Row>
-
-          <Field label="Custom header HTML" hint="Advanced — injected raw above the brand header">
-            <Textarea value={headerHtml} onChange={setHeaderHtml} rows={3} />
-          </Field>
-
-          <div className="flex items-center justify-end gap-3 pt-2">
-            <button
-              type="submit"
-              disabled={save.isPending}
-              className="rounded-md bg-white px-5 py-2.5 text-sm font-semibold text-black hover:bg-white/90 disabled:opacity-50"
-            >
-              {save.isPending ? 'Saving…' : 'Save changes'}
-            </button>
-          </div>
-        </section>
-
-        <aside>
-          <div className="mb-3 text-xs font-medium uppercase tracking-wider text-white/70">
-            Template
-          </div>
-          <div className="space-y-2">
-            {TEMPLATES.map((t) => (
-              <button
-                key={t.id}
-                type="button"
-                onClick={() => setTemplate(t.id)}
-                className="block w-full rounded-lg border p-4 text-left transition"
-                style={{
-                  borderColor: template === t.id ? '#fff' : '#1f1f1f',
-                  background: template === t.id ? 'rgba(255,255,255,0.05)' : '#0f0f0f',
-                }}
+      <form onSubmit={onSubmit} className="flex-1">
+        <div className="px-10 py-8">
+          {tab === 'brand' && (
+            <Section maxWidth={640}>
+              <Row>
+                <Field label="URL slug" required hint="a–z, 0–9, dashes">
+                  <Input value={slug} onChange={setSlug} required />
+                </Field>
+                <Field label="Brand name" required>
+                  <Input value={brandName} onChange={setBrandName} required />
+                </Field>
+              </Row>
+              <Field label="Tagline">
+                <Input value={tagline} onChange={setTagline} />
+              </Field>
+              <Field label="About" hint="Short paragraph shown under the hero">
+                <Textarea value={aboutBlurb} onChange={setAboutBlurb} rows={4} />
+              </Field>
+              <Field label="Logo URL">
+                <Input value={logoUrl} onChange={setLogoUrl} type="url" />
+              </Field>
+              <Field
+                label="Custom header HTML"
+                hint="Advanced — raw HTML strip above the brand header"
               >
-                <div className="flex items-center justify-between">
-                  <div className="font-semibold">{t.name}</div>
-                  {template === t.id && (
-                    <div className="rounded-full bg-white px-2 py-0.5 text-[10px] font-semibold uppercase text-black">
-                      Selected
-                    </div>
-                  )}
+                <Textarea value={headerHtml} onChange={setHeaderHtml} rows={3} />
+              </Field>
+            </Section>
+          )}
+
+          {tab === 'palette' && (
+            <Section maxWidth={1000}>
+              <div className="flex items-baseline justify-between">
+                <p className="text-sm text-white/60">
+                  Pick a template first — it sets the structural layout. Then tune the palette.
+                  Empty fields fall back to the template's default.
+                </p>
+                <button
+                  type="button"
+                  onClick={resetPalette}
+                  className="inline-flex items-center gap-1.5 rounded-md border border-white/10 px-3 py-1.5 text-xs hover:bg-white/5"
+                >
+                  <RotateCcw className="h-3 w-3" />
+                  Reset to template defaults
+                </button>
+              </div>
+
+              <div className="mt-6 grid grid-cols-3 gap-3">
+                {TEMPLATES.map((t) => (
+                  <button
+                    key={t.id}
+                    type="button"
+                    onClick={() => setTemplate(t.id)}
+                    className="block rounded-lg border p-4 text-left transition"
+                    style={{
+                      borderColor: template === t.id ? '#fff' : '#1f1f1f',
+                      background: template === t.id ? 'rgba(255,255,255,0.06)' : '#0f0f0f',
+                    }}
+                  >
+                    <div className="font-semibold">{t.name}</div>
+                    <div className="mt-1 text-xs text-white/60">{t.blurb}</div>
+                  </button>
+                ))}
+              </div>
+
+              <div className="mt-8 grid grid-cols-1 gap-6 lg:grid-cols-[1fr_360px]">
+                <div className="space-y-4">
+                  <ColorField label="Primary" value={primaryColor} onChange={setPrimaryColor} />
+                  <ColorField
+                    label="Accent"
+                    value={accentColor}
+                    onChange={setAccentColor}
+                    hint="Secondary highlight. Empty → falls back to Primary"
+                  />
+                  <ColorField
+                    label="Background"
+                    value={bgColor}
+                    onChange={setBgColor}
+                    hint="Page canvas"
+                  />
+                  <ColorField label="Text" value={textColor} onChange={setTextColor} />
+                  <ColorField
+                    label="Muted text"
+                    value={mutedTextColor}
+                    onChange={setMutedTextColor}
+                    hint="Captions, metadata"
+                  />
                 </div>
-                <div className="mt-1 text-xs text-white/60">{t.blurb}</div>
-              </button>
-            ))}
-          </div>
-        </aside>
+
+                {/* Live preview — shows a miniature hero so the admin
+                    can see the palette land without navigating away. */}
+                <PalettePreview
+                  primary={primaryColor || '#111111'}
+                  accent={accentColor || primaryColor || '#111111'}
+                  bg={bgColor || TEMPLATE_DEFAULTS[template].bg}
+                  fg={textColor || TEMPLATE_DEFAULTS[template].fg}
+                  muted={mutedTextColor || TEMPLATE_DEFAULTS[template].muted}
+                  brandName={brandName || 'Your brand'}
+                />
+              </div>
+            </Section>
+          )}
+
+          {tab === 'typography' && (
+            <Section maxWidth={720}>
+              <p className="text-sm text-white/60">
+                Five curated pairings. Fonts load on demand from Google Fonts — picking one doesn't
+                block the save.
+              </p>
+              <div className="mt-6 space-y-3">
+                {Object.values(FONT_PAIRINGS).map((p) => (
+                  <button
+                    key={p.id}
+                    type="button"
+                    onClick={() => setFontPairing(p.id)}
+                    className="block w-full rounded-lg border p-5 text-left transition"
+                    style={{
+                      borderColor: fontPairing === p.id ? '#fff' : '#1f1f1f',
+                      background: fontPairing === p.id ? 'rgba(255,255,255,0.06)' : '#0f0f0f',
+                    }}
+                  >
+                    <div className="flex items-center justify-between">
+                      <div>
+                        <div className="text-xs uppercase tracking-wider text-white/50">
+                          {p.label}
+                        </div>
+                        <div className="mt-2 text-3xl" style={{ fontFamily: p.heading }}>
+                          The quick brown fox
+                        </div>
+                        <div className="mt-1 text-sm text-white/70" style={{ fontFamily: p.body }}>
+                          jumps over the lazy dog.
+                        </div>
+                      </div>
+                      {fontPairing === p.id && (
+                        <div className="rounded-full bg-white px-2 py-0.5 text-[10px] font-semibold uppercase text-black">
+                          Selected
+                        </div>
+                      )}
+                    </div>
+                  </button>
+                ))}
+              </div>
+            </Section>
+          )}
+
+          {tab === 'media' && (
+            <Section maxWidth={640}>
+              <Field
+                label="Hero image URL"
+                hint="Shown in the bold / editorial templates above the job list"
+              >
+                <Input value={heroImageUrl} onChange={setHeroImageUrl} type="url" />
+                {heroImageUrl && (
+                  <img
+                    src={heroImageUrl}
+                    alt="Hero preview"
+                    className="mt-3 h-40 w-full rounded-md object-cover"
+                    style={{ background: '#1f1f1f' }}
+                  />
+                )}
+              </Field>
+
+              <Field label="Favicon URL" hint="Square image, ≥32px. Shown in browser tabs.">
+                <Input value={faviconUrl} onChange={setFaviconUrl} type="url" />
+                {faviconUrl && (
+                  <img
+                    src={faviconUrl}
+                    alt="Favicon preview"
+                    className="mt-3 h-10 w-10 rounded"
+                    style={{ background: '#1f1f1f' }}
+                  />
+                )}
+              </Field>
+
+              {/* OG card preview — a live PNG rendered by the backend
+                  from whatever is saved. The admin sees what LinkedIn
+                  will scrape when someone shares their URL. */}
+              {slug && (
+                <div className="mt-6">
+                  <div className="mb-2 text-xs font-medium uppercase tracking-wider text-white/70">
+                    Social preview
+                  </div>
+                  <img
+                    key={`${brandName}-${tagline}-${primaryColor}`}
+                    src={`${APP_URLS.api}/recruit/public/og?slug=${slug}&_=${Date.now()}`}
+                    alt="OG card"
+                    className="w-full rounded-md border"
+                    style={{ borderColor: '#1f1f1f' }}
+                  />
+                  <p className="mt-1.5 text-xs text-white/40">
+                    Refreshes after you save. This is the card LinkedIn, Slack, and iMessage use.
+                  </p>
+                </div>
+              )}
+            </Section>
+          )}
+        </div>
+
+        <div
+          className="sticky bottom-0 z-10 flex items-center justify-end gap-3 border-t px-10 py-4"
+          style={{ borderColor: '#1f1f1f', background: '#0a0a0a' }}
+        >
+          <button
+            type="submit"
+            disabled={save.isPending}
+            className="rounded-md bg-white px-5 py-2.5 text-sm font-semibold text-black hover:bg-white/90 disabled:opacity-50"
+          >
+            {save.isPending ? 'Saving…' : 'Save changes'}
+          </button>
+        </div>
       </form>
     </div>
   );
 };
+
+// ── small building-block components ───────────────────────────────
+
+const TabButton: React.FC<{
+  active: boolean;
+  onClick: () => void;
+  icon: React.ReactNode;
+  children: React.ReactNode;
+}> = ({ active, onClick, icon, children }) => (
+  <button
+    type="button"
+    onClick={onClick}
+    className={`inline-flex items-center gap-2 rounded-md px-3 py-1.5 transition ${
+      active ? 'bg-white/10 text-white' : 'text-white/60 hover:bg-white/5 hover:text-white'
+    }`}
+  >
+    <span className="[&>svg]:h-4 [&>svg]:w-4">{icon}</span>
+    {children}
+  </button>
+);
+
+const Section: React.FC<{ children: React.ReactNode; maxWidth?: number }> = ({
+  children,
+  maxWidth = 640,
+}) => (
+  <div style={{ maxWidth }} className="space-y-5">
+    {children}
+  </div>
+);
 
 const Row: React.FC<{ children: React.ReactNode }> = ({ children }) => (
   <div className="grid grid-cols-1 gap-4 sm:grid-cols-2">{children}</div>
@@ -237,6 +499,71 @@ const Textarea: React.FC<{
     className="w-full rounded-md border bg-black/40 px-3 py-2.5 text-sm leading-relaxed outline-none focus:border-white/40"
     style={{ borderColor: '#2a2a2a' }}
   />
+);
+
+const ColorField: React.FC<{
+  label: string;
+  value: string;
+  onChange: (v: string) => void;
+  hint?: string;
+}> = ({ label, value, onChange, hint }) => (
+  <Field label={label} hint={hint}>
+    <div className="flex gap-2">
+      <input
+        type="color"
+        value={value || '#000000'}
+        onChange={(e) => onChange(e.target.value)}
+        className="h-10 w-16 rounded-md border"
+        style={{ borderColor: '#2a2a2a' }}
+      />
+      <Input value={value} onChange={onChange} />
+    </div>
+  </Field>
+);
+
+/**
+ * PalettePreview renders a tiny faux careers-page hero using the live
+ * form values. Not pixel-accurate to any one template — the point is
+ * showing the admin whether their colors read together before they hit
+ * save and alt-tab to their public page.
+ */
+const PalettePreview: React.FC<{
+  primary: string;
+  accent: string;
+  bg: string;
+  fg: string;
+  muted: string;
+  brandName: string;
+}> = ({ primary, accent, bg, fg, muted, brandName }) => (
+  <div
+    className="rounded-lg border p-5 shadow-[0_0_0_1px_rgba(255,255,255,0.04)]"
+    style={{ borderColor: '#1f1f1f', background: bg }}
+  >
+    <div className="text-[10px] uppercase tracking-[0.3em]" style={{ color: accent }}>
+      Careers · {brandName}
+    </div>
+    <div
+      className="mt-3 text-2xl font-semibold leading-tight"
+      style={{ color: fg, fontFamily: 'var(--recruit-font-display)' }}
+    >
+      Come build the future of small-business software.
+    </div>
+    <div className="mt-2 text-sm" style={{ color: muted }}>
+      Remote-first · Competitive pay · Team you actually want to work with
+    </div>
+    <div className="mt-4 space-y-1.5">
+      {['Senior Frontend Engineer', 'Product Designer', 'Growth Manager'].map((role) => (
+        <div
+          key={role}
+          className="flex items-center justify-between rounded-md px-3 py-2 text-xs"
+          style={{ background: 'rgba(0,0,0,0.04)', color: fg }}
+        >
+          <span>{role}</span>
+          <span className="inline-block h-1.5 w-1.5 rounded-full" style={{ background: primary }} />
+        </div>
+      ))}
+    </div>
+  </div>
 );
 
 export default CustomizationAdmin;

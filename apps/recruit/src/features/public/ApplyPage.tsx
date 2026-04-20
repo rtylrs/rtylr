@@ -33,7 +33,7 @@ const ApplyPage: React.FC = (): React.JSX.Element => {
   const submit = useSubmitApplication();
 
   useEffect(() => {
-    if (data?.customization) applyBrand(data.customization.primaryColor);
+    if (data?.customization) applyBrand(data.customization);
   }, [data?.customization]);
 
   const [candidateName, setCandidateName] = useState('');

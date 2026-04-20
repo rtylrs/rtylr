@@ -16,7 +16,7 @@ const CareerDetail: React.FC = (): React.JSX.Element => {
   const { data, isLoading, error } = usePublicCareer(slug, careerSlug);
 
   useEffect(() => {
-    if (data?.customization) applyBrand(data.customization.primaryColor);
+    if (data?.customization) applyBrand(data.customization);
   }, [data?.customization]);
 
   if (isLoading) {

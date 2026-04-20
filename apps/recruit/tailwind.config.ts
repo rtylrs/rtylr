@@ -17,10 +17,11 @@ const config: Config = {
         },
       },
       fontFamily: {
-        // Editorial template uses a serif display face, others fall
-        // back to Plus Jakarta Sans.
-        sans: ['Plus Jakarta Sans', 'Inter', 'system-ui', 'sans-serif'],
-        display: ['"Fraunces"', '"Plus Jakarta Sans"', 'serif'],
+        // Both resolve to a CSS custom property swapped at runtime by
+        // loadFontPairing(). Defaults in globals.css cover the case
+        // where the customization row hasn't been read yet.
+        sans: ['var(--recruit-font-body)'],
+        display: ['var(--recruit-font-display)'],
       },
     },
   },

@@ -83,6 +83,13 @@ interface CustomizationBody {
   aboutBlurb?: string;
   logoUrl?: string;
   primaryColor?: string;
+  accentColor?: string;
+  bgColor?: string;
+  textColor?: string;
+  mutedTextColor?: string;
+  fontPairing?: string;
+  heroImageUrl?: string;
+  faviconUrl?: string;
   template: string;
   headerHtml?: string;
 }

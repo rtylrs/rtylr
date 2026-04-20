@@ -17,7 +17,7 @@ const CareersIndex: React.FC = (): React.JSX.Element => {
   const { data, isLoading, error } = useBusinessCareers(slug);
 
   useEffect(() => {
-    if (data?.customization) applyBrand(data.customization.primaryColor);
+    if (data?.customization) applyBrand(data.customization);
   }, [data?.customization]);
 
   if (isLoading) {
