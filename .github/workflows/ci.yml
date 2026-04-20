@@ -54,6 +54,49 @@ jobs:
       - name: Build
         run: pnpm turbo build
 
+  # ── End-to-end (Playwright) ────────────────────────────────────────
+  # Real browser, real Vite dev servers, API stubbed per-test via
+  # page.route(). Lives in its own job so Vitest failures don't waste
+  # Playwright's boot time. `continue-on-error: true` for the first
+  # rollout — flip to hard-gate once we're confident the specs are
+  # stable in CI.
+  e2e:
+    name: Playwright E2E
+    needs: check
+    runs-on: ubuntu-latest
+    continue-on-error: true
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          submodules: recursive
+          token: ${{ secrets.PAT_TOKEN }}
+      - uses: pnpm/action-setup@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 22
+          cache: pnpm
+
+      - name: Install dependencies
+        run: pnpm install --frozen-lockfile
+
+      - name: Install Playwright browsers
+        run: pnpm exec playwright install --with-deps chromium
+
+      - name: Run Playwright specs
+        run: pnpm test:e2e
+        env:
+          # Explicit empty so nothing leaks in from repo secrets.
+          # Specs stub API calls via page.route() — no real backend.
+          VITE_API_URL: ''
+
+      - name: Upload Playwright report
+        if: failure()
+        uses: actions/upload-artifact@v4
+        with:
+          name: playwright-report
+          path: playwright-report/
+          retention-days: 7
+
   # ── Detect which apps changed ──────────────────────────────────────
   # dorny/paths-filter emits one boolean per app. A change under
   # `packages/**` trips every app so shared-lib edits always reship.

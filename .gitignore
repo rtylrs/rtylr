@@ -57,3 +57,7 @@ apps/*/.next
 # Turborepo
 .turbo/
 .claude/
+
+# Playwright artifacts
+/playwright-report/
+/test-results/
