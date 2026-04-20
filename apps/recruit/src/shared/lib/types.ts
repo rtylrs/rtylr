@@ -61,6 +61,8 @@ export interface Customization {
   gaMeasurementId: string;
   metaPixelId: string;
   requireConsent: boolean;
+  notificationEmail: string;
+  emailNotifications: boolean;
   createdAt: string;
   updatedAt: string;
 }

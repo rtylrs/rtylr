@@ -97,6 +97,10 @@ const CustomizationAdmin: React.FC = (): React.JSX.Element => {
   const [gaMeasurementId, setGaMeasurementId] = useState(existing?.gaMeasurementId ?? '');
   const [metaPixelId, setMetaPixelId] = useState(existing?.metaPixelId ?? '');
   const [requireConsent, setRequireConsent] = useState(existing?.requireConsent ?? false);
+  const [notificationEmail, setNotificationEmail] = useState(existing?.notificationEmail ?? '');
+  const [emailNotifications, setEmailNotifications] = useState(
+    existing?.emailNotifications ?? true
+  );
   const [template, setTemplate] = useState<TemplateId>(
     (existing?.template as TemplateId) ?? 'minimal'
   );
@@ -126,6 +130,8 @@ const CustomizationAdmin: React.FC = (): React.JSX.Element => {
     setGaMeasurementId(existing.gaMeasurementId);
     setMetaPixelId(existing.metaPixelId);
     setRequireConsent(existing.requireConsent);
+    setNotificationEmail(existing.notificationEmail);
+    setEmailNotifications(existing.emailNotifications);
   }, [existing]);
 
   const onSubmit = (e: React.FormEvent) => {
@@ -154,6 +160,8 @@ const CustomizationAdmin: React.FC = (): React.JSX.Element => {
         gaMeasurementId,
         metaPixelId,
         requireConsent,
+        notificationEmail,
+        emailNotifications,
       },
       {
         onSuccess: () => toast.success('Careers page saved'),
@@ -428,6 +436,29 @@ const CustomizationAdmin: React.FC = (): React.JSX.Element => {
                   <Input value={metaPixelId} onChange={setMetaPixelId} />
                 </Field>
               </Row>
+
+              <div className="pt-4">
+                <div className="text-sm font-semibold">Email notifications</div>
+                <div className="text-xs text-white/50">
+                  Candidates always get a confirmation when they apply. You get a "new application"
+                  ping at the address below, if set.
+                </div>
+              </div>
+              <Field
+                label="HR notification inbox"
+                hint="Team alias works best (e.g. jobs@acme.com)"
+              >
+                <Input value={notificationEmail} onChange={setNotificationEmail} type="email" />
+              </Field>
+              <label className="flex items-center gap-2 pt-1 text-sm">
+                <input
+                  type="checkbox"
+                  checked={emailNotifications}
+                  onChange={(e) => setEmailNotifications(e.target.checked)}
+                  className="h-4 w-4"
+                />
+                Send me email notifications for new applications
+              </label>
             </Section>
           )}
 

@@ -99,6 +99,8 @@ interface CustomizationBody {
   gaMeasurementId?: string;
   metaPixelId?: string;
   requireConsent?: boolean;
+  notificationEmail?: string;
+  emailNotifications?: boolean;
 }
 
 export function useUpsertCustomization() {
