@@ -13,6 +13,7 @@ import {
 import AppLayout from '../../components/Layout/AppLayout';
 import MainLayout from '../../layouts/Main/MainLayout';
 import HelmetContainer from '../../components/HelmetContainer';
+import { productWithBreadcrumbs } from '../../lib/structured-data';
 import { APP_URLS } from '@voxire/config';
 import { navigateExternal } from '../../lib/navigation';
 import { blurFadeIn, staggerBlur, viewportOnce } from '../../lib/animations';
@@ -237,6 +238,13 @@ const FinancePage = (): JSX.Element => {
         <HelmetContainer
           title="Finance · A real P&L, in real time. | rtylr"
           description="Invoices, expenses, sales tax, and a live profit-and-loss. Every sale and every payroll roll into the books automatically."
+          canonical="https://rtylr.com/finance/"
+          structuredData={productWithBreadcrumbs({
+            name: 'Finance',
+            path: '/finance/',
+            description:
+              'Invoices, expenses, tax, and a real P&L in real time. Accounting that keeps up with your business.',
+          })}
         />
 
         <div className={styles.page}>

@@ -217,6 +217,7 @@ const IntegrationsPage = (): JSX.Element => {
         <HelmetContainer
           title="Integrations | rtylr"
           description="Every service rtylr connects to, payments, accounting, delivery, comms, hardware, and productivity."
+          canonical="https://rtylr.com/integrations/"
         />
 
         <div className={styles.page}>

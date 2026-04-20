@@ -105,6 +105,7 @@ const PartnersPage = (): JSX.Element => {
         <HelmetContainer
           title="Partner Program | rtylr"
           description="Build with rtylr. Implementation partners, technology partners, solution partners, and hardware partners, terms, tiers, and how to apply."
+          canonical="https://rtylr.com/partners/"
         />
 
         <div className={styles.page}>

@@ -69,6 +69,7 @@ const AboutPage = (): JSX.Element => {
         <HelmetContainer
           title="About | rtylr"
           description="We're building the operating system for commerce. One platform for POS, ERP, HR, CRM, Finance, Flow, and Insights."
+          canonical="https://rtylr.com/about/"
         />
 
         <div className={styles.aboutPage}>

@@ -26,6 +26,7 @@ const PrivacyPage = (): JSX.Element => {
         <HelmetContainer
           title="Privacy Policy | rtylr"
           description="How rtylr and Voxire handle your personal data, under GDPR, CCPA, and equivalent laws."
+          canonical="https://rtylr.com/legal/privacy-policy/"
         />
 
         <main className={styles.page}>

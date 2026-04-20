@@ -16,6 +16,7 @@ import {
 import AppLayout from '../../components/Layout/AppLayout';
 import MainLayout from '../../layouts/Main/MainLayout';
 import HelmetContainer from '../../components/HelmetContainer';
+import { productWithBreadcrumbs } from '../../lib/structured-data';
 import { APP_URLS } from '@voxire/config';
 import { navigateExternal } from '../../lib/navigation';
 import { blurFadeIn, staggerBlur, viewportOnce } from '../../lib/animations';
@@ -127,6 +128,13 @@ const ERPPage = (): JSX.Element => {
         <HelmetContainer
           title="ERP · Inventory that counts itself. | rtylr"
           description="Real-time inventory, suppliers, and purchasing. Recipe-linked depletion. Multi-location transfers with full audit trail."
+          canonical="https://rtylr.com/erp/"
+          structuredData={productWithBreadcrumbs({
+            name: 'ERP',
+            path: '/erp/',
+            description:
+              'Real-time inventory, suppliers, purchase orders, and warehouse management.',
+          })}
         />
 
         <div className={styles.page}>

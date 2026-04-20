@@ -72,6 +72,7 @@ const TrustPage = (): JSX.Element => {
         <HelmetContainer
           title="Trust Center | rtylr"
           description="Security, privacy, compliance, uptime, and vendor transparency, everything customers need before they commit."
+          canonical="https://rtylr.com/trust/"
         />
 
         <div className={styles.page}>

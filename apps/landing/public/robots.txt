@@ -1,0 +1,23 @@
+# rtylr marketing site. Everything under rtylr.com is safe to crawl —
+# there's no authenticated area on this domain (app subdomains handle
+# auth separately). The one disallowed path is the Next.js build
+# manifest scratch dir, which leaks build internals Google doesn't
+# need.
+
+User-agent: *
+Allow: /
+Disallow: /_next/
+
+# Explicit AI-crawler allowances so GenerativeEngineOptimization
+# surfaces us in ChatGPT / Perplexity / Claude. Treating them same as
+# Googlebot — if we ever need to opt out, change to Disallow: /.
+User-agent: GPTBot
+Allow: /
+
+User-agent: ClaudeBot
+Allow: /
+
+User-agent: PerplexityBot
+Allow: /
+
+Sitemap: https://rtylr.com/sitemap.xml

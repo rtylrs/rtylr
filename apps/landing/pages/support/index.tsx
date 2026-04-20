@@ -147,6 +147,7 @@ const SupportPage = (): JSX.Element => {
         <HelmetContainer
           title="Help Center | rtylr"
           description="Getting started, billing, team, configuration, integrations, security, everything you need to use rtylr."
+          canonical="https://rtylr.com/support/"
         />
 
         <div className={styles.page}>

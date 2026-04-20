@@ -1,0 +1,48 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!--
+  Static sitemap for the rtylr marketing site.  Next.js `output: 'export'`
+  means we ship plain HTML; there's no dynamic sitemap endpoint.
+  URLs end with a trailing slash to match next.config's trailingSlash: true
+  so Google sees the same URL shape that the site serves.
+
+  Keep in sync manually when pages are added.  A build-time generator
+  (next-sitemap) is the next iteration.
+-->
+<urlset xmlns="http://www.sitemap.org/schemas/sitemap/0.9">
+  <url>
+    <loc>https://rtylr.com/</loc>
+    <changefreq>weekly</changefreq>
+    <priority>1.0</priority>
+  </url>
+
+  <!-- Product pages — highest priority after home -->
+  <url><loc>https://rtylr.com/pos/</loc><changefreq>weekly</changefreq><priority>0.9</priority></url>
+  <url><loc>https://rtylr.com/erp/</loc><changefreq>weekly</changefreq><priority>0.9</priority></url>
+  <url><loc>https://rtylr.com/hr/</loc><changefreq>weekly</changefreq><priority>0.9</priority></url>
+  <url><loc>https://rtylr.com/crm/</loc><changefreq>weekly</changefreq><priority>0.9</priority></url>
+  <url><loc>https://rtylr.com/finance/</loc><changefreq>weekly</changefreq><priority>0.9</priority></url>
+  <url><loc>https://rtylr.com/flow/</loc><changefreq>weekly</changefreq><priority>0.9</priority></url>
+
+  <!-- Conversion pages -->
+  <url><loc>https://rtylr.com/pricing/</loc><changefreq>weekly</changefreq><priority>0.9</priority></url>
+  <url><loc>https://rtylr.com/demo/</loc><changefreq>monthly</changefreq><priority>0.8</priority></url>
+  <url><loc>https://rtylr.com/contact/</loc><changefreq>monthly</changefreq><priority>0.6</priority></url>
+
+  <!-- Supporting pages -->
+  <url><loc>https://rtylr.com/hardware/</loc><changefreq>monthly</changefreq><priority>0.7</priority></url>
+  <url><loc>https://rtylr.com/integrations/</loc><changefreq>weekly</changefreq><priority>0.7</priority></url>
+  <url><loc>https://rtylr.com/about/</loc><changefreq>monthly</changefreq><priority>0.5</priority></url>
+  <url><loc>https://rtylr.com/trust/</loc><changefreq>monthly</changefreq><priority>0.6</priority></url>
+  <url><loc>https://rtylr.com/partners/</loc><changefreq>monthly</changefreq><priority>0.5</priority></url>
+  <url><loc>https://rtylr.com/support/</loc><changefreq>weekly</changefreq><priority>0.6</priority></url>
+
+  <!-- Content -->
+  <url><loc>https://rtylr.com/blog/</loc><changefreq>daily</changefreq><priority>0.7</priority></url>
+  <url><loc>https://rtylr.com/changelog/</loc><changefreq>weekly</changefreq><priority>0.5</priority></url>
+  <url><loc>https://rtylr.com/newsroom/</loc><changefreq>weekly</changefreq><priority>0.5</priority></url>
+
+  <!-- Legal — low priority but still indexable -->
+  <url><loc>https://rtylr.com/legal/terms/</loc><changefreq>yearly</changefreq><priority>0.3</priority></url>
+  <url><loc>https://rtylr.com/legal/privacy-policy/</loc><changefreq>yearly</changefreq><priority>0.3</priority></url>
+  <url><loc>https://rtylr.com/legal/security/</loc><changefreq>yearly</changefreq><priority>0.3</priority></url>
+</urlset>

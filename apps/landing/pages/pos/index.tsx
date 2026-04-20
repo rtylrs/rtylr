@@ -5,6 +5,7 @@ import { Receipt, CreditCard, Split, Wifi, WifiOff } from 'lucide-react';
 import AppLayout from '../../components/Layout/AppLayout';
 import MainLayout from '../../layouts/Main/MainLayout';
 import HelmetContainer from '../../components/HelmetContainer';
+import { productWithBreadcrumbs } from '../../lib/structured-data';
 import { APP_URLS } from '@voxire/config';
 import { navigateExternal } from '../../lib/navigation';
 import { blurFadeIn, staggerBlur, viewportOnce } from '../../lib/animations';
@@ -58,6 +59,13 @@ const POSPage = (): JSX.Element => {
         <HelmetContainer
           title="POS · The register that keeps up. | rtylr"
           description="Full-service POS for restaurants and retail. Tickets, splits, tips, and a real offline mode. Built into the rtylr platform."
+          canonical="https://rtylr.com/pos/"
+          structuredData={productWithBreadcrumbs({
+            name: 'POS',
+            path: '/pos/',
+            description:
+              'Full-service POS for restaurants and retail. Tickets, splits, tips, and a real offline mode.',
+          })}
         />
 
         <div className={styles.page}>

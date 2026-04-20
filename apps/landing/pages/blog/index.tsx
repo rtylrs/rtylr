@@ -134,6 +134,7 @@ const BlogPage = (): JSX.Element => {
         <HelmetContainer
           title="Blog | rtylr"
           description="Product, engineering, and playbooks from the rtylr team. How we build, how to run your business on it, and why."
+          canonical="https://rtylr.com/blog/"
         />
 
         <div className={styles.page}>

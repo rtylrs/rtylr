@@ -14,9 +14,9 @@ const SUGGESTED_LINKS = [
   { href: '/', label: 'Homepage', description: 'Back to the start.' },
   { href: '/pricing', label: 'Pricing', description: 'See plans and per-seat pricing.' },
   {
-    href: '/features/pos',
-    label: 'Features',
-    description: 'Every app rtylr includes out of the box.',
+    href: '/pos',
+    label: 'Products',
+    description: 'POS, ERP, HR, CRM, Finance, Flow.',
   },
   { href: '/demo', label: 'Book a demo', description: 'See rtylr running on your data.' },
   { href: '/contact', label: 'Contact', description: 'Talk to someone on our team.' },

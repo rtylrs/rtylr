@@ -197,6 +197,7 @@ const ChangelogPage = (): JSX.Element => {
         <HelmetContainer
           title="Changelog | rtylr"
           description="What we shipped, when we shipped it. New features, improvements, fixes, and breaking changes across the rtylr platform."
+          canonical="https://rtylr.com/changelog/"
         />
 
         <div className={styles.page}>

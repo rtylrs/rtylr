@@ -5,6 +5,7 @@ import { Heart, Mail, Gift, Users, Star, Send, Target, ChevronRight, Plus } from
 import AppLayout from '../../components/Layout/AppLayout';
 import MainLayout from '../../layouts/Main/MainLayout';
 import HelmetContainer from '../../components/HelmetContainer';
+import { productWithBreadcrumbs } from '../../lib/structured-data';
 import { APP_URLS } from '@voxire/config';
 import { navigateExternal } from '../../lib/navigation';
 import { blurFadeIn, staggerBlur, viewportOnce } from '../../lib/animations';
@@ -276,6 +277,13 @@ const CRMPage = (): JSX.Element => {
         <HelmetContainer
           title="CRM · Every customer, remembered. | rtylr"
           description="Customer profiles, loyalty, segments, and campaigns. Every POS purchase enriches the profile automatically."
+          canonical="https://rtylr.com/crm/"
+          structuredData={productWithBreadcrumbs({
+            name: 'CRM',
+            path: '/crm/',
+            description:
+              'Customer profiles, loyalty programs, and campaign tracking that connect to every other app.',
+          })}
         />
 
         <div className={styles.page}>

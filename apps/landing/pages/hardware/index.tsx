@@ -109,6 +109,7 @@ const HardwarePage = (): JSX.Element => {
         <HelmetContainer
           title="Hardware | rtylr"
           description="Tested and certified hardware ecosystem designed for rtylr POS. Every device is optimized out of the box."
+          canonical="https://rtylr.com/hardware/"
         />
 
         <div className={styles.hardwarePage}>

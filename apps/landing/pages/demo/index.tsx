@@ -126,6 +126,7 @@ const DemoPage = (): JSX.Element => {
         <HelmetContainer
           title="Book a demo | rtylr"
           description="See rtylr running against real data. A live 30-minute walkthrough with someone who actually built it."
+          canonical="https://rtylr.com/demo/"
         />
         <div className={styles.demoPage}>
           <div className={styles.container}>

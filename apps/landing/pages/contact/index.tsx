@@ -5,6 +5,7 @@ import { MessageCircle, Phone, Mail, ArrowRight, CheckCircle } from 'lucide-reac
 import AppLayout from '../../components/Layout/AppLayout';
 import MainLayout from '../../layouts/Main/MainLayout';
 import HelmetContainer from '../../components/HelmetContainer';
+import { organizationContactSchema } from '../../lib/structured-data';
 import {
   blurFadeIn,
   staggerBlur,
@@ -94,6 +95,8 @@ const ContactPage = (): JSX.Element => {
         <HelmetContainer
           title="Contact | rtylr"
           description="Get in touch with the rtylr team. We respond within 24 hours."
+          canonical="https://rtylr.com/contact/"
+          structuredData={organizationContactSchema()}
         />
 
         <div className={styles.contactPage}>

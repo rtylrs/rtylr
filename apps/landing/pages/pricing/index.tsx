@@ -116,6 +116,7 @@ const PricingPage = (): JSX.Element => {
         <HelmetContainer
           title="Pricing | rtylr"
           description="Simple, transparent pricing for every team. Free to start. No credit card required."
+          canonical="https://rtylr.com/pricing/"
         />
 
         <div className={styles.pricingPage}>

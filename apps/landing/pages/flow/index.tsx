@@ -21,6 +21,7 @@ import {
 import AppLayout from '../../components/Layout/AppLayout';
 import MainLayout from '../../layouts/Main/MainLayout';
 import HelmetContainer from '../../components/HelmetContainer';
+import { productWithBreadcrumbs } from '../../lib/structured-data';
 import { APP_URLS } from '@voxire/config';
 import { navigateExternal } from '../../lib/navigation';
 import { blurFadeIn, staggerBlur, viewportOnce } from '../../lib/animations';
@@ -377,6 +378,13 @@ const FlowPage = (): JSX.Element => {
         <HelmetContainer
           title="Flow · Projects, tasks, and team workspaces. | rtylr"
           description="Kanban boards, automations, templates, and tasks linked to everything else in rtylr. Operations that don't slip."
+          canonical="https://rtylr.com/flow/"
+          structuredData={productWithBreadcrumbs({
+            name: 'Flow',
+            path: '/flow/',
+            description:
+              'Kanban boards, automations, and task management that stay connected to every other app.',
+          })}
         />
 
         <div className={styles.page}>

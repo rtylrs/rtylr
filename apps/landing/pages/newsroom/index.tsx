@@ -102,6 +102,7 @@ const NewsroomPage = (): JSX.Element => {
         <HelmetContainer
           title="Newsroom | rtylr"
           description="Press releases, media coverage, company milestones, and media-kit assets."
+          canonical="https://rtylr.com/newsroom/"
         />
 
         <div className={styles.page}>

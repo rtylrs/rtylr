@@ -31,6 +31,7 @@ const TermsPage = (): JSX.Element => {
         <HelmetContainer
           title="Terms of Service | rtylr"
           description="The terms that govern your use of rtylr, operated by Voxire."
+          canonical="https://rtylr.com/legal/terms/"
         />
 
         <main className={styles.page}>

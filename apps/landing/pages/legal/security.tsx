@@ -25,6 +25,7 @@ const SecurityPage = (): JSX.Element => {
         <HelmetContainer
           title="Security | rtylr"
           description="How rtylr protects your data, encryption, infrastructure, access controls, and incident response."
+          canonical="https://rtylr.com/legal/security/"
         />
 
         <main className={styles.page}>

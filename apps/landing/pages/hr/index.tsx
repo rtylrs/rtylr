@@ -13,6 +13,7 @@ import {
 import AppLayout from '../../components/Layout/AppLayout';
 import MainLayout from '../../layouts/Main/MainLayout';
 import HelmetContainer from '../../components/HelmetContainer';
+import { productWithBreadcrumbs } from '../../lib/structured-data';
 import { APP_URLS } from '@voxire/config';
 import { navigateExternal } from '../../lib/navigation';
 import { blurFadeIn, staggerBlur, viewportOnce } from '../../lib/animations';
@@ -130,6 +131,13 @@ const HRPage = (): JSX.Element => {
         <HelmetContainer
           title="HR · Your team. Looked after. | rtylr"
           description="Scheduling, time & attendance, payroll, time off, onboarding, and compliance. One app that treats your staff like people."
+          canonical="https://rtylr.com/hr/"
+          structuredData={productWithBreadcrumbs({
+            name: 'HR',
+            path: '/hr/',
+            description:
+              'Scheduling, payroll, compliance, and time-off management for modern teams.',
+          })}
         />
 
         <div className={styles.page}>
