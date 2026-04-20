@@ -947,6 +947,14 @@ GEMINI_API_KEY=
 
 # Email (optional — invite emails)
 RESEND_API_KEY=
+
+# Cloudflare R2 (optional — recruit resume uploads)
+# All four must be set together, or uploads are disabled and the
+# frontend falls back to the "paste a link" input.
+R2_ACCOUNT_ID=
+R2_ACCESS_KEY_ID=
+R2_SECRET_ACCESS_KEY=
+R2_BUCKET_NAME=
 ```
 
 ### Useful make targets

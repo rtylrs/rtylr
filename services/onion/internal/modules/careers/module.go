@@ -35,5 +35,6 @@ func (m *Module) GetAnonymousRoutes() []string {
 	anon = append(anon, handlers.ListPublicCareersRoutes()...)
 	anon = append(anon, handlers.GetPublicCareerRoutes()...)
 	anon = append(anon, handlers.SubmitApplicationRoutes()...)
+	anon = append(anon, handlers.ResumeUploadURLRoutes()...)
 	return anon
 }

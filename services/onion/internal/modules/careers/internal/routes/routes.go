@@ -75,4 +75,16 @@ func RegisterRoutes(ctx context.Context, router *chi.Mux, careersService *applic
 		ctx, router, handlers.SubmitApplicationRoutes(),
 		&handlers.SubmitApplicationHandler{CareersService: careersService},
 	)
+
+	// Resume upload flow — candidate presigns, browser PUTs direct to
+	// R2, HR fetches signed reads on demand. The presign endpoint is
+	// anonymous; the read endpoint requires auth (see module.go).
+	serverHttp.RegisterPOSTWithValidation[handlers.ResumeUploadURLRequest, handlers.ResumeUploadURLResponse](
+		ctx, router, handlers.ResumeUploadURLRoutes(),
+		&handlers.ResumeUploadURLHandler{CareersService: careersService},
+	)
+	serverHttp.RegisterGETWithValidation[handlers.ResumeDownloadURLRequest, handlers.ResumeDownloadURLResponse](
+		ctx, router, handlers.ResumeDownloadURLRoutes(),
+		&handlers.ResumeDownloadURLHandler{CareersService: careersService},
+	)
 }
