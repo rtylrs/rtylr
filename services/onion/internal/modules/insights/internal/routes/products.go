@@ -27,4 +27,8 @@ func registerProductRoutes(ctx context.Context, router *chi.Mux, svc *applicatio
 		ctx, router, handlers.GetSlowMoversRoutes(),
 		&handlers.GetSlowMoversHandler{Service: svc},
 	)
+	serverHttp.RegisterGET[handlers.GetCategorySalesRequest, handlers.GetCategorySalesResponse](
+		ctx, router, handlers.GetCategorySalesRoutes(),
+		&handlers.GetCategorySalesHandler{Service: svc},
+	)
 }
