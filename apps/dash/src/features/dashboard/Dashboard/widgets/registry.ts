@@ -115,6 +115,15 @@ export const WIDGET_CATALOG: WidgetConfig[] = [
     minH: 2,
   },
   {
+    id: 'invoice-aging',
+    label: 'Invoice Aging',
+    description: 'A/R buckets — 0-30, 31-60, 61-90, 90+ days',
+    defaultW: 2,
+    defaultH: 3,
+    minW: 1,
+    minH: 2,
+  },
+  {
     id: 'top-products',
     label: 'Top Products',
     description: 'Best selling items this week',

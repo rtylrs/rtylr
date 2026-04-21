@@ -7,6 +7,7 @@ import TeamWidget from './TeamWidget';
 import LowStockWidget from './LowStockWidget';
 import RevenueChartWidget from './RevenueChartWidget';
 import RevenueByAppWidget from './RevenueByAppWidget';
+import InvoiceAgingWidget from './InvoiceAgingWidget';
 import TopProductsWidget from './TopProductsWidget';
 import PendingWidget from './PendingWidget';
 import AppsWidget from './AppsWidget';
@@ -23,6 +24,7 @@ const WIDGET_COMPONENTS: Record<string, React.FC> = {
   'low-stock': LowStockWidget,
   'revenue-chart': RevenueChartWidget,
   'revenue-by-app': RevenueByAppWidget,
+  'invoice-aging': InvoiceAgingWidget,
   'top-products': TopProductsWidget,
   pending: PendingWidget,
   apps: AppsWidget,
