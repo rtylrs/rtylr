@@ -31,3 +31,11 @@ export function useUpdateAutomation() {
     onSuccess: () => qc.invalidateQueries({ queryKey: ['automations'] }),
   });
 }
+
+export function useDeleteAutomation() {
+  const qc = useQueryClient();
+  return useMutation({
+    mutationFn: (id: number) => unwrap(crmApi.deleteAutomation(id)),
+    onSuccess: () => qc.invalidateQueries({ queryKey: ['automations'] }),
+  });
+}

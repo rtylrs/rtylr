@@ -78,8 +78,7 @@ const AutomationBuilder: React.FC = () => {
           navigate('/automations');
         },
         onError: () => {
-          toast.success('Automation saved');
-          navigate('/automations');
+          toast.error('Failed to save automation');
         },
       }
     );
@@ -92,9 +91,9 @@ const AutomationBuilder: React.FC = () => {
         title="New automation"
         subtitle="Drag triggers and actions to build a workflow"
         actions={
-          <Button variant="primary" onClick={handleSave} disabled={!name}>
+          <Button variant="primary" onClick={handleSave} disabled={!name || create.isPending}>
             <Save size={13} />
-            Save
+            {create.isPending ? 'Saving…' : 'Save'}
           </Button>
         }
       />

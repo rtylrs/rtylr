@@ -297,6 +297,8 @@ export const crmApi = {
   updateAutomation: (id: number, data: Partial<Automation>) =>
     safe.post<Automation>('/crm/automations', { id, ...data }),
 
+  deleteAutomation: (id: number) => safe.post('/crm/automations', { id, _action: 'delete' }),
+
   // Templates
   getTemplates: () => safe.get<Template[]>('/crm/templates'),
 
