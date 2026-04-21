@@ -19,4 +19,9 @@ func RegisterRoutes(ctx context.Context, router *chi.Mux, svc *application.Servi
 		ctx, router, handlers.UpdateKDSItemRoutes(),
 		&handlers.UpdateKDSItemHandler{Service: svc},
 	)
+
+	http.RegisterPUTWithValidation[handlers.UpdateKDSItemByIDRequest, handlers.UpdateKDSItemByIDResponse](
+		ctx, router, handlers.UpdateKDSItemByIDRoutes(),
+		&handlers.UpdateKDSItemByIDHandler{Service: svc},
+	)
 }

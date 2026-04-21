@@ -10,3 +10,9 @@ FROM pos_order_items WHERE order_id = ? ORDER BY id;
 
 -- name: UpdateKDSItemStatus :exec
 UPDATE pos_order_items SET status = ? WHERE order_id = ? AND id = ?;
+
+-- name: UpdateKDSItemStatusByItemID :exec
+UPDATE pos_order_items oi
+JOIN pos_orders o ON o.id = oi.order_id
+SET oi.status = ?
+WHERE oi.id = ? AND o.owner_id = ?;

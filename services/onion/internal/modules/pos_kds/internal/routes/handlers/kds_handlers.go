@@ -37,6 +37,45 @@ func (h *ListKDSOrdersHandler) Serve(ctx context.Context, req *ListKDSOrdersRequ
 	return ListKDSOrdersResponse{Orders: orders}, nil
 }
 
+// --- Update Item Status by item id only ---
+
+func UpdateKDSItemByIDRoutes() []string { return []string{"/pos/kds/items/{itemId}"} }
+
+type UpdateKDSItemByIDHandler struct{ Service *application.Service }
+
+type UpdateKDSItemByIDRequest struct {
+	Status string `json:"status"`
+}
+
+type UpdateKDSItemByIDResponse struct {
+	Message string `json:"message"`
+}
+
+func (h *UpdateKDSItemByIDHandler) Validate(_ context.Context, req *UpdateKDSItemByIDRequest) *errorModels.ServerError {
+	if req.Status == "" {
+		return &errorModels.ServerError{Code: http.StatusBadRequest, Message: "Status is required"}
+	}
+	return nil
+}
+
+func (h *UpdateKDSItemByIDHandler) Serve(ctx context.Context, req *UpdateKDSItemByIDRequest) (UpdateKDSItemByIDResponse, *errorModels.ServerError) {
+	device := authPkg.DeviceCtx(ctx)
+	if device.User == nil {
+		return UpdateKDSItemByIDResponse{}, errorModels.PermissionDeniedServerError()
+	}
+
+	itemIDStr := chi.URLParamFromCtx(ctx, "itemId")
+	itemID, err := strconv.ParseInt(itemIDStr, 10, 64)
+	if err != nil || itemID <= 0 {
+		return UpdateKDSItemByIDResponse{}, &errorModels.ServerError{Code: http.StatusBadRequest, Message: "Invalid item ID"}
+	}
+
+	if updateErr := h.Service.UpdateItemStatusByItemID(ctx, device.User.UserID, itemID, req.Status); updateErr != nil {
+		return UpdateKDSItemByIDResponse{}, &errorModels.ServerError{Code: http.StatusInternalServerError, Message: "Failed to update item status"}
+	}
+	return UpdateKDSItemByIDResponse{Message: "Item status updated"}, nil
+}
+
 // --- Update Item Status (mark ready/done) ---
 
 func UpdateKDSItemRoutes() []string { return []string{"/pos/kds/{orderId}/items/{itemId}"} }

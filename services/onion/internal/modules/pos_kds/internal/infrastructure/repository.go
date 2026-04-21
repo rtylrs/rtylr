@@ -87,6 +87,21 @@ func (r *Repository) UpdateItemStatus(ctx context.Context, input domain.UpdateIt
 	return nil
 }
 
+// UpdateItemStatusByItemID updates a KDS item status by item id alone, resolving the
+// owning order via join. Owner-scoped to prevent cross-tenant mutation.
+func (r *Repository) UpdateItemStatusByItemID(ctx context.Context, ownerID int64, itemID int64, status string) error {
+	err := r.queries.UpdateKDSItemStatusByItemID(ctx, sqlc.UpdateKDSItemStatusByItemIDParams{
+		Status:  sqlc.NullPosOrderItemsStatus{PosOrderItemsStatus: sqlc.PosOrderItemsStatus(status), Valid: true},
+		ID:      itemID,
+		OwnerID: ownerID,
+	})
+	if err != nil {
+		logger.Ctx(ctx).Error("Failed to update KDS item status by item id", logger.Error(err))
+		return err
+	}
+	return nil
+}
+
 func decimalToFloat(s string) float64 {
 	if s == "" {
 		return 0

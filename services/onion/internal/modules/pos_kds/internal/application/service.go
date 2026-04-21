@@ -45,3 +45,7 @@ func (s *Service) ListActiveOrdersByStation(ctx context.Context, ownerID int64, 
 func (s *Service) UpdateItemStatus(ctx context.Context, input domain.UpdateItemStatusInput) error {
 	return s.repo.UpdateItemStatus(ctx, input)
 }
+
+func (s *Service) UpdateItemStatusByItemID(ctx context.Context, ownerID, itemID int64, status string) error {
+	return s.repo.UpdateItemStatusByItemID(ctx, ownerID, itemID, status)
+}
