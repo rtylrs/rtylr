@@ -6,6 +6,7 @@ import (
 	"github.com/go-chi/chi/v5"
 	"github.com/voxire/onion/internal/modules/business/internal/application"
 	"github.com/voxire/onion/internal/modules/business/internal/routes"
+	"github.com/voxire/onion/internal/modules/business/internal/routes/handlers"
 )
 
 type Module struct {
@@ -23,5 +24,7 @@ func (m *Module) RegisterRoutes(ctx context.Context, router *chi.Mux, _ ...inter
 }
 
 func (m *Module) GetAnonymousRoutes() []string {
-	return []string{}
+	// Public business header for the customer-facing menu app.
+	// Every other route in this module requires a JWT.
+	return handlers.PublicBusinessRoutes()
 }

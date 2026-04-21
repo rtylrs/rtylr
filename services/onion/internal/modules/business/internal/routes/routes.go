@@ -14,4 +14,11 @@ func RegisterRoutes(ctx context.Context, router *chi.Mux, service *application.S
 		ctx, router, handlers.BusinessMeRoutes(),
 		&handlers.GetProfileHandler{Service: service},
 	)
+
+	// Anonymous public read — registered in module.go's
+	// GetAnonymousRoutes so the auth middleware skips it.
+	serverHttp.RegisterGETWithValidation[handlers.PublicBusinessRequest, handlers.PublicBusinessResponse](
+		ctx, router, handlers.PublicBusinessRoutes(),
+		&handlers.PublicBusinessHandler{Service: service},
+	)
 }
