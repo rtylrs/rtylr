@@ -25,6 +25,9 @@ const ConfirmModal: React.FC<ConfirmModalProps> = ({
   if (!open) return null;
   return (
     <div
+      role="dialog"
+      aria-modal="true"
+      data-testid="confirm-modal"
       className="fixed inset-0 z-50 flex items-center justify-center p-6"
       style={{ background: 'rgba(0,0,0,0.6)' }}
       onClick={onCancel}
@@ -68,6 +71,7 @@ const ConfirmModal: React.FC<ConfirmModalProps> = ({
             {cancelLabel}
           </button>
           <button
+            data-testid="confirm-modal-confirm"
             onClick={onConfirm}
             className="px-3 py-1.5 rounded-lg text-xs font-semibold"
             style={{

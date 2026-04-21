@@ -93,7 +93,12 @@ export function useUpdateProduct() {
   const qc = useQueryClient();
   return useMutation({
     mutationFn: (data: UpdateProductInput) => unwrap(erpApi.updateProduct(data)),
-    onSuccess: () => qc.invalidateQueries({ queryKey: ['products'] }),
+    onSuccess: (_res, variables) => {
+      // Invalidate both the list cache and the individual product cache
+      // so the detail screen sees the edited name on its next render.
+      qc.invalidateQueries({ queryKey: ['products'] });
+      qc.invalidateQueries({ queryKey: ['product', variables.id] });
+    },
   });
 }
 
@@ -101,6 +106,9 @@ export function useDeleteProduct() {
   const qc = useQueryClient();
   return useMutation({
     mutationFn: (id: number) => unwrap(erpApi.deleteProduct(id)),
-    onSuccess: () => qc.invalidateQueries({ queryKey: ['products'] }),
+    onSuccess: (_res, id) => {
+      qc.invalidateQueries({ queryKey: ['products'] });
+      qc.invalidateQueries({ queryKey: ['product', id] });
+    },
   });
 }
