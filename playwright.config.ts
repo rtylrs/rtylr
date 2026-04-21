@@ -89,5 +89,21 @@ export default defineConfig({
       stdout: 'pipe',
       stderr: 'pipe',
     },
+    {
+      command: 'pnpm --filter @rtylr/flow dev',
+      port: 5183,
+      reuseExistingServer: !process.env.CI,
+      timeout: 120_000,
+      stdout: 'pipe',
+      stderr: 'pipe',
+    },
+    {
+      command: 'pnpm --filter @rtylr/insights dev',
+      port: 5186,
+      reuseExistingServer: !process.env.CI,
+      timeout: 120_000,
+      stdout: 'pipe',
+      stderr: 'pipe',
+    },
   ],
 });
