@@ -19,4 +19,10 @@ func registerReportsRoutes(ctx context.Context, router *chi.Mux, svc *applicatio
 		ctx, router, handlers.GenerateRevenueReportRoutes(),
 		&handlers.GenerateRevenueReportHandler{Service: svc},
 	)
+	// CSV export is registered directly against the router because the
+	// generic RegisterGET helper wraps the response in a JSON envelope.
+	exportHandler := &handlers.ExportRevenueHandler{Service: svc}
+	for _, path := range handlers.ExportRevenueRoutes() {
+		router.Get(path, exportHandler.ServeHTTP)
+	}
 }
