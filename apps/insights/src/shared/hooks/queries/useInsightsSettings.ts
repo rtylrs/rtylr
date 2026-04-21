@@ -1,0 +1,149 @@
+import { unwrap } from '@voxire/api';
+import {
+  useMutation,
+  useQuery,
+  useQueryClient,
+  type UseMutationResult,
+  type UseQueryResult,
+} from '@tanstack/react-query';
+import { toast } from 'sonner';
+import { useTranslation } from 'react-i18next';
+import { safe } from '../../lib/api';
+import type { InsightsSettingsResponse, ScheduledReportsResponse, ScheduledReport } from './types';
+
+export const useInsightsSettings = (): UseQueryResult<InsightsSettingsResponse> => {
+  return useQuery<InsightsSettingsResponse>({
+    queryKey: ['insights-settings'],
+    queryFn: async (): Promise<InsightsSettingsResponse> => {
+      const res = await unwrap(safe.get<InsightsSettingsResponse>('/insights/settings'));
+      return res as InsightsSettingsResponse;
+    },
+  });
+};
+
+// NOTE: the backend GET /insights/settings handler is live, but a matching
+// PUT /insights/settings is not yet wired in onion/internal/modules/insights.
+// The mutation below targets the expected contract and will start working
+// once the backend ships the update handler — the frontend is intentionally
+// ready in advance so the Settings screen can land together with the server
+// change.
+export const useUpdateInsightsSettings = (): UseMutationResult<
+  InsightsSettingsResponse,
+  unknown,
+  Partial<InsightsSettingsResponse>
+> => {
+  const qc = useQueryClient();
+  const { t } = useTranslation();
+  return useMutation<InsightsSettingsResponse, unknown, Partial<InsightsSettingsResponse>>({
+    mutationFn: async (
+      data: Partial<InsightsSettingsResponse>
+    ): Promise<InsightsSettingsResponse> => {
+      const res = await unwrap(safe.put<InsightsSettingsResponse>('/insights/settings', data));
+      return res as InsightsSettingsResponse;
+    },
+    onSuccess: (): void => {
+      void qc.invalidateQueries({ queryKey: ['insights-settings'] });
+      toast.success(t('insights.settings.saved'));
+    },
+    onError: (): void => {
+      toast.error(t('insights.errors.generic'));
+    },
+  });
+};
+
+export const useScheduledReports = (): UseQueryResult<ScheduledReportsResponse> => {
+  return useQuery<ScheduledReportsResponse>({
+    queryKey: ['insights-scheduled-reports'],
+    queryFn: async (): Promise<ScheduledReportsResponse> => {
+      const res = await unwrap(
+        safe.get<ScheduledReportsResponse>('/insights/settings/scheduled-reports')
+      );
+      return res as ScheduledReportsResponse;
+    },
+  });
+};
+
+export interface CreateScheduledReportPayload {
+  templateId: string;
+  cadence: string;
+  channel: string;
+  recipient: string;
+  isActive: boolean;
+}
+
+export const useCreateScheduledReport = (): UseMutationResult<
+  ScheduledReport,
+  unknown,
+  CreateScheduledReportPayload
+> => {
+  const qc = useQueryClient();
+  const { t } = useTranslation();
+  return useMutation<ScheduledReport, unknown, CreateScheduledReportPayload>({
+    mutationFn: async (data: CreateScheduledReportPayload): Promise<ScheduledReport> => {
+      const res = await unwrap(
+        safe.post<ScheduledReport>('/insights/settings/scheduled-reports', data)
+      );
+      return res as ScheduledReport;
+    },
+    onSuccess: (): void => {
+      void qc.invalidateQueries({ queryKey: ['insights-scheduled-reports'] });
+      toast.success(t('insights.settings.scheduledReports.created'));
+    },
+    onError: (): void => {
+      toast.error(t('insights.errors.generic'));
+    },
+  });
+};
+
+export interface UpdateScheduledReportPayload {
+  id: number;
+  data: CreateScheduledReportPayload;
+}
+
+export const useUpdateScheduledReport = (): UseMutationResult<
+  ScheduledReport,
+  unknown,
+  UpdateScheduledReportPayload
+> => {
+  const qc = useQueryClient();
+  const { t } = useTranslation();
+  return useMutation<ScheduledReport, unknown, UpdateScheduledReportPayload>({
+    mutationFn: async ({ id, data }: UpdateScheduledReportPayload): Promise<ScheduledReport> => {
+      const res = await unwrap(
+        safe.put<ScheduledReport>(`/insights/settings/scheduled-reports/${id}`, data)
+      );
+      return res as ScheduledReport;
+    },
+    onSuccess: (): void => {
+      void qc.invalidateQueries({ queryKey: ['insights-scheduled-reports'] });
+      toast.success(t('insights.settings.scheduledReports.updated'));
+    },
+    onError: (): void => {
+      toast.error(t('insights.errors.generic'));
+    },
+  });
+};
+
+export const useDeleteScheduledReport = (): UseMutationResult<
+  { deleted: boolean },
+  unknown,
+  number
+> => {
+  const qc = useQueryClient();
+  const { t } = useTranslation();
+  return useMutation<{ deleted: boolean }, unknown, number>({
+    mutationFn: async (id: number): Promise<{ deleted: boolean }> => {
+      const res = await unwrap(
+        safe.delete<{ deleted: boolean }>(`/insights/settings/scheduled-reports/${id}`)
+      );
+      return res as { deleted: boolean };
+    },
+    onSuccess: (): void => {
+      void qc.invalidateQueries({ queryKey: ['insights-scheduled-reports'] });
+      toast.success(t('insights.settings.scheduledReports.deleted'));
+    },
+    onError: (): void => {
+      toast.error(t('insights.errors.generic'));
+    },
+  });
+};
