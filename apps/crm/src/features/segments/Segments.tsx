@@ -12,7 +12,7 @@ import {
   X,
   Filter,
 } from 'lucide-react';
-import { useSegments } from './useSegments';
+import { useListSegments } from '../../shared/hooks/queries/useSegments';
 
 const ACCENT = '#3b82f6';
 
@@ -464,7 +464,7 @@ const iconMap: Record<string, React.ComponentType<{ size?: number }>> = {
 
 const Segments: React.FC = () => {
   const navigate = useNavigate();
-  const { data: fetchedSegments, isLoading } = useSegments();
+  const { data: fetchedSegments, isLoading } = useListSegments();
   const [builderOpen, setBuilderOpen] = useState(false);
   const segments: Segment[] = useMemo(() => {
     if (!fetchedSegments) return [];
