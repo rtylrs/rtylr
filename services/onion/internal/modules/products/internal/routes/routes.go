@@ -60,6 +60,8 @@ func RegisterRoutes(ctx context.Context, router *chi.Mux, service *application.S
 	)
 
 	// Path-param fetch — the FE-expected REST shape. Register helpers
-	// don't parse chi path params, so this one's wired directly.
+	// don't parse chi path params, so these are wired directly.
+	// `barcode` before `{id}` so the specific segment matches first.
+	router.Get("/erp/products/barcode/{code}", handlers.BarcodeLookupHandlerFunc(service))
 	router.Get("/erp/products/{id}", handlers.GetProductHandlerFunc(service))
 }

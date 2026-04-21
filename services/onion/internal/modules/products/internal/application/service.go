@@ -3,6 +3,7 @@ package application
 import (
 	"context"
 	"fmt"
+	"strings"
 	"time"
 
 	"github.com/voxire/onion/internal/modules/products/internal/domain"
@@ -67,6 +68,17 @@ func (s *Service) DeleteProduct(ctx context.Context, ownerID, id int64) error {
 
 func (s *Service) GetProduct(ctx context.Context, ownerID, id int64) (domain.Product, error) {
 	return s.repo.GetProduct(ctx, ownerID, id)
+}
+
+// GetProductByBarcode powers the POS + ERP scan-to-find flow. Empty
+// barcode is treated as a miss so handlers can reuse the standard
+// not-found error path.
+func (s *Service) GetProductByBarcode(ctx context.Context, ownerID int64, barcode string) (domain.Product, error) {
+	trimmed := strings.TrimSpace(barcode)
+	if trimmed == "" {
+		return domain.Product{}, domain.ErrProductNotFound
+	}
+	return s.repo.GetProductByBarcode(ctx, ownerID, trimmed)
 }
 
 func (s *Service) GetDashboard(ctx context.Context, ownerID int64) (domain.DashboardStats, error) {

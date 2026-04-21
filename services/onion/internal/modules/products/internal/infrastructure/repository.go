@@ -98,6 +98,72 @@ func (r *Repository) GetProduct(ctx context.Context, ownerID, id int64) (domain.
 	return productFromRow(row), nil
 }
 
+// GetProductByBarcode powers the barcode-scan flow in POS + ERP. An
+// empty / whitespace barcode is rejected at the service layer; at the
+// repo level we trust the input and just match exactly. Owner-scoped
+// so a barcode collision across tenants won't leak data.
+func (r *Repository) GetProductByBarcode(ctx context.Context, ownerID int64, barcode string) (domain.Product, error) {
+	// Dynamic query rather than sqlc: the SELECT shape matches
+	// ListProducts exactly, so reusing productFromRow keeps parity
+	// with GetProduct's output.
+	const q = `
+		SELECT id, owner_id, category_id, supplier_id, name, sku, barcode, description,
+		       unit, cost_price, sale_price, stock_quantity, low_stock_threshold,
+		       reorder_quantity, is_active, track_inventory, created_at, updated_at
+		FROM erp_products
+		WHERE owner_id = ? AND barcode = ?
+		LIMIT 1`
+
+	row := r.pool.QueryRowContext(ctx, q, ownerID, barcode)
+
+	var p domain.Product
+	var categoryID, supplierID sql.NullInt64
+	var barcodeCol, description, unit sql.NullString
+	var costPrice, salePrice, lowStockThreshold, reorderQuantity sql.NullFloat64
+
+	err := row.Scan(
+		&p.ID, &p.OwnerID, &categoryID, &supplierID, &p.Name, &p.SKU, &barcodeCol, &description,
+		&unit, &costPrice, &salePrice, &p.StockQuantity, &lowStockThreshold,
+		&reorderQuantity, &p.IsActive, &p.TrackInventory, &p.CreatedAt, &p.UpdatedAt,
+	)
+	if err != nil {
+		if err == sql.ErrNoRows {
+			return domain.Product{}, domain.ErrProductNotFound
+		}
+		logger.Ctx(ctx).Error("Failed to look up product by barcode", logger.Error(err))
+		return domain.Product{}, err
+	}
+
+	if categoryID.Valid {
+		p.CategoryID = categoryID.Int64
+	}
+	if supplierID.Valid {
+		p.SupplierID = supplierID.Int64
+	}
+	if barcodeCol.Valid {
+		p.Barcode = barcodeCol.String
+	}
+	if description.Valid {
+		p.Description = description.String
+	}
+	if unit.Valid {
+		p.Unit = unit.String
+	}
+	if costPrice.Valid {
+		p.CostPrice = costPrice.Float64
+	}
+	if salePrice.Valid {
+		p.SalePrice = salePrice.Float64
+	}
+	if lowStockThreshold.Valid {
+		p.LowStockThreshold = lowStockThreshold.Float64
+	}
+	if reorderQuantity.Valid {
+		p.ReorderQuantity = reorderQuantity.Float64
+	}
+	return p, nil
+}
+
 func (r *Repository) CreateProduct(ctx context.Context, ownerID int64, input domain.ProductInput) (int64, error) {
 	result, err := r.queries.CreateProduct(ctx, sqlc.CreateProductParams{
 		OwnerID:           ownerID,
