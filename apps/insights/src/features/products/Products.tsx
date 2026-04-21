@@ -1,19 +1,19 @@
 import React from 'react';
 import { motion } from 'motion/react';
-import { Package, TrendingUp, TrendingDown, BarChart3 } from 'lucide-react';
+import { Package, TrendingDown, BarChart3 } from 'lucide-react';
+import { useTranslation } from 'react-i18next';
 import {
-  useProductPerformance,
+  useProductKPIs,
   useBestSellers,
   useSlowMovers,
-  useMarginAnalysis,
-  useCategoryBreakdown,
-} from './useProducts';
-import { formatCurrency, formatNumber, formatPercent } from '../../shared/lib/format';
+  useProductMargins,
+  useProductCategoryMix,
+} from '../../shared/hooks/queries/useInsightsProducts';
+import { formatMoney } from '../../shared/utils/money';
+import { formatNumber } from '../../shared/lib/format';
 import { CardSkeleton, SkeletonRow } from '../../shared/components/Skeleton';
 import ErrorState from '../../shared/components/ErrorState';
 import EmptyState from '../../shared/components/EmptyState';
-
-const ACCENT = '#6366f1';
 
 const containerVariants = {
   hidden: {},
@@ -25,38 +25,49 @@ const itemVariants = {
   show: { opacity: 1, y: 0, transition: { duration: 0.22, ease: 'easeOut' } },
 };
 
-const Products: React.FC = () => {
-  const { data: performance, isLoading: perfLoading, isError, refetch } = useProductPerformance();
-  const { data: bestSellers, isLoading: bestLoading } = useBestSellers(10);
-  const { data: slowMovers, isLoading: slowLoading } = useSlowMovers(10);
-  const { data: margins, isLoading: marginsLoading } = useMarginAnalysis();
-  const { data: categories, isLoading: catLoading } = useCategoryBreakdown();
+const Products: React.FC = (): React.JSX.Element => {
+  const { t } = useTranslation();
+  const { data: kpis, isLoading: kpisLoading, isError, refetch } = useProductKPIs();
+  const { data: bestRes, isLoading: bestLoading } = useBestSellers({ limit: 10 });
+  const { data: slowRes, isLoading: slowLoading } = useSlowMovers({ days: 60 });
+  const { data: marginRes, isLoading: marginLoading } = useProductMargins();
+  const { data: catRes, isLoading: catLoading } = useProductCategoryMix();
 
   if (isError) {
-    return <ErrorState message="Failed to load product data." onRetry={refetch} />;
+    return <ErrorState message={t('insights.errors.generic')} onRetry={refetch} />;
   }
 
-  type ProductRow = {
-    id?: string | number;
-    name?: string;
-    revenue?: number;
-    sales?: number;
-    unitsSold?: number;
-    quantity?: number;
-  };
-  type CategoryRow = {
-    id?: string | number;
-    name?: string;
-    category?: string;
-    revenue?: number;
-    pct?: number;
-    productCount?: number;
-    count?: number;
-  };
-  const bestList = (bestSellers ?? []) as ProductRow[];
-  const slowList = (slowMovers ?? []) as ProductRow[];
-  const marginData = margins ?? {};
-  const catList = (categories ?? []) as CategoryRow[];
+  const totalSkus = kpis?.totalSkus ?? 0;
+  const activeSkus = kpis?.activeSkus ?? 0;
+  const outOfStock = kpis?.outOfStock ?? 0;
+  const avgMarginPct = kpis?.avgMarginPct ?? 0;
+  const best = bestRes?.products ?? [];
+  const slow = slowRes?.products ?? [];
+  const margins = marginRes?.buckets ?? [];
+  const categories = catRes?.categories ?? [];
+
+  const stats = [
+    {
+      label: t('insights.products.kpis.totalSkus'),
+      value: formatNumber(totalSkus),
+      icon: Package,
+    },
+    {
+      label: t('insights.products.kpis.activeSkus'),
+      value: formatNumber(activeSkus),
+      icon: BarChart3,
+    },
+    {
+      label: t('insights.products.kpis.outOfStock'),
+      value: formatNumber(outOfStock),
+      icon: TrendingDown,
+    },
+    {
+      label: t('insights.products.kpis.avgMargin'),
+      value: `${avgMarginPct.toFixed(1)}%`,
+      icon: BarChart3,
+    },
+  ];
 
   return (
     <motion.div
@@ -67,15 +78,11 @@ const Products: React.FC = () => {
     >
       <motion.div variants={itemVariants as any}>
         <h2 className="text-xl font-semibold" style={{ color: 'var(--hub-text)' }}>
-          Products
+          {t('insights.products.title')}
         </h2>
-        <p className="text-sm mt-0.5" style={{ color: 'var(--hub-text-muted)' }}>
-          Product performance and margin analysis
-        </p>
       </motion.div>
 
-      {/* Summary cards */}
-      {perfLoading || marginsLoading ? (
+      {kpisLoading ? (
         <div className="grid grid-cols-2 lg:grid-cols-4 gap-4">
           {Array.from({ length: 4 }).map((_, i) => (
             <CardSkeleton key={i} />
@@ -86,32 +93,7 @@ const Products: React.FC = () => {
           variants={containerVariants as any}
           className="grid grid-cols-2 lg:grid-cols-4 gap-4"
         >
-          {[
-            {
-              label: 'Total Products',
-              value: formatNumber(performance?.totalProducts ?? 0),
-              icon: Package,
-              color: ACCENT,
-            },
-            {
-              label: 'Avg Margin',
-              value: `${(marginData.averageMargin ?? 0).toFixed(1)}%`,
-              icon: BarChart3,
-              color: '#10b981',
-            },
-            {
-              label: 'Best Sellers',
-              value: formatNumber(bestList.length),
-              icon: TrendingUp,
-              color: '#f59e0b',
-            },
-            {
-              label: 'Slow Movers',
-              value: formatNumber(slowList.length),
-              icon: TrendingDown,
-              color: '#f87171',
-            },
-          ].map((stat) => {
+          {stats.map((stat) => {
             const Icon = stat.icon;
             return (
               <motion.div
@@ -126,9 +108,9 @@ const Products: React.FC = () => {
                   </span>
                   <span
                     className="flex items-center justify-center h-7 w-7 rounded-lg"
-                    style={{ background: `${stat.color}18` }}
+                    style={{ background: 'var(--accent-muted)' }}
                   >
-                    <Icon size={14} style={{ color: stat.color }} />
+                    <Icon size={14} style={{ color: 'var(--accent)' }} />
                   </span>
                 </div>
                 <p className="text-2xl font-bold" style={{ color: 'var(--hub-text)' }}>
@@ -140,107 +122,135 @@ const Products: React.FC = () => {
         </motion.div>
       )}
 
-      <div className="grid grid-cols-1 lg:grid-cols-2 gap-4">
-        {/* Best Sellers */}
-        <motion.div
-          variants={itemVariants as any}
-          className="rounded-xl p-5"
-          style={{ background: 'var(--hub-card)', border: '1px solid var(--hub-border)' }}
-        >
-          <div className="flex items-center gap-2 mb-4">
-            <TrendingUp size={14} style={{ color: '#10b981' }} />
-            <h3 className="text-sm font-semibold" style={{ color: 'var(--hub-text)' }}>
-              Best Sellers
-            </h3>
-          </div>
-          {bestLoading ? (
-            <div className="space-y-2">
-              {Array.from({ length: 5 }).map((_, i) => (
-                <SkeletonRow key={i} cols={3} />
-              ))}
-            </div>
-          ) : bestList.length === 0 ? (
-            <EmptyState title="No data" description="Best sellers will appear here." />
-          ) : (
-            <div className="space-y-1">
-              {bestList.map((p, i) => (
-                <div
-                  key={p.id ?? i}
-                  className="flex items-center justify-between px-3 py-2.5 rounded-lg"
-                  style={{ background: 'var(--hub-hover)' }}
-                >
-                  <div className="flex items-center gap-2">
-                    <span className="text-[10px] w-5" style={{ color: 'var(--hub-text-dim)' }}>
-                      #{i + 1}
-                    </span>
-                    <span
-                      className="text-xs font-medium truncate"
-                      style={{ color: 'var(--hub-text)' }}
-                    >
-                      {p.name ?? 'Unknown'}
-                    </span>
-                  </div>
-                  <span className="text-xs font-semibold" style={{ color: 'var(--hub-text)' }}>
-                    {formatCurrency(p.revenue ?? p.sales ?? 0)}
-                  </span>
-                </div>
-              ))}
-            </div>
-          )}
-        </motion.div>
-
-        {/* Slow Movers */}
-        <motion.div
-          variants={itemVariants as any}
-          className="rounded-xl p-5"
-          style={{ background: 'var(--hub-card)', border: '1px solid var(--hub-border)' }}
-        >
-          <div className="flex items-center gap-2 mb-4">
-            <TrendingDown size={14} style={{ color: '#f87171' }} />
-            <h3 className="text-sm font-semibold" style={{ color: 'var(--hub-text)' }}>
-              Slow Movers
-            </h3>
-          </div>
-          {slowLoading ? (
-            <div className="space-y-2">
-              {Array.from({ length: 5 }).map((_, i) => (
-                <SkeletonRow key={i} cols={3} />
-              ))}
-            </div>
-          ) : slowList.length === 0 ? (
-            <EmptyState title="No data" description="Slow movers will appear here." />
-          ) : (
-            <div className="space-y-1">
-              {slowList.map((p, i) => (
-                <div
-                  key={p.id ?? i}
-                  className="flex items-center justify-between px-3 py-2.5 rounded-lg"
-                  style={{ background: 'var(--hub-hover)' }}
-                >
-                  <span
-                    className="text-xs font-medium truncate"
-                    style={{ color: 'var(--hub-text)' }}
-                  >
-                    {p.name ?? 'Unknown'}
-                  </span>
-                  <span className="text-xs" style={{ color: 'var(--hub-text-muted)' }}>
-                    {formatNumber(p.unitsSold ?? p.quantity ?? 0)} sold
-                  </span>
-                </div>
-              ))}
-            </div>
-          )}
-        </motion.div>
-      </div>
-
-      {/* Category Breakdown */}
       <motion.div
         variants={itemVariants as any}
         className="rounded-xl p-5"
         style={{ background: 'var(--hub-card)', border: '1px solid var(--hub-border)' }}
       >
         <h3 className="text-sm font-semibold mb-4" style={{ color: 'var(--hub-text)' }}>
-          Category Breakdown
+          {t('insights.products.bestSellers')}
+        </h3>
+        {bestLoading ? (
+          <div className="space-y-2">
+            {Array.from({ length: 5 }).map((_, i) => (
+              <SkeletonRow key={i} cols={3} />
+            ))}
+          </div>
+        ) : best.length === 0 ? (
+          <EmptyState title="" description={t('insights.products.empty')} />
+        ) : (
+          <div className="space-y-1">
+            {best.map((p, i) => (
+              <div
+                key={p.productId}
+                className="grid grid-cols-3 items-center px-3 py-2.5 rounded-lg"
+                style={{ background: 'var(--hub-hover)' }}
+              >
+                <div className="flex items-center gap-2">
+                  <span className="text-[10px] w-5" style={{ color: 'var(--hub-text-dim)' }}>
+                    #{i + 1}
+                  </span>
+                  <span
+                    className="text-xs font-medium truncate"
+                    style={{ color: 'var(--hub-text)' }}
+                  >
+                    {p.name}
+                  </span>
+                </div>
+                <span className="text-xs text-center" style={{ color: 'var(--hub-text-muted)' }}>
+                  {formatNumber(p.unitsSold)} units
+                </span>
+                <span
+                  className="text-xs font-semibold text-right"
+                  style={{ color: 'var(--hub-text)' }}
+                >
+                  {formatMoney(p.revenueMinorUnits)}
+                </span>
+              </div>
+            ))}
+          </div>
+        )}
+      </motion.div>
+
+      <motion.div
+        variants={itemVariants as any}
+        className="rounded-xl p-5"
+        style={{ background: 'var(--hub-card)', border: '1px solid var(--hub-border)' }}
+      >
+        <h3 className="text-sm font-semibold mb-4" style={{ color: 'var(--hub-text)' }}>
+          {t('insights.products.margins')}
+        </h3>
+        {marginLoading ? (
+          <div className="space-y-2">
+            {Array.from({ length: 4 }).map((_, i) => (
+              <SkeletonRow key={i} cols={2} />
+            ))}
+          </div>
+        ) : margins.length === 0 ? (
+          <EmptyState title="" description={t('insights.products.empty')} />
+        ) : (
+          <div className="space-y-1">
+            {margins.map((b) => (
+              <div
+                key={b.label}
+                className="flex items-center justify-between px-3 py-2.5 rounded-lg"
+                style={{ background: 'var(--hub-hover)' }}
+              >
+                <span className="text-xs font-medium" style={{ color: 'var(--hub-text)' }}>
+                  {b.label}
+                </span>
+                <span className="text-xs font-semibold" style={{ color: 'var(--hub-text)' }}>
+                  {formatNumber(b.productCount)} products
+                </span>
+              </div>
+            ))}
+          </div>
+        )}
+      </motion.div>
+
+      <motion.div
+        variants={itemVariants as any}
+        className="rounded-xl p-5"
+        style={{ background: 'var(--hub-card)', border: '1px solid var(--hub-border)' }}
+      >
+        <h3 className="text-sm font-semibold mb-4" style={{ color: 'var(--hub-text)' }}>
+          {t('insights.products.slowMovers')}
+        </h3>
+        {slowLoading ? (
+          <div className="space-y-2">
+            {Array.from({ length: 4 }).map((_, i) => (
+              <SkeletonRow key={i} cols={2} />
+            ))}
+          </div>
+        ) : slow.length === 0 ? (
+          <EmptyState title="" description={t('insights.products.empty')} />
+        ) : (
+          <div className="space-y-1">
+            {slow.map((p) => (
+              <div
+                key={p.productId}
+                className="flex items-center justify-between px-3 py-2.5 rounded-lg"
+                style={{ background: 'var(--hub-hover)' }}
+              >
+                <span className="text-xs font-medium truncate" style={{ color: 'var(--hub-text)' }}>
+                  {p.name}
+                </span>
+                <span className="text-xs font-semibold" style={{ color: 'var(--hub-text)' }}>
+                  {formatNumber(p.stockQuantity)} in stock
+                </span>
+              </div>
+            ))}
+          </div>
+        )}
+      </motion.div>
+
+      <motion.div
+        variants={itemVariants as any}
+        className="rounded-xl p-5"
+        style={{ background: 'var(--hub-card)', border: '1px solid var(--hub-border)' }}
+      >
+        <h3 className="text-sm font-semibold mb-4" style={{ color: 'var(--hub-text)' }}>
+          {t('insights.products.categoryMix')}
         </h3>
         {catLoading ? (
           <div className="space-y-2">
@@ -248,27 +258,28 @@ const Products: React.FC = () => {
               <SkeletonRow key={i} cols={3} />
             ))}
           </div>
-        ) : catList.length === 0 ? (
-          <EmptyState title="No categories" description="Category breakdown will appear here." />
+        ) : categories.length === 0 ? (
+          <EmptyState title="" description={t('insights.products.empty')} />
         ) : (
           <div className="space-y-1">
-            {catList.map((c, i) => (
+            {categories.map((c) => (
               <div
-                key={c.id ?? i}
-                className="flex items-center justify-between px-3 py-2.5 rounded-lg"
+                key={c.categoryId}
+                className="grid grid-cols-3 items-center px-3 py-2.5 rounded-lg"
                 style={{ background: 'var(--hub-hover)' }}
               >
-                <span className="text-xs font-medium" style={{ color: 'var(--hub-text)' }}>
-                  {c.name ?? c.category ?? 'Uncategorized'}
+                <span className="text-xs font-medium truncate" style={{ color: 'var(--hub-text)' }}>
+                  {c.categoryName}
                 </span>
-                <div className="flex items-center gap-4">
-                  <span className="text-xs" style={{ color: 'var(--hub-text-muted)' }}>
-                    {formatNumber(c.productCount ?? c.count ?? 0)} products
-                  </span>
-                  <span className="text-xs font-semibold" style={{ color: 'var(--hub-text)' }}>
-                    {formatCurrency(c.revenue ?? 0)}
-                  </span>
-                </div>
+                <span className="text-xs text-center" style={{ color: 'var(--hub-text-muted)' }}>
+                  {formatNumber(c.unitsSold)} units
+                </span>
+                <span
+                  className="text-xs font-semibold text-right"
+                  style={{ color: 'var(--hub-text)' }}
+                >
+                  {formatMoney(c.revenueMinorUnits)}
+                </span>
               </div>
             ))}
           </div>
