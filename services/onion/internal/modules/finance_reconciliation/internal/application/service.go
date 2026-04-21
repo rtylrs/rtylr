@@ -1,0 +1,149 @@
+package application
+
+import (
+	"context"
+	"math"
+	"sort"
+
+	"github.com/voxire/onion/internal/modules/finance_reconciliation/internal/domain"
+	"github.com/voxire/onion/internal/modules/finance_reconciliation/internal/infrastructure"
+)
+
+// maxSuggestions caps the suggestion list so the response stays small even
+// when both sides have hundreds of rows.
+const maxSuggestions = 50
+
+// suggestionScoreCutoff discards pairings whose combined amount + date
+// distance is too large to be worth showing. The score below is "amount
+// difference in minor units + (days_apart * dayWeightMinorUnits)", so this
+// cutoff is generous for a one-dollar, one-week mismatch and tight enough to
+// reject random noise.
+const (
+	suggestionScoreCutoff = 500000.0 // $5000 equivalent
+	dayWeightMinorUnits   = 100.0    // one day ≈ $1 of penalty
+)
+
+type Service struct {
+	repo *infrastructure.Repository
+}
+
+func NewService(ctx context.Context) *Service {
+	return &Service{repo: infrastructure.NewRepository(ctx)}
+}
+
+func (s *Service) Overview(ctx context.Context, ownerID int64) (domain.ReconciliationOverview, error) {
+	bankTxns, err := s.repo.ListUnmatchedBankFeeds(ctx, ownerID)
+	if err != nil {
+		return domain.ReconciliationOverview{}, err
+	}
+
+	invoices, err := s.repo.ListUnmatchedInvoices(ctx, ownerID)
+	if err != nil {
+		return domain.ReconciliationOverview{}, err
+	}
+
+	expenses, err := s.repo.ListUnmatchedExpenses(ctx, ownerID)
+	if err != nil {
+		return domain.ReconciliationOverview{}, err
+	}
+
+	suggestions := computeSuggestions(bankTxns, invoices, expenses)
+
+	return domain.ReconciliationOverview{
+		UnmatchedBankTxns: bankTxns,
+		UnmatchedInvoices: invoices,
+		Suggestions:       suggestions,
+	}, nil
+}
+
+func (s *Service) Match(ctx context.Context, ownerID int64, input domain.MatchInput) (int64, error) {
+	if input.TargetType != domain.TargetTypeInvoice && input.TargetType != domain.TargetTypeExpense {
+		return 0, domain.ErrInvalidTarget
+	}
+	if input.BankFeedID <= 0 || input.TargetID <= 0 {
+		return 0, domain.ErrInvalidTarget
+	}
+
+	exists, err := s.repo.BankFeedExists(ctx, ownerID, input.BankFeedID)
+	if err != nil {
+		return 0, err
+	}
+	if !exists {
+		return 0, domain.ErrBankFeedNotFound
+	}
+
+	return s.repo.CreateMatch(ctx, ownerID, input)
+}
+
+// computeSuggestions scores every (bank_txn × target) pair by amount and date
+// proximity and returns the top matches. Amounts are compared in absolute
+// value so a negative bank amount (money out) still pairs with a positive
+// expense amount.
+func computeSuggestions(bankTxns []domain.UnmatchedBankTransaction, invoices, expenses []domain.UnmatchedInvoice) []domain.MatchSuggestion {
+	if len(bankTxns) == 0 {
+		return nil
+	}
+	type target struct {
+		id     int64
+		kind   string
+		amount int64
+		date   int64 // unix day
+	}
+	targets := make([]target, 0, len(invoices)+len(expenses))
+	for _, inv := range invoices {
+		targets = append(targets, target{
+			id:     inv.ID,
+			kind:   domain.TargetTypeInvoice,
+			amount: inv.AmountMinorUnits,
+			date:   inv.DueDate.Unix() / 86400,
+		})
+	}
+	for _, exp := range expenses {
+		targets = append(targets, target{
+			id:     exp.ID,
+			kind:   domain.TargetTypeExpense,
+			amount: exp.AmountMinorUnits,
+			date:   exp.IssueDate.Unix() / 86400,
+		})
+	}
+	if len(targets) == 0 {
+		return nil
+	}
+
+	suggestions := make([]domain.MatchSuggestion, 0)
+	for _, bt := range bankTxns {
+		bankAmt := absInt64(bt.AmountMinorUnits)
+		bankDate := bt.OccurredAt.Unix() / 86400
+		for _, t := range targets {
+			amountDiff := math.Abs(float64(bankAmt - absInt64(t.amount)))
+			daysApart := absInt64(bankDate - t.date)
+			score := amountDiff + float64(daysApart)*dayWeightMinorUnits
+			if score > suggestionScoreCutoff {
+				continue
+			}
+			suggestions = append(suggestions, domain.MatchSuggestion{
+				BankFeedID:       bt.ID,
+				TargetType:       t.kind,
+				TargetID:         t.id,
+				AmountMinorUnits: t.amount,
+				DaysApart:        int(daysApart),
+				Score:            score,
+			})
+		}
+	}
+
+	sort.Slice(suggestions, func(i, j int) bool {
+		return suggestions[i].Score < suggestions[j].Score
+	})
+	if len(suggestions) > maxSuggestions {
+		suggestions = suggestions[:maxSuggestions]
+	}
+	return suggestions
+}
+
+func absInt64(v int64) int64 {
+	if v < 0 {
+		return -v
+	}
+	return v
+}
