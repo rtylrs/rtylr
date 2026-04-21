@@ -1,6 +1,6 @@
 import React, { useState } from 'react';
 import { Search } from 'lucide-react';
-import { useLoyaltyMembers } from './useLoyalty';
+import { useLoyaltyMembers } from '../../shared/hooks/queries/useLoyalty';
 import { PageHeader, Card, Input, EmptyState, SkeletonList } from '../../shared/components/ui';
 import { CustomerAvatar, TierBadge, PointsBadge } from '../../shared/components/crm';
 import { Users } from 'lucide-react';
