@@ -19,4 +19,8 @@ func registerFinancialRoutes(ctx context.Context, router *chi.Mux, svc *applicat
 		ctx, router, handlers.GetExpensesByCategoryRoutes(),
 		&handlers.GetExpensesByCategoryHandler{Service: svc},
 	)
+	serverHttp.RegisterGET[handlers.GetInvoiceAgingRequest, handlers.GetInvoiceAgingResponse](
+		ctx, router, handlers.GetInvoiceAgingRoutes(),
+		&handlers.GetInvoiceAgingHandler{Service: svc},
+	)
 }

@@ -1,0 +1,43 @@
+package application
+
+import (
+	"context"
+	"fmt"
+	"time"
+
+	"github.com/voxire/onion/internal/platform/cache/cacher"
+)
+
+// InvoiceAgingBucketPayload is one bucket of the A/R aging chart.
+type InvoiceAgingBucketPayload struct {
+	Bucket           string `json:"bucket"`
+	InvoiceCount     int64  `json:"invoice_count"`
+	AmountMinorUnits int64  `json:"amount_minor_units"`
+}
+
+// GetInvoiceAging returns the four standard A/R aging buckets.
+func (s *Service) GetInvoiceAging(ctx context.Context, ownerID int64) ([]InvoiceAgingBucketPayload, error) {
+	key := fmt.Sprintf("insights:%d:financial:invoice-aging", ownerID)
+	type result struct {
+		Rows []InvoiceAgingBucketPayload
+	}
+	out, err := cacher.Of[result]().GetOrComputeSingle(ctx, key, func(ctx context.Context) (result, error) {
+		rows, rerr := s.repo.GetInvoiceAging(ctx, ownerID)
+		if rerr != nil {
+			return result{}, rerr
+		}
+		payloads := make([]InvoiceAgingBucketPayload, 0, len(rows))
+		for _, row := range rows {
+			payloads = append(payloads, InvoiceAgingBucketPayload{
+				Bucket:           row.Bucket,
+				InvoiceCount:     row.InvoiceCount,
+				AmountMinorUnits: row.AmountMinorUnits,
+			})
+		}
+		return result{Rows: payloads}, nil
+	}, cacher.WithExpiry(ctx, 5*time.Minute))
+	if err != nil {
+		return nil, err
+	}
+	return out.Rows, nil
+}
