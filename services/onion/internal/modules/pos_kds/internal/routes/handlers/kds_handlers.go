@@ -15,20 +15,22 @@ import (
 
 // --- List Active Orders for Kitchen ---
 
-func ListKDSOrdersRoutes() []string { return []string{"/pos/kds"} }
+func ListKDSOrdersRoutes() []string { return []string{"/pos/kds", "/pos/kds/orders"} }
 
 type ListKDSOrdersHandler struct{ Service *application.Service }
-type ListKDSOrdersRequest struct{}
+type ListKDSOrdersRequest struct {
+	Station string `json:"station" schema:"station"`
+}
 type ListKDSOrdersResponse struct {
 	Orders []domain.KDSOrder `json:"orders"`
 }
 
-func (h *ListKDSOrdersHandler) Serve(ctx context.Context, _ *ListKDSOrdersRequest) (ListKDSOrdersResponse, *errorModels.ServerError) {
+func (h *ListKDSOrdersHandler) Serve(ctx context.Context, req *ListKDSOrdersRequest) (ListKDSOrdersResponse, *errorModels.ServerError) {
 	device := authPkg.DeviceCtx(ctx)
 	if device.User == nil {
 		return ListKDSOrdersResponse{}, errorModels.PermissionDeniedServerError()
 	}
-	orders, err := h.Service.ListActiveOrders(ctx, device.User.UserID)
+	orders, err := h.Service.ListActiveOrdersByStation(ctx, device.User.UserID, req.Station)
 	if err != nil {
 		return ListKDSOrdersResponse{}, &errorModels.ServerError{Code: http.StatusInternalServerError, Message: "Failed to list KDS orders"}
 	}
