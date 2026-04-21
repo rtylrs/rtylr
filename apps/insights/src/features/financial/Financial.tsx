@@ -1,13 +1,17 @@
 import React from 'react';
 import { motion } from 'motion/react';
-import { DollarSign, TrendingUp, TrendingDown, Clock } from 'lucide-react';
-import { useProfitLoss, useExpenseBreakdown, useInvoiceAging, useCashFlow } from './useFinancial';
-import { formatCurrency, formatNumber } from '../../shared/lib/format';
-import { CardSkeleton, SkeletonRow } from '../../shared/components/Skeleton';
+import { Clock } from 'lucide-react';
+import { useTranslation } from 'react-i18next';
+import {
+  useCashFlow,
+  useExpensesByCategory,
+  useInvoiceAging,
+} from '../../shared/hooks/queries/useInsightsFinancial';
+import { formatMoney } from '../../shared/utils/money';
+import { formatNumber } from '../../shared/lib/format';
+import { SkeletonRow } from '../../shared/components/Skeleton';
 import ErrorState from '../../shared/components/ErrorState';
 import EmptyState from '../../shared/components/EmptyState';
-
-const ACCENT = '#6366f1';
 
 const containerVariants = {
   hidden: {},
@@ -19,41 +23,19 @@ const itemVariants = {
   show: { opacity: 1, y: 0, transition: { duration: 0.22, ease: 'easeOut' } },
 };
 
-const Financial: React.FC = () => {
-  const { data: pl, isLoading: plLoading, isError, refetch } = useProfitLoss();
-  const { data: expenses, isLoading: expLoading } = useExpenseBreakdown();
-  const { data: aging, isLoading: agingLoading } = useInvoiceAging();
-  const { data: cashFlow, isLoading: cfLoading } = useCashFlow('monthly');
+const Financial: React.FC = (): React.JSX.Element => {
+  const { t } = useTranslation();
+  const { data: cfRes, isLoading: cfLoading, isError, refetch } = useCashFlow();
+  const { data: expRes, isLoading: expLoading } = useExpensesByCategory();
+  const { data: agingRes, isLoading: agingLoading } = useInvoiceAging();
 
   if (isError) {
-    return <ErrorState message="Failed to load financial data." onRetry={refetch} />;
+    return <ErrorState message={t('insights.errors.generic')} onRetry={refetch} />;
   }
 
-  const totalRevenue = pl?.revenue ?? pl?.totalRevenue ?? 0;
-  const totalExpenses = pl?.expenses ?? pl?.totalExpenses ?? 0;
-  const netProfit = pl?.netProfit ?? totalRevenue - totalExpenses;
-  const profitMargin = totalRevenue > 0 ? (netProfit / totalRevenue) * 100 : 0;
-
-  type ExpenseRow = { id?: string | number; category?: string; name?: string; amount?: number };
-  type AgingRow = {
-    bucket?: string;
-    range?: string;
-    count?: number;
-    amount?: number;
-    total?: number;
-  };
-  type CashFlowRow = {
-    month?: string;
-    period?: string;
-    inflow?: number;
-    revenue?: number;
-    outflow?: number;
-    expenses?: number;
-    net?: number;
-  };
-  const expenseList = (expenses?.data ?? expenses?.categories ?? []) as ExpenseRow[];
-  const agingBuckets = (aging?.data ?? aging?.buckets ?? []) as AgingRow[];
-  const cashFlowList = (cashFlow?.data ?? cashFlow?.periods ?? []) as CashFlowRow[];
+  const cashFlow = cfRes?.series ?? [];
+  const expenses = expRes?.categories ?? [];
+  const buckets = agingRes?.buckets ?? [];
 
   return (
     <motion.div
@@ -64,88 +46,18 @@ const Financial: React.FC = () => {
     >
       <motion.div variants={itemVariants as any}>
         <h2 className="text-xl font-semibold" style={{ color: 'var(--hub-text)' }}>
-          Financial
+          {t('insights.financial.title')}
         </h2>
-        <p className="text-sm mt-0.5" style={{ color: 'var(--hub-text-muted)' }}>
-          P&L summary, expenses, invoicing, and cash flow
-        </p>
       </motion.div>
 
-      {/* P&L Summary */}
-      {plLoading ? (
-        <div className="grid grid-cols-2 lg:grid-cols-4 gap-4">
-          {Array.from({ length: 4 }).map((_, i) => (
-            <CardSkeleton key={i} />
-          ))}
-        </div>
-      ) : (
-        <motion.div
-          variants={containerVariants as any}
-          className="grid grid-cols-2 lg:grid-cols-4 gap-4"
-        >
-          {[
-            {
-              label: 'Revenue',
-              value: formatCurrency(totalRevenue),
-              icon: TrendingUp,
-              color: '#10b981',
-            },
-            {
-              label: 'Expenses',
-              value: formatCurrency(totalExpenses),
-              icon: TrendingDown,
-              color: '#f87171',
-            },
-            {
-              label: 'Net Profit',
-              value: formatCurrency(netProfit),
-              icon: DollarSign,
-              color: netProfit >= 0 ? '#10b981' : '#f87171',
-            },
-            {
-              label: 'Profit Margin',
-              value: `${profitMargin.toFixed(1)}%`,
-              icon: DollarSign,
-              color: ACCENT,
-            },
-          ].map((stat) => {
-            const Icon = stat.icon;
-            return (
-              <motion.div
-                key={stat.label}
-                variants={itemVariants as any}
-                className="rounded-xl p-5"
-                style={{ background: 'var(--hub-card)', border: '1px solid var(--hub-border)' }}
-              >
-                <div className="flex items-center justify-between mb-3">
-                  <span className="text-xs font-medium" style={{ color: 'var(--hub-text-muted)' }}>
-                    {stat.label}
-                  </span>
-                  <span
-                    className="flex items-center justify-center h-7 w-7 rounded-lg"
-                    style={{ background: `${stat.color}18` }}
-                  >
-                    <Icon size={14} style={{ color: stat.color }} />
-                  </span>
-                </div>
-                <p className="text-2xl font-bold" style={{ color: 'var(--hub-text)' }}>
-                  {stat.value}
-                </p>
-              </motion.div>
-            );
-          })}
-        </motion.div>
-      )}
-
       <div className="grid grid-cols-1 lg:grid-cols-2 gap-4">
-        {/* Expense Breakdown */}
         <motion.div
           variants={itemVariants as any}
           className="rounded-xl p-5"
           style={{ background: 'var(--hub-card)', border: '1px solid var(--hub-border)' }}
         >
           <h3 className="text-sm font-semibold mb-4" style={{ color: 'var(--hub-text)' }}>
-            Expense Breakdown
+            {t('insights.financial.expenses')}
           </h3>
           {expLoading ? (
             <div className="space-y-2">
@@ -153,21 +65,21 @@ const Financial: React.FC = () => {
                 <SkeletonRow key={i} cols={2} />
               ))}
             </div>
-          ) : expenseList.length === 0 ? (
-            <EmptyState title="No expense data" description="Expense breakdown will appear here." />
+          ) : expenses.length === 0 ? (
+            <EmptyState title="" description={t('insights.financial.empty')} />
           ) : (
             <div className="space-y-1">
-              {expenseList.map((e, i) => (
+              {expenses.map((e) => (
                 <div
-                  key={e.id ?? i}
+                  key={e.categoryId}
                   className="flex items-center justify-between px-3 py-2.5 rounded-lg"
                   style={{ background: 'var(--hub-hover)' }}
                 >
                   <span className="text-xs font-medium" style={{ color: 'var(--hub-text)' }}>
-                    {e.category ?? e.name ?? 'Other'}
+                    {e.categoryName}
                   </span>
                   <span className="text-xs font-semibold" style={{ color: 'var(--hub-text)' }}>
-                    {formatCurrency(e.amount ?? 0)}
+                    {formatMoney(e.amountMinorUnits)}
                   </span>
                 </div>
               ))}
@@ -175,16 +87,15 @@ const Financial: React.FC = () => {
           )}
         </motion.div>
 
-        {/* Invoice Aging */}
         <motion.div
           variants={itemVariants as any}
           className="rounded-xl p-5"
           style={{ background: 'var(--hub-card)', border: '1px solid var(--hub-border)' }}
         >
           <div className="flex items-center gap-2 mb-4">
-            <Clock size={14} style={{ color: '#f59e0b' }} />
+            <Clock size={14} style={{ color: 'var(--accent)' }} />
             <h3 className="text-sm font-semibold" style={{ color: 'var(--hub-text)' }}>
-              Invoice Aging
+              {t('insights.financial.aging')}
             </h3>
           </div>
           {agingLoading ? (
@@ -193,25 +104,25 @@ const Financial: React.FC = () => {
                 <SkeletonRow key={i} cols={2} />
               ))}
             </div>
-          ) : agingBuckets.length === 0 ? (
-            <EmptyState title="No invoice data" description="Invoice aging will appear here." />
+          ) : buckets.length === 0 ? (
+            <EmptyState title="" description={t('insights.financial.empty')} />
           ) : (
             <div className="space-y-1">
-              {agingBuckets.map((b, i) => (
+              {buckets.map((b) => (
                 <div
-                  key={i}
+                  key={b.bucket}
                   className="flex items-center justify-between px-3 py-2.5 rounded-lg"
                   style={{ background: 'var(--hub-hover)' }}
                 >
                   <span className="text-xs font-medium" style={{ color: 'var(--hub-text)' }}>
-                    {b.bucket ?? b.range ?? `${i * 30}-${(i + 1) * 30} days`}
+                    {b.bucket}
                   </span>
                   <div className="flex items-center gap-3">
                     <span className="text-xs" style={{ color: 'var(--hub-text-muted)' }}>
-                      {formatNumber(b.count ?? 0)} invoices
+                      {formatNumber(b.invoiceCount)} invoices
                     </span>
                     <span className="text-xs font-semibold" style={{ color: 'var(--hub-text)' }}>
-                      {formatCurrency(b.amount ?? b.total ?? 0)}
+                      {formatMoney(b.amountMinorUnits)}
                     </span>
                   </div>
                 </div>
@@ -221,14 +132,13 @@ const Financial: React.FC = () => {
         </motion.div>
       </div>
 
-      {/* Cash Flow Trend */}
       <motion.div
         variants={itemVariants as any}
         className="rounded-xl p-5"
         style={{ background: 'var(--hub-card)', border: '1px solid var(--hub-border)' }}
       >
         <h3 className="text-sm font-semibold mb-4" style={{ color: 'var(--hub-text)' }}>
-          Cash Flow Trend
+          {t('insights.financial.cashFlow')}
         </h3>
         {cfLoading ? (
           <div className="space-y-2">
@@ -236,33 +146,36 @@ const Financial: React.FC = () => {
               <SkeletonRow key={i} cols={3} />
             ))}
           </div>
-        ) : cashFlowList.length === 0 ? (
-          <EmptyState title="No cash flow data" description="Cash flow data will appear here." />
+        ) : cashFlow.length === 0 ? (
+          <EmptyState title="" description={t('insights.financial.empty')} />
         ) : (
           <div className="space-y-1">
-            {cashFlowList.map((c, i) => (
-              <div
-                key={i}
-                className="grid grid-cols-4 items-center px-3 py-2.5 rounded-lg"
-                style={{ background: 'var(--hub-hover)' }}
-              >
-                <span className="text-xs font-medium" style={{ color: 'var(--hub-text)' }}>
-                  {c.month ?? c.period ?? `Month ${i + 1}`}
-                </span>
-                <span className="text-xs text-center" style={{ color: '#10b981' }}>
-                  {formatCurrency(c.inflow ?? c.revenue ?? 0)}
-                </span>
-                <span className="text-xs text-center" style={{ color: '#f87171' }}>
-                  {formatCurrency(c.outflow ?? c.expenses ?? 0)}
-                </span>
-                <span
-                  className="text-xs font-semibold text-right"
-                  style={{ color: 'var(--hub-text)' }}
+            {cashFlow.map((c) => {
+              const net = c.inflowMinorUnits - c.outflowMinorUnits;
+              return (
+                <div
+                  key={c.date}
+                  className="grid grid-cols-4 items-center px-3 py-2.5 rounded-lg"
+                  style={{ background: 'var(--hub-hover)' }}
                 >
-                  {formatCurrency(c.net ?? (c.inflow ?? 0) - (c.outflow ?? 0))}
-                </span>
-              </div>
-            ))}
+                  <span className="text-xs font-medium" style={{ color: 'var(--hub-text)' }}>
+                    {c.date}
+                  </span>
+                  <span className="text-xs text-center" style={{ color: 'var(--delta-up)' }}>
+                    {formatMoney(c.inflowMinorUnits)}
+                  </span>
+                  <span className="text-xs text-center" style={{ color: 'var(--delta-down)' }}>
+                    {formatMoney(c.outflowMinorUnits)}
+                  </span>
+                  <span
+                    className="text-xs font-semibold text-right"
+                    style={{ color: 'var(--hub-text)' }}
+                  >
+                    {formatMoney(net)}
+                  </span>
+                </div>
+              );
+            })}
           </div>
         )}
       </motion.div>
