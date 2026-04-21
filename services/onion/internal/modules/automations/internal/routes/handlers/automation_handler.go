@@ -28,7 +28,7 @@ func AutomationUpdateRoutes() []string {
 }
 
 func AutomationDeleteRoutes() []string {
-	return []string{"/crm/automations"}
+	return []string{"/crm/automations/{id}"}
 }
 
 type AutomationPayload struct {
@@ -257,32 +257,28 @@ type DeleteAutomationHandler struct {
 	Service *application.Service
 }
 
-type DeleteAutomationRequest struct {
-	ID int64 `json:"id"`
-}
+type DeleteAutomationRequest struct{}
 
 type DeleteAutomationResponse struct {
 	Message string `json:"message"`
 }
 
-func (h *DeleteAutomationHandler) Validate(_ context.Context, req *DeleteAutomationRequest) *errorModels.ServerError {
-	if req.ID == 0 {
-		return &errorModels.ServerError{
-			Code:    http.StatusBadRequest,
-			Message: "Automation ID is required",
-		}
-	}
-
-	return nil
-}
-
-func (h *DeleteAutomationHandler) Serve(ctx context.Context, req *DeleteAutomationRequest) (DeleteAutomationResponse, *errorModels.ServerError) {
+func (h *DeleteAutomationHandler) Serve(ctx context.Context, _ *DeleteAutomationRequest) (DeleteAutomationResponse, *errorModels.ServerError) {
 	device := authPkg.DeviceCtx(ctx)
 	if device.User == nil {
 		return DeleteAutomationResponse{}, errorModels.PermissionDeniedServerError()
 	}
 
-	if err := h.Service.Delete(ctx, device.User.UserID, req.ID); err != nil {
+	idStr := chi.URLParamFromCtx(ctx, "id")
+	id, parseErr := strconv.ParseInt(idStr, 10, 64)
+	if parseErr != nil || id <= 0 {
+		return DeleteAutomationResponse{}, &errorModels.ServerError{
+			Code:    http.StatusBadRequest,
+			Message: "Invalid automation ID",
+		}
+	}
+
+	if err := h.Service.Delete(ctx, device.User.UserID, id); err != nil {
 		if errors.Is(err, domain.ErrAutomationNotFound) {
 			return DeleteAutomationResponse{}, &errorModels.ServerError{
 				Code:    http.StatusNotFound,
