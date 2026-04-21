@@ -39,7 +39,7 @@ func resolveOrderID(ctx context.Context, bodyID int64) (int64, *errorModels.Serv
 
 // ---- Split Order ----
 
-func SplitOrderRoutes() []string { return []string{"/pos/orders/split"} }
+func SplitOrderRoutes() []string { return []string{"/pos/orders/split", "/pos/orders/{id}/split"} }
 
 type SplitOrderHandler struct{ Service *application.Service }
 
@@ -53,8 +53,8 @@ type SplitOrderResponse struct {
 	Message  string  `json:"message"`
 }
 
-func (h *SplitOrderHandler) Validate(_ context.Context, req *SplitOrderRequest) *errorModels.ServerError {
-	if req.OrderID == 0 {
+func (h *SplitOrderHandler) Validate(ctx context.Context, req *SplitOrderRequest) *errorModels.ServerError {
+	if req.OrderID == 0 && chi.URLParamFromCtx(ctx, "id") == "" {
 		return &errorModels.ServerError{HTTPCode: http.StatusBadRequest, Code: http.StatusBadRequest, Message: "Order ID is required"}
 	}
 	if len(req.Splits) < 2 {
@@ -69,7 +69,12 @@ func (h *SplitOrderHandler) Serve(ctx context.Context, req *SplitOrderRequest) (
 		return SplitOrderResponse{}, errorModels.PermissionDeniedServerError()
 	}
 
-	orderIDs, err := h.Service.SplitOrder(ctx, device.User.UserID, req.OrderID, req.Splits)
+	orderID, sErr := resolveOrderID(ctx, req.OrderID)
+	if sErr != nil {
+		return SplitOrderResponse{}, sErr
+	}
+
+	orderIDs, err := h.Service.SplitOrder(ctx, device.User.UserID, orderID, req.Splits)
 	if err != nil {
 		if errors.Is(err, domain.ErrOrderNotFound) {
 			return SplitOrderResponse{}, &errorModels.ServerError{HTTPCode: http.StatusNotFound, Code: http.StatusNotFound, Message: "Order not found"}
