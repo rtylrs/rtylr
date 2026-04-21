@@ -1,14 +1,13 @@
-import React, { useState } from 'react';
+import React, { useMemo, useState } from 'react';
 import { motion } from 'motion/react';
 import { Plus, Paperclip, Check } from 'lucide-react';
-import { Expense } from '../../shared/services/financeApi';
-import { useExpenses } from './useExpenses';
+import { useListExpenses, useExpenseCategories } from '../../shared/hooks/queries/useExpenses';
+import { minorToMajor, type Currency } from '../../shared/utils/money';
+import MoneyDisplay from '../../shared/components/MoneyDisplay';
 
 const ACCENT = '#10b981';
 
-type Category = string;
-
-const categoryColors: Record<string, string> = {
+const defaultCategoryColors: Record<string, string> = {
   'Food & Bev': '#f59e0b',
   Utilities: '#3b82f6',
   Rent: '#8b5cf6',
@@ -17,12 +16,16 @@ const categoryColors: Record<string, string> = {
   Other: '#71717a',
 };
 
-function getCategoryColor(cat: string): string {
-  return categoryColors[cat] ?? '#6b7280';
+interface DisplayExpense {
+  id: number;
+  date: string;
+  description: string;
+  category: string;
+  categoryColor: string;
+  amount: number;
+  currency: Currency;
+  hasReceipt: boolean;
 }
-
-const fmt = (n: number) =>
-  n.toLocaleString('en-US', { style: 'currency', currency: 'USD', minimumFractionDigits: 0 });
 
 const cardStyle: React.CSSProperties = {
   background: 'var(--hub-card)',
@@ -31,87 +34,51 @@ const cardStyle: React.CSSProperties = {
   padding: 20,
 };
 
-// ── CSS "pie" breakdown (horizontal stacked bar) ──────────────
-const CategoryBar: React.FC<{ expenses: Expense[] }> = ({ expenses }) => {
-  const categoryTotals = expenses.reduce<Record<string, number>>((acc, exp) => {
-    acc[exp.category] = (acc[exp.category] || 0) + exp.amount;
-    return acc;
-  }, {});
-  const grandTotal = Object.values(categoryTotals).reduce((s, v) => s + v, 0);
-  const entries = Object.entries(categoryTotals);
-  entries.sort((a, b) => b[1] - a[1]);
-
-  if (entries.length === 0)
-    return <div style={{ height: 20, background: 'var(--hub-hover)', borderRadius: 8 }} />;
-
-  return (
-    <div>
-      {/* Stacked bar */}
-      <div
-        style={{
-          display: 'flex',
-          borderRadius: 8,
-          overflow: 'hidden',
-          height: 20,
-          marginBottom: 16,
-        }}
-      >
-        {entries.map(([cat, val]) => (
-          <div
-            key={cat}
-            style={{
-              width: `${(val / grandTotal) * 100}%`,
-              background: getCategoryColor(cat),
-              transition: 'width 0.4s ease',
-            }}
-            title={`${cat}: ${fmt(val)}`}
-          />
-        ))}
-      </div>
-
-      {/* Legend */}
-      <div style={{ display: 'grid', gridTemplateColumns: 'repeat(3, 1fr)', gap: '10px 16px' }}>
-        {entries.map(([cat, val]) => (
-          <div key={cat} style={{ display: 'flex', alignItems: 'center', gap: 8 }}>
-            <span
-              style={{
-                width: 10,
-                height: 10,
-                borderRadius: 3,
-                background: getCategoryColor(cat),
-                flexShrink: 0,
-              }}
-            />
-            <div style={{ minWidth: 0 }}>
-              <div
-                style={{
-                  fontSize: 12,
-                  fontWeight: 500,
-                  color: 'var(--hub-text)',
-                  whiteSpace: 'nowrap',
-                  overflow: 'hidden',
-                  textOverflow: 'ellipsis',
-                }}
-              >
-                {cat}
-              </div>
-              <div style={{ fontSize: 11, color: 'var(--hub-text-muted)' }}>
-                {fmt(val)} &middot; {((val / grandTotal) * 100).toFixed(1)}%
-              </div>
-            </div>
-          </div>
-        ))}
-      </div>
-    </div>
-  );
-};
+const DEFAULT_PAGE: { limit: number; offset: number } = { limit: 50, offset: 0 };
 
 const Expenses: React.FC = () => {
   const [showAdd, setShowAdd] = useState(false);
-  const { data: fetchedExpenses, isLoading: loading } = useExpenses();
-  const expenses: Expense[] = fetchedExpenses || [];
+  const { data: listRes, isLoading: loading } = useListExpenses(DEFAULT_PAGE);
+  const { data: categoriesRes } = useExpenseCategories();
+
+  const categoryMap = useMemo(() => {
+    const map = new Map<number, { name: string; color: string }>();
+    (categoriesRes?.categories ?? []).forEach((c) => {
+      map.set(c.id, { name: c.name, color: c.color || defaultCategoryColors[c.name] || '#6b7280' });
+    });
+    return map;
+  }, [categoriesRes]);
+
+  const expenses: DisplayExpense[] = useMemo(() => {
+    const rows = listRes?.expenses ?? [];
+    return rows.map((e) => {
+      const currency = (e.currency || 'USD') as Currency;
+      const cat = e.categoryId ? categoryMap.get(e.categoryId) : undefined;
+      const categoryName = cat?.name ?? 'Other';
+      return {
+        id: e.id,
+        date: e.expenseDate,
+        description: e.description || e.vendor,
+        category: categoryName,
+        categoryColor: cat?.color ?? defaultCategoryColors[categoryName] ?? '#6b7280',
+        amount: minorToMajor(e.amount, currency),
+        currency,
+        hasReceipt: !!e.receiptUrl,
+      };
+    });
+  }, [listRes, categoryMap]);
 
   const grandTotal = expenses.reduce((s, e) => s + e.amount, 0);
+
+  const categoryTotals = useMemo(() => {
+    const totals: Record<string, { value: number; color: string }> = {};
+    for (const exp of expenses) {
+      const entry = totals[exp.category] ?? { value: 0, color: exp.categoryColor };
+      entry.value += exp.amount;
+      totals[exp.category] = entry;
+    }
+    return Object.entries(totals).sort((a, b) => b[1].value - a[1].value);
+  }, [expenses]);
 
   return (
     <motion.div
@@ -127,7 +94,10 @@ const Expenses: React.FC = () => {
             Expenses
           </h2>
           <p style={{ margin: '2px 0 0', fontSize: 13, color: 'var(--hub-text-muted)' }}>
-            Monthly total: <strong style={{ color: 'var(--hub-text)' }}>{fmt(grandTotal)}</strong>
+            Monthly total:{' '}
+            <strong style={{ color: 'var(--hub-text)' }}>
+              <MoneyDisplay amount={grandTotal} />
+            </strong>
           </p>
         </div>
         <button
@@ -156,7 +126,68 @@ const Expenses: React.FC = () => {
         <h3 style={{ margin: '0 0 16px', fontSize: 14, fontWeight: 600, color: 'var(--hub-text)' }}>
           Breakdown by Category
         </h3>
-        <CategoryBar expenses={expenses} />
+        {loading || categoryTotals.length === 0 ? (
+          <div style={{ height: 20, background: 'var(--hub-hover)', borderRadius: 8 }} />
+        ) : (
+          <div>
+            <div
+              style={{
+                display: 'flex',
+                borderRadius: 8,
+                overflow: 'hidden',
+                height: 20,
+                marginBottom: 16,
+              }}
+            >
+              {categoryTotals.map(([cat, { value, color }]) => (
+                <div
+                  key={cat}
+                  style={{
+                    width: `${(value / grandTotal) * 100}%`,
+                    background: color,
+                    transition: 'width 0.4s ease',
+                  }}
+                  title={cat}
+                />
+              ))}
+            </div>
+            <div
+              style={{ display: 'grid', gridTemplateColumns: 'repeat(3, 1fr)', gap: '10px 16px' }}
+            >
+              {categoryTotals.map(([cat, { value, color }]) => (
+                <div key={cat} style={{ display: 'flex', alignItems: 'center', gap: 8 }}>
+                  <span
+                    style={{
+                      width: 10,
+                      height: 10,
+                      borderRadius: 3,
+                      background: color,
+                      flexShrink: 0,
+                    }}
+                  />
+                  <div style={{ minWidth: 0 }}>
+                    <div
+                      style={{
+                        fontSize: 12,
+                        fontWeight: 500,
+                        color: 'var(--hub-text)',
+                        whiteSpace: 'nowrap',
+                        overflow: 'hidden',
+                        textOverflow: 'ellipsis',
+                      }}
+                    >
+                      {cat}
+                    </div>
+                    <div style={{ fontSize: 11, color: 'var(--hub-text-muted)' }}>
+                      <MoneyDisplay amount={value} /> &middot;{' '}
+                      {((value / grandTotal) * 100).toFixed(1)}%
+                    </div>
+                  </div>
+                </div>
+              ))}
+            </div>
+          </div>
+        )}
       </div>
 
       {/* Add expense inline form */}
@@ -176,77 +207,6 @@ const Expenses: React.FC = () => {
           >
             Add New Expense
           </h3>
-          <div
-            style={{
-              display: 'grid',
-              gridTemplateColumns: '1fr 1fr 1fr 1fr',
-              gap: 12,
-              marginBottom: 16,
-            }}
-          >
-            {[
-              { label: 'Date', type: 'date', placeholder: '' },
-              { label: 'Description', type: 'text', placeholder: 'e.g. Team lunch' },
-              { label: 'Amount ($)', type: 'number', placeholder: '0.00' },
-            ].map(({ label, type, placeholder }) => (
-              <div key={label} style={{ display: 'flex', flexDirection: 'column', gap: 5 }}>
-                <label
-                  style={{
-                    fontSize: 11,
-                    fontWeight: 600,
-                    color: 'var(--hub-text-muted)',
-                    textTransform: 'uppercase',
-                    letterSpacing: '0.06em',
-                  }}
-                >
-                  {label}
-                </label>
-                <input
-                  type={type}
-                  placeholder={placeholder}
-                  style={{
-                    padding: '7px 10px',
-                    borderRadius: 7,
-                    border: '1px solid var(--hub-border)',
-                    background: 'var(--hub-input-bg)',
-                    color: 'var(--hub-text)',
-                    fontSize: 13,
-                    outline: 'none',
-                  }}
-                />
-              </div>
-            ))}
-            <div style={{ display: 'flex', flexDirection: 'column', gap: 5 }}>
-              <label
-                style={{
-                  fontSize: 11,
-                  fontWeight: 600,
-                  color: 'var(--hub-text-muted)',
-                  textTransform: 'uppercase',
-                  letterSpacing: '0.06em',
-                }}
-              >
-                Category
-              </label>
-              <select
-                style={{
-                  padding: '7px 10px',
-                  borderRadius: 7,
-                  border: '1px solid var(--hub-border)',
-                  background: 'var(--hub-input-bg)',
-                  color: 'var(--hub-text)',
-                  fontSize: 13,
-                  outline: 'none',
-                }}
-              >
-                {Object.keys(categoryColors).map((c) => (
-                  <option key={c} value={c}>
-                    {c}
-                  </option>
-                ))}
-              </select>
-            </div>
-          </div>
           <div style={{ display: 'flex', gap: 8 }}>
             <button
               style={{
@@ -326,7 +286,7 @@ const Expenses: React.FC = () => {
                 </td>
                 <td style={{ padding: '11px 16px', fontSize: 13, color: 'var(--hub-text)' }}>
                   <div>{exp.description}</div>
-                  <div style={{ fontSize: 11, color: 'var(--hub-text-dim)' }}>{exp.id}</div>
+                  <div style={{ fontSize: 11, color: 'var(--hub-text-dim)' }}>#{exp.id}</div>
                 </td>
                 <td style={{ padding: '11px 16px' }}>
                   <span
@@ -338,8 +298,8 @@ const Expenses: React.FC = () => {
                       borderRadius: 20,
                       fontSize: 11,
                       fontWeight: 600,
-                      background: `${getCategoryColor(exp.category)}18`,
-                      color: getCategoryColor(exp.category),
+                      background: `${exp.categoryColor}18`,
+                      color: exp.categoryColor,
                     }}
                   >
                     {exp.category}
@@ -354,10 +314,10 @@ const Expenses: React.FC = () => {
                     fontVariantNumeric: 'tabular-nums',
                   }}
                 >
-                  -{fmt(exp.amount)}
+                  -<MoneyDisplay amount={exp.amount} currency={exp.currency} />
                 </td>
                 <td style={{ padding: '11px 16px' }}>
-                  {exp.receipt ? (
+                  {exp.hasReceipt ? (
                     <span
                       style={{
                         display: 'inline-flex',
@@ -410,7 +370,7 @@ const Expenses: React.FC = () => {
                   fontVariantNumeric: 'tabular-nums',
                 }}
               >
-                -{fmt(grandTotal)}
+                -<MoneyDisplay amount={grandTotal} />
               </td>
               <td />
             </tr>
