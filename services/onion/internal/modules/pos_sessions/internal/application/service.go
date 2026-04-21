@@ -19,6 +19,10 @@ func (s *Service) List(ctx context.Context, ownerID int64) ([]domain.Session, er
 	return s.repo.List(ctx, ownerID)
 }
 
+func (s *Service) Get(ctx context.Context, ownerID, id int64) (*domain.Session, error) {
+	return s.repo.Get(ctx, ownerID, id)
+}
+
 func (s *Service) Open(ctx context.Context, input domain.OpenSessionInput) (int64, error) {
 	return s.repo.Open(ctx, input)
 }

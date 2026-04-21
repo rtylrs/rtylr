@@ -15,6 +15,11 @@ func RegisterRoutes(ctx context.Context, router *chi.Mux, svc *application.Servi
 		&handlers.ListSessionsHandler{Service: svc},
 	)
 
+	http.RegisterGET[handlers.GetSessionRequest, handlers.GetSessionResponse](
+		ctx, router, handlers.SessionGetRoutes(),
+		&handlers.GetSessionHandler{Service: svc},
+	)
+
 	http.RegisterPOST[handlers.OpenSessionRequest, handlers.OpenSessionResponse](
 		ctx, router, handlers.SessionOpenRoutes(),
 		&handlers.OpenSessionHandler{Service: svc},

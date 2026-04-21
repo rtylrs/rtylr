@@ -3,6 +3,7 @@ package infrastructure
 import (
 	"context"
 	"database/sql"
+	"errors"
 	"fmt"
 	"strconv"
 
@@ -57,6 +58,38 @@ func (r *Repository) List(ctx context.Context, ownerID int64) ([]domain.Session,
 		sessions = append(sessions, s)
 	}
 	return sessions, nil
+}
+
+func (r *Repository) Get(ctx context.Context, ownerID, id int64) (*domain.Session, error) {
+	row, err := r.queries.GetSessionByID(ctx, sqlc.GetSessionByIDParams{ID: id, OwnerID: ownerID})
+	if err != nil {
+		if errors.Is(err, sql.ErrNoRows) {
+			return nil, domain.ErrSessionNotFound
+		}
+		logger.Ctx(ctx).Error("Failed to get session", logger.Error(err))
+		return nil, err
+	}
+	s := domain.Session{
+		ID:           row.ID,
+		OwnerID:      row.OwnerID,
+		OpeningFloat: decimalToFloat(row.OpeningCash.String),
+		ClosingFloat: decimalToFloat(row.ClosingCash.String),
+		TotalSales:   decimalToFloat(row.TotalSales.String),
+		Status:       string(row.Status.PosSessionsStatus),
+		OpenedAt:     row.OpenedAt.Time,
+		CreatedAt:    row.OpenedAt.Time,
+	}
+	if row.LocationID.Valid {
+		s.LocationID = &row.LocationID.Int64
+	}
+	if row.StaffID != 0 {
+		s.StaffID = &row.StaffID
+	}
+	if row.ClosedAt.Valid {
+		t := row.ClosedAt.Time
+		s.ClosedAt = &t
+	}
+	return &s, nil
 }
 
 func (r *Repository) Open(ctx context.Context, input domain.OpenSessionInput) (int64, error) {

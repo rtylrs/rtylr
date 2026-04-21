@@ -4,6 +4,12 @@ SELECT id, owner_id, location_id, staff_id, status, opening_cash, closing_cash, 
        total_online_sales, total_refunds, opened_at, closed_at, notes
 FROM pos_sessions WHERE owner_id = ? ORDER BY opened_at DESC;
 
+-- name: GetSessionByID :one
+SELECT id, owner_id, location_id, staff_id, status, opening_cash, closing_cash, expected_cash,
+       cash_difference, total_sales, total_orders, total_cash_sales, total_card_sales,
+       total_online_sales, total_refunds, opened_at, closed_at, notes
+FROM pos_sessions WHERE id = ? AND owner_id = ?;
+
 -- name: OpenSession :execresult
 INSERT INTO pos_sessions (owner_id, location_id, staff_id, opening_cash, status, opened_at)
 VALUES (?, ?, ?, ?, 'open', NOW());

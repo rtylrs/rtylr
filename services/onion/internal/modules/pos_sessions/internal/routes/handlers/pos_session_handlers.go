@@ -74,6 +74,37 @@ func (h *ListSessionsHandler) Serve(ctx context.Context, _ *ListSessionsRequest)
 	return ListSessionsResponse{Sessions: payloads}, nil
 }
 
+// ─── Get Session Detail ──────────────────────────────────────────────────────
+
+func SessionGetRoutes() []string { return []string{"/pos/sessions/{id}"} }
+
+type GetSessionHandler struct{ Service *application.Service }
+type GetSessionRequest struct{}
+type GetSessionResponse struct {
+	Session *SessionPayload `json:"session"`
+}
+
+func (h *GetSessionHandler) Serve(ctx context.Context, _ *GetSessionRequest) (GetSessionResponse, *errorModels.ServerError) {
+	device := authPkg.DeviceCtx(ctx)
+	if device.User == nil {
+		return GetSessionResponse{}, errorModels.PermissionDeniedServerError()
+	}
+	idStr := chi.URLParamFromCtx(ctx, "id")
+	id, err := strconv.ParseInt(idStr, 10, 64)
+	if err != nil || id <= 0 {
+		return GetSessionResponse{}, &errorModels.ServerError{Code: http.StatusBadRequest, Message: "Invalid session ID"}
+	}
+	session, getErr := h.Service.Get(ctx, device.User.UserID, id)
+	if getErr != nil {
+		if errors.Is(getErr, domain.ErrSessionNotFound) {
+			return GetSessionResponse{}, &errorModels.ServerError{Code: http.StatusNotFound, Message: "Session not found"}
+		}
+		return GetSessionResponse{}, &errorModels.ServerError{Code: http.StatusInternalServerError, Message: "Failed to get session"}
+	}
+	payload := newSessionPayload(*session)
+	return GetSessionResponse{Session: &payload}, nil
+}
+
 // ─── Open ─────────────────────────────────────────────────────────────────────
 
 func SessionOpenRoutes() []string { return []string{"/pos/sessions/open"} }
