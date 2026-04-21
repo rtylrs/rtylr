@@ -183,7 +183,7 @@ func (h *VoidOrderHandler) Serve(ctx context.Context, req *VoidOrderRequest) (Vo
 
 // ---- Hold Order ----
 
-func HoldOrderRoutes() []string { return []string{"/pos/orders/hold"} }
+func HoldOrderRoutes() []string { return []string{"/pos/orders/hold", "/pos/orders/{id}/hold"} }
 
 type HoldOrderHandler struct{ Service *application.Service }
 
@@ -196,8 +196,8 @@ type HoldOrderResponse struct {
 	Message string `json:"message"`
 }
 
-func (h *HoldOrderHandler) Validate(_ context.Context, req *HoldOrderRequest) *errorModels.ServerError {
-	if req.OrderID == 0 {
+func (h *HoldOrderHandler) Validate(ctx context.Context, req *HoldOrderRequest) *errorModels.ServerError {
+	if req.OrderID == 0 && chi.URLParamFromCtx(ctx, "id") == "" {
 		return &errorModels.ServerError{HTTPCode: http.StatusBadRequest, Code: http.StatusBadRequest, Message: "Order ID is required"}
 	}
 	return nil
@@ -209,7 +209,12 @@ func (h *HoldOrderHandler) Serve(ctx context.Context, req *HoldOrderRequest) (Ho
 		return HoldOrderResponse{}, errorModels.PermissionDeniedServerError()
 	}
 
-	if err := h.Service.HoldOrder(ctx, device.User.UserID, req.OrderID, req.Reason); err != nil {
+	orderID, sErr := resolveOrderID(ctx, req.OrderID)
+	if sErr != nil {
+		return HoldOrderResponse{}, sErr
+	}
+
+	if err := h.Service.HoldOrder(ctx, device.User.UserID, orderID, req.Reason); err != nil {
 		if errors.Is(err, domain.ErrOrderNotFound) {
 			return HoldOrderResponse{}, &errorModels.ServerError{HTTPCode: http.StatusNotFound, Code: http.StatusNotFound, Message: "Order not found"}
 		}
