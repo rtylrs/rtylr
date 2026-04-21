@@ -1,32 +1,35 @@
--- name: ListPOSUsersByBusiness :many
-SELECT id, business_id, location_id, name, pin, role, is_active,
+-- name: ListPOSUsersByOwner :many
+SELECT id, owner_id, location_id, name, pin, pin_hash, role, is_active,
        hourly_rate, max_discount_pct, can_void, can_refund,
        can_open_drawer, can_apply_discount, created_by, created_at, updated_at
-FROM pos_users WHERE business_id = ? ORDER BY name ASC;
+FROM pos_users WHERE owner_id = ? ORDER BY name ASC;
 
 -- name: ListPOSUsersByLocation :many
-SELECT id, business_id, location_id, name, pin, role, is_active,
+SELECT id, owner_id, location_id, name, pin, pin_hash, role, is_active,
        hourly_rate, max_discount_pct, can_void, can_refund,
        can_open_drawer, can_apply_discount, created_by, created_at, updated_at
-FROM pos_users WHERE business_id = ? AND location_id = ? AND is_active = TRUE ORDER BY name ASC;
+FROM pos_users WHERE owner_id = ? AND location_id = ? AND is_active = TRUE ORDER BY name ASC;
 
 -- name: CreatePOSUser :execresult
-INSERT INTO pos_users (business_id, location_id, name, pin, role,
+INSERT INTO pos_users (owner_id, location_id, name, pin, pin_hash, role,
     hourly_rate, max_discount_pct, can_void, can_refund,
     can_open_drawer, can_apply_discount, created_by)
-VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?);
+VALUES (?, ?, ?, '', ?, ?, ?, ?, ?, ?, ?, ?, ?);
 
 -- name: UpdatePOSUser :exec
-UPDATE pos_users SET name = ?, pin = ?, role = ?, is_active = ?,
+UPDATE pos_users SET name = ?, role = ?, is_active = ?,
     hourly_rate = ?, max_discount_pct = ?, can_void = ?, can_refund = ?,
     can_open_drawer = ?, can_apply_discount = ?
-WHERE business_id = ? AND id = ?;
+WHERE owner_id = ? AND id = ?;
+
+-- name: UpdatePOSUserPINHash :exec
+UPDATE pos_users SET pin_hash = ?, pin = '' WHERE owner_id = ? AND id = ?;
 
 -- name: DeactivatePOSUser :exec
-UPDATE pos_users SET is_active = FALSE WHERE business_id = ? AND id = ?;
+UPDATE pos_users SET is_active = FALSE WHERE owner_id = ? AND id = ?;
 
--- name: VerifyPIN :one
-SELECT id, business_id, location_id, name, pin, role, is_active,
+-- name: FindPOSUserForPINVerify :one
+SELECT id, owner_id, location_id, name, pin, pin_hash, role, is_active,
        hourly_rate, max_discount_pct, can_void, can_refund,
        can_open_drawer, can_apply_discount, created_by, created_at, updated_at
-FROM pos_users WHERE business_id = ? AND pin = ? AND is_active = TRUE LIMIT 1;
+FROM pos_users WHERE owner_id = ? AND name = ? AND is_active = TRUE LIMIT 1;

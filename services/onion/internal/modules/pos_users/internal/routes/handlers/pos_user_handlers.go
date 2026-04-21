@@ -2,23 +2,35 @@ package handlers
 
 import (
 	"context"
+	"errors"
 	"net/http"
 
 	posv1 "github.com/voxire/voxie/gen/go/pos/v1"
 
-	authPkg "github.com/voxire/onion/internal/platform/auth"
-	errorModels "github.com/voxire/onion/internal/platform/errors"
-
 	"github.com/voxire/onion/internal/modules/pos_users/internal/application"
 	"github.com/voxire/onion/internal/modules/pos_users/internal/domain"
+	authPkg "github.com/voxire/onion/internal/platform/auth"
+	errorModels "github.com/voxire/onion/internal/platform/errors"
+	"github.com/voxire/onion/internal/platform/logger"
 )
 
+// toProtoPOSUser intentionally does NOT carry the PIN or any hash of it
+// into the proto payload. Every caller of this function sits behind an
+// authenticated, owner-scoped handler and gets only the operational
+// attributes needed to drive the POS UI.
 func toProtoPOSUser(u domain.POSUser) *posv1.POSUser {
 	return &posv1.POSUser{
-		Id: u.ID, BusinessId: u.BusinessID, LocationId: u.LocationID,
-		Name: u.Name, Role: string(u.Role), IsActive: u.IsActive,
-		MaxDiscountPct: u.MaxDiscountPct, CanVoid: u.CanVoid, CanRefund: u.CanRefund,
-		CanOpenDrawer: u.CanOpenDrawer, CanApplyDiscount: u.CanApplyDiscount,
+		Id:               u.ID,
+		BusinessId:       u.OwnerID,
+		LocationId:       u.LocationID,
+		Name:             u.Name,
+		Role:             string(u.Role),
+		IsActive:         u.IsActive,
+		MaxDiscountPct:   u.MaxDiscountPct,
+		CanVoid:          u.CanVoid,
+		CanRefund:        u.CanRefund,
+		CanOpenDrawer:    u.CanOpenDrawer,
+		CanApplyDiscount: u.CanApplyDiscount,
 	}
 }
 
@@ -27,24 +39,45 @@ func toProtoPOSUser(u domain.POSUser) *posv1.POSUser {
 func POSUserListRoutes() []string { return []string{"/pos/users"} }
 
 type ListPOSUsersHandler struct{ Service *application.Service }
-type ListPOSUsersRequest struct{ LocationID int64 `json:"location_id" schema:"location_id"` }
-type ListPOSUsersResponse struct{ Users []*posv1.POSUser `json:"users"` }
+
+type ListPOSUsersRequest struct {
+	LocationID int64 `json:"location_id" schema:"location_id"`
+}
+
+type ListPOSUsersResponse struct {
+	Users []*posv1.POSUser `json:"users"`
+}
 
 func (h *ListPOSUsersHandler) Serve(ctx context.Context, req *ListPOSUsersRequest) (ListPOSUsersResponse, *errorModels.ServerError) {
-	authUser, ok := authPkg.GetAuthUser(ctx)
-	if !ok { return ListPOSUsersResponse{}, errorModels.PermissionDeniedServerError() }
+	device := authPkg.DeviceCtx(ctx)
+	if device.User == nil {
+		return ListPOSUsersResponse{}, errorModels.PermissionDeniedServerError()
+	}
+	ownerID := device.User.BusinessID
 
 	var users []domain.POSUser
 	var err error
 	if req.LocationID > 0 {
-		users, err = h.Service.ListByLocation(ctx, authUser.BusinessID, req.LocationID)
+		users, err = h.Service.ListByLocation(ctx, ownerID, req.LocationID)
 	} else {
-		users, err = h.Service.ListByBusiness(ctx, authUser.BusinessID)
+		users, err = h.Service.ListByOwner(ctx, ownerID)
 	}
-	if err != nil { return ListPOSUsersResponse{}, &errorModels.ServerError{Code: http.StatusInternalServerError, Message: err.Error()} }
+	if err != nil {
+		logger.Ctx(ctx).Error("failed to list pos_users",
+			logger.Any("owner_id", ownerID),
+			logger.Error(err),
+		)
+		return ListPOSUsersResponse{}, &errorModels.ServerError{
+			HTTPCode: http.StatusInternalServerError,
+			Code:     http.StatusInternalServerError,
+			Message:  "Failed to list POS users",
+		}
+	}
 
 	out := make([]*posv1.POSUser, 0, len(users))
-	for _, u := range users { out = append(out, toProtoPOSUser(u)) }
+	for _, u := range users {
+		out = append(out, toProtoPOSUser(u))
+	}
 	return ListPOSUsersResponse{Users: out}, nil
 }
 
@@ -53,6 +86,7 @@ func (h *ListPOSUsersHandler) Serve(ctx context.Context, req *ListPOSUsersReques
 func POSUserCreateRoutes() []string { return []string{"/pos/users"} }
 
 type CreatePOSUserHandler struct{ Service *application.Service }
+
 type CreatePOSUserRequest struct {
 	LocationID       int64   `json:"location_id"`
 	Name             string  `json:"name"`
@@ -65,26 +99,56 @@ type CreatePOSUserRequest struct {
 	CanOpenDrawer    bool    `json:"can_open_drawer"`
 	CanApplyDiscount bool    `json:"can_apply_discount"`
 }
-type CreatePOSUserResponse struct{ ID int64 `json:"id"` }
+
+type CreatePOSUserResponse struct {
+	ID int64 `json:"id"`
+}
 
 func (h *CreatePOSUserHandler) Validate(_ context.Context, req *CreatePOSUserRequest) *errorModels.ServerError {
-	if req.Name == "" { return &errorModels.ServerError{Code: http.StatusBadRequest, Message: "Name is required"} }
-	if req.PIN == "" { return &errorModels.ServerError{Code: http.StatusBadRequest, Message: "PIN is required"} }
-	if req.LocationID == 0 { return &errorModels.ServerError{Code: http.StatusBadRequest, Message: "Location is required"} }
+	if req.Name == "" {
+		return &errorModels.ServerError{HTTPCode: http.StatusBadRequest, Code: http.StatusBadRequest, Message: "Name is required"}
+	}
+	if req.PIN == "" {
+		return &errorModels.ServerError{HTTPCode: http.StatusBadRequest, Code: http.StatusBadRequest, Message: "PIN is required"}
+	}
+	if req.LocationID == 0 {
+		return &errorModels.ServerError{HTTPCode: http.StatusBadRequest, Code: http.StatusBadRequest, Message: "Location is required"}
+	}
 	return nil
 }
 
 func (h *CreatePOSUserHandler) Serve(ctx context.Context, req *CreatePOSUserRequest) (CreatePOSUserResponse, *errorModels.ServerError) {
-	authUser, ok := authPkg.GetAuthUser(ctx)
-	if !ok { return CreatePOSUserResponse{}, errorModels.PermissionDeniedServerError() }
+	device := authPkg.DeviceCtx(ctx)
+	if device.User == nil {
+		return CreatePOSUserResponse{}, errorModels.PermissionDeniedServerError()
+	}
+	ownerID := device.User.BusinessID
 
-	id, err := h.Service.Create(ctx, authUser.BusinessID, authUser.UserID, domain.CreatePOSUserInput{
-		LocationID: req.LocationID, Name: req.Name, PIN: req.PIN,
-		Role: domain.POSUserRole(req.Role), HourlyRate: req.HourlyRate,
-		MaxDiscountPct: req.MaxDiscountPct, CanVoid: req.CanVoid, CanRefund: req.CanRefund,
-		CanOpenDrawer: req.CanOpenDrawer, CanApplyDiscount: req.CanApplyDiscount,
+	id, err := h.Service.Create(ctx, ownerID, device.User.UserID, domain.CreatePOSUserInput{
+		LocationID:       req.LocationID,
+		Name:             req.Name,
+		PIN:              req.PIN,
+		Role:             domain.POSUserRole(req.Role),
+		HourlyRate:       req.HourlyRate,
+		MaxDiscountPct:   req.MaxDiscountPct,
+		CanVoid:          req.CanVoid,
+		CanRefund:        req.CanRefund,
+		CanOpenDrawer:    req.CanOpenDrawer,
+		CanApplyDiscount: req.CanApplyDiscount,
 	})
-	if err != nil { return CreatePOSUserResponse{}, &errorModels.ServerError{Code: http.StatusInternalServerError, Message: err.Error()} }
+	// Zero the PIN on the request struct so downstream logging of the
+	// request object (should it ever happen) cannot leak it.
+	req.PIN = ""
+	if err != nil {
+		if errors.Is(err, application.ErrInvalidInput) {
+			return CreatePOSUserResponse{}, &errorModels.ServerError{HTTPCode: http.StatusBadRequest, Code: http.StatusBadRequest, Message: "Invalid input"}
+		}
+		logger.Ctx(ctx).Error("failed to create pos_user",
+			logger.Any("owner_id", ownerID),
+			logger.Error(err),
+		)
+		return CreatePOSUserResponse{}, &errorModels.ServerError{HTTPCode: http.StatusInternalServerError, Code: http.StatusInternalServerError, Message: "Failed to create POS user"}
+	}
 	return CreatePOSUserResponse{ID: id}, nil
 }
 
@@ -93,6 +157,7 @@ func (h *CreatePOSUserHandler) Serve(ctx context.Context, req *CreatePOSUserRequ
 func POSUserUpdateRoutes() []string { return []string{"/pos/users/update"} }
 
 type UpdatePOSUserHandler struct{ Service *application.Service }
+
 type UpdatePOSUserRequest struct {
 	ID               int64   `json:"id"`
 	Name             string  `json:"name"`
@@ -106,23 +171,46 @@ type UpdatePOSUserRequest struct {
 	CanOpenDrawer    bool    `json:"can_open_drawer"`
 	CanApplyDiscount bool    `json:"can_apply_discount"`
 }
-type UpdatePOSUserResponse struct{ Success bool `json:"success"` }
+
+type UpdatePOSUserResponse struct {
+	Success bool `json:"success"`
+}
 
 func (h *UpdatePOSUserHandler) Validate(_ context.Context, req *UpdatePOSUserRequest) *errorModels.ServerError {
-	if req.ID == 0 { return &errorModels.ServerError{Code: http.StatusBadRequest, Message: "ID is required"} }
+	if req.ID == 0 {
+		return &errorModels.ServerError{HTTPCode: http.StatusBadRequest, Code: http.StatusBadRequest, Message: "ID is required"}
+	}
 	return nil
 }
 
 func (h *UpdatePOSUserHandler) Serve(ctx context.Context, req *UpdatePOSUserRequest) (UpdatePOSUserResponse, *errorModels.ServerError) {
-	authUser, ok := authPkg.GetAuthUser(ctx)
-	if !ok { return UpdatePOSUserResponse{}, errorModels.PermissionDeniedServerError() }
-	err := h.Service.Update(ctx, authUser.BusinessID, req.ID, domain.UpdatePOSUserInput{
-		Name: req.Name, PIN: req.PIN, Role: domain.POSUserRole(req.Role),
-		IsActive: req.IsActive, HourlyRate: req.HourlyRate, MaxDiscountPct: req.MaxDiscountPct,
-		CanVoid: req.CanVoid, CanRefund: req.CanRefund,
-		CanOpenDrawer: req.CanOpenDrawer, CanApplyDiscount: req.CanApplyDiscount,
+	device := authPkg.DeviceCtx(ctx)
+	if device.User == nil {
+		return UpdatePOSUserResponse{}, errorModels.PermissionDeniedServerError()
+	}
+	ownerID := device.User.BusinessID
+
+	err := h.Service.Update(ctx, ownerID, req.ID, domain.UpdatePOSUserInput{
+		Name:             req.Name,
+		PIN:              req.PIN,
+		Role:             domain.POSUserRole(req.Role),
+		IsActive:         req.IsActive,
+		HourlyRate:       req.HourlyRate,
+		MaxDiscountPct:   req.MaxDiscountPct,
+		CanVoid:          req.CanVoid,
+		CanRefund:        req.CanRefund,
+		CanOpenDrawer:    req.CanOpenDrawer,
+		CanApplyDiscount: req.CanApplyDiscount,
 	})
-	if err != nil { return UpdatePOSUserResponse{}, &errorModels.ServerError{Code: http.StatusInternalServerError, Message: err.Error()} }
+	req.PIN = ""
+	if err != nil {
+		logger.Ctx(ctx).Error("failed to update pos_user",
+			logger.Any("owner_id", ownerID),
+			logger.Any("pos_user_id", req.ID),
+			logger.Error(err),
+		)
+		return UpdatePOSUserResponse{}, &errorModels.ServerError{HTTPCode: http.StatusInternalServerError, Code: http.StatusInternalServerError, Message: "Failed to update POS user"}
+	}
 	return UpdatePOSUserResponse{Success: true}, nil
 }
 
@@ -131,19 +219,38 @@ func (h *UpdatePOSUserHandler) Serve(ctx context.Context, req *UpdatePOSUserRequ
 func POSUserDeactivateRoutes() []string { return []string{"/pos/users/deactivate"} }
 
 type DeactivatePOSUserHandler struct{ Service *application.Service }
-type DeactivatePOSUserRequest struct{ ID int64 `json:"id"` }
-type DeactivatePOSUserResponse struct{ Success bool `json:"success"` }
+
+type DeactivatePOSUserRequest struct {
+	ID int64 `json:"id"`
+}
+
+type DeactivatePOSUserResponse struct {
+	Success bool `json:"success"`
+}
 
 func (h *DeactivatePOSUserHandler) Validate(_ context.Context, req *DeactivatePOSUserRequest) *errorModels.ServerError {
-	if req.ID == 0 { return &errorModels.ServerError{Code: http.StatusBadRequest, Message: "ID is required"} }
+	if req.ID == 0 {
+		return &errorModels.ServerError{HTTPCode: http.StatusBadRequest, Code: http.StatusBadRequest, Message: "ID is required"}
+	}
 	return nil
 }
 
 func (h *DeactivatePOSUserHandler) Serve(ctx context.Context, req *DeactivatePOSUserRequest) (DeactivatePOSUserResponse, *errorModels.ServerError) {
-	authUser, ok := authPkg.GetAuthUser(ctx)
-	if !ok { return DeactivatePOSUserResponse{}, errorModels.PermissionDeniedServerError() }
-	err := h.Service.Deactivate(ctx, authUser.BusinessID, req.ID)
-	if err != nil { return DeactivatePOSUserResponse{}, &errorModels.ServerError{Code: http.StatusInternalServerError, Message: err.Error()} }
+	device := authPkg.DeviceCtx(ctx)
+	if device.User == nil {
+		return DeactivatePOSUserResponse{}, errorModels.PermissionDeniedServerError()
+	}
+	ownerID := device.User.BusinessID
+
+	err := h.Service.Deactivate(ctx, ownerID, req.ID)
+	if err != nil {
+		logger.Ctx(ctx).Error("failed to deactivate pos_user",
+			logger.Any("owner_id", ownerID),
+			logger.Any("pos_user_id", req.ID),
+			logger.Error(err),
+		)
+		return DeactivatePOSUserResponse{}, &errorModels.ServerError{HTTPCode: http.StatusInternalServerError, Code: http.StatusInternalServerError, Message: "Failed to deactivate POS user"}
+	}
 	return DeactivatePOSUserResponse{Success: true}, nil
 }
 
@@ -152,20 +259,61 @@ func (h *DeactivatePOSUserHandler) Serve(ctx context.Context, req *DeactivatePOS
 func POSUserVerifyPINRoutes() []string { return []string{"/pos/users/verify-pin"} }
 
 type VerifyPINHandler struct{ Service *application.Service }
-type VerifyPINRequest struct{ PIN string `json:"pin"` }
-type VerifyPINResponse struct{ User *posv1.POSUser `json:"user"` }
+
+// VerifyPINRequest is the new lookup-by-display-name shape. PIN is never
+// logged, never echoed, and is zeroed on the struct as soon as the service
+// call returns.
+type VerifyPINRequest struct {
+	DisplayName string `json:"display_name"`
+	PIN         string `json:"pin"`
+}
+
+// VerifyPINResponse is deliberately narrow: the caller learns the user's
+// id, role, and display name and nothing else. In particular, neither the
+// plaintext PIN nor the bcrypt hash can ever appear here.
+type VerifyPINResponse struct {
+	UserID      int64  `json:"user_id"`
+	Role        string `json:"role"`
+	DisplayName string `json:"display_name"`
+}
 
 func (h *VerifyPINHandler) Validate(_ context.Context, req *VerifyPINRequest) *errorModels.ServerError {
-	if req.PIN == "" { return &errorModels.ServerError{Code: http.StatusBadRequest, Message: "PIN is required"} }
+	if req.DisplayName == "" {
+		return &errorModels.ServerError{HTTPCode: http.StatusBadRequest, Code: http.StatusBadRequest, Message: "Display name is required"}
+	}
+	if req.PIN == "" {
+		return &errorModels.ServerError{HTTPCode: http.StatusBadRequest, Code: http.StatusBadRequest, Message: "PIN is required"}
+	}
 	return nil
 }
 
 func (h *VerifyPINHandler) Serve(ctx context.Context, req *VerifyPINRequest) (VerifyPINResponse, *errorModels.ServerError) {
-	authUser, ok := authPkg.GetAuthUser(ctx)
-	if !ok { return VerifyPINResponse{}, errorModels.PermissionDeniedServerError() }
-	user, err := h.Service.VerifyPIN(ctx, authUser.BusinessID, req.PIN)
-	if err != nil { return VerifyPINResponse{}, &errorModels.ServerError{Code: http.StatusInternalServerError, Message: err.Error()} }
-	if user == nil { return VerifyPINResponse{}, &errorModels.ServerError{Code: http.StatusNotFound, Message: "Invalid PIN"} }
-	p := toProtoPOSUser(*user)
-	return VerifyPINResponse{User: p}, nil
+	device := authPkg.DeviceCtx(ctx)
+	if device.User == nil {
+		return VerifyPINResponse{}, errorModels.PermissionDeniedServerError()
+	}
+	ownerID := device.User.BusinessID
+
+	result, err := h.Service.VerifyPIN(ctx, ownerID, req.DisplayName, req.PIN)
+	// Zero the PIN immediately after the service call so any later
+	// logging of the request struct (by middleware, request loggers,
+	// crash dumps, etc.) cannot surface it.
+	req.PIN = ""
+	if err != nil {
+		if errors.Is(err, domain.ErrInvalidPIN) {
+			return VerifyPINResponse{}, &errorModels.ServerError{HTTPCode: http.StatusUnauthorized, Code: http.StatusUnauthorized, Message: "Invalid credentials"}
+		}
+		logger.Ctx(ctx).Error("pos_users verify-pin failed",
+			logger.Any("owner_id", ownerID),
+			logger.String("display_name", req.DisplayName),
+			logger.Error(err),
+		)
+		return VerifyPINResponse{}, &errorModels.ServerError{HTTPCode: http.StatusInternalServerError, Code: http.StatusInternalServerError, Message: "Failed to verify PIN"}
+	}
+
+	return VerifyPINResponse{
+		UserID:      result.UserID,
+		Role:        string(result.Role),
+		DisplayName: result.DisplayName,
+	}, nil
 }

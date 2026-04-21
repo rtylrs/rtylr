@@ -2,11 +2,21 @@ package routes
 
 import (
 	"context"
+	"time"
 
 	"github.com/go-chi/chi/v5"
 	"github.com/voxire/onion/internal/modules/pos_users/internal/application"
 	"github.com/voxire/onion/internal/modules/pos_users/internal/routes/handlers"
 	"github.com/voxire/onion/internal/platform/server/http"
+)
+
+// verifyPINRateLimit: 5 attempts per minute per IP on /pos/users/verify-pin.
+// This stacks on top of the global rate limiter and is intended to slow
+// down automated PIN-guessing against a known display name. The numbers
+// are intentionally tight because a POS PIN is only 4–10 digits.
+const (
+	verifyPINMaxPerMinute = 5
+	verifyPINWindow       = time.Minute
 )
 
 func RegisterRoutes(ctx context.Context, router *chi.Mux, svc *application.Service) {
@@ -22,7 +32,8 @@ func RegisterRoutes(ctx context.Context, router *chi.Mux, svc *application.Servi
 	http.RegisterPOSTWithValidation[handlers.DeactivatePOSUserRequest, handlers.DeactivatePOSUserResponse](
 		ctx, router, handlers.POSUserDeactivateRoutes(), &handlers.DeactivatePOSUserHandler{Service: svc},
 	)
-	http.RegisterPOSTWithValidation[handlers.VerifyPINRequest, handlers.VerifyPINResponse](
+	http.RegisterPOSTWithMiddleware[handlers.VerifyPINRequest, handlers.VerifyPINResponse](
 		ctx, router, handlers.POSUserVerifyPINRoutes(), &handlers.VerifyPINHandler{Service: svc},
+		http.PerRouteRateLimit("pos_users.verify_pin", verifyPINMaxPerMinute, verifyPINWindow),
 	)
 }
