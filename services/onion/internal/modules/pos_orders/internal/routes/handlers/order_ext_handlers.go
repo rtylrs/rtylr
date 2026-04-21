@@ -81,7 +81,7 @@ func (h *SplitOrderHandler) Serve(ctx context.Context, req *SplitOrderRequest) (
 
 // ---- Apply Discount ----
 
-func DiscountOrderRoutes() []string { return []string{"/pos/orders/discount"} }
+func DiscountOrderRoutes() []string { return []string{"/pos/orders/discount", "/pos/orders/{id}/discount"} }
 
 type DiscountOrderHandler struct{ Service *application.Service }
 
@@ -96,8 +96,8 @@ type DiscountOrderResponse struct {
 	Message string `json:"message"`
 }
 
-func (h *DiscountOrderHandler) Validate(_ context.Context, req *DiscountOrderRequest) *errorModels.ServerError {
-	if req.OrderID == 0 {
+func (h *DiscountOrderHandler) Validate(ctx context.Context, req *DiscountOrderRequest) *errorModels.ServerError {
+	if req.OrderID == 0 && chi.URLParamFromCtx(ctx, "id") == "" {
 		return &errorModels.ServerError{HTTPCode: http.StatusBadRequest, Code: http.StatusBadRequest, Message: "Order ID is required"}
 	}
 	if req.DiscountValue <= 0 {
@@ -112,8 +112,13 @@ func (h *DiscountOrderHandler) Serve(ctx context.Context, req *DiscountOrderRequ
 		return DiscountOrderResponse{}, errorModels.PermissionDeniedServerError()
 	}
 
+	orderID, sErr := resolveOrderID(ctx, req.OrderID)
+	if sErr != nil {
+		return DiscountOrderResponse{}, sErr
+	}
+
 	if err := h.Service.ApplyDiscount(ctx, device.User.UserID, domain.DiscountInput{
-		OrderID:       req.OrderID,
+		OrderID:       orderID,
 		DiscountType:  req.DiscountType,
 		DiscountValue: req.DiscountValue,
 		Reason:        req.Reason,
