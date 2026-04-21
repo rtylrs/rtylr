@@ -87,5 +87,6 @@ func (m *Module) GetAnonymousRoutes() []string {
 	return sliceutils.Concat(
 		handlers.LoginRoutes(),
 		handlers.RegisterRoutes(),
+		handlers.GoogleAuthRoutes(),
 	)
 }

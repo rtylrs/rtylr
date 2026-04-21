@@ -40,6 +40,16 @@ func RegisterRoutes(ctx context.Context, router *chi.Mux, userService *applicati
 		&handlers.LoginHandler{UserService: userService, ProvisionerResolver: provisionerResolver, OnUserLogin: userLoginCb},
 		http.PerRouteRateLimit(5, time.Minute),
 	)
+	// Google auth shares the tighter auth-endpoint budget — same
+	// 5/min/IP as /login. Both the login-by-google and signup-by-google
+	// branches land in this handler.
+	http.RegisterPOSTWithValidationAndMiddleware[handlers.GoogleAuthRequest, handlers.GoogleAuthResponse](
+		ctx,
+		router,
+		handlers.GoogleAuthRoutes(),
+		&handlers.GoogleAuthHandler{UserService: userService, OnUserCreated: userCreatedCb, OnUserLogin: userLoginCb},
+		http.PerRouteRateLimit(5, time.Minute),
+	)
 
 	http.RegisterGET[handlers.GetProfileRequest, handlers.GetProfileResponse](
 		ctx,
