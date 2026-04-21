@@ -1,0 +1,37 @@
+{
+  "customers": {
+    "created": "Customer created",
+    "updated": "Customer updated",
+    "deleted": "Customer deleted",
+    "visitRecorded": "Visit recorded",
+    "merged": "Customers merged",
+    "imported": "Customers imported",
+    "exported": "Customer data exported"
+  },
+  "loyalty": {
+    "configUpdated": "Loyalty config updated",
+    "tierSaved": "Tier saved",
+    "rewardSaved": "Reward saved",
+    "pointsAwarded": "Points awarded",
+    "pointsRedeemed": "Points redeemed"
+  },
+  "campaigns": {
+    "created": "Campaign created",
+    "updated": "Campaign updated",
+    "deleted": "Campaign deleted",
+    "statusUpdated": "Campaign status updated"
+  },
+  "segments": {
+    "created": "Segment created",
+    "updated": "Segment updated",
+    "deleted": "Segment deleted"
+  },
+  "automations": {
+    "created": "Automation created",
+    "updated": "Automation updated",
+    "deleted": "Automation deleted"
+  },
+  "settings": {
+    "updated": "Settings updated"
+  }
+}
