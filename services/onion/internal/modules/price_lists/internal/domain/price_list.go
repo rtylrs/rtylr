@@ -1,0 +1,30 @@
+package domain
+
+import (
+	"context"
+	"errors"
+	"time"
+)
+
+var ErrPriceListNotFound = errors.New("price list not found")
+
+type PriceList struct {
+	ID        int64     `json:"id"`
+	OwnerID   int64     `json:"owner_id"`
+	Name      string    `json:"name"`
+	Currency  string    `json:"currency"`
+	IsDefault bool      `json:"is_default"`
+	CreatedAt time.Time `json:"created_at"`
+	UpdatedAt time.Time `json:"updated_at"`
+}
+
+type PriceListInput struct {
+	Name      string `json:"name"`
+	Currency  string `json:"currency"`
+	IsDefault bool   `json:"is_default"`
+}
+
+type Repository interface {
+	ListPriceLists(ctx context.Context, ownerID int64) ([]PriceList, error)
+	CreatePriceList(ctx context.Context, ownerID int64, input PriceListInput) (int64, error)
+}

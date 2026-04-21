@@ -93,6 +93,7 @@ import (
 	postables "github.com/voxire/onion/internal/modules/pos_tables"
 	posterminals "github.com/voxire/onion/internal/modules/pos_terminals"
 	posusers "github.com/voxire/onion/internal/modules/pos_users"
+	pricelists "github.com/voxire/onion/internal/modules/price_lists"
 	"github.com/voxire/onion/internal/modules/products"
 	purchaseorders "github.com/voxire/onion/internal/modules/purchase_orders"
 	"github.com/voxire/onion/internal/modules/quotes"
@@ -343,6 +344,7 @@ type apiModules struct {
 	PosTables            *postables.Module
 	PosTerminals         *posterminals.Module
 	PosUsers             *posusers.Module
+	PriceLists           *pricelists.Module
 	Products             *products.Module
 	PurchaseOrders       *purchaseorders.Module
 	Quotes               *quotes.Module
@@ -470,6 +472,7 @@ func initializeModules(ctx context.Context) *apiModules {
 		PosTables:            postables.NewModule(ctx),
 		PosTerminals:         posterminals.NewModule(ctx),
 		PosUsers:             posusers.NewModule(ctx),
+		PriceLists:           pricelists.NewModule(ctx),
 		Products:             products.NewModule(ctx),
 		PurchaseOrders:       purchaseorders.NewModule(ctx),
 		Quotes:               quotes.NewModule(ctx),
