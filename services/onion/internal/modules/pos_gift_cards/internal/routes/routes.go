@@ -24,4 +24,9 @@ func RegisterRoutes(ctx context.Context, router *chi.Mux, svc *application.Servi
 		ctx, router, handlers.RedeemGiftCardRoutes(),
 		&handlers.RedeemGiftCardHandler{Service: svc},
 	)
+
+	http.RegisterGET[handlers.GetGiftCardByCodeRequest, handlers.GetGiftCardByCodeResponse](
+		ctx, router, handlers.GetGiftCardByCodeRoutes(),
+		&handlers.GetGiftCardByCodeHandler{Service: svc},
+	)
 }

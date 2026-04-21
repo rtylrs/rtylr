@@ -5,6 +5,7 @@ import (
 	"errors"
 	"net/http"
 
+	"github.com/go-chi/chi/v5"
 	authPkg "github.com/voxire/onion/internal/platform/auth"
 	errorModels "github.com/voxire/onion/internal/platform/errors"
 
@@ -117,6 +118,35 @@ func (h *CreateGiftCardHandler) Serve(ctx context.Context, req *CreateGiftCardRe
 		return CreateGiftCardResponse{}, &errorModels.ServerError{Code: http.StatusInternalServerError, Message: "Failed to create gift card"}
 	}
 	return CreateGiftCardResponse{GiftCardID: id, Message: "Gift card created successfully"}, nil
+}
+
+// --- Get Balance By Code ---
+
+func GetGiftCardByCodeRoutes() []string { return []string{"/pos/gift-cards/{code}"} }
+
+type GetGiftCardByCodeHandler struct{ Service *application.Service }
+type GetGiftCardByCodeRequest struct{}
+type GetGiftCardByCodeResponse struct {
+	GiftCard GiftCardPayload `json:"gift_card"`
+}
+
+func (h *GetGiftCardByCodeHandler) Serve(ctx context.Context, _ *GetGiftCardByCodeRequest) (GetGiftCardByCodeResponse, *errorModels.ServerError) {
+	device := authPkg.DeviceCtx(ctx)
+	if device.User == nil {
+		return GetGiftCardByCodeResponse{}, errorModels.PermissionDeniedServerError()
+	}
+	code := chi.URLParamFromCtx(ctx, "code")
+	if code == "" {
+		return GetGiftCardByCodeResponse{}, &errorModels.ServerError{Code: http.StatusBadRequest, Message: "Code is required"}
+	}
+	gc, err := h.Service.GetByCode(ctx, device.User.UserID, code)
+	if err != nil {
+		if errors.Is(err, domain.ErrGiftCardNotFound) {
+			return GetGiftCardByCodeResponse{}, &errorModels.ServerError{Code: http.StatusNotFound, Message: "Gift card not found"}
+		}
+		return GetGiftCardByCodeResponse{}, &errorModels.ServerError{Code: http.StatusInternalServerError, Message: "Failed to fetch gift card"}
+	}
+	return GetGiftCardByCodeResponse{GiftCard: newGiftCardPayload(*gc)}, nil
 }
 
 // --- Redeem / Check Balance (PUT) ---
