@@ -31,6 +31,14 @@ func RegisterRoutes(ctx context.Context, router *chi.Mux, service *application.S
 		&handlers.UpdateProductHandler{Service: service},
 	)
 
+	// PUT /erp/products/{id} — REST path variant; coexists with the body-ID route above.
+	http.RegisterPUTWithValidation[handlers.UpdateProductByIDRequest, handlers.UpdateProductByIDResponse](
+		ctx,
+		router,
+		handlers.UpdateProductByIDRoutes(),
+		&handlers.UpdateProductByIDHandler{Service: service},
+	)
+
 	http.RegisterDELETEWithValidation[handlers.DeleteProductRequest, handlers.DeleteProductResponse](
 		ctx,
 		router,
