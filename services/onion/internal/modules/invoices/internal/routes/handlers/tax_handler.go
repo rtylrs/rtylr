@@ -36,9 +36,12 @@ type TaxConfigPayload struct {
 	CreatedAt time.Time `json:"created_at"`
 }
 
-type ListTaxConfigResponse struct {
-	Configs []TaxConfigPayload `json:"configs"`
-}
+// ListTaxConfigResponse is a top-level array (TaxConfig[]) rather than an
+// object envelope. The frontend hits this endpoint to render a select/list
+// of configured tax rates; returning a bare array matches the shape the
+// other config-list endpoints in this repo already expose and keeps the
+// frontend adapter minimal.
+type ListTaxConfigResponse []TaxConfigPayload
 
 func newTaxConfigPayload(t domain.TaxConfig) TaxConfigPayload {
 	return TaxConfigPayload{
@@ -64,12 +67,12 @@ func (h *ListTaxConfigHandler) Serve(ctx context.Context, _ *ListTaxConfigReques
 		}
 	}
 
-	payloads := make([]TaxConfigPayload, 0, len(configs))
+	payloads := make(ListTaxConfigResponse, 0, len(configs))
 	for _, c := range configs {
 		payloads = append(payloads, newTaxConfigPayload(c))
 	}
 
-	return ListTaxConfigResponse{Configs: payloads}, nil
+	return payloads, nil
 }
 
 // ---------------------------------------------------------------------------
