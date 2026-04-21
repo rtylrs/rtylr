@@ -143,10 +143,11 @@ CREATE TABLE IF NOT EXISTS pos_manager_pins (
 
 CREATE TABLE IF NOT EXISTS pos_users (
     id BIGINT NOT NULL AUTO_INCREMENT PRIMARY KEY,
-    business_id BIGINT NOT NULL,
+    owner_id BIGINT NOT NULL,
     location_id BIGINT NOT NULL,
     name VARCHAR(255) NOT NULL,
-    pin VARCHAR(10) NOT NULL,
+    pin VARCHAR(10) NOT NULL DEFAULT '',
+    pin_hash VARCHAR(255) DEFAULT NULL,
     role ENUM('cashier','server','bartender','kitchen') DEFAULT 'cashier',
     is_active BOOLEAN DEFAULT TRUE,
     hourly_rate DECIMAL(10,2) DEFAULT 0,
@@ -158,9 +159,8 @@ CREATE TABLE IF NOT EXISTS pos_users (
     created_by BIGINT DEFAULT NULL,
     created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
     updated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
-    INDEX idx_pos_users_business (business_id),
-    INDEX idx_pos_users_location (location_id),
-    UNIQUE KEY unique_pin_business (business_id, pin)
+    INDEX idx_pos_users_owner (owner_id),
+    INDEX idx_pos_users_location (location_id)
 );
 
 CREATE TABLE IF NOT EXISTS pos_member_locations (
