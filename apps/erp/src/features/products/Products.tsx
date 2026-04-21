@@ -1,6 +1,7 @@
 import React, { useMemo, useState } from 'react';
 import { motion } from 'motion/react';
 import { Search, Plus, Grid3X3, List, SlidersHorizontal, ArrowUpDown } from 'lucide-react';
+import { useTranslation } from 'react-i18next';
 import { useDebounce } from '@voxire/utils';
 import { useProducts, ProductFilters } from './useProducts';
 import { type Product } from '../../shared/services/erpApi';
@@ -23,6 +24,7 @@ import { Link } from 'react-router-dom';
 const AMBER = '#f59e0b';
 
 const Products: React.FC = () => {
+  const { t } = useTranslation();
   const [search, setSearch] = useState('');
   const debouncedSearch = useDebounce(search, 300);
   const [filters, setFilters] = useState<ProductFilters>({});
@@ -71,8 +73,8 @@ const Products: React.FC = () => {
       className="space-y-5 max-w-7xl"
     >
       <PageHeader
-        title="Products"
-        description={`${products.length} products in your catalog`}
+        title={t('erp.products.title')}
+        description={t('erp.products.catalogCount', { count: products.length })}
         actions={
           <>
             <ImportCSV
@@ -81,12 +83,13 @@ const Products: React.FC = () => {
             />
             <ExportButton data={exportable} filename="products.csv" />
             <button
+              data-testid="products-new-button"
               onClick={() => setShowAdd(true)}
               className="flex items-center gap-2 px-3 py-2 rounded-lg text-sm font-semibold"
               style={{ background: AMBER, color: '#000' }}
             >
               <Plus size={14} />
-              New Product
+              {t('erp.products.new')}
             </button>
           </>
         }
@@ -181,15 +184,16 @@ const Products: React.FC = () => {
         </div>
       ) : products.length === 0 ? (
         <EmptyState
-          title="No products found"
-          description="Try adjusting your filters or create your first product."
+          title={t('erp.products.empty.title')}
+          description={t('erp.products.empty.description')}
           action={
             <button
+              data-testid="products-empty-create-button"
               onClick={() => setShowAdd(true)}
               className="px-3 py-2 rounded-lg text-xs font-semibold"
               style={{ background: AMBER, color: '#000' }}
             >
-              Create Product
+              {t('erp.products.create')}
             </button>
           }
         />

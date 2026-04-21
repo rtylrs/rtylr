@@ -1,6 +1,7 @@
 import React, { useState } from 'react';
 import { X, PackagePlus } from 'lucide-react';
 import { toast } from 'sonner';
+import { useTranslation } from 'react-i18next';
 import { useCreateProduct } from '../../features/products/useProducts';
 import UnitSelector from './UnitSelector';
 import { useCategories } from '../../features/categories/useCategories';
@@ -10,7 +11,11 @@ interface QuickAddProductModalProps {
   onClose: () => void;
 }
 
-const QuickAddProductModal: React.FC<QuickAddProductModalProps> = ({ open, onClose }) => {
+const QuickAddProductModal: React.FC<QuickAddProductModalProps> = ({
+  open,
+  onClose,
+}): React.JSX.Element | null => {
+  const { t } = useTranslation();
   const [name, setName] = useState('');
   const [sku, setSku] = useState('');
   const [category, setCategory] = useState('');
@@ -23,9 +28,9 @@ const QuickAddProductModal: React.FC<QuickAddProductModalProps> = ({ open, onClo
 
   if (!open) return null;
 
-  const handleSubmit = () => {
+  const handleSubmit = (): void => {
     if (!name || !sku || !category) {
-      toast.error('Please fill required fields');
+      toast.error(t('erp.products.validation.requiredFields'));
       return;
     }
     createProduct.mutate(
@@ -41,7 +46,7 @@ const QuickAddProductModal: React.FC<QuickAddProductModalProps> = ({ open, onClo
       },
       {
         onSuccess: () => {
-          toast.success(`Product "${name}" created`);
+          toast.success(t('erp.products.toast.created', { name }));
           setName('');
           setSku('');
           setCategory('');
@@ -51,8 +56,9 @@ const QuickAddProductModal: React.FC<QuickAddProductModalProps> = ({ open, onClo
           onClose();
         },
         onError: () => {
-          toast.success(`Product "${name}" created (offline)`);
-          onClose();
+          // Surface a real failure toast instead of faking success — the
+          // previous behaviour masked backend outages and lost user data.
+          toast.error(t('erp.products.toast.createFailed'));
         },
       }
     );
@@ -60,6 +66,10 @@ const QuickAddProductModal: React.FC<QuickAddProductModalProps> = ({ open, onClo
 
   return (
     <div
+      role="dialog"
+      aria-modal="true"
+      aria-label={t('erp.products.new')}
+      data-testid="quick-add-product-modal"
       className="fixed inset-0 z-50 flex items-center justify-center p-6"
       style={{ background: 'rgba(0,0,0,0.6)' }}
       onClick={onClose}
@@ -75,17 +85,22 @@ const QuickAddProductModal: React.FC<QuickAddProductModalProps> = ({ open, onClo
             style={{ color: 'var(--hub-text)' }}
           >
             <PackagePlus size={14} style={{ color: '#f59e0b' }} />
-            Quick Add Product
+            {t('erp.products.new')}
           </h3>
-          <button onClick={onClose}>
+          <button onClick={onClose} aria-label={t('common.close')}>
             <X size={14} style={{ color: 'var(--hub-text-muted)' }} />
           </button>
         </div>
         <div className="space-y-3">
+          <label className="sr-only" htmlFor="qap-name">
+            {t('erp.products.fields.name')}
+          </label>
           <input
+            id="qap-name"
+            data-testid="qap-name"
             value={name}
             onChange={(e) => setName(e.target.value)}
-            placeholder="Product name *"
+            placeholder={`${t('erp.products.fields.name')} *`}
             className="w-full px-3 py-2 rounded-lg text-sm outline-none"
             style={{
               background: 'var(--hub-input-bg)',
@@ -93,10 +108,15 @@ const QuickAddProductModal: React.FC<QuickAddProductModalProps> = ({ open, onClo
               color: 'var(--hub-text)',
             }}
           />
+          <label className="sr-only" htmlFor="qap-sku">
+            {t('erp.products.fields.sku')}
+          </label>
           <input
+            id="qap-sku"
+            data-testid="qap-sku"
             value={sku}
             onChange={(e) => setSku(e.target.value)}
-            placeholder="SKU *"
+            placeholder={`${t('erp.products.fields.sku')} *`}
             className="w-full px-3 py-2 rounded-lg text-sm outline-none font-mono"
             style={{
               background: 'var(--hub-input-bg)',
@@ -104,7 +124,12 @@ const QuickAddProductModal: React.FC<QuickAddProductModalProps> = ({ open, onClo
               color: 'var(--hub-text)',
             }}
           />
+          <label className="sr-only" htmlFor="qap-category">
+            {t('erp.products.fields.category')}
+          </label>
           <select
+            id="qap-category"
+            data-testid="qap-category"
             value={category}
             onChange={(e) => setCategory(e.target.value)}
             className="w-full px-3 py-2 rounded-lg text-sm outline-none"
@@ -114,7 +139,7 @@ const QuickAddProductModal: React.FC<QuickAddProductModalProps> = ({ open, onClo
               color: 'var(--hub-text)',
             }}
           >
-            <option value="">Select category *</option>
+            <option value="">{t('erp.products.fields.selectCategory')} *</option>
             {categories.map((c) => (
               <option key={c.id} value={c.name}>
                 {c.name}
@@ -123,9 +148,10 @@ const QuickAddProductModal: React.FC<QuickAddProductModalProps> = ({ open, onClo
           </select>
           <div className="grid grid-cols-2 gap-3">
             <input
+              aria-label={t('erp.products.fields.stock')}
               value={stock}
               onChange={(e) => setStock(e.target.value)}
-              placeholder="Stock"
+              placeholder={t('erp.products.fields.stock')}
               type="number"
               className="px-3 py-2 rounded-lg text-sm outline-none"
               style={{
@@ -138,9 +164,10 @@ const QuickAddProductModal: React.FC<QuickAddProductModalProps> = ({ open, onClo
           </div>
           <div className="grid grid-cols-2 gap-3">
             <input
+              aria-label={t('erp.products.fields.costPrice')}
               value={costPrice}
               onChange={(e) => setCostPrice(e.target.value)}
-              placeholder="Cost price"
+              placeholder={t('erp.products.fields.costPrice')}
               type="number"
               step="0.01"
               className="px-3 py-2 rounded-lg text-sm outline-none"
@@ -151,9 +178,10 @@ const QuickAddProductModal: React.FC<QuickAddProductModalProps> = ({ open, onClo
               }}
             />
             <input
+              aria-label={t('erp.products.fields.salePrice')}
               value={salePrice}
               onChange={(e) => setSalePrice(e.target.value)}
-              placeholder="Sale price"
+              placeholder={t('erp.products.fields.salePrice')}
               type="number"
               step="0.01"
               className="px-3 py-2 rounded-lg text-sm outline-none"
@@ -171,9 +199,10 @@ const QuickAddProductModal: React.FC<QuickAddProductModalProps> = ({ open, onClo
             className="px-3 py-1.5 rounded-lg text-xs"
             style={{ background: 'var(--hub-hover)', color: 'var(--hub-text-muted)' }}
           >
-            Cancel
+            {t('common.cancel')}
           </button>
           <button
+            data-testid="qap-submit"
             onClick={handleSubmit}
             disabled={createProduct.isPending}
             className="px-3 py-1.5 rounded-lg text-xs font-semibold"
@@ -183,7 +212,7 @@ const QuickAddProductModal: React.FC<QuickAddProductModalProps> = ({ open, onClo
               opacity: createProduct.isPending ? 0.6 : 1,
             }}
           >
-            {createProduct.isPending ? 'Creating…' : 'Create Product'}
+            {createProduct.isPending ? t('erp.products.creating') : t('erp.products.create')}
           </button>
         </div>
       </div>
