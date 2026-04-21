@@ -15,4 +15,8 @@ func registerOperationsRoutes(ctx context.Context, router *chi.Mux, svc *applica
 		ctx, router, handlers.GetOperationsKPIsRoutes(),
 		&handlers.GetOperationsKPIsHandler{Service: svc},
 	)
+	serverHttp.RegisterGET[handlers.GetHeadcountRequest, handlers.GetHeadcountResponse](
+		ctx, router, handlers.GetHeadcountRoutes(),
+		&handlers.GetHeadcountHandler{Service: svc},
+	)
 }
