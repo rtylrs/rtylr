@@ -14,4 +14,9 @@ func RegisterRoutes(ctx context.Context, router *chi.Mux, svc *application.Servi
 		ctx, router, handlers.ListReceiptsRoutes(),
 		&handlers.ListReceiptsHandler{Service: svc},
 	)
+
+	http.RegisterPOSTWithValidation[handlers.EmailReceiptRequest, handlers.EmailReceiptResponse](
+		ctx, router, handlers.EmailReceiptRoutes(),
+		&handlers.EmailReceiptHandler{Service: svc},
+	)
 }

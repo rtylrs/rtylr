@@ -2,8 +2,12 @@ package handlers
 
 import (
 	"context"
+	"errors"
 	"net/http"
+	"strconv"
+	"strings"
 
+	"github.com/go-chi/chi/v5"
 	authPkg "github.com/voxire/onion/internal/platform/auth"
 	errorModels "github.com/voxire/onion/internal/platform/errors"
 
@@ -44,6 +48,45 @@ type ListReceiptsRequest struct {
 
 type ListReceiptsResponse struct {
 	Receipts []ReceiptPayload `json:"receipts"`
+}
+
+// --- Email Receipt ---
+
+func EmailReceiptRoutes() []string { return []string{"/pos/receipts/{id}/email"} }
+
+type EmailReceiptHandler struct{ Service *application.Service }
+type EmailReceiptRequest struct {
+	Email string `json:"email"`
+}
+type EmailReceiptResponse struct {
+	Message string `json:"message"`
+}
+
+func (h *EmailReceiptHandler) Validate(_ context.Context, req *EmailReceiptRequest) *errorModels.ServerError {
+	email := strings.TrimSpace(req.Email)
+	if email == "" || !strings.Contains(email, "@") {
+		return &errorModels.ServerError{Code: http.StatusBadRequest, Message: "A valid email is required"}
+	}
+	return nil
+}
+
+func (h *EmailReceiptHandler) Serve(ctx context.Context, req *EmailReceiptRequest) (EmailReceiptResponse, *errorModels.ServerError) {
+	device := authPkg.DeviceCtx(ctx)
+	if device.User == nil {
+		return EmailReceiptResponse{}, errorModels.PermissionDeniedServerError()
+	}
+	idStr := chi.URLParamFromCtx(ctx, "id")
+	id, err := strconv.ParseInt(idStr, 10, 64)
+	if err != nil || id <= 0 {
+		return EmailReceiptResponse{}, &errorModels.ServerError{Code: http.StatusBadRequest, Message: "Invalid receipt ID"}
+	}
+	if sendErr := h.Service.EmailReceipt(ctx, device.User.UserID, id, strings.TrimSpace(req.Email)); sendErr != nil {
+		if errors.Is(sendErr, domain.ErrReceiptNotFound) {
+			return EmailReceiptResponse{}, &errorModels.ServerError{Code: http.StatusNotFound, Message: "Receipt not found"}
+		}
+		return EmailReceiptResponse{}, &errorModels.ServerError{Code: http.StatusInternalServerError, Message: "Failed to send receipt email"}
+	}
+	return EmailReceiptResponse{Message: "Receipt sent"}, nil
 }
 
 func (h *ListReceiptsHandler) Serve(ctx context.Context, req *ListReceiptsRequest) (ListReceiptsResponse, *errorModels.ServerError) {

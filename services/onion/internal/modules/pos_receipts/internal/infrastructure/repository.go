@@ -3,6 +3,7 @@ package infrastructure
 import (
 	"context"
 	"database/sql"
+	"errors"
 	"strconv"
 	"time"
 
@@ -89,6 +90,25 @@ func (r *Repository) List(ctx context.Context, ownerID int64, dateFrom, dateTo s
 		receipts = make([]domain.Receipt, 0)
 	}
 	return receipts, nil
+}
+
+func (r *Repository) Get(ctx context.Context, ownerID, id int64) (*domain.Receipt, error) {
+	row, err := r.queries.GetReceiptByID(ctx, sqlc.GetReceiptByIDParams{ID: id, OwnerID: ownerID})
+	if err != nil {
+		if errors.Is(err, sql.ErrNoRows) {
+			return nil, domain.ErrReceiptNotFound
+		}
+		logger.Ctx(ctx).Error("Failed to get receipt", logger.Error(err))
+		return nil, err
+	}
+	return &domain.Receipt{
+		ID:            row.ID,
+		OrderNumber:   row.OrderNumber,
+		CustomerName:  row.CustomerName.String,
+		Total:         decimalToFloat(row.Total.String),
+		PaymentMethod: string(row.PaymentMethod.PosOrdersPaymentMethod),
+		PaidAt:        row.PaidAt.Time,
+	}, nil
 }
 
 func decimalToFloat(s string) float64 {

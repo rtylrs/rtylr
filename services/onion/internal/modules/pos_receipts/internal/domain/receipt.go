@@ -1,6 +1,11 @@
 package domain
 
-import "time"
+import (
+	"errors"
+	"time"
+)
+
+var ErrReceiptNotFound = errors.New("receipt not found")
 
 type Receipt struct {
 	ID            int64     `json:"id"`
