@@ -1,13 +1,20 @@
 import React from 'react';
 import { motion } from 'motion/react';
-import { DollarSign, ShoppingCart, Users, Briefcase, TrendingUp, Package } from 'lucide-react';
-import { useKpis, useDashboardSummary } from './useDashboard';
-import { formatCurrency, formatNumber } from '../../shared/lib/format';
+import {
+  DollarSign,
+  ShoppingCart,
+  Users,
+  Percent,
+  ArrowUpRight,
+  ArrowDownRight,
+} from 'lucide-react';
+import { useTranslation } from 'react-i18next';
+import { useInsightsDashboard } from '../../shared/hooks/queries/useInsightsDashboard';
+import { formatMoney } from '../../shared/utils/money';
+import { formatNumber, formatPercent } from '../../shared/lib/format';
 import { CardSkeleton } from '../../shared/components/Skeleton';
 import ErrorState from '../../shared/components/ErrorState';
 import EmptyState from '../../shared/components/EmptyState';
-
-const ACCENT = '#6366f1';
 
 const containerVariants = {
   hidden: {},
@@ -26,80 +33,63 @@ const today = new Date().toLocaleDateString('en-US', {
   day: 'numeric',
 });
 
-const Dashboard: React.FC = () => {
-  const {
-    data: kpis,
-    isLoading: kpisLoading,
-    isError: kpisError,
-    refetch: refetchKpis,
-  } = useKpis();
-  const {
-    data: summary,
-    isLoading: summaryLoading,
-    isError: summaryError,
-    refetch: refetchSummary,
-  } = useDashboardSummary();
+interface DeltaBadgeProps {
+  deltaPct: number;
+}
 
-  const isLoading = kpisLoading || summaryLoading;
-  const isError = kpisError && summaryError;
+const DeltaBadge = ({ deltaPct }: DeltaBadgeProps): React.JSX.Element => {
+  const up = deltaPct >= 0;
+  return (
+    <div className="flex items-center gap-1 mt-1">
+      {up ? (
+        <ArrowUpRight size={12} style={{ color: 'var(--delta-up)' }} />
+      ) : (
+        <ArrowDownRight size={12} style={{ color: 'var(--delta-down)' }} />
+      )}
+      <span className="text-xs" style={{ color: up ? 'var(--delta-up)' : 'var(--delta-down)' }}>
+        {formatPercent(deltaPct)} vs prior
+      </span>
+    </div>
+  );
+};
+
+const Dashboard: React.FC = (): React.JSX.Element => {
+  const { t } = useTranslation();
+  const { data, isLoading, isError, refetch } = useInsightsDashboard();
 
   if (isError) {
-    return (
-      <ErrorState
-        message="Failed to load dashboard data."
-        onRetry={() => {
-          refetchKpis();
-          refetchSummary();
-        }}
-      />
-    );
+    return <ErrorState message={t('insights.errors.generic')} onRetry={refetch} />;
   }
-
-  const totalRevenue = kpis?.totalRevenue ?? summary?.totalRevenue ?? 0;
-  const ordersThisMonth = kpis?.ordersThisMonth ?? summary?.ordersThisMonth ?? 0;
-  const customerCount = kpis?.customerCount ?? summary?.customerCount ?? 0;
-  const staffCount = kpis?.staffCount ?? summary?.staffCount ?? 0;
-  const avgOrderValue = kpis?.avgOrderValue ?? summary?.avgOrderValue ?? 0;
-  const topProduct = kpis?.topProduct ?? summary?.topProduct ?? null;
 
   const stats = [
     {
-      label: 'Total Revenue',
-      value: formatCurrency(totalRevenue),
+      label: t('insights.dashboard.cards.revenue'),
+      value: data ? formatMoney(data.revenue.value) : '—',
+      deltaPct: data?.revenue.deltaPct ?? 0,
       icon: DollarSign,
-      subtitle: 'All time',
     },
     {
-      label: 'Orders This Month',
-      value: formatNumber(ordersThisMonth),
-      icon: ShoppingCart,
-      subtitle: 'Current month',
-    },
-    {
-      label: 'Customer Count',
-      value: formatNumber(customerCount),
+      label: t('insights.dashboard.cards.customers'),
+      value: data ? formatNumber(data.customers.value) : '—',
+      deltaPct: data?.customers.deltaPct ?? 0,
       icon: Users,
-      subtitle: 'Active customers',
     },
     {
-      label: 'Staff Count',
-      value: formatNumber(staffCount),
-      icon: Briefcase,
-      subtitle: 'Active employees',
+      label: t('insights.dashboard.cards.orders'),
+      value: data ? formatNumber(data.orders.value) : '—',
+      deltaPct: data?.orders.deltaPct ?? 0,
+      icon: ShoppingCart,
     },
     {
-      label: 'Avg Order Value',
-      value: formatCurrency(avgOrderValue),
-      icon: TrendingUp,
-      subtitle: 'Per transaction',
-    },
-    {
-      label: 'Top Product',
-      value: topProduct?.name ?? 'N/A',
-      icon: Package,
-      subtitle: topProduct?.revenue ? formatCurrency(topProduct.revenue) : 'By revenue',
+      label: t('insights.dashboard.cards.margin'),
+      value: data ? `${data.margin.value.toFixed(1)}%` : '—',
+      deltaPct: data?.margin.deltaPct ?? 0,
+      icon: Percent,
     },
   ];
+
+  const isEmpty =
+    !!data && data.revenue.value === 0 && data.customers.value === 0 && data.orders.value === 0;
 
   return (
     <motion.div
@@ -110,7 +100,7 @@ const Dashboard: React.FC = () => {
     >
       <motion.div variants={itemVariants as any}>
         <h2 className="text-xl font-semibold" style={{ color: 'var(--hub-text)' }}>
-          Business Overview
+          {t('insights.dashboard.title')}
         </h2>
         <p className="text-sm mt-0.5" style={{ color: 'var(--hub-text-muted)' }}>
           {today}
@@ -118,15 +108,15 @@ const Dashboard: React.FC = () => {
       </motion.div>
 
       {isLoading ? (
-        <div className="grid grid-cols-2 lg:grid-cols-3 gap-4">
-          {Array.from({ length: 6 }).map((_, i) => (
+        <div className="grid grid-cols-2 lg:grid-cols-4 gap-4">
+          {Array.from({ length: 4 }).map((_, i) => (
             <CardSkeleton key={i} />
           ))}
         </div>
       ) : (
         <motion.div
           variants={containerVariants as any}
-          className="grid grid-cols-2 lg:grid-cols-3 gap-4"
+          className="grid grid-cols-2 lg:grid-cols-4 gap-4"
         >
           {stats.map((stat) => {
             const Icon = stat.icon;
@@ -146,27 +136,25 @@ const Dashboard: React.FC = () => {
                   </span>
                   <span
                     className="flex items-center justify-center h-7 w-7 rounded-lg"
-                    style={{ background: 'rgba(99,102,241,0.1)' }}
+                    style={{ background: 'var(--accent-muted)' }}
                   >
-                    <Icon size={14} style={{ color: ACCENT }} />
+                    <Icon size={14} style={{ color: 'var(--accent)' }} />
                   </span>
                 </div>
                 <p className="text-2xl font-bold truncate" style={{ color: 'var(--hub-text)' }}>
                   {stat.value}
                 </p>
-                <p className="text-xs mt-1" style={{ color: 'var(--hub-text-dim)' }}>
-                  {stat.subtitle}
-                </p>
+                <DeltaBadge deltaPct={stat.deltaPct} />
               </motion.div>
             );
           })}
         </motion.div>
       )}
 
-      {!isLoading && totalRevenue === 0 && ordersThisMonth === 0 && (
+      {!isLoading && isEmpty && (
         <EmptyState
-          title="No KPI data yet"
-          description="KPI data will appear here once your business starts generating activity."
+          title={t('insights.dashboard.emptyTitle')}
+          description={t('insights.dashboard.emptyDescription')}
         />
       )}
     </motion.div>

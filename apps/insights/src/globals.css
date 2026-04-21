@@ -8,6 +8,9 @@
   --accent-muted: rgba(69, 131, 196, 0.12);
   --accent-border: rgba(69, 131, 196, 0.3);
   --accent-focus: rgba(69, 131, 196, 0.5);
+  /* Delta / trend indicators — green up, red down */
+  --delta-up: #10b981;
+  --delta-down: #f87171;
 }
 
 /* ── Dark mode (default) ─────────────────────────────────────── */
