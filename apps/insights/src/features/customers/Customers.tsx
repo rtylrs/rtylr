@@ -1,18 +1,18 @@
 import React from 'react';
 import { motion } from 'motion/react';
 import { Users, UserPlus, UserMinus, Star } from 'lucide-react';
+import { useTranslation } from 'react-i18next';
 import {
-  useCustomerAnalytics,
+  useCustomerKPIs,
   useTopCustomers,
   useCustomerChurn,
-  useCustomerLtv,
-} from './useCustomers';
-import { formatCurrency, formatNumber, formatPercent } from '../../shared/lib/format';
+  useCustomerLTV,
+} from '../../shared/hooks/queries/useInsightsCustomers';
+import { formatMoney } from '../../shared/utils/money';
+import { formatNumber } from '../../shared/lib/format';
 import { CardSkeleton, SkeletonRow } from '../../shared/components/Skeleton';
 import ErrorState from '../../shared/components/ErrorState';
 import EmptyState from '../../shared/components/EmptyState';
-
-const ACCENT = '#6366f1';
 
 const containerVariants = {
   hidden: {},
@@ -24,34 +24,24 @@ const itemVariants = {
   show: { opacity: 1, y: 0, transition: { duration: 0.22, ease: 'easeOut' } },
 };
 
-const Customers: React.FC = () => {
-  const { data: analytics, isLoading: analyticsLoading, isError, refetch } = useCustomerAnalytics();
-  const { data: topCustomers, isLoading: topLoading } = useTopCustomers(10);
-  const { data: churn, isLoading: churnLoading } = useCustomerChurn();
-  const { data: ltv, isLoading: ltvLoading } = useCustomerLtv();
-
-  const isLoading = analyticsLoading || topLoading || churnLoading || ltvLoading;
+const Customers: React.FC = (): React.JSX.Element => {
+  const { t } = useTranslation();
+  const { data: kpis, isLoading: kpisLoading, isError, refetch } = useCustomerKPIs();
+  const { data: topRes, isLoading: topLoading } = useTopCustomers({ limit: 10 });
+  const { data: churnRes, isLoading: churnLoading } = useCustomerChurn();
+  const { data: ltvRes, isLoading: ltvLoading } = useCustomerLTV();
 
   if (isError) {
-    return <ErrorState message="Failed to load customer data." onRetry={refetch} />;
+    return <ErrorState message={t('insights.errors.generic')} onRetry={refetch} />;
   }
 
-  const newCustomers = analytics?.newCustomers ?? 0;
-  const returningCustomers = analytics?.returningCustomers ?? 0;
-  const totalCustomers = analytics?.totalCustomers ?? 0;
-  const churnRate = churn?.rate ?? 0;
-  const avgLtv = ltv?.average ?? 0;
-
-  type TopRow = {
-    id?: string | number;
-    name?: string;
-    email?: string;
-    orders?: number;
-    orderCount?: number;
-    totalSpend?: number;
-    revenue?: number;
-  };
-  const topList = (topCustomers ?? []) as TopRow[];
+  const total = kpis?.total ?? 0;
+  const newThisMonth = kpis?.newThisMonth ?? 0;
+  const active = kpis?.active ?? 0;
+  const churned = kpis?.churned ?? 0;
+  const topList = topRes?.customers ?? [];
+  const churnWindows = churnRes?.windows ?? [];
+  const ltvBuckets = ltvRes?.buckets ?? [];
 
   return (
     <motion.div
@@ -62,14 +52,11 @@ const Customers: React.FC = () => {
     >
       <motion.div variants={itemVariants as any}>
         <h2 className="text-xl font-semibold" style={{ color: 'var(--hub-text)' }}>
-          Customers
+          {t('insights.customers.title')}
         </h2>
-        <p className="text-sm mt-0.5" style={{ color: 'var(--hub-text-muted)' }}>
-          Customer analytics and retention metrics
-        </p>
       </motion.div>
 
-      {isLoading ? (
+      {kpisLoading ? (
         <div className="grid grid-cols-2 lg:grid-cols-4 gap-4">
           {Array.from({ length: 4 }).map((_, i) => (
             <CardSkeleton key={i} />
@@ -81,29 +68,21 @@ const Customers: React.FC = () => {
           className="grid grid-cols-2 lg:grid-cols-4 gap-4"
         >
           {[
+            { label: t('insights.customers.kpis.total'), value: formatNumber(total), icon: Users },
             {
-              label: 'Total Customers',
-              value: formatNumber(totalCustomers),
-              icon: Users,
-              color: ACCENT,
-            },
-            {
-              label: 'New Customers',
-              value: formatNumber(newCustomers),
+              label: t('insights.customers.kpis.newThisMonth'),
+              value: formatNumber(newThisMonth),
               icon: UserPlus,
-              color: '#10b981',
             },
             {
-              label: 'Returning',
-              value: formatNumber(returningCustomers),
+              label: t('insights.customers.kpis.active'),
+              value: formatNumber(active),
               icon: Star,
-              color: '#f59e0b',
             },
             {
-              label: 'Churn Rate',
-              value: `${churnRate.toFixed(1)}%`,
+              label: t('insights.customers.kpis.churned'),
+              value: formatNumber(churned),
               icon: UserMinus,
-              color: '#f87171',
             },
           ].map((stat) => {
             const Icon = stat.icon;
@@ -120,9 +99,9 @@ const Customers: React.FC = () => {
                   </span>
                   <span
                     className="flex items-center justify-center h-7 w-7 rounded-lg"
-                    style={{ background: `${stat.color}18` }}
+                    style={{ background: 'var(--accent-muted)' }}
                   >
-                    <Icon size={14} style={{ color: stat.color }} />
+                    <Icon size={14} style={{ color: 'var(--accent)' }} />
                   </span>
                 </div>
                 <p className="text-2xl font-bold" style={{ color: 'var(--hub-text)' }}>
@@ -134,31 +113,13 @@ const Customers: React.FC = () => {
         </motion.div>
       )}
 
-      {/* Average LTV */}
-      <motion.div
-        variants={itemVariants as any}
-        className="rounded-xl p-5"
-        style={{ background: 'var(--hub-card)', border: '1px solid var(--hub-border)' }}
-      >
-        <h3 className="text-sm font-semibold mb-2" style={{ color: 'var(--hub-text)' }}>
-          Customer Lifetime Value
-        </h3>
-        <p className="text-2xl font-bold" style={{ color: 'var(--hub-text)' }}>
-          {ltvLoading ? '...' : formatCurrency(avgLtv)}
-        </p>
-        <p className="text-xs mt-1" style={{ color: 'var(--hub-text-dim)' }}>
-          Average per customer
-        </p>
-      </motion.div>
-
-      {/* Top Customers */}
       <motion.div
         variants={itemVariants as any}
         className="rounded-xl p-5"
         style={{ background: 'var(--hub-card)', border: '1px solid var(--hub-border)' }}
       >
         <h3 className="text-sm font-semibold mb-4" style={{ color: 'var(--hub-text)' }}>
-          Top Customers by Spend
+          {t('insights.customers.top')}
         </h3>
         {topLoading ? (
           <div className="space-y-2">
@@ -167,15 +128,12 @@ const Customers: React.FC = () => {
             ))}
           </div>
         ) : topList.length === 0 ? (
-          <EmptyState
-            title="No customer data"
-            description="Customer data will appear here once transactions are recorded."
-          />
+          <EmptyState title="" description={t('insights.customers.empty')} />
         ) : (
           <div className="space-y-1">
             {topList.map((c, i) => (
               <div
-                key={c.id ?? i}
+                key={c.customerId}
                 className="grid grid-cols-3 items-center px-3 py-2.5 rounded-lg"
                 style={{ background: 'var(--hub-hover)' }}
               >
@@ -187,17 +145,92 @@ const Customers: React.FC = () => {
                     className="text-xs font-medium truncate"
                     style={{ color: 'var(--hub-text)' }}
                   >
-                    {c.name ?? c.email ?? 'Unknown'}
+                    {c.name || c.email}
                   </span>
                 </div>
                 <span className="text-xs text-center" style={{ color: 'var(--hub-text-muted)' }}>
-                  {formatNumber(c.orders ?? c.orderCount ?? 0)} orders
+                  {formatNumber(c.orderCount)} orders
                 </span>
                 <span
                   className="text-xs font-semibold text-right"
                   style={{ color: 'var(--hub-text)' }}
                 >
-                  {formatCurrency(c.totalSpend ?? c.revenue ?? 0)}
+                  {formatMoney(c.lifetimeSpendMinorUnits)}
+                </span>
+              </div>
+            ))}
+          </div>
+        )}
+      </motion.div>
+
+      <motion.div
+        variants={itemVariants as any}
+        className="rounded-xl p-5"
+        style={{ background: 'var(--hub-card)', border: '1px solid var(--hub-border)' }}
+      >
+        <h3 className="text-sm font-semibold mb-4" style={{ color: 'var(--hub-text)' }}>
+          {t('insights.customers.ltv')}
+        </h3>
+        {ltvLoading ? (
+          <div className="space-y-2">
+            {Array.from({ length: 4 }).map((_, i) => (
+              <SkeletonRow key={i} cols={2} />
+            ))}
+          </div>
+        ) : ltvBuckets.length === 0 ? (
+          <EmptyState title="" description={t('insights.customers.empty')} />
+        ) : (
+          <div className="space-y-1">
+            {ltvBuckets.map((b) => (
+              <div
+                key={b.label}
+                className="flex items-center justify-between px-3 py-2.5 rounded-lg"
+                style={{ background: 'var(--hub-hover)' }}
+              >
+                <span className="text-xs font-medium" style={{ color: 'var(--hub-text)' }}>
+                  {b.label}
+                </span>
+                <span className="text-xs font-semibold" style={{ color: 'var(--hub-text)' }}>
+                  {formatNumber(b.customerCount)} customers
+                </span>
+              </div>
+            ))}
+          </div>
+        )}
+      </motion.div>
+
+      <motion.div
+        variants={itemVariants as any}
+        className="rounded-xl p-5"
+        style={{ background: 'var(--hub-card)', border: '1px solid var(--hub-border)' }}
+      >
+        <h3 className="text-sm font-semibold mb-4" style={{ color: 'var(--hub-text)' }}>
+          {t('insights.customers.churn')}
+        </h3>
+        {churnLoading ? (
+          <div className="space-y-2">
+            {Array.from({ length: 4 }).map((_, i) => (
+              <SkeletonRow key={i} cols={2} />
+            ))}
+          </div>
+        ) : churnWindows.length === 0 ? (
+          <EmptyState title="" description={t('insights.customers.empty')} />
+        ) : (
+          <div className="space-y-1">
+            {churnWindows.map((w) => (
+              <div
+                key={w.windowDays}
+                className="flex items-center justify-between px-3 py-2.5 rounded-lg"
+                style={{ background: 'var(--hub-hover)' }}
+              >
+                <span className="text-xs font-medium" style={{ color: 'var(--hub-text)' }}>
+                  {w.windowDays}d
+                </span>
+                <span className="text-xs font-semibold" style={{ color: 'var(--hub-text)' }}>
+                  {w.churnPct.toFixed(1)}%{' '}
+                  <span style={{ color: 'var(--hub-text-muted)' }}>
+                    ({formatNumber(w.churnedCount)} churned)
+                  </span>
                 </span>
               </div>
             ))}
