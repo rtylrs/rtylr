@@ -1,10 +1,10 @@
-import React, { useState } from 'react';
+import React, { useMemo, useState } from 'react';
 import { Link, useNavigate } from 'react-router-dom';
 import { motion } from 'motion/react';
 import { Plus, Send, CheckCircle, Eye, FileText, Download, FileSpreadsheet } from 'lucide-react';
 import { toast } from 'sonner';
-import { Invoice } from '../../shared/services/financeApi';
-import { useInvoices } from './useInvoices';
+import { useListInvoices } from '../../shared/hooks/queries/useInvoices';
+import { minorToMajor } from '../../shared/utils/money';
 import PageHeader from '../../shared/components/PageHeader';
 import MoneyDisplay from '../../shared/components/MoneyDisplay';
 import EmptyState from '../../shared/components/EmptyState';
@@ -16,6 +16,7 @@ import DownloadPdfButton from '../../shared/components/DownloadPdfButton';
 import SendInvoiceModal from '../../shared/components/SendInvoiceModal';
 import { exportQuickbooksInvoices, exportXeroInvoices } from '../../shared/lib/exports';
 import { cardStyle, ghostBtn, primaryBtn, ACCENT } from '../../shared/lib/tokens';
+import type { Currency } from '../../shared/utils/money';
 
 type InvoiceStatus = 'Draft' | 'Sent' | 'Paid' | 'Overdue';
 
@@ -26,13 +27,52 @@ const statusStyle: Record<InvoiceStatus, React.CSSProperties> = {
   Overdue: { background: 'rgba(239,68,68,0.12)', color: '#ef4444' },
 };
 
+function normaliseStatus(raw: string): InvoiceStatus {
+  const lower = raw?.toLowerCase?.() ?? '';
+  if (lower === 'paid') return 'Paid';
+  if (lower === 'overdue') return 'Overdue';
+  if (lower === 'sent') return 'Sent';
+  return 'Draft';
+}
+
+interface DisplayRow {
+  id: string;
+  numericId: number;
+  number: string;
+  client: string;
+  amount: number;
+  status: InvoiceStatus;
+  issuedDate: string;
+  dueDate: string;
+  currency: Currency;
+}
+
+const DEFAULT_PAGE: { limit: number; offset: number } = { limit: 50, offset: 0 };
+
 const Invoices: React.FC = () => {
   const [activeTab, setActiveTab] = useState<InvoiceFilterValue>('All');
   const [selected, setSelected] = useState<Set<string>>(new Set());
   const [showBulkSend, setShowBulkSend] = useState(false);
-  const { data: fetchedInvoices, isLoading: loading } = useInvoices();
+  const { data, isLoading: loading } = useListInvoices(DEFAULT_PAGE);
   const navigate = useNavigate();
-  const invoices: Invoice[] = fetchedInvoices || [];
+
+  const invoices: DisplayRow[] = useMemo(() => {
+    const rows = data?.invoices ?? [];
+    return rows.map((r) => {
+      const currency = (r.currency || 'USD') as Currency;
+      return {
+        id: String(r.id),
+        numericId: r.id,
+        number: r.invoiceNumber,
+        client: r.clientName,
+        amount: minorToMajor(r.total, currency),
+        status: normaliseStatus(r.status),
+        issuedDate: r.issueDate,
+        dueDate: r.dueDate,
+        currency,
+      };
+    });
+  }, [data]);
 
   const counts: Partial<Record<InvoiceFilterValue, number>> = {
     All: invoices.length,
@@ -46,7 +86,7 @@ const Invoices: React.FC = () => {
     activeTab === 'All' ? invoices : invoices.filter((inv) => inv.status === activeTab);
   const totalFiltered = filtered.reduce((s, inv) => s + inv.amount, 0);
 
-  const toggle = (id: string) =>
+  const toggle = (id: string): void =>
     setSelected((prev) => {
       const next = new Set(prev);
       if (next.has(id)) next.delete(id);
@@ -55,7 +95,7 @@ const Invoices: React.FC = () => {
     });
 
   const exportPayload = (activeTab === 'All' ? invoices : filtered).map((i) => ({
-    id: i.id,
+    id: i.number,
     client: i.client,
     amount: i.amount,
     issuedDate: i.issuedDate,
@@ -172,7 +212,7 @@ const Invoices: React.FC = () => {
                       }}
                     >
                       <FileText size={13} style={{ color: 'var(--hub-text-dim)' }} />
-                      {inv.id}
+                      {inv.number || inv.id}
                     </Link>
                   </td>
                   <td style={{ padding: '12px 16px', fontSize: 13, color: 'var(--hub-text)' }}>
@@ -186,7 +226,7 @@ const Invoices: React.FC = () => {
                       color: 'var(--hub-text)',
                     }}
                   >
-                    <MoneyDisplay amount={inv.amount} />
+                    <MoneyDisplay amount={inv.amount} currency={inv.currency} />
                   </td>
                   <td style={{ padding: '12px 16px' }}>
                     <span
@@ -227,7 +267,7 @@ const Invoices: React.FC = () => {
                             color: '#3b82f6',
                             borderColor: 'rgba(59,130,246,0.3)',
                           }}
-                          onClick={() => toast.success(`Sent ${inv.id}`)}
+                          onClick={() => toast.success(`Sent ${inv.number || inv.id}`)}
                         >
                           <Send size={12} /> Send
                         </button>
@@ -240,7 +280,7 @@ const Invoices: React.FC = () => {
                             color: '#10b981',
                             borderColor: 'rgba(16,185,129,0.3)',
                           }}
-                          onClick={() => toast.success(`Marked ${inv.id} paid`)}
+                          onClick={() => toast.success(`Marked ${inv.number || inv.id} paid`)}
                         >
                           <CheckCircle size={12} /> Paid
                         </button>
