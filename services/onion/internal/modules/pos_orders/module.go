@@ -23,5 +23,5 @@ func (m *Module) RegisterRoutes(ctx context.Context, router *chi.Mux, _ ...inter
 }
 
 func (m *Module) GetAnonymousRoutes() []string {
-	return []string{}
+	return []string{"/pos/payments/webhook"}
 }

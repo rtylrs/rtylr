@@ -141,4 +141,7 @@ func RegisterRoutes(ctx context.Context, router *chi.Mux, service *application.S
 		ctx, router, handlers.PayOrderRoutes(),
 		&handlers.PayOrderHandler{Service: service},
 	)
+
+	// Paddle webhook (anonymous, raw body for HMAC verification)
+	router.Post("/pos/payments/webhook", handlers.PaddlePOSWebhookHTTPHandler(service))
 }
