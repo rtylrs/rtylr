@@ -44,3 +44,28 @@ func (s *Service) GetSettings(ctx context.Context, ownerID int64) (SettingsPaylo
 		Timezone:        row.Timezone,
 	}, nil
 }
+
+// UpdateSettings writes the payload. Missing fields are rejected —
+// partial updates would surprise the UI which always sends the full
+// envelope.
+func (s *Service) UpdateSettings(ctx context.Context, ownerID int64, in SettingsPayload) (SettingsPayload, error) {
+	if in.DefaultCurrency == "" {
+		in.DefaultCurrency = "USD"
+	}
+	if in.FiscalYearStart == "" {
+		in.FiscalYearStart = "01-01"
+	}
+	if in.Timezone == "" {
+		in.Timezone = "UTC"
+	}
+	err := s.repo.UpsertSettings(ctx, infrastructure.SettingsRow{
+		OwnerID:         ownerID,
+		DefaultCurrency: in.DefaultCurrency,
+		FiscalYearStart: in.FiscalYearStart,
+		Timezone:        in.Timezone,
+	})
+	if err != nil {
+		return SettingsPayload{}, err
+	}
+	return in, nil
+}

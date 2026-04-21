@@ -15,6 +15,10 @@ func registerSettingsRoutes(ctx context.Context, router *chi.Mux, svc *applicati
 		ctx, router, handlers.GetSettingsRoutes(),
 		&handlers.GetSettingsHandler{Service: svc},
 	)
+	serverHttp.RegisterPUT[handlers.UpdateSettingsRequest, handlers.UpdateSettingsResponse](
+		ctx, router, handlers.UpdateSettingsRoutes(),
+		&handlers.UpdateSettingsHandler{Service: svc},
+	)
 	serverHttp.RegisterGET[handlers.ListScheduledReportsRequest, handlers.ListScheduledReportsResponse](
 		ctx, router, handlers.ListScheduledReportsRoutes(),
 		&handlers.ListScheduledReportsHandler{Service: svc},

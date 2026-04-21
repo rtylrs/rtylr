@@ -42,3 +42,29 @@ func (r *Repository) GetSettings(ctx context.Context, ownerID int64) (SettingsRo
 	}
 	return out, nil
 }
+
+// UpsertSettings writes the one-row-per-owner config. Inserts when
+// absent, overwrites when present. No diff-check — the frontend
+// always sends the full envelope, same as every other settings
+// endpoint in the codebase.
+func (r *Repository) UpsertSettings(ctx context.Context, row SettingsRow) error {
+	const q = `
+		INSERT INTO insights_settings (owner_id, default_currency, fiscal_year_start, timezone)
+		VALUES (?, ?, ?, ?)
+		ON DUPLICATE KEY UPDATE
+		  default_currency = VALUES(default_currency),
+		  fiscal_year_start = VALUES(fiscal_year_start),
+		  timezone = VALUES(timezone),
+		  updated_at = CURRENT_TIMESTAMP
+	`
+	if _, err := r.pool.ExecContext(ctx, q,
+		row.OwnerID, row.DefaultCurrency, row.FiscalYearStart, row.Timezone,
+	); err != nil {
+		logger.Ctx(ctx).Error("insights: upsert settings failed",
+			logger.Any("owner_id", row.OwnerID),
+			logger.Error(err),
+		)
+		return err
+	}
+	return nil
+}
