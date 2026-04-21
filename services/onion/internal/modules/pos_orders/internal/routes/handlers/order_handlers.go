@@ -540,7 +540,7 @@ func (h *ProcessPaymentHandler) Serve(ctx context.Context, req *ProcessPaymentRe
 
 // ─── Process Refund ───────────────────────────────────────────────────────────
 
-func ProcessRefundRoutes() []string { return []string{"/pos/orders/refund"} }
+func ProcessRefundRoutes() []string { return []string{"/pos/orders/refund", "/pos/orders/{id}/refund"} }
 
 type ProcessRefundHandler struct{ Service *application.Service }
 
@@ -555,8 +555,8 @@ type ProcessRefundResponse struct {
 	Message  string `json:"message"`
 }
 
-func (h *ProcessRefundHandler) Validate(_ context.Context, req *ProcessRefundRequest) *errorModels.ServerError {
-	if req.OrderID == 0 {
+func (h *ProcessRefundHandler) Validate(ctx context.Context, req *ProcessRefundRequest) *errorModels.ServerError {
+	if req.OrderID == 0 && chi.URLParamFromCtx(ctx, "id") == "" {
 		return &errorModels.ServerError{
 			HTTPCode: http.StatusBadRequest,
 			Code:     http.StatusBadRequest,
@@ -584,8 +584,21 @@ func (h *ProcessRefundHandler) Serve(ctx context.Context, req *ProcessRefundRequ
 	ownerID := device.User.UserID
 	staffID := device.User.UserID
 
+	orderID := req.OrderID
+	if raw := chi.URLParamFromCtx(ctx, "id"); raw != "" {
+		parsed, err := strconv.ParseInt(raw, 10, 64)
+		if err != nil || parsed <= 0 {
+			return ProcessRefundResponse{}, &errorModels.ServerError{
+				HTTPCode: http.StatusBadRequest,
+				Code:     http.StatusBadRequest,
+				Message:  "Invalid order id",
+			}
+		}
+		orderID = parsed
+	}
+
 	refundID, err := h.Service.ProcessRefund(ctx, ownerID, staffID, domain.RefundInput{
-		OrderID: req.OrderID,
+		OrderID: orderID,
 		Amount:  req.Amount,
 		Reason:  req.Reason,
 	})
