@@ -1,0 +1,7 @@
+{
+  "created": "Facture créée",
+  "updated": "Facture mise à jour",
+  "deleted": "Facture supprimée",
+  "paymentRecorded": "Paiement enregistré",
+  "statusUpdated": "Statut de la facture mis à jour"
+}

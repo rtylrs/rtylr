@@ -1,0 +1,7 @@
+{
+  "created": "Invoice created",
+  "updated": "Invoice updated",
+  "deleted": "Invoice deleted",
+  "paymentRecorded": "Payment recorded",
+  "statusUpdated": "Invoice status updated"
+}
