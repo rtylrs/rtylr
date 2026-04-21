@@ -1,0 +1,18 @@
+{
+  "productCreated": "Product created",
+  "productUpdated": "Product updated",
+  "productDeleted": "Product deleted",
+  "supplierCreated": "Supplier created",
+  "supplierUpdated": "Supplier updated",
+  "supplierDeleted": "Supplier deleted",
+  "warehouseCreated": "Warehouse created",
+  "categoryCreated": "Category created",
+  "brandCreated": "Brand created",
+  "stockTransferCreated": "Stock transfer created",
+  "stockTakeCreated": "Stock take created",
+  "priceListCreated": "Price list created",
+  "purchaseOrderCreated": "Purchase order created",
+  "purchaseOrderStatusUpdated": "Purchase order status updated",
+  "purchaseOrderApproved": "Purchase order approved",
+  "inventoryAdjusted": "Inventory adjusted"
+}
