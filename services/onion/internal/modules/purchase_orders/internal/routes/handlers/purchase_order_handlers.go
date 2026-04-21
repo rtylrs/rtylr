@@ -216,6 +216,7 @@ type UpdatePurchaseOrderStatusResponse struct {
 var validPOStatuses = map[string]struct{}{
 	string(domain.POStatusDraft):     {},
 	string(domain.POStatusSent):      {},
+	string(domain.POStatusApproved):  {},
 	string(domain.POStatusPartial):   {},
 	string(domain.POStatusReceived):  {},
 	string(domain.POStatusCancelled): {},
@@ -240,7 +241,7 @@ func (h *UpdatePurchaseOrderStatusHandler) Validate(_ context.Context, req *Upda
 		return &errorModels.ServerError{
 			Code:     http.StatusBadRequest,
 			HTTPCode: http.StatusBadRequest,
-			Message:  "Invalid status. Must be one of: draft, sent, partial, received, cancelled",
+			Message:  "Invalid status. Must be one of: draft, sent, approved, partial, received, cancelled",
 		}
 	}
 	return nil

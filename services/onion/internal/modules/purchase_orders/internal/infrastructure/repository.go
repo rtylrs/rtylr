@@ -154,6 +154,50 @@ func (r *Repository) CreatePurchaseOrder(ctx context.Context, ownerID int64, inp
 	return poID, nil
 }
 
+func (r *Repository) GetPurchaseOrderStatus(ctx context.Context, ownerID, id int64) (string, error) {
+	status, err := r.queries.GetPurchaseOrderStatus(ctx, sqlc.GetPurchaseOrderStatusParams{
+		OwnerID: ownerID,
+		ID:      id,
+	})
+	if err != nil {
+		if err == sql.ErrNoRows {
+			return "", domain.ErrPurchaseOrderNotFound
+		}
+
+		logger.Ctx(ctx).Error("Failed to get purchase order status",
+			logger.Any("owner_id", ownerID),
+			logger.Any("purchase_order_id", id),
+			logger.Error(err),
+		)
+
+		return "", err
+	}
+
+	if !status.Valid {
+		return "", nil
+	}
+
+	return string(status.ErpPurchaseOrdersStatus), nil
+}
+
+func (r *Repository) ApprovePurchaseOrder(ctx context.Context, ownerID, id int64) error {
+	err := r.queries.ApprovePurchaseOrder(ctx, sqlc.ApprovePurchaseOrderParams{
+		OwnerID: ownerID,
+		ID:      id,
+	})
+	if err != nil {
+		logger.Ctx(ctx).Error("Failed to approve purchase order",
+			logger.Any("owner_id", ownerID),
+			logger.Any("purchase_order_id", id),
+			logger.Error(err),
+		)
+
+		return err
+	}
+
+	return nil
+}
+
 func (r *Repository) UpdatePurchaseOrderStatus(ctx context.Context, ownerID, id int64, status string) error {
 	var err error
 

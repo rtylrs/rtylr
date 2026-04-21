@@ -6,13 +6,17 @@ import (
 	"time"
 )
 
-var ErrPurchaseOrderNotFound = errors.New("purchase order not found")
+var (
+	ErrPurchaseOrderNotFound      = errors.New("purchase order not found")
+	ErrPurchaseOrderAlreadyApproved = errors.New("purchase order already approved")
+)
 
 type PurchaseOrderStatus string
 
 const (
 	POStatusDraft     PurchaseOrderStatus = "draft"
 	POStatusSent      PurchaseOrderStatus = "sent"
+	POStatusApproved  PurchaseOrderStatus = "approved"
 	POStatusPartial   PurchaseOrderStatus = "partial"
 	POStatusReceived  PurchaseOrderStatus = "received"
 	POStatusCancelled PurchaseOrderStatus = "cancelled"

@@ -34,6 +34,12 @@ UPDATE erp_purchase_orders SET status = ? WHERE owner_id = ? AND id = ?;
 -- name: UpdatePurchaseOrderStatusReceived :exec
 UPDATE erp_purchase_orders SET status = ?, received_at = NOW() WHERE owner_id = ? AND id = ?;
 
+-- name: GetPurchaseOrderStatus :one
+SELECT status FROM erp_purchase_orders WHERE owner_id = ? AND id = ?;
+
+-- name: ApprovePurchaseOrder :exec
+UPDATE erp_purchase_orders SET status = 'approved' WHERE owner_id = ? AND id = ?;
+
 -- name: GetProductStockForUpdate :one
 SELECT stock_quantity FROM erp_products WHERE owner_id = ? AND id = ? FOR UPDATE;
 

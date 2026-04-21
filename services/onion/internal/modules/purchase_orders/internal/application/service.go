@@ -38,6 +38,28 @@ func (s *Service) CreatePurchaseOrder(ctx context.Context, ownerID int64, input 
 	return id, nil
 }
 
+// ApprovePurchaseOrder transitions a purchase order to the `approved` status.
+// Returns domain.ErrPurchaseOrderNotFound when the PO doesn't exist for the caller,
+// or domain.ErrPurchaseOrderAlreadyApproved when the PO is already approved.
+func (s *Service) ApprovePurchaseOrder(ctx context.Context, ownerID, poID int64) error {
+	status, err := s.repo.GetPurchaseOrderStatus(ctx, ownerID, poID)
+	if err != nil {
+		return err
+	}
+
+	if status == string(domain.POStatusApproved) {
+		return domain.ErrPurchaseOrderAlreadyApproved
+	}
+
+	if err := s.repo.ApprovePurchaseOrder(ctx, ownerID, poID); err != nil {
+		return err
+	}
+
+	s.invalidateCache(ctx, ownerID)
+
+	return nil
+}
+
 func (s *Service) UpdatePurchaseOrderStatus(ctx context.Context, ownerID, id int64, status string) error {
 	err := s.repo.UpdatePurchaseOrderStatus(ctx, ownerID, id, status)
 	if err != nil {

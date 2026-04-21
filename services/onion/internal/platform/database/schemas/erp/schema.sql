@@ -65,7 +65,7 @@ CREATE TABLE IF NOT EXISTS erp_purchase_orders (
     owner_id BIGINT NOT NULL,
     supplier_id BIGINT NOT NULL,
     po_number VARCHAR(100) NOT NULL,
-    status ENUM('draft','sent','partial','received','cancelled') DEFAULT 'draft',
+    status ENUM('draft','sent','approved','partial','received','cancelled') DEFAULT 'draft',
     subtotal DECIMAL(10,2) DEFAULT 0,
     tax_amount DECIMAL(10,2) DEFAULT 0,
     total DECIMAL(10,2) DEFAULT 0,
