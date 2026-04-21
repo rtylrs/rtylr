@@ -73,21 +73,37 @@ const CustomerProfile: React.FC = () => {
 
   const handleAddTag = () => {
     if (!newTag.trim()) return;
-    const updated = [...tags, newTag.trim()];
-    update.mutate({ id: customer.id, data: { tags: updated } });
+    const tagName = newTag.trim();
+    const updated = [...tags, tagName];
+    update.mutate(
+      { id: customer.id, data: { tags: updated } },
+      {
+        onSuccess: () => toast.success(`Tag "${tagName}" added`),
+        onError: () => toast.error('Failed to add tag'),
+      }
+    );
     setNewTag('');
-    toast.success(`Tag "${newTag}" added`);
   };
 
   const handleRemoveTag = (tag: string) => {
     const updated = tags.filter((t) => t !== tag);
-    update.mutate({ id: customer.id, data: { tags: updated } });
-    toast.success(`Tag "${tag}" removed`);
+    update.mutate(
+      { id: customer.id, data: { tags: updated } },
+      {
+        onSuccess: () => toast.success(`Tag "${tag}" removed`),
+        onError: () => toast.error('Failed to remove tag'),
+      }
+    );
   };
 
   const handleNotesSave = (notes: string) => {
-    update.mutate({ id: customer.id, data: { notes } });
-    toast.success('Notes saved');
+    update.mutate(
+      { id: customer.id, data: { notes } },
+      {
+        onSuccess: () => toast.success('Notes saved'),
+        onError: () => toast.error('Failed to save notes'),
+      }
+    );
   };
 
   const handleAward = (points: number, reason: string) => {
@@ -106,13 +122,16 @@ const CustomerProfile: React.FC = () => {
         toast.success('Customer deleted');
         navigate('/customers');
       },
+      onError: () => {
+        toast.error('Failed to delete customer');
+      },
     });
   };
 
   const handleExport = () => {
     exportData.mutate(customer.id, {
       onSuccess: () => toast.success('Customer data export started'),
-      onError: () => toast.success('Customer data export started'),
+      onError: () => toast.error('Failed to export customer data'),
     });
   };
 
@@ -195,9 +214,9 @@ const CustomerProfile: React.FC = () => {
           </div>
         </div>
         <div style={{ display: 'flex', flexDirection: 'column', gap: '6px' }}>
-          <Button variant="outline" onClick={handleExport}>
+          <Button variant="outline" onClick={handleExport} disabled={exportData.isPending}>
             <Download size={13} />
-            Export GDPR
+            {exportData.isPending ? 'Exporting…' : 'Export GDPR'}
           </Button>
           <Button
             variant="outline"
@@ -209,10 +228,11 @@ const CustomerProfile: React.FC = () => {
           <Button
             variant="outline"
             onClick={() => setConfirmDelete(true)}
+            disabled={remove.isPending}
             style={{ color: '#ef4444', borderColor: 'rgba(239,68,68,0.3)' }}
           >
             <Trash2 size={13} />
-            Delete
+            {remove.isPending ? 'Deleting…' : 'Delete'}
           </Button>
         </div>
       </motion.div>

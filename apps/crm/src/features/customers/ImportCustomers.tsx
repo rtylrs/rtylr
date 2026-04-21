@@ -56,8 +56,7 @@ const ImportCustomers: React.FC = () => {
         navigate('/customers');
       },
       onError: () => {
-        toast.success(`Queued ${payload.length} customers for import`);
-        navigate('/customers');
+        toast.error('Failed to import customers');
       },
     });
   };
@@ -236,9 +235,13 @@ const ImportCustomers: React.FC = () => {
             <Button variant="outline" onClick={() => navigate('/customers')}>
               Cancel
             </Button>
-            <Button variant="primary" onClick={handleImport}>
+            <Button
+              variant="primary"
+              onClick={handleImport}
+              disabled={importMut.isPending || rows.length === 0}
+            >
               <Check size={13} />
-              Import {rows.length} customers
+              {importMut.isPending ? 'Importing…' : `Import ${rows.length} customers`}
             </Button>
           </div>
         </>

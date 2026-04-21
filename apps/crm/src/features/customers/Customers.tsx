@@ -119,16 +119,43 @@ const Customers: React.FC = () => {
   };
 
   const applyBulkTag = () => {
-    if (!bulkTag.trim() || selected.size === 0) return;
-    Array.from(selected).forEach((id) => {
+    const tagName = bulkTag.trim();
+    if (!tagName || selected.size === 0) return;
+    const ids = Array.from(selected).filter((id) => {
+      const c = customers.find((x) => x.id === id);
+      return c && !(c.tags || []).includes(tagName);
+    });
+    if (ids.length === 0) {
+      toast.success(`All selected already tagged "${tagName}"`);
+      setBulkTag('');
+      setSelected(new Set());
+      return;
+    }
+    let remaining = ids.length;
+    let failed = 0;
+    ids.forEach((id) => {
       const c = customers.find((x) => x.id === id);
       if (!c) return;
-      const tags = c.tags || [];
-      if (!tags.includes(bulkTag)) {
-        update.mutate({ id, data: { tags: [...tags, bulkTag] } });
-      }
+      const tags = [...(c.tags || []), tagName];
+      update.mutate(
+        { id, data: { tags } },
+        {
+          onError: () => {
+            failed += 1;
+          },
+          onSettled: () => {
+            remaining -= 1;
+            if (remaining === 0) {
+              if (failed === 0) {
+                toast.success(`Tagged ${ids.length} customers with "${tagName}"`);
+              } else {
+                toast.error(`Failed to tag ${failed} of ${ids.length} customers`);
+              }
+            }
+          },
+        }
+      );
     });
-    toast.success(`Tagged ${selected.size} customers with "${bulkTag}"`);
     setBulkTag('');
     setSelected(new Set());
   };

@@ -75,8 +75,7 @@ const CreateCustomer: React.FC = () => {
           navigate('/customers');
         },
         onError: () => {
-          toast.success('Customer created');
-          navigate('/customers');
+          toast.error('Failed to create customer');
         },
       }
     );
@@ -238,8 +237,12 @@ const CreateCustomer: React.FC = () => {
             Next <ArrowRight size={13} />
           </Button>
         ) : (
-          <Button variant="primary" onClick={handleSubmit}>
-            Create customer
+          <Button
+            variant="primary"
+            onClick={handleSubmit}
+            disabled={create.isPending || !data.name.trim()}
+          >
+            {create.isPending ? 'Creating…' : 'Create customer'}
           </Button>
         )}
       </div>

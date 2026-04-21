@@ -32,8 +32,7 @@ const MergeCustomers: React.FC = () => {
           navigate('/customers');
         },
         onError: () => {
-          toast.success('Customers merged');
-          navigate('/customers');
+          toast.error('Failed to merge customers');
         },
       }
     );
@@ -189,8 +188,12 @@ const MergeCustomers: React.FC = () => {
         <Button variant="outline" onClick={() => navigate('/customers')}>
           Cancel
         </Button>
-        <Button variant="primary" disabled={!primaryId || !secondaryId} onClick={handleMerge}>
-          <Users size={13} /> Merge customers
+        <Button
+          variant="primary"
+          disabled={!primaryId || !secondaryId || merge.isPending}
+          onClick={handleMerge}
+        >
+          <Users size={13} /> {merge.isPending ? 'Merging…' : 'Merge customers'}
         </Button>
       </div>
     </div>
