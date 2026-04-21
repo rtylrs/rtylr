@@ -23,4 +23,8 @@ func registerProductRoutes(ctx context.Context, router *chi.Mux, svc *applicatio
 		ctx, router, handlers.GetMarginDistributionRoutes(),
 		&handlers.GetMarginDistributionHandler{Service: svc},
 	)
+	serverHttp.RegisterGET[handlers.GetSlowMoversRequest, handlers.GetSlowMoversResponse](
+		ctx, router, handlers.GetSlowMoversRoutes(),
+		&handlers.GetSlowMoversHandler{Service: svc},
+	)
 }
