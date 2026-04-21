@@ -1,8 +1,10 @@
-import React from 'react';
-import { useParams, Link } from 'react-router-dom';
+import React, { useState } from 'react';
+import { useParams, Link, useNavigate } from 'react-router-dom';
 import { motion } from 'motion/react';
 import { ArrowLeft, Edit3, Trash2, Package, TrendingUp, Clock, Tag, Truck } from 'lucide-react';
-import { useProduct } from './useProducts';
+import { toast } from 'sonner';
+import { useTranslation } from 'react-i18next';
+import { useDeleteProduct, useProduct } from './useProducts';
 import { useVariants } from './useVariants';
 import Breadcrumbs from '../../shared/components/Breadcrumbs';
 import StockBadge from '../../shared/components/StockBadge';
@@ -10,6 +12,8 @@ import BarcodeSvg from '../../shared/components/BarcodeSvg';
 import QuickStockAdjust from '../../shared/components/QuickStockAdjust';
 import EmptyState from '../../shared/components/EmptyState';
 import { Skeleton } from '../../shared/components/Skeleton';
+import QuickAddProductModal from '../../shared/components/QuickAddProductModal';
+import ConfirmModal from '../../shared/components/ConfirmModal';
 import { formatCurrency } from '../../shared/lib/format';
 
 const AMBER = '#f59e0b';
@@ -49,10 +53,29 @@ const MiniLineChart: React.FC<{ data: number[]; color: string; height?: number }
 };
 
 const ProductDetail: React.FC = () => {
+  const { t } = useTranslation();
+  const navigate = useNavigate();
   const { id } = useParams<{ id: string }>();
   const productId = id ? parseInt(id) : undefined;
   const { data: product, isLoading } = useProduct(productId);
   const { data: variants = [] } = useVariants(productId);
+  const deleteProduct = useDeleteProduct();
+  const [editing, setEditing] = useState(false);
+  const [confirmDelete, setConfirmDelete] = useState(false);
+
+  const handleDelete = (): void => {
+    if (!product) return;
+    deleteProduct.mutate(product.id, {
+      onSuccess: () => {
+        toast.success(t('erp.products.toast.deleted'));
+        setConfirmDelete(false);
+        navigate('/products');
+      },
+      onError: () => {
+        toast.error(t('erp.products.toast.deleteFailed'));
+      },
+    });
+  };
 
   if (isLoading) {
     return (
@@ -66,15 +89,15 @@ const ProductDetail: React.FC = () => {
   if (!product) {
     return (
       <EmptyState
-        title="Product not found"
-        description="The product you are looking for does not exist or has been deleted."
+        title={t('erp.products.detail.notFound')}
+        description={t('erp.products.detail.notFoundDescription')}
         action={
           <Link
             to="/products"
             className="px-3 py-2 rounded-lg text-xs font-semibold"
             style={{ background: AMBER, color: '#000', textDecoration: 'none' }}
           >
-            Back to Products
+            {t('erp.products.detail.backToProducts')}
           </Link>
         }
       />
@@ -113,6 +136,8 @@ const ProductDetail: React.FC = () => {
         </div>
         <div className="flex gap-2">
           <button
+            data-testid="product-edit-button"
+            onClick={() => setEditing(true)}
             className="flex items-center gap-1.5 px-3 py-1.5 rounded-lg text-xs font-medium"
             style={{
               background: 'var(--hub-hover)',
@@ -121,14 +146,21 @@ const ProductDetail: React.FC = () => {
             }}
           >
             <Edit3 size={12} />
-            Edit
+            {t('erp.products.detail.edit')}
           </button>
           <button
+            data-testid="product-delete-button"
+            onClick={() => setConfirmDelete(true)}
+            disabled={deleteProduct.isPending}
             className="flex items-center gap-1.5 px-3 py-1.5 rounded-lg text-xs font-medium"
-            style={{ color: '#f87171', border: '1px solid rgba(248,113,113,0.3)' }}
+            style={{
+              color: '#f87171',
+              border: '1px solid rgba(248,113,113,0.3)',
+              opacity: deleteProduct.isPending ? 0.6 : 1,
+            }}
           >
             <Trash2 size={12} />
-            Delete
+            {t('erp.products.detail.delete')}
           </button>
         </div>
       </div>
@@ -375,6 +407,18 @@ const ProductDetail: React.FC = () => {
           </div>
         </div>
       </div>
+
+      <QuickAddProductModal open={editing} onClose={() => setEditing(false)} editing={product} />
+      <ConfirmModal
+        open={confirmDelete}
+        title={t('erp.products.detail.delete')}
+        description={t('erp.products.detail.notFoundDescription')}
+        danger
+        confirmLabel={t('common.delete')}
+        cancelLabel={t('common.cancel')}
+        onConfirm={handleDelete}
+        onCancel={() => setConfirmDelete(false)}
+      />
     </motion.div>
   );
 };
