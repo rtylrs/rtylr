@@ -340,7 +340,7 @@ func (h *GetOrderDetailHandler) Serve(ctx context.Context, req *GetOrderDetailRe
 
 // ─── Update Order Status ──────────────────────────────────────────────────────
 
-func UpdateOrderStatusRoutes() []string { return []string{"/pos/orders/status"} }
+func UpdateOrderStatusRoutes() []string { return []string{"/pos/orders/status", "/pos/orders/{id}/status"} }
 
 type UpdateOrderStatusHandler struct{ Service *application.Service }
 
@@ -353,8 +353,8 @@ type UpdateOrderStatusResponse struct {
 	Message string `json:"message"`
 }
 
-func (h *UpdateOrderStatusHandler) Validate(_ context.Context, req *UpdateOrderStatusRequest) *errorModels.ServerError {
-	if req.OrderID == 0 {
+func (h *UpdateOrderStatusHandler) Validate(ctx context.Context, req *UpdateOrderStatusRequest) *errorModels.ServerError {
+	if req.OrderID == 0 && chi.URLParamFromCtx(ctx, "id") == "" {
 		return &errorModels.ServerError{
 			HTTPCode: http.StatusBadRequest,
 			Code:     http.StatusBadRequest,
@@ -381,7 +381,20 @@ func (h *UpdateOrderStatusHandler) Serve(ctx context.Context, req *UpdateOrderSt
 
 	ownerID := device.User.UserID
 
-	if err := h.Service.UpdateOrderStatus(ctx, ownerID, req.OrderID, domain.OrderStatus(req.Status)); err != nil {
+	orderID := req.OrderID
+	if raw := chi.URLParamFromCtx(ctx, "id"); raw != "" {
+		parsed, err := strconv.ParseInt(raw, 10, 64)
+		if err != nil || parsed <= 0 {
+			return UpdateOrderStatusResponse{}, &errorModels.ServerError{
+				HTTPCode: http.StatusBadRequest,
+				Code:     http.StatusBadRequest,
+				Message:  "Invalid order id",
+			}
+		}
+		orderID = parsed
+	}
+
+	if err := h.Service.UpdateOrderStatus(ctx, ownerID, orderID, domain.OrderStatus(req.Status)); err != nil {
 		return UpdateOrderStatusResponse{}, &errorModels.ServerError{
 			HTTPCode: http.StatusInternalServerError,
 			Code:     http.StatusInternalServerError,
