@@ -22,4 +22,7 @@ func RegisterRoutes(ctx context.Context, router *chi.Mux, service *application.S
 	http.RegisterGET[handlers.GetBillRequest, handlers.GetBillResponse](
 		ctx, router, handlers.GetBillRoutes(), &handlers.GetBillHandler{Service: service},
 	)
+	http.RegisterPUTWithValidation[handlers.UpdateBillByIDRequest, handlers.UpdateBillByIDResponse](
+		ctx, router, handlers.UpdateBillByIDRoutes(), &handlers.UpdateBillByIDHandler{Service: service},
+	)
 }
