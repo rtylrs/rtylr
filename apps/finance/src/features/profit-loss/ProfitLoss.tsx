@@ -6,6 +6,7 @@ import { usePL } from '../../shared/hooks/useTax';
 import PLByCategoryChart from '../../shared/components/PLByCategoryChart';
 import PaymentReminderPanel from '../../shared/components/PaymentReminderPanel';
 import ConfirmDialog from '../../shared/components/ConfirmDialog';
+import { exportProfitLossCsv } from '../../shared/lib/exports';
 
 type Period = 'This Month' | 'Last Month' | 'This Quarter' | 'This Year';
 
@@ -191,7 +192,17 @@ const ProfitLoss: React.FC = () => {
               fontSize: 13,
               cursor: 'pointer',
             }}
-            onClick={() => toast.success('P&L exported')}
+            onClick={() =>
+              exportProfitLossCsv({
+                period,
+                revenue: data.revenue,
+                cogs: data.cogs,
+                grossProfit,
+                operatingExpenses: data.operatingExpenses,
+                netProfit,
+              })
+            }
+            aria-label="Export profit and loss as CSV"
           >
             <Download size={14} />
             Export

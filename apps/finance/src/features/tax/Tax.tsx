@@ -3,6 +3,7 @@ import { motion } from 'motion/react';
 import { Download, Settings, CheckCircle, Clock, AlertTriangle } from 'lucide-react';
 import { TaxPeriod, TaxConfig as ApiTaxConfig } from '../../shared/services/financeApi';
 import { useTaxReport } from '../../shared/hooks/useTax';
+import { exportTaxSummaryCsv } from '../../shared/lib/exports';
 
 const ACCENT = '#10b981';
 
@@ -98,6 +99,23 @@ const Tax: React.FC = () => {
               fontWeight: 600,
               cursor: 'pointer',
             }}
+            onClick={() =>
+              exportTaxSummaryCsv([
+                {
+                  period: 'Year to Date',
+                  collected: vatSummary.collected,
+                  owed: vatSummary.owed,
+                  paid: vatSummary.paid,
+                },
+                ...taxPeriods.map((p) => ({
+                  period: p.period,
+                  collected: p.collected,
+                  owed: p.taxableAmount * p.taxRate,
+                  paid: p.status === 'Filed' ? p.collected : 0,
+                })),
+              ])
+            }
+            aria-label="Export tax summary for accountant"
           >
             <Download size={14} />
             Export for Accountant

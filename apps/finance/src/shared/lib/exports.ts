@@ -44,6 +44,47 @@ export function exportQuickbooksInvoices(invoices: InvoiceExport[]) {
   downloadCsv('quickbooks_invoices.csv', rows);
 }
 
+export interface PLExportRow {
+  period: string;
+  revenue: number;
+  cogs: number;
+  grossProfit: number;
+  operatingExpenses: number;
+  netProfit: number;
+}
+
+export function exportProfitLossCsv(row: PLExportRow): void {
+  const header = ['Period', 'Revenue', 'COGS', 'Gross Profit', 'Operating Expenses', 'Net Profit'];
+  const rows = [
+    header,
+    [
+      row.period,
+      row.revenue.toFixed(2),
+      row.cogs.toFixed(2),
+      row.grossProfit.toFixed(2),
+      row.operatingExpenses.toFixed(2),
+      row.netProfit.toFixed(2),
+    ],
+  ];
+  downloadCsv(`profit_loss_${row.period.replace(/\s+/g, '_').toLowerCase()}.csv`, rows);
+}
+
+export interface TaxExportRow {
+  period: string;
+  collected: number;
+  owed: number;
+  paid: number;
+}
+
+export function exportTaxSummaryCsv(rows: TaxExportRow[]): void {
+  const header = ['Period', 'Collected', 'Owed', 'Paid'];
+  const data = [
+    header,
+    ...rows.map((r) => [r.period, r.collected.toFixed(2), r.owed.toFixed(2), r.paid.toFixed(2)]),
+  ];
+  downloadCsv('tax_summary.csv', data);
+}
+
 export function exportXeroInvoices(invoices: InvoiceExport[]) {
   // Xero invoice template CSV header (simplified).
   const header = [
