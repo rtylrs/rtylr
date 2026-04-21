@@ -1,0 +1,38 @@
+{
+  "invoices": {
+    "send": "إرسال",
+    "markPaid": "مدفوع",
+    "markingPaid": "جارٍ التحديث...",
+    "void": "إلغاء",
+    "voiding": "جارٍ الإلغاء...",
+    "sendTooltip": "إرسال الفاتورة عبر البريد الإلكتروني",
+    "markPaidFailed": "تعذّر وسم الفاتورة كمدفوعة",
+    "markPaidSuccess": "تم وسم الفاتورة كمدفوعة",
+    "voidFailed": "تعذّر إلغاء الفاتورة",
+    "voidSuccess": "تم إلغاء الفاتورة",
+    "saveDraft": "حفظ كمسودة",
+    "saveSend": "حفظ وإرسال",
+    "saving": "جارٍ الحفظ...",
+    "recordPayment": "تسجيل الدفع",
+    "recording": "جارٍ التسجيل...",
+    "recordFailed": "تعذّر تسجيل الدفع",
+    "createFailed": "تعذّر حفظ الفاتورة"
+  },
+  "expenses": {
+    "submit": "إرسال",
+    "submitting": "جارٍ الإرسال...",
+    "createFailed": "تعذّر إرسال النفقة",
+    "addExpense": "إضافة نفقة"
+  },
+  "recurring": {
+    "pause": "إيقاف مؤقت",
+    "resume": "استئناف",
+    "updateFailed": "تعذّر تحديث الاشتراك"
+  },
+  "pl": {
+    "exportAria": "تصدير الأرباح والخسائر بصيغة CSV"
+  },
+  "tax": {
+    "exportAria": "تصدير ملخص الضريبة للمحاسب"
+  }
+}
