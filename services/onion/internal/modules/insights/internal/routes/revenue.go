@@ -15,4 +15,8 @@ func registerRevenueRoutes(ctx context.Context, router *chi.Mux, svc *applicatio
 		ctx, router, handlers.GetRevenueSeriesRoutes(),
 		&handlers.GetRevenueSeriesHandler{Service: svc},
 	)
+	serverHttp.RegisterGET[handlers.GetRevenueByAppRequest, handlers.GetRevenueByAppResponse](
+		ctx, router, handlers.GetRevenueByAppRoutes(),
+		&handlers.GetRevenueByAppHandler{Service: svc},
+	)
 }
