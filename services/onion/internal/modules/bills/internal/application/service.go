@@ -19,6 +19,14 @@ func (s *Service) List(ctx context.Context, ownerID int64) ([]domain.Bill, error
 	return s.repo.List(ctx, ownerID)
 }
 
+func (s *Service) GetBill(ctx context.Context, ownerID, id int64) (domain.Bill, error) {
+	return s.repo.Get(ctx, ownerID, id)
+}
+
+func (s *Service) DeleteBill(ctx context.Context, ownerID, id int64) error {
+	return s.repo.Delete(ctx, ownerID, id)
+}
+
 func (s *Service) Create(ctx context.Context, ownerID int64, input domain.BillInput) (int64, error) {
 	return s.repo.Create(ctx, ownerID, input)
 }

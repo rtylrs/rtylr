@@ -20,6 +20,35 @@ func NewRepository(_ context.Context) *Repository {
 	return &Repository{queries: sqlc.New(dbclient.Pool())}
 }
 
+func (r *Repository) Get(ctx context.Context, ownerID, id int64) (domain.Bill, error) {
+	row, err := r.queries.GetBill(ctx, sqlc.GetBillParams{ID: id, OwnerID: ownerID})
+	if err != nil {
+		if err == sql.ErrNoRows {
+			return domain.Bill{}, domain.ErrBillNotFound
+		}
+		logger.Ctx(ctx).Error("Failed to get bill", logger.Error(err))
+		return domain.Bill{}, err
+	}
+	return billFromSqlc(row), nil
+}
+
+func (r *Repository) Delete(ctx context.Context, ownerID, id int64) error {
+	res, err := r.queries.DeleteBill(ctx, sqlc.DeleteBillParams{ID: id, OwnerID: ownerID})
+	if err != nil {
+		logger.Ctx(ctx).Error("Failed to delete bill", logger.Error(err))
+		return err
+	}
+	rows, err := res.RowsAffected()
+	if err != nil {
+		logger.Ctx(ctx).Error("Failed to read delete result", logger.Error(err))
+		return err
+	}
+	if rows == 0 {
+		return domain.ErrBillNotFound
+	}
+	return nil
+}
+
 func (r *Repository) List(ctx context.Context, ownerID int64) ([]domain.Bill, error) {
 	rows, err := r.queries.ListBills(ctx, ownerID)
 	if err != nil {
@@ -138,6 +167,13 @@ func fmtFloat(f float64) string {
 }
 
 func parseFloat(s string) float64 {
-	v, _ := strconv.ParseFloat(s, 64)
+	if s == "" {
+		return 0
+	}
+	v, err := strconv.ParseFloat(s, 64)
+	if err != nil {
+		logger.Global().Warn("failed to parse decimal amount from database", logger.String("value", s), logger.Error(err))
+		return 0
+	}
 	return v
 }
