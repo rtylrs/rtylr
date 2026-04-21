@@ -1,0 +1,53 @@
+package handlers
+
+import (
+	"context"
+	"net/http"
+	"strconv"
+
+	"github.com/voxire/onion/internal/modules/insights/internal/application"
+	authPkg "github.com/voxire/onion/internal/platform/auth"
+	errorModels "github.com/voxire/onion/internal/platform/errors"
+)
+
+// GET /insights/products/best-sellers?limit=10
+
+func GetBestSellersRoutes() []string { return []string{"/insights/products/best-sellers"} }
+
+type GetBestSellersHandler struct{ Service *application.Service }
+
+type GetBestSellersRequest struct {
+	Limit string `json:"limit"`
+}
+
+type GetBestSellersResponse struct {
+	Products []application.BestSellerPayload `json:"products"`
+}
+
+func (h *GetBestSellersHandler) Serve(ctx context.Context, req *GetBestSellersRequest) (GetBestSellersResponse, *errorModels.ServerError) {
+	device := authPkg.DeviceCtx(ctx)
+	if device.User == nil {
+		return GetBestSellersResponse{}, errorModels.PermissionDeniedServerError()
+	}
+	var limit int32 = 10
+	if req.Limit != "" {
+		parsed, err := strconv.ParseInt(req.Limit, 10, 32)
+		if err != nil {
+			return GetBestSellersResponse{}, &errorModels.ServerError{
+				HTTPCode: http.StatusBadRequest,
+				Code:     http.StatusBadRequest,
+				Message:  "Invalid limit",
+			}
+		}
+		limit = int32(parsed)
+	}
+	rows, err := h.Service.GetBestSellers(ctx, device.User.UserID, limit)
+	if err != nil {
+		return GetBestSellersResponse{}, &errorModels.ServerError{
+			HTTPCode: http.StatusInternalServerError,
+			Code:     http.StatusInternalServerError,
+			Message:  "Failed to load best sellers",
+		}
+	}
+	return GetBestSellersResponse{Products: rows}, nil
+}
