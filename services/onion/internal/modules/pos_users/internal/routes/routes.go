@@ -32,8 +32,12 @@ func RegisterRoutes(ctx context.Context, router *chi.Mux, svc *application.Servi
 	http.RegisterPOSTWithValidation[handlers.DeactivatePOSUserRequest, handlers.DeactivatePOSUserResponse](
 		ctx, router, handlers.POSUserDeactivateRoutes(), &handlers.DeactivatePOSUserHandler{Service: svc},
 	)
-	http.RegisterPOSTWithMiddleware[handlers.VerifyPINRequest, handlers.VerifyPINResponse](
+	// verify-pin is validation-gated AND rate-limited. Main already
+	// has `RegisterPOSTWithValidationAndMiddleware` + 2-arg
+	// `PerRouteRateLimit` from the /auth/login work earlier — reusing
+	// both so there's a single rate-limiter pattern across the repo.
+	http.RegisterPOSTWithValidationAndMiddleware[handlers.VerifyPINRequest, handlers.VerifyPINResponse](
 		ctx, router, handlers.POSUserVerifyPINRoutes(), &handlers.VerifyPINHandler{Service: svc},
-		http.PerRouteRateLimit("pos_users.verify_pin", verifyPINMaxPerMinute, verifyPINWindow),
+		http.PerRouteRateLimit(verifyPINMaxPerMinute, verifyPINWindow),
 	)
 }
