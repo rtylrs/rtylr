@@ -1,8 +1,8 @@
 import React, { useState, useEffect } from 'react';
-import { useLoyaltyConfig, useLoyaltyTransactions } from './useLoyalty';
+import { useLoyaltyConfig, useLoyaltyTransactions } from '../../shared/hooks/queries/useLoyalty';
 import { motion } from 'motion/react';
 import { Gift, Star, Trophy, Crown, Award, ToggleLeft, ToggleRight, Clock } from 'lucide-react';
-import { type LoyaltyTransaction } from '../../shared/services/crmApi';
+import { type LoyaltyTransaction } from '../../shared/schemas/loyalty';
 
 const ACCENT = '#3b82f6';
 

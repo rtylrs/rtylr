@@ -1,6 +1,6 @@
 import React from 'react';
 import { Award, Check } from 'lucide-react';
-import { useLoyaltyTiers } from './useLoyalty';
+import { useLoyaltyTiers } from '../../shared/hooks/queries/useLoyalty';
 import { PageHeader, Card, SkeletonList } from '../../shared/components/ui';
 
 const LoyaltyTiers: React.FC = () => {

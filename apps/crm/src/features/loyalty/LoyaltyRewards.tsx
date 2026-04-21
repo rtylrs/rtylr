@@ -1,6 +1,6 @@
 import React from 'react';
 import { Gift, Package } from 'lucide-react';
-import { useLoyaltyRewards } from './useLoyalty';
+import { useLoyaltyRewards } from '../../shared/hooks/queries/useLoyalty';
 import { PageHeader, Card, EmptyState, Button, SkeletonList } from '../../shared/components/ui';
 
 const LoyaltyRewards: React.FC = () => {
