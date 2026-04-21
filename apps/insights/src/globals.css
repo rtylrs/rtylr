@@ -11,6 +11,8 @@
   /* Delta / trend indicators — green up, red down */
   --delta-up: #10b981;
   --delta-down: #f87171;
+  /* Foreground color for solid-accent buttons */
+  --accent-fg: #ffffff;
 }
 
 /* ── Dark mode (default) ─────────────────────────────────────── */
