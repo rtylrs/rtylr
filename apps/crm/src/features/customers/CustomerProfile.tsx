@@ -13,13 +13,13 @@ import {
   Users,
 } from 'lucide-react';
 import {
-  useCustomer,
+  useGetCustomerFull,
   useCustomerTimeline,
   useUpdateCustomer,
   useDeleteCustomer,
-  useExportCustomerData,
-} from './useCustomers';
-import { useAwardPoints, useRedeemPoints } from '../loyalty/useLoyalty';
+  useExportCustomers,
+} from '../../shared/hooks/queries/useCustomers';
+import { useAwardPoints, useRedeemPoints } from '../../shared/hooks/queries/useLoyalty';
 import { Breadcrumbs, Button, Card, ConfirmModal, SkeletonList } from '../../shared/components/ui';
 import {
   CustomerAvatar,
@@ -37,13 +37,13 @@ const CustomerProfile: React.FC = () => {
   const { id } = useParams<{ id: string }>();
   const navigate = useNavigate();
   const customerId = Number(id);
-  const { data: fetched, isLoading } = useCustomer(customerId);
+  const { data: fetched, isLoading } = useGetCustomerFull(customerId);
   const { data: fetchedTimeline } = useCustomerTimeline(customerId);
   const update = useUpdateCustomer();
   const remove = useDeleteCustomer();
   const award = useAwardPoints();
   const redeem = useRedeemPoints();
-  const exportData = useExportCustomerData();
+  const exportData = useExportCustomers();
   const [confirmDelete, setConfirmDelete] = useState(false);
   const [newTag, setNewTag] = useState('');
 
