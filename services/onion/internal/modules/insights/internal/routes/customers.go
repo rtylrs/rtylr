@@ -23,4 +23,8 @@ func registerCustomerRoutes(ctx context.Context, router *chi.Mux, svc *applicati
 		ctx, router, handlers.GetLTVRoutes(),
 		&handlers.GetLTVHandler{Service: svc},
 	)
+	serverHttp.RegisterGET[handlers.GetChurnRequest, handlers.GetChurnResponse](
+		ctx, router, handlers.GetChurnRoutes(),
+		&handlers.GetChurnHandler{Service: svc},
+	)
 }
