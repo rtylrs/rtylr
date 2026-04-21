@@ -124,6 +124,15 @@ export const WIDGET_CATALOG: WidgetConfig[] = [
     minH: 2,
   },
   {
+    id: 'top-customers',
+    label: 'Top Customers',
+    description: 'Top 5 by lifetime spend',
+    defaultW: 2,
+    defaultH: 3,
+    minW: 1,
+    minH: 2,
+  },
+  {
     id: 'top-products',
     label: 'Top Products',
     description: 'Best selling items this week',
