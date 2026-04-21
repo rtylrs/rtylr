@@ -1,67 +1,110 @@
-import React, { useState } from 'react';
+import React, { useEffect, useState } from 'react';
 import { X, PackagePlus } from 'lucide-react';
 import { toast } from 'sonner';
 import { useTranslation } from 'react-i18next';
-import { useCreateProduct } from '../../features/products/useProducts';
+import { useCreateProduct, useUpdateProduct } from '../../features/products/useProducts';
+import type { Product } from '../services/erpApi';
 import UnitSelector from './UnitSelector';
 import { useCategories } from '../../features/categories/useCategories';
 
 interface QuickAddProductModalProps {
   open: boolean;
   onClose: () => void;
+  /**
+   * When supplied, the modal switches to edit mode: fields are seeded from
+   * the product and submit triggers the update mutation instead of create.
+   */
+  editing?: Product | null;
 }
 
 const QuickAddProductModal: React.FC<QuickAddProductModalProps> = ({
   open,
   onClose,
+  editing,
 }): React.JSX.Element | null => {
   const { t } = useTranslation();
-  const [name, setName] = useState('');
-  const [sku, setSku] = useState('');
-  const [category, setCategory] = useState('');
-  const [stock, setStock] = useState('');
-  const [costPrice, setCostPrice] = useState('');
-  const [salePrice, setSalePrice] = useState('');
-  const [unit, setUnit] = useState('pcs');
+  const isEdit = !!editing;
+  const [name, setName] = useState(editing?.name ?? '');
+  const [sku, setSku] = useState(editing?.sku ?? '');
+  const [category, setCategory] = useState(editing?.category ?? '');
+  const [stock, setStock] = useState(editing ? String(editing.stock) : '');
+  const [costPrice, setCostPrice] = useState(editing ? String(editing.costPrice) : '');
+  const [salePrice, setSalePrice] = useState(editing ? String(editing.salePrice) : '');
+  const [unit, setUnit] = useState(editing?.unit ?? 'pcs');
   const { data: categories = [] } = useCategories();
   const createProduct = useCreateProduct();
+  const updateProduct = useUpdateProduct();
+
+  // Re-seed local state when a different product is loaded for editing.
+  useEffect(() => {
+    if (editing) {
+      setName(editing.name);
+      setSku(editing.sku);
+      setCategory(editing.category);
+      setStock(String(editing.stock));
+      setCostPrice(String(editing.costPrice));
+      setSalePrice(String(editing.salePrice));
+      setUnit(editing.unit ?? 'pcs');
+    }
+  }, [editing]);
 
   if (!open) return null;
+
+  const pending = createProduct.isPending || updateProduct.isPending;
+
+  const resetAndClose = (): void => {
+    if (!isEdit) {
+      setName('');
+      setSku('');
+      setCategory('');
+      setStock('');
+      setCostPrice('');
+      setSalePrice('');
+    }
+    onClose();
+  };
 
   const handleSubmit = (): void => {
     if (!name || !sku || !category) {
       toast.error(t('erp.products.validation.requiredFields'));
       return;
     }
-    createProduct.mutate(
-      {
-        name,
-        sku,
-        category,
-        stock: parseInt(stock) || 0,
-        lowStock: 10,
-        costPrice: parseFloat(costPrice) || 0,
-        salePrice: parseFloat(salePrice) || 0,
-        unit,
+    const payload = {
+      name,
+      sku,
+      category,
+      stock: parseInt(stock) || 0,
+      lowStock: editing?.lowStock ?? 10,
+      costPrice: parseFloat(costPrice) || 0,
+      salePrice: parseFloat(salePrice) || 0,
+      unit,
+    };
+    if (isEdit && editing) {
+      updateProduct.mutate(
+        { id: editing.id, ...payload },
+        {
+          onSuccess: () => {
+            toast.success(t('erp.products.toast.created', { name }));
+            resetAndClose();
+          },
+          onError: () => {
+            toast.error(t('erp.products.toast.createFailed'));
+          },
+        }
+      );
+      return;
+    }
+    createProduct.mutate(payload, {
+      onSuccess: () => {
+        toast.success(t('erp.products.toast.created', { name }));
+        resetAndClose();
       },
-      {
-        onSuccess: () => {
-          toast.success(t('erp.products.toast.created', { name }));
-          setName('');
-          setSku('');
-          setCategory('');
-          setStock('');
-          setCostPrice('');
-          setSalePrice('');
-          onClose();
-        },
-        onError: () => {
-          // Surface a real failure toast instead of faking success — the
-          // previous behaviour masked backend outages and lost user data.
-          toast.error(t('erp.products.toast.createFailed'));
-        },
-      }
-    );
+      onError: () => {
+        // Surface a real failure toast instead of faking success — the
+        // previous behaviour masked backend outages and lost user data.
+        toast.error(t('erp.products.toast.createFailed'));
+      },
+    });
   };
 
   return (
@@ -204,15 +247,19 @@ const QuickAddProductModal: React.FC<QuickAddProductModalProps> = ({
           <button
             data-testid="qap-submit"
             onClick={handleSubmit}
-            disabled={createProduct.isPending}
+            disabled={pending}
             className="px-3 py-1.5 rounded-lg text-xs font-semibold"
             style={{
               background: '#f59e0b',
               color: '#000',
-              opacity: createProduct.isPending ? 0.6 : 1,
+              opacity: pending ? 0.6 : 1,
             }}
           >
-            {createProduct.isPending ? t('erp.products.creating') : t('erp.products.create')}
+            {pending
+              ? t('erp.products.creating')
+              : isEdit
+                ? t('common.save')
+                : t('erp.products.create')}
           </button>
         </div>
       </div>
