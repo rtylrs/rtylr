@@ -1,0 +1,54 @@
+{
+  "products": {
+    "title": "Produits",
+    "new": "Nouveau produit",
+    "create": "Créer un produit",
+    "creating": "Création…",
+    "catalogCount": "{{count}} produits dans votre catalogue",
+    "empty": {
+      "title": "Aucun produit trouvé",
+      "description": "Ajustez les filtres ou créez votre premier produit."
+    },
+    "detail": {
+      "edit": "Modifier",
+      "delete": "Supprimer",
+      "notFound": "Produit introuvable",
+      "notFoundDescription": "Le produit demandé n'existe pas ou a été supprimé.",
+      "backToProducts": "Retour aux produits"
+    },
+    "toast": {
+      "created": "Produit \"{{name}}\" créé",
+      "createFailed": "Impossible de créer le produit. Réessayez.",
+      "deleted": "Produit supprimé",
+      "deleteFailed": "Impossible de supprimer le produit. Réessayez."
+    },
+    "fields": {
+      "name": "Nom du produit",
+      "sku": "SKU",
+      "category": "Catégorie",
+      "selectCategory": "Sélectionner une catégorie",
+      "stock": "Stock",
+      "costPrice": "Prix de revient",
+      "salePrice": "Prix de vente"
+    },
+    "validation": {
+      "requiredFields": "Veuillez remplir les champs obligatoires"
+    }
+  },
+  "inventory": {
+    "title": "Inventaire",
+    "addProduct": "Ajouter un produit",
+    "search": "Rechercher des produits…",
+    "empty": "Aucun produit trouvé."
+  },
+  "suppliers": {
+    "title": "Fournisseurs",
+    "add": "Ajouter un fournisseur",
+    "comingSoon": "La gestion des fournisseurs arrive bientôt.",
+    "scorecards": "Tableaux de bord"
+  },
+  "common": {
+    "cancel": "Annuler",
+    "comingSoon": "Cette action n'est pas encore disponible."
+  }
+}

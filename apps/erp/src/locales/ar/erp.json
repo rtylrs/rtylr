@@ -1,0 +1,54 @@
+{
+  "products": {
+    "title": "المنتجات",
+    "new": "منتج جديد",
+    "create": "إنشاء منتج",
+    "creating": "جاري الإنشاء…",
+    "catalogCount": "{{count}} منتج في الكتالوج",
+    "empty": {
+      "title": "لا توجد منتجات",
+      "description": "جرّب تعديل الفلاتر أو أنشئ منتجك الأول."
+    },
+    "detail": {
+      "edit": "تعديل",
+      "delete": "حذف",
+      "notFound": "المنتج غير موجود",
+      "notFoundDescription": "المنتج الذي تبحث عنه غير موجود أو تم حذفه.",
+      "backToProducts": "العودة إلى المنتجات"
+    },
+    "toast": {
+      "created": "تم إنشاء المنتج \"{{name}}\"",
+      "createFailed": "تعذّر إنشاء المنتج. حاول مرة أخرى.",
+      "deleted": "تم حذف المنتج",
+      "deleteFailed": "تعذّر حذف المنتج. حاول مرة أخرى."
+    },
+    "fields": {
+      "name": "اسم المنتج",
+      "sku": "SKU",
+      "category": "الفئة",
+      "selectCategory": "اختر الفئة",
+      "stock": "المخزون",
+      "costPrice": "سعر التكلفة",
+      "salePrice": "سعر البيع"
+    },
+    "validation": {
+      "requiredFields": "يرجى تعبئة الحقول المطلوبة"
+    }
+  },
+  "inventory": {
+    "title": "المخزون",
+    "addProduct": "إضافة منتج",
+    "search": "ابحث عن المنتجات…",
+    "empty": "لم يتم العثور على منتجات."
+  },
+  "suppliers": {
+    "title": "الموردون",
+    "add": "إضافة مورد",
+    "comingSoon": "إدارة الموردين قادمة قريباً.",
+    "scorecards": "بطاقات الأداء"
+  },
+  "common": {
+    "cancel": "إلغاء",
+    "comingSoon": "هذا الإجراء غير متاح بعد."
+  }
+}
