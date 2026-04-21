@@ -19,4 +19,8 @@ func registerCustomerRoutes(ctx context.Context, router *chi.Mux, svc *applicati
 		ctx, router, handlers.GetTopCustomersRoutes(),
 		&handlers.GetTopCustomersHandler{Service: svc},
 	)
+	serverHttp.RegisterGET[handlers.GetLTVRequest, handlers.GetLTVResponse](
+		ctx, router, handlers.GetLTVRoutes(),
+		&handlers.GetLTVHandler{Service: svc},
+	)
 }
