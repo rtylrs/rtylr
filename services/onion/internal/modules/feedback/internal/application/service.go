@@ -17,8 +17,8 @@ func NewService(ctx context.Context) *Service {
 	}
 }
 
-func (s *Service) List(ctx context.Context, ownerID int64, feedbackType string, page, pageSize int) ([]domain.Feedback, int, error) {
-	return s.repo.List(ctx, ownerID, feedbackType, page, pageSize)
+func (s *Service) List(ctx context.Context, ownerID int64, filters domain.ListFilters, page, pageSize int) ([]domain.Feedback, int, error) {
+	return s.repo.List(ctx, ownerID, filters, page, pageSize)
 }
 
 func (s *Service) Create(ctx context.Context, input domain.FeedbackInput) (int64, error) {

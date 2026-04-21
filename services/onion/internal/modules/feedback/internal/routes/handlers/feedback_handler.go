@@ -38,6 +38,9 @@ type ListFeedbackHandler struct {
 
 type ListFeedbackRequest struct {
 	Type     string `json:"type"`
+	Source   string `json:"source"`
+	MinScore *int   `json:"min_score"`
+	MaxScore *int   `json:"max_score"`
 	Page     int    `json:"page"`
 	PageSize int    `json:"page_size"`
 }
@@ -63,7 +66,22 @@ func (h *ListFeedbackHandler) Serve(ctx context.Context, req *ListFeedbackReques
 		req.PageSize = 20
 	}
 
-	items, total, err := h.Service.List(ctx, device.User.UserID, req.Type, req.Page, req.PageSize)
+	filters := domain.ListFilters{
+		Type:   req.Type,
+		Source: req.Source,
+	}
+
+	if req.MinScore != nil {
+		filters.MinScore = *req.MinScore
+		filters.MinScoreSet = true
+	}
+
+	if req.MaxScore != nil {
+		filters.MaxScore = *req.MaxScore
+		filters.MaxScoreSet = true
+	}
+
+	items, total, err := h.Service.List(ctx, device.User.UserID, filters, req.Page, req.PageSize)
 	if err != nil {
 		return ListFeedbackResponse{}, &errorModels.ServerError{
 			Code:    http.StatusInternalServerError,

@@ -21,3 +21,15 @@ type FeedbackInput struct {
 	Comment    string
 	Source     string
 }
+
+// ListFilters describes optional filters applied to a feedback list query.
+// A score filter is only applied when MinScoreSet or MaxScoreSet is true.
+// Source is applied when non-empty.
+type ListFilters struct {
+	Type        string
+	Source      string
+	MinScore    int
+	MaxScore    int
+	MinScoreSet bool
+	MaxScoreSet bool
+}

@@ -3,6 +3,7 @@ package infrastructure
 import (
 	"context"
 	"database/sql"
+	"strings"
 
 	"github.com/voxire/onion/internal/modules/feedback/internal/domain"
 	"github.com/voxire/onion/internal/modules/feedback/internal/infrastructure/persistence/sqlc"
@@ -20,7 +21,9 @@ func NewRepository(_ context.Context) *Repository {
 	}
 }
 
-func (r *Repository) List(ctx context.Context, ownerID int64, feedbackType string, page, pageSize int) ([]domain.Feedback, int, error) {
+// List returns feedback entries for an owner, applying optional filters by
+// type, source, and score range. Always filters by owner_id.
+func (r *Repository) List(ctx context.Context, ownerID int64, filters domain.ListFilters, page, pageSize int) ([]domain.Feedback, int, error) {
 	if page < 1 {
 		page = 1
 	}
@@ -31,60 +34,106 @@ func (r *Repository) List(ctx context.Context, ownerID int64, feedbackType strin
 
 	offset := (page - 1) * pageSize
 
+	var whereClauses []string
+	var args []interface{}
+
+	whereClauses = append(whereClauses, "owner_id = ?")
+	args = append(args, ownerID)
+
+	if filters.Type != "" {
+		whereClauses = append(whereClauses, "type = ?")
+		args = append(args, filters.Type)
+	}
+
+	if filters.Source != "" {
+		whereClauses = append(whereClauses, "source = ?")
+		args = append(args, filters.Source)
+	}
+
+	if filters.MinScoreSet {
+		whereClauses = append(whereClauses, "score >= ?")
+		args = append(args, filters.MinScore)
+	}
+
+	if filters.MaxScoreSet {
+		whereClauses = append(whereClauses, "score <= ?")
+		args = append(args, filters.MaxScore)
+	}
+
+	whereSQL := strings.Join(whereClauses, " AND ")
+
 	var total int64
-	var err error
 
-	if feedbackType != "" {
-		total, err = r.queries.CountFeedbackByType(ctx, sqlc.CountFeedbackByTypeParams{
-			OwnerID: ownerID,
-			Type:    sqlc.CrmFeedbackType(feedbackType),
-		})
-	} else {
-		total, err = r.queries.CountFeedback(ctx, ownerID)
-	}
-
-	if err != nil {
-		logger.Ctx(ctx).Error("Failed to count feedback", logger.Error(err))
+	if err := dbclient.Pool().QueryRowContext(ctx,
+		"SELECT COUNT(*) FROM crm_feedback WHERE "+whereSQL, args...).Scan(&total); err != nil {
+		logger.Ctx(ctx).Error("Failed to count feedback",
+			logger.Error(err),
+			logger.Any("owner_id", ownerID),
+		)
 
 		return nil, 0, err
 	}
 
-	var rows []sqlc.CrmFeedback
+	listArgs := append([]interface{}{}, args...)
+	listArgs = append(listArgs, pageSize, offset)
 
-	if feedbackType != "" {
-		rows, err = r.queries.ListFeedbackByType(ctx, sqlc.ListFeedbackByTypeParams{
-			OwnerID: ownerID,
-			Type:    sqlc.CrmFeedbackType(feedbackType),
-			Limit:   int32(pageSize),
-			Offset:  int32(offset),
-		})
-	} else {
-		rows, err = r.queries.ListFeedback(ctx, sqlc.ListFeedbackParams{
-			OwnerID: ownerID,
-			Limit:   int32(pageSize),
-			Offset:  int32(offset),
-		})
-	}
-
+	rows, err := dbclient.Pool().QueryContext(ctx,
+		"SELECT id, owner_id, customer_id, type, score, comment, source, created_at "+
+			"FROM crm_feedback WHERE "+whereSQL+
+			" ORDER BY created_at DESC LIMIT ? OFFSET ?", listArgs...)
 	if err != nil {
-		logger.Ctx(ctx).Error("Failed to list feedback", logger.Error(err))
+		logger.Ctx(ctx).Error("Failed to list feedback",
+			logger.Error(err),
+			logger.Any("owner_id", ownerID),
+		)
 
 		return nil, 0, err
 	}
+	defer func() {
+		if closeErr := rows.Close(); closeErr != nil {
+			logger.Ctx(ctx).Warn("Failed to close feedback rows", logger.Error(closeErr))
+		}
+	}()
 
-	items := make([]domain.Feedback, 0, len(rows))
+	items := make([]domain.Feedback, 0)
 
-	for _, row := range rows {
-		items = append(items, domain.Feedback{
-			ID:         row.ID,
-			OwnerID:    row.OwnerID,
-			CustomerID: row.CustomerID,
-			Type:       string(row.Type),
-			Score:      int(row.Score.Int32),
-			Comment:    row.Comment.String,
-			Source:     row.Source.String,
-			CreatedAt:  row.CreatedAt.Time,
-		})
+	for rows.Next() {
+		var (
+			id         int64
+			ownerRowID int64
+			customerID int64
+			typeStr    string
+			score      sql.NullInt32
+			comment    sql.NullString
+			source     sql.NullString
+			createdAt  sql.NullTime
+		)
+
+		if scanErr := rows.Scan(&id, &ownerRowID, &customerID, &typeStr, &score, &comment, &source, &createdAt); scanErr != nil {
+			logger.Ctx(ctx).Error("Failed to scan feedback row", logger.Error(scanErr))
+
+			return nil, 0, scanErr
+		}
+
+		f := domain.Feedback{
+			ID:         id,
+			OwnerID:    ownerRowID,
+			CustomerID: customerID,
+			Type:       typeStr,
+			Score:      int(score.Int32),
+			Comment:    comment.String,
+			Source:     source.String,
+		}
+
+		if createdAt.Valid {
+			f.CreatedAt = createdAt.Time
+		}
+
+		items = append(items, f)
+	}
+
+	if rowsErr := rows.Err(); rowsErr != nil {
+		return nil, 0, rowsErr
 	}
 
 	return items, int(total), nil
