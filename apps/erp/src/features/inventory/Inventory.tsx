@@ -1,6 +1,8 @@
 import React, { useState } from 'react';
 import { motion, type Variants } from 'motion/react';
 import { Search, Plus } from 'lucide-react';
+import { useNavigate } from 'react-router-dom';
+import { useTranslation } from 'react-i18next';
 import { Product } from '../../shared/services/erpApi';
 import { useProducts } from '../products/useProducts';
 
@@ -57,6 +59,8 @@ const SkeletonTableRow: React.FC = () => (
 // ─── Component ────────────────────────────────────────────────────────────────
 
 const Inventory: React.FC = () => {
+  const { t } = useTranslation();
+  const navigate = useNavigate();
   const [search, setSearch] = useState('');
   const { data: products = [], isLoading } = useProducts();
 
@@ -80,9 +84,11 @@ const Inventory: React.FC = () => {
       {/* Header */}
       <motion.div variants={itemVariants} className="flex items-center justify-between">
         <h2 className="text-xl font-semibold" style={{ color: 'var(--hub-text)' }}>
-          Inventory
+          {t('erp.inventory.title')}
         </h2>
         <button
+          data-testid="inventory-add-product-button"
+          onClick={() => navigate('/products')}
           className="flex items-center gap-2 px-3 py-2 rounded-lg text-sm font-medium transition-colors"
           style={{ background: AMBER, color: '#000' }}
           onMouseEnter={(e) => {
@@ -93,7 +99,7 @@ const Inventory: React.FC = () => {
           }}
         >
           <Plus size={14} />
-          Add Product
+          {t('erp.inventory.addProduct')}
         </button>
       </motion.div>
 

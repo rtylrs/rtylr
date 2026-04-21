@@ -1,6 +1,8 @@
 import React, { useState } from 'react';
 import { motion, type Variants } from 'motion/react';
 import { Plus, Mail, Phone, Package, BarChart3 } from 'lucide-react';
+import { toast } from 'sonner';
+import { useTranslation } from 'react-i18next';
 import { Supplier } from '../../shared/services/erpApi';
 import { useSuppliers } from './useSuppliers';
 import SupplierScorecard from '../../shared/components/SupplierScorecard';
@@ -76,6 +78,7 @@ const SkeletonCard: React.FC = () => (
 // ─── Component ────────────────────────────────────────────────────────────────
 
 const Suppliers: React.FC = () => {
+  const { t } = useTranslation();
   const { data: suppliers = [], isLoading } = useSuppliers();
   const [showScorecards, setShowScorecards] = useState(false);
 
@@ -123,6 +126,8 @@ const Suppliers: React.FC = () => {
             filename="suppliers.csv"
           />
           <button
+            data-testid="suppliers-add-button"
+            onClick={() => toast.info(t('erp.suppliers.comingSoon'))}
             className="flex items-center gap-2 px-3 py-2 rounded-lg text-sm font-medium transition-opacity"
             style={{ background: AMBER, color: '#000' }}
             onMouseEnter={(e) => {
@@ -133,7 +138,7 @@ const Suppliers: React.FC = () => {
             }}
           >
             <Plus size={14} />
-            Add Supplier
+            {t('erp.suppliers.add')}
           </button>
         </div>
       </motion.div>
