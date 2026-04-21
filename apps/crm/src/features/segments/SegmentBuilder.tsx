@@ -48,8 +48,7 @@ const SegmentBuilder: React.FC = () => {
           navigate('/segments');
         },
         onError: () => {
-          toast.success('Segment created');
-          navigate('/segments');
+          toast.error('Failed to create segment');
         },
       }
     );
@@ -62,9 +61,9 @@ const SegmentBuilder: React.FC = () => {
         title="New segment"
         subtitle="Build dynamic rules to target customers"
         actions={
-          <Button variant="primary" onClick={handleSave} disabled={!name}>
+          <Button variant="primary" onClick={handleSave} disabled={!name || create.isPending}>
             <Save size={13} />
-            Save segment
+            {create.isPending ? 'Saving…' : 'Save segment'}
           </Button>
         }
       />

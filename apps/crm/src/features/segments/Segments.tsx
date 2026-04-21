@@ -1,6 +1,7 @@
 import React, { useMemo, useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { motion, AnimatePresence } from 'motion/react';
+import { toast } from 'sonner';
 import {
   Users,
   Star,
@@ -11,8 +12,10 @@ import {
   ChevronRight,
   X,
   Filter,
+  Trash2,
 } from 'lucide-react';
-import { useListSegments } from '../../shared/hooks/queries/useSegments';
+import { useListSegments, useDeleteSegment } from '../../shared/hooks/queries/useSegments';
+import { ConfirmModal } from '../../shared/components/ui';
 
 const ACCENT = '#3b82f6';
 
@@ -332,10 +335,14 @@ function SegmentCard({
   segment,
   index,
   onClick,
+  onDelete,
+  deletePending,
 }: {
   segment: Segment;
   index: number;
   onClick?: () => void;
+  onDelete: () => void;
+  deletePending: boolean;
 }) {
   const Icon = segment.icon;
   return (
@@ -423,33 +430,60 @@ function SegmentCard({
         ))}
       </div>
 
-      {/* Action */}
-      <button
-        style={{
-          display: 'flex',
-          alignItems: 'center',
-          justifyContent: 'space-between',
-          width: '100%',
-          padding: '8px 12px',
-          borderRadius: '8px',
-          fontSize: '12px',
-          fontWeight: 600,
-          background: `${segment.color}10`,
-          color: segment.color,
-          border: `1px solid ${segment.color}25`,
-          cursor: 'pointer',
-          transition: 'background 0.15s',
-        }}
-        onMouseEnter={(e) => {
-          (e.currentTarget as HTMLElement).style.background = `${segment.color}20`;
-        }}
-        onMouseLeave={(e) => {
-          (e.currentTarget as HTMLElement).style.background = `${segment.color}10`;
-        }}
-      >
-        <span>View Customers</span>
-        <ChevronRight size={13} />
-      </button>
+      {/* Actions */}
+      <div style={{ display: 'flex', gap: '6px' }} onClick={(e) => e.stopPropagation()}>
+        <button
+          onClick={(e) => {
+            e.stopPropagation();
+            onClick?.();
+          }}
+          style={{
+            display: 'flex',
+            alignItems: 'center',
+            justifyContent: 'space-between',
+            flex: 1,
+            padding: '8px 12px',
+            borderRadius: '8px',
+            fontSize: '12px',
+            fontWeight: 600,
+            background: `${segment.color}10`,
+            color: segment.color,
+            border: `1px solid ${segment.color}25`,
+            cursor: 'pointer',
+            transition: 'background 0.15s',
+          }}
+          onMouseEnter={(e) => {
+            (e.currentTarget as HTMLElement).style.background = `${segment.color}20`;
+          }}
+          onMouseLeave={(e) => {
+            (e.currentTarget as HTMLElement).style.background = `${segment.color}10`;
+          }}
+        >
+          <span>View Customers</span>
+          <ChevronRight size={13} />
+        </button>
+        <button
+          onClick={(e) => {
+            e.stopPropagation();
+            onDelete();
+          }}
+          disabled={deletePending}
+          aria-label="Delete segment"
+          style={{
+            padding: '6px 10px',
+            borderRadius: '8px',
+            background: 'rgba(239,68,68,0.08)',
+            border: '1px solid rgba(239,68,68,0.25)',
+            color: '#ef4444',
+            cursor: deletePending ? 'not-allowed' : 'pointer',
+            opacity: deletePending ? 0.6 : 1,
+            display: 'flex',
+            alignItems: 'center',
+          }}
+        >
+          <Trash2 size={12} />
+        </button>
+      </div>
     </motion.div>
   );
 }
@@ -465,7 +499,9 @@ const iconMap: Record<string, React.ComponentType<{ size?: number }>> = {
 const Segments: React.FC = () => {
   const navigate = useNavigate();
   const { data: fetchedSegments, isLoading } = useListSegments();
+  const removeSegment = useDeleteSegment();
   const [builderOpen, setBuilderOpen] = useState(false);
+  const [confirmDeleteId, setConfirmDeleteId] = useState<number | null>(null);
   const segments: Segment[] = useMemo(() => {
     if (!fetchedSegments) return [];
     return fetchedSegments.map((s) => ({
@@ -473,6 +509,21 @@ const Segments: React.FC = () => {
       icon: iconMap[s.icon ?? ''] ?? Users,
     }));
   }, [fetchedSegments]);
+
+  const handleDelete = (id: number): void => {
+    removeSegment.mutate(id, {
+      onSuccess: () => {
+        toast.success('Segment deleted');
+        setConfirmDeleteId(null);
+      },
+      onError: () => {
+        toast.error('Failed to delete segment');
+        setConfirmDeleteId(null);
+      },
+    });
+  };
+
+  const deleteTarget = segments.find((s) => s.id === confirmDeleteId);
 
   return (
     <div style={{ display: 'flex', flexDirection: 'column', gap: '20px', maxWidth: '1280px' }}>
@@ -516,14 +567,25 @@ const Segments: React.FC = () => {
             segment={segment}
             index={i}
             onClick={() => navigate(`/segments/${segment.id}`)}
+            onDelete={() => setConfirmDeleteId(segment.id)}
+            deletePending={removeSegment.isPending}
           />
         ))}
       </div>
 
-      {/* Rule builder modal */}
-      <AnimatePresence>
-        {builderOpen && <RuleBuilder onClose={() => setBuilderOpen(false)} />}
-      </AnimatePresence>
+      <ConfirmModal
+        open={confirmDeleteId !== null}
+        onClose={() => setConfirmDeleteId(null)}
+        onConfirm={() => confirmDeleteId !== null && handleDelete(confirmDeleteId)}
+        title="Delete segment?"
+        description={
+          deleteTarget
+            ? `Are you sure you want to delete "${deleteTarget.name}"? This action cannot be undone.`
+            : ''
+        }
+        confirmLabel="Delete"
+        variant="danger"
+      />
     </div>
   );
 };
