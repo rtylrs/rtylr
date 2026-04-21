@@ -27,4 +27,8 @@ func registerOperationsRoutes(ctx context.Context, router *chi.Mux, svc *applica
 		ctx, router, handlers.GetTimeOffRoutes(),
 		&handlers.GetTimeOffHandler{Service: svc},
 	)
+	serverHttp.RegisterGET[handlers.GetUtilizationRequest, handlers.GetUtilizationResponse](
+		ctx, router, handlers.GetUtilizationRoutes(),
+		&handlers.GetUtilizationHandler{Service: svc},
+	)
 }
