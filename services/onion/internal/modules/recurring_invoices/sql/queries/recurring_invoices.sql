@@ -13,3 +13,8 @@ VALUES (?, ?, ?, ?, ?, ?);
 UPDATE finance_recurring_invoices
 SET template_invoice_id = ?, frequency = ?, next_invoice_date = ?, end_date = ?, is_active = ?
 WHERE id = ? AND owner_id = ?;
+
+-- name: SetRecurringInvoiceActive :execresult
+UPDATE finance_recurring_invoices
+SET is_active = ?
+WHERE id = ? AND owner_id = ?;

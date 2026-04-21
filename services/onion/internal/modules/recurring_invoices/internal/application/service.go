@@ -26,3 +26,11 @@ func (s *Service) Create(ctx context.Context, ownerID int64, input domain.Recurr
 func (s *Service) Update(ctx context.Context, ownerID, id int64, input domain.RecurringInvoiceInput) error {
 	return s.repo.Update(ctx, ownerID, id, input)
 }
+
+func (s *Service) Pause(ctx context.Context, ownerID, id int64) error {
+	return s.repo.SetActive(ctx, ownerID, id, false)
+}
+
+func (s *Service) Resume(ctx context.Context, ownerID, id int64) error {
+	return s.repo.SetActive(ctx, ownerID, id, true)
+}

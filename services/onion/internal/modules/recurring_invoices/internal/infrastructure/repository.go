@@ -85,6 +85,26 @@ func (r *Repository) Update(ctx context.Context, ownerID, id int64, input domain
 	return nil
 }
 
+func (r *Repository) SetActive(ctx context.Context, ownerID, id int64, active bool) error {
+	res, err := r.queries.SetRecurringInvoiceActive(ctx, sqlc.SetRecurringInvoiceActiveParams{
+		IsActive: sql.NullBool{Bool: active, Valid: true},
+		ID:       id,
+		OwnerID:  ownerID,
+	})
+	if err != nil {
+		logger.Ctx(ctx).Error("Failed to update recurring invoice active flag", logger.Error(err))
+		return err
+	}
+	rows, err := res.RowsAffected()
+	if err != nil {
+		return err
+	}
+	if rows == 0 {
+		return domain.ErrRecurringInvoiceNotFound
+	}
+	return nil
+}
+
 // ---------------------------------------------------------------------------
 // Conversion helpers
 // ---------------------------------------------------------------------------

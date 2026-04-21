@@ -21,4 +21,8 @@ func RegisterRoutes(ctx context.Context, router *chi.Mux, service *application.S
 	http.RegisterPUTWithValidation[handlers.UpdateRequest, handlers.UpdateResponse](
 		ctx, router, handlers.UpdateRoutes(), &handlers.UpdateHandler{Service: service},
 	)
+
+	http.RegisterPOST[handlers.PauseRequest, handlers.PauseResponse](
+		ctx, router, handlers.PauseRoutes(), &handlers.PauseHandler{Service: service},
+	)
 }
