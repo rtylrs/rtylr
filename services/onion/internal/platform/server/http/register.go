@@ -51,6 +51,28 @@ func RegisterPOSTWithValidation[Req, Res any](ctx context.Context, router *chi.M
 	}
 }
 
+// RegisterPOSTWithValidationAndMiddleware is the per-route
+// middleware-aware variant. Use it for endpoints that need an extra
+// layer (the main case today is per-route rate limits on
+// /auth/login, /auth/register, /recruit/public/apply). Middlewares
+// run in order around the handler — index 0 is outermost.
+func RegisterPOSTWithValidationAndMiddleware[Req, Res any](
+	ctx context.Context,
+	router *chi.Mux,
+	paths []string,
+	handler HandlerFunc[Req, Res],
+	middlewares ...MiddlewareFunc,
+) {
+	for _, path := range paths {
+		h := http.HandlerFunc(wrapHandler(ctx, handler, true))
+		var final http.Handler = h
+		for i := len(middlewares) - 1; i >= 0; i-- {
+			final = middlewares[i](final)
+		}
+		router.Method(http.MethodPost, path, final)
+	}
+}
+
 func RegisterPUT[Req, Res any](ctx context.Context, router *chi.Mux, paths []string, handler HandlerFunc[Req, Res]) {
 	for _, path := range paths {
 		router.Put(path, wrapHandler(ctx, handler, false))
