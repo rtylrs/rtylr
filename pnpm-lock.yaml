@@ -1621,6 +1621,9 @@ importers:
 
   packages/config:
     dependencies:
+      '@voxire/observability':
+        specifier: workspace:*
+        version: link:../observability
       '@voxire/types':
         specifier: workspace:*
         version: link:../types

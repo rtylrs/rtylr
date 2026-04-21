@@ -21,14 +21,17 @@ interface InitSentryOptions {
 
 let initialised = false;
 
+// Type-safe accessor for `import.meta.env` without pulling the whole
+// `vite/client` types into every transitive consumer's tsconfig.
+const viteEnv = (import.meta as { env?: Record<string, string | boolean | undefined> }).env ?? {};
+
 export function initSentry(opts: InitSentryOptions): void {
   if (initialised) return;
-  const dsn = (import.meta.env.VITE_SENTRY_DSN as string | undefined) ?? '';
+  const dsn = (viteEnv.VITE_SENTRY_DSN as string | undefined) ?? '';
   if (!dsn) return;
 
   const environment =
-    (import.meta.env.VITE_APP_ENV as string | undefined) ??
-    (import.meta.env.PROD ? 'production' : 'development');
+    (viteEnv.VITE_APP_ENV as string | undefined) ?? (viteEnv.PROD ? 'production' : 'development');
 
   Sentry.init({
     dsn,
