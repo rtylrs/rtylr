@@ -12,6 +12,7 @@ import { CookiesProvider } from 'react-cookie';
 import { QueryClientProvider } from '@tanstack/react-query';
 import { queryClient } from './shared/lib/react-query';
 import { HelmetProvider } from 'react-helmet-async';
+import { bootObservability } from '@voxire/observability';
 
 import './globals.css';
 import 'react-lazy-load-image-component/src/effects/blur.css';
@@ -21,6 +22,8 @@ import { initTheme } from './shared/stores/themeStore';
 initTheme();
 
 injectTheme();
+
+bootObservability({ app: 'dash' });
 
 const rootElement = document.getElementById('root');
 

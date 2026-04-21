@@ -5,6 +5,7 @@ import { BrowserRouter } from 'react-router-dom';
 import { Toaster } from 'sonner';
 import { CookiesProvider } from 'react-cookie';
 import { QueryClientProvider, QueryClient } from '@tanstack/react-query';
+import { bootObservability } from '@voxire/observability';
 
 import './shared/services/i18next';
 import './globals.css';
@@ -25,6 +26,8 @@ const queryClient = new QueryClient({
     queries: { retry: 1, staleTime: 30_000 },
   },
 });
+
+bootObservability({ app: 'finance' });
 
 const rootElement = document.getElementById('root');
 

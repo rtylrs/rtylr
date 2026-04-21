@@ -10,6 +10,7 @@
     "preview": "vite preview"
   },
   "dependencies": {
+    "@voxire/observability": "workspace:*",
     "@voxire/tailwind-config": "workspace:*",
     "lucide-react": "^1.8.0",
     "react": "^19.0.0",

@@ -13,6 +13,7 @@
     "@voxire/api": "workspace:*",
     "@voxire/auth": "workspace:*",
     "@voxire/config": "workspace:*",
+    "@voxire/observability": "workspace:*",
     "@voxire/tailwind-config": "workspace:*",
     "@tanstack/react-query": "^5.89.0",
     "axios": "^1.15.0",

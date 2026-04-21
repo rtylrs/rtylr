@@ -312,6 +312,9 @@ importers:
       '@voxire/i18n':
         specifier: workspace:*
         version: link:../../packages/i18n
+      '@voxire/observability':
+        specifier: workspace:*
+        version: link:../../packages/observability
       '@voxire/tailwind-config':
         specifier: workspace:*
         version: link:../../packages/tailwind-config
@@ -339,6 +342,9 @@ importers:
       '@voxire/i18n':
         specifier: workspace:*
         version: link:../../packages/i18n
+      '@voxire/observability':
+        specifier: workspace:*
+        version: link:../../packages/observability
       axios:
         specifier: ^1.15.0
         version: 1.15.0
@@ -433,6 +439,9 @@ importers:
       '@voxire/menu':
         specifier: workspace:*
         version: link:../../packages/menu
+      '@voxire/observability':
+        specifier: workspace:*
+        version: link:../../packages/observability
       '@voxire/tailwind-config':
         specifier: workspace:*
         version: link:../../packages/tailwind-config
@@ -659,6 +668,9 @@ importers:
 
   apps/docs:
     dependencies:
+      '@voxire/observability':
+        specifier: workspace:*
+        version: link:../../packages/observability
       '@voxire/tailwind-config':
         specifier: workspace:*
         version: link:../../packages/tailwind-config
@@ -723,6 +735,9 @@ importers:
       '@voxire/i18n':
         specifier: workspace:*
         version: link:../../packages/i18n
+      '@voxire/observability':
+        specifier: workspace:*
+        version: link:../../packages/observability
       '@voxire/tailwind-config':
         specifier: workspace:*
         version: link:../../packages/tailwind-config
@@ -853,6 +868,9 @@ importers:
       '@voxire/i18n':
         specifier: workspace:*
         version: link:../../packages/i18n
+      '@voxire/observability':
+        specifier: workspace:*
+        version: link:../../packages/observability
       '@voxire/tailwind-config':
         specifier: workspace:*
         version: link:../../packages/tailwind-config
@@ -959,6 +977,9 @@ importers:
       '@voxire/i18n':
         specifier: workspace:*
         version: link:../../packages/i18n
+      '@voxire/observability':
+        specifier: workspace:*
+        version: link:../../packages/observability
       axios:
         specifier: ^1.15.0
         version: 1.15.0
@@ -1135,6 +1156,9 @@ importers:
       '@voxire/i18n':
         specifier: workspace:*
         version: link:../../packages/i18n
+      '@voxire/observability':
+        specifier: workspace:*
+        version: link:../../packages/observability
       '@voxire/tailwind-config':
         specifier: workspace:*
         version: link:../../packages/tailwind-config
@@ -1268,6 +1292,9 @@ importers:
       '@voxire/menu':
         specifier: workspace:*
         version: link:../../packages/menu
+      '@voxire/observability':
+        specifier: workspace:*
+        version: link:../../packages/observability
       '@voxire/tailwind-config':
         specifier: workspace:*
         version: link:../../packages/tailwind-config
@@ -1325,6 +1352,9 @@ importers:
       '@voxire/config':
         specifier: workspace:*
         version: link:../../packages/config
+      '@voxire/observability':
+        specifier: workspace:*
+        version: link:../../packages/observability
       '@voxire/tailwind-config':
         specifier: workspace:*
         version: link:../../packages/tailwind-config
@@ -1422,6 +1452,9 @@ importers:
       '@voxire/i18n':
         specifier: workspace:*
         version: link:../../packages/i18n
+      '@voxire/observability':
+        specifier: workspace:*
+        version: link:../../packages/observability
       '@voxire/tailwind-config':
         specifier: workspace:*
         version: link:../../packages/tailwind-config

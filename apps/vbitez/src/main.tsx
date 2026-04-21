@@ -6,9 +6,12 @@ import { BrowserRouter } from 'react-router-dom';
 import { I18nextProvider } from 'react-i18next';
 import i18next from './shared/services/i18next';
 import { Toaster } from 'sonner';
+import { bootObservability } from '@voxire/observability';
 import './globals.css';
 
 injectTheme();
+
+bootObservability({ app: 'vbitez' });
 
 const rootElement = document.getElementById('root');
 

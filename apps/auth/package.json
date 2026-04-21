@@ -13,6 +13,7 @@
     "@voxire/api": "workspace:*",
     "@voxire/auth": "workspace:*",
     "@voxire/i18n": "workspace:*",
+    "@voxire/observability": "workspace:*",
     "@voxire/ui": "workspace:*",
     "@voxire/tailwind-config": "workspace:*",
     "motion": "^12.0.0",

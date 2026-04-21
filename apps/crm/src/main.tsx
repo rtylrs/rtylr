@@ -5,6 +5,7 @@ import { BrowserRouter } from 'react-router-dom';
 import { Toaster } from 'sonner';
 import { CookiesProvider } from 'react-cookie';
 import { QueryClient, QueryClientProvider } from '@tanstack/react-query';
+import { bootObservability } from '@voxire/observability';
 
 import './shared/services/i18next';
 import './globals.css';
@@ -48,6 +49,8 @@ function FullScreenLoader() {
     </div>
   );
 }
+
+bootObservability({ app: 'crm' });
 
 const rootElement = document.getElementById('root');
 

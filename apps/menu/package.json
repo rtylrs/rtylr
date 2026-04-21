@@ -15,6 +15,7 @@
     "@voxire/config": "workspace:*",
     "@voxire/i18n": "workspace:*",
     "@voxire/menu": "workspace:*",
+    "@voxire/observability": "workspace:*",
     "@voxire/ui": "workspace:*",
     "@voxire/tailwind-config": "workspace:*",
     "axios": "^1.15.0",

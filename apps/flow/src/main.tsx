@@ -3,6 +3,7 @@ import ReactDOM from 'react-dom/client';
 import { BrowserRouter } from 'react-router-dom';
 import { Toaster } from 'sonner';
 import { QueryClient, QueryClientProvider } from '@tanstack/react-query';
+import { bootObservability } from '@voxire/observability';
 import App from './App';
 import { initTheme } from './shared/stores/themeStore';
 import './shared/services/i18next';
@@ -10,6 +11,8 @@ import './globals.css';
 
 // Apply persisted theme before first render to prevent flash
 initTheme();
+
+bootObservability({ app: 'flow' });
 
 const queryClient = new QueryClient({
   defaultOptions: {

@@ -4,6 +4,7 @@ import { BrowserRouter } from 'react-router-dom';
 import { Toaster } from 'sonner';
 import { CookiesProvider } from 'react-cookie';
 import { QueryClientProvider, QueryClient } from '@tanstack/react-query';
+import { bootObservability } from '@voxire/observability';
 
 import App from './App';
 import './globals.css';
@@ -13,6 +14,8 @@ const queryClient = new QueryClient({
     queries: { retry: 1, staleTime: 30_000 },
   },
 });
+
+bootObservability({ app: 'recruit' });
 
 const rootElement = document.getElementById('root');
 

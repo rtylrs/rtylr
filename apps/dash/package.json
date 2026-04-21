@@ -22,6 +22,7 @@
     "@types/react-helmet": "^6.1.11",
     "@voxire/config": "workspace:*",
     "@voxire/menu": "workspace:*",
+    "@voxire/observability": "workspace:*",
     "@voxire/tailwind-config": "workspace:*",
     "@voxire/ui": "workspace:*",
     "axios": "^1.15.0",
