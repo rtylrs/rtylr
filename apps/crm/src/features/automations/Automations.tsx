@@ -1,12 +1,12 @@
 import React from 'react';
 import { useNavigate } from 'react-router-dom';
 import { Zap, Plus, Play, Pause, Cake, UserPlus, RotateCcw, Star } from 'lucide-react';
-import { useAutomations } from './useAutomations';
+import { useListAutomations } from '../../shared/hooks/queries/useAutomations';
 import { PageHeader, Card, Button, EmptyState, SkeletonList } from '../../shared/components/ui';
 
 const Automations: React.FC = () => {
   const navigate = useNavigate();
-  const { data: fetched, isLoading } = useAutomations();
+  const { data: fetched, isLoading } = useListAutomations();
   const automations = fetched ?? [];
 
   const icons: Record<string, React.ComponentType<{ size?: number }>> = {
