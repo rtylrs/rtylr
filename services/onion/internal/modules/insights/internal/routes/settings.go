@@ -15,4 +15,20 @@ func registerSettingsRoutes(ctx context.Context, router *chi.Mux, svc *applicati
 		ctx, router, handlers.GetSettingsRoutes(),
 		&handlers.GetSettingsHandler{Service: svc},
 	)
+	serverHttp.RegisterGET[handlers.ListScheduledReportsRequest, handlers.ListScheduledReportsResponse](
+		ctx, router, handlers.ListScheduledReportsRoutes(),
+		&handlers.ListScheduledReportsHandler{Service: svc},
+	)
+	serverHttp.RegisterPOST[handlers.CreateScheduledReportRequest, handlers.CreateScheduledReportResponse](
+		ctx, router, handlers.CreateScheduledReportRoutes(),
+		&handlers.CreateScheduledReportHandler{Service: svc},
+	)
+	serverHttp.RegisterPUT[handlers.UpdateScheduledReportRequest, handlers.UpdateScheduledReportResponse](
+		ctx, router, handlers.UpdateScheduledReportRoutes(),
+		&handlers.UpdateScheduledReportHandler{Service: svc},
+	)
+	serverHttp.RegisterDELETE[handlers.DeleteScheduledReportRequest, handlers.DeleteScheduledReportResponse](
+		ctx, router, handlers.DeleteScheduledReportRoutes(),
+		&handlers.DeleteScheduledReportHandler{Service: svc},
+	)
 }
