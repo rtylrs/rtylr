@@ -78,4 +78,16 @@ describe('bootObservability', () => {
     expect(initPostHogMock).not.toHaveBeenCalled();
     expect(enableReplaysMock).not.toHaveBeenCalled();
   });
+
+  test('accepts the string-detail event shape that @voxire/consent emits', async () => {
+    bootObservability({ app: 'erp' });
+    expect(initPostHogMock).not.toHaveBeenCalled();
+
+    // The consent package dispatches `detail: 'granted'` (raw string,
+    // no wrapper object). This guards against regressions where the
+    // observability boot only accepts the `{state}` shape.
+    window.dispatchEvent(new CustomEvent('rtylr-consent-change', { detail: 'granted' }));
+
+    expect(initPostHogMock).toHaveBeenCalledWith({ app: 'erp' });
+  });
 });

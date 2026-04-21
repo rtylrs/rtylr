@@ -60,7 +60,14 @@ export function bootObservability(opts: BootOptions): void {
 
   if (typeof window !== 'undefined') {
     const handler = (e: Event): void => {
-      const state = (e as CustomEvent<{ state: ConsentState }>).detail?.state;
+      // @voxire/consent dispatches `detail: state` (just the string),
+      // but in tests we sometimes use the `detail: {state}` shape.
+      // Accept both so a refactor on either side doesn't break this.
+      const detail = (e as CustomEvent<unknown>).detail;
+      const state: ConsentState | undefined =
+        typeof detail === 'string'
+          ? (detail as ConsentState)
+          : (detail as { state?: ConsentState })?.state;
       if (state === 'granted') {
         window.removeEventListener(CONSENT_EVENT, handler);
         enableConsented();
