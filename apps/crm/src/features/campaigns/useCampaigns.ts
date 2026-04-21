@@ -62,3 +62,11 @@ export function useUpdateCampaignStatus() {
     onSuccess: () => qc.invalidateQueries({ queryKey: ['campaigns'] }),
   });
 }
+
+export function useDeleteCampaign() {
+  const qc = useQueryClient();
+  return useMutation({
+    mutationFn: (id: number) => unwrap(crmApi.deleteCampaign(id)),
+    onSuccess: () => qc.invalidateQueries({ queryKey: ['campaigns'] }),
+  });
+}

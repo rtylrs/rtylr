@@ -49,8 +49,7 @@ const EmailCampaign: React.FC = () => {
           navigate('/campaigns');
         },
         onError: () => {
-          toast.success(send ? 'Campaign queued to send' : 'Draft saved');
-          navigate('/campaigns');
+          toast.error(send ? 'Failed to send campaign' : 'Failed to save draft');
         },
       }
     );
@@ -69,13 +68,21 @@ const EmailCampaign: React.FC = () => {
               <Eye size={13} />
               Preview
             </Button>
-            <Button variant="outline" onClick={() => handleSave(false)}>
+            <Button
+              variant="outline"
+              onClick={() => handleSave(false)}
+              disabled={create.isPending || !name.trim()}
+            >
               <Save size={13} />
-              Save draft
+              {create.isPending ? 'Saving…' : 'Save draft'}
             </Button>
-            <Button variant="primary" onClick={() => handleSave(true)}>
+            <Button
+              variant="primary"
+              onClick={() => handleSave(true)}
+              disabled={create.isPending || !name.trim() || !subject.trim()}
+            >
               <Send size={13} />
-              Send now
+              {create.isPending ? 'Sending…' : 'Send now'}
             </Button>
           </>
         }

@@ -1,8 +1,24 @@
 import React, { useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { motion, AnimatePresence } from 'motion/react';
-import { Plus, Mail, MessageSquare, Bell, Users, Send, Eye, TrendingUp } from 'lucide-react';
-import { useListCampaigns } from '../../shared/hooks/queries/useCampaigns';
+import { toast } from 'sonner';
+import {
+  Plus,
+  Mail,
+  MessageSquare,
+  Bell,
+  Users,
+  Send,
+  Eye,
+  TrendingUp,
+  Trash2,
+} from 'lucide-react';
+import {
+  useListCampaigns,
+  useUpdateCampaignStatus,
+  useDeleteCampaign,
+} from '../../shared/hooks/queries/useCampaigns';
+import { ConfirmModal } from '../../shared/components/ui';
 
 const ACCENT = '#3b82f6';
 
@@ -84,10 +100,22 @@ function CampaignCard({
   campaign,
   index,
   onClick,
+  onLaunch,
+  onPause,
+  onEdit,
+  onDelete,
+  statusPending,
+  deletePending,
 }: {
   campaign: Campaign;
   index: number;
   onClick?: () => void;
+  onLaunch: () => void;
+  onPause: () => void;
+  onEdit: () => void;
+  onDelete: () => void;
+  statusPending: boolean;
+  deletePending: boolean;
 }) {
   const ChannelIcon = channelIcon[campaign.channel];
 
@@ -208,9 +236,14 @@ function CampaignCard({
         <span style={{ fontSize: '11px', color: 'var(--hub-text-dim)' }}>
           Updated {campaign.updatedAt}
         </span>
-        <div style={{ display: 'flex', gap: '8px' }}>
+        <div style={{ display: 'flex', gap: '8px' }} onClick={(e) => e.stopPropagation()}>
           {campaign.status === 'Draft' && (
             <button
+              onClick={(e) => {
+                e.stopPropagation();
+                onLaunch();
+              }}
+              disabled={statusPending}
               style={{
                 padding: '6px 14px',
                 borderRadius: '7px',
@@ -219,14 +252,20 @@ function CampaignCard({
                 background: ACCENT,
                 color: '#fff',
                 border: 'none',
-                cursor: 'pointer',
+                cursor: statusPending ? 'not-allowed' : 'pointer',
+                opacity: statusPending ? 0.6 : 1,
               }}
             >
-              Launch
+              {statusPending ? 'Launching…' : 'Launch'}
             </button>
           )}
           {campaign.status === 'Active' && (
             <button
+              onClick={(e) => {
+                e.stopPropagation();
+                onPause();
+              }}
+              disabled={statusPending}
               style={{
                 padding: '6px 14px',
                 borderRadius: '7px',
@@ -235,13 +274,18 @@ function CampaignCard({
                 background: 'rgba(245,158,11,0.12)',
                 color: '#f59e0b',
                 border: '1px solid rgba(245,158,11,0.25)',
-                cursor: 'pointer',
+                cursor: statusPending ? 'not-allowed' : 'pointer',
+                opacity: statusPending ? 0.6 : 1,
               }}
             >
-              Pause
+              {statusPending ? 'Pausing…' : 'Pause'}
             </button>
           )}
           <button
+            onClick={(e) => {
+              e.stopPropagation();
+              onEdit();
+            }}
             style={{
               padding: '6px 14px',
               borderRadius: '7px',
@@ -255,6 +299,29 @@ function CampaignCard({
           >
             {campaign.status === 'Completed' ? 'View Report' : 'Edit'}
           </button>
+          <button
+            onClick={(e) => {
+              e.stopPropagation();
+              onDelete();
+            }}
+            disabled={deletePending}
+            aria-label="Delete campaign"
+            style={{
+              padding: '6px 10px',
+              borderRadius: '7px',
+              fontSize: '12px',
+              fontWeight: 500,
+              background: 'rgba(239,68,68,0.08)',
+              color: '#ef4444',
+              border: '1px solid rgba(239,68,68,0.25)',
+              cursor: deletePending ? 'not-allowed' : 'pointer',
+              opacity: deletePending ? 0.6 : 1,
+              display: 'flex',
+              alignItems: 'center',
+            }}
+          >
+            <Trash2 size={12} />
+          </button>
         </div>
       </div>
     </motion.div>
@@ -264,10 +331,57 @@ function CampaignCard({
 const Campaigns: React.FC = () => {
   const navigate = useNavigate();
   const { data: fetchedCampaigns } = useListCampaigns();
+  const updateStatus = useUpdateCampaignStatus();
+  const removeCampaign = useDeleteCampaign();
   const campaigns: Campaign[] = (fetchedCampaigns as Campaign[]) ?? [];
   const [statusFilter, setStatusFilter] = useState<'All' | CampaignStatus>('All');
+  const [confirmDeleteId, setConfirmDeleteId] = useState<number | null>(null);
 
   const filtered = campaigns.filter((c) => statusFilter === 'All' || c.status === statusFilter);
+
+  const handleLaunch = (id: number): void => {
+    updateStatus.mutate(
+      { id, status: 'Active' },
+      {
+        onSuccess: () => toast.success('Campaign launched'),
+        onError: () => toast.error('Failed to launch campaign'),
+      }
+    );
+  };
+
+  const handlePause = (id: number): void => {
+    updateStatus.mutate(
+      { id, status: 'Paused' },
+      {
+        onSuccess: () => toast.success('Campaign paused'),
+        onError: () => toast.error('Failed to pause campaign'),
+      }
+    );
+  };
+
+  const handleEdit = (c: Campaign): void => {
+    if (c.status === 'Completed') {
+      navigate(`/campaigns/${c.id}`);
+      return;
+    }
+    const target = c.channel === 'SMS' ? '/campaigns/sms' : '/campaigns/email';
+    navigate(`${target}?id=${c.id}&name=${encodeURIComponent(c.name)}`);
+  };
+
+  const handleDelete = (id: number): void => {
+    removeCampaign.mutate(id, {
+      onSuccess: () => {
+        toast.success('Campaign deleted');
+        setConfirmDeleteId(null);
+      },
+      onError: () => {
+        toast.error('Failed to delete campaign');
+        setConfirmDeleteId(null);
+      },
+    });
+  };
+
+  const deleteTarget = campaigns.find((c) => c.id === confirmDeleteId);
 
   return (
     <div style={{ display: 'flex', flexDirection: 'column', gap: '20px', maxWidth: '1280px' }}>
@@ -376,6 +490,12 @@ const Campaigns: React.FC = () => {
               campaign={c}
               index={i}
               onClick={() => navigate(`/campaigns/${c.id}`)}
+              onLaunch={() => handleLaunch(c.id)}
+              onPause={() => handlePause(c.id)}
+              onEdit={() => handleEdit(c)}
+              onDelete={() => setConfirmDeleteId(c.id)}
+              statusPending={updateStatus.isPending}
+              deletePending={removeCampaign.isPending}
             />
           ))}
         </AnimatePresence>
@@ -392,6 +512,20 @@ const Campaigns: React.FC = () => {
           </div>
         )}
       </div>
+
+      <ConfirmModal
+        open={confirmDeleteId !== null}
+        onClose={() => setConfirmDeleteId(null)}
+        onConfirm={() => confirmDeleteId !== null && handleDelete(confirmDeleteId)}
+        title="Delete campaign?"
+        description={
+          deleteTarget
+            ? `Are you sure you want to delete ${deleteTarget.name}? This action cannot be undone.`
+            : ''
+        }
+        confirmLabel="Delete"
+        variant="danger"
+      />
     </div>
   );
 };

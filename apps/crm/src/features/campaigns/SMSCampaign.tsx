@@ -39,8 +39,7 @@ const SMSCampaign: React.FC = () => {
           navigate('/campaigns');
         },
         onError: () => {
-          toast.success(send ? 'SMS campaign queued' : 'Draft saved');
-          navigate('/campaigns');
+          toast.error(send ? 'Failed to send SMS campaign' : 'Failed to save draft');
         },
       }
     );
@@ -56,13 +55,21 @@ const SMSCampaign: React.FC = () => {
         title="New SMS campaign"
         actions={
           <>
-            <Button variant="outline" onClick={() => handleSave(false)}>
+            <Button
+              variant="outline"
+              onClick={() => handleSave(false)}
+              disabled={create.isPending || !name.trim()}
+            >
               <Save size={13} />
-              Save draft
+              {create.isPending ? 'Saving…' : 'Save draft'}
             </Button>
-            <Button variant="primary" onClick={() => handleSave(true)}>
+            <Button
+              variant="primary"
+              onClick={() => handleSave(true)}
+              disabled={create.isPending || !name.trim() || !body.trim()}
+            >
               <Send size={13} />
-              Send now
+              {create.isPending ? 'Sending…' : 'Send now'}
             </Button>
           </>
         }

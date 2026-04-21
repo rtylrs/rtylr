@@ -287,6 +287,8 @@ export const crmApi = {
   updateCampaignStatus: (id: number, status: string) =>
     safe.post('/crm/campaigns/status', { id, status }),
 
+  deleteCampaign: (id: number) => safe.post('/crm/campaigns', { id, _action: 'delete' }),
+
   // Automations
   getAutomations: () => safe.get<Automation[]>('/crm/automations'),
 
