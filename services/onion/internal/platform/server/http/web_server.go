@@ -28,8 +28,17 @@ func Start(ctx context.Context, runMode ChiRunMode, port string) error {
 	r.Use(SecurityHeadersMiddleware())
 	r.Use(SecureErrorMiddleware())
 	r.Use(RateLimitMiddleware(100, time.Minute))
+	// Counter-only middleware — /metrics itself skips it so a scrape
+	// doesn't inflate its own numbers.
+	r.Use(MetricsMiddleware)
 
 	runMode.Setup(ctx, r)
+
+	// /metrics is mounted before runMode.Setup's module routes run so
+	// there's no way a module accidentally shadows it. Basic-auth is
+	// enforced inside the handler; the endpoint 404s when
+	// METRICS_USER/METRICS_PASS aren't set, so it stays opt-in.
+	r.Get("/metrics", MetricsHandler())
 
 	r.Get("/health", func(w http.ResponseWriter, _ *http.Request) {
 		w.Header().Set("Content-Type", "application/json")
