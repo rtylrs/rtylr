@@ -4,6 +4,7 @@ import (
 	"context"
 	"database/sql"
 	"encoding/json"
+	"fmt"
 	"strconv"
 	"time"
 
@@ -99,6 +100,209 @@ func (r *Repository) Delete(ctx context.Context, ownerID, id int64) error {
 	return nil
 }
 
+func (r *Repository) Get(ctx context.Context, ownerID, id int64) (domain.Quote, error) {
+	row, err := r.queries.GetQuote(ctx, sqlc.GetQuoteParams{ID: id, OwnerID: ownerID})
+	if err != nil {
+		if err == sql.ErrNoRows {
+			return domain.Quote{}, domain.ErrQuoteNotFound
+		}
+		logger.Ctx(ctx).Error("Failed to get quote", logger.Error(err))
+		return domain.Quote{}, err
+	}
+	return quoteFromSqlc(row), nil
+}
+
+// ConvertToInvoice materialises a quote into a finance_invoices row and marks
+// the quote as converted. The invoice insert is a cross-schema write: the
+// quotes module owns finance_quotes and writes directly to finance_invoices
+// here because the operation must be atomic. No cross-module Go imports are
+// introduced — we use dbclient + raw SQL at the infrastructure layer only.
+func (r *Repository) ConvertToInvoice(ctx context.Context, ownerID, quoteID int64) (int64, error) {
+	db := dbclient.Pool()
+
+	tx, err := db.BeginTx(ctx, nil)
+	if err != nil {
+		return 0, err
+	}
+	defer func() {
+		if p := recover(); p != nil {
+			_ = tx.Rollback()
+			panic(p)
+		}
+	}()
+
+	qtx := r.queries.WithTx(tx)
+
+	quoteRow, err := qtx.GetQuote(ctx, sqlc.GetQuoteParams{ID: quoteID, OwnerID: ownerID})
+	if err != nil {
+		_ = tx.Rollback()
+		if err == sql.ErrNoRows {
+			return 0, domain.ErrQuoteNotFound
+		}
+		logger.Ctx(ctx).Error("Failed to load quote for conversion", logger.Error(err))
+		return 0, err
+	}
+
+	if string(quoteRow.Status.FinanceQuotesStatus) == "converted" {
+		_ = tx.Rollback()
+		return 0, domain.ErrQuoteAlreadyConverted
+	}
+
+	invoiceNumber := fmt.Sprintf("Q%d-%d", quoteID, time.Now().UnixNano())
+	issueDate := time.Now().UTC()
+	// Fallback: quotes don't track an explicit due date, so default to
+	// issue_date + 30 days. If the quote had a valid_until we use that.
+	dueDate := issueDate.AddDate(0, 0, 30)
+	if quoteRow.ValidUntil.Valid {
+		dueDate = quoteRow.ValidUntil.Time
+	}
+
+	customerEmail := ""
+	if quoteRow.CustomerEmail.Valid {
+		customerEmail = quoteRow.CustomerEmail.String
+	}
+	notes := ""
+	if quoteRow.Notes.Valid {
+		notes = quoteRow.Notes.String
+	}
+
+	// cross-schema write from quotes to finance_invoices — materialise quote
+	// header row. Column list matches finance_invoices schema.
+	const insertInvoiceSQL = `INSERT INTO finance_invoices
+  (owner_id, invoice_number, client_name, client_email, status,
+   issue_date, due_date, subtotal, tax_amount, discount_amount, total,
+   amount_due, notes)
+VALUES (?,?,?,?,?,?,?,?,?,?,?,?,?)`
+
+	res, err := tx.ExecContext(ctx, insertInvoiceSQL,
+		ownerID,
+		invoiceNumber,
+		quoteRow.CustomerName,
+		nullableStringInput(customerEmail),
+		"draft",
+		issueDate,
+		dueDate,
+		nullStrValue(quoteRow.Subtotal),
+		nullStrValue(quoteRow.Tax),
+		nullStrValue(quoteRow.Discount),
+		nullStrValue(quoteRow.Total),
+		nullStrValue(quoteRow.Total),
+		nullableStringInput(notes),
+	)
+	if err != nil {
+		_ = tx.Rollback()
+		logger.Ctx(ctx).Error("Failed to create invoice from quote", logger.Error(err))
+		return 0, err
+	}
+
+	invoiceID, err := res.LastInsertId()
+	if err != nil {
+		_ = tx.Rollback()
+		return 0, err
+	}
+
+	// cross-schema write from quotes to finance_invoice_items — copy each
+	// quote line as an invoice item. Quote items are stored as JSON so we
+	// parse and fan out. Unknown fields fall back to safe defaults.
+	if len(quoteRow.Items) > 0 {
+		var items []map[string]any
+		if decodeErr := json.Unmarshal(quoteRow.Items, &items); decodeErr == nil {
+			for i, item := range items {
+				desc := stringFromAny(item["description"])
+				if desc == "" {
+					desc = stringFromAny(item["name"])
+				}
+				qty := floatFromAny(item["quantity"])
+				if qty == 0 {
+					qty = 1
+				}
+				unitPrice := floatFromAny(item["unit_price"])
+				if unitPrice == 0 {
+					unitPrice = floatFromAny(item["price"])
+				}
+				total := floatFromAny(item["total"])
+				if total == 0 {
+					total = qty * unitPrice
+				}
+				// cross-schema write from quotes to finance_invoice_items
+				const insertItemSQL = `INSERT INTO finance_invoice_items
+  (invoice_id, description, quantity, unit, unit_price, tax_rate, discount_pct, total, sort_order)
+VALUES (?,?,?,?,?,?,?,?,?)`
+				if _, itemErr := tx.ExecContext(ctx, insertItemSQL,
+					invoiceID,
+					desc,
+					fmtFloat(qty),
+					"unit",
+					fmtFloat(unitPrice),
+					fmtFloat(0),
+					fmtFloat(0),
+					fmtFloat(total),
+					i,
+				); itemErr != nil {
+					_ = tx.Rollback()
+					logger.Ctx(ctx).Error("Failed to insert invoice item from quote", logger.Error(itemErr))
+					return 0, itemErr
+				}
+			}
+		}
+	}
+
+	if _, statusErr := qtx.UpdateQuoteStatus(ctx, sqlc.UpdateQuoteStatusParams{
+		Status:  sqlc.NullFinanceQuotesStatus{FinanceQuotesStatus: sqlc.FinanceQuotesStatus("converted"), Valid: true},
+		ID:      quoteID,
+		OwnerID: ownerID,
+	}); statusErr != nil {
+		_ = tx.Rollback()
+		logger.Ctx(ctx).Error("Failed to mark quote converted", logger.Error(statusErr))
+		return 0, statusErr
+	}
+
+	if err := tx.Commit(); err != nil {
+		return 0, err
+	}
+
+	return invoiceID, nil
+}
+
+func nullableStringInput(s string) sql.NullString {
+	return sql.NullString{String: s, Valid: s != ""}
+}
+
+func nullStrValue(s sql.NullString) sql.NullString { return s }
+
+func stringFromAny(v any) string {
+	if v == nil {
+		return ""
+	}
+	if s, ok := v.(string); ok {
+		return s
+	}
+	return ""
+}
+
+func floatFromAny(v any) float64 {
+	if v == nil {
+		return 0
+	}
+	switch t := v.(type) {
+	case float64:
+		return t
+	case float32:
+		return float64(t)
+	case int:
+		return float64(t)
+	case int64:
+		return float64(t)
+	case string:
+		f, err := strconv.ParseFloat(t, 64)
+		if err != nil {
+			return 0
+		}
+		return f
+	}
+	return 0
+}
+
 // ---------------------------------------------------------------------------
 // Mapping helpers
 // ---------------------------------------------------------------------------
@@ -163,10 +367,14 @@ func fmtFloat(f float64) string {
 }
 
 func parseFloatNull(s sql.NullString) float64 {
-	if !s.Valid {
+	if !s.Valid || s.String == "" {
 		return 0
 	}
-	v, _ := strconv.ParseFloat(s.String, 64)
+	v, err := strconv.ParseFloat(s.String, 64)
+	if err != nil {
+		logger.Global().Warn("failed to parse decimal from database", logger.String("value", s.String), logger.Error(err))
+		return 0
+	}
 	return v
 }
 

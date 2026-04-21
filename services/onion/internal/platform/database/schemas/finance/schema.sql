@@ -122,7 +122,7 @@ CREATE TABLE IF NOT EXISTS finance_quotes (
     owner_id BIGINT NOT NULL,
     customer_name VARCHAR(255) NOT NULL,
     customer_email VARCHAR(255),
-    status ENUM('draft','sent','accepted','rejected','expired') DEFAULT 'draft',
+    status ENUM('draft','sent','accepted','rejected','expired','converted') DEFAULT 'draft',
     items JSON,
     subtotal DECIMAL(10,2) DEFAULT 0,
     tax DECIMAL(10,2) DEFAULT 0,

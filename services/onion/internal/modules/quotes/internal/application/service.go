@@ -30,3 +30,7 @@ func (s *Service) Update(ctx context.Context, ownerID, id int64, input domain.Qu
 func (s *Service) Delete(ctx context.Context, ownerID, id int64) error {
 	return s.repo.Delete(ctx, ownerID, id)
 }
+
+func (s *Service) ConvertToInvoice(ctx context.Context, ownerID, quoteID int64) (int64, error) {
+	return s.repo.ConvertToInvoice(ctx, ownerID, quoteID)
+}

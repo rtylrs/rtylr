@@ -28,4 +28,7 @@ func RegisterRoutes(ctx context.Context, router *chi.Mux, service *application.S
 	http.RegisterDELETE[handlers.DeleteQuoteByIDRequest, handlers.DeleteQuoteByIDResponse](
 		ctx, router, handlers.DeleteQuoteByIDRoutes(), &handlers.DeleteQuoteByIDHandler{Service: service},
 	)
+	http.RegisterPOST[handlers.ConvertQuoteRequest, handlers.ConvertQuoteResponse](
+		ctx, router, handlers.ConvertQuoteRoutes(), &handlers.ConvertQuoteHandler{Service: service},
+	)
 }

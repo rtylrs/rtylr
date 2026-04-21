@@ -6,7 +6,10 @@ import (
 	"time"
 )
 
-var ErrQuoteNotFound = errors.New("quote not found")
+var (
+	ErrQuoteNotFound         = errors.New("quote not found")
+	ErrQuoteAlreadyConverted = errors.New("quote already converted")
+)
 
 type Quote struct {
 	ID            int64     `json:"id"`
