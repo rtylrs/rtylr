@@ -13,7 +13,7 @@ import {
   Users as UsersIcon,
   Tag as TagIcon,
 } from 'lucide-react';
-import { useCustomers, useUpdateCustomer } from './useCustomers';
+import { useListCustomers, useUpdateCustomer } from '../../shared/hooks/queries/useCustomers';
 import { type Customer } from '../../shared/schemas/customers';
 import { getTier, Tier, tierColor } from '../../shared/lib/tiers';
 import { Button, EmptyState, PageHeader, SkeletonList } from '../../shared/components/ui';
@@ -90,7 +90,7 @@ function ExpandedDetail({ customer, onView }: { customer: Customer; onView: () =
 
 const Customers: React.FC = () => {
   const navigate = useNavigate();
-  const { data: fetchedCustomers, isLoading } = useCustomers();
+  const { data: fetchedCustomers, isLoading } = useListCustomers({ limit: 100, offset: 0 });
   const update = useUpdateCustomer();
   const customers = fetchedCustomers ?? [];
   const [search, setSearch] = useState('');
