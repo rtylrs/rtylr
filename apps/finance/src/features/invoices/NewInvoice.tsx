@@ -8,6 +8,7 @@ import ClientSelect, { Client } from '../../shared/components/ClientSelect';
 import LineItemRow, { LineItem } from '../../shared/components/LineItemRow';
 import TaxBreakdown from '../../shared/components/TaxBreakdown';
 import InvoicePreview from '../../shared/components/InvoicePreview';
+import { useCreateInvoice } from './useInvoices';
 import {
   cardStyle,
   ghostBtn,
@@ -37,6 +38,7 @@ const NewInvoice: React.FC = () => {
   ]);
   const [notes, setNotes] = useState(settings.invoiceNotes);
   const [discount, setDiscount] = useState(0);
+  const createInvoice = useCreateInvoice();
 
   const addItem = () =>
     setItems((prev) => [
@@ -62,9 +64,46 @@ const NewInvoice: React.FC = () => {
     return true;
   };
 
-  const handleSave = (status: 'Draft' | 'Sent') => {
-    toast.success(`Invoice ${invoiceNumber} saved as ${status}`);
-    navigate('/invoices');
+  const handleSave = (status: 'Draft' | 'Sent'): void => {
+    if (!client) {
+      toast.error('Select a client first');
+      return;
+    }
+    const subtotal = items.reduce((s, it) => s + it.quantity * it.unitPrice, 0);
+    const tax = items.reduce((s, it) => s + it.quantity * it.unitPrice * (it.taxRate / 100), 0);
+    const mappedItems = items.map((it, idx) => ({
+      description: it.description,
+      quantity: it.quantity,
+      unit: 'item',
+      unitPrice: it.unitPrice,
+      taxRate: it.taxRate,
+      discountPct: 0,
+      sortOrder: idx,
+      total: it.quantity * it.unitPrice,
+    }));
+    createInvoice.mutate(
+      {
+        number: invoiceNumber,
+        client: client.name,
+        clientEmail: client.email,
+        items: mappedItems,
+        notes,
+        discount,
+        tax,
+        subtotal,
+        amount: subtotal + tax - discount,
+        status,
+        issuedDate,
+        dueDate,
+      },
+      {
+        onSuccess: () => {
+          toast.success(`Invoice ${invoiceNumber} saved as ${status}`);
+          navigate('/invoices');
+        },
+        onError: () => toast.error('Failed to save invoice'),
+      }
+    );
   };
 
   return (
@@ -263,11 +302,19 @@ const NewInvoice: React.FC = () => {
             </button>
           ) : (
             <>
-              <button style={ghostBtn} onClick={() => handleSave('Draft')}>
-                <Save size={13} /> Save as Draft
+              <button
+                style={{ ...ghostBtn, opacity: createInvoice.isPending ? 0.6 : 1 }}
+                onClick={() => handleSave('Draft')}
+                disabled={createInvoice.isPending}
+              >
+                <Save size={13} /> {createInvoice.isPending ? 'Saving...' : 'Save as Draft'}
               </button>
-              <button style={primaryBtn} onClick={() => handleSave('Sent')}>
-                Save & Send
+              <button
+                style={{ ...primaryBtn, opacity: createInvoice.isPending ? 0.6 : 1 }}
+                onClick={() => handleSave('Sent')}
+                disabled={createInvoice.isPending}
+              >
+                {createInvoice.isPending ? 'Saving...' : 'Save & Send'}
               </button>
             </>
           )}
