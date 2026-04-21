@@ -1,13 +1,15 @@
-import React, { useState } from 'react';
+import React from 'react';
 import { motion } from 'motion/react';
-import { FileText, Download, FileSpreadsheet, Loader2 } from 'lucide-react';
-import { useReportTemplates, useExportReport } from './useReports';
+import { FileText, Download, Loader2 } from 'lucide-react';
+import { useTranslation } from 'react-i18next';
+import {
+  useReportTemplates,
+  useGenerateRevenueReport,
+  useRevenueCSVExportURL,
+} from '../../shared/hooks/queries/useInsightsReports';
 import { SkeletonRow } from '../../shared/components/Skeleton';
 import ErrorState from '../../shared/components/ErrorState';
 import EmptyState from '../../shared/components/EmptyState';
-import { toast } from 'sonner';
-
-const ACCENT = '#6366f1';
 
 const containerVariants = {
   hidden: {},
@@ -19,43 +21,17 @@ const itemVariants = {
   show: { opacity: 1, y: 0, transition: { duration: 0.22, ease: 'easeOut' } },
 };
 
-const Reports: React.FC = () => {
-  const { data: templates, isLoading, isError, refetch } = useReportTemplates();
-  const exportMutation = useExportReport();
-  const [exportingId, setExportingId] = useState<string | null>(null);
+const Reports: React.FC = (): React.JSX.Element => {
+  const { t } = useTranslation();
+  const { data, isLoading, isError, refetch } = useReportTemplates();
+  const generateRevenue = useGenerateRevenueReport();
+  const csvExportUrl = useRevenueCSVExportURL();
 
   if (isError) {
-    return <ErrorState message="Failed to load report templates." onRetry={refetch} />;
+    return <ErrorState message={t('insights.errors.generic')} onRetry={refetch} />;
   }
 
-  type TemplateRow = {
-    id?: string | number;
-    templateId?: string;
-    name?: string;
-    title?: string;
-    description?: string;
-  };
-  const templateList = (templates ?? []) as TemplateRow[];
-
-  const handleExport = async (templateId: string, format: 'csv' | 'pdf') => {
-    setExportingId(templateId);
-    try {
-      const blob = await exportMutation.mutateAsync({ templateId, format });
-      const url = window.URL.createObjectURL(blob instanceof Blob ? blob : new Blob([blob]));
-      const a = document.createElement('a');
-      a.href = url;
-      a.download = `report-${templateId}.${format}`;
-      document.body.appendChild(a);
-      a.click();
-      document.body.removeChild(a);
-      window.URL.revokeObjectURL(url);
-      toast.success('Report exported successfully');
-    } catch {
-      toast.error('Failed to export report');
-    } finally {
-      setExportingId(null);
-    }
-  };
+  const templates = data?.templates ?? [];
 
   return (
     <motion.div
@@ -64,13 +40,36 @@ const Reports: React.FC = () => {
       animate="show"
       className="space-y-6 max-w-7xl"
     >
-      <motion.div variants={itemVariants as any}>
+      <motion.div variants={itemVariants as any} className="flex items-center justify-between">
         <h2 className="text-xl font-semibold" style={{ color: 'var(--hub-text)' }}>
-          Reports
+          {t('insights.reports.title')}
         </h2>
-        <p className="text-sm mt-0.5" style={{ color: 'var(--hub-text-muted)' }}>
-          Pre-built report templates with CSV and PDF export
-        </p>
+        <div className="flex items-center gap-2">
+          <a
+            href={csvExportUrl}
+            className="flex items-center gap-1 px-3 py-1.5 rounded-md text-xs font-medium"
+            style={{ background: 'var(--hub-active)', color: 'var(--hub-text)' }}
+            aria-label={t('insights.reports.exportRevenue')}
+          >
+            <Download size={12} />
+            {t('insights.reports.exportRevenue')}
+          </a>
+          <button
+            type="button"
+            onClick={() => generateRevenue.mutate({})}
+            disabled={generateRevenue.isPending}
+            className="flex items-center gap-1 px-3 py-1.5 rounded-md text-xs font-medium"
+            style={{ background: 'var(--accent)', color: 'var(--accent-fg)' }}
+            aria-label={t('insights.reports.generateRevenue')}
+          >
+            {generateRevenue.isPending ? (
+              <Loader2 size={12} className="animate-spin" />
+            ) : (
+              <FileText size={12} />
+            )}
+            {t('insights.reports.generateRevenue')}
+          </button>
+        </div>
       </motion.div>
 
       <motion.div
@@ -79,9 +78,9 @@ const Reports: React.FC = () => {
         style={{ background: 'var(--hub-card)', border: '1px solid var(--hub-border)' }}
       >
         <div className="flex items-center gap-2 mb-4">
-          <FileText size={14} style={{ color: ACCENT }} />
+          <FileText size={14} style={{ color: 'var(--accent)' }} />
           <h3 className="text-sm font-semibold" style={{ color: 'var(--hub-text)' }}>
-            Available Reports
+            {t('insights.reports.templates')}
           </h3>
         </div>
 
@@ -91,63 +90,28 @@ const Reports: React.FC = () => {
               <SkeletonRow key={i} cols={3} />
             ))}
           </div>
-        ) : templateList.length === 0 ? (
-          <EmptyState
-            title="No report templates"
-            description="Report templates will appear here once configured."
-          />
+        ) : templates.length === 0 ? (
+          <EmptyState title="" description={t('insights.reports.empty')} />
         ) : (
           <div className="space-y-1">
-            {templateList.map((t) => {
-              const id = String(t.id ?? t.templateId ?? '');
-              const isExporting = exportingId === id;
-              return (
-                <div
-                  key={id}
-                  className="flex items-center justify-between px-3 py-3 rounded-lg"
-                  style={{ background: 'var(--hub-hover)' }}
-                >
-                  <div>
-                    <p className="text-xs font-medium" style={{ color: 'var(--hub-text)' }}>
-                      {t.name ?? t.title ?? 'Untitled Report'}
+            {templates.map((tpl) => (
+              <div
+                key={tpl.id}
+                className="flex items-center justify-between px-3 py-3 rounded-lg"
+                style={{ background: 'var(--hub-hover)' }}
+              >
+                <div>
+                  <p className="text-xs font-medium" style={{ color: 'var(--hub-text)' }}>
+                    {tpl.name}
+                  </p>
+                  {tpl.description && (
+                    <p className="text-[11px] mt-0.5" style={{ color: 'var(--hub-text-dim)' }}>
+                      {tpl.description}
                     </p>
-                    {t.description && (
-                      <p className="text-[11px] mt-0.5" style={{ color: 'var(--hub-text-dim)' }}>
-                        {t.description}
-                      </p>
-                    )}
-                  </div>
-                  <div className="flex items-center gap-1">
-                    <button
-                      onClick={() => handleExport(id, 'csv')}
-                      disabled={isExporting}
-                      className="flex items-center gap-1 px-2 py-1 rounded-md text-[10px] font-medium transition-colors"
-                      style={{ background: 'var(--hub-active)', color: 'var(--hub-text-muted)' }}
-                    >
-                      {isExporting ? (
-                        <Loader2 size={10} className="animate-spin" />
-                      ) : (
-                        <FileSpreadsheet size={10} />
-                      )}
-                      CSV
-                    </button>
-                    <button
-                      onClick={() => handleExport(id, 'pdf')}
-                      disabled={isExporting}
-                      className="flex items-center gap-1 px-2 py-1 rounded-md text-[10px] font-medium transition-colors"
-                      style={{ background: 'var(--hub-active)', color: 'var(--hub-text-muted)' }}
-                    >
-                      {isExporting ? (
-                        <Loader2 size={10} className="animate-spin" />
-                      ) : (
-                        <Download size={10} />
-                      )}
-                      PDF
-                    </button>
-                  </div>
+                  )}
                 </div>
-              );
-            })}
+              </div>
+            ))}
           </div>
         )}
       </motion.div>
