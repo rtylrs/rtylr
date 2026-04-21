@@ -1,20 +1,18 @@
 import React from 'react';
 import { motion } from 'motion/react';
-import { Briefcase, Users, Clock, Calendar } from 'lucide-react';
+import { Users, Calendar, Clock, Activity } from 'lucide-react';
+import { useTranslation } from 'react-i18next';
 import {
-  useOperationsSummary,
-  useStaffUtilization,
-  useShiftCoverage,
-  useTimeOffTrends,
-  useDeptHeadcount,
-  useHrDashboard,
-} from './useOperations';
+  useOperationsKPIs,
+  useHeadcount,
+  useShiftMetrics,
+  useTimeOff,
+  useUtilization,
+} from '../../shared/hooks/queries/useInsightsOperations';
 import { formatNumber, formatPercent } from '../../shared/lib/format';
 import { CardSkeleton, SkeletonRow } from '../../shared/components/Skeleton';
 import ErrorState from '../../shared/components/ErrorState';
 import EmptyState from '../../shared/components/EmptyState';
-
-const ACCENT = '#6366f1';
 
 const containerVariants = {
   hidden: {},
@@ -26,46 +24,40 @@ const itemVariants = {
   show: { opacity: 1, y: 0, transition: { duration: 0.22, ease: 'easeOut' } },
 };
 
-const Operations: React.FC = () => {
-  const { data: summary, isLoading: summaryLoading, isError, refetch } = useOperationsSummary();
-  const { data: utilization, isLoading: utilLoading } = useStaffUtilization();
-  const { data: shifts, isLoading: shiftsLoading } = useShiftCoverage();
-  const { data: timeOff, isLoading: toLoading } = useTimeOffTrends();
-  const { data: headcount, isLoading: hcLoading } = useDeptHeadcount();
-  const { data: hrData, isLoading: hrLoading } = useHrDashboard();
+const Operations: React.FC = (): React.JSX.Element => {
+  const { t } = useTranslation();
+  const { data: kpis, isLoading: kpisLoading, isError, refetch } = useOperationsKPIs();
+  const { data: headcount, isLoading: headcountLoading } = useHeadcount();
+  const { data: shifts, isLoading: shiftsLoading } = useShiftMetrics();
+  const { data: timeOff, isLoading: timeOffLoading } = useTimeOff();
+  const { data: utilization, isLoading: utilLoading } = useUtilization();
 
   if (isError) {
-    return <ErrorState message="Failed to load operations data." onRetry={refetch} />;
+    return <ErrorState message={t('insights.errors.generic')} onRetry={refetch} />;
   }
 
-  const isLoading = summaryLoading || hrLoading;
-
-  const totalStaff = summary?.totalStaff ?? hrData?.totalEmployees ?? 0;
-  const avgUtilization = utilization?.average ?? summary?.avgUtilization ?? 0;
-  const shiftsCovered = shifts?.coveredPercent ?? summary?.shiftCoverage ?? 0;
-  const pendingTimeOff = timeOff?.pending ?? summary?.pendingTimeOff ?? 0;
-
-  type DeptRow = {
-    id?: string | number;
-    name?: string;
-    department?: string;
-    count?: number;
-    headcount?: number;
-  };
-  type StaffRow = { id?: string | number; name?: string; utilization?: number };
-  type TimeOffRow = {
-    id?: string | number;
-    month?: string;
-    period?: string;
-    requests?: number;
-    days?: number;
-    count?: number;
-    approved?: number;
-    denied?: number;
-  };
-  const deptList = (headcount?.data ?? []) as DeptRow[];
-  const utilizationList = (utilization?.data ?? utilization?.staff ?? []) as StaffRow[];
-  const timeOffList = (timeOff?.data ?? timeOff?.recent ?? []) as TimeOffRow[];
+  const stats = [
+    {
+      label: t('insights.operations.kpis.activeStaff'),
+      value: formatNumber(kpis?.activeStaff ?? 0),
+      icon: Users,
+    },
+    {
+      label: t('insights.operations.kpis.shiftsThisWeek'),
+      value: formatNumber(kpis?.shiftsThisWeek ?? 0),
+      icon: Calendar,
+    },
+    {
+      label: t('insights.operations.kpis.pendingTimeOff'),
+      value: formatNumber(kpis?.pendingTimeOff ?? 0),
+      icon: Clock,
+    },
+    {
+      label: t('insights.operations.kpis.openLeaveRequests'),
+      value: formatNumber(kpis?.openLeaveRequests ?? 0),
+      icon: Activity,
+    },
+  ];
 
   return (
     <motion.div
@@ -76,14 +68,11 @@ const Operations: React.FC = () => {
     >
       <motion.div variants={itemVariants as any}>
         <h2 className="text-xl font-semibold" style={{ color: 'var(--hub-text)' }}>
-          Operations
+          {t('insights.operations.title')}
         </h2>
-        <p className="text-sm mt-0.5" style={{ color: 'var(--hub-text-muted)' }}>
-          Staff utilization, shifts, and department metrics
-        </p>
       </motion.div>
 
-      {isLoading ? (
+      {kpisLoading ? (
         <div className="grid grid-cols-2 lg:grid-cols-4 gap-4">
           {Array.from({ length: 4 }).map((_, i) => (
             <CardSkeleton key={i} />
@@ -94,27 +83,7 @@ const Operations: React.FC = () => {
           variants={containerVariants as any}
           className="grid grid-cols-2 lg:grid-cols-4 gap-4"
         >
-          {[
-            { label: 'Total Staff', value: formatNumber(totalStaff), icon: Users, color: ACCENT },
-            {
-              label: 'Avg Utilization',
-              value: `${avgUtilization.toFixed(1)}%`,
-              icon: Briefcase,
-              color: '#10b981',
-            },
-            {
-              label: 'Shift Coverage',
-              value: `${shiftsCovered.toFixed(1)}%`,
-              icon: Clock,
-              color: '#f59e0b',
-            },
-            {
-              label: 'Pending Time Off',
-              value: formatNumber(pendingTimeOff),
-              icon: Calendar,
-              color: '#f87171',
-            },
-          ].map((stat) => {
+          {stats.map((stat) => {
             const Icon = stat.icon;
             return (
               <motion.div
@@ -129,9 +98,9 @@ const Operations: React.FC = () => {
                   </span>
                   <span
                     className="flex items-center justify-center h-7 w-7 rounded-lg"
-                    style={{ background: `${stat.color}18` }}
+                    style={{ background: 'var(--accent-muted)' }}
                   >
-                    <Icon size={14} style={{ color: stat.color }} />
+                    <Icon size={14} style={{ color: 'var(--accent)' }} />
                   </span>
                 </div>
                 <p className="text-2xl font-bold" style={{ color: 'var(--hub-text)' }}>
@@ -144,126 +113,122 @@ const Operations: React.FC = () => {
       )}
 
       <div className="grid grid-cols-1 lg:grid-cols-2 gap-4">
-        {/* Department Headcount */}
         <motion.div
           variants={itemVariants as any}
           className="rounded-xl p-5"
           style={{ background: 'var(--hub-card)', border: '1px solid var(--hub-border)' }}
         >
           <h3 className="text-sm font-semibold mb-4" style={{ color: 'var(--hub-text)' }}>
-            Department Headcount
+            {t('insights.operations.headcount')}
           </h3>
-          {hcLoading ? (
-            <div className="space-y-2">
-              {Array.from({ length: 4 }).map((_, i) => (
-                <SkeletonRow key={i} cols={2} />
-              ))}
-            </div>
-          ) : deptList.length === 0 ? (
-            <EmptyState title="No departments" description="Department data will appear here." />
+          {headcountLoading ? (
+            <SkeletonRow cols={2} />
+          ) : !headcount ? (
+            <EmptyState title="" description={t('insights.operations.empty')} />
           ) : (
-            <div className="space-y-1">
-              {deptList.map((d, i) => (
-                <div
-                  key={d.id ?? i}
-                  className="flex items-center justify-between px-3 py-2.5 rounded-lg"
-                  style={{ background: 'var(--hub-hover)' }}
+            <div className="space-y-3">
+              <div className="flex items-baseline gap-3">
+                <span className="text-3xl font-bold" style={{ color: 'var(--hub-text)' }}>
+                  {formatNumber(headcount.activeStaff)}
+                </span>
+                <span
+                  className="text-xs"
+                  style={{
+                    color: headcount.momDelta >= 0 ? 'var(--delta-up)' : 'var(--delta-down)',
+                  }}
                 >
-                  <span className="text-xs font-medium" style={{ color: 'var(--hub-text)' }}>
-                    {d.name ?? d.department ?? 'Unknown'}
-                  </span>
-                  <span className="text-xs font-semibold" style={{ color: 'var(--hub-text)' }}>
-                    {formatNumber(d.count ?? d.headcount ?? 0)}
-                  </span>
-                </div>
-              ))}
+                  {formatPercent(headcount.momDeltaPct)} MoM
+                </span>
+              </div>
             </div>
           )}
         </motion.div>
 
-        {/* Staff Utilization */}
         <motion.div
           variants={itemVariants as any}
           className="rounded-xl p-5"
           style={{ background: 'var(--hub-card)', border: '1px solid var(--hub-border)' }}
         >
           <h3 className="text-sm font-semibold mb-4" style={{ color: 'var(--hub-text)' }}>
-            Staff Utilization
+            {t('insights.operations.utilization')}
           </h3>
           {utilLoading ? (
-            <div className="space-y-2">
-              {Array.from({ length: 4 }).map((_, i) => (
-                <SkeletonRow key={i} cols={2} />
-              ))}
-            </div>
-          ) : utilizationList.length === 0 ? (
-            <EmptyState
-              title="No utilization data"
-              description="Staff utilization will appear here."
-            />
+            <SkeletonRow cols={2} />
+          ) : !utilization ? (
+            <EmptyState title="" description={t('insights.operations.empty')} />
           ) : (
-            <div className="space-y-1">
-              {utilizationList.map((s, i) => (
-                <div
-                  key={s.id ?? i}
-                  className="flex items-center justify-between px-3 py-2.5 rounded-lg"
-                  style={{ background: 'var(--hub-hover)' }}
-                >
-                  <span
-                    className="text-xs font-medium truncate"
-                    style={{ color: 'var(--hub-text)' }}
-                  >
-                    {s.name ?? 'Unknown'}
-                  </span>
-                  <span
-                    className="text-xs font-semibold"
-                    style={{ color: (s.utilization ?? 0) >= 80 ? '#10b981' : '#f59e0b' }}
-                  >
-                    {(s.utilization ?? 0).toFixed(1)}%
-                  </span>
-                </div>
-              ))}
+            <div className="space-y-2">
+              <p className="text-3xl font-bold" style={{ color: 'var(--hub-text)' }}>
+                {utilization.utilizationPct.toFixed(1)}%
+              </p>
+              <p className="text-xs" style={{ color: 'var(--hub-text-muted)' }}>
+                {utilization.scheduledHours.toFixed(1)} / {utilization.availableHours.toFixed(1)}{' '}
+                hours
+              </p>
+            </div>
+          )}
+        </motion.div>
+
+        <motion.div
+          variants={itemVariants as any}
+          className="rounded-xl p-5"
+          style={{ background: 'var(--hub-card)', border: '1px solid var(--hub-border)' }}
+        >
+          <h3 className="text-sm font-semibold mb-4" style={{ color: 'var(--hub-text)' }}>
+            {t('insights.operations.shifts')}
+          </h3>
+          {shiftsLoading ? (
+            <SkeletonRow cols={2} />
+          ) : !shifts ? (
+            <EmptyState title="" description={t('insights.operations.empty')} />
+          ) : (
+            <div className="space-y-2 text-xs" style={{ color: 'var(--hub-text)' }}>
+              <div className="flex justify-between">
+                <span style={{ color: 'var(--hub-text-muted)' }}>Scheduled</span>
+                <span className="font-semibold">{formatNumber(shifts.scheduled)}</span>
+              </div>
+              <div className="flex justify-between">
+                <span style={{ color: 'var(--hub-text-muted)' }}>Completed</span>
+                <span className="font-semibold">{formatNumber(shifts.completed)}</span>
+              </div>
+              <div className="flex justify-between">
+                <span style={{ color: 'var(--hub-text-muted)' }}>No-shows</span>
+                <span className="font-semibold">{formatNumber(shifts.noShows)}</span>
+              </div>
+              <div className="flex justify-between">
+                <span style={{ color: 'var(--hub-text-muted)' }}>Completion</span>
+                <span className="font-semibold">{shifts.completionRatePct.toFixed(1)}%</span>
+              </div>
+            </div>
+          )}
+        </motion.div>
+
+        <motion.div
+          variants={itemVariants as any}
+          className="rounded-xl p-5"
+          style={{ background: 'var(--hub-card)', border: '1px solid var(--hub-border)' }}
+        >
+          <h3 className="text-sm font-semibold mb-4" style={{ color: 'var(--hub-text)' }}>
+            {t('insights.operations.timeOff')}
+          </h3>
+          {timeOffLoading ? (
+            <SkeletonRow cols={2} />
+          ) : !timeOff ? (
+            <EmptyState title="" description={t('insights.operations.empty')} />
+          ) : (
+            <div className="space-y-2 text-xs" style={{ color: 'var(--hub-text)' }}>
+              <div className="flex justify-between">
+                <span style={{ color: 'var(--hub-text-muted)' }}>Pending</span>
+                <span className="font-semibold">{formatNumber(timeOff.pending)}</span>
+              </div>
+              <div className="flex justify-between">
+                <span style={{ color: 'var(--hub-text-muted)' }}>Approved</span>
+                <span className="font-semibold">{formatNumber(timeOff.approved)}</span>
+              </div>
             </div>
           )}
         </motion.div>
       </div>
-
-      {/* Time Off Trends */}
-      <motion.div
-        variants={itemVariants as any}
-        className="rounded-xl p-5"
-        style={{ background: 'var(--hub-card)', border: '1px solid var(--hub-border)' }}
-      >
-        <h3 className="text-sm font-semibold mb-4" style={{ color: 'var(--hub-text)' }}>
-          Time Off Trends
-        </h3>
-        {toLoading ? (
-          <div className="space-y-2">
-            {Array.from({ length: 3 }).map((_, i) => (
-              <SkeletonRow key={i} cols={3} />
-            ))}
-          </div>
-        ) : timeOffList.length === 0 ? (
-          <EmptyState title="No time off data" description="Time off trends will appear here." />
-        ) : (
-          <div className="space-y-1">
-            {timeOffList.map((t, i) => (
-              <div
-                key={t.id ?? i}
-                className="flex items-center justify-between px-3 py-2.5 rounded-lg"
-                style={{ background: 'var(--hub-hover)' }}
-              >
-                <span className="text-xs font-medium" style={{ color: 'var(--hub-text)' }}>
-                  {t.month ?? t.period ?? `Period ${i + 1}`}
-                </span>
-                <span className="text-xs font-semibold" style={{ color: 'var(--hub-text)' }}>
-                  {formatNumber(t.days ?? t.count ?? 0)} days
-                </span>
-              </div>
-            ))}
-          </div>
-        )}
-      </motion.div>
     </motion.div>
   );
 };
