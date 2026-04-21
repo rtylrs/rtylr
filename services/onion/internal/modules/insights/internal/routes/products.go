@@ -19,4 +19,8 @@ func registerProductRoutes(ctx context.Context, router *chi.Mux, svc *applicatio
 		ctx, router, handlers.GetBestSellersRoutes(),
 		&handlers.GetBestSellersHandler{Service: svc},
 	)
+	serverHttp.RegisterGET[handlers.GetMarginDistributionRequest, handlers.GetMarginDistributionResponse](
+		ctx, router, handlers.GetMarginDistributionRoutes(),
+		&handlers.GetMarginDistributionHandler{Service: svc},
+	)
 }
