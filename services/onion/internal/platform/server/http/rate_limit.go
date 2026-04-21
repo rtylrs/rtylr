@@ -154,3 +154,40 @@ func getClientKey(r *http.Request) string {
 
 	return ip
 }
+
+// PerRouteRateLimit returns middleware that applies a tighter limit
+// than the global 100/min on specific auth + abuse-prone endpoints.
+// Returns a func that wraps a single chi.Mux Method call rather than
+// an `r.Use(...)` layer, so we can attach it to one route without
+// touching every handler.
+//
+// Rollouts:
+//   - /auth/login          → 5/min/IP   (brute-force defence)
+//   - /auth/register       → 3/min/IP   (signup spam)
+//   - /recruit/public/apply → 5/min/IP  (careers-form abuse)
+//
+// We key on IP alone — adding email-based secondary limits would
+// require parsing the request body twice, which isn't worth the
+// complexity for what this bucket actually defends.
+func PerRouteRateLimit(limit int, window time.Duration) func(http.Handler) http.Handler {
+	limiter := NewSecurityRateLimiter(limit, window)
+	limiter.cleanup()
+
+	return func(next http.Handler) http.Handler {
+		return http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
+			key := r.URL.Path + "|" + getClientKey(r)
+			if !limiter.isAllowed(key) {
+				logger.Ctx(r.Context()).Warn("Per-route rate limit exceeded",
+					logger.String("ip", r.RemoteAddr),
+					logger.String("path", r.URL.Path),
+				)
+				w.Header().Set("Content-Type", "application/json")
+				w.Header().Set("Retry-After", "60")
+				w.WriteHeader(http.StatusTooManyRequests)
+				_, _ = w.Write([]byte(`{"error":"Rate limit exceeded","message":"Too many attempts, please try again shortly","retry_after":60}`))
+				return
+			}
+			next.ServeHTTP(w, r)
+		})
+	}
+}
