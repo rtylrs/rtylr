@@ -3,6 +3,7 @@ package infrastructure
 import (
 	"context"
 	"database/sql"
+	"errors"
 	"strconv"
 	"time"
 
@@ -40,6 +41,8 @@ func (r *Repository) List(ctx context.Context, ownerID int64) ([]domain.JournalE
 			OwnerID:     row.OwnerID,
 			Date:        row.Date,
 			Description: nullStr(row.Description),
+			Status:      row.Status,
+			PostedAt:    nullTime(row.PostedAt),
 			CreatedAt:   nullTime(row.CreatedAt),
 		}
 
@@ -53,6 +56,61 @@ func (r *Repository) List(ctx context.Context, ownerID int64) ([]domain.JournalE
 	}
 
 	return entries, nil
+}
+
+func (r *Repository) Get(ctx context.Context, ownerID, id int64) (domain.JournalEntry, error) {
+	row, err := r.queries.GetJournalEntry(ctx, sqlc.GetJournalEntryParams{ID: id, OwnerID: ownerID})
+	if err != nil {
+		if errors.Is(err, sql.ErrNoRows) {
+			return domain.JournalEntry{}, domain.ErrJournalEntryNotFound
+		}
+		logger.Ctx(ctx).Error("Failed to get journal entry", logger.Error(err))
+		return domain.JournalEntry{}, err
+	}
+
+	return domain.JournalEntry{
+		ID:          row.ID,
+		OwnerID:     row.OwnerID,
+		Date:        row.Date,
+		Description: nullStr(row.Description),
+		Status:      row.Status,
+		PostedAt:    nullTime(row.PostedAt),
+		CreatedAt:   nullTime(row.CreatedAt),
+	}, nil
+}
+
+func (r *Repository) Post(ctx context.Context, ownerID, id int64) error {
+	// Verify the entry exists and read its current status up-front so the
+	// service can distinguish 404 from 409.
+	entry, err := r.Get(ctx, ownerID, id)
+	if err != nil {
+		return err
+	}
+	if entry.Status == "posted" {
+		return domain.ErrJournalEntryAlreadyPosted
+	}
+
+	res, err := r.queries.PostJournalEntry(ctx, sqlc.PostJournalEntryParams{ID: id, OwnerID: ownerID})
+	if err != nil {
+		logger.Ctx(ctx).Error("Failed to post journal entry",
+			logger.Error(err),
+			logger.Any("owner_id", ownerID),
+			logger.Any("entry_id", id),
+		)
+		return err
+	}
+
+	rowsAffected, err := res.RowsAffected()
+	if err != nil {
+		return err
+	}
+	if rowsAffected == 0 {
+		// Raced with another caller — entry was posted between the read and
+		// the update.
+		return domain.ErrJournalEntryAlreadyPosted
+	}
+
+	return nil
 }
 
 func (r *Repository) GetLines(ctx context.Context, entryID int64) ([]domain.JournalLine, error) {

@@ -22,3 +22,7 @@ func (s *Service) List(ctx context.Context, ownerID int64) ([]domain.JournalEntr
 func (s *Service) Create(ctx context.Context, ownerID int64, input domain.JournalEntryInput) (int64, error) {
 	return s.repo.Create(ctx, ownerID, input)
 }
+
+func (s *Service) Post(ctx context.Context, ownerID, id int64) error {
+	return s.repo.Post(ctx, ownerID, id)
+}

@@ -2,9 +2,12 @@ package handlers
 
 import (
 	"context"
+	"errors"
 	"net/http"
+	"strconv"
 	"time"
 
+	"github.com/go-chi/chi/v5"
 	"github.com/voxire/onion/internal/modules/journal/internal/application"
 	"github.com/voxire/onion/internal/modules/journal/internal/domain"
 	authPkg "github.com/voxire/onion/internal/platform/auth"
@@ -20,12 +23,14 @@ type JournalLinePayload struct {
 }
 
 type JournalEntryPayload struct {
-	ID          int64                 `json:"id"`
-	OwnerID     int64                 `json:"owner_id"`
-	Date        time.Time             `json:"date"`
-	Description string                `json:"description"`
-	Lines       []JournalLinePayload  `json:"lines"`
-	CreatedAt   time.Time             `json:"created_at"`
+	ID          int64                `json:"id"`
+	OwnerID     int64                `json:"owner_id"`
+	Date        time.Time            `json:"date"`
+	Description string               `json:"description"`
+	Status      string               `json:"status"`
+	PostedAt    *time.Time           `json:"posted_at"`
+	Lines       []JournalLinePayload `json:"lines"`
+	CreatedAt   time.Time            `json:"created_at"`
 }
 
 func newPayload(e domain.JournalEntry) JournalEntryPayload {
@@ -36,9 +41,15 @@ func newPayload(e domain.JournalEntry) JournalEntryPayload {
 			Debit: l.Debit, Credit: l.Credit,
 		})
 	}
+	var postedAt *time.Time
+	if !e.PostedAt.IsZero() {
+		pt := e.PostedAt
+		postedAt = &pt
+	}
 	return JournalEntryPayload{
 		ID: e.ID, OwnerID: e.OwnerID, Date: e.Date,
-		Description: e.Description, Lines: lines, CreatedAt: e.CreatedAt,
+		Description: e.Description, Status: e.Status, PostedAt: postedAt,
+		Lines: lines, CreatedAt: e.CreatedAt,
 	}
 }
 
@@ -119,4 +130,44 @@ func (h *CreateHandler) Serve(ctx context.Context, req *CreateRequest) (CreateRe
 	}
 
 	return CreateResponse{ID: id, Message: "Journal entry created successfully"}, nil
+}
+
+// ---------------------------------------------------------------------------
+// Post Journal Entry
+// ---------------------------------------------------------------------------
+
+func PostRoutes() []string { return []string{"/finance/journal/{id}/post"} }
+
+type PostHandler struct{ Service *application.Service }
+type PostRequest struct{}
+type PostResponse struct {
+	ID      int64  `json:"id"`
+	Status  string `json:"status"`
+	Message string `json:"message"`
+}
+
+func (h *PostHandler) Serve(ctx context.Context, _ *PostRequest) (PostResponse, *errorModels.ServerError) {
+	device := authPkg.DeviceCtx(ctx)
+	if device.IsAnonymous || device.User == nil {
+		return PostResponse{}, errorModels.PermissionDeniedServerError()
+	}
+
+	idStr := chi.URLParamFromCtx(ctx, "id")
+	id, err := strconv.ParseInt(idStr, 10, 64)
+	if err != nil || id <= 0 {
+		return PostResponse{}, &errorModels.ServerError{Code: http.StatusBadRequest, Message: "Invalid journal entry ID"}
+	}
+
+	if postErr := h.Service.Post(ctx, device.User.UserID, id); postErr != nil {
+		switch {
+		case errors.Is(postErr, domain.ErrJournalEntryNotFound):
+			return PostResponse{}, &errorModels.ServerError{Code: http.StatusNotFound, Message: "Journal entry not found"}
+		case errors.Is(postErr, domain.ErrJournalEntryAlreadyPosted):
+			return PostResponse{}, &errorModels.ServerError{Code: http.StatusConflict, Message: "Journal entry already posted"}
+		default:
+			return PostResponse{}, &errorModels.ServerError{Code: http.StatusInternalServerError, Message: "Failed to post journal entry"}
+		}
+	}
+
+	return PostResponse{ID: id, Status: "posted", Message: "Journal entry posted successfully"}, nil
 }
