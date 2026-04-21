@@ -4,8 +4,10 @@ import (
 	"context"
 	"errors"
 	"net/http"
+	"strconv"
 	"time"
 
+	"github.com/go-chi/chi/v5"
 	"github.com/voxire/onion/internal/modules/pos_orders/internal/application"
 	"github.com/voxire/onion/internal/modules/pos_orders/internal/domain"
 	authPkg "github.com/voxire/onion/internal/platform/auth"
@@ -281,7 +283,7 @@ func (h *CreateOrderHandler) Serve(ctx context.Context, req *CreateOrderRequest)
 
 // ─── Get Order Detail ─────────────────────────────────────────────────────────
 
-func GetOrderDetailRoutes() []string { return []string{"/pos/orders/detail"} }
+func GetOrderDetailRoutes() []string { return []string{"/pos/orders/detail", "/pos/orders/{id}"} }
 
 type GetOrderDetailHandler struct{ Service *application.Service }
 
@@ -301,7 +303,20 @@ func (h *GetOrderDetailHandler) Serve(ctx context.Context, req *GetOrderDetailRe
 
 	ownerID := device.User.UserID
 
-	order, err := h.Service.GetOrder(ctx, ownerID, req.OrderID)
+	orderID := req.OrderID
+	if raw := chi.URLParamFromCtx(ctx, "id"); raw != "" {
+		parsed, err := strconv.ParseInt(raw, 10, 64)
+		if err != nil || parsed <= 0 {
+			return GetOrderDetailResponse{}, &errorModels.ServerError{
+				HTTPCode: http.StatusBadRequest,
+				Code:     http.StatusBadRequest,
+				Message:  "Invalid order id",
+			}
+		}
+		orderID = parsed
+	}
+
+	order, err := h.Service.GetOrder(ctx, ownerID, orderID)
 	if err != nil {
 		if errors.Is(err, domain.ErrOrderNotFound) {
 			return GetOrderDetailResponse{}, &errorModels.ServerError{
