@@ -30,4 +30,20 @@ func RegisterRoutes(ctx context.Context, router *chi.Mux, service *application.S
 		handlers.UpdateSupplierRoutes(),
 		&handlers.UpdateSupplierHandler{Service: service},
 	)
+
+	// PUT /erp/suppliers/{id} — REST path variant; coexists with the body-ID route above.
+	http.RegisterPUTWithValidation[handlers.UpdateSupplierByIDRequest, handlers.UpdateSupplierByIDResponse](
+		ctx,
+		router,
+		handlers.UpdateSupplierByIDRoutes(),
+		&handlers.UpdateSupplierByIDHandler{Service: service},
+	)
+
+	// DELETE /erp/suppliers/{id} — new REST path variant.
+	http.RegisterDELETE[handlers.DeleteSupplierByIDRequest, handlers.DeleteSupplierByIDResponse](
+		ctx,
+		router,
+		handlers.DeleteSupplierByIDRoutes(),
+		&handlers.DeleteSupplierByIDHandler{Service: service},
+	)
 }

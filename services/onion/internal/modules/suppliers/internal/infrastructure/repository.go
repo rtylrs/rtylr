@@ -123,6 +123,24 @@ func (r *Repository) UpdateSupplier(ctx context.Context, ownerID, id int64, inpu
 	return nil
 }
 
+func (r *Repository) DeleteSupplier(ctx context.Context, ownerID, id int64) error {
+	err := r.queries.DeleteSupplier(ctx, sqlc.DeleteSupplierParams{
+		OwnerID: ownerID,
+		ID:      id,
+	})
+	if err != nil {
+		logger.Ctx(ctx).Error("Failed to delete supplier",
+			logger.Any("owner_id", ownerID),
+			logger.Any("supplier_id", id),
+			logger.Error(err),
+		)
+
+		return err
+	}
+
+	return nil
+}
+
 func nullString(s string) sql.NullString {
 	return sql.NullString{String: s, Valid: s != ""}
 }

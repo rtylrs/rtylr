@@ -15,3 +15,6 @@ UPDATE erp_suppliers
 SET name = ?, email = ?, phone = ?, address = ?, city = ?, country = ?,
     tax_id = ?, payment_terms = ?, notes = ?, is_active = ?
 WHERE owner_id = ? AND id = ?;
+
+-- name: DeleteSupplier :exec
+DELETE FROM erp_suppliers WHERE owner_id = ? AND id = ?;

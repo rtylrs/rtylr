@@ -46,6 +46,14 @@ func (s *Service) UpdateSupplier(ctx context.Context, ownerID, id int64, input d
 	return nil
 }
 
+func (s *Service) DeleteSupplier(ctx context.Context, ownerID, id int64) error {
+	if err := s.repo.DeleteSupplier(ctx, ownerID, id); err != nil {
+		return err
+	}
+	s.invalidateCache(ctx, ownerID)
+	return nil
+}
+
 func (s *Service) invalidateCache(ctx context.Context, ownerID int64) {
 	cacheKey := fmt.Sprintf("suppliers:%d", ownerID)
 	cacher.Of[[]domain.Supplier]().Invalidate(ctx, []string{cacheKey})
