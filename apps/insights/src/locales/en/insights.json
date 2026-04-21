@@ -1,0 +1,100 @@
+{
+  "errors": {
+    "generic": "Something went wrong. Please try again."
+  },
+  "dashboard": {
+    "title": "Business Overview",
+    "cards": {
+      "revenue": "Revenue (MTD)",
+      "customers": "Customers",
+      "orders": "Orders",
+      "margin": "Gross Margin"
+    },
+    "emptyTitle": "No KPI data yet",
+    "emptyDescription": "Metrics will appear here once your business starts generating activity."
+  },
+  "revenue": {
+    "title": "Revenue",
+    "subtitle": "Track revenue across all channels",
+    "currentPeriod": "Current Period",
+    "previousPeriod": "Previous Period",
+    "difference": "Difference",
+    "trend": "Revenue Trend",
+    "byApp": "Revenue by App",
+    "emptyTrend": "Revenue data will appear here once transactions are recorded.",
+    "emptyByApp": "Breakdown by app will appear here."
+  },
+  "customers": {
+    "title": "Customers",
+    "kpis": {
+      "total": "Total Customers",
+      "newThisMonth": "New This Month",
+      "active": "Active",
+      "churned": "Churned"
+    },
+    "top": "Top Customers",
+    "ltv": "Lifetime Value Distribution",
+    "churn": "Churn Rates",
+    "empty": "No customer data yet."
+  },
+  "products": {
+    "title": "Products",
+    "kpis": {
+      "totalSkus": "Total SKUs",
+      "activeSkus": "Active SKUs",
+      "outOfStock": "Out of Stock",
+      "avgMargin": "Avg Margin"
+    },
+    "bestSellers": "Best Sellers",
+    "margins": "Margin Distribution",
+    "slowMovers": "Slow Movers",
+    "categoryMix": "Category Mix",
+    "empty": "No product data yet."
+  },
+  "financial": {
+    "title": "Financial",
+    "cashFlow": "Cash Flow",
+    "expenses": "Expenses by Category",
+    "aging": "Invoice Aging",
+    "empty": "No financial data yet."
+  },
+  "operations": {
+    "title": "Operations",
+    "kpis": {
+      "activeStaff": "Active Staff",
+      "shiftsThisWeek": "Shifts This Week",
+      "pendingTimeOff": "Pending Time-Off",
+      "openLeaveRequests": "Open Leave Requests"
+    },
+    "headcount": "Headcount",
+    "shifts": "Shift Metrics",
+    "timeOff": "Time-Off",
+    "utilization": "Utilization",
+    "empty": "No operations data yet."
+  },
+  "reports": {
+    "title": "Reports",
+    "templates": "Report Templates",
+    "exportRevenue": "Export Revenue CSV",
+    "generateRevenue": "Generate Revenue Report",
+    "generateQueued": "Report queued",
+    "empty": "No report templates available."
+  },
+  "settings": {
+    "title": "Insights Settings",
+    "defaultCurrency": "Default Currency",
+    "fiscalYearStart": "Fiscal Year Start",
+    "timezone": "Timezone",
+    "scheduledReports": {
+      "title": "Scheduled Reports",
+      "create": "Create Scheduled Report",
+      "update": "Update Scheduled Report",
+      "delete": "Delete Scheduled Report",
+      "created": "Scheduled report created",
+      "updated": "Scheduled report updated",
+      "deleted": "Scheduled report deleted",
+      "empty": "No scheduled reports yet."
+    },
+    "saved": "Settings saved"
+  }
+}
