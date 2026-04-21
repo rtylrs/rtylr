@@ -12,11 +12,22 @@ type Account struct {
 	ID        int64     `json:"id"`
 	OwnerID   int64     `json:"owner_id"`
 	Name      string    `json:"name"`
+	Code      string    `json:"code"`
+	ParentID  int64     `json:"parent_id"`
 	Type      string    `json:"type"`
 	Currency  string    `json:"currency"`
 	Balance   float64   `json:"balance"`
 	IsActive  bool      `json:"is_active"`
 	CreatedAt time.Time `json:"created_at"`
+}
+
+// AccountTreeNode is a single node in the chart-of-accounts tree.
+type AccountTreeNode struct {
+	ID       int64              `json:"id"`
+	Name     string             `json:"name"`
+	Code     string             `json:"code"`
+	Type     string             `json:"type"`
+	Children []*AccountTreeNode `json:"children"`
 }
 
 func (a *Account) FromRow(row *sql.Rows) error {

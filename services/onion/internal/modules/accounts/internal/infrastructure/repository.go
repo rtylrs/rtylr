@@ -44,6 +44,36 @@ func (r *Repository) List(ctx context.Context, ownerID int64) ([]domain.Account,
 	return items, nil
 }
 
+func (r *Repository) ListForTree(ctx context.Context, ownerID int64) ([]domain.Account, error) {
+	rows, err := r.queries.ListAccountsForTree(ctx, ownerID)
+	if err != nil {
+		logger.Ctx(ctx).Error("Failed to list accounts for tree", logger.Error(err))
+		return nil, err
+	}
+
+	items := make([]domain.Account, 0, len(rows))
+	for _, row := range rows {
+		parentID := int64(0)
+		if row.ParentID.Valid {
+			parentID = row.ParentID.Int64
+		}
+		items = append(items, domain.Account{
+			ID:        row.ID,
+			OwnerID:   row.OwnerID,
+			Name:      row.Name,
+			Code:      nullStr(row.Code),
+			ParentID:  parentID,
+			Type:      string(row.Type),
+			Currency:  nullStr(row.Currency),
+			Balance:   parseFloatNull(row.Balance),
+			IsActive:  nullBool(row.IsActive),
+			CreatedAt: nullTime(row.CreatedAt),
+		})
+	}
+
+	return items, nil
+}
+
 func (r *Repository) Create(ctx context.Context, ownerID int64, input domain.AccountInput) (int64, error) {
 	currency := input.Currency
 	if currency == "" {

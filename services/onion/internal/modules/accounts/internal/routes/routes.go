@@ -22,4 +22,8 @@ func RegisterRoutes(ctx context.Context, router *chi.Mux, service *application.S
 	http.RegisterDELETE[handlers.DeleteAccountRequest, handlers.DeleteAccountResponse](
 		ctx, router, handlers.DeleteAccountRoutes(), &handlers.DeleteAccountHandler{Service: service},
 	)
+	http.RegisterGET[handlers.ChartOfAccountsRequest, handlers.ChartOfAccountsResponse](
+		ctx, router, handlers.ChartOfAccountsRoutes(),
+		&handlers.ChartOfAccountsHandler{Service: service},
+	)
 }

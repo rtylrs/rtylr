@@ -84,3 +84,56 @@ func (h *CreateHandler) Serve(ctx context.Context, req *CreateRequest) (CreateRe
 	}
 	return CreateResponse{ID: id, Message: "Account created successfully"}, nil
 }
+
+// ---------------------------------------------------------------------------
+// Chart of Accounts (tree)
+// ---------------------------------------------------------------------------
+
+func ChartOfAccountsRoutes() []string { return []string{"/finance/chart-of-accounts"} }
+
+type ChartOfAccountsHandler struct{ Service *application.Service }
+type ChartOfAccountsRequest struct{}
+
+type ChartOfAccountsNode struct {
+	ID       int64                  `json:"id"`
+	Name     string                 `json:"name"`
+	Code     string                 `json:"code"`
+	Type     string                 `json:"type"`
+	Children []*ChartOfAccountsNode `json:"children"`
+}
+
+type ChartOfAccountsResponse struct {
+	Tree []*ChartOfAccountsNode `json:"tree"`
+}
+
+func toChartNode(n *domain.AccountTreeNode) *ChartOfAccountsNode {
+	children := make([]*ChartOfAccountsNode, 0, len(n.Children))
+	for _, c := range n.Children {
+		children = append(children, toChartNode(c))
+	}
+	return &ChartOfAccountsNode{
+		ID:       n.ID,
+		Name:     n.Name,
+		Code:     n.Code,
+		Type:     n.Type,
+		Children: children,
+	}
+}
+
+func (h *ChartOfAccountsHandler) Serve(ctx context.Context, _ *ChartOfAccountsRequest) (ChartOfAccountsResponse, *errorModels.ServerError) {
+	device := authPkg.DeviceCtx(ctx)
+	if device.IsAnonymous || device.User == nil {
+		return ChartOfAccountsResponse{}, errorModels.PermissionDeniedServerError()
+	}
+
+	roots, err := h.Service.ChartOfAccounts(ctx, device.User.UserID)
+	if err != nil {
+		return ChartOfAccountsResponse{}, &errorModels.ServerError{Code: http.StatusInternalServerError, Message: "Failed to load chart of accounts"}
+	}
+
+	tree := make([]*ChartOfAccountsNode, 0, len(roots))
+	for _, n := range roots {
+		tree = append(tree, toChartNode(n))
+	}
+	return ChartOfAccountsResponse{Tree: tree}, nil
+}
