@@ -58,6 +58,7 @@ import (
 	hrsetup "github.com/voxire/onion/internal/modules/hr_setup"
 	hrshifts "github.com/voxire/onion/internal/modules/hr_shifts"
 	hrtime "github.com/voxire/onion/internal/modules/hr_time"
+	financebankfeeds "github.com/voxire/onion/internal/modules/finance_bank_feeds"
 	financereports "github.com/voxire/onion/internal/modules/finance_reports"
 	flowinsights "github.com/voxire/onion/internal/modules/flow_insights"
 	"github.com/voxire/onion/internal/modules/insights"
@@ -295,6 +296,7 @@ type apiModules struct {
 	Echo                 *echo.Module
 	Expenses             *expenses.Module
 	Feedback             *feedback.Module
+	FinanceBankFeeds     *financebankfeeds.Module
 	FinanceReports       *financereports.Module
 	FlowInsights         *flowinsights.Module
 	HRAttendance         *hrattendance.Module
@@ -423,6 +425,7 @@ func initializeModules(ctx context.Context) *apiModules {
 		Echo:                 echo.NewModule(ctx, memoryModule),
 		Expenses:             expenses.NewModule(ctx),
 		Feedback:             feedback.NewModule(ctx),
+		FinanceBankFeeds:     financebankfeeds.NewModule(ctx),
 		FinanceReports:       financereports.NewModule(ctx),
 		FlowInsights:         flowinsights.NewModule(ctx),
 		HRAttendance:         hrattendance.NewModule(ctx),
