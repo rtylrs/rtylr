@@ -6,7 +6,7 @@ import PageHeader from '../../shared/components/PageHeader';
 import MoneyDisplay from '../../shared/components/MoneyDisplay';
 import EmptyState from '../../shared/components/EmptyState';
 import { SkeletonRow } from '../../shared/components/Skeleton';
-import { useRecurringInvoices } from './useRecurringInvoices';
+import { useRecurringInvoices, useSetRecurringStatus } from './useRecurringInvoices';
 import { cardStyle, ghostBtn, primaryBtn, ACCENT } from '../../shared/lib/tokens';
 
 const cadenceLabel: Record<string, string> = {
@@ -18,6 +18,19 @@ const cadenceLabel: Record<string, string> = {
 
 const RecurringInvoices: React.FC = () => {
   const { data = [], isLoading } = useRecurringInvoices();
+  const setStatus = useSetRecurringStatus();
+
+  const togglePause = (id: string, current: string | null | undefined, client: string): void => {
+    const next = current === 'active' ? 'paused' : 'active';
+    setStatus.mutate(
+      { id, status: next },
+      {
+        onSuccess: () =>
+          toast.success(next === 'paused' ? `Paused ${client}` : `Resumed ${client}`),
+        onError: () => toast.error(`Failed to update ${client}`),
+      }
+    );
+  };
 
   return (
     <motion.div
@@ -120,11 +133,17 @@ const RecurringInvoices: React.FC = () => {
                   <td style={{ padding: '12px 16px' }}>
                     <div style={{ display: 'flex', gap: 6 }}>
                       <button
-                        style={{ ...ghostBtn, padding: '4px 10px' }}
-                        onClick={() =>
-                          toast.success(
-                            r.status === 'active' ? `Paused ${r.client}` : `Resumed ${r.client}`
-                          )
+                        style={{
+                          ...ghostBtn,
+                          padding: '4px 10px',
+                          opacity: setStatus.isPending ? 0.6 : 1,
+                        }}
+                        onClick={() => togglePause(r.id, r.status, r.client)}
+                        disabled={setStatus.isPending}
+                        aria-label={
+                          r.status === 'active'
+                            ? `Pause recurring invoice ${r.client}`
+                            : `Resume recurring invoice ${r.client}`
                         }
                       >
                         {r.status === 'active' ? <Pause size={12} /> : <Play size={12} />}
