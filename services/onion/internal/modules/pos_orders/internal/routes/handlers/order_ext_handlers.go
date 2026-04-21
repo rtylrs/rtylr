@@ -4,12 +4,38 @@ import (
 	"context"
 	"errors"
 	"net/http"
+	"strconv"
 
+	"github.com/go-chi/chi/v5"
 	"github.com/voxire/onion/internal/modules/pos_orders/internal/application"
 	"github.com/voxire/onion/internal/modules/pos_orders/internal/domain"
 	authPkg "github.com/voxire/onion/internal/platform/auth"
 	errorModels "github.com/voxire/onion/internal/platform/errors"
 )
+
+// resolveOrderID returns the order id from either the chi URL param or the request body.
+// The URL param takes precedence when present.
+func resolveOrderID(ctx context.Context, bodyID int64) (int64, *errorModels.ServerError) {
+	if raw := chi.URLParamFromCtx(ctx, "id"); raw != "" {
+		parsed, err := strconv.ParseInt(raw, 10, 64)
+		if err != nil || parsed <= 0 {
+			return 0, &errorModels.ServerError{
+				HTTPCode: http.StatusBadRequest,
+				Code:     http.StatusBadRequest,
+				Message:  "Invalid order id",
+			}
+		}
+		return parsed, nil
+	}
+	if bodyID == 0 {
+		return 0, &errorModels.ServerError{
+			HTTPCode: http.StatusBadRequest,
+			Code:     http.StatusBadRequest,
+			Message:  "Order id is required",
+		}
+	}
+	return bodyID, nil
+}
 
 // ---- Split Order ----
 
@@ -102,7 +128,7 @@ func (h *DiscountOrderHandler) Serve(ctx context.Context, req *DiscountOrderRequ
 
 // ---- Void Order ----
 
-func VoidOrderRoutes() []string { return []string{"/pos/orders/void"} }
+func VoidOrderRoutes() []string { return []string{"/pos/orders/void", "/pos/orders/{id}/void"} }
 
 type VoidOrderHandler struct{ Service *application.Service }
 
@@ -115,8 +141,8 @@ type VoidOrderResponse struct {
 	Message string `json:"message"`
 }
 
-func (h *VoidOrderHandler) Validate(_ context.Context, req *VoidOrderRequest) *errorModels.ServerError {
-	if req.OrderID == 0 {
+func (h *VoidOrderHandler) Validate(ctx context.Context, req *VoidOrderRequest) *errorModels.ServerError {
+	if req.OrderID == 0 && chi.URLParamFromCtx(ctx, "id") == "" {
 		return &errorModels.ServerError{HTTPCode: http.StatusBadRequest, Code: http.StatusBadRequest, Message: "Order ID is required"}
 	}
 	if req.Reason == "" {
@@ -131,7 +157,12 @@ func (h *VoidOrderHandler) Serve(ctx context.Context, req *VoidOrderRequest) (Vo
 		return VoidOrderResponse{}, errorModels.PermissionDeniedServerError()
 	}
 
-	if err := h.Service.VoidOrder(ctx, device.User.UserID, req.OrderID, req.Reason); err != nil {
+	orderID, sErr := resolveOrderID(ctx, req.OrderID)
+	if sErr != nil {
+		return VoidOrderResponse{}, sErr
+	}
+
+	if err := h.Service.VoidOrder(ctx, device.User.UserID, orderID, req.Reason); err != nil {
 		if errors.Is(err, domain.ErrOrderNotFound) {
 			return VoidOrderResponse{}, &errorModels.ServerError{HTTPCode: http.StatusNotFound, Code: http.StatusNotFound, Message: "Order not found"}
 		}
