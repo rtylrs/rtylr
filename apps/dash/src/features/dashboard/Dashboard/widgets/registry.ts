@@ -106,6 +106,15 @@ export const WIDGET_CATALOG: WidgetConfig[] = [
     minH: 3,
   },
   {
+    id: 'revenue-by-app',
+    label: 'Revenue by App',
+    description: 'MTD revenue split across POS, Finance, ERP, CRM',
+    defaultW: 2,
+    defaultH: 3,
+    minW: 1,
+    minH: 2,
+  },
+  {
     id: 'top-products',
     label: 'Top Products',
     description: 'Best selling items this week',
