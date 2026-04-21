@@ -5,7 +5,9 @@ import (
 	"encoding/json"
 	"errors"
 	"net/http"
+	"strconv"
 
+	"github.com/go-chi/chi/v5"
 	authPkg "github.com/voxire/onion/internal/platform/auth"
 	errorModels "github.com/voxire/onion/internal/platform/errors"
 
@@ -22,7 +24,7 @@ func AutomationCreateRoutes() []string {
 }
 
 func AutomationUpdateRoutes() []string {
-	return []string{"/crm/automations"}
+	return []string{"/crm/automations/{id}"}
 }
 
 func AutomationDeleteRoutes() []string {
@@ -177,7 +179,6 @@ type UpdateAutomationHandler struct {
 }
 
 type UpdateAutomationRequest struct {
-	ID            int64           `json:"id"`
 	Name          string          `json:"name"`
 	TriggerType   string          `json:"trigger_type"`
 	TriggerConfig json.RawMessage `json:"trigger_config"`
@@ -190,13 +191,6 @@ type UpdateAutomationResponse struct {
 }
 
 func (h *UpdateAutomationHandler) Validate(_ context.Context, req *UpdateAutomationRequest) *errorModels.ServerError {
-	if req.ID == 0 {
-		return &errorModels.ServerError{
-			Code:    http.StatusBadRequest,
-			Message: "Automation ID is required",
-		}
-	}
-
 	if req.Name == "" {
 		return &errorModels.ServerError{
 			Code:    http.StatusBadRequest,
@@ -213,6 +207,15 @@ func (h *UpdateAutomationHandler) Serve(ctx context.Context, req *UpdateAutomati
 		return UpdateAutomationResponse{}, errorModels.PermissionDeniedServerError()
 	}
 
+	idStr := chi.URLParamFromCtx(ctx, "id")
+	id, parseErr := strconv.ParseInt(idStr, 10, 64)
+	if parseErr != nil || id <= 0 {
+		return UpdateAutomationResponse{}, &errorModels.ServerError{
+			Code:    http.StatusBadRequest,
+			Message: "Invalid automation ID",
+		}
+	}
+
 	triggerConfig := []byte(req.TriggerConfig)
 	if triggerConfig == nil {
 		triggerConfig = []byte("{}")
@@ -224,7 +227,7 @@ func (h *UpdateAutomationHandler) Serve(ctx context.Context, req *UpdateAutomati
 	}
 
 	if err := h.Service.Update(ctx, domain.AutomationUpdateInput{
-		ID:            req.ID,
+		ID:            id,
 		OwnerID:       device.User.UserID,
 		Name:          req.Name,
 		TriggerType:   req.TriggerType,
