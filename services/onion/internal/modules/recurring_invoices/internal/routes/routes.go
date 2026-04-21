@@ -25,4 +25,8 @@ func RegisterRoutes(ctx context.Context, router *chi.Mux, service *application.S
 	http.RegisterPOST[handlers.PauseRequest, handlers.PauseResponse](
 		ctx, router, handlers.PauseRoutes(), &handlers.PauseHandler{Service: service},
 	)
+
+	http.RegisterPOST[handlers.ResumeRequest, handlers.ResumeResponse](
+		ctx, router, handlers.ResumeRoutes(), &handlers.ResumeHandler{Service: service},
+	)
 }
