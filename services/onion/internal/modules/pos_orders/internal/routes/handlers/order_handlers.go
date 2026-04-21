@@ -460,7 +460,7 @@ func (h *UpdateOrderItemStatusHandler) Serve(ctx context.Context, req *UpdateOrd
 
 // ─── Process Payment ──────────────────────────────────────────────────────────
 
-func ProcessPaymentRoutes() []string { return []string{"/pos/orders/payment"} }
+func ProcessPaymentRoutes() []string { return []string{"/pos/orders/payment", "/pos/orders/{id}/payment"} }
 
 type ProcessPaymentHandler struct{ Service *application.Service }
 
@@ -474,8 +474,8 @@ type ProcessPaymentResponse struct {
 	Message string `json:"message"`
 }
 
-func (h *ProcessPaymentHandler) Validate(_ context.Context, req *ProcessPaymentRequest) *errorModels.ServerError {
-	if req.OrderID == 0 {
+func (h *ProcessPaymentHandler) Validate(ctx context.Context, req *ProcessPaymentRequest) *errorModels.ServerError {
+	if req.OrderID == 0 && chi.URLParamFromCtx(ctx, "id") == "" {
 		return &errorModels.ServerError{
 			HTTPCode: http.StatusBadRequest,
 			Code:     http.StatusBadRequest,
@@ -502,8 +502,21 @@ func (h *ProcessPaymentHandler) Serve(ctx context.Context, req *ProcessPaymentRe
 
 	ownerID := device.User.UserID
 
+	orderID := req.OrderID
+	if raw := chi.URLParamFromCtx(ctx, "id"); raw != "" {
+		parsed, err := strconv.ParseInt(raw, 10, 64)
+		if err != nil || parsed <= 0 {
+			return ProcessPaymentResponse{}, &errorModels.ServerError{
+				HTTPCode: http.StatusBadRequest,
+				Code:     http.StatusBadRequest,
+				Message:  "Invalid order id",
+			}
+		}
+		orderID = parsed
+	}
+
 	if err := h.Service.ProcessPayment(ctx, ownerID, domain.PaymentInput{
-		OrderID:       req.OrderID,
+		OrderID:       orderID,
 		PaymentMethod: domain.PaymentMethod(req.PaymentMethod),
 		AmountPaid:    req.AmountPaid,
 	}); err != nil {
