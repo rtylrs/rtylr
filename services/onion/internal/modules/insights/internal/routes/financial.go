@@ -15,4 +15,8 @@ func registerFinancialRoutes(ctx context.Context, router *chi.Mux, svc *applicat
 		ctx, router, handlers.GetCashFlowRoutes(),
 		&handlers.GetCashFlowHandler{Service: svc},
 	)
+	serverHttp.RegisterGET[handlers.GetExpensesByCategoryRequest, handlers.GetExpensesByCategoryResponse](
+		ctx, router, handlers.GetExpensesByCategoryRoutes(),
+		&handlers.GetExpensesByCategoryHandler{Service: svc},
+	)
 }
