@@ -1,12 +1,10 @@
-import React, { useMemo, useState } from 'react';
+import React, { useState } from 'react';
 import { useParams, useNavigate } from 'react-router-dom';
 import { motion } from 'motion/react';
 import { Send, Copy, XCircle, CreditCard, Printer } from 'lucide-react';
 import { toast } from 'sonner';
-import type { InvoiceItem } from '@voxire/contracts/finance/v1/invoices';
-import { useGetInvoice } from '../../shared/hooks/queries/useInvoices';
-import { minorToMajor } from '../../shared/utils/money';
-import type { Currency } from '../../shared/utils/money';
+import { useInvoice } from './useInvoice';
+import { useDeleteInvoice } from './useInvoices';
 import PageHeader from '../../shared/components/PageHeader';
 import MoneyDisplay from '../../shared/components/MoneyDisplay';
 import PaymentBadge from '../../shared/components/PaymentBadge';
@@ -18,53 +16,16 @@ import ConfirmDialog from '../../shared/components/ConfirmDialog';
 import { SkeletonRow } from '../../shared/components/Skeleton';
 import { ACCENT, cardStyle, ghostBtn, primaryBtn } from '../../shared/lib/tokens';
 
-type PaymentStatus = 'paid' | 'overdue' | 'unpaid';
-
-function toPaymentStatus(raw: string): PaymentStatus {
-  const lower = raw?.toLowerCase?.() ?? '';
-  if (lower === 'paid') return 'paid';
-  if (lower === 'overdue') return 'overdue';
-  return 'unpaid';
-}
-
 const InvoiceDetail: React.FC = () => {
   const { id } = useParams<{ id: string }>();
   const navigate = useNavigate();
-  const numericId = id ? Number(id) : undefined;
-  const { data, isLoading } = useGetInvoice(numericId);
+  const { data: invoice, isLoading } = useInvoice(id);
+  const deleteInvoice = useDeleteInvoice();
   const [showSend, setShowSend] = useState(false);
   const [showPayment, setShowPayment] = useState(false);
   const [showVoid, setShowVoid] = useState(false);
 
-  const view = useMemo(() => {
-    const inv = data?.invoice;
-    if (!inv) return null;
-    const currency = (inv.currency || 'USD') as Currency;
-    const total = minorToMajor(inv.total, currency);
-    const paid = minorToMajor(inv.amountPaid, currency);
-    const due = minorToMajor(inv.amountDue, currency);
-    const discount = minorToMajor(inv.discountAmount, currency);
-    const items: InvoiceItem[] = inv.items ?? [];
-    return {
-      id: String(inv.id),
-      number: inv.invoiceNumber,
-      clientName: inv.clientName,
-      clientEmail: inv.clientEmail,
-      status: inv.status,
-      issueDate: inv.issueDate,
-      dueDate: inv.dueDate,
-      currency,
-      total,
-      paid,
-      due,
-      discount,
-      notes: inv.notes,
-      items,
-      paymentStatus: toPaymentStatus(inv.status),
-    };
-  }, [data]);
-
-  if (isLoading || !view) {
+  if (isLoading || !invoice) {
     return (
       <div style={{ display: 'flex', flexDirection: 'column', gap: 20 }}>
         <PageHeader
@@ -78,7 +39,11 @@ const InvoiceDetail: React.FC = () => {
     );
   }
 
-  const clientObj = { id: 'c1', name: view.clientName, email: view.clientEmail };
+  const paymentStatus =
+    invoice.status === 'Paid' ? 'paid' : invoice.status === 'Overdue' ? 'overdue' : 'unpaid';
+  const balanceDue = invoice.amount - (invoice.paid ?? 0);
+
+  const clientObj = { id: 'c1', name: invoice.client, email: invoice.clientEmail };
 
   return (
     <motion.div
@@ -87,30 +52,29 @@ const InvoiceDetail: React.FC = () => {
       style={{ display: 'flex', flexDirection: 'column', gap: 20 }}
     >
       <PageHeader
-        title={`Invoice ${view.number || view.id}`}
+        title={`Invoice ${invoice.id}`}
         subtitle={
           <span style={{ display: 'flex', alignItems: 'center', gap: 8 }}>
-            <PaymentBadge status={view.paymentStatus} />{' '}
-            <MoneyDisplay amount={view.total} currency={view.currency} /> total
+            <PaymentBadge status={paymentStatus} /> <MoneyDisplay amount={invoice.amount} /> total
           </span>
         }
-        breadcrumbs={[{ label: 'Invoices', to: '/invoices' }, { label: view.number || view.id }]}
+        breadcrumbs={[{ label: 'Invoices', to: '/invoices' }, { label: invoice.id }]}
         actions={
           <>
             <button style={ghostBtn} onClick={() => window.print()}>
               <Printer size={13} /> Print
             </button>
-            <DownloadPdfButton invoiceId={view.id} />
+            <DownloadPdfButton invoiceId={invoice.id} />
             <button
               style={ghostBtn}
               onClick={() => {
-                navigate(`/invoices/new?clone=${view.id}`);
+                navigate(`/invoices/new?clone=${invoice.id}`);
                 toast.success('Cloning invoice');
               }}
             >
               <Copy size={13} /> Clone
             </button>
-            {view.paymentStatus !== 'paid' && (
+            {invoice.status !== 'Paid' && (
               <button style={ghostBtn} onClick={() => setShowPayment(true)}>
                 <CreditCard size={13} /> Record Payment
               </button>
@@ -118,7 +82,7 @@ const InvoiceDetail: React.FC = () => {
             <button style={primaryBtn} onClick={() => setShowSend(true)}>
               <Send size={13} /> Send
             </button>
-            {view.paymentStatus !== 'paid' && (
+            {invoice.status !== 'Paid' && (
               <button
                 style={{ ...ghostBtn, color: '#ef4444', borderColor: 'rgba(239,68,68,0.3)' }}
                 onClick={() => setShowVoid(true)}
@@ -132,19 +96,13 @@ const InvoiceDetail: React.FC = () => {
 
       <div style={{ display: 'grid', gridTemplateColumns: '2fr 1fr', gap: 20 }}>
         <InvoicePreview
-          invoiceNumber={view.number || view.id}
+          invoiceNumber={invoice.id}
           client={clientObj}
-          issuedDate={view.issueDate}
-          dueDate={view.dueDate}
-          items={view.items.map((item, idx) => ({
-            id: `line-${idx}`,
-            description: item.description,
-            quantity: item.quantity,
-            unitPrice: minorToMajor(item.unitPrice, view.currency),
-            taxRate: item.taxRate,
-          }))}
-          notes={view.notes}
-          discount={view.discount}
+          issuedDate={invoice.issuedDate}
+          dueDate={invoice.dueDate}
+          items={invoice.items as any}
+          notes={invoice.notes}
+          discount={invoice.discount}
         />
 
         <div style={{ display: 'flex', flexDirection: 'column', gap: 16 }}>
@@ -170,7 +128,7 @@ const InvoiceDetail: React.FC = () => {
               }}
             >
               <span>Total invoiced</span>
-              <MoneyDisplay amount={view.total} currency={view.currency} />
+              <MoneyDisplay amount={invoice.amount} />
             </div>
             <div
               style={{
@@ -182,7 +140,7 @@ const InvoiceDetail: React.FC = () => {
               }}
             >
               <span>Paid</span>
-              <MoneyDisplay amount={view.paid} currency={view.currency} />
+              <MoneyDisplay amount={invoice.paid} />
             </div>
             <div
               style={{
@@ -192,11 +150,11 @@ const InvoiceDetail: React.FC = () => {
                 borderTop: '1px solid var(--hub-border)',
                 fontSize: 14,
                 fontWeight: 700,
-                color: view.due > 0 ? ACCENT : 'var(--hub-text)',
+                color: balanceDue > 0 ? ACCENT : 'var(--hub-text)',
               }}
             >
               <span>Balance due</span>
-              <MoneyDisplay amount={view.due} currency={view.currency} />
+              <MoneyDisplay amount={balanceDue} />
             </div>
           </div>
 
@@ -210,40 +168,22 @@ const InvoiceDetail: React.FC = () => {
                 marginBottom: 10,
               }}
             >
-              Payments
+              History
             </div>
-            {(data?.payments ?? []).length === 0 ? (
-              <div style={{ fontSize: 12, color: 'var(--hub-text-dim)' }}>No payments recorded</div>
-            ) : (
-              (data?.payments ?? []).map((p) => (
+            {invoice.history?.map((h, i) => (
+              <div
+                key={i}
+                style={{ display: 'flex', gap: 10, padding: '6px 0', alignItems: 'flex-start' }}
+              >
                 <div
-                  key={p.id}
-                  style={{ display: 'flex', gap: 10, padding: '6px 0', alignItems: 'flex-start' }}
-                >
-                  <div
-                    style={{
-                      width: 6,
-                      height: 6,
-                      borderRadius: 3,
-                      background: ACCENT,
-                      marginTop: 5,
-                    }}
-                  />
-                  <div>
-                    <div style={{ fontSize: 12, color: 'var(--hub-text)' }}>
-                      <MoneyDisplay
-                        amount={minorToMajor(p.amount, (p.currency || view.currency) as Currency)}
-                        currency={(p.currency || view.currency) as Currency}
-                      />{' '}
-                      {p.method && <span>· {p.method}</span>}
-                    </div>
-                    <div style={{ fontSize: 10, color: 'var(--hub-text-dim)' }}>
-                      {p.paymentDate}
-                    </div>
-                  </div>
+                  style={{ width: 6, height: 6, borderRadius: 3, background: ACCENT, marginTop: 5 }}
+                />
+                <div>
+                  <div style={{ fontSize: 12, color: 'var(--hub-text)' }}>{h.label}</div>
+                  <div style={{ fontSize: 10, color: 'var(--hub-text-dim)' }}>{h.at}</div>
                 </div>
-              ))
-            )}
+              </div>
+            ))}
           </div>
 
           <div style={{ ...cardStyle, padding: 16 }}>
@@ -259,9 +199,11 @@ const InvoiceDetail: React.FC = () => {
               Client
             </div>
             <div style={{ fontSize: 13, fontWeight: 600, color: 'var(--hub-text)' }}>
-              {view.clientName}
+              {invoice.client}
             </div>
-            <div style={{ fontSize: 12, color: 'var(--hub-text-muted)' }}>{view.clientEmail}</div>
+            <div style={{ fontSize: 12, color: 'var(--hub-text-muted)' }}>
+              {invoice.clientEmail}
+            </div>
           </div>
         </div>
       </div>
@@ -269,22 +211,31 @@ const InvoiceDetail: React.FC = () => {
       <SendInvoiceModal
         open={showSend}
         onClose={() => setShowSend(false)}
-        invoiceId={view.id}
-        defaultTo={view.clientEmail}
+        invoiceId={invoice.id}
+        defaultTo={invoice.clientEmail}
       />
       <RecordPaymentModal
         open={showPayment}
         onClose={() => setShowPayment(false)}
-        invoiceId={view.id}
-        amount={view.due}
+        invoiceId={invoice.id}
+        amount={balanceDue}
       />
       <ConfirmDialog
         open={showVoid}
         onClose={() => setShowVoid(false)}
-        onConfirm={() => toast.success(`Invoice ${view.number || view.id} voided`)}
+        onConfirm={() =>
+          deleteInvoice.mutate(invoice.id, {
+            onSuccess: () => {
+              toast.success(`Invoice ${invoice.id} voided`);
+              setShowVoid(false);
+              navigate('/invoices');
+            },
+            onError: () => toast.error(`Failed to void invoice ${invoice.id}`),
+          })
+        }
         title="Void invoice"
-        message={`Are you sure you want to void ${view.number || view.id}? This cannot be undone.`}
-        confirmLabel="Void"
+        message={`Are you sure you want to void ${invoice.id}? This cannot be undone.`}
+        confirmLabel={deleteInvoice.isPending ? 'Voiding...' : 'Void'}
         destructive
       />
     </motion.div>

@@ -4,6 +4,8 @@ import { toast } from 'sonner';
 import Modal from './Modal';
 import CurrencyInput from './CurrencyInput';
 import { inputStyle, primaryBtn, ghostBtn, labelStyle } from '../lib/tokens';
+import { useRecordPayment } from '../../features/invoices/useInvoices';
+import { formatMoney } from '../lib/money';
 
 interface RecordPaymentModalProps {
   open: boolean;
@@ -35,17 +37,24 @@ const RecordPaymentModal: React.FC<RecordPaymentModalProps> = ({
   const [method, setMethod] = useState(METHODS[0]);
   const [date, setDate] = useState(new Date().toISOString().slice(0, 10));
   const [reference, setReference] = useState('');
+  const recordPayment = useRecordPayment();
 
-  const handle = () => {
+  const handle = (): void => {
     if (value <= 0) {
       toast.error('Amount must be greater than zero');
       return;
     }
-    onRecorded?.(value);
-    toast.success(
-      `Recorded ${value.toLocaleString('en-US', { style: 'currency', currency: 'USD' })} payment`
+    recordPayment.mutate(
+      { id: invoiceId, amount: value },
+      {
+        onSuccess: () => {
+          onRecorded?.(value);
+          toast.success(`Recorded ${formatMoney(value)} payment`);
+          onClose();
+        },
+        onError: () => toast.error('Failed to record payment'),
+      }
     );
-    onClose();
   };
 
   return (
@@ -56,12 +65,16 @@ const RecordPaymentModal: React.FC<RecordPaymentModalProps> = ({
       width={420}
       footer={
         <>
-          <button style={ghostBtn} onClick={onClose}>
+          <button style={ghostBtn} onClick={onClose} disabled={recordPayment.isPending}>
             Cancel
           </button>
-          <button style={primaryBtn} onClick={handle}>
+          <button
+            style={{ ...primaryBtn, opacity: recordPayment.isPending ? 0.6 : 1 }}
+            onClick={handle}
+            disabled={recordPayment.isPending}
+          >
             <CheckCircle size={13} />
-            Record Payment
+            {recordPayment.isPending ? 'Recording...' : 'Record Payment'}
           </button>
         </>
       }
