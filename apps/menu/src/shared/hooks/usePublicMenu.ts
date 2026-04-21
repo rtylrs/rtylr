@@ -1,0 +1,109 @@
+import { useQuery } from '@tanstack/react-query';
+import api from '../lib/api';
+
+/**
+ * usePublicMenu — hits the new `/pos/public/*` anonymous endpoints
+ * the backend exposed this session. Complements the legacy
+ * `/menu/{mongoId}` flow; this one is for POS-powered menus keyed by
+ * numeric `business_id`.
+ *
+ * Both fetches are issued in parallel. The hook returns a merged
+ * envelope so the screen doesn't have to orchestrate two queries
+ * itself.
+ */
+
+export interface PublicBusiness {
+  id: number;
+  name: string;
+  logoUrl: string;
+  currency: string;
+  timezone: string;
+}
+
+export interface PublicMenuItem {
+  id: number;
+  name: string;
+  sku: string;
+  salePrice: number;
+  isActive: boolean;
+}
+
+interface BusinessApiResponse {
+  id: number;
+  name: string;
+  logo_url: string;
+  currency: string;
+  timezone: string;
+}
+
+interface MenuApiResponse {
+  items: {
+    id: number;
+    name: string;
+    sku: string;
+    sale_price: number;
+    is_active: boolean;
+  }[];
+}
+
+async function fetchPublicBusiness(businessId: number): Promise<PublicBusiness> {
+  const res = await api.get<BusinessApiResponse>('/pos/public/business', {
+    params: { business_id: businessId },
+  });
+  return {
+    id: res.data.id,
+    name: res.data.name,
+    logoUrl: res.data.logo_url,
+    currency: res.data.currency,
+    timezone: res.data.timezone,
+  };
+}
+
+async function fetchPublicMenu(businessId: number): Promise<PublicMenuItem[]> {
+  const res = await api.get<MenuApiResponse>('/pos/public/menu', {
+    params: { business_id: businessId },
+  });
+  return (res.data.items ?? []).map((i) => ({
+    id: i.id,
+    name: i.name,
+    sku: i.sku,
+    salePrice: i.sale_price,
+    isActive: i.is_active,
+  }));
+}
+
+export interface PublicMenuBundle {
+  business: PublicBusiness;
+  items: PublicMenuItem[];
+}
+
+export function usePublicMenu(businessId: number | null): {
+  data: PublicMenuBundle | undefined;
+  isLoading: boolean;
+  isError: boolean;
+} {
+  const query = useQuery({
+    queryKey: ['public-menu', businessId],
+    queryFn: async (): Promise<PublicMenuBundle> => {
+      if (businessId == null) {
+        throw new Error('business_id required');
+      }
+      // Two-trip parallel. If either fails the whole bundle fails —
+      // a menu without a business header renders poorly and vice
+      // versa, so we'd rather show the error state once than half-
+      // render.
+      const [business, items] = await Promise.all([
+        fetchPublicBusiness(businessId),
+        fetchPublicMenu(businessId),
+      ]);
+      return { business, items };
+    },
+    enabled: businessId != null && Number.isFinite(businessId),
+    staleTime: 60_000,
+  });
+  return {
+    data: query.data,
+    isLoading: query.isLoading,
+    isError: query.isError,
+  };
+}
