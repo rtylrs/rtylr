@@ -2,7 +2,7 @@ import React, { useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { motion, AnimatePresence } from 'motion/react';
 import { Plus, Mail, MessageSquare, Bell, Users, Send, Eye, TrendingUp } from 'lucide-react';
-import { useCampaigns } from './useCampaigns';
+import { useListCampaigns } from '../../shared/hooks/queries/useCampaigns';
 
 const ACCENT = '#3b82f6';
 
@@ -263,7 +263,7 @@ function CampaignCard({
 
 const Campaigns: React.FC = () => {
   const navigate = useNavigate();
-  const { data: fetchedCampaigns } = useCampaigns();
+  const { data: fetchedCampaigns } = useListCampaigns();
   const campaigns: Campaign[] = (fetchedCampaigns as Campaign[]) ?? [];
   const [statusFilter, setStatusFilter] = useState<'All' | CampaignStatus>('All');
 
