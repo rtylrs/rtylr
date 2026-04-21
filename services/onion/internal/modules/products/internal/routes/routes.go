@@ -58,4 +58,8 @@ func RegisterRoutes(ctx context.Context, router *chi.Mux, service *application.S
 		handlers.ExpiryRoutes(),
 		&handlers.ExpiryHandler{Service: service},
 	)
+
+	// Path-param fetch — the FE-expected REST shape. Register helpers
+	// don't parse chi path params, so this one's wired directly.
+	router.Get("/erp/products/{id}", handlers.GetProductHandlerFunc(service))
 }
