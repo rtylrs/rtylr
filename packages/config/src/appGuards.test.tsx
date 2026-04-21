@@ -38,8 +38,8 @@ describe('AppFlagGuard', () => {
         <span>protected</span>
       </AppFlagGuard>
     );
-    expect(screen.getByText('protected')).toBeInTheDocument();
-    expect(screen.queryByText('blocked')).not.toBeInTheDocument();
+    expect(screen.queryByText('protected')).not.toBeNull();
+    expect(screen.queryByText('blocked')).toBeNull();
   });
 
   test('renders fallback when prod default for the flag is false', () => {
@@ -55,8 +55,8 @@ describe('AppFlagGuard', () => {
         <span>protected</span>
       </AppFlagGuard>
     );
-    expect(screen.getByText('blocked')).toBeInTheDocument();
-    expect(screen.queryByText('protected')).not.toBeInTheDocument();
+    expect(screen.queryByText('blocked')).not.toBeNull();
+    expect(screen.queryByText('protected')).toBeNull();
   });
 
   test('FLAG_KEYS surface stable string values', () => {
