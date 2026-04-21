@@ -1,3 +1,8 @@
+// ── Features / Apps showcase ─────────────────────────────────────────────────
+// Tabbed one-screen layout. Previously a sticky-right-column
+// scroll-linked feed that occupied 7 viewport heights. Now one
+// viewport tall, tabs swap the image + copy.
+
 .featuresSection {
   padding: 120px 0;
   background: var(--app-background);
@@ -10,114 +15,176 @@
   max-width: 1400px;
   margin: 0 auto;
   padding: 0 50px;
-  display: grid;
-  grid-template-columns: 0.8fr 1.2fr;
-  gap: 0;
-  align-items: center;
-}
-
-.content {
-  position: relative;
-  padding-right: 80px;
-}
-
-.featuresList {
-  display: flex;
-  flex-direction: column;
-}
-
-.featureDivider {
   width: 100%;
-  height: 1px;
-  background-color: rgba(255, 255, 255, 0.1);
-  margin: 0;
-  border: none;
-  flex-shrink: 0;
 }
 
-.featureItem {
-  opacity: 0.4;
-  transition: opacity 0.4s ease;
-  padding: 60px 0;
-  min-height: 50vh;
-  display: flex;
-  flex-direction: column;
-  justify-content: center;
-  cursor: pointer;
-  flex-shrink: 0;
-  gap: 24px;
+// Header
 
-  &.active {
-    opacity: 1;
+.header {
+  margin-bottom: 40px;
+  text-align: left;
+}
+
+.badge {
+  display: inline-block;
+  font-size: 0.7rem;
+  font-weight: 600;
+  letter-spacing: 0.14em;
+  color: rgba(255, 255, 255, 0.6);
+  background: rgba(255, 255, 255, 0.04);
+  border: 1px solid rgba(255, 255, 255, 0.08);
+  padding: 6px 12px;
+  border-radius: 999px;
+  margin-bottom: 18px;
+}
+
+.sectionTitle {
+  font-size: clamp(2rem, 3.4vw, 3rem);
+  font-weight: 600;
+  line-height: 1.08;
+  letter-spacing: -0.028em;
+  color: #e8e6e1;
+  margin: 0;
+  max-width: 860px;
+}
+
+.sectionTitleAccent {
+  color: rgba(255, 255, 255, 0.55);
+}
+
+// Tab bar — horizontal pill row. Scrolls horizontally on narrow
+// screens rather than wrapping, so it stays one line and one row.
+
+.tabBar {
+  display: flex;
+  gap: 8px;
+  margin: 32px 0 40px;
+  overflow-x: auto;
+  scrollbar-width: none;
+  -ms-overflow-style: none;
+  padding-bottom: 4px;
+
+  &::-webkit-scrollbar {
+    display: none;
   }
 }
 
+.tab {
+  flex-shrink: 0;
+  background: transparent;
+  color: rgba(255, 255, 255, 0.62);
+  border: 1px solid rgba(255, 255, 255, 0.12);
+  border-radius: 999px;
+  padding: 9px 18px;
+  font-size: 0.88rem;
+  font-weight: 500;
+  letter-spacing: -0.005em;
+  cursor: pointer;
+  transition:
+    background 0.18s ease,
+    color 0.18s ease,
+    border-color 0.18s ease;
+  font-family: inherit;
+  min-height: 38px;
+
+  &:hover {
+    color: #e8e6e1;
+    border-color: rgba(255, 255, 255, 0.22);
+    background: rgba(255, 255, 255, 0.04);
+  }
+}
+
+.tabActive {
+  background: #e8e6e1;
+  color: #0a0a0a;
+  border-color: #e8e6e1;
+
+  &:hover {
+    background: #ffffff;
+    color: #0a0a0a;
+    border-color: #ffffff;
+  }
+}
+
+// Showcase row — left copy column, right image column.
+
+.showcaseRow {
+  display: grid;
+  grid-template-columns: 0.85fr 1.15fr;
+  gap: 48px;
+  align-items: center;
+}
+
+.copyCol {
+  min-height: 320px;
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+}
+
 .featureCategory {
-  font-size: 0.875rem;
-  font-weight: 400;
-  color: rgba(255, 255, 255, 0.6);
+  font-size: 0.78rem;
+  font-weight: 600;
+  letter-spacing: 0.1em;
   text-transform: uppercase;
-  letter-spacing: 0.05em;
-  margin: 0;
+  color: rgba(255, 255, 255, 0.55);
+  margin-bottom: 14px;
+  display: block;
 }
 
 .featureTitle {
-  font-size: 3rem;
+  font-size: clamp(1.75rem, 2.6vw, 2.4rem);
   font-weight: 600;
-  color: white;
-  margin: 0;
+  color: #e8e6e1;
+  margin: 0 0 18px;
   line-height: 1.1;
-  letter-spacing: -0.02em;
+  letter-spacing: -0.025em;
+  max-width: 520px;
 }
 
 .featureDescription {
-  font-size: 1.125rem;
-  color: rgba(255, 255, 255, 0.8);
-  line-height: 1.6;
-  margin: 0;
-  max-width: 600px;
+  font-size: 1.05rem;
+  color: rgba(255, 255, 255, 0.72);
+  line-height: 1.55;
+  margin: 0 0 26px;
+  max-width: 520px;
+  letter-spacing: -0.003em;
 }
 
 .featureActions {
   display: flex;
   align-items: center;
-  gap: 16px;
-  margin-top: 8px;
+  gap: 14px;
 }
 
 .featureButton {
   flex-shrink: 0;
 }
 
-.showcase {
-  position: sticky;
-  top: 120px;
-  height: calc(100vh - 240px);
-  max-height: 700px;
+// Image column
+
+.imgCol {
   display: flex;
-  align-items: center;
-  justify-content: center;
-  align-self: start;
+  flex-direction: column;
+  gap: 16px;
 }
 
 .showcaseImageContainer {
   position: relative;
   width: 100%;
-  height: 100%;
-  max-height: 600px;
-  border-radius: 2px;
+  aspect-ratio: 16 / 10;
+  max-height: 540px;
+  border-radius: 12px;
   overflow: hidden;
   border: 1px solid #232220;
+  background: #101010;
 }
 
 .showcaseImage {
   position: absolute;
-  top: 0;
-  left: 0;
-  width: 100%;
-  height: 100%;
+  inset: 0;
   opacity: 0;
-  transition: opacity 0.55s ease;
+  transition: opacity 0.5s ease;
   pointer-events: none;
 
   &.active {
@@ -130,66 +197,92 @@
   width: 100%;
   height: 100%;
   object-fit: cover;
-  border-radius: 0;
+  display: block;
 }
+
+// Progress dots under the image — visual indicator of auto-advance.
+
+.progressRow {
+  display: flex;
+  gap: 8px;
+  justify-content: center;
+  align-items: center;
+  padding: 4px 0 0;
+}
+
+.progressDot {
+  width: 5px;
+  height: 5px;
+  border-radius: 999px;
+  background: rgba(255, 255, 255, 0.2);
+  transition:
+    background 0.2s ease,
+    width 0.2s ease;
+}
+
+.progressDotActive {
+  background: #e8e6e1;
+  width: 20px;
+  border-radius: 999px;
+}
+
+// Responsive
 
 @media (max-width: 1024px) {
   .container {
-    grid-template-columns: 1fr;
-    gap: 60px;
     padding: 0 30px;
   }
 
-  .content {
-    padding-right: 0;
+  .showcaseRow {
+    grid-template-columns: 1fr;
+    gap: 32px;
   }
 
-  .showcase {
-    display: none;
+  .imgCol {
+    order: -1;
   }
 
-  .featureItem {
-    min-height: 40vh;
-    padding: 40px 0;
-  }
-
-  .featureCategory {
-    font-size: 0.75rem;
+  .copyCol {
+    min-height: auto;
   }
 
   .featureTitle {
-    font-size: 2rem;
+    max-width: 100%;
   }
 
   .featureDescription {
-    font-size: 1rem;
+    max-width: 100%;
   }
 }
 
 @media (max-width: 768px) {
   .featuresSection {
-    padding: 80px 0;
+    padding: 72px 0;
+    min-height: auto;
   }
 
   .container {
     padding: 0 20px;
-    gap: 40px;
   }
 
-  .featureItem {
-    min-height: 50vh;
-    padding: 30px 0;
+  .tabBar {
+    margin: 24px 0 28px;
   }
 
-  .featureCategory {
-    font-size: 0.7rem;
+  .tab {
+    padding: 8px 14px;
+    font-size: 0.82rem;
   }
 
   .featureTitle {
-    font-size: 1.75rem;
+    font-size: 1.65rem;
   }
 
   .featureDescription {
     font-size: 0.95rem;
+  }
+
+  .showcaseImageContainer {
+    aspect-ratio: 4 / 3;
   }
 }
