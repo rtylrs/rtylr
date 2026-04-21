@@ -188,3 +188,14 @@ VALUES (?, ?, ?, ?, ?, ?);
 -- name: UpdateLoyaltyTier :execresult
 UPDATE crm_loyalty_tiers SET name = ?, min_points = ?, discount_pct = ?, perks = ?, sort_order = ?
 WHERE id = ? AND owner_id = ?;
+
+-- name: GetLoyaltyTierByID :one
+SELECT id, owner_id, name, min_points, discount_pct, perks, sort_order, created_at, updated_at
+FROM crm_loyalty_tiers WHERE id = ? AND owner_id = ?;
+
+-- name: CountActiveMembersOnTier :one
+SELECT COUNT(*) FROM crm_customers
+WHERE owner_id = ? AND is_active = TRUE AND LOWER(loyalty_tier) = LOWER(?);
+
+-- name: DeleteLoyaltyTier :execresult
+DELETE FROM crm_loyalty_tiers WHERE id = ? AND owner_id = ?;

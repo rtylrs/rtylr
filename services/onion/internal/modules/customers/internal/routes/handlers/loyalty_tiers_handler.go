@@ -5,7 +5,9 @@ import (
 	"encoding/json"
 	"errors"
 	"net/http"
+	"strconv"
 
+	"github.com/go-chi/chi/v5"
 	crmv1 "github.com/voxire/voxie/gen/go/crm/v1"
 
 	authPkg "github.com/voxire/onion/internal/platform/auth"
@@ -25,6 +27,10 @@ func LoyaltyTiersCreateRoutes() []string {
 
 func LoyaltyTiersUpdateRoutes() []string {
 	return []string{"/crm/loyalty/tiers"}
+}
+
+func LoyaltyTiersDeleteRoutes() []string {
+	return []string{"/crm/loyalty/tiers/{id}"}
 }
 
 func newLoyaltyTierPayload(t domain.LoyaltyTier) *crmv1.LoyaltyTier {
@@ -205,4 +211,57 @@ func (h *UpdateLoyaltyTierHandler) Serve(ctx context.Context, req *UpdateLoyalty
 	}
 
 	return UpdateLoyaltyTierResponse{Message: "Loyalty tier updated successfully"}, nil
+}
+
+// -- DELETE ------------------------------------------------------------------
+
+type DeleteLoyaltyTierHandler struct {
+	CRMService *application.Service
+}
+
+type DeleteLoyaltyTierRequest struct{}
+
+type DeleteLoyaltyTierResponse struct {
+	Message string `json:"message"`
+}
+
+func (h *DeleteLoyaltyTierHandler) Serve(ctx context.Context, _ *DeleteLoyaltyTierRequest) (DeleteLoyaltyTierResponse, *errorModels.ServerError) {
+	device := authPkg.DeviceCtx(ctx)
+	if device.User == nil {
+		return DeleteLoyaltyTierResponse{}, errorModels.PermissionDeniedServerError()
+	}
+
+	idStr := chi.URLParamFromCtx(ctx, "id")
+	id, parseErr := strconv.ParseInt(idStr, 10, 64)
+	if parseErr != nil || id <= 0 {
+		return DeleteLoyaltyTierResponse{}, &errorModels.ServerError{
+			Code:    http.StatusBadRequest,
+			Message: "Invalid tier ID",
+		}
+	}
+
+	if err := h.CRMService.DeleteLoyaltyTier(ctx, device.User.UserID, id); err != nil {
+		if errors.Is(err, domain.ErrTierNotFound) {
+			return DeleteLoyaltyTierResponse{}, &errorModels.ServerError{
+				HTTPCode: http.StatusNotFound,
+				Code:     http.StatusNotFound,
+				Message:  "Loyalty tier not found",
+			}
+		}
+
+		if errors.Is(err, domain.ErrTierInUse) {
+			return DeleteLoyaltyTierResponse{}, &errorModels.ServerError{
+				HTTPCode: http.StatusConflict,
+				Code:     http.StatusConflict,
+				Message:  "Loyalty tier has active members and cannot be deleted",
+			}
+		}
+
+		return DeleteLoyaltyTierResponse{}, &errorModels.ServerError{
+			Code:    http.StatusInternalServerError,
+			Message: "Failed to delete loyalty tier",
+		}
+	}
+
+	return DeleteLoyaltyTierResponse{Message: "Loyalty tier deleted successfully"}, nil
 }

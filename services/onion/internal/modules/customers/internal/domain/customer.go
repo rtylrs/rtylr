@@ -12,6 +12,7 @@ var (
 	ErrSegmentNotFound     = errors.New("segment not found")
 	ErrCampaignNotFound    = errors.New("campaign not found")
 	ErrTierNotFound        = errors.New("loyalty tier not found")
+	ErrTierInUse           = errors.New("loyalty tier has active members")
 )
 
 type Customer struct {

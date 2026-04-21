@@ -1030,6 +1030,58 @@ func (r *Repository) UpdateLoyaltyTier(ctx context.Context, input domain.Loyalty
 	return nil
 }
 
+func (r *Repository) DeleteLoyaltyTier(ctx context.Context, ownerID, tierID int64) error {
+	tier, err := r.queries.GetLoyaltyTierByID(ctx, sqlc.GetLoyaltyTierByIDParams{
+		ID:      tierID,
+		OwnerID: ownerID,
+	})
+	if err != nil {
+		if errors.Is(err, sql.ErrNoRows) {
+			return domain.ErrTierNotFound
+		}
+
+		logger.Ctx(ctx).Error("Failed to look up loyalty tier", logger.Error(err), logger.Any("owner_id", ownerID), logger.Any("tier_id", tierID))
+
+		return err
+	}
+
+	// cross-schema read from crm_customers — active members on this tier
+	count, err := r.queries.CountActiveMembersOnTier(ctx, sqlc.CountActiveMembersOnTierParams{
+		OwnerID: ownerID,
+		LOWER:   tier.Name,
+	})
+	if err != nil {
+		logger.Ctx(ctx).Error("Failed to count active members on tier", logger.Error(err), logger.Any("owner_id", ownerID), logger.Any("tier_id", tierID))
+
+		return err
+	}
+
+	if count > 0 {
+		return domain.ErrTierInUse
+	}
+
+	result, err := r.queries.DeleteLoyaltyTier(ctx, sqlc.DeleteLoyaltyTierParams{
+		ID:      tierID,
+		OwnerID: ownerID,
+	})
+	if err != nil {
+		logger.Ctx(ctx).Error("Failed to delete loyalty tier", logger.Error(err), logger.Any("owner_id", ownerID), logger.Any("tier_id", tierID))
+
+		return err
+	}
+
+	rows, err := result.RowsAffected()
+	if err != nil {
+		return err
+	}
+
+	if rows == 0 {
+		return domain.ErrTierNotFound
+	}
+
+	return nil
+}
+
 // ─── Campaign Stats ─────────────────────────────────────────────────────────
 
 func (r *Repository) GetCampaignStats(ctx context.Context, ownerID, campaignID int64) (domain.CampaignStats, error) {

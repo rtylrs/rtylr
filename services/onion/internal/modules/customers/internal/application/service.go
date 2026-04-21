@@ -361,6 +361,10 @@ func (s *Service) UpdateLoyaltyTier(ctx context.Context, input domain.LoyaltyTie
 	return s.repo.UpdateLoyaltyTier(ctx, input)
 }
 
+func (s *Service) DeleteLoyaltyTier(ctx context.Context, ownerID, tierID int64) error {
+	return s.repo.DeleteLoyaltyTier(ctx, ownerID, tierID)
+}
+
 // -- Campaign Stats ----------------------------------------------------------
 
 func (s *Service) GetCampaignStats(ctx context.Context, ownerID, campaignID int64) (domain.CampaignStats, error) {

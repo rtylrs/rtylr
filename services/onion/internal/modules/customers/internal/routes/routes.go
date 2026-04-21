@@ -217,6 +217,13 @@ func RegisterRoutes(ctx context.Context, router *chi.Mux, crmService *applicatio
 		&handlers.UpdateLoyaltyTierHandler{CRMService: crmService},
 	)
 
+	http.RegisterDELETE[handlers.DeleteLoyaltyTierRequest, handlers.DeleteLoyaltyTierResponse](
+		ctx,
+		router,
+		handlers.LoyaltyTiersDeleteRoutes(),
+		&handlers.DeleteLoyaltyTierHandler{CRMService: crmService},
+	)
+
 	// Campaign Stats
 	http.RegisterGETWithValidation[handlers.GetCampaignStatsRequest, handlers.GetCampaignStatsResponse](
 		ctx,
