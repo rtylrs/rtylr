@@ -1,0 +1,37 @@
+{
+  "customers": {
+    "created": "Client créé",
+    "updated": "Client mis à jour",
+    "deleted": "Client supprimé",
+    "visitRecorded": "Visite enregistrée",
+    "merged": "Clients fusionnés",
+    "imported": "Clients importés",
+    "exported": "Données client exportées"
+  },
+  "loyalty": {
+    "configUpdated": "Configuration de fidélité mise à jour",
+    "tierSaved": "Niveau enregistré",
+    "rewardSaved": "Récompense enregistrée",
+    "pointsAwarded": "Points attribués",
+    "pointsRedeemed": "Points échangés"
+  },
+  "campaigns": {
+    "created": "Campagne créée",
+    "updated": "Campagne mise à jour",
+    "deleted": "Campagne supprimée",
+    "statusUpdated": "Statut de la campagne mis à jour"
+  },
+  "segments": {
+    "created": "Segment créé",
+    "updated": "Segment mis à jour",
+    "deleted": "Segment supprimé"
+  },
+  "automations": {
+    "created": "Automatisation créée",
+    "updated": "Automatisation mise à jour",
+    "deleted": "Automatisation supprimée"
+  },
+  "settings": {
+    "updated": "Paramètres mis à jour"
+  }
+}

@@ -1,0 +1,37 @@
+{
+  "customers": {
+    "created": "تم إنشاء العميل",
+    "updated": "تم تحديث العميل",
+    "deleted": "تم حذف العميل",
+    "visitRecorded": "تم تسجيل الزيارة",
+    "merged": "تم دمج العملاء",
+    "imported": "تم استيراد العملاء",
+    "exported": "تم تصدير بيانات العميل"
+  },
+  "loyalty": {
+    "configUpdated": "تم تحديث إعدادات الولاء",
+    "tierSaved": "تم حفظ المستوى",
+    "rewardSaved": "تم حفظ المكافأة",
+    "pointsAwarded": "تم منح النقاط",
+    "pointsRedeemed": "تم استبدال النقاط"
+  },
+  "campaigns": {
+    "created": "تم إنشاء الحملة",
+    "updated": "تم تحديث الحملة",
+    "deleted": "تم حذف الحملة",
+    "statusUpdated": "تم تحديث حالة الحملة"
+  },
+  "segments": {
+    "created": "تم إنشاء الشريحة",
+    "updated": "تم تحديث الشريحة",
+    "deleted": "تم حذف الشريحة"
+  },
+  "automations": {
+    "created": "تم إنشاء الأتمتة",
+    "updated": "تم تحديث الأتمتة",
+    "deleted": "تم حذف الأتمتة"
+  },
+  "settings": {
+    "updated": "تم تحديث الإعدادات"
+  }
+}
