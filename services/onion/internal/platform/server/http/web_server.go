@@ -9,6 +9,7 @@ import (
 	"github.com/go-chi/chi/v5"
 	"github.com/go-chi/chi/v5/middleware"
 	"github.com/voxire/onion/internal/platform/logger"
+	"github.com/voxire/onion/internal/platform/observability"
 )
 
 const serverShutdownTimeoutSeconds = 5
@@ -18,6 +19,10 @@ func Start(ctx context.Context, runMode ChiRunMode, port string) error {
 
 	r.Use(middleware.Logger)
 	r.Use(middleware.Recoverer)
+	// Sentry recover runs after chi's Recoverer so we still respond
+	// with a 500, but anything that escapes the handler layer ends
+	// up in Sentry with a proper stack trace and request scope.
+	r.Use(observability.RecoverMiddleware)
 	r.Use(corsMiddleware())
 	r.Use(CrashNotifierMiddleware())
 	r.Use(SecurityHeadersMiddleware())

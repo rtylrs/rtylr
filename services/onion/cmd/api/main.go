@@ -137,6 +137,7 @@ import (
 	"github.com/voxire/onion/internal/platform/database/dbclient"
 	emailPkg "github.com/voxire/onion/internal/platform/email"
 	"github.com/voxire/onion/internal/platform/logger"
+	"github.com/voxire/onion/internal/platform/observability"
 	"github.com/voxire/onion/internal/platform/server/http"
 	"github.com/voxire/onion/internal/platform/utils/jwtutils"
 	"github.com/voxire/onion/internal/platform/wsbus"
@@ -151,6 +152,13 @@ func main() {
 
 	shutdownCtx, stop := signal.NotifyContext(context.Background(), os.Interrupt, syscall.SIGTERM)
 	defer stop()
+
+	// Initialise Sentry as early as possible so even boot-time
+	// panics get captured. `flush` ships any queued events before
+	// the process exits — deferring here covers the restart loop
+	// path too.
+	flushSentry := observability.InitSentry(shutdownCtx)
+	defer flushSentry()
 
 	for {
 		if err := runServer(shutdownCtx); err != nil {
