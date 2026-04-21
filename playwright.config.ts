@@ -65,5 +65,13 @@ export default defineConfig({
       stdout: 'pipe',
       stderr: 'pipe',
     },
+    {
+      command: 'pnpm --filter @rtylr/erp dev',
+      port: 5179,
+      reuseExistingServer: !process.env.CI,
+      timeout: 120_000,
+      stdout: 'pipe',
+      stderr: 'pipe',
+    },
   ],
 });
