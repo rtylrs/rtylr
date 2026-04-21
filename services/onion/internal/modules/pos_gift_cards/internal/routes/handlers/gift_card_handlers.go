@@ -149,6 +149,57 @@ func (h *GetGiftCardByCodeHandler) Serve(ctx context.Context, _ *GetGiftCardByCo
 	return GetGiftCardByCodeResponse{GiftCard: newGiftCardPayload(*gc)}, nil
 }
 
+// --- Redeem By Code (path) ---
+
+func RedeemGiftCardByCodeRoutes() []string { return []string{"/pos/gift-cards/{code}/redeem"} }
+
+type RedeemGiftCardByCodeHandler struct{ Service *application.Service }
+type RedeemGiftCardByCodeRequest struct {
+	Amount float64 `json:"amount"`
+}
+type RedeemGiftCardByCodeResponse struct {
+	GiftCard GiftCardPayload `json:"gift_card"`
+	Message  string          `json:"message"`
+}
+
+func (h *RedeemGiftCardByCodeHandler) Validate(_ context.Context, req *RedeemGiftCardByCodeRequest) *errorModels.ServerError {
+	if req.Amount <= 0 {
+		return &errorModels.ServerError{Code: http.StatusBadRequest, Message: "Amount must be greater than zero"}
+	}
+	return nil
+}
+
+func (h *RedeemGiftCardByCodeHandler) Serve(ctx context.Context, req *RedeemGiftCardByCodeRequest) (RedeemGiftCardByCodeResponse, *errorModels.ServerError) {
+	device := authPkg.DeviceCtx(ctx)
+	if device.User == nil {
+		return RedeemGiftCardByCodeResponse{}, errorModels.PermissionDeniedServerError()
+	}
+	code := chi.URLParamFromCtx(ctx, "code")
+	if code == "" {
+		return RedeemGiftCardByCodeResponse{}, &errorModels.ServerError{Code: http.StatusBadRequest, Message: "Code is required"}
+	}
+	gc, err := h.Service.Redeem(ctx, device.User.UserID, domain.RedeemInput{
+		Code:   code,
+		Amount: req.Amount,
+	})
+	if err != nil {
+		if errors.Is(err, domain.ErrGiftCardNotFound) {
+			return RedeemGiftCardByCodeResponse{}, &errorModels.ServerError{Code: http.StatusNotFound, Message: "Gift card not found"}
+		}
+		if errors.Is(err, domain.ErrGiftCardInactive) {
+			return RedeemGiftCardByCodeResponse{}, &errorModels.ServerError{Code: http.StatusBadRequest, Message: "Gift card is inactive"}
+		}
+		if errors.Is(err, domain.ErrGiftCardExpired) {
+			return RedeemGiftCardByCodeResponse{}, &errorModels.ServerError{Code: http.StatusBadRequest, Message: "Gift card has expired"}
+		}
+		if errors.Is(err, domain.ErrInsufficientBalance) {
+			return RedeemGiftCardByCodeResponse{}, &errorModels.ServerError{HTTPCode: http.StatusConflict, Code: http.StatusConflict, Message: "Insufficient gift card balance"}
+		}
+		return RedeemGiftCardByCodeResponse{}, &errorModels.ServerError{Code: http.StatusInternalServerError, Message: "Failed to redeem gift card"}
+	}
+	return RedeemGiftCardByCodeResponse{GiftCard: newGiftCardPayload(*gc), Message: "Gift card redeemed successfully"}, nil
+}
+
 // --- Redeem / Check Balance (PUT) ---
 
 func RedeemGiftCardRoutes() []string { return []string{"/pos/gift-cards"} }
