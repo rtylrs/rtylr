@@ -66,6 +66,50 @@ func (r *Repository) Create(ctx context.Context, ownerID int64, input domain.Acc
 	return res.LastInsertId()
 }
 
+func (r *Repository) Update(ctx context.Context, ownerID, id int64, input domain.AccountInput) error {
+	currency := input.Currency
+	if currency == "" {
+		currency = "USD"
+	}
+	res, err := r.queries.UpdateAccount(ctx, sqlc.UpdateAccountParams{
+		Name:     input.Name,
+		Type:     sqlc.FinanceAccountsType(input.Type),
+		Currency: nullableString(currency),
+		Balance:  nullableString(fmtFloat(input.Balance)),
+		IsActive: sql.NullBool{Bool: input.IsActive, Valid: true},
+		ID:       id,
+		OwnerID:  ownerID,
+	})
+	if err != nil {
+		logger.Ctx(ctx).Error("Failed to update account", logger.Error(err))
+		return err
+	}
+	rows, err := res.RowsAffected()
+	if err != nil {
+		return err
+	}
+	if rows == 0 {
+		return domain.ErrAccountNotFound
+	}
+	return nil
+}
+
+func (r *Repository) Delete(ctx context.Context, ownerID, id int64) error {
+	res, err := r.queries.DeleteAccount(ctx, sqlc.DeleteAccountParams{ID: id, OwnerID: ownerID})
+	if err != nil {
+		logger.Ctx(ctx).Error("Failed to delete account", logger.Error(err))
+		return err
+	}
+	rows, err := res.RowsAffected()
+	if err != nil {
+		return err
+	}
+	if rows == 0 {
+		return domain.ErrAccountNotFound
+	}
+	return nil
+}
+
 // ---------------------------------------------------------------------------
 // Conversion helpers
 // ---------------------------------------------------------------------------
@@ -100,9 +144,13 @@ func fmtFloat(f float64) string {
 }
 
 func parseFloatNull(s sql.NullString) float64 {
-	if !s.Valid {
+	if !s.Valid || s.String == "" {
 		return 0
 	}
-	v, _ := strconv.ParseFloat(s.String, 64)
+	v, err := strconv.ParseFloat(s.String, 64)
+	if err != nil {
+		logger.Global().Warn("failed to parse decimal from database", logger.String("value", s.String), logger.Error(err))
+		return 0
+	}
 	return v
 }

@@ -7,3 +7,12 @@ ORDER BY type ASC, name ASC;
 -- name: CreateAccount :execresult
 INSERT INTO finance_accounts (owner_id, name, type, currency, balance, is_active)
 VALUES (?, ?, ?, ?, ?, ?);
+
+-- name: UpdateAccount :execresult
+UPDATE finance_accounts
+SET name = ?, type = ?, currency = ?, balance = ?, is_active = ?
+WHERE id = ? AND owner_id = ?;
+
+-- name: DeleteAccount :execresult
+DELETE FROM finance_accounts
+WHERE id = ? AND owner_id = ?;

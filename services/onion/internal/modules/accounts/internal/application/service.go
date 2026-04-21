@@ -22,3 +22,11 @@ func (s *Service) List(ctx context.Context, ownerID int64) ([]domain.Account, er
 func (s *Service) Create(ctx context.Context, ownerID int64, input domain.AccountInput) (int64, error) {
 	return s.repo.Create(ctx, ownerID, input)
 }
+
+func (s *Service) Update(ctx context.Context, ownerID, id int64, input domain.AccountInput) error {
+	return s.repo.Update(ctx, ownerID, id, input)
+}
+
+func (s *Service) Delete(ctx context.Context, ownerID, id int64) error {
+	return s.repo.Delete(ctx, ownerID, id)
+}

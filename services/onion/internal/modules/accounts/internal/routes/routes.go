@@ -16,4 +16,10 @@ func RegisterRoutes(ctx context.Context, router *chi.Mux, service *application.S
 	http.RegisterPOSTWithValidation[handlers.CreateRequest, handlers.CreateResponse](
 		ctx, router, handlers.CreateRoutes(), &handlers.CreateHandler{Service: service},
 	)
+	http.RegisterPUTWithValidation[handlers.UpdateAccountRequest, handlers.UpdateAccountResponse](
+		ctx, router, handlers.UpdateAccountRoutes(), &handlers.UpdateAccountHandler{Service: service},
+	)
+	http.RegisterDELETE[handlers.DeleteAccountRequest, handlers.DeleteAccountResponse](
+		ctx, router, handlers.DeleteAccountRoutes(), &handlers.DeleteAccountHandler{Service: service},
+	)
 }
