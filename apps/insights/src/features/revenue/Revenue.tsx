@@ -1,19 +1,17 @@
-import React, { useState } from 'react';
+import React from 'react';
 import { motion } from 'motion/react';
 import { TrendingUp, ArrowUpRight, ArrowDownRight } from 'lucide-react';
-import { useRevenue, useRevenueByApp, useRevenueComparison } from './useRevenue';
-import { formatCurrency, formatPercent } from '../../shared/lib/format';
+import { useTranslation } from 'react-i18next';
+import {
+  useRevenueSeries,
+  useRevenueByApp,
+  useRevenueComparison,
+} from '../../shared/hooks/queries/useRevenue';
+import { formatMoney } from '../../shared/utils/money';
+import { formatPercent } from '../../shared/lib/format';
 import { CardSkeleton, SkeletonRow } from '../../shared/components/Skeleton';
 import ErrorState from '../../shared/components/ErrorState';
 import EmptyState from '../../shared/components/EmptyState';
-
-const ACCENT = '#6366f1';
-
-const periods = [
-  { label: 'Daily', value: 'daily' },
-  { label: 'Weekly', value: 'weekly' },
-  { label: 'Monthly', value: 'monthly' },
-];
 
 const containerVariants = {
   hidden: {},
@@ -25,27 +23,21 @@ const itemVariants = {
   show: { opacity: 1, y: 0, transition: { duration: 0.22, ease: 'easeOut' } },
 };
 
-const Revenue: React.FC = () => {
-  const [period, setPeriod] = useState('monthly');
-  const { data: revenue, isLoading, isError, refetch } = useRevenue(period);
-  const { data: byApp, isLoading: byAppLoading } = useRevenueByApp(period);
-  const { data: comparison, isLoading: compLoading } = useRevenueComparison(period);
+const Revenue: React.FC = (): React.JSX.Element => {
+  const { t } = useTranslation();
+  const { data: series, isLoading, isError, refetch } = useRevenueSeries();
+  const { data: byApp, isLoading: byAppLoading } = useRevenueByApp();
+  const { data: comparison, isLoading: compLoading } = useRevenueComparison();
 
   if (isError) {
-    return <ErrorState message="Failed to load revenue data." onRetry={refetch} />;
+    return <ErrorState message={t('insights.errors.generic')} onRetry={refetch} />;
   }
 
-  type RevenueRow = {
-    date?: string;
-    period?: string;
-    revenue?: number;
-    amount?: number;
-    value?: number;
-  };
-  type AppRow = { app?: string; name?: string; revenue?: number; amount?: number };
-  const revenueData = (revenue?.data ?? []) as RevenueRow[];
-  const appBreakdown = (byApp ?? []) as AppRow[];
-  const compData = comparison ?? {};
+  const seriesRows = series?.series ?? [];
+  const appRows = byApp?.byApp ?? [];
+  const difference = (comparison?.thisPeriod ?? 0) - (comparison?.lastPeriod ?? 0);
+  const deltaPct = comparison?.deltaPct ?? 0;
+  const deltaUp = deltaPct >= 0;
 
   return (
     <motion.div
@@ -57,30 +49,14 @@ const Revenue: React.FC = () => {
       <motion.div variants={itemVariants as any} className="flex items-center justify-between">
         <div>
           <h2 className="text-xl font-semibold" style={{ color: 'var(--hub-text)' }}>
-            Revenue
+            {t('insights.revenue.title')}
           </h2>
           <p className="text-sm mt-0.5" style={{ color: 'var(--hub-text-muted)' }}>
-            Track revenue across all channels
+            {t('insights.revenue.subtitle')}
           </p>
-        </div>
-        <div className="flex gap-1 rounded-lg p-0.5" style={{ background: 'var(--hub-hover)' }}>
-          {periods.map((p) => (
-            <button
-              key={p.value}
-              onClick={() => setPeriod(p.value)}
-              className="px-3 py-1.5 rounded-md text-xs font-medium transition-colors"
-              style={{
-                background: period === p.value ? ACCENT : 'transparent',
-                color: period === p.value ? '#fff' : 'var(--hub-text-muted)',
-              }}
-            >
-              {p.label}
-            </button>
-          ))}
         </div>
       </motion.div>
 
-      {/* Comparison Cards */}
       {compLoading ? (
         <div className="grid grid-cols-1 lg:grid-cols-3 gap-4">
           {Array.from({ length: 3 }).map((_, i) => (
@@ -98,22 +74,22 @@ const Revenue: React.FC = () => {
             style={{ background: 'var(--hub-card)', border: '1px solid var(--hub-border)' }}
           >
             <p className="text-xs font-medium" style={{ color: 'var(--hub-text-muted)' }}>
-              Current Period
+              {t('insights.revenue.currentPeriod')}
             </p>
             <p className="text-2xl font-bold mt-1" style={{ color: 'var(--hub-text)' }}>
-              {formatCurrency(compData.current ?? 0)}
+              {formatMoney(comparison?.thisPeriod ?? 0)}
             </p>
             <div className="flex items-center gap-1 mt-1">
-              {(compData.changePercent ?? 0) >= 0 ? (
-                <ArrowUpRight size={12} style={{ color: '#10b981' }} />
+              {deltaUp ? (
+                <ArrowUpRight size={12} style={{ color: 'var(--delta-up)' }} />
               ) : (
-                <ArrowDownRight size={12} style={{ color: '#f87171' }} />
+                <ArrowDownRight size={12} style={{ color: 'var(--delta-down)' }} />
               )}
               <span
                 className="text-xs"
-                style={{ color: (compData.changePercent ?? 0) >= 0 ? '#10b981' : '#f87171' }}
+                style={{ color: deltaUp ? 'var(--delta-up)' : 'var(--delta-down)' }}
               >
-                {formatPercent(compData.changePercent ?? 0)} vs previous
+                {formatPercent(deltaPct)} vs previous
               </span>
             </div>
           </motion.div>
@@ -123,10 +99,10 @@ const Revenue: React.FC = () => {
             style={{ background: 'var(--hub-card)', border: '1px solid var(--hub-border)' }}
           >
             <p className="text-xs font-medium" style={{ color: 'var(--hub-text-muted)' }}>
-              Previous Period
+              {t('insights.revenue.previousPeriod')}
             </p>
             <p className="text-2xl font-bold mt-1" style={{ color: 'var(--hub-text)' }}>
-              {formatCurrency(compData.previous ?? 0)}
+              {formatMoney(comparison?.lastPeriod ?? 0)}
             </p>
           </motion.div>
           <motion.div
@@ -135,25 +111,24 @@ const Revenue: React.FC = () => {
             style={{ background: 'var(--hub-card)', border: '1px solid var(--hub-border)' }}
           >
             <p className="text-xs font-medium" style={{ color: 'var(--hub-text-muted)' }}>
-              Difference
+              {t('insights.revenue.difference')}
             </p>
             <p className="text-2xl font-bold mt-1" style={{ color: 'var(--hub-text)' }}>
-              {formatCurrency(compData.difference ?? 0)}
+              {formatMoney(difference)}
             </p>
           </motion.div>
         </motion.div>
       )}
 
-      {/* Revenue Chart Data */}
       <motion.div
         variants={itemVariants as any}
         className="rounded-xl p-5"
         style={{ background: 'var(--hub-card)', border: '1px solid var(--hub-border)' }}
       >
         <div className="flex items-center gap-2 mb-4">
-          <TrendingUp size={14} style={{ color: ACCENT }} />
+          <TrendingUp size={14} style={{ color: 'var(--accent)' }} />
           <h3 className="text-sm font-semibold" style={{ color: 'var(--hub-text)' }}>
-            Revenue Trend
+            {t('insights.revenue.trend')}
           </h3>
         </div>
         {isLoading ? (
@@ -162,24 +137,21 @@ const Revenue: React.FC = () => {
               <SkeletonRow key={i} cols={3} />
             ))}
           </div>
-        ) : revenueData.length === 0 ? (
-          <EmptyState
-            title="No revenue data"
-            description="Revenue data will appear here once transactions are recorded."
-          />
+        ) : seriesRows.length === 0 ? (
+          <EmptyState title="" description={t('insights.revenue.emptyTrend')} />
         ) : (
           <div className="space-y-1">
-            {revenueData.map((item, i) => (
+            {seriesRows.map((point) => (
               <div
-                key={i}
+                key={point.date}
                 className="flex items-center justify-between px-3 py-2.5 rounded-lg"
                 style={{ background: 'var(--hub-hover)' }}
               >
                 <span className="text-xs font-medium" style={{ color: 'var(--hub-text)' }}>
-                  {item.date ?? item.period ?? `Period ${i + 1}`}
+                  {point.date}
                 </span>
                 <span className="text-xs font-semibold" style={{ color: 'var(--hub-text)' }}>
-                  {formatCurrency(item.revenue ?? item.amount ?? 0)}
+                  {formatMoney(point.amountMinorUnits)}
                 </span>
               </div>
             ))}
@@ -187,14 +159,13 @@ const Revenue: React.FC = () => {
         )}
       </motion.div>
 
-      {/* By App Breakdown */}
       <motion.div
         variants={itemVariants as any}
         className="rounded-xl p-5"
         style={{ background: 'var(--hub-card)', border: '1px solid var(--hub-border)' }}
       >
         <h3 className="text-sm font-semibold mb-4" style={{ color: 'var(--hub-text)' }}>
-          Revenue by App
+          {t('insights.revenue.byApp')}
         </h3>
         {byAppLoading ? (
           <div className="space-y-2">
@@ -202,21 +173,22 @@ const Revenue: React.FC = () => {
               <SkeletonRow key={i} cols={2} />
             ))}
           </div>
-        ) : appBreakdown.length === 0 ? (
-          <EmptyState title="No app breakdown" description="Breakdown by app will appear here." />
+        ) : appRows.length === 0 ? (
+          <EmptyState title="" description={t('insights.revenue.emptyByApp')} />
         ) : (
           <div className="space-y-1">
-            {appBreakdown.map((item, i) => (
+            {appRows.map((row) => (
               <div
-                key={i}
+                key={row.app}
                 className="flex items-center justify-between px-3 py-2.5 rounded-lg"
                 style={{ background: 'var(--hub-hover)' }}
               >
                 <span className="text-xs font-medium" style={{ color: 'var(--hub-text)' }}>
-                  {item.app ?? item.name ?? 'Unknown'}
+                  {row.app}
                 </span>
                 <span className="text-xs font-semibold" style={{ color: 'var(--hub-text)' }}>
-                  {formatCurrency(item.revenue ?? item.amount ?? 0)}
+                  {formatMoney(row.amountMinorUnits)}{' '}
+                  <span style={{ color: 'var(--hub-text-muted)' }}>({row.pct.toFixed(1)}%)</span>
                 </span>
               </div>
             ))}
