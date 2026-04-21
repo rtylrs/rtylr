@@ -15,6 +15,11 @@ func RegisterRoutes(ctx context.Context, router *chi.Mux, svc *application.Servi
 		&handlers.ListCampaignsHandler{Service: svc},
 	)
 
+	http.RegisterGET[handlers.GetCampaignRequest, handlers.GetCampaignResponse](
+		ctx, router, handlers.CampaignGetRoutes(),
+		&handlers.GetCampaignHandler{Service: svc},
+	)
+
 	http.RegisterPOSTWithValidation[handlers.CreateCampaignRequest, handlers.CreateCampaignResponse](
 		ctx, router, handlers.CampaignCreateRoutes(),
 		&handlers.CreateCampaignHandler{Service: svc},

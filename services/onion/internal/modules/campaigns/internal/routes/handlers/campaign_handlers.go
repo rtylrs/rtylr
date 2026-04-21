@@ -2,6 +2,7 @@ package handlers
 
 import (
 	"context"
+	"errors"
 	"net/http"
 	"strconv"
 	"time"
@@ -81,6 +82,36 @@ func (h *ListCampaignsHandler) Serve(ctx context.Context, _ *ListCampaignsReques
 		payloads[i] = newCampaignPayload(c)
 	}
 	return ListCampaignsResponse{Campaigns: payloads}, nil
+}
+
+// ─── Get By ID ────────────────────────────────────────────────────────────────
+
+func CampaignGetRoutes() []string { return []string{"/crm/campaigns/{id}"} }
+
+type GetCampaignHandler struct{ Service *application.Service }
+type GetCampaignRequest struct{}
+type GetCampaignResponse struct {
+	Campaign CampaignPayload `json:"campaign"`
+}
+
+func (h *GetCampaignHandler) Serve(ctx context.Context, _ *GetCampaignRequest) (GetCampaignResponse, *errorModels.ServerError) {
+	device := authPkg.DeviceCtx(ctx)
+	if device.User == nil {
+		return GetCampaignResponse{}, errorModels.PermissionDeniedServerError()
+	}
+	idStr := chi.URLParamFromCtx(ctx, "id")
+	id, err := strconv.ParseInt(idStr, 10, 64)
+	if err != nil || id <= 0 {
+		return GetCampaignResponse{}, &errorModels.ServerError{Code: http.StatusBadRequest, Message: "Invalid campaign ID"}
+	}
+	campaign, getErr := h.Service.GetByID(ctx, device.User.UserID, id)
+	if getErr != nil {
+		if errors.Is(getErr, domain.ErrCampaignNotFound) {
+			return GetCampaignResponse{}, &errorModels.ServerError{Code: http.StatusNotFound, Message: "Campaign not found"}
+		}
+		return GetCampaignResponse{}, &errorModels.ServerError{Code: http.StatusInternalServerError, Message: "Failed to get campaign"}
+	}
+	return GetCampaignResponse{Campaign: newCampaignPayload(campaign)}, nil
 }
 
 // ─── Create ───────────────────────────────────────────────────────────────────

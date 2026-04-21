@@ -19,6 +19,10 @@ func (s *Service) List(ctx context.Context, ownerID int64) ([]domain.Campaign, e
 	return s.repo.List(ctx, ownerID)
 }
 
+func (s *Service) GetByID(ctx context.Context, ownerID, id int64) (domain.Campaign, error) {
+	return s.repo.GetByID(ctx, ownerID, id)
+}
+
 func (s *Service) Create(ctx context.Context, input domain.CampaignInput) (int64, error) {
 	return s.repo.Create(ctx, input)
 }
