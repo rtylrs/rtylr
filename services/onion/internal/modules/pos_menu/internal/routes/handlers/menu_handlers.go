@@ -28,7 +28,7 @@ func toProtoMenuItem(item domain.MenuItem) *posv1.MenuItem {
 
 // --- List ---
 
-func ListMenuItemsRoutes() []string { return []string{"/pos/menu/items"} }
+func ListMenuItemsRoutes() []string { return []string{"/pos/menu/items", "/pos/menu-items"} }
 
 type ListMenuItemsHandler struct{ Service *application.Service }
 type ListMenuItemsRequest struct{}

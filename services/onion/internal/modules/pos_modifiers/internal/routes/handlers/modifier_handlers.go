@@ -40,7 +40,7 @@ func newModifierPayload(m domain.Modifier) ModifierPayload {
 
 // --- List ---
 
-func ListModifiersRoutes() []string { return []string{"/pos/menu/modifiers"} }
+func ListModifiersRoutes() []string { return []string{"/pos/menu/modifiers", "/pos/modifiers"} }
 
 type ListModifiersHandler struct{ Service *application.Service }
 type ListModifiersRequest struct{}
@@ -66,7 +66,7 @@ func (h *ListModifiersHandler) Serve(ctx context.Context, _ *ListModifiersReques
 
 // --- Create ---
 
-func CreateModifierRoutes() []string { return []string{"/pos/menu/modifiers"} }
+func CreateModifierRoutes() []string { return []string{"/pos/menu/modifiers", "/pos/modifiers"} }
 
 type CreateModifierHandler struct{ Service *application.Service }
 

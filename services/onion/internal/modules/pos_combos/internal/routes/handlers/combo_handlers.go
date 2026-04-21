@@ -42,7 +42,7 @@ func newComboPayload(c domain.Combo) ComboPayload {
 
 // --- List ---
 
-func ListCombosRoutes() []string { return []string{"/pos/menu/combos"} }
+func ListCombosRoutes() []string { return []string{"/pos/menu/combos", "/pos/combos"} }
 
 type ListCombosHandler struct{ Service *application.Service }
 type ListCombosRequest struct{}
@@ -68,7 +68,7 @@ func (h *ListCombosHandler) Serve(ctx context.Context, _ *ListCombosRequest) (Li
 
 // --- Create ---
 
-func CreateComboRoutes() []string { return []string{"/pos/menu/combos"} }
+func CreateComboRoutes() []string { return []string{"/pos/menu/combos", "/pos/combos"} }
 
 type CreateComboHandler struct{ Service *application.Service }
 
