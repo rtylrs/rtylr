@@ -6,6 +6,7 @@ import (
 	"github.com/go-chi/chi/v5"
 	"github.com/voxire/onion/internal/modules/pos_menu/internal/application"
 	"github.com/voxire/onion/internal/modules/pos_menu/internal/routes"
+	"github.com/voxire/onion/internal/modules/pos_menu/internal/routes/handlers"
 )
 
 type Module struct {
@@ -21,5 +22,7 @@ func (m *Module) RegisterRoutes(ctx context.Context, router *chi.Mux, _ ...inter
 }
 
 func (m *Module) GetAnonymousRoutes() []string {
-	return []string{}
+	// Public-menu read is the one anonymous surface in pos_menu.
+	// Every other route is tenant-scoped and requires a JWT.
+	return handlers.PublicListMenuItemsRoutes()
 }

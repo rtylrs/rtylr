@@ -19,4 +19,11 @@ func RegisterRoutes(ctx context.Context, router *chi.Mux, svc *application.Servi
 		ctx, router, handlers.CreateMenuItemRoutes(),
 		&handlers.CreateMenuItemHandler{Service: svc},
 	)
+
+	// Public (anonymous) read — customer-facing menu app. Listed in
+	// module.go's GetAnonymousRoutes so the auth middleware skips it.
+	http.RegisterGETWithValidation[handlers.PublicListMenuItemsRequest, handlers.PublicListMenuItemsResponse](
+		ctx, router, handlers.PublicListMenuItemsRoutes(),
+		&handlers.PublicListMenuItemsHandler{Service: svc},
+	)
 }
