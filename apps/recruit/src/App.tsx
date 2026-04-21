@@ -1,6 +1,7 @@
 import React from 'react';
 import { Routes, Route } from 'react-router-dom';
 import { AppGuard } from '@voxire/auth';
+import { CookieBanner } from '@voxire/consent';
 
 import api from './shared/lib/api';
 import RootLanding from './features/public/RootLanding';
@@ -43,14 +44,20 @@ const AdminShell: React.FC = (): React.JSX.Element => (
 );
 
 const App: React.FC = (): React.JSX.Element => (
-  <Routes>
-    <Route path="/" element={<RootLanding />} />
-    <Route path="/admin/*" element={<AdminShell />} />
-    <Route path="/:slug" element={<CareersIndex />} />
-    <Route path="/:slug/:careerSlug" element={<CareerDetail />} />
-    <Route path="/:slug/:careerSlug/apply" element={<ApplyPage />} />
-    <Route path="*" element={<NotFound />} />
-  </Routes>
+  <>
+    <Routes>
+      <Route path="/" element={<RootLanding />} />
+      <Route path="/admin/*" element={<AdminShell />} />
+      <Route path="/:slug" element={<CareersIndex />} />
+      <Route path="/:slug/:careerSlug" element={<CareerDetail />} />
+      <Route path="/:slug/:careerSlug/apply" element={<ApplyPage />} />
+      <Route path="*" element={<NotFound />} />
+    </Routes>
+    {/* Public careers pages need the strict-opt-in banner (candidate
+        traffic is mostly EU); admin routes don't strictly need it but
+        showing it there too is cheaper than branching on path. */}
+    <CookieBanner />
+  </>
 );
 
 export default App;

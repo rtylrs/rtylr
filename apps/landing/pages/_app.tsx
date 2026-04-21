@@ -1,5 +1,7 @@
-import { useState } from 'react';
+import { useEffect, useState } from 'react';
 import { injectTheme } from '@voxire/config';
+import { bootObservability } from '@voxire/observability';
+import { CookieBanner } from '@voxire/consent';
 import type { AppProps } from 'next/app';
 import { QueryClient, QueryClientProvider } from '@tanstack/react-query';
 import { I18nextProvider } from 'react-i18next';
@@ -28,11 +30,22 @@ function MyApp({ Component, pageProps }: AppProps) {
       })
   );
 
+  // Next.js SSG: boot observability client-side only. Sentry init
+  // reads from `window`, and PostHog must wait for a consent cookie
+  // that only exists in the browser.
+  useEffect(() => {
+    bootObservability({ app: 'landing' });
+  }, []);
+
   return (
     <QueryClientProvider client={queryClient}>
       <CookiesProvider>
         <I18nextProvider i18n={i18next}>
           <Component {...pageProps} />
+          {/* Strict opt-in banner. Shows only until the visitor
+              accepts or declines — then cookies-granted unlocks the
+              PostHog init wired in bootObservability. */}
+          <CookieBanner />
         </I18nextProvider>
       </CookiesProvider>
     </QueryClientProvider>

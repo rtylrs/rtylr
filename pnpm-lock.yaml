@@ -59,9 +59,15 @@ importers:
       '@voxire/config':
         specifier: workspace:*
         version: link:packages/config
+      '@voxire/consent':
+        specifier: workspace:*
+        version: link:packages/consent
       '@voxire/menu':
         specifier: workspace:*
         version: link:packages/menu
+      '@voxire/observability':
+        specifier: workspace:*
+        version: link:packages/observability
       '@voxire/utils':
         specifier: workspace:*
         version: link:packages/utils
@@ -1352,6 +1358,9 @@ importers:
       '@voxire/config':
         specifier: workspace:*
         version: link:../../packages/config
+      '@voxire/consent':
+        specifier: workspace:*
+        version: link:../../packages/consent
       '@voxire/observability':
         specifier: workspace:*
         version: link:../../packages/observability
