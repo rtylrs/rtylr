@@ -2,6 +2,7 @@ package routes
 
 import (
 	"context"
+	"time"
 
 	"github.com/go-chi/chi/v5"
 	"github.com/voxire/onion/internal/modules/careers/internal/application"
@@ -71,9 +72,14 @@ func RegisterRoutes(ctx context.Context, router *chi.Mux, careersService *applic
 		ctx, router, handlers.GetPublicCareerRoutes(),
 		&handlers.GetPublicCareerHandler{CareersService: careersService},
 	)
-	serverHttp.RegisterPOSTWithValidation[handlers.SubmitApplicationRequest, handlers.SubmitApplicationResponse](
+	// Public apply — 5/min/IP. This is the single biggest spam
+	// target on the public surface (resume-blast bots and submission
+	// fuzzing); global 100/min isn't tight enough to stop an abuser
+	// from burying an inbox with junk.
+	serverHttp.RegisterPOSTWithValidationAndMiddleware[handlers.SubmitApplicationRequest, handlers.SubmitApplicationResponse](
 		ctx, router, handlers.SubmitApplicationRoutes(),
 		&handlers.SubmitApplicationHandler{CareersService: careersService},
+		serverHttp.PerRouteRateLimit(5, time.Minute),
 	)
 
 	// Resume upload flow — candidate presigns, browser PUTs direct to
