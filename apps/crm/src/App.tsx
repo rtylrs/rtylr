@@ -1,3 +1,4 @@
+import { AppFlagGuard, FLAG_KEYS } from '@voxire/config';
 import React from 'react';
 import { Routes, Route } from 'react-router-dom';
 import { AppGuard } from '@voxire/auth';
@@ -50,7 +51,9 @@ const App: React.FC = (): React.JSX.Element => (
       api.get('/user/me').then((r: { data: Record<string, unknown> }) => r.data)
     }
   >
-    <AppRouter />
+    <AppFlagGuard flag={FLAG_KEYS.APP_CRM}>
+      <AppRouter />
+    </AppFlagGuard>
   </AppGuard>
 );
 

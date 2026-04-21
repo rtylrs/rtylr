@@ -1,3 +1,4 @@
+import { AppFlagGuard, FLAG_KEYS } from '@voxire/config';
 import React from 'react';
 import { Routes, Route, useLocation } from 'react-router-dom';
 import { AppGuard } from '@voxire/auth';
@@ -26,7 +27,9 @@ const App: React.FC = (): React.JSX.Element => (
       api.get('/user/me').then((r: { data: Record<string, unknown> }) => r.data)
     }
   >
-    <AppRouter />
+    <AppFlagGuard flag={FLAG_KEYS.APP_FINANCE}>
+      <AppRouter />
+    </AppFlagGuard>
   </AppGuard>
 );
 

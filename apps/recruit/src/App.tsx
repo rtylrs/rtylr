@@ -1,3 +1,4 @@
+import { AppFlagGuard, FLAG_KEYS } from '@voxire/config';
 import React from 'react';
 import { Routes, Route } from 'react-router-dom';
 import { AppGuard } from '@voxire/auth';
@@ -45,14 +46,16 @@ const AdminShell: React.FC = (): React.JSX.Element => (
 
 const App: React.FC = (): React.JSX.Element => (
   <>
-    <Routes>
-      <Route path="/" element={<RootLanding />} />
-      <Route path="/admin/*" element={<AdminShell />} />
-      <Route path="/:slug" element={<CareersIndex />} />
-      <Route path="/:slug/:careerSlug" element={<CareerDetail />} />
-      <Route path="/:slug/:careerSlug/apply" element={<ApplyPage />} />
-      <Route path="*" element={<NotFound />} />
-    </Routes>
+    <AppFlagGuard flag={FLAG_KEYS.APP_RECRUIT}>
+      <Routes>
+        <Route path="/" element={<RootLanding />} />
+        <Route path="/admin/*" element={<AdminShell />} />
+        <Route path="/:slug" element={<CareersIndex />} />
+        <Route path="/:slug/:careerSlug" element={<CareerDetail />} />
+        <Route path="/:slug/:careerSlug/apply" element={<ApplyPage />} />
+        <Route path="*" element={<NotFound />} />
+      </Routes>
+    </AppFlagGuard>
     {/* Public careers pages need the strict-opt-in banner (candidate
         traffic is mostly EU); admin routes don't strictly need it but
         showing it there too is cheaper than branching on path. */}

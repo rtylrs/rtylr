@@ -1,6 +1,6 @@
 import React, { useEffect, Suspense, useState } from 'react';
 import { Route, Routes, useLocation } from 'react-router-dom';
-import { APP_URLS } from '@voxire/config';
+import { APP_URLS, AppFlagGuard, FLAG_KEYS } from '@voxire/config';
 import AppRoutes from './routes/AppRoutes';
 import NoMatch from './features/extras/NoMatch';
 import { useUserStore } from './shared/stores';
@@ -26,12 +26,14 @@ const AppInner = (): React.JSX.Element => {
   const location = useLocation();
   return (
     <Suspense fallback={null}>
-      <Routes key={location.pathname} location={location}>
-        {AppRoutes.map((route, index) => (
-          <Route key={index} path={route.path} element={route.element} />
-        ))}
-        <Route path="*" element={<NoMatch />} />
-      </Routes>
+      <AppFlagGuard flag={FLAG_KEYS.APP_POS}>
+        <Routes key={location.pathname} location={location}>
+          {AppRoutes.map((route, index) => (
+            <Route key={index} path={route.path} element={route.element} />
+          ))}
+          <Route path="*" element={<NoMatch />} />
+        </Routes>
+      </AppFlagGuard>
       <CommandPalette />
       <HelpOverlay />
     </Suspense>

@@ -1,3 +1,4 @@
+import { AppFlagGuard, FLAG_KEYS } from '@voxire/config';
 import React, { Suspense, useEffect } from 'react';
 import { Route, Routes, useLocation } from 'react-router-dom';
 import { FullScreenLoader } from '@voxire/components';
@@ -15,11 +16,13 @@ const App = (): JSX.Element => {
 
   return (
     <Suspense fallback={<FullScreenLoader />}>
-      <Routes key={location.pathname} location={location}>
-        {PublicRoutes.map((route, index) => (
-          <Route key={index} path={route.path} element={route.element} />
-        ))}
-      </Routes>
+      <AppFlagGuard flag={FLAG_KEYS.APP_MENU}>
+        <Routes key={location.pathname} location={location}>
+          {PublicRoutes.map((route, index) => (
+            <Route key={index} path={route.path} element={route.element} />
+          ))}
+        </Routes>
+      </AppFlagGuard>
     </Suspense>
   );
 };
