@@ -2,6 +2,7 @@ package routes
 
 import (
 	"context"
+	"time"
 
 	"github.com/go-chi/chi/v5"
 	"github.com/voxire/onion/internal/modules/user/internal/application"
@@ -20,17 +21,24 @@ func RegisterRoutes(ctx context.Context, router *chi.Mux, userService *applicati
 		userLoginCb = callbacks[1]
 	}
 
-	http.RegisterPOSTWithValidation[handlers.RegisterRequest, handlers.RegisterResponse](
+	// Auth endpoints get a tighter per-route limit on top of the
+	// global 100/min. 3/min on register and 5/min on login are wide
+	// enough for legitimate retries (wrong-password humans, reloads
+	// during signup) and narrow enough to make credential-stuffing +
+	// signup-spam impractical from a single IP.
+	http.RegisterPOSTWithValidationAndMiddleware[handlers.RegisterRequest, handlers.RegisterResponse](
 		ctx,
 		router,
 		handlers.RegisterRoutes(),
 		&handlers.RegisterHandler{UserService: userService, ProvisionerResolver: provisionerResolver, OnUserCreated: userCreatedCb},
+		http.PerRouteRateLimit(3, time.Minute),
 	)
-	http.RegisterPOSTWithValidation[handlers.LoginRequest, handlers.LoginResponse](
+	http.RegisterPOSTWithValidationAndMiddleware[handlers.LoginRequest, handlers.LoginResponse](
 		ctx,
 		router,
 		handlers.LoginRoutes(),
 		&handlers.LoginHandler{UserService: userService, ProvisionerResolver: provisionerResolver, OnUserLogin: userLoginCb},
+		http.PerRouteRateLimit(5, time.Minute),
 	)
 
 	http.RegisterGET[handlers.GetProfileRequest, handlers.GetProfileResponse](
