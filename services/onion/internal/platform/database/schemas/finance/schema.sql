@@ -2,11 +2,14 @@ CREATE TABLE IF NOT EXISTS finance_accounts (
     id BIGINT NOT NULL AUTO_INCREMENT PRIMARY KEY,
     owner_id BIGINT NOT NULL,
     name VARCHAR(255) NOT NULL,
+    code VARCHAR(32) NULL,
+    parent_id BIGINT NULL,
     type ENUM('asset','liability','equity','revenue','expense') NOT NULL,
     currency VARCHAR(10) DEFAULT 'USD',
     balance DECIMAL(15,2) DEFAULT 0,
     is_active BOOLEAN DEFAULT TRUE,
-    created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
+    created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+    INDEX idx_finance_accounts_parent (parent_id)
 );
 
 CREATE TABLE IF NOT EXISTS finance_invoices (
@@ -165,6 +168,8 @@ CREATE TABLE IF NOT EXISTS finance_journal_entries (
     owner_id BIGINT NOT NULL,
     date DATE NOT NULL,
     description TEXT,
+    status VARCHAR(20) NOT NULL DEFAULT 'draft',
+    posted_at TIMESTAMP NULL,
     created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
 );
 
