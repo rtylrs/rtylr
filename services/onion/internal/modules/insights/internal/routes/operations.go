@@ -23,4 +23,8 @@ func registerOperationsRoutes(ctx context.Context, router *chi.Mux, svc *applica
 		ctx, router, handlers.GetShiftMetricsRoutes(),
 		&handlers.GetShiftMetricsHandler{Service: svc},
 	)
+	serverHttp.RegisterGET[handlers.GetTimeOffRequest, handlers.GetTimeOffResponse](
+		ctx, router, handlers.GetTimeOffRoutes(),
+		&handlers.GetTimeOffHandler{Service: svc},
+	)
 }
