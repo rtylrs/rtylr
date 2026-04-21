@@ -3,10 +3,18 @@ package application
 import (
 	"context"
 	"errors"
+	"fmt"
 
 	"github.com/voxire/onion/internal/modules/pos_orders/internal/domain"
 	"github.com/voxire/onion/internal/modules/pos_orders/internal/infrastructure"
+	"github.com/voxire/onion/internal/platform/paddle"
 )
+
+// PaddlePaymentResult mirrors paddle.POSPaymentResult for the service surface.
+type PaddlePaymentResult struct {
+	TransactionID string
+	CheckoutURL   string
+}
 
 type Service struct {
 	repo *infrastructure.Repository
@@ -229,6 +237,82 @@ func (s *Service) HoldOrder(ctx context.Context, ownerID, orderID int64, reason 
 
 func (s *Service) ListHeldOrders(ctx context.Context, ownerID int64) ([]domain.Order, error) {
 	return s.repo.ListHeldOrders(ctx, ownerID)
+}
+
+// ─── Paddle billing ─────────────────────────────────────────────────────────
+
+// CreatePaddlePayment creates a Paddle transaction for the given order and
+// persists the returned transaction id on the order row. The actual transition
+// to status=paid happens when the matching transaction.completed webhook
+// arrives — not here.
+func (s *Service) CreatePaddlePayment(ctx context.Context, ownerID, orderID int64, customerEmail, currency string) (PaddlePaymentResult, error) {
+	order, err := s.repo.GetOrder(ctx, ownerID, orderID)
+	if err != nil {
+		return PaddlePaymentResult{}, err
+	}
+	if order == nil {
+		return PaddlePaymentResult{}, domain.ErrOrderNotFound
+	}
+	if order.PaymentStatus == domain.PaymentStatus("paid") {
+		return PaddlePaymentResult{}, errors.New("order already paid")
+	}
+
+	amountMinor := int64(order.Total * 100)
+	if amountMinor <= 0 {
+		return PaddlePaymentResult{}, errors.New("order total must be positive")
+	}
+	if currency == "" {
+		currency = "USD"
+	}
+
+	result, err := paddle.CreatePOSTransaction(ctx, paddle.POSPaymentRequest{
+		OwnerID:        ownerID,
+		OrderID:        orderID,
+		AmountMinor:    amountMinor,
+		Currency:       currency,
+		CustomerEmail:  customerEmail,
+		Description:    fmt.Sprintf("POS order %s", order.OrderNumber),
+		IdempotencyKey: fmt.Sprintf("order:%d:%d", orderID, ownerID),
+	})
+	if err != nil {
+		return PaddlePaymentResult{}, err
+	}
+
+	if setErr := s.repo.SetPaddleTransactionID(ctx, ownerID, orderID, result.TransactionID); setErr != nil {
+		return PaddlePaymentResult{}, setErr
+	}
+
+	return PaddlePaymentResult{
+		TransactionID: result.TransactionID,
+		CheckoutURL:   result.CheckoutURL,
+	}, nil
+}
+
+// HandlePaddleTransactionCompleted marks the matching order as paid. Uses the
+// pos_paddle_events_processed table to dedupe repeat deliveries.
+func (s *Service) HandlePaddleTransactionCompleted(ctx context.Context, txID, eventType string) error {
+	if txID == "" {
+		return errors.New("paddle transaction id required")
+	}
+
+	processed, err := s.repo.IsPaddleEventProcessed(ctx, txID)
+	if err != nil {
+		return err
+	}
+	if processed {
+		return nil
+	}
+
+	_, ownerID, getErr := s.repo.GetOrderIDByPaddleTx(ctx, txID)
+	if getErr != nil {
+		return getErr
+	}
+
+	if _, markErr := s.repo.MarkOrderPaidByPaddleTx(ctx, txID); markErr != nil {
+		return markErr
+	}
+
+	return s.repo.RecordPaddleEventProcessed(ctx, txID, eventType, ownerID)
 }
 
 // ─── Dashboard ───────────────────────────────────────────────────────────────

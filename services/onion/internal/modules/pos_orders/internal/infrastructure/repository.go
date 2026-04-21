@@ -1042,3 +1042,52 @@ func scanOrderRow(rows *sql.Rows) (domain.Order, error) {
 
 	return o, nil
 }
+
+// ─── Paddle integration ─────────────────────────────────────────────────────
+
+func (r *Repository) SetPaddleTransactionID(ctx context.Context, ownerID, orderID int64, txID string) error {
+	_, err := r.queries.SetOrderPaddleTransactionID(ctx, sqlc.SetOrderPaddleTransactionIDParams{
+		PaddleTransactionID: sql.NullString{String: txID, Valid: txID != ""},
+		ID:                  orderID,
+		OwnerID:             ownerID,
+	})
+	if err != nil {
+		logger.Ctx(ctx).Error("Failed to set paddle transaction id", logger.Error(err))
+		return err
+	}
+	return nil
+}
+
+func (r *Repository) MarkOrderPaidByPaddleTx(ctx context.Context, txID string) (int64, error) {
+	res, err := r.queries.MarkOrderPaidByPaddleTransaction(ctx, sql.NullString{String: txID, Valid: true})
+	if err != nil {
+		logger.Ctx(ctx).Error("Failed to mark order paid by paddle tx", logger.Error(err))
+		return 0, err
+	}
+	return res.RowsAffected()
+}
+
+func (r *Repository) IsPaddleEventProcessed(ctx context.Context, txID string) (bool, error) {
+	count, err := r.queries.IsPaddleEventProcessed(ctx, txID)
+	if err != nil {
+		return false, err
+	}
+	return count > 0, nil
+}
+
+func (r *Repository) RecordPaddleEventProcessed(ctx context.Context, txID, eventType string, ownerID int64) error {
+	_, err := r.queries.RecordPaddleEventProcessed(ctx, sqlc.RecordPaddleEventProcessedParams{
+		TransactionID: txID,
+		EventType:     eventType,
+		OwnerID:       ownerID,
+	})
+	return err
+}
+
+func (r *Repository) GetOrderIDByPaddleTx(ctx context.Context, txID string) (int64, int64, error) {
+	row, err := r.queries.GetOrderIDByPaddleTransaction(ctx, sql.NullString{String: txID, Valid: true})
+	if err != nil {
+		return 0, 0, err
+	}
+	return row.ID, row.OwnerID, nil
+}

@@ -83,6 +83,104 @@ type SubscriptionData struct {
 
 // ── Client ─────────────────────────────────────────────────────────────────────
 
+// POSPaymentRequest represents a POS-originated Paddle transaction creation.
+type POSPaymentRequest struct {
+	OwnerID        int64
+	OrderID        int64
+	AmountMinor    int64  // amount in minor units (e.g. cents)
+	Currency       string // ISO currency code (USD, EUR, etc.)
+	CustomerEmail  string
+	Description    string
+	IdempotencyKey string
+}
+
+// POSPaymentResult is returned by CreatePOSTransaction.
+type POSPaymentResult struct {
+	TransactionID string
+	CheckoutURL   string
+}
+
+// CreatePOSTransaction creates a one-off Paddle transaction for a POS order.
+// Uses the idempotency key so retries with the same key resolve to the same
+// transaction on Paddle's side.
+func CreatePOSTransaction(ctx context.Context, req POSPaymentRequest) (POSPaymentResult, error) {
+	if !config.IsPaddleConfigured() {
+		return POSPaymentResult{}, fmt.Errorf("paddle not configured")
+	}
+
+	// Paddle's transaction-creation endpoint accepts an inline one-off price via
+	// the items array with non_catalog_price payloads.
+	body := map[string]interface{}{
+		"collection_mode": "automatic",
+		"customer_email":  req.CustomerEmail,
+		"custom_data": map[string]string{
+			"owner_id": fmt.Sprintf("%d", req.OwnerID),
+			"order_id": fmt.Sprintf("%d", req.OrderID),
+		},
+		"items": []map[string]interface{}{
+			{
+				"quantity": 1,
+				"price": map[string]interface{}{
+					"description": req.Description,
+					"unit_price": map[string]interface{}{
+						"amount":        fmt.Sprintf("%d", req.AmountMinor),
+						"currency_code": strings.ToUpper(req.Currency),
+					},
+				},
+			},
+		},
+	}
+
+	raw, err := json.Marshal(body)
+	if err != nil {
+		return POSPaymentResult{}, err
+	}
+
+	httpReq, err := http.NewRequestWithContext(ctx, http.MethodPost,
+		config.GetPaddleBaseURL()+"/transactions", bytes.NewReader(raw))
+	if err != nil {
+		return POSPaymentResult{}, err
+	}
+
+	httpReq.Header.Set("Content-Type", "application/json")
+	httpReq.Header.Set("Authorization", "Bearer "+config.GetPaddleAPIKey())
+	if req.IdempotencyKey != "" {
+		httpReq.Header.Set("Paddle-Idempotency-Key", req.IdempotencyKey)
+	}
+
+	resp, err := http.DefaultClient.Do(httpReq)
+	if err != nil {
+		return POSPaymentResult{}, err
+	}
+	defer func() { _ = resp.Body.Close() }()
+
+	respBody, err := io.ReadAll(resp.Body)
+	if err != nil {
+		return POSPaymentResult{}, err
+	}
+
+	if resp.StatusCode != http.StatusCreated && resp.StatusCode != http.StatusOK {
+		logger.Ctx(ctx).Error("paddle create POS transaction failed",
+			logger.String("status", resp.Status),
+			logger.String("body", string(respBody)),
+		)
+		return POSPaymentResult{}, fmt.Errorf("paddle API returned %s", resp.Status)
+	}
+
+	var txResp TransactionResponse
+	if err := json.Unmarshal(respBody, &txResp); err != nil {
+		return POSPaymentResult{}, err
+	}
+	if txResp.Error != nil {
+		return POSPaymentResult{}, fmt.Errorf("paddle error %s: %s", txResp.Error.Code, txResp.Error.Detail)
+	}
+
+	return POSPaymentResult{
+		TransactionID: txResp.Data.ID,
+		CheckoutURL:   txResp.Data.Checkout.URL,
+	}, nil
+}
+
 // CreateTransaction creates a Paddle transaction (checkout session).
 // Returns the checkout URL the user should be redirected to.
 func CreateTransaction(ctx context.Context, ownerID int64, priceID string, customerEmail string) (string, error) {

@@ -186,3 +186,21 @@ WHERE id = ? AND owner_id = ?;
 -- name: HoldOrder :execresult
 UPDATE pos_orders SET status = 'held', notes = CONCAT(COALESCE(notes,''), ?)
 WHERE id = ? AND owner_id = ?;
+
+-- name: SetOrderPaddleTransactionID :execresult
+UPDATE pos_orders SET paddle_transaction_id = ?
+WHERE id = ? AND owner_id = ?;
+
+-- name: MarkOrderPaidByPaddleTransaction :execresult
+UPDATE pos_orders SET status = 'paid', payment_status = 'paid', paid_at = NOW()
+WHERE paddle_transaction_id = ? AND payment_status <> 'paid';
+
+-- name: GetOrderIDByPaddleTransaction :one
+SELECT id, owner_id FROM pos_orders WHERE paddle_transaction_id = ? LIMIT 1;
+
+-- name: RecordPaddleEventProcessed :execresult
+INSERT INTO pos_paddle_events_processed (transaction_id, event_type, owner_id)
+VALUES (?, ?, ?);
+
+-- name: IsPaddleEventProcessed :one
+SELECT COUNT(*) FROM pos_paddle_events_processed WHERE transaction_id = ?;
