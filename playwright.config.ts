@@ -66,6 +66,14 @@ export default defineConfig({
       stderr: 'pipe',
     },
     {
+      command: 'pnpm --filter @rtylr/finance dev',
+      port: 5182,
+      reuseExistingServer: !process.env.CI,
+      timeout: 120_000,
+      stdout: 'pipe',
+      stderr: 'pipe',
+    },
+    {
       command: 'pnpm --filter @rtylr/crm dev',
       port: 5181,
       reuseExistingServer: !process.env.CI,
