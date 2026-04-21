@@ -106,4 +106,24 @@ test.describe('Auth login', () => {
     const tokenCookie = cookies.find((c) => c.name === 'token');
     expect(tokenCookie?.value).toBe('fake-jwt');
   });
+
+  test('register page loads', async ({ page }) => {
+    await page.goto(`${AUTH_URL}/register`);
+    // Email field is the most stable signal that the register form
+    // mounted — every register variant has an email input.
+    await expect(page.getByRole('textbox', { name: /email/i }).first()).toBeVisible({
+      timeout: 10_000,
+    });
+  });
+
+  test('reset-password page loads with email field', async ({ page }) => {
+    await page.goto(`${AUTH_URL}/password-reset`);
+    await expect(page.getByRole('textbox', { name: /email/i }).first()).toBeVisible({
+      timeout: 10_000,
+    });
+    // The "Send reset link" button is the action surface.
+    await expect(
+      page.getByRole('button', { name: /send reset|reset link/i }).first()
+    ).toBeVisible();
+  });
 });
