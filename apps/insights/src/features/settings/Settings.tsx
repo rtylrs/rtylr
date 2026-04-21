@@ -1,28 +1,17 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { motion } from 'motion/react';
-import {
-  Settings as SettingsIcon,
-  Clock,
-  Mail,
-  Calendar,
-  Loader2,
-  Plus,
-  Trash2,
-} from 'lucide-react';
+import { Settings as SettingsIcon, Clock, Loader2, Trash2 } from 'lucide-react';
+import { useTranslation } from 'react-i18next';
 import appConfig from '../../app.json';
 import {
   useInsightsSettings,
   useUpdateInsightsSettings,
   useScheduledReports,
-  useCreateScheduledReport,
   useDeleteScheduledReport,
-} from './useSettings';
+} from '../../shared/hooks/queries/useInsightsSettings';
 import { CardSkeleton, SkeletonRow } from '../../shared/components/Skeleton';
 import ErrorState from '../../shared/components/ErrorState';
 import EmptyState from '../../shared/components/EmptyState';
-import { toast } from 'sonner';
-
-const ACCENT = '#6366f1';
 
 const containerVariants = {
   hidden: {},
@@ -34,61 +23,41 @@ const itemVariants = {
   show: { opacity: 1, y: 0, transition: { duration: 0.22, ease: 'easeOut' } },
 };
 
-const dateRangeOptions = [
-  { label: 'Last 7 Days', value: '7d' },
-  { label: 'Last 30 Days', value: '30d' },
-  { label: 'Last 90 Days', value: '90d' },
-  { label: 'Year to Date', value: 'ytd' },
-  { label: 'Last 12 Months', value: '12m' },
-];
-
-const Settings: React.FC = () => {
+const Settings: React.FC = (): React.JSX.Element => {
+  const { t } = useTranslation();
   const { data: settings, isLoading: settingsLoading, isError, refetch } = useInsightsSettings();
   const updateSettings = useUpdateInsightsSettings();
-  const { data: scheduled, isLoading: schedLoading } = useScheduledReports();
-  const createScheduled = useCreateScheduledReport();
+  const { data: scheduledRes, isLoading: schedLoading } = useScheduledReports();
   const deleteScheduled = useDeleteScheduledReport();
 
-  const [defaultRange, setDefaultRange] = useState<string>(settings?.defaultDateRange ?? '30d');
-  const [emailRecipients, setEmailRecipients] = useState<string>(
-    settings?.emailRecipients?.join(', ') ?? ''
-  );
+  const [defaultCurrency, setDefaultCurrency] = useState<string>('');
+  const [fiscalYearStart, setFiscalYearStart] = useState<string>('');
+  const [timezone, setTimezone] = useState<string>('');
+
+  useEffect(() => {
+    if (settings) {
+      setDefaultCurrency(settings.defaultCurrency);
+      setFiscalYearStart(settings.fiscalYearStart);
+      setTimezone(settings.timezone);
+    }
+  }, [settings]);
 
   if (isError) {
-    return <ErrorState message="Failed to load settings." onRetry={refetch} />;
+    return <ErrorState message={t('insights.errors.generic')} onRetry={refetch} />;
   }
 
-  type ScheduledRow = {
-    id?: string | number;
-    name?: string;
-    reportName?: string;
-    schedule?: string;
-    frequency?: string;
-  };
-  const scheduledList = (scheduled ?? []) as ScheduledRow[];
+  const scheduledList = scheduledRes?.scheduledReports ?? [];
 
-  const handleSave = async () => {
-    try {
-      await updateSettings.mutateAsync({
-        defaultDateRange: defaultRange,
-        emailRecipients: emailRecipients
-          .split(',')
-          .map((e: string) => e.trim())
-          .filter(Boolean),
-      });
-      toast.success('Settings saved');
-    } catch {
-      toast.error('Failed to save settings');
-    }
+  const handleSave = (): void => {
+    updateSettings.mutate({
+      defaultCurrency,
+      fiscalYearStart,
+      timezone,
+    });
   };
 
-  const handleDeleteScheduled = async (id: string) => {
-    try {
-      await deleteScheduled.mutateAsync(id);
-      toast.success('Scheduled report removed');
-    } catch {
-      toast.error('Failed to remove scheduled report');
-    }
+  const handleDeleteScheduled = (id: number): void => {
+    deleteScheduled.mutate(id);
   };
 
   return (
@@ -100,102 +69,163 @@ const Settings: React.FC = () => {
     >
       <motion.div variants={itemVariants as any}>
         <h2 className="text-xl font-semibold" style={{ color: 'var(--hub-text)' }}>
-          Settings
+          {t('insights.settings.title')}
         </h2>
-        <p className="text-sm mt-0.5" style={{ color: 'var(--hub-text-muted)' }}>
-          Report scheduling, email recipients, and defaults
-        </p>
       </motion.div>
 
-      {/* Default Date Range */}
+      <motion.div
+        variants={itemVariants as any}
+        className="rounded-xl p-5 space-y-4"
+        style={{ background: 'var(--hub-card)', border: '1px solid var(--hub-border)' }}
+      >
+        {settingsLoading ? (
+          <CardSkeleton />
+        ) : (
+          <>
+            <div>
+              <label
+                htmlFor="insights-default-currency"
+                className="text-xs font-medium"
+                style={{ color: 'var(--hub-text-muted)' }}
+              >
+                {t('insights.settings.defaultCurrency')}
+              </label>
+              <input
+                id="insights-default-currency"
+                type="text"
+                value={defaultCurrency}
+                onChange={(e) => setDefaultCurrency(e.target.value)}
+                className="mt-1 w-full px-3 py-2 rounded-lg text-base outline-none"
+                style={{
+                  background: 'var(--hub-input-bg)',
+                  border: '1px solid var(--hub-border)',
+                  color: 'var(--hub-text)',
+                  fontSize: '16px',
+                }}
+              />
+            </div>
+            <div>
+              <label
+                htmlFor="insights-fiscal-year"
+                className="text-xs font-medium"
+                style={{ color: 'var(--hub-text-muted)' }}
+              >
+                {t('insights.settings.fiscalYearStart')}
+              </label>
+              <input
+                id="insights-fiscal-year"
+                type="text"
+                value={fiscalYearStart}
+                onChange={(e) => setFiscalYearStart(e.target.value)}
+                placeholder="MM-DD"
+                className="mt-1 w-full px-3 py-2 rounded-lg outline-none"
+                style={{
+                  background: 'var(--hub-input-bg)',
+                  border: '1px solid var(--hub-border)',
+                  color: 'var(--hub-text)',
+                  fontSize: '16px',
+                }}
+              />
+            </div>
+            <div>
+              <label
+                htmlFor="insights-timezone"
+                className="text-xs font-medium"
+                style={{ color: 'var(--hub-text-muted)' }}
+              >
+                {t('insights.settings.timezone')}
+              </label>
+              <input
+                id="insights-timezone"
+                type="text"
+                value={timezone}
+                onChange={(e) => setTimezone(e.target.value)}
+                className="mt-1 w-full px-3 py-2 rounded-lg outline-none"
+                style={{
+                  background: 'var(--hub-input-bg)',
+                  border: '1px solid var(--hub-border)',
+                  color: 'var(--hub-text)',
+                  fontSize: '16px',
+                }}
+              />
+            </div>
+          </>
+        )}
+      </motion.div>
+
+      <motion.div variants={itemVariants as any}>
+        <button
+          type="button"
+          onClick={handleSave}
+          disabled={updateSettings.isPending}
+          className="flex items-center gap-2 px-4 py-2 rounded-lg text-sm font-semibold min-h-[44px]"
+          style={{ background: 'var(--accent)', color: 'var(--accent-fg)' }}
+          aria-label={t('insights.settings.saved')}
+        >
+          {updateSettings.isPending && <Loader2 size={14} className="animate-spin" />}
+          {t('insights.settings.saved')}
+        </button>
+      </motion.div>
+
       <motion.div
         variants={itemVariants as any}
         className="rounded-xl p-5"
         style={{ background: 'var(--hub-card)', border: '1px solid var(--hub-border)' }}
       >
-        <div className="flex items-center gap-2 mb-4">
-          <Calendar size={14} style={{ color: ACCENT }} />
-          <h3 className="text-sm font-semibold" style={{ color: 'var(--hub-text)' }}>
-            Default Date Range
-          </h3>
+        <div className="flex items-center justify-between mb-4">
+          <div className="flex items-center gap-2">
+            <Clock size={14} style={{ color: 'var(--accent)' }} />
+            <h3 className="text-sm font-semibold" style={{ color: 'var(--hub-text)' }}>
+              {t('insights.settings.scheduledReports.title')}
+            </h3>
+          </div>
         </div>
-        {settingsLoading ? (
-          <CardSkeleton />
+        {schedLoading ? (
+          <div className="space-y-2">
+            {Array.from({ length: 3 }).map((_, i) => (
+              <SkeletonRow key={i} cols={3} />
+            ))}
+          </div>
+        ) : scheduledList.length === 0 ? (
+          <EmptyState title="" description={t('insights.settings.scheduledReports.empty')} />
         ) : (
-          <div className="flex flex-wrap gap-2">
-            {dateRangeOptions.map((opt) => (
-              <button
-                key={opt.value}
-                onClick={() => setDefaultRange(opt.value)}
-                className="px-3 py-1.5 rounded-lg text-xs font-medium transition-colors"
-                style={{
-                  background: defaultRange === opt.value ? ACCENT : 'var(--hub-hover)',
-                  color: defaultRange === opt.value ? '#fff' : 'var(--hub-text-muted)',
-                }}
+          <div className="space-y-1">
+            {scheduledList.map((s) => (
+              <div
+                key={s.id}
+                className="flex items-center justify-between px-3 py-2.5 rounded-lg"
+                style={{ background: 'var(--hub-hover)' }}
               >
-                {opt.label}
-              </button>
+                <div>
+                  <p className="text-xs font-medium" style={{ color: 'var(--hub-text)' }}>
+                    {s.templateId}
+                  </p>
+                  <p className="text-[11px]" style={{ color: 'var(--hub-text-dim)' }}>
+                    {s.cadence} · {s.channel} · {s.recipient}
+                  </p>
+                </div>
+                <button
+                  type="button"
+                  onClick={() => handleDeleteScheduled(s.id)}
+                  className="h-11 w-11 rounded flex items-center justify-center"
+                  style={{ color: 'var(--hub-text-dim)' }}
+                  aria-label={t('insights.settings.scheduledReports.delete')}
+                >
+                  <Trash2 size={12} />
+                </button>
+              </div>
             ))}
           </div>
         )}
       </motion.div>
 
-      {/* Email Recipients */}
       <motion.div
         variants={itemVariants as any}
         className="rounded-xl p-5"
         style={{ background: 'var(--hub-card)', border: '1px solid var(--hub-border)' }}
       >
         <div className="flex items-center gap-2 mb-4">
-          <Mail size={14} style={{ color: ACCENT }} />
-          <h3 className="text-sm font-semibold" style={{ color: 'var(--hub-text)' }}>
-            Email Recipients
-          </h3>
-        </div>
-        {settingsLoading ? (
-          <SkeletonRow cols={1} />
-        ) : (
-          <div>
-            <input
-              type="text"
-              value={emailRecipients}
-              onChange={(e) => setEmailRecipients(e.target.value)}
-              placeholder="email1@example.com, email2@example.com"
-              className="w-full px-3 py-2 rounded-lg text-sm outline-none"
-              style={{
-                background: 'var(--hub-input-bg)',
-                border: '1px solid var(--hub-border)',
-                color: 'var(--hub-text)',
-              }}
-            />
-            <p className="text-[11px] mt-1" style={{ color: 'var(--hub-text-dim)' }}>
-              Comma-separated list of email addresses
-            </p>
-          </div>
-        )}
-      </motion.div>
-
-      {/* Save Button */}
-      <motion.div variants={itemVariants as any}>
-        <button
-          onClick={handleSave}
-          disabled={updateSettings.isPending}
-          className="flex items-center gap-2 px-4 py-2 rounded-lg text-sm font-semibold transition-colors"
-          style={{ background: ACCENT, color: '#fff' }}
-        >
-          {updateSettings.isPending && <Loader2 size={14} className="animate-spin" />}
-          Save Settings
-        </button>
-      </motion.div>
-
-      {/* About */}
-      <motion.div
-        variants={itemVariants as any}
-        className="rounded-xl p-5"
-        style={{ background: 'var(--hub-card)', border: '1px solid var(--hub-border)' }}
-      >
-        <div className="flex items-center gap-2 mb-4">
-          <SettingsIcon size={14} style={{ color: ACCENT }} />
+          <SettingsIcon size={14} style={{ color: 'var(--accent)' }} />
           <h3 className="text-sm font-semibold" style={{ color: 'var(--hub-text)' }}>
             About
           </h3>
@@ -219,66 +249,6 @@ const Settings: React.FC = () => {
             </div>
           ))}
         </div>
-      </motion.div>
-
-      {/* Scheduled Reports */}
-      <motion.div
-        variants={itemVariants as any}
-        className="rounded-xl p-5"
-        style={{ background: 'var(--hub-card)', border: '1px solid var(--hub-border)' }}
-      >
-        <div className="flex items-center justify-between mb-4">
-          <div className="flex items-center gap-2">
-            <Clock size={14} style={{ color: ACCENT }} />
-            <h3 className="text-sm font-semibold" style={{ color: 'var(--hub-text)' }}>
-              Scheduled Reports
-            </h3>
-          </div>
-        </div>
-        {schedLoading ? (
-          <div className="space-y-2">
-            {Array.from({ length: 3 }).map((_, i) => (
-              <SkeletonRow key={i} cols={3} />
-            ))}
-          </div>
-        ) : scheduledList.length === 0 ? (
-          <EmptyState
-            title="No scheduled reports"
-            description="Scheduled reports will appear here once configured."
-          />
-        ) : (
-          <div className="space-y-1">
-            {scheduledList.map((s) => (
-              <div
-                key={s.id}
-                className="flex items-center justify-between px-3 py-2.5 rounded-lg"
-                style={{ background: 'var(--hub-hover)' }}
-              >
-                <div>
-                  <p className="text-xs font-medium" style={{ color: 'var(--hub-text)' }}>
-                    {s.name ?? s.reportName ?? 'Untitled'}
-                  </p>
-                  <p className="text-[11px]" style={{ color: 'var(--hub-text-dim)' }}>
-                    {s.schedule ?? s.frequency ?? 'Manual'}
-                  </p>
-                </div>
-                <button
-                  onClick={() => handleDeleteScheduled(String(s.id ?? ''))}
-                  className="h-6 w-6 rounded flex items-center justify-center transition-colors"
-                  style={{ color: 'var(--hub-text-dim)' }}
-                  onMouseEnter={(e) => {
-                    (e.currentTarget as HTMLElement).style.color = '#f87171';
-                  }}
-                  onMouseLeave={(e) => {
-                    (e.currentTarget as HTMLElement).style.color = 'var(--hub-text-dim)';
-                  }}
-                >
-                  <Trash2 size={12} />
-                </button>
-              </div>
-            ))}
-          </div>
-        )}
       </motion.div>
     </motion.div>
   );
