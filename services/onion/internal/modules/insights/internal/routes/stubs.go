@@ -14,6 +14,5 @@ import (
 // routes.go compiles cleanly at every step of the rollout, so the module
 // can be toggled off by reverting a single commit without breaking main.
 
-func registerOperationsRoutes(_ context.Context, _ *chi.Mux, _ *application.Service)  {}
 func registerReportsRoutes(_ context.Context, _ *chi.Mux, _ *application.Service)     {}
 func registerSettingsRoutes(_ context.Context, _ *chi.Mux, _ *application.Service)    {}
