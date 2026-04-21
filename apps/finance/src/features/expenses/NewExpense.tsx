@@ -7,6 +7,7 @@ import PageHeader from '../../shared/components/PageHeader';
 import ReceiptUpload from '../../shared/components/ReceiptUpload';
 import CurrencyInput from '../../shared/components/CurrencyInput';
 import { useExpenseCategories } from '../../shared/hooks/useExpenseCategories';
+import { useCreateExpense } from './useExpenses';
 import {
   cardStyle,
   ghostBtn,
@@ -38,13 +39,23 @@ const NewExpense: React.FC = () => {
     toast.success('Applied OCR hints');
   };
 
-  const handleSave = () => {
+  const createExpense = useCreateExpense();
+
+  const handleSave = (): void => {
     if (!description || !amount || !category) {
       toast.error('Description, amount and category are required');
       return;
     }
-    toast.success('Expense submitted');
-    navigate('/expenses');
+    createExpense.mutate(
+      { description, amount, category, date, receipt: !!receipt },
+      {
+        onSuccess: () => {
+          toast.success('Expense submitted');
+          navigate('/expenses');
+        },
+        onError: () => toast.error('Failed to submit expense'),
+      }
+    );
   };
 
   return (
@@ -164,11 +175,19 @@ const NewExpense: React.FC = () => {
       </div>
 
       <div style={{ display: 'flex', justifyContent: 'space-between' }}>
-        <button style={ghostBtn} onClick={() => navigate('/expenses')}>
+        <button
+          style={ghostBtn}
+          onClick={() => navigate('/expenses')}
+          disabled={createExpense.isPending}
+        >
           <ArrowLeft size={13} /> Cancel
         </button>
-        <button style={primaryBtn} onClick={handleSave}>
-          <Save size={13} /> Submit
+        <button
+          style={{ ...primaryBtn, opacity: createExpense.isPending ? 0.6 : 1 }}
+          onClick={handleSave}
+          disabled={createExpense.isPending}
+        >
+          <Save size={13} /> {createExpense.isPending ? 'Submitting...' : 'Submit'}
         </button>
       </div>
     </motion.div>
