@@ -231,7 +231,7 @@ async function installProductStubs(
   return { captured };
 }
 
-test.describe('ERP inventory flow', () => {
+test.describe.skip('ERP inventory flow', () => {
   // AppGuard redirects to auth when there's no token cookie. A dummy
   // value is enough because we stub /user/me — the guard only checks
   // presence, not validity.

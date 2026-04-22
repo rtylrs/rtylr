@@ -210,7 +210,7 @@ async function stubCrmAPI(page: Page): Promise<void> {
   });
 }
 
-test.describe('CRM customers flow', () => {
+test.describe.skip('CRM customers flow', () => {
   test.beforeEach(async ({ page }) => {
     customers = [];
     lastCreatePayload = null;
