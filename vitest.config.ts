@@ -3,7 +3,11 @@ import { defineConfig } from 'vitest/config';
 export default defineConfig({
   test: {
     globals: true,
-    environment: 'jsdom',
+    // Switched from jsdom 29 → happy-dom because jsdom 29 depends on
+    // an undici export path (`wrap-handler.js`) that was removed in
+    // recent undici majors. happy-dom is faster, lighter, and has no
+    // undici dep, so it sidesteps the conflict.
+    environment: 'happy-dom',
     setupFiles: ['./test/setup.ts'],
     include: ['packages/*/src/**/*.test.{ts,tsx}', 'apps/*/src/**/*.test.{ts,tsx}'],
     exclude: ['**/node_modules/**', 'dist', '.next', 'e2e'],

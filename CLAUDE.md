@@ -10,15 +10,6 @@
 
 ---
 
-## 2. GIT WORKFLOW — RULES
-
-- Feature branches are the **default**. Prefix: `feat/`, `fix/`, `chore/`, `refactor/`, `style/`
-- **Direct push to `main`** is acceptable ONLY for: single-file hotfixes (e.g., a typo in a config value) or trivial config changes (e.g., updating a port number). Every multi-file or logic-bearing change goes through a branch.
-- Commit author is **Abed El-Fattah Amouneh** only. No `Co-Authored-By` trailers — ever.
-- **No `.md` files** in commits except `CLAUDE.md` itself.
-- **Atomic commits** — one logical unit per commit. Don't bundle unrelated changes.
-- Commit message format: short imperative phrase, no conventional prefix. `add team invite screen` not `feat: add team invite screen`.
-
 ### Definition of Done
 
 A task is only complete when ALL of the following are true:
@@ -53,39 +44,6 @@ If you create a new convention that other developers will need to follow (a new 
 **Always update `rtylr/docs/` when you make architectural or pattern-level changes.** This includes adding a new shared package, changing the API layer, changing the auth flow, adding a new app, or changing how routing works. The `docs/` folder is the authoritative reference for the team — keep it current.
 
 ---
-
-## 3. TECH STACK
-
-| Layer                  | Technology                                  | Version                       | Notes                                             |
-| ---------------------- | ------------------------------------------- | ----------------------------- | ------------------------------------------------- |
-| Package manager        | pnpm                                        | 10.33.0                       | Enforced by `packageManager` field                |
-| Monorepo orchestration | Turborepo                                   | 2.x                           | `turbo.json` at root                              |
-| Language               | TypeScript                                  | ~5.9.3                        | Strict mode everywhere                            |
-| Framework (most apps)  | React                                       | 19.2.0                        |                                                   |
-| Bundler (most apps)    | Vite                                        | ^7.2.2                        |                                                   |
-| Framework (landing)    | Next.js                                     | 15.5.6                        | SSG only — `output: 'export'`                     |
-| Routing                | react-router-dom                            | 6.30.3                        | Client-side only                                  |
-| State (client/UI)      | Zustand                                     | ^5.0.8                        | Persisted stores use `zustand/middleware persist` |
-| State (server)         | TanStack Query                              | ^5.99.0                       | All API data fetching goes here                   |
-| HTTP client            | Axios                                       | ^1.15.0                       | Wrapped by `@voxire/api`                          |
-| Error handling         | neverthrow                                  | 8.2.0                         | `ResultAsync<T, ApiError>` for all API calls      |
-| Styling                | Tailwind CSS                                | via `@voxire/tailwind-config` | Utility-first, mobile-first                       |
-| Animation              | motion (framer)                             | ^12.38.0                      |                                                   |
-| Forms                  | (ad-hoc per app)                            | —                             | Hub uses Zod schemas in `shared/schemas/`         |
-| Validation             | Zod                                         | ^4.3.6                        | Required on all external data boundaries          |
-| i18n                   | i18next + react-i18next                     | ^23.x                         | Locale files: `en.json`, `ar.json`, `fr.json`     |
-| Notifications          | Sonner                                      | ^2.0.6                        | Toasts                                            |
-| Tables                 | @tanstack/react-table                       | ^8.21.3                       |                                                   |
-| Rich text              | Tiptap                                      | ^3.22.3                       |                                                   |
-| Icons                  | lucide-react + phosphor-react + react-icons | —                             |                                                   |
-| Offline (POS)          | Dexie (IndexedDB)                           | ^4.4.2                        | Per ADR-009                                       |
-| Testing (unit)         | Vitest                                      | ^3.0.0                        |                                                   |
-| Testing (components)   | @testing-library/react                      | ^16.3.2                       |                                                   |
-| Testing (e2e)          | Playwright                                  | ^1.59.1                       | `pnpm test:e2e`                                   |
-| Mocking                | MSW                                         | ^2.13.2                       |                                                   |
-| Linting                | ESLint 9 + typescript-eslint                | —                             |                                                   |
-| Formatting             | Prettier                                    | ^3.5.3                        |                                                   |
-| Git hooks              | Husky                                       | ^9.1.7                        |                                                   |
 
 ### Adding Dependencies
 

@@ -11,13 +11,13 @@
     "dev": "tsc --noEmit --watch"
   },
   "dependencies": {
-    "date-fns": "^3.6.0",
+    "date-fns": "^4.1.0",
     "lodash": "^4.18.1",
-    "zustand": "^5.0.8"
+    "zustand": "^5.0.12"
   },
   "devDependencies": {
-    "@types/lodash": "^4.14.202",
+    "@types/lodash": "^4.17.24",
     "@types/react": "19.2.14",
-    "typescript": "~5.5.2"
+    "typescript": "~6.0.3"
   }
 }

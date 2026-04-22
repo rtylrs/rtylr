@@ -4,10 +4,15 @@ import { useClickOutside } from './useClickOutside';
 import { createRef } from 'react';
 
 describe('useClickOutside', () => {
-  let handler: ReturnType<typeof vi.fn>;
+  // Vitest 4 tightened Mock typing — generic now defaults to
+  // `Procedure | Constructable`, which doesn't match the single
+  // `(event: ...) => void` signature `useClickOutside` expects.
+  // Pin the signature explicitly to keep this assignable.
+  type OutsideHandler = (event: MouseEvent | TouchEvent) => void;
+  let handler: ReturnType<typeof vi.fn<OutsideHandler>>;
 
   beforeEach(() => {
-    handler = vi.fn();
+    handler = vi.fn<OutsideHandler>();
   });
 
   it('calls handler when clicking outside the element', () => {
@@ -111,7 +116,7 @@ describe('useClickOutside', () => {
     const div = document.createElement('div');
     document.body.appendChild(div);
     const ref = { current: div } as React.RefObject<HTMLDivElement>;
-    const handler2 = vi.fn();
+    const handler2 = vi.fn<OutsideHandler>();
 
     const { rerender } = renderHook(({ h }) => useClickOutside(ref, h), {
       initialProps: { h: handler },

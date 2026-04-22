@@ -70,7 +70,8 @@ const TimeEntryForm = ({
     const result = timeEntryFormSchema.safeParse(formData);
     if (!result.success) {
       const fieldErrors: Record<string, string> = {};
-      result.error.errors.forEach((err) => {
+      // zod v4 renamed `.errors` → `.issues`.
+      result.error.issues.forEach((err) => {
         const key = err.path[0]?.toString() ?? 'form';
         fieldErrors[key] = err.message;
       });
