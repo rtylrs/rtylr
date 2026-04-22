@@ -10,5 +10,8 @@
   },
   "devDependencies": {
     "next-sitemap": "^4.2.3"
+  },
+  "dependencies": {
+    "lucide-react": "^1.8.0"
   }
 }

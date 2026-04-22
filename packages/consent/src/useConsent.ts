@@ -18,10 +18,19 @@ interface UseConsent {
 }
 
 export function useConsent(): UseConsent {
-  const [state, setState] = useState<ConsentState>(() => readConsent());
+  // Start as 'undecided' on every render, including SSR. If we read
+  // the cookie during `useState(() => readConsent())`, client-side
+  // returns 'granted' (when the visitor already consented) while
+  // server-side returns 'undecided' — that SSR/hydration mismatch
+  // forces React 19 to remount the banner subtree, and the remount
+  // can happen between the user's mousedown and click, eating the
+  // event. Instead we read the cookie post-mount in an effect so
+  // server + initial client render match, then update state.
+  const [state, setState] = useState<ConsentState>('undecided');
 
   useEffect(() => {
     if (typeof window === 'undefined') return;
+    setState(readConsent());
     const handler = (e: Event): void => {
       const detail = (e as CustomEvent<ConsentState>).detail;
       if (detail) setState(detail);

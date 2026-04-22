@@ -16,11 +16,22 @@ const COOKIE_NAME = 'rtylr-consent';
 const COOKIE_MAX_AGE_DAYS = 365;
 
 function consentCookieDomain(): string {
-  // In local dev we can't set a leading-dot domain on localhost; let
-  // the browser default apply.
+  // The leading-dot `.rtylr.com` domain only works when the current
+  // host actually is `rtylr.com` or a subdomain of it. On localhost,
+  // on Cloudflare Pages preview URLs (`*.pages.dev`), or on any
+  // other host, the browser silently rejects the Set-Cookie header
+  // when the Domain attribute doesn't match — which is exactly how
+  // "Accept button does nothing" manifested in preview envs.
+  //
+  // Fix: set the shared domain ONLY for rtylr.com hosts; let the
+  // browser default (current host, host-only cookie) handle every
+  // other case.
   if (typeof window === 'undefined') return '';
-  if (window.location.hostname === 'localhost') return '';
-  return '.rtylr.com';
+  const host = window.location.hostname;
+  if (host === 'rtylr.com' || host.endsWith('.rtylr.com')) {
+    return '.rtylr.com';
+  }
+  return '';
 }
 
 export function readConsent(): ConsentState {
