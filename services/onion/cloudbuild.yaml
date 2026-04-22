@@ -1,4 +1,4 @@
-# Cloud Build pipeline for onion → Cloud Run. (re-trigger: v1)
+# Cloud Build pipeline for onion → Cloud Run. (re-trigger: v2)
 #
 # Triggered on push to `main`. Three steps:
 #
