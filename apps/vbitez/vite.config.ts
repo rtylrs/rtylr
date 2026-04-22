@@ -54,8 +54,10 @@ export default defineConfig(() => ({
         entryFileNames: 'assets/[name]-[hash].js',
         chunkFileNames: 'assets/[name]-[hash].js',
         assetFileNames: 'assets/[name]-[hash].[ext]',
-        manualChunks: {
-          vendor: ['react', 'react-dom', 'react-router-dom', 'zustand', 'motion'],
+        manualChunks(id) {
+          if (/node_modules\/(react|react-dom|react-router-dom|zustand|motion)\//.test(id)) {
+            return 'vendor';
+          }
         },
       },
     },

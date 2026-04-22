@@ -49,8 +49,16 @@ export default defineConfig(() => ({
         entryFileNames: 'assets/[name]-[hash].js',
         chunkFileNames: 'assets/[name]-[hash].js',
         assetFileNames: 'assets/[name]-[hash].[ext]',
-        manualChunks: {
-          vendor: ['react', 'react-dom', 'react-router-dom', 'zustand', 'motion', 'lucide-react'],
+        // Vite 8 (Rolldown) only accepts function form of manualChunks.
+        manualChunks(id: string): string | undefined {
+          if (
+            /node_modules\/(react|react-dom|react-router-dom|zustand|motion|lucide-react)\//.test(
+              id
+            )
+          ) {
+            return 'vendor';
+          }
+          return undefined;
         },
       },
     },

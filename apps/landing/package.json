@@ -3,8 +3,8 @@
   "version": "0.0.0",
   "private": true,
   "scripts": {
-    "dev": "next dev --port 4200",
-    "build": "next build && next-sitemap --config next-sitemap.config.js",
+    "dev": "next dev --webpack --port 4200",
+    "build": "next build --webpack && next-sitemap --config next-sitemap.config.js",
     "start": "next start",
     "typecheck": "tsc --noEmit"
   },
