@@ -38,7 +38,7 @@
     "@voxire/menu": "workspace:*",
     "@voxire/observability": "workspace:*",
     "@voxire/utils": "workspace:*",
-    "axios": "^1.15.0",
+    "axios": "^1.7.9",
     "chart.js": "^4.4.3",
     "cmdk": "^1.1.1",
     "dexie": "^4.4.2",
@@ -51,7 +51,7 @@
     "lodash": "^4.18.1",
     "motion": "^12.38.0",
     "neverthrow": "8.2.0",
-    "next": "15.5.6",
+    "next": "15.5.15",
     "qrcode": "^1.5.3",
     "react": "19.2.0",
     "react-chartjs-2": "^5.2.0",
@@ -121,7 +121,12 @@
   },
   "pnpm": {
     "overrides": {
-      "postcss": "8.4.49"
+      "postcss": "8.4.49",
+      "protobufjs": ">=7.5.5",
+      "undici": ">=6.24.0",
+      "@remix-run/router": ">=1.23.2",
+      "follow-redirects": ">=1.16.0",
+      "react-router": ">=6.30.3"
     }
   }
 }
