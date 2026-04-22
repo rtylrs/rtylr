@@ -6,7 +6,7 @@ import { test, expect } from '@playwright/test';
  * "diner scans QR, no account" contract from CLAUDE.md.
  */
 
-const MENU_URL = process.env.MENU_URL ?? 'http://localhost:5177';
+const MENU_URL = process.env.MENU_URL ?? 'http://localhost:5174';
 
 async function stubPublicMenuAPIs(page: import('@playwright/test').Page): Promise<void> {
   await page.route('**/pos/public/business*', (route) =>

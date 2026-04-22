@@ -107,7 +107,7 @@ export default defineConfig({
     },
     {
       command: 'pnpm --filter @rtylr/menu dev',
-      port: 5177,
+      port: 5174,
       reuseExistingServer: !process.env.CI,
       timeout: 120_000,
       stdout: 'pipe',
@@ -123,7 +123,7 @@ export default defineConfig({
     },
     {
       command: 'pnpm --filter @rtylr/insights dev',
-      port: 5186,
+      port: 5187,
       reuseExistingServer: !process.env.CI,
       timeout: 120_000,
       stdout: 'pipe',

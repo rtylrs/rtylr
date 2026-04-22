@@ -7,7 +7,7 @@ import { test, expect } from '@playwright/test';
  * backend module this session so this spec nails the contract.
  */
 
-const INSIGHTS_URL = process.env.INSIGHTS_URL ?? 'http://localhost:5186';
+const INSIGHTS_URL = process.env.INSIGHTS_URL ?? 'http://localhost:5187';
 
 async function primeAuthCookie(context: import('@playwright/test').BrowserContext): Promise<void> {
   await context.addCookies([

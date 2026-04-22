@@ -9,10 +9,10 @@ import { useConsent } from './useConsent';
  * once the user accepts or declines, the banner hides and we don't
  * prompt again until cookies are cleared.
  *
- * Styling is intentionally plain — each app wraps this or supplies
- * its own via the `className` prop to match local design. Defaults
- * to a dark bar at the bottom that works on both the landing
- * (light-theme) and recruit admin (dark theme) pages.
+ * Visual: a slim pill-shaped bar anchored to the bottom-left corner
+ * rather than a centered modal. Keeps the landing page hero visible
+ * and matches the restrained aesthetic of the rest of the marketing
+ * site. Apps can still override the whole thing via `className`.
  */
 interface CookieBannerProps {
   privacyUrl?: string;
@@ -49,46 +49,68 @@ export function CookieBanner({
       className={className}
       style={{
         position: 'fixed',
-        bottom: 16,
-        left: 16,
-        right: 16,
+        bottom: 20,
+        left: 20,
         zIndex: 9999,
-        maxWidth: 560,
-        marginInline: 'auto',
-        padding: '14px 18px',
-        borderRadius: 12,
-        background: 'rgba(15, 15, 15, 0.95)',
-        color: 'white',
-        backdropFilter: 'blur(12px)',
-        boxShadow: '0 8px 32px rgba(0,0,0,0.25)',
+        maxWidth: 380,
+        padding: '14px 16px',
+        borderRadius: 14,
+        background: 'rgba(15, 15, 15, 0.82)',
+        color: 'rgba(255,255,255,0.92)',
+        border: '1px solid rgba(255,255,255,0.08)',
+        backdropFilter: 'blur(20px)',
+        WebkitBackdropFilter: 'blur(20px)',
+        boxShadow:
+          '0 10px 40px rgba(0,0,0,0.35), 0 2px 8px rgba(0,0,0,0.2), inset 0 1px 0 rgba(255,255,255,0.04)',
         fontSize: 13,
         lineHeight: 1.5,
+        fontFamily: 'ui-sans-serif, system-ui, -apple-system, "Segoe UI", Roboto, sans-serif',
+        letterSpacing: '-0.005em',
         display: 'flex',
-        flexWrap: 'wrap',
-        alignItems: 'center',
+        flexDirection: 'column',
         gap: 12,
       }}
     >
-      <div style={{ flex: 1, minWidth: 240 }}>
+      <div style={{ color: 'rgba(255,255,255,0.78)', fontSize: 12.5 }}>
         We use essential cookies to run rtylr, and optional analytics to understand which features
         to build next.{' '}
-        <a href={privacyUrl} style={{ color: '#64C5B9', textDecoration: 'underline' }}>
-          Privacy policy
+        <a
+          href={privacyUrl}
+          style={{
+            color: 'rgba(255,255,255,0.92)',
+            textDecoration: 'underline',
+            textDecorationColor: 'rgba(255,255,255,0.3)',
+            textUnderlineOffset: 2,
+          }}
+        >
+          Privacy
         </a>
         .
       </div>
-      <div style={{ display: 'flex', gap: 8 }}>
+      <div style={{ display: 'flex', gap: 6, justifyContent: 'flex-end' }}>
         <button
           type="button"
           onClick={handleDecline}
           style={{
-            padding: '7px 14px',
-            borderRadius: 8,
-            border: '1px solid rgba(255,255,255,0.18)',
+            padding: '6px 12px',
+            borderRadius: 999,
+            border: '1px solid rgba(255,255,255,0.12)',
             background: 'transparent',
-            color: 'white',
-            fontSize: 13,
+            color: 'rgba(255,255,255,0.72)',
+            fontSize: 12.5,
+            fontWeight: 500,
             cursor: 'pointer',
+            fontFamily: 'inherit',
+            letterSpacing: '-0.005em',
+            transition: 'background 0.15s ease, color 0.15s ease',
+          }}
+          onMouseEnter={(e) => {
+            (e.currentTarget as HTMLButtonElement).style.background = 'rgba(255,255,255,0.05)';
+            (e.currentTarget as HTMLButtonElement).style.color = 'rgba(255,255,255,0.92)';
+          }}
+          onMouseLeave={(e) => {
+            (e.currentTarget as HTMLButtonElement).style.background = 'transparent';
+            (e.currentTarget as HTMLButtonElement).style.color = 'rgba(255,255,255,0.72)';
           }}
         >
           Decline
@@ -97,14 +119,23 @@ export function CookieBanner({
           type="button"
           onClick={handleAccept}
           style={{
-            padding: '7px 14px',
-            borderRadius: 8,
+            padding: '6px 14px',
+            borderRadius: 999,
             border: 'none',
-            background: '#64C5B9',
+            background: 'rgba(255,255,255,0.95)',
             color: '#0a0a0a',
-            fontSize: 13,
+            fontSize: 12.5,
             fontWeight: 600,
             cursor: 'pointer',
+            fontFamily: 'inherit',
+            letterSpacing: '-0.005em',
+            transition: 'background 0.15s ease',
+          }}
+          onMouseEnter={(e) => {
+            (e.currentTarget as HTMLButtonElement).style.background = '#ffffff';
+          }}
+          onMouseLeave={(e) => {
+            (e.currentTarget as HTMLButtonElement).style.background = 'rgba(255,255,255,0.95)';
           }}
         >
           Accept
