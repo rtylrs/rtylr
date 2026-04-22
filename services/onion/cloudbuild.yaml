@@ -1,4 +1,4 @@
-# Cloud Build pipeline for onion → Cloud Run. (re-trigger: v2)
+# Cloud Build pipeline for onion → Cloud Run. (re-trigger: v3)
 #
 # Triggered on push to `main`. Three steps:
 #
@@ -56,12 +56,17 @@ steps:
         # `git submodule` subprocesses. So we rewrite HTTPS GitHub
         # URLs to use a PAT stored in Secret Manager (Classic PAT
         # with `repo` scope on voxie; see README for provisioning).
+        #
+        # NOTE: Cloud Build eats single `$` sequences at YAML-parse
+        # time. We use `$$` so bash receives a literal `$` at run
+        # time — without it you get "GITHUB_PAT is not a valid
+        # built-in substitution" before the step even starts.
         git config --global \
-          url."https://x-access-token:${GITHUB_PAT}@github.com/".insteadOf \
+          url."https://x-access-token:$${GITHUB_PAT}@github.com/".insteadOf \
           "https://github.com/"
         git submodule update --init --recursive
         # Scrub the URL rewrite so nothing leaks downstream.
-        git config --global --unset-all url."https://x-access-token:${GITHUB_PAT}@github.com/".insteadOf || true
+        git config --global --unset-all url."https://x-access-token:$${GITHUB_PAT}@github.com/".insteadOf || true
 
   - id: 'Build'
     name: 'gcr.io/cloud-builders/docker'
