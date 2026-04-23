@@ -1,4 +1,5 @@
 import React, { useState, useEffect } from 'react';
+import { removeCookie, getDefaultCookieDomain } from '@voxire/auth';
 import { useUserStore } from '../../../../../shared/stores/userStore';
 
 function formatTimeAgo(dateStr: string): string {
@@ -176,7 +177,11 @@ const Account: React.FC = () => {
               try {
                 const { default: api } = await import('../../../../../shared/lib/api');
                 await api.post('/security/invalidate-sessions');
-                document.cookie = 'token=; expires=Thu, 01 Jan 1970 00:00:00 UTC; path=/;';
+                // Clear the cross-subdomain cookie via the shared
+                // helper; a plain `document.cookie = '...'` without a
+                // Domain attr leaves the .rtylr.com cookie intact.
+                removeCookie('token', { domain: getDefaultCookieDomain() });
+                removeCookie('token');
                 window.location.href = '/';
               } catch {}
             }}

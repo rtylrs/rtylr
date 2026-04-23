@@ -1,5 +1,6 @@
 import { create } from 'zustand';
 import { persist } from 'zustand/middleware';
+import { removeCookie, getDefaultCookieDomain } from '@voxire/auth';
 
 interface Addons {
   feedback: boolean;
@@ -81,7 +82,16 @@ export const useUserStore = create<UserState & UserActions>()(
       login: (user) => set({ user, isAuthenticated: true }),
 
       logout: () => {
-        document.cookie = 'token=; expires=Thu, 01 Jan 1970 00:00:00 UTC; path=/;';
+        // Hand-rolled `document.cookie = ...` without a Domain attr
+        // only clears the cookie for the current host (dash.rtylr.com).
+        // The shared `.rtylr.com` cookie survives, so auth.rtylr.com
+        // still sees the token on the next navigation and bounces
+        // you right back in. Use the shared helper which matches the
+        // exact domain set at login.
+        removeCookie('token', { domain: getDefaultCookieDomain() });
+        // Belt + suspenders: also clear host-only variant in case an
+        // older session persisted one with no Domain.
+        removeCookie('token');
         set({
           user: null,
           isAuthenticated: false,

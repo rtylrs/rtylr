@@ -2,6 +2,7 @@ import React, { useEffect, useState } from 'react';
 import { useLocation, Link } from 'react-router-dom';
 import { motion, AnimatePresence } from 'motion/react';
 import { APP_URLS } from '@voxire/config';
+import { removeCookie, getDefaultCookieDomain } from '@voxire/auth';
 import {
   LayoutDashboard,
   TrendingUp,
@@ -160,7 +161,12 @@ const DefaultLayout: React.FC<DefaultLayoutProps> = ({ children }) => {
   };
 
   const handleLogout = () => {
-    document.cookie = 'token=; Max-Age=0; path=/';
+    // Hand-rolled cookie clear without a Domain attr only removes
+    // the cookie on the current subdomain. The shared .rtylr.com
+    // cookie survives and auth.rtylr.com bounces the user right
+    // back. Use the shared helper which targets the exact domain.
+    removeCookie('token', { domain: getDefaultCookieDomain() });
+    removeCookie('token');
     window.location.href = `${APP_URLS.auth}?redirect=insights`;
   };
 
