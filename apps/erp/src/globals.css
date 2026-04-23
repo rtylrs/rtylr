@@ -1,6 +1,12 @@
-@tailwind base;
-@tailwind components;
-@tailwind utilities;
+@import 'tailwindcss';
+
+/* v4 auto-detects content relative to this CSS file. We add an
+ * explicit @source for the cross-workspace packages we pull classes
+ * from (shared components, menu package, etc.). The shared
+ * `@voxire/tailwind-config` theme extensions are ported below into
+ * v4's native `@theme` block — JS configs via `@config` break v4's
+ * auto content scanner in monorepo setups. */
+@source '../../../packages/**/*.{ts,tsx}';
 
 /* ── Brand accent (Voxire logo palette) ──────────────────────── */
 :root {
