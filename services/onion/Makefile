@@ -1,4 +1,4 @@
-.PHONY: onion setup build build-all generate lint test run run-api dev sql-check sql-case-check
+.PHONY: onion setup build build-all generate lint test run run-api dev sql-check sql-case-check local-env-up local-env-down local-env-logs
 
 onion: sql-check test build
 	@echo "✅ Onion project is ready!"
@@ -36,6 +36,15 @@ run-api:
 # Development with live reloading (air)
 dev:
 	air -c .air/api.toml
+
+local-env-up:
+	docker compose -p onion-env -f local-env/docker-compose.yml up -d
+
+local-env-down:
+	docker compose -p onion-env -f local-env/docker-compose.yml down
+
+local-env-logs:
+	docker compose -p onion-env -f local-env/docker-compose.yml logs -f
 
 sql-check:
 	./scripts/check_sql_case.sh

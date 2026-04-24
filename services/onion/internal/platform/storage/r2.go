@@ -1,7 +1,6 @@
-// Package storage is a thin wrapper around the S3-compatible
-// Cloudflare R2 API. It exists to keep the aws-sdk-go-v2 import
-// surface and signing quirks in one place — feature code only needs
-// the three methods at the bottom of this file.
+// Package storage is a thin wrapper around S3-compatible object
+// storage. Production uses Cloudflare R2; local development can point
+// the same code at LocalStack.
 package storage
 
 import (
@@ -20,13 +19,24 @@ import (
 	"github.com/aws/aws-sdk-go-v2/service/s3"
 )
 
+const (
+	localStackEnabledEnv  = "LOCAL_STACK_ENABLED"
+	localStackEndpointEnv = "LOCAL_STACK_ENDPOINT"
+	localStackBucketEnv   = "LOCAL_STACK_BUCKET"
+	localStackRegionEnv   = "LOCAL_STACK_REGION"
+
+	defaultLocalStackEndpoint = "http://localhost:4566"
+	defaultLocalStackBucket   = "onion-dev"
+	defaultLocalStackRegion   = "us-east-1"
+)
+
 // ErrNotConfigured is returned when any of the four required R2 env
 // vars is missing. Callers surface this as a 501 so the frontend can
 // tell the difference between "upload failed" and "upload disabled".
 var ErrNotConfigured = errors.New("r2 storage is not configured")
 
 // Client is a lazily-initialised R2 client. Feature code takes the
-// default instance via Default(); tests can build their own with New.
+// default instance via Default().
 type Client struct {
 	s3     *s3.Client
 	bucket string
@@ -43,45 +53,95 @@ var (
 // set — not a fatal condition, callers degrade gracefully.
 func Default() (*Client, error) {
 	defaultOnce.Do(func() {
-		accountID := os.Getenv("R2_ACCOUNT_ID")
-		accessKey := os.Getenv("R2_ACCESS_KEY_ID")
-		secretKey := os.Getenv("R2_SECRET_ACCESS_KEY")
-		bucket := os.Getenv("R2_BUCKET_NAME")
-		if accountID == "" || accessKey == "" || secretKey == "" || bucket == "" {
-			defaultErr = ErrNotConfigured
+		settings, settingsErr := resolveSettingsFromEnv()
+		if settingsErr != nil {
+			defaultErr = settingsErr
 			return
 		}
 
-		// R2 endpoint format. The region is a placeholder ("auto") —
-		// R2 doesn't care what we send but aws-sdk-go-v2 refuses to
-		// sign without one.
-		endpoint := fmt.Sprintf("https://%s.r2.cloudflarestorage.com", accountID)
 		cfg, err := awsconfig.LoadDefaultConfig(context.Background(),
-			awsconfig.WithCredentialsProvider(credentials.NewStaticCredentialsProvider(accessKey, secretKey, "")),
-			awsconfig.WithRegion("auto"),
+			awsconfig.WithCredentialsProvider(credentials.NewStaticCredentialsProvider(settings.accessKey, settings.secretKey, "")),
+			awsconfig.WithRegion(settings.region),
 		)
 		if err != nil {
-			defaultErr = fmt.Errorf("load r2 aws config: %w", err)
+			defaultErr = fmt.Errorf("load object storage aws config: %w", err)
 			return
 		}
 
 		s3Client := s3.NewFromConfig(cfg, func(o *s3.Options) {
-			o.BaseEndpoint = aws.String(endpoint)
-			// R2 is 100% path-style compatible and the virtual-host
-			// style forces DNS per bucket, which we don't provision.
+			o.BaseEndpoint = aws.String(settings.endpoint)
+			// R2 and LocalStack are both path-style compatible. This
+			// also avoids per-bucket DNS requirements in local dev.
 			o.UsePathStyle = true
 		})
 
-		defaultClient = &Client{s3: s3Client, bucket: bucket}
+		defaultClient = &Client{s3: s3Client, bucket: settings.bucket}
 	})
 	return defaultClient, defaultErr
+}
+
+type storageSettings struct {
+	endpoint  string
+	region    string
+	accessKey string
+	secretKey string
+	bucket    string
+}
+
+func resolveSettingsFromEnv() (storageSettings, error) {
+	if localStackEnabled() {
+		return storageSettings{
+			endpoint:  envOrDefault(localStackEndpointEnv, defaultLocalStackEndpoint),
+			region:    envOrDefault(localStackRegionEnv, defaultLocalStackRegion),
+			accessKey: "test",
+			secretKey: "test",
+			bucket:    envOrDefault(localStackBucketEnv, defaultLocalStackBucket),
+		}, nil
+	}
+
+	return resolveR2SettingsFromEnv()
+}
+
+func resolveR2SettingsFromEnv() (storageSettings, error) {
+	accountID := os.Getenv("R2_ACCOUNT_ID")
+	accessKey := os.Getenv("R2_ACCESS_KEY_ID")
+	secretKey := os.Getenv("R2_SECRET_ACCESS_KEY")
+	bucket := os.Getenv("R2_BUCKET_NAME")
+	if accountID == "" || accessKey == "" || secretKey == "" || bucket == "" {
+		return storageSettings{}, ErrNotConfigured
+	}
+
+	// R2 endpoint format. The region is a placeholder ("auto") —
+	// R2 doesn't care what we send but aws-sdk-go-v2 refuses to
+	// sign without one.
+	endpoint := fmt.Sprintf("https://%s.r2.cloudflarestorage.com", accountID)
+
+	return storageSettings{
+		endpoint:  endpoint,
+		region:    "auto",
+		accessKey: accessKey,
+		secretKey: secretKey,
+		bucket:    bucket,
+	}, nil
+}
+
+func localStackEnabled() bool {
+	value := strings.ToLower(strings.TrimSpace(os.Getenv(localStackEnabledEnv)))
+	return value == "true" || value == "1" || value == "yes"
+}
+
+func envOrDefault(key, fallback string) string {
+	if value := strings.TrimSpace(os.Getenv(key)); value != "" {
+		return value
+	}
+	return fallback
 }
 
 // AllowedResumeContentTypes is the whitelist for the resume upload
 // endpoint. PDFs and Word docs cover 99% of candidates; we reject
 // everything else to keep R2 from doubling as free file hosting.
 var AllowedResumeContentTypes = map[string]bool{
-	"application/pdf": true,
+	"application/pdf":    true,
 	"application/msword": true,
 	"application/vnd.openxmlformats-officedocument.wordprocessingml.document": true,
 }
