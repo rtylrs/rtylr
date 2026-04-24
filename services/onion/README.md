@@ -16,8 +16,9 @@ Onion is a full-featured backend framework that provides everything you need to 
 ## 📋 Prerequisites
 
 - **Go 1.26+**
-- **MySQL 8+**
-- `**mysql` and `mysqladmin` available locally**
+- **MySQL-compatible database**. Local dev uses Percona Server 5.7.23 to match the current HostGator database.
+- **Docker** for the optional local development environment.
+- `mysql` and `mysqladmin` available locally if you run database scripts from your machine.
 
 ## 🛠️ Quick Start
 
@@ -42,6 +43,13 @@ go install github.com/golangci/golangci-lint/cmd/golangci-lint@v2.1.6
 ### 3. Start Development Environment
 
 ```bash
+# Start local MySQL, Redis, and LocalStack
+make local-env-up
+
+# Copy .env.example to .env if needed. The local Docker environment
+# matches the DB_* defaults in .env.example.
+# Set LOCAL_STACK_ENABLED=true to route object storage through LocalStack.
+
 # Validate database connectivity and run local setup checks
 make setup
 
@@ -54,6 +62,10 @@ make run
 ```bash
 # Validate the configured MySQL connection
 make setup
+
+# Start/stop local MySQL, Redis, and LocalStack
+make local-env-up
+make local-env-down
 
 # Reset database
 ./scripts/reset-db.sh

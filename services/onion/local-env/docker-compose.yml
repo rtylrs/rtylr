@@ -1,0 +1,45 @@
+services:
+  db:
+    image: percona:5.7.23
+    platform: linux/amd64
+    restart: on-failure
+    environment:
+      MYSQL_DATABASE: onion_dev
+      MYSQL_USER: onion_user
+      MYSQL_PASSWORD: onion_password
+      MYSQL_ROOT_PASSWORD: onion_root_password
+    command:
+      - --character-set-server=utf8mb4
+      - --collation-server=utf8mb4_unicode_ci
+    healthcheck:
+      test: ["CMD", "mysqladmin", "ping", "-h", "127.0.0.1", "-uroot", "-ponion_root_password"]
+      interval: 2s
+      timeout: 20s
+      retries: 60
+    ports:
+      - "3306:3306"
+    volumes:
+      - onion_mysql:/var/lib/mysql
+
+  redis:
+    image: redis:7.4.1
+    restart: on-failure
+    ports:
+      - "6379:6379"
+
+  local-stack:
+    image: localstack/localstack:4.5.0
+    restart: on-failure
+    environment:
+      SERVICES: s3
+      AWS_DEFAULT_REGION: us-east-1
+      LOCAL_STACK_BUCKET: onion-dev
+    ports:
+      - "4566:4566"
+    volumes:
+      - onion_localstack:/var/lib/localstack
+      - ./localstack/init:/etc/localstack/init/ready.d:ro
+
+volumes:
+  onion_mysql:
+  onion_localstack:
