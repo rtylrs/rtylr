@@ -13,9 +13,28 @@ type Repository struct {
 	db *sql.DB
 }
 
-func NewRepository(_ context.Context) *Repository {
-	return &Repository{
-		db: dbclient.Pool(),
+func NewRepository(ctx context.Context) *Repository {
+	db := dbclient.Pool()
+	autoMigrate(ctx, db)
+	return &Repository{db: db}
+}
+
+func autoMigrate(ctx context.Context, db *sql.DB) {
+	_, err := db.ExecContext(ctx, `
+		CREATE TABLE IF NOT EXISTS voxire_website_leads (
+			id         BIGINT NOT NULL AUTO_INCREMENT PRIMARY KEY,
+			name       VARCHAR(255) NOT NULL,
+			email      VARCHAR(255) NOT NULL,
+			company    VARCHAR(255),
+			service    VARCHAR(100),
+			project    TEXT,
+			budget     VARCHAR(50),
+			source     VARCHAR(100),
+			created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
+		)
+	`)
+	if err != nil {
+		logger.Ctx(ctx).Error("Failed to auto-migrate voxire_website_leads table", logger.Error(err))
 	}
 }
 
