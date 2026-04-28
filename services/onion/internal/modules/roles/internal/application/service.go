@@ -8,8 +8,15 @@ import (
 	"github.com/voxire/onion/internal/modules/roles/internal/infrastructure"
 )
 
+type repository interface {
+	List(ctx context.Context, ownerID int64) ([]domain.Role, error)
+	Create(ctx context.Context, ownerID int64, name string, permissions []string) (int64, error)
+	Update(ctx context.Context, ownerID, roleID int64, name string, permissions []string) error
+	Delete(ctx context.Context, ownerID, roleID int64) error
+}
+
 type Service struct {
-	repo *infrastructure.Repository
+	repo repository
 }
 
 func NewService(ctx context.Context) *Service {
