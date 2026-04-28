@@ -10,7 +10,7 @@ import (
 	"github.com/voxire/onion/internal/platform/logger"
 )
 
-const notifyEmail = "info@voxire.com"
+var notifyEmails = []string{"info@voxire.com", "amounehabed@gmail.com"}
 
 type Service struct {
 	repo *infrastructure.Repository
@@ -72,7 +72,7 @@ func (s *Service) sendNotification(ctx context.Context, id int64, lead domain.Le
 	)
 
 	_, emailErr := emailPkg.Send(ctx, emailPkg.SendParams{
-		To:      []string{notifyEmail},
+		To:      notifyEmails,
 		Subject: fmt.Sprintf("New quote request from %s (%s)", lead.Name, lead.Service),
 		HTML:    html,
 		From:    "Voxire Leads <noreply@voxire.com>",
