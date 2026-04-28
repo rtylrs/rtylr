@@ -1,0 +1,114 @@
+name: PR Tests
+
+on:
+  pull_request:
+    branches: [main, master]
+    paths-ignore:
+      - "**.md"
+      - "docs/**"
+
+jobs:
+  test:
+    name: Build, Migrate, Fixtures, Test
+    runs-on: ubuntu-24.04
+    timeout-minutes: 25
+
+    services:
+      mysql:
+        image: mysql:8.0
+        env:
+          MYSQL_ROOT_PASSWORD: rootpw
+          MYSQL_DATABASE: onion_test
+          MYSQL_USER: onion
+          MYSQL_PASSWORD: onionpw
+        ports:
+          - 3306:3306
+        options: >-
+          --health-cmd="mysqladmin ping --silent"
+          --health-interval=5s
+          --health-timeout=3s
+          --health-retries=20
+
+    env:
+      DB_HOST: 127.0.0.1
+      DB_PORT: 3306
+      DB_USER: onion
+      DB_PASSWORD: onionpw
+      DB_NAME: onion_test
+      JWT_SECRET: test-jwt-secret-at-least-32-characters-long
+      APP_ENV: test
+      REDIS_ENABLED: "false"
+      INMEMORY_CACHE_MAX_SIZE_MB: "32"
+      CACHED_MARSHALLING_ENABLED: "false"
+      CI: "true"
+
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v6
+        with:
+          submodules: recursive
+          token: ${{ secrets.PAT_TOKEN }}
+
+      - name: Setup Go
+        uses: actions/setup-go@v5
+        with:
+          go-version: "1.26"
+          cache: true
+
+      - name: Install MySQL client
+        run: |
+          sudo apt-get update -y
+          sudo apt-get install -y mysql-client
+
+      - name: Wait for MySQL to be ready
+        run: |
+          for i in $(seq 1 30); do
+            if mysqladmin ping --host=127.0.0.1 --port=3306 --user=root --password=rootpw --silent; then
+              echo "MySQL is up"
+              break
+            fi
+            echo "Waiting for MySQL... ($i)"
+            sleep 2
+          done
+
+      - name: Install sqlc
+        run: |
+          curl -sSL https://github.com/sqlc-dev/sqlc/releases/download/v1.29.0/sqlc_1.29.0_linux_amd64.tar.gz \
+            | tar -xz -C /usr/local/bin sqlc
+          sqlc version
+
+      - name: Generate sqlc code
+        run: |
+          chmod +x scripts/generate_sqlc.sh
+          ./scripts/generate_sqlc.sh
+
+      - name: Apply schema migrations
+        run: |
+          chmod +x scripts/migrate.sh
+          ./scripts/migrate.sh
+
+      - name: Load test fixtures
+        run: |
+          if ls scripts/fixtures/*.sql >/dev/null 2>&1; then
+            for f in scripts/fixtures/*.sql; do
+              echo "  → loading $(basename "$f")"
+              mysql --host=127.0.0.1 --port=3306 --user=onion --password=onionpw onion_test < "$f"
+            done
+          else
+            echo "No fixtures found in scripts/fixtures/"
+          fi
+
+      - name: go vet
+        run: go vet ./...
+
+      - name: Run tests
+        run: go test ./... -count=1 -timeout=10m
+
+      - name: Tear down database
+        if: always()
+        run: |
+          # The MySQL service container is destroyed automatically when the job
+          # ends, but we drop and recreate the schema explicitly so any
+          # post-job artifacts (logs, dump files) never carry tenant fixtures.
+          mysql --host=127.0.0.1 --port=3306 --user=root --password=rootpw \
+            -e "DROP DATABASE IF EXISTS onion_test; CREATE DATABASE onion_test;" || true

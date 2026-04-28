@@ -67,7 +67,7 @@ If you create a new convention (a new middleware, a new cross-cutting utility, a
 |---|---|---|---|
 | Language | Go | 1.26 | `go 1.26` in `go.mod` |
 | HTTP router | go-chi/chi | v5.2.2 | Middleware-based, context-driven |
-| Database | MySQL | 8.0 | Production: `108.167.180.218`, db `voxirete_rtylr_db` |
+| Database | MySQL | 8.0 | Production credentials live in deployment env vars only — never in this repo |
 | DB driver | go-sql-driver/mysql | v1.9.3 | |
 | Query builder | Masterminds/squirrel | v1.5.4 | Used in some modules |
 | SQL codegen | sqlc (internal) | — | Generated code lives in `internal/modules/{mod}/internal/infrastructure/persistence/sqlc/` |
@@ -298,8 +298,18 @@ Follow this checklist exactly when creating a new module:
 9. Create `internal/routes/handlers/` with one `*_handlers.go` file per operation.
 10. Add the module's SQL schema to `internal/platform/database/schemas/`.
 11. Run `./scripts/migrate.sh` to apply the schema.
-12. **Add the module to `apiModules` struct in `cmd/api/main.go`** and instantiate it in `initializeModules()`.
+12. **Add the module to `apiModules` struct in `cmd/api/main.go`** and instantiate it in `initializeModules()`. Concretely:
+    - Add a typed import alias if the package name needs disambiguation: `mymodule "github.com/voxire/onion/internal/modules/my_module"`.
+    - Add a field to the `apiModules` struct (find it in `cmd/api/main.go` — every existing module has one): `MyModule *mymodule.Module`.
+    - In `initializeModules(ctx)`, populate the field: `apiModules.MyModule = mymodule.NewModule(ctx)`.
+    - In the route registration block (look for the long sequence of `m.MyModule.RegisterRoutes(ctx, router)` calls), add yours.
+    - If the module has scheduled jobs (`RegisterScheduledJobs`), call that too.
+    - If the module exposes anonymous routes, ensure `GetAnonymousRoutes()` returns them — they are aggregated by the auth middleware automatically.
 13. Confirm `go build ./...` passes.
+
+### Module registration cross-reference
+
+The `cmd/api/main.go` file already registers 80+ modules. Don't grep for "TODO" — instead, copy the pattern from an existing module that's similar to yours (POS module if you're adding a transactional flow; HR module if you're adding employee-scoped data; Hub module if you're adding a settings/admin surface). The shape is always the same: import → field on `apiModules` → init in `initializeModules` → register routes → optional scheduler hook.
 
 ### Auth in Handlers: DeviceCtx vs GetAuthUser
 
@@ -653,8 +663,8 @@ All relative to `https://api.voxire.dev`. Auth required unless noted.
 
 ## 6. DATABASE
 
-- **Engine:** MySQL (InnoDB) — production at `108.167.180.218`
-- **Database name:** `voxirete_rtylr_db`
+- **Engine:** MySQL (InnoDB)
+- **Production connection details (host, database name, user, password):** stored as deployment environment variables only. Never commit or paste them into this repository or any documentation. Operators retrieve them from the deployment platform (Render / Cloud Run / 1Password) directly.
 - **Multi-tenancy model:** `owner_id BIGINT NOT NULL` on every tenant-scoped table. Every query must filter by `owner_id`.
 - **Primary keys:** `BIGINT NOT NULL AUTO_INCREMENT` throughout.
 - **Schema files:** `internal/platform/database/schemas/` — apply in order: `shared → rtylr → voxire → erp → hr → crm → finance → flow → pos → hub`.
@@ -662,11 +672,12 @@ All relative to `https://api.voxire.dev`. Auth required unless noted.
 ### Migration commands
 
 ```bash
-export DB_HOST=108.167.180.218
+export DB_HOST=<host>
 export DB_PORT=3306
-export DB_USER=voxirete_onion
+export DB_USER=<user>
 export DB_PASSWORD=<password>
-export DB_NAME=voxirete_rtylr_db
+export DB_NAME=<database>
+# Pull real values from the deployment platform's secret store — never hardcode.
 
 ./scripts/migrate.sh       # apply all schemas (idempotent)
 ./scripts/reset-db.sh      # DROP + recreate (DESTRUCTIVE — dev only)
@@ -674,9 +685,49 @@ export DB_NAME=voxirete_rtylr_db
 
 ### sqlc codegen
 
-```bash
-./scripts/generate_sqlc.sh
-```
+The repository uses [sqlc](https://docs.sqlc.dev) to generate type-safe Go code
+from SQL queries. **Generated code is gitignored** — every developer (and CI)
+regenerates it locally. The flow:
+
+1. **Where queries live**
+   - One module = one `sqlc.yaml`, located at `internal/modules/<mod>/sql/sqlc.yaml`.
+   - Queries: `internal/modules/<mod>/sql/queries/*.sql` — annotated with sqlc
+     directives (`-- name: GetFoo :one`, `:many`, `:exec`, `:execresult`).
+   - Schema reference: each `sqlc.yaml` lists the schema files it needs (usually
+     pointing into `internal/platform/database/schemas/<dir>/`).
+
+2. **Where generated code lands**
+   - Output: `internal/modules/<mod>/internal/infrastructure/persistence/sqlc/`.
+   - That directory is in `.gitignore`. Do not check generated files in.
+
+3. **Regenerating**
+   ```bash
+   ./scripts/generate_sqlc.sh   # regenerates every module
+   ```
+   The script iterates over each `sql/sqlc.yaml` and runs `sqlc generate` against
+   it. Re-run any time you:
+   - Add a new query to a `*.sql` file.
+   - Change a schema file referenced by a `sqlc.yaml`.
+   - Pull a branch that touched either of the above.
+
+4. **Common pitfalls**
+   - **`migration_*.sql` files use procedural MySQL syntax that sqlc can't parse.**
+     If a module's schema directory contains both `schema.sql` and
+     `migration_v2.sql`, set `schemas/<dir>/schema.sql` (not the directory) in
+     the module's `sqlc.yaml`.
+   - **`SELECT *` is discouraged.** sqlc will resolve `*` against the schema, but
+     a future schema change can silently change the generated struct shape.
+     Prefer explicit column lists in queries.
+   - **Cross-schema queries** (a query in module A reading a table owned by
+     module B) require the borrowed schema to be listed in module A's
+     `sqlc.yaml`. Annotate any such query with a `// cross-schema read from <mod>`
+     comment in the calling Go file (see §4 Database Pattern).
+   - **Don't hand-edit generated files.** They will be overwritten next run.
+     If you need a method sqlc didn't generate, write it directly on the
+     `Repository` struct in your own `repository.go`.
+
+5. **CI**: the PR test workflow runs `generate_sqlc.sh` before `go vet` and
+   `go test`, so a missing or malformed `sql/queries/*.sql` will fail the PR.
 
 ---
 
@@ -819,11 +870,8 @@ func (s *Service) GetDashboardConfig(ctx context.Context, ownerID int64) (*domai
 
 | Issue | File / Location | Priority |
 |---|---|---|
-| `go.mod` declares `go 1.26` but Go 1.26 is not yet released — likely `go 1.25` intended | `go.mod` | Low |
 | Some modules may use `squirrel` directly instead of sqlc — inconsistent query approach | Various `infrastructure/` files | Medium |
-| No `.env.example` in repo — environment setup relies on `docs/development.md` | Root | Medium |
 | `echo` module depends on `memory` module directly (passed via `NewModule`) — only cross-module dependency | `cmd/api/main.go` | Low |
-| Production DB host hardcoded in `docs/database.md` — should be env var only | `docs/database.md` | Low |
 | gRPC server exists (`platform/server/grpc`) but no modules currently register gRPC services | `internal/platform/server/grpc/` | Info |
 | No automated testing infrastructure visible (no `_test.go` files found beyond `platform/`) | Various modules | High |
 
@@ -846,7 +894,7 @@ func (s *Service) GetDashboardConfig(ctx context.Context, ownerID int64) (*domai
 
 1. **Check the `/status` endpoint first:** `curl https://api.voxire.dev/status` — reports DB and cache health without needing log access.
 2. **Check Render dashboard** (current backend host): log into [render.com](https://render.com), navigate to the `onion` service, and check the Logs tab for panics or startup errors.
-3. If the DB is unreachable: verify MySQL at `108.167.180.218` is accessible. Check that DB credentials are set correctly in the Render service environment variables.
+3. If the DB is unreachable: verify MySQL at `${DB_HOST}` is accessible. Check that DB credentials are set correctly in the Render service environment variables.
 4. If it is a code panic: the `CrashNotifierMiddleware` logs the stack trace. Search Render logs for `panic` or `recovered`.
 
 ### Rolling back a deployment
@@ -877,7 +925,7 @@ Migrations use `IF NOT EXISTS` and are additive-only — there is no automatic r
 
 | Tool | Version | Install |
 |---|---|---|
-| Go | 1.25+ | https://go.dev/dl/ |
+| Go | 1.26+ | https://go.dev/dl/ |
 | MySQL | 8.0+ | Local or remote |
 | Redis | 7+ | Optional — set `REDIS_ENABLED=false` to skip |
 | sqlc | v1.29.0 | `go install github.com/sqlc-dev/sqlc/cmd/sqlc@v1.29.0` |
@@ -922,7 +970,7 @@ APP_ENV=development
 # MySQL (required)
 DB_HOST=localhost
 DB_PORT=3306
-DB_NAME=voxirete_rtylr_db
+DB_NAME=your_local_database
 DB_USER=your_db_user
 DB_PASSWORD=your_db_password
 

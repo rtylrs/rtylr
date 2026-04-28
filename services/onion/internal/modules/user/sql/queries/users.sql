@@ -6,10 +6,18 @@ INSERT INTO users (
 );
 
 -- name: GetUserByID :one
-SELECT * FROM users WHERE id = ?;
+SELECT
+    id, business_id, email, password_hash, full_name,
+    signup_ip_address, signup_device_info, onboarded,
+    created_at, updated_at, auth_provider
+FROM users WHERE id = ?;
 
 -- name: GetUserByEmail :one
-SELECT * FROM users WHERE email = ?;
+SELECT
+    id, business_id, email, password_hash, full_name,
+    signup_ip_address, signup_device_info, onboarded,
+    created_at, updated_at, auth_provider
+FROM users WHERE email = ?;
 
 -- name: UpdateUserProfile :exec
 UPDATE users
@@ -26,4 +34,3 @@ DELETE FROM users WHERE id = ?;
 
 -- name: RecordLoginHistory :exec
 INSERT INTO login_history (user_id, email, method, ip_address, success) VALUES (?, ?, ?, ?, ?);
-

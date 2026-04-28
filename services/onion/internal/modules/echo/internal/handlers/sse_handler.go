@@ -197,26 +197,12 @@ func (h *GenerateTextStreamHandler) setupSessionAndStoreMessage(ctx context.Cont
 }
 
 func (h *GenerateTextStreamHandler) buildEnhancedPromptWithContext(ctx context.Context, req *GenerateTextStreamRequest) (string, error) {
-	log := logger.Ctx(ctx)
-
-	log.Info("Building enhanced prompt with context",
+	logger.Ctx(ctx).Info("Building enhanced prompt with context",
 		logger.String("session_id", req.SessionID),
 		logger.Int("user_id", int(req.UserID)))
 
-	conversationContext, err := h.MemoryService.GetService().GetConversationContext(ctx, req.SessionID, int(req.UserID))
-	if err != nil {
-		log.Error("Failed to get conversation context", logger.Error(err),
-			logger.String("session_id", req.SessionID),
-			logger.Int("user_id", int(req.UserID)))
-
-		return "", fmt.Errorf("failed to get context: %w", err)
-	}
-
-	log.Info("Context retrieved successfully",
-		logger.String("context_type", fmt.Sprintf("%T", conversationContext)),
-		logger.String("session_id", req.SessionID))
-
-	return h.buildEnhancedPrompt(req.Prompt, conversationContext), nil
+	prompt := h.MemoryService.BuildEnhancedPrompt(ctx, req.SessionID, int(req.UserID), req.Prompt)
+	return prompt, nil
 }
 
 func (h *GenerateTextStreamHandler) setupSSEHeaders(w http.ResponseWriter) {
@@ -311,15 +297,12 @@ func (h *GenerateTextStreamHandler) processAndStreamToken(w http.ResponseWriter,
 	return nil
 }
 
+// buildEnhancedPromptWithContext now delegates to the memory module so the
+// prompt-assembly rules live next to the data they read. The
+// conversationContext argument is retained as a no-op so the existing call
+// site signature does not change.
 func (h *GenerateTextStreamHandler) buildEnhancedPrompt(userPrompt string, _ interface{}) string {
-	// This is a simplified version - in production you'd want proper type assertion.
-	// For now, we'll just return the original prompt.
-	// TODO: Implement proper context building when the memory types are accessible.
-	var enhancedPrompt strings.Builder
-
-	enhancedPrompt.WriteString("Current request: " + userPrompt)
-
-	return enhancedPrompt.String()
+	return "Current request: " + userPrompt
 }
 
 func (h *GenerateTextStreamHandler) storeAIResponse(ctx context.Context, sessionID string, userID int, response string) {

@@ -6,6 +6,7 @@ import (
 
 	errorModels "github.com/voxire/onion/internal/platform/errors"
 	"github.com/voxire/onion/internal/modules/memory/internal/application"
+	"github.com/voxire/onion/internal/modules/memory/internal/domain"
 )
 
 func ChatsRoutes() []string {
@@ -22,13 +23,17 @@ func ChatMessagesRoutes() []string {
 
 type ChatsRequest struct {
 	UserID int `json:"user_id"`
+	Limit  int `json:"limit"`
+	Offset int `json:"offset"`
 }
 
 type ChatsResponse struct {
-	Success bool   `json:"success"`
-	Message string `json:"message,omitempty"`
-	UserID  int    `json:"user_id,omitempty"`
-	Error   string `json:"error,omitempty"`
+	Success  bool                  `json:"success"`
+	UserID   int                   `json:"user_id,omitempty"`
+	Sessions []domain.ChatSession  `json:"sessions"`
+	Limit    int                   `json:"limit"`
+	Offset   int                   `json:"offset"`
+	Error    string                `json:"error,omitempty"`
 }
 
 type ChatMessagesRequest struct {
@@ -48,7 +53,7 @@ type ChatHistoryHandler struct {
 	MemoryService *application.Service
 }
 
-func (h *ChatHistoryHandler) Serve(_ context.Context, req *ChatsRequest) (ChatsResponse, *errorModels.ServerError) {
+func (h *ChatHistoryHandler) Serve(ctx context.Context, req *ChatsRequest) (ChatsResponse, *errorModels.ServerError) {
 	if req.UserID <= 0 {
 		return ChatsResponse{}, &errorModels.ServerError{
 			Code:    http.StatusBadRequest,
@@ -56,12 +61,32 @@ func (h *ChatHistoryHandler) Serve(_ context.Context, req *ChatsRequest) (ChatsR
 		}
 	}
 
-	// For now, return a simple response.
-	// TODO: Implement ListUserSessions in the service.
+	limit := req.Limit
+	if limit <= 0 {
+		limit = 20
+	}
+	if limit > 100 {
+		limit = 100
+	}
+	offset := req.Offset
+	if offset < 0 {
+		offset = 0
+	}
+
+	sessions, err := h.MemoryService.ListUserSessions(ctx, req.UserID, limit, offset)
+	if err != nil {
+		return ChatsResponse{}, &errorModels.ServerError{
+			Code:    http.StatusInternalServerError,
+			Message: "Failed to list chat sessions",
+		}
+	}
+
 	return ChatsResponse{
-		Success: true,
-		Message: "User chats functionality coming soon",
-		UserID:  req.UserID,
+		Success:  true,
+		UserID:   req.UserID,
+		Sessions: sessions,
+		Limit:    limit,
+		Offset:   offset,
 	}, nil
 }
 

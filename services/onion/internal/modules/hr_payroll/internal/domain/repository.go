@@ -31,3 +31,43 @@ type Repository interface {
 type ApprovalChainProvider interface {
 	GetApprovalChain(ctx context.Context, ownerID int64, requestType string) (*ApprovalChainInfo, error)
 }
+
+// FinanceJournalPoster lets the payroll service hand a completed run off to the
+// finance module without depending on it directly. The finance module is
+// expected to translate the call into the appropriate journal entries
+// (debit payroll expense, credit payable / cash) inside its own bounded
+// context. Implementations must be idempotent on (ownerID, runID).
+type FinanceJournalPoster interface {
+	PostPayrollJournal(ctx context.Context, entry PayrollJournalEntry) error
+}
+
+// PayrollJournalEntry is the payload handed to the finance module when a
+// payroll run is exported. Money figures are passed in the currency stored
+// on the run record; finance is responsible for any conversion.
+type PayrollJournalEntry struct {
+	OwnerID     int64
+	RunID       int64
+	PeriodStart string
+	PeriodEnd   string
+	TotalGross  float64
+	TotalNet    float64
+}
+
+// NotificationDispatcher lets the payroll service emit notifications without
+// depending on the notification module directly. Implementations should be
+// non-blocking from the caller's perspective (queue + return).
+type NotificationDispatcher interface {
+	Dispatch(ctx context.Context, event NotificationEvent) error
+}
+
+// NotificationEvent is the cross-module notification envelope. Type is a
+// stable string key (e.g. "payroll.payslip", "payroll.period_open") that the
+// notification module maps to a template + delivery channel based on company
+// config.
+type NotificationEvent struct {
+	OwnerID  int64
+	Type     string
+	Subject  string
+	Payload  map[string]any
+	UserIDs  []int64 // optional explicit recipients; empty = use type-based routing
+}

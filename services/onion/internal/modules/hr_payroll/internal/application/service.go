@@ -12,13 +12,55 @@ import (
 type Service struct {
 	repo             *infrastructure.Repository
 	approvalProvider domain.ApprovalChainProvider
+	financePoster    domain.FinanceJournalPoster
+	notifier         domain.NotificationDispatcher
 }
 
 func NewService(ctx context.Context, approvalProvider domain.ApprovalChainProvider) *Service {
 	return &Service{
 		repo:             infrastructure.NewRepository(ctx),
 		approvalProvider: approvalProvider,
+		financePoster:    noopFinancePoster{},
+		notifier:         noopNotifier{},
 	}
+}
+
+// SetFinancePoster wires a finance module implementation into the payroll
+// service. Call this from the module bootstrap after both modules have been
+// constructed. Until called, exports are recorded but no journal entry is
+// posted (the warning is logged).
+func (s *Service) SetFinancePoster(p domain.FinanceJournalPoster) {
+	if p != nil {
+		s.financePoster = p
+	}
+}
+
+// SetNotifier wires a notification module implementation into the payroll
+// service. Until called, notifications are no-ops (the warning is logged).
+func (s *Service) SetNotifier(n domain.NotificationDispatcher) {
+	if n != nil {
+		s.notifier = n
+	}
+}
+
+type noopFinancePoster struct{}
+
+func (noopFinancePoster) PostPayrollJournal(ctx context.Context, entry domain.PayrollJournalEntry) error {
+	logger.Ctx(ctx).Warn("finance journal poster not wired; payroll export skipped",
+		logger.Any("owner_id", entry.OwnerID),
+		logger.Any("run_id", entry.RunID),
+	)
+	return nil
+}
+
+type noopNotifier struct{}
+
+func (noopNotifier) Dispatch(ctx context.Context, event domain.NotificationEvent) error {
+	logger.Ctx(ctx).Warn("notification dispatcher not wired; event dropped",
+		logger.Any("owner_id", event.OwnerID),
+		logger.String("type", event.Type),
+	)
+	return nil
 }
 
 func (s *Service) GetPayrollConfig(ctx context.Context, ownerID int64) (*domain.PayrollConfigRecord, error) {
@@ -212,16 +254,57 @@ func (s *Service) ExportPayrollToFinance(ctx context.Context, ownerID, runID int
 		return domain.ErrPayrollAlreadyExported
 	}
 
-	// TODO: Call Finance module's internal API to create journal entries
-	// Interface: financeService.CreatePayrollJournalEntry(ctx, ownerID, runID, run.TotalGross, run.TotalNet)
-	// This would create debit/credit entries in the finance_journal_entries table
+	if postErr := s.financePoster.PostPayrollJournal(ctx, domain.PayrollJournalEntry{
+		OwnerID:     ownerID,
+		RunID:       runID,
+		PeriodStart: run.PeriodStart,
+		PeriodEnd:   run.PeriodEnd,
+		TotalGross:  run.TotalGross,
+		TotalNet:    run.TotalNet,
+	}); postErr != nil {
+		logger.Ctx(ctx).Error("finance journal post failed",
+			logger.Any("owner_id", ownerID),
+			logger.Any("run_id", runID),
+			logger.Error(postErr),
+		)
+		return postErr
+	}
 
 	if err := s.repo.SetPayrollRunExported(ctx, ownerID, runID); err != nil {
 		return err
 	}
 
-	// TODO: Dispatch pay slip notifications per employee via notification service
-	// Interface: notificationService.Dispatch(ctx, ownerID, domain.NotificationEvent{Type: "payslip", RunID: runID})
+	entries, listErr := s.repo.ListPayrollEntries(ctx, ownerID, runID)
+	if listErr != nil {
+		logger.Ctx(ctx).Warn("payroll exported but pay slip notifications could not be enumerated",
+			logger.Any("owner_id", ownerID),
+			logger.Any("run_id", runID),
+			logger.Error(listErr),
+		)
+		return nil
+	}
+
+	for _, entry := range entries {
+		if dispErr := s.notifier.Dispatch(ctx, domain.NotificationEvent{
+			OwnerID: ownerID,
+			Type:    "payroll.payslip",
+			Subject: "Your pay slip is ready",
+			Payload: map[string]any{
+				"run_id":       runID,
+				"employee_id":  entry.EmployeeID,
+				"net_pay":      entry.NetPay,
+				"period_start": run.PeriodStart,
+				"period_end":   run.PeriodEnd,
+			},
+		}); dispErr != nil {
+			logger.Ctx(ctx).Warn("pay slip notification failed",
+				logger.Any("owner_id", ownerID),
+				logger.Any("run_id", runID),
+				logger.Any("employee_id", entry.EmployeeID),
+				logger.Error(dispErr),
+			)
+		}
+	}
 
 	return nil
 }
@@ -265,8 +348,20 @@ func (s *Service) NotifyPayrollPeriodOpen(ctx context.Context) error {
 
 		now := time.Now()
 		if int32(now.Day()) == cfg.PayDayOfMonth {
-			// TODO: Dispatch notification to Finance Manager via notification service
-			// Interface: notificationService.Dispatch(ctx, ownerID, domain.NotificationEvent{Type: "payroll_period_open"})
+			if dispErr := s.notifier.Dispatch(ctx, domain.NotificationEvent{
+				OwnerID: ownerID,
+				Type:    "payroll.period_open",
+				Subject: "Payroll period is open",
+				Payload: map[string]any{
+					"period_type": cfg.PeriodType,
+					"pay_day":     cfg.PayDayOfMonth,
+				},
+			}); dispErr != nil {
+				logger.Ctx(ctx).Warn("payroll period notification dispatch failed",
+					logger.Any("owner_id", ownerID),
+					logger.Error(dispErr),
+				)
+			}
 			logger.Ctx(ctx).Info("payroll period open notification sent",
 				logger.Any("owner_id", ownerID),
 				logger.Any("period_type", cfg.PeriodType),

@@ -3,7 +3,10 @@ INSERT INTO chat_sessions (user_id, session_id, title, metadata)
 VALUES (?, ?, ?, ?);
 
 -- name: GetChatSession :one
-SELECT * FROM chat_sessions 
+SELECT
+    id, user_id, session_id, title, summary, metadata,
+    created_at, updated_at, last_activity
+FROM chat_sessions
 WHERE session_id = ? AND user_id = ?;
 
 -- name: UpdateChatSession :exec
@@ -12,9 +15,12 @@ SET title = ?, summary = ?, metadata = ?, last_activity = CURRENT_TIMESTAMP, upd
 WHERE session_id = ? AND user_id = ?;
 
 -- name: ListUserSessions :many
-SELECT * FROM chat_sessions 
-WHERE user_id = ? 
-ORDER BY last_activity DESC 
+SELECT
+    id, user_id, session_id, title, summary, metadata,
+    created_at, updated_at, last_activity
+FROM chat_sessions
+WHERE user_id = ?
+ORDER BY last_activity DESC
 LIMIT ? OFFSET ?;
 
 -- name: CreateMessage :execresult
@@ -22,22 +28,34 @@ INSERT INTO conversation_messages (session_id, user_id, role, content, tokens_us
 VALUES (?, ?, ?, ?, ?, ?);
 
 -- name: GetMessageByID :one
-SELECT * FROM conversation_messages
+SELECT
+    id, session_id, user_id, role, content,
+    tokens_used, metadata, created_at
+FROM conversation_messages
 WHERE id = ?;
 
 -- name: GetSessionMessages :many
-SELECT * FROM conversation_messages 
-WHERE session_id = ? 
+SELECT
+    id, session_id, user_id, role, content,
+    tokens_used, metadata, created_at
+FROM conversation_messages
+WHERE session_id = ?
 ORDER BY created_at ASC;
 
 -- name: GetRecentMessages :many
-SELECT * FROM conversation_messages 
-WHERE user_id = ? 
-ORDER BY created_at DESC 
+SELECT
+    id, session_id, user_id, role, content,
+    tokens_used, metadata, created_at
+FROM conversation_messages
+WHERE user_id = ?
+ORDER BY created_at DESC
 LIMIT ?;
 
 -- name: GetMessagesByTopic :many
-SELECT cm.*, cs.title AS session_title
+SELECT
+    cm.id, cm.session_id, cm.user_id, cm.role, cm.content,
+    cm.tokens_used, cm.metadata, cm.created_at,
+    cs.title AS session_title
 FROM conversation_messages cm
 JOIN chat_sessions cs ON cm.session_id = cs.session_id
 WHERE cm.user_id = ?
@@ -50,12 +68,18 @@ INSERT INTO conversation_summaries (user_id, session_id, summary, key_topics, se
 VALUES (?, ?, ?, ?, ?, ?);
 
 -- name: GetConversationSummaryByID :one
-SELECT * FROM conversation_summaries
+SELECT
+    id, user_id, session_id, summary, key_topics,
+    sentiment, importance_score, created_at
+FROM conversation_summaries
 WHERE id = ?;
 
 -- name: GetUserSummaries :many
-SELECT * FROM conversation_summaries 
-WHERE user_id = ? 
+SELECT
+    id, user_id, session_id, summary, key_topics,
+    sentiment, importance_score, created_at
+FROM conversation_summaries
+WHERE user_id = ?
 ORDER BY importance_score DESC, created_at DESC;
 
 -- name: StoreUserMemory :exec
@@ -68,17 +92,26 @@ ON DUPLICATE KEY UPDATE
     updated_at = CURRENT_TIMESTAMP;
 
 -- name: GetUserMemoryByKey :one
-SELECT * FROM user_memory
+SELECT
+    id, user_id, memory_type, `key`, value, confidence,
+    source_session, created_at, updated_at
+FROM user_memory
 WHERE user_id = ? AND memory_type = ? AND `key` = ?;
 
 -- name: GetUserMemory :many
-SELECT * FROM user_memory 
+SELECT
+    id, user_id, memory_type, `key`, value, confidence,
+    source_session, created_at, updated_at
+FROM user_memory
 WHERE user_id = ?
 AND (memory_type = ? OR ? = '')
 ORDER BY confidence DESC, updated_at DESC;
 
 -- name: SearchUserMemory :many
-SELECT * FROM user_memory 
+SELECT
+    id, user_id, memory_type, `key`, value, confidence,
+    source_session, created_at, updated_at
+FROM user_memory
 WHERE user_id = ?
 AND (
     `key` LIKE CONCAT('%', ?, '%') OR
@@ -89,9 +122,10 @@ ORDER BY confidence DESC;
 
 -- name: GetContextForSession :many
 WITH recent_messages AS (
-    SELECT * FROM conversation_messages 
-    WHERE conversation_messages.session_id = ? 
-    ORDER BY created_at DESC 
+    SELECT id, session_id, user_id, role, content, tokens_used, metadata, created_at
+    FROM conversation_messages
+    WHERE conversation_messages.session_id = ?
+    ORDER BY created_at DESC
     LIMIT 20
 ),
 session_summary AS (

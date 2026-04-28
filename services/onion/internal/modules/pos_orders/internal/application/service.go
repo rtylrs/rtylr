@@ -7,6 +7,7 @@ import (
 
 	"github.com/voxire/onion/internal/modules/pos_orders/internal/domain"
 	"github.com/voxire/onion/internal/modules/pos_orders/internal/infrastructure"
+	"github.com/voxire/onion/internal/platform/logger"
 	"github.com/voxire/onion/internal/platform/paddle"
 )
 
@@ -211,7 +212,15 @@ func (s *Service) ProcessRefund(ctx context.Context, ownerID, refundedBy int64, 
 
 	sessionID, err := s.repo.GetOrderSessionID(ctx, input.OrderID)
 	if err == nil && sessionID > 0 {
-		_ = s.repo.UpdateSessionRefundTotals(ctx, sessionID, input.Amount)
+		if updateErr := s.repo.UpdateSessionRefundTotals(ctx, sessionID, input.Amount); updateErr != nil {
+			logger.Ctx(ctx).Warn("refund recorded but session totals update failed",
+				logger.Any("session_id", sessionID),
+				logger.Any("order_id", input.OrderID),
+				logger.Any("refund_id", refundID),
+				logger.Float64("amount", input.Amount),
+				logger.Error(updateErr),
+			)
+		}
 	}
 
 	return refundID, nil

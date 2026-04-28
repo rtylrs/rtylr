@@ -132,6 +132,41 @@ func (r *Repository) CreateMessage(ctx context.Context, message *domain.Conversa
 	return &created, nil
 }
 
+func (r *Repository) ListUserSessions(ctx context.Context, userID, limit, offset int) ([]domain.ChatSession, error) {
+	if limit <= 0 {
+		limit = 20
+	}
+	if limit > 100 {
+		limit = 100
+	}
+	if offset < 0 {
+		offset = 0
+	}
+
+	arg := sqlc.ListUserSessionsParams{
+		UserID: int32(userID),
+		Limit:  int32(limit),
+		Offset: int32(offset),
+	}
+
+	rows, err := r.queries.ListUserSessions(ctx, arg)
+	if err != nil {
+		logger.Ctx(ctx).Error("Failed to list user sessions", logger.Error(err))
+		return nil, fmt.Errorf("failed to list user sessions: %w", err)
+	}
+
+	results := make([]domain.ChatSession, 0, len(rows))
+	for _, row := range rows {
+		var item domain.ChatSession
+		if fromRowsErr := item.FromRows(row); fromRowsErr != nil {
+			return nil, fromRowsErr
+		}
+		results = append(results, item)
+	}
+
+	return results, nil
+}
+
 func (r *Repository) GetSessionMessages(ctx context.Context, sessionID string) ([]domain.ConversationMessage, error) {
 	rows, err := r.queries.GetSessionMessages(ctx, sessionID)
 	if err != nil {

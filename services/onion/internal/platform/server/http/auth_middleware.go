@@ -4,7 +4,6 @@ import (
 	"context"
 	"encoding/json"
 	"fmt"
-	"log"
 	"net/http"
 	"os"
 	"strings"
@@ -45,7 +44,9 @@ func writeUnauthorizedResponse(w http.ResponseWriter, message string, logoff boo
 
 	if jsonBytes, err := json.Marshal(responseData); err == nil {
 		if _, writeErr := w.Write(jsonBytes); writeErr != nil {
-			log.Printf("Failed to write response: %v", writeErr)
+			logger.Global().Error("failed to write unauthorized response",
+				logger.Error(writeErr),
+			)
 		}
 	}
 }

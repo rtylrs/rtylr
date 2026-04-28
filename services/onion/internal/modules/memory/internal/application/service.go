@@ -52,6 +52,15 @@ func (s *Service) CreateSession(ctx context.Context, userID int, title string) (
 	return s.repository.CreateChatSession(ctx, session)
 }
 
+// ListUserSessions returns the user's chat sessions ordered by most recent activity,
+// applying paginated defaults (limit 20, max 100) per the project pagination rules.
+func (s *Service) ListUserSessions(ctx context.Context, userID, limit, offset int) ([]domain.ChatSession, error) {
+	if userID <= 0 {
+		return nil, errors.New("user id is required")
+	}
+	return s.repository.ListUserSessions(ctx, userID, limit, offset)
+}
+
 func (s *Service) StoreMessage(ctx context.Context, sessionID string, userID int, role, content string, tokensUsed int) (*domain.ConversationMessage, error) {
 	message := &domain.ConversationMessage{
 		SessionID:  sessionID,

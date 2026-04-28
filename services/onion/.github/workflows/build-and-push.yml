@@ -37,9 +37,15 @@ jobs:
             NEW_VERSION="0.1.1"
           else
             IFS='.' read -r MAJOR MINOR PATCH <<< "$LATEST"
+            # Roll PATCH at 99: 0.1.99 → 0.2.0, 0.99.99 → 1.0.0.
             if [ "$PATCH" -ge 99 ]; then
-              MINOR=$((MINOR + 1))
               PATCH=0
+              if [ "$MINOR" -ge 99 ]; then
+                MINOR=0
+                MAJOR=$((MAJOR + 1))
+              else
+                MINOR=$((MINOR + 1))
+              fi
             else
               PATCH=$((PATCH + 1))
             fi

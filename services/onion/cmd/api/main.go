@@ -4,7 +4,6 @@ import (
 	"bufio"
 	"context"
 	"fmt"
-	"log"
 	"os"
 	"os/signal"
 	"runtime"
@@ -174,7 +173,10 @@ func loadDotEnv() {
 			continue
 		}
 		if err := os.Setenv(key, val); err != nil {
-			log.Printf("Warning: could not set env var %s: %v", key, err)
+			logger.Global().Warn("could not set env var",
+				logger.String("key", key),
+				logger.Error(err),
+			)
 		}
 	}
 }

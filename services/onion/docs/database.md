@@ -2,9 +2,7 @@
 
 The rtylr backend uses MySQL. All schema files live in `onion/internal/platform/database/schemas/` organized by module.
 
-- **Host (production):** `108.167.180.218`
-- **Database:** `voxirete_rtylr_db`
-- **User:** `voxirete_onion`
+- **Production credentials (host, database, user, password):** stored as deployment environment variables only. Never commit them to this repository or any documentation. Operators retrieve them from the deployment platform's secret store.
 - **Engine:** MySQL (InnoDB)
 - **Primary keys:** `BIGINT NOT NULL AUTO_INCREMENT`
 - **Multi-tenancy:** Every table that is tenant-scoped has an `owner_id BIGINT NOT NULL` column referencing `users.id`
@@ -18,11 +16,12 @@ Use `scripts/migrate.sh`. It applies all schema files in the correct order using
 ```bash
 cd onion/
 
-export DB_HOST=108.167.180.218
+export DB_HOST=<host>
 export DB_PORT=3306
-export DB_USER=voxirete_onion
+export DB_USER=<user>
 export DB_PASSWORD=<password>
-export DB_NAME=voxirete_rtylr_db
+export DB_NAME=<database>
+# Pull real values from the deployment platform's secret store — never hardcode.
 
 ./scripts/migrate.sh
 ```

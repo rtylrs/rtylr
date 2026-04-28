@@ -94,7 +94,9 @@ func (s *Service) Deactivate(ctx context.Context, ownerID, id int64) error {
 // transparently migrated to a bcrypt hash on success. Rows with a pin_hash
 // take the fast path and skip the plaintext comparison entirely.
 //
-// TODO: remove after 2026-06-01 — all rows migrated by then
+// TODO(legacy-pin-cleanup): once `SELECT COUNT(*) FROM pos_users WHERE pin_hash IS NULL`
+// returns 0 in production (target: ~2026-06-01 once all clients have transacted at least
+// once and triggered transparent rehash), remove the legacy plaintext branch below.
 func (s *Service) VerifyPIN(ctx context.Context, ownerID int64, displayName, pin string) (*domain.VerifiedPOSUser, error) {
 	if displayName == "" || pin == "" {
 		return nil, domain.ErrInvalidPIN
