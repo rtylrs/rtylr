@@ -10,8 +10,14 @@ import (
 	"github.com/voxire/onion/internal/modules/webhooks/internal/infrastructure"
 )
 
+type repository interface {
+	List(ctx context.Context, ownerID int64) ([]domain.Webhook, error)
+	Create(ctx context.Context, ownerID int64, url, secret string, events []string) (int64, error)
+	Delete(ctx context.Context, ownerID, webhookID int64) error
+}
+
 type Service struct {
-	repo *infrastructure.Repository
+	repo repository
 }
 
 func NewService(ctx context.Context) *Service {
