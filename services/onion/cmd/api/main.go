@@ -1,17 +1,18 @@
 package main
 
 import (
+	"bufio"
 	"context"
 	"fmt"
 	"log"
 	"os"
 	"os/signal"
 	"runtime"
+	"strings"
 	"syscall"
 	"time"
 
 	"github.com/go-chi/chi/v5"
-	"github.com/joho/godotenv"
 	"github.com/voxire/onion/internal/modules/accounts"
 	"github.com/voxire/onion/internal/modules/activity"
 	"github.com/voxire/onion/internal/modules/addons"
@@ -147,12 +148,41 @@ import (
 	"github.com/voxire/onion/internal/platform/wsbus"
 )
 
+// loadDotEnv reads a .env file from the working directory and sets any key=value
+// pairs as environment variables. Missing or unreadable .env files are silently
+// ignored — in production, variables are injected by the container runtime.
+func loadDotEnv() {
+	f, err := os.Open(".env")
+	if err != nil {
+		return
+	}
+	defer f.Close()
+
+	scanner := bufio.NewScanner(f)
+	for scanner.Scan() {
+		line := strings.TrimSpace(scanner.Text())
+		if line == "" || strings.HasPrefix(line, "#") {
+			continue
+		}
+		parts := strings.SplitN(line, "=", 2)
+		if len(parts) != 2 {
+			continue
+		}
+		key := strings.TrimSpace(parts[0])
+		val := strings.TrimSpace(parts[1])
+		if key == "" {
+			continue
+		}
+		if err := os.Setenv(key, val); err != nil {
+			log.Printf("Warning: could not set env var %s: %v", key, err)
+		}
+	}
+}
+
 func main() {
 	runtime.GOMAXPROCS(runtime.NumCPU())
 
-	if err := godotenv.Load(); err != nil {
-		log.Printf("Warning: .env file not found: %v", err)
-	}
+	loadDotEnv()
 
 	shutdownCtx, stop := signal.NotifyContext(context.Background(), os.Interrupt, syscall.SIGTERM)
 	defer stop()
