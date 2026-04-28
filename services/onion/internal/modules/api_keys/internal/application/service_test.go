@@ -51,16 +51,135 @@ func TestCreateAPIKeyInputFromRequest(t *testing.T) {
 	}
 }
 
+type mockRepo struct {
+	listResult []domain.APIKey
+	listErr    error
+
+	createID  int64
+	createErr error
+	createGot struct {
+		ownerID int64
+		name    string
+		hash    string
+		prefix  string
+		scopes  []string
+	}
+
+	revokeErr error
+	revokeGot struct {
+		ownerID int64
+		keyID   int64
+	}
+}
+
+func (m *mockRepo) List(_ context.Context, ownerID int64) ([]domain.APIKey, error) {
+	_ = ownerID
+	return m.listResult, m.listErr
+}
+func (m *mockRepo) Create(_ context.Context, ownerID int64, name, hash, prefix string, scopes []string) (int64, error) {
+	m.createGot.ownerID = ownerID
+	m.createGot.name = name
+	m.createGot.hash = hash
+	m.createGot.prefix = prefix
+	m.createGot.scopes = scopes
+	return m.createID, m.createErr
+}
+func (m *mockRepo) Revoke(_ context.Context, ownerID, keyID int64) error {
+	m.revokeGot.ownerID = ownerID
+	m.revokeGot.keyID = keyID
+	return m.revokeErr
+}
+
 func TestCreate_RequiresName(t *testing.T) {
-	s := &Service{}
+	s := &Service{repo: &mockRepo{}}
 	if _, _, err := s.Create(context.Background(), 1, domain.CreateAPIKeyInput{}); err == nil {
 		t.Fatalf("expected error for empty name")
 	}
 }
 
 func TestRevoke_RequiresKeyID(t *testing.T) {
-	s := &Service{}
+	s := &Service{repo: &mockRepo{}}
 	if err := s.Revoke(context.Background(), 1, 0); err == nil {
 		t.Fatalf("expected error for missing key id")
 	}
 }
+
+func TestList_DelegatesToRepo(t *testing.T) {
+	want := []domain.APIKey{{ID: 1, OwnerID: 7, Name: "ci"}}
+	m := &mockRepo{listResult: want}
+	s := &Service{repo: m}
+	got, err := s.List(context.Background(), 7)
+	if err != nil {
+		t.Fatalf("unexpected err: %v", err)
+	}
+	if len(got) != 1 || got[0].ID != 1 {
+		t.Errorf("expected one key, got %+v", got)
+	}
+}
+
+func TestCreate_HappyPathHashesAndStores(t *testing.T) {
+	m := &mockRepo{createID: 99}
+	s := &Service{repo: m}
+
+	id, raw, err := s.Create(context.Background(), 7, domain.CreateAPIKeyInput{
+		Name:   "test key",
+		Scopes: []string{"read"},
+	})
+	if err != nil {
+		t.Fatalf("unexpected: %v", err)
+	}
+	if id != 99 {
+		t.Errorf("expected id 99, got %d", id)
+	}
+	if len(raw) != 64 {
+		t.Errorf("raw key should be 64-char hex, got %d", len(raw))
+	}
+	if m.createGot.ownerID != 7 || m.createGot.name != "test key" {
+		t.Errorf("repo args unexpected: %+v", m.createGot)
+	}
+	if m.createGot.prefix != raw[:8] {
+		t.Errorf("prefix should be first 8 of raw key")
+	}
+	if m.createGot.hash == raw {
+		t.Error("hash should not equal raw key (was supposed to be sha256-hex)")
+	}
+	if len(m.createGot.hash) != 64 {
+		t.Errorf("hash should be 64-char hex, got %d", len(m.createGot.hash))
+	}
+}
+
+func TestCreate_NilScopesNormalizedToEmpty(t *testing.T) {
+	m := &mockRepo{createID: 1}
+	s := &Service{repo: m}
+	if _, _, err := s.Create(context.Background(), 1, domain.CreateAPIKeyInput{Name: "k"}); err != nil {
+		t.Fatalf("unexpected: %v", err)
+	}
+	if m.createGot.scopes == nil || len(m.createGot.scopes) != 0 {
+		t.Errorf("expected empty (non-nil) scope slice, got %v", m.createGot.scopes)
+	}
+}
+
+func TestCreate_PropagatesRepoError(t *testing.T) {
+	m := &mockRepo{createErr: errSentinel}
+	s := &Service{repo: m}
+	if _, _, err := s.Create(context.Background(), 1, domain.CreateAPIKeyInput{Name: "k"}); err == nil {
+		t.Fatal("expected error to bubble up")
+	}
+}
+
+func TestRevoke_DelegatesWithIDs(t *testing.T) {
+	m := &mockRepo{}
+	s := &Service{repo: m}
+	if err := s.Revoke(context.Background(), 7, 42); err != nil {
+		t.Fatalf("unexpected: %v", err)
+	}
+	if m.revokeGot.ownerID != 7 || m.revokeGot.keyID != 42 {
+		t.Errorf("revoke args mismatch: %+v", m.revokeGot)
+	}
+}
+
+var errSentinel = sentinelErr("repo failed")
+
+type sentinelErr string
+
+func (s sentinelErr) Error() string { return string(s) }

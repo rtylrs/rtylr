@@ -11,8 +11,17 @@ import (
 	"github.com/voxire/onion/internal/modules/api_keys/internal/infrastructure"
 )
 
+// repository captures the subset of Repository methods used by the service.
+// Holding it as an interface lets the service be tested without a real DB
+// while keeping NewService wiring identical to other modules.
+type repository interface {
+	List(ctx context.Context, ownerID int64) ([]domain.APIKey, error)
+	Create(ctx context.Context, ownerID int64, name, keyHash, keyPrefix string, scopes []string) (int64, error)
+	Revoke(ctx context.Context, ownerID, keyID int64) error
+}
+
 type Service struct {
-	repo *infrastructure.Repository
+	repo repository
 }
 
 func NewService(ctx context.Context) *Service {
