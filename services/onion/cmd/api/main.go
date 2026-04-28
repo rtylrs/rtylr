@@ -135,6 +135,7 @@ import (
 	"github.com/voxire/onion/internal/modules/warehouses"
 	"github.com/voxire/onion/internal/modules/webhooks"
 	"github.com/voxire/onion/internal/modules/workspaces"
+	"github.com/voxire/onion/internal/modules/websitelead"
 	authPkg "github.com/voxire/onion/internal/platform/auth"
 	"github.com/voxire/onion/internal/platform/cache"
 	"github.com/voxire/onion/internal/platform/database/dbclient"
@@ -388,6 +389,7 @@ type apiModules struct {
 	Warehouses           *warehouses.Module
 	Webhooks             *webhooks.Module
 	Workspaces           *workspaces.Module
+	WebsiteLead         *websitelead.Module
 }
 
 func initializeModules(ctx context.Context) *apiModules {
@@ -518,6 +520,7 @@ func initializeModules(ctx context.Context) *apiModules {
 		Warehouses:           warehouses.NewModule(ctx),
 		Webhooks:             webhooks.NewModule(ctx),
 		Workspaces:           workspaces.NewModule(ctx),
+		WebsiteLead:         websitelead.NewModule(ctx),
 	}
 }
 
