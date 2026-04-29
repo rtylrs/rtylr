@@ -11,8 +11,14 @@ import (
 
 const ConfigCacheTTL = 500 * time.Minute // 500 minutes = 8 hours
 
+type repository interface {
+	GetConfig(ctx context.Context, ownerID string) (domain.Config, error)
+	CreateConfig(ctx context.Context, input domain.ConfigInput) error
+	GetThemeByOwnerID(ctx context.Context, id string) (domain.Theme, error)
+}
+
 type Service struct {
-	repo *infrastructure.Repository
+	repo repository
 }
 
 func NewService(ctx context.Context) *Service {
