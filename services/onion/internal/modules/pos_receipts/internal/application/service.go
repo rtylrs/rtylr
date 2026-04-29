@@ -9,8 +9,13 @@ import (
 	emailPkg "github.com/voxire/onion/internal/platform/email"
 )
 
+type repository interface {
+	List(ctx context.Context, ownerID int64, dateFrom, dateTo string) ([]domain.Receipt, error)
+	Get(ctx context.Context, ownerID, id int64) (*domain.Receipt, error)
+}
+
 type Service struct {
-	repo *infrastructure.Repository
+	repo repository
 }
 
 func NewService(ctx context.Context) *Service {

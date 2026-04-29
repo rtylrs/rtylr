@@ -7,8 +7,14 @@ import (
 	"github.com/voxire/onion/internal/modules/flow_insights/internal/infrastructure"
 )
 
+type repository interface {
+	GetInsightsStats(ctx context.Context, ownerID int64) (domain.InsightsStats, error)
+	GetTeamWorkload(ctx context.Context, ownerID int64) (domain.TeamWorkloadResult, error)
+	GetRoadmap(ctx context.Context, ownerID int64) (domain.RoadmapResult, error)
+}
+
 type Service struct {
-	repo *infrastructure.Repository
+	repo repository
 }
 
 func NewService(ctx context.Context) *Service {
