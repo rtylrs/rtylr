@@ -1,11 +1,105 @@
 package application
 
 import (
+	"context"
+	"errors"
 	"testing"
 	"time"
 
 	"github.com/voxire/onion/internal/modules/finance_reconciliation/internal/domain"
 )
+
+type mockRepo struct {
+	bank      []domain.UnmatchedBankTransaction
+	invoices  []domain.UnmatchedInvoice
+	expenses  []domain.UnmatchedInvoice
+	bankErr   error
+	invErr    error
+	expErr    error
+	exists    bool
+	existsErr error
+	matchID   int64
+	matchErr  error
+}
+
+func (m *mockRepo) ListUnmatchedBankFeeds(_ context.Context, _ int64) ([]domain.UnmatchedBankTransaction, error) {
+	return m.bank, m.bankErr
+}
+func (m *mockRepo) ListUnmatchedInvoices(_ context.Context, _ int64) ([]domain.UnmatchedInvoice, error) {
+	return m.invoices, m.invErr
+}
+func (m *mockRepo) ListUnmatchedExpenses(_ context.Context, _ int64) ([]domain.UnmatchedInvoice, error) {
+	return m.expenses, m.expErr
+}
+func (m *mockRepo) BankFeedExists(_ context.Context, _, _ int64) (bool, error) {
+	return m.exists, m.existsErr
+}
+func (m *mockRepo) CreateMatch(_ context.Context, _ int64, _ domain.MatchInput) (int64, error) {
+	return m.matchID, m.matchErr
+}
+
+func TestOverview_PropagatesEachListError(t *testing.T) {
+	want := errors.New("boom")
+
+	s := &Service{repo: &mockRepo{bankErr: want}}
+	if _, err := s.Overview(context.Background(), 1); !errors.Is(err, want) {
+		t.Errorf("bank err: %v", err)
+	}
+
+	s = &Service{repo: &mockRepo{invErr: want}}
+	if _, err := s.Overview(context.Background(), 1); !errors.Is(err, want) {
+		t.Errorf("inv err: %v", err)
+	}
+
+	s = &Service{repo: &mockRepo{expErr: want}}
+	if _, err := s.Overview(context.Background(), 1); !errors.Is(err, want) {
+		t.Errorf("exp err: %v", err)
+	}
+}
+
+func TestOverview_ReturnsBundle(t *testing.T) {
+	s := &Service{repo: &mockRepo{
+		bank:     []domain.UnmatchedBankTransaction{{ID: 1}},
+		invoices: []domain.UnmatchedInvoice{{ID: 2}},
+	}}
+	got, err := s.Overview(context.Background(), 1)
+	if err != nil {
+		t.Fatalf("err: %v", err)
+	}
+	if len(got.UnmatchedBankTxns) != 1 || len(got.UnmatchedInvoices) != 1 {
+		t.Errorf("bundle: %+v", got)
+	}
+}
+
+func TestMatch_RejectsBadInputs(t *testing.T) {
+	s := &Service{repo: &mockRepo{exists: true}}
+
+	if _, err := s.Match(context.Background(), 1, domain.MatchInput{TargetType: "fake", BankFeedID: 1, TargetID: 1}); !errors.Is(err, domain.ErrInvalidTarget) {
+		t.Errorf("bad target type: %v", err)
+	}
+	if _, err := s.Match(context.Background(), 1, domain.MatchInput{TargetType: domain.TargetTypeInvoice, BankFeedID: 0, TargetID: 1}); !errors.Is(err, domain.ErrInvalidTarget) {
+		t.Errorf("zero bank id: %v", err)
+	}
+	if _, err := s.Match(context.Background(), 1, domain.MatchInput{TargetType: domain.TargetTypeInvoice, BankFeedID: 1, TargetID: 0}); !errors.Is(err, domain.ErrInvalidTarget) {
+		t.Errorf("zero target id: %v", err)
+	}
+}
+
+func TestMatch_RejectsMissingBankFeed(t *testing.T) {
+	s := &Service{repo: &mockRepo{exists: false}}
+	_, err := s.Match(context.Background(), 1, domain.MatchInput{TargetType: domain.TargetTypeInvoice, BankFeedID: 5, TargetID: 7})
+	if !errors.Is(err, domain.ErrBankFeedNotFound) {
+		t.Errorf("expected ErrBankFeedNotFound, got %v", err)
+	}
+}
+
+func TestMatch_HappyPath(t *testing.T) {
+	s := &Service{repo: &mockRepo{exists: true, matchID: 99}}
+	id, err := s.Match(context.Background(), 1, domain.MatchInput{TargetType: domain.TargetTypeInvoice, BankFeedID: 5, TargetID: 7})
+	if err != nil || id != 99 {
+		t.Errorf("id=%d err=%v", id, err)
+	}
+}
 
 func TestAbsInt64(t *testing.T) {
 	cases := map[int64]int64{

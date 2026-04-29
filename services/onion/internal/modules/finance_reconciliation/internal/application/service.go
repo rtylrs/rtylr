@@ -23,8 +23,16 @@ const (
 	dayWeightMinorUnits   = 100.0    // one day ≈ $1 of penalty
 )
 
+type repository interface {
+	ListUnmatchedBankFeeds(ctx context.Context, ownerID int64) ([]domain.UnmatchedBankTransaction, error)
+	ListUnmatchedInvoices(ctx context.Context, ownerID int64) ([]domain.UnmatchedInvoice, error)
+	ListUnmatchedExpenses(ctx context.Context, ownerID int64) ([]domain.UnmatchedInvoice, error)
+	BankFeedExists(ctx context.Context, ownerID, id int64) (bool, error)
+	CreateMatch(ctx context.Context, ownerID int64, input domain.MatchInput) (int64, error)
+}
+
 type Service struct {
-	repo *infrastructure.Repository
+	repo repository
 }
 
 func NewService(ctx context.Context) *Service {
