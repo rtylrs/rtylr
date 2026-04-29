@@ -7,8 +7,14 @@ import (
 	"github.com/voxire/onion/internal/modules/time_off/internal/infrastructure"
 )
 
+type repository interface {
+	ListTimeOffRequests(ctx context.Context, ownerID int64) ([]domain.TimeOffRequest, error)
+	CreateTimeOffRequest(ctx context.Context, input domain.TimeOffInput) (int64, error)
+	ApproveTimeOffRequest(ctx context.Context, ownerID int64, input domain.TimeOffApprovalInput) error
+}
+
 type Service struct {
-	repo *infrastructure.Repository
+	repo repository
 }
 
 func NewService(ctx context.Context) *Service {

@@ -7,8 +7,14 @@ import (
 	"github.com/voxire/onion/internal/modules/pos_locations/internal/infrastructure"
 )
 
+type repository interface {
+	List(ctx context.Context, ownerID int64) ([]domain.Location, error)
+	Create(ctx context.Context, input domain.LocationInput) (int64, error)
+	Update(ctx context.Context, input domain.LocationUpdateInput) error
+}
+
 type Service struct {
-	repo *infrastructure.Repository
+	repo repository
 }
 
 func NewService(ctx context.Context) *Service {

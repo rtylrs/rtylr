@@ -7,8 +7,14 @@ import (
 	"github.com/voxire/onion/internal/modules/tax/internal/infrastructure"
 )
 
+type repository interface {
+	GetConfig(ctx context.Context, ownerID int64) (domain.TaxConfig, error)
+	UpsertConfig(ctx context.Context, input domain.TaxConfigInput) error
+	GetPLReport(ctx context.Context, ownerID int64) (domain.PLReport, error)
+}
+
 type Service struct {
-	repo *infrastructure.Repository
+	repo repository
 }
 
 func NewService(ctx context.Context) *Service {
