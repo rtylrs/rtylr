@@ -7,8 +7,13 @@ import (
 	"github.com/voxire/onion/internal/modules/pos_audit/internal/infrastructure"
 )
 
+type repository interface {
+	List(ctx context.Context, filter domain.AuditLogFilter) ([]domain.AuditLog, error)
+	Create(ctx context.Context, input domain.AuditLogInput) (int64, error)
+}
+
 type Service struct {
-	repo *infrastructure.Repository
+	repo repository
 }
 
 func NewService(ctx context.Context) *Service {

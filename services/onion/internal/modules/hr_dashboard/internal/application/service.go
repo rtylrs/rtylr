@@ -7,8 +7,13 @@ import (
 	"github.com/voxire/onion/internal/modules/hr_dashboard/internal/infrastructure"
 )
 
+type repository interface {
+	GetWidgets(ctx context.Context, ownerID int64) ([]*domain.DashboardWidget, error)
+	UpsertWidgets(ctx context.Context, ownerID int64, widgets []*domain.DashboardWidget) error
+}
+
 type Service struct {
-	repo *infrastructure.Repository
+	repo repository
 }
 
 func NewService(ctx context.Context) *Service {

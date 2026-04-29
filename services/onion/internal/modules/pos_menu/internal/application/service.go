@@ -7,8 +7,13 @@ import (
 	"github.com/voxire/onion/internal/modules/pos_menu/internal/infrastructure"
 )
 
+type repository interface {
+	List(ctx context.Context, ownerID int64) ([]domain.MenuItem, error)
+	QuickCreate(ctx context.Context, ownerID int64, input domain.MenuItemInput) (int64, error)
+}
+
 type Service struct {
-	repo *infrastructure.Repository
+	repo repository
 }
 
 func NewService(ctx context.Context) *Service {
