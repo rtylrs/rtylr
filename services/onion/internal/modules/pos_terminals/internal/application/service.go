@@ -7,8 +7,15 @@ import (
 	"github.com/voxire/onion/internal/modules/pos_terminals/internal/infrastructure"
 )
 
+type repository interface {
+	List(ctx context.Context, businessID int64) ([]domain.Terminal, error)
+	Create(ctx context.Context, input domain.TerminalInput) (int64, error)
+	Update(ctx context.Context, input domain.TerminalUpdateInput) error
+	Heartbeat(ctx context.Context, terminalID, businessID int64) error
+}
+
 type Service struct {
-	repo *infrastructure.Repository
+	repo repository
 }
 
 func NewService(ctx context.Context) *Service {

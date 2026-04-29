@@ -7,8 +7,15 @@ import (
 	"github.com/voxire/onion/internal/modules/pos_sessions/internal/infrastructure"
 )
 
+type repository interface {
+	List(ctx context.Context, ownerID int64) ([]domain.Session, error)
+	Get(ctx context.Context, ownerID, id int64) (*domain.Session, error)
+	Open(ctx context.Context, input domain.OpenSessionInput) (int64, error)
+	Close(ctx context.Context, input domain.CloseSessionInput) error
+}
+
 type Service struct {
-	repo *infrastructure.Repository
+	repo repository
 }
 
 func NewService(ctx context.Context) *Service {
