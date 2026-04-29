@@ -7,8 +7,12 @@ import (
 	"github.com/voxire/onion/internal/modules/pos_manager/internal/infrastructure"
 )
 
+type repository interface {
+	VerifyPIN(ctx context.Context, ownerID int64, pin string) (*domain.VerifyResult, error)
+}
+
 type Service struct {
-	repo *infrastructure.Repository
+	repo repository
 }
 
 func NewService(ctx context.Context) *Service {
