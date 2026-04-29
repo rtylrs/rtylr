@@ -12,8 +12,12 @@ import (
 
 const activityCacheTTL = 1 * time.Minute
 
+type repository interface {
+	ListActivity(ctx context.Context, ownerID int64, limit int) ([]domain.ActivityLog, error)
+}
+
 type Service struct {
-	repo *infrastructure.Repository
+	repo repository
 }
 
 func NewService(ctx context.Context) *Service {
