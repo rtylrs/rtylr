@@ -36,7 +36,7 @@ echo "Running migrations against $DB_USER@$DB_HOST:$DB_PORT/$DB_NAME"
 
 # Run schema files in a consistent order: shared first, then module-specific schemas.
 # Within each directory, files are applied in lexicographic (alphabetical) order.
-for dir in shared rtylr voxire erp hr hr_core hr_attendance hr_documents hr_equipment hr_leave hr_onboarding hr_overtime hr_payroll hr_performance hr_setup hr_shifts hr_time crm finance flow pos hub store support book hr_dashboard recruit; do
+for dir in shared rtylr voxire erp hr hr_core hr_attendance hr_documents hr_equipment hr_leave hr_onboarding hr_overtime hr_payroll hr_performance hr_setup hr_shifts hr_time crm finance flow pos hub store support book hr_dashboard recruit insights; do
     schema_dir="$PROJECT_ROOT/internal/platform/database/schemas/$dir"
     if [ ! -d "$schema_dir" ]; then
         continue
