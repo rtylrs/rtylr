@@ -1,0 +1,17 @@
+{
+  "title": "صندوق الوارد",
+  "unreadCount_other": "{{count}} إشعار غير مقروء",
+  "markAllRead": "وضع علامة قراءة على الكل",
+  "filters": {
+    "all": "الكل",
+    "unread": "غير المقروءة",
+    "assigned": "المُعيَّنة إليّ"
+  },
+  "emptyTitle": "أنت على اطلاع بكل شيء!",
+  "emptyDescription": "لا توجد إشعارات للعرض.",
+  "time": {
+    "justNow": "الآن",
+    "hoursAgo": "منذ {{count}} ساعة",
+    "yesterday": "الأمس"
+  }
+}

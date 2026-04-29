@@ -9,6 +9,8 @@ import {
   CheckCheck,
   Loader2,
 } from 'lucide-react';
+import { useTranslation } from '@voxire/i18n';
+import type { TFunction } from 'i18next';
 import {
   useNotifications,
   useMarkNotificationRead,
@@ -28,23 +30,24 @@ const TYPE_ICONS: Record<ApiNotification['type'], React.ReactNode> = {
   due_soon: <Bell size={14} style={{ color: '#ef4444' }} />,
 };
 
-function formatTimestamp(ts: string): string {
+function formatTimestamp(ts: string, t: TFunction, lang: string): string {
   const d = new Date(ts);
   const now = new Date();
   const diffMs = now.getTime() - d.getTime();
   const diffH = Math.floor(diffMs / (1000 * 60 * 60));
   const diffD = Math.floor(diffH / 24);
 
-  if (diffH < 1) return 'Just now';
-  if (diffH < 24) return `${diffH}h ago`;
-  if (diffD === 1) return 'Yesterday';
-  return d.toLocaleDateString('en-US', { month: 'short', day: 'numeric' });
+  if (diffH < 1) return t('inbox.time.justNow');
+  if (diffH < 24) return t('inbox.time.hoursAgo', { count: diffH });
+  if (diffD === 1) return t('inbox.time.yesterday');
+  return d.toLocaleDateString(lang || 'en-US', { month: 'short', day: 'numeric' });
 }
 
 const NotificationRow: React.FC<{
   notification: ApiNotification;
   onMarkRead: (id: string) => void;
 }> = ({ notification, onMarkRead }) => {
+  const { t, i18n } = useTranslation();
   return (
     <motion.div
       layout
@@ -85,7 +88,7 @@ const NotificationRow: React.FC<{
             {notification.title}
           </span>
           <span className="text-[11px] ml-auto shrink-0" style={{ color: 'var(--flow-text-dim)' }}>
-            {formatTimestamp(notification.timestamp)}
+            {formatTimestamp(notification.timestamp, t, i18n.language)}
           </span>
         </div>
 
@@ -120,6 +123,7 @@ const NotificationRow: React.FC<{
 };
 
 const Inbox: React.FC = () => {
+  const { t } = useTranslation();
   const { data: notifications = [], isLoading } = useNotifications();
   const markRead = useMarkNotificationRead();
   const markAll = useMarkAllNotificationsRead();
@@ -133,6 +137,12 @@ const Inbox: React.FC = () => {
 
   const unreadCount = notifications.filter((n) => !n.read).length;
 
+  const filterDefs = [
+    { id: 'all' as const, label: t('inbox.filters.all') },
+    { id: 'unread' as const, label: t('inbox.filters.unread') },
+    { id: 'assigned' as const, label: t('inbox.filters.assigned') },
+  ];
+
   return (
     <div className="flex flex-col h-full max-w-3xl mx-auto">
       <div
@@ -141,11 +151,11 @@ const Inbox: React.FC = () => {
       >
         <div>
           <h1 className="text-[18px] font-bold" style={{ color: 'var(--flow-text)' }}>
-            Inbox
+            {t('inbox.title')}
           </h1>
           {unreadCount > 0 && (
             <p className="text-[12px] mt-0.5" style={{ color: 'var(--flow-text-muted)' }}>
-              {unreadCount} unread notification{unreadCount !== 1 ? 's' : ''}
+              {t('inbox.unreadCount', { count: unreadCount })}
             </p>
           )}
         </div>
@@ -161,7 +171,7 @@ const Inbox: React.FC = () => {
           ) : (
             <CheckCheck size={13} />
           )}
-          Mark all read
+          {t('inbox.markAllRead')}
         </button>
       </div>
 
@@ -169,13 +179,7 @@ const Inbox: React.FC = () => {
         className="flex items-center gap-1 px-6 py-2 shrink-0"
         style={{ borderBottom: '1px solid var(--flow-border)' }}
       >
-        {(
-          [
-            { id: 'all', label: 'All' },
-            { id: 'unread', label: 'Unread' },
-            { id: 'assigned', label: 'Assigned to me' },
-          ] as const
-        ).map(({ id, label }) => (
+        {filterDefs.map(({ id, label }) => (
           <button
             key={id}
             onClick={() => setActiveFilter(id)}
@@ -213,10 +217,10 @@ const Inbox: React.FC = () => {
               >
                 <Bell size={32} style={{ color: 'var(--flow-text-dim)' }} className="mb-3" />
                 <p className="text-[14px] font-medium" style={{ color: 'var(--flow-text-muted)' }}>
-                  All caught up!
+                  {t('inbox.emptyTitle')}
                 </p>
                 <p className="text-[12px] mt-1" style={{ color: 'var(--flow-text-dim)' }}>
-                  No notifications to show.
+                  {t('inbox.emptyDescription')}
                 </p>
               </motion.div>
             ) : (
