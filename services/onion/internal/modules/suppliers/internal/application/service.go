@@ -12,8 +12,15 @@ import (
 
 const supplierCacheTTL = 5 * time.Minute
 
+type repository interface {
+	ListSuppliers(ctx context.Context, ownerID int64) ([]domain.Supplier, error)
+	CreateSupplier(ctx context.Context, ownerID int64, input domain.SupplierInput) (int64, error)
+	UpdateSupplier(ctx context.Context, ownerID, id int64, input domain.SupplierInput) error
+	DeleteSupplier(ctx context.Context, ownerID, id int64) error
+}
+
 type Service struct {
-	repo *infrastructure.Repository
+	repo repository
 }
 
 func NewService(ctx context.Context) *Service {

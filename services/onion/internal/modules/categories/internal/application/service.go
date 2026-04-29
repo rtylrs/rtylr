@@ -12,8 +12,15 @@ import (
 
 const categoriesCacheTTL = 5 * time.Minute
 
+type repository interface {
+	ListCategories(ctx context.Context, ownerID int64) ([]domain.Category, error)
+	CreateCategory(ctx context.Context, ownerID int64, input domain.CategoryInput) (int64, error)
+	UpdateCategory(ctx context.Context, ownerID, id int64, input domain.CategoryInput) error
+	DeleteCategory(ctx context.Context, ownerID, id int64) error
+}
+
 type Service struct {
-	repo *infrastructure.Repository
+	repo repository
 }
 
 func NewService(ctx context.Context) *Service {

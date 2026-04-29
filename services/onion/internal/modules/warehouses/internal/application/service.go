@@ -12,8 +12,15 @@ import (
 
 const warehousesCacheTTL = 5 * time.Minute
 
+type repository interface {
+	ListWarehouses(ctx context.Context, ownerID int64) ([]domain.Warehouse, error)
+	CreateWarehouse(ctx context.Context, ownerID int64, input domain.WarehouseInput) (int64, error)
+	UpdateWarehouse(ctx context.Context, ownerID, id int64, input domain.WarehouseInput) error
+	DeleteWarehouse(ctx context.Context, ownerID, id int64) error
+}
+
 type Service struct {
-	repo *infrastructure.Repository
+	repo repository
 }
 
 func NewService(ctx context.Context) *Service {
