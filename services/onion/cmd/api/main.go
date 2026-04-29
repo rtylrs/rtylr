@@ -134,6 +134,7 @@ import (
 	"github.com/voxire/onion/internal/modules/views"
 	"github.com/voxire/onion/internal/modules/warehouses"
 	"github.com/voxire/onion/internal/modules/webhooks"
+	"github.com/voxire/onion/internal/modules/websitelead"
 	"github.com/voxire/onion/internal/modules/workspaces"
 	"github.com/voxire/onion/internal/modules/websitelead"
 	authPkg "github.com/voxire/onion/internal/platform/auth"
@@ -330,7 +331,7 @@ type apiModules struct {
 	Echo                 *echo.Module
 	Expenses             *expenses.Module
 	Feedback             *feedback.Module
-	FinanceBankFeeds     *financebankfeeds.Module
+	FinanceBankFeeds      *financebankfeeds.Module
 	FinanceReconciliation *financereconciliation.Module
 	FinanceReports       *financereports.Module
 	FlowInsights         *flowinsights.Module
@@ -420,8 +421,8 @@ type apiModules struct {
 	Views                *views.Module
 	Warehouses           *warehouses.Module
 	Webhooks             *webhooks.Module
+	WebsiteLead          *websitelead.Module
 	Workspaces           *workspaces.Module
-	WebsiteLead         *websitelead.Module
 }
 
 func initializeModules(ctx context.Context) *apiModules {
@@ -461,7 +462,7 @@ func initializeModules(ctx context.Context) *apiModules {
 		Echo:                 echo.NewModule(ctx, memoryModule),
 		Expenses:             expenses.NewModule(ctx),
 		Feedback:             feedback.NewModule(ctx),
-		FinanceBankFeeds:     financebankfeeds.NewModule(ctx),
+		FinanceBankFeeds:      financebankfeeds.NewModule(ctx),
 		FinanceReconciliation: financereconciliation.NewModule(ctx),
 		FinanceReports:       financereports.NewModule(ctx),
 		FlowInsights:         flowinsights.NewModule(ctx),
@@ -551,8 +552,8 @@ func initializeModules(ctx context.Context) *apiModules {
 		Views:                views.NewModule(ctx),
 		Warehouses:           warehouses.NewModule(ctx),
 		Webhooks:             webhooks.NewModule(ctx),
+		WebsiteLead:          websitelead.NewModule(ctx),
 		Workspaces:           workspaces.NewModule(ctx),
-		WebsiteLead:         websitelead.NewModule(ctx),
 	}
 }
 
