@@ -7,6 +7,7 @@ import (
 	"context"
 	"errors"
 	"fmt"
+	"io"
 	"net/http"
 	"os"
 	"strings"
@@ -184,6 +185,22 @@ func (c *Client) PresignDownload(ctx context.Context, key string, expiresIn time
 	}
 	return req.URL, nil
 }
+
+// Upload streams a reader directly to R2. Used by server-side handlers
+// that receive a multipart file (e.g. POST /careers/apply) rather than
+// delegating the upload to the browser via a presigned URL.
+// contentType should match one of AllowedResumeContentTypes; the caller
+// is responsible for validating this before calling Upload.
+func (c *Client) Upload(ctx context.Context, key, contentType string, body io.Reader) error {
+	_, err := c.s3.PutObject(ctx, &s3.PutObjectInput{
+		Bucket:      aws.String(c.bucket),
+		Key:         aws.String(key),
+		ContentType: aws.String(contentType),
+		Body:        body,
+	})
+	return err
+}
+
 
 // Bucket exposes the configured bucket name for callers that need to
 // log or report it. Not used for signing (the client already holds it).
