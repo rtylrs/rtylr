@@ -1,0 +1,152 @@
+package handlers
+
+import (
+	"encoding/json"
+	"fmt"
+	"net/http"
+	"strconv"
+	"strings"
+	"time"
+
+	"github.com/google/uuid"
+
+	"github.com/voxire/onion/internal/modules/careers/internal/application"
+	"github.com/voxire/onion/internal/modules/careers/internal/domain"
+	errorModels "github.com/voxire/onion/internal/platform/errors"
+	"github.com/voxire/onion/internal/platform/logger"
+	"github.com/voxire/onion/internal/platform/storage"
+)
+
+func ApplyRoutes() []string { return []string{"/careers/apply"} }
+
+// ApplyHandler handles POST /careers/apply from the Voxire website.
+// The request is multipart/form-data because the browser attaches the
+// applicant's CV as a file. The generic JSON wrapHandler can't parse
+// multipart, so this handler is registered directly on chi and manages
+// the full request/response cycle itself.
+func ApplyHandler(ctx interface{ Done() <-chan struct{} }, svc *application.Service) http.HandlerFunc {
+	return func(w http.ResponseWriter, r *http.Request) {
+		const maxUpload = 5 << 20 // 5 MB
+		if err := r.ParseMultipartForm(maxUpload); err != nil {
+			writeApplyError(w, http.StatusBadRequest, "Invalid multipart form")
+			return
+		}
+
+		name := strings.TrimSpace(r.FormValue("name"))
+		email := strings.TrimSpace(r.FormValue("email"))
+
+		if name == "" {
+			writeApplyError(w, http.StatusBadRequest, "name is required")
+			return
+		}
+		if email == "" {
+			writeApplyError(w, http.StatusBadRequest, "email is required")
+			return
+		}
+
+		jobIDStr := r.FormValue("job_id")
+		var jobID int64
+		if jobIDStr != "" {
+			if n, err := strconv.ParseInt(jobIDStr, 10, 64); err == nil {
+				jobID = n
+			}
+		}
+
+		in := domain.ApplicationInput{
+			JobID:             jobID,
+			Name:              name,
+			Email:             email,
+			Phone:             strings.TrimSpace(r.FormValue("phone")),
+			WorkHistory:       r.FormValue("work_history"),
+			Education:         r.FormValue("education"),
+			ExperienceSummary: r.FormValue("experience_summary"),
+			CoverLetter:       r.FormValue("cover_letter"),
+		}
+
+		// ── CV upload ──────────────────────────────────────────────────
+		// Best-effort: if R2 storage is not configured or the upload
+		// fails, we still save the application without a CV key so the
+		// applicant isn't blocked. The notification email will note that
+		// the CV was not attached.
+		file, header, fileErr := r.FormFile("cv")
+		if fileErr == nil {
+			defer file.Close()
+
+			contentType := header.Header.Get("Content-Type")
+			if contentType == "" {
+				// Fallback MIME detection from extension
+				fname := strings.ToLower(header.Filename)
+				switch {
+				case strings.HasSuffix(fname, ".pdf"):
+					contentType = "application/pdf"
+				case strings.HasSuffix(fname, ".docx"):
+					contentType = "application/vnd.openxmlformats-officedocument.wordprocessingml.document"
+				case strings.HasSuffix(fname, ".doc"):
+					contentType = "application/msword"
+				}
+			}
+
+			if storage.AllowedResumeContentTypes[contentType] {
+				client, storageErr := storage.Default()
+				if storageErr == nil {
+					safeName := storage.SanitizeObjectKey(header.Filename)
+					key := fmt.Sprintf("voxire/applications/%d/%s-%s",
+						jobID,
+						uuid.NewString(),
+						safeName,
+					)
+
+					const uploadTimeout = 30 * time.Second
+					uploadCtx := r.Context()
+					_ = uploadTimeout // context already carries deadline from the HTTP server
+
+					uploadErr := client.Upload(uploadCtx, key, contentType, file)
+					if uploadErr != nil {
+						logger.Ctx(r.Context()).Warn("CV upload failed, proceeding without CV",
+							logger.Error(uploadErr),
+							logger.Any("applicant_email", email),
+						)
+					} else {
+						in.CVKey = key
+					}
+				}
+			}
+		}
+
+		id, err := svc.SaveApplication(r.Context(), in)
+		if err != nil {
+			logger.Ctx(r.Context()).Error("Failed to save career application",
+				logger.Error(err),
+				logger.Any("email", email),
+			)
+			writeApplyError(w, http.StatusInternalServerError, "Failed to submit application")
+			return
+		}
+
+		w.Header().Set("Content-Type", "application/json")
+		w.WriteHeader(http.StatusOK)
+		_ = json.NewEncoder(w).Encode(map[string]interface{}{
+			"id":      id,
+			"message": "Application received",
+			"status":  "success",
+		})
+	}
+}
+
+type applyErrorBody struct {
+	Error  applyErrorDetail `json:"error"`
+	Status string           `json:"status"`
+}
+type applyErrorDetail struct {
+	Code    int    `json:"code"`
+	Message string `json:"message"`
+}
+
+func writeApplyError(w http.ResponseWriter, code int, msg string) {
+	w.Header().Set("Content-Type", "application/json")
+	w.WriteHeader(code)
+	_ = json.NewEncoder(w).Encode(errorModels.ErrorResponse{
+		Error:  errorModels.ServerError{Code: code, Message: msg},
+		Status: "error",
+	})
+}
