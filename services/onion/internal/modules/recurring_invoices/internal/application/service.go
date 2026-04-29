@@ -7,8 +7,15 @@ import (
 	"github.com/voxire/onion/internal/modules/recurring_invoices/internal/infrastructure"
 )
 
+type repository interface {
+	List(ctx context.Context, ownerID int64) ([]domain.RecurringInvoice, error)
+	Create(ctx context.Context, ownerID int64, input domain.RecurringInvoiceInput) (int64, error)
+	Update(ctx context.Context, ownerID, id int64, input domain.RecurringInvoiceInput) error
+	SetActive(ctx context.Context, ownerID, id int64, active bool) error
+}
+
 type Service struct {
-	repo *infrastructure.Repository
+	repo repository
 }
 
 func NewService(ctx context.Context) *Service {

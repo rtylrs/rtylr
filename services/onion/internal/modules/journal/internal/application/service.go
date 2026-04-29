@@ -7,8 +7,14 @@ import (
 	"github.com/voxire/onion/internal/modules/journal/internal/infrastructure"
 )
 
+type repository interface {
+	List(ctx context.Context, ownerID int64) ([]domain.JournalEntry, error)
+	Create(ctx context.Context, ownerID int64, input domain.JournalEntryInput) (int64, error)
+	Post(ctx context.Context, ownerID, id int64) error
+}
+
 type Service struct {
-	repo *infrastructure.Repository
+	repo repository
 }
 
 func NewService(ctx context.Context) *Service {
