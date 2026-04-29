@@ -7,8 +7,15 @@ import (
 	"github.com/voxire/onion/internal/modules/pos_modifiers/internal/infrastructure"
 )
 
+type repository interface {
+	List(ctx context.Context, ownerID int64) ([]domain.Modifier, error)
+	Create(ctx context.Context, ownerID int64, input domain.ModifierInput) (int64, error)
+	Update(ctx context.Context, ownerID, id int64, input domain.ModifierInput) error
+	Delete(ctx context.Context, ownerID, id int64) error
+}
+
 type Service struct {
-	repo *infrastructure.Repository
+	repo repository
 }
 
 func NewService(ctx context.Context) *Service {
