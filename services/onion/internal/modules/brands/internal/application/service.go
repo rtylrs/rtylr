@@ -12,8 +12,15 @@ import (
 
 const brandsCacheTTL = 5 * time.Minute
 
+type repository interface {
+	ListBrands(ctx context.Context, ownerID int64) ([]domain.Brand, error)
+	CreateBrand(ctx context.Context, ownerID int64, input domain.BrandInput) (int64, error)
+	UpdateBrand(ctx context.Context, ownerID, id int64, input domain.BrandInput) error
+	DeleteBrand(ctx context.Context, ownerID, id int64) error
+}
+
 type Service struct {
-	repo *infrastructure.Repository
+	repo repository
 }
 
 func NewService(ctx context.Context) *Service {

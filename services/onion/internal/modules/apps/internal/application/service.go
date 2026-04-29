@@ -7,8 +7,13 @@ import (
 	"github.com/voxire/onion/internal/modules/apps/internal/infrastructure"
 )
 
+type repository interface {
+	GetEnabledAddons(ctx context.Context, businessID int64) map[string]bool
+	GetUserAllowedApps(ctx context.Context, businessID, userID int64) []string
+}
+
 type Service struct {
-	repo *infrastructure.Repository
+	repo repository
 }
 
 func NewService(ctx context.Context) *Service {
