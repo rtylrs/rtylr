@@ -1,8 +1,9 @@
 import React from 'react';
 import { useRoutes } from 'react-router-dom';
+import { unwrap } from '@voxire/api';
 import { AppGuard } from '@voxire/auth';
 import appRoutes from './routes/AppRoutes';
-import api from './shared/lib/api';
+import { safe } from './shared/lib/api';
 
 const AppRouter: React.FC = (): React.JSX.Element => {
   const element = useRoutes(appRoutes);
@@ -14,7 +15,7 @@ const App: React.FC = (): React.JSX.Element => {
     <AppGuard
       appId="flow"
       fetchUser={(): Promise<Record<string, unknown>> =>
-        api.get('/user/me').then((r: { data: Record<string, unknown> }) => r.data)
+        unwrap(safe.get<Record<string, unknown>>('/user/me'))
       }
     >
       <AppRouter />

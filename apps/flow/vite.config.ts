@@ -11,11 +11,6 @@ export default defineConfig(() => ({
   resolve: {
     alias: {
       '@app': path.resolve(__dirname, './src'),
-      '@screens': path.resolve(__dirname, './src/screens'),
-      '@layouts': path.resolve(__dirname, './src/layouts'),
-      '@components': path.resolve(__dirname, './src/components'),
-      '@stores': path.resolve(__dirname, './src/stores'),
-      '@lib': path.resolve(__dirname, './src/lib'),
     },
   },
   server: {
