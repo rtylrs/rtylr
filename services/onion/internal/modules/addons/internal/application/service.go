@@ -7,8 +7,15 @@ import (
 	"github.com/voxire/onion/internal/modules/addons/internal/infrastructure"
 )
 
+type repository interface {
+	ListAll(ctx context.Context) ([]domain.Addon, error)
+	ListForBusiness(ctx context.Context, businessID int64) ([]domain.BusinessAddon, error)
+	Enable(ctx context.Context, businessID int64, addonID string) error
+	Disable(ctx context.Context, businessID int64, addonID string) error
+}
+
 type Service struct {
-	repo *infrastructure.Repository
+	repo repository
 }
 
 func NewService(ctx context.Context) *Service {
