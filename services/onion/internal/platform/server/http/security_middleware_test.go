@@ -57,6 +57,17 @@ func TestIsLegitimateTraffic_AcceptsBrowsersOnPublicPaths(t *testing.T) {
 	}
 }
 
+func TestIsLegitimateTraffic_RejectsBrowserOnPrivateAPI(t *testing.T) {
+	// Regression: previously /erp/products matched because every path contains
+	// "/", which short-circuited the legitimate-paths check to true. Only the
+	// explicit allowlist should match now.
+	r := httptest.NewRequest(http.MethodGet, "/erp/products", nil)
+	r.Header.Set("User-Agent", "Mozilla/5.0")
+	if isLegitimateTraffic(r) {
+		t.Error("/erp/products is a private API, browser UA should not make it legitimate")
+	}
+}
+
 func TestIsLegitimateTraffic_RejectsScannerUA(t *testing.T) {
 	r := httptest.NewRequest(http.MethodGet, "/health", nil)
 	r.Header.Set("User-Agent", "sqlmap/1.0")

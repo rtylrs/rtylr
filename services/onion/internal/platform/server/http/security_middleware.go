@@ -541,7 +541,10 @@ func isLegitimateTraffic(r *http.Request) bool {
 	isLegitimatePath := false
 
 	for _, path := range legitimatePaths {
-		if strings.Contains(requestPath, path) {
+		// Exact match only. A substring match would let every URL through
+		// because the list contains "/" — strings.Contains(anyPath, "/") is
+		// always true.
+		if requestPath == path {
 			isLegitimatePath = true
 
 			break
