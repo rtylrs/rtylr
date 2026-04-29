@@ -144,4 +144,10 @@ func RegisterRoutes(ctx context.Context, router *chi.Mux, careersService *applic
 		ctx, router, handlers.DeleteFormFieldRoutes(),
 		&handlers.DeleteFormFieldHandler{CareersService: careersService},
 	)
+
+	// Voxire corporate website apply — multipart/form-data with CV upload.
+	// Separate from the tenant-scoped recruit product flow above.
+	for _, path := range handlers.ApplyRoutes() {
+		router.Post(path, handlers.ApplyHandler(ctx, careersService))
+	}
 }
