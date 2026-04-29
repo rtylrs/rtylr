@@ -7,8 +7,13 @@ import (
 	"github.com/voxire/onion/internal/modules/billing/internal/infrastructure"
 )
 
+type repository interface {
+	GetSummary(ctx context.Context, ownerID int64) (domain.BillingSummary, error)
+	ListInvoices(ctx context.Context, ownerID int64) ([]domain.Invoice, error)
+}
+
 type Service struct {
-	repo *infrastructure.Repository
+	repo repository
 }
 
 func NewService(ctx context.Context) *Service {

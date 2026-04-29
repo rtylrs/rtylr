@@ -7,8 +7,12 @@ import (
 	"github.com/voxire/onion/internal/modules/finance_bank_feeds/internal/infrastructure"
 )
 
+type repository interface {
+	List(ctx context.Context, ownerID int64, limit, offset int32) ([]domain.BankFeedTransaction, int64, error)
+}
+
 type Service struct {
-	repo *infrastructure.Repository
+	repo repository
 }
 
 func NewService(ctx context.Context) *Service {
