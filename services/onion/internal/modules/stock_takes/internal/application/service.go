@@ -12,8 +12,14 @@ import (
 
 const stockTakesCacheTTL = 5 * time.Minute
 
+type repository interface {
+	ListStockTakes(ctx context.Context, ownerID int64) ([]domain.StockTake, error)
+	CreateStockTake(ctx context.Context, ownerID int64, input domain.StockTakeInput) (int64, error)
+	UpdateStockTake(ctx context.Context, ownerID int64, input domain.StockTakeUpdateInput) error
+}
+
 type Service struct {
-	repo *infrastructure.Repository
+	repo repository
 }
 
 func NewService(ctx context.Context) *Service {

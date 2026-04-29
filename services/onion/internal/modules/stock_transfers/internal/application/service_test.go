@@ -1,0 +1,41 @@
+package application
+
+import (
+	"context"
+	"errors"
+	"testing"
+
+	"github.com/voxire/onion/internal/modules/stock_transfers/internal/domain"
+)
+
+type mockRepo struct {
+	createID  int64
+	createErr error
+	updErr    error
+}
+
+func (m *mockRepo) ListStockTransfers(_ context.Context, _ int64) ([]domain.StockTransfer, error) {
+	return nil, nil
+}
+func (m *mockRepo) CreateStockTransfer(_ context.Context, _ int64, _ domain.StockTransferInput) (int64, error) {
+	return m.createID, m.createErr
+}
+func (m *mockRepo) UpdateStockTransferStatus(_ context.Context, _, _ int64, _ domain.StockTransferStatus) error {
+	return m.updErr
+}
+
+func TestCreateStockTransfer_PropagatesError(t *testing.T) {
+	want := errors.New("boom")
+	s := &Service{repo: &mockRepo{createErr: want}}
+	if _, err := s.CreateStockTransfer(context.Background(), 1, domain.StockTransferInput{}); !errors.Is(err, want) {
+		t.Errorf("expected sentinel, got %v", err)
+	}
+}
+
+func TestUpdateStockTransferStatus_PropagatesError(t *testing.T) {
+	want := errors.New("boom")
+	s := &Service{repo: &mockRepo{updErr: want}}
+	if err := s.UpdateStockTransferStatus(context.Background(), 1, 5, ""); !errors.Is(err, want) {
+		t.Errorf("expected sentinel, got %v", err)
+	}
+}

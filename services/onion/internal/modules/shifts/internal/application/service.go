@@ -7,8 +7,15 @@ import (
 	"github.com/voxire/onion/internal/modules/shifts/internal/infrastructure"
 )
 
+type repository interface {
+	ListShifts(ctx context.Context, ownerID, staffID int64, date string) ([]domain.Shift, error)
+	CreateShift(ctx context.Context, input domain.ShiftInput) (int64, error)
+	UpdateShift(ctx context.Context, ownerID int64, input domain.ShiftUpdateInput) error
+	DeleteShift(ctx context.Context, ownerID, shiftID int64) error
+}
+
 type Service struct {
-	repo *infrastructure.Repository
+	repo repository
 }
 
 func NewService(ctx context.Context) *Service {
