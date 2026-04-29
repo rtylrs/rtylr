@@ -7,8 +7,14 @@ import (
 	"github.com/voxire/onion/internal/modules/milestones/internal/infrastructure"
 )
 
+type repository interface {
+	List(ctx context.Context, ownerID int64, projectID *int64) ([]domain.Milestone, error)
+	Create(ctx context.Context, input domain.MilestoneInput) (int64, error)
+	Update(ctx context.Context, input domain.MilestoneUpdateInput) error
+}
+
 type Service struct {
-	repo *infrastructure.Repository
+	repo repository
 }
 
 func NewService(ctx context.Context) *Service {

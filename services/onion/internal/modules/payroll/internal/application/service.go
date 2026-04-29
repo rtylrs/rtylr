@@ -10,8 +10,16 @@ import (
 	"github.com/voxire/onion/internal/platform/logger"
 )
 
+type repository interface {
+	ListPayrollRecords(ctx context.Context, ownerID int64, periodLabel string) ([]domain.PayrollRecord, error)
+	GetCompletedShiftsForPeriod(ctx context.Context, ownerID int64, start, end time.Time) ([]domain.ShiftSummary, error)
+	GetStaffPayRates(ctx context.Context, ownerID, staffID int64) (domain.StaffPayRates, error)
+	CreatePayrollRecord(ctx context.Context, ownerID, staffID int64, periodStart, periodEnd time.Time, periodLabel string, regularHours, overtimeHours, basePay, overtimePay, netPay float64) (int64, error)
+	MarkPayrollPaid(ctx context.Context, ownerID, payrollID int64) error
+}
+
 type Service struct {
-	repo *infrastructure.Repository
+	repo repository
 }
 
 func NewService(ctx context.Context) *Service {

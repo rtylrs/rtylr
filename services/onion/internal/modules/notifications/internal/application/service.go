@@ -7,8 +7,14 @@ import (
 	"github.com/voxire/onion/internal/modules/notifications/internal/infrastructure"
 )
 
+type repository interface {
+	List(ctx context.Context, userID int64) ([]domain.Notification, error)
+	MarkRead(ctx context.Context, userID, notificationID int64) error
+	MarkAllRead(ctx context.Context, userID int64) error
+}
+
 type Service struct {
-	repo *infrastructure.Repository
+	repo repository
 }
 
 func NewService(ctx context.Context) *Service {
