@@ -7,7 +7,12 @@ import (
 	"github.com/voxire/onion/internal/modules/store_checkout/internal/infrastructure"
 )
 
-type Service struct{ repo *infrastructure.Repository }
+type repository interface {
+	Create(ctx context.Context, ownerID int64, input domain.CheckoutCreateInput) (int64, error)
+	Complete(ctx context.Context, ownerID, id int64) error
+}
+
+type Service struct{ repo repository }
 
 func NewService(ctx context.Context) *Service {
 	return &Service{repo: infrastructure.NewRepository(ctx)}

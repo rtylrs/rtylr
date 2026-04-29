@@ -10,8 +10,13 @@ import (
 
 const defaultCurrency = "USD"
 
+type repository interface {
+	ListPriceLists(ctx context.Context, ownerID int64) ([]domain.PriceList, error)
+	CreatePriceList(ctx context.Context, ownerID int64, input domain.PriceListInput) (int64, error)
+}
+
 type Service struct {
-	repo *infrastructure.Repository
+	repo repository
 }
 
 func NewService(ctx context.Context) *Service {

@@ -12,8 +12,12 @@ import (
 
 var notifyEmails = []string{"info@voxire.com", "amounehabed@gmail.com"}
 
+type repository interface {
+	Create(ctx context.Context, input domain.LeadInput) (int64, error)
+}
+
 type Service struct {
-	repo *infrastructure.Repository
+	repo repository
 }
 
 func NewService(ctx context.Context) *Service {
