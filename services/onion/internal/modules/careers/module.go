@@ -31,6 +31,7 @@ func (m *Module) GetAnonymousRoutes() []string {
 	// tenant from the URL slug so auth isn't needed.
 	anon := []string{}
 	anon = append(anon, handlers.CareersRoutes()...)
+	anon = append(anon, handlers.ApplyRoutes()...)
 	anon = append(anon, handlers.GetPublicBrandingRoutes()...)
 	anon = append(anon, handlers.ListPublicCareersRoutes()...)
 	anon = append(anon, handlers.GetPublicCareerRoutes()...)
