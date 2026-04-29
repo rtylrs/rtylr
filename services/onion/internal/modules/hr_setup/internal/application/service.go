@@ -19,8 +19,15 @@ var validStepKeys = map[string]struct{}{
 	"employees":        {},
 }
 
+type repository interface {
+	GetSetupSteps(ctx context.Context, ownerID int64) ([]*domain.SetupStep, error)
+	UpsertSetupStep(ctx context.Context, ownerID int64, stepKey string, at time.Time) error
+	GetHRConfig(ctx context.Context, ownerID int64) (*domain.HRConfig, error)
+	UpsertHRConfig(ctx context.Context, ownerID int64, completedAt *time.Time) (*domain.HRConfig, error)
+}
+
 type Service struct {
-	repo *infrastructure.Repository
+	repo repository
 }
 
 func NewService(ctx context.Context) *Service {
