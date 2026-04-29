@@ -1,9 +1,93 @@
 package application
 
 import (
+	"context"
+	"errors"
 	"strings"
 	"testing"
 )
+
+type mockRepo struct {
+	byType    map[string]float64
+	cash      float64
+	recv      float64
+	pay       float64
+	inflow    float64
+	outflow   float64
+	typeErr   error
+	cashErr   error
+	rangeErr  error
+}
+
+func (m *mockRepo) SumAccountsByType(_ context.Context, _ int64, t string) (float64, error) {
+	return m.byType[t], m.typeErr
+}
+func (m *mockRepo) SumBankBalances(_ context.Context, _ int64) (float64, error) {
+	return m.cash, m.cashErr
+}
+func (m *mockRepo) SumReceivables(_ context.Context, _ int64) (float64, error) {
+	return m.recv, nil
+}
+func (m *mockRepo) SumPayables(_ context.Context, _ int64) (float64, error) {
+	return m.pay, nil
+}
+func (m *mockRepo) SumPaidInvoicesInRange(_ context.Context, _ int64, _, _ string) (float64, error) {
+	return m.inflow, m.rangeErr
+}
+func (m *mockRepo) SumExpensesInRange(_ context.Context, _ int64, _, _ string) (float64, error) {
+	return m.outflow, m.rangeErr
+}
+
+func TestGetBalanceSheet_AggregatesValues(t *testing.T) {
+	m := &mockRepo{
+		byType: map[string]float64{"asset": 1000, "liability": 200, "equity": 800},
+		cash:   500, recv: 100, pay: 50,
+	}
+	s := &Service{repo: m}
+	bs, err := s.GetBalanceSheet(context.Background(), 1)
+	if err != nil {
+		t.Fatalf("err: %v", err)
+	}
+	// Total assets = chart_of_accounts assets (1000) + cash (500) + receivables (100).
+	if bs.TotalAssets != 1600 {
+		t.Errorf("TotalAssets = %v, want 1600", bs.TotalAssets)
+	}
+	// Total liabilities = chart_of_accounts liabilities (200) + payables (50).
+	if bs.TotalLiabilities != 250 {
+		t.Errorf("TotalLiabilities = %v, want 250", bs.TotalLiabilities)
+	}
+	if bs.TotalEquity != 800 {
+		t.Errorf("TotalEquity = %v, want 800", bs.TotalEquity)
+	}
+}
+
+func TestGetBalanceSheet_PropagatesError(t *testing.T) {
+	want := errors.New("boom")
+	s := &Service{repo: &mockRepo{typeErr: want}}
+	if _, err := s.GetBalanceSheet(context.Background(), 1); !errors.Is(err, want) {
+		t.Errorf("expected sentinel, got %v", err)
+	}
+}
+
+func TestGetCashFlow_NetIsInflowMinusOutflow(t *testing.T) {
+	m := &mockRepo{inflow: 100, outflow: 30}
+	s := &Service{repo: m}
+	cf, err := s.GetCashFlow(context.Background(), 1, "month")
+	if err != nil {
+		t.Fatalf("err: %v", err)
+	}
+	if cf.NetOperating != 70 {
+		t.Errorf("expected 70, got %v", cf.NetOperating)
+	}
+}
+
+func TestGetCashFlow_PropagatesError(t *testing.T) {
+	want := errors.New("boom")
+	s := &Service{repo: &mockRepo{rangeErr: want}}
+	if _, err := s.GetCashFlow(context.Background(), 1, "month"); !errors.Is(err, want) {
+		t.Errorf("expected sentinel, got %v", err)
+	}
+}
 
 // resolvePeriodRange depends on time.Now() so we can't pin exact dates, but we
 // can lock in the SHAPE: yyyy-mm-dd, from <= to, and the relationships between

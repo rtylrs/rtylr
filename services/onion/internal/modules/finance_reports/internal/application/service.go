@@ -8,8 +8,17 @@ import (
 	"github.com/voxire/onion/internal/modules/finance_reports/internal/infrastructure"
 )
 
+type repository interface {
+	SumAccountsByType(ctx context.Context, ownerID int64, accountType string) (float64, error)
+	SumBankBalances(ctx context.Context, ownerID int64) (float64, error)
+	SumReceivables(ctx context.Context, ownerID int64) (float64, error)
+	SumPayables(ctx context.Context, ownerID int64) (float64, error)
+	SumPaidInvoicesInRange(ctx context.Context, ownerID int64, from, to string) (float64, error)
+	SumExpensesInRange(ctx context.Context, ownerID int64, from, to string) (float64, error)
+}
+
 type Service struct {
-	repo *infrastructure.Repository
+	repo repository
 }
 
 func NewService(ctx context.Context) *Service {
