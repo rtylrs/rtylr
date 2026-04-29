@@ -7,8 +7,12 @@ import (
 	"github.com/voxire/onion/internal/modules/kpis/internal/infrastructure"
 )
 
+type repository interface {
+	GetKPIs(ctx context.Context, ownerID int64) (domain.KPISummary, error)
+}
+
 type Service struct {
-	repo *infrastructure.Repository
+	repo repository
 }
 
 func NewService(ctx context.Context) *Service {

@@ -7,8 +7,17 @@ import (
 	"github.com/voxire/onion/internal/modules/hr_reports/internal/infrastructure"
 )
 
+type repository interface {
+	GenerateHeadcountReport(ctx context.Context, ownerID int64, params domain.ReportParams) ([]map[string]interface{}, error)
+	GenerateAttendanceSummaryReport(ctx context.Context, ownerID int64, params domain.ReportParams) ([]map[string]interface{}, error)
+	GenerateLeaveSummaryReport(ctx context.Context, ownerID int64, params domain.ReportParams) ([]map[string]interface{}, error)
+	GeneratePayrollSummaryReport(ctx context.Context, ownerID int64, params domain.ReportParams) ([]map[string]interface{}, error)
+	GenerateOvertimeSummaryReport(ctx context.Context, ownerID int64, params domain.ReportParams) ([]map[string]interface{}, error)
+	GenerateTimesheetSummaryReport(ctx context.Context, ownerID int64, params domain.ReportParams) ([]map[string]interface{}, error)
+}
+
 type Service struct {
-	repo *infrastructure.Repository
+	repo repository
 }
 
 func NewService(ctx context.Context) *Service {

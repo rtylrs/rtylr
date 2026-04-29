@@ -7,8 +7,12 @@ import (
 	"github.com/voxire/onion/internal/modules/timesheets/internal/infrastructure"
 )
 
+type repository interface {
+	GetTimesheets(ctx context.Context, ownerID int64, weekStart string) ([]domain.TimesheetEntry, error)
+}
+
 type Service struct {
-	repo *infrastructure.Repository
+	repo repository
 }
 
 func NewService(ctx context.Context) *Service {
