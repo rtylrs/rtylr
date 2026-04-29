@@ -8,8 +8,14 @@ import (
 	"github.com/voxire/onion/internal/modules/pos_kds/internal/infrastructure"
 )
 
+type repository interface {
+	ListActiveOrders(ctx context.Context, ownerID int64) ([]domain.KDSOrder, error)
+	UpdateItemStatus(ctx context.Context, input domain.UpdateItemStatusInput) error
+	UpdateItemStatusByItemID(ctx context.Context, ownerID, itemID int64, status string) error
+}
+
 type Service struct {
-	repo *infrastructure.Repository
+	repo repository
 }
 
 func NewService(ctx context.Context) *Service {

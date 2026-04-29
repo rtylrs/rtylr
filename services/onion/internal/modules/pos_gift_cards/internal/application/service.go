@@ -7,8 +7,15 @@ import (
 	"github.com/voxire/onion/internal/modules/pos_gift_cards/internal/infrastructure"
 )
 
+type repository interface {
+	List(ctx context.Context, ownerID int64) ([]domain.GiftCard, error)
+	Create(ctx context.Context, ownerID int64, input domain.GiftCardInput) (int64, error)
+	GetByCode(ctx context.Context, ownerID int64, code string) (*domain.GiftCard, error)
+	Redeem(ctx context.Context, ownerID int64, input domain.RedeemInput) (*domain.GiftCard, error)
+}
+
 type Service struct {
-	repo *infrastructure.Repository
+	repo repository
 }
 
 func NewService(ctx context.Context) *Service {
