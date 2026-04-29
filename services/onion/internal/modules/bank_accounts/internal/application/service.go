@@ -7,8 +7,13 @@ import (
 	"github.com/voxire/onion/internal/modules/bank_accounts/internal/infrastructure"
 )
 
+type repository interface {
+	List(ctx context.Context, ownerID int64) ([]domain.BankAccount, error)
+	Create(ctx context.Context, ownerID int64, input domain.BankAccountInput) (int64, error)
+}
+
 type Service struct {
-	repo *infrastructure.Repository
+	repo repository
 }
 
 func NewService(ctx context.Context) *Service {

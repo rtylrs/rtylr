@@ -7,8 +7,12 @@ import (
 	"github.com/voxire/onion/internal/modules/business/internal/infrastructure"
 )
 
+type repository interface {
+	GetProfile(ctx context.Context, ownerID int64) (domain.BusinessProfile, error)
+}
+
 type Service struct {
-	repo *infrastructure.Repository
+	repo repository
 }
 
 func NewService(ctx context.Context) *Service {
