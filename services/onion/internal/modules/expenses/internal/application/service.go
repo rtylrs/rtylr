@@ -7,8 +7,16 @@ import (
 	"github.com/voxire/onion/internal/modules/expenses/internal/infrastructure"
 )
 
+type repository interface {
+	List(ctx context.Context, ownerID int64) ([]domain.Expense, error)
+	Create(ctx context.Context, input domain.ExpenseInput) (int64, error)
+	Update(ctx context.Context, input domain.ExpenseUpdateInput) error
+	Delete(ctx context.Context, ownerID, id int64) error
+	ListCategories(ctx context.Context, ownerID int64) ([]domain.ExpenseCategory, error)
+}
+
 type Service struct {
-	repo *infrastructure.Repository
+	repo repository
 }
 
 func NewService(ctx context.Context) *Service {

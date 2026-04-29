@@ -7,8 +7,15 @@ import (
 	"github.com/voxire/onion/internal/modules/departments/internal/infrastructure"
 )
 
+type repository interface {
+	ListDepartments(ctx context.Context, ownerID int64) ([]domain.Department, error)
+	CreateDepartment(ctx context.Context, input domain.DepartmentInput) (int64, error)
+	UpdateDepartment(ctx context.Context, ownerID int64, input domain.DepartmentInput) error
+	DeleteDepartment(ctx context.Context, ownerID, departmentID int64) error
+}
+
 type Service struct {
-	repo *infrastructure.Repository
+	repo repository
 }
 
 func NewService(ctx context.Context) *Service {
