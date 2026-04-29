@@ -7,8 +7,13 @@ import (
 	"github.com/voxire/onion/internal/modules/support_customers/internal/infrastructure"
 )
 
+type repository interface {
+	List(ctx context.Context, businessID int64, page, pageSize int) ([]domain.Customer, int, error)
+	GetByID(ctx context.Context, businessID, id int64) (*domain.Customer, error)
+}
+
 type Service struct {
-	repo *infrastructure.Repository
+	repo repository
 }
 
 func NewService(ctx context.Context) *Service {

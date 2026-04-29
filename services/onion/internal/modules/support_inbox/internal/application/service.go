@@ -7,8 +7,13 @@ import (
 	"github.com/voxire/onion/internal/modules/support_inbox/internal/infrastructure"
 )
 
+type repository interface {
+	ListInbox(ctx context.Context, businessID int64, page, pageSize int) ([]domain.InboxItem, int, error)
+	UnreadCount(ctx context.Context, businessID int64) (int, error)
+}
+
 type Service struct {
-	repo *infrastructure.Repository
+	repo repository
 }
 
 func NewService(ctx context.Context) *Service {
