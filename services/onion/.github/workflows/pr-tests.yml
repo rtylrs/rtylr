@@ -10,7 +10,7 @@ on:
 jobs:
   test:
     name: Build, Migrate, Fixtures, Test
-    runs-on: ubuntu-24.04
+    runs-on: blacksmith-4vcpu-ubuntu-2404
     timeout-minutes: 25
 
     services:
