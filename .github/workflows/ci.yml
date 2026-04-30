@@ -63,7 +63,7 @@ jobs:
   e2e:
     name: Playwright E2E
     needs: check
-    runs-on: ubuntu-latest
+    runs-on: blacksmith-2vcpu-ubuntu-2404
     steps:
       - uses: actions/checkout@v4
         with:
@@ -103,7 +103,7 @@ jobs:
 
   changes:
     name: Detect changed apps
-    runs-on: ubuntu-latest
+    runs-on: blacksmith-2vcpu-ubuntu-2404
     if: (github.event_name == 'push' || github.event_name == 'workflow_dispatch') && github.ref == 'refs/heads/main'
     outputs:
       landing: ${{ github.event_name == 'workflow_dispatch' || steps.filter.outputs.landing }}
