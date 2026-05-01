@@ -77,10 +77,14 @@ const AppShell = (): React.JSX.Element => {
     return <PinLogin />;
   }
 
-  // Step 3: Set cart context with location + terminal + employee
+  // Step 3: Set cart context with location + terminal + employee.
+  // The two ids are guaranteed non-null by the early returns above.
+  // employee.id is a string in the session store but a numeric DB id;
+  // coerce explicitly so cartStore's number-typed signature stays
+  // honest.
   const employee = useEmployeeSessionStore.getState().employee;
   if (employee) {
-    setContext(locationId as any, terminalId as any, employee.id as any);
+    setContext(locationId, terminalId, Number(employee.id));
   }
 
   // Step 4: Everything ready → main POS app
