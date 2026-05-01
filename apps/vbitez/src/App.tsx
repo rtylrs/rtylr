@@ -13,6 +13,7 @@ import CommandPalette from './shared/components/CommandPalette';
 import HelpOverlay from './shared/components/HelpOverlay';
 import { useKeyboardShortcuts } from './shared/hooks';
 import { useAutoLogout } from './shared/hooks';
+import { useOnlineStatus } from './shared/hooks/useOnlineStatus';
 
 const getTokenFromCookie = (): string | null =>
   document.cookie
@@ -24,6 +25,7 @@ const getTokenFromCookie = (): string | null =>
 const AppInner = (): React.JSX.Element => {
   useKeyboardShortcuts();
   useAutoLogout();
+  useOnlineStatus();
   const location = useLocation();
   return (
     <Suspense fallback={null}>
