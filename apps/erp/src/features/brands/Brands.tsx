@@ -1,7 +1,7 @@
-import React from 'react';
+import React, { useState } from 'react';
 import { motion } from 'motion/react';
 import { Plus, Tag } from 'lucide-react';
-import { useBrands } from './useBrands';
+import { useBrands, useCreateBrand } from './useBrands';
 import PageHeader from '../../shared/components/PageHeader';
 import EmptyState from '../../shared/components/EmptyState';
 import { Skeleton } from '../../shared/components/Skeleton';
@@ -9,8 +9,37 @@ import { toast } from 'sonner';
 
 const AMBER = '#f59e0b';
 
+const inputStyle: React.CSSProperties = {
+  padding: '8px 12px',
+  borderRadius: '8px',
+  border: '1px solid var(--hub-border)',
+  background: 'var(--hub-input-bg)',
+  color: 'var(--hub-text)',
+  fontSize: '13px',
+  outline: 'none',
+  width: '100%',
+  boxSizing: 'border-box',
+};
+
 const Brands: React.FC = () => {
   const { data: brands = [], isLoading } = useBrands();
+  const createMut = useCreateBrand();
+  const [showCreate, setShowCreate] = useState(false);
+  const [newName, setNewName] = useState('');
+  const [newDescription, setNewDescription] = useState('');
+
+  const handleCreate = async (): Promise<void> => {
+    if (!newName.trim()) return;
+    try {
+      await createMut.mutateAsync({ name: newName.trim(), description: newDescription.trim() });
+      toast.success('Brand created');
+      setShowCreate(false);
+      setNewName('');
+      setNewDescription('');
+    } catch {
+      toast.error('Failed to create brand');
+    }
+  };
 
   return (
     <motion.div
@@ -23,7 +52,7 @@ const Brands: React.FC = () => {
         description={`${brands.length} brands across your catalog`}
         actions={
           <button
-            onClick={() => toast.success('Brand created')}
+            onClick={() => setShowCreate(true)}
             className="flex items-center gap-2 px-3 py-2 rounded-lg text-sm font-semibold"
             style={{ background: AMBER, color: '#000' }}
           >
@@ -85,6 +114,54 @@ const Brands: React.FC = () => {
               )}
             </div>
           ))}
+        </div>
+      )}
+
+      {showCreate && (
+        <div
+          className="fixed inset-0 flex items-center justify-center"
+          style={{ background: 'rgba(0,0,0,0.5)', zIndex: 9999 }}
+          onClick={(e) => {
+            if (e.target === e.currentTarget) setShowCreate(false);
+          }}
+        >
+          <div
+            className="rounded-xl p-6 space-y-4 w-80"
+            style={{ background: 'var(--hub-card)', border: '1px solid var(--hub-border)' }}
+          >
+            <h3 className="text-sm font-bold" style={{ color: 'var(--hub-text)' }}>
+              New Brand
+            </h3>
+            <input
+              value={newName}
+              onChange={(e) => setNewName(e.target.value)}
+              placeholder="Brand name"
+              style={inputStyle}
+            />
+            <input
+              value={newDescription}
+              onChange={(e) => setNewDescription(e.target.value)}
+              placeholder="Description (optional)"
+              style={inputStyle}
+            />
+            <div className="flex gap-2 justify-end">
+              <button
+                onClick={() => setShowCreate(false)}
+                className="px-3 py-2 rounded-lg text-xs"
+                style={{ background: 'var(--hub-hover)', color: 'var(--hub-text-muted)' }}
+              >
+                Cancel
+              </button>
+              <button
+                onClick={handleCreate}
+                disabled={createMut.isPending || !newName.trim()}
+                className="px-3 py-2 rounded-lg text-xs font-semibold disabled:opacity-40"
+                style={{ background: AMBER, color: '#000' }}
+              >
+                {createMut.isPending ? 'Creating…' : 'Create'}
+              </button>
+            </div>
+          </div>
         </div>
       )}
     </motion.div>

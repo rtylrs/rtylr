@@ -279,6 +279,7 @@ export const erpApi = {
 
   // Price lists
   listPriceLists: () => safe.get<PriceList[]>('/erp/price-lists'),
+  createPriceList: (data: Partial<PriceList>) => safe.post<PriceList>('/erp/price-lists', data),
 
   // Variants
   listVariants: (productId?: number) =>

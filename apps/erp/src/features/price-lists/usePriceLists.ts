@@ -1,6 +1,6 @@
 import { unwrap } from '@voxire/api';
 import { z } from 'zod';
-import { useQuery } from '@tanstack/react-query';
+import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
 import { erpApi, PriceList } from '../../shared/services/erpApi';
 import { priceListSchema } from '../../shared/schemas/priceLists';
 import { unwrapList } from '../../shared/lib/unwrapList';
@@ -14,5 +14,13 @@ export function usePriceLists() {
         .array(priceListSchema)
         .parse(unwrapList(res, 'price_lists', 'priceLists')) as PriceList[];
     },
+  });
+}
+
+export function useCreatePriceList() {
+  const qc = useQueryClient();
+  return useMutation({
+    mutationFn: (data: Partial<PriceList>) => unwrap(erpApi.createPriceList(data)),
+    onSuccess: () => qc.invalidateQueries({ queryKey: ['price-lists'] }),
   });
 }

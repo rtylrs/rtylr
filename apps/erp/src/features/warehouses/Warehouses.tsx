@@ -1,7 +1,7 @@
-import React from 'react';
+import React, { useState } from 'react';
 import { motion } from 'motion/react';
 import { Plus, Warehouse as WarehouseIcon, MapPin, User } from 'lucide-react';
-import { useWarehouses } from './useWarehouses';
+import { useWarehouses, useCreateWarehouse } from './useWarehouses';
 import PageHeader from '../../shared/components/PageHeader';
 import EmptyState from '../../shared/components/EmptyState';
 import { Skeleton } from '../../shared/components/Skeleton';
@@ -10,8 +10,43 @@ import { toast } from 'sonner';
 
 const AMBER = '#f59e0b';
 
+const inputStyle: React.CSSProperties = {
+  padding: '8px 12px',
+  borderRadius: '8px',
+  border: '1px solid var(--hub-border)',
+  background: 'var(--hub-input-bg)',
+  color: 'var(--hub-text)',
+  fontSize: '13px',
+  outline: 'none',
+  width: '100%',
+  boxSizing: 'border-box',
+};
+
 const Warehouses: React.FC = () => {
   const { data: warehouses = [], isLoading } = useWarehouses();
+  const createMut = useCreateWarehouse();
+  const [showCreate, setShowCreate] = useState(false);
+  const [newName, setNewName] = useState('');
+  const [newAddress, setNewAddress] = useState('');
+  const [newManager, setNewManager] = useState('');
+
+  const handleCreate = async (): Promise<void> => {
+    if (!newName.trim()) return;
+    try {
+      await createMut.mutateAsync({
+        name: newName.trim(),
+        address: newAddress.trim(),
+        manager: newManager.trim(),
+      });
+      toast.success('Warehouse created');
+      setShowCreate(false);
+      setNewName('');
+      setNewAddress('');
+      setNewManager('');
+    } catch {
+      toast.error('Failed to create warehouse');
+    }
+  };
 
   return (
     <motion.div
@@ -24,7 +59,7 @@ const Warehouses: React.FC = () => {
         description={`${warehouses.length} active storage locations`}
         actions={
           <button
-            onClick={() => toast.success('Warehouse created')}
+            onClick={() => setShowCreate(true)}
             className="flex items-center gap-2 px-3 py-2 rounded-lg text-sm font-semibold"
             style={{ background: AMBER, color: '#000' }}
           >
@@ -114,6 +149,60 @@ const Warehouses: React.FC = () => {
               </div>
             );
           })}
+        </div>
+      )}
+
+      {showCreate && (
+        <div
+          className="fixed inset-0 flex items-center justify-center"
+          style={{ background: 'rgba(0,0,0,0.5)', zIndex: 9999 }}
+          onClick={(e) => {
+            if (e.target === e.currentTarget) setShowCreate(false);
+          }}
+        >
+          <div
+            className="rounded-xl p-6 space-y-4 w-80"
+            style={{ background: 'var(--hub-card)', border: '1px solid var(--hub-border)' }}
+          >
+            <h3 className="text-sm font-bold" style={{ color: 'var(--hub-text)' }}>
+              New Warehouse
+            </h3>
+            <input
+              value={newName}
+              onChange={(e) => setNewName(e.target.value)}
+              placeholder="Warehouse name"
+              style={inputStyle}
+            />
+            <input
+              value={newAddress}
+              onChange={(e) => setNewAddress(e.target.value)}
+              placeholder="Address (optional)"
+              style={inputStyle}
+            />
+            <input
+              value={newManager}
+              onChange={(e) => setNewManager(e.target.value)}
+              placeholder="Manager name (optional)"
+              style={inputStyle}
+            />
+            <div className="flex gap-2 justify-end">
+              <button
+                onClick={() => setShowCreate(false)}
+                className="px-3 py-2 rounded-lg text-xs"
+                style={{ background: 'var(--hub-hover)', color: 'var(--hub-text-muted)' }}
+              >
+                Cancel
+              </button>
+              <button
+                onClick={handleCreate}
+                disabled={createMut.isPending || !newName.trim()}
+                className="px-3 py-2 rounded-lg text-xs font-semibold disabled:opacity-40"
+                style={{ background: AMBER, color: '#000' }}
+              >
+                {createMut.isPending ? 'Creating…' : 'Create'}
+              </button>
+            </div>
+          </div>
         </div>
       )}
     </motion.div>

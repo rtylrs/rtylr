@@ -2,16 +2,45 @@ import React, { useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { toast } from 'sonner';
 import { FileText, Mail, MessageSquare, Plus, Copy } from 'lucide-react';
-import { useTemplates } from './useTemplates';
+import { useTemplates, useCreateTemplate } from './useTemplates';
 import { PageHeader, Card, Button, EmptyState, SkeletonList } from '../../shared/components/ui';
 
 const Templates: React.FC = () => {
   const navigate = useNavigate();
   const { data: fetched, isLoading } = useTemplates();
+  const createMut = useCreateTemplate();
   const templates = fetched ?? [];
 
   const [filter, setFilter] = useState<'all' | 'email' | 'sms'>('all');
   const filtered = filter === 'all' ? templates : templates.filter((t) => t.channel === filter);
+
+  const [showCreate, setShowCreate] = useState(false);
+  const [newName, setNewName] = useState('');
+  const [newChannel, setNewChannel] = useState<'email' | 'sms'>('email');
+  const [newSubject, setNewSubject] = useState('');
+  const [newBody, setNewBody] = useState('');
+  const [newCategory, setNewCategory] = useState('general');
+
+  const handleCreate = async (): Promise<void> => {
+    if (!newName.trim() || !newBody.trim()) return;
+    try {
+      await createMut.mutateAsync({
+        name: newName.trim(),
+        channel: newChannel,
+        category: newCategory.trim() || 'general',
+        subject: newChannel === 'email' ? newSubject.trim() : undefined,
+        body: newBody.trim(),
+      });
+      toast.success('Template created');
+      setShowCreate(false);
+      setNewName('');
+      setNewSubject('');
+      setNewBody('');
+      setNewCategory('general');
+    } catch {
+      toast.error('Failed to create template');
+    }
+  };
 
   const useTemplate = (t: (typeof templates)[number]) => {
     if (t.channel === 'email') {
@@ -33,7 +62,7 @@ const Templates: React.FC = () => {
         title="Templates library"
         subtitle="Reusable email and SMS templates"
         actions={
-          <Button variant="primary">
+          <Button variant="primary" onClick={() => setShowCreate(true)}>
             <Plus size={13} />
             New template
           </Button>
@@ -181,6 +210,129 @@ const Templates: React.FC = () => {
               </div>
             );
           })}
+        </div>
+      )}
+
+      {showCreate && (
+        <div
+          style={{
+            position: 'fixed',
+            inset: 0,
+            background: 'rgba(0,0,0,0.5)',
+            display: 'flex',
+            alignItems: 'center',
+            justifyContent: 'center',
+            zIndex: 9999,
+          }}
+          onClick={(e) => {
+            if (e.target === e.currentTarget) setShowCreate(false);
+          }}
+        >
+          <div
+            style={{
+              background: 'var(--hub-card)',
+              border: '1px solid var(--hub-border)',
+              borderRadius: '16px',
+              padding: '24px',
+              width: '420px',
+              display: 'flex',
+              flexDirection: 'column',
+              gap: '12px',
+            }}
+          >
+            <h3 style={{ fontSize: '15px', fontWeight: 700, color: 'var(--hub-text)', margin: 0 }}>
+              New Template
+            </h3>
+            <input
+              placeholder="Template name"
+              value={newName}
+              onChange={(e) => setNewName(e.target.value)}
+              style={{
+                padding: '8px 12px',
+                borderRadius: '8px',
+                border: '1px solid var(--hub-border)',
+                background: 'var(--hub-input-bg)',
+                color: 'var(--hub-text)',
+                fontSize: '13px',
+                outline: 'none',
+              }}
+            />
+            <select
+              value={newChannel}
+              onChange={(e) => setNewChannel(e.target.value as 'email' | 'sms')}
+              style={{
+                padding: '8px 12px',
+                borderRadius: '8px',
+                border: '1px solid var(--hub-border)',
+                background: 'var(--hub-input-bg)',
+                color: 'var(--hub-text)',
+                fontSize: '13px',
+                outline: 'none',
+              }}
+            >
+              <option value="email">Email</option>
+              <option value="sms">SMS</option>
+            </select>
+            <input
+              placeholder="Category (e.g. promo, welcome)"
+              value={newCategory}
+              onChange={(e) => setNewCategory(e.target.value)}
+              style={{
+                padding: '8px 12px',
+                borderRadius: '8px',
+                border: '1px solid var(--hub-border)',
+                background: 'var(--hub-input-bg)',
+                color: 'var(--hub-text)',
+                fontSize: '13px',
+                outline: 'none',
+              }}
+            />
+            {newChannel === 'email' && (
+              <input
+                placeholder="Subject line"
+                value={newSubject}
+                onChange={(e) => setNewSubject(e.target.value)}
+                style={{
+                  padding: '8px 12px',
+                  borderRadius: '8px',
+                  border: '1px solid var(--hub-border)',
+                  background: 'var(--hub-input-bg)',
+                  color: 'var(--hub-text)',
+                  fontSize: '13px',
+                  outline: 'none',
+                }}
+              />
+            )}
+            <textarea
+              placeholder="Body content"
+              value={newBody}
+              onChange={(e) => setNewBody(e.target.value)}
+              rows={4}
+              style={{
+                padding: '8px 12px',
+                borderRadius: '8px',
+                border: '1px solid var(--hub-border)',
+                background: 'var(--hub-input-bg)',
+                color: 'var(--hub-text)',
+                fontSize: '13px',
+                outline: 'none',
+                resize: 'vertical',
+                fontFamily: 'inherit',
+              }}
+            />
+            <div style={{ display: 'flex', gap: '8px', justifyContent: 'flex-end' }}>
+              <Button variant="outline" onClick={() => setShowCreate(false)}>
+                Cancel
+              </Button>
+              <Button
+                variant="primary"
+                onClick={handleCreate}
+                disabled={createMut.isPending || !newName.trim() || !newBody.trim()}
+              >
+                {createMut.isPending ? 'Creating…' : 'Create'}
+              </Button>
+            </div>
+          </div>
         </div>
       )}
     </div>

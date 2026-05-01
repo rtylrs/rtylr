@@ -15,6 +15,14 @@ export function useBrands() {
   });
 }
 
+export function useCreateBrand() {
+  const qc = useQueryClient();
+  return useMutation({
+    mutationFn: (data: Partial<Brand>) => unwrap(erpApi.createBrand(data)),
+    onSuccess: () => qc.invalidateQueries({ queryKey: ['brands'] }),
+  });
+}
+
 export function useDeleteBrand() {
   const qc = useQueryClient();
   return useMutation({
