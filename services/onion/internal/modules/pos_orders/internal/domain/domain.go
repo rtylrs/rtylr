@@ -6,12 +6,13 @@ import (
 )
 
 var (
-	ErrSessionAlreadyOpen = errors.New("staff already has an open session")
-	ErrSessionNotFound    = errors.New("session not found")
-	ErrSessionNotOpen     = errors.New("session is not open")
-	ErrOrderNotFound      = errors.New("order not found")
-	ErrLocationNotFound   = errors.New("location not found")
-	ErrTableNotFound      = errors.New("table not found")
+	ErrSessionAlreadyOpen        = errors.New("staff already has an open session")
+	ErrSessionNotFound           = errors.New("session not found")
+	ErrSessionNotOpen            = errors.New("session is not open")
+	ErrOrderNotFound             = errors.New("order not found")
+	ErrLocationNotFound          = errors.New("location not found")
+	ErrTableNotFound             = errors.New("table not found")
+	ErrOrderCannotBeTransferred  = errors.New("order cannot be transferred in current status")
 )
 
 // ─── Location ────────────────────────────────────────────────────────────────
@@ -270,6 +271,13 @@ type DiscountInput struct {
 	DiscountType  string
 	DiscountValue float64
 	Reason        string
+}
+
+// ─── Transfer Table ──────────────────────────────────────────────────────────
+
+type TransferTableInput struct {
+	OrderID    int64
+	NewTableID int64
 }
 
 // ─── Dashboard ───────────────────────────────────────────────────────────────

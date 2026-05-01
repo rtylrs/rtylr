@@ -223,6 +223,56 @@ func (h *HoldOrderHandler) Serve(ctx context.Context, req *HoldOrderRequest) (Ho
 	return HoldOrderResponse{Message: "Order held successfully"}, nil
 }
 
+// ---- Transfer Table ----
+
+func TransferTableRoutes() []string {
+	return []string{"/pos/orders/transfer-table", "/pos/orders/{id}/transfer-table"}
+}
+
+type TransferTableHandler struct{ Service *application.Service }
+
+type TransferTableRequest struct {
+	OrderID    int64 `json:"order_id"`
+	NewTableID int64 `json:"new_table_id"`
+}
+
+type TransferTableResponse struct {
+	Success bool `json:"success"`
+}
+
+func (h *TransferTableHandler) Validate(ctx context.Context, req *TransferTableRequest) *errorModels.ServerError {
+	if req.OrderID == 0 && chi.URLParamFromCtx(ctx, "id") == "" {
+		return &errorModels.ServerError{HTTPCode: http.StatusBadRequest, Code: http.StatusBadRequest, Message: "Order ID is required"}
+	}
+	if req.NewTableID <= 0 {
+		return &errorModels.ServerError{HTTPCode: http.StatusBadRequest, Code: http.StatusBadRequest, Message: "New table ID is required"}
+	}
+	return nil
+}
+
+func (h *TransferTableHandler) Serve(ctx context.Context, req *TransferTableRequest) (TransferTableResponse, *errorModels.ServerError) {
+	device := authPkg.DeviceCtx(ctx)
+	if device.User == nil {
+		return TransferTableResponse{}, errorModels.PermissionDeniedServerError()
+	}
+
+	orderID, sErr := resolveOrderID(ctx, req.OrderID)
+	if sErr != nil {
+		return TransferTableResponse{}, sErr
+	}
+
+	if err := h.Service.TransferTable(ctx, device.User.UserID, orderID, req.NewTableID); err != nil {
+		if errors.Is(err, domain.ErrOrderNotFound) {
+			return TransferTableResponse{}, &errorModels.ServerError{HTTPCode: http.StatusNotFound, Code: http.StatusNotFound, Message: "Order not found"}
+		}
+		if errors.Is(err, domain.ErrOrderCannotBeTransferred) {
+			return TransferTableResponse{}, &errorModels.ServerError{HTTPCode: http.StatusUnprocessableEntity, Code: http.StatusUnprocessableEntity, Message: err.Error()}
+		}
+		return TransferTableResponse{}, &errorModels.ServerError{HTTPCode: http.StatusInternalServerError, Code: http.StatusInternalServerError, Message: "Failed to transfer table"}
+	}
+	return TransferTableResponse{Success: true}, nil
+}
+
 // ---- List Held Orders ----
 
 func ListHeldOrdersRoutes() []string { return []string{"/pos/orders/held"} }

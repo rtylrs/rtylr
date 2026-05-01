@@ -699,6 +699,57 @@ func (r *Repository) CreateRefund(ctx context.Context, ownerID, orderID, refunde
 	return refundID, nil
 }
 
+func (r *Repository) TransferTable(ctx context.Context, ownerID, orderID, oldTableID, newTableID int64) error {
+	tx, err := r.pool.BeginTx(ctx, nil)
+	if err != nil {
+		logger.Ctx(ctx).Error("Failed to begin transfer-table transaction", logger.Error(err))
+		return err
+	}
+
+	defer func() {
+		if p := recover(); p != nil {
+			_ = tx.Rollback()
+			panic(p)
+		}
+	}()
+
+	if oldTableID > 0 {
+		if _, execErr := tx.ExecContext(ctx,
+			"UPDATE pos_tables SET status='available' WHERE id=? AND owner_id=?",
+			oldTableID, ownerID,
+		); execErr != nil {
+			_ = tx.Rollback()
+			logger.Ctx(ctx).Error("Failed to free old table during transfer", logger.Error(execErr))
+			return execErr
+		}
+	}
+
+	if _, execErr := tx.ExecContext(ctx,
+		"UPDATE pos_orders SET table_id=? WHERE id=? AND owner_id=?",
+		newTableID, orderID, ownerID,
+	); execErr != nil {
+		_ = tx.Rollback()
+		logger.Ctx(ctx).Error("Failed to update order table_id during transfer", logger.Error(execErr))
+		return execErr
+	}
+
+	if _, execErr := tx.ExecContext(ctx,
+		"UPDATE pos_tables SET status='occupied' WHERE id=? AND owner_id=?",
+		newTableID, ownerID,
+	); execErr != nil {
+		_ = tx.Rollback()
+		logger.Ctx(ctx).Error("Failed to mark new table occupied during transfer", logger.Error(execErr))
+		return execErr
+	}
+
+	if commitErr := tx.Commit(); commitErr != nil {
+		logger.Ctx(ctx).Error("Failed to commit transfer-table transaction", logger.Error(commitErr))
+		return commitErr
+	}
+
+	return nil
+}
+
 // ─── Dashboard ───────────────────────────────────────────────────────────────
 
 func (r *Repository) GetDashboardStats(ctx context.Context, ownerID int64) (domain.DashboardStats, error) {

@@ -136,6 +136,11 @@ func RegisterRoutes(ctx context.Context, router *chi.Mux, service *application.S
 		&handlers.ListHeldOrdersHandler{Service: service},
 	)
 
+	serverHttp.RegisterPOSTWithValidation[handlers.TransferTableRequest, handlers.TransferTableResponse](
+		ctx, router, handlers.TransferTableRoutes(),
+		&handlers.TransferTableHandler{Service: service},
+	)
+
 	// Paddle billing
 	serverHttp.RegisterPOST[handlers.PayOrderRequest, handlers.PayOrderResponse](
 		ctx, router, handlers.PayOrderRoutes(),

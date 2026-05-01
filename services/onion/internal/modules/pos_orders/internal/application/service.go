@@ -248,6 +248,17 @@ func (s *Service) ListHeldOrders(ctx context.Context, ownerID int64) ([]domain.O
 	return s.repo.ListHeldOrders(ctx, ownerID)
 }
 
+func (s *Service) TransferTable(ctx context.Context, ownerID, orderID, newTableID int64) error {
+	order, err := s.repo.GetOrder(ctx, ownerID, orderID)
+	if err != nil {
+		return err
+	}
+	if order.Status == domain.OrderStatusPaid || order.Status == domain.OrderStatusVoided || order.Status == domain.OrderStatusCancelled {
+		return domain.ErrOrderCannotBeTransferred
+	}
+	return s.repo.TransferTable(ctx, ownerID, orderID, order.TableID, newTableID)
+}
+
 // ─── Paddle billing ─────────────────────────────────────────────────────────
 
 // CreatePaddlePayment creates a Paddle transaction for the given order and
