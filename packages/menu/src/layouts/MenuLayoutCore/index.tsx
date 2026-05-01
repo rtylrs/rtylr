@@ -22,6 +22,7 @@ export interface MenuLayoutCoreProps {
   enableAiChat?: boolean;
   onAiMessage?: (message: string, history: ChatMessage[]) => Promise<string>;
   onItemClick?: (item: MenuItemData) => void;
+  onCheckout?: (items: CartItem[]) => void;
   className?: string;
 }
 
@@ -33,6 +34,7 @@ const MenuLayoutCore: React.FC<MenuLayoutCoreProps> = ({
   enableAiChat = true,
   onAiMessage,
   onItemClick,
+  onCheckout,
   className,
 }) => {
   const config: MenuLayoutConfig = {
@@ -142,7 +144,10 @@ const MenuLayoutCore: React.FC<MenuLayoutCoreProps> = ({
           isOpen={cartOpen}
           onClose={() => setCartOpen(false)}
           onQuantityChange={handleQuantityChange}
-          onCheckout={(items) => console.log('Checkout:', items)}
+          onCheckout={(items) => {
+            setCartOpen(false);
+            onCheckout?.(items);
+          }}
         />
       )}
 

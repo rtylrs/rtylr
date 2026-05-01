@@ -1,8 +1,9 @@
 import React, { useMemo } from 'react';
-import { useParams } from 'react-router-dom';
+import { useParams, useNavigate } from 'react-router-dom';
 import { FullScreenLoader } from '@voxire/components';
-import { GridLayout, MenuCategoryData, BusinessInfo } from '@voxire/menu';
+import { GridLayout, MenuCategoryData, BusinessInfo, CartItem } from '@voxire/menu';
 import { usePublicMenu } from '../../../shared/hooks/usePublicMenu';
+import { useCartStore } from '../../../shared/stores/cartStore';
 
 /**
  * PosMenu — public customer-facing menu for POS-backed businesses.
@@ -15,14 +16,22 @@ import { usePublicMenu } from '../../../shared/hooks/usePublicMenu';
  * business doesn't need categories today — the pos_menu table
  * stores flat items — so we synthesise one "All" category for the
  * GridLayout to render.
+ *
+ * Online ordering is gated by the VITE_ONLINE_ORDERING_ENABLED env
+ * flag. When enabled the layout's built-in cart is wired to the
+ * cartStore and navigates to /checkout on "Place Order".
  */
+
+const onlineOrderingEnabled = import.meta.env.VITE_ONLINE_ORDERING_ENABLED === 'true';
 
 const PosMenu: React.FC = (): React.JSX.Element => {
   const { businessId: raw } = useParams<{ businessId: string }>();
+  const navigate = useNavigate();
   const parsed = raw != null ? Number(raw) : NaN;
   const businessId = Number.isFinite(parsed) && parsed > 0 ? parsed : null;
 
   const { data, isLoading, isError } = usePublicMenu(businessId);
+  const { clearCart, setBusinessId, addItem } = useCartStore();
 
   // GridLayout expects a category-grouped list. pos_menu_items is
   // flat today, so we bucket everything into one "Menu" group and
@@ -60,6 +69,29 @@ const PosMenu: React.FC = (): React.JSX.Element => {
     };
   }, [data]);
 
+  const handleCheckout = (cartItems: CartItem[]): void => {
+    if (businessId == null) return;
+    clearCart();
+    setBusinessId(businessId);
+    cartItems.forEach((item) => {
+      addItem({
+        menuItemId: Number(item.id),
+        name: item.name,
+        unitPrice: item.price,
+      });
+      // Sync quantity > 1 — addItem always sets qty=1 on first add,
+      // so we call it (qty-1) more times for items already at higher qty.
+      for (let i = 1; i < item.quantity; i++) {
+        addItem({
+          menuItemId: Number(item.id),
+          name: item.name,
+          unitPrice: item.price,
+        });
+      }
+    });
+    void navigate('/checkout');
+  };
+
   if (businessId == null) {
     return (
       <div className="min-h-screen flex flex-col items-center justify-center gap-4 bg-white">
@@ -82,7 +114,14 @@ const PosMenu: React.FC = (): React.JSX.Element => {
     );
   }
 
-  return <GridLayout categories={categories} business={business} />;
+  return (
+    <GridLayout
+      categories={categories}
+      business={business}
+      enableCart={onlineOrderingEnabled}
+      onCheckout={onlineOrderingEnabled ? handleCheckout : undefined}
+    />
+  );
 };
 
 export default PosMenu;
