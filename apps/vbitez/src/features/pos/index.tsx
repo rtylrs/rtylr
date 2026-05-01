@@ -1,9 +1,11 @@
 import React, { useEffect, useState } from 'react';
+import { useSearchParams } from 'react-router-dom';
 import POSLayout from '../../layouts/POSLayout';
 import QuickAccessSidebar from '../../shared/components/QuickAccessSidebar';
 import ProductGrid from './components/ProductGrid';
 import OrderPanel from './components/OrderPanel';
 import AiAssistant from './AiAssistant';
+import { useCartStore } from '../../shared/stores/cartStore';
 import api from '../../shared/lib/api';
 
 interface Product {
@@ -31,6 +33,15 @@ interface RawMenuItem {
 const POS: React.FC = () => {
   const [products, setProducts] = useState<Product[]>([]);
   const [categories, setCategories] = useState<string[]>([]);
+  const [searchParams] = useSearchParams();
+  const setTableNumber = useCartStore((s) => s.setTableNumber);
+  const tableNumber = searchParams.get('table') ?? undefined;
+
+  useEffect(() => {
+    if (tableNumber) {
+      setTableNumber(tableNumber);
+    }
+  }, [tableNumber, setTableNumber]);
 
   useEffect(() => {
     async function loadMenu() {
@@ -68,7 +79,7 @@ const POS: React.FC = () => {
       <div className="flex h-full overflow-hidden">
         <QuickAccessSidebar />
         <ProductGrid products={products} categories={categories} />
-        <OrderPanel />
+        <OrderPanel tableNumber={tableNumber} />
       </div>
       <AiAssistant />
     </POSLayout>

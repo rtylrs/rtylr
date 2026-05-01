@@ -2,12 +2,15 @@ import React, { useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { motion, AnimatePresence } from 'motion/react';
 import { toast } from 'sonner';
+import { unwrap } from '@voxire/api';
 import { useCartStore } from '../../../../shared/stores/cartStore';
 import { useHeldOrdersStore } from '../../../../shared/stores/heldOrdersStore';
 import { useSettingsStore } from '../../../../shared/stores/settingsStore';
+import { useEmployeeSessionStore } from '../../../../shared/stores/employeeSessionStore';
 import ConfirmModal from '../../../../shared/components/ConfirmModal';
 import QuickNoteModal from '../../../../shared/components/QuickNoteModal';
 import OfflineBadge from '../../../../shared/components/OfflineBadge';
+import { posService } from '../../../../shared/services/posService';
 import { formatCurrency } from '../../../../shared/utils/format';
 
 interface OrderPanelProps {
@@ -16,9 +19,19 @@ interface OrderPanelProps {
 
 const OrderPanel: React.FC<OrderPanelProps> = ({ tableNumber }) => {
   const navigate = useNavigate();
-  const { items, updateQuantity, removeItem, clearCart, updateItemNotes, total } = useCartStore();
+  const {
+    items,
+    updateQuantity,
+    removeItem,
+    clearCart,
+    updateItemNotes,
+    total,
+    serverOrderId,
+    setServerOrderId,
+  } = useCartStore();
   const hold = useHeldOrdersStore((s) => s.hold);
   const taxRate = useSettingsStore((s) => s.taxRate);
+  const employee = useEmployeeSessionStore((s) => s.employee);
 
   const subtotal = total();
   const tax = subtotal * taxRate;
@@ -26,6 +39,7 @@ const OrderPanel: React.FC<OrderPanelProps> = ({ tableNumber }) => {
 
   const [confirmClear, setConfirmClear] = useState(false);
   const [notingItemId, setNotingItemId] = useState<string | null>(null);
+  const [sendingToKitchen, setSendingToKitchen] = useState(false);
 
   const onHold = () => {
     if (items.length === 0) return;
@@ -45,6 +59,50 @@ const OrderPanel: React.FC<OrderPanelProps> = ({ tableNumber }) => {
   };
 
   const notingItem = notingItemId ? items.find((i) => i.id === notingItemId) : null;
+
+  const handleSendToKitchen = async (): Promise<void> => {
+    if (items.length === 0) return;
+    setSendingToKitchen(true);
+    try {
+      let orderId = serverOrderId;
+      if (!orderId) {
+        const orderItems = items.map((item) => ({
+          id: item.id,
+          name: item.name,
+          price: item.price,
+          quantity: item.quantity,
+          notes: item.notes ?? '',
+        }));
+        const created = await unwrap(
+          posService.createOrder({
+            id: `local-${Date.now()}`,
+            status: 'open',
+            items: orderItems,
+            subtotal,
+            tax,
+            tip: 0,
+            discount: 0,
+            total: grandTotal,
+            createdAt: new Date().toISOString(),
+            customerId: String(employee?.id ?? ''),
+          })
+        );
+        orderId =
+          (created as { id?: number; order_id?: number }).id ??
+          (created as { id?: number; order_id?: number }).order_id ??
+          0;
+        if (orderId) setServerOrderId(orderId);
+      }
+      if (orderId) {
+        await unwrap(posService.sendToKitchen(orderId));
+        toast.success('Sent to kitchen');
+      }
+    } catch {
+      toast.error('Failed to send to kitchen');
+    } finally {
+      setSendingToKitchen(false);
+    }
+  };
 
   return (
     <div className="w-80 shrink-0 flex flex-col bg-pos-card border-l border-pos-border h-full">
@@ -163,6 +221,13 @@ const OrderPanel: React.FC<OrderPanelProps> = ({ tableNumber }) => {
               Split
             </button>
           </div>
+          <button
+            className="w-full h-11 rounded-xl bg-orange-500/20 text-orange-300 font-semibold text-sm hover:bg-orange-500/30 transition disabled:opacity-40"
+            onClick={handleSendToKitchen}
+            disabled={sendingToKitchen}
+          >
+            {sendingToKitchen ? 'Sending…' : 'Send to Kitchen'}
+          </button>
           <button
             className="w-full h-14 rounded-xl bg-pos-text text-pos-bg font-bold text-sm hover:opacity-90 transition-opacity active:scale-[0.98]"
             onClick={() => navigate('/payment')}

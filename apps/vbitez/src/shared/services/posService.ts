@@ -215,6 +215,11 @@ export const posService = {
   splitOrder: (id: number, data: SplitPayload) => safe.post(`/pos/orders/${id}/split`, data),
   holdOrder: (id: number, data: HoldPayload) => safe.post(`/pos/orders/${id}/hold`, data),
   getHeldOrders: () => safe.get('/pos/orders/held'),
+  sendToKitchen: (id: number) => safe.post(`/pos/orders/${id}/send-to-kitchen`, {}),
+  transferTable: (id: number, newTableId: number) =>
+    safe.post(`/pos/orders/${id}/transfer-table`, { new_table_id: newTableId }),
+  voidOrderItem: (orderId: number, itemId: number) =>
+    safe.delete(`/pos/orders/${orderId}/items/${itemId}`),
 
   // ── Menu / Products ───────────────────────────────────────────
   getMenuItems: (params?: MenuItemFilterParams) => safe.get('/pos/menu-items', { params }),

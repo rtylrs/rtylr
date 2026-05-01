@@ -1,20 +1,25 @@
 import React, { useMemo, useState } from 'react';
-import { useParams } from 'react-router-dom';
+import { useNavigate, useParams } from 'react-router-dom';
 import { toast } from 'sonner';
+import { unwrap } from '@voxire/api';
 import ScreenLayout from '../../layouts/ScreenLayout';
 import { formatCurrency } from '../../shared/utils/format';
 import { useCartStore } from '../../shared/stores/cartStore';
+import { posService } from '../../shared/services/posService';
 
 type SplitMode = 'seat' | 'amount' | 'items';
 
 const SplitBillScreen: React.FC = () => {
   const { orderId } = useParams<{ orderId: string }>();
+  const navigate = useNavigate();
   const items = useCartStore((s) => s.items);
   const total = useCartStore((s) => s.total());
+  const serverOrderId = useCartStore((s) => s.serverOrderId);
   const [mode, setMode] = useState<SplitMode>('seat');
   const [seats, setSeats] = useState(2);
   const [assignments, setAssignments] = useState<Record<string, number>>({});
   const [amountSplits, setAmountSplits] = useState<number[]>([total / 2, total / 2]);
+  const [confirming, setConfirming] = useState(false);
 
   const seatTotals = useMemo(() => {
     const result: number[] = Array.from({ length: seats }, () => 0);
@@ -36,8 +41,29 @@ const SplitBillScreen: React.FC = () => {
     setAmountSplits((prev) => prev.map((v, i) => (i === idx ? value : v)));
   };
 
-  const confirm = () => {
-    toast.success(`Split into ${seats} ticket${seats === 1 ? '' : 's'}`);
+  const confirm = async (): Promise<void> => {
+    const targetId = serverOrderId ?? Number(orderId ?? 0);
+    if (!targetId) {
+      toast.success(`Split into ${seats} ticket${seats === 1 ? '' : 's'} (local)`);
+      navigate(-1);
+      return;
+    }
+    setConfirming(true);
+    try {
+      const splits: number[][] = Array.from({ length: seats }, (_, seatIdx) =>
+        items
+          .filter((it) => (assignments[it.id] ?? 0) === seatIdx)
+          .map((it) => Number(it.id))
+          .filter(Boolean)
+      ).filter((s) => s.length > 0);
+      await unwrap(posService.splitOrder(targetId, { parts: seats, splits } as any));
+      toast.success(`Split into ${seats} ticket${seats === 1 ? '' : 's'}`);
+      navigate(-1);
+    } catch {
+      toast.error('Failed to split order');
+    } finally {
+      setConfirming(false);
+    }
   };
 
   return (
@@ -154,9 +180,10 @@ const SplitBillScreen: React.FC = () => {
         </div>
         <button
           onClick={confirm}
-          className="w-full h-14 rounded-xl bg-pos-text text-pos-bg font-bold text-base hover:opacity-90 transition"
+          disabled={confirming}
+          className="w-full h-14 rounded-xl bg-pos-text text-pos-bg font-bold text-base hover:opacity-90 transition disabled:opacity-40"
         >
-          Confirm Split
+          {confirming ? 'Splitting…' : 'Confirm Split'}
         </button>
       </div>
     </ScreenLayout>

@@ -1,18 +1,20 @@
 import React, { useState } from 'react';
+import { useNavigate } from 'react-router-dom';
 import { toast } from 'sonner';
 import ScreenLayout from '../../layouts/ScreenLayout';
 import PinPad from '../../shared/components/PinPad';
 import { useOverride } from './useOverride';
 
 const ACTIONS = [
-  { id: 'void', label: 'Void order' },
-  { id: 'refund', label: 'Process refund' },
-  { id: 'discount', label: 'Apply discount' },
-  { id: 'price', label: 'Override price' },
-  { id: 'reopen', label: 'Reopen paid order' },
+  { id: 'void', label: 'Void order', route: '/void' },
+  { id: 'refund', label: 'Process refund', route: '/refund' },
+  { id: 'discount', label: 'Apply discount', route: '/discount' },
+  { id: 'price', label: 'Override price', route: null },
+  { id: 'reopen', label: 'Reopen paid order', route: null },
 ];
 
 const OverrideScreen: React.FC = () => {
+  const navigate = useNavigate();
   const { verify, error, clearError } = useOverride();
   const [action, setAction] = useState(ACTIONS[0].id);
   const [verified, setVerified] = useState(false);
@@ -48,6 +50,10 @@ const OverrideScreen: React.FC = () => {
             if (ok) {
               setVerified(true);
               toast.success('Approved');
+              const actionDef = ACTIONS.find((a) => a.id === action);
+              if (actionDef?.route) {
+                setTimeout(() => navigate(actionDef.route!), 600);
+              }
             }
           }}
         />
