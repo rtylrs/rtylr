@@ -31,6 +31,5 @@ if (rootElement) {
     </Suspense>
   );
 } else {
-  console.error('Root element not found');
   document.body.innerHTML = '<div>The App Failed To Load</div>';
 }

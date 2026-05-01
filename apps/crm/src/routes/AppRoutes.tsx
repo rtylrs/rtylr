@@ -1,27 +1,31 @@
-import React from 'react';
+import React, { Suspense } from 'react';
+import { FullScreenLoader } from '@voxire/components';
 import DefaultLayout from '../layouts/DefaultLayout';
-import Dashboard from '../features/dashboard/Dashboard';
-import Customers from '../features/customers/Customers';
-import CustomerProfile from '../features/customers/CustomerProfile';
-import CreateCustomer from '../features/customers/CreateCustomer';
-import ImportCustomers from '../features/customers/ImportCustomers';
-import MergeCustomers from '../features/customers/MergeCustomers';
-import Loyalty from '../features/loyalty/Loyalty';
-import LoyaltyMembers from '../features/loyalty/LoyaltyMembers';
-import LoyaltyRewards from '../features/loyalty/LoyaltyRewards';
-import LoyaltyTiers from '../features/loyalty/LoyaltyTiers';
-import Campaigns from '../features/campaigns/Campaigns';
-import EmailCampaign from '../features/campaigns/EmailCampaign';
-import SMSCampaign from '../features/campaigns/SMSCampaign';
-import CampaignDetail from '../features/campaigns/CampaignDetail';
-import Segments from '../features/segments/Segments';
-import SegmentBuilder from '../features/segments/SegmentBuilder';
-import SegmentDetail from '../features/segments/SegmentDetail';
-import Automations from '../features/automations/Automations';
-import AutomationBuilder from '../features/automations/AutomationBuilder';
-import Templates from '../features/templates/Templates';
-import Feedback from '../features/feedback/Feedback';
-import SettingsScreen from '../features/settings/Settings';
+
+// All route-level components are lazy-loaded per CLAUDE.md mandate. Layout
+// components stay eager (always needed).
+const Dashboard = React.lazy(() => import('../features/dashboard/Dashboard'));
+const Customers = React.lazy(() => import('../features/customers/Customers'));
+const CustomerProfile = React.lazy(() => import('../features/customers/CustomerProfile'));
+const CreateCustomer = React.lazy(() => import('../features/customers/CreateCustomer'));
+const ImportCustomers = React.lazy(() => import('../features/customers/ImportCustomers'));
+const MergeCustomers = React.lazy(() => import('../features/customers/MergeCustomers'));
+const Loyalty = React.lazy(() => import('../features/loyalty/Loyalty'));
+const LoyaltyMembers = React.lazy(() => import('../features/loyalty/LoyaltyMembers'));
+const LoyaltyRewards = React.lazy(() => import('../features/loyalty/LoyaltyRewards'));
+const LoyaltyTiers = React.lazy(() => import('../features/loyalty/LoyaltyTiers'));
+const Campaigns = React.lazy(() => import('../features/campaigns/Campaigns'));
+const EmailCampaign = React.lazy(() => import('../features/campaigns/EmailCampaign'));
+const SMSCampaign = React.lazy(() => import('../features/campaigns/SMSCampaign'));
+const CampaignDetail = React.lazy(() => import('../features/campaigns/CampaignDetail'));
+const Segments = React.lazy(() => import('../features/segments/Segments'));
+const SegmentBuilder = React.lazy(() => import('../features/segments/SegmentBuilder'));
+const SegmentDetail = React.lazy(() => import('../features/segments/SegmentDetail'));
+const Automations = React.lazy(() => import('../features/automations/Automations'));
+const AutomationBuilder = React.lazy(() => import('../features/automations/AutomationBuilder'));
+const Templates = React.lazy(() => import('../features/templates/Templates'));
+const Feedback = React.lazy(() => import('../features/feedback/Feedback'));
+const SettingsScreen = React.lazy(() => import('../features/settings/Settings'));
 
 interface RouteChild {
   index?: boolean;
@@ -35,45 +39,49 @@ interface AppRoute {
   children?: RouteChild[];
 }
 
+function lazy(element: React.ReactNode): React.ReactNode {
+  return <Suspense fallback={<FullScreenLoader />}>{element}</Suspense>;
+}
+
 const AppRoutes: AppRoute[] = [
   {
     path: '/',
     element: <DefaultLayout />,
     children: [
-      { index: true, element: <Dashboard /> },
+      { index: true, element: lazy(<Dashboard />) },
 
       // Customers
-      { path: 'customers', element: <Customers /> },
-      { path: 'customers/new', element: <CreateCustomer /> },
-      { path: 'customers/import', element: <ImportCustomers /> },
-      { path: 'customers/merge', element: <MergeCustomers /> },
-      { path: 'customers/:id', element: <CustomerProfile /> },
+      { path: 'customers', element: lazy(<Customers />) },
+      { path: 'customers/new', element: lazy(<CreateCustomer />) },
+      { path: 'customers/import', element: lazy(<ImportCustomers />) },
+      { path: 'customers/merge', element: lazy(<MergeCustomers />) },
+      { path: 'customers/:id', element: lazy(<CustomerProfile />) },
 
       // Loyalty
-      { path: 'loyalty', element: <Loyalty /> },
-      { path: 'loyalty/members', element: <LoyaltyMembers /> },
-      { path: 'loyalty/rewards', element: <LoyaltyRewards /> },
-      { path: 'loyalty/tiers', element: <LoyaltyTiers /> },
+      { path: 'loyalty', element: lazy(<Loyalty />) },
+      { path: 'loyalty/members', element: lazy(<LoyaltyMembers />) },
+      { path: 'loyalty/rewards', element: lazy(<LoyaltyRewards />) },
+      { path: 'loyalty/tiers', element: lazy(<LoyaltyTiers />) },
 
       // Campaigns
-      { path: 'campaigns', element: <Campaigns /> },
-      { path: 'campaigns/email', element: <EmailCampaign /> },
-      { path: 'campaigns/sms', element: <SMSCampaign /> },
-      { path: 'campaigns/:id', element: <CampaignDetail /> },
+      { path: 'campaigns', element: lazy(<Campaigns />) },
+      { path: 'campaigns/email', element: lazy(<EmailCampaign />) },
+      { path: 'campaigns/sms', element: lazy(<SMSCampaign />) },
+      { path: 'campaigns/:id', element: lazy(<CampaignDetail />) },
 
       // Segments
-      { path: 'segments', element: <Segments /> },
-      { path: 'segments/new', element: <SegmentBuilder /> },
-      { path: 'segments/:id', element: <SegmentDetail /> },
+      { path: 'segments', element: lazy(<Segments />) },
+      { path: 'segments/new', element: lazy(<SegmentBuilder />) },
+      { path: 'segments/:id', element: lazy(<SegmentDetail />) },
 
       // Automations
-      { path: 'automations', element: <Automations /> },
-      { path: 'automations/new', element: <AutomationBuilder /> },
+      { path: 'automations', element: lazy(<Automations />) },
+      { path: 'automations/new', element: lazy(<AutomationBuilder />) },
 
       // Templates, feedback, settings
-      { path: 'templates', element: <Templates /> },
-      { path: 'feedback', element: <Feedback /> },
-      { path: 'settings', element: <SettingsScreen /> },
+      { path: 'templates', element: lazy(<Templates />) },
+      { path: 'feedback', element: lazy(<Feedback />) },
+      { path: 'settings', element: lazy(<SettingsScreen />) },
     ],
   },
 ];

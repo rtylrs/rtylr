@@ -65,3 +65,32 @@ export function writeConsent(state: Exclude<ConsentState, 'undecided'>): void {
     window.dispatchEvent(new CustomEvent<ConsentState>('rtylr-consent-change', { detail: state }));
   }
 }
+
+/**
+ * Clear consent and re-show the banner. Required by GDPR Art. 7(3):
+ * withdrawing consent must be as easy as giving it.
+ *
+ * Writes a same-shape Set-Cookie with Max-Age=0 + matching Domain so
+ * the browser actually deletes the cookie set by writeConsent. A
+ * plain `document.cookie = 'rtylr-consent=; ...'` without the Domain
+ * attr would leave the parent-domain cookie alive on rtylr.com — same
+ * shape of bug as the auth-cookie logout regression (commit c81034fc).
+ */
+export function clearConsent(): void {
+  if (typeof document === 'undefined') return;
+  const domain = consentCookieDomain();
+  const parts = [`${COOKIE_NAME}=`, 'Path=/', 'Max-Age=0', 'SameSite=Lax'];
+  if (domain) parts.push(`Domain=${domain}`);
+  if (typeof window !== 'undefined' && window.location.protocol === 'https:') {
+    parts.push('Secure');
+  }
+  document.cookie = parts.join('; ');
+  // Belt + suspenders: also delete a host-only copy in case an older
+  // session wrote one without the Domain attr.
+  document.cookie = `${COOKIE_NAME}=; Path=/; Max-Age=0; SameSite=Lax`;
+  if (typeof window !== 'undefined') {
+    window.dispatchEvent(
+      new CustomEvent<ConsentState>('rtylr-consent-change', { detail: 'undecided' })
+    );
+  }
+}

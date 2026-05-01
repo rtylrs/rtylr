@@ -3,6 +3,7 @@ import React from 'react';
 import { useState, useEffect } from 'react';
 import { Route, Routes, useLocation } from 'react-router-dom';
 import { motion } from 'motion/react';
+import { ErrorBoundary } from '@voxire/ui';
 import {
   Chart as ChartJS,
   LineElement,
@@ -60,7 +61,7 @@ const App = (): React.JSX.Element => {
   }, []);
 
   return (
-    <React.Fragment>
+    <ErrorBoundary>
       <HelmetContainer title={'Rtylr'} favicon={'/favicon.ico'} />
 
       <Cookies />
@@ -83,7 +84,7 @@ const App = (): React.JSX.Element => {
 
         <Route path="*" element={<NoMatch />} />
       </Routes>
-    </React.Fragment>
+    </ErrorBoundary>
   );
 };
 

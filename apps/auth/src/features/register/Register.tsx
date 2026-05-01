@@ -222,7 +222,6 @@ const Register: React.FC = (): React.JSX.Element => {
         password,
         name: name.trim() || email.split('@')[0],
         businessName: isSoloPlan ? '' : businessName.trim(),
-        referred: '',
         planSlug: selectedPlanSlug,
       },
       {

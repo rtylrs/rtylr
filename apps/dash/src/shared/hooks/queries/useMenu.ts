@@ -51,7 +51,6 @@ export const useGetAllMenus = (restaurantId: string | null) => {
   useEffect(() => {
     if (query.error) {
       toast.error('Failed to fetch menus');
-      console.error('Error fetching menus:', query.error);
     }
   }, [query.error]);
 
@@ -84,7 +83,6 @@ export const useGetMenu = (userId: string | null, disabled?: boolean) => {
   useEffect(() => {
     if (query.error) {
       toast.error('Failed to fetch menu');
-      console.error('Error fetching menu:', query.error);
     }
   }, [query.error]);
 
@@ -113,7 +111,6 @@ export const useGetMenuById = (menuId: string | null) => {
   useEffect(() => {
     if (query.error) {
       toast.error('Failed to fetch menu');
-      console.error('Error fetching menu:', query.error);
     }
   }, [query.error]);
 
@@ -140,7 +137,6 @@ export const useCreateMenu = () => {
     },
     onError: (error: Error) => {
       toast.error('Failed to create menu');
-      console.error('Error creating menu:', error);
     },
   });
 };
@@ -163,7 +159,6 @@ export const useSetActiveMenu = () => {
     },
     onError: (error: Error) => {
       toast.error('Failed to set active menu');
-      console.error('Error setting active menu:', error);
     },
   });
 };
@@ -216,7 +211,6 @@ export const useAddMenuItem = () => {
     },
     onError: (error: Error) => {
       toast.error('Failed to add item');
-      console.error('Error adding menu item:', error);
     },
   });
 };
@@ -246,7 +240,6 @@ export const useEditMenuItem = () => {
     },
     onError: (error: Error) => {
       toast.error('Failed to update item');
-      console.error('Error editing menu item:', error);
     },
   });
 };
@@ -276,7 +269,6 @@ export const useDeleteMenuItem = () => {
     },
     onError: (error: Error) => {
       toast.error('Failed to delete item');
-      console.error('Error deleting menu item:', error);
     },
   });
 };
@@ -297,7 +289,6 @@ export const useAddCategory = () => {
     },
     onError: (error: Error) => {
       toast.error('Failed to add category');
-      console.error('Error adding category:', error);
     },
   });
 };
@@ -329,7 +320,6 @@ export const useEditCategory = () => {
     },
     onError: (error: Error) => {
       toast.error('Failed to update category');
-      console.error('Error editing category:', error);
     },
   });
 };
@@ -353,7 +343,6 @@ export const useDeleteCategory = () => {
     },
     onError: (error: Error) => {
       toast.error('Failed to delete category');
-      console.error('Error deleting category:', error);
       throw error;
     },
   });
@@ -381,7 +370,6 @@ export const useRenameCategory = () => {
     },
     onError: (error: Error) => {
       toast.error('Failed to rename category');
-      console.error('Error renaming category:', error);
     },
   });
 };
@@ -407,7 +395,6 @@ export const useAddBanner = () => {
     },
     onError: (error: Error) => {
       toast.error('Failed to add banner');
-      console.error('Error adding banner:', error);
     },
   });
 };

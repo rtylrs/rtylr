@@ -8,7 +8,6 @@ const editAddons = async ({ id, addons }: { id: string | number; addons: unknown
     });
     return res.data;
   } catch (error) {
-    console.error('Error editing addons:', error);
     throw error;
   }
 };

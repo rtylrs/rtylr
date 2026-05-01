@@ -1,8 +1,11 @@
 import { unwrap } from '@voxire/api';
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
 import { toast } from 'sonner';
+import i18next from '../../shared/services/i18next';
 import { flowApi } from '../../shared/services/flowApi';
 import type { ApiTimeLog } from '../../shared/services/flowApi';
+
+const t = (key: string): string => i18next.t(key) as string;
 
 export interface TimeLogsData {
   logs: ApiTimeLog[];
@@ -28,9 +31,9 @@ export function useLogTime() {
       qc.invalidateQueries({ queryKey: ['time-logs', tid] });
       qc.invalidateQueries({ queryKey: ['task-detail', tid] });
       qc.invalidateQueries({ queryKey: ['task'] });
-      toast.success('Time logged');
+      toast.success(t('toasts.time.logged'));
     },
-    onError: () => toast.error('Failed to log time'),
+    onError: () => toast.error(t('toasts.time.logFailed')),
   });
 }
 
@@ -44,6 +47,6 @@ export function useDeleteTimeLog() {
       qc.invalidateQueries({ queryKey: ['task-detail', tid] });
       qc.invalidateQueries({ queryKey: ['task'] });
     },
-    onError: () => toast.error('Failed to delete time log'),
+    onError: () => toast.error(t('toasts.time.deleteFailed')),
   });
 }

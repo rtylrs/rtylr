@@ -2,18 +2,20 @@ import React, { useMemo } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { Archive as ArchiveIcon, RotateCcw } from 'lucide-react';
 import { toast } from 'sonner';
+import { useTranslation } from 'react-i18next';
 import { useTasks, useUpdateTaskStatus } from '../tasks/useTasks';
 import type { ApiTask } from '../../shared/services/flowApi';
 import PriorityIcon from '../../shared/components/PriorityIcon';
 import EmptyState from '../../shared/components/EmptyState';
 
 const Archive: React.FC = () => {
+  const { t } = useTranslation();
   const navigate = useNavigate();
   const { data: apiTasks = [] } = useTasks({});
   const restoreTask = useUpdateTaskStatus();
 
   const archived = useMemo(
-    () => (apiTasks as ApiTask[]).filter((t) => t.status === 'cancelled'),
+    () => (apiTasks as ApiTask[]).filter((task) => task.status === 'cancelled'),
     [apiTasks]
   );
 
@@ -36,33 +38,33 @@ const Archive: React.FC = () => {
             description="Cancelled tasks will show up here."
           />
         ) : (
-          archived.map((t) => (
+          archived.map((task) => (
             <div
-              key={t.id}
+              key={task.id}
               className="flex items-center gap-3 px-6 py-3 hover:bg-[var(--flow-hover)] group"
               style={{ borderBottom: '1px solid var(--flow-border)' }}
             >
-              <PriorityIcon priority={t.priority} size={12} />
+              <PriorityIcon priority={task.priority} size={12} />
               <button
-                onClick={() => navigate(`/task/${t.id}`)}
+                onClick={() => navigate(`/task/${task.id}`)}
                 className="flex-1 text-left text-[12px] truncate"
                 style={{ color: 'var(--flow-text-muted)', textDecoration: 'line-through' }}
               >
-                {t.title}
+                {task.title}
               </button>
               <span
                 className="text-[10px] shrink-0 hidden group-hover:inline"
                 style={{ color: 'var(--flow-text-dim)' }}
               >
-                {t.projectName}
+                {task.projectName}
               </span>
               <button
                 onClick={() =>
                   restoreTask.mutate(
-                    { id: t.id, status: 'todo' },
+                    { id: task.id, status: 'todo' },
                     {
-                      onSuccess: () => toast.success('Task restored'),
-                      onError: () => toast.error('Failed to restore task'),
+                      onSuccess: () => toast.success(t('toasts.task.restored')),
+                      onError: () => toast.error(t('toasts.task.restoreFailed')),
                     }
                   )
                 }

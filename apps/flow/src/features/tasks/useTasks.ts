@@ -1,9 +1,12 @@
 import { unwrap } from '@voxire/api';
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
 import { toast } from 'sonner';
+import i18next from '../../shared/services/i18next';
 import { flowApi, ApiTask } from '../../shared/services/flowApi';
 import { useFlowStore } from '../../shared/stores/flowStore';
 import { unwrapListResponse } from '../../shared/lib/unwrapListResponse';
+
+const t = (key: string, opts?: Record<string, unknown>): string => i18next.t(key, opts) as string;
 
 export function useTasks(params: {
   projectId?: string;
@@ -61,7 +64,7 @@ export function useCreateTask() {
       qc.invalidateQueries({ queryKey: ['tasks'] });
       qc.invalidateQueries({ queryKey: ['my-tasks'] });
     },
-    onError: () => toast.error('Failed to create task'),
+    onError: () => toast.error(t('toasts.task.createFailed')),
   });
 }
 
@@ -76,7 +79,7 @@ export function useUpdateTask() {
       qc.invalidateQueries({ queryKey: ['my-tasks'] });
       qc.invalidateQueries({ queryKey: ['task'] });
     },
-    onError: () => toast.error('Failed to update task'),
+    onError: () => toast.error(t('toasts.task.updateFailed')),
   });
 }
 
@@ -90,7 +93,7 @@ export function useDeleteTask() {
       qc.invalidateQueries({ queryKey: ['tasks'] });
       qc.invalidateQueries({ queryKey: ['my-tasks'] });
     },
-    onError: () => toast.error('Failed to delete task'),
+    onError: () => toast.error(t('toasts.task.deleteFailed')),
   });
 }
 
@@ -104,7 +107,7 @@ export function useUpdateTaskStatus() {
       qc.invalidateQueries({ queryKey: ['tasks'] });
       qc.invalidateQueries({ queryKey: ['my-tasks'] });
     },
-    onError: () => toast.error('Failed to update status'),
+    onError: () => toast.error(t('toasts.task.statusUpdateFailed')),
   });
 }
 
@@ -117,9 +120,9 @@ export function useBulkUpdateStatus() {
     onSuccess: (_data, { ids }) => {
       qc.invalidateQueries({ queryKey: ['tasks'] });
       qc.invalidateQueries({ queryKey: ['my-tasks'] });
-      toast.success(`Updated ${ids.length} task${ids.length !== 1 ? 's' : ''}`);
+      toast.success(t('toasts.task.bulkUpdated', { count: ids.length }));
     },
-    onError: () => toast.error('Bulk update failed'),
+    onError: () => toast.error(t('toasts.task.bulkUpdateFailed')),
   });
 }
 
@@ -132,9 +135,9 @@ export function useBulkUpdatePriority() {
     onSuccess: (_data, { ids }) => {
       qc.invalidateQueries({ queryKey: ['tasks'] });
       qc.invalidateQueries({ queryKey: ['my-tasks'] });
-      toast.success(`Updated ${ids.length} task${ids.length !== 1 ? 's' : ''}`);
+      toast.success(t('toasts.task.bulkUpdated', { count: ids.length }));
     },
-    onError: () => toast.error('Bulk update failed'),
+    onError: () => toast.error(t('toasts.task.bulkUpdateFailed')),
   });
 }
 
@@ -147,9 +150,9 @@ export function useBulkDelete() {
     onSuccess: (_data, ids) => {
       qc.invalidateQueries({ queryKey: ['tasks'] });
       qc.invalidateQueries({ queryKey: ['my-tasks'] });
-      toast.success(`Deleted ${ids.length} task${ids.length !== 1 ? 's' : ''}`);
+      toast.success(t('toasts.task.bulkDeleted', { count: ids.length }));
     },
-    onError: () => toast.error('Bulk delete failed'),
+    onError: () => toast.error(t('toasts.task.bulkDeleteFailed')),
   });
 }
 
@@ -162,7 +165,7 @@ export function useAddComment() {
     onSuccess: () => {
       qc.invalidateQueries({ queryKey: ['task'] });
     },
-    onError: () => toast.error('Failed to post comment'),
+    onError: () => toast.error(t('toasts.comment.postFailed')),
   });
 }
 
@@ -175,7 +178,7 @@ export function useDeleteComment() {
     onSuccess: () => {
       qc.invalidateQueries({ queryKey: ['task'] });
     },
-    onError: () => toast.error('Failed to delete comment'),
+    onError: () => toast.error(t('toasts.comment.deleteFailed')),
   });
 }
 
@@ -188,7 +191,7 @@ export function useAddSubtask() {
     onSuccess: () => {
       qc.invalidateQueries({ queryKey: ['task'] });
     },
-    onError: () => toast.error('Failed to add subtask'),
+    onError: () => toast.error(t('toasts.subtask.addFailed')),
   });
 }
 
@@ -200,7 +203,7 @@ export function useToggleSubtask() {
     onSuccess: () => {
       qc.invalidateQueries({ queryKey: ['task'] });
     },
-    onError: () => toast.error('Failed to update subtask'),
+    onError: () => toast.error(t('toasts.subtask.updateFailed')),
   });
 }
 
@@ -219,6 +222,6 @@ export function useLogTime() {
     onSuccess: () => {
       qc.invalidateQueries({ queryKey: ['task'] });
     },
-    onError: () => toast.error('Failed to log time'),
+    onError: () => toast.error(t('toasts.time.logFailed')),
   });
 }

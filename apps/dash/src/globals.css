@@ -28,6 +28,20 @@
   --status-expired-bg: rgba(120, 120, 118, 0.08);
 }
 
+/* ── Per-app brand colors (used by app launcher cards) ────────
+ * Each app surface in the suite has a fixed brand color; these get
+ * referenced from BusinessRoute / StaffView so launcher colors stay
+ * consistent across light/dark themes. */
+:root {
+  --app-pos: #4583c4;
+  --app-erp: #10b981;
+  --app-hr: #f59e0b;
+  --app-crm: #8b5cf6;
+  --app-finance: #ef4444;
+  --app-flow: #64c5b9;
+  --app-insights: #6366f1;
+}
+
 /* ── Dark mode (default) ─────────────────────────────────────── */
 :root,
 :root[data-theme='dark'] {

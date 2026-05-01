@@ -3,6 +3,7 @@ import { motion, AnimatePresence } from 'motion/react';
 import { ChevronLeft, ChevronRight, X } from 'lucide-react';
 import { useNavigate } from 'react-router-dom';
 import { toast } from 'sonner';
+import { useTranslation } from 'react-i18next';
 import { useTasks, useCreateTask } from '../tasks/useTasks';
 import { useFlowStore } from '../../shared/stores/flowStore';
 import PriorityIcon from '../../shared/components/PriorityIcon';
@@ -15,6 +16,7 @@ interface CreateModal {
 }
 
 const Calendar: React.FC = () => {
+  const { t } = useTranslation();
   const { data: apiTasks = [] } = useTasks({});
   const tasks = apiTasks as ApiTask[];
   const navigate = useNavigate();
@@ -74,7 +76,7 @@ const Calendar: React.FC = () => {
     if (!newTitle.trim()) return;
     const projectId = newProjectId || projects[0]?.id;
     if (!projectId || !activeWorkspaceId) {
-      toast.error('Select a project first');
+      toast.error(t('toasts.task.selectProjectFirst'));
       return;
     }
     createTask.mutate(
@@ -86,10 +88,10 @@ const Calendar: React.FC = () => {
       },
       {
         onSuccess: () => {
-          toast.success('Task created');
+          toast.success(t('toasts.task.created'));
           setCreateModal(null);
         },
-        onError: () => toast.error('Failed to create task'),
+        onError: () => toast.error(t('toasts.task.createFailed')),
       }
     );
   };

@@ -28,6 +28,12 @@ export const FLAG_KEYS = {
   APP_POS: 'app.pos',
   APP_POS_PAYMENTS: 'app.pos.payments',
   APP_RECRUIT_FILE_UPLOAD: 'app.recruit.fileUpload',
+  /**
+   * Flow's UI-only stub routes (Timeline, CalendarView, Roadmap,
+   * Insights, Team, ProjectOverview/Timeline/Dashboard). Off in prod
+   * until these screens render real data — see vault flow.md P0 #4.
+   */
+  APP_FLOW_PREVIEW_ROUTES: 'app.flow.previewRoutes',
 } as const;
 
 export type FlagKey = (typeof FLAG_KEYS)[keyof typeof FLAG_KEYS];
@@ -48,6 +54,7 @@ export const FLAG_PROD_DEFAULTS: Record<FlagKey, boolean> = {
   [FLAG_KEYS.APP_POS]: false,
   [FLAG_KEYS.APP_POS_PAYMENTS]: false,
   [FLAG_KEYS.APP_RECRUIT_FILE_UPLOAD]: false, // wait for R2 creds
+  [FLAG_KEYS.APP_FLOW_PREVIEW_ROUTES]: false,
 };
 
 /**

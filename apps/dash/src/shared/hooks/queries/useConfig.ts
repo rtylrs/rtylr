@@ -45,7 +45,6 @@ export const useGetConfig = () => {
 
   useEffect(() => {
     if (query.error) {
-      console.error('Error fetching config data:', query.error);
     }
   }, [query.error]);
 
@@ -68,7 +67,6 @@ export const useUpdateConfig = () => {
     },
     onError: (error) => {
       toast.error('Failed to update config');
-      console.error('Error updating about content:', error);
     },
   });
 };
@@ -93,7 +91,6 @@ export const useGetFaqs = () => {
   useEffect(() => {
     if (query.error) {
       toast.error('Failed to fetch FAQs');
-      console.error('Error fetching FAQs:', query.error);
     }
   }, [query.error]);
 

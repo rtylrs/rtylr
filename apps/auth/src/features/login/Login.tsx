@@ -1,5 +1,6 @@
 import React, { useState, useEffect, useMemo } from 'react';
 import { useNavigate } from 'react-router-dom';
+import { useTranslation } from 'react-i18next';
 import { AlertCircle } from 'lucide-react';
 import { GoogleAuthProvider, signInWithPopup, getIdToken } from 'firebase/auth';
 import { FaGoogle } from 'react-icons/fa';
@@ -34,6 +35,7 @@ function getAppDisplayName(redirectParam: string | null): string | null {
 
 const Login: React.FC = (): React.JSX.Element => {
   const navigate = useNavigate();
+  const { t } = useTranslation();
   const provider = new GoogleAuthProvider();
   const { isAuthenticated, loading, error, clearError } = useUserStore();
   const loginMutation = useLogin();
@@ -104,14 +106,14 @@ const Login: React.FC = (): React.JSX.Element => {
     }
   }, [isAuthenticated]);
 
-  const errorMessage =
-    error &&
-    (typeof error === 'string'
-      ? error
-      : (error as { message?: string })?.message || 'An error occurred');
+  // Generic error message regardless of cause — never leak whether the
+  // email exists in our system. The audit (auth.md P1 #5) flagged the
+  // earlier "User not found" vs "Wrong password" split as a user-
+  // enumeration vector.
+  const errorMessage = error ? t('auth.login.genericError') : null;
 
-  const title = appName ? `Sign in to ${appName}.` : 'Welcome back.';
-  const subtitle = appName ? `Sign in to access ${appName}.` : 'Sign in to your account.';
+  const title = appName ? t('auth.login.title') + ' — ' + appName : t('auth.login.title');
+  const subtitle = appName ? t('auth.login.subtitle') : t('auth.login.subtitle');
 
   return (
     <AuthShell
@@ -120,7 +122,7 @@ const Login: React.FC = (): React.JSX.Element => {
       footer={
         <div className="text-center space-y-3">
           <p className="text-sm text-[#666]">
-            Don&apos;t have an account?{' '}
+            {t('auth.login.noAccount')}{' '}
             <button
               type="button"
               className="text-[#4583C4] font-medium hover:underline underline-offset-2"
@@ -128,7 +130,7 @@ const Login: React.FC = (): React.JSX.Element => {
                 navigate(redirectParam ? `/register?redirect=${redirectParam}` : '/register')
               }
             >
-              Sign up
+              {t('auth.login.createOne')}
             </button>
           </p>
         </div>
@@ -144,12 +146,12 @@ const Login: React.FC = (): React.JSX.Element => {
         {/* Email */}
         <div className="flex flex-col gap-1.5">
           <label htmlFor="login-email" className="text-sm font-medium text-[#111]">
-            Email
+            {t('auth.common.email')}
           </label>
           <input
             id="login-email"
             type="email"
-            placeholder="you@company.com"
+            placeholder={t('auth.login.emailPlaceholder')}
             autoComplete="email"
             value={email}
             onChange={(e) => setEmail(e.target.value)}
@@ -163,13 +165,13 @@ const Login: React.FC = (): React.JSX.Element => {
         {/* Password */}
         <div className="flex flex-col gap-1.5">
           <label htmlFor="login-password" className="text-sm font-medium text-[#111]">
-            Password
+            {t('auth.common.password')}
           </label>
           <div className="relative">
             <input
               id="login-password"
               type={showPassword ? 'text' : 'password'}
-              placeholder="Enter your password"
+              placeholder={t('auth.login.passwordPlaceholder')}
               autoComplete="current-password"
               value={password}
               onChange={(e) => setPassword(e.target.value)}
@@ -194,7 +196,7 @@ const Login: React.FC = (): React.JSX.Element => {
             className="text-xs text-[#4583C4] hover:underline underline-offset-2"
             onClick={() => navigate('/password-reset')}
           >
-            Forgot password?
+            {t('auth.login.forgotPassword')}
           </button>
         </div>
 
@@ -211,14 +213,14 @@ const Login: React.FC = (): React.JSX.Element => {
 
         {/* Sign in button */}
         <Button type="submit" variant="primary" fullWidth loading={loading} height={40}>
-          Sign in
+          {t('auth.login.submit')}
         </Button>
 
         {/* Google sign in */}
         <Button type="button" variant="outline" fullWidth height={40} onClick={handleGoogle}>
           <span className="inline-flex items-center gap-2">
             <FaGoogle className="text-[#444]" />
-            Continue with Google
+            {t('auth.common.continueWithGoogle')}
           </span>
         </Button>
       </form>

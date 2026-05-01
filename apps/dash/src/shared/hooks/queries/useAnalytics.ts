@@ -22,7 +22,6 @@ export const useGetAnalytics = (
   useEffect(() => {
     if (query.error) {
       toast.error('Failed to fetch analytics');
-      console.error('Error fetching analytics:', query.error);
     }
   }, [query.error]);
 
@@ -47,7 +46,6 @@ export const useGetRevenue = (
 
   useEffect(() => {
     if (query.error) {
-      console.error('Error fetching revenue:', query.error);
     }
   }, [query.error]);
 
@@ -72,7 +70,6 @@ export const useGetOrders = (
 
   useEffect(() => {
     if (query.error) {
-      console.error('Error fetching orders:', query.error);
     }
   }, [query.error]);
 

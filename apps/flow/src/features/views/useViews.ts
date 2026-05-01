@@ -2,6 +2,7 @@ import { unwrap } from '@voxire/api';
 import { useMemo } from 'react';
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
 import { flowApi } from '../../shared/services/flowApi';
+import type { ApiView } from '../../shared/services/flowApi';
 import { PRIORITY_ORDER, type SavedView, type Task } from '../../shared/stores/flowStore';
 
 export function useViews() {
@@ -9,8 +10,8 @@ export function useViews() {
     queryKey: ['views'],
     queryFn: async () => {
       const res = await unwrap(flowApi.getViews());
-      // backend returns { views: [...] }
-      return ((res as any).views ?? (Array.isArray(res) ? res : [])) as SavedView[];
+      const list = Array.isArray(res) ? res : (res?.views ?? []);
+      return list as unknown as SavedView[];
     },
   });
 }
@@ -19,7 +20,7 @@ export function useCreateView() {
   const qc = useQueryClient();
   return useMutation({
     mutationFn: (data: Partial<SavedView>) => {
-      return unwrap(flowApi.createView(data as any));
+      return unwrap(flowApi.createView(data as unknown as Partial<ApiView>));
     },
     onSuccess: () => qc.invalidateQueries({ queryKey: ['views'] }),
   });
@@ -29,7 +30,7 @@ export function useUpdateView() {
   const qc = useQueryClient();
   return useMutation({
     mutationFn: ({ id, data }: { id: string; data: Partial<SavedView> }) => {
-      return unwrap(flowApi.updateView(id, data as any)).then(() => {});
+      return unwrap(flowApi.updateView(id, data as unknown as Partial<ApiView>)).then(() => {});
     },
     onSuccess: () => qc.invalidateQueries({ queryKey: ['views'] }),
   });

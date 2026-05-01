@@ -43,7 +43,10 @@ export const TaskCard: React.FC<TaskCardProps> = ({
       exit={{ opacity: 0, y: -8 }}
       transition={{ duration: 0.18 }}
       draggable={draggable}
-      onDragStart={onDragStart as any}
+      // motion.div's onDragStart signature comes from framer-motion's drag
+      // gesture API, which is incompatible with the native HTML5 drag event
+      // we're forwarding here. The runtime accepts both — the compiler can't.
+      onDragStart={onDragStart as unknown as React.ComponentProps<typeof motion.div>['onDragStart']}
       onClick={(e) => {
         if (e.metaKey || e.ctrlKey) {
           onSelect?.();

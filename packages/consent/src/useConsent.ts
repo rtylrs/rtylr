@@ -1,20 +1,22 @@
 import { useEffect, useState } from 'react';
 
-import { readConsent, writeConsent, type ConsentState } from './consent';
+import { clearConsent, readConsent, writeConsent, type ConsentState } from './consent';
 
 /**
- * React hook for consent state. Returns the current state and two
+ * React hook for consent state. Returns the current state and three
  * action-callbacks. Subscribes to the window `rtylr-consent-change`
  * event so a banner dismissal in one component re-renders another.
  *
  * Typical use: a root-level banner calls `accept()` / `decline()`;
  * the analytics loader in a sibling component reads `state` to
- * decide whether to initialise PostHog.
+ * decide whether to initialise PostHog. A footer link calls
+ * `reopen()` to let the user revisit their choice (GDPR Art. 7(3)).
  */
 interface UseConsent {
   state: ConsentState;
   accept: () => void;
   decline: () => void;
+  reopen: () => void;
 }
 
 export function useConsent(): UseConsent {
@@ -46,6 +48,9 @@ export function useConsent(): UseConsent {
     },
     decline: (): void => {
       writeConsent('denied');
+    },
+    reopen: (): void => {
+      clearConsent();
     },
   };
 }

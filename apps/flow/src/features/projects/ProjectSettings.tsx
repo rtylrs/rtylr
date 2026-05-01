@@ -1,6 +1,7 @@
 import React, { useState } from 'react';
 import { useParams, useNavigate } from 'react-router-dom';
 import { toast } from 'sonner';
+import { useTranslation } from 'react-i18next';
 import {
   MessageSquare,
   GitBranch,
@@ -32,6 +33,7 @@ const ROLE_META: Record<string, { icon: React.ReactNode; color: string }> = {
 };
 
 const ProjectSettings: React.FC = () => {
+  const { t } = useTranslation();
   const { projectId, workspaceId } = useParams<{ projectId: string; workspaceId: string }>();
   const navigate = useNavigate();
   const { projects } = useFlowStore();
@@ -131,8 +133,8 @@ const ProjectSettings: React.FC = () => {
                 updateProject.mutate(
                   { id: projectId!, data: { name, description } },
                   {
-                    onSuccess: () => toast.success('Project updated'),
-                    onError: () => toast.error('Failed to update project'),
+                    onSuccess: () => toast.success(t('toasts.project.updated')),
+                    onError: () => toast.error(t('toasts.project.updateFailed')),
                   }
                 )
               }

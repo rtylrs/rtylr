@@ -81,11 +81,7 @@ export function useSyncCache() {
           }))
         );
       }
-
-      console.log('[POS] Cache synced: products, modifiers, combos');
-    } catch (err) {
-      console.warn('[POS] Cache sync failed (offline mode):', err);
-    }
+    } catch (err) {}
   }, []);
 
   // Auto-sync on mount

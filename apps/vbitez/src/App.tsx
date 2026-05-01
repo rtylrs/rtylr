@@ -1,6 +1,7 @@
 import React, { useEffect, Suspense, useState } from 'react';
 import { Route, Routes, useLocation } from 'react-router-dom';
 import { APP_URLS, AppFlagGuard, FLAG_KEYS } from '@voxire/config';
+import { ErrorBoundary } from '@voxire/ui';
 import AppRoutes from './routes/AppRoutes';
 import NoMatch from './features/extras/NoMatch';
 import { useUserStore } from './shared/stores';
@@ -40,7 +41,7 @@ const AppInner = (): React.JSX.Element => {
   );
 };
 
-const App = (): React.JSX.Element => {
+const AppShell = (): React.JSX.Element => {
   const { token, getUserInfo } = useUserStore();
   const { isActive } = useEmployeeSessionStore();
   const setContext = useCartStore((s) => s.setContext);
@@ -85,5 +86,11 @@ const App = (): React.JSX.Element => {
   // Step 4: Everything ready → main POS app
   return <AppInner />;
 };
+
+const App = (): React.JSX.Element => (
+  <ErrorBoundary>
+    <AppShell />
+  </ErrorBoundary>
+);
 
 export default App;

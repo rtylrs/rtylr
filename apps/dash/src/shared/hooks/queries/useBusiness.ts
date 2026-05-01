@@ -39,7 +39,6 @@ export const useUpdateBusiness = () => {
       const err = error as { response?: { data?: { message?: string } } };
       const message = err.response?.data?.message || 'Failed to update business information';
       toast.error(message);
-      console.error('Error updating business:', error);
     },
   });
 };
@@ -65,7 +64,6 @@ export const useUpdateTheme = () => {
       const err = error as { response?: { data?: { message?: string } } };
       const message = err.response?.data?.message || 'Failed to update theme';
       toast.error(message);
-      console.error('Error updating theme:', error);
     },
   });
 };

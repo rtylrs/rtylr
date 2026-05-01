@@ -1,6 +1,7 @@
 import React, { useState } from 'react';
 import { motion } from 'motion/react';
 import { toast } from 'sonner';
+import { useTranslation } from 'react-i18next';
 import { Timer, ArrowRight, Plus } from 'lucide-react';
 import { useCycles, useCreateCycle } from './useCycles';
 import { type ApiCycle } from '../../shared/services/flowApi';
@@ -8,6 +9,7 @@ import { formatDate } from '../../shared/lib/utils';
 import CycleBadge from '../../shared/components/CycleBadge';
 
 const Cycles: React.FC = () => {
+  const { t } = useTranslation();
   const { data: cycles = [], isLoading } = useCycles();
   const createCycle = useCreateCycle();
   const [showCreate, setShowCreate] = useState(false);
@@ -102,7 +104,7 @@ const Cycles: React.FC = () => {
                   },
                   {
                     onSuccess: () => {
-                      toast.success('Cycle created');
+                      toast.success(t('toasts.cycle.created'));
                       setShowCreate(false);
                       setNewName('');
                       setNewStart('');
