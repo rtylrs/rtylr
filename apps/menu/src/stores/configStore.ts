@@ -70,7 +70,6 @@ export const useConfigStore = create<ConfigStore>()((set) => ({
       });
     } catch (error) {
       set({ loading: false });
-      console.error('Error fetching config data:', error);
     }
   },
 
@@ -78,17 +77,13 @@ export const useConfigStore = create<ConfigStore>()((set) => ({
     try {
       const response = await api.put('/config/update', data);
       set({ aboutContent: response.data.aboutContent });
-    } catch (error) {
-      console.error('Error updating about content:', error);
-    }
+    } catch (error) {}
   },
 
   fetchFaqs: async () => {
     try {
       const response = await api.get('/config/faqs');
       set({ faqs: response.data });
-    } catch (error) {
-      console.error('Error fetching FAQs:', error);
-    }
+    } catch (error) {}
   },
 }));

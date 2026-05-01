@@ -11,7 +11,6 @@ export const useFullscreen = () => {
   // Apply fullscreen state to the window
   const applyFullscreen = useCallback(
     async (shouldBeFullscreen: boolean) => {
-      console.warn('Fullscreen control is not available in web environment');
       // Just update the store state for UI consistency
       setFullscreen(shouldBeFullscreen);
     },

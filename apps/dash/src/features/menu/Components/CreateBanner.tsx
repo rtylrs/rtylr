@@ -30,7 +30,6 @@ const CreateBanner = (): React.JSX.Element => {
   const handleSubmit = (e: React.FormEvent<HTMLFormElement>) => {
     e.preventDefault();
     if (!restaurantId) {
-      console.error('Restaurant ID is required');
       return;
     }
     const bannerData = new FormData();

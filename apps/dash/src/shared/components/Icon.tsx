@@ -28,8 +28,7 @@ const SvgIcon: React.FC<SvgIconProps> = ({
   useEffect(() => {
     fetch(`/icons/${icon}.svg`)
       .then((response) => response.text())
-      .then(setSvgContent)
-      .catch(console.error);
+      .then(setSvgContent);
   }, [icon]);
 
   if (!svgContent) {

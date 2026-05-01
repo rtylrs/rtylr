@@ -90,7 +90,6 @@ const Account: React.FC = () => {
   };
 
   const handleSave = () => {
-    console.log('Saving:', formData);
     setIsEditing(false);
   };
 
