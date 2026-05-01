@@ -1,5 +1,5 @@
 import React from 'react';
-import { motion } from 'motion/react';
+import { motion, type Variants } from 'motion/react';
 import { Users, UserPlus, UserMinus, Star } from 'lucide-react';
 import { useTranslation } from 'react-i18next';
 import {
@@ -14,12 +14,12 @@ import { CardSkeleton, SkeletonRow } from '../../shared/components/Skeleton';
 import ErrorState from '../../shared/components/ErrorState';
 import EmptyState from '../../shared/components/EmptyState';
 
-const containerVariants = {
+const containerVariants: Variants = {
   hidden: {},
   show: { transition: { staggerChildren: 0.05 } },
 };
 
-const itemVariants = {
+const itemVariants: Variants = {
   hidden: { opacity: 0, y: 12 },
   show: { opacity: 1, y: 0, transition: { duration: 0.22, ease: 'easeOut' } },
 };
@@ -45,12 +45,12 @@ const Customers: React.FC = (): React.JSX.Element => {
 
   return (
     <motion.div
-      variants={containerVariants as any}
+      variants={containerVariants}
       initial="hidden"
       animate="show"
       className="space-y-6 max-w-7xl"
     >
-      <motion.div variants={itemVariants as any}>
+      <motion.div variants={itemVariants}>
         <h2 className="text-xl font-semibold" style={{ color: 'var(--hub-text)' }}>
           {t('insights.customers.title')}
         </h2>
@@ -63,10 +63,7 @@ const Customers: React.FC = (): React.JSX.Element => {
           ))}
         </div>
       ) : (
-        <motion.div
-          variants={containerVariants as any}
-          className="grid grid-cols-2 lg:grid-cols-4 gap-4"
-        >
+        <motion.div variants={containerVariants} className="grid grid-cols-2 lg:grid-cols-4 gap-4">
           {[
             { label: t('insights.customers.kpis.total'), value: formatNumber(total), icon: Users },
             {
@@ -89,7 +86,7 @@ const Customers: React.FC = (): React.JSX.Element => {
             return (
               <motion.div
                 key={stat.label}
-                variants={itemVariants as any}
+                variants={itemVariants}
                 className="rounded-xl p-5"
                 style={{ background: 'var(--hub-card)', border: '1px solid var(--hub-border)' }}
               >
@@ -114,7 +111,7 @@ const Customers: React.FC = (): React.JSX.Element => {
       )}
 
       <motion.div
-        variants={itemVariants as any}
+        variants={itemVariants}
         className="rounded-xl p-5"
         style={{ background: 'var(--hub-card)', border: '1px solid var(--hub-border)' }}
       >
@@ -164,7 +161,7 @@ const Customers: React.FC = (): React.JSX.Element => {
       </motion.div>
 
       <motion.div
-        variants={itemVariants as any}
+        variants={itemVariants}
         className="rounded-xl p-5"
         style={{ background: 'var(--hub-card)', border: '1px solid var(--hub-border)' }}
       >
@@ -200,7 +197,7 @@ const Customers: React.FC = (): React.JSX.Element => {
       </motion.div>
 
       <motion.div
-        variants={itemVariants as any}
+        variants={itemVariants}
         className="rounded-xl p-5"
         style={{ background: 'var(--hub-card)', border: '1px solid var(--hub-border)' }}
       >

@@ -23,6 +23,7 @@ import {
   X,
 } from 'lucide-react';
 import { Toaster } from 'sonner';
+import { useTranslation } from 'react-i18next';
 
 interface NavItem {
   label: string;
