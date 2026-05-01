@@ -127,6 +127,7 @@ interface DefaultLayoutProps {
 }
 
 const DefaultLayout: React.FC<DefaultLayoutProps> = ({ children }) => {
+  const { t } = useTranslation();
   const location = useLocation();
   const [theme, setThemeState] = useState<Theme>(() => {
     return (localStorage.getItem('rtylr-insights-theme') as Theme) || 'dark';
@@ -353,7 +354,7 @@ const DefaultLayout: React.FC<DefaultLayoutProps> = ({ children }) => {
                     }}
                   >
                     <LogOut size={14} />
-                    Sign out
+                    {t('auth.signOut', 'Sign out')}
                   </button>
                 </motion.div>
               )}
