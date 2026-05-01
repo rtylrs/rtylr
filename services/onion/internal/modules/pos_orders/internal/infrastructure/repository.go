@@ -699,6 +699,62 @@ func (r *Repository) CreateRefund(ctx context.Context, ownerID, orderID, refunde
 	return refundID, nil
 }
 
+func (r *Repository) VoidOrderItem(ctx context.Context, ownerID, orderID, itemID int64) error {
+	tx, err := r.pool.BeginTx(ctx, nil)
+	if err != nil {
+		logger.Ctx(ctx).Error("Failed to begin void-order-item transaction", logger.Error(err))
+		return err
+	}
+
+	defer func() {
+		if p := recover(); p != nil {
+			_ = tx.Rollback()
+			panic(p)
+		}
+	}()
+
+	var itemStatus string
+	if scanErr := tx.QueryRowContext(ctx,
+		"SELECT status FROM pos_order_items WHERE id=? AND order_id=?",
+		itemID, orderID,
+	).Scan(&itemStatus); scanErr != nil {
+		_ = tx.Rollback()
+		if scanErr == sql.ErrNoRows {
+			return domain.ErrOrderNotFound
+		}
+		logger.Ctx(ctx).Error("Failed to fetch order item for void", logger.Error(scanErr))
+		return scanErr
+	}
+
+	if _, execErr := tx.ExecContext(ctx,
+		"UPDATE pos_order_items SET status='cancelled' WHERE id=? AND order_id=?",
+		itemID, orderID,
+	); execErr != nil {
+		_ = tx.Rollback()
+		logger.Ctx(ctx).Error("Failed to cancel order item", logger.Error(execErr))
+		return execErr
+	}
+
+	if _, execErr := tx.ExecContext(ctx,
+		`UPDATE pos_orders
+		 SET subtotal = (SELECT COALESCE(SUM(total),0) FROM pos_order_items WHERE order_id=? AND status != 'cancelled'),
+		     total    = subtotal + tax_amount - discount_amount
+		 WHERE id=? AND owner_id=?`,
+		orderID, orderID, ownerID,
+	); execErr != nil {
+		_ = tx.Rollback()
+		logger.Ctx(ctx).Error("Failed to recalculate order total after item void", logger.Error(execErr))
+		return execErr
+	}
+
+	if commitErr := tx.Commit(); commitErr != nil {
+		logger.Ctx(ctx).Error("Failed to commit void-order-item transaction", logger.Error(commitErr))
+		return commitErr
+	}
+
+	return nil
+}
+
 func (r *Repository) TransferTable(ctx context.Context, ownerID, orderID, oldTableID, newTableID int64) error {
 	tx, err := r.pool.BeginTx(ctx, nil)
 	if err != nil {

@@ -248,6 +248,10 @@ func (s *Service) ListHeldOrders(ctx context.Context, ownerID int64) ([]domain.O
 	return s.repo.ListHeldOrders(ctx, ownerID)
 }
 
+func (s *Service) VoidOrderItem(ctx context.Context, ownerID, orderID, itemID int64) error {
+	return s.repo.VoidOrderItem(ctx, ownerID, orderID, itemID)
+}
+
 func (s *Service) TransferTable(ctx context.Context, ownerID, orderID, newTableID int64) error {
 	order, err := s.repo.GetOrder(ctx, ownerID, orderID)
 	if err != nil {

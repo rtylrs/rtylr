@@ -223,6 +223,56 @@ func (h *HoldOrderHandler) Serve(ctx context.Context, req *HoldOrderRequest) (Ho
 	return HoldOrderResponse{Message: "Order held successfully"}, nil
 }
 
+// ---- Void Order Item ----
+
+func VoidOrderItemRoutes() []string {
+	return []string{"/pos/orders/{id}/items/{itemId}"}
+}
+
+type VoidOrderItemHandler struct{ Service *application.Service }
+
+type VoidOrderItemRequest struct{}
+
+type VoidOrderItemResponse struct {
+	Success bool `json:"success"`
+}
+
+func (h *VoidOrderItemHandler) Validate(ctx context.Context, _ *VoidOrderItemRequest) *errorModels.ServerError {
+	if chi.URLParamFromCtx(ctx, "id") == "" {
+		return &errorModels.ServerError{HTTPCode: http.StatusBadRequest, Code: http.StatusBadRequest, Message: "Order ID is required"}
+	}
+	if chi.URLParamFromCtx(ctx, "itemId") == "" {
+		return &errorModels.ServerError{HTTPCode: http.StatusBadRequest, Code: http.StatusBadRequest, Message: "Item ID is required"}
+	}
+	return nil
+}
+
+func (h *VoidOrderItemHandler) Serve(ctx context.Context, _ *VoidOrderItemRequest) (VoidOrderItemResponse, *errorModels.ServerError) {
+	device := authPkg.DeviceCtx(ctx)
+	if device.User == nil {
+		return VoidOrderItemResponse{}, errorModels.PermissionDeniedServerError()
+	}
+
+	orderID, sErr := resolveOrderID(ctx, 0)
+	if sErr != nil {
+		return VoidOrderItemResponse{}, sErr
+	}
+
+	rawItemID := chi.URLParamFromCtx(ctx, "itemId")
+	itemID, err := strconv.ParseInt(rawItemID, 10, 64)
+	if err != nil || itemID <= 0 {
+		return VoidOrderItemResponse{}, &errorModels.ServerError{HTTPCode: http.StatusBadRequest, Code: http.StatusBadRequest, Message: "Invalid item id"}
+	}
+
+	if err := h.Service.VoidOrderItem(ctx, device.User.UserID, orderID, itemID); err != nil {
+		if errors.Is(err, domain.ErrOrderNotFound) {
+			return VoidOrderItemResponse{}, &errorModels.ServerError{HTTPCode: http.StatusNotFound, Code: http.StatusNotFound, Message: "Order item not found"}
+		}
+		return VoidOrderItemResponse{}, &errorModels.ServerError{HTTPCode: http.StatusInternalServerError, Code: http.StatusInternalServerError, Message: "Failed to void order item"}
+	}
+	return VoidOrderItemResponse{Success: true}, nil
+}
+
 // ---- Transfer Table ----
 
 func TransferTableRoutes() []string {
