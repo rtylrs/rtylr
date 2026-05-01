@@ -86,12 +86,9 @@ test.describe('Sign out clears the auth cookie', () => {
         secure: false,
         sameSite: 'Lax',
       },
-      // The strict-opt-in cookie banner mounts a fixed full-screen
-      // overlay (z-50, bg-black/30) that intercepts clicks until the
-      // user picks accept or reject. For this regression we just
-      // need the banner out of the way — pre-set the consent cookie
-      // to "rejected" so the overlay never renders. The cookie
-      // name is `rtylr-consent` (see packages/consent/src/consent.ts).
+      // Strict-opt-in cookie banner from @voxire/consent reads this
+      // cookie to decide whether to render. Setting it to "rejected"
+      // skips the overlay so the test isn't blocked by it.
       {
         name: 'rtylr-consent',
         value: 'rejected',
@@ -101,6 +98,19 @@ test.describe('Sign out clears the auth cookie', () => {
         sameSite: 'Lax',
       },
     ]);
+
+    // Dash also mounts a legacy Cookies component (apps/dash/src/shared/
+    // components/Cookies/Cookies.tsx) that's keyed off localStorage,
+    // not the consent cookie. Seed `acceptedCookies=true` so its
+    // full-screen z-50 overlay never mounts and intercepts the
+    // user-menu click.
+    await context.addInitScript(() => {
+      try {
+        window.localStorage.setItem('acceptedCookies', 'true');
+      } catch {
+        // ignore — non-fatal for the test
+      }
+    });
 
     await page.goto(DASH_URL);
 
