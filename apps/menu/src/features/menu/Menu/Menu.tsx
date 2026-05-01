@@ -9,8 +9,8 @@ import {
   BusinessInfo,
   ChatMessage,
 } from '@voxire/menu';
-import useAsync from '../../../hooks/useAsync';
-import { menuApi } from '../../../api';
+import useAsync from '../../../shared/hooks/useAsync';
+import { menuApi } from '../../../shared/api/api';
 
 type LayoutType = 'grid' | 'list' | 'minimal';
 

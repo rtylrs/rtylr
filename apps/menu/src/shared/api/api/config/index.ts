@@ -1,4 +1,4 @@
-import api from '../../lib/api';
+import api from '../../../lib/api';
 import { API_ROUTES } from './routes';
 
 const getNews = async () => {
