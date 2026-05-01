@@ -2,17 +2,12 @@ import React, { useState } from 'react';
 import { motion } from 'motion/react';
 import { Link2, CheckCheck } from 'lucide-react';
 import { toast } from 'sonner';
+import { unwrap } from '@voxire/api';
 import PageHeader from '../../shared/components/PageHeader';
 import MoneyDisplay from '../../shared/components/MoneyDisplay';
 import { useBankTransactions } from '../../shared/hooks/useBankAccounts';
 import { cardStyle, ghostBtn, primaryBtn, ACCENT } from '../../shared/lib/tokens';
-
-const CANDIDATES = [
-  { id: 'INV-001', label: 'Invoice INV-001, Acme', amount: 14820 },
-  { id: 'INV-002', label: 'Invoice INV-002, Globex', amount: 2400 },
-  { id: 'STRIPE-1', label: 'Stripe payout batch 1', amount: 8920 },
-  { id: 'EXP-203', label: 'Expense EXP-203, Figma', amount: -420 },
-];
+import { financeApi } from '../../shared/services/financeApi';
 
 const Reconcile: React.FC = () => {
   const { data: transactions = [] } = useBankTransactions();
@@ -20,9 +15,28 @@ const Reconcile: React.FC = () => {
 
   const unmatched = transactions.filter((t) => !t.matched && !matches[t.id ?? '']);
 
-  const match = (txId: string, candidateId: string) => {
-    setMatches((prev) => ({ ...prev, [txId]: candidateId }));
-    toast.success(`Matched transaction to ${candidateId}`);
+  const [autoMatching, setAutoMatching] = useState(false);
+
+  const match = async (txId: string, candidateId: string): Promise<void> => {
+    try {
+      await unwrap(financeApi.matchTransaction(txId, candidateId));
+      setMatches((prev) => ({ ...prev, [txId]: candidateId }));
+      toast.success(`Matched transaction to ${candidateId}`);
+    } catch {
+      toast.error('Failed to match transaction');
+    }
+  };
+
+  const handleAutoMatch = async (): Promise<void> => {
+    setAutoMatching(true);
+    try {
+      await unwrap(financeApi.autoMatchTransactions());
+      toast.success('Auto-match completed');
+    } catch {
+      toast.error('Auto-match failed');
+    } finally {
+      setAutoMatching(false);
+    }
   };
 
   return (
@@ -35,8 +49,8 @@ const Reconcile: React.FC = () => {
         title="Reconciliation"
         subtitle={`${unmatched.length} transactions awaiting match`}
         actions={
-          <button style={primaryBtn} onClick={() => toast.success('Auto-match completed')}>
-            <CheckCheck size={13} /> Auto-match all
+          <button style={primaryBtn} onClick={handleAutoMatch} disabled={autoMatching}>
+            <CheckCheck size={13} /> {autoMatching ? 'Matching…' : 'Auto-match all'}
           </button>
         }
       />

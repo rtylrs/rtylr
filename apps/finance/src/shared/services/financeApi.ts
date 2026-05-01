@@ -195,6 +195,15 @@ export const financeApi = {
 
   createBankAccount: (data: CreateBankAccountRequest) => safe.post('/finance/bank-accounts', data),
 
+  // Reconciliation
+  getReconciliation: () => safe.get('/finance/reconciliation'),
+  matchTransaction: (transactionId: string, matchId: string) =>
+    safe.post('/finance/reconciliation/match', {
+      transaction_id: transactionId,
+      match_id: matchId,
+    }),
+  autoMatchTransactions: () => safe.post('/finance/reconciliation/match', { auto: true }),
+
   // Balance Sheet
   getBalanceSheet: () => safe.get('/finance/balance-sheet'),
 
