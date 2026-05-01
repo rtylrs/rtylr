@@ -27,7 +27,13 @@ const nextConfig = {
     optimizePackageImports: ['react-icons'],
   },
 
-  transpilePackages: ['@voxire/assets', '@voxire/components', '@voxire/config', '@voxire/utils'],
+  transpilePackages: [
+    '@voxire/assets',
+    '@voxire/components',
+    '@voxire/config',
+    '@voxire/consent',
+    '@voxire/utils',
+  ],
 
   env: {
     CUSTOM_KEY: process.env.CUSTOM_KEY,

@@ -2,6 +2,7 @@ import Link from 'next/link';
 import { useRouter } from 'next/router';
 import { Button } from '@voxire/components';
 import { ASSETS, APP_URLS } from '@voxire/config';
+import { ManageConsentLink } from '@voxire/consent';
 import React from 'react';
 import { navigateExternal } from '../../../lib/navigation';
 import styles from './Footer.module.scss';
@@ -149,6 +150,9 @@ const Footer: React.FC = () => {
             <Link href="/trust" className={styles['legal-link']}>
               TRUST CENTER
             </Link>
+            <ManageConsentLink className={styles['legal-link']}>
+              COOKIE PREFERENCES
+            </ManageConsentLink>
             <a
               href="https://voxire.com"
               target="_blank"
