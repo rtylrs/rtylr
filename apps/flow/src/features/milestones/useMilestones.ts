@@ -8,8 +8,9 @@ export function useMilestones(projectId?: string) {
     queryKey: ['milestones', projectId],
     queryFn: async () => {
       const res = await unwrap(flowApi.getMilestones(projectId));
-      const data = (res as any).milestones ?? (Array.isArray(res) ? res : []);
-      return data as ApiMilestone[];
+      if (Array.isArray(res)) return res;
+      const wrapped = res as { milestones?: ApiMilestone[] };
+      return wrapped.milestones ?? [];
     },
   });
 }

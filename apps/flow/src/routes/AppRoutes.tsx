@@ -1,5 +1,6 @@
 import React, { Suspense } from 'react';
 import { RouteObject, Navigate } from 'react-router-dom';
+import { AppFlagGuard, FLAG_KEYS } from '@voxire/config';
 import FlowLayout from '../layouts/FlowLayout';
 import { PERSONAL_WORKSPACE_ID } from '../shared/lib/personalWorkspace';
 import ErrorBoundary from '../shared/components/ErrorBoundary';
@@ -57,6 +58,23 @@ function withLayout(element: React.ReactNode): React.ReactNode {
   );
 }
 
+/**
+ * Stub-route gate. The wrapped route renders only when the
+ * `app.flow.previewRoutes` flag is on (off in prod). Otherwise the
+ * user is bounced back to their workspace dashboard so they don't see
+ * UI-only screens that have no data behind them yet.
+ */
+function previewRoute(element: React.ReactNode): React.ReactNode {
+  return (
+    <AppFlagGuard
+      flag={FLAG_KEYS.APP_FLOW_PREVIEW_ROUTES}
+      fallback={<Navigate to={`/w/${PERSONAL_WORKSPACE_ID}`} replace />}
+    >
+      {withLayout(element)}
+    </AppFlagGuard>
+  );
+}
+
 const appRoutes: RouteObject[] = [
   { path: '/', element: <Navigate to={`/w/${PERSONAL_WORKSPACE_ID}`} replace /> },
   { path: '/w/:workspaceId', element: withLayout(<WorkspaceDashboard />) },
@@ -64,22 +82,25 @@ const appRoutes: RouteObject[] = [
   { path: '/w/:workspaceId/p/:projectId', element: withLayout(<ProjectBoard />) },
   { path: '/w/:workspaceId/p/:projectId/board', element: withLayout(<ProjectBoard />) },
   { path: '/w/:workspaceId/p/:projectId/list', element: withLayout(<ProjectList />) },
-  { path: '/w/:workspaceId/p/:projectId/overview', element: withLayout(<ProjectOverview />) },
-  { path: '/w/:workspaceId/p/:projectId/timeline', element: withLayout(<ProjectTimeline />) },
+  { path: '/w/:workspaceId/p/:projectId/overview', element: previewRoute(<ProjectOverview />) },
+  { path: '/w/:workspaceId/p/:projectId/timeline', element: previewRoute(<ProjectTimeline />) },
   { path: '/w/:workspaceId/p/:projectId/calendar', element: withLayout(<ProjectCalendar />) },
-  { path: '/w/:workspaceId/p/:projectId/dashboard', element: withLayout(<ProjectDashboard />) },
+  {
+    path: '/w/:workspaceId/p/:projectId/dashboard',
+    element: previewRoute(<ProjectDashboard />),
+  },
   { path: '/w/:workspaceId/p/:projectId/settings', element: withLayout(<ProjectSettings />) },
   { path: '/task/:id', element: withLayout(<TaskDetail />) },
   { path: '/my-issues', element: withLayout(<MyIssues />) },
   { path: '/today', element: withLayout(<FocusToday />) },
-  { path: '/timeline', element: withLayout(<Timeline />) },
+  { path: '/timeline', element: previewRoute(<Timeline />) },
   { path: '/calendar', element: withLayout(<CalendarView />) },
   { path: '/milestones', element: withLayout(<Milestones />) },
   { path: '/cycles', element: withLayout(<Cycles />) },
   { path: '/views', element: withLayout(<Views />) },
-  { path: '/roadmap', element: withLayout(<Roadmap />) },
-  { path: '/insights', element: withLayout(<Insights />) },
-  { path: '/team', element: withLayout(<Team />) },
+  { path: '/roadmap', element: previewRoute(<Roadmap />) },
+  { path: '/insights', element: previewRoute(<Insights />) },
+  { path: '/team', element: previewRoute(<Team />) },
   { path: '/triage', element: withLayout(<Triage />) },
   { path: '/archive', element: withLayout(<Archive />) },
   { path: '/backlog', element: withLayout(<Backlog />) },

@@ -2,6 +2,7 @@ import React, { useState } from 'react';
 import { useParams, useNavigate } from 'react-router-dom';
 import { motion } from 'motion/react';
 import { toast } from 'sonner';
+import { useTranslation } from 'react-i18next';
 import {
   ArrowLeft,
   Copy,
@@ -171,6 +172,7 @@ function activityIcon(action: string): React.ComponentType<{ size?: number }> {
 // ── Component ────────────────────────────────────────────────────────────────
 
 const TaskDetail: React.FC = () => {
+  const { t } = useTranslation();
   const { id } = useParams<{ id: string }>();
   const navigate = useNavigate();
   useTaskRealtime(id);
@@ -277,21 +279,24 @@ const TaskDetail: React.FC = () => {
   const fieldDefs = customFieldDefinitions
     .filter((f) => f.projectId === task.projectId)
     .sort((a, b) => a.order - b.order);
-  const dependencyTasks = allTasks.filter((ot) => (task as any).dependencies?.includes(ot.id));
+  const dependencyTasks = allTasks.filter((ot) => task.dependencies?.includes(ot.id));
   const dependencyCandidates = allTasks.filter(
     (ot) =>
       ot.workspaceId === task.workspaceId &&
       ot.id !== task.id &&
-      !(task as any).dependencies?.includes(ot.id)
+      !task.dependencies?.includes(ot.id)
   );
   const taskAttachments = attachments.filter((a) => a.taskId === task.id);
 
-  // Labels: prefer API labels from listLabels, fall back to store labels
-  const taskLabelIds: number[] = (task as any).label_ids ?? (task as any).labels ?? [];
+  // Labels may arrive as label_ids (snake_case from API before normalization)
+  // or labels (post-mapping). Accept either shape.
+  const taskWithLabelIds = task as Task & { label_ids?: number[] };
+  const rawLabels = taskWithLabelIds.label_ids ?? task.labels ?? [];
+  const taskLabelIds: number[] = rawLabels.map((l) => Number(l)).filter((n) => !Number.isNaN(n));
   const taskLabels = allLabels.filter((l) => taskLabelIds.includes(l.id));
 
-  const cycle = cycles.find((c) => c.id === (task as any).cycleId);
-  const milestone = milestones.find((m) => m.id === (task as any).milestoneId);
+  const cycle = cycles.find((c) => c.id === task.cycleId);
+  const milestone = milestones.find((m) => m.id === task.milestoneId);
 
   // Time logs from API (preferred) or store fallback
   const apiLogs = timeLogsData?.logs ?? [];
@@ -329,7 +334,7 @@ const TaskDetail: React.FC = () => {
   const handleSubmitTimeLog = () => {
     const mins = parseDurationInput(logDurationInput);
     if (!mins || mins <= 0) {
-      toast.error('Enter a valid duration, e.g. "90m" or "1.5h"');
+      toast.error(t('toasts.task.invalidDuration'));
       return;
     }
     logTimeMut.mutate({
@@ -383,7 +388,7 @@ const TaskDetail: React.FC = () => {
             <button
               onClick={() => {
                 archiveTask(task.id);
-                toast.success('Task archived');
+                toast.success(t('toasts.task.archived'));
                 navigate(-1);
               }}
               className="h-7 w-7 rounded flex items-center justify-center hover:bg-[var(--flow-hover)]"
@@ -395,7 +400,7 @@ const TaskDetail: React.FC = () => {
             <button
               onClick={() => {
                 deleteTask(task.id);
-                toast.success('Task deleted');
+                toast.success(t('toasts.task.deleted'));
                 navigate(-1);
               }}
               className="h-7 w-7 rounded flex items-center justify-center hover:bg-[var(--flow-hover)]"
@@ -529,7 +534,7 @@ const TaskDetail: React.FC = () => {
             onChange={(e) => {
               const next = e.target.value as Task['status'];
               if (next === 'done' && task.status !== 'done') {
-                toast.success('Nice work!', {
+                toast.success(t('toasts.task.niceWork'), {
                   description: 'Task marked complete.',
                   icon: '🎉',
                 });

@@ -22,6 +22,7 @@ import {
 import { useQuery, useMutation } from '@tanstack/react-query';
 import { unwrap } from '@voxire/api';
 import { toast } from 'sonner';
+import { useTranslation } from 'react-i18next';
 import {
   useFlowTeam,
   useFlowInviteMember,
@@ -66,6 +67,7 @@ const SECTIONS: SettingsSection[] = [
 ];
 
 const ProfileSection: React.FC = () => {
+  const { t } = useTranslation();
   const user = useUserStore((s) => s.user);
 
   const [name, setName] = useState(user?.name || '');
@@ -82,19 +84,19 @@ const ProfileSection: React.FC = () => {
 
   const updateProfile = useMutation({
     mutationFn: (data: { name?: string; email?: string }) => unwrap(flowApi.updateProfile(data)),
-    onSuccess: () => toast.success('Profile updated'),
-    onError: () => toast.error('Failed to update profile'),
+    onSuccess: () => toast.success(t('toasts.profile.updated')),
+    onError: () => toast.error(t('toasts.profile.updateFailed')),
   });
 
   const changePassword = useMutation({
     mutationFn: (data: { currentPassword: string; newPassword: string }) =>
       unwrap(flowApi.changePassword(data)),
     onSuccess: () => {
-      toast.success('Password changed');
+      toast.success(t('toasts.password.changed'));
       setCurrentPassword('');
       setNewPassword('');
     },
-    onError: () => toast.error('Failed to change password'),
+    onError: () => toast.error(t('toasts.password.changeFailed')),
   });
 
   const inputStyle = {
@@ -578,6 +580,7 @@ const LABEL_COLORS = [
 ];
 
 const LabelsSection: React.FC = () => {
+  const { t } = useTranslation();
   const { activeWorkspaceId } = useFlowStore();
   const workspaceId = activeWorkspaceId ?? '';
   const { data: labels = [], isLoading } = useLabels(workspaceId || undefined);
@@ -591,7 +594,7 @@ const LabelsSection: React.FC = () => {
     const name = newName.trim();
     if (!name) return;
     if (!workspaceId) {
-      toast.error('No active workspace');
+      toast.error(t('toasts.workspace.noActive'));
       return;
     }
     createLabel.mutate(
@@ -600,9 +603,9 @@ const LabelsSection: React.FC = () => {
         onSuccess: () => {
           setNewName('');
           setNewColor(LABEL_COLORS[0]);
-          toast.success('Label created');
+          toast.success(t('toasts.label.created'));
         },
-        onError: () => toast.error('Failed to create label'),
+        onError: () => toast.error(t('toasts.label.createFailed')),
       }
     );
   };
@@ -712,8 +715,8 @@ const LabelsSection: React.FC = () => {
                   type="button"
                   onClick={() =>
                     deleteLabel.mutate(label.id, {
-                      onSuccess: () => toast.success('Label deleted'),
-                      onError: () => toast.error('Failed to delete label'),
+                      onSuccess: () => toast.success(t('toasts.label.deleted')),
+                      onError: () => toast.error(t('toasts.label.deleteFailed')),
                     })
                   }
                   className="h-7 w-7 rounded flex items-center justify-center hover:bg-[var(--flow-hover)]"

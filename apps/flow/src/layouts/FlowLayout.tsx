@@ -31,7 +31,7 @@ import {
   X,
   Shield,
 } from 'lucide-react';
-import { APP_URLS } from '@voxire/config';
+import { APP_URLS, useFeatureFlag, FLAG_KEYS } from '@voxire/config';
 import { useUserStore } from '../shared/stores/userStore';
 import { useThemeStore } from '../shared/stores/themeStore';
 import { useFlowStore } from '../shared/stores/flowStore';
@@ -198,6 +198,7 @@ const FlowLayout: React.FC<FlowLayoutProps> = ({ children }) => {
   const location = useLocation();
   const navigate = useNavigate();
   const { workspaceId } = useParams<{ workspaceId: string }>();
+  const showPreviewRoutes = useFeatureFlag(FLAG_KEYS.APP_FLOW_PREVIEW_ROUTES);
 
   const { toggle: toggleSidebarSection, isCollapsed: isSidebarSectionCollapsed } =
     useSidebarSections();
@@ -619,10 +620,14 @@ const FlowLayout: React.FC<FlowLayoutProps> = ({ children }) => {
                       </div>
                       <SidebarCollapsible open={!isSidebarSectionCollapsed('plan')}>
                         <nav className="flex flex-col gap-px pt-px">
-                          <SidebarLink to="/roadmap" icon={Map} label="Roadmap" />
+                          {showPreviewRoutes && (
+                            <SidebarLink to="/roadmap" icon={Map} label="Roadmap" />
+                          )}
                           <SidebarLink to="/cycles" icon={Timer} label="Cycles" />
                           <SidebarLink to="/milestones" icon={Milestone} label="Milestones" />
-                          <SidebarLink to="/timeline" icon={Timer} label="Timeline" />
+                          {showPreviewRoutes && (
+                            <SidebarLink to="/timeline" icon={Timer} label="Timeline" />
+                          )}
                           <SidebarLink to="/calendar" icon={Calendar} label="Calendar" />
                           <SidebarLink to="/views" icon={Eye} label="Views" />
                         </nav>
@@ -664,13 +669,17 @@ const FlowLayout: React.FC<FlowLayoutProps> = ({ children }) => {
                       </div>
                       <SidebarCollapsible open={!isSidebarSectionCollapsed('team')}>
                         <nav className="flex flex-col gap-px pt-px">
-                          <SidebarLink to="/team" icon={Users} label="Workload" />
+                          {showPreviewRoutes && (
+                            <SidebarLink to="/team" icon={Users} label="Workload" />
+                          )}
                           <SidebarLink
                             to={`/w/${currentWorkspaceId}/members`}
                             icon={Shield}
                             label="Members"
                           />
-                          <SidebarLink to="/insights" icon={BarChart3} label="Insights" />
+                          {showPreviewRoutes && (
+                            <SidebarLink to="/insights" icon={BarChart3} label="Insights" />
+                          )}
                           <SidebarLink to="/archive" icon={Archive} label="Archive" />
                         </nav>
                       </SidebarCollapsible>

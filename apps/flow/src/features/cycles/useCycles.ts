@@ -11,8 +11,9 @@ export function useCycles(workspaceId?: string) {
     queryKey: ['cycles', wsId],
     queryFn: async () => {
       const res = await unwrap(flowApi.getCycles(wsId));
-      const data = (res as any).cycles ?? (Array.isArray(res) ? res : []);
-      return data as ApiCycle[];
+      if (Array.isArray(res)) return res;
+      const wrapped = res as { cycles?: ApiCycle[] };
+      return wrapped.cycles ?? [];
     },
   });
 }
