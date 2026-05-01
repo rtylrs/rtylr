@@ -39,4 +39,11 @@ export {
 } from './components/DropdownMenu';
 
 export { AnimatedRoutes } from './components/AnimatedRoutes';
+
+export {
+  ErrorBoundary,
+  DefaultErrorFallback,
+  WidgetErrorFallback,
+} from './components/ErrorBoundary';
+
 export { cn } from './lib/cn';
