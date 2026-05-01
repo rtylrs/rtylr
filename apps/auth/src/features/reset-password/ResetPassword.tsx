@@ -1,5 +1,6 @@
 import React, { useState } from 'react';
 import { useNavigate } from 'react-router-dom';
+import { useTranslation } from 'react-i18next';
 import { AlertCircle, ArrowLeft, CheckCircle2 } from 'lucide-react';
 
 import { auth } from '../../firebase';
@@ -8,19 +9,25 @@ import { Button } from '@voxire/components';
 
 const ResetPassword: React.FC = () => {
   const navigate = useNavigate();
+  const { t } = useTranslation();
   const [email, setEmail] = useState('');
   const [message, setMessage] = useState('');
   const [loading, setLoading] = useState(false);
   const [requestSent, setRequestSent] = useState(false);
 
-  const handleReset = async () => {
+  const handleReset = async (): Promise<void> => {
     setLoading(true);
     try {
       await auth.sendPasswordResetEmail(email);
       setRequestSent(true);
-      setMessage('Password reset email sent. Check your inbox.');
+      setMessage(t('auth.reset.successMessage'));
     } catch (error) {
-      setMessage(`${(error as any).message}`);
+      // Surface a generic message rather than leaking provider strings
+      // (those leak whether the address exists in Firebase). The error
+      // is intentionally swallowed here — the UI already conveys
+      // failure, and adding telemetry is the P0 ops-hardening job.
+      void error;
+      setMessage(t('auth.reset.genericError'));
     } finally {
       setLoading(false);
     }
@@ -29,7 +36,6 @@ const ResetPassword: React.FC = () => {
   return (
     <div className="min-h-screen w-full flex items-center justify-center bg-white px-4">
       <div className="w-full max-w-sm">
-        {/* Logo */}
         <div className="flex justify-center mb-8">
           <img
             src={ASSETS.logos.dark}
@@ -39,10 +45,8 @@ const ResetPassword: React.FC = () => {
           />
         </div>
 
-        <h2 className="text-xl font-semibold text-[#111] mb-1">Forgot password?</h2>
-        <p className="text-sm text-[#666] mb-6">
-          Enter your email and we'll send you a reset link.
-        </p>
+        <h2 className="text-xl font-semibold text-[#111] mb-1">{t('auth.reset.title')}</h2>
+        <p className="text-sm text-[#666] mb-6">{t('auth.reset.subtitle')}</p>
 
         <form
           onSubmit={(e) => {
@@ -53,12 +57,12 @@ const ResetPassword: React.FC = () => {
         >
           <div className="flex flex-col gap-1.5">
             <label htmlFor="reset-email" className="text-sm font-medium text-[#111]">
-              Email
+              {t('auth.common.email')}
             </label>
             <input
               id="reset-email"
               type="email"
-              placeholder="you@company.com"
+              placeholder={t('auth.login.emailPlaceholder')}
               autoComplete="email"
               value={email}
               onChange={(e) => setEmail(e.target.value)}
@@ -101,7 +105,7 @@ const ResetPassword: React.FC = () => {
             disabled={requestSent}
             height={40}
           >
-            {requestSent ? 'Email sent' : 'Send reset link'}
+            {requestSent ? t('auth.reset.submitted') : t('auth.reset.submit')}
           </Button>
         </form>
 
@@ -112,7 +116,7 @@ const ResetPassword: React.FC = () => {
             className="inline-flex items-center gap-1.5 text-sm text-[#4583C4] font-medium hover:underline underline-offset-2"
           >
             <ArrowLeft className="h-4 w-4" />
-            Back to sign in
+            {t('auth.reset.backToSignIn')}
           </button>
         </div>
       </div>

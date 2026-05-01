@@ -13,7 +13,6 @@ interface RegisterPayload {
   password: string;
   name: string;
   businessName?: string;
-  referred: string;
   planSlug?: string;
 }
 
