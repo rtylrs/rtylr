@@ -174,7 +174,7 @@ jobs:
   # knobs (pnpm filter, dist dir, Cloudflare project name).
 
   deploy-landing:
-    needs: [check, changes]
+    needs: [check, e2e, changes]
     if: needs.changes.outputs.landing == 'true'
     uses: voxire/pipelines/.github/workflows/deploy-pages.yml@main
     with:
@@ -184,7 +184,7 @@ jobs:
     secrets: inherit
 
   deploy-auth:
-    needs: [check, changes]
+    needs: [check, e2e, changes]
     if: needs.changes.outputs.auth == 'true'
     uses: voxire/pipelines/.github/workflows/deploy-pages.yml@main
     with:
@@ -194,7 +194,7 @@ jobs:
     secrets: inherit
 
   deploy-dash:
-    needs: [check, changes]
+    needs: [check, e2e, changes]
     if: needs.changes.outputs.dash == 'true'
     uses: voxire/pipelines/.github/workflows/deploy-pages.yml@main
     with:
@@ -204,7 +204,7 @@ jobs:
     secrets: inherit
 
   deploy-pos:
-    needs: [check, changes]
+    needs: [check, e2e, changes]
     if: needs.changes.outputs.pos == 'true'
     uses: voxire/pipelines/.github/workflows/deploy-pages.yml@main
     with:
@@ -214,7 +214,7 @@ jobs:
     secrets: inherit
 
   deploy-erp:
-    needs: [check, changes]
+    needs: [check, e2e, changes]
     if: needs.changes.outputs.erp == 'true'
     uses: voxire/pipelines/.github/workflows/deploy-pages.yml@main
     with:
@@ -224,7 +224,7 @@ jobs:
     secrets: inherit
 
   deploy-crm:
-    needs: [check, changes]
+    needs: [check, e2e, changes]
     if: needs.changes.outputs.crm == 'true'
     uses: voxire/pipelines/.github/workflows/deploy-pages.yml@main
     with:
@@ -234,7 +234,7 @@ jobs:
     secrets: inherit
 
   deploy-hr:
-    needs: [check, changes]
+    needs: [check, e2e, changes]
     if: needs.changes.outputs.hr == 'true'
     uses: voxire/pipelines/.github/workflows/deploy-pages.yml@main
     with:
@@ -244,7 +244,7 @@ jobs:
     secrets: inherit
 
   deploy-finance:
-    needs: [check, changes]
+    needs: [check, e2e, changes]
     if: needs.changes.outputs.finance == 'true'
     uses: voxire/pipelines/.github/workflows/deploy-pages.yml@main
     with:
@@ -254,7 +254,7 @@ jobs:
     secrets: inherit
 
   deploy-flow:
-    needs: [check, changes]
+    needs: [check, e2e, changes]
     if: needs.changes.outputs.flow == 'true'
     uses: voxire/pipelines/.github/workflows/deploy-pages.yml@main
     with:
@@ -264,7 +264,7 @@ jobs:
     secrets: inherit
 
   deploy-insights:
-    needs: [check, changes]
+    needs: [check, e2e, changes]
     if: needs.changes.outputs.insights == 'true'
     uses: voxire/pipelines/.github/workflows/deploy-pages.yml@main
     with:
@@ -274,7 +274,7 @@ jobs:
     secrets: inherit
 
   deploy-menu:
-    needs: [check, changes]
+    needs: [check, e2e, changes]
     if: needs.changes.outputs.menu == 'true'
     uses: voxire/pipelines/.github/workflows/deploy-pages.yml@main
     with:
@@ -284,7 +284,7 @@ jobs:
     secrets: inherit
 
   deploy-docs:
-    needs: [check, changes]
+    needs: [check, e2e, changes]
     if: needs.changes.outputs.docs == 'true'
     uses: voxire/pipelines/.github/workflows/deploy-pages.yml@main
     with:
@@ -294,7 +294,7 @@ jobs:
     secrets: inherit
 
   deploy-recruit:
-    needs: [check, changes]
+    needs: [check, e2e, changes]
     if: needs.changes.outputs.recruit == 'true'
     uses: voxire/pipelines/.github/workflows/deploy-pages.yml@main
     with:
