@@ -159,4 +159,15 @@ func RegisterRoutes(ctx context.Context, router *chi.Mux, service *application.S
 
 	// Paddle webhook (anonymous, raw body for HMAC verification)
 	router.Post("/pos/payments/webhook", handlers.PaddlePOSWebhookHTTPHandler(service))
+
+	// Public online ordering (anonymous)
+	serverHttp.RegisterPOSTWithValidation[handlers.CreatePublicOrderRequest, handlers.CreatePublicOrderResponse](
+		ctx, router, handlers.CreatePublicOrderRoutes(),
+		&handlers.CreatePublicOrderHandler{Service: service},
+	)
+
+	serverHttp.RegisterGET[handlers.GetPublicOrderStatusRequest, handlers.GetPublicOrderStatusResponse](
+		ctx, router, handlers.GetPublicOrderStatusRoutes(),
+		&handlers.GetPublicOrderStatusHandler{Service: service},
+	)
 }

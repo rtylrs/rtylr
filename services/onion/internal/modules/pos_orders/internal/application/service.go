@@ -364,3 +364,57 @@ func (s *Service) HandlePaddleTransactionCompleted(ctx context.Context, txID, ev
 func (s *Service) GetDashboardStats(ctx context.Context, ownerID int64) (domain.DashboardStats, error) {
 	return s.repo.GetDashboardStats(ctx, ownerID)
 }
+
+// ─── Public Online Ordering ──────────────────────────────────────────────────
+
+type PublicOrderItemInput struct {
+	MenuItemID int64
+	Name       string
+	Quantity   float64
+	UnitPrice  float64
+	Notes      string
+}
+
+type PublicOrderInput struct {
+	CustomerName  string
+	CustomerPhone string
+	CustomerEmail string
+	Notes         string
+	Items         []PublicOrderItemInput
+}
+
+func (s *Service) CreatePublicOrder(ctx context.Context, ownerID int64, input PublicOrderInput) (int64, string, error) {
+	if ownerID == 0 {
+		return 0, "", errors.New("owner_id is required")
+	}
+	if len(input.Items) == 0 {
+		return 0, "", errors.New("order must have at least one item")
+	}
+
+	orderNumber, err := s.repo.GenerateOrderNumber(ctx, ownerID)
+	if err != nil {
+		return 0, "", fmt.Errorf("generate order number: %w", err)
+	}
+
+	items := make([]domain.OrderItemInput, 0, len(input.Items))
+	for _, it := range input.Items {
+		items = append(items, domain.OrderItemInput{
+			MenuItemID: it.MenuItemID,
+			Name:       it.Name,
+			Quantity:   it.Quantity,
+			UnitPrice:  it.UnitPrice,
+			Notes:      it.Notes,
+		})
+	}
+
+	orderID, err := s.repo.CreatePublicOrder(ctx, ownerID, orderNumber, input.CustomerName, input.CustomerPhone, input.Notes, items)
+	if err != nil {
+		return 0, "", fmt.Errorf("create public order: %w", err)
+	}
+
+	return orderID, orderNumber, nil
+}
+
+func (s *Service) GetPublicOrderStatus(ctx context.Context, orderID int64) (string, string, error) {
+	return s.repo.GetPublicOrderStatus(ctx, orderID)
+}

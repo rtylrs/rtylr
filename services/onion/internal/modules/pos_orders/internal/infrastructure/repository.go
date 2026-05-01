@@ -1198,3 +1198,83 @@ func (r *Repository) GetOrderIDByPaddleTx(ctx context.Context, txID string) (int
 	}
 	return row.ID, row.OwnerID, nil
 }
+
+// ─── Public Online Ordering ──────────────────────────────────────────────────
+
+func (r *Repository) CreatePublicOrder(ctx context.Context, ownerID int64, orderNumber, customerName, customerPhone, notes string, items []domain.OrderItemInput) (int64, error) {
+	tx, err := r.pool.BeginTx(ctx, nil)
+	if err != nil {
+		logger.Ctx(ctx).Error("Failed to begin public order transaction", logger.Error(err))
+		return 0, err
+	}
+
+	defer func() {
+		if err != nil {
+			_ = tx.Rollback()
+		}
+	}()
+
+	var subtotal float64
+	for _, item := range items {
+		subtotal += item.UnitPrice * item.Quantity
+	}
+
+	res, err := tx.ExecContext(ctx,
+		`INSERT INTO pos_orders
+		 (owner_id, order_number, type, status, customer_name, subtotal, total, payment_status, notes, created_at, updated_at)
+		 VALUES (?, ?, 'online', 'pending', ?, ?, ?, 'unpaid', ?, NOW(), NOW())`,
+		ownerID, orderNumber, nullableString(customerName), floatToDecimal(subtotal), floatToDecimal(subtotal), nullableString(notes),
+	)
+	if err != nil {
+		logger.Ctx(ctx).Error("Failed to insert public order", logger.Error(err))
+		return 0, err
+	}
+
+	orderID, err := res.LastInsertId()
+	if err != nil {
+		return 0, err
+	}
+
+	for _, item := range items {
+		itemTotal := item.UnitPrice * item.Quantity
+		_, err = tx.ExecContext(ctx,
+			`INSERT INTO pos_order_items
+			 (order_id, menu_item_id, name, quantity, unit_price, total, notes, status, created_at)
+			 VALUES (?, ?, ?, ?, ?, ?, ?, 'pending', NOW())`,
+			orderID, nullableInt64(item.MenuItemID), item.Name, floatToDecimal3(item.Quantity),
+			floatToDecimal(item.UnitPrice), floatToDecimal(itemTotal), nullableString(item.Notes),
+		)
+		if err != nil {
+			logger.Ctx(ctx).Error("Failed to insert public order item", logger.Error(err))
+			return 0, err
+		}
+	}
+
+	if err = tx.Commit(); err != nil {
+		return 0, err
+	}
+	return orderID, nil
+}
+
+func (r *Repository) GetPublicOrderStatus(ctx context.Context, orderID int64) (orderNumber, status string, err error) {
+	row := r.pool.QueryRowContext(ctx,
+		`SELECT order_number, status FROM pos_orders WHERE id = ? LIMIT 1`,
+		orderID,
+	)
+	err = row.Scan(&orderNumber, &status)
+	return
+}
+
+func nullableString(s string) interface{} {
+	if s == "" {
+		return nil
+	}
+	return s
+}
+
+func nullableInt64(n int64) interface{} {
+	if n == 0 {
+		return nil
+	}
+	return n
+}
