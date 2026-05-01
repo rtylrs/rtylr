@@ -4,7 +4,7 @@ import { Plus, Mail, Phone, Package, BarChart3 } from 'lucide-react';
 import { toast } from 'sonner';
 import { useTranslation } from 'react-i18next';
 import { Supplier } from '../../shared/services/erpApi';
-import { useSuppliers } from './useSuppliers';
+import { useSuppliers, useCreateSupplier } from './useSuppliers';
 import SupplierScorecard from '../../shared/components/SupplierScorecard';
 import ExportButton from '../../shared/components/ExportButton';
 
@@ -80,9 +80,36 @@ const SkeletonCard: React.FC = () => (
 const Suppliers: React.FC = () => {
   const { t } = useTranslation();
   const { data: suppliers = [], isLoading } = useSuppliers();
+  const createMut = useCreateSupplier();
   const [showScorecards, setShowScorecards] = useState(false);
+  const [showCreate, setShowCreate] = useState(false);
+  const [newName, setNewName] = useState('');
+  const [newContact, setNewContact] = useState('');
+  const [newEmail, setNewEmail] = useState('');
+  const [newPhone, setNewPhone] = useState('');
 
   const activeCount = suppliers.filter((s) => s.status === 'Active').length;
+
+  const handleCreate = async (): Promise<void> => {
+    if (!newName.trim()) return;
+    try {
+      await createMut.mutateAsync({
+        name: newName.trim(),
+        contactName: newContact.trim(),
+        email: newEmail.trim(),
+        phone: newPhone.trim(),
+        categories: [],
+      });
+      toast.success('Supplier created');
+      setShowCreate(false);
+      setNewName('');
+      setNewContact('');
+      setNewEmail('');
+      setNewPhone('');
+    } catch {
+      toast.error('Failed to create supplier');
+    }
+  };
 
   return (
     <motion.div
@@ -127,7 +154,7 @@ const Suppliers: React.FC = () => {
           />
           <button
             data-testid="suppliers-add-button"
-            onClick={() => toast.info(t('erp.suppliers.comingSoon'))}
+            onClick={() => setShowCreate(true)}
             className="flex items-center gap-2 px-3 py-2 rounded-lg text-sm font-medium transition-opacity"
             style={{ background: AMBER, color: '#000' }}
             onMouseEnter={(e) => {
@@ -254,6 +281,61 @@ const Suppliers: React.FC = () => {
               );
             })}
       </motion.div>
+
+      {showCreate && (
+        <div
+          className="fixed inset-0 flex items-center justify-center"
+          style={{ background: 'rgba(0,0,0,0.5)', zIndex: 9999 }}
+          onClick={(e) => {
+            if (e.target === e.currentTarget) setShowCreate(false);
+          }}
+        >
+          <div
+            className="rounded-xl p-6 space-y-4 w-80"
+            style={{ background: 'var(--hub-card)', border: '1px solid var(--hub-border)' }}
+          >
+            <h3 className="text-sm font-bold" style={{ color: 'var(--hub-text)' }}>
+              New Supplier
+            </h3>
+            {[
+              { value: newName, setter: setNewName, placeholder: 'Company name' },
+              { value: newContact, setter: setNewContact, placeholder: 'Contact name' },
+              { value: newEmail, setter: setNewEmail, placeholder: 'Email' },
+              { value: newPhone, setter: setNewPhone, placeholder: 'Phone' },
+            ].map(({ value, setter, placeholder }) => (
+              <input
+                key={placeholder}
+                value={value}
+                onChange={(e) => setter(e.target.value)}
+                placeholder={placeholder}
+                className="w-full px-3 py-2 rounded-lg text-sm outline-none"
+                style={{
+                  background: 'var(--hub-input-bg)',
+                  border: '1px solid var(--hub-border)',
+                  color: 'var(--hub-text)',
+                }}
+              />
+            ))}
+            <div className="flex gap-2 justify-end">
+              <button
+                onClick={() => setShowCreate(false)}
+                className="px-3 py-2 rounded-lg text-xs"
+                style={{ background: 'var(--hub-hover)', color: 'var(--hub-text-muted)' }}
+              >
+                Cancel
+              </button>
+              <button
+                onClick={handleCreate}
+                disabled={createMut.isPending || !newName.trim()}
+                className="px-3 py-2 rounded-lg text-xs font-semibold disabled:opacity-40"
+                style={{ background: AMBER, color: '#000' }}
+              >
+                {createMut.isPending ? 'Creating…' : 'Create'}
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
     </motion.div>
   );
 };
