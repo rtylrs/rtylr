@@ -7,8 +7,8 @@ import { useUserStore } from '../../shared/stores/userStore';
 
 const Account: React.FC = () => {
   const { user } = useUserStore();
-  const [name, setName] = useState((user as any)?.name ?? '');
-  const [email, setEmail] = useState((user as any)?.email ?? (user as any)?.emailAddress ?? '');
+  const [name, setName] = useState(user?.name ?? '');
+  const [email, setEmail] = useState(user?.email ?? user?.emailAddress ?? '');
   const [currentPassword, setCurrentPassword] = useState('');
   const [newPassword, setNewPassword] = useState('');
   const [confirmPassword, setConfirmPassword] = useState('');

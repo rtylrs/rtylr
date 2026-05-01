@@ -196,7 +196,10 @@ const AdminDashboard: React.FC = () => {
                     <button
                       onClick={() => removeWidget(widgetId)}
                       className="h-6 w-6 rounded-md flex items-center justify-center"
-                      style={{ background: 'rgba(239,68,68,0.1)', color: '#ef4444' }}
+                      style={{
+                        background: 'var(--status-cancelled-bg)',
+                        color: 'var(--status-cancelled)',
+                      }}
                     >
                       <X size={12} />
                     </button>
@@ -284,7 +287,10 @@ const AdminDashboard: React.FC = () => {
                           <button
                             onClick={() => removeWidget(w.id)}
                             className="shrink-0 text-xs font-medium px-3 py-1.5 rounded-md"
-                            style={{ color: '#ef4444', background: 'rgba(239,68,68,0.08)' }}
+                            style={{
+                              color: 'var(--status-cancelled)',
+                              background: 'var(--status-cancelled-bg)',
+                            }}
                           >
                             Remove
                           </button>
@@ -292,7 +298,10 @@ const AdminDashboard: React.FC = () => {
                           <button
                             onClick={() => addWidget(w.id)}
                             className="shrink-0 text-xs font-medium px-3 py-1.5 rounded-md"
-                            style={{ color: '#4583C4', background: 'rgba(69,131,196,0.08)' }}
+                            style={{
+                              color: 'var(--accent)',
+                              background: 'var(--accent-muted)',
+                            }}
                           >
                             <Plus size={12} className="inline mr-1" />
                             Add
