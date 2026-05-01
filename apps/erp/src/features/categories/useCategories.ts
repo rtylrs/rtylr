@@ -1,6 +1,6 @@
 import { unwrap } from '@voxire/api';
 import { z } from 'zod';
-import { useQuery } from '@tanstack/react-query';
+import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
 import { erpApi, Category } from '../../shared/services/erpApi';
 import { categorySchema } from '../../shared/schemas/categories';
 import { unwrapList } from '../../shared/lib/unwrapList';
@@ -12,5 +12,13 @@ export function useCategories() {
       const res = await unwrap(erpApi.listCategories());
       return z.array(categorySchema).parse(unwrapList(res, 'categories')) as Category[];
     },
+  });
+}
+
+export function useDeleteCategory() {
+  const qc = useQueryClient();
+  return useMutation({
+    mutationFn: (id: number) => unwrap(erpApi.deleteCategory(id)),
+    onSuccess: () => qc.invalidateQueries({ queryKey: ['categories'] }),
   });
 }

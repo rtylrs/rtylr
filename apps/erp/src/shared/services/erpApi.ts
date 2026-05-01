@@ -225,10 +225,14 @@ export const erpApi = {
   // Categories
   listCategories: () => safe.get<Category[]>('/erp/categories'),
   createCategory: (data: Partial<Category>) => safe.post<Category>('/erp/categories', data),
+  deleteCategory: (id: number) =>
+    safe.post<{ success: boolean }>('/erp/categories', { id, _action: 'delete' }),
 
   // Brands
   listBrands: () => safe.get<Brand[]>('/erp/brands'),
   createBrand: (data: Partial<Brand>) => safe.post<Brand>('/erp/brands', data),
+  deleteBrand: (id: number) =>
+    safe.post<{ success: boolean }>('/erp/brands', { id, _action: 'delete' }),
 
   // Warehouses
   listWarehouses: () => safe.get<Warehouse[]>('/erp/warehouses'),
@@ -247,6 +251,8 @@ export const erpApi = {
   listSuppliers: () => safe.get<Supplier[]>('/erp/suppliers'),
   createSupplier: (data: CreateSupplierInput) => safe.post<Supplier>('/erp/suppliers', data),
   updateSupplier: (data: UpdateSupplierInput) => safe.post<Supplier>('/erp/suppliers', data),
+  deleteSupplier: (id: number) =>
+    safe.post<{ success: boolean }>('/erp/suppliers', { id, _action: 'delete' }),
 
   // Purchase Orders
   listPurchaseOrders: () => safe.get<PurchaseOrder[]>('/erp/purchase-orders'),

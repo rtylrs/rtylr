@@ -3,7 +3,7 @@ import { motion } from 'motion/react';
 import { Search, Plus, Grid3X3, List, SlidersHorizontal, ArrowUpDown } from 'lucide-react';
 import { useTranslation } from 'react-i18next';
 import { useDebounce } from '@voxire/utils';
-import { useProducts, ProductFilters } from './useProducts';
+import { useProducts, useDeleteProduct, ProductFilters } from './useProducts';
 import { type Product } from '../../shared/services/erpApi';
 import { useCategories } from '../categories/useCategories';
 import { useBrands } from '../brands/useBrands';
@@ -37,6 +37,7 @@ const Products: React.FC = () => {
   const { data: products = [], isLoading } = useProducts(mergedFilters);
   const { data: categories = [] } = useCategories();
   const { data: brands = [] } = useBrands();
+  const deleteMut = useDeleteProduct();
 
   const toggle = (id: number) => {
     const next = new Set(selected);
@@ -45,8 +46,10 @@ const Products: React.FC = () => {
     setSelected(next);
   };
 
-  const handleBulkDelete = () => {
-    toast.success(`Deleted ${selected.size} products`);
+  const handleBulkDelete = async (): Promise<void> => {
+    const ids = Array.from(selected);
+    await Promise.all(ids.map((id) => deleteMut.mutateAsync(id)));
+    toast.success(t('erp.products.toast.deleted'));
     setSelected(new Set());
   };
 
