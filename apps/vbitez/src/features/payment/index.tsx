@@ -1,31 +1,79 @@
 import React, { useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { motion } from 'motion/react';
+import { toast } from 'sonner';
+import { unwrap } from '@voxire/api';
 import POSLayout from '../../layouts/POSLayout';
 import { useCartStore } from '../../shared/stores/cartStore';
+import { useSettingsStore } from '../../shared/stores/settingsStore';
+import { useEmployeeSessionStore } from '../../shared/stores/employeeSessionStore';
+import { posService } from '../../shared/services/posService';
 
 type PaymentMethod = 'card' | 'cash' | 'qr';
-const fmt = (n: number) =>
+const fmt = (n: number): string =>
   new Intl.NumberFormat('en-US', { style: 'currency', currency: 'USD' }).format(n);
 
 const Payment: React.FC = () => {
   const navigate = useNavigate();
   const { items, total, clearCart } = useCartStore();
+  const taxRate = useSettingsStore((s) => s.taxRate);
+  const employee = useEmployeeSessionStore((s) => s.employee);
   const [method, setMethod] = useState<PaymentMethod>('card');
   const [processing, setProcessing] = useState(false);
   const [cashAmount, setCashAmount] = useState('');
 
   const subtotal = total();
-  const tax = subtotal * 0.08;
+  const tax = subtotal * taxRate;
   const grandTotal = subtotal + tax;
   const cashChange =
     cashAmount && parseFloat(cashAmount) >= grandTotal ? parseFloat(cashAmount) - grandTotal : null;
 
-  const handleCharge = async () => {
+  const handleCharge = async (): Promise<void> => {
     setProcessing(true);
-    await new Promise((r) => setTimeout(r, 1500));
-    setProcessing(false);
-    navigate('/receipt');
+    try {
+      const orderItems = items.map((item) => ({
+        id: item.id,
+        name: item.name,
+        price: item.price,
+        quantity: item.quantity,
+        notes: item.notes ?? '',
+      }));
+
+      const createRes = await unwrap(
+        posService.createOrder({
+          id: `local-${Date.now()}`,
+          status: 'open',
+          items: orderItems,
+          subtotal,
+          tax,
+          tip: 0,
+          discount: 0,
+          total: grandTotal,
+          createdAt: new Date().toISOString(),
+          customerId: String(employee?.id ?? ''),
+        })
+      );
+
+      const orderId: number =
+        (createRes as { id?: number; order_id?: number }).id ??
+        (createRes as { id?: number; order_id?: number }).order_id ??
+        0;
+
+      await unwrap(
+        posService.chargeOrder(orderId, {
+          method,
+          amount: grandTotal,
+          tip: 0,
+        })
+      );
+
+      clearCart();
+      navigate('/receipt');
+    } catch {
+      toast.error('Payment failed. Please try again.');
+    } finally {
+      setProcessing(false);
+    }
   };
 
   if (items.length === 0) {
@@ -67,7 +115,7 @@ const Payment: React.FC = () => {
               <span>{fmt(subtotal)}</span>
             </div>
             <div className="flex justify-between text-pos-muted">
-              <span>Tax (8%)</span>
+              <span>Tax ({(taxRate * 100).toFixed(0)}%)</span>
               <span>{fmt(tax)}</span>
             </div>
             <div className="flex justify-between font-bold text-pos-text text-base pt-1">
