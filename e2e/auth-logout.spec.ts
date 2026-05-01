@@ -86,6 +86,20 @@ test.describe('Sign out clears the auth cookie', () => {
         secure: false,
         sameSite: 'Lax',
       },
+      // The strict-opt-in cookie banner mounts a fixed full-screen
+      // overlay (z-50, bg-black/30) that intercepts clicks until the
+      // user picks accept or reject. For this regression we just
+      // need the banner out of the way — pre-set the consent cookie
+      // to "rejected" so the overlay never renders. The cookie
+      // name is `rtylr-consent` (see packages/consent/src/consent.ts).
+      {
+        name: 'rtylr-consent',
+        value: 'rejected',
+        url: DASH_URL,
+        httpOnly: false,
+        secure: false,
+        sameSite: 'Lax',
+      },
     ]);
 
     await page.goto(DASH_URL);
