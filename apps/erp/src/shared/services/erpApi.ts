@@ -284,6 +284,8 @@ export const erpApi = {
   // Variants
   listVariants: (productId?: number) =>
     safe.get<ProductVariant[]>('/erp/variants', { params: productId ? { productId } : undefined }),
+  createVariant: (data: Partial<ProductVariant>) =>
+    safe.post<ProductVariant>('/erp/variants', data),
 
   // Activity log
   listActivity: (limit = 20) => safe.get<ActivityItem[]>('/erp/activity', { params: { limit } }),

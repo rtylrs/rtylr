@@ -1,7 +1,7 @@
-import React from 'react';
+import React, { useState } from 'react';
 import { motion } from 'motion/react';
 import { Plus, Layers } from 'lucide-react';
-import { useVariants } from '../products/useVariants';
+import { useVariants, useCreateVariant } from '../products/useVariants';
 import PageHeader from '../../shared/components/PageHeader';
 import { SkeletonRow } from '../../shared/components/Skeleton';
 import EmptyState from '../../shared/components/EmptyState';
@@ -11,8 +11,45 @@ import { toast } from 'sonner';
 
 const AMBER = '#f59e0b';
 
+const inputStyle: React.CSSProperties = {
+  padding: '8px 12px',
+  borderRadius: '8px',
+  border: '1px solid var(--hub-border)',
+  background: 'var(--hub-input-bg)',
+  color: 'var(--hub-text)',
+  fontSize: '13px',
+  outline: 'none',
+  width: '100%',
+  boxSizing: 'border-box',
+};
+
 const Variants: React.FC = () => {
   const { data: variants = [], isLoading } = useVariants();
+  const createMut = useCreateVariant();
+  const [showCreate, setShowCreate] = useState(false);
+  const [newName, setNewName] = useState('');
+  const [newSku, setNewSku] = useState('');
+  const [newPrice, setNewPrice] = useState('');
+
+  const handleCreate = async (): Promise<void> => {
+    if (!newName.trim()) return;
+    try {
+      await createMut.mutateAsync({
+        name: newName.trim(),
+        sku: newSku.trim(),
+        price: parseFloat(newPrice) || 0,
+        stock: 0,
+        attributes: {},
+      });
+      toast.success('Variant created');
+      setShowCreate(false);
+      setNewName('');
+      setNewSku('');
+      setNewPrice('');
+    } catch {
+      toast.error('Failed to create variant');
+    }
+  };
 
   return (
     <motion.div
@@ -25,7 +62,7 @@ const Variants: React.FC = () => {
         description="Individual SKUs for sizes, colors, flavors and more"
         actions={
           <button
-            onClick={() => toast.success('Variant created')}
+            onClick={() => setShowCreate(true)}
             className="flex items-center gap-2 px-3 py-2 rounded-lg text-sm font-semibold"
             style={{ background: AMBER, color: '#000' }}
           >
@@ -99,6 +136,63 @@ const Variants: React.FC = () => {
           ))
         )}
       </div>
+
+      {showCreate && (
+        <div
+          className="fixed inset-0 flex items-center justify-center"
+          style={{ background: 'rgba(0,0,0,0.5)', zIndex: 9999 }}
+          onClick={(e) => {
+            if (e.target === e.currentTarget) setShowCreate(false);
+          }}
+        >
+          <div
+            className="rounded-xl p-6 space-y-4 w-80"
+            style={{ background: 'var(--hub-card)', border: '1px solid var(--hub-border)' }}
+          >
+            <h3 className="text-sm font-bold" style={{ color: 'var(--hub-text)' }}>
+              New Variant
+            </h3>
+            <input
+              value={newName}
+              onChange={(e) => setNewName(e.target.value)}
+              placeholder="Variant name (e.g. Large / Red)"
+              style={inputStyle}
+            />
+            <input
+              value={newSku}
+              onChange={(e) => setNewSku(e.target.value)}
+              placeholder="SKU (optional)"
+              style={inputStyle}
+            />
+            <input
+              type="number"
+              min="0"
+              step="0.01"
+              value={newPrice}
+              onChange={(e) => setNewPrice(e.target.value)}
+              placeholder="Price"
+              style={inputStyle}
+            />
+            <div className="flex gap-2 justify-end">
+              <button
+                onClick={() => setShowCreate(false)}
+                className="px-3 py-2 rounded-lg text-xs"
+                style={{ background: 'var(--hub-hover)', color: 'var(--hub-text-muted)' }}
+              >
+                Cancel
+              </button>
+              <button
+                onClick={handleCreate}
+                disabled={createMut.isPending || !newName.trim()}
+                className="px-3 py-2 rounded-lg text-xs font-semibold disabled:opacity-40"
+                style={{ background: AMBER, color: '#000' }}
+              >
+                {createMut.isPending ? 'Creating…' : 'Create'}
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
     </motion.div>
   );
 };

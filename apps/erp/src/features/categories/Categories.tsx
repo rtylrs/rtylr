@@ -1,7 +1,7 @@
 import React, { useState } from 'react';
 import { motion } from 'motion/react';
 import { Plus, Folder, GripVertical, Edit3, Trash2 } from 'lucide-react';
-import { useCategories, useDeleteCategory } from './useCategories';
+import { useCategories, useCreateCategory, useDeleteCategory } from './useCategories';
 import PageHeader from '../../shared/components/PageHeader';
 import EmptyState from '../../shared/components/EmptyState';
 import { SkeletonRow } from '../../shared/components/Skeleton';
@@ -12,14 +12,20 @@ const AMBER = '#f59e0b';
 
 const Categories: React.FC = () => {
   const { data: categories = [], isLoading } = useCategories();
+  const createMut = useCreateCategory();
   const deleteMut = useDeleteCategory();
   const [confirmDelete, setConfirmDelete] = useState<number | null>(null);
   const [newName, setNewName] = useState('');
 
-  const handleCreate = () => {
+  const handleCreate = async (): Promise<void> => {
     if (!newName.trim()) return;
-    toast.success(`Category "${newName}" created`);
-    setNewName('');
+    try {
+      await createMut.mutateAsync({ name: newName.trim() });
+      toast.success(`Category "${newName}" created`);
+      setNewName('');
+    } catch {
+      toast.error('Failed to create category');
+    }
   };
 
   return (

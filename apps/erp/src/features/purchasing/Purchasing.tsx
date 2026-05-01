@@ -6,6 +6,7 @@ import {
   usePurchaseOrders,
   useApprovePurchaseOrder,
   useSendPurchaseOrder,
+  useCreatePurchaseOrder,
 } from './usePurchaseOrders';
 import PrintPOButton from '../../shared/components/PrintPOButton';
 import ExportButton from '../../shared/components/ExportButton';
@@ -59,7 +60,11 @@ const Purchasing: React.FC = () => {
   const { data: orders = [], isLoading } = usePurchaseOrders();
   const approveMut = useApprovePurchaseOrder();
   const sendMut = useSendPurchaseOrder();
+  const createMut = useCreatePurchaseOrder();
   const [filter, setFilter] = useState<PurchaseOrder['status'] | 'All'>('All');
+  const [showCreate, setShowCreate] = useState(false);
+  const [newSupplier, setNewSupplier] = useState('');
+  const [newNotes, setNewNotes] = useState('');
 
   const filteredOrders = filter === 'All' ? orders : orders.filter((o) => o.status === filter);
 
@@ -82,6 +87,23 @@ const Purchasing: React.FC = () => {
       onSuccess: () => toast.success(`PO-${id} sent to supplier`),
       onError: () => toast.error(`Failed to send PO-${id}`),
     });
+  };
+
+  const handleCreatePO = async (): Promise<void> => {
+    if (!newSupplier.trim()) return;
+    try {
+      await createMut.mutateAsync({
+        supplier: newSupplier.trim(),
+        notes: newNotes.trim(),
+        lines: [],
+      } as any);
+      toast.success('Purchase order draft created');
+      setShowCreate(false);
+      setNewSupplier('');
+      setNewNotes('');
+    } catch {
+      toast.error('Failed to create purchase order');
+    }
   };
 
   return (
@@ -109,7 +131,7 @@ const Purchasing: React.FC = () => {
             filename="purchase-orders.csv"
           />
           <button
-            onClick={() => toast.success('New purchase order draft created')}
+            onClick={() => setShowCreate(true)}
             className="flex items-center gap-2 px-3 py-2 rounded-lg text-sm font-semibold"
             style={{ background: AMBER, color: '#000' }}
           >
@@ -251,6 +273,64 @@ const Purchasing: React.FC = () => {
               })}
         </div>
       </motion.div>
+
+      {showCreate && (
+        <div
+          className="fixed inset-0 flex items-center justify-center"
+          style={{ background: 'rgba(0,0,0,0.5)', zIndex: 9999 }}
+          onClick={(e) => {
+            if (e.target === e.currentTarget) setShowCreate(false);
+          }}
+        >
+          <div
+            className="rounded-xl p-6 space-y-4 w-80"
+            style={{ background: 'var(--hub-card)', border: '1px solid var(--hub-border)' }}
+          >
+            <h3 className="text-sm font-bold" style={{ color: 'var(--hub-text)' }}>
+              New Purchase Order
+            </h3>
+            <input
+              value={newSupplier}
+              onChange={(e) => setNewSupplier(e.target.value)}
+              placeholder="Supplier name"
+              className="w-full px-3 py-2 rounded-lg text-sm outline-none"
+              style={{
+                background: 'var(--hub-input-bg)',
+                border: '1px solid var(--hub-border)',
+                color: 'var(--hub-text)',
+              }}
+            />
+            <input
+              value={newNotes}
+              onChange={(e) => setNewNotes(e.target.value)}
+              placeholder="Notes (optional)"
+              className="w-full px-3 py-2 rounded-lg text-sm outline-none"
+              style={{
+                background: 'var(--hub-input-bg)',
+                border: '1px solid var(--hub-border)',
+                color: 'var(--hub-text)',
+              }}
+            />
+            <div className="flex gap-2 justify-end">
+              <button
+                onClick={() => setShowCreate(false)}
+                className="px-3 py-2 rounded-lg text-xs"
+                style={{ background: 'var(--hub-hover)', color: 'var(--hub-text-muted)' }}
+              >
+                Cancel
+              </button>
+              <button
+                onClick={handleCreatePO}
+                disabled={createMut.isPending || !newSupplier.trim()}
+                className="px-3 py-2 rounded-lg text-xs font-semibold disabled:opacity-40"
+                style={{ background: AMBER, color: '#000' }}
+              >
+                {createMut.isPending ? 'Creating…' : 'Create Draft'}
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
     </motion.div>
   );
 };

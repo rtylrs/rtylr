@@ -15,6 +15,14 @@ export function useCategories() {
   });
 }
 
+export function useCreateCategory() {
+  const qc = useQueryClient();
+  return useMutation({
+    mutationFn: (data: Partial<Category>) => unwrap(erpApi.createCategory(data)),
+    onSuccess: () => qc.invalidateQueries({ queryKey: ['categories'] }),
+  });
+}
+
 export function useDeleteCategory() {
   const qc = useQueryClient();
   return useMutation({
