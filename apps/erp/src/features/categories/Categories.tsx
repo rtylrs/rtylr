@@ -1,7 +1,7 @@
 import React, { useState } from 'react';
 import { motion } from 'motion/react';
 import { Plus, Folder, GripVertical, Edit3, Trash2 } from 'lucide-react';
-import { useCategories } from './useCategories';
+import { useCategories, useDeleteCategory } from './useCategories';
 import PageHeader from '../../shared/components/PageHeader';
 import EmptyState from '../../shared/components/EmptyState';
 import { SkeletonRow } from '../../shared/components/Skeleton';
@@ -12,6 +12,7 @@ const AMBER = '#f59e0b';
 
 const Categories: React.FC = () => {
   const { data: categories = [], isLoading } = useCategories();
+  const deleteMut = useDeleteCategory();
   const [confirmDelete, setConfirmDelete] = useState<number | null>(null);
   const [newName, setNewName] = useState('');
 
@@ -139,8 +140,11 @@ const Categories: React.FC = () => {
         description="Products in this category will not be deleted, but they will become uncategorized."
         danger
         confirmLabel="Delete"
-        onConfirm={() => {
-          toast.success('Category deleted');
+        onConfirm={async () => {
+          if (confirmDelete !== null) {
+            await deleteMut.mutateAsync(confirmDelete);
+            toast.success('Category deleted');
+          }
           setConfirmDelete(null);
         }}
         onCancel={() => setConfirmDelete(null)}
