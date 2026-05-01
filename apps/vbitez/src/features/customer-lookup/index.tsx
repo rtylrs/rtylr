@@ -1,16 +1,22 @@
 import React from 'react';
+import { useNavigate } from 'react-router-dom';
+import { toast } from 'sonner';
 import ScreenLayout from '../../layouts/ScreenLayout';
 import SearchBar from '../../shared/components/SearchBar';
 import EmptyState from '../../shared/components/EmptyState';
 import Skeleton from '../../shared/components/Skeleton';
 import { useCustomerLookup } from './useCustomerLookup';
-import { toast } from 'sonner';
+import { useCartStore } from '../../shared/stores/cartStore';
 
 const CustomerLookupScreen: React.FC = () => {
+  const navigate = useNavigate();
   const { query, setQuery, results, loading, error } = useCustomerLookup();
+  const setCustomer = useCartStore((s) => s.setCustomer);
 
-  const attach = (name: string) => {
-    toast.success(`Attached ${name} to current order`);
+  const attach = (id: string, name: string): void => {
+    setCustomer(Number(id), name);
+    toast.success(`Attached ${name} to order`);
+    navigate(-1);
   };
 
   return (
@@ -50,7 +56,7 @@ const CustomerLookupScreen: React.FC = () => {
                   )}
                 </div>
                 <button
-                  onClick={() => attach(c.name)}
+                  onClick={() => attach(c.id, c.name)}
                   className="h-11 px-4 rounded-lg bg-pos-text text-pos-bg text-sm font-semibold"
                 >
                   Attach
