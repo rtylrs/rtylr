@@ -4,6 +4,8 @@ const Menu = React.lazy(() => import('../screens/Public/Menu/Menu'));
 const PosMenu = React.lazy(() => import('../screens/Public/PosMenu/PosMenu'));
 const NoMatch = React.lazy(() => import('../screens/Public/Extras/NoMatch'));
 const DevMenu = React.lazy(() => import('../screens/Dev/DevMenu'));
+const Checkout = React.lazy(() => import('../features/cart/Checkout'));
+const OrderStatus = React.lazy(() => import('../features/cart/OrderStatus'));
 
 const isLocalhost =
   typeof window !== 'undefined' &&
@@ -15,6 +17,15 @@ const PublicRoutes = [
   {
     path: '/b/:businessId',
     element: <PosMenu />,
+  },
+  // Online ordering flow — accessible from any menu
+  {
+    path: '/checkout',
+    element: <Checkout />,
+  },
+  {
+    path: '/order-status/:id',
+    element: <OrderStatus />,
   },
   // Legacy mongo-backed public menu. Kept intact so existing QR
   // codes continue to resolve. New businesses land on /b/{id}.
