@@ -82,7 +82,6 @@ test.describe('Sign out clears the auth cookie', () => {
         name: 'token',
         value: 'fake-jwt',
         url: DASH_URL,
-        path: '/',
         httpOnly: false,
         secure: false,
         sameSite: 'Lax',
