@@ -2,6 +2,7 @@ import React from 'react';
 import { motion } from 'motion/react';
 import { Plus, ArrowRight, CheckCircle } from 'lucide-react';
 import { toast } from 'sonner';
+import { useTranslation } from 'react-i18next';
 import PageHeader from '../../shared/components/PageHeader';
 import MoneyDisplay from '../../shared/components/MoneyDisplay';
 import EmptyState from '../../shared/components/EmptyState';
@@ -18,6 +19,7 @@ const STATUS_STYLE: Record<string, React.CSSProperties> = {
 };
 
 const Quotes: React.FC = () => {
+  const { t } = useTranslation();
   const { data = [], isLoading } = useQuotes();
   const total = data.reduce((s: number, q) => s + (q.amount ?? 0), 0);
 
@@ -133,7 +135,7 @@ const Quotes: React.FC = () => {
                     ) : q.status === 'Sent' ? (
                       <button
                         style={{ ...ghostBtn, padding: '4px 10px' }}
-                        onClick={() => toast.success(`Marked ${q.id} as accepted`)}
+                        onClick={() => toast.success(t('quotes.markedAccepted', { id: q.id }))}
                       >
                         <CheckCircle size={12} /> Mark Accepted
                       </button>

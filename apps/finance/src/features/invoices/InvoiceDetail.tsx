@@ -100,7 +100,16 @@ const InvoiceDetail: React.FC = () => {
           client={clientObj}
           issuedDate={invoice.issuedDate}
           dueDate={invoice.dueDate}
-          items={invoice.items as any}
+          items={(invoice.items ?? []).map((it, idx) => ({
+            id: String(idx),
+            description: it.description ?? '',
+            quantity: it.quantity ?? 0,
+            unitPrice: it.unitPrice ?? 0,
+            taxRate:
+              (it as { taxRate?: number; tax_rate?: number }).taxRate ??
+              (it as { taxRate?: number; tax_rate?: number }).tax_rate ??
+              0,
+          }))}
           notes={invoice.notes}
           discount={invoice.discount}
         />

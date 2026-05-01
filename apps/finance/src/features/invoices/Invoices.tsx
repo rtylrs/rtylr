@@ -3,6 +3,7 @@ import { Link, useNavigate } from 'react-router-dom';
 import { motion } from 'motion/react';
 import { Plus, Send, CheckCircle, Eye, FileText, Download, FileSpreadsheet } from 'lucide-react';
 import { toast } from 'sonner';
+import { useTranslation } from 'react-i18next';
 import { Invoice } from '../../shared/services/financeApi';
 import { useInvoices, useUpdateInvoiceStatus } from './useInvoices';
 import PageHeader from '../../shared/components/PageHeader';
@@ -27,6 +28,7 @@ const statusStyle: Record<InvoiceStatus, React.CSSProperties> = {
 };
 
 const Invoices: React.FC = () => {
+  const { t } = useTranslation();
   const [activeTab, setActiveTab] = useState<InvoiceFilterValue>('All');
   const [selected, setSelected] = useState<Set<string>>(new Set());
   const [showBulkSend, setShowBulkSend] = useState(false);
@@ -40,8 +42,8 @@ const Invoices: React.FC = () => {
     updateStatus.mutate(
       { id: inv.id, status: 'Paid' },
       {
-        onSuccess: () => toast.success(`Marked ${inv.id} paid`),
-        onError: () => toast.error(`Failed to mark ${inv.id} paid`),
+        onSuccess: () => toast.success(t('invoices.markedPaid', { id: inv.id })),
+        onError: () => toast.error(t('invoices.markPaidFailed', { id: inv.id })),
       }
     );
   };

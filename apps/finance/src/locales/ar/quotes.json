@@ -1,3 +1,4 @@
 {
-  "created": "تم إنشاء عرض السعر"
+  "created": "Quote created",
+  "markedAccepted": "Marked {{id}} as accepted"
 }

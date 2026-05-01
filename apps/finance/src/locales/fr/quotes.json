@@ -1,3 +1,4 @@
 {
-  "created": "Devis créé"
+  "created": "Quote created",
+  "markedAccepted": "Marked {{id}} as accepted"
 }
