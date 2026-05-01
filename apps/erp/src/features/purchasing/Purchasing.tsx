@@ -2,7 +2,11 @@ import React, { useState } from 'react';
 import { motion, type Variants } from 'motion/react';
 import { Plus, FileText, Send, CheckCircle, Clock as ClockIcon, ThumbsUp } from 'lucide-react';
 import { PurchaseOrder } from '../../shared/services/erpApi';
-import { usePurchaseOrders } from './usePurchaseOrders';
+import {
+  usePurchaseOrders,
+  useApprovePurchaseOrder,
+  useSendPurchaseOrder,
+} from './usePurchaseOrders';
 import PrintPOButton from '../../shared/components/PrintPOButton';
 import ExportButton from '../../shared/components/ExportButton';
 import { toast } from 'sonner';
@@ -53,6 +57,8 @@ const SkeletonTableRow: React.FC = () => (
 
 const Purchasing: React.FC = () => {
   const { data: orders = [], isLoading } = usePurchaseOrders();
+  const approveMut = useApprovePurchaseOrder();
+  const sendMut = useSendPurchaseOrder();
   const [filter, setFilter] = useState<PurchaseOrder['status'] | 'All'>('All');
 
   const filteredOrders = filter === 'All' ? orders : orders.filter((o) => o.status === filter);
@@ -64,12 +70,18 @@ const Purchasing: React.FC = () => {
     Received: orders.filter((o) => o.status === 'Received').length,
   };
 
-  const handleApprove = (id: number) => {
-    toast.success(`PO-${id} approved`);
+  const handleApprove = (id: number): void => {
+    approveMut.mutate(id, {
+      onSuccess: () => toast.success(`PO-${id} approved`),
+      onError: () => toast.error(`Failed to approve PO-${id}`),
+    });
   };
 
-  const handleSend = (id: number) => {
-    toast.success(`PO-${id} sent to supplier`);
+  const handleSend = (id: number): void => {
+    sendMut.mutate(id, {
+      onSuccess: () => toast.success(`PO-${id} sent to supplier`),
+      onError: () => toast.error(`Failed to send PO-${id}`),
+    });
   };
 
   return (
