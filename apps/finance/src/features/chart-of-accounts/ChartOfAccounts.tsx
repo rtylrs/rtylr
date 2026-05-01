@@ -6,7 +6,7 @@ import PageHeader from '../../shared/components/PageHeader';
 import MoneyDisplay from '../../shared/components/MoneyDisplay';
 import AccountTypeBadge, { AccountType } from '../../shared/components/AccountTypeBadge';
 import { SkeletonRow } from '../../shared/components/Skeleton';
-import { useChartOfAccounts } from '../../shared/hooks/useChartOfAccounts';
+import { useChartOfAccounts, useCreateAccount } from '../../shared/hooks/useChartOfAccounts';
 import { cardStyle, ghostBtn, primaryBtn, inputStyle, ACCENT } from '../../shared/lib/tokens';
 
 const TYPES: (AccountType | 'all')[] = [
@@ -18,10 +18,35 @@ const TYPES: (AccountType | 'all')[] = [
   'expense',
 ];
 
+const ACCOUNT_TYPES = ['asset', 'liability', 'equity', 'revenue', 'expense'] as const;
+
 const ChartOfAccounts: React.FC = () => {
   const { data = [], isLoading } = useChartOfAccounts();
+  const createMut = useCreateAccount();
   const [filter, setFilter] = useState<AccountType | 'all'>('all');
   const [query, setQuery] = useState('');
+  const [showCreate, setShowCreate] = useState(false);
+  const [newName, setNewName] = useState('');
+  const [newType, setNewType] = useState<(typeof ACCOUNT_TYPES)[number]>('asset');
+  const [newCode, setNewCode] = useState('');
+
+  const handleCreate = async (): Promise<void> => {
+    if (!newName.trim()) return;
+    try {
+      await createMut.mutateAsync({
+        name: newName.trim(),
+        type: newType,
+        currency: 'USD',
+        code: newCode.trim(),
+      } as any);
+      toast.success('Account created');
+      setShowCreate(false);
+      setNewName('');
+      setNewCode('');
+    } catch {
+      toast.error('Failed to create account');
+    }
+  };
 
   const filtered = data.filter((a) => {
     const matchesType = filter === 'all' || a.type === filter;
@@ -42,7 +67,7 @@ const ChartOfAccounts: React.FC = () => {
         title="Chart of Accounts"
         subtitle={`${filtered.length} accounts`}
         actions={
-          <button style={primaryBtn} onClick={() => toast.success('Account created')}>
+          <button style={primaryBtn} onClick={() => setShowCreate(true)}>
             <Plus size={13} /> New Account
           </button>
         }
@@ -154,6 +179,68 @@ const ChartOfAccounts: React.FC = () => {
               ))}
             </tbody>
           </table>
+        </div>
+      )}
+      {showCreate && (
+        <div
+          style={{
+            position: 'fixed',
+            inset: 0,
+            background: 'rgba(0,0,0,0.5)',
+            display: 'flex',
+            alignItems: 'center',
+            justifyContent: 'center',
+            zIndex: 9999,
+          }}
+          onClick={(e) => {
+            if (e.target === e.currentTarget) setShowCreate(false);
+          }}
+        >
+          <div
+            style={{
+              ...cardStyle,
+              padding: 24,
+              width: 360,
+              display: 'flex',
+              flexDirection: 'column',
+              gap: 14,
+            }}
+          >
+            <h3 style={{ fontSize: 15, fontWeight: 700, color: 'var(--hub-text)', margin: 0 }}>
+              New Account
+            </h3>
+            <input
+              style={inputStyle}
+              placeholder="Account name"
+              value={newName}
+              onChange={(e) => setNewName(e.target.value)}
+            />
+            <input
+              style={inputStyle}
+              placeholder="Account code (optional)"
+              value={newCode}
+              onChange={(e) => setNewCode(e.target.value)}
+            />
+            <select
+              style={inputStyle}
+              value={newType}
+              onChange={(e) => setNewType(e.target.value as (typeof ACCOUNT_TYPES)[number])}
+            >
+              {ACCOUNT_TYPES.map((t) => (
+                <option key={t} value={t}>
+                  {t.charAt(0).toUpperCase() + t.slice(1)}
+                </option>
+              ))}
+            </select>
+            <div style={{ display: 'flex', gap: 8, justifyContent: 'flex-end' }}>
+              <button style={ghostBtn} onClick={() => setShowCreate(false)}>
+                Cancel
+              </button>
+              <button style={primaryBtn} onClick={handleCreate} disabled={createMut.isPending}>
+                {createMut.isPending ? 'Creating…' : 'Create'}
+              </button>
+            </div>
+          </div>
         </div>
       )}
     </motion.div>

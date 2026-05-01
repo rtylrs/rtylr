@@ -9,6 +9,14 @@ import { useBankTransactions } from '../../shared/hooks/useBankAccounts';
 import { cardStyle, ghostBtn, primaryBtn, ACCENT } from '../../shared/lib/tokens';
 import { financeApi } from '../../shared/services/financeApi';
 
+interface Candidate {
+  id: string;
+  label: string;
+  amount: number;
+}
+
+const CANDIDATES: Candidate[] = [];
+
 const Reconcile: React.FC = () => {
   const { data: transactions = [] } = useBankTransactions();
   const [matches, setMatches] = useState<Record<string, string>>({});

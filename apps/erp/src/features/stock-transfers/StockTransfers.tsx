@@ -1,7 +1,7 @@
-import React from 'react';
+import React, { useState } from 'react';
 import { motion } from 'motion/react';
 import { Plus, ArrowRight } from 'lucide-react';
-import { useStockTransfers } from './useStockTransfers';
+import { useStockTransfers, useCreateStockTransfer } from './useStockTransfers';
 import PageHeader from '../../shared/components/PageHeader';
 import EmptyState from '../../shared/components/EmptyState';
 import { SkeletonRow } from '../../shared/components/Skeleton';
@@ -20,6 +20,27 @@ function statusConfig(status: StockTransfer['status']) {
 
 const StockTransfers: React.FC = () => {
   const { data: transfers = [], isLoading } = useStockTransfers();
+  const createMut = useCreateStockTransfer();
+  const [showCreate, setShowCreate] = useState(false);
+  const [fromName, setFromName] = useState('');
+  const [toName, setToName] = useState('');
+
+  const handleCreate = async (): Promise<void> => {
+    if (!fromName.trim() || !toName.trim()) return;
+    try {
+      await createMut.mutateAsync({
+        fromName: fromName.trim(),
+        toName: toName.trim(),
+        status: 'Draft',
+      });
+      toast.success('Transfer draft created');
+      setShowCreate(false);
+      setFromName('');
+      setToName('');
+    } catch {
+      toast.error('Failed to create transfer');
+    }
+  };
 
   return (
     <motion.div
@@ -32,7 +53,7 @@ const StockTransfers: React.FC = () => {
         description="Move inventory between warehouses"
         actions={
           <button
-            onClick={() => toast.success('Transfer draft created')}
+            onClick={() => setShowCreate(true)}
             className="flex items-center gap-2 px-3 py-2 rounded-lg text-sm font-semibold"
             style={{ background: AMBER, color: '#000' }}
           >
@@ -111,6 +132,63 @@ const StockTransfers: React.FC = () => {
           )}
         </div>
       </div>
+      {showCreate && (
+        <div
+          className="fixed inset-0 flex items-center justify-center"
+          style={{ background: 'rgba(0,0,0,0.5)', zIndex: 9999 }}
+          onClick={(e) => {
+            if (e.target === e.currentTarget) setShowCreate(false);
+          }}
+        >
+          <div
+            className="rounded-xl p-6 space-y-4 w-80"
+            style={{ background: 'var(--hub-card)', border: '1px solid var(--hub-border)' }}
+          >
+            <h3 className="text-sm font-bold" style={{ color: 'var(--hub-text)' }}>
+              New Stock Transfer
+            </h3>
+            <input
+              value={fromName}
+              onChange={(e) => setFromName(e.target.value)}
+              placeholder="From warehouse"
+              className="w-full px-3 py-2 rounded-lg text-sm outline-none"
+              style={{
+                background: 'var(--hub-input-bg)',
+                border: '1px solid var(--hub-border)',
+                color: 'var(--hub-text)',
+              }}
+            />
+            <input
+              value={toName}
+              onChange={(e) => setToName(e.target.value)}
+              placeholder="To warehouse"
+              className="w-full px-3 py-2 rounded-lg text-sm outline-none"
+              style={{
+                background: 'var(--hub-input-bg)',
+                border: '1px solid var(--hub-border)',
+                color: 'var(--hub-text)',
+              }}
+            />
+            <div className="flex gap-2 justify-end">
+              <button
+                onClick={() => setShowCreate(false)}
+                className="px-3 py-2 rounded-lg text-xs"
+                style={{ background: 'var(--hub-hover)', color: 'var(--hub-text-muted)' }}
+              >
+                Cancel
+              </button>
+              <button
+                onClick={handleCreate}
+                disabled={createMut.isPending}
+                className="px-3 py-2 rounded-lg text-xs font-semibold disabled:opacity-40"
+                style={{ background: AMBER, color: '#000' }}
+              >
+                {createMut.isPending ? 'Creating…' : 'Create Draft'}
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
     </motion.div>
   );
 };

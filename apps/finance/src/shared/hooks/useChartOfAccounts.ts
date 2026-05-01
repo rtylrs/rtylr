@@ -1,9 +1,11 @@
 import { unwrap } from '@voxire/api';
 import { z } from 'zod';
-import { useQuery } from '@tanstack/react-query';
-import { financeApi } from '../services/financeApi';
+import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
+import { financeApi, type TaxConfig } from '../services/financeApi';
 import { chartOfAccountSchema } from '../schemas/accounts';
 import { journalEntrySchema } from '../schemas/journal';
+import type { CreateAccountRequest } from '@voxire/contracts/finance/v1/accounts';
+import type { CreateJournalEntryRequest } from '@voxire/contracts/finance/v1/journal';
 
 export function useChartOfAccounts() {
   return useQuery({
@@ -13,6 +15,14 @@ export function useChartOfAccounts() {
       const raw = res ?? [];
       return z.array(chartOfAccountSchema).parse(Array.isArray(raw) ? raw : []);
     },
+  });
+}
+
+export function useCreateAccount() {
+  const qc = useQueryClient();
+  return useMutation({
+    mutationFn: (data: CreateAccountRequest) => unwrap(financeApi.createAccount(data)),
+    onSuccess: () => qc.invalidateQueries({ queryKey: ['chart-of-accounts'] }),
   });
 }
 
@@ -26,3 +36,14 @@ export function useJournal() {
     },
   });
 }
+
+export function useCreateJournalEntry() {
+  const qc = useQueryClient();
+  return useMutation({
+    mutationFn: (data: CreateJournalEntryRequest) => unwrap(financeApi.createJournalEntry(data)),
+    onSuccess: () => qc.invalidateQueries({ queryKey: ['journal'] }),
+  });
+}
+
+// Re-export TaxConfig so components that need it don't import financeApi directly
+export type { TaxConfig };
