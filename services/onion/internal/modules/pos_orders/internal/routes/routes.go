@@ -146,6 +146,11 @@ func RegisterRoutes(ctx context.Context, router *chi.Mux, service *application.S
 		&handlers.VoidOrderItemHandler{Service: service},
 	)
 
+	serverHttp.RegisterPOSTWithValidation[handlers.SendToKitchenRequest, handlers.SendToKitchenResponse](
+		ctx, router, handlers.SendToKitchenRoutes(),
+		&handlers.SendToKitchenHandler{Service: service},
+	)
+
 	// Paddle billing
 	serverHttp.RegisterPOST[handlers.PayOrderRequest, handlers.PayOrderResponse](
 		ctx, router, handlers.PayOrderRoutes(),

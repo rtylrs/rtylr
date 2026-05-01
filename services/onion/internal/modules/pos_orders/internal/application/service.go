@@ -9,6 +9,7 @@ import (
 	"github.com/voxire/onion/internal/modules/pos_orders/internal/infrastructure"
 	"github.com/voxire/onion/internal/platform/logger"
 	"github.com/voxire/onion/internal/platform/paddle"
+	"github.com/voxire/onion/internal/platform/wsbus"
 )
 
 // PaddlePaymentResult mirrors paddle.POSPaymentResult for the service surface.
@@ -246,6 +247,25 @@ func (s *Service) HoldOrder(ctx context.Context, ownerID, orderID int64, reason 
 
 func (s *Service) ListHeldOrders(ctx context.Context, ownerID int64) ([]domain.Order, error) {
 	return s.repo.ListHeldOrders(ctx, ownerID)
+}
+
+func (s *Service) SendToKitchen(ctx context.Context, ownerID, orderID int64) error {
+	order, err := s.repo.GetOrder(ctx, ownerID, orderID)
+	if err != nil {
+		return err
+	}
+	if order.Status != domain.OrderStatusPending && order.Status != domain.OrderStatusConfirmed {
+		return errors.New("order is not in a sendable state")
+	}
+	if err := s.repo.UpdateOrderStatus(ctx, ownerID, orderID, domain.OrderStatusPreparing); err != nil {
+		return err
+	}
+	wsbus.Publish(wsbus.Event{
+		Topic:    fmt.Sprintf("owner:%d", ownerID),
+		Type:     "pos:order:preparing",
+		EntityID: orderID,
+	})
+	return nil
 }
 
 func (s *Service) VoidOrderItem(ctx context.Context, ownerID, orderID, itemID int64) error {

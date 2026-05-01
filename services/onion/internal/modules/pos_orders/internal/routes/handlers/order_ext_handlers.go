@@ -223,6 +223,49 @@ func (h *HoldOrderHandler) Serve(ctx context.Context, req *HoldOrderRequest) (Ho
 	return HoldOrderResponse{Message: "Order held successfully"}, nil
 }
 
+// ---- Send to Kitchen ----
+
+func SendToKitchenRoutes() []string {
+	return []string{"/pos/orders/send-to-kitchen", "/pos/orders/{id}/send-to-kitchen"}
+}
+
+type SendToKitchenHandler struct{ Service *application.Service }
+
+type SendToKitchenRequest struct {
+	OrderID int64 `json:"order_id"`
+}
+
+type SendToKitchenResponse struct {
+	Success bool `json:"success"`
+}
+
+func (h *SendToKitchenHandler) Validate(ctx context.Context, req *SendToKitchenRequest) *errorModels.ServerError {
+	if req.OrderID == 0 && chi.URLParamFromCtx(ctx, "id") == "" {
+		return &errorModels.ServerError{HTTPCode: http.StatusBadRequest, Code: http.StatusBadRequest, Message: "Order ID is required"}
+	}
+	return nil
+}
+
+func (h *SendToKitchenHandler) Serve(ctx context.Context, req *SendToKitchenRequest) (SendToKitchenResponse, *errorModels.ServerError) {
+	device := authPkg.DeviceCtx(ctx)
+	if device.User == nil {
+		return SendToKitchenResponse{}, errorModels.PermissionDeniedServerError()
+	}
+
+	orderID, sErr := resolveOrderID(ctx, req.OrderID)
+	if sErr != nil {
+		return SendToKitchenResponse{}, sErr
+	}
+
+	if err := h.Service.SendToKitchen(ctx, device.User.UserID, orderID); err != nil {
+		if errors.Is(err, domain.ErrOrderNotFound) {
+			return SendToKitchenResponse{}, &errorModels.ServerError{HTTPCode: http.StatusNotFound, Code: http.StatusNotFound, Message: "Order not found"}
+		}
+		return SendToKitchenResponse{}, &errorModels.ServerError{HTTPCode: http.StatusUnprocessableEntity, Code: http.StatusUnprocessableEntity, Message: err.Error()}
+	}
+	return SendToKitchenResponse{Success: true}, nil
+}
+
 // ---- Void Order Item ----
 
 func VoidOrderItemRoutes() []string {
