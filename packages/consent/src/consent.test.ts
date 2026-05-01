@@ -1,5 +1,5 @@
 import { afterEach, beforeEach, describe, expect, test, vi } from 'vitest';
-import { readConsent, writeConsent } from './consent';
+import { clearConsent, readConsent, writeConsent } from './consent';
 
 /**
  * Tests for the strict-opt-in consent cookie. Verifies the round-trip
@@ -36,6 +36,26 @@ describe('consent', () => {
     try {
       writeConsent('granted');
       expect(listener).toHaveBeenCalledWith('granted');
+    } finally {
+      window.removeEventListener('rtylr-consent-change', wrapped);
+    }
+  });
+
+  test('clearConsent → readConsent returns "undecided"', () => {
+    writeConsent('granted');
+    expect(readConsent()).toBe('granted');
+    clearConsent();
+    expect(readConsent()).toBe('undecided');
+  });
+
+  test('clearConsent fires the rtylr-consent-change event with "undecided"', () => {
+    writeConsent('granted');
+    const listener = vi.fn();
+    const wrapped: EventListener = (e) => listener((e as CustomEvent).detail);
+    window.addEventListener('rtylr-consent-change', wrapped);
+    try {
+      clearConsent();
+      expect(listener).toHaveBeenCalledWith('undecided');
     } finally {
       window.removeEventListener('rtylr-consent-change', wrapped);
     }
