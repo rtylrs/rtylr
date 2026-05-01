@@ -52,8 +52,25 @@ export const useOfflineQueueStore = create<OfflineQueueState & OfflineQueueActio
   )
 );
 
-// Initialize online listeners once at module load (safe in Tauri webview)
+// Initialize online listeners once at module load (safe in Tauri webview).
+// On reconnect we flip the `online` flag AND fire a window event so any
+// consumer wired to drain the queue gets woken up. Before this the
+// queue would sit indefinitely after a reconnect (audit P0 #4).
+//
+// The actual API replay lives outside this store so it stays
+// dependency-free; the listener here is just the trigger surface. Wire
+// the replay against the `rtylr-offline-queue-reconnected` event.
 if (typeof window !== 'undefined') {
-  window.addEventListener('online', () => useOfflineQueueStore.getState().setOnline(true));
+  window.addEventListener('online', () => {
+    useOfflineQueueStore.getState().setOnline(true);
+    const pending = useOfflineQueueStore.getState().queue.filter((q) => q.status === 'pending');
+    if (pending.length > 0) {
+      window.dispatchEvent(
+        new CustomEvent<{ count: number }>('rtylr-offline-queue-reconnected', {
+          detail: { count: pending.length },
+        })
+      );
+    }
+  });
   window.addEventListener('offline', () => useOfflineQueueStore.getState().setOnline(false));
 }

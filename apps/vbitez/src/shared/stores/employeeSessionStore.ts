@@ -6,7 +6,6 @@ export interface Employee {
   id: string;
   name: string;
   role: string;
-  pin?: string;
 }
 
 interface EmployeeSessionState {
@@ -34,8 +33,19 @@ export const useEmployeeSessionStore = create<EmployeeSessionState & EmployeeSes
         set({ loading: true, error: null });
         try {
           const response = await api.post('/employees/pin', { pin });
+          // Strip any PIN-shaped field the backend returns before
+          // putting the employee in a persisted store. Earlier shape
+          // included `pin?: string` which would land in localStorage —
+          // a security gap (audit P0 #7).
+          const raw = response.data.employee as Employee & {
+            pin?: unknown;
+            pin_hash?: unknown;
+          };
+          const { pin: _stripPin, pin_hash: _stripHash, ...safeEmployee } = raw;
+          void _stripPin;
+          void _stripHash;
           set({
-            employee: response.data.employee,
+            employee: safeEmployee as Employee,
             isActive: true,
             loading: false,
             error: null,
