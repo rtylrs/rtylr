@@ -108,21 +108,39 @@ const DemoPage = (): JSX.Element => {
 
     setIsSubmitting(true);
 
-    // TODO: wire to the real demo-request endpoint. For now we
-    // optimistically show the success state after a short delay so
-    // the form isn't a dead button in staging / first-run dev. No
-    // console.log — that would leak the PII fields candidates type.
-    setTimeout(() => {
+    // Posts to /demo-request on the API host. The Next.js landing app
+    // is static-exported, so the URL must be absolute. NEXT_PUBLIC_API_URL
+    // is documented in apps/landing/.env.example — falls back to the
+    // production API so deployed copies work without per-env config.
+    const apiBase = process.env.NEXT_PUBLIC_API_URL || 'https://api.rtylr.com';
+    try {
+      const res = await fetch(`${apiBase.replace(/\/$/, '')}/demo-request`, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify(formData),
+      });
+      if (!res.ok) {
+        throw new Error(`HTTP ${res.status}`);
+      }
       setSubmitted(true);
-      setIsSubmitting(false);
-      // Reset form
       setFormData({
         email: '',
         country: '',
         reason: '',
         companySize: '',
       });
-    }, 1000);
+    } catch {
+      // Don't expose the API URL or status to the user — surface a
+      // generic message and let them retry. Sentry/PostHog wiring
+      // (P0 ops hardening) will pick up the failure server-side.
+      setErrors({
+        email:
+          'We could not submit your request. Please try again or email sales@rtylr.com.' as never,
+      });
+      setIsSubmitting(false);
+      return;
+    }
+    setIsSubmitting(false);
   };
 
   return (
