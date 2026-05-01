@@ -19,6 +19,7 @@
     "@voxire/api": "workspace:*",
     "@voxire/auth": "workspace:*",
     "@voxire/config": "workspace:*",
+    "@voxire/consent": "workspace:*",
     "@voxire/contracts": "workspace:*",
     "@voxire/i18n": "workspace:*",
     "@voxire/menu": "workspace:*",

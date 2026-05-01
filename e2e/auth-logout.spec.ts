@@ -99,19 +99,6 @@ test.describe('Sign out clears the auth cookie', () => {
       },
     ]);
 
-    // Dash also mounts a legacy Cookies component (apps/dash/src/shared/
-    // components/Cookies/Cookies.tsx) that's keyed off localStorage,
-    // not the consent cookie. Seed `acceptedCookies=true` so its
-    // full-screen z-50 overlay never mounts and intercepts the
-    // user-menu click.
-    await context.addInitScript(() => {
-      try {
-        window.localStorage.setItem('acceptedCookies', 'true');
-      } catch {
-        // ignore — non-fatal for the test
-      }
-    });
-
     await page.goto(DASH_URL);
 
     // StaffView renders a "User menu" button. Wait for it.

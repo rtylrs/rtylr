@@ -21,7 +21,7 @@ import AppRoutes from './routes/AppRoutes';
 import i18next from './shared/services/i18next';
 
 //Components
-import Cookies from './shared/components/Cookies/Cookies';
+import { CookieBanner } from '@voxire/consent';
 import Maintanance from './features/extras/Maintanance';
 import NoMatch from './features/extras/NoMatch';
 
@@ -64,7 +64,7 @@ const App = (): React.JSX.Element => {
     <ErrorBoundary>
       <HelmetContainer title={'Rtylr'} favicon={'/favicon.ico'} />
 
-      <Cookies />
+      <CookieBanner />
 
       <Routes key={location.pathname} location={location}>
         <Route path="/" element={<BusinessRoute />}>

@@ -452,6 +452,9 @@ importers:
       '@voxire/config':
         specifier: workspace:*
         version: link:../../packages/config
+      '@voxire/consent':
+        specifier: workspace:*
+        version: link:../../packages/consent
       '@voxire/contracts':
         specifier: workspace:*
         version: link:../../packages/contracts
