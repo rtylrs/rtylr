@@ -1,6 +1,7 @@
 import React, { useState } from 'react';
 import { Outlet, Link, useLocation, useNavigate } from 'react-router-dom';
 import { Search, Book, Layers, Users, Code, FileText, ChevronRight } from 'lucide-react';
+import { content } from '../shared/content';
 
 interface NavItem {
   label: string;
@@ -12,7 +13,20 @@ interface NavSection {
   items: NavItem[];
 }
 
-const sections: NavSection[] = [
+// Filter out any nav entry whose slug isn't in the content registry,
+// keeping `/docs/:slug` paths from ever 404'ing. The hash-routed
+// non-doc pages (`/api`, `/changelog`) are passed through unchecked.
+// See vault audit docs.md P1: sidebar drift used to require manual
+// sync — this filter flips it to fail-closed at render time.
+function pruneToContent(items: NavItem[]): NavItem[] {
+  return items.filter((it) => {
+    if (!it.href.startsWith('/docs/')) return true;
+    const slug = it.href.slice('/docs/'.length);
+    return slug in content;
+  });
+}
+
+const rawSections: NavSection[] = [
   {
     title: 'Getting Started',
     items: [
@@ -65,6 +79,10 @@ const sections: NavSection[] = [
     ],
   },
 ];
+
+const sections: NavSection[] = rawSections
+  .map((s) => ({ ...s, items: pruneToContent(s.items) }))
+  .filter((s) => s.items.length > 0);
 
 const sectionIcons: Record<string, React.ReactNode> = {
   'Getting Started': <Book size={14} />,
