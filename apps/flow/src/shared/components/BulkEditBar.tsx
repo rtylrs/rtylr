@@ -4,13 +4,13 @@ import { X, Check, Trash2, Archive, Flag } from 'lucide-react';
 import { toast } from 'sonner';
 import i18next from '../services/i18next';
 import { useFlowStore } from '../stores/flowStore';
-
-const t = (key: string): string => i18next.t(key) as string;
 import {
   useBulkUpdateStatus,
   useBulkUpdatePriority,
   useBulkDelete,
 } from '../../features/tasks/useTasks';
+
+const t = (key: string): string => i18next.t(key) as string;
 
 export const BulkEditBar: React.FC = () => {
   const { selectedTaskIds, clearSelection } = useFlowStore();
