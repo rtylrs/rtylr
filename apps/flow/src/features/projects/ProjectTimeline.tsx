@@ -178,7 +178,7 @@ const ProjectTimeline: React.FC = () => {
                 Math.round((dueDate.getTime() - startDate.getTime()) / dayMs) + 1
               );
               const isOverdue = dueDate < new Date() && t.status !== 'done';
-              const barColor = isOverdue ? 'var(--flow-danger, #ef4444)' : project.color;
+              const barColor = isOverdue ? 'var(--flow-warning, #f59e0b)' : project.color;
 
               return (
                 <div

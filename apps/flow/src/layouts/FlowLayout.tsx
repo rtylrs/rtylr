@@ -1,4 +1,5 @@
 import React, { useState, useEffect, useMemo, useRef } from 'react';
+import { toast } from 'sonner';
 import TrialBanner from '../shared/components/TrialBanner';
 import { Link, useLocation, useNavigate, useParams } from 'react-router-dom';
 import { motion, AnimatePresence } from 'motion/react';
@@ -974,7 +975,10 @@ const FlowLayout: React.FC<FlowLayoutProps> = ({ children }) => {
                             name: newProjectName.trim(),
                             color: newProjectColor,
                           },
-                          { onSuccess: () => setNewProjectOpen(false) }
+                          {
+                            onSuccess: () => setNewProjectOpen(false),
+                            onError: () => toast.error('Something went wrong. Please try again.'),
+                          }
                         );
                       }
                       if (e.key === 'Escape') setNewProjectOpen(false);
@@ -1020,7 +1024,10 @@ const FlowLayout: React.FC<FlowLayoutProps> = ({ children }) => {
                         name: newProjectName.trim(),
                         color: newProjectColor,
                       },
-                      { onSuccess: () => setNewProjectOpen(false) }
+                      {
+                        onSuccess: () => setNewProjectOpen(false),
+                        onError: () => toast.error('Something went wrong. Please try again.'),
+                      }
                     );
                   }}
                   className="px-4 py-1.5 rounded-lg text-[12px] font-semibold disabled:opacity-40 disabled:cursor-not-allowed"

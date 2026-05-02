@@ -153,6 +153,7 @@ const WorkspaceDashboard: React.FC = () => {
   const setWorkspaceBusiness = useSetWorkspaceBusiness();
   const [showNewBusiness, setShowNewBusiness] = useState(false);
   const [newBusinessName, setNewBusinessName] = useState('');
+  const [selectedBusinessId, setSelectedBusinessId] = useState('');
 
   const onWeeklyReviewDone = useCallback(() => {
     const { streak, alreadyLogged } = recordWeeklyReviewDone();
@@ -370,9 +371,10 @@ const WorkspaceDashboard: React.FC = () => {
 
         <div className="flex items-center gap-3">
           <select
-            value=""
+            value={selectedBusinessId}
             onChange={(e) => {
               const val = e.target.value;
+              setSelectedBusinessId(val);
               if (!workspaceId || workspaceId === PERSONAL_WORKSPACE_ID) return;
               setWorkspaceBusiness.mutate(
                 { workspaceId, businessId: val || null },
@@ -389,7 +391,7 @@ const WorkspaceDashboard: React.FC = () => {
               color: 'var(--flow-text)',
             }}
           >
-            <option value="">, No business linked,</option>
+            <option value="">No business linked</option>
             {businesses.map((b) => (
               <option key={b.id} value={b.id}>
                 {b.name}

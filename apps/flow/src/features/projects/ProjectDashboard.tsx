@@ -111,6 +111,7 @@ const ProjectDashboard: React.FC = () => {
                     ['in_progress', 'var(--flow-info, #3b82f6)'],
                     ['in_review', '#a855f7'],
                     ['todo', 'var(--flow-text-dim)'],
+                    ['cancelled', 'var(--flow-danger, #ef4444)'],
                     ['backlog', 'var(--flow-border)'],
                   ] as const
                 ).map(([status, color]) => {
@@ -135,6 +136,7 @@ const ProjectDashboard: React.FC = () => {
                     ['in_progress', 'var(--flow-info, #3b82f6)', 'In progress'],
                     ['in_review', '#a855f7', 'In review'],
                     ['todo', 'var(--flow-text-dim)', 'To do'],
+                    ['cancelled', 'var(--flow-danger, #ef4444)', 'Cancelled'],
                     ['backlog', 'var(--flow-border)', 'Backlog'],
                   ] as const
                 ).map(([status, color, label]) => (

@@ -1,5 +1,5 @@
 import React, { useMemo, useState } from 'react';
-import { useParams } from 'react-router-dom';
+import { useParams, useNavigate } from 'react-router-dom';
 import { ChevronLeft, ChevronRight } from 'lucide-react';
 import { useFlowStore } from '../../shared/stores/flowStore';
 import { useTasks } from '../tasks/useTasks';
@@ -20,6 +20,7 @@ const ProjectCalendar: React.FC = () => {
 
   useProjectRealtime(projectId);
 
+  const navigate = useNavigate();
   const { projects } = useFlowStore();
   const project = projects.find((p) => p.id === projectId);
   const { data: apiTasks = [] } = useTasks({ projectId });
@@ -174,8 +175,10 @@ const ProjectCalendar: React.FC = () => {
                           style={{
                             background: `${project.color}22`,
                             color: project.color,
+                            cursor: 'pointer',
                           }}
                           title={t.title}
+                          onClick={() => navigate(`/tasks/${t.id}`)}
                         >
                           {t.title}
                         </div>

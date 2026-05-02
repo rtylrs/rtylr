@@ -1,5 +1,6 @@
 import { unwrap } from '@voxire/api';
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
+import { toast } from 'sonner';
 import { flowApi, ApiWorkspaceMember } from '../../shared/services/flowApi';
 import { unwrapListResponse } from '../../shared/lib/unwrapListResponse';
 
@@ -17,8 +18,19 @@ export function useWorkspaceMembers(workspaceId?: string) {
 export function useAddWorkspaceMember(workspaceId: string) {
   const qc = useQueryClient();
   return useMutation({
-    mutationFn: (data: { workspace_id: number; user_id: number; role?: string }) =>
-      unwrap(flowApi.addWorkspaceMember(data)).then(() => {}),
+    mutationFn: (data: { workspace_id: number; user_id: number; role?: string }) => {
+      const wsId = Number(data.workspace_id);
+      const uid = Number(data.user_id);
+      if (isNaN(wsId) || wsId === 0) {
+        toast.error('Invalid workspace ID');
+        return Promise.reject(new Error('Invalid workspace ID'));
+      }
+      if (isNaN(uid) || uid === 0) {
+        toast.error('Invalid user ID');
+        return Promise.reject(new Error('Invalid user ID'));
+      }
+      return unwrap(flowApi.addWorkspaceMember(data)).then(() => {});
+    },
     onSuccess: () => {
       qc.invalidateQueries({ queryKey: ['workspace-members', workspaceId] });
     },
@@ -28,8 +40,19 @@ export function useAddWorkspaceMember(workspaceId: string) {
 export function useRemoveWorkspaceMember(workspaceId: string) {
   const qc = useQueryClient();
   return useMutation({
-    mutationFn: (data: { workspace_id: number; user_id: number }) =>
-      unwrap(flowApi.removeWorkspaceMember(data)).then(() => {}),
+    mutationFn: (data: { workspace_id: number; user_id: number }) => {
+      const wsId = Number(data.workspace_id);
+      const uid = Number(data.user_id);
+      if (isNaN(wsId) || wsId === 0) {
+        toast.error('Invalid workspace ID');
+        return Promise.reject(new Error('Invalid workspace ID'));
+      }
+      if (isNaN(uid) || uid === 0) {
+        toast.error('Invalid user ID');
+        return Promise.reject(new Error('Invalid user ID'));
+      }
+      return unwrap(flowApi.removeWorkspaceMember(data)).then(() => {});
+    },
     onSuccess: () => {
       qc.invalidateQueries({ queryKey: ['workspace-members', workspaceId] });
     },
@@ -39,8 +62,19 @@ export function useRemoveWorkspaceMember(workspaceId: string) {
 export function useUpdateWorkspaceMemberRole(workspaceId: string) {
   const qc = useQueryClient();
   return useMutation({
-    mutationFn: (data: { workspace_id: number; user_id: number; role: string }) =>
-      unwrap(flowApi.updateWorkspaceMemberRole(data)).then(() => {}),
+    mutationFn: (data: { workspace_id: number; user_id: number; role: string }) => {
+      const wsId = Number(data.workspace_id);
+      const uid = Number(data.user_id);
+      if (isNaN(wsId) || wsId === 0) {
+        toast.error('Invalid workspace ID');
+        return Promise.reject(new Error('Invalid workspace ID'));
+      }
+      if (isNaN(uid) || uid === 0) {
+        toast.error('Invalid user ID');
+        return Promise.reject(new Error('Invalid user ID'));
+      }
+      return unwrap(flowApi.updateWorkspaceMemberRole(data)).then(() => {});
+    },
     onSuccess: () => {
       qc.invalidateQueries({ queryKey: ['workspace-members', workspaceId] });
     },

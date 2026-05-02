@@ -217,7 +217,7 @@ const ProjectOverview: React.FC = () => {
           </h3>
           {recentComments.length === 0 ? (
             <p className="text-[12px]" style={{ color: 'var(--flow-text-dim)' }}>
-              No recent discussion.
+              No recent comments.
             </p>
           ) : (
             <div className="space-y-2">

@@ -178,6 +178,7 @@ const StatusGroup: React.FC<{
             <div
               className="flex items-center gap-3 px-4 py-2 hover:bg-[var(--flow-hover)] transition-colors cursor-pointer opacity-50 hover:opacity-100"
               style={{ borderBottom: '1px solid var(--flow-border)' }}
+              onClick={() => useFlowStore.getState().setQuickCreateOpen(true)}
             >
               <div
                 className="h-4 w-4 rounded border flex items-center justify-center"

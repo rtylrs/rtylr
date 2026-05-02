@@ -37,8 +37,8 @@ export interface FlowBillingDetail {
 
 // ── Helpers ───────────────────────────────────────────────────────────────────
 
-export function centsToDisplay(cents: number): string {
-  return `$${(cents / 100).toFixed(2)}`;
+export function centsToDisplay(cents: number, currency = 'USD'): string {
+  return new Intl.NumberFormat('en', { style: 'currency', currency }).format(cents / 100);
 }
 
 export function trialDaysLeft(trialEndsAt: string | null): number {
@@ -53,52 +53,32 @@ export interface SeatProration {
   nextMonthName: string;
 }
 
+function shortMonth(date: Date, utc = false): string {
+  return new Intl.DateTimeFormat('en', {
+    month: 'short',
+    timeZone: utc ? 'UTC' : undefined,
+  }).format(date);
+}
+
 export function computeSeatProration(pricePerSeatCents: number): SeatProration {
   const now = new Date();
   const month = now.getMonth();
   const daysInMonth = new Date(now.getFullYear(), month + 1, 0).getDate();
   const daysRemaining = daysInMonth - now.getDate() + 1;
-  const MONTHS = [
-    'Jan',
-    'Feb',
-    'Mar',
-    'Apr',
-    'May',
-    'Jun',
-    'Jul',
-    'Aug',
-    'Sep',
-    'Oct',
-    'Nov',
-    'Dec',
-  ];
+  const nextMonthDate = new Date(now.getFullYear(), (month + 1) % 12, 1);
   return {
     daysRemaining,
     daysInMonth,
     proratedCents: Math.round((daysRemaining * pricePerSeatCents) / daysInMonth),
-    nextMonthName: MONTHS[(month + 1) % 12],
+    nextMonthName: shortMonth(nextMonthDate),
   };
 }
 
 export function formatPeriodRange(start: string, end: string | null): string {
   const s = new Date(start);
   const e = end ? new Date(end) : new Date();
-  const months = [
-    'Jan',
-    'Feb',
-    'Mar',
-    'Apr',
-    'May',
-    'Jun',
-    'Jul',
-    'Aug',
-    'Sep',
-    'Oct',
-    'Nov',
-    'Dec',
-  ];
-  const sMonth = months[s.getUTCMonth()];
-  const eMonth = months[e.getUTCMonth()];
+  const sMonth = shortMonth(s, true);
+  const eMonth = shortMonth(e, true);
   const year = e.getUTCFullYear();
   if (s.getUTCMonth() === e.getUTCMonth() && s.getUTCFullYear() === e.getUTCFullYear()) {
     return `${sMonth} ${s.getUTCDate()} – ${e.getUTCDate()}, ${year}`;

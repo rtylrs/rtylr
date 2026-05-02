@@ -1,7 +1,11 @@
 import React from 'react';
 import { motion, AnimatePresence } from 'motion/react';
 import { X, Check, Trash2, Archive, Flag } from 'lucide-react';
+import { toast } from 'sonner';
+import i18next from '../services/i18next';
 import { useFlowStore } from '../stores/flowStore';
+
+const t = (key: string): string => i18next.t(key) as string;
 import {
   useBulkUpdateStatus,
   useBulkUpdatePriority,
@@ -43,6 +47,7 @@ export const BulkEditBar: React.FC = () => {
             bulkStatus
               .mutateAsync({ ids: selectedTaskIds, status: 'done' })
               .then(() => clearSelection())
+              .catch(() => toast.error(t('errors.generic')))
           }
           className="h-7 px-2 rounded text-[11px] flex items-center gap-1 hover:bg-[var(--flow-hover)] disabled:opacity-40"
           style={{ color: 'var(--flow-text-muted)' }}
@@ -55,6 +60,7 @@ export const BulkEditBar: React.FC = () => {
             bulkPriority
               .mutateAsync({ ids: selectedTaskIds, priority: 'urgent' })
               .then(() => clearSelection())
+              .catch(() => toast.error(t('errors.generic')))
           }
           className="h-7 px-2 rounded text-[11px] flex items-center gap-1 hover:bg-[var(--flow-hover)] disabled:opacity-40"
           style={{ color: 'var(--flow-text-muted)' }}
@@ -67,6 +73,7 @@ export const BulkEditBar: React.FC = () => {
             bulkStatus
               .mutateAsync({ ids: selectedTaskIds, status: 'cancelled' })
               .then(() => clearSelection())
+              .catch(() => toast.error(t('errors.generic')))
           }
           className="h-7 px-2 rounded text-[11px] flex items-center gap-1 hover:bg-[var(--flow-hover)] disabled:opacity-40"
           style={{ color: 'var(--flow-text-muted)' }}
@@ -75,7 +82,12 @@ export const BulkEditBar: React.FC = () => {
         </button>
         <button
           disabled={isPending}
-          onClick={() => bulkDelete.mutateAsync(selectedTaskIds).then(() => clearSelection())}
+          onClick={() =>
+            bulkDelete
+              .mutateAsync(selectedTaskIds)
+              .then(() => clearSelection())
+              .catch(() => toast.error(t('errors.generic')))
+          }
           className="h-7 px-2 rounded text-[11px] flex items-center gap-1 hover:bg-[var(--flow-hover)] disabled:opacity-40"
           style={{ color: '#ef4444' }}
         >

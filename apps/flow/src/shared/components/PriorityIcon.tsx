@@ -21,16 +21,13 @@ export const PriorityIcon: React.FC<PriorityIconProps> = ({
   size = 13,
   showLabel = false,
 }) => {
-  const Icon = ICONS[priority];
-  const color = PRIORITY_COLORS[priority];
+  const Icon = ICONS[priority] ?? Minus;
+  const color = PRIORITY_COLORS[priority] ?? 'var(--flow-text-dim)';
+  const label = PRIORITY_LABELS[priority] ?? priority;
   return (
-    <span
-      className="inline-flex items-center gap-1.5"
-      style={{ color }}
-      title={PRIORITY_LABELS[priority]}
-    >
+    <span className="inline-flex items-center gap-1.5" style={{ color }} title={label}>
       <Icon size={size} />
-      {showLabel && <span className="text-[12px] font-medium">{PRIORITY_LABELS[priority]}</span>}
+      {showLabel && <span className="text-[12px] font-medium">{label}</span>}
     </span>
   );
 };

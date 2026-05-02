@@ -1,17 +1,21 @@
 import { unwrap } from '@voxire/api';
 import { useMemo } from 'react';
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
+import { toast } from 'sonner';
+import i18next from '../../shared/services/i18next';
 import { flowApi } from '../../shared/services/flowApi';
 import type { ApiView } from '../../shared/services/flowApi';
+import { unwrapListResponse } from '../../shared/lib/unwrapListResponse';
 import { PRIORITY_ORDER, type SavedView, type Task } from '../../shared/stores/flowStore';
+
+const t = (key: string): string => i18next.t(key) as string;
 
 export function useViews() {
   return useQuery<SavedView[]>({
     queryKey: ['views'],
     queryFn: async () => {
       const res = await unwrap(flowApi.getViews());
-      const list = Array.isArray(res) ? res : (res?.views ?? []);
-      return list as unknown as SavedView[];
+      return unwrapListResponse<SavedView>(res, 'views');
     },
   });
 }
@@ -20,19 +24,21 @@ export function useCreateView() {
   const qc = useQueryClient();
   return useMutation({
     mutationFn: (data: Partial<SavedView>) => {
-      return unwrap(flowApi.createView(data as unknown as Partial<ApiView>));
+      return unwrap(flowApi.createView(data as Partial<ApiView>));
     },
     onSuccess: () => qc.invalidateQueries({ queryKey: ['views'] }),
+    onError: () => toast.error(t('errors.generic')),
   });
 }
 
 export function useUpdateView() {
   const qc = useQueryClient();
   return useMutation({
-    mutationFn: ({ id, data }: { id: string; data: Partial<SavedView> }) => {
-      return unwrap(flowApi.updateView(id, data as unknown as Partial<ApiView>)).then(() => {});
+    mutationFn: ({ id, data }: { id: string; data: Partial<SavedView> }): Promise<void> => {
+      return unwrap(flowApi.updateView(id, data as Partial<ApiView>)).then(() => {});
     },
     onSuccess: () => qc.invalidateQueries({ queryKey: ['views'] }),
+    onError: () => toast.error(t('errors.generic')),
   });
 }
 
@@ -43,6 +49,7 @@ export function useDeleteView() {
       return unwrap(flowApi.deleteView(id));
     },
     onSuccess: () => qc.invalidateQueries({ queryKey: ['views'] }),
+    onError: () => toast.error(t('errors.generic')),
   });
 }
 

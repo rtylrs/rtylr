@@ -96,6 +96,7 @@ const MemberRow: React.FC<{
         onMouseEnter={(e) => (e.currentTarget.style.color = '#ef4444')}
         onMouseLeave={(e) => (e.currentTarget.style.color = 'var(--flow-text-dim)')}
         title="Remove member"
+        aria-label="Remove member"
         disabled={isLastManager}
       >
         <Trash2 size={11} />
@@ -110,21 +111,27 @@ const WorkspaceManager: React.FC = () => {
   const { data: members = [], isLoading } = useWorkspaceMembers(wsId);
   const addMember = useAddWorkspaceMember(wsId);
 
-  const [inviteUserId, setInviteUserId] = useState('');
+  const [inviteInput, setInviteInput] = useState('');
   const [inviteRole, setInviteRole] = useState<'manager' | 'member' | 'viewer'>('member');
   const [showInvite, setShowInvite] = useState(false);
 
   const managerCount = members.filter((m) => m.role === 'manager').length;
 
   const handleInvite = () => {
-    const userId = Number(inviteUserId.trim());
-    if (!userId) return toast.error('Enter a valid user ID');
+    const trimmed = inviteInput.trim();
+    if (!trimmed) return toast.error('Enter a user ID or email');
+    if (trimmed.includes('@')) {
+      toast.info('Email invite coming soon');
+      return;
+    }
+    const userId = Number(trimmed);
+    if (isNaN(userId) || userId === 0) return toast.error('Enter a valid user ID');
     addMember.mutate(
       { workspace_id: Number(wsId), user_id: userId, role: inviteRole },
       {
         onSuccess: () => {
           toast.success('Member added');
-          setInviteUserId('');
+          setInviteInput('');
           setShowInvite(false);
         },
         onError: () => toast.error('Failed to add member'),
@@ -168,10 +175,10 @@ const WorkspaceManager: React.FC = () => {
             </p>
             <div className="flex gap-2">
               <input
-                type="number"
-                placeholder="User ID"
-                value={inviteUserId}
-                onChange={(e) => setInviteUserId(e.target.value)}
+                type="text"
+                placeholder="User ID or email"
+                value={inviteInput}
+                onChange={(e) => setInviteInput(e.target.value)}
                 className="flex-1 rounded px-3 py-2 text-[12px] outline-none"
                 style={{
                   background: 'var(--flow-input-bg)',

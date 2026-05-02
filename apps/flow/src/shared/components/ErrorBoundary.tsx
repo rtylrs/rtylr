@@ -13,8 +13,8 @@ export class ErrorBoundary extends React.Component<{ children: React.ReactNode }
     return { hasError: true, message };
   }
 
-  componentDidCatch(error: unknown, info: React.ErrorInfo) {
-    console.error('[Flow ErrorBoundary]', error, info.componentStack);
+  componentDidCatch(_error: unknown, _info: React.ErrorInfo): void {
+    // Error captured in state via getDerivedStateFromError — no console logging in production.
   }
 
   render() {

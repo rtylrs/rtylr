@@ -18,16 +18,13 @@ const ICONS: Record<Task['status'], React.ComponentType<{ size?: number }>> = {
 };
 
 export const StatusIcon: React.FC<StatusIconProps> = ({ status, size = 13, showLabel = false }) => {
-  const Icon = ICONS[status];
-  const color = STATUS_COLORS[status];
+  const Icon = ICONS[status] ?? Circle;
+  const color = STATUS_COLORS[status] ?? 'var(--flow-text-dim)';
+  const label = STATUS_LABELS[status] ?? status;
   return (
-    <span
-      className="inline-flex items-center gap-1.5"
-      style={{ color }}
-      title={STATUS_LABELS[status]}
-    >
+    <span className="inline-flex items-center gap-1.5" style={{ color }} title={label}>
       <Icon size={size} />
-      {showLabel && <span className="text-[12px] font-medium">{STATUS_LABELS[status]}</span>}
+      {showLabel && <span className="text-[12px] font-medium">{label}</span>}
     </span>
   );
 };

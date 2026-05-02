@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, { useRef, useState } from 'react';
 import { useParams, useNavigate } from 'react-router-dom';
 import { toast } from 'sonner';
 import { useTranslation } from 'react-i18next';
@@ -50,6 +50,8 @@ const ProjectSettings: React.FC = () => {
   const removeMember = useRemoveProjectMember(projectId ?? '');
   const updateRole = useUpdateProjectMemberRole(projectId ?? '');
   const transferOwnership = useTransferProjectOwnership();
+
+  const transferRef = useRef<HTMLSelectElement>(null);
 
   const [showAddMember, setShowAddMember] = useState(false);
   const [newEmail, setNewEmail] = useState('');
@@ -338,6 +340,7 @@ const ProjectSettings: React.FC = () => {
                 </p>
                 <div className="flex gap-2">
                   <select
+                    ref={transferRef}
                     id="transfer-select"
                     className="flex-1 rounded px-2 py-1.5 text-[11px] outline-none"
                     style={{
@@ -358,8 +361,7 @@ const ProjectSettings: React.FC = () => {
                   </select>
                   <button
                     onClick={() => {
-                      const sel = document.getElementById('transfer-select') as HTMLSelectElement;
-                      const newOwnerId = Number(sel?.value);
+                      const newOwnerId = Number(transferRef.current?.value);
                       if (!newOwnerId) return toast.error('Select a member');
                       if (!window.confirm('Transfer ownership? This cannot be undone.')) return;
                       transferOwnership.mutate(
@@ -414,6 +416,7 @@ const ProjectSettings: React.FC = () => {
                 <button
                   className="text-[11px] px-2 py-1 rounded hover:bg-[var(--flow-hover)]"
                   style={{ color: 'var(--flow-text-muted)' }}
+                  onClick={() => toast.info('Integration setup coming soon')}
                 >
                   Connect
                 </button>

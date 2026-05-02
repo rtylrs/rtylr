@@ -1,5 +1,6 @@
 import React, { useRef, useState } from 'react';
 import { AtSign, Send, Smile } from 'lucide-react';
+import { toast } from 'sonner';
 import { useFlowStore } from '../stores/flowStore';
 
 interface CommentInputProps {
@@ -73,8 +74,10 @@ export const CommentInput: React.FC<CommentInputProps> = ({
           </button>
           <button
             type="button"
+            onClick={() => toast.info('Emoji picker coming soon')}
             className="h-6 w-6 rounded flex items-center justify-center hover:bg-[var(--flow-hover)]"
             style={{ color: 'var(--flow-text-dim)' }}
+            title="Emoji picker"
           >
             <Smile size={12} />
           </button>
