@@ -1,37 +1,47 @@
-import React from 'react';
+import React, { Suspense } from 'react';
+import { FullScreenLoader } from '@voxire/components';
 import DefaultLayout from '../layouts/DefaultLayout';
-import Dashboard from '../features/dashboard/Dashboard';
-import Invoices from '../features/invoices/Invoices';
-import InvoiceDetail from '../features/invoices/InvoiceDetail';
-import NewInvoice from '../features/invoices/NewInvoice';
-import RecurringInvoices from '../features/recurring-invoices/RecurringInvoices';
-import Quotes from '../features/quotes/Quotes';
-import Expenses from '../features/expenses/Expenses';
-import ExpenseDetail from '../features/expenses/ExpenseDetail';
-import NewExpense from '../features/expenses/NewExpense';
-import Categories from '../features/categories/Categories';
-import Bills from '../features/bills/Bills';
-import BankFeeds from '../features/bank-feeds/BankFeeds';
-import Reconcile from '../features/reconcile/Reconcile';
-import ProfitLoss from '../features/profit-loss/ProfitLoss';
-import BalanceSheet from '../features/balance-sheet/BalanceSheet';
-import CashFlow from '../features/cash-flow/CashFlow';
-import Tax from '../features/tax/Tax';
-import TaxReport from '../features/tax/TaxReport';
-import Journal from '../features/journal/Journal';
-import ChartOfAccounts from '../features/chart-of-accounts/ChartOfAccounts';
-import Settings from '../features/settings/Settings';
+
+// All route-level components are lazy-loaded per CLAUDE.md mandate. Layout
+// components stay eager (always needed).
+const Dashboard = React.lazy(() => import('../features/dashboard/Dashboard'));
+const Invoices = React.lazy(() => import('../features/invoices/Invoices'));
+const InvoiceDetail = React.lazy(() => import('../features/invoices/InvoiceDetail'));
+const NewInvoice = React.lazy(() => import('../features/invoices/NewInvoice'));
+const RecurringInvoices = React.lazy(
+  () => import('../features/recurring-invoices/RecurringInvoices')
+);
+const Quotes = React.lazy(() => import('../features/quotes/Quotes'));
+const Expenses = React.lazy(() => import('../features/expenses/Expenses'));
+const ExpenseDetail = React.lazy(() => import('../features/expenses/ExpenseDetail'));
+const NewExpense = React.lazy(() => import('../features/expenses/NewExpense'));
+const Categories = React.lazy(() => import('../features/categories/Categories'));
+const Bills = React.lazy(() => import('../features/bills/Bills'));
+const BankFeeds = React.lazy(() => import('../features/bank-feeds/BankFeeds'));
+const Reconcile = React.lazy(() => import('../features/reconcile/Reconcile'));
+const ProfitLoss = React.lazy(() => import('../features/profit-loss/ProfitLoss'));
+const BalanceSheet = React.lazy(() => import('../features/balance-sheet/BalanceSheet'));
+const CashFlow = React.lazy(() => import('../features/cash-flow/CashFlow'));
+const Tax = React.lazy(() => import('../features/tax/Tax'));
+const TaxReport = React.lazy(() => import('../features/tax/TaxReport'));
+const Journal = React.lazy(() => import('../features/journal/Journal'));
+const ChartOfAccounts = React.lazy(() => import('../features/chart-of-accounts/ChartOfAccounts'));
+const Settings = React.lazy(() => import('../features/settings/Settings'));
 
 interface RouteChild {
   index?: boolean;
   path?: string;
-  element: React.ReactElement;
+  element: React.ReactNode;
 }
 
 interface AppRoute {
   path: string;
-  element: React.ReactElement;
+  element: React.ReactNode;
   children?: RouteChild[];
+}
+
+function lazy(element: React.ReactNode): React.ReactNode {
+  return <Suspense fallback={<FullScreenLoader />}>{element}</Suspense>;
 }
 
 const AppRoutes: AppRoute[] = [
@@ -39,39 +49,39 @@ const AppRoutes: AppRoute[] = [
     path: '/',
     element: <DefaultLayout />,
     children: [
-      { index: true, element: <Dashboard /> },
+      { index: true, element: lazy(<Dashboard />) },
 
       // Invoices
-      { path: 'invoices', element: <Invoices /> },
-      { path: 'invoices/new', element: <NewInvoice /> },
-      { path: 'invoices/recurring', element: <RecurringInvoices /> },
-      { path: 'invoices/:id', element: <InvoiceDetail /> },
-      { path: 'quotes', element: <Quotes /> },
+      { path: 'invoices', element: lazy(<Invoices />) },
+      { path: 'invoices/new', element: lazy(<NewInvoice />) },
+      { path: 'invoices/recurring', element: lazy(<RecurringInvoices />) },
+      { path: 'invoices/:id', element: lazy(<InvoiceDetail />) },
+      { path: 'quotes', element: lazy(<Quotes />) },
 
       // Expenses
-      { path: 'expenses', element: <Expenses /> },
-      { path: 'expenses/new', element: <NewExpense /> },
-      { path: 'expenses/:id', element: <ExpenseDetail /> },
-      { path: 'categories', element: <Categories /> },
+      { path: 'expenses', element: lazy(<Expenses />) },
+      { path: 'expenses/new', element: lazy(<NewExpense />) },
+      { path: 'expenses/:id', element: lazy(<ExpenseDetail />) },
+      { path: 'categories', element: lazy(<Categories />) },
 
       // Bills & bank
-      { path: 'bills', element: <Bills /> },
-      { path: 'bank', element: <BankFeeds /> },
-      { path: 'reconcile', element: <Reconcile /> },
+      { path: 'bills', element: lazy(<Bills />) },
+      { path: 'bank', element: lazy(<BankFeeds />) },
+      { path: 'reconcile', element: lazy(<Reconcile />) },
 
       // Reports
-      { path: 'pl', element: <ProfitLoss /> },
-      { path: 'reports/balance-sheet', element: <BalanceSheet /> },
-      { path: 'reports/cash-flow', element: <CashFlow /> },
-      { path: 'reports/tax', element: <TaxReport /> },
+      { path: 'pl', element: lazy(<ProfitLoss />) },
+      { path: 'reports/balance-sheet', element: lazy(<BalanceSheet />) },
+      { path: 'reports/cash-flow', element: lazy(<CashFlow />) },
+      { path: 'reports/tax', element: lazy(<TaxReport />) },
 
       // Accounting
-      { path: 'journal', element: <Journal /> },
-      { path: 'accounts', element: <ChartOfAccounts /> },
+      { path: 'journal', element: lazy(<Journal />) },
+      { path: 'accounts', element: lazy(<ChartOfAccounts />) },
 
       // Tax & settings
-      { path: 'tax', element: <Tax /> },
-      { path: 'settings', element: <Settings /> },
+      { path: 'tax', element: lazy(<Tax />) },
+      { path: 'settings', element: lazy(<Settings />) },
     ],
   },
 ];
