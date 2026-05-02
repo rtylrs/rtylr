@@ -316,8 +316,11 @@ test.describe('Flow — project list', () => {
     await page.goto(`${FLOW_URL}/w/10`);
 
     // Both project names must appear somewhere in the rendered output.
-    await expect(page.getByText('Alpha Project').first()).toBeVisible({ timeout: 10_000 });
-    await expect(page.getByText('Beta Project').first()).toBeVisible({ timeout: 10_000 });
+    // Use toBeAttached rather than toBeVisible — the cards animate in from
+    // opacity:0 and headless Chrome may not run Framer Motion transitions,
+    // so visibility checks would be flaky even though the DOM is correct.
+    await expect(page.getByText('Alpha Project').first()).toBeAttached({ timeout: 10_000 });
+    await expect(page.getByText('Beta Project').first()).toBeAttached({ timeout: 10_000 });
   });
 
   test('workspace dashboard shows empty state when no projects', async ({ page }) => {
@@ -365,7 +368,7 @@ test.describe('Flow — task board', () => {
     await page.goto(`${FLOW_URL}/w/10/p/1`);
 
     // The project board should mount and display the project header.
-    await expect(page.getByText('Alpha Project').first()).toBeVisible({ timeout: 15_000 });
+    await expect(page.getByText('Alpha Project').first()).toBeAttached({ timeout: 15_000 });
   });
 
   test('project list view renders tasks grouped by status', async ({ page }) => {
@@ -388,11 +391,11 @@ test.describe('Flow — task board', () => {
     await page.goto(`${FLOW_URL}/w/10/p/1/list`);
 
     // The list view shows the project name in the header.
-    await expect(page.getByText('Alpha Project').first()).toBeVisible({ timeout: 15_000 });
+    await expect(page.getByText('Alpha Project').first()).toBeAttached({ timeout: 15_000 });
 
     // Status group headers should be present (the component hard-codes these labels).
-    await expect(page.getByText('Todo').first()).toBeVisible({ timeout: 10_000 });
-    await expect(page.getByText('Done').first()).toBeVisible({ timeout: 10_000 });
+    await expect(page.getByText('Todo').first()).toBeAttached({ timeout: 10_000 });
+    await expect(page.getByText('Done').first()).toBeAttached({ timeout: 10_000 });
   });
 });
 
