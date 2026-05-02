@@ -81,7 +81,8 @@ export function useRecordVisit() {
 export function useImportCustomers() {
   const qc = useQueryClient();
   return useMutation({
-    mutationFn: (rows: Record<string, unknown>[]) => unwrap(crmApi.importCustomers(rows)),
+    mutationFn: ({ rows, dedupe }: { rows: Record<string, unknown>[]; dedupe?: boolean }) =>
+      unwrap(crmApi.importCustomers(rows, dedupe)),
     onSuccess: () => qc.invalidateQueries({ queryKey: ['customers'] }),
   });
 }

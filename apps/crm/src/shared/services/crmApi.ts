@@ -225,8 +225,8 @@ export const crmApi = {
 
   recordVisit: (customerId: number) => safe.post('/crm/customers/record-visit', { customerId }),
 
-  importCustomers: (rows: Record<string, unknown>[]) =>
-    safe.post('/crm/customers/import', { rows }),
+  importCustomers: (rows: Record<string, unknown>[], dedupe?: boolean) =>
+    safe.post('/crm/customers/import', { rows, dedupe }),
 
   mergeCustomers: (primaryId: number, secondaryId: number) =>
     safe.post('/crm/customers/merge', { primaryId, secondaryId }),

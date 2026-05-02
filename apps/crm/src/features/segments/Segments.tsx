@@ -14,7 +14,11 @@ import {
   Filter,
   Trash2,
 } from 'lucide-react';
-import { useListSegments, useDeleteSegment } from '../../shared/hooks/queries/useSegments';
+import {
+  useListSegments,
+  useDeleteSegment,
+  useCreateSegment,
+} from '../../shared/hooks/queries/useSegments';
 import { ConfirmModal } from '../../shared/components/ui';
 
 const ACCENT = '#3b82f6';
@@ -64,7 +68,13 @@ interface Rule {
   value: string;
 }
 
-function RuleBuilder({ onClose }: { onClose: () => void }) {
+function RuleBuilder({
+  onClose,
+  onSave,
+}: {
+  onClose: () => void;
+  onSave: (name: string, rules: Rule[]) => void;
+}) {
   const [rules, setRules] = useState<Rule[]>([
     { id: 1, field: 'Total Spend', operator: '>', value: '$500' },
   ]);
@@ -311,7 +321,7 @@ function RuleBuilder({ onClose }: { onClose: () => void }) {
             Cancel
           </button>
           <button
-            onClick={onClose}
+            onClick={() => onSave(segmentName, rules)}
             style={{
               padding: '8px 16px',
               borderRadius: '8px',
@@ -500,6 +510,7 @@ const Segments: React.FC = () => {
   const navigate = useNavigate();
   const { data: fetchedSegments, isLoading } = useListSegments();
   const removeSegment = useDeleteSegment();
+  const createSegment = useCreateSegment();
   const [builderOpen, setBuilderOpen] = useState(false);
   const [confirmDeleteId, setConfirmDeleteId] = useState<number | null>(null);
   const segments: Segment[] = useMemo(() => {
@@ -523,6 +534,21 @@ const Segments: React.FC = () => {
     });
   };
 
+  const handleCreate = (name: string, rules: Rule[]): void => {
+    createSegment.mutate(
+      { name, rules: rules.map((r) => `${r.field} ${r.operator} ${r.value}`) },
+      {
+        onSuccess: () => {
+          toast.success('Segment created');
+          setBuilderOpen(false);
+        },
+        onError: () => {
+          toast.error('Failed to create segment');
+        },
+      }
+    );
+  };
+
   const deleteTarget = segments.find((s) => s.id === confirmDeleteId);
 
   return (
@@ -539,7 +565,7 @@ const Segments: React.FC = () => {
           </p>
         </div>
         <button
-          onClick={() => navigate('/segments/new')}
+          onClick={() => setBuilderOpen(true)}
           style={{
             display: 'flex',
             alignItems: 'center',
@@ -586,6 +612,10 @@ const Segments: React.FC = () => {
         confirmLabel="Delete"
         variant="danger"
       />
+
+      <AnimatePresence>
+        {builderOpen && <RuleBuilder onClose={() => setBuilderOpen(false)} onSave={handleCreate} />}
+      </AnimatePresence>
     </div>
   );
 };

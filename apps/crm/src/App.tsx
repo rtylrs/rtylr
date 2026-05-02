@@ -3,9 +3,10 @@ import React from 'react';
 import { Routes, Route } from 'react-router-dom';
 import { AppGuard } from '@voxire/auth';
 import { ErrorBoundary } from '@voxire/ui';
+import { unwrap } from '@voxire/api';
 import AppRoutes from './routes/AppRoutes';
 import { ShortcutsProvider } from './shared/components/ShortcutsProvider';
-import api from './shared/lib/api';
+import { safe } from './shared/lib/api';
 
 function NotFound(): React.JSX.Element {
   return (
@@ -50,7 +51,7 @@ const App: React.FC = (): React.JSX.Element => (
     <AppGuard
       appId="crm"
       fetchUser={(): Promise<Record<string, unknown>> =>
-        api.get('/user/me').then((r: { data: Record<string, unknown> }) => r.data)
+        unwrap(safe.get<Record<string, unknown>>('/user/me'))
       }
     >
       <AppFlagGuard flag={FLAG_KEYS.APP_CRM}>

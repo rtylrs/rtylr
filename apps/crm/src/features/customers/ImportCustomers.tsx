@@ -50,15 +50,18 @@ const ImportCustomers: React.FC = () => {
       });
       return o;
     });
-    importMut.mutate(payload, {
-      onSuccess: () => {
-        toast.success(`Imported ${payload.length} customers`);
-        navigate('/customers');
-      },
-      onError: () => {
-        toast.error('Failed to import customers');
-      },
-    });
+    importMut.mutate(
+      { rows: payload, dedupe },
+      {
+        onSuccess: () => {
+          toast.success(`Imported ${payload.length} customers`);
+          navigate('/customers');
+        },
+        onError: () => {
+          toast.error('Failed to import customers');
+        },
+      }
+    );
   };
 
   return (

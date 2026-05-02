@@ -107,13 +107,23 @@ const CustomerProfile: React.FC = () => {
   };
 
   const handleAward = (points: number, reason: string) => {
-    award.mutate({ customerId: customer.id, points, reason });
-    toast.success(`Awarded ${points} points`);
+    award.mutate(
+      { customerId: customer.id, points, reason },
+      {
+        onSuccess: () => toast.success(`Awarded ${points} points`),
+        onError: () => toast.error('Failed to award points'),
+      }
+    );
   };
 
   const handleDeduct = (points: number, reason: string) => {
-    redeem.mutate({ customerId: customer.id, points, reason });
-    toast.success(`Deducted ${points} points`);
+    redeem.mutate(
+      { customerId: customer.id, points, reason },
+      {
+        onSuccess: () => toast.success(`Deducted ${points} points`),
+        onError: () => toast.error('Failed to deduct points'),
+      }
+    );
   };
 
   const handleDelete = () => {

@@ -1,6 +1,7 @@
-import React, { useEffect, useState } from 'react';
+import React, { useEffect, useRef, useState } from 'react';
 import TrialBanner from '../shared/components/TrialBanner';
 import { useLocation, useNavigate, Link, Outlet } from 'react-router-dom';
+import { toast } from 'sonner';
 import { motion, AnimatePresence } from 'motion/react';
 import { APP_URLS } from '@voxire/config';
 import { removeCookie, getDefaultCookieDomain } from '@voxire/auth';
@@ -26,6 +27,7 @@ import {
   X,
 } from 'lucide-react';
 import { useShortcuts } from '../shared/components/ShortcutsProvider';
+import { useForesightLinks } from '@voxire/utils';
 
 const ACCENT = '#3b82f6';
 
@@ -153,6 +155,19 @@ const DefaultLayout: React.FC = () => {
   const navigate = useNavigate();
   const { openPalette } = useShortcuts();
   const [theme, setThemeState] = useState<Theme>(getStoredTheme);
+  const sidebarRef = useRef<HTMLElement | null>(null);
+
+  useForesightLinks(sidebarRef, {
+    '/': () => import('../features/dashboard/Dashboard'),
+    '/customers': () => import('../features/customers/Customers'),
+    '/loyalty': () => import('../features/loyalty/Loyalty'),
+    '/campaigns': () => import('../features/campaigns/Campaigns'),
+    '/segments': () => import('../features/segments/Segments'),
+    '/automations': () => import('../features/automations/Automations'),
+    '/templates': () => import('../features/templates/Templates'),
+    '/feedback': () => import('../features/feedback/Feedback'),
+    '/settings': () => import('../features/settings/Settings'),
+  });
   const [userMenuOpen, setUserMenuOpen] = useState(false);
   const [sidebarOpen, setSidebarOpen] = useState(false);
 
@@ -270,6 +285,7 @@ const DefaultLayout: React.FC = () => {
 
         {/* Navigation */}
         <nav
+          ref={sidebarRef}
           style={{
             flex: 1,
             overflowY: 'auto',
@@ -508,6 +524,8 @@ const DefaultLayout: React.FC = () => {
               </kbd>
             </button>
             <button
+              aria-label="Notifications"
+              onClick={() => toast.info('Notifications coming soon')}
               style={{
                 height: '28px',
                 width: '28px',

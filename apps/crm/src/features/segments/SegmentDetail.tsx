@@ -1,7 +1,7 @@
 import React from 'react';
 import { useParams, useNavigate } from 'react-router-dom';
 import { ArrowLeft, Mail, MessageSquare, PieChart } from 'lucide-react';
-import { useSegmentById, useSegmentCustomers } from './useSegments';
+import { useGetSegment, useSegmentCustomers } from '../../shared/hooks/queries/useSegments';
 import { Breadcrumbs, Button, Card, EmptyState, SkeletonList } from '../../shared/components/ui';
 import { CustomerAvatar, TierBadge } from '../../shared/components/crm';
 import { getTier } from '../../shared/lib/tiers';
@@ -14,7 +14,7 @@ const SegmentDetail: React.FC = () => {
     data: fetched,
     isLoading: segmentLoading,
     error: segmentError,
-  } = useSegmentById(segmentId);
+  } = useGetSegment(segmentId);
   const { data: fetchedCustomers, isLoading } = useSegmentCustomers(segmentId);
   const segment = fetched;
   const customers = fetchedCustomers ?? [];
@@ -132,7 +132,7 @@ const SegmentDetail: React.FC = () => {
         {[
           { label: 'Customers', value: segment.customerCount.toLocaleString() },
           { label: 'Trend', value: segment.trend },
-          { label: 'Avg Spend', value: '$1,240' },
+          { label: 'Avg Spend', value: '—' },
         ].map((s) => (
           <Card key={s.label}>
             <div
