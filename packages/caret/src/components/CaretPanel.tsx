@@ -9,6 +9,9 @@ export interface CaretPanelProps {
   systemContext?: string;
   userId: number;
   apiBaseUrl: string;
+  /** 'inline' renders as a normal flex column that fills its container
+   *  instead of a fixed overlay. The parent controls visibility/width. */
+  variant?: 'inline';
 }
 
 const SUGGESTIONS = [
@@ -18,7 +21,12 @@ const SUGGESTIONS = [
   'How many staff are clocked in?',
 ];
 
-const CaretPanel = ({ systemContext, userId, apiBaseUrl }: CaretPanelProps): React.JSX.Element => {
+const CaretPanel = ({
+  systemContext,
+  userId,
+  apiBaseUrl,
+  variant,
+}: CaretPanelProps): React.JSX.Element => {
   const { isOpen, close, messages, isStreaming } = useCaretStore();
   const { sendMessage } = useCaretStream({ userId, apiBaseUrl, systemContext });
   const [input, setInput] = useState('');
@@ -61,28 +69,43 @@ const CaretPanel = ({ systemContext, userId, apiBaseUrl }: CaretPanelProps): Rea
       role="complementary"
       aria-label="Caret AI assistant"
       style={
-        {
-          '--caret-accent': '#8b5cf6',
-          '--caret-card': '#1e1e1e',
-          '--caret-border': '#2a2a2a',
-          '--caret-text': '#ffffff',
-          '--caret-text-muted': '#888888',
-          '--caret-input-bg': '#2a2a2a',
-
-          position: 'fixed',
-          top: 0,
-          right: 0,
-          width: '380px',
-          height: '100dvh',
-          zIndex: 9999,
-          background: '#141414',
-          borderLeft: '1px solid #2a2a2a',
-          display: 'flex',
-          flexDirection: 'column',
-          transform: isOpen ? 'translateX(0)' : 'translateX(100%)',
-          transition: 'transform 0.25s cubic-bezier(0.4, 0, 0.2, 1)',
-          willChange: 'transform',
-        } as React.CSSProperties
+        variant === 'inline'
+          ? ({
+              '--caret-accent': '#8b5cf6',
+              '--caret-card': '#1e1e1e',
+              '--caret-border': '#2a2a2a',
+              '--caret-text': '#ffffff',
+              '--caret-text-muted': '#888888',
+              '--caret-input-bg': '#2a2a2a',
+              position: 'relative',
+              width: '100%',
+              height: '100%',
+              background: '#141414',
+              borderLeft: '1px solid #2a2a2a',
+              display: 'flex',
+              flexDirection: 'column',
+            } as React.CSSProperties)
+          : ({
+              '--caret-accent': '#8b5cf6',
+              '--caret-card': '#1e1e1e',
+              '--caret-border': '#2a2a2a',
+              '--caret-text': '#ffffff',
+              '--caret-text-muted': '#888888',
+              '--caret-input-bg': '#2a2a2a',
+              position: 'fixed',
+              top: 0,
+              right: 0,
+              width: '380px',
+              height: '100dvh',
+              zIndex: 9999,
+              background: '#141414',
+              borderLeft: '1px solid #2a2a2a',
+              display: 'flex',
+              flexDirection: 'column',
+              transform: isOpen ? 'translateX(0)' : 'translateX(100%)',
+              transition: 'transform 0.25s cubic-bezier(0.4, 0, 0.2, 1)',
+              willChange: 'transform',
+            } as React.CSSProperties)
       }
     >
       {/* Header */}

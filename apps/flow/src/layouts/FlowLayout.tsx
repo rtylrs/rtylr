@@ -31,9 +31,10 @@ import {
   Menu,
   X,
   Shield,
+  Sparkles,
 } from 'lucide-react';
 import { APP_URLS, useFeatureFlag, FLAG_KEYS } from '@voxire/config';
-import { CaretPanel, CaretButton } from '@voxire/caret';
+import { CaretPanel, useCaretStore } from '@voxire/caret';
 import { useForesightLinks } from '@voxire/utils';
 import { useUserStore } from '../shared/stores/userStore';
 import { useThemeStore } from '../shared/stores/themeStore';
@@ -223,6 +224,7 @@ const FlowLayout: React.FC<FlowLayoutProps> = ({ children }) => {
   } = useFlowStore();
 
   const { data: apiNotifications = [] } = useNotifications();
+  const { isOpen: caretOpen } = useCaretStore();
   const unreadNotifications = apiNotifications.filter((n) => !n.read).length;
 
   // Fetch workspaces from API.
@@ -445,7 +447,15 @@ const FlowLayout: React.FC<FlowLayoutProps> = ({ children }) => {
           >
             <Plus size={20} strokeWidth={2} />
           </button>
-          <CaretButton />
+          <button
+            type="button"
+            onClick={() => useCaretStore.getState().toggle()}
+            className="flex h-10 w-10 shrink-0 items-center justify-center rounded-lg transition-colors hover:bg-[var(--flow-hover)]"
+            style={{ color: '#8b5cf6' }}
+            aria-label="Open Caret AI"
+          >
+            <Sparkles size={18} strokeWidth={2} />
+          </button>
         </header>
 
         {mobileNavOpen && (
@@ -821,7 +831,19 @@ const FlowLayout: React.FC<FlowLayoutProps> = ({ children }) => {
             style={{ borderTop: '1px solid var(--flow-border)' }}
           >
             <SidebarLink to="/settings" icon={Settings} label="Settings" />
-            <CaretButton className="w-full" />
+            <button
+              type="button"
+              onClick={() => useCaretStore.getState().toggle()}
+              className="w-full flex items-center gap-2 px-3 py-2 rounded-lg transition-all duration-150"
+              style={{
+                background: caretOpen ? 'rgba(139,92,246,0.15)' : 'rgba(139,92,246,0.08)',
+                color: '#8b5cf6',
+                border: `1px solid ${caretOpen ? 'rgba(139,92,246,0.4)' : 'rgba(139,92,246,0.2)'}`,
+              }}
+            >
+              <Sparkles size={13} />
+              <span className="text-[12px] font-medium">Caret AI</span>
+            </button>
 
             <div className="relative">
               <button
@@ -1056,46 +1078,61 @@ const FlowLayout: React.FC<FlowLayoutProps> = ({ children }) => {
           )}
         </AnimatePresence>
 
-        <div className="flex min-h-0 flex-1 flex-col overflow-hidden">
-          <TrialBanner />
-          {inQuietHours && (
-            <div
-              className="shrink-0 px-3 py-2 text-center text-[10px] sm:px-4 sm:text-[11px] leading-snug"
-              style={{
-                background: 'var(--flow-hover)',
-                color: 'var(--flow-text-muted)',
-                borderBottom: '1px solid var(--flow-border)',
-              }}
-            >
-              Quiet hours ({lifePrefs.quietStart}–{lifePrefs.quietEnd}), non-urgent reminders stay
-              soft. Digest preference: {lifePrefs.digestHour}:00. Change in Settings → Life &
-              rhythm.
-            </div>
-          )}
-          <AnimatePresence mode="wait">
-            <motion.main
-              key={location.pathname}
-              initial={{ opacity: 0, y: 6 }}
-              animate={{ opacity: 1, y: 0 }}
-              exit={{ opacity: 0, y: -4 }}
-              transition={{ duration: 0.18, ease: 'easeOut' }}
-              className="flex-1 overflow-y-auto pb-[max(0.5rem,env(safe-area-inset-bottom))]"
-            >
-              {children}
-            </motion.main>
-          </AnimatePresence>
+        <div className="flex min-h-0 flex-1 overflow-hidden">
+          {/* Main content column */}
+          <div className="flex min-h-0 flex-1 flex-col overflow-hidden">
+            <TrialBanner />
+            {inQuietHours && (
+              <div
+                className="shrink-0 px-3 py-2 text-center text-[10px] sm:px-4 sm:text-[11px] leading-snug"
+                style={{
+                  background: 'var(--flow-hover)',
+                  color: 'var(--flow-text-muted)',
+                  borderBottom: '1px solid var(--flow-border)',
+                }}
+              >
+                Quiet hours ({lifePrefs.quietStart}–{lifePrefs.quietEnd}), non-urgent reminders stay
+                soft. Digest preference: {lifePrefs.digestHour}:00. Change in Settings → Life &
+                rhythm.
+              </div>
+            )}
+            <AnimatePresence mode="wait">
+              <motion.main
+                key={location.pathname}
+                initial={{ opacity: 0, y: 6 }}
+                animate={{ opacity: 1, y: 0 }}
+                exit={{ opacity: 0, y: -4 }}
+                transition={{ duration: 0.18, ease: 'easeOut' }}
+                className="flex-1 overflow-y-auto pb-[max(0.5rem,env(safe-area-inset-bottom))]"
+              >
+                {children}
+              </motion.main>
+            </AnimatePresence>
+          </div>
+
+          {/* Caret AI — inline third column, pushes content left */}
+          <div
+            style={{
+              width: caretOpen ? '360px' : '0px',
+              flexShrink: 0,
+              overflow: 'hidden',
+              transition: 'width 0.25s cubic-bezier(0.4, 0, 0.2, 1)',
+            }}
+          >
+            <CaretPanel
+              variant="inline"
+              appId="flow"
+              userId={caretUserId}
+              apiBaseUrl={import.meta.env.VITE_API_URL || 'https://api.voxire.dev/'}
+              systemContext="User is in the Flow app (projects, tasks, team workspaces)"
+            />
+          </div>
         </div>
 
         <CommandBar />
         <QuickCreate />
         <BulkEditBar />
       </div>
-      <CaretPanel
-        appId="flow"
-        userId={caretUserId}
-        apiBaseUrl={import.meta.env.VITE_API_URL ?? 'https://api.voxire.dev/'}
-        systemContext="User is in the Flow app (projects, tasks, team workspaces)"
-      />
     </>
   );
 };
