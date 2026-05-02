@@ -1,4 +1,4 @@
-import React, { useState, useEffect, useMemo } from 'react';
+import React, { useState, useEffect, useMemo, useRef } from 'react';
 import TrialBanner from '../shared/components/TrialBanner';
 import { Link, useLocation, useNavigate, useParams } from 'react-router-dom';
 import { motion, AnimatePresence } from 'motion/react';
@@ -32,6 +32,7 @@ import {
   Shield,
 } from 'lucide-react';
 import { APP_URLS, useFeatureFlag, FLAG_KEYS } from '@voxire/config';
+import { useForesightLinks } from '@voxire/utils';
 import { useUserStore } from '../shared/stores/userStore';
 import { useThemeStore } from '../shared/stores/themeStore';
 import { useFlowStore } from '../shared/stores/flowStore';
@@ -306,6 +307,21 @@ const FlowLayout: React.FC<FlowLayoutProps> = ({ children }) => {
   }, [currentWorkspaceId, userId]);
   useRealtime(realtimeTopics, handleRealtime);
 
+  const sidebarRef = useRef<HTMLDivElement | null>(null);
+  useForesightLinks(sidebarRef, {
+    '/inbox': () => import('../features/inbox/Inbox'),
+    '/my-issues': () => import('../features/tasks/MyIssues'),
+    '/today': () => import('../features/focus-today/FocusToday'),
+    '/triage': () => import('../features/triage/Triage'),
+    '/backlog': () => import('../features/backlog/Backlog'),
+    '/cycles': () => import('../features/cycles/Cycles'),
+    '/milestones': () => import('../features/milestones/Milestones'),
+    '/calendar': () => import('../features/calendar/Calendar'),
+    '/views': () => import('../features/views/Views'),
+    '/archive': () => import('../features/archive/Archive'),
+    '/settings': () => import('../features/settings/FlowSettings'),
+  });
+
   const createProject = useCreateProject();
   const [workspaceSwitcherOpen, setWorkspaceSwitcherOpen] = useState(false);
   const [userMenuOpen, setUserMenuOpen] = useState(false);
@@ -567,7 +583,7 @@ const FlowLayout: React.FC<FlowLayoutProps> = ({ children }) => {
           </button>
         </div>
 
-        <div className={cn('flex-1 min-h-0 overflow-y-auto py-2', sx)}>
+        <div ref={sidebarRef} className={cn('flex-1 min-h-0 overflow-y-auto py-2', sx)}>
           <div className="flex flex-col gap-2">
             <nav className="flex flex-col gap-px">
               <SidebarLink to="/inbox" icon={Inbox} label="Inbox" badge={unreadNotifications} />

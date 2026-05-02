@@ -1,5 +1,6 @@
-import React, { useEffect, useState } from 'react';
+import React, { useEffect, useRef, useState } from 'react';
 import { useLocation, Link } from 'react-router-dom';
+import { useForesightLinks } from '@voxire/utils';
 import { motion, AnimatePresence } from 'motion/react';
 import { APP_URLS } from '@voxire/config';
 import { removeCookie, getDefaultCookieDomain } from '@voxire/auth';
@@ -136,6 +137,18 @@ const DefaultLayout: React.FC<DefaultLayoutProps> = ({ children }) => {
   const [sidebarOpen, setSidebarOpen] = useState(false);
 
   const pageTitle = getPageTitle(location.pathname);
+  const sidebarRef = useRef<HTMLElement | null>(null);
+
+  useForesightLinks(sidebarRef, {
+    '/': () => import('../features/dashboard/Dashboard'),
+    '/revenue': () => import('../features/revenue/Revenue'),
+    '/customers': () => import('../features/customers/Customers'),
+    '/products': () => import('../features/products/Products'),
+    '/operations': () => import('../features/operations/Operations'),
+    '/financial': () => import('../features/financial/Financial'),
+    '/reports': () => import('../features/reports/Reports'),
+    '/settings': () => import('../features/settings/Settings'),
+  });
 
   useEffect(() => {
     applyTheme(theme);
@@ -243,7 +256,7 @@ const DefaultLayout: React.FC<DefaultLayoutProps> = ({ children }) => {
           </a>
         </div>
 
-        <nav className="flex-1 overflow-y-auto py-2 px-2 space-y-0.5">
+        <nav ref={sidebarRef} className="flex-1 overflow-y-auto py-2 px-2 space-y-0.5">
           {navItems.map((item) => (
             <SidebarNavItem key={item.path} {...item} />
           ))}
