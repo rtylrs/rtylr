@@ -17,6 +17,7 @@
     "@types/lodash": "^4.17.24",
     "@types/react-helmet": "^6.1.11",
     "@voxire/api": "workspace:*",
+    "@voxire/caret": "workspace:*",
     "@voxire/auth": "workspace:*",
     "@voxire/config": "workspace:*",
     "@voxire/consent": "workspace:*",
