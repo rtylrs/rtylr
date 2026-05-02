@@ -33,7 +33,7 @@ import {
   Search,
   Sparkles,
 } from 'lucide-react';
-import { CaretPanel, CaretButton } from '@voxire/caret';
+import { CaretPanel, CaretButton, useCaretStore } from '@voxire/caret';
 import { useUserStore } from '../shared/stores/userStore';
 import { useThemeStore } from '../shared/stores/themeStore';
 import { cn } from '../shared/lib/utils';
@@ -448,7 +448,7 @@ const DefaultLayout: React.FC<DefaultLayoutProps> = ({ children }) => {
                 </kbd>
               </button>
               <button
-                onClick={() => navigate('/chat')}
+                onClick={() => useCaretStore.getState().open()}
                 className="h-7 rounded-lg flex items-center gap-1.5 px-3 transition-all duration-150"
                 style={{
                   background: 'rgba(139,92,246,0.1)',

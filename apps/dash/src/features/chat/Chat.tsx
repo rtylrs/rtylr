@@ -2,7 +2,7 @@ import React, { useRef, useEffect, useCallback } from 'react';
 import { Send, Sparkles } from 'lucide-react';
 import { motion, AnimatePresence } from 'motion/react';
 import { useCaretStore, useCaretStream } from '@voxire/caret';
-import { useUserStore } from '../../../shared/stores/userStore';
+import { useUserStore } from '../../shared/stores/userStore';
 
 const SUGGESTIONS = [
   'How much revenue did we make today?',
