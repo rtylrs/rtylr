@@ -110,6 +110,6 @@ describe('apiTaskToTask', () => {
 
   it('passes labels through unchanged', () => {
     const out = apiTaskToTask(baseApiTask({ labels: [1, 2, 3] as unknown as string[] }));
-    expect(out.labels).toEqual([1, 2, 3]);
+    expect(out.labelIds).toEqual([1, 2, 3]);
   });
 });
