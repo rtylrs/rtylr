@@ -5,6 +5,7 @@ import { ASSETS, APP_URLS } from '@voxire/config';
 import { ManageConsentLink } from '@voxire/consent';
 import React from 'react';
 import { navigateExternal } from '../../../lib/navigation';
+import { VoxireCredit } from './VoxireCredit';
 import styles from './Footer.module.scss';
 
 const Footer: React.FC = () => {
@@ -165,6 +166,7 @@ const Footer: React.FC = () => {
           <p className={styles.copyright}>© RTYLR {new Date().getFullYear()}</p>
         </div>
       </div>
+      <VoxireCredit />
     </footer>
   );
 };
