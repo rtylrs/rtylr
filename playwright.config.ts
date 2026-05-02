@@ -50,7 +50,10 @@ export default defineConfig({
   webServer: [
     {
       command: 'pnpm --filter @rtylr/landing dev',
-      port: 4200,
+      // Use url (not port) so Playwright makes a real HTTP GET — this
+      // triggers Vite's dep pre-bundling before tests start, preventing
+      // mid-test page reloads caused by first-request dep optimisation.
+      url: 'http://localhost:4200',
       reuseExistingServer: !process.env.CI,
       // Next.js cold boot with Tailwind compile can reach 30s on first run.
       timeout: 120_000,
@@ -59,7 +62,7 @@ export default defineConfig({
     },
     {
       command: 'pnpm --filter @rtylr/recruit dev',
-      port: 5184,
+      url: 'http://localhost:5184',
       reuseExistingServer: !process.env.CI,
       timeout: 120_000,
       stdout: 'pipe',
@@ -67,7 +70,7 @@ export default defineConfig({
     },
     {
       command: 'pnpm --filter @rtylr/erp dev',
-      port: 5179,
+      url: 'http://localhost:5179',
       reuseExistingServer: !process.env.CI,
       timeout: 120_000,
       stdout: 'pipe',
@@ -75,7 +78,7 @@ export default defineConfig({
     },
     {
       command: 'pnpm --filter @rtylr/finance dev',
-      port: 5182,
+      url: 'http://localhost:5182',
       reuseExistingServer: !process.env.CI,
       timeout: 120_000,
       stdout: 'pipe',
@@ -83,7 +86,7 @@ export default defineConfig({
     },
     {
       command: 'pnpm --filter @rtylr/crm dev',
-      port: 5181,
+      url: 'http://localhost:5181',
       reuseExistingServer: !process.env.CI,
       timeout: 120_000,
       stdout: 'pipe',
@@ -91,7 +94,7 @@ export default defineConfig({
     },
     {
       command: 'pnpm --filter @rtylr/auth dev',
-      port: 5176,
+      url: 'http://localhost:5176',
       reuseExistingServer: !process.env.CI,
       timeout: 120_000,
       stdout: 'pipe',
@@ -99,7 +102,7 @@ export default defineConfig({
     },
     {
       command: 'pnpm --filter dash dev',
-      port: 5175,
+      url: 'http://localhost:5175',
       reuseExistingServer: !process.env.CI,
       timeout: 120_000,
       stdout: 'pipe',
@@ -107,7 +110,7 @@ export default defineConfig({
     },
     {
       command: 'pnpm --filter @rtylr/menu dev',
-      port: 5174,
+      url: 'http://localhost:5174',
       reuseExistingServer: !process.env.CI,
       timeout: 120_000,
       stdout: 'pipe',
@@ -115,7 +118,7 @@ export default defineConfig({
     },
     {
       command: 'pnpm --filter @rtylr/flow dev',
-      port: 5183,
+      url: 'http://localhost:5183',
       reuseExistingServer: !process.env.CI,
       timeout: 120_000,
       stdout: 'pipe',
@@ -123,7 +126,7 @@ export default defineConfig({
     },
     {
       command: 'pnpm --filter @rtylr/insights dev',
-      port: 5187,
+      url: 'http://localhost:5187',
       reuseExistingServer: !process.env.CI,
       timeout: 120_000,
       stdout: 'pipe',
