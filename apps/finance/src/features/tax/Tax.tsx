@@ -1,19 +1,29 @@
 import React, { useState } from 'react';
 import { motion } from 'motion/react';
 import { Download, Settings, CheckCircle, Clock, AlertTriangle } from 'lucide-react';
-import { TaxPeriod, TaxConfig as ApiTaxConfig } from '../../shared/services/financeApi';
-import { useTaxReport } from '../../shared/hooks/useTax';
+import { toast } from 'sonner';
+import { TaxPeriod } from '../../shared/services/financeApi';
+import { useTaxReport, useTaxConfig, useCreateTaxConfig } from '../../shared/hooks/useTax';
 import { exportTaxSummaryCsv } from '../../shared/lib/exports';
 
-const ACCENT = '#10b981';
+const ACCENT = 'var(--finance-accent, #10b981)';
 
 const fmt = (n: number) =>
   n.toLocaleString('en-US', { style: 'currency', currency: 'USD', minimumFractionDigits: 2 });
 
 const statusStyle: Record<TaxPeriod['status'], React.CSSProperties> = {
-  Filed: { background: 'rgba(16,185,129,0.12)', color: '#10b981' },
-  Pending: { background: 'rgba(245,158,11,0.12)', color: '#f59e0b' },
-  Due: { background: 'rgba(239,68,68,0.12)', color: '#ef4444' },
+  Filed: {
+    background: 'color-mix(in srgb, var(--finance-accent, #10b981) 12%, transparent)',
+    color: 'var(--finance-accent, #10b981)',
+  },
+  Pending: {
+    background: 'color-mix(in srgb, var(--finance-warning, #f59e0b) 12%, transparent)',
+    color: 'var(--finance-warning, #f59e0b)',
+  },
+  Due: {
+    background: 'color-mix(in srgb, var(--finance-danger, #ef4444) 12%, transparent)',
+    color: 'var(--finance-danger, #ef4444)',
+  },
 };
 
 const statusIcon: Record<TaxPeriod['status'], React.ReactNode> = {
@@ -34,16 +44,22 @@ interface TaxConfig {
   name: string;
   rate: number;
 }
-const defaultRates: TaxConfig[] = [
-  { name: 'Standard VAT', rate: 7.0 },
-  { name: 'Reduced VAT', rate: 3.5 },
-  { name: 'Services Tax', rate: 5.0 },
-];
 
 const Tax: React.FC = () => {
   const [showConfig, setShowConfig] = useState(false);
-  const [rates, setRates] = useState<TaxConfig[]>(defaultRates);
-  const { data: taxReport, isLoading: loading } = useTaxReport();
+  const { data: taxConfigData } = useTaxConfig();
+  const saveRates = useCreateTaxConfig();
+
+  // Derive editable rates from real data; fall back to empty list while loading
+  const serverRates: TaxConfig[] = (taxConfigData ?? []).map((c) => ({
+    name: c.name,
+    rate: c.rate,
+  }));
+  const [rates, setRates] = useState<TaxConfig[] | null>(null);
+  // Sync server rates into local state once loaded (only on first load)
+  const editableRates: TaxConfig[] = rates ?? serverRates;
+
+  const { data: taxReport } = useTaxReport();
 
   const vatSummary = taxReport?.vatSummary ?? { collected: 0, owed: 0, paid: 0 };
   const taxPeriods: TaxPeriod[] = taxReport?.periods ?? [];
@@ -129,14 +145,19 @@ const Tax: React.FC = () => {
           {
             label: 'Tax Collected (YTD)',
             value: vatSummary.collected,
-            color: '#10b981',
+            color: 'var(--finance-accent, #10b981)',
             note: 'From invoices',
           },
-          { label: 'Tax Owed', value: vatSummary.owed, color: '#f59e0b', note: 'Net payable' },
+          {
+            label: 'Tax Owed',
+            value: vatSummary.owed,
+            color: 'var(--finance-warning, #f59e0b)',
+            note: 'Net payable',
+          },
           {
             label: 'Tax Paid',
             value: vatSummary.paid,
-            color: '#3b82f6',
+            color: 'var(--finance-info, #3b82f6)',
             note: 'Remitted to authority',
           },
         ].map(({ label, value, color, note }) => (
@@ -186,18 +207,22 @@ const Tax: React.FC = () => {
             gap: 12,
             padding: '14px 16px',
             borderRadius: 10,
-            background: 'rgba(245,158,11,0.08)',
-            border: '1px solid rgba(245,158,11,0.25)',
+            background: 'color-mix(in srgb, var(--finance-warning, #f59e0b) 8%, transparent)',
+            border:
+              '1px solid color-mix(in srgb, var(--finance-warning, #f59e0b) 25%, transparent)',
           }}
         >
-          <AlertTriangle size={16} style={{ color: '#f59e0b', flexShrink: 0, marginTop: 1 }} />
+          <AlertTriangle
+            size={16}
+            style={{ color: 'var(--finance-warning, #f59e0b)', flexShrink: 0, marginTop: 1 }}
+          />
           <div>
             <p
               style={{
                 margin: 0,
                 fontSize: 13,
                 fontWeight: 600,
-                color: '#f59e0b',
+                color: 'var(--finance-warning, #f59e0b)',
                 marginBottom: 2,
               }}
             >
@@ -217,20 +242,28 @@ const Tax: React.FC = () => {
           initial={{ opacity: 0, y: -8 }}
           animate={{ opacity: 1, y: 0 }}
           transition={{ duration: 0.2 }}
-          style={{ ...cardStyle, border: `1px solid ${ACCENT}30` }}
+          style={{
+            ...cardStyle,
+            border: '1px solid color-mix(in srgb, var(--finance-accent, #10b981) 30%, transparent)',
+          }}
         >
           <h3
             style={{ margin: '0 0 14px', fontSize: 14, fontWeight: 600, color: 'var(--hub-text)' }}
           >
             Tax Rate Configuration
           </h3>
+          {editableRates.length === 0 && (
+            <p style={{ fontSize: 13, color: 'var(--hub-text-muted)', margin: '0 0 10px' }}>
+              No tax rates configured yet.
+            </p>
+          )}
           <div style={{ display: 'flex', flexDirection: 'column', gap: 10 }}>
-            {rates.map((r, i) => (
+            {editableRates.map((r, i) => (
               <div key={i} style={{ display: 'flex', alignItems: 'center', gap: 12 }}>
                 <input
                   value={r.name}
                   onChange={(e) => {
-                    const next = [...rates];
+                    const next = [...editableRates];
                     next[i] = { ...next[i], name: e.target.value };
                     setRates(next);
                   }}
@@ -251,7 +284,7 @@ const Tax: React.FC = () => {
                     value={r.rate}
                     step={0.5}
                     onChange={(e) => {
-                      const next = [...rates];
+                      const next = [...editableRates];
                       next[i] = { ...next[i], rate: parseFloat(e.target.value) };
                       setRates(next);
                     }}
@@ -273,6 +306,7 @@ const Tax: React.FC = () => {
             ))}
           </div>
           <button
+            disabled={saveRates.isPending}
             style={{
               marginTop: 14,
               padding: '7px 16px',
@@ -282,11 +316,25 @@ const Tax: React.FC = () => {
               border: 'none',
               fontSize: 13,
               fontWeight: 600,
-              cursor: 'pointer',
+              cursor: saveRates.isPending ? 'not-allowed' : 'pointer',
+              opacity: saveRates.isPending ? 0.6 : 1,
             }}
-            onClick={() => setShowConfig(false)}
+            onClick={() => {
+              // Persist each edited rate via the mutation
+              editableRates.forEach((r) => {
+                saveRates.mutate(r, {
+                  onSuccess: () => {
+                    toast.success('Tax rates saved');
+                    setShowConfig(false);
+                  },
+                  onError: () => {
+                    toast.error('Failed to save tax rates');
+                  },
+                });
+              });
+            }}
           >
-            Save Rates
+            {saveRates.isPending ? 'Saving…' : 'Save Rates'}
           </button>
         </motion.div>
       )}
@@ -413,7 +461,10 @@ const Tax: React.FC = () => {
                   style={{
                     padding: '12px 16px',
                     fontSize: 12,
-                    color: tp.status === 'Due' ? '#ef4444' : 'var(--hub-text-muted)',
+                    color:
+                      tp.status === 'Due'
+                        ? 'var(--finance-danger, #ef4444)'
+                        : 'var(--hub-text-muted)',
                   }}
                 >
                   {tp.dueDate}
