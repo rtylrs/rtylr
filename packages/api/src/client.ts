@@ -2,7 +2,7 @@ import axios, { type AxiosInstance } from 'axios';
 
 const getBaseUrl = (): string => {
   return (
-    (import.meta as ImportMeta & { env: Record<string, string> }).env.VITE_API_URL ??
+    (import.meta as ImportMeta & { env: Record<string, string> }).env.VITE_API_URL ||
     'https://api.voxire.dev/'
   );
 };
