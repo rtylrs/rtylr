@@ -2,6 +2,7 @@ import React, { useMemo } from 'react';
 import { Link } from 'react-router-dom';
 import { motion } from 'motion/react';
 import { Sun, Pin } from 'lucide-react';
+import { useTranslation } from 'react-i18next';
 import { useFlowStore, Task, Project } from '../../shared/stores/flowStore';
 import { useMyIssues } from '../tasks/useMyIssues';
 import { apiTaskToTask } from '../../shared/lib/taskMapper';
@@ -11,9 +12,10 @@ import { formatEffortMinutes } from '../../shared/lib/effortPresets';
 import { formatDate } from '../../shared/lib/utils';
 import PriorityIcon from '../../shared/components/PriorityIcon';
 
-const ACCENT = '#64C5B9';
+const ACCENT_VAR = 'var(--flow-accent, #64C5B9)';
 
 const FocusToday: React.FC = () => {
+  const { t } = useTranslation();
   const { projects, activeWorkspaceId } = useFlowStore();
   const { data: myTasks } = useMyIssues();
   const tasks: Task[] = (myTasks ?? []).map(apiTaskToTask);
@@ -52,9 +54,9 @@ const FocusToday: React.FC = () => {
     <div className="flex flex-col h-full max-w-3xl mx-auto px-4 py-6 sm:px-6 sm:py-8">
       <motion.div initial={{ opacity: 0, y: -6 }} animate={{ opacity: 1, y: 0 }} className="mb-8">
         <div className="flex items-center gap-2 mb-1">
-          <Sun size={22} style={{ color: ACCENT }} strokeWidth={2} />
+          <Sun size={22} style={{ color: ACCENT_VAR }} strokeWidth={2} />
           <h1 className="text-xl font-bold" style={{ color: 'var(--flow-text)' }}>
-            Today
+            {t('nav.focusToday', 'Today')}
           </h1>
         </div>
         <p className="text-[13px] leading-relaxed" style={{ color: 'var(--flow-text-muted)' }}>
@@ -67,7 +69,7 @@ const FocusToday: React.FC = () => {
             <Link
               to="/triage"
               className="underline-offset-2 hover:underline"
-              style={{ color: ACCENT }}
+              style={{ color: ACCENT_VAR }}
             >
               Triage
             </Link>{' '}
@@ -83,10 +85,10 @@ const FocusToday: React.FC = () => {
         {focusTasks.length === 0 ? (
           <div className="p-10 text-center">
             <p className="text-[14px] font-medium mb-1" style={{ color: 'var(--flow-text-muted)' }}>
-              Nothing pinned for today
+              {t('focusToday.emptyTitle')}
             </p>
             <p className="text-[12px] max-w-sm mx-auto" style={{ color: 'var(--flow-text-dim)' }}>
-              Pin tasks from task detail, or set a due date to today. Enjoy the clear runway.
+              {t('focusToday.emptyHint')}
             </p>
           </div>
         ) : (
@@ -124,7 +126,7 @@ const FocusRow: React.FC<{
       <div className="flex-1 min-w-0">
         <div className="flex items-center gap-2">
           {task.focusPin && (
-            <Pin size={12} className="shrink-0" style={{ color: ACCENT }} aria-hidden />
+            <Pin size={12} className="shrink-0" style={{ color: ACCENT_VAR }} aria-hidden />
           )}
           <span className="text-[13px] font-medium truncate" style={{ color: 'var(--flow-text)' }}>
             {task.title}

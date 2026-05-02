@@ -9,7 +9,7 @@ import { useFlowStore } from '../../shared/stores/flowStore';
 import PriorityIcon from '../../shared/components/PriorityIcon';
 import type { ApiTask } from '../../shared/services/flowApi';
 
-const ACCENT = '#64C5B9';
+const ACCENT_VAR = 'var(--flow-accent, #64C5B9)';
 
 interface CreateModal {
   date: string;
@@ -173,7 +173,7 @@ const Calendar: React.FC = () => {
                   <span
                     className="text-[10px] font-semibold h-5 w-5 flex items-center justify-center rounded-full"
                     style={{
-                      background: isToday ? ACCENT : 'transparent',
+                      background: isToday ? ACCENT_VAR : 'transparent',
                       color: isToday ? '#0a0a0a' : 'var(--flow-text-muted)',
                     }}
                   >
@@ -210,7 +210,7 @@ const Calendar: React.FC = () => {
                     <button
                       onClick={(e) => e.stopPropagation()}
                       className="text-[9px] px-1 hover:underline"
-                      style={{ color: ACCENT }}
+                      style={{ color: ACCENT_VAR }}
                     >
                       +{dayTasks.length - 3} more
                     </button>
@@ -245,7 +245,7 @@ const Calendar: React.FC = () => {
               <div className="flex items-center justify-between mb-4">
                 <h2 className="text-[13px] font-semibold" style={{ color: 'var(--flow-text)' }}>
                   New task for{' '}
-                  <span style={{ color: ACCENT }}>
+                  <span style={{ color: ACCENT_VAR }}>
                     {new Date(createModal.date + 'T00:00:00').toLocaleDateString('en-US', {
                       month: 'short',
                       day: 'numeric',
@@ -306,7 +306,7 @@ const Calendar: React.FC = () => {
                   onClick={submitCreate}
                   disabled={!newTitle.trim() || createTask.isPending}
                   className="px-3 py-1.5 rounded text-[12px] font-semibold disabled:opacity-40"
-                  style={{ background: ACCENT, color: '#0a0a0a' }}
+                  style={{ background: ACCENT_VAR, color: '#0a0a0a' }}
                 >
                   {createTask.isPending ? 'Creating…' : 'Create'}
                 </button>

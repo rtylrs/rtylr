@@ -14,11 +14,10 @@ function daysLeft(trialEndsAt: string | null): number {
   return Math.max(0, Math.ceil((new Date(trialEndsAt).getTime() - Date.now()) / 86_400_000));
 }
 
-const DISMISSED_KEY = 'trial_banner_dismissed_date';
+const DISMISSED_KEY = 'trial_banner_dismissed';
 
 const TrialBanner: React.FC = (): React.JSX.Element | null => {
-  const today = new Date().toISOString().slice(0, 10);
-  const [dismissed, setDismissed] = useState(() => localStorage.getItem(DISMISSED_KEY) === today);
+  const [dismissed, setDismissed] = useState(() => localStorage.getItem(DISMISSED_KEY) === '1');
 
   const { data } = useQuery({
     queryKey: ['subscription-banner'],
@@ -33,7 +32,7 @@ const TrialBanner: React.FC = (): React.JSX.Element | null => {
   if (days > 7) return null;
 
   const dismiss = (): void => {
-    localStorage.setItem(DISMISSED_KEY, today);
+    localStorage.setItem(DISMISSED_KEY, '1');
     setDismissed(true);
   };
 
@@ -46,8 +45,8 @@ const TrialBanner: React.FC = (): React.JSX.Element | null => {
         borderBottom: '1px solid rgba(245,158,11,0.25)',
       }}
     >
-      <Clock size={14} style={{ color: '#f59e0b', flexShrink: 0 }} />
-      <p className="flex-1 font-medium" style={{ color: '#92400e' }}>
+      <Clock size={14} style={{ color: 'var(--flow-warning, #f59e0b)', flexShrink: 0 }} />
+      <p className="flex-1 font-medium" style={{ color: 'var(--flow-warning-dark, #92400e)' }}>
         {days === 0
           ? 'Your trial ends today.'
           : `Your trial ends in ${days} day${days !== 1 ? 's' : ''}.`}{' '}
@@ -56,7 +55,7 @@ const TrialBanner: React.FC = (): React.JSX.Element | null => {
       <a
         href={`${APP_URLS.dash as string}/settings/billing`}
         className="flex items-center gap-1.5 px-3 py-1 rounded-lg text-xs font-semibold shrink-0"
-        style={{ background: '#f59e0b', color: '#fff' }}
+        style={{ background: 'var(--flow-warning, #f59e0b)', color: '#fff' }}
       >
         <Zap size={11} />
         Activate plan
@@ -66,7 +65,7 @@ const TrialBanner: React.FC = (): React.JSX.Element | null => {
         aria-label="Dismiss"
         onClick={dismiss}
         className="h-6 w-6 flex items-center justify-center rounded shrink-0 hover:bg-amber-100 transition-colors"
-        style={{ color: '#92400e' }}
+        style={{ color: 'var(--flow-warning-dark, #92400e)' }}
       >
         <X size={12} />
       </button>

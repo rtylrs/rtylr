@@ -1,4 +1,5 @@
 import React from 'react';
+import { useTranslation } from 'react-i18next';
 import {
   Plus,
   ArrowRight,
@@ -37,32 +38,38 @@ function timeAgo(ts: string): string {
   return Math.floor(hours / 24) + 'd ago';
 }
 
-function describe(a: ActivityEntry): string {
-  switch (a.type) {
-    case 'created':
-      return 'created this task';
-    case 'status_change':
-      return `changed status from ${a.from} to ${a.to}`;
-    case 'assignee_change':
-      return `assigned to ${a.to}`;
-    case 'priority_change':
-      return `changed priority from ${a.from} to ${a.to}`;
-    case 'due_date_change':
-      return `changed due date to ${a.to}`;
-    case 'comment':
-      return `commented`;
-    case 'label_added':
-      return `added label ${a.detail}`;
-    case 'attachment':
-      return `attached ${a.detail}`;
-  }
+function useActivityLabel(): (a: ActivityEntry) => string {
+  const { t } = useTranslation();
+  return (a: ActivityEntry): string => {
+    switch (a.type) {
+      case 'created':
+        return t('activity.created');
+      case 'status_change':
+        return t('activity.statusChanged', { from: a.from, to: a.to });
+      case 'assignee_change':
+        return t('activity.assigneeChanged', { to: a.to });
+      case 'priority_change':
+        return t('activity.priorityChanged', { from: a.from, to: a.to });
+      case 'due_date_change':
+        return t('activity.dueDateChanged', { to: a.to });
+      case 'comment':
+        return t('activity.commented');
+      case 'label_added':
+        return t('activity.labelAdded', { detail: a.detail });
+      case 'attachment':
+        return t('activity.attachment', { detail: a.detail });
+    }
+  };
 }
 
 export const ActivityFeed: React.FC<ActivityFeedProps> = ({ entries }) => {
+  const { t } = useTranslation();
+  const getActivityLabel = useActivityLabel();
+
   if (entries.length === 0) {
     return (
       <div className="text-[12px] text-center py-4" style={{ color: 'var(--flow-text-dim)' }}>
-        No activity yet.
+        {t('activity.empty', 'No activity yet.')}
       </div>
     );
   }
@@ -82,7 +89,7 @@ export const ActivityFeed: React.FC<ActivityFeedProps> = ({ entries }) => {
               <span className="font-semibold" style={{ color: 'var(--flow-text)' }}>
                 {a.actor}
               </span>{' '}
-              {describe(a)}
+              {getActivityLabel(a)}
               <span className="ml-2" style={{ color: 'var(--flow-text-dim)' }}>
                 {timeAgo(a.createdAt)}
               </span>

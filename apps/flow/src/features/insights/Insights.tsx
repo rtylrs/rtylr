@@ -1,19 +1,42 @@
 import React from 'react';
 import { motion } from 'motion/react';
 import { BarChart3, TrendingUp, Clock, CheckCircle2 } from 'lucide-react';
+import { useTranslation } from 'react-i18next';
 import { useInsights } from './useInsights';
 import { useFlowStore } from '../../shared/stores/flowStore';
+import { Skeleton, CardSkeleton } from '../../shared/components/Skeleton';
 
 const Insights: React.FC = () => {
+  const { t } = useTranslation();
   const { activeWorkspaceId } = useFlowStore();
   const { data, isLoading } = useInsights(activeWorkspaceId);
 
-  if (isLoading || !data)
+  if (isLoading || !data) {
     return (
-      <div className="p-6 text-sm" style={{ color: 'var(--flow-text-dim)' }}>
-        Loading insights...
+      <div className="flex flex-col h-full overflow-auto">
+        <div
+          className="px-6 py-4 shrink-0"
+          style={{ borderBottom: '1px solid var(--flow-border)' }}
+        >
+          <Skeleton width={120} height={16} className="mb-1" />
+          <Skeleton width={200} height={11} />
+        </div>
+        <div className="p-6 max-w-6xl space-y-6">
+          <div className="grid grid-cols-4 gap-4">
+            {[1, 2, 3, 4].map((i) => (
+              <CardSkeleton key={i} />
+            ))}
+          </div>
+          <CardSkeleton />
+          <div className="grid grid-cols-2 gap-4">
+            <CardSkeleton />
+            <CardSkeleton />
+          </div>
+          <CardSkeleton />
+        </div>
       </div>
     );
+  }
 
   const maxThroughput = Math.max(...(data.throughput?.map((t) => t.completed) ?? [0]));
 
@@ -64,7 +87,7 @@ const Insights: React.FC = () => {
         </div>
 
         {/* Burndown */}
-        <ChartCard title="Burndown (active cycle)">
+        <ChartCard title={t('insights.burndown')}>
           {data.burndown.length === 0 ? (
             <EmptyChart />
           ) : (
@@ -113,7 +136,7 @@ const Insights: React.FC = () => {
         </ChartCard>
 
         <div className="grid grid-cols-2 gap-4">
-          <ChartCard title="Throughput (tasks/week)">
+          <ChartCard title={t('insights.throughput')}>
             <div className="flex items-end gap-2 h-40">
               {data.throughput.map((t) => (
                 <div key={t.week} className="flex-1 flex flex-col items-center gap-1">
@@ -132,7 +155,7 @@ const Insights: React.FC = () => {
             </div>
           </ChartCard>
 
-          <ChartCard title="Velocity (last cycles)">
+          <ChartCard title={t('insights.velocity')}>
             <div className="space-y-2">
               {data.velocity.map((v) => (
                 <div key={v.cycle}>
@@ -160,7 +183,7 @@ const Insights: React.FC = () => {
           </ChartCard>
         </div>
 
-        <ChartCard title="Time tracked by person">
+        <ChartCard title={t('insights.timeByPerson')}>
           <div className="space-y-2">
             {data.timeByMember.map((m) => (
               <div key={m.id} className="flex items-center gap-3">

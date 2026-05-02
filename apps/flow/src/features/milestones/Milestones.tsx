@@ -1,10 +1,12 @@
 import React, { useState } from 'react';
 import { motion } from 'motion/react';
 import { toast } from 'sonner';
+import { useTranslation } from 'react-i18next';
 import { Milestone as MilestoneIcon, Plus } from 'lucide-react';
 import { useMilestones, useCreateMilestone } from './useMilestones';
 import { formatDate } from '../../shared/lib/utils';
 import EmptyState from '../../shared/components/EmptyState';
+import { CardSkeleton } from '../../shared/components/Skeleton';
 
 const STATUS_STYLES: Record<string, { bg: string; color: string }> = {
   planning: { bg: 'rgba(107,114,128,0.15)', color: '#9ca3af' },
@@ -14,18 +16,22 @@ const STATUS_STYLES: Record<string, { bg: string; color: string }> = {
 };
 
 const Milestones: React.FC = () => {
+  const { t } = useTranslation();
   const { data: milestones = [], isLoading } = useMilestones();
   const createMilestone = useCreateMilestone();
   const [showCreate, setShowCreate] = useState(false);
   const [newName, setNewName] = useState('');
   const [newDate, setNewDate] = useState('');
 
-  if (isLoading)
+  if (isLoading) {
     return (
-      <div className="p-6 text-sm" style={{ color: 'var(--flow-text-dim)' }}>
-        Loading milestones...
+      <div className="p-6 grid grid-cols-1 md:grid-cols-2 gap-4">
+        {[1, 2, 3, 4].map((i) => (
+          <CardSkeleton key={i} />
+        ))}
       </div>
     );
+  }
 
   if (milestones.length === 0) {
     return (
@@ -54,7 +60,7 @@ const Milestones: React.FC = () => {
         <button
           onClick={() => setShowCreate(true)}
           className="flex items-center gap-1.5 px-3 py-1.5 rounded text-[11px] font-semibold"
-          style={{ background: '#64C5B9', color: '#0a0a0a' }}
+          style={{ background: 'var(--flow-accent, #64C5B9)', color: '#0a0a0a' }}
         >
           <Plus size={11} /> New milestone
         </button>
@@ -95,17 +101,18 @@ const Milestones: React.FC = () => {
                   { name: newName, targetDate: newDate || new Date().toISOString().slice(0, 10) },
                   {
                     onSuccess: () => {
-                      toast.success('Milestone created');
+                      toast.success(t('toasts.milestoneCreated'));
                       setShowCreate(false);
                       setNewName('');
                       setNewDate('');
                     },
+                    onError: () => toast.error(t('errors.generic')),
                   }
                 );
               }}
               disabled={createMilestone.isPending || !newName.trim()}
               className="px-3 py-1.5 rounded text-[11px] font-semibold disabled:opacity-50"
-              style={{ background: '#64C5B9', color: '#0a0a0a' }}
+              style={{ background: 'var(--flow-accent, #64C5B9)', color: '#0a0a0a' }}
             >
               {createMilestone.isPending ? 'Creating...' : 'Create'}
             </button>

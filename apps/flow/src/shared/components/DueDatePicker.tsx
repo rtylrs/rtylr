@@ -1,5 +1,6 @@
 import React, { useState } from 'react';
 import { Calendar, X } from 'lucide-react';
+import { useTranslation } from 'react-i18next';
 import { formatDate } from '../lib/utils';
 
 interface DueDatePickerProps {
@@ -8,15 +9,16 @@ interface DueDatePickerProps {
 }
 
 export const DueDatePicker: React.FC<DueDatePickerProps> = ({ value, onChange }) => {
+  const { t } = useTranslation();
   const [open, setOpen] = useState(false);
   const overdue = value && new Date(value) < new Date();
 
   const quickOptions = [
-    { label: 'Today', days: 0 },
-    { label: 'Tomorrow', days: 1 },
-    { label: 'In 3 days', days: 3 },
-    { label: 'Next week', days: 7 },
-    { label: 'In 2 weeks', days: 14 },
+    { label: t('datePicker.today'), days: 0 },
+    { label: t('datePicker.tomorrow'), days: 1 },
+    { label: t('datePicker.in3Days'), days: 3 },
+    { label: t('datePicker.nextWeek'), days: 7 },
+    { label: t('datePicker.in2Weeks'), days: 14 },
   ];
 
   return (
@@ -27,7 +29,7 @@ export const DueDatePicker: React.FC<DueDatePickerProps> = ({ value, onChange })
         style={{ color: overdue ? '#ef4444' : 'var(--flow-text-muted)' }}
       >
         <Calendar size={12} />
-        {value ? formatDate(value) : 'Set date'}
+        {value ? formatDate(value) : t('datePicker.setDate')}
         {value && (
           <X
             size={10}

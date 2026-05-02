@@ -54,17 +54,19 @@ interface SettingsSection {
   icon: React.ComponentType<{ size?: number; className?: string }>;
 }
 
-const SECTIONS: SettingsSection[] = [
-  { id: 'profile', label: 'Profile', icon: User },
-  { id: 'team', label: 'Team', icon: Users },
-  { id: 'billing', label: 'Billing', icon: CreditCard },
-  { id: 'notifications', label: 'Notifications', icon: Bell },
-  { id: 'appearance', label: 'Appearance', icon: Palette },
-  { id: 'labels', label: 'Labels', icon: Tag },
-  { id: 'life', label: 'Life & rhythm', icon: Sparkles },
-  { id: 'shortcuts', label: 'Keyboard Shortcuts', icon: Keyboard },
-  { id: 'about', label: 'About', icon: Info },
-];
+function buildSections(t: (key: string) => string): SettingsSection[] {
+  return [
+    { id: 'profile', label: t('settings.profile'), icon: User },
+    { id: 'team', label: t('settings.team'), icon: Users },
+    { id: 'billing', label: t('settings.billing'), icon: CreditCard },
+    { id: 'notifications', label: t('settings.notifications'), icon: Bell },
+    { id: 'appearance', label: t('settings.appearance'), icon: Palette },
+    { id: 'labels', label: t('settings.labels'), icon: Tag },
+    { id: 'life', label: t('settings.life'), icon: Sparkles },
+    { id: 'shortcuts', label: t('settings.shortcuts'), icon: Keyboard },
+    { id: 'about', label: t('settings.about'), icon: Info },
+  ];
+}
 
 const ProfileSection: React.FC = () => {
   const { t } = useTranslation();
@@ -325,17 +327,17 @@ const NotificationsSection: React.FC = () => {
 };
 
 const LifeRhythmSection: React.FC = () => {
+  const { t } = useTranslation();
   const { prefs, setPrefs } = useLifePreferences();
 
   return (
     <div className="space-y-6">
       <div>
         <h2 className="text-[15px] font-semibold mb-1" style={{ color: 'var(--flow-text)' }}>
-          Life & rhythm
+          {t('settings.life')}
         </h2>
         <p className="text-[12px]" style={{ color: 'var(--flow-text-muted)' }}>
-          Quiet hours affect in-app banners only for now; digest hour is saved for when scheduled
-          reminders ship.
+          {t('settings.quietHoursNote')}
         </p>
       </div>
 
@@ -1145,19 +1147,25 @@ const SECTION_CONTENT: Record<string, React.FC> = {
   about: AboutSection,
 };
 
-const PlaceholderSection: React.FC<{ id: string }> = ({ id }) => (
-  <div className="flex flex-col items-center justify-center py-20 text-center">
-    <p className="text-[14px] font-medium mb-1" style={{ color: 'var(--flow-text-muted)' }}>
-      {SECTIONS.find((s) => s.id === id)?.label}
-    </p>
-    <p className="text-[12px]" style={{ color: 'var(--flow-text-dim)' }}>
-      This section is coming soon.
-    </p>
-  </div>
-);
+const PlaceholderSection: React.FC<{ id: string }> = ({ id }) => {
+  const { t } = useTranslation();
+  const sections = buildSections(t);
+  return (
+    <div className="flex flex-col items-center justify-center py-20 text-center">
+      <p className="text-[14px] font-medium mb-1" style={{ color: 'var(--flow-text-muted)' }}>
+        {sections.find((s) => s.id === id)?.label}
+      </p>
+      <p className="text-[12px]" style={{ color: 'var(--flow-text-dim)' }}>
+        This section is coming soon.
+      </p>
+    </div>
+  );
+};
 
 const FlowSettings: React.FC = () => {
+  const { t } = useTranslation();
   const [activeSection, setActiveSection] = useState('profile');
+  const sections = buildSections(t);
 
   const ActiveComponent =
     SECTION_CONTENT[activeSection] || (() => <PlaceholderSection id={activeSection} />);
@@ -1171,10 +1179,10 @@ const FlowSettings: React.FC = () => {
             className="mb-3 hidden text-[13px] font-semibold md:mb-4 md:block"
             style={{ color: 'var(--flow-text)' }}
           >
-            Settings
+            {t('nav.settings')}
           </h1>
           <nav className="flex min-w-max flex-row gap-1 md:min-w-0 md:flex-col md:space-y-0.5">
-            {SECTIONS.map((section) => {
+            {sections.map((section) => {
               const isActive = activeSection === section.id;
               const Icon = section.icon;
               return (
