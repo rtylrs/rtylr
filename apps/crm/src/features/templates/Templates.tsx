@@ -54,7 +54,7 @@ const Templates: React.FC = () => {
     }
   };
 
-  const duplicate = (name: string) => toast.success(`Duplicated: ${name}`);
+  const duplicate = (_name: string) => toast.info('Duplicate coming soon');
 
   return (
     <div style={{ maxWidth: '1100px' }}>

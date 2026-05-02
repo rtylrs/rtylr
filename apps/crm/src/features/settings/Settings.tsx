@@ -72,7 +72,7 @@ const GeneralTab: React.FC = () => {
   const handleSave = (): void => {
     update.mutate(form, {
       onSuccess: () => toast.success('Settings saved'),
-      onError: () => toast.success('Settings saved'),
+      onError: () => toast.error('Failed to save settings'),
     });
   };
 

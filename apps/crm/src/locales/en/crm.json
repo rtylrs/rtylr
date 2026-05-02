@@ -73,6 +73,12 @@
   "settings": {
     "updated": "Settings updated"
   },
+  "team": {
+    "inviteSent": "Invitation sent",
+    "inviteFailed": "Failed to send invitation",
+    "memberRemoved": "Member removed",
+    "removeFailed": "Failed to remove member"
+  },
   "actions": {
     "launch": "Launch",
     "pause": "Pause",

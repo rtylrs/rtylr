@@ -2,6 +2,7 @@ import { unwrap } from '@voxire/api';
 import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query';
 import type { UseMutationResult, UseQueryResult } from '@tanstack/react-query';
 import { toast } from 'sonner';
+import { useTranslation } from 'react-i18next';
 import { safe } from '../../lib/api';
 
 // ── Types ─────────────────────────────────────────────────────────────────────
@@ -41,30 +42,32 @@ export const useCrmTeam = (): UseQueryResult<CrmTeamMember[]> =>
 
 export const useCrmInviteMember = (): UseMutationResult<unknown, unknown, InvitePayload> => {
   const qc = useQueryClient();
+  const { t } = useTranslation();
   return useMutation<unknown, unknown, InvitePayload>({
     mutationFn: (payload: InvitePayload): Promise<unknown> =>
       unwrap(safe.post('/auth/invite', { ...payload, apps: ['crm'] })),
     onSuccess: (): void => {
-      toast.success('Invitation sent');
+      toast.success(t('crm.team.inviteSent'));
       void qc.invalidateQueries({ queryKey: ['crm-team'] });
     },
     onError: (): void => {
-      toast.error('Failed to send invitation');
+      toast.error(t('crm.team.inviteFailed'));
     },
   });
 };
 
 export const useCrmDeactivateMember = (): UseMutationResult<unknown, unknown, string> => {
   const qc = useQueryClient();
+  const { t } = useTranslation();
   return useMutation<unknown, unknown, string>({
     mutationFn: (id: string): Promise<unknown> =>
       unwrap(safe.post(`/team/members/${id}/deactivate`, {})),
     onSuccess: (): void => {
-      toast.success('Member removed');
+      toast.success(t('crm.team.memberRemoved'));
       void qc.invalidateQueries({ queryKey: ['crm-team'] });
     },
     onError: (): void => {
-      toast.error('Failed to remove member');
+      toast.error(t('crm.team.removeFailed'));
     },
   });
 };
