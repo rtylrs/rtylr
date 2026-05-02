@@ -1,5 +1,12 @@
 import React from 'react';
 
+const shimmerStyle = `
+@keyframes flow-shimmer {
+  from { background-position: -200px 0; }
+  to   { background-position: calc(200px + 100%) 0; }
+}
+`;
+
 interface SkeletonProps {
   className?: string;
   width?: string | number;
@@ -14,18 +21,21 @@ export const Skeleton: React.FC<SkeletonProps> = ({
   rounded = '4px',
 }) => {
   return (
-    <div
-      className={`flow-shimmer ${className}`}
-      style={{
-        width,
-        height,
-        borderRadius: rounded,
-        background:
-          'linear-gradient(90deg, var(--flow-hover) 0%, var(--flow-active) 50%, var(--flow-hover) 100%)',
-        backgroundSize: '200% 100%',
-        animation: 'flow-shimmer 1.4s infinite',
-      }}
-    />
+    <>
+      <style>{shimmerStyle}</style>
+      <div
+        className={`flow-shimmer ${className}`}
+        style={{
+          width,
+          height,
+          borderRadius: rounded,
+          background:
+            'linear-gradient(90deg, var(--flow-hover) 0%, var(--flow-active) 50%, var(--flow-hover) 100%)',
+          backgroundSize: '200% 100%',
+          animation: 'flow-shimmer 1.4s infinite',
+        }}
+      />
+    </>
   );
 };
 

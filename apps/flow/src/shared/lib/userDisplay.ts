@@ -6,6 +6,6 @@ export function displayUserEmail(user: FlowUser | null | undefined): string {
 }
 
 export function displayUserName(user: FlowUser | null | undefined): string {
-  if (!user) return 'User';
-  return user.name?.trim() || user.firstName?.trim() || displayUserEmail(user) || 'User';
+  if (!user) return '';
+  return user.name?.trim() || user.firstName?.trim() || displayUserEmail(user) || '';
 }

@@ -3,7 +3,7 @@ import { useCallback, useState } from 'react';
 export const SIDEBAR_SECTION_IDS = ['plan', 'team', 'projects'] as const;
 export type SidebarSectionId = (typeof SIDEBAR_SECTION_IDS)[number];
 
-const STORAGE_KEY = 'flow.sidebar.sectionOrder';
+const STORAGE_KEY = 'flow.sidebar.sectionOrder-v1';
 
 function normalize(raw: unknown): SidebarSectionId[] {
   if (!Array.isArray(raw)) return [...SIDEBAR_SECTION_IDS];

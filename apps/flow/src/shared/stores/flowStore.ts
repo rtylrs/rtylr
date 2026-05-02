@@ -168,7 +168,7 @@ export interface Task {
   subtaskCount: number;
   completedSubtasks?: number;
   projectName: string;
-  labels?: string[];
+  labelIds?: string[];
   cycleId?: string;
   milestoneId?: string;
   parentId?: string;
@@ -284,6 +284,7 @@ interface FlowState {
   createTask: (
     data: Partial<Task> & { title: string; projectId: string; workspaceId: string }
   ) => Task;
+  confirmTask: (tempId: string, realId: string) => void;
   deleteTask: (id: string) => void;
   archiveTask: (id: string) => void;
   bulkUpdateTasks: (ids: string[], patch: Partial<Task>) => void;
@@ -376,7 +377,7 @@ export const useFlowStore = create<FlowState>()((set, get) => ({
   createTask: (data) => {
     const state = get();
     const project = state.projects.find((p) => p.id === data.projectId);
-    const id = `t${Date.now()}`;
+    const id = '';
     const count = state.tasks.filter((t) => t.projectId === data.projectId).length + 1;
     const newTask: Task = {
       id,
@@ -393,7 +394,7 @@ export const useFlowStore = create<FlowState>()((set, get) => ({
       subtaskCount: 0,
       completedSubtasks: 0,
       projectName: project?.name || '',
-      labels: data.labels || [],
+      labelIds: data.labelIds || [],
       estimate: data.estimate,
       effortMinutes: data.effortMinutes,
       waitingOn: data.waitingOn,
@@ -411,6 +412,11 @@ export const useFlowStore = create<FlowState>()((set, get) => ({
     set((s) => ({ tasks: [newTask, ...s.tasks] }));
     return newTask;
   },
+
+  confirmTask: (tempId, realId) =>
+    set((s) => ({
+      tasks: s.tasks.map((t) => (t.id === tempId ? { ...t, id: realId } : t)),
+    })),
 
   deleteTask: (id) => set((s) => ({ tasks: s.tasks.filter((t) => t.id !== id) })),
 

@@ -48,7 +48,7 @@ export function apiTaskToTask(t: ApiTask): Task {
     startDate: (t as { startDate?: string }).startDate,
     subtaskCount: t.subtaskCount ?? 0,
     projectName: t.projectName ?? '',
-    labels: t.labels,
+    labelIds: t.labels,
     identifier: t.identifier ?? id,
     createdAt: t.createdAt ?? new Date().toISOString(),
     updatedAt: t.updatedAt ?? new Date().toISOString(),

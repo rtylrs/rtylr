@@ -40,12 +40,12 @@ export function useLogTime() {
 export function useDeleteTimeLog() {
   const qc = useQueryClient();
   return useMutation({
-    mutationFn: ({ id }: { id: number; task_id: number }) => unwrap(flowApi.deleteTimeLog(id)),
+    mutationFn: ({ id }: { id: number; taskId: string }) => unwrap(flowApi.deleteTimeLog(id)),
     onSuccess: (_data, variables) => {
-      const tid = String(variables.task_id);
-      qc.invalidateQueries({ queryKey: ['time-logs', tid] });
-      qc.invalidateQueries({ queryKey: ['task-detail', tid] });
+      qc.invalidateQueries({ queryKey: ['time-logs', variables.taskId] });
+      qc.invalidateQueries({ queryKey: ['task-detail', variables.taskId] });
       qc.invalidateQueries({ queryKey: ['task'] });
+      toast.success(t('toasts.time.deleted'));
     },
     onError: () => toast.error(t('toasts.time.deleteFailed')),
   });

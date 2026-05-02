@@ -1,3 +1,5 @@
+import { mondayStartMs } from './lifeRhythm';
+
 const KEY = 'flow.weeklyReviewStreak.v1';
 
 interface Stored {
@@ -28,15 +30,6 @@ function save(s: Stored): void {
   }
 }
 
-function mondayStart(d: Date): number {
-  const t = new Date(d);
-  const day = t.getDay();
-  const diff = t.getDate() - day + (day === 0 ? -6 : 1);
-  t.setDate(diff);
-  t.setHours(0, 0, 0, 0);
-  return t.getTime();
-}
-
 export function getWeeklyReviewStreak(): { streak: number; lastWeekMonday: number | null } {
   const s = load();
   return { streak: s.streak, lastWeekMonday: s.lastWeekMonday };
@@ -44,7 +37,7 @@ export function getWeeklyReviewStreak(): { streak: number; lastWeekMonday: numbe
 
 /** Mark “weekly review” done for the current week; extends streak across consecutive weeks. */
 export function recordWeeklyReviewDone(): { streak: number; alreadyLogged: boolean } {
-  const thisWeek = mondayStart(new Date());
+  const thisWeek = mondayStartMs(new Date());
   const data = load();
   if (data.lastWeekMonday === thisWeek) {
     return { streak: data.streak, alreadyLogged: true };
