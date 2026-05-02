@@ -1,6 +1,7 @@
 import { unwrap } from '@voxire/api';
 import { z } from 'zod';
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
+import { toast } from 'sonner';
 import { financeApi, type TaxConfig } from '../services/financeApi';
 import { chartOfAccountSchema } from '../schemas/accounts';
 import { journalEntrySchema } from '../schemas/journal';
@@ -22,7 +23,13 @@ export function useCreateAccount() {
   const qc = useQueryClient();
   return useMutation({
     mutationFn: (data: CreateAccountRequest) => unwrap(financeApi.createAccount(data)),
-    onSuccess: () => qc.invalidateQueries({ queryKey: ['chart-of-accounts'] }),
+    onSuccess: () => {
+      qc.invalidateQueries({ queryKey: ['chart-of-accounts'] });
+      toast.success('Account created');
+    },
+    onError: () => {
+      toast.error('Failed to create account');
+    },
   });
 }
 
@@ -41,7 +48,12 @@ export function useCreateJournalEntry() {
   const qc = useQueryClient();
   return useMutation({
     mutationFn: (data: CreateJournalEntryRequest) => unwrap(financeApi.createJournalEntry(data)),
-    onSuccess: () => qc.invalidateQueries({ queryKey: ['journal'] }),
+    onSuccess: () => {
+      qc.invalidateQueries({ queryKey: ['journal'] });
+    },
+    onError: () => {
+      toast.error('Failed to create journal entry');
+    },
   });
 }
 

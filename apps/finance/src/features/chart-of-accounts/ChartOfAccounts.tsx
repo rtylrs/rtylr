@@ -1,7 +1,6 @@
 import React, { useState } from 'react';
 import { motion } from 'motion/react';
 import { Plus, Search } from 'lucide-react';
-import { toast } from 'sonner';
 import PageHeader from '../../shared/components/PageHeader';
 import MoneyDisplay from '../../shared/components/MoneyDisplay';
 import AccountTypeBadge, { AccountType } from '../../shared/components/AccountTypeBadge';
@@ -37,14 +36,14 @@ const ChartOfAccounts: React.FC = () => {
         name: newName.trim(),
         type: newType,
         currency: 'USD',
-        code: newCode.trim(),
-      } as any);
-      toast.success('Account created');
+        balance: 0,
+        isActive: true,
+      });
       setShowCreate(false);
       setNewName('');
       setNewCode('');
     } catch {
-      toast.error('Failed to create account');
+      // onError in useCreateAccount handles the error toast
     }
   };
 
