@@ -1,62 +1,82 @@
 import React from 'react';
-import { TrendingUp, TrendingDown, Calendar, Clock } from 'lucide-react';
+import { TrendingUp, TrendingDown, DollarSign, Clock } from 'lucide-react';
 import MoneyDisplay from './MoneyDisplay';
-import { cardStyle, ACCENT } from '../lib/tokens';
+import { cardStyle } from '../lib/tokens';
+import { useFinanceDashboard } from '../hooks/queries/useFinanceDashboard';
 
 interface Kpi {
   label: string;
   value: React.ReactNode;
   hint?: string;
   icon: React.ComponentType<{ size?: number; style?: React.CSSProperties }>;
-  color: string;
+  colorVar: string;
+  colorFallback: string;
 }
 
-// Default KPI values shown before real dashboard data arrives.
-const DEFAULT_KPIS = {
-  mrr: 82400,
-  mrrChange: '+8.4%',
-  burn: 64200,
-  runway: 18,
-  overdue: 12420,
-  overdueCount: 3,
-};
+const FinanceKpiWidgets: React.FC = () => {
+  const { data, isLoading } = useFinanceDashboard();
 
-const FinanceKpiWidgets: React.FC<{ data?: Partial<typeof DEFAULT_KPIS> }> = ({ data }) => {
-  const d = { ...DEFAULT_KPIS, ...data };
+  const dash = data as
+    | {
+        totalReceivable: number;
+        overdueAmount: number;
+        totalExpensesMtd: number;
+        netProfitMtd: number;
+      }
+    | undefined;
+
   const kpis: Kpi[] = [
     {
-      label: 'MRR',
-      value: <MoneyDisplay amount={d.mrr} fractionDigits={0} />,
-      hint: d.mrrChange,
-      icon: TrendingUp,
-      color: ACCENT,
+      label: 'Receivable',
+      value:
+        isLoading || !dash ? (
+          '—'
+        ) : (
+          <MoneyDisplay amount={dash.totalReceivable} fractionDigits={0} />
+        ),
+      hint: 'outstanding',
+      icon: DollarSign,
+      colorVar: '--finance-receivable',
+      colorFallback: '#10b981',
     },
     {
-      label: 'Burn',
-      value: <MoneyDisplay amount={d.burn} fractionDigits={0} />,
-      hint: 'per month',
+      label: 'Expenses MTD',
+      value:
+        isLoading || !dash ? (
+          '—'
+        ) : (
+          <MoneyDisplay amount={dash.totalExpensesMtd} fractionDigits={0} />
+        ),
+      hint: 'month to date',
       icon: TrendingDown,
-      color: '#ef4444',
+      colorVar: '--finance-expenses',
+      colorFallback: '#ef4444',
     },
     {
-      label: 'Runway',
-      value: `${d.runway} mo`,
-      hint: 'at current burn',
-      icon: Calendar,
-      color: '#3b82f6',
+      label: 'Net Profit MTD',
+      value:
+        isLoading || !dash ? '—' : <MoneyDisplay amount={dash.netProfitMtd} fractionDigits={0} />,
+      hint: 'month to date',
+      icon: TrendingUp,
+      colorVar: '--finance-profit',
+      colorFallback: '#3b82f6',
     },
     {
       label: 'Overdue',
-      value: <MoneyDisplay amount={d.overdue} fractionDigits={0} />,
-      hint: `${d.overdueCount} invoices`,
+      value:
+        isLoading || !dash ? '—' : <MoneyDisplay amount={dash.overdueAmount} fractionDigits={0} />,
+      hint: 'past due date',
       icon: Clock,
-      color: '#f59e0b',
+      colorVar: '--finance-overdue',
+      colorFallback: '#f59e0b',
     },
   ];
+
   return (
     <div style={{ display: 'grid', gridTemplateColumns: 'repeat(4, 1fr)', gap: 14 }}>
       {kpis.map((k) => {
         const Icon = k.icon;
+        const color = `var(${k.colorVar}, ${k.colorFallback})`;
         return (
           <div key={k.label} style={{ ...cardStyle, padding: 18 }}>
             <div
@@ -86,8 +106,8 @@ const FinanceKpiWidgets: React.FC<{ data?: Partial<typeof DEFAULT_KPIS> }> = ({ 
                   width: 28,
                   height: 28,
                   borderRadius: 8,
-                  background: `${k.color}18`,
-                  color: k.color,
+                  background: `color-mix(in srgb, var(${k.colorVar}, ${k.colorFallback}) 12%, transparent)`,
+                  color,
                 }}
               >
                 <Icon size={14} />
