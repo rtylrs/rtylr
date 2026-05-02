@@ -1,7 +1,8 @@
 import React, { useState } from 'react';
 import { motion } from 'motion/react';
 import { PackageCheck, Check, X as XIcon, Plus, Minus } from 'lucide-react';
-import { usePurchaseOrders } from './usePurchaseOrders';
+import { usePurchaseOrders, useUpdatePurchaseOrderStatus } from './usePurchaseOrders';
+import type { PurchaseOrder } from '../../shared/services/erpApi';
 import PageHeader from '../../shared/components/PageHeader';
 import EmptyState from '../../shared/components/EmptyState';
 import { Skeleton } from '../../shared/components/Skeleton';
@@ -19,13 +20,22 @@ interface ReceiveLine {
 
 const Receiving: React.FC = () => {
   const { data: orders = [], isLoading } = usePurchaseOrders();
+  const updateStatus = useUpdatePurchaseOrderStatus();
   const open = orders.filter((o) => o.status === 'Sent' || o.status === 'Approved');
   const [selectedId, setSelectedId] = useState<number | null>(null);
-  const [lines, setLines] = useState<ReceiveLine[]>([
-    { sku: 'BEV-001', name: 'Arabica Coffee Beans', expected: 40, received: 40 },
-    { sku: 'BEV-012', name: 'Whole Milk (2L)', expected: 80, received: 75 },
-    { sku: 'DAIRY-022', name: 'Greek Yogurt (1kg)', expected: 30, received: 30 },
-  ]);
+  const [lines, setLines] = useState<ReceiveLine[]>([]);
+
+  const handleSelectOrder = (order: PurchaseOrder): void => {
+    setSelectedId(order.id);
+    setLines([
+      {
+        sku: order.id.toString(),
+        name: `PO-${order.id} — All items (${order.supplier})`,
+        expected: order.items,
+        received: order.items,
+      },
+    ]);
+  };
 
   const adjust = (sku: string, delta: number) => {
     setLines((prev) =>
@@ -40,6 +50,9 @@ const Receiving: React.FC = () => {
         ? 'Receipt completed, all items received'
         : `Receipt completed with ${variance} unit variance`
     );
+    if (selectedId !== null) {
+      updateStatus.mutate({ id: selectedId, status: 'Received' });
+    }
     setSelectedId(null);
   };
 
@@ -140,7 +153,7 @@ const Receiving: React.FC = () => {
           {open.map((o) => (
             <button
               key={o.id}
-              onClick={() => setSelectedId(o.id)}
+              onClick={() => handleSelectOrder(o)}
               className="w-full flex items-center gap-3 px-4 py-3 rounded-xl text-left transition-colors"
               style={{
                 background: 'var(--hub-card)',

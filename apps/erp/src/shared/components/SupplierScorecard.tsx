@@ -8,7 +8,7 @@ interface SupplierScorecardProps {
 
 const Metric: React.FC<{
   label: string;
-  value: number;
+  value: number | null;
   suffix?: string;
   color: string;
   icon: React.ComponentType<{ size?: number; style?: React.CSSProperties }>;
@@ -21,22 +21,30 @@ const Metric: React.FC<{
       </p>
     </div>
     <p className="text-lg font-bold" style={{ color }}>
-      {value}
-      <span className="text-xs ml-0.5">{suffix}</span>
+      {value !== null ? (
+        <>
+          {value}
+          <span className="text-xs ml-0.5">{suffix}</span>
+        </>
+      ) : (
+        <span className="text-sm" style={{ color: 'var(--hub-text-dim)' }}>
+          —
+        </span>
+      )}
     </p>
     <div className="h-1 rounded-full mt-1" style={{ background: 'var(--hub-hover)' }}>
       <div
         className="h-full rounded-full"
-        style={{ width: `${Math.min(100, value)}%`, background: color }}
+        style={{ width: value !== null ? `${Math.min(100, value)}%` : '0%', background: color }}
       />
     </div>
   </div>
 );
 
 const SupplierScorecard: React.FC<SupplierScorecardProps> = ({ supplier }) => {
-  const onTime = supplier.onTimeDeliveryPct ?? 85;
-  const accuracy = supplier.fulfillmentAccuracy ?? 92;
-  const leadTime = supplier.leadTimeDays ?? 5;
+  const onTime = supplier.onTimeDeliveryPct ?? null;
+  const accuracy = supplier.fulfillmentAccuracy ?? null;
+  const leadTime = supplier.leadTimeDays ?? null;
 
   return (
     <div
@@ -61,7 +69,7 @@ const SupplierScorecard: React.FC<SupplierScorecardProps> = ({ supplier }) => {
         <Metric
           label="On-Time"
           value={onTime}
-          color={onTime >= 90 ? '#10b981' : '#f59e0b'}
+          color={onTime === null ? 'var(--hub-text-dim)' : onTime >= 90 ? '#10b981' : '#f59e0b'}
           icon={Truck}
         />
         <Metric
