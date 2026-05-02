@@ -174,8 +174,8 @@ async function installFlowStubs(
       })
   );
 
-  // (3) Workspaces.
-  await page.route(`${API_HOST}/flow/workspaces`, (route: Route) =>
+  // (3) Workspaces — regex to match with or without query params.
+  await page.route(/api\.voxire\.dev\/flow\/workspaces(\?.*)?$/, (route: Route) =>
     route.fulfill({
       status: 200,
       contentType: 'application/json',
@@ -183,8 +183,8 @@ async function installFlowStubs(
     })
   );
 
-  // (4) Dashboard stats (workspace home page).
-  await page.route(`${API_HOST}/flow/dashboard`, (route: Route) =>
+  // (4) Dashboard stats — regex to match ?workspace_id=... query param.
+  await page.route(/api\.voxire\.dev\/flow\/dashboard(\?.*)?$/, (route: Route) =>
     route.fulfill({
       status: 200,
       contentType: 'application/json',
@@ -199,10 +199,8 @@ async function installFlowStubs(
     })
   );
 
-  // (5) Notifications — registered BEFORE /flow/** catch-all but that's fine
-  //     because Playwright evaluates in reverse insertion order; this fires
-  //     first for the specific path.
-  await page.route(`${API_HOST}/flow/notifications`, (route: Route) =>
+  // (5) Notifications.
+  await page.route(/api\.voxire\.dev\/flow\/notifications(\?.*)?$/, (route: Route) =>
     route.fulfill({
       status: 200,
       contentType: 'application/json',
@@ -210,8 +208,8 @@ async function installFlowStubs(
     })
   );
 
-  // (6) Tasks for a project.
-  await page.route(`${API_HOST}/flow/tasks`, (route: Route) => {
+  // (6) Tasks for a project — regex to match ?project_id=... query param.
+  await page.route(/api\.voxire\.dev\/flow\/tasks(\?.*)?$/, (route: Route) => {
     const url = new URL(route.request().url());
     const projectId = url.searchParams.get('project_id');
     const filtered = projectId ? tasks.filter((t) => t.projectId === projectId) : tasks;
@@ -222,7 +220,7 @@ async function installFlowStubs(
     });
   });
 
-  await page.route(`${API_HOST}/flow/tasks/my`, (route: Route) =>
+  await page.route(/api\.voxire\.dev\/flow\/tasks\/my(\?.*)?$/, (route: Route) =>
     route.fulfill({
       status: 200,
       contentType: 'application/json',
@@ -230,8 +228,8 @@ async function installFlowStubs(
     })
   );
 
-  // (7) Projects: GET list + POST create.  Registered LAST (most specific).
-  await page.route(`${API_HOST}/flow/projects`, async (route: Route) => {
+  // (7) Projects: GET list + POST create — regex excludes /columns sub-path.
+  await page.route(/api\.voxire\.dev\/flow\/projects(\?.*)?$/, async (route: Route) => {
     const req = route.request();
     if (req.method() === 'GET') {
       await route.fulfill({
@@ -263,7 +261,7 @@ async function installFlowStubs(
   });
 
   // Project columns (board page).
-  await page.route(`${API_HOST}/flow/projects/columns`, (route: Route) =>
+  await page.route(/api\.voxire\.dev\/flow\/projects\/columns(\?.*)?$/, (route: Route) =>
     route.fulfill({
       status: 200,
       contentType: 'application/json',
