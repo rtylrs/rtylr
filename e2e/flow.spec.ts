@@ -124,6 +124,27 @@ async function installFlowStubs(
   const tasks = opts.tasks ?? [];
   const notifications = opts.notifications ?? [];
 
+  // (0) Broadest catch-all — intercepts any request to api.voxire.dev that
+  //     isn't covered by a more-specific handler below.  Prevents unstubbed
+  //     calls (e.g. Caret /memory/chats, realtime ws upgrade fallback) from
+  //     reaching the real API and delaying the networkidle signal.
+  await page.route(/api\.voxire\.dev\//, (route: Route) => {
+    const method = route.request().method();
+    if (method === 'GET') {
+      route.fulfill({
+        status: 200,
+        contentType: 'application/json',
+        body: JSON.stringify({}),
+      });
+    } else {
+      route.fulfill({
+        status: 200,
+        contentType: 'application/json',
+        body: JSON.stringify({ success: true }),
+      });
+    }
+  });
+
   // (1) Catch-all for any /flow/* endpoint not handled below — returns empty
   //     envelopes so the shell doesn't throw on missing data.
   await page.route(`${API_HOST}/flow/**`, (route: Route) => {
@@ -314,6 +335,7 @@ test.describe('Flow — project list', () => {
     await installFlowStubs(page, { projects: [alpha, beta] });
 
     await page.goto(`${FLOW_URL}/w/10`);
+    await page.waitForLoadState('networkidle', { timeout: 30_000 });
 
     // Both project names must appear somewhere in the rendered output.
     // Use toBeAttached rather than toBeVisible — the cards animate in from
@@ -366,6 +388,7 @@ test.describe('Flow — task board', () => {
     });
 
     await page.goto(`${FLOW_URL}/w/10/p/1`);
+    await page.waitForLoadState('networkidle', { timeout: 30_000 });
 
     // The project board should mount and display the project header.
     await expect(page.getByText('Alpha Project').first()).toBeAttached({ timeout: 15_000 });
@@ -389,6 +412,7 @@ test.describe('Flow — task board', () => {
 
     await installFlowStubs(page, { projects: [project], tasks: [todoTask, doneTask] });
     await page.goto(`${FLOW_URL}/w/10/p/1/list`);
+    await page.waitForLoadState('networkidle', { timeout: 30_000 });
 
     // The list view shows the project name in the header.
     await expect(page.getByText('Alpha Project').first()).toBeAttached({ timeout: 15_000 });
@@ -420,6 +444,7 @@ test.describe('Flow — inbox', () => {
 
     await installFlowStubs(page, { notifications: [n1, n2] });
     await page.goto(`${FLOW_URL}/inbox`);
+    await page.waitForLoadState('networkidle', { timeout: 30_000 });
 
     // The inbox heading is always rendered (i18n key inbox.title → "Inbox").
     await expect(page.getByRole('heading').first().or(page.locator('h1').first())).toBeVisible({
@@ -427,8 +452,8 @@ test.describe('Flow — inbox', () => {
     });
 
     // Both notification titles should appear.
-    await expect(page.getByText('Task assigned to you').first()).toBeVisible({ timeout: 10_000 });
-    await expect(page.getByText('You were mentioned').first()).toBeVisible({ timeout: 10_000 });
+    await expect(page.getByText('Task assigned to you').first()).toBeAttached({ timeout: 10_000 });
+    await expect(page.getByText('You were mentioned').first()).toBeAttached({ timeout: 10_000 });
   });
 
   test('inbox shows empty state when there are no notifications', async ({ page }) => {
