@@ -11,7 +11,7 @@ type RouteMap = Record<string, () => Promise<unknown>>;
  */
 export function useForesightLinks(
   containerRef: RefObject<HTMLElement | null>,
-  routes: RouteMap,
+  routes: RouteMap
 ): void {
   const prefetchedRef = useRef<Set<string>>(new Set());
 
@@ -29,7 +29,7 @@ export function useForesightLinks(
 
       // Find a matching route prefix
       const matchedPath = Object.keys(routes).find(
-        (path) => href === path || href.startsWith(path + '/') || href.startsWith(path + '?'),
+        (path) => href === path || href.startsWith(path + '/') || href.startsWith(path + '?')
       );
 
       if (matchedPath && !prefetchedRef.current.has(matchedPath)) {
