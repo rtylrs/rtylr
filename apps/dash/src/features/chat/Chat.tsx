@@ -1,12 +1,8 @@
-import React, { useState, useRef, useEffect } from 'react';
+import React, { useRef, useEffect, useCallback } from 'react';
 import { Send, Sparkles } from 'lucide-react';
 import { motion, AnimatePresence } from 'motion/react';
-
-interface Message {
-  id: string;
-  role: 'user' | 'assistant';
-  content: string;
-}
+import { useCaretStore, useCaretStream } from '@voxire/caret';
+import { useUserStore } from '../../../shared/stores/userStore';
 
 const SUGGESTIONS = [
   'How much revenue did we make today?',
@@ -16,42 +12,38 @@ const SUGGESTIONS = [
 ];
 
 const Chat: React.FC = () => {
-  const [messages, setMessages] = useState<Message[]>([]);
-  const [input, setInput] = useState('');
-  const [isTyping, setIsTyping] = useState(false);
+  const { user } = useUserStore();
+  const userId = Number(user?.id) || 0;
+  const apiBaseUrl = import.meta.env.VITE_API_URL ?? 'https://api.voxire.dev/';
+  const systemContext =
+    'User is in the Dash app (business command center — KPIs, orders, staff overview)';
+
+  const { messages, isStreaming } = useCaretStore();
+  const { sendMessage } = useCaretStream({ userId, apiBaseUrl, systemContext });
+
+  const [input, setInput] = React.useState('');
   const bottomRef = useRef<HTMLDivElement>(null);
 
   useEffect(() => {
     bottomRef.current?.scrollIntoView({ behavior: 'smooth' });
-  }, [messages, isTyping]);
+  }, [messages, isStreaming]);
 
-  const send = (text: string) => {
-    if (!text.trim()) return;
-    const userMsg: Message = { id: Date.now().toString(), role: 'user', content: text.trim() };
-    setMessages((p) => [...p, userMsg]);
-    setInput('');
-    setIsTyping(true);
-
-    setTimeout(() => {
-      setMessages((p) => [
-        ...p,
-        {
-          id: (Date.now() + 1).toString(),
-          role: 'assistant',
-          content:
-            'Caret AI is coming soon. When ready, I will be able to answer questions about your revenue, inventory, staff, customers, and more by querying your live business data across all rtylr apps.',
-        },
-      ]);
-      setIsTyping(false);
-    }, 1500);
-  };
+  const send = useCallback(
+    (text: string): void => {
+      const trimmed = text.trim();
+      if (!trimmed || isStreaming) return;
+      setInput('');
+      void sendMessage(trimmed);
+    },
+    [isStreaming, sendMessage]
+  );
 
   const isEmpty = messages.length === 0;
 
   return (
     <div className="flex flex-col overflow-hidden -m-6" style={{ height: 'calc(100vh - 44px)' }}>
       {/* Messages or empty state */}
-      <div className="flex-1 overflow-y-auto">
+      <div className="flex-1 overflow-y-auto" aria-live="polite" aria-atomic="false">
         {isEmpty ? (
           <div className="flex flex-col items-center justify-center h-full px-6">
             <motion.div
@@ -106,36 +98,46 @@ const Chat: React.FC = () => {
         ) : (
           <div className="max-w-2xl mx-auto px-6 py-8 space-y-6">
             <AnimatePresence>
-              {messages.map((msg) => (
-                <motion.div
-                  key={msg.id}
-                  initial={{ opacity: 0, y: 6 }}
-                  animate={{ opacity: 1, y: 0 }}
-                  className={`flex ${msg.role === 'user' ? 'justify-end' : 'justify-start'}`}
-                >
-                  {msg.role === 'assistant' && (
-                    <div
-                      className="h-7 w-7 rounded-lg flex items-center justify-center shrink-0 mr-3 mt-1"
-                      style={{ background: 'rgba(139,92,246,0.1)' }}
-                    >
-                      <Sparkles size={14} style={{ color: '#8b5cf6' }} />
-                    </div>
-                  )}
-                  <div
-                    className="rounded-2xl px-4 py-3 max-w-[80%]"
-                    style={{
-                      background: msg.role === 'user' ? '#4583C4' : 'var(--dash-card)',
-                      color: msg.role === 'user' ? '#fff' : 'var(--dash-text)',
-                      border: msg.role === 'user' ? 'none' : '1px solid var(--dash-border)',
-                    }}
+              {messages.map((msg, index) => {
+                const isLastStreaming =
+                  index === messages.length - 1 && msg.role === 'assistant' && isStreaming;
+                return (
+                  <motion.div
+                    key={msg.id}
+                    initial={{ opacity: 0, y: 6 }}
+                    animate={{ opacity: 1, y: 0 }}
+                    className={`flex ${msg.role === 'user' ? 'justify-end' : 'justify-start'}`}
                   >
-                    <p className="text-sm leading-relaxed">{msg.content}</p>
-                  </div>
-                </motion.div>
-              ))}
+                    {msg.role === 'assistant' && (
+                      <div
+                        className="h-7 w-7 rounded-lg flex items-center justify-center shrink-0 mr-3 mt-1"
+                        style={{ background: 'rgba(139,92,246,0.1)' }}
+                      >
+                        <Sparkles size={14} style={{ color: '#8b5cf6' }} />
+                      </div>
+                    )}
+                    <div
+                      className="rounded-2xl px-4 py-3 max-w-[80%]"
+                      style={{
+                        background: msg.role === 'user' ? '#4583C4' : 'var(--dash-card)',
+                        color: msg.role === 'user' ? '#fff' : 'var(--dash-text)',
+                        border: msg.role === 'user' ? 'none' : '1px solid var(--dash-border)',
+                      }}
+                    >
+                      <p className="text-sm leading-relaxed whitespace-pre-wrap">{msg.content}</p>
+                      {isLastStreaming && (
+                        <span
+                          className="inline-block h-3 w-0.5 ml-0.5 rounded-sm animate-pulse"
+                          style={{ background: '#8b5cf6' }}
+                        />
+                      )}
+                    </div>
+                  </motion.div>
+                );
+              })}
             </AnimatePresence>
 
-            {isTyping && (
+            {isStreaming && messages[messages.length - 1]?.role !== 'assistant' && (
               <motion.div
                 initial={{ opacity: 0 }}
                 animate={{ opacity: 1 }}
@@ -181,11 +183,14 @@ const Chat: React.FC = () => {
             value={input}
             onChange={(e) => setInput(e.target.value)}
             placeholder="Message Caret..."
+            aria-label="Message Caret"
+            disabled={isStreaming}
             className="w-full h-12 rounded-xl pl-4 pr-12 text-sm outline-none transition-colors"
             style={{
               background: 'var(--dash-card)',
               border: '1px solid var(--dash-border)',
               color: 'var(--dash-text)',
+              fontSize: '16px',
             }}
             onFocus={(e) => {
               (e.target as HTMLElement).style.borderColor = 'rgba(139,92,246,0.4)';
@@ -196,11 +201,12 @@ const Chat: React.FC = () => {
           />
           <button
             type="submit"
-            disabled={!input.trim()}
+            disabled={!input.trim() || isStreaming}
+            aria-label="Send message"
             className="absolute right-2 top-1/2 -translate-y-1/2 h-8 w-8 rounded-lg flex items-center justify-center transition-colors"
             style={{
-              background: input.trim() ? '#8b5cf6' : 'transparent',
-              color: input.trim() ? '#fff' : 'var(--dash-text-dim)',
+              background: input.trim() && !isStreaming ? '#8b5cf6' : 'transparent',
+              color: input.trim() && !isStreaming ? '#fff' : 'var(--dash-text-dim)',
             }}
           >
             <Send size={15} />

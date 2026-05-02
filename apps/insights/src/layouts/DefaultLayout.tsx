@@ -3,7 +3,8 @@ import { useLocation, Link } from 'react-router-dom';
 import { useForesightLinks } from '@voxire/utils';
 import { motion, AnimatePresence } from 'motion/react';
 import { APP_URLS } from '@voxire/config';
-import { removeCookie, getDefaultCookieDomain } from '@voxire/auth';
+import { removeCookie, getDefaultCookieDomain, useUserStore } from '@voxire/auth';
+import { CaretPanel, CaretButton } from '@voxire/caret';
 import {
   LayoutDashboard,
   TrendingUp,
@@ -135,6 +136,8 @@ const DefaultLayout: React.FC<DefaultLayoutProps> = ({ children }) => {
   });
   const [showUserMenu, setShowUserMenu] = useState(false);
   const [sidebarOpen, setSidebarOpen] = useState(false);
+  const insightsUser = useUserStore((s) => s.user);
+  const userId = Number(insightsUser?.id) || 0;
 
   const pageTitle = getPageTitle(location.pathname);
   const sidebarRef = useRef<HTMLElement | null>(null);
@@ -186,257 +189,266 @@ const DefaultLayout: React.FC<DefaultLayoutProps> = ({ children }) => {
   };
 
   return (
-    <div className="flex h-screen overflow-hidden" style={{ background: 'var(--hub-bg)' }}>
-      {/* Mobile top bar */}
-      <div
-        className="fixed top-0 left-0 right-0 z-40 flex md:hidden items-center justify-between h-11 px-4 shrink-0"
-        style={{
-          background: 'var(--hub-surface)',
-          borderBottom: '1px solid var(--hub-border)',
-        }}
-      >
-        <button
-          onClick={() => setSidebarOpen(true)}
-          className="h-8 w-8 rounded-lg flex items-center justify-center"
-          style={{ color: 'var(--hub-text-muted)' }}
-        >
-          <Menu size={18} />
-        </button>
-        <h1 className="text-sm font-semibold" style={{ color: 'var(--hub-text)' }}>
-          {pageTitle}
-        </h1>
-        <div className="w-8" />
-      </div>
-
-      {/* Mobile overlay */}
-      {sidebarOpen && (
+    <>
+      <div className="flex h-screen overflow-hidden" style={{ background: 'var(--hub-bg)' }}>
+        {/* Mobile top bar */}
         <div
-          className="fixed inset-0 z-40 bg-black/50 md:hidden"
-          onClick={() => setSidebarOpen(false)}
-        />
-      )}
-
-      <aside
-        className={`${
-          sidebarOpen ? 'fixed inset-y-0 left-0 z-50 flex' : 'hidden'
-        } md:flex w-56 flex-col shrink-0 overflow-hidden`}
-        style={{
-          background: 'var(--hub-surface)',
-          borderRight: '1px solid var(--hub-border)',
-        }}
-      >
-        <div
-          className="flex items-center justify-between gap-2.5 px-4 py-4"
-          style={{ borderBottom: '1px solid var(--hub-border)' }}
-        >
-          <img src="/logo.png" alt="rtylr" className="h-6 w-auto" />
-          <button
-            onClick={() => setSidebarOpen(false)}
-            className="h-7 w-7 rounded-lg flex md:hidden items-center justify-center"
-            style={{ color: 'var(--hub-text-muted)' }}
-          >
-            <X size={16} />
-          </button>
-        </div>
-
-        <div className="px-3 pt-3">
-          <a
-            href={APP_URLS.dash}
-            className="flex items-center gap-2 px-3 py-1.5 rounded-lg text-xs transition-colors duration-150 no-underline"
-            style={{ color: 'var(--hub-text-muted)' }}
-            onMouseEnter={(e) => {
-              (e.currentTarget as HTMLElement).style.background = 'var(--hub-hover)';
-            }}
-            onMouseLeave={(e) => {
-              (e.currentTarget as HTMLElement).style.background = 'transparent';
-            }}
-          >
-            <ArrowLeft size={12} />
-            <span>Hub</span>
-          </a>
-        </div>
-
-        <nav ref={sidebarRef} className="flex-1 overflow-y-auto py-2 px-2 space-y-0.5">
-          {navItems.map((item) => (
-            <SidebarNavItem key={item.path} {...item} />
-          ))}
-        </nav>
-
-        <div className="p-2" style={{ borderTop: '1px solid var(--hub-border)' }}>
-          <div className="relative">
-            <button
-              onClick={() => setShowUserMenu((v) => !v)}
-              className="flex items-center gap-2.5 w-full px-3 py-2 rounded-lg transition-colors duration-150"
-              style={{ background: 'transparent' }}
-              onMouseEnter={(e) => {
-                (e.currentTarget as HTMLElement).style.background = 'var(--hub-hover)';
-              }}
-              onMouseLeave={(e) => {
-                (e.currentTarget as HTMLElement).style.background = 'transparent';
-              }}
-            >
-              <span
-                className="flex items-center justify-center h-6 w-6 rounded-full text-[10px] font-bold shrink-0"
-                style={{ background: 'rgba(99,102,241,0.15)', color: ACCENT }}
-              >
-                {getInitials(userName)}
-              </span>
-              <div className="flex flex-col items-start min-w-0 flex-1">
-                <span
-                  className="text-xs font-medium truncate w-full text-left"
-                  style={{ color: 'var(--hub-text)' }}
-                >
-                  {userName}
-                </span>
-                {userEmail && (
-                  <span
-                    className="text-[10px] truncate w-full text-left"
-                    style={{ color: 'var(--hub-text-muted)' }}
-                  >
-                    {userEmail}
-                  </span>
-                )}
-              </div>
-              <ChevronRight
-                size={12}
-                className="shrink-0"
-                style={{ color: 'var(--hub-text-dim)' }}
-              />
-            </button>
-
-            <AnimatePresence>
-              {showUserMenu && (
-                <motion.div
-                  initial={{ opacity: 0, y: 4 }}
-                  animate={{ opacity: 1, y: 0 }}
-                  exit={{ opacity: 0, y: 4 }}
-                  transition={{ duration: 0.12 }}
-                  className="absolute bottom-full left-0 right-0 mb-1 rounded-xl p-2 z-50"
-                  style={{
-                    background: 'var(--hub-card)',
-                    border: '1px solid var(--hub-border)',
-                    boxShadow: 'var(--hub-shadow)',
-                  }}
-                >
-                  <p
-                    className="px-2 py-1 text-[10px] font-semibold uppercase tracking-wider"
-                    style={{ color: 'var(--hub-text-dim)' }}
-                  >
-                    Appearance
-                  </p>
-                  <div className="flex gap-1 mb-2">
-                    {(
-                      [
-                        { value: 'light' as Theme, icon: Sun, label: 'Light' },
-                        { value: 'dark' as Theme, icon: Moon, label: 'Dark' },
-                        { value: 'system' as Theme, icon: Monitor, label: 'System' },
-                      ] as const
-                    ).map(({ value, icon: Icon, label }) => (
-                      <button
-                        key={value}
-                        onClick={() => handleSetTheme(value)}
-                        className="flex-1 flex flex-col items-center gap-1 py-2 rounded-lg text-[10px] font-medium transition-colors"
-                        style={{
-                          background:
-                            theme === value ? 'rgba(99,102,241,0.12)' : 'var(--hub-hover)',
-                          color: theme === value ? ACCENT : 'var(--hub-text-muted)',
-                          border:
-                            theme === value
-                              ? '1px solid rgba(99,102,241,0.3)'
-                              : '1px solid transparent',
-                        }}
-                      >
-                        <Icon size={13} />
-                        {label}
-                      </button>
-                    ))}
-                  </div>
-                  <div
-                    className="my-1"
-                    style={{ height: '1px', background: 'var(--hub-border)' }}
-                  />
-                  <button
-                    onClick={handleLogout}
-                    className="flex items-center gap-2 w-full px-2 py-2 rounded-lg text-sm transition-colors"
-                    style={{ color: '#ef4444' }}
-                    onMouseEnter={(e) => {
-                      (e.currentTarget as HTMLElement).style.background = 'rgba(239,68,68,0.08)';
-                    }}
-                    onMouseLeave={(e) => {
-                      (e.currentTarget as HTMLElement).style.background = 'transparent';
-                    }}
-                  >
-                    <LogOut size={14} />
-                    {t('auth.signOut', 'Sign out')}
-                  </button>
-                </motion.div>
-              )}
-            </AnimatePresence>
-          </div>
-        </div>
-      </aside>
-
-      <div className="flex flex-col flex-1 overflow-hidden pt-11 md:pt-0">
-        <header
-          className="hidden md:flex h-11 items-center justify-between px-6 shrink-0"
+          className="fixed top-0 left-0 right-0 z-40 flex md:hidden items-center justify-between h-11 px-4 shrink-0"
           style={{
             background: 'var(--hub-surface)',
             borderBottom: '1px solid var(--hub-border)',
           }}
         >
+          <button
+            onClick={() => setSidebarOpen(true)}
+            className="h-8 w-8 rounded-lg flex items-center justify-center"
+            style={{ color: 'var(--hub-text-muted)' }}
+          >
+            <Menu size={18} />
+          </button>
           <h1 className="text-sm font-semibold" style={{ color: 'var(--hub-text)' }}>
             {pageTitle}
           </h1>
-          <div className="flex items-center gap-1">
+          <div className="w-8" />
+        </div>
+
+        {/* Mobile overlay */}
+        {sidebarOpen && (
+          <div
+            className="fixed inset-0 z-40 bg-black/50 md:hidden"
+            onClick={() => setSidebarOpen(false)}
+          />
+        )}
+
+        <aside
+          className={`${
+            sidebarOpen ? 'fixed inset-y-0 left-0 z-50 flex' : 'hidden'
+          } md:flex w-56 flex-col shrink-0 overflow-hidden`}
+          style={{
+            background: 'var(--hub-surface)',
+            borderRight: '1px solid var(--hub-border)',
+          }}
+        >
+          <div
+            className="flex items-center justify-between gap-2.5 px-4 py-4"
+            style={{ borderBottom: '1px solid var(--hub-border)' }}
+          >
+            <img src="/logo.png" alt="rtylr" className="h-6 w-auto" />
             <button
-              onClick={() => handleSetTheme(theme === 'dark' ? 'light' : 'dark')}
-              className="h-7 w-7 rounded-lg flex items-center justify-center"
+              onClick={() => setSidebarOpen(false)}
+              className="h-7 w-7 rounded-lg flex md:hidden items-center justify-center"
               style={{ color: 'var(--hub-text-muted)' }}
-              onMouseEnter={(e) => {
-                (e.currentTarget as HTMLElement).style.background = 'var(--hub-hover)';
-              }}
-              onMouseLeave={(e) => {
-                (e.currentTarget as HTMLElement).style.background = 'transparent';
-              }}
             >
-              {theme === 'dark' ? <Sun size={14} /> : <Moon size={14} />}
-            </button>
-            <button
-              className="h-7 w-7 rounded-lg flex items-center justify-center transition-colors duration-150"
-              style={{ color: 'var(--hub-text-muted)' }}
-              onMouseEnter={(e) => {
-                (e.currentTarget as HTMLElement).style.background = 'var(--hub-hover)';
-              }}
-              onMouseLeave={(e) => {
-                (e.currentTarget as HTMLElement).style.background = 'transparent';
-              }}
-            >
-              <Bell size={14} />
+              <X size={16} />
             </button>
           </div>
-        </header>
 
-        <AnimatePresence mode="wait">
-          <motion.main
-            key={location.pathname}
-            initial={{ opacity: 0, y: 6 }}
-            animate={{ opacity: 1, y: 0 }}
-            exit={{ opacity: 0, y: -4 }}
-            transition={{ duration: 0.18, ease: 'easeOut' }}
-            className="flex-1 overflow-y-auto p-6"
+          <div className="px-3 pt-3">
+            <a
+              href={APP_URLS.dash}
+              className="flex items-center gap-2 px-3 py-1.5 rounded-lg text-xs transition-colors duration-150 no-underline"
+              style={{ color: 'var(--hub-text-muted)' }}
+              onMouseEnter={(e) => {
+                (e.currentTarget as HTMLElement).style.background = 'var(--hub-hover)';
+              }}
+              onMouseLeave={(e) => {
+                (e.currentTarget as HTMLElement).style.background = 'transparent';
+              }}
+            >
+              <ArrowLeft size={12} />
+              <span>Hub</span>
+            </a>
+          </div>
+
+          <nav ref={sidebarRef} className="flex-1 overflow-y-auto py-2 px-2 space-y-0.5">
+            {navItems.map((item) => (
+              <SidebarNavItem key={item.path} {...item} />
+            ))}
+          </nav>
+
+          <div className="p-2" style={{ borderTop: '1px solid var(--hub-border)' }}>
+            <div className="relative">
+              <button
+                onClick={() => setShowUserMenu((v) => !v)}
+                className="flex items-center gap-2.5 w-full px-3 py-2 rounded-lg transition-colors duration-150"
+                style={{ background: 'transparent' }}
+                onMouseEnter={(e) => {
+                  (e.currentTarget as HTMLElement).style.background = 'var(--hub-hover)';
+                }}
+                onMouseLeave={(e) => {
+                  (e.currentTarget as HTMLElement).style.background = 'transparent';
+                }}
+              >
+                <span
+                  className="flex items-center justify-center h-6 w-6 rounded-full text-[10px] font-bold shrink-0"
+                  style={{ background: 'rgba(99,102,241,0.15)', color: ACCENT }}
+                >
+                  {getInitials(userName)}
+                </span>
+                <div className="flex flex-col items-start min-w-0 flex-1">
+                  <span
+                    className="text-xs font-medium truncate w-full text-left"
+                    style={{ color: 'var(--hub-text)' }}
+                  >
+                    {userName}
+                  </span>
+                  {userEmail && (
+                    <span
+                      className="text-[10px] truncate w-full text-left"
+                      style={{ color: 'var(--hub-text-muted)' }}
+                    >
+                      {userEmail}
+                    </span>
+                  )}
+                </div>
+                <ChevronRight
+                  size={12}
+                  className="shrink-0"
+                  style={{ color: 'var(--hub-text-dim)' }}
+                />
+              </button>
+
+              <AnimatePresence>
+                {showUserMenu && (
+                  <motion.div
+                    initial={{ opacity: 0, y: 4 }}
+                    animate={{ opacity: 1, y: 0 }}
+                    exit={{ opacity: 0, y: 4 }}
+                    transition={{ duration: 0.12 }}
+                    className="absolute bottom-full left-0 right-0 mb-1 rounded-xl p-2 z-50"
+                    style={{
+                      background: 'var(--hub-card)',
+                      border: '1px solid var(--hub-border)',
+                      boxShadow: 'var(--hub-shadow)',
+                    }}
+                  >
+                    <p
+                      className="px-2 py-1 text-[10px] font-semibold uppercase tracking-wider"
+                      style={{ color: 'var(--hub-text-dim)' }}
+                    >
+                      Appearance
+                    </p>
+                    <div className="flex gap-1 mb-2">
+                      {(
+                        [
+                          { value: 'light' as Theme, icon: Sun, label: 'Light' },
+                          { value: 'dark' as Theme, icon: Moon, label: 'Dark' },
+                          { value: 'system' as Theme, icon: Monitor, label: 'System' },
+                        ] as const
+                      ).map(({ value, icon: Icon, label }) => (
+                        <button
+                          key={value}
+                          onClick={() => handleSetTheme(value)}
+                          className="flex-1 flex flex-col items-center gap-1 py-2 rounded-lg text-[10px] font-medium transition-colors"
+                          style={{
+                            background:
+                              theme === value ? 'rgba(99,102,241,0.12)' : 'var(--hub-hover)',
+                            color: theme === value ? ACCENT : 'var(--hub-text-muted)',
+                            border:
+                              theme === value
+                                ? '1px solid rgba(99,102,241,0.3)'
+                                : '1px solid transparent',
+                          }}
+                        >
+                          <Icon size={13} />
+                          {label}
+                        </button>
+                      ))}
+                    </div>
+                    <div
+                      className="my-1"
+                      style={{ height: '1px', background: 'var(--hub-border)' }}
+                    />
+                    <button
+                      onClick={handleLogout}
+                      className="flex items-center gap-2 w-full px-2 py-2 rounded-lg text-sm transition-colors"
+                      style={{ color: '#ef4444' }}
+                      onMouseEnter={(e) => {
+                        (e.currentTarget as HTMLElement).style.background = 'rgba(239,68,68,0.08)';
+                      }}
+                      onMouseLeave={(e) => {
+                        (e.currentTarget as HTMLElement).style.background = 'transparent';
+                      }}
+                    >
+                      <LogOut size={14} />
+                      {t('auth.signOut', 'Sign out')}
+                    </button>
+                  </motion.div>
+                )}
+              </AnimatePresence>
+            </div>
+          </div>
+        </aside>
+
+        <div className="flex flex-col flex-1 overflow-hidden pt-11 md:pt-0">
+          <header
+            className="hidden md:flex h-11 items-center justify-between px-6 shrink-0"
+            style={{
+              background: 'var(--hub-surface)',
+              borderBottom: '1px solid var(--hub-border)',
+            }}
           >
-            {children}
-          </motion.main>
-        </AnimatePresence>
-      </div>
+            <h1 className="text-sm font-semibold" style={{ color: 'var(--hub-text)' }}>
+              {pageTitle}
+            </h1>
+            <div className="flex items-center gap-1">
+              <button
+                onClick={() => handleSetTheme(theme === 'dark' ? 'light' : 'dark')}
+                className="h-7 w-7 rounded-lg flex items-center justify-center"
+                style={{ color: 'var(--hub-text-muted)' }}
+                onMouseEnter={(e) => {
+                  (e.currentTarget as HTMLElement).style.background = 'var(--hub-hover)';
+                }}
+                onMouseLeave={(e) => {
+                  (e.currentTarget as HTMLElement).style.background = 'transparent';
+                }}
+              >
+                {theme === 'dark' ? <Sun size={14} /> : <Moon size={14} />}
+              </button>
+              <button
+                className="h-7 w-7 rounded-lg flex items-center justify-center transition-colors duration-150"
+                style={{ color: 'var(--hub-text-muted)' }}
+                onMouseEnter={(e) => {
+                  (e.currentTarget as HTMLElement).style.background = 'var(--hub-hover)';
+                }}
+                onMouseLeave={(e) => {
+                  (e.currentTarget as HTMLElement).style.background = 'transparent';
+                }}
+              >
+                <Bell size={14} />
+              </button>
+              <CaretButton />
+            </div>
+          </header>
 
-      <Toaster
-        theme={theme === 'light' ? 'light' : 'dark'}
-        position="bottom-right"
-        richColors
-        closeButton
+          <AnimatePresence mode="wait">
+            <motion.main
+              key={location.pathname}
+              initial={{ opacity: 0, y: 6 }}
+              animate={{ opacity: 1, y: 0 }}
+              exit={{ opacity: 0, y: -4 }}
+              transition={{ duration: 0.18, ease: 'easeOut' }}
+              className="flex-1 overflow-y-auto p-6"
+            >
+              {children}
+            </motion.main>
+          </AnimatePresence>
+        </div>
+
+        <Toaster
+          theme={theme === 'light' ? 'light' : 'dark'}
+          position="bottom-right"
+          richColors
+          closeButton
+        />
+      </div>
+      <CaretPanel
+        appId="insights"
+        userId={userId}
+        apiBaseUrl={import.meta.env.VITE_API_URL ?? 'https://api.voxire.dev/'}
+        systemContext="User is in the Insights app (analytics and reporting)"
       />
-    </div>
+    </>
   );
 };
 

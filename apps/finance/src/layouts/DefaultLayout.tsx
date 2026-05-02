@@ -1,4 +1,6 @@
 import React, { useEffect, useRef, useState } from 'react';
+import { useUserStore } from '@voxire/auth';
+import { CaretPanel, CaretButton } from '@voxire/caret';
 import TrialBanner from '../shared/components/TrialBanner';
 import { useForesightLinks } from '@voxire/utils';
 import { useLocation, useNavigate, Link, Outlet } from 'react-router-dom';
@@ -192,6 +194,8 @@ const DefaultLayout: React.FC = () => {
   );
   const [searchOpen, setSearchOpen] = useState(false);
   const sidebarRef = useRef<HTMLElement | null>(null);
+  const financeUser = useUserStore((s) => s.user);
+  const userId = Number(financeUser?.id) || 0;
 
   useForesightLinks(sidebarRef, {
     '/': () => import('../features/dashboard/Dashboard'),
@@ -246,233 +250,242 @@ const DefaultLayout: React.FC = () => {
   }, [navigate]);
 
   return (
-    <div className="flex h-screen overflow-hidden" style={{ background: 'var(--hub-bg)' }}>
-      <aside
-        style={{
-          width: 224,
-          display: 'flex',
-          flexDirection: 'column',
-          flexShrink: 0,
-          overflow: 'hidden',
-          background: 'var(--hub-surface)',
-          borderRight: '1px solid var(--hub-border)',
-        }}
-      >
-        <div
+    <>
+      <div className="flex h-screen overflow-hidden" style={{ background: 'var(--hub-bg)' }}>
+        <aside
           style={{
-            display: 'flex',
-            alignItems: 'center',
-            gap: 10,
-            padding: 16,
-            borderBottom: '1px solid var(--hub-border)',
-          }}
-        >
-          <img src="/logo.png" alt="rtylr" className="h-6 w-auto" />
-        </div>
-
-        <div style={{ padding: '10px 8px 4px' }}>
-          <a
-            href={APP_URLS.dash}
-            style={{
-              display: 'flex',
-              alignItems: 'center',
-              gap: 6,
-              padding: '6px 12px',
-              borderRadius: 8,
-              fontSize: 12,
-              color: 'var(--hub-text-muted)',
-              textDecoration: 'none',
-              background: 'var(--hub-hover)',
-              border: '1px solid var(--hub-border)',
-            }}
-          >
-            <ArrowLeft size={12} />
-            <span>Hub</span>
-          </a>
-        </div>
-
-        <div style={{ padding: '6px 8px' }}>
-          <button
-            onClick={() => setSearchOpen(true)}
-            style={{
-              display: 'flex',
-              alignItems: 'center',
-              gap: 8,
-              width: '100%',
-              padding: '6px 12px',
-              borderRadius: 8,
-              background: 'var(--hub-hover)',
-              border: '1px solid var(--hub-border)',
-              color: 'var(--hub-text-muted)',
-              fontSize: 12,
-              cursor: 'pointer',
-            }}
-          >
-            <SearchIcon size={12} />
-            <span>Search</span>
-            <span style={{ marginLeft: 'auto', fontSize: 10, color: 'var(--hub-text-dim)' }}>
-              Cmd K
-            </span>
-          </button>
-        </div>
-
-        <nav
-          ref={sidebarRef}
-          style={{
-            flex: 1,
-            overflowY: 'auto',
-            padding: 8,
+            width: 224,
             display: 'flex',
             flexDirection: 'column',
-            gap: 8,
+            flexShrink: 0,
+            overflow: 'hidden',
+            background: 'var(--hub-surface)',
+            borderRight: '1px solid var(--hub-border)',
           }}
         >
-          {navGroups.map((group) => (
-            <div key={group.title} style={{ display: 'flex', flexDirection: 'column', gap: 2 }}>
-              <p
-                style={{
-                  padding: '4px 12px 4px',
-                  fontSize: 9,
-                  fontWeight: 700,
-                  textTransform: 'uppercase',
-                  letterSpacing: '0.1em',
-                  color: 'var(--hub-text-dim)',
-                  margin: 0,
-                }}
-              >
-                {group.title}
-              </p>
-              {group.items.map((item) => (
-                <SidebarNavItem key={item.path} {...item} />
-              ))}
-            </div>
-          ))}
-        </nav>
-
-        <div style={{ padding: 8, borderTop: '1px solid var(--hub-border)' }}>
-          <p
+          <div
             style={{
-              fontSize: 10,
-              fontWeight: 600,
-              textTransform: 'uppercase',
-              letterSpacing: '0.08em',
-              color: 'var(--hub-text-dim)',
-              margin: '0 0 6px 4px',
+              display: 'flex',
+              alignItems: 'center',
+              gap: 10,
+              padding: 16,
+              borderBottom: '1px solid var(--hub-border)',
             }}
           >
-            Appearance
-          </p>
-          <div style={{ display: 'flex', gap: 4 }}>
-            {[
-              { value: 'light' as Theme, icon: Sun, label: 'Light' },
-              { value: 'dark' as Theme, icon: Moon, label: 'Dark' },
-              { value: 'system' as Theme, icon: Monitor, label: 'System' },
-            ].map(({ value, icon: Icon, label }) => (
-              <button
-                key={value}
-                onClick={() => handleTheme(value)}
-                style={{
-                  flex: 1,
-                  display: 'flex',
-                  flexDirection: 'column',
-                  alignItems: 'center',
-                  gap: 4,
-                  padding: '6px 4px',
-                  borderRadius: 8,
-                  fontSize: 10,
-                  fontWeight: 500,
-                  cursor: 'pointer',
-                  border:
-                    theme === value
-                      ? `1px solid color-mix(in srgb, ${ACCENT} 25%, transparent)`
-                      : '1px solid transparent',
-                  background:
-                    theme === value
-                      ? 'color-mix(in srgb, var(--finance-accent, #10b981) 12%, transparent)'
-                      : 'var(--hub-hover)',
-                  color: theme === value ? ACCENT : 'var(--hub-text-muted)',
-                }}
-              >
-                <Icon size={13} />
-                {label}
-              </button>
-            ))}
+            <img src="/logo.png" alt="rtylr" className="h-6 w-auto" />
           </div>
-        </div>
-      </aside>
 
-      <div style={{ display: 'flex', flexDirection: 'column', flex: 1, overflow: 'hidden' }}>
-        <header
-          style={{
-            height: 44,
-            display: 'flex',
-            alignItems: 'center',
-            justifyContent: 'space-between',
-            padding: '0 24px',
-            flexShrink: 0,
-            background: 'var(--hub-surface)',
-            borderBottom: '1px solid var(--hub-border)',
-          }}
-        >
-          <h1 style={{ margin: 0, fontSize: 13, fontWeight: 600, color: 'var(--hub-text)' }}>
-            {pageTitle}
-          </h1>
-          <div style={{ display: 'flex', alignItems: 'center', gap: 4 }}>
+          <div style={{ padding: '10px 8px 4px' }}>
+            <a
+              href={APP_URLS.dash}
+              style={{
+                display: 'flex',
+                alignItems: 'center',
+                gap: 6,
+                padding: '6px 12px',
+                borderRadius: 8,
+                fontSize: 12,
+                color: 'var(--hub-text-muted)',
+                textDecoration: 'none',
+                background: 'var(--hub-hover)',
+                border: '1px solid var(--hub-border)',
+              }}
+            >
+              <ArrowLeft size={12} />
+              <span>Hub</span>
+            </a>
+          </div>
+
+          <div style={{ padding: '6px 8px' }}>
             <button
               onClick={() => setSearchOpen(true)}
               style={{
-                height: 28,
-                width: 28,
-                borderRadius: 8,
                 display: 'flex',
                 alignItems: 'center',
-                justifyContent: 'center',
-                background: 'transparent',
-                border: 'none',
-                cursor: 'pointer',
-                color: 'var(--hub-text-muted)',
-              }}
-            >
-              <SearchIcon size={14} />
-            </button>
-            <button
-              onClick={() => toast.info('Notifications coming soon')}
-              aria-label="Notifications"
-              style={{
-                height: 28,
-                width: 28,
+                gap: 8,
+                width: '100%',
+                padding: '6px 12px',
                 borderRadius: 8,
-                display: 'flex',
-                alignItems: 'center',
-                justifyContent: 'center',
-                background: 'transparent',
-                border: 'none',
-                cursor: 'pointer',
+                background: 'var(--hub-hover)',
+                border: '1px solid var(--hub-border)',
                 color: 'var(--hub-text-muted)',
+                fontSize: 12,
+                cursor: 'pointer',
               }}
             >
-              <Bell size={14} />
+              <SearchIcon size={12} />
+              <span>Search</span>
+              <span style={{ marginLeft: 'auto', fontSize: 10, color: 'var(--hub-text-dim)' }}>
+                Cmd K
+              </span>
             </button>
           </div>
-        </header>
 
-        <TrialBanner />
-        <AnimatePresence mode="wait">
-          <motion.main
-            key={location.pathname}
-            initial={{ opacity: 0, y: 6 }}
-            animate={{ opacity: 1, y: 0 }}
-            exit={{ opacity: 0, y: -4 }}
-            transition={{ duration: 0.18, ease: 'easeOut' }}
-            style={{ flex: 1, overflowY: 'auto', padding: 24 }}
+          <nav
+            ref={sidebarRef}
+            style={{
+              flex: 1,
+              overflowY: 'auto',
+              padding: 8,
+              display: 'flex',
+              flexDirection: 'column',
+              gap: 8,
+            }}
           >
-            <Outlet />
-          </motion.main>
-        </AnimatePresence>
-      </div>
+            {navGroups.map((group) => (
+              <div key={group.title} style={{ display: 'flex', flexDirection: 'column', gap: 2 }}>
+                <p
+                  style={{
+                    padding: '4px 12px 4px',
+                    fontSize: 9,
+                    fontWeight: 700,
+                    textTransform: 'uppercase',
+                    letterSpacing: '0.1em',
+                    color: 'var(--hub-text-dim)',
+                    margin: 0,
+                  }}
+                >
+                  {group.title}
+                </p>
+                {group.items.map((item) => (
+                  <SidebarNavItem key={item.path} {...item} />
+                ))}
+              </div>
+            ))}
+          </nav>
 
-      <GlobalSearch open={searchOpen} onClose={() => setSearchOpen(false)} />
-    </div>
+          <div style={{ padding: 8, borderTop: '1px solid var(--hub-border)' }}>
+            <p
+              style={{
+                fontSize: 10,
+                fontWeight: 600,
+                textTransform: 'uppercase',
+                letterSpacing: '0.08em',
+                color: 'var(--hub-text-dim)',
+                margin: '0 0 6px 4px',
+              }}
+            >
+              Appearance
+            </p>
+            <div style={{ display: 'flex', gap: 4 }}>
+              {[
+                { value: 'light' as Theme, icon: Sun, label: 'Light' },
+                { value: 'dark' as Theme, icon: Moon, label: 'Dark' },
+                { value: 'system' as Theme, icon: Monitor, label: 'System' },
+              ].map(({ value, icon: Icon, label }) => (
+                <button
+                  key={value}
+                  onClick={() => handleTheme(value)}
+                  style={{
+                    flex: 1,
+                    display: 'flex',
+                    flexDirection: 'column',
+                    alignItems: 'center',
+                    gap: 4,
+                    padding: '6px 4px',
+                    borderRadius: 8,
+                    fontSize: 10,
+                    fontWeight: 500,
+                    cursor: 'pointer',
+                    border:
+                      theme === value
+                        ? `1px solid color-mix(in srgb, ${ACCENT} 25%, transparent)`
+                        : '1px solid transparent',
+                    background:
+                      theme === value
+                        ? 'color-mix(in srgb, var(--finance-accent, #10b981) 12%, transparent)'
+                        : 'var(--hub-hover)',
+                    color: theme === value ? ACCENT : 'var(--hub-text-muted)',
+                  }}
+                >
+                  <Icon size={13} />
+                  {label}
+                </button>
+              ))}
+            </div>
+          </div>
+        </aside>
+
+        <div style={{ display: 'flex', flexDirection: 'column', flex: 1, overflow: 'hidden' }}>
+          <header
+            style={{
+              height: 44,
+              display: 'flex',
+              alignItems: 'center',
+              justifyContent: 'space-between',
+              padding: '0 24px',
+              flexShrink: 0,
+              background: 'var(--hub-surface)',
+              borderBottom: '1px solid var(--hub-border)',
+            }}
+          >
+            <h1 style={{ margin: 0, fontSize: 13, fontWeight: 600, color: 'var(--hub-text)' }}>
+              {pageTitle}
+            </h1>
+            <div style={{ display: 'flex', alignItems: 'center', gap: 4 }}>
+              <button
+                onClick={() => setSearchOpen(true)}
+                style={{
+                  height: 28,
+                  width: 28,
+                  borderRadius: 8,
+                  display: 'flex',
+                  alignItems: 'center',
+                  justifyContent: 'center',
+                  background: 'transparent',
+                  border: 'none',
+                  cursor: 'pointer',
+                  color: 'var(--hub-text-muted)',
+                }}
+              >
+                <SearchIcon size={14} />
+              </button>
+              <button
+                onClick={() => toast.info('Notifications coming soon')}
+                aria-label="Notifications"
+                style={{
+                  height: 28,
+                  width: 28,
+                  borderRadius: 8,
+                  display: 'flex',
+                  alignItems: 'center',
+                  justifyContent: 'center',
+                  background: 'transparent',
+                  border: 'none',
+                  cursor: 'pointer',
+                  color: 'var(--hub-text-muted)',
+                }}
+              >
+                <Bell size={14} />
+              </button>
+              <CaretButton />
+            </div>
+          </header>
+
+          <TrialBanner />
+          <AnimatePresence mode="wait">
+            <motion.main
+              key={location.pathname}
+              initial={{ opacity: 0, y: 6 }}
+              animate={{ opacity: 1, y: 0 }}
+              exit={{ opacity: 0, y: -4 }}
+              transition={{ duration: 0.18, ease: 'easeOut' }}
+              style={{ flex: 1, overflowY: 'auto', padding: 24 }}
+            >
+              <Outlet />
+            </motion.main>
+          </AnimatePresence>
+        </div>
+
+        <GlobalSearch open={searchOpen} onClose={() => setSearchOpen(false)} />
+      </div>
+      <CaretPanel
+        appId="finance"
+        userId={userId}
+        apiBaseUrl={import.meta.env.VITE_API_URL ?? 'https://api.voxire.dev/'}
+        systemContext="User is in the Finance app (invoices, expenses, bills, P&L, tax)"
+      />
+    </>
   );
 };
 

@@ -13,6 +13,7 @@
     "@tanstack/react-query": "^5.99.2",
     "@voxire/api": "workspace:*",
     "@voxire/auth": "workspace:*",
+    "@voxire/caret": "workspace:*",
     "@voxire/config": "workspace:*",
     "@voxire/contracts": "workspace:*",
     "@voxire/i18n": "workspace:*",

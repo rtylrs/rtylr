@@ -355,6 +355,9 @@ importers:
       '@voxire/auth':
         specifier: workspace:*
         version: link:../../packages/auth
+      '@voxire/caret':
+        specifier: workspace:*
+        version: link:../../packages/caret
       '@voxire/config':
         specifier: workspace:*
         version: link:../../packages/config
@@ -754,6 +757,9 @@ importers:
       '@voxire/auth':
         specifier: workspace:*
         version: link:../../packages/auth
+      '@voxire/caret':
+        specifier: workspace:*
+        version: link:../../packages/caret
       '@voxire/config':
         specifier: workspace:*
         version: link:../../packages/config
@@ -887,6 +893,9 @@ importers:
       '@voxire/auth':
         specifier: workspace:*
         version: link:../../packages/auth
+      '@voxire/caret':
+        specifier: workspace:*
+        version: link:../../packages/caret
       '@voxire/config':
         specifier: workspace:*
         version: link:../../packages/config
@@ -1002,6 +1011,9 @@ importers:
       '@voxire/auth':
         specifier: workspace:*
         version: link:../../packages/auth
+      '@voxire/caret':
+        specifier: workspace:*
+        version: link:../../packages/caret
       '@voxire/config':
         specifier: workspace:*
         version: link:../../packages/config
@@ -1090,6 +1102,9 @@ importers:
       '@voxire/auth':
         specifier: workspace:*
         version: link:../../packages/auth
+      '@voxire/caret':
+        specifier: workspace:*
+        version: link:../../packages/caret
       '@voxire/config':
         specifier: workspace:*
         version: link:../../packages/config
@@ -1184,6 +1199,9 @@ importers:
       '@voxire/auth':
         specifier: workspace:*
         version: link:../../packages/auth
+      '@voxire/caret':
+        specifier: workspace:*
+        version: link:../../packages/caret
       '@voxire/config':
         specifier: workspace:*
         version: link:../../packages/config

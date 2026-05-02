@@ -15,6 +15,7 @@
     "@tanstack/react-virtual": "^3.13.24",
     "@voxire/api": "workspace:*",
     "@voxire/auth": "workspace:*",
+    "@voxire/caret": "workspace:*",
     "@voxire/config": "workspace:*",
     "@voxire/contracts": "workspace:*",
     "@voxire/i18n": "workspace:*",
