@@ -195,7 +195,9 @@ func (c *GeminiProvider) processResponse(ctx context.Context, resp *genai.Genera
 		return false
 	}
 
-	fmt.Printf("Gemini returned text chunk: '%s' (length: %d)\n", text, len(text))
+	logger.Global().Debug("Gemini returned text chunk",
+		logger.String("text_preview", text[:min(len(text), 50)]),
+		logger.Int("length", len(text)))
 
 	select {
 	case tokenChan <- StreamToken{Text: text, Done: false}:
