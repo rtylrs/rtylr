@@ -118,3 +118,39 @@ export const useDeleteExpense = () => {
     },
   });
 };
+
+export const useApproveExpense = () => {
+  const queryClient = useQueryClient();
+  const { t } = useTranslation();
+
+  return useMutation({
+    mutationFn: async (id: string): Promise<void> => {
+      await unwrap(safe.post<void>(`/finance/expenses/${id}/approve`, {}));
+    },
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ['expenses'] });
+      toast.success(t('expenses.approved'));
+    },
+    onError: () => {
+      toast.error(t('errors.generic'));
+    },
+  });
+};
+
+export const useRejectExpense = () => {
+  const queryClient = useQueryClient();
+  const { t } = useTranslation();
+
+  return useMutation({
+    mutationFn: async (id: string): Promise<void> => {
+      await unwrap(safe.post<void>(`/finance/expenses/${id}/reject`, {}));
+    },
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ['expenses'] });
+      toast.success(t('expenses.rejected'));
+    },
+    onError: () => {
+      toast.error(t('errors.generic'));
+    },
+  });
+};
