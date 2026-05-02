@@ -7,3 +7,4 @@ export * from './usePrevious';
 export * from './useWindowDimensions';
 export * from './useMediaQuery';
 export * from './useTheme';
+export * from './useForesightLinks';
