@@ -22,7 +22,7 @@ const Categories: React.FC = () => {
         title="Expense Categories"
         subtitle={`${data.length} categories`}
         actions={
-          <button style={primaryBtn} onClick={() => toast.success('Category dialog opened')}>
+          <button style={primaryBtn} onClick={() => toast.info('Create category coming soon')}>
             <Plus size={13} /> New Category
           </button>
         }
@@ -65,7 +65,12 @@ const Categories: React.FC = () => {
                       {c.name}
                     </span>
                   </div>
-                  <span style={{ fontSize: 11, color: over ? '#ef4444' : 'var(--hub-text-dim)' }}>
+                  <span
+                    style={{
+                      fontSize: 11,
+                      color: over ? 'var(--finance-error, #ef4444)' : 'var(--hub-text-dim)',
+                    }}
+                  >
                     {pct}%
                   </span>
                 </div>
@@ -94,7 +99,7 @@ const Categories: React.FC = () => {
                     style={{
                       width: `${pct}%`,
                       height: '100%',
-                      background: over ? '#ef4444' : c.color,
+                      background: over ? 'var(--finance-error, #ef4444)' : c.color,
                       transition: 'width 0.3s',
                     }}
                   />
