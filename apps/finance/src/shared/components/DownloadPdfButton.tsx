@@ -9,30 +9,15 @@ interface DownloadPdfButtonProps {
 }
 
 const DownloadPdfButton: React.FC<DownloadPdfButtonProps> = ({
-  invoiceId,
+  invoiceId: _invoiceId,
   label = 'Download PDF',
 }) => {
-  const handle = () => {
-    // Create a simple "fake" text blob as a placeholder for a PDF.
-    const blob = new Blob(
-      [
-        `Invoice ${invoiceId}\nGenerated ${new Date().toLocaleString()}\n\nThis is a placeholder PDF export.`,
-      ],
-      { type: 'application/pdf' }
-    );
-    const url = URL.createObjectURL(blob);
-    const a = document.createElement('a');
-    a.href = url;
-    a.download = `${invoiceId}.pdf`;
-    document.body.appendChild(a);
-    a.click();
-    a.remove();
-    URL.revokeObjectURL(url);
-    toast.success(`Downloaded ${invoiceId}.pdf`);
+  const handle = (): void => {
+    toast.info('PDF download coming soon');
   };
 
   return (
-    <button onClick={handle} style={ghostBtn}>
+    <button onClick={handle} style={ghostBtn} aria-label="Download PDF">
       <Download size={13} />
       {label}
     </button>
