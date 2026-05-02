@@ -291,7 +291,7 @@ const TaskDetail: React.FC = () => {
   // Labels may arrive as label_ids (snake_case from API before normalization)
   // or labels (post-mapping). Accept either shape.
   const taskWithLabelIds = task as Task & { label_ids?: number[] };
-  const rawLabels = taskWithLabelIds.label_ids ?? task.labelIds ?? [];
+  const rawLabels = taskWithLabelIds.label_ids ?? task.labels ?? [];
   const taskLabelIds: number[] = rawLabels.map((l) => Number(l)).filter((n) => !Number.isNaN(n));
   const taskLabels = allLabels.filter((l) => taskLabelIds.includes(l.id));
 
