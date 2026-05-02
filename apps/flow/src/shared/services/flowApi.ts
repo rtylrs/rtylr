@@ -254,7 +254,6 @@ export interface ApiTaskDetail {
 
 // -- Per-feature services (re-exported for backwards compat) ---------------
 
-export { projectService } from './projectService';
 export { taskService } from './taskService';
 export { workspaceService } from './workspaceService';
 export { cycleService } from './cycleService';
@@ -450,7 +449,7 @@ export const flowApi = {
   logTime: (data: { task_id: number; duration_minutes: number; description?: string }) =>
     safe.post<ApiTimeLog>('/flow/tasks/time', data),
 
-  deleteTimeLog: (id: number) => safe.delete('/flow/tasks/time', { params: { id } }),
+  deleteTimeLog: (id: number) => safe.delete('/flow/tasks/time', { data: { id } }),
 
   // -- Labels -------------------------------------------------------------
 
