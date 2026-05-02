@@ -37,7 +37,11 @@ const Quotes: React.FC = () => {
           </>
         }
         actions={
-          <button style={primaryBtn}>
+          <button
+            style={primaryBtn}
+            aria-label="New Quote"
+            onClick={() => toast.info('Create quote coming soon')}
+          >
             <Plus size={13} /> New Quote
           </button>
         }
@@ -125,22 +129,29 @@ const Quotes: React.FC = () => {
                         style={{
                           ...ghostBtn,
                           padding: '4px 10px',
-                          color: '#10b981',
-                          borderColor: 'rgba(16,185,129,0.3)',
+                          color: 'var(--finance-accent, #10b981)',
+                          borderColor: 'var(--finance-accent-border, rgba(16,185,129,0.3))',
                         }}
-                        onClick={() => toast.success(`Converted ${q.id} to invoice`)}
+                        aria-label={`Convert quote ${q.id} to invoice`}
+                        onClick={() => toast.info('Convert to invoice coming soon')}
                       >
                         <ArrowRight size={12} /> Convert
                       </button>
                     ) : q.status === 'Sent' ? (
                       <button
                         style={{ ...ghostBtn, padding: '4px 10px' }}
-                        onClick={() => toast.success(t('quotes.markedAccepted', { id: q.id }))}
+                        aria-label={`Mark quote ${q.id} as accepted`}
+                        onClick={() => toast.info('Mark accepted coming soon')}
                       >
                         <CheckCircle size={12} /> Mark Accepted
                       </button>
                     ) : (
-                      <button style={{ ...ghostBtn, padding: '4px 10px' }}>View</button>
+                      <button
+                        style={{ ...ghostBtn, padding: '4px 10px' }}
+                        aria-label={`View quote ${q.id}`}
+                      >
+                        View
+                      </button>
                     )}
                   </td>
                 </tr>
