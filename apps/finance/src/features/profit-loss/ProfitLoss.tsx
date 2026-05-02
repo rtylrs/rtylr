@@ -3,7 +3,6 @@ import { motion } from 'motion/react';
 import { TrendingUp, TrendingDown, Download, Lock } from 'lucide-react';
 import { toast } from 'sonner';
 import { usePL } from '../../shared/hooks/useTax';
-import PLByCategoryChart from '../../shared/components/PLByCategoryChart';
 import PaymentReminderPanel from '../../shared/components/PaymentReminderPanel';
 import ConfirmDialog from '../../shared/components/ConfirmDialog';
 import { exportProfitLossCsv } from '../../shared/lib/exports';
@@ -28,7 +27,7 @@ const fmt = (n: number) =>
 
 const pct = (n: number, of: number) => (of === 0 ? '0.0%' : `${((n / of) * 100).toFixed(1)}%`);
 
-const ACCENT = '#10b981';
+const ACCENT = 'var(--finance-accent, #10b981)';
 
 const cardStyle: React.CSSProperties = {
   background: 'var(--hub-card)',
@@ -60,7 +59,11 @@ const PLRow: React.FC<RowProps> = ({
   sub,
   large,
 }) => {
-  const color = positive ? '#10b981' : negative ? '#ef4444' : 'var(--hub-text)';
+  const color = positive
+    ? 'var(--finance-accent, #10b981)'
+    : negative
+      ? 'var(--finance-danger, #ef4444)'
+      : 'var(--hub-text)';
   return (
     <div
       style={{
@@ -112,19 +115,10 @@ const PERIOD_PARAMS: Record<Period, string> = {
   'This Year': 'year',
 };
 
-const CATEGORY_BREAKDOWN = [
-  { category: 'Rent', amount: 6800, color: '#3b82f6' },
-  { category: 'Marketing & Advertising', amount: 5200, color: '#ec4899' },
-  { category: 'Software & SaaS', amount: 2820, color: '#8b5cf6' },
-  { category: 'Travel', amount: 1870, color: '#f59e0b' },
-  { category: 'Meals & Entertainment', amount: 1240, color: '#ef4444' },
-  { category: 'Utilities', amount: 720, color: '#10b981' },
-];
-
 const ProfitLoss: React.FC = () => {
   const [period, setPeriod] = useState<Period>('This Month');
   const [showClose, setShowClose] = useState(false);
-  const { data: plData, isLoading: loading } = usePL(PERIOD_PARAMS[period]);
+  const { data: plData } = usePL(PERIOD_PARAMS[period]);
 
   const data: PeriodData = plData
     ? {
@@ -143,18 +137,28 @@ const ProfitLoss: React.FC = () => {
 
   // Summary cards
   const summaryItems = [
-    { label: 'Revenue', value: data.revenue, color: '#10b981', Icon: TrendingUp },
-    { label: 'Gross Profit', value: grossProfit, color: '#3b82f6', Icon: TrendingUp },
+    {
+      label: 'Revenue',
+      value: data.revenue,
+      color: 'var(--finance-accent, #10b981)',
+      Icon: TrendingUp,
+    },
+    {
+      label: 'Gross Profit',
+      value: grossProfit,
+      color: 'var(--finance-info, #3b82f6)',
+      Icon: TrendingUp,
+    },
     {
       label: 'Net Profit',
       value: netProfit,
-      color: netProfit >= 0 ? '#10b981' : '#ef4444',
+      color: netProfit >= 0 ? 'var(--finance-accent, #10b981)' : 'var(--finance-danger, #ef4444)',
       Icon: netProfit >= 0 ? TrendingUp : TrendingDown,
     },
     {
       label: 'Net Margin',
       value: parseFloat(netMargin),
-      color: '#f59e0b',
+      color: 'var(--finance-warning, #f59e0b)',
       Icon: TrendingUp,
       isMeta: true,
       display: netMargin,
@@ -215,9 +219,10 @@ const ProfitLoss: React.FC = () => {
               gap: 6,
               padding: '7px 14px',
               borderRadius: 8,
-              border: '1px solid rgba(245,158,11,0.3)',
-              background: 'rgba(245,158,11,0.08)',
-              color: '#f59e0b',
+              border:
+                '1px solid color-mix(in srgb, var(--finance-warning, #f59e0b) 30%, transparent)',
+              background: 'color-mix(in srgb, var(--finance-warning, #f59e0b) 8%, transparent)',
+              color: 'var(--finance-warning, #f59e0b)',
               fontSize: 13,
               cursor: 'pointer',
               fontWeight: 600,
@@ -391,25 +396,7 @@ const ProfitLoss: React.FC = () => {
           >
             Operating Expenses
           </div>
-          <PLRow label="Rent" value={Math.round(data.operatingExpenses * 0.42)} indent negative />
-          <PLRow
-            label="Marketing & Advertising"
-            value={Math.round(data.operatingExpenses * 0.28)}
-            indent
-            negative
-          />
-          <PLRow
-            label="Utilities & Software"
-            value={Math.round(data.operatingExpenses * 0.18)}
-            indent
-            negative
-          />
-          <PLRow
-            label="Other Operating"
-            value={Math.round(data.operatingExpenses * 0.12)}
-            indent
-            negative
-          />
+          <PLRow label="Total Operating Expenses" value={data.operatingExpenses} indent negative />
           <div
             style={{
               display: 'flex',
@@ -426,7 +413,7 @@ const ProfitLoss: React.FC = () => {
               style={{
                 fontSize: 12,
                 fontWeight: 600,
-                color: '#ef4444',
+                color: 'var(--finance-danger, #ef4444)',
                 fontVariantNumeric: 'tabular-nums',
               }}
             >
@@ -451,7 +438,20 @@ const ProfitLoss: React.FC = () => {
       {/* By-category + reminders */}
       <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: 20 }}>
         <div style={{ ...cardStyle, padding: 20 }}>
-          <PLByCategoryChart data={CATEGORY_BREAKDOWN} />
+          <div
+            style={{
+              fontSize: 11,
+              color: 'var(--hub-text-dim)',
+              textTransform: 'uppercase',
+              letterSpacing: '0.08em',
+              marginBottom: 12,
+            }}
+          >
+            Expenses by Category
+          </div>
+          <p style={{ fontSize: 13, color: 'var(--hub-text-muted)', margin: 0 }}>
+            Category breakdown not available yet.
+          </p>
         </div>
         <PaymentReminderPanel />
       </div>
