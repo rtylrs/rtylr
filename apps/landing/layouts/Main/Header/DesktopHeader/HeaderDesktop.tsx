@@ -130,6 +130,13 @@ const HeaderDesktop: React.FC = () => {
     [router]
   );
 
+  const prefetchRoute = useCallback(
+    (path: string) => {
+      router.prefetch(path).catch(() => {});
+    },
+    [router]
+  );
+
   const handleExternalLink = useCallback((url: string) => {
     setResourcesDropdown(false);
     window.open(url, '_blank', 'noopener,noreferrer');
@@ -196,25 +203,41 @@ const HeaderDesktop: React.FC = () => {
             </p>
             {featuresDropdown && (
               <div className={styles['header-dropdown-wide']}>
-                <div className={styles['dropdown-item']} onClick={() => handleNavigation('/pos')}>
+                <div
+                  className={styles['dropdown-item']}
+                  onClick={() => handleNavigation('/pos')}
+                  onMouseEnter={() => prefetchRoute('/pos')}
+                >
                   <div className={styles['dropdown-item-title']}>POS</div>
                   <div className={styles['dropdown-item-desc']}>
                     Payments, tables, orders, and receipts in one register.
                   </div>
                 </div>
-                <div className={styles['dropdown-item']} onClick={() => handleNavigation('/erp')}>
+                <div
+                  className={styles['dropdown-item']}
+                  onClick={() => handleNavigation('/erp')}
+                  onMouseEnter={() => prefetchRoute('/erp')}
+                >
                   <div className={styles['dropdown-item-title']}>ERP</div>
                   <div className={styles['dropdown-item-desc']}>
                     Inventory, suppliers, and purchasing that stay in sync.
                   </div>
                 </div>
-                <div className={styles['dropdown-item']} onClick={() => handleNavigation('/hr')}>
+                <div
+                  className={styles['dropdown-item']}
+                  onClick={() => handleNavigation('/hr')}
+                  onMouseEnter={() => prefetchRoute('/hr')}
+                >
                   <div className={styles['dropdown-item-title']}>HR</div>
                   <div className={styles['dropdown-item-desc']}>
                     Staff, schedules, time off, and payroll in one place.
                   </div>
                 </div>
-                <div className={styles['dropdown-item']} onClick={() => handleNavigation('/crm')}>
+                <div
+                  className={styles['dropdown-item']}
+                  onClick={() => handleNavigation('/crm')}
+                  onMouseEnter={() => prefetchRoute('/crm')}
+                >
                   <div className={styles['dropdown-item-title']}>CRM</div>
                   <div className={styles['dropdown-item-desc']}>
                     Customer profiles, loyalty, segments, and campaigns.
@@ -223,13 +246,18 @@ const HeaderDesktop: React.FC = () => {
                 <div
                   className={styles['dropdown-item']}
                   onClick={() => handleNavigation('/finance')}
+                  onMouseEnter={() => prefetchRoute('/finance')}
                 >
                   <div className={styles['dropdown-item-title']}>Finance</div>
                   <div className={styles['dropdown-item-desc']}>
                     Invoices, expenses, tax, and a real P&L in seconds.
                   </div>
                 </div>
-                <div className={styles['dropdown-item']} onClick={() => handleNavigation('/flow')}>
+                <div
+                  className={styles['dropdown-item']}
+                  onClick={() => handleNavigation('/flow')}
+                  onMouseEnter={() => prefetchRoute('/flow')}
+                >
                   <div className={styles['dropdown-item-title']}>Flow</div>
                   <div className={styles['dropdown-item-desc']}>
                     Projects, tasks, and team workspaces for every department.
@@ -255,13 +283,43 @@ const HeaderDesktop: React.FC = () => {
             </p>
             {resourcesDropdown && (
               <div className={styles['header-dropdown']}>
-                <h6 onClick={() => handleNavigation('/hardware')}>Hardware</h6>
-                <h6 onClick={() => handleNavigation('/integrations')}>Integrations</h6>
-                <h6 onClick={() => handleNavigation('/blog')}>Blog</h6>
-                <h6 onClick={() => handleNavigation('/changelog')}>Changelog</h6>
+                <h6
+                  onClick={() => handleNavigation('/hardware')}
+                  onMouseEnter={() => prefetchRoute('/hardware')}
+                >
+                  Hardware
+                </h6>
+                <h6
+                  onClick={() => handleNavigation('/integrations')}
+                  onMouseEnter={() => prefetchRoute('/integrations')}
+                >
+                  Integrations
+                </h6>
+                <h6
+                  onClick={() => handleNavigation('/blog')}
+                  onMouseEnter={() => prefetchRoute('/blog')}
+                >
+                  Blog
+                </h6>
+                <h6
+                  onClick={() => handleNavigation('/changelog')}
+                  onMouseEnter={() => prefetchRoute('/changelog')}
+                >
+                  Changelog
+                </h6>
                 <h6 onClick={() => handleExternalLink('https://docs.rtylr.com')}>Documentation</h6>
-                <h6 onClick={() => handleNavigation('/support')}>Help Center</h6>
-                <h6 onClick={() => handleNavigation('/trust')}>Trust Center</h6>
+                <h6
+                  onClick={() => handleNavigation('/support')}
+                  onMouseEnter={() => prefetchRoute('/support')}
+                >
+                  Help Center
+                </h6>
+                <h6
+                  onClick={() => handleNavigation('/trust')}
+                  onMouseEnter={() => prefetchRoute('/trust')}
+                >
+                  Trust Center
+                </h6>
                 <h6 onClick={() => handleExternalLink(APP_URLS.status)}>Status</h6>
               </div>
             )}
@@ -279,11 +337,31 @@ const HeaderDesktop: React.FC = () => {
             </p>
             {solutionsDropdown && (
               <div className={styles['header-dropdown']}>
-                <h6 onClick={() => handleNavigation('/about')}>About</h6>
-                <h6 onClick={() => handleNavigation('/partners')}>Partners</h6>
-                <h6 onClick={() => handleNavigation('/newsroom')}>Newsroom</h6>
+                <h6
+                  onClick={() => handleNavigation('/about')}
+                  onMouseEnter={() => prefetchRoute('/about')}
+                >
+                  About
+                </h6>
+                <h6
+                  onClick={() => handleNavigation('/partners')}
+                  onMouseEnter={() => prefetchRoute('/partners')}
+                >
+                  Partners
+                </h6>
+                <h6
+                  onClick={() => handleNavigation('/newsroom')}
+                  onMouseEnter={() => prefetchRoute('/newsroom')}
+                >
+                  Newsroom
+                </h6>
                 <h6 onClick={() => handleExternalLink('https://voxire.com/careers')}>Careers</h6>
-                <h6 onClick={() => handleNavigation('/contact')}>Contact</h6>
+                <h6
+                  onClick={() => handleNavigation('/contact')}
+                  onMouseEnter={() => prefetchRoute('/contact')}
+                >
+                  Contact
+                </h6>
               </div>
             )}
           </div>
