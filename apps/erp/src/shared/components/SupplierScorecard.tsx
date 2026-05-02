@@ -75,7 +75,7 @@ const SupplierScorecard: React.FC<SupplierScorecardProps> = ({ supplier }) => {
         <Metric
           label="Accuracy"
           value={accuracy}
-          color={accuracy >= 95 ? '#10b981' : '#f59e0b'}
+          color={accuracy === null ? 'var(--hub-text-dim)' : accuracy >= 95 ? '#10b981' : '#f59e0b'}
           icon={Target}
         />
         <Metric label="Lead Days" value={leadTime} suffix="d" color="#60a5fa" icon={Clock} />

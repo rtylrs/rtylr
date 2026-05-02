@@ -21,7 +21,7 @@ import { useActivity } from '../../shared/hooks/useActivity';
 import { timeAgo, formatCurrency } from '../../shared/lib/format';
 import { SkeletonRow } from '../../shared/components/Skeleton';
 
-const AMBER = '#f59e0b';
+const AMBER = 'var(--erp-accent, #f59e0b)';
 
 const today = new Date().toLocaleDateString('en-US', {
   weekday: 'long',
@@ -31,10 +31,17 @@ const today = new Date().toLocaleDateString('en-US', {
 });
 
 function getStatusColor(status: PurchaseOrder['status']): string {
-  if (status === 'Received') return '#10b981';
+  if (status === 'Received') return 'var(--erp-success, #10b981)';
   if (status === 'Sent' || status === 'Approved') return AMBER;
-  if (status === 'Pending Approval') return '#a78bfa';
+  if (status === 'Pending Approval') return 'var(--erp-purple, #a78bfa)';
   return 'var(--hub-text-dim)';
+}
+
+function getStatusBg(status: PurchaseOrder['status']): string {
+  if (status === 'Received') return 'rgba(16,185,129,0.09)';
+  if (status === 'Sent' || status === 'Approved') return 'rgba(245,158,11,0.09)';
+  if (status === 'Pending Approval') return 'rgba(167,139,250,0.09)';
+  return 'rgba(0,0,0,0.06)';
 }
 
 const activityIconFor = (type: string) => {
@@ -73,7 +80,7 @@ const Dashboard: React.FC = () => {
       label: 'Total Products',
       value: productsData?.length ?? 0,
       icon: Package,
-      change: '+12 this month',
+      change: '',
       changePositive: true,
       to: '/products',
     },
@@ -89,7 +96,7 @@ const Dashboard: React.FC = () => {
       label: 'Pending Orders',
       value: ordersForList.filter((o) => o.status === 'Sent' || o.status === 'Draft').length,
       icon: ShoppingCart,
-      change: '2 awaiting approval',
+      change: `${ordersForList.filter((o) => o.status === 'Pending Approval').length} awaiting approval`,
       changePositive: true,
       to: '/purchasing',
     },
@@ -97,13 +104,15 @@ const Dashboard: React.FC = () => {
       label: 'Total Suppliers',
       value: suppliersData?.length ?? 0,
       icon: Users,
-      change: '+2 this month',
+      change: '',
       changePositive: true,
       to: '/suppliers',
     },
   ];
 
-  const weeklyValue = (productsData || []).slice(0, 5).reduce((s, p) => s + p.salePrice * 3, 0);
+  const weeklyValue = (productsData || [])
+    .slice(0, 5)
+    .reduce((s, p) => s + p.salePrice * (p.stock || 0), 0);
 
   return (
     <motion.div
@@ -169,12 +178,18 @@ const Dashboard: React.FC = () => {
                 <p className="text-2xl font-bold" style={{ color: 'var(--hub-text)' }}>
                   {isLoading ? '…' : stat.value}
                 </p>
-                <p
-                  className="text-xs mt-1"
-                  style={{ color: stat.changePositive ? '#10b981' : '#f87171' }}
-                >
-                  {stat.change}
-                </p>
+                {stat.change && (
+                  <p
+                    className="text-xs mt-1"
+                    style={{
+                      color: stat.changePositive
+                        ? 'var(--erp-success, #10b981)'
+                        : 'var(--erp-danger, #f87171)',
+                    }}
+                  >
+                    {stat.change}
+                  </p>
+                )}
               </Link>
             </motion.div>
           );
@@ -192,16 +207,16 @@ const Dashboard: React.FC = () => {
           style={{ background: 'var(--hub-card)', border: '1px solid var(--hub-border)' }}
         >
           <div className="flex items-center gap-2 mb-3">
-            <TrendingUp size={14} style={{ color: '#10b981' }} />
+            <TrendingUp size={14} style={{ color: 'var(--erp-success, #10b981)' }} />
             <h3 className="text-sm font-semibold" style={{ color: 'var(--hub-text)' }}>
-              Sales This Week
+              Catalog Value (Top 5)
             </h3>
           </div>
           <p className="text-2xl font-bold" style={{ color: 'var(--hub-text)' }}>
             {formatCurrency(weeklyValue)}
           </p>
-          <p className="text-[11px] mt-1" style={{ color: '#10b981' }}>
-            +18% vs last week
+          <p className="text-[11px] mt-1" style={{ color: 'var(--hub-text-dim)' }}>
+            top 5 products by price
           </p>
         </motion.div>
 
@@ -239,7 +254,7 @@ const Dashboard: React.FC = () => {
           style={{ background: 'var(--hub-card)', border: '1px solid var(--hub-border)' }}
         >
           <div className="flex items-center gap-2 mb-3">
-            <Activity size={14} style={{ color: '#60a5fa' }} />
+            <Activity size={14} style={{ color: 'var(--erp-info, #60a5fa)' }} />
             <h3 className="text-sm font-semibold" style={{ color: 'var(--hub-text)' }}>
               Recent Activity
             </h3>
@@ -280,13 +295,13 @@ const Dashboard: React.FC = () => {
           style={{ background: 'var(--hub-card)', border: '1px solid var(--hub-border)' }}
         >
           <div className="flex items-center gap-2 mb-4">
-            <TrendingDown size={15} style={{ color: '#f87171' }} />
+            <TrendingDown size={15} style={{ color: 'var(--erp-danger, #f87171)' }} />
             <h3 className="text-sm font-semibold" style={{ color: 'var(--hub-text)' }}>
               Low Stock Alert
             </h3>
             <span
               className="ml-auto text-xs px-2 py-0.5 rounded-full font-medium"
-              style={{ background: 'rgba(248,113,113,0.1)', color: '#f87171' }}
+              style={{ background: 'rgba(248,113,113,0.1)', color: 'var(--erp-danger, #f87171)' }}
             >
               {isLoading ? '…' : `${lowStockItems.length} items`}
             </span>
@@ -310,7 +325,7 @@ const Dashboard: React.FC = () => {
                     </div>
                     <p
                       className="text-sm font-bold text-center"
-                      style={{ color: item.stock <= 5 ? '#f87171' : AMBER }}
+                      style={{ color: item.stock <= 5 ? 'var(--erp-danger, #f87171)' : AMBER }}
                     >
                       {item.stock} {item.unit}
                     </p>
@@ -338,6 +353,7 @@ const Dashboard: React.FC = () => {
               ? Array.from({ length: 3 }).map((_, i) => <SkeletonRow key={i} cols={4} />)
               : recentOrders.map((order) => {
                   const statusColor = getStatusColor(order.status);
+                  const statusBg = getStatusBg(order.status);
                   return (
                     <div
                       key={order.id}
@@ -367,7 +383,7 @@ const Dashboard: React.FC = () => {
                       <div className="flex justify-end">
                         <span
                           className="text-[10px] font-medium px-2 py-0.5 rounded-full"
-                          style={{ background: `${statusColor}18`, color: statusColor }}
+                          style={{ background: statusBg, color: statusColor }}
                         >
                           {order.status}
                         </span>

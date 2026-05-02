@@ -1,7 +1,12 @@
 import React, { useState } from 'react';
 import { motion } from 'motion/react';
 import { Plus, Folder, GripVertical, Edit3, Trash2 } from 'lucide-react';
-import { useCategories, useCreateCategory, useDeleteCategory } from './useCategories';
+import {
+  useCategories,
+  useCreateCategory,
+  useDeleteCategory,
+  useUpdateCategory,
+} from './useCategories';
 import PageHeader from '../../shared/components/PageHeader';
 import EmptyState from '../../shared/components/EmptyState';
 import { SkeletonRow } from '../../shared/components/Skeleton';
@@ -14,8 +19,11 @@ const Categories: React.FC = () => {
   const { data: categories = [], isLoading } = useCategories();
   const createMut = useCreateCategory();
   const deleteMut = useDeleteCategory();
+  const updateMut = useUpdateCategory();
   const [confirmDelete, setConfirmDelete] = useState<number | null>(null);
   const [newName, setNewName] = useState('');
+  const [editingId, setEditingId] = useState<number | null>(null);
+  const [editName, setEditName] = useState('');
 
   const handleCreate = async (): Promise<void> => {
     if (!newName.trim()) return;
