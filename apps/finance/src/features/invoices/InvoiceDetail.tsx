@@ -43,7 +43,8 @@ const InvoiceDetail: React.FC = () => {
     invoice.status === 'Paid' ? 'paid' : invoice.status === 'Overdue' ? 'overdue' : 'unpaid';
   const balanceDue = invoice.amount - (invoice.paid ?? 0);
 
-  const clientObj = { id: 'c1', name: invoice.client, email: invoice.clientEmail };
+  // clientId is not available in the current Invoice payload; using empty string until the API provides it.
+  const clientObj = { id: invoice.id, name: invoice.client, email: invoice.clientEmail };
 
   return (
     <motion.div
