@@ -1,5 +1,6 @@
-import React, { useEffect, useState } from 'react';
+import React, { useEffect, useRef, useState } from 'react';
 import TrialBanner from '../shared/components/TrialBanner';
+import { useForesightLinks } from '@voxire/utils';
 import { useLocation, useNavigate, Link, Outlet } from 'react-router-dom';
 import { motion, AnimatePresence } from 'motion/react';
 import { APP_URLS } from '@voxire/config';
@@ -28,8 +29,9 @@ import {
   FileCheck,
 } from 'lucide-react';
 import GlobalSearch from '../shared/components/GlobalSearch';
+import { toast } from 'sonner';
 
-const ACCENT = '#10b981';
+const ACCENT = 'var(--finance-accent, #10b981)';
 
 interface NavItem {
   label: string;
@@ -189,6 +191,27 @@ const DefaultLayout: React.FC = () => {
     () => (localStorage.getItem('finance-theme') as Theme) || 'dark'
   );
   const [searchOpen, setSearchOpen] = useState(false);
+  const sidebarRef = useRef<HTMLElement | null>(null);
+
+  useForesightLinks(sidebarRef, {
+    '/': () => import('../features/dashboard/Dashboard'),
+    '/invoices': () => import('../features/invoices/Invoices'),
+    '/invoices/recurring': () => import('../features/recurring-invoices/RecurringInvoices'),
+    '/quotes': () => import('../features/quotes/Quotes'),
+    '/expenses': () => import('../features/expenses/Expenses'),
+    '/categories': () => import('../features/categories/Categories'),
+    '/bills': () => import('../features/bills/Bills'),
+    '/bank': () => import('../features/bank-feeds/BankFeeds'),
+    '/reconcile': () => import('../features/reconcile/Reconcile'),
+    '/pl': () => import('../features/profit-loss/ProfitLoss'),
+    '/reports/balance-sheet': () => import('../features/balance-sheet/BalanceSheet'),
+    '/reports/cash-flow': () => import('../features/cash-flow/CashFlow'),
+    '/reports/tax': () => import('../features/tax/TaxReport'),
+    '/journal': () => import('../features/journal/Journal'),
+    '/accounts': () => import('../features/chart-of-accounts/ChartOfAccounts'),
+    '/tax': () => import('../features/tax/Tax'),
+    '/settings': () => import('../features/settings/Settings'),
+  });
 
   const handleTheme = (t: Theme) => {
     setThemeState(t);
@@ -294,6 +317,7 @@ const DefaultLayout: React.FC = () => {
         </div>
 
         <nav
+          ref={sidebarRef}
           style={{
             flex: 1,
             overflowY: 'auto',
@@ -358,8 +382,14 @@ const DefaultLayout: React.FC = () => {
                   fontSize: 10,
                   fontWeight: 500,
                   cursor: 'pointer',
-                  border: theme === value ? `1px solid ${ACCENT}40` : '1px solid transparent',
-                  background: theme === value ? 'rgba(16,185,129,0.12)' : 'var(--hub-hover)',
+                  border:
+                    theme === value
+                      ? `1px solid color-mix(in srgb, ${ACCENT} 25%, transparent)`
+                      : '1px solid transparent',
+                  background:
+                    theme === value
+                      ? 'color-mix(in srgb, var(--finance-accent, #10b981) 12%, transparent)'
+                      : 'var(--hub-hover)',
                   color: theme === value ? ACCENT : 'var(--hub-text-muted)',
                 }}
               >
@@ -406,6 +436,8 @@ const DefaultLayout: React.FC = () => {
               <SearchIcon size={14} />
             </button>
             <button
+              onClick={() => toast.info('Notifications coming soon')}
+              aria-label="Notifications"
               style={{
                 height: 28,
                 width: 28,
