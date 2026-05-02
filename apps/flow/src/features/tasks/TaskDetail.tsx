@@ -291,7 +291,7 @@ const TaskDetail: React.FC = () => {
   // Labels may arrive as label_ids (snake_case from API before normalization)
   // or labels (post-mapping). Accept either shape.
   const taskWithLabelIds = task as Task & { label_ids?: number[] };
-  const rawLabels = taskWithLabelIds.label_ids ?? task.labels ?? [];
+  const rawLabels = taskWithLabelIds.label_ids ?? task.labelIds ?? [];
   const taskLabelIds: number[] = rawLabels.map((l) => Number(l)).filter((n) => !Number.isNaN(n));
   const taskLabels = allLabels.filter((l) => taskLabelIds.includes(l.id));
 
@@ -655,9 +655,7 @@ const TaskDetail: React.FC = () => {
                     {(user == null || String(log.user_id) === user.id) && (
                       <button
                         type="button"
-                        onClick={() =>
-                          deleteTimeLogMut.mutate({ id: log.id, task_id: log.task_id })
-                        }
+                        onClick={() => deleteTimeLogMut.mutate({ id: log.id, taskId: task.id })}
                         className="shrink-0 hover:opacity-70 mt-0.5"
                         style={{ color: 'var(--flow-text-dim)' }}
                         title="Delete log"

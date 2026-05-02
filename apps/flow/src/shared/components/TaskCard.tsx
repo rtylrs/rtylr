@@ -27,7 +27,7 @@ export const TaskCard: React.FC<TaskCardProps> = ({
 }) => {
   const navigate = useNavigate();
   const { labels, comments, attachments, subtasks } = useFlowStore();
-  const taskLabels = labels.filter((l) => task.labels?.includes(l.id));
+  const taskLabels = labels.filter((l) => task.labelIds?.includes(l.id));
   const commentCount = comments.filter((c) => c.taskId === task.id).length;
   const attachmentCount = attachments.filter((a) => a.taskId === task.id).length;
   const taskSubtasks = subtasks.filter((s) => s.taskId === task.id);

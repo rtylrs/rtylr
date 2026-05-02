@@ -17,7 +17,7 @@ interface TaskRowProps {
 export const TaskRow: React.FC<TaskRowProps> = ({ task, showProject, selected, onSelect }) => {
   const navigate = useNavigate();
   const { labels, projects, toggleSelectTask } = useFlowStore();
-  const taskLabels = labels.filter((l) => task.labels?.includes(l.id));
+  const taskLabels = labels.filter((l) => task.labelIds?.includes(l.id));
   const project = projects.find((p) => p.id === task.projectId);
 
   const overdue = task.dueDate && new Date(task.dueDate) < new Date() && task.status !== 'done';

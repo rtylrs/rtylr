@@ -70,7 +70,7 @@ export function useFilteredTasks(view: SavedView | null, tasks: Task[]) {
       filtered = filtered.filter((t) => t.projectId === view.filters.projectId);
     }
     if (view.filters.labels && view.filters.labels.length) {
-      filtered = filtered.filter((t) => t.labels?.some((l) => view.filters.labels!.includes(l)));
+      filtered = filtered.filter((t) => t.labelIds?.some((l) => view.filters.labels!.includes(l)));
     }
     if (view.sortBy) {
       const dir = view.sortDir === 'desc' ? -1 : 1;
