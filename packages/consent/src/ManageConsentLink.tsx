@@ -36,22 +36,15 @@ export function ManageConsentLink({
       type="button"
       onClick={reopen}
       className={className}
-      style={
-        // Reset only when no className override — keeps the element
-        // visually neutral so footer styles win when supplied.
-        className
-          ? undefined
-          : {
-              background: 'none',
-              border: 'none',
-              padding: 0,
-              cursor: 'pointer',
-              color: 'inherit',
-              font: 'inherit',
-              textDecoration: 'underline',
-              textUnderlineOffset: 2,
-            }
-      }
+      style={{
+        background: 'none',
+        border: 'none',
+        padding: 0,
+        cursor: 'pointer',
+        color: 'inherit',
+        font: 'inherit',
+        ...(className ? {} : { textDecoration: 'underline', textUnderlineOffset: 2 }),
+      }}
     >
       {children ?? 'Cookie preferences'}
     </button>
