@@ -3,6 +3,7 @@ import { Send } from 'lucide-react';
 import { toast } from 'sonner';
 import Modal from './Modal';
 import { inputStyle, primaryBtn, ghostBtn, labelStyle } from '../lib/tokens';
+import { useSendInvoice } from '../hooks/queries/useInvoices';
 
 interface SendInvoiceModalProps {
   open: boolean;
@@ -30,20 +31,23 @@ const SendInvoiceModal: React.FC<SendInvoiceModalProps> = ({
     defaultBody ??
       `Hi,\n\nPlease find invoice ${invoiceId} attached. Payment is due upon receipt.\n\nThank you,\nrtylr`
   );
-  const [sending, setSending] = useState(false);
 
-  const handleSend = () => {
+  const { mutate: sendInvoice, isPending: sending } = useSendInvoice();
+
+  const handleSend = (): void => {
     if (!to) {
       toast.error('Recipient required');
       return;
     }
-    setSending(true);
-    setTimeout(() => {
-      setSending(false);
-      toast.success(`Invoice ${invoiceId} sent to ${to}`);
-      onSent?.();
-      onClose();
-    }, 700);
+    sendInvoice(
+      { invoiceId, to, cc: cc || undefined, subject, body },
+      {
+        onSuccess: () => {
+          onSent?.();
+          onClose();
+        },
+      }
+    );
   };
 
   return (

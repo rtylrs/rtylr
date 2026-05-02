@@ -128,6 +128,39 @@ export const useRecordInvoicePayment = () => {
   });
 };
 
+export interface SendInvoiceRequest {
+  invoiceId: string;
+  to: string;
+  cc?: string;
+  subject: string;
+  body: string;
+}
+
+export interface SendInvoiceResponse {
+  message: string;
+}
+
+export const useSendInvoice = () => {
+  const queryClient = useQueryClient();
+  const { t } = useTranslation();
+
+  return useMutation({
+    mutationFn: async (data: SendInvoiceRequest): Promise<SendInvoiceResponse> => {
+      const res = await unwrap(
+        safe.post<SendInvoiceResponse>(`/finance/invoices/${data.invoiceId}/send`, data)
+      );
+      return res as SendInvoiceResponse;
+    },
+    onSuccess: (_data: SendInvoiceResponse, variables: SendInvoiceRequest) => {
+      queryClient.invalidateQueries({ queryKey: ['invoices'] });
+      toast.success(t('invoices.sent', { to: variables.to }));
+    },
+    onError: () => {
+      toast.error(t('errors.generic'));
+    },
+  });
+};
+
 interface SetInvoiceStatusVariables {
   id: number;
   status: string;
