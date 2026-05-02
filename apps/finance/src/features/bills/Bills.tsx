@@ -56,7 +56,11 @@ const Bills: React.FC = () => {
                 <CheckCircle size={13} /> Pay selected ({selected.size})
               </button>
             )}
-            <button style={ghostBtn}>
+            <button
+              style={ghostBtn}
+              aria-label="New Bill"
+              onClick={() => toast.info('Create bill coming soon')}
+            >
               <Plus size={13} /> New Bill
             </button>
           </>
@@ -118,7 +122,10 @@ const Bills: React.FC = () => {
                     style={{
                       padding: '12px 16px',
                       fontSize: 12,
-                      color: b.status === 'overdue' ? '#ef4444' : 'var(--hub-text-muted)',
+                      color:
+                        b.status === 'overdue'
+                          ? 'var(--finance-danger, #ef4444)'
+                          : 'var(--hub-text-muted)',
                     }}
                   >
                     {b.dueDate}
