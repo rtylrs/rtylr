@@ -43,7 +43,11 @@ const RecurringInvoices: React.FC = () => {
         subtitle={`${data.length} active subscriptions`}
         breadcrumbs={[{ label: 'Invoices', to: '/invoices' }, { label: 'Recurring' }]}
         actions={
-          <button style={primaryBtn}>
+          <button
+            style={primaryBtn}
+            aria-label="New Recurring Invoice"
+            onClick={() => toast.info('Create recurring invoice coming soon')}
+          >
             <Repeat size={13} /> New Recurring
           </button>
         }
@@ -57,7 +61,15 @@ const RecurringInvoices: React.FC = () => {
         <EmptyState
           title="No recurring invoices yet"
           description="Create a subscription to automatically bill customers on a schedule."
-          action={<button style={primaryBtn}>Create subscription</button>}
+          action={
+            <button
+              style={primaryBtn}
+              aria-label="Create subscription"
+              onClick={() => toast.info('Create recurring invoice coming soon')}
+            >
+              Create subscription
+            </button>
+          }
         />
       ) : (
         <div style={{ ...cardStyle, overflow: 'hidden' }}>
@@ -151,7 +163,8 @@ const RecurringInvoices: React.FC = () => {
                       </button>
                       <button
                         style={{ ...ghostBtn, padding: '4px 10px' }}
-                        onClick={() => toast.success(`Invoice re-issued for ${r.client}`)}
+                        aria-label={`Run invoice now for ${r.client}`}
+                        onClick={() => toast.info('Run now coming soon')}
                       >
                         <RotateCcw size={12} /> Run now
                       </button>
