@@ -6,6 +6,7 @@ import { motion, AnimatePresence } from 'motion/react';
 import { APP_URLS } from '@voxire/config';
 import { removeCookie, getDefaultCookieDomain, useUserStore } from '@voxire/auth';
 import { CaretPanel, CaretButton } from '@voxire/caret';
+import { useQuery } from '@tanstack/react-query';
 import {
   LayoutDashboard,
   Users,
@@ -26,11 +27,37 @@ import {
   Search,
   Menu,
   X,
+  TrendingUp,
 } from 'lucide-react';
 import { useShortcuts } from '../shared/components/ShortcutsProvider';
 import { useForesightLinks } from '@voxire/utils';
+import { safe } from '../shared/lib/api';
+import { unwrap } from '@voxire/api';
 
 const ACCENT = '#3b82f6';
+
+interface AddonEntry {
+  id: string;
+  isEnabled: boolean;
+}
+
+function useAddonEnabled(addonId: string): boolean {
+  const { data } = useQuery<AddonEntry[]>({
+    queryKey: ['crm-addons'],
+    queryFn: async (): Promise<AddonEntry[]> => {
+      try {
+        // Re-uses the CRM API client (same cookie auth, same backend).
+        // The /addons endpoint is shared across apps via the same backend service.
+        const res = await unwrap(safe.get<{ addons?: AddonEntry[] }>('/addons'));
+        return res?.addons ?? [];
+      } catch {
+        return [];
+      }
+    },
+    staleTime: 5 * 60 * 1000,
+  });
+  return (data ?? []).some((a) => a.id === addonId && a.isEnabled);
+}
 
 interface NavItem {
   label: string;
@@ -69,6 +96,9 @@ const routeLabels: Record<string, string> = {
   '/templates': 'Templates',
   '/feedback': 'Feedback & NPS',
   '/settings': 'Settings',
+  '/sales': 'Pipeline',
+  '/sales/leads': 'Leads',
+  '/sales/contracts': 'Contracts',
 };
 
 function getPageTitle(pathname: string): string {
@@ -159,6 +189,7 @@ const DefaultLayout: React.FC = () => {
   const sidebarRef = useRef<HTMLElement | null>(null);
   const crmUser = useUserStore((s) => s.user);
   const userId = Number(crmUser?.id) || 0;
+  const salesPipelineEnabled = useAddonEnabled('sales_pipeline');
 
   useForesightLinks(sidebarRef, {
     '/': () => import('../features/dashboard/Dashboard'),
@@ -315,6 +346,28 @@ const DefaultLayout: React.FC = () => {
             {navItems.map((item) => (
               <SidebarNavItem key={item.path} {...item} />
             ))}
+
+            {/* Sales Pipeline — add-on gated */}
+            {salesPipelineEnabled && (
+              <>
+                <p
+                  style={{
+                    padding: '4px 12px 6px',
+                    fontSize: '10px',
+                    fontWeight: 600,
+                    textTransform: 'uppercase',
+                    letterSpacing: '0.1em',
+                    color: 'var(--hub-text-dim)',
+                    marginTop: '8px',
+                  }}
+                >
+                  Sales
+                </p>
+                <SidebarNavItem label="Pipeline" path="/sales" icon={TrendingUp} />
+                <SidebarNavItem label="Leads" path="/sales/leads" icon={Users} />
+                <SidebarNavItem label="Contracts" path="/sales/contracts" icon={FileText} />
+              </>
+            )}
           </nav>
 
           {/* Footer, user */}

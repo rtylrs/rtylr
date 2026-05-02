@@ -201,6 +201,145 @@ export interface Settings {
   currency: string;
 }
 
+// ── Sales Pipeline Types ─────────────────────────────────────────
+
+export type LeadStage =
+  | 'cold'
+  | 'contacted'
+  | 'demo_booked'
+  | 'demo_done'
+  | 'proposal_sent'
+  | 'contracted'
+  | 'lost';
+
+export type TouchpointType = 'phone' | 'email' | 'meeting';
+export type TouchpointOutcome = 'positive' | 'neutral' | 'negative' | 'no_answer';
+export type ContractPlan = 'free' | 'pro' | 'scale';
+
+export interface Lead {
+  id: number;
+  company: string;
+  industry: string;
+  size: string;
+  source: string;
+  stage: LeadStage;
+  mrrPotential: number;
+  assignedRep: string;
+  notes: string;
+  createdAt: string;
+  updatedAt: string;
+}
+
+export interface PipelineColumn {
+  stage: LeadStage;
+  leadCount: number;
+  totalMrr: number;
+}
+
+export interface Touchpoint {
+  id: number;
+  leadId: number;
+  type: TouchpointType;
+  outcome: TouchpointOutcome;
+  notes: string;
+  repName: string;
+  contactId: number | null;
+  nextFollowUp: string | null;
+  createdAt: string;
+}
+
+export interface SalesContact {
+  id: number;
+  leadId: number;
+  name: string;
+  role: string;
+  phone: string;
+  email: string;
+  createdAt: string;
+}
+
+export interface Contract {
+  id: number;
+  leadId: number;
+  company: string;
+  plan: ContractPlan;
+  mrr: number;
+  seats: number;
+  signedAt: string;
+  signedBy: string;
+  closedBy: string;
+  notes: string;
+  createdAt: string;
+}
+
+export interface CreateLeadRequest {
+  company: string;
+  industry: string;
+  size: string;
+  source: string;
+  stage: LeadStage;
+  mrrPotential: number;
+  assignedRep: string;
+  notes?: string;
+}
+
+export interface UpdateLeadRequest {
+  company?: string;
+  industry?: string;
+  size?: string;
+  source?: string;
+  stage?: LeadStage;
+  mrrPotential?: number;
+  assignedRep?: string;
+  notes?: string;
+}
+
+export interface CreateTouchpointRequest {
+  leadId: number;
+  type: TouchpointType;
+  outcome: TouchpointOutcome;
+  notes: string;
+  repName: string;
+  contactId?: number | null;
+  nextFollowUp?: string | null;
+}
+
+export interface CreateContactRequest {
+  leadId: number;
+  name: string;
+  role: string;
+  phone: string;
+  email: string;
+}
+
+export interface UpdateContactRequest {
+  name?: string;
+  role?: string;
+  phone?: string;
+  email?: string;
+}
+
+export interface CreateContractRequest {
+  leadId: number;
+  plan: ContractPlan;
+  mrr: number;
+  seats: number;
+  signedAt: string;
+  signedBy: string;
+  closedBy: string;
+  notes?: string;
+}
+
+export interface UpdateContractRequest {
+  plan?: ContractPlan;
+  mrr?: number;
+  seats?: number;
+  signedAt?: string;
+  signedBy?: string;
+  closedBy?: string;
+  notes?: string;
+}
+
 // ── Service ──────────────────────────────────────────────────────
 
 export const crmApi = {
@@ -311,4 +450,34 @@ export const crmApi = {
   getSettings: () => safe.get<Settings>('/crm/settings'),
 
   updateSettings: (data: Partial<Settings>) => safe.post<Settings>('/crm/settings', data),
+
+  // Sales Pipeline
+  getSalesPipeline: () => safe.get<PipelineColumn[]>('/crm/sales/pipeline'),
+  getLeads: () => safe.get<Lead[]>('/crm/sales/leads'),
+  getLead: (id: number) => safe.get<Lead>(`/crm/sales/leads/${id}`),
+  createLead: (data: CreateLeadRequest) => safe.post<Lead>('/crm/sales/leads', data),
+  updateLead: (id: number, data: UpdateLeadRequest) =>
+    safe.post<Lead>(`/crm/sales/leads/${id}`, { ...data, _action: 'update' }),
+  deleteLead: (id: number) => safe.post(`/crm/sales/leads/${id}`, { _action: 'delete' }),
+  getLeadTouchpoints: (leadId: number) =>
+    safe.get<Touchpoint[]>(`/crm/sales/leads/${leadId}/touchpoints`),
+  createTouchpoint: (data: CreateTouchpointRequest) =>
+    safe.post<Touchpoint>('/crm/sales/touchpoints', data),
+  deleteTouchpoint: (id: number) =>
+    safe.post(`/crm/sales/touchpoints/${id}`, { _action: 'delete' }),
+  getContacts: (leadId?: number) =>
+    safe.get<SalesContact[]>('/crm/sales/contacts', {
+      params: leadId ? { lead_id: leadId } : {},
+    }),
+  createContact: (data: CreateContactRequest) =>
+    safe.post<SalesContact>('/crm/sales/contacts', data),
+  updateContact: (id: number, data: UpdateContactRequest) =>
+    safe.post<SalesContact>(`/crm/sales/contacts/${id}`, { ...data, _action: 'update' }),
+  deleteContact: (id: number) => safe.post(`/crm/sales/contacts/${id}`, { _action: 'delete' }),
+  getContracts: () => safe.get<Contract[]>('/crm/sales/contracts'),
+  getContract: (id: number) => safe.get<Contract>(`/crm/sales/contracts/${id}`),
+  createContract: (data: CreateContractRequest) =>
+    safe.post<Contract>('/crm/sales/contracts', data),
+  updateContract: (id: number, data: UpdateContractRequest) =>
+    safe.post<Contract>(`/crm/sales/contracts/${id}`, { ...data, _action: 'update' }),
 };

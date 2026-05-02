@@ -27,6 +27,12 @@ const Templates = React.lazy(() => import('../features/templates/Templates'));
 const Feedback = React.lazy(() => import('../features/feedback/Feedback'));
 const SettingsScreen = React.lazy(() => import('../features/settings/Settings'));
 
+// Sales Pipeline
+const Pipeline = React.lazy(() => import('../features/sales/Pipeline'));
+const Leads = React.lazy(() => import('../features/sales/Leads'));
+const LeadDetail = React.lazy(() => import('../features/sales/LeadDetail'));
+const SalesContracts = React.lazy(() => import('../features/sales/Contracts'));
+
 interface RouteChild {
   index?: boolean;
   path?: string;
@@ -82,6 +88,12 @@ const AppRoutes: AppRoute[] = [
       { path: 'templates', element: lazy(<Templates />) },
       { path: 'feedback', element: lazy(<Feedback />) },
       { path: 'settings', element: lazy(<SettingsScreen />) },
+
+      // Sales Pipeline (add-on gated in sidebar; routes always present for deep links)
+      { path: 'sales', element: lazy(<Pipeline />) },
+      { path: 'sales/leads', element: lazy(<Leads />) },
+      { path: 'sales/leads/:id', element: lazy(<LeadDetail />) },
+      { path: 'sales/contracts', element: lazy(<SalesContracts />) },
     ],
   },
 ];
