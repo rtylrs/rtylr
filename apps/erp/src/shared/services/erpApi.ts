@@ -227,16 +227,24 @@ export const erpApi = {
   createCategory: (data: Partial<Category>) => safe.post<Category>('/erp/categories', data),
   deleteCategory: (id: number) =>
     safe.post<{ success: boolean }>('/erp/categories', { id, _action: 'delete' }),
+  updateCategory: (data: { id: number; name: string; description?: string }) =>
+    safe.post<Category>('/erp/categories', { ...data, _action: 'update' }),
 
   // Brands
   listBrands: () => safe.get<Brand[]>('/erp/brands'),
   createBrand: (data: Partial<Brand>) => safe.post<Brand>('/erp/brands', data),
   deleteBrand: (id: number) =>
     safe.post<{ success: boolean }>('/erp/brands', { id, _action: 'delete' }),
+  updateBrand: (data: { id: number; name: string; description?: string }) =>
+    safe.post<Brand>('/erp/brands', { ...data, _action: 'update' }),
 
   // Warehouses
   listWarehouses: () => safe.get<Warehouse[]>('/erp/warehouses'),
   createWarehouse: (data: Partial<Warehouse>) => safe.post<Warehouse>('/erp/warehouses', data),
+  deleteWarehouse: (id: number) =>
+    safe.post<{ success: boolean }>('/erp/warehouses', { id, _action: 'delete' }),
+  updateWarehouse: (data: { id: number; name: string; address?: string; manager?: string }) =>
+    safe.post<Warehouse>('/erp/warehouses', { ...data, _action: 'update' }),
 
   // Stock transfers
   listStockTransfers: () => safe.get<StockTransfer[]>('/erp/stock-transfers'),

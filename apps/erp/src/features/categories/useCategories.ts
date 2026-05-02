@@ -30,3 +30,12 @@ export function useDeleteCategory() {
     onSuccess: () => qc.invalidateQueries({ queryKey: ['categories'] }),
   });
 }
+
+export function useUpdateCategory() {
+  const qc = useQueryClient();
+  return useMutation({
+    mutationFn: (data: { id: number; name: string; description?: string }) =>
+      unwrap(erpApi.updateCategory(data)),
+    onSuccess: () => qc.invalidateQueries({ queryKey: ['categories'] }),
+  });
+}

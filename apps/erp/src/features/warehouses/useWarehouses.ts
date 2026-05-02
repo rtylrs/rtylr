@@ -22,3 +22,11 @@ export function useCreateWarehouse() {
     onSuccess: () => qc.invalidateQueries({ queryKey: ['warehouses'] }),
   });
 }
+
+export function useDeleteWarehouse() {
+  const qc = useQueryClient();
+  return useMutation({
+    mutationFn: (id: number) => unwrap(erpApi.deleteWarehouse(id)),
+    onSuccess: () => qc.invalidateQueries({ queryKey: ['warehouses'] }),
+  });
+}

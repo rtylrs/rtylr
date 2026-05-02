@@ -1,10 +1,11 @@
 import React, { useState } from 'react';
 import { motion } from 'motion/react';
-import { Plus, Warehouse as WarehouseIcon, MapPin, User } from 'lucide-react';
-import { useWarehouses, useCreateWarehouse } from './useWarehouses';
+import { Plus, Warehouse as WarehouseIcon, MapPin, User, Trash2 } from 'lucide-react';
+import { useWarehouses, useCreateWarehouse, useDeleteWarehouse } from './useWarehouses';
 import PageHeader from '../../shared/components/PageHeader';
 import EmptyState from '../../shared/components/EmptyState';
 import { Skeleton } from '../../shared/components/Skeleton';
+import ConfirmModal from '../../shared/components/ConfirmModal';
 import { formatNumber } from '../../shared/lib/format';
 import { toast } from 'sonner';
 
@@ -25,7 +26,9 @@ const inputStyle: React.CSSProperties = {
 const Warehouses: React.FC = () => {
   const { data: warehouses = [], isLoading } = useWarehouses();
   const createMut = useCreateWarehouse();
+  const deleteMut = useDeleteWarehouse();
   const [showCreate, setShowCreate] = useState(false);
+  const [confirmDeleteId, setConfirmDeleteId] = useState<number | null>(null);
   const [newName, setNewName] = useState('');
   const [newAddress, setNewAddress] = useState('');
   const [newManager, setNewManager] = useState('');
@@ -111,6 +114,20 @@ const Warehouses: React.FC = () => {
                       )}
                     </div>
                   </div>
+                  <button
+                    aria-label="Delete warehouse"
+                    onClick={() => setConfirmDeleteId(w.id)}
+                    className="h-7 w-7 rounded-lg flex items-center justify-center"
+                    style={{ color: '#f87171' }}
+                    onMouseEnter={(e) => {
+                      (e.currentTarget as HTMLElement).style.background = 'rgba(248,113,113,0.1)';
+                    }}
+                    onMouseLeave={(e) => {
+                      (e.currentTarget as HTMLElement).style.background = 'transparent';
+                    }}
+                  >
+                    <Trash2 size={13} />
+                  </button>
                 </div>
                 <div className="space-y-1.5 mb-4">
                   <div
@@ -151,6 +168,22 @@ const Warehouses: React.FC = () => {
           })}
         </div>
       )}
+
+      <ConfirmModal
+        open={confirmDeleteId !== null}
+        title="Delete warehouse?"
+        description="Products assigned to this warehouse will become unassigned."
+        danger
+        confirmLabel="Delete"
+        onConfirm={async () => {
+          if (confirmDeleteId !== null) {
+            await deleteMut.mutateAsync(confirmDeleteId);
+            toast.success('Warehouse deleted');
+          }
+          setConfirmDeleteId(null);
+        }}
+        onCancel={() => setConfirmDeleteId(null)}
+      />
 
       {showCreate && (
         <div

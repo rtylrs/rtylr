@@ -103,13 +103,43 @@ const Categories: React.FC = () => {
                 <Folder size={14} style={{ color: AMBER }} />
               </div>
               <div className="flex-1">
-                <p className="text-sm font-medium" style={{ color: 'var(--hub-text)' }}>
-                  {cat.name}
-                </p>
-                {cat.description && (
-                  <p className="text-[11px]" style={{ color: 'var(--hub-text-dim)' }}>
-                    {cat.description}
-                  </p>
+                {editingId === cat.id ? (
+                  <input
+                    value={editName}
+                    onChange={(e) => setEditName(e.target.value)}
+                    onKeyDown={(e) => {
+                      if (e.key === 'Enter') {
+                        updateMut.mutate(
+                          { id: cat.id, name: editName.trim() },
+                          {
+                            onSuccess: () => {
+                              toast.success('Category updated');
+                              setEditingId(null);
+                            },
+                          }
+                        );
+                      }
+                      if (e.key === 'Escape') setEditingId(null);
+                    }}
+                    className="flex-1 px-3 py-1 rounded-lg text-sm outline-none"
+                    style={{
+                      background: 'var(--hub-input-bg)',
+                      border: '1px solid var(--hub-border)',
+                      color: 'var(--hub-text)',
+                    }}
+                    autoFocus
+                  />
+                ) : (
+                  <>
+                    <p className="text-sm font-medium" style={{ color: 'var(--hub-text)' }}>
+                      {cat.name}
+                    </p>
+                    {cat.description && (
+                      <p className="text-[11px]" style={{ color: 'var(--hub-text-dim)' }}>
+                        {cat.description}
+                      </p>
+                    )}
+                  </>
                 )}
               </div>
               <span
@@ -118,31 +148,81 @@ const Categories: React.FC = () => {
               >
                 {cat.productCount} products
               </span>
-              <button
-                className="h-7 w-7 rounded-lg flex items-center justify-center"
-                style={{ color: 'var(--hub-text-muted)' }}
-                onMouseEnter={(e) => {
-                  (e.currentTarget as HTMLElement).style.background = 'var(--hub-hover)';
-                }}
-                onMouseLeave={(e) => {
-                  (e.currentTarget as HTMLElement).style.background = 'transparent';
-                }}
-              >
-                <Edit3 size={12} />
-              </button>
-              <button
-                onClick={() => setConfirmDelete(cat.id)}
-                className="h-7 w-7 rounded-lg flex items-center justify-center"
-                style={{ color: '#f87171' }}
-                onMouseEnter={(e) => {
-                  (e.currentTarget as HTMLElement).style.background = 'rgba(248,113,113,0.1)';
-                }}
-                onMouseLeave={(e) => {
-                  (e.currentTarget as HTMLElement).style.background = 'transparent';
-                }}
-              >
-                <Trash2 size={12} />
-              </button>
+              {editingId === cat.id ? (
+                <>
+                  <button
+                    aria-label="Save category"
+                    onClick={() =>
+                      updateMut.mutate(
+                        { id: cat.id, name: editName.trim() },
+                        {
+                          onSuccess: () => {
+                            toast.success('Category updated');
+                            setEditingId(null);
+                          },
+                        }
+                      )
+                    }
+                    className="h-7 w-7 rounded-lg flex items-center justify-center text-xs font-bold"
+                    style={{ color: '#10b981' }}
+                    onMouseEnter={(e) => {
+                      (e.currentTarget as HTMLElement).style.background = 'rgba(16,185,129,0.1)';
+                    }}
+                    onMouseLeave={(e) => {
+                      (e.currentTarget as HTMLElement).style.background = 'transparent';
+                    }}
+                  >
+                    ✓
+                  </button>
+                  <button
+                    aria-label="Cancel edit"
+                    onClick={() => setEditingId(null)}
+                    className="h-7 w-7 rounded-lg flex items-center justify-center text-xs font-bold"
+                    style={{ color: '#f87171' }}
+                    onMouseEnter={(e) => {
+                      (e.currentTarget as HTMLElement).style.background = 'rgba(248,113,113,0.1)';
+                    }}
+                    onMouseLeave={(e) => {
+                      (e.currentTarget as HTMLElement).style.background = 'transparent';
+                    }}
+                  >
+                    ✗
+                  </button>
+                </>
+              ) : (
+                <>
+                  <button
+                    aria-label="Edit category"
+                    onClick={() => {
+                      setEditingId(cat.id);
+                      setEditName(cat.name);
+                    }}
+                    className="h-7 w-7 rounded-lg flex items-center justify-center"
+                    style={{ color: 'var(--hub-text-muted)' }}
+                    onMouseEnter={(e) => {
+                      (e.currentTarget as HTMLElement).style.background = 'var(--hub-hover)';
+                    }}
+                    onMouseLeave={(e) => {
+                      (e.currentTarget as HTMLElement).style.background = 'transparent';
+                    }}
+                  >
+                    <Edit3 size={12} />
+                  </button>
+                  <button
+                    onClick={() => setConfirmDelete(cat.id)}
+                    className="h-7 w-7 rounded-lg flex items-center justify-center"
+                    style={{ color: '#f87171' }}
+                    onMouseEnter={(e) => {
+                      (e.currentTarget as HTMLElement).style.background = 'rgba(248,113,113,0.1)';
+                    }}
+                    onMouseLeave={(e) => {
+                      (e.currentTarget as HTMLElement).style.background = 'transparent';
+                    }}
+                  >
+                    <Trash2 size={12} />
+                  </button>
+                </>
+              )}
             </div>
           ))
         )}

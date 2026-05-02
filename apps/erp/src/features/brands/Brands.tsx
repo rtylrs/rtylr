@@ -1,10 +1,11 @@
 import React, { useState } from 'react';
 import { motion } from 'motion/react';
-import { Plus, Tag } from 'lucide-react';
-import { useBrands, useCreateBrand } from './useBrands';
+import { Plus, Tag, Trash2 } from 'lucide-react';
+import { useBrands, useCreateBrand, useDeleteBrand } from './useBrands';
 import PageHeader from '../../shared/components/PageHeader';
 import EmptyState from '../../shared/components/EmptyState';
 import { Skeleton } from '../../shared/components/Skeleton';
+import ConfirmModal from '../../shared/components/ConfirmModal';
 import { toast } from 'sonner';
 
 const AMBER = '#f59e0b';
@@ -24,7 +25,9 @@ const inputStyle: React.CSSProperties = {
 const Brands: React.FC = () => {
   const { data: brands = [], isLoading } = useBrands();
   const createMut = useCreateBrand();
+  const deleteMut = useDeleteBrand();
   const [showCreate, setShowCreate] = useState(false);
+  const [confirmDeleteId, setConfirmDeleteId] = useState<number | null>(null);
   const [newName, setNewName] = useState('');
   const [newDescription, setNewDescription] = useState('');
 
@@ -106,6 +109,20 @@ const Brands: React.FC = () => {
                   </p>
                 </div>
                 <Tag size={14} style={{ color: 'var(--hub-text-dim)' }} />
+                <button
+                  aria-label="Delete brand"
+                  onClick={() => setConfirmDeleteId(b.id)}
+                  className="h-7 w-7 rounded-lg flex items-center justify-center"
+                  style={{ color: '#f87171' }}
+                  onMouseEnter={(e) => {
+                    (e.currentTarget as HTMLElement).style.background = 'rgba(248,113,113,0.1)';
+                  }}
+                  onMouseLeave={(e) => {
+                    (e.currentTarget as HTMLElement).style.background = 'transparent';
+                  }}
+                >
+                  <Trash2 size={13} />
+                </button>
               </div>
               {b.description && (
                 <p className="text-xs" style={{ color: 'var(--hub-text-muted)' }}>
@@ -116,6 +133,22 @@ const Brands: React.FC = () => {
           ))}
         </div>
       )}
+
+      <ConfirmModal
+        open={confirmDeleteId !== null}
+        title="Delete brand?"
+        description="Products with this brand will not be deleted, but they will become unbranded."
+        danger
+        confirmLabel="Delete"
+        onConfirm={async () => {
+          if (confirmDeleteId !== null) {
+            await deleteMut.mutateAsync(confirmDeleteId);
+            toast.success('Brand deleted');
+          }
+          setConfirmDeleteId(null);
+        }}
+        onCancel={() => setConfirmDeleteId(null)}
+      />
 
       {showCreate && (
         <div
