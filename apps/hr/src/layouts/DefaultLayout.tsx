@@ -1,4 +1,4 @@
-import React, { useEffect, useState } from 'react';
+import React, { useEffect, useRef, useState } from 'react';
 import { useLocation, Link } from 'react-router-dom';
 import { motion, AnimatePresence } from 'motion/react';
 import { useTranslation } from 'react-i18next';
@@ -46,6 +46,7 @@ import {
   FileBarChart,
 } from 'lucide-react';
 import type { HRCompanyConfigPayload } from '@voxire/contracts/hr/v1/setup';
+import { useForesightLinks } from '@voxire/utils';
 import { useHRConfigStore } from '../shared/stores/hrConfigStore';
 import CommandPalette from '../shared/components/CommandPalette';
 import GlobalShortcuts from '../shared/components/GlobalShortcuts';
@@ -505,6 +506,44 @@ const DefaultLayout: React.FC<DefaultLayoutProps> = ({ children }) => {
   const config = useHRConfigStore((s) => s.config);
   const timeTrackingModel = config?.timeTrackingModel ?? 'both';
 
+  const sidebarRef = useRef<HTMLElement | null>(null);
+  useForesightLinks(sidebarRef, {
+    '/': () => import('../features/dashboard/Dashboard'),
+    '/staff': () => import('../features/staff/Staff'),
+    '/departments': () => import('../features/departments/Departments'),
+    '/org-chart': () => import('../features/departments/OrgChart'),
+    '/shifts': () => import('../features/shifts/Shifts'),
+    '/schedule': () => import('../features/shifts/Schedule'),
+    '/shifts/roster': () => import('../features/shifts/RosterBuilder'),
+    '/time': () => import('../features/time-logging/TimeLogging'),
+    '/timesheets': () => import('../features/timesheets/TimesheetsList'),
+    '/attendance': () => import('../features/attendance/Attendance'),
+    '/timesheets/approvals': () => import('../features/timesheets/approvals/TimesheetApprovals'),
+    '/time-off': () => import('../features/time-off/TimeOff'),
+    '/leave': () => import('../features/leave/Leave'),
+    '/overtime': () => import('../features/overtime/Overtime'),
+    '/calendar': () => import('../features/calendar/Calendar'),
+    '/reviews': () => import('../features/reviews/Reviews'),
+    '/one-on-ones': () => import('../features/reviews/OneOnOnes'),
+    '/performance': () => import('../features/performance/Performance'),
+    '/performance/my-review': () => import('../features/performance/MyReview'),
+    '/performance/goals': () => import('../features/performance/GoalsList'),
+    '/onboarding': () => import('../features/onboarding/Onboarding'),
+    '/offboarding': () => import('../features/onboarding/Offboarding'),
+    '/training': () => import('../features/training/Training'),
+    '/payroll': () => import('../features/payroll/Payroll'),
+    '/payroll/my-payslips': () => import('../features/payroll/MyPaySlips'),
+    '/settings/payroll-config': () =>
+      import('../features/settings/payroll-config/PayrollConfigSettings'),
+    '/benefits': () => import('../features/benefits/Benefits'),
+    '/equipment': () => import('../features/equipment/Equipment'),
+    '/equipment/assets': () => import('../features/equipment/AssetRegister'),
+    '/documents': () => import('../features/documents/Documents'),
+    '/reports': () => import('../features/reports/Reports'),
+    '/operations': () => import('../features/operations/Operations'),
+    '/settings': () => import('../features/settings/Settings'),
+  });
+
   const toggleSection = (key: string): void => {
     setCollapsedSections((prev) => ({ ...prev, [key]: !prev[key] }));
   };
@@ -612,6 +651,7 @@ const DefaultLayout: React.FC<DefaultLayoutProps> = ({ children }) => {
 
         {/* Navigation */}
         <nav
+          ref={sidebarRef}
           style={{
             flex: 1,
             overflowY: 'auto',
