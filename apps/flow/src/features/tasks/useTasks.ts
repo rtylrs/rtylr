@@ -210,12 +210,20 @@ export function useToggleSubtask() {
 export function useLogTime() {
   const qc = useQueryClient();
   return useMutation({
-    mutationFn: ({ taskId, minutes, note }: { taskId: string; minutes: number; note?: string }) => {
+    mutationFn: ({
+      task_id,
+      duration_minutes,
+      description,
+    }: {
+      task_id: number;
+      duration_minutes: number;
+      description?: string;
+    }) => {
       return unwrap(
         flowApi.logTime({
-          task_id: Number(taskId),
-          duration_minutes: minutes,
-          description: note,
+          task_id,
+          duration_minutes,
+          description,
         })
       ).then(() => {});
     },
