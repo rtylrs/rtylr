@@ -62,7 +62,7 @@ const PaymentReminderPanel: React.FC = () => {
       ))}
       <button
         style={{ ...ghostBtn, marginTop: 14 }}
-        onClick={() => toast.success('Reminder schedule saved')}
+        onClick={() => toast.info('Payment reminder settings coming soon')}
       >
         Save schedule
       </button>
