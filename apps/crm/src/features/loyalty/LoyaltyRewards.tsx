@@ -1,5 +1,6 @@
 import React from 'react';
 import { Gift, Package } from 'lucide-react';
+import { toast } from 'sonner';
 import { useLoyaltyRewards } from '../../shared/hooks/queries/useLoyalty';
 import { PageHeader, Card, EmptyState, Button, SkeletonList } from '../../shared/components/ui';
 
@@ -12,7 +13,15 @@ const LoyaltyRewards: React.FC = () => {
       <PageHeader
         title="Rewards catalog"
         subtitle="What customers can redeem their points for"
-        actions={<Button variant="primary">Add reward</Button>}
+        actions={
+          <Button
+            variant="primary"
+            aria-label="Add reward"
+            onClick={() => toast.info('Reward management coming soon')}
+          >
+            Add reward
+          </Button>
+        }
       />
 
       {isLoading ? (

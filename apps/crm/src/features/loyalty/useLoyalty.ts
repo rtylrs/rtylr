@@ -1,6 +1,8 @@
 import { unwrap } from '@voxire/api';
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
 import { z } from 'zod';
+import { toast } from 'sonner';
+import { useTranslation } from 'react-i18next';
 import { crmApi, LoyaltyConfig, LoyaltyTier } from '../../shared/services/crmApi';
 import {
   loyaltyConfigSchema,
@@ -64,23 +66,28 @@ export function useLoyaltyTiers() {
 
 export function useUpdateLoyaltyTier() {
   const qc = useQueryClient();
+  const { t } = useTranslation();
   return useMutation({
     mutationFn: ({ id, data }: { id: number; data: Partial<LoyaltyTier> }) =>
       unwrap(crmApi.updateLoyaltyTier(id, data)),
     onSuccess: () => qc.invalidateQueries({ queryKey: ['loyalty-tiers'] }),
+    onError: () => toast.error(t('errors.generic')),
   });
 }
 
 export function useUpdateLoyaltyConfig() {
   const qc = useQueryClient();
+  const { t } = useTranslation();
   return useMutation({
     mutationFn: (config: Partial<LoyaltyConfig>) => unwrap(crmApi.updateLoyaltyConfig(config)),
     onSuccess: () => qc.invalidateQueries({ queryKey: ['loyalty-config'] }),
+    onError: () => toast.error(t('errors.generic')),
   });
 }
 
 export function useAwardPoints() {
   const qc = useQueryClient();
+  const { t } = useTranslation();
   return useMutation({
     mutationFn: ({
       customerId,
@@ -95,11 +102,13 @@ export function useAwardPoints() {
       qc.invalidateQueries({ queryKey: ['loyalty-transactions'] });
       qc.invalidateQueries({ queryKey: ['customers'] });
     },
+    onError: () => toast.error(t('errors.generic')),
   });
 }
 
 export function useRedeemPoints() {
   const qc = useQueryClient();
+  const { t } = useTranslation();
   return useMutation({
     mutationFn: ({
       customerId,
@@ -114,5 +123,6 @@ export function useRedeemPoints() {
       qc.invalidateQueries({ queryKey: ['loyalty-transactions'] });
       qc.invalidateQueries({ queryKey: ['customers'] });
     },
+    onError: () => toast.error(t('errors.generic')),
   });
 }

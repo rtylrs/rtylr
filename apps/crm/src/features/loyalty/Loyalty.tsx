@@ -1,74 +1,21 @@
 import React, { useState, useEffect } from 'react';
-import { useLoyaltyConfig, useLoyaltyTransactions } from '../../shared/hooks/queries/useLoyalty';
+import {
+  useLoyaltyConfig,
+  useLoyaltyTransactions,
+  useLoyaltyTiers,
+} from '../../shared/hooks/queries/useLoyalty';
 import { motion } from 'motion/react';
 import { Gift, Star, Trophy, Crown, Award, ToggleLeft, ToggleRight, Clock } from 'lucide-react';
-import { type LoyaltyTransaction } from '../../shared/schemas/loyalty';
+import { type LoyaltyTransaction, type LoyaltyTier } from '../../shared/schemas/loyalty';
 
 const ACCENT = '#3b82f6';
 
-interface Tier {
-  name: string;
-  icon: React.ComponentType<{ size?: number }>;
-  color: string;
-  minPoints: number;
-  discount: number;
-  memberCount: number;
-  perks: string[];
-}
-
-const tiers: Tier[] = [
-  {
-    name: 'Bronze',
-    icon: Award,
-    color: '#b45309',
-    minPoints: 0,
-    discount: 5,
-    memberCount: 1820,
-    perks: ['5% discount', 'Birthday reward', 'Member-only offers'],
-  },
-  {
-    name: 'Silver',
-    icon: Star,
-    color: '#94a3b8',
-    minPoints: 500,
-    discount: 10,
-    memberCount: 640,
-    perks: ['10% discount', 'Early access to sales', 'Free delivery (3x/mo)'],
-  },
-  {
-    name: 'Gold',
-    icon: Trophy,
-    color: '#f59e0b',
-    minPoints: 1000,
-    discount: 15,
-    memberCount: 310,
-    perks: ['15% discount', 'Priority support', 'Exclusive events', 'Free delivery'],
-  },
-  {
-    name: 'Platinum',
-    icon: Crown,
-    color: '#e879f9',
-    minPoints: 2500,
-    discount: 20,
-    memberCount: 98,
-    perks: [
-      '20% discount',
-      'Dedicated concierge',
-      'Quarterly gift',
-      'VIP events',
-      'Free delivery (unlimited)',
-    ],
-  },
-];
-
-const defaultActivityLog: LoyaltyTransaction[] = [
-  { customer: 'Sarah Johnson', action: 'Earned 240 points', time: '2 hours ago', type: 'earn' },
-  { customer: 'Michael Chen', action: 'Redeemed 500 points', time: '5 hours ago', type: 'redeem' },
-  { customer: 'Emily Rodriguez', action: 'Upgraded to Gold', time: '1 day ago', type: 'upgrade' },
-  { customer: 'James Wilson', action: 'Earned 120 points', time: '1 day ago', type: 'earn' },
-  { customer: 'Aisha Patel', action: 'Earned 80 points', time: '2 days ago', type: 'earn' },
-  { customer: 'David Kim', action: 'Redeemed 200 points', time: '3 days ago', type: 'redeem' },
-];
+const TIER_ICON_MAP: Record<string, React.ComponentType<{ size?: number }>> = {
+  Bronze: Award,
+  Silver: Star,
+  Gold: Trophy,
+  Platinum: Crown,
+};
 
 const activityColor: Record<string, string> = {
   earn: '#10b981',
@@ -79,6 +26,9 @@ const activityColor: Record<string, string> = {
 const Loyalty: React.FC = () => {
   const { data: config } = useLoyaltyConfig();
   const { data: transactions } = useLoyaltyTransactions();
+  const { data: tiersData } = useLoyaltyTiers();
+
+  const tiers: LoyaltyTier[] = tiersData ?? [];
 
   const [programEnabled, setProgramEnabled] = useState(true);
   const [pointsPerDollar, setPointsPerDollar] = useState(1);
@@ -92,8 +42,7 @@ const Loyalty: React.FC = () => {
     }
   }, [config]);
 
-  const activityLog: LoyaltyTransaction[] =
-    transactions && transactions.length ? transactions : defaultActivityLog;
+  const activityLog: LoyaltyTransaction[] = transactions ?? [];
 
   return (
     <div style={{ display: 'flex', flexDirection: 'column', gap: '24px', maxWidth: '1280px' }}>
@@ -284,7 +233,7 @@ const Loyalty: React.FC = () => {
         </h3>
         <div style={{ display: 'grid', gridTemplateColumns: 'repeat(4, 1fr)', gap: '16px' }}>
           {tiers.map((tier, i) => {
-            const Icon = tier.icon;
+            const Icon = TIER_ICON_MAP[tier.name] ?? Award;
             return (
               <motion.div
                 key={tier.name}
@@ -317,18 +266,6 @@ const Loyalty: React.FC = () => {
                   >
                     <Icon size={18} {...({ style: { color: tier.color } } as any)} />
                   </div>
-                  <span
-                    style={{
-                      padding: '3px 10px',
-                      borderRadius: '9999px',
-                      fontSize: '11px',
-                      fontWeight: 600,
-                      background: `${tier.color}18`,
-                      color: tier.color,
-                    }}
-                  >
-                    {tier.memberCount} members
-                  </span>
                 </div>
                 <div>
                   <div style={{ fontSize: '16px', fontWeight: 700, color: 'var(--hub-text)' }}>
@@ -337,9 +274,9 @@ const Loyalty: React.FC = () => {
                   <div
                     style={{ fontSize: '12px', color: 'var(--hub-text-muted)', marginTop: '2px' }}
                   >
-                    {tier.minPoints === 0
+                    {tier.threshold === 0
                       ? 'Starting tier'
-                      : `From ${tier.minPoints.toLocaleString()} pts`}
+                      : `From ${tier.threshold.toLocaleString()} pts`}
                   </div>
                 </div>
                 <div
@@ -351,12 +288,12 @@ const Loyalty: React.FC = () => {
                   }}
                 >
                   <span style={{ fontSize: '22px', fontWeight: 700, color: tier.color }}>
-                    {tier.discount}%
+                    {tier.multiplier}x
                   </span>
                   <span
                     style={{ fontSize: '12px', color: 'var(--hub-text-muted)', marginLeft: '4px' }}
                   >
-                    discount
+                    multiplier
                   </span>
                 </div>
                 <ul
