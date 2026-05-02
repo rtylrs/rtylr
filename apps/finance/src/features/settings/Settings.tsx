@@ -68,7 +68,13 @@ const GeneralTab: React.FC = () => {
   };
 
   const handleSave = (): void => {
-    toast.success('Settings saved');
+    try {
+      // Settings are persisted locally via Zustand persist middleware on every setSetting call.
+      // This button confirms the current state is intentionally saved.
+      toast.success('Settings saved');
+    } catch {
+      toast.error('Failed to save settings');
+    }
   };
 
   return (
@@ -127,7 +133,12 @@ const GeneralTab: React.FC = () => {
                 placeholder="https://..."
                 style={inputStyle}
               />
-              <button style={{ ...ghostBtn, padding: '8px 12px' }}>
+              <button
+                type="button"
+                style={{ ...ghostBtn, padding: '8px 12px' }}
+                onClick={() => toast.info('Logo upload coming soon')}
+                aria-label="Upload logo"
+              >
                 <ImageIcon size={13} />
               </button>
             </div>
@@ -274,6 +285,10 @@ const TeamTab: React.FC = () => {
           setEmail('');
           setFullName('');
           setShowInvite(false);
+          toast.success('Invitation sent');
+        },
+        onError: () => {
+          toast.error('Failed to send invitation');
         },
       }
     );
@@ -459,7 +474,10 @@ const TeamTab: React.FC = () => {
                 type="button"
                 aria-label={`Remove ${m.name}`}
                 onClick={() => {
-                  deactivate.mutate(m.id);
+                  deactivate.mutate(m.id, {
+                    onSuccess: () => toast.success(`${m.name} removed`),
+                    onError: () => toast.error(`Failed to remove ${m.name}`),
+                  });
                 }}
                 style={{
                   height: 28,
