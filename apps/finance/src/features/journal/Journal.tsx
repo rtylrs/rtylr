@@ -15,7 +15,9 @@ const Journal: React.FC = () => {
   const [memo, setMemo] = useState('');
   const [date, setDate] = useState(new Date().toISOString().slice(0, 10));
   const [debitAcc, setDebitAcc] = useState('');
+  const [debitAccId, setDebitAccId] = useState(0);
   const [creditAcc, setCreditAcc] = useState('');
+  const [creditAccId, setCreditAccId] = useState(0);
   const [amount, setAmount] = useState('');
 
   const handleCreate = async (): Promise<void> => {
@@ -27,14 +29,14 @@ const Journal: React.FC = () => {
         description: memo.trim(),
         lines: [
           {
-            accountId: 0,
+            accountId: debitAccId,
             accountName: debitAcc || 'Debit Account',
             debit: amt,
             credit: 0,
             description: '',
           },
           {
-            accountId: 0,
+            accountId: creditAccId,
             accountName: creditAcc || 'Credit Account',
             debit: 0,
             credit: amt,
@@ -46,6 +48,10 @@ const Journal: React.FC = () => {
       setShowCreate(false);
       setMemo('');
       setAmount('');
+      setDebitAcc('');
+      setDebitAccId(0);
+      setCreditAcc('');
+      setCreditAccId(0);
     } catch {
       toast.error('Failed to create journal entry');
     }
@@ -224,9 +230,27 @@ const Journal: React.FC = () => {
             />
             <input
               style={inputStyle}
+              type="number"
+              min="0"
+              step="1"
+              placeholder="Debit account ID (optional)"
+              value={debitAccId || ''}
+              onChange={(e) => setDebitAccId(parseInt(e.target.value, 10) || 0)}
+            />
+            <input
+              style={inputStyle}
               placeholder="Credit account name"
               value={creditAcc}
               onChange={(e) => setCreditAcc(e.target.value)}
+            />
+            <input
+              style={inputStyle}
+              type="number"
+              min="0"
+              step="1"
+              placeholder="Credit account ID (optional)"
+              value={creditAccId || ''}
+              onChange={(e) => setCreditAccId(parseInt(e.target.value, 10) || 0)}
             />
             <input
               style={inputStyle}
