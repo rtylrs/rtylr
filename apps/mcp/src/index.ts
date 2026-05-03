@@ -6,12 +6,8 @@ import {
   ListToolsRequestSchema,
 } from '@modelcontextprotocol/sdk/types.js';
 
-import { flowTools } from './tools/flow.js';
-import { crmTools } from './tools/crm.js';
-import { financeTools } from './tools/finance.js';
-import { erpTools } from './tools/erp.js';
-
-const ALL_TOOLS = [...flowTools, ...crmTools, ...financeTools, ...erpTools];
+import { ALL_TOOLS } from './tools/index.js';
+import { createClient } from './client.js';
 
 const server = new Server(
   { name: 'rtylr-mcp', version: '0.1.0' },
@@ -33,7 +29,9 @@ server.setRequestHandler(CallToolRequestSchema, async (request) => {
   }
 
   const input = (request.params.arguments ?? {}) as Record<string, unknown>;
-  return tool.handler(input);
+  const api = createClient();
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
+  return tool.handler(input, api) as any;
 });
 
 async function main(): Promise<void> {
