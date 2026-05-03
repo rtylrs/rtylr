@@ -762,36 +762,3 @@ func (s *Service) SeedDefaultColumns(ctx context.Context, projectID, workspaceID
 	return s.repo.SeedDefaultColumns(ctx, projectID, workspaceID, createdBy)
 }
 
-// ─────────────────────────────────────────────
-// Businesses
-// ─────────────────────────────────────────────
-
-func (s *Service) ListBusinesses(ctx context.Context, ownerID int64) ([]domain.Business, error) {
-	return s.repo.ListBusinesses(ctx, ownerID)
-}
-
-func (s *Service) CreateBusiness(ctx context.Context, input domain.BusinessInput) (domain.Business, error) {
-	id, err := s.repo.CreateBusiness(ctx, input)
-	if err != nil {
-		return domain.Business{}, err
-	}
-	return domain.Business{
-		ID:      id,
-		OwnerID: input.OwnerID,
-		Name:    input.Name,
-		Color:   input.Color,
-		Icon:    input.Icon,
-	}, nil
-}
-
-func (s *Service) UpdateBusiness(ctx context.Context, id int64, name, color, icon string) error {
-	return s.repo.UpdateBusiness(ctx, id, name, color, icon)
-}
-
-func (s *Service) DeleteBusiness(ctx context.Context, id int64, ownerID int64) error {
-	return s.repo.DeleteBusiness(ctx, id, ownerID)
-}
-
-func (s *Service) SetWorkspaceBusiness(ctx context.Context, workspaceID int64, businessID *int64) error {
-	return s.repo.SetWorkspaceBusiness(ctx, workspaceID, businessID)
-}

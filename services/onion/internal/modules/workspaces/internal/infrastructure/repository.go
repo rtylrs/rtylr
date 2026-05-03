@@ -910,7 +910,7 @@ func tasksFromRows(rows []sqlc.FlowTask) []domain.Task {
 // listEnrichedTasks in sync.
 const enrichedTaskColumns = `
 	t.id, t.project_id, t.workspace_id, t.owner_id, t.parent_task_id, t.section_id,
-	t.title, t.description, t.status, t.priority,
+	t.title, t.description, COALESCE(t.status, 'todo') AS status, COALESCE(t.priority, 'none') AS priority,
 	t.assignee_id, t.reporter_id, t.due_date, t.start_date, t.completed_at,
 	t.estimated_hours, t.actual_hours, t.sort_order, t.labels,
 	t.created_at, t.updated_at,
@@ -1420,86 +1420,6 @@ func (r *Repository) LookupUserByEmail(ctx context.Context, email string) (int64
 	return id, true, nil
 }
 
-// ─────────────────────────────────────────────
-// Businesses
-// ─────────────────────────────────────────────
-
-func (r *Repository) ListBusinesses(ctx context.Context, ownerID int64) ([]domain.Business, error) {
-	rows, err := r.pool.QueryContext(ctx,
-		`SELECT id, owner_id, name, color, icon, created_at, updated_at
-		 FROM flow_businesses WHERE owner_id = ? ORDER BY created_at ASC`,
-		ownerID,
-	)
-	if err != nil {
-		logger.Ctx(ctx).Error("ListBusinesses failed", logger.Error(err))
-		return nil, err
-	}
-	defer rows.Close()
-
-	var businesses []domain.Business
-	for rows.Next() {
-		var b domain.Business
-		if err := rows.Scan(&b.ID, &b.OwnerID, &b.Name, &b.Color, &b.Icon, &b.CreatedAt, &b.UpdatedAt); err != nil {
-			return nil, err
-		}
-		businesses = append(businesses, b)
-	}
-	return businesses, rows.Err()
-}
-
-func (r *Repository) CreateBusiness(ctx context.Context, input domain.BusinessInput) (int64, error) {
-	color := input.Color
-	if color == "" {
-		color = "#64C5B9"
-	}
-	icon := input.Icon
-	if icon == "" {
-		icon = "🏢"
-	}
-
-	res, err := r.pool.ExecContext(ctx,
-		`INSERT INTO flow_businesses (owner_id, name, color, icon) VALUES (?, ?, ?, ?)`,
-		input.OwnerID, input.Name, color, icon,
-	)
-	if err != nil {
-		logger.Ctx(ctx).Error("CreateBusiness failed", logger.Error(err))
-		return 0, err
-	}
-	return res.LastInsertId()
-}
-
-func (r *Repository) UpdateBusiness(ctx context.Context, id int64, name, color, icon string) error {
-	_, err := r.pool.ExecContext(ctx,
-		`UPDATE flow_businesses SET name = ?, color = ?, icon = ?, updated_at = NOW() WHERE id = ?`,
-		name, color, icon, id,
-	)
-	if err != nil {
-		logger.Ctx(ctx).Error("UpdateBusiness failed", logger.Error(err))
-	}
-	return err
-}
-
-func (r *Repository) DeleteBusiness(ctx context.Context, id int64, ownerID int64) error {
-	_, err := r.pool.ExecContext(ctx,
-		`DELETE FROM flow_businesses WHERE id = ? AND owner_id = ?`,
-		id, ownerID,
-	)
-	if err != nil {
-		logger.Ctx(ctx).Error("DeleteBusiness failed", logger.Error(err))
-	}
-	return err
-}
-
-func (r *Repository) SetWorkspaceBusiness(ctx context.Context, workspaceID int64, businessID *int64) error {
-	_, err := r.pool.ExecContext(ctx,
-		`UPDATE flow_workspaces SET business_id = ? WHERE id = ?`,
-		businessID, workspaceID,
-	)
-	if err != nil {
-		logger.Ctx(ctx).Error("SetWorkspaceBusiness failed", logger.Error(err))
-	}
-	return err
-}
 
 // ─────────────────────────────────────────────────────────────────────────────
 // Membership checks (used by realtime topic auth).
