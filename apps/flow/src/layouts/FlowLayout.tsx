@@ -31,10 +31,9 @@ import {
   Menu,
   X,
   Shield,
-  Sparkles,
 } from 'lucide-react';
 import { APP_URLS, useFeatureFlag, FLAG_KEYS } from '@voxire/config';
-import { CaretPanel, useCaretStore } from '@voxire/caret';
+import { CaretPanel, CaretButton, useCaretStore } from '@voxire/caret';
 import { useForesightLinks } from '@voxire/utils';
 import { useUserStore } from '../shared/stores/userStore';
 import { useThemeStore } from '../shared/stores/themeStore';
@@ -447,15 +446,7 @@ const FlowLayout: React.FC<FlowLayoutProps> = ({ children }) => {
           >
             <Plus size={20} strokeWidth={2} />
           </button>
-          <button
-            type="button"
-            onClick={() => useCaretStore.getState().toggle()}
-            className="flex h-10 w-10 shrink-0 items-center justify-center rounded-lg transition-colors hover:bg-[var(--flow-hover)]"
-            style={{ color: '#8b5cf6' }}
-            aria-label="Open Caret AI"
-          >
-            <Sparkles size={18} strokeWidth={2} />
-          </button>
+          <CaretButton />
         </header>
 
         {mobileNavOpen && (
@@ -831,19 +822,7 @@ const FlowLayout: React.FC<FlowLayoutProps> = ({ children }) => {
             style={{ borderTop: '1px solid var(--flow-border)' }}
           >
             <SidebarLink to="/settings" icon={Settings} label="Settings" />
-            <button
-              type="button"
-              onClick={() => useCaretStore.getState().toggle()}
-              className="w-full flex items-center gap-2 px-3 py-2 rounded-lg transition-all duration-150"
-              style={{
-                background: caretOpen ? 'rgba(139,92,246,0.15)' : 'rgba(139,92,246,0.08)',
-                color: '#8b5cf6',
-                border: `1px solid ${caretOpen ? 'rgba(139,92,246,0.4)' : 'rgba(139,92,246,0.2)'}`,
-              }}
-            >
-              <Sparkles size={13} />
-              <span className="text-[12px] font-medium">Caret AI</span>
-            </button>
+            <CaretButton className="w-full justify-center" />
 
             <div className="relative">
               <button

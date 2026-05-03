@@ -33,7 +33,7 @@ import {
   Search,
   Sparkles,
 } from 'lucide-react';
-import { CaretPanel, useCaretStore } from '@voxire/caret';
+import { CaretPanel, CaretButton, useCaretStore } from '@voxire/caret';
 import { useUserStore } from '../shared/stores/userStore';
 import { useThemeStore } from '../shared/stores/themeStore';
 import { cn } from '../shared/lib/utils';
@@ -242,6 +242,7 @@ const DefaultLayout: React.FC<DefaultLayoutProps> = ({ children }) => {
   useKeyboardShortcuts();
   useOnboardingTour();
 
+  const { isOpen: caretOpen } = useCaretStore();
   const userId = Number(user?.id) || 0;
   const unreadCount = Array.isArray(notifications)
     ? notifications.filter((n) => !n.read).length
@@ -398,114 +399,112 @@ const DefaultLayout: React.FC<DefaultLayoutProps> = ({ children }) => {
           </div>
         </aside>
 
-        {/* Main content */}
-        <div className="flex flex-col flex-1 overflow-hidden">
-          {/* Topbar */}
-          <header
-            className="h-11 flex items-center justify-between px-6 shrink-0"
+        {/* Main content + Caret AI inline column */}
+        <div className="flex flex-1 overflow-hidden">
+          <div className="flex flex-col flex-1 overflow-hidden">
+            {/* Topbar */}
+            <header
+              className="h-11 flex items-center justify-between px-6 shrink-0"
+              style={{
+                background: 'var(--dash-surface)',
+                borderBottom: '1px solid var(--dash-border)',
+              }}
+            >
+              {pageTitle === '__caret__' ? (
+                <div className="flex items-center gap-2">
+                  <div
+                    className="h-6 w-6 rounded-lg flex items-center justify-center"
+                    style={{ background: 'rgba(139,92,246,0.1)' }}
+                  >
+                    <Sparkles size={13} style={{ color: '#8b5cf6' }} />
+                  </div>
+                  <span className="text-sm font-semibold" style={{ color: 'var(--dash-text)' }}>
+                    Caret
+                  </span>
+                  <span
+                    className="text-[9px] font-bold uppercase tracking-wider px-1.5 py-0.5 rounded"
+                    style={{ background: 'rgba(139,92,246,0.1)', color: '#8b5cf6' }}
+                  >
+                    AI
+                  </span>
+                </div>
+              ) : (
+                <h1 className="text-sm font-semibold" style={{ color: 'var(--dash-text)' }}>
+                  {pageTitle}
+                </h1>
+              )}
+              <div className="flex items-center gap-1">
+                <button
+                  onClick={() => setCommandPaletteOpen(true)}
+                  className="flex items-center gap-2 px-2.5 h-7 rounded-lg transition-colors duration-150 hover:bg-[var(--dash-hover)]"
+                  style={{
+                    color: 'var(--dash-text-muted)',
+                    border: '1px solid var(--dash-border)',
+                  }}
+                  aria-label="Open command palette"
+                >
+                  <Search size={12} />
+                  <span className="text-[11px]">Search</span>
+                  <kbd
+                    className="hidden sm:inline-flex items-center px-1 py-0.5 rounded text-[9px] font-mono"
+                    style={{ background: 'var(--dash-hover)', color: 'var(--dash-text-dim)' }}
+                  >
+                    ⌘K
+                  </kbd>
+                </button>
+                <CaretButton data-tour="caret" />
+                <button
+                  onClick={() => navigate('/notifications')}
+                  className="relative h-7 w-7 rounded-lg flex items-center justify-center transition-colors duration-150 hover:bg-[var(--dash-hover)]"
+                  style={{ color: 'var(--dash-text-muted)' }}
+                  aria-label="Notifications"
+                >
+                  <Bell size={14} />
+                  {unreadCount > 0 && (
+                    <span
+                      className="absolute top-1 right-1 h-1.5 w-1.5 rounded-full"
+                      style={{ background: '#ef4444' }}
+                    />
+                  )}
+                </button>
+              </div>
+            </header>
+            <SearchCommand />
+
+            {/* Page content */}
+            <AnimatePresence mode="wait">
+              <motion.main
+                key={location.pathname}
+                initial={{ opacity: 0, y: 6 }}
+                animate={{ opacity: 1, y: 0 }}
+                exit={{ opacity: 0, y: -4 }}
+                transition={{ duration: 0.18, ease: 'easeOut' }}
+                className="flex-1 overflow-y-auto p-6"
+              >
+                {children}
+              </motion.main>
+            </AnimatePresence>
+          </div>
+
+          {/* Caret AI — inline third column, pushes content left */}
+          <div
             style={{
-              background: 'var(--dash-surface)',
-              borderBottom: '1px solid var(--dash-border)',
+              width: caretOpen ? '360px' : '0px',
+              flexShrink: 0,
+              overflow: 'hidden',
+              transition: 'width 0.25s cubic-bezier(0.4, 0, 0.2, 1)',
             }}
           >
-            {pageTitle === '__caret__' ? (
-              <div className="flex items-center gap-2">
-                <div
-                  className="h-6 w-6 rounded-lg flex items-center justify-center"
-                  style={{ background: 'rgba(139,92,246,0.1)' }}
-                >
-                  <Sparkles size={13} style={{ color: '#8b5cf6' }} />
-                </div>
-                <span className="text-sm font-semibold" style={{ color: 'var(--dash-text)' }}>
-                  Caret
-                </span>
-                <span
-                  className="text-[9px] font-bold uppercase tracking-wider px-1.5 py-0.5 rounded"
-                  style={{ background: 'rgba(139,92,246,0.1)', color: '#8b5cf6' }}
-                >
-                  AI
-                </span>
-              </div>
-            ) : (
-              <h1 className="text-sm font-semibold" style={{ color: 'var(--dash-text)' }}>
-                {pageTitle}
-              </h1>
-            )}
-            <div className="flex items-center gap-1">
-              <button
-                onClick={() => setCommandPaletteOpen(true)}
-                className="flex items-center gap-2 px-2.5 h-7 rounded-lg transition-colors duration-150 hover:bg-[var(--dash-hover)]"
-                style={{ color: 'var(--dash-text-muted)', border: '1px solid var(--dash-border)' }}
-                aria-label="Open command palette"
-              >
-                <Search size={12} />
-                <span className="text-[11px]">Search</span>
-                <kbd
-                  className="hidden sm:inline-flex items-center px-1 py-0.5 rounded text-[9px] font-mono"
-                  style={{ background: 'var(--dash-hover)', color: 'var(--dash-text-dim)' }}
-                >
-                  ⌘K
-                </kbd>
-              </button>
-              <button
-                onClick={() => useCaretStore.getState().open()}
-                className="h-7 rounded-lg flex items-center gap-1.5 px-3 transition-all duration-150"
-                style={{
-                  background: 'rgba(139,92,246,0.1)',
-                  color: '#8b5cf6',
-                  border: '1px solid rgba(139,92,246,0.2)',
-                }}
-                onMouseEnter={(e) => {
-                  (e.currentTarget as HTMLElement).style.background = 'rgba(139,92,246,0.18)';
-                }}
-                onMouseLeave={(e) => {
-                  (e.currentTarget as HTMLElement).style.background = 'rgba(139,92,246,0.1)';
-                }}
-                aria-label="Chat with Caret"
-                data-tour="caret"
-              >
-                <Sparkles size={13} />
-                <span className="text-[11px] font-semibold">Caret AI</span>
-              </button>
-              <button
-                onClick={() => navigate('/notifications')}
-                className="relative h-7 w-7 rounded-lg flex items-center justify-center transition-colors duration-150 hover:bg-[var(--dash-hover)]"
-                style={{ color: 'var(--dash-text-muted)' }}
-                aria-label="Notifications"
-              >
-                <Bell size={14} />
-                {unreadCount > 0 && (
-                  <span
-                    className="absolute top-1 right-1 h-1.5 w-1.5 rounded-full"
-                    style={{ background: '#ef4444' }}
-                  />
-                )}
-              </button>
-            </div>
-          </header>
-          <SearchCommand />
-
-          {/* Page content */}
-          <AnimatePresence mode="wait">
-            <motion.main
-              key={location.pathname}
-              initial={{ opacity: 0, y: 6 }}
-              animate={{ opacity: 1, y: 0 }}
-              exit={{ opacity: 0, y: -4 }}
-              transition={{ duration: 0.18, ease: 'easeOut' }}
-              className="flex-1 overflow-y-auto p-6"
-            >
-              {children}
-            </motion.main>
-          </AnimatePresence>
+            <CaretPanel
+              variant="inline"
+              appId="dash"
+              userId={userId}
+              apiBaseUrl={import.meta.env.VITE_API_URL ?? 'https://api.voxire.dev/'}
+              systemContext="User is in the Dash app (business command center — KPIs, orders, staff overview)"
+            />
+          </div>
         </div>
       </div>
-      <CaretPanel
-        appId="dash"
-        userId={userId}
-        apiBaseUrl={import.meta.env.VITE_API_URL ?? 'https://api.voxire.dev/'}
-        systemContext="User is in the Dash app (business command center — KPIs, orders, staff overview)"
-      />
     </>
   );
 };
