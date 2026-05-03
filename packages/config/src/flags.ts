@@ -45,16 +45,16 @@ export type FlagKey = (typeof FLAG_KEYS)[keyof typeof FLAG_KEYS];
  * don't have flags; they always render.
  */
 export const FLAG_PROD_DEFAULTS: Record<FlagKey, boolean> = {
-  [FLAG_KEYS.APP_RECRUIT]: true, // shipped this session — public surface live
-  [FLAG_KEYS.APP_ERP]: false,
-  [FLAG_KEYS.APP_CRM]: false,
-  [FLAG_KEYS.APP_FINANCE]: false,
-  [FLAG_KEYS.APP_INSIGHTS]: false,
-  [FLAG_KEYS.APP_MENU]: false,
-  [FLAG_KEYS.APP_POS]: false,
-  [FLAG_KEYS.APP_POS_PAYMENTS]: false,
-  [FLAG_KEYS.APP_RECRUIT_FILE_UPLOAD]: false, // wait for R2 creds
-  [FLAG_KEYS.APP_FLOW_PREVIEW_ROUTES]: false,
+  [FLAG_KEYS.APP_RECRUIT]: true,
+  [FLAG_KEYS.APP_ERP]: true,
+  [FLAG_KEYS.APP_CRM]: true,
+  [FLAG_KEYS.APP_FINANCE]: true,
+  [FLAG_KEYS.APP_INSIGHTS]: true,
+  [FLAG_KEYS.APP_MENU]: true,
+  [FLAG_KEYS.APP_POS]: true,
+  [FLAG_KEYS.APP_POS_PAYMENTS]: false, // off until Paddle is wired
+  [FLAG_KEYS.APP_RECRUIT_FILE_UPLOAD]: false, // off until R2 creds
+  [FLAG_KEYS.APP_FLOW_PREVIEW_ROUTES]: false, // off until screens render real data
 };
 
 /**
