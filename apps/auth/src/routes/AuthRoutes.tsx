@@ -10,6 +10,7 @@ const EmailVerification = React.lazy(
 );
 const VerifyEmail = React.lazy(() => import('../features/email-verification/VerifyEmail'));
 const InviteAccept = React.lazy(() => import('../features/invite/InviteAccept'));
+const OAuthConsent = React.lazy(() => import('../features/oauth/OAuthConsent'));
 
 const wrap = (node: React.ReactNode) => (
   <Public hasHeader={false} hasPadding={false}>
@@ -24,6 +25,7 @@ const AuthRoutes = [
   { path: '/verify/:token', element: wrap(<EmailVerification />) },
   { path: '/verify', element: wrap(<VerifyEmail />) },
   { path: '/invite/:token', element: wrap(<InviteAccept />) },
+  { path: '/oauth', element: wrap(<OAuthConsent />) },
 ];
 
 export default AuthRoutes;

@@ -54,8 +54,6 @@ import DueDatePicker from '../../shared/components/DueDatePicker';
 import { getInitials } from '../../shared/lib/utils';
 import { EFFORT_PRESETS, formatEffortMinutes } from '../../shared/lib/effortPresets';
 
-const ACCENT = '#64C5B9';
-
 // ── Helpers ──────────────────────────────────────────────────────────────────
 
 function formatRelative(dateStr: string): string {
@@ -637,7 +635,10 @@ const TaskDetail: React.FC = () => {
                     style={{ background: 'var(--flow-hover)' }}
                   >
                     <div className="flex-1 min-w-0">
-                      <span className="text-[11px] font-semibold" style={{ color: ACCENT }}>
+                      <span
+                        className="text-[11px] font-semibold"
+                        style={{ color: 'var(--accent)' }}
+                      >
                         {formatDuration(log.duration_minutes)}
                       </span>
                       {log.description && (
@@ -708,7 +709,7 @@ const TaskDetail: React.FC = () => {
                     onClick={handleSubmitTimeLog}
                     disabled={logTimeMut.isPending}
                     className="flex-1 py-1 rounded text-[10px] font-semibold disabled:opacity-40"
-                    style={{ background: ACCENT, color: '#0a0a0a' }}
+                    style={{ background: 'var(--accent)', color: '#0a0a0a' }}
                   >
                     {logTimeMut.isPending ? 'Logging…' : 'Log'}
                   </button>
@@ -756,11 +757,11 @@ const TaskDetail: React.FC = () => {
                 onClick={() => updateTask(task.id, { effortMinutes: m })}
                 className="text-[10px] px-2 py-1 rounded-md transition-colors"
                 style={{
-                  background: task.effortMinutes === m ? `${ACCENT}28` : 'transparent',
+                  background: task.effortMinutes === m ? 'var(--accent-muted)' : 'transparent',
                   color: 'var(--flow-text)',
                   border:
                     task.effortMinutes === m
-                      ? `1px solid ${ACCENT}66`
+                      ? `1px solid ${'var(--accent)'}66`
                       : '1px solid var(--flow-border)',
                 }}
                 title={`${m} minutes`}
@@ -798,9 +799,9 @@ const TaskDetail: React.FC = () => {
             onClick={() => updateTask(task.id, { focusPin: !task.focusPin })}
             className="text-[11px] px-2.5 py-1.5 rounded-md w-full text-left transition-colors"
             style={{
-              background: task.focusPin ? `${ACCENT}22` : 'var(--flow-hover)',
+              background: task.focusPin ? 'var(--accent-muted)' : 'var(--flow-hover)',
               color: 'var(--flow-text)',
-              border: task.focusPin ? `1px solid ${ACCENT}55` : '1px solid transparent',
+              border: task.focusPin ? `1px solid ${'var(--accent)'}55` : '1px solid transparent',
             }}
           >
             {task.focusPin ? 'Pinned to Today view' : 'Pin to Today view'}
@@ -905,7 +906,7 @@ const TaskDetail: React.FC = () => {
                   type="button"
                   onClick={() => navigate(`/task/${dt.id}`)}
                   className="text-[11px] text-left truncate flex-1 hover:underline"
-                  style={{ color: ACCENT }}
+                  style={{ color: 'var(--accent)' }}
                 >
                   {dt.identifier} · {dt.title}
                 </button>
@@ -949,7 +950,7 @@ const TaskDetail: React.FC = () => {
                     setDepId('');
                   }}
                   className="text-[10px] px-1.5 py-0.5 rounded font-semibold disabled:opacity-40"
-                  style={{ background: ACCENT, color: '#0a0a0a' }}
+                  style={{ background: 'var(--accent)', color: '#0a0a0a' }}
                 >
                   Add
                 </button>

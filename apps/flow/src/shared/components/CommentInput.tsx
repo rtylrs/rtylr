@@ -87,7 +87,7 @@ export const CommentInput: React.FC<CommentInputProps> = ({
           onClick={handleSubmit}
           disabled={!value.trim()}
           className="flex items-center gap-1 px-2.5 py-1 rounded text-[11px] font-semibold transition-opacity disabled:opacity-40"
-          style={{ background: '#64C5B9', color: '#0a0a0a' }}
+          style={{ background: 'var(--accent)', color: '#0a0a0a' }}
         >
           <Send size={11} />
           Comment
@@ -111,7 +111,7 @@ export const CommentInput: React.FC<CommentInputProps> = ({
             >
               <span
                 className="h-5 w-5 rounded-full flex items-center justify-center text-[9px] font-bold"
-                style={{ background: 'rgba(100,197,185,0.22)', color: '#64C5B9' }}
+                style={{ background: 'var(--accent-muted)', color: 'var(--accent)' }}
               >
                 {m.initials}
               </span>

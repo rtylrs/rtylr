@@ -162,7 +162,7 @@ const ProjectCalendar: React.FC = () => {
                         isToday ? 'font-bold' : 'font-medium',
                       ].join(' ')}
                       style={{
-                        color: isToday ? 'var(--flow-accent, #64C5B9)' : 'var(--flow-text-dim)',
+                        color: isToday ? 'var(--accent)' : 'var(--flow-text-dim)',
                       }}
                     >
                       {d.getDate()}

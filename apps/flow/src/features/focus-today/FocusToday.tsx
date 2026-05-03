@@ -12,7 +12,7 @@ import { formatEffortMinutes } from '../../shared/lib/effortPresets';
 import { formatDate } from '../../shared/lib/utils';
 import PriorityIcon from '../../shared/components/PriorityIcon';
 
-const ACCENT_VAR = 'var(--flow-accent, #64C5B9)';
+const ACCENT_VAR = 'var(--accent)';
 
 const FocusToday: React.FC = () => {
   const { t } = useTranslation();

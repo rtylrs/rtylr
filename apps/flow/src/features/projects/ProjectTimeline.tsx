@@ -97,7 +97,7 @@ const ProjectTimeline: React.FC = () => {
                   width: colWidth,
                   color:
                     d.toDateString() === new Date().toDateString()
-                      ? 'var(--flow-accent, #64C5B9)'
+                      ? 'var(--accent)'
                       : 'var(--flow-text-dim)',
                   borderRight: '1px solid var(--flow-border)',
                 }}

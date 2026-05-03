@@ -9,7 +9,7 @@ import { useFlowStore } from '../../shared/stores/flowStore';
 import PriorityIcon from '../../shared/components/PriorityIcon';
 import type { ApiTask } from '../../shared/services/flowApi';
 
-const ACCENT_VAR = 'var(--flow-accent, #64C5B9)';
+const ACCENT_VAR = 'var(--accent)';
 
 interface CreateModal {
   date: string;

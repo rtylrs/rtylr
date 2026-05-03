@@ -29,7 +29,7 @@ import type { ApiProjectMember } from '../../shared/services/flowApi';
 
 const ROLE_META: Record<string, { icon: React.ReactNode; color: string }> = {
   manager: { icon: <Crown size={10} />, color: '#f59e0b' },
-  member: { icon: <Shield size={10} />, color: '#64C5B9' },
+  member: { icon: <Shield size={10} />, color: 'var(--accent)' },
   viewer: { icon: <Eye size={10} />, color: '#8b5cf6' },
 };
 
@@ -100,7 +100,7 @@ const ProjectSettings: React.FC = () => {
               className="text-[12px] pb-1 border-b-2 transition-colors"
               style={{
                 color: tab === t.id ? 'var(--flow-text)' : 'var(--flow-text-muted)',
-                borderColor: tab === t.id ? '#64C5B9' : 'transparent',
+                borderColor: tab === t.id ? 'var(--accent)' : 'transparent',
               }}
             >
               {t.label}
@@ -150,7 +150,7 @@ const ProjectSettings: React.FC = () => {
               }
               disabled={updateProject.isPending}
               className="flex items-center gap-1.5 px-3 py-1.5 rounded text-[11px] font-semibold"
-              style={{ background: '#64C5B9', color: '#0a0a0a' }}
+              style={{ background: 'var(--accent)', color: '#0a0a0a' }}
             >
               <Save size={11} /> {updateProject.isPending ? 'Saving...' : 'Save changes'}
             </button>
@@ -222,7 +222,7 @@ const ProjectSettings: React.FC = () => {
                   }}
                   disabled={inviteMember.isPending}
                   className="px-3 py-1.5 rounded text-[11px] font-semibold"
-                  style={{ background: '#64C5B9', color: '#0a0a0a' }}
+                  style={{ background: 'var(--accent)', color: '#0a0a0a' }}
                 >
                   Invite
                 </button>
@@ -266,7 +266,7 @@ const ProjectSettings: React.FC = () => {
                     >
                       <span
                         className="h-7 w-7 rounded-full flex items-center justify-center text-[10px] font-bold shrink-0"
-                        style={{ background: 'rgba(100,197,185,0.15)', color: '#64C5B9' }}
+                        style={{ background: 'var(--accent-muted)', color: 'var(--accent)' }}
                       >
                         {initials}
                       </span>

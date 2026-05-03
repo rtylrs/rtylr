@@ -18,8 +18,6 @@ const ICON_MAP: Record<string, React.ComponentType<{ size?: number }>> = {
   'check-circle': CheckCircle2,
 };
 
-const ACCENT = '#64C5B9';
-
 const Views: React.FC = () => {
   const { data: views = [] } = useViews();
   const createView = useCreateView();
@@ -127,7 +125,7 @@ const Views: React.FC = () => {
                     <button
                       onClick={() => commitEdit(v)}
                       className="h-4 w-4 flex items-center justify-center rounded hover:bg-[var(--flow-hover)]"
-                      style={{ color: ACCENT }}
+                      style={{ color: 'var(--accent)' }}
                     >
                       <Check size={10} />
                     </button>

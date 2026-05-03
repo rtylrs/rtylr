@@ -18,12 +18,10 @@ import {
 } from './useNotifications';
 import type { ApiNotification } from '../../shared/services/flowApi';
 
-const ACCENT = '#64C5B9';
-
 type FilterType = 'all' | 'unread' | 'assigned';
 
 const TYPE_ICONS: Record<ApiNotification['type'], React.ReactNode> = {
-  assigned: <CheckCircle2 size={14} style={{ color: ACCENT }} />,
+  assigned: <CheckCircle2 size={14} style={{ color: 'var(--accent)' }} />,
   mention: <AtSign size={14} style={{ color: '#f59e0b' }} />,
   comment: <MessageSquare size={14} style={{ color: '#3b82f6' }} />,
   status_change: <Circle size={14} style={{ color: '#22c55e' }} />,
@@ -62,7 +60,7 @@ const NotificationRow: React.FC<{
       {!notification.read && (
         <span
           className="absolute left-2 top-1/2 -translate-y-1/2 h-1.5 w-1.5 rounded-full"
-          style={{ background: ACCENT }}
+          style={{ background: 'var(--accent)' }}
         />
       )}
 
@@ -70,7 +68,7 @@ const NotificationRow: React.FC<{
         className="h-8 w-8 rounded-full flex items-center justify-center text-[11px] font-bold shrink-0 mt-0.5"
         style={{
           background: `${notification.projectColor || '#64C5B9'}22`,
-          color: notification.projectColor || ACCENT,
+          color: notification.projectColor || 'var(--accent)',
         }}
       >
         {notification.actorInitials || '?'}
@@ -185,15 +183,15 @@ const Inbox: React.FC = () => {
             onClick={() => setActiveFilter(id)}
             className="px-3 py-1.5 rounded-md text-[12px] font-medium transition-colors"
             style={{
-              background: activeFilter === id ? `${ACCENT}18` : 'transparent',
-              color: activeFilter === id ? ACCENT : 'var(--flow-text-muted)',
+              background: activeFilter === id ? 'var(--accent-muted)' : 'transparent',
+              color: activeFilter === id ? 'var(--accent)' : 'var(--flow-text-muted)',
             }}
           >
             {label}
             {id === 'unread' && unreadCount > 0 && (
               <span
                 className="ml-1.5 px-1.5 py-0.5 rounded-full text-[10px] font-bold"
-                style={{ background: ACCENT, color: '#0a0a0a' }}
+                style={{ background: 'var(--accent)', color: '#0a0a0a' }}
               >
                 {unreadCount}
               </span>

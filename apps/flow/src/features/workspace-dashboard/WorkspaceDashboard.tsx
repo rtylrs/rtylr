@@ -22,8 +22,6 @@ import { getCurrentUserId, isTaskMine } from '../../shared/lib/currentUser';
 import { isDueThisCalendarWeek } from '../../shared/lib/lifeRhythm';
 import { getWeeklyReviewStreak, recordWeeklyReviewDone } from '../../shared/lib/weeklyReviewStreak';
 
-const ACCENT = '#64C5B9';
-
 const PRIORITY_COLORS: Record<string, string> = {
   urgent: '#ef4444',
   high: '#f97316',
@@ -168,7 +166,8 @@ const WorkspaceDashboard: React.FC = () => {
         </h1>
         <p className="text-[13px]" style={{ color: 'var(--flow-text-muted)' }}>
           Here's what's happening in{' '}
-          <span style={{ color: workspace?.color || ACCENT }}>{workspace?.name}</span> today.
+          <span style={{ color: workspace?.color || 'var(--accent)' }}>{workspace?.name}</span>{' '}
+          today.
         </p>
       </motion.div>
 
@@ -182,10 +181,10 @@ const WorkspaceDashboard: React.FC = () => {
           0
         )}
         {statCard(
-          <Clock size={15} style={{ color: ACCENT }} />,
+          <Clock size={15} style={{ color: 'var(--accent)' }} />,
           'In Progress',
           inProgress,
-          ACCENT,
+          'var(--accent)',
           1
         )}
         {statCard(
@@ -219,7 +218,7 @@ const WorkspaceDashboard: React.FC = () => {
             <span className="text-[12px] font-medium" style={{ color: 'var(--flow-text-muted)' }}>
               Week load (your tasks due this week)
             </span>
-            <Gauge size={15} style={{ color: ACCENT }} />
+            <Gauge size={15} style={{ color: 'var(--accent)' }} />
           </div>
           <div className="flex items-baseline gap-2">
             <span className="text-2xl font-bold" style={{ color: 'var(--flow-text)' }}>
@@ -237,7 +236,7 @@ const WorkspaceDashboard: React.FC = () => {
               className="h-2 rounded-full transition-all duration-500"
               style={{
                 width: `${weekLoadPct}%`,
-                background: weekLoadPct > 95 ? '#f97316' : ACCENT,
+                background: weekLoadPct > 95 ? '#f97316' : 'var(--accent)',
               }}
             />
           </div>
@@ -276,7 +275,7 @@ const WorkspaceDashboard: React.FC = () => {
             type="button"
             onClick={onWeeklyReviewDone}
             className="text-[12px] font-semibold py-2 px-3 rounded-lg w-fit transition-opacity hover:opacity-90"
-            style={{ background: ACCENT, color: '#0a0a0a' }}
+            style={{ background: 'var(--accent)', color: '#0a0a0a' }}
           >
             I did my review this week
           </button>
@@ -311,8 +310,8 @@ const WorkspaceDashboard: React.FC = () => {
             <span
               className="text-[12px] px-2 py-0.5 rounded-full"
               style={{
-                background: `${ACCENT}18`,
-                color: ACCENT,
+                background: 'var(--accent-muted)',
+                color: 'var(--accent)',
               }}
             >
               {myTasks.length} active
@@ -390,7 +389,7 @@ const WorkspaceDashboard: React.FC = () => {
             <Link
               to={`/w/${workspaceId}`}
               className="flex items-center gap-1 text-[11px] transition-colors hover:opacity-70"
-              style={{ color: ACCENT }}
+              style={{ color: 'var(--accent)' }}
             >
               View all
               <ArrowRight size={11} />

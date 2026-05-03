@@ -11,8 +11,6 @@ import {
   Plus,
 } from 'lucide-react';
 
-const ACCENT = '#64C5B9';
-
 interface ProjectViewTabsProps {
   project: { name: string; color: string };
   workspaceId: string;
@@ -135,7 +133,7 @@ const ProjectViewTabs: React.FC<ProjectViewTabsProps> = ({
                 ].join(' ')}
                 style={
                   active
-                    ? { background: `${ACCENT}18`, color: ACCENT }
+                    ? { background: 'var(--accent-muted)', color: 'var(--accent)' }
                     : { color: 'var(--flow-text-muted)' }
                 }
               >
@@ -160,7 +158,7 @@ const ProjectViewTabs: React.FC<ProjectViewTabsProps> = ({
         <button
           onClick={onNewTask}
           className="flex items-center gap-1.5 h-7 px-2.5 rounded text-[11px] font-semibold transition-opacity hover:opacity-90"
-          style={{ background: ACCENT, color: '#ffffff' }}
+          style={{ background: 'var(--accent)', color: '#ffffff' }}
         >
           <Plus size={12} strokeWidth={2.5} /> New task
         </button>

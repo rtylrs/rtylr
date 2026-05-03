@@ -60,7 +60,7 @@ const Milestones: React.FC = () => {
         <button
           onClick={() => setShowCreate(true)}
           className="flex items-center gap-1.5 px-3 py-1.5 rounded text-[11px] font-semibold"
-          style={{ background: 'var(--flow-accent, #64C5B9)', color: '#0a0a0a' }}
+          style={{ background: 'var(--accent)', color: '#0a0a0a' }}
         >
           <Plus size={11} /> New milestone
         </button>
@@ -112,7 +112,7 @@ const Milestones: React.FC = () => {
               }}
               disabled={createMilestone.isPending || !newName.trim()}
               className="px-3 py-1.5 rounded text-[11px] font-semibold disabled:opacity-50"
-              style={{ background: 'var(--flow-accent, #64C5B9)', color: '#0a0a0a' }}
+              style={{ background: 'var(--accent)', color: '#0a0a0a' }}
             >
               {createMilestone.isPending ? 'Creating...' : 'Create'}
             </button>
@@ -149,9 +149,12 @@ const Milestones: React.FC = () => {
                 <div className="flex items-center gap-2">
                   <span
                     className="h-8 w-8 rounded-md flex items-center justify-center"
-                    style={{ background: `${m.project?.color || '#64C5B9'}22` }}
+                    style={{ background: `${m.project?.color || 'var(--accent)'}22` }}
                   >
-                    <MilestoneIcon size={14} style={{ color: m.project?.color || '#64C5B9' }} />
+                    <MilestoneIcon
+                      size={14}
+                      style={{ color: m.project?.color || 'var(--accent)' }}
+                    />
                   </span>
                   <div>
                     <p className="text-[13px] font-bold" style={{ color: 'var(--flow-text)' }}>

@@ -187,7 +187,7 @@ export const TaskCard: React.FC<TaskCardProps> = ({
         style={{
           background: 'var(--flow-card)',
           border: selected ? '1px solid #64C5B9' : '1px solid var(--flow-border)',
-          boxShadow: selected ? '0 0 0 3px rgba(100,197,185,0.15)' : '0 1px 3px rgba(0,0,0,0.15)',
+          boxShadow: selected ? '0 0 0 3px var(--accent-muted)' : '0 1px 3px rgba(0,0,0,0.15)',
         }}
         whileHover={{ y: -1 }}
       >

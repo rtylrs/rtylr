@@ -45,7 +45,7 @@ const Cycles: React.FC = () => {
         <button
           onClick={() => setShowCreate(true)}
           className="flex items-center gap-1.5 px-3 py-1.5 rounded text-[11px] font-semibold"
-          style={{ background: '#64C5B9', color: '#0a0a0a' }}
+          style={{ background: 'var(--accent)', color: '#0a0a0a' }}
         >
           <Plus size={11} /> New cycle
         </button>
@@ -115,7 +115,7 @@ const Cycles: React.FC = () => {
               }}
               disabled={createCycle.isPending || !newName.trim()}
               className="px-3 py-1.5 rounded text-[11px] font-semibold disabled:opacity-50"
-              style={{ background: '#64C5B9', color: '#0a0a0a' }}
+              style={{ background: 'var(--accent)', color: '#0a0a0a' }}
             >
               {createCycle.isPending ? 'Creating...' : 'Create'}
             </button>
@@ -142,8 +142,8 @@ const Cycles: React.FC = () => {
             className="rounded-xl p-6"
             style={{
               background:
-                'linear-gradient(135deg, rgba(100,197,185,0.08) 0%, rgba(100,197,185,0.02) 100%)',
-              border: '1px solid rgba(100,197,185,0.3)',
+                'linear-gradient(135deg, var(--accent-muted) 0%, rgba(100,197,185,0.02) 100%)',
+              border: '1px solid var(--accent-border)',
             }}
           >
             <div className="flex items-center gap-2 mb-3">
@@ -183,7 +183,7 @@ const Cycles: React.FC = () => {
                   className="h-full rounded-full"
                   style={{
                     width: `${active.scope > 0 ? (active.completed / active.scope) * 100 : 0}%`,
-                    background: '#64C5B9',
+                    background: 'var(--accent)',
                   }}
                 />
               </div>

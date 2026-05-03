@@ -63,7 +63,15 @@ import { useQueryClient } from '@tanstack/react-query';
 import type { RealtimeEvent } from '@voxire/api';
 import { useCallback } from 'react';
 
-const ACCENT = '#64C5B9';
+const ACCENT_DEFAULT = '#64C5B9';
+
+function hexToRgba(hex: string, alpha: number): string {
+  const h = hex.replace('#', '');
+  const r = parseInt(h.slice(0, 2), 16);
+  const g = parseInt(h.slice(2, 4), 16);
+  const b = parseInt(h.slice(4, 6), 16);
+  return `rgba(${r}, ${g}, ${b}, ${alpha})`;
+}
 
 /** Horizontal inset for sidebar content (single column). */
 const sx = 'px-3';
@@ -186,7 +194,7 @@ const SidebarLink: React.FC<SidebarLinkProps> = ({ to, icon: Icon, label, exact,
       {isActive && (
         <span
           className="relative h-1.5 w-1.5 rounded-full shrink-0"
-          style={{ background: ACCENT }}
+          style={{ background: 'var(--accent)' }}
         />
       )}
     </Link>
@@ -235,7 +243,7 @@ const FlowLayout: React.FC<FlowLayoutProps> = ({ children }) => {
   const PERSONAL_FALLBACK: Workspace = {
     id: PERSONAL_WORKSPACE_ID,
     name: 'Personal',
-    color: ACCENT,
+    color: ACCENT_DEFAULT,
   };
 
   // Effective workspace list: prefer live API data, fall back to store, guarantee Personal.
@@ -358,6 +366,17 @@ const FlowLayout: React.FC<FlowLayoutProps> = ({ children }) => {
     liveWorkspaces.find((w) => w.id === currentWorkspaceId) ||
     liveWorkspaces[0] ||
     (workspacesLoading ? { id: '', name: '', color: '#6b7280' } : PERSONAL_FALLBACK);
+
+  // Sync --accent CSS vars to the active workspace color so every component
+  // in the tree can reference var(--accent) without prop-drilling.
+  useEffect(() => {
+    const color = activeWorkspace.color || ACCENT_DEFAULT;
+    const root = document.documentElement;
+    root.style.setProperty('--accent', color);
+    root.style.setProperty('--accent-muted', hexToRgba(color, 0.12));
+    root.style.setProperty('--accent-border', hexToRgba(color, 0.3));
+    root.style.setProperty('--accent-focus', hexToRgba(color, 0.5));
+  }, [activeWorkspace.color]);
   const workspaceProjects = projects.filter(
     (p) => p.workspaceId === currentWorkspaceId && !p.archived
   );
@@ -446,7 +465,7 @@ const FlowLayout: React.FC<FlowLayoutProps> = ({ children }) => {
             aria-label="New task"
             onClick={() => setQuickCreateOpen(true)}
             className="flex h-10 w-10 shrink-0 items-center justify-center rounded-lg transition-colors hover:bg-[var(--flow-hover)]"
-            style={{ color: ACCENT }}
+            style={{ color: 'var(--accent)' }}
           >
             <Plus size={20} strokeWidth={2} />
           </button>
@@ -569,7 +588,7 @@ const FlowLayout: React.FC<FlowLayoutProps> = ({ children }) => {
                       {ws.id === currentWorkspaceId && (
                         <span
                           className="ml-auto h-1.5 w-1.5 rounded-full"
-                          style={{ background: ACCENT }}
+                          style={{ background: 'var(--accent)' }}
                         />
                       )}
                     </button>
@@ -836,8 +855,8 @@ const FlowLayout: React.FC<FlowLayoutProps> = ({ children }) => {
                 <span
                   className="h-6 w-6 rounded-full flex items-center justify-center text-[10px] font-bold shrink-0"
                   style={{
-                    background: `${ACCENT}22`,
-                    color: ACCENT,
+                    background: 'var(--accent-muted)',
+                    color: 'var(--accent)',
                   }}
                 >
                   {getInitials(userName)}
@@ -899,10 +918,13 @@ const FlowLayout: React.FC<FlowLayoutProps> = ({ children }) => {
                             onClick={() => setTheme(value)}
                             className="flex-1 flex flex-col items-center gap-1 py-2 rounded-md text-[10px] font-medium transition-colors"
                             style={{
-                              background: theme === value ? `${ACCENT}22` : 'var(--flow-hover)',
-                              color: theme === value ? ACCENT : 'var(--flow-text-muted)',
+                              background:
+                                theme === value ? 'var(--accent-muted)' : 'var(--flow-hover)',
+                              color: theme === value ? 'var(--accent)' : 'var(--flow-text-muted)',
                               border:
-                                theme === value ? `1px solid ${ACCENT}44` : '1px solid transparent',
+                                theme === value
+                                  ? '1px solid var(--accent-border)'
+                                  : '1px solid transparent',
                             }}
                           >
                             <Icon size={12} />
@@ -1051,7 +1073,7 @@ const FlowLayout: React.FC<FlowLayoutProps> = ({ children }) => {
                       );
                     }}
                     className="px-4 py-1.5 rounded-lg text-[12px] font-semibold disabled:opacity-40 disabled:cursor-not-allowed"
-                    style={{ background: ACCENT, color: '#0a0a0a' }}
+                    style={{ background: 'var(--accent)', color: '#0a0a0a' }}
                   >
                     {createProject.isPending ? 'Creating…' : 'Create'}
                   </button>

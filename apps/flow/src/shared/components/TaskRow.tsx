@@ -166,7 +166,7 @@ export const TaskRow: React.FC<TaskRowProps> = ({ task, showProject, selected, o
         )}
         style={{
           borderBottom: '1px solid var(--flow-border)',
-          background: selected ? 'rgba(100,197,185,0.08)' : undefined,
+          background: selected ? 'var(--accent-muted)' : undefined,
         }}
       >
         {/* Checkbox, always visible when selected, appears on row hover otherwise */}
@@ -177,8 +177,8 @@ export const TaskRow: React.FC<TaskRowProps> = ({ task, showProject, selected, o
             selected ? 'opacity-100' : 'opacity-0 group-hover:opacity-100'
           )}
           style={{
-            borderColor: selected ? '#64C5B9' : 'var(--flow-border)',
-            background: selected ? '#64C5B9' : 'transparent',
+            borderColor: selected ? 'var(--accent)' : 'var(--flow-border)',
+            background: selected ? 'var(--accent)' : 'transparent',
           }}
           aria-label={selected ? 'Deselect task' : 'Select task'}
         >

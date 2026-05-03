@@ -18,8 +18,6 @@ import ProjectViewTabs from './ProjectViewTabs';
 import type { ApiProjectColumn } from '../../shared/services/flowApi';
 import type { Task } from '../../shared/stores/flowStore';
 
-const ACCENT = '#64C5B9';
-
 // ── Group-by (swimlanes) ────────────────────────────────────────────────
 // "None" = plain kanban columns. Any other value partitions each column's
 // tasks into horizontal lanes keyed by that attribute (assignee, priority,
@@ -325,7 +323,7 @@ const ProjectBoard: React.FC = () => {
                     onClick={handleAddColumn}
                     disabled={!newColumnName.trim() || createColumn.isPending}
                     className="h-6 px-2.5 rounded text-[11px] font-semibold disabled:opacity-40"
-                    style={{ background: ACCENT, color: '#ffffff' }}
+                    style={{ background: 'var(--accent)', color: '#ffffff' }}
                   >
                     Add
                   </button>

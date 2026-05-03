@@ -15,7 +15,7 @@ import type { ApiWorkspaceMember } from '../../shared/services/flowApi';
 
 const ROLE_LABELS: Record<string, { label: string; icon: React.ReactNode; color: string }> = {
   manager: { label: 'Manager', icon: <Crown size={11} />, color: '#f59e0b' },
-  member: { label: 'Member', icon: <Shield size={11} />, color: '#64C5B9' },
+  member: { label: 'Member', icon: <Shield size={11} />, color: 'var(--accent)' },
   viewer: { label: 'Viewer', icon: <Eye size={11} />, color: '#8b5cf6' },
 };
 
@@ -43,7 +43,7 @@ const MemberRow: React.FC<{
     >
       <span
         className="h-8 w-8 rounded-full flex items-center justify-center text-[11px] font-bold shrink-0"
-        style={{ background: 'rgba(100,197,185,0.15)', color: '#64C5B9' }}
+        style={{ background: 'var(--accent-muted)', color: 'var(--accent)' }}
       >
         {initials}
       </span>
@@ -167,7 +167,7 @@ const WorkspaceManager: React.FC = () => {
           <button
             onClick={() => setShowInvite((v) => !v)}
             className="flex items-center gap-1.5 px-3 py-1.5 rounded text-[11px] font-semibold"
-            style={{ background: '#64C5B9', color: '#0a0a0a' }}
+            style={{ background: 'var(--accent)', color: '#0a0a0a' }}
           >
             <Plus size={11} /> Add member
           </button>
@@ -229,7 +229,7 @@ const WorkspaceManager: React.FC = () => {
                   >
                     <span
                       className="h-6 w-6 rounded-full flex items-center justify-center text-[10px] font-bold shrink-0"
-                      style={{ background: 'rgba(100,197,185,0.15)', color: '#64C5B9' }}
+                      style={{ background: 'var(--accent-muted)', color: 'var(--accent)' }}
                     >
                       {(m.name || m.email).charAt(0).toUpperCase()}
                     </span>
@@ -272,7 +272,7 @@ const WorkspaceManager: React.FC = () => {
                 onClick={handleAddMember}
                 disabled={!selectedUserId || addMember.isPending}
                 className="flex-1 px-4 py-2 rounded text-[12px] font-semibold disabled:opacity-40"
-                style={{ background: '#64C5B9', color: '#0a0a0a' }}
+                style={{ background: 'var(--accent)', color: '#0a0a0a' }}
               >
                 {addMember.isPending ? 'Adding...' : 'Add to workspace'}
               </button>

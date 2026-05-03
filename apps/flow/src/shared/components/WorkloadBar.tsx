@@ -21,7 +21,7 @@ export const WorkloadBar: React.FC<WorkloadBarProps> = ({
     <div className="flex items-center gap-3 py-2">
       <span
         className="h-7 w-7 rounded-full flex items-center justify-center text-[10px] font-bold shrink-0"
-        style={{ background: 'rgba(100,197,185,0.22)', color: '#64C5B9' }}
+        style={{ background: 'var(--accent-muted)', color: 'var(--accent)' }}
       >
         {initials}
       </span>

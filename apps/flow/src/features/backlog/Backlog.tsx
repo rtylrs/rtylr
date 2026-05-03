@@ -7,8 +7,6 @@ import PriorityIcon from '../../shared/components/PriorityIcon';
 import StatusIcon from '../../shared/components/StatusIcon';
 import type { ApiTask } from '../../shared/services/flowApi';
 
-const ACCENT = '#64C5B9';
-
 const Backlog: React.FC = () => {
   const navigate = useNavigate();
   const { projects, setQuickCreateOpen } = useFlowStore();
@@ -78,7 +76,7 @@ const Backlog: React.FC = () => {
           <button
             onClick={() => setQuickCreateOpen(true)}
             className="flex items-center gap-1.5 h-7 px-2.5 rounded text-[11px] font-semibold"
-            style={{ background: ACCENT, color: '#0a0a0a' }}
+            style={{ background: 'var(--accent)', color: '#0a0a0a' }}
           >
             <Plus size={11} /> New task
           </button>

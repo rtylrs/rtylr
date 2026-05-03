@@ -13,8 +13,6 @@ import { displayUserName } from '../lib/userDisplay';
 import { EFFORT_PRESETS, formatEffortMinutes } from '../lib/effortPresets';
 import { useCreateTask } from '../../features/tasks/useTasks';
 
-const ACCENT = '#64C5B9';
-
 function FieldRow({
   label,
   icon: Icon,
@@ -205,12 +203,14 @@ export const QuickCreate: React.FC = () => {
                       style={{
                         background: assignToMe ? 'var(--flow-hover)' : 'transparent',
                         color: 'var(--flow-text)',
-                        border: assignToMe ? `1px solid ${ACCENT}44` : '1px solid transparent',
+                        border: assignToMe
+                          ? `1px solid ${'var(--accent)'}44`
+                          : '1px solid transparent',
                       }}
                     >
                       <span
                         className="h-6 w-6 rounded-full flex items-center justify-center text-[10px] font-bold"
-                        style={{ background: `${ACCENT}22`, color: ACCENT }}
+                        style={{ background: 'var(--accent-muted)', color: 'var(--accent)' }}
                       >
                         {getInitials(assigneeName)}
                       </span>
@@ -258,11 +258,11 @@ export const QuickCreate: React.FC = () => {
                         onClick={() => setEffortMinutes(m)}
                         className="text-[11px] px-2 py-1 rounded-md"
                         style={{
-                          background: effortMinutes === m ? `${ACCENT}28` : 'transparent',
+                          background: effortMinutes === m ? 'var(--accent-muted)' : 'transparent',
                           color: 'var(--flow-text)',
                           border:
                             effortMinutes === m
-                              ? `1px solid ${ACCENT}55`
+                              ? `1px solid ${'var(--accent)'}55`
                               : '1px solid var(--flow-border)',
                         }}
                       >
@@ -355,7 +355,7 @@ export const QuickCreate: React.FC = () => {
                 onClick={submit}
                 disabled={!title.trim() || !projectId || createTaskMutation.isPending}
                 className="px-4 py-2 rounded-lg text-[12px] font-semibold disabled:opacity-40 disabled:cursor-not-allowed transition-opacity"
-                style={{ background: ACCENT, color: '#0a0a0a' }}
+                style={{ background: 'var(--accent)', color: '#0a0a0a' }}
               >
                 {createTaskMutation.isPending ? 'Creating…' : 'Create task'}
               </button>

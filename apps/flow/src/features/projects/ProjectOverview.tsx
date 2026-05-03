@@ -128,7 +128,7 @@ const ProjectOverview: React.FC = () => {
               value={stats.inProgress}
               color="#3b82f6"
             />
-            <StatCard icon={Clock} label="Total" value={stats.total} color="#64C5B9" />
+            <StatCard icon={Clock} label="Total" value={stats.total} color="var(--accent)" />
             <StatCard icon={AlertCircle} label="Overdue" value={stats.overdue} color="#ef4444" />
           </div>
         </motion.section>
@@ -169,7 +169,7 @@ const ProjectOverview: React.FC = () => {
                   >
                     <div
                       className="h-full"
-                      style={{ width: `${m.progress}%`, background: '#64C5B9' }}
+                      style={{ width: `${m.progress}%`, background: 'var(--accent)' }}
                     />
                   </div>
                 </div>
@@ -225,7 +225,7 @@ const ProjectOverview: React.FC = () => {
                 <div key={c.id} className="flex items-start gap-2 text-[12px]">
                   <span
                     className="h-5 w-5 rounded-full flex items-center justify-center text-[9px] font-bold shrink-0 mt-0.5"
-                    style={{ background: 'rgba(100,197,185,0.22)', color: '#64C5B9' }}
+                    style={{ background: 'var(--accent-muted)', color: 'var(--accent)' }}
                   >
                     {c.authorInitials}
                   </span>

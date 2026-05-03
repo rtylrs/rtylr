@@ -33,7 +33,7 @@ export const SubtaskList: React.FC<SubtaskListProps> = ({ subtasks, onToggle, on
             >
               <div
                 className="h-full transition-all"
-                style={{ width: `${pct}%`, background: '#64C5B9' }}
+                style={{ width: `${pct}%`, background: 'var(--accent)' }}
               />
             </div>
             <span className="text-[10px]" style={{ color: 'var(--flow-text-dim)' }}>
@@ -51,7 +51,7 @@ export const SubtaskList: React.FC<SubtaskListProps> = ({ subtasks, onToggle, on
                   className="h-4 w-4 rounded flex items-center justify-center shrink-0"
                   style={{
                     border: '1px solid var(--flow-border)',
-                    background: s.completed ? '#64C5B9' : 'transparent',
+                    background: s.completed ? 'var(--accent)' : 'transparent',
                   }}
                 >
                   {s.completed && <Check size={10} color="#0a0a0a" strokeWidth={3} />}

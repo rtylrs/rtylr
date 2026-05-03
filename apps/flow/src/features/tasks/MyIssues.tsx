@@ -169,7 +169,7 @@ const QuickAddRow: React.FC = () => {
           onClick={submit}
           disabled={createTask.isPending}
           className="text-[11px] font-semibold px-2.5 py-1 rounded transition-opacity hover:opacity-90 disabled:opacity-50"
-          style={{ background: '#64C5B9', color: '#ffffff' }}
+          style={{ background: 'var(--accent)', color: '#ffffff' }}
         >
           Add
         </button>

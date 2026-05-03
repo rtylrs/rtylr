@@ -27,7 +27,7 @@ function renderBody(body: string): React.ReactNode {
         <span
           key={i}
           className="rounded px-1 font-medium"
-          style={{ background: 'rgba(100,197,185,0.15)', color: '#64C5B9' }}
+          style={{ background: 'var(--accent-muted)', color: 'var(--accent)' }}
         >
           {p}
         </span>

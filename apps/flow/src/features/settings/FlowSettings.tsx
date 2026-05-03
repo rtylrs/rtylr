@@ -50,8 +50,6 @@ import {
   useCreateWorkspace,
 } from '../../features/workspace-dashboard/useWorkspaces';
 
-const ACCENT = '#64C5B9';
-
 interface SettingsSection {
   id: string;
   label: string;
@@ -174,7 +172,7 @@ const WorkspacesSection: React.FC = () => {
               disabled={!wsName.trim() || createWorkspace.isPending}
               onClick={handleCreate}
               className="flex items-center gap-1.5 px-3 py-1.5 rounded-lg text-[12px] font-semibold disabled:opacity-40"
-              style={{ background: ACCENT, color: '#0a0a0a' }}
+              style={{ background: 'var(--accent)', color: '#0a0a0a' }}
             >
               <Plus size={12} />
               {createWorkspace.isPending ? 'Creating…' : 'Create workspace'}
@@ -194,7 +192,7 @@ const WorkspacesSection: React.FC = () => {
           type="button"
           onClick={() => setShowCreate(true)}
           className="flex items-center gap-1.5 px-3 py-1.5 rounded-lg text-[12px] font-semibold"
-          style={{ background: ACCENT, color: '#0a0a0a' }}
+          style={{ background: 'var(--accent)', color: '#0a0a0a' }}
         >
           <Plus size={12} />
           New workspace
@@ -220,7 +218,7 @@ const WorkspacesSection: React.FC = () => {
             <div key={ws.id} className="flex items-center gap-3 px-4 py-3">
               <span
                 className="h-3 w-3 rounded-full shrink-0"
-                style={{ background: ws.color || ACCENT }}
+                style={{ background: ws.color || 'var(--accent)' }}
               />
               <p className="text-[13px] font-medium flex-1" style={{ color: 'var(--flow-text)' }}>
                 {ws.name}
@@ -327,7 +325,7 @@ const NotificationsSection: React.FC = () => {
                 'focus-visible:ring-offset-2 focus-visible:ring-offset-[var(--flow-bg)]'
               )}
               style={{
-                background: settings[item.key] ? ACCENT : 'var(--flow-hover)',
+                background: settings[item.key] ? 'var(--accent)' : 'var(--flow-hover)',
               }}
             >
               <span
@@ -467,9 +465,9 @@ const AppearanceSection: React.FC = () => {
               onClick={() => setTheme(value)}
               className="p-3 rounded-xl border-2 text-[12px] font-medium transition-all text-center"
               style={{
-                borderColor: theme === value ? ACCENT : 'var(--flow-border)',
+                borderColor: theme === value ? 'var(--accent)' : 'var(--flow-border)',
                 background: 'var(--flow-card)',
-                color: theme === value ? ACCENT : 'var(--flow-text-muted)',
+                color: theme === value ? 'var(--accent)' : 'var(--flow-text-muted)',
               }}
             >
               <div className="w-full h-12 rounded-lg mb-2" style={{ background: preview }} />
@@ -487,9 +485,9 @@ const AppearanceSection: React.FC = () => {
           Accent color
         </label>
         <div className="flex items-center gap-2">
-          <span className="h-8 w-8 rounded-full" style={{ background: ACCENT }} />
+          <span className="h-8 w-8 rounded-full" style={{ background: 'var(--accent)' }} />
           <span className="text-[13px] font-mono" style={{ color: 'var(--flow-text)' }}>
-            {ACCENT}
+            {'var(--accent)'}
           </span>
           <span className="text-[11px]" style={{ color: 'var(--flow-text-dim)' }}>
             (Flow teal, from Voxire logo)
@@ -694,7 +692,7 @@ const LabelsSection: React.FC = () => {
           disabled={!newName.trim() || createLabel.isPending}
           onClick={handleCreate}
           className="flex items-center gap-1.5 px-3 py-1.5 rounded-lg text-[12px] font-semibold disabled:opacity-40"
-          style={{ background: ACCENT, color: '#0a0a0a' }}
+          style={{ background: 'var(--accent)', color: '#0a0a0a' }}
         >
           {createLabel.isPending ? 'Creating…' : 'Create label'}
         </button>
@@ -867,7 +865,7 @@ const TeamSection: React.FC = () => {
               disabled={!email.trim() || !fullName.trim() || invite.isPending}
               onClick={handleInvite}
               className="flex items-center gap-1.5 px-3 py-1.5 rounded-lg text-[12px] font-semibold disabled:opacity-40"
-              style={{ background: ACCENT, color: '#0a0a0a' }}
+              style={{ background: 'var(--accent)', color: '#0a0a0a' }}
             >
               <UserPlus size={12} />
               {invite.isPending ? 'Sending…' : 'Send invite'}
@@ -887,7 +885,7 @@ const TeamSection: React.FC = () => {
           type="button"
           onClick={() => setShowInvite(true)}
           className="flex items-center gap-1.5 px-3 py-1.5 rounded-lg text-[12px] font-semibold"
-          style={{ background: ACCENT, color: '#0a0a0a' }}
+          style={{ background: 'var(--accent)', color: '#0a0a0a' }}
         >
           <UserPlus size={12} />
           Invite member
@@ -919,7 +917,7 @@ const TeamSection: React.FC = () => {
             <div key={m.id} className="flex items-center gap-3 px-4 py-3">
               <div
                 className="h-8 w-8 rounded-full flex items-center justify-center text-[12px] font-semibold shrink-0"
-                style={{ background: ACCENT + '33', color: ACCENT }}
+                style={{ background: 'var(--accent-border)', color: 'var(--accent)' }}
               >
                 {m.name.charAt(0).toUpperCase()}
               </div>
@@ -1235,7 +1233,7 @@ const FlowSettings: React.FC = () => {
                   {isActive && (
                     <span
                       className="h-1.5 w-1.5 rounded-full shrink-0"
-                      style={{ background: ACCENT }}
+                      style={{ background: 'var(--accent)' }}
                     />
                   )}
                 </button>

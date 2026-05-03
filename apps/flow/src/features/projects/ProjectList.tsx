@@ -18,8 +18,6 @@ import { cn, formatDate } from '../../shared/lib/utils';
 import { useTasks, useUpdateTaskStatus } from '../tasks/useTasks';
 import { apiTaskToTask } from '../../shared/lib/taskMapper';
 
-const ACCENT = '#64C5B9';
-
 const PRIORITY_ICONS: Record<string, { color: string; label: string }> = {
   urgent: { color: '#ef4444', label: 'Urgent' },
   high: { color: '#f97316', label: 'High' },
@@ -73,8 +71,8 @@ const TaskRow: React.FC<TaskRowProps> = ({ task, depth = 0 }) => {
         onClick={handleToggle}
         className="h-4 w-4 rounded shrink-0 flex items-center justify-center transition-colors border"
         style={{
-          background: checked ? ACCENT : 'transparent',
-          borderColor: checked ? ACCENT : 'var(--flow-border)',
+          background: checked ? 'var(--accent)' : 'transparent',
+          borderColor: checked ? 'var(--accent)' : 'var(--flow-border)',
         }}
       >
         {checked && <Check size={10} strokeWidth={3} color="#0a0a0a" />}
@@ -109,7 +107,7 @@ const TaskRow: React.FC<TaskRowProps> = ({ task, depth = 0 }) => {
       {/* Assignee */}
       <span
         className="h-5 w-5 rounded-full flex items-center justify-center text-[9px] font-bold shrink-0"
-        style={{ background: `${ACCENT}22`, color: ACCENT }}
+        style={{ background: 'var(--accent-muted)', color: 'var(--accent)' }}
       >
         {task.assigneeInitials}
       </span>
@@ -272,8 +270,8 @@ const ProjectList: React.FC = () => {
           <button
             className="flex items-center gap-1.5 px-3 py-1.5 rounded-md text-[12px] font-medium transition-colors"
             style={{
-              background: `${ACCENT}18`,
-              color: ACCENT,
+              background: 'var(--accent-muted)',
+              color: 'var(--accent)',
             }}
           >
             <List size={13} />
