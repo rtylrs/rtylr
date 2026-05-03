@@ -1258,6 +1258,17 @@ func (r *Repository) TransferProjectOwnership(ctx context.Context, input domain.
 	return err
 }
 
+func (r *Repository) MoveProject(ctx context.Context, input domain.MoveProjectInput) error {
+	_, err := r.pool.ExecContext(ctx,
+		`UPDATE flow_projects SET workspace_id = ? WHERE id = ? AND owner_id = ?`,
+		input.WorkspaceID, input.ProjectID, input.CallerID,
+	)
+	if err != nil {
+		logger.Ctx(ctx).Error("MoveProject failed", logger.Error(err))
+	}
+	return err
+}
+
 func (r *Repository) GetUserWorkspaceRole(ctx context.Context, workspaceID, userID int64) (string, error) {
 	var role string
 	err := r.pool.QueryRowContext(ctx,

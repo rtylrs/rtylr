@@ -264,6 +264,11 @@ func RegisterRoutes(ctx context.Context, router *chi.Mux, flowService *applicati
 		&handlers.TransferProjectOwnershipHandler{FlowService: flowService},
 	)
 
+	http.RegisterPUTWithValidation[handlers.MoveProjectRequest, handlers.MoveProjectResponse](
+		ctx, router, handlers.MoveProjectRoutes(),
+		&handlers.MoveProjectHandler{FlowService: flowService},
+	)
+
 	http.RegisterPOSTWithValidation[handlers.InviteProjectMemberByEmailRequest, handlers.InviteProjectMemberByEmailResponse](
 		ctx, router, handlers.InviteProjectMemberByEmailRoutes(),
 		&handlers.InviteProjectMemberByEmailHandler{FlowService: flowService},

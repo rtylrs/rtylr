@@ -274,6 +274,54 @@ func (h *UpdateProjectHandler) Serve(ctx context.Context, req *UpdateProjectRequ
 }
 
 // ─────────────────────────────────────────────
+// PUT /flow/projects/move
+
+func MoveProjectRoutes() []string { return []string{"/flow/projects/move"} }
+
+type MoveProjectHandler struct {
+	FlowService *application.Service
+}
+
+type MoveProjectRequest struct {
+	ProjectID   JSONID `json:"project_id"`
+	WorkspaceID JSONID `json:"workspace_id"`
+}
+
+type MoveProjectResponse struct {
+	Message string `json:"message"`
+}
+
+func (h *MoveProjectHandler) Validate(_ context.Context, req *MoveProjectRequest) *errorModels.ServerError {
+	if req.ProjectID.IsZero() {
+		return &errorModels.ServerError{Code: http.StatusBadRequest, Message: "project_id is required"}
+	}
+	if req.WorkspaceID.IsZero() {
+		return &errorModels.ServerError{Code: http.StatusBadRequest, Message: "workspace_id is required"}
+	}
+	return nil
+}
+
+func (h *MoveProjectHandler) Serve(ctx context.Context, req *MoveProjectRequest) (MoveProjectResponse, *errorModels.ServerError) {
+	authUser, ok := authPkg.GetAuthUser(ctx)
+	if !ok {
+		return MoveProjectResponse{}, errorModels.PermissionDeniedServerError()
+	}
+
+	if err := h.FlowService.MoveProject(ctx, domain.MoveProjectInput{
+		ProjectID:   req.ProjectID.Int64(),
+		WorkspaceID: req.WorkspaceID.Int64(),
+		CallerID:    authUser.UserID,
+	}); err != nil {
+		return MoveProjectResponse{}, &errorModels.ServerError{
+			Code:    http.StatusInternalServerError,
+			Message: "Failed to move project",
+		}
+	}
+
+	return MoveProjectResponse{Message: "Project moved"}, nil
+}
+
+// ─────────────────────────────────────────────
 // DELETE /flow/projects
 // ─────────────────────────────────────────────
 

@@ -173,6 +173,10 @@ func (s *Service) TransferProjectOwnership(ctx context.Context, input domain.Tra
 	return s.repo.TransferProjectOwnership(ctx, input)
 }
 
+func (s *Service) MoveProject(ctx context.Context, input domain.MoveProjectInput) error {
+	return s.repo.MoveProject(ctx, input)
+}
+
 func (s *Service) InviteProjectMemberByEmail(ctx context.Context, projectID int64, email string, role string, addedBy int64) (bool, error) {
 	userID, found, err := s.repo.LookupUserByEmail(ctx, email)
 	if err != nil {
