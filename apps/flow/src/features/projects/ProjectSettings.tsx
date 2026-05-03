@@ -56,6 +56,8 @@ const ProjectSettings: React.FC = () => {
 
   const transferRef = useRef<HTMLSelectElement>(null);
   const [targetWorkspaceId, setTargetWorkspaceId] = useState('');
+  const [confirmMove, setConfirmMove] = useState(false);
+  const [confirmTransfer, setConfirmTransfer] = useState(false);
 
   const [showAddMember, setShowAddMember] = useState(false);
   const [newEmail, setNewEmail] = useState('');
@@ -349,7 +351,10 @@ const ProjectSettings: React.FC = () => {
                   <div className="flex gap-2">
                     <select
                       value={targetWorkspaceId}
-                      onChange={(e) => setTargetWorkspaceId(e.target.value)}
+                      onChange={(e) => {
+                        setTargetWorkspaceId(e.target.value);
+                        setConfirmMove(false);
+                      }}
                       className="flex-1 rounded px-2 py-1.5 text-[11px] outline-none"
                       style={{
                         background: 'var(--flow-input-bg)',
@@ -364,31 +369,59 @@ const ProjectSettings: React.FC = () => {
                         </option>
                       ))}
                     </select>
-                    <button
-                      onClick={() => {
-                        if (!targetWorkspaceId) return toast.error('Select a workspace');
-                        if (!window.confirm('Move project to this workspace?')) return;
-                        moveProject.mutate(
-                          {
-                            project_id: Number(projectId),
-                            workspace_id: Number(targetWorkspaceId),
-                          },
-                          {
-                            onSuccess: () => {
-                              toast.success('Project moved');
-                              navigate(`/w/${targetWorkspaceId}`);
-                            },
-                            onError: () => toast.error('Failed to move project'),
-                          }
-                        );
-                      }}
-                      disabled={moveProject.isPending}
-                      className="flex items-center gap-1 px-3 py-1.5 rounded text-[11px] font-semibold"
-                      style={{ background: 'var(--flow-hover)', color: 'var(--flow-text)' }}
-                    >
-                      <ArrowRightLeft size={10} /> {moveProject.isPending ? 'Moving…' : 'Move'}
-                    </button>
+                    {confirmMove ? (
+                      <>
+                        <button
+                          onClick={() => {
+                            moveProject.mutate(
+                              {
+                                project_id: Number(projectId),
+                                workspace_id: Number(targetWorkspaceId),
+                              },
+                              {
+                                onSuccess: () => {
+                                  toast.success('Project moved');
+                                  navigate(`/w/${targetWorkspaceId}`);
+                                },
+                                onError: () => {
+                                  toast.error('Failed to move project');
+                                  setConfirmMove(false);
+                                },
+                              }
+                            );
+                          }}
+                          disabled={moveProject.isPending}
+                          className="px-3 py-1.5 rounded text-[11px] font-semibold"
+                          style={{ background: '#ef4444', color: '#fff' }}
+                        >
+                          {moveProject.isPending ? 'Moving…' : 'Confirm'}
+                        </button>
+                        <button
+                          onClick={() => setConfirmMove(false)}
+                          className="px-3 py-1.5 rounded text-[11px]"
+                          style={{ color: 'var(--flow-text-muted)' }}
+                        >
+                          Cancel
+                        </button>
+                      </>
+                    ) : (
+                      <button
+                        onClick={() => {
+                          if (!targetWorkspaceId) return toast.error('Select a workspace');
+                          setConfirmMove(true);
+                        }}
+                        className="flex items-center gap-1 px-3 py-1.5 rounded text-[11px] font-semibold"
+                        style={{ background: 'var(--flow-hover)', color: 'var(--flow-text)' }}
+                      >
+                        <ArrowRightLeft size={10} /> Move
+                      </button>
+                    )}
                   </div>
+                  {confirmMove && (
+                    <p className="text-[11px] mt-1.5" style={{ color: '#f97316' }}>
+                      This will move the project and all its tasks. Click Confirm to proceed.
+                    </p>
+                  )}
                 </div>
               )}
 
@@ -407,6 +440,7 @@ const ProjectSettings: React.FC = () => {
                   <select
                     ref={transferRef}
                     id="transfer-select"
+                    onChange={() => setConfirmTransfer(false)}
                     className="flex-1 rounded px-2 py-1.5 text-[11px] outline-none"
                     style={{
                       background: 'var(--flow-input-bg)',
@@ -424,26 +458,58 @@ const ProjectSettings: React.FC = () => {
                       </option>
                     ))}
                   </select>
-                  <button
-                    onClick={() => {
-                      const newOwnerId = Number(transferRef.current?.value);
-                      if (!newOwnerId) return toast.error('Select a member');
-                      if (!window.confirm('Transfer ownership? This cannot be undone.')) return;
-                      transferOwnership.mutate(
-                        { project_id: Number(projectId), new_owner_id: newOwnerId },
-                        {
-                          onSuccess: () => toast.success('Ownership transferred'),
-                          onError: () => toast.error('Failed'),
-                        }
-                      );
-                    }}
-                    disabled={transferOwnership.isPending}
-                    className="flex items-center gap-1 px-3 py-1.5 rounded text-[11px] font-semibold"
-                    style={{ background: 'var(--flow-hover)', color: 'var(--flow-text)' }}
-                  >
-                    <ArrowRightLeft size={10} /> Transfer
-                  </button>
+                  {confirmTransfer ? (
+                    <>
+                      <button
+                        onClick={() => {
+                          const newOwnerId = Number(transferRef.current?.value);
+                          transferOwnership.mutate(
+                            { project_id: Number(projectId), new_owner_id: newOwnerId },
+                            {
+                              onSuccess: () => {
+                                toast.success('Ownership transferred');
+                                setConfirmTransfer(false);
+                              },
+                              onError: () => {
+                                toast.error('Failed');
+                                setConfirmTransfer(false);
+                              },
+                            }
+                          );
+                        }}
+                        disabled={transferOwnership.isPending}
+                        className="px-3 py-1.5 rounded text-[11px] font-semibold"
+                        style={{ background: '#ef4444', color: '#fff' }}
+                      >
+                        {transferOwnership.isPending ? 'Transferring…' : 'Confirm'}
+                      </button>
+                      <button
+                        onClick={() => setConfirmTransfer(false)}
+                        className="px-3 py-1.5 rounded text-[11px]"
+                        style={{ color: 'var(--flow-text-muted)' }}
+                      >
+                        Cancel
+                      </button>
+                    </>
+                  ) : (
+                    <button
+                      onClick={() => {
+                        const newOwnerId = Number(transferRef.current?.value);
+                        if (!newOwnerId) return toast.error('Select a member');
+                        setConfirmTransfer(true);
+                      }}
+                      className="flex items-center gap-1 px-3 py-1.5 rounded text-[11px] font-semibold"
+                      style={{ background: 'var(--flow-hover)', color: 'var(--flow-text)' }}
+                    >
+                      <ArrowRightLeft size={10} /> Transfer
+                    </button>
+                  )}
                 </div>
+                {confirmTransfer && (
+                  <p className="text-[11px] mt-1.5" style={{ color: '#f97316' }}>
+                    Ownership will transfer immediately. Click Confirm to proceed.
+                  </p>
+                )}
               </div>
             </div>
           </div>
