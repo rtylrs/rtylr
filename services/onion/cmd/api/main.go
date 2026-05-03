@@ -73,6 +73,7 @@ import (
 	"github.com/voxire/onion/internal/modules/memory"
 	"github.com/voxire/onion/internal/modules/milestones"
 	"github.com/voxire/onion/internal/modules/notifications"
+	"github.com/voxire/onion/internal/modules/oauth"
 	oneonones "github.com/voxire/onion/internal/modules/one_on_ones"
 	"github.com/voxire/onion/internal/modules/payroll"
 	posaudit "github.com/voxire/onion/internal/modules/pos_audit"
@@ -360,6 +361,7 @@ type apiModules struct {
 	Memory               *memory.Module
 	Milestones           *milestones.Module
 	Notifications        *notifications.Module
+	OAuth                *oauth.Module
 	OneOnOnes            *oneonones.Module
 	Payroll              *payroll.Module
 	PosAudit             *posaudit.Module
@@ -492,6 +494,7 @@ func initializeModules(ctx context.Context) *apiModules {
 		Memory:               memoryModule,
 		Milestones:           milestones.NewModule(ctx),
 		Notifications:        notifications.NewModule(ctx),
+		OAuth:                oauth.NewModule(ctx),
 		OneOnOnes:            oneonones.NewModule(ctx),
 		Payroll:              payroll.NewModule(ctx),
 		PosAudit:             posaudit.NewModule(ctx),
