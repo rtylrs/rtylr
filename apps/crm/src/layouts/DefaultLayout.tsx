@@ -5,7 +5,7 @@ import { toast } from 'sonner';
 import { motion, AnimatePresence } from 'motion/react';
 import { APP_URLS } from '@voxire/config';
 import { removeCookie, getDefaultCookieDomain, useUserStore } from '@voxire/auth';
-import { CaretPanel, CaretButton } from '@voxire/caret';
+import { CaretPanel, CaretButton, useCaretStore } from '@voxire/caret';
 import { useQuery } from '@tanstack/react-query';
 import {
   LayoutDashboard,
@@ -189,6 +189,7 @@ const DefaultLayout: React.FC = () => {
   const sidebarRef = useRef<HTMLElement | null>(null);
   const crmUser = useUserStore((s) => s.user);
   const userId = Number(crmUser?.id) || 0;
+  const { isOpen: caretOpen } = useCaretStore();
   const salesPipelineEnabled = useAddonEnabled('sales_pipeline');
 
   useForesightLinks(sidebarRef, {
@@ -535,112 +536,129 @@ const DefaultLayout: React.FC = () => {
           </div>
         </aside>
 
-        {/* Main area */}
-        <div className="flex flex-col flex-1 overflow-hidden pt-11 md:pt-0">
-          {/* Topbar */}
-          <header
-            className="hidden md:flex"
-            style={{
-              height: '44px',
-              alignItems: 'center',
-              justifyContent: 'space-between',
-              padding: '0 24px',
-              flexShrink: 0,
-              background: 'var(--hub-surface)',
-              borderBottom: '1px solid var(--hub-border)',
-            }}
-          >
-            <h1 style={{ fontSize: '14px', fontWeight: 600, color: 'var(--hub-text)', margin: 0 }}>
-              {pageTitle}
-            </h1>
-            <div style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
-              <button
-                onClick={openPalette}
-                style={{
-                  height: '28px',
-                  padding: '0 10px',
-                  borderRadius: '8px',
-                  display: 'flex',
-                  alignItems: 'center',
-                  gap: '8px',
-                  background: 'var(--hub-input-bg)',
-                  border: '1px solid var(--hub-border)',
-                  cursor: 'pointer',
-                  color: 'var(--hub-text-muted)',
-                  fontSize: '12px',
-                  transition: 'all 0.15s',
-                }}
-              >
-                <Search size={12} />
-                <span>Search...</span>
-                <kbd
-                  style={{
-                    fontSize: '9px',
-                    padding: '1px 5px',
-                    borderRadius: '3px',
-                    border: '1px solid var(--hub-border)',
-                    background: 'var(--hub-card)',
-                    color: 'var(--hub-text-dim)',
-                  }}
-                >
-                  ⌘K
-                </kbd>
-              </button>
-              <button
-                aria-label="Notifications"
-                onClick={() => toast.info('Notifications coming soon')}
-                style={{
-                  height: '28px',
-                  width: '28px',
-                  borderRadius: '8px',
-                  display: 'flex',
-                  alignItems: 'center',
-                  justifyContent: 'center',
-                  background: 'transparent',
-                  border: 'none',
-                  cursor: 'pointer',
-                  color: 'var(--hub-text-muted)',
-                  transition: 'background 0.15s',
-                }}
-                onMouseEnter={(e) => {
-                  (e.currentTarget as HTMLElement).style.background = 'var(--hub-hover)';
-                }}
-                onMouseLeave={(e) => {
-                  (e.currentTarget as HTMLElement).style.background = 'transparent';
-                }}
-              >
-                <Bell size={14} />
-              </button>
-              <CaretButton />
-            </div>
-          </header>
-
-          {/* Content */}
-          <TrialBanner />
-          <AnimatePresence mode="wait">
-            <motion.main
-              key={location.pathname}
-              initial={{ opacity: 0, y: 6 }}
-              animate={{ opacity: 1, y: 0 }}
-              exit={{ opacity: 0, y: -4 }}
-              transition={{ duration: 0.18, ease: 'easeOut' }}
+        {/* Main content + Caret AI inline column */}
+        <div className="flex flex-1 overflow-hidden">
+          {/* Main area */}
+          <div className="flex flex-col flex-1 overflow-hidden pt-11 md:pt-0">
+            {/* Topbar */}
+            <header
+              className="hidden md:flex"
               style={{
-                flex: 1,
-                overflowY: 'auto',
-                padding: '24px',
+                height: '44px',
+                alignItems: 'center',
+                justifyContent: 'space-between',
+                padding: '0 24px',
+                flexShrink: 0,
+                background: 'var(--hub-surface)',
+                borderBottom: '1px solid var(--hub-border)',
               }}
             >
-              <Outlet />
-            </motion.main>
-          </AnimatePresence>
+              <h1
+                style={{ fontSize: '14px', fontWeight: 600, color: 'var(--hub-text)', margin: 0 }}
+              >
+                {pageTitle}
+              </h1>
+              <div style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
+                <button
+                  onClick={openPalette}
+                  style={{
+                    height: '28px',
+                    padding: '0 10px',
+                    borderRadius: '8px',
+                    display: 'flex',
+                    alignItems: 'center',
+                    gap: '8px',
+                    background: 'var(--hub-input-bg)',
+                    border: '1px solid var(--hub-border)',
+                    cursor: 'pointer',
+                    color: 'var(--hub-text-muted)',
+                    fontSize: '12px',
+                    transition: 'all 0.15s',
+                  }}
+                >
+                  <Search size={12} />
+                  <span>Search...</span>
+                  <kbd
+                    style={{
+                      fontSize: '9px',
+                      padding: '1px 5px',
+                      borderRadius: '3px',
+                      border: '1px solid var(--hub-border)',
+                      background: 'var(--hub-card)',
+                      color: 'var(--hub-text-dim)',
+                    }}
+                  >
+                    ⌘K
+                  </kbd>
+                </button>
+                <button
+                  aria-label="Notifications"
+                  onClick={() => toast.info('Notifications coming soon')}
+                  style={{
+                    height: '28px',
+                    width: '28px',
+                    borderRadius: '8px',
+                    display: 'flex',
+                    alignItems: 'center',
+                    justifyContent: 'center',
+                    background: 'transparent',
+                    border: 'none',
+                    cursor: 'pointer',
+                    color: 'var(--hub-text-muted)',
+                    transition: 'background 0.15s',
+                  }}
+                  onMouseEnter={(e) => {
+                    (e.currentTarget as HTMLElement).style.background = 'var(--hub-hover)';
+                  }}
+                  onMouseLeave={(e) => {
+                    (e.currentTarget as HTMLElement).style.background = 'transparent';
+                  }}
+                >
+                  <Bell size={14} />
+                </button>
+                <CaretButton />
+              </div>
+            </header>
+
+            {/* Content */}
+            <TrialBanner />
+            <AnimatePresence mode="wait">
+              <motion.main
+                key={location.pathname}
+                initial={{ opacity: 0, y: 6 }}
+                animate={{ opacity: 1, y: 0 }}
+                exit={{ opacity: 0, y: -4 }}
+                transition={{ duration: 0.18, ease: 'easeOut' }}
+                style={{
+                  flex: 1,
+                  overflowY: 'auto',
+                  padding: '24px',
+                }}
+              >
+                <Outlet />
+              </motion.main>
+            </AnimatePresence>
+          </div>
+
+          {/* Caret AI — inline third column, pushes content left */}
+          <div
+            style={{
+              width: caretOpen ? '360px' : '0px',
+              flexShrink: 0,
+              overflow: 'hidden',
+              transition: 'width 0.25s cubic-bezier(0.4, 0, 0.2, 1)',
+            }}
+          >
+            <CaretPanel
+              variant="inline"
+              appId="crm"
+              userId={userId}
+              apiBaseUrl={import.meta.env.VITE_API_URL ?? 'https://api.voxire.dev/'}
+              systemContext="User is in the CRM app (customers, loyalty, campaigns, segments)"
+            />
+          </div>
         </div>
       </div>
-      <CaretPanel
-        appId="crm"
-        userId={userId}
-        apiBaseUrl={import.meta.env.VITE_API_URL ?? 'https://api.voxire.dev/'}
-        systemContext="User is in the CRM app (customers, loyalty, campaigns, segments)"
-      />
     </>
   );
 };

@@ -1,6 +1,6 @@
 import React, { useEffect, useRef, useState } from 'react';
 import { useUserStore } from '@voxire/auth';
-import { CaretPanel, CaretButton } from '@voxire/caret';
+import { CaretPanel, CaretButton, useCaretStore } from '@voxire/caret';
 import TrialBanner from '../shared/components/TrialBanner';
 import { useForesightLinks } from '@voxire/utils';
 import { useLocation, useNavigate, Link, Outlet } from 'react-router-dom';
@@ -196,6 +196,7 @@ const DefaultLayout: React.FC = () => {
   const sidebarRef = useRef<HTMLElement | null>(null);
   const financeUser = useUserStore((s) => s.user);
   const userId = Number(financeUser?.id) || 0;
+  const { isOpen: caretOpen } = useCaretStore();
 
   useForesightLinks(sidebarRef, {
     '/': () => import('../features/dashboard/Dashboard'),
@@ -406,85 +407,100 @@ const DefaultLayout: React.FC = () => {
           </div>
         </aside>
 
-        <div style={{ display: 'flex', flexDirection: 'column', flex: 1, overflow: 'hidden' }}>
-          <header
+        {/* Main content + Caret AI inline column */}
+        <div style={{ display: 'flex', flex: 1, overflow: 'hidden' }}>
+          <div style={{ display: 'flex', flexDirection: 'column', flex: 1, overflow: 'hidden' }}>
+            <header
+              style={{
+                height: 44,
+                display: 'flex',
+                alignItems: 'center',
+                justifyContent: 'space-between',
+                padding: '0 24px',
+                flexShrink: 0,
+                background: 'var(--hub-surface)',
+                borderBottom: '1px solid var(--hub-border)',
+              }}
+            >
+              <h1 style={{ margin: 0, fontSize: 13, fontWeight: 600, color: 'var(--hub-text)' }}>
+                {pageTitle}
+              </h1>
+              <div style={{ display: 'flex', alignItems: 'center', gap: 4 }}>
+                <button
+                  onClick={() => setSearchOpen(true)}
+                  style={{
+                    height: 28,
+                    width: 28,
+                    borderRadius: 8,
+                    display: 'flex',
+                    alignItems: 'center',
+                    justifyContent: 'center',
+                    background: 'transparent',
+                    border: 'none',
+                    cursor: 'pointer',
+                    color: 'var(--hub-text-muted)',
+                  }}
+                >
+                  <SearchIcon size={14} />
+                </button>
+                <button
+                  onClick={() => toast.info('Notifications coming soon')}
+                  aria-label="Notifications"
+                  style={{
+                    height: 28,
+                    width: 28,
+                    borderRadius: 8,
+                    display: 'flex',
+                    alignItems: 'center',
+                    justifyContent: 'center',
+                    background: 'transparent',
+                    border: 'none',
+                    cursor: 'pointer',
+                    color: 'var(--hub-text-muted)',
+                  }}
+                >
+                  <Bell size={14} />
+                </button>
+                <CaretButton />
+              </div>
+            </header>
+
+            <TrialBanner />
+            <AnimatePresence mode="wait">
+              <motion.main
+                key={location.pathname}
+                initial={{ opacity: 0, y: 6 }}
+                animate={{ opacity: 1, y: 0 }}
+                exit={{ opacity: 0, y: -4 }}
+                transition={{ duration: 0.18, ease: 'easeOut' }}
+                style={{ flex: 1, overflowY: 'auto', padding: 24 }}
+              >
+                <Outlet />
+              </motion.main>
+            </AnimatePresence>
+          </div>
+
+          {/* Caret AI — inline third column, pushes content left */}
+          <div
             style={{
-              height: 44,
-              display: 'flex',
-              alignItems: 'center',
-              justifyContent: 'space-between',
-              padding: '0 24px',
+              width: caretOpen ? '360px' : '0px',
               flexShrink: 0,
-              background: 'var(--hub-surface)',
-              borderBottom: '1px solid var(--hub-border)',
+              overflow: 'hidden',
+              transition: 'width 0.25s cubic-bezier(0.4, 0, 0.2, 1)',
             }}
           >
-            <h1 style={{ margin: 0, fontSize: 13, fontWeight: 600, color: 'var(--hub-text)' }}>
-              {pageTitle}
-            </h1>
-            <div style={{ display: 'flex', alignItems: 'center', gap: 4 }}>
-              <button
-                onClick={() => setSearchOpen(true)}
-                style={{
-                  height: 28,
-                  width: 28,
-                  borderRadius: 8,
-                  display: 'flex',
-                  alignItems: 'center',
-                  justifyContent: 'center',
-                  background: 'transparent',
-                  border: 'none',
-                  cursor: 'pointer',
-                  color: 'var(--hub-text-muted)',
-                }}
-              >
-                <SearchIcon size={14} />
-              </button>
-              <button
-                onClick={() => toast.info('Notifications coming soon')}
-                aria-label="Notifications"
-                style={{
-                  height: 28,
-                  width: 28,
-                  borderRadius: 8,
-                  display: 'flex',
-                  alignItems: 'center',
-                  justifyContent: 'center',
-                  background: 'transparent',
-                  border: 'none',
-                  cursor: 'pointer',
-                  color: 'var(--hub-text-muted)',
-                }}
-              >
-                <Bell size={14} />
-              </button>
-              <CaretButton />
-            </div>
-          </header>
-
-          <TrialBanner />
-          <AnimatePresence mode="wait">
-            <motion.main
-              key={location.pathname}
-              initial={{ opacity: 0, y: 6 }}
-              animate={{ opacity: 1, y: 0 }}
-              exit={{ opacity: 0, y: -4 }}
-              transition={{ duration: 0.18, ease: 'easeOut' }}
-              style={{ flex: 1, overflowY: 'auto', padding: 24 }}
-            >
-              <Outlet />
-            </motion.main>
-          </AnimatePresence>
+            <CaretPanel
+              variant="inline"
+              appId="finance"
+              userId={userId}
+              apiBaseUrl={import.meta.env.VITE_API_URL ?? 'https://api.voxire.dev/'}
+              systemContext="User is in the Finance app (invoices, expenses, bills, P&L, tax)"
+            />
+          </div>
         </div>
 
         <GlobalSearch open={searchOpen} onClose={() => setSearchOpen(false)} />
       </div>
-      <CaretPanel
-        appId="finance"
-        userId={userId}
-        apiBaseUrl={import.meta.env.VITE_API_URL ?? 'https://api.voxire.dev/'}
-        systemContext="User is in the Finance app (invoices, expenses, bills, P&L, tax)"
-      />
     </>
   );
 };

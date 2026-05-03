@@ -5,7 +5,7 @@ import { useLocation, Link, useNavigate } from 'react-router-dom';
 import { motion, AnimatePresence } from 'motion/react';
 import { APP_URLS } from '@voxire/config';
 import { removeCookie, getDefaultCookieDomain, useUserStore } from '@voxire/auth';
-import { CaretPanel, CaretButton } from '@voxire/caret';
+import { CaretPanel, CaretButton, useCaretStore } from '@voxire/caret';
 import {
   LayoutDashboard,
   Package,
@@ -229,6 +229,7 @@ const DefaultLayout: React.FC<DefaultLayoutProps> = ({ children }) => {
 
   const erpUser = useUserStore((s) => s.user);
   const userId = Number(erpUser?.id) || 0;
+  const { isOpen: caretOpen } = useCaretStore();
   const pageTitle = getPageTitle(location.pathname);
 
   useEffect(() => {
@@ -534,91 +535,112 @@ const DefaultLayout: React.FC<DefaultLayoutProps> = ({ children }) => {
           </div>
         </aside>
 
-        <div className="flex flex-col flex-1 overflow-hidden pt-11 md:pt-0">
-          <header
-            className="hidden md:flex h-11 items-center justify-between px-6 shrink-0"
+        {/* Main content + Caret AI inline column */}
+        <div className="flex flex-1 overflow-hidden">
+          <div className="flex flex-col flex-1 overflow-hidden pt-11 md:pt-0">
+            <header
+              className="hidden md:flex h-11 items-center justify-between px-6 shrink-0"
+              style={{
+                background: 'var(--hub-surface)',
+                borderBottom: '1px solid var(--hub-border)',
+              }}
+            >
+              <h1 className="text-sm font-semibold" style={{ color: 'var(--hub-text)' }}>
+                {pageTitle}
+              </h1>
+              <div className="flex items-center gap-1">
+                <button
+                  onClick={() => setPaletteOpen(true)}
+                  className="flex items-center gap-2 h-7 px-3 rounded-lg text-xs"
+                  style={{
+                    background: 'var(--hub-hover)',
+                    color: 'var(--hub-text-muted)',
+                    border: '1px solid var(--hub-border)',
+                  }}
+                >
+                  <SearchIcon size={11} />
+                  <span>Search...</span>
+                  <kbd
+                    className="text-[9px] font-mono px-1 py-0.5 rounded"
+                    style={{ background: 'var(--hub-active)', color: 'var(--hub-text-dim)' }}
+                  >
+                    cmd+k
+                  </kbd>
+                </button>
+                <button
+                  onClick={() => handleSetTheme(theme === 'dark' ? 'light' : 'dark')}
+                  className="h-7 w-7 rounded-lg flex items-center justify-center"
+                  style={{ color: 'var(--hub-text-muted)' }}
+                  onMouseEnter={(e) => {
+                    (e.currentTarget as HTMLElement).style.background = 'var(--hub-hover)';
+                  }}
+                  onMouseLeave={(e) => {
+                    (e.currentTarget as HTMLElement).style.background = 'transparent';
+                  }}
+                >
+                  {theme === 'dark' ? <Sun size={14} /> : <Moon size={14} />}
+                </button>
+                <button
+                  onClick={() => setShortcutsOpen(true)}
+                  className="h-7 w-7 rounded-lg flex items-center justify-center"
+                  style={{ color: 'var(--hub-text-muted)' }}
+                  onMouseEnter={(e) => {
+                    (e.currentTarget as HTMLElement).style.background = 'var(--hub-hover)';
+                  }}
+                  onMouseLeave={(e) => {
+                    (e.currentTarget as HTMLElement).style.background = 'transparent';
+                  }}
+                >
+                  <Keyboard size={14} />
+                </button>
+                <button
+                  className="h-7 w-7 rounded-lg flex items-center justify-center transition-colors duration-150"
+                  style={{ color: 'var(--hub-text-muted)' }}
+                  onMouseEnter={(e) => {
+                    (e.currentTarget as HTMLElement).style.background = 'var(--hub-hover)';
+                  }}
+                  onMouseLeave={(e) => {
+                    (e.currentTarget as HTMLElement).style.background = 'transparent';
+                  }}
+                >
+                  <Bell size={14} />
+                </button>
+                <CaretButton />
+              </div>
+            </header>
+
+            <TrialBanner />
+            <AnimatePresence mode="wait">
+              <motion.main
+                key={location.pathname}
+                initial={{ opacity: 0, y: 6 }}
+                animate={{ opacity: 1, y: 0 }}
+                exit={{ opacity: 0, y: -4 }}
+                transition={{ duration: 0.18, ease: 'easeOut' }}
+                className="flex-1 overflow-y-auto p-6"
+              >
+                {children}
+              </motion.main>
+            </AnimatePresence>
+          </div>
+
+          {/* Caret AI — inline third column, pushes content left */}
+          <div
             style={{
-              background: 'var(--hub-surface)',
-              borderBottom: '1px solid var(--hub-border)',
+              width: caretOpen ? '360px' : '0px',
+              flexShrink: 0,
+              overflow: 'hidden',
+              transition: 'width 0.25s cubic-bezier(0.4, 0, 0.2, 1)',
             }}
           >
-            <h1 className="text-sm font-semibold" style={{ color: 'var(--hub-text)' }}>
-              {pageTitle}
-            </h1>
-            <div className="flex items-center gap-1">
-              <button
-                onClick={() => setPaletteOpen(true)}
-                className="flex items-center gap-2 h-7 px-3 rounded-lg text-xs"
-                style={{
-                  background: 'var(--hub-hover)',
-                  color: 'var(--hub-text-muted)',
-                  border: '1px solid var(--hub-border)',
-                }}
-              >
-                <SearchIcon size={11} />
-                <span>Search...</span>
-                <kbd
-                  className="text-[9px] font-mono px-1 py-0.5 rounded"
-                  style={{ background: 'var(--hub-active)', color: 'var(--hub-text-dim)' }}
-                >
-                  cmd+k
-                </kbd>
-              </button>
-              <button
-                onClick={() => handleSetTheme(theme === 'dark' ? 'light' : 'dark')}
-                className="h-7 w-7 rounded-lg flex items-center justify-center"
-                style={{ color: 'var(--hub-text-muted)' }}
-                onMouseEnter={(e) => {
-                  (e.currentTarget as HTMLElement).style.background = 'var(--hub-hover)';
-                }}
-                onMouseLeave={(e) => {
-                  (e.currentTarget as HTMLElement).style.background = 'transparent';
-                }}
-              >
-                {theme === 'dark' ? <Sun size={14} /> : <Moon size={14} />}
-              </button>
-              <button
-                onClick={() => setShortcutsOpen(true)}
-                className="h-7 w-7 rounded-lg flex items-center justify-center"
-                style={{ color: 'var(--hub-text-muted)' }}
-                onMouseEnter={(e) => {
-                  (e.currentTarget as HTMLElement).style.background = 'var(--hub-hover)';
-                }}
-                onMouseLeave={(e) => {
-                  (e.currentTarget as HTMLElement).style.background = 'transparent';
-                }}
-              >
-                <Keyboard size={14} />
-              </button>
-              <button
-                className="h-7 w-7 rounded-lg flex items-center justify-center transition-colors duration-150"
-                style={{ color: 'var(--hub-text-muted)' }}
-                onMouseEnter={(e) => {
-                  (e.currentTarget as HTMLElement).style.background = 'var(--hub-hover)';
-                }}
-                onMouseLeave={(e) => {
-                  (e.currentTarget as HTMLElement).style.background = 'transparent';
-                }}
-              >
-                <Bell size={14} />
-              </button>
-              <CaretButton />
-            </div>
-          </header>
-
-          <TrialBanner />
-          <AnimatePresence mode="wait">
-            <motion.main
-              key={location.pathname}
-              initial={{ opacity: 0, y: 6 }}
-              animate={{ opacity: 1, y: 0 }}
-              exit={{ opacity: 0, y: -4 }}
-              transition={{ duration: 0.18, ease: 'easeOut' }}
-              className="flex-1 overflow-y-auto p-6"
-            >
-              {children}
-            </motion.main>
-          </AnimatePresence>
+            <CaretPanel
+              variant="inline"
+              appId="erp"
+              userId={userId}
+              apiBaseUrl={import.meta.env.VITE_API_URL ?? 'https://api.voxire.dev/'}
+              systemContext="User is in the ERP app (inventory, products, suppliers, purchasing)"
+            />
+          </div>
         </div>
 
         <CommandPalette open={paletteOpen} onClose={() => setPaletteOpen(false)} />
@@ -632,12 +654,6 @@ const DefaultLayout: React.FC<DefaultLayoutProps> = ({ children }) => {
           closeButton
         />
       </div>
-      <CaretPanel
-        appId="erp"
-        userId={userId}
-        apiBaseUrl={import.meta.env.VITE_API_URL ?? 'https://api.voxire.dev/'}
-        systemContext="User is in the ERP app (inventory, products, suppliers, purchasing)"
-      />
     </>
   );
 };

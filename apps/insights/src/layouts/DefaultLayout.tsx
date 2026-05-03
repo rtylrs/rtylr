@@ -4,7 +4,7 @@ import { useForesightLinks } from '@voxire/utils';
 import { motion, AnimatePresence } from 'motion/react';
 import { APP_URLS } from '@voxire/config';
 import { removeCookie, getDefaultCookieDomain, useUserStore } from '@voxire/auth';
-import { CaretPanel, CaretButton } from '@voxire/caret';
+import { CaretPanel, CaretButton, useCaretStore } from '@voxire/caret';
 import {
   LayoutDashboard,
   TrendingUp,
@@ -139,6 +139,7 @@ const DefaultLayout: React.FC<DefaultLayoutProps> = ({ children }) => {
   const insightsUser = useUserStore((s) => s.user);
   const userId = Number(insightsUser?.id) || 0;
 
+  const { isOpen: caretOpen } = useCaretStore();
   const pageTitle = getPageTitle(location.pathname);
   const sidebarRef = useRef<HTMLElement | null>(null);
 
@@ -380,59 +381,80 @@ const DefaultLayout: React.FC<DefaultLayoutProps> = ({ children }) => {
           </div>
         </aside>
 
-        <div className="flex flex-col flex-1 overflow-hidden pt-11 md:pt-0">
-          <header
-            className="hidden md:flex h-11 items-center justify-between px-6 shrink-0"
+        {/* Main content + Caret AI inline column */}
+        <div className="flex flex-1 overflow-hidden">
+          <div className="flex flex-col flex-1 overflow-hidden pt-11 md:pt-0">
+            <header
+              className="hidden md:flex h-11 items-center justify-between px-6 shrink-0"
+              style={{
+                background: 'var(--hub-surface)',
+                borderBottom: '1px solid var(--hub-border)',
+              }}
+            >
+              <h1 className="text-sm font-semibold" style={{ color: 'var(--hub-text)' }}>
+                {pageTitle}
+              </h1>
+              <div className="flex items-center gap-1">
+                <button
+                  onClick={() => handleSetTheme(theme === 'dark' ? 'light' : 'dark')}
+                  className="h-7 w-7 rounded-lg flex items-center justify-center"
+                  style={{ color: 'var(--hub-text-muted)' }}
+                  onMouseEnter={(e) => {
+                    (e.currentTarget as HTMLElement).style.background = 'var(--hub-hover)';
+                  }}
+                  onMouseLeave={(e) => {
+                    (e.currentTarget as HTMLElement).style.background = 'transparent';
+                  }}
+                >
+                  {theme === 'dark' ? <Sun size={14} /> : <Moon size={14} />}
+                </button>
+                <button
+                  className="h-7 w-7 rounded-lg flex items-center justify-center transition-colors duration-150"
+                  style={{ color: 'var(--hub-text-muted)' }}
+                  onMouseEnter={(e) => {
+                    (e.currentTarget as HTMLElement).style.background = 'var(--hub-hover)';
+                  }}
+                  onMouseLeave={(e) => {
+                    (e.currentTarget as HTMLElement).style.background = 'transparent';
+                  }}
+                >
+                  <Bell size={14} />
+                </button>
+                <CaretButton />
+              </div>
+            </header>
+
+            <AnimatePresence mode="wait">
+              <motion.main
+                key={location.pathname}
+                initial={{ opacity: 0, y: 6 }}
+                animate={{ opacity: 1, y: 0 }}
+                exit={{ opacity: 0, y: -4 }}
+                transition={{ duration: 0.18, ease: 'easeOut' }}
+                className="flex-1 overflow-y-auto p-6"
+              >
+                {children}
+              </motion.main>
+            </AnimatePresence>
+          </div>
+
+          {/* Caret AI — inline third column, pushes content left */}
+          <div
             style={{
-              background: 'var(--hub-surface)',
-              borderBottom: '1px solid var(--hub-border)',
+              width: caretOpen ? '360px' : '0px',
+              flexShrink: 0,
+              overflow: 'hidden',
+              transition: 'width 0.25s cubic-bezier(0.4, 0, 0.2, 1)',
             }}
           >
-            <h1 className="text-sm font-semibold" style={{ color: 'var(--hub-text)' }}>
-              {pageTitle}
-            </h1>
-            <div className="flex items-center gap-1">
-              <button
-                onClick={() => handleSetTheme(theme === 'dark' ? 'light' : 'dark')}
-                className="h-7 w-7 rounded-lg flex items-center justify-center"
-                style={{ color: 'var(--hub-text-muted)' }}
-                onMouseEnter={(e) => {
-                  (e.currentTarget as HTMLElement).style.background = 'var(--hub-hover)';
-                }}
-                onMouseLeave={(e) => {
-                  (e.currentTarget as HTMLElement).style.background = 'transparent';
-                }}
-              >
-                {theme === 'dark' ? <Sun size={14} /> : <Moon size={14} />}
-              </button>
-              <button
-                className="h-7 w-7 rounded-lg flex items-center justify-center transition-colors duration-150"
-                style={{ color: 'var(--hub-text-muted)' }}
-                onMouseEnter={(e) => {
-                  (e.currentTarget as HTMLElement).style.background = 'var(--hub-hover)';
-                }}
-                onMouseLeave={(e) => {
-                  (e.currentTarget as HTMLElement).style.background = 'transparent';
-                }}
-              >
-                <Bell size={14} />
-              </button>
-              <CaretButton />
-            </div>
-          </header>
-
-          <AnimatePresence mode="wait">
-            <motion.main
-              key={location.pathname}
-              initial={{ opacity: 0, y: 6 }}
-              animate={{ opacity: 1, y: 0 }}
-              exit={{ opacity: 0, y: -4 }}
-              transition={{ duration: 0.18, ease: 'easeOut' }}
-              className="flex-1 overflow-y-auto p-6"
-            >
-              {children}
-            </motion.main>
-          </AnimatePresence>
+            <CaretPanel
+              variant="inline"
+              appId="insights"
+              userId={userId}
+              apiBaseUrl={import.meta.env.VITE_API_URL ?? 'https://api.voxire.dev/'}
+              systemContext="User is in the Insights app (analytics and reporting)"
+            />
+          </div>
         </div>
 
         <Toaster
@@ -442,12 +464,6 @@ const DefaultLayout: React.FC<DefaultLayoutProps> = ({ children }) => {
           closeButton
         />
       </div>
-      <CaretPanel
-        appId="insights"
-        userId={userId}
-        apiBaseUrl={import.meta.env.VITE_API_URL ?? 'https://api.voxire.dev/'}
-        systemContext="User is in the Insights app (analytics and reporting)"
-      />
     </>
   );
 };
