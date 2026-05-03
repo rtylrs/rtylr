@@ -826,7 +826,7 @@ const FlowLayout: React.FC<FlowLayoutProps> = ({ children }) => {
             style={{ borderTop: '1px solid var(--flow-border)' }}
           >
             <SidebarLink to="/settings" icon={Settings} label="Settings" />
-            <CaretButton className="w-full justify-center" />
+            <CaretButton className="w-full justify-start" />
 
             <div className="relative">
               <button
