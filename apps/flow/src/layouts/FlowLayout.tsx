@@ -239,9 +239,13 @@ const FlowLayout: React.FC<FlowLayoutProps> = ({ children }) => {
   };
 
   // Effective workspace list: prefer live API data, fall back to store, guarantee Personal.
+  // Always map through apiWorkspaceToWorkspace so IDs are strings — URL params are strings
+  // and === comparisons would silently fail against numeric API IDs.
   const liveWorkspaces = useMemo<Workspace[]>(() => {
     const list =
-      apiWorkspaces && apiWorkspaces.length > 0 ? (apiWorkspaces as Workspace[]) : workspaces;
+      apiWorkspaces && apiWorkspaces.length > 0
+        ? apiWorkspaces.map(apiWorkspaceToWorkspace)
+        : workspaces;
     if (list.length === 0) return workspacesLoading ? [] : [PERSONAL_FALLBACK];
     return list;
     // eslint-disable-next-line react-hooks/exhaustive-deps

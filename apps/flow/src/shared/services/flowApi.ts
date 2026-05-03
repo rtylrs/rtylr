@@ -363,6 +363,9 @@ export const flowApi = {
   transferProjectOwnership: (data: { project_id: number; new_owner_id: number }) =>
     safe.put('/flow/projects/transfer', data),
 
+  moveProject: (data: { project_id: number; workspace_id: number }) =>
+    safe.put('/flow/projects/move', data),
+
   // -- Tasks --------------------------------------------------------------
 
   getTasks: (params: {

@@ -15,7 +15,7 @@ import {
   ArrowRightLeft,
 } from 'lucide-react';
 import { useFlowStore } from '../../shared/stores/flowStore';
-import { useUpdateProject, useDeleteProject } from './useProjects';
+import { useUpdateProject, useDeleteProject, useMoveProject } from './useProjects';
 import {
   useProjectMembers,
   useRemoveProjectMember,
@@ -23,6 +23,7 @@ import {
   useTransferProjectOwnership,
   useInviteProjectMember,
 } from './useProjectMembers';
+import { useFlowTeam } from '../../shared/hooks/queries/useFlowTeam';
 import Breadcrumbs from '../../shared/components/Breadcrumbs';
 import type { ApiProjectMember } from '../../shared/services/flowApi';
 
@@ -36,7 +37,7 @@ const ProjectSettings: React.FC = () => {
   const { t } = useTranslation();
   const { projectId, workspaceId } = useParams<{ projectId: string; workspaceId: string }>();
   const navigate = useNavigate();
-  const { projects } = useFlowStore();
+  const { projects, workspaces } = useFlowStore();
   const project = projects.find((p) => p.id === projectId);
 
   const [name, setName] = useState(project?.name || '');
@@ -45,17 +46,22 @@ const ProjectSettings: React.FC = () => {
 
   const updateProject = useUpdateProject();
   const deleteProject = useDeleteProject();
+  const moveProject = useMoveProject();
   const { data: members = [], isLoading: membersLoading } = useProjectMembers(projectId);
+  const { data: orgMembers = [] } = useFlowTeam();
   const inviteMember = useInviteProjectMember(projectId ?? '');
   const removeMember = useRemoveProjectMember(projectId ?? '');
   const updateRole = useUpdateProjectMemberRole(projectId ?? '');
   const transferOwnership = useTransferProjectOwnership();
 
   const transferRef = useRef<HTMLSelectElement>(null);
+  const [targetWorkspaceId, setTargetWorkspaceId] = useState('');
 
   const [showAddMember, setShowAddMember] = useState(false);
   const [newEmail, setNewEmail] = useState('');
   const [newRole, setNewRole] = useState<'manager' | 'member' | 'viewer'>('member');
+
+  const otherWorkspaces = workspaces.filter((w) => w.id !== (project?.workspaceId ?? workspaceId));
 
   if (!project) {
     return (
@@ -327,16 +333,75 @@ const ProjectSettings: React.FC = () => {
               </div>
             )}
 
-            {members.length > 0 && (
-              <div className="pt-4" style={{ borderTop: '1px solid var(--flow-border)' }}>
+            <div className="pt-4 space-y-4" style={{ borderTop: '1px solid var(--flow-border)' }}>
+              {/* Move to workspace */}
+              {otherWorkspaces.length > 0 && (
+                <div>
+                  <p
+                    className="text-[11px] font-semibold mb-1"
+                    style={{ color: 'var(--flow-text-muted)' }}
+                  >
+                    Move to workspace
+                  </p>
+                  <p className="text-[11px] mb-2" style={{ color: 'var(--flow-text-dim)' }}>
+                    Move this project (and all its tasks) to a different workspace.
+                  </p>
+                  <div className="flex gap-2">
+                    <select
+                      value={targetWorkspaceId}
+                      onChange={(e) => setTargetWorkspaceId(e.target.value)}
+                      className="flex-1 rounded px-2 py-1.5 text-[11px] outline-none"
+                      style={{
+                        background: 'var(--flow-input-bg)',
+                        border: '1px solid var(--flow-border)',
+                        color: 'var(--flow-text)',
+                      }}
+                    >
+                      <option value="">Select workspace…</option>
+                      {otherWorkspaces.map((w) => (
+                        <option key={w.id} value={w.id}>
+                          {w.name}
+                        </option>
+                      ))}
+                    </select>
+                    <button
+                      onClick={() => {
+                        if (!targetWorkspaceId) return toast.error('Select a workspace');
+                        if (!window.confirm('Move project to this workspace?')) return;
+                        moveProject.mutate(
+                          {
+                            project_id: Number(projectId),
+                            workspace_id: Number(targetWorkspaceId),
+                          },
+                          {
+                            onSuccess: () => {
+                              toast.success('Project moved');
+                              navigate(`/w/${targetWorkspaceId}`);
+                            },
+                            onError: () => toast.error('Failed to move project'),
+                          }
+                        );
+                      }}
+                      disabled={moveProject.isPending}
+                      className="flex items-center gap-1 px-3 py-1.5 rounded text-[11px] font-semibold"
+                      style={{ background: 'var(--flow-hover)', color: 'var(--flow-text)' }}
+                    >
+                      <ArrowRightLeft size={10} /> {moveProject.isPending ? 'Moving…' : 'Move'}
+                    </button>
+                  </div>
+                </div>
+              )}
+
+              {/* Transfer ownership */}
+              <div>
                 <p
-                  className="text-[11px] font-semibold mb-2"
+                  className="text-[11px] font-semibold mb-1"
                   style={{ color: 'var(--flow-text-muted)' }}
                 >
                   Transfer Ownership
                 </p>
                 <p className="text-[11px] mb-2" style={{ color: 'var(--flow-text-dim)' }}>
-                  Transfer ownership to another project member. You'll remain a member.
+                  Transfer ownership to any org member. You'll remain a member.
                 </p>
                 <div className="flex gap-2">
                   <select
@@ -353,8 +418,8 @@ const ProjectSettings: React.FC = () => {
                     <option value="" disabled>
                       Select new owner…
                     </option>
-                    {members.map((m) => (
-                      <option key={m.id} value={m.userId}>
+                    {orgMembers.map((m) => (
+                      <option key={m.id} value={m.id}>
                         {m.name || m.email}
                       </option>
                     ))}
@@ -380,7 +445,7 @@ const ProjectSettings: React.FC = () => {
                   </button>
                 </div>
               </div>
-            )}
+            </div>
           </div>
         )}
 

@@ -53,3 +53,12 @@ export function useDeleteProject() {
     onSuccess: () => qc.invalidateQueries({ queryKey: ['projects'] }),
   });
 }
+
+export function useMoveProject() {
+  const qc = useQueryClient();
+  return useMutation({
+    mutationFn: (data: { project_id: number; workspace_id: number }) =>
+      unwrap(flowApi.moveProject(data)).then(() => {}),
+    onSuccess: () => qc.invalidateQueries({ queryKey: ['projects'] }),
+  });
+}
