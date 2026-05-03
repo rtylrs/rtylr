@@ -15,6 +15,8 @@ import {
   UserCheck,
   CreditCard,
   Layers,
+  FolderOpen,
+  X,
 } from 'lucide-react';
 import { motion } from 'motion/react';
 import { Button, Input } from '../../shared/components/ui';
@@ -26,6 +28,7 @@ import {
   centsToDisplay,
   computeSeatProration,
 } from '../../shared/hooks/queries/useSubscription';
+import { useGroups, useAddGroupMembers } from '../../shared/hooks/queries/useGroups';
 
 const APP_ICONS: Record<
   string,
@@ -41,7 +44,7 @@ const APP_ICONS: Record<
 
 const ITEMS_PER_PAGE = 10;
 
-const Team: React.FC = () => {
+const Team: React.FC = (): React.JSX.Element => {
   const navigate = useNavigate();
   const { data: membersRaw = [], isLoading } = useTeam();
   const members = Array.isArray(membersRaw) ? membersRaw : [];
@@ -63,6 +66,19 @@ const Team: React.FC = () => {
   const [menuOpen, setMenuOpen] = useState<string | null>(null);
   const [page, setPage] = useState(0);
 
+  // Bulk selection state
+  const [selected, setSelected] = useState<Set<string>>(new Set());
+  const [showAddToGroupModal, setShowAddToGroupModal] = useState(false);
+  const [selectedGroupId, setSelectedGroupId] = useState<string>('');
+  const [bulkConfirmDeactivate, setBulkConfirmDeactivate] = useState(false);
+
+  const { data: groups = [] } = useGroups();
+
+  // We need to pick the groupId for the add-to-group action from the selected users
+  // We'll use the first selected user id to build the hook; actual mutation will be triggered manually
+  const [addGroupTarget, setAddGroupTarget] = useState<string | undefined>(undefined);
+  const addGroupMembers = useAddGroupMembers(addGroupTarget);
+
   const filtered = useMemo(() => {
     return members.filter((m) => {
       const matchesQuery =
@@ -76,6 +92,55 @@ const Team: React.FC = () => {
 
   const totalPages = Math.ceil(filtered.length / ITEMS_PER_PAGE);
   const paged = filtered.slice(page * ITEMS_PER_PAGE, (page + 1) * ITEMS_PER_PAGE);
+
+  const allPageIds = paged.map((m) => m.id);
+  const allPageSelected = allPageIds.length > 0 && allPageIds.every((id) => selected.has(id));
+
+  const toggleRow = (id: string): void => {
+    setSelected((prev) => {
+      const next = new Set(prev);
+      if (next.has(id)) {
+        next.delete(id);
+      } else {
+        next.add(id);
+      }
+      return next;
+    });
+  };
+
+  const toggleAllPage = (): void => {
+    setSelected((prev) => {
+      const next = new Set(prev);
+      if (allPageSelected) {
+        allPageIds.forEach((id) => next.delete(id));
+      } else {
+        allPageIds.forEach((id) => next.add(id));
+      }
+      return next;
+    });
+  };
+
+  const clearSelection = (): void => setSelected(new Set());
+
+  const handleAddToGroup = async (): Promise<void> => {
+    if (!selectedGroupId) return;
+    setAddGroupTarget(selectedGroupId);
+    const userIds = Array.from(selected)
+      .map(Number)
+      .filter((n) => !isNaN(n));
+    await addGroupMembers.mutateAsync(userIds);
+    clearSelection();
+    setShowAddToGroupModal(false);
+    setSelectedGroupId('');
+  };
+
+  const handleBulkDeactivate = async (): Promise<void> => {
+    for (const id of Array.from(selected)) {
+      await deactivate.mutateAsync(id);
+    }
+    clearSelection();
+    setBulkConfirmDeactivate(false);
+  };
 
   return (
     <div className="space-y-5">
@@ -92,10 +157,16 @@ const Team: React.FC = () => {
             {members.length} {members.length === 1 ? 'member' : 'members'}
           </p>
         </div>
-        <Button onClick={() => navigate('/team/invite')}>
-          <UserPlus size={14} />
-          Invite member
-        </Button>
+        <div className="flex items-center gap-2">
+          <Button variant="outline" onClick={() => navigate('/team/groups')}>
+            <FolderOpen size={14} />
+            Groups
+          </Button>
+          <Button onClick={() => navigate('/team/invite')}>
+            <UserPlus size={14} />
+            Invite member
+          </Button>
+        </div>
       </motion.div>
 
       {/* Filters */}
@@ -173,7 +244,16 @@ const Team: React.FC = () => {
                 borderBottom: '1px solid var(--dash-border)',
               }}
             >
-              <div className="col-span-4">Member</div>
+              <div className="col-span-1 flex items-center">
+                <input
+                  type="checkbox"
+                  aria-label="Select all on this page"
+                  checked={allPageSelected}
+                  onChange={toggleAllPage}
+                  style={{ accentColor: '#4583C4' }}
+                />
+              </div>
+              <div className="col-span-3">Member</div>
               <div className="col-span-2">Role</div>
               <div className="col-span-4">Licenses</div>
               <div className="col-span-1">Status</div>
@@ -183,6 +263,7 @@ const Team: React.FC = () => {
             {/* Rows */}
             {paged.map((m) => {
               const apps = m.apps ?? [];
+              const isChecked = selected.has(m.id);
               return (
                 <div
                   key={m.id}
@@ -190,8 +271,19 @@ const Team: React.FC = () => {
                   style={{ borderBottom: '1px solid var(--dash-border)' }}
                   onClick={() => navigate(`/team/${m.id}`)}
                 >
+                  {/* Checkbox */}
+                  <div className="col-span-1" onClick={(e) => e.stopPropagation()}>
+                    <input
+                      type="checkbox"
+                      aria-label={`Select ${m.name || m.email}`}
+                      checked={isChecked}
+                      onChange={() => toggleRow(m.id)}
+                      style={{ accentColor: '#4583C4' }}
+                    />
+                  </div>
+
                   {/* Name + email */}
-                  <div className="col-span-4 flex items-center gap-3 min-w-0">
+                  <div className="col-span-3 flex items-center gap-3 min-w-0">
                     <div
                       className="h-8 w-8 rounded-full flex items-center justify-center text-[11px] font-bold shrink-0"
                       style={{ background: 'rgba(69,131,196,0.12)', color: '#4583C4' }}
@@ -266,6 +358,7 @@ const Team: React.FC = () => {
                   {/* Actions */}
                   <div className="col-span-1 flex justify-end relative">
                     <button
+                      aria-label="Member actions"
                       onClick={(e) => {
                         e.stopPropagation();
                         setMenuOpen(menuOpen === m.id ? null : m.id);
@@ -369,6 +462,118 @@ const Team: React.FC = () => {
 
       {/* Close menu on outside click */}
       {menuOpen && <div className="fixed inset-0 z-40" onClick={() => setMenuOpen(null)} />}
+
+      {/* Floating bulk action bar */}
+      {selected.size > 0 && (
+        <div
+          className="fixed bottom-6 left-1/2 -translate-x-1/2 z-50 flex items-center gap-3 px-4 py-3 rounded-xl shadow-2xl"
+          style={{ background: 'var(--dash-surface)', border: '1px solid var(--dash-border)' }}
+        >
+          <span className="text-sm font-medium" style={{ color: 'var(--dash-text)' }}>
+            {selected.size} selected
+          </span>
+          <div className="w-px h-4" style={{ background: 'var(--dash-border)' }} />
+          <button
+            onClick={() => setShowAddToGroupModal(true)}
+            className="flex items-center gap-1.5 px-3 py-1.5 rounded-lg text-xs font-medium transition-colors"
+            style={{
+              background: 'rgba(69,131,196,0.1)',
+              color: '#4583C4',
+              border: '1px solid rgba(69,131,196,0.2)',
+            }}
+          >
+            <FolderOpen size={12} /> Add to group
+          </button>
+          <button
+            onClick={() => setBulkConfirmDeactivate(true)}
+            className="flex items-center gap-1.5 px-3 py-1.5 rounded-lg text-xs font-medium transition-colors"
+            style={{
+              background: 'rgba(239,68,68,0.08)',
+              color: '#ef4444',
+              border: '1px solid rgba(239,68,68,0.2)',
+            }}
+          >
+            <UserX size={12} /> Deactivate
+          </button>
+          <button
+            aria-label="Clear selection"
+            onClick={clearSelection}
+            className="h-6 w-6 rounded-md flex items-center justify-center hover:bg-[var(--dash-hover)] transition-colors"
+            style={{ color: 'var(--dash-text-muted)' }}
+          >
+            <X size={12} />
+          </button>
+        </div>
+      )}
+
+      {/* Add to group modal */}
+      {showAddToGroupModal && (
+        <div className="fixed inset-0 z-50 flex items-center justify-center p-4">
+          <div
+            className="fixed inset-0 bg-black/40"
+            onClick={() => setShowAddToGroupModal(false)}
+          />
+          <div
+            className="relative rounded-xl p-6 w-full max-w-sm space-y-4 shadow-2xl"
+            style={{ background: 'var(--dash-surface)', border: '1px solid var(--dash-border)' }}
+          >
+            <h3 className="text-sm font-semibold" style={{ color: 'var(--dash-text)' }}>
+              Add {selected.size} member{selected.size !== 1 ? 's' : ''} to group
+            </h3>
+            <div className="space-y-1.5">
+              <label className="text-xs font-medium" style={{ color: 'var(--dash-text-muted)' }}>
+                Select group
+              </label>
+              <select
+                value={selectedGroupId}
+                onChange={(e) => setSelectedGroupId(e.target.value)}
+                className="w-full rounded-lg px-3 py-2 text-sm"
+                style={{
+                  background: 'var(--dash-bg)',
+                  border: '1px solid var(--dash-border)',
+                  color: 'var(--dash-text)',
+                }}
+              >
+                <option value="">Choose a group...</option>
+                {groups.map((g) => (
+                  <option key={g.id} value={String(g.id)}>
+                    {g.name}
+                  </option>
+                ))}
+              </select>
+            </div>
+            <div className="flex items-center justify-end gap-2 pt-2">
+              <button
+                onClick={() => {
+                  setShowAddToGroupModal(false);
+                  setSelectedGroupId('');
+                }}
+                className="px-3 py-1.5 rounded-lg text-sm"
+                style={{ color: 'var(--dash-text-muted)' }}
+              >
+                Cancel
+              </button>
+              <Button
+                onClick={handleAddToGroup}
+                disabled={!selectedGroupId || addGroupMembers.isPending}
+              >
+                Add to group
+              </Button>
+            </div>
+          </div>
+        </div>
+      )}
+
+      <ConfirmDialog
+        open={bulkConfirmDeactivate}
+        onOpenChange={(o) => !o && setBulkConfirmDeactivate(false)}
+        title={`Deactivate ${selected.size} member${selected.size !== 1 ? 's' : ''}?`}
+        description="They will lose access to all apps immediately. This can be undone later."
+        confirmLabel="Deactivate"
+        destructive
+        isLoading={deactivate.isPending}
+        onConfirm={handleBulkDeactivate}
+      />
 
       <ConfirmDialog
         open={!!confirm}

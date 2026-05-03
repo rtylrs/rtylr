@@ -22,6 +22,7 @@ export const useTeam = () => {
           ...parsed,
           name: parsed.fullName || parsed.name || parsed.email,
           status: parsed.isActive ? 'active' : 'inactive',
+          groups: parsed.groups ?? [],
         } as TeamMember;
       });
     },
@@ -57,6 +58,7 @@ export const useInviteMember = () => {
       fullName: string;
       role: TeamMember['role'];
       apps: string[];
+      groupId?: number;
     }) => {
       const res = await unwrap(safe.post('/team/invite', payload));
       return res;

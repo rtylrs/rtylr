@@ -30,6 +30,8 @@ const Subscription = React.lazy(() => import('../features/subscription/Subscript
 const Team = React.lazy(() => import('../features/team/Team'));
 const InviteUser = React.lazy(() => import('../features/team/InviteUser'));
 const MemberDetail = React.lazy(() => import('../features/team/MemberDetail'));
+const Groups = React.lazy(() => import('../features/team/Groups'));
+const GroupDetail = React.lazy(() => import('../features/team/GroupDetail'));
 const Permissions = React.lazy(() => import('../features/permissions/Permissions'));
 const Roles = React.lazy(() => import('../features/permissions/Roles'));
 const AppsScreen = React.lazy(() => import('../features/apps/Apps'));
@@ -76,6 +78,8 @@ const AppRoutes: RouteObject[] = [
   // New Hub screens
   { path: '/team', element: wrap(<Team />) },
   { path: '/team/invite', element: wrap(<InviteUser />) },
+  { path: '/team/groups', element: wrap(<Groups />) },
+  { path: '/team/groups/:id', element: wrap(<GroupDetail />) },
   { path: '/team/:id', element: wrap(<MemberDetail />) },
   { path: '/permissions', element: wrap(<Permissions />) },
   { path: '/roles', element: wrap(<Roles />) },

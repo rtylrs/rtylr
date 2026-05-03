@@ -1,9 +1,10 @@
 import React, { useState } from 'react';
 import { useNavigate, useParams } from 'react-router-dom';
-import { ArrowLeft, Mail, Shield, Clock, UserX } from 'lucide-react';
-import { Avatar, Button } from '../../shared/components/ui';
+import { ArrowLeft, Mail, Shield, Clock, UserX, X } from 'lucide-react';
+import { useQuery } from '@tanstack/react-query';
+import { unwrap } from '@voxire/api';
+import { Avatar } from '../../shared/components/ui';
 import {
-  Breadcrumbs,
   RoleBadge,
   AppBadge,
   SettingSection,
@@ -19,6 +20,10 @@ import {
   centsToDisplay,
   computeSeatProration,
 } from '../../shared/hooks/queries/useSubscription';
+import { useMutation, useQueryClient } from '@tanstack/react-query';
+import { toast } from 'sonner';
+import type { GroupSummary } from '../../shared/hooks/queries/useGroups';
+import { safe } from '../../shared/lib/api';
 
 function getInitials(name?: string | null): string {
   if (!name) return '?';
@@ -30,7 +35,7 @@ function getInitials(name?: string | null): string {
     .slice(0, 2);
 }
 
-const MemberDetail: React.FC = () => {
+const MemberDetail: React.FC = (): React.JSX.Element => {
   const { id } = useParams<{ id: string }>();
   const navigate = useNavigate();
   const { data: member, isLoading } = useMember(id);
@@ -38,6 +43,28 @@ const MemberDetail: React.FC = () => {
   const deactivate = useDeactivateMember();
   const { data: sub } = useMySubscription();
   const [confirmOpen, setConfirmOpen] = useState(false);
+
+  const { data: memberGroups = [] } = useQuery<GroupSummary[]>({
+    queryKey: ['user-groups', id],
+    queryFn: async () => {
+      const res = await unwrap(safe.get(`/team/users/${id}/groups`));
+      return (res as { groups?: GroupSummary[] })?.groups ?? [];
+    },
+    enabled: !!id,
+  });
+
+  const qc = useQueryClient();
+  const removeFromGroup = useMutation({
+    mutationFn: async ({ groupId, userId }: { groupId: number; userId: string }) => {
+      await unwrap(safe.delete(`/team/groups/${groupId}/members/${userId}`));
+    },
+    onSuccess: () => {
+      toast.success('Removed from group');
+      qc.invalidateQueries({ queryKey: ['user-groups', id] });
+      qc.invalidateQueries({ queryKey: ['team'] });
+    },
+    onError: () => toast.error('Failed to remove from group'),
+  });
 
   if (isLoading) {
     return (
@@ -160,6 +187,59 @@ const MemberDetail: React.FC = () => {
           </div>
         )}
       </SettingSection>
+
+      <div
+        className="rounded-xl"
+        style={{ background: 'var(--dash-card)', border: '1px solid var(--dash-border)' }}
+      >
+        <div className="px-5 py-4" style={{ borderBottom: '1px solid var(--dash-border)' }}>
+          <div className="flex items-center justify-between">
+            <p className="text-sm font-semibold" style={{ color: 'var(--dash-text)' }}>
+              Groups
+            </p>
+            <button
+              onClick={() => navigate('/team/groups')}
+              className="text-xs"
+              style={{ color: '#4583C4' }}
+            >
+              Manage groups
+            </button>
+          </div>
+          <p className="text-xs mt-0.5" style={{ color: 'var(--dash-text-dim)' }}>
+            Groups this member belongs to.
+          </p>
+        </div>
+        <div className="px-5 py-4">
+          {memberGroups.length === 0 ? (
+            <p className="text-xs" style={{ color: 'var(--dash-text-dim)' }}>
+              Not in any group.
+            </p>
+          ) : (
+            <div className="flex flex-wrap gap-2">
+              {memberGroups.map((g) => (
+                <div
+                  key={g.id}
+                  className="flex items-center gap-1.5 px-2.5 py-1 rounded-full text-xs font-medium"
+                  style={{
+                    background: `${g.color}18`,
+                    border: `1px solid ${g.color}30`,
+                    color: g.color,
+                  }}
+                >
+                  <span>{g.name}</span>
+                  <button
+                    aria-label={`Remove from ${g.name}`}
+                    onClick={() => removeFromGroup.mutate({ groupId: g.id, userId: member.id })}
+                    className="hover:opacity-70 transition-opacity"
+                  >
+                    <X size={11} />
+                  </button>
+                </div>
+              ))}
+            </div>
+          )}
+        </div>
+      </div>
 
       {member.role !== 'owner' && (
         <DangerZone
