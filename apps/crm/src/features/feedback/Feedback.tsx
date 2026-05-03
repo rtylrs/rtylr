@@ -1,10 +1,10 @@
 import React from 'react';
 import { MessageSquare, Star } from 'lucide-react';
-import { useFeedback } from './useFeedback';
+import { useListFeedback } from '../../shared/hooks/queries/useFeedback';
 import { PageHeader, Card, EmptyState, SkeletonList } from '../../shared/components/ui';
 
 const Feedback: React.FC = () => {
-  const { data: fetched, isLoading } = useFeedback();
+  const { data: fetched, isLoading } = useListFeedback();
   const feedback = fetched ?? [];
 
   const promoters = feedback.filter((f) => f.nps >= 9).length;

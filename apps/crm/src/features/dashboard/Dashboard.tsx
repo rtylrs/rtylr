@@ -14,10 +14,10 @@ import {
   Activity,
   ArrowRight,
 } from 'lucide-react';
-import { type DashboardStats } from '../../shared/services/crmApi';
-import { useCRMDashboard } from './useDashboard';
-import { useCustomers } from '../customers/useCustomers';
-import { useSegments } from '../segments/useSegments';
+import { useCrmDashboard } from '../../shared/hooks/queries/useCrmDashboard';
+import { useListCustomers } from '../../shared/hooks/queries/useCustomers';
+import { useListSegments } from '../../shared/hooks/queries/useSegments';
+import type { DashboardStats } from '../../shared/schemas/dashboard';
 import { CustomerAvatar } from '../../shared/components/crm';
 
 const ACCENT = '#3b82f6';
@@ -169,9 +169,9 @@ function StatCard({ stat, index }: { stat: (typeof defaultStats)[0]; index: numb
 
 const Dashboard: React.FC = () => {
   const navigate = useNavigate();
-  const { data: dashboardData } = useCRMDashboard();
-  const { data: fetchedCustomers } = useCustomers();
-  const { data: fetchedSegments } = useSegments();
+  const { data: dashboardData } = useCrmDashboard();
+  const { data: fetchedCustomers } = useListCustomers({ limit: 200, offset: 0 });
+  const { data: fetchedSegments } = useListSegments();
   const customersPool = fetchedCustomers ?? [];
   const segmentsPool = fetchedSegments ?? [];
 
