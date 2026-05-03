@@ -1,18 +1,7 @@
 import React, { useEffect, useState } from 'react';
 import { useNavigate, useParams } from 'react-router-dom';
-import {
-  ArrowLeft,
-  Save,
-  Users,
-  Plus,
-  X,
-  MonitorSpeaker,
-  Package,
-  UserCheck,
-  CreditCard,
-  Layers,
-} from 'lucide-react';
-import { Users as UsersIcon } from 'lucide-react';
+import { useTranslation } from 'react-i18next';
+import { ArrowLeft, Save, Users, Plus, X } from 'lucide-react';
 import { motion } from 'motion/react';
 import { Button, Input } from '../../shared/components/ui';
 import { EmptyState, SkeletonList } from '../../shared/components/dash';
@@ -22,25 +11,18 @@ import {
   useUpdateGroup,
   useAddGroupMembers,
   useRemoveGroupMember,
-  type AppPermission,
-  type PermissionLevel,
+  type ResourcePermission,
+  type ResourcePermissionLevel,
 } from '../../shared/hooks/queries/useGroups';
 import { useTeam } from '../../shared/hooks/queries/useTeam';
+import { APP_RESOURCES, type PermissionLevel } from '../../shared/config/appResources';
 
-const ALL_APPS = [
-  { key: 'pos', label: 'POS', icon: MonitorSpeaker, color: '#4583C4' },
-  { key: 'erp', label: 'ERP', icon: Package, color: '#10b981' },
-  { key: 'hr', label: 'HR', icon: UserCheck, color: '#f59e0b' },
-  { key: 'crm', label: 'CRM', icon: UsersIcon, color: '#8b5cf6' },
-  { key: 'finance', label: 'Finance', icon: CreditCard, color: '#ef4444' },
-  { key: 'flow', label: 'Flow', icon: Layers, color: '#64C5B9' },
-];
+type LocalPermissionLevel = PermissionLevel; // 'none' | 'viewer' | 'editor'
 
-const LEVELS: { value: PermissionLevel | 'none'; label: string }[] = [
-  { value: 'none', label: 'None' },
-  { value: 'use', label: 'Use' },
-  { value: 'edit', label: 'Edit' },
-  { value: 'own', label: 'Own' },
+const LEVELS: { value: LocalPermissionLevel; tKey: string }[] = [
+  { value: 'none', tKey: 'groupDetail.levelNone' },
+  { value: 'viewer', tKey: 'groupDetail.levelViewer' },
+  { value: 'editor', tKey: 'groupDetail.levelEditor' },
 ];
 
 const PRESET_COLORS = [
@@ -55,7 +37,8 @@ const PRESET_COLORS = [
   '#f97316',
 ];
 
-const GroupDetail: React.FC = (): React.JSX.Element => {
+const GroupDetail = (): React.JSX.Element => {
+  const { t } = useTranslation('team');
   const { id } = useParams<{ id: string }>();
   const navigate = useNavigate();
   const isNew = id === 'new';
@@ -71,7 +54,7 @@ const GroupDetail: React.FC = (): React.JSX.Element => {
   const [name, setName] = useState('');
   const [description, setDescription] = useState('');
   const [color, setColor] = useState('#6366f1');
-  const [appPerms, setAppPerms] = useState<Record<string, PermissionLevel | 'none'>>({});
+  const [resourcePerms, setResourcePerms] = useState<Map<string, LocalPermissionLevel>>(new Map());
   const [showAddMembers, setShowAddMembers] = useState(false);
   const [selectedToAdd, setSelectedToAdd] = useState<number[]>([]);
   const [dirty, setDirty] = useState(false);
@@ -81,41 +64,52 @@ const GroupDetail: React.FC = (): React.JSX.Element => {
       setName(group.name);
       setDescription(group.description ?? '');
       setColor(group.color ?? '#6366f1');
-      const perms: Record<string, PermissionLevel | 'none'> = {};
-      for (const app of ALL_APPS) {
-        perms[app.key] = 'none';
+      const perms = new Map<string, LocalPermissionLevel>();
+      for (const p of group.resourcePermissions) {
+        perms.set(p.resourceKey, p.permissionLevel);
       }
-      for (const p of group.appPermissions) {
-        perms[p.appId] = p.permissionLevel;
-      }
-      setAppPerms(perms);
+      setResourcePerms(perms);
       setDirty(false);
     } else if (isNew) {
-      const perms: Record<string, PermissionLevel | 'none'> = {};
-      for (const app of ALL_APPS) {
-        perms[app.key] = 'none';
-      }
-      setAppPerms(perms);
+      setResourcePerms(new Map());
     }
   }, [group, isNew]);
 
-  const setLevel = (appKey: string, level: PermissionLevel | 'none'): void => {
-    setAppPerms((prev) => ({ ...prev, [appKey]: level }));
+  const setLevel = (resourceKey: string, level: LocalPermissionLevel): void => {
+    setResourcePerms((prev) => {
+      const next = new Map(prev);
+      if (level === 'none') {
+        next.delete(resourceKey);
+      } else {
+        next.set(resourceKey, level);
+      }
+      return next;
+    });
     setDirty(true);
   };
 
-  const buildPermissions = (): AppPermission[] =>
-    Object.entries(appPerms)
-      .filter(([, level]) => level !== 'none')
-      .map(([appId, level]) => ({ appId, permissionLevel: level as PermissionLevel }));
+  const buildPermissions = (): ResourcePermission[] => {
+    const result: ResourcePermission[] = [];
+    resourcePerms.forEach((level, resourceKey) => {
+      result.push({ resourceKey, permissionLevel: level as ResourcePermissionLevel });
+    });
+    return result;
+  };
+
+  const activeSectionCount = resourcePerms.size;
 
   const handleSave = async (): Promise<void> => {
-    const appPermissions = buildPermissions();
+    const resourcePermissions = buildPermissions();
     if (isNew) {
-      const created = await createGroup.mutateAsync({ name, description, color, appPermissions });
+      const created = await createGroup.mutateAsync({
+        name,
+        description,
+        color,
+        resourcePermissions,
+      });
       navigate(`/team/groups/${created.id}`, { replace: true });
     } else {
-      await updateGroup.mutateAsync({ name, description, color, appPermissions });
+      await updateGroup.mutateAsync({ name, description, color, resourcePermissions });
     }
     setDirty(false);
   };
@@ -147,7 +141,7 @@ const GroupDetail: React.FC = (): React.JSX.Element => {
         <div className="flex items-center gap-3">
           <button
             onClick={() => navigate('/team/groups')}
-            aria-label="Back to groups"
+            aria-label={t('groupDetail.backAriaLabel')}
             className="h-8 w-8 rounded-lg flex items-center justify-center hover:bg-[var(--dash-hover)] transition-colors"
             style={{ color: 'var(--dash-text-muted)' }}
           >
@@ -155,18 +149,23 @@ const GroupDetail: React.FC = (): React.JSX.Element => {
           </button>
           <div>
             <h1 className="text-lg font-semibold" style={{ color: 'var(--dash-text)' }}>
-              {isNew ? 'New group' : name}
+              {isNew ? t('groupDetail.newGroupTitle') : name}
             </h1>
             {!isNew && (
               <p className="text-[11px] mt-0.5" style={{ color: 'var(--dash-text-dim)' }}>
-                {group?.memberCount ?? 0} member{(group?.memberCount ?? 0) !== 1 ? 's' : ''}
+                {t(
+                  (group?.memberCount ?? 0) === 1
+                    ? 'groupDetail.membersCountSingular'
+                    : 'groupDetail.membersCountPlural',
+                  { count: group?.memberCount ?? 0 }
+                )}
               </p>
             )}
           </div>
         </div>
         <Button onClick={handleSave} disabled={isSaving || (!dirty && !isNew)}>
           <Save size={14} />
-          {isSaving ? 'Saving...' : 'Save'}
+          {isSaving ? t('groupDetail.savingButton') : t('groupDetail.saveButton')}
         </Button>
       </div>
 
@@ -176,12 +175,12 @@ const GroupDetail: React.FC = (): React.JSX.Element => {
         style={{ background: 'var(--dash-card)', border: '1px solid var(--dash-border)' }}
       >
         <p className="text-sm font-semibold" style={{ color: 'var(--dash-text)' }}>
-          General
+          {t('groupDetail.generalSection')}
         </p>
         <div className="grid grid-cols-2 gap-4">
           <div className="space-y-1.5">
             <label className="text-xs font-medium" style={{ color: 'var(--dash-text-muted)' }}>
-              Group name
+              {t('groupDetail.labelName')}
             </label>
             <Input
               value={name}
@@ -189,12 +188,12 @@ const GroupDetail: React.FC = (): React.JSX.Element => {
                 setName(e.target.value);
                 setDirty(true);
               }}
-              placeholder="e.g. Store Managers"
+              placeholder={t('groupDetail.namePlaceholder')}
             />
           </div>
           <div className="space-y-1.5">
             <label className="text-xs font-medium" style={{ color: 'var(--dash-text-muted)' }}>
-              Description
+              {t('groupDetail.labelDescription')}
             </label>
             <Input
               value={description}
@@ -202,19 +201,19 @@ const GroupDetail: React.FC = (): React.JSX.Element => {
                 setDescription(e.target.value);
                 setDirty(true);
               }}
-              placeholder="Optional"
+              placeholder={t('groupDetail.descriptionPlaceholder')}
             />
           </div>
         </div>
         <div className="space-y-1.5">
           <label className="text-xs font-medium" style={{ color: 'var(--dash-text-muted)' }}>
-            Color
+            {t('groupDetail.labelColor')}
           </label>
           <div className="flex items-center gap-2 flex-wrap">
             {PRESET_COLORS.map((c) => (
               <button
                 key={c}
-                aria-label={`Select color ${c}`}
+                aria-label={t('groupDetail.colorAriaLabel', { color: c })}
                 onClick={() => {
                   setColor(c);
                   setDirty(true);
@@ -237,20 +236,20 @@ const GroupDetail: React.FC = (): React.JSX.Element => {
           className="flex items-center gap-1"
           style={{ borderBottom: '1px solid var(--dash-border)' }}
         >
-          {(['apps', 'members'] as const).map((t) => (
+          {(['apps', 'members'] as const).map((tabKey) => (
             <button
-              key={t}
-              onClick={() => setTab(t)}
-              className="px-4 py-2 text-sm font-medium capitalize transition-colors"
+              key={tabKey}
+              onClick={() => setTab(tabKey)}
+              className="px-4 py-2 text-sm font-medium transition-colors"
               style={{
-                color: tab === t ? 'var(--dash-text)' : 'var(--dash-text-muted)',
-                borderBottom: tab === t ? '2px solid #4583C4' : '2px solid transparent',
+                color: tab === tabKey ? 'var(--dash-text)' : 'var(--dash-text-muted)',
+                borderBottom: tab === tabKey ? '2px solid var(--accent)' : '2px solid transparent',
                 marginBottom: '-1px',
               }}
             >
-              {t === 'apps'
-                ? `Apps (${buildPermissions().length})`
-                : `Members (${group?.members?.length ?? 0})`}
+              {tabKey === 'apps'
+                ? t('groupDetail.tabApps', { count: activeSectionCount })
+                : t('groupDetail.tabMembers', { count: group?.members?.length ?? 0 })}
             </button>
           ))}
         </div>
@@ -272,51 +271,71 @@ const GroupDetail: React.FC = (): React.JSX.Element => {
               borderBottom: '1px solid var(--dash-border)',
             }}
           >
-            <div className="col-span-4">App</div>
+            <div className="col-span-6">{t('groupDetail.columnSection')}</div>
             {LEVELS.map((l) => (
               <div key={l.value} className="col-span-2 text-center">
-                {l.label}
+                {t(l.tKey)}
               </div>
             ))}
           </div>
-          {ALL_APPS.map((app) => {
-            const Icon = app.icon;
-            const current = appPerms[app.key] ?? 'none';
-            return (
+
+          {APP_RESOURCES.map((app) => (
+            <React.Fragment key={app.id}>
+              {/* App header row */}
               <div
-                key={app.key}
-                className="grid grid-cols-12 gap-2 items-center px-5 py-3 transition-colors hover:bg-[var(--dash-hover)]"
-                style={{ borderBottom: '1px solid var(--dash-border)' }}
+                className="px-5 py-2.5"
+                style={{
+                  background: 'var(--dash-hover)',
+                  borderBottom: '1px solid var(--dash-border)',
+                }}
               >
-                <div className="col-span-4 flex items-center gap-2.5">
-                  <div
-                    className="h-7 w-7 rounded-lg flex items-center justify-center shrink-0"
-                    style={{ background: `${app.color}12` }}
-                  >
-                    <Icon size={14} style={{ color: app.color }} />
-                  </div>
-                  <span className="text-sm font-medium" style={{ color: 'var(--dash-text)' }}>
-                    {app.label}
-                  </span>
-                </div>
-                {LEVELS.map((l) => (
-                  <div key={l.value} className="col-span-2 flex justify-center">
-                    <button
-                      aria-label={`Set ${app.label} to ${l.label}`}
-                      onClick={() => setLevel(app.key, l.value)}
-                      className="h-5 w-5 rounded-full border-2 flex items-center justify-center transition-all"
-                      style={{
-                        borderColor: current === l.value ? '#4583C4' : 'var(--dash-border)',
-                        background: current === l.value ? '#4583C4' : 'transparent',
-                      }}
-                    >
-                      {current === l.value && <div className="h-1.5 w-1.5 rounded-full bg-white" />}
-                    </button>
-                  </div>
-                ))}
+                <span
+                  className="text-xs font-semibold uppercase tracking-wider"
+                  style={{ color: 'var(--dash-text-muted)' }}
+                >
+                  {app.label}
+                </span>
               </div>
-            );
-          })}
+
+              {/* Section rows */}
+              {app.sections.map((section) => {
+                const current: LocalPermissionLevel = resourcePerms.get(section.key) ?? 'none';
+                return (
+                  <div
+                    key={section.key}
+                    className="grid grid-cols-12 gap-2 items-center px-5 py-3 transition-colors hover:bg-[var(--dash-hover)]"
+                    style={{ borderBottom: '1px solid var(--dash-border)' }}
+                  >
+                    <div className="col-span-6 pl-3">
+                      <span className="text-sm font-medium" style={{ color: 'var(--dash-text)' }}>
+                        {section.label}
+                      </span>
+                    </div>
+                    {LEVELS.map((l) => (
+                      <div key={l.value} className="col-span-2 flex justify-center">
+                        <button
+                          aria-label={t('groupDetail.radioAriaLabel', {
+                            section: section.label,
+                            level: t(l.tKey),
+                          })}
+                          onClick={() => setLevel(section.key, l.value)}
+                          className="h-5 w-5 rounded-full border-2 flex items-center justify-center transition-all"
+                          style={{
+                            borderColor: current === l.value ? color : 'var(--dash-border)',
+                            background: current === l.value ? color : 'transparent',
+                          }}
+                        >
+                          {current === l.value && (
+                            <div className="h-1.5 w-1.5 rounded-full bg-white" />
+                          )}
+                        </button>
+                      </div>
+                    ))}
+                  </div>
+                );
+              })}
+            </React.Fragment>
+          ))}
         </motion.div>
       )}
 
@@ -325,19 +344,23 @@ const GroupDetail: React.FC = (): React.JSX.Element => {
         <motion.div initial={{ opacity: 0 }} animate={{ opacity: 1 }} className="space-y-3">
           <div className="flex items-center justify-between">
             <p className="text-sm font-medium" style={{ color: 'var(--dash-text)' }}>
-              {group?.members?.length ?? 0} member
-              {(group?.members?.length ?? 0) !== 1 ? 's' : ''}
+              {t(
+                (group?.members?.length ?? 0) === 1
+                  ? 'groupDetail.membersCountSingular'
+                  : 'groupDetail.membersCountPlural',
+                { count: group?.members?.length ?? 0 }
+              )}
             </p>
             <button
               onClick={() => setShowAddMembers(true)}
               className="flex items-center gap-1.5 px-3 py-1.5 rounded-lg text-xs font-medium transition-colors"
               style={{
-                background: 'rgba(69,131,196,0.1)',
-                color: '#4583C4',
-                border: '1px solid rgba(69,131,196,0.2)',
+                background: 'var(--accent-muted)',
+                color: 'var(--accent)',
+                border: '1px solid var(--accent-border)',
               }}
             >
-              <Plus size={12} /> Add members
+              <Plus size={12} /> {t('groupDetail.addMembersButton')}
             </button>
           </div>
 
@@ -349,9 +372,9 @@ const GroupDetail: React.FC = (): React.JSX.Element => {
               <div className="p-4">
                 <EmptyState
                   icon={Users}
-                  title="No members yet"
-                  description="Add team members to this group."
-                  actionLabel="Add members"
+                  title={t('groupDetail.noMembersTitle')}
+                  description={t('groupDetail.noMembersDescription')}
+                  actionLabel={t('groupDetail.addMembersButton')}
                   onAction={() => setShowAddMembers(true)}
                 />
               </div>
@@ -365,7 +388,7 @@ const GroupDetail: React.FC = (): React.JSX.Element => {
                   <div className="flex items-center gap-3">
                     <div
                       className="h-7 w-7 rounded-full flex items-center justify-center text-[10px] font-bold shrink-0"
-                      style={{ background: 'rgba(69,131,196,0.12)', color: '#4583C4' }}
+                      style={{ background: 'var(--accent-muted)', color: 'var(--accent)' }}
                     >
                       {(m.fullName || m.email || '?').charAt(0).toUpperCase()}
                     </div>
@@ -379,7 +402,9 @@ const GroupDetail: React.FC = (): React.JSX.Element => {
                     </div>
                   </div>
                   <button
-                    aria-label={`Remove ${m.fullName || m.email} from group`}
+                    aria-label={t('groupDetail.removeMemberAriaLabel', {
+                      name: m.fullName || m.email,
+                    })}
                     onClick={() => removeMember.mutateAsync(m.userId)}
                     className="h-7 w-7 rounded-lg flex items-center justify-center hover:bg-[var(--dash-hover)] transition-colors"
                     style={{ color: 'var(--dash-text-muted)' }}
@@ -398,11 +423,11 @@ const GroupDetail: React.FC = (): React.JSX.Element => {
               style={{ background: 'var(--dash-card)', border: '1px solid var(--dash-border)' }}
             >
               <p className="text-sm font-semibold" style={{ color: 'var(--dash-text)' }}>
-                Add members
+                {t('groupDetail.addMembersTitle')}
               </p>
               {addableMembersList.length === 0 ? (
                 <p className="text-sm" style={{ color: 'var(--dash-text-muted)' }}>
-                  All team members are already in this group.
+                  {t('groupDetail.allMembersInGroup')}
                 </p>
               ) : (
                 <div className="space-y-1 max-h-48 overflow-y-auto">
@@ -423,7 +448,7 @@ const GroupDetail: React.FC = (): React.JSX.Element => {
                             )
                           }
                           className="rounded"
-                          style={{ accentColor: '#4583C4' }}
+                          style={{ accentColor: 'var(--accent)' }}
                         />
                         <div>
                           <p className="text-sm font-medium" style={{ color: 'var(--dash-text)' }}>
@@ -447,14 +472,18 @@ const GroupDetail: React.FC = (): React.JSX.Element => {
                   className="px-3 py-1.5 rounded-lg text-sm"
                   style={{ color: 'var(--dash-text-muted)' }}
                 >
-                  Cancel
+                  {t('groupDetail.cancelButton')}
                 </button>
                 <Button
                   onClick={handleAddMembers}
                   disabled={selectedToAdd.length === 0 || addMembers.isPending}
                 >
-                  Add {selectedToAdd.length > 0 ? selectedToAdd.length : ''} member
-                  {selectedToAdd.length !== 1 ? 's' : ''}
+                  {t(
+                    selectedToAdd.length === 1
+                      ? 'groupDetail.addNButton'
+                      : 'groupDetail.addNButton_other',
+                    { count: selectedToAdd.length }
+                  )}
                 </Button>
               </div>
             </div>

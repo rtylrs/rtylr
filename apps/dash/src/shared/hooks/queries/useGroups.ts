@@ -4,11 +4,11 @@ import { toast } from 'sonner';
 import { safe } from '../../lib/api';
 
 // Types
-export type PermissionLevel = 'use' | 'edit' | 'own';
+export type ResourcePermissionLevel = 'viewer' | 'editor';
 
-export type AppPermission = {
-  appId: string;
-  permissionLevel: PermissionLevel;
+export type ResourcePermission = {
+  resourceKey: string;
+  permissionLevel: ResourcePermissionLevel;
 };
 
 export type GroupSummary = {
@@ -23,7 +23,7 @@ export type Group = {
   name: string;
   description: string;
   color: string;
-  appPermissions: AppPermission[];
+  resourcePermissions: ResourcePermission[];
   memberCount: number;
   createdAt: string;
   updatedAt: string;
@@ -75,7 +75,12 @@ export const useCreateGroup = (): ReturnType<
   typeof useMutation<
     Group,
     Error,
-    { name: string; description?: string; color?: string; appPermissions: AppPermission[] }
+    {
+      name: string;
+      description?: string;
+      color?: string;
+      resourcePermissions: ResourcePermission[];
+    }
   >
 > => {
   const qc = useQueryClient();
@@ -84,7 +89,7 @@ export const useCreateGroup = (): ReturnType<
       name: string;
       description?: string;
       color?: string;
-      appPermissions: AppPermission[];
+      resourcePermissions: ResourcePermission[];
     }) => {
       const res = await unwrap(safe.post('/team/groups', payload));
       return (res as { group: Group })?.group;
@@ -103,7 +108,12 @@ export const useUpdateGroup = (
   typeof useMutation<
     Group,
     Error,
-    { name: string; description?: string; color?: string; appPermissions: AppPermission[] }
+    {
+      name: string;
+      description?: string;
+      color?: string;
+      resourcePermissions: ResourcePermission[];
+    }
   >
 > => {
   const qc = useQueryClient();
@@ -112,7 +122,7 @@ export const useUpdateGroup = (
       name: string;
       description?: string;
       color?: string;
-      appPermissions: AppPermission[];
+      resourcePermissions: ResourcePermission[];
     }) => {
       const res = await unwrap(safe.put(`/team/groups/${id}`, payload));
       return (res as { group: Group })?.group;
