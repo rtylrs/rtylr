@@ -12,6 +12,7 @@ import (
 	"github.com/voxire/onion/internal/platform/logger"
 )
 
+
 type Repository struct {
 	queries *sqlc.Queries
 }
@@ -185,6 +186,14 @@ func (r *Repository) ListStaffUsers(ctx context.Context, ownerID int64) ([]domai
 		users = append(users, su)
 	}
 
+	for i := range users {
+		groups, err := r.GetUserGroups(ctx, ownerID, users[i].ID)
+		if err != nil || groups == nil {
+			groups = []domain.GroupSummary{}
+		}
+		users[i].Groups = groups
+	}
+
 	return users, nil
 }
 
@@ -222,6 +231,12 @@ func (r *Repository) GetStaffUserByID(ctx context.Context, ownerID, businessID, 
 	if err := json.Unmarshal(row.Apps, &su.Apps); err != nil {
 		su.Apps = []string{}
 	}
+
+	groups, err := r.GetUserGroups(ctx, ownerID, su.ID)
+	if err != nil || groups == nil {
+		groups = []domain.GroupSummary{}
+	}
+	su.Groups = groups
 
 	return su, nil
 }
@@ -349,4 +364,212 @@ func (r *Repository) CountActiveMembers(ctx context.Context, ownerID int64) (int
 	}
 
 	return count, nil
+}
+
+// ─── Groups ──────────────────────────────────────────────────────────────────
+
+func (r *Repository) CreateGroup(ctx context.Context, ownerID int64, input domain.CreateGroupInput) (int64, error) {
+	res, err := r.queries.CreateGroup(ctx, sqlc.CreateGroupParams{
+		OwnerID:     ownerID,
+		Name:        input.Name,
+		Description: sql.NullString{String: input.Description, Valid: input.Description != ""},
+		Color:       sql.NullString{String: input.Color, Valid: input.Color != ""},
+	})
+	if err != nil {
+		return 0, err
+	}
+	id, err := res.LastInsertId()
+	if err != nil {
+		return 0, err
+	}
+	if err := r.setGroupAppPermissions(ctx, id, input.AppPermissions); err != nil {
+		return 0, err
+	}
+	return id, nil
+}
+
+func (r *Repository) setGroupAppPermissions(ctx context.Context, groupID int64, perms []domain.AppPermission) error {
+	if err := r.queries.DeleteGroupAppPermissions(ctx, groupID); err != nil {
+		return err
+	}
+	for _, p := range perms {
+		if err := r.queries.UpsertGroupAppPermission(ctx, sqlc.UpsertGroupAppPermissionParams{
+			GroupID:         groupID,
+			AppID:           p.AppID,
+			PermissionLevel: sqlc.UserGroupAppPermissionsPermissionLevel(p.PermissionLevel),
+		}); err != nil {
+			return err
+		}
+	}
+	return nil
+}
+
+func (r *Repository) GetGroup(ctx context.Context, ownerID, groupID int64) (*domain.Group, error) {
+	row, err := r.queries.GetGroup(ctx, sqlc.GetGroupParams{ID: groupID, OwnerID: ownerID})
+	if err != nil {
+		return nil, err
+	}
+	perms, _ := r.queries.ListGroupAppPermissions(ctx, groupID)
+	g := &domain.Group{
+		ID:          row.ID,
+		OwnerID:     row.OwnerID,
+		Name:        row.Name,
+		Description: row.Description,
+		Color:       row.Color.String,
+	}
+	if row.CreatedAt.Valid {
+		g.CreatedAt = row.CreatedAt.Time
+	}
+	if row.UpdatedAt.Valid {
+		g.UpdatedAt = row.UpdatedAt.Time
+	}
+	for _, p := range perms {
+		g.AppPermissions = append(g.AppPermissions, domain.AppPermission{
+			AppID:           p.AppID,
+			PermissionLevel: domain.PermissionLevel(p.PermissionLevel),
+		})
+	}
+	return g, nil
+}
+
+func (r *Repository) ListGroups(ctx context.Context, ownerID int64) ([]domain.Group, error) {
+	rows, err := r.queries.ListGroups(ctx, ownerID)
+	if err != nil {
+		return nil, err
+	}
+	var groups []domain.Group
+	for _, row := range rows {
+		g := domain.Group{
+			ID:          row.ID,
+			OwnerID:     row.OwnerID,
+			Name:        row.Name,
+			Description: row.Description,
+			Color:       row.Color.String,
+			MemberCount: int(row.MemberCount),
+		}
+		if row.CreatedAt.Valid {
+			g.CreatedAt = row.CreatedAt.Time
+		}
+		if row.UpdatedAt.Valid {
+			g.UpdatedAt = row.UpdatedAt.Time
+		}
+		perms, _ := r.queries.ListGroupAppPermissions(ctx, row.ID)
+		for _, p := range perms {
+			g.AppPermissions = append(g.AppPermissions, domain.AppPermission{
+				AppID:           p.AppID,
+				PermissionLevel: domain.PermissionLevel(p.PermissionLevel),
+			})
+		}
+		groups = append(groups, g)
+	}
+	return groups, nil
+}
+
+func (r *Repository) UpdateGroup(ctx context.Context, ownerID, groupID int64, input domain.UpdateGroupInput) error {
+	if err := r.queries.UpdateGroup(ctx, sqlc.UpdateGroupParams{
+		Name:        input.Name,
+		Description: sql.NullString{String: input.Description, Valid: input.Description != ""},
+		Color:       sql.NullString{String: input.Color, Valid: input.Color != ""},
+		ID:          groupID,
+		OwnerID:     ownerID,
+	}); err != nil {
+		return err
+	}
+	return r.setGroupAppPermissions(ctx, groupID, input.AppPermissions)
+}
+
+func (r *Repository) DeleteGroup(ctx context.Context, ownerID, groupID int64) error {
+	if err := r.queries.DeleteGroupAppPermissions(ctx, groupID); err != nil {
+		return err
+	}
+	return r.queries.DeleteGroup(ctx, sqlc.DeleteGroupParams{ID: groupID, OwnerID: ownerID})
+}
+
+func (r *Repository) AddGroupMembers(ctx context.Context, ownerID, groupID, addedBy int64, userIDs []int64) error {
+	for _, uid := range userIDs {
+		if err := r.queries.AddGroupMember(ctx, sqlc.AddGroupMemberParams{
+			GroupID: groupID,
+			UserID:  uid,
+			OwnerID: ownerID,
+			AddedBy: sql.NullInt64{Int64: addedBy, Valid: addedBy > 0},
+		}); err != nil {
+			return err
+		}
+	}
+	return nil
+}
+
+func (r *Repository) RemoveGroupMember(ctx context.Context, groupID, userID int64) error {
+	return r.queries.RemoveGroupMember(ctx, sqlc.RemoveGroupMemberParams{
+		GroupID: groupID,
+		UserID:  userID,
+	})
+}
+
+func (r *Repository) GetGroupDetail(ctx context.Context, ownerID, groupID int64) (*domain.GroupDetail, error) {
+	g, err := r.GetGroup(ctx, ownerID, groupID)
+	if err != nil {
+		return nil, err
+	}
+	memberRows, err := r.queries.ListGroupMembers(ctx, groupID)
+	if err != nil {
+		return nil, err
+	}
+	detail := &domain.GroupDetail{Group: *g}
+	for _, m := range memberRows {
+		gm := domain.GroupMember{
+			UserID:   m.UserID,
+			Email:    m.Email,
+			FullName: m.FullName,
+		}
+		if m.AddedAt.Valid {
+			gm.AddedAt = m.AddedAt.Time
+		}
+		detail.Members = append(detail.Members, gm)
+	}
+	return detail, nil
+}
+
+func (r *Repository) GetUserGroups(ctx context.Context, ownerID, userID int64) ([]domain.GroupSummary, error) {
+	rows, err := r.queries.ListUserGroups(ctx, sqlc.ListUserGroupsParams{UserID: userID, OwnerID: ownerID})
+	if err != nil {
+		return nil, err
+	}
+	var summaries []domain.GroupSummary
+	for _, row := range rows {
+		summaries = append(summaries, domain.GroupSummary{ID: row.ID, Name: row.Name, Color: row.Color.String})
+	}
+	return summaries, nil
+}
+
+// GetUserEffectiveApps returns the union of direct app access + all group app permissions.
+// Returns map[appID]highest_permission_level.
+func (r *Repository) GetUserEffectiveApps(ctx context.Context, ownerID, userID int64) (map[string]domain.PermissionLevel, error) {
+	effective := map[string]domain.PermissionLevel{}
+	levelRank := map[domain.PermissionLevel]int{
+		domain.PermLevelUse:  1,
+		domain.PermLevelEdit: 2,
+		domain.PermLevelOwn:  3,
+	}
+	merge := func(appID string, level domain.PermissionLevel) {
+		if existing, ok := effective[appID]; !ok || levelRank[level] > levelRank[existing] {
+			effective[appID] = level
+		}
+	}
+	perm, err := r.GetPermission(ctx, ownerID, userID)
+	if err == nil && perm != nil {
+		for _, app := range perm.Apps {
+			merge(app, domain.PermLevelUse)
+		}
+	}
+	groupPerms, err := r.queries.ListUserGroupAppPermissions(ctx, sqlc.ListUserGroupAppPermissionsParams{
+		UserID:  userID,
+		OwnerID: ownerID,
+	})
+	if err == nil {
+		for _, gp := range groupPerms {
+			merge(gp.AppID, domain.PermissionLevel(gp.PermissionLevel))
+		}
+	}
+	return effective, nil
 }

@@ -26,8 +26,13 @@ type ListUsersHandler struct{ Service *application.Service }
 
 type ListUsersRequest struct{}
 
+type StaffUserWithGroupsPayload struct {
+	*hubv1.StaffUserPayload
+	Groups []GroupSummaryPayload `json:"groups"`
+}
+
 type ListUsersResponse struct {
-	Users []*hubv1.StaffUserPayload `json:"users"`
+	Users []StaffUserWithGroupsPayload `json:"users"`
 }
 
 func newProtoStaffUser(u domain.StaffUser) *hubv1.StaffUserPayload {
@@ -64,9 +69,16 @@ func (h *ListUsersHandler) Serve(ctx context.Context, _ *ListUsersRequest) (List
 		}
 	}
 
-	payloads := make([]*hubv1.StaffUserPayload, 0, len(users))
+	payloads := make([]StaffUserWithGroupsPayload, 0, len(users))
 	for _, u := range users {
-		payloads = append(payloads, newProtoStaffUser(u))
+		groups := make([]GroupSummaryPayload, 0, len(u.Groups))
+		for _, g := range u.Groups {
+			groups = append(groups, GroupSummaryPayload{ID: g.ID, Name: g.Name, Color: g.Color})
+		}
+		payloads = append(payloads, StaffUserWithGroupsPayload{
+			StaffUserPayload: newProtoStaffUser(u),
+			Groups:           groups,
+		})
 	}
 
 	return ListUsersResponse{Users: payloads}, nil
@@ -79,7 +91,7 @@ type GetMemberByIDHandler struct{ Service *application.Service }
 type GetMemberByIDRequest struct{}
 
 type GetMemberByIDResponse struct {
-	User *hubv1.StaffUserPayload `json:"user"`
+	User StaffUserWithGroupsPayload `json:"user"`
 }
 
 func (h *GetMemberByIDHandler) Serve(ctx context.Context, _ *GetMemberByIDRequest) (GetMemberByIDResponse, *errorModels.ServerError) {
@@ -118,7 +130,14 @@ func (h *GetMemberByIDHandler) Serve(ctx context.Context, _ *GetMemberByIDReques
 		}
 	}
 
-	return GetMemberByIDResponse{User: newProtoStaffUser(*member)}, nil
+	memberGroups := make([]GroupSummaryPayload, 0, len(member.Groups))
+	for _, g := range member.Groups {
+		memberGroups = append(memberGroups, GroupSummaryPayload{ID: g.ID, Name: g.Name, Color: g.Color})
+	}
+	return GetMemberByIDResponse{User: StaffUserWithGroupsPayload{
+		StaffUserPayload: newProtoStaffUser(*member),
+		Groups:           memberGroups,
+	}}, nil
 }
 
 // ─── Invite User ──────────────────────────────────────────────────────────────
@@ -133,6 +152,7 @@ type InviteUserRequest struct {
 	Password string   `json:"password"`
 	Apps     []string `json:"apps"`
 	Role     string   `json:"role"`
+	GroupID  int64    `json:"group_id"`
 }
 
 type InviteUserResponse = hubv1.InviteUserResponse
@@ -188,6 +208,10 @@ func (h *InviteUserHandler) Serve(ctx context.Context, req *InviteUserRequest) (
 		defer cancel()
 		h.Service.RecordSeatChange(bgCtx, ownerID)
 	}()
+
+	if req.GroupID > 0 {
+		_ = h.Service.AddGroupMembers(ctx, ownerID, req.GroupID, ownerID, []int64{userID})
+	}
 
 	// Only send invite email if no password was set manually
 	if req.Password == "" && token != "" {
@@ -502,6 +526,14 @@ func (h *MeHandler) Serve(ctx context.Context, req *MeRequest) (MeResponse, *err
 		if subErr == nil {
 			planSlug = slug
 			subscriptionStatus = status
+		}
+	} else {
+		effectiveApps, effectiveErr := h.Service.GetUserEffectiveApps(ctx, businessID, userID)
+		if effectiveErr == nil && len(effectiveApps) > 0 {
+			apps = make([]string, 0, len(effectiveApps))
+			for app := range effectiveApps {
+				apps = append(apps, app)
+			}
 		}
 	}
 

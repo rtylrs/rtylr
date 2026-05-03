@@ -1,0 +1,64 @@
+-- name: CreateGroup :execresult
+INSERT INTO user_groups (owner_id, name, description, color)
+VALUES (?, ?, ?, ?);
+
+-- name: GetGroup :one
+SELECT id, owner_id, name, COALESCE(description,'') AS description, color, created_at, updated_at
+FROM user_groups WHERE id = ? AND owner_id = ?;
+
+-- name: ListGroups :many
+SELECT g.id, g.owner_id, g.name, COALESCE(g.description,'') AS description, g.color, g.created_at, g.updated_at,
+       COUNT(m.user_id) AS member_count
+FROM user_groups g
+LEFT JOIN user_group_members m ON m.group_id = g.id
+WHERE g.owner_id = ?
+GROUP BY g.id
+ORDER BY g.created_at DESC;
+
+-- name: UpdateGroup :exec
+UPDATE user_groups SET name = ?, description = ?, color = ?, updated_at = NOW()
+WHERE id = ? AND owner_id = ?;
+
+-- name: DeleteGroup :exec
+DELETE FROM user_groups WHERE id = ? AND owner_id = ?;
+
+-- name: UpsertGroupAppPermission :exec
+INSERT INTO user_group_app_permissions (group_id, app_id, permission_level)
+VALUES (?, ?, ?)
+ON DUPLICATE KEY UPDATE permission_level = VALUES(permission_level);
+
+-- name: DeleteGroupAppPermissions :exec
+DELETE FROM user_group_app_permissions WHERE group_id = ?;
+
+-- name: ListGroupAppPermissions :many
+SELECT group_id, app_id, permission_level FROM user_group_app_permissions WHERE group_id = ?;
+
+-- name: AddGroupMember :exec
+INSERT IGNORE INTO user_group_members (group_id, user_id, owner_id, added_by)
+VALUES (?, ?, ?, ?);
+
+-- name: RemoveGroupMember :exec
+DELETE FROM user_group_members WHERE group_id = ? AND user_id = ?;
+
+-- name: ListGroupMembers :many
+SELECT m.user_id, u.email, COALESCE(u.full_name,'') AS full_name, m.added_at
+FROM user_group_members m
+JOIN users u ON u.id = m.user_id
+WHERE m.group_id = ?
+ORDER BY m.added_at DESC;
+
+-- name: ListUserGroups :many
+SELECT g.id, g.name, g.color
+FROM user_group_members m
+JOIN user_groups g ON g.id = m.group_id
+WHERE m.user_id = ? AND m.owner_id = ?
+ORDER BY g.name;
+
+-- name: ListUserGroupAppPermissions :many
+SELECT gap.app_id, gap.permission_level
+FROM user_group_members m
+JOIN user_group_app_permissions gap ON gap.group_id = m.group_id
+WHERE m.user_id = ? AND m.owner_id = ?;
+
+-- name: CountGroupMembers :one
+SELECT COUNT(*) FROM user_group_members WHERE group_id = ?;

@@ -304,6 +304,102 @@ func (s *Service) RecordSeatChange(ctx context.Context, ownerID int64) {
 		newCount, ownerID)
 }
 
+// ─── Groups ──────────────────────────────────────────────────────────────────
+
+func (s *Service) CreateGroup(ctx context.Context, ownerID int64, input domain.CreateGroupInput) (int64, error) {
+	if input.Name == "" {
+		return 0, errors.New("name is required")
+	}
+	if input.Color == "" {
+		input.Color = "#6366f1"
+	}
+	return s.repo.CreateGroup(ctx, ownerID, input)
+}
+
+func (s *Service) ListGroups(ctx context.Context, ownerID int64) ([]domain.Group, error) {
+	return s.repo.ListGroups(ctx, ownerID)
+}
+
+func (s *Service) GetGroup(ctx context.Context, ownerID, groupID int64) (*domain.Group, error) {
+	return s.repo.GetGroup(ctx, ownerID, groupID)
+}
+
+func (s *Service) GetGroupDetail(ctx context.Context, ownerID, groupID int64) (*domain.GroupDetail, error) {
+	return s.repo.GetGroupDetail(ctx, ownerID, groupID)
+}
+
+func (s *Service) UpdateGroup(ctx context.Context, ownerID, groupID int64, input domain.UpdateGroupInput) error {
+	if input.Name == "" {
+		return errors.New("name is required")
+	}
+	return s.repo.UpdateGroup(ctx, ownerID, groupID, input)
+}
+
+func (s *Service) DeleteGroup(ctx context.Context, ownerID, groupID int64) error {
+	return s.repo.DeleteGroup(ctx, ownerID, groupID)
+}
+
+func (s *Service) AddGroupMembers(ctx context.Context, ownerID, groupID, callerID int64, userIDs []int64) error {
+	if len(userIDs) == 0 {
+		return errors.New("no user IDs provided")
+	}
+	return s.repo.AddGroupMembers(ctx, ownerID, groupID, callerID, userIDs)
+}
+
+func (s *Service) RemoveGroupMember(ctx context.Context, ownerID, groupID, userID int64) error {
+	if _, err := s.repo.GetGroup(ctx, ownerID, groupID); err != nil {
+		return domain.ErrPermissionNotFound
+	}
+	return s.repo.RemoveGroupMember(ctx, groupID, userID)
+}
+
+func (s *Service) GetUserGroups(ctx context.Context, ownerID, userID int64) ([]domain.GroupSummary, error) {
+	return s.repo.GetUserGroups(ctx, ownerID, userID)
+}
+
+func (s *Service) GetUserEffectiveApps(ctx context.Context, ownerID, userID int64) (map[string]domain.PermissionLevel, error) {
+	return s.repo.GetUserEffectiveApps(ctx, ownerID, userID)
+}
+
+// BulkInvite invites multiple users with the same role/apps/group in one call.
+func (s *Service) BulkInvite(ctx context.Context, ownerID int64, input domain.BulkInviteInput) ([]domain.BulkInviteResult, error) {
+	var results []domain.BulkInviteResult
+	for _, email := range input.Emails {
+		email = strings.ToLower(strings.TrimSpace(email))
+		if email == "" {
+			continue
+		}
+		userID, token, err := s.InviteUser(ctx, ownerID, domain.InviteUserInput{
+			Email: email,
+			Apps:  input.Apps,
+			Role:  input.Role,
+		})
+		if err != nil {
+			results = append(results, domain.BulkInviteResult{
+				Email:   email,
+				Status:  "error",
+				Message: err.Error(),
+			})
+			continue
+		}
+		if input.GroupID > 0 {
+			_ = s.repo.AddGroupMembers(ctx, ownerID, input.GroupID, ownerID, []int64{userID})
+		}
+		status := "invited"
+		if token == "" {
+			status = "existing"
+		}
+		results = append(results, domain.BulkInviteResult{
+			Email:   email,
+			UserID:  userID,
+			Token:   token,
+			Status:  status,
+			Message: "ok",
+		})
+	}
+	return results, nil
+}
+
 func (s *Service) GetMe(ctx context.Context, ownerID, userID int64) (string, string, []string, domain.Role, error) {
 	email, fullName, err := s.repo.GetUserByID(ctx, userID)
 	if err != nil {

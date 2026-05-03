@@ -52,6 +52,7 @@ type StaffUser struct {
 	Apps      []string
 	Role      Role
 	IsActive  bool
+	Groups    []GroupSummary
 }
 
 type InviteUserInput struct {
@@ -66,4 +67,76 @@ type UpdatePermissionsInput struct {
 	UserID int64
 	Apps   []string
 	Role   Role
+}
+
+type PermissionLevel string
+
+const (
+	PermLevelUse  PermissionLevel = "use"
+	PermLevelEdit PermissionLevel = "edit"
+	PermLevelOwn  PermissionLevel = "own"
+)
+
+type AppPermission struct {
+	AppID           string
+	PermissionLevel PermissionLevel
+}
+
+type GroupSummary struct {
+	ID    int64
+	Name  string
+	Color string
+}
+
+type Group struct {
+	ID             int64
+	OwnerID        int64
+	Name           string
+	Description    string
+	Color          string
+	AppPermissions []AppPermission
+	MemberCount    int
+	CreatedAt      time.Time
+	UpdatedAt      time.Time
+}
+
+type GroupMember struct {
+	UserID   int64
+	Email    string
+	FullName string
+	AddedAt  time.Time
+}
+
+type GroupDetail struct {
+	Group
+	Members []GroupMember
+}
+
+type CreateGroupInput struct {
+	Name           string
+	Description    string
+	Color          string
+	AppPermissions []AppPermission
+}
+
+type UpdateGroupInput struct {
+	Name           string
+	Description    string
+	Color          string
+	AppPermissions []AppPermission
+}
+
+type BulkInviteInput struct {
+	Emails  []string
+	Role    Role
+	Apps    []string
+	GroupID int64
+}
+
+type BulkInviteResult struct {
+	Email   string
+	UserID  int64
+	Token   string
+	Status  string
+	Message string
 }
