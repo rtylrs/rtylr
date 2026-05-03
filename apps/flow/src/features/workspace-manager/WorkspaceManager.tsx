@@ -1,6 +1,7 @@
-import React, { useState } from 'react';
+import React, { useState, useMemo } from 'react';
 import { motion } from 'motion/react';
-import { Users, Plus, Trash2, Shield, Eye, Crown } from 'lucide-react';
+import { Users, Plus, Trash2, Shield, Eye, Crown, Search } from 'lucide-react';
+
 import { toast } from 'sonner';
 import { useParams } from 'react-router-dom';
 import {
@@ -9,6 +10,7 @@ import {
   useRemoveWorkspaceMember,
   useUpdateWorkspaceMemberRole,
 } from './useWorkspaceManager';
+import { useFlowTeam } from '../../shared/hooks/queries/useFlowTeam';
 import type { ApiWorkspaceMember } from '../../shared/services/flowApi';
 
 const ROLE_LABELS: Record<string, { label: string; icon: React.ReactNode; color: string }> = {
@@ -110,28 +112,41 @@ const WorkspaceManager: React.FC = () => {
   const wsId = workspaceId ?? '';
   const { data: members = [], isLoading } = useWorkspaceMembers(wsId);
   const addMember = useAddWorkspaceMember(wsId);
+  const { data: orgMembers = [] } = useFlowTeam();
 
-  const [inviteInput, setInviteInput] = useState('');
+  const [selectedUserId, setSelectedUserId] = useState('');
   const [inviteRole, setInviteRole] = useState<'manager' | 'member' | 'viewer'>('member');
   const [showInvite, setShowInvite] = useState(false);
+  const [search, setSearch] = useState('');
 
   const managerCount = members.filter((m) => m.role === 'manager').length;
 
-  const handleInvite = () => {
-    const trimmed = inviteInput.trim();
-    if (!trimmed) return toast.error('Enter a user ID or email');
-    if (trimmed.includes('@')) {
-      toast.info('Email invite coming soon');
+  const existingUserIds = useMemo(() => new Set(members.map((m) => String(m.userId))), [members]);
+
+  const availableMembers = useMemo(
+    () =>
+      orgMembers.filter(
+        (m) =>
+          !existingUserIds.has(String(m.id)) &&
+          (search === '' ||
+            m.name.toLowerCase().includes(search.toLowerCase()) ||
+            m.email.toLowerCase().includes(search.toLowerCase()))
+      ),
+    [orgMembers, existingUserIds, search]
+  );
+
+  const handleAddMember = (): void => {
+    if (!selectedUserId) {
+      toast.error('Select a team member');
       return;
     }
-    const userId = Number(trimmed);
-    if (isNaN(userId) || userId === 0) return toast.error('Enter a valid user ID');
     addMember.mutate(
-      { workspace_id: Number(wsId), user_id: userId, role: inviteRole },
+      { workspace_id: Number(wsId), user_id: Number(selectedUserId), role: inviteRole },
       {
         onSuccess: () => {
-          toast.success('Member added');
-          setInviteInput('');
+          toast.success('Member added to workspace');
+          setSelectedUserId('');
+          setSearch('');
           setShowInvite(false);
         },
         onError: () => toast.error('Failed to add member'),
@@ -171,21 +186,74 @@ const WorkspaceManager: React.FC = () => {
             style={{ background: 'var(--flow-card)', border: '1px solid var(--flow-border)' }}
           >
             <p className="text-[12px] font-semibold" style={{ color: 'var(--flow-text)' }}>
-              Add member by user ID
+              Add a team member to this workspace
             </p>
-            <div className="flex gap-2">
+            <div
+              className="flex items-center gap-2 rounded px-3 py-2"
+              style={{
+                background: 'var(--flow-input-bg)',
+                border: '1px solid var(--flow-border)',
+              }}
+            >
+              <Search size={12} style={{ color: 'var(--flow-text-dim)' }} />
               <input
                 type="text"
-                placeholder="User ID or email"
-                value={inviteInput}
-                onChange={(e) => setInviteInput(e.target.value)}
-                className="flex-1 rounded px-3 py-2 text-[12px] outline-none"
-                style={{
-                  background: 'var(--flow-input-bg)',
-                  border: '1px solid var(--flow-border)',
-                  color: 'var(--flow-text)',
+                placeholder="Search by name or email..."
+                value={search}
+                onChange={(e) => {
+                  setSearch(e.target.value);
+                  setSelectedUserId('');
                 }}
+                className="flex-1 bg-transparent outline-none text-[12px]"
+                style={{ color: 'var(--flow-text)' }}
               />
+            </div>
+            {search && availableMembers.length > 0 && (
+              <div
+                className="rounded-lg overflow-hidden divide-y divide-[var(--flow-border)] max-h-48 overflow-y-auto"
+                style={{ border: '1px solid var(--flow-border)' }}
+              >
+                {availableMembers.map((m) => (
+                  <button
+                    key={m.id}
+                    type="button"
+                    onClick={() => {
+                      setSelectedUserId(String(m.id));
+                      setSearch(m.name || m.email);
+                    }}
+                    className="w-full flex items-center gap-3 px-3 py-2.5 text-left hover:bg-[var(--flow-hover)] transition-colors"
+                    style={{
+                      background:
+                        selectedUserId === String(m.id) ? 'var(--flow-active)' : 'var(--flow-card)',
+                    }}
+                  >
+                    <span
+                      className="h-6 w-6 rounded-full flex items-center justify-center text-[10px] font-bold shrink-0"
+                      style={{ background: 'rgba(100,197,185,0.15)', color: '#64C5B9' }}
+                    >
+                      {(m.name || m.email).charAt(0).toUpperCase()}
+                    </span>
+                    <div className="flex-1 min-w-0">
+                      <p
+                        className="text-[12px] font-medium truncate"
+                        style={{ color: 'var(--flow-text)' }}
+                      >
+                        {m.name}
+                      </p>
+                      <p className="text-[10px] truncate" style={{ color: 'var(--flow-text-dim)' }}>
+                        {m.email}
+                      </p>
+                    </div>
+                  </button>
+                ))}
+              </div>
+            )}
+            {search && availableMembers.length === 0 && (
+              <p className="text-[11px]" style={{ color: 'var(--flow-text-dim)' }}>
+                No org members found. Only existing team members can be added to workspaces.
+              </p>
+            )}
+            <div className="flex items-center gap-2">
               <select
                 value={inviteRole}
                 onChange={(e) => setInviteRole(e.target.value as 'manager' | 'member' | 'viewer')}
@@ -201,12 +269,24 @@ const WorkspaceManager: React.FC = () => {
                 <option value="viewer">Viewer</option>
               </select>
               <button
-                onClick={handleInvite}
-                disabled={addMember.isPending}
-                className="px-4 py-2 rounded text-[12px] font-semibold"
+                onClick={handleAddMember}
+                disabled={!selectedUserId || addMember.isPending}
+                className="flex-1 px-4 py-2 rounded text-[12px] font-semibold disabled:opacity-40"
                 style={{ background: '#64C5B9', color: '#0a0a0a' }}
               >
-                {addMember.isPending ? 'Adding...' : 'Add'}
+                {addMember.isPending ? 'Adding...' : 'Add to workspace'}
+              </button>
+              <button
+                type="button"
+                onClick={() => {
+                  setShowInvite(false);
+                  setSearch('');
+                  setSelectedUserId('');
+                }}
+                className="px-3 py-2 rounded text-[12px]"
+                style={{ color: 'var(--flow-text-muted)' }}
+              >
+                Cancel
               </button>
             </div>
           </motion.div>
@@ -238,34 +318,6 @@ const WorkspaceManager: React.FC = () => {
             ))}
           </div>
         )}
-
-        <div
-          className="rounded-lg p-4 mt-4"
-          style={{ background: 'var(--flow-card)', border: '1px solid var(--flow-border)' }}
-        >
-          <p
-            className="text-[11px] font-semibold uppercase tracking-wider mb-2"
-            style={{ color: 'var(--flow-text-muted)' }}
-          >
-            Roles
-          </p>
-          <div className="space-y-1.5 text-[11px]" style={{ color: 'var(--flow-text-dim)' }}>
-            <div className="flex items-center gap-2">
-              <Crown size={11} style={{ color: '#f59e0b' }} />
-              <strong style={{ color: 'var(--flow-text)' }}>Manager</strong>, can create/archive
-              projects, manage all members
-            </div>
-            <div className="flex items-center gap-2">
-              <Shield size={11} style={{ color: '#64C5B9' }} />
-              <strong style={{ color: 'var(--flow-text)' }}>Member</strong>, can create/edit tasks
-              in their projects
-            </div>
-            <div className="flex items-center gap-2">
-              <Eye size={11} style={{ color: '#8b5cf6' }} />
-              <strong style={{ color: 'var(--flow-text)' }}>Viewer</strong>, read-only access
-            </div>
-          </div>
-        </div>
       </div>
     </div>
   );

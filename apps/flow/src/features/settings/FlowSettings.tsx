@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useMemo } from 'react';
 import { motion } from 'motion/react';
 import {
   Bell,
@@ -6,8 +6,6 @@ import {
   Keyboard,
   Sparkles,
   Info,
-  User,
-  Save,
   Tag,
   Trash2,
   Users,
@@ -18,6 +16,8 @@ import {
   CheckCircle2,
   XCircle,
   AlertCircle,
+  LayoutDashboard,
+  Plus,
 } from 'lucide-react';
 import { useQuery, useMutation } from '@tanstack/react-query';
 import { unwrap } from '@voxire/api';
@@ -45,6 +45,10 @@ import type { ApiUserSettings } from '../../shared/services/flowApi';
 import { useUserStore } from '../../shared/stores/userStore';
 import { useFlowStore } from '../../shared/stores/flowStore';
 import { useLabels, useCreateLabel, useDeleteLabel } from '../../features/tasks/useLabels';
+import {
+  useWorkspaces,
+  useCreateWorkspace,
+} from '../../features/workspace-dashboard/useWorkspaces';
 
 const ACCENT = '#64C5B9';
 
@@ -54,9 +58,11 @@ interface SettingsSection {
   icon: React.ComponentType<{ size?: number; className?: string }>;
 }
 
-function buildSections(t: (key: string) => string): SettingsSection[] {
-  return [
-    { id: 'profile', label: t('settings.profile'), icon: User },
+function buildSections(
+  t: (key: string) => string,
+  canManageWorkspaces: boolean
+): SettingsSection[] {
+  const sections: SettingsSection[] = [
     { id: 'team', label: t('settings.team'), icon: Users },
     { id: 'billing', label: t('settings.billing'), icon: CreditCard },
     { id: 'notifications', label: t('settings.notifications'), icon: Bell },
@@ -66,40 +72,29 @@ function buildSections(t: (key: string) => string): SettingsSection[] {
     { id: 'shortcuts', label: t('settings.shortcuts'), icon: Keyboard },
     { id: 'about', label: t('settings.about'), icon: Info },
   ];
+  if (canManageWorkspaces) {
+    sections.unshift({ id: 'workspaces', label: 'Workspaces', icon: LayoutDashboard });
+  }
+  return sections;
 }
 
-const ProfileSection: React.FC = () => {
-  const { t } = useTranslation();
-  const user = useUserStore((s) => s.user);
+const WorkspacesSection: React.FC = () => {
+  const { data: workspaces = [], isLoading } = useWorkspaces();
+  const createWorkspace = useCreateWorkspace();
+  const [showCreate, setShowCreate] = useState(false);
+  const [wsName, setWsName] = useState('');
+  const [wsColor, setWsColor] = useState('#64C5B9');
 
-  const [name, setName] = useState(user?.name || '');
-  const [email, setEmail] = useState(user?.email || '');
-  const [currentPassword, setCurrentPassword] = useState('');
-  const [newPassword, setNewPassword] = useState('');
-
-  useEffect(() => {
-    if (user) {
-      setName(user.name || '');
-      setEmail(user.email || '');
-    }
-  }, [user]);
-
-  const updateProfile = useMutation({
-    mutationFn: (data: { name?: string; email?: string }) => unwrap(flowApi.updateProfile(data)),
-    onSuccess: () => toast.success(t('toasts.profile.updated')),
-    onError: () => toast.error(t('toasts.profile.updateFailed')),
-  });
-
-  const changePassword = useMutation({
-    mutationFn: (data: { currentPassword: string; newPassword: string }) =>
-      unwrap(flowApi.changePassword(data)),
-    onSuccess: () => {
-      toast.success(t('toasts.password.changed'));
-      setCurrentPassword('');
-      setNewPassword('');
-    },
-    onError: () => toast.error(t('toasts.password.changeFailed')),
-  });
+  const WORKSPACE_COLORS = [
+    '#64C5B9',
+    '#3b82f6',
+    '#8b5cf6',
+    '#f59e0b',
+    '#ef4444',
+    '#22c55e',
+    '#ec4899',
+    '#f97316',
+  ];
 
   const inputStyle = {
     background: 'var(--flow-input-bg)',
@@ -107,109 +102,133 @@ const ProfileSection: React.FC = () => {
     color: 'var(--flow-text)',
   };
 
+  const handleCreate = (): void => {
+    const name = wsName.trim();
+    if (!name) return;
+    createWorkspace.mutate(
+      { name, color: wsColor },
+      {
+        onSuccess: () => {
+          toast.success('Workspace created');
+          setWsName('');
+          setWsColor('#64C5B9');
+          setShowCreate(false);
+        },
+        onError: () => toast.error('Failed to create workspace'),
+      }
+    );
+  };
+
   return (
-    <div className="space-y-8">
+    <div className="space-y-6">
       <div>
         <h2 className="text-[15px] font-semibold mb-1" style={{ color: 'var(--flow-text)' }}>
-          Profile
+          Workspaces
         </h2>
         <p className="text-[12px]" style={{ color: 'var(--flow-text-muted)' }}>
-          Update your name and email address.
+          Manage your Flow workspaces.
         </p>
       </div>
 
-      <div className="space-y-4">
-        <div>
-          <label
-            className="block text-[12px] font-medium mb-1.5"
-            style={{ color: 'var(--flow-text-muted)' }}
-          >
-            Name
-          </label>
+      {showCreate ? (
+        <div
+          className="rounded-xl p-4 space-y-3"
+          style={{ border: '1px solid var(--flow-border)', background: 'var(--flow-card)' }}
+        >
+          <h3 className="text-[13px] font-semibold" style={{ color: 'var(--flow-text)' }}>
+            New workspace
+          </h3>
           <input
             type="text"
-            value={name}
-            onChange={(e) => setName(e.target.value)}
+            placeholder="Workspace name"
+            value={wsName}
+            onChange={(e) => setWsName(e.target.value)}
+            onKeyDown={(e) => e.key === 'Enter' && handleCreate()}
             className="w-full rounded-lg px-3 py-2 text-[13px] outline-none"
             style={inputStyle}
           />
+          <div>
+            <p className="text-[11px] mb-2" style={{ color: 'var(--flow-text-muted)' }}>
+              Color
+            </p>
+            <div className="flex gap-2">
+              {WORKSPACE_COLORS.map((c) => (
+                <button
+                  key={c}
+                  type="button"
+                  onClick={() => setWsColor(c)}
+                  className="h-6 w-6 rounded-full transition-all"
+                  style={{
+                    background: c,
+                    outline: wsColor === c ? `2px solid ${c}` : 'none',
+                    outlineOffset: 2,
+                    boxShadow: wsColor === c ? '0 0 0 2px var(--flow-bg)' : 'none',
+                  }}
+                />
+              ))}
+            </div>
+          </div>
+          <div className="flex items-center gap-2">
+            <button
+              type="button"
+              disabled={!wsName.trim() || createWorkspace.isPending}
+              onClick={handleCreate}
+              className="flex items-center gap-1.5 px-3 py-1.5 rounded-lg text-[12px] font-semibold disabled:opacity-40"
+              style={{ background: ACCENT, color: '#0a0a0a' }}
+            >
+              <Plus size={12} />
+              {createWorkspace.isPending ? 'Creating…' : 'Create workspace'}
+            </button>
+            <button
+              type="button"
+              onClick={() => setShowCreate(false)}
+              className="px-3 py-1.5 rounded-lg text-[12px]"
+              style={{ color: 'var(--flow-text-muted)' }}
+            >
+              Cancel
+            </button>
+          </div>
         </div>
-        <div>
-          <label
-            className="block text-[12px] font-medium mb-1.5"
-            style={{ color: 'var(--flow-text-muted)' }}
-          >
-            Email
-          </label>
-          <input
-            type="email"
-            value={email}
-            onChange={(e) => setEmail(e.target.value)}
-            className="w-full rounded-lg px-3 py-2 text-[13px] outline-none"
-            style={inputStyle}
-          />
-        </div>
+      ) : (
         <button
           type="button"
-          disabled={updateProfile.isPending}
-          onClick={() => updateProfile.mutate({ name, email })}
-          className="flex items-center gap-1.5 px-3 py-1.5 rounded-lg text-[12px] font-semibold disabled:opacity-40"
+          onClick={() => setShowCreate(true)}
+          className="flex items-center gap-1.5 px-3 py-1.5 rounded-lg text-[12px] font-semibold"
           style={{ background: ACCENT, color: '#0a0a0a' }}
         >
-          <Save size={12} />
-          {updateProfile.isPending ? 'Saving…' : 'Save profile'}
+          <Plus size={12} />
+          New workspace
         </button>
-      </div>
+      )}
 
-      <div className="pt-6" style={{ borderTop: '1px solid var(--flow-border)' }}>
-        <h3 className="text-[13px] font-semibold mb-1" style={{ color: 'var(--flow-text)' }}>
-          Change password
-        </h3>
-        <p className="text-[12px] mb-4" style={{ color: 'var(--flow-text-muted)' }}>
-          Leave blank to keep your current password.
-        </p>
-        <div className="space-y-4">
-          <div>
-            <label
-              className="block text-[12px] font-medium mb-1.5"
-              style={{ color: 'var(--flow-text-muted)' }}
-            >
-              Current password
-            </label>
-            <input
-              type="password"
-              value={currentPassword}
-              onChange={(e) => setCurrentPassword(e.target.value)}
-              className="w-full rounded-lg px-3 py-2 text-[13px] outline-none"
-              style={inputStyle}
+      {isLoading ? (
+        <div className="space-y-2">
+          {[1, 2].map((i) => (
+            <div
+              key={i}
+              className="h-12 rounded-xl animate-pulse"
+              style={{ background: 'var(--flow-hover)' }}
             />
-          </div>
-          <div>
-            <label
-              className="block text-[12px] font-medium mb-1.5"
-              style={{ color: 'var(--flow-text-muted)' }}
-            >
-              New password
-            </label>
-            <input
-              type="password"
-              value={newPassword}
-              onChange={(e) => setNewPassword(e.target.value)}
-              className="w-full rounded-lg px-3 py-2 text-[13px] outline-none"
-              style={inputStyle}
-            />
-          </div>
-          <button
-            type="button"
-            disabled={changePassword.isPending || !currentPassword || !newPassword}
-            onClick={() => changePassword.mutate({ currentPassword, newPassword })}
-            className="flex items-center gap-1.5 px-3 py-1.5 rounded-lg text-[12px] font-semibold disabled:opacity-40"
-            style={{ background: 'var(--flow-hover)', color: 'var(--flow-text)' }}
-          >
-            {changePassword.isPending ? 'Changing…' : 'Change password'}
-          </button>
+          ))}
         </div>
-      </div>
+      ) : (
+        <div
+          className="rounded-xl divide-y divide-[var(--flow-border)]"
+          style={{ border: '1px solid var(--flow-border)' }}
+        >
+          {workspaces.map((ws) => (
+            <div key={ws.id} className="flex items-center gap-3 px-4 py-3">
+              <span
+                className="h-3 w-3 rounded-full shrink-0"
+                style={{ background: ws.color || ACCENT }}
+              />
+              <p className="text-[13px] font-medium flex-1" style={{ color: 'var(--flow-text)' }}>
+                {ws.name}
+              </p>
+            </div>
+          ))}
+        </div>
+      )}
     </div>
   );
 };
@@ -1136,7 +1155,7 @@ const BillingSection: React.FC = () => {
 // ── Section content map ───────────────────────────────────────────────────────
 
 const SECTION_CONTENT: Record<string, React.FC> = {
-  profile: ProfileSection,
+  workspaces: WorkspacesSection,
   team: TeamSection,
   billing: BillingSection,
   notifications: NotificationsSection,
@@ -1149,7 +1168,7 @@ const SECTION_CONTENT: Record<string, React.FC> = {
 
 const PlaceholderSection: React.FC<{ id: string }> = ({ id }) => {
   const { t } = useTranslation();
-  const sections = buildSections(t);
+  const sections = buildSections(t, false);
   return (
     <div className="flex flex-col items-center justify-center py-20 text-center">
       <p className="text-[14px] font-medium mb-1" style={{ color: 'var(--flow-text-muted)' }}>
@@ -1162,10 +1181,25 @@ const PlaceholderSection: React.FC<{ id: string }> = ({ id }) => {
   );
 };
 
+function getRoleFromToken(token: string | null): string {
+  if (!token) return '';
+  try {
+    const payload = JSON.parse(atob(token.split('.')[1]));
+    return (payload.role as string) || '';
+  } catch {
+    return '';
+  }
+}
+
+const MANAGE_WORKSPACE_ROLES = new Set(['owner', 'admin', 'manager']);
+
 const FlowSettings: React.FC = () => {
   const { t } = useTranslation();
-  const [activeSection, setActiveSection] = useState('profile');
-  const sections = buildSections(t);
+  const token = useUserStore((s) => s.token);
+  const role = useMemo(() => getRoleFromToken(token), [token]);
+  const canManageWorkspaces = MANAGE_WORKSPACE_ROLES.has(role);
+  const [activeSection, setActiveSection] = useState(canManageWorkspaces ? 'workspaces' : 'team');
+  const sections = buildSections(t, canManageWorkspaces);
 
   const ActiveComponent =
     SECTION_CONTENT[activeSection] || (() => <PlaceholderSection id={activeSection} />);

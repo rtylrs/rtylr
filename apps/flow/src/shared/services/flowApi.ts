@@ -547,29 +547,4 @@ export const flowApi = {
 
   changePassword: (data: { currentPassword: string; newPassword: string }) =>
     safe.post('/account/password', data),
-
-  // -- Businesses ----------------------------------------------------------
-
-  getBusiness: (workspaceId: string) =>
-    safe.get<{ business: { id: string; name: string; color: string; icon: string } | null }>(
-      '/flow/workspaces/business',
-      { params: { workspace_id: workspaceId } }
-    ),
-
-  listBusinesses: () =>
-    safe.get<{ businesses: { id: string; name: string; color: string; icon: string }[] }>(
-      '/flow/businesses'
-    ),
-
-  createBusiness: (data: { name: string; color?: string; icon?: string }) =>
-    safe.post<{ business: { id: string; name: string; color: string; icon: string } }>(
-      '/flow/businesses',
-      data
-    ),
-
-  setWorkspaceBusiness: (workspaceId: string, businessId: string | null) =>
-    safe.put('/flow/workspaces/business', {
-      workspace_id: Number(workspaceId),
-      business_id: businessId ? Number(businessId) : null,
-    }),
 };
