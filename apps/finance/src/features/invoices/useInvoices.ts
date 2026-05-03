@@ -1,25 +1,26 @@
 import { unwrap } from '@voxire/api';
 import { z } from 'zod';
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
-import { financeApi, Invoice } from '../../shared/services/financeApi';
+import { safe } from '../../shared/lib/api';
+import type { Invoice } from '../../shared/services/financeApi';
 import { invoiceSchema } from '../../shared/schemas/invoices';
 import { unwrapList } from '../../shared/lib/unwrapList';
 
 export function useInvoices() {
-  return useQuery({
+  return useQuery<Invoice[]>({
     queryKey: ['invoices'],
-    queryFn: async () => {
-      const res = await unwrap(financeApi.getInvoices());
+    queryFn: async (): Promise<Invoice[]> => {
+      const res = await unwrap(safe.get<unknown>('/finance/invoices'));
       return z.array(invoiceSchema).parse(unwrapList(res, 'invoices')) as Invoice[];
     },
   });
 }
 
 export function useInvoiceDetail(id: string | undefined) {
-  return useQuery({
+  return useQuery<Invoice>({
     queryKey: ['invoice', id],
-    queryFn: async () => {
-      const res = await unwrap(financeApi.getInvoiceDetail(id!));
+    queryFn: async (): Promise<Invoice> => {
+      const res = await unwrap(safe.get<unknown>(`/finance/invoices/${id}`));
       return invoiceSchema.parse(res) as Invoice;
     },
     enabled: !!id,
@@ -29,7 +30,8 @@ export function useInvoiceDetail(id: string | undefined) {
 export function useCreateInvoice() {
   const qc = useQueryClient();
   return useMutation({
-    mutationFn: (data: Partial<Invoice>) => unwrap(financeApi.createInvoice(data)),
+    mutationFn: (data: Partial<Invoice>): Promise<Invoice> =>
+      unwrap(safe.post<Invoice>('/finance/invoices', data)),
     onSuccess: () => qc.invalidateQueries({ queryKey: ['invoices'] }),
   });
 }
@@ -37,8 +39,8 @@ export function useCreateInvoice() {
 export function useUpdateInvoice() {
   const qc = useQueryClient();
   return useMutation({
-    mutationFn: ({ id, data }: { id: string; data: Partial<Invoice> }) =>
-      unwrap(financeApi.updateInvoice(id, data)),
+    mutationFn: ({ id, data }: { id: string; data: Partial<Invoice> }): Promise<Invoice> =>
+      unwrap(safe.put<Invoice>(`/finance/invoices/${id}`, data)),
     onSuccess: () => qc.invalidateQueries({ queryKey: ['invoices'] }),
   });
 }
@@ -46,7 +48,7 @@ export function useUpdateInvoice() {
 export function useDeleteInvoice() {
   const qc = useQueryClient();
   return useMutation({
-    mutationFn: (id: string) => unwrap(financeApi.deleteInvoice(id)),
+    mutationFn: (id: string): Promise<void> => unwrap(safe.delete<void>(`/finance/invoices/${id}`)),
     onSuccess: () => qc.invalidateQueries({ queryKey: ['invoices'] }),
   });
 }
@@ -54,8 +56,8 @@ export function useDeleteInvoice() {
 export function useUpdateInvoiceStatus() {
   const qc = useQueryClient();
   return useMutation({
-    mutationFn: ({ id, status }: { id: string; status: Invoice['status'] }) =>
-      unwrap(financeApi.updateInvoiceStatus(id, status)),
+    mutationFn: ({ id, status }: { id: string; status: Invoice['status'] }): Promise<void> =>
+      unwrap(safe.put<void>(`/finance/invoices/${id}/status`, { status })),
     onSuccess: () => qc.invalidateQueries({ queryKey: ['invoices'] }),
   });
 }
@@ -63,8 +65,8 @@ export function useUpdateInvoiceStatus() {
 export function useRecordPayment() {
   const qc = useQueryClient();
   return useMutation({
-    mutationFn: ({ id, amount }: { id: string; amount: number }) =>
-      unwrap(financeApi.recordPayment(id, amount)),
+    mutationFn: ({ id, amount }: { id: string; amount: number }): Promise<void> =>
+      unwrap(safe.post<void>(`/finance/invoices/${id}/payment`, { amount })),
     onSuccess: () => qc.invalidateQueries({ queryKey: ['invoices'] }),
   });
 }

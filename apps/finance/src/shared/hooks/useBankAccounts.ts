@@ -1,16 +1,16 @@
 import { unwrap } from '@voxire/api';
 import { z } from 'zod';
 import { useQuery } from '@tanstack/react-query';
-import { financeApi } from '../services/financeApi';
+import { safe } from '../lib/api';
 import { bankAccountSchema } from '../schemas/accounts';
+import { unwrapList } from '../lib/unwrapList';
 
 export function useBankAccounts() {
   return useQuery({
     queryKey: ['bank-accounts'],
     queryFn: async () => {
-      const res = await unwrap(financeApi.getBankAccounts());
-      const raw = res ?? [];
-      return z.array(bankAccountSchema).parse(Array.isArray(raw) ? raw : []);
+      const res = await unwrap(safe.get<unknown>('/finance/bank-accounts'));
+      return z.array(bankAccountSchema).parse(unwrapList(res, 'accounts', 'bank_accounts'));
     },
   });
 }
@@ -19,9 +19,11 @@ export function useBankTransactions(accountId?: string) {
   return useQuery({
     queryKey: ['bank-tx', accountId ?? 'all'],
     queryFn: async () => {
-      const res = await unwrap(financeApi.getBankAccounts());
-      const raw = res ?? [];
-      return z.array(bankAccountSchema).parse(Array.isArray(raw) ? raw : []);
+      const params = accountId ? { account_id: accountId } : undefined;
+      const res = await unwrap(
+        safe.get<unknown>('/finance/bank-accounts/transactions', { params })
+      );
+      return z.array(bankAccountSchema).parse(unwrapList(res, 'transactions'));
     },
   });
 }
