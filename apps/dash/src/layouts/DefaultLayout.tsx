@@ -33,7 +33,7 @@ import {
   Search,
   Sparkles,
 } from 'lucide-react';
-import { CaretPanel, CaretButton, useCaretStore } from '@voxire/caret';
+import { CaretPanel, useCaretStore } from '@voxire/caret';
 import { useUserStore } from '../shared/stores/userStore';
 import { useThemeStore } from '../shared/stores/themeStore';
 import { cn } from '../shared/lib/utils';
@@ -467,7 +467,6 @@ const DefaultLayout: React.FC<DefaultLayoutProps> = ({ children }) => {
                 <Sparkles size={13} />
                 <span className="text-[11px] font-semibold">Caret AI</span>
               </button>
-              <CaretButton />
               <button
                 onClick={() => navigate('/notifications')}
                 className="relative h-7 w-7 rounded-lg flex items-center justify-center transition-colors duration-150 hover:bg-[var(--dash-hover)]"
