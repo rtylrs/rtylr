@@ -72,13 +72,12 @@ type UpdatePermissionsInput struct {
 type PermissionLevel string
 
 const (
-	PermLevelUse  PermissionLevel = "use"
-	PermLevelEdit PermissionLevel = "edit"
-	PermLevelOwn  PermissionLevel = "own"
+	PermLevelViewer PermissionLevel = "viewer"
+	PermLevelEditor PermissionLevel = "editor"
 )
 
-type AppPermission struct {
-	AppID           string
+type ResourcePermission struct {
+	ResourceKey     string
 	PermissionLevel PermissionLevel
 }
 
@@ -89,15 +88,15 @@ type GroupSummary struct {
 }
 
 type Group struct {
-	ID             int64
-	OwnerID        int64
-	Name           string
-	Description    string
-	Color          string
-	AppPermissions []AppPermission
-	MemberCount    int
-	CreatedAt      time.Time
-	UpdatedAt      time.Time
+	ID                  int64
+	OwnerID             int64
+	Name                string
+	Description         string
+	Color               string
+	ResourcePermissions []ResourcePermission
+	MemberCount         int
+	CreatedAt           time.Time
+	UpdatedAt           time.Time
 }
 
 type GroupMember struct {
@@ -113,17 +112,17 @@ type GroupDetail struct {
 }
 
 type CreateGroupInput struct {
-	Name           string
-	Description    string
-	Color          string
-	AppPermissions []AppPermission
+	Name                string
+	Description         string
+	Color               string
+	ResourcePermissions []ResourcePermission
 }
 
 type UpdateGroupInput struct {
-	Name           string
-	Description    string
-	Color          string
-	AppPermissions []AppPermission
+	Name                string
+	Description         string
+	Color               string
+	ResourcePermissions []ResourcePermission
 }
 
 type BulkInviteInput struct {

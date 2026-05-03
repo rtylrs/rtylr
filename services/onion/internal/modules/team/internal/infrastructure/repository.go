@@ -382,21 +382,21 @@ func (r *Repository) CreateGroup(ctx context.Context, ownerID int64, input domai
 	if err != nil {
 		return 0, err
 	}
-	if err := r.setGroupAppPermissions(ctx, id, input.AppPermissions); err != nil {
+	if err := r.setGroupResourcePermissions(ctx, id, input.ResourcePermissions); err != nil {
 		return 0, err
 	}
 	return id, nil
 }
 
-func (r *Repository) setGroupAppPermissions(ctx context.Context, groupID int64, perms []domain.AppPermission) error {
-	if err := r.queries.DeleteGroupAppPermissions(ctx, groupID); err != nil {
+func (r *Repository) setGroupResourcePermissions(ctx context.Context, groupID int64, perms []domain.ResourcePermission) error {
+	if err := r.queries.DeleteGroupResourcePermissions(ctx, groupID); err != nil {
 		return err
 	}
 	for _, p := range perms {
-		if err := r.queries.UpsertGroupAppPermission(ctx, sqlc.UpsertGroupAppPermissionParams{
+		if err := r.queries.UpsertGroupResourcePermission(ctx, sqlc.UpsertGroupResourcePermissionParams{
 			GroupID:         groupID,
-			AppID:           p.AppID,
-			PermissionLevel: sqlc.UserGroupAppPermissionsPermissionLevel(p.PermissionLevel),
+			ResourceKey:     p.ResourceKey,
+			PermissionLevel: sqlc.UserGroupResourcePermissionsPermissionLevel(p.PermissionLevel),
 		}); err != nil {
 			return err
 		}
@@ -409,7 +409,7 @@ func (r *Repository) GetGroup(ctx context.Context, ownerID, groupID int64) (*dom
 	if err != nil {
 		return nil, err
 	}
-	perms, _ := r.queries.ListGroupAppPermissions(ctx, groupID)
+	perms, _ := r.queries.ListGroupResourcePermissions(ctx, groupID)
 	g := &domain.Group{
 		ID:          row.ID,
 		OwnerID:     row.OwnerID,
@@ -424,8 +424,8 @@ func (r *Repository) GetGroup(ctx context.Context, ownerID, groupID int64) (*dom
 		g.UpdatedAt = row.UpdatedAt.Time
 	}
 	for _, p := range perms {
-		g.AppPermissions = append(g.AppPermissions, domain.AppPermission{
-			AppID:           p.AppID,
+		g.ResourcePermissions = append(g.ResourcePermissions, domain.ResourcePermission{
+			ResourceKey:     p.ResourceKey,
 			PermissionLevel: domain.PermissionLevel(p.PermissionLevel),
 		})
 	}
@@ -453,10 +453,10 @@ func (r *Repository) ListGroups(ctx context.Context, ownerID int64) ([]domain.Gr
 		if row.UpdatedAt.Valid {
 			g.UpdatedAt = row.UpdatedAt.Time
 		}
-		perms, _ := r.queries.ListGroupAppPermissions(ctx, row.ID)
+		perms, _ := r.queries.ListGroupResourcePermissions(ctx, row.ID)
 		for _, p := range perms {
-			g.AppPermissions = append(g.AppPermissions, domain.AppPermission{
-				AppID:           p.AppID,
+			g.ResourcePermissions = append(g.ResourcePermissions, domain.ResourcePermission{
+				ResourceKey:     p.ResourceKey,
 				PermissionLevel: domain.PermissionLevel(p.PermissionLevel),
 			})
 		}
@@ -475,11 +475,11 @@ func (r *Repository) UpdateGroup(ctx context.Context, ownerID, groupID int64, in
 	}); err != nil {
 		return err
 	}
-	return r.setGroupAppPermissions(ctx, groupID, input.AppPermissions)
+	return r.setGroupResourcePermissions(ctx, groupID, input.ResourcePermissions)
 }
 
 func (r *Repository) DeleteGroup(ctx context.Context, ownerID, groupID int64) error {
-	if err := r.queries.DeleteGroupAppPermissions(ctx, groupID); err != nil {
+	if err := r.queries.DeleteGroupResourcePermissions(ctx, groupID); err != nil {
 		return err
 	}
 	return r.queries.DeleteGroup(ctx, sqlc.DeleteGroupParams{ID: groupID, OwnerID: ownerID})
@@ -542,33 +542,26 @@ func (r *Repository) GetUserGroups(ctx context.Context, ownerID, userID int64) (
 	return summaries, nil
 }
 
-// GetUserEffectiveApps returns the union of direct app access + all group app permissions.
-// Returns map[appID]highest_permission_level.
-func (r *Repository) GetUserEffectiveApps(ctx context.Context, ownerID, userID int64) (map[string]domain.PermissionLevel, error) {
+// GetUserEffectiveResources returns the union of all group resource permissions for a user.
+// Returns map[resourceKey]highest_permission_level — viewer=1, editor=2.
+func (r *Repository) GetUserEffectiveResources(ctx context.Context, ownerID, userID int64) (map[string]domain.PermissionLevel, error) {
 	effective := map[string]domain.PermissionLevel{}
 	levelRank := map[domain.PermissionLevel]int{
-		domain.PermLevelUse:  1,
-		domain.PermLevelEdit: 2,
-		domain.PermLevelOwn:  3,
+		domain.PermLevelViewer: 1,
+		domain.PermLevelEditor: 2,
 	}
-	merge := func(appID string, level domain.PermissionLevel) {
-		if existing, ok := effective[appID]; !ok || levelRank[level] > levelRank[existing] {
-			effective[appID] = level
+	merge := func(resourceKey string, level domain.PermissionLevel) {
+		if existing, ok := effective[resourceKey]; !ok || levelRank[level] > levelRank[existing] {
+			effective[resourceKey] = level
 		}
 	}
-	perm, err := r.GetPermission(ctx, ownerID, userID)
-	if err == nil && perm != nil {
-		for _, app := range perm.Apps {
-			merge(app, domain.PermLevelUse)
-		}
-	}
-	groupPerms, err := r.queries.ListUserGroupAppPermissions(ctx, sqlc.ListUserGroupAppPermissionsParams{
+	groupPerms, err := r.queries.ListUserGroupResourcePermissions(ctx, sqlc.ListUserGroupResourcePermissionsParams{
 		UserID:  userID,
 		OwnerID: ownerID,
 	})
 	if err == nil {
 		for _, gp := range groupPerms {
-			merge(gp.AppID, domain.PermissionLevel(gp.PermissionLevel))
+			merge(gp.ResourceKey, domain.PermissionLevel(gp.PermissionLevel))
 		}
 	}
 	return effective, nil

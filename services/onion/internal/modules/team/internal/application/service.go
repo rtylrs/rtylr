@@ -357,8 +357,8 @@ func (s *Service) GetUserGroups(ctx context.Context, ownerID, userID int64) ([]d
 	return s.repo.GetUserGroups(ctx, ownerID, userID)
 }
 
-func (s *Service) GetUserEffectiveApps(ctx context.Context, ownerID, userID int64) (map[string]domain.PermissionLevel, error) {
-	return s.repo.GetUserEffectiveApps(ctx, ownerID, userID)
+func (s *Service) GetUserEffectiveResources(ctx context.Context, ownerID, userID int64) (map[string]domain.PermissionLevel, error) {
+	return s.repo.GetUserEffectiveResources(ctx, ownerID, userID)
 }
 
 // BulkInvite invites multiple users with the same role/apps/group in one call.

@@ -10,12 +10,12 @@ CREATE TABLE IF NOT EXISTS user_groups (
     UNIQUE KEY uk_group_owner_name (owner_id, name)
 );
 
-CREATE TABLE IF NOT EXISTS user_group_app_permissions (
+CREATE TABLE IF NOT EXISTS user_group_resource_permissions (
     group_id BIGINT NOT NULL,
-    app_id VARCHAR(32) NOT NULL,
-    permission_level ENUM('use', 'edit', 'own') NOT NULL DEFAULT 'use',
-    PRIMARY KEY (group_id, app_id),
-    INDEX idx_ugap_group (group_id)
+    resource_key VARCHAR(64) NOT NULL,
+    permission_level ENUM('viewer', 'editor') NOT NULL DEFAULT 'viewer',
+    PRIMARY KEY (group_id, resource_key),
+    INDEX idx_ugrp_group (group_id)
 );
 
 CREATE TABLE IF NOT EXISTS user_group_members (

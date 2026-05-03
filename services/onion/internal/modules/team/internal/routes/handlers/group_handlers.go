@@ -14,8 +14,8 @@ import (
 
 // ─── shared payload types ────────────────────────────────────────────────────
 
-type AppPermissionPayload struct {
-	AppID           string `json:"app_id"`
+type ResourcePermissionPayload struct {
+	ResourceKey     string `json:"resource_key"`
 	PermissionLevel string `json:"permission_level"`
 }
 
@@ -26,15 +26,15 @@ type GroupSummaryPayload struct {
 }
 
 type GroupPayload struct {
-	ID             int64                  `json:"id"`
-	OwnerID        int64                  `json:"owner_id"`
-	Name           string                 `json:"name"`
-	Description    string                 `json:"description"`
-	Color          string                 `json:"color"`
-	AppPermissions []AppPermissionPayload `json:"app_permissions"`
-	MemberCount    int                    `json:"member_count"`
-	CreatedAt      string                 `json:"created_at"`
-	UpdatedAt      string                 `json:"updated_at"`
+	ID                  int64                       `json:"id"`
+	OwnerID             int64                       `json:"owner_id"`
+	Name                string                      `json:"name"`
+	Description         string                      `json:"description"`
+	Color               string                      `json:"color"`
+	ResourcePermissions []ResourcePermissionPayload `json:"resource_permissions"`
+	MemberCount         int                         `json:"member_count"`
+	CreatedAt           string                      `json:"created_at"`
+	UpdatedAt           string                      `json:"updated_at"`
 }
 
 type GroupMemberPayload struct {
@@ -50,20 +50,20 @@ type GroupDetailPayload struct {
 }
 
 func toGroupPayload(g domain.Group) GroupPayload {
-	perms := make([]AppPermissionPayload, 0, len(g.AppPermissions))
-	for _, p := range g.AppPermissions {
-		perms = append(perms, AppPermissionPayload{AppID: p.AppID, PermissionLevel: string(p.PermissionLevel)})
+	perms := make([]ResourcePermissionPayload, 0, len(g.ResourcePermissions))
+	for _, p := range g.ResourcePermissions {
+		perms = append(perms, ResourcePermissionPayload{ResourceKey: p.ResourceKey, PermissionLevel: string(p.PermissionLevel)})
 	}
 	return GroupPayload{
-		ID:             g.ID,
-		OwnerID:        g.OwnerID,
-		Name:           g.Name,
-		Description:    g.Description,
-		Color:          g.Color,
-		AppPermissions: perms,
-		MemberCount:    g.MemberCount,
-		CreatedAt:      g.CreatedAt.Format("2006-01-02T15:04:05Z07:00"),
-		UpdatedAt:      g.UpdatedAt.Format("2006-01-02T15:04:05Z07:00"),
+		ID:                  g.ID,
+		OwnerID:             g.OwnerID,
+		Name:                g.Name,
+		Description:         g.Description,
+		Color:               g.Color,
+		ResourcePermissions: perms,
+		MemberCount:         g.MemberCount,
+		CreatedAt:           g.CreatedAt.Format("2006-01-02T15:04:05Z07:00"),
+		UpdatedAt:           g.UpdatedAt.Format("2006-01-02T15:04:05Z07:00"),
 	}
 }
 
@@ -105,10 +105,10 @@ func (h *ListGroupsHandler) Serve(ctx context.Context, _ *ListGroupsRequest) (Li
 
 type CreateGroupHandler struct{ Service *application.Service }
 type CreateGroupRequest struct {
-	Name           string                 `json:"name"`
-	Description    string                 `json:"description"`
-	Color          string                 `json:"color"`
-	AppPermissions []AppPermissionPayload `json:"app_permissions"`
+	Name                string                      `json:"name"`
+	Description         string                      `json:"description"`
+	Color               string                      `json:"color"`
+	ResourcePermissions []ResourcePermissionPayload `json:"resource_permissions"`
 }
 type CreateGroupResponse struct {
 	Group GroupPayload `json:"group"`
@@ -126,16 +126,16 @@ func (h *CreateGroupHandler) Serve(ctx context.Context, req *CreateGroupRequest)
 	if !ok {
 		return CreateGroupResponse{}, errorModels.PermissionDeniedServerError()
 	}
-	perms := make([]domain.AppPermission, 0, len(req.AppPermissions))
-	for _, p := range req.AppPermissions {
-		perms = append(perms, domain.AppPermission{AppID: p.AppID, PermissionLevel: domain.PermissionLevel(p.PermissionLevel)})
+	perms := make([]domain.ResourcePermission, 0, len(req.ResourcePermissions))
+	for _, p := range req.ResourcePermissions {
+		perms = append(perms, domain.ResourcePermission{ResourceKey: p.ResourceKey, PermissionLevel: domain.PermissionLevel(p.PermissionLevel)})
 	}
 	color := req.Color
 	if color == "" {
 		color = "#6366f1"
 	}
 	id, err := h.Service.CreateGroup(ctx, ownerID, domain.CreateGroupInput{
-		Name: req.Name, Description: req.Description, Color: color, AppPermissions: perms,
+		Name: req.Name, Description: req.Description, Color: color, ResourcePermissions: perms,
 	})
 	if err != nil {
 		return CreateGroupResponse{}, &errorModels.ServerError{HTTPCode: http.StatusInternalServerError, Code: http.StatusInternalServerError, Message: "Failed to create group"}
@@ -187,10 +187,10 @@ func (h *GetGroupDetailHandler) Serve(ctx context.Context, _ *GetGroupDetailRequ
 
 type UpdateGroupHandler struct{ Service *application.Service }
 type UpdateGroupRequest struct {
-	Name           string                 `json:"name"`
-	Description    string                 `json:"description"`
-	Color          string                 `json:"color"`
-	AppPermissions []AppPermissionPayload `json:"app_permissions"`
+	Name                string                      `json:"name"`
+	Description         string                      `json:"description"`
+	Color               string                      `json:"color"`
+	ResourcePermissions []ResourcePermissionPayload `json:"resource_permissions"`
 }
 type UpdateGroupResponse struct {
 	Group GroupPayload `json:"group"`
@@ -213,12 +213,12 @@ func (h *UpdateGroupHandler) Serve(ctx context.Context, req *UpdateGroupRequest)
 	if err != nil || groupID <= 0 {
 		return UpdateGroupResponse{}, &errorModels.ServerError{HTTPCode: http.StatusBadRequest, Code: http.StatusBadRequest, Message: "Invalid group id"}
 	}
-	perms := make([]domain.AppPermission, 0, len(req.AppPermissions))
-	for _, p := range req.AppPermissions {
-		perms = append(perms, domain.AppPermission{AppID: p.AppID, PermissionLevel: domain.PermissionLevel(p.PermissionLevel)})
+	perms := make([]domain.ResourcePermission, 0, len(req.ResourcePermissions))
+	for _, p := range req.ResourcePermissions {
+		perms = append(perms, domain.ResourcePermission{ResourceKey: p.ResourceKey, PermissionLevel: domain.PermissionLevel(p.PermissionLevel)})
 	}
 	if err := h.Service.UpdateGroup(ctx, ownerID, groupID, domain.UpdateGroupInput{
-		Name: req.Name, Description: req.Description, Color: req.Color, AppPermissions: perms,
+		Name: req.Name, Description: req.Description, Color: req.Color, ResourcePermissions: perms,
 	}); err != nil {
 		return UpdateGroupResponse{}, &errorModels.ServerError{HTTPCode: http.StatusInternalServerError, Code: http.StatusInternalServerError, Message: "Failed to update group"}
 	}

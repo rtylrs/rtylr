@@ -464,17 +464,18 @@ type MeRequest struct {
 }
 
 type MeResponse struct {
-	ID                 int64    `json:"id"`
-	Email              string   `json:"email"`
-	FullName           string   `json:"full_name"`
-	Apps               []string `json:"apps"`
-	Role               string   `json:"role"`
-	BusinessID         int64    `json:"business_id"`
-	BusinessName       string   `json:"business_name"`
-	IsOwner            bool     `json:"is_owner"`
-	Onboarded          bool     `json:"onboarded"`
-	PlanSlug           string   `json:"plan_slug"`
-	SubscriptionStatus string   `json:"subscription_status"`
+	ID                 int64                      `json:"id"`
+	Email              string                     `json:"email"`
+	FullName           string                     `json:"full_name"`
+	Apps               []string                   `json:"apps"`
+	Role               string                     `json:"role"`
+	BusinessID         int64                      `json:"business_id"`
+	BusinessName       string                     `json:"business_name"`
+	IsOwner            bool                       `json:"is_owner"`
+	Onboarded          bool                       `json:"onboarded"`
+	PlanSlug           string                     `json:"plan_slug"`
+	SubscriptionStatus string                     `json:"subscription_status"`
+	EffectiveResources map[string]string          `json:"effective_resources"`
 }
 
 func (h *MeHandler) Serve(ctx context.Context, req *MeRequest) (MeResponse, *errorModels.ServerError) {
@@ -527,12 +528,14 @@ func (h *MeHandler) Serve(ctx context.Context, req *MeRequest) (MeResponse, *err
 			planSlug = slug
 			subscriptionStatus = status
 		}
-	} else {
-		effectiveApps, effectiveErr := h.Service.GetUserEffectiveApps(ctx, businessID, userID)
-		if effectiveErr == nil && len(effectiveApps) > 0 {
-			apps = make([]string, 0, len(effectiveApps))
-			for app := range effectiveApps {
-				apps = append(apps, app)
+	}
+
+	effectiveResources := map[string]string{}
+	if !isOwner {
+		resPerms, resErr := h.Service.GetUserEffectiveResources(ctx, businessID, userID)
+		if resErr == nil {
+			for key, level := range resPerms {
+				effectiveResources[key] = string(level)
 			}
 		}
 	}
@@ -549,6 +552,7 @@ func (h *MeHandler) Serve(ctx context.Context, req *MeRequest) (MeResponse, *err
 		Onboarded:          h.Service.IsOnboarded(ctx, userID),
 		PlanSlug:           planSlug,
 		SubscriptionStatus: subscriptionStatus,
+		EffectiveResources: effectiveResources,
 	}, nil
 }
 

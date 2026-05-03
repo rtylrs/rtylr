@@ -22,16 +22,19 @@ WHERE id = ? AND owner_id = ?;
 -- name: DeleteGroup :exec
 DELETE FROM user_groups WHERE id = ? AND owner_id = ?;
 
--- name: UpsertGroupAppPermission :exec
-INSERT INTO user_group_app_permissions (group_id, app_id, permission_level)
+-- name: UpsertGroupResourcePermission :exec
+INSERT INTO user_group_resource_permissions (group_id, resource_key, permission_level)
 VALUES (?, ?, ?)
 ON DUPLICATE KEY UPDATE permission_level = VALUES(permission_level);
 
--- name: DeleteGroupAppPermissions :exec
-DELETE FROM user_group_app_permissions WHERE group_id = ?;
+-- name: DeleteGroupResourcePermissions :exec
+DELETE FROM user_group_resource_permissions WHERE group_id = ?;
 
--- name: ListGroupAppPermissions :many
-SELECT group_id, app_id, permission_level FROM user_group_app_permissions WHERE group_id = ?;
+-- name: DeleteGroupResourcePermission :exec
+DELETE FROM user_group_resource_permissions WHERE group_id = ? AND resource_key = ?;
+
+-- name: ListGroupResourcePermissions :many
+SELECT resource_key, permission_level FROM user_group_resource_permissions WHERE group_id = ?;
 
 -- name: AddGroupMember :exec
 INSERT IGNORE INTO user_group_members (group_id, user_id, owner_id, added_by)
@@ -54,11 +57,11 @@ JOIN user_groups g ON g.id = m.group_id
 WHERE m.user_id = ? AND m.owner_id = ?
 ORDER BY g.name;
 
--- name: ListUserGroupAppPermissions :many
-SELECT gap.app_id, gap.permission_level
-FROM user_group_members m
-JOIN user_group_app_permissions gap ON gap.group_id = m.group_id
-WHERE m.user_id = ? AND m.owner_id = ?;
+-- name: ListUserGroupResourcePermissions :many
+SELECT ugm.group_id, ugrp.resource_key, ugrp.permission_level
+FROM user_group_members ugm
+JOIN user_group_resource_permissions ugrp ON ugm.group_id = ugrp.group_id
+WHERE ugm.user_id = ? AND ugm.owner_id = ?;
 
 -- name: CountGroupMembers :one
 SELECT COUNT(*) FROM user_group_members WHERE group_id = ?;
