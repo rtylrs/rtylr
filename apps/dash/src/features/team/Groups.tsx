@@ -23,7 +23,7 @@ const appLabel = (appId: string): string =>
   APP_RESOURCES.find((a) => a.id === appId)?.label ?? appId.toUpperCase();
 
 const Groups = (): React.JSX.Element => {
-  const { t } = useTranslation('team');
+  const { t } = useTranslation();
   const navigate = useNavigate();
   const { data: groups = [], isLoading } = useGroups();
   const deleteGroup = useDeleteGroup();
@@ -43,14 +43,14 @@ const Groups = (): React.JSX.Element => {
       >
         <div>
           <h1 className="text-lg font-semibold" style={{ color: 'var(--dash-text)' }}>
-            {t('groups.title')}
+            {t('team.groups.title')}
           </h1>
           <p className="text-xs mt-0.5" style={{ color: 'var(--dash-text-dim)' }}>
-            {t('groups.subtitle')}
+            {t('team.groups.subtitle')}
           </p>
         </div>
         <Button onClick={() => navigate('/team/groups/new')}>
-          <Plus size={14} /> {t('groups.newGroup')}
+          <Plus size={14} /> {t('team.groups.newGroup')}
         </Button>
       </motion.div>
 
@@ -63,7 +63,7 @@ const Groups = (): React.JSX.Element => {
         <Input
           value={query}
           onChange={(e) => setQuery(e.target.value)}
-          placeholder={t('groups.searchPlaceholder')}
+          placeholder={t('team.groups.searchPlaceholder')}
           className="pl-9"
         />
       </div>
@@ -80,9 +80,9 @@ const Groups = (): React.JSX.Element => {
           <div className="p-4">
             <EmptyState
               icon={Users}
-              title={query ? t('groups.noGroupsMatch') : t('groups.noGroupsTitle')}
-              description={t('groups.noGroupsDescription')}
-              actionLabel={t('groups.newGroup')}
+              title={query ? t('team.groups.noGroupsMatch') : t('team.groups.noGroupsTitle')}
+              description={t('team.groups.noGroupsDescription')}
+              actionLabel={t('team.groups.newGroup')}
               onAction={() => navigate('/team/groups/new')}
             />
           </div>
@@ -96,9 +96,9 @@ const Groups = (): React.JSX.Element => {
                 borderBottom: '1px solid var(--dash-border)',
               }}
             >
-              <div className="col-span-5">{t('groups.columnName')}</div>
-              <div className="col-span-4">{t('groups.columnSections')}</div>
-              <div className="col-span-2">{t('groups.columnMembers')}</div>
+              <div className="col-span-5">{t('team.groups.columnName')}</div>
+              <div className="col-span-4">{t('team.groups.columnSections')}</div>
+              <div className="col-span-2">{t('team.groups.columnMembers')}</div>
               <div className="col-span-1"></div>
             </div>
 
@@ -145,7 +145,7 @@ const Groups = (): React.JSX.Element => {
                   <div className="col-span-4 flex items-center gap-1 flex-wrap">
                     {activeAppIds.length === 0 ? (
                       <span className="text-[11px]" style={{ color: 'var(--dash-text-dim)' }}>
-                        {t('groups.noneLabel')}
+                        {t('team.groups.noneLabel')}
                       </span>
                     ) : (
                       <>
@@ -182,7 +182,9 @@ const Groups = (): React.JSX.Element => {
                       {g.memberCount}
                     </span>
                     <span className="text-[11px] ml-1" style={{ color: 'var(--dash-text-dim)' }}>
-                      {g.memberCount === 1 ? t('groups.userSingular') : t('groups.userPlural')}
+                      {g.memberCount === 1
+                        ? t('team.groups.userSingular')
+                        : t('team.groups.userPlural')}
                     </span>
                   </div>
 
@@ -193,7 +195,7 @@ const Groups = (): React.JSX.Element => {
                         e.stopPropagation();
                         setConfirmDelete(g);
                       }}
-                      aria-label={t('groups.deleteConfirm')}
+                      aria-label={t('team.groups.deleteConfirm')}
                       className="h-7 w-7 rounded-lg flex items-center justify-center hover:bg-[var(--dash-hover)] transition-colors"
                       style={{ color: 'var(--dash-text-muted)' }}
                     >
@@ -211,9 +213,9 @@ const Groups = (): React.JSX.Element => {
       <ConfirmDialog
         open={!!confirmDelete}
         onOpenChange={(o) => !o && setConfirmDelete(null)}
-        title={t('groups.deleteTitle', { name: confirmDelete?.name ?? '' })}
-        description={t('groups.deleteDescription')}
-        confirmLabel={t('groups.deleteConfirm')}
+        title={t('team.groups.deleteTitle', { name: confirmDelete?.name ?? '' })}
+        description={t('team.groups.deleteDescription')}
+        confirmLabel={t('team.groups.deleteConfirm')}
         destructive
         isLoading={deleteGroup.isPending}
         onConfirm={async () => {

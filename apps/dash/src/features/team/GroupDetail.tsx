@@ -38,7 +38,7 @@ const PRESET_COLORS = [
 ];
 
 const GroupDetail = (): React.JSX.Element => {
-  const { t } = useTranslation('team');
+  const { t } = useTranslation();
   const { id } = useParams<{ id: string }>();
   const navigate = useNavigate();
   const isNew = id === 'new';
@@ -141,7 +141,7 @@ const GroupDetail = (): React.JSX.Element => {
         <div className="flex items-center gap-3">
           <button
             onClick={() => navigate('/team/groups')}
-            aria-label={t('groupDetail.backAriaLabel')}
+            aria-label={t('team.groupDetail.backAriaLabel')}
             className="h-8 w-8 rounded-lg flex items-center justify-center hover:bg-[var(--dash-hover)] transition-colors"
             style={{ color: 'var(--dash-text-muted)' }}
           >
@@ -149,7 +149,7 @@ const GroupDetail = (): React.JSX.Element => {
           </button>
           <div>
             <h1 className="text-lg font-semibold" style={{ color: 'var(--dash-text)' }}>
-              {isNew ? t('groupDetail.newGroupTitle') : name}
+              {isNew ? t('team.groupDetail.newGroupTitle') : name}
             </h1>
             {!isNew && (
               <p className="text-[11px] mt-0.5" style={{ color: 'var(--dash-text-dim)' }}>
@@ -165,7 +165,7 @@ const GroupDetail = (): React.JSX.Element => {
         </div>
         <Button onClick={handleSave} disabled={isSaving || (!dirty && !isNew)}>
           <Save size={14} />
-          {isSaving ? t('groupDetail.savingButton') : t('groupDetail.saveButton')}
+          {isSaving ? t('team.groupDetail.savingButton') : t('team.groupDetail.saveButton')}
         </Button>
       </div>
 
@@ -175,12 +175,12 @@ const GroupDetail = (): React.JSX.Element => {
         style={{ background: 'var(--dash-card)', border: '1px solid var(--dash-border)' }}
       >
         <p className="text-sm font-semibold" style={{ color: 'var(--dash-text)' }}>
-          {t('groupDetail.generalSection')}
+          {t('team.groupDetail.generalSection')}
         </p>
         <div className="grid grid-cols-2 gap-4">
           <div className="space-y-1.5">
             <label className="text-xs font-medium" style={{ color: 'var(--dash-text-muted)' }}>
-              {t('groupDetail.labelName')}
+              {t('team.groupDetail.labelName')}
             </label>
             <Input
               value={name}
@@ -188,12 +188,12 @@ const GroupDetail = (): React.JSX.Element => {
                 setName(e.target.value);
                 setDirty(true);
               }}
-              placeholder={t('groupDetail.namePlaceholder')}
+              placeholder={t('team.groupDetail.namePlaceholder')}
             />
           </div>
           <div className="space-y-1.5">
             <label className="text-xs font-medium" style={{ color: 'var(--dash-text-muted)' }}>
-              {t('groupDetail.labelDescription')}
+              {t('team.groupDetail.labelDescription')}
             </label>
             <Input
               value={description}
@@ -201,19 +201,19 @@ const GroupDetail = (): React.JSX.Element => {
                 setDescription(e.target.value);
                 setDirty(true);
               }}
-              placeholder={t('groupDetail.descriptionPlaceholder')}
+              placeholder={t('team.groupDetail.descriptionPlaceholder')}
             />
           </div>
         </div>
         <div className="space-y-1.5">
           <label className="text-xs font-medium" style={{ color: 'var(--dash-text-muted)' }}>
-            {t('groupDetail.labelColor')}
+            {t('team.groupDetail.labelColor')}
           </label>
           <div className="flex items-center gap-2 flex-wrap">
             {PRESET_COLORS.map((c) => (
               <button
                 key={c}
-                aria-label={t('groupDetail.colorAriaLabel', { color: c })}
+                aria-label={t('team.groupDetail.colorAriaLabel', { color: c })}
                 onClick={() => {
                   setColor(c);
                   setDirty(true);
@@ -248,8 +248,8 @@ const GroupDetail = (): React.JSX.Element => {
               }}
             >
               {tabKey === 'apps'
-                ? t('groupDetail.tabApps', { count: activeSectionCount })
-                : t('groupDetail.tabMembers', { count: group?.members?.length ?? 0 })}
+                ? t('team.groupDetail.tabApps', { count: activeSectionCount })
+                : t('team.groupDetail.tabMembers', { count: group?.members?.length ?? 0 })}
             </button>
           ))}
         </div>
@@ -271,7 +271,7 @@ const GroupDetail = (): React.JSX.Element => {
               borderBottom: '1px solid var(--dash-border)',
             }}
           >
-            <div className="col-span-6">{t('groupDetail.columnSection')}</div>
+            <div className="col-span-6">{t('team.groupDetail.columnSection')}</div>
             {LEVELS.map((l) => (
               <div key={l.value} className="col-span-2 text-center">
                 {t(l.tKey)}
@@ -314,7 +314,7 @@ const GroupDetail = (): React.JSX.Element => {
                     {LEVELS.map((l) => (
                       <div key={l.value} className="col-span-2 flex justify-center">
                         <button
-                          aria-label={t('groupDetail.radioAriaLabel', {
+                          aria-label={t('team.groupDetail.radioAriaLabel', {
                             section: section.label,
                             level: t(l.tKey),
                           })}
@@ -360,7 +360,7 @@ const GroupDetail = (): React.JSX.Element => {
                 border: '1px solid var(--accent-border)',
               }}
             >
-              <Plus size={12} /> {t('groupDetail.addMembersButton')}
+              <Plus size={12} /> {t('team.groupDetail.addMembersButton')}
             </button>
           </div>
 
@@ -372,9 +372,9 @@ const GroupDetail = (): React.JSX.Element => {
               <div className="p-4">
                 <EmptyState
                   icon={Users}
-                  title={t('groupDetail.noMembersTitle')}
-                  description={t('groupDetail.noMembersDescription')}
-                  actionLabel={t('groupDetail.addMembersButton')}
+                  title={t('team.groupDetail.noMembersTitle')}
+                  description={t('team.groupDetail.noMembersDescription')}
+                  actionLabel={t('team.groupDetail.addMembersButton')}
                   onAction={() => setShowAddMembers(true)}
                 />
               </div>
@@ -402,7 +402,7 @@ const GroupDetail = (): React.JSX.Element => {
                     </div>
                   </div>
                   <button
-                    aria-label={t('groupDetail.removeMemberAriaLabel', {
+                    aria-label={t('team.groupDetail.removeMemberAriaLabel', {
                       name: m.fullName || m.email,
                     })}
                     onClick={() => removeMember.mutateAsync(m.userId)}
@@ -423,11 +423,11 @@ const GroupDetail = (): React.JSX.Element => {
               style={{ background: 'var(--dash-card)', border: '1px solid var(--dash-border)' }}
             >
               <p className="text-sm font-semibold" style={{ color: 'var(--dash-text)' }}>
-                {t('groupDetail.addMembersTitle')}
+                {t('team.groupDetail.addMembersTitle')}
               </p>
               {addableMembersList.length === 0 ? (
                 <p className="text-sm" style={{ color: 'var(--dash-text-muted)' }}>
-                  {t('groupDetail.allMembersInGroup')}
+                  {t('team.groupDetail.allMembersInGroup')}
                 </p>
               ) : (
                 <div className="space-y-1 max-h-48 overflow-y-auto">
@@ -472,7 +472,7 @@ const GroupDetail = (): React.JSX.Element => {
                   className="px-3 py-1.5 rounded-lg text-sm"
                   style={{ color: 'var(--dash-text-muted)' }}
                 >
-                  {t('groupDetail.cancelButton')}
+                  {t('team.groupDetail.cancelButton')}
                 </button>
                 <Button
                   onClick={handleAddMembers}
