@@ -397,20 +397,51 @@ func (r *Repository) UpdateTask(ctx context.Context, input domain.UpdateTaskInpu
 		return err
 	}
 
-	err = r.queries.UpdateTask(ctx, sqlc.UpdateTaskParams{
-		Title:       input.Title,
-		Description: sql.NullString{String: input.Description, Valid: input.Description != ""},
-		Status:      sqlc.NullFlowTasksStatus{FlowTasksStatus: sqlc.FlowTasksStatus(input.Status), Valid: input.Status != ""},
-		Priority:    sqlc.NullFlowTasksPriority{FlowTasksPriority: sqlc.FlowTasksPriority(input.Priority), Valid: input.Priority != ""},
-		AssigneeID:  nullInt64Ptr(input.AssigneeID),
-		DueDate:     nullTimePtrToSql(input.DueDate),
-		StartDate:   nullTimePtrToSql(input.StartDate),
-		Labels:      labelsJSON,
-		Column9:     input.Status,
-		Column10:    input.Status,
-		ID:          input.ID,
-		OwnerID:     input.OwnerID,
-	})
+	var statusParam interface{}
+	if input.Status != "" {
+		statusParam = input.Status
+	}
+	var priorityParam interface{}
+	if input.Priority != "" {
+		priorityParam = input.Priority
+	}
+	var labelsParam interface{}
+	if labelsJSON != nil {
+		labelsParam = labelsJSON
+	}
+
+	// Raw query so partial updates (e.g. title-only) don't overwrite status/priority/completed_at.
+	// COALESCE(?, col) preserves the existing value when the param is NULL.
+	// The completed_at CASE only fires when a non-NULL status is explicitly supplied.
+	_, err = dbclient.Pool().ExecContext(ctx, `
+		UPDATE flow_tasks
+		SET title       = ?,
+		    description = COALESCE(?, description),
+		    status      = COALESCE(?, status),
+		    priority    = COALESCE(?, priority),
+		    assignee_id = ?,
+		    due_date    = ?,
+		    start_date  = ?,
+		    labels      = COALESCE(?, labels),
+		    completed_at = CASE
+		        WHEN ? IS NOT NULL AND ? = 'done'  AND completed_at IS NULL THEN NOW()
+		        WHEN ? IS NOT NULL AND ? != 'done' THEN NULL
+		        ELSE completed_at
+		    END
+		WHERE id = ? AND owner_id = ?`,
+		input.Title,
+		sql.NullString{String: input.Description, Valid: input.Description != ""},
+		statusParam,
+		priorityParam,
+		nullInt64Ptr(input.AssigneeID),
+		nullTimePtrToSql(input.DueDate),
+		nullTimePtrToSql(input.StartDate),
+		labelsParam,
+		statusParam, statusParam, // CASE WHEN ? IS NOT NULL AND ? = 'done'
+		statusParam, statusParam, // CASE WHEN ? IS NOT NULL AND ? != 'done'
+		input.ID,
+		input.OwnerID,
+	)
 	if err != nil {
 		logger.Ctx(ctx).Error("UpdateTask failed", logger.Error(err))
 		return err
