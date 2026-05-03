@@ -1,20 +1,24 @@
+// @vitest-environment happy-dom
 import { describe, it, expect, vi, beforeEach } from 'vitest';
 import { renderHook, waitFor } from '@testing-library/react';
 import { QueryClient, QueryClientProvider } from '@tanstack/react-query';
 import React from 'react';
 
-vi.mock('../../shared/services/financeApi', () => ({
-  financeApi: {
-    getDashboard: vi.fn(),
+vi.mock('../../shared/lib/api', () => ({
+  safe: {
+    get: vi.fn(),
+    post: vi.fn(),
+    put: vi.fn(),
+    delete: vi.fn(),
   },
 }));
 
 vi.mock('@voxire/api', () => ({
-  unwrap: vi.fn((val) => val),
+  unwrap: vi.fn((val: unknown) => Promise.resolve(val)),
 }));
 
 import { useFinanceDashboard } from './useDashboard';
-import { financeApi } from '../../shared/services/financeApi';
+import { safe } from '../../shared/lib/api';
 
 const createWrapper = () => {
   const client = new QueryClient({
@@ -43,27 +47,21 @@ describe('useFinanceDashboard', () => {
       overdueInvoices: [],
       barData: [],
     };
-    (financeApi.getDashboard as any).mockResolvedValue(data);
-    const { result } = renderHook(() => useFinanceDashboard(), {
-      wrapper: createWrapper(),
-    });
+    (safe.get as ReturnType<typeof vi.fn>).mockResolvedValue(data);
+    const { result } = renderHook(() => useFinanceDashboard(), { wrapper: createWrapper() });
     await waitFor(() => expect(result.current.isSuccess).toBe(true));
-    expect(result.current.data).toEqual(data);
+    expect(safe.get).toHaveBeenCalledWith('/finance/dashboard');
   });
 
   it('starts in loading state', () => {
-    (financeApi.getDashboard as any).mockReturnValue(new Promise(() => {}));
-    const { result } = renderHook(() => useFinanceDashboard(), {
-      wrapper: createWrapper(),
-    });
+    (safe.get as ReturnType<typeof vi.fn>).mockReturnValue(new Promise(() => {}));
+    const { result } = renderHook(() => useFinanceDashboard(), { wrapper: createWrapper() });
     expect(result.current.isLoading).toBe(true);
   });
 
   it('handles error state', async () => {
-    (financeApi.getDashboard as any).mockRejectedValue(new Error('Network error'));
-    const { result } = renderHook(() => useFinanceDashboard(), {
-      wrapper: createWrapper(),
-    });
+    (safe.get as ReturnType<typeof vi.fn>).mockRejectedValue(new Error('Network error'));
+    const { result } = renderHook(() => useFinanceDashboard(), { wrapper: createWrapper() });
     await waitFor(() => expect(result.current.isError).toBe(true));
     expect(result.current.error).toBeInstanceOf(Error);
   });

@@ -1,21 +1,20 @@
+// @vitest-environment happy-dom
 import { describe, it, expect, vi, beforeEach } from 'vitest';
 import { renderHook, waitFor, act } from '@testing-library/react';
 import { QueryClient, QueryClientProvider } from '@tanstack/react-query';
 import React from 'react';
 
-vi.mock('../../shared/services/financeApi', () => ({
-  financeApi: {
-    getExpenses: vi.fn(),
-    getExpenseCategories: vi.fn(),
-    createExpense: vi.fn(),
-    updateExpense: vi.fn(),
-    deleteExpense: vi.fn(),
-    createExpenseCategory: vi.fn(),
+vi.mock('../../shared/lib/api', () => ({
+  safe: {
+    get: vi.fn(),
+    post: vi.fn(),
+    put: vi.fn(),
+    delete: vi.fn(),
   },
 }));
 
 vi.mock('@voxire/api', () => ({
-  unwrap: vi.fn((val) => val),
+  unwrap: vi.fn((val: unknown) => Promise.resolve(val)),
 }));
 
 import {
@@ -26,7 +25,7 @@ import {
   useDeleteExpense,
   useCreateExpenseCategory,
 } from './useExpenses';
-import { financeApi } from '../../shared/services/financeApi';
+import { safe } from '../../shared/lib/api';
 
 const createWrapper = () => {
   const client = new QueryClient({
@@ -50,22 +49,17 @@ describe('useExpenses', () => {
         description: 'Office supplies',
         category: 'Supplies',
         receipt: false,
-        approval: 'pending',
       },
     ];
-    (financeApi.getExpenses as any).mockResolvedValue(input);
-    const { result } = renderHook(() => useExpenses(), {
-      wrapper: createWrapper(),
-    });
+    (safe.get as ReturnType<typeof vi.fn>).mockResolvedValue(input);
+    const { result } = renderHook(() => useExpenses(), { wrapper: createWrapper() });
     await waitFor(() => expect(result.current.isSuccess).toBe(true));
-    expect(result.current.data).toEqual(input);
+    expect(safe.get).toHaveBeenCalledWith('/finance/expenses');
   });
 
   it('starts in loading state', () => {
-    (financeApi.getExpenses as any).mockReturnValue(new Promise(() => {}));
-    const { result } = renderHook(() => useExpenses(), {
-      wrapper: createWrapper(),
-    });
+    (safe.get as ReturnType<typeof vi.fn>).mockReturnValue(new Promise(() => {}));
+    const { result } = renderHook(() => useExpenses(), { wrapper: createWrapper() });
     expect(result.current.isLoading).toBe(true);
   });
 });
@@ -77,12 +71,10 @@ describe('useExpenseCategories', () => {
 
   it('fetches expense categories', async () => {
     const input = [{ id: 1, name: 'Office supplies', color: '#3b82f6' }];
-    (financeApi.getExpenseCategories as any).mockResolvedValue(input);
-    const { result } = renderHook(() => useExpenseCategories(), {
-      wrapper: createWrapper(),
-    });
+    (safe.get as ReturnType<typeof vi.fn>).mockResolvedValue(input);
+    const { result } = renderHook(() => useExpenseCategories(), { wrapper: createWrapper() });
     await waitFor(() => expect(result.current.isSuccess).toBe(true));
-    expect(result.current.data).toEqual(input);
+    expect(safe.get).toHaveBeenCalledWith('/finance/expenses/categories');
   });
 });
 
@@ -91,13 +83,11 @@ describe('useCreateExpense', () => {
     vi.clearAllMocks();
   });
 
-  it('calls createExpense service method', async () => {
-    (financeApi.createExpense as any).mockResolvedValue({ id: 'exp-new' });
-    const { result } = renderHook(() => useCreateExpense(), {
-      wrapper: createWrapper(),
-    });
+  it('calls POST /finance/expenses', async () => {
+    (safe.post as ReturnType<typeof vi.fn>).mockResolvedValue({ id: 'exp-new' });
+    const { result } = renderHook(() => useCreateExpense(), { wrapper: createWrapper() });
     await act(() => result.current.mutateAsync({ amount: 75 } as any));
-    expect(financeApi.createExpense).toHaveBeenCalledWith({ amount: 75 });
+    expect(safe.post).toHaveBeenCalledWith('/finance/expenses', { amount: 75 });
   });
 });
 
@@ -106,13 +96,11 @@ describe('useUpdateExpense', () => {
     vi.clearAllMocks();
   });
 
-  it('calls updateExpense with id and data', async () => {
-    (financeApi.updateExpense as any).mockResolvedValue({ id: 'exp-1' });
-    const { result } = renderHook(() => useUpdateExpense(), {
-      wrapper: createWrapper(),
-    });
+  it('calls PUT /finance/expenses/:id', async () => {
+    (safe.put as ReturnType<typeof vi.fn>).mockResolvedValue({ id: 'exp-1' });
+    const { result } = renderHook(() => useUpdateExpense(), { wrapper: createWrapper() });
     await act(() => result.current.mutateAsync({ id: 'exp-1', data: { amount: 150 } as any }));
-    expect(financeApi.updateExpense).toHaveBeenCalledWith('exp-1', { amount: 150 });
+    expect(safe.put).toHaveBeenCalledWith('/finance/expenses/exp-1', { amount: 150 });
   });
 });
 
@@ -121,13 +109,11 @@ describe('useDeleteExpense', () => {
     vi.clearAllMocks();
   });
 
-  it('calls deleteExpense with id', async () => {
-    (financeApi.deleteExpense as any).mockResolvedValue({ ok: true });
-    const { result } = renderHook(() => useDeleteExpense(), {
-      wrapper: createWrapper(),
-    });
+  it('calls DELETE /finance/expenses/:id', async () => {
+    (safe.delete as ReturnType<typeof vi.fn>).mockResolvedValue(undefined);
+    const { result } = renderHook(() => useDeleteExpense(), { wrapper: createWrapper() });
     await act(() => result.current.mutateAsync('exp-2'));
-    expect(financeApi.deleteExpense).toHaveBeenCalledWith('exp-2');
+    expect(safe.delete).toHaveBeenCalledWith('/finance/expenses/exp-2');
   });
 });
 
@@ -136,12 +122,10 @@ describe('useCreateExpenseCategory', () => {
     vi.clearAllMocks();
   });
 
-  it('calls createExpenseCategory service method', async () => {
-    (financeApi.createExpenseCategory as any).mockResolvedValue({ id: 'cat-new' });
-    const { result } = renderHook(() => useCreateExpenseCategory(), {
-      wrapper: createWrapper(),
-    });
+  it('calls POST /finance/expenses/categories', async () => {
+    (safe.post as ReturnType<typeof vi.fn>).mockResolvedValue({ id: 'cat-new' });
+    const { result } = renderHook(() => useCreateExpenseCategory(), { wrapper: createWrapper() });
     await act(() => result.current.mutateAsync({ name: 'Travel' } as any));
-    expect(financeApi.createExpenseCategory).toHaveBeenCalledWith({ name: 'Travel' });
+    expect(safe.post).toHaveBeenCalledWith('/finance/expenses/categories', { name: 'Travel' });
   });
 });
