@@ -29,7 +29,6 @@ import {
   Grid3x3,
   Store,
   MessageSquare,
-  Activity as ActivityIcon,
   Search,
   Sparkles,
 } from 'lucide-react';
@@ -61,7 +60,6 @@ const navItems: NavItem[] = [
   { label: 'Dashboard', path: '/', icon: LayoutDashboard },
   { label: 'Team', path: '/team', icon: Users },
   { label: 'Apps', path: '/apps', icon: Grid3x3 },
-  { label: 'Activity', path: '/activity', icon: ActivityIcon },
 ];
 
 const menuSubItems: NavItem[] = [
@@ -87,7 +85,6 @@ const routeLabels: Record<string, string> = {
   '/permissions': 'Permissions',
   '/roles': 'Roles',
   '/apps': 'Apps',
-  '/activity': 'Activity',
   '/audit': 'Audit log',
   '/notifications': 'Notifications',
   '/account': 'Account',
@@ -231,7 +228,6 @@ const DefaultLayout: React.FC<DefaultLayoutProps> = ({ children }) => {
     '/': () => import('../features/dashboard/Dashboard/VendorDashboard'),
     '/team': () => import('../features/team/Team'),
     '/apps': () => import('../features/addons/Addons'),
-    '/activity': () => import('../features/activity/Activity'),
     '/menus': () => import('../features/menu/Menus'),
     '/orders': () => import('../features/orders/Orders'),
     '/qr-codes': () => import('../features/qr-codes/QrCodes'),

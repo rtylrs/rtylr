@@ -35,7 +35,6 @@ const GroupDetail = React.lazy(() => import('../features/team/GroupDetail'));
 const Permissions = React.lazy(() => import('../features/permissions/Permissions'));
 const Roles = React.lazy(() => import('../features/permissions/Roles'));
 const AppsScreen = React.lazy(() => import('../features/apps/Apps'));
-const ActivityScreen = React.lazy(() => import('../features/activity/Activity'));
 const Audit = React.lazy(() => import('../features/activity/Audit'));
 const Notifications = React.lazy(() => import('../features/notifications/Notifications'));
 const AccountHome = React.lazy(() => import('../features/account/Account'));
@@ -84,7 +83,6 @@ const AppRoutes: RouteObject[] = [
   { path: '/permissions', element: wrap(<Permissions />) },
   { path: '/roles', element: wrap(<Roles />) },
   { path: '/apps', element: wrap(<AppsScreen />) },
-  { path: '/activity', element: wrap(<ActivityScreen />) },
   { path: '/audit', element: wrap(<Audit />) },
   { path: '/notifications', element: wrap(<Notifications />) },
   { path: '/account', element: <Navigate to="/settings/account" replace /> },
