@@ -11,6 +11,8 @@
   },
   "dependencies": {
     "@tanstack/react-query": "^5.99.2",
+    "chart.js": "^4.5.1",
+    "react-chartjs-2": "^5.3.1",
     "@voxire/api": "workspace:*",
     "@voxire/auth": "workspace:*",
     "@voxire/caret": "workspace:*",

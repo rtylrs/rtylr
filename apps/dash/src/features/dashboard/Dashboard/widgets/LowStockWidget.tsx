@@ -1,7 +1,8 @@
 import React from 'react';
 import { Package, AlertTriangle } from 'lucide-react';
 import { useQuery } from '@tanstack/react-query';
-import api from '../../../../shared/lib/api';
+import { unwrap } from '@voxire/api';
+import { safe } from '../../../../shared/lib/api';
 
 interface StockItem {
   name?: string;
@@ -13,8 +14,10 @@ const LowStockWidget: React.FC = () => {
   const { data: raw } = useQuery({
     queryKey: ['low-stock-widget'],
     queryFn: async () => {
-      const res = await api.get('/erp/inventory/low-stock');
-      return res.data?.products ?? res.data ?? [];
+      const res = await unwrap(
+        safe.get<{ products?: StockItem[] } | StockItem[]>('/erp/inventory/low-stock')
+      );
+      return (Array.isArray(res) ? res : res.products) ?? [];
     },
     staleTime: 60_000,
   });
@@ -26,7 +29,7 @@ const LowStockWidget: React.FC = () => {
         className="flex items-center gap-2 px-4 py-3"
         style={{ borderBottom: '1px solid var(--dash-border)' }}
       >
-        <Package size={14} style={{ color: '#ef4444' }} />
+        <Package size={14} style={{ color: 'var(--aging-critical)' }} />
         <p className="text-sm font-semibold" style={{ color: 'var(--dash-text)' }}>
           Low stock
         </p>
@@ -45,13 +48,16 @@ const LowStockWidget: React.FC = () => {
               className="flex items-center gap-3 px-2 py-1.5 rounded-lg"
               style={{ background: 'var(--dash-bg)' }}
             >
-              <AlertTriangle size={12} style={{ color: '#ef4444' }} />
+              <AlertTriangle size={12} style={{ color: 'var(--aging-critical)' }} />
               <div className="flex-1 min-w-0">
                 <p className="text-xs font-medium truncate" style={{ color: 'var(--dash-text)' }}>
                   {p.name}
                 </p>
               </div>
-              <span className="text-[10px] font-semibold" style={{ color: '#ef4444' }}>
+              <span
+                className="text-[10px] font-semibold"
+                style={{ color: 'var(--aging-critical)' }}
+              >
                 {p.stockQuantity ?? p.stock ?? 0} left
               </span>
             </div>

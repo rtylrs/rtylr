@@ -2,6 +2,8 @@ import React from 'react';
 import { motion } from 'motion/react';
 import { TrendingUp, ArrowUpRight, ArrowDownRight } from 'lucide-react';
 import { useTranslation } from 'react-i18next';
+import { Line, Bar } from 'react-chartjs-2';
+import type { ChartOptions } from 'chart.js';
 import {
   useRevenueSeries,
   useRevenueByApp,
@@ -9,7 +11,7 @@ import {
 } from '../../shared/hooks/queries/useRevenue';
 import { formatMoney } from '../../shared/utils/money';
 import { formatPercent } from '../../shared/lib/format';
-import { CardSkeleton, SkeletonRow } from '../../shared/components/Skeleton';
+import { CardSkeleton, SkeletonBlock } from '../../shared/components/Skeleton';
 import ErrorState from '../../shared/components/ErrorState';
 import EmptyState from '../../shared/components/EmptyState';
 
@@ -21,6 +23,80 @@ const containerVariants = {
 const itemVariants = {
   hidden: { opacity: 0, y: 12 },
   show: { opacity: 1, y: 0, transition: { duration: 0.22, ease: 'easeOut' } },
+};
+
+const areaOptions: ChartOptions<'line'> = {
+  responsive: true,
+  maintainAspectRatio: false,
+  plugins: {
+    legend: { display: false },
+    tooltip: {
+      backgroundColor: 'var(--hub-card)',
+      titleColor: 'var(--hub-text-muted)',
+      bodyColor: 'var(--hub-text)',
+      borderColor: 'var(--hub-border)',
+      borderWidth: 1,
+      padding: 10,
+      callbacks: {
+        label: (ctx): string => formatMoney((ctx.raw as number) * 100),
+      },
+    },
+  },
+  scales: {
+    x: {
+      grid: { display: false },
+      ticks: {
+        color: 'var(--hub-text-muted)',
+        font: { size: 11 },
+        maxTicksLimit: 6,
+      },
+      border: { display: false },
+    },
+    y: {
+      grid: { color: 'var(--hub-border)' },
+      ticks: {
+        color: 'var(--hub-text-muted)',
+        font: { size: 11 },
+        callback: (value): string => formatMoney((value as number) * 100),
+      },
+      border: { display: false },
+    },
+  },
+};
+
+const barOptions: ChartOptions<'bar'> = {
+  responsive: true,
+  maintainAspectRatio: false,
+  plugins: {
+    legend: { display: false },
+    tooltip: {
+      backgroundColor: 'var(--hub-card)',
+      titleColor: 'var(--hub-text-muted)',
+      bodyColor: 'var(--hub-text)',
+      borderColor: 'var(--hub-border)',
+      borderWidth: 1,
+      padding: 10,
+      callbacks: {
+        label: (ctx): string => formatMoney((ctx.raw as number) * 100),
+      },
+    },
+  },
+  scales: {
+    x: {
+      grid: { display: false },
+      ticks: { color: 'var(--hub-text-muted)', font: { size: 11 } },
+      border: { display: false },
+    },
+    y: {
+      grid: { color: 'var(--hub-border)' },
+      ticks: {
+        color: 'var(--hub-text-muted)',
+        font: { size: 11 },
+        callback: (value): string => formatMoney((value as number) * 100),
+      },
+      border: { display: false },
+    },
+  },
 };
 
 const Revenue: React.FC = (): React.JSX.Element => {
@@ -38,6 +114,36 @@ const Revenue: React.FC = (): React.JSX.Element => {
   const difference = (comparison?.thisPeriod ?? 0) - (comparison?.lastPeriod ?? 0);
   const deltaPct = comparison?.deltaPct ?? 0;
   const deltaUp = deltaPct >= 0;
+
+  const areaData = {
+    labels: seriesRows.map((p) => p.date),
+    datasets: [
+      {
+        data: seriesRows.map((p) => p.amountMinorUnits / 100),
+        fill: true,
+        tension: 0.35,
+        borderColor: 'var(--accent)',
+        backgroundColor: 'var(--accent-muted)',
+        pointRadius: seriesRows.length > 30 ? 0 : 3,
+        pointHoverRadius: 5,
+        borderWidth: 2,
+      },
+    ],
+  };
+
+  const barData = {
+    labels: appRows.map((r) => r.app),
+    datasets: [
+      {
+        data: appRows.map((r) => r.amountMinorUnits / 100),
+        backgroundColor: 'var(--accent-muted)',
+        hoverBackgroundColor: 'var(--accent)',
+        borderColor: 'var(--accent)',
+        borderWidth: 1,
+        borderRadius: 6,
+      },
+    ],
+  };
 
   return (
     <motion.div
@@ -132,29 +238,12 @@ const Revenue: React.FC = (): React.JSX.Element => {
           </h3>
         </div>
         {isLoading ? (
-          <div className="space-y-2">
-            {Array.from({ length: 5 }).map((_, i) => (
-              <SkeletonRow key={i} cols={3} />
-            ))}
-          </div>
+          <SkeletonBlock className="h-56 w-full" />
         ) : seriesRows.length === 0 ? (
           <EmptyState title="" description={t('insights.revenue.emptyTrend')} />
         ) : (
-          <div className="space-y-1">
-            {seriesRows.map((point) => (
-              <div
-                key={point.date}
-                className="flex items-center justify-between px-3 py-2.5 rounded-lg"
-                style={{ background: 'var(--hub-hover)' }}
-              >
-                <span className="text-xs font-medium" style={{ color: 'var(--hub-text)' }}>
-                  {point.date}
-                </span>
-                <span className="text-xs font-semibold" style={{ color: 'var(--hub-text)' }}>
-                  {formatMoney(point.amountMinorUnits)}
-                </span>
-              </div>
-            ))}
+          <div style={{ height: 220 }}>
+            <Line data={areaData} options={areaOptions} />
           </div>
         )}
       </motion.div>
@@ -168,30 +257,12 @@ const Revenue: React.FC = (): React.JSX.Element => {
           {t('insights.revenue.byApp')}
         </h3>
         {byAppLoading ? (
-          <div className="space-y-2">
-            {Array.from({ length: 3 }).map((_, i) => (
-              <SkeletonRow key={i} cols={2} />
-            ))}
-          </div>
+          <SkeletonBlock className="h-48 w-full" />
         ) : appRows.length === 0 ? (
           <EmptyState title="" description={t('insights.revenue.emptyByApp')} />
         ) : (
-          <div className="space-y-1">
-            {appRows.map((row) => (
-              <div
-                key={row.app}
-                className="flex items-center justify-between px-3 py-2.5 rounded-lg"
-                style={{ background: 'var(--hub-hover)' }}
-              >
-                <span className="text-xs font-medium" style={{ color: 'var(--hub-text)' }}>
-                  {row.app}
-                </span>
-                <span className="text-xs font-semibold" style={{ color: 'var(--hub-text)' }}>
-                  {formatMoney(row.amountMinorUnits)}{' '}
-                  <span style={{ color: 'var(--hub-text-muted)' }}>({row.pct.toFixed(1)}%)</span>
-                </span>
-              </div>
-            ))}
+          <div style={{ height: 200 }}>
+            <Bar data={barData} options={barOptions} />
           </div>
         )}
       </motion.div>

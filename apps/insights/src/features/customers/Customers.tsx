@@ -2,6 +2,8 @@ import React from 'react';
 import { motion, type Variants } from 'motion/react';
 import { Users, UserPlus, UserMinus, Star } from 'lucide-react';
 import { useTranslation } from 'react-i18next';
+import { Bar } from 'react-chartjs-2';
+import type { ChartOptions } from 'chart.js';
 import {
   useCustomerKPIs,
   useTopCustomers,
@@ -10,7 +12,7 @@ import {
 } from '../../shared/hooks/queries/useInsightsCustomers';
 import { formatMoney } from '../../shared/utils/money';
 import { formatNumber } from '../../shared/lib/format';
-import { CardSkeleton, SkeletonRow } from '../../shared/components/Skeleton';
+import { CardSkeleton, SkeletonBlock, SkeletonRow } from '../../shared/components/Skeleton';
 import ErrorState from '../../shared/components/ErrorState';
 import EmptyState from '../../shared/components/EmptyState';
 
@@ -22,6 +24,42 @@ const containerVariants: Variants = {
 const itemVariants: Variants = {
   hidden: { opacity: 0, y: 12 },
   show: { opacity: 1, y: 0, transition: { duration: 0.22, ease: 'easeOut' } },
+};
+
+const topCustomersBarOptions: ChartOptions<'bar'> = {
+  responsive: true,
+  maintainAspectRatio: false,
+  indexAxis: 'y',
+  plugins: {
+    legend: { display: false },
+    tooltip: {
+      backgroundColor: 'var(--hub-card)',
+      titleColor: 'var(--hub-text-muted)',
+      bodyColor: 'var(--hub-text)',
+      borderColor: 'var(--hub-border)',
+      borderWidth: 1,
+      padding: 10,
+      callbacks: {
+        label: (ctx): string => formatMoney((ctx.raw as number) * 100),
+      },
+    },
+  },
+  scales: {
+    x: {
+      grid: { color: 'var(--hub-border)' },
+      ticks: {
+        color: 'var(--hub-text-muted)',
+        font: { size: 11 },
+        callback: (value): string => formatMoney((value as number) * 100),
+      },
+      border: { display: false },
+    },
+    y: {
+      grid: { display: false },
+      ticks: { color: 'var(--hub-text-muted)', font: { size: 11 } },
+      border: { display: false },
+    },
+  },
 };
 
 const Customers: React.FC = (): React.JSX.Element => {
@@ -42,6 +80,20 @@ const Customers: React.FC = (): React.JSX.Element => {
   const topList = topRes?.customers ?? [];
   const churnWindows = churnRes?.windows ?? [];
   const ltvBuckets = ltvRes?.buckets ?? [];
+
+  const topCustomersBarData = {
+    labels: topList.map((c) => c.name || c.email),
+    datasets: [
+      {
+        data: topList.map((c) => c.lifetimeSpendMinorUnits / 100),
+        backgroundColor: 'var(--accent-muted)',
+        hoverBackgroundColor: 'var(--accent)',
+        borderColor: 'var(--accent)',
+        borderWidth: 1,
+        borderRadius: 4,
+      },
+    ],
+  };
 
   return (
     <motion.div
@@ -119,43 +171,12 @@ const Customers: React.FC = (): React.JSX.Element => {
           {t('insights.customers.top')}
         </h3>
         {topLoading ? (
-          <div className="space-y-2">
-            {Array.from({ length: 5 }).map((_, i) => (
-              <SkeletonRow key={i} cols={3} />
-            ))}
-          </div>
+          <SkeletonBlock className="h-64 w-full" />
         ) : topList.length === 0 ? (
           <EmptyState title="" description={t('insights.customers.empty')} />
         ) : (
-          <div className="space-y-1">
-            {topList.map((c, i) => (
-              <div
-                key={c.customerId}
-                className="grid grid-cols-3 items-center px-3 py-2.5 rounded-lg"
-                style={{ background: 'var(--hub-hover)' }}
-              >
-                <div className="flex items-center gap-2">
-                  <span className="text-[10px] w-5" style={{ color: 'var(--hub-text-dim)' }}>
-                    #{i + 1}
-                  </span>
-                  <span
-                    className="text-xs font-medium truncate"
-                    style={{ color: 'var(--hub-text)' }}
-                  >
-                    {c.name || c.email}
-                  </span>
-                </div>
-                <span className="text-xs text-center" style={{ color: 'var(--hub-text-muted)' }}>
-                  {formatNumber(c.orderCount)} orders
-                </span>
-                <span
-                  className="text-xs font-semibold text-right"
-                  style={{ color: 'var(--hub-text)' }}
-                >
-                  {formatMoney(c.lifetimeSpendMinorUnits)}
-                </span>
-              </div>
-            ))}
+          <div style={{ height: Math.max(180, topList.length * 36) }}>
+            <Bar data={topCustomersBarData} options={topCustomersBarOptions} />
           </div>
         )}
       </motion.div>
