@@ -1,8 +1,10 @@
 import { unwrap } from '@voxire/api';
 import { z } from 'zod';
-import { useEffect, useState } from 'react';
+import { useCallback, useEffect, useState } from 'react';
 import { posService } from '../../shared/services/posService';
 import { kdsOrderSchema } from '../../shared/schemas/kdsOrders';
+import { useUserStore } from '../../shared/stores/userStore';
+import { useKdsStream } from './useKdsStream';
 
 export interface KDSOrder {
   id: string;
@@ -19,7 +21,10 @@ export function useKDSOrders(station?: string) {
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
 
-  const load = async () => {
+  const rawUserId = useUserStore((s) => s.userId);
+  const ownerID = rawUserId != null ? Number(rawUserId) : undefined;
+
+  const load = useCallback(async (): Promise<void> => {
     setLoading(true);
     setError(null);
     try {
@@ -48,16 +53,15 @@ export function useKDSOrders(station?: string) {
     } finally {
       setLoading(false);
     }
-  };
-
-  useEffect(() => {
-    load();
-    const t = window.setInterval(load, 15000);
-    return () => window.clearInterval(t);
-    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [station]);
 
-  const setStatus = async (id: string, status: KDSOrder['status']) => {
+  useEffect(() => {
+    void load();
+  }, [load]);
+
+  useKdsStream(ownerID, load);
+
+  const setStatus = async (id: string, status: KDSOrder['status']): Promise<void> => {
     setOrders((prev) => prev.map((o) => (o.id === id ? { ...o, status } : o)));
     try {
       await unwrap(posService.updateKDSItemStatus(Number(id), status));
