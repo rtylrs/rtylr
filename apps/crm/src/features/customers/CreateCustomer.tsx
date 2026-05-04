@@ -2,7 +2,7 @@ import React, { useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { toast } from 'sonner';
 import { Check, ArrowLeft, ArrowRight } from 'lucide-react';
-import { useCreateCustomer } from './useCustomers';
+import { useCreateCustomer } from '../../shared/hooks/queries/useCustomers';
 import { Breadcrumbs, Button, Card, Input, PageHeader } from '../../shared/components/ui';
 
 interface FormData {

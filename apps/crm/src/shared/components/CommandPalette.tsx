@@ -15,7 +15,7 @@ import {
   Plus,
   Award,
 } from 'lucide-react';
-import { useCustomers } from '../../features/customers/useCustomers';
+import { useListCustomers } from '../hooks/queries/useCustomers';
 import { CustomerAvatar } from './crm';
 
 interface CommandItem {
@@ -34,7 +34,7 @@ export const CommandPalette: React.FC<{ open: boolean; onClose: () => void }> = 
   const navigate = useNavigate();
   const [query, setQuery] = useState('');
   const [cursor, setCursor] = useState(0);
-  const { data: fetchedCustomers } = useCustomers();
+  const { data: fetchedCustomers } = useListCustomers({ limit: 50, offset: 0 });
   const customers = fetchedCustomers ?? [];
 
   useEffect(() => {

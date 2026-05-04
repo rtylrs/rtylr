@@ -1,7 +1,8 @@
 import React from 'react';
 import { Clock } from 'lucide-react';
 import { useQuery } from '@tanstack/react-query';
-import api from '../../../../shared/lib/api';
+import { unwrap } from '@voxire/api';
+import { safe } from '../../../../shared/lib/api';
 
 /**
  * Invoice aging buckets — accounts-receivable at a glance. Hits
@@ -27,10 +28,10 @@ interface ApiResponse {
 }
 
 const BUCKET_COLOUR: Record<string, string> = {
-  '0-30': '#34d399',
-  '31-60': '#fbbf24',
-  '61-90': '#f97316',
-  '90+': '#ef4444',
+  '0-30': 'var(--aging-current)',
+  '31-60': 'var(--aging-warning)',
+  '61-90': 'var(--aging-overdue)',
+  '90+': 'var(--aging-critical)',
 };
 
 function formatMoney(minor: number): string {
@@ -45,8 +46,8 @@ const InvoiceAgingWidget: React.FC = (): React.JSX.Element => {
     queryKey: ['insights-invoice-aging'],
     queryFn: async (): Promise<Bucket[]> => {
       try {
-        const res = await api.get<ApiResponse>('/insights/financial/invoice-aging');
-        return (res.data.buckets ?? []).map((b) => ({
+        const res = await unwrap(safe.get<ApiResponse>('/insights/financial/invoice-aging'));
+        return (res.buckets ?? []).map((b) => ({
           label: b.label,
           amountMinorUnits: b.amount_minor_units,
           count: b.count,

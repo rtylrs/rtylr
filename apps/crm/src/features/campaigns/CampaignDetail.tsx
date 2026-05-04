@@ -9,7 +9,7 @@ import {
   DollarSign,
   Mail,
 } from 'lucide-react';
-import { useCampaignById, useCampaignStats } from './useCampaigns';
+import { useGetCampaign, useCampaignStats } from '../../shared/hooks/queries/useCampaigns';
 import { Breadcrumbs, Card, SkeletonList, EmptyState } from '../../shared/components/ui';
 import { CampaignStatsCard } from '../../shared/components/crm';
 
@@ -21,7 +21,7 @@ const CampaignDetail: React.FC = () => {
     data: fetched,
     isLoading: campaignLoading,
     error: campaignError,
-  } = useCampaignById(campaignId);
+  } = useGetCampaign(campaignId);
   const { data: fetchedStats } = useCampaignStats(campaignId);
   const campaign = fetched;
   const stats = fetchedStats;

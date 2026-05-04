@@ -2,7 +2,7 @@ import React, { useState } from 'react';
 import { useNavigate, useSearchParams } from 'react-router-dom';
 import { toast } from 'sonner';
 import { Users, ArrowRight } from 'lucide-react';
-import { useCustomers, useMergeCustomers } from './useCustomers';
+import { useListCustomers, useMergeCustomers } from '../../shared/hooks/queries/useCustomers';
 import { Breadcrumbs, Button, Card, PageHeader } from '../../shared/components/ui';
 import { SearchableCustomerSelect, CustomerAvatar, TierBadge } from '../../shared/components/crm';
 import { getTier } from '../../shared/lib/tiers';
@@ -11,7 +11,7 @@ const MergeCustomers: React.FC = () => {
   const navigate = useNavigate();
   const [searchParams] = useSearchParams();
   const merge = useMergeCustomers();
-  const { data: fetched } = useCustomers();
+  const { data: fetched } = useListCustomers({ limit: 200, offset: 0 });
   const customers = fetched ?? [];
 
   const [primaryId, setPrimaryId] = useState<number | null>(

@@ -200,6 +200,31 @@ export const useImportCustomers = (): UseMutationResult<unknown, unknown, File> 
   });
 };
 
+interface ImportCustomerRowsPayload {
+  rows: Record<string, string>[];
+  dedupe: boolean;
+}
+
+export const useImportCustomerRows = (): UseMutationResult<
+  unknown,
+  unknown,
+  ImportCustomerRowsPayload
+> => {
+  const qc = useQueryClient();
+  const { t } = useTranslation();
+  return useMutation<unknown, unknown, ImportCustomerRowsPayload>({
+    mutationFn: (payload: ImportCustomerRowsPayload): Promise<unknown> =>
+      unwrap(safe.post('/crm/customers/import', payload)),
+    onSuccess: (): void => {
+      void qc.invalidateQueries({ queryKey: ['crm-customers'] });
+      toast.success(t('crm.customers.imported'));
+    },
+    onError: (): void => {
+      toast.error(t('errors.generic'));
+    },
+  });
+};
+
 export const useExportCustomers = (): UseMutationResult<unknown, unknown, number> => {
   const { t } = useTranslation();
   return useMutation<unknown, unknown, number>({

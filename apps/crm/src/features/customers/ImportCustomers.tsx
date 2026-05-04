@@ -2,14 +2,14 @@ import React, { useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { toast } from 'sonner';
 import { Upload, FileText, Check } from 'lucide-react';
-import { useImportCustomers } from './useCustomers';
+import { useImportCustomerRows } from '../../shared/hooks/queries/useCustomers';
 import { Breadcrumbs, Button, Card, PageHeader, Select } from '../../shared/components/ui';
 
 const REQUIRED = ['name', 'email', 'phone'];
 
 const ImportCustomers: React.FC = () => {
   const navigate = useNavigate();
-  const importMut = useImportCustomers();
+  const importMut = useImportCustomerRows();
   const [rows, setRows] = useState<string[][]>([]);
   const [headers, setHeaders] = useState<string[]>([]);
   const [mapping, setMapping] = useState<Record<string, string>>({});

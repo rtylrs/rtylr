@@ -2,7 +2,7 @@ import React, { useState } from 'react';
 import { useNavigate, useSearchParams } from 'react-router-dom';
 import { toast } from 'sonner';
 import { Send, Save, Eye } from 'lucide-react';
-import { useCreateCampaign } from './useCampaigns';
+import { useCreateCampaign } from '../../shared/hooks/queries/useCampaigns';
 import { useSegments } from '../segments/useSegments';
 import { useTemplates } from '../templates/useTemplates';
 import { Breadcrumbs, Button, Card, Input, PageHeader, Select } from '../../shared/components/ui';

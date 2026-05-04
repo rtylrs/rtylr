@@ -28,6 +28,14 @@
   --status-expired-bg: rgba(120, 120, 118, 0.08);
 }
 
+/* ── Invoice aging bucket colours ───────────────────────────── */
+:root {
+  --aging-current: #34d399;
+  --aging-warning: #fbbf24;
+  --aging-overdue: #f97316;
+  --aging-critical: #ef4444;
+}
+
 /* ── Per-app brand colors (used by app launcher cards) ────────
  * Each app surface in the suite has a fixed brand color; these get
  * referenced from BusinessRoute / StaffView so launcher colors stay
