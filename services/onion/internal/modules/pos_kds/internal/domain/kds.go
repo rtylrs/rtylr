@@ -24,6 +24,7 @@ type KDSItem struct {
 }
 
 type UpdateItemStatusInput struct {
+	OwnerID int64
 	OrderID int64
 	ItemID  int64
 	Status  string

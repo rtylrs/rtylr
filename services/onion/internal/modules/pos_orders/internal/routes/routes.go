@@ -170,4 +170,7 @@ func RegisterRoutes(ctx context.Context, router *chi.Mux, service *application.S
 		ctx, router, handlers.GetPublicOrderStatusRoutes(),
 		&handlers.GetPublicOrderStatusHandler{Service: service},
 	)
+
+	// POS WebSocket realtime endpoint (anonymous at middleware layer; token validated in handler)
+	router.Get("/pos/ws", handlers.ServePOSWebSocket)
 }

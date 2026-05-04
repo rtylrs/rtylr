@@ -164,7 +164,18 @@ func (s *Service) CreateOrder(ctx context.Context, ownerID, staffID int64, input
 		return 0, err
 	}
 
-	return s.repo.CreateOrder(ctx, ownerID, staffID, orderNumber, input)
+	orderID, err := s.repo.CreateOrder(ctx, ownerID, staffID, orderNumber, input)
+	if err != nil {
+		return 0, err
+	}
+
+	wsbus.Publish(wsbus.Event{
+		Topic:    fmt.Sprintf("owner:%d", ownerID),
+		Type:     "pos:order:created",
+		EntityID: orderID,
+	})
+
+	return orderID, nil
 }
 
 func (s *Service) UpdateOrderStatus(ctx context.Context, ownerID, orderID int64, status domain.OrderStatus) error {

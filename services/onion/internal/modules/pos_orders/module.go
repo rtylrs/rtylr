@@ -27,5 +27,6 @@ func (m *Module) GetAnonymousRoutes() []string {
 		"/pos/payments/webhook",
 		"/pos/public/orders",
 		"/pos/public/orders/{id}/status",
+		"/pos/ws",
 	}
 }

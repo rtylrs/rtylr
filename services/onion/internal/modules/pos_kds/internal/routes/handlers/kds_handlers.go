@@ -116,6 +116,7 @@ func (h *UpdateKDSItemHandler) Serve(ctx context.Context, req *UpdateKDSItemRequ
 	}
 
 	if updateErr := h.Service.UpdateItemStatus(ctx, domain.UpdateItemStatusInput{
+		OwnerID: device.User.UserID,
 		OrderID: orderID,
 		ItemID:  itemID,
 		Status:  req.Status,
