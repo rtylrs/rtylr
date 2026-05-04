@@ -28,6 +28,9 @@ func Start(ctx context.Context, runMode ChiRunMode, port string) error {
 	r.Use(SecurityHeadersMiddleware())
 	r.Use(SecureErrorMiddleware())
 	r.Use(RateLimitMiddleware(100, time.Minute))
+	// Hard 15 s request deadline — cancels in-flight DB queries when
+	// the deadline fires. Also logs a warn for requests >5 s.
+	r.Use(RequestTimeoutMiddleware)
 	// Counter-only middleware — /metrics itself skips it so a scrape
 	// doesn't inflate its own numbers.
 	r.Use(MetricsMiddleware)

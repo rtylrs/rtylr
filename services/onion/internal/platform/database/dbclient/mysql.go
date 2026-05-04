@@ -51,9 +51,13 @@ const (
 
 	// DSN-level timeouts — prevent a single slow query or dead socket
 	// from hanging a goroutine indefinitely.
+	// readTimeout / writeTimeout are the network I/O deadlines; any
+	// query that hasn't finished sending/receiving within this window
+	// gets a hard socket close. Keep in sync with the HTTP server's
+	// WriteTimeout and the request timeout middleware.
 	dsnConnectTimeout = "10s"
-	dsnReadTimeout    = "30s"
-	dsnWriteTimeout   = "30s"
+	dsnReadTimeout    = "15s"
+	dsnWriteTimeout   = "15s"
 )
 
 func getClient() *MySQLClient {
