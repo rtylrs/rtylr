@@ -3,8 +3,8 @@ sql:
   - engine: "mysql"
     queries: "queries"
     schema:
-      - "../../../../internal/platform/database/schemas/shared"
-      - "../../../../internal/platform/database/schemas/rtylr"
+      - "../../../../db/schemas/shared"
+      - "../../../../db/schemas/rtylr"
     gen:
       go:
         package: "sqlc"

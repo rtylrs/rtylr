@@ -3,11 +3,11 @@ sql:
   - engine: "mysql"
     queries: "queries"
     schema:
-      - "../../../../internal/platform/database/schemas/shared"
-      - "../../../../internal/platform/database/schemas/hr_payroll"
-      - "../../../../internal/platform/database/schemas/hr_time"
-      - "../../../../internal/platform/database/schemas/hr_overtime"
-      - "../../../../internal/platform/database/schemas/hr_core"
+      - "../../../../db/schemas/shared"
+      - "../../../../db/schemas/hr_payroll"
+      - "../../../../db/schemas/hr_time"
+      - "../../../../db/schemas/hr_overtime"
+      - "../../../../db/schemas/hr_core"
     gen:
       go:
         package: "sqlc"
