@@ -55,7 +55,7 @@ export const InsightsDemo = ({ isActive }: { isActive: boolean }): React.JSX.Ele
       style={{
         position: 'absolute',
         inset: 0,
-        background: '#0c0c0f',
+        background: 'var(--app-background)',
         fontFamily: 'inherit',
         fontSize: 13,
         display: 'flex',

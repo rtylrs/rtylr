@@ -59,7 +59,7 @@ export const POSDemo = ({ isActive }: { isActive: boolean }): React.JSX.Element 
         position: 'absolute',
         inset: 0,
         display: 'flex',
-        background: '#0c0c0f',
+        background: 'var(--app-background)',
         fontFamily: 'inherit',
         fontSize: 13,
         overflow: 'hidden',
@@ -119,7 +119,7 @@ export const POSDemo = ({ isActive }: { isActive: boolean }): React.JSX.Element 
           padding: '20px 14px',
           display: 'flex',
           flexDirection: 'column',
-          background: '#090909',
+          background: 'var(--app-background)',
         }}
       >
         <div

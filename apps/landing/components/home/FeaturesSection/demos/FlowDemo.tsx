@@ -96,7 +96,7 @@ export const FlowDemo = ({ isActive }: { isActive: boolean }): React.JSX.Element
       style={{
         position: 'absolute',
         inset: 0,
-        background: '#0c0c0f',
+        background: 'var(--app-background)',
         fontFamily: 'inherit',
         fontSize: 13,
         display: 'flex',
@@ -220,7 +220,7 @@ export const FlowDemo = ({ isActive }: { isActive: boolean }): React.JSX.Element
                     exit={{ opacity: 0, scale: 0.95 }}
                     transition={{ duration: 0.22 }}
                     style={{
-                      background: '#161616',
+                      background: 'rgba(255,255,255,0.03)',
                       border: '1px solid rgba(255,255,255,0.07)',
                       borderRadius: 7,
                       padding: '9px 10px',

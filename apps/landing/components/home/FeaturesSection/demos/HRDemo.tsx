@@ -100,7 +100,7 @@ export const HRDemo = ({ isActive }: { isActive: boolean }): React.JSX.Element =
       style={{
         position: 'absolute',
         inset: 0,
-        background: '#0c0c0f',
+        background: 'var(--app-background)',
         fontFamily: 'inherit',
         fontSize: 13,
         display: 'flex',
