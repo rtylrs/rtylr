@@ -2,8 +2,6 @@
 
 $blue: #e8e6e1;
 $cyan: #e8e6e1;
-$dark-primary: #040428;
-$bg: #151515;
 $border: #232220;
 $border-subtle: rgba(255, 255, 255, 0.1);
 $text-muted: rgba(255, 255, 255, 0.5);
@@ -102,156 +100,8 @@ $text-mid: rgba(255, 255, 255, 0.65);
 }
 
 .plansContainer {
-  display: grid;
-  grid-template-columns: repeat(3, 1fr);
-  gap: 24px;
   width: 100%;
   max-width: 1100px;
-}
-
-.planCard {
-  position: relative;
-  background: rgba(255, 255, 255, 0.03);
-  border: 1px solid $border;
-  border-radius: 16px;
-  padding: 36px 32px;
-  display: flex;
-  flex-direction: column;
-  gap: 28px;
-  transition: border-color 0.25s ease;
-
-  &:hover {
-    border-color: rgba(232, 230, 225, 0.35);
-  }
-}
-
-.planCardPro {
-  border-color: rgba(232, 230, 225, 0.4);
-  background: rgba(232, 230, 225, 0.06);
-
-  &:hover {
-    border-color: rgba(232, 230, 225, 0.7);
-  }
-}
-
-.popularBadge {
-  position: absolute;
-  top: -13px;
-  left: 50%;
-  transform: translateX(-50%);
-  background: $blue;
-  color: #fff;
-  font-size: 0.72rem;
-  font-weight: 700;
-  letter-spacing: 0.5px;
-  text-transform: uppercase;
-  padding: 4px 18px;
-  border-radius: 100px;
-  white-space: nowrap;
-}
-
-.planHeader {
-  display: flex;
-  flex-direction: column;
-  gap: 8px;
-}
-
-.planName {
-  font-size: 0.85rem;
-  font-weight: 600;
-  color: $text-mid;
-  text-transform: uppercase;
-  letter-spacing: 0.8px;
-}
-
-.planPrice {
-  display: flex;
-  align-items: baseline;
-  gap: 4px;
-}
-
-.priceAmount {
-  font-size: 2.8rem;
-  font-weight: 700;
-  color: #fff;
-  letter-spacing: -0.04em;
-  line-height: 1;
-}
-
-.pricePeriod {
-  font-size: 0.9rem;
-  color: $text-muted;
-  font-weight: 400;
-}
-
-.annualNote {
-  font-size: 0.78rem;
-  color: $cyan;
-  margin: 0;
-}
-
-.planTagline {
-  font-size: 0.9rem;
-  color: $text-muted;
-  margin: 0;
-  line-height: 1.5;
-}
-
-.planFeatures {
-  list-style: none;
-  margin: 0;
-  padding: 0;
-  display: flex;
-  flex-direction: column;
-  gap: 12px;
-  flex: 1;
-
-  li {
-    font-size: 0.9rem;
-    color: $text-mid;
-    padding-left: 20px;
-    position: relative;
-
-    &::before {
-      content: '-';
-      position: absolute;
-      left: 0;
-      color: rgba(232, 230, 225, 0.6);
-      font-size: 0.75rem;
-    }
-  }
-}
-
-.planCta {
-  width: 100%;
-  padding: 13px 24px;
-  border-radius: 8px;
-  font-size: 0.9rem;
-  font-weight: 600;
-  cursor: pointer;
-  transition: all 0.25s ease;
-  background: rgba(255, 255, 255, 0.07);
-  color: rgba(255, 255, 255, 0.85);
-  border: 1px solid $border;
-
-  &:hover {
-    background: rgba(255, 255, 255, 0.12);
-    border-color: rgba(255, 255, 255, 0.25);
-    color: #fff;
-  }
-}
-
-.planCtaPro {
-  background: $blue;
-  color: #fff;
-  border-color: $blue;
-
-  &:hover {
-    background: #5596d5;
-    border-color: #5596d5;
-    transform: translateY(-1px);
-    box-shadow: 0 8px 32px rgba(232, 230, 225, 0.35);
-  }
 }
 
 // ── Feature comparison table ──────────────────────────────────────────────────
@@ -430,7 +280,6 @@ $text-mid: rgba(255, 255, 255, 0.65);
   text-align: center;
   padding: 80px 24px 0;
   border-top: 1px solid $border;
-  margin: 0 24px;
   max-width: 1100px;
   margin-inline: auto;
 }
@@ -469,7 +318,7 @@ $text-mid: rgba(255, 255, 255, 0.65);
   transition: all 0.25s ease;
 
   &:hover {
-    background: #5596d5;
+    background: #ffffff;
     transform: translateY(-2px);
     box-shadow: 0 12px 40px rgba(232, 230, 225, 0.4);
   }
@@ -502,11 +351,6 @@ $text-mid: rgba(255, 255, 255, 0.65);
 @media (max-width: 1024px) {
   .heroTitle {
     font-size: 3rem;
-  }
-
-  .plansContainer {
-    grid-template-columns: 1fr;
-    max-width: 480px;
   }
 }
 
@@ -565,9 +409,5 @@ $text-mid: rgba(255, 255, 255, 0.65);
 @media (max-width: 480px) {
   .heroTitle {
     font-size: 2rem;
-  }
-
-  .priceAmount {
-    font-size: 2.2rem;
   }
 }

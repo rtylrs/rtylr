@@ -9,9 +9,9 @@ import { pricingPageSchema } from '../../lib/structured-data';
 import { APP_URLS } from '@voxire/config';
 import { navigateExternal } from '../../lib/navigation';
 import { blurFadeIn, staggerBlur, viewportOnce } from '../../lib/animations';
+import PricingCards from '../../components/pricing/PricingCards';
+import type { BillingCycle, Plan } from '../../components/pricing/pricingData';
 import styles from './pricing.module.scss';
-
-type BillingCycle = 'monthly' | 'annual';
 
 interface PlanFeature {
   name: string;
@@ -45,12 +45,12 @@ const FAQ_ITEMS = [
   {
     question: 'What happens when I hit 10 seats on Free?',
     answer:
-      'You\u2019re prompted to upgrade to Pro before adding seat 11. Nothing breaks. Your data, reports, and configurations all carry over.',
+      "You're prompted to upgrade to Pro before adding seat 11. Nothing breaks. Your data, reports, and configurations all carry over.",
   },
   {
     question: 'How does per-seat billing work?',
     answer:
-      'You pay only for the days each seat is active. Add a server mid-month, you\u2019re billed for those days. Remove them, the remaining days credit against your next invoice. No full-month minimums.',
+      "You pay only for the days each seat is active. Add a server mid-month, you're billed for those days. Remove them, the remaining days credit against your next invoice. No full-month minimums.",
   },
   {
     question: 'When does Scale pricing kick in?',
@@ -82,29 +82,21 @@ const FeatureCell = ({ value }: { value: boolean | string }): React.JSX.Element 
   return <span className={styles.featureText}>{value}</span>;
 };
 
-const PricingPage = (): JSX.Element => {
+const PricingPage = (): React.JSX.Element => {
   const router = useRouter();
   const [billing, setBilling] = useState<BillingCycle>('monthly');
   const [openFaq, setOpenFaq] = useState<number | null>(null);
 
   const proMonthly = 6.99;
-  const proAnnual = 4.99;
-  const proPrice = billing === 'annual' ? proAnnual : proMonthly;
 
-  const handleGetStarted = (): void => {
-    navigateExternal(`${APP_URLS.auth}/register`);
-  };
-
-  const handleStartPro = (): void => {
-    navigateExternal(`${APP_URLS.auth}/register?plan=pro`);
-  };
-
-  const handleContactSales = (): void => {
-    void router.push('/contact');
-  };
-
-  const handleBookDemo = (): void => {
-    void router.push('/demo');
+  const handleCta = (action: Plan['ctaAction']): void => {
+    if (action === 'contact') {
+      void router.push('/contact');
+      return;
+    }
+    const plan = action === 'register-pro' ? 'pro' : undefined;
+    const url = plan ? `${APP_URLS.auth}/register?plan=${plan}` : `${APP_URLS.auth}/register`;
+    navigateExternal(url);
   };
 
   const toggleFaq = (index: number): void => {
@@ -141,8 +133,6 @@ const PricingPage = (): JSX.Element => {
                 url: 'https://rtylr.com/contact/',
               },
             ],
-            // Use the on-page FAQ_ITEMS so the JSON-LD matches what
-            // the visitor actually sees — Google penalises mismatches.
             faqs: FAQ_ITEMS,
           })}
         />
@@ -165,7 +155,6 @@ const PricingPage = (): JSX.Element => {
               per-location fees, no module upsells.
             </motion.p>
 
-            {/* Billing toggle */}
             <motion.div className={styles.billingToggle} variants={blurFadeIn}>
               <button
                 className={`${styles.toggleOption} ${billing === 'monthly' ? styles.toggleActive : ''}`}
@@ -186,109 +175,7 @@ const PricingPage = (): JSX.Element => {
           {/* Plan cards */}
           <section className={styles.plansSection}>
             <div className={styles.plansContainer}>
-              {/* Free */}
-              <motion.div
-                className={styles.planCard}
-                initial="hidden"
-                whileInView="visible"
-                viewport={viewportOnce}
-                variants={blurFadeIn}
-              >
-                <div className={styles.planHeader}>
-                  <span className={styles.planName}>Free</span>
-                  <div className={styles.planPrice}>
-                    <span className={styles.priceAmount}>$0</span>
-                    <span className={styles.pricePeriod}>/forever</span>
-                  </div>
-                  <p className={styles.planTagline}>
-                    Everything you need to run a single location.
-                  </p>
-                </div>
-                <ul className={styles.planFeatures}>
-                  <li>Up to 10 team members</li>
-                  <li>All 7 apps included</li>
-                  <li>1 location</li>
-                  <li>0% transaction fees under $10k/mo</li>
-                  <li>1,000 AI credits / month</li>
-                </ul>
-                <button className={styles.planCta} onClick={handleGetStarted}>
-                  Get started
-                </button>
-              </motion.div>
-
-              {/* Pro */}
-              <motion.div
-                className={`${styles.planCard} ${styles.planCardPro}`}
-                initial="hidden"
-                whileInView="visible"
-                viewport={viewportOnce}
-                variants={blurFadeIn}
-              >
-                <div className={styles.popularBadge}>Most Popular</div>
-                <div className={styles.planHeader}>
-                  <span className={styles.planName}>Pro</span>
-                  <div className={styles.planPrice}>
-                    <span className={styles.priceAmount}>${proPrice.toFixed(2)}</span>
-                    <span className={styles.pricePeriod}>/seat/month</span>
-                  </div>
-                  {billing === 'annual' && (
-                    <p className={styles.annualNote}>
-                      Billed annually · ${(proAnnual * 12).toFixed(2)}/seat/year
-                    </p>
-                  )}
-                  <p className={styles.planTagline}>
-                    Growing teams scaling across multiple locations.
-                  </p>
-                </div>
-                <ul className={styles.planFeatures}>
-                  <li>Up to 30 team members</li>
-                  <li>Up to 5 locations</li>
-                  <li>0% transaction fees under $100k/mo</li>
-                  <li>10,000 AI credits / month + 500 per seat</li>
-                  <li>Priority email + chat support</li>
-                </ul>
-                <button
-                  className={`${styles.planCta} ${styles.planCtaPro}`}
-                  onClick={handleStartPro}
-                >
-                  Start with Pro
-                </button>
-              </motion.div>
-
-              {/* Scale */}
-              <motion.div
-                className={styles.planCard}
-                initial="hidden"
-                whileInView="visible"
-                viewport={viewportOnce}
-                variants={blurFadeIn}
-              >
-                <div className={styles.planHeader}>
-                  <span className={styles.planName}>Scale</span>
-                  <div className={styles.planPrice}>
-                    <span className={styles.priceAmount}>$4.99</span>
-                    <span className={styles.pricePeriod}>/seat/month</span>
-                  </div>
-                  {billing === 'annual' && (
-                    <p className={styles.annualNote}>
-                      $2.99/seat on annual · unlocks at 30+ active seats
-                    </p>
-                  )}
-                  <p className={styles.planTagline}>
-                    Unlimited seats. Every feature unlocked. Every app. Every location.
-                  </p>
-                </div>
-                <ul className={styles.planFeatures}>
-                  <li>Unlimited team members</li>
-                  <li>Unlimited locations</li>
-                  <li>0% transaction fees (no cap)</li>
-                  <li>50,000 AI credits / month + 1,000 per seat</li>
-                  <li>SSO, audit logs, dedicated success manager</li>
-                </ul>
-                <button className={styles.planCta} onClick={handleContactSales}>
-                  Talk to sales
-                </button>
-              </motion.div>
+              <PricingCards billing={billing} onCta={handleCta} />
             </div>
           </section>
 
@@ -395,10 +282,10 @@ const PricingPage = (): JSX.Element => {
               10 seats and all 7 apps are yours from day one. No credit card until you need seat 11.
             </motion.p>
             <motion.div className={styles.bottomCtaButtons} variants={blurFadeIn}>
-              <button className={styles.ctaPrimary} onClick={handleGetStarted}>
+              <button className={styles.ctaPrimary} onClick={() => handleCta('register')}>
                 Start free
               </button>
-              <button className={styles.ctaSecondary} onClick={handleBookDemo}>
+              <button className={styles.ctaSecondary} onClick={() => void router.push('/demo')}>
                 Book a demo
               </button>
             </motion.div>
