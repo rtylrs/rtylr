@@ -13,22 +13,21 @@ import { clearConsent, readConsent, writeConsent, type ConsentState } from './co
  * `reopen()` to let the user revisit their choice (GDPR Art. 7(3)).
  */
 interface UseConsent {
-  state: ConsentState;
+  state: ConsentState | null;
   accept: () => void;
   decline: () => void;
   reopen: () => void;
 }
 
 export function useConsent(): UseConsent {
-  // Start as 'undecided' on every render, including SSR. If we read
-  // the cookie during `useState(() => readConsent())`, client-side
-  // returns 'granted' (when the visitor already consented) while
-  // server-side returns 'undecided' — that SSR/hydration mismatch
-  // forces React 19 to remount the banner subtree, and the remount
-  // can happen between the user's mousedown and click, eating the
-  // event. Instead we read the cookie post-mount in an effect so
-  // server + initial client render match, then update state.
-  const [state, setState] = useState<ConsentState>('undecided');
+  // Start as null (hidden) until after mount. Reading the cookie in
+  // useState() causes an SSR/hydration mismatch — server always
+  // returns 'undecided' while the client may return 'granted', forcing
+  // React to remount the subtree and producing a flash. null means
+  // "not yet determined": the banner stays invisible on the first
+  // paint, then the effect reads the real cookie value and renders
+  // only when genuinely undecided.
+  const [state, setState] = useState<ConsentState | null>(null);
 
   useEffect(() => {
     if (typeof window === 'undefined') return;

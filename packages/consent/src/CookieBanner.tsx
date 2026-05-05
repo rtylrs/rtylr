@@ -31,7 +31,7 @@ export function CookieBanner({
   onDecline,
 }: CookieBannerProps): React.JSX.Element | null {
   const { state, accept, decline } = useConsent();
-  if (state !== 'undecided') return null;
+  if (state !== 'undecided') return null; // null (pre-mount) and decided states all hide the banner
 
   const handleAccept = (): void => {
     accept();
