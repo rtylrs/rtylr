@@ -7,9 +7,17 @@ const mockPosService = {
   updateKDSItemStatus: vi.fn(),
 };
 
-vi.mock('@voxire/api', () => ({
-  unwrap: vi.fn((v) => v),
-}));
+vi.mock('@voxire/api', () => {
+  class MockRealtimeClient {
+    subscribe = vi.fn(() => vi.fn());
+  }
+  return {
+    unwrap: vi.fn((v) => v),
+    createApiClient: vi.fn(() => ({})),
+    safeFetch: vi.fn(() => ({})),
+    RealtimeClient: MockRealtimeClient,
+  };
+});
 
 vi.mock('../../shared/services/posService', () => ({
   posService: {
