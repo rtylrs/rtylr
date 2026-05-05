@@ -3,8 +3,8 @@ sql:
   - engine: "mysql"
     queries: "queries"
     schema:
-      - "../../../../db/schemas/shared"
-      - "../../../../db/schemas/hr_attendance"
+      - "../../../../internal/platform/database/schemas/shared"
+      - "../../../../internal/platform/database/schemas/hr_attendance"
     gen:
       go:
         package: "sqlc"

@@ -1,6 +1,6 @@
 [submodule "voxie"]
 	path = voxie
 	url = https://github.com/voxire/voxie.git
-[submodule "db/schemas"]
-	path = db/schemas
+[submodule "internal/platform/database/schemas"]
+	path = internal/platform/database/schemas
 	url = git@github.com:voxire/schemas.git

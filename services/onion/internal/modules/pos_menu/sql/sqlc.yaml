@@ -3,9 +3,9 @@ sql:
   - engine: "mysql"
     queries: "queries"
     schema:
-      - "../../../../db/schemas/shared"
-      - "../../../../db/schemas/pos"
-      - "../../../../db/schemas/erp"
+      - "../../../../internal/platform/database/schemas/shared"
+      - "../../../../internal/platform/database/schemas/pos"
+      - "../../../../internal/platform/database/schemas/erp"
     gen:
       go:
         package: "sqlc"
