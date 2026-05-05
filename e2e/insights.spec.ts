@@ -139,9 +139,7 @@ test.describe('Insights', () => {
 
   test('dashboard loads past auth guard', async ({ page }) => {
     await page.goto(INSIGHTS_URL);
-    await expect(
-      page.getByRole('heading').first().or(page.getByRole('banner').first())
-    ).toBeVisible({ timeout: 10_000 });
+    await expect(page.getByRole('heading').first()).toBeVisible({ timeout: 10_000 });
   });
 
   test('renders without console errors', async ({ page }) => {
