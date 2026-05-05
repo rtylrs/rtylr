@@ -1223,6 +1223,9 @@ importers:
       axios:
         specifier: ^1.15.2
         version: 1.15.2
+      chart.js:
+        specifier: ^4.5.1
+        version: 4.5.1
       lucide-react:
         specifier: ^1.8.0
         version: 1.8.0(react@19.2.5)
@@ -1232,6 +1235,9 @@ importers:
       react:
         specifier: 19.2.5
         version: 19.2.5
+      react-chartjs-2:
+        specifier: ^5.3.1
+        version: 5.3.1(chart.js@4.5.1)(react@19.2.5)
       react-cookie:
         specifier: ^8.1.0
         version: 8.1.0(@types/react@19.2.14)(react@19.2.5)
