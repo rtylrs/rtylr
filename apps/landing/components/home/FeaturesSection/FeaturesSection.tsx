@@ -3,21 +3,18 @@ import { motion, AnimatePresence } from 'motion/react';
 import { Button } from '@voxire/components';
 import { useRouter } from 'next/router';
 import { blurFadeIn, blurFadeInSlow, viewportOnce } from '../../../lib/animations';
+import { POSDemo } from './demos/POSDemo';
+import { ERPDemo } from './demos/ERPDemo';
+import { HRDemo } from './demos/HRDemo';
+import { CRMDemo } from './demos/CRMDemo';
+import { FinanceDemo } from './demos/FinanceDemo';
+import { FlowDemo } from './demos/FlowDemo';
+import { InsightsDemo } from './demos/InsightsDemo';
 import styles from './FeaturesSection.module.scss';
 
-/**
- * Apps showcase — tabbed version.
- *
- * The previous incarnation was a sticky-right-column, scroll-linked
- * feed where each of the seven apps occupied ~50vh. Great on a demo
- * recording; terrible on the actual home page — seven viewport
- * heights of scroll just to get past the platform pitch.
- *
- * This version collapses the same content into a single tabbed
- * viewport: one screen tall, one app on display at a time, auto-
- * advancing every 6s (pauses when the visitor hovers or interacts).
- * All seven app images stay preloaded so swaps are instant.
- */
+interface DemoProps {
+  isActive: boolean;
+}
 
 interface Feature {
   id: string;
@@ -25,7 +22,7 @@ interface Feature {
   title: string;
   description: string;
   ctaText: string;
-  image: string;
+  Demo: React.ComponentType<DemoProps>;
 }
 
 const FEATURES: Feature[] = [
@@ -34,9 +31,9 @@ const FEATURES: Feature[] = [
     category: 'POS',
     title: 'A register that keeps up with real service.',
     description:
-      'Tickets, tables, splits, tips, and every payment type — card, Apple Pay, cash, gift, comp. Works offline when the WiFi doesn\u2019t. < 200ms per checkout.',
+      'Tickets, tables, splits, tips, and every payment type — card, Apple Pay, cash, gift, comp. Works offline when the WiFi doesn’t. < 200ms per checkout.',
     ctaText: 'Open POS',
-    image: '/images/features/pos.jpg',
+    Demo: POSDemo,
   },
   {
     id: 'erp',
@@ -45,7 +42,7 @@ const FEATURES: Feature[] = [
     description:
       'Recipe-linked depletion as sales ring up. Auto-reorder at threshold. Multi-location transfers with a full audit trail. Your shelves tell the database, not the other way around.',
     ctaText: 'Open ERP',
-    image: '/images/features/erp.jpg',
+    Demo: ERPDemo,
   },
   {
     id: 'hr',
@@ -54,7 +51,7 @@ const FEATURES: Feature[] = [
     description:
       'Drag-to-publish schedules. Clock-in from the POS. Payroll that rolls up tips, hours, and deductions automatically. Compliance flags before they become violations.',
     ctaText: 'Open HR',
-    image: '/images/features/hr.jpg',
+    Demo: HRDemo,
   },
   {
     id: 'crm',
@@ -63,7 +60,7 @@ const FEATURES: Feature[] = [
     description:
       'Every POS sale enriches the profile. Segment by spend, visit cadence, birthday, tags. Send the campaign from the same app — no Mailchimp detour required.',
     ctaText: 'Open CRM',
-    image: '/images/features/crm.jpg',
+    Demo: CRMDemo,
   },
   {
     id: 'finance',
@@ -72,16 +69,16 @@ const FEATURES: Feature[] = [
     description:
       'Recurring invoices that collect themselves. Expenses captured at source. Sales tax by jurisdiction. A P&L that updates with every sale, not at month-end.',
     ctaText: 'Open Finance',
-    image: '/images/features/finance.jpg',
+    Demo: FinanceDemo,
   },
   {
     id: 'flow',
     category: 'Flow',
     title: 'Work that moves between apps.',
     description:
-      'Kanban boards, automations, and tasks linked to the invoice, customer, or shift they\u2019re actually about. Operations that don\u2019t slip between tools.',
+      'Kanban boards, automations, and tasks linked to the invoice, customer, or shift they’re actually about. Operations that don’t slip between tools.',
     ctaText: 'Open Flow',
-    image: '/images/features/flow.jpg',
+    Demo: FlowDemo,
   },
   {
     id: 'insights',
@@ -90,7 +87,7 @@ const FEATURES: Feature[] = [
     description:
       'Revenue trends, customer cohorts, product performance, labor margin. Every number pulled live from every other app. No SQL, no nightly ETL.',
     ctaText: 'Open Insights',
-    image: '/images/features/insights.jpg',
+    Demo: InsightsDemo,
   },
 ];
 
@@ -105,15 +102,9 @@ const FeaturesSection: React.FC = (): React.JSX.Element => {
   const active = FEATURES[activeIndex];
 
   const advance = useCallback((): void => {
-    // Modulo wrap — Insights (last) rolls back to POS (first).
     setActiveIndex((i) => (i + 1) % FEATURES.length);
   }, []);
 
-  // Auto-advance. Pauses while hovered so a visitor reading one
-  // app's copy isn't yanked mid-sentence; leaving the section
-  // resumes the cycle from whatever tab is currently selected.
-  // Every click resets the timer too — the clicked tab always gets
-  // its full spotlight window before the carousel rolls on.
   useEffect(() => {
     if (isPaused) return;
     timerRef.current = window.setTimeout(advance, AUTO_ADVANCE_MS);
@@ -126,10 +117,6 @@ const FeaturesSection: React.FC = (): React.JSX.Element => {
   }, [activeIndex, isPaused, advance]);
 
   const selectFeature = (idx: number): void => {
-    // Clicking a tab pins the carousel to that app and resets the
-    // countdown. When the visitor is interested in a specific app,
-    // they get 6 full seconds on it before the cycle resumes — no
-    // getting yanked mid-sentence, no full pause either.
     setActiveIndex(idx);
   };
 
@@ -208,15 +195,7 @@ const FeaturesSection: React.FC = (): React.JSX.Element => {
                   className={`${styles.showcaseImage} ${i === activeIndex ? styles.active : ''}`}
                   aria-hidden={i !== activeIndex}
                 >
-                  {/* All images mounted from first paint — swap is a
-                      CSS opacity transition rather than a network trip,
-                      so the preview is instant once cached. */}
-                  <img
-                    src={f.image}
-                    alt={f.title}
-                    className={styles.showcaseImg}
-                    loading={i === 0 ? 'eager' : 'lazy'}
-                  />
+                  <f.Demo isActive={i === activeIndex} />
                 </div>
               ))}
             </div>
