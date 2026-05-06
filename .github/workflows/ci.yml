@@ -109,7 +109,6 @@ jobs:
       landing: ${{ github.event_name == 'workflow_dispatch' || steps.filter.outputs.landing }}
       auth: ${{ github.event_name == 'workflow_dispatch' || steps.filter.outputs.auth }}
       dash: ${{ github.event_name == 'workflow_dispatch' || steps.filter.outputs.dash }}
-      pos: ${{ github.event_name == 'workflow_dispatch' || steps.filter.outputs.pos }}
       erp: ${{ github.event_name == 'workflow_dispatch' || steps.filter.outputs.erp }}
       crm: ${{ github.event_name == 'workflow_dispatch' || steps.filter.outputs.crm }}
       hr: ${{ github.event_name == 'workflow_dispatch' || steps.filter.outputs.hr }}
@@ -136,9 +135,6 @@ jobs:
               - 'packages/**'
             dash:
               - 'apps/dash/**'
-              - 'packages/**'
-            pos:
-              - 'apps/vbitez/**'
               - 'packages/**'
             erp:
               - 'apps/erp/**'
@@ -201,16 +197,6 @@ jobs:
       app_filter: dash
       dist_dir: dist/dash
       project_name: rtylr-hub
-    secrets: inherit
-
-  deploy-pos:
-    needs: [check, e2e, changes]
-    if: needs.changes.outputs.pos == 'true'
-    uses: voxire/pipelines/.github/workflows/deploy-pages.yml@main
-    with:
-      app_filter: vbitez
-      dist_dir: dist/vbitez
-      project_name: rtylr-pos
     secrets: inherit
 
   deploy-erp:
