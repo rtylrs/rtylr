@@ -406,6 +406,7 @@ linters:
           allow:
             - $gostd
             - github.com/voxire/onion
+            - github.com/voxire/voxie
             - github.com/joho/godotenv
             - github.com/go-chi/chi/v5
             - github.com/google/uuid
