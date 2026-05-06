@@ -1,0 +1,103 @@
+.about {
+  display: flex;
+  flex-direction: column;
+  gap: 32px;
+}
+
+.about__section {
+  display: flex;
+  flex-direction: column;
+  gap: 14px;
+}
+
+.about__sectionTitle {
+  font-size: 0.75rem;
+  font-weight: 700;
+  text-transform: uppercase;
+  letter-spacing: 0.08em;
+  color: var(--menu-subtext, rgba(26, 26, 26, 0.5));
+  margin: 0;
+}
+
+.about__story {
+  font-size: 0.9rem;
+  line-height: 1.7;
+  color: var(--menu-text, #1a1a1a);
+  margin: 0;
+
+  @media (min-width: 480px) {
+    font-size: 0.95rem;
+  }
+}
+
+.about__infoGrid {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+}
+
+.about__infoCard {
+  display: flex;
+  align-items: flex-start;
+  gap: 14px;
+  padding: 14px 16px;
+  background: var(--menu-card-bg, #ffffff);
+  border: 1px solid var(--menu-border, rgba(0, 0, 0, 0.08));
+  border-radius: 10px;
+  text-decoration: none;
+  transition: box-shadow 0.15s ease;
+
+  &[href]:hover {
+    box-shadow: 0 2px 12px rgba(0, 0, 0, 0.08);
+  }
+}
+
+.about__infoIcon {
+  font-size: 1.2rem;
+  line-height: 1;
+  flex-shrink: 0;
+  margin-top: 1px;
+}
+
+.about__infoLabel {
+  display: block;
+  font-size: 0.7rem;
+  font-weight: 600;
+  text-transform: uppercase;
+  letter-spacing: 0.06em;
+  color: var(--menu-subtext, rgba(26, 26, 26, 0.45));
+  margin-bottom: 2px;
+}
+
+.about__infoValue {
+  display: block;
+  font-size: 0.875rem;
+  color: var(--menu-text, #1a1a1a);
+  font-weight: 500;
+}
+
+.about__socials {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+}
+
+.about__socialBtn {
+  display: flex;
+  align-items: center;
+  padding: 12px 16px;
+  background: var(--menu-card-bg, #ffffff);
+  border: 1px solid var(--menu-border, rgba(0, 0, 0, 0.08));
+  border-radius: 10px;
+  font-size: 0.875rem;
+  font-weight: 500;
+  color: var(--menu-accent, #1a1a1a);
+  text-decoration: none;
+  transition: background 0.15s ease;
+
+  &:hover {
+    background: var(--menu-accent, #1a1a1a);
+    color: var(--menu-accent-text, #ffffff);
+    border-color: var(--menu-accent, #1a1a1a);
+  }
+}

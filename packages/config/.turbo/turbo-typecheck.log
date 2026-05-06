@@ -1,0 +1,4 @@
+
+> @voxire/config@0.0.1 typecheck /Users/mhomsi/personal/code/voxire/rtylr/rtylr/packages/config
+> tsc --noEmit
+

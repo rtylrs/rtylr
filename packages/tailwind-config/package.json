@@ -1,0 +1,11 @@
+{
+  "name": "@voxire/tailwind-config",
+  "version": "0.0.1",
+  "private": true,
+  "exports": {
+    ".": "./tailwind.config.ts"
+  },
+  "devDependencies": {
+    "tailwindcss": "^4.2.4"
+  }
+}

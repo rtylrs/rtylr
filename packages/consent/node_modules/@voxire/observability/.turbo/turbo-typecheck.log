@@ -1,0 +1,4 @@
+
+> @voxire/observability@0.0.1 typecheck /Users/mhomsi/personal/code/voxire/rtylr/rtylr/packages/observability
+> tsc --noEmit
+

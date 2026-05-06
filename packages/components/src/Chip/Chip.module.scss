@@ -1,0 +1,43 @@
+.chip {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.375rem;
+  padding: 0.25rem 0.625rem;
+  border-radius: 9999px;
+  font-size: 0.75rem;
+  font-weight: 500;
+  line-height: 1;
+  white-space: nowrap;
+}
+
+.primary {
+  background: var(--primary-color, #151515);
+  color: #fff;
+}
+
+.secondary {
+  background: var(--secondary-color, #4485c4);
+  color: #fff;
+}
+
+.default {
+  background: #e5e7eb;
+  color: #374151;
+}
+
+.sm {
+  padding: 0.2rem 0.5rem;
+  font-size: 0.7rem;
+}
+
+.md {
+  padding: 0.3rem 0.75rem;
+  font-size: 0.8rem;
+}
+
+.icon {
+  display: flex;
+  align-items: center;
+  flex-shrink: 0;
+  font-size: 0.9em;
+}

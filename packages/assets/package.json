@@ -1,0 +1,17 @@
+{
+  "name": "@voxire/assets",
+  "version": "0.0.1",
+  "description": "Shared static assets and SCSS variables for Voxire apps",
+  "type": "module",
+  "exports": {
+    ".": "./src/index.ts",
+    "./icons/*": "./src/icons/*",
+    "./styles/*": "./src/styles/*"
+  },
+  "scripts": {
+    "typecheck": "tsc --noEmit"
+  },
+  "devDependencies": {
+    "typescript": "~6.0.3"
+  }
+}

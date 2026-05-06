@@ -1,0 +1,81 @@
+.voxire-loading-spinner {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  gap: 0.5rem;
+}
+
+.voxire-spinner-ring {
+  border: 3px solid rgba(16, 16, 16, 0.1);
+  border-top: 3px solid #151515;
+  border-radius: 50%;
+  animation: voxire-spin-animation 1s linear infinite;
+}
+
+.voxire-spinner-text {
+  font-family:
+    'Inter',
+    -apple-system,
+    BlinkMacSystemFont,
+    'Segoe UI',
+    'Roboto',
+    sans-serif;
+  font-size: 0.875rem;
+  color: #757575;
+  text-align: center;
+  margin-top: 0.5rem;
+}
+
+/* Size variants */
+.voxire-loading-spinner--small .voxire-spinner-ring {
+  width: 20px;
+  height: 20px;
+  border-width: 2px;
+}
+
+.voxire-loading-spinner--small .voxire-spinner-text {
+  font-size: 0.75rem;
+}
+
+.voxire-loading-spinner--medium .voxire-spinner-ring {
+  width: 32px;
+  height: 32px;
+  border-width: 3px;
+}
+
+.voxire-loading-spinner--medium .voxire-spinner-text {
+  font-size: 0.875rem;
+}
+
+.voxire-loading-spinner--large .voxire-spinner-ring {
+  width: 48px;
+  height: 48px;
+  border-width: 4px;
+}
+
+.voxire-loading-spinner--large .voxire-spinner-text {
+  font-size: 1rem;
+}
+
+/* Color variants */
+.voxire-loading-spinner--primary .voxire-spinner-ring {
+  border-top-color: #151515;
+}
+
+.voxire-loading-spinner--secondary .voxire-spinner-ring {
+  border-top-color: #dc004e;
+}
+
+.voxire-loading-spinner--inherit .voxire-spinner-ring {
+  border-top-color: currentColor;
+}
+
+@keyframes voxire-spin-animation {
+  0% {
+    transform: rotate(0deg);
+  }
+  100% {
+    transform: rotate(360deg);
+  }
+}

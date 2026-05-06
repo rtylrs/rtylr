@@ -1,0 +1,82 @@
+.voxire-input {
+  position: relative;
+  width: 100%;
+}
+
+.voxire-input__label {
+  display: inline-block;
+  color: #6b7280;
+  font-weight: 600;
+  font-size: 0.9rem;
+  margin-bottom: 6px;
+}
+
+.voxire-input__field {
+  width: 100%;
+  padding: 12px 46px 12px 14px;
+  border: 1.5px solid #e5e7eb;
+  border-radius: 8px;
+  outline: none;
+  font-size: 15px;
+  font-family:
+    'Inter',
+    -apple-system,
+    BlinkMacSystemFont,
+    'Segoe UI',
+    'Roboto',
+    sans-serif;
+  background: #ffffff;
+  color: #111827;
+  transition:
+    box-shadow 0.2s ease,
+    border-color 0.2s ease;
+
+  &::placeholder {
+    color: #9ca3af;
+  }
+
+  &:focus {
+    border-color: var(--primary-color);
+    box-shadow: 0 0 0 3px rgba(4, 4, 40, 0.06);
+  }
+
+  &:disabled {
+    background: #f9fafb;
+    cursor: not-allowed;
+  }
+}
+
+.voxire-input__toggle {
+  position: absolute;
+  right: 20px;
+  background: transparent;
+  border: none;
+  cursor: pointer;
+  color: #6b7280;
+  width: 24px;
+  height: 24px;
+
+  svg {
+    position: absolute;
+    width: 16px;
+    height: 16px;
+  }
+}
+
+.voxire-input__helper {
+  margin-top: 4px;
+  font-size: 13px;
+  color: #6b7280;
+
+  &.is-error {
+    color: #dc2626;
+  }
+}
+
+.voxire-input--error .voxire-input__field {
+  border-color: #dc2626;
+}
+
+.voxire-input--disabled .voxire-input__field {
+  opacity: 0.6;
+}
