@@ -1,5 +1,13 @@
 #[tauri::command]
 pub fn open_cash_drawer(printer_name: String) -> Result<String, String> {
+    let printer_name = printer_name.trim();
+    if printer_name.is_empty() {
+        return Err("Printer name is required".to_string());
+    }
+
+    #[cfg(not(windows))]
+    let _ = &printer_name;
+
     #[cfg(windows)]
     {
         use std::ffi::OsStr;
@@ -90,5 +98,17 @@ pub fn open_cash_drawer(printer_name: String) -> Result<String, String> {
     #[cfg(not(windows))]
     {
         Err("This function is only available on Windows".to_string())
+    }
+}
+
+#[cfg(test)]
+mod tests {
+    use super::open_cash_drawer;
+
+    #[test]
+    fn rejects_blank_printer_name() {
+        let result = open_cash_drawer("   ".to_string());
+
+        assert_eq!(result, Err("Printer name is required".to_string()));
     }
 }

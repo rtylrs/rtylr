@@ -10,6 +10,7 @@ import { useCartStore } from '../../shared/stores/cartStore';
 import { useSettingsStore } from '../../shared/stores/settingsStore';
 import type { PaymentEntry, PaymentMethod } from '../../shared/types/pos';
 import { posService } from '../../shared/services/posService';
+import { finalizeMultiPayment } from './multiPaymentWorkflow';
 
 const MultiPaymentScreen: React.FC = () => {
   const { orderId } = useParams<{ orderId: string }>();
@@ -52,15 +53,20 @@ const MultiPaymentScreen: React.FC = () => {
     }
     setBusy(true);
     try {
-      if (orderId) {
-        await unwrap(posService.chargeOrder(Number(orderId), { payments, tip, total }));
-      }
+      await finalizeMultiPayment({
+        orderId,
+        payments,
+        tip,
+        total,
+        chargeOrder: async (id, payload) => {
+          await unwrap(posService.chargeOrder(id, payload));
+        },
+      });
       toast.success('Payment complete');
       clear();
       navigate('/receipts');
-    } catch {
-      toast.warning('Sync failed, saved offline');
-      navigate('/receipts');
+    } catch (error) {
+      toast.error(error instanceof Error ? error.message : 'Payment failed. Please try again.');
     } finally {
       setBusy(false);
     }

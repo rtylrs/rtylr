@@ -7,10 +7,16 @@ export function useOverride() {
   const [error, setError] = useState<string | null>(null);
 
   const verify = useCallback(async (pin: string): Promise<boolean> => {
+    const normalizedPin = pin.trim();
+    if (!normalizedPin) {
+      setError('Enter a manager PIN');
+      return false;
+    }
+
     setVerifying(true);
     setError(null);
     try {
-      const res = await unwrap(posService.verifyManagerPin(pin));
+      const res = await unwrap(posService.verifyManagerPin(normalizedPin));
       const ok = !!(res?.ok ?? res?.verified ?? res?.success);
       if (!ok) setError('Incorrect manager PIN');
       return ok;

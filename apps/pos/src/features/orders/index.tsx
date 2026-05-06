@@ -9,6 +9,7 @@ import OrderStatusBadge from '../../shared/components/OrderStatusBadge';
 import { posService } from '../../shared/services/posService';
 import type { Order } from '../../shared/types/pos';
 import { formatCurrency, formatDate } from '../../shared/utils/format';
+import { normalizeOrdersResponse } from './ordersWorkflow';
 
 const OrdersScreen: React.FC = () => {
   const [orders, setOrders] = useState<Order[]>([]);
@@ -23,21 +24,7 @@ const OrdersScreen: React.FC = () => {
       setLoading(true);
       try {
         const res = await unwrap(posService.getOrders());
-        const raw = res?.orders ?? res?.data ?? [];
-        const mapped: Order[] = (Array.isArray(raw) ? raw : []).map((o) => ({
-          id: String(o.id),
-          number: o.number,
-          tableNumber: o.tableNumber,
-          status: (o.status ?? 'open') as Order['status'],
-          items: o.items ?? [],
-          subtotal: Number(o.subtotal ?? 0),
-          tax: Number(o.tax ?? 0),
-          tip: Number(o.tip ?? 0),
-          discount: Number(o.discount ?? 0),
-          total: Number(o.total ?? 0),
-          createdAt: o.createdAt ?? new Date().toISOString(),
-        }));
-        setOrders(mapped);
+        setOrders(normalizeOrdersResponse(res));
       } catch (e) {
         const err = e as { response?: { data?: { message?: string } }; message?: string };
         setError(err?.response?.data?.message ?? 'Failed to load orders');

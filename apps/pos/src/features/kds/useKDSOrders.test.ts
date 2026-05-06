@@ -104,6 +104,25 @@ describe('useKDSOrders', () => {
     expect(mockPosService.updateKDSItemStatus).toHaveBeenCalledWith(1, 'ready');
   });
 
+  it('setStatus rejects invalid item ids without calling the API', async () => {
+    mockPosService.getKDSOrders.mockResolvedValue({
+      orders: [{ id: 'local-1', number: '101', station: 'Kitchen', items: [], status: 'new' }],
+    });
+
+    const { result } = renderHook(() => useKDSOrders());
+
+    await waitFor(() => expect(result.current.loading).toBe(false));
+
+    await expect(async () => {
+      await act(async () => {
+        await result.current.setStatus('local-1', 'ready');
+      });
+    }).rejects.toThrow('Select a valid KDS item before updating status.');
+
+    expect(result.current.orders[0].status).toBe('new');
+    expect(mockPosService.updateKDSItemStatus).not.toHaveBeenCalled();
+  });
+
   it('defaults missing fields correctly', async () => {
     mockPosService.getKDSOrders.mockResolvedValue({
       orders: [{ id: '3' }],

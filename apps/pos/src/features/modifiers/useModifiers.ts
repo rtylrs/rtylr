@@ -33,7 +33,11 @@ export function useModifiers() {
   return {
     groups: query.data ?? [],
     loading: query.isLoading,
-    error: query.error ? String(query.error) : null,
+    error: query.error
+      ? query.error instanceof Error
+        ? query.error.message
+        : String(query.error)
+      : null,
     reload: query.refetch,
   };
 }

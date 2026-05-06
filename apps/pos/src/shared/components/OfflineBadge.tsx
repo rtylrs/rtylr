@@ -1,9 +1,14 @@
 import React from 'react';
 import { useOfflineQueueStore } from '../stores/offlineQueueStore';
+import { useSessionCloseQueueStore } from '../stores/sessionCloseQueueStore';
+import { useCashMovementQueueStore } from '../stores/cashMovementQueueStore';
 
 const OfflineBadge: React.FC = () => {
   const online = useOfflineQueueStore((s) => s.online);
-  const queueSize = useOfflineQueueStore((s) => s.queue.length);
+  const orderQueueSize = useOfflineQueueStore((s) => s.queue.length);
+  const sessionCloseQueueSize = useSessionCloseQueueStore((s) => s.queue.length);
+  const cashMovementQueueSize = useCashMovementQueueStore((s) => s.queue.length);
+  const queueSize = orderQueueSize + sessionCloseQueueSize + cashMovementQueueSize;
   if (online && queueSize === 0) return null;
   return (
     <div

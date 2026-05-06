@@ -5,7 +5,10 @@ import { toast } from 'sonner';
 import ScreenLayout from '../../layouts/ScreenLayout';
 import ConfirmModal from '../../shared/components/ConfirmModal';
 import { posService } from '../../shared/services/posService';
+import { useCashDrawerStore } from '../../shared/stores/cashDrawerStore';
+import { useReceiptsStore } from '../../shared/stores/receiptsStore';
 import { formatCurrency } from '../../shared/utils/format';
+import { processRefund } from './refundWorkflow';
 
 const REASONS = [
   'Customer complaint',
@@ -24,21 +27,27 @@ const RefundScreen: React.FC = () => {
   const [fullRefund, setFullRefund] = useState(true);
   const [confirm, setConfirm] = useState(false);
   const [busy, setBusy] = useState(false);
+  const receipt = useReceiptsStore((s) => (orderId ? s.byOrder(orderId) : undefined));
+  const recordCashRefund = useCashDrawerStore((s) => s.recordCashRefund);
 
   const submit = async () => {
     setBusy(true);
     try {
-      await unwrap(
-        posService.refundOrder(Number(orderId!), {
-          amount: fullRefund ? null : Number(amount),
-          reason,
-          full: fullRefund,
-        })
-      );
+      await processRefund({
+        orderId,
+        fullRefund,
+        amountInput: amount,
+        reason,
+        receipt,
+        refundOrder: async (id, payload) => {
+          await unwrap(posService.refundOrder(id, payload));
+        },
+        recordCashRefund,
+      });
       toast.success('Refund processed');
       navigate('/receipts');
-    } catch {
-      toast.error('Refund failed');
+    } catch (error) {
+      toast.error(error instanceof Error ? error.message : 'Refund failed');
     } finally {
       setBusy(false);
       setConfirm(false);

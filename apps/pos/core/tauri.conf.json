@@ -6,7 +6,7 @@
     "beforeDevCommand": "pnpm dev",
     "devUrl": "http://localhost:5178",
     "beforeBuildCommand": "pnpm build",
-    "frontendDist": "../../dist/vbitez"
+    "frontendDist": "../../../dist/vbitez"
   },
   "app": {
     "withGlobalTauri": true,
@@ -23,12 +23,12 @@
       }
     ],
     "security": {
-      "csp": null
+      "csp": "default-src 'self'; script-src 'self'; style-src 'self' 'unsafe-inline'; img-src 'self' asset: https://asset.localhost https://cdn.voxire.dev data: blob:; font-src 'self' data:; connect-src 'self' https://api.voxire.dev https://auth.rtylr.com wss://api.voxire.dev; frame-src 'none'; object-src 'none'; base-uri 'self'"
     }
   },
   "bundle": {
     "active": true,
-    "targets": "all",
+    "targets": "app",
     "icon": [
       "icons/32x32.png",
       "icons/128x128.png",
@@ -36,10 +36,5 @@
       "icons/icon.icns",
       "icons/icon.ico"
     ]
-  },
-  "plugins": {
-    "shell": {
-      "open": true
-    }
   }
 }

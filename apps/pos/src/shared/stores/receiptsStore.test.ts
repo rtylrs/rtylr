@@ -37,6 +37,44 @@ describe('receiptsStore', () => {
     expect(getState().receipts[0].id).toBe('r1');
   });
 
+  it('rejects receipts without usable identity', () => {
+    act(() => getState().add(makeReceipt({ id: '   ', orderId: 'o1' })));
+    act(() => getState().add(makeReceipt({ id: 'r1', orderId: '   ' })));
+
+    expect(getState().receipts).toEqual([]);
+  });
+
+  it('normalizes receipt totals, lines, payments, and text fields', () => {
+    act(() =>
+      getState().add(
+        makeReceipt({
+          id: ' r1 ',
+          orderId: ' o1 ',
+          total: Number.NaN,
+          customerName: ' Alice ',
+          items: [{ name: ' Burger ', qty: 2.8, price: Number.POSITIVE_INFINITY }],
+          payments: [
+            {
+              id: ' p1 ',
+              method: 'cash',
+              amount: -5,
+              createdAt: '2026-05-06T00:00:00.000Z',
+            },
+          ],
+        })
+      )
+    );
+
+    expect(getState().receipts[0]).toMatchObject({
+      id: 'r1',
+      orderId: 'o1',
+      total: 0,
+      customerName: 'Alice',
+      items: [{ name: 'Burger', qty: 2, price: 0 }],
+      payments: [{ id: 'p1', amount: 0 }],
+    });
+  });
+
   it('prepends new receipts (newest first)', () => {
     act(() => {
       getState().add(makeReceipt({ id: 'r1' }));

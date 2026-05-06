@@ -2,14 +2,14 @@
 import { defineConfig } from 'vite';
 import path from 'path';
 import react from '@vitejs/plugin-react';
-import tsconfigPaths from 'vite-tsconfig-paths';
 
 export default defineConfig(() => ({
   root: __dirname,
   cacheDir: './node_modules/.vite',
   base: '/',
-  plugins: [react(), tsconfigPaths()],
+  plugins: [react()],
   resolve: {
+    tsconfigPaths: true,
     alias: {
       '@app': path.resolve(__dirname, './src'),
       '@features': path.resolve(__dirname, './src/features'),
@@ -73,5 +73,9 @@ export default defineConfig(() => ({
       '@voxire/config',
       '@voxire/menu',
     ],
+  },
+  test: {
+    environment: 'happy-dom',
+    globals: false,
   },
 }));

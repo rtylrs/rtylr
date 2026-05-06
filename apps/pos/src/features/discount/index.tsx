@@ -7,29 +7,29 @@ import PinPad from '../../shared/components/PinPad';
 import { posService } from '../../shared/services/posService';
 import { useOverride } from '../override/useOverride';
 import { formatCurrency } from '../../shared/utils/format';
+import { buildDiscountRequest, type DiscountMode } from './discountWorkflow';
 
 const DiscountScreen: React.FC = () => {
   const { orderId } = useParams<{ orderId: string }>();
   const navigate = useNavigate();
-  const [mode, setMode] = useState<'percent' | 'flat'>('percent');
+  const [mode, setMode] = useState<DiscountMode>('percent');
   const [value, setValue] = useState('');
   const [verified, setVerified] = useState(false);
   const { verify, error } = useOverride();
 
   const submit = async () => {
     try {
-      await unwrap(
-        posService.applyDiscount(Number(orderId!), {
-          mode,
-          value: Number(value),
-        })
-      );
+      const request = buildDiscountRequest({ orderId, mode, valueInput: value });
+      await unwrap(posService.applyDiscount(request.orderId, request.payload));
       toast.success('Discount applied');
       navigate(-1);
-    } catch {
-      toast.error('Could not apply discount');
+    } catch (error) {
+      toast.error(error instanceof Error ? error.message : 'Could not apply discount');
     }
   };
+
+  const discountPreview = Number(value);
+  const canSubmit = Number.isFinite(discountPreview) && discountPreview > 0;
 
   return (
     <ScreenLayout title="Apply Discount" subtitle={`Order #${orderId ?? 'current'}`}>
@@ -81,11 +81,13 @@ const DiscountScreen: React.FC = () => {
             </div>
             <button
               onClick={submit}
-              disabled={!Number(value)}
+              disabled={!canSubmit}
               className="w-full h-14 rounded-xl bg-pos-text text-pos-bg font-bold disabled:opacity-50"
             >
               Apply{' '}
-              {mode === 'percent' ? `${Number(value || 0)}%` : formatCurrency(Number(value || 0))}
+              {mode === 'percent'
+                ? `${Number.isFinite(discountPreview) ? discountPreview : 0}%`
+                : formatCurrency(Number.isFinite(discountPreview) ? discountPreview : 0)}
             </button>
           </>
         )}

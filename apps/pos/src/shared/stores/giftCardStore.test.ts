@@ -35,10 +35,30 @@ describe('giftCardStore', () => {
     expect(card.customerName).toBe('Jane');
   });
 
+  it('rejects issuing a card with non-positive balance', () => {
+    expect(() => getState().issue({ code: 'GC-BAD', balance: 0 })).toThrow(
+      'Gift card amount must be greater than zero'
+    );
+    expect(() => getState().issue({ code: 'GC-BAD', balance: -10 })).toThrow(
+      'Gift card amount must be greater than zero'
+    );
+    expect(getState().cards).toHaveLength(0);
+  });
+
   it('prepends new cards (newest first)', () => {
     getState().issue({ code: 'FIRST', balance: 10 });
     getState().issue({ code: 'SECOND', balance: 20 });
     expect(getState().cards[0].code).toBe('SECOND');
+  });
+
+  it('rejects issuing a duplicate card code', () => {
+    getState().issue({ code: 'GC-DUP', balance: 25 });
+
+    expect(() => getState().issue({ code: 'GC-DUP', balance: 50 })).toThrow(
+      'Gift card code already exists'
+    );
+    expect(getState().cards).toHaveLength(1);
+    expect(getState().findByCode('GC-DUP')?.balance).toBe(25);
   });
 
   // ── redeem ─────────────────────────────────────────────────────
@@ -84,6 +104,17 @@ describe('giftCardStore', () => {
     expect(result.error).toBe('Insufficient balance');
   });
 
+  it('fails to redeem a non-positive amount', () => {
+    getState().issue({ code: 'GC-VALIDATE', balance: 20 });
+
+    const zero = getState().redeem('GC-VALIDATE', 0);
+    const negative = getState().redeem('GC-VALIDATE', -10);
+
+    expect(zero).toEqual({ ok: false, error: 'Redeem amount must be greater than zero' });
+    expect(negative).toEqual({ ok: false, error: 'Redeem amount must be greater than zero' });
+    expect(getState().findByCode('GC-VALIDATE')?.balance).toBe(20);
+  });
+
   // ── addBalance ─────────────────────────────────────────────────
 
   it('adds balance to a gift card', () => {
@@ -92,10 +123,21 @@ describe('giftCardStore', () => {
     expect(getState().findByCode('GC-ADD')?.balance).toBe(75);
   });
 
-  it('addBalance with zero does not change balance', () => {
+  it('rejects adding zero balance', () => {
     getState().issue({ code: 'GC-ZERO', balance: 100 });
-    act(() => getState().addBalance('GC-ZERO', 0));
+    expect(() => getState().addBalance('GC-ZERO', 0)).toThrow(
+      'Gift card amount must be greater than zero'
+    );
     expect(getState().findByCode('GC-ZERO')?.balance).toBe(100);
+  });
+
+  it('rejects adding a negative balance', () => {
+    getState().issue({ code: 'GC-ADD-BAD', balance: 100 });
+
+    expect(() => getState().addBalance('GC-ADD-BAD', -25)).toThrow(
+      'Gift card amount must be greater than zero'
+    );
+    expect(getState().findByCode('GC-ADD-BAD')?.balance).toBe(100);
   });
 
   // ── deactivate ─────────────────────────────────────────────────

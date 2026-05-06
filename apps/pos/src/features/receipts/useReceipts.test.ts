@@ -102,7 +102,7 @@ describe('useReceipts', () => {
     expect(result.current.receipts).toHaveLength(3);
   });
 
-  it('email function calls posService and marks emailed', async () => {
+  it('email function calls posService and marks emailed for remote receipt ids', async () => {
     mockPosService.getReceipts.mockResolvedValue({ receipts: [] });
     mockPosService.emailReceipt.mockResolvedValue({ success: true });
 
@@ -111,13 +111,28 @@ describe('useReceipts', () => {
 
     let emailResult: boolean | undefined;
     await act(async () => {
-      emailResult = await result.current.email('r1', 'alice@test.com');
+      emailResult = await result.current.email('42', 'alice@test.com');
     });
 
     expect(emailResult).toBe(true);
-    // The hook calls posService.emailReceipt(Number(id), address) - 'r1' becomes NaN
-    expect(mockPosService.emailReceipt).toHaveBeenCalledWith(NaN, 'alice@test.com');
-    expect(mockReceiptsStore.markEmailed).toHaveBeenCalledWith('r1');
+    expect(mockPosService.emailReceipt).toHaveBeenCalledWith(42, 'alice@test.com');
+    expect(mockReceiptsStore.markEmailed).toHaveBeenCalledWith('42');
+  });
+
+  it('does not call backend email API for local-only receipt ids', async () => {
+    mockPosService.getReceipts.mockResolvedValue({ receipts: [] });
+
+    const { result } = renderHook(() => useReceipts());
+    await waitFor(() => expect(result.current.loading).toBe(false));
+
+    let emailResult: boolean | undefined;
+    await act(async () => {
+      emailResult = await result.current.email('receipt-local-1', 'alice@test.com');
+    });
+
+    expect(emailResult).toBe(false);
+    expect(mockPosService.emailReceipt).not.toHaveBeenCalled();
+    expect(mockReceiptsStore.markEmailed).not.toHaveBeenCalled();
   });
 
   it('email function returns false on error', async () => {

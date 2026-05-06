@@ -2,10 +2,14 @@ import React from 'react';
 import { toast } from 'sonner';
 import ScreenLayout from '../../layouts/ScreenLayout';
 import { useSettingsStore } from '../../shared/stores/settingsStore';
+import { useCartStore } from '../../shared/stores/cartStore';
+import { useTerminalContextStore } from '../../shared/stores/terminalContextStore';
 import appConfig from '../../app.json';
 
 const SettingsScreen: React.FC = () => {
   const s = useSettingsStore();
+  const { locationId, terminalId, clearTerminalContext } = useTerminalContextStore();
+  const clearCart = useCartStore((state) => state.clearCart);
 
   const updateTip = (index: number, value: number) => {
     const next = [...s.tipPresets];
@@ -87,6 +91,30 @@ const SettingsScreen: React.FC = () => {
 
         <Section title="Workstation">
           <div className="space-y-3">
+            <div className="rounded-lg bg-white/5 border border-pos-border p-3 space-y-2">
+              <div className="flex items-center justify-between gap-3">
+                <div>
+                  <div className="text-xs text-pos-muted">Assigned terminal</div>
+                  <div className="text-sm text-pos-text">
+                    {locationId && terminalId
+                      ? `Location ${locationId} / Terminal ${terminalId}`
+                      : 'Not assigned'}
+                  </div>
+                </div>
+                <button
+                  type="button"
+                  disabled={!locationId || !terminalId}
+                  onClick={() => {
+                    clearCart();
+                    clearTerminalContext();
+                    toast.success('Terminal assignment cleared');
+                  }}
+                  className="h-10 px-3 rounded-lg bg-white/10 text-pos-text text-xs font-semibold disabled:opacity-50"
+                >
+                  Reassign
+                </button>
+              </div>
+            </div>
             <div>
               <label className="text-xs text-pos-muted">Auto logout after (minutes)</label>
               <input

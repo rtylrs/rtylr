@@ -5,6 +5,7 @@ import EmptyState from '../../shared/components/EmptyState';
 import SearchBar from '../../shared/components/SearchBar';
 import { useGiftCards } from './useGiftCards';
 import { formatCurrency, formatShortDate } from '../../shared/utils/format';
+import { issueGiftCard } from './giftCardWorkflow';
 
 const GiftCardsScreen: React.FC = () => {
   const { cards, issue, redeem, checkBalance } = useGiftCards();
@@ -19,11 +20,12 @@ const GiftCardsScreen: React.FC = () => {
   );
 
   const handleSell = () => {
-    if (!code.trim() || !Number(amount)) {
-      toast.error('Code and amount required');
+    const result = issueGiftCard({ codeInput: code, amountInput: amount, issue });
+    if (!result.ok) {
+      toast.error(result.error);
       return;
     }
-    const card = issue({ code: code.trim(), balance: Number(amount) });
+    const { card } = result;
     toast.success(`Gift card ${card.code} issued (${formatCurrency(card.balance)})`);
     setCode('');
     setAmount('');

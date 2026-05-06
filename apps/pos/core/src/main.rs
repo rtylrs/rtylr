@@ -7,9 +7,6 @@ use commands::printer;
 
 fn main() {
     tauri::Builder::default()
-        .plugin(tauri_plugin_shell::init())
-        .plugin(tauri_plugin_dialog::init())
-        .plugin(tauri_plugin_process::init())
         .invoke_handler(tauri::generate_handler![
             printer::open_cash_drawer
         ])

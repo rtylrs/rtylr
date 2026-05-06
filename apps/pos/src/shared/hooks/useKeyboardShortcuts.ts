@@ -16,6 +16,7 @@ export function useKeyboardShortcuts() {
   const setHelp = useShortcutStore((s) => s.setHelp);
   const items = useCartStore((s) => s.items);
   const orderId = useCartStore((s) => s.orderId);
+  const serverOrderId = useCartStore((s) => s.serverOrderId);
 
   useEffect(() => {
     const handler = (e: KeyboardEvent) => {
@@ -39,12 +40,12 @@ export function useKeyboardShortcuts() {
       }
       if (e.key === 'F2') {
         e.preventDefault();
-        navigate(`/discount/${orderId ?? 'current'}`);
+        navigate(`/discount/${serverOrderId ?? orderId ?? 'current'}`);
         return;
       }
       if (e.key === 'F3') {
         e.preventDefault();
-        navigate(`/refund/${orderId ?? 'current'}`);
+        navigate(`/refund/${serverOrderId ?? orderId ?? 'current'}`);
         return;
       }
 
@@ -60,5 +61,5 @@ export function useKeyboardShortcuts() {
     };
     window.addEventListener('keydown', handler);
     return () => window.removeEventListener('keydown', handler);
-  }, [navigate, toggleCommand, setHelp, items.length, orderId]);
+  }, [navigate, toggleCommand, setHelp, items.length, orderId, serverOrderId]);
 }

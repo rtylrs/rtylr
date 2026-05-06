@@ -1,50 +1,62 @@
 import { unwrap } from '@voxire/api';
 import { useCallback } from 'react';
 import { useOfflineQueueStore } from '../../shared/stores/offlineQueueStore';
+import { useSessionCloseQueueStore } from '../../shared/stores/sessionCloseQueueStore';
+import { useCashMovementQueueStore } from '../../shared/stores/cashMovementQueueStore';
 import { posService } from '../../shared/services/posService';
+import { syncQueuedOrders } from './syncOfflineQueue';
+import {
+  retrySessionClose,
+  syncAllSessionCloses,
+  syncPendingSessionCloses,
+} from '../close-session/sessionCloseQueueSync';
+import { retryCashMovement, syncAllCashMovements } from '../cash-drop/cashMovementQueueSync';
+
+const syncOrder = async (order: Parameters<typeof posService.createOrder>[0]): Promise<void> => {
+  await unwrap(posService.createOrder(order));
+};
 
 export function useOfflineQueue() {
   const store = useOfflineQueueStore();
+  const sessionCloseStore = useSessionCloseQueueStore();
+  const cashMovementStore = useCashMovementQueueStore();
 
   const flush = useCallback(async () => {
-    const { queue } = useOfflineQueueStore.getState();
-    for (const entry of queue) {
-      try {
-        useOfflineQueueStore.getState().retry(entry.id);
-        await unwrap(posService.createOrder(entry.order));
-        useOfflineQueueStore.getState().markSynced(entry.id);
-      } catch (e) {
-        const err = e as { response?: { data?: { message?: string } }; message?: string };
-        useOfflineQueueStore
-          .getState()
-          .markFailed(entry.id, err?.response?.data?.message ?? err?.message ?? 'Sync failed');
-      }
-    }
+    const { queue, retry, markSynced, markFailed } = useOfflineQueueStore.getState();
+    await syncQueuedOrders({ entries: queue, syncOrder, retry, markSynced, markFailed });
+    await syncAllSessionCloses();
+    await syncAllCashMovements();
   }, []);
 
   const retryOne = useCallback(async (id: string) => {
     const entry = useOfflineQueueStore.getState().queue.find((q) => q.id === id);
     if (!entry) return false;
-    useOfflineQueueStore.getState().retry(id);
-    try {
-      await unwrap(posService.createOrder(entry.order));
-      useOfflineQueueStore.getState().markSynced(id);
-      return true;
-    } catch (e) {
-      const err = e as { response?: { data?: { message?: string } }; message?: string };
-      useOfflineQueueStore
-        .getState()
-        .markFailed(id, err?.response?.data?.message ?? err?.message ?? 'Sync failed');
-      return false;
-    }
+    const { retry, markSynced, markFailed } = useOfflineQueueStore.getState();
+    const result = await syncQueuedOrders({
+      entries: [entry],
+      syncOrder,
+      retry,
+      markSynced,
+      markFailed,
+    });
+    return result.synced === 1;
   }, []);
 
   return {
     queue: store.queue,
+    sessionCloseQueue: sessionCloseStore.queue,
+    cashMovementQueue: cashMovementStore.queue,
+    totalQueued: store.queue.length + sessionCloseStore.queue.length + cashMovementStore.queue.length,
     online: store.online,
     enqueue: store.enqueue,
     flush,
     retry: retryOne,
-    clear: store.clear,
+    retrySessionClose,
+    retryCashMovement,
+    clear: () => {
+      store.clear();
+      sessionCloseStore.clear();
+      cashMovementStore.clear();
+    },
   };
 }

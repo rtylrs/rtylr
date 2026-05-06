@@ -9,6 +9,7 @@ import { SkeletonGrid } from '../../shared/components/Skeleton';
 import { useMenuItems } from './useMenuItems';
 import { useCartStore } from '../../shared/stores/cartStore';
 import type { MenuItem } from '../../shared/types/pos';
+import { buildMenuItemCartProduct } from '../../shared/cart/cartProduct';
 
 const MenuItemsScreen: React.FC = () => {
   const { items, categories, loading, error, reload } = useMenuItems();
@@ -23,13 +24,12 @@ const MenuItemsScreen: React.FC = () => {
   });
 
   const quickAdd = (item: MenuItem) => {
-    addItem({
-      id: item.id,
-      productId: Number(item.id) || 0,
-      name: item.name,
-      unitPrice: item.price,
-      price: item.price,
-    } as any);
+    try {
+      addItem(buildMenuItemCartProduct(item));
+    } catch (error) {
+      toast.error(error instanceof Error ? error.message : 'Failed to add menu item');
+      return;
+    }
     toast.success(`Added ${item.name}`);
   };
 

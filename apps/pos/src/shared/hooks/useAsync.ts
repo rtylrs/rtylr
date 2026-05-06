@@ -45,7 +45,7 @@ export default function useAsync<T>({
   const [requestData, setRequestData] = useState<unknown>(null);
 
   const debouncedMain = useCallback(
-    debounce(async (data) => {
+    debounce(async (data: unknown) => {
       try {
         setLoading(true);
         setRequestData(data);

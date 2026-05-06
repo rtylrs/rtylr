@@ -9,6 +9,7 @@ import { useMenuItems } from '../menu-items/useMenuItems';
 import { posService } from '../../shared/services/posService';
 import type { MenuItem } from '../../shared/types/pos';
 import { formatCurrency } from '../../shared/utils/format';
+import { buildMenuItemUpdate } from './productQuickEditWorkflow';
 
 const ProductQuickEditScreen: React.FC = () => {
   const { items, loading, error, reload } = useMenuItems();
@@ -43,11 +44,12 @@ const ProductQuickEditScreen: React.FC = () => {
   const save = async (item: MenuItem) => {
     const draft = drafts[item.id];
     try {
-      await unwrap(posService.updateMenuItem(Number(item.id), draft));
+      const update = buildMenuItemUpdate(item.id, draft);
+      await unwrap(posService.updateMenuItem(update.itemId, update.payload));
       toast.success(`Updated ${item.name}`);
       reload();
-    } catch {
-      toast.error('Update failed');
+    } catch (error) {
+      toast.error(error instanceof Error ? error.message : 'Update failed');
     }
   };
 

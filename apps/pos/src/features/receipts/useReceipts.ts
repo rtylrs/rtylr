@@ -6,6 +6,11 @@ import { useReceiptsStore } from '../../shared/stores/receiptsStore';
 import type { Receipt } from '../../shared/types/pos';
 import { receiptSchema } from '../../shared/schemas/receipts';
 
+function parseRemoteReceiptId(id: string): number | null {
+  const parsed = Number(id);
+  return Number.isInteger(parsed) && parsed > 0 ? parsed : null;
+}
+
 export function useReceipts() {
   const local = useReceiptsStore((s) => s.receipts);
   const addLocal = useReceiptsStore((s) => s.add);
@@ -35,8 +40,11 @@ export function useReceipts() {
 
   const email = useCallback(
     async (id: string, address: string) => {
+      const remoteId = parseRemoteReceiptId(id);
+      if (!remoteId) return false;
+
       try {
-        await unwrap(posService.emailReceipt(Number(id), address));
+        await unwrap(posService.emailReceipt(remoteId, address));
         markEmailed(id);
         return true;
       } catch {

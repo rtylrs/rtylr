@@ -7,36 +7,52 @@ import { formatCurrency } from '../../shared/utils/format';
 import { useCashDrawerStore } from '../../shared/stores/cashDrawerStore';
 import { useDaySummary } from '../day-summary/useDaySummary';
 import { posService } from '../../shared/services/posService';
+import { useSessionCloseQueueStore } from '../../shared/stores/sessionCloseQueueStore';
+import { buildCloseSessionPayload, closeSessionWithFallback } from './closeSessionWorkflow';
 
 const CloseSessionScreen: React.FC = () => {
   const navigate = useNavigate();
   const { summary } = useDaySummary();
   const expected = useCashDrawerStore((s) => s.expectedCash());
   const closeDrawer = useCashDrawerStore((s) => s.closeDrawer);
+  const enqueueSessionClose = useSessionCloseQueueStore((s) => s.enqueue);
   const [actualCash, setActualCash] = useState('');
   const [busy, setBusy] = useState(false);
 
-  const actual = Number(actualCash || 0);
-  const variance = actual - expected;
+  let variance = 0;
+  try {
+    variance = buildCloseSessionPayload({
+      sessionId: 'current',
+      expected,
+      actualInput: actualCash || '0',
+    }).variance as number;
+  } catch {
+    variance = -expected;
+  }
 
   const close = async () => {
     setBusy(true);
     try {
-      await unwrap(
-        posService.closeSession({
+      const result = await closeSessionWithFallback({
+        payload: buildCloseSessionPayload({
           sessionId: 'current',
           expected,
-          actual,
-          variance,
-        })
-      );
+          actualInput: actualCash,
+        }),
+        closeSession: async (payload) => {
+          await unwrap(posService.closeSession(payload));
+        },
+        enqueue: enqueueSessionClose,
+      });
       closeDrawer();
-      toast.success('Session closed');
+      if (result.status === 'queued') {
+        toast.warning('Session close saved locally and will sync later');
+      } else {
+        toast.success('Session closed');
+      }
       navigate('/day-summary');
-    } catch {
-      toast.warning('Saved locally, will sync');
-      closeDrawer();
-      navigate('/day-summary');
+    } catch (error) {
+      toast.error(error instanceof Error ? error.message : 'Unable to close session.');
     } finally {
       setBusy(false);
     }

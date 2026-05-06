@@ -51,16 +51,41 @@ const defaults: SettingsState = {
   language: 'en',
 };
 
+function clampNumber(value: number, min: number, max: number): number {
+  if (!Number.isFinite(value)) return min;
+  return Math.min(max, Math.max(min, value));
+}
+
+function normalizePrinter(partial: Partial<PrinterSettings>): Partial<PrinterSettings> {
+  if (partial.copies === undefined) return partial;
+  return { ...partial, copies: Math.round(clampNumber(partial.copies, 1, 5)) };
+}
+
+function normalizeTipPresets(presets: number[]): number[] {
+  return presets.map((preset) => clampNumber(preset, 0, 1));
+}
+
+function normalizeCurrency(currency: string, currencySymbol: string) {
+  const normalizedCurrency = currency.trim().toUpperCase();
+  const normalizedSymbol = currencySymbol.trim();
+  if (!/^[A-Z]{3}$/.test(normalizedCurrency) || !normalizedSymbol) {
+    return { currency: defaults.currency, currencySymbol: defaults.currencySymbol };
+  }
+  return { currency: normalizedCurrency, currencySymbol: normalizedSymbol };
+}
+
 export const useSettingsStore = create<SettingsState & SettingsActions>()(
   persist(
     (set) => ({
       ...defaults,
-      setTaxRate: (taxRate) => set({ taxRate }),
-      setTipPresets: (tipPresets) => set({ tipPresets }),
-      setCurrency: (currency, currencySymbol) => set({ currency, currencySymbol }),
+      setTaxRate: (taxRate) => set({ taxRate: clampNumber(taxRate, 0, 1) }),
+      setTipPresets: (tipPresets) => set({ tipPresets: normalizeTipPresets(tipPresets) }),
+      setCurrency: (currency, currencySymbol) => set(normalizeCurrency(currency, currencySymbol)),
       setReceiptFooter: (receiptFooter) => set({ receiptFooter }),
-      setPrinter: (partial) => set((s) => ({ printer: { ...s.printer, ...partial } })),
-      setAutoLogoutMinutes: (autoLogoutMinutes) => set({ autoLogoutMinutes }),
+      setPrinter: (partial) =>
+        set((s) => ({ printer: { ...s.printer, ...normalizePrinter(partial) } })),
+      setAutoLogoutMinutes: (autoLogoutMinutes) =>
+        set({ autoLogoutMinutes: Math.round(clampNumber(autoLogoutMinutes, 0, 24 * 60)) }),
       setSpeedMode: (speedMode) => set({ speedMode }),
       setBarMode: (barMode) => set({ barMode }),
       setQuickAccessSidebar: (quickAccessSidebar) => set({ quickAccessSidebar }),

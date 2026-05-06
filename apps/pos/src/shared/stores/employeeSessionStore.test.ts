@@ -93,6 +93,50 @@ describe('employeeSessionStore', () => {
     expect(getState().error).toBeNull();
   });
 
+  it('rejects blank PINs without calling the API', async () => {
+    await expect(getState().authenticatePin('   ')).rejects.toThrow('Enter your employee PIN');
+
+    expect(api.post).not.toHaveBeenCalled();
+    expect(getState().employee).toBeNull();
+    expect(getState().isActive).toBe(false);
+    expect(getState().loading).toBe(false);
+    expect(getState().error).toBe('Enter your employee PIN');
+  });
+
+  it('rejects malformed employee auth responses without activating a session', async () => {
+    vi.mocked(api.post).mockResolvedValueOnce({
+      data: { employee: { id: 'employee-uuid', name: 'Alice', role: 'cashier', pin: '1234' } },
+    });
+
+    await expect(getState().authenticatePin('1234')).rejects.toThrow(
+      'Employee login returned invalid employee data',
+    );
+
+    expect(getState().employee).toBeNull();
+    expect(getState().isActive).toBe(false);
+    expect(getState().loading).toBe(false);
+    expect(getState().error).toBe('Employee login returned invalid employee data');
+  });
+
+  it('normalizes employee auth response and strips sensitive fields', async () => {
+    vi.mocked(api.post).mockResolvedValueOnce({
+      data: {
+        employee: {
+          id: 9.7,
+          name: ' Alice ',
+          role: ' cashier ',
+          pin: '1234',
+          pin_hash: 'secret',
+        },
+      },
+    });
+
+    await getState().authenticatePin(' 1234 ');
+
+    expect(api.post).toHaveBeenCalledWith('/employees/pin', { pin: '1234' });
+    expect(getState().employee).toEqual({ id: '9', name: 'Alice', role: 'cashier' });
+  });
+
   // ── endSession ─────────────────────────────────────────────────
 
   it('ends the session and clears employee', () => {

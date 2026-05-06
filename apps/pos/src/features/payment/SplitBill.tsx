@@ -6,6 +6,7 @@ import ScreenLayout from '../../layouts/ScreenLayout';
 import { formatCurrency } from '../../shared/utils/format';
 import { useCartStore } from '../../shared/stores/cartStore';
 import { posService } from '../../shared/services/posService';
+import { buildSplitBillRequest } from './splitBillWorkflow';
 
 type SplitMode = 'seat' | 'amount' | 'items';
 
@@ -42,21 +43,28 @@ const SplitBillScreen: React.FC = () => {
   };
 
   const confirm = async (): Promise<void> => {
-    const targetId = serverOrderId ?? Number(orderId ?? 0);
-    if (!targetId) {
+    let request: ReturnType<typeof buildSplitBillRequest>;
+    try {
+      request = buildSplitBillRequest({
+        routeOrderId: orderId,
+        serverOrderId,
+        seats,
+        items,
+        assignments,
+      });
+    } catch (error) {
+      toast.error(error instanceof Error ? error.message : 'Failed to split order');
+      return;
+    }
+
+    if (request.localOnly) {
       toast.success(`Split into ${seats} ticket${seats === 1 ? '' : 's'} (local)`);
       navigate(-1);
       return;
     }
     setConfirming(true);
     try {
-      const splits: number[][] = Array.from({ length: seats }, (_, seatIdx) =>
-        items
-          .filter((it) => (assignments[it.id] ?? 0) === seatIdx)
-          .map((it) => Number(it.id))
-          .filter(Boolean)
-      ).filter((s) => s.length > 0);
-      await unwrap(posService.splitOrder(targetId, { parts: seats, splits } as any));
+      await unwrap(posService.splitOrder(request.orderId, request.payload));
       toast.success(`Split into ${seats} ticket${seats === 1 ? '' : 's'}`);
       navigate(-1);
     } catch {

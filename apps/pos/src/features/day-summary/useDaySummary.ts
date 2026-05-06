@@ -3,13 +3,14 @@ import { useEffect, useState } from 'react';
 import { posService } from '../../shared/services/posService';
 import { useCashDrawerStore } from '../../shared/stores/cashDrawerStore';
 import type { DaySummary } from '../../shared/types/pos';
-import { daySummarySchema } from '../../shared/schemas/daySummary';
+import { buildLocalDaySummary, normalizeDaySummaryResponse } from './cashDrawerSummary';
 
 export function useDaySummary(date?: string) {
   const [summary, setSummary] = useState<DaySummary | null>(null);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
   const openingFloat = useCashDrawerStore((s) => s.openingFloat);
+  const movements = useCashDrawerStore((s) => s.movements);
   const expectedCash = useCashDrawerStore((s) => s.expectedCash());
 
   const load = async () => {
@@ -17,32 +18,23 @@ export function useDaySummary(date?: string) {
     setError(null);
     try {
       const res = await unwrap(posService.getDaySummary(date));
-      const raw = res?.data ?? {};
-      const parsed = daySummarySchema.parse({
-        ...raw,
-        date: raw.date ?? date,
-        openingFloat: raw.openingFloat ?? openingFloat,
-        closingCash: raw.closingCash ?? expectedCash,
+      const mapped = normalizeDaySummaryResponse(res, {
+        date: date ?? new Date().toISOString().slice(0, 10),
+        openingFloat,
+        closingCash: expectedCash,
       });
-      const mapped: DaySummary = parsed;
       setSummary(mapped);
     } catch (e) {
       const err = e as { response?: { data?: { message?: string } }; message?: string };
       setError(err?.response?.data?.message ?? err?.message ?? 'Failed to load day summary');
-      setSummary({
-        date: date ?? new Date().toISOString().slice(0, 10),
-        grossSales: 0,
-        netSales: 0,
-        taxCollected: 0,
-        tips: 0,
-        refunds: 0,
-        voids: 0,
-        orderCount: 0,
-        averageTicket: 0,
-        cashDrops: 0,
-        openingFloat,
-        closingCash: expectedCash,
-      });
+      setSummary(
+        buildLocalDaySummary({
+          date: date ?? new Date().toISOString().slice(0, 10),
+          openingFloat,
+          movements,
+          closingCash: expectedCash,
+        })
+      );
     } finally {
       setLoading(false);
     }

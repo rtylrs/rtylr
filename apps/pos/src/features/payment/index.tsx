@@ -8,69 +8,87 @@ import { useCartStore } from '../../shared/stores/cartStore';
 import { useSettingsStore } from '../../shared/stores/settingsStore';
 import { useEmployeeSessionStore } from '../../shared/stores/employeeSessionStore';
 import { posService } from '../../shared/services/posService';
+import { useOfflineQueueStore } from '../../shared/stores/offlineQueueStore';
+import {
+  buildCashTender,
+  buildCheckoutOrder,
+  processCheckout,
+  type CheckoutPaymentMethod,
+} from './checkoutWorkflow';
+import { buildReceiptFromOrder } from './receiptArtifact';
+import { useReceiptsStore } from '../../shared/stores/receiptsStore';
+import { useCashDrawerStore } from '../../shared/stores/cashDrawerStore';
+import { openConfiguredCashDrawer } from '../../shared/hardware/cashDrawerHardware';
+import { resetAfterCheckout } from './checkoutState';
 
-type PaymentMethod = 'card' | 'cash' | 'qr';
 const fmt = (n: number): string =>
   new Intl.NumberFormat('en-US', { style: 'currency', currency: 'USD' }).format(n);
 
 const Payment: React.FC = () => {
   const navigate = useNavigate();
-  const { items, total, clearCart } = useCartStore();
+  const { items, total, clearCart, newOrder } = useCartStore();
   const taxRate = useSettingsStore((s) => s.taxRate);
+  const printer = useSettingsStore((s) => s.printer);
   const employee = useEmployeeSessionStore((s) => s.employee);
-  const [method, setMethod] = useState<PaymentMethod>('card');
+  const enqueueOffline = useOfflineQueueStore((s) => s.enqueue);
+  const addReceipt = useReceiptsStore((s) => s.add);
+  const recordCashSale = useCashDrawerStore((s) => s.recordCashSale);
+  const [method, setMethod] = useState<CheckoutPaymentMethod>('card');
   const [processing, setProcessing] = useState(false);
   const [cashAmount, setCashAmount] = useState('');
 
   const subtotal = total();
   const tax = subtotal * taxRate;
   const grandTotal = subtotal + tax;
-  const cashChange =
-    cashAmount && parseFloat(cashAmount) >= grandTotal ? parseFloat(cashAmount) - grandTotal : null;
+  const cashTender = buildCashTender(cashAmount, grandTotal);
 
   const handleCharge = async (): Promise<void> => {
     setProcessing(true);
     try {
-      const orderItems = items.map((item) => ({
-        id: item.id,
-        name: item.name,
-        price: item.price,
-        quantity: item.quantity,
-        notes: item.notes ?? '',
-      }));
+      const order = buildCheckoutOrder({
+        id: `local-${Date.now()}`,
+        items,
+        subtotal,
+        tax,
+        total: grandTotal,
+        employeeId: employee?.id,
+        createdAt: new Date().toISOString(),
+      });
 
-      const createRes = await unwrap(
-        posService.createOrder({
-          id: `local-${Date.now()}`,
-          status: 'open',
-          items: orderItems,
-          subtotal,
-          tax,
-          tip: 0,
-          discount: 0,
-          total: grandTotal,
-          createdAt: new Date().toISOString(),
-          customerId: String(employee?.id ?? ''),
-        })
-      );
+      const result = await processCheckout({
+        order,
+        method,
+        createOrder: async (payload) => unwrap(posService.createOrder(payload)),
+        chargeOrder: async (orderId, payload) => {
+          await unwrap(posService.chargeOrder(orderId, payload));
+        },
+        enqueueOffline,
+        recordCashSale,
+      });
 
-      const orderId: number =
-        (createRes as { id?: number; order_id?: number }).id ??
-        (createRes as { id?: number; order_id?: number }).order_id ??
-        0;
-
-      await unwrap(
-        posService.chargeOrder(orderId, {
+      addReceipt(
+        buildReceiptFromOrder({
+          order,
           method,
-          amount: grandTotal,
-          tip: 0,
+          printedAt: new Date().toISOString(),
         })
       );
-
-      clearCart();
+      resetAfterCheckout({ newOrder, clearCart });
+      if (result.status === 'queued') {
+        toast.warning('Cash order saved offline. It will sync when connection returns.');
+      }
+      if (method === 'cash') {
+        const drawerResult = await openConfiguredCashDrawer({
+          enabled: printer.cashDrawerKick,
+          printerName: printer.name,
+        });
+        if (drawerResult.status === 'failed') {
+          toast.warning(`Cash drawer did not open: ${drawerResult.error}`);
+        }
+      }
       navigate('/receipt');
-    } catch {
-      toast.error('Payment failed. Please try again.');
+    } catch (error) {
+      toast.error(error instanceof Error ? error.message : 'Payment failed. Please try again.');
     } finally {
       setProcessing(false);
     }
@@ -81,7 +99,7 @@ const Payment: React.FC = () => {
     return null;
   }
 
-  const methods: { id: PaymentMethod; label: string }[] = [
+  const methods: { id: CheckoutPaymentMethod; label: string }[] = [
     { id: 'card', label: '💳 Card' },
     { id: 'cash', label: '💵 Cash' },
     { id: 'qr', label: '📱 QR Pay' },
@@ -161,13 +179,13 @@ const Payment: React.FC = () => {
                 onChange={(e) => setCashAmount(e.target.value)}
                 placeholder={fmt(grandTotal)}
               />
-              {cashChange !== null && cashChange >= 0 && (
+              {cashTender.change !== null && cashTender.change >= 0 && (
                 <motion.div
                   className="text-center text-sm text-success font-medium"
                   initial={{ opacity: 0 }}
                   animate={{ opacity: 1 }}
                 >
-                  Change: {fmt(cashChange)}
+                  Change: {fmt(cashTender.change)}
                 </motion.div>
               )}
             </div>
@@ -187,7 +205,7 @@ const Payment: React.FC = () => {
             onClick={handleCharge}
             disabled={
               processing ||
-              (method === 'cash' && (!cashAmount || parseFloat(cashAmount) < grandTotal))
+              (method === 'cash' && !cashTender.canCharge)
             }
           >
             {processing ? (

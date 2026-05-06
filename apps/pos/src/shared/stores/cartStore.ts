@@ -107,13 +107,38 @@ function generateLineId(
 }
 
 function computeItemTotal(item: CartItem): number {
-  const modifierTotal = item.modifiers.reduce((s, m) => s + m.priceDelta, 0);
+  const modifierTotal = item.modifiers.reduce((s, m) => s + nonNegativeNumber(m.priceDelta), 0);
   const basePrice = (item.unitPrice + modifierTotal) * item.quantity;
   const discountedPrice =
     item.discountPct > 0
       ? basePrice * (1 - item.discountPct / 100)
       : basePrice - item.discountAmount;
   return Math.max(0, discountedPrice);
+}
+
+function nonNegativeNumber(value: number): number {
+  if (!Number.isFinite(value) || value < 0) return 0;
+  return value;
+}
+
+function clampNumber(value: number, min: number, max: number): number {
+  if (!Number.isFinite(value)) return min;
+  return Math.min(max, Math.max(min, value));
+}
+
+function positiveInteger(value: number): number | null {
+  if (!Number.isFinite(value) || value <= 0) return null;
+  return Math.floor(value);
+}
+
+function normalizeContextId(id: number): number | null {
+  if (!Number.isFinite(id) || id <= 0) return null;
+  return Math.floor(id);
+}
+
+function trimmedOrNull(value: string | null): string | null {
+  const trimmed = value?.trim() ?? '';
+  return trimmed || null;
 }
 
 // ── Store ────────────────────────────────────────────────────────
@@ -219,7 +244,11 @@ export const useCartStore = create<CartState & CartActions>()((set, get) => ({
   // ── Items ──────────────────────────────────────────────────────
 
   addItem: (product) => {
-    const lineId = generateLineId(product.productId, product.variantName, product.modifiers);
+    const modifiers = (product.modifiers ?? []).map((modifier) => ({
+      ...modifier,
+      priceDelta: nonNegativeNumber(modifier.priceDelta),
+    }));
+    const lineId = generateLineId(product.productId, product.variantName, modifiers);
     set((state) => {
       const existing = state.items.find((i) => i.lineId === lineId);
       if (existing) {
@@ -236,15 +265,15 @@ export const useCartStore = create<CartState & CartActions>()((set, get) => ({
         name: product.name,
         sku: product.sku,
         barcode: product.barcode,
-        unitPrice: product.unitPrice,
-        price: product.unitPrice,
+        unitPrice: nonNegativeNumber(product.unitPrice),
+        price: nonNegativeNumber(product.unitPrice),
         quantity: 1,
-        modifiers: product.modifiers ?? [],
+        modifiers,
         comboId: product.comboId,
         variantName: product.variantName,
         discountPct: 0,
         discountAmount: 0,
-        taxRate: product.taxRate ?? 0,
+        taxRate: nonNegativeNumber(product.taxRate ?? 0),
         status: 'pending',
       };
       return { items: [...state.items, newItem] };
@@ -255,11 +284,14 @@ export const useCartStore = create<CartState & CartActions>()((set, get) => ({
     set((state) => ({ items: state.items.filter((i) => i.lineId !== lineId) })),
 
   updateQuantity: (lineId, quantity) => {
-    if (quantity <= 0) {
+    const normalizedQuantity = positiveInteger(quantity);
+    if (!normalizedQuantity) {
       get().removeItem(lineId);
     } else {
       set((state) => ({
-        items: state.items.map((i) => (i.lineId === lineId ? { ...i, quantity } : i)),
+        items: state.items.map((i) =>
+          i.lineId === lineId ? { ...i, quantity: normalizedQuantity } : i
+        ),
       }));
     }
   },
@@ -272,7 +304,13 @@ export const useCartStore = create<CartState & CartActions>()((set, get) => ({
   setItemDiscount: (lineId, discountPct, discountAmount) =>
     set((state) => ({
       items: state.items.map((i) =>
-        i.lineId === lineId ? { ...i, discountPct, discountAmount } : i
+        i.lineId === lineId
+          ? {
+              ...i,
+              discountPct: clampNumber(discountPct, 0, 100),
+              discountAmount: nonNegativeNumber(discountAmount),
+            }
+          : i
       ),
     })),
 
@@ -283,27 +321,64 @@ export const useCartStore = create<CartState & CartActions>()((set, get) => ({
 
   // ── Order-level ───────────────────────────────────────────────
 
-  setOrderDiscount: (discount) => set({ orderDiscount: discount }),
-  setTip: (tipAmount) => set({ tipAmount }),
+  setOrderDiscount: (discount) =>
+    set({
+      orderDiscount: discount
+        ? {
+            ...discount,
+            value:
+              discount.type === 'percentage'
+                ? clampNumber(discount.value, 0, 100)
+                : nonNegativeNumber(discount.value),
+          }
+        : null,
+    }),
+  setTip: (tipAmount) => set({ tipAmount: nonNegativeNumber(tipAmount) }),
   setOrderType: (orderType) => set({ orderType }),
   setNotes: (notes) => set({ notes }),
   setKitchenNotes: (kitchenNotes) => set({ kitchenNotes }),
 
   // ── Customer ──────────────────────────────────────────────────
 
-  setCustomer: (customerId, customerName) => set({ customerId, customerName }),
+  setCustomer: (customerId, customerName) => {
+    const normalizedCustomerId = customerId === null ? null : positiveInteger(customerId);
+    set({
+      customerId: normalizedCustomerId,
+      customerName: normalizedCustomerId ? trimmedOrNull(customerName) : null,
+    });
+  },
 
   // ── Table ─────────────────────────────────────────────────────
 
-  setTable: (tableId, floorId) => set({ tableId, floorId: floorId ?? null }),
+  setTable: (tableId, floorId) =>
+    set({
+      tableId: tableId === null ? null : positiveInteger(tableId),
+      floorId: floorId === undefined || floorId === null ? null : positiveInteger(floorId),
+    }),
 
   // ── Context ───────────────────────────────────────────────────
 
-  setContext: (branchId, terminalId, employeeId) => set({ branchId, terminalId, employeeId }),
+  setContext: (branchId, terminalId, employeeId) => {
+    const normalizedBranchId = normalizeContextId(branchId);
+    const normalizedTerminalId = normalizeContextId(terminalId);
+    const normalizedEmployeeId = normalizeContextId(employeeId);
+    if (!normalizedBranchId || !normalizedTerminalId || !normalizedEmployeeId) {
+      set({ branchId: null, terminalId: null, employeeId: null });
+      return;
+    }
+    set({
+      branchId: normalizedBranchId,
+      terminalId: normalizedTerminalId,
+      employeeId: normalizedEmployeeId,
+    });
+  },
 
   // ── Payments ──────────────────────────────────────────────────
 
-  addPayment: (payment) => set((state) => ({ payments: [...state.payments, payment] })),
+  addPayment: (payment) =>
+    set((state) => ({
+      payments: [...state.payments, { ...payment, amount: nonNegativeNumber(payment.amount) }],
+    })),
 
   removePayment: (index) =>
     set((state) => ({ payments: state.payments.filter((_, i) => i !== index) })),
@@ -317,11 +392,11 @@ export const useCartStore = create<CartState & CartActions>()((set, get) => ({
 
   // ── Order tracking ────────────────────────────────────────────
 
-  setServerOrderId: (serverOrderId) => set({ serverOrderId }),
-  setOrderNumber: (orderNumber) => set({ orderNumber }),
+  setServerOrderId: (serverOrderId) => set({ serverOrderId: positiveInteger(serverOrderId) }),
+  setOrderNumber: (orderNumber) => set({ orderNumber: trimmedOrNull(orderNumber) }),
 
   // ── Table number ──────────────────────────────────────────────
-  setTableNumber: (num) => set({ tableNumber: num }),
+  setTableNumber: (num) => set({ tableNumber: trimmedOrNull(num) }),
 
   // ── Notes update ─────────────────────────────────────────────
   updateNotes: (notes) => set({ notes }),

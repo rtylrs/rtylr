@@ -50,6 +50,7 @@ export interface DiscountPayload {
 
 export interface SplitPayload {
   parts: number;
+  splits?: number[][];
   [key: string]: unknown;
 }
 

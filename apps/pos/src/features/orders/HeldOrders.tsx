@@ -9,15 +9,12 @@ import { useHeldOrdersStore } from '../../shared/stores/heldOrdersStore';
 import { useCartStore } from '../../shared/stores/cartStore';
 import { formatDate, formatCurrency } from '../../shared/utils/format';
 import { posService } from '../../shared/services/posService';
-
-interface ServerHeldOrder {
-  id: number;
-  orderNumber: string;
-  customerName?: string;
-  total: number;
-  createdAt: string;
-  items?: Array<{ name: string; quantity: number }>;
-}
+import {
+  buildHeldOrderCartProducts,
+  buildServerHeldOrderResume,
+  normalizeServerHeldOrders,
+  type ServerHeldOrder,
+} from './heldOrdersWorkflow';
 
 const HeldOrdersScreen: React.FC = () => {
   const orders = useHeldOrdersStore((s) => s.orders);
@@ -30,32 +27,41 @@ const HeldOrdersScreen: React.FC = () => {
 
   const { data: serverOrders = [] } = useQuery<ServerHeldOrder[]>({
     queryKey: ['pos', 'held-orders'],
-    queryFn: () => unwrap(posService.getHeldOrders()) as Promise<ServerHeldOrder[]>,
+    queryFn: async () => normalizeServerHeldOrders(await unwrap(posService.getHeldOrders())),
     refetchInterval: 15_000,
   });
 
   const restore = (id: string) => {
+    const existingOrder = orders.find((order) => order.id === id);
+    if (!existingOrder) return;
+
+    let products: ReturnType<typeof buildHeldOrderCartProducts>;
+    try {
+      products = buildHeldOrderCartProducts(existingOrder);
+    } catch (error) {
+      toast.error(error instanceof Error ? error.message : 'Failed to release held order');
+      return;
+    }
+
     const order = release(id);
     if (!order) return;
-    order.items.forEach((it) =>
-      addItem({
-        id: it.id,
-        productId: Number(it.id) || 0,
-        name: it.name,
-        unitPrice: it.price,
-        price: it.price,
-      } as any)
-    );
+    products.forEach(addItem);
     setTable(order.tableNumber ?? null);
     toast.success(`Released ${order.label}`);
     navigate('/');
   };
 
   const resumeServerOrder = (o: ServerHeldOrder): void => {
-    setServerOrderId(o.id);
-    (o.items ?? []).forEach((it) =>
-      addItem({ productId: 0, name: it.name, unitPrice: 0, price: 0 })
-    );
+    let resume: ReturnType<typeof buildServerHeldOrderResume>;
+    try {
+      resume = buildServerHeldOrderResume(o);
+    } catch (error) {
+      toast.error(error instanceof Error ? error.message : 'Failed to resume held order');
+      return;
+    }
+
+    setServerOrderId(resume.orderId);
+    resume.products.forEach(addItem);
     toast.success(`Resumed order #${o.orderNumber}`);
     navigate('/');
   };

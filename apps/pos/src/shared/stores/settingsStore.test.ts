@@ -55,6 +55,14 @@ describe('settingsStore', () => {
     expect(getState().taxRate).toBe(0);
   });
 
+  it('clamps invalid tax rates to the production range', () => {
+    act(() => getState().setTaxRate(-0.2));
+    expect(getState().taxRate).toBe(0);
+
+    act(() => getState().setTaxRate(2));
+    expect(getState().taxRate).toBe(1);
+  });
+
   // ── setTipPresets ──────────────────────────────────────────────
 
   it('sets tip presets', () => {
@@ -67,12 +75,33 @@ describe('settingsStore', () => {
     expect(getState().tipPresets).toEqual([]);
   });
 
+  it('clamps tip presets to the production range', () => {
+    act(() => getState().setTipPresets([-0.1, 0.18, 2]));
+    expect(getState().tipPresets).toEqual([0, 0.18, 1]);
+  });
+
+  it('normalizes non-finite tip presets to zero', () => {
+    act(() => getState().setTipPresets([Number.NaN, Number.POSITIVE_INFINITY]));
+    expect(getState().tipPresets).toEqual([0, 0]);
+  });
+
   // ── setCurrency ────────────────────────────────────────────────
 
   it('sets currency code and symbol', () => {
     act(() => getState().setCurrency('EUR', '€'));
     expect(getState().currency).toBe('EUR');
     expect(getState().currencySymbol).toBe('€');
+  });
+
+  it('normalizes currency code before persisting', () => {
+    act(() => getState().setCurrency(' eur ', '€'));
+    expect(getState().currency).toBe('EUR');
+  });
+
+  it('falls back to default currency when code or symbol is blank', () => {
+    act(() => getState().setCurrency('', ''));
+    expect(getState().currency).toBe('USD');
+    expect(getState().currencySymbol).toBe('$');
   });
 
   // ── setReceiptFooter ──────────────────────────────────────────
@@ -107,11 +136,24 @@ describe('settingsStore', () => {
     expect(getState().printer.cashDrawerKick).toBe(false);
   });
 
+  it('clamps printer copies between 1 and 5', () => {
+    act(() => getState().setPrinter({ copies: 0 }));
+    expect(getState().printer.copies).toBe(1);
+
+    act(() => getState().setPrinter({ copies: 99 }));
+    expect(getState().printer.copies).toBe(5);
+  });
+
   // ── setAutoLogoutMinutes ──────────────────────────────────────
 
   it('sets auto logout minutes', () => {
     act(() => getState().setAutoLogoutMinutes(30));
     expect(getState().autoLogoutMinutes).toBe(30);
+  });
+
+  it('clamps negative auto logout minutes to zero', () => {
+    act(() => getState().setAutoLogoutMinutes(-5));
+    expect(getState().autoLogoutMinutes).toBe(0);
   });
 
   // ── Boolean toggles ──────────────────────────────────────────

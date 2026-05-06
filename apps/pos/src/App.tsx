@@ -1,4 +1,4 @@
-import React, { useEffect, Suspense, useState } from 'react';
+import React, { useEffect, Suspense, useRef } from 'react';
 import { Route, Routes, useLocation } from 'react-router-dom';
 import { APP_URLS, AppFlagGuard, FLAG_KEYS } from '@voxire/config';
 import { ErrorBoundary } from '@voxire/ui';
@@ -14,6 +14,12 @@ import HelpOverlay from './shared/components/HelpOverlay';
 import { useKeyboardShortcuts } from './shared/hooks';
 import { useAutoLogout } from './shared/hooks';
 import { useOnlineStatus } from './shared/hooks/useOnlineStatus';
+import { restoreUserSessionFromCookie } from './shared/auth/sessionRestore';
+import { useOfflineQueueAutoSync } from './features/offline-queue/useOfflineQueueAutoSync';
+import { reportReactError } from './shared/observability/appErrors';
+import { useTerminalHeartbeat } from './shared/terminal/useTerminalHeartbeat';
+import { useTerminalContextStore } from './shared/stores/terminalContextStore';
+import { buildCartContext } from './shared/terminal/cartContext';
 
 const getTokenFromCookie = (): string | null =>
   document.cookie
@@ -26,6 +32,8 @@ const AppInner = (): React.JSX.Element => {
   useKeyboardShortcuts();
   useAutoLogout();
   useOnlineStatus();
+  useOfflineQueueAutoSync();
+  useTerminalHeartbeat(true);
   const location = useLocation();
   return (
     <Suspense fallback={null}>
@@ -44,31 +52,47 @@ const AppInner = (): React.JSX.Element => {
 };
 
 const AppShell = (): React.JSX.Element => {
-  const { token, getUserInfo } = useUserStore();
-  const { isActive } = useEmployeeSessionStore();
+  const { token, setToken, getUserInfo } = useUserStore();
+  const { isActive, employee, endSession } = useEmployeeSessionStore();
   const setContext = useCartStore((s) => s.setContext);
-  const [locationId, setLocationId] = useState<number | null>(null);
-  const [terminalId, setTerminalId] = useState<number | null>(null);
+  const { locationId, terminalId, setTerminalContext } = useTerminalContextStore();
+  const hasRestoredSession = useRef(false);
 
   // Check auth
   useEffect(() => {
+    if (hasRestoredSession.current) return;
+    hasRestoredSession.current = true;
+
     const cookieToken = getTokenFromCookie();
-    if (!cookieToken) {
-      window.location.href = `${APP_URLS.auth}?redirect=pos`;
+    restoreUserSessionFromCookie({
+      cookieToken,
+      storeToken: token,
+      setToken,
+      getUserInfo,
+      redirectToAuth: () => {
+        window.location.href = `${APP_URLS.auth}?redirect=pos`;
+      },
+    });
+  }, [getUserInfo, setToken, token]);
+
+  useEffect(() => {
+    if (!locationId || !terminalId || !isActive || !employee) return;
+
+    const context = buildCartContext(locationId, terminalId, employee.id);
+    if (!context) {
+      endSession();
       return;
     }
-    if (token) {
-      getUserInfo().catch(() => {});
-    }
-  }, []);
+
+    setContext(context.branchId, context.terminalId, context.employeeId);
+  }, [employee, endSession, isActive, locationId, setContext, terminalId]);
 
   // Step 1: No location/terminal selected → show LocationSelect
   if (!locationId || !terminalId) {
     return (
       <LocationSelect
         onComplete={(locId, termId) => {
-          setLocationId(locId);
-          setTerminalId(termId);
+          setTerminalContext(locId, termId);
         }}
       />
     );
@@ -79,22 +103,12 @@ const AppShell = (): React.JSX.Element => {
     return <PinLogin />;
   }
 
-  // Step 3: Set cart context with location + terminal + employee.
-  // The two ids are guaranteed non-null by the early returns above.
-  // employee.id is a string in the session store but a numeric DB id;
-  // coerce explicitly so cartStore's number-typed signature stays
-  // honest.
-  const employee = useEmployeeSessionStore.getState().employee;
-  if (employee) {
-    setContext(locationId, terminalId, Number(employee.id));
-  }
-
-  // Step 4: Everything ready → main POS app
+  // Step 3: Everything ready → main POS app
   return <AppInner />;
 };
 
 const App = (): React.JSX.Element => (
-  <ErrorBoundary>
+  <ErrorBoundary onError={reportReactError}>
     <AppShell />
   </ErrorBoundary>
 );

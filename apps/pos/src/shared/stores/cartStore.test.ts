@@ -27,6 +27,26 @@ describe('cartStore', () => {
     expect(getState().itemCount()).toBe(1);
   });
 
+  it('normalizes invalid product pricing before adding an item', () => {
+    act(() =>
+      getState().addItem({
+        productId: 1,
+        name: 'Broken item',
+        unitPrice: Number.NaN,
+        taxRate: Number.POSITIVE_INFINITY,
+        modifiers: [{ id: 1, name: 'Bad modifier', priceDelta: -5 }],
+      })
+    );
+
+    expect(getState().items[0]).toMatchObject({
+      unitPrice: 0,
+      price: 0,
+      taxRate: 0,
+      modifiers: [{ id: 1, name: 'Bad modifier', priceDelta: 0 }],
+    });
+    expect(getState().total()).toBe(0);
+  });
+
   it('increments quantity for same product', () => {
     act(() => {
       getState().addItem({ productId: 1, name: 'Burger', unitPrice: 12.99 });
@@ -72,6 +92,23 @@ describe('cartStore', () => {
       getState().addItem({ productId: 1, name: 'Burger', unitPrice: 12.99 });
       const lineId = getState().items[0].lineId;
       getState().updateQuantity(lineId, 0);
+    });
+
+    expect(getState().items).toHaveLength(0);
+  });
+
+  it('normalizes quantities to positive integers', () => {
+    act(() => {
+      getState().addItem({ productId: 1, name: 'Burger', unitPrice: 10 });
+      const lineId = getState().items[0].lineId;
+      getState().updateQuantity(lineId, 2.8);
+    });
+
+    expect(getState().items[0].quantity).toBe(2);
+
+    act(() => {
+      const lineId = getState().items[0].lineId;
+      getState().updateQuantity(lineId, Number.NaN);
     });
 
     expect(getState().items).toHaveLength(0);
@@ -137,6 +174,18 @@ describe('cartStore', () => {
     expect(getState().subtotal()).toBe(85);
   });
 
+  it('clamps invalid per-item discounts', () => {
+    act(() => {
+      getState().addItem({ productId: 1, name: 'Burger', unitPrice: 100 });
+      const lineId = getState().items[0].lineId;
+      getState().setItemDiscount(lineId, 250, Number.NaN);
+    });
+
+    expect(getState().items[0].discountPct).toBe(100);
+    expect(getState().items[0].discountAmount).toBe(0);
+    expect(getState().subtotal()).toBe(0);
+  });
+
   // ── Order-level discount ──────────────────────────────────────
 
   it('applies order-level percentage discount', () => {
@@ -156,6 +205,20 @@ describe('cartStore', () => {
     });
 
     expect(getState().total()).toBe(75);
+  });
+
+  it('normalizes invalid order-level discounts', () => {
+    act(() => {
+      getState().addItem({ productId: 1, name: 'Burger', unitPrice: 100 });
+      getState().setOrderDiscount({ type: 'percentage', value: 120 });
+    });
+
+    expect(getState().orderDiscount).toMatchObject({ type: 'percentage', value: 100 });
+    expect(getState().total()).toBe(0);
+
+    act(() => getState().setOrderDiscount({ type: 'fixed', value: Number.NaN }));
+
+    expect(getState().orderDiscount).toMatchObject({ type: 'fixed', value: 0 });
   });
 
   // ── Tax ────────────────────────────────────────────────────────
@@ -201,6 +264,16 @@ describe('cartStore', () => {
     expect(getState().total()).toBe(115);
   });
 
+  it('normalizes invalid tips to zero', () => {
+    act(() => {
+      getState().addItem({ productId: 1, name: 'Burger', unitPrice: 100 });
+      getState().setTip(Number.NaN);
+    });
+
+    expect(getState().tipAmount).toBe(0);
+    expect(getState().total()).toBe(100);
+  });
+
   // ── Payments ──────────────────────────────────────────────────
 
   it('tracks amount paid', () => {
@@ -238,6 +311,16 @@ describe('cartStore', () => {
     expect(getState().amountPaid()).toBe(50);
   });
 
+  it('normalizes invalid payment amounts to zero', () => {
+    act(() => {
+      getState().addPayment({ method: 'cash', amount: Number.POSITIVE_INFINITY });
+      getState().addPayment({ method: 'card', amount: -10 });
+    });
+
+    expect(getState().payments.map((payment) => payment.amount)).toEqual([0, 0]);
+    expect(getState().amountPaid()).toBe(0);
+  });
+
   // ── Hold/Park ─────────────────────────────────────────────────
 
   it('holds and resumes order', () => {
@@ -259,6 +342,28 @@ describe('cartStore', () => {
 
   it('sets branch/terminal/employee context', () => {
     act(() => getState().setContext(1, 2, 3));
+
+    expect(getState().branchId).toBe(1);
+    expect(getState().terminalId).toBe(2);
+    expect(getState().employeeId).toBe(3);
+  });
+
+  it('clears branch/terminal/employee context when any id is invalid', () => {
+    act(() => getState().setContext(1, 0, 3));
+
+    expect(getState().branchId).toBeNull();
+    expect(getState().terminalId).toBeNull();
+    expect(getState().employeeId).toBeNull();
+
+    act(() => getState().setContext(1, 2, Number.NaN));
+
+    expect(getState().branchId).toBeNull();
+    expect(getState().terminalId).toBeNull();
+    expect(getState().employeeId).toBeNull();
+  });
+
+  it('rounds valid branch/terminal/employee context ids', () => {
+    act(() => getState().setContext(1.9, 2.8, 3.7));
 
     expect(getState().branchId).toBe(1);
     expect(getState().terminalId).toBe(2);
@@ -289,6 +394,56 @@ describe('cartStore', () => {
 
     act(() => getState().setCustomer(null, null));
     expect(getState().customerId).toBeNull();
+  });
+
+  it('normalizes invalid customer ids and blank names', () => {
+    act(() => getState().setCustomer(Number.NaN, ' Alice '));
+
+    expect(getState().customerId).toBeNull();
+    expect(getState().customerName).toBeNull();
+
+    act(() => getState().setCustomer(42.9, '   '));
+
+    expect(getState().customerId).toBe(42);
+    expect(getState().customerName).toBeNull();
+  });
+
+  // ── Table ─────────────────────────────────────────────────────
+
+  it('normalizes table and floor ids', () => {
+    act(() => getState().setTable(12.8, 3.4));
+
+    expect(getState().tableId).toBe(12);
+    expect(getState().floorId).toBe(3);
+
+    act(() => getState().setTable(0, Number.NaN));
+
+    expect(getState().tableId).toBeNull();
+    expect(getState().floorId).toBeNull();
+  });
+
+  // ── Order tracking ────────────────────────────────────────────
+
+  it('normalizes server order id and order number', () => {
+    act(() => {
+      getState().setServerOrderId(99.8);
+      getState().setOrderNumber('  ORD-1  ');
+      getState().setTableNumber(' T7 ');
+    });
+
+    expect(getState().serverOrderId).toBe(99);
+    expect(getState().orderNumber).toBe('ORD-1');
+    expect(getState().tableNumber).toBe('T7');
+
+    act(() => {
+      getState().setServerOrderId(Number.NaN);
+      getState().setOrderNumber('   ');
+      getState().setTableNumber('   ');
+    });
+
+    expect(getState().serverOrderId).toBeNull();
+    expect(getState().orderNumber).toBeNull();
+    expect(getState().tableNumber).toBeNull();
   });
 
   // ── Order type ────────────────────────────────────────────────

@@ -2,21 +2,15 @@ import React, { useRef } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { motion } from 'motion/react';
 import POSLayout from '../../layouts/POSLayout';
-import { useCartStore } from '../../shared/stores/cartStore';
-
-const fmt = (n: number) =>
-  new Intl.NumberFormat('en-US', { style: 'currency', currency: 'USD' }).format(n);
+import ReceiptPreview from '../../shared/components/ReceiptPreview';
+import { useReceiptsStore } from '../../shared/stores/receiptsStore';
 
 const Receipt: React.FC = () => {
   const navigate = useNavigate();
-  const { items, total, clearCart } = useCartStore();
-  const orderRef = useRef(`ORD-${Date.now().toString(36).toUpperCase()}`);
+  const receipt = useReceiptsStore((s) => s.receipts[0]);
+  const orderRef = useRef(receipt?.orderId ?? `ORD-${Date.now().toString(36).toUpperCase()}`);
 
-  const subtotal = total();
-  const tax = subtotal * 0.08;
-  const grandTotal = subtotal + tax;
-
-  if (items.length === 0 && subtotal === 0) {
+  if (!receipt) {
     navigate('/');
     return null;
   }
@@ -50,33 +44,7 @@ const Receipt: React.FC = () => {
             </p>
           </div>
 
-          {/* Items */}
-          <div className="space-y-1.5 text-sm">
-            {items.map((item) => (
-              <div key={item.id} className="flex gap-2">
-                <span className="text-pos-muted w-6 shrink-0">{item.quantity}×</span>
-                <span className="flex-1 text-pos-text">{item.name}</span>
-                <span className="text-pos-muted">{fmt(item.price * item.quantity)}</span>
-              </div>
-            ))}
-          </div>
-
-          <div className="h-px bg-pos-border" />
-
-          <div className="space-y-1.5 text-sm">
-            <div className="flex justify-between text-pos-muted">
-              <span>Subtotal</span>
-              <span>{fmt(subtotal)}</span>
-            </div>
-            <div className="flex justify-between text-pos-muted">
-              <span>Tax (8%)</span>
-              <span>{fmt(tax)}</span>
-            </div>
-            <div className="flex justify-between font-bold text-pos-text">
-              <span>Total</span>
-              <span>{fmt(grandTotal)}</span>
-            </div>
-          </div>
+          <ReceiptPreview receipt={receipt} businessName="Vbitez POS" />
 
           <div className="flex gap-3">
             <button
@@ -88,7 +56,6 @@ const Receipt: React.FC = () => {
             <button
               className="flex-1 py-2.5 rounded-xl bg-pos-text text-pos-bg text-sm font-semibold hover:opacity-90 transition-opacity"
               onClick={() => {
-                clearCart();
                 navigate('/');
               }}
             >

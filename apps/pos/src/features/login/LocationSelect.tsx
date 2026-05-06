@@ -1,22 +1,15 @@
 import React, { useEffect, useState } from 'react';
 import { MapPin, Monitor, Plus, Loader2 } from 'lucide-react';
 import { unwrap } from '@voxire/api';
+import { toast } from 'sonner';
 import { posService } from '../../shared/services/posService';
-import { useSettingsStore } from '../../shared/stores/settingsStore';
-
-interface Location {
-  locationId: number;
-  name: string;
-  address: string;
-  phone: string;
-}
-
-interface Terminal {
-  id: number;
-  name: string;
-  type: string;
-  isActive: boolean;
-}
+import {
+  extractCreatedTerminalId,
+  filterTerminalsForLocation,
+  mapBranchLocations,
+  type LocationOption,
+  type TerminalOption,
+} from './locationSelection';
 
 interface Props {
   onComplete: (locationId: number, terminalId: number) => void;
@@ -24,20 +17,25 @@ interface Props {
 
 const LocationSelect: React.FC<Props> = ({ onComplete }) => {
   const [step, setStep] = useState<'location' | 'terminal'>('location');
-  const [locations, setLocations] = useState<Location[]>([]);
-  const [terminals, setTerminals] = useState<Terminal[]>([]);
-  const [selectedLocation, setSelectedLocation] = useState<Location | null>(null);
+  const [locations, setLocations] = useState<LocationOption[]>([]);
+  const [terminals, setTerminals] = useState<TerminalOption[]>([]);
+  const [selectedLocation, setSelectedLocation] = useState<LocationOption | null>(null);
   const [loading, setLoading] = useState(true);
   const [creatingTerminal, setCreatingTerminal] = useState(false);
   const [newTerminalName, setNewTerminalName] = useState('');
+  const [locationError, setLocationError] = useState<string | null>(null);
+  const [terminalError, setTerminalError] = useState<string | null>(null);
 
   // Load locations
   useEffect(() => {
     (async () => {
       try {
         const data = await unwrap(posService.getMyLocations());
-        const locs = (data as any)?.locations ?? [];
+        const locs = mapBranchLocations(
+          ((data as Record<string, unknown>)?.locations as unknown[]) ?? []
+        );
         setLocations(locs);
+        setLocationError(null);
         // Auto-select if only one location
         if (locs.length === 1) {
           handleLocationSelect(locs[0]);
@@ -49,48 +47,39 @@ const LocationSelect: React.FC<Props> = ({ onComplete }) => {
           const rawBranches = Array.isArray(data)
             ? data
             : ((data as Record<string, unknown>)?.locations ?? []);
-          const branches = rawBranches as Array<{
-            id?: number;
-            name?: string;
-            address?: string;
-            phone?: string;
-          }>;
-          const mapped: Location[] = branches.map((b) => ({
-            locationId: Number(b.id ?? 0),
-            name: b.name ?? '',
-            address: b.address ?? '',
-            phone: b.phone ?? '',
-          }));
+          const mapped = mapBranchLocations(rawBranches as unknown[]);
           setLocations(mapped);
+          setLocationError(null);
           if (mapped.length === 1) handleLocationSelect(mapped[0]);
-        } catch {}
+        } catch {
+          setLocations([]);
+          setLocationError('Unable to load locations. Check your connection and try again.');
+        }
       } finally {
         setLoading(false);
       }
     })();
   }, []);
 
-  const handleLocationSelect = async (loc: Location) => {
+  const handleLocationSelect = async (loc: LocationOption) => {
     setSelectedLocation(loc);
     setStep('terminal');
     setLoading(true);
+    setTerminalError(null);
     try {
       const data = await unwrap(posService.getTerminals());
       const rawTerminals =
         (data as Record<string, unknown>)?.terminals ?? (Array.isArray(data) ? data : []);
-      const all = rawTerminals as Terminal[];
-      // Filter terminals for this location
-      const filtered = all.filter(
-        (t) =>
-          (t as unknown as Record<string, unknown>).branchId === loc.locationId ||
-          (t as unknown as Record<string, unknown>).branch_id === loc.locationId
-      );
+      const filtered = filterTerminalsForLocation(rawTerminals as unknown[], loc.locationId);
       setTerminals(filtered);
-    } catch {}
+    } catch {
+      setTerminals([]);
+      setTerminalError('Unable to load terminals. You can retry or register a new terminal.');
+    }
     setLoading(false);
   };
 
-  const handleTerminalSelect = (terminal: Terminal) => {
+  const handleTerminalSelect = (terminal: TerminalOption) => {
     if (!selectedLocation) return;
     onComplete(selectedLocation.locationId, terminal.id);
   };
@@ -106,12 +95,12 @@ const LocationSelect: React.FC<Props> = ({ onComplete }) => {
           type: 'pos',
         })
       );
-      const id = (data as any)?.id;
-      if (id) {
-        onComplete(selectedLocation.locationId, id);
-      }
-    } catch {}
-    setCreatingTerminal(false);
+      onComplete(selectedLocation.locationId, extractCreatedTerminalId(data));
+    } catch (error) {
+      toast.error(error instanceof Error ? error.message : 'Failed to register terminal');
+    } finally {
+      setCreatingTerminal(false);
+    }
   };
 
   if (loading) {
@@ -140,10 +129,16 @@ const LocationSelect: React.FC<Props> = ({ onComplete }) => {
             {locations.length === 0 && (
               <div className="text-center py-12">
                 <MapPin className="w-10 h-10 mx-auto text-pos-muted mb-3" />
-                <p className="text-sm text-pos-muted">No locations assigned to your account.</p>
-                <p className="text-xs text-pos-muted mt-1">
-                  Ask your business owner to assign you to a location.
-                </p>
+                {locationError ? (
+                  <p className="text-sm text-destructive">{locationError}</p>
+                ) : (
+                  <>
+                    <p className="text-sm text-pos-muted">No locations assigned to your account.</p>
+                    <p className="text-xs text-pos-muted mt-1">
+                      Ask your business owner to assign you to a location.
+                    </p>
+                  </>
+                )}
               </div>
             )}
             {locations.map((loc) => (
@@ -182,6 +177,11 @@ const LocationSelect: React.FC<Props> = ({ onComplete }) => {
             )}
 
             <div className="grid gap-3">
+              {terminalError && (
+                <div className="rounded-lg border border-destructive/40 bg-destructive/10 px-3 py-2 text-xs text-destructive">
+                  {terminalError}
+                </div>
+              )}
               {terminals.map((t) => (
                 <button
                   key={t.id}

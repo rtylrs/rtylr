@@ -2,38 +2,39 @@ import React, { useState } from 'react';
 import { toast } from 'sonner';
 import ScreenLayout from '../../layouts/ScreenLayout';
 import { useCashDrawerStore } from '../../shared/stores/cashDrawerStore';
+import { useCashMovementQueueStore } from '../../shared/stores/cashMovementQueueStore';
 import { formatCurrency, formatDate } from '../../shared/utils/format';
-
-type Action = 'drop' | 'paid_out' | 'paid_in' | 'float';
+import { processCashDrawerAction, type CashDrawerAction } from './cashDrawerWorkflow';
+import { syncCashMovementWithApi } from './cashMovementQueueSync';
 
 const CashDropScreen: React.FC = () => {
   const { movements, openingFloat, openDrawer, cashDrop, paidOut, paidIn, expectedCash } =
     useCashDrawerStore();
-  const [action, setAction] = useState<Action>('drop');
+  const enqueueMovement = useCashMovementQueueStore((s) => s.enqueue);
+  const [action, setAction] = useState<CashDrawerAction>('drop');
   const [amount, setAmount] = useState('');
   const [reason, setReason] = useState('');
 
-  const submit = () => {
-    const value = Number(amount || 0);
-    if (value <= 0) {
-      toast.error('Enter an amount');
-      return;
+  const submit = async () => {
+    try {
+      const result = await processCashDrawerAction({
+        action,
+        amountInput: amount,
+        reason,
+        drawer: { openDrawer, cashDrop, paidOut, paidIn },
+        syncMovement: syncCashMovementWithApi,
+        enqueueMovement,
+      });
+      if (result.queued) {
+        toast.warning(`${result.message}. Saved offline and will sync when connection returns.`);
+      } else {
+        toast.success(result.message);
+      }
+      setAmount('');
+      setReason('');
+    } catch (error) {
+      toast.error(error instanceof Error ? error.message : 'Unable to record cash movement.');
     }
-    if (action === 'float') {
-      openDrawer(value);
-      toast.success(`Opening float set to ${formatCurrency(value)}`);
-    } else if (action === 'drop') {
-      cashDrop(value, reason);
-      toast.success(`Cash drop recorded`);
-    } else if (action === 'paid_out') {
-      paidOut(value, reason);
-      toast.success(`Paid out`);
-    } else if (action === 'paid_in') {
-      paidIn(value, reason);
-      toast.success(`Paid in`);
-    }
-    setAmount('');
-    setReason('');
   };
 
   return (
@@ -51,7 +52,7 @@ const CashDropScreen: React.FC = () => {
         </div>
         <div className="rounded-xl bg-pos-card border border-pos-border p-4 space-y-3">
           <div className="grid grid-cols-4 gap-2">
-            {(['float', 'drop', 'paid_out', 'paid_in'] as Action[]).map((a) => (
+            {(['float', 'drop', 'paid_out', 'paid_in'] as CashDrawerAction[]).map((a) => (
               <button
                 key={a}
                 onClick={() => setAction(a)}

@@ -12,6 +12,7 @@ import QuickNoteModal from '../../../../shared/components/QuickNoteModal';
 import OfflineBadge from '../../../../shared/components/OfflineBadge';
 import { posService } from '../../../../shared/services/posService';
 import { formatCurrency } from '../../../../shared/utils/format';
+import { buildKitchenOrderPayload, extractCreatedOrderId } from './kitchenWorkflow';
 
 interface OrderPanelProps {
   tableNumber?: string;
@@ -66,37 +67,22 @@ const OrderPanel: React.FC<OrderPanelProps> = ({ tableNumber }) => {
     try {
       let orderId = serverOrderId;
       if (!orderId) {
-        const orderItems = items.map((item) => ({
-          id: item.id,
-          name: item.name,
-          price: item.price,
-          quantity: item.quantity,
-          notes: item.notes ?? '',
-        }));
         const created = await unwrap(
-          posService.createOrder({
-            id: `local-${Date.now()}`,
-            status: 'open',
-            items: orderItems,
-            subtotal,
-            tax,
-            tip: 0,
-            discount: 0,
-            total: grandTotal,
-            createdAt: new Date().toISOString(),
-            customerId: String(employee?.id ?? ''),
-          })
+          posService.createOrder(
+            buildKitchenOrderPayload({
+              items,
+              subtotal,
+              tax,
+              total: grandTotal,
+              employeeId: employee?.id,
+            })
+          )
         );
-        orderId =
-          (created as { id?: number; order_id?: number }).id ??
-          (created as { id?: number; order_id?: number }).order_id ??
-          0;
-        if (orderId) setServerOrderId(orderId);
+        orderId = extractCreatedOrderId(created);
+        setServerOrderId(orderId);
       }
-      if (orderId) {
-        await unwrap(posService.sendToKitchen(orderId));
-        toast.success('Sent to kitchen');
-      }
+      await unwrap(posService.sendToKitchen(orderId));
+      toast.success('Sent to kitchen');
     } catch {
       toast.error('Failed to send to kitchen');
     } finally {

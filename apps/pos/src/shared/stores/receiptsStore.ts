@@ -13,11 +13,60 @@ interface ReceiptsActions {
   byOrder: (orderId: string) => Receipt | undefined;
 }
 
+function textOrNull(value: string | undefined): string | undefined {
+  const trimmed = value?.trim() ?? '';
+  return trimmed || undefined;
+}
+
+function requiredText(value: string): string | null {
+  const trimmed = value.trim();
+  return trimmed || null;
+}
+
+function nonNegativeNumber(value: number): number {
+  if (!Number.isFinite(value) || value < 0) return 0;
+  return value;
+}
+
+function positiveInteger(value: number): number {
+  if (!Number.isFinite(value) || value <= 0) return 0;
+  return Math.floor(value);
+}
+
+function normalizeReceipt(receipt: Receipt): Receipt | null {
+  const id = requiredText(receipt.id);
+  const orderId = requiredText(receipt.orderId);
+  if (!id || !orderId) return null;
+
+  return {
+    ...receipt,
+    id,
+    orderId,
+    total: nonNegativeNumber(receipt.total),
+    customerName: textOrNull(receipt.customerName),
+    items: receipt.items.map((item) => ({
+      name: item.name.trim(),
+      qty: positiveInteger(item.qty),
+      price: nonNegativeNumber(item.price),
+    })),
+    payments: receipt.payments.map((payment) => ({
+      ...payment,
+      id: payment.id.trim(),
+      amount: nonNegativeNumber(payment.amount),
+      tipAmount: payment.tipAmount === undefined ? undefined : nonNegativeNumber(payment.tipAmount),
+    })),
+  };
+}
+
 export const useReceiptsStore = create<ReceiptsState & ReceiptsActions>()(
   persist(
     (set, get) => ({
       receipts: [],
-      add: (receipt) => set((s) => ({ receipts: [receipt, ...s.receipts] })),
+      add: (receipt) => {
+        const normalized = normalizeReceipt(receipt);
+        if (!normalized) return;
+        set((s) => ({ receipts: [normalized, ...s.receipts] }));
+      },
       markEmailed: (id) =>
         set((s) => ({
           receipts: s.receipts.map((r) => (r.id === id ? { ...r, emailed: true } : r)),

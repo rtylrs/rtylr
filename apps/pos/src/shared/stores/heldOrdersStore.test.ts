@@ -31,6 +31,39 @@ describe('heldOrdersStore', () => {
     expect(getState().orders).toHaveLength(1);
   });
 
+  it('rejects held orders without a usable label', () => {
+    const order = getState().hold({
+      label: '   ',
+      items: [{ id: '1', name: 'Burger', price: 10, quantity: 1 }],
+    });
+
+    expect(order).toBeUndefined();
+    expect(getState().orders).toEqual([]);
+  });
+
+  it('normalizes held order labels, notes, table numbers, and line items', () => {
+    const order = getState().hold({
+      label: ' Table 5 ',
+      tableNumber: ' T5 ',
+      note: ' Rush ',
+      items: [
+        {
+          id: ' 1 ',
+          name: ' Burger ',
+          price: Number.NaN,
+          quantity: 2.8,
+        },
+      ],
+    });
+
+    expect(order).toMatchObject({
+      label: 'Table 5',
+      tableNumber: 'T5',
+      note: 'Rush',
+      items: [{ id: '1', name: 'Burger', price: 0, quantity: 2 }],
+    });
+  });
+
   it('prepends new held orders (newest first)', () => {
     getState().hold({ label: 'Order A', items: [] });
     getState().hold({ label: 'Order B', items: [] });
@@ -96,6 +129,12 @@ describe('heldOrdersStore', () => {
     const order = getState().hold({ label: 'Table 4', items: [] });
     act(() => getState().updateNote(order.id, 'No onions'));
     expect(getState().orders[0].note).toBe('No onions');
+  });
+
+  it('normalizes updated notes', () => {
+    const order = getState().hold({ label: 'Table 4', items: [] });
+    act(() => getState().updateNote(order.id, '   '));
+    expect(getState().orders[0].note).toBeUndefined();
   });
 
   it('updateNote does not affect other orders', () => {

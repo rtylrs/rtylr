@@ -6,20 +6,20 @@ import Skeleton from '../../shared/components/Skeleton';
 import { useCombos } from './useCombos';
 import { useCartStore } from '../../shared/stores/cartStore';
 import { formatCurrency } from '../../shared/utils/format';
+import { buildComboCartProduct } from '../../shared/cart/cartProduct';
 
 const CombosScreen: React.FC = () => {
   const { combos, loading, error } = useCombos();
   const addItem = useCartStore((s) => s.addItem);
 
-  const addCombo = (id: string, name: string, price: number) => {
-    addItem({
-      id: `combo_${id}`,
-      productId: Number(id) || 0,
-      name,
-      unitPrice: price,
-      price,
-    } as any);
-    toast.success(`Added combo: ${name}`);
+  const addCombo = (combo: (typeof combos)[number]) => {
+    try {
+      addItem(buildComboCartProduct(combo));
+    } catch (error) {
+      toast.error(error instanceof Error ? error.message : 'Failed to add combo');
+      return;
+    }
+    toast.success(`Added combo: ${combo.name}`);
   };
 
   return (
@@ -51,7 +51,7 @@ const CombosScreen: React.FC = () => {
                   ))}
                 </div>
                 <button
-                  onClick={() => addCombo(c.id, c.name, c.price)}
+                  onClick={() => addCombo(c)}
                   className="mt-auto h-11 rounded-lg bg-pos-text text-pos-bg font-bold text-sm hover:opacity-90 transition"
                 >
                   Add to Order

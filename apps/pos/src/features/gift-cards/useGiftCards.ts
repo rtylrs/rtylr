@@ -3,6 +3,7 @@ import { useCallback, useState } from 'react';
 import { posService } from '../../shared/services/posService';
 import { useGiftCardStore } from '../../shared/stores/giftCardStore';
 import type { GiftCard } from '../../shared/types/pos';
+import { normalizeRemoteGiftCard } from './giftCardRemote';
 
 export function useGiftCards() {
   const store = useGiftCardStore();
@@ -23,11 +24,17 @@ export function useGiftCards() {
   }, []);
 
   const checkBalance = useCallback(async (code: string): Promise<GiftCard | null> => {
+    const normalizedCode = code.trim();
+    if (!normalizedCode) return null;
+
     try {
-      const res = await unwrap(posService.getGiftCardBalance(code));
-      return (res?.data ?? null) as GiftCard | null;
+      const res = await unwrap(posService.getGiftCardBalance(normalizedCode));
+      const remoteCard = normalizeRemoteGiftCard(res);
+      if (remoteCard) return remoteCard;
+
+      return useGiftCardStore.getState().findByCode(normalizedCode) ?? null;
     } catch {
-      const local = useGiftCardStore.getState().findByCode(code);
+      const local = useGiftCardStore.getState().findByCode(normalizedCode);
       return local ?? null;
     }
   }, []);

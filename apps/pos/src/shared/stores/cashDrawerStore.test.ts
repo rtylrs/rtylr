@@ -28,6 +28,14 @@ describe('cashDrawerStore', () => {
     expect(getState().movements).toEqual([]);
   });
 
+  it('normalizes invalid opening floats to zero', () => {
+    act(() => getState().openDrawer(-50));
+    expect(getState().openingFloat).toBe(0);
+
+    act(() => getState().openDrawer(Number.NaN));
+    expect(getState().openingFloat).toBe(0);
+  });
+
   it('opening the drawer clears previous movements', () => {
     act(() => {
       getState().openDrawer(100);
@@ -59,6 +67,16 @@ describe('cashDrawerStore', () => {
     expect(movement.type).toBe('float');
     expect(movement.amount).toBe(50);
     expect(getState().movements).toHaveLength(1);
+  });
+
+  it('normalizes invalid movement amounts to zero', () => {
+    act(() => getState().openDrawer(100));
+    const negative = getState().addMovement({ type: 'paid_in', amount: -25 });
+    const nonFinite = getState().addMovement({ type: 'paid_out', amount: Number.POSITIVE_INFINITY });
+
+    expect(negative.amount).toBe(0);
+    expect(nonFinite.amount).toBe(0);
+    expect(getState().expectedCash()).toBe(100);
   });
 
   it('prepends new movements (newest first)', () => {
@@ -108,6 +126,28 @@ describe('cashDrawerStore', () => {
     expect(getState().movements[0].amount).toBe(25);
   });
 
+  it('records a cash sale separately from manual paid in', () => {
+    act(() => {
+      getState().openDrawer(100);
+      getState().recordCashSale(42.5, 'order-123');
+    });
+
+    expect(getState().movements[0].type).toBe('sale');
+    expect(getState().movements[0].amount).toBe(42.5);
+    expect(getState().movements[0].reason).toBe('order-123');
+  });
+
+  it('records a cash refund separately from manual paid out', () => {
+    act(() => {
+      getState().openDrawer(100);
+      getState().recordCashRefund(12, 'order-123');
+    });
+
+    expect(getState().movements[0].type).toBe('refund');
+    expect(getState().movements[0].amount).toBe(12);
+    expect(getState().movements[0].reason).toBe('order-123');
+  });
+
   // ── expectedCash ───────────────────────────────────────────────
 
   it('calculates expected cash with no movements', () => {
@@ -136,13 +176,23 @@ describe('cashDrawerStore', () => {
   it('calculates expected cash with mixed movements', () => {
     act(() => {
       getState().openDrawer(300);
-      getState().paidIn(100, 'sales');
+      getState().recordCashSale(100, 'sale-1');
       getState().paidOut(50, 'petty cash');
       getState().cashDrop(150, 'safe');
-      getState().paidIn(75, 'more sales');
+      getState().recordCashSale(75, 'sale-2');
     });
     // 300 + 100 - 50 - 150 + 75 = 275
     expect(getState().expectedCash()).toBe(275);
+  });
+
+  it('subtracts cash refunds from expected cash', () => {
+    act(() => {
+      getState().openDrawer(300);
+      getState().recordCashSale(100, 'sale-1');
+      getState().recordCashRefund(25, 'sale-1');
+    });
+
+    expect(getState().expectedCash()).toBe(375);
   });
 
   // ── Edge cases ─────────────────────────────────────────────────

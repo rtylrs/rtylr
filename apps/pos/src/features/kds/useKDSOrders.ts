@@ -1,9 +1,8 @@
 import { unwrap } from '@voxire/api';
-import { z } from 'zod';
 import { useCallback, useEffect, useState } from 'react';
 import { posService } from '../../shared/services/posService';
-import { kdsOrderSchema } from '../../shared/schemas/kdsOrders';
 import { useUserStore } from '../../shared/stores/userStore';
+import { buildKdsStatusUpdate, mapKdsOrders, parsePositiveInteger } from './kdsWorkflow';
 import { useKdsStream } from './useKdsStream';
 
 export interface KDSOrder {
@@ -22,7 +21,7 @@ export function useKDSOrders(station?: string) {
   const [error, setError] = useState<string | null>(null);
 
   const rawUserId = useUserStore((s) => s.userId);
-  const ownerID = rawUserId != null ? Number(rawUserId) : undefined;
+  const ownerID = rawUserId != null ? parsePositiveInteger(rawUserId) : undefined;
 
   const load = useCallback(async (): Promise<void> => {
     setLoading(true);
@@ -30,22 +29,7 @@ export function useKDSOrders(station?: string) {
     try {
       const res = await unwrap(posService.getKDSOrders(station));
       const raw = res?.orders ?? res?.data ?? [];
-      const parsed = z.array(kdsOrderSchema).parse(Array.isArray(raw) ? raw : []);
-      const mapped: KDSOrder[] = parsed.map((o) => ({
-        id: o.id,
-        number: o.number ?? o.id,
-        station: o.station,
-        items: o.items.map((it) => ({
-          name: it.name,
-          qty: it.qty,
-          course: it.course ?? undefined,
-          notes: it.notes ?? undefined,
-        })),
-        status: o.status,
-        createdAt: o.createdAt,
-        elapsedSeconds: o.elapsedSeconds,
-      }));
-      setOrders(mapped);
+      setOrders(mapKdsOrders(raw));
     } catch (e) {
       const err = e as { response?: { data?: { message?: string } }; message?: string };
       setError(err?.response?.data?.message ?? err?.message ?? 'Failed to load KDS orders');
@@ -62,9 +46,10 @@ export function useKDSOrders(station?: string) {
   useKdsStream(ownerID, load);
 
   const setStatus = async (id: string, status: KDSOrder['status']): Promise<void> => {
+    const request = buildKdsStatusUpdate(id, status);
     setOrders((prev) => prev.map((o) => (o.id === id ? { ...o, status } : o)));
     try {
-      await unwrap(posService.updateKDSItemStatus(Number(id), status));
+      await unwrap(posService.updateKDSItemStatus(request.itemId, request.status));
     } catch {
       // leave local state updated; real sync handled by reload
     }

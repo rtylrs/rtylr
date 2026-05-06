@@ -1,9 +1,8 @@
 import { unwrap } from '@voxire/api';
-import { z } from 'zod';
 import { useEffect, useState } from 'react';
 import { posService } from '../../shared/services/posService';
 import type { Customer } from '../../shared/types/pos';
-import { customerSchema } from '../../shared/schemas/customers';
+import { mapCustomers } from './customerLookupWorkflow';
 
 export function useCustomerLookup(initialQuery = '') {
   const [query, setQuery] = useState(initialQuery);
@@ -24,16 +23,7 @@ export function useCustomerLookup(initialQuery = '') {
         const res = await unwrap(posService.searchCustomers(query.trim()));
         if (cancelled) return;
         const raw = res?.customers ?? res?.data ?? [];
-        const parsed = z.array(customerSchema).parse(Array.isArray(raw) ? raw : []);
-        const mapped: Customer[] = parsed.map((c) => ({
-          id: c.id,
-          name: c.name,
-          phone: c.phone ?? undefined,
-          email: c.email ?? undefined,
-          loyaltyPoints: c.loyaltyPoints ?? undefined,
-          lastVisit: c.lastVisit ?? undefined,
-        }));
-        setResults(mapped);
+        setResults(mapCustomers(raw));
       } catch (e) {
         const err = e as { response?: { data?: { message?: string } }; message?: string };
         if (!cancelled) {

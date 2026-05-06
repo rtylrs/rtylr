@@ -7,6 +7,7 @@ import EmptyState from '../../shared/components/EmptyState';
 import Skeleton from '../../shared/components/Skeleton';
 import { useCustomerLookup } from './useCustomerLookup';
 import { useCartStore } from '../../shared/stores/cartStore';
+import { buildCustomerAttachment } from './customerLookupWorkflow';
 
 const CustomerLookupScreen: React.FC = () => {
   const navigate = useNavigate();
@@ -14,8 +15,14 @@ const CustomerLookupScreen: React.FC = () => {
   const setCustomer = useCartStore((s) => s.setCustomer);
 
   const attach = (id: string, name: string): void => {
-    setCustomer(Number(id), name);
-    toast.success(`Attached ${name} to order`);
+    try {
+      const attachment = buildCustomerAttachment({ id, name });
+      setCustomer(attachment.customerId, attachment.customerName);
+      toast.success(`Attached ${attachment.customerName} to order`);
+    } catch (error) {
+      toast.error(error instanceof Error ? error.message : 'Failed to attach customer');
+      return;
+    }
     navigate(-1);
   };
 

@@ -1,15 +1,11 @@
 import React, { useState } from 'react';
 import { motion } from 'motion/react';
+import { toast } from 'sonner';
 import { useCartStore } from '../../../../shared/stores/cartStore';
+import { buildMenuItemCartProduct } from '../../../../shared/cart/cartProduct';
+import type { MenuItem } from '../../../../shared/types/pos';
 
-interface Product {
-  id: string;
-  name: string;
-  price: number;
-  category: string;
-  image?: string;
-  available?: boolean;
-}
+type Product = MenuItem;
 interface ProductGridProps {
   products: Product[];
   categories: string[];
@@ -29,6 +25,16 @@ const ProductGrid: React.FC<ProductGridProps> = ({ products, categories }) => {
     const matchSearch = p.name.toLowerCase().includes(search.toLowerCase());
     return matchCat && matchSearch;
   });
+
+  const addProduct = (product: Product) => {
+    if (product.available === false) return;
+
+    try {
+      addItem(buildMenuItemCartProduct(product));
+    } catch (error) {
+      toast.error(error instanceof Error ? error.message : 'Failed to add menu item');
+    }
+  };
 
   return (
     <div className="flex-1 flex flex-col overflow-hidden">
@@ -72,7 +78,7 @@ const ProductGrid: React.FC<ProductGridProps> = ({ products, categories }) => {
                 className={`flex flex-col p-3 rounded-xl bg-pos-card border border-pos-border text-left transition-colors hover:border-white/15 ${
                   product.available === false ? 'opacity-50 cursor-not-allowed' : ''
                 }`}
-                onClick={() => product.available !== false && addItem(product as any)}
+                onClick={() => addProduct(product)}
                 whileTap={{ scale: 0.96 }}
                 disabled={product.available === false}
               >

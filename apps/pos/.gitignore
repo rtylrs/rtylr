@@ -6,3 +6,5 @@ dist/
 .env.*
 !.env.example
 src-tauri/target/
+core/target/
+core/gen/
