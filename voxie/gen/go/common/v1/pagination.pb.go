@@ -232,7 +232,7 @@ var File_common_v1_pagination_proto protoreflect.FileDescriptor
 
 const file_common_v1_pagination_proto_rawDesc = "" +
 	"\n" +
-	"\x1acommon/v1/pagination.proto\x12\x06common\"q\n" +
+	"\x1acommon/v1/pagination.proto\x12\tcommon.v1\"q\n" +
 	"\x11PaginationRequest\x12\x12\n" +
 	"\x04page\x18\x01 \x01(\x05R\x04page\x12\x14\n" +
 	"\x05limit\x18\x02 \x01(\x05R\x05limit\x12\x17\n" +
@@ -264,9 +264,9 @@ func file_common_v1_pagination_proto_rawDescGZIP() []byte {
 
 var file_common_v1_pagination_proto_msgTypes = make([]protoimpl.MessageInfo, 3)
 var file_common_v1_pagination_proto_goTypes = []any{
-	(*PaginationRequest)(nil),  // 0: common.PaginationRequest
-	(*PaginationResponse)(nil), // 1: common.PaginationResponse
-	(*Timestamp)(nil),          // 2: common.Timestamp
+	(*PaginationRequest)(nil),  // 0: common.v1.PaginationRequest
+	(*PaginationResponse)(nil), // 1: common.v1.PaginationResponse
+	(*Timestamp)(nil),          // 2: common.v1.Timestamp
 }
 var file_common_v1_pagination_proto_depIdxs = []int32{
 	0, // [0:0] is the sub-list for method output_type

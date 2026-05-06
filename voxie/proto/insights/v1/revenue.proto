@@ -1,6 +1,6 @@
 syntax = "proto3";
 
-package insights;
+package insights.v1;
 
 option go_package = "github.com/voxire/voxie/gen/go/insights/v1";
 

@@ -1605,7 +1605,8 @@ var File_finance_v1_invoices_proto protoreflect.FileDescriptor
 
 const file_finance_v1_invoices_proto_rawDesc = "" +
 	"\n" +
-	"\x19finance/v1/invoices.proto\x12\afinance\"\xf1\x01\n" +
+	"\x19finance/v1/invoices.proto\x12\n" +
+	"finance.v1\"\xf1\x01\n" +
 	"\vInvoiceItem\x12 \n" +
 	"\vdescription\x18\x01 \x01(\tR\vdescription\x12\x1a\n" +
 	"\bquantity\x18\x02 \x01(\x01R\bquantity\x12\x12\n" +
@@ -1635,7 +1636,7 @@ const file_finance_v1_invoices_proto_rawDesc = "" +
 	"\n" +
 	"amount_due\x18\v \x01(\x01R\tamountDue\x12\x1d\n" +
 	"\n" +
-	"created_at\x18\f \x01(\tR\tcreatedAt\"\xb2\x06\n" +
+	"created_at\x18\f \x01(\tR\tcreatedAt\"\xb5\x06\n" +
 	"\rInvoiceDetail\x12\x0e\n" +
 	"\x02id\x18\x01 \x01(\x03R\x02id\x12\x19\n" +
 	"\bowner_id\x18\x02 \x01(\x03R\aownerId\x12%\n" +
@@ -1669,15 +1670,15 @@ const file_finance_v1_invoices_proto_rawDesc = "" +
 	"\n" +
 	"created_at\x18\x18 \x01(\tR\tcreatedAt\x12\x1d\n" +
 	"\n" +
-	"updated_at\x18\x19 \x01(\tR\tupdatedAt\x12*\n" +
-	"\x05items\x18\x1a \x03(\v2\x14.finance.InvoiceItemR\x05items\"{\n" +
+	"updated_at\x18\x19 \x01(\tR\tupdatedAt\x12-\n" +
+	"\x05items\x18\x1a \x03(\v2\x17.finance.v1.InvoiceItemR\x05items\"{\n" +
 	"\x13ListInvoicesRequest\x12\x16\n" +
 	"\x06status\x18\x01 \x01(\tR\x06status\x12\x16\n" +
 	"\x06search\x18\x02 \x01(\tR\x06search\x12\x1b\n" +
 	"\tdate_from\x18\x03 \x01(\tR\bdateFrom\x12\x17\n" +
-	"\adate_to\x18\x04 \x01(\tR\x06dateTo\"K\n" +
-	"\x14ListInvoicesResponse\x123\n" +
-	"\binvoices\x18\x01 \x03(\v2\x17.finance.InvoiceSummaryR\binvoices\"#\n" +
+	"\adate_to\x18\x04 \x01(\tR\x06dateTo\"N\n" +
+	"\x14ListInvoicesResponse\x126\n" +
+	"\binvoices\x18\x01 \x03(\v2\x1a.finance.v1.InvoiceSummaryR\binvoices\"#\n" +
 	"\x11GetInvoiceRequest\x12\x0e\n" +
 	"\x02id\x18\x01 \x01(\x03R\x02id\"\xbc\x01\n" +
 	"\aPayment\x12\x0e\n" +
@@ -1687,10 +1688,10 @@ const file_finance_v1_invoices_proto_rawDesc = "" +
 	"\fpayment_date\x18\x04 \x01(\tR\vpaymentDate\x12\x16\n" +
 	"\x06method\x18\x05 \x01(\tR\x06method\x12\x1c\n" +
 	"\treference\x18\x06 \x01(\tR\treference\x12\x14\n" +
-	"\x05notes\x18\a \x01(\tR\x05notes\"t\n" +
-	"\x12GetInvoiceResponse\x120\n" +
-	"\ainvoice\x18\x01 \x01(\v2\x16.finance.InvoiceDetailR\ainvoice\x12,\n" +
-	"\bpayments\x18\x02 \x03(\v2\x10.finance.PaymentR\bpayments\"\xba\x03\n" +
+	"\x05notes\x18\a \x01(\tR\x05notes\"z\n" +
+	"\x12GetInvoiceResponse\x123\n" +
+	"\ainvoice\x18\x01 \x01(\v2\x19.finance.v1.InvoiceDetailR\ainvoice\x12/\n" +
+	"\bpayments\x18\x02 \x03(\v2\x13.finance.v1.PaymentR\bpayments\"\xbd\x03\n" +
 	"\x14CreateInvoiceRequest\x12\x1f\n" +
 	"\vclient_name\x18\x01 \x01(\tR\n" +
 	"clientName\x12!\n" +
@@ -1706,10 +1707,10 @@ const file_finance_v1_invoices_proto_rawDesc = "" +
 	"\btax_rate\x18\n" +
 	" \x01(\x01R\ataxRate\x12\x14\n" +
 	"\x05notes\x18\v \x01(\tR\x05notes\x12\x14\n" +
-	"\x05terms\x18\f \x01(\tR\x05terms\x12*\n" +
-	"\x05items\x18\r \x03(\v2\x14.finance.InvoiceItemR\x05items\"I\n" +
-	"\x15CreateInvoiceResponse\x120\n" +
-	"\ainvoice\x18\x01 \x01(\v2\x16.finance.InvoiceDetailR\ainvoice\"\xca\x03\n" +
+	"\x05terms\x18\f \x01(\tR\x05terms\x12-\n" +
+	"\x05items\x18\r \x03(\v2\x17.finance.v1.InvoiceItemR\x05items\"L\n" +
+	"\x15CreateInvoiceResponse\x123\n" +
+	"\ainvoice\x18\x01 \x01(\v2\x19.finance.v1.InvoiceDetailR\ainvoice\"\xcd\x03\n" +
 	"\x14UpdateInvoiceRequest\x12\x0e\n" +
 	"\x02id\x18\x01 \x01(\x03R\x02id\x12\x1f\n" +
 	"\vclient_name\x18\x02 \x01(\tR\n" +
@@ -1726,10 +1727,10 @@ const file_finance_v1_invoices_proto_rawDesc = "" +
 	" \x01(\x01R\rdiscountValue\x12\x19\n" +
 	"\btax_rate\x18\v \x01(\x01R\ataxRate\x12\x14\n" +
 	"\x05notes\x18\f \x01(\tR\x05notes\x12\x14\n" +
-	"\x05terms\x18\r \x01(\tR\x05terms\x12*\n" +
-	"\x05items\x18\x0e \x03(\v2\x14.finance.InvoiceItemR\x05items\"I\n" +
-	"\x15UpdateInvoiceResponse\x120\n" +
-	"\ainvoice\x18\x01 \x01(\v2\x16.finance.InvoiceDetailR\ainvoice\"D\n" +
+	"\x05terms\x18\r \x01(\tR\x05terms\x12-\n" +
+	"\x05items\x18\x0e \x03(\v2\x17.finance.v1.InvoiceItemR\x05items\"L\n" +
+	"\x15UpdateInvoiceResponse\x123\n" +
+	"\ainvoice\x18\x01 \x01(\v2\x19.finance.v1.InvoiceDetailR\ainvoice\"D\n" +
 	"\x1aUpdateInvoiceStatusRequest\x12\x0e\n" +
 	"\x02id\x18\x01 \x01(\x03R\x02id\x12\x16\n" +
 	"\x06status\x18\x02 \x01(\tR\x06status\"7\n" +
@@ -1757,9 +1758,9 @@ const file_finance_v1_invoices_proto_rawDesc = "" +
 	"\fpayment_date\x18\x05 \x01(\tR\vpaymentDate\x12\x16\n" +
 	"\x06method\x18\x06 \x01(\tR\x06method\x12\x1c\n" +
 	"\treference\x18\a \x01(\tR\treference\x12\x14\n" +
-	"\x05notes\x18\b \x01(\tR\x05notes\"r\n" +
-	"\x15RecordPaymentResponse\x12?\n" +
-	"\apayment\x18\x01 \x01(\v2%.finance.RecordPaymentResponsePayloadR\apayment\x12\x18\n" +
+	"\x05notes\x18\b \x01(\tR\x05notes\"u\n" +
+	"\x15RecordPaymentResponse\x12B\n" +
+	"\apayment\x18\x01 \x01(\v2(.finance.v1.RecordPaymentResponsePayloadR\apayment\x12\x18\n" +
 	"\amessage\x18\x02 \x01(\tR\amessageB+Z)github.com/voxire/voxie/gen/go/finance/v1b\x06proto3"
 
 var (
@@ -1776,36 +1777,36 @@ func file_finance_v1_invoices_proto_rawDescGZIP() []byte {
 
 var file_finance_v1_invoices_proto_msgTypes = make([]protoimpl.MessageInfo, 19)
 var file_finance_v1_invoices_proto_goTypes = []any{
-	(*InvoiceItem)(nil),                  // 0: finance.InvoiceItem
-	(*InvoiceSummary)(nil),               // 1: finance.InvoiceSummary
-	(*InvoiceDetail)(nil),                // 2: finance.InvoiceDetail
-	(*ListInvoicesRequest)(nil),          // 3: finance.ListInvoicesRequest
-	(*ListInvoicesResponse)(nil),         // 4: finance.ListInvoicesResponse
-	(*GetInvoiceRequest)(nil),            // 5: finance.GetInvoiceRequest
-	(*Payment)(nil),                      // 6: finance.Payment
-	(*GetInvoiceResponse)(nil),           // 7: finance.GetInvoiceResponse
-	(*CreateInvoiceRequest)(nil),         // 8: finance.CreateInvoiceRequest
-	(*CreateInvoiceResponse)(nil),        // 9: finance.CreateInvoiceResponse
-	(*UpdateInvoiceRequest)(nil),         // 10: finance.UpdateInvoiceRequest
-	(*UpdateInvoiceResponse)(nil),        // 11: finance.UpdateInvoiceResponse
-	(*UpdateInvoiceStatusRequest)(nil),   // 12: finance.UpdateInvoiceStatusRequest
-	(*UpdateInvoiceStatusResponse)(nil),  // 13: finance.UpdateInvoiceStatusResponse
-	(*DeleteInvoiceRequest)(nil),         // 14: finance.DeleteInvoiceRequest
-	(*DeleteInvoiceResponse)(nil),        // 15: finance.DeleteInvoiceResponse
-	(*RecordPaymentRequest)(nil),         // 16: finance.RecordPaymentRequest
-	(*RecordPaymentResponsePayload)(nil), // 17: finance.RecordPaymentResponsePayload
-	(*RecordPaymentResponse)(nil),        // 18: finance.RecordPaymentResponse
+	(*InvoiceItem)(nil),                  // 0: finance.v1.InvoiceItem
+	(*InvoiceSummary)(nil),               // 1: finance.v1.InvoiceSummary
+	(*InvoiceDetail)(nil),                // 2: finance.v1.InvoiceDetail
+	(*ListInvoicesRequest)(nil),          // 3: finance.v1.ListInvoicesRequest
+	(*ListInvoicesResponse)(nil),         // 4: finance.v1.ListInvoicesResponse
+	(*GetInvoiceRequest)(nil),            // 5: finance.v1.GetInvoiceRequest
+	(*Payment)(nil),                      // 6: finance.v1.Payment
+	(*GetInvoiceResponse)(nil),           // 7: finance.v1.GetInvoiceResponse
+	(*CreateInvoiceRequest)(nil),         // 8: finance.v1.CreateInvoiceRequest
+	(*CreateInvoiceResponse)(nil),        // 9: finance.v1.CreateInvoiceResponse
+	(*UpdateInvoiceRequest)(nil),         // 10: finance.v1.UpdateInvoiceRequest
+	(*UpdateInvoiceResponse)(nil),        // 11: finance.v1.UpdateInvoiceResponse
+	(*UpdateInvoiceStatusRequest)(nil),   // 12: finance.v1.UpdateInvoiceStatusRequest
+	(*UpdateInvoiceStatusResponse)(nil),  // 13: finance.v1.UpdateInvoiceStatusResponse
+	(*DeleteInvoiceRequest)(nil),         // 14: finance.v1.DeleteInvoiceRequest
+	(*DeleteInvoiceResponse)(nil),        // 15: finance.v1.DeleteInvoiceResponse
+	(*RecordPaymentRequest)(nil),         // 16: finance.v1.RecordPaymentRequest
+	(*RecordPaymentResponsePayload)(nil), // 17: finance.v1.RecordPaymentResponsePayload
+	(*RecordPaymentResponse)(nil),        // 18: finance.v1.RecordPaymentResponse
 }
 var file_finance_v1_invoices_proto_depIdxs = []int32{
-	0,  // 0: finance.InvoiceDetail.items:type_name -> finance.InvoiceItem
-	1,  // 1: finance.ListInvoicesResponse.invoices:type_name -> finance.InvoiceSummary
-	2,  // 2: finance.GetInvoiceResponse.invoice:type_name -> finance.InvoiceDetail
-	6,  // 3: finance.GetInvoiceResponse.payments:type_name -> finance.Payment
-	0,  // 4: finance.CreateInvoiceRequest.items:type_name -> finance.InvoiceItem
-	2,  // 5: finance.CreateInvoiceResponse.invoice:type_name -> finance.InvoiceDetail
-	0,  // 6: finance.UpdateInvoiceRequest.items:type_name -> finance.InvoiceItem
-	2,  // 7: finance.UpdateInvoiceResponse.invoice:type_name -> finance.InvoiceDetail
-	17, // 8: finance.RecordPaymentResponse.payment:type_name -> finance.RecordPaymentResponsePayload
+	0,  // 0: finance.v1.InvoiceDetail.items:type_name -> finance.v1.InvoiceItem
+	1,  // 1: finance.v1.ListInvoicesResponse.invoices:type_name -> finance.v1.InvoiceSummary
+	2,  // 2: finance.v1.GetInvoiceResponse.invoice:type_name -> finance.v1.InvoiceDetail
+	6,  // 3: finance.v1.GetInvoiceResponse.payments:type_name -> finance.v1.Payment
+	0,  // 4: finance.v1.CreateInvoiceRequest.items:type_name -> finance.v1.InvoiceItem
+	2,  // 5: finance.v1.CreateInvoiceResponse.invoice:type_name -> finance.v1.InvoiceDetail
+	0,  // 6: finance.v1.UpdateInvoiceRequest.items:type_name -> finance.v1.InvoiceItem
+	2,  // 7: finance.v1.UpdateInvoiceResponse.invoice:type_name -> finance.v1.InvoiceDetail
+	17, // 8: finance.v1.RecordPaymentResponse.payment:type_name -> finance.v1.RecordPaymentResponsePayload
 	9,  // [9:9] is the sub-list for method output_type
 	9,  // [9:9] is the sub-list for method input_type
 	9,  // [9:9] is the sub-list for extension type_name

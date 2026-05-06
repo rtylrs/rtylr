@@ -653,7 +653,7 @@ var File_erp_v1_purchase_orders_proto protoreflect.FileDescriptor
 
 const file_erp_v1_purchase_orders_proto_rawDesc = "" +
 	"\n" +
-	"\x1cerp/v1/purchase_orders.proto\x12\x03erp\"\x82\x02\n" +
+	"\x1cerp/v1/purchase_orders.proto\x12\x06erp.v1\"\x82\x02\n" +
 	"\x11PurchaseOrderItem\x12\x0e\n" +
 	"\x02id\x18\x01 \x01(\x03R\x02id\x12*\n" +
 	"\x11purchase_order_id\x18\x02 \x01(\x03R\x0fpurchaseOrderId\x12\x1d\n" +
@@ -663,7 +663,7 @@ const file_erp_v1_purchase_orders_proto_rawDesc = "" +
 	"\x11quantity_received\x18\x05 \x01(\x01R\x10quantityReceived\x12\x1b\n" +
 	"\tunit_cost\x18\x06 \x01(\x01R\bunitCost\x12\x1d\n" +
 	"\n" +
-	"total_cost\x18\a \x01(\x01R\ttotalCost\"\x80\x04\n" +
+	"total_cost\x18\a \x01(\x01R\ttotalCost\"\x83\x04\n" +
 	"\rPurchaseOrder\x12\x0e\n" +
 	"\x02id\x18\x01 \x01(\x03R\x02id\x12\x19\n" +
 	"\bowner_id\x18\x02 \x01(\x03R\aownerId\x12\x1f\n" +
@@ -685,19 +685,19 @@ const file_erp_v1_purchase_orders_proto_rawDesc = "" +
 	"\n" +
 	"created_at\x18\r \x01(\tR\tcreatedAt\x12\x1d\n" +
 	"\n" +
-	"updated_at\x18\x0e \x01(\tR\tupdatedAt\x12,\n" +
-	"\x05items\x18\x0f \x03(\v2\x16.erp.PurchaseOrderItemR\x05itemsB\x14\n" +
+	"updated_at\x18\x0e \x01(\tR\tupdatedAt\x12/\n" +
+	"\x05items\x18\x0f \x03(\v2\x19.erp.v1.PurchaseOrderItemR\x05itemsB\x14\n" +
 	"\x12_expected_deliveryB\x0e\n" +
 	"\f_received_at\"3\n" +
 	"\x19ListPurchaseOrdersRequest\x12\x16\n" +
-	"\x06status\x18\x01 \x01(\tR\x06status\"Y\n" +
-	"\x1aListPurchaseOrdersResponse\x12;\n" +
-	"\x0fpurchase_orders\x18\x01 \x03(\v2\x12.erp.PurchaseOrderR\x0epurchaseOrders\"\x87\x01\n" +
+	"\x06status\x18\x01 \x01(\tR\x06status\"\\\n" +
+	"\x1aListPurchaseOrdersResponse\x12>\n" +
+	"\x0fpurchase_orders\x18\x01 \x03(\v2\x15.erp.v1.PurchaseOrderR\x0epurchaseOrders\"\x87\x01\n" +
 	"\x1eCreatePurchaseOrderItemRequest\x12\x1d\n" +
 	"\n" +
 	"product_id\x18\x01 \x01(\x03R\tproductId\x12)\n" +
 	"\x10quantity_ordered\x18\x02 \x01(\x01R\x0fquantityOrdered\x12\x1b\n" +
-	"\tunit_cost\x18\x03 \x01(\x01R\bunitCost\"\xf7\x01\n" +
+	"\tunit_cost\x18\x03 \x01(\x01R\bunitCost\"\xfa\x01\n" +
 	"\x1aCreatePurchaseOrderRequest\x12\x1f\n" +
 	"\vsupplier_id\x18\x01 \x01(\x03R\n" +
 	"supplierId\x12\x1b\n" +
@@ -705,8 +705,8 @@ const file_erp_v1_purchase_orders_proto_rawDesc = "" +
 	"\n" +
 	"tax_amount\x18\x03 \x01(\x01R\ttaxAmount\x12+\n" +
 	"\x11expected_delivery\x18\x04 \x01(\tR\x10expectedDelivery\x12\x14\n" +
-	"\x05notes\x18\x05 \x01(\tR\x05notes\x129\n" +
-	"\x05items\x18\x06 \x03(\v2#.erp.CreatePurchaseOrderItemRequestR\x05items\"c\n" +
+	"\x05notes\x18\x05 \x01(\tR\x05notes\x12<\n" +
+	"\x05items\x18\x06 \x03(\v2&.erp.v1.CreatePurchaseOrderItemRequestR\x05items\"c\n" +
 	"\x1bCreatePurchaseOrderResponse\x12*\n" +
 	"\x11purchase_order_id\x18\x01 \x01(\x03R\x0fpurchaseOrderId\x12\x18\n" +
 	"\amessage\x18\x02 \x01(\tR\amessage\"J\n" +
@@ -730,20 +730,20 @@ func file_erp_v1_purchase_orders_proto_rawDescGZIP() []byte {
 
 var file_erp_v1_purchase_orders_proto_msgTypes = make([]protoimpl.MessageInfo, 9)
 var file_erp_v1_purchase_orders_proto_goTypes = []any{
-	(*PurchaseOrderItem)(nil),                 // 0: erp.PurchaseOrderItem
-	(*PurchaseOrder)(nil),                     // 1: erp.PurchaseOrder
-	(*ListPurchaseOrdersRequest)(nil),         // 2: erp.ListPurchaseOrdersRequest
-	(*ListPurchaseOrdersResponse)(nil),        // 3: erp.ListPurchaseOrdersResponse
-	(*CreatePurchaseOrderItemRequest)(nil),    // 4: erp.CreatePurchaseOrderItemRequest
-	(*CreatePurchaseOrderRequest)(nil),        // 5: erp.CreatePurchaseOrderRequest
-	(*CreatePurchaseOrderResponse)(nil),       // 6: erp.CreatePurchaseOrderResponse
-	(*UpdatePurchaseOrderStatusRequest)(nil),  // 7: erp.UpdatePurchaseOrderStatusRequest
-	(*UpdatePurchaseOrderStatusResponse)(nil), // 8: erp.UpdatePurchaseOrderStatusResponse
+	(*PurchaseOrderItem)(nil),                 // 0: erp.v1.PurchaseOrderItem
+	(*PurchaseOrder)(nil),                     // 1: erp.v1.PurchaseOrder
+	(*ListPurchaseOrdersRequest)(nil),         // 2: erp.v1.ListPurchaseOrdersRequest
+	(*ListPurchaseOrdersResponse)(nil),        // 3: erp.v1.ListPurchaseOrdersResponse
+	(*CreatePurchaseOrderItemRequest)(nil),    // 4: erp.v1.CreatePurchaseOrderItemRequest
+	(*CreatePurchaseOrderRequest)(nil),        // 5: erp.v1.CreatePurchaseOrderRequest
+	(*CreatePurchaseOrderResponse)(nil),       // 6: erp.v1.CreatePurchaseOrderResponse
+	(*UpdatePurchaseOrderStatusRequest)(nil),  // 7: erp.v1.UpdatePurchaseOrderStatusRequest
+	(*UpdatePurchaseOrderStatusResponse)(nil), // 8: erp.v1.UpdatePurchaseOrderStatusResponse
 }
 var file_erp_v1_purchase_orders_proto_depIdxs = []int32{
-	0, // 0: erp.PurchaseOrder.items:type_name -> erp.PurchaseOrderItem
-	1, // 1: erp.ListPurchaseOrdersResponse.purchase_orders:type_name -> erp.PurchaseOrder
-	4, // 2: erp.CreatePurchaseOrderRequest.items:type_name -> erp.CreatePurchaseOrderItemRequest
+	0, // 0: erp.v1.PurchaseOrder.items:type_name -> erp.v1.PurchaseOrderItem
+	1, // 1: erp.v1.ListPurchaseOrdersResponse.purchase_orders:type_name -> erp.v1.PurchaseOrder
+	4, // 2: erp.v1.CreatePurchaseOrderRequest.items:type_name -> erp.v1.CreatePurchaseOrderItemRequest
 	3, // [3:3] is the sub-list for method output_type
 	3, // [3:3] is the sub-list for method input_type
 	3, // [3:3] is the sub-list for extension type_name

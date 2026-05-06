@@ -385,14 +385,14 @@ var File_pos_v1_kds_proto protoreflect.FileDescriptor
 
 const file_pos_v1_kds_proto_rawDesc = "" +
 	"\n" +
-	"\x10pos/v1/kds.proto\x12\x03pos\"\x92\x01\n" +
+	"\x10pos/v1/kds.proto\x12\x06pos.v1\"\x92\x01\n" +
 	"\aKDSItem\x12\x0e\n" +
 	"\x02id\x18\x01 \x01(\x03R\x02id\x12\x19\n" +
 	"\border_id\x18\x02 \x01(\x03R\aorderId\x12\x12\n" +
 	"\x04name\x18\x03 \x01(\tR\x04name\x12\x1a\n" +
 	"\bquantity\x18\x04 \x01(\x01R\bquantity\x12\x14\n" +
 	"\x05notes\x18\x05 \x01(\tR\x05notes\x12\x16\n" +
-	"\x06status\x18\x06 \x01(\tR\x06status\"\x91\x02\n" +
+	"\x06status\x18\x06 \x01(\tR\x06status\"\x94\x02\n" +
 	"\bKDSOrder\x12\x0e\n" +
 	"\x02id\x18\x01 \x01(\x03R\x02id\x12!\n" +
 	"\forder_number\x18\x02 \x01(\tR\vorderNumber\x12\x12\n" +
@@ -402,11 +402,11 @@ const file_pos_v1_kds_proto_rawDesc = "" +
 	"\rcustomer_name\x18\x06 \x01(\tR\fcustomerName\x12#\n" +
 	"\rkitchen_notes\x18\a \x01(\tR\fkitchenNotes\x12\x1d\n" +
 	"\n" +
-	"created_at\x18\b \x01(\tR\tcreatedAt\x12\"\n" +
-	"\x05items\x18\t \x03(\v2\f.pos.KDSItemR\x05items\"\x16\n" +
-	"\x14ListKDSOrdersRequest\">\n" +
-	"\x15ListKDSOrdersResponse\x12%\n" +
-	"\x06orders\x18\x01 \x03(\v2\r.pos.KDSOrderR\x06orders\"4\n" +
+	"created_at\x18\b \x01(\tR\tcreatedAt\x12%\n" +
+	"\x05items\x18\t \x03(\v2\x0f.pos.v1.KDSItemR\x05items\"\x16\n" +
+	"\x14ListKDSOrdersRequest\"A\n" +
+	"\x15ListKDSOrdersResponse\x12(\n" +
+	"\x06orders\x18\x01 \x03(\v2\x10.pos.v1.KDSOrderR\x06orders\"4\n" +
 	"\x1aUpdateKDSItemStatusRequest\x12\x16\n" +
 	"\x06status\x18\x01 \x01(\tR\x06status\"7\n" +
 	"\x1bUpdateKDSItemStatusResponse\x12\x18\n" +
@@ -426,16 +426,16 @@ func file_pos_v1_kds_proto_rawDescGZIP() []byte {
 
 var file_pos_v1_kds_proto_msgTypes = make([]protoimpl.MessageInfo, 6)
 var file_pos_v1_kds_proto_goTypes = []any{
-	(*KDSItem)(nil),                     // 0: pos.KDSItem
-	(*KDSOrder)(nil),                    // 1: pos.KDSOrder
-	(*ListKDSOrdersRequest)(nil),        // 2: pos.ListKDSOrdersRequest
-	(*ListKDSOrdersResponse)(nil),       // 3: pos.ListKDSOrdersResponse
-	(*UpdateKDSItemStatusRequest)(nil),  // 4: pos.UpdateKDSItemStatusRequest
-	(*UpdateKDSItemStatusResponse)(nil), // 5: pos.UpdateKDSItemStatusResponse
+	(*KDSItem)(nil),                     // 0: pos.v1.KDSItem
+	(*KDSOrder)(nil),                    // 1: pos.v1.KDSOrder
+	(*ListKDSOrdersRequest)(nil),        // 2: pos.v1.ListKDSOrdersRequest
+	(*ListKDSOrdersResponse)(nil),       // 3: pos.v1.ListKDSOrdersResponse
+	(*UpdateKDSItemStatusRequest)(nil),  // 4: pos.v1.UpdateKDSItemStatusRequest
+	(*UpdateKDSItemStatusResponse)(nil), // 5: pos.v1.UpdateKDSItemStatusResponse
 }
 var file_pos_v1_kds_proto_depIdxs = []int32{
-	0, // 0: pos.KDSOrder.items:type_name -> pos.KDSItem
-	1, // 1: pos.ListKDSOrdersResponse.orders:type_name -> pos.KDSOrder
+	0, // 0: pos.v1.KDSOrder.items:type_name -> pos.v1.KDSItem
+	1, // 1: pos.v1.ListKDSOrdersResponse.orders:type_name -> pos.v1.KDSOrder
 	2, // [2:2] is the sub-list for method output_type
 	2, // [2:2] is the sub-list for method input_type
 	2, // [2:2] is the sub-list for extension type_name

@@ -129,7 +129,7 @@ var File_pos_v1_manager_proto protoreflect.FileDescriptor
 
 const file_pos_v1_manager_proto_rawDesc = "" +
 	"\n" +
-	"\x14pos/v1/manager.proto\x12\x03pos\"$\n" +
+	"\x14pos/v1/manager.proto\x12\x06pos.v1\"$\n" +
 	"\x10VerifyPINRequest\x12\x10\n" +
 	"\x03pin\x18\x01 \x01(\tR\x03pin\"^\n" +
 	"\x11VerifyPINResponse\x12\x14\n" +
@@ -151,8 +151,8 @@ func file_pos_v1_manager_proto_rawDescGZIP() []byte {
 
 var file_pos_v1_manager_proto_msgTypes = make([]protoimpl.MessageInfo, 2)
 var file_pos_v1_manager_proto_goTypes = []any{
-	(*VerifyPINRequest)(nil),  // 0: pos.VerifyPINRequest
-	(*VerifyPINResponse)(nil), // 1: pos.VerifyPINResponse
+	(*VerifyPINRequest)(nil),  // 0: pos.v1.VerifyPINRequest
+	(*VerifyPINResponse)(nil), // 1: pos.v1.VerifyPINResponse
 }
 var file_pos_v1_manager_proto_depIdxs = []int32{
 	0, // [0:0] is the sub-list for method output_type

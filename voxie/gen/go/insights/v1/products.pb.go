@@ -730,7 +730,7 @@ var File_insights_v1_products_proto protoreflect.FileDescriptor
 
 const file_insights_v1_products_proto_rawDesc = "" +
 	"\n" +
-	"\x1ainsights/v1/products.proto\x12\binsights\x1a\x1acommon/v1/pagination.proto\"\x94\x01\n" +
+	"\x1ainsights/v1/products.proto\x12\vinsights.v1\x1a\x1acommon/v1/pagination.proto\"\x94\x01\n" +
 	"\n" +
 	"BestSeller\x12\x1d\n" +
 	"\n" +
@@ -764,41 +764,41 @@ const file_insights_v1_products_proto_rawDesc = "" +
 	"units_sold\x18\x03 \x01(\x05R\tunitsSold\x12\x1d\n" +
 	"\n" +
 	"avg_margin\x18\x04 \x01(\x01R\tavgMargin\x12#\n" +
-	"\rproduct_count\x18\x05 \x01(\x05R\fproductCount\"j\n" +
-	"\x15GetBestSellersRequest\x129\n" +
+	"\rproduct_count\x18\x05 \x01(\x05R\fproductCount\"m\n" +
+	"\x15GetBestSellersRequest\x12<\n" +
 	"\n" +
-	"pagination\x18\x01 \x01(\v2\x19.common.PaginationRequestR\n" +
-	"pagination\x12\x16\n" +
-	"\x06period\x18\x02 \x01(\tR\x06period\"\x86\x01\n" +
-	"\x16GetBestSellersResponse\x120\n" +
-	"\bproducts\x18\x01 \x03(\v2\x14.insights.BestSellerR\bproducts\x12:\n" +
-	"\n" +
-	"pagination\x18\x02 \x01(\v2\x1a.common.PaginationResponseR\n" +
-	"pagination\"Q\n" +
-	"\x14GetSlowMoversRequest\x129\n" +
-	"\n" +
-	"pagination\x18\x01 \x01(\v2\x19.common.PaginationRequestR\n" +
-	"pagination\"\x84\x01\n" +
-	"\x15GetSlowMoversResponse\x12/\n" +
-	"\bproducts\x18\x01 \x03(\v2\x13.insights.SlowMoverR\bproducts\x12:\n" +
-	"\n" +
-	"pagination\x18\x02 \x01(\v2\x1a.common.PaginationResponseR\n" +
-	"pagination\"m\n" +
-	"\x18GetProductMarginsRequest\x129\n" +
-	"\n" +
-	"pagination\x18\x01 \x01(\v2\x19.common.PaginationRequestR\n" +
+	"pagination\x18\x01 \x01(\v2\x1c.common.v1.PaginationRequestR\n" +
 	"pagination\x12\x16\n" +
 	"\x06period\x18\x02 \x01(\tR\x06period\"\x8c\x01\n" +
-	"\x19GetProductMarginsResponse\x123\n" +
-	"\bproducts\x18\x01 \x03(\v2\x17.insights.ProductMarginR\bproducts\x12:\n" +
+	"\x16GetBestSellersResponse\x123\n" +
+	"\bproducts\x18\x01 \x03(\v2\x17.insights.v1.BestSellerR\bproducts\x12=\n" +
 	"\n" +
-	"pagination\x18\x02 \x01(\v2\x1a.common.PaginationResponseR\n" +
+	"pagination\x18\x02 \x01(\v2\x1d.common.v1.PaginationResponseR\n" +
+	"pagination\"T\n" +
+	"\x14GetSlowMoversRequest\x12<\n" +
+	"\n" +
+	"pagination\x18\x01 \x01(\v2\x1c.common.v1.PaginationRequestR\n" +
+	"pagination\"\x8a\x01\n" +
+	"\x15GetSlowMoversResponse\x122\n" +
+	"\bproducts\x18\x01 \x03(\v2\x16.insights.v1.SlowMoverR\bproducts\x12=\n" +
+	"\n" +
+	"pagination\x18\x02 \x01(\v2\x1d.common.v1.PaginationResponseR\n" +
+	"pagination\"p\n" +
+	"\x18GetProductMarginsRequest\x12<\n" +
+	"\n" +
+	"pagination\x18\x01 \x01(\v2\x1c.common.v1.PaginationRequestR\n" +
+	"pagination\x12\x16\n" +
+	"\x06period\x18\x02 \x01(\tR\x06period\"\x92\x01\n" +
+	"\x19GetProductMarginsResponse\x126\n" +
+	"\bproducts\x18\x01 \x03(\v2\x1a.insights.v1.ProductMarginR\bproducts\x12=\n" +
+	"\n" +
+	"pagination\x18\x02 \x01(\v2\x1d.common.v1.PaginationResponseR\n" +
 	"pagination\"7\n" +
 	"\x1dGetCategoryPerformanceRequest\x12\x16\n" +
-	"\x06period\x18\x01 \x01(\tR\x06period\"_\n" +
-	"\x1eGetCategoryPerformanceResponse\x12=\n" +
+	"\x06period\x18\x01 \x01(\tR\x06period\"b\n" +
+	"\x1eGetCategoryPerformanceResponse\x12@\n" +
 	"\n" +
-	"categories\x18\x01 \x03(\v2\x1d.insights.CategoryPerformanceR\n" +
+	"categories\x18\x01 \x03(\v2 .insights.v1.CategoryPerformanceR\n" +
 	"categoriesB,Z*github.com/voxire/voxie/gen/go/insights/v1b\x06proto3"
 
 var (
@@ -815,32 +815,32 @@ func file_insights_v1_products_proto_rawDescGZIP() []byte {
 
 var file_insights_v1_products_proto_msgTypes = make([]protoimpl.MessageInfo, 12)
 var file_insights_v1_products_proto_goTypes = []any{
-	(*BestSeller)(nil),                     // 0: insights.BestSeller
-	(*SlowMover)(nil),                      // 1: insights.SlowMover
-	(*ProductMargin)(nil),                  // 2: insights.ProductMargin
-	(*CategoryPerformance)(nil),            // 3: insights.CategoryPerformance
-	(*GetBestSellersRequest)(nil),          // 4: insights.GetBestSellersRequest
-	(*GetBestSellersResponse)(nil),         // 5: insights.GetBestSellersResponse
-	(*GetSlowMoversRequest)(nil),           // 6: insights.GetSlowMoversRequest
-	(*GetSlowMoversResponse)(nil),          // 7: insights.GetSlowMoversResponse
-	(*GetProductMarginsRequest)(nil),       // 8: insights.GetProductMarginsRequest
-	(*GetProductMarginsResponse)(nil),      // 9: insights.GetProductMarginsResponse
-	(*GetCategoryPerformanceRequest)(nil),  // 10: insights.GetCategoryPerformanceRequest
-	(*GetCategoryPerformanceResponse)(nil), // 11: insights.GetCategoryPerformanceResponse
-	(*v1.PaginationRequest)(nil),           // 12: common.PaginationRequest
-	(*v1.PaginationResponse)(nil),          // 13: common.PaginationResponse
+	(*BestSeller)(nil),                     // 0: insights.v1.BestSeller
+	(*SlowMover)(nil),                      // 1: insights.v1.SlowMover
+	(*ProductMargin)(nil),                  // 2: insights.v1.ProductMargin
+	(*CategoryPerformance)(nil),            // 3: insights.v1.CategoryPerformance
+	(*GetBestSellersRequest)(nil),          // 4: insights.v1.GetBestSellersRequest
+	(*GetBestSellersResponse)(nil),         // 5: insights.v1.GetBestSellersResponse
+	(*GetSlowMoversRequest)(nil),           // 6: insights.v1.GetSlowMoversRequest
+	(*GetSlowMoversResponse)(nil),          // 7: insights.v1.GetSlowMoversResponse
+	(*GetProductMarginsRequest)(nil),       // 8: insights.v1.GetProductMarginsRequest
+	(*GetProductMarginsResponse)(nil),      // 9: insights.v1.GetProductMarginsResponse
+	(*GetCategoryPerformanceRequest)(nil),  // 10: insights.v1.GetCategoryPerformanceRequest
+	(*GetCategoryPerformanceResponse)(nil), // 11: insights.v1.GetCategoryPerformanceResponse
+	(*v1.PaginationRequest)(nil),           // 12: common.v1.PaginationRequest
+	(*v1.PaginationResponse)(nil),          // 13: common.v1.PaginationResponse
 }
 var file_insights_v1_products_proto_depIdxs = []int32{
-	12, // 0: insights.GetBestSellersRequest.pagination:type_name -> common.PaginationRequest
-	0,  // 1: insights.GetBestSellersResponse.products:type_name -> insights.BestSeller
-	13, // 2: insights.GetBestSellersResponse.pagination:type_name -> common.PaginationResponse
-	12, // 3: insights.GetSlowMoversRequest.pagination:type_name -> common.PaginationRequest
-	1,  // 4: insights.GetSlowMoversResponse.products:type_name -> insights.SlowMover
-	13, // 5: insights.GetSlowMoversResponse.pagination:type_name -> common.PaginationResponse
-	12, // 6: insights.GetProductMarginsRequest.pagination:type_name -> common.PaginationRequest
-	2,  // 7: insights.GetProductMarginsResponse.products:type_name -> insights.ProductMargin
-	13, // 8: insights.GetProductMarginsResponse.pagination:type_name -> common.PaginationResponse
-	3,  // 9: insights.GetCategoryPerformanceResponse.categories:type_name -> insights.CategoryPerformance
+	12, // 0: insights.v1.GetBestSellersRequest.pagination:type_name -> common.v1.PaginationRequest
+	0,  // 1: insights.v1.GetBestSellersResponse.products:type_name -> insights.v1.BestSeller
+	13, // 2: insights.v1.GetBestSellersResponse.pagination:type_name -> common.v1.PaginationResponse
+	12, // 3: insights.v1.GetSlowMoversRequest.pagination:type_name -> common.v1.PaginationRequest
+	1,  // 4: insights.v1.GetSlowMoversResponse.products:type_name -> insights.v1.SlowMover
+	13, // 5: insights.v1.GetSlowMoversResponse.pagination:type_name -> common.v1.PaginationResponse
+	12, // 6: insights.v1.GetProductMarginsRequest.pagination:type_name -> common.v1.PaginationRequest
+	2,  // 7: insights.v1.GetProductMarginsResponse.products:type_name -> insights.v1.ProductMargin
+	13, // 8: insights.v1.GetProductMarginsResponse.pagination:type_name -> common.v1.PaginationResponse
+	3,  // 9: insights.v1.GetCategoryPerformanceResponse.categories:type_name -> insights.v1.CategoryPerformance
 	10, // [10:10] is the sub-list for method output_type
 	10, // [10:10] is the sub-list for method input_type
 	10, // [10:10] is the sub-list for extension type_name

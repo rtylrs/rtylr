@@ -1937,7 +1937,7 @@ var File_pos_v1_orders_proto protoreflect.FileDescriptor
 
 const file_pos_v1_orders_proto_rawDesc = "" +
 	"\n" +
-	"\x13pos/v1/orders.proto\x12\x03pos\"\x83\x03\n" +
+	"\x13pos/v1/orders.proto\x12\x06pos.v1\"\x83\x03\n" +
 	"\tOrderItem\x12\x0e\n" +
 	"\x02id\x18\x01 \x01(\x03R\x02id\x12\x19\n" +
 	"\border_id\x18\x02 \x01(\x03R\aorderId\x12 \n" +
@@ -1956,7 +1956,7 @@ const file_pos_v1_orders_proto_rawDesc = "" +
 	"\x05notes\x18\f \x01(\tR\x05notes\x12\x16\n" +
 	"\x06status\x18\r \x01(\tR\x06status\x12\x1d\n" +
 	"\n" +
-	"created_at\x18\x0e \x01(\tR\tcreatedAt\"\xfd\x05\n" +
+	"created_at\x18\x0e \x01(\tR\tcreatedAt\"\x80\x06\n" +
 	"\x05Order\x12\x0e\n" +
 	"\x02id\x18\x01 \x01(\x03R\x02id\x12\x19\n" +
 	"\bowner_id\x18\x02 \x01(\x03R\aownerId\x12\x1d\n" +
@@ -1990,17 +1990,16 @@ const file_pos_v1_orders_proto_rawDesc = "" +
 	"created_at\x18\x16 \x01(\tR\tcreatedAt\x12\x1d\n" +
 	"\n" +
 	"updated_at\x18\x17 \x01(\tR\tupdatedAt\x12\x17\n" +
-	"\apaid_at\x18\x18 \x01(\tR\x06paidAt\x12$\n" +
-	"\x05items\x18\x19 \x03(\v2\x0e.pos.OrderItemR\x05items\"\x80\x01\n" +
+	"\apaid_at\x18\x18 \x01(\tR\x06paidAt\x12'\n" +
+	"\x05items\x18\x19 \x03(\v2\x11.pos.v1.OrderItemR\x05items\"\x80\x01\n" +
 	"\x11ListOrdersRequest\x12\x1d\n" +
 	"\n" +
 	"session_id\x18\x01 \x01(\x03R\tsessionId\x12\x16\n" +
 	"\x06status\x18\x02 \x01(\tR\x06status\x12\x1b\n" +
 	"\tdate_from\x18\x03 \x01(\tR\bdateFrom\x12\x17\n" +
-	"\adate_to\x18\x04 \x01(\tR\x06dateTo\"8\n" +
-	"\x12ListOrdersResponse\x12\"\n" +
-	"\x06orders\x18\x01 \x03(\v2\n" +
-	".pos.OrderR\x06orders\"\xed\x01\n" +
+	"\adate_to\x18\x04 \x01(\tR\x06dateTo\";\n" +
+	"\x12ListOrdersResponse\x12%\n" +
+	"\x06orders\x18\x01 \x03(\v2\r.pos.v1.OrderR\x06orders\"\xed\x01\n" +
 	"\x14CreateOrderItemInput\x12 \n" +
 	"\fmenu_item_id\x18\x01 \x01(\x03R\n" +
 	"menuItemId\x12\x12\n" +
@@ -2011,7 +2010,7 @@ const file_pos_v1_orders_proto_rawDesc = "" +
 	"unit_price\x18\x05 \x01(\x01R\tunitPrice\x12!\n" +
 	"\fdiscount_pct\x18\x06 \x01(\x01R\vdiscountPct\x12\x19\n" +
 	"\btax_rate\x18\a \x01(\x01R\ataxRate\x12\x14\n" +
-	"\x05notes\x18\b \x01(\tR\x05notes\"\xdc\x02\n" +
+	"\x05notes\x18\b \x01(\tR\x05notes\"\xdf\x02\n" +
 	"\x12CreateOrderRequest\x12\x1d\n" +
 	"\n" +
 	"session_id\x18\x01 \x01(\x03R\tsessionId\x12\x19\n" +
@@ -2024,18 +2023,17 @@ const file_pos_v1_orders_proto_rawDesc = "" +
 	"\rcustomer_name\x18\x06 \x01(\tR\fcustomerName\x12%\n" +
 	"\x0epayment_method\x18\a \x01(\tR\rpaymentMethod\x12\x14\n" +
 	"\x05notes\x18\b \x01(\tR\x05notes\x12#\n" +
-	"\rkitchen_notes\x18\t \x01(\tR\fkitchenNotes\x12/\n" +
+	"\rkitchen_notes\x18\t \x01(\tR\fkitchenNotes\x122\n" +
 	"\x05items\x18\n" +
-	" \x03(\v2\x19.pos.CreateOrderItemInputR\x05items\"m\n" +
+	" \x03(\v2\x1c.pos.v1.CreateOrderItemInputR\x05items\"m\n" +
 	"\x13CreateOrderResponse\x12\x19\n" +
 	"\border_id\x18\x01 \x01(\x03R\aorderId\x12!\n" +
 	"\forder_number\x18\x02 \x01(\tR\vorderNumber\x12\x18\n" +
 	"\amessage\x18\x03 \x01(\tR\amessage\"2\n" +
 	"\x15GetOrderDetailRequest\x12\x19\n" +
-	"\border_id\x18\x01 \x01(\x03R\aorderId\":\n" +
-	"\x16GetOrderDetailResponse\x12 \n" +
-	"\x05order\x18\x01 \x01(\v2\n" +
-	".pos.OrderR\x05order\"M\n" +
+	"\border_id\x18\x01 \x01(\x03R\aorderId\"=\n" +
+	"\x16GetOrderDetailResponse\x12#\n" +
+	"\x05order\x18\x01 \x01(\v2\r.pos.v1.OrderR\x05order\"M\n" +
 	"\x18UpdateOrderStatusRequest\x12\x19\n" +
 	"\border_id\x18\x01 \x01(\x03R\aorderId\x12\x16\n" +
 	"\x06status\x18\x02 \x01(\tR\x06status\"5\n" +
@@ -2060,10 +2058,10 @@ const file_pos_v1_orders_proto_rawDesc = "" +
 	"\x06reason\x18\x03 \x01(\tR\x06reason\"N\n" +
 	"\x15ProcessRefundResponse\x12\x1b\n" +
 	"\trefund_id\x18\x01 \x01(\x03R\brefundId\x12\x18\n" +
-	"\amessage\x18\x02 \x01(\tR\amessage\"W\n" +
+	"\amessage\x18\x02 \x01(\tR\amessage\"Z\n" +
 	"\x11SplitOrderRequest\x12\x19\n" +
-	"\border_id\x18\x01 \x01(\x03R\aorderId\x12'\n" +
-	"\x06splits\x18\x02 \x03(\v2\x0f.pos.SplitGroupR\x06splits\"'\n" +
+	"\border_id\x18\x01 \x01(\x03R\aorderId\x12*\n" +
+	"\x06splits\x18\x02 \x03(\v2\x12.pos.v1.SplitGroupR\x06splits\"'\n" +
 	"\n" +
 	"SplitGroup\x12\x19\n" +
 	"\bitem_ids\x18\x01 \x03(\x03R\aitemIds\"K\n" +
@@ -2087,10 +2085,9 @@ const file_pos_v1_orders_proto_rawDesc = "" +
 	"\x06reason\x18\x02 \x01(\tR\x06reason\"-\n" +
 	"\x11HoldOrderResponse\x12\x18\n" +
 	"\amessage\x18\x01 \x01(\tR\amessage\"\x17\n" +
-	"\x15ListHeldOrdersRequest\"<\n" +
-	"\x16ListHeldOrdersResponse\x12\"\n" +
-	"\x06orders\x18\x01 \x03(\v2\n" +
-	".pos.OrderR\x06orders\"\x12\n" +
+	"\x15ListHeldOrdersRequest\"?\n" +
+	"\x16ListHeldOrdersResponse\x12%\n" +
+	"\x06orders\x18\x01 \x03(\v2\r.pos.v1.OrderR\x06orders\"\x12\n" +
 	"\x10DashboardRequest\"\x99\x01\n" +
 	"\x11DashboardResponse\x12\x1f\n" +
 	"\vtotal_sales\x18\x01 \x01(\x01R\n" +
@@ -2114,44 +2111,44 @@ func file_pos_v1_orders_proto_rawDescGZIP() []byte {
 
 var file_pos_v1_orders_proto_msgTypes = make([]protoimpl.MessageInfo, 30)
 var file_pos_v1_orders_proto_goTypes = []any{
-	(*OrderItem)(nil),                     // 0: pos.OrderItem
-	(*Order)(nil),                         // 1: pos.Order
-	(*ListOrdersRequest)(nil),             // 2: pos.ListOrdersRequest
-	(*ListOrdersResponse)(nil),            // 3: pos.ListOrdersResponse
-	(*CreateOrderItemInput)(nil),          // 4: pos.CreateOrderItemInput
-	(*CreateOrderRequest)(nil),            // 5: pos.CreateOrderRequest
-	(*CreateOrderResponse)(nil),           // 6: pos.CreateOrderResponse
-	(*GetOrderDetailRequest)(nil),         // 7: pos.GetOrderDetailRequest
-	(*GetOrderDetailResponse)(nil),        // 8: pos.GetOrderDetailResponse
-	(*UpdateOrderStatusRequest)(nil),      // 9: pos.UpdateOrderStatusRequest
-	(*UpdateOrderStatusResponse)(nil),     // 10: pos.UpdateOrderStatusResponse
-	(*UpdateOrderItemStatusRequest)(nil),  // 11: pos.UpdateOrderItemStatusRequest
-	(*UpdateOrderItemStatusResponse)(nil), // 12: pos.UpdateOrderItemStatusResponse
-	(*ProcessPaymentRequest)(nil),         // 13: pos.ProcessPaymentRequest
-	(*ProcessPaymentResponse)(nil),        // 14: pos.ProcessPaymentResponse
-	(*ProcessRefundRequest)(nil),          // 15: pos.ProcessRefundRequest
-	(*ProcessRefundResponse)(nil),         // 16: pos.ProcessRefundResponse
-	(*SplitOrderRequest)(nil),             // 17: pos.SplitOrderRequest
-	(*SplitGroup)(nil),                    // 18: pos.SplitGroup
-	(*SplitOrderResponse)(nil),            // 19: pos.SplitOrderResponse
-	(*DiscountOrderRequest)(nil),          // 20: pos.DiscountOrderRequest
-	(*DiscountOrderResponse)(nil),         // 21: pos.DiscountOrderResponse
-	(*VoidOrderRequest)(nil),              // 22: pos.VoidOrderRequest
-	(*VoidOrderResponse)(nil),             // 23: pos.VoidOrderResponse
-	(*HoldOrderRequest)(nil),              // 24: pos.HoldOrderRequest
-	(*HoldOrderResponse)(nil),             // 25: pos.HoldOrderResponse
-	(*ListHeldOrdersRequest)(nil),         // 26: pos.ListHeldOrdersRequest
-	(*ListHeldOrdersResponse)(nil),        // 27: pos.ListHeldOrdersResponse
-	(*DashboardRequest)(nil),              // 28: pos.DashboardRequest
-	(*DashboardResponse)(nil),             // 29: pos.DashboardResponse
+	(*OrderItem)(nil),                     // 0: pos.v1.OrderItem
+	(*Order)(nil),                         // 1: pos.v1.Order
+	(*ListOrdersRequest)(nil),             // 2: pos.v1.ListOrdersRequest
+	(*ListOrdersResponse)(nil),            // 3: pos.v1.ListOrdersResponse
+	(*CreateOrderItemInput)(nil),          // 4: pos.v1.CreateOrderItemInput
+	(*CreateOrderRequest)(nil),            // 5: pos.v1.CreateOrderRequest
+	(*CreateOrderResponse)(nil),           // 6: pos.v1.CreateOrderResponse
+	(*GetOrderDetailRequest)(nil),         // 7: pos.v1.GetOrderDetailRequest
+	(*GetOrderDetailResponse)(nil),        // 8: pos.v1.GetOrderDetailResponse
+	(*UpdateOrderStatusRequest)(nil),      // 9: pos.v1.UpdateOrderStatusRequest
+	(*UpdateOrderStatusResponse)(nil),     // 10: pos.v1.UpdateOrderStatusResponse
+	(*UpdateOrderItemStatusRequest)(nil),  // 11: pos.v1.UpdateOrderItemStatusRequest
+	(*UpdateOrderItemStatusResponse)(nil), // 12: pos.v1.UpdateOrderItemStatusResponse
+	(*ProcessPaymentRequest)(nil),         // 13: pos.v1.ProcessPaymentRequest
+	(*ProcessPaymentResponse)(nil),        // 14: pos.v1.ProcessPaymentResponse
+	(*ProcessRefundRequest)(nil),          // 15: pos.v1.ProcessRefundRequest
+	(*ProcessRefundResponse)(nil),         // 16: pos.v1.ProcessRefundResponse
+	(*SplitOrderRequest)(nil),             // 17: pos.v1.SplitOrderRequest
+	(*SplitGroup)(nil),                    // 18: pos.v1.SplitGroup
+	(*SplitOrderResponse)(nil),            // 19: pos.v1.SplitOrderResponse
+	(*DiscountOrderRequest)(nil),          // 20: pos.v1.DiscountOrderRequest
+	(*DiscountOrderResponse)(nil),         // 21: pos.v1.DiscountOrderResponse
+	(*VoidOrderRequest)(nil),              // 22: pos.v1.VoidOrderRequest
+	(*VoidOrderResponse)(nil),             // 23: pos.v1.VoidOrderResponse
+	(*HoldOrderRequest)(nil),              // 24: pos.v1.HoldOrderRequest
+	(*HoldOrderResponse)(nil),             // 25: pos.v1.HoldOrderResponse
+	(*ListHeldOrdersRequest)(nil),         // 26: pos.v1.ListHeldOrdersRequest
+	(*ListHeldOrdersResponse)(nil),        // 27: pos.v1.ListHeldOrdersResponse
+	(*DashboardRequest)(nil),              // 28: pos.v1.DashboardRequest
+	(*DashboardResponse)(nil),             // 29: pos.v1.DashboardResponse
 }
 var file_pos_v1_orders_proto_depIdxs = []int32{
-	0,  // 0: pos.Order.items:type_name -> pos.OrderItem
-	1,  // 1: pos.ListOrdersResponse.orders:type_name -> pos.Order
-	4,  // 2: pos.CreateOrderRequest.items:type_name -> pos.CreateOrderItemInput
-	1,  // 3: pos.GetOrderDetailResponse.order:type_name -> pos.Order
-	18, // 4: pos.SplitOrderRequest.splits:type_name -> pos.SplitGroup
-	1,  // 5: pos.ListHeldOrdersResponse.orders:type_name -> pos.Order
+	0,  // 0: pos.v1.Order.items:type_name -> pos.v1.OrderItem
+	1,  // 1: pos.v1.ListOrdersResponse.orders:type_name -> pos.v1.Order
+	4,  // 2: pos.v1.CreateOrderRequest.items:type_name -> pos.v1.CreateOrderItemInput
+	1,  // 3: pos.v1.GetOrderDetailResponse.order:type_name -> pos.v1.Order
+	18, // 4: pos.v1.SplitOrderRequest.splits:type_name -> pos.v1.SplitGroup
+	1,  // 5: pos.v1.ListHeldOrdersResponse.orders:type_name -> pos.v1.Order
 	6,  // [6:6] is the sub-list for method output_type
 	6,  // [6:6] is the sub-list for method input_type
 	6,  // [6:6] is the sub-list for extension type_name

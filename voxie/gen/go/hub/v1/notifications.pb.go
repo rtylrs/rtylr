@@ -365,7 +365,7 @@ var File_hub_v1_notifications_proto protoreflect.FileDescriptor
 
 const file_hub_v1_notifications_proto_rawDesc = "" +
 	"\n" +
-	"\x1ahub/v1/notifications.proto\x12\x03hub\"\xa3\x01\n" +
+	"\x1ahub/v1/notifications.proto\x12\x06hub.v1\"\xa3\x01\n" +
 	"\fNotification\x12\x0e\n" +
 	"\x02id\x18\x01 \x01(\x03R\x02id\x12\x14\n" +
 	"\x05title\x18\x02 \x01(\tR\x05title\x12\x12\n" +
@@ -375,9 +375,9 @@ const file_hub_v1_notifications_proto_rawDesc = "" +
 	"\n" +
 	"created_at\x18\x06 \x01(\tR\tcreatedAt\x12\x12\n" +
 	"\x04link\x18\a \x01(\tR\x04link\"\x1a\n" +
-	"\x18ListNotificationsRequest\"T\n" +
-	"\x19ListNotificationsResponse\x127\n" +
-	"\rnotifications\x18\x01 \x03(\v2\x11.hub.NotificationR\rnotifications\"-\n" +
+	"\x18ListNotificationsRequest\"W\n" +
+	"\x19ListNotificationsResponse\x12:\n" +
+	"\rnotifications\x18\x01 \x03(\v2\x14.hub.v1.NotificationR\rnotifications\"-\n" +
 	"\x1bMarkNotificationReadRequest\x12\x0e\n" +
 	"\x02id\x18\x01 \x01(\x03R\x02id\"8\n" +
 	"\x1cMarkNotificationReadResponse\x12\x18\n" +
@@ -400,16 +400,16 @@ func file_hub_v1_notifications_proto_rawDescGZIP() []byte {
 
 var file_hub_v1_notifications_proto_msgTypes = make([]protoimpl.MessageInfo, 7)
 var file_hub_v1_notifications_proto_goTypes = []any{
-	(*Notification)(nil),                 // 0: hub.Notification
-	(*ListNotificationsRequest)(nil),     // 1: hub.ListNotificationsRequest
-	(*ListNotificationsResponse)(nil),    // 2: hub.ListNotificationsResponse
-	(*MarkNotificationReadRequest)(nil),  // 3: hub.MarkNotificationReadRequest
-	(*MarkNotificationReadResponse)(nil), // 4: hub.MarkNotificationReadResponse
-	(*MarkAllReadRequest)(nil),           // 5: hub.MarkAllReadRequest
-	(*MarkAllReadResponse)(nil),          // 6: hub.MarkAllReadResponse
+	(*Notification)(nil),                 // 0: hub.v1.Notification
+	(*ListNotificationsRequest)(nil),     // 1: hub.v1.ListNotificationsRequest
+	(*ListNotificationsResponse)(nil),    // 2: hub.v1.ListNotificationsResponse
+	(*MarkNotificationReadRequest)(nil),  // 3: hub.v1.MarkNotificationReadRequest
+	(*MarkNotificationReadResponse)(nil), // 4: hub.v1.MarkNotificationReadResponse
+	(*MarkAllReadRequest)(nil),           // 5: hub.v1.MarkAllReadRequest
+	(*MarkAllReadResponse)(nil),          // 6: hub.v1.MarkAllReadResponse
 }
 var file_hub_v1_notifications_proto_depIdxs = []int32{
-	0, // 0: hub.ListNotificationsResponse.notifications:type_name -> hub.Notification
+	0, // 0: hub.v1.ListNotificationsResponse.notifications:type_name -> hub.v1.Notification
 	1, // [1:1] is the sub-list for method output_type
 	1, // [1:1] is the sub-list for method input_type
 	1, // [1:1] is the sub-list for extension type_name

@@ -429,7 +429,7 @@ var File_pos_v1_sessions_proto protoreflect.FileDescriptor
 
 const file_pos_v1_sessions_proto_rawDesc = "" +
 	"\n" +
-	"\x15pos/v1/sessions.proto\x12\x03pos\"\x86\x03\n" +
+	"\x15pos/v1/sessions.proto\x12\x06pos.v1\"\x86\x03\n" +
 	"\aSession\x12\x0e\n" +
 	"\x02id\x18\x01 \x01(\x03R\x02id\x12\x19\n" +
 	"\bowner_id\x18\x02 \x01(\x03R\aownerId\x12$\n" +
@@ -450,9 +450,9 @@ const file_pos_v1_sessions_proto_rawDesc = "" +
 	"\t_staff_idB\f\n" +
 	"\n" +
 	"_closed_at\"\x15\n" +
-	"\x13ListSessionsRequest\"@\n" +
-	"\x14ListSessionsResponse\x12(\n" +
-	"\bsessions\x18\x01 \x03(\v2\f.pos.SessionR\bsessions\"u\n" +
+	"\x13ListSessionsRequest\"C\n" +
+	"\x14ListSessionsResponse\x12+\n" +
+	"\bsessions\x18\x01 \x03(\v2\x0f.pos.v1.SessionR\bsessions\"u\n" +
 	"\x12OpenSessionRequest\x12\x1f\n" +
 	"\vlocation_id\x18\x01 \x01(\x03R\n" +
 	"locationId\x12\x19\n" +
@@ -481,16 +481,16 @@ func file_pos_v1_sessions_proto_rawDescGZIP() []byte {
 
 var file_pos_v1_sessions_proto_msgTypes = make([]protoimpl.MessageInfo, 7)
 var file_pos_v1_sessions_proto_goTypes = []any{
-	(*Session)(nil),              // 0: pos.Session
-	(*ListSessionsRequest)(nil),  // 1: pos.ListSessionsRequest
-	(*ListSessionsResponse)(nil), // 2: pos.ListSessionsResponse
-	(*OpenSessionRequest)(nil),   // 3: pos.OpenSessionRequest
-	(*OpenSessionResponse)(nil),  // 4: pos.OpenSessionResponse
-	(*CloseSessionRequest)(nil),  // 5: pos.CloseSessionRequest
-	(*CloseSessionResponse)(nil), // 6: pos.CloseSessionResponse
+	(*Session)(nil),              // 0: pos.v1.Session
+	(*ListSessionsRequest)(nil),  // 1: pos.v1.ListSessionsRequest
+	(*ListSessionsResponse)(nil), // 2: pos.v1.ListSessionsResponse
+	(*OpenSessionRequest)(nil),   // 3: pos.v1.OpenSessionRequest
+	(*OpenSessionResponse)(nil),  // 4: pos.v1.OpenSessionResponse
+	(*CloseSessionRequest)(nil),  // 5: pos.v1.CloseSessionRequest
+	(*CloseSessionResponse)(nil), // 6: pos.v1.CloseSessionResponse
 }
 var file_pos_v1_sessions_proto_depIdxs = []int32{
-	0, // 0: pos.ListSessionsResponse.sessions:type_name -> pos.Session
+	0, // 0: pos.v1.ListSessionsResponse.sessions:type_name -> pos.v1.Session
 	1, // [1:1] is the sub-list for method output_type
 	1, // [1:1] is the sub-list for method input_type
 	1, // [1:1] is the sub-list for extension type_name

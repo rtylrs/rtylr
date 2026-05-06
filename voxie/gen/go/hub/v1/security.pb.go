@@ -565,10 +565,10 @@ var File_hub_v1_security_proto protoreflect.FileDescriptor
 
 const file_hub_v1_security_proto_rawDesc = "" +
 	"\n" +
-	"\x15hub/v1/security.proto\x12\x03hub\"z\n" +
+	"\x15hub/v1/security.proto\x12\x06hub.v1\"}\n" +
 	"\rSecurityState\x12,\n" +
-	"\x12two_factor_enabled\x18\x01 \x01(\bR\x10twoFactorEnabled\x12;\n" +
-	"\x0factive_sessions\x18\x02 \x03(\v2\x12.hub.ActiveSessionR\x0eactiveSessions\"\x8c\x01\n" +
+	"\x12two_factor_enabled\x18\x01 \x01(\bR\x10twoFactorEnabled\x12>\n" +
+	"\x0factive_sessions\x18\x02 \x03(\v2\x15.hub.v1.ActiveSessionR\x0eactiveSessions\"\x8c\x01\n" +
 	"\rActiveSession\x12\x0e\n" +
 	"\x02id\x18\x01 \x01(\tR\x02id\x12\x0e\n" +
 	"\x02ip\x18\x02 \x01(\tR\x02ip\x12\x1d\n" +
@@ -578,9 +578,9 @@ const file_hub_v1_security_proto_rawDesc = "" +
 	"created_at\x18\x04 \x01(\tR\tcreatedAt\x12\x1d\n" +
 	"\n" +
 	"is_current\x18\x05 \x01(\bR\tisCurrent\"\x19\n" +
-	"\x17GetSecurityStateRequest\"D\n" +
-	"\x18GetSecurityStateResponse\x12(\n" +
-	"\x05state\x18\x01 \x01(\v2\x12.hub.SecurityStateR\x05state\",\n" +
+	"\x17GetSecurityStateRequest\"G\n" +
+	"\x18GetSecurityStateResponse\x12+\n" +
+	"\x05state\x18\x01 \x01(\v2\x15.hub.v1.SecurityStateR\x05state\",\n" +
 	"\x10Update2FARequest\x12\x18\n" +
 	"\aenabled\x18\x01 \x01(\bR\aenabled\"-\n" +
 	"\x11Update2FAResponse\x12\x18\n" +
@@ -595,9 +595,9 @@ const file_hub_v1_security_proto_rawDesc = "" +
 	"\asuccess\x18\x05 \x01(\bR\asuccess\x12\x1d\n" +
 	"\n" +
 	"created_at\x18\x06 \x01(\tR\tcreatedAt\"\x15\n" +
-	"\x13LoginHistoryRequest\"A\n" +
-	"\x14LoginHistoryResponse\x12)\n" +
-	"\ahistory\x18\x01 \x03(\v2\x0f.hub.LoginEntryR\ahistory\"\x1b\n" +
+	"\x13LoginHistoryRequest\"D\n" +
+	"\x14LoginHistoryResponse\x12,\n" +
+	"\ahistory\x18\x01 \x03(\v2\x12.hub.v1.LoginEntryR\ahistory\"\x1b\n" +
 	"\x19InvalidateSessionsRequest\"6\n" +
 	"\x1aInvalidateSessionsResponse\x12\x18\n" +
 	"\amessage\x18\x01 \x01(\tR\amessageB'Z%github.com/voxire/voxie/gen/go/hub/v1b\x06proto3"
@@ -616,22 +616,22 @@ func file_hub_v1_security_proto_rawDescGZIP() []byte {
 
 var file_hub_v1_security_proto_msgTypes = make([]protoimpl.MessageInfo, 11)
 var file_hub_v1_security_proto_goTypes = []any{
-	(*SecurityState)(nil),              // 0: hub.SecurityState
-	(*ActiveSession)(nil),              // 1: hub.ActiveSession
-	(*GetSecurityStateRequest)(nil),    // 2: hub.GetSecurityStateRequest
-	(*GetSecurityStateResponse)(nil),   // 3: hub.GetSecurityStateResponse
-	(*Update2FARequest)(nil),           // 4: hub.Update2FARequest
-	(*Update2FAResponse)(nil),          // 5: hub.Update2FAResponse
-	(*LoginEntry)(nil),                 // 6: hub.LoginEntry
-	(*LoginHistoryRequest)(nil),        // 7: hub.LoginHistoryRequest
-	(*LoginHistoryResponse)(nil),       // 8: hub.LoginHistoryResponse
-	(*InvalidateSessionsRequest)(nil),  // 9: hub.InvalidateSessionsRequest
-	(*InvalidateSessionsResponse)(nil), // 10: hub.InvalidateSessionsResponse
+	(*SecurityState)(nil),              // 0: hub.v1.SecurityState
+	(*ActiveSession)(nil),              // 1: hub.v1.ActiveSession
+	(*GetSecurityStateRequest)(nil),    // 2: hub.v1.GetSecurityStateRequest
+	(*GetSecurityStateResponse)(nil),   // 3: hub.v1.GetSecurityStateResponse
+	(*Update2FARequest)(nil),           // 4: hub.v1.Update2FARequest
+	(*Update2FAResponse)(nil),          // 5: hub.v1.Update2FAResponse
+	(*LoginEntry)(nil),                 // 6: hub.v1.LoginEntry
+	(*LoginHistoryRequest)(nil),        // 7: hub.v1.LoginHistoryRequest
+	(*LoginHistoryResponse)(nil),       // 8: hub.v1.LoginHistoryResponse
+	(*InvalidateSessionsRequest)(nil),  // 9: hub.v1.InvalidateSessionsRequest
+	(*InvalidateSessionsResponse)(nil), // 10: hub.v1.InvalidateSessionsResponse
 }
 var file_hub_v1_security_proto_depIdxs = []int32{
-	1, // 0: hub.SecurityState.active_sessions:type_name -> hub.ActiveSession
-	0, // 1: hub.GetSecurityStateResponse.state:type_name -> hub.SecurityState
-	6, // 2: hub.LoginHistoryResponse.history:type_name -> hub.LoginEntry
+	1, // 0: hub.v1.SecurityState.active_sessions:type_name -> hub.v1.ActiveSession
+	0, // 1: hub.v1.GetSecurityStateResponse.state:type_name -> hub.v1.SecurityState
+	6, // 2: hub.v1.LoginHistoryResponse.history:type_name -> hub.v1.LoginEntry
 	3, // [3:3] is the sub-list for method output_type
 	3, // [3:3] is the sub-list for method input_type
 	3, // [3:3] is the sub-list for extension type_name

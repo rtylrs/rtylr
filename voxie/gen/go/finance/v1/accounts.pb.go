@@ -333,7 +333,8 @@ var File_finance_v1_accounts_proto protoreflect.FileDescriptor
 
 const file_finance_v1_accounts_proto_rawDesc = "" +
 	"\n" +
-	"\x19finance/v1/accounts.proto\x12\afinance\"\xce\x01\n" +
+	"\x19finance/v1/accounts.proto\x12\n" +
+	"finance.v1\"\xce\x01\n" +
 	"\aAccount\x12\x0e\n" +
 	"\x02id\x18\x01 \x01(\x03R\x02id\x12\x19\n" +
 	"\bowner_id\x18\x02 \x01(\x03R\aownerId\x12\x12\n" +
@@ -344,9 +345,9 @@ const file_finance_v1_accounts_proto_rawDesc = "" +
 	"\tis_active\x18\a \x01(\bR\bisActive\x12\x1d\n" +
 	"\n" +
 	"created_at\x18\b \x01(\tR\tcreatedAt\"\x15\n" +
-	"\x13ListAccountsRequest\"D\n" +
-	"\x14ListAccountsResponse\x12,\n" +
-	"\baccounts\x18\x01 \x03(\v2\x10.finance.AccountR\baccounts\"\x91\x01\n" +
+	"\x13ListAccountsRequest\"G\n" +
+	"\x14ListAccountsResponse\x12/\n" +
+	"\baccounts\x18\x01 \x03(\v2\x13.finance.v1.AccountR\baccounts\"\x91\x01\n" +
 	"\x14CreateAccountRequest\x12\x12\n" +
 	"\x04name\x18\x01 \x01(\tR\x04name\x12\x12\n" +
 	"\x04type\x18\x02 \x01(\tR\x04type\x12\x1a\n" +
@@ -371,14 +372,14 @@ func file_finance_v1_accounts_proto_rawDescGZIP() []byte {
 
 var file_finance_v1_accounts_proto_msgTypes = make([]protoimpl.MessageInfo, 5)
 var file_finance_v1_accounts_proto_goTypes = []any{
-	(*Account)(nil),               // 0: finance.Account
-	(*ListAccountsRequest)(nil),   // 1: finance.ListAccountsRequest
-	(*ListAccountsResponse)(nil),  // 2: finance.ListAccountsResponse
-	(*CreateAccountRequest)(nil),  // 3: finance.CreateAccountRequest
-	(*CreateAccountResponse)(nil), // 4: finance.CreateAccountResponse
+	(*Account)(nil),               // 0: finance.v1.Account
+	(*ListAccountsRequest)(nil),   // 1: finance.v1.ListAccountsRequest
+	(*ListAccountsResponse)(nil),  // 2: finance.v1.ListAccountsResponse
+	(*CreateAccountRequest)(nil),  // 3: finance.v1.CreateAccountRequest
+	(*CreateAccountResponse)(nil), // 4: finance.v1.CreateAccountResponse
 }
 var file_finance_v1_accounts_proto_depIdxs = []int32{
-	0, // 0: finance.ListAccountsResponse.accounts:type_name -> finance.Account
+	0, // 0: finance.v1.ListAccountsResponse.accounts:type_name -> finance.v1.Account
 	1, // [1:1] is the sub-list for method output_type
 	1, // [1:1] is the sub-list for method input_type
 	1, // [1:1] is the sub-list for extension type_name

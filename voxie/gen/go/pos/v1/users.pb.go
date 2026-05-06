@@ -741,7 +741,7 @@ var File_pos_v1_users_proto protoreflect.FileDescriptor
 
 const file_pos_v1_users_proto_rawDesc = "" +
 	"\n" +
-	"\x12pos/v1/users.proto\x12\x03pos\"\xda\x02\n" +
+	"\x12pos/v1/users.proto\x12\x06pos.v1\"\xda\x02\n" +
 	"\aPOSUser\x12\x0e\n" +
 	"\x02id\x18\x01 \x01(\x03R\x02id\x12\x1f\n" +
 	"\vbusiness_id\x18\x02 \x01(\x03R\n" +
@@ -760,9 +760,9 @@ const file_pos_v1_users_proto_rawDesc = "" +
 	"\x12can_apply_discount\x18\v \x01(\bR\x10canApplyDiscount\"6\n" +
 	"\x13ListPOSUsersRequest\x12\x1f\n" +
 	"\vlocation_id\x18\x01 \x01(\x03R\n" +
-	"locationId\":\n" +
-	"\x14ListPOSUsersResponse\x12\"\n" +
-	"\x05users\x18\x01 \x03(\v2\f.pos.POSUserR\x05users\"\xcc\x02\n" +
+	"locationId\"=\n" +
+	"\x14ListPOSUsersResponse\x12%\n" +
+	"\x05users\x18\x01 \x03(\v2\x0f.pos.v1.POSUserR\x05users\"\xcc\x02\n" +
 	"\x14CreatePOSUserRequest\x12\x1f\n" +
 	"\vlocation_id\x18\x01 \x01(\x03R\n" +
 	"locationId\x12\x12\n" +
@@ -802,9 +802,9 @@ const file_pos_v1_users_proto_rawDesc = "" +
 	"\x19DeactivatePOSUserResponse\x12\x18\n" +
 	"\asuccess\x18\x01 \x01(\bR\asuccess\"+\n" +
 	"\x17VerifyPOSUserPINRequest\x12\x10\n" +
-	"\x03pin\x18\x01 \x01(\tR\x03pin\"<\n" +
-	"\x18VerifyPOSUserPINResponse\x12 \n" +
-	"\x04user\x18\x01 \x01(\v2\f.pos.POSUserR\x04userB'Z%github.com/voxire/voxie/gen/go/pos/v1b\x06proto3"
+	"\x03pin\x18\x01 \x01(\tR\x03pin\"?\n" +
+	"\x18VerifyPOSUserPINResponse\x12#\n" +
+	"\x04user\x18\x01 \x01(\v2\x0f.pos.v1.POSUserR\x04userB'Z%github.com/voxire/voxie/gen/go/pos/v1b\x06proto3"
 
 var (
 	file_pos_v1_users_proto_rawDescOnce sync.Once
@@ -820,21 +820,21 @@ func file_pos_v1_users_proto_rawDescGZIP() []byte {
 
 var file_pos_v1_users_proto_msgTypes = make([]protoimpl.MessageInfo, 11)
 var file_pos_v1_users_proto_goTypes = []any{
-	(*POSUser)(nil),                   // 0: pos.POSUser
-	(*ListPOSUsersRequest)(nil),       // 1: pos.ListPOSUsersRequest
-	(*ListPOSUsersResponse)(nil),      // 2: pos.ListPOSUsersResponse
-	(*CreatePOSUserRequest)(nil),      // 3: pos.CreatePOSUserRequest
-	(*CreatePOSUserResponse)(nil),     // 4: pos.CreatePOSUserResponse
-	(*UpdatePOSUserRequest)(nil),      // 5: pos.UpdatePOSUserRequest
-	(*UpdatePOSUserResponse)(nil),     // 6: pos.UpdatePOSUserResponse
-	(*DeactivatePOSUserRequest)(nil),  // 7: pos.DeactivatePOSUserRequest
-	(*DeactivatePOSUserResponse)(nil), // 8: pos.DeactivatePOSUserResponse
-	(*VerifyPOSUserPINRequest)(nil),   // 9: pos.VerifyPOSUserPINRequest
-	(*VerifyPOSUserPINResponse)(nil),  // 10: pos.VerifyPOSUserPINResponse
+	(*POSUser)(nil),                   // 0: pos.v1.POSUser
+	(*ListPOSUsersRequest)(nil),       // 1: pos.v1.ListPOSUsersRequest
+	(*ListPOSUsersResponse)(nil),      // 2: pos.v1.ListPOSUsersResponse
+	(*CreatePOSUserRequest)(nil),      // 3: pos.v1.CreatePOSUserRequest
+	(*CreatePOSUserResponse)(nil),     // 4: pos.v1.CreatePOSUserResponse
+	(*UpdatePOSUserRequest)(nil),      // 5: pos.v1.UpdatePOSUserRequest
+	(*UpdatePOSUserResponse)(nil),     // 6: pos.v1.UpdatePOSUserResponse
+	(*DeactivatePOSUserRequest)(nil),  // 7: pos.v1.DeactivatePOSUserRequest
+	(*DeactivatePOSUserResponse)(nil), // 8: pos.v1.DeactivatePOSUserResponse
+	(*VerifyPOSUserPINRequest)(nil),   // 9: pos.v1.VerifyPOSUserPINRequest
+	(*VerifyPOSUserPINResponse)(nil),  // 10: pos.v1.VerifyPOSUserPINResponse
 }
 var file_pos_v1_users_proto_depIdxs = []int32{
-	0, // 0: pos.ListPOSUsersResponse.users:type_name -> pos.POSUser
-	0, // 1: pos.VerifyPOSUserPINResponse.user:type_name -> pos.POSUser
+	0, // 0: pos.v1.ListPOSUsersResponse.users:type_name -> pos.v1.POSUser
+	0, // 1: pos.v1.VerifyPOSUserPINResponse.user:type_name -> pos.v1.POSUser
 	2, // [2:2] is the sub-list for method output_type
 	2, // [2:2] is the sub-list for method input_type
 	2, // [2:2] is the sub-list for extension type_name

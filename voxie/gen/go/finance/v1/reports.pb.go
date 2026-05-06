@@ -841,7 +841,8 @@ var File_finance_v1_reports_proto protoreflect.FileDescriptor
 
 const file_finance_v1_reports_proto_rawDesc = "" +
 	"\n" +
-	"\x18finance/v1/reports.proto\x12\afinance\"@\n" +
+	"\x18finance/v1/reports.proto\x12\n" +
+	"finance.v1\"@\n" +
 	"\x12GetPLReportRequest\x12\x16\n" +
 	"\x06period\x18\x01 \x01(\tR\x06period\x12\x12\n" +
 	"\x04date\x18\x02 \x01(\tR\x04date\"\xeb\x01\n" +
@@ -866,17 +867,17 @@ const file_finance_v1_reports_proto_rawDesc = "" +
 	"\tis_active\x18\a \x01(\bR\bisActive\x12\x1d\n" +
 	"\n" +
 	"created_at\x18\b \x01(\tR\tcreatedAt\"\x16\n" +
-	"\x14ListTaxConfigRequest\"E\n" +
-	"\x15ListTaxConfigResponse\x12,\n" +
-	"\aconfigs\x18\x01 \x03(\v2\x12.finance.TaxConfigR\aconfigs\"s\n" +
+	"\x14ListTaxConfigRequest\"H\n" +
+	"\x15ListTaxConfigResponse\x12/\n" +
+	"\aconfigs\x18\x01 \x03(\v2\x15.finance.v1.TaxConfigR\aconfigs\"s\n" +
 	"\x16CreateTaxConfigRequest\x12\x12\n" +
 	"\x04name\x18\x01 \x01(\tR\x04name\x12\x12\n" +
 	"\x04rate\x18\x02 \x01(\x01R\x04rate\x12\x12\n" +
 	"\x04type\x18\x03 \x01(\tR\x04type\x12\x1d\n" +
 	"\n" +
-	"is_default\x18\x04 \x01(\bR\tisDefault\"E\n" +
-	"\x17CreateTaxConfigResponse\x12*\n" +
-	"\x06config\x18\x01 \x01(\v2\x12.finance.TaxConfigR\x06config\"A\n" +
+	"is_default\x18\x04 \x01(\bR\tisDefault\"H\n" +
+	"\x17CreateTaxConfigResponse\x12-\n" +
+	"\x06config\x18\x01 \x01(\v2\x15.finance.v1.TaxConfigR\x06config\"A\n" +
 	"\x13GetTaxReportRequest\x12\x16\n" +
 	"\x06period\x18\x01 \x01(\tR\x06period\x12\x12\n" +
 	"\x04date\x18\x02 \x01(\tR\x04date\"n\n" +
@@ -892,17 +893,17 @@ const file_finance_v1_reports_proto_rawDesc = "" +
 	"\x04icon\x18\x05 \x01(\tR\x04icon\x12\x1d\n" +
 	"\n" +
 	"created_at\x18\x06 \x01(\tR\tcreatedAt\"#\n" +
-	"!ListExpenseCategoryDetailsRequest\"d\n" +
-	"\"ListExpenseCategoryDetailsResponse\x12>\n" +
+	"!ListExpenseCategoryDetailsRequest\"g\n" +
+	"\"ListExpenseCategoryDetailsResponse\x12A\n" +
 	"\n" +
-	"categories\x18\x01 \x03(\v2\x1e.finance.ExpenseCategoryDetailR\n" +
+	"categories\x18\x01 \x03(\v2!.finance.v1.ExpenseCategoryDetailR\n" +
 	"categories\"b\n" +
 	"\"CreateExpenseCategoryDetailRequest\x12\x12\n" +
 	"\x04name\x18\x01 \x01(\tR\x04name\x12\x14\n" +
 	"\x05color\x18\x02 \x01(\tR\x05color\x12\x12\n" +
-	"\x04icon\x18\x03 \x01(\tR\x04icon\"a\n" +
-	"#CreateExpenseCategoryDetailResponse\x12:\n" +
-	"\bcategory\x18\x01 \x01(\v2\x1e.finance.ExpenseCategoryDetailR\bcategoryB+Z)github.com/voxire/voxie/gen/go/finance/v1b\x06proto3"
+	"\x04icon\x18\x03 \x01(\tR\x04icon\"d\n" +
+	"#CreateExpenseCategoryDetailResponse\x12=\n" +
+	"\bcategory\x18\x01 \x01(\v2!.finance.v1.ExpenseCategoryDetailR\bcategoryB+Z)github.com/voxire/voxie/gen/go/finance/v1b\x06proto3"
 
 var (
 	file_finance_v1_reports_proto_rawDescOnce sync.Once
@@ -918,26 +919,26 @@ func file_finance_v1_reports_proto_rawDescGZIP() []byte {
 
 var file_finance_v1_reports_proto_msgTypes = make([]protoimpl.MessageInfo, 14)
 var file_finance_v1_reports_proto_goTypes = []any{
-	(*GetPLReportRequest)(nil),                  // 0: finance.GetPLReportRequest
-	(*GetPLReportResponse)(nil),                 // 1: finance.GetPLReportResponse
-	(*TaxConfig)(nil),                           // 2: finance.TaxConfig
-	(*ListTaxConfigRequest)(nil),                // 3: finance.ListTaxConfigRequest
-	(*ListTaxConfigResponse)(nil),               // 4: finance.ListTaxConfigResponse
-	(*CreateTaxConfigRequest)(nil),              // 5: finance.CreateTaxConfigRequest
-	(*CreateTaxConfigResponse)(nil),             // 6: finance.CreateTaxConfigResponse
-	(*GetTaxReportRequest)(nil),                 // 7: finance.GetTaxReportRequest
-	(*GetTaxReportResponse)(nil),                // 8: finance.GetTaxReportResponse
-	(*ExpenseCategoryDetail)(nil),               // 9: finance.ExpenseCategoryDetail
-	(*ListExpenseCategoryDetailsRequest)(nil),   // 10: finance.ListExpenseCategoryDetailsRequest
-	(*ListExpenseCategoryDetailsResponse)(nil),  // 11: finance.ListExpenseCategoryDetailsResponse
-	(*CreateExpenseCategoryDetailRequest)(nil),  // 12: finance.CreateExpenseCategoryDetailRequest
-	(*CreateExpenseCategoryDetailResponse)(nil), // 13: finance.CreateExpenseCategoryDetailResponse
+	(*GetPLReportRequest)(nil),                  // 0: finance.v1.GetPLReportRequest
+	(*GetPLReportResponse)(nil),                 // 1: finance.v1.GetPLReportResponse
+	(*TaxConfig)(nil),                           // 2: finance.v1.TaxConfig
+	(*ListTaxConfigRequest)(nil),                // 3: finance.v1.ListTaxConfigRequest
+	(*ListTaxConfigResponse)(nil),               // 4: finance.v1.ListTaxConfigResponse
+	(*CreateTaxConfigRequest)(nil),              // 5: finance.v1.CreateTaxConfigRequest
+	(*CreateTaxConfigResponse)(nil),             // 6: finance.v1.CreateTaxConfigResponse
+	(*GetTaxReportRequest)(nil),                 // 7: finance.v1.GetTaxReportRequest
+	(*GetTaxReportResponse)(nil),                // 8: finance.v1.GetTaxReportResponse
+	(*ExpenseCategoryDetail)(nil),               // 9: finance.v1.ExpenseCategoryDetail
+	(*ListExpenseCategoryDetailsRequest)(nil),   // 10: finance.v1.ListExpenseCategoryDetailsRequest
+	(*ListExpenseCategoryDetailsResponse)(nil),  // 11: finance.v1.ListExpenseCategoryDetailsResponse
+	(*CreateExpenseCategoryDetailRequest)(nil),  // 12: finance.v1.CreateExpenseCategoryDetailRequest
+	(*CreateExpenseCategoryDetailResponse)(nil), // 13: finance.v1.CreateExpenseCategoryDetailResponse
 }
 var file_finance_v1_reports_proto_depIdxs = []int32{
-	2, // 0: finance.ListTaxConfigResponse.configs:type_name -> finance.TaxConfig
-	2, // 1: finance.CreateTaxConfigResponse.config:type_name -> finance.TaxConfig
-	9, // 2: finance.ListExpenseCategoryDetailsResponse.categories:type_name -> finance.ExpenseCategoryDetail
-	9, // 3: finance.CreateExpenseCategoryDetailResponse.category:type_name -> finance.ExpenseCategoryDetail
+	2, // 0: finance.v1.ListTaxConfigResponse.configs:type_name -> finance.v1.TaxConfig
+	2, // 1: finance.v1.CreateTaxConfigResponse.config:type_name -> finance.v1.TaxConfig
+	9, // 2: finance.v1.ListExpenseCategoryDetailsResponse.categories:type_name -> finance.v1.ExpenseCategoryDetail
+	9, // 3: finance.v1.CreateExpenseCategoryDetailResponse.category:type_name -> finance.v1.ExpenseCategoryDetail
 	4, // [4:4] is the sub-list for method output_type
 	4, // [4:4] is the sub-list for method input_type
 	4, // [4:4] is the sub-list for extension type_name

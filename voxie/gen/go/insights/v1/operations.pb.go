@@ -937,7 +937,7 @@ var File_insights_v1_operations_proto protoreflect.FileDescriptor
 
 const file_insights_v1_operations_proto_rawDesc = "" +
 	"\n" +
-	"\x1cinsights/v1/operations.proto\x12\binsights\"\x80\x02\n" +
+	"\x1cinsights/v1/operations.proto\x12\vinsights.v1\"\x83\x02\n" +
 	"\x12UtilizationMetrics\x12'\n" +
 	"\x0favg_utilization\x18\x01 \x01(\x01R\x0eavgUtilization\x12\x1f\n" +
 	"\vtotal_staff\x18\x02 \x01(\x05R\n" +
@@ -945,59 +945,59 @@ const file_insights_v1_operations_proto_rawDesc = "" +
 	"\factive_today\x18\x03 \x01(\x05R\vactiveToday\x12\x1f\n" +
 	"\vtotal_hours\x18\x04 \x01(\x01R\n" +
 	"totalHours\x12%\n" +
-	"\x0eovertime_hours\x18\x05 \x01(\x01R\rovertimeHours\x125\n" +
-	"\bby_staff\x18\x06 \x03(\v2\x1a.insights.StaffUtilizationR\abyStaff\"\xaf\x01\n" +
+	"\x0eovertime_hours\x18\x05 \x01(\x01R\rovertimeHours\x128\n" +
+	"\bby_staff\x18\x06 \x03(\v2\x1d.insights.v1.StaffUtilizationR\abyStaff\"\xaf\x01\n" +
 	"\x10StaffUtilization\x12\x19\n" +
 	"\bstaff_id\x18\x01 \x01(\x03R\astaffId\x12\x12\n" +
 	"\x04name\x18\x02 \x01(\tR\x04name\x12!\n" +
 	"\fhours_worked\x18\x03 \x01(\x01R\vhoursWorked\x12'\n" +
 	"\x0fhours_scheduled\x18\x04 \x01(\x01R\x0ehoursScheduled\x12 \n" +
-	"\vutilization\x18\x05 \x01(\x01R\vutilization\"\xb6\x01\n" +
+	"\vutilization\x18\x05 \x01(\x01R\vutilization\"\xb9\x01\n" +
 	"\fShiftMetrics\x12!\n" +
 	"\ftotal_shifts\x18\x01 \x01(\x05R\vtotalShifts\x12\x18\n" +
 	"\acovered\x18\x02 \x01(\x05R\acovered\x12\x16\n" +
 	"\x06missed\x18\x03 \x01(\x05R\x06missed\x12#\n" +
-	"\rcoverage_rate\x18\x04 \x01(\x01R\fcoverageRate\x12,\n" +
-	"\x06by_day\x18\x05 \x03(\v2\x15.insights.ShiftsByDayR\x05byDay\"[\n" +
+	"\rcoverage_rate\x18\x04 \x01(\x01R\fcoverageRate\x12/\n" +
+	"\x06by_day\x18\x05 \x03(\v2\x18.insights.v1.ShiftsByDayR\x05byDay\"[\n" +
 	"\vShiftsByDay\x12\x10\n" +
 	"\x03day\x18\x01 \x01(\tR\x03day\x12\x1c\n" +
 	"\tscheduled\x18\x02 \x01(\x05R\tscheduled\x12\x1c\n" +
-	"\tcompleted\x18\x03 \x01(\x05R\tcompleted\"\xbb\x01\n" +
+	"\tcompleted\x18\x03 \x01(\x05R\tcompleted\"\xbe\x01\n" +
 	"\x0eTimeOffMetrics\x12%\n" +
 	"\x0etotal_requests\x18\x01 \x01(\x05R\rtotalRequests\x12\x1a\n" +
 	"\bapproved\x18\x02 \x01(\x05R\bapproved\x12\x18\n" +
 	"\apending\x18\x03 \x01(\x05R\apending\x12\x1a\n" +
-	"\brejected\x18\x04 \x01(\x05R\brejected\x120\n" +
-	"\aby_type\x18\x05 \x03(\v2\x17.insights.TimeOffByTypeR\x06byType\"S\n" +
+	"\brejected\x18\x04 \x01(\x05R\brejected\x123\n" +
+	"\aby_type\x18\x05 \x03(\v2\x1a.insights.v1.TimeOffByTypeR\x06byType\"S\n" +
 	"\rTimeOffByType\x12\x12\n" +
 	"\x04type\x18\x01 \x01(\tR\x04type\x12\x12\n" +
 	"\x04days\x18\x02 \x01(\x05R\x04days\x12\x1a\n" +
-	"\brequests\x18\x03 \x01(\x05R\brequests\"\xdf\x01\n" +
+	"\brequests\x18\x03 \x01(\x05R\brequests\"\xe2\x01\n" +
 	"\x10HeadcountMetrics\x12\x18\n" +
 	"\acurrent\x18\x01 \x01(\x05R\acurrent\x12*\n" +
 	"\x11hired_this_period\x18\x02 \x01(\x05R\x0fhiredThisPeriod\x120\n" +
 	"\x14departed_this_period\x18\x03 \x01(\x05R\x12departedThisPeriod\x12#\n" +
-	"\rturnover_rate\x18\x04 \x01(\x01R\fturnoverRate\x12.\n" +
-	"\x05trend\x18\x05 \x03(\v2\x18.insights.HeadcountPointR\x05trend\":\n" +
+	"\rturnover_rate\x18\x04 \x01(\x01R\fturnoverRate\x121\n" +
+	"\x05trend\x18\x05 \x03(\v2\x1b.insights.v1.HeadcountPointR\x05trend\":\n" +
 	"\x0eHeadcountPoint\x12\x12\n" +
 	"\x04date\x18\x01 \x01(\tR\x04date\x12\x14\n" +
 	"\x05count\x18\x02 \x01(\x05R\x05count\"/\n" +
 	"\x15GetUtilizationRequest\x12\x16\n" +
-	"\x06period\x18\x01 \x01(\tR\x06period\"P\n" +
-	"\x16GetUtilizationResponse\x126\n" +
-	"\ametrics\x18\x01 \x01(\v2\x1c.insights.UtilizationMetricsR\ametrics\"0\n" +
-	"\x16GetShiftMetricsRequest\x12\x16\n" +
-	"\x06period\x18\x01 \x01(\tR\x06period\"K\n" +
-	"\x17GetShiftMetricsResponse\x120\n" +
-	"\ametrics\x18\x01 \x01(\v2\x16.insights.ShiftMetricsR\ametrics\"2\n" +
-	"\x18GetTimeOffMetricsRequest\x12\x16\n" +
-	"\x06period\x18\x01 \x01(\tR\x06period\"O\n" +
-	"\x19GetTimeOffMetricsResponse\x122\n" +
-	"\ametrics\x18\x01 \x01(\v2\x18.insights.TimeOffMetricsR\ametrics\"4\n" +
-	"\x1aGetHeadcountMetricsRequest\x12\x16\n" +
 	"\x06period\x18\x01 \x01(\tR\x06period\"S\n" +
-	"\x1bGetHeadcountMetricsResponse\x124\n" +
-	"\ametrics\x18\x01 \x01(\v2\x1a.insights.HeadcountMetricsR\ametricsB,Z*github.com/voxire/voxie/gen/go/insights/v1b\x06proto3"
+	"\x16GetUtilizationResponse\x129\n" +
+	"\ametrics\x18\x01 \x01(\v2\x1f.insights.v1.UtilizationMetricsR\ametrics\"0\n" +
+	"\x16GetShiftMetricsRequest\x12\x16\n" +
+	"\x06period\x18\x01 \x01(\tR\x06period\"N\n" +
+	"\x17GetShiftMetricsResponse\x123\n" +
+	"\ametrics\x18\x01 \x01(\v2\x19.insights.v1.ShiftMetricsR\ametrics\"2\n" +
+	"\x18GetTimeOffMetricsRequest\x12\x16\n" +
+	"\x06period\x18\x01 \x01(\tR\x06period\"R\n" +
+	"\x19GetTimeOffMetricsResponse\x125\n" +
+	"\ametrics\x18\x01 \x01(\v2\x1b.insights.v1.TimeOffMetricsR\ametrics\"4\n" +
+	"\x1aGetHeadcountMetricsRequest\x12\x16\n" +
+	"\x06period\x18\x01 \x01(\tR\x06period\"V\n" +
+	"\x1bGetHeadcountMetricsResponse\x127\n" +
+	"\ametrics\x18\x01 \x01(\v2\x1d.insights.v1.HeadcountMetricsR\ametricsB,Z*github.com/voxire/voxie/gen/go/insights/v1b\x06proto3"
 
 var (
 	file_insights_v1_operations_proto_rawDescOnce sync.Once
@@ -1013,32 +1013,32 @@ func file_insights_v1_operations_proto_rawDescGZIP() []byte {
 
 var file_insights_v1_operations_proto_msgTypes = make([]protoimpl.MessageInfo, 16)
 var file_insights_v1_operations_proto_goTypes = []any{
-	(*UtilizationMetrics)(nil),          // 0: insights.UtilizationMetrics
-	(*StaffUtilization)(nil),            // 1: insights.StaffUtilization
-	(*ShiftMetrics)(nil),                // 2: insights.ShiftMetrics
-	(*ShiftsByDay)(nil),                 // 3: insights.ShiftsByDay
-	(*TimeOffMetrics)(nil),              // 4: insights.TimeOffMetrics
-	(*TimeOffByType)(nil),               // 5: insights.TimeOffByType
-	(*HeadcountMetrics)(nil),            // 6: insights.HeadcountMetrics
-	(*HeadcountPoint)(nil),              // 7: insights.HeadcountPoint
-	(*GetUtilizationRequest)(nil),       // 8: insights.GetUtilizationRequest
-	(*GetUtilizationResponse)(nil),      // 9: insights.GetUtilizationResponse
-	(*GetShiftMetricsRequest)(nil),      // 10: insights.GetShiftMetricsRequest
-	(*GetShiftMetricsResponse)(nil),     // 11: insights.GetShiftMetricsResponse
-	(*GetTimeOffMetricsRequest)(nil),    // 12: insights.GetTimeOffMetricsRequest
-	(*GetTimeOffMetricsResponse)(nil),   // 13: insights.GetTimeOffMetricsResponse
-	(*GetHeadcountMetricsRequest)(nil),  // 14: insights.GetHeadcountMetricsRequest
-	(*GetHeadcountMetricsResponse)(nil), // 15: insights.GetHeadcountMetricsResponse
+	(*UtilizationMetrics)(nil),          // 0: insights.v1.UtilizationMetrics
+	(*StaffUtilization)(nil),            // 1: insights.v1.StaffUtilization
+	(*ShiftMetrics)(nil),                // 2: insights.v1.ShiftMetrics
+	(*ShiftsByDay)(nil),                 // 3: insights.v1.ShiftsByDay
+	(*TimeOffMetrics)(nil),              // 4: insights.v1.TimeOffMetrics
+	(*TimeOffByType)(nil),               // 5: insights.v1.TimeOffByType
+	(*HeadcountMetrics)(nil),            // 6: insights.v1.HeadcountMetrics
+	(*HeadcountPoint)(nil),              // 7: insights.v1.HeadcountPoint
+	(*GetUtilizationRequest)(nil),       // 8: insights.v1.GetUtilizationRequest
+	(*GetUtilizationResponse)(nil),      // 9: insights.v1.GetUtilizationResponse
+	(*GetShiftMetricsRequest)(nil),      // 10: insights.v1.GetShiftMetricsRequest
+	(*GetShiftMetricsResponse)(nil),     // 11: insights.v1.GetShiftMetricsResponse
+	(*GetTimeOffMetricsRequest)(nil),    // 12: insights.v1.GetTimeOffMetricsRequest
+	(*GetTimeOffMetricsResponse)(nil),   // 13: insights.v1.GetTimeOffMetricsResponse
+	(*GetHeadcountMetricsRequest)(nil),  // 14: insights.v1.GetHeadcountMetricsRequest
+	(*GetHeadcountMetricsResponse)(nil), // 15: insights.v1.GetHeadcountMetricsResponse
 }
 var file_insights_v1_operations_proto_depIdxs = []int32{
-	1, // 0: insights.UtilizationMetrics.by_staff:type_name -> insights.StaffUtilization
-	3, // 1: insights.ShiftMetrics.by_day:type_name -> insights.ShiftsByDay
-	5, // 2: insights.TimeOffMetrics.by_type:type_name -> insights.TimeOffByType
-	7, // 3: insights.HeadcountMetrics.trend:type_name -> insights.HeadcountPoint
-	0, // 4: insights.GetUtilizationResponse.metrics:type_name -> insights.UtilizationMetrics
-	2, // 5: insights.GetShiftMetricsResponse.metrics:type_name -> insights.ShiftMetrics
-	4, // 6: insights.GetTimeOffMetricsResponse.metrics:type_name -> insights.TimeOffMetrics
-	6, // 7: insights.GetHeadcountMetricsResponse.metrics:type_name -> insights.HeadcountMetrics
+	1, // 0: insights.v1.UtilizationMetrics.by_staff:type_name -> insights.v1.StaffUtilization
+	3, // 1: insights.v1.ShiftMetrics.by_day:type_name -> insights.v1.ShiftsByDay
+	5, // 2: insights.v1.TimeOffMetrics.by_type:type_name -> insights.v1.TimeOffByType
+	7, // 3: insights.v1.HeadcountMetrics.trend:type_name -> insights.v1.HeadcountPoint
+	0, // 4: insights.v1.GetUtilizationResponse.metrics:type_name -> insights.v1.UtilizationMetrics
+	2, // 5: insights.v1.GetShiftMetricsResponse.metrics:type_name -> insights.v1.ShiftMetrics
+	4, // 6: insights.v1.GetTimeOffMetricsResponse.metrics:type_name -> insights.v1.TimeOffMetrics
+	6, // 7: insights.v1.GetHeadcountMetricsResponse.metrics:type_name -> insights.v1.HeadcountMetrics
 	8, // [8:8] is the sub-list for method output_type
 	8, // [8:8] is the sub-list for method input_type
 	8, // [8:8] is the sub-list for extension type_name

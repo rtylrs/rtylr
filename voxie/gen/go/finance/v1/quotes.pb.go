@@ -570,15 +570,16 @@ var File_finance_v1_quotes_proto protoreflect.FileDescriptor
 
 const file_finance_v1_quotes_proto_rawDesc = "" +
 	"\n" +
-	"\x17finance/v1/quotes.proto\x12\afinance\x1a\x1acommon/v1/pagination.proto\"\x8c\x03\n" +
+	"\x17finance/v1/quotes.proto\x12\n" +
+	"finance.v1\x1a\x1acommon/v1/pagination.proto\"\x8f\x03\n" +
 	"\x05Quote\x12\x0e\n" +
 	"\x02id\x18\x01 \x01(\x03R\x02id\x12\x16\n" +
 	"\x06number\x18\x02 \x01(\tR\x06number\x12\x1f\n" +
 	"\vcustomer_id\x18\x03 \x01(\x03R\n" +
 	"customerId\x12#\n" +
 	"\rcustomer_name\x18\x04 \x01(\tR\fcustomerName\x12\x16\n" +
-	"\x06status\x18\x05 \x01(\tR\x06status\x12(\n" +
-	"\x05lines\x18\x06 \x03(\v2\x12.finance.QuoteLineR\x05lines\x12\x1a\n" +
+	"\x06status\x18\x05 \x01(\tR\x06status\x12+\n" +
+	"\x05lines\x18\x06 \x03(\v2\x15.finance.v1.QuoteLineR\x05lines\x12\x1a\n" +
 	"\bsubtotal\x18\a \x01(\x01R\bsubtotal\x12\x10\n" +
 	"\x03tax\x18\b \x01(\x01R\x03tax\x12\x1a\n" +
 	"\bdiscount\x18\t \x01(\x01R\bdiscount\x12\x14\n" +
@@ -597,33 +598,33 @@ const file_finance_v1_quotes_proto_rawDesc = "" +
 	"\n" +
 	"unit_price\x18\x03 \x01(\x01R\tunitPrice\x12\x19\n" +
 	"\btax_rate\x18\x04 \x01(\x01R\ataxRate\x12\x14\n" +
-	"\x05total\x18\x05 \x01(\x01R\x05total\"\x87\x01\n" +
-	"\x11ListQuotesRequest\x129\n" +
+	"\x05total\x18\x05 \x01(\x01R\x05total\"\x8a\x01\n" +
+	"\x11ListQuotesRequest\x12<\n" +
 	"\n" +
-	"pagination\x18\x01 \x01(\v2\x19.common.PaginationRequestR\n" +
+	"pagination\x18\x01 \x01(\v2\x1c.common.v1.PaginationRequestR\n" +
 	"pagination\x12\x16\n" +
 	"\x06status\x18\x02 \x01(\tR\x06status\x12\x1f\n" +
 	"\vcustomer_id\x18\x03 \x01(\x03R\n" +
-	"customerId\"x\n" +
-	"\x12ListQuotesResponse\x12&\n" +
-	"\x06quotes\x18\x01 \x03(\v2\x0e.finance.QuoteR\x06quotes\x12:\n" +
+	"customerId\"~\n" +
+	"\x12ListQuotesResponse\x12)\n" +
+	"\x06quotes\x18\x01 \x03(\v2\x11.finance.v1.QuoteR\x06quotes\x12=\n" +
 	"\n" +
-	"pagination\x18\x02 \x01(\v2\x1a.common.PaginationResponseR\n" +
+	"pagination\x18\x02 \x01(\v2\x1d.common.v1.PaginationResponseR\n" +
 	"pagination\"!\n" +
 	"\x0fGetQuoteRequest\x12\x0e\n" +
-	"\x02id\x18\x01 \x01(\x03R\x02id\"8\n" +
-	"\x10GetQuoteResponse\x12$\n" +
-	"\x05quote\x18\x01 \x01(\v2\x0e.finance.QuoteR\x05quote\"\xb2\x01\n" +
+	"\x02id\x18\x01 \x01(\x03R\x02id\";\n" +
+	"\x10GetQuoteResponse\x12'\n" +
+	"\x05quote\x18\x01 \x01(\v2\x11.finance.v1.QuoteR\x05quote\"\xb5\x01\n" +
 	"\x12CreateQuoteRequest\x12\x1f\n" +
 	"\vcustomer_id\x18\x01 \x01(\x03R\n" +
-	"customerId\x12(\n" +
-	"\x05lines\x18\x02 \x03(\v2\x12.finance.QuoteLineR\x05lines\x12\x1f\n" +
+	"customerId\x12+\n" +
+	"\x05lines\x18\x02 \x03(\v2\x15.finance.v1.QuoteLineR\x05lines\x12\x1f\n" +
 	"\vvalid_until\x18\x03 \x01(\tR\n" +
 	"validUntil\x12\x1a\n" +
 	"\bdiscount\x18\x04 \x01(\x01R\bdiscount\x12\x14\n" +
-	"\x05notes\x18\x05 \x01(\tR\x05notes\";\n" +
-	"\x13CreateQuoteResponse\x12$\n" +
-	"\x05quote\x18\x01 \x01(\v2\x0e.finance.QuoteR\x05quoteB+Z)github.com/voxire/voxie/gen/go/finance/v1b\x06proto3"
+	"\x05notes\x18\x05 \x01(\tR\x05notes\">\n" +
+	"\x13CreateQuoteResponse\x12'\n" +
+	"\x05quote\x18\x01 \x01(\v2\x11.finance.v1.QuoteR\x05quoteB+Z)github.com/voxire/voxie/gen/go/finance/v1b\x06proto3"
 
 var (
 	file_finance_v1_quotes_proto_rawDescOnce sync.Once
@@ -639,25 +640,25 @@ func file_finance_v1_quotes_proto_rawDescGZIP() []byte {
 
 var file_finance_v1_quotes_proto_msgTypes = make([]protoimpl.MessageInfo, 8)
 var file_finance_v1_quotes_proto_goTypes = []any{
-	(*Quote)(nil),                 // 0: finance.Quote
-	(*QuoteLine)(nil),             // 1: finance.QuoteLine
-	(*ListQuotesRequest)(nil),     // 2: finance.ListQuotesRequest
-	(*ListQuotesResponse)(nil),    // 3: finance.ListQuotesResponse
-	(*GetQuoteRequest)(nil),       // 4: finance.GetQuoteRequest
-	(*GetQuoteResponse)(nil),      // 5: finance.GetQuoteResponse
-	(*CreateQuoteRequest)(nil),    // 6: finance.CreateQuoteRequest
-	(*CreateQuoteResponse)(nil),   // 7: finance.CreateQuoteResponse
-	(*v1.PaginationRequest)(nil),  // 8: common.PaginationRequest
-	(*v1.PaginationResponse)(nil), // 9: common.PaginationResponse
+	(*Quote)(nil),                 // 0: finance.v1.Quote
+	(*QuoteLine)(nil),             // 1: finance.v1.QuoteLine
+	(*ListQuotesRequest)(nil),     // 2: finance.v1.ListQuotesRequest
+	(*ListQuotesResponse)(nil),    // 3: finance.v1.ListQuotesResponse
+	(*GetQuoteRequest)(nil),       // 4: finance.v1.GetQuoteRequest
+	(*GetQuoteResponse)(nil),      // 5: finance.v1.GetQuoteResponse
+	(*CreateQuoteRequest)(nil),    // 6: finance.v1.CreateQuoteRequest
+	(*CreateQuoteResponse)(nil),   // 7: finance.v1.CreateQuoteResponse
+	(*v1.PaginationRequest)(nil),  // 8: common.v1.PaginationRequest
+	(*v1.PaginationResponse)(nil), // 9: common.v1.PaginationResponse
 }
 var file_finance_v1_quotes_proto_depIdxs = []int32{
-	1, // 0: finance.Quote.lines:type_name -> finance.QuoteLine
-	8, // 1: finance.ListQuotesRequest.pagination:type_name -> common.PaginationRequest
-	0, // 2: finance.ListQuotesResponse.quotes:type_name -> finance.Quote
-	9, // 3: finance.ListQuotesResponse.pagination:type_name -> common.PaginationResponse
-	0, // 4: finance.GetQuoteResponse.quote:type_name -> finance.Quote
-	1, // 5: finance.CreateQuoteRequest.lines:type_name -> finance.QuoteLine
-	0, // 6: finance.CreateQuoteResponse.quote:type_name -> finance.Quote
+	1, // 0: finance.v1.Quote.lines:type_name -> finance.v1.QuoteLine
+	8, // 1: finance.v1.ListQuotesRequest.pagination:type_name -> common.v1.PaginationRequest
+	0, // 2: finance.v1.ListQuotesResponse.quotes:type_name -> finance.v1.Quote
+	9, // 3: finance.v1.ListQuotesResponse.pagination:type_name -> common.v1.PaginationResponse
+	0, // 4: finance.v1.GetQuoteResponse.quote:type_name -> finance.v1.Quote
+	1, // 5: finance.v1.CreateQuoteRequest.lines:type_name -> finance.v1.QuoteLine
+	0, // 6: finance.v1.CreateQuoteResponse.quote:type_name -> finance.v1.Quote
 	7, // [7:7] is the sub-list for method output_type
 	7, // [7:7] is the sub-list for method input_type
 	7, // [7:7] is the sub-list for extension type_name

@@ -1,6 +1,6 @@
 syntax = "proto3";
 
-package finance;
+package finance.v1;
 
 option go_package = "github.com/voxire/voxie/gen/go/finance/v1";
 
@@ -27,14 +27,14 @@ message JournalLine {
 }
 
 message ListJournalEntriesRequest {
-  common.PaginationRequest pagination = 1;
+  common.v1.PaginationRequest pagination = 1;
   string from_date = 2;
   string to_date = 3;
 }
 
 message ListJournalEntriesResponse {
   repeated JournalEntry entries = 1;
-  common.PaginationResponse pagination = 2;
+  common.v1.PaginationResponse pagination = 2;
 }
 
 message GetJournalEntryRequest {

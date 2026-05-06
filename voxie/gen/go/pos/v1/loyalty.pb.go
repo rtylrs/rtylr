@@ -825,7 +825,7 @@ var File_pos_v1_loyalty_proto protoreflect.FileDescriptor
 
 const file_pos_v1_loyalty_proto_rawDesc = "" +
 	"\n" +
-	"\x14pos/v1/loyalty.proto\x12\x03pos\"\x9e\x02\n" +
+	"\x14pos/v1/loyalty.proto\x12\x06pos.v1\"\x9e\x02\n" +
 	"\rLoyaltyConfig\x12\x0e\n" +
 	"\x02id\x18\x01 \x01(\x03R\x02id\x12\x1f\n" +
 	"\vbusiness_id\x18\x02 \x01(\x03R\n" +
@@ -839,9 +839,9 @@ const file_pos_v1_loyalty_proto_rawDesc = "" +
 	"created_at\x18\a \x01(\tR\tcreatedAt\x12\x1d\n" +
 	"\n" +
 	"updated_at\x18\b \x01(\tR\tupdatedAt\"\x19\n" +
-	"\x17GetLoyaltyConfigRequest\"F\n" +
-	"\x18GetLoyaltyConfigResponse\x12*\n" +
-	"\x06config\x18\x01 \x01(\v2\x12.pos.LoyaltyConfigR\x06config\"\xbc\x01\n" +
+	"\x17GetLoyaltyConfigRequest\"I\n" +
+	"\x18GetLoyaltyConfigResponse\x12-\n" +
+	"\x06config\x18\x01 \x01(\v2\x15.pos.v1.LoyaltyConfigR\x06config\"\xbc\x01\n" +
 	"\x1aUpdateLoyaltyConfigRequest\x12\x1d\n" +
 	"\n" +
 	"is_enabled\x18\x01 \x01(\bR\tisEnabled\x12*\n" +
@@ -865,9 +865,9 @@ const file_pos_v1_loyalty_proto_rawDesc = "" +
 	"created_at\x18\t \x01(\tR\tcreatedAt\"A\n" +
 	"\x1eListLoyaltyTransactionsRequest\x12\x1f\n" +
 	"\vcustomer_id\x18\x01 \x01(\x03R\n" +
-	"customerId\"^\n" +
-	"\x1fListLoyaltyTransactionsResponse\x12;\n" +
-	"\ftransactions\x18\x01 \x03(\v2\x17.pos.LoyaltyTransactionR\ftransactions\"g\n" +
+	"customerId\"a\n" +
+	"\x1fListLoyaltyTransactionsResponse\x12>\n" +
+	"\ftransactions\x18\x01 \x03(\v2\x1a.pos.v1.LoyaltyTransactionR\ftransactions\"g\n" +
 	"\x11EarnPointsRequest\x12\x1f\n" +
 	"\vcustomer_id\x18\x01 \x01(\x03R\n" +
 	"customerId\x12\x19\n" +
@@ -905,24 +905,24 @@ func file_pos_v1_loyalty_proto_rawDescGZIP() []byte {
 
 var file_pos_v1_loyalty_proto_msgTypes = make([]protoimpl.MessageInfo, 14)
 var file_pos_v1_loyalty_proto_goTypes = []any{
-	(*LoyaltyConfig)(nil),                   // 0: pos.LoyaltyConfig
-	(*GetLoyaltyConfigRequest)(nil),         // 1: pos.GetLoyaltyConfigRequest
-	(*GetLoyaltyConfigResponse)(nil),        // 2: pos.GetLoyaltyConfigResponse
-	(*UpdateLoyaltyConfigRequest)(nil),      // 3: pos.UpdateLoyaltyConfigRequest
-	(*UpdateLoyaltyConfigResponse)(nil),     // 4: pos.UpdateLoyaltyConfigResponse
-	(*LoyaltyTransaction)(nil),              // 5: pos.LoyaltyTransaction
-	(*ListLoyaltyTransactionsRequest)(nil),  // 6: pos.ListLoyaltyTransactionsRequest
-	(*ListLoyaltyTransactionsResponse)(nil), // 7: pos.ListLoyaltyTransactionsResponse
-	(*EarnPointsRequest)(nil),               // 8: pos.EarnPointsRequest
-	(*EarnPointsResponse)(nil),              // 9: pos.EarnPointsResponse
-	(*RedeemPointsRequest)(nil),             // 10: pos.RedeemPointsRequest
-	(*RedeemPointsResponse)(nil),            // 11: pos.RedeemPointsResponse
-	(*GetLoyaltyBalanceRequest)(nil),        // 12: pos.GetLoyaltyBalanceRequest
-	(*GetLoyaltyBalanceResponse)(nil),       // 13: pos.GetLoyaltyBalanceResponse
+	(*LoyaltyConfig)(nil),                   // 0: pos.v1.LoyaltyConfig
+	(*GetLoyaltyConfigRequest)(nil),         // 1: pos.v1.GetLoyaltyConfigRequest
+	(*GetLoyaltyConfigResponse)(nil),        // 2: pos.v1.GetLoyaltyConfigResponse
+	(*UpdateLoyaltyConfigRequest)(nil),      // 3: pos.v1.UpdateLoyaltyConfigRequest
+	(*UpdateLoyaltyConfigResponse)(nil),     // 4: pos.v1.UpdateLoyaltyConfigResponse
+	(*LoyaltyTransaction)(nil),              // 5: pos.v1.LoyaltyTransaction
+	(*ListLoyaltyTransactionsRequest)(nil),  // 6: pos.v1.ListLoyaltyTransactionsRequest
+	(*ListLoyaltyTransactionsResponse)(nil), // 7: pos.v1.ListLoyaltyTransactionsResponse
+	(*EarnPointsRequest)(nil),               // 8: pos.v1.EarnPointsRequest
+	(*EarnPointsResponse)(nil),              // 9: pos.v1.EarnPointsResponse
+	(*RedeemPointsRequest)(nil),             // 10: pos.v1.RedeemPointsRequest
+	(*RedeemPointsResponse)(nil),            // 11: pos.v1.RedeemPointsResponse
+	(*GetLoyaltyBalanceRequest)(nil),        // 12: pos.v1.GetLoyaltyBalanceRequest
+	(*GetLoyaltyBalanceResponse)(nil),       // 13: pos.v1.GetLoyaltyBalanceResponse
 }
 var file_pos_v1_loyalty_proto_depIdxs = []int32{
-	0, // 0: pos.GetLoyaltyConfigResponse.config:type_name -> pos.LoyaltyConfig
-	5, // 1: pos.ListLoyaltyTransactionsResponse.transactions:type_name -> pos.LoyaltyTransaction
+	0, // 0: pos.v1.GetLoyaltyConfigResponse.config:type_name -> pos.v1.LoyaltyConfig
+	5, // 1: pos.v1.ListLoyaltyTransactionsResponse.transactions:type_name -> pos.v1.LoyaltyTransaction
 	2, // [2:2] is the sub-list for method output_type
 	2, // [2:2] is the sub-list for method input_type
 	2, // [2:2] is the sub-list for extension type_name

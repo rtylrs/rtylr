@@ -537,11 +537,11 @@ var File_insights_v1_revenue_proto protoreflect.FileDescriptor
 
 const file_insights_v1_revenue_proto_rawDesc = "" +
 	"\n" +
-	"\x19insights/v1/revenue.proto\x12\binsights\"m\n" +
+	"\x19insights/v1/revenue.proto\x12\vinsights.v1\"p\n" +
 	"\x0fRevenueOverview\x12\x14\n" +
 	"\x05total\x18\x01 \x01(\x01R\x05total\x12\x16\n" +
-	"\x06change\x18\x02 \x01(\x01R\x06change\x12,\n" +
-	"\x05trend\x18\x03 \x03(\v2\x16.insights.RevenuePointR\x05trend\":\n" +
+	"\x06change\x18\x02 \x01(\x01R\x06change\x12/\n" +
+	"\x05trend\x18\x03 \x03(\v2\x19.insights.v1.RevenuePointR\x05trend\":\n" +
 	"\fRevenuePoint\x12\x12\n" +
 	"\x04date\x18\x01 \x01(\tR\x04date\x12\x16\n" +
 	"\x06amount\x18\x02 \x01(\x01R\x06amount\"X\n" +
@@ -557,19 +557,19 @@ const file_insights_v1_revenue_proto_rawDesc = "" +
 	"\bprevious\x18\x03 \x01(\x01R\bprevious\x12\x16\n" +
 	"\x06change\x18\x04 \x01(\x01R\x06change\"3\n" +
 	"\x19GetRevenueOverviewRequest\x12\x16\n" +
-	"\x06period\x18\x01 \x01(\tR\x06period\"S\n" +
-	"\x1aGetRevenueOverviewResponse\x125\n" +
-	"\boverview\x18\x01 \x01(\v2\x19.insights.RevenueOverviewR\boverview\"0\n" +
+	"\x06period\x18\x01 \x01(\tR\x06period\"V\n" +
+	"\x1aGetRevenueOverviewResponse\x128\n" +
+	"\boverview\x18\x01 \x01(\v2\x1c.insights.v1.RevenueOverviewR\boverview\"0\n" +
 	"\x16GetRevenueByAppRequest\x12\x16\n" +
-	"\x06period\x18\x01 \x01(\tR\x06period\"E\n" +
-	"\x17GetRevenueByAppResponse\x12*\n" +
-	"\x04apps\x18\x01 \x03(\v2\x16.insights.RevenueByAppR\x04apps\"T\n" +
+	"\x06period\x18\x01 \x01(\tR\x06period\"H\n" +
+	"\x17GetRevenueByAppResponse\x12-\n" +
+	"\x04apps\x18\x01 \x03(\v2\x19.insights.v1.RevenueByAppR\x04apps\"T\n" +
 	"\x1bGetRevenueComparisonRequest\x12\x16\n" +
 	"\x06period\x18\x01 \x01(\tR\x06period\x12\x1d\n" +
 	"\n" +
-	"compare_to\x18\x02 \x01(\tR\tcompareTo\"]\n" +
-	"\x1cGetRevenueComparisonResponse\x12=\n" +
-	"\vcomparisons\x18\x01 \x03(\v2\x1b.insights.RevenueComparisonR\vcomparisonsB,Z*github.com/voxire/voxie/gen/go/insights/v1b\x06proto3"
+	"compare_to\x18\x02 \x01(\tR\tcompareTo\"`\n" +
+	"\x1cGetRevenueComparisonResponse\x12@\n" +
+	"\vcomparisons\x18\x01 \x03(\v2\x1e.insights.v1.RevenueComparisonR\vcomparisonsB,Z*github.com/voxire/voxie/gen/go/insights/v1b\x06proto3"
 
 var (
 	file_insights_v1_revenue_proto_rawDescOnce sync.Once
@@ -585,22 +585,22 @@ func file_insights_v1_revenue_proto_rawDescGZIP() []byte {
 
 var file_insights_v1_revenue_proto_msgTypes = make([]protoimpl.MessageInfo, 10)
 var file_insights_v1_revenue_proto_goTypes = []any{
-	(*RevenueOverview)(nil),              // 0: insights.RevenueOverview
-	(*RevenuePoint)(nil),                 // 1: insights.RevenuePoint
-	(*RevenueByApp)(nil),                 // 2: insights.RevenueByApp
-	(*RevenueComparison)(nil),            // 3: insights.RevenueComparison
-	(*GetRevenueOverviewRequest)(nil),    // 4: insights.GetRevenueOverviewRequest
-	(*GetRevenueOverviewResponse)(nil),   // 5: insights.GetRevenueOverviewResponse
-	(*GetRevenueByAppRequest)(nil),       // 6: insights.GetRevenueByAppRequest
-	(*GetRevenueByAppResponse)(nil),      // 7: insights.GetRevenueByAppResponse
-	(*GetRevenueComparisonRequest)(nil),  // 8: insights.GetRevenueComparisonRequest
-	(*GetRevenueComparisonResponse)(nil), // 9: insights.GetRevenueComparisonResponse
+	(*RevenueOverview)(nil),              // 0: insights.v1.RevenueOverview
+	(*RevenuePoint)(nil),                 // 1: insights.v1.RevenuePoint
+	(*RevenueByApp)(nil),                 // 2: insights.v1.RevenueByApp
+	(*RevenueComparison)(nil),            // 3: insights.v1.RevenueComparison
+	(*GetRevenueOverviewRequest)(nil),    // 4: insights.v1.GetRevenueOverviewRequest
+	(*GetRevenueOverviewResponse)(nil),   // 5: insights.v1.GetRevenueOverviewResponse
+	(*GetRevenueByAppRequest)(nil),       // 6: insights.v1.GetRevenueByAppRequest
+	(*GetRevenueByAppResponse)(nil),      // 7: insights.v1.GetRevenueByAppResponse
+	(*GetRevenueComparisonRequest)(nil),  // 8: insights.v1.GetRevenueComparisonRequest
+	(*GetRevenueComparisonResponse)(nil), // 9: insights.v1.GetRevenueComparisonResponse
 }
 var file_insights_v1_revenue_proto_depIdxs = []int32{
-	1, // 0: insights.RevenueOverview.trend:type_name -> insights.RevenuePoint
-	0, // 1: insights.GetRevenueOverviewResponse.overview:type_name -> insights.RevenueOverview
-	2, // 2: insights.GetRevenueByAppResponse.apps:type_name -> insights.RevenueByApp
-	3, // 3: insights.GetRevenueComparisonResponse.comparisons:type_name -> insights.RevenueComparison
+	1, // 0: insights.v1.RevenueOverview.trend:type_name -> insights.v1.RevenuePoint
+	0, // 1: insights.v1.GetRevenueOverviewResponse.overview:type_name -> insights.v1.RevenueOverview
+	2, // 2: insights.v1.GetRevenueByAppResponse.apps:type_name -> insights.v1.RevenueByApp
+	3, // 3: insights.v1.GetRevenueComparisonResponse.comparisons:type_name -> insights.v1.RevenueComparison
 	4, // [4:4] is the sub-list for method output_type
 	4, // [4:4] is the sub-list for method input_type
 	4, // [4:4] is the sub-list for extension type_name

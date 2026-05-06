@@ -454,7 +454,8 @@ var File_finance_v1_bank_accounts_proto protoreflect.FileDescriptor
 
 const file_finance_v1_bank_accounts_proto_rawDesc = "" +
 	"\n" +
-	"\x1efinance/v1/bank_accounts.proto\x12\afinance\x1a\x1acommon/v1/pagination.proto\"\x82\x02\n" +
+	"\x1efinance/v1/bank_accounts.proto\x12\n" +
+	"finance.v1\x1a\x1acommon/v1/pagination.proto\"\x82\x02\n" +
 	"\vBankAccount\x12\x0e\n" +
 	"\x02id\x18\x01 \x01(\x03R\x02id\x12\x12\n" +
 	"\x04name\x18\x02 \x01(\tR\x04name\x12\x1b\n" +
@@ -466,20 +467,20 @@ const file_finance_v1_bank_accounts_proto_rawDesc = "" +
 	"\n" +
 	"is_primary\x18\b \x01(\bR\tisPrimary\x12\x1d\n" +
 	"\n" +
-	"created_at\x18\t \x01(\tR\tcreatedAt\"T\n" +
-	"\x17ListBankAccountsRequest\x129\n" +
+	"created_at\x18\t \x01(\tR\tcreatedAt\"W\n" +
+	"\x17ListBankAccountsRequest\x12<\n" +
 	"\n" +
-	"pagination\x18\x01 \x01(\v2\x19.common.PaginationRequestR\n" +
-	"pagination\"\x88\x01\n" +
-	"\x18ListBankAccountsResponse\x120\n" +
-	"\baccounts\x18\x01 \x03(\v2\x14.finance.BankAccountR\baccounts\x12:\n" +
+	"pagination\x18\x01 \x01(\v2\x1c.common.v1.PaginationRequestR\n" +
+	"pagination\"\x8e\x01\n" +
+	"\x18ListBankAccountsResponse\x123\n" +
+	"\baccounts\x18\x01 \x03(\v2\x17.finance.v1.BankAccountR\baccounts\x12=\n" +
 	"\n" +
-	"pagination\x18\x02 \x01(\v2\x1a.common.PaginationResponseR\n" +
+	"pagination\x18\x02 \x01(\v2\x1d.common.v1.PaginationResponseR\n" +
 	"pagination\"'\n" +
 	"\x15GetBankAccountRequest\x12\x0e\n" +
-	"\x02id\x18\x01 \x01(\x03R\x02id\"H\n" +
-	"\x16GetBankAccountResponse\x12.\n" +
-	"\aaccount\x18\x01 \x01(\v2\x14.finance.BankAccountR\aaccount\"\xe0\x01\n" +
+	"\x02id\x18\x01 \x01(\x03R\x02id\"K\n" +
+	"\x16GetBankAccountResponse\x121\n" +
+	"\aaccount\x18\x01 \x01(\v2\x17.finance.v1.BankAccountR\aaccount\"\xe0\x01\n" +
 	"\x18CreateBankAccountRequest\x12\x12\n" +
 	"\x04name\x18\x01 \x01(\tR\x04name\x12\x1b\n" +
 	"\tbank_name\x18\x02 \x01(\tR\bbankName\x12!\n" +
@@ -488,9 +489,9 @@ const file_finance_v1_bank_accounts_proto_rawDesc = "" +
 	"\abalance\x18\x05 \x01(\x01R\abalance\x12\x1a\n" +
 	"\bcurrency\x18\x06 \x01(\tR\bcurrency\x12\x1d\n" +
 	"\n" +
-	"is_primary\x18\a \x01(\bR\tisPrimary\"K\n" +
-	"\x19CreateBankAccountResponse\x12.\n" +
-	"\aaccount\x18\x01 \x01(\v2\x14.finance.BankAccountR\aaccountB+Z)github.com/voxire/voxie/gen/go/finance/v1b\x06proto3"
+	"is_primary\x18\a \x01(\bR\tisPrimary\"N\n" +
+	"\x19CreateBankAccountResponse\x121\n" +
+	"\aaccount\x18\x01 \x01(\v2\x17.finance.v1.BankAccountR\aaccountB+Z)github.com/voxire/voxie/gen/go/finance/v1b\x06proto3"
 
 var (
 	file_finance_v1_bank_accounts_proto_rawDescOnce sync.Once
@@ -506,22 +507,22 @@ func file_finance_v1_bank_accounts_proto_rawDescGZIP() []byte {
 
 var file_finance_v1_bank_accounts_proto_msgTypes = make([]protoimpl.MessageInfo, 7)
 var file_finance_v1_bank_accounts_proto_goTypes = []any{
-	(*BankAccount)(nil),               // 0: finance.BankAccount
-	(*ListBankAccountsRequest)(nil),   // 1: finance.ListBankAccountsRequest
-	(*ListBankAccountsResponse)(nil),  // 2: finance.ListBankAccountsResponse
-	(*GetBankAccountRequest)(nil),     // 3: finance.GetBankAccountRequest
-	(*GetBankAccountResponse)(nil),    // 4: finance.GetBankAccountResponse
-	(*CreateBankAccountRequest)(nil),  // 5: finance.CreateBankAccountRequest
-	(*CreateBankAccountResponse)(nil), // 6: finance.CreateBankAccountResponse
-	(*v1.PaginationRequest)(nil),      // 7: common.PaginationRequest
-	(*v1.PaginationResponse)(nil),     // 8: common.PaginationResponse
+	(*BankAccount)(nil),               // 0: finance.v1.BankAccount
+	(*ListBankAccountsRequest)(nil),   // 1: finance.v1.ListBankAccountsRequest
+	(*ListBankAccountsResponse)(nil),  // 2: finance.v1.ListBankAccountsResponse
+	(*GetBankAccountRequest)(nil),     // 3: finance.v1.GetBankAccountRequest
+	(*GetBankAccountResponse)(nil),    // 4: finance.v1.GetBankAccountResponse
+	(*CreateBankAccountRequest)(nil),  // 5: finance.v1.CreateBankAccountRequest
+	(*CreateBankAccountResponse)(nil), // 6: finance.v1.CreateBankAccountResponse
+	(*v1.PaginationRequest)(nil),      // 7: common.v1.PaginationRequest
+	(*v1.PaginationResponse)(nil),     // 8: common.v1.PaginationResponse
 }
 var file_finance_v1_bank_accounts_proto_depIdxs = []int32{
-	7, // 0: finance.ListBankAccountsRequest.pagination:type_name -> common.PaginationRequest
-	0, // 1: finance.ListBankAccountsResponse.accounts:type_name -> finance.BankAccount
-	8, // 2: finance.ListBankAccountsResponse.pagination:type_name -> common.PaginationResponse
-	0, // 3: finance.GetBankAccountResponse.account:type_name -> finance.BankAccount
-	0, // 4: finance.CreateBankAccountResponse.account:type_name -> finance.BankAccount
+	7, // 0: finance.v1.ListBankAccountsRequest.pagination:type_name -> common.v1.PaginationRequest
+	0, // 1: finance.v1.ListBankAccountsResponse.accounts:type_name -> finance.v1.BankAccount
+	8, // 2: finance.v1.ListBankAccountsResponse.pagination:type_name -> common.v1.PaginationResponse
+	0, // 3: finance.v1.GetBankAccountResponse.account:type_name -> finance.v1.BankAccount
+	0, // 4: finance.v1.CreateBankAccountResponse.account:type_name -> finance.v1.BankAccount
 	5, // [5:5] is the sub-list for method output_type
 	5, // [5:5] is the sub-list for method input_type
 	5, // [5:5] is the sub-list for extension type_name

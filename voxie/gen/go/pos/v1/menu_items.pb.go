@@ -325,7 +325,7 @@ var File_pos_v1_menu_items_proto protoreflect.FileDescriptor
 
 const file_pos_v1_menu_items_proto_rawDesc = "" +
 	"\n" +
-	"\x17pos/v1/menu_items.proto\x12\x03pos\"\xf6\x01\n" +
+	"\x17pos/v1/menu_items.proto\x12\x06pos.v1\"\xf6\x01\n" +
 	"\bMenuItem\x12\x0e\n" +
 	"\x02id\x18\x01 \x01(\x03R\x02id\x12\x19\n" +
 	"\bowner_id\x18\x02 \x01(\x03R\aownerId\x12\x1f\n" +
@@ -340,9 +340,9 @@ const file_pos_v1_menu_items_proto_rawDesc = "" +
 	"created_at\x18\b \x01(\tR\tcreatedAt\x12\x1d\n" +
 	"\n" +
 	"updated_at\x18\t \x01(\tR\tupdatedAt\"\x16\n" +
-	"\x14ListMenuItemsRequest\"<\n" +
-	"\x15ListMenuItemsResponse\x12#\n" +
-	"\x05items\x18\x01 \x03(\v2\r.pos.MenuItemR\x05items\"\\\n" +
+	"\x14ListMenuItemsRequest\"?\n" +
+	"\x15ListMenuItemsResponse\x12&\n" +
+	"\x05items\x18\x01 \x03(\v2\x10.pos.v1.MenuItemR\x05items\"\\\n" +
 	"\x15CreateMenuItemRequest\x12\x12\n" +
 	"\x04name\x18\x01 \x01(\tR\x04name\x12\x10\n" +
 	"\x03sku\x18\x02 \x01(\tR\x03sku\x12\x1d\n" +
@@ -366,14 +366,14 @@ func file_pos_v1_menu_items_proto_rawDescGZIP() []byte {
 
 var file_pos_v1_menu_items_proto_msgTypes = make([]protoimpl.MessageInfo, 5)
 var file_pos_v1_menu_items_proto_goTypes = []any{
-	(*MenuItem)(nil),               // 0: pos.MenuItem
-	(*ListMenuItemsRequest)(nil),   // 1: pos.ListMenuItemsRequest
-	(*ListMenuItemsResponse)(nil),  // 2: pos.ListMenuItemsResponse
-	(*CreateMenuItemRequest)(nil),  // 3: pos.CreateMenuItemRequest
-	(*CreateMenuItemResponse)(nil), // 4: pos.CreateMenuItemResponse
+	(*MenuItem)(nil),               // 0: pos.v1.MenuItem
+	(*ListMenuItemsRequest)(nil),   // 1: pos.v1.ListMenuItemsRequest
+	(*ListMenuItemsResponse)(nil),  // 2: pos.v1.ListMenuItemsResponse
+	(*CreateMenuItemRequest)(nil),  // 3: pos.v1.CreateMenuItemRequest
+	(*CreateMenuItemResponse)(nil), // 4: pos.v1.CreateMenuItemResponse
 }
 var file_pos_v1_menu_items_proto_depIdxs = []int32{
-	0, // 0: pos.ListMenuItemsResponse.items:type_name -> pos.MenuItem
+	0, // 0: pos.v1.ListMenuItemsResponse.items:type_name -> pos.v1.MenuItem
 	1, // [1:1] is the sub-list for method output_type
 	1, // [1:1] is the sub-list for method input_type
 	1, // [1:1] is the sub-list for extension type_name

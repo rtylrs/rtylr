@@ -657,7 +657,7 @@ var File_flow_v1_projects_proto protoreflect.FileDescriptor
 
 const file_flow_v1_projects_proto_rawDesc = "" +
 	"\n" +
-	"\x16flow/v1/projects.proto\x12\x04flow\"\xe5\x03\n" +
+	"\x16flow/v1/projects.proto\x12\aflow.v1\"\xe5\x03\n" +
 	"\aProject\x12\x0e\n" +
 	"\x02id\x18\x01 \x01(\x03R\x02id\x12!\n" +
 	"\fworkspace_id\x18\x02 \x01(\x03R\vworkspaceId\x12\x19\n" +
@@ -683,9 +683,9 @@ const file_flow_v1_projects_proto_rawDesc = "" +
 	"\fmember_count\x18\x10 \x01(\x05R\vmemberCount\x12\x12\n" +
 	"\x04code\x18\x11 \x01(\tR\x04code\"8\n" +
 	"\x13ListProjectsRequest\x12!\n" +
-	"\fworkspace_id\x18\x01 \x01(\x03R\vworkspaceId\"A\n" +
-	"\x14ListProjectsResponse\x12)\n" +
-	"\bprojects\x18\x01 \x03(\v2\r.flow.ProjectR\bprojects\"\xd3\x01\n" +
+	"\fworkspace_id\x18\x01 \x01(\x03R\vworkspaceId\"D\n" +
+	"\x14ListProjectsResponse\x12,\n" +
+	"\bprojects\x18\x01 \x03(\v2\x10.flow.v1.ProjectR\bprojects\"\xd3\x01\n" +
 	"\x14CreateProjectRequest\x12!\n" +
 	"\fworkspace_id\x18\x01 \x01(\x03R\vworkspaceId\x12\x12\n" +
 	"\x04name\x18\x02 \x01(\tR\x04name\x12 \n" +
@@ -694,9 +694,9 @@ const file_flow_v1_projects_proto_rawDesc = "" +
 	"\x05color\x18\x05 \x01(\tR\x05color\x12\x1d\n" +
 	"\n" +
 	"start_date\x18\x06 \x01(\tR\tstartDate\x12\x19\n" +
-	"\bdue_date\x18\a \x01(\tR\adueDate\"@\n" +
-	"\x15CreateProjectResponse\x12'\n" +
-	"\aproject\x18\x01 \x01(\v2\r.flow.ProjectR\aproject\"\xd8\x01\n" +
+	"\bdue_date\x18\a \x01(\tR\adueDate\"C\n" +
+	"\x15CreateProjectResponse\x12*\n" +
+	"\aproject\x18\x01 \x01(\v2\x10.flow.v1.ProjectR\aproject\"\xd8\x01\n" +
 	"\x14UpdateProjectRequest\x12\x0e\n" +
 	"\x02id\x18\x01 \x01(\x03R\x02id\x12\x12\n" +
 	"\x04name\x18\x02 \x01(\tR\x04name\x12 \n" +
@@ -728,19 +728,19 @@ func file_flow_v1_projects_proto_rawDescGZIP() []byte {
 
 var file_flow_v1_projects_proto_msgTypes = make([]protoimpl.MessageInfo, 9)
 var file_flow_v1_projects_proto_goTypes = []any{
-	(*Project)(nil),               // 0: flow.Project
-	(*ListProjectsRequest)(nil),   // 1: flow.ListProjectsRequest
-	(*ListProjectsResponse)(nil),  // 2: flow.ListProjectsResponse
-	(*CreateProjectRequest)(nil),  // 3: flow.CreateProjectRequest
-	(*CreateProjectResponse)(nil), // 4: flow.CreateProjectResponse
-	(*UpdateProjectRequest)(nil),  // 5: flow.UpdateProjectRequest
-	(*UpdateProjectResponse)(nil), // 6: flow.UpdateProjectResponse
-	(*DeleteProjectRequest)(nil),  // 7: flow.DeleteProjectRequest
-	(*DeleteProjectResponse)(nil), // 8: flow.DeleteProjectResponse
+	(*Project)(nil),               // 0: flow.v1.Project
+	(*ListProjectsRequest)(nil),   // 1: flow.v1.ListProjectsRequest
+	(*ListProjectsResponse)(nil),  // 2: flow.v1.ListProjectsResponse
+	(*CreateProjectRequest)(nil),  // 3: flow.v1.CreateProjectRequest
+	(*CreateProjectResponse)(nil), // 4: flow.v1.CreateProjectResponse
+	(*UpdateProjectRequest)(nil),  // 5: flow.v1.UpdateProjectRequest
+	(*UpdateProjectResponse)(nil), // 6: flow.v1.UpdateProjectResponse
+	(*DeleteProjectRequest)(nil),  // 7: flow.v1.DeleteProjectRequest
+	(*DeleteProjectResponse)(nil), // 8: flow.v1.DeleteProjectResponse
 }
 var file_flow_v1_projects_proto_depIdxs = []int32{
-	0, // 0: flow.ListProjectsResponse.projects:type_name -> flow.Project
-	0, // 1: flow.CreateProjectResponse.project:type_name -> flow.Project
+	0, // 0: flow.v1.ListProjectsResponse.projects:type_name -> flow.v1.Project
+	0, // 1: flow.v1.CreateProjectResponse.project:type_name -> flow.v1.Project
 	2, // [2:2] is the sub-list for method output_type
 	2, // [2:2] is the sub-list for method input_type
 	2, // [2:2] is the sub-list for extension type_name

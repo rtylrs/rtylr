@@ -145,17 +145,16 @@ var File_flow_v1_dashboard_proto protoreflect.FileDescriptor
 
 const file_flow_v1_dashboard_proto_rawDesc = "" +
 	"\n" +
-	"\x17flow/v1/dashboard.proto\x12\x04flow\x1a\x13flow/v1/tasks.proto\"<\n" +
+	"\x17flow/v1/dashboard.proto\x12\aflow.v1\x1a\x13flow/v1/tasks.proto\"<\n" +
 	"\x17GetFlowDashboardRequest\x12!\n" +
-	"\fworkspace_id\x18\x01 \x01(\x03R\vworkspaceId\"\xe1\x01\n" +
+	"\fworkspace_id\x18\x01 \x01(\x03R\vworkspaceId\"\xe4\x01\n" +
 	"\x18GetFlowDashboardResponse\x12\x1d\n" +
 	"\n" +
 	"open_tasks\x18\x01 \x01(\x03R\topenTasks\x12*\n" +
 	"\x11in_progress_tasks\x18\x02 \x01(\x03R\x0finProgressTasks\x12.\n" +
 	"\x13completed_this_week\x18\x03 \x01(\x03R\x11completedThisWeek\x12#\n" +
-	"\roverdue_tasks\x18\x04 \x01(\x03R\foverdueTasks\x12%\n" +
-	"\bmy_tasks\x18\x05 \x03(\v2\n" +
-	".flow.TaskR\amyTasksB(Z&github.com/voxire/voxie/gen/go/flow/v1b\x06proto3"
+	"\roverdue_tasks\x18\x04 \x01(\x03R\foverdueTasks\x12(\n" +
+	"\bmy_tasks\x18\x05 \x03(\v2\r.flow.v1.TaskR\amyTasksB(Z&github.com/voxire/voxie/gen/go/flow/v1b\x06proto3"
 
 var (
 	file_flow_v1_dashboard_proto_rawDescOnce sync.Once
@@ -171,12 +170,12 @@ func file_flow_v1_dashboard_proto_rawDescGZIP() []byte {
 
 var file_flow_v1_dashboard_proto_msgTypes = make([]protoimpl.MessageInfo, 2)
 var file_flow_v1_dashboard_proto_goTypes = []any{
-	(*GetFlowDashboardRequest)(nil),  // 0: flow.GetFlowDashboardRequest
-	(*GetFlowDashboardResponse)(nil), // 1: flow.GetFlowDashboardResponse
-	(*Task)(nil),                     // 2: flow.Task
+	(*GetFlowDashboardRequest)(nil),  // 0: flow.v1.GetFlowDashboardRequest
+	(*GetFlowDashboardResponse)(nil), // 1: flow.v1.GetFlowDashboardResponse
+	(*Task)(nil),                     // 2: flow.v1.Task
 }
 var file_flow_v1_dashboard_proto_depIdxs = []int32{
-	2, // 0: flow.GetFlowDashboardResponse.my_tasks:type_name -> flow.Task
+	2, // 0: flow.v1.GetFlowDashboardResponse.my_tasks:type_name -> flow.v1.Task
 	1, // [1:1] is the sub-list for method output_type
 	1, // [1:1] is the sub-list for method input_type
 	1, // [1:1] is the sub-list for extension type_name

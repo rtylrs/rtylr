@@ -145,7 +145,7 @@ var File_hub_v1_dashboard_proto protoreflect.FileDescriptor
 
 const file_hub_v1_dashboard_proto_rawDesc = "" +
 	"\n" +
-	"\x16hub/v1/dashboard.proto\x12\x03hub\"\x10\n" +
+	"\x16hub/v1/dashboard.proto\x12\x06hub.v1\"\x10\n" +
 	"\x0eGetKPIsRequest\"\xdd\x01\n" +
 	"\x0fGetKPIsResponse\x12\x18\n" +
 	"\arevenue\x18\x01 \x01(\x01R\arevenue\x12\x1f\n" +
@@ -172,8 +172,8 @@ func file_hub_v1_dashboard_proto_rawDescGZIP() []byte {
 
 var file_hub_v1_dashboard_proto_msgTypes = make([]protoimpl.MessageInfo, 2)
 var file_hub_v1_dashboard_proto_goTypes = []any{
-	(*GetKPIsRequest)(nil),  // 0: hub.GetKPIsRequest
-	(*GetKPIsResponse)(nil), // 1: hub.GetKPIsResponse
+	(*GetKPIsRequest)(nil),  // 0: hub.v1.GetKPIsRequest
+	(*GetKPIsResponse)(nil), // 1: hub.v1.GetKPIsResponse
 }
 var file_hub_v1_dashboard_proto_depIdxs = []int32{
 	0, // [0:0] is the sub-list for method output_type

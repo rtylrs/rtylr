@@ -153,9 +153,9 @@ var File_pos_v1_day_summary_proto protoreflect.FileDescriptor
 
 const file_pos_v1_day_summary_proto_rawDesc = "" +
 	"\n" +
-	"\x18pos/v1/day_summary.proto\x12\x03pos\"'\n" +
+	"\x18pos/v1/day_summary.proto\x12\x06pos.v1\"'\n" +
 	"\x11DaySummaryRequest\x12\x12\n" +
-	"\x04date\x18\x01 \x01(\tR\x04date\"\xda\x02\n" +
+	"\x04date\x18\x01 \x01(\tR\x04date\"\xdd\x02\n" +
 	"\x12DaySummaryResponse\x12\x1f\n" +
 	"\vtotal_sales\x18\x01 \x01(\x01R\n" +
 	"totalSales\x12\x1b\n" +
@@ -163,8 +163,8 @@ const file_pos_v1_day_summary_proto_rawDesc = "" +
 	"\n" +
 	"total_tips\x18\x03 \x01(\x01R\ttotalTips\x12#\n" +
 	"\rtotal_refunds\x18\x04 \x01(\x01R\ftotalRefunds\x12!\n" +
-	"\ftotal_orders\x18\x05 \x01(\x05R\vtotalOrders\x12Z\n" +
-	"\x11payment_breakdown\x18\x06 \x03(\v2-.pos.DaySummaryResponse.PaymentBreakdownEntryR\x10paymentBreakdown\x1aC\n" +
+	"\ftotal_orders\x18\x05 \x01(\x05R\vtotalOrders\x12]\n" +
+	"\x11payment_breakdown\x18\x06 \x03(\v20.pos.v1.DaySummaryResponse.PaymentBreakdownEntryR\x10paymentBreakdown\x1aC\n" +
 	"\x15PaymentBreakdownEntry\x12\x10\n" +
 	"\x03key\x18\x01 \x01(\tR\x03key\x12\x14\n" +
 	"\x05value\x18\x02 \x01(\x01R\x05value:\x028\x01B'Z%github.com/voxire/voxie/gen/go/pos/v1b\x06proto3"
@@ -183,12 +183,12 @@ func file_pos_v1_day_summary_proto_rawDescGZIP() []byte {
 
 var file_pos_v1_day_summary_proto_msgTypes = make([]protoimpl.MessageInfo, 3)
 var file_pos_v1_day_summary_proto_goTypes = []any{
-	(*DaySummaryRequest)(nil),  // 0: pos.DaySummaryRequest
-	(*DaySummaryResponse)(nil), // 1: pos.DaySummaryResponse
-	nil,                        // 2: pos.DaySummaryResponse.PaymentBreakdownEntry
+	(*DaySummaryRequest)(nil),  // 0: pos.v1.DaySummaryRequest
+	(*DaySummaryResponse)(nil), // 1: pos.v1.DaySummaryResponse
+	nil,                        // 2: pos.v1.DaySummaryResponse.PaymentBreakdownEntry
 }
 var file_pos_v1_day_summary_proto_depIdxs = []int32{
-	2, // 0: pos.DaySummaryResponse.payment_breakdown:type_name -> pos.DaySummaryResponse.PaymentBreakdownEntry
+	2, // 0: pos.v1.DaySummaryResponse.payment_breakdown:type_name -> pos.v1.DaySummaryResponse.PaymentBreakdownEntry
 	1, // [1:1] is the sub-list for method output_type
 	1, // [1:1] is the sub-list for method input_type
 	1, // [1:1] is the sub-list for extension type_name

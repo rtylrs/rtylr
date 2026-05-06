@@ -493,7 +493,7 @@ var File_pos_v1_floors_proto protoreflect.FileDescriptor
 
 const file_pos_v1_floors_proto_rawDesc = "" +
 	"\n" +
-	"\x13pos/v1/floors.proto\x12\x03pos\"\xc4\x01\n" +
+	"\x13pos/v1/floors.proto\x12\x06pos.v1\"\xc4\x01\n" +
 	"\x05Floor\x12\x0e\n" +
 	"\x02id\x18\x01 \x01(\x03R\x02id\x12\x1f\n" +
 	"\vbusiness_id\x18\x02 \x01(\x03R\n" +
@@ -506,10 +506,9 @@ const file_pos_v1_floors_proto_rawDesc = "" +
 	"\n" +
 	"created_at\x18\a \x01(\tR\tcreatedAt\"0\n" +
 	"\x11ListFloorsRequest\x12\x1b\n" +
-	"\tbranch_id\x18\x01 \x01(\x03R\bbranchId\"8\n" +
-	"\x12ListFloorsResponse\x12\"\n" +
-	"\x06floors\x18\x01 \x03(\v2\n" +
-	".pos.FloorR\x06floors\"d\n" +
+	"\tbranch_id\x18\x01 \x01(\x03R\bbranchId\";\n" +
+	"\x12ListFloorsResponse\x12%\n" +
+	"\x06floors\x18\x01 \x03(\v2\r.pos.v1.FloorR\x06floors\"d\n" +
 	"\x12CreateFloorRequest\x12\x1b\n" +
 	"\tbranch_id\x18\x01 \x01(\x03R\bbranchId\x12\x12\n" +
 	"\x04name\x18\x02 \x01(\tR\x04name\x12\x1d\n" +
@@ -542,18 +541,18 @@ func file_pos_v1_floors_proto_rawDescGZIP() []byte {
 
 var file_pos_v1_floors_proto_msgTypes = make([]protoimpl.MessageInfo, 9)
 var file_pos_v1_floors_proto_goTypes = []any{
-	(*Floor)(nil),               // 0: pos.Floor
-	(*ListFloorsRequest)(nil),   // 1: pos.ListFloorsRequest
-	(*ListFloorsResponse)(nil),  // 2: pos.ListFloorsResponse
-	(*CreateFloorRequest)(nil),  // 3: pos.CreateFloorRequest
-	(*CreateFloorResponse)(nil), // 4: pos.CreateFloorResponse
-	(*UpdateFloorRequest)(nil),  // 5: pos.UpdateFloorRequest
-	(*UpdateFloorResponse)(nil), // 6: pos.UpdateFloorResponse
-	(*DeleteFloorRequest)(nil),  // 7: pos.DeleteFloorRequest
-	(*DeleteFloorResponse)(nil), // 8: pos.DeleteFloorResponse
+	(*Floor)(nil),               // 0: pos.v1.Floor
+	(*ListFloorsRequest)(nil),   // 1: pos.v1.ListFloorsRequest
+	(*ListFloorsResponse)(nil),  // 2: pos.v1.ListFloorsResponse
+	(*CreateFloorRequest)(nil),  // 3: pos.v1.CreateFloorRequest
+	(*CreateFloorResponse)(nil), // 4: pos.v1.CreateFloorResponse
+	(*UpdateFloorRequest)(nil),  // 5: pos.v1.UpdateFloorRequest
+	(*UpdateFloorResponse)(nil), // 6: pos.v1.UpdateFloorResponse
+	(*DeleteFloorRequest)(nil),  // 7: pos.v1.DeleteFloorRequest
+	(*DeleteFloorResponse)(nil), // 8: pos.v1.DeleteFloorResponse
 }
 var file_pos_v1_floors_proto_depIdxs = []int32{
-	0, // 0: pos.ListFloorsResponse.floors:type_name -> pos.Floor
+	0, // 0: pos.v1.ListFloorsResponse.floors:type_name -> pos.v1.Floor
 	1, // [1:1] is the sub-list for method output_type
 	1, // [1:1] is the sub-list for method input_type
 	1, // [1:1] is the sub-list for extension type_name

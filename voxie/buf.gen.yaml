@@ -3,12 +3,14 @@ plugins:
   # Go code generation
   - local: protoc-gen-go
     out: gen/go
+    strategy: all
     opt:
       - paths=source_relative
 
   # TypeScript - pure interfaces only (no protobuf runtime)
   - local: protoc-gen-ts_proto
     out: gen/ts
+    strategy: all
     opt:
       - esModuleInterop=true
       - outputServices=false

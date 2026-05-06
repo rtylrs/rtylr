@@ -759,7 +759,7 @@ var File_flow_v1_workspaces_proto protoreflect.FileDescriptor
 
 const file_flow_v1_workspaces_proto_rawDesc = "" +
 	"\n" +
-	"\x18flow/v1/workspaces.proto\x12\x04flow\"\xd6\x02\n" +
+	"\x18flow/v1/workspaces.proto\x12\aflow.v1\"\xd6\x02\n" +
 	"\tWorkspace\x12\x0e\n" +
 	"\x02id\x18\x01 \x01(\x03R\x02id\x12\x19\n" +
 	"\bowner_id\x18\x02 \x01(\x03R\aownerId\x12\x12\n" +
@@ -779,18 +779,18 @@ const file_flow_v1_workspaces_proto_rawDesc = "" +
 	"\fmember_count\x18\v \x01(\x05R\vmemberCount\x12\x1f\n" +
 	"\vis_personal\x18\f \x01(\bR\n" +
 	"isPersonal\"\x17\n" +
-	"\x15ListWorkspacesRequest\"I\n" +
-	"\x16ListWorkspacesResponse\x12/\n" +
+	"\x15ListWorkspacesRequest\"L\n" +
+	"\x16ListWorkspacesResponse\x122\n" +
 	"\n" +
-	"workspaces\x18\x01 \x03(\v2\x0f.flow.WorkspaceR\n" +
+	"workspaces\x18\x01 \x03(\v2\x12.flow.v1.WorkspaceR\n" +
 	"workspaces\"x\n" +
 	"\x16CreateWorkspaceRequest\x12\x12\n" +
 	"\x04name\x18\x01 \x01(\tR\x04name\x12 \n" +
 	"\vdescription\x18\x02 \x01(\tR\vdescription\x12\x12\n" +
 	"\x04icon\x18\x03 \x01(\tR\x04icon\x12\x14\n" +
-	"\x05color\x18\x04 \x01(\tR\x05color\"H\n" +
-	"\x17CreateWorkspaceResponse\x12-\n" +
-	"\tworkspace\x18\x01 \x01(\v2\x0f.flow.WorkspaceR\tworkspace\"\x88\x01\n" +
+	"\x05color\x18\x04 \x01(\tR\x05color\"K\n" +
+	"\x17CreateWorkspaceResponse\x120\n" +
+	"\tworkspace\x18\x01 \x01(\v2\x12.flow.v1.WorkspaceR\tworkspace\"\x88\x01\n" +
 	"\x16UpdateWorkspaceRequest\x12\x0e\n" +
 	"\x02id\x18\x01 \x01(\x03R\x02id\x12\x12\n" +
 	"\x04name\x18\x02 \x01(\tR\x04name\x12 \n" +
@@ -829,23 +829,23 @@ func file_flow_v1_workspaces_proto_rawDescGZIP() []byte {
 
 var file_flow_v1_workspaces_proto_msgTypes = make([]protoimpl.MessageInfo, 13)
 var file_flow_v1_workspaces_proto_goTypes = []any{
-	(*Workspace)(nil),                     // 0: flow.Workspace
-	(*ListWorkspacesRequest)(nil),         // 1: flow.ListWorkspacesRequest
-	(*ListWorkspacesResponse)(nil),        // 2: flow.ListWorkspacesResponse
-	(*CreateWorkspaceRequest)(nil),        // 3: flow.CreateWorkspaceRequest
-	(*CreateWorkspaceResponse)(nil),       // 4: flow.CreateWorkspaceResponse
-	(*UpdateWorkspaceRequest)(nil),        // 5: flow.UpdateWorkspaceRequest
-	(*UpdateWorkspaceResponse)(nil),       // 6: flow.UpdateWorkspaceResponse
-	(*DeleteWorkspaceRequest)(nil),        // 7: flow.DeleteWorkspaceRequest
-	(*DeleteWorkspaceResponse)(nil),       // 8: flow.DeleteWorkspaceResponse
-	(*AddWorkspaceMemberRequest)(nil),     // 9: flow.AddWorkspaceMemberRequest
-	(*AddWorkspaceMemberResponse)(nil),    // 10: flow.AddWorkspaceMemberResponse
-	(*RemoveWorkspaceMemberRequest)(nil),  // 11: flow.RemoveWorkspaceMemberRequest
-	(*RemoveWorkspaceMemberResponse)(nil), // 12: flow.RemoveWorkspaceMemberResponse
+	(*Workspace)(nil),                     // 0: flow.v1.Workspace
+	(*ListWorkspacesRequest)(nil),         // 1: flow.v1.ListWorkspacesRequest
+	(*ListWorkspacesResponse)(nil),        // 2: flow.v1.ListWorkspacesResponse
+	(*CreateWorkspaceRequest)(nil),        // 3: flow.v1.CreateWorkspaceRequest
+	(*CreateWorkspaceResponse)(nil),       // 4: flow.v1.CreateWorkspaceResponse
+	(*UpdateWorkspaceRequest)(nil),        // 5: flow.v1.UpdateWorkspaceRequest
+	(*UpdateWorkspaceResponse)(nil),       // 6: flow.v1.UpdateWorkspaceResponse
+	(*DeleteWorkspaceRequest)(nil),        // 7: flow.v1.DeleteWorkspaceRequest
+	(*DeleteWorkspaceResponse)(nil),       // 8: flow.v1.DeleteWorkspaceResponse
+	(*AddWorkspaceMemberRequest)(nil),     // 9: flow.v1.AddWorkspaceMemberRequest
+	(*AddWorkspaceMemberResponse)(nil),    // 10: flow.v1.AddWorkspaceMemberResponse
+	(*RemoveWorkspaceMemberRequest)(nil),  // 11: flow.v1.RemoveWorkspaceMemberRequest
+	(*RemoveWorkspaceMemberResponse)(nil), // 12: flow.v1.RemoveWorkspaceMemberResponse
 }
 var file_flow_v1_workspaces_proto_depIdxs = []int32{
-	0, // 0: flow.ListWorkspacesResponse.workspaces:type_name -> flow.Workspace
-	0, // 1: flow.CreateWorkspaceResponse.workspace:type_name -> flow.Workspace
+	0, // 0: flow.v1.ListWorkspacesResponse.workspaces:type_name -> flow.v1.Workspace
+	0, // 1: flow.v1.CreateWorkspaceResponse.workspace:type_name -> flow.v1.Workspace
 	2, // [2:2] is the sub-list for method output_type
 	2, // [2:2] is the sub-list for method input_type
 	2, // [2:2] is the sub-list for extension type_name

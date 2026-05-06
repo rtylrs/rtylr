@@ -293,7 +293,7 @@ var File_hub_v1_menu_proto protoreflect.FileDescriptor
 
 const file_hub_v1_menu_proto_rawDesc = "" +
 	"\n" +
-	"\x11hub/v1/menu.proto\x12\x03hub\"\xcb\x01\n" +
+	"\x11hub/v1/menu.proto\x12\x06hub.v1\"\xce\x01\n" +
 	"\bMenuItem\x12\x0e\n" +
 	"\x02id\x18\x01 \x01(\x03R\x02id\x12\x14\n" +
 	"\x05label\x18\x02 \x01(\tR\x05label\x12\x12\n" +
@@ -301,13 +301,13 @@ const file_hub_v1_menu_proto_rawDesc = "" +
 	"\x04path\x18\x04 \x01(\tR\x04path\x12\x10\n" +
 	"\x03app\x18\x05 \x01(\tR\x03app\x12\x1a\n" +
 	"\bposition\x18\x06 \x01(\x05R\bposition\x12\x18\n" +
-	"\avisible\x18\a \x01(\bR\avisible\x12)\n" +
-	"\bchildren\x18\b \x03(\v2\r.hub.MenuItemR\bchildren\"\x11\n" +
-	"\x0fListMenuRequest\"7\n" +
-	"\x10ListMenuResponse\x12#\n" +
-	"\x05items\x18\x01 \x03(\v2\r.hub.MenuItemR\x05items\"8\n" +
-	"\x11UpdateMenuRequest\x12#\n" +
-	"\x05items\x18\x01 \x03(\v2\r.hub.MenuItemR\x05items\".\n" +
+	"\avisible\x18\a \x01(\bR\avisible\x12,\n" +
+	"\bchildren\x18\b \x03(\v2\x10.hub.v1.MenuItemR\bchildren\"\x11\n" +
+	"\x0fListMenuRequest\":\n" +
+	"\x10ListMenuResponse\x12&\n" +
+	"\x05items\x18\x01 \x03(\v2\x10.hub.v1.MenuItemR\x05items\";\n" +
+	"\x11UpdateMenuRequest\x12&\n" +
+	"\x05items\x18\x01 \x03(\v2\x10.hub.v1.MenuItemR\x05items\".\n" +
 	"\x12UpdateMenuResponse\x12\x18\n" +
 	"\asuccess\x18\x01 \x01(\bR\asuccessB'Z%github.com/voxire/voxie/gen/go/hub/v1b\x06proto3"
 
@@ -325,16 +325,16 @@ func file_hub_v1_menu_proto_rawDescGZIP() []byte {
 
 var file_hub_v1_menu_proto_msgTypes = make([]protoimpl.MessageInfo, 5)
 var file_hub_v1_menu_proto_goTypes = []any{
-	(*MenuItem)(nil),           // 0: hub.MenuItem
-	(*ListMenuRequest)(nil),    // 1: hub.ListMenuRequest
-	(*ListMenuResponse)(nil),   // 2: hub.ListMenuResponse
-	(*UpdateMenuRequest)(nil),  // 3: hub.UpdateMenuRequest
-	(*UpdateMenuResponse)(nil), // 4: hub.UpdateMenuResponse
+	(*MenuItem)(nil),           // 0: hub.v1.MenuItem
+	(*ListMenuRequest)(nil),    // 1: hub.v1.ListMenuRequest
+	(*ListMenuResponse)(nil),   // 2: hub.v1.ListMenuResponse
+	(*UpdateMenuRequest)(nil),  // 3: hub.v1.UpdateMenuRequest
+	(*UpdateMenuResponse)(nil), // 4: hub.v1.UpdateMenuResponse
 }
 var file_hub_v1_menu_proto_depIdxs = []int32{
-	0, // 0: hub.MenuItem.children:type_name -> hub.MenuItem
-	0, // 1: hub.ListMenuResponse.items:type_name -> hub.MenuItem
-	0, // 2: hub.UpdateMenuRequest.items:type_name -> hub.MenuItem
+	0, // 0: hub.v1.MenuItem.children:type_name -> hub.v1.MenuItem
+	0, // 1: hub.v1.ListMenuResponse.items:type_name -> hub.v1.MenuItem
+	0, // 2: hub.v1.UpdateMenuRequest.items:type_name -> hub.v1.MenuItem
 	3, // [3:3] is the sub-list for method output_type
 	3, // [3:3] is the sub-list for method input_type
 	3, // [3:3] is the sub-list for extension type_name

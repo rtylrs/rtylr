@@ -2562,7 +2562,7 @@ var File_flow_v1_tasks_proto protoreflect.FileDescriptor
 
 const file_flow_v1_tasks_proto_rawDesc = "" +
 	"\n" +
-	"\x13flow/v1/tasks.proto\x12\x04flow\"\xf5\b\n" +
+	"\x13flow/v1/tasks.proto\x12\aflow.v1\"\xf5\b\n" +
 	"\x04Task\x12\x0e\n" +
 	"\x02id\x18\x01 \x01(\x03R\x02id\x12\x1d\n" +
 	"\n" +
@@ -2640,10 +2640,9 @@ const file_flow_v1_tasks_proto_rawDesc = "" +
 	"\vassignee_id\x18\x03 \x01(\x03H\x00R\n" +
 	"assigneeId\x88\x01\x01\x12\x1a\n" +
 	"\bpriority\x18\x04 \x01(\tR\bpriorityB\x0e\n" +
-	"\f_assignee_id\"5\n" +
-	"\x11ListTasksResponse\x12 \n" +
-	"\x05tasks\x18\x01 \x03(\v2\n" +
-	".flow.TaskR\x05tasks\"\xb1\x03\n" +
+	"\f_assignee_id\"8\n" +
+	"\x11ListTasksResponse\x12#\n" +
+	"\x05tasks\x18\x01 \x03(\v2\r.flow.v1.TaskR\x05tasks\"\xb1\x03\n" +
 	"\x11CreateTaskRequest\x12\x1d\n" +
 	"\n" +
 	"project_id\x18\x01 \x01(\x03R\tprojectId\x12!\n" +
@@ -2662,19 +2661,16 @@ const file_flow_v1_tasks_proto_rawDesc = "" +
 	"\x06labels\x18\v \x03(\x03R\x06labelsB\x11\n" +
 	"\x0f_parent_task_idB\x0e\n" +
 	"\f_assignee_idB\x12\n" +
-	"\x10_estimated_hours\"4\n" +
-	"\x12CreateTaskResponse\x12\x1e\n" +
-	"\x04task\x18\x01 \x01(\v2\n" +
-	".flow.TaskR\x04task\"&\n" +
+	"\x10_estimated_hours\"7\n" +
+	"\x12CreateTaskResponse\x12!\n" +
+	"\x04task\x18\x01 \x01(\v2\r.flow.v1.TaskR\x04task\"&\n" +
 	"\x14GetTaskDetailRequest\x12\x0e\n" +
-	"\x02id\x18\x01 \x01(\x03R\x02id\"\xbe\x01\n" +
-	"\x15GetTaskDetailResponse\x12\x1e\n" +
-	"\x04task\x18\x01 \x01(\v2\n" +
-	".flow.TaskR\x04task\x12&\n" +
-	"\bsubtasks\x18\x02 \x03(\v2\n" +
-	".flow.TaskR\bsubtasks\x12-\n" +
-	"\bcomments\x18\x03 \x03(\v2\x11.flow.TaskCommentR\bcomments\x12.\n" +
-	"\bactivity\x18\x04 \x03(\v2\x12.flow.TaskActivityR\bactivity\"\x97\x02\n" +
+	"\x02id\x18\x01 \x01(\x03R\x02id\"\xca\x01\n" +
+	"\x15GetTaskDetailResponse\x12!\n" +
+	"\x04task\x18\x01 \x01(\v2\r.flow.v1.TaskR\x04task\x12)\n" +
+	"\bsubtasks\x18\x02 \x03(\v2\r.flow.v1.TaskR\bsubtasks\x120\n" +
+	"\bcomments\x18\x03 \x03(\v2\x14.flow.v1.TaskCommentR\bcomments\x121\n" +
+	"\bactivity\x18\x04 \x03(\v2\x15.flow.v1.TaskActivityR\bactivity\"\x97\x02\n" +
 	"\x11UpdateTaskRequest\x12\x0e\n" +
 	"\x02id\x18\x01 \x01(\x03R\x02id\x12\x14\n" +
 	"\x05title\x18\x02 \x01(\tR\x05title\x12 \n" +
@@ -2699,15 +2695,14 @@ const file_flow_v1_tasks_proto_rawDesc = "" +
 	"\x06status\x18\x02 \x01(\tR\x06status\"4\n" +
 	"\x18UpdateTaskStatusResponse\x12\x18\n" +
 	"\amessage\x18\x01 \x01(\tR\amessage\"\x13\n" +
-	"\x11GetMyTasksRequest\"6\n" +
-	"\x12GetMyTasksResponse\x12 \n" +
-	"\x05tasks\x18\x01 \x03(\v2\n" +
-	".flow.TaskR\x05tasks\"F\n" +
+	"\x11GetMyTasksRequest\"9\n" +
+	"\x12GetMyTasksResponse\x12#\n" +
+	"\x05tasks\x18\x01 \x03(\v2\r.flow.v1.TaskR\x05tasks\"F\n" +
 	"\x11AddCommentRequest\x12\x17\n" +
 	"\atask_id\x18\x01 \x01(\x03R\x06taskId\x12\x18\n" +
-	"\acontent\x18\x02 \x01(\tR\acontent\"A\n" +
-	"\x12AddCommentResponse\x12+\n" +
-	"\acomment\x18\x01 \x01(\v2\x11.flow.TaskCommentR\acomment\"&\n" +
+	"\acontent\x18\x02 \x01(\tR\acontent\"D\n" +
+	"\x12AddCommentResponse\x12.\n" +
+	"\acomment\x18\x01 \x01(\v2\x14.flow.v1.TaskCommentR\acomment\"&\n" +
 	"\x14DeleteCommentRequest\x12\x0e\n" +
 	"\x02id\x18\x01 \x01(\x03R\x02id\"1\n" +
 	"\x15DeleteCommentResponse\x12\x18\n" +
@@ -2741,9 +2736,9 @@ const file_flow_v1_tasks_proto_rawDesc = "" +
 	"\n" +
 	"created_at\x18\a \x01(\tR\tcreatedAt\"-\n" +
 	"\x12GetSubtasksRequest\x12\x17\n" +
-	"\atask_id\x18\x01 \x01(\x03R\x06taskId\"K\n" +
-	"\x13GetSubtasksResponse\x124\n" +
-	"\bsubtasks\x18\x01 \x03(\v2\x18.flow.TaskPayloadCompactR\bsubtasks\"\xde\x02\n" +
+	"\atask_id\x18\x01 \x01(\x03R\x06taskId\"N\n" +
+	"\x13GetSubtasksResponse\x127\n" +
+	"\bsubtasks\x18\x01 \x03(\v2\x1b.flow.v1.TaskPayloadCompactR\bsubtasks\"\xde\x02\n" +
 	"\x14CreateSubtaskRequest\x12\x1d\n" +
 	"\n" +
 	"project_id\x18\x01 \x01(\x03R\tprojectId\x12!\n" +
@@ -2763,9 +2758,9 @@ const file_flow_v1_tasks_proto_rawDesc = "" +
 	"\atask_id\x18\x01 \x01(\x03R\x06taskId\x12\x18\n" +
 	"\amessage\x18\x02 \x01(\tR\amessage\"0\n" +
 	"\x15GetAttachmentsRequest\x12\x17\n" +
-	"\atask_id\x18\x01 \x01(\x03R\x06taskId\"L\n" +
-	"\x16GetAttachmentsResponse\x122\n" +
-	"\vattachments\x18\x01 \x03(\v2\x10.flow.AttachmentR\vattachments\"S\n" +
+	"\atask_id\x18\x01 \x01(\x03R\x06taskId\"O\n" +
+	"\x16GetAttachmentsResponse\x125\n" +
+	"\vattachments\x18\x01 \x03(\v2\x13.flow.v1.AttachmentR\vattachments\"S\n" +
 	"\x17CreateAttachmentRequest\x12\x12\n" +
 	"\x04name\x18\x01 \x01(\tR\x04name\x12\x10\n" +
 	"\x03url\x18\x02 \x01(\tR\x03url\x12\x12\n" +
@@ -2778,9 +2773,9 @@ const file_flow_v1_tasks_proto_rawDesc = "" +
 	"\x18DeleteAttachmentResponse\x12\x18\n" +
 	"\amessage\x18\x01 \x01(\tR\amessage\"-\n" +
 	"\x12GetTimeLogsRequest\x12\x17\n" +
-	"\atask_id\x18\x01 \x01(\x03R\x06taskId\"A\n" +
-	"\x13GetTimeLogsResponse\x12*\n" +
-	"\ttime_logs\x18\x01 \x03(\v2\r.flow.TimeLogR\btimeLogs\"c\n" +
+	"\atask_id\x18\x01 \x01(\x03R\x06taskId\"D\n" +
+	"\x13GetTimeLogsResponse\x12-\n" +
+	"\ttime_logs\x18\x01 \x03(\v2\x10.flow.v1.TimeLogR\btimeLogs\"c\n" +
 	"\x14CreateTimeLogRequest\x12)\n" +
 	"\x10duration_minutes\x18\x01 \x01(\x03R\x0fdurationMinutes\x12 \n" +
 	"\vdescription\x18\x02 \x01(\tR\vdescription\"Q\n" +
@@ -2788,9 +2783,9 @@ const file_flow_v1_tasks_proto_rawDesc = "" +
 	"\vtime_log_id\x18\x01 \x01(\x03R\ttimeLogId\x12\x18\n" +
 	"\amessage\x18\x02 \x01(\tR\amessage\"1\n" +
 	"\x16GetTaskActivityRequest\x12\x17\n" +
-	"\atask_id\x18\x01 \x01(\x03R\x06taskId\"I\n" +
-	"\x17GetTaskActivityResponse\x12.\n" +
-	"\bactivity\x18\x01 \x03(\v2\x12.flow.TaskActivityR\bactivityB(Z&github.com/voxire/voxie/gen/go/flow/v1b\x06proto3"
+	"\atask_id\x18\x01 \x01(\x03R\x06taskId\"L\n" +
+	"\x17GetTaskActivityResponse\x121\n" +
+	"\bactivity\x18\x01 \x03(\v2\x15.flow.v1.TaskActivityR\bactivityB(Z&github.com/voxire/voxie/gen/go/flow/v1b\x06proto3"
 
 var (
 	file_flow_v1_tasks_proto_rawDescOnce sync.Once
@@ -2806,60 +2801,60 @@ func file_flow_v1_tasks_proto_rawDescGZIP() []byte {
 
 var file_flow_v1_tasks_proto_msgTypes = make([]protoimpl.MessageInfo, 40)
 var file_flow_v1_tasks_proto_goTypes = []any{
-	(*Task)(nil),                     // 0: flow.Task
-	(*TaskComment)(nil),              // 1: flow.TaskComment
-	(*TaskActivity)(nil),             // 2: flow.TaskActivity
-	(*ListTasksRequest)(nil),         // 3: flow.ListTasksRequest
-	(*ListTasksResponse)(nil),        // 4: flow.ListTasksResponse
-	(*CreateTaskRequest)(nil),        // 5: flow.CreateTaskRequest
-	(*CreateTaskResponse)(nil),       // 6: flow.CreateTaskResponse
-	(*GetTaskDetailRequest)(nil),     // 7: flow.GetTaskDetailRequest
-	(*GetTaskDetailResponse)(nil),    // 8: flow.GetTaskDetailResponse
-	(*UpdateTaskRequest)(nil),        // 9: flow.UpdateTaskRequest
-	(*UpdateTaskResponse)(nil),       // 10: flow.UpdateTaskResponse
-	(*DeleteTaskRequest)(nil),        // 11: flow.DeleteTaskRequest
-	(*DeleteTaskResponse)(nil),       // 12: flow.DeleteTaskResponse
-	(*UpdateTaskStatusRequest)(nil),  // 13: flow.UpdateTaskStatusRequest
-	(*UpdateTaskStatusResponse)(nil), // 14: flow.UpdateTaskStatusResponse
-	(*GetMyTasksRequest)(nil),        // 15: flow.GetMyTasksRequest
-	(*GetMyTasksResponse)(nil),       // 16: flow.GetMyTasksResponse
-	(*AddCommentRequest)(nil),        // 17: flow.AddCommentRequest
-	(*AddCommentResponse)(nil),       // 18: flow.AddCommentResponse
-	(*DeleteCommentRequest)(nil),     // 19: flow.DeleteCommentRequest
-	(*DeleteCommentResponse)(nil),    // 20: flow.DeleteCommentResponse
-	(*TaskPayloadCompact)(nil),       // 21: flow.TaskPayloadCompact
-	(*Attachment)(nil),               // 22: flow.Attachment
-	(*TimeLog)(nil),                  // 23: flow.TimeLog
-	(*GetSubtasksRequest)(nil),       // 24: flow.GetSubtasksRequest
-	(*GetSubtasksResponse)(nil),      // 25: flow.GetSubtasksResponse
-	(*CreateSubtaskRequest)(nil),     // 26: flow.CreateSubtaskRequest
-	(*CreateSubtaskResponse)(nil),    // 27: flow.CreateSubtaskResponse
-	(*GetAttachmentsRequest)(nil),    // 28: flow.GetAttachmentsRequest
-	(*GetAttachmentsResponse)(nil),   // 29: flow.GetAttachmentsResponse
-	(*CreateAttachmentRequest)(nil),  // 30: flow.CreateAttachmentRequest
-	(*CreateAttachmentResponse)(nil), // 31: flow.CreateAttachmentResponse
-	(*DeleteAttachmentRequest)(nil),  // 32: flow.DeleteAttachmentRequest
-	(*DeleteAttachmentResponse)(nil), // 33: flow.DeleteAttachmentResponse
-	(*GetTimeLogsRequest)(nil),       // 34: flow.GetTimeLogsRequest
-	(*GetTimeLogsResponse)(nil),      // 35: flow.GetTimeLogsResponse
-	(*CreateTimeLogRequest)(nil),     // 36: flow.CreateTimeLogRequest
-	(*CreateTimeLogResponse)(nil),    // 37: flow.CreateTimeLogResponse
-	(*GetTaskActivityRequest)(nil),   // 38: flow.GetTaskActivityRequest
-	(*GetTaskActivityResponse)(nil),  // 39: flow.GetTaskActivityResponse
+	(*Task)(nil),                     // 0: flow.v1.Task
+	(*TaskComment)(nil),              // 1: flow.v1.TaskComment
+	(*TaskActivity)(nil),             // 2: flow.v1.TaskActivity
+	(*ListTasksRequest)(nil),         // 3: flow.v1.ListTasksRequest
+	(*ListTasksResponse)(nil),        // 4: flow.v1.ListTasksResponse
+	(*CreateTaskRequest)(nil),        // 5: flow.v1.CreateTaskRequest
+	(*CreateTaskResponse)(nil),       // 6: flow.v1.CreateTaskResponse
+	(*GetTaskDetailRequest)(nil),     // 7: flow.v1.GetTaskDetailRequest
+	(*GetTaskDetailResponse)(nil),    // 8: flow.v1.GetTaskDetailResponse
+	(*UpdateTaskRequest)(nil),        // 9: flow.v1.UpdateTaskRequest
+	(*UpdateTaskResponse)(nil),       // 10: flow.v1.UpdateTaskResponse
+	(*DeleteTaskRequest)(nil),        // 11: flow.v1.DeleteTaskRequest
+	(*DeleteTaskResponse)(nil),       // 12: flow.v1.DeleteTaskResponse
+	(*UpdateTaskStatusRequest)(nil),  // 13: flow.v1.UpdateTaskStatusRequest
+	(*UpdateTaskStatusResponse)(nil), // 14: flow.v1.UpdateTaskStatusResponse
+	(*GetMyTasksRequest)(nil),        // 15: flow.v1.GetMyTasksRequest
+	(*GetMyTasksResponse)(nil),       // 16: flow.v1.GetMyTasksResponse
+	(*AddCommentRequest)(nil),        // 17: flow.v1.AddCommentRequest
+	(*AddCommentResponse)(nil),       // 18: flow.v1.AddCommentResponse
+	(*DeleteCommentRequest)(nil),     // 19: flow.v1.DeleteCommentRequest
+	(*DeleteCommentResponse)(nil),    // 20: flow.v1.DeleteCommentResponse
+	(*TaskPayloadCompact)(nil),       // 21: flow.v1.TaskPayloadCompact
+	(*Attachment)(nil),               // 22: flow.v1.Attachment
+	(*TimeLog)(nil),                  // 23: flow.v1.TimeLog
+	(*GetSubtasksRequest)(nil),       // 24: flow.v1.GetSubtasksRequest
+	(*GetSubtasksResponse)(nil),      // 25: flow.v1.GetSubtasksResponse
+	(*CreateSubtaskRequest)(nil),     // 26: flow.v1.CreateSubtaskRequest
+	(*CreateSubtaskResponse)(nil),    // 27: flow.v1.CreateSubtaskResponse
+	(*GetAttachmentsRequest)(nil),    // 28: flow.v1.GetAttachmentsRequest
+	(*GetAttachmentsResponse)(nil),   // 29: flow.v1.GetAttachmentsResponse
+	(*CreateAttachmentRequest)(nil),  // 30: flow.v1.CreateAttachmentRequest
+	(*CreateAttachmentResponse)(nil), // 31: flow.v1.CreateAttachmentResponse
+	(*DeleteAttachmentRequest)(nil),  // 32: flow.v1.DeleteAttachmentRequest
+	(*DeleteAttachmentResponse)(nil), // 33: flow.v1.DeleteAttachmentResponse
+	(*GetTimeLogsRequest)(nil),       // 34: flow.v1.GetTimeLogsRequest
+	(*GetTimeLogsResponse)(nil),      // 35: flow.v1.GetTimeLogsResponse
+	(*CreateTimeLogRequest)(nil),     // 36: flow.v1.CreateTimeLogRequest
+	(*CreateTimeLogResponse)(nil),    // 37: flow.v1.CreateTimeLogResponse
+	(*GetTaskActivityRequest)(nil),   // 38: flow.v1.GetTaskActivityRequest
+	(*GetTaskActivityResponse)(nil),  // 39: flow.v1.GetTaskActivityResponse
 }
 var file_flow_v1_tasks_proto_depIdxs = []int32{
-	0,  // 0: flow.ListTasksResponse.tasks:type_name -> flow.Task
-	0,  // 1: flow.CreateTaskResponse.task:type_name -> flow.Task
-	0,  // 2: flow.GetTaskDetailResponse.task:type_name -> flow.Task
-	0,  // 3: flow.GetTaskDetailResponse.subtasks:type_name -> flow.Task
-	1,  // 4: flow.GetTaskDetailResponse.comments:type_name -> flow.TaskComment
-	2,  // 5: flow.GetTaskDetailResponse.activity:type_name -> flow.TaskActivity
-	0,  // 6: flow.GetMyTasksResponse.tasks:type_name -> flow.Task
-	1,  // 7: flow.AddCommentResponse.comment:type_name -> flow.TaskComment
-	21, // 8: flow.GetSubtasksResponse.subtasks:type_name -> flow.TaskPayloadCompact
-	22, // 9: flow.GetAttachmentsResponse.attachments:type_name -> flow.Attachment
-	23, // 10: flow.GetTimeLogsResponse.time_logs:type_name -> flow.TimeLog
-	2,  // 11: flow.GetTaskActivityResponse.activity:type_name -> flow.TaskActivity
+	0,  // 0: flow.v1.ListTasksResponse.tasks:type_name -> flow.v1.Task
+	0,  // 1: flow.v1.CreateTaskResponse.task:type_name -> flow.v1.Task
+	0,  // 2: flow.v1.GetTaskDetailResponse.task:type_name -> flow.v1.Task
+	0,  // 3: flow.v1.GetTaskDetailResponse.subtasks:type_name -> flow.v1.Task
+	1,  // 4: flow.v1.GetTaskDetailResponse.comments:type_name -> flow.v1.TaskComment
+	2,  // 5: flow.v1.GetTaskDetailResponse.activity:type_name -> flow.v1.TaskActivity
+	0,  // 6: flow.v1.GetMyTasksResponse.tasks:type_name -> flow.v1.Task
+	1,  // 7: flow.v1.AddCommentResponse.comment:type_name -> flow.v1.TaskComment
+	21, // 8: flow.v1.GetSubtasksResponse.subtasks:type_name -> flow.v1.TaskPayloadCompact
+	22, // 9: flow.v1.GetAttachmentsResponse.attachments:type_name -> flow.v1.Attachment
+	23, // 10: flow.v1.GetTimeLogsResponse.time_logs:type_name -> flow.v1.TimeLog
+	2,  // 11: flow.v1.GetTaskActivityResponse.activity:type_name -> flow.v1.TaskActivity
 	12, // [12:12] is the sub-list for method output_type
 	12, // [12:12] is the sub-list for method input_type
 	12, // [12:12] is the sub-list for extension type_name

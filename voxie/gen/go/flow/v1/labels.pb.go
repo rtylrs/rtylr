@@ -293,7 +293,7 @@ var File_flow_v1_labels_proto protoreflect.FileDescriptor
 
 const file_flow_v1_labels_proto_rawDesc = "" +
 	"\n" +
-	"\x14flow/v1/labels.proto\x12\x04flow\"\x83\x01\n" +
+	"\x14flow/v1/labels.proto\x12\aflow.v1\"\x83\x01\n" +
 	"\x05Label\x12\x0e\n" +
 	"\x02id\x18\x01 \x01(\x03R\x02id\x12!\n" +
 	"\fworkspace_id\x18\x02 \x01(\x03R\vworkspaceId\x12\x12\n" +
@@ -302,15 +302,15 @@ const file_flow_v1_labels_proto_rawDesc = "" +
 	"\n" +
 	"created_at\x18\x05 \x01(\tR\tcreatedAt\"6\n" +
 	"\x11ListLabelsRequest\x12!\n" +
-	"\fworkspace_id\x18\x01 \x01(\x03R\vworkspaceId\"9\n" +
-	"\x12ListLabelsResponse\x12#\n" +
-	"\x06labels\x18\x01 \x03(\v2\v.flow.LabelR\x06labels\"a\n" +
+	"\fworkspace_id\x18\x01 \x01(\x03R\vworkspaceId\"<\n" +
+	"\x12ListLabelsResponse\x12&\n" +
+	"\x06labels\x18\x01 \x03(\v2\x0e.flow.v1.LabelR\x06labels\"a\n" +
 	"\x12CreateLabelRequest\x12!\n" +
 	"\fworkspace_id\x18\x01 \x01(\x03R\vworkspaceId\x12\x12\n" +
 	"\x04name\x18\x02 \x01(\tR\x04name\x12\x14\n" +
-	"\x05color\x18\x03 \x01(\tR\x05color\"8\n" +
-	"\x13CreateLabelResponse\x12!\n" +
-	"\x05label\x18\x01 \x01(\v2\v.flow.LabelR\x05labelB(Z&github.com/voxire/voxie/gen/go/flow/v1b\x06proto3"
+	"\x05color\x18\x03 \x01(\tR\x05color\";\n" +
+	"\x13CreateLabelResponse\x12$\n" +
+	"\x05label\x18\x01 \x01(\v2\x0e.flow.v1.LabelR\x05labelB(Z&github.com/voxire/voxie/gen/go/flow/v1b\x06proto3"
 
 var (
 	file_flow_v1_labels_proto_rawDescOnce sync.Once
@@ -326,15 +326,15 @@ func file_flow_v1_labels_proto_rawDescGZIP() []byte {
 
 var file_flow_v1_labels_proto_msgTypes = make([]protoimpl.MessageInfo, 5)
 var file_flow_v1_labels_proto_goTypes = []any{
-	(*Label)(nil),               // 0: flow.Label
-	(*ListLabelsRequest)(nil),   // 1: flow.ListLabelsRequest
-	(*ListLabelsResponse)(nil),  // 2: flow.ListLabelsResponse
-	(*CreateLabelRequest)(nil),  // 3: flow.CreateLabelRequest
-	(*CreateLabelResponse)(nil), // 4: flow.CreateLabelResponse
+	(*Label)(nil),               // 0: flow.v1.Label
+	(*ListLabelsRequest)(nil),   // 1: flow.v1.ListLabelsRequest
+	(*ListLabelsResponse)(nil),  // 2: flow.v1.ListLabelsResponse
+	(*CreateLabelRequest)(nil),  // 3: flow.v1.CreateLabelRequest
+	(*CreateLabelResponse)(nil), // 4: flow.v1.CreateLabelResponse
 }
 var file_flow_v1_labels_proto_depIdxs = []int32{
-	0, // 0: flow.ListLabelsResponse.labels:type_name -> flow.Label
-	0, // 1: flow.CreateLabelResponse.label:type_name -> flow.Label
+	0, // 0: flow.v1.ListLabelsResponse.labels:type_name -> flow.v1.Label
+	0, // 1: flow.v1.CreateLabelResponse.label:type_name -> flow.v1.Label
 	2, // [2:2] is the sub-list for method output_type
 	2, // [2:2] is the sub-list for method input_type
 	2, // [2:2] is the sub-list for extension type_name

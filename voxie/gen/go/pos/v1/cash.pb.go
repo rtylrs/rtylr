@@ -645,7 +645,7 @@ var File_pos_v1_cash_proto protoreflect.FileDescriptor
 
 const file_pos_v1_cash_proto_rawDesc = "" +
 	"\n" +
-	"\x11pos/v1/cash.proto\x12\x03pos\"\xfb\x02\n" +
+	"\x11pos/v1/cash.proto\x12\x06pos.v1\"\xfb\x02\n" +
 	"\fCashMovement\x12\x0e\n" +
 	"\x02id\x18\x01 \x01(\x03R\x02id\x12\x1f\n" +
 	"\vbusiness_id\x18\x02 \x01(\x03R\n" +
@@ -670,9 +670,9 @@ const file_pos_v1_cash_proto_rawDesc = "" +
 	"\f_approved_by\"9\n" +
 	"\x18ListCashMovementsRequest\x12\x1d\n" +
 	"\n" +
-	"session_id\x18\x01 \x01(\x03R\tsessionId\"L\n" +
-	"\x19ListCashMovementsResponse\x12/\n" +
-	"\tmovements\x18\x01 \x03(\v2\x11.pos.CashMovementR\tmovements\"\xbf\x01\n" +
+	"session_id\x18\x01 \x01(\x03R\tsessionId\"O\n" +
+	"\x19ListCashMovementsResponse\x122\n" +
+	"\tmovements\x18\x01 \x03(\v2\x14.pos.v1.CashMovementR\tmovements\"\xbf\x01\n" +
 	"\x0fCashDropRequest\x12\x1b\n" +
 	"\tbranch_id\x18\x01 \x01(\x03R\bbranchId\x12\x1f\n" +
 	"\vterminal_id\x18\x02 \x01(\x03R\n" +
@@ -730,18 +730,18 @@ func file_pos_v1_cash_proto_rawDescGZIP() []byte {
 
 var file_pos_v1_cash_proto_msgTypes = make([]protoimpl.MessageInfo, 9)
 var file_pos_v1_cash_proto_goTypes = []any{
-	(*CashMovement)(nil),              // 0: pos.CashMovement
-	(*ListCashMovementsRequest)(nil),  // 1: pos.ListCashMovementsRequest
-	(*ListCashMovementsResponse)(nil), // 2: pos.ListCashMovementsResponse
-	(*CashDropRequest)(nil),           // 3: pos.CashDropRequest
-	(*CashDropResponse)(nil),          // 4: pos.CashDropResponse
-	(*CashPickupRequest)(nil),         // 5: pos.CashPickupRequest
-	(*CashPickupResponse)(nil),        // 6: pos.CashPickupResponse
-	(*CashAdjustRequest)(nil),         // 7: pos.CashAdjustRequest
-	(*CashAdjustResponse)(nil),        // 8: pos.CashAdjustResponse
+	(*CashMovement)(nil),              // 0: pos.v1.CashMovement
+	(*ListCashMovementsRequest)(nil),  // 1: pos.v1.ListCashMovementsRequest
+	(*ListCashMovementsResponse)(nil), // 2: pos.v1.ListCashMovementsResponse
+	(*CashDropRequest)(nil),           // 3: pos.v1.CashDropRequest
+	(*CashDropResponse)(nil),          // 4: pos.v1.CashDropResponse
+	(*CashPickupRequest)(nil),         // 5: pos.v1.CashPickupRequest
+	(*CashPickupResponse)(nil),        // 6: pos.v1.CashPickupResponse
+	(*CashAdjustRequest)(nil),         // 7: pos.v1.CashAdjustRequest
+	(*CashAdjustResponse)(nil),        // 8: pos.v1.CashAdjustResponse
 }
 var file_pos_v1_cash_proto_depIdxs = []int32{
-	0, // 0: pos.ListCashMovementsResponse.movements:type_name -> pos.CashMovement
+	0, // 0: pos.v1.ListCashMovementsResponse.movements:type_name -> pos.v1.CashMovement
 	1, // [1:1] is the sub-list for method output_type
 	1, // [1:1] is the sub-list for method input_type
 	1, // [1:1] is the sub-list for extension type_name

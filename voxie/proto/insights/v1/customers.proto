@@ -1,6 +1,6 @@
 syntax = "proto3";
 
-package insights;
+package insights.v1;
 
 option go_package = "github.com/voxire/voxie/gen/go/insights/v1";
 
@@ -64,14 +64,14 @@ message GetCustomerAnalyticsResponse {
 }
 
 message GetTopCustomersRequest {
-  common.PaginationRequest pagination = 1;
+  common.v1.PaginationRequest pagination = 1;
   string period = 2;
   string sort_by = 3; // total_spent, order_count
 }
 
 message GetTopCustomersResponse {
   repeated TopCustomerEntry customers = 1;
-  common.PaginationResponse pagination = 2;
+  common.v1.PaginationResponse pagination = 2;
 }
 
 message GetChurnAnalysisRequest {

@@ -94,13 +94,13 @@ var File_common_v1_error_proto protoreflect.FileDescriptor
 
 const file_common_v1_error_proto_rawDesc = "" +
 	"\n" +
-	"\x15common/v1/error.proto\x12\x06common\"\xd6\x01\n" +
+	"\x15common/v1/error.proto\x12\tcommon.v1\"\xd9\x01\n" +
 	"\rErrorResponse\x12\x12\n" +
 	"\x04code\x18\x01 \x01(\x05R\x04code\x12\x18\n" +
 	"\amessage\x18\x02 \x01(\tR\amessage\x12\x1d\n" +
 	"\n" +
-	"error_code\x18\x03 \x01(\tR\terrorCode\x12<\n" +
-	"\adetails\x18\x04 \x03(\v2\".common.ErrorResponse.DetailsEntryR\adetails\x1a:\n" +
+	"error_code\x18\x03 \x01(\tR\terrorCode\x12?\n" +
+	"\adetails\x18\x04 \x03(\v2%.common.v1.ErrorResponse.DetailsEntryR\adetails\x1a:\n" +
 	"\fDetailsEntry\x12\x10\n" +
 	"\x03key\x18\x01 \x01(\tR\x03key\x12\x14\n" +
 	"\x05value\x18\x02 \x01(\tR\x05value:\x028\x01B*Z(github.com/voxire/voxie/gen/go/common/v1b\x06proto3"
@@ -119,11 +119,11 @@ func file_common_v1_error_proto_rawDescGZIP() []byte {
 
 var file_common_v1_error_proto_msgTypes = make([]protoimpl.MessageInfo, 2)
 var file_common_v1_error_proto_goTypes = []any{
-	(*ErrorResponse)(nil), // 0: common.ErrorResponse
-	nil,                   // 1: common.ErrorResponse.DetailsEntry
+	(*ErrorResponse)(nil), // 0: common.v1.ErrorResponse
+	nil,                   // 1: common.v1.ErrorResponse.DetailsEntry
 }
 var file_common_v1_error_proto_depIdxs = []int32{
-	1, // 0: common.ErrorResponse.details:type_name -> common.ErrorResponse.DetailsEntry
+	1, // 0: common.v1.ErrorResponse.details:type_name -> common.v1.ErrorResponse.DetailsEntry
 	1, // [1:1] is the sub-list for method output_type
 	1, // [1:1] is the sub-list for method input_type
 	1, // [1:1] is the sub-list for extension type_name

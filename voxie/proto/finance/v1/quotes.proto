@@ -1,6 +1,6 @@
 syntax = "proto3";
 
-package finance;
+package finance.v1;
 
 option go_package = "github.com/voxire/voxie/gen/go/finance/v1";
 
@@ -34,14 +34,14 @@ message QuoteLine {
 }
 
 message ListQuotesRequest {
-  common.PaginationRequest pagination = 1;
+  common.v1.PaginationRequest pagination = 1;
   string status = 2;
   int64 customer_id = 3;
 }
 
 message ListQuotesResponse {
   repeated Quote quotes = 1;
-  common.PaginationResponse pagination = 2;
+  common.v1.PaginationResponse pagination = 2;
 }
 
 message GetQuoteRequest {

@@ -961,7 +961,7 @@ var File_crm_v1_campaigns_proto protoreflect.FileDescriptor
 
 const file_crm_v1_campaigns_proto_rawDesc = "" +
 	"\n" +
-	"\x16crm/v1/campaigns.proto\x12\x03crm\"\xdc\x04\n" +
+	"\x16crm/v1/campaigns.proto\x12\x06crm.v1\"\xdc\x04\n" +
 	"\bCampaign\x12\x0e\n" +
 	"\x02id\x18\x01 \x01(\x03R\x02id\x12\x19\n" +
 	"\bowner_id\x18\x02 \x01(\x03R\aownerId\x12\x12\n" +
@@ -991,9 +991,9 @@ const file_crm_v1_campaigns_proto_rawDesc = "" +
 	"\n" +
 	"\b_sent_at\".\n" +
 	"\x14ListCampaignsRequest\x12\x16\n" +
-	"\x06status\x18\x01 \x01(\tR\x06status\"D\n" +
-	"\x15ListCampaignsResponse\x12+\n" +
-	"\tcampaigns\x18\x01 \x03(\v2\r.crm.CampaignR\tcampaigns\"\xf1\x01\n" +
+	"\x06status\x18\x01 \x01(\tR\x06status\"G\n" +
+	"\x15ListCampaignsResponse\x12.\n" +
+	"\tcampaigns\x18\x01 \x03(\v2\x10.crm.v1.CampaignR\tcampaigns\"\xf1\x01\n" +
 	"\x15CreateCampaignRequest\x12\x12\n" +
 	"\x04name\x18\x01 \x01(\tR\x04name\x12 \n" +
 	"\vdescription\x18\x02 \x01(\tR\vdescription\x12\x18\n" +
@@ -1039,14 +1039,14 @@ const file_crm_v1_campaigns_proto_rawDesc = "" +
 	"\ffailed_count\x18\b \x01(\x03R\vfailedCount\":\n" +
 	"\x17GetCampaignStatsRequest\x12\x1f\n" +
 	"\vcampaign_id\x18\x01 \x01(\x03R\n" +
-	"campaignId\"D\n" +
-	"\x18GetCampaignStatsResponse\x12(\n" +
-	"\x05stats\x18\x01 \x01(\v2\x12.crm.CampaignStatsR\x05stats\"*\n" +
+	"campaignId\"G\n" +
+	"\x18GetCampaignStatsResponse\x12+\n" +
+	"\x05stats\x18\x01 \x01(\v2\x15.crm.v1.CampaignStatsR\x05stats\"*\n" +
 	"\x18GetCampaignDetailRequest\x12\x0e\n" +
-	"\x02id\x18\x01 \x01(\x03R\x02id\"p\n" +
-	"\x19GetCampaignDetailResponse\x12)\n" +
-	"\bcampaign\x18\x01 \x01(\v2\r.crm.CampaignR\bcampaign\x12(\n" +
-	"\x05stats\x18\x02 \x01(\v2\x12.crm.CampaignStatsR\x05statsB'Z%github.com/voxire/voxie/gen/go/crm/v1b\x06proto3"
+	"\x02id\x18\x01 \x01(\x03R\x02id\"v\n" +
+	"\x19GetCampaignDetailResponse\x12,\n" +
+	"\bcampaign\x18\x01 \x01(\v2\x10.crm.v1.CampaignR\bcampaign\x12+\n" +
+	"\x05stats\x18\x02 \x01(\v2\x15.crm.v1.CampaignStatsR\x05statsB'Z%github.com/voxire/voxie/gen/go/crm/v1b\x06proto3"
 
 var (
 	file_crm_v1_campaigns_proto_rawDescOnce sync.Once
@@ -1062,26 +1062,26 @@ func file_crm_v1_campaigns_proto_rawDescGZIP() []byte {
 
 var file_crm_v1_campaigns_proto_msgTypes = make([]protoimpl.MessageInfo, 14)
 var file_crm_v1_campaigns_proto_goTypes = []any{
-	(*Campaign)(nil),                     // 0: crm.Campaign
-	(*ListCampaignsRequest)(nil),         // 1: crm.ListCampaignsRequest
-	(*ListCampaignsResponse)(nil),        // 2: crm.ListCampaignsResponse
-	(*CreateCampaignRequest)(nil),        // 3: crm.CreateCampaignRequest
-	(*CreateCampaignResponse)(nil),       // 4: crm.CreateCampaignResponse
-	(*UpdateCampaignRequest)(nil),        // 5: crm.UpdateCampaignRequest
-	(*UpdateCampaignResponse)(nil),       // 6: crm.UpdateCampaignResponse
-	(*UpdateCampaignStatusRequest)(nil),  // 7: crm.UpdateCampaignStatusRequest
-	(*UpdateCampaignStatusResponse)(nil), // 8: crm.UpdateCampaignStatusResponse
-	(*CampaignStats)(nil),                // 9: crm.CampaignStats
-	(*GetCampaignStatsRequest)(nil),      // 10: crm.GetCampaignStatsRequest
-	(*GetCampaignStatsResponse)(nil),     // 11: crm.GetCampaignStatsResponse
-	(*GetCampaignDetailRequest)(nil),     // 12: crm.GetCampaignDetailRequest
-	(*GetCampaignDetailResponse)(nil),    // 13: crm.GetCampaignDetailResponse
+	(*Campaign)(nil),                     // 0: crm.v1.Campaign
+	(*ListCampaignsRequest)(nil),         // 1: crm.v1.ListCampaignsRequest
+	(*ListCampaignsResponse)(nil),        // 2: crm.v1.ListCampaignsResponse
+	(*CreateCampaignRequest)(nil),        // 3: crm.v1.CreateCampaignRequest
+	(*CreateCampaignResponse)(nil),       // 4: crm.v1.CreateCampaignResponse
+	(*UpdateCampaignRequest)(nil),        // 5: crm.v1.UpdateCampaignRequest
+	(*UpdateCampaignResponse)(nil),       // 6: crm.v1.UpdateCampaignResponse
+	(*UpdateCampaignStatusRequest)(nil),  // 7: crm.v1.UpdateCampaignStatusRequest
+	(*UpdateCampaignStatusResponse)(nil), // 8: crm.v1.UpdateCampaignStatusResponse
+	(*CampaignStats)(nil),                // 9: crm.v1.CampaignStats
+	(*GetCampaignStatsRequest)(nil),      // 10: crm.v1.GetCampaignStatsRequest
+	(*GetCampaignStatsResponse)(nil),     // 11: crm.v1.GetCampaignStatsResponse
+	(*GetCampaignDetailRequest)(nil),     // 12: crm.v1.GetCampaignDetailRequest
+	(*GetCampaignDetailResponse)(nil),    // 13: crm.v1.GetCampaignDetailResponse
 }
 var file_crm_v1_campaigns_proto_depIdxs = []int32{
-	0, // 0: crm.ListCampaignsResponse.campaigns:type_name -> crm.Campaign
-	9, // 1: crm.GetCampaignStatsResponse.stats:type_name -> crm.CampaignStats
-	0, // 2: crm.GetCampaignDetailResponse.campaign:type_name -> crm.Campaign
-	9, // 3: crm.GetCampaignDetailResponse.stats:type_name -> crm.CampaignStats
+	0, // 0: crm.v1.ListCampaignsResponse.campaigns:type_name -> crm.v1.Campaign
+	9, // 1: crm.v1.GetCampaignStatsResponse.stats:type_name -> crm.v1.CampaignStats
+	0, // 2: crm.v1.GetCampaignDetailResponse.campaign:type_name -> crm.v1.Campaign
+	9, // 3: crm.v1.GetCampaignDetailResponse.stats:type_name -> crm.v1.CampaignStats
 	4, // [4:4] is the sub-list for method output_type
 	4, // [4:4] is the sub-list for method input_type
 	4, // [4:4] is the sub-list for extension type_name

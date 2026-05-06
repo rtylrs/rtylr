@@ -854,15 +854,15 @@ var File_insights_v1_customers_proto protoreflect.FileDescriptor
 
 const file_insights_v1_customers_proto_rawDesc = "" +
 	"\n" +
-	"\x1binsights/v1/customers.proto\x12\binsights\x1a\x1acommon/v1/pagination.proto\"\xfc\x01\n" +
+	"\x1binsights/v1/customers.proto\x12\vinsights.v1\x1a\x1acommon/v1/pagination.proto\"\xff\x01\n" +
 	"\x11CustomerAnalytics\x12\x14\n" +
 	"\x05total\x18\x01 \x01(\x05R\x05total\x12&\n" +
 	"\x0fnew_this_period\x18\x02 \x01(\x05R\rnewThisPeriod\x12%\n" +
 	"\x0eretention_rate\x18\x03 \x01(\x01R\rretentionRate\x12,\n" +
 	"\x12avg_lifetime_value\x18\x04 \x01(\x01R\x10avgLifetimeValue\x12\x1d\n" +
 	"\n" +
-	"churn_rate\x18\x05 \x01(\x01R\tchurnRate\x125\n" +
-	"\x06growth\x18\x06 \x03(\v2\x1d.insights.CustomerGrowthPointR\x06growth\"d\n" +
+	"churn_rate\x18\x05 \x01(\x01R\tchurnRate\x128\n" +
+	"\x06growth\x18\x06 \x03(\v2 .insights.v1.CustomerGrowthPointR\x06growth\"d\n" +
 	"\x13CustomerGrowthPoint\x12\x12\n" +
 	"\x04date\x18\x01 \x01(\tR\x04date\x12#\n" +
 	"\rnew_customers\x18\x02 \x01(\x05R\fnewCustomers\x12\x14\n" +
@@ -874,49 +874,49 @@ const file_insights_v1_customers_proto_rawDesc = "" +
 	"totalSpent\x12\x1f\n" +
 	"\vorder_count\x18\x04 \x01(\x05R\n" +
 	"orderCount\x12\"\n" +
-	"\rlast_order_at\x18\x05 \x01(\tR\vlastOrderAt\"\x84\x01\n" +
+	"\rlast_order_at\x18\x05 \x01(\tR\vlastOrderAt\"\x87\x01\n" +
 	"\rChurnAnalysis\x12\x1d\n" +
 	"\n" +
 	"churn_rate\x18\x01 \x01(\x01R\tchurnRate\x12#\n" +
-	"\rchurned_count\x18\x02 \x01(\x05R\fchurnedCount\x12/\n" +
-	"\areasons\x18\x03 \x03(\v2\x15.insights.ChurnReasonR\areasons\"[\n" +
+	"\rchurned_count\x18\x02 \x01(\x05R\fchurnedCount\x122\n" +
+	"\areasons\x18\x03 \x03(\v2\x18.insights.v1.ChurnReasonR\areasons\"[\n" +
 	"\vChurnReason\x12\x16\n" +
 	"\x06reason\x18\x01 \x01(\tR\x06reason\x12\x14\n" +
 	"\x05count\x18\x02 \x01(\x05R\x05count\x12\x1e\n" +
 	"\n" +
 	"percentage\x18\x03 \x01(\x01R\n" +
-	"percentage\"q\n" +
+	"percentage\"t\n" +
 	"\vLTVAnalysis\x12\x18\n" +
 	"\aaverage\x18\x01 \x01(\x01R\aaverage\x12\x16\n" +
-	"\x06median\x18\x02 \x01(\x01R\x06median\x120\n" +
-	"\bsegments\x18\x03 \x03(\v2\x14.insights.LTVSegmentR\bsegments\"f\n" +
+	"\x06median\x18\x02 \x01(\x01R\x06median\x123\n" +
+	"\bsegments\x18\x03 \x03(\v2\x17.insights.v1.LTVSegmentR\bsegments\"f\n" +
 	"\n" +
 	"LTVSegment\x12\x18\n" +
 	"\asegment\x18\x01 \x01(\tR\asegment\x12\x17\n" +
 	"\aavg_ltv\x18\x02 \x01(\x01R\x06avgLtv\x12%\n" +
 	"\x0ecustomer_count\x18\x03 \x01(\x05R\rcustomerCount\"5\n" +
 	"\x1bGetCustomerAnalyticsRequest\x12\x16\n" +
-	"\x06period\x18\x01 \x01(\tR\x06period\"Y\n" +
-	"\x1cGetCustomerAnalyticsResponse\x129\n" +
-	"\tanalytics\x18\x01 \x01(\v2\x1b.insights.CustomerAnalyticsR\tanalytics\"\x84\x01\n" +
-	"\x16GetTopCustomersRequest\x129\n" +
+	"\x06period\x18\x01 \x01(\tR\x06period\"\\\n" +
+	"\x1cGetCustomerAnalyticsResponse\x12<\n" +
+	"\tanalytics\x18\x01 \x01(\v2\x1e.insights.v1.CustomerAnalyticsR\tanalytics\"\x87\x01\n" +
+	"\x16GetTopCustomersRequest\x12<\n" +
 	"\n" +
-	"pagination\x18\x01 \x01(\v2\x19.common.PaginationRequestR\n" +
+	"pagination\x18\x01 \x01(\v2\x1c.common.v1.PaginationRequestR\n" +
 	"pagination\x12\x16\n" +
 	"\x06period\x18\x02 \x01(\tR\x06period\x12\x17\n" +
-	"\asort_by\x18\x03 \x01(\tR\x06sortBy\"\x8f\x01\n" +
-	"\x17GetTopCustomersResponse\x128\n" +
-	"\tcustomers\x18\x01 \x03(\v2\x1a.insights.TopCustomerEntryR\tcustomers\x12:\n" +
+	"\asort_by\x18\x03 \x01(\tR\x06sortBy\"\x95\x01\n" +
+	"\x17GetTopCustomersResponse\x12;\n" +
+	"\tcustomers\x18\x01 \x03(\v2\x1d.insights.v1.TopCustomerEntryR\tcustomers\x12=\n" +
 	"\n" +
-	"pagination\x18\x02 \x01(\v2\x1a.common.PaginationResponseR\n" +
+	"pagination\x18\x02 \x01(\v2\x1d.common.v1.PaginationResponseR\n" +
 	"pagination\"1\n" +
 	"\x17GetChurnAnalysisRequest\x12\x16\n" +
-	"\x06period\x18\x01 \x01(\tR\x06period\"O\n" +
-	"\x18GetChurnAnalysisResponse\x123\n" +
-	"\banalysis\x18\x01 \x01(\v2\x17.insights.ChurnAnalysisR\banalysis\"\x17\n" +
-	"\x15GetLTVAnalysisRequest\"K\n" +
-	"\x16GetLTVAnalysisResponse\x121\n" +
-	"\banalysis\x18\x01 \x01(\v2\x15.insights.LTVAnalysisR\banalysisB,Z*github.com/voxire/voxie/gen/go/insights/v1b\x06proto3"
+	"\x06period\x18\x01 \x01(\tR\x06period\"R\n" +
+	"\x18GetChurnAnalysisResponse\x126\n" +
+	"\banalysis\x18\x01 \x01(\v2\x1a.insights.v1.ChurnAnalysisR\banalysis\"\x17\n" +
+	"\x15GetLTVAnalysisRequest\"N\n" +
+	"\x16GetLTVAnalysisResponse\x124\n" +
+	"\banalysis\x18\x01 \x01(\v2\x18.insights.v1.LTVAnalysisR\banalysisB,Z*github.com/voxire/voxie/gen/go/insights/v1b\x06proto3"
 
 var (
 	file_insights_v1_customers_proto_rawDescOnce sync.Once
@@ -932,34 +932,34 @@ func file_insights_v1_customers_proto_rawDescGZIP() []byte {
 
 var file_insights_v1_customers_proto_msgTypes = make([]protoimpl.MessageInfo, 15)
 var file_insights_v1_customers_proto_goTypes = []any{
-	(*CustomerAnalytics)(nil),            // 0: insights.CustomerAnalytics
-	(*CustomerGrowthPoint)(nil),          // 1: insights.CustomerGrowthPoint
-	(*TopCustomerEntry)(nil),             // 2: insights.TopCustomerEntry
-	(*ChurnAnalysis)(nil),                // 3: insights.ChurnAnalysis
-	(*ChurnReason)(nil),                  // 4: insights.ChurnReason
-	(*LTVAnalysis)(nil),                  // 5: insights.LTVAnalysis
-	(*LTVSegment)(nil),                   // 6: insights.LTVSegment
-	(*GetCustomerAnalyticsRequest)(nil),  // 7: insights.GetCustomerAnalyticsRequest
-	(*GetCustomerAnalyticsResponse)(nil), // 8: insights.GetCustomerAnalyticsResponse
-	(*GetTopCustomersRequest)(nil),       // 9: insights.GetTopCustomersRequest
-	(*GetTopCustomersResponse)(nil),      // 10: insights.GetTopCustomersResponse
-	(*GetChurnAnalysisRequest)(nil),      // 11: insights.GetChurnAnalysisRequest
-	(*GetChurnAnalysisResponse)(nil),     // 12: insights.GetChurnAnalysisResponse
-	(*GetLTVAnalysisRequest)(nil),        // 13: insights.GetLTVAnalysisRequest
-	(*GetLTVAnalysisResponse)(nil),       // 14: insights.GetLTVAnalysisResponse
-	(*v1.PaginationRequest)(nil),         // 15: common.PaginationRequest
-	(*v1.PaginationResponse)(nil),        // 16: common.PaginationResponse
+	(*CustomerAnalytics)(nil),            // 0: insights.v1.CustomerAnalytics
+	(*CustomerGrowthPoint)(nil),          // 1: insights.v1.CustomerGrowthPoint
+	(*TopCustomerEntry)(nil),             // 2: insights.v1.TopCustomerEntry
+	(*ChurnAnalysis)(nil),                // 3: insights.v1.ChurnAnalysis
+	(*ChurnReason)(nil),                  // 4: insights.v1.ChurnReason
+	(*LTVAnalysis)(nil),                  // 5: insights.v1.LTVAnalysis
+	(*LTVSegment)(nil),                   // 6: insights.v1.LTVSegment
+	(*GetCustomerAnalyticsRequest)(nil),  // 7: insights.v1.GetCustomerAnalyticsRequest
+	(*GetCustomerAnalyticsResponse)(nil), // 8: insights.v1.GetCustomerAnalyticsResponse
+	(*GetTopCustomersRequest)(nil),       // 9: insights.v1.GetTopCustomersRequest
+	(*GetTopCustomersResponse)(nil),      // 10: insights.v1.GetTopCustomersResponse
+	(*GetChurnAnalysisRequest)(nil),      // 11: insights.v1.GetChurnAnalysisRequest
+	(*GetChurnAnalysisResponse)(nil),     // 12: insights.v1.GetChurnAnalysisResponse
+	(*GetLTVAnalysisRequest)(nil),        // 13: insights.v1.GetLTVAnalysisRequest
+	(*GetLTVAnalysisResponse)(nil),       // 14: insights.v1.GetLTVAnalysisResponse
+	(*v1.PaginationRequest)(nil),         // 15: common.v1.PaginationRequest
+	(*v1.PaginationResponse)(nil),        // 16: common.v1.PaginationResponse
 }
 var file_insights_v1_customers_proto_depIdxs = []int32{
-	1,  // 0: insights.CustomerAnalytics.growth:type_name -> insights.CustomerGrowthPoint
-	4,  // 1: insights.ChurnAnalysis.reasons:type_name -> insights.ChurnReason
-	6,  // 2: insights.LTVAnalysis.segments:type_name -> insights.LTVSegment
-	0,  // 3: insights.GetCustomerAnalyticsResponse.analytics:type_name -> insights.CustomerAnalytics
-	15, // 4: insights.GetTopCustomersRequest.pagination:type_name -> common.PaginationRequest
-	2,  // 5: insights.GetTopCustomersResponse.customers:type_name -> insights.TopCustomerEntry
-	16, // 6: insights.GetTopCustomersResponse.pagination:type_name -> common.PaginationResponse
-	3,  // 7: insights.GetChurnAnalysisResponse.analysis:type_name -> insights.ChurnAnalysis
-	5,  // 8: insights.GetLTVAnalysisResponse.analysis:type_name -> insights.LTVAnalysis
+	1,  // 0: insights.v1.CustomerAnalytics.growth:type_name -> insights.v1.CustomerGrowthPoint
+	4,  // 1: insights.v1.ChurnAnalysis.reasons:type_name -> insights.v1.ChurnReason
+	6,  // 2: insights.v1.LTVAnalysis.segments:type_name -> insights.v1.LTVSegment
+	0,  // 3: insights.v1.GetCustomerAnalyticsResponse.analytics:type_name -> insights.v1.CustomerAnalytics
+	15, // 4: insights.v1.GetTopCustomersRequest.pagination:type_name -> common.v1.PaginationRequest
+	2,  // 5: insights.v1.GetTopCustomersResponse.customers:type_name -> insights.v1.TopCustomerEntry
+	16, // 6: insights.v1.GetTopCustomersResponse.pagination:type_name -> common.v1.PaginationResponse
+	3,  // 7: insights.v1.GetChurnAnalysisResponse.analysis:type_name -> insights.v1.ChurnAnalysis
+	5,  // 8: insights.v1.GetLTVAnalysisResponse.analysis:type_name -> insights.v1.LTVAnalysis
 	9,  // [9:9] is the sub-list for method output_type
 	9,  // [9:9] is the sub-list for method input_type
 	9,  // [9:9] is the sub-list for extension type_name

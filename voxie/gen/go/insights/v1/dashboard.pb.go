@@ -617,7 +617,7 @@ var File_insights_v1_dashboard_proto protoreflect.FileDescriptor
 
 const file_insights_v1_dashboard_proto_rawDesc = "" +
 	"\n" +
-	"\x1binsights/v1/dashboard.proto\x12\binsights\"\x14\n" +
+	"\x1binsights/v1/dashboard.proto\x12\vinsights.v1\"\x14\n" +
 	"\x12GetInsightsRequest\"\xa4\x02\n" +
 	"\x13GetInsightsResponse\x12\x1f\n" +
 	"\vtotal_tasks\x18\x01 \x01(\x03R\n" +
@@ -636,9 +636,9 @@ const file_insights_v1_dashboard_proto_rawDesc = "" +
 	"\x0fcompleted_tasks\x18\x04 \x01(\x03R\x0ecompletedTasks\x12#\n" +
 	"\roverdue_tasks\x18\x05 \x01(\x03R\foverdueTasks\x12!\n" +
 	"\ftotal_active\x18\x06 \x01(\x03R\vtotalActive\"\x14\n" +
-	"\x12GetWorkloadRequest\"J\n" +
-	"\x13GetWorkloadResponse\x123\n" +
-	"\bworkload\x18\x01 \x03(\v2\x17.insights.WorkloadEntryR\bworkload\"\x99\x02\n" +
+	"\x12GetWorkloadRequest\"M\n" +
+	"\x13GetWorkloadResponse\x126\n" +
+	"\bworkload\x18\x01 \x03(\v2\x1a.insights.v1.WorkloadEntryR\bworkload\"\x99\x02\n" +
 	"\x0eRoadmapProject\x12\x1d\n" +
 	"\n" +
 	"project_id\x18\x01 \x01(\x03R\tprojectId\x12!\n" +
@@ -651,9 +651,9 @@ const file_insights_v1_dashboard_proto_rawDesc = "" +
 	"\n" +
 	"start_date\x18\a \x01(\tR\tstartDate\x12\x19\n" +
 	"\bdue_date\x18\b \x01(\tR\adueDate\"\x13\n" +
-	"\x11GetRoadmapRequest\"J\n" +
-	"\x12GetRoadmapResponse\x124\n" +
-	"\bprojects\x18\x01 \x03(\v2\x18.insights.RoadmapProjectR\bprojects\"\x10\n" +
+	"\x11GetRoadmapRequest\"M\n" +
+	"\x12GetRoadmapResponse\x127\n" +
+	"\bprojects\x18\x01 \x03(\v2\x1b.insights.v1.RoadmapProjectR\bprojects\"\x10\n" +
 	"\x0eGetKPIsRequest\"\xdd\x01\n" +
 	"\x0fGetKPIsResponse\x12\x18\n" +
 	"\arevenue\x18\x01 \x01(\x01R\arevenue\x12\x1f\n" +
@@ -680,20 +680,20 @@ func file_insights_v1_dashboard_proto_rawDescGZIP() []byte {
 
 var file_insights_v1_dashboard_proto_msgTypes = make([]protoimpl.MessageInfo, 10)
 var file_insights_v1_dashboard_proto_goTypes = []any{
-	(*GetInsightsRequest)(nil),  // 0: insights.GetInsightsRequest
-	(*GetInsightsResponse)(nil), // 1: insights.GetInsightsResponse
-	(*WorkloadEntry)(nil),       // 2: insights.WorkloadEntry
-	(*GetWorkloadRequest)(nil),  // 3: insights.GetWorkloadRequest
-	(*GetWorkloadResponse)(nil), // 4: insights.GetWorkloadResponse
-	(*RoadmapProject)(nil),      // 5: insights.RoadmapProject
-	(*GetRoadmapRequest)(nil),   // 6: insights.GetRoadmapRequest
-	(*GetRoadmapResponse)(nil),  // 7: insights.GetRoadmapResponse
-	(*GetKPIsRequest)(nil),      // 8: insights.GetKPIsRequest
-	(*GetKPIsResponse)(nil),     // 9: insights.GetKPIsResponse
+	(*GetInsightsRequest)(nil),  // 0: insights.v1.GetInsightsRequest
+	(*GetInsightsResponse)(nil), // 1: insights.v1.GetInsightsResponse
+	(*WorkloadEntry)(nil),       // 2: insights.v1.WorkloadEntry
+	(*GetWorkloadRequest)(nil),  // 3: insights.v1.GetWorkloadRequest
+	(*GetWorkloadResponse)(nil), // 4: insights.v1.GetWorkloadResponse
+	(*RoadmapProject)(nil),      // 5: insights.v1.RoadmapProject
+	(*GetRoadmapRequest)(nil),   // 6: insights.v1.GetRoadmapRequest
+	(*GetRoadmapResponse)(nil),  // 7: insights.v1.GetRoadmapResponse
+	(*GetKPIsRequest)(nil),      // 8: insights.v1.GetKPIsRequest
+	(*GetKPIsResponse)(nil),     // 9: insights.v1.GetKPIsResponse
 }
 var file_insights_v1_dashboard_proto_depIdxs = []int32{
-	2, // 0: insights.GetWorkloadResponse.workload:type_name -> insights.WorkloadEntry
-	5, // 1: insights.GetRoadmapResponse.projects:type_name -> insights.RoadmapProject
+	2, // 0: insights.v1.GetWorkloadResponse.workload:type_name -> insights.v1.WorkloadEntry
+	5, // 1: insights.v1.GetRoadmapResponse.projects:type_name -> insights.v1.RoadmapProject
 	2, // [2:2] is the sub-list for method output_type
 	2, // [2:2] is the sub-list for method input_type
 	2, // [2:2] is the sub-list for extension type_name
