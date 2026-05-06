@@ -5,9 +5,12 @@ import { createApiClient } from './client';
 vi.stubGlobal('import', { meta: { env: { VITE_API_URL: 'https://api.test.com/' } } });
 
 beforeEach(() => {
-  // Reset document.cookie
-  document.cookie = '';
+  vi.restoreAllMocks();
 });
+
+function mockCookie(value: string) {
+  return vi.spyOn(document, 'cookie', 'get').mockReturnValue(value);
+}
 
 describe('createApiClient', () => {
   it('returns an axios instance', () => {
@@ -26,7 +29,7 @@ describe('createApiClient', () => {
   });
 
   it('request interceptor adds Authorization header when token exists', async () => {
-    document.cookie = 'token=my-test-token';
+    mockCookie('token=my-test-token');
     const client = createApiClient('hub');
 
     // Access the request interceptor through the config
@@ -44,7 +47,7 @@ describe('createApiClient', () => {
   });
 
   it('request interceptor does not add header when no token', async () => {
-    document.cookie = '';
+    mockCookie('');
     const client = createApiClient('hub');
 
     const config = {
@@ -57,6 +60,7 @@ describe('createApiClient', () => {
   });
 
   it('response interceptor handles 401 by redirecting', async () => {
+    const cookieSetter = vi.spyOn(document, 'cookie', 'set');
     const client = createApiClient('hub');
 
     const interceptors = (client.interceptors.response as any).handlers;
@@ -64,16 +68,13 @@ describe('createApiClient', () => {
 
     // The rejected handler handles 401s
     const error = { response: { status: 401 } };
-    const originalHref = window.location.href;
-
     try {
       await interceptors[0].rejected(error);
     } catch {
       // Expected to reject
     }
 
-    // Cookie should be cleared
-    expect(document.cookie).toContain('Max-Age=0');
+    expect(cookieSetter).toHaveBeenCalledWith('token=; Max-Age=0; path=/;');
   });
 
   it('response interceptor passes through non-401 errors', async () => {
@@ -110,7 +111,7 @@ describe('createApiClient', () => {
   });
 
   it('handles token with special characters in cookie', () => {
-    document.cookie = 'token=eyJhbGciOiJIUzI1NiJ9.test.sig';
+    mockCookie('token=eyJhbGciOiJIUzI1NiJ9.test.sig');
     const client = createApiClient('hub');
 
     const config = { headers: {} as any };
