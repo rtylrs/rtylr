@@ -498,13 +498,14 @@ var File_finance_v1_journal_proto protoreflect.FileDescriptor
 
 const file_finance_v1_journal_proto_rawDesc = "" +
 	"\n" +
-	"\x18finance/v1/journal.proto\x12\afinance\x1a\x1acommon/v1/pagination.proto\"\xcf\x01\n" +
+	"\x18finance/v1/journal.proto\x12\n" +
+	"finance.v1\x1a\x1acommon/v1/pagination.proto\"\xd2\x01\n" +
 	"\fJournalEntry\x12\x0e\n" +
 	"\x02id\x18\x01 \x01(\x03R\x02id\x12\x16\n" +
 	"\x06number\x18\x02 \x01(\tR\x06number\x12\x12\n" +
 	"\x04date\x18\x03 \x01(\tR\x04date\x12 \n" +
-	"\vdescription\x18\x04 \x01(\tR\vdescription\x12*\n" +
-	"\x05lines\x18\x05 \x03(\v2\x14.finance.JournalLineR\x05lines\x12\x16\n" +
+	"\vdescription\x18\x04 \x01(\tR\vdescription\x12-\n" +
+	"\x05lines\x18\x05 \x03(\v2\x17.finance.v1.JournalLineR\x05lines\x12\x16\n" +
 	"\x06status\x18\x06 \x01(\tR\x06status\x12\x1d\n" +
 	"\n" +
 	"created_at\x18\a \x01(\tR\tcreatedAt\"\x9f\x01\n" +
@@ -514,28 +515,28 @@ const file_finance_v1_journal_proto_rawDesc = "" +
 	"\faccount_name\x18\x02 \x01(\tR\vaccountName\x12\x14\n" +
 	"\x05debit\x18\x03 \x01(\x01R\x05debit\x12\x16\n" +
 	"\x06credit\x18\x04 \x01(\x01R\x06credit\x12 \n" +
-	"\vdescription\x18\x05 \x01(\tR\vdescription\"\x8c\x01\n" +
-	"\x19ListJournalEntriesRequest\x129\n" +
+	"\vdescription\x18\x05 \x01(\tR\vdescription\"\x8f\x01\n" +
+	"\x19ListJournalEntriesRequest\x12<\n" +
 	"\n" +
-	"pagination\x18\x01 \x01(\v2\x19.common.PaginationRequestR\n" +
+	"pagination\x18\x01 \x01(\v2\x1c.common.v1.PaginationRequestR\n" +
 	"pagination\x12\x1b\n" +
 	"\tfrom_date\x18\x02 \x01(\tR\bfromDate\x12\x17\n" +
-	"\ato_date\x18\x03 \x01(\tR\x06toDate\"\x89\x01\n" +
-	"\x1aListJournalEntriesResponse\x12/\n" +
-	"\aentries\x18\x01 \x03(\v2\x15.finance.JournalEntryR\aentries\x12:\n" +
+	"\ato_date\x18\x03 \x01(\tR\x06toDate\"\x8f\x01\n" +
+	"\x1aListJournalEntriesResponse\x122\n" +
+	"\aentries\x18\x01 \x03(\v2\x18.finance.v1.JournalEntryR\aentries\x12=\n" +
 	"\n" +
-	"pagination\x18\x02 \x01(\v2\x1a.common.PaginationResponseR\n" +
+	"pagination\x18\x02 \x01(\v2\x1d.common.v1.PaginationResponseR\n" +
 	"pagination\"(\n" +
 	"\x16GetJournalEntryRequest\x12\x0e\n" +
-	"\x02id\x18\x01 \x01(\x03R\x02id\"F\n" +
-	"\x17GetJournalEntryResponse\x12+\n" +
-	"\x05entry\x18\x01 \x01(\v2\x15.finance.JournalEntryR\x05entry\"}\n" +
+	"\x02id\x18\x01 \x01(\x03R\x02id\"I\n" +
+	"\x17GetJournalEntryResponse\x12.\n" +
+	"\x05entry\x18\x01 \x01(\v2\x18.finance.v1.JournalEntryR\x05entry\"\x80\x01\n" +
 	"\x19CreateJournalEntryRequest\x12\x12\n" +
 	"\x04date\x18\x01 \x01(\tR\x04date\x12 \n" +
-	"\vdescription\x18\x02 \x01(\tR\vdescription\x12*\n" +
-	"\x05lines\x18\x03 \x03(\v2\x14.finance.JournalLineR\x05lines\"I\n" +
-	"\x1aCreateJournalEntryResponse\x12+\n" +
-	"\x05entry\x18\x01 \x01(\v2\x15.finance.JournalEntryR\x05entryB+Z)github.com/voxire/voxie/gen/go/finance/v1b\x06proto3"
+	"\vdescription\x18\x02 \x01(\tR\vdescription\x12-\n" +
+	"\x05lines\x18\x03 \x03(\v2\x17.finance.v1.JournalLineR\x05lines\"L\n" +
+	"\x1aCreateJournalEntryResponse\x12.\n" +
+	"\x05entry\x18\x01 \x01(\v2\x18.finance.v1.JournalEntryR\x05entryB+Z)github.com/voxire/voxie/gen/go/finance/v1b\x06proto3"
 
 var (
 	file_finance_v1_journal_proto_rawDescOnce sync.Once
@@ -551,25 +552,25 @@ func file_finance_v1_journal_proto_rawDescGZIP() []byte {
 
 var file_finance_v1_journal_proto_msgTypes = make([]protoimpl.MessageInfo, 8)
 var file_finance_v1_journal_proto_goTypes = []any{
-	(*JournalEntry)(nil),               // 0: finance.JournalEntry
-	(*JournalLine)(nil),                // 1: finance.JournalLine
-	(*ListJournalEntriesRequest)(nil),  // 2: finance.ListJournalEntriesRequest
-	(*ListJournalEntriesResponse)(nil), // 3: finance.ListJournalEntriesResponse
-	(*GetJournalEntryRequest)(nil),     // 4: finance.GetJournalEntryRequest
-	(*GetJournalEntryResponse)(nil),    // 5: finance.GetJournalEntryResponse
-	(*CreateJournalEntryRequest)(nil),  // 6: finance.CreateJournalEntryRequest
-	(*CreateJournalEntryResponse)(nil), // 7: finance.CreateJournalEntryResponse
-	(*v1.PaginationRequest)(nil),       // 8: common.PaginationRequest
-	(*v1.PaginationResponse)(nil),      // 9: common.PaginationResponse
+	(*JournalEntry)(nil),               // 0: finance.v1.JournalEntry
+	(*JournalLine)(nil),                // 1: finance.v1.JournalLine
+	(*ListJournalEntriesRequest)(nil),  // 2: finance.v1.ListJournalEntriesRequest
+	(*ListJournalEntriesResponse)(nil), // 3: finance.v1.ListJournalEntriesResponse
+	(*GetJournalEntryRequest)(nil),     // 4: finance.v1.GetJournalEntryRequest
+	(*GetJournalEntryResponse)(nil),    // 5: finance.v1.GetJournalEntryResponse
+	(*CreateJournalEntryRequest)(nil),  // 6: finance.v1.CreateJournalEntryRequest
+	(*CreateJournalEntryResponse)(nil), // 7: finance.v1.CreateJournalEntryResponse
+	(*v1.PaginationRequest)(nil),       // 8: common.v1.PaginationRequest
+	(*v1.PaginationResponse)(nil),      // 9: common.v1.PaginationResponse
 }
 var file_finance_v1_journal_proto_depIdxs = []int32{
-	1, // 0: finance.JournalEntry.lines:type_name -> finance.JournalLine
-	8, // 1: finance.ListJournalEntriesRequest.pagination:type_name -> common.PaginationRequest
-	0, // 2: finance.ListJournalEntriesResponse.entries:type_name -> finance.JournalEntry
-	9, // 3: finance.ListJournalEntriesResponse.pagination:type_name -> common.PaginationResponse
-	0, // 4: finance.GetJournalEntryResponse.entry:type_name -> finance.JournalEntry
-	1, // 5: finance.CreateJournalEntryRequest.lines:type_name -> finance.JournalLine
-	0, // 6: finance.CreateJournalEntryResponse.entry:type_name -> finance.JournalEntry
+	1, // 0: finance.v1.JournalEntry.lines:type_name -> finance.v1.JournalLine
+	8, // 1: finance.v1.ListJournalEntriesRequest.pagination:type_name -> common.v1.PaginationRequest
+	0, // 2: finance.v1.ListJournalEntriesResponse.entries:type_name -> finance.v1.JournalEntry
+	9, // 3: finance.v1.ListJournalEntriesResponse.pagination:type_name -> common.v1.PaginationResponse
+	0, // 4: finance.v1.GetJournalEntryResponse.entry:type_name -> finance.v1.JournalEntry
+	1, // 5: finance.v1.CreateJournalEntryRequest.lines:type_name -> finance.v1.JournalLine
+	0, // 6: finance.v1.CreateJournalEntryResponse.entry:type_name -> finance.v1.JournalEntry
 	7, // [7:7] is the sub-list for method output_type
 	7, // [7:7] is the sub-list for method input_type
 	7, // [7:7] is the sub-list for extension type_name

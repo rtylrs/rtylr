@@ -1133,7 +1133,7 @@ var File_crm_v1_customers_proto protoreflect.FileDescriptor
 
 const file_crm_v1_customers_proto_rawDesc = "" +
 	"\n" +
-	"\x16crm/v1/customers.proto\x12\x03crm\x1a\x15crm/v1/segments.proto\"\x84\x05\n" +
+	"\x16crm/v1/customers.proto\x12\x06crm.v1\x1a\x15crm/v1/segments.proto\"\x84\x05\n" +
 	"\bCustomer\x12\x0e\n" +
 	"\x02id\x18\x01 \x01(\x03R\x02id\x12\x19\n" +
 	"\bowner_id\x18\x02 \x01(\x03R\aownerId\x12\x1d\n" +
@@ -1169,9 +1169,9 @@ const file_crm_v1_customers_proto_rawDesc = "" +
 	"\x04tier\x18\x02 \x01(\tR\x04tier\x12\x10\n" +
 	"\x03tag\x18\x03 \x01(\tR\x03tag\x12\x12\n" +
 	"\x04page\x18\x04 \x01(\x03R\x04page\x12\x1b\n" +
-	"\tpage_size\x18\x05 \x01(\x03R\bpageSize\"\x8b\x01\n" +
-	"\x15ListCustomersResponse\x12+\n" +
-	"\tcustomers\x18\x01 \x03(\v2\r.crm.CustomerR\tcustomers\x12\x14\n" +
+	"\tpage_size\x18\x05 \x01(\x03R\bpageSize\"\x8e\x01\n" +
+	"\x15ListCustomersResponse\x12.\n" +
+	"\tcustomers\x18\x01 \x03(\v2\x10.crm.v1.CustomerR\tcustomers\x12\x14\n" +
 	"\x05total\x18\x02 \x01(\x03R\x05total\x12\x12\n" +
 	"\x04page\x18\x03 \x01(\x03R\x04page\x12\x1b\n" +
 	"\tpage_size\x18\x04 \x01(\x03R\bpageSize\"\xad\x02\n" +
@@ -1218,24 +1218,24 @@ const file_crm_v1_customers_proto_rawDesc = "" +
 	"\x16DeleteCustomerResponse\x12\x18\n" +
 	"\amessage\x18\x01 \x01(\tR\amessage\")\n" +
 	"\x17GetSegmentDetailRequest\x12\x0e\n" +
-	"\x02id\x18\x01 \x01(\x03R\x02id\"o\n" +
-	"\x18GetSegmentDetailResponse\x12&\n" +
-	"\asegment\x18\x01 \x01(\v2\f.crm.SegmentR\asegment\x12+\n" +
-	"\tcustomers\x18\x02 \x03(\v2\r.crm.CustomerR\tcustomers\"l\n" +
+	"\x02id\x18\x01 \x01(\x03R\x02id\"u\n" +
+	"\x18GetSegmentDetailResponse\x12)\n" +
+	"\asegment\x18\x01 \x01(\v2\x0f.crm.v1.SegmentR\asegment\x12.\n" +
+	"\tcustomers\x18\x02 \x03(\v2\x10.crm.v1.CustomerR\tcustomers\"l\n" +
 	"\x1aGetSegmentCustomersRequest\x12\x1d\n" +
 	"\n" +
 	"segment_id\x18\x01 \x01(\x03R\tsegmentId\x12\x12\n" +
 	"\x04page\x18\x02 \x01(\x03R\x04page\x12\x1b\n" +
-	"\tpage_size\x18\x03 \x01(\x03R\bpageSize\"\x91\x01\n" +
-	"\x1bGetSegmentCustomersResponse\x12+\n" +
-	"\tcustomers\x18\x01 \x03(\v2\r.crm.CustomerR\tcustomers\x12\x14\n" +
+	"\tpage_size\x18\x03 \x01(\x03R\bpageSize\"\x94\x01\n" +
+	"\x1bGetSegmentCustomersResponse\x12.\n" +
+	"\tcustomers\x18\x01 \x03(\v2\x10.crm.v1.CustomerR\tcustomers\x12\x14\n" +
 	"\x05total\x18\x02 \x01(\x03R\x05total\x12\x12\n" +
 	"\x04page\x18\x03 \x01(\x03R\x04page\x12\x1b\n" +
 	"\tpage_size\x18\x04 \x01(\x03R\bpageSize\"$\n" +
 	"\x12GetCustomerRequest\x12\x0e\n" +
-	"\x02id\x18\x01 \x01(\x03R\x02id\"@\n" +
-	"\x13GetCustomerResponse\x12)\n" +
-	"\bcustomer\x18\x01 \x01(\v2\r.crm.CustomerR\bcustomerB'Z%github.com/voxire/voxie/gen/go/crm/v1b\x06proto3"
+	"\x02id\x18\x01 \x01(\x03R\x02id\"C\n" +
+	"\x13GetCustomerResponse\x12,\n" +
+	"\bcustomer\x18\x01 \x01(\v2\x10.crm.v1.CustomerR\bcustomerB'Z%github.com/voxire/voxie/gen/go/crm/v1b\x06proto3"
 
 var (
 	file_crm_v1_customers_proto_rawDescOnce sync.Once
@@ -1251,29 +1251,29 @@ func file_crm_v1_customers_proto_rawDescGZIP() []byte {
 
 var file_crm_v1_customers_proto_msgTypes = make([]protoimpl.MessageInfo, 15)
 var file_crm_v1_customers_proto_goTypes = []any{
-	(*Customer)(nil),                    // 0: crm.Customer
-	(*ListCustomersRequest)(nil),        // 1: crm.ListCustomersRequest
-	(*ListCustomersResponse)(nil),       // 2: crm.ListCustomersResponse
-	(*CreateCustomerRequest)(nil),       // 3: crm.CreateCustomerRequest
-	(*CreateCustomerResponse)(nil),      // 4: crm.CreateCustomerResponse
-	(*UpdateCustomerRequest)(nil),       // 5: crm.UpdateCustomerRequest
-	(*UpdateCustomerResponse)(nil),      // 6: crm.UpdateCustomerResponse
-	(*DeleteCustomerRequest)(nil),       // 7: crm.DeleteCustomerRequest
-	(*DeleteCustomerResponse)(nil),      // 8: crm.DeleteCustomerResponse
-	(*GetSegmentDetailRequest)(nil),     // 9: crm.GetSegmentDetailRequest
-	(*GetSegmentDetailResponse)(nil),    // 10: crm.GetSegmentDetailResponse
-	(*GetSegmentCustomersRequest)(nil),  // 11: crm.GetSegmentCustomersRequest
-	(*GetSegmentCustomersResponse)(nil), // 12: crm.GetSegmentCustomersResponse
-	(*GetCustomerRequest)(nil),          // 13: crm.GetCustomerRequest
-	(*GetCustomerResponse)(nil),         // 14: crm.GetCustomerResponse
-	(*Segment)(nil),                     // 15: crm.Segment
+	(*Customer)(nil),                    // 0: crm.v1.Customer
+	(*ListCustomersRequest)(nil),        // 1: crm.v1.ListCustomersRequest
+	(*ListCustomersResponse)(nil),       // 2: crm.v1.ListCustomersResponse
+	(*CreateCustomerRequest)(nil),       // 3: crm.v1.CreateCustomerRequest
+	(*CreateCustomerResponse)(nil),      // 4: crm.v1.CreateCustomerResponse
+	(*UpdateCustomerRequest)(nil),       // 5: crm.v1.UpdateCustomerRequest
+	(*UpdateCustomerResponse)(nil),      // 6: crm.v1.UpdateCustomerResponse
+	(*DeleteCustomerRequest)(nil),       // 7: crm.v1.DeleteCustomerRequest
+	(*DeleteCustomerResponse)(nil),      // 8: crm.v1.DeleteCustomerResponse
+	(*GetSegmentDetailRequest)(nil),     // 9: crm.v1.GetSegmentDetailRequest
+	(*GetSegmentDetailResponse)(nil),    // 10: crm.v1.GetSegmentDetailResponse
+	(*GetSegmentCustomersRequest)(nil),  // 11: crm.v1.GetSegmentCustomersRequest
+	(*GetSegmentCustomersResponse)(nil), // 12: crm.v1.GetSegmentCustomersResponse
+	(*GetCustomerRequest)(nil),          // 13: crm.v1.GetCustomerRequest
+	(*GetCustomerResponse)(nil),         // 14: crm.v1.GetCustomerResponse
+	(*Segment)(nil),                     // 15: crm.v1.Segment
 }
 var file_crm_v1_customers_proto_depIdxs = []int32{
-	0,  // 0: crm.ListCustomersResponse.customers:type_name -> crm.Customer
-	15, // 1: crm.GetSegmentDetailResponse.segment:type_name -> crm.Segment
-	0,  // 2: crm.GetSegmentDetailResponse.customers:type_name -> crm.Customer
-	0,  // 3: crm.GetSegmentCustomersResponse.customers:type_name -> crm.Customer
-	0,  // 4: crm.GetCustomerResponse.customer:type_name -> crm.Customer
+	0,  // 0: crm.v1.ListCustomersResponse.customers:type_name -> crm.v1.Customer
+	15, // 1: crm.v1.GetSegmentDetailResponse.segment:type_name -> crm.v1.Segment
+	0,  // 2: crm.v1.GetSegmentDetailResponse.customers:type_name -> crm.v1.Customer
+	0,  // 3: crm.v1.GetSegmentCustomersResponse.customers:type_name -> crm.v1.Customer
+	0,  // 4: crm.v1.GetCustomerResponse.customer:type_name -> crm.v1.Customer
 	5,  // [5:5] is the sub-list for method output_type
 	5,  // [5:5] is the sub-list for method input_type
 	5,  // [5:5] is the sub-list for extension type_name

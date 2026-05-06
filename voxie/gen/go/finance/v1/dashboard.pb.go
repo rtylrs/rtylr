@@ -129,7 +129,8 @@ var File_finance_v1_dashboard_proto protoreflect.FileDescriptor
 
 const file_finance_v1_dashboard_proto_rawDesc = "" +
 	"\n" +
-	"\x1afinance/v1/dashboard.proto\x12\afinance\"\x1c\n" +
+	"\x1afinance/v1/dashboard.proto\x12\n" +
+	"finance.v1\"\x1c\n" +
 	"\x1aGetFinanceDashboardRequest\"\xc3\x01\n" +
 	"\x1bGetFinanceDashboardResponse\x12)\n" +
 	"\x10total_receivable\x18\x01 \x01(\x01R\x0ftotalReceivable\x12%\n" +
@@ -151,8 +152,8 @@ func file_finance_v1_dashboard_proto_rawDescGZIP() []byte {
 
 var file_finance_v1_dashboard_proto_msgTypes = make([]protoimpl.MessageInfo, 2)
 var file_finance_v1_dashboard_proto_goTypes = []any{
-	(*GetFinanceDashboardRequest)(nil),  // 0: finance.GetFinanceDashboardRequest
-	(*GetFinanceDashboardResponse)(nil), // 1: finance.GetFinanceDashboardResponse
+	(*GetFinanceDashboardRequest)(nil),  // 0: finance.v1.GetFinanceDashboardRequest
+	(*GetFinanceDashboardResponse)(nil), // 1: finance.v1.GetFinanceDashboardResponse
 }
 var file_finance_v1_dashboard_proto_depIdxs = []int32{
 	0, // [0:0] is the sub-list for method output_type

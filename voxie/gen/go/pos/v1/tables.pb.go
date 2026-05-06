@@ -509,7 +509,7 @@ var File_pos_v1_tables_proto protoreflect.FileDescriptor
 
 const file_pos_v1_tables_proto_rawDesc = "" +
 	"\n" +
-	"\x13pos/v1/tables.proto\x12\x03pos\"\xea\x01\n" +
+	"\x13pos/v1/tables.proto\x12\x06pos.v1\"\xea\x01\n" +
 	"\x05Table\x12\x0e\n" +
 	"\x02id\x18\x01 \x01(\x03R\x02id\x12\x19\n" +
 	"\bowner_id\x18\x02 \x01(\x03R\aownerId\x12$\n" +
@@ -523,10 +523,9 @@ const file_pos_v1_tables_proto_rawDesc = "" +
 	"\n" +
 	"updated_at\x18\b \x01(\tR\tupdatedAtB\x0e\n" +
 	"\f_location_id\"\x13\n" +
-	"\x11ListTablesRequest\"8\n" +
-	"\x12ListTablesResponse\x12\"\n" +
-	"\x06tables\x18\x01 \x03(\v2\n" +
-	".pos.TableR\x06tables\"v\n" +
+	"\x11ListTablesRequest\";\n" +
+	"\x12ListTablesResponse\x12%\n" +
+	"\x06tables\x18\x01 \x03(\v2\r.pos.v1.TableR\x06tables\"v\n" +
 	"\x12CreateTableRequest\x12$\n" +
 	"\vlocation_id\x18\x01 \x01(\x03H\x00R\n" +
 	"locationId\x88\x01\x01\x12\x14\n" +
@@ -563,18 +562,18 @@ func file_pos_v1_tables_proto_rawDescGZIP() []byte {
 
 var file_pos_v1_tables_proto_msgTypes = make([]protoimpl.MessageInfo, 9)
 var file_pos_v1_tables_proto_goTypes = []any{
-	(*Table)(nil),               // 0: pos.Table
-	(*ListTablesRequest)(nil),   // 1: pos.ListTablesRequest
-	(*ListTablesResponse)(nil),  // 2: pos.ListTablesResponse
-	(*CreateTableRequest)(nil),  // 3: pos.CreateTableRequest
-	(*CreateTableResponse)(nil), // 4: pos.CreateTableResponse
-	(*UpdateTableRequest)(nil),  // 5: pos.UpdateTableRequest
-	(*UpdateTableResponse)(nil), // 6: pos.UpdateTableResponse
-	(*DeleteTableRequest)(nil),  // 7: pos.DeleteTableRequest
-	(*DeleteTableResponse)(nil), // 8: pos.DeleteTableResponse
+	(*Table)(nil),               // 0: pos.v1.Table
+	(*ListTablesRequest)(nil),   // 1: pos.v1.ListTablesRequest
+	(*ListTablesResponse)(nil),  // 2: pos.v1.ListTablesResponse
+	(*CreateTableRequest)(nil),  // 3: pos.v1.CreateTableRequest
+	(*CreateTableResponse)(nil), // 4: pos.v1.CreateTableResponse
+	(*UpdateTableRequest)(nil),  // 5: pos.v1.UpdateTableRequest
+	(*UpdateTableResponse)(nil), // 6: pos.v1.UpdateTableResponse
+	(*DeleteTableRequest)(nil),  // 7: pos.v1.DeleteTableRequest
+	(*DeleteTableResponse)(nil), // 8: pos.v1.DeleteTableResponse
 }
 var file_pos_v1_tables_proto_depIdxs = []int32{
-	0, // 0: pos.ListTablesResponse.tables:type_name -> pos.Table
+	0, // 0: pos.v1.ListTablesResponse.tables:type_name -> pos.v1.Table
 	1, // [1:1] is the sub-list for method output_type
 	1, // [1:1] is the sub-list for method input_type
 	1, // [1:1] is the sub-list for extension type_name

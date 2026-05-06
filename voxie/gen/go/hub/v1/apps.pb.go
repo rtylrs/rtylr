@@ -633,7 +633,7 @@ var File_hub_v1_apps_proto protoreflect.FileDescriptor
 
 const file_hub_v1_apps_proto_rawDesc = "" +
 	"\n" +
-	"\x11hub/v1/apps.proto\x12\x03hub\"~\n" +
+	"\x11hub/v1/apps.proto\x12\x06hub.v1\"~\n" +
 	"\x03App\x12\x0e\n" +
 	"\x02id\x18\x01 \x01(\tR\x02id\x12\x12\n" +
 	"\x04name\x18\x02 \x01(\tR\x04name\x12 \n" +
@@ -641,9 +641,9 @@ const file_hub_v1_apps_proto_rawDesc = "" +
 	"\x04icon\x18\x04 \x01(\tR\x04icon\x12\x1d\n" +
 	"\n" +
 	"is_enabled\x18\x05 \x01(\bR\tisEnabled\"\x11\n" +
-	"\x0fListAppsRequest\"0\n" +
-	"\x10ListAppsResponse\x12\x1c\n" +
-	"\x04apps\x18\x01 \x03(\v2\b.hub.AppR\x04apps\"\x98\x02\n" +
+	"\x0fListAppsRequest\"3\n" +
+	"\x10ListAppsResponse\x12\x1f\n" +
+	"\x04apps\x18\x01 \x03(\v2\v.hub.v1.AppR\x04apps\"\x98\x02\n" +
 	"\x05Addon\x12\x0e\n" +
 	"\x02id\x18\x01 \x01(\tR\x02id\x12\x12\n" +
 	"\x04name\x18\x02 \x01(\tR\x04name\x12 \n" +
@@ -659,10 +659,9 @@ const file_hub_v1_apps_proto_rawDesc = "" +
 	"disabledAt\x88\x01\x01B\r\n" +
 	"\v_enabled_atB\x0e\n" +
 	"\f_disabled_at\"\x13\n" +
-	"\x11ListAddonsRequest\"8\n" +
-	"\x12ListAddonsResponse\x12\"\n" +
-	"\x06addons\x18\x01 \x03(\v2\n" +
-	".hub.AddonR\x06addons\"/\n" +
+	"\x11ListAddonsRequest\";\n" +
+	"\x12ListAddonsResponse\x12%\n" +
+	"\x06addons\x18\x01 \x03(\v2\r.hub.v1.AddonR\x06addons\"/\n" +
 	"\x12EnableAddonRequest\x12\x19\n" +
 	"\baddon_id\x18\x01 \x01(\tR\aaddonId\"/\n" +
 	"\x13EnableAddonResponse\x12\x18\n" +
@@ -691,22 +690,22 @@ func file_hub_v1_apps_proto_rawDescGZIP() []byte {
 
 var file_hub_v1_apps_proto_msgTypes = make([]protoimpl.MessageInfo, 12)
 var file_hub_v1_apps_proto_goTypes = []any{
-	(*App)(nil),                  // 0: hub.App
-	(*ListAppsRequest)(nil),      // 1: hub.ListAppsRequest
-	(*ListAppsResponse)(nil),     // 2: hub.ListAppsResponse
-	(*Addon)(nil),                // 3: hub.Addon
-	(*ListAddonsRequest)(nil),    // 4: hub.ListAddonsRequest
-	(*ListAddonsResponse)(nil),   // 5: hub.ListAddonsResponse
-	(*EnableAddonRequest)(nil),   // 6: hub.EnableAddonRequest
-	(*EnableAddonResponse)(nil),  // 7: hub.EnableAddonResponse
-	(*DisableAddonRequest)(nil),  // 8: hub.DisableAddonRequest
-	(*DisableAddonResponse)(nil), // 9: hub.DisableAddonResponse
-	(*AddonStatusRequest)(nil),   // 10: hub.AddonStatusRequest
-	(*AddonStatusResponse)(nil),  // 11: hub.AddonStatusResponse
+	(*App)(nil),                  // 0: hub.v1.App
+	(*ListAppsRequest)(nil),      // 1: hub.v1.ListAppsRequest
+	(*ListAppsResponse)(nil),     // 2: hub.v1.ListAppsResponse
+	(*Addon)(nil),                // 3: hub.v1.Addon
+	(*ListAddonsRequest)(nil),    // 4: hub.v1.ListAddonsRequest
+	(*ListAddonsResponse)(nil),   // 5: hub.v1.ListAddonsResponse
+	(*EnableAddonRequest)(nil),   // 6: hub.v1.EnableAddonRequest
+	(*EnableAddonResponse)(nil),  // 7: hub.v1.EnableAddonResponse
+	(*DisableAddonRequest)(nil),  // 8: hub.v1.DisableAddonRequest
+	(*DisableAddonResponse)(nil), // 9: hub.v1.DisableAddonResponse
+	(*AddonStatusRequest)(nil),   // 10: hub.v1.AddonStatusRequest
+	(*AddonStatusResponse)(nil),  // 11: hub.v1.AddonStatusResponse
 }
 var file_hub_v1_apps_proto_depIdxs = []int32{
-	0, // 0: hub.ListAppsResponse.apps:type_name -> hub.App
-	3, // 1: hub.ListAddonsResponse.addons:type_name -> hub.Addon
+	0, // 0: hub.v1.ListAppsResponse.apps:type_name -> hub.v1.App
+	3, // 1: hub.v1.ListAddonsResponse.addons:type_name -> hub.v1.Addon
 	2, // [2:2] is the sub-list for method output_type
 	2, // [2:2] is the sub-list for method input_type
 	2, // [2:2] is the sub-list for extension type_name

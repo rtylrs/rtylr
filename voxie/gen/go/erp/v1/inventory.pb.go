@@ -601,7 +601,7 @@ var File_erp_v1_inventory_proto protoreflect.FileDescriptor
 
 const file_erp_v1_inventory_proto_rawDesc = "" +
 	"\n" +
-	"\x16erp/v1/inventory.proto\x12\x03erp\"y\n" +
+	"\x16erp/v1/inventory.proto\x12\x06erp.v1\"y\n" +
 	"\x16AdjustInventoryRequest\x12\x1d\n" +
 	"\n" +
 	"product_id\x18\x01 \x01(\x03R\tproductId\x12\x16\n" +
@@ -628,14 +628,14 @@ const file_erp_v1_inventory_proto_rawDesc = "" +
 	"stockValue\x12 \n" +
 	"\fis_low_stock\x18\v \x01(\bR\n" +
 	"isLowStock\"\x1b\n" +
-	"\x19GetInventoryReportRequest\"m\n" +
-	"\x1aGetInventoryReportResponse\x12.\n" +
-	"\x05items\x18\x01 \x03(\v2\x18.erp.InventoryReportItemR\x05items\x12\x1f\n" +
+	"\x19GetInventoryReportRequest\"p\n" +
+	"\x1aGetInventoryReportResponse\x121\n" +
+	"\x05items\x18\x01 \x03(\v2\x1b.erp.v1.InventoryReportItemR\x05items\x12\x1f\n" +
 	"\vtotal_value\x18\x02 \x01(\x01R\n" +
 	"totalValue\"\x14\n" +
-	"\x12GetLowStockRequest\"[\n" +
-	"\x13GetLowStockResponse\x12.\n" +
-	"\x05items\x18\x01 \x03(\v2\x18.erp.InventoryReportItemR\x05items\x12\x14\n" +
+	"\x12GetLowStockRequest\"^\n" +
+	"\x13GetLowStockResponse\x121\n" +
+	"\x05items\x18\x01 \x03(\v2\x1b.erp.v1.InventoryReportItemR\x05items\x12\x14\n" +
 	"\x05count\x18\x02 \x01(\x03R\x05count\"\xbc\x01\n" +
 	"\rValuationItem\x12#\n" +
 	"\rcategory_name\x18\x01 \x01(\tR\fcategoryName\x12%\n" +
@@ -646,9 +646,9 @@ const file_erp_v1_inventory_proto_rawDesc = "" +
 	"totalValue\x12\x1d\n" +
 	"\n" +
 	"total_cost\x18\x05 \x01(\x01R\ttotalCost\"\x15\n" +
-	"\x13GetValuationRequest\"a\n" +
-	"\x14GetValuationResponse\x12(\n" +
-	"\x05items\x18\x01 \x03(\v2\x12.erp.ValuationItemR\x05items\x12\x1f\n" +
+	"\x13GetValuationRequest\"d\n" +
+	"\x14GetValuationResponse\x12+\n" +
+	"\x05items\x18\x01 \x03(\v2\x15.erp.v1.ValuationItemR\x05items\x12\x1f\n" +
 	"\vtotal_value\x18\x02 \x01(\x01R\n" +
 	"totalValueB'Z%github.com/voxire/voxie/gen/go/erp/v1b\x06proto3"
 
@@ -666,21 +666,21 @@ func file_erp_v1_inventory_proto_rawDescGZIP() []byte {
 
 var file_erp_v1_inventory_proto_msgTypes = make([]protoimpl.MessageInfo, 10)
 var file_erp_v1_inventory_proto_goTypes = []any{
-	(*AdjustInventoryRequest)(nil),     // 0: erp.AdjustInventoryRequest
-	(*AdjustInventoryResponse)(nil),    // 1: erp.AdjustInventoryResponse
-	(*InventoryReportItem)(nil),        // 2: erp.InventoryReportItem
-	(*GetInventoryReportRequest)(nil),  // 3: erp.GetInventoryReportRequest
-	(*GetInventoryReportResponse)(nil), // 4: erp.GetInventoryReportResponse
-	(*GetLowStockRequest)(nil),         // 5: erp.GetLowStockRequest
-	(*GetLowStockResponse)(nil),        // 6: erp.GetLowStockResponse
-	(*ValuationItem)(nil),              // 7: erp.ValuationItem
-	(*GetValuationRequest)(nil),        // 8: erp.GetValuationRequest
-	(*GetValuationResponse)(nil),       // 9: erp.GetValuationResponse
+	(*AdjustInventoryRequest)(nil),     // 0: erp.v1.AdjustInventoryRequest
+	(*AdjustInventoryResponse)(nil),    // 1: erp.v1.AdjustInventoryResponse
+	(*InventoryReportItem)(nil),        // 2: erp.v1.InventoryReportItem
+	(*GetInventoryReportRequest)(nil),  // 3: erp.v1.GetInventoryReportRequest
+	(*GetInventoryReportResponse)(nil), // 4: erp.v1.GetInventoryReportResponse
+	(*GetLowStockRequest)(nil),         // 5: erp.v1.GetLowStockRequest
+	(*GetLowStockResponse)(nil),        // 6: erp.v1.GetLowStockResponse
+	(*ValuationItem)(nil),              // 7: erp.v1.ValuationItem
+	(*GetValuationRequest)(nil),        // 8: erp.v1.GetValuationRequest
+	(*GetValuationResponse)(nil),       // 9: erp.v1.GetValuationResponse
 }
 var file_erp_v1_inventory_proto_depIdxs = []int32{
-	2, // 0: erp.GetInventoryReportResponse.items:type_name -> erp.InventoryReportItem
-	2, // 1: erp.GetLowStockResponse.items:type_name -> erp.InventoryReportItem
-	7, // 2: erp.GetValuationResponse.items:type_name -> erp.ValuationItem
+	2, // 0: erp.v1.GetInventoryReportResponse.items:type_name -> erp.v1.InventoryReportItem
+	2, // 1: erp.v1.GetLowStockResponse.items:type_name -> erp.v1.InventoryReportItem
+	7, // 2: erp.v1.GetValuationResponse.items:type_name -> erp.v1.ValuationItem
 	3, // [3:3] is the sub-list for method output_type
 	3, // [3:3] is the sub-list for method input_type
 	3, // [3:3] is the sub-list for extension type_name

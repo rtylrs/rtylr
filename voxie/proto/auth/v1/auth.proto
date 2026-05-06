@@ -1,6 +1,6 @@
 syntax = "proto3";
 
-package auth;
+package auth.v1;
 
 option go_package = "github.com/voxire/voxie/gen/go/auth/v1";
 

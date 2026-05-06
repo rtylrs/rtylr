@@ -517,7 +517,7 @@ var File_pos_v1_modifiers_proto protoreflect.FileDescriptor
 
 const file_pos_v1_modifiers_proto_rawDesc = "" +
 	"\n" +
-	"\x16pos/v1/modifiers.proto\x12\x03pos\"\xe8\x01\n" +
+	"\x16pos/v1/modifiers.proto\x12\x06pos.v1\"\xe8\x01\n" +
 	"\bModifier\x12\x0e\n" +
 	"\x02id\x18\x01 \x01(\x03R\x02id\x12\x19\n" +
 	"\bowner_id\x18\x02 \x01(\x03R\aownerId\x12\x12\n" +
@@ -532,9 +532,9 @@ const file_pos_v1_modifiers_proto_rawDesc = "" +
 	"created_at\x18\a \x01(\tR\tcreatedAt\x12\x1d\n" +
 	"\n" +
 	"updated_at\x18\b \x01(\tR\tupdatedAt\"\x16\n" +
-	"\x14ListModifiersRequest\"D\n" +
-	"\x15ListModifiersResponse\x12+\n" +
-	"\tmodifiers\x18\x01 \x03(\v2\r.pos.ModifierR\tmodifiers\"\x8c\x01\n" +
+	"\x14ListModifiersRequest\"G\n" +
+	"\x15ListModifiersResponse\x12.\n" +
+	"\tmodifiers\x18\x01 \x03(\v2\x10.pos.v1.ModifierR\tmodifiers\"\x8c\x01\n" +
 	"\x15CreateModifierRequest\x12\x12\n" +
 	"\x04name\x18\x01 \x01(\tR\x04name\x12\x1f\n" +
 	"\vprice_delta\x18\x02 \x01(\x01R\n" +
@@ -575,18 +575,18 @@ func file_pos_v1_modifiers_proto_rawDescGZIP() []byte {
 
 var file_pos_v1_modifiers_proto_msgTypes = make([]protoimpl.MessageInfo, 9)
 var file_pos_v1_modifiers_proto_goTypes = []any{
-	(*Modifier)(nil),               // 0: pos.Modifier
-	(*ListModifiersRequest)(nil),   // 1: pos.ListModifiersRequest
-	(*ListModifiersResponse)(nil),  // 2: pos.ListModifiersResponse
-	(*CreateModifierRequest)(nil),  // 3: pos.CreateModifierRequest
-	(*CreateModifierResponse)(nil), // 4: pos.CreateModifierResponse
-	(*UpdateModifierRequest)(nil),  // 5: pos.UpdateModifierRequest
-	(*UpdateModifierResponse)(nil), // 6: pos.UpdateModifierResponse
-	(*DeleteModifierRequest)(nil),  // 7: pos.DeleteModifierRequest
-	(*DeleteModifierResponse)(nil), // 8: pos.DeleteModifierResponse
+	(*Modifier)(nil),               // 0: pos.v1.Modifier
+	(*ListModifiersRequest)(nil),   // 1: pos.v1.ListModifiersRequest
+	(*ListModifiersResponse)(nil),  // 2: pos.v1.ListModifiersResponse
+	(*CreateModifierRequest)(nil),  // 3: pos.v1.CreateModifierRequest
+	(*CreateModifierResponse)(nil), // 4: pos.v1.CreateModifierResponse
+	(*UpdateModifierRequest)(nil),  // 5: pos.v1.UpdateModifierRequest
+	(*UpdateModifierResponse)(nil), // 6: pos.v1.UpdateModifierResponse
+	(*DeleteModifierRequest)(nil),  // 7: pos.v1.DeleteModifierRequest
+	(*DeleteModifierResponse)(nil), // 8: pos.v1.DeleteModifierResponse
 }
 var file_pos_v1_modifiers_proto_depIdxs = []int32{
-	0, // 0: pos.ListModifiersResponse.modifiers:type_name -> pos.Modifier
+	0, // 0: pos.v1.ListModifiersResponse.modifiers:type_name -> pos.v1.Modifier
 	1, // [1:1] is the sub-list for method output_type
 	1, // [1:1] is the sub-list for method input_type
 	1, // [1:1] is the sub-list for extension type_name

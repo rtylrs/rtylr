@@ -221,7 +221,7 @@ var File_crm_v1_dashboard_proto protoreflect.FileDescriptor
 
 const file_crm_v1_dashboard_proto_rawDesc = "" +
 	"\n" +
-	"\x16crm/v1/dashboard.proto\x12\x03crm\"\xda\x01\n" +
+	"\x16crm/v1/dashboard.proto\x12\x06crm.v1\"\xda\x01\n" +
 	"\vTopCustomer\x12\x0e\n" +
 	"\x02id\x18\x01 \x01(\x03R\x02id\x12\x1d\n" +
 	"\n" +
@@ -232,12 +232,12 @@ const file_crm_v1_dashboard_proto_rawDesc = "" +
 	"totalSpent\x12%\n" +
 	"\x0eloyalty_points\x18\x06 \x01(\x03R\rloyaltyPoints\x12!\n" +
 	"\floyalty_tier\x18\a \x01(\tR\vloyaltyTier\"\x15\n" +
-	"\x13GetDashboardRequest\"\xd2\x01\n" +
+	"\x13GetDashboardRequest\"\xd5\x01\n" +
 	"\x14GetDashboardResponse\x12'\n" +
 	"\x0ftotal_customers\x18\x01 \x01(\x03R\x0etotalCustomers\x12$\n" +
 	"\x0enew_this_month\x18\x02 \x01(\x03R\fnewThisMonth\x124\n" +
-	"\x16active_loyalty_members\x18\x03 \x01(\x03R\x14activeLoyaltyMembers\x125\n" +
-	"\rtop_customers\x18\x04 \x03(\v2\x10.crm.TopCustomerR\ftopCustomersB'Z%github.com/voxire/voxie/gen/go/crm/v1b\x06proto3"
+	"\x16active_loyalty_members\x18\x03 \x01(\x03R\x14activeLoyaltyMembers\x128\n" +
+	"\rtop_customers\x18\x04 \x03(\v2\x13.crm.v1.TopCustomerR\ftopCustomersB'Z%github.com/voxire/voxie/gen/go/crm/v1b\x06proto3"
 
 var (
 	file_crm_v1_dashboard_proto_rawDescOnce sync.Once
@@ -253,12 +253,12 @@ func file_crm_v1_dashboard_proto_rawDescGZIP() []byte {
 
 var file_crm_v1_dashboard_proto_msgTypes = make([]protoimpl.MessageInfo, 3)
 var file_crm_v1_dashboard_proto_goTypes = []any{
-	(*TopCustomer)(nil),          // 0: crm.TopCustomer
-	(*GetDashboardRequest)(nil),  // 1: crm.GetDashboardRequest
-	(*GetDashboardResponse)(nil), // 2: crm.GetDashboardResponse
+	(*TopCustomer)(nil),          // 0: crm.v1.TopCustomer
+	(*GetDashboardRequest)(nil),  // 1: crm.v1.GetDashboardRequest
+	(*GetDashboardResponse)(nil), // 2: crm.v1.GetDashboardResponse
 }
 var file_crm_v1_dashboard_proto_depIdxs = []int32{
-	0, // 0: crm.GetDashboardResponse.top_customers:type_name -> crm.TopCustomer
+	0, // 0: crm.v1.GetDashboardResponse.top_customers:type_name -> crm.v1.TopCustomer
 	1, // [1:1] is the sub-list for method output_type
 	1, // [1:1] is the sub-list for method input_type
 	1, // [1:1] is the sub-list for extension type_name

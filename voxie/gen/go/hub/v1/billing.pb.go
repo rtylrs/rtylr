@@ -345,7 +345,7 @@ var File_hub_v1_billing_proto protoreflect.FileDescriptor
 
 const file_hub_v1_billing_proto_rawDesc = "" +
 	"\n" +
-	"\x14hub/v1/billing.proto\x12\x03hub\"\xae\x01\n" +
+	"\x14hub/v1/billing.proto\x12\x06hub.v1\"\xae\x01\n" +
 	"\x0eBillingSummary\x12\x12\n" +
 	"\x04plan\x18\x01 \x01(\tR\x04plan\x12\x16\n" +
 	"\x06status\x18\x02 \x01(\tR\x06status\x12#\n" +
@@ -353,9 +353,9 @@ const file_hub_v1_billing_proto_rawDesc = "" +
 	"\vusage_limit\x18\x04 \x01(\x01R\n" +
 	"usageLimit\x12*\n" +
 	"\x11next_billing_date\x18\x05 \x01(\tR\x0fnextBillingDate\"\x1a\n" +
-	"\x18GetBillingSummaryRequest\"J\n" +
-	"\x19GetBillingSummaryResponse\x12-\n" +
-	"\asummary\x18\x01 \x01(\v2\x13.hub.BillingSummaryR\asummary\"\x9b\x01\n" +
+	"\x18GetBillingSummaryRequest\"M\n" +
+	"\x19GetBillingSummaryResponse\x120\n" +
+	"\asummary\x18\x01 \x01(\v2\x16.hub.v1.BillingSummaryR\asummary\"\x9b\x01\n" +
 	"\aInvoice\x12\x0e\n" +
 	"\x02id\x18\x01 \x01(\x03R\x02id\x12\x16\n" +
 	"\x06amount\x18\x02 \x01(\x01R\x06amount\x12\x1a\n" +
@@ -363,9 +363,9 @@ const file_hub_v1_billing_proto_rawDesc = "" +
 	"\x06status\x18\x04 \x01(\tR\x06status\x12\x1b\n" +
 	"\tissued_at\x18\x05 \x01(\tR\bissuedAt\x12\x17\n" +
 	"\apaid_at\x18\x06 \x01(\tR\x06paidAt\"\x15\n" +
-	"\x13ListInvoicesRequest\"@\n" +
-	"\x14ListInvoicesResponse\x12(\n" +
-	"\binvoices\x18\x01 \x03(\v2\f.hub.InvoiceR\binvoicesB'Z%github.com/voxire/voxie/gen/go/hub/v1b\x06proto3"
+	"\x13ListInvoicesRequest\"C\n" +
+	"\x14ListInvoicesResponse\x12+\n" +
+	"\binvoices\x18\x01 \x03(\v2\x0f.hub.v1.InvoiceR\binvoicesB'Z%github.com/voxire/voxie/gen/go/hub/v1b\x06proto3"
 
 var (
 	file_hub_v1_billing_proto_rawDescOnce sync.Once
@@ -381,16 +381,16 @@ func file_hub_v1_billing_proto_rawDescGZIP() []byte {
 
 var file_hub_v1_billing_proto_msgTypes = make([]protoimpl.MessageInfo, 6)
 var file_hub_v1_billing_proto_goTypes = []any{
-	(*BillingSummary)(nil),            // 0: hub.BillingSummary
-	(*GetBillingSummaryRequest)(nil),  // 1: hub.GetBillingSummaryRequest
-	(*GetBillingSummaryResponse)(nil), // 2: hub.GetBillingSummaryResponse
-	(*Invoice)(nil),                   // 3: hub.Invoice
-	(*ListInvoicesRequest)(nil),       // 4: hub.ListInvoicesRequest
-	(*ListInvoicesResponse)(nil),      // 5: hub.ListInvoicesResponse
+	(*BillingSummary)(nil),            // 0: hub.v1.BillingSummary
+	(*GetBillingSummaryRequest)(nil),  // 1: hub.v1.GetBillingSummaryRequest
+	(*GetBillingSummaryResponse)(nil), // 2: hub.v1.GetBillingSummaryResponse
+	(*Invoice)(nil),                   // 3: hub.v1.Invoice
+	(*ListInvoicesRequest)(nil),       // 4: hub.v1.ListInvoicesRequest
+	(*ListInvoicesResponse)(nil),      // 5: hub.v1.ListInvoicesResponse
 }
 var file_hub_v1_billing_proto_depIdxs = []int32{
-	0, // 0: hub.GetBillingSummaryResponse.summary:type_name -> hub.BillingSummary
-	3, // 1: hub.ListInvoicesResponse.invoices:type_name -> hub.Invoice
+	0, // 0: hub.v1.GetBillingSummaryResponse.summary:type_name -> hub.v1.BillingSummary
+	3, // 1: hub.v1.ListInvoicesResponse.invoices:type_name -> hub.v1.Invoice
 	2, // [2:2] is the sub-list for method output_type
 	2, // [2:2] is the sub-list for method input_type
 	2, // [2:2] is the sub-list for extension type_name

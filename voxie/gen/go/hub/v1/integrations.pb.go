@@ -381,7 +381,7 @@ var File_hub_v1_integrations_proto protoreflect.FileDescriptor
 
 const file_hub_v1_integrations_proto_rawDesc = "" +
 	"\n" +
-	"\x19hub/v1/integrations.proto\x12\x03hub\"\xab\x01\n" +
+	"\x19hub/v1/integrations.proto\x12\x06hub.v1\"\xab\x01\n" +
 	"\vIntegration\x12\x0e\n" +
 	"\x02id\x18\x01 \x01(\x03R\x02id\x12\x1a\n" +
 	"\bprovider\x18\x02 \x01(\tR\bprovider\x12\x16\n" +
@@ -390,9 +390,9 @@ const file_hub_v1_integrations_proto_rawDesc = "" +
 	"\fconnected_at\x18\x05 \x01(\tR\vconnectedAt\x12\x1d\n" +
 	"\n" +
 	"created_at\x18\x06 \x01(\tR\tcreatedAt\"\x19\n" +
-	"\x17ListIntegrationsRequest\"P\n" +
-	"\x18ListIntegrationsResponse\x124\n" +
-	"\fintegrations\x18\x01 \x03(\v2\x10.hub.IntegrationR\fintegrations\"O\n" +
+	"\x17ListIntegrationsRequest\"S\n" +
+	"\x18ListIntegrationsResponse\x127\n" +
+	"\fintegrations\x18\x01 \x03(\v2\x13.hub.v1.IntegrationR\fintegrations\"O\n" +
 	"\x19ConnectIntegrationRequest\x12\x1a\n" +
 	"\bprovider\x18\x01 \x01(\tR\bprovider\x12\x16\n" +
 	"\x06config\x18\x02 \x01(\fR\x06config\"F\n" +
@@ -418,16 +418,16 @@ func file_hub_v1_integrations_proto_rawDescGZIP() []byte {
 
 var file_hub_v1_integrations_proto_msgTypes = make([]protoimpl.MessageInfo, 7)
 var file_hub_v1_integrations_proto_goTypes = []any{
-	(*Integration)(nil),                   // 0: hub.Integration
-	(*ListIntegrationsRequest)(nil),       // 1: hub.ListIntegrationsRequest
-	(*ListIntegrationsResponse)(nil),      // 2: hub.ListIntegrationsResponse
-	(*ConnectIntegrationRequest)(nil),     // 3: hub.ConnectIntegrationRequest
-	(*ConnectIntegrationResponse)(nil),    // 4: hub.ConnectIntegrationResponse
-	(*DisconnectIntegrationRequest)(nil),  // 5: hub.DisconnectIntegrationRequest
-	(*DisconnectIntegrationResponse)(nil), // 6: hub.DisconnectIntegrationResponse
+	(*Integration)(nil),                   // 0: hub.v1.Integration
+	(*ListIntegrationsRequest)(nil),       // 1: hub.v1.ListIntegrationsRequest
+	(*ListIntegrationsResponse)(nil),      // 2: hub.v1.ListIntegrationsResponse
+	(*ConnectIntegrationRequest)(nil),     // 3: hub.v1.ConnectIntegrationRequest
+	(*ConnectIntegrationResponse)(nil),    // 4: hub.v1.ConnectIntegrationResponse
+	(*DisconnectIntegrationRequest)(nil),  // 5: hub.v1.DisconnectIntegrationRequest
+	(*DisconnectIntegrationResponse)(nil), // 6: hub.v1.DisconnectIntegrationResponse
 }
 var file_hub_v1_integrations_proto_depIdxs = []int32{
-	0, // 0: hub.ListIntegrationsResponse.integrations:type_name -> hub.Integration
+	0, // 0: hub.v1.ListIntegrationsResponse.integrations:type_name -> hub.v1.Integration
 	1, // [1:1] is the sub-list for method output_type
 	1, // [1:1] is the sub-list for method input_type
 	1, // [1:1] is the sub-list for extension type_name

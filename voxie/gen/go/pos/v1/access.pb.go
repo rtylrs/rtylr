@@ -381,7 +381,7 @@ var File_pos_v1_access_proto protoreflect.FileDescriptor
 
 const file_pos_v1_access_proto_rawDesc = "" +
 	"\n" +
-	"\x13pos/v1/access.proto\x12\x03pos\"q\n" +
+	"\x13pos/v1/access.proto\x12\x06pos.v1\"q\n" +
 	"\n" +
 	"MyLocation\x12\x1f\n" +
 	"\vlocation_id\x18\x01 \x01(\x03R\n" +
@@ -389,9 +389,9 @@ const file_pos_v1_access_proto_rawDesc = "" +
 	"\x04name\x18\x02 \x01(\tR\x04name\x12\x18\n" +
 	"\aaddress\x18\x03 \x01(\tR\aaddress\x12\x14\n" +
 	"\x05phone\x18\x04 \x01(\tR\x05phone\"\x17\n" +
-	"\x15GetMyLocationsRequest\"G\n" +
-	"\x16GetMyLocationsResponse\x12-\n" +
-	"\tlocations\x18\x01 \x03(\v2\x0f.pos.MyLocationR\tlocations\"\xde\x01\n" +
+	"\x15GetMyLocationsRequest\"J\n" +
+	"\x16GetMyLocationsResponse\x120\n" +
+	"\tlocations\x18\x01 \x03(\v2\x12.pos.v1.MyLocationR\tlocations\"\xde\x01\n" +
 	"\x15AssignLocationRequest\x12\x17\n" +
 	"\auser_id\x18\x01 \x01(\x03R\x06userId\x12\x1f\n" +
 	"\vlocation_id\x18\x02 \x01(\x03R\n" +
@@ -420,16 +420,16 @@ func file_pos_v1_access_proto_rawDescGZIP() []byte {
 
 var file_pos_v1_access_proto_msgTypes = make([]protoimpl.MessageInfo, 7)
 var file_pos_v1_access_proto_goTypes = []any{
-	(*MyLocation)(nil),             // 0: pos.MyLocation
-	(*GetMyLocationsRequest)(nil),  // 1: pos.GetMyLocationsRequest
-	(*GetMyLocationsResponse)(nil), // 2: pos.GetMyLocationsResponse
-	(*AssignLocationRequest)(nil),  // 3: pos.AssignLocationRequest
-	(*AssignLocationResponse)(nil), // 4: pos.AssignLocationResponse
-	(*RemoveLocationRequest)(nil),  // 5: pos.RemoveLocationRequest
-	(*RemoveLocationResponse)(nil), // 6: pos.RemoveLocationResponse
+	(*MyLocation)(nil),             // 0: pos.v1.MyLocation
+	(*GetMyLocationsRequest)(nil),  // 1: pos.v1.GetMyLocationsRequest
+	(*GetMyLocationsResponse)(nil), // 2: pos.v1.GetMyLocationsResponse
+	(*AssignLocationRequest)(nil),  // 3: pos.v1.AssignLocationRequest
+	(*AssignLocationResponse)(nil), // 4: pos.v1.AssignLocationResponse
+	(*RemoveLocationRequest)(nil),  // 5: pos.v1.RemoveLocationRequest
+	(*RemoveLocationResponse)(nil), // 6: pos.v1.RemoveLocationResponse
 }
 var file_pos_v1_access_proto_depIdxs = []int32{
-	0, // 0: pos.GetMyLocationsResponse.locations:type_name -> pos.MyLocation
+	0, // 0: pos.v1.GetMyLocationsResponse.locations:type_name -> pos.v1.MyLocation
 	1, // [1:1] is the sub-list for method output_type
 	1, // [1:1] is the sub-list for method input_type
 	1, // [1:1] is the sub-list for extension type_name

@@ -541,7 +541,7 @@ var File_pos_v1_combos_proto protoreflect.FileDescriptor
 
 const file_pos_v1_combos_proto_rawDesc = "" +
 	"\n" +
-	"\x13pos/v1/combos.proto\x12\x03pos\"\xef\x01\n" +
+	"\x13pos/v1/combos.proto\x12\x06pos.v1\"\xef\x01\n" +
 	"\x05Combo\x12\x0e\n" +
 	"\x02id\x18\x01 \x01(\x03R\x02id\x12\x19\n" +
 	"\bowner_id\x18\x02 \x01(\x03R\aownerId\x12\x12\n" +
@@ -554,10 +554,9 @@ const file_pos_v1_combos_proto_rawDesc = "" +
 	"created_at\x18\b \x01(\tR\tcreatedAt\x12\x1d\n" +
 	"\n" +
 	"updated_at\x18\t \x01(\tR\tupdatedAt\"\x13\n" +
-	"\x11ListCombosRequest\"8\n" +
-	"\x12ListCombosResponse\x12\"\n" +
-	"\x06combos\x18\x01 \x03(\v2\n" +
-	".pos.ComboR\x06combos\"\x93\x01\n" +
+	"\x11ListCombosRequest\";\n" +
+	"\x12ListCombosResponse\x12%\n" +
+	"\x06combos\x18\x01 \x03(\v2\r.pos.v1.ComboR\x06combos\"\x93\x01\n" +
 	"\x12CreateComboRequest\x12\x12\n" +
 	"\x04name\x18\x01 \x01(\tR\x04name\x12 \n" +
 	"\vdescription\x18\x02 \x01(\tR\vdescription\x12\x14\n" +
@@ -593,18 +592,18 @@ func file_pos_v1_combos_proto_rawDescGZIP() []byte {
 
 var file_pos_v1_combos_proto_msgTypes = make([]protoimpl.MessageInfo, 9)
 var file_pos_v1_combos_proto_goTypes = []any{
-	(*Combo)(nil),               // 0: pos.Combo
-	(*ListCombosRequest)(nil),   // 1: pos.ListCombosRequest
-	(*ListCombosResponse)(nil),  // 2: pos.ListCombosResponse
-	(*CreateComboRequest)(nil),  // 3: pos.CreateComboRequest
-	(*CreateComboResponse)(nil), // 4: pos.CreateComboResponse
-	(*UpdateComboRequest)(nil),  // 5: pos.UpdateComboRequest
-	(*UpdateComboResponse)(nil), // 6: pos.UpdateComboResponse
-	(*DeleteComboRequest)(nil),  // 7: pos.DeleteComboRequest
-	(*DeleteComboResponse)(nil), // 8: pos.DeleteComboResponse
+	(*Combo)(nil),               // 0: pos.v1.Combo
+	(*ListCombosRequest)(nil),   // 1: pos.v1.ListCombosRequest
+	(*ListCombosResponse)(nil),  // 2: pos.v1.ListCombosResponse
+	(*CreateComboRequest)(nil),  // 3: pos.v1.CreateComboRequest
+	(*CreateComboResponse)(nil), // 4: pos.v1.CreateComboResponse
+	(*UpdateComboRequest)(nil),  // 5: pos.v1.UpdateComboRequest
+	(*UpdateComboResponse)(nil), // 6: pos.v1.UpdateComboResponse
+	(*DeleteComboRequest)(nil),  // 7: pos.v1.DeleteComboRequest
+	(*DeleteComboResponse)(nil), // 8: pos.v1.DeleteComboResponse
 }
 var file_pos_v1_combos_proto_depIdxs = []int32{
-	0, // 0: pos.ListCombosResponse.combos:type_name -> pos.Combo
+	0, // 0: pos.v1.ListCombosResponse.combos:type_name -> pos.v1.Combo
 	1, // [1:1] is the sub-list for method output_type
 	1, // [1:1] is the sub-list for method input_type
 	1, // [1:1] is the sub-list for extension type_name

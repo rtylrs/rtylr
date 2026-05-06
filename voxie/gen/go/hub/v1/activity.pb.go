@@ -229,7 +229,7 @@ var File_hub_v1_activity_proto protoreflect.FileDescriptor
 
 const file_hub_v1_activity_proto_rawDesc = "" +
 	"\n" +
-	"\x15hub/v1/activity.proto\x12\x03hub\"\x99\x02\n" +
+	"\x15hub/v1/activity.proto\x12\x06hub.v1\"\x99\x02\n" +
 	"\rActivityEntry\x12\x0e\n" +
 	"\x02id\x18\x01 \x01(\x03R\x02id\x12\x19\n" +
 	"\bowner_id\x18\x02 \x01(\x03R\aownerId\x12\x10\n" +
@@ -245,10 +245,10 @@ const file_hub_v1_activity_proto_rawDesc = "" +
 	"created_at\x18\n" +
 	" \x01(\tR\tcreatedAt\"+\n" +
 	"\x13ListActivityRequest\x12\x14\n" +
-	"\x05limit\x18\x01 \x01(\x05R\x05limit\"J\n" +
-	"\x14ListActivityResponse\x122\n" +
+	"\x05limit\x18\x01 \x01(\x05R\x05limit\"M\n" +
+	"\x14ListActivityResponse\x125\n" +
 	"\n" +
-	"activities\x18\x01 \x03(\v2\x12.hub.ActivityEntryR\n" +
+	"activities\x18\x01 \x03(\v2\x15.hub.v1.ActivityEntryR\n" +
 	"activitiesB'Z%github.com/voxire/voxie/gen/go/hub/v1b\x06proto3"
 
 var (
@@ -265,12 +265,12 @@ func file_hub_v1_activity_proto_rawDescGZIP() []byte {
 
 var file_hub_v1_activity_proto_msgTypes = make([]protoimpl.MessageInfo, 3)
 var file_hub_v1_activity_proto_goTypes = []any{
-	(*ActivityEntry)(nil),        // 0: hub.ActivityEntry
-	(*ListActivityRequest)(nil),  // 1: hub.ListActivityRequest
-	(*ListActivityResponse)(nil), // 2: hub.ListActivityResponse
+	(*ActivityEntry)(nil),        // 0: hub.v1.ActivityEntry
+	(*ListActivityRequest)(nil),  // 1: hub.v1.ListActivityRequest
+	(*ListActivityResponse)(nil), // 2: hub.v1.ListActivityResponse
 }
 var file_hub_v1_activity_proto_depIdxs = []int32{
-	0, // 0: hub.ListActivityResponse.activities:type_name -> hub.ActivityEntry
+	0, // 0: hub.v1.ListActivityResponse.activities:type_name -> hub.v1.ActivityEntry
 	1, // [1:1] is the sub-list for method output_type
 	1, // [1:1] is the sub-list for method input_type
 	1, // [1:1] is the sub-list for extension type_name

@@ -525,7 +525,7 @@ var File_crm_v1_segments_proto protoreflect.FileDescriptor
 
 const file_crm_v1_segments_proto_rawDesc = "" +
 	"\n" +
-	"\x15crm/v1/segments.proto\x12\x03crm\"\xaf\x02\n" +
+	"\x15crm/v1/segments.proto\x12\x06crm.v1\"\xaf\x02\n" +
 	"\aSegment\x12\x0e\n" +
 	"\x02id\x18\x01 \x01(\x03R\x02id\x12\x19\n" +
 	"\bowner_id\x18\x02 \x01(\x03R\aownerId\x12\x12\n" +
@@ -539,9 +539,9 @@ const file_crm_v1_segments_proto_rawDesc = "" +
 	"\n" +
 	"updated_at\x18\t \x01(\tR\tupdatedAtB\x15\n" +
 	"\x13_last_calculated_at\"\x15\n" +
-	"\x13ListSegmentsRequest\"@\n" +
-	"\x14ListSegmentsResponse\x12(\n" +
-	"\bsegments\x18\x01 \x03(\v2\f.crm.SegmentR\bsegments\"b\n" +
+	"\x13ListSegmentsRequest\"C\n" +
+	"\x14ListSegmentsResponse\x12+\n" +
+	"\bsegments\x18\x01 \x03(\v2\x0f.crm.v1.SegmentR\bsegments\"b\n" +
 	"\x14CreateSegmentRequest\x12\x12\n" +
 	"\x04name\x18\x01 \x01(\tR\x04name\x12 \n" +
 	"\vdescription\x18\x02 \x01(\tR\vdescription\x12\x14\n" +
@@ -576,18 +576,18 @@ func file_crm_v1_segments_proto_rawDescGZIP() []byte {
 
 var file_crm_v1_segments_proto_msgTypes = make([]protoimpl.MessageInfo, 9)
 var file_crm_v1_segments_proto_goTypes = []any{
-	(*Segment)(nil),               // 0: crm.Segment
-	(*ListSegmentsRequest)(nil),   // 1: crm.ListSegmentsRequest
-	(*ListSegmentsResponse)(nil),  // 2: crm.ListSegmentsResponse
-	(*CreateSegmentRequest)(nil),  // 3: crm.CreateSegmentRequest
-	(*CreateSegmentResponse)(nil), // 4: crm.CreateSegmentResponse
-	(*UpdateSegmentRequest)(nil),  // 5: crm.UpdateSegmentRequest
-	(*UpdateSegmentResponse)(nil), // 6: crm.UpdateSegmentResponse
-	(*DeleteSegmentRequest)(nil),  // 7: crm.DeleteSegmentRequest
-	(*DeleteSegmentResponse)(nil), // 8: crm.DeleteSegmentResponse
+	(*Segment)(nil),               // 0: crm.v1.Segment
+	(*ListSegmentsRequest)(nil),   // 1: crm.v1.ListSegmentsRequest
+	(*ListSegmentsResponse)(nil),  // 2: crm.v1.ListSegmentsResponse
+	(*CreateSegmentRequest)(nil),  // 3: crm.v1.CreateSegmentRequest
+	(*CreateSegmentResponse)(nil), // 4: crm.v1.CreateSegmentResponse
+	(*UpdateSegmentRequest)(nil),  // 5: crm.v1.UpdateSegmentRequest
+	(*UpdateSegmentResponse)(nil), // 6: crm.v1.UpdateSegmentResponse
+	(*DeleteSegmentRequest)(nil),  // 7: crm.v1.DeleteSegmentRequest
+	(*DeleteSegmentResponse)(nil), // 8: crm.v1.DeleteSegmentResponse
 }
 var file_crm_v1_segments_proto_depIdxs = []int32{
-	0, // 0: crm.ListSegmentsResponse.segments:type_name -> crm.Segment
+	0, // 0: crm.v1.ListSegmentsResponse.segments:type_name -> crm.v1.Segment
 	1, // [1:1] is the sub-list for method output_type
 	1, // [1:1] is the sub-list for method input_type
 	1, // [1:1] is the sub-list for extension type_name

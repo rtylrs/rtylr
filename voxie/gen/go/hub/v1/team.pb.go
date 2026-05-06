@@ -877,7 +877,7 @@ var File_hub_v1_team_proto protoreflect.FileDescriptor
 
 const file_hub_v1_team_proto_rawDesc = "" +
 	"\n" +
-	"\x11hub/v1/team.proto\x12\x03hub\"\xb9\x01\n" +
+	"\x11hub/v1/team.proto\x12\x06hub.v1\"\xb9\x01\n" +
 	"\x10StaffUserPayload\x12\x0e\n" +
 	"\x02id\x18\x01 \x01(\x03R\x02id\x12\x14\n" +
 	"\x05email\x18\x02 \x01(\tR\x05email\x12\x1b\n" +
@@ -887,9 +887,9 @@ const file_hub_v1_team_proto_rawDesc = "" +
 	"\x04apps\x18\x05 \x03(\tR\x04apps\x12\x12\n" +
 	"\x04role\x18\x06 \x01(\tR\x04role\x12\x1b\n" +
 	"\tis_active\x18\a \x01(\bR\bisActive\"\x11\n" +
-	"\x0fListTeamRequest\"?\n" +
-	"\x10ListTeamResponse\x12+\n" +
-	"\x05users\x18\x01 \x03(\v2\x15.hub.StaffUserPayloadR\x05users\"\x8a\x01\n" +
+	"\x0fListTeamRequest\"B\n" +
+	"\x10ListTeamResponse\x12.\n" +
+	"\x05users\x18\x01 \x03(\v2\x18.hub.v1.StaffUserPayloadR\x05users\"\x8a\x01\n" +
 	"\x11InviteUserRequest\x12\x14\n" +
 	"\x05email\x18\x01 \x01(\tR\x05email\x12\x1b\n" +
 	"\tfull_name\x18\x02 \x01(\tR\bfullName\x12\x12\n" +
@@ -941,26 +941,26 @@ func file_hub_v1_team_proto_rawDescGZIP() []byte {
 
 var file_hub_v1_team_proto_msgTypes = make([]protoimpl.MessageInfo, 17)
 var file_hub_v1_team_proto_goTypes = []any{
-	(*StaffUserPayload)(nil),          // 0: hub.StaffUserPayload
-	(*ListTeamRequest)(nil),           // 1: hub.ListTeamRequest
-	(*ListTeamResponse)(nil),          // 2: hub.ListTeamResponse
-	(*InviteUserRequest)(nil),         // 3: hub.InviteUserRequest
-	(*InviteUserResponse)(nil),        // 4: hub.InviteUserResponse
-	(*UpdatePermissionsRequest)(nil),  // 5: hub.UpdatePermissionsRequest
-	(*UpdatePermissionsResponse)(nil), // 6: hub.UpdatePermissionsResponse
-	(*RemoveMemberRequest)(nil),       // 7: hub.RemoveMemberRequest
-	(*RemoveMemberResponse)(nil),      // 8: hub.RemoveMemberResponse
-	(*VerifyInviteRequest)(nil),       // 9: hub.VerifyInviteRequest
-	(*VerifyInviteResponse)(nil),      // 10: hub.VerifyInviteResponse
-	(*AcceptInviteRequest)(nil),       // 11: hub.AcceptInviteRequest
-	(*AcceptInviteResponse)(nil),      // 12: hub.AcceptInviteResponse
-	(*MarkOnboardedRequest)(nil),      // 13: hub.MarkOnboardedRequest
-	(*MarkOnboardedResponse)(nil),     // 14: hub.MarkOnboardedResponse
-	(*RequestAccessRequest)(nil),      // 15: hub.RequestAccessRequest
-	(*RequestAccessResponse)(nil),     // 16: hub.RequestAccessResponse
+	(*StaffUserPayload)(nil),          // 0: hub.v1.StaffUserPayload
+	(*ListTeamRequest)(nil),           // 1: hub.v1.ListTeamRequest
+	(*ListTeamResponse)(nil),          // 2: hub.v1.ListTeamResponse
+	(*InviteUserRequest)(nil),         // 3: hub.v1.InviteUserRequest
+	(*InviteUserResponse)(nil),        // 4: hub.v1.InviteUserResponse
+	(*UpdatePermissionsRequest)(nil),  // 5: hub.v1.UpdatePermissionsRequest
+	(*UpdatePermissionsResponse)(nil), // 6: hub.v1.UpdatePermissionsResponse
+	(*RemoveMemberRequest)(nil),       // 7: hub.v1.RemoveMemberRequest
+	(*RemoveMemberResponse)(nil),      // 8: hub.v1.RemoveMemberResponse
+	(*VerifyInviteRequest)(nil),       // 9: hub.v1.VerifyInviteRequest
+	(*VerifyInviteResponse)(nil),      // 10: hub.v1.VerifyInviteResponse
+	(*AcceptInviteRequest)(nil),       // 11: hub.v1.AcceptInviteRequest
+	(*AcceptInviteResponse)(nil),      // 12: hub.v1.AcceptInviteResponse
+	(*MarkOnboardedRequest)(nil),      // 13: hub.v1.MarkOnboardedRequest
+	(*MarkOnboardedResponse)(nil),     // 14: hub.v1.MarkOnboardedResponse
+	(*RequestAccessRequest)(nil),      // 15: hub.v1.RequestAccessRequest
+	(*RequestAccessResponse)(nil),     // 16: hub.v1.RequestAccessResponse
 }
 var file_hub_v1_team_proto_depIdxs = []int32{
-	0, // 0: hub.ListTeamResponse.users:type_name -> hub.StaffUserPayload
+	0, // 0: hub.v1.ListTeamResponse.users:type_name -> hub.v1.StaffUserPayload
 	1, // [1:1] is the sub-list for method output_type
 	1, // [1:1] is the sub-list for method input_type
 	1, // [1:1] is the sub-list for extension type_name

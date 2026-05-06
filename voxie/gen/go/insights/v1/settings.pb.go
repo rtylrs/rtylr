@@ -269,20 +269,20 @@ var File_insights_v1_settings_proto protoreflect.FileDescriptor
 
 const file_insights_v1_settings_proto_rawDesc = "" +
 	"\n" +
-	"\x1ainsights/v1/settings.proto\x12\binsights\"\xd8\x01\n" +
+	"\x1ainsights/v1/settings.proto\x12\vinsights.v1\"\xd8\x01\n" +
 	"\x10InsightsSettings\x12%\n" +
 	"\x0edefault_period\x18\x01 \x01(\tR\rdefaultPeriod\x12\x1a\n" +
 	"\bcurrency\x18\x02 \x01(\tR\bcurrency\x12)\n" +
 	"\x10compare_previous\x18\x03 \x01(\bR\x0fcomparePrevious\x12+\n" +
 	"\x11dashboard_widgets\x18\x04 \x03(\tR\x10dashboardWidgets\x12)\n" +
 	"\x10favorite_reports\x18\x05 \x03(\tR\x0ffavoriteReports\"\x1c\n" +
-	"\x1aGetInsightsSettingsRequest\"U\n" +
-	"\x1bGetInsightsSettingsResponse\x126\n" +
-	"\bsettings\x18\x01 \x01(\v2\x1a.insights.InsightsSettingsR\bsettings\"W\n" +
-	"\x1dUpdateInsightsSettingsRequest\x126\n" +
-	"\bsettings\x18\x01 \x01(\v2\x1a.insights.InsightsSettingsR\bsettings\"X\n" +
-	"\x1eUpdateInsightsSettingsResponse\x126\n" +
-	"\bsettings\x18\x01 \x01(\v2\x1a.insights.InsightsSettingsR\bsettingsB,Z*github.com/voxire/voxie/gen/go/insights/v1b\x06proto3"
+	"\x1aGetInsightsSettingsRequest\"X\n" +
+	"\x1bGetInsightsSettingsResponse\x129\n" +
+	"\bsettings\x18\x01 \x01(\v2\x1d.insights.v1.InsightsSettingsR\bsettings\"Z\n" +
+	"\x1dUpdateInsightsSettingsRequest\x129\n" +
+	"\bsettings\x18\x01 \x01(\v2\x1d.insights.v1.InsightsSettingsR\bsettings\"[\n" +
+	"\x1eUpdateInsightsSettingsResponse\x129\n" +
+	"\bsettings\x18\x01 \x01(\v2\x1d.insights.v1.InsightsSettingsR\bsettingsB,Z*github.com/voxire/voxie/gen/go/insights/v1b\x06proto3"
 
 var (
 	file_insights_v1_settings_proto_rawDescOnce sync.Once
@@ -298,16 +298,16 @@ func file_insights_v1_settings_proto_rawDescGZIP() []byte {
 
 var file_insights_v1_settings_proto_msgTypes = make([]protoimpl.MessageInfo, 5)
 var file_insights_v1_settings_proto_goTypes = []any{
-	(*InsightsSettings)(nil),               // 0: insights.InsightsSettings
-	(*GetInsightsSettingsRequest)(nil),     // 1: insights.GetInsightsSettingsRequest
-	(*GetInsightsSettingsResponse)(nil),    // 2: insights.GetInsightsSettingsResponse
-	(*UpdateInsightsSettingsRequest)(nil),  // 3: insights.UpdateInsightsSettingsRequest
-	(*UpdateInsightsSettingsResponse)(nil), // 4: insights.UpdateInsightsSettingsResponse
+	(*InsightsSettings)(nil),               // 0: insights.v1.InsightsSettings
+	(*GetInsightsSettingsRequest)(nil),     // 1: insights.v1.GetInsightsSettingsRequest
+	(*GetInsightsSettingsResponse)(nil),    // 2: insights.v1.GetInsightsSettingsResponse
+	(*UpdateInsightsSettingsRequest)(nil),  // 3: insights.v1.UpdateInsightsSettingsRequest
+	(*UpdateInsightsSettingsResponse)(nil), // 4: insights.v1.UpdateInsightsSettingsResponse
 }
 var file_insights_v1_settings_proto_depIdxs = []int32{
-	0, // 0: insights.GetInsightsSettingsResponse.settings:type_name -> insights.InsightsSettings
-	0, // 1: insights.UpdateInsightsSettingsRequest.settings:type_name -> insights.InsightsSettings
-	0, // 2: insights.UpdateInsightsSettingsResponse.settings:type_name -> insights.InsightsSettings
+	0, // 0: insights.v1.GetInsightsSettingsResponse.settings:type_name -> insights.v1.InsightsSettings
+	0, // 1: insights.v1.UpdateInsightsSettingsRequest.settings:type_name -> insights.v1.InsightsSettings
+	0, // 2: insights.v1.UpdateInsightsSettingsResponse.settings:type_name -> insights.v1.InsightsSettings
 	3, // [3:3] is the sub-list for method output_type
 	3, // [3:3] is the sub-list for method input_type
 	3, // [3:3] is the sub-list for extension type_name

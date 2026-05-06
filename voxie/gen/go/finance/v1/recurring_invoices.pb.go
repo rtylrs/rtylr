@@ -554,14 +554,15 @@ var File_finance_v1_recurring_invoices_proto protoreflect.FileDescriptor
 
 const file_finance_v1_recurring_invoices_proto_rawDesc = "" +
 	"\n" +
-	"#finance/v1/recurring_invoices.proto\x12\afinance\x1a\x1acommon/v1/pagination.proto\"\x9a\x03\n" +
+	"#finance/v1/recurring_invoices.proto\x12\n" +
+	"finance.v1\x1a\x1acommon/v1/pagination.proto\"\x9d\x03\n" +
 	"\x10RecurringInvoice\x12\x0e\n" +
 	"\x02id\x18\x01 \x01(\x03R\x02id\x12\x1f\n" +
 	"\vcustomer_id\x18\x02 \x01(\x03R\n" +
 	"customerId\x12#\n" +
 	"\rcustomer_name\x18\x03 \x01(\tR\fcustomerName\x12\x1c\n" +
-	"\tfrequency\x18\x04 \x01(\tR\tfrequency\x123\n" +
-	"\x05lines\x18\x05 \x03(\v2\x1d.finance.RecurringInvoiceLineR\x05lines\x12\x1a\n" +
+	"\tfrequency\x18\x04 \x01(\tR\tfrequency\x126\n" +
+	"\x05lines\x18\x05 \x03(\v2 .finance.v1.RecurringInvoiceLineR\x05lines\x12\x1a\n" +
 	"\bsubtotal\x18\x06 \x01(\x01R\bsubtotal\x12\x10\n" +
 	"\x03tax\x18\a \x01(\x01R\x03tax\x12\x14\n" +
 	"\x05total\x18\b \x01(\x01R\x05total\x12\x1b\n" +
@@ -578,32 +579,32 @@ const file_finance_v1_recurring_invoices_proto_rawDesc = "" +
 	"\n" +
 	"unit_price\x18\x03 \x01(\x01R\tunitPrice\x12\x19\n" +
 	"\btax_rate\x18\x04 \x01(\x01R\ataxRate\x12\x14\n" +
-	"\x05total\x18\x05 \x01(\x01R\x05total\"z\n" +
-	"\x1cListRecurringInvoicesRequest\x129\n" +
+	"\x05total\x18\x05 \x01(\x01R\x05total\"}\n" +
+	"\x1cListRecurringInvoicesRequest\x12<\n" +
 	"\n" +
-	"pagination\x18\x01 \x01(\v2\x19.common.PaginationRequestR\n" +
+	"pagination\x18\x01 \x01(\v2\x1c.common.v1.PaginationRequestR\n" +
 	"pagination\x12\x1f\n" +
 	"\vactive_only\x18\x02 \x01(\bR\n" +
-	"activeOnly\"\x92\x01\n" +
-	"\x1dListRecurringInvoicesResponse\x125\n" +
-	"\binvoices\x18\x01 \x03(\v2\x19.finance.RecurringInvoiceR\binvoices\x12:\n" +
+	"activeOnly\"\x98\x01\n" +
+	"\x1dListRecurringInvoicesResponse\x128\n" +
+	"\binvoices\x18\x01 \x03(\v2\x1c.finance.v1.RecurringInvoiceR\binvoices\x12=\n" +
 	"\n" +
-	"pagination\x18\x02 \x01(\v2\x1a.common.PaginationResponseR\n" +
+	"pagination\x18\x02 \x01(\v2\x1d.common.v1.PaginationResponseR\n" +
 	"pagination\",\n" +
 	"\x1aGetRecurringInvoiceRequest\x12\x0e\n" +
-	"\x02id\x18\x01 \x01(\x03R\x02id\"R\n" +
-	"\x1bGetRecurringInvoiceResponse\x123\n" +
-	"\ainvoice\x18\x01 \x01(\v2\x19.finance.RecurringInvoiceR\ainvoice\"\xc8\x01\n" +
+	"\x02id\x18\x01 \x01(\x03R\x02id\"U\n" +
+	"\x1bGetRecurringInvoiceResponse\x126\n" +
+	"\ainvoice\x18\x01 \x01(\v2\x1c.finance.v1.RecurringInvoiceR\ainvoice\"\xcb\x01\n" +
 	"\x1dCreateRecurringInvoiceRequest\x12\x1f\n" +
 	"\vcustomer_id\x18\x01 \x01(\x03R\n" +
 	"customerId\x12\x1c\n" +
-	"\tfrequency\x18\x02 \x01(\tR\tfrequency\x123\n" +
-	"\x05lines\x18\x03 \x03(\v2\x1d.finance.RecurringInvoiceLineR\x05lines\x12\x1d\n" +
+	"\tfrequency\x18\x02 \x01(\tR\tfrequency\x126\n" +
+	"\x05lines\x18\x03 \x03(\v2 .finance.v1.RecurringInvoiceLineR\x05lines\x12\x1d\n" +
 	"\n" +
 	"start_date\x18\x04 \x01(\tR\tstartDate\x12\x14\n" +
-	"\x05notes\x18\x05 \x01(\tR\x05notes\"U\n" +
-	"\x1eCreateRecurringInvoiceResponse\x123\n" +
-	"\ainvoice\x18\x01 \x01(\v2\x19.finance.RecurringInvoiceR\ainvoiceB+Z)github.com/voxire/voxie/gen/go/finance/v1b\x06proto3"
+	"\x05notes\x18\x05 \x01(\tR\x05notes\"X\n" +
+	"\x1eCreateRecurringInvoiceResponse\x126\n" +
+	"\ainvoice\x18\x01 \x01(\v2\x1c.finance.v1.RecurringInvoiceR\ainvoiceB+Z)github.com/voxire/voxie/gen/go/finance/v1b\x06proto3"
 
 var (
 	file_finance_v1_recurring_invoices_proto_rawDescOnce sync.Once
@@ -619,25 +620,25 @@ func file_finance_v1_recurring_invoices_proto_rawDescGZIP() []byte {
 
 var file_finance_v1_recurring_invoices_proto_msgTypes = make([]protoimpl.MessageInfo, 8)
 var file_finance_v1_recurring_invoices_proto_goTypes = []any{
-	(*RecurringInvoice)(nil),               // 0: finance.RecurringInvoice
-	(*RecurringInvoiceLine)(nil),           // 1: finance.RecurringInvoiceLine
-	(*ListRecurringInvoicesRequest)(nil),   // 2: finance.ListRecurringInvoicesRequest
-	(*ListRecurringInvoicesResponse)(nil),  // 3: finance.ListRecurringInvoicesResponse
-	(*GetRecurringInvoiceRequest)(nil),     // 4: finance.GetRecurringInvoiceRequest
-	(*GetRecurringInvoiceResponse)(nil),    // 5: finance.GetRecurringInvoiceResponse
-	(*CreateRecurringInvoiceRequest)(nil),  // 6: finance.CreateRecurringInvoiceRequest
-	(*CreateRecurringInvoiceResponse)(nil), // 7: finance.CreateRecurringInvoiceResponse
-	(*v1.PaginationRequest)(nil),           // 8: common.PaginationRequest
-	(*v1.PaginationResponse)(nil),          // 9: common.PaginationResponse
+	(*RecurringInvoice)(nil),               // 0: finance.v1.RecurringInvoice
+	(*RecurringInvoiceLine)(nil),           // 1: finance.v1.RecurringInvoiceLine
+	(*ListRecurringInvoicesRequest)(nil),   // 2: finance.v1.ListRecurringInvoicesRequest
+	(*ListRecurringInvoicesResponse)(nil),  // 3: finance.v1.ListRecurringInvoicesResponse
+	(*GetRecurringInvoiceRequest)(nil),     // 4: finance.v1.GetRecurringInvoiceRequest
+	(*GetRecurringInvoiceResponse)(nil),    // 5: finance.v1.GetRecurringInvoiceResponse
+	(*CreateRecurringInvoiceRequest)(nil),  // 6: finance.v1.CreateRecurringInvoiceRequest
+	(*CreateRecurringInvoiceResponse)(nil), // 7: finance.v1.CreateRecurringInvoiceResponse
+	(*v1.PaginationRequest)(nil),           // 8: common.v1.PaginationRequest
+	(*v1.PaginationResponse)(nil),          // 9: common.v1.PaginationResponse
 }
 var file_finance_v1_recurring_invoices_proto_depIdxs = []int32{
-	1, // 0: finance.RecurringInvoice.lines:type_name -> finance.RecurringInvoiceLine
-	8, // 1: finance.ListRecurringInvoicesRequest.pagination:type_name -> common.PaginationRequest
-	0, // 2: finance.ListRecurringInvoicesResponse.invoices:type_name -> finance.RecurringInvoice
-	9, // 3: finance.ListRecurringInvoicesResponse.pagination:type_name -> common.PaginationResponse
-	0, // 4: finance.GetRecurringInvoiceResponse.invoice:type_name -> finance.RecurringInvoice
-	1, // 5: finance.CreateRecurringInvoiceRequest.lines:type_name -> finance.RecurringInvoiceLine
-	0, // 6: finance.CreateRecurringInvoiceResponse.invoice:type_name -> finance.RecurringInvoice
+	1, // 0: finance.v1.RecurringInvoice.lines:type_name -> finance.v1.RecurringInvoiceLine
+	8, // 1: finance.v1.ListRecurringInvoicesRequest.pagination:type_name -> common.v1.PaginationRequest
+	0, // 2: finance.v1.ListRecurringInvoicesResponse.invoices:type_name -> finance.v1.RecurringInvoice
+	9, // 3: finance.v1.ListRecurringInvoicesResponse.pagination:type_name -> common.v1.PaginationResponse
+	0, // 4: finance.v1.GetRecurringInvoiceResponse.invoice:type_name -> finance.v1.RecurringInvoice
+	1, // 5: finance.v1.CreateRecurringInvoiceRequest.lines:type_name -> finance.v1.RecurringInvoiceLine
+	0, // 6: finance.v1.CreateRecurringInvoiceResponse.invoice:type_name -> finance.v1.RecurringInvoice
 	7, // [7:7] is the sub-list for method output_type
 	7, // [7:7] is the sub-list for method input_type
 	7, // [7:7] is the sub-list for extension type_name

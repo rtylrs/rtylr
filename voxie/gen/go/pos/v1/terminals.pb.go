@@ -517,7 +517,7 @@ var File_pos_v1_terminals_proto protoreflect.FileDescriptor
 
 const file_pos_v1_terminals_proto_rawDesc = "" +
 	"\n" +
-	"\x16pos/v1/terminals.proto\x12\x03pos\"\x90\x02\n" +
+	"\x16pos/v1/terminals.proto\x12\x06pos.v1\"\x90\x02\n" +
 	"\bTerminal\x12\x0e\n" +
 	"\x02id\x18\x01 \x01(\x03R\x02id\x12\x1f\n" +
 	"\vbusiness_id\x18\x02 \x01(\x03R\n" +
@@ -533,9 +533,9 @@ const file_pos_v1_terminals_proto_rawDesc = "" +
 	"\n" +
 	"_device_idB\x0f\n" +
 	"\r_last_seen_at\"\x16\n" +
-	"\x14ListTerminalsRequest\"D\n" +
-	"\x15ListTerminalsResponse\x12+\n" +
-	"\tterminals\x18\x01 \x03(\v2\r.pos.TerminalR\tterminals\"e\n" +
+	"\x14ListTerminalsRequest\"G\n" +
+	"\x15ListTerminalsResponse\x12.\n" +
+	"\tterminals\x18\x01 \x03(\v2\x10.pos.v1.TerminalR\tterminals\"e\n" +
 	"\x15CreateTerminalRequest\x12\x1b\n" +
 	"\tbranch_id\x18\x01 \x01(\x03R\bbranchId\x12\x12\n" +
 	"\x04name\x18\x02 \x01(\tR\x04name\x12\x1b\n" +
@@ -571,18 +571,18 @@ func file_pos_v1_terminals_proto_rawDescGZIP() []byte {
 
 var file_pos_v1_terminals_proto_msgTypes = make([]protoimpl.MessageInfo, 9)
 var file_pos_v1_terminals_proto_goTypes = []any{
-	(*Terminal)(nil),                  // 0: pos.Terminal
-	(*ListTerminalsRequest)(nil),      // 1: pos.ListTerminalsRequest
-	(*ListTerminalsResponse)(nil),     // 2: pos.ListTerminalsResponse
-	(*CreateTerminalRequest)(nil),     // 3: pos.CreateTerminalRequest
-	(*CreateTerminalResponse)(nil),    // 4: pos.CreateTerminalResponse
-	(*UpdateTerminalRequest)(nil),     // 5: pos.UpdateTerminalRequest
-	(*UpdateTerminalResponse)(nil),    // 6: pos.UpdateTerminalResponse
-	(*HeartbeatTerminalRequest)(nil),  // 7: pos.HeartbeatTerminalRequest
-	(*HeartbeatTerminalResponse)(nil), // 8: pos.HeartbeatTerminalResponse
+	(*Terminal)(nil),                  // 0: pos.v1.Terminal
+	(*ListTerminalsRequest)(nil),      // 1: pos.v1.ListTerminalsRequest
+	(*ListTerminalsResponse)(nil),     // 2: pos.v1.ListTerminalsResponse
+	(*CreateTerminalRequest)(nil),     // 3: pos.v1.CreateTerminalRequest
+	(*CreateTerminalResponse)(nil),    // 4: pos.v1.CreateTerminalResponse
+	(*UpdateTerminalRequest)(nil),     // 5: pos.v1.UpdateTerminalRequest
+	(*UpdateTerminalResponse)(nil),    // 6: pos.v1.UpdateTerminalResponse
+	(*HeartbeatTerminalRequest)(nil),  // 7: pos.v1.HeartbeatTerminalRequest
+	(*HeartbeatTerminalResponse)(nil), // 8: pos.v1.HeartbeatTerminalResponse
 }
 var file_pos_v1_terminals_proto_depIdxs = []int32{
-	0, // 0: pos.ListTerminalsResponse.terminals:type_name -> pos.Terminal
+	0, // 0: pos.v1.ListTerminalsResponse.terminals:type_name -> pos.v1.Terminal
 	1, // [1:1] is the sub-list for method output_type
 	1, // [1:1] is the sub-list for method input_type
 	1, // [1:1] is the sub-list for extension type_name

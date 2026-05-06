@@ -789,7 +789,7 @@ var File_erp_v1_products_proto protoreflect.FileDescriptor
 
 const file_erp_v1_products_proto_rawDesc = "" +
 	"\n" +
-	"\x15erp/v1/products.proto\x12\x03erp\"\xb0\x04\n" +
+	"\x15erp/v1/products.proto\x12\x06erp.v1\"\xb0\x04\n" +
 	"\aProduct\x12\x0e\n" +
 	"\x02id\x18\x01 \x01(\x03R\x02id\x12\x19\n" +
 	"\bowner_id\x18\x02 \x01(\x03R\aownerId\x12\x1f\n" +
@@ -821,9 +821,9 @@ const file_erp_v1_products_proto_rawDesc = "" +
 	"\vcategory_id\x18\x02 \x01(\x03R\n" +
 	"categoryId\x12\x14\n" +
 	"\x05limit\x18\x03 \x01(\x03R\x05limit\x12\x16\n" +
-	"\x06offset\x18\x04 \x01(\x03R\x06offset\"@\n" +
-	"\x14ListProductsResponse\x12(\n" +
-	"\bproducts\x18\x01 \x03(\v2\f.erp.ProductR\bproducts\"\xad\x03\n" +
+	"\x06offset\x18\x04 \x01(\x03R\x06offset\"C\n" +
+	"\x14ListProductsResponse\x12+\n" +
+	"\bproducts\x18\x01 \x03(\v2\x0f.erp.v1.ProductR\bproducts\"\xad\x03\n" +
 	"\x14CreateProductRequest\x12\x1f\n" +
 	"\vcategory_id\x18\x01 \x01(\x03R\n" +
 	"categoryId\x12\x1f\n" +
@@ -888,18 +888,18 @@ func file_erp_v1_products_proto_rawDescGZIP() []byte {
 
 var file_erp_v1_products_proto_msgTypes = make([]protoimpl.MessageInfo, 9)
 var file_erp_v1_products_proto_goTypes = []any{
-	(*Product)(nil),               // 0: erp.Product
-	(*ListProductsRequest)(nil),   // 1: erp.ListProductsRequest
-	(*ListProductsResponse)(nil),  // 2: erp.ListProductsResponse
-	(*CreateProductRequest)(nil),  // 3: erp.CreateProductRequest
-	(*CreateProductResponse)(nil), // 4: erp.CreateProductResponse
-	(*UpdateProductRequest)(nil),  // 5: erp.UpdateProductRequest
-	(*UpdateProductResponse)(nil), // 6: erp.UpdateProductResponse
-	(*DeleteProductRequest)(nil),  // 7: erp.DeleteProductRequest
-	(*DeleteProductResponse)(nil), // 8: erp.DeleteProductResponse
+	(*Product)(nil),               // 0: erp.v1.Product
+	(*ListProductsRequest)(nil),   // 1: erp.v1.ListProductsRequest
+	(*ListProductsResponse)(nil),  // 2: erp.v1.ListProductsResponse
+	(*CreateProductRequest)(nil),  // 3: erp.v1.CreateProductRequest
+	(*CreateProductResponse)(nil), // 4: erp.v1.CreateProductResponse
+	(*UpdateProductRequest)(nil),  // 5: erp.v1.UpdateProductRequest
+	(*UpdateProductResponse)(nil), // 6: erp.v1.UpdateProductResponse
+	(*DeleteProductRequest)(nil),  // 7: erp.v1.DeleteProductRequest
+	(*DeleteProductResponse)(nil), // 8: erp.v1.DeleteProductResponse
 }
 var file_erp_v1_products_proto_depIdxs = []int32{
-	0, // 0: erp.ListProductsResponse.products:type_name -> erp.Product
+	0, // 0: erp.v1.ListProductsResponse.products:type_name -> erp.v1.Product
 	1, // [1:1] is the sub-list for method output_type
 	1, // [1:1] is the sub-list for method input_type
 	1, // [1:1] is the sub-list for extension type_name

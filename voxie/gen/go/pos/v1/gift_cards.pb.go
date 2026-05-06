@@ -453,7 +453,7 @@ var File_pos_v1_gift_cards_proto protoreflect.FileDescriptor
 
 const file_pos_v1_gift_cards_proto_rawDesc = "" +
 	"\n" +
-	"\x17pos/v1/gift_cards.proto\x12\x03pos\"\xc0\x02\n" +
+	"\x17pos/v1/gift_cards.proto\x12\x06pos.v1\"\xc0\x02\n" +
 	"\bGiftCard\x12\x0e\n" +
 	"\x02id\x18\x01 \x01(\x03R\x02id\x12\x19\n" +
 	"\bowner_id\x18\x02 \x01(\x03R\aownerId\x12\x12\n" +
@@ -468,10 +468,10 @@ const file_pos_v1_gift_cards_proto_rawDesc = "" +
 	"\n" +
 	"created_at\x18\n" +
 	" \x01(\tR\tcreatedAt\"\x16\n" +
-	"\x14ListGiftCardsRequest\"E\n" +
-	"\x15ListGiftCardsResponse\x12,\n" +
+	"\x14ListGiftCardsRequest\"H\n" +
+	"\x15ListGiftCardsResponse\x12/\n" +
 	"\n" +
-	"gift_cards\x18\x01 \x03(\v2\r.pos.GiftCardR\tgiftCards\"\xbd\x01\n" +
+	"gift_cards\x18\x01 \x03(\v2\x10.pos.v1.GiftCardR\tgiftCards\"\xbd\x01\n" +
 	"\x15CreateGiftCardRequest\x12\x12\n" +
 	"\x04code\x18\x01 \x01(\tR\x04code\x12%\n" +
 	"\x0einitial_amount\x18\x02 \x01(\x01R\rinitialAmount\x12#\n" +
@@ -485,9 +485,9 @@ const file_pos_v1_gift_cards_proto_rawDesc = "" +
 	"\amessage\x18\x02 \x01(\tR\amessage\"C\n" +
 	"\x15RedeemGiftCardRequest\x12\x12\n" +
 	"\x04code\x18\x01 \x01(\tR\x04code\x12\x16\n" +
-	"\x06amount\x18\x02 \x01(\x01R\x06amount\"^\n" +
-	"\x16RedeemGiftCardResponse\x12*\n" +
-	"\tgift_card\x18\x01 \x01(\v2\r.pos.GiftCardR\bgiftCard\x12\x18\n" +
+	"\x06amount\x18\x02 \x01(\x01R\x06amount\"a\n" +
+	"\x16RedeemGiftCardResponse\x12-\n" +
+	"\tgift_card\x18\x01 \x01(\v2\x10.pos.v1.GiftCardR\bgiftCard\x12\x18\n" +
 	"\amessage\x18\x02 \x01(\tR\amessageB'Z%github.com/voxire/voxie/gen/go/pos/v1b\x06proto3"
 
 var (
@@ -504,17 +504,17 @@ func file_pos_v1_gift_cards_proto_rawDescGZIP() []byte {
 
 var file_pos_v1_gift_cards_proto_msgTypes = make([]protoimpl.MessageInfo, 7)
 var file_pos_v1_gift_cards_proto_goTypes = []any{
-	(*GiftCard)(nil),               // 0: pos.GiftCard
-	(*ListGiftCardsRequest)(nil),   // 1: pos.ListGiftCardsRequest
-	(*ListGiftCardsResponse)(nil),  // 2: pos.ListGiftCardsResponse
-	(*CreateGiftCardRequest)(nil),  // 3: pos.CreateGiftCardRequest
-	(*CreateGiftCardResponse)(nil), // 4: pos.CreateGiftCardResponse
-	(*RedeemGiftCardRequest)(nil),  // 5: pos.RedeemGiftCardRequest
-	(*RedeemGiftCardResponse)(nil), // 6: pos.RedeemGiftCardResponse
+	(*GiftCard)(nil),               // 0: pos.v1.GiftCard
+	(*ListGiftCardsRequest)(nil),   // 1: pos.v1.ListGiftCardsRequest
+	(*ListGiftCardsResponse)(nil),  // 2: pos.v1.ListGiftCardsResponse
+	(*CreateGiftCardRequest)(nil),  // 3: pos.v1.CreateGiftCardRequest
+	(*CreateGiftCardResponse)(nil), // 4: pos.v1.CreateGiftCardResponse
+	(*RedeemGiftCardRequest)(nil),  // 5: pos.v1.RedeemGiftCardRequest
+	(*RedeemGiftCardResponse)(nil), // 6: pos.v1.RedeemGiftCardResponse
 }
 var file_pos_v1_gift_cards_proto_depIdxs = []int32{
-	0, // 0: pos.ListGiftCardsResponse.gift_cards:type_name -> pos.GiftCard
-	0, // 1: pos.RedeemGiftCardResponse.gift_card:type_name -> pos.GiftCard
+	0, // 0: pos.v1.ListGiftCardsResponse.gift_cards:type_name -> pos.v1.GiftCard
+	0, // 1: pos.v1.RedeemGiftCardResponse.gift_card:type_name -> pos.v1.GiftCard
 	2, // [2:2] is the sub-list for method output_type
 	2, // [2:2] is the sub-list for method input_type
 	2, // [2:2] is the sub-list for extension type_name

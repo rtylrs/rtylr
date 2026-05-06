@@ -353,7 +353,7 @@ var File_hub_v1_user_proto protoreflect.FileDescriptor
 
 const file_hub_v1_user_proto_rawDesc = "" +
 	"\n" +
-	"\x11hub/v1/user.proto\x12\x03hub\"\x0e\n" +
+	"\x11hub/v1/user.proto\x12\x06hub.v1\"\x0e\n" +
 	"\fGetMeRequest\"\xf9\x01\n" +
 	"\rGetMeResponse\x12\x0e\n" +
 	"\x02id\x18\x01 \x01(\x03R\x02id\x12\x14\n" +
@@ -368,9 +368,9 @@ const file_hub_v1_user_proto_rawDesc = "" +
 	"\tonboarded\x18\t \x01(\bR\tonboarded\"@\n" +
 	"\x14UpdateProfileRequest\x12\x12\n" +
 	"\x04name\x18\x01 \x01(\tR\x04name\x12\x14\n" +
-	"\x05email\x18\x02 \x01(\tR\x05email\"?\n" +
-	"\x15UpdateProfileResponse\x12&\n" +
-	"\x04user\x18\x01 \x01(\v2\x12.hub.GetMeResponseR\x04user\"e\n" +
+	"\x05email\x18\x02 \x01(\tR\x05email\"B\n" +
+	"\x15UpdateProfileResponse\x12)\n" +
+	"\x04user\x18\x01 \x01(\v2\x15.hub.v1.GetMeResponseR\x04user\"e\n" +
 	"\x15ChangePasswordRequest\x12)\n" +
 	"\x10current_password\x18\x01 \x01(\tR\x0fcurrentPassword\x12!\n" +
 	"\fnew_password\x18\x02 \x01(\tR\vnewPassword\"\x18\n" +
@@ -390,15 +390,15 @@ func file_hub_v1_user_proto_rawDescGZIP() []byte {
 
 var file_hub_v1_user_proto_msgTypes = make([]protoimpl.MessageInfo, 6)
 var file_hub_v1_user_proto_goTypes = []any{
-	(*GetMeRequest)(nil),           // 0: hub.GetMeRequest
-	(*GetMeResponse)(nil),          // 1: hub.GetMeResponse
-	(*UpdateProfileRequest)(nil),   // 2: hub.UpdateProfileRequest
-	(*UpdateProfileResponse)(nil),  // 3: hub.UpdateProfileResponse
-	(*ChangePasswordRequest)(nil),  // 4: hub.ChangePasswordRequest
-	(*ChangePasswordResponse)(nil), // 5: hub.ChangePasswordResponse
+	(*GetMeRequest)(nil),           // 0: hub.v1.GetMeRequest
+	(*GetMeResponse)(nil),          // 1: hub.v1.GetMeResponse
+	(*UpdateProfileRequest)(nil),   // 2: hub.v1.UpdateProfileRequest
+	(*UpdateProfileResponse)(nil),  // 3: hub.v1.UpdateProfileResponse
+	(*ChangePasswordRequest)(nil),  // 4: hub.v1.ChangePasswordRequest
+	(*ChangePasswordResponse)(nil), // 5: hub.v1.ChangePasswordResponse
 }
 var file_hub_v1_user_proto_depIdxs = []int32{
-	1, // 0: hub.UpdateProfileResponse.user:type_name -> hub.GetMeResponse
+	1, // 0: hub.v1.UpdateProfileResponse.user:type_name -> hub.v1.GetMeResponse
 	1, // [1:1] is the sub-list for method output_type
 	1, // [1:1] is the sub-list for method input_type
 	1, // [1:1] is the sub-list for extension type_name

@@ -1,6 +1,6 @@
 syntax = "proto3";
 
-package insights;
+package insights.v1;
 
 option go_package = "github.com/voxire/voxie/gen/go/insights/v1";
 
@@ -31,13 +31,13 @@ message ScheduledReport {
 }
 
 message ListReportTemplatesRequest {
-  common.PaginationRequest pagination = 1;
+  common.v1.PaginationRequest pagination = 1;
   string type = 2;
 }
 
 message ListReportTemplatesResponse {
   repeated ReportTemplate templates = 1;
-  common.PaginationResponse pagination = 2;
+  common.v1.PaginationResponse pagination = 2;
 }
 
 message GetReportTemplateRequest {
@@ -61,12 +61,12 @@ message CreateReportTemplateResponse {
 }
 
 message ListScheduledReportsRequest {
-  common.PaginationRequest pagination = 1;
+  common.v1.PaginationRequest pagination = 1;
 }
 
 message ListScheduledReportsResponse {
   repeated ScheduledReport reports = 1;
-  common.PaginationResponse pagination = 2;
+  common.v1.PaginationResponse pagination = 2;
 }
 
 message CreateScheduledReportRequest {

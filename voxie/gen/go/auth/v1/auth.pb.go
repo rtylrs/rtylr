@@ -585,7 +585,7 @@ var File_auth_v1_auth_proto protoreflect.FileDescriptor
 
 const file_auth_v1_auth_proto_rawDesc = "" +
 	"\n" +
-	"\x12auth/v1/auth.proto\x12\x04auth\"@\n" +
+	"\x12auth/v1/auth.proto\x12\aauth.v1\"@\n" +
 	"\fLoginRequest\x12\x14\n" +
 	"\x05email\x18\x01 \x01(\tR\x05email\x12\x1a\n" +
 	"\bpassword\x18\x02 \x01(\tR\bpassword\"\x82\x01\n" +
@@ -636,16 +636,16 @@ func file_auth_v1_auth_proto_rawDescGZIP() []byte {
 
 var file_auth_v1_auth_proto_msgTypes = make([]protoimpl.MessageInfo, 10)
 var file_auth_v1_auth_proto_goTypes = []any{
-	(*LoginRequest)(nil),          // 0: auth.LoginRequest
-	(*LoginResponse)(nil),         // 1: auth.LoginResponse
-	(*RegisterRequest)(nil),       // 2: auth.RegisterRequest
-	(*RegisterResponse)(nil),      // 3: auth.RegisterResponse
-	(*ResetPasswordRequest)(nil),  // 4: auth.ResetPasswordRequest
-	(*ResetPasswordResponse)(nil), // 5: auth.ResetPasswordResponse
-	(*InviteAcceptRequest)(nil),   // 6: auth.InviteAcceptRequest
-	(*InviteAcceptResponse)(nil),  // 7: auth.InviteAcceptResponse
-	(*GoogleAuthRequest)(nil),     // 8: auth.GoogleAuthRequest
-	(*GoogleAuthResponse)(nil),    // 9: auth.GoogleAuthResponse
+	(*LoginRequest)(nil),          // 0: auth.v1.LoginRequest
+	(*LoginResponse)(nil),         // 1: auth.v1.LoginResponse
+	(*RegisterRequest)(nil),       // 2: auth.v1.RegisterRequest
+	(*RegisterResponse)(nil),      // 3: auth.v1.RegisterResponse
+	(*ResetPasswordRequest)(nil),  // 4: auth.v1.ResetPasswordRequest
+	(*ResetPasswordResponse)(nil), // 5: auth.v1.ResetPasswordResponse
+	(*InviteAcceptRequest)(nil),   // 6: auth.v1.InviteAcceptRequest
+	(*InviteAcceptResponse)(nil),  // 7: auth.v1.InviteAcceptResponse
+	(*GoogleAuthRequest)(nil),     // 8: auth.v1.GoogleAuthRequest
+	(*GoogleAuthResponse)(nil),    // 9: auth.v1.GoogleAuthResponse
 }
 var file_auth_v1_auth_proto_depIdxs = []int32{
 	0, // [0:0] is the sub-list for method output_type

@@ -1373,7 +1373,7 @@ var File_crm_v1_loyalty_proto protoreflect.FileDescriptor
 
 const file_crm_v1_loyalty_proto_rawDesc = "" +
 	"\n" +
-	"\x14crm/v1/loyalty.proto\x12\x03crm\"\xc9\x04\n" +
+	"\x14crm/v1/loyalty.proto\x12\x06crm.v1\"\xc9\x04\n" +
 	"\rLoyaltyConfig\x12\x0e\n" +
 	"\x02id\x18\x01 \x01(\x03R\x02id\x12\x19\n" +
 	"\bowner_id\x18\x02 \x01(\x03R\aownerId\x12\x1d\n" +
@@ -1395,9 +1395,9 @@ const file_crm_v1_loyalty_proto_rawDesc = "" +
 	"\x12points_expiry_days\x18\x0e \x01(\x03R\x10pointsExpiryDays\x12\x1d\n" +
 	"\n" +
 	"updated_at\x18\x0f \x01(\tR\tupdatedAt\"\x19\n" +
-	"\x17GetLoyaltyConfigRequest\"F\n" +
-	"\x18GetLoyaltyConfigResponse\x12*\n" +
-	"\x06config\x18\x01 \x01(\v2\x12.crm.LoyaltyConfigR\x06config\"\x8c\x04\n" +
+	"\x17GetLoyaltyConfigRequest\"I\n" +
+	"\x18GetLoyaltyConfigResponse\x12-\n" +
+	"\x06config\x18\x01 \x01(\v2\x15.crm.v1.LoyaltyConfigR\x06config\"\x8c\x04\n" +
 	"\x1aUpdateLoyaltyConfigRequest\x12\x1d\n" +
 	"\n" +
 	"is_enabled\x18\x01 \x01(\bR\tisEnabled\x127\n" +
@@ -1437,9 +1437,9 @@ const file_crm_v1_loyalty_proto_rawDesc = "" +
 	"\vcustomer_id\x18\x01 \x01(\x03R\n" +
 	"customerId\x12\x12\n" +
 	"\x04page\x18\x02 \x01(\x03R\x04page\x12\x1b\n" +
-	"\tpage_size\x18\x03 \x01(\x03R\bpageSize\"\xa5\x01\n" +
-	"\x1fListLoyaltyTransactionsResponse\x12;\n" +
-	"\ftransactions\x18\x01 \x03(\v2\x17.crm.LoyaltyTransactionR\ftransactions\x12\x14\n" +
+	"\tpage_size\x18\x03 \x01(\x03R\bpageSize\"\xa8\x01\n" +
+	"\x1fListLoyaltyTransactionsResponse\x12>\n" +
+	"\ftransactions\x18\x01 \x03(\v2\x1a.crm.v1.LoyaltyTransactionR\ftransactions\x12\x14\n" +
 	"\x05total\x18\x02 \x01(\x03R\x05total\x12\x12\n" +
 	"\x04page\x18\x03 \x01(\x03R\x04page\x12\x1b\n" +
 	"\tpage_size\x18\x04 \x01(\x03R\bpageSize\"\xcf\x01\n" +
@@ -1477,9 +1477,9 @@ const file_crm_v1_loyalty_proto_rawDesc = "" +
 	"created_at\x18\b \x01(\tR\tcreatedAt\x12\x1d\n" +
 	"\n" +
 	"updated_at\x18\t \x01(\tR\tupdatedAt\"\x19\n" +
-	"\x17ListLoyaltyTiersRequest\"B\n" +
-	"\x18ListLoyaltyTiersResponse\x12&\n" +
-	"\x05tiers\x18\x01 \x03(\v2\x10.crm.LoyaltyTierR\x05tiers\"\xa5\x01\n" +
+	"\x17ListLoyaltyTiersRequest\"E\n" +
+	"\x18ListLoyaltyTiersResponse\x12)\n" +
+	"\x05tiers\x18\x01 \x03(\v2\x13.crm.v1.LoyaltyTierR\x05tiers\"\xa5\x01\n" +
 	"\x18CreateLoyaltyTierRequest\x12\x12\n" +
 	"\x04name\x18\x01 \x01(\tR\x04name\x12\x1d\n" +
 	"\n" +
@@ -1517,30 +1517,30 @@ func file_crm_v1_loyalty_proto_rawDescGZIP() []byte {
 
 var file_crm_v1_loyalty_proto_msgTypes = make([]protoimpl.MessageInfo, 19)
 var file_crm_v1_loyalty_proto_goTypes = []any{
-	(*LoyaltyConfig)(nil),                   // 0: crm.LoyaltyConfig
-	(*GetLoyaltyConfigRequest)(nil),         // 1: crm.GetLoyaltyConfigRequest
-	(*GetLoyaltyConfigResponse)(nil),        // 2: crm.GetLoyaltyConfigResponse
-	(*UpdateLoyaltyConfigRequest)(nil),      // 3: crm.UpdateLoyaltyConfigRequest
-	(*UpdateLoyaltyConfigResponse)(nil),     // 4: crm.UpdateLoyaltyConfigResponse
-	(*LoyaltyTransaction)(nil),              // 5: crm.LoyaltyTransaction
-	(*ListLoyaltyTransactionsRequest)(nil),  // 6: crm.ListLoyaltyTransactionsRequest
-	(*ListLoyaltyTransactionsResponse)(nil), // 7: crm.ListLoyaltyTransactionsResponse
-	(*AwardPointsRequest)(nil),              // 8: crm.AwardPointsRequest
-	(*AwardPointsResponse)(nil),             // 9: crm.AwardPointsResponse
-	(*RedeemPointsRequest)(nil),             // 10: crm.RedeemPointsRequest
-	(*RedeemPointsResponse)(nil),            // 11: crm.RedeemPointsResponse
-	(*LoyaltyTier)(nil),                     // 12: crm.LoyaltyTier
-	(*ListLoyaltyTiersRequest)(nil),         // 13: crm.ListLoyaltyTiersRequest
-	(*ListLoyaltyTiersResponse)(nil),        // 14: crm.ListLoyaltyTiersResponse
-	(*CreateLoyaltyTierRequest)(nil),        // 15: crm.CreateLoyaltyTierRequest
-	(*CreateLoyaltyTierResponse)(nil),       // 16: crm.CreateLoyaltyTierResponse
-	(*UpdateLoyaltyTierRequest)(nil),        // 17: crm.UpdateLoyaltyTierRequest
-	(*UpdateLoyaltyTierResponse)(nil),       // 18: crm.UpdateLoyaltyTierResponse
+	(*LoyaltyConfig)(nil),                   // 0: crm.v1.LoyaltyConfig
+	(*GetLoyaltyConfigRequest)(nil),         // 1: crm.v1.GetLoyaltyConfigRequest
+	(*GetLoyaltyConfigResponse)(nil),        // 2: crm.v1.GetLoyaltyConfigResponse
+	(*UpdateLoyaltyConfigRequest)(nil),      // 3: crm.v1.UpdateLoyaltyConfigRequest
+	(*UpdateLoyaltyConfigResponse)(nil),     // 4: crm.v1.UpdateLoyaltyConfigResponse
+	(*LoyaltyTransaction)(nil),              // 5: crm.v1.LoyaltyTransaction
+	(*ListLoyaltyTransactionsRequest)(nil),  // 6: crm.v1.ListLoyaltyTransactionsRequest
+	(*ListLoyaltyTransactionsResponse)(nil), // 7: crm.v1.ListLoyaltyTransactionsResponse
+	(*AwardPointsRequest)(nil),              // 8: crm.v1.AwardPointsRequest
+	(*AwardPointsResponse)(nil),             // 9: crm.v1.AwardPointsResponse
+	(*RedeemPointsRequest)(nil),             // 10: crm.v1.RedeemPointsRequest
+	(*RedeemPointsResponse)(nil),            // 11: crm.v1.RedeemPointsResponse
+	(*LoyaltyTier)(nil),                     // 12: crm.v1.LoyaltyTier
+	(*ListLoyaltyTiersRequest)(nil),         // 13: crm.v1.ListLoyaltyTiersRequest
+	(*ListLoyaltyTiersResponse)(nil),        // 14: crm.v1.ListLoyaltyTiersResponse
+	(*CreateLoyaltyTierRequest)(nil),        // 15: crm.v1.CreateLoyaltyTierRequest
+	(*CreateLoyaltyTierResponse)(nil),       // 16: crm.v1.CreateLoyaltyTierResponse
+	(*UpdateLoyaltyTierRequest)(nil),        // 17: crm.v1.UpdateLoyaltyTierRequest
+	(*UpdateLoyaltyTierResponse)(nil),       // 18: crm.v1.UpdateLoyaltyTierResponse
 }
 var file_crm_v1_loyalty_proto_depIdxs = []int32{
-	0,  // 0: crm.GetLoyaltyConfigResponse.config:type_name -> crm.LoyaltyConfig
-	5,  // 1: crm.ListLoyaltyTransactionsResponse.transactions:type_name -> crm.LoyaltyTransaction
-	12, // 2: crm.ListLoyaltyTiersResponse.tiers:type_name -> crm.LoyaltyTier
+	0,  // 0: crm.v1.GetLoyaltyConfigResponse.config:type_name -> crm.v1.LoyaltyConfig
+	5,  // 1: crm.v1.ListLoyaltyTransactionsResponse.transactions:type_name -> crm.v1.LoyaltyTransaction
+	12, // 2: crm.v1.ListLoyaltyTiersResponse.tiers:type_name -> crm.v1.LoyaltyTier
 	3,  // [3:3] is the sub-list for method output_type
 	3,  // [3:3] is the sub-list for method input_type
 	3,  // [3:3] is the sub-list for extension type_name

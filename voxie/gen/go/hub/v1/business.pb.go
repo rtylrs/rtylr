@@ -405,7 +405,7 @@ var File_hub_v1_business_proto protoreflect.FileDescriptor
 
 const file_hub_v1_business_proto_rawDesc = "" +
 	"\n" +
-	"\x15hub/v1/business.proto\x12\x03hub\"\xc2\x02\n" +
+	"\x15hub/v1/business.proto\x12\x06hub.v1\"\xc2\x02\n" +
 	"\bBusiness\x12\x0e\n" +
 	"\x02id\x18\x01 \x01(\x03R\x02id\x12\x12\n" +
 	"\x04name\x18\x02 \x01(\tR\x04name\x12\x12\n" +
@@ -424,9 +424,9 @@ const file_hub_v1_business_proto_rawDesc = "" +
 	"created_at\x18\r \x01(\tR\tcreatedAt\"5\n" +
 	"\x12GetBusinessRequest\x12\x1f\n" +
 	"\vbusiness_id\x18\x01 \x01(\x03R\n" +
-	"businessId\"@\n" +
-	"\x13GetBusinessResponse\x12)\n" +
-	"\bbusiness\x18\x01 \x01(\v2\r.hub.BusinessR\bbusiness\"\xf8\x01\n" +
+	"businessId\"C\n" +
+	"\x13GetBusinessResponse\x12,\n" +
+	"\bbusiness\x18\x01 \x01(\v2\x10.hub.v1.BusinessR\bbusiness\"\xf8\x01\n" +
 	"\x15UpdateBusinessRequest\x12\x1f\n" +
 	"\vbusiness_id\x18\x01 \x01(\x03R\n" +
 	"businessId\x12\x12\n" +
@@ -437,9 +437,9 @@ const file_hub_v1_business_proto_rawDesc = "" +
 	"\x05email\x18\x06 \x01(\tR\x05email\x12\x18\n" +
 	"\awebsite\x18\a \x01(\tR\awebsite\x12\x1a\n" +
 	"\btimezone\x18\b \x01(\tR\btimezone\x12\x1a\n" +
-	"\bcurrency\x18\t \x01(\tR\bcurrency\"C\n" +
-	"\x16UpdateBusinessResponse\x12)\n" +
-	"\bbusiness\x18\x01 \x01(\v2\r.hub.BusinessR\bbusinessB'Z%github.com/voxire/voxie/gen/go/hub/v1b\x06proto3"
+	"\bcurrency\x18\t \x01(\tR\bcurrency\"F\n" +
+	"\x16UpdateBusinessResponse\x12,\n" +
+	"\bbusiness\x18\x01 \x01(\v2\x10.hub.v1.BusinessR\bbusinessB'Z%github.com/voxire/voxie/gen/go/hub/v1b\x06proto3"
 
 var (
 	file_hub_v1_business_proto_rawDescOnce sync.Once
@@ -455,15 +455,15 @@ func file_hub_v1_business_proto_rawDescGZIP() []byte {
 
 var file_hub_v1_business_proto_msgTypes = make([]protoimpl.MessageInfo, 5)
 var file_hub_v1_business_proto_goTypes = []any{
-	(*Business)(nil),               // 0: hub.Business
-	(*GetBusinessRequest)(nil),     // 1: hub.GetBusinessRequest
-	(*GetBusinessResponse)(nil),    // 2: hub.GetBusinessResponse
-	(*UpdateBusinessRequest)(nil),  // 3: hub.UpdateBusinessRequest
-	(*UpdateBusinessResponse)(nil), // 4: hub.UpdateBusinessResponse
+	(*Business)(nil),               // 0: hub.v1.Business
+	(*GetBusinessRequest)(nil),     // 1: hub.v1.GetBusinessRequest
+	(*GetBusinessResponse)(nil),    // 2: hub.v1.GetBusinessResponse
+	(*UpdateBusinessRequest)(nil),  // 3: hub.v1.UpdateBusinessRequest
+	(*UpdateBusinessResponse)(nil), // 4: hub.v1.UpdateBusinessResponse
 }
 var file_hub_v1_business_proto_depIdxs = []int32{
-	0, // 0: hub.GetBusinessResponse.business:type_name -> hub.Business
-	0, // 1: hub.UpdateBusinessResponse.business:type_name -> hub.Business
+	0, // 0: hub.v1.GetBusinessResponse.business:type_name -> hub.v1.Business
+	0, // 1: hub.v1.UpdateBusinessResponse.business:type_name -> hub.v1.Business
 	2, // [2:2] is the sub-list for method output_type
 	2, // [2:2] is the sub-list for method input_type
 	2, // [2:2] is the sub-list for extension type_name

@@ -873,7 +873,7 @@ var File_hub_v1_developer_proto protoreflect.FileDescriptor
 
 const file_hub_v1_developer_proto_rawDesc = "" +
 	"\n" +
-	"\x16hub/v1/developer.proto\x12\x03hub\"\xe0\x01\n" +
+	"\x16hub/v1/developer.proto\x12\x06hub.v1\"\xe0\x01\n" +
 	"\x06ApiKey\x12\x0e\n" +
 	"\x02id\x18\x01 \x01(\x03R\x02id\x12\x12\n" +
 	"\x04name\x18\x02 \x01(\tR\x04name\x12\x1d\n" +
@@ -887,9 +887,9 @@ const file_hub_v1_developer_proto_rawDesc = "" +
 	"\n" +
 	"expires_at\x18\a \x01(\tR\texpiresAt\x12\x1b\n" +
 	"\tis_active\x18\b \x01(\bR\bisActive\"\x14\n" +
-	"\x12ListApiKeysRequest\"6\n" +
-	"\x13ListApiKeysResponse\x12\x1f\n" +
-	"\x04keys\x18\x01 \x03(\v2\v.hub.ApiKeyR\x04keys\"A\n" +
+	"\x12ListApiKeysRequest\"9\n" +
+	"\x13ListApiKeysResponse\x12\"\n" +
+	"\x04keys\x18\x01 \x03(\v2\x0e.hub.v1.ApiKeyR\x04keys\"A\n" +
 	"\x13CreateApiKeyRequest\x12\x12\n" +
 	"\x04name\x18\x01 \x01(\tR\x04name\x12\x16\n" +
 	"\x06scopes\x18\x02 \x03(\tR\x06scopes\"R\n" +
@@ -909,9 +909,9 @@ const file_hub_v1_developer_proto_rawDesc = "" +
 	"\n" +
 	"created_at\x18\x05 \x01(\tR\tcreatedAt\x12*\n" +
 	"\x11last_triggered_at\x18\x06 \x01(\tR\x0flastTriggeredAt\"\x15\n" +
-	"\x13ListWebhooksRequest\"@\n" +
-	"\x14ListWebhooksResponse\x12(\n" +
-	"\bwebhooks\x18\x01 \x03(\v2\f.hub.WebhookR\bwebhooks\"@\n" +
+	"\x13ListWebhooksRequest\"C\n" +
+	"\x14ListWebhooksResponse\x12+\n" +
+	"\bwebhooks\x18\x01 \x03(\v2\x0f.hub.v1.WebhookR\bwebhooks\"@\n" +
 	"\x14CreateWebhookRequest\x12\x10\n" +
 	"\x03url\x18\x01 \x01(\tR\x03url\x12\x16\n" +
 	"\x06events\x18\x02 \x03(\tR\x06events\"A\n" +
@@ -922,9 +922,9 @@ const file_hub_v1_developer_proto_rawDesc = "" +
 	"\x02id\x18\x01 \x01(\x03R\x02id\x12\x10\n" +
 	"\x03url\x18\x02 \x01(\tR\x03url\x12\x16\n" +
 	"\x06events\x18\x03 \x03(\tR\x06events\x12\x1b\n" +
-	"\tis_active\x18\x04 \x01(\bR\bisActive\"?\n" +
-	"\x15UpdateWebhookResponse\x12&\n" +
-	"\awebhook\x18\x01 \x01(\v2\f.hub.WebhookR\awebhook\"&\n" +
+	"\tis_active\x18\x04 \x01(\bR\bisActive\"B\n" +
+	"\x15UpdateWebhookResponse\x12)\n" +
+	"\awebhook\x18\x01 \x01(\v2\x0f.hub.v1.WebhookR\awebhook\"&\n" +
 	"\x14DeleteWebhookRequest\x12\x0e\n" +
 	"\x02id\x18\x01 \x01(\x03R\x02id\"1\n" +
 	"\x15DeleteWebhookResponse\x12\x18\n" +
@@ -944,27 +944,27 @@ func file_hub_v1_developer_proto_rawDescGZIP() []byte {
 
 var file_hub_v1_developer_proto_msgTypes = make([]protoimpl.MessageInfo, 16)
 var file_hub_v1_developer_proto_goTypes = []any{
-	(*ApiKey)(nil),                // 0: hub.ApiKey
-	(*ListApiKeysRequest)(nil),    // 1: hub.ListApiKeysRequest
-	(*ListApiKeysResponse)(nil),   // 2: hub.ListApiKeysResponse
-	(*CreateApiKeyRequest)(nil),   // 3: hub.CreateApiKeyRequest
-	(*CreateApiKeyResponse)(nil),  // 4: hub.CreateApiKeyResponse
-	(*RevokeApiKeyRequest)(nil),   // 5: hub.RevokeApiKeyRequest
-	(*RevokeApiKeyResponse)(nil),  // 6: hub.RevokeApiKeyResponse
-	(*Webhook)(nil),               // 7: hub.Webhook
-	(*ListWebhooksRequest)(nil),   // 8: hub.ListWebhooksRequest
-	(*ListWebhooksResponse)(nil),  // 9: hub.ListWebhooksResponse
-	(*CreateWebhookRequest)(nil),  // 10: hub.CreateWebhookRequest
-	(*CreateWebhookResponse)(nil), // 11: hub.CreateWebhookResponse
-	(*UpdateWebhookRequest)(nil),  // 12: hub.UpdateWebhookRequest
-	(*UpdateWebhookResponse)(nil), // 13: hub.UpdateWebhookResponse
-	(*DeleteWebhookRequest)(nil),  // 14: hub.DeleteWebhookRequest
-	(*DeleteWebhookResponse)(nil), // 15: hub.DeleteWebhookResponse
+	(*ApiKey)(nil),                // 0: hub.v1.ApiKey
+	(*ListApiKeysRequest)(nil),    // 1: hub.v1.ListApiKeysRequest
+	(*ListApiKeysResponse)(nil),   // 2: hub.v1.ListApiKeysResponse
+	(*CreateApiKeyRequest)(nil),   // 3: hub.v1.CreateApiKeyRequest
+	(*CreateApiKeyResponse)(nil),  // 4: hub.v1.CreateApiKeyResponse
+	(*RevokeApiKeyRequest)(nil),   // 5: hub.v1.RevokeApiKeyRequest
+	(*RevokeApiKeyResponse)(nil),  // 6: hub.v1.RevokeApiKeyResponse
+	(*Webhook)(nil),               // 7: hub.v1.Webhook
+	(*ListWebhooksRequest)(nil),   // 8: hub.v1.ListWebhooksRequest
+	(*ListWebhooksResponse)(nil),  // 9: hub.v1.ListWebhooksResponse
+	(*CreateWebhookRequest)(nil),  // 10: hub.v1.CreateWebhookRequest
+	(*CreateWebhookResponse)(nil), // 11: hub.v1.CreateWebhookResponse
+	(*UpdateWebhookRequest)(nil),  // 12: hub.v1.UpdateWebhookRequest
+	(*UpdateWebhookResponse)(nil), // 13: hub.v1.UpdateWebhookResponse
+	(*DeleteWebhookRequest)(nil),  // 14: hub.v1.DeleteWebhookRequest
+	(*DeleteWebhookResponse)(nil), // 15: hub.v1.DeleteWebhookResponse
 }
 var file_hub_v1_developer_proto_depIdxs = []int32{
-	0, // 0: hub.ListApiKeysResponse.keys:type_name -> hub.ApiKey
-	7, // 1: hub.ListWebhooksResponse.webhooks:type_name -> hub.Webhook
-	7, // 2: hub.UpdateWebhookResponse.webhook:type_name -> hub.Webhook
+	0, // 0: hub.v1.ListApiKeysResponse.keys:type_name -> hub.v1.ApiKey
+	7, // 1: hub.v1.ListWebhooksResponse.webhooks:type_name -> hub.v1.Webhook
+	7, // 2: hub.v1.UpdateWebhookResponse.webhook:type_name -> hub.v1.Webhook
 	3, // [3:3] is the sub-list for method output_type
 	3, // [3:3] is the sub-list for method input_type
 	3, // [3:3] is the sub-list for extension type_name

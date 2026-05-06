@@ -753,7 +753,8 @@ var File_finance_v1_expenses_proto protoreflect.FileDescriptor
 
 const file_finance_v1_expenses_proto_rawDesc = "" +
 	"\n" +
-	"\x19finance/v1/expenses.proto\x12\afinance\"\xf2\x02\n" +
+	"\x19finance/v1/expenses.proto\x12\n" +
+	"finance.v1\"\xf2\x02\n" +
 	"\aExpense\x12\x0e\n" +
 	"\x02id\x18\x01 \x01(\x03R\x02id\x12\x19\n" +
 	"\bowner_id\x18\x02 \x01(\x03R\aownerId\x12$\n" +
@@ -773,9 +774,9 @@ const file_finance_v1_expenses_proto_rawDesc = "" +
 	"\n" +
 	"updated_at\x18\f \x01(\tR\tupdatedAtB\x0e\n" +
 	"\f_category_id\"\x15\n" +
-	"\x13ListExpensesRequest\"D\n" +
-	"\x14ListExpensesResponse\x12,\n" +
-	"\bexpenses\x18\x01 \x03(\v2\x10.finance.ExpenseR\bexpenses\"\xfe\x01\n" +
+	"\x13ListExpensesRequest\"G\n" +
+	"\x14ListExpensesResponse\x12/\n" +
+	"\bexpenses\x18\x01 \x03(\v2\x13.finance.v1.ExpenseR\bexpenses\"\xfe\x01\n" +
 	"\x14CreateExpenseRequest\x12$\n" +
 	"\vcategory_id\x18\x01 \x01(\x03H\x00R\n" +
 	"categoryId\x88\x01\x01\x12\x16\n" +
@@ -814,10 +815,10 @@ const file_finance_v1_expenses_proto_rawDesc = "" +
 	"\x05color\x18\x04 \x01(\tR\x05color\x12\x1d\n" +
 	"\n" +
 	"created_at\x18\x05 \x01(\tR\tcreatedAt\"\x1e\n" +
-	"\x1cListExpenseCategoriesRequest\"Y\n" +
-	"\x1dListExpenseCategoriesResponse\x128\n" +
+	"\x1cListExpenseCategoriesRequest\"\\\n" +
+	"\x1dListExpenseCategoriesResponse\x12;\n" +
 	"\n" +
-	"categories\x18\x01 \x03(\v2\x18.finance.ExpenseCategoryR\n" +
+	"categories\x18\x01 \x03(\v2\x1b.finance.v1.ExpenseCategoryR\n" +
 	"categoriesB+Z)github.com/voxire/voxie/gen/go/finance/v1b\x06proto3"
 
 var (
@@ -834,22 +835,22 @@ func file_finance_v1_expenses_proto_rawDescGZIP() []byte {
 
 var file_finance_v1_expenses_proto_msgTypes = make([]protoimpl.MessageInfo, 12)
 var file_finance_v1_expenses_proto_goTypes = []any{
-	(*Expense)(nil),                       // 0: finance.Expense
-	(*ListExpensesRequest)(nil),           // 1: finance.ListExpensesRequest
-	(*ListExpensesResponse)(nil),          // 2: finance.ListExpensesResponse
-	(*CreateExpenseRequest)(nil),          // 3: finance.CreateExpenseRequest
-	(*CreateExpenseResponse)(nil),         // 4: finance.CreateExpenseResponse
-	(*UpdateExpenseRequest)(nil),          // 5: finance.UpdateExpenseRequest
-	(*UpdateExpenseResponse)(nil),         // 6: finance.UpdateExpenseResponse
-	(*DeleteExpenseRequest)(nil),          // 7: finance.DeleteExpenseRequest
-	(*DeleteExpenseResponse)(nil),         // 8: finance.DeleteExpenseResponse
-	(*ExpenseCategory)(nil),               // 9: finance.ExpenseCategory
-	(*ListExpenseCategoriesRequest)(nil),  // 10: finance.ListExpenseCategoriesRequest
-	(*ListExpenseCategoriesResponse)(nil), // 11: finance.ListExpenseCategoriesResponse
+	(*Expense)(nil),                       // 0: finance.v1.Expense
+	(*ListExpensesRequest)(nil),           // 1: finance.v1.ListExpensesRequest
+	(*ListExpensesResponse)(nil),          // 2: finance.v1.ListExpensesResponse
+	(*CreateExpenseRequest)(nil),          // 3: finance.v1.CreateExpenseRequest
+	(*CreateExpenseResponse)(nil),         // 4: finance.v1.CreateExpenseResponse
+	(*UpdateExpenseRequest)(nil),          // 5: finance.v1.UpdateExpenseRequest
+	(*UpdateExpenseResponse)(nil),         // 6: finance.v1.UpdateExpenseResponse
+	(*DeleteExpenseRequest)(nil),          // 7: finance.v1.DeleteExpenseRequest
+	(*DeleteExpenseResponse)(nil),         // 8: finance.v1.DeleteExpenseResponse
+	(*ExpenseCategory)(nil),               // 9: finance.v1.ExpenseCategory
+	(*ListExpenseCategoriesRequest)(nil),  // 10: finance.v1.ListExpenseCategoriesRequest
+	(*ListExpenseCategoriesResponse)(nil), // 11: finance.v1.ListExpenseCategoriesResponse
 }
 var file_finance_v1_expenses_proto_depIdxs = []int32{
-	0, // 0: finance.ListExpensesResponse.expenses:type_name -> finance.Expense
-	9, // 1: finance.ListExpenseCategoriesResponse.categories:type_name -> finance.ExpenseCategory
+	0, // 0: finance.v1.ListExpensesResponse.expenses:type_name -> finance.v1.Expense
+	9, // 1: finance.v1.ListExpenseCategoriesResponse.categories:type_name -> finance.v1.ExpenseCategory
 	2, // [2:2] is the sub-list for method output_type
 	2, // [2:2] is the sub-list for method input_type
 	2, // [2:2] is the sub-list for extension type_name

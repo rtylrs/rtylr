@@ -205,7 +205,7 @@ var File_pos_v1_receipts_proto protoreflect.FileDescriptor
 
 const file_pos_v1_receipts_proto_rawDesc = "" +
 	"\n" +
-	"\x15pos/v1/receipts.proto\x12\x03pos\"\xb7\x01\n" +
+	"\x15pos/v1/receipts.proto\x12\x06pos.v1\"\xb7\x01\n" +
 	"\aReceipt\x12\x0e\n" +
 	"\x02id\x18\x01 \x01(\x03R\x02id\x12!\n" +
 	"\forder_number\x18\x02 \x01(\tR\vorderNumber\x12#\n" +
@@ -215,9 +215,9 @@ const file_pos_v1_receipts_proto_rawDesc = "" +
 	"\apaid_at\x18\x06 \x01(\tR\x06paidAt\"9\n" +
 	"\x13ListReceiptsRequest\x12\x12\n" +
 	"\x04from\x18\x01 \x01(\tR\x04from\x12\x0e\n" +
-	"\x02to\x18\x02 \x01(\tR\x02to\"@\n" +
-	"\x14ListReceiptsResponse\x12(\n" +
-	"\breceipts\x18\x01 \x03(\v2\f.pos.ReceiptR\breceiptsB'Z%github.com/voxire/voxie/gen/go/pos/v1b\x06proto3"
+	"\x02to\x18\x02 \x01(\tR\x02to\"C\n" +
+	"\x14ListReceiptsResponse\x12+\n" +
+	"\breceipts\x18\x01 \x03(\v2\x0f.pos.v1.ReceiptR\breceiptsB'Z%github.com/voxire/voxie/gen/go/pos/v1b\x06proto3"
 
 var (
 	file_pos_v1_receipts_proto_rawDescOnce sync.Once
@@ -233,12 +233,12 @@ func file_pos_v1_receipts_proto_rawDescGZIP() []byte {
 
 var file_pos_v1_receipts_proto_msgTypes = make([]protoimpl.MessageInfo, 3)
 var file_pos_v1_receipts_proto_goTypes = []any{
-	(*Receipt)(nil),              // 0: pos.Receipt
-	(*ListReceiptsRequest)(nil),  // 1: pos.ListReceiptsRequest
-	(*ListReceiptsResponse)(nil), // 2: pos.ListReceiptsResponse
+	(*Receipt)(nil),              // 0: pos.v1.Receipt
+	(*ListReceiptsRequest)(nil),  // 1: pos.v1.ListReceiptsRequest
+	(*ListReceiptsResponse)(nil), // 2: pos.v1.ListReceiptsResponse
 }
 var file_pos_v1_receipts_proto_depIdxs = []int32{
-	0, // 0: pos.ListReceiptsResponse.receipts:type_name -> pos.Receipt
+	0, // 0: pos.v1.ListReceiptsResponse.receipts:type_name -> pos.v1.Receipt
 	1, // [1:1] is the sub-list for method output_type
 	1, // [1:1] is the sub-list for method input_type
 	1, // [1:1] is the sub-list for extension type_name

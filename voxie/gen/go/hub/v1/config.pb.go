@@ -113,10 +113,10 @@ var File_hub_v1_config_proto protoreflect.FileDescriptor
 
 const file_hub_v1_config_proto_rawDesc = "" +
 	"\n" +
-	"\x13hub/v1/config.proto\x12\x03hub\x1a\x15hub/v1/business.proto\"\x12\n" +
-	"\x10GetConfigRequest\"`\n" +
-	"\x11GetConfigResponse\x12)\n" +
-	"\bbusiness\x18\x01 \x01(\v2\r.hub.BusinessR\bbusiness\x12 \n" +
+	"\x13hub/v1/config.proto\x12\x06hub.v1\x1a\x15hub/v1/business.proto\"\x12\n" +
+	"\x10GetConfigRequest\"c\n" +
+	"\x11GetConfigResponse\x12,\n" +
+	"\bbusiness\x18\x01 \x01(\v2\x10.hub.v1.BusinessR\bbusiness\x12 \n" +
 	"\vmaintenance\x18\x02 \x01(\bR\vmaintenanceB'Z%github.com/voxire/voxie/gen/go/hub/v1b\x06proto3"
 
 var (
@@ -133,12 +133,12 @@ func file_hub_v1_config_proto_rawDescGZIP() []byte {
 
 var file_hub_v1_config_proto_msgTypes = make([]protoimpl.MessageInfo, 2)
 var file_hub_v1_config_proto_goTypes = []any{
-	(*GetConfigRequest)(nil),  // 0: hub.GetConfigRequest
-	(*GetConfigResponse)(nil), // 1: hub.GetConfigResponse
-	(*Business)(nil),          // 2: hub.Business
+	(*GetConfigRequest)(nil),  // 0: hub.v1.GetConfigRequest
+	(*GetConfigResponse)(nil), // 1: hub.v1.GetConfigResponse
+	(*Business)(nil),          // 2: hub.v1.Business
 }
 var file_hub_v1_config_proto_depIdxs = []int32{
-	2, // 0: hub.GetConfigResponse.business:type_name -> hub.Business
+	2, // 0: hub.v1.GetConfigResponse.business:type_name -> hub.v1.Business
 	1, // [1:1] is the sub-list for method output_type
 	1, // [1:1] is the sub-list for method input_type
 	1, // [1:1] is the sub-list for extension type_name

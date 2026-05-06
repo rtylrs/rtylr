@@ -725,13 +725,13 @@ var File_insights_v1_financial_proto protoreflect.FileDescriptor
 
 const file_insights_v1_financial_proto_rawDesc = "" +
 	"\n" +
-	"\x1binsights/v1/financial.proto\x12\binsights\"\xac\x01\n" +
+	"\x1binsights/v1/financial.proto\x12\vinsights.v1\"\xb2\x01\n" +
 	"\x10ExpenseAnalytics\x12\x14\n" +
 	"\x05total\x18\x01 \x01(\x01R\x05total\x12\x16\n" +
-	"\x06change\x18\x02 \x01(\x01R\x06change\x12<\n" +
-	"\vby_category\x18\x03 \x03(\v2\x1b.insights.ExpenseByCategoryR\n" +
-	"byCategory\x12,\n" +
-	"\x05trend\x18\x04 \x03(\v2\x16.insights.ExpensePointR\x05trend\"\xa1\x01\n" +
+	"\x06change\x18\x02 \x01(\x01R\x06change\x12?\n" +
+	"\vby_category\x18\x03 \x03(\v2\x1e.insights.v1.ExpenseByCategoryR\n" +
+	"byCategory\x12/\n" +
+	"\x05trend\x18\x04 \x03(\v2\x19.insights.v1.ExpensePointR\x05trend\"\xa1\x01\n" +
 	"\x11ExpenseByCategory\x12\x1a\n" +
 	"\bcategory\x18\x01 \x01(\tR\bcategory\x12\x16\n" +
 	"\x06amount\x18\x02 \x01(\x01R\x06amount\x12\x1e\n" +
@@ -746,31 +746,31 @@ const file_insights_v1_financial_proto_rawDesc = "" +
 	"\x12InvoiceAgingBucket\x12\x16\n" +
 	"\x06bucket\x18\x01 \x01(\tR\x06bucket\x12\x14\n" +
 	"\x05count\x18\x02 \x01(\x05R\x05count\x12\x16\n" +
-	"\x06amount\x18\x03 \x01(\x01R\x06amount\"s\n" +
+	"\x06amount\x18\x03 \x01(\x01R\x06amount\"v\n" +
 	"\fInvoiceAging\x12+\n" +
-	"\x11total_outstanding\x18\x01 \x01(\x01R\x10totalOutstanding\x126\n" +
-	"\abuckets\x18\x02 \x03(\v2\x1c.insights.InvoiceAgingBucketR\abuckets\"\x8a\x01\n" +
+	"\x11total_outstanding\x18\x01 \x01(\x01R\x10totalOutstanding\x129\n" +
+	"\abuckets\x18\x02 \x03(\v2\x1f.insights.v1.InvoiceAgingBucketR\abuckets\"\x8d\x01\n" +
 	"\x11CashFlowAnalytics\x12\x18\n" +
 	"\ainflows\x18\x01 \x01(\x01R\ainflows\x12\x1a\n" +
 	"\boutflows\x18\x02 \x01(\x01R\boutflows\x12\x10\n" +
-	"\x03net\x18\x03 \x01(\x01R\x03net\x12-\n" +
-	"\x05trend\x18\x04 \x03(\v2\x17.insights.CashFlowPointR\x05trend\"g\n" +
+	"\x03net\x18\x03 \x01(\x01R\x03net\x120\n" +
+	"\x05trend\x18\x04 \x03(\v2\x1a.insights.v1.CashFlowPointR\x05trend\"g\n" +
 	"\rCashFlowPoint\x12\x12\n" +
 	"\x04date\x18\x01 \x01(\tR\x04date\x12\x16\n" +
 	"\x06inflow\x18\x02 \x01(\x01R\x06inflow\x12\x18\n" +
 	"\aoutflow\x18\x03 \x01(\x01R\aoutflow\x12\x10\n" +
 	"\x03net\x18\x04 \x01(\x01R\x03net\"4\n" +
 	"\x1aGetExpenseAnalyticsRequest\x12\x16\n" +
-	"\x06period\x18\x01 \x01(\tR\x06period\"W\n" +
-	"\x1bGetExpenseAnalyticsResponse\x128\n" +
-	"\tanalytics\x18\x01 \x01(\v2\x1a.insights.ExpenseAnalyticsR\tanalytics\"\x18\n" +
-	"\x16GetInvoiceAgingRequest\"G\n" +
-	"\x17GetInvoiceAgingResponse\x12,\n" +
-	"\x05aging\x18\x01 \x01(\v2\x16.insights.InvoiceAgingR\x05aging\"5\n" +
+	"\x06period\x18\x01 \x01(\tR\x06period\"Z\n" +
+	"\x1bGetExpenseAnalyticsResponse\x12;\n" +
+	"\tanalytics\x18\x01 \x01(\v2\x1d.insights.v1.ExpenseAnalyticsR\tanalytics\"\x18\n" +
+	"\x16GetInvoiceAgingRequest\"J\n" +
+	"\x17GetInvoiceAgingResponse\x12/\n" +
+	"\x05aging\x18\x01 \x01(\v2\x19.insights.v1.InvoiceAgingR\x05aging\"5\n" +
 	"\x1bGetCashFlowAnalyticsRequest\x12\x16\n" +
-	"\x06period\x18\x01 \x01(\tR\x06period\"Y\n" +
-	"\x1cGetCashFlowAnalyticsResponse\x129\n" +
-	"\tanalytics\x18\x01 \x01(\v2\x1b.insights.CashFlowAnalyticsR\tanalyticsB,Z*github.com/voxire/voxie/gen/go/insights/v1b\x06proto3"
+	"\x06period\x18\x01 \x01(\tR\x06period\"\\\n" +
+	"\x1cGetCashFlowAnalyticsResponse\x12<\n" +
+	"\tanalytics\x18\x01 \x01(\v2\x1e.insights.v1.CashFlowAnalyticsR\tanalyticsB,Z*github.com/voxire/voxie/gen/go/insights/v1b\x06proto3"
 
 var (
 	file_insights_v1_financial_proto_rawDescOnce sync.Once
@@ -786,28 +786,28 @@ func file_insights_v1_financial_proto_rawDescGZIP() []byte {
 
 var file_insights_v1_financial_proto_msgTypes = make([]protoimpl.MessageInfo, 13)
 var file_insights_v1_financial_proto_goTypes = []any{
-	(*ExpenseAnalytics)(nil),             // 0: insights.ExpenseAnalytics
-	(*ExpenseByCategory)(nil),            // 1: insights.ExpenseByCategory
-	(*ExpensePoint)(nil),                 // 2: insights.ExpensePoint
-	(*InvoiceAgingBucket)(nil),           // 3: insights.InvoiceAgingBucket
-	(*InvoiceAging)(nil),                 // 4: insights.InvoiceAging
-	(*CashFlowAnalytics)(nil),            // 5: insights.CashFlowAnalytics
-	(*CashFlowPoint)(nil),                // 6: insights.CashFlowPoint
-	(*GetExpenseAnalyticsRequest)(nil),   // 7: insights.GetExpenseAnalyticsRequest
-	(*GetExpenseAnalyticsResponse)(nil),  // 8: insights.GetExpenseAnalyticsResponse
-	(*GetInvoiceAgingRequest)(nil),       // 9: insights.GetInvoiceAgingRequest
-	(*GetInvoiceAgingResponse)(nil),      // 10: insights.GetInvoiceAgingResponse
-	(*GetCashFlowAnalyticsRequest)(nil),  // 11: insights.GetCashFlowAnalyticsRequest
-	(*GetCashFlowAnalyticsResponse)(nil), // 12: insights.GetCashFlowAnalyticsResponse
+	(*ExpenseAnalytics)(nil),             // 0: insights.v1.ExpenseAnalytics
+	(*ExpenseByCategory)(nil),            // 1: insights.v1.ExpenseByCategory
+	(*ExpensePoint)(nil),                 // 2: insights.v1.ExpensePoint
+	(*InvoiceAgingBucket)(nil),           // 3: insights.v1.InvoiceAgingBucket
+	(*InvoiceAging)(nil),                 // 4: insights.v1.InvoiceAging
+	(*CashFlowAnalytics)(nil),            // 5: insights.v1.CashFlowAnalytics
+	(*CashFlowPoint)(nil),                // 6: insights.v1.CashFlowPoint
+	(*GetExpenseAnalyticsRequest)(nil),   // 7: insights.v1.GetExpenseAnalyticsRequest
+	(*GetExpenseAnalyticsResponse)(nil),  // 8: insights.v1.GetExpenseAnalyticsResponse
+	(*GetInvoiceAgingRequest)(nil),       // 9: insights.v1.GetInvoiceAgingRequest
+	(*GetInvoiceAgingResponse)(nil),      // 10: insights.v1.GetInvoiceAgingResponse
+	(*GetCashFlowAnalyticsRequest)(nil),  // 11: insights.v1.GetCashFlowAnalyticsRequest
+	(*GetCashFlowAnalyticsResponse)(nil), // 12: insights.v1.GetCashFlowAnalyticsResponse
 }
 var file_insights_v1_financial_proto_depIdxs = []int32{
-	1, // 0: insights.ExpenseAnalytics.by_category:type_name -> insights.ExpenseByCategory
-	2, // 1: insights.ExpenseAnalytics.trend:type_name -> insights.ExpensePoint
-	3, // 2: insights.InvoiceAging.buckets:type_name -> insights.InvoiceAgingBucket
-	6, // 3: insights.CashFlowAnalytics.trend:type_name -> insights.CashFlowPoint
-	0, // 4: insights.GetExpenseAnalyticsResponse.analytics:type_name -> insights.ExpenseAnalytics
-	4, // 5: insights.GetInvoiceAgingResponse.aging:type_name -> insights.InvoiceAging
-	5, // 6: insights.GetCashFlowAnalyticsResponse.analytics:type_name -> insights.CashFlowAnalytics
+	1, // 0: insights.v1.ExpenseAnalytics.by_category:type_name -> insights.v1.ExpenseByCategory
+	2, // 1: insights.v1.ExpenseAnalytics.trend:type_name -> insights.v1.ExpensePoint
+	3, // 2: insights.v1.InvoiceAging.buckets:type_name -> insights.v1.InvoiceAgingBucket
+	6, // 3: insights.v1.CashFlowAnalytics.trend:type_name -> insights.v1.CashFlowPoint
+	0, // 4: insights.v1.GetExpenseAnalyticsResponse.analytics:type_name -> insights.v1.ExpenseAnalytics
+	4, // 5: insights.v1.GetInvoiceAgingResponse.aging:type_name -> insights.v1.InvoiceAging
+	5, // 6: insights.v1.GetCashFlowAnalyticsResponse.analytics:type_name -> insights.v1.CashFlowAnalytics
 	7, // [7:7] is the sub-list for method output_type
 	7, // [7:7] is the sub-list for method input_type
 	7, // [7:7] is the sub-list for extension type_name

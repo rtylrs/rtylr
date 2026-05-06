@@ -597,22 +597,22 @@ var File_hub_v1_permissions_proto protoreflect.FileDescriptor
 
 const file_hub_v1_permissions_proto_rawDesc = "" +
 	"\n" +
-	"\x18hub/v1/permissions.proto\x12\x03hub\"P\n" +
-	"\x10PermissionMatrix\x12&\n" +
-	"\x04rows\x18\x01 \x03(\v2\x12.hub.PermissionRowR\x04rows\x12\x14\n" +
-	"\x05roles\x18\x02 \x03(\tR\x05roles\"\xd7\x01\n" +
+	"\x18hub/v1/permissions.proto\x12\x06hub.v1\"S\n" +
+	"\x10PermissionMatrix\x12)\n" +
+	"\x04rows\x18\x01 \x03(\v2\x15.hub.v1.PermissionRowR\x04rows\x12\x14\n" +
+	"\x05roles\x18\x02 \x03(\tR\x05roles\"\xda\x01\n" +
 	"\rPermissionRow\x12\x10\n" +
 	"\x03key\x18\x01 \x01(\tR\x03key\x12\x1a\n" +
 	"\bcategory\x18\x02 \x01(\tR\bcategory\x12\x14\n" +
-	"\x05label\x18\x03 \x01(\tR\x05label\x12C\n" +
-	"\vrole_values\x18\x04 \x03(\v2\".hub.PermissionRow.RoleValuesEntryR\n" +
+	"\x05label\x18\x03 \x01(\tR\x05label\x12F\n" +
+	"\vrole_values\x18\x04 \x03(\v2%.hub.v1.PermissionRow.RoleValuesEntryR\n" +
 	"roleValues\x1a=\n" +
 	"\x0fRoleValuesEntry\x12\x10\n" +
 	"\x03key\x18\x01 \x01(\tR\x03key\x12\x14\n" +
 	"\x05value\x18\x02 \x01(\bR\x05value:\x028\x01\"\x17\n" +
-	"\x15GetPermissionsRequest\"G\n" +
-	"\x16GetPermissionsResponse\x12-\n" +
-	"\x06matrix\x18\x01 \x01(\v2\x15.hub.PermissionMatrixR\x06matrix\"t\n" +
+	"\x15GetPermissionsRequest\"J\n" +
+	"\x16GetPermissionsResponse\x120\n" +
+	"\x06matrix\x18\x01 \x01(\v2\x18.hub.v1.PermissionMatrixR\x06matrix\"t\n" +
 	"\x1dUpdatePermissionMatrixRequest\x12\x12\n" +
 	"\x04role\x18\x01 \x01(\tR\x04role\x12%\n" +
 	"\x0epermission_key\x18\x02 \x01(\tR\rpermissionKey\x12\x18\n" +
@@ -628,15 +628,15 @@ const file_hub_v1_permissions_proto_rawDesc = "" +
 	"\fmember_count\x18\x05 \x01(\x05R\vmemberCount\x12\x1d\n" +
 	"\n" +
 	"created_at\x18\x06 \x01(\tR\tcreatedAt\"\x12\n" +
-	"\x10ListRolesRequest\":\n" +
-	"\x11ListRolesResponse\x12%\n" +
-	"\x05roles\x18\x01 \x03(\v2\x0f.hub.CustomRoleR\x05roles\"k\n" +
+	"\x10ListRolesRequest\"=\n" +
+	"\x11ListRolesResponse\x12(\n" +
+	"\x05roles\x18\x01 \x03(\v2\x12.hub.v1.CustomRoleR\x05roles\"k\n" +
 	"\x11CreateRoleRequest\x12\x12\n" +
 	"\x04name\x18\x01 \x01(\tR\x04name\x12 \n" +
 	"\vdescription\x18\x02 \x01(\tR\vdescription\x12 \n" +
-	"\vpermissions\x18\x03 \x03(\tR\vpermissions\"9\n" +
-	"\x12CreateRoleResponse\x12#\n" +
-	"\x04role\x18\x01 \x01(\v2\x0f.hub.CustomRoleR\x04roleB'Z%github.com/voxire/voxie/gen/go/hub/v1b\x06proto3"
+	"\vpermissions\x18\x03 \x03(\tR\vpermissions\"<\n" +
+	"\x12CreateRoleResponse\x12&\n" +
+	"\x04role\x18\x01 \x01(\v2\x12.hub.v1.CustomRoleR\x04roleB'Z%github.com/voxire/voxie/gen/go/hub/v1b\x06proto3"
 
 var (
 	file_hub_v1_permissions_proto_rawDescOnce sync.Once
@@ -652,25 +652,25 @@ func file_hub_v1_permissions_proto_rawDescGZIP() []byte {
 
 var file_hub_v1_permissions_proto_msgTypes = make([]protoimpl.MessageInfo, 12)
 var file_hub_v1_permissions_proto_goTypes = []any{
-	(*PermissionMatrix)(nil),               // 0: hub.PermissionMatrix
-	(*PermissionRow)(nil),                  // 1: hub.PermissionRow
-	(*GetPermissionsRequest)(nil),          // 2: hub.GetPermissionsRequest
-	(*GetPermissionsResponse)(nil),         // 3: hub.GetPermissionsResponse
-	(*UpdatePermissionMatrixRequest)(nil),  // 4: hub.UpdatePermissionMatrixRequest
-	(*UpdatePermissionMatrixResponse)(nil), // 5: hub.UpdatePermissionMatrixResponse
-	(*CustomRole)(nil),                     // 6: hub.CustomRole
-	(*ListRolesRequest)(nil),               // 7: hub.ListRolesRequest
-	(*ListRolesResponse)(nil),              // 8: hub.ListRolesResponse
-	(*CreateRoleRequest)(nil),              // 9: hub.CreateRoleRequest
-	(*CreateRoleResponse)(nil),             // 10: hub.CreateRoleResponse
-	nil,                                    // 11: hub.PermissionRow.RoleValuesEntry
+	(*PermissionMatrix)(nil),               // 0: hub.v1.PermissionMatrix
+	(*PermissionRow)(nil),                  // 1: hub.v1.PermissionRow
+	(*GetPermissionsRequest)(nil),          // 2: hub.v1.GetPermissionsRequest
+	(*GetPermissionsResponse)(nil),         // 3: hub.v1.GetPermissionsResponse
+	(*UpdatePermissionMatrixRequest)(nil),  // 4: hub.v1.UpdatePermissionMatrixRequest
+	(*UpdatePermissionMatrixResponse)(nil), // 5: hub.v1.UpdatePermissionMatrixResponse
+	(*CustomRole)(nil),                     // 6: hub.v1.CustomRole
+	(*ListRolesRequest)(nil),               // 7: hub.v1.ListRolesRequest
+	(*ListRolesResponse)(nil),              // 8: hub.v1.ListRolesResponse
+	(*CreateRoleRequest)(nil),              // 9: hub.v1.CreateRoleRequest
+	(*CreateRoleResponse)(nil),             // 10: hub.v1.CreateRoleResponse
+	nil,                                    // 11: hub.v1.PermissionRow.RoleValuesEntry
 }
 var file_hub_v1_permissions_proto_depIdxs = []int32{
-	1,  // 0: hub.PermissionMatrix.rows:type_name -> hub.PermissionRow
-	11, // 1: hub.PermissionRow.role_values:type_name -> hub.PermissionRow.RoleValuesEntry
-	0,  // 2: hub.GetPermissionsResponse.matrix:type_name -> hub.PermissionMatrix
-	6,  // 3: hub.ListRolesResponse.roles:type_name -> hub.CustomRole
-	6,  // 4: hub.CreateRoleResponse.role:type_name -> hub.CustomRole
+	1,  // 0: hub.v1.PermissionMatrix.rows:type_name -> hub.v1.PermissionRow
+	11, // 1: hub.v1.PermissionRow.role_values:type_name -> hub.v1.PermissionRow.RoleValuesEntry
+	0,  // 2: hub.v1.GetPermissionsResponse.matrix:type_name -> hub.v1.PermissionMatrix
+	6,  // 3: hub.v1.ListRolesResponse.roles:type_name -> hub.v1.CustomRole
+	6,  // 4: hub.v1.CreateRoleResponse.role:type_name -> hub.v1.CustomRole
 	5,  // [5:5] is the sub-list for method output_type
 	5,  // [5:5] is the sub-list for method input_type
 	5,  // [5:5] is the sub-list for extension type_name

@@ -421,7 +421,7 @@ var File_pos_v1_audit_proto protoreflect.FileDescriptor
 
 const file_pos_v1_audit_proto_rawDesc = "" +
 	"\n" +
-	"\x12pos/v1/audit.proto\x12\x03pos\"\x95\x03\n" +
+	"\x12pos/v1/audit.proto\x12\x06pos.v1\"\x95\x03\n" +
 	"\bAuditLog\x12\x0e\n" +
 	"\x02id\x18\x01 \x01(\x03R\x02id\x12\x1f\n" +
 	"\vbusiness_id\x18\x02 \x01(\x03R\n" +
@@ -455,9 +455,9 @@ const file_pos_v1_audit_proto_rawDesc = "" +
 	"employeeId\x12\x1d\n" +
 	"\n" +
 	"start_date\x18\x04 \x01(\tR\tstartDate\x12\x19\n" +
-	"\bend_date\x18\x05 \x01(\tR\aendDate\"6\n" +
-	"\x11ListAuditResponse\x12!\n" +
-	"\x04logs\x18\x01 \x03(\v2\r.pos.AuditLogR\x04logs\"\x82\x02\n" +
+	"\bend_date\x18\x05 \x01(\tR\aendDate\"9\n" +
+	"\x11ListAuditResponse\x12$\n" +
+	"\x04logs\x18\x01 \x03(\v2\x10.pos.v1.AuditLogR\x04logs\"\x82\x02\n" +
 	"\x12CreateAuditRequest\x12\x1b\n" +
 	"\tbranch_id\x18\x01 \x01(\x03R\bbranchId\x12\x1f\n" +
 	"\vterminal_id\x18\x02 \x01(\x03R\n" +
@@ -490,14 +490,14 @@ func file_pos_v1_audit_proto_rawDescGZIP() []byte {
 
 var file_pos_v1_audit_proto_msgTypes = make([]protoimpl.MessageInfo, 5)
 var file_pos_v1_audit_proto_goTypes = []any{
-	(*AuditLog)(nil),            // 0: pos.AuditLog
-	(*ListAuditRequest)(nil),    // 1: pos.ListAuditRequest
-	(*ListAuditResponse)(nil),   // 2: pos.ListAuditResponse
-	(*CreateAuditRequest)(nil),  // 3: pos.CreateAuditRequest
-	(*CreateAuditResponse)(nil), // 4: pos.CreateAuditResponse
+	(*AuditLog)(nil),            // 0: pos.v1.AuditLog
+	(*ListAuditRequest)(nil),    // 1: pos.v1.ListAuditRequest
+	(*ListAuditResponse)(nil),   // 2: pos.v1.ListAuditResponse
+	(*CreateAuditRequest)(nil),  // 3: pos.v1.CreateAuditRequest
+	(*CreateAuditResponse)(nil), // 4: pos.v1.CreateAuditResponse
 }
 var file_pos_v1_audit_proto_depIdxs = []int32{
-	0, // 0: pos.ListAuditResponse.logs:type_name -> pos.AuditLog
+	0, // 0: pos.v1.ListAuditResponse.logs:type_name -> pos.v1.AuditLog
 	1, // [1:1] is the sub-list for method output_type
 	1, // [1:1] is the sub-list for method input_type
 	1, // [1:1] is the sub-list for extension type_name

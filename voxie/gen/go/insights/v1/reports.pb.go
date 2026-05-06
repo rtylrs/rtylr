@@ -738,7 +738,7 @@ var File_insights_v1_reports_proto protoreflect.FileDescriptor
 
 const file_insights_v1_reports_proto_rawDesc = "" +
 	"\n" +
-	"\x19insights/v1/reports.proto\x12\binsights\x1a\x1acommon/v1/pagination.proto\"\xbb\x01\n" +
+	"\x19insights/v1/reports.proto\x12\vinsights.v1\x1a\x1acommon/v1/pagination.proto\"\xbb\x01\n" +
 	"\x0eReportTemplate\x12\x0e\n" +
 	"\x02id\x18\x01 \x01(\x03R\x02id\x12\x12\n" +
 	"\x04name\x18\x02 \x01(\tR\x04name\x12 \n" +
@@ -761,45 +761,45 @@ const file_insights_v1_reports_proto_rawDesc = "" +
 	"\fnext_send_at\x18\b \x01(\tR\n" +
 	"nextSendAt\x12\x1d\n" +
 	"\n" +
-	"created_at\x18\t \x01(\tR\tcreatedAt\"k\n" +
-	"\x1aListReportTemplatesRequest\x129\n" +
+	"created_at\x18\t \x01(\tR\tcreatedAt\"n\n" +
+	"\x1aListReportTemplatesRequest\x12<\n" +
 	"\n" +
-	"pagination\x18\x01 \x01(\v2\x19.common.PaginationRequestR\n" +
+	"pagination\x18\x01 \x01(\v2\x1c.common.v1.PaginationRequestR\n" +
 	"pagination\x12\x12\n" +
-	"\x04type\x18\x02 \x01(\tR\x04type\"\x91\x01\n" +
-	"\x1bListReportTemplatesResponse\x126\n" +
-	"\ttemplates\x18\x01 \x03(\v2\x18.insights.ReportTemplateR\ttemplates\x12:\n" +
+	"\x04type\x18\x02 \x01(\tR\x04type\"\x97\x01\n" +
+	"\x1bListReportTemplatesResponse\x129\n" +
+	"\ttemplates\x18\x01 \x03(\v2\x1b.insights.v1.ReportTemplateR\ttemplates\x12=\n" +
 	"\n" +
-	"pagination\x18\x02 \x01(\v2\x1a.common.PaginationResponseR\n" +
+	"pagination\x18\x02 \x01(\v2\x1d.common.v1.PaginationResponseR\n" +
 	"pagination\"*\n" +
 	"\x18GetReportTemplateRequest\x12\x0e\n" +
-	"\x02id\x18\x01 \x01(\x03R\x02id\"Q\n" +
-	"\x19GetReportTemplateResponse\x124\n" +
-	"\btemplate\x18\x01 \x01(\v2\x18.insights.ReportTemplateR\btemplate\"\x99\x01\n" +
+	"\x02id\x18\x01 \x01(\x03R\x02id\"T\n" +
+	"\x19GetReportTemplateResponse\x127\n" +
+	"\btemplate\x18\x01 \x01(\v2\x1b.insights.v1.ReportTemplateR\btemplate\"\x99\x01\n" +
 	"\x1bCreateReportTemplateRequest\x12\x12\n" +
 	"\x04name\x18\x01 \x01(\tR\x04name\x12 \n" +
 	"\vdescription\x18\x02 \x01(\tR\vdescription\x12\x12\n" +
 	"\x04type\x18\x03 \x01(\tR\x04type\x12\x18\n" +
 	"\ametrics\x18\x04 \x03(\tR\ametrics\x12\x16\n" +
-	"\x06format\x18\x05 \x01(\tR\x06format\"T\n" +
-	"\x1cCreateReportTemplateResponse\x124\n" +
-	"\btemplate\x18\x01 \x01(\v2\x18.insights.ReportTemplateR\btemplate\"X\n" +
-	"\x1bListScheduledReportsRequest\x129\n" +
+	"\x06format\x18\x05 \x01(\tR\x06format\"W\n" +
+	"\x1cCreateReportTemplateResponse\x127\n" +
+	"\btemplate\x18\x01 \x01(\v2\x1b.insights.v1.ReportTemplateR\btemplate\"[\n" +
+	"\x1bListScheduledReportsRequest\x12<\n" +
 	"\n" +
-	"pagination\x18\x01 \x01(\v2\x19.common.PaginationRequestR\n" +
-	"pagination\"\x8f\x01\n" +
-	"\x1cListScheduledReportsResponse\x123\n" +
-	"\areports\x18\x01 \x03(\v2\x19.insights.ScheduledReportR\areports\x12:\n" +
+	"pagination\x18\x01 \x01(\v2\x1c.common.v1.PaginationRequestR\n" +
+	"pagination\"\x95\x01\n" +
+	"\x1cListScheduledReportsResponse\x126\n" +
+	"\areports\x18\x01 \x03(\v2\x1c.insights.v1.ScheduledReportR\areports\x12=\n" +
 	"\n" +
-	"pagination\x18\x02 \x01(\v2\x1a.common.PaginationResponseR\n" +
+	"pagination\x18\x02 \x01(\v2\x1d.common.v1.PaginationResponseR\n" +
 	"pagination\"\x86\x01\n" +
 	"\x1cCreateScheduledReportRequest\x12\x1f\n" +
 	"\vtemplate_id\x18\x01 \x01(\x03R\n" +
 	"templateId\x12\x1c\n" +
 	"\tfrequency\x18\x02 \x01(\tR\tfrequency\x12'\n" +
-	"\x0frecipient_email\x18\x03 \x01(\tR\x0erecipientEmail\"R\n" +
-	"\x1dCreateScheduledReportResponse\x121\n" +
-	"\x06report\x18\x01 \x01(\v2\x19.insights.ScheduledReportR\x06reportB,Z*github.com/voxire/voxie/gen/go/insights/v1b\x06proto3"
+	"\x0frecipient_email\x18\x03 \x01(\tR\x0erecipientEmail\"U\n" +
+	"\x1dCreateScheduledReportResponse\x124\n" +
+	"\x06report\x18\x01 \x01(\v2\x1c.insights.v1.ScheduledReportR\x06reportB,Z*github.com/voxire/voxie/gen/go/insights/v1b\x06proto3"
 
 var (
 	file_insights_v1_reports_proto_rawDescOnce sync.Once
@@ -815,31 +815,31 @@ func file_insights_v1_reports_proto_rawDescGZIP() []byte {
 
 var file_insights_v1_reports_proto_msgTypes = make([]protoimpl.MessageInfo, 12)
 var file_insights_v1_reports_proto_goTypes = []any{
-	(*ReportTemplate)(nil),                // 0: insights.ReportTemplate
-	(*ScheduledReport)(nil),               // 1: insights.ScheduledReport
-	(*ListReportTemplatesRequest)(nil),    // 2: insights.ListReportTemplatesRequest
-	(*ListReportTemplatesResponse)(nil),   // 3: insights.ListReportTemplatesResponse
-	(*GetReportTemplateRequest)(nil),      // 4: insights.GetReportTemplateRequest
-	(*GetReportTemplateResponse)(nil),     // 5: insights.GetReportTemplateResponse
-	(*CreateReportTemplateRequest)(nil),   // 6: insights.CreateReportTemplateRequest
-	(*CreateReportTemplateResponse)(nil),  // 7: insights.CreateReportTemplateResponse
-	(*ListScheduledReportsRequest)(nil),   // 8: insights.ListScheduledReportsRequest
-	(*ListScheduledReportsResponse)(nil),  // 9: insights.ListScheduledReportsResponse
-	(*CreateScheduledReportRequest)(nil),  // 10: insights.CreateScheduledReportRequest
-	(*CreateScheduledReportResponse)(nil), // 11: insights.CreateScheduledReportResponse
-	(*v1.PaginationRequest)(nil),          // 12: common.PaginationRequest
-	(*v1.PaginationResponse)(nil),         // 13: common.PaginationResponse
+	(*ReportTemplate)(nil),                // 0: insights.v1.ReportTemplate
+	(*ScheduledReport)(nil),               // 1: insights.v1.ScheduledReport
+	(*ListReportTemplatesRequest)(nil),    // 2: insights.v1.ListReportTemplatesRequest
+	(*ListReportTemplatesResponse)(nil),   // 3: insights.v1.ListReportTemplatesResponse
+	(*GetReportTemplateRequest)(nil),      // 4: insights.v1.GetReportTemplateRequest
+	(*GetReportTemplateResponse)(nil),     // 5: insights.v1.GetReportTemplateResponse
+	(*CreateReportTemplateRequest)(nil),   // 6: insights.v1.CreateReportTemplateRequest
+	(*CreateReportTemplateResponse)(nil),  // 7: insights.v1.CreateReportTemplateResponse
+	(*ListScheduledReportsRequest)(nil),   // 8: insights.v1.ListScheduledReportsRequest
+	(*ListScheduledReportsResponse)(nil),  // 9: insights.v1.ListScheduledReportsResponse
+	(*CreateScheduledReportRequest)(nil),  // 10: insights.v1.CreateScheduledReportRequest
+	(*CreateScheduledReportResponse)(nil), // 11: insights.v1.CreateScheduledReportResponse
+	(*v1.PaginationRequest)(nil),          // 12: common.v1.PaginationRequest
+	(*v1.PaginationResponse)(nil),         // 13: common.v1.PaginationResponse
 }
 var file_insights_v1_reports_proto_depIdxs = []int32{
-	12, // 0: insights.ListReportTemplatesRequest.pagination:type_name -> common.PaginationRequest
-	0,  // 1: insights.ListReportTemplatesResponse.templates:type_name -> insights.ReportTemplate
-	13, // 2: insights.ListReportTemplatesResponse.pagination:type_name -> common.PaginationResponse
-	0,  // 3: insights.GetReportTemplateResponse.template:type_name -> insights.ReportTemplate
-	0,  // 4: insights.CreateReportTemplateResponse.template:type_name -> insights.ReportTemplate
-	12, // 5: insights.ListScheduledReportsRequest.pagination:type_name -> common.PaginationRequest
-	1,  // 6: insights.ListScheduledReportsResponse.reports:type_name -> insights.ScheduledReport
-	13, // 7: insights.ListScheduledReportsResponse.pagination:type_name -> common.PaginationResponse
-	1,  // 8: insights.CreateScheduledReportResponse.report:type_name -> insights.ScheduledReport
+	12, // 0: insights.v1.ListReportTemplatesRequest.pagination:type_name -> common.v1.PaginationRequest
+	0,  // 1: insights.v1.ListReportTemplatesResponse.templates:type_name -> insights.v1.ReportTemplate
+	13, // 2: insights.v1.ListReportTemplatesResponse.pagination:type_name -> common.v1.PaginationResponse
+	0,  // 3: insights.v1.GetReportTemplateResponse.template:type_name -> insights.v1.ReportTemplate
+	0,  // 4: insights.v1.CreateReportTemplateResponse.template:type_name -> insights.v1.ReportTemplate
+	12, // 5: insights.v1.ListScheduledReportsRequest.pagination:type_name -> common.v1.PaginationRequest
+	1,  // 6: insights.v1.ListScheduledReportsResponse.reports:type_name -> insights.v1.ScheduledReport
+	13, // 7: insights.v1.ListScheduledReportsResponse.pagination:type_name -> common.v1.PaginationResponse
+	1,  // 8: insights.v1.CreateScheduledReportResponse.report:type_name -> insights.v1.ScheduledReport
 	9,  // [9:9] is the sub-list for method output_type
 	9,  // [9:9] is the sub-list for method input_type
 	9,  // [9:9] is the sub-list for extension type_name

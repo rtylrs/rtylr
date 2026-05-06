@@ -1,6 +1,6 @@
 syntax = "proto3";
 
-package finance;
+package finance.v1;
 
 option go_package = "github.com/voxire/voxie/gen/go/finance/v1";
 
@@ -21,12 +21,12 @@ message BankAccount {
 }
 
 message ListBankAccountsRequest {
-  common.PaginationRequest pagination = 1;
+  common.v1.PaginationRequest pagination = 1;
 }
 
 message ListBankAccountsResponse {
   repeated BankAccount accounts = 1;
-  common.PaginationResponse pagination = 2;
+  common.v1.PaginationResponse pagination = 2;
 }
 
 message GetBankAccountRequest {

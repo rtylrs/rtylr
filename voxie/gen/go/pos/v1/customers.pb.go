@@ -189,7 +189,7 @@ var File_pos_v1_customers_proto protoreflect.FileDescriptor
 
 const file_pos_v1_customers_proto_rawDesc = "" +
 	"\n" +
-	"\x16pos/v1/customers.proto\x12\x03pos\"\x82\x01\n" +
+	"\x16pos/v1/customers.proto\x12\x06pos.v1\"\x82\x01\n" +
 	"\bCustomer\x12\x0e\n" +
 	"\x02id\x18\x01 \x01(\x03R\x02id\x12\x1d\n" +
 	"\n" +
@@ -198,9 +198,9 @@ const file_pos_v1_customers_proto_rawDesc = "" +
 	"\x05email\x18\x04 \x01(\tR\x05email\x12\x14\n" +
 	"\x05phone\x18\x05 \x01(\tR\x05phone\".\n" +
 	"\x16SearchCustomersRequest\x12\x14\n" +
-	"\x05query\x18\x01 \x01(\tR\x05query\"F\n" +
-	"\x17SearchCustomersResponse\x12+\n" +
-	"\tcustomers\x18\x01 \x03(\v2\r.pos.CustomerR\tcustomersB'Z%github.com/voxire/voxie/gen/go/pos/v1b\x06proto3"
+	"\x05query\x18\x01 \x01(\tR\x05query\"I\n" +
+	"\x17SearchCustomersResponse\x12.\n" +
+	"\tcustomers\x18\x01 \x03(\v2\x10.pos.v1.CustomerR\tcustomersB'Z%github.com/voxire/voxie/gen/go/pos/v1b\x06proto3"
 
 var (
 	file_pos_v1_customers_proto_rawDescOnce sync.Once
@@ -216,12 +216,12 @@ func file_pos_v1_customers_proto_rawDescGZIP() []byte {
 
 var file_pos_v1_customers_proto_msgTypes = make([]protoimpl.MessageInfo, 3)
 var file_pos_v1_customers_proto_goTypes = []any{
-	(*Customer)(nil),                // 0: pos.Customer
-	(*SearchCustomersRequest)(nil),  // 1: pos.SearchCustomersRequest
-	(*SearchCustomersResponse)(nil), // 2: pos.SearchCustomersResponse
+	(*Customer)(nil),                // 0: pos.v1.Customer
+	(*SearchCustomersRequest)(nil),  // 1: pos.v1.SearchCustomersRequest
+	(*SearchCustomersResponse)(nil), // 2: pos.v1.SearchCustomersResponse
 }
 var file_pos_v1_customers_proto_depIdxs = []int32{
-	0, // 0: pos.SearchCustomersResponse.customers:type_name -> pos.Customer
+	0, // 0: pos.v1.SearchCustomersResponse.customers:type_name -> pos.v1.Customer
 	1, // [1:1] is the sub-list for method output_type
 	1, // [1:1] is the sub-list for method input_type
 	1, // [1:1] is the sub-list for extension type_name

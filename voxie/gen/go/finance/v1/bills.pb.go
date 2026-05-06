@@ -493,7 +493,8 @@ var File_finance_v1_bills_proto protoreflect.FileDescriptor
 
 const file_finance_v1_bills_proto_rawDesc = "" +
 	"\n" +
-	"\x16finance/v1/bills.proto\x12\afinance\"\x99\x02\n" +
+	"\x16finance/v1/bills.proto\x12\n" +
+	"finance.v1\"\x99\x02\n" +
 	"\x04Bill\x12\x0e\n" +
 	"\x02id\x18\x01 \x01(\x03R\x02id\x12\x19\n" +
 	"\bowner_id\x18\x02 \x01(\x03R\aownerId\x12\x1f\n" +
@@ -509,9 +510,9 @@ const file_finance_v1_bills_proto_rawDesc = "" +
 	"\n" +
 	"updated_at\x18\n" +
 	" \x01(\tR\tupdatedAt\"\x12\n" +
-	"\x10ListBillsRequest\"8\n" +
-	"\x11ListBillsResponse\x12#\n" +
-	"\x05bills\x18\x01 \x03(\v2\r.finance.BillR\x05bills\"\xbd\x01\n" +
+	"\x10ListBillsRequest\";\n" +
+	"\x11ListBillsResponse\x12&\n" +
+	"\x05bills\x18\x01 \x03(\v2\x10.finance.v1.BillR\x05bills\"\xbd\x01\n" +
 	"\x11CreateBillRequest\x12\x1f\n" +
 	"\vsupplier_id\x18\x01 \x01(\x03R\n" +
 	"supplierId\x12\x16\n" +
@@ -549,16 +550,16 @@ func file_finance_v1_bills_proto_rawDescGZIP() []byte {
 
 var file_finance_v1_bills_proto_msgTypes = make([]protoimpl.MessageInfo, 7)
 var file_finance_v1_bills_proto_goTypes = []any{
-	(*Bill)(nil),               // 0: finance.Bill
-	(*ListBillsRequest)(nil),   // 1: finance.ListBillsRequest
-	(*ListBillsResponse)(nil),  // 2: finance.ListBillsResponse
-	(*CreateBillRequest)(nil),  // 3: finance.CreateBillRequest
-	(*CreateBillResponse)(nil), // 4: finance.CreateBillResponse
-	(*UpdateBillRequest)(nil),  // 5: finance.UpdateBillRequest
-	(*UpdateBillResponse)(nil), // 6: finance.UpdateBillResponse
+	(*Bill)(nil),               // 0: finance.v1.Bill
+	(*ListBillsRequest)(nil),   // 1: finance.v1.ListBillsRequest
+	(*ListBillsResponse)(nil),  // 2: finance.v1.ListBillsResponse
+	(*CreateBillRequest)(nil),  // 3: finance.v1.CreateBillRequest
+	(*CreateBillResponse)(nil), // 4: finance.v1.CreateBillResponse
+	(*UpdateBillRequest)(nil),  // 5: finance.v1.UpdateBillRequest
+	(*UpdateBillResponse)(nil), // 6: finance.v1.UpdateBillResponse
 }
 var file_finance_v1_bills_proto_depIdxs = []int32{
-	0, // 0: finance.ListBillsResponse.bills:type_name -> finance.Bill
+	0, // 0: finance.v1.ListBillsResponse.bills:type_name -> finance.v1.Bill
 	1, // [1:1] is the sub-list for method output_type
 	1, // [1:1] is the sub-list for method input_type
 	1, // [1:1] is the sub-list for extension type_name

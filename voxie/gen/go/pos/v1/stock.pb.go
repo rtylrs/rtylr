@@ -1041,7 +1041,7 @@ var File_pos_v1_stock_proto protoreflect.FileDescriptor
 
 const file_pos_v1_stock_proto_rawDesc = "" +
 	"\n" +
-	"\x12pos/v1/stock.proto\x12\x03pos\"\x9b\x03\n" +
+	"\x12pos/v1/stock.proto\x12\x06pos.v1\"\x9b\x03\n" +
 	"\rStockMovement\x12\x0e\n" +
 	"\x02id\x18\x01 \x01(\x03R\x02id\x12\x1f\n" +
 	"\vbusiness_id\x18\x02 \x01(\x03R\n" +
@@ -1078,9 +1078,9 @@ const file_pos_v1_stock_proto_rawDesc = "" +
 	"\x19ListStockMovementsRequest\x12\x1b\n" +
 	"\tbranch_id\x18\x01 \x01(\x03R\bbranchId\x12\x1d\n" +
 	"\n" +
-	"product_id\x18\x02 \x01(\x03R\tproductId\"N\n" +
-	"\x1aListStockMovementsResponse\x120\n" +
-	"\tmovements\x18\x01 \x03(\v2\x12.pos.StockMovementR\tmovements\"\xa2\x01\n" +
+	"product_id\x18\x02 \x01(\x03R\tproductId\"Q\n" +
+	"\x1aListStockMovementsResponse\x123\n" +
+	"\tmovements\x18\x01 \x03(\v2\x15.pos.v1.StockMovementR\tmovements\"\xa2\x01\n" +
 	"\x13ReceiveStockRequest\x12\x1b\n" +
 	"\tbranch_id\x18\x01 \x01(\x03R\bbranchId\x12\x1d\n" +
 	"\n" +
@@ -1132,13 +1132,13 @@ const file_pos_v1_stock_proto_rawDesc = "" +
 	"movementId\x12\x18\n" +
 	"\amessage\x18\x02 \x01(\tR\amessage\"3\n" +
 	"\x14ListInventoryRequest\x12\x1b\n" +
-	"\tbranch_id\x18\x01 \x01(\x03R\bbranchId\"K\n" +
-	"\x15ListInventoryResponse\x122\n" +
-	"\tinventory\x18\x01 \x03(\v2\x14.pos.BranchInventoryR\tinventory\".\n" +
+	"\tbranch_id\x18\x01 \x01(\x03R\bbranchId\"N\n" +
+	"\x15ListInventoryResponse\x125\n" +
+	"\tinventory\x18\x01 \x03(\v2\x17.pos.v1.BranchInventoryR\tinventory\".\n" +
 	"\x0fLowStockRequest\x12\x1b\n" +
-	"\tbranch_id\x18\x01 \x01(\x03R\bbranchId\">\n" +
-	"\x10LowStockResponse\x12*\n" +
-	"\x05items\x18\x01 \x03(\v2\x14.pos.BranchInventoryR\x05itemsB'Z%github.com/voxire/voxie/gen/go/pos/v1b\x06proto3"
+	"\tbranch_id\x18\x01 \x01(\x03R\bbranchId\"A\n" +
+	"\x10LowStockResponse\x12-\n" +
+	"\x05items\x18\x01 \x03(\v2\x17.pos.v1.BranchInventoryR\x05itemsB'Z%github.com/voxire/voxie/gen/go/pos/v1b\x06proto3"
 
 var (
 	file_pos_v1_stock_proto_rawDescOnce sync.Once
@@ -1154,27 +1154,27 @@ func file_pos_v1_stock_proto_rawDescGZIP() []byte {
 
 var file_pos_v1_stock_proto_msgTypes = make([]protoimpl.MessageInfo, 16)
 var file_pos_v1_stock_proto_goTypes = []any{
-	(*StockMovement)(nil),              // 0: pos.StockMovement
-	(*BranchInventory)(nil),            // 1: pos.BranchInventory
-	(*ListStockMovementsRequest)(nil),  // 2: pos.ListStockMovementsRequest
-	(*ListStockMovementsResponse)(nil), // 3: pos.ListStockMovementsResponse
-	(*ReceiveStockRequest)(nil),        // 4: pos.ReceiveStockRequest
-	(*ReceiveStockResponse)(nil),       // 5: pos.ReceiveStockResponse
-	(*AdjustStockRequest)(nil),         // 6: pos.AdjustStockRequest
-	(*AdjustStockResponse)(nil),        // 7: pos.AdjustStockResponse
-	(*WasteStockRequest)(nil),          // 8: pos.WasteStockRequest
-	(*WasteStockResponse)(nil),         // 9: pos.WasteStockResponse
-	(*TransferStockRequest)(nil),       // 10: pos.TransferStockRequest
-	(*TransferStockResponse)(nil),      // 11: pos.TransferStockResponse
-	(*ListInventoryRequest)(nil),       // 12: pos.ListInventoryRequest
-	(*ListInventoryResponse)(nil),      // 13: pos.ListInventoryResponse
-	(*LowStockRequest)(nil),            // 14: pos.LowStockRequest
-	(*LowStockResponse)(nil),           // 15: pos.LowStockResponse
+	(*StockMovement)(nil),              // 0: pos.v1.StockMovement
+	(*BranchInventory)(nil),            // 1: pos.v1.BranchInventory
+	(*ListStockMovementsRequest)(nil),  // 2: pos.v1.ListStockMovementsRequest
+	(*ListStockMovementsResponse)(nil), // 3: pos.v1.ListStockMovementsResponse
+	(*ReceiveStockRequest)(nil),        // 4: pos.v1.ReceiveStockRequest
+	(*ReceiveStockResponse)(nil),       // 5: pos.v1.ReceiveStockResponse
+	(*AdjustStockRequest)(nil),         // 6: pos.v1.AdjustStockRequest
+	(*AdjustStockResponse)(nil),        // 7: pos.v1.AdjustStockResponse
+	(*WasteStockRequest)(nil),          // 8: pos.v1.WasteStockRequest
+	(*WasteStockResponse)(nil),         // 9: pos.v1.WasteStockResponse
+	(*TransferStockRequest)(nil),       // 10: pos.v1.TransferStockRequest
+	(*TransferStockResponse)(nil),      // 11: pos.v1.TransferStockResponse
+	(*ListInventoryRequest)(nil),       // 12: pos.v1.ListInventoryRequest
+	(*ListInventoryResponse)(nil),      // 13: pos.v1.ListInventoryResponse
+	(*LowStockRequest)(nil),            // 14: pos.v1.LowStockRequest
+	(*LowStockResponse)(nil),           // 15: pos.v1.LowStockResponse
 }
 var file_pos_v1_stock_proto_depIdxs = []int32{
-	0, // 0: pos.ListStockMovementsResponse.movements:type_name -> pos.StockMovement
-	1, // 1: pos.ListInventoryResponse.inventory:type_name -> pos.BranchInventory
-	1, // 2: pos.LowStockResponse.items:type_name -> pos.BranchInventory
+	0, // 0: pos.v1.ListStockMovementsResponse.movements:type_name -> pos.v1.StockMovement
+	1, // 1: pos.v1.ListInventoryResponse.inventory:type_name -> pos.v1.BranchInventory
+	1, // 2: pos.v1.LowStockResponse.items:type_name -> pos.v1.BranchInventory
 	3, // [3:3] is the sub-list for method output_type
 	3, // [3:3] is the sub-list for method input_type
 	3, // [3:3] is the sub-list for extension type_name

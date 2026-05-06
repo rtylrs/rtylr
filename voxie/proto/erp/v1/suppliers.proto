@@ -1,6 +1,6 @@
 syntax = "proto3";
 
-package erp;
+package erp.v1;
 
 option go_package = "github.com/voxire/voxie/gen/go/erp/v1";
 
