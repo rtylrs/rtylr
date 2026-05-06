@@ -1,0 +1,52 @@
+{
+  "name": "vbitez",
+  "version": "0.1.0",
+  "description": "rtylr POS Terminal",
+  "type": "module",
+  "scripts": {
+    "dev": "vite",
+    "build": "vite build",
+    "typecheck": "tsc --noEmit",
+    "preview": "vite preview",
+    "tauri": "tauri",
+    "tauri:dev": "tauri dev",
+    "tauri:build": "tauri build"
+  },
+  "dependencies": {
+    "@tanstack/react-query": "^5.99.2",
+    "@tauri-apps/api": "^2.10.1",
+    "@tauri-apps/plugin-dialog": "^2.7.0",
+    "@tauri-apps/plugin-process": "^2.3.1",
+    "@tauri-apps/plugin-shell": "^2.3.5",
+    "@voxire/api": "workspace:*",
+    "@voxire/auth": "workspace:*",
+    "@voxire/components": "workspace:*",
+    "@voxire/config": "workspace:*",
+    "@voxire/i18n": "workspace:*",
+    "@voxire/observability": "workspace:*",
+    "@voxire/tailwind-config": "workspace:*",
+    "@voxire/ui": "workspace:*",
+    "@voxire/utils": "workspace:*",
+    "axios": "^1.15.2",
+    "dexie": "^4.4.2",
+    "dexie-react-hooks": "^4.4.0",
+    "lucide-react": "^1.8.0",
+    "motion": "^12.38.0",
+    "react": "^19.2.5",
+    "react-dom": "^19.2.5",
+    "react-router-dom": "7.14.2",
+    "sonner": "^2.0.7",
+    "zod": "^4.3.6",
+    "zustand": "^5.0.12"
+  },
+  "devDependencies": {
+    "@tauri-apps/cli": "^2.10.1",
+    "@types/node": "^25.6.0",
+    "@types/react": "19.2.14",
+    "@types/react-dom": "^19.2.3",
+    "@vitejs/plugin-react": "^6.0.1",
+    "typescript": "~6.0.3",
+    "vite": "^8.0.9",
+    "vite-tsconfig-paths": "^6.1.1"
+  }
+}
