@@ -4,12 +4,12 @@
 
 -- ── Branches (enhanced locations) ────────────────────────────────
 ALTER TABLE pos_locations
-  ADD COLUMN IF NOT EXISTS timezone VARCHAR(50) DEFAULT 'UTC',
-  ADD COLUMN IF NOT EXISTS currency VARCHAR(10) DEFAULT 'USD',
-  ADD COLUMN IF NOT EXISTS tax_rate DECIMAL(5,2) DEFAULT 0.00,
-  ADD COLUMN IF NOT EXISTS receipt_header TEXT,
-  ADD COLUMN IF NOT EXISTS receipt_footer TEXT,
-  ADD COLUMN IF NOT EXISTS business_id BIGINT NOT NULL DEFAULT 0;
+  ADD COLUMN timezone VARCHAR(50) DEFAULT 'UTC',
+  ADD COLUMN currency VARCHAR(10) DEFAULT 'USD',
+  ADD COLUMN tax_rate DECIMAL(5,2) DEFAULT 0.00,
+  ADD COLUMN receipt_header TEXT,
+  ADD COLUMN receipt_footer TEXT,
+  ADD COLUMN business_id BIGINT NOT NULL DEFAULT 0;
 
 -- ── Floors (per branch) ──────────────────────────────────────────
 CREATE TABLE IF NOT EXISTS pos_floors (
@@ -25,8 +25,8 @@ CREATE TABLE IF NOT EXISTS pos_floors (
 
 -- ── Add floor_id to tables ───────────────────────────────────────
 ALTER TABLE pos_tables
-  ADD COLUMN IF NOT EXISTS floor_id BIGINT DEFAULT NULL,
-  ADD COLUMN IF NOT EXISTS sort_order INT DEFAULT 0;
+  ADD COLUMN floor_id BIGINT DEFAULT NULL,
+  ADD COLUMN sort_order INT DEFAULT 0;
 
 -- ── Terminals (registered POS devices per branch) ────────────────
 CREATE TABLE IF NOT EXISTS pos_terminals (
@@ -43,18 +43,18 @@ CREATE TABLE IF NOT EXISTS pos_terminals (
 
 -- ── Add terminal_id to sessions ──────────────────────────────────
 ALTER TABLE pos_sessions
-  ADD COLUMN IF NOT EXISTS terminal_id BIGINT DEFAULT NULL,
-  ADD COLUMN IF NOT EXISTS business_id BIGINT NOT NULL DEFAULT 0;
+  ADD COLUMN terminal_id BIGINT DEFAULT NULL,
+  ADD COLUMN business_id BIGINT NOT NULL DEFAULT 0;
 
 -- ── Add terminal_id, tip, void fields to orders ──────────────────
 ALTER TABLE pos_orders
-  ADD COLUMN IF NOT EXISTS terminal_id BIGINT DEFAULT NULL,
-  ADD COLUMN IF NOT EXISTS branch_id BIGINT DEFAULT NULL,
-  ADD COLUMN IF NOT EXISTS tip_amount DECIMAL(10,2) DEFAULT 0,
-  ADD COLUMN IF NOT EXISTS void_reason TEXT DEFAULT NULL,
-  ADD COLUMN IF NOT EXISTS voided_by BIGINT DEFAULT NULL,
-  ADD COLUMN IF NOT EXISTS voided_at TIMESTAMP NULL,
-  ADD COLUMN IF NOT EXISTS exchange_order_id BIGINT DEFAULT NULL;
+  ADD COLUMN terminal_id BIGINT DEFAULT NULL,
+  ADD COLUMN branch_id BIGINT DEFAULT NULL,
+  ADD COLUMN tip_amount DECIMAL(10,2) DEFAULT 0,
+  ADD COLUMN void_reason TEXT DEFAULT NULL,
+  ADD COLUMN voided_by BIGINT DEFAULT NULL,
+  ADD COLUMN voided_at TIMESTAMP NULL,
+  ADD COLUMN exchange_order_id BIGINT DEFAULT NULL;
 
 -- Update order status enum to include voided and held
 ALTER TABLE pos_orders MODIFY COLUMN status
@@ -76,9 +76,9 @@ CREATE TABLE IF NOT EXISTS pos_order_payments (
 
 -- ── Add modifiers JSON to order items ────────────────────────────
 ALTER TABLE pos_order_items
-  ADD COLUMN IF NOT EXISTS modifiers JSON DEFAULT NULL,
-  ADD COLUMN IF NOT EXISTS combo_id BIGINT DEFAULT NULL,
-  ADD COLUMN IF NOT EXISTS variant_name VARCHAR(255) DEFAULT NULL;
+  ADD COLUMN modifiers JSON DEFAULT NULL,
+  ADD COLUMN combo_id BIGINT DEFAULT NULL,
+  ADD COLUMN variant_name VARCHAR(255) DEFAULT NULL;
 
 -- ── Audit trail ──────────────────────────────────────────────────
 CREATE TABLE IF NOT EXISTS pos_audit_log (

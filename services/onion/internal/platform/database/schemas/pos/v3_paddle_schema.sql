@@ -4,7 +4,7 @@
 
 -- Store the Paddle transaction ID returned when a pay intent is created.
 ALTER TABLE pos_orders
-  ADD COLUMN IF NOT EXISTS paddle_transaction_id VARCHAR(64) DEFAULT NULL;
+  ADD COLUMN paddle_transaction_id VARCHAR(64) DEFAULT NULL;
 
 -- Track processed Paddle webhook events to enforce idempotent delivery.
 CREATE TABLE IF NOT EXISTS pos_paddle_events_processed (
