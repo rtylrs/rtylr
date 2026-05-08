@@ -48,9 +48,13 @@ const Products: React.FC = () => {
 
   const handleBulkDelete = async (): Promise<void> => {
     const ids = Array.from(selected);
-    await Promise.all(ids.map((id) => deleteMut.mutateAsync(id)));
-    toast.success(t('erp.products.toast.deleted'));
-    setSelected(new Set());
+    try {
+      await Promise.all(ids.map((id) => deleteMut.mutateAsync(id)));
+      toast.success(t('erp.products.toast.deleted'));
+      setSelected(new Set());
+    } catch {
+      // onError in hook handles toast
+    }
   };
 
   const exportable = useMemo(

@@ -126,25 +126,33 @@ const InviteUser: React.FC = (): React.JSX.Element => {
   const submitSingle = async (e: React.FormEvent): Promise<void> => {
     e.preventDefault();
     if (!email.trim() || !name.trim()) return;
-    await invite.mutateAsync({
-      email,
-      fullName: name,
-      role,
-      apps: selectedApps,
-      ...(singleGroupId ? { groupId: Number(singleGroupId) } : {}),
-    });
-    navigate('/team');
+    try {
+      await invite.mutateAsync({
+        email,
+        fullName: name,
+        role,
+        apps: selectedApps,
+        ...(singleGroupId ? { groupId: Number(singleGroupId) } : {}),
+      });
+      navigate('/team');
+    } catch {
+      // onError in hook handles toast
+    }
   };
 
   const submitBulk = async (): Promise<void> => {
     if (parsedEmails.length === 0) return;
-    const res = await bulkInvite.mutateAsync({
-      emails: parsedEmails,
-      role: bulkRole,
-      apps: bulkApps,
-      ...(bulkGroupId ? { groupId: Number(bulkGroupId) } : {}),
-    });
-    setBulkResults(res.results);
+    try {
+      const res = await bulkInvite.mutateAsync({
+        emails: parsedEmails,
+        role: bulkRole,
+        apps: bulkApps,
+        ...(bulkGroupId ? { groupId: Number(bulkGroupId) } : {}),
+      });
+      setBulkResults(res.results);
+    } catch {
+      // onError in hook handles toast
+    }
   };
 
   const renderRoleSelector = (

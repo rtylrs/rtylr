@@ -100,25 +100,33 @@ const GroupDetail = (): React.JSX.Element => {
 
   const handleSave = async (): Promise<void> => {
     const resourcePermissions = buildPermissions();
-    if (isNew) {
-      const created = await createGroup.mutateAsync({
-        name,
-        description,
-        color,
-        resourcePermissions,
-      });
-      navigate(`/team/groups/${created.id}`, { replace: true });
-    } else {
-      await updateGroup.mutateAsync({ name, description, color, resourcePermissions });
+    try {
+      if (isNew) {
+        const created = await createGroup.mutateAsync({
+          name,
+          description,
+          color,
+          resourcePermissions,
+        });
+        navigate(`/team/groups/${created.id}`, { replace: true });
+      } else {
+        await updateGroup.mutateAsync({ name, description, color, resourcePermissions });
+      }
+      setDirty(false);
+    } catch {
+      // onError in hooks handles toast
     }
-    setDirty(false);
   };
 
   const handleAddMembers = async (): Promise<void> => {
     if (selectedToAdd.length === 0) return;
-    await addMembers.mutateAsync(selectedToAdd);
-    setSelectedToAdd([]);
-    setShowAddMembers(false);
+    try {
+      await addMembers.mutateAsync(selectedToAdd);
+      setSelectedToAdd([]);
+      setShowAddMembers(false);
+    } catch {
+      // onError in hook handles toast
+    }
   };
 
   const currentMemberIds = new Set((group?.members ?? []).map((m) => m.userId));
@@ -405,7 +413,7 @@ const GroupDetail = (): React.JSX.Element => {
                     aria-label={t('team.groupDetail.removeMemberAriaLabel', {
                       name: m.fullName || m.email,
                     })}
-                    onClick={() => removeMember.mutateAsync(m.userId)}
+                    onClick={() => removeMember.mutate(m.userId)}
                     className="h-7 w-7 rounded-lg flex items-center justify-center hover:bg-[var(--dash-hover)] transition-colors"
                     style={{ color: 'var(--dash-text-muted)' }}
                   >
