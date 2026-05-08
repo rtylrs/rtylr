@@ -17,8 +17,18 @@ const getToken = (): string | null => {
   );
 };
 
+const getCookieDomain = (): string | undefined => {
+  const hostname = window.location.hostname.toLowerCase();
+  if (hostname === 'localhost' || /^\d+\.\d+\.\d+\.\d+$/.test(hostname)) return undefined;
+  if (hostname === 'rtylr.com' || hostname.endsWith('.rtylr.com')) return '.rtylr.com';
+  return undefined;
+};
+
 const clearTokenCookie = (): void => {
-  document.cookie = 'token=; Max-Age=0; path=/;';
+  const domain = getCookieDomain();
+  let cookie = 'token=; Max-Age=0; path=/;';
+  if (domain) cookie += ` Domain=${domain};`;
+  document.cookie = cookie;
 };
 
 const getAuthUrl = (appId: string): string => {
