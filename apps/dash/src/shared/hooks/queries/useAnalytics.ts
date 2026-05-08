@@ -46,6 +46,7 @@ export const useGetRevenue = (
 
   useEffect(() => {
     if (query.error) {
+      toast.error('Failed to load analytics data');
     }
   }, [query.error]);
 
@@ -70,6 +71,7 @@ export const useGetOrders = (
 
   useEffect(() => {
     if (query.error) {
+      toast.error('Failed to load analytics data');
     }
   }, [query.error]);
 

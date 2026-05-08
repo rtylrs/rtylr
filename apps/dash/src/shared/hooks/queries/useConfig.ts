@@ -1,12 +1,14 @@
 import { unwrap } from '@voxire/api';
 import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query';
 import { useEffect } from 'react';
+import { useTranslation } from 'react-i18next';
 import { safe } from '../../lib/api';
 import { configSchema } from '../../schemas/config';
 import { useConfigStore } from '../../stores/configStore';
 import { toast } from 'sonner';
 
 export const useGetConfig = () => {
+  const { t } = useTranslation();
   const { setAboutContent, setMaintanance, setBusinessCount, setContactInfo, setFaqs, setNews } =
     useConfigStore();
 
@@ -45,6 +47,7 @@ export const useGetConfig = () => {
 
   useEffect(() => {
     if (query.error) {
+      toast.error(t('errors.configLoadFailed'));
     }
   }, [query.error]);
 
