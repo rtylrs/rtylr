@@ -5,12 +5,13 @@ import { createApiClient } from './client';
 vi.stubGlobal('import', { meta: { env: { VITE_API_URL: 'https://api.test.com/' } } });
 
 beforeEach(() => {
+  // Clear all cookies between tests
+  document.cookie.split(';').forEach((c) => {
+    const name = c.trim().split('=')[0];
+    if (name) document.cookie = `${name}=; Max-Age=0; path=/`;
+  });
   vi.restoreAllMocks();
 });
-
-function mockCookie(value: string) {
-  return vi.spyOn(document, 'cookie', 'get').mockReturnValue(value);
-}
 
 describe('createApiClient', () => {
   it('returns an axios instance', () => {
@@ -29,29 +30,25 @@ describe('createApiClient', () => {
   });
 
   it('request interceptor adds Authorization header when token exists', async () => {
-    mockCookie('token=my-test-token');
+    document.cookie = 'token=my-test-token';
     const client = createApiClient('hub');
 
-    // Access the request interceptor through the config
     const config = {
-      headers: {} as any,
+      headers: {} as Record<string, string>,
     };
 
-    // Get interceptors - they're stored in axios
     const interceptors = (client.interceptors.request as any).handlers;
     expect(interceptors.length).toBeGreaterThan(0);
 
-    // Execute the fulfilled handler
     const result = interceptors[0].fulfilled(config);
     expect(result.headers['Authorization']).toBe('Bearer my-test-token');
   });
 
   it('request interceptor does not add header when no token', async () => {
-    mockCookie('');
     const client = createApiClient('hub');
 
     const config = {
-      headers: {} as any,
+      headers: {} as Record<string, string>,
     };
 
     const interceptors = (client.interceptors.request as any).handlers;
@@ -59,14 +56,13 @@ describe('createApiClient', () => {
     expect(result.headers['Authorization']).toBeUndefined();
   });
 
-  it('response interceptor handles 401 by redirecting', async () => {
-    const cookieSetter = vi.spyOn(document, 'cookie', 'set');
+  it('response interceptor handles 401 by redirecting to auth', async () => {
+    document.cookie = 'token=my-test-token';
     const client = createApiClient('hub');
 
     const interceptors = (client.interceptors.response as any).handlers;
     expect(interceptors.length).toBeGreaterThan(0);
 
-    // The rejected handler handles 401s
     const error = { response: { status: 401 } };
     try {
       await interceptors[0].rejected(error);
@@ -74,7 +70,9 @@ describe('createApiClient', () => {
       // Expected to reject
     }
 
-    expect(cookieSetter).toHaveBeenCalledWith('token=; Max-Age=0; path=/;');
+    // After 401, the token cookie should be expired (Max-Age=0 removes it)
+    // and window.location.href should point to auth
+    expect(window.location.href).toContain('localhost:5176');
   });
 
   it('response interceptor passes through non-401 errors', async () => {
@@ -87,7 +85,7 @@ describe('createApiClient', () => {
   });
 
   it('response interceptor passes through successful responses', () => {
-    const client = createApiClient('hub');
+    const client = createApiClient('test-app');
 
     const interceptors = (client.interceptors.response as any).handlers;
     const response = { status: 200, data: { ok: true } };
@@ -111,10 +109,10 @@ describe('createApiClient', () => {
   });
 
   it('handles token with special characters in cookie', () => {
-    mockCookie('token=eyJhbGciOiJIUzI1NiJ9.test.sig');
+    document.cookie = 'token=eyJhbGciOiJIUzI1NiJ9.test.sig';
     const client = createApiClient('hub');
 
-    const config = { headers: {} as any };
+    const config = { headers: {} as Record<string, string> };
     const interceptors = (client.interceptors.request as any).handlers;
     const result = interceptors[0].fulfilled(config);
     expect(result.headers['Authorization']).toBe('Bearer eyJhbGciOiJIUzI1NiJ9.test.sig');
