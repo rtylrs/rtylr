@@ -1,5 +1,5 @@
 import React, { useState } from 'react';
-import { DollarSign, ShoppingBag, TrendingUp, Star, BarChart2 } from 'lucide-react';
+import { DollarSign, ShoppingBag, TrendingUp, Star, BarChart2, Loader2 } from 'lucide-react';
 import {
   Card,
   CardContent,
@@ -8,7 +8,6 @@ import {
   Tabs,
   TabsList,
   TabsTrigger,
-  TabsContent,
   Table,
   TableHeader,
   TableBody,
@@ -17,31 +16,40 @@ import {
   TableCell,
 } from '../../shared/components/ui';
 import { cn } from '../../shared/lib/utils';
-
-const statCards = [
-  {
-    label: 'Total Revenue',
-    value: '$0.00',
-    icon: DollarSign,
-    iconClass: 'text-emerald-600 bg-emerald-500/15',
-  },
-  {
-    label: 'Total Orders',
-    value: '0',
-    icon: ShoppingBag,
-    iconClass: 'text-blue-600 bg-blue-500/15',
-  },
-  {
-    label: 'Avg Order Value',
-    value: '$0.00',
-    icon: TrendingUp,
-    iconClass: 'text-violet-600 bg-violet-500/15',
-  },
-  { label: 'Top Item', value: '-', icon: Star, iconClass: 'text-amber-600 bg-amber-500/15' },
-];
+import { useKpis } from '../../shared/hooks/queries/useKpis';
 
 const Analytics: React.FC = () => {
   const [range, setRange] = useState('7d');
+  const { data: kpis, isLoading } = useKpis();
+
+  const avgOrderValue = kpis && kpis.ordersToday > 0 ? kpis.revenueToday / kpis.ordersToday : 0;
+
+  const statCards = [
+    {
+      label: 'Revenue Today',
+      value: isLoading ? '—' : `$${(kpis?.revenueToday ?? 0).toFixed(2)}`,
+      icon: DollarSign,
+      iconClass: 'text-emerald-600 bg-emerald-500/15',
+    },
+    {
+      label: 'Orders Today',
+      value: isLoading ? '—' : String(kpis?.ordersToday ?? 0),
+      icon: ShoppingBag,
+      iconClass: 'text-blue-600 bg-blue-500/15',
+    },
+    {
+      label: 'Avg Order Value',
+      value: isLoading ? '—' : `$${avgOrderValue.toFixed(2)}`,
+      icon: TrendingUp,
+      iconClass: 'text-violet-600 bg-violet-500/15',
+    },
+    {
+      label: 'New Customers',
+      value: isLoading ? '—' : String(kpis?.newCustomers ?? 0),
+      icon: Star,
+      iconClass: 'text-amber-600 bg-amber-500/15',
+    },
+  ];
 
   return (
     <div className="space-y-6">
@@ -72,7 +80,13 @@ const Analytics: React.FC = () => {
                     <p className="text-xs font-medium text-gray-400 uppercase tracking-wide">
                       {stat.label}
                     </p>
-                    <p className="text-2xl font-bold text-primary mt-1.5">{stat.value}</p>
+                    <div className="flex items-center gap-2 mt-1.5">
+                      {isLoading ? (
+                        <Loader2 size={16} className="animate-spin text-gray-400" />
+                      ) : (
+                        <p className="text-2xl font-bold text-primary">{stat.value}</p>
+                      )}
+                    </div>
                   </div>
                   <div
                     className={cn(
@@ -89,24 +103,52 @@ const Analytics: React.FC = () => {
         })}
       </div>
 
-      {/* Chart Placeholder */}
-      <Card>
-        <CardHeader>
-          <CardTitle>Revenue Over Time</CardTitle>
-        </CardHeader>
-        <CardContent className="pt-0">
-          <div
-            className="flex flex-col items-center justify-center h-52 rounded-xl"
-            style={{ background: 'var(--dash-hover)', border: '1px solid var(--dash-border)' }}
-          >
-            <BarChart2 size={36} className="text-gray-200 mb-3" />
-            <p className="text-sm font-medium text-gray-400">Chart coming soon</p>
-            <p className="text-xs text-gray-300 mt-1">Revenue visualization will appear here</p>
-          </div>
-        </CardContent>
-      </Card>
+      {/* Revenue sparkline */}
+      {kpis && kpis.revenueSeries.length > 1 && (
+        <Card>
+          <CardHeader>
+            <CardTitle>Revenue Trend</CardTitle>
+          </CardHeader>
+          <CardContent className="pt-0">
+            <div style={{ height: 80, position: 'relative' }}>
+              <svg
+                width="100%"
+                height="80"
+                viewBox={`0 0 ${kpis.revenueSeries.length - 1} 100`}
+                preserveAspectRatio="none"
+              >
+                {(() => {
+                  const vals = kpis.revenueSeries;
+                  const max = Math.max(...vals);
+                  const min = Math.min(...vals);
+                  const range = max - min || 1;
+                  const pts = vals
+                    .map((v, i) => `${i},${100 - ((v - min) / range) * 90}`)
+                    .join(' ');
+                  return (
+                    <>
+                      <polyline
+                        fill="none"
+                        stroke="#10b981"
+                        strokeWidth="2"
+                        vectorEffect="non-scaling-stroke"
+                        points={pts}
+                      />
+                      <polyline
+                        fill="rgba(16,185,129,0.12)"
+                        stroke="none"
+                        points={`0,100 ${pts} ${vals.length - 1},100`}
+                      />
+                    </>
+                  );
+                })()}
+              </svg>
+            </div>
+          </CardContent>
+        </Card>
+      )}
 
-      {/* Top Items */}
+      {/* Top Items placeholder — requires a dedicated endpoint */}
       <Card>
         <CardHeader>
           <CardTitle>Top Items</CardTitle>
@@ -124,7 +166,7 @@ const Analytics: React.FC = () => {
               <TableRow>
                 <TableCell colSpan={3}>
                   <div className="flex flex-col items-center justify-center py-8 text-center">
-                    <Star size={28} className="text-gray-200 mb-3" />
+                    <BarChart2 size={28} className="text-gray-200 mb-3" />
                     <p className="text-sm font-medium text-gray-400">No data yet</p>
                     <p className="text-xs text-gray-300 mt-1">
                       Top performing items will appear here

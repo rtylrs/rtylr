@@ -105,7 +105,7 @@ const OrdersTable: React.FC<{ orders: HubOrder[]; emptyLabel: string }> = ({
 
 const Orders: React.FC = () => {
   const [tab, setTab] = useState<OrderStatus>('all');
-  const { data: allOrders = [] } = useOrders();
+  const { data: allOrders = [], isLoading, isError } = useOrders();
 
   const pendingOrders = useMemo(() => allOrders.filter((o) => o.status === 'pending'), [allOrders]);
   const inProgressOrders = useMemo(
@@ -123,6 +123,45 @@ const Orders: React.FC = () => {
     in_progress: inProgressOrders,
     completed: completedOrders,
   };
+
+  if (isLoading) {
+    return (
+      <div className="space-y-6">
+        <div>
+          <h1 className="text-xl font-bold" style={{ color: 'var(--dash-text)' }}>
+            Orders
+          </h1>
+        </div>
+        <div
+          className="rounded-xl p-8 flex items-center justify-center"
+          style={{ background: 'var(--dash-card)', border: '1px solid var(--dash-border)' }}
+        >
+          <Loader2 size={20} className="animate-spin" style={{ color: 'var(--dash-text-dim)' }} />
+        </div>
+      </div>
+    );
+  }
+
+  if (isError) {
+    return (
+      <div className="space-y-6">
+        <div>
+          <h1 className="text-xl font-bold" style={{ color: 'var(--dash-text)' }}>
+            Orders
+          </h1>
+        </div>
+        <div
+          className="rounded-xl p-8 flex flex-col items-center justify-center gap-2"
+          style={{ background: 'var(--dash-card)', border: '1px solid var(--dash-border)' }}
+        >
+          <ShoppingBag size={28} style={{ color: 'var(--dash-text-dim)' }} />
+          <p className="text-sm" style={{ color: 'var(--dash-text-muted)' }}>
+            Failed to load orders. Please refresh.
+          </p>
+        </div>
+      </div>
+    );
+  }
 
   return (
     <div className="space-y-6">

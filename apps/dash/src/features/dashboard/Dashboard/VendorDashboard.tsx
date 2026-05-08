@@ -3,6 +3,7 @@ import { createPortal } from 'react-dom';
 import { ResponsiveGridLayout, type Layout, type ResponsiveLayouts } from 'react-grid-layout';
 import { motion, AnimatePresence } from 'motion/react';
 import { Settings2, X, Plus, GripVertical } from 'lucide-react';
+import { ErrorBoundary } from '@voxire/ui';
 import { useUserStore } from '../../../shared/stores/userStore';
 import {
   getWidgetComponent,
@@ -206,7 +207,9 @@ const AdminDashboard: React.FC = () => {
                   </div>
                 )}
                 <div className="h-full">
-                  <Widget />
+                  <ErrorBoundary>
+                    <Widget />
+                  </ErrorBoundary>
                 </div>
               </div>
             );
