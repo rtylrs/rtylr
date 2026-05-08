@@ -392,18 +392,9 @@ const ProductDetail: React.FC = () => {
             >
               <Clock size={12} /> ACTIVITY
             </h3>
-            <div className="space-y-2 text-xs">
-              {[
-                { text: 'Stock adjusted +5', when: '2h ago' },
-                { text: 'Price updated', when: '1d ago' },
-                { text: 'Product created', when: '5d ago' },
-              ].map((a, i) => (
-                <div key={i} className="flex justify-between">
-                  <span style={{ color: 'var(--hub-text)' }}>{a.text}</span>
-                  <span style={{ color: 'var(--hub-text-dim)' }}>{a.when}</span>
-                </div>
-              ))}
-            </div>
+            <p className="text-xs py-2 text-center" style={{ color: 'var(--hub-text-dim)' }}>
+              {t('erp.products.detail.noActivity')}
+            </p>
           </div>
         </div>
       </div>
