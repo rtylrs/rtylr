@@ -65,7 +65,7 @@ export function getDefaultCookieDomain(): string | undefined {
   if (isLocalhost) return undefined;
 
   if (hostname === 'rtylr.com' || hostname.endsWith('.rtylr.com')) {
-    return 'rtylr.com';
+    return '.rtylr.com';
   }
 
   return undefined;
