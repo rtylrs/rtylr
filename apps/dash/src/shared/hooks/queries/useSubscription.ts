@@ -1,5 +1,6 @@
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
 import { unwrap } from '@voxire/api';
+import { toast } from 'sonner';
 import { safe } from '../../lib/api';
 
 // ── Types ─────────────────────────────────────────────────────────────────────
@@ -211,6 +212,7 @@ export const useSetSubscription = () => {
     onSuccess: () => {
       void queryClient.invalidateQueries({ queryKey: ['subscription'] });
     },
+    onError: () => toast.error('Failed to update subscription'),
   });
 };
 

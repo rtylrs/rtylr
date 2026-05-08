@@ -27,6 +27,7 @@ export const useToggleTwoFactor = () => {
       toast.success(enabled ? 'Two-factor enabled' : 'Two-factor disabled');
       qc.invalidateQueries({ queryKey: ['security'] });
     },
+    onError: () => toast.error('Failed to update two-factor settings'),
   });
 };
 
@@ -41,5 +42,6 @@ export const useRevokeSession = () => {
       toast.success('Session revoked');
       qc.invalidateQueries({ queryKey: ['security'] });
     },
+    onError: () => toast.error('Failed to revoke session'),
   });
 };

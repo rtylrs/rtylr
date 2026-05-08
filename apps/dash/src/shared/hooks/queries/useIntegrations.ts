@@ -29,6 +29,7 @@ export const useConnectIntegration = () => {
       toast.success('Integration connected');
       qc.invalidateQueries({ queryKey: ['integrations'] });
     },
+    onError: () => toast.error('Failed to connect integration'),
   });
 };
 
@@ -43,5 +44,6 @@ export const useDisconnectIntegration = () => {
       toast.success('Integration disconnected');
       qc.invalidateQueries({ queryKey: ['integrations'] });
     },
+    onError: () => toast.error('Failed to disconnect integration'),
   });
 };
