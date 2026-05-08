@@ -48,10 +48,14 @@ const Webhooks: React.FC = () => {
 
   const submitCreate = async () => {
     if (!url.trim() || events.length === 0) return;
-    await create.mutateAsync({ url, events });
-    setUrl('');
-    setEvents([]);
-    setCreateOpen(false);
+    try {
+      await create.mutateAsync({ url, events });
+      setUrl('');
+      setEvents([]);
+      setCreateOpen(false);
+    } catch {
+      // onError in hook handles toast
+    }
   };
 
   return (

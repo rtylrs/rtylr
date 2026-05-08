@@ -46,11 +46,15 @@ const ApiKeys: React.FC = () => {
 
   const submitCreate = async () => {
     if (!name.trim()) return;
-    const result = await create.mutateAsync({ name, scopes });
-    setShowKey(result.key);
-    setName('');
-    setScopes(['read']);
-    setCreateOpen(false);
+    try {
+      const result = await create.mutateAsync({ name, scopes });
+      setShowKey(result.key);
+      setName('');
+      setScopes(['read']);
+      setCreateOpen(false);
+    } catch {
+      // onError in hook handles toast
+    }
   };
 
   return (

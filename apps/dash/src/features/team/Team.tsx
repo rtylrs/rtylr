@@ -128,18 +128,26 @@ const Team: React.FC = (): React.JSX.Element => {
     const userIds = Array.from(selected)
       .map(Number)
       .filter((n) => !isNaN(n));
-    await addGroupMembers.mutateAsync(userIds);
-    clearSelection();
-    setShowAddToGroupModal(false);
-    setSelectedGroupId('');
+    try {
+      await addGroupMembers.mutateAsync(userIds);
+      clearSelection();
+      setShowAddToGroupModal(false);
+      setSelectedGroupId('');
+    } catch {
+      // onError in hook handles toast
+    }
   };
 
   const handleBulkDeactivate = async (): Promise<void> => {
-    for (const id of Array.from(selected)) {
-      await deactivate.mutateAsync(id);
+    try {
+      for (const id of Array.from(selected)) {
+        await deactivate.mutateAsync(id);
+      }
+      clearSelection();
+      setBulkConfirmDeactivate(false);
+    } catch {
+      // onError in hook handles toast
     }
-    clearSelection();
-    setBulkConfirmDeactivate(false);
   };
 
   return (
