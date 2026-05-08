@@ -609,7 +609,12 @@ const Team: React.FC = (): React.JSX.Element => {
         destructive
         isLoading={deactivate.isPending}
         onConfirm={async () => {
-          if (confirm) await deactivate.mutateAsync(confirm.id);
+          if (confirm)
+            try {
+              await deactivate.mutateAsync(confirm.id);
+            } catch {
+              // onError in hook handles toast
+            }
         }}
       />
     </div>

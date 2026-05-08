@@ -236,8 +236,12 @@ const Categories: React.FC = () => {
         confirmLabel="Delete"
         onConfirm={async () => {
           if (confirmDelete !== null) {
-            await deleteMut.mutateAsync(confirmDelete);
-            toast.success('Category deleted');
+            try {
+              await deleteMut.mutateAsync(confirmDelete);
+              toast.success('Category deleted');
+            } catch {
+              // onError in hook handles toast
+            }
           }
           setConfirmDelete(null);
         }}

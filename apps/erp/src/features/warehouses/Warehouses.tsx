@@ -177,8 +177,12 @@ const Warehouses: React.FC = () => {
         confirmLabel="Delete"
         onConfirm={async () => {
           if (confirmDeleteId !== null) {
-            await deleteMut.mutateAsync(confirmDeleteId);
-            toast.success('Warehouse deleted');
+            try {
+              await deleteMut.mutateAsync(confirmDeleteId);
+              toast.success('Warehouse deleted');
+            } catch {
+              // onError in hook handles toast
+            }
           }
           setConfirmDeleteId(null);
         }}

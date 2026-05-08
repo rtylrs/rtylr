@@ -174,7 +174,12 @@ const Webhooks: React.FC = () => {
         destructive
         isLoading={remove.isPending}
         onConfirm={async () => {
-          if (toDelete) await remove.mutateAsync(toDelete.id);
+          if (toDelete)
+            try {
+              await remove.mutateAsync(toDelete.id);
+            } catch {
+              // onError in hook handles toast
+            }
         }}
       />
     </div>

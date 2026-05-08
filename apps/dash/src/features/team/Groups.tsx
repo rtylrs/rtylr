@@ -219,7 +219,12 @@ const Groups = (): React.JSX.Element => {
         destructive
         isLoading={deleteGroup.isPending}
         onConfirm={async () => {
-          if (confirmDelete) await deleteGroup.mutateAsync(confirmDelete.id);
+          if (confirmDelete)
+            try {
+              await deleteGroup.mutateAsync(confirmDelete.id);
+            } catch {
+              // onError in hook handles toast
+            }
         }}
       />
     </div>

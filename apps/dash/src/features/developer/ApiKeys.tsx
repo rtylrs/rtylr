@@ -208,7 +208,12 @@ const ApiKeys: React.FC = () => {
         destructive
         isLoading={revoke.isPending}
         onConfirm={async () => {
-          if (toRevoke) await revoke.mutateAsync(toRevoke.id);
+          if (toRevoke)
+            try {
+              await revoke.mutateAsync(toRevoke.id);
+            } catch {
+              // onError in hook handles toast
+            }
         }}
       />
     </div>

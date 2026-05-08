@@ -142,8 +142,12 @@ const Brands: React.FC = () => {
         confirmLabel="Delete"
         onConfirm={async () => {
           if (confirmDeleteId !== null) {
-            await deleteMut.mutateAsync(confirmDeleteId);
-            toast.success('Brand deleted');
+            try {
+              await deleteMut.mutateAsync(confirmDeleteId);
+              toast.success('Brand deleted');
+            } catch {
+              // onError in hook handles toast
+            }
           }
           setConfirmDeleteId(null);
         }}

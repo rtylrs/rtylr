@@ -286,8 +286,12 @@ const MemberDetail: React.FC = (): React.JSX.Element => {
         destructive
         isLoading={deactivate.isPending}
         onConfirm={async () => {
-          await deactivate.mutateAsync(member.id);
-          navigate('/team');
+          try {
+            await deactivate.mutateAsync(member.id);
+            navigate('/team');
+          } catch {
+            // onError in hook handles toast
+          }
         }}
       />
     </div>
