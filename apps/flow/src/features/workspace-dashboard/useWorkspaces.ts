@@ -1,5 +1,6 @@
 import { unwrap } from '@voxire/api';
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
+import { toast } from 'sonner';
 import { flowApi } from '../../shared/services/flowApi';
 import type { ApiWorkspace } from '../../shared/services/flowApi';
 import { PERSONAL_WORKSPACE_ID } from '../../shared/lib/personalWorkspace';
@@ -22,6 +23,7 @@ export function useCreateWorkspace() {
       return unwrap(flowApi.createWorkspace(data));
     },
     onSuccess: () => qc.invalidateQueries({ queryKey: ['workspaces'] }),
+    onError: () => toast.error('Failed to create workspace'),
   });
 }
 
@@ -32,6 +34,7 @@ export function useUpdateWorkspace() {
       return unwrap(flowApi.updateWorkspace(id, data)).then(() => {});
     },
     onSuccess: () => qc.invalidateQueries({ queryKey: ['workspaces'] }),
+    onError: () => toast.error('Failed to update workspace'),
   });
 }
 
@@ -45,5 +48,6 @@ export function useDeleteWorkspace() {
       return unwrap(flowApi.deleteWorkspace(id));
     },
     onSuccess: () => qc.invalidateQueries({ queryKey: ['workspaces'] }),
+    onError: () => toast.error('Failed to delete workspace'),
   });
 }

@@ -1,5 +1,6 @@
 import { unwrap } from '@voxire/api';
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
+import { toast } from 'sonner';
 import { flowApi } from '../../shared/services/flowApi';
 import type { ApiLabel } from '../../shared/services/flowApi';
 import { unwrapListResponse } from '../../shared/lib/unwrapListResponse';
@@ -24,6 +25,7 @@ export function useCreateLabel() {
     mutationFn: (data: { workspace_id: number; name: string; color: string }) =>
       unwrap(flowApi.createLabel(data)),
     onSuccess: () => qc.invalidateQueries({ queryKey: ['labels'] }),
+    onError: () => toast.error('Failed to create label'),
   });
 }
 
@@ -33,6 +35,7 @@ export function useUpdateLabel() {
     mutationFn: (data: { id: number; name: string; color: string }) =>
       unwrap(flowApi.updateLabel(data)),
     onSuccess: () => qc.invalidateQueries({ queryKey: ['labels'] }),
+    onError: () => toast.error('Failed to update label'),
   });
 }
 
@@ -41,6 +44,7 @@ export function useDeleteLabel() {
   return useMutation({
     mutationFn: (id: number) => unwrap(flowApi.deleteLabel(id)),
     onSuccess: () => qc.invalidateQueries({ queryKey: ['labels'] }),
+    onError: () => toast.error('Failed to delete label'),
   });
 }
 
@@ -54,5 +58,6 @@ export function useSetTaskLabels() {
       qc.invalidateQueries({ queryKey: ['tasks'] });
       qc.invalidateQueries({ queryKey: ['task'] });
     },
+    onError: () => toast.error('Failed to set task labels'),
   });
 }

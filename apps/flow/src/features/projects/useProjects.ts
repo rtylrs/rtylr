@@ -1,5 +1,6 @@
 import { unwrap } from '@voxire/api';
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
+import { toast } from 'sonner';
 import { flowApi } from '../../shared/services/flowApi';
 import type { ApiProject } from '../../shared/services/flowApi';
 import { unwrapListResponse } from '../../shared/lib/unwrapListResponse';
@@ -25,6 +26,7 @@ export function useCreateProject() {
     // sentinel while the fetched query keyed with the resolved numeric ID,
     // so keying the invalidation on variables.workspaceId would miss.
     onSuccess: () => qc.invalidateQueries({ queryKey: ['projects'] }),
+    onError: () => toast.error('Failed to create project'),
   });
 }
 
@@ -41,6 +43,7 @@ export function useUpdateProject() {
       return unwrap(flowApi.updateProject(id, data)).then(() => {});
     },
     onSuccess: () => qc.invalidateQueries({ queryKey: ['projects'] }),
+    onError: () => toast.error('Failed to update project'),
   });
 }
 
@@ -51,6 +54,7 @@ export function useDeleteProject() {
       return unwrap(flowApi.deleteProject(id));
     },
     onSuccess: () => qc.invalidateQueries({ queryKey: ['projects'] }),
+    onError: () => toast.error('Failed to delete project'),
   });
 }
 
@@ -60,5 +64,6 @@ export function useMoveProject() {
     mutationFn: (data: { project_id: number; workspace_id: number }) =>
       unwrap(flowApi.moveProject(data)).then(() => {}),
     onSuccess: () => qc.invalidateQueries({ queryKey: ['projects'] }),
+    onError: () => toast.error('Failed to move project'),
   });
 }

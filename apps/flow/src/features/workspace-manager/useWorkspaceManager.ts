@@ -34,6 +34,7 @@ export function useAddWorkspaceMember(workspaceId: string) {
     onSuccess: () => {
       qc.invalidateQueries({ queryKey: ['workspace-members', workspaceId] });
     },
+    onError: () => toast.error('Failed to add workspace member'),
   });
 }
 
@@ -56,6 +57,7 @@ export function useRemoveWorkspaceMember(workspaceId: string) {
     onSuccess: () => {
       qc.invalidateQueries({ queryKey: ['workspace-members', workspaceId] });
     },
+    onError: () => toast.error('Failed to remove workspace member'),
   });
 }
 
@@ -78,5 +80,6 @@ export function useUpdateWorkspaceMemberRole(workspaceId: string) {
     onSuccess: () => {
       qc.invalidateQueries({ queryKey: ['workspace-members', workspaceId] });
     },
+    onError: () => toast.error('Failed to update workspace member role'),
   });
 }
