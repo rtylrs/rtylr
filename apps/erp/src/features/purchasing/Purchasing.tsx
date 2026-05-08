@@ -8,6 +8,7 @@ import {
   useSendPurchaseOrder,
   useCreatePurchaseOrder,
 } from './usePurchaseOrders';
+import { useSuppliers } from '../suppliers/useSuppliers';
 import PrintPOButton from '../../shared/components/PrintPOButton';
 import ExportButton from '../../shared/components/ExportButton';
 import { toast } from 'sonner';
@@ -61,9 +62,14 @@ const Purchasing: React.FC = () => {
   const approveMut = useApprovePurchaseOrder();
   const sendMut = useSendPurchaseOrder();
   const createMut = useCreatePurchaseOrder();
+  const { data: suppliers = [] } = useSuppliers();
   const [filter, setFilter] = useState<PurchaseOrder['status'] | 'All'>('All');
   const [showCreate, setShowCreate] = useState(false);
-  const [newSupplier, setNewSupplier] = useState('');
+  const [newSupplierId, setNewSupplierId] = useState('');
+  const [newPoNumber, setNewPoNumber] = useState('');
+  const [newExpectedDelivery, setNewExpectedDelivery] = useState(
+    new Date(Date.now() + 7 * 86400000).toISOString().slice(0, 10)
+  );
   const [newNotes, setNewNotes] = useState('');
 
   const filteredOrders = filter === 'All' ? orders : orders.filter((o) => o.status === filter);
@@ -90,16 +96,24 @@ const Purchasing: React.FC = () => {
   };
 
   const handleCreatePO = async (): Promise<void> => {
-    if (!newSupplier.trim()) return;
+    if (!newSupplierId || !newPoNumber.trim()) {
+      toast.error('Supplier and PO number are required');
+      return;
+    }
     try {
       await createMut.mutateAsync({
-        supplier: newSupplier.trim(),
+        supplierId: Number(newSupplierId),
+        poNumber: newPoNumber.trim(),
+        taxAmount: 0,
+        expectedDelivery: newExpectedDelivery,
         notes: newNotes.trim(),
-        lines: [],
-      } as any);
+        items: [],
+      });
       toast.success('Purchase order draft created');
       setShowCreate(false);
-      setNewSupplier('');
+      setNewSupplierId('');
+      setNewPoNumber('');
+      setNewExpectedDelivery(new Date(Date.now() + 7 * 86400000).toISOString().slice(0, 10));
       setNewNotes('');
     } catch {
       toast.error('Failed to create purchase order');
@@ -289,10 +303,38 @@ const Purchasing: React.FC = () => {
             <h3 className="text-sm font-bold" style={{ color: 'var(--hub-text)' }}>
               New Purchase Order
             </h3>
+            <select
+              value={newSupplierId}
+              onChange={(e) => setNewSupplierId(e.target.value)}
+              className="w-full px-3 py-2 rounded-lg text-sm outline-none"
+              style={{
+                background: 'var(--hub-input-bg)',
+                border: '1px solid var(--hub-border)',
+                color: 'var(--hub-text)',
+              }}
+            >
+              <option value="">Select supplier*</option>
+              {suppliers.map((s) => (
+                <option key={s.id} value={s.id}>
+                  {s.name}
+                </option>
+              ))}
+            </select>
             <input
-              value={newSupplier}
-              onChange={(e) => setNewSupplier(e.target.value)}
-              placeholder="Supplier name"
+              value={newPoNumber}
+              onChange={(e) => setNewPoNumber(e.target.value)}
+              placeholder="PO number*"
+              className="w-full px-3 py-2 rounded-lg text-sm outline-none"
+              style={{
+                background: 'var(--hub-input-bg)',
+                border: '1px solid var(--hub-border)',
+                color: 'var(--hub-text)',
+              }}
+            />
+            <input
+              type="date"
+              value={newExpectedDelivery}
+              onChange={(e) => setNewExpectedDelivery(e.target.value)}
               className="w-full px-3 py-2 rounded-lg text-sm outline-none"
               style={{
                 background: 'var(--hub-input-bg)',
@@ -321,7 +363,7 @@ const Purchasing: React.FC = () => {
               </button>
               <button
                 onClick={handleCreatePO}
-                disabled={createMut.isPending || !newSupplier.trim()}
+                disabled={createMut.isPending || !newSupplierId || !newPoNumber.trim()}
                 className="px-3 py-2 rounded-lg text-xs font-semibold disabled:opacity-40"
                 style={{ background: AMBER, color: '#000' }}
               >

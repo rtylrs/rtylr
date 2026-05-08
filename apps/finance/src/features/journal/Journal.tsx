@@ -103,7 +103,10 @@ const Journal: React.FC = () => {
                   <div
                     style={{
                       fontSize: 11,
-                      color: debits === credits ? 'var(--hub-text-dim)' : '#ef4444',
+                      color:
+                        debits === credits
+                          ? 'var(--hub-text-dim)'
+                          : 'var(--finance-danger, #ef4444)',
                     }}
                   >
                     {debits === credits ? 'Balanced' : 'Out of balance'}

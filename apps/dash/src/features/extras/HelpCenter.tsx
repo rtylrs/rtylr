@@ -123,7 +123,8 @@ const HelpCenter: React.FC = () => {
           <a
             key={a.id}
             href={a.href}
-            className="flex items-start gap-3 px-4 py-3 no-underline transition-colors hover:bg-[var(--dash-hover)]"
+            onClick={(e) => e.preventDefault()}
+            className="flex items-start gap-3 px-4 py-3 no-underline transition-colors hover:bg-[var(--dash-hover)] cursor-not-allowed opacity-60"
             style={{ borderBottom: '1px solid var(--dash-border)' }}
           >
             <div className="flex-1 min-w-0">

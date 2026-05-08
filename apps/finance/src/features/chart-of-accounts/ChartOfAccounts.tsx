@@ -95,7 +95,7 @@ const ChartOfAccounts: React.FC = () => {
                 fontWeight: 500,
                 cursor: 'pointer',
                 background: filter === t ? ACCENT : 'transparent',
-                color: filter === t ? '#fff' : 'var(--hub-text-muted)',
+                color: filter === t ? 'var(--hub-bg, #fff)' : 'var(--hub-text-muted)',
                 textTransform: 'capitalize',
               }}
             >

@@ -58,6 +58,7 @@ const NewQuoteModal: React.FC<{ open: boolean; onClose: () => void }> = ({ open,
       },
       {
         onSuccess: () => {
+          toast.success('Quote created');
           onClose();
           setForm({
             client: '',
@@ -153,7 +154,10 @@ const Quotes: React.FC = () => {
   const [showCreate, setShowCreate] = useState(false);
 
   const handleConvert = (id: string): void => {
-    convertQuote.mutate(id);
+    convertQuote.mutate(id, {
+      onSuccess: () => toast.success('Quote converted to invoice'),
+      onError: () => toast.error('Failed to convert quote'),
+    });
   };
 
   const handleMarkAccepted = (id: string): void => {

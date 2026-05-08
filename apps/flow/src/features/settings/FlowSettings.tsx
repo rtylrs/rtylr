@@ -1173,7 +1173,7 @@ const PlaceholderSection: React.FC<{ id: string }> = ({ id }) => {
         {sections.find((s) => s.id === id)?.label}
       </p>
       <p className="text-[12px]" style={{ color: 'var(--flow-text-dim)' }}>
-        This section is coming soon.
+        This section is not yet available.
       </p>
     </div>
   );
