@@ -1,6 +1,7 @@
 import { unwrap } from '@voxire/api';
 import { z } from 'zod';
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
+import { toast } from 'sonner';
 import { safe } from '../lib/api';
 import type { TaxConfig, TaxReport, PLReport } from '../services/financeApi';
 import { taxConfigSchema, taxReportSchema, plReportSchema } from '../schemas/tax';
@@ -35,6 +36,7 @@ export function useCreateTaxConfig() {
       qc.invalidateQueries({ queryKey: ['tax-config'] });
       qc.invalidateQueries({ queryKey: ['tax-report'] });
     },
+    onError: () => toast.error('Failed to create tax config'),
   });
 }
 

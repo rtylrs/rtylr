@@ -1,6 +1,7 @@
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
 import { z } from 'zod';
 import { unwrap } from '@voxire/api';
+import { toast } from 'sonner';
 import {
   insightsService,
   InsightsSettingsPayload,
@@ -26,6 +27,7 @@ export function useUpdateInsightsSettings() {
     onSuccess: () => {
       qc.invalidateQueries({ queryKey: ['insights', 'settings'] });
     },
+    onError: () => toast.error('Failed to update settings'),
   });
 }
 
@@ -48,6 +50,7 @@ export function useCreateScheduledReport() {
     onSuccess: () => {
       qc.invalidateQueries({ queryKey: ['insights', 'scheduled-reports'] });
     },
+    onError: () => toast.error('Failed to create scheduled report'),
   });
 }
 
@@ -58,5 +61,6 @@ export function useDeleteScheduledReport() {
     onSuccess: () => {
       qc.invalidateQueries({ queryKey: ['insights', 'scheduled-reports'] });
     },
+    onError: () => toast.error('Failed to delete scheduled report'),
   });
 }

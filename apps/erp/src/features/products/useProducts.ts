@@ -1,6 +1,7 @@
 import { unwrap } from '@voxire/api';
 import { z } from 'zod';
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
+import { toast } from 'sonner';
 import {
   erpApi,
   CreateProductInput,
@@ -86,6 +87,7 @@ export function useCreateProduct() {
   return useMutation({
     mutationFn: (data: CreateProductInput) => unwrap(erpApi.createProduct(data)),
     onSuccess: () => qc.invalidateQueries({ queryKey: ['products'] }),
+    onError: () => toast.error('Failed to create product'),
   });
 }
 
@@ -99,6 +101,7 @@ export function useUpdateProduct() {
       qc.invalidateQueries({ queryKey: ['products'] });
       qc.invalidateQueries({ queryKey: ['product', variables.id] });
     },
+    onError: () => toast.error('Failed to update product'),
   });
 }
 
@@ -110,5 +113,6 @@ export function useDeleteProduct() {
       qc.invalidateQueries({ queryKey: ['products'] });
       qc.invalidateQueries({ queryKey: ['product', id] });
     },
+    onError: () => toast.error('Failed to delete product'),
   });
 }

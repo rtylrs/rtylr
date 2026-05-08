@@ -1,6 +1,7 @@
 import { unwrap } from '@voxire/api';
 import { z } from 'zod';
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
+import { toast } from 'sonner';
 import { erpApi, StockTransfer } from '../../shared/services/erpApi';
 import { stockTransferSchema } from '../../shared/schemas/stockTransfers';
 import { unwrapList } from '../../shared/lib/unwrapList';
@@ -22,5 +23,6 @@ export function useCreateStockTransfer() {
   return useMutation({
     mutationFn: (data: Partial<StockTransfer>) => unwrap(erpApi.createStockTransfer(data)),
     onSuccess: () => qc.invalidateQueries({ queryKey: ['stock-transfers'] }),
+    onError: () => toast.error('Failed to create stock transfer'),
   });
 }

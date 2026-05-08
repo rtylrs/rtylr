@@ -1,6 +1,7 @@
 import { unwrap } from '@voxire/api';
 import { z } from 'zod';
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
+import { toast } from 'sonner';
 import type { CreatePurchaseOrderRequest } from '@voxire/contracts/erp/v1/purchase_orders';
 import { erpApi, PurchaseOrder } from '../../shared/services/erpApi';
 import { purchaseOrderSchema } from '../../shared/schemas/purchaseOrders';
@@ -23,6 +24,7 @@ export function useCreatePurchaseOrder() {
   return useMutation({
     mutationFn: (data: CreatePurchaseOrderRequest) => unwrap(erpApi.createPurchaseOrder(data)),
     onSuccess: () => qc.invalidateQueries({ queryKey: ['purchase-orders'] }),
+    onError: () => toast.error('Failed to create purchase order'),
   });
 }
 
@@ -32,6 +34,7 @@ export function useUpdatePurchaseOrderStatus() {
     mutationFn: ({ id, status }: { id: number; status: string }) =>
       unwrap(erpApi.updatePurchaseOrderStatus(id, status)),
     onSuccess: () => qc.invalidateQueries({ queryKey: ['purchase-orders'] }),
+    onError: () => toast.error('Failed to update purchase order status'),
   });
 }
 
@@ -40,6 +43,7 @@ export function useApprovePurchaseOrder() {
   return useMutation({
     mutationFn: (id: number) => unwrap(erpApi.approvePurchaseOrder(id)),
     onSuccess: () => qc.invalidateQueries({ queryKey: ['purchase-orders'] }),
+    onError: () => toast.error('Failed to approve purchase order'),
   });
 }
 
@@ -52,5 +56,6 @@ export function useSendPurchaseOrder() {
     // swap the mutationFn here and the call sites stay unchanged.
     mutationFn: (id: number) => unwrap(erpApi.updatePurchaseOrderStatus(id, 'sent')),
     onSuccess: () => qc.invalidateQueries({ queryKey: ['purchase-orders'] }),
+    onError: () => toast.error('Failed to send purchase order'),
   });
 }

@@ -1,5 +1,6 @@
 import { unwrap } from '@voxire/api';
 import { useMutation, useQuery } from '@tanstack/react-query';
+import { toast } from 'sonner';
 import { safe } from '../../lib/api';
 import type { Customization, FormField, RecruitCareer, Section } from '../../lib/types';
 
@@ -67,6 +68,7 @@ export function useSubmitApplication() {
   return useMutation({
     mutationFn: (body: SubmitApplicationBody) =>
       unwrap(safe.post<SubmitApplicationResponse>('/recruit/public/apply', body)),
+    onError: () => toast.error('Failed to apply'),
   });
 }
 

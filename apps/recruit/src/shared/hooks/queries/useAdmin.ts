@@ -1,5 +1,6 @@
 import { unwrap } from '@voxire/api';
 import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query';
+import { toast } from 'sonner';
 import { safe } from '../../lib/api';
 import type { Customization, FormField, RecruitCareer, Section, Submission } from '../../lib/types';
 
@@ -44,6 +45,7 @@ export function useCreateCareer() {
     mutationFn: (body: CareerBody) =>
       unwrap(safe.post<CreateCareerResponse>('/recruit/careers', body)),
     onSuccess: () => qc.invalidateQueries({ queryKey: ['recruit', 'admin', 'careers'] }),
+    onError: () => toast.error('Failed to create career'),
   });
 }
 
@@ -53,6 +55,7 @@ export function useUpdateCareer() {
     mutationFn: (body: CareerBody) =>
       unwrap(safe.put<{ message: string }>('/recruit/careers', body)),
     onSuccess: () => qc.invalidateQueries({ queryKey: ['recruit', 'admin', 'careers'] }),
+    onError: () => toast.error('Failed to update career'),
   });
 }
 
@@ -62,6 +65,7 @@ export function useDeleteCareer() {
     mutationFn: (id: number) =>
       unwrap(safe.delete<{ message: string }>('/recruit/careers', { data: { id } })),
     onSuccess: () => qc.invalidateQueries({ queryKey: ['recruit', 'admin', 'careers'] }),
+    onError: () => toast.error('Failed to delete career'),
   });
 }
 
@@ -109,6 +113,7 @@ export function useUpsertCustomization() {
     mutationFn: (body: CustomizationBody) =>
       unwrap(safe.put<{ message: string }>('/recruit/customization', body)),
     onSuccess: () => qc.invalidateQueries({ queryKey: ['recruit', 'admin', 'customization'] }),
+    onError: () => toast.error('Failed to update customization'),
   });
 }
 
@@ -134,6 +139,7 @@ export function useUpdateSubmissionStatus() {
     mutationFn: (body: { id: number; status: string }) =>
       unwrap(safe.put<{ message: string }>('/recruit/submissions/status', body)),
     onSuccess: () => qc.invalidateQueries({ queryKey: ['recruit', 'admin', 'submissions'] }),
+    onError: () => toast.error('Failed to update submission status'),
   });
 }
 
@@ -184,6 +190,7 @@ export function useCreateSection() {
     mutationFn: (body: SectionBody) =>
       unwrap(safe.post<{ section: Section }>('/recruit/sections', body)),
     onSuccess: () => qc.invalidateQueries({ queryKey: ['recruit', 'admin', 'sections'] }),
+    onError: () => toast.error('Failed to create section'),
   });
 }
 
@@ -193,6 +200,7 @@ export function useUpdateSection() {
     mutationFn: (body: SectionBody) =>
       unwrap(safe.put<{ message: string }>('/recruit/sections', body)),
     onSuccess: () => qc.invalidateQueries({ queryKey: ['recruit', 'admin', 'sections'] }),
+    onError: () => toast.error('Failed to update section'),
   });
 }
 
@@ -202,6 +210,7 @@ export function useDeleteSection() {
     mutationFn: (id: number) =>
       unwrap(safe.delete<{ message: string }>('/recruit/sections', { data: { id } })),
     onSuccess: () => qc.invalidateQueries({ queryKey: ['recruit', 'admin', 'sections'] }),
+    onError: () => toast.error('Failed to delete section'),
   });
 }
 
@@ -211,6 +220,7 @@ export function useReorderSections() {
     mutationFn: (orderedIds: number[]) =>
       unwrap(safe.put<{ message: string }>('/recruit/sections/reorder', { orderedIds })),
     onSuccess: () => qc.invalidateQueries({ queryKey: ['recruit', 'admin', 'sections'] }),
+    onError: () => toast.error('Failed to reorder sections'),
   });
 }
 
@@ -251,6 +261,7 @@ export function useCreateFormField() {
       unwrap(safe.post<{ field: FormField }>('/recruit/form-fields', body)),
     onSuccess: (_, vars) =>
       qc.invalidateQueries({ queryKey: ['recruit', 'admin', 'form-fields', vars.careerId] }),
+    onError: () => toast.error('Failed to create form field'),
   });
 }
 
@@ -261,6 +272,7 @@ export function useUpdateFormField() {
       unwrap(safe.put<{ message: string }>('/recruit/form-fields', body)),
     onSuccess: (_, vars) =>
       qc.invalidateQueries({ queryKey: ['recruit', 'admin', 'form-fields', vars.careerId] }),
+    onError: () => toast.error('Failed to update form field'),
   });
 }
 
@@ -271,5 +283,6 @@ export function useDeleteFormField(careerId: number) {
       unwrap(safe.delete<{ message: string }>('/recruit/form-fields', { data: { id } })),
     onSuccess: () =>
       qc.invalidateQueries({ queryKey: ['recruit', 'admin', 'form-fields', careerId] }),
+    onError: () => toast.error('Failed to delete form field'),
   });
 }

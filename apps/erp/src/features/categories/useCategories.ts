@@ -1,6 +1,7 @@
 import { unwrap } from '@voxire/api';
 import { z } from 'zod';
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
+import { toast } from 'sonner';
 import { erpApi, Category } from '../../shared/services/erpApi';
 import { categorySchema } from '../../shared/schemas/categories';
 import { unwrapList } from '../../shared/lib/unwrapList';
@@ -20,6 +21,7 @@ export function useCreateCategory() {
   return useMutation({
     mutationFn: (data: Partial<Category>) => unwrap(erpApi.createCategory(data)),
     onSuccess: () => qc.invalidateQueries({ queryKey: ['categories'] }),
+    onError: () => toast.error('Failed to create category'),
   });
 }
 
@@ -28,6 +30,7 @@ export function useDeleteCategory() {
   return useMutation({
     mutationFn: (id: number) => unwrap(erpApi.deleteCategory(id)),
     onSuccess: () => qc.invalidateQueries({ queryKey: ['categories'] }),
+    onError: () => toast.error('Failed to delete category'),
   });
 }
 
@@ -37,5 +40,6 @@ export function useUpdateCategory() {
     mutationFn: (data: { id: number; name: string; description?: string }) =>
       unwrap(erpApi.updateCategory(data)),
     onSuccess: () => qc.invalidateQueries({ queryKey: ['categories'] }),
+    onError: () => toast.error('Failed to update category'),
   });
 }

@@ -1,6 +1,7 @@
 import { unwrap } from '@voxire/api';
 import { z } from 'zod';
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
+import { toast } from 'sonner';
 import { erpApi, PriceList } from '../../shared/services/erpApi';
 import { priceListSchema } from '../../shared/schemas/priceLists';
 import { unwrapList } from '../../shared/lib/unwrapList';
@@ -22,5 +23,6 @@ export function useCreatePriceList() {
   return useMutation({
     mutationFn: (data: Partial<PriceList>) => unwrap(erpApi.createPriceList(data)),
     onSuccess: () => qc.invalidateQueries({ queryKey: ['price-lists'] }),
+    onError: () => toast.error('Failed to create price list'),
   });
 }

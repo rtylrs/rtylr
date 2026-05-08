@@ -1,6 +1,7 @@
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
 import { z } from 'zod';
 import { unwrap } from '@voxire/api';
+import { toast } from 'sonner';
 import { insightsService } from '../../shared/services/insightsService';
 import { reportTemplateSchema } from '../../shared/schemas/reports';
 
@@ -19,6 +20,7 @@ export function useGenerateReport() {
   return useMutation({
     mutationFn: ({ templateId, params }: { templateId: string; params?: Record<string, string> }) =>
       unwrap(insightsService.generateReport(templateId, params)),
+    onError: () => toast.error('Failed to generate report'),
   });
 }
 
@@ -33,5 +35,6 @@ export function useExportReport() {
       format: 'csv' | 'pdf';
       params?: Record<string, string>;
     }) => unwrap(insightsService.exportReport(templateId, format, params)),
+    onError: () => toast.error('Failed to export report'),
   });
 }

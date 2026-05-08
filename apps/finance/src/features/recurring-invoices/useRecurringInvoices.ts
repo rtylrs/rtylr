@@ -1,6 +1,7 @@
 import { unwrap } from '@voxire/api';
 import { z } from 'zod';
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
+import { toast } from 'sonner';
 import { safe } from '../../shared/lib/api';
 import { recurringInvoiceSchema } from '../../shared/schemas/recurringInvoices';
 import { unwrapList } from '../../shared/lib/unwrapList';
@@ -32,6 +33,7 @@ export function useCreateRecurringInvoice() {
     onSuccess: () => {
       void qc.invalidateQueries({ queryKey: ['recurring-invoices'] });
     },
+    onError: () => toast.error('Failed to create recurring invoice'),
   });
 }
 
@@ -41,5 +43,6 @@ export function useSetRecurringStatus() {
     mutationFn: ({ id, status }: { id: string; status: 'active' | 'paused' }): Promise<void> =>
       unwrap(safe.put<void>(`/finance/recurring-invoices/${id}`, { status } as unknown as object)),
     onSuccess: () => qc.invalidateQueries({ queryKey: ['recurring-invoices'] }),
+    onError: () => toast.error('Failed to update recurring invoice status'),
   });
 }

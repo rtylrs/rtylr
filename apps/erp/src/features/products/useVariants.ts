@@ -1,6 +1,7 @@
 import { unwrap } from '@voxire/api';
 import { z } from 'zod';
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
+import { toast } from 'sonner';
 import { erpApi, ProductVariant } from '../../shared/services/erpApi';
 import { productVariantSchema } from '../../shared/schemas/products';
 import { unwrapList } from '../../shared/lib/unwrapList';
@@ -20,5 +21,6 @@ export function useCreateVariant() {
   return useMutation({
     mutationFn: (data: Partial<ProductVariant>) => unwrap(erpApi.createVariant(data)),
     onSuccess: () => qc.invalidateQueries({ queryKey: ['variants'] }),
+    onError: () => toast.error('Failed to create variant'),
   });
 }

@@ -1,6 +1,7 @@
 import { unwrap } from '@voxire/api';
 import { z } from 'zod';
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
+import { toast } from 'sonner';
 import {
   erpApi,
   CreateSupplierInput,
@@ -25,6 +26,7 @@ export function useCreateSupplier() {
   return useMutation({
     mutationFn: (data: CreateSupplierInput) => unwrap(erpApi.createSupplier(data)),
     onSuccess: () => qc.invalidateQueries({ queryKey: ['suppliers'] }),
+    onError: () => toast.error('Failed to create supplier'),
   });
 }
 
@@ -33,5 +35,6 @@ export function useUpdateSupplier() {
   return useMutation({
     mutationFn: (data: UpdateSupplierInput) => unwrap(erpApi.updateSupplier(data)),
     onSuccess: () => qc.invalidateQueries({ queryKey: ['suppliers'] }),
+    onError: () => toast.error('Failed to update supplier'),
   });
 }

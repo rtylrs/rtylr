@@ -1,6 +1,7 @@
 import { unwrap } from '@voxire/api';
 import { z } from 'zod';
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
+import { toast } from 'sonner';
 import { erpApi, InventoryReportItem, LowStockItem } from '../../shared/services/erpApi';
 import { inventoryReportItemSchema, lowStockItemSchema } from '../../shared/schemas/inventory';
 import { unwrapList } from '../../shared/lib/unwrapList';
@@ -39,5 +40,6 @@ export function useAdjustInventory() {
       qc.invalidateQueries({ queryKey: ['low-stock'] });
       qc.invalidateQueries({ queryKey: ['products'] });
     },
+    onError: () => toast.error('Failed to adjust inventory'),
   });
 }

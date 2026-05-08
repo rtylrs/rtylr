@@ -1,6 +1,7 @@
 import { unwrap } from '@voxire/api';
 import { z } from 'zod';
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
+import { toast } from 'sonner';
 import { safe } from '../../shared/lib/api';
 import type { Expense, ExpenseCategory } from '../../shared/services/financeApi';
 import { expenseSchema, expenseCategorySchema } from '../../shared/schemas/expenses';
@@ -34,6 +35,7 @@ export function useCreateExpense() {
     mutationFn: (data: Partial<Expense>): Promise<Expense> =>
       unwrap(safe.post<Expense>('/finance/expenses', data)),
     onSuccess: () => qc.invalidateQueries({ queryKey: ['expenses'] }),
+    onError: () => toast.error('Failed to create expense'),
   });
 }
 
@@ -43,6 +45,7 @@ export function useUpdateExpense() {
     mutationFn: ({ id, data }: { id: string; data: Partial<Expense> }): Promise<Expense> =>
       unwrap(safe.put<Expense>(`/finance/expenses/${id}`, data)),
     onSuccess: () => qc.invalidateQueries({ queryKey: ['expenses'] }),
+    onError: () => toast.error('Failed to update expense'),
   });
 }
 
@@ -51,6 +54,7 @@ export function useDeleteExpense() {
   return useMutation({
     mutationFn: (id: string): Promise<void> => unwrap(safe.delete<void>(`/finance/expenses/${id}`)),
     onSuccess: () => qc.invalidateQueries({ queryKey: ['expenses'] }),
+    onError: () => toast.error('Failed to delete expense'),
   });
 }
 
@@ -60,5 +64,6 @@ export function useCreateExpenseCategory() {
     mutationFn: (data: Partial<ExpenseCategory>): Promise<ExpenseCategory> =>
       unwrap(safe.post<ExpenseCategory>('/finance/expenses/categories', data)),
     onSuccess: () => qc.invalidateQueries({ queryKey: ['expense-categories'] }),
+    onError: () => toast.error('Failed to create expense category'),
   });
 }
