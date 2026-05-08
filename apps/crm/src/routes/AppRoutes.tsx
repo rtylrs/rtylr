@@ -1,4 +1,5 @@
 import React, { Suspense } from 'react';
+import { Navigate } from 'react-router-dom';
 import { FullScreenLoader } from '@voxire/components';
 import DefaultLayout from '../layouts/DefaultLayout';
 
@@ -94,6 +95,8 @@ const AppRoutes: AppRoute[] = [
       { path: 'sales/leads', element: lazy(<Leads />) },
       { path: 'sales/leads/:id', element: lazy(<LeadDetail />) },
       { path: 'sales/contracts', element: lazy(<SalesContracts />) },
+
+      { path: '*', element: <Navigate to="/" replace /> },
     ],
   },
 ];
