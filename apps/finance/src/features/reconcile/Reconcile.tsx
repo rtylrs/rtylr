@@ -6,6 +6,7 @@ import { unwrap } from '@voxire/api';
 import PageHeader from '../../shared/components/PageHeader';
 import MoneyDisplay from '../../shared/components/MoneyDisplay';
 import { useBankTransactions } from '../../shared/hooks/useBankAccounts';
+import { useListInvoices } from '../../shared/hooks/queries/useInvoices';
 import { cardStyle, ghostBtn, primaryBtn, ACCENT } from '../../shared/lib/tokens';
 import { financeApi } from '../../shared/services/financeApi';
 
@@ -15,10 +16,14 @@ interface Candidate {
   amount: number;
 }
 
-const CANDIDATES: Candidate[] = [];
-
 const Reconcile: React.FC = () => {
   const { data: transactions = [] } = useBankTransactions();
+  const { data: invoicesResp } = useListInvoices({ limit: 200, offset: 0, status: 'sent' });
+  const candidates: Candidate[] = (invoicesResp?.invoices ?? []).map((inv) => ({
+    id: String(inv.id),
+    label: `${inv.invoiceNumber} — ${inv.clientName}`,
+    amount: inv.total,
+  }));
   const [matches, setMatches] = useState<Record<string, string>>({});
 
   const unmatched = transactions.filter((t) => !t.matched && !matches[t.id ?? '']);
@@ -93,19 +98,21 @@ const Reconcile: React.FC = () => {
               </div>
             </div>
             <div style={{ display: 'flex', gap: 8, flexWrap: 'wrap' }}>
-              {CANDIDATES.filter(
-                (c) =>
-                  Math.abs(c.amount) === Math.abs(t.amount ?? 0) ||
-                  Math.abs(Math.abs(c.amount) - Math.abs(t.amount ?? 0)) < 500
-              ).map((c) => (
-                <button
-                  key={c.id}
-                  style={{ ...ghostBtn, padding: '6px 12px' }}
-                  onClick={() => match(t.id ?? '', c.id)}
-                >
-                  <Link2 size={12} /> {c.label}
-                </button>
-              ))}
+              {candidates
+                .filter(
+                  (c) =>
+                    Math.abs(c.amount) === Math.abs(t.amount ?? 0) ||
+                    Math.abs(Math.abs(c.amount) - Math.abs(t.amount ?? 0)) < 500
+                )
+                .map((c) => (
+                  <button
+                    key={c.id}
+                    style={{ ...ghostBtn, padding: '6px 12px' }}
+                    onClick={() => match(t.id ?? '', c.id)}
+                  >
+                    <Link2 size={12} /> {c.label}
+                  </button>
+                ))}
             </div>
           </div>
         ))}
