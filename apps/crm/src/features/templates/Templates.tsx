@@ -2,7 +2,7 @@ import React, { useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { toast } from 'sonner';
 import { FileText, Mail, MessageSquare, Plus, Copy } from 'lucide-react';
-import { useTemplates, useCreateTemplate } from './useTemplates';
+import { useTemplates, useCreateTemplate } from '../../shared/hooks/queries/useTemplates';
 import { PageHeader, Card, Button, EmptyState, SkeletonList } from '../../shared/components/ui';
 
 const Templates: React.FC = () => {

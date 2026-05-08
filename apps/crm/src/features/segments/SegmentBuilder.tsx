@@ -2,7 +2,7 @@ import React, { useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { toast } from 'sonner';
 import { Plus, Save } from 'lucide-react';
-import { useCreateSegment } from './useSegments';
+import { useCreateSegment } from '../../shared/hooks/queries/useSegments';
 import { Breadcrumbs, Button, Card, Input, Textarea, PageHeader } from '../../shared/components/ui';
 import { SegmentRuleRow } from '../../shared/components/crm';
 

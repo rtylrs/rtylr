@@ -3,7 +3,7 @@ import { useNavigate } from 'react-router-dom';
 import { toast } from 'sonner';
 import { Send, Save } from 'lucide-react';
 import { useCreateCampaign } from '../../shared/hooks/queries/useCampaigns';
-import { useSegments } from '../segments/useSegments';
+import { useListSegments } from '../../shared/hooks/queries/useSegments';
 import { useListCustomers } from '../../shared/hooks/queries/useCustomers';
 import { Breadcrumbs, Button, Card, Input, PageHeader, Select } from '../../shared/components/ui';
 import { SMSComposer, CustomerAvatar } from '../../shared/components/crm';
@@ -11,7 +11,7 @@ import { SMSComposer, CustomerAvatar } from '../../shared/components/crm';
 const SMSCampaign: React.FC = () => {
   const navigate = useNavigate();
   const create = useCreateCampaign();
-  const { data: fetchedSegments } = useSegments();
+  const { data: fetchedSegments } = useListSegments();
   const { data: fetchedCustomers } = useListCustomers({ limit: 200, offset: 0 });
   const segments = fetchedSegments ?? [];
   const customers = fetchedCustomers ?? [];

@@ -2,7 +2,7 @@ import React, { useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { toast } from 'sonner';
 import { Save, Plus, Zap, Mail, Clock, GitBranch, MessageSquare, Gift } from 'lucide-react';
-import { useCreateAutomation } from './useAutomations';
+import { useCreateAutomation } from '../../shared/hooks/queries/useAutomations';
 import { Breadcrumbs, Button, Card, Input, PageHeader } from '../../shared/components/ui';
 import { AutomationNode } from '../../shared/components/crm';
 

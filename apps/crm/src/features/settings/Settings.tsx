@@ -14,9 +14,9 @@ import {
 } from 'lucide-react';
 import { motion } from 'motion/react';
 import appConfig from '../../app.json';
-import { useSettings, useUpdateSettings } from './useSettings';
+import { useCrmSettings, useUpdateCrmSettings } from '../../shared/hooks/queries/useCrmSettings';
 import { PageHeader, Card, Input, Select, Button, ACCENT } from '../../shared/components/ui';
-import type { Settings } from '../../shared/services/crmApi';
+import type { Settings } from '../../shared/schemas/settings';
 import {
   useCrmTeam,
   useCrmInviteMember,
@@ -48,8 +48,8 @@ const TABS: TabDef[] = [
 // ── General Tab ───────────────────────────────────────────────────────────────
 
 const GeneralTab: React.FC = () => {
-  const { data: fetched } = useSettings();
-  const update = useUpdateSettings();
+  const { data: fetched } = useCrmSettings();
+  const update = useUpdateCrmSettings();
   const defaultSettings: Settings = {
     defaultConsent: true,
     timezone: 'America/Los_Angeles',

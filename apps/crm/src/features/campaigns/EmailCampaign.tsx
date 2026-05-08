@@ -3,8 +3,8 @@ import { useNavigate, useSearchParams } from 'react-router-dom';
 import { toast } from 'sonner';
 import { Send, Save, Eye } from 'lucide-react';
 import { useCreateCampaign } from '../../shared/hooks/queries/useCampaigns';
-import { useSegments } from '../segments/useSegments';
-import { useTemplates } from '../templates/useTemplates';
+import { useListSegments } from '../../shared/hooks/queries/useSegments';
+import { useTemplates } from '../../shared/hooks/queries/useTemplates';
 import { Breadcrumbs, Button, Card, Input, PageHeader, Select } from '../../shared/components/ui';
 import { EmailEditor } from '../../shared/components/crm';
 
@@ -12,7 +12,7 @@ const EmailCampaign: React.FC = () => {
   const navigate = useNavigate();
   const [searchParams] = useSearchParams();
   const create = useCreateCampaign();
-  const { data: fetchedSegments } = useSegments();
+  const { data: fetchedSegments } = useListSegments();
   const { data: fetchedTemplates } = useTemplates();
   const segments = fetchedSegments ?? [];
   const templates = (fetchedTemplates ?? []).filter((t) => t.channel === 'email');
