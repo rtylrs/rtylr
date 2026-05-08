@@ -22,6 +22,7 @@ export function useAddProjectMember(projectId: string) {
     mutationFn: (data: { project_id: number; user_id: number; role?: string }) =>
       unwrap(flowApi.addProjectMember(data)).then(() => {}),
     onSuccess: () => qc.invalidateQueries({ queryKey: ['project-members', projectId] }),
+    onError: () => toast.error('Failed to add member'),
   });
 }
 
@@ -31,6 +32,7 @@ export function useRemoveProjectMember(projectId: string) {
     mutationFn: (data: { project_id: number; user_id: number }) =>
       unwrap(flowApi.removeProjectMember(data)).then(() => {}),
     onSuccess: () => qc.invalidateQueries({ queryKey: ['project-members', projectId] }),
+    onError: () => toast.error('Failed to remove member'),
   });
 }
 
@@ -40,6 +42,7 @@ export function useUpdateProjectMemberRole(projectId: string) {
     mutationFn: (data: { project_id: number; user_id: number; role: string }) =>
       unwrap(flowApi.updateProjectMemberRole(data)).then(() => {}),
     onSuccess: () => qc.invalidateQueries({ queryKey: ['project-members', projectId] }),
+    onError: () => toast.error('Failed to update role'),
   });
 }
 
@@ -49,6 +52,7 @@ export function useTransferProjectOwnership() {
     mutationFn: (data: { project_id: number; new_owner_id: number }) =>
       unwrap(flowApi.transferProjectOwnership(data)).then(() => {}),
     onSuccess: () => qc.invalidateQueries({ queryKey: ['projects'] }),
+    onError: () => toast.error('Failed to transfer ownership'),
   });
 }
 

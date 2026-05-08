@@ -30,6 +30,9 @@ export const useCreateWebhook = () => {
       toast.success('Webhook created');
       qc.invalidateQueries({ queryKey: ['webhooks'] });
     },
+    onError: () => {
+      toast.error('Failed to create webhook');
+    },
   });
 };
 
@@ -43,6 +46,9 @@ export const useDeleteWebhook = () => {
     onSuccess: () => {
       toast.success('Webhook removed');
       qc.invalidateQueries({ queryKey: ['webhooks'] });
+    },
+    onError: () => {
+      toast.error('Failed to remove webhook');
     },
   });
 };

@@ -48,9 +48,17 @@ export const useMarkAllNotificationsRead = () => {
     },
     onMutate: async () => {
       await qc.cancelQueries({ queryKey: ['notifications'] });
+      const prev = qc.getQueryData<Notification[]>(['notifications']);
       qc.setQueryData<Notification[]>(['notifications'], (old) =>
         (old ?? []).map((n) => ({ ...n, read: true }))
       );
+      return { prev };
+    },
+    onError: (_err, _vars, ctx) => {
+      if (ctx?.prev) qc.setQueryData(['notifications'], ctx.prev);
+    },
+    onSettled: () => {
+      void qc.invalidateQueries({ queryKey: ['notifications'] });
     },
   });
 };

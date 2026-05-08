@@ -45,5 +45,6 @@ export const useRevokeApiKey = () => {
       toast.success('API key revoked');
       qc.invalidateQueries({ queryKey: ['api-keys'] });
     },
+    onError: () => toast.error('Failed to revoke API key'),
   });
 };

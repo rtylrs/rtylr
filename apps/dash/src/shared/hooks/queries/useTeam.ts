@@ -97,5 +97,6 @@ export const useDeactivateMember = () => {
       toast.success('Member deactivated');
       qc.invalidateQueries({ queryKey: ['team'] });
     },
+    onError: () => toast.error('Failed to deactivate member'),
   });
 };
