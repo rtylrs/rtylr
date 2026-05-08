@@ -1,4 +1,5 @@
 import React, { Suspense } from 'react';
+import { Navigate } from 'react-router-dom';
 import { FullScreenLoader } from '@voxire/components';
 import DefaultLayout from '../layouts/DefaultLayout';
 
@@ -82,6 +83,8 @@ const AppRoutes: AppRoute[] = [
       // Tax & settings
       { path: 'tax', element: lazy(<Tax />) },
       { path: 'settings', element: lazy(<Settings />) },
+
+      { path: '*', element: <Navigate to="/" replace /> },
     ],
   },
 ];
