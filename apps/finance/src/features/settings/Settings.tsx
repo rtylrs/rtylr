@@ -136,7 +136,9 @@ const GeneralTab: React.FC = () => {
               <button
                 type="button"
                 style={{ ...ghostBtn, padding: '8px 12px' }}
-                onClick={() => toast.info('Logo upload coming soon')}
+                disabled
+                title="Logo upload coming in a future update"
+                onClick={undefined}
                 aria-label="Upload logo"
               >
                 <ImageIcon size={13} />

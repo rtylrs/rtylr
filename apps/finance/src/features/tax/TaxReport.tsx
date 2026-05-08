@@ -1,7 +1,6 @@
 import React from 'react';
 import { motion } from 'motion/react';
 import { FileSpreadsheet, Download } from 'lucide-react';
-import { toast } from 'sonner';
 import PageHeader from '../../shared/components/PageHeader';
 import MoneyDisplay from '../../shared/components/MoneyDisplay';
 import { cardStyle, ghostBtn, ACCENT } from '../../shared/lib/tokens';
@@ -25,7 +24,7 @@ const TaxReport: React.FC = () => {
         title="Tax Summary"
         breadcrumbs={[{ label: 'Reports' }, { label: 'Tax' }]}
         actions={
-          <button style={ghostBtn} onClick={() => toast.info('Export coming soon')}>
+          <button style={ghostBtn} disabled title="Export coming in a future update">
             <Download size={13} /> Export
           </button>
         }
@@ -136,7 +135,8 @@ const TaxReport: React.FC = () => {
                     <td style={{ padding: '12px 16px' }}>
                       <button
                         style={{ ...ghostBtn, padding: '4px 10px' }}
-                        onClick={() => toast.info('Detail view coming soon')}
+                        disabled
+                        onClick={undefined}
                       >
                         <FileSpreadsheet size={12} /> View
                       </button>

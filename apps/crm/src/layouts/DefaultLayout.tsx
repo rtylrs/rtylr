@@ -1,7 +1,6 @@
 import React, { useEffect, useRef, useState } from 'react';
 import TrialBanner from '../shared/components/TrialBanner';
 import { useLocation, useNavigate, Link, Outlet } from 'react-router-dom';
-import { toast } from 'sonner';
 import { motion, AnimatePresence } from 'motion/react';
 import { APP_URLS } from '@voxire/config';
 import { removeCookie, getDefaultCookieDomain, useUserStore } from '@voxire/auth';
@@ -593,7 +592,7 @@ const DefaultLayout: React.FC = () => {
                 </button>
                 <button
                   aria-label="Notifications"
-                  onClick={() => toast.info('Notifications coming soon')}
+                  onClick={undefined}
                   style={{
                     height: '28px',
                     width: '28px',

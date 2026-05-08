@@ -102,7 +102,7 @@ const ThemeCustomizer: React.FC = () => {
                 onChange={(e) => setLogoUrl(e.target.value)}
                 placeholder="https://..."
               />
-              <Button variant="secondary" onClick={() => toast.info('Upload coming soon')}>
+              <Button variant="secondary" disabled title="Logo upload coming in a future update">
                 <Upload size={13} />
                 Upload
               </Button>

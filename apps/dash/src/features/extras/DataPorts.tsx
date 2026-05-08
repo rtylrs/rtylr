@@ -105,12 +105,7 @@ export const DataImport: React.FC = () => {
             <p className="text-xs mt-1" style={{ color: 'var(--dash-text-muted)' }}>
               {src.description}
             </p>
-            <Button
-              className="mt-3 w-full"
-              variant="secondary"
-              size="sm"
-              onClick={() => toast.info(`${src.name} import coming soon`)}
-            >
+            <Button className="mt-3 w-full" variant="secondary" size="sm" disabled>
               Start import
             </Button>
           </div>

@@ -1,6 +1,5 @@
 import React, { useState } from 'react';
 import { Bell, BellRing } from 'lucide-react';
-import { toast } from 'sonner';
 import { cardStyle, ACCENT, ghostBtn } from '../lib/tokens';
 
 const DEFAULT_SCHEDULE = [
@@ -62,7 +61,9 @@ const PaymentReminderPanel: React.FC = () => {
       ))}
       <button
         style={{ ...ghostBtn, marginTop: 14 }}
-        onClick={() => toast.info('Payment reminder settings coming soon')}
+        disabled
+        title="Reminder schedule coming in a future update"
+        onClick={undefined}
       >
         Save schedule
       </button>

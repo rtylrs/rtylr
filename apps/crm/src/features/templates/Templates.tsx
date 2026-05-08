@@ -54,7 +54,14 @@ const Templates: React.FC = () => {
     }
   };
 
-  const duplicate = (_name: string) => toast.info('Duplicate coming soon');
+  const duplicate = (t: (typeof templates)[number]): void => {
+    setNewName(`Copy of ${t.name}`);
+    setNewChannel(t.channel as 'email' | 'sms');
+    setNewSubject(t.subject ?? '');
+    setNewBody(t.body);
+    setNewCategory(t.category);
+    setShowCreate(true);
+  };
 
   return (
     <div style={{ maxWidth: '1100px' }}>
@@ -195,7 +202,7 @@ const Templates: React.FC = () => {
                   <Button
                     variant="outline"
                     style={{ flex: 1, justifyContent: 'center', padding: '6px' }}
-                    onClick={() => duplicate(t.name)}
+                    onClick={() => duplicate(t)}
                   >
                     <Copy size={11} /> Duplicate
                   </Button>

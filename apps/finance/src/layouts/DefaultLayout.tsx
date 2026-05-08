@@ -31,7 +31,6 @@ import {
   FileCheck,
 } from 'lucide-react';
 import GlobalSearch from '../shared/components/GlobalSearch';
-import { toast } from 'sonner';
 
 const ACCENT = 'var(--finance-accent, #10b981)';
 
@@ -444,7 +443,7 @@ const DefaultLayout: React.FC = () => {
                   <SearchIcon size={14} />
                 </button>
                 <button
-                  onClick={() => toast.info('Notifications coming soon')}
+                  onClick={undefined}
                   aria-label="Notifications"
                   style={{
                     height: 28,

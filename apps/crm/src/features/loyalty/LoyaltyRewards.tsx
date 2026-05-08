@@ -1,12 +1,166 @@
-import React from 'react';
-import { Gift, Package } from 'lucide-react';
-import { toast } from 'sonner';
-import { useLoyaltyRewards } from '../../shared/hooks/queries/useLoyalty';
+import React, { useState } from 'react';
+import { Gift, Package, Plus, X } from 'lucide-react';
+import { useLoyaltyRewards, useUpsertReward } from '../../shared/hooks/queries/useLoyalty';
 import { PageHeader, Card, EmptyState, Button, SkeletonList } from '../../shared/components/ui';
+
+interface RewardForm {
+  name: string;
+  description: string;
+  pointsCost: number;
+  stock: number;
+  category: string;
+}
+
+const AddRewardModal: React.FC<{ onClose: () => void }> = ({ onClose }) => {
+  const upsert = useUpsertReward();
+  const [form, setForm] = useState<RewardForm>({
+    name: '',
+    description: '',
+    pointsCost: 100,
+    stock: 10,
+    category: 'general',
+  });
+
+  const handleSubmit = (): void => {
+    if (!form.name.trim()) return;
+    upsert.mutate({ data: { ...form, active: true } }, { onSuccess: () => onClose() });
+  };
+
+  const inputStyle: React.CSSProperties = {
+    padding: '8px 12px',
+    borderRadius: '8px',
+    border: '1px solid var(--hub-border)',
+    background: 'var(--hub-input-bg, var(--hub-card))',
+    color: 'var(--hub-text)',
+    fontSize: '13px',
+    outline: 'none',
+    width: '100%',
+    boxSizing: 'border-box',
+  };
+
+  return (
+    <div
+      style={{
+        position: 'fixed',
+        inset: 0,
+        background: 'rgba(0,0,0,0.5)',
+        display: 'flex',
+        alignItems: 'center',
+        justifyContent: 'center',
+        zIndex: 9999,
+      }}
+      onClick={(e) => {
+        if (e.target === e.currentTarget) onClose();
+      }}
+    >
+      <div
+        style={{
+          background: 'var(--hub-card)',
+          border: '1px solid var(--hub-border)',
+          borderRadius: '16px',
+          padding: '24px',
+          width: '420px',
+          display: 'flex',
+          flexDirection: 'column',
+          gap: '12px',
+        }}
+      >
+        <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between' }}>
+          <h3 style={{ fontSize: '15px', fontWeight: 700, color: 'var(--hub-text)', margin: 0 }}>
+            New reward
+          </h3>
+          <button
+            aria-label="Close"
+            onClick={onClose}
+            style={{
+              background: 'none',
+              border: 'none',
+              cursor: 'pointer',
+              color: 'var(--hub-text-muted)',
+            }}
+          >
+            <X size={16} />
+          </button>
+        </div>
+        <input
+          placeholder="Reward name"
+          value={form.name}
+          onChange={(e) => setForm((f) => ({ ...f, name: e.target.value }))}
+          style={inputStyle}
+        />
+        <input
+          placeholder="Description"
+          value={form.description}
+          onChange={(e) => setForm((f) => ({ ...f, description: e.target.value }))}
+          style={inputStyle}
+        />
+        <input
+          placeholder="Category (e.g. discount, freebie)"
+          value={form.category}
+          onChange={(e) => setForm((f) => ({ ...f, category: e.target.value }))}
+          style={inputStyle}
+        />
+        <div style={{ display: 'flex', gap: '8px' }}>
+          <div style={{ flex: 1 }}>
+            <label
+              style={{
+                fontSize: '11px',
+                color: 'var(--hub-text-muted)',
+                display: 'block',
+                marginBottom: '4px',
+              }}
+            >
+              Points cost
+            </label>
+            <input
+              type="number"
+              min={1}
+              value={form.pointsCost}
+              onChange={(e) => setForm((f) => ({ ...f, pointsCost: Number(e.target.value) }))}
+              style={inputStyle}
+            />
+          </div>
+          <div style={{ flex: 1 }}>
+            <label
+              style={{
+                fontSize: '11px',
+                color: 'var(--hub-text-muted)',
+                display: 'block',
+                marginBottom: '4px',
+              }}
+            >
+              Stock
+            </label>
+            <input
+              type="number"
+              min={0}
+              value={form.stock}
+              onChange={(e) => setForm((f) => ({ ...f, stock: Number(e.target.value) }))}
+              style={inputStyle}
+            />
+          </div>
+        </div>
+        <div style={{ display: 'flex', gap: '8px', justifyContent: 'flex-end' }}>
+          <Button variant="outline" onClick={onClose}>
+            Cancel
+          </Button>
+          <Button
+            variant="primary"
+            onClick={handleSubmit}
+            disabled={upsert.isPending || !form.name.trim()}
+          >
+            {upsert.isPending ? 'Saving…' : 'Create reward'}
+          </Button>
+        </div>
+      </div>
+    </div>
+  );
+};
 
 const LoyaltyRewards: React.FC = () => {
   const { data: fetched, isLoading } = useLoyaltyRewards();
   const rewards = fetched ?? [];
+  const [showAdd, setShowAdd] = useState(false);
 
   return (
     <div style={{ maxWidth: '1100px' }}>
@@ -14,15 +168,14 @@ const LoyaltyRewards: React.FC = () => {
         title="Rewards catalog"
         subtitle="What customers can redeem their points for"
         actions={
-          <Button
-            variant="primary"
-            aria-label="Add reward"
-            onClick={() => toast.info('Reward management coming soon')}
-          >
+          <Button variant="primary" aria-label="Add reward" onClick={() => setShowAdd(true)}>
+            <Plus size={13} />
             Add reward
           </Button>
         }
       />
+
+      {showAdd && <AddRewardModal onClose={() => setShowAdd(false)} />}
 
       {isLoading ? (
         <Card>
@@ -89,7 +242,9 @@ const LoyaltyRewards: React.FC = () => {
                   borderTop: '1px solid var(--hub-border)',
                 }}
               >
-                <span style={{ fontSize: '16px', fontWeight: 700, color: '#3b82f6' }}>
+                <span
+                  style={{ fontSize: '16px', fontWeight: 700, color: 'var(--crm-accent, #3b82f6)' }}
+                >
                   {r.pointsCost.toLocaleString()} pts
                 </span>
                 <span

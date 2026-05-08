@@ -547,7 +547,8 @@ const ProjectSettings: React.FC = () => {
                 <button
                   className="text-[11px] px-2 py-1 rounded hover:bg-[var(--flow-hover)]"
                   style={{ color: 'var(--flow-text-muted)' }}
-                  onClick={() => toast.info('Integration setup coming soon')}
+                  disabled
+                  onClick={undefined}
                 >
                   Connect
                 </button>

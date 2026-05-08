@@ -3,7 +3,6 @@ import { Plus } from 'lucide-react';
 import { Button } from '../../shared/components/ui';
 import { Breadcrumbs, SkeletonGrid } from '../../shared/components/dash';
 import { useCustomRoles } from '../../shared/hooks/queries/usePermissions';
-import { toast } from 'sonner';
 
 const Roles: React.FC = () => {
   const { data = [], isLoading } = useCustomRoles();
@@ -19,7 +18,7 @@ const Roles: React.FC = () => {
             Build purpose-built roles for your business. Assign them to members in Team.
           </p>
         </div>
-        <Button onClick={() => toast.info('Role builder coming soon')}>
+        <Button disabled title="Custom role builder coming in a future update">
           <Plus size={14} />
           New role
         </Button>

@@ -1,7 +1,6 @@
 import React from 'react';
 import { motion } from 'motion/react';
 import { Plus, Tag } from 'lucide-react';
-import { toast } from 'sonner';
 import PageHeader from '../../shared/components/PageHeader';
 import MoneyDisplay from '../../shared/components/MoneyDisplay';
 import EmptyState from '../../shared/components/EmptyState';
@@ -22,7 +21,7 @@ const Categories: React.FC = () => {
         title="Expense Categories"
         subtitle={`${data.length} categories`}
         actions={
-          <button style={primaryBtn} onClick={() => toast.info('Create category coming soon')}>
+          <button style={primaryBtn} disabled title="Category management coming in a future update">
             <Plus size={13} /> New Category
           </button>
         }

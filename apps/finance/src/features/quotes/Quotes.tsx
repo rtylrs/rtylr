@@ -1,4 +1,4 @@
-import React from 'react';
+import React, { useState } from 'react';
 import { motion } from 'motion/react';
 import { Plus, ArrowRight, CheckCircle } from 'lucide-react';
 import { toast } from 'sonner';
@@ -7,21 +7,161 @@ import PageHeader from '../../shared/components/PageHeader';
 import MoneyDisplay from '../../shared/components/MoneyDisplay';
 import EmptyState from '../../shared/components/EmptyState';
 import { SkeletonRow } from '../../shared/components/Skeleton';
-import { useQuotes } from './useQuotes';
-import { cardStyle, ghostBtn, primaryBtn } from '../../shared/lib/tokens';
+import Modal from '../../shared/components/Modal';
+import CurrencyInput from '../../shared/components/CurrencyInput';
+import { useQuotes, useCreateQuote, useConvertQuote, useUpdateQuoteStatus } from './useQuotes';
+import { cardStyle, ghostBtn, primaryBtn, inputStyle, labelStyle } from '../../shared/lib/tokens';
 
 const STATUS_STYLE: Record<string, React.CSSProperties> = {
-  Draft: { background: 'rgba(113,113,122,0.15)', color: '#a1a1aa' },
-  Sent: { background: 'rgba(59,130,246,0.12)', color: '#3b82f6' },
-  Accepted: { background: 'rgba(16,185,129,0.12)', color: '#10b981' },
-  Declined: { background: 'rgba(239,68,68,0.12)', color: '#ef4444' },
-  Expired: { background: 'rgba(245,158,11,0.12)', color: '#f59e0b' },
+  Draft: { background: 'rgba(113,113,122,0.15)', color: 'var(--finance-text-dim, #a1a1aa)' },
+  Sent: { background: 'rgba(59,130,246,0.12)', color: 'var(--finance-accent-blue, #3b82f6)' },
+  Accepted: { background: 'rgba(16,185,129,0.12)', color: 'var(--finance-accent, #10b981)' },
+  Declined: { background: 'rgba(239,68,68,0.12)', color: 'var(--finance-danger, #ef4444)' },
+  Expired: { background: 'rgba(245,158,11,0.12)', color: 'var(--finance-warning, #f59e0b)' },
+};
+
+interface NewQuoteForm {
+  client: string;
+  amount: number;
+  issuedDate: string;
+  expiresAt: string;
+  description: string;
+}
+
+const NewQuoteModal: React.FC<{ open: boolean; onClose: () => void }> = ({ open, onClose }) => {
+  const createQuote = useCreateQuote();
+  const [form, setForm] = useState<NewQuoteForm>({
+    client: '',
+    amount: 0,
+    issuedDate: new Date().toISOString().slice(0, 10),
+    expiresAt: new Date(Date.now() + 30 * 86400000).toISOString().slice(0, 10),
+    description: '',
+  });
+
+  const handleSubmit = (): void => {
+    if (!form.client.trim()) {
+      toast.error('Client name is required');
+      return;
+    }
+    if (form.amount <= 0) {
+      toast.error('Amount must be greater than zero');
+      return;
+    }
+    createQuote.mutate(
+      {
+        client: form.client,
+        amount: form.amount,
+        currency: 'USD',
+        issuedDate: form.issuedDate,
+        expiresAt: form.expiresAt,
+        description: form.description || undefined,
+      },
+      {
+        onSuccess: () => {
+          onClose();
+          setForm({
+            client: '',
+            amount: 0,
+            issuedDate: new Date().toISOString().slice(0, 10),
+            expiresAt: new Date(Date.now() + 30 * 86400000).toISOString().slice(0, 10),
+            description: '',
+          });
+        },
+      }
+    );
+  };
+
+  return (
+    <Modal
+      open={open}
+      onClose={onClose}
+      title="New Quote"
+      width={440}
+      footer={
+        <>
+          <button style={ghostBtn} onClick={onClose} disabled={createQuote.isPending}>
+            Cancel
+          </button>
+          <button
+            style={{ ...primaryBtn, opacity: createQuote.isPending ? 0.6 : 1 }}
+            onClick={handleSubmit}
+            disabled={createQuote.isPending}
+          >
+            <CheckCircle size={13} />
+            {createQuote.isPending ? 'Saving…' : 'Create Quote'}
+          </button>
+        </>
+      }
+    >
+      <div style={{ display: 'flex', flexDirection: 'column', gap: 12 }}>
+        <div style={{ display: 'flex', flexDirection: 'column', gap: 6 }}>
+          <label style={labelStyle}>Client</label>
+          <input
+            value={form.client}
+            onChange={(e) => setForm((f) => ({ ...f, client: e.target.value }))}
+            placeholder="Client or company name"
+            style={inputStyle}
+          />
+        </div>
+        <div style={{ display: 'flex', flexDirection: 'column', gap: 6 }}>
+          <label style={labelStyle}>Amount</label>
+          <CurrencyInput
+            value={form.amount}
+            onChange={(v) => setForm((f) => ({ ...f, amount: v }))}
+          />
+        </div>
+        <div style={{ display: 'flex', gap: 12 }}>
+          <div style={{ flex: 1, display: 'flex', flexDirection: 'column', gap: 6 }}>
+            <label style={labelStyle}>Issue Date</label>
+            <input
+              type="date"
+              value={form.issuedDate}
+              onChange={(e) => setForm((f) => ({ ...f, issuedDate: e.target.value }))}
+              style={inputStyle}
+            />
+          </div>
+          <div style={{ flex: 1, display: 'flex', flexDirection: 'column', gap: 6 }}>
+            <label style={labelStyle}>Expires</label>
+            <input
+              type="date"
+              value={form.expiresAt}
+              onChange={(e) => setForm((f) => ({ ...f, expiresAt: e.target.value }))}
+              style={inputStyle}
+            />
+          </div>
+        </div>
+        <div style={{ display: 'flex', flexDirection: 'column', gap: 6 }}>
+          <label style={labelStyle}>Description</label>
+          <input
+            value={form.description}
+            onChange={(e) => setForm((f) => ({ ...f, description: e.target.value }))}
+            placeholder="Optional notes"
+            style={inputStyle}
+          />
+        </div>
+      </div>
+    </Modal>
+  );
 };
 
 const Quotes: React.FC = () => {
   const { t } = useTranslation();
   const { data = [], isLoading } = useQuotes();
+  const convertQuote = useConvertQuote();
+  const updateStatus = useUpdateQuoteStatus();
   const total = data.reduce((s: number, q) => s + (q.amount ?? 0), 0);
+  const [showCreate, setShowCreate] = useState(false);
+
+  const handleConvert = (id: string): void => {
+    convertQuote.mutate(id);
+  };
+
+  const handleMarkAccepted = (id: string): void => {
+    updateStatus.mutate(
+      { id, status: 'accepted' },
+      { onSuccess: () => toast.success('Quote marked as accepted') }
+    );
+  };
 
   return (
     <motion.div
@@ -37,15 +177,13 @@ const Quotes: React.FC = () => {
           </>
         }
         actions={
-          <button
-            style={primaryBtn}
-            aria-label="New Quote"
-            onClick={() => toast.info('Create quote coming soon')}
-          >
+          <button style={primaryBtn} aria-label="New Quote" onClick={() => setShowCreate(true)}>
             <Plus size={13} /> New Quote
           </button>
         }
       />
+
+      <NewQuoteModal open={showCreate} onClose={() => setShowCreate(false)} />
 
       {isLoading ? (
         <div style={{ ...cardStyle, padding: 20 }}>
@@ -98,7 +236,7 @@ const Quotes: React.FC = () => {
                     {q.client}
                   </td>
                   <td style={{ padding: '12px 16px', fontSize: 13, fontWeight: 600 }}>
-                    <MoneyDisplay amount={q.amount} />
+                    <MoneyDisplay amount={q.amount ?? 0} />
                   </td>
                   <td style={{ padding: '12px 16px' }}>
                     <span
@@ -130,18 +268,25 @@ const Quotes: React.FC = () => {
                           ...ghostBtn,
                           padding: '4px 10px',
                           color: 'var(--finance-accent, #10b981)',
-                          borderColor: 'var(--finance-accent-border, rgba(16,185,129,0.3))',
+                          borderColor: 'rgba(16,185,129,0.3)',
+                          opacity: convertQuote.isPending ? 0.6 : 1,
                         }}
                         aria-label={`Convert quote ${q.id} to invoice`}
-                        onClick={() => toast.info('Convert to invoice coming soon')}
+                        onClick={() => handleConvert(q.id)}
+                        disabled={convertQuote.isPending}
                       >
                         <ArrowRight size={12} /> Convert
                       </button>
                     ) : q.status === 'Sent' ? (
                       <button
-                        style={{ ...ghostBtn, padding: '4px 10px' }}
+                        style={{
+                          ...ghostBtn,
+                          padding: '4px 10px',
+                          opacity: updateStatus.isPending ? 0.6 : 1,
+                        }}
                         aria-label={`Mark quote ${q.id} as accepted`}
-                        onClick={() => toast.info('Mark accepted coming soon')}
+                        onClick={() => handleMarkAccepted(q.id)}
+                        disabled={updateStatus.isPending}
                       >
                         <CheckCircle size={12} /> Mark Accepted
                       </button>

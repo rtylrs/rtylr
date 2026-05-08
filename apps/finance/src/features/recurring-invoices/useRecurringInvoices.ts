@@ -15,6 +15,26 @@ export function useRecurringInvoices() {
   });
 }
 
+interface CreateRecurringPayload {
+  client: string;
+  amount: number;
+  currency: string;
+  cadence: string;
+  startDate: string;
+  description?: string;
+}
+
+export function useCreateRecurringInvoice() {
+  const qc = useQueryClient();
+  return useMutation({
+    mutationFn: (data: CreateRecurringPayload): Promise<unknown> =>
+      unwrap(safe.post('/finance/recurring-invoices', data as unknown as object)),
+    onSuccess: () => {
+      void qc.invalidateQueries({ queryKey: ['recurring-invoices'] });
+    },
+  });
+}
+
 export function useSetRecurringStatus() {
   const qc = useQueryClient();
   return useMutation({
