@@ -1,5 +1,6 @@
 import React from 'react';
 import { useState, useRef, useEffect } from 'react';
+import { toast } from 'sonner';
 import { QRCode } from 'react-qrcode-logo';
 import html2canvas from 'html2canvas';
 import { saveAs } from 'file-saver';
@@ -30,7 +31,7 @@ function QrCode() {
 
   const handleDownload = async () => {
     if (qrOptions.logoImage && !isLogoLoaded) {
-      alert('Please wait for the logo to load before downloading.');
+      toast.error('Please wait for the logo to load before downloading.');
       return;
     }
 
@@ -46,7 +47,7 @@ function QrCode() {
       img.src = user?.logo ?? '';
       img.onload = () => setIsLogoLoaded(true);
       img.onerror = () => {
-        alert('Failed to load logo image.');
+        toast.error('Failed to load logo image.');
         setIsLogoLoaded(false);
       };
     } else {

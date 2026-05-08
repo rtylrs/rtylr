@@ -1,6 +1,7 @@
 import { useState, useEffect, type FormEvent } from 'react';
 import * as Dialog from '@radix-ui/react-dialog';
 import { X } from 'lucide-react';
+import { toast } from 'sonner';
 import { useMenuStore } from '../../../shared/stores/menuStore';
 import { useUserStore } from '../../../shared/stores/userStore';
 
@@ -58,7 +59,7 @@ const CreateParentCategoryModal: React.FC<CreateParentCategoryModalProps> = ({
       setIconURL('');
       onClose();
     } else {
-      alert('Category name cannot be empty.');
+      toast.error('Category name cannot be empty.');
     }
   };
 
