@@ -4,24 +4,24 @@ Shared frontend packages for the voxire platform. Used as a git submodule in `vo
 
 ## Packages
 
-| Package | Description |
-|---|---|
-| `@voxire/api` | API client, realtime WebSocket, result helpers |
-| `@voxire/assets` | Icons, global SCSS variables |
-| `@voxire/auth` | Auth store, route guards, cookie helpers |
-| `@voxire/caret` | Caret AI chat components and hooks |
-| `@voxire/components` | Core UI component library |
-| `@voxire/config` | App config, feature flags, app guards |
-| `@voxire/consent` | Cookie consent banner and `useConsent` hook |
-| `@voxire/contracts` | Shared TypeScript types for all API contracts |
-| `@voxire/i18n` | i18next setup and language definitions |
-| `@voxire/menu` | Public digital menu components and layouts |
-| `@voxire/observability` | Sentry + PostHog boot helpers |
-| `@voxire/permissions` | Role/capability matrix and guards |
-| `@voxire/tailwind-config` | Shared Tailwind configuration |
-| `@voxire/types` | Shared domain types (business, user, etc.) |
-| `@voxire/ui` | Headless UI primitives (shadcn-based) |
-| `@voxire/utils` | Formatting, validation, and common hooks |
+| Package                   | Description                                    |
+| ------------------------- | ---------------------------------------------- |
+| `@voxire/api`             | API client, realtime WebSocket, result helpers |
+| `@voxire/assets`          | Icons, global SCSS variables                   |
+| `@voxire/auth`            | Auth store, route guards, cookie helpers       |
+| `@voxire/caret`           | Caret AI chat components and hooks             |
+| `@voxire/components`      | Core UI component library                      |
+| `@voxire/config`          | App config, feature flags, app guards          |
+| `@voxire/consent`         | Cookie consent banner and `useConsent` hook    |
+| `@voxire/contracts`       | Shared TypeScript types for all API contracts  |
+| `@voxire/i18n`            | i18next setup and language definitions         |
+| `@voxire/menu`            | Public digital menu components and layouts     |
+| `@voxire/observability`   | Sentry + PostHog boot helpers                  |
+| `@voxire/permissions`     | Role/capability matrix and guards              |
+| `@voxire/tailwind-config` | Shared Tailwind configuration                  |
+| `@voxire/types`           | Shared domain types (business, user, etc.)     |
+| `@voxire/ui`              | Headless UI primitives (shadcn-based)          |
+| `@voxire/utils`           | Formatting, validation, and common hooks       |
 
 ## Usage
 
