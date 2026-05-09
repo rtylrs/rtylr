@@ -132,6 +132,7 @@ import (
 	"github.com/voxire/onion/internal/modules/user"
 	"github.com/voxire/onion/internal/modules/variants"
 	"github.com/voxire/onion/internal/modules/views"
+	"github.com/voxire/onion/internal/modules/voxhire"
 	"github.com/voxire/onion/internal/modules/warehouses"
 	"github.com/voxire/onion/internal/modules/webhooks"
 	"github.com/voxire/onion/internal/modules/websitelead"
@@ -141,6 +142,7 @@ import (
 	"github.com/voxire/onion/internal/platform/database/dbclient"
 	emailPkg "github.com/voxire/onion/internal/platform/email"
 	"github.com/voxire/onion/internal/platform/logger"
+	sheetsPkg "github.com/voxire/onion/internal/platform/sheets"
 	"github.com/voxire/onion/internal/platform/observability"
 	"github.com/voxire/onion/internal/platform/server/http"
 	"github.com/voxire/onion/internal/platform/utils/jwtutils"
@@ -282,6 +284,7 @@ func run(ctx context.Context) error {
 	}
 
 	emailPkg.Initialize()
+	sheetsPkg.Initialize(ctx)
 
 	readyTime := time.Now()
 	startupDuration := readyTime.Sub(startTime)
@@ -418,6 +421,7 @@ type apiModules struct {
 	User                 *user.Module
 	Variants             *variants.Module
 	Views                *views.Module
+	Voxhire              *voxhire.Module
 	Warehouses           *warehouses.Module
 	Webhooks             *webhooks.Module
 	WebsiteLead          *websitelead.Module
@@ -549,6 +553,7 @@ func initializeModules(ctx context.Context) *apiModules {
 		User:                 user.NewModule(ctx),
 		Variants:             variants.NewModule(ctx),
 		Views:                views.NewModule(ctx),
+		Voxhire:              voxhire.NewModule(ctx),
 		Warehouses:           warehouses.NewModule(ctx),
 		Webhooks:             webhooks.NewModule(ctx),
 		WebsiteLead:          websitelead.NewModule(ctx),
