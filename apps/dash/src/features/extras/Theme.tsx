@@ -1,6 +1,6 @@
 import React, { useState } from 'react';
 import { Palette, Upload } from 'lucide-react';
-import { toast } from 'sonner';
+import { useNavigate } from 'react-router-dom';
 import { Button, Input, Label } from '../../shared/components/ui';
 import { Breadcrumbs, SettingSection } from '../../shared/components/dash';
 
@@ -16,6 +16,7 @@ const COLORS = [
 ];
 
 const ThemeCustomizer: React.FC = () => {
+  const navigate = useNavigate();
   const [accent, setAccent] = useState('#4583C4');
   const [brandName, setBrandName] = useState('My Business');
   const [logoUrl, setLogoUrl] = useState('');
@@ -43,8 +44,8 @@ const ThemeCustomizer: React.FC = () => {
         title="Accent color"
         description="Applied to primary buttons, links, and highlights."
         footer={
-          <Button size="sm" onClick={() => toast.success('Theme saved')}>
-            Save theme
+          <Button size="sm" onClick={() => navigate('/design')}>
+            Open full design editor
           </Button>
         }
       >
