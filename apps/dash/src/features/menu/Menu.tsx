@@ -100,7 +100,7 @@ const Menu: React.FC<{}> = () => {
             <button
               className="px-3 py-1.5 text-sm bg-accent text-white rounded-lg hover:opacity-90 transition-opacity"
               onClick={() => {
-                navigate('/app/business/create-item', {
+                navigate('/create-item', {
                   state: { categoryId: category.itemId },
                 });
               }}
