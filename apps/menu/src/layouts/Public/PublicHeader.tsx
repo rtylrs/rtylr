@@ -96,12 +96,8 @@ const Header: React.FC = () => {
   }, []);
 
   const handleClick = useCallback(() => {
-    if (token) {
-      navigate('/app/business/');
-    } else {
-      navigate('/auth/register');
-    }
-  }, [token, navigate]);
+    navigate('/');
+  }, [navigate]);
 
   const handleLogoClick = useCallback(() => {
     navigate('/');
