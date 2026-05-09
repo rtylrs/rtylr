@@ -18,7 +18,6 @@ import appConfig from '../../app.json';
 import PageHeader from '../../shared/components/PageHeader';
 import { useSettings } from '../../shared/lib/settingsStore';
 import { useWarehouses } from '../warehouses/useWarehouses';
-import { toast } from 'sonner';
 import {
   useErpTeam,
   useErpInviteMember,
@@ -110,10 +109,6 @@ const Toggle: React.FC<{ value: boolean; onChange: (v: boolean) => void }> = ({
 const GeneralTab: React.FC = () => {
   const settings = useSettings();
   const { data: warehouses = [] } = useWarehouses();
-
-  const save = (): void => {
-    toast.success('Settings saved');
-  };
 
   return (
     <motion.div
@@ -226,17 +221,6 @@ const GeneralTab: React.FC = () => {
           </div>
         </ConfigField>
       </Section>
-
-      <div className="flex justify-end">
-        <button
-          type="button"
-          onClick={save}
-          className="px-4 py-2 rounded-lg text-sm font-semibold"
-          style={{ background: 'var(--erp-accent, #f59e0b)', color: '#000' }}
-        >
-          Save Settings
-        </button>
-      </div>
 
       <Section title="About" icon={SettingsIcon}>
         {[

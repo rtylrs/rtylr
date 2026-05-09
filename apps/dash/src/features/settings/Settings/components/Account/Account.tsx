@@ -1,5 +1,9 @@
 import React, { useState, useEffect } from 'react';
 import { removeCookie, getDefaultCookieDomain } from '@voxire/auth';
+import { useMutation } from '@tanstack/react-query';
+import { unwrap } from '@voxire/api';
+import { toast } from 'sonner';
+import { safe } from '../../../../../shared/lib/api';
 import { useUserStore } from '../../../../../shared/stores/userStore';
 
 function formatTimeAgo(dateStr: string): string {
@@ -89,8 +93,23 @@ const Account: React.FC = () => {
     setIsEditing(true);
   };
 
-  const handleSave = () => {
-    setIsEditing(false);
+  const updateProfile = useMutation({
+    mutationFn: () =>
+      unwrap(
+        safe.post('/account/profile', {
+          firstName: formData.firstName,
+          lastName: formData.lastName,
+        })
+      ),
+    onSuccess: () => {
+      toast.success('Profile saved');
+      setIsEditing(false);
+    },
+    onError: () => toast.error('Failed to save profile'),
+  });
+
+  const handleSave = (): void => {
+    updateProfile.mutate();
   };
 
   const handleCancel = () => {
@@ -149,11 +168,15 @@ const Account: React.FC = () => {
             />
           </div>
           <div className="flex justify-end gap-2 pt-1">
-            <Button variant="outline" onClick={handleCancel} disabled={!isEditing}>
+            <Button
+              variant="outline"
+              onClick={handleCancel}
+              disabled={!isEditing || updateProfile.isPending}
+            >
               Cancel
             </Button>
-            <Button onClick={handleSave} disabled={!isEditing}>
-              Save changes
+            <Button onClick={handleSave} disabled={!isEditing || updateProfile.isPending}>
+              {updateProfile.isPending ? 'Saving…' : 'Save changes'}
             </Button>
           </div>
         </CardContent>

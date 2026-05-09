@@ -48,6 +48,12 @@ const Account: React.FC = () => {
 
   const email = user?.email ?? user?.emailAddress ?? '';
 
+  const resendVerification = useMutation({
+    mutationFn: () => unwrap(safe.post('/auth/resend-verification', { email })),
+    onSuccess: () => toast.success('Verification email sent'),
+    onError: () => toast.error('Failed to send verification email'),
+  });
+
   const handlePasswordSave = (): void => {
     if (!currentPassword.trim() || !newPassword.trim()) return;
     if (newPassword !== confirmPassword) {
@@ -108,9 +114,10 @@ const Account: React.FC = () => {
           <Button
             size="sm"
             variant="secondary"
-            onClick={() => toast.info('Verification email sent')}
+            onClick={() => resendVerification.mutate()}
+            disabled={resendVerification.isPending || !email}
           >
-            Send verification
+            {resendVerification.isPending ? 'Sending…' : 'Send verification'}
           </Button>
         }
       >
