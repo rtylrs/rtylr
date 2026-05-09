@@ -110,6 +110,7 @@ const AppRoutes: RouteObject[] = [
       { path: 'integrations', element: <Integrations /> },
     ],
   },
+  { path: '*', element: <Navigate to="/" replace /> },
 ];
 
 export default AppRoutes;
