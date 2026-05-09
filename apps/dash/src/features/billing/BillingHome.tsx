@@ -3,6 +3,7 @@ import { CreditCard, Download, Check } from 'lucide-react';
 import { Button } from '../../shared/components/ui';
 import { Breadcrumbs, SettingSection, SkeletonList } from '../../shared/components/dash';
 import { useBilling, useInvoices, type Invoice } from '../../shared/hooks/queries/useBilling';
+import { useCheckout } from '../../shared/hooks/queries/useSubscription';
 import { toast } from 'sonner';
 
 function formatMoney(amount: number, currency: string) {
@@ -71,14 +72,27 @@ const InvoiceRow: React.FC<{ invoice: Invoice }> = ({ invoice }) => (
     <p className="text-sm font-semibold w-20 text-right" style={{ color: 'var(--dash-text)' }}>
       {formatMoney(invoice.amount, invoice.currency)}
     </p>
-    <button
-      className="h-7 w-7 rounded-lg flex items-center justify-center transition-colors hover:bg-[var(--dash-active)]"
-      style={{ color: 'var(--dash-text-dim)' }}
-      onClick={() => toast.success('Invoice downloaded')}
-      aria-label="Download invoice"
-    >
-      <Download size={13} />
-    </button>
+    {invoice.pdfUrl ? (
+      <a
+        href={invoice.pdfUrl}
+        target="_blank"
+        rel="noopener noreferrer"
+        className="h-7 w-7 rounded-lg flex items-center justify-center transition-colors hover:bg-[var(--dash-active)]"
+        style={{ color: 'var(--dash-text-dim)' }}
+        aria-label="Download invoice"
+      >
+        <Download size={13} />
+      </a>
+    ) : (
+      <button
+        className="h-7 w-7 rounded-lg flex items-center justify-center opacity-30 cursor-not-allowed"
+        style={{ color: 'var(--dash-text-dim)' }}
+        disabled
+        aria-label="Invoice not available"
+      >
+        <Download size={13} />
+      </button>
+    )}
   </div>
 );
 
@@ -103,6 +117,7 @@ const PLANS = [
 const BillingHome: React.FC = () => {
   const { data: billing, isLoading } = useBilling();
   const { data: invoices = [], isLoading: invoicesLoading } = useInvoices();
+  const checkout = useCheckout();
 
   if (isLoading || !billing) {
     return (
@@ -258,10 +273,30 @@ const BillingHome: React.FC = () => {
                   size="sm"
                   variant={isCurrent ? 'secondary' : 'default'}
                   className="mt-3 w-full"
-                  disabled={isCurrent}
-                  onClick={() => toast.success(`Upgrading to ${plan.label}`)}
+                  disabled={isCurrent || checkout.isPending}
+                  onClick={() => {
+                    if (plan.price === 0) {
+                      window.open('mailto:info@voxire.com?subject=Enterprise inquiry', '_blank');
+                      return;
+                    }
+                    checkout.mutate(
+                      { planSlug: plan.key },
+                      {
+                        onSuccess: (data) => {
+                          window.location.href = data.checkoutUrl;
+                        },
+                        onError: () => toast.error('Failed to start checkout'),
+                      }
+                    );
+                  }}
                 >
-                  {isCurrent ? 'Current plan' : plan.price === 0 ? 'Contact sales' : 'Upgrade'}
+                  {isCurrent
+                    ? 'Current plan'
+                    : plan.price === 0
+                      ? 'Contact sales'
+                      : checkout.isPending
+                        ? 'Loading...'
+                        : 'Upgrade'}
                 </Button>
               </div>
             );
