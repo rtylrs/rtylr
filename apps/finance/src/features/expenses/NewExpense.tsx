@@ -1,21 +1,14 @@
 import React, { useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { motion } from 'motion/react';
-import { Save, ArrowLeft, Sparkles } from 'lucide-react';
+import { Save, ArrowLeft } from 'lucide-react';
 import { toast } from 'sonner';
 import PageHeader from '../../shared/components/PageHeader';
 import ReceiptUpload from '../../shared/components/ReceiptUpload';
 import CurrencyInput from '../../shared/components/CurrencyInput';
 import { useExpenseCategories } from '../../shared/hooks/useExpenseCategories';
 import { useCreateExpense } from './useExpenses';
-import {
-  cardStyle,
-  ghostBtn,
-  primaryBtn,
-  inputStyle,
-  labelStyle,
-  ACCENT,
-} from '../../shared/lib/tokens';
+import { cardStyle, ghostBtn, primaryBtn, inputStyle, labelStyle } from '../../shared/lib/tokens';
 
 const NewExpense: React.FC = () => {
   const navigate = useNavigate();
@@ -26,19 +19,6 @@ const NewExpense: React.FC = () => {
   const [category, setCategory] = useState('');
   const [date, setDate] = useState(new Date().toISOString().slice(0, 10));
   const [notes, setNotes] = useState('');
-  const [ocrHint, setOcrHint] = useState<{
-    merchant?: string;
-    amount?: number;
-    date?: string;
-  } | null>(null);
-
-  const applyOcr = () => {
-    if (ocrHint?.merchant) setDescription(ocrHint.merchant);
-    if (ocrHint?.amount) setAmount(ocrHint.amount);
-    if (ocrHint?.date) setDate(ocrHint.date);
-    toast.success('Applied OCR hints');
-  };
-
   const createExpense = useCreateExpense();
 
   const handleSave = (): void => {
@@ -136,41 +116,7 @@ const NewExpense: React.FC = () => {
           >
             Receipt
           </div>
-          <ReceiptUpload value={receipt} onChange={setReceipt} onOcrHint={setOcrHint} />
-          {ocrHint && (
-            <div
-              style={{
-                marginTop: 12,
-                padding: 12,
-                background: 'rgba(16,185,129,0.08)',
-                border: `1px solid ${ACCENT}33`,
-                borderRadius: 8,
-                display: 'flex',
-                justifyContent: 'space-between',
-                alignItems: 'center',
-              }}
-            >
-              <div>
-                <div
-                  style={{
-                    fontSize: 11,
-                    color: ACCENT,
-                    display: 'flex',
-                    alignItems: 'center',
-                    gap: 4,
-                  }}
-                >
-                  <Sparkles size={11} /> OCR extracted
-                </div>
-                <div style={{ fontSize: 12, color: 'var(--hub-text-muted)' }}>
-                  {ocrHint.merchant} <>&middot;</> ${ocrHint.amount} <>&middot;</> {ocrHint.date}
-                </div>
-              </div>
-              <button style={ghostBtn} onClick={applyOcr}>
-                Apply
-              </button>
-            </div>
-          )}
+          <ReceiptUpload value={receipt} onChange={setReceipt} />
         </div>
       </div>
 

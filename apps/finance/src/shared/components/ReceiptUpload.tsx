@@ -1,34 +1,20 @@
 import React, { useRef, useState } from 'react';
-import { Upload, FileImage, Sparkles, X } from 'lucide-react';
-import { ACCENT } from '../lib/tokens';
+import { Upload, FileImage, X } from 'lucide-react';
 
 interface ReceiptUploadProps {
   value?: string | null;
   onChange: (dataUrl: string | null) => void;
-  onOcrHint?: (hint: { merchant?: string; amount?: number; date?: string }) => void;
 }
 
-const ReceiptUpload: React.FC<ReceiptUploadProps> = ({ value, onChange, onOcrHint }) => {
+const ReceiptUpload: React.FC<ReceiptUploadProps> = ({ value, onChange }) => {
   const [dragging, setDragging] = useState(false);
-  const [ocrRunning, setOcrRunning] = useState(false);
   const fileRef = useRef<HTMLInputElement>(null);
 
-  const handleFile = (file: File | undefined | null) => {
+  const handleFile = (file: File | undefined | null): void => {
     if (!file) return;
     const reader = new FileReader();
     reader.onload = () => {
       onChange(reader.result as string);
-      if (onOcrHint) {
-        setOcrRunning(true);
-        setTimeout(() => {
-          setOcrRunning(false);
-          onOcrHint({
-            merchant: 'Example Vendor',
-            amount: Math.round(Math.random() * 200 * 100) / 100,
-            date: new Date().toISOString().slice(0, 10),
-          });
-        }, 900);
-      }
     };
     reader.readAsDataURL(file);
   };
@@ -47,7 +33,7 @@ const ReceiptUpload: React.FC<ReceiptUploadProps> = ({ value, onChange, onOcrHin
       }}
       onClick={() => fileRef.current?.click()}
       style={{
-        border: `2px dashed ${dragging ? ACCENT : 'var(--hub-border)'}`,
+        border: `2px dashed ${dragging ? 'var(--hub-accent, #10b981)' : 'var(--hub-border)'}`,
         borderRadius: 12,
         padding: 24,
         textAlign: 'center',
@@ -81,7 +67,7 @@ const ReceiptUpload: React.FC<ReceiptUploadProps> = ({ value, onChange, onOcrHin
               position: 'absolute',
               top: -8,
               right: -8,
-              background: '#ef4444',
+              background: 'var(--hub-error, #ef4444)',
               color: '#fff',
               border: 'none',
               borderRadius: '50%',
@@ -95,21 +81,6 @@ const ReceiptUpload: React.FC<ReceiptUploadProps> = ({ value, onChange, onOcrHin
           >
             <X size={12} />
           </button>
-          {ocrRunning && (
-            <div
-              style={{
-                marginTop: 8,
-                display: 'flex',
-                alignItems: 'center',
-                justifyContent: 'center',
-                gap: 6,
-                color: ACCENT,
-                fontSize: 12,
-              }}
-            >
-              <Sparkles size={12} /> Running OCR...
-            </div>
-          )}
         </div>
       ) : (
         <>
@@ -119,18 +90,6 @@ const ReceiptUpload: React.FC<ReceiptUploadProps> = ({ value, onChange, onOcrHin
           </div>
           <div style={{ fontSize: 11, color: 'var(--hub-text-dim)', marginTop: 6 }}>
             PNG, JPG up to 10MB
-          </div>
-          <div
-            style={{
-              marginTop: 10,
-              display: 'inline-flex',
-              alignItems: 'center',
-              gap: 4,
-              fontSize: 10,
-              color: ACCENT,
-            }}
-          >
-            <Sparkles size={11} /> OCR preview enabled
           </div>
         </>
       )}

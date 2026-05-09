@@ -31,7 +31,7 @@ const NewInvoice: React.FC = () => {
   const [issuedDate, setIssuedDate] = useState(today);
   const [dueDate, setDueDate] = useState(due);
   const [invoiceNumber, setInvoiceNumber] = useState(
-    `${settings.invoicePrefix}-${Math.floor(Math.random() * 9000) + 1000}`
+    `${settings.invoicePrefix}-${String(Date.now()).slice(-6)}`
   );
   const [items, setItems] = useState<LineItem[]>([
     { id: 'l1', description: '', quantity: 1, unitPrice: 0, taxRate: settings.defaultTaxRate },
