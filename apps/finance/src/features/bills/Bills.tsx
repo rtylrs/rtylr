@@ -153,7 +153,7 @@ const Bills: React.FC = () => {
     });
 
   const payAll = (): void => {
-    toast.success(`Scheduled ${selected.size} bills for payment`);
+    toast.info('Bulk bill payment coming soon');
     setSelected(new Set());
   };
 

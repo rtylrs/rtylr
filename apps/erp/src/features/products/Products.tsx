@@ -377,11 +377,43 @@ const Products: React.FC = () => {
         onClear={() => setSelected(new Set())}
         onDelete={handleBulkDelete}
         onArchive={() => {
-          toast.success(`Archived ${selected.size} products`);
-          setSelected(new Set());
+          toast.info('Archive coming soon');
         }}
         onExport={() => {
-          toast.success(`Exported ${selected.size} products`);
+          const rows = products.filter((p) => selected.has(p.id));
+          if (rows.length === 0) return;
+          const header = [
+            'id',
+            'name',
+            'sku',
+            'category',
+            'brand',
+            'stock',
+            'costPrice',
+            'salePrice',
+            'status',
+          ];
+          const csv = [
+            header,
+            ...rows.map((p) => [
+              p.id,
+              p.name,
+              p.sku,
+              p.category,
+              p.brand || '',
+              p.stock,
+              p.costPrice,
+              p.salePrice,
+              p.status,
+            ]),
+          ]
+            .map((r) => r.map((c) => `"${String(c).replace(/"/g, '""')}"`).join(','))
+            .join('\n');
+          const a = document.createElement('a');
+          a.href = URL.createObjectURL(new Blob([csv], { type: 'text/csv' }));
+          a.download = `products-selection.csv`;
+          a.click();
+          toast.success(`Exported ${rows.length} products`);
         }}
       />
 

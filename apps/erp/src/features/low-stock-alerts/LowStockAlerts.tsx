@@ -13,11 +13,11 @@ const LowStockAlerts: React.FC = () => {
   const { data: items = [], isLoading } = useLowStock();
 
   const handleReorder = (name: string) => {
-    toast.success(`Reorder triggered for ${name}`);
+    toast.info(`Reorder for ${name} coming soon`);
   };
 
   const handleReorderAll = () => {
-    toast.success(`${items.length} reorders created`);
+    toast.info('Bulk reorder coming soon');
   };
 
   return (
