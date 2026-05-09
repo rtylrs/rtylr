@@ -233,7 +233,7 @@ const Menu: React.FC<{}> = () => {
             Create Category
           </button>
           <button
-            onClick={() => navigate('/app/business/create-banner')}
+            onClick={() => navigate('/create-banner')}
             className="px-4 py-2 text-sm font-medium bg-accent text-white rounded-lg hover:opacity-90 transition-opacity"
           >
             Create Banner

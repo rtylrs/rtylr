@@ -26,7 +26,7 @@ const FreeAccount: React.FC<{}> = () => {
         <div className="free-account-content">
           <p>You are currently using a free tier.</p>
         </div>
-        <button className="upgrade-button" onClick={() => navigate('/app/business/billing')}>
+        <button className="upgrade-button" onClick={() => navigate('/settings/billing')}>
           Select a Plan
         </button>
       </div>

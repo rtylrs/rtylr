@@ -172,9 +172,7 @@ const Menus: React.FC = () => {
                           </button>
                         </DropdownMenuTrigger>
                         <DropdownMenuContent align="end">
-                          <DropdownMenuItem
-                            onClick={() => navigate(`/app/business/menu/${menu._id}`)}
-                          >
+                          <DropdownMenuItem onClick={() => navigate(`/menu/${menu._id}`)}>
                             View Menu
                           </DropdownMenuItem>
                           {!isActive && (
@@ -193,7 +191,7 @@ const Menus: React.FC = () => {
                     variant="outline"
                     size="sm"
                     className="w-full"
-                    onClick={() => navigate(`/app/business/menu/${menu._id}`)}
+                    onClick={() => navigate(`/menu/${menu._id}`)}
                   >
                     View Menu
                   </Button>
