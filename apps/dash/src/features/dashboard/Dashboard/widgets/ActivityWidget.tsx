@@ -22,7 +22,7 @@ const ActivityWidget: React.FC = () => {
           </p>
         </div>
         <button
-          onClick={() => navigate('/activity')}
+          onClick={() => navigate('/audit')}
           className="flex items-center gap-1 text-xs font-medium"
           style={{ color: '#4583C4' }}
         >
