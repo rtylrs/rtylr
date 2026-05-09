@@ -26,7 +26,7 @@ const Expiry: React.FC = () => {
         description={`${items.length} batches with expiry dates`}
         actions={
           <button
-            onClick={() => toast.success('Markdown rules applied')}
+            onClick={() => toast.info('Auto-markdown rules coming soon')}
             className="flex items-center gap-2 px-3 py-2 rounded-lg text-sm font-semibold"
             style={{ background: AMBER, color: '#000' }}
           >

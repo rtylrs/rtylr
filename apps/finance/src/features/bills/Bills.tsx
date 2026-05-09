@@ -267,7 +267,7 @@ const Bills: React.FC = () => {
                     {b.status === 'unpaid' || b.status === 'overdue' ? (
                       <button
                         style={{ ...ghostBtn, padding: '4px 10px' }}
-                        onClick={() => toast.success(`Scheduled ${b.id}`)}
+                        onClick={() => toast.info('Bill scheduling coming soon')}
                       >
                         <Clock size={12} /> Schedule
                       </button>

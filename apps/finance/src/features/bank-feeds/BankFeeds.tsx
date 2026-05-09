@@ -39,7 +39,7 @@ const BankFeeds: React.FC = () => {
           </>
         }
         actions={
-          <button style={primaryBtn} onClick={() => toast.success('Launching Plaid connect...')}>
+          <button style={primaryBtn} onClick={() => toast.info('Bank connection coming soon')}>
             <LinkIcon size={13} /> Connect Account
           </button>
         }

@@ -23,7 +23,7 @@ const Reorder: React.FC = () => {
         description="Smart recommendations based on sales velocity and lead times"
         actions={
           <button
-            onClick={() => toast.success(`Created ${suggestions.length} reorder drafts`)}
+            onClick={() => toast.info('Bulk reorder creation coming soon')}
             disabled={suggestions.length === 0}
             className="flex items-center gap-2 px-3 py-2 rounded-lg text-sm font-semibold"
             style={{
@@ -123,7 +123,7 @@ const Reorder: React.FC = () => {
                   </span>
                 </span>
                 <button
-                  onClick={() => toast.success(`Created reorder for ${s.name}`)}
+                  onClick={() => toast.info('Reorder creation coming soon')}
                   className="text-[10px] font-semibold px-2 py-1 rounded-md"
                   style={{ background: 'rgba(245,158,11,0.15)', color: AMBER }}
                 >

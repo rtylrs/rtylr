@@ -85,7 +85,9 @@ const Products: React.FC = () => {
         actions={
           <>
             <ImportCSV
-              onImport={(rows) => toast.success(`${rows.length} rows queued`)}
+              onImport={(rows) =>
+                toast.info(`${rows.length} rows parsed — bulk import coming soon`)
+              }
               expectedColumns={['name', 'sku', 'category', 'stock']}
             />
             <ExportButton data={exportable} filename="products.csv" />

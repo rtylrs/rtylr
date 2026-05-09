@@ -459,7 +459,9 @@ const ProfitLoss: React.FC = () => {
       <ConfirmDialog
         open={showClose}
         onClose={() => setShowClose(false)}
-        onConfirm={() => toast.success('Fiscal year closed. Books are now read-only.')}
+        onConfirm={() =>
+          toast.info('Fiscal year close coming soon — contact support to close your books.')
+        }
         title="Close fiscal year"
         message="This will lock all entries for the current fiscal year. Adjustments will require a new period. Continue?"
         confirmLabel="Close year"
