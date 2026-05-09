@@ -1,18 +1,7 @@
 import React from 'react';
-import { Gift, Copy, Users, DollarSign } from 'lucide-react';
-import { toast } from 'sonner';
-import { Button } from '../../shared/components/ui';
-import { Breadcrumbs, SettingSection, StatCard } from '../../shared/components/dash';
+import { Gift } from 'lucide-react';
 
 const Referrals: React.FC = () => {
-  const referralCode = 'RTYLR-2K7X';
-  const referralLink = `https://rtylr.com/invite?code=${referralCode}`;
-
-  const copyLink = () => {
-    navigator.clipboard.writeText(referralLink);
-    toast.success('Referral link copied');
-  };
-
   return (
     <div className="space-y-5 max-w-3xl">
       <div className="flex items-center gap-3">
@@ -32,29 +21,19 @@ const Referrals: React.FC = () => {
         </div>
       </div>
 
-      <div className="grid grid-cols-3 gap-3">
-        <StatCard label="Invited" value="12" icon={Users} accent="#4583C4" />
-        <StatCard label="Signed up" value="4" icon={Gift} accent="#ec4899" />
-        <StatCard label="Earned" value="$120" icon={DollarSign} accent="#10b981" />
-      </div>
-
-      <SettingSection
-        title="Your referral link"
-        description="Share with other business owners. You get $30 credit per successful signup."
+      <div
+        className="rounded-xl p-8 flex flex-col items-center justify-center text-center"
+        style={{ background: 'var(--dash-card)', border: '1px solid var(--dash-border)' }}
       >
-        <div
-          className="flex items-center gap-2 p-3 rounded-lg font-mono text-xs"
-          style={{ background: 'var(--dash-hover)', border: '1px solid var(--dash-border)' }}
-        >
-          <span className="flex-1 truncate" style={{ color: 'var(--dash-text)' }}>
-            {referralLink}
-          </span>
-          <Button size="sm" variant="secondary" onClick={copyLink}>
-            <Copy size={12} />
-            Copy
-          </Button>
-        </div>
-      </SettingSection>
+        <Gift size={28} className="mb-3" style={{ color: 'var(--dash-text-dim)' }} />
+        <p className="text-sm font-semibold" style={{ color: 'var(--dash-text)' }}>
+          Referral program coming soon
+        </p>
+        <p className="text-xs mt-1" style={{ color: 'var(--dash-text-muted)' }}>
+          Earn $30 credit for every business you refer. Your unique link will appear here when the
+          program launches.
+        </p>
+      </div>
     </div>
   );
 };

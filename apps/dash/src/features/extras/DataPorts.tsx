@@ -5,19 +5,8 @@ import { Button } from '../../shared/components/ui';
 import { Breadcrumbs, SettingSection } from '../../shared/components/dash';
 
 const DataExport: React.FC = () => {
-  const exportAll = () => {
-    const snapshot = {
-      exportedAt: new Date().toISOString(),
-      message: 'Snapshot export placeholder',
-    };
-    const blob = new Blob([JSON.stringify(snapshot, null, 2)], { type: 'application/json' });
-    const url = URL.createObjectURL(blob);
-    const a = document.createElement('a');
-    a.href = url;
-    a.download = `rtylr-export-${Date.now()}.json`;
-    a.click();
-    URL.revokeObjectURL(url);
-    toast.success('Export started');
+  const exportAll = (): void => {
+    toast.info('Full workspace export coming soon');
   };
 
   return (
