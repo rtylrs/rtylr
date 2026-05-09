@@ -1,8 +1,9 @@
 import React from 'react';
 import { RouteObject, Navigate } from 'react-router-dom';
 import AppLayout from '../layouts/AppLayout';
-import MenuWithId from '../features/menu/MenuWithId.jsx';
 import SettingsLayout from '../features/settings/Settings/components/SettingsLayout';
+
+const MenuWithId = React.lazy(() => import('../features/menu/MenuWithId.jsx'));
 
 const Orders = React.lazy(() => import('../features/orders/Orders'));
 const VendorDashboard = React.lazy(() => import('../features/dashboard/Dashboard/VendorDashboard'));

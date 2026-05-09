@@ -1,9 +1,10 @@
-import React from 'react';
+import React, { Suspense } from 'react';
 //Package imports
 import { useState, useEffect } from 'react';
 import { Route, Routes, useLocation } from 'react-router-dom';
 import { motion } from 'motion/react';
 import { ErrorBoundary } from '@voxire/ui';
+import { Spinner } from '@voxire/components';
 import {
   Chart as ChartJS,
   LineElement,
@@ -66,24 +67,32 @@ const App = (): React.JSX.Element => {
 
       <CookieBanner />
 
-      <Routes key={location.pathname} location={location}>
-        <Route path="/" element={<BusinessRoute />}>
-          {AppRoutes.map((route, index) => (
-            <Route key={index} path={route.path} element={route.element}>
-              {route.children?.map((child, childIndex) => (
-                <Route
-                  key={childIndex}
-                  index={child.index}
-                  path={child.path}
-                  element={child.element}
-                />
-              ))}
-            </Route>
-          ))}
-        </Route>
+      <Suspense
+        fallback={
+          <div className="flex h-screen items-center justify-center">
+            <Spinner size={32} />
+          </div>
+        }
+      >
+        <Routes key={location.pathname} location={location}>
+          <Route path="/" element={<BusinessRoute />}>
+            {AppRoutes.map((route, index) => (
+              <Route key={index} path={route.path} element={route.element}>
+                {route.children?.map((child, childIndex) => (
+                  <Route
+                    key={childIndex}
+                    index={child.index}
+                    path={child.path}
+                    element={child.element}
+                  />
+                ))}
+              </Route>
+            ))}
+          </Route>
 
-        <Route path="*" element={<NoMatch />} />
-      </Routes>
+          <Route path="*" element={<NoMatch />} />
+        </Routes>
+      </Suspense>
     </ErrorBoundary>
   );
 };

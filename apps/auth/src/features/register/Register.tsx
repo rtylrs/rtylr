@@ -541,7 +541,13 @@ const Register: React.FC = (): React.JSX.Element => {
           fullWidth
           loading={loading}
           height={40}
-          disabled={!email || !!emailError || pwScore < 2 || !!matchError}
+          disabled={
+            !email ||
+            !!emailError ||
+            pwScore < 2 ||
+            !!matchError ||
+            (!isSoloPlan && !businessName.trim())
+          }
         >
           Create account
         </Button>
