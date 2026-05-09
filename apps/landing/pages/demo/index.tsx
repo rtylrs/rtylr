@@ -107,39 +107,13 @@ const DemoPage = (): JSX.Element => {
     }
 
     setIsSubmitting(true);
-
-    // Posts to /demo-request on the API host. The Next.js landing app
-    // is static-exported, so the URL must be absolute. NEXT_PUBLIC_API_URL
-    // is documented in apps/landing/.env.example — falls back to the
-    // production API so deployed copies work without per-env config.
-    const apiBase = process.env.NEXT_PUBLIC_API_URL || 'https://api.rtylr.com';
-    try {
-      const res = await fetch(`${apiBase.replace(/\/$/, '')}/demo-request`, {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify(formData),
-      });
-      if (!res.ok) {
-        throw new Error(`HTTP ${res.status}`);
-      }
-      setSubmitted(true);
-      setFormData({
-        email: '',
-        country: '',
-        reason: '',
-        companySize: '',
-      });
-    } catch {
-      // Don't expose the API URL or status to the user — surface a
-      // generic message and let them retry. Sentry/PostHog wiring
-      // (P0 ops hardening) will pick up the failure server-side.
-      setErrors({
-        email:
-          'We could not submit your request. Please try again or email sales@rtylr.com.' as never,
-      });
-      setIsSubmitting(false);
-      return;
-    }
+    const subject = encodeURIComponent('Demo request from rtylr.com');
+    const body = encodeURIComponent(
+      `Email: ${formData.email}\nCountry: ${formData.country}\nCompany size: ${formData.companySize}\nReason: ${formData.reason}`
+    );
+    window.location.href = `mailto:sales@rtylr.com?subject=${subject}&body=${body}`;
+    setSubmitted(true);
+    setFormData({ email: '', country: '', reason: '', companySize: '' });
     setIsSubmitting(false);
   };
 

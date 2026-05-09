@@ -82,6 +82,13 @@ const ContactPage = (): JSX.Element => {
   const handleSubmit = (e: React.FormEvent<HTMLFormElement>): void => {
     e.preventDefault();
     if (!validate()) return;
+    const subject = encodeURIComponent(
+      `Contact from ${form.name}${form.company ? ` at ${form.company}` : ''}`
+    );
+    const body = encodeURIComponent(
+      `Name: ${form.name}\nEmail: ${form.email}${form.company ? `\nCompany: ${form.company}` : ''}\n\n${form.message}`
+    );
+    window.location.href = `mailto:info@voxire.com?subject=${subject}&body=${body}`;
     setSubmitted(true);
   };
 
