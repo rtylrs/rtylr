@@ -239,6 +239,7 @@ const NotificationsSection: React.FC = () => {
 
   const save = useMutation({
     mutationFn: (data: ApiUserSettings) => unwrap(flowApi.updateUserSettings(data)),
+    onError: () => toast.error('Failed to save notification preferences'),
   });
 
   const [settings, setSettings] = useState<ApiUserSettings>({
@@ -254,10 +255,11 @@ const NotificationsSection: React.FC = () => {
     if (remote) setSettings(remote);
   }, [remote]);
 
-  const toggle = (key: keyof ApiUserSettings) => {
+  const toggle = (key: keyof ApiUserSettings): void => {
+    const prev = { ...settings };
     const next = { ...settings, [key]: !settings[key] };
     setSettings(next);
-    save.mutate(next);
+    save.mutate(next, { onError: () => setSettings(prev) });
   };
 
   const items = [
