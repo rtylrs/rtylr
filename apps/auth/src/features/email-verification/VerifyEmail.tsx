@@ -39,6 +39,7 @@ const VerifyEmail: React.FC = () => {
       { email },
       {
         onSuccess: () => notify.success('Verification email sent'),
+        onError: () => notify.error('Failed to send verification email'),
       }
     );
   };
