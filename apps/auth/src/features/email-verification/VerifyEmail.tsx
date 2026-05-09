@@ -32,9 +32,11 @@ const VerifyEmail: React.FC = () => {
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
 
-  const handleResend = () => {
+  const handleResend = (): void => {
+    const email = params.get('email') ?? '';
+    if (!email) return;
     resendMutation.mutate(
-      { email: 'you@company.com' },
+      { email },
       {
         onSuccess: () => notify.success('Verification email sent'),
       }

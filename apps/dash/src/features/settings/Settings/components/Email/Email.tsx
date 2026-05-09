@@ -1,5 +1,6 @@
 import React, { useState } from 'react';
-import { Mail, Server, Bell, Loader2 } from 'lucide-react';
+import { Mail, Server, Bell } from 'lucide-react';
+import { toast } from 'sonner';
 import {
   Card,
   CardContent,
@@ -144,8 +145,6 @@ const Email: React.FC = () => {
     fromEmail: '',
     replyTo: '',
   });
-  const [savingSender, setSavingSender] = useState(false);
-
   // SMTP
   const [useSmtp, setUseSmtp] = useState(false);
   const [smtp, setSmtp] = useState<SmtpForm>({
@@ -155,8 +154,6 @@ const Email: React.FC = () => {
     password: '',
     encryption: 'TLS',
   });
-  const [testingSmtp, setTestingSmtp] = useState(false);
-  const [savingSmtp, setSavingSmtp] = useState(false);
 
   // Notifications
   const [notifications, setNotifications] = useState<NotificationState>({
@@ -176,25 +173,16 @@ const Email: React.FC = () => {
     setSmtp((prev) => ({ ...prev, [name]: value }));
   };
 
-  const handleSaveSender = async () => {
-    setSavingSender(true);
-    // Placeholder, wire up real API call here
-    await new Promise((r) => setTimeout(r, 800));
-    setSavingSender(false);
+  const handleSaveSender = (): void => {
+    toast.info('Email sender settings coming soon');
   };
 
-  const handleTestSmtp = async () => {
-    setTestingSmtp(true);
-    // Placeholder, wire up real API call here
-    await new Promise((r) => setTimeout(r, 1200));
-    setTestingSmtp(false);
+  const handleTestSmtp = (): void => {
+    toast.info('SMTP test connection coming soon');
   };
 
-  const handleSaveSmtp = async () => {
-    setSavingSmtp(true);
-    // Placeholder, wire up real API call here
-    await new Promise((r) => setTimeout(r, 800));
-    setSavingSmtp(false);
+  const handleSaveSmtp = (): void => {
+    toast.info('Custom SMTP settings coming soon');
   };
 
   const toggleNotification = (key: keyof NotificationState) => (next: boolean) => {
@@ -256,15 +244,8 @@ const Email: React.FC = () => {
             />
           </div>
           <div className="flex justify-end pt-1">
-            <Button size="sm" onClick={handleSaveSender} disabled={savingSender}>
-              {savingSender ? (
-                <>
-                  <Loader2 size={12} className="animate-spin" />
-                  Saving...
-                </>
-              ) : (
-                'Save'
-              )}
+            <Button size="sm" onClick={handleSaveSender}>
+              Save
             </Button>
           </div>
         </CardContent>
@@ -357,30 +338,11 @@ const Email: React.FC = () => {
               </div>
 
               <div className="flex items-center gap-2 justify-end pt-1">
-                <Button
-                  variant="outline"
-                  size="sm"
-                  onClick={handleTestSmtp}
-                  disabled={testingSmtp || savingSmtp}
-                >
-                  {testingSmtp ? (
-                    <>
-                      <Loader2 size={12} className="animate-spin" />
-                      Testing...
-                    </>
-                  ) : (
-                    'Test Connection'
-                  )}
+                <Button variant="outline" size="sm" onClick={handleTestSmtp}>
+                  Test Connection
                 </Button>
-                <Button size="sm" onClick={handleSaveSmtp} disabled={savingSmtp || testingSmtp}>
-                  {savingSmtp ? (
-                    <>
-                      <Loader2 size={12} className="animate-spin" />
-                      Saving...
-                    </>
-                  ) : (
-                    'Save SMTP Settings'
-                  )}
+                <Button size="sm" onClick={handleSaveSmtp}>
+                  Save SMTP Settings
                 </Button>
               </div>
             </>

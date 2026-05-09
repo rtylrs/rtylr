@@ -1,4 +1,6 @@
 import { useMutation } from '@tanstack/react-query';
+import { unwrap } from '@voxire/api';
+import { safe } from '../../shared/lib/api';
 
 export interface VerifyEmailPayload {
   token: string;
@@ -6,18 +8,14 @@ export interface VerifyEmailPayload {
 
 export const useEmailVerification = () => {
   return useMutation({
-    mutationFn: async (_payload: VerifyEmailPayload) => {
-      await new Promise((resolve) => setTimeout(resolve, 500));
-      return { verified: true } as const;
-    },
+    mutationFn: (payload: VerifyEmailPayload) =>
+      unwrap(safe.post<{ verified: boolean }>('/auth/verify-email', payload)),
   });
 };
 
 export const useResendVerificationEmail = () => {
   return useMutation({
-    mutationFn: async (_payload: { email: string }) => {
-      await new Promise((resolve) => setTimeout(resolve, 500));
-      return { ok: true } as const;
-    },
+    mutationFn: (payload: { email: string }) =>
+      unwrap(safe.post<{ ok: boolean }>('/auth/resend-verification', payload)),
   });
 };

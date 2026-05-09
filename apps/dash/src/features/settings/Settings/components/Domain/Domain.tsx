@@ -1,4 +1,5 @@
 import React, { useState } from 'react';
+import { toast } from 'sonner';
 import { Globe, Copy, Check, ChevronDown, ChevronUp, ShieldCheck, AlertCircle } from 'lucide-react';
 import {
   Card,
@@ -13,16 +14,15 @@ import {
   Separator,
 } from '../../../../../shared/components/ui';
 import { cn } from '../../../../../shared/lib/utils';
-
-// Placeholder, replace with real store hook when wired up
-const BUSINESS_SUBDOMAIN = 'mybusiness';
+import { useUserStore } from '../../../../../shared/stores/userStore';
 
 const Domain: React.FC = () => {
-  const menuUrl = `${BUSINESS_SUBDOMAIN}.rtylr.com`;
+  const user = useUserStore((s) => s.user);
+  const subdomain = user?.businessName?.toLowerCase().replace(/\s+/g, '-') ?? 'your-business';
+  const menuUrl = `${subdomain}.rtylr.com`;
 
   const [copied, setCopied] = useState(false);
   const [customDomain, setCustomDomain] = useState('');
-  const [domainStatus, setDomainStatus] = useState<'idle' | 'active'>('idle');
   const [dnsOpen, setDnsOpen] = useState(true);
 
   const handleCopy = async () => {
@@ -43,10 +43,9 @@ const Domain: React.FC = () => {
     }
   };
 
-  const handleConnect = () => {
+  const handleConnect = (): void => {
     if (!customDomain.trim()) return;
-    // Placeholder, wire up real API call here
-    setDomainStatus('active');
+    toast.info('Custom domain connection coming soon');
   };
 
   return (
@@ -106,11 +105,7 @@ const Domain: React.FC = () => {
               <CardTitle>Custom Domain</CardTitle>
               <CardDescription>Point your own domain at your rtylr menu.</CardDescription>
             </div>
-            {domainStatus === 'active' ? (
-              <Badge variant="success">Active</Badge>
-            ) : (
-              <Badge variant="outline">Not configured</Badge>
-            )}
+            <Badge variant="outline">Not configured</Badge>
           </div>
         </CardHeader>
         <CardContent className="pt-0 space-y-4">
