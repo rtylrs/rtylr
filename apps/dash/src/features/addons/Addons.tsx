@@ -22,6 +22,7 @@ import {
 } from 'lucide-react';
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
 import { motion, AnimatePresence } from 'motion/react';
+import { toast } from 'sonner';
 import { Input } from '../../shared/components/ui';
 import api from '../../shared/lib/api';
 
@@ -113,7 +114,10 @@ const Addons: React.FC = () => {
         qc.invalidateQueries({ queryKey: ['addons'] });
       }, 2000);
     },
-    onError: () => setEnablingId(null),
+    onError: () => {
+      setEnablingId(null);
+      toast.error('Failed to enable addon');
+    },
   });
 
   const disableMutation = useMutation({
@@ -125,6 +129,7 @@ const Addons: React.FC = () => {
       setConfirmText('');
       qc.invalidateQueries({ queryKey: ['addons'] });
     },
+    onError: () => toast.error('Failed to disable addon'),
   });
 
   const filtered = addons.filter(
