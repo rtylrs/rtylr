@@ -1,17 +1,61 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { UserCircle, Mail, KeyRound } from 'lucide-react';
 import { toast } from 'sonner';
+import { useMutation, useQueryClient } from '@tanstack/react-query';
+import { unwrap } from '@voxire/api';
 import { Button, Input, Label } from '../../shared/components/ui';
 import { Breadcrumbs, DangerZone, SettingSection } from '../../shared/components/dash';
 import { useUserStore } from '../../shared/stores/userStore';
+import { safe } from '../../shared/lib/api';
 
 const Account: React.FC = () => {
   const { user } = useUserStore();
+  const qc = useQueryClient();
   const [name, setName] = useState(user?.name ?? '');
-  const [email, setEmail] = useState(user?.email ?? user?.emailAddress ?? '');
   const [currentPassword, setCurrentPassword] = useState('');
   const [newPassword, setNewPassword] = useState('');
   const [confirmPassword, setConfirmPassword] = useState('');
+
+  useEffect(() => {
+    if (user?.name) setName(user.name);
+  }, [user?.name]);
+
+  const updateProfile = useMutation({
+    mutationFn: () => unwrap(safe.post('/account/profile', { name })),
+    onSuccess: () => {
+      toast.success('Profile saved');
+      qc.invalidateQueries({ queryKey: ['user'] });
+    },
+    onError: () => toast.error('Failed to save profile'),
+  });
+
+  const changePassword = useMutation({
+    mutationFn: () =>
+      unwrap(
+        safe.post('/account/password', {
+          currentPassword,
+          newPassword,
+        })
+      ),
+    onSuccess: () => {
+      toast.success('Password updated');
+      setCurrentPassword('');
+      setNewPassword('');
+      setConfirmPassword('');
+    },
+    onError: () => toast.error('Failed to update password'),
+  });
+
+  const email = user?.email ?? user?.emailAddress ?? '';
+
+  const handlePasswordSave = (): void => {
+    if (!currentPassword.trim() || !newPassword.trim()) return;
+    if (newPassword !== confirmPassword) {
+      toast.error('Passwords do not match');
+      return;
+    }
+    changePassword.mutate();
+  };
 
   return (
     <div className="space-y-5 max-w-2xl">
@@ -36,8 +80,12 @@ const Account: React.FC = () => {
         title="Profile"
         description="Your name is visible to your team and customers."
         footer={
-          <Button size="sm" onClick={() => toast.success('Profile saved')}>
-            Save changes
+          <Button
+            size="sm"
+            onClick={() => updateProfile.mutate()}
+            disabled={updateProfile.isPending || !name.trim()}
+          >
+            {updateProfile.isPending ? 'Saving...' : 'Save changes'}
           </Button>
         }
       >
@@ -89,19 +137,16 @@ const Account: React.FC = () => {
         footer={
           <Button
             size="sm"
-            onClick={() => {
-              if (newPassword !== confirmPassword) {
-                toast.error('Passwords do not match');
-                return;
-              }
-              toast.success('Password updated');
-              setCurrentPassword('');
-              setNewPassword('');
-              setConfirmPassword('');
-            }}
+            onClick={handlePasswordSave}
+            disabled={
+              changePassword.isPending ||
+              !currentPassword.trim() ||
+              !newPassword.trim() ||
+              !confirmPassword.trim()
+            }
           >
             <KeyRound size={13} />
-            Update password
+            {changePassword.isPending ? 'Updating...' : 'Update password'}
           </Button>
         }
       >
