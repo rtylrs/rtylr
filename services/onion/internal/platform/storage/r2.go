@@ -1,6 +1,6 @@
 // Package storage is a thin wrapper around S3-compatible object
 // storage. Production uses Cloudflare R2; local development can point
-// the same code at LocalStack.
+// the same code at Floci.
 package storage
 
 import (
@@ -21,14 +21,14 @@ import (
 )
 
 const (
-	localStackEnabledEnv  = "LOCAL_STACK_ENABLED"
-	localStackEndpointEnv = "LOCAL_STACK_ENDPOINT"
-	localStackBucketEnv   = "LOCAL_STACK_BUCKET"
-	localStackRegionEnv   = "LOCAL_STACK_REGION"
+	flociEnabledEnv  = "FLOCI_ENABLED"
+	flociEndpointEnv = "FLOCI_ENDPOINT"
+	flociBucketEnv   = "FLOCI_BUCKET"
+	flociRegionEnv   = "FLOCI_REGION"
 
-	defaultLocalStackEndpoint = "http://localhost:4566"
-	defaultLocalStackBucket   = "onion-dev"
-	defaultLocalStackRegion   = "us-east-1"
+	defaultFlociEndpoint = "http://localhost:4566"
+	defaultFlociBucket   = "onion-dev"
+	defaultFlociRegion   = "us-east-1"
 )
 
 // ErrNotConfigured is returned when any of the four required R2 env
@@ -71,7 +71,7 @@ func Default() (*Client, error) {
 
 		s3Client := s3.NewFromConfig(cfg, func(o *s3.Options) {
 			o.BaseEndpoint = aws.String(settings.endpoint)
-			// R2 and LocalStack are both path-style compatible. This
+			// R2 and Floci are both path-style compatible. This
 			// also avoids per-bucket DNS requirements in local dev.
 			o.UsePathStyle = true
 		})
@@ -90,13 +90,13 @@ type storageSettings struct {
 }
 
 func resolveSettingsFromEnv() (storageSettings, error) {
-	if localStackEnabled() {
+	if flociEnabled() {
 		return storageSettings{
-			endpoint:  envOrDefault(localStackEndpointEnv, defaultLocalStackEndpoint),
-			region:    envOrDefault(localStackRegionEnv, defaultLocalStackRegion),
+			endpoint:  envOrDefault(flociEndpointEnv, defaultFlociEndpoint),
+			region:    envOrDefault(flociRegionEnv, defaultFlociRegion),
 			accessKey: "test",
 			secretKey: "test",
-			bucket:    envOrDefault(localStackBucketEnv, defaultLocalStackBucket),
+			bucket:    envOrDefault(flociBucketEnv, defaultFlociBucket),
 		}, nil
 	}
 
@@ -126,8 +126,12 @@ func resolveR2SettingsFromEnv() (storageSettings, error) {
 	}, nil
 }
 
-func localStackEnabled() bool {
-	value := strings.ToLower(strings.TrimSpace(os.Getenv(localStackEnabledEnv)))
+func flociEnabled() bool {
+	return envBool(flociEnabledEnv)
+}
+
+func envBool(key string) bool {
+	value := strings.ToLower(strings.TrimSpace(os.Getenv(key)))
 	return value == "true" || value == "1" || value == "yes"
 }
 
@@ -200,7 +204,6 @@ func (c *Client) Upload(ctx context.Context, key, contentType string, body io.Re
 	})
 	return err
 }
-
 
 // Bucket exposes the configured bucket name for callers that need to
 // log or report it. Not used for signing (the client already holds it).

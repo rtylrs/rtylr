@@ -27,19 +27,20 @@ services:
     ports:
       - "6379:6379"
 
-  local-stack:
-    image: localstack/localstack:4.5.0
+  floci:
+    image: floci/floci:latest-compat
     restart: on-failure
     environment:
-      SERVICES: s3
-      AWS_DEFAULT_REGION: us-east-1
-      LOCAL_STACK_BUCKET: onion-dev
+      FLOCI_HOSTNAME: floci
+      FLOCI_STORAGE_MODE: persistent
+      FLOCI_STORAGE_PERSISTENT_PATH: /app/data
+      FLOCI_BUCKET: onion-dev
     ports:
       - "4566:4566"
     volumes:
-      - onion_localstack:/var/lib/localstack
-      - ./localstack/init:/etc/localstack/init/ready.d:ro
+      - onion_floci:/app/data
+      - ./floci/init:/etc/floci/init/ready.d:ro
 
 volumes:
   onion_mysql:
-  onion_localstack:
+  onion_floci:
