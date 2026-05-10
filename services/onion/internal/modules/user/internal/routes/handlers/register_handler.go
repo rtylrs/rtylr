@@ -9,13 +9,12 @@ import (
 	"strings"
 	"time"
 
-	authv1 "github.com/voxire/voxie/gen/go/auth/v1"
-
 	"github.com/voxire/onion/internal/modules/user/internal/application"
 	authPkg "github.com/voxire/onion/internal/platform/auth"
 	"github.com/voxire/onion/internal/platform/database/dbclient"
 	errorModels "github.com/voxire/onion/internal/platform/errors"
 	"github.com/voxire/onion/internal/platform/logger"
+	authv1 "github.com/voxire/voxie/gen/go/auth/v1"
 )
 
 func RegisterRoutes() []string {
@@ -178,7 +177,7 @@ func assignSubscription(ctx context.Context, ownerID int64, planSlug string) err
 		`SELECT id FROM plans WHERE slug = ? AND is_active = TRUE`,
 		planSlug).Scan(&planID)
 	if err != nil {
-		if err == sql.ErrNoRows {
+		if errors.Is(err, sql.ErrNoRows) {
 			return errors.New("plan not found: " + planSlug)
 		}
 
@@ -194,4 +193,3 @@ func assignSubscription(ctx context.Context, ownerID int64, planSlug string) err
 
 	return execErr
 }
-

@@ -13,15 +13,20 @@ import (
 )
 
 type Repository struct {
-	db *sql.DB
+	db  *sql.DB
+	ctx context.Context
 }
 
-func NewRepository(_ context.Context) *Repository {
-	return &Repository{db: dbclient.Pool()}
+func NewRepository(ctx context.Context) *Repository {
+	if ctx == nil {
+		ctx = context.Background()
+	}
+	return &Repository{db: dbclient.Pool(), ctx: ctx}
 }
 
 func (r *Repository) GetClient(clientID string) (*domain.Client, error) {
-	row := r.db.QueryRow(
+	row := r.db.QueryRowContext(
+		r.ctx,
 		`SELECT id, name, redirect_uris, scopes, is_public, created_at FROM oauth_clients WHERE id = ?`,
 		clientID,
 	)
@@ -47,7 +52,8 @@ func (r *Repository) GetClient(clientID string) (*domain.Client, error) {
 }
 
 func (r *Repository) SaveAuthCode(code *domain.AuthCode) error {
-	_, err := r.db.Exec(
+	_, err := r.db.ExecContext(
+		r.ctx,
 		`INSERT INTO oauth_auth_codes (code, client_id, user_id, redirect_uri, scope, code_challenge, code_challenge_method, expires_at)
 		 VALUES (?, ?, ?, ?, ?, ?, ?, ?)`,
 		code.Code, code.ClientID, code.UserID, code.RedirectURI, code.Scope,
@@ -57,7 +63,8 @@ func (r *Repository) SaveAuthCode(code *domain.AuthCode) error {
 }
 
 func (r *Repository) GetAuthCode(code string) (*domain.AuthCode, error) {
-	row := r.db.QueryRow(
+	row := r.db.QueryRowContext(
+		r.ctx,
 		`SELECT code, client_id, user_id, redirect_uri, scope, code_challenge, code_challenge_method, expires_at, used
 		 FROM oauth_auth_codes WHERE code = ?`,
 		code,
@@ -81,12 +88,13 @@ func (r *Repository) GetAuthCode(code string) (*domain.AuthCode, error) {
 }
 
 func (r *Repository) MarkAuthCodeUsed(code string) error {
-	_, err := r.db.Exec(`UPDATE oauth_auth_codes SET used = 1 WHERE code = ?`, code)
+	_, err := r.db.ExecContext(r.ctx, `UPDATE oauth_auth_codes SET used = 1 WHERE code = ?`, code)
 	return err
 }
 
 func (r *Repository) SaveToken(token *domain.Token) error {
-	_, err := r.db.Exec(
+	_, err := r.db.ExecContext(
+		r.ctx,
 		`INSERT INTO oauth_tokens (access_token, refresh_token, client_id, user_id, scope, expires_at)
 		 VALUES (?, ?, ?, ?, ?, ?)`,
 		token.AccessToken, token.RefreshToken, token.ClientID, token.UserID, token.Scope, token.ExpiresAt,
@@ -95,7 +103,8 @@ func (r *Repository) SaveToken(token *domain.Token) error {
 }
 
 func (r *Repository) GetTokenByRefresh(refreshToken string) (*domain.Token, error) {
-	row := r.db.QueryRow(
+	row := r.db.QueryRowContext(
+		r.ctx,
 		`SELECT id, access_token, refresh_token, client_id, user_id, scope, expires_at, revoked
 		 FROM oauth_tokens WHERE refresh_token = ?`,
 		refreshToken,
@@ -119,13 +128,13 @@ func (r *Repository) GetTokenByRefresh(refreshToken string) (*domain.Token, erro
 }
 
 func (r *Repository) RevokeToken(refreshToken string) error {
-	_, err := r.db.Exec(`UPDATE oauth_tokens SET revoked = 1 WHERE refresh_token = ?`, refreshToken)
+	_, err := r.db.ExecContext(r.ctx, `UPDATE oauth_tokens SET revoked = 1 WHERE refresh_token = ?`, refreshToken)
 	return err
 }
 
 func (r *Repository) GetUserPasswordHash(userID int64) (string, error) {
 	var hash string
-	err := r.db.QueryRow(`SELECT password_hash FROM users WHERE id = ?`, userID).Scan(&hash)
+	err := r.db.QueryRowContext(r.ctx, `SELECT password_hash FROM users WHERE id = ?`, userID).Scan(&hash)
 	if errors.Is(err, sql.ErrNoRows) {
 		return "", errors.New("user not found")
 	}
@@ -134,7 +143,7 @@ func (r *Repository) GetUserPasswordHash(userID int64) (string, error) {
 
 func (r *Repository) GetUserIDByEmail(email string) (int64, error) {
 	var userID int64
-	err := r.db.QueryRow(`SELECT id FROM users WHERE email = ? LIMIT 1`, email).Scan(&userID)
+	err := r.db.QueryRowContext(r.ctx, `SELECT id FROM users WHERE email = ? LIMIT 1`, email).Scan(&userID)
 	if errors.Is(err, sql.ErrNoRows) {
 		return 0, errors.New("user not found")
 	}
@@ -146,7 +155,8 @@ func (r *Repository) GetUserBusinessIDAndRole(userID int64) (int64, string, erro
 	var businessID sql.NullInt64
 	var role string
 
-	err := r.db.QueryRow(
+	err := r.db.QueryRowContext(
+		r.ctx,
 		`SELECT u.business_id, COALESCE(uap.role, '')
 		 FROM users u
 		 LEFT JOIN user_app_permissions uap ON uap.user_id = u.id

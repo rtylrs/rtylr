@@ -106,7 +106,7 @@ func (s *Service) CreateShiftAssignment(ctx context.Context, ownerID int64, assi
 	return s.repo.CreateShiftAssignment(ctx, ownerID, assignment)
 }
 
-func (s *Service) PublishRoster(ctx context.Context, ownerID int64, locationID int64, weekStart string) error {
+func (s *Service) PublishRoster(ctx context.Context, ownerID, locationID int64, weekStart string) error {
 	ws, err := time.Parse("2006-01-02", weekStart)
 	if err != nil {
 		return err

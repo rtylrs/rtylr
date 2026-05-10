@@ -1,9 +1,8 @@
 package handlers
 
 import (
-	"net/http"
-
 	"context"
+	"net/http"
 	"strconv"
 	"time"
 

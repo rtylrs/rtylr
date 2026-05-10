@@ -12,7 +12,7 @@ import (
 	"sync"
 	"time"
 
-	_ "github.com/go-sql-driver/mysql"
+	_ "github.com/go-sql-driver/mysql" // register MySQL driver
 	"github.com/voxire/onion/internal/platform/logger"
 )
 
@@ -43,11 +43,11 @@ const (
 	//   DB_MAX_IDLE_CONNS   (default 10)
 	//   DB_CONN_MAX_LIFETIME (default 30m, e.g. "30m", "1h")
 	//   DB_CONN_MAX_IDLE_TIME (default 10m)
-	DefaultMaxOpenConns     = 25
-	DefaultMaxIdleConns     = 10
-	DefaultConnMaxLifetime  = 30 * time.Minute
-	DefaultConnMaxIdleTime  = 10 * time.Minute
-	DefaultRetryInterval    = 2 * time.Second
+	DefaultMaxOpenConns    = 25
+	DefaultMaxIdleConns    = 10
+	DefaultConnMaxLifetime = 30 * time.Minute
+	DefaultConnMaxIdleTime = 10 * time.Minute
+	DefaultRetryInterval   = 2 * time.Second
 
 	// DSN-level timeouts — prevent a single slow query or dead socket
 	// from hanging a goroutine indefinitely.

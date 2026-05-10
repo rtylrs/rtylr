@@ -4,6 +4,7 @@ import (
 	"context"
 	"database/sql"
 	"encoding/json"
+	"errors"
 	"fmt"
 	"strconv"
 	"time"
@@ -103,7 +104,7 @@ func (r *Repository) Delete(ctx context.Context, ownerID, id int64) error {
 func (r *Repository) Get(ctx context.Context, ownerID, id int64) (domain.Quote, error) {
 	row, err := r.queries.GetQuote(ctx, sqlc.GetQuoteParams{ID: id, OwnerID: ownerID})
 	if err != nil {
-		if err == sql.ErrNoRows {
+		if errors.Is(err, sql.ErrNoRows) {
 			return domain.Quote{}, domain.ErrQuoteNotFound
 		}
 		logger.Ctx(ctx).Error("Failed to get quote", logger.Error(err))
@@ -136,7 +137,7 @@ func (r *Repository) ConvertToInvoice(ctx context.Context, ownerID, quoteID int6
 	quoteRow, err := qtx.GetQuote(ctx, sqlc.GetQuoteParams{ID: quoteID, OwnerID: ownerID})
 	if err != nil {
 		_ = tx.Rollback()
-		if err == sql.ErrNoRows {
+		if errors.Is(err, sql.ErrNoRows) {
 			return 0, domain.ErrQuoteNotFound
 		}
 		logger.Ctx(ctx).Error("Failed to load quote for conversion", logger.Error(err))

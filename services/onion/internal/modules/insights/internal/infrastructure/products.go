@@ -8,10 +8,10 @@ import (
 
 // ProductKPIs summarises the state of the ERP product catalog.
 type ProductKPIs struct {
-	TotalSKUs     int64
-	ActiveSKUs    int64
-	OutOfStock    int64
-	AvgMarginPct  float64
+	TotalSKUs    int64
+	ActiveSKUs   int64
+	OutOfStock   int64
+	AvgMarginPct float64
 }
 
 // GetProductKPIs reads counts and an average margin from erp_products.

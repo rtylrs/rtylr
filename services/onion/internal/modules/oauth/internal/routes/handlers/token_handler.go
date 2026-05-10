@@ -5,11 +5,10 @@ import (
 	"errors"
 	"net/http"
 
-	authPkg "github.com/voxire/onion/internal/platform/auth"
-	errorModels "github.com/voxire/onion/internal/platform/errors"
-
 	"github.com/voxire/onion/internal/modules/oauth/internal/application"
 	"github.com/voxire/onion/internal/modules/oauth/internal/domain"
+	authPkg "github.com/voxire/onion/internal/platform/auth"
+	errorModels "github.com/voxire/onion/internal/platform/errors"
 )
 
 // TokenRoutes returns the paths for the token endpoint.

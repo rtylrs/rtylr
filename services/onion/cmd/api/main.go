@@ -21,7 +21,6 @@ import (
 	bankaccounts "github.com/voxire/onion/internal/modules/bank_accounts"
 	"github.com/voxire/onion/internal/modules/benefits"
 	"github.com/voxire/onion/internal/modules/billing"
-	"github.com/voxire/onion/internal/modules/subscriptions"
 	"github.com/voxire/onion/internal/modules/bills"
 	bookingappointments "github.com/voxire/onion/internal/modules/booking_appointments"
 	bookingcalendar "github.com/voxire/onion/internal/modules/booking_calendar"
@@ -36,8 +35,8 @@ import (
 	"github.com/voxire/onion/internal/modules/careers"
 	"github.com/voxire/onion/internal/modules/categories"
 	"github.com/voxire/onion/internal/modules/config"
-	crmsettings "github.com/voxire/onion/internal/modules/crm_settings"
 	crmsales "github.com/voxire/onion/internal/modules/crm_sales"
+	crmsettings "github.com/voxire/onion/internal/modules/crm_settings"
 	"github.com/voxire/onion/internal/modules/customers"
 	"github.com/voxire/onion/internal/modules/cycles"
 	"github.com/voxire/onion/internal/modules/departments"
@@ -45,6 +44,10 @@ import (
 	"github.com/voxire/onion/internal/modules/echo"
 	"github.com/voxire/onion/internal/modules/expenses"
 	"github.com/voxire/onion/internal/modules/feedback"
+	financebankfeeds "github.com/voxire/onion/internal/modules/finance_bank_feeds"
+	financereconciliation "github.com/voxire/onion/internal/modules/finance_reconciliation"
+	financereports "github.com/voxire/onion/internal/modules/finance_reports"
+	flowinsights "github.com/voxire/onion/internal/modules/flow_insights"
 	hrattendance "github.com/voxire/onion/internal/modules/hr_attendance"
 	hrcore "github.com/voxire/onion/internal/modules/hr_core"
 	hrdashboard "github.com/voxire/onion/internal/modules/hr_dashboard"
@@ -59,10 +62,6 @@ import (
 	hrsetup "github.com/voxire/onion/internal/modules/hr_setup"
 	hrshifts "github.com/voxire/onion/internal/modules/hr_shifts"
 	hrtime "github.com/voxire/onion/internal/modules/hr_time"
-	financebankfeeds "github.com/voxire/onion/internal/modules/finance_bank_feeds"
-	financereconciliation "github.com/voxire/onion/internal/modules/finance_reconciliation"
-	financereports "github.com/voxire/onion/internal/modules/finance_reports"
-	flowinsights "github.com/voxire/onion/internal/modules/flow_insights"
 	"github.com/voxire/onion/internal/modules/insights"
 	"github.com/voxire/onion/internal/modules/integrations"
 	"github.com/voxire/onion/internal/modules/inventory"
@@ -118,6 +117,7 @@ import (
 	storeshipping "github.com/voxire/onion/internal/modules/store_shipping"
 	storethemes "github.com/voxire/onion/internal/modules/store_themes"
 	"github.com/voxire/onion/internal/modules/storefronts"
+	"github.com/voxire/onion/internal/modules/subscriptions"
 	"github.com/voxire/onion/internal/modules/suppliers"
 	supportcanned "github.com/voxire/onion/internal/modules/support_canned"
 	supportcustomers "github.com/voxire/onion/internal/modules/support_customers"
@@ -300,132 +300,132 @@ func run(ctx context.Context) error {
 }
 
 type apiModules struct {
-	Accounts             *accounts.Module
-	Activity             *activity.Module
-	Addons               *addons.Module
-	APIKeys              *apikeys.Module
-	Apps                 *apps.Module
-	Automations          *automations.Module
-	BankAccounts         *bankaccounts.Module
-	Benefits             *benefits.Module
-	Billing              *billing.Module
-	Subscriptions        *subscriptions.Module
-	Bills                *bills.Module
-	BookingAppointments  *bookingappointments.Module
-	BookingCalendar      *bookingcalendar.Module
-	BookingDashboard     *bookingdashboard.Module
-	BookingReminders     *bookingreminders.Module
-	BookingResources     *bookingresources.Module
-	BookingServices      *bookingservices.Module
-	BookingWaitlist      *bookingwaitlist.Module
-	Brands               *brands.Module
-	Business             *business.Module
-	Campaigns            *campaigns.Module
-	Careers              *careers.Module
-	Categories           *categories.Module
-	Config               *config.Module
-	CRMSettings          *crmsettings.Module
-	CRMSales             *crmsales.Module
-	Customers            *customers.Module
-	Cycles               *cycles.Module
-	Departments          *departments.Module
-	Documents            *documents.Module
-	Echo                 *echo.Module
-	Expenses             *expenses.Module
-	Feedback             *feedback.Module
+	Accounts              *accounts.Module
+	Activity              *activity.Module
+	Addons                *addons.Module
+	APIKeys               *apikeys.Module
+	Apps                  *apps.Module
+	Automations           *automations.Module
+	BankAccounts          *bankaccounts.Module
+	Benefits              *benefits.Module
+	Billing               *billing.Module
+	Subscriptions         *subscriptions.Module
+	Bills                 *bills.Module
+	BookingAppointments   *bookingappointments.Module
+	BookingCalendar       *bookingcalendar.Module
+	BookingDashboard      *bookingdashboard.Module
+	BookingReminders      *bookingreminders.Module
+	BookingResources      *bookingresources.Module
+	BookingServices       *bookingservices.Module
+	BookingWaitlist       *bookingwaitlist.Module
+	Brands                *brands.Module
+	Business              *business.Module
+	Campaigns             *campaigns.Module
+	Careers               *careers.Module
+	Categories            *categories.Module
+	Config                *config.Module
+	CRMSettings           *crmsettings.Module
+	CRMSales              *crmsales.Module
+	Customers             *customers.Module
+	Cycles                *cycles.Module
+	Departments           *departments.Module
+	Documents             *documents.Module
+	Echo                  *echo.Module
+	Expenses              *expenses.Module
+	Feedback              *feedback.Module
 	FinanceBankFeeds      *financebankfeeds.Module
 	FinanceReconciliation *financereconciliation.Module
-	FinanceReports       *financereports.Module
-	FlowInsights         *flowinsights.Module
-	HRAttendance         *hrattendance.Module
-	HRCore               *hrcore.Module
-	HRDashboard          *hrdashboard.Module
-	HRDocuments          *hrdocuments.Module
-	HREquipment          *hrequipment.Module
-	HRLeave              *hrleave.Module
-	HROnboarding         *hronboarding.Module
-	HROvertime           *hrovertime.Module
-	HRPayroll            *hrpayroll.Module
-	HRPerformance        *hrperformance.Module
-	HRReports            *hrreports.Module
-	HRSetup              *hrsetup.Module
-	HRShifts             *hrshifts.Module
-	HRTime               *hrtime.Module
-	Insights             *insights.Module
-	Integrations         *integrations.Module
-	Inventory            *inventory.Module
-	Invoices             *invoices.Module
-	Journal              *journal.Module
-	KPIs                 *kpis.Module
-	Loyalty              *loyalty.Module
-	Memory               *memory.Module
-	Milestones           *milestones.Module
-	Notifications        *notifications.Module
-	OAuth                *oauth.Module
-	OneOnOnes            *oneonones.Module
-	Payroll              *payroll.Module
-	PosAudit             *posaudit.Module
-	PosCashMovements     *poscashmovements.Module
-	PosCombos            *poscombos.Module
-	PosCustomers         *poscustomers.Module
-	PosDaySummary        *posdaysummary.Module
-	PosFloors            *posfloors.Module
-	PosGiftCards         *posgiftcards.Module
-	PosKDS               *poskds.Module
-	PosLocations         *poslocations.Module
-	PosLoyalty           *posloyalty.Module
-	PosManager           *posmanager.Module
-	PosMemberLocations   *posmemberlocations.Module
-	PosMenu              *posmenu.Module
-	PosModifiers         *posmodifiers.Module
-	PosOrders            *posorders.Module
-	PosReceipts          *posreceipts.Module
-	PosSessions          *possessions.Module
-	PosStockMovements    *posstockmovements.Module
-	PosTables            *postables.Module
-	PosTerminals         *posterminals.Module
-	PosUsers             *posusers.Module
-	PriceLists           *pricelists.Module
-	Products             *products.Module
-	PurchaseOrders       *purchaseorders.Module
-	Quotes               *quotes.Module
-	RecurringInvoices    *recurringinvoices.Module
-	Reviews              *reviews.Module
-	Roles                *roles.Module
-	Security             *security.Module
-	Segments             *segments.Module
-	Shifts               *shifts.Module
-	Staff                *staff.Module
-	StockTakes           *stocktakes.Module
-	StockTransfers       *stocktransfers.Module
-	StoreCategories      *storecategories.Module
-	StoreCheckout        *storecheckout.Module
-	Storefronts          *storefronts.Module
-	StoreOrders          *storeorders.Module
-	StorePayments        *storepayments.Module
-	StoreProducts        *storeproducts.Module
-	StoreShipping        *storeshipping.Module
-	StoreThemes          *storethemes.Module
-	SupportCanned        *supportcanned.Module
-	SupportCustomers     *supportcustomers.Module
-	SupportInbox         *supportinbox.Module
-	SupportKnowledge     *supportknowledge.Module
-	SupportSettings      *supportsettings.Module
-	SupportTickets       *supporttickets.Module
-	Suppliers            *suppliers.Module
-	Tax                  *tax.Module
-	Team                 *team.Module
-	Templates            *templates.Module
-	TimeOff              *timeoff.Module
-	Timesheets           *timesheets.Module
-	Training             *training.Module
-	User                 *user.Module
-	Variants             *variants.Module
-	Views                *views.Module
-	Warehouses           *warehouses.Module
-	Webhooks             *webhooks.Module
-	WebsiteLead          *websitelead.Module
-	Workspaces           *workspaces.Module
+	FinanceReports        *financereports.Module
+	FlowInsights          *flowinsights.Module
+	HRAttendance          *hrattendance.Module
+	HRCore                *hrcore.Module
+	HRDashboard           *hrdashboard.Module
+	HRDocuments           *hrdocuments.Module
+	HREquipment           *hrequipment.Module
+	HRLeave               *hrleave.Module
+	HROnboarding          *hronboarding.Module
+	HROvertime            *hrovertime.Module
+	HRPayroll             *hrpayroll.Module
+	HRPerformance         *hrperformance.Module
+	HRReports             *hrreports.Module
+	HRSetup               *hrsetup.Module
+	HRShifts              *hrshifts.Module
+	HRTime                *hrtime.Module
+	Insights              *insights.Module
+	Integrations          *integrations.Module
+	Inventory             *inventory.Module
+	Invoices              *invoices.Module
+	Journal               *journal.Module
+	KPIs                  *kpis.Module
+	Loyalty               *loyalty.Module
+	Memory                *memory.Module
+	Milestones            *milestones.Module
+	Notifications         *notifications.Module
+	OAuth                 *oauth.Module
+	OneOnOnes             *oneonones.Module
+	Payroll               *payroll.Module
+	PosAudit              *posaudit.Module
+	PosCashMovements      *poscashmovements.Module
+	PosCombos             *poscombos.Module
+	PosCustomers          *poscustomers.Module
+	PosDaySummary         *posdaysummary.Module
+	PosFloors             *posfloors.Module
+	PosGiftCards          *posgiftcards.Module
+	PosKDS                *poskds.Module
+	PosLocations          *poslocations.Module
+	PosLoyalty            *posloyalty.Module
+	PosManager            *posmanager.Module
+	PosMemberLocations    *posmemberlocations.Module
+	PosMenu               *posmenu.Module
+	PosModifiers          *posmodifiers.Module
+	PosOrders             *posorders.Module
+	PosReceipts           *posreceipts.Module
+	PosSessions           *possessions.Module
+	PosStockMovements     *posstockmovements.Module
+	PosTables             *postables.Module
+	PosTerminals          *posterminals.Module
+	PosUsers              *posusers.Module
+	PriceLists            *pricelists.Module
+	Products              *products.Module
+	PurchaseOrders        *purchaseorders.Module
+	Quotes                *quotes.Module
+	RecurringInvoices     *recurringinvoices.Module
+	Reviews               *reviews.Module
+	Roles                 *roles.Module
+	Security              *security.Module
+	Segments              *segments.Module
+	Shifts                *shifts.Module
+	Staff                 *staff.Module
+	StockTakes            *stocktakes.Module
+	StockTransfers        *stocktransfers.Module
+	StoreCategories       *storecategories.Module
+	StoreCheckout         *storecheckout.Module
+	Storefronts           *storefronts.Module
+	StoreOrders           *storeorders.Module
+	StorePayments         *storepayments.Module
+	StoreProducts         *storeproducts.Module
+	StoreShipping         *storeshipping.Module
+	StoreThemes           *storethemes.Module
+	SupportCanned         *supportcanned.Module
+	SupportCustomers      *supportcustomers.Module
+	SupportInbox          *supportinbox.Module
+	SupportKnowledge      *supportknowledge.Module
+	SupportSettings       *supportsettings.Module
+	SupportTickets        *supporttickets.Module
+	Suppliers             *suppliers.Module
+	Tax                   *tax.Module
+	Team                  *team.Module
+	Templates             *templates.Module
+	TimeOff               *timeoff.Module
+	Timesheets            *timesheets.Module
+	Training              *training.Module
+	User                  *user.Module
+	Variants              *variants.Module
+	Views                 *views.Module
+	Warehouses            *warehouses.Module
+	Webhooks              *webhooks.Module
+	WebsiteLead           *websitelead.Module
+	Workspaces            *workspaces.Module
 }
 
 func initializeModules(ctx context.Context) *apiModules {
@@ -433,132 +433,132 @@ func initializeModules(ctx context.Context) *apiModules {
 	hrCoreModule := hrcore.NewModule(ctx)
 
 	return &apiModules{
-		Accounts:             accounts.NewModule(ctx),
-		Activity:             activity.NewModule(ctx),
-		Addons:               addons.NewModule(ctx),
-		APIKeys:              apikeys.NewModule(ctx),
-		Apps:                 apps.NewModule(ctx),
-		Automations:          automations.NewModule(ctx),
-		BankAccounts:         bankaccounts.NewModule(ctx),
-		Benefits:             benefits.NewModule(ctx),
-		Billing:              billing.NewModule(ctx),
-		Subscriptions:        subscriptions.NewModule(ctx),
-		Bills:                bills.NewModule(ctx),
-		BookingAppointments:  bookingappointments.NewModule(ctx),
-		BookingCalendar:      bookingcalendar.NewModule(ctx),
-		BookingDashboard:     bookingdashboard.NewModule(ctx),
-		BookingReminders:     bookingreminders.NewModule(ctx),
-		BookingResources:     bookingresources.NewModule(ctx),
-		BookingServices:      bookingservices.NewModule(ctx),
-		BookingWaitlist:      bookingwaitlist.NewModule(ctx),
-		Brands:               brands.NewModule(ctx),
-		Business:             business.NewModule(ctx),
-		Campaigns:            campaigns.NewModule(ctx),
-		Careers:              careers.NewModule(ctx),
-		Categories:           categories.NewModule(ctx),
-		Config:               config.NewModule(ctx),
-		CRMSettings:          crmsettings.NewModule(ctx),
-		CRMSales:             crmsales.NewModule(ctx),
-		Customers:            customers.NewModule(ctx),
-		Cycles:               cycles.NewModule(ctx),
-		Departments:          departments.NewModule(ctx),
-		Documents:            documents.NewModule(ctx),
-		Echo:                 echo.NewModule(ctx, memoryModule),
-		Expenses:             expenses.NewModule(ctx),
-		Feedback:             feedback.NewModule(ctx),
+		Accounts:              accounts.NewModule(ctx),
+		Activity:              activity.NewModule(ctx),
+		Addons:                addons.NewModule(ctx),
+		APIKeys:               apikeys.NewModule(ctx),
+		Apps:                  apps.NewModule(ctx),
+		Automations:           automations.NewModule(ctx),
+		BankAccounts:          bankaccounts.NewModule(ctx),
+		Benefits:              benefits.NewModule(ctx),
+		Billing:               billing.NewModule(ctx),
+		Subscriptions:         subscriptions.NewModule(ctx),
+		Bills:                 bills.NewModule(ctx),
+		BookingAppointments:   bookingappointments.NewModule(ctx),
+		BookingCalendar:       bookingcalendar.NewModule(ctx),
+		BookingDashboard:      bookingdashboard.NewModule(ctx),
+		BookingReminders:      bookingreminders.NewModule(ctx),
+		BookingResources:      bookingresources.NewModule(ctx),
+		BookingServices:       bookingservices.NewModule(ctx),
+		BookingWaitlist:       bookingwaitlist.NewModule(ctx),
+		Brands:                brands.NewModule(ctx),
+		Business:              business.NewModule(ctx),
+		Campaigns:             campaigns.NewModule(ctx),
+		Careers:               careers.NewModule(ctx),
+		Categories:            categories.NewModule(ctx),
+		Config:                config.NewModule(ctx),
+		CRMSettings:           crmsettings.NewModule(ctx),
+		CRMSales:              crmsales.NewModule(ctx),
+		Customers:             customers.NewModule(ctx),
+		Cycles:                cycles.NewModule(ctx),
+		Departments:           departments.NewModule(ctx),
+		Documents:             documents.NewModule(ctx),
+		Echo:                  echo.NewModule(ctx, memoryModule),
+		Expenses:              expenses.NewModule(ctx),
+		Feedback:              feedback.NewModule(ctx),
 		FinanceBankFeeds:      financebankfeeds.NewModule(ctx),
 		FinanceReconciliation: financereconciliation.NewModule(ctx),
-		FinanceReports:       financereports.NewModule(ctx),
-		FlowInsights:         flowinsights.NewModule(ctx),
-		HRAttendance:         hrattendance.NewModule(ctx),
-		HRCore:               hrCoreModule,
-		HRDashboard:          hrdashboard.NewModule(ctx),
-		HRDocuments:          hrdocuments.NewModule(ctx),
-		HREquipment:          hrequipment.NewModule(ctx, hrCoreModule),
-		HRLeave:              hrleave.NewModule(ctx, hrCoreModule),
-		HROnboarding:         hronboarding.NewModule(ctx),
-		HROvertime:           hrovertime.NewModule(ctx, hrCoreModule),
-		HRPayroll:            hrpayroll.NewModule(ctx, hrCoreModule),
-		HRPerformance:        hrperformance.NewModule(ctx),
-		HRReports:            hrreports.NewModule(ctx),
-		HRSetup:              hrsetup.NewModule(ctx),
-		HRShifts:             hrshifts.NewModule(ctx),
-		HRTime:               hrtime.NewModule(ctx, hrCoreModule),
-		Insights:             insights.NewModule(ctx),
-		Integrations:         integrations.NewModule(ctx),
-		Inventory:            inventory.NewModule(ctx),
-		Invoices:             invoices.NewModule(ctx),
-		Journal:              journal.NewModule(ctx),
-		KPIs:                 kpis.NewModule(ctx),
-		Loyalty:              loyalty.NewModule(ctx),
-		Memory:               memoryModule,
-		Milestones:           milestones.NewModule(ctx),
-		Notifications:        notifications.NewModule(ctx),
-		OAuth:                oauth.NewModule(ctx),
-		OneOnOnes:            oneonones.NewModule(ctx),
-		Payroll:              payroll.NewModule(ctx),
-		PosAudit:             posaudit.NewModule(ctx),
-		PosCashMovements:     poscashmovements.NewModule(ctx),
-		PosCombos:            poscombos.NewModule(ctx),
-		PosCustomers:         poscustomers.NewModule(ctx),
-		PosDaySummary:        posdaysummary.NewModule(ctx),
-		PosFloors:            posfloors.NewModule(ctx),
-		PosGiftCards:         posgiftcards.NewModule(ctx),
-		PosKDS:               poskds.NewModule(ctx),
-		PosLocations:         poslocations.NewModule(ctx),
-		PosLoyalty:           posloyalty.NewModule(ctx),
-		PosManager:           posmanager.NewModule(ctx),
-		PosMemberLocations:   posmemberlocations.NewModule(ctx),
-		PosMenu:              posmenu.NewModule(ctx),
-		PosModifiers:         posmodifiers.NewModule(ctx),
-		PosOrders:            posorders.NewModule(ctx),
-		PosReceipts:          posreceipts.NewModule(ctx),
-		PosSessions:          possessions.NewModule(ctx),
-		PosStockMovements:    posstockmovements.NewModule(ctx),
-		PosTables:            postables.NewModule(ctx),
-		PosTerminals:         posterminals.NewModule(ctx),
-		PosUsers:             posusers.NewModule(ctx),
-		PriceLists:           pricelists.NewModule(ctx),
-		Products:             products.NewModule(ctx),
-		PurchaseOrders:       purchaseorders.NewModule(ctx),
-		Quotes:               quotes.NewModule(ctx),
-		RecurringInvoices:    recurringinvoices.NewModule(ctx),
-		Reviews:              reviews.NewModule(ctx),
-		Roles:                roles.NewModule(ctx),
-		Security:             security.NewModule(ctx),
-		Segments:             segments.NewModule(ctx),
-		Shifts:               shifts.NewModule(ctx),
-		Staff:                staff.NewModule(ctx),
-		StockTakes:           stocktakes.NewModule(ctx),
-		StockTransfers:       stocktransfers.NewModule(ctx),
-		StoreCategories:      storecategories.NewModule(ctx),
-		StoreCheckout:        storecheckout.NewModule(ctx),
-		Storefronts:          storefronts.NewModule(ctx),
-		StoreOrders:          storeorders.NewModule(ctx),
-		StorePayments:        storepayments.NewModule(ctx),
-		StoreProducts:        storeproducts.NewModule(ctx),
-		StoreShipping:        storeshipping.NewModule(ctx),
-		StoreThemes:          storethemes.NewModule(ctx),
-		SupportCanned:        supportcanned.NewModule(ctx),
-		SupportCustomers:     supportcustomers.NewModule(ctx),
-		SupportInbox:         supportinbox.NewModule(ctx),
-		SupportKnowledge:     supportknowledge.NewModule(ctx),
-		SupportSettings:      supportsettings.NewModule(ctx),
-		SupportTickets:       supporttickets.NewModule(ctx),
-		Suppliers:            suppliers.NewModule(ctx),
-		Tax:                  tax.NewModule(ctx),
-		Team:                 team.NewModule(ctx),
-		Templates:            templates.NewModule(ctx),
-		TimeOff:              timeoff.NewModule(ctx),
-		Timesheets:           timesheets.NewModule(ctx),
-		Training:             training.NewModule(ctx),
-		User:                 user.NewModule(ctx),
-		Variants:             variants.NewModule(ctx),
-		Views:                views.NewModule(ctx),
-		Warehouses:           warehouses.NewModule(ctx),
-		Webhooks:             webhooks.NewModule(ctx),
-		WebsiteLead:          websitelead.NewModule(ctx),
-		Workspaces:           workspaces.NewModule(ctx),
+		FinanceReports:        financereports.NewModule(ctx),
+		FlowInsights:          flowinsights.NewModule(ctx),
+		HRAttendance:          hrattendance.NewModule(ctx),
+		HRCore:                hrCoreModule,
+		HRDashboard:           hrdashboard.NewModule(ctx),
+		HRDocuments:           hrdocuments.NewModule(ctx),
+		HREquipment:           hrequipment.NewModule(ctx, hrCoreModule),
+		HRLeave:               hrleave.NewModule(ctx, hrCoreModule),
+		HROnboarding:          hronboarding.NewModule(ctx),
+		HROvertime:            hrovertime.NewModule(ctx, hrCoreModule),
+		HRPayroll:             hrpayroll.NewModule(ctx, hrCoreModule),
+		HRPerformance:         hrperformance.NewModule(ctx),
+		HRReports:             hrreports.NewModule(ctx),
+		HRSetup:               hrsetup.NewModule(ctx),
+		HRShifts:              hrshifts.NewModule(ctx),
+		HRTime:                hrtime.NewModule(ctx, hrCoreModule),
+		Insights:              insights.NewModule(ctx),
+		Integrations:          integrations.NewModule(ctx),
+		Inventory:             inventory.NewModule(ctx),
+		Invoices:              invoices.NewModule(ctx),
+		Journal:               journal.NewModule(ctx),
+		KPIs:                  kpis.NewModule(ctx),
+		Loyalty:               loyalty.NewModule(ctx),
+		Memory:                memoryModule,
+		Milestones:            milestones.NewModule(ctx),
+		Notifications:         notifications.NewModule(ctx),
+		OAuth:                 oauth.NewModule(ctx),
+		OneOnOnes:             oneonones.NewModule(ctx),
+		Payroll:               payroll.NewModule(ctx),
+		PosAudit:              posaudit.NewModule(ctx),
+		PosCashMovements:      poscashmovements.NewModule(ctx),
+		PosCombos:             poscombos.NewModule(ctx),
+		PosCustomers:          poscustomers.NewModule(ctx),
+		PosDaySummary:         posdaysummary.NewModule(ctx),
+		PosFloors:             posfloors.NewModule(ctx),
+		PosGiftCards:          posgiftcards.NewModule(ctx),
+		PosKDS:                poskds.NewModule(ctx),
+		PosLocations:          poslocations.NewModule(ctx),
+		PosLoyalty:            posloyalty.NewModule(ctx),
+		PosManager:            posmanager.NewModule(ctx),
+		PosMemberLocations:    posmemberlocations.NewModule(ctx),
+		PosMenu:               posmenu.NewModule(ctx),
+		PosModifiers:          posmodifiers.NewModule(ctx),
+		PosOrders:             posorders.NewModule(ctx),
+		PosReceipts:           posreceipts.NewModule(ctx),
+		PosSessions:           possessions.NewModule(ctx),
+		PosStockMovements:     posstockmovements.NewModule(ctx),
+		PosTables:             postables.NewModule(ctx),
+		PosTerminals:          posterminals.NewModule(ctx),
+		PosUsers:              posusers.NewModule(ctx),
+		PriceLists:            pricelists.NewModule(ctx),
+		Products:              products.NewModule(ctx),
+		PurchaseOrders:        purchaseorders.NewModule(ctx),
+		Quotes:                quotes.NewModule(ctx),
+		RecurringInvoices:     recurringinvoices.NewModule(ctx),
+		Reviews:               reviews.NewModule(ctx),
+		Roles:                 roles.NewModule(ctx),
+		Security:              security.NewModule(ctx),
+		Segments:              segments.NewModule(ctx),
+		Shifts:                shifts.NewModule(ctx),
+		Staff:                 staff.NewModule(ctx),
+		StockTakes:            stocktakes.NewModule(ctx),
+		StockTransfers:        stocktransfers.NewModule(ctx),
+		StoreCategories:       storecategories.NewModule(ctx),
+		StoreCheckout:         storecheckout.NewModule(ctx),
+		Storefronts:           storefronts.NewModule(ctx),
+		StoreOrders:           storeorders.NewModule(ctx),
+		StorePayments:         storepayments.NewModule(ctx),
+		StoreProducts:         storeproducts.NewModule(ctx),
+		StoreShipping:         storeshipping.NewModule(ctx),
+		StoreThemes:           storethemes.NewModule(ctx),
+		SupportCanned:         supportcanned.NewModule(ctx),
+		SupportCustomers:      supportcustomers.NewModule(ctx),
+		SupportInbox:          supportinbox.NewModule(ctx),
+		SupportKnowledge:      supportknowledge.NewModule(ctx),
+		SupportSettings:       supportsettings.NewModule(ctx),
+		SupportTickets:        supporttickets.NewModule(ctx),
+		Suppliers:             suppliers.NewModule(ctx),
+		Tax:                   tax.NewModule(ctx),
+		Team:                  team.NewModule(ctx),
+		Templates:             templates.NewModule(ctx),
+		TimeOff:               timeoff.NewModule(ctx),
+		Timesheets:            timesheets.NewModule(ctx),
+		Training:              training.NewModule(ctx),
+		User:                  user.NewModule(ctx),
+		Variants:              variants.NewModule(ctx),
+		Views:                 views.NewModule(ctx),
+		Warehouses:            warehouses.NewModule(ctx),
+		Webhooks:              webhooks.NewModule(ctx),
+		WebsiteLead:           websitelead.NewModule(ctx),
+		Workspaces:            workspaces.NewModule(ctx),
 	}
 }
 

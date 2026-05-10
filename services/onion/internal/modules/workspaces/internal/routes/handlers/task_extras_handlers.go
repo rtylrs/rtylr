@@ -7,22 +7,22 @@ import (
 	"time"
 
 	"github.com/go-chi/chi/v5"
-	flowv1 "github.com/voxire/voxie/gen/go/flow/v1"
-
-	authPkg "github.com/voxire/onion/internal/platform/auth"
-	errorModels "github.com/voxire/onion/internal/platform/errors"
-
 	"github.com/voxire/onion/internal/modules/workspaces/internal/application"
 	"github.com/voxire/onion/internal/modules/workspaces/internal/domain"
+	authPkg "github.com/voxire/onion/internal/platform/auth"
+	errorModels "github.com/voxire/onion/internal/platform/errors"
+	flowv1 "github.com/voxire/voxie/gen/go/flow/v1"
 )
 
 // --- Task Activity ---
 
-func GetTaskActivityRoutes() []string       { return []string{"/flow/tasks/{id}/activity"} }
-func GetTaskActivityByQPRoutes() []string   { return []string{"/flow/tasks/activity"} }
+func GetTaskActivityRoutes() []string     { return []string{"/flow/tasks/{id}/activity"} }
+func GetTaskActivityByQPRoutes() []string { return []string{"/flow/tasks/activity"} }
 
-type GetTaskActivityHandler struct{ FlowService *application.Service }
-type GetTaskActivityRequest struct{}
+type (
+	GetTaskActivityHandler struct{ FlowService *application.Service }
+	GetTaskActivityRequest struct{}
+)
 
 type GetTaskActivityResponse struct {
 	Activity []*flowv1.TaskActivity `json:"activity"`
@@ -49,7 +49,7 @@ func (h *GetTaskActivityHandler) Serve(ctx context.Context, _ *GetTaskActivityRe
 	return GetTaskActivityResponse{Activity: payloads}, nil
 }
 
-// GetTaskActivityByQPHandler handles GET /flow/tasks/activity?task_id=
+// GetTaskActivityByQPHandler handles GET /flow/tasks/activity?task_id=.
 type GetTaskActivityByQPHandler struct{ FlowService *application.Service }
 
 type GetTaskActivityByQPRequest struct {
@@ -85,11 +85,13 @@ func (h *GetTaskActivityByQPHandler) Serve(ctx context.Context, req *GetTaskActi
 
 func GetSubtasksRoutes() []string { return []string{"/flow/tasks/{id}/subtasks"} }
 
-type GetSubtasksHandler struct{ FlowService *application.Service }
-type GetSubtasksRequest struct{}
-type GetSubtasksResponse struct {
-	Subtasks []TaskPayloadCompact `json:"subtasks"`
-}
+type (
+	GetSubtasksHandler  struct{ FlowService *application.Service }
+	GetSubtasksRequest  struct{}
+	GetSubtasksResponse struct {
+		Subtasks []TaskPayloadCompact `json:"subtasks"`
+	}
+)
 
 type TaskPayloadCompact struct {
 	ID        int64   `json:"id"`
@@ -136,14 +138,14 @@ func CreateSubtaskRoutes() []string { return []string{"/flow/tasks/{id}/subtasks
 type CreateSubtaskHandler struct{ FlowService *application.Service }
 
 type CreateSubtaskRequest struct {
-	ProjectID      int64   `json:"project_id"`
-	WorkspaceID    int64   `json:"workspace_id"`
-	Title          string  `json:"title"`
-	Description    string  `json:"description"`
-	Priority       string  `json:"priority"`
-	AssigneeID     *int64  `json:"assignee_id"`
-	DueDate        *string `json:"due_date"`
-	StartDate      *string `json:"start_date"`
+	ProjectID      int64    `json:"project_id"`
+	WorkspaceID    int64    `json:"workspace_id"`
+	Title          string   `json:"title"`
+	Description    string   `json:"description"`
+	Priority       string   `json:"priority"`
+	AssigneeID     *int64   `json:"assignee_id"`
+	DueDate        *string  `json:"due_date"`
+	StartDate      *string  `json:"start_date"`
 	EstimatedHours *float64 `json:"estimated_hours"`
 }
 
@@ -202,8 +204,10 @@ func (h *CreateSubtaskHandler) Serve(ctx context.Context, req *CreateSubtaskRequ
 
 func GetAttachmentsRoutes() []string { return []string{"/flow/tasks/{id}/attachments"} }
 
-type GetAttachmentsHandler struct{ FlowService *application.Service }
-type GetAttachmentsRequest struct{}
+type (
+	GetAttachmentsHandler struct{ FlowService *application.Service }
+	GetAttachmentsRequest struct{}
+)
 
 type AttachmentPayload struct {
 	ID         int64  `json:"id"`
@@ -300,11 +304,13 @@ func (h *CreateAttachmentHandler) Serve(ctx context.Context, req *CreateAttachme
 
 func DeleteAttachmentRoutes() []string { return []string{"/flow/tasks/{taskId}/attachments/{id}"} }
 
-type DeleteAttachmentHandler struct{ FlowService *application.Service }
-type DeleteAttachmentRequest struct{}
-type DeleteAttachmentResponse struct {
-	Message string `json:"message"`
-}
+type (
+	DeleteAttachmentHandler  struct{ FlowService *application.Service }
+	DeleteAttachmentRequest  struct{}
+	DeleteAttachmentResponse struct {
+		Message string `json:"message"`
+	}
+)
 
 func (h *DeleteAttachmentHandler) Serve(ctx context.Context, _ *DeleteAttachmentRequest) (DeleteAttachmentResponse, *errorModels.ServerError) {
 	device := authPkg.DeviceCtx(ctx)
@@ -326,8 +332,10 @@ func (h *DeleteAttachmentHandler) Serve(ctx context.Context, _ *DeleteAttachment
 
 func GetTimeLogsRoutes() []string { return []string{"/flow/tasks/{id}/time"} }
 
-type GetTimeLogsHandler struct{ FlowService *application.Service }
-type GetTimeLogsRequest struct{}
+type (
+	GetTimeLogsHandler struct{ FlowService *application.Service }
+	GetTimeLogsRequest struct{}
+)
 
 type TimeLogPayload struct {
 	ID              int64  `json:"id"`
@@ -421,11 +429,13 @@ func (h *CreateTimeLogHandler) Serve(ctx context.Context, req *CreateTimeLogRequ
 
 func DeleteTimeLogRoutes() []string { return []string{"/flow/tasks/{taskId}/time/{id}"} }
 
-type DeleteTimeLogHandler struct{ FlowService *application.Service }
-type DeleteTimeLogRequest struct{}
-type DeleteTimeLogResponse struct {
-	Message string `json:"message"`
-}
+type (
+	DeleteTimeLogHandler  struct{ FlowService *application.Service }
+	DeleteTimeLogRequest  struct{}
+	DeleteTimeLogResponse struct {
+		Message string `json:"message"`
+	}
+)
 
 func (h *DeleteTimeLogHandler) Serve(ctx context.Context, _ *DeleteTimeLogRequest) (DeleteTimeLogResponse, *errorModels.ServerError) {
 	device := authPkg.DeviceCtx(ctx)
@@ -454,9 +464,9 @@ func (h *DeleteTimeLogHandler) Serve(ctx context.Context, _ *DeleteTimeLogReques
 
 // --- Flat-URL Time Log endpoints (spec-style: query params / body task_id) ---
 
-func GetTimeLogsFlatRoutes() []string    { return []string{"/flow/tasks/time"} }
-func CreateTimeLogFlatRoutes() []string  { return []string{"/flow/tasks/time"} }
-func DeleteTimeLogFlatRoutes() []string  { return []string{"/flow/tasks/time"} }
+func GetTimeLogsFlatRoutes() []string   { return []string{"/flow/tasks/time"} }
+func CreateTimeLogFlatRoutes() []string { return []string{"/flow/tasks/time"} }
+func DeleteTimeLogFlatRoutes() []string { return []string{"/flow/tasks/time"} }
 
 // GET /flow/tasks/time?task_id=
 

@@ -40,11 +40,13 @@ func configToPayload(c domain.HRCompanyConfigRecord) *HRConfigPayload {
 
 func GetHRConfigRoutes() []string { return []string{"/hr/config"} }
 
-type GetHRConfigHandler struct{ Service *application.Service }
-type GetHRConfigRequest struct{}
-type GetHRConfigResponse struct {
-	Config *HRConfigPayload `json:"config"`
-}
+type (
+	GetHRConfigHandler  struct{ Service *application.Service }
+	GetHRConfigRequest  struct{}
+	GetHRConfigResponse struct {
+		Config *HRConfigPayload `json:"config"`
+	}
+)
 
 func (h *GetHRConfigHandler) Serve(ctx context.Context, _ *GetHRConfigRequest) (GetHRConfigResponse, *errorModels.ServerError) {
 	device := authPkg.DeviceCtx(ctx)
@@ -68,16 +70,19 @@ func (h *GetHRConfigHandler) Serve(ctx context.Context, _ *GetHRConfigRequest) (
 
 func UpsertHRConfigRoutes() []string { return []string{"/hr/config"} }
 
-type UpsertHRConfigHandler struct{ Service *application.Service }
-type UpsertHRConfigRequest struct {
-	CompanyName           string  `json:"company_name"`
-	FiscalYearStartMonth  int32   `json:"fiscal_year_start_month"`
-	DefaultCurrency       string  `json:"default_currency"`
-	DefaultTimezone       string  `json:"default_timezone"`
-	DefaultWorkScheduleID int64   `json:"default_work_schedule_id"`
-	OvertimeEnabled       bool    `json:"overtime_enabled"`
-	OvertimeMultiplier    float64 `json:"overtime_multiplier"`
-}
+type (
+	UpsertHRConfigHandler struct{ Service *application.Service }
+	UpsertHRConfigRequest struct {
+		CompanyName           string  `json:"company_name"`
+		FiscalYearStartMonth  int32   `json:"fiscal_year_start_month"`
+		DefaultCurrency       string  `json:"default_currency"`
+		DefaultTimezone       string  `json:"default_timezone"`
+		DefaultWorkScheduleID int64   `json:"default_work_schedule_id"`
+		OvertimeEnabled       bool    `json:"overtime_enabled"`
+		OvertimeMultiplier    float64 `json:"overtime_multiplier"`
+	}
+)
+
 type UpsertHRConfigResponse struct {
 	Config *HRConfigPayload `json:"config"`
 }

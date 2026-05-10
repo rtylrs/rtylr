@@ -6,13 +6,11 @@ import (
 	"errors"
 	"net/http"
 
-	crmv1 "github.com/voxire/voxie/gen/go/crm/v1"
-
-	authPkg "github.com/voxire/onion/internal/platform/auth"
-	errorModels "github.com/voxire/onion/internal/platform/errors"
-
 	"github.com/voxire/onion/internal/modules/customers/internal/application"
 	"github.com/voxire/onion/internal/modules/customers/internal/domain"
+	authPkg "github.com/voxire/onion/internal/platform/auth"
+	errorModels "github.com/voxire/onion/internal/platform/errors"
+	crmv1 "github.com/voxire/voxie/gen/go/crm/v1"
 )
 
 func SegmentListRoutes() []string {
@@ -34,7 +32,7 @@ func SegmentDeleteRoutes() []string {
 func newSegmentPayload(seg domain.Segment) *crmv1.Segment {
 	p := &crmv1.Segment{
 		Id:            seg.ID,
-		OwnerId:      seg.OwnerID,
+		OwnerId:       seg.OwnerID,
 		Name:          seg.Name,
 		Description:   seg.Description,
 		Rules:         string(seg.Rules),

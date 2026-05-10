@@ -25,15 +25,19 @@ type mockRepo struct {
 func (m *mockRepo) ListUnmatchedBankFeeds(_ context.Context, _ int64) ([]domain.UnmatchedBankTransaction, error) {
 	return m.bank, m.bankErr
 }
+
 func (m *mockRepo) ListUnmatchedInvoices(_ context.Context, _ int64) ([]domain.UnmatchedInvoice, error) {
 	return m.invoices, m.invErr
 }
+
 func (m *mockRepo) ListUnmatchedExpenses(_ context.Context, _ int64) ([]domain.UnmatchedInvoice, error) {
 	return m.expenses, m.expErr
 }
+
 func (m *mockRepo) BankFeedExists(_ context.Context, _, _ int64) (bool, error) {
 	return m.exists, m.existsErr
 }
+
 func (m *mockRepo) CreateMatch(_ context.Context, _ int64, _ domain.MatchInput) (int64, error) {
 	return m.matchID, m.matchErr
 }

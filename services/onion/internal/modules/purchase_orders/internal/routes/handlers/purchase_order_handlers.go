@@ -4,12 +4,11 @@ import (
 	"context"
 	"net/http"
 
-	erpv1 "github.com/voxire/voxie/gen/go/erp/v1"
-
 	"github.com/voxire/onion/internal/modules/purchase_orders/internal/application"
 	"github.com/voxire/onion/internal/modules/purchase_orders/internal/domain"
 	authPkg "github.com/voxire/onion/internal/platform/auth"
 	errorModels "github.com/voxire/onion/internal/platform/errors"
+	erpv1 "github.com/voxire/voxie/gen/go/erp/v1"
 )
 
 // ─── List Purchase Orders ─────────────────────────────────────────────────────
@@ -33,7 +32,7 @@ type ListPurchaseOrdersResponse struct {
 func newPurchaseOrderPayload(po domain.PurchaseOrder) *erpv1.PurchaseOrder {
 	payload := &erpv1.PurchaseOrder{
 		Id:         po.ID,
-		OwnerId:   po.OwnerID,
+		OwnerId:    po.OwnerID,
 		SupplierId: po.SupplierID,
 		PoNumber:   po.PONumber,
 		Status:     string(po.Status),

@@ -15,9 +15,13 @@ func CreateRoutes() []string { return []string{"/store/products"} }
 func UpdateRoutes() []string { return []string{"/store/products"} }
 func DeleteRoutes() []string { return []string{"/store/products"} }
 
-type ListHandler struct{ Service *application.Service }
-type ListRequest struct{}
-type ListResponse struct{ Products []domain.StoreProduct `json:"products"` }
+type (
+	ListHandler  struct{ Service *application.Service }
+	ListRequest  struct{}
+	ListResponse struct {
+		Products []domain.StoreProduct `json:"products"`
+	}
+)
 
 func (h *ListHandler) Serve(ctx context.Context, _ *ListRequest) (ListResponse, *errorModels.ServerError) {
 	authUser, ok := authPkg.GetAuthUser(ctx)
@@ -31,18 +35,21 @@ func (h *ListHandler) Serve(ctx context.Context, _ *ListRequest) (ListResponse, 
 	return ListResponse{Products: items}, nil
 }
 
-type CreateHandler struct{ Service *application.Service }
-type CreateRequest struct {
-	ProductID      int64   `json:"product_id"`
-	Title          string  `json:"title"`
-	Slug           string  `json:"slug"`
-	Description    string  `json:"description"`
-	Images         string  `json:"images"`
-	Price          float64 `json:"price"`
-	CompareAtPrice float64 `json:"compare_at_price"`
-	IsPublished    bool    `json:"is_published"`
-	SortOrder      int     `json:"sort_order"`
-}
+type (
+	CreateHandler struct{ Service *application.Service }
+	CreateRequest struct {
+		ProductID      int64   `json:"product_id"`
+		Title          string  `json:"title"`
+		Slug           string  `json:"slug"`
+		Description    string  `json:"description"`
+		Images         string  `json:"images"`
+		Price          float64 `json:"price"`
+		CompareAtPrice float64 `json:"compare_at_price"`
+		IsPublished    bool    `json:"is_published"`
+		SortOrder      int     `json:"sort_order"`
+	}
+)
+
 type CreateResponse struct {
 	ID      int64  `json:"id"`
 	Message string `json:"message"`
@@ -71,20 +78,25 @@ func (h *CreateHandler) Serve(ctx context.Context, req *CreateRequest) (CreateRe
 	return CreateResponse{ID: id, Message: "Store product created successfully"}, nil
 }
 
-type UpdateHandler struct{ Service *application.Service }
-type UpdateRequest struct {
-	ID             int64   `json:"id"`
-	ProductID      int64   `json:"product_id"`
-	Title          string  `json:"title"`
-	Slug           string  `json:"slug"`
-	Description    string  `json:"description"`
-	Images         string  `json:"images"`
-	Price          float64 `json:"price"`
-	CompareAtPrice float64 `json:"compare_at_price"`
-	IsPublished    bool    `json:"is_published"`
-	SortOrder      int     `json:"sort_order"`
+type (
+	UpdateHandler struct{ Service *application.Service }
+	UpdateRequest struct {
+		ID             int64   `json:"id"`
+		ProductID      int64   `json:"product_id"`
+		Title          string  `json:"title"`
+		Slug           string  `json:"slug"`
+		Description    string  `json:"description"`
+		Images         string  `json:"images"`
+		Price          float64 `json:"price"`
+		CompareAtPrice float64 `json:"compare_at_price"`
+		IsPublished    bool    `json:"is_published"`
+		SortOrder      int     `json:"sort_order"`
+	}
+)
+
+type UpdateResponse struct {
+	Message string `json:"message"`
 }
-type UpdateResponse struct{ Message string `json:"message"` }
 
 func (h *UpdateHandler) Validate(_ context.Context, req *UpdateRequest) *errorModels.ServerError {
 	if req.ID == 0 {
@@ -108,9 +120,16 @@ func (h *UpdateHandler) Serve(ctx context.Context, req *UpdateRequest) (UpdateRe
 	return UpdateResponse{Message: "Store product updated successfully"}, nil
 }
 
-type DeleteHandler struct{ Service *application.Service }
-type DeleteRequest struct{ ID int64 `json:"id"` }
-type DeleteResponse struct{ Message string `json:"message"` }
+type (
+	DeleteHandler struct{ Service *application.Service }
+	DeleteRequest struct {
+		ID int64 `json:"id"`
+	}
+)
+
+type DeleteResponse struct {
+	Message string `json:"message"`
+}
 
 func (h *DeleteHandler) Validate(_ context.Context, req *DeleteRequest) *errorModels.ServerError {
 	if req.ID == 0 {

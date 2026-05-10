@@ -81,5 +81,3 @@ type UpdateWorkspaceMemberRoleInput struct {
 	UserID      int64
 	Role        string
 }
-
-

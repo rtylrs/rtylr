@@ -15,11 +15,14 @@ func CreateArticleRoutes() []string { return []string{"/support/knowledge"} }
 func UpdateArticleRoutes() []string { return []string{"/support/knowledge"} }
 func DeleteArticleRoutes() []string { return []string{"/support/knowledge"} }
 
-type ListArticlesHandler struct{ Service *application.Service }
-type ListArticlesRequest struct {
-	Page     int `json:"page"`
-	PageSize int `json:"page_size"`
-}
+type (
+	ListArticlesHandler struct{ Service *application.Service }
+	ListArticlesRequest struct {
+		Page     int `json:"page"`
+		PageSize int `json:"page_size"`
+	}
+)
+
 type ListArticlesResponse struct {
 	Articles []domain.Article `json:"articles"`
 	Total    int              `json:"total"`
@@ -45,14 +48,17 @@ func (h *ListArticlesHandler) Serve(ctx context.Context, req *ListArticlesReques
 	return ListArticlesResponse{Articles: items, Total: total, Page: req.Page, PageSize: req.PageSize}, nil
 }
 
-type CreateArticleHandler struct{ Service *application.Service }
-type CreateArticleRequest struct {
-	Title       string `json:"title"`
-	Slug        string `json:"slug"`
-	Body        string `json:"body"`
-	Category    string `json:"category"`
-	IsPublished bool   `json:"is_published"`
-}
+type (
+	CreateArticleHandler struct{ Service *application.Service }
+	CreateArticleRequest struct {
+		Title       string `json:"title"`
+		Slug        string `json:"slug"`
+		Body        string `json:"body"`
+		Category    string `json:"category"`
+		IsPublished bool   `json:"is_published"`
+	}
+)
+
 type CreateArticleResponse struct {
 	ArticleID int64  `json:"article_id"`
 	Message   string `json:"message"`
@@ -83,15 +89,18 @@ func (h *CreateArticleHandler) Serve(ctx context.Context, req *CreateArticleRequ
 	return CreateArticleResponse{ArticleID: id, Message: "Article created"}, nil
 }
 
-type UpdateArticleHandler struct{ Service *application.Service }
-type UpdateArticleRequest struct {
-	ID          int64  `json:"id"`
-	Title       string `json:"title"`
-	Slug        string `json:"slug"`
-	Body        string `json:"body"`
-	Category    string `json:"category"`
-	IsPublished bool   `json:"is_published"`
-}
+type (
+	UpdateArticleHandler struct{ Service *application.Service }
+	UpdateArticleRequest struct {
+		ID          int64  `json:"id"`
+		Title       string `json:"title"`
+		Slug        string `json:"slug"`
+		Body        string `json:"body"`
+		Category    string `json:"category"`
+		IsPublished bool   `json:"is_published"`
+	}
+)
+
 type UpdateArticleResponse struct {
 	Message string `json:"message"`
 }
@@ -118,10 +127,13 @@ func (h *UpdateArticleHandler) Serve(ctx context.Context, req *UpdateArticleRequ
 	return UpdateArticleResponse{Message: "Article updated"}, nil
 }
 
-type DeleteArticleHandler struct{ Service *application.Service }
-type DeleteArticleRequest struct {
-	ID int64 `json:"id"`
-}
+type (
+	DeleteArticleHandler struct{ Service *application.Service }
+	DeleteArticleRequest struct {
+		ID int64 `json:"id"`
+	}
+)
+
 type DeleteArticleResponse struct {
 	Message string `json:"message"`
 }

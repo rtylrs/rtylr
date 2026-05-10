@@ -6,13 +6,12 @@ import (
 	"net/http"
 	"time"
 
-	flowv1 "github.com/voxire/voxie/gen/go/flow/v1"
-
 	"github.com/voxire/onion/internal/modules/workspaces/internal/application"
 	"github.com/voxire/onion/internal/modules/workspaces/internal/domain"
 	authPkg "github.com/voxire/onion/internal/platform/auth"
 	errorModels "github.com/voxire/onion/internal/platform/errors"
 	"github.com/voxire/onion/internal/platform/wsbus"
+	flowv1 "github.com/voxire/voxie/gen/go/flow/v1"
 )
 
 // publishProjectEvent fans a project-level change out to every client
@@ -138,11 +137,11 @@ type CreateProjectRequest struct {
 	// Accepts a numeric ID, a numeric string, or the sentinel "personal".
 	WorkspaceID WorkspaceIDField `json:"workspace_id"`
 	Name        string           `json:"name"`
-	Description string     `json:"description"`
-	Icon        string     `json:"icon"`
-	Color       string     `json:"color"`
-	StartDate   *time.Time `json:"start_date"`
-	DueDate     *time.Time `json:"due_date"`
+	Description string           `json:"description"`
+	Icon        string           `json:"icon"`
+	Color       string           `json:"color"`
+	StartDate   *time.Time       `json:"start_date"`
+	DueDate     *time.Time       `json:"due_date"`
 }
 
 type CreateProjectResponse struct {

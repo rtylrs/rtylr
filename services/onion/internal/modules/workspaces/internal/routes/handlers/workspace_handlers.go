@@ -5,13 +5,12 @@ import (
 	"fmt"
 	"net/http"
 
-	flowv1 "github.com/voxire/voxie/gen/go/flow/v1"
-
 	"github.com/voxire/onion/internal/modules/workspaces/internal/application"
 	"github.com/voxire/onion/internal/modules/workspaces/internal/domain"
 	authPkg "github.com/voxire/onion/internal/platform/auth"
 	errorModels "github.com/voxire/onion/internal/platform/errors"
 	"github.com/voxire/onion/internal/platform/wsbus"
+	flowv1 "github.com/voxire/voxie/gen/go/flow/v1"
 )
 
 // publishWorkspaceMemberEvent fans member add/remove events to the
@@ -34,10 +33,10 @@ func publishWorkspaceMemberEvent(eventType string, workspaceID, memberUserID, ac
 // Route declarations
 // ─────────────────────────────────────────────
 
-func ListWorkspacesRoutes() []string  { return []string{"/flow/workspaces"} }
-func CreateWorkspaceRoutes() []string { return []string{"/flow/workspaces"} }
-func UpdateWorkspaceRoutes() []string { return []string{"/flow/workspaces"} }
-func DeleteWorkspaceRoutes() []string { return []string{"/flow/workspaces"} }
+func ListWorkspacesRoutes() []string        { return []string{"/flow/workspaces"} }
+func CreateWorkspaceRoutes() []string       { return []string{"/flow/workspaces"} }
+func UpdateWorkspaceRoutes() []string       { return []string{"/flow/workspaces"} }
+func DeleteWorkspaceRoutes() []string       { return []string{"/flow/workspaces"} }
 func AddWorkspaceMemberRoutes() []string    { return []string{"/flow/workspaces/member"} }
 func RemoveWorkspaceMemberRoutes() []string { return []string{"/flow/workspaces/member"} }
 
@@ -48,7 +47,7 @@ func RemoveWorkspaceMemberRoutes() []string { return []string{"/flow/workspaces/
 func toWorkspacePayload(w domain.Workspace) *flowv1.Workspace {
 	return &flowv1.Workspace{
 		Id:          w.ID,
-		OwnerId:    w.OwnerID,
+		OwnerId:     w.OwnerID,
 		Name:        w.Name,
 		Description: w.Description,
 		Icon:        w.Icon,

@@ -3,6 +3,7 @@ package infrastructure
 import (
 	"context"
 	"database/sql"
+	"errors"
 	"fmt"
 	"strconv"
 
@@ -86,7 +87,7 @@ func (r *Repository) GetProduct(ctx context.Context, ownerID, id int64) (domain.
 		ID:      id,
 	})
 	if err != nil {
-		if err == sql.ErrNoRows {
+		if errors.Is(err, sql.ErrNoRows) {
 			return domain.Product{}, domain.ErrProductNotFound
 		}
 
@@ -127,7 +128,7 @@ func (r *Repository) GetProductByBarcode(ctx context.Context, ownerID int64, bar
 		&reorderQuantity, &p.IsActive, &p.TrackInventory, &p.CreatedAt, &p.UpdatedAt,
 	)
 	if err != nil {
-		if err == sql.ErrNoRows {
+		if errors.Is(err, sql.ErrNoRows) {
 			return domain.Product{}, domain.ErrProductNotFound
 		}
 		logger.Ctx(ctx).Error("Failed to look up product by barcode", logger.Error(err))

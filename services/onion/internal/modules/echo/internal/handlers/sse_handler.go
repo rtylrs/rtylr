@@ -10,11 +10,11 @@ import (
 	"strings"
 	"time"
 
+	"github.com/voxire/onion/internal/modules/echo/internal/application"
+	"github.com/voxire/onion/internal/modules/memory"
 	errorModels "github.com/voxire/onion/internal/platform/errors"
 	"github.com/voxire/onion/internal/platform/logger"
 	"github.com/voxire/onion/internal/platform/snips"
-	"github.com/voxire/onion/internal/modules/echo/internal/application"
-	"github.com/voxire/onion/internal/modules/memory"
 )
 
 const caretSystemPreamble = "You are Caret, an AI business assistant for rtylr."
@@ -312,14 +312,6 @@ func (h *GenerateTextStreamHandler) processAndStreamToken(w http.ResponseWriter,
 	}
 
 	return nil
-}
-
-// buildEnhancedPromptWithContext now delegates to the memory module so the
-// prompt-assembly rules live next to the data they read. The
-// conversationContext argument is retained as a no-op so the existing call
-// site signature does not change.
-func (h *GenerateTextStreamHandler) buildEnhancedPrompt(userPrompt string, _ interface{}) string {
-	return "Current request: " + userPrompt
 }
 
 func (h *GenerateTextStreamHandler) storeAIResponse(ctx context.Context, sessionID string, userID int, response string) {

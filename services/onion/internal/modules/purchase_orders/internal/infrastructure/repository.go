@@ -3,6 +3,7 @@ package infrastructure
 import (
 	"context"
 	"database/sql"
+	"errors"
 	"strconv"
 	"time"
 
@@ -160,7 +161,7 @@ func (r *Repository) GetPurchaseOrderStatus(ctx context.Context, ownerID, id int
 		ID:      id,
 	})
 	if err != nil {
-		if err == sql.ErrNoRows {
+		if errors.Is(err, sql.ErrNoRows) {
 			return "", domain.ErrPurchaseOrderNotFound
 		}
 

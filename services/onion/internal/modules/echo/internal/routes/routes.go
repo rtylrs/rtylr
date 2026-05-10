@@ -5,10 +5,10 @@ import (
 	"time"
 
 	"github.com/go-chi/chi/v5"
-	serverHttp "github.com/voxire/onion/internal/platform/server/http"
 	"github.com/voxire/onion/internal/modules/echo/internal/application"
 	"github.com/voxire/onion/internal/modules/echo/internal/handlers"
 	"github.com/voxire/onion/internal/modules/memory"
+	serverHttp "github.com/voxire/onion/internal/platform/server/http"
 )
 
 // aiStreamRateLimit is 5 requests per minute per authenticated user.

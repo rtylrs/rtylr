@@ -3,15 +3,15 @@ package domain
 import "time"
 
 type KDSOrder struct {
-	ID           int64      `json:"id"`
-	OrderNumber  string     `json:"order_number"`
-	Type         string     `json:"type"`
-	Status       string     `json:"status"`
-	TableID      int64      `json:"table_id"`
-	CustomerName string     `json:"customer_name"`
-	KitchenNotes string     `json:"kitchen_notes"`
-	CreatedAt    time.Time  `json:"created_at"`
-	Items        []KDSItem  `json:"items"`
+	ID           int64     `json:"id"`
+	OrderNumber  string    `json:"order_number"`
+	Type         string    `json:"type"`
+	Status       string    `json:"status"`
+	TableID      int64     `json:"table_id"`
+	CustomerName string    `json:"customer_name"`
+	KitchenNotes string    `json:"kitchen_notes"`
+	CreatedAt    time.Time `json:"created_at"`
+	Items        []KDSItem `json:"items"`
 }
 
 type KDSItem struct {

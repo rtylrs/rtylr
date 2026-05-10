@@ -4,23 +4,25 @@ import (
 	"context"
 	"net/http"
 
-	posv1 "github.com/voxire/voxie/gen/go/pos/v1"
-
 	"github.com/voxire/onion/internal/modules/pos_stock_movements/internal/application"
 	"github.com/voxire/onion/internal/modules/pos_stock_movements/internal/domain"
 	authPkg "github.com/voxire/onion/internal/platform/auth"
 	errorModels "github.com/voxire/onion/internal/platform/errors"
+	posv1 "github.com/voxire/voxie/gen/go/pos/v1"
 )
 
 // ─── List Movements ──────────────────────────────────────────────────────────
 
 func ListMovementsRoutes() []string { return []string{"/pos/stock/movements"} }
 
-type ListMovementsHandler struct{ Service *application.Service }
-type ListMovementsRequest struct {
-	BranchID  int64 `json:"branch_id"`
-	ProductID int64 `json:"product_id"`
-}
+type (
+	ListMovementsHandler struct{ Service *application.Service }
+	ListMovementsRequest struct {
+		BranchID  int64 `json:"branch_id"`
+		ProductID int64 `json:"product_id"`
+	}
+)
+
 type ListMovementsResponse struct {
 	Movements []*posv1.StockMovement `json:"movements"`
 }
@@ -209,10 +211,13 @@ func (h *TransferStockHandler) Serve(ctx context.Context, req *TransferStockRequ
 
 func ListInventoryRoutes() []string { return []string{"/pos/stock/inventory"} }
 
-type ListInventoryHandler struct{ Service *application.Service }
-type ListInventoryRequest struct {
-	BranchID int64 `json:"branch_id"`
-}
+type (
+	ListInventoryHandler struct{ Service *application.Service }
+	ListInventoryRequest struct {
+		BranchID int64 `json:"branch_id"`
+	}
+)
+
 type ListInventoryResponse struct {
 	Inventory []*posv1.BranchInventory `json:"inventory"`
 }
@@ -258,10 +263,13 @@ func (h *ListInventoryHandler) Serve(ctx context.Context, req *ListInventoryRequ
 
 func LowStockRoutes() []string { return []string{"/pos/stock/low-stock"} }
 
-type LowStockHandler struct{ Service *application.Service }
-type LowStockRequest struct {
-	BranchID int64 `json:"branch_id"`
-}
+type (
+	LowStockHandler struct{ Service *application.Service }
+	LowStockRequest struct {
+		BranchID int64 `json:"branch_id"`
+	}
+)
+
 type LowStockResponse struct {
 	Items []*posv1.BranchInventory `json:"items"`
 }

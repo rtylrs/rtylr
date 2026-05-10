@@ -20,15 +20,19 @@ type mockRepo struct {
 func (m *mockRepo) List(_ context.Context, _ int64) ([]domain.Campaign, error) {
 	return m.list, nil
 }
+
 func (m *mockRepo) GetByID(_ context.Context, _, _ int64) (domain.Campaign, error) {
 	return m.get, nil
 }
+
 func (m *mockRepo) Create(_ context.Context, _ domain.CampaignInput) (int64, error) {
 	return m.createID, m.createErr
 }
+
 func (m *mockRepo) Update(_ context.Context, _ domain.CampaignUpdateInput) error {
 	return m.updErr
 }
+
 func (m *mockRepo) UpdateStatus(_ context.Context, _, _ int64, _ string) error {
 	return m.updStErr
 }

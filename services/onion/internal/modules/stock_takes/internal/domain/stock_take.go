@@ -101,8 +101,8 @@ func (i *StockTakeItem) FromRow(row *sql.Rows) error {
 }
 
 type StockTakeInput struct {
-	WarehouseID int64               `json:"warehouse_id"`
-	Notes       string              `json:"notes"`
+	WarehouseID int64                `json:"warehouse_id"`
+	Notes       string               `json:"notes"`
 	Items       []StockTakeItemInput `json:"items"`
 }
 
@@ -113,8 +113,8 @@ type StockTakeItemInput struct {
 }
 
 type StockTakeUpdateInput struct {
-	ID     int64           `json:"id"`
-	Status StockTakeStatus `json:"status"`
-	Notes  string          `json:"notes"`
+	ID     int64                `json:"id"`
+	Status StockTakeStatus      `json:"status"`
+	Notes  string               `json:"notes"`
 	Items  []StockTakeItemInput `json:"items"`
 }

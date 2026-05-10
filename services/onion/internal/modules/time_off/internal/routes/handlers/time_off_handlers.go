@@ -4,12 +4,11 @@ import (
 	"context"
 	"net/http"
 
-	hrv1 "github.com/voxire/voxie/gen/go/hr/v1"
-
 	"github.com/voxire/onion/internal/modules/time_off/internal/application"
 	"github.com/voxire/onion/internal/modules/time_off/internal/domain"
 	authPkg "github.com/voxire/onion/internal/platform/auth"
 	errorModels "github.com/voxire/onion/internal/platform/errors"
+	hrv1 "github.com/voxire/voxie/gen/go/hr/v1"
 )
 
 func ListTimeOffRoutes() []string    { return []string{"/hr/time-off"} }
@@ -23,19 +22,21 @@ func newTimeOffPayload(t domain.TimeOffRequest) *hrv1.TimeOffRequest {
 		DaysCount: t.DaysCount, Status: t.Status, Reason: t.Reason,
 		ApprovedBy: t.ApprovedBy,
 		ApprovedAt: t.ApprovedAt.Format("2006-01-02T15:04:05Z"),
-		Notes: t.Notes,
-		CreatedAt: t.CreatedAt.Format("2006-01-02T15:04:05Z"),
-		UpdatedAt: t.UpdatedAt.Format("2006-01-02T15:04:05Z"),
+		Notes:      t.Notes,
+		CreatedAt:  t.CreatedAt.Format("2006-01-02T15:04:05Z"),
+		UpdatedAt:  t.UpdatedAt.Format("2006-01-02T15:04:05Z"),
 	}
 }
 
 // ─── List ────────────────────────────────────────────────────────────────────
 
-type ListTimeOffHandler struct{ Service *application.Service }
-type ListTimeOffRequest struct{}
-type ListTimeOffResponse struct {
-	Requests []*hrv1.TimeOffRequest `json:"requests"`
-}
+type (
+	ListTimeOffHandler  struct{ Service *application.Service }
+	ListTimeOffRequest  struct{}
+	ListTimeOffResponse struct {
+		Requests []*hrv1.TimeOffRequest `json:"requests"`
+	}
+)
 
 func (h *ListTimeOffHandler) Serve(ctx context.Context, _ *ListTimeOffRequest) (ListTimeOffResponse, *errorModels.ServerError) {
 	device := authPkg.DeviceCtx(ctx)

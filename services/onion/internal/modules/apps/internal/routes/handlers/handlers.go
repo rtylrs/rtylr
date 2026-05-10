@@ -3,18 +3,19 @@ package handlers
 import (
 	"context"
 
-	hubv1 "github.com/voxire/voxie/gen/go/hub/v1"
-
 	"github.com/voxire/onion/internal/modules/apps/internal/application"
 	"github.com/voxire/onion/internal/modules/apps/internal/domain"
 	authPkg "github.com/voxire/onion/internal/platform/auth"
 	errorModels "github.com/voxire/onion/internal/platform/errors"
+	hubv1 "github.com/voxire/voxie/gen/go/hub/v1"
 )
 
 func AppRoutes() []string { return []string{"/apps"} }
 
-type ListAppsHandler struct{ Service *application.Service }
-type ListAppsRequest struct{}
+type (
+	ListAppsHandler struct{ Service *application.Service }
+	ListAppsRequest struct{}
+)
 
 // ListAppsResponse uses the proto-generated App type from voxie.
 type ListAppsResponse struct {

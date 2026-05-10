@@ -17,9 +17,11 @@ import (
 
 func OverviewRoutes() []string { return []string{"/finance/reconciliation"} }
 
-type OverviewHandler struct{ Service *application.Service }
-type OverviewRequest struct{}
-type OverviewResponse = domain.ReconciliationOverview
+type (
+	OverviewHandler  struct{ Service *application.Service }
+	OverviewRequest  struct{}
+	OverviewResponse = domain.ReconciliationOverview
+)
 
 func (h *OverviewHandler) Serve(ctx context.Context, _ *OverviewRequest) (OverviewResponse, *errorModels.ServerError) {
 	device := authPkg.DeviceCtx(ctx)

@@ -9,16 +9,16 @@ import (
 
 func TestExtractLanguage(t *testing.T) {
 	cases := map[string]string{
-		"":                  "en",
-		"en":                "en",
-		"en-US,en;q=0.9":    "en",
-		"fr-FR,fr;q=0.9":    "fr",
-		"de-DE":             "de",
-		"AR-LB":             "ar",
-		"  en-GB  ,en":      "en",
+		"":               "en",
+		"en":             "en",
+		"en-US,en;q=0.9": "en",
+		"fr-FR,fr;q=0.9": "fr",
+		"de-DE":          "de",
+		"AR-LB":          "ar",
+		"  en-GB  ,en":   "en",
 	}
 	for header, want := range cases {
-		r := httptest.NewRequest(http.MethodGet, "/", nil)
+		r := httptest.NewRequest(http.MethodGet, "/", http.NoBody)
 		if header != "" {
 			r.Header.Set("Accept-Language", header)
 		}
@@ -30,15 +30,15 @@ func TestExtractLanguage(t *testing.T) {
 
 func TestExtractDeviceInfo_FromUserAgent(t *testing.T) {
 	cases := map[string]string{
-		"":                                                                                  "unknown",
-		"Mozilla/5.0 (Macintosh; Intel Mac OS X)":                                           "desktop",
-		"Mozilla/5.0 (iPhone; CPU iPhone OS 17 like Mac OS X) AppleWebKit/605":             "mobile",
-		"Mozilla/5.0 (iPad; CPU OS 17_0 like Mac OS X) AppleWebKit/605":                    "tablet",
-		"Mozilla/5.0 (Linux; Android 14; Pixel) AppleWebKit/537":                           "mobile",
-		"Googlebot/2.1 (+http://www.google.com/bot.html)":                                  "bot",
+		"": "unknown",
+		"Mozilla/5.0 (Macintosh; Intel Mac OS X)":                              "desktop",
+		"Mozilla/5.0 (iPhone; CPU iPhone OS 17 like Mac OS X) AppleWebKit/605": "mobile",
+		"Mozilla/5.0 (iPad; CPU OS 17_0 like Mac OS X) AppleWebKit/605":        "tablet",
+		"Mozilla/5.0 (Linux; Android 14; Pixel) AppleWebKit/537":               "mobile",
+		"Googlebot/2.1 (+http://www.google.com/bot.html)":                      "bot",
 	}
 	for ua, want := range cases {
-		r := httptest.NewRequest(http.MethodGet, "/", nil)
+		r := httptest.NewRequest(http.MethodGet, "/", http.NoBody)
 		if ua != "" {
 			r.Header.Set("User-Agent", ua)
 		}

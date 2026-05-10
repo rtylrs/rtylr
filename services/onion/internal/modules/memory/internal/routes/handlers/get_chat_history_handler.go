@@ -4,9 +4,9 @@ import (
 	"context"
 	"net/http"
 
-	errorModels "github.com/voxire/onion/internal/platform/errors"
 	"github.com/voxire/onion/internal/modules/memory/internal/application"
 	"github.com/voxire/onion/internal/modules/memory/internal/domain"
+	errorModels "github.com/voxire/onion/internal/platform/errors"
 )
 
 func ChatsRoutes() []string {
@@ -28,12 +28,12 @@ type ChatsRequest struct {
 }
 
 type ChatsResponse struct {
-	Success  bool                  `json:"success"`
-	UserID   int                   `json:"user_id,omitempty"`
-	Sessions []domain.ChatSession  `json:"sessions"`
-	Limit    int                   `json:"limit"`
-	Offset   int                   `json:"offset"`
-	Error    string                `json:"error,omitempty"`
+	Success  bool                 `json:"success"`
+	UserID   int                  `json:"user_id,omitempty"`
+	Sessions []domain.ChatSession `json:"sessions"`
+	Limit    int                  `json:"limit"`
+	Offset   int                  `json:"offset"`
+	Error    string               `json:"error,omitempty"`
 }
 
 type ChatMessagesRequest struct {

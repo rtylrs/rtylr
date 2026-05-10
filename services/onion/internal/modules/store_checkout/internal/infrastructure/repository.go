@@ -11,7 +11,7 @@ import (
 	"github.com/voxire/onion/internal/platform/logger"
 )
 
-// ensure domain is used
+// ensure domain is used.
 var _ = domain.Checkout{}
 
 type Repository struct {
@@ -52,6 +52,8 @@ func (r *Repository) Complete(ctx context.Context, ownerID, id int64) error {
 }
 
 func nullJSON(s string) []byte {
-	if s == "" { return nil }
+	if s == "" {
+		return nil
+	}
 	return []byte(s)
 }

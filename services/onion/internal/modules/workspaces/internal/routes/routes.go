@@ -402,5 +402,4 @@ func RegisterRoutes(ctx context.Context, router *chi.Mux, flowService *applicati
 		ctx, router, handlers.UpdateUserSettingsRoutes(),
 		&handlers.UpdateUserSettingsHandler{FlowService: flowService},
 	)
-
 }

@@ -2,15 +2,15 @@ package handlers
 
 import (
 	"context"
+	"errors"
 	"net/http"
-
-	hrv1 "github.com/voxire/voxie/gen/go/hr/v1"
 
 	"github.com/voxire/onion/internal/modules/hr_leave/internal/application"
 	"github.com/voxire/onion/internal/modules/hr_leave/internal/domain"
 	authPkg "github.com/voxire/onion/internal/platform/auth"
 	errorModels "github.com/voxire/onion/internal/platform/errors"
 	"github.com/voxire/onion/internal/platform/logger"
+	hrv1 "github.com/voxire/voxie/gen/go/hr/v1"
 )
 
 func ListLeaveTypesRoutes() []string { return []string{"/hr/leave/types"} }
@@ -39,7 +39,7 @@ func (h *ListLeaveTypesHandler) Serve(ctx context.Context, req *ListLeaveTypesRe
 		Limit: req.Limit, Offset: req.Offset,
 	})
 	if err != nil {
-		if err == domain.ErrLeaveNotConfigured {
+		if errors.Is(err, domain.ErrLeaveNotConfigured) {
 			return ListLeaveTypesResponse{Types: []*hrv1.LeaveTypePayload{}, Total: 0, Limit: req.Limit, Offset: req.Offset}, nil
 		}
 		logger.Ctx(ctx).Error("failed to list leave types", logger.Any("owner_id", device.User.UserID), logger.Error(err))

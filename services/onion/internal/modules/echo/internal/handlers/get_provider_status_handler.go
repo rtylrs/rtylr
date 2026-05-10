@@ -3,8 +3,8 @@ package handlers
 import (
 	"context"
 
-	errorModels "github.com/voxire/onion/internal/platform/errors"
 	"github.com/voxire/onion/internal/modules/echo/internal/application"
+	errorModels "github.com/voxire/onion/internal/platform/errors"
 )
 
 func ProviderStatusRoutes() []string {

@@ -26,6 +26,6 @@ type Repository interface {
 	CreateEmployeeChecklistItem(ctx context.Context, ownerID, employeeChecklistID, checklistItemID, assignedToEmployeeID int64, dueDate string) error
 	GetChecklistItem(ctx context.Context, ownerID, itemID int64) (*EmployeeChecklistItemRecord, error)
 	CompleteChecklistItem(ctx context.Context, ownerID, itemID, completedBy int64) error
-	GetChecklistCompletionStats(ctx context.Context, ownerID, checklistID int64) (total int, completed int, err error)
+	GetChecklistCompletionStats(ctx context.Context, ownerID, checklistID int64) (total, completed int, err error)
 	ListEmployeeChecklistItems(ctx context.Context, ownerID, employeeChecklistID int64) ([]EmployeeChecklistItemRecord, error)
 }

@@ -18,9 +18,11 @@ type mockRepo struct {
 func (m *mockRepo) List(_ context.Context, _ int64, _ *int64) ([]domain.Milestone, error) {
 	return m.list, nil
 }
+
 func (m *mockRepo) Create(_ context.Context, _ domain.MilestoneInput) (int64, error) {
 	return m.createID, m.createErr
 }
+
 func (m *mockRepo) Update(_ context.Context, _ domain.MilestoneUpdateInput) error {
 	return m.updErr
 }

@@ -28,12 +28,14 @@ type mockRepo struct {
 func (m *mockRepo) List(_ context.Context, _ int64) ([]domain.Integration, error) {
 	return m.listResult, m.listErr
 }
+
 func (m *mockRepo) Connect(_ context.Context, ownerID int64, provider string, config json.RawMessage) (int64, error) {
 	m.connectGot.ownerID = ownerID
 	m.connectGot.provider = provider
 	m.connectGot.config = config
 	return m.connectID, m.connectErr
 }
+
 func (m *mockRepo) Disconnect(_ context.Context, ownerID, id int64) error {
 	m.disconnGot.ownerID = ownerID
 	m.disconnGot.id = id

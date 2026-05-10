@@ -4,11 +4,10 @@ import (
 	"context"
 	"net/http"
 
-	hubv1 "github.com/voxire/voxie/gen/go/hub/v1"
-
 	"github.com/voxire/onion/internal/modules/billing/internal/application"
 	authPkg "github.com/voxire/onion/internal/platform/auth"
 	errorModels "github.com/voxire/onion/internal/platform/errors"
+	hubv1 "github.com/voxire/voxie/gen/go/hub/v1"
 )
 
 func SummaryRoutes() []string  { return []string{"/billing/summary"} }
@@ -16,8 +15,10 @@ func InvoicesRoutes() []string { return []string{"/billing/invoices"} }
 
 // -- Billing Summary --
 
-type SummaryHandler struct{ Service *application.Service }
-type SummaryRequest struct{}
+type (
+	SummaryHandler struct{ Service *application.Service }
+	SummaryRequest struct{}
+)
 
 type SummaryResponse struct {
 	Summary *hubv1.BillingSummary `json:"summary"`
@@ -53,8 +54,10 @@ func (h *SummaryHandler) Serve(ctx context.Context, _ *SummaryRequest) (SummaryR
 
 // -- List Invoices --
 
-type InvoicesHandler struct{ Service *application.Service }
-type InvoicesRequest struct{}
+type (
+	InvoicesHandler struct{ Service *application.Service }
+	InvoicesRequest struct{}
+)
 
 type InvoicesResponse struct {
 	Invoices []*hubv1.Invoice `json:"invoices"`

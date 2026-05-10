@@ -177,7 +177,7 @@ func (s *Service) MoveProject(ctx context.Context, input domain.MoveProjectInput
 	return s.repo.MoveProject(ctx, input)
 }
 
-func (s *Service) InviteProjectMemberByEmail(ctx context.Context, projectID int64, email string, role string, addedBy int64) (bool, error) {
+func (s *Service) InviteProjectMemberByEmail(ctx context.Context, projectID int64, email, role string, addedBy int64) (bool, error) {
 	userID, found, err := s.repo.LookupUserByEmail(ctx, email)
 	if err != nil {
 		return false, err
@@ -291,8 +291,8 @@ func (s *Service) UpdateTask(ctx context.Context, input domain.UpdateTaskInput, 
 
 	if existingAssignee != newAssignee {
 		if actErr := s.repo.LogActivity(ctx, input.ID, userID, "assignee_changed",
-			fmt.Sprintf("%d", existingAssignee),
-			fmt.Sprintf("%d", newAssignee),
+			strconv.FormatInt(existingAssignee, 10),
+			strconv.FormatInt(newAssignee, 10),
 		); actErr != nil {
 			logger.Ctx(ctx).Error("UpdateTask: failed to log assignee activity", logger.Error(actErr))
 		}
@@ -691,8 +691,10 @@ func (s *Service) CreateColumn(ctx context.Context, input domain.ProjectColumnIn
 			return c, nil
 		}
 	}
-	return domain.ProjectColumn{ID: id, ProjectID: input.ProjectID, WorkspaceID: input.WorkspaceID,
-		Name: input.Name, Color: input.Color, SortOrder: input.SortOrder}, nil
+	return domain.ProjectColumn{
+		ID: id, ProjectID: input.ProjectID, WorkspaceID: input.WorkspaceID,
+		Name: input.Name, Color: input.Color, SortOrder: input.SortOrder,
+	}, nil
 }
 
 func (s *Service) UpdateColumn(ctx context.Context, input domain.UpdateProjectColumnInput) error {
@@ -765,4 +767,3 @@ func (s *Service) EnsureInboxProject(
 func (s *Service) SeedDefaultColumns(ctx context.Context, projectID, workspaceID, createdBy int64) error {
 	return s.repo.SeedDefaultColumns(ctx, projectID, workspaceID, createdBy)
 }
-

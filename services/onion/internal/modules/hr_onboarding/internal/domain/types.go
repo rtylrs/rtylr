@@ -27,15 +27,15 @@ type ChecklistItemRecord struct {
 }
 
 type EmployeeChecklistRecord struct {
-	ID          int64                       `json:"id"`
-	OwnerID     int64                       `json:"owner_id"`
-	EmployeeID  int64                       `json:"employee_id"`
-	TemplateID  int64                       `json:"template_id"`
-	Status      string                      `json:"status"`
-	TriggeredAt time.Time                   `json:"triggered_at"`
+	ID          int64                         `json:"id"`
+	OwnerID     int64                         `json:"owner_id"`
+	EmployeeID  int64                         `json:"employee_id"`
+	TemplateID  int64                         `json:"template_id"`
+	Status      string                        `json:"status"`
+	TriggeredAt time.Time                     `json:"triggered_at"`
 	Items       []EmployeeChecklistItemRecord `json:"items"`
-	CreatedAt   time.Time                   `json:"created_at"`
-	UpdatedAt   time.Time                   `json:"updated_at"`
+	CreatedAt   time.Time                     `json:"created_at"`
+	UpdatedAt   time.Time                     `json:"updated_at"`
 }
 
 type EmployeeChecklistItemRecord struct {

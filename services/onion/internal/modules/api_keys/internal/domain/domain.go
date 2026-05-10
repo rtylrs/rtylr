@@ -15,6 +15,6 @@ type APIKey struct {
 }
 
 type CreateAPIKeyInput struct {
-	Name    string   `json:"name"`
-	Scopes  []string `json:"scopes"`
+	Name   string   `json:"name"`
+	Scopes []string `json:"scopes"`
 }

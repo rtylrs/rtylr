@@ -22,7 +22,7 @@ func NewRepository(_ context.Context) *Repository {
 	}
 }
 
-func (r *Repository) ListTransactions(ctx context.Context, ownerID int64, customerID int64, page, pageSize int) ([]domain.LoyaltyTransaction, int, error) {
+func (r *Repository) ListTransactions(ctx context.Context, ownerID, customerID int64, page, pageSize int) ([]domain.LoyaltyTransaction, int, error) {
 	if page < 1 {
 		page = 1
 	}

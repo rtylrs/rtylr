@@ -3,6 +3,7 @@ package infrastructure
 import (
 	"context"
 	"database/sql"
+	"errors"
 	"time"
 
 	"github.com/voxire/onion/internal/modules/hr_setup/internal/domain"
@@ -64,7 +65,7 @@ func (r *Repository) GetHRConfig(ctx context.Context, ownerID int64) (*domain.HR
 	var cfg domain.HRConfig
 	err := row.Scan(&cfg.ID, &cfg.OwnerID, &cfg.SetupCompletedAt, &cfg.CreatedAt, &cfg.UpdatedAt)
 	if err != nil {
-		if err == sql.ErrNoRows {
+		if errors.Is(err, sql.ErrNoRows) {
 			return nil, domain.ErrConfigNotFound
 		}
 		return nil, err

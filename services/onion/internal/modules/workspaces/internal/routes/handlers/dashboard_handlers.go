@@ -4,11 +4,10 @@ import (
 	"context"
 	"net/http"
 
-	flowv1 "github.com/voxire/voxie/gen/go/flow/v1"
-
 	"github.com/voxire/onion/internal/modules/workspaces/internal/application"
 	authPkg "github.com/voxire/onion/internal/platform/auth"
 	errorModels "github.com/voxire/onion/internal/platform/errors"
+	flowv1 "github.com/voxire/voxie/gen/go/flow/v1"
 )
 
 // ─────────────────────────────────────────────
@@ -30,10 +29,10 @@ type GetDashboardRequest struct {
 }
 
 type GetDashboardResponse struct {
-	OpenTasks         int64         `json:"open_tasks"`
-	InProgressTasks   int64         `json:"in_progress_tasks"`
-	CompletedThisWeek int64         `json:"completed_this_week"`
-	OverdueTasks      int64         `json:"overdue_tasks"`
+	OpenTasks         int64          `json:"open_tasks"`
+	InProgressTasks   int64          `json:"in_progress_tasks"`
+	CompletedThisWeek int64          `json:"completed_this_week"`
+	OverdueTasks      int64          `json:"overdue_tasks"`
 	MyTasks           []*flowv1.Task `json:"my_tasks"`
 }
 

@@ -2,6 +2,7 @@ package handlers
 
 import (
 	"context"
+	"errors"
 	"net/http"
 	"strconv"
 
@@ -39,10 +40,10 @@ func (h *CompleteChecklistItemHandler) Serve(ctx context.Context, _ *CompleteChe
 
 	err := h.Service.CompleteChecklistItem(ctx, device.User.UserID, itemID, device.User.UserID)
 	if err != nil {
-		if err == domain.ErrChecklistItemNotFound {
+		if errors.Is(err, domain.ErrChecklistItemNotFound) {
 			return CompleteChecklistItemResponse{}, &errorModels.ServerError{HTTPCode: http.StatusNotFound, Code: http.StatusNotFound, Message: "Checklist item not found"}
 		}
-		if err == domain.ErrChecklistAlreadyCompleted {
+		if errors.Is(err, domain.ErrChecklistAlreadyCompleted) {
 			return CompleteChecklistItemResponse{}, &errorModels.ServerError{HTTPCode: http.StatusConflict, Code: http.StatusConflict, Message: "Checklist item is already completed"}
 		}
 		logger.Ctx(ctx).Error("failed to complete checklist item", logger.Any("owner_id", device.User.UserID), logger.Any("item_id", itemID), logger.Error(err))

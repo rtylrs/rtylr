@@ -35,9 +35,13 @@ func toPayload(s domain.Storefront) Payload {
 
 func ListRoutes() []string { return []string{"/store/sites"} }
 
-type ListHandler struct{ Service *application.Service }
-type ListRequest struct{}
-type ListResponse struct{ Sites []Payload `json:"sites"` }
+type (
+	ListHandler  struct{ Service *application.Service }
+	ListRequest  struct{}
+	ListResponse struct {
+		Sites []Payload `json:"sites"`
+	}
+)
 
 func (h *ListHandler) Serve(ctx context.Context, _ *ListRequest) (ListResponse, *errorModels.ServerError) {
 	authUser, ok := authPkg.GetAuthUser(ctx)
@@ -59,14 +63,17 @@ func (h *ListHandler) Serve(ctx context.Context, _ *ListRequest) (ListResponse, 
 
 func CreateRoutes() []string { return []string{"/store/sites"} }
 
-type CreateHandler struct{ Service *application.Service }
-type CreateRequest struct {
-	Name        string `json:"name"`
-	Domain      string `json:"domain"`
-	LogoURL     string `json:"logo_url"`
-	ThemeID     int64  `json:"theme_id"`
-	IsPublished bool   `json:"is_published"`
-}
+type (
+	CreateHandler struct{ Service *application.Service }
+	CreateRequest struct {
+		Name        string `json:"name"`
+		Domain      string `json:"domain"`
+		LogoURL     string `json:"logo_url"`
+		ThemeID     int64  `json:"theme_id"`
+		IsPublished bool   `json:"is_published"`
+	}
+)
+
 type CreateResponse struct {
 	ID      int64  `json:"id"`
 	Message string `json:"message"`
@@ -97,16 +104,21 @@ func (h *CreateHandler) Serve(ctx context.Context, req *CreateRequest) (CreateRe
 
 func UpdateRoutes() []string { return []string{"/store/sites"} }
 
-type UpdateHandler struct{ Service *application.Service }
-type UpdateRequest struct {
-	ID          int64  `json:"id"`
-	Name        string `json:"name"`
-	Domain      string `json:"domain"`
-	LogoURL     string `json:"logo_url"`
-	ThemeID     int64  `json:"theme_id"`
-	IsPublished bool   `json:"is_published"`
+type (
+	UpdateHandler struct{ Service *application.Service }
+	UpdateRequest struct {
+		ID          int64  `json:"id"`
+		Name        string `json:"name"`
+		Domain      string `json:"domain"`
+		LogoURL     string `json:"logo_url"`
+		ThemeID     int64  `json:"theme_id"`
+		IsPublished bool   `json:"is_published"`
+	}
+)
+
+type UpdateResponse struct {
+	Message string `json:"message"`
 }
-type UpdateResponse struct{ Message string `json:"message"` }
 
 func (h *UpdateHandler) Validate(_ context.Context, req *UpdateRequest) *errorModels.ServerError {
 	if req.ID == 0 {

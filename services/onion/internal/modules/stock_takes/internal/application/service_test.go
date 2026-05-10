@@ -17,9 +17,11 @@ type mockRepo struct {
 func (m *mockRepo) ListStockTakes(_ context.Context, _ int64) ([]domain.StockTake, error) {
 	return nil, nil
 }
+
 func (m *mockRepo) CreateStockTake(_ context.Context, _ int64, _ domain.StockTakeInput) (int64, error) {
 	return m.createID, m.createErr
 }
+
 func (m *mockRepo) UpdateStockTake(_ context.Context, _ int64, _ domain.StockTakeUpdateInput) error {
 	return m.updErr
 }

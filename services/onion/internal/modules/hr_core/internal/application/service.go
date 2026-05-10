@@ -120,7 +120,7 @@ func (s *Service) UpdateLocation(ctx context.Context, ownerID int64, loc domain.
 
 // --- Departments ---
 
-func (s *Service) ListDepartments(ctx context.Context, ownerID int64, locationID int64) ([]domain.DepartmentRecord, error) {
+func (s *Service) ListDepartments(ctx context.Context, ownerID, locationID int64) ([]domain.DepartmentRecord, error) {
 	return s.repo.ListDepartments(ctx, ownerID, locationID)
 }
 

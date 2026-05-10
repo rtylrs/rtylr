@@ -4,6 +4,7 @@ import (
 	"context"
 	"database/sql"
 	"encoding/json"
+	"errors"
 	"time"
 
 	"github.com/voxire/onion/internal/modules/team/internal/domain"
@@ -11,7 +12,6 @@ import (
 	"github.com/voxire/onion/internal/platform/database/dbclient"
 	"github.com/voxire/onion/internal/platform/logger"
 )
-
 
 type Repository struct {
 	queries *sqlc.Queries
@@ -52,7 +52,7 @@ func (r *Repository) GetPermissionByBusiness(ctx context.Context, businessID, us
 func (r *Repository) GetPermissionByUserID(ctx context.Context, userID int64) (*domain.UserAppPermission, error) {
 	row, err := r.queries.GetPermissionByUserID(ctx, userID)
 	if err != nil {
-		if err == sql.ErrNoRows {
+		if errors.Is(err, sql.ErrNoRows) {
 			return nil, nil
 		}
 
@@ -129,7 +129,7 @@ func (r *Repository) GetUserByEmail(ctx context.Context, email string) (int64, s
 func (r *Repository) GetUserByID(ctx context.Context, id int64) (string, string, error) {
 	row, err := r.queries.GetUserByID(ctx, id)
 	if err != nil {
-		if err == sql.ErrNoRows {
+		if errors.Is(err, sql.ErrNoRows) {
 			return "", "", domain.ErrUserNotFound
 		}
 
@@ -204,7 +204,7 @@ func (r *Repository) GetStaffUserByID(ctx context.Context, ownerID, businessID, 
 		UserID:     userID,
 	})
 	if err != nil {
-		if err == sql.ErrNoRows {
+		if errors.Is(err, sql.ErrNoRows) {
 			return nil, domain.ErrUserNotFound
 		}
 

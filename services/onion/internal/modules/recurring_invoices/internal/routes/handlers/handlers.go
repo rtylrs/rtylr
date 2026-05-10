@@ -36,11 +36,13 @@ func newPayload(r domain.RecurringInvoice) RecurringInvoicePayload {
 
 func ListRoutes() []string { return []string{"/finance/recurring-invoices"} }
 
-type ListHandler struct{ Service *application.Service }
-type ListRequest struct{}
-type ListResponse struct {
-	RecurringInvoices []RecurringInvoicePayload `json:"recurring_invoices"`
-}
+type (
+	ListHandler  struct{ Service *application.Service }
+	ListRequest  struct{}
+	ListResponse struct {
+		RecurringInvoices []RecurringInvoicePayload `json:"recurring_invoices"`
+	}
+)
 
 func (h *ListHandler) Serve(ctx context.Context, _ *ListRequest) (ListResponse, *errorModels.ServerError) {
 	device := authPkg.DeviceCtx(ctx)
@@ -65,14 +67,17 @@ func (h *ListHandler) Serve(ctx context.Context, _ *ListRequest) (ListResponse, 
 
 func CreateRoutes() []string { return []string{"/finance/recurring-invoices"} }
 
-type CreateHandler struct{ Service *application.Service }
-type CreateRequest struct {
-	TemplateInvoiceID int64  `json:"template_invoice_id"`
-	Frequency         string `json:"frequency"`
-	NextInvoiceDate   string `json:"next_invoice_date"`
-	EndDate           string `json:"end_date"`
-	IsActive          bool   `json:"is_active"`
-}
+type (
+	CreateHandler struct{ Service *application.Service }
+	CreateRequest struct {
+		TemplateInvoiceID int64  `json:"template_invoice_id"`
+		Frequency         string `json:"frequency"`
+		NextInvoiceDate   string `json:"next_invoice_date"`
+		EndDate           string `json:"end_date"`
+		IsActive          bool   `json:"is_active"`
+	}
+)
+
 type CreateResponse struct {
 	ID      int64  `json:"id"`
 	Message string `json:"message"`
@@ -117,15 +122,18 @@ func (h *CreateHandler) Serve(ctx context.Context, req *CreateRequest) (CreateRe
 
 func UpdateRoutes() []string { return []string{"/finance/recurring-invoices"} }
 
-type UpdateHandler struct{ Service *application.Service }
-type UpdateRequest struct {
-	ID                int64  `json:"id"`
-	TemplateInvoiceID int64  `json:"template_invoice_id"`
-	Frequency         string `json:"frequency"`
-	NextInvoiceDate   string `json:"next_invoice_date"`
-	EndDate           string `json:"end_date"`
-	IsActive          bool   `json:"is_active"`
-}
+type (
+	UpdateHandler struct{ Service *application.Service }
+	UpdateRequest struct {
+		ID                int64  `json:"id"`
+		TemplateInvoiceID int64  `json:"template_invoice_id"`
+		Frequency         string `json:"frequency"`
+		NextInvoiceDate   string `json:"next_invoice_date"`
+		EndDate           string `json:"end_date"`
+		IsActive          bool   `json:"is_active"`
+	}
+)
+
 type UpdateResponse struct {
 	Message string `json:"message"`
 }

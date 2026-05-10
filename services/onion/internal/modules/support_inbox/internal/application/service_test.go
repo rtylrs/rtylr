@@ -19,6 +19,7 @@ type mockRepo struct {
 func (m *mockRepo) ListInbox(_ context.Context, _ int64, _, _ int) ([]domain.InboxItem, int, error) {
 	return m.list, m.total, m.listEr
 }
+
 func (m *mockRepo) UnreadCount(_ context.Context, _ int64) (int, error) {
 	return m.count, m.cntErr
 }

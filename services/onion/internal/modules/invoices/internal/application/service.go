@@ -358,7 +358,7 @@ func (s *Service) RecordPayment(ctx context.Context, ownerID int64, input domain
 // Expenses
 // ---------------------------------------------------------------------------
 
-func (s *Service) ListExpenses(ctx context.Context, ownerID int64, categoryID int64, search, dateFrom, dateTo string) ([]domain.Expense, error) {
+func (s *Service) ListExpenses(ctx context.Context, ownerID, categoryID int64, search, dateFrom, dateTo string) ([]domain.Expense, error) {
 	return s.repo.ListExpenses(ctx, ownerID, categoryID, search, dateFrom, dateTo)
 }
 

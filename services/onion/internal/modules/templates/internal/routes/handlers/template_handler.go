@@ -6,11 +6,10 @@ import (
 	"errors"
 	"net/http"
 
-	authPkg "github.com/voxire/onion/internal/platform/auth"
-	errorModels "github.com/voxire/onion/internal/platform/errors"
-
 	"github.com/voxire/onion/internal/modules/templates/internal/application"
 	"github.com/voxire/onion/internal/modules/templates/internal/domain"
+	authPkg "github.com/voxire/onion/internal/platform/auth"
+	errorModels "github.com/voxire/onion/internal/platform/errors"
 )
 
 func TemplateListRoutes() []string {

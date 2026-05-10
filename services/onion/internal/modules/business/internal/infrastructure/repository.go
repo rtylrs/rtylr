@@ -3,6 +3,7 @@ package infrastructure
 import (
 	"context"
 	"database/sql"
+	"errors"
 
 	"github.com/voxire/onion/internal/modules/business/internal/domain"
 	"github.com/voxire/onion/internal/modules/business/internal/infrastructure/persistence/sqlc"
@@ -24,7 +25,7 @@ func (r *Repository) GetProfile(ctx context.Context, ownerID int64) (domain.Busi
 	var profile domain.BusinessProfile
 
 	row, err := r.queries.GetBusinessProfile(ctx, int32(ownerID))
-	if err != nil && err != sql.ErrNoRows {
+	if err != nil && !errors.Is(err, sql.ErrNoRows) {
 		logger.Ctx(ctx).Error("Failed to get business profile", logger.Error(err))
 		return profile, err
 	}

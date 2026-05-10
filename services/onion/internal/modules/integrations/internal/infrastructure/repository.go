@@ -34,7 +34,7 @@ func (r *Repository) List(ctx context.Context, ownerID int64) ([]domain.Integrat
 		i.OwnerID = row.OwnerID
 		i.Provider = row.Provider
 		i.Status = domain.IntegrationStatus(row.Status)
-		i.Config = json.RawMessage(row.Config)
+		i.Config = row.Config
 		if row.ConnectedAt.Valid {
 			i.ConnectedAt = &row.ConnectedAt.Time
 		}

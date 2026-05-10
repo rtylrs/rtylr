@@ -6,10 +6,10 @@ import (
 )
 
 var (
-	ErrGiftCardNotFound      = errors.New("gift card not found")
-	ErrGiftCardInactive      = errors.New("gift card is inactive")
-	ErrGiftCardExpired       = errors.New("gift card has expired")
-	ErrInsufficientBalance   = errors.New("insufficient gift card balance")
+	ErrGiftCardNotFound    = errors.New("gift card not found")
+	ErrGiftCardInactive    = errors.New("gift card is inactive")
+	ErrGiftCardExpired     = errors.New("gift card has expired")
+	ErrInsufficientBalance = errors.New("insufficient gift card balance")
 )
 
 type GiftCard struct {
@@ -27,11 +27,11 @@ type GiftCard struct {
 }
 
 type GiftCardInput struct {
-	Code           string  `json:"code"`
-	InitialAmount  float64 `json:"initial_amount"`
-	CustomerName   string  `json:"customer_name"`
-	CustomerEmail  string  `json:"customer_email"`
-	ExpiresAt      string  `json:"expires_at"`
+	Code          string  `json:"code"`
+	InitialAmount float64 `json:"initial_amount"`
+	CustomerName  string  `json:"customer_name"`
+	CustomerEmail string  `json:"customer_email"`
+	ExpiresAt     string  `json:"expires_at"`
 }
 
 type RedeemInput struct {

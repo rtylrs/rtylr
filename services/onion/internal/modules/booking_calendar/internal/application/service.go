@@ -46,9 +46,15 @@ func (s *Service) GetCalendar(ctx context.Context, ownerID int64, from, to strin
 			StartTime: startTime.Format("2006-01-02T15:04:05Z07:00"),
 			EndTime:   endTime.Format("2006-01-02T15:04:05Z07:00"),
 		}
-		if serviceID.Valid { appt.ServiceID = serviceID.Int64 }
-		if custName.Valid { appt.CustomerName = custName.String }
-		if status.Valid { appt.Status = status.String }
+		if serviceID.Valid {
+			appt.ServiceID = serviceID.Int64
+		}
+		if custName.Valid {
+			appt.CustomerName = custName.String
+		}
+		if status.Valid {
+			appt.Status = status.String
+		}
 		dayMap[dateKey] = append(dayMap[dateKey], appt)
 	}
 

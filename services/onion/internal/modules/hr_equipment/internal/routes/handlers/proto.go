@@ -1,8 +1,8 @@
 package handlers
 
 import (
-	hrv1 "github.com/voxire/voxie/gen/go/hr/v1"
 	"github.com/voxire/onion/internal/modules/hr_equipment/internal/domain"
+	hrv1 "github.com/voxire/voxie/gen/go/hr/v1"
 )
 
 func equipmentRequestToProto(r domain.EquipmentRequestRecord) *hrv1.EquipmentRequestPayload {

@@ -1,9 +1,8 @@
 package handlers
 
 import (
-	hrv1 "github.com/voxire/voxie/gen/go/hr/v1"
-
 	"github.com/voxire/onion/internal/modules/hr_shifts/internal/domain"
+	hrv1 "github.com/voxire/voxie/gen/go/hr/v1"
 )
 
 func shiftToProto(s domain.ShiftRecord) *hrv1.ShiftPayload {

@@ -8,19 +8,17 @@ import (
 	"time"
 
 	"github.com/go-chi/chi/v5"
-	finv1 "github.com/voxire/voxie/gen/go/finance/v1"
-
-	authPkg "github.com/voxire/onion/internal/platform/auth"
-	errorModels "github.com/voxire/onion/internal/platform/errors"
-
 	"github.com/voxire/onion/internal/modules/expenses/internal/application"
 	"github.com/voxire/onion/internal/modules/expenses/internal/domain"
+	authPkg "github.com/voxire/onion/internal/platform/auth"
+	errorModels "github.com/voxire/onion/internal/platform/errors"
+	finv1 "github.com/voxire/voxie/gen/go/finance/v1"
 )
 
 func newExpensePayload(e domain.Expense) *finv1.Expense {
 	return &finv1.Expense{
 		Id:          e.ID,
-		OwnerId:    e.OwnerID,
+		OwnerId:     e.OwnerID,
 		CategoryId:  e.CategoryID,
 		Amount:      e.Amount,
 		Currency:    e.Currency,
@@ -38,11 +36,13 @@ func newExpensePayload(e domain.Expense) *finv1.Expense {
 
 func ExpenseListRoutes() []string { return []string{"/finance/expenses"} }
 
-type ListExpensesHandler struct{ Service *application.Service }
-type ListExpensesRequest struct{}
-type ListExpensesResponse struct {
-	Expenses []*finv1.Expense `json:"expenses"`
-}
+type (
+	ListExpensesHandler  struct{ Service *application.Service }
+	ListExpensesRequest  struct{}
+	ListExpensesResponse struct {
+		Expenses []*finv1.Expense `json:"expenses"`
+	}
+)
 
 func (h *ListExpensesHandler) Serve(ctx context.Context, _ *ListExpensesRequest) (ListExpensesResponse, *errorModels.ServerError) {
 	device := authPkg.DeviceCtx(ctx)
@@ -181,11 +181,13 @@ func (h *UpdateExpenseHandler) Serve(ctx context.Context, req *UpdateExpenseRequ
 
 func ExpenseDeleteRoutes() []string { return []string{"/finance/expenses/{id}"} }
 
-type DeleteExpenseHandler struct{ Service *application.Service }
-type DeleteExpenseRequest struct{}
-type DeleteExpenseResponse struct {
-	Message string `json:"message"`
-}
+type (
+	DeleteExpenseHandler  struct{ Service *application.Service }
+	DeleteExpenseRequest  struct{}
+	DeleteExpenseResponse struct {
+		Message string `json:"message"`
+	}
+)
 
 func (h *DeleteExpenseHandler) Serve(ctx context.Context, _ *DeleteExpenseRequest) (DeleteExpenseResponse, *errorModels.ServerError) {
 	device := authPkg.DeviceCtx(ctx)
@@ -210,11 +212,13 @@ func (h *DeleteExpenseHandler) Serve(ctx context.Context, _ *DeleteExpenseReques
 
 func ExpenseCategoriesRoutes() []string { return []string{"/finance/expenses/categories"} }
 
-type ListCategoriesHandler struct{ Service *application.Service }
-type ListCategoriesRequest struct{}
-type ListCategoriesResponse struct {
-	Categories []*finv1.ExpenseCategory `json:"categories"`
-}
+type (
+	ListCategoriesHandler  struct{ Service *application.Service }
+	ListCategoriesRequest  struct{}
+	ListCategoriesResponse struct {
+		Categories []*finv1.ExpenseCategory `json:"categories"`
+	}
+)
 
 func (h *ListCategoriesHandler) Serve(ctx context.Context, _ *ListCategoriesRequest) (ListCategoriesResponse, *errorModels.ServerError) {
 	device := authPkg.DeviceCtx(ctx)
@@ -229,7 +233,7 @@ func (h *ListCategoriesHandler) Serve(ctx context.Context, _ *ListCategoriesRequ
 	for i, c := range cats {
 		payloads[i] = &finv1.ExpenseCategory{
 			Id:        c.ID,
-			OwnerId:  c.OwnerID,
+			OwnerId:   c.OwnerID,
 			Name:      c.Name,
 			Color:     c.Color,
 			CreatedAt: c.CreatedAt.Format("2006-01-02T15:04:05Z"),

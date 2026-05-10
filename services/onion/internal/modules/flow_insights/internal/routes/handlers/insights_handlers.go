@@ -14,9 +14,9 @@ import (
 // Route declarations
 // ─────────────────────────────────────────────
 
-func GetInsightsRoutes() []string      { return []string{"/flow/insights"} }
-func GetTeamWorkloadRoutes() []string  { return []string{"/flow/team/workload"} }
-func GetRoadmapRoutes() []string       { return []string{"/flow/roadmap"} }
+func GetInsightsRoutes() []string     { return []string{"/flow/insights"} }
+func GetTeamWorkloadRoutes() []string { return []string{"/flow/team/workload"} }
+func GetRoadmapRoutes() []string      { return []string{"/flow/roadmap"} }
 
 // ─────────────────────────────────────────────
 // GET /flow/insights

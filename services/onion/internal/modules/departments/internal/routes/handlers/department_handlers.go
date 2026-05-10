@@ -4,34 +4,35 @@ import (
 	"context"
 	"net/http"
 
-	hrv1 "github.com/voxire/voxie/gen/go/hr/v1"
-
 	"github.com/voxire/onion/internal/modules/departments/internal/application"
 	"github.com/voxire/onion/internal/modules/departments/internal/domain"
 	authPkg "github.com/voxire/onion/internal/platform/auth"
 	errorModels "github.com/voxire/onion/internal/platform/errors"
+	hrv1 "github.com/voxire/voxie/gen/go/hr/v1"
 )
 
-func ListDepartmentsRoutes() []string   { return []string{"/hr/departments"} }
-func CreateDepartmentRoutes() []string  { return []string{"/hr/departments"} }
-func UpdateDepartmentRoutes() []string  { return []string{"/hr/departments"} }
-func DeleteDepartmentRoutes() []string  { return []string{"/hr/departments"} }
+func ListDepartmentsRoutes() []string  { return []string{"/hr/departments"} }
+func CreateDepartmentRoutes() []string { return []string{"/hr/departments"} }
+func UpdateDepartmentRoutes() []string { return []string{"/hr/departments"} }
+func DeleteDepartmentRoutes() []string { return []string{"/hr/departments"} }
 
 func newDepartmentPayload(d domain.Department) *hrv1.DepartmentPayload {
 	return &hrv1.DepartmentPayload{
 		Id:        d.ID,
-		OwnerId:  d.OwnerID,
-		Name:     d.Name,
+		OwnerId:   d.OwnerID,
+		Name:      d.Name,
 		CreatedAt: d.CreatedAt.Unix(),
 		UpdatedAt: d.UpdatedAt.Unix(),
 	}
 }
 
-type ListDepartmentsHandler struct{ Service *application.Service }
-type ListDepartmentsRequest struct{}
-type ListDepartmentsResponse struct {
-	Departments []*hrv1.DepartmentPayload `json:"departments"`
-}
+type (
+	ListDepartmentsHandler  struct{ Service *application.Service }
+	ListDepartmentsRequest  struct{}
+	ListDepartmentsResponse struct {
+		Departments []*hrv1.DepartmentPayload `json:"departments"`
+	}
+)
 
 func (h *ListDepartmentsHandler) Serve(ctx context.Context, _ *ListDepartmentsRequest) (ListDepartmentsResponse, *errorModels.ServerError) {
 	device := authPkg.DeviceCtx(ctx)
@@ -49,11 +50,14 @@ func (h *ListDepartmentsHandler) Serve(ctx context.Context, _ *ListDepartmentsRe
 	return ListDepartmentsResponse{Departments: payloads}, nil
 }
 
-type CreateDepartmentHandler struct{ Service *application.Service }
-type CreateDepartmentRequest struct {
-	Name        string `json:"name"`
-	Description string `json:"description"`
-}
+type (
+	CreateDepartmentHandler struct{ Service *application.Service }
+	CreateDepartmentRequest struct {
+		Name        string `json:"name"`
+		Description string `json:"description"`
+	}
+)
+
 type CreateDepartmentResponse struct {
 	ID int64 `json:"id"`
 }
@@ -78,12 +82,15 @@ func (h *CreateDepartmentHandler) Serve(ctx context.Context, req *CreateDepartme
 	return CreateDepartmentResponse{ID: id}, nil
 }
 
-type UpdateDepartmentHandler struct{ Service *application.Service }
-type UpdateDepartmentRequest struct {
-	ID          int64  `json:"id"`
-	Name        string `json:"name"`
-	Description string `json:"description"`
-}
+type (
+	UpdateDepartmentHandler struct{ Service *application.Service }
+	UpdateDepartmentRequest struct {
+		ID          int64  `json:"id"`
+		Name        string `json:"name"`
+		Description string `json:"description"`
+	}
+)
+
 type UpdateDepartmentResponse struct {
 	Success bool `json:"success"`
 }
@@ -110,10 +117,13 @@ func (h *UpdateDepartmentHandler) Serve(ctx context.Context, req *UpdateDepartme
 	return UpdateDepartmentResponse{Success: true}, nil
 }
 
-type DeleteDepartmentHandler struct{ Service *application.Service }
-type DeleteDepartmentRequest struct {
-	ID int64 `json:"id"`
-}
+type (
+	DeleteDepartmentHandler struct{ Service *application.Service }
+	DeleteDepartmentRequest struct {
+		ID int64 `json:"id"`
+	}
+)
+
 type DeleteDepartmentResponse struct {
 	Success bool `json:"success"`
 }

@@ -13,16 +13,18 @@ import (
 
 func BalanceSheetRoutes() []string { return []string{"/finance/balance-sheet"} }
 
-type BalanceSheetHandler struct{ Service *application.Service }
-type BalanceSheetRequest struct{}
-type BalanceSheetResponse struct {
-	TotalAssets         float64 `json:"total_assets"`
-	TotalLiabilities    float64 `json:"total_liabilities"`
-	TotalEquity         float64 `json:"total_equity"`
-	CashBalance         float64 `json:"cash_balance"`
-	AccountsReceivable  float64 `json:"accounts_receivable"`
-	AccountsPayable     float64 `json:"accounts_payable"`
-}
+type (
+	BalanceSheetHandler  struct{ Service *application.Service }
+	BalanceSheetRequest  struct{}
+	BalanceSheetResponse struct {
+		TotalAssets        float64 `json:"total_assets"`
+		TotalLiabilities   float64 `json:"total_liabilities"`
+		TotalEquity        float64 `json:"total_equity"`
+		CashBalance        float64 `json:"cash_balance"`
+		AccountsReceivable float64 `json:"accounts_receivable"`
+		AccountsPayable    float64 `json:"accounts_payable"`
+	}
+)
 
 func (h *BalanceSheetHandler) Serve(ctx context.Context, _ *BalanceSheetRequest) (BalanceSheetResponse, *errorModels.ServerError) {
 	device := authPkg.DeviceCtx(ctx)
@@ -46,10 +48,13 @@ func (h *BalanceSheetHandler) Serve(ctx context.Context, _ *BalanceSheetRequest)
 
 func CashFlowRoutes() []string { return []string{"/finance/cash-flow"} }
 
-type CashFlowHandler struct{ Service *application.Service }
-type CashFlowRequest struct {
-	Period string `json:"period"`
-}
+type (
+	CashFlowHandler struct{ Service *application.Service }
+	CashFlowRequest struct {
+		Period string `json:"period"`
+	}
+)
+
 type CashFlowResponse struct {
 	Period           string  `json:"period"`
 	OperatingInflow  float64 `json:"operating_inflow"`

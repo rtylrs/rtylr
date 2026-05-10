@@ -3,6 +3,7 @@ package infrastructure
 import (
 	"context"
 	"database/sql"
+	"errors"
 	"strconv"
 	"time"
 
@@ -88,7 +89,7 @@ func (r *Repository) GetByCode(ctx context.Context, ownerID int64, code string) 
 		Code:    code,
 	})
 	if err != nil {
-		if err == sql.ErrNoRows {
+		if errors.Is(err, sql.ErrNoRows) {
 			return nil, domain.ErrGiftCardNotFound
 		}
 		logger.Ctx(ctx).Error("Failed to get gift card by code", logger.Error(err))

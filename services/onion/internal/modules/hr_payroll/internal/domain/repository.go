@@ -65,9 +65,9 @@ type NotificationDispatcher interface {
 // notification module maps to a template + delivery channel based on company
 // config.
 type NotificationEvent struct {
-	OwnerID  int64
-	Type     string
-	Subject  string
-	Payload  map[string]any
-	UserIDs  []int64 // optional explicit recipients; empty = use type-based routing
+	OwnerID int64
+	Type    string
+	Subject string
+	Payload map[string]any
+	UserIDs []int64 // optional explicit recipients; empty = use type-based routing
 }

@@ -4,12 +4,11 @@ import (
 	"context"
 	"net/http"
 
-	erpv1 "github.com/voxire/voxie/gen/go/erp/v1"
-
 	"github.com/voxire/onion/internal/modules/suppliers/internal/application"
 	"github.com/voxire/onion/internal/modules/suppliers/internal/domain"
 	authPkg "github.com/voxire/onion/internal/platform/auth"
 	errorModels "github.com/voxire/onion/internal/platform/errors"
+	erpv1 "github.com/voxire/voxie/gen/go/erp/v1"
 )
 
 // ─── List Suppliers ───────────────────────────────────────────────────────────
@@ -31,7 +30,7 @@ type ListSuppliersResponse struct {
 func newSupplierPayload(s domain.Supplier) *erpv1.Supplier {
 	return &erpv1.Supplier{
 		Id:           s.ID,
-		OwnerId:     s.OwnerID,
+		OwnerId:      s.OwnerID,
 		Name:         s.Name,
 		Email:        s.Email,
 		Phone:        s.Phone,

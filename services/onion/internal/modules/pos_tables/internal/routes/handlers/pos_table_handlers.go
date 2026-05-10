@@ -7,24 +7,23 @@ import (
 	"strconv"
 
 	"github.com/go-chi/chi/v5"
-	posv1 "github.com/voxire/voxie/gen/go/pos/v1"
-
 	"github.com/voxire/onion/internal/modules/pos_tables/internal/application"
 	"github.com/voxire/onion/internal/modules/pos_tables/internal/domain"
 	authPkg "github.com/voxire/onion/internal/platform/auth"
 	errorModels "github.com/voxire/onion/internal/platform/errors"
+	posv1 "github.com/voxire/voxie/gen/go/pos/v1"
 )
 
 func toProtoTable(t domain.Table) *posv1.Table {
 	p := &posv1.Table{
-		Id:        t.ID,
-		OwnerId:   t.OwnerID,
+		Id:         t.ID,
+		OwnerId:    t.OwnerID,
 		LocationId: t.LocationID,
-		Label:     t.Label,
-		Seats:     int32(t.Seats),
-		Status:    t.Status,
-		CreatedAt: t.CreatedAt.Format("2006-01-02T15:04:05Z"),
-		UpdatedAt: t.UpdatedAt.Format("2006-01-02T15:04:05Z"),
+		Label:      t.Label,
+		Seats:      int32(t.Seats),
+		Status:     t.Status,
+		CreatedAt:  t.CreatedAt.Format("2006-01-02T15:04:05Z"),
+		UpdatedAt:  t.UpdatedAt.Format("2006-01-02T15:04:05Z"),
 	}
 	return p
 }
@@ -33,11 +32,13 @@ func toProtoTable(t domain.Table) *posv1.Table {
 
 func TableListRoutes() []string { return []string{"/pos/tables"} }
 
-type ListTablesHandler struct{ Service *application.Service }
-type ListTablesRequest struct{}
-type ListTablesResponse struct {
-	Tables []*posv1.Table `json:"tables"`
-}
+type (
+	ListTablesHandler  struct{ Service *application.Service }
+	ListTablesRequest  struct{}
+	ListTablesResponse struct {
+		Tables []*posv1.Table `json:"tables"`
+	}
+)
 
 func (h *ListTablesHandler) Serve(ctx context.Context, _ *ListTablesRequest) (ListTablesResponse, *errorModels.ServerError) {
 	device := authPkg.DeviceCtx(ctx)
@@ -154,11 +155,13 @@ func (h *UpdateTableHandler) Serve(ctx context.Context, req *UpdateTableRequest)
 
 func TableDeleteRoutes() []string { return []string{"/pos/tables/{id}"} }
 
-type DeleteTableHandler struct{ Service *application.Service }
-type DeleteTableRequest struct{}
-type DeleteTableResponse struct {
-	Message string `json:"message"`
-}
+type (
+	DeleteTableHandler  struct{ Service *application.Service }
+	DeleteTableRequest  struct{}
+	DeleteTableResponse struct {
+		Message string `json:"message"`
+	}
+)
 
 func (h *DeleteTableHandler) Serve(ctx context.Context, _ *DeleteTableRequest) (DeleteTableResponse, *errorModels.ServerError) {
 	device := authPkg.DeviceCtx(ctx)

@@ -9,24 +9,27 @@ import (
 )
 
 type mockRepo struct {
-	list      []domain.Session
-	sess      *domain.Session
-	openID    int64
-	listErr   error
-	getErr    error
-	openErr   error
-	closeErr  error
+	list     []domain.Session
+	sess     *domain.Session
+	openID   int64
+	listErr  error
+	getErr   error
+	openErr  error
+	closeErr error
 }
 
 func (m *mockRepo) List(_ context.Context, _ int64) ([]domain.Session, error) {
 	return m.list, m.listErr
 }
+
 func (m *mockRepo) Get(_ context.Context, _, _ int64) (*domain.Session, error) {
 	return m.sess, m.getErr
 }
+
 func (m *mockRepo) Open(_ context.Context, _ domain.OpenSessionInput) (int64, error) {
 	return m.openID, m.openErr
 }
+
 func (m *mockRepo) Close(_ context.Context, _ domain.CloseSessionInput) error {
 	return m.closeErr
 }

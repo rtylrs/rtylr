@@ -3,6 +3,7 @@ package infrastructure
 import (
 	"context"
 	"database/sql"
+	"errors"
 	"fmt"
 	"strconv"
 	"time"
@@ -53,7 +54,7 @@ func (r *Repository) GetEquipmentRequest(ctx context.Context, ownerID, id int64)
 		ID:      id,
 	})
 	if err != nil {
-		if err == sql.ErrNoRows {
+		if errors.Is(err, sql.ErrNoRows) {
 			return nil, domain.ErrEquipmentRequestNotFound
 		}
 		return nil, err
@@ -164,7 +165,7 @@ func (r *Repository) GetAsset(ctx context.Context, ownerID, id int64) (*domain.A
 		ID:      id,
 	})
 	if err != nil {
-		if err == sql.ErrNoRows {
+		if errors.Is(err, sql.ErrNoRows) {
 			return nil, domain.ErrAssetNotFound
 		}
 		return nil, err

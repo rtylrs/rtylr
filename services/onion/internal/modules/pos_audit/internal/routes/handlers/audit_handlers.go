@@ -5,12 +5,11 @@ import (
 	"encoding/json"
 	"net/http"
 
-	posv1 "github.com/voxire/voxie/gen/go/pos/v1"
-
 	"github.com/voxire/onion/internal/modules/pos_audit/internal/application"
 	"github.com/voxire/onion/internal/modules/pos_audit/internal/domain"
 	authPkg "github.com/voxire/onion/internal/platform/auth"
 	errorModels "github.com/voxire/onion/internal/platform/errors"
+	posv1 "github.com/voxire/voxie/gen/go/pos/v1"
 )
 
 func toProtoAuditLog(l domain.AuditLog) *posv1.AuditLog {
@@ -37,14 +36,17 @@ func toProtoAuditLog(l domain.AuditLog) *posv1.AuditLog {
 
 func AuditListRoutes() []string { return []string{"/pos/audit"} }
 
-type ListAuditHandler struct{ Service *application.Service }
-type ListAuditRequest struct {
-	Action     *string `json:"action"`
-	EntityType *string `json:"entity_type"`
-	EmployeeID *int64  `json:"employee_id"`
-	StartDate  *string `json:"start_date"`
-	EndDate    *string `json:"end_date"`
-}
+type (
+	ListAuditHandler struct{ Service *application.Service }
+	ListAuditRequest struct {
+		Action     *string `json:"action"`
+		EntityType *string `json:"entity_type"`
+		EmployeeID *int64  `json:"employee_id"`
+		StartDate  *string `json:"start_date"`
+		EndDate    *string `json:"end_date"`
+	}
+)
+
 type ListAuditResponse struct {
 	Logs []*posv1.AuditLog `json:"logs"`
 }

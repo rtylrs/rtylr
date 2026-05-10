@@ -18,6 +18,7 @@ type mockRepo struct {
 func (m *mockRepo) GetSummary(_ context.Context, _ int64) (domain.BillingSummary, error) {
 	return m.summary, m.sErr
 }
+
 func (m *mockRepo) ListInvoices(_ context.Context, _ int64) ([]domain.Invoice, error) {
 	return m.invoices, m.iErr
 }

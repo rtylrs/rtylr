@@ -11,10 +11,10 @@ import (
 // Keeping it flat here avoids the repository needing to know about the
 // frontend's JSON contract.
 type CustomerKPIs struct {
-	Total       int64
+	Total        int64
 	NewThisMonth int64
-	Active      int64
-	Churned     int64
+	Active       int64
+	Churned      int64
 }
 
 // GetCustomerKPIs computes four cohort-style counters over the CRM customer

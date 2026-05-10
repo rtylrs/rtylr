@@ -97,11 +97,13 @@ func (h *ListHandler) Serve(ctx context.Context, req *ListRequest) (ListResponse
 
 func SyncRoutes() []string { return []string{"/finance/bank-feeds/sync"} }
 
-type SyncHandler struct{ Service *application.Service }
-type SyncRequest struct{}
-type SyncResponse struct {
-	Imported int `json:"imported"`
-}
+type (
+	SyncHandler  struct{ Service *application.Service }
+	SyncRequest  struct{}
+	SyncResponse struct {
+		Imported int `json:"imported"`
+	}
+)
 
 func (h *SyncHandler) Serve(ctx context.Context, _ *SyncRequest) (SyncResponse, *errorModels.ServerError) {
 	device := authPkg.DeviceCtx(ctx)

@@ -79,11 +79,13 @@ func ownerIDFromCtx(ctx context.Context) (int64, bool) {
 
 func ListGroupsRoutes() []string { return []string{"/team/groups"} }
 
-type ListGroupsHandler struct{ Service *application.Service }
-type ListGroupsRequest struct{}
-type ListGroupsResponse struct {
-	Groups []GroupPayload `json:"groups"`
-}
+type (
+	ListGroupsHandler  struct{ Service *application.Service }
+	ListGroupsRequest  struct{}
+	ListGroupsResponse struct {
+		Groups []GroupPayload `json:"groups"`
+	}
+)
 
 func (h *ListGroupsHandler) Serve(ctx context.Context, _ *ListGroupsRequest) (ListGroupsResponse, *errorModels.ServerError) {
 	ownerID, ok := ownerIDFromCtx(ctx)
@@ -103,13 +105,16 @@ func (h *ListGroupsHandler) Serve(ctx context.Context, _ *ListGroupsRequest) (Li
 
 // ─── Create Group ─────────────────────────────────────────────────────────────
 
-type CreateGroupHandler struct{ Service *application.Service }
-type CreateGroupRequest struct {
-	Name                string                      `json:"name"`
-	Description         string                      `json:"description"`
-	Color               string                      `json:"color"`
-	ResourcePermissions []ResourcePermissionPayload `json:"resource_permissions"`
-}
+type (
+	CreateGroupHandler struct{ Service *application.Service }
+	CreateGroupRequest struct {
+		Name                string                      `json:"name"`
+		Description         string                      `json:"description"`
+		Color               string                      `json:"color"`
+		ResourcePermissions []ResourcePermissionPayload `json:"resource_permissions"`
+	}
+)
+
 type CreateGroupResponse struct {
 	Group GroupPayload `json:"group"`
 }
@@ -151,11 +156,13 @@ func (h *CreateGroupHandler) Serve(ctx context.Context, req *CreateGroupRequest)
 
 func GetGroupDetailRoutes() []string { return []string{"/team/groups/{id}"} }
 
-type GetGroupDetailHandler struct{ Service *application.Service }
-type GetGroupDetailRequest struct{}
-type GetGroupDetailResponse struct {
-	Group GroupDetailPayload `json:"group"`
-}
+type (
+	GetGroupDetailHandler  struct{ Service *application.Service }
+	GetGroupDetailRequest  struct{}
+	GetGroupDetailResponse struct {
+		Group GroupDetailPayload `json:"group"`
+	}
+)
 
 func (h *GetGroupDetailHandler) Serve(ctx context.Context, _ *GetGroupDetailRequest) (GetGroupDetailResponse, *errorModels.ServerError) {
 	ownerID, ok := ownerIDFromCtx(ctx)
@@ -185,13 +192,16 @@ func (h *GetGroupDetailHandler) Serve(ctx context.Context, _ *GetGroupDetailRequ
 
 // ─── Update Group ─────────────────────────────────────────────────────────────
 
-type UpdateGroupHandler struct{ Service *application.Service }
-type UpdateGroupRequest struct {
-	Name                string                      `json:"name"`
-	Description         string                      `json:"description"`
-	Color               string                      `json:"color"`
-	ResourcePermissions []ResourcePermissionPayload `json:"resource_permissions"`
-}
+type (
+	UpdateGroupHandler struct{ Service *application.Service }
+	UpdateGroupRequest struct {
+		Name                string                      `json:"name"`
+		Description         string                      `json:"description"`
+		Color               string                      `json:"color"`
+		ResourcePermissions []ResourcePermissionPayload `json:"resource_permissions"`
+	}
+)
+
 type UpdateGroupResponse struct {
 	Group GroupPayload `json:"group"`
 }
@@ -231,11 +241,13 @@ func (h *UpdateGroupHandler) Serve(ctx context.Context, req *UpdateGroupRequest)
 
 // ─── Delete Group ─────────────────────────────────────────────────────────────
 
-type DeleteGroupHandler struct{ Service *application.Service }
-type DeleteGroupRequest struct{}
-type DeleteGroupResponse struct {
-	Message string `json:"message"`
-}
+type (
+	DeleteGroupHandler  struct{ Service *application.Service }
+	DeleteGroupRequest  struct{}
+	DeleteGroupResponse struct {
+		Message string `json:"message"`
+	}
+)
 
 func (h *DeleteGroupHandler) Serve(ctx context.Context, _ *DeleteGroupRequest) (DeleteGroupResponse, *errorModels.ServerError) {
 	ownerID, ok := ownerIDFromCtx(ctx)
@@ -257,10 +269,13 @@ func (h *DeleteGroupHandler) Serve(ctx context.Context, _ *DeleteGroupRequest) (
 
 func AddGroupMembersRoutes() []string { return []string{"/team/groups/{id}/members"} }
 
-type AddGroupMembersHandler struct{ Service *application.Service }
-type AddGroupMembersRequest struct {
-	UserIDs []int64 `json:"user_ids"`
-}
+type (
+	AddGroupMembersHandler struct{ Service *application.Service }
+	AddGroupMembersRequest struct {
+		UserIDs []int64 `json:"user_ids"`
+	}
+)
+
 type AddGroupMembersResponse struct {
 	Added   int    `json:"added"`
 	Message string `json:"message"`
@@ -293,11 +308,13 @@ func (h *AddGroupMembersHandler) Serve(ctx context.Context, req *AddGroupMembers
 
 func RemoveGroupMemberRoutes() []string { return []string{"/team/groups/{id}/members/{userId}"} }
 
-type RemoveGroupMemberHandler struct{ Service *application.Service }
-type RemoveGroupMemberRequest struct{}
-type RemoveGroupMemberResponse struct {
-	Message string `json:"message"`
-}
+type (
+	RemoveGroupMemberHandler  struct{ Service *application.Service }
+	RemoveGroupMemberRequest  struct{}
+	RemoveGroupMemberResponse struct {
+		Message string `json:"message"`
+	}
+)
 
 func (h *RemoveGroupMemberHandler) Serve(ctx context.Context, _ *RemoveGroupMemberRequest) (RemoveGroupMemberResponse, *errorModels.ServerError) {
 	ownerID, ok := ownerIDFromCtx(ctx)
@@ -324,11 +341,13 @@ func (h *RemoveGroupMemberHandler) Serve(ctx context.Context, _ *RemoveGroupMemb
 
 func GetUserGroupsRoutes() []string { return []string{"/team/users/{id}/groups"} }
 
-type GetUserGroupsHandler struct{ Service *application.Service }
-type GetUserGroupsRequest struct{}
-type GetUserGroupsResponse struct {
-	Groups []GroupSummaryPayload `json:"groups"`
-}
+type (
+	GetUserGroupsHandler  struct{ Service *application.Service }
+	GetUserGroupsRequest  struct{}
+	GetUserGroupsResponse struct {
+		Groups []GroupSummaryPayload `json:"groups"`
+	}
+)
 
 func (h *GetUserGroupsHandler) Serve(ctx context.Context, _ *GetUserGroupsRequest) (GetUserGroupsResponse, *errorModels.ServerError) {
 	ownerID, ok := ownerIDFromCtx(ctx)

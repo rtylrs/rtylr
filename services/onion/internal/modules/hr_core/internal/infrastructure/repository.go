@@ -4,11 +4,11 @@ import (
 	"context"
 	"database/sql"
 	"encoding/json"
+	"errors"
 	"strconv"
 	"time"
 
 	"github.com/google/uuid"
-
 	"github.com/voxire/onion/internal/modules/hr_core/internal/domain"
 	"github.com/voxire/onion/internal/modules/hr_core/internal/infrastructure/persistence/sqlc"
 	"github.com/voxire/onion/internal/platform/database/dbclient"
@@ -57,7 +57,7 @@ func (r *Repository) ListEmployees(ctx context.Context, ownerID int64, params do
 func (r *Repository) GetEmployee(ctx context.Context, ownerID, employeeID int64) (*domain.EmployeeRecord, error) {
 	row, err := r.queries.GetEmployee(ctx, sqlc.GetEmployeeParams{OwnerID: ownerID, ID: employeeID})
 	if err != nil {
-		if err == sql.ErrNoRows {
+		if errors.Is(err, sql.ErrNoRows) {
 			return nil, domain.ErrEmployeeNotFound
 		}
 		logger.Ctx(ctx).Error("failed to get employee", logger.Any("owner_id", ownerID), logger.Any("employee_id", employeeID), logger.Error(err))
@@ -184,7 +184,7 @@ func (r *Repository) CreateInviteToken(ctx context.Context, ownerID, employeeID 
 func (r *Repository) GetInviteByToken(ctx context.Context, token string) (*domain.InviteRecord, error) {
 	row, err := r.queries.GetInviteByToken(ctx, token)
 	if err != nil {
-		if err == sql.ErrNoRows {
+		if errors.Is(err, sql.ErrNoRows) {
 			return nil, domain.ErrInviteTokenInvalid
 		}
 		return nil, err
@@ -221,7 +221,7 @@ func (r *Repository) ListLocations(ctx context.Context, ownerID int64) ([]domain
 func (r *Repository) GetLocation(ctx context.Context, ownerID, locationID int64) (*domain.LocationRecord, error) {
 	row, err := r.queries.GetLocation(ctx, sqlc.GetLocationParams{OwnerID: ownerID, ID: locationID})
 	if err != nil {
-		if err == sql.ErrNoRows {
+		if errors.Is(err, sql.ErrNoRows) {
 			return nil, domain.ErrLocationNotFound
 		}
 		return nil, err
@@ -278,7 +278,7 @@ func (r *Repository) UpdateLocation(ctx context.Context, ownerID int64, loc doma
 
 // --- Departments ---
 
-func (r *Repository) ListDepartments(ctx context.Context, ownerID int64, _ int64) ([]domain.DepartmentRecord, error) {
+func (r *Repository) ListDepartments(ctx context.Context, ownerID, _ int64) ([]domain.DepartmentRecord, error) {
 	rows, err := r.queries.ListHRDepartments(ctx, ownerID)
 	if err != nil {
 		logger.Ctx(ctx).Error("failed to list departments", logger.Any("owner_id", ownerID), logger.Error(err))
@@ -347,7 +347,7 @@ func (r *Repository) ListWorkSchedules(ctx context.Context, ownerID int64) ([]do
 func (r *Repository) GetWorkScheduleForEmployee(ctx context.Context, ownerID, employeeID int64) (*domain.WorkScheduleRecord, error) {
 	row, err := r.queries.GetWorkScheduleForEmployee(ctx, sqlc.GetWorkScheduleForEmployeeParams{OwnerID: ownerID, ID: employeeID})
 	if err != nil {
-		if err == sql.ErrNoRows {
+		if errors.Is(err, sql.ErrNoRows) {
 			return nil, nil
 		}
 		return nil, err
@@ -510,7 +510,7 @@ func (r *Repository) CompleteSetupStep(ctx context.Context, ownerID int64, stepK
 func (r *Repository) GetHRConfig(ctx context.Context, ownerID int64) (*domain.HRCompanyConfigRecord, error) {
 	row, err := r.queries.GetHRConfig(ctx, ownerID)
 	if err != nil {
-		if err == sql.ErrNoRows {
+		if errors.Is(err, sql.ErrNoRows) {
 			return nil, domain.ErrSetupNotComplete
 		}
 		logger.Ctx(ctx).Error("failed to get hr config", logger.Any("owner_id", ownerID), logger.Error(err))
@@ -574,7 +574,7 @@ func (r *Repository) GetApprovalChain(ctx context.Context, ownerID int64, reques
 		RequestType: requestType,
 	})
 	if err != nil {
-		if err == sql.ErrNoRows {
+		if errors.Is(err, sql.ErrNoRows) {
 			return nil, nil
 		}
 		return nil, err

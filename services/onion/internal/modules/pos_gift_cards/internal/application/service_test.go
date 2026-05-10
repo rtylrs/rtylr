@@ -20,12 +20,15 @@ type mockRepo struct {
 func (m *mockRepo) List(_ context.Context, _ int64) ([]domain.GiftCard, error) {
 	return m.list, nil
 }
+
 func (m *mockRepo) Create(_ context.Context, _ int64, _ domain.GiftCardInput) (int64, error) {
 	return m.createID, m.createErr
 }
+
 func (m *mockRepo) GetByCode(_ context.Context, _ int64, _ string) (*domain.GiftCard, error) {
 	return m.card, m.getErr
 }
+
 func (m *mockRepo) Redeem(_ context.Context, _ int64, _ domain.RedeemInput) (*domain.GiftCard, error) {
 	return m.card, m.redErr
 }

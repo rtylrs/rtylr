@@ -15,62 +15,116 @@ func CreateRoutes() []string { return []string{"/book/resources"} }
 func UpdateRoutes() []string { return []string{"/book/resources"} }
 func DeleteRoutes() []string { return []string{"/book/resources"} }
 
-type ListHandler struct{ Service *application.Service }
-type ListRequest struct{}
-type ListResponse struct{ Resources []domain.Resource `json:"resources"` }
+type (
+	ListHandler  struct{ Service *application.Service }
+	ListRequest  struct{}
+	ListResponse struct {
+		Resources []domain.Resource `json:"resources"`
+	}
+)
 
 func (h *ListHandler) Serve(ctx context.Context, _ *ListRequest) (ListResponse, *errorModels.ServerError) {
 	authUser, ok := authPkg.GetAuthUser(ctx)
-	if !ok { return ListResponse{}, &errorModels.ServerError{Code: http.StatusUnauthorized, HTTPCode: http.StatusUnauthorized, Message: "unauthorized"} }
+	if !ok {
+		return ListResponse{}, &errorModels.ServerError{Code: http.StatusUnauthorized, HTTPCode: http.StatusUnauthorized, Message: "unauthorized"}
+	}
 	items, err := h.Service.List(ctx, authUser.UserID)
-	if err != nil { return ListResponse{}, &errorModels.ServerError{Code: http.StatusInternalServerError, HTTPCode: http.StatusInternalServerError, Message: "Failed to list resources"} }
+	if err != nil {
+		return ListResponse{}, &errorModels.ServerError{Code: http.StatusInternalServerError, HTTPCode: http.StatusInternalServerError, Message: "Failed to list resources"}
+	}
 	return ListResponse{Resources: items}, nil
 }
 
-type CreateHandler struct{ Service *application.Service }
-type CreateRequest struct { Name string `json:"name"`; Type string `json:"type"`; Capacity int `json:"capacity"`; IsActive bool `json:"is_active"` }
-type CreateResponse struct { ID int64 `json:"id"`; Message string `json:"message"` }
+type (
+	CreateHandler struct{ Service *application.Service }
+	CreateRequest struct {
+		Name     string `json:"name"`
+		Type     string `json:"type"`
+		Capacity int    `json:"capacity"`
+		IsActive bool   `json:"is_active"`
+	}
+)
+
+type CreateResponse struct {
+	ID      int64  `json:"id"`
+	Message string `json:"message"`
+}
 
 func (h *CreateHandler) Validate(_ context.Context, req *CreateRequest) *errorModels.ServerError {
-	if req.Name == "" { return &errorModels.ServerError{Code: http.StatusBadRequest, HTTPCode: http.StatusBadRequest, Message: "Name is required"} }; return nil
+	if req.Name == "" {
+		return &errorModels.ServerError{Code: http.StatusBadRequest, HTTPCode: http.StatusBadRequest, Message: "Name is required"}
+	}
+	return nil
 }
 
 func (h *CreateHandler) Serve(ctx context.Context, req *CreateRequest) (CreateResponse, *errorModels.ServerError) {
 	authUser, ok := authPkg.GetAuthUser(ctx)
-	if !ok { return CreateResponse{}, &errorModels.ServerError{Code: http.StatusUnauthorized, HTTPCode: http.StatusUnauthorized, Message: "unauthorized"} }
+	if !ok {
+		return CreateResponse{}, &errorModels.ServerError{Code: http.StatusUnauthorized, HTTPCode: http.StatusUnauthorized, Message: "unauthorized"}
+	}
 	id, err := h.Service.Create(ctx, authUser.UserID, domain.ResourceInput{Name: req.Name, Type: req.Type, Capacity: req.Capacity, IsActive: req.IsActive})
-	if err != nil { return CreateResponse{}, &errorModels.ServerError{Code: http.StatusInternalServerError, HTTPCode: http.StatusInternalServerError, Message: "Failed to create resource"} }
+	if err != nil {
+		return CreateResponse{}, &errorModels.ServerError{Code: http.StatusInternalServerError, HTTPCode: http.StatusInternalServerError, Message: "Failed to create resource"}
+	}
 	return CreateResponse{ID: id, Message: "Resource created"}, nil
 }
 
-type UpdateHandler struct{ Service *application.Service }
-type UpdateRequest struct { ID int64 `json:"id"`; Name string `json:"name"`; Type string `json:"type"`; Capacity int `json:"capacity"`; IsActive bool `json:"is_active"` }
-type UpdateResponse struct{ Message string `json:"message"` }
+type (
+	UpdateHandler struct{ Service *application.Service }
+	UpdateRequest struct {
+		ID       int64  `json:"id"`
+		Name     string `json:"name"`
+		Type     string `json:"type"`
+		Capacity int    `json:"capacity"`
+		IsActive bool   `json:"is_active"`
+	}
+)
+
+type UpdateResponse struct {
+	Message string `json:"message"`
+}
 
 func (h *UpdateHandler) Validate(_ context.Context, req *UpdateRequest) *errorModels.ServerError {
-	if req.ID == 0 { return &errorModels.ServerError{Code: http.StatusBadRequest, HTTPCode: http.StatusBadRequest, Message: "ID is required"} }; return nil
+	if req.ID == 0 {
+		return &errorModels.ServerError{Code: http.StatusBadRequest, HTTPCode: http.StatusBadRequest, Message: "ID is required"}
+	}
+	return nil
 }
 
 func (h *UpdateHandler) Serve(ctx context.Context, req *UpdateRequest) (UpdateResponse, *errorModels.ServerError) {
 	authUser, ok := authPkg.GetAuthUser(ctx)
-	if !ok { return UpdateResponse{}, &errorModels.ServerError{Code: http.StatusUnauthorized, HTTPCode: http.StatusUnauthorized, Message: "unauthorized"} }
+	if !ok {
+		return UpdateResponse{}, &errorModels.ServerError{Code: http.StatusUnauthorized, HTTPCode: http.StatusUnauthorized, Message: "unauthorized"}
+	}
 	if err := h.Service.Update(ctx, authUser.UserID, req.ID, domain.ResourceInput{Name: req.Name, Type: req.Type, Capacity: req.Capacity, IsActive: req.IsActive}); err != nil {
 		return UpdateResponse{}, &errorModels.ServerError{Code: http.StatusInternalServerError, HTTPCode: http.StatusInternalServerError, Message: "Failed to update resource"}
 	}
 	return UpdateResponse{Message: "Resource updated"}, nil
 }
 
-type DeleteHandler struct{ Service *application.Service }
-type DeleteRequest struct{ ID int64 `json:"id"` }
-type DeleteResponse struct{ Message string `json:"message"` }
+type (
+	DeleteHandler struct{ Service *application.Service }
+	DeleteRequest struct {
+		ID int64 `json:"id"`
+	}
+)
+
+type DeleteResponse struct {
+	Message string `json:"message"`
+}
 
 func (h *DeleteHandler) Validate(_ context.Context, req *DeleteRequest) *errorModels.ServerError {
-	if req.ID == 0 { return &errorModels.ServerError{Code: http.StatusBadRequest, HTTPCode: http.StatusBadRequest, Message: "ID is required"} }; return nil
+	if req.ID == 0 {
+		return &errorModels.ServerError{Code: http.StatusBadRequest, HTTPCode: http.StatusBadRequest, Message: "ID is required"}
+	}
+	return nil
 }
 
 func (h *DeleteHandler) Serve(ctx context.Context, req *DeleteRequest) (DeleteResponse, *errorModels.ServerError) {
 	authUser, ok := authPkg.GetAuthUser(ctx)
-	if !ok { return DeleteResponse{}, &errorModels.ServerError{Code: http.StatusUnauthorized, HTTPCode: http.StatusUnauthorized, Message: "unauthorized"} }
+	if !ok {
+		return DeleteResponse{}, &errorModels.ServerError{Code: http.StatusUnauthorized, HTTPCode: http.StatusUnauthorized, Message: "unauthorized"}
+	}
 	if err := h.Service.Delete(ctx, authUser.UserID, req.ID); err != nil {
 		return DeleteResponse{}, &errorModels.ServerError{Code: http.StatusInternalServerError, HTTPCode: http.StatusInternalServerError, Message: "Failed to delete resource"}
 	}

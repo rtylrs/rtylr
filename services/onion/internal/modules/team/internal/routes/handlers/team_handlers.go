@@ -9,13 +9,12 @@ import (
 	"time"
 
 	"github.com/go-chi/chi/v5"
-	hubv1 "github.com/voxire/voxie/gen/go/hub/v1"
-
 	"github.com/voxire/onion/internal/modules/team/internal/application"
 	"github.com/voxire/onion/internal/modules/team/internal/domain"
 	authPkg "github.com/voxire/onion/internal/platform/auth"
 	emailPkg "github.com/voxire/onion/internal/platform/email"
 	errorModels "github.com/voxire/onion/internal/platform/errors"
+	hubv1 "github.com/voxire/voxie/gen/go/hub/v1"
 )
 
 // ─── List Staff Users ─────────────────────────────────────────────────────────
@@ -464,18 +463,18 @@ type MeRequest struct {
 }
 
 type MeResponse struct {
-	ID                 int64                      `json:"id"`
-	Email              string                     `json:"email"`
-	FullName           string                     `json:"full_name"`
-	Apps               []string                   `json:"apps"`
-	Role               string                     `json:"role"`
-	BusinessID         int64                      `json:"business_id"`
-	BusinessName       string                     `json:"business_name"`
-	IsOwner            bool                       `json:"is_owner"`
-	Onboarded          bool                       `json:"onboarded"`
-	PlanSlug           string                     `json:"plan_slug"`
-	SubscriptionStatus string                     `json:"subscription_status"`
-	EffectiveResources map[string]string          `json:"effective_resources"`
+	ID                 int64             `json:"id"`
+	Email              string            `json:"email"`
+	FullName           string            `json:"full_name"`
+	Apps               []string          `json:"apps"`
+	Role               string            `json:"role"`
+	BusinessID         int64             `json:"business_id"`
+	BusinessName       string            `json:"business_name"`
+	IsOwner            bool              `json:"is_owner"`
+	Onboarded          bool              `json:"onboarded"`
+	PlanSlug           string            `json:"plan_slug"`
+	SubscriptionStatus string            `json:"subscription_status"`
+	EffectiveResources map[string]string `json:"effective_resources"`
 }
 
 func (h *MeHandler) Serve(ctx context.Context, req *MeRequest) (MeResponse, *errorModels.ServerError) {
@@ -560,11 +559,13 @@ func (h *MeHandler) Serve(ctx context.Context, req *MeRequest) (MeResponse, *err
 
 func MarkOnboardedRoutes() []string { return []string{"/user/onboarded"} }
 
-type MarkOnboardedHandler struct{ Service *application.Service }
-type MarkOnboardedRequest struct{}
-type MarkOnboardedResponse struct {
-	Message string `json:"message"`
-}
+type (
+	MarkOnboardedHandler  struct{ Service *application.Service }
+	MarkOnboardedRequest  struct{}
+	MarkOnboardedResponse struct {
+		Message string `json:"message"`
+	}
+)
 
 func (h *MarkOnboardedHandler) Serve(ctx context.Context, _ *MarkOnboardedRequest) (MarkOnboardedResponse, *errorModels.ServerError) {
 	device := authPkg.DeviceCtx(ctx)

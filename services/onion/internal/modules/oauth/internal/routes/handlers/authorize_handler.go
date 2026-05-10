@@ -6,11 +6,10 @@ import (
 	"net/url"
 	"os"
 
+	"github.com/voxire/onion/internal/modules/oauth/internal/application"
 	authPkg "github.com/voxire/onion/internal/platform/auth"
 	errorModels "github.com/voxire/onion/internal/platform/errors"
 	"github.com/voxire/onion/internal/platform/logger"
-
-	"github.com/voxire/onion/internal/modules/oauth/internal/application"
 )
 
 // AuthorizeHandler handles GET /oauth/authorize.

@@ -8,11 +8,10 @@ import (
 	"time"
 
 	"github.com/go-chi/chi/v5"
-	authPkg "github.com/voxire/onion/internal/platform/auth"
-	errorModels "github.com/voxire/onion/internal/platform/errors"
-
 	"github.com/voxire/onion/internal/modules/milestones/internal/application"
 	"github.com/voxire/onion/internal/modules/milestones/internal/domain"
+	authPkg "github.com/voxire/onion/internal/platform/auth"
+	errorModels "github.com/voxire/onion/internal/platform/errors"
 )
 
 type MilestonePayload struct {
@@ -49,13 +48,15 @@ func newMilestonePayload(m domain.Milestone) MilestonePayload {
 
 func MilestoneListRoutes() []string { return []string{"/flow/milestones"} }
 
-type ListMilestonesHandler struct{ Service *application.Service }
-type ListMilestonesRequest struct{}
-type ListMilestonesResponse struct {
-	Milestones []MilestonePayload `json:"milestones"`
-}
+type (
+	ListMilestonesHandler  struct{ Service *application.Service }
+	ListMilestonesRequest  struct{}
+	ListMilestonesResponse struct {
+		Milestones []MilestonePayload `json:"milestones"`
+	}
+)
 
-func (h *ListMilestonesHandler) Validate(ctx context.Context, _ *ListMilestonesRequest) *errorModels.ServerError {
+func (h *ListMilestonesHandler) Validate(_ context.Context, _ *ListMilestonesRequest) *errorModels.ServerError {
 	return nil
 }
 

@@ -29,7 +29,6 @@ import (
 	"time"
 
 	"github.com/coder/websocket"
-
 	"github.com/voxire/onion/internal/platform/logger"
 )
 
@@ -59,10 +58,10 @@ type clientMessage struct {
 
 // serverMessage is what we send back.
 type serverMessage struct {
-	Op      string   `json:"op"`
-	Topics  []string `json:"topics,omitempty"`
-	Event   *Event   `json:"event,omitempty"`
-	Error   string   `json:"error,omitempty"`
+	Op     string   `json:"op"`
+	Topics []string `json:"topics,omitempty"`
+	Event  *Event   `json:"event,omitempty"`
+	Error  string   `json:"error,omitempty"`
 }
 
 // Hub is a running websocket broker. Construct with New, start the

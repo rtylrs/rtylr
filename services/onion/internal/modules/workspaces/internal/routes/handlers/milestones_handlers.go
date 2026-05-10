@@ -1,9 +1,8 @@
 package handlers
 
 import (
-	"net/http"
-
 	"context"
+	"net/http"
 	"strconv"
 	"time"
 
@@ -27,17 +26,17 @@ type ListMilestonesResponse struct {
 }
 
 type milestonePayload struct {
-	ID              string                    `json:"id"`
-	ProjectID       string                    `json:"projectId"`
-	Name            string                    `json:"name"`
-	TargetDate      string                    `json:"targetDate"`
-	Progress        int                       `json:"progress"`
+	ID               string                   `json:"id"`
+	ProjectID        string                   `json:"projectId"`
+	Name             string                   `json:"name"`
+	TargetDate       string                   `json:"targetDate"`
+	Progress         int                      `json:"progress"`
 	ComputedProgress int                      `json:"computedProgress"`
-	DoneCount       int                       `json:"doneCount"`
-	TaskCount       int                       `json:"taskCount"`
-	Status          string                    `json:"status"`
-	Description     string                    `json:"description,omitempty"`
-	Project         *milestoneProjectPayload  `json:"project,omitempty"`
+	DoneCount        int                      `json:"doneCount"`
+	TaskCount        int                      `json:"taskCount"`
+	Status           string                   `json:"status"`
+	Description      string                   `json:"description,omitempty"`
+	Project          *milestoneProjectPayload `json:"project,omitempty"`
 }
 
 type milestoneProjectPayload struct {
@@ -77,16 +76,16 @@ func (h *ListMilestonesHandler) Serve(ctx context.Context, r *ListMilestonesRequ
 	payloads := make([]milestonePayload, 0, len(milestones))
 	for _, m := range milestones {
 		p := milestonePayload{
-			ID:              strconv.FormatInt(m.ID, 10),
-			ProjectID:       strconv.FormatInt(m.ProjectID, 10),
-			Name:            m.Name,
-			TargetDate:      m.DueDate.Format("2006-01-02"),
-			Progress:        m.Progress,
+			ID:               strconv.FormatInt(m.ID, 10),
+			ProjectID:        strconv.FormatInt(m.ProjectID, 10),
+			Name:             m.Name,
+			TargetDate:       m.DueDate.Format("2006-01-02"),
+			Progress:         m.Progress,
 			ComputedProgress: m.Progress,
-			DoneCount:       m.DoneCount,
-			TaskCount:       m.TaskCount,
-			Status:          m.Status,
-			Description:     m.Description,
+			DoneCount:        m.DoneCount,
+			TaskCount:        m.TaskCount,
+			Status:           m.Status,
+			Description:      m.Description,
 		}
 		if m.Project != nil {
 			p.Project = &milestoneProjectPayload{Name: m.Project.Name, Color: m.Project.Color}
@@ -153,11 +152,11 @@ func (h *CreateMilestoneHandler) Serve(ctx context.Context, r *CreateMilestoneRe
 	}
 
 	return CreateMilestoneResponse{Milestone: milestonePayload{
-		ID:        strconv.FormatInt(milestone.ID, 10),
-		ProjectID: strconv.FormatInt(milestone.ProjectID, 10),
-		Name:      milestone.Name,
-		TargetDate: milestone.DueDate.Format("2006-01-02"),
-		Status:    milestone.Status,
+		ID:          strconv.FormatInt(milestone.ID, 10),
+		ProjectID:   strconv.FormatInt(milestone.ProjectID, 10),
+		Name:        milestone.Name,
+		TargetDate:  milestone.DueDate.Format("2006-01-02"),
+		Status:      milestone.Status,
 		Description: milestone.Description,
 	}}, nil
 }

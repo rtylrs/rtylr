@@ -3,6 +3,7 @@ package infrastructure
 import (
 	"context"
 	"database/sql"
+	"errors"
 	"strconv"
 	"time"
 
@@ -23,7 +24,7 @@ func NewRepository(_ context.Context) *Repository {
 func (r *Repository) Get(ctx context.Context, ownerID, id int64) (domain.Bill, error) {
 	row, err := r.queries.GetBill(ctx, sqlc.GetBillParams{ID: id, OwnerID: ownerID})
 	if err != nil {
-		if err == sql.ErrNoRows {
+		if errors.Is(err, sql.ErrNoRows) {
 			return domain.Bill{}, domain.ErrBillNotFound
 		}
 		logger.Ctx(ctx).Error("Failed to get bill", logger.Error(err))

@@ -4,9 +4,9 @@ import (
 	"context"
 	"encoding/json"
 	"errors"
-	"fmt"
 	"io"
 	"net/http"
+	"strconv"
 	"time"
 
 	"github.com/voxire/onion/internal/modules/subscriptions/internal/application"
@@ -21,8 +21,10 @@ import (
 
 func ListPlansRoutes() []string { return []string{"/subscriptions/plans"} }
 
-type ListPlansHandler struct{ Service *application.Service }
-type ListPlansRequest struct{}
+type (
+	ListPlansHandler struct{ Service *application.Service }
+	ListPlansRequest struct{}
+)
 
 type PlanPayload struct {
 	ID                      int64    `json:"id"`
@@ -86,8 +88,10 @@ func (h *ListPlansHandler) Serve(ctx context.Context, _ *ListPlansRequest) (List
 
 func MySubscriptionRoutes() []string { return []string{"/subscriptions/my"} }
 
-type MySubscriptionHandler struct{ Service *application.Service }
-type MySubscriptionRequest struct{}
+type (
+	MySubscriptionHandler struct{ Service *application.Service }
+	MySubscriptionRequest struct{}
+)
 
 type SubscriptionPayload struct {
 	ID                   int64      `json:"id"`
@@ -144,8 +148,10 @@ func (h *MySubscriptionHandler) Serve(ctx context.Context, _ *MySubscriptionRequ
 
 func BillingDetailRoutes() []string { return []string{"/subscriptions/billing"} }
 
-type BillingDetailHandler struct{ Service *application.Service }
-type BillingDetailRequest struct{}
+type (
+	BillingDetailHandler struct{ Service *application.Service }
+	BillingDetailRequest struct{}
+)
 
 type BillingLineItemPayload struct {
 	PeriodStart       time.Time  `json:"period_start"`
@@ -158,7 +164,7 @@ type BillingLineItemPayload struct {
 type BillingDetailPayload struct {
 	BillingMonth         time.Time                `json:"billing_month"`
 	NextBillingDate      *time.Time               `json:"next_billing_date"`
-	LineItems            []BillingLineItemPayload  `json:"line_items"`
+	LineItems            []BillingLineItemPayload `json:"line_items"`
 	TotalCents           int                      `json:"total_cents"`
 	PlanName             string                   `json:"plan_name"`
 	PricePerSeatCents    int                      `json:"price_per_seat_cents"`
@@ -221,13 +227,15 @@ func (h *BillingDetailHandler) Serve(ctx context.Context, _ *BillingDetailReques
 
 func BillingHistoryRoutes() []string { return []string{"/subscriptions/billing/history"} }
 
-type BillingHistoryHandler struct{ Service *application.Service }
-type BillingHistoryRequest struct{}
+type (
+	BillingHistoryHandler struct{ Service *application.Service }
+	BillingHistoryRequest struct{}
+)
 
 type BillingMonthPayload struct {
 	Month      time.Time                `json:"month"`
 	TotalCents int                      `json:"total_cents"`
-	LineItems  []BillingLineItemPayload  `json:"line_items"`
+	LineItems  []BillingLineItemPayload `json:"line_items"`
 	Status     string                   `json:"status"`
 }
 
@@ -365,7 +373,7 @@ func (h *CheckoutHandler) Serve(ctx context.Context, req *CheckoutRequest) (Chec
 			}
 		}
 		logger.Ctx(ctx).Error("failed to create paddle checkout",
-			logger.String("owner_id", fmt.Sprintf("%d", device.User.UserID)),
+			logger.String("owner_id", strconv.FormatInt(device.User.UserID, 10)),
 			logger.String("plan_slug", req.PlanSlug),
 			logger.Error(err),
 		)

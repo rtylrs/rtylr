@@ -10,8 +10,8 @@ import (
 // CashFlowDayRow is a single day in the cash-flow series. Inflow covers
 // paid invoices; outflow covers logged expenses. Both in minor units.
 type CashFlowDayRow struct {
-	Date            string
-	InflowMinorUnits int64
+	Date              string
+	InflowMinorUnits  int64
 	OutflowMinorUnits int64
 }
 

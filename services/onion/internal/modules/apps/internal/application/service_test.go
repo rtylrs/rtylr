@@ -6,16 +6,17 @@ import (
 )
 
 type mockRepo struct {
-	enabled map[string]bool
-	allowed []string
+	enabled       map[string]bool
+	allowed       []string
 	gotEnabledBiz int64
-	gotAllowed   struct{ biz, uid int64 }
+	gotAllowed    struct{ biz, uid int64 }
 }
 
 func (m *mockRepo) GetEnabledAddons(_ context.Context, businessID int64) map[string]bool {
 	m.gotEnabledBiz = businessID
 	return m.enabled
 }
+
 func (m *mockRepo) GetUserAllowedApps(_ context.Context, biz, uid int64) []string {
 	m.gotAllowed.biz = biz
 	m.gotAllowed.uid = uid

@@ -2,6 +2,7 @@ package application
 
 import (
 	"context"
+	"errors"
 	"fmt"
 	"time"
 
@@ -36,7 +37,7 @@ func ResolveDateRange(fromStr, toStr string) (time.Time, time.Time, error) {
 		from = t
 	}
 	if from.After(to) {
-		return time.Time{}, time.Time{}, fmt.Errorf("from date is after to date")
+		return time.Time{}, time.Time{}, errors.New("from date is after to date")
 	}
 	return from, to, nil
 }

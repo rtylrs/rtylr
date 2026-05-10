@@ -4,13 +4,11 @@ import (
 	"context"
 	"net/http"
 
-	crmv1 "github.com/voxire/voxie/gen/go/crm/v1"
-
-	authPkg "github.com/voxire/onion/internal/platform/auth"
-	errorModels "github.com/voxire/onion/internal/platform/errors"
-
 	"github.com/voxire/onion/internal/modules/customers/internal/application"
 	"github.com/voxire/onion/internal/modules/customers/internal/domain"
+	authPkg "github.com/voxire/onion/internal/platform/auth"
+	errorModels "github.com/voxire/onion/internal/platform/errors"
+	crmv1 "github.com/voxire/voxie/gen/go/crm/v1"
 )
 
 func LoyaltyConfigGetRoutes() []string {
@@ -36,7 +34,7 @@ type GetLoyaltyConfigResponse struct {
 func newLoyaltyConfigPayload(cfg domain.LoyaltyConfig) *crmv1.LoyaltyConfig {
 	return &crmv1.LoyaltyConfig{
 		Id:                    cfg.ID,
-		OwnerId:              cfg.OwnerID,
+		OwnerId:               cfg.OwnerID,
 		IsEnabled:             cfg.IsEnabled,
 		PointsPerCurrencyUnit: cfg.PointsPerCurrencyUnit,
 		CurrencyPerPoint:      cfg.CurrencyPerPoint,

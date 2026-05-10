@@ -4,23 +4,22 @@ import (
 	"context"
 	"net/http"
 
-	flowv1 "github.com/voxire/voxie/gen/go/flow/v1"
-
 	"github.com/voxire/onion/internal/modules/workspaces/internal/application"
 	"github.com/voxire/onion/internal/modules/workspaces/internal/domain"
 	authPkg "github.com/voxire/onion/internal/platform/auth"
 	errorModels "github.com/voxire/onion/internal/platform/errors"
+	flowv1 "github.com/voxire/voxie/gen/go/flow/v1"
 )
 
 // ─────────────────────────────────────────────
 // Route declarations
 // ─────────────────────────────────────────────
 
-func ListLabelsRoutes() []string     { return []string{"/flow/labels"} }
-func CreateLabelRoutes() []string    { return []string{"/flow/labels"} }
-func UpdateLabelRoutes() []string    { return []string{"/flow/labels"} }
-func DeleteLabelRoutes() []string    { return []string{"/flow/labels"} }
-func SetTaskLabelsRoutes() []string  { return []string{"/flow/tasks/labels"} }
+func ListLabelsRoutes() []string    { return []string{"/flow/labels"} }
+func CreateLabelRoutes() []string   { return []string{"/flow/labels"} }
+func UpdateLabelRoutes() []string   { return []string{"/flow/labels"} }
+func DeleteLabelRoutes() []string   { return []string{"/flow/labels"} }
+func SetTaskLabelsRoutes() []string { return []string{"/flow/tasks/labels"} }
 
 // ─────────────────────────────────────────────
 // Shared payload types

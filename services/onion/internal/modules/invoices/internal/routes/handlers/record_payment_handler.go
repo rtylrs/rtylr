@@ -2,14 +2,14 @@ package handlers
 
 import (
 	"context"
+	"errors"
 	"net/http"
-
-	finv1 "github.com/voxire/voxie/gen/go/finance/v1"
 
 	"github.com/voxire/onion/internal/modules/invoices/internal/application"
 	"github.com/voxire/onion/internal/modules/invoices/internal/domain"
 	authPkg "github.com/voxire/onion/internal/platform/auth"
 	errorModels "github.com/voxire/onion/internal/platform/errors"
+	finv1 "github.com/voxire/voxie/gen/go/finance/v1"
 )
 
 func RecordPaymentRoutes() []string {
@@ -82,7 +82,7 @@ func (h *RecordPaymentHandler) Serve(ctx context.Context, req *RecordPaymentRequ
 
 	p, err := h.FinanceService.RecordPayment(ctx, device.User.UserID, input)
 	if err != nil {
-		if err == domain.ErrInvoiceNotFound {
+		if errors.Is(err, domain.ErrInvoiceNotFound) {
 			return RecordPaymentResponse{}, &errorModels.ServerError{
 				Code:    http.StatusNotFound,
 				Message: "Invoice not found",

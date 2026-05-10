@@ -3,6 +3,7 @@ package infrastructure
 import (
 	"context"
 	"database/sql"
+	"errors"
 	"time"
 
 	"github.com/voxire/onion/internal/modules/hr_documents/internal/domain"
@@ -52,7 +53,7 @@ func (r *Repository) GetDocument(ctx context.Context, ownerID, id int64) (*domai
 		ID:      id,
 	})
 	if err != nil {
-		if err == sql.ErrNoRows {
+		if errors.Is(err, sql.ErrNoRows) {
 			return nil, domain.ErrDocumentNotFound
 		}
 		return nil, err

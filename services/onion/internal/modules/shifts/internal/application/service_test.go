@@ -19,12 +19,15 @@ type mockRepo struct {
 func (m *mockRepo) ListShifts(_ context.Context, _, _ int64, _ string) ([]domain.Shift, error) {
 	return m.list, nil
 }
+
 func (m *mockRepo) CreateShift(_ context.Context, _ domain.ShiftInput) (int64, error) {
 	return m.createID, m.createErr
 }
+
 func (m *mockRepo) UpdateShift(_ context.Context, _ int64, _ domain.ShiftUpdateInput) error {
 	return m.updErr
 }
+
 func (m *mockRepo) DeleteShift(_ context.Context, _, _ int64) error {
 	return m.delErr
 }

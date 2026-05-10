@@ -38,7 +38,7 @@ func (s *Service) EmailReceipt(ctx context.Context, ownerID, id int64, toEmail s
 		return err
 	}
 
-	subject := fmt.Sprintf("Your receipt for order %s", receipt.OrderNumber)
+	subject := "Your receipt for order " + receipt.OrderNumber
 	html := fmt.Sprintf(
 		"<p>Hello %s,</p><p>Thank you for your order <strong>%s</strong>.</p>"+
 			"<p>Total: <strong>%.2f</strong></p>"+

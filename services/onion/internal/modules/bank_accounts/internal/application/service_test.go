@@ -22,6 +22,7 @@ type mockRepo struct {
 func (m *mockRepo) List(_ context.Context, _ int64) ([]domain.BankAccount, error) {
 	return m.listResult, m.listErr
 }
+
 func (m *mockRepo) Create(_ context.Context, ownerID int64, input domain.BankAccountInput) (int64, error) {
 	m.createGot.ownerID = ownerID
 	m.createGot.input = input

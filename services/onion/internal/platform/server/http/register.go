@@ -64,8 +64,7 @@ func RegisterPOSTWithValidationAndMiddleware[Req, Res any](
 	middlewares ...MiddlewareFunc,
 ) {
 	for _, path := range paths {
-		h := http.HandlerFunc(wrapHandler(ctx, handler, true))
-		var final http.Handler = h
+		var final http.Handler = wrapHandler(ctx, handler, true)
 		for i := len(middlewares) - 1; i >= 0; i-- {
 			final = middlewares[i](final)
 		}

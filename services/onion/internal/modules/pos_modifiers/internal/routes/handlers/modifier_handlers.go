@@ -7,11 +7,10 @@ import (
 	"strconv"
 
 	"github.com/go-chi/chi/v5"
-	authPkg "github.com/voxire/onion/internal/platform/auth"
-	errorModels "github.com/voxire/onion/internal/platform/errors"
-
 	"github.com/voxire/onion/internal/modules/pos_modifiers/internal/application"
 	"github.com/voxire/onion/internal/modules/pos_modifiers/internal/domain"
+	authPkg "github.com/voxire/onion/internal/platform/auth"
+	errorModels "github.com/voxire/onion/internal/platform/errors"
 )
 
 type ModifierPayload struct {
@@ -42,11 +41,13 @@ func newModifierPayload(m domain.Modifier) ModifierPayload {
 
 func ListModifiersRoutes() []string { return []string{"/pos/menu/modifiers", "/pos/modifiers"} }
 
-type ListModifiersHandler struct{ Service *application.Service }
-type ListModifiersRequest struct{}
-type ListModifiersResponse struct {
-	Modifiers []ModifierPayload `json:"modifiers"`
-}
+type (
+	ListModifiersHandler  struct{ Service *application.Service }
+	ListModifiersRequest  struct{}
+	ListModifiersResponse struct {
+		Modifiers []ModifierPayload `json:"modifiers"`
+	}
+)
 
 func (h *ListModifiersHandler) Serve(ctx context.Context, _ *ListModifiersRequest) (ListModifiersResponse, *errorModels.ServerError) {
 	device := authPkg.DeviceCtx(ctx)
@@ -158,11 +159,13 @@ func (h *UpdateModifierHandler) Serve(ctx context.Context, req *UpdateModifierRe
 
 func DeleteModifierRoutes() []string { return []string{"/pos/menu/modifiers/{id}"} }
 
-type DeleteModifierHandler struct{ Service *application.Service }
-type DeleteModifierRequest struct{}
-type DeleteModifierResponse struct {
-	Message string `json:"message"`
-}
+type (
+	DeleteModifierHandler  struct{ Service *application.Service }
+	DeleteModifierRequest  struct{}
+	DeleteModifierResponse struct {
+		Message string `json:"message"`
+	}
+)
 
 func (h *DeleteModifierHandler) Serve(ctx context.Context, _ *DeleteModifierRequest) (DeleteModifierResponse, *errorModels.ServerError) {
 	device := authPkg.DeviceCtx(ctx)

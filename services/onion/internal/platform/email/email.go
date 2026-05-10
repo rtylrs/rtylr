@@ -2,6 +2,7 @@ package email
 
 import (
 	"context"
+	"errors"
 	"fmt"
 	"os"
 
@@ -38,7 +39,7 @@ type SendParams struct {
 func Send(ctx context.Context, params SendParams) (string, error) {
 	if client == nil {
 		logger.Ctx(ctx).Warn("Email sending disabled (no RESEND_API_KEY)")
-		return "", fmt.Errorf("email sending disabled")
+		return "", errors.New("email sending disabled")
 	}
 
 	from := params.From
@@ -77,7 +78,7 @@ func Send(ctx context.Context, params SendParams) (string, error) {
 	return sent.Id, nil
 }
 
-// SendInvitation sends a team invitation email
+// SendInvitation sends a team invitation email.
 func SendInvitation(ctx context.Context, toEmail, inviterName, businessName, inviteLink string) (string, error) {
 	html := fmt.Sprintf(`
 		<div style="font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif; max-width: 480px; margin: 0 auto; padding: 40px 20px;">
@@ -101,7 +102,7 @@ func SendInvitation(ctx context.Context, toEmail, inviterName, businessName, inv
 	})
 }
 
-// SendPasswordReset sends a password reset email
+// SendPasswordReset sends a password reset email.
 func SendPasswordReset(ctx context.Context, toEmail, resetLink string) (string, error) {
 	html := fmt.Sprintf(`
 		<div style="font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif; max-width: 480px; margin: 0 auto; padding: 40px 20px;">
@@ -125,7 +126,7 @@ func SendPasswordReset(ctx context.Context, toEmail, resetLink string) (string, 
 	})
 }
 
-// SendWelcome sends a welcome email after registration
+// SendWelcome sends a welcome email after registration.
 func SendWelcome(ctx context.Context, toEmail, name string) (string, error) {
 	greeting := "there"
 	if name != "" {
@@ -151,7 +152,7 @@ func SendWelcome(ctx context.Context, toEmail, name string) (string, error) {
 	})
 }
 
-// SendInvoice sends an invoice email
+// SendInvoice sends an invoice email.
 func SendInvoice(ctx context.Context, toEmail, customerName, invoiceNumber, amount, dueDate, viewLink string) (string, error) {
 	html := fmt.Sprintf(`
 		<div style="font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif; max-width: 480px; margin: 0 auto; padding: 40px 20px;">

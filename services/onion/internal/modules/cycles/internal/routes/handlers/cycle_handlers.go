@@ -8,11 +8,10 @@ import (
 	"time"
 
 	"github.com/go-chi/chi/v5"
-	authPkg "github.com/voxire/onion/internal/platform/auth"
-	errorModels "github.com/voxire/onion/internal/platform/errors"
-
 	"github.com/voxire/onion/internal/modules/cycles/internal/application"
 	"github.com/voxire/onion/internal/modules/cycles/internal/domain"
+	authPkg "github.com/voxire/onion/internal/platform/auth"
+	errorModels "github.com/voxire/onion/internal/platform/errors"
 )
 
 type CyclePayload struct {
@@ -52,13 +51,15 @@ func newCyclePayload(c domain.Cycle) CyclePayload {
 
 func CycleListRoutes() []string { return []string{"/flow/cycles"} }
 
-type ListCyclesHandler struct{ Service *application.Service }
-type ListCyclesRequest struct{}
-type ListCyclesResponse struct {
-	Cycles []CyclePayload `json:"cycles"`
-}
+type (
+	ListCyclesHandler  struct{ Service *application.Service }
+	ListCyclesRequest  struct{}
+	ListCyclesResponse struct {
+		Cycles []CyclePayload `json:"cycles"`
+	}
+)
 
-func (h *ListCyclesHandler) Validate(ctx context.Context, _ *ListCyclesRequest) *errorModels.ServerError {
+func (h *ListCyclesHandler) Validate(_ context.Context, _ *ListCyclesRequest) *errorModels.ServerError {
 	return nil
 }
 

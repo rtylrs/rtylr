@@ -9,24 +9,24 @@ import (
 var ErrPayrollNotFound = errors.New("payroll record not found")
 
 type PayrollRecord struct {
-	ID           int64     `json:"id"`
-	OwnerID      int64     `json:"owner_id"`
-	StaffID      int64     `json:"staff_id"`
-	PeriodStart  time.Time `json:"period_start"`
-	PeriodEnd    time.Time `json:"period_end"`
-	PeriodLabel  string    `json:"period_label"`
-	RegularHours float64   `json:"regular_hours"`
-	OvertimeHours float64  `json:"overtime_hours"`
-	BasePay      float64   `json:"base_pay"`
-	OvertimePay  float64   `json:"overtime_pay"`
-	Bonuses      float64   `json:"bonuses"`
-	Deductions   float64   `json:"deductions"`
-	TaxWithheld  float64   `json:"tax_withheld"`
-	NetPay       float64   `json:"net_pay"`
-	Status       string    `json:"status"`
-	PaidAt       time.Time `json:"paid_at"`
-	Notes        string    `json:"notes"`
-	CreatedAt    time.Time `json:"created_at"`
+	ID            int64     `json:"id"`
+	OwnerID       int64     `json:"owner_id"`
+	StaffID       int64     `json:"staff_id"`
+	PeriodStart   time.Time `json:"period_start"`
+	PeriodEnd     time.Time `json:"period_end"`
+	PeriodLabel   string    `json:"period_label"`
+	RegularHours  float64   `json:"regular_hours"`
+	OvertimeHours float64   `json:"overtime_hours"`
+	BasePay       float64   `json:"base_pay"`
+	OvertimePay   float64   `json:"overtime_pay"`
+	Bonuses       float64   `json:"bonuses"`
+	Deductions    float64   `json:"deductions"`
+	TaxWithheld   float64   `json:"tax_withheld"`
+	NetPay        float64   `json:"net_pay"`
+	Status        string    `json:"status"`
+	PaidAt        time.Time `json:"paid_at"`
+	Notes         string    `json:"notes"`
+	CreatedAt     time.Time `json:"created_at"`
 }
 
 func (p *PayrollRecord) FromRow(row *sql.Rows) error {
@@ -117,10 +117,10 @@ type PayrollMarkPaidInput struct {
 }
 
 type DashboardStats struct {
-	TotalStaff       int `json:"total_staff"`
-	OnShiftToday     int `json:"on_shift_today"`
-	PendingTimeOff   int `json:"pending_time_off"`
-	PayrollDraft     int `json:"payroll_draft"`
+	TotalStaff     int `json:"total_staff"`
+	OnShiftToday   int `json:"on_shift_today"`
+	PendingTimeOff int `json:"pending_time_off"`
+	PayrollDraft   int `json:"payroll_draft"`
 }
 
 // ShiftSummary is used internally for payroll calculation aggregation.

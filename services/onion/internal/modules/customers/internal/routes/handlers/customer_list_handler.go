@@ -4,13 +4,11 @@ import (
 	"context"
 	"net/http"
 
-	crmv1 "github.com/voxire/voxie/gen/go/crm/v1"
-
-	authPkg "github.com/voxire/onion/internal/platform/auth"
-	errorModels "github.com/voxire/onion/internal/platform/errors"
-
 	"github.com/voxire/onion/internal/modules/customers/internal/application"
 	"github.com/voxire/onion/internal/modules/customers/internal/domain"
+	authPkg "github.com/voxire/onion/internal/platform/auth"
+	errorModels "github.com/voxire/onion/internal/platform/errors"
+	crmv1 "github.com/voxire/voxie/gen/go/crm/v1"
 )
 
 func CustomerListRoutes() []string {
@@ -39,7 +37,7 @@ type ListCustomersResponse struct {
 func newCustomerPayload(c domain.Customer) *crmv1.Customer {
 	p := &crmv1.Customer{
 		Id:            c.ID,
-		OwnerId:      c.OwnerID,
+		OwnerId:       c.OwnerID,
 		FirstName:     c.FirstName,
 		LastName:      c.LastName,
 		Email:         c.Email,

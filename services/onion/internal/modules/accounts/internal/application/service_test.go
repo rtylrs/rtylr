@@ -21,15 +21,19 @@ type mockRepo struct {
 func (m *mockRepo) List(_ context.Context, _ int64) ([]domain.Account, error) {
 	return m.listResult, nil
 }
+
 func (m *mockRepo) Create(_ context.Context, _ int64, _ domain.AccountInput) (int64, error) {
 	return m.createID, m.createErr
 }
+
 func (m *mockRepo) Update(_ context.Context, _, _ int64, _ domain.AccountInput) error {
 	return m.updErr
 }
+
 func (m *mockRepo) Delete(_ context.Context, _, _ int64) error {
 	return m.delErr
 }
+
 func (m *mockRepo) ListForTree(_ context.Context, _ int64) ([]domain.Account, error) {
 	return m.tree, m.treeErr
 }

@@ -326,7 +326,7 @@ func (s *Service) CreatePaddlePayment(ctx context.Context, ownerID, orderID int6
 		AmountMinor:    amountMinor,
 		Currency:       currency,
 		CustomerEmail:  customerEmail,
-		Description:    fmt.Sprintf("POS order %s", order.OrderNumber),
+		Description:    "POS order " + order.OrderNumber,
 		IdempotencyKey: fmt.Sprintf("order:%d:%d", orderID, ownerID),
 	})
 	if err != nil {

@@ -4,9 +4,9 @@ import (
 	"context"
 	"net/http"
 
-	errorModels "github.com/voxire/onion/internal/platform/errors"
 	"github.com/voxire/onion/internal/modules/careers/internal/application"
 	"github.com/voxire/onion/internal/modules/careers/internal/domain"
+	errorModels "github.com/voxire/onion/internal/platform/errors"
 )
 
 func CareersRoutes() []string {

@@ -18,12 +18,15 @@ type mockRepo struct {
 func (m *mockRepo) ListCategories(_ context.Context, _ int64) ([]domain.Category, error) {
 	return nil, nil
 }
+
 func (m *mockRepo) CreateCategory(_ context.Context, _ int64, _ domain.CategoryInput) (int64, error) {
 	return m.createID, m.createErr
 }
+
 func (m *mockRepo) UpdateCategory(_ context.Context, _, _ int64, _ domain.CategoryInput) error {
 	return m.updateErr
 }
+
 func (m *mockRepo) DeleteCategory(_ context.Context, _, _ int64) error {
 	return m.deleteErr
 }

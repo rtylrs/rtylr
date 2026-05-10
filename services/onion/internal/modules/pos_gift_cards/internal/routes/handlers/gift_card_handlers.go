@@ -6,11 +6,10 @@ import (
 	"net/http"
 
 	"github.com/go-chi/chi/v5"
-	authPkg "github.com/voxire/onion/internal/platform/auth"
-	errorModels "github.com/voxire/onion/internal/platform/errors"
-
 	"github.com/voxire/onion/internal/modules/pos_gift_cards/internal/application"
 	"github.com/voxire/onion/internal/modules/pos_gift_cards/internal/domain"
+	authPkg "github.com/voxire/onion/internal/platform/auth"
+	errorModels "github.com/voxire/onion/internal/platform/errors"
 )
 
 type GiftCardPayload struct {
@@ -51,11 +50,13 @@ func newGiftCardPayload(gc domain.GiftCard) GiftCardPayload {
 
 func ListGiftCardsRoutes() []string { return []string{"/pos/gift-cards"} }
 
-type ListGiftCardsHandler struct{ Service *application.Service }
-type ListGiftCardsRequest struct{}
-type ListGiftCardsResponse struct {
-	GiftCards []GiftCardPayload `json:"gift_cards"`
-}
+type (
+	ListGiftCardsHandler  struct{ Service *application.Service }
+	ListGiftCardsRequest  struct{}
+	ListGiftCardsResponse struct {
+		GiftCards []GiftCardPayload `json:"gift_cards"`
+	}
+)
 
 func (h *ListGiftCardsHandler) Serve(ctx context.Context, _ *ListGiftCardsRequest) (ListGiftCardsResponse, *errorModels.ServerError) {
 	device := authPkg.DeviceCtx(ctx)
@@ -124,11 +125,13 @@ func (h *CreateGiftCardHandler) Serve(ctx context.Context, req *CreateGiftCardRe
 
 func GetGiftCardByCodeRoutes() []string { return []string{"/pos/gift-cards/{code}"} }
 
-type GetGiftCardByCodeHandler struct{ Service *application.Service }
-type GetGiftCardByCodeRequest struct{}
-type GetGiftCardByCodeResponse struct {
-	GiftCard GiftCardPayload `json:"gift_card"`
-}
+type (
+	GetGiftCardByCodeHandler  struct{ Service *application.Service }
+	GetGiftCardByCodeRequest  struct{}
+	GetGiftCardByCodeResponse struct {
+		GiftCard GiftCardPayload `json:"gift_card"`
+	}
+)
 
 func (h *GetGiftCardByCodeHandler) Serve(ctx context.Context, _ *GetGiftCardByCodeRequest) (GetGiftCardByCodeResponse, *errorModels.ServerError) {
 	device := authPkg.DeviceCtx(ctx)
@@ -153,10 +156,13 @@ func (h *GetGiftCardByCodeHandler) Serve(ctx context.Context, _ *GetGiftCardByCo
 
 func RedeemGiftCardByCodeRoutes() []string { return []string{"/pos/gift-cards/{code}/redeem"} }
 
-type RedeemGiftCardByCodeHandler struct{ Service *application.Service }
-type RedeemGiftCardByCodeRequest struct {
-	Amount float64 `json:"amount"`
-}
+type (
+	RedeemGiftCardByCodeHandler struct{ Service *application.Service }
+	RedeemGiftCardByCodeRequest struct {
+		Amount float64 `json:"amount"`
+	}
+)
+
 type RedeemGiftCardByCodeResponse struct {
 	GiftCard GiftCardPayload `json:"gift_card"`
 	Message  string          `json:"message"`

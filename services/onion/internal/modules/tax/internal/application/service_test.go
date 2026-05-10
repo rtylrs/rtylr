@@ -9,19 +9,21 @@ import (
 )
 
 type mockRepo struct {
-	cfg      domain.TaxConfig
-	pl       domain.PLReport
-	cfgErr   error
-	upErr    error
-	plErr    error
+	cfg    domain.TaxConfig
+	pl     domain.PLReport
+	cfgErr error
+	upErr  error
+	plErr  error
 }
 
 func (m *mockRepo) GetConfig(_ context.Context, _ int64) (domain.TaxConfig, error) {
 	return m.cfg, m.cfgErr
 }
+
 func (m *mockRepo) UpsertConfig(_ context.Context, _ domain.TaxConfigInput) error {
 	return m.upErr
 }
+
 func (m *mockRepo) GetPLReport(_ context.Context, _ int64) (domain.PLReport, error) {
 	return m.pl, m.plErr
 }

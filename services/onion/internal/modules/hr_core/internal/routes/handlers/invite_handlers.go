@@ -81,9 +81,9 @@ type VerifyInviteRequest struct {
 }
 
 type VerifyInviteResponse struct {
-	Valid      bool   `json:"valid"`
-	EmployeeID int64  `json:"employee_id"`
-	OwnerID    int64  `json:"owner_id"`
+	Valid      bool  `json:"valid"`
+	EmployeeID int64 `json:"employee_id"`
+	OwnerID    int64 `json:"owner_id"`
 }
 
 func (h *VerifyInviteHandler) Serve(ctx context.Context, req *VerifyInviteRequest) (VerifyInviteResponse, *errorModels.ServerError) {

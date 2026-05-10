@@ -55,11 +55,13 @@ func newPayload(e domain.JournalEntry) JournalEntryPayload {
 
 func ListRoutes() []string { return []string{"/finance/journal"} }
 
-type ListHandler struct{ Service *application.Service }
-type ListRequest struct{}
-type ListResponse struct {
-	Entries []JournalEntryPayload `json:"entries"`
-}
+type (
+	ListHandler  struct{ Service *application.Service }
+	ListRequest  struct{}
+	ListResponse struct {
+		Entries []JournalEntryPayload `json:"entries"`
+	}
+)
 
 func (h *ListHandler) Serve(ctx context.Context, _ *ListRequest) (ListResponse, *errorModels.ServerError) {
 	device := authPkg.DeviceCtx(ctx)
@@ -138,13 +140,15 @@ func (h *CreateHandler) Serve(ctx context.Context, req *CreateRequest) (CreateRe
 
 func PostRoutes() []string { return []string{"/finance/journal/{id}/post"} }
 
-type PostHandler struct{ Service *application.Service }
-type PostRequest struct{}
-type PostResponse struct {
-	ID      int64  `json:"id"`
-	Status  string `json:"status"`
-	Message string `json:"message"`
-}
+type (
+	PostHandler  struct{ Service *application.Service }
+	PostRequest  struct{}
+	PostResponse struct {
+		ID      int64  `json:"id"`
+		Status  string `json:"status"`
+		Message string `json:"message"`
+	}
+)
 
 func (h *PostHandler) Serve(ctx context.Context, _ *PostRequest) (PostResponse, *errorModels.ServerError) {
 	device := authPkg.DeviceCtx(ctx)

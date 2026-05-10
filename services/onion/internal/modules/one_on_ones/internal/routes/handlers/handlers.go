@@ -33,11 +33,13 @@ func newPayload(o domain.OneOnOne) OneOnOnePayload {
 
 func ListRoutes() []string { return []string{"/hr/one-on-ones"} }
 
-type ListHandler struct{ Service *application.Service }
-type ListRequest struct{}
-type ListResponse struct {
-	OneOnOnes []OneOnOnePayload `json:"one_on_ones"`
-}
+type (
+	ListHandler  struct{ Service *application.Service }
+	ListRequest  struct{}
+	ListResponse struct {
+		OneOnOnes []OneOnOnePayload `json:"one_on_ones"`
+	}
+)
 
 func (h *ListHandler) Serve(ctx context.Context, _ *ListRequest) (ListResponse, *errorModels.ServerError) {
 	device := authPkg.DeviceCtx(ctx)
@@ -57,15 +59,18 @@ func (h *ListHandler) Serve(ctx context.Context, _ *ListRequest) (ListResponse, 
 
 func CreateRoutes() []string { return []string{"/hr/one-on-ones"} }
 
-type CreateHandler struct{ Service *application.Service }
-type CreateRequest struct {
-	ManagerID   int64  `json:"manager_id"`
-	StaffID     int64  `json:"staff_id"`
-	ScheduledAt string `json:"scheduled_at"`
-	Notes       string `json:"notes"`
-	ActionItems string `json:"action_items"`
-	Status      string `json:"status"`
-}
+type (
+	CreateHandler struct{ Service *application.Service }
+	CreateRequest struct {
+		ManagerID   int64  `json:"manager_id"`
+		StaffID     int64  `json:"staff_id"`
+		ScheduledAt string `json:"scheduled_at"`
+		Notes       string `json:"notes"`
+		ActionItems string `json:"action_items"`
+		Status      string `json:"status"`
+	}
+)
+
 type CreateResponse struct {
 	ID      int64  `json:"id"`
 	Message string `json:"message"`

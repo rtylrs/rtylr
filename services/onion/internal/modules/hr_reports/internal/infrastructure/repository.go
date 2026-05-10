@@ -74,7 +74,7 @@ func scanRows(rows *sql.Rows) ([]map[string]interface{}, error) {
 	return results, nil
 }
 
-// cross-schema aggregation read
+// cross-schema aggregation read.
 func (r *Repository) GenerateHeadcountReport(ctx context.Context, ownerID int64, params domain.ReportParams) ([]map[string]interface{}, error) {
 	query := `
 		SELECT
@@ -97,14 +97,14 @@ func (r *Repository) GenerateHeadcountReport(ctx context.Context, ownerID int64,
 
 	rows, err := r.pool.QueryContext(ctx, query, args...)
 	if err != nil {
-		return nil, fmt.Errorf("%w: %v", domain.ErrReportGenerationFailed, err)
+		return nil, fmt.Errorf("%w: %w", domain.ErrReportGenerationFailed, err)
 	}
 	defer rows.Close()
 
 	return scanRows(rows)
 }
 
-// cross-schema aggregation read
+// cross-schema aggregation read.
 func (r *Repository) GenerateAttendanceSummaryReport(ctx context.Context, ownerID int64, params domain.ReportParams) ([]map[string]interface{}, error) {
 	query := `
 		SELECT
@@ -130,14 +130,14 @@ func (r *Repository) GenerateAttendanceSummaryReport(ctx context.Context, ownerI
 
 	rows, err := r.pool.QueryContext(ctx, query, args...)
 	if err != nil {
-		return nil, fmt.Errorf("%w: %v", domain.ErrReportGenerationFailed, err)
+		return nil, fmt.Errorf("%w: %w", domain.ErrReportGenerationFailed, err)
 	}
 	defer rows.Close()
 
 	return scanRows(rows)
 }
 
-// cross-schema aggregation read
+// cross-schema aggregation read.
 func (r *Repository) GenerateLeaveSummaryReport(ctx context.Context, ownerID int64, params domain.ReportParams) ([]map[string]interface{}, error) {
 	query := `
 		SELECT
@@ -169,14 +169,14 @@ func (r *Repository) GenerateLeaveSummaryReport(ctx context.Context, ownerID int
 
 	rows, err := r.pool.QueryContext(ctx, query, args...)
 	if err != nil {
-		return nil, fmt.Errorf("%w: %v", domain.ErrReportGenerationFailed, err)
+		return nil, fmt.Errorf("%w: %w", domain.ErrReportGenerationFailed, err)
 	}
 	defer rows.Close()
 
 	return scanRows(rows)
 }
 
-// cross-schema aggregation read
+// cross-schema aggregation read.
 func (r *Repository) GeneratePayrollSummaryReport(ctx context.Context, ownerID int64, params domain.ReportParams) ([]map[string]interface{}, error) {
 	query := `
 		SELECT
@@ -206,14 +206,14 @@ func (r *Repository) GeneratePayrollSummaryReport(ctx context.Context, ownerID i
 
 	rows, err := r.pool.QueryContext(ctx, query, args...)
 	if err != nil {
-		return nil, fmt.Errorf("%w: %v", domain.ErrReportGenerationFailed, err)
+		return nil, fmt.Errorf("%w: %w", domain.ErrReportGenerationFailed, err)
 	}
 	defer rows.Close()
 
 	return scanRows(rows)
 }
 
-// cross-schema aggregation read
+// cross-schema aggregation read.
 func (r *Repository) GenerateOvertimeSummaryReport(ctx context.Context, ownerID int64, params domain.ReportParams) ([]map[string]interface{}, error) {
 	query := `
 		SELECT
@@ -240,14 +240,14 @@ func (r *Repository) GenerateOvertimeSummaryReport(ctx context.Context, ownerID 
 
 	rows, err := r.pool.QueryContext(ctx, query, args...)
 	if err != nil {
-		return nil, fmt.Errorf("%w: %v", domain.ErrReportGenerationFailed, err)
+		return nil, fmt.Errorf("%w: %w", domain.ErrReportGenerationFailed, err)
 	}
 	defer rows.Close()
 
 	return scanRows(rows)
 }
 
-// cross-schema aggregation read
+// cross-schema aggregation read.
 func (r *Repository) GenerateTimesheetSummaryReport(ctx context.Context, ownerID int64, params domain.ReportParams) ([]map[string]interface{}, error) {
 	query := `
 		SELECT
@@ -273,7 +273,7 @@ func (r *Repository) GenerateTimesheetSummaryReport(ctx context.Context, ownerID
 
 	rows, err := r.pool.QueryContext(ctx, query, args...)
 	if err != nil {
-		return nil, fmt.Errorf("%w: %v", domain.ErrReportGenerationFailed, err)
+		return nil, fmt.Errorf("%w: %w", domain.ErrReportGenerationFailed, err)
 	}
 	defer rows.Close()
 

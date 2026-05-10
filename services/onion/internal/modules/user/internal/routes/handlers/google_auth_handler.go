@@ -7,10 +7,9 @@ import (
 	"net/netip"
 	"strings"
 
-	authv1 "github.com/voxire/voxie/gen/go/auth/v1"
-
 	"github.com/voxire/onion/internal/modules/user/internal/application"
 	errorModels "github.com/voxire/onion/internal/platform/errors"
+	authv1 "github.com/voxire/voxie/gen/go/auth/v1"
 )
 
 // GoogleAuthRoutes is the single endpoint the frontend already calls

@@ -9,17 +9,19 @@ import (
 )
 
 type mockRepo struct {
-	list   []domain.Notification
-	mrErr  error
-	maErr  error
+	list  []domain.Notification
+	mrErr error
+	maErr error
 }
 
 func (m *mockRepo) List(_ context.Context, _ int64) ([]domain.Notification, error) {
 	return m.list, nil
 }
+
 func (m *mockRepo) MarkRead(_ context.Context, _, _ int64) error {
 	return m.mrErr
 }
+
 func (m *mockRepo) MarkAllRead(_ context.Context, _ int64) error {
 	return m.maErr
 }

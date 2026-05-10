@@ -4,13 +4,11 @@ import (
 	"context"
 	"net/http"
 
-	crmv1 "github.com/voxire/voxie/gen/go/crm/v1"
-
-	authPkg "github.com/voxire/onion/internal/platform/auth"
-	errorModels "github.com/voxire/onion/internal/platform/errors"
-
 	"github.com/voxire/onion/internal/modules/customers/internal/application"
 	"github.com/voxire/onion/internal/modules/customers/internal/domain"
+	authPkg "github.com/voxire/onion/internal/platform/auth"
+	errorModels "github.com/voxire/onion/internal/platform/errors"
+	crmv1 "github.com/voxire/voxie/gen/go/crm/v1"
 )
 
 func DashboardRoutes() []string {
@@ -24,10 +22,10 @@ type DashboardHandler struct {
 type DashboardRequest struct{}
 
 type DashboardResponse struct {
-	TotalCustomers       int                    `json:"total_customers"`
-	NewThisMonth         int                    `json:"new_this_month"`
-	ActiveLoyaltyMembers int                    `json:"active_loyalty_members"`
-	TopCustomers         []*crmv1.TopCustomer   `json:"top_customers"`
+	TotalCustomers       int                  `json:"total_customers"`
+	NewThisMonth         int                  `json:"new_this_month"`
+	ActiveLoyaltyMembers int                  `json:"active_loyalty_members"`
+	TopCustomers         []*crmv1.TopCustomer `json:"top_customers"`
 }
 
 func newTopCustomerPayload(tc domain.TopCustomer) *crmv1.TopCustomer {

@@ -6,13 +6,11 @@ import (
 	"strconv"
 
 	"github.com/go-chi/chi/v5"
-	posv1 "github.com/voxire/voxie/gen/go/pos/v1"
-
-	authPkg "github.com/voxire/onion/internal/platform/auth"
-	errorModels "github.com/voxire/onion/internal/platform/errors"
-
 	"github.com/voxire/onion/internal/modules/pos_floors/internal/application"
 	"github.com/voxire/onion/internal/modules/pos_floors/internal/domain"
+	authPkg "github.com/voxire/onion/internal/platform/auth"
+	errorModels "github.com/voxire/onion/internal/platform/errors"
+	posv1 "github.com/voxire/voxie/gen/go/pos/v1"
 )
 
 func toProtoFloor(f domain.Floor) *posv1.Floor {
@@ -31,10 +29,13 @@ func toProtoFloor(f domain.Floor) *posv1.Floor {
 
 func FloorListRoutes() []string { return []string{"/pos/floors"} }
 
-type ListFloorsHandler struct{ Service *application.Service }
-type ListFloorsRequest struct {
-	BranchID int64 `json:"branch_id"`
-}
+type (
+	ListFloorsHandler struct{ Service *application.Service }
+	ListFloorsRequest struct {
+		BranchID int64 `json:"branch_id"`
+	}
+)
+
 type ListFloorsResponse struct {
 	Floors []*posv1.Floor `json:"floors"`
 }
@@ -149,11 +150,13 @@ func (h *UpdateFloorHandler) Serve(ctx context.Context, req *UpdateFloorRequest)
 
 func FloorDeleteRoutes() []string { return []string{"/pos/floors/{id}"} }
 
-type DeleteFloorHandler struct{ Service *application.Service }
-type DeleteFloorRequest struct{}
-type DeleteFloorResponse struct {
-	Message string `json:"message"`
-}
+type (
+	DeleteFloorHandler  struct{ Service *application.Service }
+	DeleteFloorRequest  struct{}
+	DeleteFloorResponse struct {
+		Message string `json:"message"`
+	}
+)
 
 func (h *DeleteFloorHandler) Serve(ctx context.Context, _ *DeleteFloorRequest) (DeleteFloorResponse, *errorModels.ServerError) {
 	device := authPkg.DeviceCtx(ctx)

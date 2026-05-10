@@ -13,10 +13,10 @@ import (
 // schema — no annotation comment is needed because there is no
 // other module owning it.
 type SettingsRow struct {
-	OwnerID          int64
-	DefaultCurrency  string
-	FiscalYearStart  string // "MM-DD"
-	Timezone         string
+	OwnerID         int64
+	DefaultCurrency string
+	FiscalYearStart string // "MM-DD"
+	Timezone        string
 }
 
 // ErrSettingsNotFound matches the sentinel used in every other module.

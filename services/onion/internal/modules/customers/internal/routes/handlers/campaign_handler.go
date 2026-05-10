@@ -6,13 +6,11 @@ import (
 	"net/http"
 	"time"
 
-	crmv1 "github.com/voxire/voxie/gen/go/crm/v1"
-
-	authPkg "github.com/voxire/onion/internal/platform/auth"
-	errorModels "github.com/voxire/onion/internal/platform/errors"
-
 	"github.com/voxire/onion/internal/modules/customers/internal/application"
 	"github.com/voxire/onion/internal/modules/customers/internal/domain"
+	authPkg "github.com/voxire/onion/internal/platform/auth"
+	errorModels "github.com/voxire/onion/internal/platform/errors"
+	crmv1 "github.com/voxire/voxie/gen/go/crm/v1"
 )
 
 func CampaignListRoutes() []string {
@@ -34,7 +32,7 @@ func CampaignStatusRoutes() []string {
 func newCampaignPayload(c domain.Campaign) *crmv1.Campaign {
 	p := &crmv1.Campaign{
 		Id:             c.ID,
-		OwnerId:       c.OwnerID,
+		OwnerId:        c.OwnerID,
 		Name:           c.Name,
 		Description:    c.Description,
 		Channel:        c.Channel,
@@ -107,13 +105,13 @@ type CreateCampaignHandler struct {
 }
 
 type CreateCampaignRequest struct {
-	Name        string  `json:"name"`
-	Description string  `json:"description"`
-	Channel     string  `json:"channel"`
-	SegmentID   *int64  `json:"segment_id"`
-	Subject     string  `json:"subject"`
-	Content     string  `json:"content"`
-	ScheduledAt string  `json:"scheduled_at"`
+	Name        string `json:"name"`
+	Description string `json:"description"`
+	Channel     string `json:"channel"`
+	SegmentID   *int64 `json:"segment_id"`
+	Subject     string `json:"subject"`
+	Content     string `json:"content"`
+	ScheduledAt string `json:"scheduled_at"`
 }
 
 type CreateCampaignResponse struct {
@@ -187,14 +185,14 @@ type UpdateCampaignHandler struct {
 }
 
 type UpdateCampaignRequest struct {
-	ID          int64   `json:"id"`
-	Name        string  `json:"name"`
-	Description string  `json:"description"`
-	Channel     string  `json:"channel"`
-	SegmentID   *int64  `json:"segment_id"`
-	Subject     string  `json:"subject"`
-	Content     string  `json:"content"`
-	ScheduledAt string  `json:"scheduled_at"`
+	ID          int64  `json:"id"`
+	Name        string `json:"name"`
+	Description string `json:"description"`
+	Channel     string `json:"channel"`
+	SegmentID   *int64 `json:"segment_id"`
+	Subject     string `json:"subject"`
+	Content     string `json:"content"`
+	ScheduledAt string `json:"scheduled_at"`
 }
 
 type UpdateCampaignResponse struct {

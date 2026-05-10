@@ -6,7 +6,6 @@ import (
 	"strconv"
 
 	"github.com/go-chi/chi/v5"
-
 	"github.com/voxire/onion/internal/modules/hr_core/internal/application"
 	"github.com/voxire/onion/internal/modules/hr_core/internal/domain"
 	authPkg "github.com/voxire/onion/internal/platform/auth"
@@ -38,11 +37,13 @@ func roleToPayload(r domain.RoleRecord) *RolePayload {
 
 func ListRolesRoutes() []string { return []string{"/hr/roles"} }
 
-type ListRolesHandler struct{ Service *application.Service }
-type ListRolesRequest struct{}
-type ListRolesResponse struct {
-	Roles []*RolePayload `json:"roles"`
-}
+type (
+	ListRolesHandler  struct{ Service *application.Service }
+	ListRolesRequest  struct{}
+	ListRolesResponse struct {
+		Roles []*RolePayload `json:"roles"`
+	}
+)
 
 func (h *ListRolesHandler) Serve(ctx context.Context, _ *ListRolesRequest) (ListRolesResponse, *errorModels.ServerError) {
 	device := authPkg.DeviceCtx(ctx)
@@ -67,12 +68,15 @@ func (h *ListRolesHandler) Serve(ctx context.Context, _ *ListRolesRequest) (List
 
 func CreateRoleRoutes() []string { return []string{"/hr/roles"} }
 
-type CreateRoleHandler struct{ Service *application.Service }
-type CreateRoleRequest struct {
-	Name        string `json:"name"`
-	Description string `json:"description"`
-	Permissions string `json:"permissions"`
-}
+type (
+	CreateRoleHandler struct{ Service *application.Service }
+	CreateRoleRequest struct {
+		Name        string `json:"name"`
+		Description string `json:"description"`
+		Permissions string `json:"permissions"`
+	}
+)
+
 type CreateRoleResponse struct {
 	Role *RolePayload `json:"role"`
 }
@@ -104,12 +108,15 @@ func (h *CreateRoleHandler) Serve(ctx context.Context, req *CreateRoleRequest) (
 
 func UpdateRoleRoutes() []string { return []string{"/hr/roles/{id}"} }
 
-type UpdateRoleHandler struct{ Service *application.Service }
-type UpdateRoleRequest struct {
-	Name        string `json:"name"`
-	Description string `json:"description"`
-	Permissions string `json:"permissions"`
-}
+type (
+	UpdateRoleHandler struct{ Service *application.Service }
+	UpdateRoleRequest struct {
+		Name        string `json:"name"`
+		Description string `json:"description"`
+		Permissions string `json:"permissions"`
+	}
+)
+
 type UpdateRoleResponse struct {
 	Role *RolePayload `json:"role"`
 }
@@ -147,10 +154,13 @@ func (h *UpdateRoleHandler) Serve(ctx context.Context, req *UpdateRoleRequest) (
 
 func AssignRoleRoutes() []string { return []string{"/hr/employees/{id}/role"} }
 
-type AssignRoleHandler struct{ Service *application.Service }
-type AssignRoleRequest struct {
-	RoleID int64 `json:"role_id"`
-}
+type (
+	AssignRoleHandler struct{ Service *application.Service }
+	AssignRoleRequest struct {
+		RoleID int64 `json:"role_id"`
+	}
+)
+
 type AssignRoleResponse struct {
 	Success bool `json:"success"`
 }

@@ -5,7 +5,6 @@ import (
 	"net/http"
 
 	"github.com/golang-jwt/jwt/v5"
-
 	authPkg "github.com/voxire/onion/internal/platform/auth"
 	"github.com/voxire/onion/internal/platform/logger"
 	"github.com/voxire/onion/internal/platform/utils/jwtutils"

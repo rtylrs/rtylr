@@ -5,23 +5,24 @@ import (
 	"errors"
 	"net/http"
 
-	posv1 "github.com/voxire/voxie/gen/go/pos/v1"
-
 	"github.com/voxire/onion/internal/modules/pos_loyalty/internal/application"
 	"github.com/voxire/onion/internal/modules/pos_loyalty/internal/domain"
 	authPkg "github.com/voxire/onion/internal/platform/auth"
 	errorModels "github.com/voxire/onion/internal/platform/errors"
+	posv1 "github.com/voxire/voxie/gen/go/pos/v1"
 )
 
 // ─── Get Config ──────────────────────────────────────────────────────────────
 
 func GetConfigRoutes() []string { return []string{"/pos/loyalty/config"} }
 
-type GetConfigHandler struct{ Service *application.Service }
-type GetConfigRequest struct{}
-type GetConfigResponse struct {
-	Config *posv1.LoyaltyConfig `json:"config"`
-}
+type (
+	GetConfigHandler  struct{ Service *application.Service }
+	GetConfigRequest  struct{}
+	GetConfigResponse struct {
+		Config *posv1.LoyaltyConfig `json:"config"`
+	}
+)
 
 func (h *GetConfigHandler) Serve(ctx context.Context, _ *GetConfigRequest) (GetConfigResponse, *errorModels.ServerError) {
 	device := authPkg.DeviceCtx(ctx)
@@ -85,10 +86,13 @@ func (h *UpdateConfigHandler) Serve(ctx context.Context, req *UpdateConfigReques
 
 func ListTransactionsRoutes() []string { return []string{"/pos/loyalty/transactions"} }
 
-type ListTransactionsHandler struct{ Service *application.Service }
-type ListTransactionsRequest struct {
-	CustomerID int64 `json:"customer_id"`
-}
+type (
+	ListTransactionsHandler struct{ Service *application.Service }
+	ListTransactionsRequest struct {
+		CustomerID int64 `json:"customer_id"`
+	}
+)
+
 type ListTransactionsResponse struct {
 	Transactions []*posv1.LoyaltyTransaction `json:"transactions"`
 }
@@ -206,10 +210,13 @@ func (h *RedeemPointsHandler) Serve(ctx context.Context, req *RedeemPointsReques
 
 func GetBalanceRoutes() []string { return []string{"/pos/loyalty/balance"} }
 
-type GetBalanceHandler struct{ Service *application.Service }
-type GetBalanceRequest struct {
-	CustomerID int64 `json:"customer_id"`
-}
+type (
+	GetBalanceHandler struct{ Service *application.Service }
+	GetBalanceRequest struct {
+		CustomerID int64 `json:"customer_id"`
+	}
+)
+
 type GetBalanceResponse struct {
 	CustomerID int64 `json:"customer_id"`
 	Balance    int32 `json:"balance"`

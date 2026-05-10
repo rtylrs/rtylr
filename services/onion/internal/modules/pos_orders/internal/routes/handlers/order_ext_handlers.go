@@ -86,15 +86,17 @@ func (h *SplitOrderHandler) Serve(ctx context.Context, req *SplitOrderRequest) (
 
 // ---- Apply Discount ----
 
-func DiscountOrderRoutes() []string { return []string{"/pos/orders/discount", "/pos/orders/{id}/discount"} }
+func DiscountOrderRoutes() []string {
+	return []string{"/pos/orders/discount", "/pos/orders/{id}/discount"}
+}
 
 type DiscountOrderHandler struct{ Service *application.Service }
 
 type DiscountOrderRequest struct {
-	OrderID        int64   `json:"order_id"`
-	DiscountType   string  `json:"discount_type"`
-	DiscountValue  float64 `json:"discount_value"`
-	Reason         string  `json:"reason"`
+	OrderID       int64   `json:"order_id"`
+	DiscountType  string  `json:"discount_type"`
+	DiscountValue float64 `json:"discount_value"`
+	Reason        string  `json:"reason"`
 }
 
 type DiscountOrderResponse struct {

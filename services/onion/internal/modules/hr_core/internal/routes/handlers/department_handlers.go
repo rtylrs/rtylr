@@ -6,19 +6,18 @@ import (
 	"strconv"
 
 	"github.com/go-chi/chi/v5"
-	hrv1 "github.com/voxire/voxie/gen/go/hr/v1"
-
 	"github.com/voxire/onion/internal/modules/hr_core/internal/application"
 	"github.com/voxire/onion/internal/modules/hr_core/internal/domain"
 	authPkg "github.com/voxire/onion/internal/platform/auth"
 	errorModels "github.com/voxire/onion/internal/platform/errors"
 	"github.com/voxire/onion/internal/platform/logger"
+	hrv1 "github.com/voxire/voxie/gen/go/hr/v1"
 )
 
 func deptToProto(d domain.DepartmentRecord) *hrv1.DepartmentPayload {
 	return &hrv1.DepartmentPayload{
 		Id:                    d.ID,
-		OwnerId:              d.OwnerID,
+		OwnerId:               d.OwnerID,
 		LocationId:            d.LocationID,
 		ParentDepartmentId:    &d.ParentDepartmentID,
 		Name:                  d.Name,
@@ -32,10 +31,13 @@ func deptToProto(d domain.DepartmentRecord) *hrv1.DepartmentPayload {
 
 func ListHRCoreDepartmentsRoutes() []string { return []string{"/hr/core/departments"} }
 
-type ListHRCoreDepartmentsHandler struct{ Service *application.Service }
-type ListHRCoreDepartmentsRequest struct {
-	LocationID int64 `json:"location_id"`
-}
+type (
+	ListHRCoreDepartmentsHandler struct{ Service *application.Service }
+	ListHRCoreDepartmentsRequest struct {
+		LocationID int64 `json:"location_id"`
+	}
+)
+
 type ListHRCoreDepartmentsResponse struct {
 	Departments []*hrv1.DepartmentPayload `json:"departments"`
 }
@@ -63,13 +65,16 @@ func (h *ListHRCoreDepartmentsHandler) Serve(ctx context.Context, req *ListHRCor
 
 func CreateHRCoreDepartmentRoutes() []string { return []string{"/hr/core/departments"} }
 
-type CreateHRCoreDepartmentHandler struct{ Service *application.Service }
-type CreateHRCoreDepartmentRequest struct {
-	Name                  string `json:"name"`
-	LocationID            int64  `json:"location_id"`
-	ParentDepartmentID    int64  `json:"parent_department_id"`
-	DefaultWorkScheduleID int64  `json:"default_work_schedule_id"`
-}
+type (
+	CreateHRCoreDepartmentHandler struct{ Service *application.Service }
+	CreateHRCoreDepartmentRequest struct {
+		Name                  string `json:"name"`
+		LocationID            int64  `json:"location_id"`
+		ParentDepartmentID    int64  `json:"parent_department_id"`
+		DefaultWorkScheduleID int64  `json:"default_work_schedule_id"`
+	}
+)
+
 type CreateHRCoreDepartmentResponse struct {
 	Department *hrv1.DepartmentPayload `json:"department"`
 }
@@ -101,13 +106,16 @@ func (h *CreateHRCoreDepartmentHandler) Serve(ctx context.Context, req *CreateHR
 
 func UpdateHRCoreDepartmentRoutes() []string { return []string{"/hr/core/departments/{id}"} }
 
-type UpdateHRCoreDepartmentHandler struct{ Service *application.Service }
-type UpdateHRCoreDepartmentRequest struct {
-	Name                  string `json:"name"`
-	LocationID            int64  `json:"location_id"`
-	ParentDepartmentID    int64  `json:"parent_department_id"`
-	DefaultWorkScheduleID int64  `json:"default_work_schedule_id"`
-}
+type (
+	UpdateHRCoreDepartmentHandler struct{ Service *application.Service }
+	UpdateHRCoreDepartmentRequest struct {
+		Name                  string `json:"name"`
+		LocationID            int64  `json:"location_id"`
+		ParentDepartmentID    int64  `json:"parent_department_id"`
+		DefaultWorkScheduleID int64  `json:"default_work_schedule_id"`
+	}
+)
+
 type UpdateHRCoreDepartmentResponse struct {
 	Department *hrv1.DepartmentPayload `json:"department"`
 }

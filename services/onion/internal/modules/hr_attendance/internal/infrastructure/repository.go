@@ -3,6 +3,7 @@ package infrastructure
 import (
 	"context"
 	"database/sql"
+	"errors"
 	"math"
 	"time"
 
@@ -79,7 +80,7 @@ func (r *Repository) GetActiveClockIn(ctx context.Context, ownerID, employeeID i
 		EmployeeID: employeeID,
 	})
 	if err != nil {
-		if err == sql.ErrNoRows {
+		if errors.Is(err, sql.ErrNoRows) {
 			return nil, nil
 		}
 		return nil, err
@@ -155,23 +156,23 @@ func (r *Repository) GetDailyAttendance(ctx context.Context, ownerID, locationID
 func (r *Repository) GetAttendanceConfig(ctx context.Context, ownerID int64) (*domain.AttendanceConfigRecord, error) {
 	row, err := r.queries.GetAttendanceConfig(ctx, ownerID)
 	if err != nil {
-		if err == sql.ErrNoRows {
+		if errors.Is(err, sql.ErrNoRows) {
 			return nil, nil
 		}
 		logger.Ctx(ctx).Error("failed to get attendance config", logger.Any("owner_id", ownerID), logger.Error(err))
 		return nil, err
 	}
 	return &domain.AttendanceConfigRecord{
-		ID:                  row.ID,
-		OwnerID:             row.OwnerID,
-		AppEnabled:          row.AppEnabled,
-		QREnabled:           row.QrEnabled,
-		GPSEnabled:          row.GpsEnabled,
-		PinEnabled:          row.PinEnabled,
-		FacialEnabled:       row.FacialEnabled,
-		GeofenceRadiusM:     row.GeofenceRadiusM,
-		DefaultLocationLat:  row.DefaultLocationLat,
-		DefaultLocationLng:  row.DefaultLocationLng,
+		ID:                 row.ID,
+		OwnerID:            row.OwnerID,
+		AppEnabled:         row.AppEnabled,
+		QREnabled:          row.QrEnabled,
+		GPSEnabled:         row.GpsEnabled,
+		PinEnabled:         row.PinEnabled,
+		FacialEnabled:      row.FacialEnabled,
+		GeofenceRadiusM:    row.GeofenceRadiusM,
+		DefaultLocationLat: row.DefaultLocationLat,
+		DefaultLocationLng: row.DefaultLocationLng,
 	}, nil
 }
 
@@ -184,7 +185,7 @@ func (r *Repository) GetEmployeePINHash(ctx context.Context, ownerID, employeeID
 		employeeID, ownerID,
 	).Scan(&hash)
 	if err != nil {
-		if err == sql.ErrNoRows {
+		if errors.Is(err, sql.ErrNoRows) {
 			return "", domain.ErrAttendanceNotFound
 		}
 		logger.Ctx(ctx).Error("failed to get employee PIN hash", logger.Any("owner_id", ownerID), logger.Any("employee_id", employeeID), logger.Error(err))
@@ -224,7 +225,7 @@ func (r *Repository) GetLocationCoordinates(ctx context.Context, ownerID, locati
 		locationID, ownerID,
 	).Scan(&lat, &lng)
 	if err != nil {
-		if err == sql.ErrNoRows {
+		if errors.Is(err, sql.ErrNoRows) {
 			return nil, nil
 		}
 		logger.Ctx(ctx).Error("failed to get location coordinates", logger.Any("owner_id", ownerID), logger.Any("location_id", locationID), logger.Error(err))
