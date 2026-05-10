@@ -43,12 +43,12 @@ go install github.com/golangci/golangci-lint/cmd/golangci-lint@v2.1.6
 ### 3. Start Development Environment
 
 ```bash
-# Start local MySQL, Redis, and LocalStack
+# Start local MySQL, Redis, and Floci
 make local-env-up
 
 # Copy .env.example to .env if needed. The local Docker environment
 # matches the DB_* defaults in .env.example.
-# Set LOCAL_STACK_ENABLED=true to route object storage through LocalStack.
+# Set FLOCI_ENABLED=true to route object storage through Floci.
 
 # Validate database connectivity and run local setup checks
 make setup
@@ -63,7 +63,7 @@ make run
 # Validate the configured MySQL connection
 make setup
 
-# Start/stop local MySQL, Redis, and LocalStack
+# Start/stop local MySQL, Redis, and Floci
 make local-env-up
 make local-env-down
 
