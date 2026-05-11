@@ -6,12 +6,11 @@ on:
     paths-ignore:
       - "**.md"
       - "docs/**"
-  workflow_dispatch:
 
 jobs:
   test:
     name: Build, Migrate, Fixtures, Test
-    runs-on: ubuntu-24.04
+    runs-on: blacksmith-4vcpu-ubuntu-2404
     timeout-minutes: 25
 
     services:
@@ -51,7 +50,7 @@ jobs:
           token: ${{ secrets.PAT_TOKEN }}
 
       - name: Setup Go
-        uses: actions/setup-go@v5
+        uses: actions/setup-go@v6
         with:
           go-version: "1.26"
           cache: true
