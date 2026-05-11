@@ -3,6 +3,7 @@ package infrastructure
 import (
 	"context"
 	"database/sql"
+	"errors"
 	"time"
 
 	"github.com/voxire/onion/internal/modules/hr_time/internal/domain"
@@ -34,7 +35,7 @@ func (a *FlowAdapter) GetCompletedTasksForEmployee(ctx context.Context, ownerID,
 		employeeID, ownerID,
 	).Scan(&userID)
 	if err != nil {
-		if err == sql.ErrNoRows {
+		if errors.Is(err, sql.ErrNoRows) {
 			return nil, nil
 		}
 		logger.Ctx(ctx).Error("flow adapter: failed to resolve employee user_id",

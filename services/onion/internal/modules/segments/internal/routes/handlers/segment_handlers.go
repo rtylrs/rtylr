@@ -8,11 +8,10 @@ import (
 	"strconv"
 
 	"github.com/go-chi/chi/v5"
-	authPkg "github.com/voxire/onion/internal/platform/auth"
-	errorModels "github.com/voxire/onion/internal/platform/errors"
-
 	"github.com/voxire/onion/internal/modules/segments/internal/application"
 	"github.com/voxire/onion/internal/modules/segments/internal/domain"
+	authPkg "github.com/voxire/onion/internal/platform/auth"
+	errorModels "github.com/voxire/onion/internal/platform/errors"
 )
 
 type SegmentPayload struct {
@@ -47,11 +46,13 @@ func newSegmentPayload(seg domain.Segment) SegmentPayload {
 
 func SegmentListRoutes() []string { return []string{"/crm/segments"} }
 
-type ListSegmentsHandler struct{ Service *application.Service }
-type ListSegmentsRequest struct{}
-type ListSegmentsResponse struct {
-	Segments []SegmentPayload `json:"segments"`
-}
+type (
+	ListSegmentsHandler  struct{ Service *application.Service }
+	ListSegmentsRequest  struct{}
+	ListSegmentsResponse struct {
+		Segments []SegmentPayload `json:"segments"`
+	}
+)
 
 func (h *ListSegmentsHandler) Serve(ctx context.Context, _ *ListSegmentsRequest) (ListSegmentsResponse, *errorModels.ServerError) {
 	device := authPkg.DeviceCtx(ctx)
@@ -170,11 +171,13 @@ func (h *UpdateSegmentHandler) Serve(ctx context.Context, req *UpdateSegmentRequ
 
 func SegmentDeleteRoutes() []string { return []string{"/crm/segments/{id}"} }
 
-type DeleteSegmentHandler struct{ Service *application.Service }
-type DeleteSegmentRequest struct{}
-type DeleteSegmentResponse struct {
-	Message string `json:"message"`
-}
+type (
+	DeleteSegmentHandler  struct{ Service *application.Service }
+	DeleteSegmentRequest  struct{}
+	DeleteSegmentResponse struct {
+		Message string `json:"message"`
+	}
+)
 
 func (h *DeleteSegmentHandler) Serve(ctx context.Context, _ *DeleteSegmentRequest) (DeleteSegmentResponse, *errorModels.ServerError) {
 	device := authPkg.DeviceCtx(ctx)

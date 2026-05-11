@@ -60,7 +60,7 @@ func TestRateLimitMiddleware_Returns429(t *testing.T) {
 	}))
 
 	for i := 0; i < 3; i++ {
-		req := httptest.NewRequest(http.MethodGet, "/x", nil)
+		req := httptest.NewRequest(http.MethodGet, "/x", http.NoBody)
 		req.RemoteAddr = "1.1.1.1:1234"
 		rec := httptest.NewRecorder()
 		wrapped.ServeHTTP(rec, req)
@@ -85,7 +85,7 @@ func TestRateLimitMiddleware_Returns429(t *testing.T) {
 }
 
 func TestGetClientKey_PrefersHeaders(t *testing.T) {
-	r := httptest.NewRequest(http.MethodGet, "/", nil)
+	r := httptest.NewRequest(http.MethodGet, "/", http.NoBody)
 	r.RemoteAddr = "10.0.0.1:1234"
 	if got := getClientKey(r); got != "10.0.0.1:1234" {
 		t.Errorf("default to RemoteAddr, got %q", got)
@@ -105,11 +105,11 @@ func TestGetClientKey_PrefersHeaders(t *testing.T) {
 func TestPerRouteRateLimit_KeysOnPathAndIP(t *testing.T) {
 	mw := PerRouteRateLimit(1, 10*time.Second)
 
-	srv := func(path string, ip string) int {
+	srv := func(path, ip string) int {
 		w := mw(http.HandlerFunc(func(w http.ResponseWriter, _ *http.Request) {
 			w.WriteHeader(http.StatusOK)
 		}))
-		req := httptest.NewRequest(http.MethodGet, path, nil)
+		req := httptest.NewRequest(http.MethodGet, path, http.NoBody)
 		req.RemoteAddr = ip
 		rec := httptest.NewRecorder()
 		w.ServeHTTP(rec, req)

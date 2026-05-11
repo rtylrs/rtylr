@@ -57,7 +57,7 @@ func (r *Repository) List(ctx context.Context, filter domain.AuditLogFilter) ([]
 			l.EntityID = &row.EntityID.Int64
 		}
 		if len(row.Details) > 0 {
-			raw := json.RawMessage(row.Details)
+			raw := row.Details
 			l.Details = &raw
 		}
 		if row.IpAddress.Valid {

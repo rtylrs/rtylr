@@ -136,27 +136,27 @@ type LoyaltyConfigInput struct {
 }
 
 type AwardPointsInput struct {
-	OwnerID     int64
-	CustomerID  int64
-	Points      int
-	Description string
-	ReferenceID *int64
+	OwnerID       int64
+	CustomerID    int64
+	Points        int
+	Description   string
+	ReferenceID   *int64
 	ReferenceType string
 }
 
 type RedeemPointsInput struct {
-	OwnerID     int64
-	CustomerID  int64
-	Points      int
-	Description string
-	ReferenceID *int64
+	OwnerID       int64
+	CustomerID    int64
+	Points        int
+	Description   string
+	ReferenceID   *int64
 	ReferenceType string
 }
 
 type RecordVisitInput struct {
-	OwnerID    int64
-	CustomerID int64
-	Amount     float64
+	OwnerID     int64
+	CustomerID  int64
+	Amount      float64
 	AwardPoints bool
 }
 
@@ -232,10 +232,10 @@ type CampaignUpdateInput struct {
 }
 
 type DashboardStats struct {
-	TotalCustomers       int              `json:"total_customers"`
-	NewThisMonth         int              `json:"new_this_month"`
-	ActiveLoyaltyMembers int              `json:"active_loyalty_members"`
-	TopCustomers         []TopCustomer    `json:"top_customers"`
+	TotalCustomers       int           `json:"total_customers"`
+	NewThisMonth         int           `json:"new_this_month"`
+	ActiveLoyaltyMembers int           `json:"active_loyalty_members"`
+	TopCustomers         []TopCustomer `json:"top_customers"`
 }
 
 type TopCustomer struct {
@@ -316,15 +316,15 @@ type MergeCustomersInput struct {
 // Loyalty Tiers
 
 type LoyaltyTier struct {
-	ID             int64     `json:"id"`
-	OwnerID        int64     `json:"owner_id"`
-	Name           string    `json:"name"`
-	MinPoints      int       `json:"min_points"`
-	DiscountPct    float64   `json:"discount_pct"`
-	Perks          []byte    `json:"perks"`
-	SortOrder      int       `json:"sort_order"`
-	CreatedAt      time.Time `json:"created_at"`
-	UpdatedAt      time.Time `json:"updated_at"`
+	ID          int64     `json:"id"`
+	OwnerID     int64     `json:"owner_id"`
+	Name        string    `json:"name"`
+	MinPoints   int       `json:"min_points"`
+	DiscountPct float64   `json:"discount_pct"`
+	Perks       []byte    `json:"perks"`
+	SortOrder   int       `json:"sort_order"`
+	CreatedAt   time.Time `json:"created_at"`
+	UpdatedAt   time.Time `json:"updated_at"`
 }
 
 type LoyaltyTierInput struct {

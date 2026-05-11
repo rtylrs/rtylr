@@ -18,4 +18,4 @@ go vet ./...
 mkdir -p ./bin
 go build -o ./bin/api ./cmd/api/main.go
 
-golangci-lint run       
+golangci-lint run

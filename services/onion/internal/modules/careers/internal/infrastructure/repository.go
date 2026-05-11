@@ -6,9 +6,9 @@ import (
 	"errors"
 	"strings"
 
-	"github.com/voxire/onion/internal/platform/database/dbclient"
 	"github.com/voxire/onion/internal/modules/careers/internal/domain"
 	"github.com/voxire/onion/internal/modules/careers/internal/infrastructure/persistence/sqlc"
+	"github.com/voxire/onion/internal/platform/database/dbclient"
 )
 
 type Repository struct {

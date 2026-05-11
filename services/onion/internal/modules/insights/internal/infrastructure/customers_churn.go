@@ -11,10 +11,10 @@ import (
 // customers who had ever placed an order, what fraction have been silent
 // for the entire window [now-windowDays, now].
 type ChurnRateRow struct {
-	WindowDays int32
+	WindowDays   int32
 	ChurnedCount int64
 	ActiveCount  int64
-	ChurnPct    float64
+	ChurnPct     float64
 }
 
 // Standard windows used by the frontend churn panel.

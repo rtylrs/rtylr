@@ -1,6 +1,7 @@
 #!/bin/bash
 # scripts/migrate.sh
 # Run all schema SQL files in order against the configured database.
+# Each file is recorded in schema_migrations once applied — re-runs are skipped.
 #
 # Required environment variables:
 #   DB_HOST     - Database host (default: localhost)
@@ -19,8 +20,7 @@ DB_NAME="${DB_NAME:?DB_NAME is required}"
 
 SCRIPT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
 PROJECT_ROOT="$(cd "$SCRIPT_DIR/.." && pwd)"
-
-ERRORS=0
+SCHEMAS_DIR="$PROJECT_ROOT/internal/platform/database/schemas"
 
 mysql_cmd() {
     mysql \
@@ -28,34 +28,56 @@ mysql_cmd() {
         --port="$DB_PORT" \
         --user="$DB_USER" \
         --password="$DB_PASSWORD" \
-        --force \
         "$DB_NAME"
 }
 
 echo "Running migrations against $DB_USER@$DB_HOST:$DB_PORT/$DB_NAME"
 
-# Run schema files in a consistent order: shared first, then module-specific schemas.
-# Within each directory, files are applied in lexicographic (alphabetical) order.
-for dir in shared rtylr voxire erp hr hr_core hr_attendance hr_documents hr_equipment hr_leave hr_onboarding hr_overtime hr_payroll hr_performance hr_setup hr_shifts hr_time crm finance flow pos hub store support book hr_dashboard recruit insights; do
-    schema_dir="$PROJECT_ROOT/internal/platform/database/schemas/$dir"
+# Bootstrap the tracking table on first run.
+mysql_cmd <<'SQL'
+CREATE TABLE IF NOT EXISTS schema_migrations (
+    filename VARCHAR(255) NOT NULL PRIMARY KEY,
+    applied_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
+);
+SQL
+
+already_applied() {
+    local filename="$1"
+    local count
+    count=$(mysql_cmd -sN -e "SELECT COUNT(*) FROM schema_migrations WHERE filename = '$filename';" 2>/dev/null)
+    [ "$count" -gt 0 ]
+}
+
+record_applied() {
+    local filename="$1"
+    mysql_cmd -e "INSERT IGNORE INTO schema_migrations (filename) VALUES ('$filename');" 2>/dev/null
+}
+
+APPLIED=0
+SKIPPED=0
+
+for dir in shared rtylr voxire erp hr hr_core hr_attendance hr_documents hr_equipment hr_leave hr_onboarding hr_overtime hr_payroll hr_performance hr_setup hr_shifts hr_time crm finance flow pos hub store support book hr_dashboard recruit insights oauth; do
+    schema_dir="$SCHEMAS_DIR/$dir"
     if [ ! -d "$schema_dir" ]; then
         continue
     fi
 
     for f in "$schema_dir"/*.sql; do
         [ -f "$f" ] || continue
-        echo "  → $(basename "$f")"
-        if ! mysql_cmd < "$f" 2>&1 | grep -v "Warning:"; then
-            echo "    ⚠ warnings in $f (continuing)"
-            ERRORS=$((ERRORS + 1))
+        filename="$dir/$(basename "$f")"
+
+        if already_applied "$filename"; then
+            echo "  ✓ $filename (already applied)"
+            SKIPPED=$((SKIPPED + 1))
+            continue
         fi
+
+        echo "  → $filename"
+        mysql_cmd < "$f" 2>&1 | grep -v "Warning:" || true
+        record_applied "$filename"
+        APPLIED=$((APPLIED + 1))
     done
 done
 
-if [ "$ERRORS" -gt 0 ]; then
-    echo ""
-    echo "✅ Migrations complete with $ERRORS warning(s) (tables/indexes already existed)."
-else
-    echo ""
-    echo "✅ All migrations applied cleanly."
-fi
+echo ""
+echo "✅ Migrations complete. Applied: $APPLIED, Skipped: $SKIPPED."

@@ -4,10 +4,9 @@ import (
 	"context"
 	"net/http"
 
+	"github.com/voxire/onion/internal/modules/pos_manager/internal/application"
 	authPkg "github.com/voxire/onion/internal/platform/auth"
 	errorModels "github.com/voxire/onion/internal/platform/errors"
-
-	"github.com/voxire/onion/internal/modules/pos_manager/internal/application"
 )
 
 func VerifyPINRoutes() []string { return []string{"/pos/manager/verify"} }

@@ -9,6 +9,7 @@ import (
 	"github.com/voxire/onion/internal/modules/pos_orders/internal/infrastructure"
 	"github.com/voxire/onion/internal/platform/logger"
 	"github.com/voxire/onion/internal/platform/paddle"
+	"github.com/voxire/onion/internal/platform/wsbus"
 )
 
 // PaddlePaymentResult mirrors paddle.POSPaymentResult for the service surface.
@@ -163,7 +164,18 @@ func (s *Service) CreateOrder(ctx context.Context, ownerID, staffID int64, input
 		return 0, err
 	}
 
-	return s.repo.CreateOrder(ctx, ownerID, staffID, orderNumber, input)
+	orderID, err := s.repo.CreateOrder(ctx, ownerID, staffID, orderNumber, input)
+	if err != nil {
+		return 0, err
+	}
+
+	wsbus.Publish(wsbus.Event{
+		Topic:    fmt.Sprintf("owner:%d", ownerID),
+		Type:     "pos:order:created",
+		EntityID: orderID,
+	})
+
+	return orderID, nil
 }
 
 func (s *Service) UpdateOrderStatus(ctx context.Context, ownerID, orderID int64, status domain.OrderStatus) error {
@@ -248,6 +260,40 @@ func (s *Service) ListHeldOrders(ctx context.Context, ownerID int64) ([]domain.O
 	return s.repo.ListHeldOrders(ctx, ownerID)
 }
 
+func (s *Service) SendToKitchen(ctx context.Context, ownerID, orderID int64) error {
+	order, err := s.repo.GetOrder(ctx, ownerID, orderID)
+	if err != nil {
+		return err
+	}
+	if order.Status != domain.OrderStatusPending && order.Status != domain.OrderStatusConfirmed {
+		return errors.New("order is not in a sendable state")
+	}
+	if err := s.repo.UpdateOrderStatus(ctx, ownerID, orderID, domain.OrderStatusPreparing); err != nil {
+		return err
+	}
+	wsbus.Publish(wsbus.Event{
+		Topic:    fmt.Sprintf("owner:%d", ownerID),
+		Type:     "pos:order:preparing",
+		EntityID: orderID,
+	})
+	return nil
+}
+
+func (s *Service) VoidOrderItem(ctx context.Context, ownerID, orderID, itemID int64) error {
+	return s.repo.VoidOrderItem(ctx, ownerID, orderID, itemID)
+}
+
+func (s *Service) TransferTable(ctx context.Context, ownerID, orderID, newTableID int64) error {
+	order, err := s.repo.GetOrder(ctx, ownerID, orderID)
+	if err != nil {
+		return err
+	}
+	if order.Status == domain.OrderStatusPaid || order.Status == domain.OrderStatusVoided || order.Status == domain.OrderStatusCancelled {
+		return domain.ErrOrderCannotBeTransferred
+	}
+	return s.repo.TransferTable(ctx, ownerID, orderID, order.TableID, newTableID)
+}
+
 // ─── Paddle billing ─────────────────────────────────────────────────────────
 
 // CreatePaddlePayment creates a Paddle transaction for the given order and
@@ -280,7 +326,7 @@ func (s *Service) CreatePaddlePayment(ctx context.Context, ownerID, orderID int6
 		AmountMinor:    amountMinor,
 		Currency:       currency,
 		CustomerEmail:  customerEmail,
-		Description:    fmt.Sprintf("POS order %s", order.OrderNumber),
+		Description:    "POS order " + order.OrderNumber,
 		IdempotencyKey: fmt.Sprintf("order:%d:%d", orderID, ownerID),
 	})
 	if err != nil {
@@ -328,4 +374,58 @@ func (s *Service) HandlePaddleTransactionCompleted(ctx context.Context, txID, ev
 
 func (s *Service) GetDashboardStats(ctx context.Context, ownerID int64) (domain.DashboardStats, error) {
 	return s.repo.GetDashboardStats(ctx, ownerID)
+}
+
+// ─── Public Online Ordering ──────────────────────────────────────────────────
+
+type PublicOrderItemInput struct {
+	MenuItemID int64
+	Name       string
+	Quantity   float64
+	UnitPrice  float64
+	Notes      string
+}
+
+type PublicOrderInput struct {
+	CustomerName  string
+	CustomerPhone string
+	CustomerEmail string
+	Notes         string
+	Items         []PublicOrderItemInput
+}
+
+func (s *Service) CreatePublicOrder(ctx context.Context, ownerID int64, input PublicOrderInput) (int64, string, error) {
+	if ownerID == 0 {
+		return 0, "", errors.New("owner_id is required")
+	}
+	if len(input.Items) == 0 {
+		return 0, "", errors.New("order must have at least one item")
+	}
+
+	orderNumber, err := s.repo.GenerateOrderNumber(ctx, ownerID)
+	if err != nil {
+		return 0, "", fmt.Errorf("generate order number: %w", err)
+	}
+
+	items := make([]domain.OrderItemInput, 0, len(input.Items))
+	for _, it := range input.Items {
+		items = append(items, domain.OrderItemInput{
+			MenuItemID: it.MenuItemID,
+			Name:       it.Name,
+			Quantity:   it.Quantity,
+			UnitPrice:  it.UnitPrice,
+			Notes:      it.Notes,
+		})
+	}
+
+	orderID, err := s.repo.CreatePublicOrder(ctx, ownerID, orderNumber, input.CustomerName, input.CustomerPhone, input.Notes, items)
+	if err != nil {
+		return 0, "", fmt.Errorf("create public order: %w", err)
+	}
+
+	return orderID, orderNumber, nil
+}
+
+func (s *Service) GetPublicOrderStatus(ctx context.Context, orderID int64) (string, string, error) {
+	return s.repo.GetPublicOrderStatus(ctx, orderID)
 }

@@ -1,9 +1,8 @@
 package handlers
 
 import (
-	"net/http"
-
 	"context"
+	"net/http"
 	"strconv"
 
 	"github.com/voxire/onion/internal/modules/workspaces/internal/application"
@@ -20,13 +19,13 @@ type GetInsightsRequest struct {
 }
 
 type GetInsightsResponse struct {
-	Velocity   []velocityPoint  `json:"velocity"`
-	Burndown   []burndownPoint  `json:"burndown"`
-	CycleTime  float64          `json:"cycleTime"`
-	TimeByMember []memberTime   `json:"timeByMember"`
-	Throughput []throughputPoint `json:"throughput"`
-	TotalTasks int              `json:"totalTasks"`
-	DoneTasks  int              `json:"doneTasks"`
+	Velocity     []velocityPoint   `json:"velocity"`
+	Burndown     []burndownPoint   `json:"burndown"`
+	CycleTime    float64           `json:"cycleTime"`
+	TimeByMember []memberTime      `json:"timeByMember"`
+	Throughput   []throughputPoint `json:"throughput"`
+	TotalTasks   int               `json:"totalTasks"`
+	DoneTasks    int               `json:"doneTasks"`
 }
 
 type velocityPoint struct {
@@ -205,16 +204,16 @@ type GetRoadmapResponse struct {
 }
 
 type roadmapProject struct {
-	ID          string  `json:"id"`
-	Name        string  `json:"name"`
-	Color       string  `json:"color"`
-	StartDate   string  `json:"startDate"`
-	TargetDate  string  `json:"targetDate"`
-	Progress    int     `json:"progress"`
-	DoneCount   int     `json:"doneCount"`
-	TaskCount   int     `json:"taskCount"`
-	Description string  `json:"description,omitempty"`
-	WorkspaceID string  `json:"workspaceId"`
+	ID          string `json:"id"`
+	Name        string `json:"name"`
+	Color       string `json:"color"`
+	StartDate   string `json:"startDate"`
+	TargetDate  string `json:"targetDate"`
+	Progress    int    `json:"progress"`
+	DoneCount   int    `json:"doneCount"`
+	TaskCount   int    `json:"taskCount"`
+	Description string `json:"description,omitempty"`
+	WorkspaceID string `json:"workspaceId"`
 }
 
 func (r *GetRoadmapRequest) Validate() *errorModels.ServerError { return nil }

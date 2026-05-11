@@ -18,22 +18,27 @@ func (m *mockRepo) GenerateHeadcountReport(_ context.Context, _ int64, _ domain.
 	m.calledType = "headcount"
 	return m.result, m.err
 }
+
 func (m *mockRepo) GenerateAttendanceSummaryReport(_ context.Context, _ int64, _ domain.ReportParams) ([]map[string]interface{}, error) {
 	m.calledType = "attendance"
 	return m.result, m.err
 }
+
 func (m *mockRepo) GenerateLeaveSummaryReport(_ context.Context, _ int64, _ domain.ReportParams) ([]map[string]interface{}, error) {
 	m.calledType = "leave"
 	return m.result, m.err
 }
+
 func (m *mockRepo) GeneratePayrollSummaryReport(_ context.Context, _ int64, _ domain.ReportParams) ([]map[string]interface{}, error) {
 	m.calledType = "payroll"
 	return m.result, m.err
 }
+
 func (m *mockRepo) GenerateOvertimeSummaryReport(_ context.Context, _ int64, _ domain.ReportParams) ([]map[string]interface{}, error) {
 	m.calledType = "overtime"
 	return m.result, m.err
 }
+
 func (m *mockRepo) GenerateTimesheetSummaryReport(_ context.Context, _ int64, _ domain.ReportParams) ([]map[string]interface{}, error) {
 	m.calledType = "timesheet"
 	return m.result, m.err

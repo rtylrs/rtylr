@@ -4,12 +4,11 @@ import (
 	"context"
 	"net/http"
 
-	erpv1 "github.com/voxire/voxie/gen/go/erp/v1"
-
 	"github.com/voxire/onion/internal/modules/products/internal/application"
 	"github.com/voxire/onion/internal/modules/products/internal/domain"
 	authPkg "github.com/voxire/onion/internal/platform/auth"
 	errorModels "github.com/voxire/onion/internal/platform/errors"
+	erpv1 "github.com/voxire/voxie/gen/go/erp/v1"
 )
 
 // ─── List Products ────────────────────────────────────────────────────────────
@@ -36,9 +35,9 @@ type ListProductsResponse struct {
 func newProductPayload(p domain.Product) *erpv1.Product {
 	return &erpv1.Product{
 		Id:                p.ID,
-		OwnerId:          p.OwnerID,
-		CategoryId:       p.CategoryID,
-		SupplierId:       p.SupplierID,
+		OwnerId:           p.OwnerID,
+		CategoryId:        p.CategoryID,
+		SupplierId:        p.SupplierID,
 		Name:              p.Name,
 		Sku:               p.SKU,
 		Barcode:           p.Barcode,

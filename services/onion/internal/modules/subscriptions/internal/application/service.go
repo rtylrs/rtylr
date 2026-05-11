@@ -163,7 +163,7 @@ func computeLineItem(seatCount, pricePerSeatCents int, start time.Time, end *tim
 // ── Paddle ─────────────────────────────────────────────────────────────────────
 
 // CreateCheckout creates a Paddle transaction for the given plan and returns the checkout URL.
-func (s *Service) CreateCheckout(ctx context.Context, ownerID int64, planSlug string, ownerEmail string) (string, error) {
+func (s *Service) CreateCheckout(ctx context.Context, ownerID int64, planSlug, ownerEmail string) (string, error) {
 	plan, err := s.repo.GetPlanBySlug(ctx, planSlug)
 	if err != nil {
 		return "", err

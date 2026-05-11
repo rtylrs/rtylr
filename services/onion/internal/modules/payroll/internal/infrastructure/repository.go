@@ -3,6 +3,7 @@ package infrastructure
 import (
 	"context"
 	"database/sql"
+	"errors"
 	"fmt"
 	"strconv"
 	"time"
@@ -102,7 +103,7 @@ func (r *Repository) MarkPayrollPaid(ctx context.Context, ownerID, payrollID int
 	}
 
 	if affected == 0 {
-		return fmt.Errorf("payroll record not found or already paid")
+		return errors.New("payroll record not found or already paid")
 	}
 
 	return nil

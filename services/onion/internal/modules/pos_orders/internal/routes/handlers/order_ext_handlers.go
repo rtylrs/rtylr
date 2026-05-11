@@ -86,15 +86,17 @@ func (h *SplitOrderHandler) Serve(ctx context.Context, req *SplitOrderRequest) (
 
 // ---- Apply Discount ----
 
-func DiscountOrderRoutes() []string { return []string{"/pos/orders/discount", "/pos/orders/{id}/discount"} }
+func DiscountOrderRoutes() []string {
+	return []string{"/pos/orders/discount", "/pos/orders/{id}/discount"}
+}
 
 type DiscountOrderHandler struct{ Service *application.Service }
 
 type DiscountOrderRequest struct {
-	OrderID        int64   `json:"order_id"`
-	DiscountType   string  `json:"discount_type"`
-	DiscountValue  float64 `json:"discount_value"`
-	Reason         string  `json:"reason"`
+	OrderID       int64   `json:"order_id"`
+	DiscountType  string  `json:"discount_type"`
+	DiscountValue float64 `json:"discount_value"`
+	Reason        string  `json:"reason"`
 }
 
 type DiscountOrderResponse struct {
@@ -221,6 +223,149 @@ func (h *HoldOrderHandler) Serve(ctx context.Context, req *HoldOrderRequest) (Ho
 		return HoldOrderResponse{}, &errorModels.ServerError{HTTPCode: http.StatusInternalServerError, Code: http.StatusInternalServerError, Message: "Failed to hold order"}
 	}
 	return HoldOrderResponse{Message: "Order held successfully"}, nil
+}
+
+// ---- Send to Kitchen ----
+
+func SendToKitchenRoutes() []string {
+	return []string{"/pos/orders/send-to-kitchen", "/pos/orders/{id}/send-to-kitchen"}
+}
+
+type SendToKitchenHandler struct{ Service *application.Service }
+
+type SendToKitchenRequest struct {
+	OrderID int64 `json:"order_id"`
+}
+
+type SendToKitchenResponse struct {
+	Success bool `json:"success"`
+}
+
+func (h *SendToKitchenHandler) Validate(ctx context.Context, req *SendToKitchenRequest) *errorModels.ServerError {
+	if req.OrderID == 0 && chi.URLParamFromCtx(ctx, "id") == "" {
+		return &errorModels.ServerError{HTTPCode: http.StatusBadRequest, Code: http.StatusBadRequest, Message: "Order ID is required"}
+	}
+	return nil
+}
+
+func (h *SendToKitchenHandler) Serve(ctx context.Context, req *SendToKitchenRequest) (SendToKitchenResponse, *errorModels.ServerError) {
+	device := authPkg.DeviceCtx(ctx)
+	if device.User == nil {
+		return SendToKitchenResponse{}, errorModels.PermissionDeniedServerError()
+	}
+
+	orderID, sErr := resolveOrderID(ctx, req.OrderID)
+	if sErr != nil {
+		return SendToKitchenResponse{}, sErr
+	}
+
+	if err := h.Service.SendToKitchen(ctx, device.User.UserID, orderID); err != nil {
+		if errors.Is(err, domain.ErrOrderNotFound) {
+			return SendToKitchenResponse{}, &errorModels.ServerError{HTTPCode: http.StatusNotFound, Code: http.StatusNotFound, Message: "Order not found"}
+		}
+		return SendToKitchenResponse{}, &errorModels.ServerError{HTTPCode: http.StatusUnprocessableEntity, Code: http.StatusUnprocessableEntity, Message: err.Error()}
+	}
+	return SendToKitchenResponse{Success: true}, nil
+}
+
+// ---- Void Order Item ----
+
+func VoidOrderItemRoutes() []string {
+	return []string{"/pos/orders/{id}/items/{itemId}"}
+}
+
+type VoidOrderItemHandler struct{ Service *application.Service }
+
+type VoidOrderItemRequest struct{}
+
+type VoidOrderItemResponse struct {
+	Success bool `json:"success"`
+}
+
+func (h *VoidOrderItemHandler) Validate(ctx context.Context, _ *VoidOrderItemRequest) *errorModels.ServerError {
+	if chi.URLParamFromCtx(ctx, "id") == "" {
+		return &errorModels.ServerError{HTTPCode: http.StatusBadRequest, Code: http.StatusBadRequest, Message: "Order ID is required"}
+	}
+	if chi.URLParamFromCtx(ctx, "itemId") == "" {
+		return &errorModels.ServerError{HTTPCode: http.StatusBadRequest, Code: http.StatusBadRequest, Message: "Item ID is required"}
+	}
+	return nil
+}
+
+func (h *VoidOrderItemHandler) Serve(ctx context.Context, _ *VoidOrderItemRequest) (VoidOrderItemResponse, *errorModels.ServerError) {
+	device := authPkg.DeviceCtx(ctx)
+	if device.User == nil {
+		return VoidOrderItemResponse{}, errorModels.PermissionDeniedServerError()
+	}
+
+	orderID, sErr := resolveOrderID(ctx, 0)
+	if sErr != nil {
+		return VoidOrderItemResponse{}, sErr
+	}
+
+	rawItemID := chi.URLParamFromCtx(ctx, "itemId")
+	itemID, err := strconv.ParseInt(rawItemID, 10, 64)
+	if err != nil || itemID <= 0 {
+		return VoidOrderItemResponse{}, &errorModels.ServerError{HTTPCode: http.StatusBadRequest, Code: http.StatusBadRequest, Message: "Invalid item id"}
+	}
+
+	if err := h.Service.VoidOrderItem(ctx, device.User.UserID, orderID, itemID); err != nil {
+		if errors.Is(err, domain.ErrOrderNotFound) {
+			return VoidOrderItemResponse{}, &errorModels.ServerError{HTTPCode: http.StatusNotFound, Code: http.StatusNotFound, Message: "Order item not found"}
+		}
+		return VoidOrderItemResponse{}, &errorModels.ServerError{HTTPCode: http.StatusInternalServerError, Code: http.StatusInternalServerError, Message: "Failed to void order item"}
+	}
+	return VoidOrderItemResponse{Success: true}, nil
+}
+
+// ---- Transfer Table ----
+
+func TransferTableRoutes() []string {
+	return []string{"/pos/orders/transfer-table", "/pos/orders/{id}/transfer-table"}
+}
+
+type TransferTableHandler struct{ Service *application.Service }
+
+type TransferTableRequest struct {
+	OrderID    int64 `json:"order_id"`
+	NewTableID int64 `json:"new_table_id"`
+}
+
+type TransferTableResponse struct {
+	Success bool `json:"success"`
+}
+
+func (h *TransferTableHandler) Validate(ctx context.Context, req *TransferTableRequest) *errorModels.ServerError {
+	if req.OrderID == 0 && chi.URLParamFromCtx(ctx, "id") == "" {
+		return &errorModels.ServerError{HTTPCode: http.StatusBadRequest, Code: http.StatusBadRequest, Message: "Order ID is required"}
+	}
+	if req.NewTableID <= 0 {
+		return &errorModels.ServerError{HTTPCode: http.StatusBadRequest, Code: http.StatusBadRequest, Message: "New table ID is required"}
+	}
+	return nil
+}
+
+func (h *TransferTableHandler) Serve(ctx context.Context, req *TransferTableRequest) (TransferTableResponse, *errorModels.ServerError) {
+	device := authPkg.DeviceCtx(ctx)
+	if device.User == nil {
+		return TransferTableResponse{}, errorModels.PermissionDeniedServerError()
+	}
+
+	orderID, sErr := resolveOrderID(ctx, req.OrderID)
+	if sErr != nil {
+		return TransferTableResponse{}, sErr
+	}
+
+	if err := h.Service.TransferTable(ctx, device.User.UserID, orderID, req.NewTableID); err != nil {
+		if errors.Is(err, domain.ErrOrderNotFound) {
+			return TransferTableResponse{}, &errorModels.ServerError{HTTPCode: http.StatusNotFound, Code: http.StatusNotFound, Message: "Order not found"}
+		}
+		if errors.Is(err, domain.ErrOrderCannotBeTransferred) {
+			return TransferTableResponse{}, &errorModels.ServerError{HTTPCode: http.StatusUnprocessableEntity, Code: http.StatusUnprocessableEntity, Message: err.Error()}
+		}
+		return TransferTableResponse{}, &errorModels.ServerError{HTTPCode: http.StatusInternalServerError, Code: http.StatusInternalServerError, Message: "Failed to transfer table"}
+	}
+	return TransferTableResponse{Success: true}, nil
 }
 
 // ---- List Held Orders ----

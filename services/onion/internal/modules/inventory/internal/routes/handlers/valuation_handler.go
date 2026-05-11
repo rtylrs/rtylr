@@ -4,12 +4,11 @@ import (
 	"context"
 	"net/http"
 
-	erpv1 "github.com/voxire/voxie/gen/go/erp/v1"
-
 	"github.com/voxire/onion/internal/modules/inventory/internal/application"
 	"github.com/voxire/onion/internal/modules/inventory/internal/domain"
 	authPkg "github.com/voxire/onion/internal/platform/auth"
 	errorModels "github.com/voxire/onion/internal/platform/errors"
+	erpv1 "github.com/voxire/voxie/gen/go/erp/v1"
 )
 
 func ValuationRoutes() []string {

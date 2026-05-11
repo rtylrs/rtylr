@@ -173,7 +173,11 @@ func (s *Service) TransferProjectOwnership(ctx context.Context, input domain.Tra
 	return s.repo.TransferProjectOwnership(ctx, input)
 }
 
-func (s *Service) InviteProjectMemberByEmail(ctx context.Context, projectID int64, email string, role string, addedBy int64) (bool, error) {
+func (s *Service) MoveProject(ctx context.Context, input domain.MoveProjectInput) error {
+	return s.repo.MoveProject(ctx, input)
+}
+
+func (s *Service) InviteProjectMemberByEmail(ctx context.Context, projectID int64, email, role string, addedBy int64) (bool, error) {
 	userID, found, err := s.repo.LookupUserByEmail(ctx, email)
 	if err != nil {
 		return false, err
@@ -287,8 +291,8 @@ func (s *Service) UpdateTask(ctx context.Context, input domain.UpdateTaskInput, 
 
 	if existingAssignee != newAssignee {
 		if actErr := s.repo.LogActivity(ctx, input.ID, userID, "assignee_changed",
-			fmt.Sprintf("%d", existingAssignee),
-			fmt.Sprintf("%d", newAssignee),
+			strconv.FormatInt(existingAssignee, 10),
+			strconv.FormatInt(newAssignee, 10),
 		); actErr != nil {
 			logger.Ctx(ctx).Error("UpdateTask: failed to log assignee activity", logger.Error(actErr))
 		}
@@ -687,8 +691,10 @@ func (s *Service) CreateColumn(ctx context.Context, input domain.ProjectColumnIn
 			return c, nil
 		}
 	}
-	return domain.ProjectColumn{ID: id, ProjectID: input.ProjectID, WorkspaceID: input.WorkspaceID,
-		Name: input.Name, Color: input.Color, SortOrder: input.SortOrder}, nil
+	return domain.ProjectColumn{
+		ID: id, ProjectID: input.ProjectID, WorkspaceID: input.WorkspaceID,
+		Name: input.Name, Color: input.Color, SortOrder: input.SortOrder,
+	}, nil
 }
 
 func (s *Service) UpdateColumn(ctx context.Context, input domain.UpdateProjectColumnInput) error {
@@ -760,38 +766,4 @@ func (s *Service) EnsureInboxProject(
 
 func (s *Service) SeedDefaultColumns(ctx context.Context, projectID, workspaceID, createdBy int64) error {
 	return s.repo.SeedDefaultColumns(ctx, projectID, workspaceID, createdBy)
-}
-
-// ─────────────────────────────────────────────
-// Businesses
-// ─────────────────────────────────────────────
-
-func (s *Service) ListBusinesses(ctx context.Context, ownerID int64) ([]domain.Business, error) {
-	return s.repo.ListBusinesses(ctx, ownerID)
-}
-
-func (s *Service) CreateBusiness(ctx context.Context, input domain.BusinessInput) (domain.Business, error) {
-	id, err := s.repo.CreateBusiness(ctx, input)
-	if err != nil {
-		return domain.Business{}, err
-	}
-	return domain.Business{
-		ID:      id,
-		OwnerID: input.OwnerID,
-		Name:    input.Name,
-		Color:   input.Color,
-		Icon:    input.Icon,
-	}, nil
-}
-
-func (s *Service) UpdateBusiness(ctx context.Context, id int64, name, color, icon string) error {
-	return s.repo.UpdateBusiness(ctx, id, name, color, icon)
-}
-
-func (s *Service) DeleteBusiness(ctx context.Context, id int64, ownerID int64) error {
-	return s.repo.DeleteBusiness(ctx, id, ownerID)
-}
-
-func (s *Service) SetWorkspaceBusiness(ctx context.Context, workspaceID int64, businessID *int64) error {
-	return s.repo.SetWorkspaceBusiness(ctx, workspaceID, businessID)
 }

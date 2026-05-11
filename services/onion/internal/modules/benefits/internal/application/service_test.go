@@ -19,6 +19,7 @@ type mockRepo struct {
 func (m *mockRepo) List(_ context.Context, _ int64) ([]domain.BenefitPlan, error) {
 	return m.listResult, m.listErr
 }
+
 func (m *mockRepo) Create(_ context.Context, _ int64, input domain.BenefitPlanInput) (int64, error) {
 	m.createGot = input
 	return m.createID, m.createErr

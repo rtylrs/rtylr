@@ -3,6 +3,7 @@ package infrastructure
 import (
 	"context"
 	"database/sql"
+	"errors"
 	"fmt"
 	"strconv"
 
@@ -28,7 +29,7 @@ func NewRepository(_ context.Context) *Repository {
 func (r *Repository) GetConfig(ctx context.Context, businessID int64) (domain.LoyaltyConfig, error) {
 	row, err := r.queries.GetLoyaltyConfig(ctx, businessID)
 	if err != nil {
-		if err == sql.ErrNoRows {
+		if errors.Is(err, sql.ErrNoRows) {
 			return domain.LoyaltyConfig{}, domain.ErrConfigNotFound
 		}
 		logger.Ctx(ctx).Error("Failed to get loyalty config", logger.Error(err))
@@ -40,7 +41,7 @@ func (r *Repository) GetConfig(ctx context.Context, businessID int64) (domain.Lo
 		IsEnabled:       row.IsEnabled.Bool,
 		PointsPerDollar: decimalToFloat(row.PointsPerDollar.String),
 		RedemptionRate:  decimalToFloat(row.RedemptionRate.String),
-		MinRedeemPoints: int32(row.MinRedeemPoints.Int32),
+		MinRedeemPoints: row.MinRedeemPoints.Int32,
 		CreatedAt:       row.CreatedAt.Time,
 		UpdatedAt:       row.UpdatedAt.Time,
 	}, nil

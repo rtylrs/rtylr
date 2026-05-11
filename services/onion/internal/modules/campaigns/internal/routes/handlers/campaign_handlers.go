@@ -8,11 +8,10 @@ import (
 	"time"
 
 	"github.com/go-chi/chi/v5"
-	authPkg "github.com/voxire/onion/internal/platform/auth"
-	errorModels "github.com/voxire/onion/internal/platform/errors"
-
 	"github.com/voxire/onion/internal/modules/campaigns/internal/application"
 	"github.com/voxire/onion/internal/modules/campaigns/internal/domain"
+	authPkg "github.com/voxire/onion/internal/platform/auth"
+	errorModels "github.com/voxire/onion/internal/platform/errors"
 )
 
 type CampaignPayload struct {
@@ -62,11 +61,13 @@ func newCampaignPayload(c domain.Campaign) CampaignPayload {
 
 func CampaignListRoutes() []string { return []string{"/crm/campaigns"} }
 
-type ListCampaignsHandler struct{ Service *application.Service }
-type ListCampaignsRequest struct{}
-type ListCampaignsResponse struct {
-	Campaigns []CampaignPayload `json:"campaigns"`
-}
+type (
+	ListCampaignsHandler  struct{ Service *application.Service }
+	ListCampaignsRequest  struct{}
+	ListCampaignsResponse struct {
+		Campaigns []CampaignPayload `json:"campaigns"`
+	}
+)
 
 func (h *ListCampaignsHandler) Serve(ctx context.Context, _ *ListCampaignsRequest) (ListCampaignsResponse, *errorModels.ServerError) {
 	device := authPkg.DeviceCtx(ctx)
@@ -88,11 +89,13 @@ func (h *ListCampaignsHandler) Serve(ctx context.Context, _ *ListCampaignsReques
 
 func CampaignGetRoutes() []string { return []string{"/crm/campaigns/{id}"} }
 
-type GetCampaignHandler struct{ Service *application.Service }
-type GetCampaignRequest struct{}
-type GetCampaignResponse struct {
-	Campaign CampaignPayload `json:"campaign"`
-}
+type (
+	GetCampaignHandler  struct{ Service *application.Service }
+	GetCampaignRequest  struct{}
+	GetCampaignResponse struct {
+		Campaign CampaignPayload `json:"campaign"`
+	}
+)
 
 func (h *GetCampaignHandler) Serve(ctx context.Context, _ *GetCampaignRequest) (GetCampaignResponse, *errorModels.ServerError) {
 	device := authPkg.DeviceCtx(ctx)

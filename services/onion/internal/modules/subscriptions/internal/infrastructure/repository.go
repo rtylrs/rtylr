@@ -35,7 +35,8 @@ const planSelectCols = `id, name, slug, apps, price_per_seat_cents,
 // Reused by all three GetPlan* entrypoints.
 func scanPlan(scanner interface {
 	Scan(dest ...any) error
-}) (domain.Plan, error) {
+},
+) (domain.Plan, error) {
 	var p domain.Plan
 	var appsJSON, featuresJSON string
 	var maxSeats, maxLocations sql.NullInt64
@@ -138,7 +139,7 @@ func (r *Repository) GetSubscription(ctx context.Context, ownerID int64) (*domai
 		&sub.Status, &sub.SeatCount, &trialEndsAt, &nextBillingDate,
 		&periodEndsAt, &paddleSubID, &paddleCustID, &sub.CreatedAt)
 	if err != nil {
-		if err == sql.ErrNoRows {
+		if errors.Is(err, sql.ErrNoRows) {
 			return nil, domain.ErrSubscriptionNotFound
 		}
 		return nil, err
@@ -191,7 +192,7 @@ func (r *Repository) GetOwnerApps(ctx context.Context, ownerID int64) ([]string,
 		`SELECT p.apps FROM subscriptions s JOIN plans p ON p.id = s.plan_id WHERE s.owner_id = ?`,
 		ownerID).Scan(&appsJSON)
 	if err != nil {
-		if err == sql.ErrNoRows {
+		if errors.Is(err, sql.ErrNoRows) {
 			return nil, domain.ErrSubscriptionNotFound
 		}
 		return nil, err
@@ -227,7 +228,7 @@ func (r *Repository) GetActivePeriod(ctx context.Context, subscriptionID int64) 
 		&sp.ID, &sp.SubscriptionID, &sp.OwnerID, &sp.SeatCount, &sp.PricePerSeatCents,
 		&sp.PeriodStart, &periodEnd, &sp.BillingMonth)
 	if err != nil {
-		if err == sql.ErrNoRows {
+		if errors.Is(err, sql.ErrNoRows) {
 			return nil, nil
 		}
 		return nil, err

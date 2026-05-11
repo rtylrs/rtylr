@@ -10,10 +10,10 @@ import (
 
 // ChurnWindowPayload is the JSON shape for a single rolling window.
 type ChurnWindowPayload struct {
-	WindowDays  int32   `json:"window_days"`
-	ChurnedCount int64  `json:"churned_count"`
-	ActiveCount  int64  `json:"active_count"`
-	ChurnPct    float64 `json:"churn_pct"`
+	WindowDays   int32   `json:"window_days"`
+	ChurnedCount int64   `json:"churned_count"`
+	ActiveCount  int64   `json:"active_count"`
+	ChurnPct     float64 `json:"churn_pct"`
 }
 
 // GetChurnRates returns all four standard windows (30/60/90/180d).

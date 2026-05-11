@@ -23,12 +23,15 @@ type mockRepo struct {
 func (m *mockRepo) List(_ context.Context, _ int64) ([]domain.RecurringInvoice, error) {
 	return m.list, nil
 }
+
 func (m *mockRepo) Create(_ context.Context, _ int64, _ domain.RecurringInvoiceInput) (int64, error) {
 	return m.createID, m.createErr
 }
+
 func (m *mockRepo) Update(_ context.Context, _, _ int64, _ domain.RecurringInvoiceInput) error {
 	return m.updErr
 }
+
 func (m *mockRepo) SetActive(_ context.Context, owner, id int64, active bool) error {
 	m.setGot.owner = owner
 	m.setGot.id = id

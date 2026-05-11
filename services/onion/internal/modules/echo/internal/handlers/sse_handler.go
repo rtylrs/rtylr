@@ -10,12 +10,14 @@ import (
 	"strings"
 	"time"
 
+	"github.com/voxire/onion/internal/modules/echo/internal/application"
+	"github.com/voxire/onion/internal/modules/memory"
 	errorModels "github.com/voxire/onion/internal/platform/errors"
 	"github.com/voxire/onion/internal/platform/logger"
 	"github.com/voxire/onion/internal/platform/snips"
-	"github.com/voxire/onion/internal/modules/echo/internal/application"
-	"github.com/voxire/onion/internal/modules/memory"
 )
+
+const caretSystemPreamble = "You are Caret, an AI business assistant for rtylr."
 
 var ErrInvalidRequestBody = errors.New("invalid request body")
 
@@ -31,9 +33,10 @@ type GenerateTextStreamHandler struct {
 }
 
 type GenerateTextStreamRequest struct {
-	Prompt    string `json:"prompt"`
-	SessionID string `json:"sessionId"`
-	UserID    int64  `json:"userId"`
+	Prompt        string `json:"prompt"`
+	SessionID     string `json:"sessionId"`
+	UserID        int64  `json:"userId"`
+	SystemContext string `json:"system_context"` // optional — app context injected as system message
 }
 
 type GenerateTextStreamResponse struct {
@@ -201,8 +204,22 @@ func (h *GenerateTextStreamHandler) buildEnhancedPromptWithContext(ctx context.C
 		logger.String("session_id", req.SessionID),
 		logger.Int("user_id", int(req.UserID)))
 
-	prompt := h.MemoryService.BuildEnhancedPrompt(ctx, req.SessionID, int(req.UserID), req.Prompt)
-	return prompt, nil
+	enhancedPrompt := h.MemoryService.BuildEnhancedPrompt(ctx, req.SessionID, int(req.UserID), req.Prompt)
+
+	if req.SystemContext == "" {
+		return enhancedPrompt, nil
+	}
+
+	var sb strings.Builder
+	sb.WriteString(caretSystemPreamble)
+	sb.WriteString(" Today is ")
+	sb.WriteString(time.Now().Format("2006-01-02"))
+	sb.WriteString(".\nCurrent application context:\n")
+	sb.WriteString(req.SystemContext)
+	sb.WriteString("\n\n---\n\n")
+	sb.WriteString(enhancedPrompt)
+
+	return sb.String(), nil
 }
 
 func (h *GenerateTextStreamHandler) setupSSEHeaders(w http.ResponseWriter) {
@@ -227,7 +244,7 @@ func (h *GenerateTextStreamHandler) monitorClientDisconnect(r *http.Request) cha
 
 func (h *GenerateTextStreamHandler) writeErrorResponse(w http.ResponseWriter, errorMsg string) {
 	if _, writeErr := fmt.Fprintf(w, "event: error\ndata: %s\n\n", jsonEscape(errorMsg)); writeErr != nil {
-		fmt.Printf("Failed to write error to response: %v\n", writeErr)
+		logger.Global().Error("Failed to write error to SSE response", logger.Error(writeErr))
 	}
 
 	if flusher, ok := w.(http.Flusher); ok {
@@ -281,7 +298,7 @@ func (h *GenerateTextStreamHandler) processAndStreamToken(w http.ResponseWriter,
 	}
 
 	if _, err := fmt.Fprintf(w, "data: %s\n\n", data); err != nil {
-		fmt.Printf("Failed to write data to response: %v\n", err)
+		logger.Global().Error("Failed to write SSE data to response", logger.Error(err))
 
 		return err
 	}
@@ -297,26 +314,24 @@ func (h *GenerateTextStreamHandler) processAndStreamToken(w http.ResponseWriter,
 	return nil
 }
 
-// buildEnhancedPromptWithContext now delegates to the memory module so the
-// prompt-assembly rules live next to the data they read. The
-// conversationContext argument is retained as a no-op so the existing call
-// site signature does not change.
-func (h *GenerateTextStreamHandler) buildEnhancedPrompt(userPrompt string, _ interface{}) string {
-	return "Current request: " + userPrompt
-}
-
 func (h *GenerateTextStreamHandler) storeAIResponse(ctx context.Context, sessionID string, userID int, response string) {
 	_, err := h.MemoryService.GetService().StoreMessage(ctx, sessionID, userID, "assistant", response, len(response)/4)
 	if err != nil {
-		fmt.Printf("Failed to store AI response: %v\n", err)
+		logger.Ctx(ctx).Error("Failed to store AI response",
+			logger.Error(err),
+			logger.String("session_id", sessionID),
+			logger.Int("user_id", userID))
 	}
 
 	go func() {
 		timeoutCtx, cancel := context.WithTimeout(ctx, 30*time.Second)
 		defer cancel()
 
-		if err := h.MemoryService.GetService().SummarizeSession(timeoutCtx, sessionID, userID); err != nil {
-			fmt.Printf("Failed to summarize session: %v\n", err)
+		if summarizeErr := h.MemoryService.GetService().SummarizeSession(timeoutCtx, sessionID, userID); summarizeErr != nil {
+			logger.Ctx(ctx).Warn("Failed to summarize session",
+				logger.Error(summarizeErr),
+				logger.String("session_id", sessionID),
+				logger.Int("user_id", userID))
 		}
 	}()
 }

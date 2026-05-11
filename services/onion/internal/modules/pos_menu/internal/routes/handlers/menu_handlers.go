@@ -4,12 +4,11 @@ import (
 	"context"
 	"net/http"
 
-	posv1 "github.com/voxire/voxie/gen/go/pos/v1"
-
 	"github.com/voxire/onion/internal/modules/pos_menu/internal/application"
 	"github.com/voxire/onion/internal/modules/pos_menu/internal/domain"
 	authPkg "github.com/voxire/onion/internal/platform/auth"
 	errorModels "github.com/voxire/onion/internal/platform/errors"
+	posv1 "github.com/voxire/voxie/gen/go/pos/v1"
 )
 
 func toProtoMenuItem(item domain.MenuItem) *posv1.MenuItem {
@@ -30,11 +29,13 @@ func toProtoMenuItem(item domain.MenuItem) *posv1.MenuItem {
 
 func ListMenuItemsRoutes() []string { return []string{"/pos/menu/items", "/pos/menu-items"} }
 
-type ListMenuItemsHandler struct{ Service *application.Service }
-type ListMenuItemsRequest struct{}
-type ListMenuItemsResponse struct {
-	Items []*posv1.MenuItem `json:"items"`
-}
+type (
+	ListMenuItemsHandler  struct{ Service *application.Service }
+	ListMenuItemsRequest  struct{}
+	ListMenuItemsResponse struct {
+		Items []*posv1.MenuItem `json:"items"`
+	}
+)
 
 func (h *ListMenuItemsHandler) Serve(ctx context.Context, _ *ListMenuItemsRequest) (ListMenuItemsResponse, *errorModels.ServerError) {
 	device := authPkg.DeviceCtx(ctx)

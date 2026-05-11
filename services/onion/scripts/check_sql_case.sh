@@ -25,8 +25,9 @@ SQL_KEYWORDS=(
 
 echo -e "${BLUE}🔍 Checking SQL keyword case in SQLC query files...${NC}"
 
-# Find all SQL files
-SQL_FILES=$(find . -name "*.sql" -type f -not -path "./.git/*" -not -path "./tmp/*" -not -path "./bin/*")
+# Find tracked SQL files only. Untracked agent worktrees and local scratch
+# directories can contain stale copies that should not affect repo builds.
+SQL_FILES=$(git ls-files '*.sql')
 
 found_issues=false
 
@@ -39,10 +40,10 @@ for file in $SQL_FILES; do
         # Convert keyword to lowercase for search
         lowercase_keyword=$(echo "$keyword" | tr '[:upper:]' '[:lower:]')
         
-        # Search for non-uppercase versions of the keyword, but exclude comments
-        # First, remove single-line comments (-- comment)
-        # Then, remove multi-line comments (/* comment */)
-        processed_content=$(sed 's/--.*$//' "$file" | sed '/\/\*/,/\*\//d')
+        # Search for non-uppercase versions of the keyword, but exclude comments,
+        # string literals, and quoted identifiers. Seed data and enum values often
+        # contain ordinary words like "and", "in", or "drop" that are not SQL.
+        processed_content=$(perl -0777 -pe 's/--[^\n]*//g; s{/\*.*?\*/}{}gs; s/'\''(?:'\'''\''|[^'\''])*'\''//g; s/"(?:""|[^"])*"//g; s/`(?:``|[^`])*`//g' "$file")
         
         # Check for lowercase version
         if echo "$processed_content" | grep -q "\b${lowercase_keyword}\b"; then

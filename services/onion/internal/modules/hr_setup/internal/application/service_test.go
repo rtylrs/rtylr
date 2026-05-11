@@ -21,12 +21,15 @@ type mockRepo struct {
 func (m *mockRepo) GetSetupSteps(_ context.Context, _ int64) ([]*domain.SetupStep, error) {
 	return m.steps, m.stepsErr
 }
+
 func (m *mockRepo) UpsertSetupStep(_ context.Context, _ int64, _ string, _ time.Time) error {
 	return m.upStepEr
 }
+
 func (m *mockRepo) GetHRConfig(_ context.Context, _ int64) (*domain.HRConfig, error) {
 	return m.cfg, m.cfgErr
 }
+
 func (m *mockRepo) UpsertHRConfig(_ context.Context, _ int64, _ *time.Time) (*domain.HRConfig, error) {
 	return m.cfg, m.upCfgErr
 }

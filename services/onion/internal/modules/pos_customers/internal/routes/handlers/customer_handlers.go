@@ -4,11 +4,10 @@ import (
 	"context"
 	"net/http"
 
-	authPkg "github.com/voxire/onion/internal/platform/auth"
-	errorModels "github.com/voxire/onion/internal/platform/errors"
-
 	"github.com/voxire/onion/internal/modules/pos_customers/internal/application"
 	"github.com/voxire/onion/internal/modules/pos_customers/internal/domain"
+	authPkg "github.com/voxire/onion/internal/platform/auth"
+	errorModels "github.com/voxire/onion/internal/platform/errors"
 )
 
 func SearchCustomersRoutes() []string { return []string{"/pos/customers"} }

@@ -6,21 +6,23 @@ import (
 	"strconv"
 
 	"github.com/go-chi/chi/v5"
-	authPkg "github.com/voxire/onion/internal/platform/auth"
-	errorModels "github.com/voxire/onion/internal/platform/errors"
-
 	"github.com/voxire/onion/internal/modules/pos_kds/internal/application"
 	"github.com/voxire/onion/internal/modules/pos_kds/internal/domain"
+	authPkg "github.com/voxire/onion/internal/platform/auth"
+	errorModels "github.com/voxire/onion/internal/platform/errors"
 )
 
 // --- List Active Orders for Kitchen ---
 
 func ListKDSOrdersRoutes() []string { return []string{"/pos/kds", "/pos/kds/orders"} }
 
-type ListKDSOrdersHandler struct{ Service *application.Service }
-type ListKDSOrdersRequest struct {
-	Station string `json:"station" schema:"station"`
-}
+type (
+	ListKDSOrdersHandler struct{ Service *application.Service }
+	ListKDSOrdersRequest struct {
+		Station string `json:"station" schema:"station"`
+	}
+)
+
 type ListKDSOrdersResponse struct {
 	Orders []domain.KDSOrder `json:"orders"`
 }
@@ -116,6 +118,7 @@ func (h *UpdateKDSItemHandler) Serve(ctx context.Context, req *UpdateKDSItemRequ
 	}
 
 	if updateErr := h.Service.UpdateItemStatus(ctx, domain.UpdateItemStatusInput{
+		OwnerID: device.User.UserID,
 		OrderID: orderID,
 		ItemID:  itemID,
 		Status:  req.Status,

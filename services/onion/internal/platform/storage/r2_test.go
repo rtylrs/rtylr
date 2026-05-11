@@ -14,10 +14,10 @@ func resetDefaultStorageForTest() {
 	defaultOnce = sync.Once{}
 }
 
-func TestDefaultUsesLocalStackWhenEnabled(t *testing.T) {
-	t.Setenv("LOCAL_STACK_ENABLED", "true")
-	t.Setenv("LOCAL_STACK_ENDPOINT", "http://localhost:4566")
-	t.Setenv("LOCAL_STACK_BUCKET", "onion-dev")
+func TestDefaultUsesFlociWhenEnabled(t *testing.T) {
+	t.Setenv("FLOCI_ENABLED", "true")
+	t.Setenv("FLOCI_ENDPOINT", "http://localhost:4566")
+	t.Setenv("FLOCI_BUCKET", "onion-dev")
 	t.Setenv("R2_ACCOUNT_ID", "")
 	t.Setenv("R2_ACCESS_KEY_ID", "")
 	t.Setenv("R2_SECRET_ACCESS_KEY", "")
@@ -38,6 +38,6 @@ func TestDefaultUsesLocalStackWhenEnabled(t *testing.T) {
 		t.Fatalf("PresignUpload() returned error: %v", err)
 	}
 	if !strings.HasPrefix(url, "http://localhost:4566/onion-dev/resumes/test.pdf?") {
-		t.Fatalf("PresignUpload() URL = %q, want localstack path-style URL", url)
+		t.Fatalf("PresignUpload() URL = %q, want floci path-style URL", url)
 	}
 }

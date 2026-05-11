@@ -8,9 +8,9 @@ import (
 
 // BestSellerRow is one row in the top-N-by-units-sold ranking.
 type BestSellerRow struct {
-	ProductID        int64
-	Name             string
-	UnitsSold        float64
+	ProductID         int64
+	Name              string
+	UnitsSold         float64
 	RevenueMinorUnits int64
 }
 

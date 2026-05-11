@@ -11,7 +11,7 @@ func TestSlugify(t *testing.T) {
 		{"Mixed-CASE & symbols!!!", "mixed-case-symbols"},
 		{"---leading-trailing---", "leading-trailing"},
 		{"a   b   c", "a-b-c"},
-		{"Café", "caf"},  // diacritics stripped (non a-z0-9-)
+		{"Café", "caf"}, // diacritics stripped (non a-z0-9-)
 		{"", ""},
 	}
 	for _, tc := range cases {

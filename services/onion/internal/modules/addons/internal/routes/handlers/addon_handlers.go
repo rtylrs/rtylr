@@ -4,20 +4,21 @@ import (
 	"context"
 	"net/http"
 
-	hubv1 "github.com/voxire/voxie/gen/go/hub/v1"
-
 	"github.com/voxire/onion/internal/modules/addons/internal/application"
 	"github.com/voxire/onion/internal/modules/addons/internal/domain"
 	authPkg "github.com/voxire/onion/internal/platform/auth"
 	errorModels "github.com/voxire/onion/internal/platform/errors"
+	hubv1 "github.com/voxire/voxie/gen/go/hub/v1"
 )
 
 // ─── List addons for the current business ───────────────────────────────────
 
 func ListAddonsRoutes() []string { return []string{"/addons"} }
 
-type ListAddonsHandler struct{ Service *application.Service }
-type ListAddonsRequest struct{}
+type (
+	ListAddonsHandler struct{ Service *application.Service }
+	ListAddonsRequest struct{}
+)
 
 type ListAddonsResponse struct {
 	Addons []*hubv1.Addon `json:"addons"`
@@ -167,5 +168,5 @@ func (h *AddonStatusHandler) Serve(ctx context.Context, req *AddonStatusRequest)
 	return AddonStatusResponse{IsEnabled: enabled}, nil
 }
 
-// ─── Unused import guard ────────────────────────────────────────────────────
+// ─── Unused import guard ────────────────────────────────────────────────────.
 var _ domain.Addon

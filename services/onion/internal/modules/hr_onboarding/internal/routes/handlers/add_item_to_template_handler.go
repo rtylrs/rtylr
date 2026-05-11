@@ -2,16 +2,17 @@ package handlers
 
 import (
 	"context"
+	"errors"
 	"net/http"
 	"strconv"
 
 	"github.com/go-chi/chi/v5"
-	hrv1 "github.com/voxire/voxie/gen/go/hr/v1"
 	"github.com/voxire/onion/internal/modules/hr_onboarding/internal/application"
 	"github.com/voxire/onion/internal/modules/hr_onboarding/internal/domain"
 	authPkg "github.com/voxire/onion/internal/platform/auth"
 	errorModels "github.com/voxire/onion/internal/platform/errors"
 	"github.com/voxire/onion/internal/platform/logger"
+	hrv1 "github.com/voxire/voxie/gen/go/hr/v1"
 )
 
 func AddItemToTemplateRoutes() []string { return []string{"/hr/onboarding/templates/{id}/items"} }
@@ -57,7 +58,7 @@ func (h *AddItemToTemplateHandler) Serve(ctx context.Context, req *AddItemToTemp
 		RequiresAttachment: req.RequiresAttachment,
 	})
 	if err != nil {
-		if err == domain.ErrTemplateNotFound {
+		if errors.Is(err, domain.ErrTemplateNotFound) {
 			return AddItemToTemplateResponse{}, &errorModels.ServerError{HTTPCode: http.StatusNotFound, Code: http.StatusNotFound, Message: "Template not found"}
 		}
 		logger.Ctx(ctx).Error("failed to add item to onboarding template", logger.Any("owner_id", device.User.UserID), logger.Any("template_id", templateID), logger.Error(err))

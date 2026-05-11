@@ -4,10 +4,9 @@ import (
 	"context"
 	"net/http"
 
-	posv1 "github.com/voxire/voxie/gen/go/pos/v1"
-
 	"github.com/voxire/onion/internal/modules/pos_menu/internal/application"
 	errorModels "github.com/voxire/onion/internal/platform/errors"
+	posv1 "github.com/voxire/voxie/gen/go/pos/v1"
 )
 
 // Public read path for the customer-facing menu app. This endpoint

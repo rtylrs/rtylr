@@ -3,6 +3,7 @@ package infrastructure
 import (
 	"context"
 	"database/sql"
+	"errors"
 	"fmt"
 	"strconv"
 	"time"
@@ -31,7 +32,7 @@ func NewRepository(_ context.Context) *Repository {
 func (r *Repository) GetPayrollConfig(ctx context.Context, ownerID int64) (*domain.PayrollConfigRecord, error) {
 	row, err := r.queries.GetPayrollConfig(ctx, ownerID)
 	if err != nil {
-		if err == sql.ErrNoRows {
+		if errors.Is(err, sql.ErrNoRows) {
 			return nil, domain.ErrPayrollNotConfigured
 		}
 		logger.Ctx(ctx).Error("failed to get payroll config", logger.Any("owner_id", ownerID), logger.Error(err))
@@ -83,7 +84,7 @@ func (r *Repository) ListPayrollRuns(ctx context.Context, ownerID int64, params 
 func (r *Repository) GetPayrollRun(ctx context.Context, ownerID, runID int64) (*domain.PayrollRunRecord, error) {
 	row, err := r.queries.GetPayrollRun(ctx, sqlc.GetPayrollRunParams{OwnerID: ownerID, ID: runID})
 	if err != nil {
-		if err == sql.ErrNoRows {
+		if errors.Is(err, sql.ErrNoRows) {
 			return nil, domain.ErrPayrollRunNotFound
 		}
 		logger.Ctx(ctx).Error("failed to get payroll run", logger.Any("owner_id", ownerID), logger.Any("run_id", runID), logger.Error(err))
@@ -221,7 +222,7 @@ func (r *Repository) ListPayrollEntries(ctx context.Context, ownerID, runID int6
 	return entries, nil
 }
 
-// cross-schema read from hr_time — approved timesheet hours for payroll computation
+// cross-schema read from hr_time — approved timesheet hours for payroll computation.
 func (r *Repository) ListApprovedTimesheetSummaries(ctx context.Context, ownerID int64, periodStart, periodEnd string) ([]domain.TimesheetSummary, error) {
 	ps, err := time.Parse("2006-01-02", periodStart)
 	if err != nil {
@@ -252,7 +253,7 @@ func (r *Repository) ListApprovedTimesheetSummaries(ctx context.Context, ownerID
 	return summaries, nil
 }
 
-// cross-schema read from hr_overtime — approved overtime minutes with multipliers for payroll computation
+// cross-schema read from hr_overtime — approved overtime minutes with multipliers for payroll computation.
 func (r *Repository) ListApprovedOvertimeSummaries(ctx context.Context, ownerID int64, periodStart, periodEnd string) ([]domain.OvertimeSummary, error) {
 	ps, err := time.Parse("2006-01-02", periodStart)
 	if err != nil {
@@ -284,7 +285,7 @@ func (r *Repository) ListApprovedOvertimeSummaries(ctx context.Context, ownerID 
 	return summaries, nil
 }
 
-// cross-schema read from hr_core — employee contract type, rates, and schedule for payroll computation
+// cross-schema read from hr_core — employee contract type, rates, and schedule for payroll computation.
 func (r *Repository) ListEmployeePayInfo(ctx context.Context, ownerID int64) ([]domain.EmployeePayInfo, error) {
 	rows, err := r.queries.ListEmployeePayInfo(ctx, ownerID)
 	if err != nil {
@@ -312,11 +313,11 @@ func (r *Repository) ListEmployeePayInfo(ctx context.Context, ownerID int64) ([]
 	return employees, nil
 }
 
-// cross-schema read from hr_overtime — overtime rate multiplier configuration for payroll computation
+// cross-schema read from hr_overtime — overtime rate multiplier configuration for payroll computation.
 func (r *Repository) GetOvertimeConfig(ctx context.Context, ownerID int64) (float64, bool, error) {
 	row, err := r.queries.GetOvertimeConfigForPayroll(ctx, ownerID)
 	if err != nil {
-		if err == sql.ErrNoRows {
+		if errors.Is(err, sql.ErrNoRows) {
 			return 0, false, nil
 		}
 		return 0, false, err

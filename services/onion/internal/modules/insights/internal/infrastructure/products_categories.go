@@ -9,9 +9,9 @@ import (
 // CategorySalesRow is one category of ERP products with its MTD revenue
 // and units-sold totals rolled up from POS.
 type CategorySalesRow struct {
-	CategoryID       int64
-	CategoryName     string
-	UnitsSold        float64
+	CategoryID        int64
+	CategoryName      string
+	UnitsSold         float64
 	RevenueMinorUnits int64
 }
 

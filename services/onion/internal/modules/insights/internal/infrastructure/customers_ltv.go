@@ -9,10 +9,10 @@ import (
 // LTVBucketRow is a distribution bucket for the LTV histogram. Upper
 // bounds are exclusive except the final open-ended bucket (100k+).
 type LTVBucketRow struct {
-	Label             string
-	LowerMinorUnits   int64
-	UpperMinorUnits   int64 // 0 means "no upper bound"
-	CustomerCount     int64
+	Label           string
+	LowerMinorUnits int64
+	UpperMinorUnits int64 // 0 means "no upper bound"
+	CustomerCount   int64
 }
 
 // lifetime spend thresholds in minor units (cents, USD for now). These

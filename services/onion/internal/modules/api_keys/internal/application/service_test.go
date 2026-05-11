@@ -76,6 +76,7 @@ func (m *mockRepo) List(_ context.Context, ownerID int64) ([]domain.APIKey, erro
 	_ = ownerID
 	return m.listResult, m.listErr
 }
+
 func (m *mockRepo) Create(_ context.Context, ownerID int64, name, hash, prefix string, scopes []string) (int64, error) {
 	m.createGot.ownerID = ownerID
 	m.createGot.name = name
@@ -84,6 +85,7 @@ func (m *mockRepo) Create(_ context.Context, ownerID int64, name, hash, prefix s
 	m.createGot.scopes = scopes
 	return m.createID, m.createErr
 }
+
 func (m *mockRepo) Revoke(_ context.Context, ownerID, keyID int64) error {
 	m.revokeGot.ownerID = ownerID
 	m.revokeGot.keyID = keyID

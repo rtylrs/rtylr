@@ -1,8 +1,8 @@
 package handlers
 
 import (
-	hrv1 "github.com/voxire/voxie/gen/go/hr/v1"
 	"github.com/voxire/onion/internal/modules/hr_onboarding/internal/domain"
+	hrv1 "github.com/voxire/voxie/gen/go/hr/v1"
 )
 
 func templateToProto(t domain.ChecklistTemplateRecord) *hrv1.ChecklistTemplatePayload {

@@ -12,11 +12,11 @@ import (
 // TopCustomerPayload is one row in the top-customers response. Name is
 // already joined here so the frontend doesn't need to stitch first+last.
 type TopCustomerPayload struct {
-	CustomerID            int64  `json:"customer_id"`
-	Name                  string `json:"name"`
-	Email                 string `json:"email"`
-	LifetimeSpendMinorUnits int64 `json:"lifetime_spend_minor_units"`
-	OrderCount            int64  `json:"order_count"`
+	CustomerID              int64  `json:"customer_id"`
+	Name                    string `json:"name"`
+	Email                   string `json:"email"`
+	LifetimeSpendMinorUnits int64  `json:"lifetime_spend_minor_units"`
+	OrderCount              int64  `json:"order_count"`
 }
 
 // GetTopCustomers returns the leaderboard. Limit is capped at 100 upstream

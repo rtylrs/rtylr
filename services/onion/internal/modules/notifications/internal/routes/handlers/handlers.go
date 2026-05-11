@@ -4,20 +4,21 @@ import (
 	"context"
 	"net/http"
 
-	hubv1 "github.com/voxire/voxie/gen/go/hub/v1"
-
 	"github.com/voxire/onion/internal/modules/notifications/internal/application"
 	authPkg "github.com/voxire/onion/internal/platform/auth"
 	errorModels "github.com/voxire/onion/internal/platform/errors"
+	hubv1 "github.com/voxire/voxie/gen/go/hub/v1"
 )
 
-func NotificationRoutes() []string    { return []string{"/notifications"} }
-func ReadAllRoutes() []string         { return []string{"/notifications/read-all"} }
+func NotificationRoutes() []string { return []string{"/notifications"} }
+func ReadAllRoutes() []string      { return []string{"/notifications/read-all"} }
 
 // -- List --
 
-type ListHandler struct{ Service *application.Service }
-type ListRequest struct{}
+type (
+	ListHandler struct{ Service *application.Service }
+	ListRequest struct{}
+)
 
 type ListResponse struct {
 	Notifications []*hubv1.Notification `json:"notifications"`

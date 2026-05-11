@@ -5,10 +5,9 @@ import (
 	"encoding/json"
 	"net/http"
 
+	"github.com/voxire/onion/internal/modules/customers/internal/application"
 	authPkg "github.com/voxire/onion/internal/platform/auth"
 	errorModels "github.com/voxire/onion/internal/platform/errors"
-
-	"github.com/voxire/onion/internal/modules/customers/internal/application"
 )
 
 func CustomerTimelineRoutes() []string {

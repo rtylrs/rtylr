@@ -18,12 +18,15 @@ type mockRepo struct {
 func (m *mockRepo) ListWarehouses(_ context.Context, _ int64) ([]domain.Warehouse, error) {
 	return nil, nil
 }
+
 func (m *mockRepo) CreateWarehouse(_ context.Context, _ int64, _ domain.WarehouseInput) (int64, error) {
 	return m.createID, m.createErr
 }
+
 func (m *mockRepo) UpdateWarehouse(_ context.Context, _, _ int64, _ domain.WarehouseInput) error {
 	return m.updateErr
 }
+
 func (m *mockRepo) DeleteWarehouse(_ context.Context, _, _ int64) error {
 	return m.deleteErr
 }

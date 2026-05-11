@@ -2,6 +2,7 @@ package handlers
 
 import (
 	"context"
+	"errors"
 	"net/http"
 	"strconv"
 
@@ -49,7 +50,7 @@ func (h *ApproveEquipmentRequestHandler) Serve(ctx context.Context, req *Approve
 
 	err := h.Service.ApproveEquipmentRequest(ctx, device.User.UserID, requestID, device.User.UserID, req.Approve, req.Reason)
 	if err != nil {
-		if err == domain.ErrEquipmentRequestNotFound {
+		if errors.Is(err, domain.ErrEquipmentRequestNotFound) {
 			return ApproveEquipmentRequestResponse{}, &errorModels.ServerError{HTTPCode: http.StatusNotFound, Code: http.StatusNotFound, Message: "Equipment request not found"}
 		}
 		logger.Ctx(ctx).Error("failed to approve equipment request", logger.Any("owner_id", device.User.UserID), logger.Any("request_id", requestID), logger.Error(err))

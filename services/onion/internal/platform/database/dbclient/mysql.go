@@ -7,11 +7,12 @@ import (
 	"fmt"
 	"net/url"
 	"os"
+	"strconv"
 	"strings"
 	"sync"
 	"time"
 
-	_ "github.com/go-sql-driver/mysql"
+	_ "github.com/go-sql-driver/mysql" // register MySQL driver
 	"github.com/voxire/onion/internal/platform/logger"
 )
 
@@ -32,8 +33,31 @@ const (
 	DefaultDBUser     = "onion_user"
 	DefaultDBPassword = "onion_password"
 
-	DefaultConnMaxIdleTime = 30 * time.Minute
+	// Pool defaults — tuned for a production SaaS with ~1 000 users.
+	// MySQL's own max_connections is typically 100-300 on shared/small
+	// hosts. We stay well below that so other processes (migrations,
+	// monitoring, ad-hoc queries) always have headroom.
+	//
+	// Override via env vars:
+	//   DB_MAX_OPEN_CONNS   (default 25)
+	//   DB_MAX_IDLE_CONNS   (default 10)
+	//   DB_CONN_MAX_LIFETIME (default 30m, e.g. "30m", "1h")
+	//   DB_CONN_MAX_IDLE_TIME (default 10m)
+	DefaultMaxOpenConns    = 25
+	DefaultMaxIdleConns    = 10
+	DefaultConnMaxLifetime = 30 * time.Minute
+	DefaultConnMaxIdleTime = 10 * time.Minute
 	DefaultRetryInterval   = 2 * time.Second
+
+	// DSN-level timeouts — prevent a single slow query or dead socket
+	// from hanging a goroutine indefinitely.
+	// readTimeout / writeTimeout are the network I/O deadlines; any
+	// query that hasn't finished sending/receiving within this window
+	// gets a hard socket close. Keep in sync with the HTTP server's
+	// WriteTimeout and the request timeout middleware.
+	dsnConnectTimeout = "10s"
+	dsnReadTimeout    = "15s"
+	dsnWriteTimeout   = "15s"
 )
 
 func getClient() *MySQLClient {
@@ -84,19 +108,38 @@ func openDB(ctx context.Context, dsn string) (*sql.DB, error) {
 		return nil, err
 	}
 
-	db.SetMaxOpenConns(10)
-	db.SetMaxIdleConns(5)
-	db.SetConnMaxIdleTime(DefaultConnMaxIdleTime)
-	db.SetConnMaxLifetime(time.Hour)
+	maxOpen := intEnvOrDefault("DB_MAX_OPEN_CONNS", DefaultMaxOpenConns)
+	maxIdle := intEnvOrDefault("DB_MAX_IDLE_CONNS", DefaultMaxIdleConns)
+	lifetime := durationEnvOrDefault("DB_CONN_MAX_LIFETIME", DefaultConnMaxLifetime)
+	idleTime := durationEnvOrDefault("DB_CONN_MAX_IDLE_TIME", DefaultConnMaxIdleTime)
 
-	pingCtx, cancel := context.WithTimeout(ctx, 5*time.Second)
+	// Clamp idle to open — having more idle than open makes no sense
+	// and would cause sql/database to waste resources.
+	if maxIdle > maxOpen {
+		maxIdle = maxOpen
+	}
+
+	db.SetMaxOpenConns(maxOpen)
+	db.SetMaxIdleConns(maxIdle)
+	db.SetConnMaxLifetime(lifetime)
+	db.SetConnMaxIdleTime(idleTime)
+
+	pingCtx, cancel := context.WithTimeout(ctx, 10*time.Second)
 	defer cancel()
 
 	if err := db.PingContext(pingCtx); err != nil {
 		_ = db.Close()
-
 		return nil, err
 	}
+
+	stats := db.Stats()
+	logger.Ctx(ctx).Info("database pool configured",
+		logger.Int("max_open", maxOpen),
+		logger.Int("max_idle", maxIdle),
+		logger.String("conn_max_lifetime", lifetime.String()),
+		logger.String("conn_max_idle_time", idleTime.String()),
+		logger.Int("open_connections", stats.OpenConnections),
+	)
 
 	return db, nil
 }
@@ -116,12 +159,10 @@ func buildLocalDSN() string {
 	user := getEnvOrDefault("DB_USER", DefaultDBUser)
 	password := getEnvOrDefault("DB_PASSWORD", DefaultDBPassword)
 
-	return fmt.Sprintf("%s:%s@tcp(%s:%s)/%s?parseTime=true&loc=UTC&multiStatements=true&charset=utf8mb4&collation=utf8mb4_unicode_ci",
-		user,
-		password,
-		host,
-		port,
-		dbname,
+	return fmt.Sprintf(
+		"%s:%s@tcp(%s:%s)/%s?parseTime=true&loc=UTC&multiStatements=true&charset=utf8mb4&collation=utf8mb4_unicode_ci&timeout=%s&readTimeout=%s&writeTimeout=%s&interpolateParams=true",
+		user, password, host, port, dbname,
+		dsnConnectTimeout, dsnReadTimeout, dsnWriteTimeout,
 	)
 }
 
@@ -158,8 +199,44 @@ func normalizeDSN(dsn string) string {
 	if query.Get("collation") == "" {
 		query.Set("collation", "utf8mb4_unicode_ci")
 	}
+	if query.Get("timeout") == "" {
+		query.Set("timeout", dsnConnectTimeout)
+	}
+	if query.Get("readTimeout") == "" {
+		query.Set("readTimeout", dsnReadTimeout)
+	}
+	if query.Get("writeTimeout") == "" {
+		query.Set("writeTimeout", dsnWriteTimeout)
+	}
+	if query.Get("interpolateParams") == "" {
+		query.Set("interpolateParams", "true")
+	}
 
 	return fmt.Sprintf("%s:%s@tcp(%s)/%s?%s", user, password, host, dbname, query.Encode())
+}
+
+func intEnvOrDefault(key string, def int) int {
+	v := os.Getenv(key)
+	if v == "" {
+		return def
+	}
+	n, err := strconv.Atoi(v)
+	if err != nil || n <= 0 {
+		return def
+	}
+	return n
+}
+
+func durationEnvOrDefault(key string, def time.Duration) time.Duration {
+	v := os.Getenv(key)
+	if v == "" {
+		return def
+	}
+	d, err := time.ParseDuration(v)
+	if err != nil || d <= 0 {
+		return def
+	}
+	return d
 }
 
 func getEnvOrDefault(key, defaultValue string) string {

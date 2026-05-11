@@ -2,28 +2,36 @@ package routes
 
 import (
 	"context"
+	"time"
 
 	"github.com/go-chi/chi/v5"
-	http "github.com/voxire/onion/internal/platform/server/http"
 	"github.com/voxire/onion/internal/modules/echo/internal/application"
 	"github.com/voxire/onion/internal/modules/echo/internal/handlers"
 	"github.com/voxire/onion/internal/modules/memory"
+	serverHttp "github.com/voxire/onion/internal/platform/server/http"
 )
 
+// aiStreamRateLimit is 5 requests per minute per authenticated user.
+// The limiter is package-level so all paths returned by
+// GenerateTextStreamRoutes() share the same bucket state.
+var aiStreamRateLimit = serverHttp.AIUserRateLimit(5, time.Minute)
+
 func RegisterRoutes(ctx context.Context, r *chi.Mux, snipsService *application.Service, memoryService *memory.Module) {
-	http.RegisterGET[handlers.GetProviderStatusRequest, handlers.GetProviderStatusResponse](
+	serverHttp.RegisterGET[handlers.GetProviderStatusRequest, handlers.GetProviderStatusResponse](
 		ctx,
 		r,
 		handlers.ProviderStatusRoutes(),
 		&handlers.ProviderStatusHandler{SnipsService: snipsService},
 	)
 
-	// For SSE endpoints, we need to register them manually since they don't follow the standard request/response pattern
+	// SSE endpoints are registered manually — they stream tokens rather than
+	// following the standard request/response pattern used by RegisterPOST.
+	// A per-user rate limit (5 req/min) is applied to control AI generation cost.
 	for _, path := range handlers.GenerateTextStreamRoutes() {
 		streamHandler := &handlers.GenerateTextStreamHandler{
 			AiService:     snipsService,
 			MemoryService: memoryService,
 		}
-		r.Post(path, streamHandler.ServeHTTP)
+		r.With(aiStreamRateLimit).Post(path, streamHandler.ServeHTTP)
 	}
 }

@@ -9,7 +9,6 @@ import (
 	"time"
 
 	"github.com/google/uuid"
-
 	"github.com/voxire/onion/internal/modules/careers/internal/application"
 	"github.com/voxire/onion/internal/modules/careers/internal/domain"
 	errorModels "github.com/voxire/onion/internal/platform/errors"
@@ -24,7 +23,7 @@ func ApplyRoutes() []string { return []string{"/careers/apply"} }
 // applicant's CV as a file. The generic JSON wrapHandler can't parse
 // multipart, so this handler is registered directly on chi and manages
 // the full request/response cycle itself.
-func ApplyHandler(ctx interface{ Done() <-chan struct{} }, svc *application.Service) http.HandlerFunc {
+func ApplyHandler(_ interface{ Done() <-chan struct{} }, svc *application.Service) http.HandlerFunc {
 	return func(w http.ResponseWriter, r *http.Request) {
 		const maxUpload = 5 << 20 // 5 MB
 		if err := r.ParseMultipartForm(maxUpload); err != nil {
@@ -133,20 +132,13 @@ func ApplyHandler(ctx interface{ Done() <-chan struct{} }, svc *application.Serv
 	}
 }
 
-type applyErrorBody struct {
-	Error  applyErrorDetail `json:"error"`
-	Status string           `json:"status"`
-}
-type applyErrorDetail struct {
-	Code    int    `json:"code"`
-	Message string `json:"message"`
-}
-
 func writeApplyError(w http.ResponseWriter, code int, msg string) {
 	w.Header().Set("Content-Type", "application/json")
 	w.WriteHeader(code)
-	_ = json.NewEncoder(w).Encode(errorModels.ErrorResponse{
+	if err := json.NewEncoder(w).Encode(errorModels.ErrorResponse{
 		Error:  errorModels.ServerError{Code: code, Message: msg},
 		Status: "error",
-	})
+	}); err != nil {
+		logger.Global().Warn("failed to write apply error response", logger.Error(err))
+	}
 }

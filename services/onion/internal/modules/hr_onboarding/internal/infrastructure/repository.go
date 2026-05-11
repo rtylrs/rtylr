@@ -3,6 +3,7 @@ package infrastructure
 import (
 	"context"
 	"database/sql"
+	"errors"
 	"fmt"
 	"time"
 
@@ -49,7 +50,7 @@ func (r *Repository) GetTemplate(ctx context.Context, ownerID, id int64) (*domai
 		ID:      id,
 	})
 	if err != nil {
-		if err == sql.ErrNoRows {
+		if errors.Is(err, sql.ErrNoRows) {
 			return nil, domain.ErrTemplateNotFound
 		}
 		return nil, err
@@ -224,7 +225,7 @@ func (r *Repository) GetEmployeeChecklist(ctx context.Context, ownerID, employee
 		ID:         checklistID,
 	})
 	if err != nil {
-		if err == sql.ErrNoRows {
+		if errors.Is(err, sql.ErrNoRows) {
 			return nil, domain.ErrChecklistNotFound
 		}
 		return nil, err
@@ -304,7 +305,7 @@ func (r *Repository) GetChecklistItem(ctx context.Context, ownerID, itemID int64
 		ID:      itemID,
 	})
 	if err != nil {
-		if err == sql.ErrNoRows {
+		if errors.Is(err, sql.ErrNoRows) {
 			return nil, domain.ErrChecklistItemNotFound
 		}
 		return nil, err

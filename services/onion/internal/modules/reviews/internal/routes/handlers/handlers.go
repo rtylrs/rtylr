@@ -38,11 +38,13 @@ func newPayload(r domain.Review) ReviewPayload {
 
 func ListRoutes() []string { return []string{"/hr/reviews"} }
 
-type ListHandler struct{ Service *application.Service }
-type ListRequest struct{}
-type ListResponse struct {
-	Reviews []ReviewPayload `json:"reviews"`
-}
+type (
+	ListHandler  struct{ Service *application.Service }
+	ListRequest  struct{}
+	ListResponse struct {
+		Reviews []ReviewPayload `json:"reviews"`
+	}
+)
 
 func (h *ListHandler) Serve(ctx context.Context, _ *ListRequest) (ListResponse, *errorModels.ServerError) {
 	device := authPkg.DeviceCtx(ctx)
@@ -62,18 +64,21 @@ func (h *ListHandler) Serve(ctx context.Context, _ *ListRequest) (ListResponse, 
 
 func CreateRoutes() []string { return []string{"/hr/reviews"} }
 
-type CreateHandler struct{ Service *application.Service }
-type CreateRequest struct {
-	StaffID      int64   `json:"staff_id"`
-	ReviewerID   int64   `json:"reviewer_id"`
-	Period       string  `json:"period"`
-	Rating       float64 `json:"rating"`
-	GoalsRating  float64 `json:"goals_rating"`
-	ValuesRating float64 `json:"values_rating"`
-	SkillsRating float64 `json:"skills_rating"`
-	Notes        string  `json:"notes"`
-	Status       string  `json:"status"`
-}
+type (
+	CreateHandler struct{ Service *application.Service }
+	CreateRequest struct {
+		StaffID      int64   `json:"staff_id"`
+		ReviewerID   int64   `json:"reviewer_id"`
+		Period       string  `json:"period"`
+		Rating       float64 `json:"rating"`
+		GoalsRating  float64 `json:"goals_rating"`
+		ValuesRating float64 `json:"values_rating"`
+		SkillsRating float64 `json:"skills_rating"`
+		Notes        string  `json:"notes"`
+		Status       string  `json:"status"`
+	}
+)
+
 type CreateResponse struct {
 	ID      int64  `json:"id"`
 	Message string `json:"message"`

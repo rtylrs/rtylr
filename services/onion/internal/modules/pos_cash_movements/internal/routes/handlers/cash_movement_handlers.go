@@ -4,22 +4,24 @@ import (
 	"context"
 	"net/http"
 
-	posv1 "github.com/voxire/voxie/gen/go/pos/v1"
-
 	"github.com/voxire/onion/internal/modules/pos_cash_movements/internal/application"
 	"github.com/voxire/onion/internal/modules/pos_cash_movements/internal/domain"
 	authPkg "github.com/voxire/onion/internal/platform/auth"
 	errorModels "github.com/voxire/onion/internal/platform/errors"
+	posv1 "github.com/voxire/voxie/gen/go/pos/v1"
 )
 
 // ─── List Cash Movements ─────────────────────────────────────────────────────
 
 func ListCashMovementsRoutes() []string { return []string{"/pos/cash/movements"} }
 
-type ListCashMovementsHandler struct{ Service *application.Service }
-type ListCashMovementsRequest struct {
-	SessionID int64 `json:"session_id"`
-}
+type (
+	ListCashMovementsHandler struct{ Service *application.Service }
+	ListCashMovementsRequest struct {
+		SessionID int64 `json:"session_id"`
+	}
+)
+
 type ListCashMovementsResponse struct {
 	Movements []*posv1.CashMovement `json:"movements"`
 }

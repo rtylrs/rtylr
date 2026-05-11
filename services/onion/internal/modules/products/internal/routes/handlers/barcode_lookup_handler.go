@@ -6,13 +6,11 @@ import (
 	"net/http"
 
 	"github.com/go-chi/chi/v5"
-
-	erpv1 "github.com/voxire/voxie/gen/go/erp/v1"
-
 	"github.com/voxire/onion/internal/modules/products/internal/application"
 	"github.com/voxire/onion/internal/modules/products/internal/domain"
 	authPkg "github.com/voxire/onion/internal/platform/auth"
 	"github.com/voxire/onion/internal/platform/logger"
+	erpv1 "github.com/voxire/voxie/gen/go/erp/v1"
 )
 
 // BarcodeLookupResponse mirrors GetProductResponse — one product,

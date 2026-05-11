@@ -23,7 +23,9 @@ type MyLocation struct {
 func (r *Repository) ListForUser(ctx context.Context, businessID, userID int64) ([]domain.MemberLocation, error) {
 	q := sqlc.New(dbclient.Pool())
 	rows, err := q.ListMemberLocations(ctx, sqlc.ListMemberLocationsParams{BusinessID: businessID, UserID: userID})
-	if err != nil { return nil, err }
+	if err != nil {
+		return nil, err
+	}
 	out := make([]domain.MemberLocation, 0, len(rows))
 	for _, row := range rows {
 		out = append(out, domain.MemberLocation{
@@ -39,7 +41,9 @@ func (r *Repository) ListForUser(ctx context.Context, businessID, userID int64) 
 func (r *Repository) GetMyLocations(ctx context.Context, businessID, userID int64) ([]MyLocation, error) {
 	q := sqlc.New(dbclient.Pool())
 	rows, err := q.GetMyLocations(ctx, sqlc.GetMyLocationsParams{BusinessID: businessID, UserID: userID})
-	if err != nil { return nil, err }
+	if err != nil {
+		return nil, err
+	}
 	out := make([]MyLocation, 0, len(rows))
 	for _, row := range rows {
 		out = append(out, MyLocation{
@@ -60,7 +64,9 @@ func (r *Repository) Assign(ctx context.Context, businessID, userID, locationID 
 		CanManageTerminals: sql.NullBool{Bool: canManageTerminals, Valid: true},
 		CanViewReports:     sql.NullBool{Bool: canViewReports, Valid: true},
 	})
-	if err != nil { return 0, err }
+	if err != nil {
+		return 0, err
+	}
 	id, _ := res.LastInsertId()
 	return id, nil
 }

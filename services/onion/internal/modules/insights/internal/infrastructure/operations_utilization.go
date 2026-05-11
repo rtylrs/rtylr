@@ -14,7 +14,7 @@ type UtilizationRow struct {
 
 // GetUtilization estimates staff utilization as:
 //
-//   scheduled_hours / available_hours
+//	scheduled_hours / available_hours
 //
 // where scheduled_hours comes from the per-shift start/end time strings
 // stored in hr_shifts joined to hr_shift_assignments.date in the next 7

@@ -204,3 +204,32 @@ VALUES (?, ?, ?);
 
 -- name: IsPaddleEventProcessed :one
 SELECT COUNT(*) FROM pos_paddle_events_processed WHERE transaction_id = ?;
+
+-- name: TransferOrderTable :execresult
+UPDATE pos_orders SET table_id = ? WHERE id = ? AND owner_id = ? AND status NOT IN ('paid','voided','cancelled');
+
+-- name: SetTableStatus :exec
+UPDATE pos_tables SET status = ? WHERE id = ? AND owner_id = ?;
+
+-- name: VoidOrderItem :execresult
+UPDATE pos_order_items SET status = 'cancelled' WHERE id = ? AND order_id = ? AND status IN ('pending','preparing');
+
+-- name: RecalcOrderTotal :exec
+UPDATE pos_orders
+SET subtotal = (SELECT COALESCE(SUM(oi.total),0) FROM pos_order_items oi WHERE oi.order_id = pos_orders.id AND oi.status != 'cancelled'),
+    total = (SELECT COALESCE(SUM(oi.total),0) FROM pos_order_items oi WHERE oi.order_id = pos_orders.id AND oi.status != 'cancelled') + pos_orders.tax_amount - pos_orders.discount_amount
+WHERE pos_orders.id = ? AND pos_orders.owner_id = ?;
+
+-- name: UpdateOrderStatusToPreparingFromPending :execresult
+UPDATE pos_orders SET status = 'preparing' WHERE id = ? AND owner_id = ? AND status = 'pending';
+
+-- name: IsOnlineOrderingEnabled :one
+SELECT COUNT(*) FROM business_addons WHERE business_id = ? AND addon_id = 'online_ordering' AND is_enabled = TRUE;
+
+-- name: CreateOnlineOrder :execresult
+INSERT INTO pos_orders
+(owner_id, order_number, type, status, customer_name, subtotal, total, payment_status, notes, kitchen_notes)
+VALUES (?, ?, 'online', 'pending', ?, ?, ?, 'unpaid', ?, ?);
+
+-- name: GetPublicOrderStatus :one
+SELECT id, order_number, status FROM pos_orders WHERE id = ? LIMIT 1;

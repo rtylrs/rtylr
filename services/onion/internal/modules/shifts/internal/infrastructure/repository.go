@@ -25,7 +25,7 @@ func NewRepository(_ context.Context) *Repository {
 	}
 }
 
-func (r *Repository) ListShifts(ctx context.Context, ownerID int64, staffID int64, date string) ([]domain.Shift, error) {
+func (r *Repository) ListShifts(ctx context.Context, ownerID, staffID int64, date string) ([]domain.Shift, error) {
 	// Dynamic WHERE clauses - keep on pool
 	query := `
 		SELECT id, owner_id, staff_id, department_id, date, start_time, end_time,

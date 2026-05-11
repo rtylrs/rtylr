@@ -9,14 +9,14 @@ import (
 )
 
 var validStepKeys = map[string]struct{}{
-	"company_profile":  {},
-	"work_schedule":    {},
-	"org_structure":    {},
-	"locations":        {},
+	"company_profile":   {},
+	"work_schedule":     {},
+	"org_structure":     {},
+	"locations":         {},
 	"roles_permissions": {},
-	"payroll":          {},
-	"notifications":    {},
-	"employees":        {},
+	"payroll":           {},
+	"notifications":     {},
+	"employees":         {},
 }
 
 type repository interface {

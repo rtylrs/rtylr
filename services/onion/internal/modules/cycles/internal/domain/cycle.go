@@ -5,9 +5,7 @@ import (
 	"time"
 )
 
-var (
-	ErrCycleNotFound = errors.New("cycle not found")
-)
+var ErrCycleNotFound = errors.New("cycle not found")
 
 type Cycle struct {
 	ID          int64
@@ -30,10 +28,10 @@ type CycleInput struct {
 }
 
 type CycleUpdateInput struct {
-	ID          int64
-	OwnerID     int64
-	Name        string
-	StartDate   *time.Time
-	EndDate     *time.Time
-	Status      string
+	ID        int64
+	OwnerID   int64
+	Name      string
+	StartDate *time.Time
+	EndDate   *time.Time
+	Status    string
 }

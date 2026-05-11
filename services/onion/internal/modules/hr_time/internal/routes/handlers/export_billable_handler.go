@@ -18,10 +18,10 @@ type ExportBillableHandler struct{ Service *application.Service }
 type ExportBillableRequest struct{}
 
 type ExportBillableResponse struct {
-	BatchID      int64                      `json:"batch_id"`
+	BatchID      int64                       `json:"batch_id"`
 	Items        []domain.BillableExportItem `json:"items"`
-	TotalMinutes int32                      `json:"total_minutes"`
-	Count        int32                      `json:"count"`
+	TotalMinutes int32                       `json:"total_minutes"`
+	Count        int32                       `json:"count"`
 }
 
 func (h *ExportBillableHandler) Validate(_ context.Context, _ *ExportBillableRequest) *errorModels.ServerError {

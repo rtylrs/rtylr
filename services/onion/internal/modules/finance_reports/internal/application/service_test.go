@@ -8,32 +8,37 @@ import (
 )
 
 type mockRepo struct {
-	byType    map[string]float64
-	cash      float64
-	recv      float64
-	pay       float64
-	inflow    float64
-	outflow   float64
-	typeErr   error
-	cashErr   error
-	rangeErr  error
+	byType   map[string]float64
+	cash     float64
+	recv     float64
+	pay      float64
+	inflow   float64
+	outflow  float64
+	typeErr  error
+	cashErr  error
+	rangeErr error
 }
 
 func (m *mockRepo) SumAccountsByType(_ context.Context, _ int64, t string) (float64, error) {
 	return m.byType[t], m.typeErr
 }
+
 func (m *mockRepo) SumBankBalances(_ context.Context, _ int64) (float64, error) {
 	return m.cash, m.cashErr
 }
+
 func (m *mockRepo) SumReceivables(_ context.Context, _ int64) (float64, error) {
 	return m.recv, nil
 }
+
 func (m *mockRepo) SumPayables(_ context.Context, _ int64) (float64, error) {
 	return m.pay, nil
 }
+
 func (m *mockRepo) SumPaidInvoicesInRange(_ context.Context, _ int64, _, _ string) (float64, error) {
 	return m.inflow, m.rangeErr
 }
+
 func (m *mockRepo) SumExpensesInRange(_ context.Context, _ int64, _, _ string) (float64, error) {
 	return m.outflow, m.rangeErr
 }

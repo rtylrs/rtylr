@@ -3,6 +3,7 @@ package infrastructure
 import (
 	"context"
 	"database/sql"
+	"errors"
 	"time"
 
 	"github.com/voxire/onion/internal/modules/hr_time/internal/domain"
@@ -70,7 +71,7 @@ func (r *Repository) ListTimeEntries(ctx context.Context, ownerID int64, params 
 func (r *Repository) GetTimeEntry(ctx context.Context, ownerID, entryID int64) (*domain.TimeEntryRecord, error) {
 	row, err := r.queries.GetTimeEntry(ctx, sqlc.GetTimeEntryParams{OwnerID: ownerID, ID: entryID})
 	if err != nil {
-		if err == sql.ErrNoRows {
+		if errors.Is(err, sql.ErrNoRows) {
 			return nil, domain.ErrTimeEntryNotFound
 		}
 		logger.Ctx(ctx).Error("failed to get time entry", logger.Any("owner_id", ownerID), logger.Any("entry_id", entryID), logger.Error(err))
@@ -162,7 +163,7 @@ func (r *Repository) DeleteTimeEntry(ctx context.Context, ownerID, entryID int64
 func (r *Repository) GetTimesheet(ctx context.Context, ownerID, timesheetID int64) (*domain.TimesheetRecord, error) {
 	row, err := r.queries.GetTimesheet(ctx, sqlc.GetTimesheetParams{OwnerID: ownerID, ID: timesheetID})
 	if err != nil {
-		if err == sql.ErrNoRows {
+		if errors.Is(err, sql.ErrNoRows) {
 			return nil, domain.ErrTimesheetNotFound
 		}
 		logger.Ctx(ctx).Error("failed to get timesheet", logger.Any("owner_id", ownerID), logger.Any("timesheet_id", timesheetID), logger.Error(err))
@@ -183,7 +184,7 @@ func (r *Repository) GetTimesheetForPeriod(ctx context.Context, ownerID, employe
 		PeriodStart: ps,
 	})
 	if err != nil {
-		if err == sql.ErrNoRows {
+		if errors.Is(err, sql.ErrNoRows) {
 			return nil, nil
 		}
 		return nil, err
@@ -374,7 +375,7 @@ func (r *Repository) GetTimeEntryBySourceAndTask(ctx context.Context, ownerID, e
 		TaskID:     nullInt64(taskID),
 	})
 	if err != nil {
-		if err == sql.ErrNoRows {
+		if errors.Is(err, sql.ErrNoRows) {
 			return nil, nil
 		}
 		return nil, err

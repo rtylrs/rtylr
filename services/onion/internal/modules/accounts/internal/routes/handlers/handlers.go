@@ -4,12 +4,11 @@ import (
 	"context"
 	"net/http"
 
-	finv1 "github.com/voxire/voxie/gen/go/finance/v1"
-
 	"github.com/voxire/onion/internal/modules/accounts/internal/application"
 	"github.com/voxire/onion/internal/modules/accounts/internal/domain"
 	authPkg "github.com/voxire/onion/internal/platform/auth"
 	errorModels "github.com/voxire/onion/internal/platform/errors"
+	finv1 "github.com/voxire/voxie/gen/go/finance/v1"
 )
 
 func newPayload(a domain.Account) *finv1.Account {
@@ -22,11 +21,13 @@ func newPayload(a domain.Account) *finv1.Account {
 
 func ListRoutes() []string { return []string{"/finance/accounts"} }
 
-type ListHandler struct{ Service *application.Service }
-type ListRequest struct{}
-type ListResponse struct {
-	Accounts []*finv1.Account `json:"accounts"`
-}
+type (
+	ListHandler  struct{ Service *application.Service }
+	ListRequest  struct{}
+	ListResponse struct {
+		Accounts []*finv1.Account `json:"accounts"`
+	}
+)
 
 func (h *ListHandler) Serve(ctx context.Context, _ *ListRequest) (ListResponse, *errorModels.ServerError) {
 	device := authPkg.DeviceCtx(ctx)
@@ -46,14 +47,17 @@ func (h *ListHandler) Serve(ctx context.Context, _ *ListRequest) (ListResponse, 
 
 func CreateRoutes() []string { return []string{"/finance/accounts"} }
 
-type CreateHandler struct{ Service *application.Service }
-type CreateRequest struct {
-	Name     string  `json:"name"`
-	Type     string  `json:"type"`
-	Currency string  `json:"currency"`
-	Balance  float64 `json:"balance"`
-	IsActive bool    `json:"is_active"`
-}
+type (
+	CreateHandler struct{ Service *application.Service }
+	CreateRequest struct {
+		Name     string  `json:"name"`
+		Type     string  `json:"type"`
+		Currency string  `json:"currency"`
+		Balance  float64 `json:"balance"`
+		IsActive bool    `json:"is_active"`
+	}
+)
+
 type CreateResponse struct {
 	ID      int64  `json:"id"`
 	Message string `json:"message"`
@@ -91,8 +95,10 @@ func (h *CreateHandler) Serve(ctx context.Context, req *CreateRequest) (CreateRe
 
 func ChartOfAccountsRoutes() []string { return []string{"/finance/chart-of-accounts"} }
 
-type ChartOfAccountsHandler struct{ Service *application.Service }
-type ChartOfAccountsRequest struct{}
+type (
+	ChartOfAccountsHandler struct{ Service *application.Service }
+	ChartOfAccountsRequest struct{}
+)
 
 type ChartOfAccountsNode struct {
 	ID       int64                  `json:"id"`

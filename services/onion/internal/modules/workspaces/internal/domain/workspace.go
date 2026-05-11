@@ -12,7 +12,6 @@ var (
 	ErrCommentNotFound   = errors.New("comment not found")
 	ErrLabelNotFound     = errors.New("label not found")
 	ErrUnauthorized      = errors.New("unauthorized")
-	ErrBusinessNotFound  = errors.New("business not found")
 )
 
 // ─────────────────────────────────────────────
@@ -82,25 +81,3 @@ type UpdateWorkspaceMemberRoleInput struct {
 	UserID      int64
 	Role        string
 }
-
-// ─────────────────────────────────────────────
-// Business
-// ─────────────────────────────────────────────
-
-type Business struct {
-	ID        int64
-	OwnerID   int64
-	Name      string
-	Color     string
-	Icon      string
-	CreatedAt time.Time
-	UpdatedAt time.Time
-}
-
-type BusinessInput struct {
-	OwnerID int64
-	Name    string
-	Color   string
-	Icon    string
-}
-

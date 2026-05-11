@@ -4,6 +4,7 @@ import (
 	"context"
 	"database/sql"
 	"encoding/json"
+	"errors"
 	"fmt"
 	"strconv"
 	"time"
@@ -32,7 +33,7 @@ func NewRepository(_ context.Context) *Repository {
 func (r *Repository) GetPerformanceConfig(ctx context.Context, ownerID int64) (*domain.PerformanceConfigRecord, error) {
 	row, err := r.queries.GetPerformanceConfig(ctx, ownerID)
 	if err != nil {
-		if err == sql.ErrNoRows {
+		if errors.Is(err, sql.ErrNoRows) {
 			return nil, domain.ErrPerformanceConfigNotFound
 		}
 		return nil, err
@@ -99,7 +100,7 @@ func (r *Repository) GetReviewCycle(ctx context.Context, ownerID, id int64) (*do
 		ID:      id,
 	})
 	if err != nil {
-		if err == sql.ErrNoRows {
+		if errors.Is(err, sql.ErrNoRows) {
 			return nil, domain.ErrReviewCycleNotFound
 		}
 		return nil, err
@@ -224,7 +225,7 @@ func (r *Repository) GetPerformanceReview(ctx context.Context, ownerID, id int64
 		ID:      id,
 	})
 	if err != nil {
-		if err == sql.ErrNoRows {
+		if errors.Is(err, sql.ErrNoRows) {
 			return nil, domain.ErrReviewNotFound
 		}
 		return nil, err
@@ -343,7 +344,7 @@ func (r *Repository) GetGoal(ctx context.Context, ownerID, id int64) (*domain.Re
 		ID:      id,
 	})
 	if err != nil {
-		if err == sql.ErrNoRows {
+		if errors.Is(err, sql.ErrNoRows) {
 			return nil, domain.ErrGoalNotFound
 		}
 		return nil, err

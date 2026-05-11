@@ -397,20 +397,51 @@ func (r *Repository) UpdateTask(ctx context.Context, input domain.UpdateTaskInpu
 		return err
 	}
 
-	err = r.queries.UpdateTask(ctx, sqlc.UpdateTaskParams{
-		Title:       input.Title,
-		Description: sql.NullString{String: input.Description, Valid: input.Description != ""},
-		Status:      sqlc.NullFlowTasksStatus{FlowTasksStatus: sqlc.FlowTasksStatus(input.Status), Valid: input.Status != ""},
-		Priority:    sqlc.NullFlowTasksPriority{FlowTasksPriority: sqlc.FlowTasksPriority(input.Priority), Valid: input.Priority != ""},
-		AssigneeID:  nullInt64Ptr(input.AssigneeID),
-		DueDate:     nullTimePtrToSql(input.DueDate),
-		StartDate:   nullTimePtrToSql(input.StartDate),
-		Labels:      labelsJSON,
-		Column9:     input.Status,
-		Column10:    input.Status,
-		ID:          input.ID,
-		OwnerID:     input.OwnerID,
-	})
+	var statusParam interface{}
+	if input.Status != "" {
+		statusParam = input.Status
+	}
+	var priorityParam interface{}
+	if input.Priority != "" {
+		priorityParam = input.Priority
+	}
+	var labelsParam interface{}
+	if labelsJSON != nil {
+		labelsParam = labelsJSON
+	}
+
+	// Raw query so partial updates (e.g. title-only) don't overwrite status/priority/completed_at.
+	// COALESCE(?, col) preserves the existing value when the param is NULL.
+	// The completed_at CASE only fires when a non-NULL status is explicitly supplied.
+	_, err = dbclient.Pool().ExecContext(ctx, `
+		UPDATE flow_tasks
+		SET title       = ?,
+		    description = COALESCE(?, description),
+		    status      = COALESCE(?, status),
+		    priority    = COALESCE(?, priority),
+		    assignee_id = ?,
+		    due_date    = ?,
+		    start_date  = ?,
+		    labels      = COALESCE(?, labels),
+		    completed_at = CASE
+		        WHEN ? IS NOT NULL AND ? = 'done'  AND completed_at IS NULL THEN NOW()
+		        WHEN ? IS NOT NULL AND ? != 'done' THEN NULL
+		        ELSE completed_at
+		    END
+		WHERE id = ? AND owner_id = ?`,
+		input.Title,
+		sql.NullString{String: input.Description, Valid: input.Description != ""},
+		statusParam,
+		priorityParam,
+		nullInt64Ptr(input.AssigneeID),
+		nullTimePtrToSql(input.DueDate),
+		nullTimePtrToSql(input.StartDate),
+		labelsParam,
+		statusParam, statusParam, // CASE WHEN ? IS NOT NULL AND ? = 'done'
+		statusParam, statusParam, // CASE WHEN ? IS NOT NULL AND ? != 'done'
+		input.ID,
+		input.OwnerID,
+	)
 	if err != nil {
 		logger.Ctx(ctx).Error("UpdateTask failed", logger.Error(err))
 		return err
@@ -816,60 +847,6 @@ func marshalLabels(labels []int64) (json.RawMessage, error) {
 	return json.Marshal(labels)
 }
 
-func taskFromFlowTask(row sqlc.FlowTask) domain.Task {
-	t := domain.Task{
-		ID:          row.ID,
-		ProjectID:   row.ProjectID,
-		WorkspaceID: row.WorkspaceID,
-		OwnerID:     row.OwnerID,
-		Title:       row.Title,
-		Description: row.Description.String,
-		Status:      string(row.Status.FlowTasksStatus),
-		Priority:    string(row.Priority.FlowTasksPriority),
-		ReporterID:  row.ReporterID,
-		SortOrder:   int(row.SortOrder.Int32),
-		CreatedAt:   row.CreatedAt.Time,
-		UpdatedAt:   row.UpdatedAt.Time,
-	}
-
-	if row.ParentTaskID.Valid {
-		t.ParentTaskID = &row.ParentTaskID.Int64
-	}
-	if row.AssigneeID.Valid {
-		t.AssigneeID = &row.AssigneeID.Int64
-	}
-	if row.DueDate.Valid {
-		t.DueDate = &row.DueDate.Time
-	}
-	if row.StartDate.Valid {
-		t.StartDate = &row.StartDate.Time
-	}
-	if row.CompletedAt.Valid {
-		t.CompletedAt = &row.CompletedAt.Time
-	}
-	if row.EstimatedHours.Valid {
-		f, _ := strconv.ParseFloat(row.EstimatedHours.String, 64)
-		t.EstimatedHours = &f
-	}
-	if row.ActualHours.Valid {
-		f, _ := strconv.ParseFloat(row.ActualHours.String, 64)
-		t.ActualHours = &f
-	}
-	if len(row.Labels) > 0 {
-		_ = json.Unmarshal(row.Labels, &t.Labels)
-	}
-
-	return t
-}
-
-func tasksFromRows(rows []sqlc.FlowTask) []domain.Task {
-	var tasks []domain.Task
-	for _, row := range rows {
-		tasks = append(tasks, taskFromFlowTask(row))
-	}
-	return tasks
-}
-
 // enrichedTaskColumns is the column list used by every task read path.
 // It selects the raw flow_tasks row plus the JOINed display projections
 // (project name/color, assignee name, subtask count) so the UI never has
@@ -879,7 +856,7 @@ func tasksFromRows(rows []sqlc.FlowTask) []domain.Task {
 // listEnrichedTasks in sync.
 const enrichedTaskColumns = `
 	t.id, t.project_id, t.workspace_id, t.owner_id, t.parent_task_id, t.section_id,
-	t.title, t.description, t.status, t.priority,
+	t.title, t.description, COALESCE(t.status, 'todo') AS status, COALESCE(t.priority, 'none') AS priority,
 	t.assignee_id, t.reporter_id, t.due_date, t.start_date, t.completed_at,
 	t.estimated_hours, t.actual_hours, t.sort_order, t.labels,
 	t.created_at, t.updated_at,
@@ -1227,6 +1204,17 @@ func (r *Repository) TransferProjectOwnership(ctx context.Context, input domain.
 	return err
 }
 
+func (r *Repository) MoveProject(ctx context.Context, input domain.MoveProjectInput) error {
+	_, err := r.pool.ExecContext(ctx,
+		`UPDATE flow_projects SET workspace_id = ? WHERE id = ? AND owner_id = ?`,
+		input.WorkspaceID, input.ProjectID, input.CallerID,
+	)
+	if err != nil {
+		logger.Ctx(ctx).Error("MoveProject failed", logger.Error(err))
+	}
+	return err
+}
+
 func (r *Repository) GetUserWorkspaceRole(ctx context.Context, workspaceID, userID int64) (string, error) {
 	var role string
 	err := r.pool.QueryRowContext(ctx,
@@ -1387,87 +1375,6 @@ func (r *Repository) LookupUserByEmail(ctx context.Context, email string) (int64
 		return 0, false, err
 	}
 	return id, true, nil
-}
-
-// ─────────────────────────────────────────────
-// Businesses
-// ─────────────────────────────────────────────
-
-func (r *Repository) ListBusinesses(ctx context.Context, ownerID int64) ([]domain.Business, error) {
-	rows, err := r.pool.QueryContext(ctx,
-		`SELECT id, owner_id, name, color, icon, created_at, updated_at
-		 FROM flow_businesses WHERE owner_id = ? ORDER BY created_at ASC`,
-		ownerID,
-	)
-	if err != nil {
-		logger.Ctx(ctx).Error("ListBusinesses failed", logger.Error(err))
-		return nil, err
-	}
-	defer rows.Close()
-
-	var businesses []domain.Business
-	for rows.Next() {
-		var b domain.Business
-		if err := rows.Scan(&b.ID, &b.OwnerID, &b.Name, &b.Color, &b.Icon, &b.CreatedAt, &b.UpdatedAt); err != nil {
-			return nil, err
-		}
-		businesses = append(businesses, b)
-	}
-	return businesses, rows.Err()
-}
-
-func (r *Repository) CreateBusiness(ctx context.Context, input domain.BusinessInput) (int64, error) {
-	color := input.Color
-	if color == "" {
-		color = "#64C5B9"
-	}
-	icon := input.Icon
-	if icon == "" {
-		icon = "🏢"
-	}
-
-	res, err := r.pool.ExecContext(ctx,
-		`INSERT INTO flow_businesses (owner_id, name, color, icon) VALUES (?, ?, ?, ?)`,
-		input.OwnerID, input.Name, color, icon,
-	)
-	if err != nil {
-		logger.Ctx(ctx).Error("CreateBusiness failed", logger.Error(err))
-		return 0, err
-	}
-	return res.LastInsertId()
-}
-
-func (r *Repository) UpdateBusiness(ctx context.Context, id int64, name, color, icon string) error {
-	_, err := r.pool.ExecContext(ctx,
-		`UPDATE flow_businesses SET name = ?, color = ?, icon = ?, updated_at = NOW() WHERE id = ?`,
-		name, color, icon, id,
-	)
-	if err != nil {
-		logger.Ctx(ctx).Error("UpdateBusiness failed", logger.Error(err))
-	}
-	return err
-}
-
-func (r *Repository) DeleteBusiness(ctx context.Context, id int64, ownerID int64) error {
-	_, err := r.pool.ExecContext(ctx,
-		`DELETE FROM flow_businesses WHERE id = ? AND owner_id = ?`,
-		id, ownerID,
-	)
-	if err != nil {
-		logger.Ctx(ctx).Error("DeleteBusiness failed", logger.Error(err))
-	}
-	return err
-}
-
-func (r *Repository) SetWorkspaceBusiness(ctx context.Context, workspaceID int64, businessID *int64) error {
-	_, err := r.pool.ExecContext(ctx,
-		`UPDATE flow_workspaces SET business_id = ? WHERE id = ?`,
-		businessID, workspaceID,
-	)
-	if err != nil {
-		logger.Ctx(ctx).Error("SetWorkspaceBusiness failed", logger.Error(err))
-	}
-	return err
 }
 
 // ─────────────────────────────────────────────────────────────────────────────

@@ -2,6 +2,7 @@ package handlers
 
 import (
 	"context"
+	"errors"
 	"net/http"
 	"strconv"
 
@@ -52,7 +53,7 @@ func (h *UpdateTemplateHandler) Serve(ctx context.Context, req *UpdateTemplateRe
 		RoleID:      req.RoleID,
 	})
 	if err != nil {
-		if err == domain.ErrTemplateNotFound {
+		if errors.Is(err, domain.ErrTemplateNotFound) {
 			return UpdateTemplateResponse{}, &errorModels.ServerError{HTTPCode: http.StatusNotFound, Code: http.StatusNotFound, Message: "Template not found"}
 		}
 		logger.Ctx(ctx).Error("failed to update onboarding template", logger.Any("owner_id", device.User.UserID), logger.Any("template_id", id), logger.Error(err))

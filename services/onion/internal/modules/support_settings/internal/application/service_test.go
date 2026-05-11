@@ -17,6 +17,7 @@ type mockRepo struct {
 func (m *mockRepo) Get(_ context.Context, _ int64) (*domain.Settings, error) {
 	return m.settings, m.getErr
 }
+
 func (m *mockRepo) Upsert(_ context.Context, _ domain.SettingsInput) error {
 	return m.upErr
 }

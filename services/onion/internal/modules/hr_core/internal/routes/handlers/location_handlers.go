@@ -6,7 +6,6 @@ import (
 	"strconv"
 
 	"github.com/go-chi/chi/v5"
-
 	"github.com/voxire/onion/internal/modules/hr_core/internal/application"
 	"github.com/voxire/onion/internal/modules/hr_core/internal/domain"
 	authPkg "github.com/voxire/onion/internal/platform/auth"
@@ -41,11 +40,13 @@ func locationToPayload(loc domain.LocationRecord) *LocationPayload {
 
 func ListLocationsRoutes() []string { return []string{"/hr/locations"} }
 
-type ListLocationsHandler struct{ Service *application.Service }
-type ListLocationsRequest struct{}
-type ListLocationsResponse struct {
-	Locations []*LocationPayload `json:"locations"`
-}
+type (
+	ListLocationsHandler  struct{ Service *application.Service }
+	ListLocationsRequest  struct{}
+	ListLocationsResponse struct {
+		Locations []*LocationPayload `json:"locations"`
+	}
+)
 
 func (h *ListLocationsHandler) Serve(ctx context.Context, _ *ListLocationsRequest) (ListLocationsResponse, *errorModels.ServerError) {
 	device := authPkg.DeviceCtx(ctx)
@@ -70,15 +71,18 @@ func (h *ListLocationsHandler) Serve(ctx context.Context, _ *ListLocationsReques
 
 func CreateLocationRoutes() []string { return []string{"/hr/locations"} }
 
-type CreateLocationHandler struct{ Service *application.Service }
-type CreateLocationRequest struct {
-	Name      string `json:"name"`
-	Address   string `json:"address"`
-	City      string `json:"city"`
-	Country   string `json:"country"`
-	Timezone  string `json:"timezone"`
-	IsDefault bool   `json:"is_default"`
-}
+type (
+	CreateLocationHandler struct{ Service *application.Service }
+	CreateLocationRequest struct {
+		Name      string `json:"name"`
+		Address   string `json:"address"`
+		City      string `json:"city"`
+		Country   string `json:"country"`
+		Timezone  string `json:"timezone"`
+		IsDefault bool   `json:"is_default"`
+	}
+)
+
 type CreateLocationResponse struct {
 	Location *LocationPayload `json:"location"`
 }
@@ -113,15 +117,18 @@ func (h *CreateLocationHandler) Serve(ctx context.Context, req *CreateLocationRe
 
 func UpdateLocationRoutes() []string { return []string{"/hr/locations/{id}"} }
 
-type UpdateLocationHandler struct{ Service *application.Service }
-type UpdateLocationRequest struct {
-	Name      string `json:"name"`
-	Address   string `json:"address"`
-	City      string `json:"city"`
-	Country   string `json:"country"`
-	Timezone  string `json:"timezone"`
-	IsDefault bool   `json:"is_default"`
-}
+type (
+	UpdateLocationHandler struct{ Service *application.Service }
+	UpdateLocationRequest struct {
+		Name      string `json:"name"`
+		Address   string `json:"address"`
+		City      string `json:"city"`
+		Country   string `json:"country"`
+		Timezone  string `json:"timezone"`
+		IsDefault bool   `json:"is_default"`
+	}
+)
+
 type UpdateLocationResponse struct {
 	Location *LocationPayload `json:"location"`
 }

@@ -6,12 +6,13 @@ import (
 )
 
 var (
-	ErrSessionAlreadyOpen = errors.New("staff already has an open session")
-	ErrSessionNotFound    = errors.New("session not found")
-	ErrSessionNotOpen     = errors.New("session is not open")
-	ErrOrderNotFound      = errors.New("order not found")
-	ErrLocationNotFound   = errors.New("location not found")
-	ErrTableNotFound      = errors.New("table not found")
+	ErrSessionAlreadyOpen       = errors.New("staff already has an open session")
+	ErrSessionNotFound          = errors.New("session not found")
+	ErrSessionNotOpen           = errors.New("session is not open")
+	ErrOrderNotFound            = errors.New("order not found")
+	ErrLocationNotFound         = errors.New("location not found")
+	ErrTableNotFound            = errors.New("table not found")
+	ErrOrderCannotBeTransferred = errors.New("order cannot be transferred in current status")
 )
 
 // ─── Location ────────────────────────────────────────────────────────────────
@@ -44,16 +45,16 @@ const (
 )
 
 type Table struct {
-	ID                   int64
-	OwnerID              int64
-	LocationID           int64
-	Name                 string
-	Capacity             int
-	Status               TableStatus
+	ID                    int64
+	OwnerID               int64
+	LocationID            int64
+	Name                  string
+	Capacity              int
+	Status                TableStatus
 	CurrentSessionOrderID int64
-	QRCodeURL            string
-	CreatedAt            time.Time
-	UpdatedAt            time.Time
+	QRCodeURL             string
+	CreatedAt             time.Time
+	UpdatedAt             time.Time
 }
 
 type TableInput struct {
@@ -150,29 +151,29 @@ const (
 )
 
 type Order struct {
-	ID             int64
-	OwnerID        int64
-	SessionID      int64
-	TableID        int64
-	LocationID     int64
-	OrderNumber    string
-	Type           OrderType
-	Status         OrderStatus
-	CustomerID     int64
-	CustomerName   string
-	StaffID        int64
-	Subtotal       float64
-	DiscountAmount float64
-	TaxAmount      float64
-	Total          float64
-	PaymentMethod  PaymentMethod
-	PaymentStatus  PaymentStatus
-	AmountPaid     float64
-	ChangeDue      float64
-	Notes          string
-	KitchenNotes   string
-	CreatedAt      time.Time
-	UpdatedAt      time.Time
+	ID              int64
+	OwnerID         int64
+	SessionID       int64
+	TableID         int64
+	LocationID      int64
+	OrderNumber     string
+	Type            OrderType
+	Status          OrderStatus
+	CustomerID      int64
+	CustomerName    string
+	StaffID         int64
+	Subtotal        float64
+	DiscountAmount  float64
+	TaxAmount       float64
+	Total           float64
+	PaymentMethod   PaymentMethod
+	PaymentStatus   PaymentStatus
+	AmountPaid      float64
+	ChangeDue       float64
+	Notes           string
+	KitchenNotes    string
+	CreatedAt       time.Time
+	UpdatedAt       time.Time
 	PaidAt          *time.Time
 	Items           []OrderItem
 	TerminalID      int64
@@ -185,16 +186,16 @@ type Order struct {
 }
 
 type OrderInput struct {
-	SessionID      int64
-	TableID        int64
-	LocationID     int64
-	Type           OrderType
-	CustomerID     int64
-	CustomerName   string
-	PaymentMethod  PaymentMethod
-	Notes          string
-	KitchenNotes   string
-	Items          []OrderItemInput
+	SessionID     int64
+	TableID       int64
+	LocationID    int64
+	Type          OrderType
+	CustomerID    int64
+	CustomerName  string
+	PaymentMethod PaymentMethod
+	Notes         string
+	KitchenNotes  string
+	Items         []OrderItemInput
 }
 
 // ─── Order Item ──────────────────────────────────────────────────────────────
@@ -227,14 +228,14 @@ type OrderItem struct {
 }
 
 type OrderItemInput struct {
-	MenuItemID     int64
-	Name           string
-	SKU            string
-	Quantity       float64
-	UnitPrice      float64
-	DiscountPct    float64
-	TaxRate        float64
-	Notes          string
+	MenuItemID  int64
+	Name        string
+	SKU         string
+	Quantity    float64
+	UnitPrice   float64
+	DiscountPct float64
+	TaxRate     float64
+	Notes       string
 }
 
 // ─── Payment ─────────────────────────────────────────────────────────────────
@@ -248,13 +249,13 @@ type PaymentInput struct {
 // ─── Refund ──────────────────────────────────────────────────────────────────
 
 type Refund struct {
-	ID          int64
-	OwnerID     int64
-	OrderID     int64
-	Amount      float64
-	Reason      string
-	RefundedBy  int64
-	RefundedAt  time.Time
+	ID         int64
+	OwnerID    int64
+	OrderID    int64
+	Amount     float64
+	Reason     string
+	RefundedBy int64
+	RefundedAt time.Time
 }
 
 type RefundInput struct {
@@ -270,6 +271,13 @@ type DiscountInput struct {
 	DiscountType  string
 	DiscountValue float64
 	Reason        string
+}
+
+// ─── Transfer Table ──────────────────────────────────────────────────────────
+
+type TransferTableInput struct {
+	OrderID    int64
+	NewTableID int64
 }
 
 // ─── Dashboard ───────────────────────────────────────────────────────────────

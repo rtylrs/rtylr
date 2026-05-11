@@ -4,6 +4,7 @@ import (
 	"context"
 	"database/sql"
 	"encoding/json"
+	"errors"
 	"fmt"
 	"strconv"
 	"time"
@@ -142,7 +143,7 @@ func (r *Repository) GetStaffByID(ctx context.Context, ownerID, staffID int64) (
 		OwnerID: ownerID,
 	})
 	if err != nil {
-		if err == sql.ErrNoRows {
+		if errors.Is(err, sql.ErrNoRows) {
 			return nil, domain.ErrStaffNotFound
 		}
 		return nil, err

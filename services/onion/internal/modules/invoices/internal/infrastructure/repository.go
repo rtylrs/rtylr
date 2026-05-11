@@ -3,6 +3,7 @@ package infrastructure
 import (
 	"context"
 	"database/sql"
+	"errors"
 	"fmt"
 	"strconv"
 	"time"
@@ -96,7 +97,7 @@ func (r *Repository) GetInvoiceByID(ctx context.Context, ownerID, invoiceID int6
 		OwnerID: ownerID,
 	})
 	if err != nil {
-		if err == sql.ErrNoRows {
+		if errors.Is(err, sql.ErrNoRows) {
 			return nil, domain.ErrInvoiceNotFound
 		}
 		logger.Ctx(ctx).Error("Failed to get invoice by ID", logger.Error(err))
@@ -367,7 +368,7 @@ func (r *Repository) GetPaymentsByInvoice(ctx context.Context, invoiceID int64) 
 // Expenses
 // ---------------------------------------------------------------------------
 
-func (r *Repository) ListExpenses(ctx context.Context, ownerID int64, categoryID int64, search, dateFrom, dateTo string) ([]domain.Expense, error) {
+func (r *Repository) ListExpenses(ctx context.Context, ownerID, categoryID int64, search, dateFrom, dateTo string) ([]domain.Expense, error) {
 	// Dynamic filters require raw SQL.
 	query := `
 		SELECT id, owner_id, category_id, description, amount, currency, expense_date, vendor,
@@ -430,7 +431,7 @@ func (r *Repository) GetExpenseByID(ctx context.Context, ownerID, expenseID int6
 		OwnerID: ownerID,
 	})
 	if err != nil {
-		if err == sql.ErrNoRows {
+		if errors.Is(err, sql.ErrNoRows) {
 			return nil, domain.ErrExpenseNotFound
 		}
 		logger.Ctx(ctx).Error("Failed to get expense by ID", logger.Error(err))

@@ -59,7 +59,7 @@ func toColumnPayload(c domain.ProjectColumn) ColumnPayload {
 // GET /flow/projects/columns
 // ─────────────────────────────────────────────
 
-func ListColumnsRoutes() []string  { return []string{"/flow/projects/columns"} }
+func ListColumnsRoutes() []string { return []string{"/flow/projects/columns"} }
 
 type ListColumnsHandler struct{ FlowService *application.Service }
 

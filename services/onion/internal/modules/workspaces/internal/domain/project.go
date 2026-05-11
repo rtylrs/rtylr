@@ -82,3 +82,9 @@ type TransferProjectOwnershipInput struct {
 	NewOwnerID int64
 	CallerID   int64
 }
+
+type MoveProjectInput struct {
+	ProjectID   int64
+	WorkspaceID int64
+	CallerID    int64
+}

@@ -38,7 +38,7 @@ type Theme struct {
 }
 
 func (t *Theme) FromRows(row sqlc.Theme) {
-	t.ID = int64(row.ID)
+	t.ID = row.ID
 	t.PrimaryColor = convert.ToString(row.PrimaryColor)
 	t.SecondaryColor = convert.ToString(row.SecondaryColor)
 	t.AccentColor = convert.ToString(row.AccentColor)

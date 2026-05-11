@@ -136,6 +136,21 @@ func RegisterRoutes(ctx context.Context, router *chi.Mux, service *application.S
 		&handlers.ListHeldOrdersHandler{Service: service},
 	)
 
+	serverHttp.RegisterPOSTWithValidation[handlers.TransferTableRequest, handlers.TransferTableResponse](
+		ctx, router, handlers.TransferTableRoutes(),
+		&handlers.TransferTableHandler{Service: service},
+	)
+
+	serverHttp.RegisterDELETEWithValidation[handlers.VoidOrderItemRequest, handlers.VoidOrderItemResponse](
+		ctx, router, handlers.VoidOrderItemRoutes(),
+		&handlers.VoidOrderItemHandler{Service: service},
+	)
+
+	serverHttp.RegisterPOSTWithValidation[handlers.SendToKitchenRequest, handlers.SendToKitchenResponse](
+		ctx, router, handlers.SendToKitchenRoutes(),
+		&handlers.SendToKitchenHandler{Service: service},
+	)
+
 	// Paddle billing
 	serverHttp.RegisterPOST[handlers.PayOrderRequest, handlers.PayOrderResponse](
 		ctx, router, handlers.PayOrderRoutes(),
@@ -144,4 +159,18 @@ func RegisterRoutes(ctx context.Context, router *chi.Mux, service *application.S
 
 	// Paddle webhook (anonymous, raw body for HMAC verification)
 	router.Post("/pos/payments/webhook", handlers.PaddlePOSWebhookHTTPHandler(service))
+
+	// Public online ordering (anonymous)
+	serverHttp.RegisterPOSTWithValidation[handlers.CreatePublicOrderRequest, handlers.CreatePublicOrderResponse](
+		ctx, router, handlers.CreatePublicOrderRoutes(),
+		&handlers.CreatePublicOrderHandler{Service: service},
+	)
+
+	serverHttp.RegisterGET[handlers.GetPublicOrderStatusRequest, handlers.GetPublicOrderStatusResponse](
+		ctx, router, handlers.GetPublicOrderStatusRoutes(),
+		&handlers.GetPublicOrderStatusHandler{Service: service},
+	)
+
+	// POS WebSocket realtime endpoint (anonymous at middleware layer; token validated in handler)
+	router.Get("/pos/ws", handlers.ServePOSWebSocket)
 }

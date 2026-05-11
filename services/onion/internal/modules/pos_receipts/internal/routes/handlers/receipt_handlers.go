@@ -8,11 +8,10 @@ import (
 	"strings"
 
 	"github.com/go-chi/chi/v5"
-	authPkg "github.com/voxire/onion/internal/platform/auth"
-	errorModels "github.com/voxire/onion/internal/platform/errors"
-
 	"github.com/voxire/onion/internal/modules/pos_receipts/internal/application"
 	"github.com/voxire/onion/internal/modules/pos_receipts/internal/domain"
+	authPkg "github.com/voxire/onion/internal/platform/auth"
+	errorModels "github.com/voxire/onion/internal/platform/errors"
 )
 
 type ReceiptPayload struct {
@@ -54,10 +53,13 @@ type ListReceiptsResponse struct {
 
 func EmailReceiptRoutes() []string { return []string{"/pos/receipts/{id}/email"} }
 
-type EmailReceiptHandler struct{ Service *application.Service }
-type EmailReceiptRequest struct {
-	Email string `json:"email"`
-}
+type (
+	EmailReceiptHandler struct{ Service *application.Service }
+	EmailReceiptRequest struct {
+		Email string `json:"email"`
+	}
+)
+
 type EmailReceiptResponse struct {
 	Message string `json:"message"`
 }

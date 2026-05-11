@@ -5,12 +5,11 @@ import (
 	"errors"
 	"net/http"
 
-	hrv1 "github.com/voxire/voxie/gen/go/hr/v1"
-
 	"github.com/voxire/onion/internal/modules/hr_attendance/internal/application"
 	"github.com/voxire/onion/internal/modules/hr_attendance/internal/domain"
 	errorModels "github.com/voxire/onion/internal/platform/errors"
 	"github.com/voxire/onion/internal/platform/logger"
+	hrv1 "github.com/voxire/voxie/gen/go/hr/v1"
 )
 
 func ClockInRoutes() []string { return []string{"/hr/attendance/clock-in"} }

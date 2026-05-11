@@ -66,4 +66,42 @@ func RegisterRoutes(ctx context.Context, router *chi.Mux, service *application.S
 		ctx, router, handlers.DeactivateMemberRoutes(),
 		&handlers.DeactivateMemberHandler{Service: service},
 	)
+
+	// Groups
+	serverHttp.RegisterGET[handlers.ListGroupsRequest, handlers.ListGroupsResponse](
+		ctx, router, handlers.ListGroupsRoutes(),
+		&handlers.ListGroupsHandler{Service: service},
+	)
+	serverHttp.RegisterPOSTWithValidation[handlers.CreateGroupRequest, handlers.CreateGroupResponse](
+		ctx, router, handlers.ListGroupsRoutes(),
+		&handlers.CreateGroupHandler{Service: service},
+	)
+	serverHttp.RegisterGET[handlers.GetGroupDetailRequest, handlers.GetGroupDetailResponse](
+		ctx, router, handlers.GetGroupDetailRoutes(),
+		&handlers.GetGroupDetailHandler{Service: service},
+	)
+	serverHttp.RegisterPUTWithValidation[handlers.UpdateGroupRequest, handlers.UpdateGroupResponse](
+		ctx, router, handlers.GetGroupDetailRoutes(),
+		&handlers.UpdateGroupHandler{Service: service},
+	)
+	serverHttp.RegisterDELETE[handlers.DeleteGroupRequest, handlers.DeleteGroupResponse](
+		ctx, router, handlers.GetGroupDetailRoutes(),
+		&handlers.DeleteGroupHandler{Service: service},
+	)
+	serverHttp.RegisterPOSTWithValidation[handlers.AddGroupMembersRequest, handlers.AddGroupMembersResponse](
+		ctx, router, handlers.AddGroupMembersRoutes(),
+		&handlers.AddGroupMembersHandler{Service: service},
+	)
+	serverHttp.RegisterDELETE[handlers.RemoveGroupMemberRequest, handlers.RemoveGroupMemberResponse](
+		ctx, router, handlers.RemoveGroupMemberRoutes(),
+		&handlers.RemoveGroupMemberHandler{Service: service},
+	)
+	serverHttp.RegisterGET[handlers.GetUserGroupsRequest, handlers.GetUserGroupsResponse](
+		ctx, router, handlers.GetUserGroupsRoutes(),
+		&handlers.GetUserGroupsHandler{Service: service},
+	)
+	serverHttp.RegisterPOSTWithValidation[handlers.BulkInviteRequest, handlers.BulkInviteResponse](
+		ctx, router, handlers.BulkInviteRoutes(),
+		&handlers.BulkInviteHandler{Service: service},
+	)
 }

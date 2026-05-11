@@ -20,12 +20,15 @@ type mockRepo struct {
 func (m *mockRepo) ListAll(_ context.Context) ([]domain.Addon, error) {
 	return m.all, m.allErr
 }
+
 func (m *mockRepo) ListForBusiness(_ context.Context, _ int64) ([]domain.BusinessAddon, error) {
 	return m.enabled, m.bizErr
 }
+
 func (m *mockRepo) Enable(_ context.Context, _ int64, _ string) error {
 	return m.enErr
 }
+
 func (m *mockRepo) Disable(_ context.Context, _ int64, _ string) error {
 	return m.disErr
 }

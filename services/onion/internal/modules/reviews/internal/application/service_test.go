@@ -17,6 +17,7 @@ type mockRepo struct {
 func (m *mockRepo) List(_ context.Context, _ int64) ([]domain.Review, error) {
 	return m.list, nil
 }
+
 func (m *mockRepo) Create(_ context.Context, _ int64, _ domain.ReviewInput) (int64, error) {
 	return m.createID, m.createErr
 }

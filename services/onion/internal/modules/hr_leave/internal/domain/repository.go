@@ -30,7 +30,7 @@ type Repository interface {
 	// Accrual
 	ListDistinctOwnerIDs(ctx context.Context) ([]int64, error)
 	ListAllActiveLeaveTypesForOwner(ctx context.Context, ownerID int64) ([]LeaveTypeRecord, error)
-	ListBalancesForAccrual(ctx context.Context, ownerID int64, year int32, currentMonth int32) ([]LeaveBalanceRecord, error)
+	ListBalancesForAccrual(ctx context.Context, ownerID int64, year, currentMonth int32) ([]LeaveBalanceRecord, error)
 	AddToEntitledDays(ctx context.Context, ownerID, employeeID, leaveTypeID int64, year int32, days float64, month int32) error
 }
 

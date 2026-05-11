@@ -5,8 +5,8 @@ import (
 	"strconv"
 	"time"
 
-	"github.com/voxire/onion/internal/platform/utils/convert"
 	sqlc "github.com/voxire/onion/internal/modules/memory/internal/infrastructure/persistence/sqlc"
+	"github.com/voxire/onion/internal/platform/utils/convert"
 )
 
 type ChatSession struct {

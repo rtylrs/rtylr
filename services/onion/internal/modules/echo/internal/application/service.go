@@ -5,8 +5,8 @@ import (
 	"errors"
 	"fmt"
 
-	"github.com/voxire/onion/internal/platform/snips"
 	"github.com/voxire/onion/internal/modules/echo/internal/domain"
+	"github.com/voxire/onion/internal/platform/snips"
 )
 
 var ErrClientNotInitialized = errors.New("AI client not initialized")

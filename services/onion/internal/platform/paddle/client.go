@@ -9,9 +9,11 @@ import (
 	"crypto/sha256"
 	"encoding/hex"
 	"encoding/json"
+	"errors"
 	"fmt"
 	"io"
 	"net/http"
+	"strconv"
 	"strings"
 	"time"
 
@@ -24,13 +26,13 @@ import (
 // CreateTransactionRequest is the body for POST /transactions.
 // https://developer.paddle.com/api-reference/transactions/create-transaction
 type CreateTransactionRequest struct {
-	Items          []TransactionItem    `json:"items"`
-	CustomerID     string               `json:"customer_id,omitempty"`
-	CustomerEmail  string               `json:"customer_email,omitempty"`
-	CheckoutURL    string               `json:"checkout"`
-	SuccessURL     string               `json:"success_url,omitempty"`
-	CustomData     map[string]string    `json:"custom_data,omitempty"`
-	CollectionMode string               `json:"collection_mode"`
+	Items          []TransactionItem `json:"items"`
+	CustomerID     string            `json:"customer_id,omitempty"`
+	CustomerEmail  string            `json:"customer_email,omitempty"`
+	CheckoutURL    string            `json:"checkout"`
+	SuccessURL     string            `json:"success_url,omitempty"`
+	CustomData     map[string]string `json:"custom_data,omitempty"`
+	CollectionMode string            `json:"collection_mode"`
 }
 
 // TransactionItem is a single line in a Paddle transaction.
@@ -57,16 +59,16 @@ type TransactionResponse struct {
 
 // WebhookEvent is the outer envelope of all Paddle webhook notifications.
 type WebhookEvent struct {
-	EventType        string          `json:"event_type"`
-	OccurredAt       time.Time       `json:"occurred_at"`
-	Data             json.RawMessage `json:"data"`
+	EventType  string          `json:"event_type"`
+	OccurredAt time.Time       `json:"occurred_at"`
+	Data       json.RawMessage `json:"data"`
 }
 
 // SubscriptionData is embedded in subscription.* webhook events.
 type SubscriptionData struct {
-	ID         string     `json:"id"`
-	Status     string     `json:"status"`
-	CustomerID string     `json:"customer_id"`
+	ID         string `json:"id"`
+	Status     string `json:"status"`
+	CustomerID string `json:"customer_id"`
 	Items      []struct {
 		Price struct {
 			ID        string `json:"id"`
@@ -75,7 +77,7 @@ type SubscriptionData struct {
 		Status   string `json:"status"`
 		Quantity int    `json:"quantity"`
 	} `json:"items"`
-	CustomData     map[string]string `json:"custom_data"`
+	CustomData           map[string]string `json:"custom_data"`
 	CurrentBillingPeriod *struct {
 		EndsAt time.Time `json:"ends_at"`
 	} `json:"current_billing_period"`
@@ -105,7 +107,7 @@ type POSPaymentResult struct {
 // transaction on Paddle's side.
 func CreatePOSTransaction(ctx context.Context, req POSPaymentRequest) (POSPaymentResult, error) {
 	if !config.IsPaddleConfigured() {
-		return POSPaymentResult{}, fmt.Errorf("paddle not configured")
+		return POSPaymentResult{}, errors.New("paddle not configured")
 	}
 
 	// Paddle's transaction-creation endpoint accepts an inline one-off price via
@@ -114,8 +116,8 @@ func CreatePOSTransaction(ctx context.Context, req POSPaymentRequest) (POSPaymen
 		"collection_mode": "automatic",
 		"customer_email":  req.CustomerEmail,
 		"custom_data": map[string]string{
-			"owner_id": fmt.Sprintf("%d", req.OwnerID),
-			"order_id": fmt.Sprintf("%d", req.OrderID),
+			"owner_id": strconv.FormatInt(req.OwnerID, 10),
+			"order_id": strconv.FormatInt(req.OrderID, 10),
 		},
 		"items": []map[string]interface{}{
 			{
@@ -123,7 +125,7 @@ func CreatePOSTransaction(ctx context.Context, req POSPaymentRequest) (POSPaymen
 				"price": map[string]interface{}{
 					"description": req.Description,
 					"unit_price": map[string]interface{}{
-						"amount":        fmt.Sprintf("%d", req.AmountMinor),
+						"amount":        strconv.FormatInt(req.AmountMinor, 10),
 						"currency_code": strings.ToUpper(req.Currency),
 					},
 				},
@@ -183,19 +185,19 @@ func CreatePOSTransaction(ctx context.Context, req POSPaymentRequest) (POSPaymen
 
 // CreateTransaction creates a Paddle transaction (checkout session).
 // Returns the checkout URL the user should be redirected to.
-func CreateTransaction(ctx context.Context, ownerID int64, priceID string, customerEmail string) (string, error) {
+func CreateTransaction(ctx context.Context, ownerID int64, priceID, customerEmail string) (string, error) {
 	if !config.IsPaddleConfigured() {
-		return "", fmt.Errorf("paddle not configured")
+		return "", errors.New("paddle not configured")
 	}
 
 	body := map[string]interface{}{
 		"items": []map[string]interface{}{
 			{"price_id": priceID, "quantity": 1},
 		},
-		"collection_mode":  "automatic",
-		"customer_email":   customerEmail,
+		"collection_mode": "automatic",
+		"customer_email":  customerEmail,
 		"custom_data": map[string]string{
-			"owner_id": fmt.Sprintf("%d", ownerID),
+			"owner_id": strconv.FormatInt(ownerID, 10),
 		},
 	}
 
@@ -268,7 +270,7 @@ func VerifyWebhookSignature(rawBody []byte, signatureHeader string) error {
 	}
 
 	if ts == "" || h1 == "" {
-		return fmt.Errorf("invalid Paddle-Signature header format")
+		return errors.New("invalid Paddle-Signature header format")
 	}
 
 	// Compute HMAC-SHA256 of "ts:rawBody"
@@ -278,7 +280,7 @@ func VerifyWebhookSignature(rawBody []byte, signatureHeader string) error {
 	expected := hex.EncodeToString(mac.Sum(nil))
 
 	if !hmac.Equal([]byte(expected), []byte(h1)) {
-		return fmt.Errorf("webhook signature mismatch")
+		return errors.New("webhook signature mismatch")
 	}
 
 	return nil

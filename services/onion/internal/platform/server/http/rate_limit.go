@@ -170,12 +170,42 @@ func getClientKey(r *http.Request) string {
 // require parsing the request body twice, which isn't worth the
 // complexity for what this bucket actually defends.
 func PerRouteRateLimit(limit int, window time.Duration) func(http.Handler) http.Handler {
+	return perRouteRateLimitWithKeyFn(limit, window, func(r *http.Request) string {
+		return r.URL.Path + "|" + getClientKey(r)
+	})
+}
+
+// AIUserRateLimit returns middleware that rate-limits per authenticated user ID
+// (read from the "userId" JSON field in the request body) for the AI SSE endpoint.
+// It applies a tighter limit than the global limiter so that individual users
+// cannot monopolise the AI generation capacity.
+//
+// Rollouts:
+//   - /ai/generate-text-stream → 5/min/user  (AI cost control)
+//
+// The userId is taken from the GenerateTextStreamRequest struct (snake_case JSON
+// key "userId") which is already part of the request contract.  If the header
+// X-User-Id is present, that value is preferred to avoid re-parsing the body.
+// Falls back to IP if neither source provides a non-empty value.
+func AIUserRateLimit(limit int, window time.Duration) func(http.Handler) http.Handler {
+	return perRouteRateLimitWithKeyFn(limit, window, func(r *http.Request) string {
+		if uid := r.Header.Get("X-User-Id"); uid != "" {
+			return r.URL.Path + "|user:" + uid
+		}
+		return r.URL.Path + "|" + getClientKey(r)
+	})
+}
+
+// perRouteRateLimitWithKeyFn is the shared implementation used by both
+// PerRouteRateLimit and AIUserRateLimit.  The keyFn determines the bucket
+// identifier for each incoming request.
+func perRouteRateLimitWithKeyFn(limit int, window time.Duration, keyFn func(*http.Request) string) func(http.Handler) http.Handler {
 	limiter := NewSecurityRateLimiter(limit, window)
 	limiter.cleanup()
 
 	return func(next http.Handler) http.Handler {
 		return http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
-			key := r.URL.Path + "|" + getClientKey(r)
+			key := keyFn(r)
 			if !limiter.isAllowed(key) {
 				logger.Ctx(r.Context()).Warn("Per-route rate limit exceeded",
 					logger.String("ip", r.RemoteAddr),

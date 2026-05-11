@@ -4,19 +4,20 @@ import (
 	"context"
 	"net/http"
 
-	hubv1 "github.com/voxire/voxie/gen/go/hub/v1"
-
 	"github.com/voxire/onion/internal/modules/webhooks/internal/application"
 	authPkg "github.com/voxire/onion/internal/platform/auth"
 	errorModels "github.com/voxire/onion/internal/platform/errors"
+	hubv1 "github.com/voxire/voxie/gen/go/hub/v1"
 )
 
 func WebhookRoutes() []string { return []string{"/webhooks"} }
 
 // -- List --
 
-type ListHandler struct{ Service *application.Service }
-type ListRequest struct{}
+type (
+	ListHandler struct{ Service *application.Service }
+	ListRequest struct{}
+)
 
 type ListResponse struct {
 	Webhooks []*hubv1.Webhook `json:"webhooks"`

@@ -16,6 +16,7 @@ type mockRepo struct {
 func (m *mockRepo) ListPriceLists(_ context.Context, _ int64) ([]domain.PriceList, error) {
 	return m.list, nil
 }
+
 func (m *mockRepo) CreatePriceList(_ context.Context, _ int64, input domain.PriceListInput) (int64, error) {
 	m.createGot = input
 	return m.createID, nil

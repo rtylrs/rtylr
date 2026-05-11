@@ -5,13 +5,12 @@ import (
 	"errors"
 	"net/http"
 
-	hrv1 "github.com/voxire/voxie/gen/go/hr/v1"
-
 	"github.com/voxire/onion/internal/modules/hr_shifts/internal/application"
 	"github.com/voxire/onion/internal/modules/hr_shifts/internal/domain"
 	authPkg "github.com/voxire/onion/internal/platform/auth"
 	errorModels "github.com/voxire/onion/internal/platform/errors"
 	"github.com/voxire/onion/internal/platform/logger"
+	hrv1 "github.com/voxire/voxie/gen/go/hr/v1"
 )
 
 func CreateShiftAssignmentRoutes() []string { return []string{"/hr/shifts/roster/assignments"} }

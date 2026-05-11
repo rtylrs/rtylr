@@ -4,6 +4,7 @@ import (
 	"context"
 	"database/sql"
 	"encoding/json"
+	"errors"
 	"fmt"
 	"math"
 	"strings"
@@ -265,7 +266,10 @@ func (r *Repository) ListViews(ctx context.Context, workspaceID int64) ([]domain
 }
 
 func (r *Repository) CreateView(ctx context.Context, input domain.ViewInput) (int64, error) {
-	filtersJSON, _ := json.Marshal(input.Filters)
+	filtersJSON, err := json.Marshal(input.Filters)
+	if err != nil {
+		return 0, err
+	}
 	res, err := r.pool.ExecContext(ctx,
 		`INSERT INTO flow_views (workspace_id, name, icon, filters, group_by, sort_by, sort_dir, created_by)
 		 VALUES (?, ?, ?, ?, ?, ?, ?, ?)`,
@@ -285,8 +289,11 @@ func (r *Repository) CreateView(ctx context.Context, input domain.ViewInput) (in
 }
 
 func (r *Repository) UpdateView(ctx context.Context, input domain.UpdateViewInput) error {
-	filtersJSON, _ := json.Marshal(input.Filters)
-	_, err := r.pool.ExecContext(ctx,
+	filtersJSON, err := json.Marshal(input.Filters)
+	if err != nil {
+		return err
+	}
+	_, err = r.pool.ExecContext(ctx,
 		`UPDATE flow_views SET name = ?, icon = ?, filters = ?, group_by = ?, sort_by = ?, sort_dir = ? WHERE id = ?`,
 		input.Name,
 		sql.NullString{String: input.Icon, Valid: input.Icon != ""},
@@ -359,6 +366,9 @@ func (r *Repository) GetInsights(ctx context.Context, workspaceID int64) (domain
 				})
 			}
 		}
+		if err := velRows.Err(); err != nil {
+			logger.Ctx(ctx).Error("GetInsights velocity rows failed", logger.Error(err))
+		}
 	}
 
 	// Throughput: completed per week last 8 weeks (same as velocity for now)
@@ -379,7 +389,7 @@ func (r *Repository) GetInsights(ctx context.Context, workspaceID int64) (domain
 		remaining := math.Max(0, float64(totalOpen)-float64(d)*idealPerDay*1.15)
 		ins.Burndown[d] = domain.InsightsBurndownPoint{
 			Day:    d,
-			Ideal:  math.Round((float64(totalOpen) - idealPerDay*float64(d)) * 10) / 10,
+			Ideal:  math.Round((float64(totalOpen)-idealPerDay*float64(d))*10) / 10,
 			Actual: math.Round(remaining*10) / 10,
 		}
 	}
@@ -402,6 +412,9 @@ func (r *Repository) GetInsights(ctx context.Context, workspaceID int64) (domain
 				m.Hours = math.Round(m.Hours*10) / 10
 				ins.TimeByMember = append(ins.TimeByMember, m)
 			}
+		}
+		if err := tlRows.Err(); err != nil {
+			logger.Ctx(ctx).Error("GetInsights time log rows failed", logger.Error(err))
 		}
 	}
 	if ins.TimeByMember == nil {
@@ -458,6 +471,9 @@ func (r *Repository) GetTeamWorkload(ctx context.Context, workspaceID int64) ([]
 		w.AssignedHours = float64(taskCount) * 5
 		w.Load = math.Min(1.0, float64(taskCount)/float64(w.Capacity))
 		workloads = append(workloads, w)
+	}
+	if err := rows.Err(); err != nil {
+		return nil, err
 	}
 
 	// Load tasks for each member
@@ -624,7 +640,7 @@ func (r *Repository) GetUserSettings(ctx context.Context, userID int64) (domain.
 		SELECT task_assigned, task_comments, mentions, status_changes, weekly_digest, email_notifications
 		FROM flow_user_settings WHERE user_id = ?`, userID,
 	).Scan(&s.TaskAssigned, &s.TaskComments, &s.Mentions, &s.StatusChanges, &s.WeeklyDigest, &s.EmailNotifications)
-	if err == sql.ErrNoRows {
+	if errors.Is(err, sql.ErrNoRows) {
 		return s, nil // return defaults
 	}
 	return s, err
@@ -658,5 +674,5 @@ func (r *Repository) GetProjectTaskCounts(ctx context.Context, projectID int64) 
 		`SELECT COUNT(*), SUM(status='done') FROM flow_tasks WHERE project_id = ? AND parent_task_id IS NULL`,
 		projectID,
 	).Scan(&total, &done)
-	return
+	return total, done
 }

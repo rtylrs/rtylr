@@ -6,11 +6,10 @@ import (
 	"net/http"
 	"time"
 
-	authv1 "github.com/voxire/voxie/gen/go/auth/v1"
-
 	"github.com/voxire/onion/internal/modules/user/internal/application"
 	authPkg "github.com/voxire/onion/internal/platform/auth"
 	errorModels "github.com/voxire/onion/internal/platform/errors"
+	authv1 "github.com/voxire/voxie/gen/go/auth/v1"
 )
 
 func LoginRoutes() []string {

@@ -18,12 +18,15 @@ type mockRepo struct {
 func (m *mockRepo) ListSuppliers(_ context.Context, _ int64) ([]domain.Supplier, error) {
 	return nil, nil
 }
+
 func (m *mockRepo) CreateSupplier(_ context.Context, _ int64, _ domain.SupplierInput) (int64, error) {
 	return m.createID, m.createErr
 }
+
 func (m *mockRepo) UpdateSupplier(_ context.Context, _, _ int64, _ domain.SupplierInput) error {
 	return m.updateErr
 }
+
 func (m *mockRepo) DeleteSupplier(_ context.Context, _, _ int64) error {
 	return m.deleteErr
 }

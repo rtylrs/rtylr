@@ -3,6 +3,7 @@ package infrastructure
 import (
 	"context"
 	"database/sql"
+	"errors"
 	"fmt"
 	"strconv"
 	"time"
@@ -66,7 +67,7 @@ func (r *Repository) CreateLocation(ctx context.Context, ownerID int64, input do
 
 // ─── Tables ──────────────────────────────────────────────────────────────────
 
-func (r *Repository) ListTables(ctx context.Context, ownerID int64, locationID int64, status string) ([]domain.Table, error) {
+func (r *Repository) ListTables(ctx context.Context, ownerID, locationID int64, status string) ([]domain.Table, error) {
 	// ListTablesByOwner returns all tables; we filter in-memory for locationID/status
 	// since the sqlc query doesn't support optional filters.
 	rows, err := r.queries.ListTablesByOwner(ctx, ownerID)
@@ -163,7 +164,7 @@ func (r *Repository) GetCurrentOpenSession(ctx context.Context, ownerID, staffID
 		StaffID: staffID,
 	})
 	if err != nil {
-		if err == sql.ErrNoRows {
+		if errors.Is(err, sql.ErrNoRows) {
 			return nil, nil
 		}
 		logger.Ctx(ctx).Error("Failed to get current open session", logger.Error(err))
@@ -273,14 +274,14 @@ func (r *Repository) GetSessionTotals(ctx context.Context, sessionID int64) (tot
 	row, err := r.queries.GetSessionTotals(ctx, sql.NullInt64{Int64: sessionID, Valid: true})
 	if err != nil {
 		logger.Ctx(ctx).Error("Failed to get session totals", logger.Error(err))
-		return
+		return totalSales, cashSales, cardSales, onlineSales, totalOrders, err
 	}
 	totalSales = interfaceToFloat(row.TotalSales)
 	cashSales = interfaceToFloat(row.CashSales)
 	cardSales = interfaceToFloat(row.CardSales)
 	onlineSales = interfaceToFloat(row.OnlineSales)
 	totalOrders = int(row.TotalOrders)
-	return
+	return totalSales, cashSales, cardSales, onlineSales, totalOrders, err
 }
 
 func (r *Repository) UpdateSessionTotals(ctx context.Context, sessionID int64, totalSales, cashSales, cardSales, onlineSales float64, totalOrders int) error {
@@ -305,7 +306,7 @@ func (r *Repository) GetSessionByID(ctx context.Context, ownerID, sessionID int6
 		ID:      sessionID,
 	})
 	if err != nil {
-		if err == sql.ErrNoRows {
+		if errors.Is(err, sql.ErrNoRows) {
 			return nil, domain.ErrSessionNotFound
 		}
 		logger.Ctx(ctx).Error("Failed to get session by id", logger.Error(err))
@@ -391,7 +392,7 @@ func (r *Repository) GetOrder(ctx context.Context, ownerID, orderID int64) (*dom
 		ID:      orderID,
 	})
 	if err != nil {
-		if err == sql.ErrNoRows {
+		if errors.Is(err, sql.ErrNoRows) {
 			return nil, domain.ErrOrderNotFound
 		}
 		logger.Ctx(ctx).Error("Failed to get pos order", logger.Error(err))
@@ -606,7 +607,7 @@ func (r *Repository) ProcessPayment(ctx context.Context, ownerID, orderID int64,
 		ID:      orderID,
 	})
 	if err != nil {
-		if err == sql.ErrNoRows {
+		if errors.Is(err, sql.ErrNoRows) {
 			return domain.ErrOrderNotFound
 		}
 		logger.Ctx(ctx).Error("Failed to get order for payment", logger.Error(err))
@@ -697,6 +698,113 @@ func (r *Repository) CreateRefund(ctx context.Context, ownerID, orderID, refunde
 	}
 
 	return refundID, nil
+}
+
+func (r *Repository) VoidOrderItem(ctx context.Context, ownerID, orderID, itemID int64) error {
+	tx, err := r.pool.BeginTx(ctx, nil)
+	if err != nil {
+		logger.Ctx(ctx).Error("Failed to begin void-order-item transaction", logger.Error(err))
+		return err
+	}
+
+	defer func() {
+		if p := recover(); p != nil {
+			_ = tx.Rollback()
+			panic(p)
+		}
+	}()
+
+	var itemStatus string
+	if scanErr := tx.QueryRowContext(ctx,
+		"SELECT status FROM pos_order_items WHERE id=? AND order_id=?",
+		itemID, orderID,
+	).Scan(&itemStatus); scanErr != nil {
+		_ = tx.Rollback()
+		if errors.Is(scanErr, sql.ErrNoRows) {
+			return domain.ErrOrderNotFound
+		}
+		logger.Ctx(ctx).Error("Failed to fetch order item for void", logger.Error(scanErr))
+		return scanErr
+	}
+
+	if _, execErr := tx.ExecContext(ctx,
+		"UPDATE pos_order_items SET status='cancelled' WHERE id=? AND order_id=?",
+		itemID, orderID,
+	); execErr != nil {
+		_ = tx.Rollback()
+		logger.Ctx(ctx).Error("Failed to cancel order item", logger.Error(execErr))
+		return execErr
+	}
+
+	if _, execErr := tx.ExecContext(ctx,
+		`UPDATE pos_orders
+		 SET subtotal = (SELECT COALESCE(SUM(total),0) FROM pos_order_items WHERE order_id=? AND status != 'cancelled'),
+		     total    = subtotal + tax_amount - discount_amount
+		 WHERE id=? AND owner_id=?`,
+		orderID, orderID, ownerID,
+	); execErr != nil {
+		_ = tx.Rollback()
+		logger.Ctx(ctx).Error("Failed to recalculate order total after item void", logger.Error(execErr))
+		return execErr
+	}
+
+	if commitErr := tx.Commit(); commitErr != nil {
+		logger.Ctx(ctx).Error("Failed to commit void-order-item transaction", logger.Error(commitErr))
+		return commitErr
+	}
+
+	return nil
+}
+
+func (r *Repository) TransferTable(ctx context.Context, ownerID, orderID, oldTableID, newTableID int64) error {
+	tx, err := r.pool.BeginTx(ctx, nil)
+	if err != nil {
+		logger.Ctx(ctx).Error("Failed to begin transfer-table transaction", logger.Error(err))
+		return err
+	}
+
+	defer func() {
+		if p := recover(); p != nil {
+			_ = tx.Rollback()
+			panic(p)
+		}
+	}()
+
+	if oldTableID > 0 {
+		if _, execErr := tx.ExecContext(ctx,
+			"UPDATE pos_tables SET status='available' WHERE id=? AND owner_id=?",
+			oldTableID, ownerID,
+		); execErr != nil {
+			_ = tx.Rollback()
+			logger.Ctx(ctx).Error("Failed to free old table during transfer", logger.Error(execErr))
+			return execErr
+		}
+	}
+
+	if _, execErr := tx.ExecContext(ctx,
+		"UPDATE pos_orders SET table_id=? WHERE id=? AND owner_id=?",
+		newTableID, orderID, ownerID,
+	); execErr != nil {
+		_ = tx.Rollback()
+		logger.Ctx(ctx).Error("Failed to update order table_id during transfer", logger.Error(execErr))
+		return execErr
+	}
+
+	if _, execErr := tx.ExecContext(ctx,
+		"UPDATE pos_tables SET status='occupied' WHERE id=? AND owner_id=?",
+		newTableID, ownerID,
+	); execErr != nil {
+		_ = tx.Rollback()
+		logger.Ctx(ctx).Error("Failed to mark new table occupied during transfer", logger.Error(execErr))
+		return execErr
+	}
+
+	if commitErr := tx.Commit(); commitErr != nil {
+		logger.Ctx(ctx).Error("Failed to commit transfer-table transaction", logger.Error(commitErr))
+		return commitErr
+	}
+
+	return nil
 }
 
 // ─── Dashboard ───────────────────────────────────────────────────────────────
@@ -831,7 +939,7 @@ func (r *Repository) ApplyDiscount(ctx context.Context, ownerID int64, input dom
 		ID:      input.OrderID,
 	})
 	if err != nil {
-		if err == sql.ErrNoRows {
+		if errors.Is(err, sql.ErrNoRows) {
 			return domain.ErrOrderNotFound
 		}
 		return err
@@ -990,38 +1098,6 @@ func sessionFromRow(row sqlc.PosSession) *domain.Session {
 	return s
 }
 
-func orderFromRow(row sqlc.PosOrder) domain.Order {
-	o := domain.Order{
-		ID:             row.ID,
-		OwnerID:        row.OwnerID,
-		SessionID:      row.SessionID.Int64,
-		TableID:        row.TableID.Int64,
-		LocationID:     row.LocationID.Int64,
-		OrderNumber:    row.OrderNumber,
-		Type:           domain.OrderType(row.Type.PosOrdersType),
-		Status:         domain.OrderStatus(row.Status.PosOrdersStatus),
-		CustomerID:     row.CustomerID.Int64,
-		CustomerName:   row.CustomerName.String,
-		StaffID:        row.StaffID.Int64,
-		Subtotal:       decimalToFloat(row.Subtotal.String),
-		DiscountAmount: decimalToFloat(row.DiscountAmount.String),
-		TaxAmount:      decimalToFloat(row.TaxAmount.String),
-		Total:          decimalToFloat(row.Total.String),
-		PaymentMethod:  domain.PaymentMethod(row.PaymentMethod.PosOrdersPaymentMethod),
-		PaymentStatus:  domain.PaymentStatus(row.PaymentStatus.PosOrdersPaymentStatus),
-		AmountPaid:     decimalToFloat(row.AmountPaid.String),
-		ChangeDue:      decimalToFloat(row.ChangeDue.String),
-		Notes:          row.Notes.String,
-		KitchenNotes:   row.KitchenNotes.String,
-		CreatedAt:      row.CreatedAt.Time,
-		UpdatedAt:      row.UpdatedAt.Time,
-	}
-	if row.PaidAt.Valid {
-		o.PaidAt = &row.PaidAt.Time
-	}
-	return o
-}
-
 func scanOrderRow(rows *sql.Rows) (domain.Order, error) {
 	var o domain.Order
 	var paidAt sql.NullTime
@@ -1090,4 +1166,84 @@ func (r *Repository) GetOrderIDByPaddleTx(ctx context.Context, txID string) (int
 		return 0, 0, err
 	}
 	return row.ID, row.OwnerID, nil
+}
+
+// ─── Public Online Ordering ──────────────────────────────────────────────────
+
+func (r *Repository) CreatePublicOrder(ctx context.Context, ownerID int64, orderNumber, customerName, customerPhone, notes string, items []domain.OrderItemInput) (int64, error) {
+	tx, err := r.pool.BeginTx(ctx, nil)
+	if err != nil {
+		logger.Ctx(ctx).Error("Failed to begin public order transaction", logger.Error(err))
+		return 0, err
+	}
+
+	defer func() {
+		if err != nil {
+			_ = tx.Rollback()
+		}
+	}()
+
+	var subtotal float64
+	for _, item := range items {
+		subtotal += item.UnitPrice * item.Quantity
+	}
+
+	res, err := tx.ExecContext(ctx,
+		`INSERT INTO pos_orders
+		 (owner_id, order_number, type, status, customer_name, subtotal, total, payment_status, notes, created_at, updated_at)
+		 VALUES (?, ?, 'online', 'pending', ?, ?, ?, 'unpaid', ?, NOW(), NOW())`,
+		ownerID, orderNumber, nullableString(customerName), floatToDecimal(subtotal), floatToDecimal(subtotal), nullableString(notes),
+	)
+	if err != nil {
+		logger.Ctx(ctx).Error("Failed to insert public order", logger.Error(err))
+		return 0, err
+	}
+
+	orderID, err := res.LastInsertId()
+	if err != nil {
+		return 0, err
+	}
+
+	for _, item := range items {
+		itemTotal := item.UnitPrice * item.Quantity
+		_, err = tx.ExecContext(ctx,
+			`INSERT INTO pos_order_items
+			 (order_id, menu_item_id, name, quantity, unit_price, total, notes, status, created_at)
+			 VALUES (?, ?, ?, ?, ?, ?, ?, 'pending', NOW())`,
+			orderID, nullableInt64(item.MenuItemID), item.Name, floatToDecimal3(item.Quantity),
+			floatToDecimal(item.UnitPrice), floatToDecimal(itemTotal), nullableString(item.Notes),
+		)
+		if err != nil {
+			logger.Ctx(ctx).Error("Failed to insert public order item", logger.Error(err))
+			return 0, err
+		}
+	}
+
+	if err = tx.Commit(); err != nil {
+		return 0, err
+	}
+	return orderID, nil
+}
+
+func (r *Repository) GetPublicOrderStatus(ctx context.Context, orderID int64) (orderNumber, status string, err error) {
+	row := r.pool.QueryRowContext(ctx,
+		`SELECT order_number, status FROM pos_orders WHERE id = ? LIMIT 1`,
+		orderID,
+	)
+	err = row.Scan(&orderNumber, &status)
+	return orderNumber, status, err
+}
+
+func nullableString(s string) interface{} {
+	if s == "" {
+		return nil
+	}
+	return s
+}
+
+func nullableInt64(n int64) interface{} {
+	if n == 0 {
+		return nil
+	}
+	return n
 }

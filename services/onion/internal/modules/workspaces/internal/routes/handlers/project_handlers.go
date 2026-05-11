@@ -6,13 +6,12 @@ import (
 	"net/http"
 	"time"
 
-	flowv1 "github.com/voxire/voxie/gen/go/flow/v1"
-
 	"github.com/voxire/onion/internal/modules/workspaces/internal/application"
 	"github.com/voxire/onion/internal/modules/workspaces/internal/domain"
 	authPkg "github.com/voxire/onion/internal/platform/auth"
 	errorModels "github.com/voxire/onion/internal/platform/errors"
 	"github.com/voxire/onion/internal/platform/wsbus"
+	flowv1 "github.com/voxire/voxie/gen/go/flow/v1"
 )
 
 // publishProjectEvent fans a project-level change out to every client
@@ -138,11 +137,11 @@ type CreateProjectRequest struct {
 	// Accepts a numeric ID, a numeric string, or the sentinel "personal".
 	WorkspaceID WorkspaceIDField `json:"workspace_id"`
 	Name        string           `json:"name"`
-	Description string     `json:"description"`
-	Icon        string     `json:"icon"`
-	Color       string     `json:"color"`
-	StartDate   *time.Time `json:"start_date"`
-	DueDate     *time.Time `json:"due_date"`
+	Description string           `json:"description"`
+	Icon        string           `json:"icon"`
+	Color       string           `json:"color"`
+	StartDate   *time.Time       `json:"start_date"`
+	DueDate     *time.Time       `json:"due_date"`
 }
 
 type CreateProjectResponse struct {
@@ -271,6 +270,54 @@ func (h *UpdateProjectHandler) Serve(ctx context.Context, req *UpdateProjectRequ
 		authUser.UserID,
 	)
 	return UpdateProjectResponse{Message: "Project updated successfully"}, nil
+}
+
+// ─────────────────────────────────────────────
+// PUT /flow/projects/move
+
+func MoveProjectRoutes() []string { return []string{"/flow/projects/move"} }
+
+type MoveProjectHandler struct {
+	FlowService *application.Service
+}
+
+type MoveProjectRequest struct {
+	ProjectID   JSONID `json:"project_id"`
+	WorkspaceID JSONID `json:"workspace_id"`
+}
+
+type MoveProjectResponse struct {
+	Message string `json:"message"`
+}
+
+func (h *MoveProjectHandler) Validate(_ context.Context, req *MoveProjectRequest) *errorModels.ServerError {
+	if req.ProjectID.IsZero() {
+		return &errorModels.ServerError{Code: http.StatusBadRequest, Message: "project_id is required"}
+	}
+	if req.WorkspaceID.IsZero() {
+		return &errorModels.ServerError{Code: http.StatusBadRequest, Message: "workspace_id is required"}
+	}
+	return nil
+}
+
+func (h *MoveProjectHandler) Serve(ctx context.Context, req *MoveProjectRequest) (MoveProjectResponse, *errorModels.ServerError) {
+	authUser, ok := authPkg.GetAuthUser(ctx)
+	if !ok {
+		return MoveProjectResponse{}, errorModels.PermissionDeniedServerError()
+	}
+
+	if err := h.FlowService.MoveProject(ctx, domain.MoveProjectInput{
+		ProjectID:   req.ProjectID.Int64(),
+		WorkspaceID: req.WorkspaceID.Int64(),
+		CallerID:    authUser.UserID,
+	}); err != nil {
+		return MoveProjectResponse{}, &errorModels.ServerError{
+			Code:    http.StatusInternalServerError,
+			Message: "Failed to move project",
+		}
+	}
+
+	return MoveProjectResponse{Message: "Project moved"}, nil
 }
 
 // ─────────────────────────────────────────────

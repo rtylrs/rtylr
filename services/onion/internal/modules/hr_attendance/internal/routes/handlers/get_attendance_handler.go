@@ -4,13 +4,12 @@ import (
 	"context"
 	"net/http"
 
-	hrv1 "github.com/voxire/voxie/gen/go/hr/v1"
-
 	"github.com/voxire/onion/internal/modules/hr_attendance/internal/application"
 	"github.com/voxire/onion/internal/modules/hr_attendance/internal/domain"
 	authPkg "github.com/voxire/onion/internal/platform/auth"
 	errorModels "github.com/voxire/onion/internal/platform/errors"
 	"github.com/voxire/onion/internal/platform/logger"
+	hrv1 "github.com/voxire/voxie/gen/go/hr/v1"
 )
 
 func GetAttendanceRoutes() []string { return []string{"/hr/attendance"} }

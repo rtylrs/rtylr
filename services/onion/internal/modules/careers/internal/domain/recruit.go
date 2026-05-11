@@ -103,22 +103,22 @@ type Customization struct {
 // validated by the service — the unique index on the table is the
 // backstop, not the front line.
 type CustomizationInput struct {
-	OwnerID         int64
-	Slug            string
-	BrandName       string
-	Tagline         string
-	AboutBlurb      string
-	LogoURL         string
-	PrimaryColor    string
-	AccentColor     string
-	BgColor         string
-	TextColor       string
-	MutedTextColor  string
-	FontPairing     string
-	HeroImageURL    string
-	FaviconURL      string
-	Template        string
-	HeaderHTML      string
+	OwnerID            int64
+	Slug               string
+	BrandName          string
+	Tagline            string
+	AboutBlurb         string
+	LogoURL            string
+	PrimaryColor       string
+	AccentColor        string
+	BgColor            string
+	TextColor          string
+	MutedTextColor     string
+	FontPairing        string
+	HeroImageURL       string
+	FaviconURL         string
+	Template           string
+	HeaderHTML         string
 	MetaTitle          string
 	MetaDescription    string
 	PrivacyURL         string

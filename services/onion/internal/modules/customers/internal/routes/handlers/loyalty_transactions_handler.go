@@ -4,13 +4,11 @@ import (
 	"context"
 	"net/http"
 
-	crmv1 "github.com/voxire/voxie/gen/go/crm/v1"
-
-	authPkg "github.com/voxire/onion/internal/platform/auth"
-	errorModels "github.com/voxire/onion/internal/platform/errors"
-
 	"github.com/voxire/onion/internal/modules/customers/internal/application"
 	"github.com/voxire/onion/internal/modules/customers/internal/domain"
+	authPkg "github.com/voxire/onion/internal/platform/auth"
+	errorModels "github.com/voxire/onion/internal/platform/errors"
+	crmv1 "github.com/voxire/voxie/gen/go/crm/v1"
 )
 
 func LoyaltyTransactionsRoutes() []string {
@@ -37,8 +35,8 @@ type ListLoyaltyTransactionsResponse struct {
 func newLoyaltyTransactionPayload(tx domain.LoyaltyTransaction) *crmv1.LoyaltyTransaction {
 	return &crmv1.LoyaltyTransaction{
 		Id:            tx.ID,
-		OwnerId:      tx.OwnerID,
-		CustomerId:   tx.CustomerID,
+		OwnerId:       tx.OwnerID,
+		CustomerId:    tx.CustomerID,
 		Type:          tx.Type,
 		Points:        int64(tx.Points),
 		BalanceBefore: int64(tx.BalanceBefore),

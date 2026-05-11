@@ -41,11 +41,13 @@ func newPayload(q domain.Quote) QuotePayload {
 
 func ListRoutes() []string { return []string{"/finance/quotes"} }
 
-type ListHandler struct{ Service *application.Service }
-type ListRequest struct{}
-type ListResponse struct {
-	Quotes []QuotePayload `json:"quotes"`
-}
+type (
+	ListHandler  struct{ Service *application.Service }
+	ListRequest  struct{}
+	ListResponse struct {
+		Quotes []QuotePayload `json:"quotes"`
+	}
+)
 
 func (h *ListHandler) Serve(ctx context.Context, _ *ListRequest) (ListResponse, *errorModels.ServerError) {
 	device := authPkg.DeviceCtx(ctx)
@@ -70,19 +72,22 @@ func (h *ListHandler) Serve(ctx context.Context, _ *ListRequest) (ListResponse, 
 
 func CreateRoutes() []string { return []string{"/finance/quotes"} }
 
-type CreateHandler struct{ Service *application.Service }
-type CreateRequest struct {
-	CustomerName  string  `json:"customer_name"`
-	CustomerEmail string  `json:"customer_email"`
-	Status        string  `json:"status"`
-	Items         string  `json:"items"`
-	Subtotal      float64 `json:"subtotal"`
-	Tax           float64 `json:"tax"`
-	Discount      float64 `json:"discount"`
-	Total         float64 `json:"total"`
-	ValidUntil    string  `json:"valid_until"`
-	Notes         string  `json:"notes"`
-}
+type (
+	CreateHandler struct{ Service *application.Service }
+	CreateRequest struct {
+		CustomerName  string  `json:"customer_name"`
+		CustomerEmail string  `json:"customer_email"`
+		Status        string  `json:"status"`
+		Items         string  `json:"items"`
+		Subtotal      float64 `json:"subtotal"`
+		Tax           float64 `json:"tax"`
+		Discount      float64 `json:"discount"`
+		Total         float64 `json:"total"`
+		ValidUntil    string  `json:"valid_until"`
+		Notes         string  `json:"notes"`
+	}
+)
+
 type CreateResponse struct {
 	ID      int64  `json:"id"`
 	Message string `json:"message"`
@@ -120,20 +125,23 @@ func (h *CreateHandler) Serve(ctx context.Context, req *CreateRequest) (CreateRe
 
 func UpdateRoutes() []string { return []string{"/finance/quotes"} }
 
-type UpdateHandler struct{ Service *application.Service }
-type UpdateRequest struct {
-	ID            int64   `json:"id"`
-	CustomerName  string  `json:"customer_name"`
-	CustomerEmail string  `json:"customer_email"`
-	Status        string  `json:"status"`
-	Items         string  `json:"items"`
-	Subtotal      float64 `json:"subtotal"`
-	Tax           float64 `json:"tax"`
-	Discount      float64 `json:"discount"`
-	Total         float64 `json:"total"`
-	ValidUntil    string  `json:"valid_until"`
-	Notes         string  `json:"notes"`
-}
+type (
+	UpdateHandler struct{ Service *application.Service }
+	UpdateRequest struct {
+		ID            int64   `json:"id"`
+		CustomerName  string  `json:"customer_name"`
+		CustomerEmail string  `json:"customer_email"`
+		Status        string  `json:"status"`
+		Items         string  `json:"items"`
+		Subtotal      float64 `json:"subtotal"`
+		Tax           float64 `json:"tax"`
+		Discount      float64 `json:"discount"`
+		Total         float64 `json:"total"`
+		ValidUntil    string  `json:"valid_until"`
+		Notes         string  `json:"notes"`
+	}
+)
+
 type UpdateResponse struct {
 	Message string `json:"message"`
 }
@@ -169,10 +177,13 @@ func (h *UpdateHandler) Serve(ctx context.Context, req *UpdateRequest) (UpdateRe
 
 func DeleteRoutes() []string { return []string{"/finance/quotes"} }
 
-type DeleteHandler struct{ Service *application.Service }
-type DeleteRequest struct {
-	ID int64 `json:"id"`
-}
+type (
+	DeleteHandler struct{ Service *application.Service }
+	DeleteRequest struct {
+		ID int64 `json:"id"`
+	}
+)
+
 type DeleteResponse struct {
 	Message string `json:"message"`
 }

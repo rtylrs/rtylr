@@ -3,6 +3,7 @@ package infrastructure
 import (
 	"context"
 	"database/sql"
+	"errors"
 	"fmt"
 	"strconv"
 
@@ -201,7 +202,7 @@ func (r *Repository) GetInventoryItem(ctx context.Context, businessID, branchID,
 		ProductID:  productID,
 	})
 	if err != nil {
-		if err == sql.ErrNoRows {
+		if errors.Is(err, sql.ErrNoRows) {
 			return domain.BranchInventory{}, domain.ErrInventoryNotFound
 		}
 		logger.Ctx(ctx).Error("Failed to get inventory item", logger.Error(err))

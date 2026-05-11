@@ -22,7 +22,7 @@ func NewService(ctx context.Context) *Service {
 	return &Service{repo: infrastructure.NewRepository(ctx)}
 }
 
-func (s *Service) ListShifts(ctx context.Context, ownerID int64, staffID int64, date string) ([]domain.Shift, error) {
+func (s *Service) ListShifts(ctx context.Context, ownerID, staffID int64, date string) ([]domain.Shift, error) {
 	return s.repo.ListShifts(ctx, ownerID, staffID, date)
 }
 

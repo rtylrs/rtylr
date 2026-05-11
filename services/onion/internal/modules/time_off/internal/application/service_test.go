@@ -19,9 +19,11 @@ type mockRepo struct {
 func (m *mockRepo) ListTimeOffRequests(_ context.Context, _ int64) ([]domain.TimeOffRequest, error) {
 	return m.list, m.listErr
 }
+
 func (m *mockRepo) CreateTimeOffRequest(_ context.Context, _ domain.TimeOffInput) (int64, error) {
 	return m.createID, m.createErr
 }
+
 func (m *mockRepo) ApproveTimeOffRequest(_ context.Context, _ int64, _ domain.TimeOffApprovalInput) error {
 	return m.apvErr
 }

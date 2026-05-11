@@ -5,9 +5,7 @@ import (
 	"time"
 )
 
-var (
-	ErrMilestoneNotFound = errors.New("milestone not found")
-)
+var ErrMilestoneNotFound = errors.New("milestone not found")
 
 type Milestone struct {
 	ID          int64

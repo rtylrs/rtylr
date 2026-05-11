@@ -6,7 +6,6 @@ import (
 	"strconv"
 
 	"github.com/go-chi/chi/v5"
-
 	"github.com/voxire/onion/internal/modules/hr_core/internal/application"
 	"github.com/voxire/onion/internal/modules/hr_core/internal/domain"
 	authPkg "github.com/voxire/onion/internal/platform/auth"
@@ -37,11 +36,13 @@ func wsToPayload(ws domain.WorkScheduleRecord) *WorkSchedulePayload {
 
 func ListWorkSchedulesRoutes() []string { return []string{"/hr/work-schedules"} }
 
-type ListWorkSchedulesHandler struct{ Service *application.Service }
-type ListWorkSchedulesRequest struct{}
-type ListWorkSchedulesResponse struct {
-	WorkSchedules []*WorkSchedulePayload `json:"work_schedules"`
-}
+type (
+	ListWorkSchedulesHandler  struct{ Service *application.Service }
+	ListWorkSchedulesRequest  struct{}
+	ListWorkSchedulesResponse struct {
+		WorkSchedules []*WorkSchedulePayload `json:"work_schedules"`
+	}
+)
 
 func (h *ListWorkSchedulesHandler) Serve(ctx context.Context, _ *ListWorkSchedulesRequest) (ListWorkSchedulesResponse, *errorModels.ServerError) {
 	device := authPkg.DeviceCtx(ctx)
@@ -66,12 +67,15 @@ func (h *ListWorkSchedulesHandler) Serve(ctx context.Context, _ *ListWorkSchedul
 
 func CreateWorkScheduleRoutes() []string { return []string{"/hr/work-schedules"} }
 
-type CreateWorkScheduleHandler struct{ Service *application.Service }
-type CreateWorkScheduleRequest struct {
-	Name         string `json:"name"`
-	ScheduleData string `json:"schedule_data"`
-	IsDefault    bool   `json:"is_default"`
-}
+type (
+	CreateWorkScheduleHandler struct{ Service *application.Service }
+	CreateWorkScheduleRequest struct {
+		Name         string `json:"name"`
+		ScheduleData string `json:"schedule_data"`
+		IsDefault    bool   `json:"is_default"`
+	}
+)
+
 type CreateWorkScheduleResponse struct {
 	WorkSchedule *WorkSchedulePayload `json:"work_schedule"`
 }
@@ -103,12 +107,15 @@ func (h *CreateWorkScheduleHandler) Serve(ctx context.Context, req *CreateWorkSc
 
 func UpdateWorkScheduleRoutes() []string { return []string{"/hr/work-schedules/{id}"} }
 
-type UpdateWorkScheduleHandler struct{ Service *application.Service }
-type UpdateWorkScheduleRequest struct {
-	Name         string `json:"name"`
-	ScheduleData string `json:"schedule_data"`
-	IsDefault    bool   `json:"is_default"`
-}
+type (
+	UpdateWorkScheduleHandler struct{ Service *application.Service }
+	UpdateWorkScheduleRequest struct {
+		Name         string `json:"name"`
+		ScheduleData string `json:"schedule_data"`
+		IsDefault    bool   `json:"is_default"`
+	}
+)
+
 type UpdateWorkScheduleResponse struct {
 	WorkSchedule *WorkSchedulePayload `json:"work_schedule"`
 }

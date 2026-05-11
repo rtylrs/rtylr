@@ -6,13 +6,12 @@ import (
 	"net/http"
 	"time"
 
-	flowv1 "github.com/voxire/voxie/gen/go/flow/v1"
-
 	"github.com/voxire/onion/internal/modules/workspaces/internal/application"
 	"github.com/voxire/onion/internal/modules/workspaces/internal/domain"
 	authPkg "github.com/voxire/onion/internal/platform/auth"
 	errorModels "github.com/voxire/onion/internal/platform/errors"
 	"github.com/voxire/onion/internal/platform/wsbus"
+	flowv1 "github.com/voxire/voxie/gen/go/flow/v1"
 )
 
 // publishTaskEvent fans out a task-level invalidation hint to every
@@ -346,9 +345,9 @@ type GetTaskDetailRequest struct {
 }
 
 type GetTaskDetailResponse struct {
-	Task     *flowv1.Task          `json:"task"`
-	Subtasks []*flowv1.Task        `json:"subtasks"`
-	Comments []*flowv1.TaskComment `json:"comments"`
+	Task     *flowv1.Task           `json:"task"`
+	Subtasks []*flowv1.Task         `json:"subtasks"`
+	Comments []*flowv1.TaskComment  `json:"comments"`
 	Activity []*flowv1.TaskActivity `json:"activity"`
 }
 

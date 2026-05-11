@@ -9,13 +9,12 @@ import (
 	"time"
 
 	"github.com/go-chi/chi/v5"
-	hubv1 "github.com/voxire/voxie/gen/go/hub/v1"
-
 	"github.com/voxire/onion/internal/modules/team/internal/application"
 	"github.com/voxire/onion/internal/modules/team/internal/domain"
 	authPkg "github.com/voxire/onion/internal/platform/auth"
 	emailPkg "github.com/voxire/onion/internal/platform/email"
 	errorModels "github.com/voxire/onion/internal/platform/errors"
+	hubv1 "github.com/voxire/voxie/gen/go/hub/v1"
 )
 
 // ─── List Staff Users ─────────────────────────────────────────────────────────
@@ -26,8 +25,13 @@ type ListUsersHandler struct{ Service *application.Service }
 
 type ListUsersRequest struct{}
 
+type StaffUserWithGroupsPayload struct {
+	*hubv1.StaffUserPayload
+	Groups []GroupSummaryPayload `json:"groups"`
+}
+
 type ListUsersResponse struct {
-	Users []*hubv1.StaffUserPayload `json:"users"`
+	Users []StaffUserWithGroupsPayload `json:"users"`
 }
 
 func newProtoStaffUser(u domain.StaffUser) *hubv1.StaffUserPayload {
@@ -64,9 +68,16 @@ func (h *ListUsersHandler) Serve(ctx context.Context, _ *ListUsersRequest) (List
 		}
 	}
 
-	payloads := make([]*hubv1.StaffUserPayload, 0, len(users))
+	payloads := make([]StaffUserWithGroupsPayload, 0, len(users))
 	for _, u := range users {
-		payloads = append(payloads, newProtoStaffUser(u))
+		groups := make([]GroupSummaryPayload, 0, len(u.Groups))
+		for _, g := range u.Groups {
+			groups = append(groups, GroupSummaryPayload{ID: g.ID, Name: g.Name, Color: g.Color})
+		}
+		payloads = append(payloads, StaffUserWithGroupsPayload{
+			StaffUserPayload: newProtoStaffUser(u),
+			Groups:           groups,
+		})
 	}
 
 	return ListUsersResponse{Users: payloads}, nil
@@ -79,7 +90,7 @@ type GetMemberByIDHandler struct{ Service *application.Service }
 type GetMemberByIDRequest struct{}
 
 type GetMemberByIDResponse struct {
-	User *hubv1.StaffUserPayload `json:"user"`
+	User StaffUserWithGroupsPayload `json:"user"`
 }
 
 func (h *GetMemberByIDHandler) Serve(ctx context.Context, _ *GetMemberByIDRequest) (GetMemberByIDResponse, *errorModels.ServerError) {
@@ -118,7 +129,14 @@ func (h *GetMemberByIDHandler) Serve(ctx context.Context, _ *GetMemberByIDReques
 		}
 	}
 
-	return GetMemberByIDResponse{User: newProtoStaffUser(*member)}, nil
+	memberGroups := make([]GroupSummaryPayload, 0, len(member.Groups))
+	for _, g := range member.Groups {
+		memberGroups = append(memberGroups, GroupSummaryPayload{ID: g.ID, Name: g.Name, Color: g.Color})
+	}
+	return GetMemberByIDResponse{User: StaffUserWithGroupsPayload{
+		StaffUserPayload: newProtoStaffUser(*member),
+		Groups:           memberGroups,
+	}}, nil
 }
 
 // ─── Invite User ──────────────────────────────────────────────────────────────
@@ -133,6 +151,7 @@ type InviteUserRequest struct {
 	Password string   `json:"password"`
 	Apps     []string `json:"apps"`
 	Role     string   `json:"role"`
+	GroupID  int64    `json:"group_id"`
 }
 
 type InviteUserResponse = hubv1.InviteUserResponse
@@ -188,6 +207,10 @@ func (h *InviteUserHandler) Serve(ctx context.Context, req *InviteUserRequest) (
 		defer cancel()
 		h.Service.RecordSeatChange(bgCtx, ownerID)
 	}()
+
+	if req.GroupID > 0 {
+		_ = h.Service.AddGroupMembers(ctx, ownerID, req.GroupID, ownerID, []int64{userID})
+	}
 
 	// Only send invite email if no password was set manually
 	if req.Password == "" && token != "" {
@@ -440,17 +463,18 @@ type MeRequest struct {
 }
 
 type MeResponse struct {
-	ID                 int64    `json:"id"`
-	Email              string   `json:"email"`
-	FullName           string   `json:"full_name"`
-	Apps               []string `json:"apps"`
-	Role               string   `json:"role"`
-	BusinessID         int64    `json:"business_id"`
-	BusinessName       string   `json:"business_name"`
-	IsOwner            bool     `json:"is_owner"`
-	Onboarded          bool     `json:"onboarded"`
-	PlanSlug           string   `json:"plan_slug"`
-	SubscriptionStatus string   `json:"subscription_status"`
+	ID                 int64             `json:"id"`
+	Email              string            `json:"email"`
+	FullName           string            `json:"full_name"`
+	Apps               []string          `json:"apps"`
+	Role               string            `json:"role"`
+	BusinessID         int64             `json:"business_id"`
+	BusinessName       string            `json:"business_name"`
+	IsOwner            bool              `json:"is_owner"`
+	Onboarded          bool              `json:"onboarded"`
+	PlanSlug           string            `json:"plan_slug"`
+	SubscriptionStatus string            `json:"subscription_status"`
+	EffectiveResources map[string]string `json:"effective_resources"`
 }
 
 func (h *MeHandler) Serve(ctx context.Context, req *MeRequest) (MeResponse, *errorModels.ServerError) {
@@ -505,6 +529,16 @@ func (h *MeHandler) Serve(ctx context.Context, req *MeRequest) (MeResponse, *err
 		}
 	}
 
+	effectiveResources := map[string]string{}
+	if !isOwner {
+		resPerms, resErr := h.Service.GetUserEffectiveResources(ctx, businessID, userID)
+		if resErr == nil {
+			for key, level := range resPerms {
+				effectiveResources[key] = string(level)
+			}
+		}
+	}
+
 	return MeResponse{
 		ID:                 userID,
 		Email:              email,
@@ -517,6 +551,7 @@ func (h *MeHandler) Serve(ctx context.Context, req *MeRequest) (MeResponse, *err
 		Onboarded:          h.Service.IsOnboarded(ctx, userID),
 		PlanSlug:           planSlug,
 		SubscriptionStatus: subscriptionStatus,
+		EffectiveResources: effectiveResources,
 	}, nil
 }
 
@@ -524,11 +559,13 @@ func (h *MeHandler) Serve(ctx context.Context, req *MeRequest) (MeResponse, *err
 
 func MarkOnboardedRoutes() []string { return []string{"/user/onboarded"} }
 
-type MarkOnboardedHandler struct{ Service *application.Service }
-type MarkOnboardedRequest struct{}
-type MarkOnboardedResponse struct {
-	Message string `json:"message"`
-}
+type (
+	MarkOnboardedHandler  struct{ Service *application.Service }
+	MarkOnboardedRequest  struct{}
+	MarkOnboardedResponse struct {
+		Message string `json:"message"`
+	}
+)
 
 func (h *MarkOnboardedHandler) Serve(ctx context.Context, _ *MarkOnboardedRequest) (MarkOnboardedResponse, *errorModels.ServerError) {
 	device := authPkg.DeviceCtx(ctx)

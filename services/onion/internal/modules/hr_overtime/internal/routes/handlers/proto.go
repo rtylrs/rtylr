@@ -1,9 +1,8 @@
 package handlers
 
 import (
-	hrv1 "github.com/voxire/voxie/gen/go/hr/v1"
-
 	"github.com/voxire/onion/internal/modules/hr_overtime/internal/domain"
+	hrv1 "github.com/voxire/voxie/gen/go/hr/v1"
 )
 
 func overtimeRequestToProto(r domain.OvertimeRequestRecord) *hrv1.OvertimeRequestPayload {

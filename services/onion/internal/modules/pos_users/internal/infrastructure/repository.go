@@ -50,7 +50,7 @@ func (r *Repository) ListByLocation(ctx context.Context, ownerID, locationID int
 // Create inserts a new pos_user. The hashedPIN argument is a bcrypt hash;
 // the service layer is responsible for producing it so this layer never
 // handles plaintext PINs.
-func (r *Repository) Create(ctx context.Context, ownerID int64, createdBy int64, input domain.CreatePOSUserInput, hashedPIN string) (int64, error) {
+func (r *Repository) Create(ctx context.Context, ownerID, createdBy int64, input domain.CreatePOSUserInput, hashedPIN string) (int64, error) {
 	q := sqlc.New(dbclient.Pool())
 	res, err := q.CreatePOSUser(ctx, sqlc.CreatePOSUserParams{
 		OwnerID:          ownerID,

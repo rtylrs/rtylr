@@ -33,11 +33,13 @@ func newPayload(b domain.BenefitPlan) BenefitPlanPayload {
 
 func ListRoutes() []string { return []string{"/hr/benefits"} }
 
-type ListHandler struct{ Service *application.Service }
-type ListRequest struct{}
-type ListResponse struct {
-	Plans []BenefitPlanPayload `json:"plans"`
-}
+type (
+	ListHandler  struct{ Service *application.Service }
+	ListRequest  struct{}
+	ListResponse struct {
+		Plans []BenefitPlanPayload `json:"plans"`
+	}
+)
 
 func (h *ListHandler) Serve(ctx context.Context, _ *ListRequest) (ListResponse, *errorModels.ServerError) {
 	device := authPkg.DeviceCtx(ctx)
@@ -57,15 +59,18 @@ func (h *ListHandler) Serve(ctx context.Context, _ *ListRequest) (ListResponse, 
 
 func CreateRoutes() []string { return []string{"/hr/benefits"} }
 
-type CreateHandler struct{ Service *application.Service }
-type CreateRequest struct {
-	Name         string  `json:"name"`
-	Type         string  `json:"type"`
-	Provider     string  `json:"provider"`
-	CostEmployer float64 `json:"cost_employer"`
-	CostEmployee float64 `json:"cost_employee"`
-	IsActive     bool    `json:"is_active"`
-}
+type (
+	CreateHandler struct{ Service *application.Service }
+	CreateRequest struct {
+		Name         string  `json:"name"`
+		Type         string  `json:"type"`
+		Provider     string  `json:"provider"`
+		CostEmployer float64 `json:"cost_employer"`
+		CostEmployee float64 `json:"cost_employee"`
+		IsActive     bool    `json:"is_active"`
+	}
+)
+
 type CreateResponse struct {
 	ID      int64  `json:"id"`
 	Message string `json:"message"`

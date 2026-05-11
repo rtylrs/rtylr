@@ -2,10 +2,12 @@ package application
 
 import (
 	"context"
+	"fmt"
 	"strings"
 
 	"github.com/voxire/onion/internal/modules/pos_kds/internal/domain"
 	"github.com/voxire/onion/internal/modules/pos_kds/internal/infrastructure"
+	"github.com/voxire/onion/internal/platform/wsbus"
 )
 
 type repository interface {
@@ -49,9 +51,25 @@ func (s *Service) ListActiveOrdersByStation(ctx context.Context, ownerID int64, 
 }
 
 func (s *Service) UpdateItemStatus(ctx context.Context, input domain.UpdateItemStatusInput) error {
-	return s.repo.UpdateItemStatus(ctx, input)
+	if err := s.repo.UpdateItemStatus(ctx, input); err != nil {
+		return err
+	}
+	wsbus.Publish(wsbus.Event{
+		Topic:    fmt.Sprintf("owner:%d", input.OwnerID),
+		Type:     "pos:kds:item:updated",
+		EntityID: input.ItemID,
+	})
+	return nil
 }
 
 func (s *Service) UpdateItemStatusByItemID(ctx context.Context, ownerID, itemID int64, status string) error {
-	return s.repo.UpdateItemStatusByItemID(ctx, ownerID, itemID, status)
+	if err := s.repo.UpdateItemStatusByItemID(ctx, ownerID, itemID, status); err != nil {
+		return err
+	}
+	wsbus.Publish(wsbus.Event{
+		Topic:    fmt.Sprintf("owner:%d", ownerID),
+		Type:     "pos:kds:item:updated",
+		EntityID: itemID,
+	})
+	return nil
 }

@@ -8,10 +8,10 @@ import (
 	"time"
 
 	"github.com/google/uuid"
-	"github.com/voxire/onion/internal/platform/logger"
-	"github.com/voxire/onion/internal/platform/snips"
 	"github.com/voxire/onion/internal/modules/memory/internal/domain"
 	"github.com/voxire/onion/internal/modules/memory/internal/infrastructure"
+	"github.com/voxire/onion/internal/platform/logger"
+	"github.com/voxire/onion/internal/platform/snips"
 )
 
 var ErrAIClientNotAvailable = errors.New("AI client not available for summarization")

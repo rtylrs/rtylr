@@ -10,7 +10,6 @@ import (
 	"time"
 
 	"github.com/getsentry/sentry-go"
-
 	"github.com/voxire/onion/internal/platform/logger"
 )
 

@@ -29,6 +29,7 @@ func (m *mockRepo) List(_ context.Context, ownerID int64, filters domain.ListFil
 	m.listGot.pageSize = pageSize
 	return m.listResult, m.listTotal, m.listErr
 }
+
 func (m *mockRepo) Create(_ context.Context, _ domain.FeedbackInput) (int64, error) {
 	return m.createID, m.createErr
 }

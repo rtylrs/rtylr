@@ -48,4 +48,3 @@ func (s *Service) CreateConfig(ctx context.Context, input domain.ConfigInput) er
 func (s *Service) GetThemeByOwnerID(ctx context.Context, id string) (domain.Theme, error) {
 	return s.repo.GetThemeByOwnerID(ctx, id)
 }
-

@@ -34,11 +34,13 @@ func newPayload(b domain.BankAccount) BankAccountPayload {
 
 func ListRoutes() []string { return []string{"/finance/bank-accounts"} }
 
-type ListHandler struct{ Service *application.Service }
-type ListRequest struct{}
-type ListResponse struct {
-	Accounts []BankAccountPayload `json:"accounts"`
-}
+type (
+	ListHandler  struct{ Service *application.Service }
+	ListRequest  struct{}
+	ListResponse struct {
+		Accounts []BankAccountPayload `json:"accounts"`
+	}
+)
 
 func (h *ListHandler) Serve(ctx context.Context, _ *ListRequest) (ListResponse, *errorModels.ServerError) {
 	device := authPkg.DeviceCtx(ctx)
@@ -58,15 +60,18 @@ func (h *ListHandler) Serve(ctx context.Context, _ *ListRequest) (ListResponse, 
 
 func CreateRoutes() []string { return []string{"/finance/bank-accounts"} }
 
-type CreateHandler struct{ Service *application.Service }
-type CreateRequest struct {
-	Name        string  `json:"name"`
-	Institution string  `json:"institution"`
-	AccountType string  `json:"account_type"`
-	Balance     float64 `json:"balance"`
-	Currency    string  `json:"currency"`
-	IsConnected bool    `json:"is_connected"`
-}
+type (
+	CreateHandler struct{ Service *application.Service }
+	CreateRequest struct {
+		Name        string  `json:"name"`
+		Institution string  `json:"institution"`
+		AccountType string  `json:"account_type"`
+		Balance     float64 `json:"balance"`
+		Currency    string  `json:"currency"`
+		IsConnected bool    `json:"is_connected"`
+	}
+)
+
 type CreateResponse struct {
 	ID      int64  `json:"id"`
 	Message string `json:"message"`

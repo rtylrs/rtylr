@@ -25,7 +25,7 @@ type Repository interface {
 	UpdateLocation(ctx context.Context, ownerID int64, loc LocationRecord) (*LocationRecord, error)
 
 	// Departments
-	ListDepartments(ctx context.Context, ownerID int64, locationID int64) ([]DepartmentRecord, error)
+	ListDepartments(ctx context.Context, ownerID, locationID int64) ([]DepartmentRecord, error)
 	CreateDepartment(ctx context.Context, ownerID int64, dept DepartmentRecord) (*DepartmentRecord, error)
 	UpdateDepartment(ctx context.Context, ownerID int64, dept DepartmentRecord) (*DepartmentRecord, error)
 

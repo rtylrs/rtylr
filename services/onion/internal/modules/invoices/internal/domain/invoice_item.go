@@ -18,9 +18,7 @@ type InvoiceItem struct {
 }
 
 func (item *InvoiceItem) FromRow(row *sql.Rows) error {
-	var (
-		unit sql.NullString
-	)
+	var unit sql.NullString
 
 	err := row.Scan(
 		&item.ID,

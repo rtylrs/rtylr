@@ -32,9 +32,9 @@ type CycleInput struct {
 }
 
 type UpdateCycleInput struct {
-	ID     int64
-	Name   string
-	Status string
+	ID      int64
+	Name    string
+	Status  string
 	EndDate time.Time
 }
 
@@ -124,20 +124,20 @@ type UpdateViewInput struct {
 // ─────────────────────────────────────────────
 
 type Notification struct {
-	ID           int64
-	UserID       int64
-	WorkspaceID  *int64
-	Type         string // assigned | mention | comment | status_change | due_soon
-	Title        string
-	Description  string
-	TaskID       *int64
-	TaskTitle    string
-	ActorID      *int64
+	ID            int64
+	UserID        int64
+	WorkspaceID   *int64
+	Type          string // assigned | mention | comment | status_change | due_soon
+	Title         string
+	Description   string
+	TaskID        *int64
+	TaskTitle     string
+	ActorID       *int64
 	ActorInitials string
-	Project      string
-	ProjectColor string
-	IsRead       bool
-	CreatedAt    time.Time
+	Project       string
+	ProjectColor  string
+	IsRead        bool
+	CreatedAt     time.Time
 }
 
 type CreateNotificationInput struct {
@@ -183,13 +183,13 @@ type InsightsThroughput struct {
 }
 
 type Insights struct {
-	Velocity   []InsightsVelocityPoint
-	Burndown   []InsightsBurndownPoint
-	CycleTime  float64
+	Velocity     []InsightsVelocityPoint
+	Burndown     []InsightsBurndownPoint
+	CycleTime    float64
 	TimeByMember []InsightsMemberTime
-	Throughput []InsightsThroughput
-	TotalTasks int
-	DoneTasks  int
+	Throughput   []InsightsThroughput
+	TotalTasks   int
+	DoneTasks    int
 }
 
 // ─────────────────────────────────────────────
@@ -211,11 +211,11 @@ type TeamMemberWorkload struct {
 // ─────────────────────────────────────────────
 
 type UserSettings struct {
-	UserID               int64
-	TaskAssigned         bool
-	TaskComments         bool
-	Mentions             bool
-	StatusChanges        bool
-	WeeklyDigest         bool
-	EmailNotifications   bool
+	UserID             int64
+	TaskAssigned       bool
+	TaskComments       bool
+	Mentions           bool
+	StatusChanges      bool
+	WeeklyDigest       bool
+	EmailNotifications bool
 }
