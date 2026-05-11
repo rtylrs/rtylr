@@ -35,23 +35,12 @@ func (h *ContactHandler) Validate(_ context.Context, req *ContactRequest) *error
 }
 
 func (h *ContactHandler) Serve(ctx context.Context, req *ContactRequest) (ContactResponse, *errorModels.ServerError) {
-	// Map contact submission to a lead. We use service="contact" to
-	// distinguish from quote requests. Phone number is prepended to the
-	// message so it's visible in the notification email without a schema change.
-	project := req.Message
-	if req.PhoneNumber != "" {
-		if project != "" {
-			project = "Phone: " + req.PhoneNumber + "\n\n" + project
-		} else {
-			project = "Phone: " + req.PhoneNumber
-		}
-	}
-
 	_, err := h.Service.Submit(ctx, domain.LeadInput{
 		Name:    req.Name,
 		Email:   req.Email,
+		Phone:   req.PhoneNumber,
 		Service: "contact",
-		Project: project,
+		Project: req.Message,
 	})
 	if err != nil {
 		return ContactResponse{}, &errorModels.ServerError{

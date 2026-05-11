@@ -1,0 +1,43 @@
+// Package voxhire wires the public hire.voxire.com forms (company
+// hiring inquiries and talent applications) into Onion. Both endpoints
+// are anonymous (no auth) and available via CORS to *.voxire.com.
+//
+// Tables are auto-migrated by the repository on startup:
+//
+//   - voxhire_company_leads
+//   - voxhire_talent_applications
+//
+// CV files land in R2 at the key prefix voxhire/applications/<track-slug>/...
+package voxhire
+
+import (
+	"context"
+
+	"github.com/go-chi/chi/v5"
+
+	"github.com/voxire/onion/internal/modules/voxhire/internal/application"
+	"github.com/voxire/onion/internal/modules/voxhire/internal/routes"
+	"github.com/voxire/onion/internal/modules/voxhire/internal/routes/handlers"
+)
+
+type Module struct {
+	service *application.Service
+}
+
+func NewModule(ctx context.Context) *Module {
+	return &Module{service: application.NewService(ctx)}
+}
+
+func (m *Module) RegisterRoutes(ctx context.Context, router *chi.Mux, _ ...interface{}) {
+	routes.RegisterRoutes(ctx, router, m.service)
+}
+
+// GetAnonymousRoutes returns paths that bypass JWT auth. Both VoxHire
+// public endpoints are anonymous because they accept submissions from
+// hire.voxire.com visitors who don't have an Onion account.
+func (m *Module) GetAnonymousRoutes() []string {
+	anon := []string{}
+	anon = append(anon, handlers.ContactRoutes()...)
+	anon = append(anon, handlers.ApplicationsRoutes()...)
+	return anon
+}
