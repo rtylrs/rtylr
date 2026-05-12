@@ -70,7 +70,7 @@ export const useDeleteTemplate = (): UseMutationResult<unknown, unknown, number>
   const { t } = useTranslation();
   return useMutation<unknown, unknown, number>({
     mutationFn: (id: number): Promise<unknown> =>
-      unwrap(safe.delete('/crm/templates', { params: { id } })),
+      unwrap(safe.delete('/crm/templates', { data: { id } })),
     onSuccess: (): void => {
       void qc.invalidateQueries({ queryKey: ['crm-templates'] });
       toast.success(t('crm.templates.deleted'));
