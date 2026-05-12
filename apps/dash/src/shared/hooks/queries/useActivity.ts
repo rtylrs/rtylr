@@ -22,9 +22,9 @@ export const useAuditLog = (limit = 200) => {
   return useQuery({
     queryKey: ['audit', limit],
     queryFn: async () => {
-      const res = await unwrap(safe.get(`/audit?limit=${limit}`));
-      const raw = Array.isArray(res) ? res : [];
-      return z.array(activityEntrySchema).parse(raw);
+      const res = await unwrap(safe.get(`/activity?limit=${limit}`));
+      const raw = res?.activities ?? res?.entries ?? res;
+      return z.array(activityEntrySchema).parse(Array.isArray(raw) ? raw : []);
     },
     staleTime: 20_000,
   });
