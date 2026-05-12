@@ -127,12 +127,12 @@ export const financeApi = {
   createInvoice: (data: Partial<Invoice>) => safe.post<Invoice>('/finance/invoices', data),
 
   updateInvoice: (id: string, data: Partial<Invoice>) =>
-    safe.post<Invoice>('/finance/invoices', { id, ...data }),
+    safe.put<Invoice>('/finance/invoices', { id, ...data }),
 
-  deleteInvoice: (id: string) => safe.post('/finance/invoices', { id, _action: 'delete' }),
+  deleteInvoice: (id: string) => safe.delete('/finance/invoices', { data: { id } }),
 
   updateInvoiceStatus: (id: string, status: Invoice['status']) =>
-    safe.post('/finance/invoices/status', { id, status }),
+    safe.put('/finance/invoices/status', { id, status }),
 
   recordPayment: (id: string, amount: number) =>
     safe.post('/finance/invoices/payment', { id, amount }),
@@ -143,9 +143,9 @@ export const financeApi = {
   createExpense: (data: Partial<Expense>) => safe.post<Expense>('/finance/expenses', data),
 
   updateExpense: (id: string, data: Partial<Expense>) =>
-    safe.post<Expense>('/finance/expenses', { id, ...data }),
+    safe.put<Expense>('/finance/expenses', { id, ...data }),
 
-  deleteExpense: (id: string) => safe.post('/finance/expenses', { id, _action: 'delete' }),
+  deleteExpense: (id: string) => safe.delete('/finance/expenses', { data: { id } }),
 
   // Expense Categories
   getExpenseCategories: () => safe.get<ExpenseCategory[]>('/finance/expense-categories'),
@@ -170,7 +170,7 @@ export const financeApi = {
     safe.post('/finance/recurring-invoices', data),
 
   updateRecurringInvoice: (id: string, data: Partial<CreateRecurringInvoiceRequest>) =>
-    safe.post('/finance/recurring-invoices', { id, ...data }),
+    safe.put('/finance/recurring-invoices', { id, ...data }),
 
   // Quotes
   getQuotes: () => safe.get('/finance/quotes'),
@@ -178,9 +178,9 @@ export const financeApi = {
   createQuote: (data: CreateQuoteRequest) => safe.post('/finance/quotes', data),
 
   updateQuote: (id: string, data: Partial<CreateQuoteRequest>) =>
-    safe.post('/finance/quotes', { id, ...data }),
+    safe.put('/finance/quotes', { id, ...data }),
 
-  deleteQuote: (id: string) => safe.post('/finance/quotes', { id, _action: 'delete' }),
+  deleteQuote: (id: string) => safe.delete('/finance/quotes', { data: { id } }),
 
   // Bills
   getBills: () => safe.get('/finance/bills'),
@@ -188,7 +188,7 @@ export const financeApi = {
   createBill: (data: CreateBillRequest) => safe.post('/finance/bills', data),
 
   updateBill: (id: string, data: Partial<CreateBillRequest>) =>
-    safe.post('/finance/bills', { id, ...data }),
+    safe.put('/finance/bills', { id, ...data }),
 
   // Bank Accounts
   getBankAccounts: () => safe.get('/finance/bank-accounts'),
