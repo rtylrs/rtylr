@@ -2,6 +2,7 @@ import React, { useState, ChangeEvent, useEffect } from 'react';
 import { useBusinessStore, BusinessType } from '../../../../../shared/stores/businessStore';
 import { useUpdateBusiness } from '../../../../../shared/hooks/queries/useBusiness';
 import { useUserStore } from '../../../../../shared/stores/userStore';
+import { useConfigStore } from '../../../../../shared/stores/configStore';
 import {
   Card,
   CardContent,
@@ -28,6 +29,7 @@ const BUSINESS_TYPES: { value: BusinessType; label: string }[] = [
 const General: React.FC = () => {
   const { businessType, setBusinessType } = useBusinessStore();
   const { user, userId } = useUserStore();
+  const { websiteData, contactInfo } = useConfigStore();
   const updateBusiness = useUpdateBusiness();
 
   const [formData, setFormData] = useState({
@@ -52,12 +54,22 @@ const General: React.FC = () => {
     if (user) {
       setFormData((prev) => ({
         ...prev,
-        storeName: user.businessName || prev.storeName,
-        contactEmail: user.email || prev.contactEmail,
-        companyName: user.businessName || prev.companyName,
+        storeName:
+          (websiteData?.siteName as string | undefined) || user.businessName || prev.storeName,
+        contactEmail:
+          contactInfo?.contactEmail ||
+          (websiteData?.contactEmail as string | undefined) ||
+          user.email ||
+          prev.contactEmail,
+        telephone:
+          contactInfo?.contactNumber ||
+          (websiteData?.contactNumber as string | undefined) ||
+          prev.telephone,
+        companyName:
+          (websiteData?.siteName as string | undefined) || user.businessName || prev.companyName,
       }));
     }
-  }, [user]);
+  }, [user, websiteData, contactInfo]);
 
   useEffect(() => {
     if (businessType) setFormData((prev) => ({ ...prev, storeIndustry: businessType }));
