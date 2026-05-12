@@ -20,6 +20,15 @@ export interface BalanceSheetResponse {
   equity: BalanceSheetRow[];
 }
 
+interface BalanceSheetApiResponse {
+  totalAssets: number;
+  totalLiabilities: number;
+  totalEquity: number;
+  cashBalance: number;
+  accountsReceivable: number;
+  accountsPayable: number;
+}
+
 export interface CashFlowPoint {
   label: string;
   inflow: number;
@@ -34,10 +43,20 @@ export const useBalanceSheet = (range: ReportRange) => {
   return useQuery<BalanceSheetResponse>({
     queryKey: ['balance-sheet', range],
     queryFn: async (): Promise<BalanceSheetResponse> => {
-      const res = await unwrap(
-        safe.get<BalanceSheetResponse>('/finance/balance-sheet', { params: range })
+      const raw = await unwrap(
+        safe.get<BalanceSheetApiResponse>('/finance/balance-sheet', { params: range })
       );
-      return res as BalanceSheetResponse;
+      const res = raw as BalanceSheetApiResponse;
+      return {
+        assets: [
+          { label: 'Cash', amount: res.cashBalance ?? 0, type: 'asset' },
+          { label: 'Accounts Receivable', amount: res.accountsReceivable ?? 0, type: 'asset' },
+        ],
+        liabilities: [
+          { label: 'Accounts Payable', amount: res.accountsPayable ?? 0, type: 'liability' },
+        ],
+        equity: [{ label: 'Equity', amount: res.totalEquity ?? 0, type: 'equity' }],
+      };
     },
     enabled: !!range.from && !!range.to,
   });
