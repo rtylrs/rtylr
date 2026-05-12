@@ -4,6 +4,7 @@ import (
 	"context"
 	"errors"
 	"net/http"
+	"time"
 
 	"github.com/voxire/onion/internal/modules/invoices/internal/application"
 	"github.com/voxire/onion/internal/modules/invoices/internal/domain"
@@ -50,32 +51,28 @@ func (h *RecordPaymentHandler) Validate(_ context.Context, req *RecordPaymentReq
 		}
 	}
 
-	if req.PaymentDate == "" {
-		return &errorModels.ServerError{
-			Code:    http.StatusBadRequest,
-			Message: "Payment date is required",
-		}
-	}
-
-	if req.Method == "" {
-		return &errorModels.ServerError{
-			Code:    http.StatusBadRequest,
-			Message: "Payment method is required",
-		}
-	}
-
 	return nil
 }
 
 func (h *RecordPaymentHandler) Serve(ctx context.Context, req *RecordPaymentRequest) (RecordPaymentResponse, *errorModels.ServerError) {
 	device := authPkg.DeviceCtx(ctx)
 
+	paymentDate := req.PaymentDate
+	if paymentDate == "" {
+		paymentDate = time.Now().Format("2006-01-02")
+	}
+
+	method := req.Method
+	if method == "" {
+		method = "cash"
+	}
+
 	input := domain.PaymentInput{
 		InvoiceID:   req.InvoiceID,
 		Amount:      req.Amount,
 		Currency:    req.Currency,
-		PaymentDate: req.PaymentDate,
-		Method:      req.Method,
+		PaymentDate: paymentDate,
+		Method:      method,
 		Reference:   req.Reference,
 		Notes:       req.Notes,
 	}
