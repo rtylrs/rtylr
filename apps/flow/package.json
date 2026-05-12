@@ -18,6 +18,8 @@
     "@voxire/i18n": "workspace:*",
     "@voxire/observability": "workspace:*",
     "@voxire/ui": "workspace:*",
+    "clsx": "^2.1.1",
+    "tailwind-merge": "^3.5.0",
     "axios": "^1.15.2",
     "lucide-react": "^1.8.0",
     "motion": "^12.38.0",

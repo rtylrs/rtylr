@@ -1,4 +1,5 @@
 import React, { useEffect, useRef, useState } from 'react';
+import { cn } from '@voxire/ui';
 import { useLocation, Link } from 'react-router-dom';
 import { useForesightLinks } from '@voxire/utils';
 import { motion, AnimatePresence } from 'motion/react';
@@ -222,9 +223,10 @@ const DefaultLayout: React.FC<DefaultLayoutProps> = ({ children }) => {
         )}
 
         <aside
-          className={`${
-            sidebarOpen ? 'fixed inset-y-0 left-0 z-50 flex' : 'hidden'
-          } md:flex w-56 flex-col shrink-0 overflow-hidden`}
+          className={cn(
+            sidebarOpen ? 'fixed inset-y-0 left-0 z-50 flex' : 'hidden',
+            'md:flex w-56 flex-col shrink-0 overflow-hidden'
+          )}
           style={{
             background: 'var(--hub-surface)',
             borderRight: '1px solid var(--hub-border)',

@@ -1,4 +1,5 @@
 import React from 'react';
+import { cn } from '@voxire/ui';
 
 interface SkeletonProps {
   className?: string;
@@ -7,7 +8,7 @@ interface SkeletonProps {
 
 export const Skeleton: React.FC<SkeletonProps> = ({ className = '', style }) => (
   <div
-    className={`rounded animate-pulse ${className}`}
+    className={cn('rounded animate-pulse', className)}
     style={{ background: 'var(--hub-border)', opacity: 0.6, ...style }}
   />
 );

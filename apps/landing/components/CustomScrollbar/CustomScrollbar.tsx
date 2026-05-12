@@ -1,4 +1,5 @@
 import React, { useState, useEffect, useRef } from 'react';
+import { cn } from '../../lib/cn';
 import styles from './CustomScrollbar.module.scss';
 
 const CustomScrollbar: React.FC = () => {
@@ -158,9 +159,7 @@ const CustomScrollbar: React.FC = () => {
 
   return (
     <div
-      className={`${styles.scrollbar} ${isVisible ? styles.visible : ''} ${
-        isHovered ? styles.hovered : ''
-      }`}
+      className={cn(styles.scrollbar, isVisible && styles.visible, isHovered && styles.hovered)}
       onClick={handleTrackClick}
     >
       <div

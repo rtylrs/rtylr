@@ -256,7 +256,7 @@ const Register: React.FC = (): React.JSX.Element => {
   useEffect((): void => {
     const hasToken = document.cookie.split(';').some((c) => c.trim().startsWith('token='));
     if (isAuthenticated && hasToken) {
-      navigate(role === 'business' ? '/auth/questionnaire' : '/');
+      window.location.href = APP_URLS.dash as string;
     }
   }, [isAuthenticated, navigate, role]);
 

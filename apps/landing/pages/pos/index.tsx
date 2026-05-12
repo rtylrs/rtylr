@@ -1,4 +1,5 @@
 import React from 'react';
+import { cn } from '../../lib/cn';
 import { motion } from 'motion/react';
 import { useRouter } from 'next/router';
 import { Receipt, CreditCard, Split, Wifi, WifiOff } from 'lucide-react';
@@ -74,8 +75,8 @@ const POSPage = (): JSX.Element => {
           {/* ── HERO, split layout: copy left, receipt mockup right ───────── */}
           <section className={styles.hero}>
             <div className={styles.heroFrame} aria-hidden="true">
-              <span className={`${styles.vLine} ${styles.vLineLeft}`} />
-              <span className={`${styles.vLine} ${styles.vLineRight}`} />
+              <span className={cn(styles.vLine, styles.vLineLeft)} />
+              <span className={cn(styles.vLine, styles.vLineRight)} />
             </div>
 
             <motion.div
@@ -154,7 +155,7 @@ const POSPage = (): JSX.Element => {
                   <span>$9.99</span>
                 </div>
                 <div className={styles.receiptDivider} />
-                <div className={`${styles.receiptSumRow} ${styles.receiptTotal}`}>
+                <div className={cn(styles.receiptSumRow, styles.receiptTotal)}>
                   <span>Total</span>
                   <span>$65.54</span>
                 </div>
@@ -287,7 +288,8 @@ const POSPage = (): JSX.Element => {
                         return (
                           <td
                             key={i}
-                            className={`${isUs ? styles.compareUs : ''} ${
+                            className={cn(
+                              isUs && styles.compareUs,
                               variant === 'yes'
                                 ? styles.cellYes
                                 : variant === 'no'
@@ -297,7 +299,7 @@ const POSPage = (): JSX.Element => {
                                     : variant === 'addon'
                                       ? styles.cellAddon
                                       : styles.cellText
-                            }`}
+                            )}
                           >
                             {variant === 'yes'
                               ? 'Included'

@@ -1,4 +1,5 @@
 import React, { useState } from 'react';
+import { cn } from '../../../../lib/cn';
 import { motion } from 'motion/react';
 import { Sparkles, Shuffle } from 'lucide-react';
 import { APP_URLS } from '@voxire/config';
@@ -33,8 +34,8 @@ const MainHero: React.FC = (): React.JSX.Element => {
       {/* Retool-style framing rails, scoped to just this block so they don't
           bleed into the stats section below */}
       <div className={styles.heroFrame} aria-hidden="true">
-        <span className={`${styles.heroVLine} ${styles.heroVLineLeft}`} />
-        <span className={`${styles.heroVLine} ${styles.heroVLineRight}`} />
+        <span className={cn(styles.heroVLine, styles.heroVLineLeft)} />
+        <span className={cn(styles.heroVLine, styles.heroVLineRight)} />
       </div>
 
       {/* Announcement row, BETA pill sits next to plain link text */}
@@ -92,7 +93,7 @@ const MainHero: React.FC = (): React.JSX.Element => {
             <button
               type="button"
               onClick={goToRegister}
-              className={`${styles.aiCardIcon} ${styles.aiCardIconActive}`}
+              className={cn(styles.aiCardIcon, styles.aiCardIconActive)}
               aria-label="rtylr AI"
               title="rtylr AI"
             >

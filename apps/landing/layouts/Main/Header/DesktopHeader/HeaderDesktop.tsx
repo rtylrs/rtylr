@@ -1,4 +1,5 @@
 import React, { useState, useEffect, useCallback, useMemo } from 'react';
+import { cn } from '../../../../lib/cn';
 import { HiChevronDown } from 'react-icons/hi';
 import Link from 'next/link';
 import { useRouter } from 'next/router';
@@ -191,7 +192,7 @@ const HeaderDesktop: React.FC = () => {
         </div>
 
         <nav className={styles['nav-links']}>
-          <div className={`${styles['nav-item']} features-dropdown-container`}>
+          <div className={cn(styles['nav-item'], 'features-dropdown-container')}>
             <p className={styles['nav-link']} onClick={toggleFeaturesDropdown}>
               Features
               <HiChevronDown
@@ -271,7 +272,7 @@ const HeaderDesktop: React.FC = () => {
             Pricing
           </LinkWithColor>
 
-          <div className={`${styles['nav-item']} resources-dropdown-container`}>
+          <div className={cn(styles['nav-item'], 'resources-dropdown-container')}>
             <p className={styles['nav-link']} onClick={toggleResourcesDropdown}>
               Resources
               <HiChevronDown
@@ -325,7 +326,7 @@ const HeaderDesktop: React.FC = () => {
             )}
           </div>
 
-          <div className={`${styles['nav-item']} solutions-dropdown-container`}>
+          <div className={cn(styles['nav-item'], 'solutions-dropdown-container')}>
             <p className={styles['nav-link']} onClick={toggleSolutionsDropdown}>
               Company
               <HiChevronDown
@@ -370,7 +371,7 @@ const HeaderDesktop: React.FC = () => {
 
       <div className={styles['header-right']}>
         <div
-          className={`${styles['language-selector-container']} lang-dropdown-container`}
+          className={cn(styles['language-selector-container'], 'lang-dropdown-container')}
           style={{ display: 'none' }}
         >
           <span className={styles['language-selector']} onClick={toggleLanguageDropdown}>

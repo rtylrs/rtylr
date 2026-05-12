@@ -1,4 +1,5 @@
 import React, { useEffect, useRef, useState } from 'react';
+import { cn } from '@voxire/ui';
 import TrialBanner from '../shared/components/TrialBanner';
 import { useLocation, useNavigate, Link, Outlet } from 'react-router-dom';
 import { motion, AnimatePresence } from 'motion/react';
@@ -260,7 +261,7 @@ const DefaultLayout: React.FC = () => {
 
         {/* Sidebar */}
         <aside
-          className={`${sidebarOpen ? 'fixed inset-y-0 left-0 z-50 flex' : 'hidden'} md:flex`}
+          className={cn(sidebarOpen ? 'fixed inset-y-0 left-0 z-50 flex' : 'hidden', 'md:flex')}
           style={{
             width: '220px',
             flexDirection: 'column',

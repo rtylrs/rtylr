@@ -1,8 +1,9 @@
 import React from 'react';
+import { cn } from '@voxire/ui';
 
 export const SkeletonBlock: React.FC<{ className?: string }> = ({ className = '' }) => (
   <div
-    className={`animate-pulse rounded-lg ${className}`}
+    className={cn('animate-pulse rounded-lg', className)}
     style={{ background: 'var(--hub-hover)' }}
   />
 );

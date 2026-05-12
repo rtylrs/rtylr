@@ -1,4 +1,5 @@
 import React from 'react';
+import { cn } from '../../../lib/cn';
 import { motion } from 'motion/react';
 import { fadeInUp, viewportOnce } from '../../../lib/animations';
 import styles from './TestimonialsSection.module.scss';
@@ -77,7 +78,7 @@ const TestimonialsSection: React.FC = () => {
           transition={{ duration: 0.8, delay: 0.2 }}
         >
           <div className={styles.tickerContainer}>
-            <div className={`${styles.tickerTrack} ${styles.tickerLeft}`}>
+            <div className={cn(styles.tickerTrack, styles.tickerLeft)}>
               {duplicatedTestimonials.map((testimonial, index) => (
                 <div key={index} className={styles.testimonialCard}>
                   <p className={styles.quote}>"{testimonial.quote}"</p>
@@ -97,7 +98,7 @@ const TestimonialsSection: React.FC = () => {
             </div>
           </div>
           <div className={styles.tickerContainer}>
-            <div className={`${styles.tickerTrack} ${styles.tickerRight}`}>
+            <div className={cn(styles.tickerTrack, styles.tickerRight)}>
               {duplicatedTestimonials.map((testimonial, index) => (
                 <div key={index} className={styles.testimonialCard}>
                   <p className={styles.quote}>"{testimonial.quote}"</p>

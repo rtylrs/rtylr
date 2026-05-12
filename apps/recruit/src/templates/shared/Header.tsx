@@ -1,4 +1,5 @@
 import React from 'react';
+import { cn } from '@voxire/ui';
 import type { Customization } from '../../shared/lib/types';
 
 interface HeaderProps {
@@ -32,7 +33,7 @@ const Header: React.FC<HeaderProps> = ({ customization, compact = false }) => {
         />
       )}
       <div
-        className={`mx-auto flex max-w-5xl items-center gap-3 px-6 ${compact ? 'py-4' : 'py-6'}`}
+        className={cn('mx-auto flex max-w-5xl items-center gap-3 px-6', compact ? 'py-4' : 'py-6')}
       >
         {customization.logoUrl ? (
           <img

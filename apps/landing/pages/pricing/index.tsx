@@ -1,4 +1,5 @@
 import React, { useState } from 'react';
+import { cn } from '../../lib/cn';
 import { motion, AnimatePresence } from 'motion/react';
 import { useRouter } from 'next/router';
 import { Check, Minus, ChevronDown } from 'lucide-react';
@@ -157,13 +158,13 @@ const PricingPage = (): React.JSX.Element => {
 
             <motion.div className={styles.billingToggle} variants={blurFadeIn}>
               <button
-                className={`${styles.toggleOption} ${billing === 'monthly' ? styles.toggleActive : ''}`}
+                className={cn(styles.toggleOption, billing === 'monthly' && styles.toggleActive)}
                 onClick={() => setBilling('monthly')}
               >
                 Monthly
               </button>
               <button
-                className={`${styles.toggleOption} ${billing === 'annual' ? styles.toggleActive : ''}`}
+                className={cn(styles.toggleOption, billing === 'annual' && styles.toggleActive)}
                 onClick={() => setBilling('annual')}
               >
                 Annual
@@ -235,7 +236,7 @@ const PricingPage = (): React.JSX.Element => {
               {FAQ_ITEMS.map((item, index) => (
                 <motion.div
                   key={index}
-                  className={`${styles.faqItem} ${openFaq === index ? styles.faqItemOpen : ''}`}
+                  className={cn(styles.faqItem, openFaq === index && styles.faqItemOpen)}
                   variants={blurFadeIn}
                 >
                   <button
@@ -246,7 +247,7 @@ const PricingPage = (): React.JSX.Element => {
                     <span>{item.question}</span>
                     <ChevronDown
                       size={18}
-                      className={`${styles.faqChevron} ${openFaq === index ? styles.faqChevronOpen : ''}`}
+                      className={cn(styles.faqChevron, openFaq === index && styles.faqChevronOpen)}
                     />
                   </button>
                   <AnimatePresence>

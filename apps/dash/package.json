@@ -27,6 +27,8 @@
     "@voxire/observability": "workspace:*",
     "@voxire/tailwind-config": "workspace:*",
     "@voxire/ui": "workspace:*",
+    "clsx": "^2.1.1",
+    "tailwind-merge": "^3.5.0",
     "axios": "^1.15.2",
     "chart.js": "^4.5.1",
     "driver.js": "^1.4.0",

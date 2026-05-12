@@ -1,4 +1,5 @@
 import React, { useRef, useEffect, useCallback } from 'react';
+import { cn } from '@voxire/ui';
 import { Send, Sparkles } from 'lucide-react';
 import { motion, AnimatePresence } from 'motion/react';
 import { useCaretStore, useCaretStream } from '@voxire/caret';
@@ -106,7 +107,7 @@ const Chat: React.FC = () => {
                     key={msg.id}
                     initial={{ opacity: 0, y: 6 }}
                     animate={{ opacity: 1, y: 0 }}
-                    className={`flex ${msg.role === 'user' ? 'justify-end' : 'justify-start'}`}
+                    className={cn('flex', msg.role === 'user' ? 'justify-end' : 'justify-start')}
                   >
                     {msg.role === 'assistant' && (
                       <div

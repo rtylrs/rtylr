@@ -1,4 +1,5 @@
 import React from 'react';
+import { cn } from '../../lib/cn';
 import { motion } from 'motion/react';
 import { HiCheck } from 'react-icons/hi';
 import { blurFadeIn, staggerBlur, viewportOnce } from '../../lib/animations';
@@ -24,7 +25,7 @@ const PricingCards = ({ billing = 'monthly', onCta }: PricingCardsProps): React.
       return (
         <motion.div
           key={plan.name}
-          className={`${styles.pricingCard} ${plan.featured ? styles.featured : ''}`}
+          className={cn(styles.pricingCard, plan.featured && styles.featured)}
           variants={blurFadeIn}
           whileHover={{ y: -8, transition: { duration: 0.25, ease: 'easeOut' } }}
         >
@@ -47,7 +48,7 @@ const PricingCards = ({ billing = 'monthly', onCta }: PricingCardsProps): React.
             ))}
           </ul>
           <button
-            className={`${styles.ctaButton} ${plan.featured ? styles.ctaFeatured : ''}`}
+            className={cn(styles.ctaButton, plan.featured && styles.ctaFeatured)}
             onClick={() => onCta(plan.ctaAction)}
           >
             {plan.ctaText}

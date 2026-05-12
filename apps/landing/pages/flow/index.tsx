@@ -1,4 +1,5 @@
 import React, { useEffect, useRef, useState } from 'react';
+import { cn } from '../../lib/cn';
 import { motion, AnimatePresence, type PanInfo } from 'motion/react';
 import { useRouter } from 'next/router';
 import {
@@ -439,7 +440,7 @@ const FlowPage = (): JSX.Element => {
                 <div className={styles.boardHeaderRight}>
                   <span className={styles.boardCount}>{totalTasks} tasks</span>
                   <div className={styles.boardViews}>
-                    <span className={`${styles.boardView} ${styles.boardViewActive}`}>Board</span>
+                    <span className={cn(styles.boardView, styles.boardViewActive)}>Board</span>
                     <span className={styles.boardView}>List</span>
                     <span className={styles.boardView}>Timeline</span>
                   </div>
@@ -605,7 +606,7 @@ const FlowPage = (): JSX.Element => {
                       key={i}
                       type="button"
                       onClick={() => selectRule(i)}
-                      className={`${styles.ruleDot} ${i === ruleIdx ? styles.ruleDotActive : ''}`}
+                      className={cn(styles.ruleDot, i === ruleIdx && styles.ruleDotActive)}
                       aria-label={`Example ${i + 1}`}
                     />
                   ))}

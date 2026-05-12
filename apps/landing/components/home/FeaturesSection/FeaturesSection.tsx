@@ -1,4 +1,5 @@
 import React, { useCallback, useEffect, useRef, useState } from 'react';
+import { cn } from '../../../lib/cn';
 import { motion, AnimatePresence } from 'motion/react';
 import { Button } from '@voxire/components';
 import { useRouter } from 'next/router';
@@ -149,7 +150,7 @@ const FeaturesSection: React.FC = (): React.JSX.Element => {
               aria-selected={i === activeIndex}
               aria-controls={`feature-panel-${f.id}`}
               onClick={() => selectFeature(i)}
-              className={`${styles.tab} ${i === activeIndex ? styles.tabActive : ''}`}
+              className={cn(styles.tab, i === activeIndex && styles.tabActive)}
             >
               {f.category}
             </button>
@@ -192,7 +193,7 @@ const FeaturesSection: React.FC = (): React.JSX.Element => {
               {FEATURES.map((f, i) => (
                 <div
                   key={f.id}
-                  className={`${styles.showcaseImage} ${i === activeIndex ? styles.active : ''}`}
+                  className={cn(styles.showcaseImage, i === activeIndex && styles.active)}
                   aria-hidden={i !== activeIndex}
                 >
                   <f.Demo isActive={i === activeIndex} />
@@ -204,7 +205,7 @@ const FeaturesSection: React.FC = (): React.JSX.Element => {
               {FEATURES.map((f, i) => (
                 <span
                   key={f.id}
-                  className={`${styles.progressDot} ${i === activeIndex ? styles.progressDotActive : ''}`}
+                  className={cn(styles.progressDot, i === activeIndex && styles.progressDotActive)}
                 />
               ))}
             </div>

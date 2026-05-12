@@ -1,4 +1,5 @@
 import React from 'react';
+import { cn } from '../lib/cn';
 import { motion } from 'motion/react';
 import Link from 'next/link';
 import { useRouter } from 'next/router';
@@ -44,8 +45,8 @@ const NotFoundPage = (): JSX.Element => {
         <main className={styles.page}>
           {/* Framing rails, match the hero aesthetic */}
           <div className={styles.frame} aria-hidden="true">
-            <span className={`${styles.vLine} ${styles.vLineLeft}`} />
-            <span className={`${styles.vLine} ${styles.vLineRight}`} />
+            <span className={cn(styles.vLine, styles.vLineLeft)} />
+            <span className={cn(styles.vLine, styles.vLineRight)} />
           </div>
 
           <motion.section

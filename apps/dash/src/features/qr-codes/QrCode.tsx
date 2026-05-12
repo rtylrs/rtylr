@@ -1,5 +1,6 @@
 import React from 'react';
 import { useState, useRef, useEffect } from 'react';
+import { cn } from '@voxire/ui';
 import { toast } from 'sonner';
 import { QRCode } from 'react-qrcode-logo';
 import html2canvas from 'html2canvas';
@@ -64,9 +65,10 @@ function QrCode() {
             {QrCodeTemplates.map((template) => (
               <div
                 key={template.name}
-                className={`cursor-pointer rounded-lg border-2 p-1 transition-colors ${
+                className={cn(
+                  'cursor-pointer rounded-lg border-2 p-1 transition-colors',
                   template.name === qrOptions.name ? 'border-accent' : 'border-black/10'
-                }`}
+                )}
               >
                 <QrCodeTemplate
                   {...template}

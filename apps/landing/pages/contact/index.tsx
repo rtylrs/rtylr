@@ -1,4 +1,5 @@
 import React, { useState } from 'react';
+import { cn } from '../../lib/cn';
 import { motion } from 'motion/react';
 import { useRouter } from 'next/router';
 import { MessageCircle, Phone, Mail, ArrowRight, CheckCircle } from 'lucide-react';
@@ -197,7 +198,7 @@ const ContactPage = (): JSX.Element => {
                     <h2 className={styles.formTitle}>Send us a message</h2>
 
                     <div className={styles.fieldRow}>
-                      <div className={`${styles.field} ${errors.name ? styles.fieldError : ''}`}>
+                      <div className={cn(styles.field, errors.name && styles.fieldError)}>
                         <label htmlFor="contact-name" className={styles.fieldLabel}>
                           Name <span className={styles.required}>*</span>
                         </label>
@@ -214,7 +215,7 @@ const ContactPage = (): JSX.Element => {
                         {errors.name && <span className={styles.errorMsg}>{errors.name}</span>}
                       </div>
 
-                      <div className={`${styles.field} ${errors.email ? styles.fieldError : ''}`}>
+                      <div className={cn(styles.field, errors.email && styles.fieldError)}>
                         <label htmlFor="contact-email" className={styles.fieldLabel}>
                           Email <span className={styles.required}>*</span>
                         </label>
@@ -248,7 +249,7 @@ const ContactPage = (): JSX.Element => {
                       />
                     </div>
 
-                    <div className={`${styles.field} ${errors.message ? styles.fieldError : ''}`}>
+                    <div className={cn(styles.field, errors.message && styles.fieldError)}>
                       <label htmlFor="contact-message" className={styles.fieldLabel}>
                         Message <span className={styles.required}>*</span>
                       </label>

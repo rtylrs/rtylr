@@ -1,4 +1,5 @@
 import React, { useState, useRef, useEffect } from 'react';
+import { cn } from '@voxire/ui';
 import { AnimatePresence, motion } from 'motion/react';
 import {
   MenuLayout,
@@ -295,9 +296,10 @@ const BtnGroup = <T extends string | number>({
     {options.map((o) => (
       <button
         key={String(o.value)}
-        className={`px-2.5 py-1 text-xs font-medium transition-colors ${
+        className={cn(
+          'px-2.5 py-1 text-xs font-medium transition-colors',
           value === o.value ? 'bg-gray-900 text-white' : 'bg-white text-gray-600 hover:bg-gray-50'
-        }`}
+        )}
         onClick={() => onChange(o.value)}
       >
         {o.label}
@@ -601,11 +603,12 @@ const DevMenu: React.FC = () => {
                   {ACCENT_OPTIONS.map((a) => (
                     <button
                       key={a.value}
-                      className={`w-7 h-7 rounded-full transition-all ${
+                      className={cn(
+                        'w-7 h-7 rounded-full transition-all',
                         accent.value === a.value
                           ? 'ring-2 ring-offset-1 ring-gray-900 scale-110'
                           : 'hover:scale-105'
-                      }`}
+                      )}
                       style={{ background: a.value }}
                       onClick={() => setAccent(a)}
                       title={a.label}

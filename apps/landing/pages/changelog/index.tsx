@@ -1,4 +1,5 @@
 import React from 'react';
+import { cn } from '../../lib/cn';
 import { motion } from 'motion/react';
 import Link from 'next/link';
 import { Rss } from 'lucide-react';
@@ -255,7 +256,7 @@ const ChangelogPage = (): JSX.Element => {
                   <ul className={styles.changeList}>
                     {entry.changes.map((change, i) => (
                       <li key={i} className={styles.changeItem}>
-                        <span className={`${styles.changeKind} ${styles[`kind_${change.kind}`]}`}>
+                        <span className={cn(styles.changeKind, styles[`kind_${change.kind}`])}>
                           {KIND_LABEL[change.kind]}
                         </span>
                         <span className={styles.changeText}>{change.text}</span>

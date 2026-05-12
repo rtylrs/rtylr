@@ -1,4 +1,5 @@
 import React, { useState } from 'react';
+import { cn } from '@voxire/ui';
 import { toast } from 'sonner';
 import { Mail, Phone, FileText } from 'lucide-react';
 
@@ -195,9 +196,10 @@ const FilterChip: React.FC<{
 }> = ({ active, onClick, children }) => (
   <button
     onClick={onClick}
-    className={`rounded-full px-3 py-1 text-xs font-medium transition ${
+    className={cn(
+      'rounded-full px-3 py-1 text-xs font-medium transition',
       active ? 'bg-white text-black' : 'border border-white/10 text-white/70 hover:bg-white/5'
-    }`}
+    )}
   >
     {children}
   </button>

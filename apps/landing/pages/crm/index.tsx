@@ -1,4 +1,5 @@
 import React, { useMemo, useState } from 'react';
+import { cn } from '../../lib/cn';
 import { motion } from 'motion/react';
 import { useRouter } from 'next/router';
 import { Heart, Mail, Gift, Users, Star, Send, Target, ChevronRight, Plus } from 'lucide-react';
@@ -527,7 +528,7 @@ const CRMPage = (): JSX.Element => {
                         <button
                           type="button"
                           onClick={() => toggleFilter(f.id)}
-                          className={`${styles.filterToggle} ${active ? styles.filterToggleActive : ''}`}
+                          className={cn(styles.filterToggle, active && styles.filterToggleActive)}
                           aria-pressed={active}
                         >
                           <span className={styles.filterCheckbox}>

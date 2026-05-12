@@ -1,4 +1,6 @@
 import React, { useState } from 'react';
+import { useQuery } from '@tanstack/react-query';
+import { unwrap } from '@voxire/api';
 import { DollarSign, ShoppingBag, TrendingUp, Star, BarChart2, Loader2 } from 'lucide-react';
 import {
   Card,
@@ -17,10 +19,33 @@ import {
 } from '../../shared/components/ui';
 import { cn } from '../../shared/lib/utils';
 import { useKpis } from '../../shared/hooks/queries/useKpis';
+import { safe } from '../../shared/lib/api';
+
+interface BestSeller {
+  productId: number;
+  name: string;
+  unitsSold: number;
+  revenueMinorUnits: number;
+}
+
+const useBestSellers = () =>
+  useQuery({
+    queryKey: ['dash-best-sellers'],
+    queryFn: async (): Promise<BestSeller[]> => {
+      const res = await unwrap(
+        safe.get<{ products: BestSeller[] }>('/insights/products/best-sellers', {
+          params: { limit: 5 },
+        })
+      );
+      return (res as { products: BestSeller[] }).products ?? [];
+    },
+    staleTime: 60_000,
+  });
 
 const Analytics: React.FC = () => {
   const [range, setRange] = useState('7d');
   const { data: kpis, isLoading } = useKpis();
+  const { data: bestSellers = [], isLoading: sellersLoading } = useBestSellers();
 
   const avgOrderValue = kpis && kpis.ordersToday > 0 ? kpis.revenueToday / kpis.ordersToday : 0;
 
@@ -148,7 +173,6 @@ const Analytics: React.FC = () => {
         </Card>
       )}
 
-      {/* Top Items placeholder — requires a dedicated endpoint */}
       <Card>
         <CardHeader>
           <CardTitle>Top Items</CardTitle>
@@ -158,22 +182,40 @@ const Analytics: React.FC = () => {
             <TableHeader>
               <TableRow>
                 <TableHead>Name</TableHead>
-                <TableHead>Orders</TableHead>
+                <TableHead>Units Sold</TableHead>
                 <TableHead>Revenue</TableHead>
               </TableRow>
             </TableHeader>
             <TableBody>
-              <TableRow>
-                <TableCell colSpan={3}>
-                  <div className="flex flex-col items-center justify-center py-8 text-center">
-                    <BarChart2 size={28} className="text-gray-200 mb-3" />
-                    <p className="text-sm font-medium text-gray-400">No data yet</p>
-                    <p className="text-xs text-gray-300 mt-1">
-                      Top performing items will appear here
-                    </p>
-                  </div>
-                </TableCell>
-              </TableRow>
+              {sellersLoading ? (
+                <TableRow>
+                  <TableCell colSpan={3}>
+                    <div className="flex items-center justify-center py-6">
+                      <Loader2 size={18} className="animate-spin text-gray-300" />
+                    </div>
+                  </TableCell>
+                </TableRow>
+              ) : bestSellers.length === 0 ? (
+                <TableRow>
+                  <TableCell colSpan={3}>
+                    <div className="flex flex-col items-center justify-center py-8 text-center">
+                      <BarChart2 size={28} className="text-gray-200 mb-3" />
+                      <p className="text-sm font-medium text-gray-400">No data yet</p>
+                      <p className="text-xs text-gray-300 mt-1">
+                        Top performing items will appear here
+                      </p>
+                    </div>
+                  </TableCell>
+                </TableRow>
+              ) : (
+                bestSellers.map((item) => (
+                  <TableRow key={item.productId}>
+                    <TableCell className="font-medium">{item.name}</TableCell>
+                    <TableCell>{item.unitsSold.toLocaleString()}</TableCell>
+                    <TableCell>${(item.revenueMinorUnits / 100).toFixed(2)}</TableCell>
+                  </TableRow>
+                ))
+              )}
             </TableBody>
           </Table>
         </CardContent>

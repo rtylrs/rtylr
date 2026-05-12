@@ -1,4 +1,5 @@
 import React, { useEffect, useState } from 'react';
+import { cn } from '@voxire/ui';
 import { toast } from 'sonner';
 import { APP_URLS } from '@voxire/config';
 import { ExternalLink, RotateCcw, Palette, Type, ImageIcon, Layout, Search } from 'lucide-react';
@@ -543,9 +544,10 @@ const TabButton: React.FC<{
   <button
     type="button"
     onClick={onClick}
-    className={`inline-flex items-center gap-2 rounded-md px-3 py-1.5 transition ${
+    className={cn(
+      'inline-flex items-center gap-2 rounded-md px-3 py-1.5 transition',
       active ? 'bg-white/10 text-white' : 'text-white/60 hover:bg-white/5 hover:text-white'
-    }`}
+    )}
   >
     <span className="[&>svg]:h-4 [&>svg]:w-4">{icon}</span>
     {children}

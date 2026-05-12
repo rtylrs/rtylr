@@ -1,4 +1,5 @@
 import React, { useCallback, useState, useEffect, useMemo } from 'react';
+import { cn } from '../../lib/cn';
 import { motion } from 'motion/react';
 import { useRouter } from 'next/router';
 import {
@@ -181,7 +182,7 @@ const ERPPage = (): JSX.Element => {
             >
               <div className={styles.tableHeader}>
                 <div className={styles.tableTabs}>
-                  <span className={`${styles.tableTab} ${styles.tableTabActive}`}>All SKUs</span>
+                  <span className={cn(styles.tableTab, styles.tableTabActive)}>All SKUs</span>
                   <span className={styles.tableTab}>Low stock · {lowStockCount}</span>
                   <span className={styles.tableTab}>Suppliers</span>
                   <span className={styles.tableTab}>Purchase orders</span>
@@ -247,13 +248,14 @@ const ERPPage = (): JSX.Element => {
                           </motion.span>
                           <div className={styles.stockBar} aria-hidden="true">
                             <motion.div
-                              className={`${styles.stockBarFill} ${
+                              className={cn(
+                                styles.stockBarFill,
                                 status === 'critical'
                                   ? styles.stockBarCritical
                                   : status === 'low'
                                     ? styles.stockBarLow
                                     : styles.stockBarOk
-                              }`}
+                              )}
                               animate={{ width: `${fillPct}%` }}
                               transition={{ duration: 0.6, ease: [0.16, 1, 0.3, 1] }}
                             />
@@ -263,13 +265,14 @@ const ERPPage = (): JSX.Element => {
                         <td>
                           <motion.span
                             key={status}
-                            className={`${styles.badge} ${
+                            className={cn(
+                              styles.badge,
                               status === 'critical'
                                 ? styles.badgeCritical
                                 : status === 'low'
                                   ? styles.badgeLow
                                   : styles.badgeOk
-                            }`}
+                            )}
                             initial={{ opacity: 0, scale: 0.9 }}
                             animate={{ opacity: 1, scale: 1 }}
                             transition={{ duration: 0.2 }}
@@ -324,7 +327,7 @@ const ERPPage = (): JSX.Element => {
               {CAPABILITIES.map(({ icon: Icon, title, copy }, i) => (
                 <motion.div
                   key={title}
-                  className={`${styles.capabilityRow} ${i % 2 === 1 ? styles.capabilityRowReverse : ''}`}
+                  className={cn(styles.capabilityRow, i % 2 === 1 && styles.capabilityRowReverse)}
                   initial={{ opacity: 0, x: i % 2 === 0 ? -20 : 20 }}
                   whileInView={{ opacity: 1, x: 0 }}
                   viewport={{ once: true, margin: '-80px' }}
