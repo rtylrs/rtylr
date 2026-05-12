@@ -20,6 +20,11 @@ func RegisterRoutes(ctx context.Context, router *chi.Mux, svc *application.Servi
 		&handlers.ListExpensesHandler{Service: svc},
 	)
 
+	http.RegisterGET[handlers.GetExpenseRequest, handlers.GetExpenseResponse](
+		ctx, router, handlers.ExpenseGetRoutes(),
+		&handlers.GetExpenseHandler{Service: svc},
+	)
+
 	http.RegisterPOSTWithValidation[handlers.CreateExpenseRequest, handlers.CreateExpenseResponse](
 		ctx, router, handlers.ExpenseCreateRoutes(),
 		&handlers.CreateExpenseHandler{Service: svc},

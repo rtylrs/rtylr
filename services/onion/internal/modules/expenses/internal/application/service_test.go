@@ -23,6 +23,13 @@ func (m *mockRepo) List(_ context.Context, _ int64) ([]domain.Expense, error) {
 	return m.listResult, m.listErr
 }
 
+func (m *mockRepo) GetByID(_ context.Context, _, _ int64) (domain.Expense, error) {
+	if len(m.listResult) > 0 {
+		return m.listResult[0], m.listErr
+	}
+	return domain.Expense{}, m.listErr
+}
+
 func (m *mockRepo) Create(_ context.Context, _ domain.ExpenseInput) (int64, error) {
 	return m.createID, m.createErr
 }

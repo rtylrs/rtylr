@@ -60,6 +60,38 @@ func (h *ListExpensesHandler) Serve(ctx context.Context, _ *ListExpensesRequest)
 	return ListExpensesResponse{Expenses: payloads}, nil
 }
 
+// ─── Get by ID ────────────────────────────────────────────────────────────────
+
+func ExpenseGetRoutes() []string { return []string{"/finance/expenses/{id}"} }
+
+type (
+	GetExpenseHandler  struct{ Service *application.Service }
+	GetExpenseRequest  struct{}
+	GetExpenseResponse struct {
+		Expense *finv1.Expense `json:"expense"`
+	}
+)
+
+func (h *GetExpenseHandler) Serve(ctx context.Context, _ *GetExpenseRequest) (GetExpenseResponse, *errorModels.ServerError) {
+	device := authPkg.DeviceCtx(ctx)
+	if device.User == nil {
+		return GetExpenseResponse{}, errorModels.PermissionDeniedServerError()
+	}
+	idStr := chi.URLParamFromCtx(ctx, "id")
+	id, err := strconv.ParseInt(idStr, 10, 64)
+	if err != nil {
+		return GetExpenseResponse{}, &errorModels.ServerError{Code: http.StatusBadRequest, Message: "Invalid expense ID"}
+	}
+	expense, getErr := h.Service.GetByID(ctx, device.User.UserID, id)
+	if getErr != nil {
+		if errors.Is(getErr, domain.ErrExpenseNotFound) {
+			return GetExpenseResponse{}, &errorModels.ServerError{Code: http.StatusNotFound, Message: "Expense not found"}
+		}
+		return GetExpenseResponse{}, &errorModels.ServerError{Code: http.StatusInternalServerError, Message: "Failed to get expense"}
+	}
+	return GetExpenseResponse{Expense: newExpensePayload(expense)}, nil
+}
+
 // ─── Create ───────────────────────────────────────────────────────────────────
 
 func ExpenseCreateRoutes() []string { return []string{"/finance/expenses"} }

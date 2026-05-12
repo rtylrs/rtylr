@@ -9,6 +9,7 @@ import (
 
 type repository interface {
 	List(ctx context.Context, ownerID int64) ([]domain.Expense, error)
+	GetByID(ctx context.Context, ownerID, id int64) (domain.Expense, error)
 	Create(ctx context.Context, input domain.ExpenseInput) (int64, error)
 	Update(ctx context.Context, input domain.ExpenseUpdateInput) error
 	UpdateStatus(ctx context.Context, ownerID, id int64, status string) error
@@ -26,6 +27,10 @@ func NewService(ctx context.Context) *Service {
 
 func (s *Service) List(ctx context.Context, ownerID int64) ([]domain.Expense, error) {
 	return s.repo.List(ctx, ownerID)
+}
+
+func (s *Service) GetByID(ctx context.Context, ownerID, id int64) (domain.Expense, error) {
+	return s.repo.GetByID(ctx, ownerID, id)
 }
 
 func (s *Service) Create(ctx context.Context, input domain.ExpenseInput) (int64, error) {
