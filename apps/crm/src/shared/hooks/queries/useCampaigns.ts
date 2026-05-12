@@ -80,9 +80,7 @@ export const useUpdateCampaign = (): UseMutationResult<
   const { t } = useTranslation();
   return useMutation<Campaign, unknown, UpdateCampaignPayload>({
     mutationFn: async (payload: UpdateCampaignPayload): Promise<Campaign> => {
-      const res = await unwrap(
-        safe.put<Campaign>('/crm/campaigns', { id: payload.id, ...payload.data })
-      );
+      const res = await unwrap(safe.put<Campaign>(`/crm/campaigns/${payload.id}`, payload.data));
       return res as Campaign;
     },
     onSuccess: (_data: Campaign, variables: UpdateCampaignPayload): void => {
@@ -120,7 +118,7 @@ export const useUpdateCampaignStatus = (): UseMutationResult<
   const { t } = useTranslation();
   return useMutation<unknown, unknown, CampaignStatusPayload>({
     mutationFn: (payload: CampaignStatusPayload): Promise<unknown> =>
-      unwrap(safe.put('/crm/campaigns/status', payload)),
+      unwrap(safe.put(`/crm/campaigns/${payload.id}/status`, { status: payload.status })),
     onSuccess: (_data: unknown, variables: CampaignStatusPayload): void => {
       void qc.invalidateQueries({ queryKey: ['crm-campaigns'] });
       void qc.invalidateQueries({ queryKey: ['crm-campaign', variables.id] });
