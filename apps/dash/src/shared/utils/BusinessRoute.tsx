@@ -12,8 +12,9 @@ import {
   Lock,
   BarChart3,
 } from 'lucide-react';
+import { unwrap } from '@voxire/api';
 import { useUserStore, type StoredUser } from '../stores/userStore';
-import api from '../lib/api';
+import { safe } from '../lib/api';
 
 const getCookieToken = (): string | null =>
   document.cookie
@@ -102,7 +103,7 @@ function StaffView({ user }: { user: StoredUser }): React.JSX.Element {
   const handleRequestAccess = async (appId: string): Promise<void> => {
     setRequestLoading(appId);
     try {
-      await api.post('/team/request-access', { app: appId });
+      await safe.post('/team/request-access', { app: appId });
       setRequested((prev) => new Set(prev).add(appId));
     } catch {
       // silently fail, server returns success anyway if already requested
@@ -399,15 +400,12 @@ function BusinessRoute(): React.JSX.Element | null {
 
     setToken(token);
 
-    api
-      .get('/user/me')
-      .then((res: { data?: Record<string, unknown> }) => {
-        if (res.data) {
-          setUser(res.data as StoredUser);
-        }
+    unwrap(safe.get<Record<string, unknown>>('/user/me'))
+      .then((res) => {
+        setUser(res as StoredUser);
       })
       .catch(() => {
-        // allow on error, auth interceptor handles 401
+        // auth interceptor handles 401 redirect
       })
       .finally(() => setLoading(false));
   }, [token]);

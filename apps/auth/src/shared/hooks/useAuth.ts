@@ -1,5 +1,6 @@
 import { useMutation } from '@tanstack/react-query';
-import api from '../lib/api';
+import { unwrap, type ApiError } from '@voxire/api';
+import { safe } from '../lib/api';
 import { useUserStore } from '../stores/userStore';
 import { setCookie, getDefaultCookieDomain } from '../lib/cookies';
 
@@ -29,10 +30,8 @@ export const useLogin = () => {
   const { login, setLoading, setError } = useUserStore();
 
   return useMutation({
-    mutationFn: async (payload: LoginPayload): Promise<AuthResponse> => {
-      const response = await api.post('/auth/login', payload);
-      return response.data;
-    },
+    mutationFn: (payload: LoginPayload): Promise<AuthResponse> =>
+      unwrap(safe.post<AuthResponse>('/auth/login', payload)),
     onMutate: () => {
       setLoading(true);
       setError(null);
@@ -45,10 +44,8 @@ export const useLogin = () => {
       });
       login(data.role);
     },
-    onError: (error: { response?: { data?: { message?: string; error?: string } } }) => {
-      const errorMessage =
-        error.response?.data?.message || error.response?.data?.error || 'Login failed';
-      setError(errorMessage);
+    onError: (error: ApiError) => {
+      setError(error.message || 'Login failed');
       setLoading(false);
     },
     onSettled: () => {
@@ -61,10 +58,8 @@ export const useRegisterRestaurant = () => {
   const { login, setLoading, setError } = useUserStore();
 
   return useMutation({
-    mutationFn: async (payload: RegisterPayload): Promise<AuthResponse> => {
-      const response = await api.post('/auth/register', payload);
-      return response.data;
-    },
+    mutationFn: (payload: RegisterPayload): Promise<AuthResponse> =>
+      unwrap(safe.post<AuthResponse>('/auth/register', payload)),
     onMutate: () => {
       setLoading(true);
       setError(null);
@@ -77,10 +72,8 @@ export const useRegisterRestaurant = () => {
       });
       login(data.role);
     },
-    onError: (error: { response?: { data?: { message?: string; error?: string } } }) => {
-      const errorMessage =
-        error.response?.data?.message || error.response?.data?.error || 'Registration failed';
-      setError(errorMessage);
+    onError: (error: ApiError) => {
+      setError(error.message || 'Registration failed');
       setLoading(false);
     },
     onSettled: () => {
@@ -93,10 +86,8 @@ export const useGoogleAuth = () => {
   const { login, setLoading, setError } = useUserStore();
 
   return useMutation({
-    mutationFn: async (payload: GoogleAuthPayload): Promise<AuthResponse> => {
-      const response = await api.post('/auth/register/google', payload);
-      return response.data;
-    },
+    mutationFn: (payload: GoogleAuthPayload): Promise<AuthResponse> =>
+      unwrap(safe.post<AuthResponse>('/auth/register/google', payload)),
     onMutate: () => {
       setLoading(true);
       setError(null);
@@ -109,10 +100,8 @@ export const useGoogleAuth = () => {
       });
       login(data.role);
     },
-    onError: (error: { response?: { data?: { message?: string; error?: string } } }) => {
-      const errorMessage =
-        error.response?.data?.message || error.response?.data?.error || 'Google login failed';
-      setError(errorMessage);
+    onError: (error: ApiError) => {
+      setError(error.message || 'Google login failed');
       setLoading(false);
     },
     onSettled: () => {

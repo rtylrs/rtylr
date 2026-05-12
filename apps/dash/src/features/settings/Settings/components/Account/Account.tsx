@@ -197,8 +197,7 @@ const Account: React.FC = () => {
             size="sm"
             onClick={async () => {
               try {
-                const { default: api } = await import('../../../../../shared/lib/api');
-                await api.post('/security/invalidate-sessions');
+                await unwrap(safe.post('/security/invalidate-sessions'));
                 // Clear the cross-subdomain cookie via the shared
                 // helper; a plain `document.cookie = '...'` without a
                 // Domain attr leaves the .rtylr.com cookie intact.
