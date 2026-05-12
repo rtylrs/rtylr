@@ -19,7 +19,7 @@ export const useTaxConfig = () => {
   return useQuery<ListTaxConfigResponse>({
     queryKey: ['tax-config'],
     queryFn: async (): Promise<ListTaxConfigResponse> => {
-      const res = await unwrap(safe.get<ListTaxConfigResponse>('/finance/tax'));
+      const res = await unwrap(safe.get<ListTaxConfigResponse>('/finance/tax/config'));
       return res as ListTaxConfigResponse;
     },
   });
@@ -31,7 +31,7 @@ export const useUpdateTaxConfig = () => {
 
   return useMutation({
     mutationFn: async (data: CreateTaxConfigRequest): Promise<CreateTaxConfigResponse> => {
-      const res = await unwrap(safe.put<CreateTaxConfigResponse>('/finance/tax', data));
+      const res = await unwrap(safe.put<CreateTaxConfigResponse>('/finance/tax/config', data));
       return res as CreateTaxConfigResponse;
     },
     onSuccess: () => {
