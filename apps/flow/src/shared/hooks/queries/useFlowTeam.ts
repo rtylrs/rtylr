@@ -51,7 +51,7 @@ export const useFlowInviteMember = (): UseMutationResult<unknown, unknown, Invit
   const qc = useQueryClient();
   return useMutation<unknown, unknown, InvitePayload>({
     mutationFn: (payload: InvitePayload): Promise<unknown> =>
-      unwrap(safe.post('/auth/invite', { ...payload, apps: ['flow'] })),
+      unwrap(safe.post('/team/invite', { ...payload, apps: ['flow'] })),
     onSuccess: (): void => {
       toast.success('Invitation sent');
       void qc.invalidateQueries({ queryKey: ['flow-team'] });
