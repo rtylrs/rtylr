@@ -39,7 +39,9 @@ export const useGetInvoice = (id: number | undefined) => {
   return useQuery<GetInvoiceResponse>({
     queryKey: ['invoice', id],
     queryFn: async (): Promise<GetInvoiceResponse> => {
-      const res = await unwrap(safe.get<GetInvoiceResponse>(`/finance/invoices/${id}`));
+      const res = await unwrap(
+        safe.get<GetInvoiceResponse>('/finance/invoices/detail', { params: { id } })
+      );
       return res as GetInvoiceResponse;
     },
     enabled: !!id,
@@ -71,9 +73,7 @@ export const useUpdateInvoice = () => {
 
   return useMutation({
     mutationFn: async (data: UpdateInvoiceRequest): Promise<UpdateInvoiceResponse> => {
-      const res = await unwrap(
-        safe.put<UpdateInvoiceResponse>(`/finance/invoices/${data.id}`, data)
-      );
+      const res = await unwrap(safe.put<UpdateInvoiceResponse>('/finance/invoices', data));
       return res as UpdateInvoiceResponse;
     },
     onSuccess: (_data: UpdateInvoiceResponse, variables: UpdateInvoiceRequest) => {
@@ -93,7 +93,9 @@ export const useDeleteInvoice = () => {
 
   return useMutation({
     mutationFn: async (id: number): Promise<DeleteInvoiceResponse> => {
-      const res = await unwrap(safe.delete<DeleteInvoiceResponse>(`/finance/invoices/${id}`));
+      const res = await unwrap(
+        safe.delete<DeleteInvoiceResponse>('/finance/invoices', { data: { id } })
+      );
       return res as DeleteInvoiceResponse;
     },
     onSuccess: () => {
