@@ -112,9 +112,7 @@ export const useRecordInvoicePayment = () => {
 
   return useMutation({
     mutationFn: async (data: RecordPaymentRequest): Promise<RecordPaymentResponse> => {
-      const res = await unwrap(
-        safe.post<RecordPaymentResponse>(`/finance/invoices/${data.invoiceId}/payment`, data)
-      );
+      const res = await unwrap(safe.post<RecordPaymentResponse>('/finance/invoices/payment', data));
       return res as RecordPaymentResponse;
     },
     onSuccess: (_data: RecordPaymentResponse, variables: RecordPaymentRequest) => {
@@ -173,7 +171,8 @@ export const useSetInvoiceStatus = () => {
   return useMutation({
     mutationFn: async (data: SetInvoiceStatusVariables): Promise<UpdateInvoiceStatusResponse> => {
       const res = await unwrap(
-        safe.put<UpdateInvoiceStatusResponse>(`/finance/invoices/${data.id}/status`, {
+        safe.put<UpdateInvoiceStatusResponse>('/finance/invoices/status', {
+          id: data.id,
           status: data.status,
         })
       );
