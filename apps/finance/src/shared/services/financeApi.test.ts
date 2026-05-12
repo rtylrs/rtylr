@@ -43,22 +43,19 @@ describe('financeApi', () => {
     expect(safe.post).toHaveBeenCalledWith('/finance/invoices', data);
   });
 
-  it('updateInvoice calls POST /finance/invoices with id', () => {
+  it('updateInvoice calls PUT /finance/invoices with id', () => {
     financeApi.updateInvoice('INV-001', { amount: 1500 });
-    expect(safe.post).toHaveBeenCalledWith('/finance/invoices', { id: 'INV-001', amount: 1500 });
+    expect(safe.put).toHaveBeenCalledWith('/finance/invoices', { id: 'INV-001', amount: 1500 });
   });
 
-  it('deleteInvoice calls POST /finance/invoices with delete action', () => {
+  it('deleteInvoice calls DELETE /finance/invoices with id', () => {
     financeApi.deleteInvoice('INV-001');
-    expect(safe.post).toHaveBeenCalledWith('/finance/invoices', {
-      id: 'INV-001',
-      _action: 'delete',
-    });
+    expect(safe.delete).toHaveBeenCalledWith('/finance/invoices', { data: { id: 'INV-001' } });
   });
 
-  it('updateInvoiceStatus calls POST /finance/invoices/status', () => {
+  it('updateInvoiceStatus calls PUT /finance/invoices/status', () => {
     financeApi.updateInvoiceStatus('INV-001', 'Paid');
-    expect(safe.post).toHaveBeenCalledWith('/finance/invoices/status', {
+    expect(safe.put).toHaveBeenCalledWith('/finance/invoices/status', {
       id: 'INV-001',
       status: 'Paid',
     });
@@ -84,9 +81,9 @@ describe('financeApi', () => {
     expect(safe.post).toHaveBeenCalledWith('/finance/expenses', data);
   });
 
-  it('deleteExpense calls POST /finance/expenses with delete action', () => {
+  it('deleteExpense calls DELETE /finance/expenses with id', () => {
     financeApi.deleteExpense('EXP-1');
-    expect(safe.post).toHaveBeenCalledWith('/finance/expenses', { id: 'EXP-1', _action: 'delete' });
+    expect(safe.delete).toHaveBeenCalledWith('/finance/expenses', { data: { id: 'EXP-1' } });
   });
 
   it('getExpenseCategories calls GET /finance/expense-categories', () => {
@@ -135,9 +132,9 @@ describe('financeApi', () => {
     expect(safe.get).toHaveBeenCalledWith('/finance/quotes');
   });
 
-  it('deleteQuote calls POST /finance/quotes with delete action', () => {
+  it('deleteQuote calls DELETE /finance/quotes with id', () => {
     financeApi.deleteQuote('Q-1');
-    expect(safe.post).toHaveBeenCalledWith('/finance/quotes', { id: 'Q-1', _action: 'delete' });
+    expect(safe.delete).toHaveBeenCalledWith('/finance/quotes', { data: { id: 'Q-1' } });
   });
 
   // Bills

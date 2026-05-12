@@ -44,9 +44,9 @@ describe('erpApi', () => {
     expect(safe.post).toHaveBeenCalledWith('/erp/products', data);
   });
 
-  it('deleteProduct calls POST /erp/products with delete action', () => {
+  it('deleteProduct calls DELETE /erp/products with id', () => {
     erpApi.deleteProduct(3);
-    expect(safe.post).toHaveBeenCalledWith('/erp/products', { id: 3, _action: 'delete' });
+    expect(safe.delete).toHaveBeenCalledWith('/erp/products', { data: { id: 3 } });
   });
 
   it('lookupBarcode calls GET /erp/products/barcode/:code', () => {

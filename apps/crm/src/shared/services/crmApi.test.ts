@@ -51,14 +51,14 @@ describe('crmApi', () => {
     expect(safe.post).toHaveBeenCalledWith('/crm/customers', data);
   });
 
-  it('updateCustomer calls POST /crm/customers with id', () => {
+  it('updateCustomer calls PUT /crm/customers with id', () => {
     crmApi.updateCustomer(3, { name: 'Updated' });
-    expect(safe.post).toHaveBeenCalledWith('/crm/customers', { id: 3, name: 'Updated' });
+    expect(safe.put).toHaveBeenCalledWith('/crm/customers', { id: 3, name: 'Updated' });
   });
 
-  it('deleteCustomer calls POST /crm/customers with delete action', () => {
+  it('deleteCustomer calls DELETE /crm/customers with id', () => {
     crmApi.deleteCustomer(3);
-    expect(safe.post).toHaveBeenCalledWith('/crm/customers', { id: 3, _action: 'delete' });
+    expect(safe.delete).toHaveBeenCalledWith('/crm/customers', { data: { id: 3 } });
   });
 
   it('recordVisit calls POST /crm/customers/record-visit', () => {
@@ -109,10 +109,10 @@ describe('crmApi', () => {
     expect(safe.get).toHaveBeenCalledWith('/crm/loyalty/config');
   });
 
-  it('updateLoyaltyConfig calls POST /crm/loyalty/config', () => {
+  it('updateLoyaltyConfig calls PUT /crm/loyalty/config', () => {
     const config = { pointsPerDollar: 2 };
     crmApi.updateLoyaltyConfig(config);
-    expect(safe.post).toHaveBeenCalledWith('/crm/loyalty/config', config);
+    expect(safe.put).toHaveBeenCalledWith('/crm/loyalty/config', config);
   });
 
   it('getLoyaltyMembers calls GET /crm/loyalty/members', () => {
@@ -120,9 +120,9 @@ describe('crmApi', () => {
     expect(safe.get).toHaveBeenCalledWith('/crm/loyalty/members');
   });
 
-  it('updateLoyaltyTier calls POST /crm/loyalty/tiers', () => {
+  it('updateLoyaltyTier calls PUT /crm/loyalty/tiers', () => {
     crmApi.updateLoyaltyTier(1, { name: 'Platinum' });
-    expect(safe.post).toHaveBeenCalledWith('/crm/loyalty/tiers', { id: 1, name: 'Platinum' });
+    expect(safe.put).toHaveBeenCalledWith('/crm/loyalty/tiers', { id: 1, name: 'Platinum' });
   });
 
   // Segments
@@ -142,9 +142,9 @@ describe('crmApi', () => {
     expect(safe.post).toHaveBeenCalledWith('/crm/segments', data);
   });
 
-  it('deleteSegment calls POST /crm/segments with delete action', () => {
+  it('deleteSegment calls DELETE /crm/segments with id', () => {
     crmApi.deleteSegment(4);
-    expect(safe.post).toHaveBeenCalledWith('/crm/segments', { id: 4, _action: 'delete' });
+    expect(safe.delete).toHaveBeenCalledWith('/crm/segments', { data: { id: 4 } });
   });
 
   // Campaigns
@@ -159,9 +159,9 @@ describe('crmApi', () => {
     expect(safe.post).toHaveBeenCalledWith('/crm/campaigns', data);
   });
 
-  it('updateCampaignStatus calls POST /crm/campaigns/status', () => {
+  it('updateCampaignStatus calls PUT /crm/campaigns/status', () => {
     crmApi.updateCampaignStatus(1, 'active');
-    expect(safe.post).toHaveBeenCalledWith('/crm/campaigns/status', { id: 1, status: 'active' });
+    expect(safe.put).toHaveBeenCalledWith('/crm/campaigns/status', { id: 1, status: 'active' });
   });
 
   // Automations
