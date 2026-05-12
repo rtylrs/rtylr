@@ -113,7 +113,7 @@ export const useUpdateCustomer = (): UseMutationResult<
   return useMutation<Customer, unknown, UpdateCustomerPayload>({
     mutationFn: async (payload: UpdateCustomerPayload): Promise<Customer> => {
       const res = await unwrap(
-        safe.post<Customer>('/crm/customers', { id: payload.id, ...payload.data })
+        safe.put<Customer>('/crm/customers', { id: payload.id, ...payload.data })
       );
       return res as Customer;
     },

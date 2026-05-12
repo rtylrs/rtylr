@@ -74,7 +74,7 @@ export const useUpdateSegment = (): UseMutationResult<Segment, unknown, UpdateSe
   return useMutation<Segment, unknown, UpdateSegmentPayload>({
     mutationFn: async (payload: UpdateSegmentPayload): Promise<Segment> => {
       const res = await unwrap(
-        safe.post<Segment>('/crm/segments', { id: payload.id, ...payload.data })
+        safe.put<Segment>('/crm/segments', { id: payload.id, ...payload.data })
       );
       return res as Segment;
     },
