@@ -34,9 +34,8 @@ export const useToggleTwoFactor = () => {
 export const useRevokeSession = () => {
   const qc = useQueryClient();
   return useMutation({
-    mutationFn: async (id: string) => {
-      await unwrap(safe.post(`/security/sessions/${id}/revoke`));
-      return id;
+    mutationFn: async (_id: string) => {
+      await unwrap(safe.post('/security/invalidate-sessions'));
     },
     onSuccess: () => {
       toast.success('Session revoked');
