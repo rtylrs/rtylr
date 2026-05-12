@@ -2,7 +2,8 @@ import React from 'react';
 import { Users, ArrowUpRight } from 'lucide-react';
 import { useNavigate } from 'react-router-dom';
 import { useQuery } from '@tanstack/react-query';
-import api from '../../../../shared/lib/api';
+import { unwrap } from '@voxire/api';
+import { safe } from '../../../../shared/lib/api';
 
 interface WidgetMember {
   id?: string;
@@ -16,9 +17,15 @@ const TeamWidget: React.FC = () => {
   const navigate = useNavigate();
   const { data: raw } = useQuery({
     queryKey: ['team-widget'],
-    queryFn: async () => {
-      const res = await api.get('/team/members');
-      return res.data?.users ?? [];
+    queryFn: async (): Promise<WidgetMember[]> => {
+      try {
+        const res = await unwrap(
+          safe.get<{ users?: WidgetMember[] } | WidgetMember[]>('/team/members')
+        );
+        return (Array.isArray(res) ? res : res.users) ?? [];
+      } catch {
+        return [];
+      }
     },
     staleTime: 60_000,
   });

@@ -1,13 +1,8 @@
 import React from 'react';
 import { Crown } from 'lucide-react';
 import { useQuery } from '@tanstack/react-query';
-import api from '../../../../shared/lib/api';
-
-/**
- * Top 5 customers by lifetime spend. Reads `/insights/customers/top`.
- * Cheap, high-signal widget — restaurants/retailers pull this one
- * open on day 30 to check who their VIPs are.
- */
+import { unwrap } from '@voxire/api';
+import { safe } from '../../../../shared/lib/api';
 
 interface TopCustomer {
   id: number;
@@ -17,12 +12,7 @@ interface TopCustomer {
 }
 
 interface ApiResponse {
-  customers?: {
-    id: number;
-    name: string;
-    lifetime_spend_minor_units: number;
-    order_count: number;
-  }[];
+  customers?: TopCustomer[];
 }
 
 function formatMoney(minor: number): string {
@@ -37,15 +27,10 @@ const TopCustomersWidget: React.FC = (): React.JSX.Element => {
     queryKey: ['insights-top-customers', { limit: 5 }],
     queryFn: async (): Promise<TopCustomer[]> => {
       try {
-        const res = await api.get<ApiResponse>('/insights/customers/top', {
-          params: { limit: 5 },
-        });
-        return (res.data.customers ?? []).map((c) => ({
-          id: c.id,
-          name: c.name,
-          lifetimeSpendMinorUnits: c.lifetime_spend_minor_units,
-          orderCount: c.order_count,
-        }));
+        const res = await unwrap(
+          safe.get<ApiResponse>('/insights/customers/top', { params: { limit: 5 } })
+        );
+        return res.customers ?? [];
       } catch {
         return [];
       }

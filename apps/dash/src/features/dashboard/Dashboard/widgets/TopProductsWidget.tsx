@@ -1,7 +1,8 @@
 import React from 'react';
 import { ShoppingBag } from 'lucide-react';
 import { useQuery } from '@tanstack/react-query';
-import api from '../../../../shared/lib/api';
+import { unwrap } from '@voxire/api';
+import { safe } from '../../../../shared/lib/api';
 
 interface WidgetProduct {
   name?: string;
@@ -14,9 +15,17 @@ interface WidgetProduct {
 const TopProductsWidget: React.FC = () => {
   const { data: raw } = useQuery({
     queryKey: ['top-products-widget'],
-    queryFn: async () => {
-      const res = await api.get('/erp/products?limit=5');
-      return res.data?.products ?? res.data ?? [];
+    queryFn: async (): Promise<WidgetProduct[]> => {
+      try {
+        const res = await unwrap(
+          safe.get<{ products?: WidgetProduct[] } | WidgetProduct[]>('/erp/products', {
+            params: { limit: 5 },
+          })
+        );
+        return (Array.isArray(res) ? res : res.products) ?? [];
+      } catch {
+        return [];
+      }
     },
     staleTime: 60_000,
   });

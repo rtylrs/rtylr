@@ -1,17 +1,8 @@
 import React, { useMemo } from 'react';
 import { PieChart } from 'lucide-react';
 import { useQuery } from '@tanstack/react-query';
-import api from '../../../../shared/lib/api';
-
-/**
- * Revenue split by app surface. Hits the new `/insights/revenue/by-app`
- * endpoint that landed this session — one horizontal bar per app
- * (POS, Finance, ERP, CRM) sized by its share of MTD revenue.
- *
- * Keeping this deliberately thin: no date picker, no toggles, no
- * drill-down. That belongs in the Insights app. Here it's a hero-
- * tile summary.
- */
+import { unwrap } from '@voxire/api';
+import { safe } from '../../../../shared/lib/api';
 
 interface AppSlice {
   app: string;
@@ -20,11 +11,7 @@ interface AppSlice {
 }
 
 interface ApiResponse {
-  by_app?: {
-    app: string;
-    amount_minor_units: number;
-    pct: number;
-  }[];
+  byApp?: AppSlice[];
 }
 
 const APP_COLOUR: Record<string, string> = {
@@ -47,15 +34,9 @@ const RevenueByAppWidget: React.FC = (): React.JSX.Element => {
     queryKey: ['insights-revenue-by-app'],
     queryFn: async (): Promise<AppSlice[]> => {
       try {
-        const res = await api.get<ApiResponse>('/insights/revenue/by-app');
-        return (res.data.by_app ?? []).map((s) => ({
-          app: s.app,
-          amountMinorUnits: s.amount_minor_units,
-          pct: s.pct,
-        }));
+        const res = await unwrap(safe.get<ApiResponse>('/insights/revenue/by-app'));
+        return res.byApp ?? [];
       } catch {
-        // Insights namespace may not be deployed everywhere yet —
-        // fail open to the empty-state render below.
         return [];
       }
     },

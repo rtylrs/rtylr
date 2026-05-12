@@ -1,7 +1,8 @@
 import React from 'react';
 import { Clock } from 'lucide-react';
 import { useQuery } from '@tanstack/react-query';
-import api from '../../../../shared/lib/api';
+import { unwrap } from '@voxire/api';
+import { safe } from '../../../../shared/lib/api';
 
 interface PendingRequest {
   staffName?: string;
@@ -11,9 +12,17 @@ interface PendingRequest {
 const PendingWidget: React.FC = () => {
   const { data: raw } = useQuery({
     queryKey: ['pending-widget'],
-    queryFn: async () => {
-      const res = await api.get('/hr/time-off?status=pending');
-      return res.data?.requests ?? res.data ?? [];
+    queryFn: async (): Promise<PendingRequest[]> => {
+      try {
+        const res = await unwrap(
+          safe.get<{ requests?: PendingRequest[] } | PendingRequest[]>('/hr/time-off', {
+            params: { status: 'pending' },
+          })
+        );
+        return (Array.isArray(res) ? res : res.requests) ?? [];
+      } catch {
+        return [];
+      }
     },
     staleTime: 60_000,
   });
