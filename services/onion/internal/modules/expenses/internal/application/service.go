@@ -11,6 +11,7 @@ type repository interface {
 	List(ctx context.Context, ownerID int64) ([]domain.Expense, error)
 	Create(ctx context.Context, input domain.ExpenseInput) (int64, error)
 	Update(ctx context.Context, input domain.ExpenseUpdateInput) error
+	UpdateStatus(ctx context.Context, ownerID, id int64, status string) error
 	Delete(ctx context.Context, ownerID, id int64) error
 	ListCategories(ctx context.Context, ownerID int64) ([]domain.ExpenseCategory, error)
 }
@@ -33,6 +34,10 @@ func (s *Service) Create(ctx context.Context, input domain.ExpenseInput) (int64,
 
 func (s *Service) Update(ctx context.Context, input domain.ExpenseUpdateInput) error {
 	return s.repo.Update(ctx, input)
+}
+
+func (s *Service) UpdateStatus(ctx context.Context, ownerID, id int64, status string) error {
+	return s.repo.UpdateStatus(ctx, ownerID, id, status)
 }
 
 func (s *Service) Delete(ctx context.Context, ownerID, id int64) error {

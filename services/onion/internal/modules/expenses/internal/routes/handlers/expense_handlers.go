@@ -208,6 +208,63 @@ func (h *DeleteExpenseHandler) Serve(ctx context.Context, _ *DeleteExpenseReques
 	return DeleteExpenseResponse{Message: "Expense deleted successfully"}, nil
 }
 
+// ─── Approve / Reject ─────────────────────────────────────────────────────────
+
+func ExpenseApproveRoutes() []string { return []string{"/finance/expenses/{id}/approve"} }
+func ExpenseRejectRoutes() []string  { return []string{"/finance/expenses/{id}/reject"} }
+
+type (
+	ApproveExpenseHandler  struct{ Service *application.Service }
+	ApproveExpenseRequest  struct{}
+	ApproveExpenseResponse struct {
+		Message string `json:"message"`
+	}
+
+	RejectExpenseHandler  struct{ Service *application.Service }
+	RejectExpenseRequest  struct{}
+	RejectExpenseResponse struct {
+		Message string `json:"message"`
+	}
+)
+
+func (h *ApproveExpenseHandler) Serve(ctx context.Context, _ *ApproveExpenseRequest) (ApproveExpenseResponse, *errorModels.ServerError) {
+	device := authPkg.DeviceCtx(ctx)
+	if device.User == nil {
+		return ApproveExpenseResponse{}, errorModels.PermissionDeniedServerError()
+	}
+	idStr := chi.URLParamFromCtx(ctx, "id")
+	id, err := strconv.ParseInt(idStr, 10, 64)
+	if err != nil {
+		return ApproveExpenseResponse{}, &errorModels.ServerError{Code: http.StatusBadRequest, Message: "Invalid expense ID"}
+	}
+	if updateErr := h.Service.UpdateStatus(ctx, device.User.UserID, id, "approved"); updateErr != nil {
+		if errors.Is(updateErr, domain.ErrExpenseNotFound) {
+			return ApproveExpenseResponse{}, &errorModels.ServerError{Code: http.StatusNotFound, Message: "Expense not found"}
+		}
+		return ApproveExpenseResponse{}, &errorModels.ServerError{Code: http.StatusInternalServerError, Message: "Failed to approve expense"}
+	}
+	return ApproveExpenseResponse{Message: "Expense approved"}, nil
+}
+
+func (h *RejectExpenseHandler) Serve(ctx context.Context, _ *RejectExpenseRequest) (RejectExpenseResponse, *errorModels.ServerError) {
+	device := authPkg.DeviceCtx(ctx)
+	if device.User == nil {
+		return RejectExpenseResponse{}, errorModels.PermissionDeniedServerError()
+	}
+	idStr := chi.URLParamFromCtx(ctx, "id")
+	id, err := strconv.ParseInt(idStr, 10, 64)
+	if err != nil {
+		return RejectExpenseResponse{}, &errorModels.ServerError{Code: http.StatusBadRequest, Message: "Invalid expense ID"}
+	}
+	if updateErr := h.Service.UpdateStatus(ctx, device.User.UserID, id, "rejected"); updateErr != nil {
+		if errors.Is(updateErr, domain.ErrExpenseNotFound) {
+			return RejectExpenseResponse{}, &errorModels.ServerError{Code: http.StatusNotFound, Message: "Expense not found"}
+		}
+		return RejectExpenseResponse{}, &errorModels.ServerError{Code: http.StatusInternalServerError, Message: "Failed to reject expense"}
+	}
+	return RejectExpenseResponse{Message: "Expense rejected"}, nil
+}
+
 // ─── Categories ───────────────────────────────────────────────────────────────
 
 func ExpenseCategoriesRoutes() []string { return []string{"/finance/expenses/categories"} }

@@ -34,4 +34,14 @@ func RegisterRoutes(ctx context.Context, router *chi.Mux, svc *application.Servi
 		ctx, router, handlers.ExpenseDeleteRoutes(),
 		&handlers.DeleteExpenseHandler{Service: svc},
 	)
+
+	http.RegisterPOST[handlers.ApproveExpenseRequest, handlers.ApproveExpenseResponse](
+		ctx, router, handlers.ExpenseApproveRoutes(),
+		&handlers.ApproveExpenseHandler{Service: svc},
+	)
+
+	http.RegisterPOST[handlers.RejectExpenseRequest, handlers.RejectExpenseResponse](
+		ctx, router, handlers.ExpenseRejectRoutes(),
+		&handlers.RejectExpenseHandler{Service: svc},
+	)
 }

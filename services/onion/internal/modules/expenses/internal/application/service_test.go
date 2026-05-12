@@ -31,6 +31,10 @@ func (m *mockRepo) Update(_ context.Context, _ domain.ExpenseUpdateInput) error 
 	return m.updErr
 }
 
+func (m *mockRepo) UpdateStatus(_ context.Context, _, _ int64, _ string) error {
+	return m.updErr
+}
+
 func (m *mockRepo) Delete(_ context.Context, _, _ int64) error {
 	return m.delErr
 }
