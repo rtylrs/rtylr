@@ -2,7 +2,8 @@ import { useEffect, useState } from 'react';
 import { useNavigate, useParams } from 'react-router-dom';
 import { CheckCircle2, AlertCircle, Loader2 } from 'lucide-react';
 
-import api from '../../shared/lib/api';
+import { unwrap } from '@voxire/api';
+import { safe } from '../../shared/lib/api';
 import { ASSETS } from '@voxire/config';
 import { Button } from '@voxire/components';
 
@@ -14,10 +15,9 @@ const EmailVerification = () => {
   const [success, setSuccess] = useState(false);
 
   useEffect(() => {
-    api
-      .get(`/auth/verify/${token}`)
+    unwrap(safe.get<{ message?: string }>(`/auth/verify/${token}`))
       .then((r) => {
-        setMessage(r.data.message || 'Your email has been verified.');
+        setMessage(r.message || 'Your email has been verified.');
         setSuccess(true);
       })
       .catch(() => {

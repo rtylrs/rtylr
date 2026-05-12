@@ -40,7 +40,6 @@ import { BusinessRoute } from './shared/utils/BusinessRoute';
 // Store imports
 import { useConfigStore } from './shared/stores/configStore';
 import { useUserStore } from './shared/stores/userStore';
-import { useGetConfig } from './shared/hooks/queries/useConfig';
 
 ChartJS.register(LineElement, PointElement, LinearScale, Title, Tooltip, Legend, CategoryScale);
 

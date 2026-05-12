@@ -4,7 +4,8 @@ import { AlertCircle } from 'lucide-react';
 import { Button } from '@voxire/components';
 import { APP_URLS } from '@voxire/config';
 import AuthShell from '../../shared/components/AuthShell';
-import api from '../../shared/lib/api';
+import { unwrap } from '@voxire/api';
+import { safe } from '../../shared/lib/api';
 import type { AppId } from '@voxire/types';
 
 const InviteAccept: React.FC = () => {
@@ -25,14 +26,18 @@ const InviteAccept: React.FC = () => {
   // Verify the token on mount
   useEffect(() => {
     if (!token) return;
-    api
-      .get(`/auth/invite/verify?token=${token}`)
+    unwrap(
+      safe.get<{ valid?: boolean; email?: string; fullName?: string; apps?: string[] }>(
+        '/auth/invite/verify',
+        { params: { token } }
+      )
+    )
       .then((res) => {
-        if (res.data?.valid) {
+        if (res.valid) {
           setValid(true);
-          setEmail(res.data.email || '');
-          setFullName(res.data.fullName || '');
-          setApps(res.data.apps ?? []);
+          setEmail(res.email || '');
+          setFullName(res.fullName || '');
+          setApps(res.apps ?? []);
         } else {
           setValid(false);
         }
@@ -54,7 +59,7 @@ const InviteAccept: React.FC = () => {
     setError(null);
 
     try {
-      await api.post('/auth/invite/accept', { token, password });
+      await unwrap(safe.post('/auth/invite/accept', { token, password }));
       setSuccess(true);
     } catch (err) {
       const e = err as { response?: { data?: { error?: { message?: string } } } };

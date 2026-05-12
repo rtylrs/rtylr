@@ -5,17 +5,19 @@ import { AppGuard } from '@voxire/auth';
 import { CookieBanner } from '@voxire/consent';
 import { ErrorBoundary } from '@voxire/ui';
 
-import api from './shared/lib/api';
+import { unwrap } from '@voxire/api';
+import { safe } from './shared/lib/api';
 import RootLanding from './features/public/RootLanding';
 import CareersIndex from './features/public/CareersIndex';
 import CareerDetail from './features/public/CareerDetail';
 import ApplyPage from './features/public/ApplyPage';
 import NotFound from './features/public/NotFound';
-import AdminLayout from './features/admin/AdminLayout';
-import CareersAdmin from './features/admin/CareersAdmin';
-import SubmissionsAdmin from './features/admin/SubmissionsAdmin';
-import CustomizationAdmin from './features/admin/CustomizationAdmin';
-import SectionsAdmin from './features/admin/SectionsAdmin';
+
+const AdminLayout = React.lazy(() => import('./features/admin/AdminLayout'));
+const CareersAdmin = React.lazy(() => import('./features/admin/CareersAdmin'));
+const SubmissionsAdmin = React.lazy(() => import('./features/admin/SubmissionsAdmin'));
+const CustomizationAdmin = React.lazy(() => import('./features/admin/CustomizationAdmin'));
+const SectionsAdmin = React.lazy(() => import('./features/admin/SectionsAdmin'));
 
 /**
  * Recruit is a split app: the `/admin/*` routes are the HR back-office
@@ -30,18 +32,20 @@ const AdminShell: React.FC = (): React.JSX.Element => (
   <AppGuard
     appId="recruit"
     fetchUser={(): Promise<Record<string, unknown>> =>
-      api.get('/user/me').then((r: { data: Record<string, unknown> }) => r.data)
+      unwrap(safe.get<Record<string, unknown>>('/user/me'))
     }
   >
-    <Routes>
-      <Route path="/" element={<AdminLayout />}>
-        <Route index element={<CareersAdmin />} />
-        <Route path="careers" element={<CareersAdmin />} />
-        <Route path="submissions" element={<SubmissionsAdmin />} />
-        <Route path="sections" element={<SectionsAdmin />} />
-        <Route path="customization" element={<CustomizationAdmin />} />
-      </Route>
-    </Routes>
+    <React.Suspense fallback={null}>
+      <Routes>
+        <Route path="/" element={<AdminLayout />}>
+          <Route index element={<CareersAdmin />} />
+          <Route path="careers" element={<CareersAdmin />} />
+          <Route path="submissions" element={<SubmissionsAdmin />} />
+          <Route path="sections" element={<SectionsAdmin />} />
+          <Route path="customization" element={<CustomizationAdmin />} />
+        </Route>
+      </Routes>
+    </React.Suspense>
   </AppGuard>
 );
 
