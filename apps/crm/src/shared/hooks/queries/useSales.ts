@@ -97,12 +97,7 @@ export const useUpdateLead = (): UseMutationResult<Lead, unknown, UpdateLeadPayl
   const qc = useQueryClient();
   return useMutation<Lead, unknown, UpdateLeadPayload>({
     mutationFn: async (payload: UpdateLeadPayload): Promise<Lead> => {
-      const res = await unwrap(
-        safe.put<Lead>('/crm/sales/leads', {
-          id: payload.id,
-          ...payload.data,
-        })
-      );
+      const res = await unwrap(safe.put<Lead>(`/crm/sales/leads/${payload.id}`, payload.data));
       return res as Lead;
     },
     onSuccess: (_data: Lead, variables: UpdateLeadPayload): void => {
@@ -120,8 +115,7 @@ export const useUpdateLead = (): UseMutationResult<Lead, unknown, UpdateLeadPayl
 export const useDeleteLead = (): UseMutationResult<unknown, unknown, number> => {
   const qc = useQueryClient();
   return useMutation<unknown, unknown, number>({
-    mutationFn: (id: number): Promise<unknown> =>
-      unwrap(safe.delete('/crm/sales/leads', { data: { id } })),
+    mutationFn: (id: number): Promise<unknown> => unwrap(safe.delete(`/crm/sales/leads/${id}`)),
     onSuccess: (): void => {
       void qc.invalidateQueries({ queryKey: ['crm-sales-leads'] });
       void qc.invalidateQueries({ queryKey: ['crm-sales-pipeline'] });
@@ -172,7 +166,7 @@ export const useDeleteTouchpoint = (): UseMutationResult<unknown, unknown, numbe
   const qc = useQueryClient();
   return useMutation<unknown, unknown, number>({
     mutationFn: (id: number): Promise<unknown> =>
-      unwrap(safe.delete('/crm/sales/touchpoints', { data: { id } })),
+      unwrap(safe.delete(`/crm/sales/touchpoints/${id}`)),
     onSuccess: (): void => {
       void qc.invalidateQueries({ queryKey: ['crm-sales-touchpoints'] });
       toast.success('Touchpoint deleted');
@@ -235,10 +229,7 @@ export const useUpdateContact = (): UseMutationResult<
   return useMutation<SalesContact, unknown, UpdateContactPayload>({
     mutationFn: async (payload: UpdateContactPayload): Promise<SalesContact> => {
       const res = await unwrap(
-        safe.put<SalesContact>('/crm/sales/contacts', {
-          id: payload.id,
-          ...payload.data,
-        })
+        safe.put<SalesContact>(`/crm/sales/contacts/${payload.id}`, payload.data)
       );
       return res as SalesContact;
     },
@@ -262,7 +253,7 @@ export const useDeleteContact = (): UseMutationResult<unknown, unknown, DeleteCo
   const qc = useQueryClient();
   return useMutation<unknown, unknown, DeleteContactPayload>({
     mutationFn: (payload: DeleteContactPayload): Promise<unknown> =>
-      unwrap(safe.delete('/crm/sales/contacts', { data: { id: payload.id } })),
+      unwrap(safe.delete(`/crm/sales/contacts/${payload.id}`)),
     onSuccess: (_data: unknown, variables: DeleteContactPayload): void => {
       void qc.invalidateQueries({ queryKey: ['crm-sales-contacts', variables.leadId] });
       void qc.invalidateQueries({ queryKey: ['crm-sales-contacts', 'all'] });
@@ -331,10 +322,7 @@ export const useUpdateContract = (): UseMutationResult<
   return useMutation<Contract, unknown, UpdateContractPayload>({
     mutationFn: async (payload: UpdateContractPayload): Promise<Contract> => {
       const res = await unwrap(
-        safe.put<Contract>('/crm/sales/contracts', {
-          id: payload.id,
-          ...payload.data,
-        })
+        safe.put<Contract>(`/crm/sales/contracts/${payload.id}`, payload.data)
       );
       return res as Contract;
     },

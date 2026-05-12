@@ -457,13 +457,13 @@ export const crmApi = {
   getLead: (id: number) => safe.get<Lead>(`/crm/sales/leads/${id}`),
   createLead: (data: CreateLeadRequest) => safe.post<Lead>('/crm/sales/leads', data),
   updateLead: (id: number, data: UpdateLeadRequest) =>
-    safe.put<Lead>('/crm/sales/leads', { id, ...data }),
-  deleteLead: (id: number) => safe.delete('/crm/sales/leads', { data: { id } }),
+    safe.put<Lead>(`/crm/sales/leads/${id}`, data),
+  deleteLead: (id: number) => safe.delete(`/crm/sales/leads/${id}`),
   getLeadTouchpoints: (leadId: number) =>
     safe.get<Touchpoint[]>(`/crm/sales/leads/${leadId}/touchpoints`),
   createTouchpoint: (data: CreateTouchpointRequest) =>
     safe.post<Touchpoint>('/crm/sales/touchpoints', data),
-  deleteTouchpoint: (id: number) => safe.delete('/crm/sales/touchpoints', { data: { id } }),
+  deleteTouchpoint: (id: number) => safe.delete(`/crm/sales/touchpoints/${id}`),
   getContacts: (leadId?: number) =>
     safe.get<SalesContact[]>('/crm/sales/contacts', {
       params: leadId ? { lead_id: leadId } : {},
@@ -471,12 +471,12 @@ export const crmApi = {
   createContact: (data: CreateContactRequest) =>
     safe.post<SalesContact>('/crm/sales/contacts', data),
   updateContact: (id: number, data: UpdateContactRequest) =>
-    safe.put<SalesContact>('/crm/sales/contacts', { id, ...data }),
-  deleteContact: (id: number) => safe.delete('/crm/sales/contacts', { data: { id } }),
+    safe.put<SalesContact>(`/crm/sales/contacts/${id}`, data),
+  deleteContact: (id: number) => safe.delete(`/crm/sales/contacts/${id}`),
   getContracts: () => safe.get<Contract[]>('/crm/sales/contracts'),
   getContract: (id: number) => safe.get<Contract>(`/crm/sales/contracts/${id}`),
   createContract: (data: CreateContractRequest) =>
     safe.post<Contract>('/crm/sales/contracts', data),
   updateContract: (id: number, data: UpdateContractRequest) =>
-    safe.put<Contract>('/crm/sales/contracts', { id, ...data }),
+    safe.put<Contract>(`/crm/sales/contracts/${id}`, data),
 };
