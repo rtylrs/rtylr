@@ -426,7 +426,7 @@ export const crmApi = {
   updateCampaignStatus: (id: number, status: string) =>
     safe.put('/crm/campaigns/status', { id, status }),
 
-  deleteCampaign: (id: number) => safe.delete('/crm/campaigns', { data: { id } }),
+  deleteCampaign: (id: number) => safe.delete(`/crm/campaigns/${id}`),
 
   // Automations
   getAutomations: () => safe.get<Automation[]>('/crm/automations'),
@@ -434,9 +434,9 @@ export const crmApi = {
   createAutomation: (data: Partial<Automation>) => safe.post<Automation>('/crm/automations', data),
 
   updateAutomation: (id: number, data: Partial<Automation>) =>
-    safe.put<Automation>('/crm/automations', { id, ...data }),
+    safe.put<Automation>(`/crm/automations/${id}`, data),
 
-  deleteAutomation: (id: number) => safe.delete('/crm/automations', { data: { id } }),
+  deleteAutomation: (id: number) => safe.delete(`/crm/automations/${id}`),
 
   // Templates
   getTemplates: () => safe.get<Template[]>('/crm/templates'),

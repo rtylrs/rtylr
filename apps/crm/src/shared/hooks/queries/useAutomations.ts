@@ -60,7 +60,7 @@ export const useUpdateAutomation = (): UseMutationResult<
   return useMutation<Automation, unknown, UpdateAutomationPayload>({
     mutationFn: async (payload: UpdateAutomationPayload): Promise<Automation> => {
       const res = await unwrap(
-        safe.put<Automation>('/crm/automations', { id: payload.id, ...payload.data })
+        safe.put<Automation>(`/crm/automations/${payload.id}`, payload.data)
       );
       return res as Automation;
     },
@@ -78,8 +78,7 @@ export const useDeleteAutomation = (): UseMutationResult<unknown, unknown, numbe
   const qc = useQueryClient();
   const { t } = useTranslation();
   return useMutation<unknown, unknown, number>({
-    mutationFn: (id: number): Promise<unknown> =>
-      unwrap(safe.delete('/crm/automations', { params: { id } })),
+    mutationFn: (id: number): Promise<unknown> => unwrap(safe.delete(`/crm/automations/${id}`)),
     onSuccess: (): void => {
       void qc.invalidateQueries({ queryKey: ['crm-automations'] });
       toast.success(t('crm.automations.deleted'));

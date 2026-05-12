@@ -81,7 +81,7 @@ export const useUpdateCampaign = (): UseMutationResult<
   return useMutation<Campaign, unknown, UpdateCampaignPayload>({
     mutationFn: async (payload: UpdateCampaignPayload): Promise<Campaign> => {
       const res = await unwrap(
-        safe.post<Campaign>('/crm/campaigns', { id: payload.id, ...payload.data })
+        safe.put<Campaign>('/crm/campaigns', { id: payload.id, ...payload.data })
       );
       return res as Campaign;
     },
@@ -100,8 +100,7 @@ export const useDeleteCampaign = (): UseMutationResult<unknown, unknown, number>
   const qc = useQueryClient();
   const { t } = useTranslation();
   return useMutation<unknown, unknown, number>({
-    mutationFn: (id: number): Promise<unknown> =>
-      unwrap(safe.delete('/crm/campaigns', { data: { id } })),
+    mutationFn: (id: number): Promise<unknown> => unwrap(safe.delete(`/crm/campaigns/${id}`)),
     onSuccess: (): void => {
       void qc.invalidateQueries({ queryKey: ['crm-campaigns'] });
       toast.success(t('crm.campaigns.deleted'));
@@ -121,7 +120,7 @@ export const useUpdateCampaignStatus = (): UseMutationResult<
   const { t } = useTranslation();
   return useMutation<unknown, unknown, CampaignStatusPayload>({
     mutationFn: (payload: CampaignStatusPayload): Promise<unknown> =>
-      unwrap(safe.post('/crm/campaigns/status', payload)),
+      unwrap(safe.put('/crm/campaigns/status', payload)),
     onSuccess: (_data: unknown, variables: CampaignStatusPayload): void => {
       void qc.invalidateQueries({ queryKey: ['crm-campaigns'] });
       void qc.invalidateQueries({ queryKey: ['crm-campaign', variables.id] });
