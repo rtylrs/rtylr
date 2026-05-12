@@ -112,9 +112,9 @@ describe('erpApi', () => {
     expect(safe.get).toHaveBeenCalledWith('/erp/purchase-orders');
   });
 
-  it('updatePurchaseOrderStatus calls POST /erp/purchase-orders/status', () => {
+  it('updatePurchaseOrderStatus calls PUT /erp/purchase-orders/status', () => {
     erpApi.updatePurchaseOrderStatus(1, 'Approved');
-    expect(safe.post).toHaveBeenCalledWith('/erp/purchase-orders/status', {
+    expect(safe.put).toHaveBeenCalledWith('/erp/purchase-orders/status', {
       id: 1,
       status: 'Approved',
     });
