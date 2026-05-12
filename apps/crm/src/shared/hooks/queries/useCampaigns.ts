@@ -101,7 +101,7 @@ export const useDeleteCampaign = (): UseMutationResult<unknown, unknown, number>
   const { t } = useTranslation();
   return useMutation<unknown, unknown, number>({
     mutationFn: (id: number): Promise<unknown> =>
-      unwrap(safe.post('/crm/campaigns', { id, _action: 'delete' })),
+      unwrap(safe.delete('/crm/campaigns', { data: { id } })),
     onSuccess: (): void => {
       void qc.invalidateQueries({ queryKey: ['crm-campaigns'] });
       toast.success(t('crm.campaigns.deleted'));

@@ -94,7 +94,7 @@ export const useDeleteSegment = (): UseMutationResult<unknown, unknown, number> 
   const { t } = useTranslation();
   return useMutation<unknown, unknown, number>({
     mutationFn: (id: number): Promise<unknown> =>
-      unwrap(safe.post('/crm/segments', { id, _action: 'delete' })),
+      unwrap(safe.delete('/crm/segments', { data: { id } })),
     onSuccess: (): void => {
       void qc.invalidateQueries({ queryKey: ['crm-segments'] });
       toast.success(t('crm.segments.deleted'));

@@ -358,9 +358,9 @@ export const crmApi = {
   createCustomer: (data: Partial<Customer>) => safe.post<Customer>('/crm/customers', data),
 
   updateCustomer: (id: number, data: Partial<Customer>) =>
-    safe.post<Customer>('/crm/customers', { id, ...data }),
+    safe.put<Customer>('/crm/customers', { id, ...data }),
 
-  deleteCustomer: (id: number) => safe.post('/crm/customers', { id, _action: 'delete' }),
+  deleteCustomer: (id: number) => safe.delete('/crm/customers', { data: { id } }),
 
   recordVisit: (customerId: number) => safe.post('/crm/customers/record-visit', { customerId }),
 
@@ -382,7 +382,7 @@ export const crmApi = {
   getLoyaltyConfig: () => safe.get<LoyaltyConfig>('/crm/loyalty/config'),
 
   updateLoyaltyConfig: (config: Partial<LoyaltyConfig>) =>
-    safe.post<LoyaltyConfig>('/crm/loyalty/config', config),
+    safe.put<LoyaltyConfig>('/crm/loyalty/config', config),
 
   getLoyaltyTransactions: () => safe.get<LoyaltyTransaction[]>('/crm/loyalty/transactions'),
 
@@ -393,7 +393,7 @@ export const crmApi = {
   getLoyaltyTiers: () => safe.get<LoyaltyTier[]>('/crm/loyalty/tiers'),
 
   updateLoyaltyTier: (id: number, data: Partial<LoyaltyTier>) =>
-    safe.post('/crm/loyalty/tiers', { id, ...data }),
+    safe.put('/crm/loyalty/tiers', { id, ...data }),
 
   // Segments
   getSegments: () => safe.get<Segment[]>('/crm/segments'),
@@ -406,9 +406,9 @@ export const crmApi = {
   createSegment: (data: Partial<Segment>) => safe.post<Segment>('/crm/segments', data),
 
   updateSegment: (id: number, data: Partial<Segment>) =>
-    safe.post<Segment>('/crm/segments', { id, ...data }),
+    safe.put<Segment>('/crm/segments', { id, ...data }),
 
-  deleteSegment: (id: number) => safe.post('/crm/segments', { id, _action: 'delete' }),
+  deleteSegment: (id: number) => safe.delete('/crm/segments', { data: { id } }),
 
   // Campaigns
   getCampaigns: () => safe.get<Campaign[]>('/crm/campaigns'),
@@ -421,12 +421,12 @@ export const crmApi = {
   createCampaign: (data: Partial<Campaign>) => safe.post<Campaign>('/crm/campaigns', data),
 
   updateCampaign: (id: number, data: Partial<Campaign>) =>
-    safe.post<Campaign>('/crm/campaigns', { id, ...data }),
+    safe.put<Campaign>('/crm/campaigns', { id, ...data }),
 
   updateCampaignStatus: (id: number, status: string) =>
-    safe.post('/crm/campaigns/status', { id, status }),
+    safe.put('/crm/campaigns/status', { id, status }),
 
-  deleteCampaign: (id: number) => safe.post('/crm/campaigns', { id, _action: 'delete' }),
+  deleteCampaign: (id: number) => safe.delete('/crm/campaigns', { data: { id } }),
 
   // Automations
   getAutomations: () => safe.get<Automation[]>('/crm/automations'),
@@ -434,9 +434,9 @@ export const crmApi = {
   createAutomation: (data: Partial<Automation>) => safe.post<Automation>('/crm/automations', data),
 
   updateAutomation: (id: number, data: Partial<Automation>) =>
-    safe.post<Automation>('/crm/automations', { id, ...data }),
+    safe.put<Automation>('/crm/automations', { id, ...data }),
 
-  deleteAutomation: (id: number) => safe.post('/crm/automations', { id, _action: 'delete' }),
+  deleteAutomation: (id: number) => safe.delete('/crm/automations', { data: { id } }),
 
   // Templates
   getTemplates: () => safe.get<Template[]>('/crm/templates'),
@@ -457,14 +457,13 @@ export const crmApi = {
   getLead: (id: number) => safe.get<Lead>(`/crm/sales/leads/${id}`),
   createLead: (data: CreateLeadRequest) => safe.post<Lead>('/crm/sales/leads', data),
   updateLead: (id: number, data: UpdateLeadRequest) =>
-    safe.post<Lead>(`/crm/sales/leads/${id}`, { ...data, _action: 'update' }),
-  deleteLead: (id: number) => safe.post(`/crm/sales/leads/${id}`, { _action: 'delete' }),
+    safe.put<Lead>('/crm/sales/leads', { id, ...data }),
+  deleteLead: (id: number) => safe.delete('/crm/sales/leads', { data: { id } }),
   getLeadTouchpoints: (leadId: number) =>
     safe.get<Touchpoint[]>(`/crm/sales/leads/${leadId}/touchpoints`),
   createTouchpoint: (data: CreateTouchpointRequest) =>
     safe.post<Touchpoint>('/crm/sales/touchpoints', data),
-  deleteTouchpoint: (id: number) =>
-    safe.post(`/crm/sales/touchpoints/${id}`, { _action: 'delete' }),
+  deleteTouchpoint: (id: number) => safe.delete('/crm/sales/touchpoints', { data: { id } }),
   getContacts: (leadId?: number) =>
     safe.get<SalesContact[]>('/crm/sales/contacts', {
       params: leadId ? { lead_id: leadId } : {},
@@ -472,12 +471,12 @@ export const crmApi = {
   createContact: (data: CreateContactRequest) =>
     safe.post<SalesContact>('/crm/sales/contacts', data),
   updateContact: (id: number, data: UpdateContactRequest) =>
-    safe.post<SalesContact>(`/crm/sales/contacts/${id}`, { ...data, _action: 'update' }),
-  deleteContact: (id: number) => safe.post(`/crm/sales/contacts/${id}`, { _action: 'delete' }),
+    safe.put<SalesContact>('/crm/sales/contacts', { id, ...data }),
+  deleteContact: (id: number) => safe.delete('/crm/sales/contacts', { data: { id } }),
   getContracts: () => safe.get<Contract[]>('/crm/sales/contracts'),
   getContract: (id: number) => safe.get<Contract>(`/crm/sales/contracts/${id}`),
   createContract: (data: CreateContractRequest) =>
     safe.post<Contract>('/crm/sales/contracts', data),
   updateContract: (id: number, data: UpdateContractRequest) =>
-    safe.post<Contract>(`/crm/sales/contracts/${id}`, { ...data, _action: 'update' }),
+    safe.put<Contract>('/crm/sales/contracts', { id, ...data }),
 };
