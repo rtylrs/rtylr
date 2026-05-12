@@ -70,8 +70,25 @@ export function useUpdateInvoiceStatus() {
 export function useRecordPayment() {
   const qc = useQueryClient();
   return useMutation({
-    mutationFn: ({ id, amount }: { id: string; amount: number }): Promise<void> =>
-      unwrap(safe.post<void>(`/finance/invoices/${id}/payment`, { amount })),
+    mutationFn: ({
+      id,
+      amount,
+      paymentDate,
+      method,
+    }: {
+      id: string;
+      amount: number;
+      paymentDate?: string;
+      method?: string;
+    }): Promise<void> =>
+      unwrap(
+        safe.post<void>('/finance/invoices/payment', {
+          invoiceId: Number(id),
+          amount,
+          paymentDate,
+          method,
+        })
+      ),
     onSuccess: () => qc.invalidateQueries({ queryKey: ['invoices'] }),
     onError: () => toast.error('Failed to record payment'),
   });
