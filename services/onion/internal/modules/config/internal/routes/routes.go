@@ -23,4 +23,11 @@ func RegisterRoutes(ctx context.Context, router *chi.Mux, configService *applica
 		handlers.CreateConfigRoutes(),
 		&handlers.CreateConfigHandler{ConfigService: configService},
 	)
+
+	http.RegisterPUT[handlers.UpdateConfigRequest, handlers.UpdateConfigResponse](
+		ctx,
+		router,
+		handlers.UpdateConfigRoutes(),
+		&handlers.UpdateConfigHandler{ConfigService: configService},
+	)
 }

@@ -14,6 +14,7 @@ const ConfigCacheTTL = 500 * time.Minute // 500 minutes = 8 hours
 type repository interface {
 	GetConfig(ctx context.Context, ownerID string) (domain.Config, error)
 	CreateConfig(ctx context.Context, input domain.ConfigInput) error
+	UpdateConfig(ctx context.Context, input domain.ConfigInput) error
 	GetThemeByOwnerID(ctx context.Context, id string) (domain.Theme, error)
 }
 
@@ -43,6 +44,16 @@ func (s *Service) GetConfig(ctx context.Context, ownerID string) (domain.Config,
 
 func (s *Service) CreateConfig(ctx context.Context, input domain.ConfigInput) error {
 	return s.repo.CreateConfig(ctx, input)
+}
+
+func (s *Service) UpdateConfig(ctx context.Context, ownerID string, input domain.ConfigInput) error {
+	input.OwnerId = ownerID
+	err := s.repo.UpdateConfig(ctx, input)
+	if err != nil {
+		return err
+	}
+	cacher.Of[domain.Config]().Invalidate(ctx, []string{"config:" + ownerID})
+	return nil
 }
 
 func (s *Service) GetThemeByOwnerID(ctx context.Context, id string) (domain.Theme, error) {

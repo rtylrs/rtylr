@@ -18,6 +18,25 @@ SELECT
     footer_sub_text
 FROM config WHERE owner_id = ?;
 
+-- name: UpdateConfig :exec
+UPDATE config SET
+    site_name = ?,
+    logo_url = ?,
+    favicon_url = ?,
+    meta_tags = ?,
+    contact_email = ?,
+    contact_number = ?,
+    instagram = ?,
+    maintenance_mode = ?,
+    maintenance_notice = ?,
+    addons_enabled = ?,
+    enable_reviews = ?,
+    enable_wishlist = ?,
+    enable_newsletter_signup = ?,
+    about_content = ?,
+    footer_sub_text = ?
+WHERE owner_id = ?;
+
 -- name: CreateConfig :exec
 INSERT INTO config (
     owner_id,
