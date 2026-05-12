@@ -23,7 +23,7 @@ interface GoogleAuthPayload {
 
 interface AuthResponse {
   token: string;
-  role: string;
+  role?: string;
 }
 
 export const useLogin = () => {
@@ -42,7 +42,7 @@ export const useLogin = () => {
         sameSite: 'lax',
         domain: getDefaultCookieDomain(),
       });
-      login(data.role);
+      login(data.role ?? '');
     },
     onError: (error: ApiError) => {
       setError(error.message || 'Login failed');
@@ -70,7 +70,7 @@ export const useRegisterRestaurant = () => {
         sameSite: 'lax',
         domain: getDefaultCookieDomain(),
       });
-      login(data.role);
+      login(data.role ?? '');
     },
     onError: (error: ApiError) => {
       setError(error.message || 'Registration failed');
@@ -98,7 +98,7 @@ export const useGoogleAuth = () => {
         sameSite: 'lax',
         domain: getDefaultCookieDomain(),
       });
-      login(data.role);
+      login(data.role ?? '');
     },
     onError: (error: ApiError) => {
       setError(error.message || 'Google login failed');
