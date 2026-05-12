@@ -1,4 +1,5 @@
 import React, { useState, useMemo } from 'react';
+import { cn } from '../../lib/cn';
 import { motion } from 'motion/react';
 import Link from 'next/link';
 import { Search, Clock } from 'lucide-react';
@@ -176,7 +177,10 @@ const BlogPage = (): JSX.Element => {
                       key={cat}
                       type="button"
                       onClick={() => setActiveCategory(cat)}
-                      className={`${styles.categoryTab} ${activeCategory === cat ? styles.categoryTabActive : ''}`}
+                      className={cn(
+                        styles.categoryTab,
+                        activeCategory === cat && styles.categoryTabActive
+                      )}
                     >
                       {cat}
                     </button>

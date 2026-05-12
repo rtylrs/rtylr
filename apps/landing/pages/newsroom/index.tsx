@@ -1,4 +1,5 @@
 import React from 'react';
+import { cn } from '../../lib/cn';
 import { motion } from 'motion/react';
 import Link from 'next/link';
 import { Newspaper, Download, Mail, ArrowUpRight } from 'lucide-react';
@@ -163,9 +164,7 @@ const NewsroomPage = (): JSX.Element => {
                   variants={blurFadeIn}
                 >
                   <div className={styles.newsMeta}>
-                    <span
-                      className={`${styles.newsKind} ${styles[`kind_${KIND_STYLES[item.kind]}`]}`}
-                    >
+                    <span className={cn(styles.newsKind, styles[`kind_${KIND_STYLES[item.kind]}`])}>
                       {item.kind}
                     </span>
                     <span className={styles.newsDate}>{item.date}</span>

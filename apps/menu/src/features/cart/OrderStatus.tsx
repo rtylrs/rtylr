@@ -1,6 +1,6 @@
 import React, { useCallback, useEffect, useRef, useState } from 'react';
 import { useNavigate, useParams, useSearchParams } from 'react-router-dom';
-import axios from 'axios';
+import api from '../../shared/lib/api';
 import { useCartStore } from '../../shared/stores/cartStore';
 
 type OrderStatusValue = 'received' | 'preparing' | 'ready' | 'done';
@@ -10,9 +10,6 @@ interface OrderStatusResponse {
   status: OrderStatusValue;
   estimated_minutes: number | null;
 }
-
-const API_BASE =
-  import.meta.env.VITE_POS_API_URL ?? import.meta.env.VITE_API_URL ?? 'https://api.voxire.dev/';
 
 const POLL_INTERVAL_MS = 30_000;
 
@@ -43,9 +40,7 @@ const OrderStatus = (): React.JSX.Element => {
   const fetchStatus = useCallback(async (): Promise<void> => {
     if (!id) return;
     try {
-      const res = await axios.get<OrderStatusResponse>(
-        `${API_BASE.replace(/\/$/, '')}/pos/public/orders/${id}/status`
-      );
+      const res = await api.get<OrderStatusResponse>(`/pos/public/orders/${id}/status`);
       setStatus(res.data.status);
       setEstimatedMinutes(res.data.estimated_minutes);
       setFetchError(false);

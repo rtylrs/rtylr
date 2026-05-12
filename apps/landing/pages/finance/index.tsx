@@ -1,4 +1,5 @@
 import React, { useState } from 'react';
+import { cn } from '../../lib/cn';
 import { motion } from 'motion/react';
 import { useRouter } from 'next/router';
 import {
@@ -323,7 +324,7 @@ const FinancePage = (): JSX.Element => {
                     role="tab"
                     aria-selected={range === t.id}
                     onClick={() => setRange(t.id)}
-                    className={`${styles.rangeTab} ${range === t.id ? styles.rangeTabActive : ''}`}
+                    className={cn(styles.rangeTab, range === t.id && styles.rangeTabActive)}
                   >
                     {t.label}
                   </button>
@@ -348,18 +349,20 @@ const FinancePage = (): JSX.Element => {
                     {data.rows.map((row) => (
                       <tr
                         key={row.label}
-                        className={`${row.subtotal ? styles.rowSubtotal : ''} ${
-                          row.total ? styles.rowTotal : ''
-                        }`}
+                        className={cn(
+                          row.subtotal && styles.rowSubtotal,
+                          row.total && styles.rowTotal
+                        )}
                       >
                         <td>{row.label}</td>
                         <td className={styles.colNum}>{fmt(row.amount)}</td>
                         <td className={styles.colNum}>
                           {row.delta !== 0 ? (
                             <span
-                              className={`${styles.delta} ${
+                              className={cn(
+                                styles.delta,
                                 row.positive ? styles.deltaUp : styles.deltaDown
-                              }`}
+                              )}
                             >
                               {row.positive ? (
                                 <ArrowUp size={11} strokeWidth={2.5} />
@@ -424,7 +427,7 @@ const FinancePage = (): JSX.Element => {
                     role="tab"
                     aria-selected={chartMetric === m.id}
                     onClick={() => setChartMetric(m.id)}
-                    className={`${styles.chartTab} ${chartMetric === m.id ? styles.chartTabActive : ''}`}
+                    className={cn(styles.chartTab, chartMetric === m.id && styles.chartTabActive)}
                   >
                     <span className={styles.chartTabDot} style={{ background: m.color }} />
                     {m.label}

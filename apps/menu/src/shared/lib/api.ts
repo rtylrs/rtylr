@@ -1,9 +1,7 @@
 import axios from 'axios';
 import i18next from 'i18next';
 
-const getBaseUrl = () => {
-  return 'https://api.voxire.dev/';
-};
+const getBaseUrl = (): string => import.meta.env.VITE_API_URL ?? 'https://api.voxire.dev/';
 
 const api = axios.create({
   baseURL: getBaseUrl(),

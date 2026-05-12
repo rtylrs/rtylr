@@ -1,6 +1,6 @@
 import React, { useState } from 'react';
 import { useNavigate } from 'react-router-dom';
-import axios from 'axios';
+import api from '../../shared/lib/api';
 import { useCartStore } from '../../shared/stores/cartStore';
 
 interface OrderItem {
@@ -25,9 +25,6 @@ interface PlaceOrderResponse {
   order_number: string;
   estimated_minutes: number;
 }
-
-const API_BASE =
-  import.meta.env.VITE_POS_API_URL ?? import.meta.env.VITE_API_URL ?? 'https://api.voxire.dev/';
 
 const Checkout = (): React.JSX.Element => {
   const navigate = useNavigate();
@@ -86,10 +83,7 @@ const Checkout = (): React.JSX.Element => {
     };
 
     try {
-      const res = await axios.post<PlaceOrderResponse>(
-        `${API_BASE.replace(/\/$/, '')}/pos/public/orders`,
-        body
-      );
+      const res = await api.post<PlaceOrderResponse>('/pos/public/orders', body);
       const { order_id, order_number } = res.data;
       clearCart();
       void navigate(`/order-status/${order_id}?number=${encodeURIComponent(order_number)}`);

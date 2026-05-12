@@ -1,4 +1,5 @@
 import React, { useMemo, useState } from 'react';
+import { cn } from '../../lib/cn';
 import { motion } from 'motion/react';
 import { useRouter } from 'next/router';
 import {
@@ -197,7 +198,7 @@ const HRPage = (): JSX.Element => {
                   >
                     {totalShifts} shifts
                   </motion.span>
-                  <span className={`${styles.scheduleChip} ${styles.scheduleChipGood}`}>
+                  <span className={cn(styles.scheduleChip, styles.scheduleChipGood)}>
                     No conflicts
                   </span>
                 </div>
@@ -229,9 +230,10 @@ const HRPage = (): JSX.Element => {
                       <motion.button
                         type="button"
                         key={`${person.name}-${dayIdx}`}
-                        className={`${styles.scheduleShift} ${
-                          shift === 'OFF' ? styles.scheduleShiftOff : ''
-                        }`}
+                        className={cn(
+                          styles.scheduleShift,
+                          shift === 'OFF' && styles.scheduleShiftOff
+                        )}
                         style={shift !== 'OFF' ? { background: `${person.color}26` } : undefined}
                         onClick={() => cycleShift(staffIdx, dayIdx)}
                         whileTap={{ scale: 0.94 }}

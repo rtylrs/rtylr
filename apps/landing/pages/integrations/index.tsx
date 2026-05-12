@@ -1,4 +1,5 @@
 import React, { useMemo, useState } from 'react';
+import { cn } from '../../lib/cn';
 import { motion } from 'motion/react';
 import { useRouter } from 'next/router';
 import {
@@ -261,9 +262,10 @@ const IntegrationsPage = (): JSX.Element => {
                   <button
                     key={id}
                     type="button"
-                    className={`${styles.categoryTab} ${
-                      activeCategory === id ? styles.categoryTabActive : ''
-                    }`}
+                    className={cn(
+                      styles.categoryTab,
+                      activeCategory === id && styles.categoryTabActive
+                    )}
                     onClick={() => setActiveCategory(id)}
                   >
                     <Icon width={14} height={14} strokeWidth={1.8} />
@@ -306,7 +308,7 @@ const IntegrationsPage = (): JSX.Element => {
                           .join('')}
                       </div>
                       <span
-                        className={`${styles.statusPill} ${styles[`status_${integration.status}`]}`}
+                        className={cn(styles.statusPill, styles[`status_${integration.status}`])}
                       >
                         {STATUS_LABEL[integration.status]}
                       </span>

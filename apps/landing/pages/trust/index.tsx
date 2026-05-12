@@ -1,4 +1,5 @@
 import React from 'react';
+import { cn } from '../../lib/cn';
 import { motion } from 'motion/react';
 import Link from 'next/link';
 import {
@@ -207,9 +208,10 @@ const TrustPage = (): JSX.Element => {
                 <li key={item.label} className={styles.complianceItem}>
                   <span className={styles.complianceLabel}>{item.label}</span>
                   <span
-                    className={`${styles.complianceStatus} ${
-                      item.ready ? styles.complianceStatusReady : ''
-                    }`}
+                    className={cn(
+                      styles.complianceStatus,
+                      item.ready && styles.complianceStatusReady
+                    )}
                   >
                     {item.ready && <CheckCircle2 size={14} strokeWidth={2.2} />}
                     {item.status}
