@@ -216,9 +216,9 @@ export const erpApi = {
   }) => safe.get<Product[]>('/erp/products', { params }),
   getProduct: (id: number) => safe.get<Product>(`/erp/products/${id}`),
   createProduct: (data: CreateProductInput) => safe.post<Product>('/erp/products', data),
-  updateProduct: (data: UpdateProductInput) => safe.post<Product>('/erp/products', data),
+  updateProduct: (data: UpdateProductInput) => safe.put<Product>('/erp/products', data),
   deleteProduct: (id: number) =>
-    safe.post<{ success: boolean }>('/erp/products', { id, _action: 'delete' }),
+    safe.delete<{ success: boolean }>('/erp/products', { data: { id } }),
   lookupBarcode: (code: string) =>
     safe.get<Product>(`/erp/products/barcode/${encodeURIComponent(code)}`),
 
@@ -226,25 +226,24 @@ export const erpApi = {
   listCategories: () => safe.get<Category[]>('/erp/categories'),
   createCategory: (data: Partial<Category>) => safe.post<Category>('/erp/categories', data),
   deleteCategory: (id: number) =>
-    safe.post<{ success: boolean }>('/erp/categories', { id, _action: 'delete' }),
+    safe.delete<{ success: boolean }>('/erp/categories', { data: { id } }),
   updateCategory: (data: { id: number; name: string; description?: string }) =>
-    safe.post<Category>('/erp/categories', { ...data, _action: 'update' }),
+    safe.put<Category>('/erp/categories', data),
 
   // Brands
   listBrands: () => safe.get<Brand[]>('/erp/brands'),
   createBrand: (data: Partial<Brand>) => safe.post<Brand>('/erp/brands', data),
-  deleteBrand: (id: number) =>
-    safe.post<{ success: boolean }>('/erp/brands', { id, _action: 'delete' }),
+  deleteBrand: (id: number) => safe.delete<{ success: boolean }>('/erp/brands', { data: { id } }),
   updateBrand: (data: { id: number; name: string; description?: string }) =>
-    safe.post<Brand>('/erp/brands', { ...data, _action: 'update' }),
+    safe.put<Brand>('/erp/brands', data),
 
   // Warehouses
   listWarehouses: () => safe.get<Warehouse[]>('/erp/warehouses'),
   createWarehouse: (data: Partial<Warehouse>) => safe.post<Warehouse>('/erp/warehouses', data),
   deleteWarehouse: (id: number) =>
-    safe.post<{ success: boolean }>('/erp/warehouses', { id, _action: 'delete' }),
+    safe.delete<{ success: boolean }>('/erp/warehouses', { data: { id } }),
   updateWarehouse: (data: { id: number; name: string; address?: string; manager?: string }) =>
-    safe.post<Warehouse>('/erp/warehouses', { ...data, _action: 'update' }),
+    safe.put<Warehouse>('/erp/warehouses', data),
 
   // Stock transfers
   listStockTransfers: () => safe.get<StockTransfer[]>('/erp/stock-transfers'),
@@ -258,9 +257,9 @@ export const erpApi = {
   // Suppliers
   listSuppliers: () => safe.get<Supplier[]>('/erp/suppliers'),
   createSupplier: (data: CreateSupplierInput) => safe.post<Supplier>('/erp/suppliers', data),
-  updateSupplier: (data: UpdateSupplierInput) => safe.post<Supplier>('/erp/suppliers', data),
+  updateSupplier: (data: UpdateSupplierInput) => safe.put<Supplier>('/erp/suppliers', data),
   deleteSupplier: (id: number) =>
-    safe.post<{ success: boolean }>('/erp/suppliers', { id, _action: 'delete' }),
+    safe.delete<{ success: boolean }>('/erp/suppliers', { data: { id } }),
 
   // Purchase Orders
   listPurchaseOrders: () => safe.get<PurchaseOrder[]>('/erp/purchase-orders'),
