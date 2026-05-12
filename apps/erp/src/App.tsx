@@ -3,7 +3,8 @@ import React from 'react';
 import { AppGuard } from '@voxire/auth';
 import { ErrorBoundary } from '@voxire/ui';
 import AppRoutes from './routes/AppRoutes';
-import api from './shared/lib/api';
+import { unwrap } from '@voxire/api';
+import { safe } from './shared/lib/api';
 
 const App: React.FC = (): React.JSX.Element => {
   return (
@@ -11,7 +12,7 @@ const App: React.FC = (): React.JSX.Element => {
       <AppGuard
         appId="erp"
         fetchUser={(): Promise<Record<string, unknown>> =>
-          api.get('/user/me').then((r: { data: Record<string, unknown> }) => r.data)
+          unwrap(safe.get<Record<string, unknown>>('/user/me'))
         }
       >
         <AppFlagGuard flag={FLAG_KEYS.APP_ERP}>

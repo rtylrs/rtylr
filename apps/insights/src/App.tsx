@@ -14,7 +14,8 @@ import {
   Legend,
 } from 'chart.js';
 import AppRoutes from './routes/AppRoutes';
-import api from './shared/lib/api';
+import { unwrap } from '@voxire/api';
+import { safe } from './shared/lib/api';
 
 ChartJS.register(
   CategoryScale,
@@ -33,7 +34,7 @@ const App: React.FC = (): React.JSX.Element => {
       <AppGuard
         appId="insights"
         fetchUser={(): Promise<Record<string, unknown>> =>
-          api.get('/user/me').then((r: { data: Record<string, unknown> }) => r.data)
+          unwrap(safe.get<Record<string, unknown>>('/user/me'))
         }
       >
         <AppFlagGuard flag={FLAG_KEYS.APP_INSIGHTS}>
