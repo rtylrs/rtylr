@@ -179,3 +179,10 @@ func nullableTime(t *time.Time) sql.NullTime {
 
 	return sql.NullTime{Time: *t, Valid: true}
 }
+
+func (r *Repository) Delete(ctx context.Context, ownerID, id int64) error {
+	return r.queries.DeleteCampaign(ctx, sqlc.DeleteCampaignParams{
+		ID:      id,
+		OwnerID: ownerID,
+	})
+}

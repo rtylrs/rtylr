@@ -22,3 +22,6 @@ WHERE id = ? AND owner_id = ?;
 
 -- name: UpdateCampaignStatus :execresult
 UPDATE crm_campaigns SET status = ? WHERE id = ? AND owner_id = ?;
+
+-- name: DeleteCampaign :exec
+DELETE FROM crm_campaigns WHERE id = ? AND owner_id = ?;

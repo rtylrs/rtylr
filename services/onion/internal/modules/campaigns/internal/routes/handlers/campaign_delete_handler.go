@@ -1,0 +1,43 @@
+package handlers
+
+import (
+	"context"
+	"errors"
+	"net/http"
+	"strconv"
+
+	"github.com/go-chi/chi/v5"
+	"github.com/voxire/onion/internal/modules/campaigns/internal/application"
+	"github.com/voxire/onion/internal/modules/campaigns/internal/domain"
+	authPkg "github.com/voxire/onion/internal/platform/auth"
+	errorModels "github.com/voxire/onion/internal/platform/errors"
+)
+
+func CampaignDeleteRoutes() []string { return []string{"/crm/campaigns/{id}"} }
+
+type (
+	DeleteCampaignHandler  struct{ Service *application.Service }
+	DeleteCampaignRequest  struct{}
+	DeleteCampaignResponse struct {
+		Message string `json:"message"`
+	}
+)
+
+func (h *DeleteCampaignHandler) Serve(ctx context.Context, _ *DeleteCampaignRequest) (DeleteCampaignResponse, *errorModels.ServerError) {
+	device := authPkg.DeviceCtx(ctx)
+	if device.User == nil {
+		return DeleteCampaignResponse{}, errorModels.PermissionDeniedServerError()
+	}
+	idStr := chi.URLParamFromCtx(ctx, "id")
+	id, err := strconv.ParseInt(idStr, 10, 64)
+	if err != nil || id <= 0 {
+		return DeleteCampaignResponse{}, &errorModels.ServerError{Code: http.StatusBadRequest, Message: "Invalid campaign ID"}
+	}
+	if deleteErr := h.Service.Delete(ctx, device.User.UserID, id); deleteErr != nil {
+		if errors.Is(deleteErr, domain.ErrCampaignNotFound) {
+			return DeleteCampaignResponse{}, &errorModels.ServerError{Code: http.StatusNotFound, Message: "Campaign not found"}
+		}
+		return DeleteCampaignResponse{}, &errorModels.ServerError{Code: http.StatusInternalServerError, Message: "Failed to delete campaign"}
+	}
+	return DeleteCampaignResponse{Message: "Campaign deleted successfully"}, nil
+}

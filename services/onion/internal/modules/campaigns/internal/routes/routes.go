@@ -34,4 +34,9 @@ func RegisterRoutes(ctx context.Context, router *chi.Mux, svc *application.Servi
 		ctx, router, handlers.CampaignStatusRoutes(),
 		&handlers.UpdateCampaignStatusHandler{Service: svc},
 	)
+
+	http.RegisterDELETE[handlers.DeleteCampaignRequest, handlers.DeleteCampaignResponse](
+		ctx, router, handlers.CampaignDeleteRoutes(),
+		&handlers.DeleteCampaignHandler{Service: svc},
+	)
 }

@@ -13,6 +13,7 @@ type repository interface {
 	Create(ctx context.Context, input domain.CampaignInput) (int64, error)
 	Update(ctx context.Context, input domain.CampaignUpdateInput) error
 	UpdateStatus(ctx context.Context, ownerID, id int64, status string) error
+	Delete(ctx context.Context, ownerID, id int64) error
 }
 
 type Service struct {
@@ -41,4 +42,8 @@ func (s *Service) Update(ctx context.Context, input domain.CampaignUpdateInput) 
 
 func (s *Service) UpdateStatus(ctx context.Context, ownerID, id int64, status string) error {
 	return s.repo.UpdateStatus(ctx, ownerID, id, status)
+}
+
+func (s *Service) Delete(ctx context.Context, ownerID, id int64) error {
+	return s.repo.Delete(ctx, ownerID, id)
 }

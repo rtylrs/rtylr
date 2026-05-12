@@ -15,6 +15,7 @@ type mockRepo struct {
 	createErr error
 	updErr    error
 	updStErr  error
+	delErr    error
 }
 
 func (m *mockRepo) List(_ context.Context, _ int64) ([]domain.Campaign, error) {
@@ -35,6 +36,10 @@ func (m *mockRepo) Update(_ context.Context, _ domain.CampaignUpdateInput) error
 
 func (m *mockRepo) UpdateStatus(_ context.Context, _, _ int64, _ string) error {
 	return m.updStErr
+}
+
+func (m *mockRepo) Delete(_ context.Context, _, _ int64) error {
+	return m.delErr
 }
 
 func TestList_Delegates(t *testing.T) {
