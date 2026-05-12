@@ -14,6 +14,7 @@ import {
 } from 'lucide-react';
 import { unwrap } from '@voxire/api';
 import { useUserStore, type StoredUser } from '../stores/userStore';
+import { useConfigStore } from '../stores/configStore';
 import { safe } from '../lib/api';
 
 const getCookieToken = (): string | null =>
@@ -389,6 +390,7 @@ function StaffView({ user }: { user: StoredUser }): React.JSX.Element {
 function BusinessRoute(): React.JSX.Element | null {
   const token = getCookieToken();
   const { user, setUser, setToken } = useUserStore();
+  const { setWebsiteData, setContactInfo, setMaintanance, setAboutContent } = useConfigStore();
   const [loading, setLoading] = useState(true);
   const location = useLocation();
 
@@ -403,6 +405,27 @@ function BusinessRoute(): React.JSX.Element | null {
     unwrap(safe.get<Record<string, unknown>>('/user/me'))
       .then((res) => {
         setUser(res as StoredUser);
+        const businessId = res.businessId ?? res.business_id;
+        if (businessId) {
+          unwrap(
+            safe.get<{ config?: Record<string, unknown>; theme?: Record<string, unknown> }>(
+              `/get-configs?owner=${String(businessId)}`
+            )
+          )
+            .then((configRes) => {
+              const config = configRes?.config ?? {};
+              setWebsiteData(config);
+              setContactInfo({
+                contactEmail: (config.contactEmail as string | null) ?? null,
+                contactNumber: (config.contactNumber as string | null) ?? null,
+              });
+              setMaintanance((config.maintenanceMode as boolean) ?? false);
+              setAboutContent({ aboutContent: config.aboutContent ?? null });
+            })
+            .catch(() => {
+              // config is non-critical — missing config won't block the app
+            });
+        }
       })
       .catch(() => {
         // auth interceptor handles 401 redirect
