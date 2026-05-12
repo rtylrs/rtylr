@@ -266,7 +266,7 @@ export const erpApi = {
   createPurchaseOrder: (data: CreatePurchaseOrderRequest) =>
     safe.post<PurchaseOrder>('/erp/purchase-orders', data),
   updatePurchaseOrderStatus: (id: number, status: string) =>
-    safe.post<PurchaseOrder>('/erp/purchase-orders/status', { id, status }),
+    safe.put<PurchaseOrder>('/erp/purchase-orders/status', { id, status }),
   approvePurchaseOrder: (id: number) =>
     safe.post<PurchaseOrder>(`/erp/purchase-orders/${id}/approve`, {}),
 

@@ -89,7 +89,8 @@ export const useUpdatePurchaseOrderStatus = (): UseMutationResult<
       data: UpdatePurchaseOrderStatusRequest
     ): Promise<UpdatePurchaseOrderStatusResponse> => {
       const res = await unwrap(
-        safe.put<UpdatePurchaseOrderStatusResponse>(`/erp/purchase-orders/${data.id}/status`, {
+        safe.put<UpdatePurchaseOrderStatusResponse>('/erp/purchase-orders/status', {
+          id: data.id,
           status: data.status,
         })
       );
