@@ -75,7 +75,13 @@ export const useUpdateMember = () => {
   const qc = useQueryClient();
   return useMutation({
     mutationFn: async ({ id, patch }: { id: string; patch: Partial<TeamMember> }) => {
-      return unwrap(safe.patch(`/team/members/${id}`, patch));
+      return unwrap(
+        safe.put('/team/users/permissions', {
+          userId: Number(id),
+          apps: patch.apps ?? [],
+          role: patch.role,
+        })
+      );
     },
     onSuccess: () => {
       toast.success('Member updated');
