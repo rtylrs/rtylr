@@ -64,10 +64,10 @@ export const useUpdateRecurringInvoice = () => {
       variables: UpdateRecurringInvoiceVariables
     ): Promise<CreateRecurringInvoiceResponse> => {
       const res = await unwrap(
-        safe.put<CreateRecurringInvoiceResponse>(
-          `/finance/recurring-invoices/${variables.id}`,
-          variables.data
-        )
+        safe.put<CreateRecurringInvoiceResponse>('/finance/recurring-invoices', {
+          id: variables.id,
+          ...variables.data,
+        })
       );
       return res as CreateRecurringInvoiceResponse;
     },
