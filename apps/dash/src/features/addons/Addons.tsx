@@ -24,7 +24,8 @@ import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
 import { motion, AnimatePresence } from 'motion/react';
 import { toast } from 'sonner';
 import { Input } from '../../shared/components/ui';
-import api from '../../shared/lib/api';
+import { unwrap } from '@voxire/api';
+import { safe } from '../../shared/lib/api';
 
 const ICON_MAP: Record<
   string,
@@ -87,8 +88,12 @@ const useAddons = () =>
   useQuery<AddonData[]>({
     queryKey: ['addons'],
     queryFn: async () => {
-      const res = await api.get('/addons');
-      return res.data?.addons ?? [];
+      try {
+        const res = await unwrap(safe.get<{ addons?: AddonData[] }>('/addons'));
+        return res.addons ?? [];
+      } catch {
+        return [];
+      }
     },
   });
 
@@ -104,7 +109,7 @@ const Addons: React.FC = () => {
   const enableMutation = useMutation({
     mutationFn: async (addonId: string) => {
       setEnablingId(addonId);
-      await api.post('/addons/enable', { addonId });
+      await unwrap(safe.post('/addons/enable', { addonId }));
     },
     onSuccess: (_, addonId) => {
       setShowEnableSuccess(addonId);
@@ -122,7 +127,7 @@ const Addons: React.FC = () => {
 
   const disableMutation = useMutation({
     mutationFn: async (addonId: string) => {
-      await api.post('/addons/disable', { addonId });
+      await unwrap(safe.post('/addons/disable', { addonId }));
     },
     onSuccess: () => {
       setDisableTarget(null);

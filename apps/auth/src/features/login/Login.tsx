@@ -10,7 +10,8 @@ import { useUserStore } from '../../shared/stores/userStore';
 import { useLogin, useGoogleAuth } from '../../shared/hooks/useAuth';
 import { auth } from '../../firebase';
 import notify from '../../shared/lib/notify/notify';
-import api from '../../shared/lib/api';
+import { unwrap } from '@voxire/api';
+import { safe } from '../../shared/lib/api';
 import { Button } from '@voxire/components';
 import AuthShell from '../../shared/components/AuthShell';
 
@@ -61,9 +62,9 @@ const Login: React.FC = (): React.JSX.Element => {
     }
     // No explicit redirect, decide based on the user's subscription apps
     try {
-      const res = await api.get('/user/me');
-      const role: string = (res.data?.role as string) ?? '';
-      const apps: string[] = (res.data?.apps as string[]) ?? [];
+      const res = await unwrap(safe.get<{ role?: string; apps?: string[] }>('/user/me'));
+      const role: string = res.role ?? '';
+      const apps: string[] = res.apps ?? [];
       // Owners and admins always land on Dash (the account center)
       if (role === 'owner' || role === 'admin' || apps.length === 0) {
         window.location.href = APP_URLS.dash as string;

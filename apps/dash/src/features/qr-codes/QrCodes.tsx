@@ -18,7 +18,8 @@ import {
   Badge,
 } from '../../shared/components/ui';
 import { SkeletonList } from '../../shared/components/dash';
-import api from '../../shared/lib/api';
+import { unwrap } from '@voxire/api';
+import { safe } from '../../shared/lib/api';
 
 interface TableRow {
   id: number;
@@ -32,21 +33,12 @@ const useQrTables = () =>
   useQuery<TableRow[]>({
     queryKey: ['qr-tables'],
     queryFn: async () => {
-      const res = await api.get('/pos/tables');
-      const tables: Array<{
-        id: number;
-        name: string;
-        capacity: number;
-        status: string;
-        qr_code_url: string;
-      }> = res.data?.tables ?? [];
-      return tables.map((t) => ({
-        id: t.id,
-        name: t.name,
-        capacity: t.capacity,
-        status: t.status,
-        qrCodeUrl: t.qr_code_url,
-      }));
+      try {
+        const res = await unwrap(safe.get<{ tables?: TableRow[] } | TableRow[]>('/pos/tables'));
+        return Array.isArray(res) ? res : (res.tables ?? []);
+      } catch {
+        return [];
+      }
     },
   });
 

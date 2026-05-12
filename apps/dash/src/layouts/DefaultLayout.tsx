@@ -3,7 +3,8 @@ import { useLocation, useNavigate, Link } from 'react-router-dom';
 import { useForesightLinks } from '@voxire/utils';
 import { motion, AnimatePresence } from 'motion/react';
 import { useQuery } from '@tanstack/react-query';
-import api from '../shared/lib/api';
+import { unwrap } from '@voxire/api';
+import { safe } from '../shared/lib/api';
 import { APP_URLS } from '@voxire/config';
 import {
   LayoutDashboard,
@@ -216,8 +217,14 @@ const DefaultLayout: React.FC<DefaultLayoutProps> = ({ children }) => {
   const { data: addonsData } = useQuery<Array<{ id: string; isEnabled: boolean }>>({
     queryKey: ['addons'],
     queryFn: async () => {
-      const res = await api.get('/addons');
-      return res.data?.addons ?? [];
+      try {
+        const res = await unwrap(
+          safe.get<{ addons?: Array<{ id: string; isEnabled: boolean }> }>('/addons')
+        );
+        return res.addons ?? [];
+      } catch {
+        return [];
+      }
     },
     staleTime: 60_000,
   });

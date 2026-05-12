@@ -13,7 +13,8 @@ import {
   EyeOff,
 } from 'lucide-react';
 import { Button, Input, Label } from '../../shared/components/ui';
-import api from '../../shared/lib/api';
+import { unwrap } from '@voxire/api';
+import { safe } from '../../shared/lib/api';
 import { useInviteMember, type TeamMember } from '../../shared/hooks/queries/useTeam';
 import { useGroups, useBulkInvite, type BulkResult } from '../../shared/hooks/queries/useGroups';
 import {
@@ -88,8 +89,14 @@ const InviteUser: React.FC = (): React.JSX.Element => {
   const { data: addonsData } = useQuery<Array<{ id: string; isEnabled: boolean }>>({
     queryKey: ['addons'],
     queryFn: async () => {
-      const res = await api.get('/addons');
-      return res.data?.addons ?? [];
+      try {
+        const res = await unwrap(
+          safe.get<{ addons?: Array<{ id: string; isEnabled: boolean }> }>('/addons')
+        );
+        return res.addons ?? [];
+      } catch {
+        return [];
+      }
     },
     staleTime: 60_000,
   });

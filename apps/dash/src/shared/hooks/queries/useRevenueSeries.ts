@@ -1,5 +1,6 @@
 import { useQuery } from '@tanstack/react-query';
-import api from '../../lib/api';
+import { unwrap } from '@voxire/api';
+import { safe } from '../../lib/api';
 
 /**
  * Revenue time-series for the dashboard widget. Hits the insights
@@ -34,15 +35,13 @@ export function useRevenueSeries(days = 7): {
     queryKey: ['insights', 'revenue', { days }],
     queryFn: async (): Promise<RevenuePoint[]> => {
       try {
-        const res = await api.get(`/insights/revenue`, {
-          params: { from: isoDate(from), to: isoDate(today) },
-        });
-        const series = (res.data as { series?: RevenuePoint[] })?.series;
-        return Array.isArray(series) ? series : [];
+        const res = await unwrap(
+          safe.get<{ series?: RevenuePoint[] }>('/insights/revenue', {
+            params: { from: isoDate(from), to: isoDate(today) },
+          })
+        );
+        return Array.isArray(res.series) ? res.series : [];
       } catch {
-        // Endpoint may not be deployed yet (insights namespace is P3
-        // gap-fill in progress). Fail open — the widget shows the
-        // "no data" state, not an error.
         return [];
       }
     },

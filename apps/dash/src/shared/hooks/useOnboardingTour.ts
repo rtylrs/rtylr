@@ -2,7 +2,7 @@ import { useEffect, useRef } from 'react';
 import Shepherd, { type StepOptions, type Tour } from 'shepherd.js';
 import 'shepherd.js/dist/css/shepherd.css';
 import { useUserStore } from '../stores/userStore';
-import api from '../lib/api';
+import { safe } from '../lib/api';
 
 const TOUR_STEPS: StepOptions[] = [
   {
@@ -148,11 +148,11 @@ export function useOnboardingTour() {
       TOUR_STEPS.forEach((step) => tour.addStep(step));
 
       tour.on('complete', () => {
-        api.get('/user/onboarded').catch(() => {});
+        void safe.get('/user/onboarded');
       });
 
       tour.on('cancel', () => {
-        api.get('/user/onboarded').catch(() => {});
+        void safe.get('/user/onboarded');
       });
 
       tour.start();

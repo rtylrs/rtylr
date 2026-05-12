@@ -6,7 +6,8 @@ import { GoogleAuthProvider, signInWithPopup, getIdToken } from 'firebase/auth';
 import { FaGoogle } from 'react-icons/fa';
 import { APP_URLS } from '@voxire/config';
 
-import api from '../../shared/lib/api';
+import { unwrap } from '@voxire/api';
+import { safe } from '../../shared/lib/api';
 import notify from '../../shared/lib/notify/notify';
 import { useUserStore } from '../../shared/stores/userStore';
 import { useRegisterRestaurant, useGoogleAuth } from '../../shared/hooks/useAuth';
@@ -198,8 +199,12 @@ const Register: React.FC = (): React.JSX.Element => {
   const plansQuery = useQuery({
     queryKey: ['subscription-plans'],
     queryFn: async (): Promise<ApiPlan[]> => {
-      const res = await api.get<{ plans: ApiPlan[] }>('/subscriptions/plans');
-      return res.data.plans ?? [];
+      try {
+        const res = await unwrap(safe.get<{ plans: ApiPlan[] }>('/subscriptions/plans'));
+        return res.plans ?? [];
+      } catch {
+        return [];
+      }
     },
     staleTime: 5 * 60 * 1000,
   });
