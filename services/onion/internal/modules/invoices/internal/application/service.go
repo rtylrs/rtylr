@@ -7,6 +7,7 @@ import (
 
 	"github.com/voxire/onion/internal/modules/invoices/internal/domain"
 	"github.com/voxire/onion/internal/modules/invoices/internal/infrastructure"
+	emailPkg "github.com/voxire/onion/internal/platform/email"
 	"github.com/voxire/onion/internal/platform/logger"
 )
 
@@ -279,6 +280,43 @@ func (s *Service) UpdateInvoice(ctx context.Context, ownerID, invoiceID int64, i
 
 func (s *Service) UpdateInvoiceStatus(ctx context.Context, ownerID, invoiceID int64, status string) error {
 	return s.repo.UpdateInvoiceStatus(ctx, ownerID, invoiceID, status)
+}
+
+func (s *Service) SendInvoice(ctx context.Context, ownerID, invoiceID int64) error {
+	inv, err := s.GetInvoice(ctx, ownerID, invoiceID)
+	if err != nil {
+		return err
+	}
+
+	if err := s.repo.UpdateInvoiceStatus(ctx, ownerID, invoiceID, "sent"); err != nil {
+		return err
+	}
+
+	if inv.ClientEmail != "" && emailPkg.IsEnabled() {
+		subject := fmt.Sprintf("Invoice %s from rtylr", inv.InvoiceNumber)
+		html := fmt.Sprintf(
+			"<p>Dear %s,</p><p>Please find attached invoice <strong>%s</strong> for <strong>%.2f %s</strong> due on %s.</p>",
+			inv.ClientName, inv.InvoiceNumber, inv.Total, inv.Currency, inv.DueDate.Format("2006-01-02"),
+		)
+		text := fmt.Sprintf(
+			"Invoice %s\nAmount: %.2f %s\nDue: %s\n",
+			inv.InvoiceNumber, inv.Total, inv.Currency, inv.DueDate.Format("2006-01-02"),
+		)
+
+		if _, sendErr := emailPkg.Send(ctx, emailPkg.SendParams{
+			To:      []string{inv.ClientEmail},
+			Subject: subject,
+			HTML:    html,
+			Text:    text,
+		}); sendErr != nil {
+			logger.Ctx(ctx).Warn("failed to email invoice",
+				logger.String("client_email", inv.ClientEmail),
+				logger.Error(sendErr),
+			)
+		}
+	}
+
+	return nil
 }
 
 func (s *Service) DeleteInvoice(ctx context.Context, ownerID, invoiceID int64) error {

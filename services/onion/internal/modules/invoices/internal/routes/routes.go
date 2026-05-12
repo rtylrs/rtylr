@@ -60,6 +60,13 @@ func RegisterRoutes(ctx context.Context, router *chi.Mux, financeService *applic
 		&handlers.RecordPaymentHandler{FinanceService: financeService},
 	)
 
+	http.RegisterPOSTWithValidation[handlers.SendInvoiceRequest, handlers.SendInvoiceResponse](
+		ctx,
+		router,
+		handlers.SendInvoiceRoutes(),
+		&handlers.SendInvoiceHandler{FinanceService: financeService},
+	)
+
 	// Expenses
 	http.RegisterGET[handlers.ListExpensesRequest, handlers.ListExpensesResponse](
 		ctx,
