@@ -12,7 +12,8 @@ import {
 import Modal from './Modal';
 import { inputStyle, ACCENT } from '../lib/tokens';
 import type { Client } from './ClientSelect';
-import api from '../lib/api';
+import { unwrap } from '@voxire/api';
+import { safe } from '../lib/api';
 
 interface Result {
   id: string;
@@ -90,9 +91,8 @@ const GlobalSearch: React.FC<GlobalSearchProps> = ({ open, onClose }) => {
     if (open) {
       setQuery('');
       setIndex(0);
-      api
-        .get<Client[]>('/crm/customers')
-        .then((r) => setClients(r.data ?? []))
+      void unwrap(safe.get<Client[]>('/crm/customers'))
+        .then((data) => setClients(data ?? []))
         .catch(() => {});
     }
   }, [open]);

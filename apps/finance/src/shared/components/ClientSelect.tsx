@@ -1,6 +1,7 @@
 import React, { useMemo, useState, useEffect } from 'react';
 import { ChevronDown, Search } from 'lucide-react';
-import api from '../lib/api';
+import { unwrap } from '@voxire/api';
+import { safe } from '../lib/api';
 
 export interface Client {
   id: string;
@@ -20,9 +21,8 @@ const ClientSelect: React.FC<ClientSelectProps> = ({ value, onChange }) => {
   const [clients, setClients] = useState<Client[]>([]);
 
   useEffect(() => {
-    api
-      .get<Client[]>('/crm/customers')
-      .then((r) => setClients(r.data ?? []))
+    void unwrap(safe.get<Client[]>('/crm/customers'))
+      .then((data) => setClients(data ?? []))
       .catch(() => {});
   }, []);
 
