@@ -1,69 +1,33 @@
 import { unwrap } from '@voxire/api';
-import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query';
+import { useMutation, useQueryClient } from '@tanstack/react-query';
 import { safe } from '../../lib/api';
-import { businessSchema } from '../../schemas/business';
-import { useUserStore } from '../../stores/userStore';
 import { toast } from 'sonner';
-
-export const useGetBusiness = (businessId: string | null) => {
-  return useQuery({
-    queryKey: ['business', businessId],
-    queryFn: async () => {
-      const response = await unwrap(safe.get(`/business/${businessId}`));
-      return businessSchema.parse(response.data);
-    },
-    enabled: !!businessId,
-  });
-};
 
 export const useUpdateBusiness = () => {
   const queryClient = useQueryClient();
 
   return useMutation({
-    mutationFn: async ({
-      businessId,
-      data,
-    }: {
-      businessId: string;
-      data: Record<string, unknown>;
-    }) => {
-      const response = await unwrap(safe.put(`/business/${businessId}`, data));
-      return response.data;
+    mutationFn: async ({ data }: { businessId: string; data: Record<string, unknown> }) => {
+      const payload: Record<string, unknown> = {};
+      if (data.storeName) payload.siteName = data.storeName;
+      if (data.companyName && !payload.siteName) payload.siteName = data.companyName;
+      if (data.contactEmail) payload.contactEmail = data.contactEmail;
+      if (data.telephone) payload.contactNumber = data.telephone;
+      if (data.aboutContent) payload.aboutContent = data.aboutContent;
+      if (data.logoUrl) payload.logoUrl = data.logoUrl;
+      if (data.instagram) payload.instagram = data.instagram;
+      if (data.maintenanceMode !== undefined) payload.maintenanceMode = data.maintenanceMode;
+
+      return unwrap(safe.put('/config/update', payload));
     },
-    onSuccess: (data, variables) => {
+    onSuccess: (_data, variables) => {
       queryClient.invalidateQueries({ queryKey: ['business', variables.businessId] });
       queryClient.invalidateQueries({ queryKey: ['user'] });
       toast.success('Business information updated successfully');
     },
     onError: (error: unknown) => {
-      const err = error as { response?: { data?: { message?: string } } };
-      const message = err.response?.data?.message || 'Failed to update business information';
-      toast.error(message);
-    },
-  });
-};
-
-export const useUpdateTheme = () => {
-  const queryClient = useQueryClient();
-  const { user, setUser } = useUserStore();
-
-  return useMutation({
-    mutationFn: async ({ id, themeData }: { id: string; themeData: Record<string, unknown> }) => {
-      const response = await unwrap(safe.put(`/business/${id}/theme`, themeData));
-      return response.data;
-    },
-    onSuccess: (data, variables) => {
-      if (user) {
-        setUser({ ...user, theme: data.theme });
-      }
-      queryClient.invalidateQueries({ queryKey: ['business', variables.id] });
-      queryClient.invalidateQueries({ queryKey: ['user'] });
-      toast.success('Theme updated successfully');
-    },
-    onError: (error: unknown) => {
-      const err = error as { response?: { data?: { message?: string } } };
-      const message = err.response?.data?.message || 'Failed to update theme';
-      toast.error(message);
+      const err = error as { message?: string };
+      toast.error(err.message || 'Failed to update business information');
     },
   });
 };
