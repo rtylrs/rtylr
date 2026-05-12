@@ -53,6 +53,33 @@ func (r *Repository) ListPurchaseOrders(ctx context.Context, ownerID int64, stat
 	return orders, nil
 }
 
+func (r *Repository) GetByID(ctx context.Context, ownerID, id int64) (domain.PurchaseOrder, error) {
+	const q = `SELECT id, owner_id, supplier_id, po_number, status, subtotal, tax_amount, total,
+	             expected_delivery, received_at, notes, created_by, created_at, updated_at
+	           FROM erp_purchase_orders WHERE id = ? AND owner_id = ?`
+	var row sqlc.ErpPurchaseOrder
+	err := r.pool.QueryRowContext(ctx, q, id, ownerID).Scan(
+		&row.ID, &row.OwnerID, &row.SupplierID, &row.PoNumber, &row.Status,
+		&row.Subtotal, &row.TaxAmount, &row.Total, &row.ExpectedDelivery,
+		&row.ReceivedAt, &row.Notes, &row.CreatedBy, &row.CreatedAt, &row.UpdatedAt,
+	)
+	if errors.Is(err, sql.ErrNoRows) {
+		return domain.PurchaseOrder{}, domain.ErrPurchaseOrderNotFound
+	}
+	if err != nil {
+		logger.Ctx(ctx).Error("Failed to get purchase order by ID", logger.Error(err))
+		return domain.PurchaseOrder{}, err
+	}
+	po := purchaseOrderFromRow(row)
+	items, itemErr := r.GetPurchaseOrderItems(ctx, po.ID)
+	if itemErr != nil {
+		logger.Ctx(ctx).Error("Failed to get purchase order items", logger.Error(itemErr))
+		return domain.PurchaseOrder{}, itemErr
+	}
+	po.Items = items
+	return po, nil
+}
+
 func (r *Repository) GetPurchaseOrderItems(ctx context.Context, purchaseOrderID int64) ([]domain.PurchaseOrderItem, error) {
 	rows, err := r.queries.GetPurchaseOrderItems(ctx, purchaseOrderID)
 	if err != nil {

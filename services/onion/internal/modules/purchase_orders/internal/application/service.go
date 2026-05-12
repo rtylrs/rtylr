@@ -21,6 +21,10 @@ func NewService(ctx context.Context) *Service {
 	return &Service{repo: infrastructure.NewRepository(ctx)}
 }
 
+func (s *Service) GetByID(ctx context.Context, ownerID, id int64) (domain.PurchaseOrder, error) {
+	return s.repo.GetByID(ctx, ownerID, id)
+}
+
 func (s *Service) ListPurchaseOrders(ctx context.Context, ownerID int64, status string) ([]domain.PurchaseOrder, error) {
 	cacheKey := fmt.Sprintf("purchase_orders:%d:%s", ownerID, status)
 

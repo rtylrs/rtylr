@@ -17,6 +17,13 @@ func RegisterRoutes(ctx context.Context, router *chi.Mux, service *application.S
 		&handlers.ListPurchaseOrdersHandler{Service: service},
 	)
 
+	http.RegisterGET[handlers.GetPurchaseOrderRequest, handlers.GetPurchaseOrderResponse](
+		ctx,
+		router,
+		handlers.GetPurchaseOrderRoutes(),
+		&handlers.GetPurchaseOrderHandler{Service: service},
+	)
+
 	http.RegisterPOSTWithValidation[handlers.CreatePurchaseOrderRequest, handlers.CreatePurchaseOrderResponse](
 		ctx,
 		router,
