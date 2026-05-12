@@ -178,7 +178,7 @@ const ProjectCalendar: React.FC = () => {
                             cursor: 'pointer',
                           }}
                           title={t.title}
-                          onClick={() => navigate(`/tasks/${t.id}`)}
+                          onClick={() => navigate(`/task/${t.id}`)}
                         >
                           {t.title}
                         </div>
