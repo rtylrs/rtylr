@@ -1,6 +1,8 @@
 import React from 'react';
 import { useNavigate } from 'react-router-dom';
 import { motion } from 'motion/react';
+import Skeleton from 'react-loading-skeleton';
+import 'react-loading-skeleton/dist/skeleton.css';
 import {
   Users,
   UserPlus,
@@ -22,48 +24,14 @@ import { CustomerAvatar } from '../../shared/components/crm';
 
 const ACCENT = '#3b82f6';
 
-const defaultStats = [
-  {
-    label: 'Total Customers',
-    value: '4,821',
-    change: '+12%',
-    up: true,
-    icon: Users,
-    color: '#3b82f6',
-  },
-  {
-    label: 'New This Month',
-    value: '184',
-    change: '+8%',
-    up: true,
-    icon: UserPlus,
-    color: '#10b981',
-  },
-  {
-    label: 'Active Loyalty Members',
-    value: '2,340',
-    change: '+5%',
-    up: true,
-    icon: Gift,
-    color: '#f59e0b',
-  },
-  {
-    label: 'Campaign Reach',
-    value: '18,920',
-    change: '-3%',
-    up: false,
-    icon: Megaphone,
-    color: '#8b5cf6',
-  },
-];
-
-const defaultTopCustomers = [
-  { name: 'Sarah Johnson', spend: '$4,820', visits: 34, tier: 'Platinum' },
-  { name: 'Michael Chen', spend: '$3,640', visits: 28, tier: 'Gold' },
-  { name: 'Emily Rodriguez', spend: '$2,910', visits: 22, tier: 'Gold' },
-  { name: 'James Wilson', spend: '$1,870', visits: 17, tier: 'Silver' },
-  { name: 'Aisha Patel', spend: '$1,420', visits: 14, tier: 'Silver' },
-];
+interface StatItem {
+  label: string;
+  value: string;
+  change: string | undefined;
+  up: boolean | undefined;
+  icon: React.ElementType;
+  color: string;
+}
 
 const tierColor: Record<string, string> = {
   Platinum: '#e879f9',
@@ -72,25 +40,7 @@ const tierColor: Record<string, string> = {
   Bronze: '#b45309',
 };
 
-const defaultCampaigns = [
-  {
-    name: 'Summer Loyalty Blast',
-    channel: 'Email',
-    sent: 3200,
-    openRate: '42%',
-    revenue: '$8,400',
-  },
-  {
-    name: 'Win-Back: 30-Day Inactive',
-    channel: 'SMS',
-    sent: 980,
-    openRate: '61%',
-    revenue: '$2,100',
-  },
-  { name: 'VIP Exclusive Preview', channel: 'Push', sent: 540, openRate: '38%', revenue: '$3,700' },
-];
-
-function StatCard({ stat, index }: { stat: (typeof defaultStats)[0]; index: number }) {
+function StatCard({ stat, index }: { stat: StatItem; index: number }): React.JSX.Element {
   const Icon = stat.icon;
   return (
     <motion.div
@@ -169,7 +119,7 @@ function StatCard({ stat, index }: { stat: (typeof defaultStats)[0]; index: numb
 
 const Dashboard: React.FC = () => {
   const navigate = useNavigate();
-  const { data: dashboardData } = useCrmDashboard();
+  const { data: dashboardData, isLoading: dashLoading } = useCrmDashboard();
   const { data: fetchedCustomers } = useListCustomers({ limit: 200, offset: 0 });
   const { data: fetchedSegments } = useListSegments();
   const customersPool = fetchedCustomers ?? [];
@@ -222,21 +172,31 @@ const Dashboard: React.FC = () => {
           color: '#8b5cf6',
         },
       ]
-    : defaultStats;
-  const topCustomers = dashboardData?.topCustomers?.length
-    ? dashboardData.topCustomers
-    : defaultTopCustomers;
-  const campaigns = dashboardData?.recentCampaigns?.length
-    ? dashboardData.recentCampaigns
-    : defaultCampaigns;
+    : [];
+  const topCustomers = dashboardData?.topCustomers ?? [];
+  const campaigns = dashboardData?.recentCampaigns ?? [];
 
   return (
     <div style={{ display: 'flex', flexDirection: 'column', gap: '24px', maxWidth: '1280px' }}>
       {/* Stats grid */}
       <div style={{ display: 'grid', gridTemplateColumns: 'repeat(4, 1fr)', gap: '16px' }}>
-        {stats.map((stat, i) => (
-          <StatCard key={stat.label} stat={stat} index={i} />
-        ))}
+        {dashLoading
+          ? [0, 1, 2, 3].map((i) => (
+              <div
+                key={i}
+                style={{
+                  background: 'var(--hub-card)',
+                  border: '1px solid var(--hub-border)',
+                  borderRadius: '12px',
+                  padding: '16px',
+                }}
+              >
+                <Skeleton height={12} width="60%" style={{ marginBottom: 12 }} />
+                <Skeleton height={28} width="50%" style={{ marginBottom: 6 }} />
+                <Skeleton height={10} width="40%" />
+              </div>
+            ))
+          : stats.map((stat, i) => <StatCard key={stat.label} stat={stat} index={i} />)}
       </div>
 
       {/* Extended KPI widgets */}
@@ -342,10 +302,10 @@ const Dashboard: React.FC = () => {
             </div>
           </div>
           <div style={{ fontSize: '24px', fontWeight: 700, color: 'var(--hub-text)' }}>
-            {dashboardData?.newThisMonth || 184}
+            {dashLoading ? <Skeleton width={60} /> : (dashboardData?.newThisMonth ?? 0)}
           </div>
           <div style={{ fontSize: '11px', color: '#10b981', marginTop: '2px' }}>
-            +8% vs last month
+            {dashboardData?.newThisMonthChange ?? ''}
           </div>
         </motion.div>
 
@@ -457,10 +417,12 @@ const Dashboard: React.FC = () => {
               marginTop: '2px',
             }}
           >
-            {topSegment?.name || 'VIP Customers'}
+            {topSegment?.name ?? '—'}
           </div>
           <div style={{ fontSize: '11px', color: 'var(--hub-text-muted)' }}>
-            {topSegment?.customerCount.toLocaleString() || 0} members
+            {topSegment
+              ? `${topSegment.customerCount.toLocaleString()} members`
+              : 'No segments yet'}
           </div>
         </motion.div>
       </div>
