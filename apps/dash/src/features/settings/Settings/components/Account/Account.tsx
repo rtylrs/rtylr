@@ -51,28 +51,23 @@ const Account: React.FC = () => {
   const [loginHistory, setLoginHistory] = useState<LoginHistoryItem[]>([]);
 
   useEffect(() => {
-    import('../../../../../shared/lib/api').then(({ default: api }) => {
-      api
-        .get('/security/login-history')
-        .then(
-          (res: {
-            data?: {
-              history?: Array<{ email: string; method: string; ip?: string; createdAt: string }>;
-            };
-          }) => {
-            const history = res.data?.history ?? [];
-            setLoginHistory(
-              history.map((h) => ({
-                email: h.email,
-                method: h.method === 'email' ? 'Logged in via email' : `Logged in via ${h.method}`,
-                ip: h.ip ? `from ${h.ip}` : '',
-                timeAgo: formatTimeAgo(h.createdAt),
-              }))
-            );
-          }
-        )
-        .catch(() => {});
-    });
+    void unwrap(
+      safe.get<{
+        history?: Array<{ email: string; method: string; ip?: string; createdAt: string }>;
+      }>('/security/login-history')
+    )
+      .then((res) => {
+        const history = res.history ?? [];
+        setLoginHistory(
+          history.map((h) => ({
+            email: h.email,
+            method: h.method === 'email' ? 'Logged in via email' : `Logged in via ${h.method}`,
+            ip: h.ip ? `from ${h.ip}` : '',
+            timeAgo: formatTimeAgo(h.createdAt),
+          }))
+        );
+      })
+      .catch(() => {});
   }, []);
 
   useEffect(() => {
