@@ -1,10 +1,11 @@
-import React from 'react';
+import React, { useCallback, useEffect, useRef, useState } from 'react';
 import ScreenLayout from '../../layouts/ScreenLayout';
 import EmptyState from '../../shared/components/EmptyState';
 import Skeleton from '../../shared/components/Skeleton';
 import { useKDSOrders, KDSOrder } from './useKDSOrders';
 import { useSettingsStore } from '../../shared/stores/settingsStore';
-import { formatTime } from '../../shared/utils/format';
+import { useKdsTick, formatElapsed, elapsedSeconds } from './useKdsTimer';
+import { sendKdsTicket } from '../../shared/hardware/kdsHardware';
 
 const STATUS_ORDER: KDSOrder['status'][] = ['new', 'cooking', 'ready', 'served'];
 
@@ -15,15 +16,90 @@ const statusStyles: Record<KDSOrder['status'], string> = {
   served: 'bg-white/5 border-pos-border text-pos-muted',
 };
 
+const urgencyStyles: Record<'ok' | 'warn' | 'crit', string> = {
+  ok: 'text-pos-muted',
+  warn: 'text-amber-400 font-semibold',
+  crit: 'text-red-400 font-bold animate-pulse',
+};
+
+const ACTIVE_STATUSES = new Set<KDSOrder['status']>(['new', 'cooking']);
+
 const KDSScreen: React.FC = () => {
   const station = useSettingsStore((s) => s.kdsStation);
   const setStation = useSettingsStore((s) => s.setKdsStation);
+  const kdsHardware = useSettingsStore((s) => s.kdsHardware);
   const { orders, loading, setStatus } = useKDSOrders(station === 'all' ? undefined : station);
+  const tick = useKdsTick();
+  const [selectedIdx, setSelectedIdx] = useState(0);
+  const containerRef = useRef<HTMLDivElement>(null);
+  const sentIds = useRef(new Set<string>());
 
   const next = (status: KDSOrder['status']): KDSOrder['status'] => {
     const idx = STATUS_ORDER.indexOf(status);
     return STATUS_ORDER[Math.min(STATUS_ORDER.length - 1, idx + 1)];
   };
+
+  const bump = useCallback(
+    async (order: KDSOrder) => {
+      await setStatus(order.id, next(order.status));
+    },
+    [setStatus],
+  );
+
+  // Bump-bar keyboard shortcuts
+  useEffect(() => {
+    const handler = (e: KeyboardEvent) => {
+      if (orders.length === 0) return;
+      if (e.target instanceof HTMLInputElement || e.target instanceof HTMLSelectElement) return;
+
+      if (e.key >= '1' && e.key <= '9') {
+        const idx = Number(e.key) - 1;
+        if (idx < orders.length) void bump(orders[idx]);
+        return;
+      }
+
+      const activeOrders = orders.filter((o) => ACTIVE_STATUSES.has(o.status));
+
+      if (e.key === 'Enter' || e.key === ' ') {
+        e.preventDefault();
+        const target = activeOrders[selectedIdx] ?? activeOrders[0];
+        if (target) void bump(target);
+        return;
+      }
+
+      if (e.key === 'ArrowRight' || e.key === 'ArrowDown') {
+        e.preventDefault();
+        setSelectedIdx((i) => Math.min(i + 1, activeOrders.length - 1));
+      } else if (e.key === 'ArrowLeft' || e.key === 'ArrowUp') {
+        e.preventDefault();
+        setSelectedIdx((i) => Math.max(i - 1, 0));
+      }
+    };
+
+    window.addEventListener('keydown', handler);
+    return () => window.removeEventListener('keydown', handler);
+  }, [orders, selectedIdx, bump]);
+
+  // Send new orders to hardware KDS display (once per order)
+  useEffect(() => {
+    if (kdsHardware.transport === 'none') return;
+    orders
+      .filter((o) => o.status === 'new' && !sentIds.current.has(o.id))
+      .forEach((o) => {
+        sentIds.current.add(o.id);
+        void sendKdsTicket(kdsHardware, {
+          orderNumber: o.number,
+          station: o.station || undefined,
+          items: o.items.map((it) => ({
+            name: it.name,
+            quantity: it.qty,
+            notes: it.notes,
+            modifiers: [],
+          })),
+          createdAt: o.createdAt,
+        });
+      });
+  }, [orders, kdsHardware]);
 
   return (
     <ScreenLayout
@@ -43,45 +119,73 @@ const KDSScreen: React.FC = () => {
         </select>
       }
     >
-      <div className="p-5">
+      <div className="p-5" ref={containerRef}>
         {loading ? (
           <Skeleton rows={6} />
         ) : orders.length === 0 ? (
           <EmptyState icon="🍳" title="No active tickets" />
         ) : (
-          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-3">
-            {orders.map((o) => (
-              <div
-                key={o.id}
-                className={`p-4 rounded-xl border-2 ${statusStyles[o.status]} flex flex-col gap-3`}
-              >
-                <div className="flex items-baseline justify-between">
-                  <span className="font-bold text-lg text-pos-text">#{o.number}</span>
-                  <span className="text-[10px] uppercase">{o.station}</span>
-                </div>
-                <div className="text-[10px] opacity-70">{formatTime(o.createdAt)}</div>
-                <ul className="space-y-1.5 flex-1">
-                  {o.items.map((it, idx) => (
-                    <li key={idx} className="text-sm text-pos-text">
-                      <span className="font-semibold">{it.qty}×</span> {it.name}
-                      {it.notes && (
-                        <div className="text-[10px] italic text-pos-muted">{it.notes}</div>
-                      )}
-                    </li>
-                  ))}
-                </ul>
-                <button
-                  onClick={() => setStatus(o.id, next(o.status))}
-                  className="h-11 rounded-lg bg-white/10 text-pos-text font-semibold text-sm hover:bg-white/20"
-                >
-                  {o.status === 'new' && 'Start Cooking'}
-                  {o.status === 'cooking' && 'Mark Ready'}
-                  {o.status === 'ready' && 'Mark Served'}
-                  {o.status === 'served' && 'Served'}
-                </button>
-              </div>
-            ))}
-          </div>
+          <>
+            <p className="text-[10px] text-pos-muted mb-3">
+              Keys 1–9 bump ticket · Arrow keys navigate · Enter bump selected
+            </p>
+            <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-3">
+              {orders.map((o, idx) => {
+                void tick; // re-render trigger every second
+                const elapsed = elapsedSeconds(o.createdAt);
+                const { label: elapsedLabel, urgency } = formatElapsed(elapsed);
+                const isActive = ACTIVE_STATUSES.has(o.status);
+                const isSelected = isActive && idx === selectedIdx;
+
+                return (
+                  <div
+                    key={o.id}
+                    className={`p-4 rounded-xl border-2 ${statusStyles[o.status]} flex flex-col gap-3 transition-all ${
+                      isSelected ? 'ring-2 ring-white/40' : ''
+                    }`}
+                  >
+                    <div className="flex items-baseline justify-between">
+                      <div className="flex items-center gap-2">
+                        <span className="font-bold text-lg text-pos-text">#{o.number}</span>
+                        {isActive && (
+                          <span className={`text-[10px] tabular-nums ${urgencyStyles[urgency]}`}>
+                            {elapsedLabel}
+                          </span>
+                        )}
+                      </div>
+                      <span className="text-[10px] uppercase opacity-70">{o.station}</span>
+                    </div>
+
+                    {idx < 9 && (
+                      <span className="text-[9px] text-pos-muted opacity-40">⌨ {idx + 1}</span>
+                    )}
+
+                    <ul className="space-y-1.5 flex-1">
+                      {o.items.map((it, i) => (
+                        <li key={i} className="text-sm text-pos-text">
+                          <span className="font-semibold">{it.qty}×</span> {it.name}
+                          {it.notes && (
+                            <div className="text-[10px] italic text-pos-muted">{it.notes}</div>
+                          )}
+                        </li>
+                      ))}
+                    </ul>
+
+                    {o.status !== 'served' && (
+                      <button
+                        onClick={() => void bump(o)}
+                        className="h-11 rounded-lg bg-white/10 text-pos-text font-semibold text-sm hover:bg-white/20 active:scale-95 transition-all"
+                      >
+                        {o.status === 'new' && 'Start Cooking'}
+                        {o.status === 'cooking' && 'Mark Ready'}
+                        {o.status === 'ready' && 'Mark Served'}
+                      </button>
+                    )}
+                  </div>
+                );
+              })}
+            </div>
+          </>
         )}
       </div>
     </ScreenLayout>
