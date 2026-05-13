@@ -21,3 +21,7 @@ export type {
 // KDS hardware display
 export { sendKdsTicket } from './kdsHardware';
 export type { KdsTicket, KdsTicketItem, KdsHardwareResult } from './kdsHardware';
+
+// Hardware health check
+export { checkHardwareHealth } from './hardwareHealth';
+export type { DeviceStatus, HardwareHealthReport } from './hardwareHealth';

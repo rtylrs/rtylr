@@ -7,6 +7,7 @@ import { useTerminalContextStore } from '../../shared/stores/terminalContextStor
 import { listPrinters, listSerialPorts } from '../../shared/hardware/hardwareDiscovery';
 import type { PrinterInfo, SerialPortInfo } from '../../shared/hardware/hardwareDiscovery';
 import appConfig from '../../app.json';
+import { HardwareHealthCheck } from './HardwareHealthCheck';
 
 const INPUT_CLS =
   'w-full h-11 px-3 rounded-lg bg-white/8 border border-pos-border text-pos-text outline-none focus:border-white/25';
@@ -375,6 +376,10 @@ const SettingsScreen: React.FC = () => {
               </div>
             </div>
           )}
+        </Section>
+
+        <Section title="Hardware Status">
+          <HardwareHealthCheck printer={s.printer} kds={s.kdsHardware} />
         </Section>
 
         <Section title="Workstation">
