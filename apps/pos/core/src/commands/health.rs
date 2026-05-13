@@ -645,4 +645,38 @@ mod tests {
         // 1 initial + 2 retries = 3 total calls
         assert_eq!(call_count.load(std::sync::atomic::Ordering::SeqCst), 3);
     }
+
+    // ── Concurrent probe stress test ──────────────────────────────────────────
+
+    /// Spawn 32 threads each calling probe_tcp against an unreachable address.
+    /// Verifies: no panic, no deadlock, all results collected correctly,
+    /// and the shared result set has exactly one entry per thread (no data races).
+    #[test]
+    fn concurrent_probes_do_not_panic_or_race() {
+        use std::sync::{Arc, Mutex};
+
+        let results: Arc<Mutex<Vec<DeviceStatus>>> = Arc::new(Mutex::new(Vec::new()));
+        let mut handles = Vec::new();
+
+        for i in 0..32u16 {
+            let results = Arc::clone(&results);
+            // Each thread targets a distinct port in the TEST-NET range (192.0.2.x)
+            // so they all get a fast ECONNREFUSED or timeout without hitting real hardware
+            handles.push(std::thread::spawn(move || {
+                let status = probe_tcp("192.0.2.1", 9100 + i);
+                results.lock().unwrap().push(status);
+            }));
+        }
+
+        for h in handles {
+            h.join().expect("probe thread panicked");
+        }
+
+        let collected = results.lock().unwrap();
+        assert_eq!(collected.len(), 32, "expected exactly one result per thread");
+        // Every probe to an unreachable host must report 'unreachable'
+        for status in collected.iter() {
+            assert_eq!(status.status, "unreachable", "unexpected status: {:?}", status);
+        }
+    }
 }
