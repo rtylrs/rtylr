@@ -28,8 +28,16 @@ function parseOrderId(orderId: string | undefined): number {
   return numericOrderId;
 }
 
-function parseRefundAmount(fullRefund: boolean, amountInput: string): number | null {
-  if (fullRefund) return null;
+function parseRefundAmount(
+  fullRefund: boolean,
+  amountInput: string,
+  receipt: Receipt | undefined,
+): number {
+  if (fullRefund) {
+    const total = receipt?.total ?? 0;
+    if (total <= 0) throw new Error('Cannot determine order total for full refund.');
+    return total;
+  }
   const amount = Number(amountInput);
   if (!Number.isFinite(amount) || amount <= 0) {
     throw new Error('Enter a refund amount greater than zero.');
@@ -53,18 +61,16 @@ export function buildRefundRequest({
   receipt,
 }: BuildRefundRequestParams): BuiltRefundRequest {
   const numericOrderId = parseOrderId(orderId);
-  const amount = parseRefundAmount(fullRefund, amountInput);
+  const amount = parseRefundAmount(fullRefund, amountInput, receipt);
   const cashTendered = cashPaid(receipt);
-  const requestedAmount = amount ?? receipt?.total ?? 0;
 
   return {
     orderId: numericOrderId,
     payload: {
       amount,
       reason,
-      full: fullRefund,
     },
-    cashRefundAmount: Math.min(requestedAmount, cashTendered),
+    cashRefundAmount: Math.min(amount, cashTendered),
   };
 }
 

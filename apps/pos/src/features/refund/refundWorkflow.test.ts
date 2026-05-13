@@ -45,7 +45,6 @@ describe('buildRefundRequest', () => {
       payload: {
         amount: 15.5,
         reason: 'Wrong item',
-        full: false,
       },
       cashRefundAmount: 15.5,
     });
@@ -68,9 +67,8 @@ describe('processRefund', () => {
     });
 
     expect(refundOrder).toHaveBeenCalledWith(7, {
-      amount: null,
+      amount: 42,
       reason: 'Customer complaint',
-      full: true,
     });
     expect(recordCashRefund).toHaveBeenCalledWith(42, '7');
   });
