@@ -19,6 +19,7 @@ const OrdersScreen: React.FC = () => {
   const [search, setSearch] = useState('');
   const [filter, setFilter] = useState<'all' | 'open' | 'paid' | 'voided'>('all');
   const [reopening, setReopening] = useState<string | null>(null);
+  const [voiding, setVoiding] = useState<string | null>(null);
   const navigate = useNavigate();
   const [params] = useSearchParams();
   const reopenMode = params.get('reopen') === '1';
@@ -50,6 +51,24 @@ const OrdersScreen: React.FC = () => {
       toast.error(e?.response?.data?.message ?? 'Failed to reopen order');
     } finally {
       setReopening(null);
+    }
+  };
+
+  const handleVoid = async (e: React.MouseEvent, order: Order) => {
+    e.stopPropagation();
+    if (!window.confirm(`Void order #${order.number ?? order.id}? This cannot be undone.`)) return;
+    setVoiding(String(order.id));
+    try {
+      await unwrap(posService.voidOrder(Number(order.id), { reason: 'Manager void' }));
+      setOrders((prev) =>
+        prev.map((o) => (o.id === order.id ? { ...o, status: 'voided' } : o)),
+      );
+      toast.success(`Order #${order.number ?? order.id} voided`);
+    } catch (err) {
+      const e = err as { response?: { data?: { message?: string } }; message?: string };
+      toast.error(e?.response?.data?.message ?? 'Failed to void order');
+    } finally {
+      setVoiding(null);
     }
   };
 
@@ -113,6 +132,16 @@ const OrdersScreen: React.FC = () => {
                         className="h-8 px-3 rounded-lg bg-amber-500/20 border border-amber-500/40 text-amber-300 text-xs font-semibold hover:bg-amber-500/30 disabled:opacity-50 transition-colors"
                       >
                         {reopening === String(o.id) ? '...' : 'Reopen'}
+                      </button>
+                    )}
+                    {!reopenMode && o.status === 'open' && (
+                      <button
+                        type="button"
+                        disabled={voiding === String(o.id)}
+                        onClick={(e) => void handleVoid(e, o)}
+                        className="h-8 px-3 rounded-lg bg-red-500/15 border border-red-500/30 text-red-400 text-xs font-semibold hover:bg-red-500/25 disabled:opacity-50 transition-colors"
+                      >
+                        {voiding === String(o.id) ? '...' : 'Void'}
                       </button>
                     )}
                   </div>
