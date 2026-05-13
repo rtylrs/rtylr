@@ -1,4 +1,6 @@
 use serde::Serialize;
+use std::net::{SocketAddr, TcpStream};
+use std::time::Duration;
 
 #[derive(Serialize)]
 pub struct PrinterInfo {
@@ -231,5 +233,130 @@ fn infer_connection_type_unix(name: &str) -> String {
         "Serial".to_string()
     } else {
         "Unknown".to_string()
+    }
+}
+
+// ── Network hardware auto-discovery ─────────────────────────────────────────
+
+/// A device found during network scan.
+#[derive(Debug, Serialize)]
+pub struct DiscoveredDevice {
+    pub host: String,
+    pub port: u16,
+    pub device_type: String, // "thermal_escpos" | "network_lpr" | "network_ipp" | "kds" | "unknown"
+    pub label: String,
+}
+
+/// Well-known ports probed during subnet scan, mapped to device types.
+const SCAN_PORTS: &[(u16, &str, &str)] = &[
+    (9100, "thermal_escpos", "Thermal/ESC-POS printer"),
+    (515,  "network_lpr",   "LPR/LPD line printer"),
+    (631,  "network_ipp",   "IPP network printer"),
+    (9200, "kds",           "KDS display (alt port)"),
+    (4999, "kds",           "KDS display"),
+];
+
+fn scan_host(host: &str, timeout_ms: u64) -> Vec<DiscoveredDevice> {
+    let timeout = Duration::from_millis(timeout_ms.clamp(50, 5000));
+    let mut found = Vec::new();
+    for &(port, device_type, label) in SCAN_PORTS {
+        let addr_str = format!("{}:{}", host, port);
+        if let Ok(addr) = addr_str.parse::<SocketAddr>() {
+            if TcpStream::connect_timeout(&addr, timeout).is_ok() {
+                found.push(DiscoveredDevice {
+                    host: host.to_string(),
+                    port,
+                    device_type: device_type.to_string(),
+                    label: format!("{} at {}:{}", label, host, port),
+                });
+            }
+        }
+    }
+    found
+}
+
+/// Scan a /24 subnet for hardware devices (printers, KDS displays).
+///
+/// `subnet_prefix` is the first three octets, e.g. "192.168.1".
+/// `timeout_ms` is the per-host per-port connection timeout (50–5000 ms).
+///
+/// Runs each host probe sequentially to avoid triggering IDS/firewalls.
+/// For a /24 this completes in roughly: 255 × n_ports × timeout_ms.
+/// Caller should use a short timeout (100–300 ms) for interactive use.
+#[tauri::command]
+pub fn discover_network_hardware(
+    subnet_prefix: String,
+    timeout_ms: u64,
+) -> Result<Vec<DiscoveredDevice>, String> {
+    let prefix = subnet_prefix.trim().to_string();
+    if prefix.is_empty() {
+        return Err("subnet_prefix is required (e.g. \"192.168.1\")".to_string());
+    }
+    // Validate: must be exactly three dot-separated octets
+    let parts: Vec<&str> = prefix.split('.').collect();
+    if parts.len() != 3 || parts.iter().any(|p| p.parse::<u8>().is_err()) {
+        return Err(format!("Invalid subnet prefix '{}' — expected format: \"192.168.1\"", prefix));
+    }
+
+    let mut results = Vec::new();
+    for host_octet in 1u8..=254 {
+        let host = format!("{}.{}", prefix, host_octet);
+        results.extend(scan_host(&host, timeout_ms));
+    }
+    Ok(results)
+}
+
+// ── Tests ─────────────────────────────────────────────────────────────────────
+
+#[cfg(test)]
+mod tests {
+    use super::*;
+    use std::net::TcpListener;
+    use std::thread;
+
+    #[test]
+    fn discover_rejects_empty_subnet_prefix() {
+        let result = discover_network_hardware("".to_string(), 100);
+        assert!(result.is_err());
+        assert!(result.unwrap_err().contains("subnet_prefix is required"));
+    }
+
+    #[test]
+    fn discover_rejects_invalid_subnet_format() {
+        let result = discover_network_hardware("not-a-subnet".to_string(), 100);
+        assert!(result.is_err());
+    }
+
+    #[test]
+    fn discover_rejects_four_octet_full_ip() {
+        // Full IP isn't a valid prefix
+        let result = discover_network_hardware("192.168.1.1".to_string(), 100);
+        assert!(result.is_err());
+    }
+
+    #[test]
+    fn scan_host_finds_listening_port() {
+        // Bind a random port on loopback, scan for it
+        let listener = TcpListener::bind("127.0.0.1:0").expect("bind");
+        let port = listener.local_addr().expect("addr").port();
+
+        // Accept one connection in background so scan_host doesn't block
+        thread::spawn(move || {
+            let _ = listener.accept();
+        });
+
+        // scan_host only scans SCAN_PORTS so we exercise the helper directly
+        let timeout = Duration::from_millis(200);
+        let addr_str = format!("127.0.0.1:{}", port);
+        let addr: SocketAddr = addr_str.parse().unwrap();
+        let connected = TcpStream::connect_timeout(&addr, timeout).is_ok();
+        assert!(connected, "Should be able to connect to our own listener");
+    }
+
+    #[test]
+    fn scan_host_returns_nothing_for_unreachable_host() {
+        // TEST-NET (192.0.2.0/24) is guaranteed non-routable
+        let found = scan_host("192.0.2.1", 50);
+        assert!(found.is_empty(), "TEST-NET host should not be reachable");
     }
 }

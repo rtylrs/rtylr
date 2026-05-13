@@ -13,6 +13,7 @@ fn main() {
             // Cross-platform hardware discovery
             discovery::list_printers,
             discovery::list_serial_ports,
+            discovery::discover_network_hardware,
             // Cross-platform drawer via serial or network
             drawer::open_cash_drawer_serial,
             drawer::open_cash_drawer_network,
