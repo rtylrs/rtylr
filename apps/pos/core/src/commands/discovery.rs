@@ -18,6 +18,39 @@ pub struct SerialPortInfo {
     pub product: Option<String>,
     pub vid: Option<u16>,
     pub pid: Option<u16>,
+    /// Best-guess thermal printer brand derived from USB VID, e.g. "epson", "star", "bematech", "elgin", "ncr", "citizen", "custom", "unknown"
+    pub thermal_brand: String,
+}
+
+/// Map USB Vendor ID to thermal printer brand name.
+/// Covers the major brands sold globally plus the Brazilian market (Elgin, Bematech).
+pub fn classify_thermal_brand(vid: Option<u16>, manufacturer: Option<&str>) -> &'static str {
+    match vid {
+        Some(0x04b8) => "epson",       // Seiko Epson Corp
+        Some(0x0519) => "star",        // Star Micronics
+        Some(0x0dd4) => "bematech",    // Bematech S/A (Brazilian market)
+        Some(0x20d1) => "elgin",       // Elgin (Brazilian market)
+        Some(0x0404) => "ncr",         // NCR Corporation
+        Some(0x1a86) => "citizen",     // Citizen Systems (also CH340 clone — check product)
+        Some(0x0425) => "custom",      // Custom S.p.A. (kiosk/ticket printers)
+        Some(0x154f) => "sewoo",       // Sewoo Tech (Korean POS printers)
+        Some(0x0fe6) => "datecs",      // Datecs Ltd (fiscal printers)
+        Some(0x2730) => "rongta",      // Rongta Technology
+        _ => {
+            // Fall back to manufacturer string heuristic
+            if let Some(mfr) = manufacturer {
+                let m = mfr.to_lowercase();
+                if m.contains("epson")    { return "epson"; }
+                if m.contains("star")     { return "star"; }
+                if m.contains("bematech") { return "bematech"; }
+                if m.contains("elgin")    { return "elgin"; }
+                if m.contains("ncr")      { return "ncr"; }
+                if m.contains("citizen")  { return "citizen"; }
+                if m.contains("zebra")    { return "zebra"; }
+            }
+            "unknown"
+        }
+    }
 }
 
 /// List all available printers on the system.
@@ -52,12 +85,15 @@ pub fn list_serial_ports() -> Result<Vec<SerialPortInfo>, String> {
                 ),
                 _ => (None, None, None, None),
             };
+            let thermal_brand =
+                classify_thermal_brand(vid, manufacturer.as_deref()).to_string();
             SerialPortInfo {
                 port_name: p.port_name,
                 manufacturer,
                 product,
                 vid,
                 pid,
+                thermal_brand,
             }
         })
         .collect();
@@ -398,5 +434,54 @@ mod tests {
         // TEST-NET (192.0.2.0/24) is guaranteed non-routable
         let found = scan_host("192.0.2.1", 50);
         assert!(found.is_empty(), "TEST-NET host should not be reachable");
+    }
+
+    // ── Brand detection (VID/PID) ─────────────────────────────────────────────
+
+    #[test]
+    fn brand_epson_vid() {
+        assert_eq!(classify_thermal_brand(Some(0x04b8), None), "epson");
+    }
+
+    #[test]
+    fn brand_star_vid() {
+        assert_eq!(classify_thermal_brand(Some(0x0519), None), "star");
+    }
+
+    #[test]
+    fn brand_bematech_vid() {
+        assert_eq!(classify_thermal_brand(Some(0x0dd4), None), "bematech");
+    }
+
+    #[test]
+    fn brand_elgin_vid() {
+        assert_eq!(classify_thermal_brand(Some(0x20d1), None), "elgin");
+    }
+
+    #[test]
+    fn brand_ncr_vid() {
+        assert_eq!(classify_thermal_brand(Some(0x0404), None), "ncr");
+    }
+
+    #[test]
+    fn brand_citizen_vid() {
+        assert_eq!(classify_thermal_brand(Some(0x1a86), None), "citizen");
+    }
+
+    #[test]
+    fn brand_unknown_vid_falls_back_to_manufacturer_string() {
+        assert_eq!(classify_thermal_brand(Some(0xffff), Some("BEMATECH Printer")), "bematech");
+    }
+
+    #[test]
+    fn brand_unknown_vid_and_no_mfr_returns_unknown() {
+        assert_eq!(classify_thermal_brand(Some(0xffff), None), "unknown");
+    }
+
+    #[test]
+    fn brand_no_vid_uses_manufacturer_string() {
+        assert_eq!(classify_thermal_brand(None, Some("ELGIN POS")), "elgin");
+        assert_eq!(classify_thermal_brand(None, Some("NCR Corporation")), "ncr");
+        assert_eq!(classify_thermal_brand(None, Some("Zebra Technologies")), "zebra");
     }
 }
