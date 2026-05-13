@@ -54,6 +54,35 @@ const SettingsScreen: React.FC = () => {
   return (
     <ScreenLayout title="Settings">
       <div className="p-5 max-w-3xl space-y-5">
+        <Section title="Business">
+          <div className="grid grid-cols-1 gap-3">
+            <div>
+              <label className="text-xs text-pos-muted">Business name (appears on receipt)</label>
+              <input
+                value={s.business.name}
+                onChange={(e) => s.setBusiness({ name: e.target.value })}
+                className={INPUT_CLS}
+              />
+            </div>
+            <div>
+              <label className="text-xs text-pos-muted">Address</label>
+              <input
+                value={s.business.address}
+                onChange={(e) => s.setBusiness({ address: e.target.value })}
+                className={INPUT_CLS}
+              />
+            </div>
+            <div>
+              <label className="text-xs text-pos-muted">Phone</label>
+              <input
+                value={s.business.phone}
+                onChange={(e) => s.setBusiness({ phone: e.target.value })}
+                className={INPUT_CLS}
+              />
+            </div>
+          </div>
+        </Section>
+
         <Section title="Tax">
           <label className="text-xs text-pos-muted">Tax rate (%)</label>
           <input
@@ -258,6 +287,94 @@ const SettingsScreen: React.FC = () => {
               </div>
             )}
           </div>
+        </Section>
+
+        <Section title="KDS Hardware Display">
+          <p className="text-xs text-pos-muted">
+            Connect a dedicated hardware KDS display (VFD, kitchen screen) via serial or network.
+            Set to None to use the browser-based KDS only.
+          </p>
+          <div>
+            <label className="text-xs text-pos-muted">Transport</label>
+            <select
+              value={s.kdsHardware.transport}
+              onChange={(e) =>
+                s.setKdsHardware({
+                  transport: e.target.value as 'none' | 'serial' | 'network',
+                })
+              }
+              className={SELECT_CLS}
+            >
+              <option value="none">None (software KDS only)</option>
+              <option value="serial">Serial / USB-Serial</option>
+              <option value="network">Network (TCP/IP)</option>
+            </select>
+          </div>
+          {s.kdsHardware.transport === 'serial' && (
+            <div className="grid grid-cols-2 gap-3">
+              <div className="col-span-2">
+                <label className="text-xs text-pos-muted">Serial port</label>
+                {serialPorts.length > 0 ? (
+                  <select
+                    value={s.kdsHardware.serialPort}
+                    onChange={(e) => s.setKdsHardware({ serialPort: e.target.value })}
+                    className={SELECT_CLS}
+                  >
+                    <option value="">— select port —</option>
+                    {serialPorts.map((p) => (
+                      <option key={p.portName} value={p.portName}>
+                        {p.portName}
+                        {p.product ? ` (${p.product})` : ''}
+                      </option>
+                    ))}
+                  </select>
+                ) : (
+                  <input
+                    value={s.kdsHardware.serialPort}
+                    placeholder="e.g. /dev/tty.usbserial-1420"
+                    onChange={(e) => s.setKdsHardware({ serialPort: e.target.value })}
+                    className={INPUT_CLS}
+                  />
+                )}
+              </div>
+              <div>
+                <label className="text-xs text-pos-muted">Baud rate</label>
+                <select
+                  value={s.kdsHardware.serialBaudRate}
+                  onChange={(e) => s.setKdsHardware({ serialBaudRate: Number(e.target.value) })}
+                  className={SELECT_CLS}
+                >
+                  {[9600, 19200, 38400, 115200].map((b) => (
+                    <option key={b} value={b}>
+                      {b}
+                    </option>
+                  ))}
+                </select>
+              </div>
+            </div>
+          )}
+          {s.kdsHardware.transport === 'network' && (
+            <div className="grid grid-cols-3 gap-3">
+              <div className="col-span-2">
+                <label className="text-xs text-pos-muted">Host / IP</label>
+                <input
+                  value={s.kdsHardware.networkHost}
+                  placeholder="e.g. 192.168.1.200"
+                  onChange={(e) => s.setKdsHardware({ networkHost: e.target.value })}
+                  className={INPUT_CLS}
+                />
+              </div>
+              <div>
+                <label className="text-xs text-pos-muted">Port</label>
+                <input
+                  type="number"
+                  value={s.kdsHardware.networkPort}
+                  onChange={(e) => s.setKdsHardware({ networkPort: Number(e.target.value) })}
+                  className={INPUT_CLS}
+                />
+              </div>
+            </div>
+          )}
         </Section>
 
         <Section title="Workstation">
