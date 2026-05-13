@@ -3,7 +3,7 @@
 
 mod commands;
 
-use commands::{discovery, drawer, kds, printer, receipt};
+use commands::{discovery, drawer, health, kds, printer, receipt};
 
 fn main() {
     tauri::Builder::default()
@@ -21,6 +21,8 @@ fn main() {
             // KDS hardware display (serial / network)
             kds::send_kds_ticket_serial,
             kds::send_kds_ticket_network,
+            // Hardware health check
+            health::check_hardware,
         ])
         .run(tauri::generate_context!())
         .expect("error while running tauri application");
