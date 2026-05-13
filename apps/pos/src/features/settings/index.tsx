@@ -1,15 +1,49 @@
-import React from 'react';
+import React, { useEffect, useState } from 'react';
 import { toast } from 'sonner';
 import ScreenLayout from '../../layouts/ScreenLayout';
 import { useSettingsStore } from '../../shared/stores/settingsStore';
 import { useCartStore } from '../../shared/stores/cartStore';
 import { useTerminalContextStore } from '../../shared/stores/terminalContextStore';
+import { listPrinters, listSerialPorts } from '../../shared/hardware/hardwareDiscovery';
+import type { PrinterInfo, SerialPortInfo } from '../../shared/hardware/hardwareDiscovery';
 import appConfig from '../../app.json';
+
+const INPUT_CLS =
+  'w-full h-11 px-3 rounded-lg bg-white/8 border border-pos-border text-pos-text outline-none focus:border-white/25';
+const SELECT_CLS =
+  'w-full h-11 px-3 rounded-lg bg-white/8 border border-pos-border text-pos-text outline-none focus:border-white/25';
 
 const SettingsScreen: React.FC = () => {
   const s = useSettingsStore();
   const { locationId, terminalId, clearTerminalContext } = useTerminalContextStore();
   const clearCart = useCartStore((state) => state.clearCart);
+
+  const [printers, setPrinters] = useState<PrinterInfo[]>([]);
+  const [serialPorts, setSerialPorts] = useState<SerialPortInfo[]>([]);
+  const [discovering, setDiscovering] = useState(false);
+
+  const discover = async () => {
+    setDiscovering(true);
+    try {
+      const [p, sp] = await Promise.all([listPrinters(), listSerialPorts()]);
+      setPrinters(p);
+      setSerialPorts(sp);
+      if (p.length === 0 && sp.length === 0) {
+        toast.info('No hardware detected');
+      } else {
+        toast.success(`Found ${p.length} printer(s), ${sp.length} serial port(s)`);
+      }
+    } catch {
+      toast.error('Hardware discovery failed');
+    } finally {
+      setDiscovering(false);
+    }
+  };
+
+  useEffect(() => {
+    discover();
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, []);
 
   const updateTip = (index: number, value: number) => {
     const next = [...s.tipPresets];
@@ -27,7 +61,7 @@ const SettingsScreen: React.FC = () => {
             step="0.01"
             value={(s.taxRate * 100).toFixed(2)}
             onChange={(e) => s.setTaxRate(Number(e.target.value) / 100)}
-            className="w-full h-11 px-3 rounded-lg bg-white/8 border border-pos-border text-pos-text outline-none focus:border-white/25"
+            className={INPUT_CLS}
           />
         </Section>
 
@@ -47,7 +81,7 @@ const SettingsScreen: React.FC = () => {
         </Section>
 
         <Section title="Receipt">
-          <label className="text-xs text-pos-muted">Footer</label>
+          <label className="text-xs text-pos-muted">Footer message</label>
           <textarea
             value={s.receiptFooter}
             onChange={(e) => s.setReceiptFooter(e.target.value)}
@@ -56,28 +90,150 @@ const SettingsScreen: React.FC = () => {
           />
         </Section>
 
-        <Section title="Printer">
-          <div className="grid grid-cols-2 gap-3">
+        <Section title="Printer & Cash Drawer">
+          <div className="flex items-center justify-between">
+            <p className="text-xs text-pos-muted">
+              {discovering
+                ? 'Scanning hardware...'
+                : `${printers.length} printer(s) · ${serialPorts.length} serial port(s) detected`}
+            </p>
+            <button
+              type="button"
+              onClick={discover}
+              disabled={discovering}
+              className="h-8 px-3 rounded-lg bg-white/10 text-pos-text text-xs font-semibold disabled:opacity-50"
+            >
+              Refresh
+            </button>
+          </div>
+
+          {/* Transport */}
+          <div>
+            <label className="text-xs text-pos-muted">Transport</label>
+            <select
+              value={s.printer.transport}
+              onChange={(e) =>
+                s.setPrinter({ transport: e.target.value as 'windows' | 'serial' | 'network' })
+              }
+              className={SELECT_CLS}
+            >
+              <option value="windows">Windows Spooler</option>
+              <option value="serial">Serial / USB-Serial</option>
+              <option value="network">Network (TCP/IP)</option>
+            </select>
+          </div>
+
+          {/* Transport-specific fields */}
+          {s.printer.transport === 'windows' && (
             <div>
-              <label className="text-xs text-pos-muted">Name</label>
-              <input
-                value={s.printer.name}
-                onChange={(e) => s.setPrinter({ name: e.target.value })}
-                className="w-full h-11 px-3 rounded-lg bg-white/8 border border-pos-border text-pos-text outline-none focus:border-white/25"
-              />
+              <label className="text-xs text-pos-muted">Windows printer name</label>
+              {printers.length > 0 ? (
+                <select
+                  value={s.printer.name}
+                  onChange={(e) => s.setPrinter({ name: e.target.value })}
+                  className={SELECT_CLS}
+                >
+                  {printers.map((p) => (
+                    <option key={p.name} value={p.name}>
+                      {p.name}
+                      {p.isDefault ? ' (default)' : ''} — {p.connectionType}
+                    </option>
+                  ))}
+                </select>
+              ) : (
+                <input
+                  value={s.printer.name}
+                  placeholder="e.g. EPSON TM-T88VI"
+                  onChange={(e) => s.setPrinter({ name: e.target.value })}
+                  className={INPUT_CLS}
+                />
+              )}
             </div>
-            <div>
-              <label className="text-xs text-pos-muted">Copies</label>
-              <input
-                type="number"
-                min={1}
-                max={5}
-                value={s.printer.copies}
-                onChange={(e) => s.setPrinter({ copies: Number(e.target.value) })}
-                className="w-full h-11 px-3 rounded-lg bg-white/8 border border-pos-border text-pos-text outline-none focus:border-white/25"
-              />
+          )}
+
+          {s.printer.transport === 'serial' && (
+            <div className="grid grid-cols-2 gap-3">
+              <div className="col-span-2">
+                <label className="text-xs text-pos-muted">Serial port</label>
+                {serialPorts.length > 0 ? (
+                  <select
+                    value={s.printer.serialPort}
+                    onChange={(e) => s.setPrinter({ serialPort: e.target.value })}
+                    className={SELECT_CLS}
+                  >
+                    <option value="">— select port —</option>
+                    {serialPorts.map((p) => (
+                      <option key={p.portName} value={p.portName}>
+                        {p.portName}
+                        {p.product ? ` (${p.product})` : ''}
+                      </option>
+                    ))}
+                  </select>
+                ) : (
+                  <input
+                    value={s.printer.serialPort}
+                    placeholder="e.g. /dev/tty.usbserial-1420 or COM3"
+                    onChange={(e) => s.setPrinter({ serialPort: e.target.value })}
+                    className={INPUT_CLS}
+                  />
+                )}
+              </div>
+              <div>
+                <label className="text-xs text-pos-muted">Baud rate</label>
+                <select
+                  value={s.printer.serialBaudRate}
+                  onChange={(e) => s.setPrinter({ serialBaudRate: Number(e.target.value) })}
+                  className={SELECT_CLS}
+                >
+                  {[9600, 19200, 38400, 57600, 115200].map((b) => (
+                    <option key={b} value={b}>
+                      {b}
+                    </option>
+                  ))}
+                </select>
+              </div>
             </div>
-            <label className="flex items-center gap-2 col-span-2 text-sm text-pos-text">
+          )}
+
+          {s.printer.transport === 'network' && (
+            <div className="grid grid-cols-3 gap-3">
+              <div className="col-span-2">
+                <label className="text-xs text-pos-muted">Printer host / IP</label>
+                <input
+                  value={s.printer.networkHost}
+                  placeholder="e.g. 192.168.1.100"
+                  onChange={(e) => s.setPrinter({ networkHost: e.target.value })}
+                  className={INPUT_CLS}
+                />
+              </div>
+              <div>
+                <label className="text-xs text-pos-muted">TCP port</label>
+                <input
+                  type="number"
+                  value={s.printer.networkPort}
+                  onChange={(e) => s.setPrinter({ networkPort: Number(e.target.value) })}
+                  className={INPUT_CLS}
+                />
+              </div>
+            </div>
+          )}
+
+          {/* Copies */}
+          <div>
+            <label className="text-xs text-pos-muted">Copies</label>
+            <input
+              type="number"
+              min={1}
+              max={5}
+              value={s.printer.copies}
+              onChange={(e) => s.setPrinter({ copies: Number(e.target.value) })}
+              className={INPUT_CLS}
+            />
+          </div>
+
+          {/* Cash drawer */}
+          <div className="space-y-2 pt-1">
+            <label className="flex items-center gap-2 text-sm text-pos-text">
               <input
                 type="checkbox"
                 checked={s.printer.cashDrawerKick}
@@ -86,6 +242,21 @@ const SettingsScreen: React.FC = () => {
               />
               Kick cash drawer on print
             </label>
+            {s.printer.cashDrawerKick && (
+              <div>
+                <label className="text-xs text-pos-muted">Drawer pin</label>
+                <select
+                  value={s.printer.drawerPin}
+                  onChange={(e) =>
+                    s.setPrinter({ drawerPin: Number(e.target.value) as 2 | 5 })
+                  }
+                  className={SELECT_CLS}
+                >
+                  <option value={2}>Pin 2 (most printers)</option>
+                  <option value={5}>Pin 5</option>
+                </select>
+              </div>
+            )}
           </div>
         </Section>
 
@@ -122,7 +293,7 @@ const SettingsScreen: React.FC = () => {
                 min={0}
                 value={s.autoLogoutMinutes}
                 onChange={(e) => s.setAutoLogoutMinutes(Number(e.target.value))}
-                className="w-full h-11 px-3 rounded-lg bg-white/8 border border-pos-border text-pos-text outline-none focus:border-white/25"
+                className={INPUT_CLS}
               />
             </div>
             <label className="flex items-center gap-2 text-sm text-pos-text">
@@ -158,7 +329,7 @@ const SettingsScreen: React.FC = () => {
         <button
           onClick={() => {
             s.reset();
-            toast.success('Settings reset');
+            toast.success('Settings reset to defaults');
           }}
           className="h-12 px-5 rounded-lg bg-destructive text-white font-semibold"
         >
