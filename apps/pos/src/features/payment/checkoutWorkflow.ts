@@ -90,9 +90,8 @@ export async function processCheckout({
     }
 
     await chargeOrder(orderId, {
-      method,
-      amount: order.total,
-      tip: 0,
+      payment_method: method,
+      amount_paid: order.total,
     });
 
     if (method === 'cash') {

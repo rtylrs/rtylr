@@ -70,7 +70,7 @@ describe('processCheckout', () => {
     });
 
     expect(result).toEqual({ status: 'online', orderId: 123 });
-    expect(chargeOrder).toHaveBeenCalledWith(123, { method: 'cash', amount: 21.6, tip: 0 });
+    expect(chargeOrder).toHaveBeenCalledWith(123, { payment_method: 'cash', amount_paid: 21.6 });
     expect(enqueueOffline).not.toHaveBeenCalled();
     expect(recordCashSale).toHaveBeenCalledWith(21.6, 'local-1');
   });
