@@ -211,6 +211,7 @@ export const posService = {
   chargeOrder: (id: number, data: PaymentPayload) => safe.post(`/pos/orders/${id}/payment`, data),
   voidOrder: (id: number, data: VoidRefundPayload) => safe.post(`/pos/orders/${id}/void`, data),
   refundOrder: (id: number, data: VoidRefundPayload) => safe.post(`/pos/orders/${id}/refund`, data),
+  reopenOrder: (id: number) => safe.post(`/pos/orders/${id}/reopen`, {}),
   applyDiscount: (id: number, data: DiscountPayload) =>
     safe.post(`/pos/orders/${id}/discount`, data),
   splitOrder: (id: number, data: SplitPayload) => safe.post(`/pos/orders/${id}/split`, data),
