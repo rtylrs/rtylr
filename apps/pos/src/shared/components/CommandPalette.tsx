@@ -104,6 +104,12 @@ const CommandPalette: React.FC = () => {
         action: () => navigate('/cash-drop'),
       },
       {
+        id: 'nav-inventory',
+        label: 'Inventory Management',
+        category: 'Navigate',
+        action: () => navigate('/inventory'),
+      },
+      {
         id: 'nav-products',
         label: 'Product Quick Edit',
         category: 'Navigate',
