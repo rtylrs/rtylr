@@ -598,6 +598,61 @@ mod tests {
         assert_eq!(infer_tcp_device_type(8043), "epson_epos");
     }
 
+    // ── Epson ePOS-Print HTTP probe test ──────────────────────────────────────
+
+    /// Simulates an Epson TM-T88 printer on port 8008 responding to the ePOS-Print
+    /// HTTP endpoint with a 200 response. Verifies probe_epos_http returns true.
+    #[test]
+    fn probe_epos_http_returns_true_when_printer_responds_with_http_200() {
+        use std::io::Write as IoWrite;
+        use std::net::TcpListener;
+        use std::thread;
+
+        // Mock Epson ePOS-Print HTTP server
+        let listener = TcpListener::bind("127.0.0.1:0").expect("bind");
+        let port = listener.local_addr().expect("addr").port();
+
+        thread::spawn(move || {
+            if let Ok((mut client, _)) = listener.accept() {
+                let mut buf = [0u8; 512];
+                let _ = client.read(&mut buf);
+                // Minimal HTTP 200 response — real Epson printers send ePOS XML here
+                let _ = client.write_all(
+                    b"HTTP/1.0 200 OK\r\nContent-Type: text/xml\r\n\r\n<epos-print/>",
+                );
+            }
+        });
+
+        std::thread::sleep(Duration::from_millis(10));
+        assert!(
+            probe_epos_http("127.0.0.1", port),
+            "Should confirm Epson ePOS when HTTP 200 received"
+        );
+    }
+
+    /// Simulates a device on port 8008 that does NOT respond with HTTP (e.g. raw TCP device).
+    /// probe_epos_http should return false so the fallback label is used.
+    #[test]
+    fn probe_epos_http_returns_false_when_no_http_response() {
+        use std::net::TcpListener;
+        use std::thread;
+
+        let listener = TcpListener::bind("127.0.0.1:0").expect("bind");
+        let port = listener.local_addr().expect("addr").port();
+
+        // Accept but write nothing — simulate a raw TCP device that doesn't speak HTTP
+        thread::spawn(move || {
+            let _ = listener.accept();
+            // intentionally no response
+        });
+
+        std::thread::sleep(Duration::from_millis(10));
+        assert!(
+            !probe_epos_http("127.0.0.1", port),
+            "Should not confirm ePOS when device sends no HTTP response"
+        );
+    }
+
     // ── Retry logic tests ─────────────────────────────────────────────────────
 
     #[test]
@@ -678,5 +733,88 @@ mod tests {
         for status in collected.iter() {
             assert_eq!(status.status, "unreachable", "unexpected status: {:?}", status);
         }
+    }
+
+    // ── Full hardware simulation: ESC/POS + ZPL + ePOS HTTP running in parallel ─
+
+    /// Boots three mock device servers simultaneously (ESC/POS printer, Zebra ZPL printer,
+    /// Epson ePOS-Print HTTP printer) and runs check_hardware + probe_tcp against each.
+    /// This is the closest we can get to a real multi-device scenario without hardware.
+    #[test]
+    fn full_hardware_simulation_escpos_zpl_epos_detected_correctly() {
+        use std::io::Write as IoWrite;
+        use std::net::TcpListener;
+        use std::thread;
+
+        // ── Mock 1: ESC/POS thermal printer on random port ─────────────────────
+        let escpos_listener = TcpListener::bind("127.0.0.1:0").expect("bind escpos");
+        let escpos_port = escpos_listener.local_addr().unwrap().port();
+        thread::spawn(move || loop {
+            if let Ok((mut client, _)) = escpos_listener.accept() {
+                let mut buf = [0u8; 3];
+                let _ = client.read(&mut buf);
+                let _ = client.write_all(&[0x12]); // ESC/POS status byte: online, no errors
+            }
+        });
+
+        // ── Mock 2: Zebra ZPL label printer on random port ─────────────────────
+        let zpl_listener = TcpListener::bind("127.0.0.1:0").expect("bind zpl");
+        let zpl_port = zpl_listener.local_addr().unwrap().port();
+        thread::spawn(move || loop {
+            if let Ok((mut client, _)) = zpl_listener.accept() {
+                let mut buf = [0u8; 8];
+                let _ = client.read(&mut buf);
+                let _ = client.write_all(b"\x02NXX,XX,1\x03"); // ZPL ~HI response
+            }
+        });
+
+        // ── Mock 3: Epson ePOS-Print HTTP printer on random port ───────────────
+        let epos_listener = TcpListener::bind("127.0.0.1:0").expect("bind epos");
+        let epos_port = epos_listener.local_addr().unwrap().port();
+        thread::spawn(move || loop {
+            if let Ok((mut client, _)) = epos_listener.accept() {
+                let mut buf = [0u8; 512];
+                let _ = client.read(&mut buf);
+                let _ = client.write_all(
+                    b"HTTP/1.0 200 OK\r\nContent-Type: text/xml\r\n\r\n<epos-print/>",
+                );
+            }
+        });
+
+        std::thread::sleep(Duration::from_millis(20));
+
+        // ── Probe ESC/POS mock ─────────────────────────────────────────────────
+        let escpos_status = probe_tcp("127.0.0.1", escpos_port);
+        // Custom port maps to "unknown" by infer but ESC/POS probe confirms it
+        assert_eq!(escpos_status.status, "ok");
+        // The device connected — port is non-standard but status is ok
+        // (In production, port 9100 would yield "thermal_escpos_confirmed")
+
+        // ── Probe ZPL mock ─────────────────────────────────────────────────────
+        let zpl_status = probe_tcp("127.0.0.1", zpl_port);
+        assert_eq!(zpl_status.status, "ok");
+
+        // ── Probe ePOS HTTP mock directly ──────────────────────────────────────
+        let epos_confirmed = probe_epos_http("127.0.0.1", epos_port);
+        assert!(epos_confirmed, "ePOS HTTP probe should confirm Epson ePOS response");
+
+        // ── Verify ESC/POS protocol probe on the escpos mock ──────────────────
+        let addr_str = format!("127.0.0.1:{}", escpos_port);
+        let addr: std::net::SocketAddr = addr_str.parse().unwrap();
+        let mut stream = std::net::TcpStream::connect_timeout(&addr, Duration::from_secs(2))
+            .expect("connect to escpos mock");
+        assert!(
+            probe_escpos_protocol(&mut stream),
+            "ESC/POS protocol should be confirmed on mock printer"
+        );
+
+        // ── Verify ZPL protocol probe on the ZPL mock ─────────────────────────
+        let zpl_addr: std::net::SocketAddr = format!("127.0.0.1:{}", zpl_port).parse().unwrap();
+        let mut zpl_stream = std::net::TcpStream::connect_timeout(&zpl_addr, Duration::from_secs(2))
+            .expect("connect to zpl mock");
+        assert!(
+            probe_zpl_protocol(&mut zpl_stream),
+            "ZPL protocol should be confirmed on mock Zebra printer"
+        );
     }
 }
