@@ -4,8 +4,9 @@ use serde::{Deserialize, Serialize};
 #[derive(Debug, Serialize, Deserialize)]
 pub struct DeviceStatus {
     pub name: String,
-    pub status: String, // "ok" | "unreachable" | "not_configured"
+    pub status: String,      // "ok" | "unreachable" | "not_configured"
     pub message: String,
+    pub device_type: String, // "thermal_escpos" | "serial_escpos" | "windows_spooler" | "network_lpr" | "network_ipp" | "unknown" | "none"
 }
 
 #[derive(Debug, Serialize, Deserialize)]
@@ -45,6 +46,7 @@ fn probe_serial(port_name: &str, baud_rate: u32) -> DeviceStatus {
             name: name.clone(),
             status: "not_configured".to_string(),
             message: "No serial port configured".to_string(),
+            device_type: "none".to_string(),
         };
     }
     let baud = if baud_rate == 0 { 9600 } else { baud_rate };
@@ -56,23 +58,36 @@ fn probe_serial(port_name: &str, baud_rate: u32) -> DeviceStatus {
             name,
             status: "ok".to_string(),
             message: format!("Serial port {} reachable at {} baud", port_name, baud),
+            device_type: "serial_escpos".to_string(),
         },
         Err(e) => DeviceStatus {
             name,
             status: "unreachable".to_string(),
             message: format!("Cannot open {}: {}", port_name, e),
+            device_type: "serial_escpos".to_string(),
         },
+    }
+}
+
+fn infer_tcp_device_type(port: u16) -> &'static str {
+    match port {
+        9100 => "thermal_escpos",
+        515  => "network_lpr",
+        631  => "network_ipp",
+        _    => "unknown",
     }
 }
 
 fn probe_tcp(host: &str, port: u16) -> DeviceStatus {
     let addr_str = format!("{}:{}", host, port);
     let name = addr_str.clone();
+    let device_type = infer_tcp_device_type(port).to_string();
     if host.trim().is_empty() {
         return DeviceStatus {
             name,
             status: "not_configured".to_string(),
             message: "No host configured".to_string(),
+            device_type,
         };
     }
     let addr = match addr_str.parse::<std::net::SocketAddr>() {
@@ -82,6 +97,7 @@ fn probe_tcp(host: &str, port: u16) -> DeviceStatus {
                 name,
                 status: "unreachable".to_string(),
                 message: format!("Invalid address {}: {}", addr_str, e),
+                device_type,
             }
         }
     };
@@ -89,12 +105,14 @@ fn probe_tcp(host: &str, port: u16) -> DeviceStatus {
         Ok(_) => DeviceStatus {
             name,
             status: "ok".to_string(),
-            message: format!("TCP {}:{} reachable", host, port),
+            message: format!("TCP {}:{} reachable ({})", host, port, infer_tcp_device_type(port)),
+            device_type,
         },
         Err(e) => DeviceStatus {
             name,
             status: "unreachable".to_string(),
             message: format!("Cannot connect to {}:{}: {}", host, port, e),
+            device_type,
         },
     }
 }
@@ -112,6 +130,7 @@ fn probe_windows_printer(printer_name: &str) -> DeviceStatus {
             name,
             status: "not_configured".to_string(),
             message: "No printer name configured".to_string(),
+            device_type: "windows_spooler".to_string(),
         };
     }
 
@@ -128,12 +147,14 @@ fn probe_windows_printer(printer_name: &str) -> DeviceStatus {
                 name,
                 status: "ok".to_string(),
                 message: format!("Windows printer '{}' accessible", printer_name),
+                device_type: "windows_spooler".to_string(),
             }
         } else {
             DeviceStatus {
                 name,
                 status: "unreachable".to_string(),
                 message: format!("Cannot open Windows printer '{}'", printer_name),
+                device_type: "windows_spooler".to_string(),
             }
         }
     }
@@ -145,6 +166,7 @@ fn probe_windows_printer(printer_name: &str) -> DeviceStatus {
         name: printer_name.to_string(),
         status: "not_configured".to_string(),
         message: "Windows spooler not available on this platform".to_string(),
+        device_type: "windows_spooler".to_string(),
     }
 }
 
@@ -164,6 +186,7 @@ pub fn check_hardware(config: HealthCheckConfig) -> HardwareHealthReport {
             name: "printer".to_string(),
             status: "not_configured".to_string(),
             message: "No printer transport configured".to_string(),
+            device_type: "none".to_string(),
         },
     };
 
@@ -181,6 +204,7 @@ pub fn check_hardware(config: HealthCheckConfig) -> HardwareHealthReport {
             name: "drawer".to_string(),
             status: printer.status.clone(),
             message: "Drawer shares printer connection".to_string(),
+            device_type: printer.device_type.clone(),
         },
     };
 
@@ -197,6 +221,7 @@ pub fn check_hardware(config: HealthCheckConfig) -> HardwareHealthReport {
             name: "kds".to_string(),
             status: "not_configured".to_string(),
             message: "No KDS hardware configured".to_string(),
+            device_type: "none".to_string(),
         },
     };
 
@@ -274,8 +299,39 @@ mod tests {
             ..base_config()
         };
         let report = check_hardware(config);
-        // Both should be unreachable (TEST-NET IP) and drawer mirrors printer
         assert_eq!(report.printer.status, "unreachable");
         assert_eq!(report.drawer.status, "unreachable");
+        assert_eq!(report.drawer.device_type, report.printer.device_type);
+    }
+
+    #[test]
+    fn tcp_port_9100_infers_thermal_escpos() {
+        let status = probe_tcp("192.0.2.1", 9100);
+        assert_eq!(status.device_type, "thermal_escpos");
+    }
+
+    #[test]
+    fn tcp_port_515_infers_network_lpr() {
+        let status = probe_tcp("192.0.2.1", 515);
+        assert_eq!(status.device_type, "network_lpr");
+    }
+
+    #[test]
+    fn tcp_port_631_infers_network_ipp() {
+        let status = probe_tcp("192.0.2.1", 631);
+        assert_eq!(status.device_type, "network_ipp");
+    }
+
+    #[test]
+    fn serial_port_infers_serial_escpos() {
+        let status = probe_serial("/dev/ttyNONEXISTENT999", 9600);
+        assert_eq!(status.device_type, "serial_escpos");
+    }
+
+    #[test]
+    fn unconfigured_printer_returns_none_device_type() {
+        let report = check_hardware(base_config());
+        assert_eq!(report.printer.device_type, "none");
+        assert_eq!(report.kds.device_type, "none");
     }
 }
