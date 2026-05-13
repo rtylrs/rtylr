@@ -15,7 +15,7 @@ export const useNotifications = () => {
       const raw = res?.notifications ?? res;
       return z.array(notificationSchema).parse(Array.isArray(raw) ? raw : []);
     },
-    staleTime: 15_000,
+    staleTime: 5 * 60 * 1000, // WS push handles freshness; this is a fallback
   });
 };
 
