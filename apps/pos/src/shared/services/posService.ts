@@ -114,8 +114,9 @@ export interface LoyaltyConfigPayload {
 }
 
 export interface LoyaltyPayload {
-  customerId: number;
-  amount: number;
+  customer_id: number;
+  points: number;
+  order_id?: number;
   [key: string]: unknown;
 }
 
