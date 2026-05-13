@@ -113,16 +113,49 @@ fn probe_zpl_protocol(stream: &mut std::net::TcpStream) -> bool {
 
 fn infer_tcp_device_type(port: u16) -> &'static str {
     match port {
-        9100       => "thermal_escpos",
+        9100        => "thermal_escpos",
         9101 | 9102 => "star_micronics",
-        4242       => "star_cloudprnt",
-        6101       => "zpl_label",
-        9999       => "kiosk_display",
-        515        => "network_lpr",
-        631        => "network_ipp",
+        4242        => "star_cloudprnt",
+        6101        => "zpl_label",
+        9999        => "kiosk_display",
+        515         => "network_lpr",
+        631         => "network_ipp",
         9200 | 4999 => "kds",
-        _          => "unknown",
+        8008 | 8043 => "epson_epos",
+        _           => "unknown",
     }
+}
+
+/// Probe Epson ePOS-Print HTTP endpoint (port 8008/8043).
+/// Epson ePOS printers expose an XML-over-HTTP API; a GET to /cgi-bin/epos/service.cgi
+/// returns a 200 with an ePOS XML body when the printer is ready.
+fn probe_epos_http(host: &str, port: u16) -> bool {
+    let addr_str = format!("{}:{}", host, port);
+    let Ok(addr) = addr_str.parse::<std::net::SocketAddr>() else {
+        return false;
+    };
+    let Ok(mut stream) = std::net::TcpStream::connect_timeout(&addr, Duration::from_secs(2)) else {
+        return false;
+    };
+    stream.set_write_timeout(Some(Duration::from_millis(500))).ok();
+    stream.set_read_timeout(Some(Duration::from_millis(800))).ok();
+
+    let request = format!(
+        "GET /cgi-bin/epos/service.cgi HTTP/1.0\r\nHost: {}:{}\r\nConnection: close\r\n\r\n",
+        host, port
+    );
+    if stream.write_all(request.as_bytes()).is_err() {
+        return false;
+    }
+
+    let mut buf = [0u8; 128];
+    let n = stream.read(&mut buf).unwrap_or(0);
+    if n < 7 {
+        return false;
+    }
+    // Accept HTTP 200 or 400 — both confirm an ePOS HTTP server is present
+    let resp = &buf[..n];
+    resp.starts_with(b"HTTP/1") && (resp.contains(&b'2') || resp.contains(&b'4'))
 }
 
 // ESC/POS DLE EOT 1 — real-time status transmission request.
@@ -185,6 +218,15 @@ fn probe_tcp(host: &str, port: u16) -> DeviceStatus {
                         ("zpl_label_confirmed", "Zebra ZPL response received — label printer confirmed")
                     } else {
                         ("zpl_label", "Connected on port 6101 — ZPL assumed (no identification response)")
+                    }
+                }
+                8008 | 8043 => {
+                    // Drop the TCP stream first so the HTTP probe can make its own connection
+                    drop(stream);
+                    if probe_epos_http(host, port) {
+                        ("epson_epos_confirmed", "Epson ePOS-Print HTTP response confirmed")
+                    } else {
+                        ("epson_epos", "Connected on ePOS port — Epson ePOS assumed (no HTTP response)")
                     }
                 }
                 // Star Micronics native ports and all other well-known device ports
@@ -544,6 +586,16 @@ mod tests {
     fn tcp_port_9999_infers_kiosk_display() {
         let status = probe_tcp("192.0.2.1", 9999);
         assert_eq!(status.device_type, "kiosk_display");
+    }
+
+    #[test]
+    fn tcp_port_8008_infers_epson_epos() {
+        assert_eq!(infer_tcp_device_type(8008), "epson_epos");
+    }
+
+    #[test]
+    fn tcp_port_8043_infers_epson_epos() {
+        assert_eq!(infer_tcp_device_type(8043), "epson_epos");
     }
 
     // ── Retry logic tests ─────────────────────────────────────────────────────

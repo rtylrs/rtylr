@@ -265,6 +265,8 @@ const SCAN_PORTS: &[(u16, &str, &str)] = &[
     (631,  "network_ipp",     "IPP network printer"),
     (9200, "kds",             "Kitchen Display System (alt port)"),
     (4999, "kds",             "Kitchen Display System"),
+    (8008, "epson_epos",     "Epson ePOS-Print thermal printer (HTTP)"),
+    (8043, "epson_epos",     "Epson ePOS-Print thermal printer (HTTPS)"),
 ];
 
 fn scan_host(host: &str, timeout_ms: u64) -> Vec<DiscoveredDevice> {
