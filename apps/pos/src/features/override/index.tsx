@@ -9,8 +9,8 @@ const ACTIONS = [
   { id: 'void', label: 'Void order', route: '/void' },
   { id: 'refund', label: 'Process refund', route: '/refund' },
   { id: 'discount', label: 'Apply discount', route: '/discount' },
-  { id: 'price', label: 'Override price', route: null },
-  { id: 'reopen', label: 'Reopen paid order', route: null },
+  { id: 'price', label: 'Override price', route: '/products/quick' },
+  { id: 'reopen', label: 'Reopen paid order', route: '/orders?reopen=1' },
 ];
 
 const OverrideScreen: React.FC = () => {
@@ -58,8 +58,20 @@ const OverrideScreen: React.FC = () => {
           }}
         />
         {verified && (
-          <div className="p-4 rounded-xl border border-emerald-500/30 bg-emerald-500/10 text-emerald-300 text-sm">
-            {ACTIONS.find((a) => a.id === action)?.label} approved.
+          <div className="p-4 rounded-xl border border-emerald-500/30 bg-emerald-500/10 text-emerald-300 text-sm space-y-1">
+            <div className="font-semibold">
+              {ACTIONS.find((a) => a.id === action)?.label} — approved
+            </div>
+            {action === 'price' && (
+              <div className="text-xs text-emerald-400/70">
+                Redirecting to quick edit — you can now modify item prices on the current order.
+              </div>
+            )}
+            {action === 'reopen' && (
+              <div className="text-xs text-emerald-400/70">
+                Redirecting to order history — select the order and tap Reopen.
+              </div>
+            )}
           </div>
         )}
       </div>
