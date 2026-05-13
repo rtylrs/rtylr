@@ -61,7 +61,7 @@ export async function earnPointsAfterPayment(params: {
   if (earned === 0) return { earned: 0, newTotal: null };
 
   await unwrap(
-    posService.earnLoyaltyPoints({ customerId, amount: earned, order_id: orderId }),
+    posService.earnLoyaltyPoints({ customer_id: customerId, points: earned, order_id: orderId }),
   );
   return { earned, newTotal: null };
 }
@@ -80,8 +80,8 @@ export async function redeemPointsForDiscount(params: {
   const discountAmount = calculateRedemptionDiscount(pointsToRedeem, pointValue);
   await unwrap(
     posService.redeemLoyaltyPoints({
-      customerId,
-      amount: pointsToRedeem,
+      customer_id: customerId,
+      points: pointsToRedeem,
       order_id: orderId,
     }),
   );
