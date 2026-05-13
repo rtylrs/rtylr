@@ -20,6 +20,7 @@ import { reportReactError } from './shared/observability/appErrors';
 import { useTerminalHeartbeat } from './shared/terminal/useTerminalHeartbeat';
 import { useTerminalContextStore } from './shared/stores/terminalContextStore';
 import { buildCartContext } from './shared/terminal/cartContext';
+import { useStockAlerts } from './shared/hooks/useStockAlerts';
 
 const getTokenFromCookie = (): string | null =>
   document.cookie
@@ -34,6 +35,7 @@ const AppInner = (): React.JSX.Element => {
   useOnlineStatus();
   useOfflineQueueAutoSync();
   useTerminalHeartbeat(true);
+  useStockAlerts();
   const location = useLocation();
   return (
     <Suspense fallback={null}>
