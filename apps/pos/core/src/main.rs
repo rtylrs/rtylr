@@ -3,12 +3,24 @@
 
 mod commands;
 
-use commands::printer;
+use commands::{discovery, drawer, kds, printer, receipt};
 
 fn main() {
     tauri::Builder::default()
         .invoke_handler(tauri::generate_handler![
-            printer::open_cash_drawer
+            // Legacy Windows-spooler drawer kick (kept for backward compat)
+            printer::open_cash_drawer,
+            // Cross-platform hardware discovery
+            discovery::list_printers,
+            discovery::list_serial_ports,
+            // Cross-platform drawer via serial or network
+            drawer::open_cash_drawer_serial,
+            drawer::open_cash_drawer_network,
+            // ESC/POS receipt printing (serial / network / Windows spooler)
+            receipt::print_receipt,
+            // KDS hardware display (serial / network)
+            kds::send_kds_ticket_serial,
+            kds::send_kds_ticket_network,
         ])
         .run(tauri::generate_context!())
         .expect("error while running tauri application");
