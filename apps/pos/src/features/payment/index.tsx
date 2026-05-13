@@ -21,13 +21,14 @@ import { useCashDrawerStore } from '../../shared/stores/cashDrawerStore';
 import { printReceiptAndOpenDrawer, openDrawer } from './paymentHardware';
 import { resetAfterCheckout } from './checkoutState';
 import QrPayPanel from './QrPayPanel';
+import { earnPointsAfterPayment } from '../loyalty/loyaltyWorkflow';
 
 const fmt = (n: number): string =>
   new Intl.NumberFormat('en-US', { style: 'currency', currency: 'USD' }).format(n);
 
 const Payment: React.FC = () => {
   const navigate = useNavigate();
-  const { items, total, clearCart, newOrder } = useCartStore();
+  const { items, total, clearCart, newOrder, customerId } = useCartStore();
   const taxRate = useSettingsStore((s) => s.taxRate);
   const printer = useSettingsStore((s) => s.printer);
   const business = useSettingsStore((s) => s.business);
@@ -81,6 +82,19 @@ const Payment: React.FC = () => {
       resetAfterCheckout({ newOrder, clearCart });
       if (result.status === 'queued') {
         toast.warning('Cash order saved offline. It will sync when connection returns.');
+      }
+
+      // Earn loyalty points for attached customer (fire-and-forget, non-blocking)
+      if (result.status === 'online') {
+        void earnPointsAfterPayment({
+          customerId,
+          orderId: result.orderId,
+          totalAmount: grandTotal,
+        }).then((earn) => {
+          if (earn && earn.earned > 0) {
+            toast.success(`+${earn.earned} loyalty points earned`);
+          }
+        });
       }
 
       // Print receipt + open drawer via configured hardware
