@@ -45,3 +45,36 @@ export async function listSerialPorts(): Promise<SerialPortInfo[]> {
     pid: p.pid,
   }));
 }
+
+export interface DiscoveredDevice {
+  host: string;
+  port: number;
+  deviceType: 'thermal_escpos' | 'network_lpr' | 'network_ipp' | 'kds' | 'unknown';
+  label: string;
+}
+
+/**
+ * Scan a /24 subnet for printers and KDS displays.
+ * subnetPrefix: first three octets, e.g. "192.168.1"
+ * timeoutMs: per-host per-port TCP connect timeout (50–5000 ms)
+ */
+export async function discoverNetworkHardware(
+  subnetPrefix: string,
+  timeoutMs = 150,
+): Promise<DiscoveredDevice[]> {
+  const raw = await invoke<Array<{
+    host: string;
+    port: number;
+    device_type: string;
+    label: string;
+  }>>('discover_network_hardware', {
+    subnetPrefix,
+    timeoutMs,
+  });
+  return raw.map((d) => ({
+    host: d.host,
+    port: d.port,
+    deviceType: d.device_type as DiscoveredDevice['deviceType'],
+    label: d.label,
+  }));
+}
