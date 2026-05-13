@@ -87,8 +87,8 @@ describe('earnPointsAfterPayment', () => {
 
     expect(result).toEqual({ earned: 25, newTotal: null });
     expect(posService.earnLoyaltyPoints).toHaveBeenCalledWith({
-      customerId: 42,
-      amount: 25,
+      customer_id: 42,
+      points: 25,
       order_id: 500,
     });
   });
@@ -128,8 +128,8 @@ describe('redeemPointsForDiscount', () => {
 
     expect(result).toEqual({ pointsUsed: 200, discountAmount: 2.0 });
     expect(posService.redeemLoyaltyPoints).toHaveBeenCalledWith({
-      customerId: 42,
-      amount: 200,
+      customer_id: 42,
+      points: 200,
       order_id: 500,
     });
   });
