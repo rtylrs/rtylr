@@ -38,6 +38,25 @@ pub struct HealthCheckConfig {
     pub kds_baud_rate: Option<u32>,
     pub kds_host: Option<String>,
     pub kds_port: Option<u16>,
+    // Retry count for flaky connections (0 = no retry, default 1)
+    pub retry_count: Option<u32>,
+}
+
+/// Retry a probe up to `retries` extra times if the first attempt fails.
+/// Returns immediately on the first `status == "ok"` result.
+fn probe_with_retry<F>(probe: F, retries: u32) -> DeviceStatus
+where
+    F: Fn() -> DeviceStatus,
+{
+    let mut result = probe();
+    for _ in 0..retries {
+        if result.status == "ok" {
+            break;
+        }
+        std::thread::sleep(Duration::from_millis(250));
+        result = probe();
+    }
+    result
 }
 
 fn probe_serial(port_name: &str, baud_rate: u32) -> DeviceStatus {
@@ -70,12 +89,39 @@ fn probe_serial(port_name: &str, baud_rate: u32) -> DeviceStatus {
     }
 }
 
+// Zebra ZPL host identification command.
+// A Zebra printer responds with STX + printer model info + ETX within ~200 ms.
+const ZPL_HOST_IDENT: &[u8] = b"~HI\r\n";
+
+/// Attempt to confirm ZPL protocol on an already-connected stream.
+/// Returns `true` if the device responded with a Zebra STX header.
+fn probe_zpl_protocol(stream: &mut std::net::TcpStream) -> bool {
+    stream.set_write_timeout(Some(Duration::from_millis(200))).ok();
+    stream.set_read_timeout(Some(Duration::from_millis(400))).ok();
+
+    if stream.write_all(ZPL_HOST_IDENT).is_err() {
+        return false;
+    }
+
+    let mut buf = [0u8; 4];
+    if stream.read(&mut buf).unwrap_or(0) == 0 {
+        return false;
+    }
+    // Zebra responses start with STX (0x02) or 'N' for model info
+    buf[0] == 0x02 || buf[0] == b'N'
+}
+
 fn infer_tcp_device_type(port: u16) -> &'static str {
     match port {
-        9100 => "thermal_escpos",
-        515  => "network_lpr",
-        631  => "network_ipp",
-        _    => "unknown",
+        9100       => "thermal_escpos",
+        9101 | 9102 => "star_micronics",
+        4242       => "star_cloudprnt",
+        6101       => "zpl_label",
+        9999       => "kiosk_display",
+        515        => "network_lpr",
+        631        => "network_ipp",
+        9200 | 4999 => "kds",
+        _          => "unknown",
     }
 }
 
@@ -126,15 +172,24 @@ fn probe_tcp(host: &str, port: u16) -> DeviceStatus {
     };
     match std::net::TcpStream::connect_timeout(&addr, Duration::from_secs(3)) {
         Ok(mut stream) => {
-            // For port 9100, probe for ESC/POS protocol response to confirm printer type.
-            let (device_type, detail) = if port == 9100 {
-                if probe_escpos_protocol(&mut stream) {
-                    ("thermal_escpos_confirmed", "ESC/POS status byte received — thermal printer confirmed")
-                } else {
-                    ("thermal_escpos", "Connected on port 9100 — ESC/POS assumed (no status response)")
+            let (device_type, detail) = match port {
+                9100 => {
+                    if probe_escpos_protocol(&mut stream) {
+                        ("thermal_escpos_confirmed", "ESC/POS status byte received — thermal printer confirmed")
+                    } else {
+                        ("thermal_escpos", "Connected on port 9100 — ESC/POS assumed (no status response)")
+                    }
                 }
-            } else {
-                (device_type_hint, "TCP connection established")
+                6101 => {
+                    if probe_zpl_protocol(&mut stream) {
+                        ("zpl_label_confirmed", "Zebra ZPL response received — label printer confirmed")
+                    } else {
+                        ("zpl_label", "Connected on port 6101 — ZPL assumed (no identification response)")
+                    }
+                }
+                // Star Micronics native ports and all other well-known device ports
+                // are identified by port number alone (no probe needed)
+                _ => (device_type_hint, "TCP connection established"),
             };
             DeviceStatus {
                 name,
@@ -207,15 +262,19 @@ fn probe_windows_printer(printer_name: &str) -> DeviceStatus {
 
 #[tauri::command]
 pub fn check_hardware(config: HealthCheckConfig) -> HardwareHealthReport {
+    let retries = config.retry_count.unwrap_or(1);
+
     let printer = match config.printer_transport.as_str() {
-        "serial" => probe_serial(
-            config.printer_serial_port.as_deref().unwrap_or(""),
-            config.printer_baud_rate.unwrap_or(9600),
-        ),
-        "network" => probe_tcp(
-            config.printer_host.as_deref().unwrap_or(""),
-            config.printer_port.unwrap_or(9100),
-        ),
+        "serial" => {
+            let port = config.printer_serial_port.clone().unwrap_or_default();
+            let baud = config.printer_baud_rate.unwrap_or(9600);
+            probe_with_retry(|| probe_serial(&port, baud), retries)
+        }
+        "network" => {
+            let host = config.printer_host.clone().unwrap_or_default();
+            let port = config.printer_port.unwrap_or(9100);
+            probe_with_retry(|| probe_tcp(&host, port), retries)
+        }
         "windows" => probe_windows_printer(config.printer_name.as_deref().unwrap_or("")),
         _ => DeviceStatus {
             name: "printer".to_string(),
@@ -226,14 +285,16 @@ pub fn check_hardware(config: HealthCheckConfig) -> HardwareHealthReport {
     };
 
     let drawer = match config.drawer_transport.as_deref().unwrap_or("printer") {
-        "serial" => probe_serial(
-            config.drawer_serial_port.as_deref().unwrap_or(""),
-            config.drawer_baud_rate.unwrap_or(9600),
-        ),
-        "network" => probe_tcp(
-            config.drawer_host.as_deref().unwrap_or(""),
-            config.drawer_port.unwrap_or(9100),
-        ),
+        "serial" => {
+            let port = config.drawer_serial_port.clone().unwrap_or_default();
+            let baud = config.drawer_baud_rate.unwrap_or(9600);
+            probe_with_retry(|| probe_serial(&port, baud), retries)
+        }
+        "network" => {
+            let host = config.drawer_host.clone().unwrap_or_default();
+            let port = config.drawer_port.unwrap_or(9100);
+            probe_with_retry(|| probe_tcp(&host, port), retries)
+        }
         // "printer" means drawer shares the printer connection
         _ => DeviceStatus {
             name: "drawer".to_string(),
@@ -244,14 +305,16 @@ pub fn check_hardware(config: HealthCheckConfig) -> HardwareHealthReport {
     };
 
     let kds = match config.kds_transport.as_str() {
-        "serial" => probe_serial(
-            config.kds_serial_port.as_deref().unwrap_or(""),
-            config.kds_baud_rate.unwrap_or(9600),
-        ),
-        "network" => probe_tcp(
-            config.kds_host.as_deref().unwrap_or(""),
-            config.kds_port.unwrap_or(9100),
-        ),
+        "serial" => {
+            let port = config.kds_serial_port.clone().unwrap_or_default();
+            let baud = config.kds_baud_rate.unwrap_or(9600);
+            probe_with_retry(|| probe_serial(&port, baud), retries)
+        }
+        "network" => {
+            let host = config.kds_host.clone().unwrap_or_default();
+            let port = config.kds_port.unwrap_or(9100);
+            probe_with_retry(|| probe_tcp(&host, port), retries)
+        }
         _ => DeviceStatus {
             name: "kds".to_string(),
             status: "not_configured".to_string(),
@@ -285,6 +348,7 @@ mod tests {
             kds_baud_rate: None,
             kds_host: None,
             kds_port: None,
+            retry_count: None,
         }
     }
 
@@ -432,5 +496,101 @@ mod tests {
 
         let confirmed = probe_escpos_protocol(&mut stream);
         assert!(!confirmed, "Should not confirm ESC/POS when no status byte received");
+    }
+
+    // ── ZPL protocol probe tests ──────────────────────────────────────────────
+
+    #[test]
+    fn probe_zpl_returns_confirmed_when_zebra_responds_with_stx() {
+        use std::io::Write as IoWrite;
+        use std::net::TcpListener;
+        use std::thread;
+
+        let listener = TcpListener::bind("127.0.0.1:0").expect("bind");
+        let port = listener.local_addr().expect("addr").port();
+
+        thread::spawn(move || {
+            if let Ok((mut client, _)) = listener.accept() {
+                let mut buf = [0u8; 5];
+                let _ = client.read(&mut buf);
+                // Zebra ZPL host identification response starts with STX (0x02)
+                let _ = client.write_all(b"\x02NXX,XX,1\x03");
+            }
+        });
+
+        std::thread::sleep(std::time::Duration::from_millis(10));
+
+        let addr_str = format!("127.0.0.1:{}", port);
+        let addr: std::net::SocketAddr = addr_str.parse().unwrap();
+        let mut stream = std::net::TcpStream::connect_timeout(&addr, Duration::from_secs(2))
+            .expect("connect");
+
+        assert!(probe_zpl_protocol(&mut stream), "Should confirm ZPL when Zebra responds with STX");
+    }
+
+    #[test]
+    fn tcp_port_6101_infers_zpl_label() {
+        let status = probe_tcp("192.0.2.1", 6101);
+        assert_eq!(status.device_type, "zpl_label");
+    }
+
+    #[test]
+    fn tcp_port_9101_infers_star_micronics() {
+        let status = probe_tcp("192.0.2.1", 9101);
+        assert_eq!(status.device_type, "star_micronics");
+    }
+
+    #[test]
+    fn tcp_port_9999_infers_kiosk_display() {
+        let status = probe_tcp("192.0.2.1", 9999);
+        assert_eq!(status.device_type, "kiosk_display");
+    }
+
+    // ── Retry logic tests ─────────────────────────────────────────────────────
+
+    #[test]
+    fn probe_with_retry_returns_immediately_on_first_ok() {
+        let call_count = std::sync::Arc::new(std::sync::atomic::AtomicU32::new(0));
+        let count = std::sync::Arc::clone(&call_count);
+
+        let result = probe_with_retry(
+            move || {
+                count.fetch_add(1, std::sync::atomic::Ordering::SeqCst);
+                DeviceStatus {
+                    name: "test".to_string(),
+                    status: "ok".to_string(),
+                    message: "ok".to_string(),
+                    device_type: "unknown".to_string(),
+                }
+            },
+            3,
+        );
+
+        assert_eq!(result.status, "ok");
+        // Should have called exactly once and stopped
+        assert_eq!(call_count.load(std::sync::atomic::Ordering::SeqCst), 1);
+    }
+
+    #[test]
+    fn probe_with_retry_retries_on_failure_and_returns_last() {
+        let call_count = std::sync::Arc::new(std::sync::atomic::AtomicU32::new(0));
+        let count = std::sync::Arc::clone(&call_count);
+
+        let result = probe_with_retry(
+            move || {
+                count.fetch_add(1, std::sync::atomic::Ordering::SeqCst);
+                DeviceStatus {
+                    name: "test".to_string(),
+                    status: "unreachable".to_string(),
+                    message: "failed".to_string(),
+                    device_type: "unknown".to_string(),
+                }
+            },
+            2,
+        );
+
+        assert_eq!(result.status, "unreachable");
+        // 1 initial + 2 retries = 3 total calls
+        assert_eq!(call_count.load(std::sync::atomic::Ordering::SeqCst), 3);
     }
 }
