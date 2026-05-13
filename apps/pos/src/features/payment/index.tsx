@@ -20,6 +20,7 @@ import { useReceiptsStore } from '../../shared/stores/receiptsStore';
 import { useCashDrawerStore } from '../../shared/stores/cashDrawerStore';
 import { printReceiptAndOpenDrawer, openDrawer } from './paymentHardware';
 import { resetAfterCheckout } from './checkoutState';
+import QrPayPanel from './QrPayPanel';
 
 const fmt = (n: number): string =>
   new Intl.NumberFormat('en-US', { style: 'currency', currency: 'USD' }).format(n);
@@ -29,6 +30,7 @@ const Payment: React.FC = () => {
   const { items, total, clearCart, newOrder } = useCartStore();
   const taxRate = useSettingsStore((s) => s.taxRate);
   const printer = useSettingsStore((s) => s.printer);
+  const business = useSettingsStore((s) => s.business);
   const employee = useEmployeeSessionStore((s) => s.employee);
   const enqueueOffline = useOfflineQueueStore((s) => s.enqueue);
   const addReceipt = useReceiptsStore((s) => s.add);
@@ -36,6 +38,7 @@ const Payment: React.FC = () => {
   const [method, setMethod] = useState<CheckoutPaymentMethod>('card');
   const [processing, setProcessing] = useState(false);
   const [cashAmount, setCashAmount] = useState('');
+  const [qrConfirmed, setQrConfirmed] = useState(false);
 
   const subtotal = total();
   const tax = subtotal * taxRate;
@@ -93,7 +96,7 @@ const Payment: React.FC = () => {
         amountPaid: isCash ? (cashTender.received || grandTotal) : grandTotal,
         changeDue: isCash ? (cashTender.change ?? 0) : 0,
         orderNumber: order.id,
-        businessName: 'rtylr POS',
+        businessName: business.name,
         footerMessage: undefined,
         kickDrawer: isCash && printer.cashDrawerKick,
       });
@@ -217,12 +220,21 @@ const Payment: React.FC = () => {
           )}
 
           {method === 'qr' && (
-            <div className="flex justify-center">
-              <div className="w-40 h-40 rounded-2xl bg-white/8 border border-pos-border flex flex-col items-center justify-center gap-1">
-                <span className="text-3xl">⬜</span>
-                <span className="text-xs text-pos-muted">Scan to pay</span>
-              </div>
-            </div>
+            <QrPayPanel
+              orderId={`local-${Date.now().toString(36)}`}
+              amount={grandTotal}
+              onConfirmed={() => setQrConfirmed(true)}
+            />
+          )}
+
+          {method === 'qr' && qrConfirmed && (
+            <motion.div
+              className="text-center text-sm text-emerald-400 font-medium"
+              initial={{ opacity: 0 }}
+              animate={{ opacity: 1 }}
+            >
+              Payment confirmed — tap Charge to complete
+            </motion.div>
           )}
 
           <button
@@ -230,7 +242,8 @@ const Payment: React.FC = () => {
             onClick={handleCharge}
             disabled={
               processing ||
-              (method === 'cash' && !cashTender.canCharge)
+              (method === 'cash' && !cashTender.canCharge) ||
+              (method === 'qr' && !qrConfirmed)
             }
           >
             {processing ? (
