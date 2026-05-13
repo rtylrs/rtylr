@@ -24,6 +24,7 @@ const CloseSession = React.lazy(() => import('../features/close-session'));
 const Settings = React.lazy(() => import('../features/settings'));
 const HeldOrders = React.lazy(() => import('../features/orders/HeldOrders'));
 const CashDrop = React.lazy(() => import('../features/cash-drop'));
+const Inventory = React.lazy(() => import('../features/inventory'));
 
 const AppRoutes = [
   { path: '/', element: <POS /> },
@@ -50,6 +51,7 @@ const AppRoutes = [
   { path: '/settings', element: <Settings /> },
   { path: '/held-orders', element: <HeldOrders /> },
   { path: '/cash-drop', element: <CashDrop /> },
+  { path: '/inventory', element: <Inventory /> },
 ];
 
 export default AppRoutes;
