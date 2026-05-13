@@ -18,7 +18,7 @@ import {
 import { buildReceiptFromOrder } from './receiptArtifact';
 import { useReceiptsStore } from '../../shared/stores/receiptsStore';
 import { useCashDrawerStore } from '../../shared/stores/cashDrawerStore';
-import { openConfiguredCashDrawer } from '../../shared/hardware/cashDrawerHardware';
+import { printReceiptAndOpenDrawer, openDrawer } from './paymentHardware';
 import { resetAfterCheckout } from './checkoutState';
 
 const fmt = (n: number): string =>
@@ -66,6 +66,8 @@ const Payment: React.FC = () => {
         recordCashSale,
       });
 
+      const isCash = method === 'cash';
+
       addReceipt(
         buildReceiptFromOrder({
           order,
@@ -77,15 +79,38 @@ const Payment: React.FC = () => {
       if (result.status === 'queued') {
         toast.warning('Cash order saved offline. It will sync when connection returns.');
       }
-      if (method === 'cash') {
-        const drawerResult = await openConfiguredCashDrawer({
-          enabled: printer.cashDrawerKick,
-          printerName: printer.name,
-        });
-        if (drawerResult.status === 'failed') {
-          toast.warning(`Cash drawer did not open: ${drawerResult.error}`);
+
+      // Print receipt + open drawer via configured hardware
+      const hwResult = await printReceiptAndOpenDrawer({
+        printer,
+        items,
+        subtotal,
+        taxAmount: tax,
+        discountAmount: 0,
+        tipAmount: 0,
+        total: grandTotal,
+        paymentMethod: method,
+        amountPaid: isCash ? (cashTender.received || grandTotal) : grandTotal,
+        changeDue: isCash ? (cashTender.change ?? 0) : 0,
+        orderNumber: order.id,
+        businessName: 'rtylr POS',
+        footerMessage: undefined,
+        kickDrawer: isCash && printer.cashDrawerKick,
+      });
+
+      if (hwResult.kind === 'print_failed') {
+        toast.warning(`Receipt not printed: ${hwResult.error}`);
+        // Still open drawer if printing failed but drawer was requested
+        if (isCash && printer.cashDrawerKick) {
+          const dr = await openDrawer(printer);
+          if (dr.kind === 'drawer_failed') {
+            toast.warning(`Cash drawer did not open: ${dr.error}`);
+          }
         }
+      } else if (hwResult.kind === 'drawer_failed') {
+        toast.warning(`Cash drawer did not open: ${hwResult.error}`);
       }
+
       navigate('/receipt');
     } catch (error) {
       toast.error(error instanceof Error ? error.message : 'Payment failed. Please try again.');
