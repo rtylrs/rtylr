@@ -593,6 +593,14 @@ func setupRoutes(ctx context.Context, r *chi.Mux) {
 		switch scope {
 		case "user":
 			return id == userID
+		case "owner":
+			// Allow if the connected user's businessID matches. businessID is
+			// stored on AuthUser in the client context by each WS handler.
+			authUser, _ := ctx.Value(authPkg.AuthUserKey).(*authPkg.AuthUser)
+			if authUser == nil {
+				return false
+			}
+			return authUser.BusinessID == id
 		case "workspace":
 			return workspacesSvc.IsWorkspaceMember(ctx, userID, id)
 		case "project":
