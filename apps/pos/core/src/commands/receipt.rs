@@ -420,6 +420,27 @@ fn print_via_windows_spooler(_printer_name: &str, _data: &[u8]) -> Result<String
 #[cfg(test)]
 mod tests {
     use super::*;
+    use std::io::Read;
+    use std::net::TcpListener;
+    use std::thread;
+
+    /// Spin up a one-shot TCP listener on a random local port, run `f` against
+    /// that port, then return all bytes the listener received.
+    fn with_tcp_mock<F: FnOnce(u16) -> Result<String, String>>(f: F) -> (Result<String, String>, Vec<u8>) {
+        let listener = TcpListener::bind("127.0.0.1:0").expect("bind");
+        let port = listener.local_addr().expect("addr").port();
+
+        let recv_handle = thread::spawn(move || {
+            let (mut stream, _) = listener.accept().expect("accept");
+            let mut buf = Vec::new();
+            stream.read_to_end(&mut buf).expect("read");
+            buf
+        });
+
+        let result = f(port);
+        let received = recv_handle.join().expect("join");
+        (result, received)
+    }
 
     fn sample_receipt() -> ReceiptData {
         ReceiptData {
@@ -501,5 +522,70 @@ mod tests {
         assert!(!data
             .windows(5)
             .any(|w| w == [0x1B, 0x70, 0x00, 0x19, 0xFA]));
+    }
+
+    // ── TCP wire protocol tests ───────────────────────────────────────────────
+    // These tests spin up a real TcpListener on localhost, call print_via_network,
+    // and verify the exact bytes that arrive on the wire — no mocks.
+
+    #[test]
+    fn network_print_sends_escpos_init_bytes_over_tcp() {
+        let (result, received) = with_tcp_mock(|port| {
+            print_via_network("127.0.0.1", port, &build_receipt(&sample_receipt()))
+        });
+
+        assert!(result.is_ok(), "print_via_network failed: {:?}", result);
+        assert!(received.starts_with(&[0x1B, 0x40]), "Missing ESC/POS INIT at start of stream");
+    }
+
+    #[test]
+    fn network_print_ends_with_cut_command_over_tcp() {
+        let (result, received) = with_tcp_mock(|port| {
+            print_via_network("127.0.0.1", port, &build_receipt(&sample_receipt()))
+        });
+
+        assert!(result.is_ok());
+        assert!(
+            received.ends_with(&[0x1D, 0x56, 0x41, 0x03]),
+            "Missing CUT command at end of stream"
+        );
+    }
+
+    #[test]
+    fn network_print_contains_business_name_in_tcp_stream() {
+        let (result, received) = with_tcp_mock(|port| {
+            print_via_network("127.0.0.1", port, &build_receipt(&sample_receipt()))
+        });
+
+        assert!(result.is_ok());
+        let text = String::from_utf8_lossy(&received);
+        assert!(text.contains("Test Cafe"), "Business name not found in TCP stream");
+    }
+
+    #[test]
+    fn network_print_embeds_drawer_kick_in_tcp_stream() {
+        let mut r = sample_receipt();
+        r.open_drawer = true;
+        r.drawer_pin = Some(2);
+
+        let (result, received) = with_tcp_mock(|port| {
+            print_via_network("127.0.0.1", port, &build_receipt(&r))
+        });
+
+        assert!(result.is_ok());
+        assert!(
+            received.windows(5).any(|w| w == [0x1B, 0x70, 0x00, 0x19, 0xFA]),
+            "Drawer kick ESC/POS bytes not found in TCP stream"
+        );
+    }
+
+    #[test]
+    fn network_print_returns_ok_with_host_port_confirmation() {
+        let (result, _) = with_tcp_mock(|port| {
+            print_via_network("127.0.0.1", port, &build_receipt(&sample_receipt()))
+        });
+
+        let msg = result.expect("should succeed");
+        assert!(msg.contains("127.0.0.1"), "Result message missing host");
     }
 }
