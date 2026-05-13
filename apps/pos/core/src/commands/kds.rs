@@ -218,4 +218,73 @@ mod tests {
         let text = format_ticket_text(&sample_ticket());
         assert!(text.contains("TABLE 7"));
     }
+
+    // ── TCP wire protocol tests ───────────────────────────────────────────────
+
+    use std::io::Read;
+    use std::net::TcpListener;
+    use std::thread;
+
+    fn with_tcp_mock<F: FnOnce(u16) -> Result<String, String>>(f: F) -> (Result<String, String>, Vec<u8>) {
+        let listener = TcpListener::bind("127.0.0.1:0").expect("bind");
+        let port = listener.local_addr().expect("addr").port();
+        let recv_handle = thread::spawn(move || {
+            let (mut stream, _) = listener.accept().expect("accept");
+            let mut buf = Vec::new();
+            stream.read_to_end(&mut buf).expect("read");
+            buf
+        });
+        let result = f(port);
+        let received = recv_handle.join().expect("join");
+        (result, received)
+    }
+
+    #[test]
+    fn network_kds_sends_ticket_text_over_tcp() {
+        let (result, received) = with_tcp_mock(|port| {
+            send_kds_ticket_network("127.0.0.1".to_string(), port, sample_ticket())
+        });
+
+        assert!(result.is_ok(), "send_kds_ticket_network failed: {:?}", result);
+        let text = String::from_utf8_lossy(&received);
+        assert!(text.contains("ORDER #42"), "Order number missing from TCP stream");
+        assert!(text.contains("Burger"), "Item name missing from TCP stream");
+        assert!(text.contains("GRILL"), "Station missing from TCP stream");
+    }
+
+    #[test]
+    fn network_kds_ends_with_form_feed_over_tcp() {
+        let (result, received) = with_tcp_mock(|port| {
+            send_kds_ticket_network("127.0.0.1".to_string(), port, sample_ticket())
+        });
+
+        assert!(result.is_ok());
+        assert_eq!(
+            received.last().copied(),
+            Some(0x0C),
+            "TCP stream must end with form feed (0x0C)"
+        );
+    }
+
+    #[test]
+    fn network_kds_sends_modifiers_and_notes_over_tcp() {
+        let (result, received) = with_tcp_mock(|port| {
+            send_kds_ticket_network("127.0.0.1".to_string(), port, sample_ticket())
+        });
+
+        assert!(result.is_ok());
+        let text = String::from_utf8_lossy(&received);
+        assert!(text.contains("Extra cheese"), "Modifier missing from TCP stream");
+        assert!(text.contains("No pickles"), "Notes missing from TCP stream");
+    }
+
+    #[test]
+    fn network_kds_returns_ok_with_address_confirmation() {
+        let (result, _) = with_tcp_mock(|port| {
+            send_kds_ticket_network("127.0.0.1".to_string(), port, sample_ticket())
+        });
+
+        let msg = result.expect("should succeed");
+        assert!(msg.contains("127.0.0.1"), "Result message missing host");
+    }
 }
