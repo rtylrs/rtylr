@@ -1,10 +1,41 @@
 import { create } from 'zustand';
 import { persist } from 'zustand/middleware';
 
+export type PrinterTransportType = 'windows' | 'serial' | 'network';
+
 export interface PrinterSettings {
+  /** Display name (used as Windows spooler printer name when transport='windows') */
   name: string;
   copies: number;
   cashDrawerKick: boolean;
+  drawerPin: 2 | 5;
+  /** How to reach the printer */
+  transport: PrinterTransportType;
+  /** Serial: e.g. /dev/tty.usbserial-1420 or COM3 */
+  serialPort: string;
+  /** Serial baud rate (default 9600) */
+  serialBaudRate: number;
+  /** Network: hostname or IP address */
+  networkHost: string;
+  /** Network: TCP port (default 9100 for most thermal printers) */
+  networkPort: number;
+}
+
+export interface BusinessInfo {
+  name: string;
+  address: string;
+  phone: string;
+}
+
+export type KdsHardwareTransport = 'none' | 'serial' | 'network';
+
+export interface KdsHardwareSettings {
+  /** 'none' = software-only KDS (browser), 'serial'/'network' = hardware KDS display */
+  transport: KdsHardwareTransport;
+  serialPort: string;
+  serialBaudRate: number;
+  networkHost: string;
+  networkPort: number;
 }
 
 interface SettingsState {
@@ -14,6 +45,8 @@ interface SettingsState {
   currencySymbol: string;
   receiptFooter: string;
   printer: PrinterSettings;
+  business: BusinessInfo;
+  kdsHardware: KdsHardwareSettings;
   autoLogoutMinutes: number;
   speedMode: boolean;
   barMode: boolean;
@@ -28,6 +61,8 @@ interface SettingsActions {
   setCurrency: (code: string, symbol: string) => void;
   setReceiptFooter: (footer: string) => void;
   setPrinter: (partial: Partial<PrinterSettings>) => void;
+  setBusiness: (partial: Partial<BusinessInfo>) => void;
+  setKdsHardware: (partial: Partial<KdsHardwareSettings>) => void;
   setAutoLogoutMinutes: (min: number) => void;
   setSpeedMode: (on: boolean) => void;
   setBarMode: (on: boolean) => void;
@@ -42,7 +77,29 @@ const defaults: SettingsState = {
   currency: 'USD',
   currencySymbol: '$',
   receiptFooter: 'Thank you for your visit!',
-  printer: { name: 'Default', copies: 1, cashDrawerKick: true },
+  printer: {
+    name: 'Default',
+    copies: 1,
+    cashDrawerKick: true,
+    drawerPin: 2,
+    transport: 'windows',
+    serialPort: '',
+    serialBaudRate: 9600,
+    networkHost: '',
+    networkPort: 9100,
+  },
+  business: {
+    name: 'My Restaurant',
+    address: '',
+    phone: '',
+  },
+  kdsHardware: {
+    transport: 'none',
+    serialPort: '',
+    serialBaudRate: 9600,
+    networkHost: '',
+    networkPort: 9000,
+  },
   autoLogoutMinutes: 10,
   speedMode: false,
   barMode: false,
@@ -84,6 +141,10 @@ export const useSettingsStore = create<SettingsState & SettingsActions>()(
       setReceiptFooter: (receiptFooter) => set({ receiptFooter }),
       setPrinter: (partial) =>
         set((s) => ({ printer: { ...s.printer, ...normalizePrinter(partial) } })),
+      setBusiness: (partial) =>
+        set((s) => ({ business: { ...s.business, ...partial } })),
+      setKdsHardware: (partial) =>
+        set((s) => ({ kdsHardware: { ...s.kdsHardware, ...partial } })),
       setAutoLogoutMinutes: (autoLogoutMinutes) =>
         set({ autoLogoutMinutes: Math.round(clampNumber(autoLogoutMinutes, 0, 24 * 60)) }),
       setSpeedMode: (speedMode) => set({ speedMode }),

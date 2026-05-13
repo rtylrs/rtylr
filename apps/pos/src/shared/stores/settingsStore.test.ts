@@ -12,7 +12,17 @@ const defaults = {
   currency: 'USD',
   currencySymbol: '$',
   receiptFooter: 'Thank you for your visit!',
-  printer: { name: 'Default', copies: 1, cashDrawerKick: true },
+  printer: {
+    name: 'Default',
+    copies: 1,
+    cashDrawerKick: true,
+    drawerPin: 2,
+    transport: 'windows',
+    serialPort: '',
+    serialBaudRate: 9600,
+    networkHost: '',
+    networkPort: 9100,
+  },
   autoLogoutMinutes: 10,
   speedMode: false,
   barMode: false,
@@ -34,7 +44,17 @@ describe('settingsStore', () => {
     expect(getState().currency).toBe('USD');
     expect(getState().currencySymbol).toBe('$');
     expect(getState().receiptFooter).toBe('Thank you for your visit!');
-    expect(getState().printer).toEqual({ name: 'Default', copies: 1, cashDrawerKick: true });
+    expect(getState().printer).toEqual({
+      name: 'Default',
+      copies: 1,
+      cashDrawerKick: true,
+      drawerPin: 2,
+      transport: 'windows',
+      serialPort: '',
+      serialBaudRate: 9600,
+      networkHost: '',
+      networkPort: 9100,
+    });
     expect(getState().autoLogoutMinutes).toBe(10);
     expect(getState().speedMode).toBe(false);
     expect(getState().barMode).toBe(false);
