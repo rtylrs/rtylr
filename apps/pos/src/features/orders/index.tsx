@@ -1,6 +1,7 @@
 import { unwrap } from '@voxire/api';
 import React, { useEffect, useState } from 'react';
-import { useNavigate } from 'react-router-dom';
+import { useNavigate, useSearchParams } from 'react-router-dom';
+import { toast } from 'sonner';
 import ScreenLayout from '../../layouts/ScreenLayout';
 import SearchBar from '../../shared/components/SearchBar';
 import EmptyState from '../../shared/components/EmptyState';
@@ -17,7 +18,10 @@ const OrdersScreen: React.FC = () => {
   const [error, setError] = useState<string | null>(null);
   const [search, setSearch] = useState('');
   const [filter, setFilter] = useState<'all' | 'open' | 'paid' | 'voided'>('all');
+  const [reopening, setReopening] = useState<string | null>(null);
   const navigate = useNavigate();
+  const [params] = useSearchParams();
+  const reopenMode = params.get('reopen') === '1';
 
   useEffect(() => {
     (async () => {
@@ -34,6 +38,21 @@ const OrdersScreen: React.FC = () => {
     })();
   }, []);
 
+  const handleReopen = async (e: React.MouseEvent, order: Order) => {
+    e.stopPropagation();
+    setReopening(String(order.id));
+    try {
+      await unwrap(posService.reopenOrder(Number(order.id)));
+      setOrders((prev) => prev.map((o) => (o.id === order.id ? { ...o, status: 'open' } : o)));
+      toast.success(`Order #${order.number ?? order.id} reopened`);
+    } catch (err) {
+      const e = err as { response?: { data?: { message?: string } }; message?: string };
+      toast.error(e?.response?.data?.message ?? 'Failed to reopen order');
+    } finally {
+      setReopening(null);
+    }
+  };
+
   const filtered = orders.filter((o) => {
     if (filter !== 'all' && o.status !== filter) return false;
     if (search && !(o.number ?? o.id).toString().includes(search)) return false;
@@ -43,6 +62,11 @@ const OrdersScreen: React.FC = () => {
   return (
     <ScreenLayout title="Orders">
       <div className="p-5 max-w-5xl space-y-4">
+        {reopenMode && (
+          <div className="p-3 rounded-lg bg-amber-500/10 border border-amber-500/30 text-amber-300 text-xs">
+            Manager override approved — select a paid order below to reopen it.
+          </div>
+        )}
         <SearchBar value={search} onChange={setSearch} placeholder="Search orders..." />
         <div className="flex gap-2">
           {(['all', 'open', 'paid', 'voided'] as const).map((f) => (
@@ -69,7 +93,7 @@ const OrdersScreen: React.FC = () => {
               <li
                 key={o.id}
                 className="p-4 rounded-xl bg-pos-card border border-pos-border hover:border-white/20 cursor-pointer transition"
-                onClick={() => navigate(`/payment/${o.id}`)}
+                onClick={() => !reopenMode && navigate(`/payment/${o.id}`)}
               >
                 <div className="flex justify-between items-center">
                   <div className="flex items-center gap-3">
@@ -79,7 +103,19 @@ const OrdersScreen: React.FC = () => {
                       <span className="text-xs text-pos-muted">Table {o.tableNumber}</span>
                     )}
                   </div>
-                  <span className="text-sm font-bold text-pos-text">{formatCurrency(o.total)}</span>
+                  <div className="flex items-center gap-3">
+                    <span className="text-sm font-bold text-pos-text">{formatCurrency(o.total)}</span>
+                    {reopenMode && o.status === 'paid' && (
+                      <button
+                        type="button"
+                        disabled={reopening === String(o.id)}
+                        onClick={(e) => void handleReopen(e, o)}
+                        className="h-8 px-3 rounded-lg bg-amber-500/20 border border-amber-500/40 text-amber-300 text-xs font-semibold hover:bg-amber-500/30 disabled:opacity-50 transition-colors"
+                      >
+                        {reopening === String(o.id) ? '...' : 'Reopen'}
+                      </button>
+                    )}
+                  </div>
                 </div>
                 <div className="text-[11px] text-pos-muted mt-1">{formatDate(o.createdAt)}</div>
               </li>
