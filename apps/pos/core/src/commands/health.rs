@@ -1,3 +1,4 @@
+use std::io::{Read, Write};
 use std::time::Duration;
 use serde::{Deserialize, Serialize};
 
@@ -78,16 +79,38 @@ fn infer_tcp_device_type(port: u16) -> &'static str {
     }
 }
 
+// ESC/POS DLE EOT 1 — real-time status transmission request.
+// A conforming ESC/POS printer responds with a 1-byte status packet within ~100 ms.
+const ESCPOS_STATUS_REQUEST: &[u8] = &[0x10, 0x04, 0x01];
+
+/// Attempt to confirm ESC/POS protocol on an already-connected TCP stream.
+/// Returns `true` if the printer responded with a status byte.
+fn probe_escpos_protocol(stream: &mut std::net::TcpStream) -> bool {
+    stream
+        .set_write_timeout(Some(Duration::from_millis(200)))
+        .ok();
+    stream
+        .set_read_timeout(Some(Duration::from_millis(300)))
+        .ok();
+
+    if stream.write_all(ESCPOS_STATUS_REQUEST).is_err() {
+        return false;
+    }
+
+    let mut buf = [0u8; 1];
+    matches!(stream.read_exact(&mut buf), Ok(()))
+}
+
 fn probe_tcp(host: &str, port: u16) -> DeviceStatus {
     let addr_str = format!("{}:{}", host, port);
     let name = addr_str.clone();
-    let device_type = infer_tcp_device_type(port).to_string();
+    let device_type_hint = infer_tcp_device_type(port);
     if host.trim().is_empty() {
         return DeviceStatus {
             name,
             status: "not_configured".to_string(),
             message: "No host configured".to_string(),
-            device_type,
+            device_type: device_type_hint.to_string(),
         };
     }
     let addr = match addr_str.parse::<std::net::SocketAddr>() {
@@ -97,22 +120,34 @@ fn probe_tcp(host: &str, port: u16) -> DeviceStatus {
                 name,
                 status: "unreachable".to_string(),
                 message: format!("Invalid address {}: {}", addr_str, e),
-                device_type,
+                device_type: device_type_hint.to_string(),
             }
         }
     };
     match std::net::TcpStream::connect_timeout(&addr, Duration::from_secs(3)) {
-        Ok(_) => DeviceStatus {
-            name,
-            status: "ok".to_string(),
-            message: format!("TCP {}:{} reachable ({})", host, port, infer_tcp_device_type(port)),
-            device_type,
-        },
+        Ok(mut stream) => {
+            // For port 9100, probe for ESC/POS protocol response to confirm printer type.
+            let (device_type, detail) = if port == 9100 {
+                if probe_escpos_protocol(&mut stream) {
+                    ("thermal_escpos_confirmed", "ESC/POS status byte received — thermal printer confirmed")
+                } else {
+                    ("thermal_escpos", "Connected on port 9100 — ESC/POS assumed (no status response)")
+                }
+            } else {
+                (device_type_hint, "TCP connection established")
+            };
+            DeviceStatus {
+                name,
+                status: "ok".to_string(),
+                message: format!("{}:{} reachable — {}", host, port, detail),
+                device_type: device_type.to_string(),
+            }
+        }
         Err(e) => DeviceStatus {
             name,
             status: "unreachable".to_string(),
             message: format!("Cannot connect to {}:{}: {}", host, port, e),
-            device_type,
+            device_type: device_type_hint.to_string(),
         },
     }
 }
@@ -333,5 +368,69 @@ mod tests {
         let report = check_hardware(base_config());
         assert_eq!(report.printer.device_type, "none");
         assert_eq!(report.kds.device_type, "none");
+    }
+
+    // ── ESC/POS protocol probe tests ─────────────────────────────────────────
+
+    #[test]
+    fn probe_escpos_returns_confirmed_when_printer_responds_with_status_byte() {
+        use std::io::Write as IoWrite;
+        use std::net::TcpListener;
+        use std::thread;
+
+        // Mock ESC/POS printer: accept connection, read request, reply with 1 status byte
+        let listener = TcpListener::bind("127.0.0.1:0").expect("bind");
+        let port = listener.local_addr().expect("addr").port();
+
+        thread::spawn(move || {
+            if let Ok((mut client, _)) = listener.accept() {
+                let mut buf = [0u8; 3];
+                let _ = client.read(&mut buf);
+                // Reply with ESC/POS printer status byte (0x12 = OK, online, no errors)
+                let _ = client.write_all(&[0x12]);
+            }
+        });
+
+        // Give the listener thread a moment to start
+        std::thread::sleep(std::time::Duration::from_millis(10));
+
+        let addr_str = format!("127.0.0.1:{}", port);
+        let addr: std::net::SocketAddr = addr_str.parse().unwrap();
+        let mut stream = std::net::TcpStream::connect_timeout(
+            &addr,
+            Duration::from_secs(2),
+        ).expect("connect");
+
+        let confirmed = probe_escpos_protocol(&mut stream);
+        assert!(confirmed, "Should confirm ESC/POS when printer sends status byte");
+    }
+
+    #[test]
+    fn probe_escpos_returns_assumed_when_no_status_byte_received() {
+        use std::net::TcpListener;
+        use std::thread;
+
+        // Mock raw TCP listener that accepts but sends no response (dumb network printer)
+        let listener = TcpListener::bind("127.0.0.1:0").expect("bind");
+        let port = listener.local_addr().expect("addr").port();
+
+        thread::spawn(move || {
+            if let Ok((_client, _)) = listener.accept() {
+                // Accept but don't respond — simulates plain raw TCP printer
+                std::thread::sleep(std::time::Duration::from_millis(600));
+            }
+        });
+
+        std::thread::sleep(std::time::Duration::from_millis(10));
+
+        let addr_str = format!("127.0.0.1:{}", port);
+        let addr: std::net::SocketAddr = addr_str.parse().unwrap();
+        let mut stream = std::net::TcpStream::connect_timeout(
+            &addr,
+            Duration::from_secs(2),
+        ).expect("connect");
+
+        let confirmed = probe_escpos_protocol(&mut stream);
+        assert!(!confirmed, "Should not confirm ESC/POS when no status byte received");
     }
 }
