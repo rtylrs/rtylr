@@ -3,7 +3,9 @@ package handlers
 import (
 	"context"
 	"net/http"
+	"strconv"
 
+	"github.com/go-chi/chi/v5"
 	"github.com/voxire/onion/internal/modules/notifications/internal/application"
 	authPkg "github.com/voxire/onion/internal/platform/auth"
 	errorModels "github.com/voxire/onion/internal/platform/errors"
@@ -85,6 +87,45 @@ func (h *MarkReadHandler) Serve(ctx context.Context, req *MarkReadRequest) (Mark
 	}
 
 	if err := h.Service.MarkRead(ctx, device.User.UserID, req.ID); err != nil {
+		return MarkReadResponse{}, &errorModels.ServerError{
+			HTTPCode: http.StatusInternalServerError,
+			Code:     http.StatusInternalServerError,
+			Message:  "Failed to mark notification as read",
+		}
+	}
+
+	return MarkReadResponse{Message: "Notification marked as read"}, nil
+}
+
+// -- Mark Read by path param: POST /notifications/{id}/read --
+
+func MarkReadByIDRoutes() []string { return []string{"/notifications/{id}/read"} }
+
+type MarkReadByIDHandler struct{ Service *application.Service }
+
+type MarkReadByIDRequest struct{}
+
+func (h *MarkReadByIDHandler) Validate(_ context.Context, _ *MarkReadByIDRequest) *errorModels.ServerError {
+	return nil
+}
+
+func (h *MarkReadByIDHandler) Serve(ctx context.Context, _ *MarkReadByIDRequest) (MarkReadResponse, *errorModels.ServerError) {
+	device := authPkg.DeviceCtx(ctx)
+	if device.User == nil {
+		return MarkReadResponse{}, errorModels.PermissionDeniedServerError()
+	}
+
+	idStr := chi.URLParamFromCtx(ctx, "id")
+	id, err := strconv.ParseInt(idStr, 10, 64)
+	if err != nil || id == 0 {
+		return MarkReadResponse{}, &errorModels.ServerError{
+			HTTPCode: http.StatusBadRequest,
+			Code:     http.StatusBadRequest,
+			Message:  "Invalid notification id",
+		}
+	}
+
+	if err := h.Service.MarkRead(ctx, device.User.UserID, id); err != nil {
 		return MarkReadResponse{}, &errorModels.ServerError{
 			HTTPCode: http.StatusInternalServerError,
 			Code:     http.StatusInternalServerError,
