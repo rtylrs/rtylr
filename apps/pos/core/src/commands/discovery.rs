@@ -1,5 +1,7 @@
 use serde::Serialize;
 use std::net::{SocketAddr, TcpStream};
+use std::sync::{Arc, Mutex};
+use std::thread;
 use std::time::Duration;
 
 #[derive(Serialize)]
@@ -248,12 +250,21 @@ pub struct DiscoveredDevice {
 }
 
 /// Well-known ports probed during subnet scan, mapped to device types.
+///
+/// Covers ESC/POS thermal printers, Star Micronics native ports, Zebra ZPL
+/// label printers, customer-facing kiosk displays, LPR/IPP network printers,
+/// and kitchen display systems (KDS).
 const SCAN_PORTS: &[(u16, &str, &str)] = &[
-    (9100, "thermal_escpos", "Thermal/ESC-POS printer"),
-    (515,  "network_lpr",   "LPR/LPD line printer"),
-    (631,  "network_ipp",   "IPP network printer"),
-    (9200, "kds",           "KDS display (alt port)"),
-    (4999, "kds",           "KDS display"),
+    (9100, "thermal_escpos",  "Thermal/ESC-POS or raw receipt printer"),
+    (9101, "star_micronics",  "Star Micronics receipt printer (port 2)"),
+    (9102, "star_micronics",  "Star Micronics receipt printer (port 3)"),
+    (4242, "star_cloudprnt",  "Star CloudPRNT kiosk/receipt printer"),
+    (6101, "zpl_label",       "Zebra ZPL label printer"),
+    (9999, "kiosk_display",   "Customer-facing kiosk or pole display"),
+    (515,  "network_lpr",     "LPR/LPD line printer"),
+    (631,  "network_ipp",     "IPP network printer"),
+    (9200, "kds",             "Kitchen Display System (alt port)"),
+    (4999, "kds",             "Kitchen Display System"),
 ];
 
 fn scan_host(host: &str, timeout_ms: u64) -> Vec<DiscoveredDevice> {
@@ -275,14 +286,14 @@ fn scan_host(host: &str, timeout_ms: u64) -> Vec<DiscoveredDevice> {
     found
 }
 
-/// Scan a /24 subnet for hardware devices (printers, KDS displays).
+/// Scan a /24 subnet for hardware devices (printers, KDS displays, kiosk terminals).
 ///
 /// `subnet_prefix` is the first three octets, e.g. "192.168.1".
 /// `timeout_ms` is the per-host per-port connection timeout (50–5000 ms).
 ///
-/// Runs each host probe sequentially to avoid triggering IDS/firewalls.
-/// For a /24 this completes in roughly: 255 × n_ports × timeout_ms.
-/// Caller should use a short timeout (100–300 ms) for interactive use.
+/// All 254 hosts are probed **in parallel** — total wall time is approximately
+/// `n_ports × timeout_ms` regardless of subnet size (vs sequential which would be
+/// `254 × n_ports × timeout_ms`). Results are sorted by host then port.
 #[tauri::command]
 pub fn discover_network_hardware(
     subnet_prefix: String,
@@ -298,12 +309,39 @@ pub fn discover_network_hardware(
         return Err(format!("Invalid subnet prefix '{}' — expected format: \"192.168.1\"", prefix));
     }
 
-    let mut results = Vec::new();
-    for host_octet in 1u8..=254 {
-        let host = format!("{}.{}", prefix, host_octet);
-        results.extend(scan_host(&host, timeout_ms));
+    let results: Arc<Mutex<Vec<DiscoveredDevice>>> = Arc::new(Mutex::new(Vec::new()));
+
+    let handles: Vec<_> = (1u8..=254)
+        .map(|octet| {
+            let host = format!("{}.{}", prefix, octet);
+            let results = Arc::clone(&results);
+            thread::spawn(move || {
+                let found = scan_host(&host, timeout_ms);
+                if !found.is_empty() {
+                    results.lock().expect("mutex").extend(found);
+                }
+            })
+        })
+        .collect();
+
+    for handle in handles {
+        handle.join().map_err(|_| "Thread panicked during subnet scan".to_string())?;
     }
-    Ok(results)
+
+    let mut final_results = Arc::try_unwrap(results)
+        .map_err(|_| "Internal scan error: arc still held".to_string())?
+        .into_inner()
+        .map_err(|_| "Mutex poisoned".to_string())?;
+
+    final_results.sort_by(|a, b| {
+        a.host
+            .parse::<std::net::IpAddr>()
+            .ok()
+            .cmp(&b.host.parse::<std::net::IpAddr>().ok())
+            .then(a.port.cmp(&b.port))
+    });
+
+    Ok(final_results)
 }
 
 // ── Tests ─────────────────────────────────────────────────────────────────────
