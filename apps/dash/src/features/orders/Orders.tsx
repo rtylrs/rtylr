@@ -1,6 +1,7 @@
 import React, { useMemo, useState } from 'react';
 import { ShoppingBag, Clock, CheckCircle2, Loader2, Info } from 'lucide-react';
 import { useOrders, type HubOrder } from '../../shared/hooks/queries/useOrders';
+import { useOrdersRealtime } from '../../shared/lib/useOrdersRealtime';
 import {
   Card,
   CardContent,
@@ -106,6 +107,7 @@ const OrdersTable: React.FC<{ orders: HubOrder[]; emptyLabel: string }> = ({
 const Orders: React.FC = () => {
   const [tab, setTab] = useState<OrderStatus>('all');
   const { data: allOrders = [], isLoading, isError } = useOrders();
+  useOrdersRealtime();
 
   const pendingOrders = useMemo(() => allOrders.filter((o) => o.status === 'pending'), [allOrders]);
   const inProgressOrders = useMemo(
