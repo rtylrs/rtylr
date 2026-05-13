@@ -1,12 +1,7 @@
 import { useEffect } from 'react';
 import type { RealtimeEvent } from '@voxire/api';
 import { posRealtime } from '../../shared/lib/realtime';
-
-const KDS_EVENT_TYPES = new Set([
-  'pos:order:created',
-  'pos:order:preparing',
-  'pos:kds:item:updated',
-]);
+import { KDS_EVENT_TYPES } from '../../shared/lib/realtimeEvents';
 
 export function useKdsStream(ownerID: number | undefined, onInvalidate: () => void): void {
   useEffect(() => {
@@ -14,7 +9,7 @@ export function useKdsStream(ownerID: number | undefined, onInvalidate: () => vo
     const topic = `owner:${ownerID}`;
 
     const handler = (e: RealtimeEvent): void => {
-      if (KDS_EVENT_TYPES.has(e.type)) {
+      if (KDS_EVENT_TYPES.has(e.type as never)) {
         onInvalidate();
       }
     };
