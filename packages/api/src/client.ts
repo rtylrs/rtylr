@@ -8,13 +8,10 @@ const getBaseUrl = (): string => {
 };
 
 const getToken = (): string | null => {
-  return (
-    document.cookie
-      .split(';')
-      .map((c) => c.trim())
-      .find((c) => c.startsWith('token='))
-      ?.split('=')[1] ?? null
-  );
+  const match = document.cookie.match(/(?:^|;\s*)token=([^;]+)/);
+  const token = match ? decodeURIComponent(match[1]) : null;
+  if (!token || token.split('.').length !== 3) return null;
+  return token;
 };
 
 const isLocalDevHost = (hostname: string): boolean => {
