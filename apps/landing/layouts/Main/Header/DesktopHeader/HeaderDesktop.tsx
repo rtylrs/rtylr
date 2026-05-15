@@ -350,12 +350,6 @@ const HeaderDesktop: React.FC = () => {
                 >
                   Partners
                 </h6>
-                <h6
-                  onClick={() => handleNavigation('/newsroom')}
-                  onMouseEnter={() => prefetchRoute('/newsroom')}
-                >
-                  Newsroom
-                </h6>
                 <h6 onClick={() => handleExternalLink('https://voxire.com/careers')}>Careers</h6>
                 <h6
                   onClick={() => handleNavigation('/contact')}

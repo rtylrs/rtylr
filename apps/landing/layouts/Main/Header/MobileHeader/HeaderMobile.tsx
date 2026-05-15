@@ -267,9 +267,6 @@ const HeaderMobile: React.FC = () => {
                   <Link href="/partners" onClick={() => handleNavigation('/partners')}>
                     Partners
                   </Link>
-                  <Link href="/newsroom" onClick={() => handleNavigation('/newsroom')}>
-                    Newsroom
-                  </Link>
                   <a
                     href="#"
                     onClick={(e) => {
