@@ -402,8 +402,9 @@ function BusinessRoute(): React.JSX.Element | null {
         const businessId = res.businessId ?? res.business_id;
         if (businessId) {
           unwrap(
-            safe.get<{ config?: Record<string, unknown>; theme?: Record<string, unknown> }>(
-              `/get-configs?owner=${String(businessId)}`
+            safe.post<{ config?: Record<string, unknown>; theme?: Record<string, unknown> }>(
+              '/get-configs',
+              { owner: String(businessId) }
             )
           )
             .then((configRes) => {
