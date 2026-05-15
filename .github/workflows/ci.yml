@@ -84,9 +84,10 @@ jobs:
       - name: Run Playwright specs
         run: pnpm test:e2e
         env:
-          # Explicit empty so nothing leaks in from repo secrets.
-          # Specs stub API calls via page.route() — no real backend.
-          VITE_API_URL: ''
+          # Point at a local port with nothing listening. page.route() stubs
+          # intercept before the network layer so tests never make real calls.
+          # If a stub is missing the request fails with ECONNREFUSED, not a prod hit.
+          VITE_API_URL: 'http://localhost:9999/'
 
       - name: Upload Playwright report
         if: failure()

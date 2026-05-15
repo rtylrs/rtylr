@@ -1,4 +1,4 @@
-import { test, expect, type Page, type Route } from '@playwright/test';
+import { test, expect, type Page, type Route } from './fixtures';
 
 /**
  * End-to-end: an HR operator managing staff and shifts.
@@ -73,7 +73,7 @@ async function installHrStubs(
   page: Page,
   initial: { staff?: StubStaff[]; shifts?: StubShift[] } = {}
 ): Promise<void> {
-  const apiHost = 'https://api.voxire.com';
+  const apiHost = 'http://localhost:9999';
 
   const state = {
     staff: [...(initial.staff ?? [])],
@@ -167,7 +167,7 @@ async function installHrStubs(
 
   // (7) Staff detail — GET /hr/staff/detail?id=<n>. Registered last so it
   // wins over the wider /hr/staff catch-all.
-  await page.route(/api\.voxire\.dev\/hr\/staff\/detail(\?.*)?$/, async (route: Route) => {
+  await page.route(/localhost:9999\/hr\/staff\/detail(\?.*)?$/, async (route: Route) => {
     const url = new URL(route.request().url());
     const id = Number(url.searchParams.get('id'));
     const member = state.staff.find((s) => s.id === id);

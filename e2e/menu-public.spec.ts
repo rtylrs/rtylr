@@ -1,4 +1,4 @@
-import { test, expect } from '@playwright/test';
+import { test, expect } from './fixtures';
 
 /**
  * Public menu e2e — /b/:businessId hits the new anonymous `/pos/public/*`

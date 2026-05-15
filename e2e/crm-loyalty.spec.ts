@@ -1,4 +1,4 @@
-import { test, expect, type Page, type Route } from '@playwright/test';
+import { test, expect, type Page, type Route } from './fixtures';
 
 /**
  * End-to-end: CRM loyalty tiers, campaigns, segments, and customer import UI.
@@ -82,8 +82,8 @@ async function seedAuth(page: Page): Promise<void> {
 }
 
 async function stubBaseRoutes(page: Page): Promise<void> {
-  // Catch-all for any api.voxire.com request not handled by a specific stub.
-  await page.route(/https:\/\/api\.voxire\.dev\//, (route: Route) =>
+  // Catch-all for any localhost:9999 request not handled by a specific stub.
+  await page.route(/localhost:9999\//, (route: Route) =>
     route.fulfill({ status: 200, contentType: 'application/json', body: '{}' })
   );
 

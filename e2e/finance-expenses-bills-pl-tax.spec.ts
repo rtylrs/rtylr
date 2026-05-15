@@ -1,4 +1,4 @@
-import { test, expect } from '@playwright/test';
+import { test, expect } from './fixtures';
 
 /**
  * End-to-end: Finance — Expenses, Bills, Profit & Loss, Tax screens.
@@ -51,7 +51,7 @@ async function seedAuth(page: import('@playwright/test').Page): Promise<void> {
 
   // Catch-all for any un-stubbed finance sub-routes so rogue prefetches
   // never cause a 401 redirect.
-  await page.route(/api\.voxire\.dev/, (route) =>
+  await page.route(/localhost:9999/, (route) =>
     route.fulfill({
       status: 200,
       contentType: 'application/json',

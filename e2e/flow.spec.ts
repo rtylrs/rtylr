@@ -1,4 +1,4 @@
-import { test, expect, type Page, type Route } from '@playwright/test';
+import { test, expect, type Page, type Route } from './fixtures';
 
 /**
  * Flow app (projects & tasks). Cookie-primed past ProtectedRoute,
@@ -11,7 +11,7 @@ import { test, expect, type Page, type Route } from '@playwright/test';
  */
 
 const FLOW_URL = process.env.FLOW_URL ?? 'http://localhost:5183';
-const API_HOST = 'https://api.voxire.com';
+const API_HOST = 'http://localhost:9999';
 
 // ── Shared fixtures ────────────────────────────────────────────────────────
 
@@ -87,10 +87,12 @@ function fakeNotification(overrides: Record<string, unknown> = {}): Record<strin
 // ── Auth helpers ───────────────────────────────────────────────────────────
 
 async function primeAuthCookie(context: import('@playwright/test').BrowserContext): Promise<void> {
+  // Three base64url segments so getToken()'s JWT shape check passes.
+  const fakeJwt = 'eyJhbGciOiJub25lIn0.eyJ1c2VyX2lkIjoiMSJ9.fake_sig';
   await context.addCookies([
     {
       name: 'token',
-      value: 'fake-jwt',
+      value: fakeJwt,
       domain: 'localhost',
       path: '/',
       httpOnly: false,
@@ -124,11 +126,11 @@ async function installFlowStubs(
   const tasks = opts.tasks ?? [];
   const notifications = opts.notifications ?? [];
 
-  // (0) Broadest catch-all — intercepts any request to api.voxire.com that
+  // (0) Broadest catch-all — intercepts any request to localhost:9999 that
   //     isn't covered by a more-specific handler below.  Prevents unstubbed
   //     calls (e.g. Caret /memory/chats, realtime ws upgrade fallback) from
   //     reaching the real API and delaying the networkidle signal.
-  await page.route(/api\.voxire\.dev\//, (route: Route) => {
+  await page.route(/localhost:9999\//, (route: Route) => {
     const method = route.request().method();
     if (method === 'GET') {
       route.fulfill({
@@ -186,7 +188,7 @@ async function installFlowStubs(
   );
 
   await page.route(
-    /api\.voxire\.dev\/(get-configs|subscriptions|business\/me|hub\/kpis|team|activity|notifications)/,
+    /localhost:9999\/(get-configs|subscriptions|business\/me|hub\/kpis|team|activity|notifications)/,
     (route: Route) =>
       route.fulfill({
         status: 200,
@@ -196,7 +198,7 @@ async function installFlowStubs(
   );
 
   // (3) Workspaces — regex to match with or without query params.
-  await page.route(/api\.voxire\.dev\/flow\/workspaces(\?.*)?$/, (route: Route) =>
+  await page.route(/localhost:9999\/flow\/workspaces(\?.*)?$/, (route: Route) =>
     route.fulfill({
       status: 200,
       contentType: 'application/json',
@@ -205,7 +207,7 @@ async function installFlowStubs(
   );
 
   // (4) Dashboard stats — regex to match ?workspace_id=... query param.
-  await page.route(/api\.voxire\.dev\/flow\/dashboard(\?.*)?$/, (route: Route) =>
+  await page.route(/localhost:9999\/flow\/dashboard(\?.*)?$/, (route: Route) =>
     route.fulfill({
       status: 200,
       contentType: 'application/json',
@@ -221,7 +223,7 @@ async function installFlowStubs(
   );
 
   // (5) Notifications.
-  await page.route(/api\.voxire\.dev\/flow\/notifications(\?.*)?$/, (route: Route) =>
+  await page.route(/localhost:9999\/flow\/notifications(\?.*)?$/, (route: Route) =>
     route.fulfill({
       status: 200,
       contentType: 'application/json',
@@ -230,7 +232,7 @@ async function installFlowStubs(
   );
 
   // (6) Tasks for a project — regex to match ?project_id=... query param.
-  await page.route(/api\.voxire\.dev\/flow\/tasks(\?.*)?$/, (route: Route) => {
+  await page.route(/localhost:9999\/flow\/tasks(\?.*)?$/, (route: Route) => {
     const url = new URL(route.request().url());
     const projectId = url.searchParams.get('project_id');
     const filtered = projectId ? tasks.filter((t) => t.projectId === projectId) : tasks;
@@ -241,7 +243,7 @@ async function installFlowStubs(
     });
   });
 
-  await page.route(/api\.voxire\.dev\/flow\/tasks\/my(\?.*)?$/, (route: Route) =>
+  await page.route(/localhost:9999\/flow\/tasks\/my(\?.*)?$/, (route: Route) =>
     route.fulfill({
       status: 200,
       contentType: 'application/json',
@@ -250,7 +252,7 @@ async function installFlowStubs(
   );
 
   // (7) Projects: GET list + POST create — regex excludes /columns sub-path.
-  await page.route(/api\.voxire\.dev\/flow\/projects(\?.*)?$/, async (route: Route) => {
+  await page.route(/localhost:9999\/flow\/projects(\?.*)?$/, async (route: Route) => {
     const req = route.request();
     if (req.method() === 'GET') {
       await route.fulfill({
@@ -282,7 +284,7 @@ async function installFlowStubs(
   });
 
   // Project columns (board page).
-  await page.route(/api\.voxire\.dev\/flow\/projects\/columns(\?.*)?$/, (route: Route) =>
+  await page.route(/localhost:9999\/flow\/projects\/columns(\?.*)?$/, (route: Route) =>
     route.fulfill({
       status: 200,
       contentType: 'application/json',
@@ -304,9 +306,7 @@ test.describe('Flow — smoke', () => {
 
   test('inbox loads past auth guard', async ({ page }) => {
     await page.goto(`${FLOW_URL}/inbox`);
-    await expect(
-      page.getByRole('heading').first().or(page.getByRole('banner').first())
-    ).toBeVisible({ timeout: 10_000 });
+    await expect(page.locator('h1, h2, [role="banner"]').first()).toBeVisible({ timeout: 10_000 });
   });
 
   test('renders without console errors', async ({ page }) => {
@@ -349,9 +349,7 @@ test.describe('Flow — project list', () => {
     await installFlowStubs(page, { projects: [] });
     await page.goto(`${FLOW_URL}/w/10`);
     // Page should still mount and render the workspace name or a header.
-    await expect(page.getByRole('heading').first().or(page.locator('h1').first())).toBeVisible({
-      timeout: 10_000,
-    });
+    await expect(page.locator('h1, h2').first()).toBeVisible({ timeout: 10_000 });
   });
 });
 
@@ -447,9 +445,7 @@ test.describe('Flow — inbox', () => {
     await page.waitForLoadState('networkidle', { timeout: 30_000 });
 
     // The inbox heading is always rendered (i18n key inbox.title → "Inbox").
-    await expect(page.getByRole('heading').first().or(page.locator('h1').first())).toBeVisible({
-      timeout: 10_000,
-    });
+    await expect(page.locator('h1, h2').first()).toBeVisible({ timeout: 10_000 });
 
     // Both notification titles should appear.
     await expect(page.getByText('Task assigned to you').first()).toBeAttached({ timeout: 10_000 });
@@ -461,9 +457,7 @@ test.describe('Flow — inbox', () => {
     await page.goto(`${FLOW_URL}/inbox`);
 
     // Header always renders.
-    await expect(page.getByRole('heading').first().or(page.locator('h1').first())).toBeVisible({
-      timeout: 10_000,
-    });
+    await expect(page.locator('h1, h2').first()).toBeVisible({ timeout: 10_000 });
   });
 
   test('inbox renders without console errors', async ({ page }) => {

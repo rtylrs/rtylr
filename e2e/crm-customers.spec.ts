@@ -1,4 +1,4 @@
-import { test, expect, type Page, type Route } from '@playwright/test';
+import { test, expect, type Page, type Route } from './fixtures';
 
 /**
  * End-to-end: the CRM customers flow.
@@ -68,11 +68,11 @@ async function seedAuth(page: Page): Promise<void> {
 }
 
 async function stubCrmAPI(page: Page): Promise<void> {
-  // Catch-all stub — anything that reaches `api.voxire.com` without a
+  // Catch-all stub — anything that reaches `localhost:9999` without a
   // more-specific handler returns an empty object rather than hitting
   // the real backend. Registered first so specific handlers below take
   // precedence (Playwright runs routes in reverse-registration order).
-  await page.route(/https:\/\/api\.voxire\.dev\//, (route: Route) =>
+  await page.route(/localhost:9999\//, (route: Route) =>
     route.fulfill({ status: 200, contentType: 'application/json', body: '{}' })
   );
 

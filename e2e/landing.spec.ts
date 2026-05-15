@@ -1,4 +1,4 @@
-import { test, expect } from '@playwright/test';
+import { test, expect } from './fixtures';
 
 /**
  * Landing-site e2e. Strict-mode selectors (role + name) so assertions

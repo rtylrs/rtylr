@@ -1,4 +1,4 @@
-import { test, expect } from '@playwright/test';
+import { test, expect } from './fixtures';
 
 /**
  * Recruit admin e2e — complements recruit-apply.spec.ts which only

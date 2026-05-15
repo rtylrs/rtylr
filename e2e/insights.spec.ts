@@ -1,4 +1,4 @@
-import { test, expect } from '@playwright/test';
+import { test, expect } from './fixtures';
 
 /**
  * Insights e2e — dashboard loads, pillar screens switch, scheduled

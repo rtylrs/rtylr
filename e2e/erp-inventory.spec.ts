@@ -1,4 +1,4 @@
-import { test, expect, type Page, type Route } from '@playwright/test';
+import { test, expect, type Page, type Route } from './fixtures';
 
 /**
  * End-to-end: an operator managing the ERP product catalog.
@@ -65,7 +65,7 @@ async function installProductStubs(
   };
   const captured: { lastPost: Record<string, unknown> | null } = { lastPost: null };
 
-  // All stubs are scoped to the backend host (api.voxire.com) — matching
+  // All stubs are scoped to the backend host (localhost:9999) — matching
   // against `**/erp/**` would also swallow Vite's own module requests
   // (the dev server hosts source under paths that include `/erp/`), so
   // we anchor the glob to the API origin to keep the two worlds separate.
@@ -73,7 +73,7 @@ async function installProductStubs(
   // Registration order matters: Playwright matches routes in REVERSE
   // registration order, so the most generic catch-alls must be registered
   // FIRST and the most specific handlers LAST.
-  const apiHost = 'https://api.voxire.com';
+  const apiHost = 'http://localhost:9999';
 
   // (1) Widest catch-all for ERP endpoints not otherwise handled.
   await page.route(`${apiHost}/erp/**`, (route: Route) => {
@@ -208,7 +208,7 @@ async function installProductStubs(
 
   // (7) Most-specific: product-by-id detail GET. Registered LAST so it
   // wins the match against any of the earlier wider patterns.
-  await page.route(/api\.voxire\.dev\/erp\/products\/\d+(\?.*)?$/, async (route: Route) => {
+  await page.route(/localhost:9999\/erp\/products\/\d+(\?.*)?$/, async (route: Route) => {
     const url = new URL(route.request().url());
     const idStr = url.pathname.split('/').pop() ?? '';
     const id = Number(idStr);
@@ -276,7 +276,7 @@ async function installSupplierStubs(
     nextId: initial.length > 0 ? Math.max(...initial.map((s) => s.id)) + 1 : 1,
   };
   const captured: { lastPost: Record<string, unknown> | null } = { lastPost: null };
-  const apiHost = 'https://api.voxire.com';
+  const apiHost = 'http://localhost:9999';
 
   // (1) Widest ERP catch-all — registered first so specific handlers win.
   await page.route(`${apiHost}/erp/**`, (route: Route) => {
@@ -366,7 +366,7 @@ async function installPurchaseOrderStubs(
     nextId: initial.length > 0 ? Math.max(...initial.map((o) => o.id)) + 1 : 1,
   };
   const captured: { lastPost: Record<string, unknown> | null } = { lastPost: null };
-  const apiHost = 'https://api.voxire.com';
+  const apiHost = 'http://localhost:9999';
 
   await page.route(`${apiHost}/erp/**`, (route: Route) => {
     if (route.request().method() === 'GET') {
@@ -429,7 +429,7 @@ async function installPurchaseOrderStubs(
   });
 
   // Approve endpoint.
-  await page.route(/api\.voxire\.dev\/erp\/purchase-orders\/\d+\/approve/, async (route: Route) => {
+  await page.route(/localhost:9999\/erp\/purchase-orders\/\d+\/approve/, async (route: Route) => {
     const url = new URL(route.request().url());
     const parts = url.pathname.split('/');
     const id = Number(parts[parts.indexOf('purchase-orders') + 1]);
@@ -460,7 +460,7 @@ async function installCategoryStubs(
     nextId: initial.length > 0 ? Math.max(...initial.map((c) => c.id)) + 1 : 1,
   };
   const captured: { lastPost: Record<string, unknown> | null } = { lastPost: null };
-  const apiHost = 'https://api.voxire.com';
+  const apiHost = 'http://localhost:9999';
 
   await page.route(`${apiHost}/erp/**`, (route: Route) => {
     if (route.request().method() === 'GET') {

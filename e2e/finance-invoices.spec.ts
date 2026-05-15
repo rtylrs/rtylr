@@ -1,4 +1,4 @@
-import { test, expect } from '@playwright/test';
+import { test, expect } from './fixtures';
 
 /**
  * End-to-end: invoice list → create → detail → payment → delete.
@@ -180,7 +180,7 @@ test.describe.skip('Finance invoices flow', () => {
     // Prevent any un-stubbed outbound request from bouncing us into the
     // auth redirect. If an endpoint we haven't stubbed gets hit, answering
     // empty 200 keeps the app on-screen instead of triggering a 401.
-    await page.route(/api\.voxire\.dev/, (route) =>
+    await page.route(/localhost:9999/, (route) =>
       route.fulfill({
         status: 200,
         contentType: 'application/json',
