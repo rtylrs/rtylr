@@ -71,7 +71,7 @@ func processTokenAuthentication(ctx context.Context, token, path, remoteAddr str
 
 	claims, err := tokenValidator.ValidateTokenFull(ctx, token)
 	if err != nil {
-		logger.Ctx(ctx).Error("Invalid token",
+		logger.Ctx(ctx).Warn("Invalid token",
 			logger.Error(err),
 			logger.String("path", path),
 			logger.String("ip", remoteAddr),
