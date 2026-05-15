@@ -34,6 +34,7 @@ import (
 	"github.com/voxire/onion/internal/modules/campaigns"
 	"github.com/voxire/onion/internal/modules/careers"
 	"github.com/voxire/onion/internal/modules/categories"
+	"github.com/voxire/onion/internal/modules/console"
 	"github.com/voxire/onion/internal/modules/config"
 	crmsales "github.com/voxire/onion/internal/modules/crm_sales"
 	crmsettings "github.com/voxire/onion/internal/modules/crm_settings"
@@ -326,6 +327,7 @@ type apiModules struct {
 	Campaigns             *campaigns.Module
 	Careers               *careers.Module
 	Categories            *categories.Module
+	Console               *console.Module
 	Config                *config.Module
 	CRMSettings           *crmsettings.Module
 	CRMSales              *crmsales.Module
@@ -460,6 +462,7 @@ func initializeModules(ctx context.Context) *apiModules {
 		Campaigns:             campaigns.NewModule(ctx),
 		Careers:               careers.NewModule(ctx),
 		Categories:            categories.NewModule(ctx),
+		Console:               console.NewModule(ctx),
 		Config:                config.NewModule(ctx),
 		CRMSettings:           crmsettings.NewModule(ctx),
 		CRMSales:              crmsales.NewModule(ctx),
