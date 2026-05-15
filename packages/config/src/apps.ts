@@ -22,7 +22,7 @@ export const APP_URLS: Record<AppId, string> & { api: string; status: string } =
   insights: IS_LOCAL ? 'http://localhost:5187' : 'https://insights.rtylr.com',
   recruit: IS_LOCAL ? 'http://localhost:5184' : 'https://recruit.rtylr.com',
   landing: IS_LOCAL ? 'http://localhost:4200' : 'https://rtylr.com',
-  api: 'https://api.voxire.dev',
+  api: 'https://api.voxire.com',
   status: 'https://status.rtylr.com',
 };
 

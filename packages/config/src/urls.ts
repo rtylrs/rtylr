@@ -21,7 +21,7 @@ const LOCAL_URLS = {
   dash: 'http://localhost:5175',
   menu: 'http://localhost:5177',
   pos: 'http://localhost:5178',
-  api: 'https://api.voxire.dev',
+  api: 'https://api.voxire.com',
   status: 'https://status.rtylr.com',
 } as const;
 
@@ -31,7 +31,7 @@ const PROD_URLS = {
   dash: 'https://dash.rtylr.com',
   menu: 'https://menu.rtylr.com',
   pos: 'https://pos.rtylr.com',
-  api: 'https://api.voxire.dev',
+  api: 'https://api.voxire.com',
   status: 'https://status.rtylr.com',
 } as const;
 

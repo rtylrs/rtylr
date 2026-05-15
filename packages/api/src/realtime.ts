@@ -25,7 +25,7 @@ export interface RealtimeEvent {
 type EventHandler = (e: RealtimeEvent) => void;
 
 interface ClientOptions {
-  /** Full ws URL, e.g. `wss://api.voxire.dev/flow/ws`. */
+  /** Full ws URL, e.g. `wss://api.voxire.com/flow/ws`. */
   url: string;
   /** Function returning the current auth token. Called on every (re)connect. */
   getToken: () => string | null | undefined;
