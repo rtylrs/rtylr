@@ -1,37 +1,39 @@
-import { describe, it, expect, vi, beforeEach } from 'vitest';
-import { createApiClient } from './client';
+import { describe, it, expect, vi, beforeEach } from "vitest";
+import { createApiClient } from "./client";
 
 // We need to mock import.meta.env
-vi.stubGlobal('import', { meta: { env: { VITE_API_URL: 'https://api.test.com/' } } });
+vi.stubGlobal("import", {
+  meta: { env: { VITE_API_URL: "https://api.test.com/" } },
+});
 
 beforeEach(() => {
   // Clear all cookies between tests
-  document.cookie.split(';').forEach((c) => {
-    const name = c.trim().split('=')[0];
+  document.cookie.split(";").forEach((c) => {
+    const name = c.trim().split("=")[0];
     if (name) document.cookie = `${name}=; Max-Age=0; path=/`;
   });
   vi.restoreAllMocks();
 });
 
-describe('createApiClient', () => {
-  it('returns an axios instance', () => {
-    const client = createApiClient('hub');
+describe("createApiClient", () => {
+  it("returns an axios instance", () => {
+    const client = createApiClient("hub");
     expect(client).toBeDefined();
-    expect(typeof client.get).toBe('function');
-    expect(typeof client.post).toBe('function');
-    expect(typeof client.put).toBe('function');
-    expect(typeof client.delete).toBe('function');
+    expect(typeof client.get).toBe("function");
+    expect(typeof client.post).toBe("function");
+    expect(typeof client.put).toBe("function");
+    expect(typeof client.delete).toBe("function");
   });
 
-  it('client has baseURL set', () => {
-    const client = createApiClient('hub');
+  it("client has baseURL set", () => {
+    const client = createApiClient("hub");
     expect(client.defaults.baseURL).toBeDefined();
-    expect(typeof client.defaults.baseURL).toBe('string');
+    expect(typeof client.defaults.baseURL).toBe("string");
   });
 
-  it('request interceptor adds Authorization header when token exists', async () => {
-    document.cookie = 'token=eyJhbGciOiJub25lIn0.eyJ1c2VyX2lkIjoiMSJ9.fake_sig';
-    const client = createApiClient('hub');
+  it("request interceptor adds Authorization header when token exists", async () => {
+    document.cookie = "token=eyJhbGciOiJub25lIn0.eyJ1c2VyX2lkIjoiMSJ9.fake_sig";
+    const client = createApiClient("hub");
 
     const config = {
       headers: {} as Record<string, string>,
@@ -41,11 +43,13 @@ describe('createApiClient', () => {
     expect(interceptors.length).toBeGreaterThan(0);
 
     const result = interceptors[0].fulfilled(config);
-    expect(result.headers['Authorization']).toBe('Bearer eyJhbGciOiJub25lIn0.eyJ1c2VyX2lkIjoiMSJ9.fake_sig');
+    expect(result.headers["Authorization"]).toBe(
+      "Bearer eyJhbGciOiJub25lIn0.eyJ1c2VyX2lkIjoiMSJ9.fake_sig",
+    );
   });
 
-  it('request interceptor does not add header when no token', async () => {
-    const client = createApiClient('hub');
+  it("request interceptor does not add header when no token", async () => {
+    const client = createApiClient("hub");
 
     const config = {
       headers: {} as Record<string, string>,
@@ -53,12 +57,12 @@ describe('createApiClient', () => {
 
     const interceptors = (client.interceptors.request as any).handlers;
     const result = interceptors[0].fulfilled(config);
-    expect(result.headers['Authorization']).toBeUndefined();
+    expect(result.headers["Authorization"]).toBeUndefined();
   });
 
-  it('response interceptor handles 401 by redirecting to auth', async () => {
-    document.cookie = 'token=eyJhbGciOiJub25lIn0.eyJ1c2VyX2lkIjoiMSJ9.fake_sig';
-    const client = createApiClient('hub');
+  it("response interceptor handles 401 by redirecting to auth", async () => {
+    document.cookie = "token=eyJhbGciOiJub25lIn0.eyJ1c2VyX2lkIjoiMSJ9.fake_sig";
+    const client = createApiClient("hub");
 
     const interceptors = (client.interceptors.response as any).handlers;
     expect(interceptors.length).toBeGreaterThan(0);
@@ -72,11 +76,11 @@ describe('createApiClient', () => {
 
     // After 401, the token cookie should be expired (Max-Age=0 removes it)
     // and window.location.href should point to auth
-    expect(window.location.href).toContain('localhost:5176');
+    expect(window.location.href).toContain("localhost:5176");
   });
 
-  it('response interceptor passes through non-401 errors', async () => {
-    const client = createApiClient('hub');
+  it("response interceptor passes through non-401 errors", async () => {
+    const client = createApiClient("hub");
 
     const interceptors = (client.interceptors.response as any).handlers;
     const error = { response: { status: 500 } };
@@ -84,8 +88,8 @@ describe('createApiClient', () => {
     await expect(interceptors[0].rejected(error)).rejects.toEqual(error);
   });
 
-  it('response interceptor passes through successful responses', () => {
-    const client = createApiClient('test-app');
+  it("response interceptor passes through successful responses", () => {
+    const client = createApiClient("test-app");
 
     const interceptors = (client.interceptors.response as any).handlers;
     const response = { status: 200, data: { ok: true } };
@@ -94,27 +98,29 @@ describe('createApiClient', () => {
     expect(result).toEqual(response);
   });
 
-  it('creates different clients for different appIds', () => {
-    const hubClient = createApiClient('hub');
-    const authClient = createApiClient('auth');
+  it("creates different clients for different appIds", () => {
+    const hubClient = createApiClient("hub");
+    const authClient = createApiClient("auth");
     expect(hubClient).not.toBe(authClient);
   });
 
-  it('client has interceptors registered', () => {
-    const client = createApiClient('test-app');
+  it("client has interceptors registered", () => {
+    const client = createApiClient("test-app");
     const reqHandlers = (client.interceptors.request as any).handlers;
     const resHandlers = (client.interceptors.response as any).handlers;
     expect(reqHandlers.length).toBe(1);
     expect(resHandlers.length).toBe(1);
   });
 
-  it('handles token with special characters in cookie', () => {
-    document.cookie = 'token=eyJhbGciOiJIUzI1NiJ9.test.sig';
-    const client = createApiClient('hub');
+  it("handles token with special characters in cookie", () => {
+    document.cookie = "token=eyJhbGciOiJIUzI1NiJ9.test.sig";
+    const client = createApiClient("hub");
 
     const config = { headers: {} as Record<string, string> };
     const interceptors = (client.interceptors.request as any).handlers;
     const result = interceptors[0].fulfilled(config);
-    expect(result.headers['Authorization']).toBe('Bearer eyJhbGciOiJIUzI1NiJ9.test.sig');
+    expect(result.headers["Authorization"]).toBe(
+      "Bearer eyJhbGciOiJIUzI1NiJ9.test.sig",
+    );
   });
 });
