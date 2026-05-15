@@ -10,7 +10,7 @@ interface QrPayPanelProps {
 
 /**
  * Generates a QR code encoding a payment URL for this order.
- * The URL format is: https://pay.api.voxire.dev/checkout?ref={orderId}&amount={amount}
+ * The URL format is: https://pay.api.voxire.com/checkout?ref={orderId}&amount={amount}
  * A real payment gateway backend would serve that URL and POST back a webhook on completion.
  */
 const QrPayPanel: React.FC<QrPayPanelProps> = ({ orderId, amount, onConfirmed }) => {
@@ -18,7 +18,7 @@ const QrPayPanel: React.FC<QrPayPanelProps> = ({ orderId, amount, onConfirmed })
   const [url, setUrl] = useState('');
   const [copied, setCopied] = useState(false);
 
-  const paymentUrl = `https://pay.api.voxire.dev/checkout?ref=${encodeURIComponent(orderId)}&amount=${amount.toFixed(2)}`;
+  const paymentUrl = `https://pay.api.voxire.com/checkout?ref=${encodeURIComponent(orderId)}&amount=${amount.toFixed(2)}`;
 
   useEffect(() => {
     setUrl(paymentUrl);
