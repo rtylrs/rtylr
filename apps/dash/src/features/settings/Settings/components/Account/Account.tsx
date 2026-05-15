@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from 'react';
-import { removeCookie, getDefaultCookieDomain } from '@voxire/auth';
+import { signOut } from '@voxire/auth';
 import { useMutation } from '@tanstack/react-query';
 import { unwrap } from '@voxire/api';
 import { toast } from 'sonner';
@@ -193,12 +193,7 @@ const Account: React.FC = () => {
             onClick={async () => {
               try {
                 await unwrap(safe.post('/security/invalidate-sessions'));
-                // Clear the cross-subdomain cookie via the shared
-                // helper; a plain `document.cookie = '...'` without a
-                // Domain attr leaves the .rtylr.com cookie intact.
-                removeCookie('token', { domain: getDefaultCookieDomain() });
-                removeCookie('token');
-                window.location.href = '/';
+                signOut('dash');
               } catch {}
             }}
           >

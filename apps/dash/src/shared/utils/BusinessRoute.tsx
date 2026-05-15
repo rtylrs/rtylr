@@ -31,7 +31,7 @@ const ALL_APPS = [
     desc: 'Point of sale',
     color: 'var(--app-pos)',
     icon: MonitorSpeaker,
-    href: APP_URLS.pos || 'https://pos.rtylr.com',
+    href: APP_URLS.pos,
   },
   {
     id: 'erp',
@@ -39,7 +39,7 @@ const ALL_APPS = [
     desc: 'Inventory and supply',
     color: 'var(--app-erp)',
     icon: Package,
-    href: APP_URLS.erp || 'https://erp.rtylr.com',
+    href: APP_URLS.erp,
   },
   {
     id: 'hr',
@@ -47,7 +47,7 @@ const ALL_APPS = [
     desc: 'Staff and payroll',
     color: 'var(--app-hr)',
     icon: UserCheck,
-    href: APP_URLS.hr || 'https://hr.rtylr.com',
+    href: APP_URLS.hr,
   },
   {
     id: 'crm',
@@ -55,7 +55,7 @@ const ALL_APPS = [
     desc: 'Customers and loyalty',
     color: 'var(--app-crm)',
     icon: Users,
-    href: APP_URLS.crm || 'https://crm.rtylr.com',
+    href: APP_URLS.crm,
   },
   {
     id: 'finance',
@@ -63,7 +63,7 @@ const ALL_APPS = [
     desc: 'Invoices and expenses',
     color: 'var(--app-finance)',
     icon: CreditCard,
-    href: APP_URLS.finance || 'https://finance.rtylr.com',
+    href: APP_URLS.finance,
   },
   {
     id: 'flow',
@@ -71,7 +71,7 @@ const ALL_APPS = [
     desc: 'Projects and tasks',
     color: 'var(--app-flow)',
     icon: Layers,
-    href: APP_URLS.flow || 'https://flow.rtylr.com',
+    href: APP_URLS.flow,
   },
   {
     id: 'insights',
@@ -79,7 +79,7 @@ const ALL_APPS = [
     desc: 'Analytics and reports',
     color: 'var(--app-insights)',
     icon: BarChart3,
-    href: APP_URLS.insights || 'https://insights.rtylr.com',
+    href: APP_URLS.insights,
   },
 ];
 

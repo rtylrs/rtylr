@@ -2,6 +2,7 @@ import React from 'react';
 import { Check, Circle, ArrowRight } from 'lucide-react';
 import { motion } from 'motion/react';
 import { useNavigate } from 'react-router-dom';
+import { APP_URLS } from '@voxire/config';
 
 export interface OnboardingStep {
   id: string;
@@ -21,7 +22,7 @@ const DEFAULT_STEPS: OnboardingStep[] = [
     id: 'pos',
     label: 'Set up Point of Sale',
     description: 'Configure your first register and kitchen display.',
-    href: 'https://pos.rtylr.com',
+    href: APP_URLS.pos,
     done: false,
   },
   {

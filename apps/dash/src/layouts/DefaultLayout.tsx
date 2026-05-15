@@ -6,6 +6,7 @@ import { useQuery } from '@tanstack/react-query';
 import { unwrap } from '@voxire/api';
 import { safe } from '../shared/lib/api';
 import { APP_URLS } from '@voxire/config';
+import { signOut } from '@voxire/auth';
 import {
   LayoutDashboard,
   UtensilsCrossed,
@@ -259,7 +260,7 @@ const DefaultLayout: React.FC<DefaultLayoutProps> = ({ children }) => {
 
   const handleLogout = (): void => {
     logout();
-    window.location.href = `${APP_URLS.auth}?redirect=dash`;
+    signOut('dash');
   };
 
   return (

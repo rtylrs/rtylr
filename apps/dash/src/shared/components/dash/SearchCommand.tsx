@@ -27,6 +27,7 @@ import {
   CommandIcon,
   ArrowRight,
 } from 'lucide-react';
+import { APP_URLS } from '@voxire/config';
 import { useCommandPalette } from '../../stores/commandPaletteStore';
 
 interface CommandItem {
@@ -194,42 +195,42 @@ export const SearchCommand: React.FC = () => {
         label: 'Launch POS',
         group: 'Apps',
         icon: MonitorSpeaker,
-        action: launchApp('https://pos.rtylr.com'),
+        action: launchApp(APP_URLS.pos),
       },
       {
         id: 'app-erp',
         label: 'Launch ERP',
         group: 'Apps',
         icon: Package,
-        action: launchApp('https://erp.rtylr.com'),
+        action: launchApp(APP_URLS.erp),
       },
       {
         id: 'app-hr',
         label: 'Launch HR',
         group: 'Apps',
         icon: UserCheck,
-        action: launchApp('https://hr.rtylr.com'),
+        action: launchApp(APP_URLS.hr),
       },
       {
         id: 'app-crm',
         label: 'Launch CRM',
         group: 'Apps',
         icon: Users,
-        action: launchApp('https://crm.rtylr.com'),
+        action: launchApp(APP_URLS.crm),
       },
       {
         id: 'app-finance',
         label: 'Launch Finance',
         group: 'Apps',
         icon: CreditCard,
-        action: launchApp('https://finance.rtylr.com'),
+        action: launchApp(APP_URLS.finance),
       },
       {
         id: 'app-flow',
         label: 'Launch Flow',
         group: 'Apps',
         icon: Layers,
-        action: launchApp('https://flow.rtylr.com'),
+        action: launchApp(APP_URLS.flow),
       },
     ];
   }, [navigate, setOpen]);
