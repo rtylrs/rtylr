@@ -45,8 +45,7 @@ interface LoginHistoryItem {
 }
 
 const Account: React.FC = () => {
-  const { user, role } = useUserStore();
-  const isOwner = role === 'owner';
+  const { user } = useUserStore();
   const [formData, setFormData] = useState({ name: '', email: '' });
   const [isEditing, setIsEditing] = useState(false);
   const [loginHistory, setLoginHistory] = useState<LoginHistoryItem[]>([]);
@@ -140,14 +139,9 @@ const Account: React.FC = () => {
                 name="email"
                 type="email"
                 value={formData.email}
-                onChange={handleInputChange}
-                disabled={!isOwner}
+                disabled
+                readOnly
               />
-              {!isOwner && (
-                <p className="text-xs" style={{ color: 'var(--dash-text-muted)' }}>
-                  Only the account owner can change the email address.
-                </p>
-              )}
             </div>
           </div>
           <div className="flex justify-end gap-2 pt-1">
