@@ -293,8 +293,8 @@ $text-mid: rgba(255, 255, 255, 0.65);
 }
 
 .submitBtn {
-  background: $blue;
-  color: #fff;
+  background: #e8e6e1;
+  color: #0a0a0a;
   border: none;
   padding: 14px 32px;
   border-radius: 8px;
@@ -307,7 +307,7 @@ $text-mid: rgba(255, 255, 255, 0.65);
   font-family: inherit;
 
   &:hover {
-    background: #5596d5;
+    background: #ffffff;
     transform: translateY(-2px);
     box-shadow: 0 10px 32px rgba(232, 230, 225, 0.35);
   }
@@ -375,14 +375,15 @@ $text-mid: rgba(255, 255, 255, 0.65);
   justify-content: center;
   gap: 24px;
   padding: 32px 24px;
-  background: $blue;
+  background: rgba(255, 255, 255, 0.03);
+  border-top: 1px solid rgba(255, 255, 255, 0.06);
   flex-wrap: wrap;
 }
 
 .stripText {
   font-size: 1rem;
   font-weight: 500;
-  color: rgba(255, 255, 255, 0.9);
+  color: rgba(255, 255, 255, 0.6);
   margin: 0;
 }
 
@@ -390,9 +391,9 @@ $text-mid: rgba(255, 255, 255, 0.65);
   display: inline-flex;
   align-items: center;
   gap: 8px;
-  background: rgba(255, 255, 255, 0.15);
-  color: #fff;
-  border: 1px solid rgba(255, 255, 255, 0.3);
+  background: #e8e6e1;
+  color: #0a0a0a;
+  border: none;
   padding: 10px 24px;
   border-radius: 8px;
   font-size: 0.9rem;

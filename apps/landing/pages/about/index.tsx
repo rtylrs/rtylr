@@ -118,26 +118,6 @@ const AboutPage = (): JSX.Element => {
                     everything updates at once, because it&apos;s all the same database underneath.
                   </p>
                 </motion.div>
-                <motion.div className={styles.missionRight} variants={slideInRight}>
-                  <div className={styles.statsGrid}>
-                    <div className={styles.statCard}>
-                      <span className={styles.statNumber}>2</span>
-                      <span className={styles.statLabel}>Founders</span>
-                    </div>
-                    <div className={styles.statCard}>
-                      <span className={styles.statNumber}>7</span>
-                      <span className={styles.statLabel}>Apps</span>
-                    </div>
-                    <div className={styles.statCard}>
-                      <span className={styles.statNumber}>2024</span>
-                      <span className={styles.statLabel}>Founded</span>
-                    </div>
-                    <div className={styles.statCard}>
-                      <span className={styles.statNumber}>🇱🇧</span>
-                      <span className={styles.statLabel}>Lebanon</span>
-                    </div>
-                  </div>
-                </motion.div>
               </div>
             </div>
           </motion.section>
@@ -213,55 +193,6 @@ const AboutPage = (): JSX.Element => {
                     <p className={styles.productCardDescription}>{cluster.description}</p>
                   </motion.div>
                 ))}
-              </div>
-            </div>
-          </motion.section>
-
-          {/* Team */}
-          <motion.section
-            className={styles.teamSection}
-            initial="hidden"
-            whileInView="visible"
-            viewport={viewportOnce}
-            variants={staggerBlur}
-          >
-            <div className={styles.sectionContainer}>
-              <motion.span className={styles.sectionLabel} variants={blurFadeIn}>
-                The Team
-              </motion.span>
-              <motion.h2 className={styles.sectionTitle} variants={blurFadeIn}>
-                Built by founders, for founders.
-              </motion.h2>
-              <div className={styles.teamGrid}>
-                <motion.div className={styles.founderCard} variants={blurFadeIn}>
-                  <div className={styles.avatarWrapper} aria-hidden="true">
-                    <span className={styles.avatarInitials}>AA</span>
-                  </div>
-                  <h3 className={styles.founderName}>Abed El-Fattah Amouneh</h3>
-                  <span className={styles.founderRole}>Co-founder &amp; CEO</span>
-                  <a
-                    href="mailto:info@voxire.com"
-                    className={styles.founderEmail}
-                    aria-label="Email Abed"
-                  >
-                    info@voxire.com
-                  </a>
-                </motion.div>
-
-                <motion.div className={styles.founderCard} variants={blurFadeIn}>
-                  <div className={styles.avatarWrapper} aria-hidden="true">
-                    <span className={styles.avatarInitials}>MH</span>
-                  </div>
-                  <h3 className={styles.founderName}>Mohammad Homsi</h3>
-                  <span className={styles.founderRole}>Co-founder &amp; CTO</span>
-                  <a
-                    href="mailto:info@voxire.com"
-                    className={styles.founderEmail}
-                    aria-label="Email Mohammad"
-                  >
-                    info@voxire.com
-                  </a>
-                </motion.div>
               </div>
             </div>
           </motion.section>
