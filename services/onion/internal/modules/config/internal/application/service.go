@@ -2,6 +2,7 @@ package application
 
 import (
 	"context"
+	"errors"
 	"time"
 
 	"github.com/voxire/onion/internal/modules/config/internal/domain"
@@ -38,6 +39,16 @@ func (s *Service) GetConfig(ctx context.Context, ownerID string) (domain.Config,
 	cacheKey := "config:" + ownerID
 
 	return cacher.Of[domain.Config]().GetOrComputeSingle(ctx, cacheKey, func(ctx context.Context) (domain.Config, error) {
+		cfg, err := s.repo.GetConfig(ctx, ownerID)
+		if err == nil {
+			return cfg, nil
+		}
+		if !errors.Is(err, domain.ErrConfigNotFound) {
+			return domain.Config{}, err
+		}
+		if seedErr := s.repo.CreateConfig(ctx, domain.ConfigInput{OwnerId: ownerID}); seedErr != nil {
+			return domain.Config{}, seedErr
+		}
 		return s.repo.GetConfig(ctx, ownerID)
 	}, cacher.WithExpiry(ctx, ConfigCacheTTL))
 }
