@@ -7,10 +7,7 @@ const FOCUSABLE =
  * Trap focus inside `container` while `active`. Used by approval dialogs so
  * keyboard users can't tab into the chat behind a destructive prompt.
  */
-export function useFocusTrap(
-  container: React.RefObject<HTMLElement>,
-  active: boolean
-): void {
+export function useFocusTrap(container: React.RefObject<HTMLElement>, active: boolean): void {
   useEffect(() => {
     if (!active) return;
     const root = container.current;

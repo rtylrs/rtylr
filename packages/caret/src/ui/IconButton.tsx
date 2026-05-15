@@ -36,25 +36,14 @@ export const IconButton: React.FC<React.PropsWithChildren<IconButtonProps>> = ({
         : variant === 'soft' || active
           ? caretTokens.accentSoft
           : 'transparent',
-    color:
-      variant === 'solid'
-        ? '#fff'
-        : active
-          ? caretTokens.accent
-          : caretTokens.textMuted,
+    color: variant === 'solid' ? '#fff' : active ? caretTokens.accent : caretTokens.textMuted,
     border: 'none',
     cursor: rest.disabled ? 'not-allowed' : 'pointer',
     transition: 'background 0.12s, color 0.12s',
     flexShrink: 0,
   };
   return (
-    <button
-      type="button"
-      aria-label={label}
-      title={label}
-      {...rest}
-      style={{ ...base, ...style }}
-    >
+    <button type="button" aria-label={label} title={label} {...rest} style={{ ...base, ...style }}>
       {children}
     </button>
   );

@@ -43,9 +43,7 @@ export const MessageBubble: React.FC<MessageBubbleProps> = ({
         ? [{ id: `${message.id}-text`, type: 'text', content: message.content }]
         : [];
 
-  const text = isUser
-    ? message.content ?? blocksToText(blocks)
-    : blocksToText(blocks);
+  const text = isUser ? (message.content ?? blocksToText(blocks)) : blocksToText(blocks);
 
   if (isUser) {
     return (

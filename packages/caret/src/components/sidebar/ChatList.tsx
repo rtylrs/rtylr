@@ -34,9 +34,7 @@ export const ChatList: React.FC<ChatListProps> = ({
     });
     if (!q) return ordered;
     return ordered.filter(
-      (c) =>
-        c.title.toLowerCase().includes(q) ||
-        (c.summary ?? '').toLowerCase().includes(q)
+      (c) => c.title.toLowerCase().includes(q) || (c.summary ?? '').toLowerCase().includes(q)
     );
   }, [chats, debounced]);
 

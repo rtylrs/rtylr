@@ -20,9 +20,7 @@ export function useShortcuts(): void {
       const target = e.target as HTMLElement | null;
       const editable =
         !!target &&
-        (target.tagName === 'INPUT' ||
-          target.tagName === 'TEXTAREA' ||
-          target.isContentEditable);
+        (target.tagName === 'INPUT' || target.tagName === 'TEXTAREA' || target.isContentEditable);
 
       if (mod && (e.key === 'j' || e.key === 'J')) {
         e.preventDefault();

@@ -74,7 +74,7 @@ export const ToolCallCard: React.FC<ToolCallCardProps> = ({ call, onApprove, onD
           style={{
             padding: '8px 10px',
             borderTop: `1px solid ${caretTokens.border}`,
-            fontFamily: "SFMono-Regular, Menlo, Consolas, monospace",
+            fontFamily: 'SFMono-Regular, Menlo, Consolas, monospace',
             fontSize: 11,
             color: caretTokens.textMuted,
           }}

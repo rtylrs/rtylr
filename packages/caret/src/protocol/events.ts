@@ -41,10 +41,7 @@ export interface LegacyStreamToken {
 /** Try to parse a JSON line into a CaretStreamEvent.
  *  Falls back to a `text_delta` envelope so we stay compatible with the old
  *  `{text, done}` server output during the rollout window. */
-export function parseStreamLine(
-  line: string,
-  fallbackMessageId: string
-): CaretStreamEvent | null {
+export function parseStreamLine(line: string, fallbackMessageId: string): CaretStreamEvent | null {
   const trimmed = line.trim();
   if (!trimmed) return null;
   try {

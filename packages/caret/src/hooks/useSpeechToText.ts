@@ -25,7 +25,10 @@ type SpeechCtor = new () => SpeechRecognitionLike;
 
 function getRecognitionCtor(): SpeechCtor | null {
   if (typeof window === 'undefined') return null;
-  const w = window as unknown as { SpeechRecognition?: SpeechCtor; webkitSpeechRecognition?: SpeechCtor };
+  const w = window as unknown as {
+    SpeechRecognition?: SpeechCtor;
+    webkitSpeechRecognition?: SpeechCtor;
+  };
   return w.SpeechRecognition ?? w.webkitSpeechRecognition ?? null;
 }
 

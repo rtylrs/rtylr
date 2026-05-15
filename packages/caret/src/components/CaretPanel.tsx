@@ -30,12 +30,7 @@ const DEFAULT_SUGGESTIONS = [
   'How many staff are clocked in?',
 ];
 
-const CaretPanel: React.FC<CaretPanelProps> = ({
-  systemContext,
-  userId,
-  apiBaseUrl,
-  variant,
-}) => {
+const CaretPanel: React.FC<CaretPanelProps> = ({ systemContext, userId, apiBaseUrl, variant }) => {
   useShortcuts();
   const { isOpen, messages, isStreaming, setToolStatus, reset } = useCaretStore();
   const showThinking = useCaretSettingsStore((s) => s.showThinking);
@@ -116,10 +111,7 @@ const CaretPanel: React.FC<CaretPanelProps> = ({
       {view === 'chat' && (
         <>
           {messages.length === 0 ? (
-            <EmptyState
-              suggestions={DEFAULT_SUGGESTIONS}
-              onSuggestion={(s) => sendMessage(s)}
-            />
+            <EmptyState suggestions={DEFAULT_SUGGESTIONS} onSuggestion={(s) => sendMessage(s)} />
           ) : (
             <MessageList
               messages={messages}
@@ -138,12 +130,7 @@ const CaretPanel: React.FC<CaretPanelProps> = ({
       )}
 
       {view === 'history' && (
-        <ChatList
-          chats={[]}
-          activeId={null}
-          onSelect={() => setView('chat')}
-          onNew={newChat}
-        />
+        <ChatList chats={[]} activeId={null} onSelect={() => setView('chat')} onNew={newChat} />
       )}
 
       {view === 'settings' && <SettingsPanel />}

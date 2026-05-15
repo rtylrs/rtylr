@@ -130,8 +130,7 @@ export function useCaretStream({
 
       case 'thinking_end': {
         const opened = openThinking[event.blockId];
-        const duration =
-          event.durationMs ?? (opened ? Date.now() - opened.startedAt : undefined);
+        const duration = event.durationMs ?? (opened ? Date.now() - opened.startedAt : undefined);
         store.updateBlockOnLastAssistant(event.blockId, (b) =>
           b.type === 'thinking' ? { ...b, durationMs: duration } : b
         );

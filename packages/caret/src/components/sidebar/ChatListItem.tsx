@@ -62,11 +62,7 @@ export const ChatListItem: React.FC<ChatListItemProps> = ({
           </IconButton>
         )}
         {onDelete && (
-          <IconButton
-            size="sm"
-            label="Delete chat"
-            onClick={() => onDelete(chat.id)}
-          >
+          <IconButton size="sm" label="Delete chat" onClick={() => onDelete(chat.id)}>
             <Trash2 size={11} />
           </IconButton>
         )}
