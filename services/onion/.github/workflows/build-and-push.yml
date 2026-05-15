@@ -105,6 +105,7 @@ jobs:
             --output table
 
       - name: Create GitHub Release
+        continue-on-error: true
         env:
           GH_TOKEN: ${{ secrets.PAT_TOKEN }}
         run: |
