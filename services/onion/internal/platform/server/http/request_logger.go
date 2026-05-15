@@ -52,6 +52,13 @@ func RequestLoggerMiddleware(ctx context.Context) func(next http.Handler) http.H
 			sanitizedQuery := sanitizeMap(r.URL.Query())
 			sanitizedHeaders := sanitizeMap(r.Header)
 
+			// WebSocket upgrades require the raw ResponseWriter for Hijack;
+			// skip wrapping and let the connection pass through unlogged.
+			if strings.EqualFold(r.Header.Get("Upgrade"), "websocket") {
+				next.ServeHTTP(w, r)
+				return
+			}
+
 			responseWriter := &ResponseWriter{ResponseWriter: w, statusCode: http.StatusOK}
 
 			next.ServeHTTP(responseWriter, r)
