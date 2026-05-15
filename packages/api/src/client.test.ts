@@ -30,7 +30,7 @@ describe('createApiClient', () => {
   });
 
   it('request interceptor adds Authorization header when token exists', async () => {
-    document.cookie = 'token=my-test-token';
+    document.cookie = 'token=eyJhbGciOiJub25lIn0.eyJ1c2VyX2lkIjoiMSJ9.fake_sig';
     const client = createApiClient('hub');
 
     const config = {
@@ -41,7 +41,7 @@ describe('createApiClient', () => {
     expect(interceptors.length).toBeGreaterThan(0);
 
     const result = interceptors[0].fulfilled(config);
-    expect(result.headers['Authorization']).toBe('Bearer my-test-token');
+    expect(result.headers['Authorization']).toBe('Bearer eyJhbGciOiJub25lIn0.eyJ1c2VyX2lkIjoiMSJ9.fake_sig');
   });
 
   it('request interceptor does not add header when no token', async () => {
@@ -57,7 +57,7 @@ describe('createApiClient', () => {
   });
 
   it('response interceptor handles 401 by redirecting to auth', async () => {
-    document.cookie = 'token=my-test-token';
+    document.cookie = 'token=eyJhbGciOiJub25lIn0.eyJ1c2VyX2lkIjoiMSJ9.fake_sig';
     const client = createApiClient('hub');
 
     const interceptors = (client.interceptors.response as any).handlers;
