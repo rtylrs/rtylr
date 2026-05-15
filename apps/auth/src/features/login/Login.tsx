@@ -113,8 +113,8 @@ const Login: React.FC = (): React.JSX.Element => {
   // enumeration vector.
   const errorMessage = error ? t('auth.login.genericError') : null;
 
-  const title = appName ? t('auth.login.title') + ' — ' + appName : t('auth.login.title');
-  const subtitle = appName ? t('auth.login.subtitle') : t('auth.login.subtitle');
+  const title = t('auth.login.title');
+  const subtitle = t('auth.login.subtitle');
 
   return (
     <AuthShell
