@@ -22,6 +22,7 @@ import {
   Monitor,
   ExternalLink,
   Users,
+  Grid3x3,
   Store,
   MessageSquare,
   Search,
@@ -55,6 +56,7 @@ interface NavItem {
 const navItems: NavItem[] = [
   { label: 'Dashboard', path: '/', icon: LayoutDashboard },
   { label: 'Team', path: '/team', icon: Users },
+  { label: 'Apps', path: '/apps', icon: Grid3x3 },
 ];
 
 const menuSubItems: NavItem[] = [
