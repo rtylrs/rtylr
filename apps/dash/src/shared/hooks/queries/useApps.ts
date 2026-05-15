@@ -17,7 +17,16 @@ import {
   Headphones,
   FileText,
 } from 'lucide-react';
+import { APP_URLS } from '@voxire/config';
+import type { AppId } from '@voxire/auth';
 import { safe } from '../../lib/api';
+
+function appLaunchUrl(appId: string): string {
+  if (appId in APP_URLS) {
+    return APP_URLS[appId as AppId];
+  }
+  return '#';
+}
 import { appContractSchema } from '../../schemas/apps';
 
 export interface RtylrApp {
@@ -61,37 +70,37 @@ const APP_META: Record<
   { href: string; color: string; bg: string; category: RtylrApp['category'] }
 > = {
   pos: {
-    href: 'https://pos.rtylr.com',
+    href: appLaunchUrl('pos'),
     color: '#4583C4',
     bg: 'rgba(69,131,196,0.12)',
     category: 'core',
   },
   erp: {
-    href: 'https://erp.rtylr.com',
+    href: appLaunchUrl('erp'),
     color: '#10b981',
     bg: 'rgba(16,185,129,0.12)',
     category: 'operations',
   },
   hr: {
-    href: 'https://hr.rtylr.com',
+    href: appLaunchUrl('hr'),
     color: '#f59e0b',
     bg: 'rgba(245,158,11,0.12)',
     category: 'operations',
   },
   crm: {
-    href: 'https://crm.rtylr.com',
+    href: appLaunchUrl('crm'),
     color: '#8b5cf6',
     bg: 'rgba(139,92,246,0.12)',
     category: 'growth',
   },
   finance: {
-    href: 'https://finance.rtylr.com',
+    href: appLaunchUrl('finance'),
     color: '#ef4444',
     bg: 'rgba(239,68,68,0.12)',
     category: 'finance',
   },
   flow: {
-    href: 'https://flow.rtylr.com',
+    href: appLaunchUrl('flow'),
     color: '#64C5B9',
     bg: 'rgba(100,197,185,0.12)',
     category: 'core',
@@ -115,7 +124,7 @@ const APP_META: Record<
     category: 'growth',
   },
   insights: {
-    href: 'https://insights.rtylr.com',
+    href: appLaunchUrl('insights'),
     color: '#6366f1',
     bg: 'rgba(99,102,241,0.12)',
     category: 'core',

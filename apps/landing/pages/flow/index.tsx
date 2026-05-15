@@ -367,7 +367,7 @@ const FlowPage = (): JSX.Element => {
   const totalTasks = columns.reduce((acc, c) => acc + c.tasks.length, 0);
 
   const goRegister = (): void => {
-    navigateExternal(`${APP_URLS.auth}/register`);
+    navigateExternal(`${APP_URLS.auth}/register?redirect=flow`);
   };
 
   const goDemo = (): void => {

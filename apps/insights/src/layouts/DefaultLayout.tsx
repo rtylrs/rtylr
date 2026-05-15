@@ -4,7 +4,7 @@ import { useLocation, Link } from 'react-router-dom';
 import { useForesightLinks } from '@voxire/utils';
 import { motion, AnimatePresence } from 'motion/react';
 import { APP_URLS } from '@voxire/config';
-import { removeCookie, getDefaultCookieDomain, useUserStore } from '@voxire/auth';
+import { signOut, useUserStore } from '@voxire/auth';
 import { CaretPanel, CaretButton, useCaretStore } from '@voxire/caret';
 import {
   LayoutDashboard,
@@ -180,14 +180,8 @@ const DefaultLayout: React.FC<DefaultLayoutProps> = ({ children }) => {
     localStorage.setItem('rtylr-insights-theme', t);
   };
 
-  const handleLogout = () => {
-    // Hand-rolled cookie clear without a Domain attr only removes
-    // the cookie on the current subdomain. The shared .rtylr.com
-    // cookie survives and auth.rtylr.com bounces the user right
-    // back. Use the shared helper which targets the exact domain.
-    removeCookie('token', { domain: getDefaultCookieDomain() });
-    removeCookie('token');
-    window.location.href = `${APP_URLS.auth}?redirect=insights`;
+  const handleLogout = (): void => {
+    signOut('insights');
   };
 
   return (

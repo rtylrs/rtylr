@@ -35,6 +35,7 @@ import {
 import { APP_URLS, useFeatureFlag, FLAG_KEYS } from '@voxire/config';
 import { CaretPanel, CaretButton, useCaretStore } from '@voxire/caret';
 import { useForesightLinks } from '@voxire/utils';
+import { signOut, useUserStore as useAuthUserStore } from '@voxire/auth';
 import { useUserStore } from '../shared/stores/userStore';
 import { useThemeStore } from '../shared/stores/themeStore';
 import { useFlowStore } from '../shared/stores/flowStore';
@@ -216,7 +217,17 @@ const FlowLayout: React.FC<FlowLayoutProps> = ({ children }) => {
   const { order: sidebarSectionOrder, moveSection: moveSidebarSection } = useSidebarSectionOrder();
   const { prefs: lifePrefs } = useLifePreferences();
 
-  const { user, logout } = useUserStore();
+  const authUser = useAuthUserStore((s) => s.user);
+  const { user, setUser } = useUserStore();
+
+  useEffect((): void => {
+    if (!authUser) return;
+    setUser({
+      id: authUser.id ?? authUser.userId ?? '',
+      name: authUser.name ?? authUser.firstName ?? '',
+      email: authUser.email ?? authUser.emailAddress ?? '',
+    });
+  }, [authUser, setUser]);
   const { theme, setTheme } = useThemeStore();
   const {
     workspaces,
@@ -399,9 +410,8 @@ const FlowLayout: React.FC<FlowLayoutProps> = ({ children }) => {
   const userEmail = displayUserEmail(user);
   const userName = displayUserName(user);
 
-  const handleLogout = () => {
-    logout();
-    window.location.href = APP_URLS.auth;
+  const handleLogout = (): void => {
+    signOut('flow');
   };
 
   const isMac = typeof navigator !== 'undefined' && /Mac/i.test(navigator.platform);

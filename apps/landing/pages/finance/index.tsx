@@ -227,7 +227,7 @@ const FinancePage = (): JSX.Element => {
   const chartSum = CHART_DATA[chartMetric].reduce((acc, n) => acc + n, 0);
 
   const goRegister = (): void => {
-    navigateExternal(`${APP_URLS.auth}/register`);
+    navigateExternal(`${APP_URLS.auth}/register?redirect=finance`);
   };
 
   const goDemo = (): void => {

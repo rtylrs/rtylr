@@ -117,7 +117,7 @@ const ERPPage = (): JSX.Element => {
   }, []);
 
   const goRegister = (): void => {
-    navigateExternal(`${APP_URLS.auth}/register`);
+    navigateExternal(`${APP_URLS.auth}/register?redirect=erp`);
   };
 
   const goDemo = (): void => {

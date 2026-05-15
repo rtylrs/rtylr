@@ -42,7 +42,7 @@ import { cn } from '../../shared/lib/utils';
 import { useLifePreferences } from '../../shared/lib/lifePreferences';
 import { flowApi } from '../../shared/services/flowApi';
 import type { ApiUserSettings } from '../../shared/services/flowApi';
-import { useUserStore } from '../../shared/stores/userStore';
+import { getCookie } from '@voxire/auth';
 import { useFlowStore } from '../../shared/stores/flowStore';
 import { useLabels, useCreateLabel, useDeleteLabel } from '../../features/tasks/useLabels';
 import {
@@ -1195,7 +1195,7 @@ const MANAGE_WORKSPACE_ROLES = new Set(['owner', 'admin', 'manager']);
 
 const FlowSettings: React.FC = () => {
   const { t } = useTranslation();
-  const token = useUserStore((s) => s.token);
+  const token = getCookie('token');
   const role = useMemo(() => getRoleFromToken(token), [token]);
   const canManageWorkspaces = MANAGE_WORKSPACE_ROLES.has(role);
   const [activeSection, setActiveSection] = useState(canManageWorkspaces ? 'workspaces' : 'team');

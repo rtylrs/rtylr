@@ -48,7 +48,7 @@ const POSPage = (): JSX.Element => {
   const router = useRouter();
 
   const goRegister = (): void => {
-    navigateExternal(`${APP_URLS.auth}/register`);
+    navigateExternal(`${APP_URLS.auth}/register?redirect=pos`);
   };
 
   const goDemo = (): void => {

@@ -1,7 +1,7 @@
 import { Outlet, useLocation } from 'react-router-dom';
 import { useEffect, useState } from 'react';
 import { APP_URLS } from '@voxire/config';
-import { removeCookie, getDefaultCookieDomain } from '@voxire/auth';
+import { signOut } from '@voxire/auth';
 import {
   MonitorSpeaker,
   Package,
@@ -92,13 +92,7 @@ function StaffView({ user }: { user: StoredUser }): React.JSX.Element {
   const [menuOpen, setMenuOpen] = useState(false);
 
   const handleLogout = (): void => {
-    // Plain `document.cookie = 'token=; …; path=/'` without a Domain
-    // attr only clears the cookie for the current host. The shared
-    // .rtylr.com cookie survives, and auth.rtylr.com then bounces
-    // the user straight back in. Use the shared helper.
-    removeCookie('token', { domain: getDefaultCookieDomain() });
-    removeCookie('token');
-    window.location.href = `${APP_URLS.auth}?redirect=dash`;
+    signOut('dash');
   };
 
   const handleRequestAccess = async (appId: string): Promise<void> => {

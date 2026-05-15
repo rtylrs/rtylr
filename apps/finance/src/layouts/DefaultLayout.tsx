@@ -1,5 +1,5 @@
 import React, { useEffect, useRef, useState } from 'react';
-import { useUserStore } from '@voxire/auth';
+import { signOut, useUserStore } from '@voxire/auth';
 import { CaretPanel, CaretButton, useCaretStore } from '@voxire/caret';
 import TrialBanner from '../shared/components/TrialBanner';
 import { useForesightLinks } from '@voxire/utils';
@@ -403,6 +403,26 @@ const DefaultLayout: React.FC = () => {
                 </button>
               ))}
             </div>
+            <button
+              type="button"
+              onClick={() => signOut('finance')}
+              style={{
+                display: 'flex',
+                alignItems: 'center',
+                gap: 8,
+                width: '100%',
+                marginTop: 8,
+                padding: '8px 12px',
+                borderRadius: 8,
+                background: 'transparent',
+                border: 'none',
+                color: 'var(--hr-error, #ef4444)',
+                fontSize: 13,
+                cursor: 'pointer',
+              }}
+            >
+              Sign out
+            </button>
           </div>
         </aside>
 

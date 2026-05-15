@@ -266,7 +266,7 @@ const CRMPage = (): JSX.Element => {
   }, [activeFilters]);
 
   const goRegister = (): void => {
-    navigateExternal(`${APP_URLS.auth}/register`);
+    navigateExternal(`${APP_URLS.auth}/register?redirect=crm`);
   };
 
   const goDemo = (): void => {

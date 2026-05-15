@@ -257,9 +257,9 @@ const DefaultLayout: React.FC<DefaultLayoutProps> = ({ children }) => {
   const userName = user?.name || user?.firstName || userEmail || 'User';
   const businessName = user?.businessName || user?.storeName || 'My Business';
 
-  const handleLogout = () => {
+  const handleLogout = (): void => {
     logout();
-    window.location.href = APP_URLS.auth;
+    window.location.href = `${APP_URLS.auth}?redirect=dash`;
   };
 
   return (

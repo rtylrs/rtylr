@@ -1,6 +1,8 @@
 import React, { Suspense } from 'react';
 import { Routes, Route, Navigate } from 'react-router-dom';
-import { ProtectedRoute } from '@voxire/auth';
+import { AppGuard } from '@voxire/auth';
+import { unwrap } from '@voxire/api';
+import { safe } from './shared/lib/api';
 import ErrorBoundary from './shared/components/ErrorBoundary';
 import HRConfigRoute from './features/setup-wizard/HRConfigRoute';
 import DefaultLayout from './layouts/DefaultLayout';
@@ -79,7 +81,12 @@ function wrap(screen: React.ReactNode): React.JSX.Element {
 const App = (): React.JSX.Element => {
   return (
     <ErrorBoundary>
-      <ProtectedRoute appId="hr">
+      <AppGuard
+        appId="hr"
+        fetchUser={(): Promise<Record<string, unknown>> =>
+          unwrap(safe.get<Record<string, unknown>>('/user/me'))
+        }
+      >
         <Suspense fallback={<PageLoader />}>
           <Routes>
             {/* Setup wizard, outside HRConfigRoute */}
@@ -144,7 +151,7 @@ const App = (): React.JSX.Element => {
             <Route path="*" element={<Navigate to="/" replace />} />
           </Routes>
         </Suspense>
-      </ProtectedRoute>
+      </AppGuard>
     </ErrorBoundary>
   );
 };

@@ -7,6 +7,20 @@ import { useLogin } from '../../shared/hooks/useAuth';
 import { useIssueAuthCode } from './useOAuth';
 import { getEmailError } from '../../shared/lib/validation';
 
+function isAllowedOAuthRedirect(url: string): boolean {
+  try {
+    const host = new URL(url).hostname.toLowerCase();
+    return (
+      host === 'localhost' ||
+      host === '127.0.0.1' ||
+      host === 'rtylr.com' ||
+      host.endsWith('.rtylr.com')
+    );
+  } catch {
+    return false;
+  }
+}
+
 const SCOPE_LABELS: Record<string, string> = {
   'flow:read': 'View your projects and tasks',
   'flow:write': 'Create and update projects and tasks',
@@ -78,6 +92,10 @@ const OAuthConsent: React.FC = (): React.JSX.Element => {
       },
       {
         onSuccess: (data) => {
+          if (!isAllowedOAuthRedirect(data.redirect_url)) {
+            setError('Redirect URI is not on an allowed domain.');
+            return;
+          }
           window.location.href = data.redirect_url;
         },
         onError: () => setError('Failed to authorize. Please try again.'),

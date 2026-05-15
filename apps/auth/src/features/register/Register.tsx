@@ -261,9 +261,9 @@ const Register: React.FC = (): React.JSX.Element => {
   useEffect((): void => {
     const hasToken = document.cookie.split(';').some((c) => c.trim().startsWith('token='));
     if (isAuthenticated && hasToken) {
-      window.location.href = APP_URLS.dash as string;
+      window.location.href = getRedirectUrl(redirectParam);
     }
-  }, [isAuthenticated, navigate, role]);
+  }, [isAuthenticated, navigate, role, redirectParam]);
 
   const errorMessage =
     error &&

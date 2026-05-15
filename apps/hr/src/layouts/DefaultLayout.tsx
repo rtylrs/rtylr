@@ -3,6 +3,7 @@ import { useLocation, Link } from 'react-router-dom';
 import { motion, AnimatePresence } from 'motion/react';
 import { useTranslation } from 'react-i18next';
 import { APP_URLS } from '@voxire/config';
+import { signOut } from '@voxire/auth';
 import {
   LayoutDashboard,
   Users,
@@ -457,7 +458,7 @@ function UserMenu({ theme, setTheme }: { theme: Theme; setTheme: (t: Theme) => v
             />
             <button
               onClick={() => {
-                window.location.href = APP_URLS.auth;
+                signOut('hr');
               }}
               style={{
                 display: 'flex',
