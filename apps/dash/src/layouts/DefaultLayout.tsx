@@ -33,10 +33,15 @@ import {
   MessageSquare,
   Search,
   Sparkles,
+  Pin,
+  PinOff,
+  Plus,
+  X,
 } from 'lucide-react';
 import { CaretPanel, CaretButton, useCaretStore } from '@voxire/caret';
 import { useUserStore } from '../shared/stores/userStore';
 import { useThemeStore } from '../shared/stores/themeStore';
+import { usePinnedStore } from '../shared/stores/pinnedStore';
 import { cn } from '../shared/lib/utils';
 import {
   Avatar,
@@ -204,6 +209,156 @@ const SidebarSection: React.FC<{
   );
 };
 
+const APP_META: Record<
+  string,
+  { label: string; icon: React.ComponentType<{ size?: number; className?: string }> }
+> = {
+  pos: { label: 'POS', icon: MonitorSpeaker },
+  erp: { label: 'ERP', icon: Package },
+  hr: { label: 'HR', icon: UserCheck },
+  crm: { label: 'CRM', icon: Users },
+  finance: { label: 'Finance', icon: CreditCard },
+  flow: { label: 'Flow', icon: Layers },
+  insights: { label: 'Insights', icon: BarChart3 },
+  menu: { label: 'Menu', icon: UtensilsCrossed },
+};
+
+const MyAppsSection: React.FC = () => {
+  const { user } = useUserStore();
+  const apps = (user?.apps as string[] | undefined) ?? [];
+  const visible = apps.filter((id) => APP_META[id] && id in APP_URLS);
+  const [open, setOpen] = React.useState(true);
+
+  if (visible.length === 0) return null;
+
+  return (
+    <div className="pt-1">
+      <button
+        onClick={() => setOpen((v) => !v)}
+        className="flex items-center gap-3 px-3 py-2 rounded-lg text-sm w-full transition-colors duration-150 hover:bg-[var(--dash-hover)]"
+        style={{ color: 'var(--dash-text-muted)' }}
+      >
+        <Grid3x3 size={16} className="shrink-0" />
+        <span className="flex-1 text-left">My apps</span>
+        <ChevronRight
+          size={12}
+          className={cn('shrink-0 transition-transform', open && 'rotate-90')}
+          style={{ color: 'var(--dash-text-dim)' }}
+        />
+      </button>
+      {open && (
+        <div
+          className="ml-5 pl-2 mt-0.5 space-y-0.5"
+          style={{ borderLeft: '1px solid var(--dash-border)' }}
+        >
+          {visible.map((id) => {
+            const meta = APP_META[id];
+            const Icon = meta.icon;
+            return (
+              <a
+                key={id}
+                href={APP_URLS[id as keyof typeof APP_URLS]}
+                target="_blank"
+                rel="noopener noreferrer"
+                className="flex items-center gap-3 px-3 py-1.5 rounded-lg text-sm transition-colors duration-150 hover:bg-[var(--dash-hover)]"
+                style={{ color: 'var(--dash-text-muted)' }}
+              >
+                <Icon size={14} className="shrink-0" />
+                <span className="flex-1 truncate">{meta.label}</span>
+                <ExternalLink size={11} style={{ color: 'var(--dash-text-dim)' }} />
+              </a>
+            );
+          })}
+        </div>
+      )}
+    </div>
+  );
+};
+
+const PinnedSection: React.FC<{ currentPath: string; currentLabel: string }> = ({
+  currentPath,
+  currentLabel,
+}) => {
+  const { items, add, remove } = usePinnedStore();
+  const [open, setOpen] = React.useState(true);
+  const alreadyPinned = items.some((i) => i.path === currentPath);
+  const canPin = currentPath !== '/' && currentLabel && !alreadyPinned;
+
+  return (
+    <div className="pt-1">
+      <button
+        onClick={() => setOpen((v) => !v)}
+        className="flex items-center gap-3 px-3 py-2 rounded-lg text-sm w-full transition-colors duration-150 hover:bg-[var(--dash-hover)]"
+        style={{ color: 'var(--dash-text-muted)' }}
+      >
+        <Pin size={16} className="shrink-0" />
+        <span className="flex-1 text-left">Pinned</span>
+        <ChevronRight
+          size={12}
+          className={cn('shrink-0 transition-transform', open && 'rotate-90')}
+          style={{ color: 'var(--dash-text-dim)' }}
+        />
+      </button>
+      {open && (
+        <div
+          className="ml-5 pl-2 mt-0.5 space-y-0.5"
+          style={{ borderLeft: '1px solid var(--dash-border)' }}
+        >
+          {items.length === 0 && (
+            <p className="px-3 py-1.5 text-xs" style={{ color: 'var(--dash-text-dim)' }}>
+              No pinned pages yet.
+            </p>
+          )}
+          {items.map((item) => (
+            <div
+              key={item.id}
+              className="group flex items-center gap-1 rounded-lg hover:bg-[var(--dash-hover)]"
+            >
+              <Link
+                to={item.path}
+                className="flex-1 flex items-center gap-3 px-3 py-1.5 text-sm"
+                style={{ color: 'var(--dash-text-muted)' }}
+              >
+                <span className="flex-1 truncate">{item.label}</span>
+              </Link>
+              <button
+                onClick={(e) => {
+                  e.preventDefault();
+                  remove(item.id);
+                }}
+                className="opacity-0 group-hover:opacity-100 p-1 mr-1 rounded transition-opacity"
+                title="Unpin"
+              >
+                <X size={11} style={{ color: 'var(--dash-text-dim)' }} />
+              </button>
+            </div>
+          ))}
+          {canPin && (
+            <button
+              onClick={() => add({ id: currentPath, label: currentLabel, path: currentPath })}
+              className="flex items-center gap-2 px-3 py-1.5 rounded-lg text-xs w-full transition-colors duration-150 hover:bg-[var(--dash-hover)]"
+              style={{ color: 'var(--dash-text-dim)' }}
+            >
+              <Plus size={11} className="shrink-0" />
+              <span className="flex-1 text-left truncate">Pin "{currentLabel}"</span>
+            </button>
+          )}
+          {alreadyPinned && (
+            <button
+              onClick={() => remove(currentPath)}
+              className="flex items-center gap-2 px-3 py-1.5 rounded-lg text-xs w-full transition-colors duration-150 hover:bg-[var(--dash-hover)]"
+              style={{ color: 'var(--dash-text-dim)' }}
+            >
+              <PinOff size={11} className="shrink-0" />
+              <span className="flex-1 text-left">Unpin current page</span>
+            </button>
+          )}
+        </div>
+      )}
+    </div>
+  );
+};
+
 interface DefaultLayoutProps {
   children?: React.ReactNode;
 }
@@ -301,6 +456,9 @@ const DefaultLayout: React.FC<DefaultLayoutProps> = ({ children }) => {
             {menuAddonEnabled && (
               <SidebarSection label="Storefront" icon={Store} items={menuSubItems} />
             )}
+
+            <MyAppsSection />
+            <PinnedSection currentPath={location.pathname} currentLabel={pageTitle} />
           </nav>
 
           {/* Footer */}
