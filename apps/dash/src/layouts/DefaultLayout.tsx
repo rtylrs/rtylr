@@ -253,7 +253,7 @@ const DefaultLayout: React.FC<DefaultLayoutProps> = ({ children }) => {
     : 0;
   const pageTitle = getPageTitle(location.pathname);
   const userEmail = user?.email || user?.emailAddress || null;
-  const userName = user?.name || user?.firstName || userEmail || 'User';
+  const userName = user?.fullName || user?.name || user?.firstName || 'User';
   const businessName = user?.businessName || user?.storeName || 'My Business';
 
   const handleLogout = (): void => {
