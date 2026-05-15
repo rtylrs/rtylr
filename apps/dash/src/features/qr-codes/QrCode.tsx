@@ -45,7 +45,7 @@ function QrCode() {
   useEffect(() => {
     if (qrOptions.logoImage) {
       const img = new Image();
-      img.src = user?.logo ?? '';
+      img.src = (user?.logo as string) ?? '';
       img.onload = () => setIsLogoLoaded(true);
       img.onerror = () => {
         toast.error('Failed to load logo image.');
@@ -73,7 +73,7 @@ function QrCode() {
                 <QrCodeTemplate
                   {...template}
                   url={qrOptions.url}
-                  logo={user?.logo ?? ''}
+                  logo={(user?.logo as string) ?? ''}
                   setQrOptions={() => {
                     setQrOptions({
                       ...qrOptions,
@@ -236,7 +236,7 @@ function QrCode() {
               size={qrOptions.size + 100}
               fgColor={qrOptions.fgColor}
               bgColor={qrOptions.bgColor}
-              logoImage={qrOptions.logoImage ? user?.logo : ''}
+              logoImage={qrOptions.logoImage ? (user?.logo as string) : ''}
               logoWidth={qrOptions.logoWidth}
               logoHeight={qrOptions.logoHeight}
               eyeRadius={qrOptions.eyeRadius}

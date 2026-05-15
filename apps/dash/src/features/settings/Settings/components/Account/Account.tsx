@@ -73,8 +73,8 @@ const Account: React.FC = () => {
   useEffect(() => {
     if (user) {
       setFormData({
-        name: user.fullName || user.name || '',
-        email: user.email || user.emailAddress || '',
+        name: user.fullName || '',
+        email: user.email || '',
       });
     }
   }, [user]);
@@ -106,7 +106,7 @@ const Account: React.FC = () => {
   const handleCancel = () => {
     if (user) {
       setFormData({
-        name: user.fullName || user.name || '',
+        name: user.fullName || '',
         email: user.email || '',
       });
     }

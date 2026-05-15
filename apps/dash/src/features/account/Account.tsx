@@ -11,14 +11,14 @@ import { safe } from '../../shared/lib/api';
 const Account: React.FC = () => {
   const { user } = useUserStore();
   const qc = useQueryClient();
-  const [name, setName] = useState(user?.name ?? '');
+  const [name, setName] = useState(user?.fullName ?? '');
   const [currentPassword, setCurrentPassword] = useState('');
   const [newPassword, setNewPassword] = useState('');
   const [confirmPassword, setConfirmPassword] = useState('');
 
   useEffect(() => {
-    if (user?.name) setName(user.name);
-  }, [user?.name]);
+    if (user?.fullName) setName(user.fullName);
+  }, [user?.fullName]);
 
   const updateProfile = useMutation({
     mutationFn: () => unwrap(safe.post('/account/profile', { name })),
@@ -46,7 +46,7 @@ const Account: React.FC = () => {
     onError: () => toast.error('Failed to update password'),
   });
 
-  const email = user?.email ?? user?.emailAddress ?? '';
+  const email = user?.email ?? '';
 
   const resendVerification = useMutation({
     mutationFn: () => unwrap(safe.post('/auth/resend-verification', { email })),

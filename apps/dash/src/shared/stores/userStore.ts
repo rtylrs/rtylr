@@ -10,31 +10,18 @@ interface Addons {
 }
 
 export interface StoredUser {
-  // Auth fields
+  id?: number;
   email?: string;
-  emailAddress?: string;
-  role?: string;
   fullName?: string;
-  name?: string;
-  firstName?: string;
-  lastName?: string;
-  // Business fields
+  role?: string;
+  businessId?: number;
   businessName?: string;
-  storeName?: string;
-  businessDescription?: string;
-  coverImage?: string;
-  logo?: string;
-  address?: string;
-  phone?: string;
-  hours?: string;
-  averageRating?: number;
-  reviewCount?: number;
-  // Permissions
   isOwner?: boolean;
   apps?: string[];
-  // Onboarding
   onboarded?: boolean;
-  // Server can send additional fields
+  planSlug?: string;
+  subscriptionStatus?: string;
+  effectiveResources?: Record<string, string>;
   [key: string]: unknown;
 }
 

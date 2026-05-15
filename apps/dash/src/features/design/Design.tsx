@@ -507,17 +507,18 @@ const Design: React.FC = () => {
   const { items: menuItems } = useMenuStore();
 
   // Build business info and menu categories from real data
-  const businessInfo: BusinessInfo = user
+  const u = user as Record<string, unknown> | null;
+  const businessInfo: BusinessInfo = u
     ? {
-        name: user.businessName || user.name || DEFAULT_BUSINESS.name,
-        description: user.businessDescription || DEFAULT_BUSINESS.description,
-        coverImage: user.coverImage || DEFAULT_BUSINESS.coverImage,
-        logo: user.logo || DEFAULT_BUSINESS.logo,
-        address: user.address || DEFAULT_BUSINESS.address,
-        phone: user.phone || DEFAULT_BUSINESS.phone,
-        hours: user.hours || DEFAULT_BUSINESS.hours,
-        averageRating: user.averageRating ?? DEFAULT_BUSINESS.averageRating,
-        reviewCount: user.reviewCount ?? DEFAULT_BUSINESS.reviewCount,
+        name: (u.businessName as string) || DEFAULT_BUSINESS.name,
+        description: (u.businessDescription as string) || DEFAULT_BUSINESS.description,
+        coverImage: (u.coverImage as string) || DEFAULT_BUSINESS.coverImage,
+        logo: (u.logo as string) || DEFAULT_BUSINESS.logo,
+        address: (u.address as string) || DEFAULT_BUSINESS.address,
+        phone: (u.phone as string) || DEFAULT_BUSINESS.phone,
+        hours: (u.hours as string) || DEFAULT_BUSINESS.hours,
+        averageRating: (u.averageRating as number) ?? DEFAULT_BUSINESS.averageRating,
+        reviewCount: (u.reviewCount as number) ?? DEFAULT_BUSINESS.reviewCount,
       }
     : DEFAULT_BUSINESS;
 

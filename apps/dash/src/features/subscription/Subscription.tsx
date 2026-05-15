@@ -313,7 +313,7 @@ const PlanCard: React.FC<{
 const Subscription: React.FC = (): React.JSX.Element => {
   const { data: sub, isLoading: subLoading } = useMySubscription();
   const { data: plans = [], isLoading: plansLoading } = useListPlans();
-  const ownerEmail = useUserStore((s) => s.user?.email ?? s.user?.emailAddress ?? '');
+  const ownerEmail = useUserStore((s) => s.user?.email ?? '');
 
   const tierPlans = [...plans].filter((p) => !p.isSolo).sort((a, b) => a.tierOrder - b.tierOrder);
   const soloPlans = [...plans].filter((p) => p.isSolo).sort((a, b) => a.tierOrder - b.tierOrder);
