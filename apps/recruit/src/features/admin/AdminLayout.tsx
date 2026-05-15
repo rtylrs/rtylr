@@ -2,6 +2,7 @@ import React from 'react';
 import { NavLink, Outlet } from 'react-router-dom';
 import { Briefcase, Inbox, Palette, ArrowLeft, LayoutGrid } from 'lucide-react';
 import { APP_URLS } from '@voxire/config';
+import { signOut } from '@voxire/auth';
 
 /**
  * AdminLayout — wraps the authenticated admin routes under /admin.
@@ -34,14 +35,23 @@ const AdminLayout: React.FC = (): React.JSX.Element => {
             label="Page branding"
           />
         </nav>
-        <a
-          href={APP_URLS.dash}
-          className="mx-3 mb-4 inline-flex items-center gap-2 rounded-md px-3 py-2 text-xs"
-          style={{ color: '#999' }}
-        >
-          <ArrowLeft className="h-3.5 w-3.5" />
-          Back to dashboard
-        </a>
+        <div className="mx-3 mb-4 flex flex-col gap-1">
+          <a
+            href={APP_URLS.dash}
+            className="inline-flex items-center gap-2 rounded-md px-3 py-2 text-xs"
+            style={{ color: '#999' }}
+          >
+            <ArrowLeft className="h-3.5 w-3.5" />
+            Back to dashboard
+          </a>
+          <button
+            type="button"
+            onClick={() => signOut('recruit')}
+            className="inline-flex items-center gap-2 rounded-md border-0 bg-transparent px-3 py-2 text-left text-xs text-red-400 cursor-pointer hover:text-red-300"
+          >
+            Sign out
+          </button>
+        </div>
       </aside>
       <main className="ml-56 min-h-screen">
         <Outlet />
