@@ -17,24 +17,30 @@ const getToken = (): string | null => {
   );
 };
 
+const isLocalDevHost = (hostname: string): boolean => {
+  const host = hostname.toLowerCase();
+  return host === 'localhost' || host === '127.0.0.1' || /^\d+\.\d+\.\d+\.\d+$/.test(host);
+};
+
 const getCookieDomain = (): string | undefined => {
   const hostname = window.location.hostname.toLowerCase();
-  if (hostname === 'localhost' || /^\d+\.\d+\.\d+\.\d+$/.test(hostname)) return undefined;
+  if (isLocalDevHost(hostname)) return undefined;
   if (hostname === 'rtylr.com' || hostname.endsWith('.rtylr.com')) return '.rtylr.com';
   return undefined;
 };
 
 const clearTokenCookie = (): void => {
   const domain = getCookieDomain();
-  let cookie = 'token=; Max-Age=0; path=/;';
-  if (domain) cookie += ` Domain=${domain};`;
-  document.cookie = cookie;
+  if (domain) {
+    document.cookie = `token=; Max-Age=0; path=/; Domain=${domain};`;
+  }
+  document.cookie = 'token=; Max-Age=0; path=/;';
 };
 
 const getAuthUrl = (appId: string): string => {
-  const isLocalhost =
-    window.location.hostname === 'localhost' || window.location.hostname === '127.0.0.1';
-  const base = isLocalhost ? 'http://localhost:5176' : 'https://auth.rtylr.com';
+  const base = isLocalDevHost(window.location.hostname)
+    ? 'http://localhost:5176'
+    : 'https://auth.rtylr.com';
   return `${base}?redirect=${appId}`;
 };
 
