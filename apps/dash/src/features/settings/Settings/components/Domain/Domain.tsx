@@ -1,5 +1,14 @@
 import React, { useState } from 'react';
-import { Globe, Copy, Check, Clock } from 'lucide-react';
+import {
+  Globe,
+  Copy,
+  Check,
+  ChevronDown,
+  ChevronUp,
+  ShieldCheck,
+  AlertCircle,
+  Clock,
+} from 'lucide-react';
 import {
   Card,
   CardContent,
@@ -9,6 +18,8 @@ import {
   Input,
   Label,
   Button,
+  Badge,
+  Separator,
 } from '../../../../../shared/components/ui';
 import { cn } from '../../../../../shared/lib/utils';
 import { useUserStore } from '../../../../../shared/stores/userStore';
@@ -19,6 +30,7 @@ const Domain: React.FC = () => {
   const menuUrl = `${subdomain}.rtylr.com`;
 
   const [copied, setCopied] = useState(false);
+  const [dnsOpen, setDnsOpen] = useState(true);
 
   const handleCopy = async () => {
     try {
@@ -68,7 +80,7 @@ const Domain: React.FC = () => {
         </div>
       </div>
 
-      {/* Menu URL */}
+      {/* Section 1, Your menu URL */}
       <Card>
         <CardHeader>
           <CardTitle>Your menu URL</CardTitle>
@@ -105,22 +117,143 @@ const Domain: React.FC = () => {
         </CardContent>
       </Card>
 
-      {/* Custom Domain — disabled */}
-      <div className="opacity-40 pointer-events-none select-none">
+      {/* Section 2, Custom Domain — disabled */}
+      <div className="opacity-50 pointer-events-none select-none">
         <Card>
           <CardHeader>
-            <CardTitle>Custom Domain</CardTitle>
-            <CardDescription>Point your own domain at your rtylr menu.</CardDescription>
+            <div className="flex items-start justify-between">
+              <div>
+                <CardTitle>Custom Domain</CardTitle>
+                <CardDescription>Point your own domain at your rtylr menu.</CardDescription>
+              </div>
+              <Badge variant="outline">Not configured</Badge>
+            </div>
           </CardHeader>
           <CardContent className="pt-0 space-y-4">
+            {/* Domain input + connect button */}
             <div className="space-y-1.5">
-              <Label>Domain</Label>
+              <Label htmlFor="custom-domain">Domain</Label>
               <div className="flex items-center gap-2">
-                <Input placeholder="menu.mybusiness.com" className="flex-1" disabled />
+                <Input
+                  id="custom-domain"
+                  placeholder="menu.mybusiness.com"
+                  className="flex-1"
+                  disabled
+                />
                 <Button size="sm" disabled className="shrink-0">
                   Connect Domain
                 </Button>
               </div>
+            </div>
+
+            <Separator />
+
+            {/* DNS Instructions, collapsible */}
+            <div
+              className="rounded-xl overflow-hidden"
+              style={{ border: '1px solid var(--dash-border)' }}
+            >
+              {/* Collapsible header */}
+              <button
+                type="button"
+                onClick={() => setDnsOpen((o) => !o)}
+                className="w-full flex items-center justify-between px-4 py-3 text-sm font-medium transition-colors hover:bg-[var(--dash-hover)]"
+                style={{ color: 'var(--dash-text)' }}
+              >
+                <span>DNS Setup Instructions</span>
+                {dnsOpen ? <ChevronUp size={15} /> : <ChevronDown size={15} />}
+              </button>
+
+              {dnsOpen && (
+                <div
+                  className="px-4 pb-4 space-y-3"
+                  style={{ borderTop: '1px solid var(--dash-border)' }}
+                >
+                  <p className="text-sm pt-3" style={{ color: 'var(--dash-text-muted)' }}>
+                    Add the following CNAME record in your DNS provider's dashboard (e.g.
+                    Cloudflare, Namecheap, GoDaddy):
+                  </p>
+
+                  {/* DNS table */}
+                  <div
+                    className="rounded-lg overflow-hidden text-xs"
+                    style={{ border: '1px solid var(--dash-border)' }}
+                  >
+                    <table className="w-full">
+                      <thead>
+                        <tr style={{ background: 'var(--dash-hover)' }}>
+                          {['Type', 'Name', 'Value', 'TTL'].map((h) => (
+                            <th
+                              key={h}
+                              className="px-3 py-2 text-left font-semibold"
+                              style={{
+                                color: 'var(--dash-text-muted)',
+                                borderBottom: '1px solid var(--dash-border)',
+                              }}
+                            >
+                              {h}
+                            </th>
+                          ))}
+                        </tr>
+                      </thead>
+                      <tbody>
+                        <tr style={{ background: 'var(--dash-card)' }}>
+                          <td
+                            className="px-3 py-2.5 font-mono"
+                            style={{ color: 'var(--dash-text)' }}
+                          >
+                            CNAME
+                          </td>
+                          <td
+                            className="px-3 py-2.5 font-mono"
+                            style={{ color: 'var(--dash-text)' }}
+                          >
+                            menu
+                          </td>
+                          <td className="px-3 py-2.5 font-mono" style={{ color: '#4583C4' }}>
+                            cname.rtylr.com
+                          </td>
+                          <td
+                            className="px-3 py-2.5 font-mono"
+                            style={{ color: 'var(--dash-text-muted)' }}
+                          >
+                            3600
+                          </td>
+                        </tr>
+                      </tbody>
+                    </table>
+                  </div>
+
+                  {/* Propagation notice */}
+                  <div
+                    className="flex items-start gap-2 px-3 py-2.5 rounded-lg text-xs"
+                    style={{
+                      background: 'rgba(251,191,36,0.08)',
+                      border: '1px solid rgba(251,191,36,0.2)',
+                      color: 'var(--dash-text-muted)',
+                    }}
+                  >
+                    <AlertCircle size={13} className="shrink-0 mt-0.5 text-amber-500" />
+                    <span>DNS changes can take up to 48 hours to propagate.</span>
+                  </div>
+                </div>
+              )}
+            </div>
+
+            {/* SSL notice */}
+            <div
+              className="flex items-start gap-2 px-3 py-2.5 rounded-lg text-xs"
+              style={{
+                background: 'rgba(16,185,129,0.07)',
+                border: '1px solid rgba(16,185,129,0.18)',
+                color: 'var(--dash-text-muted)',
+              }}
+            >
+              <ShieldCheck size={13} className="shrink-0 mt-0.5 text-emerald-500" />
+              <span>
+                SSL is automatically provisioned once your domain is verified. No manual certificate
+                setup required.
+              </span>
             </div>
           </CardContent>
         </Card>
