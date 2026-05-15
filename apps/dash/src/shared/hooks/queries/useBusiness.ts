@@ -7,7 +7,7 @@ export const useUpdateBusiness = () => {
   const queryClient = useQueryClient();
 
   return useMutation({
-    mutationFn: async ({ data }: { businessId: string; data: Record<string, unknown> }) => {
+    mutationFn: async ({ data }: { data: Record<string, unknown> }) => {
       const payload: Record<string, unknown> = {};
       if (data.storeName) payload.siteName = data.storeName;
       if (data.companyName && !payload.siteName) payload.siteName = data.companyName;
@@ -20,8 +20,8 @@ export const useUpdateBusiness = () => {
 
       return unwrap(safe.put('/config/update', payload));
     },
-    onSuccess: (_data, variables) => {
-      queryClient.invalidateQueries({ queryKey: ['business', variables.businessId] });
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ['business'] });
       queryClient.invalidateQueries({ queryKey: ['user'] });
       toast.success('Business information updated successfully');
     },

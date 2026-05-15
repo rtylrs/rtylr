@@ -2,7 +2,6 @@ import React, { useState, useEffect, useMemo } from 'react';
 import { Search, Loader2 } from 'lucide-react';
 import { useBusinessStore, type BusinessType } from '../../../../../shared/stores/businessStore';
 import { useUpdateBusiness } from '../../../../../shared/hooks/queries/useBusiness';
-import { useUserStore } from '../../../../../shared/stores/userStore';
 import { useIndustries } from '../../../../../shared/hooks/queries/useIndustries';
 import {
   Card,
@@ -16,7 +15,6 @@ import { cn } from '../../../../../shared/lib/utils';
 
 const BusinessTypeSettings: React.FC = () => {
   const { businessType, setBusinessType } = useBusinessStore();
-  const { userId } = useUserStore();
   const updateBusiness = useUpdateBusiness();
   const { data, isLoading } = useIndustries();
 
@@ -51,9 +49,9 @@ const BusinessTypeSettings: React.FC = () => {
   }, [groups, selected]);
 
   const handleSave = () => {
-    if (!userId || !selected) return;
+    if (!selected) return;
     setBusinessType(selected as BusinessType);
-    updateBusiness.mutate({ businessId: userId, data: { businessType: selected } });
+    updateBusiness.mutate({ data: { businessType: selected } });
   };
 
   return (
@@ -135,7 +133,7 @@ const BusinessTypeSettings: React.FC = () => {
             <span style={{ color: 'var(--dash-text)', fontWeight: 500 }}>{selectedLabel}</span>
           </p>
           <Button onClick={handleSave} disabled={updateBusiness.isPending}>
-            {updateBusiness.isPending ? 'Saving...' : 'Save'}
+            {updateBusiness.isPending ? 'Saving...' : 'Save changes'}
           </Button>
         </div>
       )}

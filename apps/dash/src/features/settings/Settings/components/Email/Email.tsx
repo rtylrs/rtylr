@@ -245,7 +245,7 @@ const Email: React.FC = () => {
           </div>
           <div className="flex justify-end pt-1">
             <Button size="sm" onClick={handleSaveSender}>
-              Save
+              Save changes
             </Button>
           </div>
         </CardContent>
@@ -342,7 +342,7 @@ const Email: React.FC = () => {
                   Test Connection
                 </Button>
                 <Button size="sm" onClick={handleSaveSmtp}>
-                  Save SMTP Settings
+                  Save changes
                 </Button>
               </div>
             </>

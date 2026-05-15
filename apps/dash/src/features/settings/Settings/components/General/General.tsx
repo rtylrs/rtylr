@@ -16,7 +16,7 @@ import {
 
 const General: React.FC = () => {
   const { businessType } = useBusinessStore();
-  const { user, userId } = useUserStore();
+  const { user } = useUserStore();
   const { websiteData, contactInfo } = useConfigStore();
   const updateBusiness = useUpdateBusiness();
 
@@ -60,13 +60,9 @@ const General: React.FC = () => {
     setFormData((prev) => ({ ...prev, [name]: value }));
   };
 
-  const handleSubmit = async (e: React.FormEvent) => {
+  const handleSubmit = (e: React.FormEvent) => {
     e.preventDefault();
-    if (!userId) return;
-    updateBusiness.mutate({
-      businessId: userId,
-      data: { ...formData, businessType },
-    });
+    updateBusiness.mutate({ data: { ...formData, businessType } });
   };
 
   return (
@@ -147,7 +143,7 @@ const General: React.FC = () => {
 
         <div className="flex justify-end">
           <Button type="submit" disabled={updateBusiness.isPending}>
-            {updateBusiness.isPending ? 'Saving...' : 'Save Changes'}
+            {updateBusiness.isPending ? 'Saving...' : 'Save changes'}
           </Button>
         </div>
       </form>
