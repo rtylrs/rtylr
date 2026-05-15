@@ -190,6 +190,7 @@ func main() {
 	runtime.GOMAXPROCS(runtime.NumCPU())
 
 	loadDotEnv()
+	logger.SetupLogger()
 
 	shutdownCtx, stop := signal.NotifyContext(context.Background(), os.Interrupt, syscall.SIGTERM)
 	defer stop()
