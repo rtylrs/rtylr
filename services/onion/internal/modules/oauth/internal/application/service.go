@@ -97,7 +97,7 @@ func (s *Service) IssueAuthCode(_ context.Context, clientID string, userID int64
 }
 
 // ExchangeCode exchanges an authorization code for access+refresh tokens.
-func (s *Service) ExchangeCode(ctx context.Context, clientID, code, codeVerifier, redirectURI string) (accessToken, refreshToken string, expiresIn int, err error) {
+func (s *Service) ExchangeCode(_ context.Context, clientID, code, codeVerifier, redirectURI string) (accessToken, refreshToken string, expiresIn int, err error) {
 	authCode, err := s.repo.GetAuthCode(code)
 	if err != nil {
 		return "", "", 0, domain.ErrCodeNotFound

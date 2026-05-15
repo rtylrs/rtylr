@@ -23,8 +23,7 @@ formatters:
       sections:
         - standard # Standard Go packages
         - default # Third-party packages
-        - prefix(github.com/anghami) # Company packages
-        - prefix(github.com/anghami/hexago) # Current project
+        - prefix(github.com/voxire) # Project packages
       # Custom import separators
       custom-order: true
 
@@ -32,7 +31,7 @@ formatters:
       # Choose whether to use the extra rules
       extra-rules: true
       # Choose whether to use the module path
-      module-path: github.com/anghami/hexago
+      module-path: github.com/voxire/onion
 
 # Linters configuration
 linters:
@@ -379,14 +378,18 @@ linters:
             - go.uber.org/zap
             - github.com/golang-jwt/jwt/v5
             - github.com/jackc/pgx/v5
+            - github.com/go-sql-driver/mysql
             - github.com/gin-gonic/gin
             - codnect.io/chrono
             - github.com/beevik/etree
             - golang.org/x/crypto
+            - golang.org/x/oauth2
             - github.com/openai/openai-go/v2
             - github.com/openai/openai-go/v2/option
             - github.com/google/generative-ai-go/genai
             - google.golang.org/api/option
+            - google.golang.org/api/sheets/v4
+            - google.golang.org/api/idtoken
             - google.golang.org/grpc
             - google.golang.org/grpc/reflection
             - github.com/aws/aws-sdk-go-v2/aws
@@ -401,7 +404,10 @@ linters:
             - golang.org/x/image/font/gofont/gobold
             - golang.org/x/image/font/gofont/goregular
             - golang.org/x/image/font/opentype
-            - google.golang.org/api/idtoken
+            - github.com/resend/resend-go/v2
+            - github.com/getsentry/sentry-go
+            - github.com/coder/websocket
+            - github.com/axiomhq/axiom-go
           # Packages that are not allowed
           deny:
             - pkg: "github.com/sirupsen/logrus"
@@ -441,6 +447,7 @@ linters:
           - github.com/resend/resend-go/v2
           - github.com/getsentry/sentry-go
           - github.com/coder/websocket
+          - github.com/axiomhq/axiom-go
 
         # List of allowed module domains
         domains:
@@ -463,6 +470,7 @@ linters:
           - github.com/resend
           - github.com/getsentry
           - github.com/coder
+          - github.com/axiomhq
 
       blocked:
         # List of blocked modules

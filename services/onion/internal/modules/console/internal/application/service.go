@@ -5,11 +5,12 @@ import (
 	"errors"
 	"time"
 
-	"github.com/voxire/onion/internal/modules/console/internal/infrastructure"
 	"github.com/golang-jwt/jwt/v5"
+
+	"github.com/voxire/onion/internal/modules/console/internal/infrastructure"
+	"github.com/voxire/onion/internal/platform/logger"
 	"github.com/voxire/onion/internal/platform/utils/jwtutils"
 	"github.com/voxire/onion/internal/platform/utils/passwordutils"
-	"github.com/voxire/onion/internal/platform/logger"
 )
 
 // consoleClaims is the JWT claims payload for console admin sessions.

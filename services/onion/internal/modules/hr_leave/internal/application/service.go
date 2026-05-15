@@ -141,7 +141,7 @@ func (s *Service) ListLeaveRequests(ctx context.Context, ownerID int64, params d
 	return s.repo.ListLeaveRequests(ctx, ownerID, params)
 }
 
-func (s *Service) ApproveLeave(ctx context.Context, ownerID, requestID, approverID int64) error {
+func (s *Service) ApproveLeave(ctx context.Context, ownerID, requestID int64) error {
 	req, err := s.repo.GetLeaveRequest(ctx, ownerID, requestID)
 	if err != nil {
 		return err

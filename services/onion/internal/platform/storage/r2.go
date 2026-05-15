@@ -239,4 +239,3 @@ func BuildHTTPError(err error) (int, string) {
 	}
 	return http.StatusInternalServerError, "Storage error"
 }
-

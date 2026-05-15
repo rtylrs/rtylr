@@ -7,8 +7,8 @@ import (
 	"time"
 
 	"github.com/voxire/onion/internal/modules/console/internal/application"
-	errorModels "github.com/voxire/onion/internal/platform/errors"
 	authPkg "github.com/voxire/onion/internal/platform/auth"
+	errorModels "github.com/voxire/onion/internal/platform/errors"
 )
 
 // ── helpers ───────────────────────────────────────────────────────────────────
@@ -67,8 +67,10 @@ func (h *LoginHandler) Serve(ctx context.Context, req *LoginRequest) (LoginRespo
 
 // ── Stats ─────────────────────────────────────────────────────────────────────
 
-type StatsRequest struct{}
-type StatsResponse = application.StatsDTO
+type (
+	StatsRequest  struct{}
+	StatsResponse = application.StatsDTO
+)
 
 type StatsHandler struct{ Service *application.Service }
 
@@ -109,7 +111,6 @@ func (h *ListUsersHandler) Serve(ctx context.Context, req *ListUsersRequest) (Li
 	}
 	return *result, nil
 }
-
 
 // CreateUser
 
@@ -158,20 +159,22 @@ type UpdateUserResponse struct {
 
 type UpdateUserHandler struct{ Service *application.Service }
 
-func (h *UpdateUserHandler) Serve(ctx context.Context, req *UpdateUserRequest) (UpdateUserResponse, *errorModels.ServerError) {
+func (h *UpdateUserHandler) Serve(_ context.Context, _ *UpdateUserRequest) (UpdateUserResponse, *errorModels.ServerError) {
 	return UpdateUserResponse{}, nil // raw HTTP via route
 }
 
 // DeleteUser
 
-type DeleteUserRequest struct{}
-type DeleteUserResponse struct {
-	Message string `json:"message"`
-}
+type (
+	DeleteUserRequest  struct{}
+	DeleteUserResponse struct {
+		Message string `json:"message"`
+	}
+)
 
 type DeleteUserHandler struct{ Service *application.Service }
 
-func (h *DeleteUserHandler) Serve(ctx context.Context, _ *DeleteUserRequest) (DeleteUserResponse, *errorModels.ServerError) {
+func (h *DeleteUserHandler) Serve(_ context.Context, _ *DeleteUserRequest) (DeleteUserResponse, *errorModels.ServerError) {
 	return DeleteUserResponse{}, nil // raw HTTP via route
 }
 
@@ -187,20 +190,22 @@ type BanUserResponse struct {
 
 type BanUserHandler struct{ Service *application.Service }
 
-func (h *BanUserHandler) Serve(ctx context.Context, req *BanUserRequest) (BanUserResponse, *errorModels.ServerError) {
+func (h *BanUserHandler) Serve(_ context.Context, _ *BanUserRequest) (BanUserResponse, *errorModels.ServerError) {
 	return BanUserResponse{}, nil // raw HTTP via route
 }
 
 // UnbanUser
 
-type UnbanUserRequest struct{}
-type UnbanUserResponse struct {
-	Message string `json:"message"`
-}
+type (
+	UnbanUserRequest  struct{}
+	UnbanUserResponse struct {
+		Message string `json:"message"`
+	}
+)
 
 type UnbanUserHandler struct{ Service *application.Service }
 
-func (h *UnbanUserHandler) Serve(ctx context.Context, _ *UnbanUserRequest) (UnbanUserResponse, *errorModels.ServerError) {
+func (h *UnbanUserHandler) Serve(_ context.Context, _ *UnbanUserRequest) (UnbanUserResponse, *errorModels.ServerError) {
 	return UnbanUserResponse{}, nil // raw HTTP via route
 }
 
@@ -241,7 +246,7 @@ type UpdateBusinessResponse struct {
 
 type UpdateBusinessHandler struct{ Service *application.Service }
 
-func (h *UpdateBusinessHandler) Serve(ctx context.Context, req *UpdateBusinessRequest) (UpdateBusinessResponse, *errorModels.ServerError) {
+func (h *UpdateBusinessHandler) Serve(_ context.Context, _ *UpdateBusinessRequest) (UpdateBusinessResponse, *errorModels.ServerError) {
 	return UpdateBusinessResponse{}, nil // raw HTTP via route
 }
 
@@ -284,7 +289,7 @@ type UpdateSubscriptionResponse struct {
 
 type UpdateSubscriptionHandler struct{ Service *application.Service }
 
-func (h *UpdateSubscriptionHandler) Serve(ctx context.Context, req *UpdateSubscriptionRequest) (UpdateSubscriptionResponse, *errorModels.ServerError) {
+func (h *UpdateSubscriptionHandler) Serve(_ context.Context, _ *UpdateSubscriptionRequest) (UpdateSubscriptionResponse, *errorModels.ServerError) {
 	return UpdateSubscriptionResponse{}, nil // raw HTTP via route
 }
 
@@ -337,17 +342,21 @@ func (h *UpsertSubscriptionHandler) Serve(ctx context.Context, req *UpsertSubscr
 
 // DeleteSubscription
 
-type DeleteSubscriptionRequest struct{}
-type DeleteSubscriptionResponse struct {
-	Message string `json:"message"`
-}
+type (
+	DeleteSubscriptionRequest  struct{}
+	DeleteSubscriptionResponse struct {
+		Message string `json:"message"`
+	}
+)
 
 // ── Plans ─────────────────────────────────────────────────────────────────────
 
-type ListPlansRequest struct{}
-type ListPlansResponse struct {
-	Plans []application.PlanDTO `json:"plans"`
-}
+type (
+	ListPlansRequest  struct{}
+	ListPlansResponse struct {
+		Plans []application.PlanDTO `json:"plans"`
+	}
+)
 
 type ListPlansHandler struct{ Service *application.Service }
 
@@ -375,7 +384,7 @@ type UpdatePlanResponse struct {
 
 type UpdatePlanHandler struct{ Service *application.Service }
 
-func (h *UpdatePlanHandler) Serve(ctx context.Context, req *UpdatePlanRequest) (UpdatePlanResponse, *errorModels.ServerError) {
+func (h *UpdatePlanHandler) Serve(_ context.Context, _ *UpdatePlanRequest) (UpdatePlanResponse, *errorModels.ServerError) {
 	return UpdatePlanResponse{}, nil // raw HTTP via route
 }
 

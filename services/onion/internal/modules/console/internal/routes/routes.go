@@ -7,11 +7,12 @@ import (
 	"strconv"
 
 	"github.com/go-chi/chi/v5"
+
 	"github.com/voxire/onion/internal/modules/console/internal/application"
 	"github.com/voxire/onion/internal/modules/console/internal/routes/handlers"
-	serverHttp "github.com/voxire/onion/internal/platform/server/http"
-	errorModels "github.com/voxire/onion/internal/platform/errors"
 	authPkg "github.com/voxire/onion/internal/platform/auth"
+	errorModels "github.com/voxire/onion/internal/platform/errors"
+	serverHttp "github.com/voxire/onion/internal/platform/server/http"
 )
 
 func RegisterRoutes(ctx context.Context, router *chi.Mux, service *application.Service) {
@@ -124,15 +125,18 @@ func checkAdmin(r *http.Request) (*authPkg.AuthUser, bool) {
 func rawGetUser(_ context.Context, svc *application.Service) http.HandlerFunc {
 	return func(w http.ResponseWriter, r *http.Request) {
 		if _, ok := checkAdmin(r); !ok {
-			writeError(w, http.StatusForbidden, "Console admin access required"); return
+			writeError(w, http.StatusForbidden, "Console admin access required")
+			return
 		}
 		id, ok := getIDParam(r, "id")
 		if !ok {
-			writeError(w, http.StatusBadRequest, "Invalid id"); return
+			writeError(w, http.StatusBadRequest, "Invalid id")
+			return
 		}
 		user, err := svc.GetUser(r.Context(), id)
 		if err != nil {
-			writeError(w, http.StatusNotFound, "User not found"); return
+			writeError(w, http.StatusNotFound, "User not found")
+			return
 		}
 		writeJSON(w, http.StatusOK, user)
 	}
@@ -141,21 +145,25 @@ func rawGetUser(_ context.Context, svc *application.Service) http.HandlerFunc {
 func rawUpdateUser(_ context.Context, svc *application.Service) http.HandlerFunc {
 	return func(w http.ResponseWriter, r *http.Request) {
 		if _, ok := checkAdmin(r); !ok {
-			writeError(w, http.StatusForbidden, "Console admin access required"); return
+			writeError(w, http.StatusForbidden, "Console admin access required")
+			return
 		}
 		id, ok := getIDParam(r, "id")
 		if !ok {
-			writeError(w, http.StatusBadRequest, "Invalid id"); return
+			writeError(w, http.StatusBadRequest, "Invalid id")
+			return
 		}
 		var req struct {
 			FullName string `json:"full_name"`
 			Email    string `json:"email"`
 		}
 		if err := json.NewDecoder(r.Body).Decode(&req); err != nil {
-			writeError(w, http.StatusBadRequest, "Invalid body"); return
+			writeError(w, http.StatusBadRequest, "Invalid body")
+			return
 		}
 		if err := svc.UpdateUser(r.Context(), id, req.FullName, req.Email); err != nil {
-			writeError(w, http.StatusInternalServerError, "Failed to update user"); return
+			writeError(w, http.StatusInternalServerError, "Failed to update user")
+			return
 		}
 		writeJSON(w, http.StatusOK, map[string]string{"message": "User updated"})
 	}
@@ -164,14 +172,17 @@ func rawUpdateUser(_ context.Context, svc *application.Service) http.HandlerFunc
 func rawDeleteUser(_ context.Context, svc *application.Service) http.HandlerFunc {
 	return func(w http.ResponseWriter, r *http.Request) {
 		if _, ok := checkAdmin(r); !ok {
-			writeError(w, http.StatusForbidden, "Console admin access required"); return
+			writeError(w, http.StatusForbidden, "Console admin access required")
+			return
 		}
 		id, ok := getIDParam(r, "id")
 		if !ok {
-			writeError(w, http.StatusBadRequest, "Invalid id"); return
+			writeError(w, http.StatusBadRequest, "Invalid id")
+			return
 		}
 		if err := svc.DeleteUser(r.Context(), id); err != nil {
-			writeError(w, http.StatusInternalServerError, "Failed to delete user"); return
+			writeError(w, http.StatusInternalServerError, "Failed to delete user")
+			return
 		}
 		writeJSON(w, http.StatusOK, map[string]string{"message": "User deleted"})
 	}
@@ -180,18 +191,21 @@ func rawDeleteUser(_ context.Context, svc *application.Service) http.HandlerFunc
 func rawBanUser(_ context.Context, svc *application.Service) http.HandlerFunc {
 	return func(w http.ResponseWriter, r *http.Request) {
 		if _, ok := checkAdmin(r); !ok {
-			writeError(w, http.StatusForbidden, "Console admin access required"); return
+			writeError(w, http.StatusForbidden, "Console admin access required")
+			return
 		}
 		id, ok := getIDParam(r, "id")
 		if !ok {
-			writeError(w, http.StatusBadRequest, "Invalid id"); return
+			writeError(w, http.StatusBadRequest, "Invalid id")
+			return
 		}
 		var req struct {
 			Reason string `json:"reason"`
 		}
 		_ = json.NewDecoder(r.Body).Decode(&req)
 		if err := svc.BanUser(r.Context(), id, req.Reason); err != nil {
-			writeError(w, http.StatusInternalServerError, "Failed to ban user"); return
+			writeError(w, http.StatusInternalServerError, "Failed to ban user")
+			return
 		}
 		writeJSON(w, http.StatusOK, map[string]string{"message": "User banned"})
 	}
@@ -200,14 +214,17 @@ func rawBanUser(_ context.Context, svc *application.Service) http.HandlerFunc {
 func rawUnbanUser(_ context.Context, svc *application.Service) http.HandlerFunc {
 	return func(w http.ResponseWriter, r *http.Request) {
 		if _, ok := checkAdmin(r); !ok {
-			writeError(w, http.StatusForbidden, "Console admin access required"); return
+			writeError(w, http.StatusForbidden, "Console admin access required")
+			return
 		}
 		id, ok := getIDParam(r, "id")
 		if !ok {
-			writeError(w, http.StatusBadRequest, "Invalid id"); return
+			writeError(w, http.StatusBadRequest, "Invalid id")
+			return
 		}
 		if err := svc.UnbanUser(r.Context(), id); err != nil {
-			writeError(w, http.StatusInternalServerError, "Failed to unban user"); return
+			writeError(w, http.StatusInternalServerError, "Failed to unban user")
+			return
 		}
 		writeJSON(w, http.StatusOK, map[string]string{"message": "User unbanned"})
 	}
@@ -216,18 +233,21 @@ func rawUnbanUser(_ context.Context, svc *application.Service) http.HandlerFunc 
 func rawSetConsoleAdmin(_ context.Context, svc *application.Service) http.HandlerFunc {
 	return func(w http.ResponseWriter, r *http.Request) {
 		if _, ok := checkAdmin(r); !ok {
-			writeError(w, http.StatusForbidden, "Console admin access required"); return
+			writeError(w, http.StatusForbidden, "Console admin access required")
+			return
 		}
 		id, ok := getIDParam(r, "id")
 		if !ok {
-			writeError(w, http.StatusBadRequest, "Invalid id"); return
+			writeError(w, http.StatusBadRequest, "Invalid id")
+			return
 		}
 		var req struct {
 			IsConsoleAdmin bool `json:"is_console_admin"`
 		}
 		_ = json.NewDecoder(r.Body).Decode(&req)
 		if err := svc.SetConsoleAdmin(r.Context(), id, req.IsConsoleAdmin); err != nil {
-			writeError(w, http.StatusInternalServerError, "Failed to update admin status"); return
+			writeError(w, http.StatusInternalServerError, "Failed to update admin status")
+			return
 		}
 		writeJSON(w, http.StatusOK, map[string]string{"message": "Updated"})
 	}
@@ -236,15 +256,18 @@ func rawSetConsoleAdmin(_ context.Context, svc *application.Service) http.Handle
 func rawGetUserSubscription(_ context.Context, svc *application.Service) http.HandlerFunc {
 	return func(w http.ResponseWriter, r *http.Request) {
 		if _, ok := checkAdmin(r); !ok {
-			writeError(w, http.StatusForbidden, "Console admin access required"); return
+			writeError(w, http.StatusForbidden, "Console admin access required")
+			return
 		}
 		id, ok := getIDParam(r, "id")
 		if !ok {
-			writeError(w, http.StatusBadRequest, "Invalid id"); return
+			writeError(w, http.StatusBadRequest, "Invalid id")
+			return
 		}
 		sub, err := svc.GetSubscriptionByOwner(r.Context(), id)
 		if err != nil {
-			writeError(w, http.StatusNotFound, "No subscription found"); return
+			writeError(w, http.StatusNotFound, "No subscription found")
+			return
 		}
 		writeJSON(w, http.StatusOK, sub)
 	}
@@ -253,15 +276,18 @@ func rawGetUserSubscription(_ context.Context, svc *application.Service) http.Ha
 func rawGetBusiness(_ context.Context, svc *application.Service) http.HandlerFunc {
 	return func(w http.ResponseWriter, r *http.Request) {
 		if _, ok := checkAdmin(r); !ok {
-			writeError(w, http.StatusForbidden, "Console admin access required"); return
+			writeError(w, http.StatusForbidden, "Console admin access required")
+			return
 		}
 		id, ok := getIDParam(r, "id")
 		if !ok {
-			writeError(w, http.StatusBadRequest, "Invalid id"); return
+			writeError(w, http.StatusBadRequest, "Invalid id")
+			return
 		}
 		b, err := svc.GetBusiness(r.Context(), id)
 		if err != nil {
-			writeError(w, http.StatusNotFound, "Business not found"); return
+			writeError(w, http.StatusNotFound, "Business not found")
+			return
 		}
 		writeJSON(w, http.StatusOK, b)
 	}
@@ -270,20 +296,24 @@ func rawGetBusiness(_ context.Context, svc *application.Service) http.HandlerFun
 func rawUpdateBusiness(_ context.Context, svc *application.Service) http.HandlerFunc {
 	return func(w http.ResponseWriter, r *http.Request) {
 		if _, ok := checkAdmin(r); !ok {
-			writeError(w, http.StatusForbidden, "Console admin access required"); return
+			writeError(w, http.StatusForbidden, "Console admin access required")
+			return
 		}
 		id, ok := getIDParam(r, "id")
 		if !ok {
-			writeError(w, http.StatusBadRequest, "Invalid id"); return
+			writeError(w, http.StatusBadRequest, "Invalid id")
+			return
 		}
 		var req struct {
 			Name string `json:"name"`
 		}
 		if err := json.NewDecoder(r.Body).Decode(&req); err != nil {
-			writeError(w, http.StatusBadRequest, "Invalid body"); return
+			writeError(w, http.StatusBadRequest, "Invalid body")
+			return
 		}
 		if err := svc.UpdateBusiness(r.Context(), id, req.Name); err != nil {
-			writeError(w, http.StatusInternalServerError, "Failed to update"); return
+			writeError(w, http.StatusInternalServerError, "Failed to update")
+			return
 		}
 		writeJSON(w, http.StatusOK, map[string]string{"message": "Business updated"})
 	}
@@ -292,14 +322,17 @@ func rawUpdateBusiness(_ context.Context, svc *application.Service) http.Handler
 func rawDeleteBusiness(_ context.Context, svc *application.Service) http.HandlerFunc {
 	return func(w http.ResponseWriter, r *http.Request) {
 		if _, ok := checkAdmin(r); !ok {
-			writeError(w, http.StatusForbidden, "Console admin access required"); return
+			writeError(w, http.StatusForbidden, "Console admin access required")
+			return
 		}
 		id, ok := getIDParam(r, "id")
 		if !ok {
-			writeError(w, http.StatusBadRequest, "Invalid id"); return
+			writeError(w, http.StatusBadRequest, "Invalid id")
+			return
 		}
 		if err := svc.DeleteBusiness(r.Context(), id); err != nil {
-			writeError(w, http.StatusInternalServerError, "Failed to delete"); return
+			writeError(w, http.StatusInternalServerError, "Failed to delete")
+			return
 		}
 		writeJSON(w, http.StatusOK, map[string]string{"message": "Business deleted"})
 	}
@@ -308,15 +341,18 @@ func rawDeleteBusiness(_ context.Context, svc *application.Service) http.Handler
 func rawGetSubscription(_ context.Context, svc *application.Service) http.HandlerFunc {
 	return func(w http.ResponseWriter, r *http.Request) {
 		if _, ok := checkAdmin(r); !ok {
-			writeError(w, http.StatusForbidden, "Console admin access required"); return
+			writeError(w, http.StatusForbidden, "Console admin access required")
+			return
 		}
 		id, ok := getIDParam(r, "id")
 		if !ok {
-			writeError(w, http.StatusBadRequest, "Invalid id"); return
+			writeError(w, http.StatusBadRequest, "Invalid id")
+			return
 		}
 		sub, err := svc.GetSubscription(r.Context(), id)
 		if err != nil {
-			writeError(w, http.StatusNotFound, "Subscription not found"); return
+			writeError(w, http.StatusNotFound, "Subscription not found")
+			return
 		}
 		writeJSON(w, http.StatusOK, sub)
 	}
@@ -325,11 +361,13 @@ func rawGetSubscription(_ context.Context, svc *application.Service) http.Handle
 func rawUpdateSubscription(_ context.Context, svc *application.Service) http.HandlerFunc {
 	return func(w http.ResponseWriter, r *http.Request) {
 		if _, ok := checkAdmin(r); !ok {
-			writeError(w, http.StatusForbidden, "Console admin access required"); return
+			writeError(w, http.StatusForbidden, "Console admin access required")
+			return
 		}
 		id, ok := getIDParam(r, "id")
 		if !ok {
-			writeError(w, http.StatusBadRequest, "Invalid id"); return
+			writeError(w, http.StatusBadRequest, "Invalid id")
+			return
 		}
 		var req struct {
 			PlanID    int64  `json:"plan_id"`
@@ -337,10 +375,12 @@ func rawUpdateSubscription(_ context.Context, svc *application.Service) http.Han
 			SeatCount int    `json:"seat_count"`
 		}
 		if err := json.NewDecoder(r.Body).Decode(&req); err != nil {
-			writeError(w, http.StatusBadRequest, "Invalid body"); return
+			writeError(w, http.StatusBadRequest, "Invalid body")
+			return
 		}
 		if err := svc.UpdateSubscription(r.Context(), id, req.PlanID, req.Status, req.SeatCount); err != nil {
-			writeError(w, http.StatusInternalServerError, "Failed to update subscription"); return
+			writeError(w, http.StatusInternalServerError, "Failed to update subscription")
+			return
 		}
 		writeJSON(w, http.StatusOK, map[string]string{"message": "Subscription updated"})
 	}
@@ -349,14 +389,17 @@ func rawUpdateSubscription(_ context.Context, svc *application.Service) http.Han
 func rawDeleteSubscription(_ context.Context, svc *application.Service) http.HandlerFunc {
 	return func(w http.ResponseWriter, r *http.Request) {
 		if _, ok := checkAdmin(r); !ok {
-			writeError(w, http.StatusForbidden, "Console admin access required"); return
+			writeError(w, http.StatusForbidden, "Console admin access required")
+			return
 		}
 		id, ok := getIDParam(r, "id")
 		if !ok {
-			writeError(w, http.StatusBadRequest, "Invalid id"); return
+			writeError(w, http.StatusBadRequest, "Invalid id")
+			return
 		}
 		if err := svc.DeleteSubscription(r.Context(), id); err != nil {
-			writeError(w, http.StatusInternalServerError, "Failed to delete subscription"); return
+			writeError(w, http.StatusInternalServerError, "Failed to delete subscription")
+			return
 		}
 		writeJSON(w, http.StatusOK, map[string]string{"message": "Subscription deleted"})
 	}
@@ -365,11 +408,13 @@ func rawDeleteSubscription(_ context.Context, svc *application.Service) http.Han
 func rawUpdatePlan(_ context.Context, svc *application.Service) http.HandlerFunc {
 	return func(w http.ResponseWriter, r *http.Request) {
 		if _, ok := checkAdmin(r); !ok {
-			writeError(w, http.StatusForbidden, "Console admin access required"); return
+			writeError(w, http.StatusForbidden, "Console admin access required")
+			return
 		}
 		id, ok := getIDParam(r, "id")
 		if !ok {
-			writeError(w, http.StatusBadRequest, "Invalid id"); return
+			writeError(w, http.StatusBadRequest, "Invalid id")
+			return
 		}
 		var req struct {
 			Name                    string `json:"name"`
@@ -378,10 +423,12 @@ func rawUpdatePlan(_ context.Context, svc *application.Service) http.HandlerFunc
 			IsActive                bool   `json:"is_active"`
 		}
 		if err := json.NewDecoder(r.Body).Decode(&req); err != nil {
-			writeError(w, http.StatusBadRequest, "Invalid body"); return
+			writeError(w, http.StatusBadRequest, "Invalid body")
+			return
 		}
 		if err := svc.UpdatePlan(r.Context(), id, req.Name, req.PricePerSeatCents, req.AnnualPricePerSeatCents, req.IsActive); err != nil {
-			writeError(w, http.StatusInternalServerError, "Failed to update plan"); return
+			writeError(w, http.StatusInternalServerError, "Failed to update plan")
+			return
 		}
 		writeJSON(w, http.StatusOK, map[string]string{"message": "Plan updated"})
 	}
@@ -390,14 +437,17 @@ func rawUpdatePlan(_ context.Context, svc *application.Service) http.HandlerFunc
 func rawRevokeGrant(_ context.Context, svc *application.Service) http.HandlerFunc {
 	return func(w http.ResponseWriter, r *http.Request) {
 		if _, ok := checkAdmin(r); !ok {
-			writeError(w, http.StatusForbidden, "Console admin access required"); return
+			writeError(w, http.StatusForbidden, "Console admin access required")
+			return
 		}
 		id, ok := getIDParam(r, "id")
 		if !ok {
-			writeError(w, http.StatusBadRequest, "Invalid id"); return
+			writeError(w, http.StatusBadRequest, "Invalid id")
+			return
 		}
 		if err := svc.RevokeGrant(r.Context(), id); err != nil {
-			writeError(w, http.StatusInternalServerError, "Failed to revoke grant"); return
+			writeError(w, http.StatusInternalServerError, "Failed to revoke grant")
+			return
 		}
 		writeJSON(w, http.StatusOK, map[string]string{"message": "Grant revoked"})
 	}
@@ -406,16 +456,18 @@ func rawRevokeGrant(_ context.Context, svc *application.Service) http.HandlerFun
 func rawDeleteGrant(_ context.Context, svc *application.Service) http.HandlerFunc {
 	return func(w http.ResponseWriter, r *http.Request) {
 		if _, ok := checkAdmin(r); !ok {
-			writeError(w, http.StatusForbidden, "Console admin access required"); return
+			writeError(w, http.StatusForbidden, "Console admin access required")
+			return
 		}
 		id, ok := getIDParam(r, "id")
 		if !ok {
-			writeError(w, http.StatusBadRequest, "Invalid id"); return
+			writeError(w, http.StatusBadRequest, "Invalid id")
+			return
 		}
 		if err := svc.DeleteGrant(r.Context(), id); err != nil {
-			writeError(w, http.StatusInternalServerError, "Failed to delete grant"); return
+			writeError(w, http.StatusInternalServerError, "Failed to delete grant")
+			return
 		}
 		writeJSON(w, http.StatusOK, map[string]string{"message": "Grant deleted"})
 	}
 }
-

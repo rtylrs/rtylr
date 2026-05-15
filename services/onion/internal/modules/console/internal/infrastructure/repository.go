@@ -10,16 +10,16 @@ import (
 )
 
 type UserRow struct {
-	ID              int64
-	Email           string
-	FullName        sql.NullString
-	BusinessID      sql.NullInt64
-	IsConsoleAdmin  bool
-	IsBanned        bool
-	BanReason       sql.NullString
-	BannedAt        sql.NullTime
-	CreatedAt       sql.NullTime
-	PasswordHash    string
+	ID             int64
+	Email          string
+	FullName       sql.NullString
+	BusinessID     sql.NullInt64
+	IsConsoleAdmin bool
+	IsBanned       bool
+	BanReason      sql.NullString
+	BannedAt       sql.NullTime
+	CreatedAt      sql.NullTime
+	PasswordHash   string
 }
 
 type BusinessRow struct {
@@ -30,33 +30,33 @@ type BusinessRow struct {
 }
 
 type SubscriptionRow struct {
-	ID                     int64
-	OwnerID                int64
-	PlanID                 int64
-	PlanName               string
-	Status                 string
-	SeatCount              int
-	TrialEndsAt            sql.NullTime
-	CurrentPeriodEndsAt    sql.NullTime
-	CreatedAt              sql.NullTime
-	OwnerEmail             sql.NullString
+	ID                  int64
+	OwnerID             int64
+	PlanID              int64
+	PlanName            string
+	Status              string
+	SeatCount           int
+	TrialEndsAt         sql.NullTime
+	CurrentPeriodEndsAt sql.NullTime
+	CreatedAt           sql.NullTime
+	OwnerEmail          sql.NullString
 }
 
 type PlanRow struct {
-	ID                       int64
-	Name                     string
-	Slug                     string
-	PricePerSeatCents        int
-	AnnualPricePerSeatCents  int
-	TrialDays                int
-	MaxSeats                 sql.NullInt64
-	MaxLocations             sql.NullInt64
-	IsActive                 bool
-	IsSolo                   bool
-	IsFeatured               bool
-	TierOrder                int
-	Tagline                  string
-	CreatedAt                sql.NullTime
+	ID                      int64
+	Name                    string
+	Slug                    string
+	PricePerSeatCents       int
+	AnnualPricePerSeatCents int
+	TrialDays               int
+	MaxSeats                sql.NullInt64
+	MaxLocations            sql.NullInt64
+	IsActive                bool
+	IsSolo                  bool
+	IsFeatured              bool
+	TierOrder               int
+	Tagline                 string
+	CreatedAt               sql.NullTime
 }
 
 type GrantRow struct {
