@@ -53,6 +53,7 @@ CREATE TABLE IF NOT EXISTS pos_orders (
     status ENUM('pending','confirmed','preparing','ready','served','paid','cancelled','refunded') DEFAULT 'pending',
     customer_id BIGINT,
     customer_name VARCHAR(255),
+    customer_phone VARCHAR(50),
     staff_id BIGINT,
     subtotal DECIMAL(10,2) DEFAULT 0,
     discount_amount DECIMAL(10,2) DEFAULT 0,
