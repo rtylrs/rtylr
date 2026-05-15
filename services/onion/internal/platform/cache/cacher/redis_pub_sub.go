@@ -24,6 +24,10 @@ func NewPubSub[C redisConsumer]() RedisPubSub[C] {
 }
 
 func (r RedisPubSub[C]) Publish(channel string, message C) {
+	if r.redisCacheCluster == nil {
+		return
+	}
+
 	ctx := context.Background()
 
 	ctx, cancel := getTimeoutContext(ctx)
@@ -52,6 +56,10 @@ func (r RedisPubSub[C]) Publish(channel string, message C) {
 }
 
 func (r RedisPubSub[C]) Subscribe(channel string) {
+	if r.redisCacheCluster == nil {
+		return
+	}
+
 	ctx := context.Background()
 	subscriber := r.redisCacheCluster.Subscribe(ctx, channel)
 

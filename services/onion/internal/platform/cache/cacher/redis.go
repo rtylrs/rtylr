@@ -51,7 +51,7 @@ type redisCache struct {
 
 var (
 	client             redis.UniversalClient
-	redisCacheInstance *redisCache
+	redisCacheInstance RedisCache
 )
 
 func getTimeoutContext(ctx context.Context) (context.Context, context.CancelFunc) {
@@ -61,6 +61,11 @@ func getTimeoutContext(ctx context.Context) (context.Context, context.CancelFunc
 }
 
 func init() {
+	if !config.IsRedisEnabled() {
+		redisCacheInstance = &noopRedisCache{}
+		return
+	}
+
 	client = getNewRedisClient()
 	redisCacheInstance = &redisCache{
 		redisCacheCluster: client,
@@ -87,7 +92,7 @@ func getNewRedisClient() redis.UniversalClient {
 	return redisClient
 }
 
-func getRedisCache() *redisCache {
+func getRedisCache() RedisCache {
 	return redisCacheInstance
 }
 
