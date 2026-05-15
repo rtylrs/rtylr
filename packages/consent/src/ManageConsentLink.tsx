@@ -41,9 +41,9 @@ export function ManageConsentLink({
         border: 'none',
         padding: 0,
         cursor: 'pointer',
-        color: 'inherit',
-        font: 'inherit',
-        ...(className ? {} : { textDecoration: 'underline', textUnderlineOffset: 2 }),
+        ...(className
+          ? {}
+          : { color: 'inherit', font: 'inherit', textDecoration: 'underline', textUnderlineOffset: 2 }),
       }}
     >
       {children ?? 'Cookie preferences'}
