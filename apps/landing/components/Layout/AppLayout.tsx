@@ -18,8 +18,6 @@ import CustomScrollbar from '../CustomScrollbar/CustomScrollbar';
 
 // Import Zustand stores and React Query hooks
 import { useUserStore } from '../../stores/userStore';
-import { useConfigStore } from '../../stores/configStore';
-import { useConfigData } from '../../hooks/api/useConfigApi';
 import { useUserInfo } from '../../hooks/api/useUserApi';
 
 ChartJS.register(LineElement, PointElement, LinearScale, Title, Tooltip, Legend, CategoryScale);
@@ -33,7 +31,6 @@ const AppLayout: React.FC<AppLayoutProps> = ({ children }) => {
 
   // Zustand stores
   const { isAuthenticated, role } = useUserStore();
-  const configStore = useConfigStore();
 
   // React Query hooks - only on client side
   const [isClient, setIsClient] = useState(false);
@@ -42,7 +39,6 @@ const AppLayout: React.FC<AppLayoutProps> = ({ children }) => {
     setIsClient(true);
   }, []);
 
-  const { data: configData } = useConfigData();
   const { data: userData } = useUserInfo();
 
   // States
@@ -56,9 +52,7 @@ const AppLayout: React.FC<AppLayoutProps> = ({ children }) => {
 
   return (
     <React.Fragment>
-      {configData && (
-        <HelmetContainer title={'Rtylr - Contactless QR Menu'} favicon={'/favicon.ico'} />
-      )}
+      <HelmetContainer title={'Rtylr - Contactless QR Menu'} favicon={'/favicon.ico'} />
 
       {/* Toolbar and Cookies components temporarily commented out */}
       {/* {(role && role === 'admin') ||
