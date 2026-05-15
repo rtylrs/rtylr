@@ -81,7 +81,6 @@ const CTASection: React.FC = (): React.JSX.Element => {
             className={styles.rightImg}
             aria-hidden="true"
           />
-          <div className={styles.rightFade} />
         </motion.div>
       </div>
     </section>
