@@ -6,52 +6,51 @@ import styles from './TestimonialsSection.module.scss';
 
 const testimonials = [
   {
-    quote:
-      'We used to close the books on the 8th of every month. Now we close them on the 2nd, because there\u2019s nothing left to reconcile.',
-    author: 'Laila Ahmed',
-    role: 'Owner, Byblos Kitchen',
-    company: 'Restaurant · 3 locations',
+    quote: 'كنا نقفل الحسابات في الثامن من كل شهر. هلق بنقفلها بالثاني، ما في شي لازم نسوي تسوية.',
+    author: 'ليلى أحمد',
+    role: 'صاحبة مطعم، مطبخ بيبلوس',
+    company: 'مطعم · ٣ فروع',
     image: 'https://placehold.co/80x80/d6b88e/1a1612?text=LA',
   },
   {
     quote:
-      'A server hit 20 lifetime visits and rtylr drafted the thank-you email on its own. My manager asked if I\u2019d set that up. I hadn\u2019t.',
-    author: 'Marcus Hale',
-    role: 'GM, Terrace',
-    company: 'Restaurant',
-    image: 'https://placehold.co/80x80/c9a48a/1a1612?text=MH',
+      'النادل وصل لـ٢٠ زيارة وrtylr كتب إيميل الشكر لحاله. مديري سألني إذا أنا ضبطتها. ما ضبطتها.',
+    author: 'كريم منصور',
+    role: 'مدير عام، مطعم التراس',
+    company: 'مطعم',
+    image: 'https://placehold.co/80x80/c9a48a/1a1612?text=KM',
   },
   {
     quote:
-      'Lost WiFi on a Saturday night. 200 covers. The POS kept going. I didn\u2019t know software could do that.',
-    author: 'David Park',
-    role: 'Owner, Mountain Cafe',
-    company: 'Restaurant',
-    image: 'https://placehold.co/80x80/b89a8a/1a1612?text=DP',
+      'انقطع الإنترنت ليلة السبت وعنا ٢٠٠ طاولة. الكاشير ما وقف. ما كنت أتوقع برنامج يقدر يعمل هيك.',
+    author: 'طارق الزين',
+    role: 'صاحب، كافيه الجبل',
+    company: 'مطعم',
+    image: 'https://placehold.co/80x80/b89a8a/1a1612?text=TZ',
   },
   {
     quote:
-      'Scheduling used to live in a WhatsApp group. Now shifts publish in four clicks and payroll reconciles on its own Sunday night.',
-    author: 'Juno Park',
-    role: 'Ops Lead, Urban Retail Co.',
-    company: 'Retail · 5 stores',
-    image: 'https://placehold.co/80x80/a89680/1a1612?text=JP',
+      'الجدول كان على واتساب. هلق الدوام بينشر بأربع ضغطات والرواتب بتتسوى تلقائي كل أحد بالليل.',
+    author: 'سارة الحلبي',
+    role: 'مسؤولة عمليات، سلسلة Urban',
+    company: 'ريتيل · ٥ فروع',
+    image: 'https://placehold.co/80x80/a89680/1a1612?text=SH',
   },
   {
     quote:
-      'Moving off Toast saved us roughly $340 per location every month. And that\u2019s before I counted the module add-ons we were paying for.',
-    author: 'Sarah Johnson',
-    role: 'Founder, Fresh Market',
-    company: 'Grocery · 4 stores',
-    image: 'https://placehold.co/80x80/d6b88e/1a1612?text=SJ',
+      'التحويل من النظام القديم وفّر علينا تقريباً ٦٠٠ دولار على كل فرع كل شهر. وهاد قبل ما أحسب الإضافات.',
+    author: 'نادين فرحات',
+    role: 'مؤسسة، ماركت الطازج',
+    company: 'بقالة · ٤ فروع',
+    image: 'https://placehold.co/80x80/d6b88e/1a1612?text=NF',
   },
   {
     quote:
-      'Tasks link to the invoice, the customer, the shift. I stopped opening four tabs for four tools, I just open Flow.',
-    author: 'James Wilson',
-    role: 'Manager, Tech Store Pro',
-    company: 'Retail',
-    image: 'https://placehold.co/80x80/c9a48a/1a1612?text=JW',
+      'المهمة مربوطة بالفاتورة، بالزبون، بالدوام. بطّلت أفتح أربع تابات لأربع برامج، بس بفتح Flow.',
+    author: 'جاد معلوف',
+    role: 'مدير، Tech Store Pro',
+    company: 'ريتيل',
+    image: 'https://placehold.co/80x80/c9a48a/1a1612?text=JM',
   },
 ];
 
@@ -81,7 +80,7 @@ const TestimonialsSection: React.FC = () => {
             <div className={cn(styles.tickerTrack, styles.tickerLeft)}>
               {duplicatedTestimonials.map((testimonial, index) => (
                 <div key={index} className={styles.testimonialCard}>
-                  <p className={styles.quote}>"{testimonial.quote}"</p>
+                  <p className={styles.quote}>&ldquo;{testimonial.quote}&rdquo;</p>
                   <div className={styles.authorInfo}>
                     <img
                       src={testimonial.image}
@@ -101,7 +100,7 @@ const TestimonialsSection: React.FC = () => {
             <div className={cn(styles.tickerTrack, styles.tickerRight)}>
               {duplicatedTestimonials.map((testimonial, index) => (
                 <div key={index} className={styles.testimonialCard}>
-                  <p className={styles.quote}>"{testimonial.quote}"</p>
+                  <p className={styles.quote}>&ldquo;{testimonial.quote}&rdquo;</p>
                   <div className={styles.authorInfo}>
                     <img
                       src={testimonial.image}
