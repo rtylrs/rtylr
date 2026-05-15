@@ -1,0 +1,11 @@
+@import './keyframes.css';
+@import './markdown.css';
+
+.caret-chat-row .caret-chat-actions {
+  opacity: 0;
+  transition: opacity 0.12s;
+}
+.caret-chat-row:hover .caret-chat-actions,
+.caret-chat-row:focus-within .caret-chat-actions {
+  opacity: 1;
+}
