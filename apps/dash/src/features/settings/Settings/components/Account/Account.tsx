@@ -46,7 +46,7 @@ interface LoginHistoryItem {
 
 const Account: React.FC = () => {
   const { user } = useUserStore();
-  const [formData, setFormData] = useState({ firstName: '', lastName: '', email: '' });
+  const [formData, setFormData] = useState({ name: '', email: '' });
   const [isEditing, setIsEditing] = useState(false);
   const [loginHistory, setLoginHistory] = useState<LoginHistoryItem[]>([]);
 
@@ -72,11 +72,8 @@ const Account: React.FC = () => {
 
   useEffect(() => {
     if (user) {
-      const fullName = user.fullName || user.name || '';
-      const parts = fullName.split(' ');
       setFormData({
-        firstName: user.firstName || parts[0] || '',
-        lastName: user.lastName || parts.slice(1).join(' ') || '',
+        name: user.fullName || user.name || '',
         email: user.email || user.emailAddress || '',
       });
     }
@@ -92,8 +89,7 @@ const Account: React.FC = () => {
     mutationFn: () =>
       unwrap(
         safe.post('/account/profile', {
-          firstName: formData.firstName,
-          lastName: formData.lastName,
+          name: formData.name,
         })
       ),
     onSuccess: () => {
@@ -110,8 +106,7 @@ const Account: React.FC = () => {
   const handleCancel = () => {
     if (user) {
       setFormData({
-        firstName: user.firstName || user.name?.split(' ')[0] || '',
-        lastName: user.lastName || user.name?.split(' ').slice(1).join(' ') || '',
+        name: user.fullName || user.name || '',
         email: user.email || '',
       });
     }
@@ -134,33 +129,19 @@ const Account: React.FC = () => {
         <CardContent className="pt-0 space-y-4">
           <div className="grid grid-cols-2 gap-4">
             <div className="space-y-1.5">
-              <Label htmlFor="firstName">First name</Label>
-              <Input
-                id="firstName"
-                name="firstName"
-                value={formData.firstName}
-                onChange={handleInputChange}
-              />
+              <Label htmlFor="name">Full name</Label>
+              <Input id="name" name="name" value={formData.name} onChange={handleInputChange} />
             </div>
             <div className="space-y-1.5">
-              <Label htmlFor="lastName">Last name</Label>
+              <Label htmlFor="email">Email</Label>
               <Input
-                id="lastName"
-                name="lastName"
-                value={formData.lastName}
+                id="email"
+                name="email"
+                type="email"
+                value={formData.email}
                 onChange={handleInputChange}
               />
             </div>
-          </div>
-          <div className="space-y-1.5">
-            <Label htmlFor="email">Email</Label>
-            <Input
-              id="email"
-              name="email"
-              type="email"
-              value={formData.email}
-              onChange={handleInputChange}
-            />
           </div>
           <div className="flex justify-end gap-2 pt-1">
             <Button
