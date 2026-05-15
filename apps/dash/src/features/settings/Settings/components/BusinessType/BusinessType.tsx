@@ -1,105 +1,59 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useMemo } from 'react';
+import { Search, Loader2 } from 'lucide-react';
 import { useBusinessStore, type BusinessType } from '../../../../../shared/stores/businessStore';
 import { useUpdateBusiness } from '../../../../../shared/hooks/queries/useBusiness';
 import { useUserStore } from '../../../../../shared/stores/userStore';
+import { useIndustries } from '../../../../../shared/hooks/queries/useIndustries';
 import {
   Card,
   CardContent,
   CardHeader,
   CardTitle,
-  CardDescription,
   Button,
   Input,
-  Label,
 } from '../../../../../shared/components/ui';
 import { cn } from '../../../../../shared/lib/utils';
-
-type IndustryGroup = {
-  label: string;
-  emoji: string;
-  types: { value: string; label: string }[];
-};
-
-const INDUSTRY_GROUPS: IndustryGroup[] = [
-  {
-    label: 'Food & Beverage',
-    emoji: '🍽️',
-    types: [
-      { value: 'restaurant', label: 'Restaurant' },
-      { value: 'cafe', label: 'Cafe / Coffee Shop' },
-      { value: 'bar', label: 'Bar / Pub' },
-      { value: 'food_truck', label: 'Food Truck' },
-      { value: 'bakery', label: 'Bakery' },
-      { value: 'juice_bar', label: 'Juice Bar' },
-      { value: 'catering', label: 'Catering' },
-      { value: 'fast_food', label: 'Fast Food' },
-    ],
-  },
-  {
-    label: 'Retail',
-    emoji: '🛍️',
-    types: [
-      { value: 'retail_clothing', label: 'Clothing & Apparel' },
-      { value: 'retail_grocery', label: 'Grocery / Supermarket' },
-      { value: 'retail_pharmacy', label: 'Pharmacy' },
-      { value: 'retail_electronics', label: 'Electronics' },
-      { value: 'retail_gifts', label: 'Gifts & Souvenirs' },
-      { value: 'retail_books', label: 'Books & Stationery' },
-    ],
-  },
-  {
-    label: 'Health & Beauty',
-    emoji: '💆',
-    types: [
-      { value: 'salon', label: 'Hair Salon' },
-      { value: 'barber', label: 'Barbershop' },
-      { value: 'spa', label: 'Spa & Wellness' },
-      { value: 'gym', label: 'Gym / Fitness' },
-      { value: 'nail_salon', label: 'Nail Salon' },
-      { value: 'clinic', label: 'Medical Clinic' },
-    ],
-  },
-  {
-    label: 'Hospitality',
-    emoji: '🏨',
-    types: [
-      { value: 'hotel', label: 'Hotel' },
-      { value: 'hostel', label: 'Hostel' },
-      { value: 'resort', label: 'Resort' },
-      { value: 'guesthouse', label: 'Guesthouse / B&B' },
-    ],
-  },
-  {
-    label: 'Other',
-    emoji: '🏢',
-    types: [
-      { value: 'events', label: 'Events & Venue' },
-      { value: 'education', label: 'Education' },
-      { value: 'services', label: 'Professional Services' },
-      { value: 'other', label: 'Other' },
-    ],
-  },
-];
-
-const ALL_TYPES = INDUSTRY_GROUPS.flatMap((g) => g.types);
 
 const BusinessTypeSettings: React.FC = () => {
   const { businessType, setBusinessType } = useBusinessStore();
   const { userId } = useUserStore();
   const updateBusiness = useUpdateBusiness();
+  const { data, isLoading } = useIndustries();
+
   const [selected, setSelected] = useState<string>(businessType || '');
-  const [customType, setCustomType] = useState('');
+  const [search, setSearch] = useState('');
 
   useEffect(() => {
     if (businessType) setSelected(businessType);
   }, [businessType]);
 
-  const handleSave = async () => {
+  const groups = data?.groups ?? [];
+
+  const filteredGroups = useMemo(() => {
+    const q = search.toLowerCase().trim();
+    if (!q) return groups;
+    return groups
+      .map((g) => ({
+        ...g,
+        types: g.types.filter(
+          (t) => t.label.toLowerCase().includes(q) || t.slug.toLowerCase().includes(q)
+        ),
+      }))
+      .filter((g) => g.types.length > 0);
+  }, [groups, search]);
+
+  const selectedLabel = useMemo(() => {
+    for (const g of groups) {
+      const t = g.types.find((t) => t.slug === selected);
+      if (t) return t.label;
+    }
+    return selected;
+  }, [groups, selected]);
+
+  const handleSave = () => {
     if (!userId || !selected) return;
     setBusinessType(selected as BusinessType);
-    const data: Record<string, unknown> = { businessType: selected };
-    if (selected === 'other' && customType) data.customBusinessType = customType;
-    updateBusiness.mutate({ businessId: userId, data });
+    updateBusiness.mutate({ businessId: userId, data: { businessType: selected } });
   };
 
   return (
@@ -109,71 +63,76 @@ const BusinessTypeSettings: React.FC = () => {
           Industry
         </h1>
         <p className="text-sm mt-0.5" style={{ color: 'var(--dash-text-muted)' }}>
-          Select the category that best describes your business. This personalizes your dashboard
-          experience.
+          Select the category that best describes your business.
         </p>
       </div>
 
-      <div className="space-y-5">
-        {INDUSTRY_GROUPS.map((group) => (
-          <Card key={group.label}>
-            <CardHeader className="pb-3">
-              <CardTitle className="flex items-center gap-2 text-sm">
-                <span>{group.emoji}</span>
-                {group.label}
-              </CardTitle>
-            </CardHeader>
-            <CardContent className="pt-0">
-              <div className="grid grid-cols-2 gap-2">
-                {group.types.map((type) => {
-                  const isActive = selected === type.value;
-                  return (
-                    <button
-                      key={type.value}
-                      onClick={() => setSelected(type.value)}
-                      className={cn(
-                        'px-3 py-2.5 rounded-lg text-sm text-left transition-all font-medium'
-                      )}
-                      style={{
-                        background: isActive ? 'rgba(69,131,196,0.12)' : 'var(--dash-hover)',
-                        border: isActive
-                          ? '1px solid rgba(69,131,196,0.35)'
-                          : '1px solid transparent',
-                        color: isActive ? '#4583C4' : 'var(--dash-text-muted)',
-                      }}
-                    >
-                      {type.label}
-                    </button>
-                  );
-                })}
-              </div>
-            </CardContent>
-          </Card>
-        ))}
+      {/* Search */}
+      <div className="relative">
+        <Search
+          size={14}
+          className="absolute left-3 top-1/2 -translate-y-1/2"
+          style={{ color: 'var(--dash-text-dim)' }}
+        />
+        <Input
+          placeholder="Search industries..."
+          value={search}
+          onChange={(e) => setSearch(e.target.value)}
+          className="pl-9"
+        />
       </div>
 
-      {selected === 'other' && (
-        <Card>
-          <CardContent className="pt-5">
-            <div className="space-y-1.5">
-              <Label>Describe your business</Label>
-              <Input
-                value={customType}
-                onChange={(e) => setCustomType(e.target.value)}
-                placeholder="e.g. Pet grooming, Florist, Coworking space..."
-              />
-            </div>
-          </CardContent>
-        </Card>
+      {isLoading ? (
+        <div className="flex items-center justify-center py-16">
+          <Loader2 size={20} className="animate-spin" style={{ color: 'var(--dash-text-dim)' }} />
+        </div>
+      ) : filteredGroups.length === 0 ? (
+        <p className="text-sm text-center py-10" style={{ color: 'var(--dash-text-muted)' }}>
+          No industries match "{search}"
+        </p>
+      ) : (
+        <div className="space-y-5">
+          {filteredGroups.map((group) => (
+            <Card key={group.category}>
+              <CardHeader className="pb-3">
+                <CardTitle className="text-sm">{group.category}</CardTitle>
+              </CardHeader>
+              <CardContent className="pt-0">
+                <div className="grid grid-cols-2 gap-2">
+                  {group.types.map((type) => {
+                    const isActive = selected === type.slug;
+                    return (
+                      <button
+                        key={type.slug}
+                        onClick={() => setSelected(type.slug)}
+                        className={cn(
+                          'px-3 py-2.5 rounded-lg text-sm text-left transition-all font-medium flex items-center gap-2'
+                        )}
+                        style={{
+                          background: isActive ? 'rgba(69,131,196,0.12)' : 'var(--dash-hover)',
+                          border: isActive
+                            ? '1px solid rgba(69,131,196,0.35)'
+                            : '1px solid transparent',
+                          color: isActive ? '#4583C4' : 'var(--dash-text-muted)',
+                        }}
+                      >
+                        {type.icon && <span>{type.icon}</span>}
+                        {type.label}
+                      </button>
+                    );
+                  })}
+                </div>
+              </CardContent>
+            </Card>
+          ))}
+        </div>
       )}
 
       {selected && (
         <div className="flex items-center justify-between pt-1">
           <p className="text-sm" style={{ color: 'var(--dash-text-muted)' }}>
             Selected:{' '}
-            <span style={{ color: 'var(--dash-text)', fontWeight: 500 }}>
-              {ALL_TYPES.find((t) => t.value === selected)?.label ?? selected}
-            </span>
+            <span style={{ color: 'var(--dash-text)', fontWeight: 500 }}>{selectedLabel}</span>
           </p>
           <Button onClick={handleSave} disabled={updateBusiness.isPending}>
             {updateBusiness.isPending ? 'Saving...' : 'Save'}
