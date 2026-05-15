@@ -1,3 +1,10 @@
 export { buildDashSystemContext } from './systemContext';
 export type { DashSystemContextInput } from './systemContext';
 export { suggestionsFor } from './suggestions';
+export { transcriptToText, transcriptToMarkdown } from './transcripts';
+export { downloadTextFile } from './download';
+export { deriveChatTitle } from './titles';
+export { relativeTime } from './time';
+export { rememberApproval, getApproval, clearApprovals } from './approvals';
+export { QUICK_ACTIONS, quickActionsByScope } from './quickActions';
+export type { QuickAction } from './quickActions';
