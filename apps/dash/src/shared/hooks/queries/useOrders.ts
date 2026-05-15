@@ -14,6 +14,6 @@ export const useOrders = () => {
       const raw = res?.orders ?? res;
       return z.array(dashOrderSchema).parse(Array.isArray(raw) ? raw : []);
     },
-    staleTime: 5 * 60 * 1000, // WS push handles freshness; this is a fallback
+    refetchInterval: 15_000,
   });
 };

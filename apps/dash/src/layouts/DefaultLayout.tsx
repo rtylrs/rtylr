@@ -51,7 +51,6 @@ import { useCommandPalette } from '../shared/stores/commandPaletteStore';
 import { useKeyboardShortcuts } from '../shared/hooks/useKeyboardShortcuts';
 import { useOnboardingTour } from '../shared/hooks/useOnboardingTour';
 import { useNotifications } from '../shared/hooks/queries/useNotifications';
-import { useNotificationsRealtime } from '../shared/lib/useNotificationsRealtime';
 
 interface NavItem {
   label: string;
@@ -216,7 +215,6 @@ const DefaultLayout: React.FC<DefaultLayoutProps> = ({ children }) => {
   const { theme, setTheme } = useThemeStore();
   const { setOpen: setCommandPaletteOpen } = useCommandPalette();
   const { data: notifications = [] } = useNotifications();
-  useNotificationsRealtime();
   const { data: addonsData } = useQuery<Array<{ id: string; isEnabled: boolean }>>({
     queryKey: ['addons'],
     queryFn: async () => {
