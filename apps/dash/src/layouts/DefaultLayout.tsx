@@ -13,7 +13,6 @@ import {
   ClipboardList,
   QrCode,
   Palette,
-  BarChart3,
   Settings,
   Bell,
   LogOut,
@@ -21,27 +20,17 @@ import {
   Sun,
   Moon,
   Monitor,
-  MonitorSpeaker,
-  Package,
-  UserCheck,
-  CreditCard,
-  Layers,
   ExternalLink,
   Users,
-  Grid3x3,
   Store,
   MessageSquare,
   Search,
   Sparkles,
-  Pin,
-  PinOff,
-  Plus,
-  X,
 } from 'lucide-react';
 import { CaretPanel, CaretButton, useCaretStore } from '@voxire/caret';
 import { useUserStore } from '../shared/stores/userStore';
 import { useThemeStore } from '../shared/stores/themeStore';
-import { usePinnedStore } from '../shared/stores/pinnedStore';
+import { useApps } from '../shared/hooks/queries/useApps';
 import { cn } from '../shared/lib/utils';
 import {
   Avatar,
@@ -66,7 +55,6 @@ interface NavItem {
 const navItems: NavItem[] = [
   { label: 'Dashboard', path: '/', icon: LayoutDashboard },
   { label: 'Team', path: '/team', icon: Users },
-  { label: 'Apps', path: '/apps', icon: Grid3x3 },
 ];
 
 const menuSubItems: NavItem[] = [
@@ -209,152 +197,53 @@ const SidebarSection: React.FC<{
   );
 };
 
-const APP_META: Record<
-  string,
-  { label: string; icon: React.ComponentType<{ size?: number; className?: string }> }
-> = {
-  pos: { label: 'POS', icon: MonitorSpeaker },
-  erp: { label: 'ERP', icon: Package },
-  hr: { label: 'HR', icon: UserCheck },
-  crm: { label: 'CRM', icon: Users },
-  finance: { label: 'Finance', icon: CreditCard },
-  flow: { label: 'Flow', icon: Layers },
-  insights: { label: 'Insights', icon: BarChart3 },
-  menu: { label: 'Menu', icon: UtensilsCrossed },
-};
-
-const MyAppsSection: React.FC = () => {
+const AppsSection: React.FC = () => {
   const { user } = useUserStore();
-  const apps = (user?.apps as string[] | undefined) ?? [];
-  const visible = apps.filter((id) => APP_META[id] && id in APP_URLS);
-  const [open, setOpen] = React.useState(true);
+  const { data: apps = [] } = useApps();
+  const userApps = (user?.apps as string[] | undefined) ?? [];
+  const isOwner = user?.role === 'owner' || user?.role === 'admin';
+
+  const visible = apps.filter((a) => {
+    if (!(a.key in APP_URLS)) return false;
+    if (a.status !== 'active') return false;
+    if (isOwner) return userApps.length === 0 || userApps.includes(a.key);
+    return userApps.includes(a.key);
+  });
 
   if (visible.length === 0) return null;
 
   return (
-    <div className="pt-1">
-      <button
-        onClick={() => setOpen((v) => !v)}
-        className="flex items-center gap-3 px-3 py-2 rounded-lg text-sm w-full transition-colors duration-150 hover:bg-[var(--dash-hover)]"
-        style={{ color: 'var(--dash-text-muted)' }}
+    <div className="pt-3">
+      <div
+        className="px-3 pb-1.5 text-xs font-semibold uppercase tracking-wide"
+        style={{ color: 'var(--dash-text-dim)' }}
       >
-        <Grid3x3 size={16} className="shrink-0" />
-        <span className="flex-1 text-left">My apps</span>
-        <ChevronRight
-          size={12}
-          className={cn('shrink-0 transition-transform', open && 'rotate-90')}
-          style={{ color: 'var(--dash-text-dim)' }}
-        />
-      </button>
-      {open && (
-        <div
-          className="ml-5 pl-2 mt-0.5 space-y-0.5"
-          style={{ borderLeft: '1px solid var(--dash-border)' }}
-        >
-          {visible.map((id) => {
-            const meta = APP_META[id];
-            const Icon = meta.icon;
-            return (
-              <a
-                key={id}
-                href={APP_URLS[id as keyof typeof APP_URLS]}
-                target="_blank"
-                rel="noopener noreferrer"
-                className="flex items-center gap-3 px-3 py-1.5 rounded-lg text-sm transition-colors duration-150 hover:bg-[var(--dash-hover)]"
-                style={{ color: 'var(--dash-text-muted)' }}
-              >
-                <Icon size={14} className="shrink-0" />
-                <span className="flex-1 truncate">{meta.label}</span>
-                <ExternalLink size={11} style={{ color: 'var(--dash-text-dim)' }} />
-              </a>
-            );
-          })}
-        </div>
-      )}
-    </div>
-  );
-};
-
-const PinnedSection: React.FC<{ currentPath: string; currentLabel: string }> = ({
-  currentPath,
-  currentLabel,
-}) => {
-  const { items, add, remove } = usePinnedStore();
-  const [open, setOpen] = React.useState(true);
-  const alreadyPinned = items.some((i) => i.path === currentPath);
-  const canPin = currentPath !== '/' && currentLabel && !alreadyPinned;
-
-  return (
-    <div className="pt-1">
-      <button
-        onClick={() => setOpen((v) => !v)}
-        className="flex items-center gap-3 px-3 py-2 rounded-lg text-sm w-full transition-colors duration-150 hover:bg-[var(--dash-hover)]"
-        style={{ color: 'var(--dash-text-muted)' }}
-      >
-        <Pin size={16} className="shrink-0" />
-        <span className="flex-1 text-left">Pinned</span>
-        <ChevronRight
-          size={12}
-          className={cn('shrink-0 transition-transform', open && 'rotate-90')}
-          style={{ color: 'var(--dash-text-dim)' }}
-        />
-      </button>
-      {open && (
-        <div
-          className="ml-5 pl-2 mt-0.5 space-y-0.5"
-          style={{ borderLeft: '1px solid var(--dash-border)' }}
-        >
-          {items.length === 0 && (
-            <p className="px-3 py-1.5 text-xs" style={{ color: 'var(--dash-text-dim)' }}>
-              No pinned pages yet.
-            </p>
-          )}
-          {items.map((item) => (
-            <div
-              key={item.id}
-              className="group flex items-center gap-1 rounded-lg hover:bg-[var(--dash-hover)]"
+        Apps
+      </div>
+      <div className="space-y-0.5">
+        {visible.map((a) => {
+          const Icon = a.icon;
+          return (
+            <a
+              key={a.key}
+              href={APP_URLS[a.key as keyof typeof APP_URLS]}
+              target="_blank"
+              rel="noopener noreferrer"
+              className="flex items-center gap-3 px-3 py-2 rounded-lg text-sm transition-colors duration-150 hover:bg-[var(--dash-hover)]"
+              style={{ color: 'var(--dash-text-muted)' }}
             >
-              <Link
-                to={item.path}
-                className="flex-1 flex items-center gap-3 px-3 py-1.5 text-sm"
-                style={{ color: 'var(--dash-text-muted)' }}
+              <span
+                className="h-6 w-6 rounded-md flex items-center justify-center shrink-0"
+                style={{ background: a.bg }}
               >
-                <span className="flex-1 truncate">{item.label}</span>
-              </Link>
-              <button
-                onClick={(e) => {
-                  e.preventDefault();
-                  remove(item.id);
-                }}
-                className="opacity-0 group-hover:opacity-100 p-1 mr-1 rounded transition-opacity"
-                title="Unpin"
-              >
-                <X size={11} style={{ color: 'var(--dash-text-dim)' }} />
-              </button>
-            </div>
-          ))}
-          {canPin && (
-            <button
-              onClick={() => add({ id: currentPath, label: currentLabel, path: currentPath })}
-              className="flex items-center gap-2 px-3 py-1.5 rounded-lg text-xs w-full transition-colors duration-150 hover:bg-[var(--dash-hover)]"
-              style={{ color: 'var(--dash-text-dim)' }}
-            >
-              <Plus size={11} className="shrink-0" />
-              <span className="flex-1 text-left truncate">Pin "{currentLabel}"</span>
-            </button>
-          )}
-          {alreadyPinned && (
-            <button
-              onClick={() => remove(currentPath)}
-              className="flex items-center gap-2 px-3 py-1.5 rounded-lg text-xs w-full transition-colors duration-150 hover:bg-[var(--dash-hover)]"
-              style={{ color: 'var(--dash-text-dim)' }}
-            >
-              <PinOff size={11} className="shrink-0" />
-              <span className="flex-1 text-left">Unpin current page</span>
-            </button>
-          )}
-        </div>
-      )}
+                <Icon size={13} style={{ color: a.color }} />
+              </span>
+              <span className="flex-1 truncate">{a.label}</span>
+              <ExternalLink size={11} style={{ color: 'var(--dash-text-dim)' }} />
+            </a>
+          );
+        })}
+      </div>
     </div>
   );
 };
@@ -457,8 +346,7 @@ const DefaultLayout: React.FC<DefaultLayoutProps> = ({ children }) => {
               <SidebarSection label="Storefront" icon={Store} items={menuSubItems} />
             )}
 
-            <MyAppsSection />
-            <PinnedSection currentPath={location.pathname} currentLabel={pageTitle} />
+            <AppsSection />
           </nav>
 
           {/* Footer */}
