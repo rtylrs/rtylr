@@ -228,8 +228,8 @@ SELECT COUNT(*) FROM business_addons WHERE business_id = ? AND addon_id = 'onlin
 
 -- name: CreateOnlineOrder :execresult
 INSERT INTO pos_orders
-(owner_id, order_number, type, status, customer_name, subtotal, total, payment_status, notes, kitchen_notes)
-VALUES (?, ?, 'online', 'pending', ?, ?, ?, 'unpaid', ?, ?);
+(owner_id, order_number, type, status, customer_name, customer_phone, subtotal, total, payment_status, notes, kitchen_notes)
+VALUES (?, ?, 'online', 'pending', ?, ?, ?, ?, 'unpaid', ?, ?);
 
 -- name: GetPublicOrderStatus :one
 SELECT id, order_number, status FROM pos_orders WHERE id = ? LIMIT 1;

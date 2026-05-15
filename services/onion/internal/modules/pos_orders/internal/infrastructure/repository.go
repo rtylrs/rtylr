@@ -1190,9 +1190,9 @@ func (r *Repository) CreatePublicOrder(ctx context.Context, ownerID int64, order
 
 	res, err := tx.ExecContext(ctx,
 		`INSERT INTO pos_orders
-		 (owner_id, order_number, type, status, customer_name, subtotal, total, payment_status, notes, created_at, updated_at)
-		 VALUES (?, ?, 'online', 'pending', ?, ?, ?, 'unpaid', ?, NOW(), NOW())`,
-		ownerID, orderNumber, nullableString(customerName), floatToDecimal(subtotal), floatToDecimal(subtotal), nullableString(notes),
+		 (owner_id, order_number, type, status, customer_name, customer_phone, subtotal, total, payment_status, notes, created_at, updated_at)
+		 VALUES (?, ?, 'online', 'pending', ?, ?, ?, ?, 'unpaid', ?, NOW(), NOW())`,
+		ownerID, orderNumber, nullableString(customerName), nullableString(customerPhone), floatToDecimal(subtotal), floatToDecimal(subtotal), nullableString(notes),
 	)
 	if err != nil {
 		logger.Ctx(ctx).Error("Failed to insert public order", logger.Error(err))
