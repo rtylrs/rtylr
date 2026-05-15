@@ -30,6 +30,17 @@ func (s *Service) ListStaffUsers(ctx context.Context, ownerID int64) ([]domain.S
 	return s.repo.ListStaffUsers(ctx, ownerID)
 }
 
+// ListStaffUsersByBusiness resolves the business owner and lists all staff
+// under that owner. Lets non-owner members see the full team, not just the
+// rows they personally own (which would be empty).
+func (s *Service) ListStaffUsersByBusiness(ctx context.Context, businessID int64) ([]domain.StaffUser, error) {
+	_, ownerID, err := s.repo.GetBusinessByID(ctx, businessID)
+	if err != nil {
+		return nil, err
+	}
+	return s.repo.ListStaffUsers(ctx, ownerID)
+}
+
 func (s *Service) GetStaffUserByID(ctx context.Context, ownerID, businessID, userID int64) (*domain.StaffUser, error) {
 	if userID == 0 {
 		return nil, domain.ErrUserNotFound

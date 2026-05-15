@@ -57,9 +57,9 @@ func (h *ListUsersHandler) Serve(ctx context.Context, _ *ListUsersRequest) (List
 		return ListUsersResponse{}, errorModels.PermissionDeniedServerError()
 	}
 
-	ownerID := device.User.UserID
-
-	users, err := h.Service.ListStaffUsers(ctx, ownerID)
+	// Scope the team list by business so non-owner members see colleagues
+	// instead of the empty set returned by querying owner_id = own user_id.
+	users, err := h.Service.ListStaffUsersByBusiness(ctx, device.User.BusinessID)
 	if err != nil {
 		return ListUsersResponse{}, &errorModels.ServerError{
 			HTTPCode: http.StatusInternalServerError,
