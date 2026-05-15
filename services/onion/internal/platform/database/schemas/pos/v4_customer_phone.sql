@@ -3,4 +3,4 @@
 -- ═══════════════════════════════════════════════════════════════════
 
 ALTER TABLE pos_orders
-  ADD COLUMN customer_phone VARCHAR(50) DEFAULT NULL AFTER customer_name;
+  ADD COLUMN IF NOT EXISTS customer_phone VARCHAR(50) DEFAULT NULL AFTER customer_name;
