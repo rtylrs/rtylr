@@ -211,6 +211,7 @@ export const useSetSubscription = () => {
       unwrap(safe.post('/subscriptions/my', { plan_slug: data.planSlug })),
     onSuccess: () => {
       void queryClient.invalidateQueries({ queryKey: ['subscription'] });
+      toast.success('Subscription updated');
     },
     onError: () => toast.error('Failed to update subscription'),
   });
