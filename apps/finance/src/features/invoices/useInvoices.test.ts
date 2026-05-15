@@ -149,10 +149,15 @@ describe('useRecordPayment', () => {
     vi.clearAllMocks();
   });
 
-  it('calls POST /finance/invoices/:id/payment', async () => {
+  it('calls POST /finance/invoices/payment', async () => {
     (safe.post as ReturnType<typeof vi.fn>).mockResolvedValue(undefined);
     const { result } = renderHook(() => useRecordPayment(), { wrapper: createWrapper() });
-    await act(() => result.current.mutateAsync({ id: 'inv-1', amount: 250 }));
-    expect(safe.post).toHaveBeenCalledWith('/finance/invoices/inv-1/payment', { amount: 250 });
+    await act(() => result.current.mutateAsync({ id: '42', amount: 250 }));
+    expect(safe.post).toHaveBeenCalledWith('/finance/invoices/payment', {
+      invoiceId: 42,
+      amount: 250,
+      paymentDate: undefined,
+      method: undefined,
+    });
   });
 });
