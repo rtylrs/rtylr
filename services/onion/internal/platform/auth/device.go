@@ -49,9 +49,26 @@ func GetAnonymousDevice() Device {
 	}
 }
 
+func extractIP(r *http.Request) string {
+	if ip := r.Header.Get("Cf-Connecting-Ip"); ip != "" {
+		return ip
+	}
+	if ip := r.Header.Get("X-Forwarded-For"); ip != "" {
+		// X-Forwarded-For may be a comma-separated list; take the first
+		if idx := strings.Index(ip, ","); idx != -1 {
+			return strings.TrimSpace(ip[:idx])
+		}
+		return strings.TrimSpace(ip)
+	}
+	if ip := r.Header.Get("X-Real-Ip"); ip != "" {
+		return ip
+	}
+	return r.RemoteAddr
+}
+
 func ExtractDeviceInfo(r *http.Request) Device {
 	device := Device{
-		IP:         r.RemoteAddr,
+		IP:         extractIP(r),
 		UserAgent:  r.UserAgent(),
 		Language:   extractLanguage(r),
 		DeviceInfo: extractDeviceInfo(r),

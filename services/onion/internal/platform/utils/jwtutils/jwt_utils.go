@@ -3,6 +3,7 @@ package jwtutils
 import (
 	"context"
 	"errors"
+	"net/http"
 	"net/url"
 	"os"
 	"time"
@@ -137,4 +138,23 @@ func InitializeJWT(ctx context.Context) (context.Context, error) {
 	ctx = context.WithValue(ctx, JWTDurationKey, jwtDuration)
 
 	return ctx, nil
+}
+
+// JWTMiddleware injects the JWT secret and duration from env into every
+// request context so handlers can call ctx.Value(JWTSecretKey).
+func JWTMiddleware() func(http.Handler) http.Handler {
+	secret := os.Getenv("JWT_SECRET")
+	duration := time.Duration(0)
+	if d := os.Getenv("JWT_DURATION"); d != "" {
+		if parsed, err := time.ParseDuration(d); err == nil {
+			duration = parsed
+		}
+	}
+	return func(next http.Handler) http.Handler {
+		return http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
+			ctx := context.WithValue(r.Context(), JWTSecretKey, secret)
+			ctx = context.WithValue(ctx, JWTDurationKey, duration)
+			next.ServeHTTP(w, r.WithContext(ctx))
+		})
+	}
 }

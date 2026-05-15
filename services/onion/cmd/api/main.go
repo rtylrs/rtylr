@@ -645,6 +645,7 @@ func setupRoutes(ctx context.Context, r *chi.Mux) {
 
 	middlewares := []http.MiddlewareFunc{
 		http.SecurityMiddleware(),
+		jwtutils.JWTMiddleware(),
 		http.RequestLoggerMiddleware(ctx),
 		http.GetAuthMiddlewareFunc(accessPolicy, tokenResolver),
 		authPkg.DeviceMiddleware(),

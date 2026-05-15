@@ -98,10 +98,7 @@ func (h *LoginHandler) Serve(ctx context.Context, req *LoginRequest) (LoginRespo
 		taskCtx, cancel := context.WithTimeout(context.WithoutCancel(ctx), 10*time.Second)
 		defer cancel()
 
-		ip := ""
-		if device := authPkg.DeviceCtx(ctx); device.User != nil {
-			ip = device.User.IP
-		}
+		ip := authPkg.DeviceCtx(ctx).IP
 		_ = h.UserService.RecordLogin(taskCtx, userId, req.Email, "email", ip, true)
 
 		if h.OnUserLogin != nil {
