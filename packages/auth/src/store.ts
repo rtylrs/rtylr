@@ -29,6 +29,7 @@ export const useUserStore = create<UserStore>()(
 
       logout: () => {
         removeCookie('token', { domain: getDefaultCookieDomain() });
+        removeCookie('token');
         set({
           user: null,
           token: null,

@@ -1,0 +1,15 @@
+import { APP_URLS } from '@voxire/config';
+import { removeCookie, getDefaultCookieDomain } from './cookies';
+import { useUserStore } from './store';
+import type { AppId } from './types';
+
+/**
+ * Clears the SSO token cookie (host + parent domain), resets the shared user store,
+ * and redirects to auth with ?redirect= so the user can sign in again for this app.
+ */
+export function signOut(appId: AppId): void {
+  removeCookie('token', { domain: getDefaultCookieDomain() });
+  removeCookie('token');
+  useUserStore.getState().logout();
+  window.location.href = `${APP_URLS.auth}?redirect=${appId}`;
+}

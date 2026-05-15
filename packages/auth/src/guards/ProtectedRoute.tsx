@@ -1,11 +1,7 @@
 import React from 'react';
+import { APP_URLS } from '@voxire/config';
 import { getCookie } from '../cookies';
 import type { AppId } from '../types';
-
-const AUTH_URL =
-  typeof window !== 'undefined' && window.location.hostname === 'localhost'
-    ? 'http://localhost:5176'
-    : 'https://auth.rtylr.com';
 
 interface ProtectedRouteProps {
   appId: AppId;
@@ -16,7 +12,7 @@ export function ProtectedRoute({ appId, children }: ProtectedRouteProps) {
   const token = getCookie('token');
 
   if (!token) {
-    window.location.href = `${AUTH_URL}?redirect=${appId}`;
+    window.location.href = `${APP_URLS.auth}?redirect=${appId}`;
     return null;
   }
 

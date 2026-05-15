@@ -1,6 +1,7 @@
-import React, { useEffect, useState } from 'react';
+import React, { useCallback, useEffect, useState } from 'react';
 import { APP_URLS } from '@voxire/config';
 import { getCookie } from '../cookies';
+import { signOut } from '../signOut';
 import { useUserStore } from '../store';
 import type { AppId, User } from '../types';
 
@@ -62,10 +63,7 @@ function DefaultDenied({ appId }: { appId: AppId }): React.JSX.Element {
       </a>
       <button
         type="button"
-        onClick={() => {
-          document.cookie = 'token=; expires=Thu, 01 Jan 1970 00:00:00 UTC; path=/;';
-          window.location.href = `${APP_URLS.auth}?redirect=${appId}`;
-        }}
+        onClick={() => signOut(appId)}
         style={{
           fontSize: '12px',
           color: '#999',
@@ -97,6 +95,42 @@ function DefaultDenied({ appId }: { appId: AppId }): React.JSX.Element {
  * </AppGuard>
  * ```
  */
+function DefaultError({ onRetry }: { onRetry: () => void }): React.JSX.Element {
+  return (
+    <div
+      style={{
+        display: 'flex',
+        flexDirection: 'column',
+        alignItems: 'center',
+        justifyContent: 'center',
+        height: '100vh',
+        background: '#fff',
+        color: '#111',
+        gap: '12px',
+        fontSize: '14px',
+      }}
+    >
+      <p style={{ fontWeight: 600 }}>Could not verify your session.</p>
+      <p style={{ color: '#999', fontSize: '13px' }}>Check your connection and try again.</p>
+      <button
+        type="button"
+        onClick={onRetry}
+        style={{
+          marginTop: '8px',
+          padding: '8px 16px',
+          borderRadius: '8px',
+          border: '1px solid #e5e5e5',
+          background: '#fff',
+          cursor: 'pointer',
+          fontSize: '13px',
+        }}
+      >
+        Retry
+      </button>
+    </div>
+  );
+}
+
 export function AppGuard({
   appId,
   fetchUser,
@@ -104,20 +138,23 @@ export function AppGuard({
   loader,
   denied,
 }: AppGuardProps): React.JSX.Element {
-  const [status, setStatus] = useState<'loading' | 'allowed' | 'denied'>('loading');
+  const [status, setStatus] = useState<'loading' | 'allowed' | 'denied' | 'error'>('loading');
+  const [attempt, setAttempt] = useState(0);
   const { login } = useUserStore();
 
-  useEffect((): void => {
+  const verifySession = useCallback((): void => {
     const token = getCookie('token');
     if (!token) {
       window.location.href = `${APP_URLS.auth}?redirect=${appId}`;
       return;
     }
 
+    setStatus('loading');
+
     fetchUser()
       .then((data) => {
         const user: User = {
-          id: String(data.id ?? ''),
+          id: String(data.id ?? data.user_id ?? data.userId ?? ''),
           email: (data.email as string) ?? '',
           name: (data.fullName as string) ?? (data.full_name as string) ?? '',
           role: (data.role as User['role']) ?? undefined,
@@ -134,12 +171,18 @@ export function AppGuard({
         setStatus(allowed ? 'allowed' : 'denied');
       })
       .catch((): void => {
-        // Optimistic: allow on API error to avoid locking users out unexpectedly
-        setStatus('allowed');
+        setStatus('error');
       });
-  }, [appId]);
+  }, [appId, fetchUser, login]);
+
+  useEffect((): void => {
+    verifySession();
+  }, [verifySession, attempt]);
 
   if (status === 'loading') return loader ? <>{loader}</> : <DefaultLoader />;
   if (status === 'denied') return denied ? <>{denied}</> : <DefaultDenied appId={appId} />;
+  if (status === 'error') {
+    return <DefaultError onRetry={() => setAttempt((n) => n + 1)} />;
+  }
   return <>{children}</>;
 }

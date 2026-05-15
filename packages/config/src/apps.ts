@@ -2,7 +2,12 @@ import type { AppId, UserRole } from '@voxire/types';
 
 export type { AppId };
 
-const IS_LOCAL = typeof window !== 'undefined' && window.location.hostname === 'localhost';
+function isLocalDevHost(hostname: string): boolean {
+  const host = hostname.toLowerCase();
+  return host === 'localhost' || host === '127.0.0.1' || /^\d+\.\d+\.\d+\.\d+$/.test(host);
+}
+
+const IS_LOCAL = typeof window !== 'undefined' && isLocalDevHost(window.location.hostname);
 
 export const APP_URLS: Record<AppId, string> & { api: string; status: string } = {
   dash: IS_LOCAL ? 'http://localhost:5175' : 'https://dash.rtylr.com',
