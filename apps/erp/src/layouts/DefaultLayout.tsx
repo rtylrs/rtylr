@@ -633,7 +633,7 @@ const DefaultLayout: React.FC<DefaultLayoutProps> = ({ children }) => {
               variant="inline"
               appId="erp"
               userId={userId}
-              apiBaseUrl={import.meta.env.VITE_API_URL ?? 'https://api.voxire.dev/'}
+              apiBaseUrl={import.meta.env.VITE_API_URL ?? 'https://api.voxire.com/'}
               systemContext="User is in the ERP app (inventory, products, suppliers, purchasing)"
             />
           </div>

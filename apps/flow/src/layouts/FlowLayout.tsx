@@ -1138,7 +1138,7 @@ const FlowLayout: React.FC<FlowLayoutProps> = ({ children }) => {
               variant="inline"
               appId="flow"
               userId={caretUserId}
-              apiBaseUrl={import.meta.env.VITE_API_URL || 'https://api.voxire.dev/'}
+              apiBaseUrl={import.meta.env.VITE_API_URL || 'https://api.voxire.com/'}
               systemContext="User is in the Flow app (projects, tasks, team workspaces)"
             />
           </div>

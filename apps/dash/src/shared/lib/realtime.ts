@@ -8,7 +8,7 @@ function getTokenFromCookie(): string | null {
 }
 
 function resolveWsUrl(): string {
-  const base = (import.meta.env.VITE_API_URL as string | undefined) ?? 'https://api.voxire.dev/';
+  const base = (import.meta.env.VITE_API_URL as string | undefined) ?? 'https://api.voxire.com/';
   const stripped = base.replace(/\/$/, '');
   const wsScheme = stripped.startsWith('https://') ? 'wss://' : 'ws://';
   return `${wsScheme}${stripped.replace(/^https?:\/\//, '')}/dash/ws`;

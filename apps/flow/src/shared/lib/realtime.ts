@@ -16,7 +16,7 @@ function getTokenFromCookie(): string | null {
 
 function resolveWsUrl(): string {
   // VITE_API_URL is a full http(s) URL; swap scheme for ws(s).
-  const base = (import.meta.env.VITE_API_URL as string | undefined) ?? 'https://api.voxire.dev/';
+  const base = (import.meta.env.VITE_API_URL as string | undefined) ?? 'https://api.voxire.com/';
   const stripped = base.replace(/\/$/, '');
   const wsScheme = stripped.startsWith('https://') ? 'wss://' : 'ws://';
   return `${wsScheme}${stripped.replace(/^https?:\/\//, '')}/flow/ws`;

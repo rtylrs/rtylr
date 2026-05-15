@@ -512,7 +512,7 @@ const DefaultLayout: React.FC = () => {
               variant="inline"
               appId="finance"
               userId={userId}
-              apiBaseUrl={import.meta.env.VITE_API_URL ?? 'https://api.voxire.dev/'}
+              apiBaseUrl={import.meta.env.VITE_API_URL ?? 'https://api.voxire.com/'}
               systemContext="User is in the Finance app (invoices, expenses, bills, P&L, tax)"
             />
           </div>

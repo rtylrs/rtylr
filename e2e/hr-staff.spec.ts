@@ -73,7 +73,7 @@ async function installHrStubs(
   page: Page,
   initial: { staff?: StubStaff[]; shifts?: StubShift[] } = {}
 ): Promise<void> {
-  const apiHost = 'https://api.voxire.dev';
+  const apiHost = 'https://api.voxire.com';
 
   const state = {
     staff: [...(initial.staff ?? [])],

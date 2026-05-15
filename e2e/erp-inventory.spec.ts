@@ -65,7 +65,7 @@ async function installProductStubs(
   };
   const captured: { lastPost: Record<string, unknown> | null } = { lastPost: null };
 
-  // All stubs are scoped to the backend host (api.voxire.dev) — matching
+  // All stubs are scoped to the backend host (api.voxire.com) — matching
   // against `**/erp/**` would also swallow Vite's own module requests
   // (the dev server hosts source under paths that include `/erp/`), so
   // we anchor the glob to the API origin to keep the two worlds separate.
@@ -73,7 +73,7 @@ async function installProductStubs(
   // Registration order matters: Playwright matches routes in REVERSE
   // registration order, so the most generic catch-alls must be registered
   // FIRST and the most specific handlers LAST.
-  const apiHost = 'https://api.voxire.dev';
+  const apiHost = 'https://api.voxire.com';
 
   // (1) Widest catch-all for ERP endpoints not otherwise handled.
   await page.route(`${apiHost}/erp/**`, (route: Route) => {
@@ -276,7 +276,7 @@ async function installSupplierStubs(
     nextId: initial.length > 0 ? Math.max(...initial.map((s) => s.id)) + 1 : 1,
   };
   const captured: { lastPost: Record<string, unknown> | null } = { lastPost: null };
-  const apiHost = 'https://api.voxire.dev';
+  const apiHost = 'https://api.voxire.com';
 
   // (1) Widest ERP catch-all — registered first so specific handlers win.
   await page.route(`${apiHost}/erp/**`, (route: Route) => {
@@ -366,7 +366,7 @@ async function installPurchaseOrderStubs(
     nextId: initial.length > 0 ? Math.max(...initial.map((o) => o.id)) + 1 : 1,
   };
   const captured: { lastPost: Record<string, unknown> | null } = { lastPost: null };
-  const apiHost = 'https://api.voxire.dev';
+  const apiHost = 'https://api.voxire.com';
 
   await page.route(`${apiHost}/erp/**`, (route: Route) => {
     if (route.request().method() === 'GET') {
@@ -460,7 +460,7 @@ async function installCategoryStubs(
     nextId: initial.length > 0 ? Math.max(...initial.map((c) => c.id)) + 1 : 1,
   };
   const captured: { lastPost: Record<string, unknown> | null } = { lastPost: null };
-  const apiHost = 'https://api.voxire.dev';
+  const apiHost = 'https://api.voxire.com';
 
   await page.route(`${apiHost}/erp/**`, (route: Route) => {
     if (route.request().method() === 'GET') {

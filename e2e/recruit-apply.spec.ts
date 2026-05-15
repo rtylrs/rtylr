@@ -9,7 +9,7 @@ import { test, expect } from '@playwright/test';
  * real browser through the real app, stubbing only the API layer.
  *
  * API calls are intercepted via `page.route()` so the test doesn't
- * depend on `api.voxire.dev` — CI stays deterministic, no backend
+ * depend on `api.voxire.com` — CI stays deterministic, no backend
  * required, no prod data pollution.
  */
 

@@ -68,7 +68,7 @@ export function applySEO(
   // OG image — the server-rendered preview at /recruit/public/og. The
   // slug query is set on every call so LinkedIn's crawler gets a fresh
   // image after branding edits.
-  const apiBase = (import.meta.env.VITE_API_URL as string | undefined) ?? 'https://api.voxire.dev';
+  const apiBase = (import.meta.env.VITE_API_URL as string | undefined) ?? 'https://api.voxire.com';
   const ogImage = `${apiBase.replace(/\/$/, '')}/recruit/public/og?slug=${encodeURIComponent(customization.slug)}`;
   upsertMeta('property', 'og:image', ogImage);
   upsertMeta('name', 'twitter:card', 'summary_large_image');
@@ -128,7 +128,7 @@ export function emitJobPostingJSONLD(career: RecruitCareer, customization: Custo
   const existing = document.getElementById(id);
   if (existing) existing.remove();
 
-  const apiBase = (import.meta.env.VITE_API_URL as string | undefined) ?? 'https://api.voxire.dev';
+  const apiBase = (import.meta.env.VITE_API_URL as string | undefined) ?? 'https://api.voxire.com';
   const url = `${typeof window !== 'undefined' ? window.location.origin : ''}/${customization.slug}/${career.slug}`;
 
   // Conservative JSON-LD — only emit fields we actually have values

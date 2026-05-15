@@ -11,7 +11,7 @@ import { test, expect, type Page, type Route } from '@playwright/test';
  */
 
 const FLOW_URL = process.env.FLOW_URL ?? 'http://localhost:5183';
-const API_HOST = 'https://api.voxire.dev';
+const API_HOST = 'https://api.voxire.com';
 
 // ── Shared fixtures ────────────────────────────────────────────────────────
 
@@ -124,7 +124,7 @@ async function installFlowStubs(
   const tasks = opts.tasks ?? [];
   const notifications = opts.notifications ?? [];
 
-  // (0) Broadest catch-all — intercepts any request to api.voxire.dev that
+  // (0) Broadest catch-all — intercepts any request to api.voxire.com that
   //     isn't covered by a more-specific handler below.  Prevents unstubbed
   //     calls (e.g. Caret /memory/chats, realtime ws upgrade fallback) from
   //     reaching the real API and delaying the networkidle signal.

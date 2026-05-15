@@ -2,7 +2,7 @@ import axios from 'axios';
 import i18next from 'i18next';
 
 const getBaseUrl = () => {
-  return 'https://api.voxire.dev/';
+  return 'https://api.voxire.com/';
 };
 
 const api = axios.create({

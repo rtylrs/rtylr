@@ -68,7 +68,7 @@ async function seedAuth(page: Page): Promise<void> {
 }
 
 async function stubCrmAPI(page: Page): Promise<void> {
-  // Catch-all stub — anything that reaches `api.voxire.dev` without a
+  // Catch-all stub — anything that reaches `api.voxire.com` without a
   // more-specific handler returns an empty object rather than hitting
   // the real backend. Registered first so specific handlers below take
   // precedence (Playwright runs routes in reverse-registration order).

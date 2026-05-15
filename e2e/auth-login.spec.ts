@@ -3,7 +3,7 @@ import { test, expect } from '@playwright/test';
 /**
  * Auth login spec. Rate-limited backend (5/min/IP) plus strict-mode
  * role selectors so the assertions survive UI tweaks. API is stubbed
- * via `page.route()` — never hits api.voxire.dev.
+ * via `page.route()` — never hits api.voxire.com.
  */
 
 const AUTH_URL = process.env.AUTH_URL ?? 'http://localhost:5176';

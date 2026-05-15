@@ -82,7 +82,7 @@ async function seedAuth(page: Page): Promise<void> {
 }
 
 async function stubBaseRoutes(page: Page): Promise<void> {
-  // Catch-all for any api.voxire.dev request not handled by a specific stub.
+  // Catch-all for any api.voxire.com request not handled by a specific stub.
   await page.route(/https:\/\/api\.voxire\.dev\//, (route: Route) =>
     route.fulfill({ status: 200, contentType: 'application/json', body: '{}' })
   );

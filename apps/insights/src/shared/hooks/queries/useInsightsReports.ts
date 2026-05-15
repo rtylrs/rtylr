@@ -59,7 +59,7 @@ export const useRevenueCSVExportURL = (params?: DateRangeParams): string => {
   const { from, to } = resolveDateRange(params);
   const base =
     (import.meta as ImportMeta & { env: Record<string, string> }).env.VITE_API_URL ??
-    'https://api.voxire.dev/';
+    'https://api.voxire.com/';
   const trimmed = base.endsWith('/') ? base.slice(0, -1) : base;
   const query = new URLSearchParams({ from, to }).toString();
   return `${trimmed}/insights/reports/export/revenue?${query}`;

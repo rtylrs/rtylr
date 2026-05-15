@@ -647,7 +647,7 @@ const DefaultLayout: React.FC = () => {
               variant="inline"
               appId="crm"
               userId={userId}
-              apiBaseUrl={import.meta.env.VITE_API_URL ?? 'https://api.voxire.dev/'}
+              apiBaseUrl={import.meta.env.VITE_API_URL ?? 'https://api.voxire.com/'}
               systemContext="User is in the CRM app (customers, loyalty, campaigns, segments)"
             />
           </div>

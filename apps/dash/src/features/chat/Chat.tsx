@@ -15,7 +15,7 @@ const SUGGESTIONS = [
 const Chat: React.FC = () => {
   const { user } = useUserStore();
   const userId = Number(user?.id) || 0;
-  const apiBaseUrl = import.meta.env.VITE_API_URL ?? 'https://api.voxire.dev/';
+  const apiBaseUrl = import.meta.env.VITE_API_URL ?? 'https://api.voxire.com/';
   const systemContext =
     'User is in the Dash app (business command center — KPIs, orders, staff overview)';
 

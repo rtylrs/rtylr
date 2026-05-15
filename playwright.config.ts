@@ -3,7 +3,7 @@ import { defineConfig, devices } from '@playwright/test';
 /**
  * End-to-end tests run against real dev servers booted by Playwright.
  * Every spec uses `page.route()` to stub API calls — we never hit the
- * real `api.voxire.dev` in tests, so CI is deterministic and we don't
+ * real `api.voxire.com` in tests, so CI is deterministic and we don't
  * pollute prod data.
  *
  * The `webServer` array below boots each app's Vite dev server before
