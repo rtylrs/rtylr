@@ -33,7 +33,7 @@ func (r *Repository) GetKPIs(ctx context.Context, ownerID int64) (domain.KPISumm
 
 	// Customer count
 	err = r.pool.QueryRowContext(ctx,
-		`SELECT COUNT(*) FROM customers WHERE owner_id = ?`, ownerID,
+		`SELECT COUNT(*) FROM crm_customers WHERE owner_id = ?`, ownerID,
 	).Scan(&kpi.CustomerCount)
 	if err != nil && !errors.Is(err, sql.ErrNoRows) {
 		logger.Ctx(ctx).Error("Failed to get customer count", logger.Error(err))
@@ -41,7 +41,7 @@ func (r *Repository) GetKPIs(ctx context.Context, ownerID int64) (domain.KPISumm
 
 	// Low stock count
 	err = r.pool.QueryRowContext(ctx,
-		`SELECT COUNT(*) FROM products WHERE owner_id = ? AND quantity <= reorder_level AND quantity > 0`, ownerID,
+		`SELECT COUNT(*) FROM erp_products WHERE owner_id = ? AND stock_quantity <= low_stock_threshold AND stock_quantity > 0`, ownerID,
 	).Scan(&kpi.LowStockCount)
 	if err != nil && !errors.Is(err, sql.ErrNoRows) {
 		logger.Ctx(ctx).Error("Failed to get low stock count", logger.Error(err))
