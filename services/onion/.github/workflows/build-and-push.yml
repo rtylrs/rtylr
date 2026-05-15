@@ -104,13 +104,3 @@ jobs:
             --query 'service.deployments[0].{status:status,desiredCount:desiredCount}' \
             --output table
 
-      - name: Create GitHub Release
-        continue-on-error: true
-        env:
-          GH_TOKEN: ${{ secrets.PAT_TOKEN }}
-        run: |
-          VERSION=${{ needs.version.outputs.new_version }}
-          gh release create "$VERSION" \
-            --title "Release $VERSION" \
-            --target main \
-            --generate-notes
