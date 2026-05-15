@@ -30,4 +30,11 @@ func RegisterRoutes(ctx context.Context, router *chi.Mux, configService *applica
 		handlers.UpdateConfigRoutes(),
 		&handlers.UpdateConfigHandler{ConfigService: configService},
 	)
+
+	http.RegisterGET[handlers.GetIndustriesRequest, handlers.GetIndustriesResponse](
+		ctx,
+		router,
+		handlers.IndustriesRoutes(),
+		&handlers.GetIndustriesHandler{},
+	)
 }
