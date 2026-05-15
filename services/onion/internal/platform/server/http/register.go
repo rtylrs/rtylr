@@ -3,6 +3,7 @@ package http
 import (
 	"context"
 	"encoding/json"
+	"io"
 	"net/http"
 	"strconv"
 
@@ -102,7 +103,7 @@ func wrapHandler[Req, Res any](ctx context.Context, handler HandlerFunc[Req, Res
 
 		switch r.Method {
 		case "POST", "PUT", "PATCH":
-			if err := json.NewDecoder(r.Body).Decode(&req); err != nil {
+			if err := json.NewDecoder(r.Body).Decode(&req); err != nil && err != io.EOF {
 				writeBadRequest(ctx, w)
 
 				return
