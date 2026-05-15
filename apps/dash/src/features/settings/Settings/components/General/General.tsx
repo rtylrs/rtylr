@@ -1,5 +1,5 @@
 import React, { useState, ChangeEvent, useEffect } from 'react';
-import { useBusinessStore, BusinessType } from '../../../../../shared/stores/businessStore';
+import { useBusinessStore } from '../../../../../shared/stores/businessStore';
 import { useUpdateBusiness } from '../../../../../shared/hooks/queries/useBusiness';
 import { useUserStore } from '../../../../../shared/stores/userStore';
 import { useConfigStore } from '../../../../../shared/stores/configStore';
@@ -12,22 +12,10 @@ import {
   Input,
   Label,
   Button,
-  Select,
 } from '../../../../../shared/components/ui';
 
-const BUSINESS_TYPES: { value: BusinessType; label: string }[] = [
-  { value: 'restaurant', label: 'Restaurant' },
-  { value: 'gym', label: 'Gym/Fitness' },
-  { value: 'retail', label: 'Retail Store' },
-  { value: 'salon', label: 'Salon/Beauty' },
-  { value: 'cafe', label: 'Cafe' },
-  { value: 'bar', label: 'Bar' },
-  { value: 'hotel', label: 'Hotel' },
-  { value: 'other', label: 'Other' },
-];
-
 const General: React.FC = () => {
-  const { businessType, setBusinessType } = useBusinessStore();
+  const { businessType } = useBusinessStore();
   const { user, userId } = useUserStore();
   const { websiteData, contactInfo } = useConfigStore();
   const updateBusiness = useUpdateBusiness();
@@ -36,8 +24,6 @@ const General: React.FC = () => {
     storeName: '',
     contactEmail: '',
     senderEmail: '',
-    storeIndustry: businessType || 'restaurant',
-    cuisineType: '',
     companyName: '',
     website: '',
     telephone: '',
@@ -46,8 +32,6 @@ const General: React.FC = () => {
     city: '',
     zipcode: '',
     country: 'Lebanon',
-    state: '',
-    customBusinessType: '',
   });
 
   useEffect(() => {
@@ -71,20 +55,18 @@ const General: React.FC = () => {
     }
   }, [user, websiteData, contactInfo]);
 
-  useEffect(() => {
-    if (businessType) setFormData((prev) => ({ ...prev, storeIndustry: businessType }));
-  }, [businessType]);
-
-  const handleInputChange = (e: ChangeEvent<HTMLInputElement | HTMLSelectElement>) => {
+  const handleInputChange = (e: ChangeEvent<HTMLInputElement>) => {
     const { name, value } = e.target;
     setFormData((prev) => ({ ...prev, [name]: value }));
-    if (name === 'storeIndustry') setBusinessType(value as BusinessType);
   };
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     if (!userId) return;
-    updateBusiness.mutate({ businessId: userId, data: formData });
+    updateBusiness.mutate({
+      businessId: userId,
+      data: { ...formData, businessType },
+    });
   };
 
   return (
@@ -128,42 +110,6 @@ const General: React.FC = () => {
                 onChange={handleInputChange}
               />
             </div>
-            <div className="space-y-1.5">
-              <Label>Store industry</Label>
-              <Select
-                name="storeIndustry"
-                value={formData.storeIndustry}
-                onChange={handleInputChange}
-              >
-                {BUSINESS_TYPES.map((type) => (
-                  <option key={type.value} value={type.value}>
-                    {type.label}
-                  </option>
-                ))}
-              </Select>
-            </div>
-            {formData.storeIndustry === 'other' && (
-              <div className="space-y-1.5">
-                <Label>Custom business type</Label>
-                <Input
-                  name="customBusinessType"
-                  value={formData.customBusinessType}
-                  onChange={handleInputChange}
-                  placeholder="Enter your business type"
-                />
-              </div>
-            )}
-            {formData.storeIndustry === 'restaurant' && (
-              <div className="space-y-1.5">
-                <Label>Cuisine type</Label>
-                <Input
-                  name="cuisineType"
-                  value={formData.cuisineType}
-                  onChange={handleInputChange}
-                  placeholder="e.g. Italian, Mexican, Asian"
-                />
-              </div>
-            )}
           </CardContent>
         </Card>
 
@@ -182,7 +128,6 @@ const General: React.FC = () => {
               { label: 'Address', name: 'address' },
               { label: 'City', name: 'city' },
               { label: 'Zipcode', name: 'zipcode' },
-              { label: 'State', name: 'state' },
             ].map((field) => (
               <div key={field.name} className="space-y-1.5">
                 <Label>{field.label}</Label>
@@ -195,9 +140,7 @@ const General: React.FC = () => {
             ))}
             <div className="space-y-1.5">
               <Label>Country</Label>
-              <Select name="country" value={formData.country} onChange={handleInputChange}>
-                <option value="Lebanon">Lebanon</option>
-              </Select>
+              <Input name="country" value={formData.country} onChange={handleInputChange} />
             </div>
           </CardContent>
         </Card>
