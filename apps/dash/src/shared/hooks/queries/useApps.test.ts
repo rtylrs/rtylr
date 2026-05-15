@@ -2,6 +2,7 @@ import { describe, it, expect, vi, beforeEach } from 'vitest';
 import { renderHook, waitFor } from '@testing-library/react';
 import { QueryClient, QueryClientProvider } from '@tanstack/react-query';
 import React from 'react';
+import { APP_URLS } from '@voxire/config';
 import { useApps } from './useApps';
 
 const mockGet = vi.fn();
@@ -42,7 +43,7 @@ describe('useApps', () => {
     expect(result.current.data![0].key).toBe('pos');
     expect(result.current.data![0].label).toBe('Point of Sale');
     expect(result.current.data![0].status).toBe('active');
-    expect(result.current.data![0].href).toBe('https://pos.rtylr.com');
+    expect(result.current.data![0].href).toBe(APP_URLS.pos);
   });
 
   it('maps disabled apps as coming_soon', async () => {
