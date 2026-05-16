@@ -22,6 +22,7 @@ type RedisCache interface {
 	PutMulti(ctx context.Context, keyVals map[string][]byte, ttl time.Duration)
 	GetMulti(ctx context.Context, keys []string) (results map[string][]byte, notFound []string)
 	Delete(ctx context.Context, keys []string)
+	DeleteByPattern(ctx context.Context, pattern string) int
 	HSet(ctx context.Context, key, field string, val []byte, ttl time.Duration)
 	HFieldExpire(ctx context.Context, key, field string, ttl time.Duration)
 	HSetWithFieldExpiry(ctx context.Context, key, field string, val []byte, fieldExpiry, ttl time.Duration)
@@ -628,6 +629,54 @@ func (r *redisCache) SCard(ctx context.Context, key string) (int64, bool) {
 	}
 
 	return command.Val(), true
+}
+
+// DeleteByPattern SCANs for keys matching the glob `pattern` (e.g.
+// "cache:user:42:*") and deletes them in batched UNLINK calls. Use this
+// for bulk invalidation; for known keys use Delete() instead.
+func (r *redisCache) DeleteByPattern(ctx context.Context, pattern string) int {
+	ctx, cancel := getTimeoutContext(ctx)
+	defer cancel()
+
+	if pattern == "" {
+		return 0
+	}
+
+	const batch = 200
+	deleted := 0
+	iter := r.redisCacheCluster.Scan(ctx, 0, pattern, batch).Iterator()
+	keys := make([]string, 0, batch)
+
+	flush := func() {
+		if len(keys) == 0 {
+			return
+		}
+		if err := r.redisCacheCluster.Del(ctx, keys...).Err(); err != nil {
+			logger.Ctx(ctx).Warn("redis pattern delete failed",
+				logger.Error(err),
+				logger.String("pattern", pattern),
+			)
+		} else {
+			deleted += len(keys)
+		}
+		keys = keys[:0]
+	}
+
+	for iter.Next(ctx) {
+		keys = append(keys, iter.Val())
+		if len(keys) >= batch {
+			flush()
+		}
+	}
+	flush()
+
+	if err := iter.Err(); err != nil {
+		logger.Ctx(ctx).Warn("redis scan failed during pattern delete",
+			logger.Error(err),
+			logger.String("pattern", pattern),
+		)
+	}
+	return deleted
 }
 
 // Delete deletes one or multiple keys from Redis.
