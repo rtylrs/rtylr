@@ -2,9 +2,18 @@ package application
 
 import (
 	"context"
+	"fmt"
+	"time"
 
 	"github.com/voxire/onion/internal/modules/pos_sessions/internal/domain"
 	"github.com/voxire/onion/internal/modules/pos_sessions/internal/infrastructure"
+	"github.com/voxire/onion/internal/platform/cache/cacher"
+	cacheKeys "github.com/voxire/onion/internal/platform/cache/keys"
+)
+
+const (
+	posSessionsScope = "pos_sessions"
+	posSessionsTTL   = 30 * time.Second
 )
 
 type repository interface {
@@ -22,18 +31,45 @@ func NewService(ctx context.Context) *Service {
 	return &Service{repo: infrastructure.NewRepository(ctx)}
 }
 
+func invalidatePosSessionsScope(ctx context.Context, ownerID int64) {
+	if cache := cacher.GetRedisCache(); cache != nil {
+		cache.DeleteByPattern(ctx, cacheKeys.ScopedPrefix(posSessionsScope, ownerID))
+	}
+}
+
 func (s *Service) List(ctx context.Context, ownerID int64) ([]domain.Session, error) {
-	return s.repo.List(ctx, ownerID)
+	return cacher.Of[[]domain.Session]().GetOrComputeSingle(ctx,
+		cacheKeys.Scoped(posSessionsScope, ownerID, "list"),
+		func(ctx context.Context) ([]domain.Session, error) {
+			return s.repo.List(ctx, ownerID)
+		},
+		cacher.WithExpiry(ctx, posSessionsTTL),
+	)
 }
 
 func (s *Service) Get(ctx context.Context, ownerID, id int64) (*domain.Session, error) {
-	return s.repo.Get(ctx, ownerID, id)
+	key := cacheKeys.Scoped(posSessionsScope, ownerID, fmt.Sprintf("id=%d", id))
+	return cacher.Of[*domain.Session]().GetOrComputeSingle(ctx, key,
+		func(ctx context.Context) (*domain.Session, error) {
+			return s.repo.Get(ctx, ownerID, id)
+		},
+		cacher.WithExpiry(ctx, posSessionsTTL),
+	)
 }
 
 func (s *Service) Open(ctx context.Context, input domain.OpenSessionInput) (int64, error) {
-	return s.repo.Open(ctx, input)
+	id, err := s.repo.Open(ctx, input)
+	if err != nil {
+		return 0, err
+	}
+	invalidatePosSessionsScope(ctx, input.OwnerID)
+	return id, nil
 }
 
 func (s *Service) Close(ctx context.Context, input domain.CloseSessionInput) error {
-	return s.repo.Close(ctx, input)
+	if err := s.repo.Close(ctx, input); err != nil {
+		return err
+	}
+	invalidatePosSessionsScope(ctx, input.OwnerID)
+	return nil
 }

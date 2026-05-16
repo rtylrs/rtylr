@@ -166,3 +166,19 @@ func Subscription(ownerID int64) string {
 func SubscriptionPrefix(ownerID int64) string {
 	return fmt.Sprintf("%ssubscription:%d*", Namespace, ownerID)
 }
+
+// ─── generic per-module scoping ────────────────────────────────────────────
+//
+// Scoped + ScopedPrefix exist so modules that don't (yet) have a dedicated
+// key family in this registry can still cache through the same SCAN/UNLINK
+// invalidation pattern. Picking a stable `scope` string per module (e.g.
+// "pos_tables") keeps wildcard wipes contained. Modules that need
+// cross-module invalidation should graduate to dedicated helpers above.
+
+func Scoped(scope string, ownerID int64, detail string) string {
+	return fmt.Sprintf("%s%s:%d:%s", Namespace, scope, ownerID, detail)
+}
+
+func ScopedPrefix(scope string, ownerID int64) string {
+	return fmt.Sprintf("%s%s:%d:*", Namespace, scope, ownerID)
+}

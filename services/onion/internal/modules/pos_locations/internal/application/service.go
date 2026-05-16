@@ -2,9 +2,17 @@ package application
 
 import (
 	"context"
+	"time"
 
 	"github.com/voxire/onion/internal/modules/pos_locations/internal/domain"
 	"github.com/voxire/onion/internal/modules/pos_locations/internal/infrastructure"
+	"github.com/voxire/onion/internal/platform/cache/cacher"
+	cacheKeys "github.com/voxire/onion/internal/platform/cache/keys"
+)
+
+const (
+	posLocationsScope = "pos_locations"
+	posLocationsTTL   = 5 * time.Minute
 )
 
 type repository interface {
@@ -21,14 +29,35 @@ func NewService(ctx context.Context) *Service {
 	return &Service{repo: infrastructure.NewRepository(ctx)}
 }
 
+func invalidatePosLocationsScope(ctx context.Context, ownerID int64) {
+	if cache := cacher.GetRedisCache(); cache != nil {
+		cache.DeleteByPattern(ctx, cacheKeys.ScopedPrefix(posLocationsScope, ownerID))
+	}
+}
+
 func (s *Service) List(ctx context.Context, ownerID int64) ([]domain.Location, error) {
-	return s.repo.List(ctx, ownerID)
+	return cacher.Of[[]domain.Location]().GetOrComputeSingle(ctx,
+		cacheKeys.Scoped(posLocationsScope, ownerID, "list"),
+		func(ctx context.Context) ([]domain.Location, error) {
+			return s.repo.List(ctx, ownerID)
+		},
+		cacher.WithExpiry(ctx, posLocationsTTL),
+	)
 }
 
 func (s *Service) Create(ctx context.Context, input domain.LocationInput) (int64, error) {
-	return s.repo.Create(ctx, input)
+	id, err := s.repo.Create(ctx, input)
+	if err != nil {
+		return 0, err
+	}
+	invalidatePosLocationsScope(ctx, input.OwnerID)
+	return id, nil
 }
 
 func (s *Service) Update(ctx context.Context, input domain.LocationUpdateInput) error {
-	return s.repo.Update(ctx, input)
+	if err := s.repo.Update(ctx, input); err != nil {
+		return err
+	}
+	invalidatePosLocationsScope(ctx, input.OwnerID)
+	return nil
 }
