@@ -7,8 +7,21 @@ import (
 
 	"github.com/voxire/onion/internal/modules/payroll/internal/domain"
 	"github.com/voxire/onion/internal/modules/payroll/internal/infrastructure"
+	"github.com/voxire/onion/internal/platform/cache/cacher"
+	cacheKeys "github.com/voxire/onion/internal/platform/cache/keys"
 	"github.com/voxire/onion/internal/platform/logger"
 )
+
+const (
+	payrollScope = "payroll"
+	payrollTTL   = 5 * time.Minute
+)
+
+func invalidatePayrollScope(ctx context.Context, ownerID int64) {
+	if cache := cacher.GetRedisCache(); cache != nil {
+		cache.DeleteByPattern(ctx, cacheKeys.ScopedPrefix(payrollScope, ownerID))
+	}
+}
 
 type repository interface {
 	ListPayrollRecords(ctx context.Context, ownerID int64, periodLabel string) ([]domain.PayrollRecord, error)
@@ -27,7 +40,13 @@ func NewService(ctx context.Context) *Service {
 }
 
 func (s *Service) ListPayrollRecords(ctx context.Context, ownerID int64, periodLabel string) ([]domain.PayrollRecord, error) {
-	return s.repo.ListPayrollRecords(ctx, ownerID, periodLabel)
+	key := cacheKeys.Scoped(payrollScope, ownerID, fmt.Sprintf("list|p=%s", periodLabel))
+	return cacher.Of[[]domain.PayrollRecord]().GetOrComputeSingle(ctx, key,
+		func(ctx context.Context) ([]domain.PayrollRecord, error) {
+			return s.repo.ListPayrollRecords(ctx, ownerID, periodLabel)
+		},
+		cacher.WithExpiry(ctx, payrollTTL),
+	)
 }
 
 func (s *Service) RunPayroll(ctx context.Context, ownerID int64, input domain.PayrollRunInput) (int, error) {
@@ -88,9 +107,16 @@ func (s *Service) RunPayroll(ctx context.Context, ownerID int64, input domain.Pa
 		createdCount++
 	}
 
+	if createdCount > 0 {
+		invalidatePayrollScope(ctx, ownerID)
+	}
 	return createdCount, nil
 }
 
 func (s *Service) MarkPayrollPaid(ctx context.Context, ownerID, payrollID int64) error {
-	return s.repo.MarkPayrollPaid(ctx, ownerID, payrollID)
+	if err := s.repo.MarkPayrollPaid(ctx, ownerID, payrollID); err != nil {
+		return err
+	}
+	invalidatePayrollScope(ctx, ownerID)
+	return nil
 }

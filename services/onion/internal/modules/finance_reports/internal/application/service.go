@@ -2,11 +2,16 @@ package application
 
 import (
 	"context"
+	"fmt"
 	"time"
 
 	"github.com/voxire/onion/internal/modules/finance_reports/internal/domain"
 	"github.com/voxire/onion/internal/modules/finance_reports/internal/infrastructure"
+	"github.com/voxire/onion/internal/platform/cache/cacher"
+	cacheKeys "github.com/voxire/onion/internal/platform/cache/keys"
 )
+
+const financeReportsTTL = 5 * time.Minute
 
 type repository interface {
 	SumAccountsByType(ctx context.Context, ownerID int64, accountType string) (float64, error)
@@ -26,6 +31,16 @@ func NewService(ctx context.Context) *Service {
 }
 
 func (s *Service) GetBalanceSheet(ctx context.Context, ownerID int64) (domain.BalanceSheet, error) {
+	return cacher.Of[domain.BalanceSheet]().GetOrComputeSingle(ctx,
+		cacheKeys.Scoped("finance_reports", ownerID, "balance_sheet"),
+		func(ctx context.Context) (domain.BalanceSheet, error) {
+			return s.computeBalanceSheet(ctx, ownerID)
+		},
+		cacher.WithExpiry(ctx, financeReportsTTL),
+	)
+}
+
+func (s *Service) computeBalanceSheet(ctx context.Context, ownerID int64) (domain.BalanceSheet, error) {
 	assets, err := s.repo.SumAccountsByType(ctx, ownerID, "asset")
 	if err != nil {
 		return domain.BalanceSheet{}, err
@@ -67,6 +82,16 @@ func (s *Service) GetBalanceSheet(ctx context.Context, ownerID int64) (domain.Ba
 }
 
 func (s *Service) GetCashFlow(ctx context.Context, ownerID int64, period string) (domain.CashFlow, error) {
+	key := cacheKeys.Scoped("finance_reports", ownerID, fmt.Sprintf("cash_flow|p=%s", period))
+	return cacher.Of[domain.CashFlow]().GetOrComputeSingle(ctx, key,
+		func(ctx context.Context) (domain.CashFlow, error) {
+			return s.computeCashFlow(ctx, ownerID, period)
+		},
+		cacher.WithExpiry(ctx, financeReportsTTL),
+	)
+}
+
+func (s *Service) computeCashFlow(ctx context.Context, ownerID int64, period string) (domain.CashFlow, error) {
 	dateFrom, dateTo := resolvePeriodRange(period)
 
 	inflow, err := s.repo.SumPaidInvoicesInRange(ctx, ownerID, dateFrom, dateTo)
