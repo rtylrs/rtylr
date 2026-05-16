@@ -9,6 +9,7 @@ import (
 	"time"
 
 	"github.com/redis/go-redis/v9"
+
 	"github.com/voxire/onion/internal/platform/config"
 	"github.com/voxire/onion/internal/platform/logger"
 	"github.com/voxire/onion/internal/platform/utils/maputils"
@@ -78,6 +79,21 @@ func getNewRedisClient() redis.UniversalClient {
 		defaultMinClusterClientIdleConns = 10
 		defaultPoolSize                  = 25
 	)
+
+	// Prefer REDIS_URL (Upstash / Heroku style). Falls back to the
+	// REDIS_HOSTS / REDIS_USERNAME / REDIS_PASSWORD env trio used by
+	// our older self-hosted setup.
+	if url := config.GetRedisURL(); url != "" {
+		opt, err := redis.ParseURL(url)
+		if err == nil {
+			opt.ClientName = "onion-api"
+			opt.ConnMaxLifetime = defaultMaxClusterClientConnAge
+			opt.PoolSize = defaultPoolSize
+			opt.MinIdleConns = defaultMinClusterClientIdleConns
+			return redis.NewClient(opt)
+		}
+		logger.Global().Warn("REDIS_URL failed to parse; falling back to REDIS_HOSTS", logger.Error(err))
+	}
 
 	redisClient := redis.NewUniversalClient(&redis.UniversalOptions{
 		ClientName:      "onion-api",

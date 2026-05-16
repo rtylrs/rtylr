@@ -7,11 +7,18 @@ import (
 )
 
 const (
+	RedisURLEnvVar      = "REDIS_URL"
 	RedisHostsEnvVar    = "REDIS_HOSTS"
 	RedisUsernameEnvVar = "REDIS_USERNAME"
 	RedisPasswordEnvVar = "REDIS_PASSWORD"
 	RedisEnabledEnvVar  = "REDIS_ENABLED"
 )
+
+// GetRedisURL returns a single-string Redis connection URL (Upstash style:
+// rediss://user:pass@host:port). Empty when not configured.
+func GetRedisURL() string {
+	return os.Getenv(RedisURLEnvVar)
+}
 
 const (
 	InMemoryCacheMaxSizeMbEnvVar   = "INMEMORY_CACHE_MAX_SIZE_MB"
@@ -41,7 +48,13 @@ func IsRedisEnabled() bool {
 }
 
 func IsRedisConfigured() bool {
-	return IsRedisEnabled() && len(GetRedisHosts()) > 0
+	if !IsRedisEnabled() {
+		return false
+	}
+	if GetRedisURL() != "" {
+		return true
+	}
+	return len(GetRedisHosts()) > 0
 }
 
 // Cache Configuration.
