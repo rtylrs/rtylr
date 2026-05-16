@@ -6,9 +6,13 @@ import (
 	"time"
 
 	"github.com/voxire/onion/internal/modules/booking_dashboard/internal/domain"
+	"github.com/voxire/onion/internal/platform/cache/cacher"
+	cacheKeys "github.com/voxire/onion/internal/platform/cache/keys"
 	"github.com/voxire/onion/internal/platform/database/dbclient"
 	"github.com/voxire/onion/internal/platform/logger"
 )
+
+const bookingDashboardTTL = 1 * time.Minute
 
 type Service struct{ pool *sql.DB }
 
@@ -17,6 +21,16 @@ func NewService(_ context.Context) *Service {
 }
 
 func (s *Service) GetDashboard(ctx context.Context, ownerID int64) (domain.DashboardData, error) {
+	return cacher.Of[domain.DashboardData]().GetOrComputeSingle(ctx,
+		cacheKeys.Scoped("booking_dashboard", ownerID, "data"),
+		func(ctx context.Context) (domain.DashboardData, error) {
+			return s.fetchDashboard(ctx, ownerID)
+		},
+		cacher.WithExpiry(ctx, bookingDashboardTTL),
+	)
+}
+
+func (s *Service) fetchDashboard(ctx context.Context, ownerID int64) (domain.DashboardData, error) {
 	now := time.Now()
 	startOfDay := time.Date(now.Year(), now.Month(), now.Day(), 0, 0, 0, 0, now.Location())
 	endOfDay := startOfDay.Add(24 * time.Hour)
