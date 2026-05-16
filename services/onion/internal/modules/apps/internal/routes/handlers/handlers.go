@@ -2,10 +2,13 @@ package handlers
 
 import (
 	"context"
+	"time"
 
 	"github.com/voxire/onion/internal/modules/apps/internal/application"
 	"github.com/voxire/onion/internal/modules/apps/internal/domain"
 	authPkg "github.com/voxire/onion/internal/platform/auth"
+	"github.com/voxire/onion/internal/platform/cache/cacher"
+	cacheKeys "github.com/voxire/onion/internal/platform/cache/keys"
 	errorModels "github.com/voxire/onion/internal/platform/errors"
 	hubv1 "github.com/voxire/voxie/gen/go/hub/v1"
 )
@@ -23,6 +26,23 @@ type ListAppsResponse struct {
 }
 
 func (h *ListAppsHandler) Serve(ctx context.Context, _ *ListAppsRequest) (ListAppsResponse, *errorModels.ServerError) {
+	if authUser, ok := authPkg.GetAuthUser(ctx); ok {
+		res, err := cacher.Of[ListAppsResponse]().GetOrComputeSingle(
+			ctx,
+			cacheKeys.UserApps(authUser.UserID),
+			func(ctx context.Context) (ListAppsResponse, error) {
+				return h.computeApps(ctx), nil
+			},
+			cacher.WithExpiry(ctx, 5*time.Minute),
+		)
+		if err == nil {
+			return res, nil
+		}
+	}
+	return h.computeApps(ctx), nil
+}
+
+func (h *ListAppsHandler) computeApps(ctx context.Context) ListAppsResponse {
 	allApps := h.Service.ListApps()
 
 	authUser, ok := authPkg.GetAuthUser(ctx)
@@ -33,7 +53,7 @@ func (h *ListAppsHandler) Serve(ctx context.Context, _ *ListAppsRequest) (ListAp
 				payloads = append(payloads, toProtoApp(a, a.IsEnabled))
 			}
 		}
-		return ListAppsResponse{Apps: payloads}, nil
+		return ListAppsResponse{Apps: payloads}
 	}
 
 	enabledAddons := h.Service.GetEnabledAddons(ctx, authUser.BusinessID)
@@ -51,7 +71,7 @@ func (h *ListAppsHandler) Serve(ctx context.Context, _ *ListAppsRequest) (ListAp
 		for _, a := range allApps {
 			payloads = append(payloads, buildPayload(a))
 		}
-		return ListAppsResponse{Apps: payloads}, nil
+		return ListAppsResponse{Apps: payloads}
 	}
 
 	allowedApps := h.Service.GetUserAllowedApps(ctx, authUser.BusinessID, authUser.UserID)
@@ -67,7 +87,7 @@ func (h *ListAppsHandler) Serve(ctx context.Context, _ *ListAppsRequest) (ListAp
 		}
 	}
 
-	return ListAppsResponse{Apps: payloads}, nil
+	return ListAppsResponse{Apps: payloads}
 }
 
 func toProtoApp(a domain.App, enabled bool) *hubv1.App {
