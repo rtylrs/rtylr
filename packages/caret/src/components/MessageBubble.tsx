@@ -1,10 +1,9 @@
-import React from 'react';
-import { caretTokens, caretRadius } from '../ui/tokens';
-import Avatar from '../ui/Avatar';
-import MessageBlocks from './MessageBlocks';
-import MessageActions from './MessageActions';
-import StreamingDot from './blocks/StreamingDot';
-import type { CaretMessage, ContentBlock } from '../types/message';
+import React from "react";
+import { caretTokens, caretRadius } from "../ui/tokens";
+import MessageBlocks from "./MessageBlocks";
+import MessageActions from "./MessageActions";
+import StreamingDot from "./blocks/StreamingDot";
+import type { CaretMessage, ContentBlock } from "../types/message";
 
 export interface MessageBubbleProps {
   message: CaretMessage;
@@ -19,12 +18,12 @@ export interface MessageBubbleProps {
 function blocksToText(blocks: ContentBlock[]): string {
   return blocks
     .map((b) => {
-      if (b.type === 'text') return b.content;
-      if (b.type === 'thinking') return '';
+      if (b.type === "text") return b.content;
+      if (b.type === "thinking") return "";
       return `[tool:${b.name}]`;
     })
     .filter(Boolean)
-    .join('\n');
+    .join("\n");
 }
 
 export const MessageBubble: React.FC<MessageBubbleProps> = ({
@@ -35,36 +34,39 @@ export const MessageBubble: React.FC<MessageBubbleProps> = ({
   onDenyTool,
   onRetry,
 }) => {
-  const isUser = message.role === 'user';
+  const isUser = message.role === "user";
   const blocks: ContentBlock[] =
     message.blocks.length > 0
       ? message.blocks
       : message.content
-        ? [{ id: `${message.id}-text`, type: 'text', content: message.content }]
+        ? [{ id: `${message.id}-text`, type: "text", content: message.content }]
         : [];
 
-  const text = isUser ? (message.content ?? blocksToText(blocks)) : blocksToText(blocks);
+  const text = isUser
+    ? (message.content ?? blocksToText(blocks))
+    : blocksToText(blocks);
 
+  // User message — right-aligned bubble (ChatGPT-style).
   if (isUser) {
     return (
       <div
         style={{
-          display: 'flex',
-          justifyContent: 'flex-end',
-          marginBottom: 10,
+          display: "flex",
+          justifyContent: "flex-end",
+          margin: "14px 0",
         }}
       >
         <div
           style={{
-            maxWidth: '85%',
-            padding: '8px 12px',
-            borderRadius: caretRadius.md,
+            maxWidth: "85%",
+            padding: "8px 12px",
+            borderRadius: caretRadius.lg,
             background: caretTokens.accent,
-            color: '#ffffff',
-            fontSize: 13.5,
-            lineHeight: 1.55,
-            whiteSpace: 'pre-wrap',
-            wordBreak: 'break-word',
+            color: "#ffffff",
+            fontSize: 14,
+            lineHeight: 1.5,
+            whiteSpace: "pre-wrap",
+            wordBreak: "break-word",
           }}
         >
           {text}
@@ -73,35 +75,27 @@ export const MessageBubble: React.FC<MessageBubbleProps> = ({
     );
   }
 
+  // Assistant message — full-width plain text, no avatar, no bubble (ChatGPT-style).
   return (
-    <div
-      style={{
-        display: 'flex',
-        gap: 8,
-        marginBottom: 12,
-      }}
-    >
-      <Avatar role="assistant" initials="C" />
-      <div style={{ flex: 1, minWidth: 0 }}>
-        <div
-          style={{
-            color: caretTokens.text,
-            fontSize: 13.5,
-            lineHeight: 1.55,
-          }}
-        >
-          <MessageBlocks
-            blocks={blocks}
-            onApprove={onApproveTool}
-            onDeny={onDenyTool}
-            showThinking={showThinking}
-          />
-          {isStreaming && <StreamingDot />}
-        </div>
-        {!isStreaming && blocks.some((b) => b.type === 'text') && (
-          <MessageActions text={text} onRetry={onRetry} />
-        )}
+    <div style={{ margin: "14px 0" }}>
+      <div
+        style={{
+          color: caretTokens.text,
+          fontSize: 14,
+          lineHeight: 1.6,
+        }}
+      >
+        <MessageBlocks
+          blocks={blocks}
+          onApprove={onApproveTool}
+          onDeny={onDenyTool}
+          showThinking={showThinking}
+        />
+        {isStreaming && <StreamingDot />}
       </div>
+      {!isStreaming && blocks.some((b) => b.type === "text") && (
+        <MessageActions text={text} onRetry={onRetry} />
+      )}
     </div>
   );
 };
