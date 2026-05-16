@@ -5,7 +5,7 @@ import { useLayoutEffect, useRef } from 'react';
  * textarea ref and the current value.
  */
 export function useAutosize(
-  ref: React.RefObject<HTMLTextAreaElement>,
+  ref: React.RefObject<HTMLTextAreaElement | null>,
   value: string,
   maxRows = 8
 ): void {

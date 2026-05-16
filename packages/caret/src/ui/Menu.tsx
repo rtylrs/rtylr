@@ -39,13 +39,17 @@ export const Menu: React.FC<MenuProps> = ({ trigger, items, align = 'start' }) =
 
   return (
     <span ref={rootRef} style={{ position: 'relative', display: 'inline-flex' }}>
-      {React.cloneElement(trigger, {
-        onClick: (e: React.MouseEvent) => {
-          e.stopPropagation();
-          setOpen((v) => !v);
-          if (typeof trigger.props.onClick === 'function') trigger.props.onClick(e);
-        },
-      })}
+      {React.cloneElement(
+        trigger as React.ReactElement<{ onClick?: (e: React.MouseEvent) => void }>,
+        {
+          onClick: (e: React.MouseEvent) => {
+            e.stopPropagation();
+            setOpen((v) => !v);
+            const props = trigger.props as { onClick?: (e: React.MouseEvent) => void };
+            if (typeof props.onClick === 'function') props.onClick(e);
+          },
+        }
+      )}
       {open && (
         <div
           role="menu"

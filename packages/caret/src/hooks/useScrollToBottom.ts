@@ -5,7 +5,9 @@ import { useEffect, useRef } from 'react';
  * the container pinned to the bottom while the user hasn't scrolled away.
  * Triggered on changes to `deps`.
  */
-export function useScrollToBottom<T extends HTMLElement>(deps: unknown[]): React.RefObject<T> {
+export function useScrollToBottom<T extends HTMLElement>(
+  deps: unknown[]
+): React.RefObject<T | null> {
   const ref = useRef<T>(null);
 
   useEffect(() => {

@@ -14,15 +14,35 @@ export { default as EmptyState } from './components/EmptyState';
 export { default as SettingsPanel } from './components/SettingsPanel';
 export { default as ApprovalDialog } from './components/ApprovalDialog';
 
-export * from './components/blocks';
+export { Markdown, CodeBlock, ToolCallCard, StreamingDot } from './components/blocks';
+export type { MarkdownProps, CodeBlockProps, ToolCallCardProps } from './components/blocks';
+// Note: ThinkingBlock is re-exported only as a value (the message block type
+// of the same name lives in ./types).
+export { ThinkingBlock as ThinkingBlockView } from './components/blocks';
+export type { ThinkingBlockProps } from './components/blocks';
+
 export * from './components/composer';
 export * from './components/sidebar';
 
 // Stores
 export * from './stores';
 
-// Types
-export * from './types';
+// Types — re-export with friendlier aliases for legacy consumers.
+export type {
+  MessageRole,
+  CaretMessage as CaretMessageType,
+  ContentBlock,
+  TextBlock,
+  ThinkingBlock,
+  ToolCallBlock,
+  CaretChat,
+  CaretChatSummary,
+  CaretMode,
+  CaretModeDef,
+  CaretModel,
+  CaretModelDef,
+} from './types';
+export { CARET_MODES, DEFAULT_MODE, CARET_MODELS, DEFAULT_MODEL } from './types';
 
 // Hooks
 export * from './hooks';
