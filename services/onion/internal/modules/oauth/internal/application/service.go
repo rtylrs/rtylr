@@ -14,8 +14,14 @@ import (
 
 	"github.com/voxire/onion/internal/modules/oauth/internal/domain"
 	"github.com/voxire/onion/internal/modules/oauth/internal/infrastructure"
+	"github.com/voxire/onion/internal/platform/cache/cacher"
 	"github.com/voxire/onion/internal/platform/utils/jwtutils"
 )
+
+// OAuth client lookups are read-heavy and effectively immutable; the rest
+// of the flow (Login, IssueAuthCode, ExchangeCode, RefreshTokens) MUST NOT
+// be cached — those are security-sensitive single-use exchanges.
+const oauthClientTTL = 10 * time.Minute
 
 type Service struct {
 	repo domain.Repository
@@ -30,8 +36,14 @@ func NewService(ctx context.Context) *Service {
 	}
 }
 
-func (s *Service) GetClient(_ context.Context, clientID string) (*domain.Client, error) {
-	return s.repo.GetClient(clientID)
+func (s *Service) GetClient(ctx context.Context, clientID string) (*domain.Client, error) {
+	key := "cache:oauth:client:" + clientID
+	return cacher.Of[*domain.Client]().GetOrComputeSingle(ctx, key,
+		func(_ context.Context) (*domain.Client, error) {
+			return s.repo.GetClient(clientID)
+		},
+		cacher.WithExpiry(ctx, oauthClientTTL),
+	)
 }
 
 // ValidateAuthRequest validates client_id, redirect_uri, scope and returns the client.
