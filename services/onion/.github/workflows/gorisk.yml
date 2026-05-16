@@ -28,6 +28,26 @@ jobs:
           submodules: recursive
           token: ${{ secrets.PAT_TOKEN }}
 
+      # gorisk runs `go list ./...` to build the package graph. onion's
+      # repos contain hand-written code that imports sqlc-generated
+      # packages, so without generation the load step fails before any
+      # capability analysis runs. Mirror what pr-tests.yml does.
+      - name: Setup Go
+        uses: actions/setup-go@v6
+        with:
+          go-version: "1.26"
+          cache: true
+
+      - name: Install sqlc
+        run: |
+          curl -sSL https://github.com/sqlc-dev/sqlc/releases/download/v1.29.0/sqlc_1.29.0_linux_amd64.tar.gz \
+            | tar -xz -C /usr/local/bin sqlc
+
+      - name: Generate sqlc code
+        run: |
+          chmod +x scripts/generate_sqlc.sh
+          ./scripts/generate_sqlc.sh
+
       - name: gorisk
         uses: 1homsi/gorisk@main
         with:
