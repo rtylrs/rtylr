@@ -6,10 +6,29 @@ import (
 	"fmt"
 	"net"
 	"net/http"
+	"strings"
 	"time"
 
 	"github.com/voxire/onion/internal/platform/logger"
 )
+
+// isLongLivedRequest returns true for requests that intentionally hold
+// the connection open past the 15s hard timeout (WebSocket upgrades,
+// SSE streams, file uploads). Applying the request timeout to these
+// generates a permanent stream of "exceeded hard timeout" warnings on
+// every successful connection.
+func isLongLivedRequest(r *http.Request) bool {
+	if strings.EqualFold(r.Header.Get("Upgrade"), "websocket") {
+		return true
+	}
+	if strings.Contains(strings.ToLower(r.Header.Get("Connection")), "upgrade") {
+		return true
+	}
+	if strings.Contains(r.Header.Get("Accept"), "text/event-stream") {
+		return true
+	}
+	return false
+}
 
 const (
 	// RequestTimeout is the hard deadline for any single HTTP request.
@@ -26,8 +45,18 @@ const (
 
 // RequestTimeoutMiddleware enforces a hard 15 s deadline on every request
 // and logs a structured warning for any request that exceeds 5 s.
+//
+// WebSocket / SSE / Upgrade requests bypass the deadline entirely —
+// they are designed to live longer than 15 s, and applying the timeout
+// here either kills them prematurely or floods logs with false-positive
+// "exceeded hard timeout" warnings on every successful connection.
 func RequestTimeoutMiddleware(next http.Handler) http.Handler {
 	return http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
+		if isLongLivedRequest(r) {
+			next.ServeHTTP(w, r)
+			return
+		}
+
 		start := time.Now()
 
 		ctx, cancel := context.WithTimeout(r.Context(), RequestTimeout)
