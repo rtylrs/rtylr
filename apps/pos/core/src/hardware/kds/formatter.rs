@@ -2,7 +2,7 @@
 
 use serde::Deserialize;
 
-#[derive(Deserialize, Clone)]
+#[derive(Deserialize, Clone, Debug, PartialEq)]
 pub struct KdsItem {
     pub name: String,
     pub quantity: f64,
@@ -10,7 +10,7 @@ pub struct KdsItem {
     pub modifiers: Vec<String>,
 }
 
-#[derive(Deserialize, Clone)]
+#[derive(Deserialize, Clone, Debug, PartialEq)]
 pub struct KdsTicket {
     pub order_number: String,
     pub station: Option<String>,
