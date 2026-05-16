@@ -4,6 +4,7 @@ import (
 	"context"
 
 	"github.com/go-chi/chi/v5"
+
 	"github.com/voxire/onion/internal/modules/booking_waitlist/internal/application"
 	"github.com/voxire/onion/internal/modules/booking_waitlist/internal/routes"
 )

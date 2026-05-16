@@ -13,6 +13,7 @@ import (
 	"time"
 
 	_ "github.com/go-sql-driver/mysql" // register MySQL driver
+
 	"github.com/voxire/onion/internal/platform/logger"
 )
 

@@ -29,6 +29,7 @@ import (
 	"time"
 
 	"github.com/coder/websocket"
+
 	"github.com/voxire/onion/internal/platform/logger"
 )
 

@@ -9,6 +9,7 @@ import (
 	"strconv"
 
 	"github.com/go-chi/chi/v5"
+
 	"github.com/voxire/onion/internal/modules/pos_orders/internal/application"
 	errorModels "github.com/voxire/onion/internal/platform/errors"
 )

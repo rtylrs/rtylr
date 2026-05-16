@@ -9,10 +9,11 @@ import (
 	"os"
 	"strings"
 
+	"google.golang.org/api/idtoken"
+
 	"github.com/voxire/onion/internal/modules/user/internal/domain"
 	"github.com/voxire/onion/internal/platform/logger"
 	"github.com/voxire/onion/internal/platform/utils/passwordutils"
-	"google.golang.org/api/idtoken"
 )
 
 // GoogleAuthResult is what the handler returns to the frontend. IsNew

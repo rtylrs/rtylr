@@ -7,6 +7,7 @@ import (
 	"os"
 
 	"github.com/resend/resend-go/v2"
+
 	"github.com/voxire/onion/internal/platform/logger"
 )
 

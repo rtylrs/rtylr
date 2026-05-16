@@ -5,9 +5,10 @@ import (
 	"fmt"
 	"net"
 
-	"github.com/voxire/onion/internal/platform/logger"
 	"google.golang.org/grpc"
 	"google.golang.org/grpc/reflection"
+
+	"github.com/voxire/onion/internal/platform/logger"
 )
 
 type Server struct {

@@ -9,6 +9,7 @@ import (
 	"time"
 
 	"github.com/google/uuid"
+
 	"github.com/voxire/onion/internal/modules/hr_core/internal/domain"
 	"github.com/voxire/onion/internal/modules/hr_core/internal/infrastructure/persistence/sqlc"
 	"github.com/voxire/onion/internal/platform/database/dbclient"

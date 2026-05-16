@@ -9,6 +9,7 @@ import (
 	"time"
 
 	"github.com/golang-jwt/jwt/v5"
+
 	"github.com/voxire/onion/internal/modules/user/internal/domain"
 	"github.com/voxire/onion/internal/modules/user/internal/infrastructure"
 	"github.com/voxire/onion/internal/platform/logger"

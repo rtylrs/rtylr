@@ -4,6 +4,7 @@ import (
 	"context"
 
 	"github.com/go-chi/chi/v5"
+
 	"github.com/voxire/onion/internal/modules/user/internal/application"
 	"github.com/voxire/onion/internal/modules/user/internal/infrastructure"
 	"github.com/voxire/onion/internal/modules/user/internal/routes"

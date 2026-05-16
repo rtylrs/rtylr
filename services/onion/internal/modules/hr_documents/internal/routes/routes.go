@@ -4,6 +4,7 @@ import (
 	"context"
 
 	"github.com/go-chi/chi/v5"
+
 	"github.com/voxire/onion/internal/modules/hr_documents/internal/application"
 	"github.com/voxire/onion/internal/modules/hr_documents/internal/routes/handlers"
 	serverHttp "github.com/voxire/onion/internal/platform/server/http"

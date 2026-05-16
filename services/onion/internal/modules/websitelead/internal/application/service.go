@@ -223,16 +223,12 @@ func (s *Service) sendAutoReply(ctx context.Context, lead domain.LeadInput) {
 	// Build a brief summary of what they submitted.
 	var summaryRows strings.Builder
 	if lead.Service != "" && lead.Service != "contact" {
-		summaryRows.WriteString(fmt.Sprintf(
-			`<tr><td style="padding:7px 0;color:rgba(0,0,0,0.45);font-size:13px;width:120px;">Service</td><td style="padding:7px 0;font-size:14px;color:#111;font-weight:500;">%s</td></tr>`,
-			lead.Service,
-		))
+		fmt.Fprintf(&summaryRows, `<tr><td style="padding:7px 0;color:rgba(0,0,0,0.45);font-size:13px;width:120px;">Service</td><td style="padding:7px 0;font-size:14px;color:#111;font-weight:500;">%s</td></tr>`,
+			lead.Service)
 	}
 	if lead.Budget != "" {
-		summaryRows.WriteString(fmt.Sprintf(
-			`<tr><td style="padding:7px 0;color:rgba(0,0,0,0.45);font-size:13px;">Budget</td><td style="padding:7px 0;font-size:14px;color:#111;">%s</td></tr>`,
-			lead.Budget,
-		))
+		fmt.Fprintf(&summaryRows, `<tr><td style="padding:7px 0;color:rgba(0,0,0,0.45);font-size:13px;">Budget</td><td style="padding:7px 0;font-size:14px;color:#111;">%s</td></tr>`,
+			lead.Budget)
 	}
 
 	summaryBlock := ""

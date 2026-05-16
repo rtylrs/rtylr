@@ -8,6 +8,7 @@ import (
 	"time"
 
 	"github.com/google/uuid"
+
 	"github.com/voxire/onion/internal/modules/memory/internal/domain"
 	"github.com/voxire/onion/internal/modules/memory/internal/infrastructure"
 	"github.com/voxire/onion/internal/platform/logger"

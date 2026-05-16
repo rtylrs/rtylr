@@ -10,10 +10,11 @@ import (
 	"strings"
 	"time"
 
+	"golang.org/x/crypto/bcrypt"
+
 	"github.com/voxire/onion/internal/modules/oauth/internal/domain"
 	"github.com/voxire/onion/internal/modules/oauth/internal/infrastructure"
 	"github.com/voxire/onion/internal/platform/utils/jwtutils"
-	"golang.org/x/crypto/bcrypt"
 )
 
 type Service struct {

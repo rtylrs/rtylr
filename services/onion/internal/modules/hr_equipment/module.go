@@ -4,6 +4,7 @@ import (
 	"context"
 
 	"github.com/go-chi/chi/v5"
+
 	hrcore "github.com/voxire/onion/internal/modules/hr_core"
 	"github.com/voxire/onion/internal/modules/hr_equipment/internal/application"
 	"github.com/voxire/onion/internal/modules/hr_equipment/internal/domain"

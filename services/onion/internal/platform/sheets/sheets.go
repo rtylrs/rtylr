@@ -8,8 +8,8 @@
 //  3. Share the sheet with the service account's email address (Editor access).
 //  4. Base64-encode the JSON key: `base64 < service-account.json`
 //  5. Set the following env vars on the deployment platform:
-//       GOOGLE_SHEETS_CREDENTIALS   — base64-encoded service account JSON
-//       GOOGLE_SHEETS_LEAD_SHEET_ID — the spreadsheet ID
+//     GOOGLE_SHEETS_CREDENTIALS   — base64-encoded service account JSON
+//     GOOGLE_SHEETS_LEAD_SHEET_ID — the spreadsheet ID
 //
 // When either env var is absent, AppendLeadRow is a no-op and logs a warning.
 package sheets
@@ -20,10 +20,11 @@ import (
 	"os"
 	"sync"
 
-	"github.com/voxire/onion/internal/platform/logger"
 	"golang.org/x/oauth2/google"
 	"google.golang.org/api/option"
 	sheetsv4 "google.golang.org/api/sheets/v4"
+
+	"github.com/voxire/onion/internal/platform/logger"
 )
 
 const leadsSheetRange = "Leads!A:J"

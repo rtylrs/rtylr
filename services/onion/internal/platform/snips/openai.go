@@ -7,6 +7,7 @@ import (
 
 	"github.com/openai/openai-go/v2"
 	"github.com/openai/openai-go/v2/option"
+
 	"github.com/voxire/onion/internal/platform/config"
 	"github.com/voxire/onion/internal/platform/logger"
 )

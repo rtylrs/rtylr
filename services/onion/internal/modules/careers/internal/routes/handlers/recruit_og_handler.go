@@ -10,11 +10,12 @@ import (
 	"strings"
 
 	"github.com/fogleman/gg"
-	"github.com/voxire/onion/internal/modules/careers/internal/application"
-	"github.com/voxire/onion/internal/modules/careers/internal/domain"
 	"golang.org/x/image/font/gofont/gobold"
 	"golang.org/x/image/font/gofont/goregular"
 	"golang.org/x/image/font/opentype"
+
+	"github.com/voxire/onion/internal/modules/careers/internal/application"
+	"github.com/voxire/onion/internal/modules/careers/internal/domain"
 )
 
 // The OG card endpoint renders a 1200×630 PNG on the fly from a

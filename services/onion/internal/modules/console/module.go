@@ -5,6 +5,7 @@ import (
 	"time"
 
 	"github.com/go-chi/chi/v5"
+
 	"github.com/voxire/onion/internal/modules/console/internal/application"
 	"github.com/voxire/onion/internal/modules/console/internal/routes"
 	"github.com/voxire/onion/internal/platform/utils/jwtutils"
