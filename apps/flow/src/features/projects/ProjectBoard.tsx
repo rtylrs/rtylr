@@ -14,6 +14,7 @@ import { PERSONAL_WORKSPACE_ID } from '../../shared/lib/personalWorkspace';
 import { apiTaskToTask } from '../../shared/lib/taskMapper';
 import { useProjectRealtime } from '../../shared/lib/useProjectRealtime';
 import TaskCard from '../../shared/components/TaskCard';
+import ConfirmDialog from '../../shared/components/ConfirmDialog';
 import ProjectViewTabs from './ProjectViewTabs';
 import type { ApiProjectColumn } from '../../shared/services/flowApi';
 import type { Task } from '../../shared/stores/flowStore';
@@ -166,6 +167,7 @@ const ProjectBoard: React.FC = () => {
   const [addingColumn, setAddingColumn] = useState(false);
   const [newColumnName, setNewColumnName] = useState('');
   const [groupBy, setGroupByState] = useState<GroupKey>('none');
+  const [pendingDeleteColumn, setPendingDeleteColumn] = useState<ApiProjectColumn | null>(null);
 
   // Hydrate group-by from localStorage once the project id is known.
   useEffect(() => {
@@ -295,7 +297,7 @@ const ProjectBoard: React.FC = () => {
                   sortOrder: col.sortOrder,
                 })
               }
-              onDelete={() => deleteColumn.mutate(String(col.id))}
+              onDelete={() => setPendingDeleteColumn(col)}
             />
           ))}
 
@@ -352,6 +354,27 @@ const ProjectBoard: React.FC = () => {
           </div>
         </div>
       </div>
+      <ConfirmDialog
+        open={pendingDeleteColumn !== null}
+        onOpenChange={(o) => {
+          if (!o) setPendingDeleteColumn(null);
+        }}
+        title="Delete column"
+        description={
+          <>
+            Delete the <strong>{pendingDeleteColumn?.name}</strong> column? Tasks in this column
+            will need to be moved manually first or they will become orphaned.
+          </>
+        }
+        confirmLabel="Delete column"
+        pending={deleteColumn.isPending}
+        onConfirm={() => {
+          if (!pendingDeleteColumn) return;
+          deleteColumn.mutate(String(pendingDeleteColumn.id), {
+            onSettled: () => setPendingDeleteColumn(null),
+          });
+        }}
+      />
     </div>
   );
 };

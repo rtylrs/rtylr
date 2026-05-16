@@ -45,6 +45,7 @@ import type { ApiUserSettings } from '../../shared/services/flowApi';
 import { getCookie } from '@voxire/auth';
 import { useFlowStore } from '../../shared/stores/flowStore';
 import { useLabels, useCreateLabel, useDeleteLabel } from '../../features/tasks/useLabels';
+import ConfirmDialog from '../../shared/components/ConfirmDialog';
 import {
   useWorkspaces,
   useCreateWorkspace,
@@ -610,6 +611,10 @@ const LabelsSection: React.FC = () => {
 
   const [newName, setNewName] = useState('');
   const [newColor, setNewColor] = useState(LABEL_COLORS[0]);
+  const [pendingDeleteLabel, setPendingDeleteLabel] = useState<{
+    id: number;
+    name: string;
+  } | null>(null);
 
   const handleCreate = () => {
     const name = newName.trim();
@@ -734,12 +739,7 @@ const LabelsSection: React.FC = () => {
                 </div>
                 <button
                   type="button"
-                  onClick={() =>
-                    deleteLabel.mutate(label.id, {
-                      onSuccess: () => toast.success(t('toasts.label.deleted')),
-                      onError: () => toast.error(t('toasts.label.deleteFailed')),
-                    })
-                  }
+                  onClick={() => setPendingDeleteLabel({ id: label.id, name: label.name })}
                   className="h-7 w-7 rounded flex items-center justify-center hover:bg-[var(--flow-hover)]"
                   style={{ color: 'var(--flow-text-dim)' }}
                   title="Delete label"
@@ -751,6 +751,31 @@ const LabelsSection: React.FC = () => {
           </div>
         )}
       </div>
+      <ConfirmDialog
+        open={pendingDeleteLabel !== null}
+        onOpenChange={(o) => {
+          if (!o) setPendingDeleteLabel(null);
+        }}
+        title="Delete label"
+        description={
+          <>
+            Delete <strong>{pendingDeleteLabel?.name}</strong>? It is removed from every task it is
+            attached to.
+          </>
+        }
+        confirmLabel="Delete"
+        pending={deleteLabel.isPending}
+        onConfirm={() => {
+          if (!pendingDeleteLabel) return;
+          deleteLabel.mutate(pendingDeleteLabel.id, {
+            onSuccess: () => {
+              toast.success(t('toasts.label.deleted'));
+              setPendingDeleteLabel(null);
+            },
+            onError: () => toast.error(t('toasts.label.deleteFailed')),
+          });
+        }}
+      />
     </div>
   );
 };

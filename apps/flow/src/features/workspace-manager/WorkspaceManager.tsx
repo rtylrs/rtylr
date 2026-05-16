@@ -12,6 +12,7 @@ import {
 } from './useWorkspaceManager';
 import { useFlowTeam } from '../../shared/hooks/queries/useFlowTeam';
 import type { ApiWorkspaceMember } from '../../shared/services/flowApi';
+import ConfirmDialog from '../../shared/components/ConfirmDialog';
 
 const ROLE_LABELS: Record<string, { label: string; icon: React.ReactNode; color: string }> = {
   manager: { label: 'Manager', icon: <Crown size={11} />, color: '#f59e0b' },
@@ -26,6 +27,7 @@ const MemberRow: React.FC<{
 }> = ({ member, workspaceId, isLastManager }) => {
   const remove = useRemoveWorkspaceMember(workspaceId);
   const updateRole = useUpdateWorkspaceMemberRole(workspaceId);
+  const [confirmRemove, setConfirmRemove] = useState(false);
   const roleInfo = ROLE_LABELS[member.role] ?? ROLE_LABELS.member;
   const initials = member.name
     ? member.name
@@ -85,13 +87,7 @@ const MemberRow: React.FC<{
       <button
         onClick={() => {
           if (isLastManager) return toast.error('Cannot remove the last manager');
-          remove.mutate(
-            { workspace_id: Number(workspaceId), user_id: Number(member.userId) },
-            {
-              onSuccess: () => toast.success('Member removed'),
-              onError: () => toast.error('Failed to remove member'),
-            }
-          );
+          setConfirmRemove(true);
         }}
         className="h-7 w-7 rounded flex items-center justify-center shrink-0 opacity-0 group-hover:opacity-100 transition-opacity"
         style={{ color: 'var(--flow-text-dim)' }}
@@ -103,6 +99,31 @@ const MemberRow: React.FC<{
       >
         <Trash2 size={11} />
       </button>
+      <ConfirmDialog
+        open={confirmRemove}
+        onOpenChange={setConfirmRemove}
+        title="Remove member"
+        description={
+          <>
+            Remove <strong>{member.name || member.email}</strong> from this workspace? They lose
+            access immediately and any tasks they own stay where they are.
+          </>
+        }
+        confirmLabel="Remove"
+        pending={remove.isPending}
+        onConfirm={() => {
+          remove.mutate(
+            { workspace_id: Number(workspaceId), user_id: Number(member.userId) },
+            {
+              onSuccess: () => {
+                toast.success('Member removed');
+                setConfirmRemove(false);
+              },
+              onError: () => toast.error('Failed to remove member'),
+            }
+          );
+        }}
+      />
     </div>
   );
 };

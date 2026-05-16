@@ -1,6 +1,14 @@
-import { List as Menu, House as Home, ArrowClockwise as RotateCw, X, User } from 'phosphor-react';
+import {
+  List as Menu,
+  House as Home,
+  ArrowClockwise as RotateCw,
+  X,
+  User,
+  Warning,
+} from 'phosphor-react';
 import { useEffect, useState, useRef } from 'react';
 import { useNavigate } from 'react-router-dom';
+import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogDescription } from '@voxire/ui';
 import { useUserStore } from '../../stores/userStore';
 import { useFullscreen } from '../../hooks/useFullscreen';
 
@@ -76,87 +84,116 @@ const ToolBarContent: React.FC = () => {
     navigate(path);
   };
 
-  const handleClearStorage = () => {
-    if (
-      window.confirm(
-        'Are you sure you want to clear the local storage? This action cannot be undone.'
-      )
-    ) {
-      localStorage.clear();
-      window.location.reload();
-    }
+  const [confirmClearStorage, setConfirmClearStorage] = useState(false);
+  const handleClearStorage = () => setConfirmClearStorage(true);
+  const doClearStorage = () => {
+    localStorage.clear();
+    window.location.reload();
   };
 
   const itemCls =
     'w-8 h-8 flex items-center justify-center rounded-lg hover:bg-white/10 text-white/70 hover:text-white cursor-pointer transition-colors';
 
   return (
-    <div className="fixed bottom-4 left-1/2 -translate-x-1/2 z-50">
-      <div className="flex items-center gap-1 bg-gray-900/95 backdrop-blur-sm border border-white/10 rounded-xl px-2 py-1.5 shadow-xl">
-        <div className={itemCls} onClick={() => toolbarNavigate('/')} title="Home">
-          <Home size={14} />
-        </div>
-        <div
-          className={itemCls}
-          onClick={() => toolbarNavigate('/app/business/')}
-          title="Dashboard"
-        >
-          <User size={14} />
-        </div>
-        <div className={itemCls} onClick={() => window.location.reload()} title="Reload">
-          <RotateCw size={14} />
-        </div>
-
-        <div className="w-px h-4 bg-white/15 mx-0.5" />
-
-        <label className="flex items-center gap-1.5 cursor-pointer">
-          <span className="text-[10px] text-white/50">DEV</span>
-          <div className="relative">
-            <input
-              type="checkbox"
-              className="sr-only peer"
-              checked={mode === 'dev'}
-              onChange={() => setMode((m) => (m === 'dev' ? 'prod' : 'dev'))}
-            />
-            <div className="w-7 h-3.5 bg-white/15 rounded-full peer peer-checked:bg-accent after:content-[''] after:absolute after:top-[2px] after:left-[2px] after:w-2.5 after:h-2.5 after:rounded-full after:bg-white after:transition-all peer-checked:after:translate-x-3.5" />
+    <>
+      <Dialog open={confirmClearStorage} onOpenChange={setConfirmClearStorage}>
+        <DialogContent className="max-w-md">
+          <DialogHeader>
+            <DialogTitle className="flex items-center gap-2 text-[14px] font-semibold">
+              <Warning size={14} weight="fill" style={{ color: '#ef4444' }} />
+              Clear local storage
+            </DialogTitle>
+            <DialogDescription className="text-[12px]">
+              This wipes every cached preference, token, and saved view in this browser and reloads.
+              You will need to sign in again. This cannot be undone.
+            </DialogDescription>
+          </DialogHeader>
+          <div className="flex justify-end gap-2 mt-4">
+            <button
+              type="button"
+              onClick={() => setConfirmClearStorage(false)}
+              className="px-3 py-1.5 rounded-lg text-[12px] font-medium text-white/70"
+            >
+              Cancel
+            </button>
+            <button
+              type="button"
+              onClick={doClearStorage}
+              className="px-3 py-1.5 rounded-lg text-[12px] font-semibold"
+              style={{ background: '#ef4444', color: '#fff' }}
+            >
+              Clear and reload
+            </button>
           </div>
-        </label>
+        </DialogContent>
+      </Dialog>
+      <div className="fixed bottom-4 left-1/2 -translate-x-1/2 z-50">
+        <div className="flex items-center gap-1 bg-gray-900/95 backdrop-blur-sm border border-white/10 rounded-xl px-2 py-1.5 shadow-xl">
+          <div className={itemCls} onClick={() => toolbarNavigate('/')} title="Home">
+            <Home size={14} />
+          </div>
+          <div
+            className={itemCls}
+            onClick={() => toolbarNavigate('/app/business/')}
+            title="Dashboard"
+          >
+            <User size={14} />
+          </div>
+          <div className={itemCls} onClick={() => window.location.reload()} title="Reload">
+            <RotateCw size={14} />
+          </div>
 
-        <div className="w-px h-4 bg-white/15 mx-0.5" />
+          <div className="w-px h-4 bg-white/15 mx-0.5" />
 
-        <span className="text-[10px] text-white/50 px-1">FPS: {fps}</span>
-        <span className="text-[10px] text-white/50 px-1">RAM: {memoryUsage}</span>
+          <label className="flex items-center gap-1.5 cursor-pointer">
+            <span className="text-[10px] text-white/50">DEV</span>
+            <div className="relative">
+              <input
+                type="checkbox"
+                className="sr-only peer"
+                checked={mode === 'dev'}
+                onChange={() => setMode((m) => (m === 'dev' ? 'prod' : 'dev'))}
+              />
+              <div className="w-7 h-3.5 bg-white/15 rounded-full peer peer-checked:bg-accent after:content-[''] after:absolute after:top-[2px] after:left-[2px] after:w-2.5 after:h-2.5 after:rounded-full after:bg-white after:transition-all peer-checked:after:translate-x-3.5" />
+            </div>
+          </label>
 
-        <div className={itemCls} onClick={() => setMenuOpen((v) => !v)}>
-          {menuOpen ? <X size={14} /> : <Menu size={14} />}
-        </div>
+          <div className="w-px h-4 bg-white/15 mx-0.5" />
 
-        {menuOpen && (
-          <div className="absolute bottom-full left-0 mb-2 w-40 bg-gray-900 border border-white/10 rounded-xl overflow-hidden shadow-xl">
-            <div className="p-1">
-              <div
-                className="px-3 py-2 text-sm text-white/80 hover:bg-white/8 rounded-lg cursor-pointer"
-                onClick={() => toolbarNavigate('/')}
-              >
-                Home
-              </div>
-              <div
-                className="px-3 py-2 text-sm text-white/80 hover:bg-white/8 rounded-lg cursor-pointer"
-                onClick={() => toolbarNavigate('/app/business/')}
-              >
-                Statistics
-              </div>
-              <div
-                className="px-3 py-2 text-sm text-red-400 font-semibold hover:bg-white/8 rounded-lg cursor-pointer"
-                onClick={handleClearStorage}
-              >
-                Clear Storage
+          <span className="text-[10px] text-white/50 px-1">FPS: {fps}</span>
+          <span className="text-[10px] text-white/50 px-1">RAM: {memoryUsage}</span>
+
+          <div className={itemCls} onClick={() => setMenuOpen((v) => !v)}>
+            {menuOpen ? <X size={14} /> : <Menu size={14} />}
+          </div>
+
+          {menuOpen && (
+            <div className="absolute bottom-full left-0 mb-2 w-40 bg-gray-900 border border-white/10 rounded-xl overflow-hidden shadow-xl">
+              <div className="p-1">
+                <div
+                  className="px-3 py-2 text-sm text-white/80 hover:bg-white/8 rounded-lg cursor-pointer"
+                  onClick={() => toolbarNavigate('/')}
+                >
+                  Home
+                </div>
+                <div
+                  className="px-3 py-2 text-sm text-white/80 hover:bg-white/8 rounded-lg cursor-pointer"
+                  onClick={() => toolbarNavigate('/app/business/')}
+                >
+                  Statistics
+                </div>
+                <div
+                  className="px-3 py-2 text-sm text-red-400 font-semibold hover:bg-white/8 rounded-lg cursor-pointer"
+                  onClick={handleClearStorage}
+                >
+                  Clear Storage
+                </div>
               </div>
             </div>
-          </div>
-        )}
+          )}
+        </div>
       </div>
-    </div>
+    </>
   );
 };
 

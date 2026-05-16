@@ -11,6 +11,7 @@ import {
   useFilteredTasks,
 } from './useViews';
 import TaskRow from '../../shared/components/TaskRow';
+import ConfirmDialog from '../../shared/components/ConfirmDialog';
 
 const ICON_MAP: Record<string, React.ComponentType<{ size?: number }>> = {
   flame: Flame,
@@ -27,6 +28,7 @@ const Views: React.FC = () => {
   const [selected, setSelected] = useState<SavedView | null>(null);
   const [editingId, setEditingId] = useState<string | null>(null);
   const [editName, setEditName] = useState('');
+  const [pendingDelete, setPendingDelete] = useState<SavedView | null>(null);
 
   const displayView = selected || views[0] || null;
   const tasks = useFilteredTasks(displayView, allTasks);
@@ -56,10 +58,15 @@ const Views: React.FC = () => {
 
   const handleDelete = (v: SavedView, e: React.MouseEvent) => {
     e.stopPropagation();
+    setPendingDelete(v);
+  };
+
+  const performDelete = (v: SavedView) => {
     deleteView.mutate(v.id, {
       onSuccess: () => {
         toast.success('View deleted');
         if (selected?.id === v.id) setSelected(null);
+        setPendingDelete(null);
       },
       onError: () => toast.error('Failed to delete view'),
     });
@@ -208,6 +215,22 @@ const Views: React.FC = () => {
           ))}
         </motion.div>
       </div>
+      <ConfirmDialog
+        open={pendingDelete !== null}
+        onOpenChange={(o) => {
+          if (!o) setPendingDelete(null);
+        }}
+        title="Delete saved view"
+        description={
+          <>
+            Delete the <strong>{pendingDelete?.name}</strong> view? The filters are lost; tasks
+            themselves aren't affected.
+          </>
+        }
+        confirmLabel="Delete view"
+        pending={deleteView.isPending}
+        onConfirm={() => pendingDelete && performDelete(pendingDelete)}
+      />
     </div>
   );
 };
