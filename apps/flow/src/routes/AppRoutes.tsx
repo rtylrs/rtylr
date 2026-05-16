@@ -102,9 +102,6 @@ const appRoutes: RouteObject[] = [
   { path: '/team', element: previewRoute(<Team />) },
   { path: '/triage', element: withLayout(<Triage />) },
   { path: '/archive', element: withLayout(<Archive />) },
-  // Backlog is now a column inside My Tasks. Keep the URL alive so
-  // old bookmarks don't 404 — just redirect to /my-issues.
-  { path: '/backlog', element: <Navigate to="/my-issues" replace /> },
   { path: '/inbox', element: withLayout(<Inbox />) },
   { path: '/settings', element: withLayout(<FlowSettings />) },
   { path: '*', element: <Navigate to={`/w/${PERSONAL_WORKSPACE_ID}`} replace /> },

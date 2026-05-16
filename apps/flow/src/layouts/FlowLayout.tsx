@@ -340,7 +340,6 @@ const FlowLayout: React.FC<FlowLayoutProps> = ({ children }) => {
     '/my-issues': () => import('../features/tasks/MyIssues'),
     '/today': () => import('../features/focus-today/FocusToday'),
     '/triage': () => import('../features/triage/Triage'),
-    '/backlog': () => import('../features/backlog/Backlog'),
     '/cycles': () => import('../features/cycles/Cycles'),
     '/milestones': () => import('../features/milestones/Milestones'),
     '/calendar': () => import('../features/calendar/Calendar'),
