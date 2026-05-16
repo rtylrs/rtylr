@@ -25,14 +25,21 @@ interface ListMembersResponse {
   members?: FlowTeamMember[];
 }
 
-interface InvitePayload {
-  email: string;
-  fullName: string;
+interface GrantPayload {
+  userId: string;
+  // Member's existing apps and role come from useFlowTeam so the
+  // permissions update is additive — we only flip Flow on, nothing
+  // else is touched.
+  apps: string[];
   role: string;
 }
 
 // ── Hooks ─────────────────────────────────────────────────────────────────────
 
+// useFlowTeam returns every member of the business. Flow-specific
+// filters (current members vs. grant candidates) are applied in the UI
+// against each member's `.apps` array — there is no separate Flow-only
+// endpoint, so the same query backs both lists.
 export const useFlowTeam = (): ReturnType<typeof useQuery<FlowTeamMember[]>> =>
   useQuery<FlowTeamMember[]>({
     queryKey: ['flow-team'],
@@ -47,17 +54,28 @@ export const useFlowTeam = (): ReturnType<typeof useQuery<FlowTeamMember[]>> =>
     staleTime: 30_000,
   });
 
-export const useFlowInviteMember = (): UseMutationResult<unknown, unknown, InvitePayload> => {
+// useFlowGrantAccess grants Flow access to an existing business member.
+// External invites happen at the business level (hub Team page); here
+// we only flip the bit for someone already in the org.
+export const useFlowGrantAccess = (): UseMutationResult<unknown, unknown, GrantPayload> => {
   const qc = useQueryClient();
-  return useMutation<unknown, unknown, InvitePayload>({
-    mutationFn: (payload: InvitePayload): Promise<unknown> =>
-      unwrap(safe.post('/team/invite', { ...payload, apps: ['flow'] })),
+  return useMutation<unknown, unknown, GrantPayload>({
+    mutationFn: ({ userId, apps, role }: GrantPayload): Promise<unknown> => {
+      const nextApps = apps.includes('flow') ? apps : [...apps, 'flow'];
+      return unwrap(
+        safe.put('/team/users/permissions', {
+          user_id: Number(userId),
+          apps: nextApps,
+          role,
+        })
+      );
+    },
     onSuccess: (): void => {
-      toast.success('Invitation sent');
+      toast.success('Flow access granted');
       void qc.invalidateQueries({ queryKey: ['flow-team'] });
     },
     onError: (): void => {
-      toast.error('Failed to send invitation');
+      toast.error('Failed to grant Flow access');
     },
   });
 };

@@ -25,7 +25,7 @@ import { toast } from 'sonner';
 import { useTranslation } from 'react-i18next';
 import {
   useFlowTeam,
-  useFlowInviteMember,
+  useFlowGrantAccess,
   useFlowDeactivateMember,
 } from '../../shared/hooks/queries/useFlowTeam';
 import {
@@ -758,13 +758,18 @@ const LabelsSection: React.FC = () => {
 // ── Team Section ─────────────────────────────────────────────────────────────
 
 const TeamSection: React.FC = () => {
-  const { data: members = [], isLoading } = useFlowTeam();
-  const invite = useFlowInviteMember();
+  const { data: allMembers = [], isLoading } = useFlowTeam();
+  const grant = useFlowGrantAccess();
   const deactivate = useFlowDeactivateMember();
   const { data: sub } = useFlowSubscription();
 
-  const [email, setEmail] = useState('');
-  const [fullName, setFullName] = useState('');
+  // The /team/members endpoint returns the entire business team. Flow
+  // is one of several apps a member can have access to; we split here
+  // so the visible list and the grant picker stay in sync.
+  const flowMembers = allMembers.filter((m) => m.apps?.includes('flow'));
+  const candidates = allMembers.filter((m) => !m.apps?.includes('flow'));
+
+  const [selectedUserId, setSelectedUserId] = useState('');
   const [showInvite, setShowInvite] = useState(false);
 
   const inputStyle = {
@@ -773,14 +778,14 @@ const TeamSection: React.FC = () => {
     color: 'var(--flow-text)',
   };
 
-  const handleInvite = (): void => {
-    if (!email.trim() || !fullName.trim()) return;
-    invite.mutate(
-      { email: email.trim(), fullName: fullName.trim(), role: 'member' },
+  const handleGrant = (): void => {
+    const member = candidates.find((m) => m.id === selectedUserId);
+    if (!member) return;
+    grant.mutate(
+      { userId: member.id, apps: member.apps ?? [], role: member.role ?? 'member' },
       {
         onSuccess: () => {
-          setEmail('');
-          setFullName('');
+          setSelectedUserId('');
           setShowInvite(false);
         },
       }
@@ -798,49 +803,50 @@ const TeamSection: React.FC = () => {
         </p>
       </div>
 
-      {/* Invite form */}
+      {/* Grant Flow access to an existing business member */}
       {showInvite ? (
         <div
           className="rounded-xl p-4 space-y-3"
           style={{ border: '1px solid var(--flow-border)', background: 'var(--flow-card)' }}
         >
-          <h3 className="text-[13px] font-semibold" style={{ color: 'var(--flow-text)' }}>
-            Invite someone to Flow
-          </h3>
-          <div className="grid grid-cols-2 gap-3">
-            <div>
-              <label
-                className="block text-[11px] font-medium mb-1"
-                style={{ color: 'var(--flow-text-muted)' }}
+          <div>
+            <h3 className="text-[13px] font-semibold mb-1" style={{ color: 'var(--flow-text)' }}>
+              Grant Flow access
+            </h3>
+            <p className="text-[11px]" style={{ color: 'var(--flow-text-muted)' }}>
+              Only people who are already part of your business can be added here. Add new people
+              from the Team page first.
+            </p>
+          </div>
+          <div>
+            <label
+              className="block text-[11px] font-medium mb-1"
+              style={{ color: 'var(--flow-text-muted)' }}
+            >
+              Team member
+            </label>
+            {candidates.length === 0 ? (
+              <p
+                className="rounded-lg px-3 py-2 text-[12px]"
+                style={{ ...inputStyle, color: 'var(--flow-text-muted)' }}
               >
-                Full name
-              </label>
-              <input
-                type="text"
-                placeholder="Jane Smith"
-                value={fullName}
-                onChange={(e) => setFullName(e.target.value)}
+                Everyone in your business already has Flow access.
+              </p>
+            ) : (
+              <select
+                value={selectedUserId}
+                onChange={(e) => setSelectedUserId(e.target.value)}
                 className="w-full rounded-lg px-3 py-2 text-[13px] outline-none"
                 style={inputStyle}
-              />
-            </div>
-            <div>
-              <label
-                className="block text-[11px] font-medium mb-1"
-                style={{ color: 'var(--flow-text-muted)' }}
               >
-                Email
-              </label>
-              <input
-                type="email"
-                placeholder="jane@company.com"
-                value={email}
-                onChange={(e) => setEmail(e.target.value)}
-                onKeyDown={(e) => e.key === 'Enter' && handleInvite()}
-                className="w-full rounded-lg px-3 py-2 text-[13px] outline-none"
-                style={inputStyle}
-              />
-            </div>
+                <option value="">Select a team member…</option>
+                {candidates.map((m) => (
+                  <option key={m.id} value={m.id}>
+                    {m.name} — {m.email}
+                  </option>
+                ))}
+              </select>
+            )}
           </div>
           {sub &&
             sub.pricePerSeatCents > 0 &&
@@ -864,17 +870,20 @@ const TeamSection: React.FC = () => {
           <div className="flex items-center gap-2">
             <button
               type="button"
-              disabled={!email.trim() || !fullName.trim() || invite.isPending}
-              onClick={handleInvite}
+              disabled={!selectedUserId || grant.isPending}
+              onClick={handleGrant}
               className="flex items-center gap-1.5 px-3 py-1.5 rounded-lg text-[12px] font-semibold disabled:opacity-40"
               style={{ background: 'var(--accent)', color: '#0a0a0a' }}
             >
               <UserPlus size={12} />
-              {invite.isPending ? 'Sending…' : 'Send invite'}
+              {grant.isPending ? 'Granting…' : 'Grant access'}
             </button>
             <button
               type="button"
-              onClick={() => setShowInvite(false)}
+              onClick={() => {
+                setShowInvite(false);
+                setSelectedUserId('');
+              }}
               className="px-3 py-1.5 rounded-lg text-[12px] font-medium"
               style={{ color: 'var(--flow-text-muted)' }}
             >
@@ -890,7 +899,7 @@ const TeamSection: React.FC = () => {
           style={{ background: 'var(--accent)', color: '#0a0a0a' }}
         >
           <UserPlus size={12} />
-          Invite member
+          Add member
         </button>
       )}
 
@@ -905,7 +914,7 @@ const TeamSection: React.FC = () => {
             />
           ))}
         </div>
-      ) : members.length === 0 ? (
+      ) : flowMembers.length === 0 ? (
         <div className="py-8 text-center" style={{ color: 'var(--flow-text-dim)' }}>
           <Users size={24} className="mx-auto mb-2 opacity-40" />
           <p className="text-[13px]">No team members yet.</p>
@@ -915,7 +924,7 @@ const TeamSection: React.FC = () => {
           className="rounded-xl divide-y divide-[var(--flow-border)]"
           style={{ border: '1px solid var(--flow-border)' }}
         >
-          {members.map((m) => (
+          {flowMembers.map((m) => (
             <div key={m.id} className="flex items-center gap-3 px-4 py-3">
               <div
                 className="h-8 w-8 rounded-full flex items-center justify-center text-[12px] font-semibold shrink-0"
