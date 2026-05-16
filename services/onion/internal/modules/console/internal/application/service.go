@@ -3,15 +3,31 @@ package application
 import (
 	"context"
 	"errors"
+	"fmt"
 	"time"
 
 	"github.com/golang-jwt/jwt/v5"
 
 	"github.com/voxire/onion/internal/modules/console/internal/infrastructure"
+	"github.com/voxire/onion/internal/platform/cache/cacher"
 	"github.com/voxire/onion/internal/platform/logger"
 	"github.com/voxire/onion/internal/platform/utils/jwtutils"
 	"github.com/voxire/onion/internal/platform/utils/passwordutils"
 )
+
+const consoleTTL = 1 * time.Minute
+
+// Console is a global admin surface — caches are keyed on the admin namespace
+// rather than per-owner because they aggregate across all tenants.
+func consoleKey(detail string) string {
+	return "cache:console:" + detail
+}
+
+func invalidateConsoleScope(ctx context.Context) {
+	if cache := cacher.GetRedisCache(); cache != nil {
+		cache.DeleteByPattern(ctx, "cache:console:*")
+	}
+}
 
 // consoleClaims is the JWT claims payload for console admin sessions.
 type consoleClaims struct {
@@ -136,15 +152,21 @@ type ListUsersResult struct {
 }
 
 func (s *Service) ListUsers(ctx context.Context, limit, offset int, search string) (*ListUsersResult, error) {
-	users, total, err := s.repo.ListUsers(ctx, limit, offset, search)
-	if err != nil {
-		return nil, err
-	}
-	dtos := make([]UserDTO, 0, len(users))
-	for _, u := range users {
-		dtos = append(dtos, toUserDTO(u))
-	}
-	return &ListUsersResult{Users: dtos, Total: total}, nil
+	key := consoleKey(fmt.Sprintf("users|l=%d|o=%d|q=%s", limit, offset, search))
+	return cacher.Of[*ListUsersResult]().GetOrComputeSingle(ctx, key,
+		func(ctx context.Context) (*ListUsersResult, error) {
+			users, total, err := s.repo.ListUsers(ctx, limit, offset, search)
+			if err != nil {
+				return nil, err
+			}
+			dtos := make([]UserDTO, 0, len(users))
+			for _, u := range users {
+				dtos = append(dtos, toUserDTO(u))
+			}
+			return &ListUsersResult{Users: dtos, Total: total}, nil
+		},
+		cacher.WithExpiry(ctx, consoleTTL),
+	)
 }
 
 func (s *Service) GetUser(ctx context.Context, id int64) (*UserDTO, error) {
@@ -169,22 +191,27 @@ func (s *Service) CreateUser(ctx context.Context, email, password, fullName stri
 }
 
 func (s *Service) UpdateUser(ctx context.Context, id int64, fullName, email string) error {
+	defer invalidateConsoleScope(ctx)
 	return s.repo.UpdateUser(ctx, id, fullName, email)
 }
 
 func (s *Service) DeleteUser(ctx context.Context, id int64) error {
+	defer invalidateConsoleScope(ctx)
 	return s.repo.DeleteUser(ctx, id)
 }
 
 func (s *Service) BanUser(ctx context.Context, id int64, reason string) error {
+	defer invalidateConsoleScope(ctx)
 	return s.repo.BanUser(ctx, id, reason)
 }
 
 func (s *Service) UnbanUser(ctx context.Context, id int64) error {
+	defer invalidateConsoleScope(ctx)
 	return s.repo.UnbanUser(ctx, id)
 }
 
 func (s *Service) SetConsoleAdmin(ctx context.Context, id int64, isAdmin bool) error {
+	defer invalidateConsoleScope(ctx)
 	return s.repo.SetConsoleAdmin(ctx, id, isAdmin)
 }
 
@@ -203,19 +230,25 @@ type ListBusinessesResult struct {
 }
 
 func (s *Service) ListBusinesses(ctx context.Context, limit, offset int, search string) (*ListBusinessesResult, error) {
-	rows, total, err := s.repo.ListBusinesses(ctx, limit, offset, search)
-	if err != nil {
-		return nil, err
-	}
-	dtos := make([]BusinessDTO, 0, len(rows))
-	for _, b := range rows {
-		dto := BusinessDTO{ID: b.ID, Name: b.Name, OwnerID: b.OwnerID}
-		if b.CreatedAt.Valid {
-			dto.CreatedAt = b.CreatedAt.Time.Format(time.RFC3339)
-		}
-		dtos = append(dtos, dto)
-	}
-	return &ListBusinessesResult{Businesses: dtos, Total: total}, nil
+	key := consoleKey(fmt.Sprintf("biz|l=%d|o=%d|q=%s", limit, offset, search))
+	return cacher.Of[*ListBusinessesResult]().GetOrComputeSingle(ctx, key,
+		func(ctx context.Context) (*ListBusinessesResult, error) {
+			rows, total, err := s.repo.ListBusinesses(ctx, limit, offset, search)
+			if err != nil {
+				return nil, err
+			}
+			dtos := make([]BusinessDTO, 0, len(rows))
+			for _, b := range rows {
+				dto := BusinessDTO{ID: b.ID, Name: b.Name, OwnerID: b.OwnerID}
+				if b.CreatedAt.Valid {
+					dto.CreatedAt = b.CreatedAt.Time.Format(time.RFC3339)
+				}
+				dtos = append(dtos, dto)
+			}
+			return &ListBusinessesResult{Businesses: dtos, Total: total}, nil
+		},
+		cacher.WithExpiry(ctx, consoleTTL),
+	)
 }
 
 func (s *Service) GetBusiness(ctx context.Context, id int64) (*BusinessDTO, error) {
@@ -231,10 +264,12 @@ func (s *Service) GetBusiness(ctx context.Context, id int64) (*BusinessDTO, erro
 }
 
 func (s *Service) UpdateBusiness(ctx context.Context, id int64, name string) error {
+	defer invalidateConsoleScope(ctx)
 	return s.repo.UpdateBusiness(ctx, id, name)
 }
 
 func (s *Service) DeleteBusiness(ctx context.Context, id int64) error {
+	defer invalidateConsoleScope(ctx)
 	return s.repo.DeleteBusiness(ctx, id)
 }
 
@@ -281,6 +316,16 @@ func toSubDTO(s infrastructure.SubscriptionRow) SubscriptionDTO {
 }
 
 func (s *Service) ListSubscriptions(ctx context.Context, limit, offset int, status string) (*ListSubscriptionsResult, error) {
+	key := consoleKey(fmt.Sprintf("subs|l=%d|o=%d|s=%s", limit, offset, status))
+	return cacher.Of[*ListSubscriptionsResult]().GetOrComputeSingle(ctx, key,
+		func(ctx context.Context) (*ListSubscriptionsResult, error) {
+			return s.listSubscriptionsImpl(ctx, limit, offset, status)
+		},
+		cacher.WithExpiry(ctx, consoleTTL),
+	)
+}
+
+func (s *Service) listSubscriptionsImpl(ctx context.Context, limit, offset int, status string) (*ListSubscriptionsResult, error) {
 	rows, total, err := s.repo.ListSubscriptions(ctx, limit, offset, status)
 	if err != nil {
 		return nil, err
