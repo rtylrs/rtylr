@@ -1,7 +1,10 @@
 package http
 
 import (
+	"bufio"
 	"crypto/subtle"
+	"fmt"
+	"net"
 	"net/http"
 	"os"
 	"runtime"
@@ -61,6 +64,18 @@ type statusRecorder struct {
 func (s *statusRecorder) WriteHeader(code int) {
 	s.status = code
 	s.ResponseWriter.WriteHeader(code)
+}
+
+// Hijack passes the underlying connection up so WebSocket upgrades
+// work even when this middleware is in the chain. Without it, the
+// wsbus accept path returned "http.ResponseWriter does not implement
+// http.Hijacker" and every realtime client failed to connect.
+func (s *statusRecorder) Hijack() (net.Conn, *bufio.ReadWriter, error) {
+	h, ok := s.ResponseWriter.(http.Hijacker)
+	if !ok {
+		return nil, nil, fmt.Errorf("underlying ResponseWriter does not implement http.Hijacker")
+	}
+	return h.Hijack()
 }
 
 // MetricsHandler serves the Prometheus-format scrape. Expected env:
