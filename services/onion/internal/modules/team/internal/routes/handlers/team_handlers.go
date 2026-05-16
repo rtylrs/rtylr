@@ -62,9 +62,29 @@ func (h *ListUsersHandler) Serve(ctx context.Context, _ *ListUsersRequest) (List
 		return ListUsersResponse{}, errorModels.PermissionDeniedServerError()
 	}
 
-	// Scope the team list by business so non-owner members see colleagues
-	// instead of the empty set returned by querying owner_id = own user_id.
-	users, err := h.Service.ListStaffUsersByBusiness(ctx, device.User.BusinessID)
+	res, err := cacher.Of[ListUsersResponse]().GetOrComputeSingle(
+		ctx,
+		cacheKeys.BusinessTeam(device.User.BusinessID),
+		func(ctx context.Context) (ListUsersResponse, error) {
+			users, err := h.Service.ListStaffUsersByBusiness(ctx, device.User.BusinessID)
+			if err != nil {
+				return ListUsersResponse{}, err
+			}
+			payloads := make([]StaffUserWithGroupsPayload, 0, len(users))
+			for _, u := range users {
+				groups := make([]GroupSummaryPayload, 0, len(u.Groups))
+				for _, g := range u.Groups {
+					groups = append(groups, GroupSummaryPayload{ID: g.ID, Name: g.Name, Color: g.Color})
+				}
+				payloads = append(payloads, StaffUserWithGroupsPayload{
+					StaffUserPayload: newProtoStaffUser(u),
+					Groups:           groups,
+				})
+			}
+			return ListUsersResponse{Users: payloads}, nil
+		},
+		cacher.WithExpiry(ctx, 5*time.Minute),
+	)
 	if err != nil {
 		return ListUsersResponse{}, &errorModels.ServerError{
 			HTTPCode: http.StatusInternalServerError,
@@ -72,20 +92,7 @@ func (h *ListUsersHandler) Serve(ctx context.Context, _ *ListUsersRequest) (List
 			Message:  "Failed to list users",
 		}
 	}
-
-	payloads := make([]StaffUserWithGroupsPayload, 0, len(users))
-	for _, u := range users {
-		groups := make([]GroupSummaryPayload, 0, len(u.Groups))
-		for _, g := range u.Groups {
-			groups = append(groups, GroupSummaryPayload{ID: g.ID, Name: g.Name, Color: g.Color})
-		}
-		payloads = append(payloads, StaffUserWithGroupsPayload{
-			StaffUserPayload: newProtoStaffUser(u),
-			Groups:           groups,
-		})
-	}
-
-	return ListUsersResponse{Users: payloads}, nil
+	return res, nil
 }
 
 func GetMemberByIDRoutes() []string { return []string{"/team/members/{id}"} }
