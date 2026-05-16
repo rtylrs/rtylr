@@ -1,4 +1,4 @@
-import { useLayoutEffect } from "react";
+import { useLayoutEffect } from 'react';
 
 /**
  * Make a textarea grow as the user types, capped at `maxRows`. The
@@ -9,7 +9,7 @@ import { useLayoutEffect } from "react";
 export function useAutosize(
   ref: React.RefObject<HTMLTextAreaElement | null>,
   value: string,
-  maxRows = 6,
+  maxRows = 6
 ): void {
   useLayoutEffect(() => {
     const el = ref.current;
