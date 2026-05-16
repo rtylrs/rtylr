@@ -35,3 +35,8 @@ jobs:
           fail-on: medium
           sarif: true
           lang: node
+          # Don't block merges yet — first run on a repo with 34 open
+          # Dependabot alerts will surface a backlog of findings.
+          # Findings still upload to the Security tab; flip this off
+          # once the backlog is triaged so regressions block PRs.
+          continue-on-error: true
