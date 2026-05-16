@@ -2,9 +2,18 @@ package application
 
 import (
 	"context"
+	"fmt"
+	"time"
 
 	"github.com/voxire/onion/internal/modules/loyalty/internal/domain"
 	"github.com/voxire/onion/internal/modules/loyalty/internal/infrastructure"
+	"github.com/voxire/onion/internal/platform/cache/cacher"
+	cacheKeys "github.com/voxire/onion/internal/platform/cache/keys"
+)
+
+const (
+	loyaltyScope = "loyalty"
+	loyaltyTTL   = 5 * time.Minute
 )
 
 type Service struct {
@@ -15,34 +24,88 @@ func NewService(ctx context.Context) *Service {
 	return &Service{repo: infrastructure.NewRepository(ctx)}
 }
 
+func invalidateLoyaltyScope(ctx context.Context, ownerID int64) {
+	if cache := cacher.GetRedisCache(); cache != nil {
+		cache.DeleteByPattern(ctx, cacheKeys.ScopedPrefix(loyaltyScope, ownerID))
+	}
+}
+
+type loyaltyTxResult struct {
+	Items []domain.LoyaltyTransaction
+	Total int
+}
+
 func (s *Service) ListTransactions(ctx context.Context, ownerID, customerID int64, page, pageSize int) ([]domain.LoyaltyTransaction, int, error) {
-	return s.repo.ListTransactions(ctx, ownerID, customerID, page, pageSize)
+	key := cacheKeys.Scoped(loyaltyScope, ownerID, fmt.Sprintf("tx|c=%d|p=%d|ps=%d", customerID, page, pageSize))
+	res, err := cacher.Of[loyaltyTxResult]().GetOrComputeSingle(ctx, key,
+		func(ctx context.Context) (loyaltyTxResult, error) {
+			items, total, err := s.repo.ListTransactions(ctx, ownerID, customerID, page, pageSize)
+			return loyaltyTxResult{Items: items, Total: total}, err
+		},
+		cacher.WithExpiry(ctx, loyaltyTTL),
+	)
+	return res.Items, res.Total, err
 }
 
 func (s *Service) AwardPoints(ctx context.Context, input domain.AwardInput) error {
-	return s.repo.CreateTransaction(ctx, input, "award")
+	if err := s.repo.CreateTransaction(ctx, input, "award"); err != nil {
+		return err
+	}
+	invalidateLoyaltyScope(ctx, input.OwnerID)
+	return nil
 }
 
 func (s *Service) RedeemPoints(ctx context.Context, input domain.RedeemInput) error {
-	return s.repo.CreateRedeemTransaction(ctx, input)
+	if err := s.repo.CreateRedeemTransaction(ctx, input); err != nil {
+		return err
+	}
+	invalidateLoyaltyScope(ctx, input.OwnerID)
+	return nil
 }
 
 func (s *Service) GetConfig(ctx context.Context, ownerID int64) (domain.LoyaltyConfig, error) {
-	return s.repo.GetConfig(ctx, ownerID)
+	return cacher.Of[domain.LoyaltyConfig]().GetOrComputeSingle(ctx,
+		cacheKeys.Scoped(loyaltyScope, ownerID, "config"),
+		func(ctx context.Context) (domain.LoyaltyConfig, error) {
+			return s.repo.GetConfig(ctx, ownerID)
+		},
+		cacher.WithExpiry(ctx, loyaltyTTL),
+	)
 }
 
 func (s *Service) UpdateConfig(ctx context.Context, input domain.LoyaltyConfigInput) error {
-	return s.repo.UpsertConfig(ctx, input)
+	if err := s.repo.UpsertConfig(ctx, input); err != nil {
+		return err
+	}
+	invalidateLoyaltyScope(ctx, input.OwnerID)
+	return nil
 }
 
 func (s *Service) ListMembers(ctx context.Context, ownerID int64, limit, offset int) ([]domain.LoyaltyMember, error) {
-	return s.repo.ListMembers(ctx, ownerID, limit, offset)
+	key := cacheKeys.Scoped(loyaltyScope, ownerID, fmt.Sprintf("members|l=%d|o=%d", limit, offset))
+	return cacher.Of[[]domain.LoyaltyMember]().GetOrComputeSingle(ctx, key,
+		func(ctx context.Context) ([]domain.LoyaltyMember, error) {
+			return s.repo.ListMembers(ctx, ownerID, limit, offset)
+		},
+		cacher.WithExpiry(ctx, loyaltyTTL),
+	)
 }
 
 func (s *Service) ListRewards(ctx context.Context, ownerID int64, activeOnly bool) ([]domain.LoyaltyReward, error) {
-	return s.repo.ListRewards(ctx, ownerID, activeOnly)
+	key := cacheKeys.Scoped(loyaltyScope, ownerID, fmt.Sprintf("rewards|active=%v", activeOnly))
+	return cacher.Of[[]domain.LoyaltyReward]().GetOrComputeSingle(ctx, key,
+		func(ctx context.Context) ([]domain.LoyaltyReward, error) {
+			return s.repo.ListRewards(ctx, ownerID, activeOnly)
+		},
+		cacher.WithExpiry(ctx, loyaltyTTL),
+	)
 }
 
 func (s *Service) UpsertReward(ctx context.Context, rw domain.LoyaltyReward) (int64, error) {
-	return s.repo.UpsertReward(ctx, rw)
+	id, err := s.repo.UpsertReward(ctx, rw)
+	if err != nil {
+		return 0, err
+	}
+	invalidateLoyaltyScope(ctx, rw.OwnerID)
+	return id, nil
 }
