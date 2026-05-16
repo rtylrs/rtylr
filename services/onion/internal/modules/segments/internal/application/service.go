@@ -2,9 +2,17 @@ package application
 
 import (
 	"context"
+	"time"
 
 	"github.com/voxire/onion/internal/modules/segments/internal/domain"
 	"github.com/voxire/onion/internal/modules/segments/internal/infrastructure"
+	"github.com/voxire/onion/internal/platform/cache/cacher"
+	cacheKeys "github.com/voxire/onion/internal/platform/cache/keys"
+)
+
+const (
+	segmentsScope = "segments"
+	segmentsTTL   = 5 * time.Minute
 )
 
 type repository interface {
@@ -22,18 +30,43 @@ func NewService(ctx context.Context) *Service {
 	return &Service{repo: infrastructure.NewRepository(ctx)}
 }
 
+func invalidateSegmentsScope(ctx context.Context, ownerID int64) {
+	if cache := cacher.GetRedisCache(); cache != nil {
+		cache.DeleteByPattern(ctx, cacheKeys.ScopedPrefix(segmentsScope, ownerID))
+	}
+}
+
 func (s *Service) List(ctx context.Context, ownerID int64) ([]domain.Segment, error) {
-	return s.repo.List(ctx, ownerID)
+	return cacher.Of[[]domain.Segment]().GetOrComputeSingle(ctx,
+		cacheKeys.Scoped(segmentsScope, ownerID, "list"),
+		func(ctx context.Context) ([]domain.Segment, error) {
+			return s.repo.List(ctx, ownerID)
+		},
+		cacher.WithExpiry(ctx, segmentsTTL),
+	)
 }
 
 func (s *Service) Create(ctx context.Context, input domain.SegmentInput) (int64, error) {
-	return s.repo.Create(ctx, input)
+	id, err := s.repo.Create(ctx, input)
+	if err != nil {
+		return 0, err
+	}
+	invalidateSegmentsScope(ctx, input.OwnerID)
+	return id, nil
 }
 
 func (s *Service) Update(ctx context.Context, input domain.SegmentUpdateInput) error {
-	return s.repo.Update(ctx, input)
+	if err := s.repo.Update(ctx, input); err != nil {
+		return err
+	}
+	invalidateSegmentsScope(ctx, input.OwnerID)
+	return nil
 }
 
 func (s *Service) Delete(ctx context.Context, ownerID, id int64) error {
-	return s.repo.Delete(ctx, ownerID, id)
+	if err := s.repo.Delete(ctx, ownerID, id); err != nil {
+		return err
+	}
+	invalidateSegmentsScope(ctx, ownerID)
+	return nil
 }
