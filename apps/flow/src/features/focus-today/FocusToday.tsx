@@ -85,10 +85,10 @@ const FocusToday: React.FC = () => {
         {focusTasks.length === 0 ? (
           <div className="p-10 text-center">
             <p className="text-[14px] font-medium mb-1" style={{ color: 'var(--flow-text-muted)' }}>
-              {t('focusToday.emptyTitle')}
+              {t('common.focusToday.emptyTitle')}
             </p>
             <p className="text-[12px] max-w-sm mx-auto" style={{ color: 'var(--flow-text-dim)' }}>
-              {t('focusToday.emptyHint')}
+              {t('common.focusToday.emptyHint')}
             </p>
           </div>
         ) : (

@@ -87,7 +87,7 @@ const Insights: React.FC = () => {
         </div>
 
         {/* Burndown */}
-        <ChartCard title={t('insights.burndown')}>
+        <ChartCard title={t('common.insights.burndown')}>
           {data.burndown.length === 0 ? (
             <EmptyChart />
           ) : (
@@ -136,7 +136,7 @@ const Insights: React.FC = () => {
         </ChartCard>
 
         <div className="grid grid-cols-2 gap-4">
-          <ChartCard title={t('insights.throughput')}>
+          <ChartCard title={t('common.insights.throughput')}>
             <div className="flex items-end gap-2 h-40">
               {data.throughput.map((t) => (
                 <div key={t.week} className="flex-1 flex flex-col items-center gap-1">
@@ -155,7 +155,7 @@ const Insights: React.FC = () => {
             </div>
           </ChartCard>
 
-          <ChartCard title={t('insights.velocity')}>
+          <ChartCard title={t('common.insights.velocity')}>
             <div className="space-y-2">
               {data.velocity.map((v) => (
                 <div key={v.cycle}>
@@ -183,7 +183,7 @@ const Insights: React.FC = () => {
           </ChartCard>
         </div>
 
-        <ChartCard title={t('insights.timeByPerson')}>
+        <ChartCard title={t('common.insights.timeByPerson')}>
           <div className="space-y-2">
             {data.timeByMember.map((m) => (
               <div key={m.id} className="flex items-center gap-3">

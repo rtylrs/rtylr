@@ -43,21 +43,21 @@ function useActivityLabel(): (a: ActivityEntry) => string {
   return (a: ActivityEntry): string => {
     switch (a.type) {
       case 'created':
-        return t('activity.created');
+        return t('common.activity.created');
       case 'status_change':
-        return t('activity.statusChanged', { from: a.from, to: a.to });
+        return t('common.activity.statusChanged', { from: a.from, to: a.to });
       case 'assignee_change':
-        return t('activity.assigneeChanged', { to: a.to });
+        return t('common.activity.assigneeChanged', { to: a.to });
       case 'priority_change':
-        return t('activity.priorityChanged', { from: a.from, to: a.to });
+        return t('common.activity.priorityChanged', { from: a.from, to: a.to });
       case 'due_date_change':
-        return t('activity.dueDateChanged', { to: a.to });
+        return t('common.activity.dueDateChanged', { to: a.to });
       case 'comment':
-        return t('activity.commented');
+        return t('common.activity.commented');
       case 'label_added':
-        return t('activity.labelAdded', { detail: a.detail });
+        return t('common.activity.labelAdded', { detail: a.detail });
       case 'attachment':
-        return t('activity.attachment', { detail: a.detail });
+        return t('common.activity.attachment', { detail: a.detail });
     }
   };
 }
@@ -69,7 +69,7 @@ export const ActivityFeed: React.FC<ActivityFeedProps> = ({ entries }) => {
   if (entries.length === 0) {
     return (
       <div className="text-[12px] text-center py-4" style={{ color: 'var(--flow-text-dim)' }}>
-        {t('activity.empty', 'No activity yet.')}
+        {t('common.activity.empty', 'No activity yet.')}
       </div>
     );
   }

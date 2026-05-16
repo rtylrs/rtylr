@@ -61,14 +61,14 @@ function buildSections(
   canManageWorkspaces: boolean
 ): SettingsSection[] {
   const sections: SettingsSection[] = [
-    { id: 'team', label: t('settings.team'), icon: Users },
-    { id: 'billing', label: t('settings.billing'), icon: CreditCard },
-    { id: 'notifications', label: t('settings.notifications'), icon: Bell },
-    { id: 'appearance', label: t('settings.appearance'), icon: Palette },
-    { id: 'labels', label: t('settings.labels'), icon: Tag },
-    { id: 'life', label: t('settings.life'), icon: Sparkles },
-    { id: 'shortcuts', label: t('settings.shortcuts'), icon: Keyboard },
-    { id: 'about', label: t('settings.about'), icon: Info },
+    { id: 'team', label: t('common.settings.team'), icon: Users },
+    { id: 'billing', label: t('common.settings.billing'), icon: CreditCard },
+    { id: 'notifications', label: t('common.settings.notifications'), icon: Bell },
+    { id: 'appearance', label: t('common.settings.appearance'), icon: Palette },
+    { id: 'labels', label: t('common.settings.labels'), icon: Tag },
+    { id: 'life', label: t('common.settings.life'), icon: Sparkles },
+    { id: 'shortcuts', label: t('common.settings.shortcuts'), icon: Keyboard },
+    { id: 'about', label: t('common.settings.about'), icon: Info },
   ];
   if (canManageWorkspaces) {
     sections.unshift({ id: 'workspaces', label: 'Workspaces', icon: LayoutDashboard });
@@ -353,10 +353,10 @@ const LifeRhythmSection: React.FC = () => {
     <div className="space-y-6">
       <div>
         <h2 className="text-[15px] font-semibold mb-1" style={{ color: 'var(--flow-text)' }}>
-          {t('settings.life')}
+          {t('common.settings.life')}
         </h2>
         <p className="text-[12px]" style={{ color: 'var(--flow-text-muted)' }}>
-          {t('settings.quietHoursNote')}
+          {t('common.settings.quietHoursNote')}
         </p>
       </div>
 

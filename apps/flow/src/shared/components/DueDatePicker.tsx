@@ -14,11 +14,11 @@ export const DueDatePicker: React.FC<DueDatePickerProps> = ({ value, onChange })
   const overdue = value && new Date(value) < new Date();
 
   const quickOptions = [
-    { label: t('datePicker.today'), days: 0 },
-    { label: t('datePicker.tomorrow'), days: 1 },
-    { label: t('datePicker.in3Days'), days: 3 },
-    { label: t('datePicker.nextWeek'), days: 7 },
-    { label: t('datePicker.in2Weeks'), days: 14 },
+    { label: t('common.datePicker.today'), days: 0 },
+    { label: t('common.datePicker.tomorrow'), days: 1 },
+    { label: t('common.datePicker.in3Days'), days: 3 },
+    { label: t('common.datePicker.nextWeek'), days: 7 },
+    { label: t('common.datePicker.in2Weeks'), days: 14 },
   ];
 
   return (
@@ -29,7 +29,7 @@ export const DueDatePicker: React.FC<DueDatePickerProps> = ({ value, onChange })
         style={{ color: overdue ? '#ef4444' : 'var(--flow-text-muted)' }}
       >
         <Calendar size={12} />
-        {value ? formatDate(value) : t('datePicker.setDate')}
+        {value ? formatDate(value) : t('common.datePicker.setDate')}
         {value && (
           <X
             size={10}
