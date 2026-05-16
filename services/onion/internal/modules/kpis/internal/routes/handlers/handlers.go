@@ -3,9 +3,12 @@ package handlers
 import (
 	"context"
 	"net/http"
+	"time"
 
 	"github.com/voxire/onion/internal/modules/kpis/internal/application"
 	authPkg "github.com/voxire/onion/internal/platform/auth"
+	"github.com/voxire/onion/internal/platform/cache/cacher"
+	cacheKeys "github.com/voxire/onion/internal/platform/cache/keys"
 	errorModels "github.com/voxire/onion/internal/platform/errors"
 	hubv1 "github.com/voxire/voxie/gen/go/hub/v1"
 )
@@ -25,7 +28,25 @@ func (h *KPIHandler) Serve(ctx context.Context, _ *KPIRequest) (KPIResponse, *er
 		return KPIResponse{}, errorModels.PermissionDeniedServerError()
 	}
 
-	kpi, err := h.Service.GetKPIs(ctx, device.User.UserID)
+	res, err := cacher.Of[KPIResponse]().GetOrComputeSingle(
+		ctx,
+		cacheKeys.BusinessKPIs(device.User.UserID),
+		func(ctx context.Context) (KPIResponse, error) {
+			kpi, err := h.Service.GetKPIs(ctx, device.User.UserID)
+			if err != nil {
+				return KPIResponse{}, err
+			}
+			return KPIResponse{
+				Revenue:       kpi.Revenue,
+				OrderCount:    kpi.OrderCount,
+				StaffCount:    kpi.StaffCount,
+				CustomerCount: kpi.CustomerCount,
+				LowStockCount: kpi.LowStockCount,
+				ActiveApps:    kpi.ActiveApps,
+			}, nil
+		},
+		cacher.WithExpiry(ctx, 2*time.Minute),
+	)
 	if err != nil {
 		return KPIResponse{}, &errorModels.ServerError{
 			HTTPCode: http.StatusInternalServerError,
@@ -33,13 +54,5 @@ func (h *KPIHandler) Serve(ctx context.Context, _ *KPIRequest) (KPIResponse, *er
 			Message:  "Failed to get KPIs",
 		}
 	}
-
-	return KPIResponse{
-		Revenue:       kpi.Revenue,
-		OrderCount:    kpi.OrderCount,
-		StaffCount:    kpi.StaffCount,
-		CustomerCount: kpi.CustomerCount,
-		LowStockCount: kpi.LowStockCount,
-		ActiveApps:    kpi.ActiveApps,
-	}, nil
+	return res, nil
 }
