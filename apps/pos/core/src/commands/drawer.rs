@@ -1,79 +1,73 @@
-use std::io::Write;
-use std::time::Duration;
+//! Tauri commands for cash-drawer kick (serial / network).
 
-// ESC/POS cash drawer kick sequences
-// Pin 2 = 0x00, Pin 5 = 0x01
-const DRAWER_PIN2: [u8; 5] = [0x1B, 0x70, 0x00, 0x19, 0xFA];
-const DRAWER_PIN5: [u8; 5] = [0x1B, 0x70, 0x01, 0x19, 0xFA];
+use crate::hardware::escpos::drawer_bytes;
+use crate::transport::{network, serial};
+use crate::validation::{
+    drawer::validate_drawer_pin,
+    net::{validate_baud, validate_host, validate_port, validate_serial_port_name},
+};
 
-fn drawer_bytes(pin: u8) -> &'static [u8] {
-    if pin == 5 {
-        &DRAWER_PIN5
-    } else {
-        &DRAWER_PIN2
-    }
-}
-
-/// Open cash drawer via a serial port (RJ11/RJ12 or USB-to-serial adapter).
-/// `pin` is 2 or 5 (the cash drawer kick pin on the printer).
+/// Open the cash drawer via a serial port (RJ11/RJ12 or USB-to-serial adapter).
 #[tauri::command]
 pub fn open_cash_drawer_serial(
     port_name: String,
     baud_rate: u32,
     pin: u8,
 ) -> Result<String, String> {
-    let port_name = port_name.trim().to_string();
-    if port_name.is_empty() {
-        return Err("Serial port name is required".to_string());
-    }
+    let port_name = validate_serial_port_name(&port_name)?;
+    let baud = validate_baud(baud_rate)?;
+    let pin = validate_drawer_pin(pin)?;
 
-    let baud = if baud_rate == 0 { 9600 } else { baud_rate };
-    let pin = if pin == 5 { 5 } else { 2 };
-
-    let mut port = serialport::new(&port_name, baud)
-        .timeout(Duration::from_millis(2000))
-        .open()
-        .map_err(|e| format!("Cannot open port '{}': {}", port_name, e))?;
-
-    port.write_all(drawer_bytes(pin))
-        .map_err(|e| format!("Write to port '{}' failed: {}", port_name, e))?;
-
+    serial::write_all(&port_name, baud, 2000, drawer_bytes(pin))?;
     Ok(format!("Drawer opened via serial {}", port_name))
 }
 
-/// Open cash drawer over the network (e.g. network-connected thermal printer).
-/// Sends ESC/POS drawer kick to `host:port` via TCP.
+/// Open the cash drawer over the network (network-attached thermal printer).
 #[tauri::command]
 pub fn open_cash_drawer_network(host: String, port: u16, pin: u8) -> Result<String, String> {
-    let host = host.trim().to_string();
-    if host.is_empty() {
-        return Err("Host is required".to_string());
-    }
-    if port == 0 {
-        return Err("Port must be non-zero".to_string());
-    }
+    let host = validate_host(&host)?;
+    let port = validate_port(port)?;
+    let pin = validate_drawer_pin(pin)?;
 
-    let pin = if pin == 5 { 5 } else { 2 };
-    let addr = format!("{}:{}", host, port);
-
-    let mut stream = std::net::TcpStream::connect_timeout(
-        &addr.parse().map_err(|_| format!("Invalid address: {}", addr))?,
-        Duration::from_secs(5),
-    )
-    .map_err(|e| format!("Cannot connect to {}: {}", addr, e))?;
-
-    stream
-        .write_all(drawer_bytes(pin))
-        .map_err(|e| format!("Write to {} failed: {}", addr, e))?;
-
+    network::write_all(&host, port, 5, drawer_bytes(pin))?;
     Ok(format!("Drawer opened via network {}:{}", host, port))
 }
-
-// ── Tests ─────────────────────────────────────────────────────────────────────
 
 #[cfg(test)]
 mod tests {
     use super::*;
+
+    #[test]
+    fn network_drawer_rejects_zero_port() {
+        let result = open_cash_drawer_network("127.0.0.1".to_string(), 0, 2);
+        assert!(result.is_err());
+    }
+
+    #[test]
+    fn network_drawer_rejects_empty_host() {
+        let result = open_cash_drawer_network("".to_string(), 9100, 2);
+        assert!(result.is_err());
+    }
+
+    #[test]
+    fn network_drawer_rejects_bad_pin() {
+        let result = open_cash_drawer_network("127.0.0.1".to_string(), 9100, 3);
+        assert!(result.is_err());
+    }
+
+    #[test]
+    fn serial_drawer_rejects_empty_port() {
+        let result = open_cash_drawer_serial("".to_string(), 9600, 2);
+        assert!(result.is_err());
+    }
+
+    #[test]
+    fn serial_drawer_rejects_bad_baud() {
+        let result = open_cash_drawer_serial("COM3".to_string(), 123, 2);
+        assert!(result.is_err());
+    }
+
+    // ── Wire-format integration: TCP mock receives ESC/POS drawer kick ─────────
     use std::io::Read;
     use std::net::TcpListener;
     use std::thread;
@@ -97,13 +91,8 @@ mod tests {
         let (result, received) = with_tcp_mock(|port| {
             open_cash_drawer_network("127.0.0.1".to_string(), port, 2)
         });
-
-        assert!(result.is_ok(), "open_cash_drawer_network failed: {:?}", result);
-        assert_eq!(
-            received.as_slice(),
-            &[0x1B, 0x70, 0x00, 0x19, 0xFA],
-            "Pin 2 ESC/POS drawer kick bytes incorrect on the wire"
-        );
+        assert!(result.is_ok());
+        assert_eq!(received.as_slice(), &[0x1B, 0x70, 0x00, 0x19, 0xFA]);
     }
 
     #[test]
@@ -111,36 +100,7 @@ mod tests {
         let (result, received) = with_tcp_mock(|port| {
             open_cash_drawer_network("127.0.0.1".to_string(), port, 5)
         });
-
         assert!(result.is_ok());
-        assert_eq!(
-            received.as_slice(),
-            &[0x1B, 0x70, 0x01, 0x19, 0xFA],
-            "Pin 5 ESC/POS drawer kick bytes incorrect on the wire"
-        );
-    }
-
-    #[test]
-    fn network_drawer_returns_ok_with_host_port() {
-        let (result, _) = with_tcp_mock(|port| {
-            open_cash_drawer_network("127.0.0.1".to_string(), port, 2)
-        });
-
-        let msg = result.expect("should succeed");
-        assert!(msg.contains("127.0.0.1"));
-    }
-
-    #[test]
-    fn network_drawer_rejects_zero_port() {
-        let result = open_cash_drawer_network("127.0.0.1".to_string(), 0, 2);
-        assert!(result.is_err());
-        assert!(result.unwrap_err().contains("Port must be non-zero"));
-    }
-
-    #[test]
-    fn network_drawer_rejects_empty_host() {
-        let result = open_cash_drawer_network("".to_string(), 9100, 2);
-        assert!(result.is_err());
-        assert!(result.unwrap_err().contains("Host is required"));
+        assert_eq!(received.as_slice(), &[0x1B, 0x70, 0x01, 0x19, 0xFA]);
     }
 }

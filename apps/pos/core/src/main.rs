@@ -2,6 +2,10 @@
 #![cfg_attr(not(debug_assertions), windows_subsystem = "windows")]
 
 mod commands;
+mod hardware;
+mod transport;
+mod util;
+mod validation;
 
 use commands::{discovery, drawer, health, kds, printer, receipt};
 
