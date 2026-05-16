@@ -2,12 +2,26 @@ package application
 
 import (
 	"context"
+	"fmt"
 	"time"
 
 	"github.com/voxire/onion/internal/modules/hr_overtime/internal/domain"
 	"github.com/voxire/onion/internal/modules/hr_overtime/internal/infrastructure"
+	"github.com/voxire/onion/internal/platform/cache/cacher"
+	cacheKeys "github.com/voxire/onion/internal/platform/cache/keys"
 	"github.com/voxire/onion/internal/platform/logger"
 )
+
+const (
+	hrOvertimeScope = "hr_overtime"
+	hrOvertimeTTL   = 2 * time.Minute
+)
+
+func invalidateHROvertimeScope(ctx context.Context, ownerID int64) {
+	if cache := cacher.GetRedisCache(); cache != nil {
+		cache.DeleteByPattern(ctx, cacheKeys.ScopedPrefix(hrOvertimeScope, ownerID))
+	}
+}
 
 type Service struct {
 	repo             *infrastructure.Repository
@@ -28,13 +42,29 @@ func (s *Service) ListOvertimeRequests(ctx context.Context, ownerID int64, param
 	if params.Limit > 100 {
 		params.Limit = 100
 	}
-	return s.repo.ListOvertimeRequests(ctx, ownerID, params)
+	key := cacheKeys.Scoped(hrOvertimeScope, ownerID, fmt.Sprintf("reqs|l=%d|o=%d", params.Limit, params.Offset))
+	type listResult struct {
+		Items []domain.OvertimeRequestRecord
+		Total int64
+	}
+	res, err := cacher.Of[listResult]().GetOrComputeSingle(ctx, key,
+		func(ctx context.Context) (listResult, error) {
+			items, total, err := s.repo.ListOvertimeRequests(ctx, ownerID, params)
+			return listResult{Items: items, Total: total}, err
+		},
+		cacher.WithExpiry(ctx, hrOvertimeTTL),
+	)
+	return res.Items, res.Total, err
 }
 
 func (s *Service) CreateOvertimeRequest(ctx context.Context, ownerID int64, req domain.OvertimeRequestRecord) (*domain.OvertimeRequestRecord, error) {
 	req.Status = "pending"
 	req.CurrentApprovalLevel = 0
-	return s.repo.CreateOvertimeRequest(ctx, ownerID, req)
+	rec, err := s.repo.CreateOvertimeRequest(ctx, ownerID, req)
+	if err == nil {
+		invalidateHROvertimeScope(ctx, ownerID)
+	}
+	return rec, err
 }
 
 func (s *Service) ApproveOvertime(ctx context.Context, ownerID, requestID, approverID int64, multiplier float64) error {
@@ -64,29 +94,46 @@ func (s *Service) ApproveOvertime(ctx context.Context, ownerID, requestID, appro
 		}
 	}
 
-	return s.repo.ApproveOvertimeRequest(ctx, ownerID, requestID, approverID, multiplier)
+	if err := s.repo.ApproveOvertimeRequest(ctx, ownerID, requestID, approverID, multiplier); err != nil {
+		return err
+	}
+	invalidateHROvertimeScope(ctx, ownerID)
+	return nil
 }
 
 func (s *Service) RejectOvertime(ctx context.Context, ownerID, requestID int64) error {
-	_, err := s.repo.GetOvertimeRequest(ctx, ownerID, requestID)
-	if err != nil {
+	if _, err := s.repo.GetOvertimeRequest(ctx, ownerID, requestID); err != nil {
 		return err
 	}
-	return s.repo.RejectOvertimeRequest(ctx, ownerID, requestID)
+	if err := s.repo.RejectOvertimeRequest(ctx, ownerID, requestID); err != nil {
+		return err
+	}
+	invalidateHROvertimeScope(ctx, ownerID)
+	return nil
 }
 
 func (s *Service) GetOvertimeConfig(ctx context.Context, ownerID int64) (*domain.OvertimeConfigRecord, error) {
-	cfg, err := s.repo.GetOvertimeConfig(ctx, ownerID)
-	if err != nil {
-		logger.Ctx(ctx).Debug("no overtime config found, auto-detection disabled",
-			logger.Any("owner_id", ownerID))
-		return nil, domain.ErrOvertimeConfigNotFound
-	}
-	return cfg, nil
+	return cacher.Of[*domain.OvertimeConfigRecord]().GetOrComputeSingle(ctx,
+		cacheKeys.Scoped(hrOvertimeScope, ownerID, "config"),
+		func(ctx context.Context) (*domain.OvertimeConfigRecord, error) {
+			cfg, err := s.repo.GetOvertimeConfig(ctx, ownerID)
+			if err != nil {
+				logger.Ctx(ctx).Debug("no overtime config found, auto-detection disabled",
+					logger.Any("owner_id", ownerID))
+				return nil, domain.ErrOvertimeConfigNotFound
+			}
+			return cfg, nil
+		},
+		cacher.WithExpiry(ctx, 10*time.Minute),
+	)
 }
 
 func (s *Service) UpsertOvertimeConfig(ctx context.Context, ownerID int64, cfg domain.OvertimeConfigRecord) error {
-	return s.repo.UpsertOvertimeConfig(ctx, ownerID, cfg)
+	if err := s.repo.UpsertOvertimeConfig(ctx, ownerID, cfg); err != nil {
+		return err
+	}
+	invalidateHROvertimeScope(ctx, ownerID)
+	return nil
 }
 
 func (s *Service) DetectAndFlagOvertime(ctx context.Context, ownerID int64, date string) error {
