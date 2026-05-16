@@ -13,14 +13,10 @@ import (
 	"github.com/voxire/onion/internal/modules/team/internal/application"
 	"github.com/voxire/onion/internal/modules/team/internal/domain"
 	authPkg "github.com/voxire/onion/internal/platform/auth"
-	"github.com/voxire/onion/internal/platform/cache/cacher"
-	cacheKeys "github.com/voxire/onion/internal/platform/cache/keys"
 	emailPkg "github.com/voxire/onion/internal/platform/email"
 	errorModels "github.com/voxire/onion/internal/platform/errors"
 	hubv1 "github.com/voxire/voxie/gen/go/hub/v1"
 )
-
-const meCacheTTL = 5 * time.Minute
 
 // ─── List Staff Users ─────────────────────────────────────────────────────────
 
@@ -62,29 +58,7 @@ func (h *ListUsersHandler) Serve(ctx context.Context, _ *ListUsersRequest) (List
 		return ListUsersResponse{}, errorModels.PermissionDeniedServerError()
 	}
 
-	res, err := cacher.Of[ListUsersResponse]().GetOrComputeSingle(
-		ctx,
-		cacheKeys.BusinessTeam(device.User.BusinessID),
-		func(ctx context.Context) (ListUsersResponse, error) {
-			users, err := h.Service.ListStaffUsersByBusiness(ctx, device.User.BusinessID)
-			if err != nil {
-				return ListUsersResponse{}, err
-			}
-			payloads := make([]StaffUserWithGroupsPayload, 0, len(users))
-			for _, u := range users {
-				groups := make([]GroupSummaryPayload, 0, len(u.Groups))
-				for _, g := range u.Groups {
-					groups = append(groups, GroupSummaryPayload{ID: g.ID, Name: g.Name, Color: g.Color})
-				}
-				payloads = append(payloads, StaffUserWithGroupsPayload{
-					StaffUserPayload: newProtoStaffUser(u),
-					Groups:           groups,
-				})
-			}
-			return ListUsersResponse{Users: payloads}, nil
-		},
-		cacher.WithExpiry(ctx, 5*time.Minute),
-	)
+	users, err := h.Service.ListStaffUsersByBusiness(ctx, device.User.BusinessID)
 	if err != nil {
 		return ListUsersResponse{}, &errorModels.ServerError{
 			HTTPCode: http.StatusInternalServerError,
@@ -92,7 +66,18 @@ func (h *ListUsersHandler) Serve(ctx context.Context, _ *ListUsersRequest) (List
 			Message:  "Failed to list users",
 		}
 	}
-	return res, nil
+	payloads := make([]StaffUserWithGroupsPayload, 0, len(users))
+	for _, u := range users {
+		groups := make([]GroupSummaryPayload, 0, len(u.Groups))
+		for _, g := range u.Groups {
+			groups = append(groups, GroupSummaryPayload{ID: g.ID, Name: g.Name, Color: g.Color})
+		}
+		payloads = append(payloads, StaffUserWithGroupsPayload{
+			StaffUserPayload: newProtoStaffUser(u),
+			Groups:           groups,
+		})
+	}
+	return ListUsersResponse{Users: payloads}, nil
 }
 
 func GetMemberByIDRoutes() []string { return []string{"/team/members/{id}"} }
@@ -198,7 +183,7 @@ func (h *InviteUserHandler) Serve(ctx context.Context, req *InviteUserRequest) (
 		role = domain.RoleStaff
 	}
 
-	userID, token, err := h.Service.InviteUser(ctx, ownerID, domain.InviteUserInput{
+	userID, token, err := h.Service.InviteUser(ctx, ownerID, device.User.BusinessID, domain.InviteUserInput{
 		Email:    req.Email,
 		FullName: req.FullName,
 		Password: req.Password,
@@ -222,13 +207,6 @@ func (h *InviteUserHandler) Serve(ctx context.Context, req *InviteUserRequest) (
 
 	if req.GroupID > 0 {
 		_ = h.Service.AddGroupMembers(ctx, ownerID, req.GroupID, ownerID, []int64{userID})
-	}
-
-	// New team member changes the owner's team list cache + the new user's
-	// /me payload (apps/permissions just got attached).
-	if cache := cacher.GetRedisCache(); cache != nil {
-		cache.DeleteByPattern(ctx, cacheKeys.BusinessPrefix(device.User.BusinessID))
-		cache.DeleteByPattern(ctx, cacheKeys.UserPrefix(userID))
 	}
 
 	// Only send invite email if no password was set manually
@@ -357,7 +335,7 @@ func (h *UpdatePermissionsHandler) Serve(ctx context.Context, req *UpdatePermiss
 		apps = []string{}
 	}
 
-	if err := h.Service.UpdatePermissions(ctx, ownerID, domain.UpdatePermissionsInput{
+	if err := h.Service.UpdatePermissions(ctx, ownerID, device.User.BusinessID, domain.UpdatePermissionsInput{
 		UserID: req.UserID,
 		Apps:   apps,
 		Role:   domain.Role(req.Role),
@@ -367,11 +345,6 @@ func (h *UpdatePermissionsHandler) Serve(ctx context.Context, req *UpdatePermiss
 			Code:     http.StatusInternalServerError,
 			Message:  "Failed to update permissions",
 		}
-	}
-
-	if cache := cacher.GetRedisCache(); cache != nil {
-		cache.DeleteByPattern(ctx, cacheKeys.UserPrefix(req.UserID))
-		cache.DeleteByPattern(ctx, cacheKeys.BusinessPrefix(device.User.BusinessID))
 	}
 
 	return UpdatePermissionsResponse{Message: "Permissions updated"}, nil
@@ -409,19 +382,12 @@ func (h *DeactivateUserHandler) Serve(ctx context.Context, req *DeactivateUserRe
 
 	ownerID := device.User.UserID
 
-	if err := h.Service.DeactivateUser(ctx, ownerID, req.UserID); err != nil {
+	if err := h.Service.DeactivateUser(ctx, ownerID, device.User.BusinessID, req.UserID); err != nil {
 		return DeactivateUserResponse{}, &errorModels.ServerError{
 			HTTPCode: http.StatusInternalServerError,
 			Code:     http.StatusInternalServerError,
 			Message:  "Failed to deactivate user",
 		}
-	}
-
-	// Invalidate the deactivated user's /me + the owner's team list.
-	cache := cacher.GetRedisCache()
-	if cache != nil {
-		cache.DeleteByPattern(ctx, cacheKeys.UserPrefix(req.UserID))
-		cache.DeleteByPattern(ctx, cacheKeys.BusinessPrefix(device.User.BusinessID))
 	}
 
 	// Record the seat change asynchronously so billing stays accurate.
@@ -465,7 +431,7 @@ func (h *DeactivateMemberHandler) Serve(ctx context.Context, _ *DeactivateMember
 
 	ownerID := device.User.UserID
 
-	if err := h.Service.DeactivateUser(ctx, ownerID, memberID); err != nil {
+	if err := h.Service.DeactivateUser(ctx, ownerID, device.User.BusinessID, memberID); err != nil {
 		return DeactivateMemberResponse{}, &errorModels.ServerError{
 			HTTPCode: http.StatusInternalServerError,
 			Code:     http.StatusInternalServerError,
@@ -508,26 +474,13 @@ type MeResponse struct {
 	EffectiveResources map[string]string `json:"effective_resources"`
 }
 
-func (h *MeHandler) Serve(ctx context.Context, req *MeRequest) (MeResponse, *errorModels.ServerError) {
+func (h *MeHandler) Serve(ctx context.Context, _ *MeRequest) (MeResponse, *errorModels.ServerError) {
 	device := authPkg.DeviceCtx(ctx)
 	if device.User == nil {
 		return MeResponse{}, errorModels.PermissionDeniedServerError()
 	}
 
-	userID := device.User.UserID
-	businessID := device.User.BusinessID
-
-	// Cache key is per-user: any team/role/subscription change invalidates
-	// `cache:user:{id}:*`, which wipes this entry too.
-	cacheKey := cacheKeys.UserMe(userID)
-	cached, err := cacher.Of[MeResponse]().GetOrComputeSingle(
-		ctx,
-		cacheKey,
-		func(ctx context.Context) (MeResponse, error) {
-			return h.computeMe(ctx, userID, businessID)
-		},
-		cacher.WithExpiry(ctx, meCacheTTL),
-	)
+	profile, err := h.Service.GetMyProfile(ctx, device.User.UserID, device.User.BusinessID)
 	if err != nil {
 		if errors.Is(err, domain.ErrUserNotFound) {
 			return MeResponse{}, &errorModels.ServerError{
@@ -542,65 +495,8 @@ func (h *MeHandler) Serve(ctx context.Context, req *MeRequest) (MeResponse, *err
 			Message:  "Failed to get user info",
 		}
 	}
-	return cached, nil
-}
 
-func (h *MeHandler) computeMe(ctx context.Context, userID, businessID int64) (MeResponse, error) {
-	email, fullName, apps, role, err := h.Service.GetMeByBusiness(ctx, businessID, userID)
-	if err != nil {
-		return MeResponse{}, err
-	}
-
-	if apps == nil {
-		apps = []string{}
-	}
-
-	// Get business name
-	businessName, isOwner := h.Service.GetBusinessInfo(ctx, businessID, userID)
-
-	var planSlug, subscriptionStatus string
-
-	// If user is the owner, resolve apps from their subscription plan
-	if isOwner {
-		role = "owner"
-		ownerApps, appsErr := h.Service.GetOwnerApps(ctx, userID)
-		if appsErr != nil || len(ownerApps) == 0 {
-			apps = []string{"pos", "erp", "hr", "crm", "finance", "flow"}
-		} else {
-			apps = ownerApps
-		}
-
-		slug, status, subErr := h.Service.GetOwnerSubscriptionInfo(ctx, userID)
-		if subErr == nil {
-			planSlug = slug
-			subscriptionStatus = status
-		}
-	}
-
-	effectiveResources := map[string]string{}
-	if !isOwner {
-		resPerms, resErr := h.Service.GetUserEffectiveResources(ctx, businessID, userID)
-		if resErr == nil {
-			for key, level := range resPerms {
-				effectiveResources[key] = string(level)
-			}
-		}
-	}
-
-	return MeResponse{
-		ID:                 userID,
-		Email:              email,
-		FullName:           fullName,
-		Apps:               apps,
-		Role:               string(role),
-		BusinessID:         businessID,
-		BusinessName:       businessName,
-		IsOwner:            isOwner,
-		Onboarded:          h.Service.IsOnboarded(ctx, userID),
-		PlanSlug:           planSlug,
-		SubscriptionStatus: subscriptionStatus,
-		EffectiveResources: effectiveResources,
-	}, nil
+	return MeResponse(profile), nil
 }
 
 // ─── Mark Onboarded ─────────────────────────────────────────────────────────
@@ -627,10 +523,6 @@ func (h *MarkOnboardedHandler) Serve(ctx context.Context, _ *MarkOnboardedReques
 			Code:     http.StatusInternalServerError,
 			Message:  "Failed to update",
 		}
-	}
-
-	if cache := cacher.GetRedisCache(); cache != nil {
-		cache.DeleteByPattern(ctx, cacheKeys.UserPrefix(device.User.UserID))
 	}
 
 	return MarkOnboardedResponse{Message: "Onboarding complete"}, nil

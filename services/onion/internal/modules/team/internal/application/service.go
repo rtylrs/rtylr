@@ -12,9 +12,28 @@ import (
 
 	"github.com/voxire/onion/internal/modules/team/internal/domain"
 	"github.com/voxire/onion/internal/modules/team/internal/infrastructure"
+	"github.com/voxire/onion/internal/platform/cache/cacher"
+	cacheKeys "github.com/voxire/onion/internal/platform/cache/keys"
 	"github.com/voxire/onion/internal/platform/database/dbclient"
 	"github.com/voxire/onion/internal/platform/utils/passwordutils"
 )
+
+const (
+	meCacheTTL   = 5 * time.Minute
+	teamCacheTTL = 5 * time.Minute
+)
+
+func invalidateUserScope(ctx context.Context, userID int64) {
+	if cache := cacher.GetRedisCache(); cache != nil {
+		cache.DeleteByPattern(ctx, cacheKeys.UserPrefix(userID))
+	}
+}
+
+func invalidateBusinessTeamScope(ctx context.Context, businessID int64) {
+	if cache := cacher.GetRedisCache(); cache != nil {
+		cache.DeleteByPattern(ctx, cacheKeys.BusinessPrefix(businessID))
+	}
+}
 
 type Service struct {
 	repo *infrastructure.Repository
@@ -32,13 +51,86 @@ func (s *Service) ListStaffUsers(ctx context.Context, ownerID int64) ([]domain.S
 
 // ListStaffUsersByBusiness resolves the business owner and lists all staff
 // under that owner. Lets non-owner members see the full team, not just the
-// rows they personally own (which would be empty).
+// rows they personally own (which would be empty). Result is cached per
+// businessID and invalidated by any team mutation under that business.
 func (s *Service) ListStaffUsersByBusiness(ctx context.Context, businessID int64) ([]domain.StaffUser, error) {
-	_, ownerID, err := s.repo.GetBusinessByID(ctx, businessID)
+	return cacher.Of[[]domain.StaffUser]().GetOrComputeSingle(
+		ctx,
+		cacheKeys.BusinessTeam(businessID),
+		func(ctx context.Context) ([]domain.StaffUser, error) {
+			_, ownerID, err := s.repo.GetBusinessByID(ctx, businessID)
+			if err != nil {
+				return nil, err
+			}
+			return s.repo.ListStaffUsers(ctx, ownerID)
+		},
+		cacher.WithExpiry(ctx, teamCacheTTL),
+	)
+}
+
+// GetMyProfile builds the composite /user/me payload (identity + business +
+// subscription + effective resources). Cached per-user; any team or
+// subscription mutation under the user invalidates `cache:user:{id}:*`.
+func (s *Service) GetMyProfile(ctx context.Context, userID, businessID int64) (domain.MyProfile, error) {
+	return cacher.Of[domain.MyProfile]().GetOrComputeSingle(
+		ctx,
+		cacheKeys.UserMe(userID),
+		func(ctx context.Context) (domain.MyProfile, error) {
+			return s.computeMyProfile(ctx, userID, businessID)
+		},
+		cacher.WithExpiry(ctx, meCacheTTL),
+	)
+}
+
+func (s *Service) computeMyProfile(ctx context.Context, userID, businessID int64) (domain.MyProfile, error) {
+	email, fullName, apps, role, err := s.GetMeByBusiness(ctx, businessID, userID)
 	if err != nil {
-		return nil, err
+		return domain.MyProfile{}, err
 	}
-	return s.repo.ListStaffUsers(ctx, ownerID)
+	if apps == nil {
+		apps = []string{}
+	}
+
+	businessName, isOwner := s.GetBusinessInfo(ctx, businessID, userID)
+
+	var planSlug, subscriptionStatus string
+	if isOwner {
+		role = "owner"
+		ownerApps, appsErr := s.GetOwnerApps(ctx, userID)
+		if appsErr != nil || len(ownerApps) == 0 {
+			apps = []string{"pos", "erp", "hr", "crm", "finance", "flow"}
+		} else {
+			apps = ownerApps
+		}
+		if slug, status, subErr := s.GetOwnerSubscriptionInfo(ctx, userID); subErr == nil {
+			planSlug = slug
+			subscriptionStatus = status
+		}
+	}
+
+	effectiveResources := map[string]string{}
+	if !isOwner {
+		if resPerms, resErr := s.GetUserEffectiveResources(ctx, businessID, userID); resErr == nil {
+			for k, v := range resPerms {
+				effectiveResources[k] = string(v)
+			}
+		}
+	}
+
+	return domain.MyProfile{
+		ID:                 userID,
+		Email:              email,
+		FullName:           fullName,
+		Apps:               apps,
+		Role:               string(role),
+		BusinessID:         businessID,
+		BusinessName:       businessName,
+		IsOwner:            isOwner,
+		Onboarded:          s.IsOnboarded(ctx, userID),
+		PlanSlug:           planSlug,
+		SubscriptionStatus: subscriptionStatus,
+		EffectiveResources: effectiveResources,
+	}, nil
 }
 
 func (s *Service) GetStaffUserByID(ctx context.Context, ownerID, businessID, userID int64) (*domain.StaffUser, error) {
@@ -51,7 +143,11 @@ func (s *Service) GetStaffUserByID(ctx context.Context, ownerID, businessID, use
 
 // InviteUser creates a user account (no password) and generates an invite token.
 // Returns userID and invite token string.
-func (s *Service) InviteUser(ctx context.Context, ownerID int64, input domain.InviteUserInput) (int64, string, error) {
+//
+// businessID is passed in (rather than looked up) so the service can invalidate
+// the business-scoped team list cache without an extra query. Tests that don't
+// care about the cache key may pass 0.
+func (s *Service) InviteUser(ctx context.Context, ownerID, businessID int64, input domain.InviteUserInput) (int64, string, error) {
 	if input.Email == "" {
 		return 0, "", errors.New("email is required")
 	}
@@ -94,6 +190,13 @@ func (s *Service) InviteUser(ctx context.Context, ownerID int64, input domain.In
 
 	if err := s.repo.UpsertPermission(ctx, ownerID, userID, apps, role); err != nil {
 		return 0, "", err
+	}
+
+	// New team member changes the business's team list cache + the new user's
+	// /me payload (apps/permissions just got attached).
+	invalidateUserScope(ctx, userID)
+	if businessID != 0 {
+		invalidateBusinessTeamScope(ctx, businessID)
 	}
 
 	// Generate invite token (32 bytes = 64 hex chars)
@@ -202,7 +305,11 @@ func (s *Service) IsOnboarded(ctx context.Context, userID int64) bool {
 }
 
 func (s *Service) MarkOnboarded(ctx context.Context, userID int64) error {
-	return s.repo.MarkOnboarded(ctx, userID)
+	if err := s.repo.MarkOnboarded(ctx, userID); err != nil {
+		return err
+	}
+	invalidateUserScope(ctx, userID)
+	return nil
 }
 
 // GetBusinessInfo returns the business name and whether the user is the owner.
@@ -219,7 +326,7 @@ func (s *Service) GetBusinessInfo(ctx context.Context, businessID, userID int64)
 	return name, ownerID == userID
 }
 
-func (s *Service) UpdatePermissions(ctx context.Context, ownerID int64, input domain.UpdatePermissionsInput) error {
+func (s *Service) UpdatePermissions(ctx context.Context, ownerID, businessID int64, input domain.UpdatePermissionsInput) error {
 	if input.UserID == 0 {
 		return errors.New("user id is required")
 	}
@@ -234,15 +341,31 @@ func (s *Service) UpdatePermissions(ctx context.Context, ownerID int64, input do
 		apps = []string{}
 	}
 
-	return s.repo.UpsertPermission(ctx, ownerID, input.UserID, apps, role)
+	if err := s.repo.UpsertPermission(ctx, ownerID, input.UserID, apps, role); err != nil {
+		return err
+	}
+
+	invalidateUserScope(ctx, input.UserID)
+	if businessID != 0 {
+		invalidateBusinessTeamScope(ctx, businessID)
+	}
+	return nil
 }
 
-func (s *Service) DeactivateUser(ctx context.Context, ownerID, userID int64) error {
+func (s *Service) DeactivateUser(ctx context.Context, ownerID, businessID, userID int64) error {
 	if userID == 0 {
 		return errors.New("user id is required")
 	}
 
-	return s.repo.DeactivateUser(ctx, ownerID, userID)
+	if err := s.repo.DeactivateUser(ctx, ownerID, userID); err != nil {
+		return err
+	}
+
+	invalidateUserScope(ctx, userID)
+	if businessID != 0 {
+		invalidateBusinessTeamScope(ctx, businessID)
+	}
+	return nil
 }
 
 // GetOwnerApps returns the list of apps the owner is subscribed to.
@@ -373,14 +496,14 @@ func (s *Service) GetUserEffectiveResources(ctx context.Context, ownerID, userID
 }
 
 // BulkInvite invites multiple users with the same role/apps/group in one call.
-func (s *Service) BulkInvite(ctx context.Context, ownerID int64, input domain.BulkInviteInput) ([]domain.BulkInviteResult, error) {
+func (s *Service) BulkInvite(ctx context.Context, ownerID, businessID int64, input domain.BulkInviteInput) ([]domain.BulkInviteResult, error) {
 	var results []domain.BulkInviteResult
 	for _, email := range input.Emails {
 		email = strings.ToLower(strings.TrimSpace(email))
 		if email == "" {
 			continue
 		}
-		userID, token, err := s.InviteUser(ctx, ownerID, domain.InviteUserInput{
+		userID, token, err := s.InviteUser(ctx, ownerID, businessID, domain.InviteUserInput{
 			Email: email,
 			Apps:  input.Apps,
 			Role:  input.Role,

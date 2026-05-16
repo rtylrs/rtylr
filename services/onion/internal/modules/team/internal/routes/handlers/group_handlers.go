@@ -408,6 +408,11 @@ func (h *BulkInviteHandler) Serve(ctx context.Context, req *BulkInviteRequest) (
 	if !ok {
 		return BulkInviteResponse{}, errorModels.PermissionDeniedServerError()
 	}
+	device := authPkg.DeviceCtx(ctx)
+	businessID := int64(0)
+	if device.User != nil {
+		businessID = device.User.BusinessID
+	}
 	role := domain.Role(req.Role)
 	if role == "" {
 		role = domain.RoleStaff
@@ -416,7 +421,7 @@ func (h *BulkInviteHandler) Serve(ctx context.Context, req *BulkInviteRequest) (
 	if apps == nil {
 		apps = []string{}
 	}
-	results, err := h.Service.BulkInvite(ctx, ownerID, domain.BulkInviteInput{
+	results, err := h.Service.BulkInvite(ctx, ownerID, businessID, domain.BulkInviteInput{
 		Emails:  req.Emails,
 		Role:    role,
 		Apps:    apps,
