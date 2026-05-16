@@ -12,10 +12,20 @@ import (
 
 	"github.com/voxire/onion/internal/modules/user/internal/domain"
 	"github.com/voxire/onion/internal/modules/user/internal/infrastructure"
+	"github.com/voxire/onion/internal/platform/cache/cacher"
+	cacheKeys "github.com/voxire/onion/internal/platform/cache/keys"
 	"github.com/voxire/onion/internal/platform/logger"
 	"github.com/voxire/onion/internal/platform/utils/jwtutils"
 	"github.com/voxire/onion/internal/platform/utils/passwordutils"
 )
+
+const userProfileTTL = 5 * time.Minute
+
+func invalidateUserScope(ctx context.Context, userID int64) {
+	if cache := cacher.GetRedisCache(); cache != nil {
+		cache.DeleteByPattern(ctx, cacheKeys.UserPrefix(userID))
+	}
+}
 
 var (
 	ErrInvalidCredentials = infrastructure.ErrInvalidCredentials
@@ -199,6 +209,7 @@ func (s *Service) RefreshToken(ctx context.Context, userID int64) (string, error
 }
 
 func (s *Service) UpdateProfile(ctx context.Context, userID int64, name string) (*domain.User, error) {
+	defer invalidateUserScope(ctx, userID)
 	if err := s.validator.ValidateFullName(name); err != nil {
 		return nil, err
 	}
@@ -218,6 +229,7 @@ func (s *Service) UpdateProfile(ctx context.Context, userID int64, name string) 
 }
 
 func (s *Service) ChangePassword(ctx context.Context, userID int64, currentPassword, newPassword string) error {
+	defer invalidateUserScope(ctx, userID)
 	user, err := s.repo.GetUserByID(ctx, userID)
 	if err != nil {
 		return err
@@ -241,6 +253,7 @@ func (s *Service) ChangePassword(ctx context.Context, userID int64, currentPassw
 }
 
 func (s *Service) DeleteAccount(ctx context.Context, userID int64, password string) error {
+	defer invalidateUserScope(ctx, userID)
 	user, err := s.repo.GetUserByID(ctx, userID)
 	if err != nil {
 		return err
@@ -258,7 +271,13 @@ func (s *Service) GetUserByEmail(ctx context.Context, email string) (*domain.Use
 }
 
 func (s *Service) GetUserByID(ctx context.Context, id int64) (*domain.User, error) {
-	return s.repo.GetUserByID(ctx, id)
+	return cacher.Of[*domain.User]().GetOrComputeSingle(ctx,
+		cacheKeys.Scoped("user", id, "profile"),
+		func(ctx context.Context) (*domain.User, error) {
+			return s.repo.GetUserByID(ctx, id)
+		},
+		cacher.WithExpiry(ctx, userProfileTTL),
+	)
 }
 
 type AccessTokenClaims struct {
