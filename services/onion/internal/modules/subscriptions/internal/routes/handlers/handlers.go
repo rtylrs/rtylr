@@ -12,6 +12,8 @@ import (
 	"github.com/voxire/onion/internal/modules/subscriptions/internal/application"
 	"github.com/voxire/onion/internal/modules/subscriptions/internal/domain"
 	authPkg "github.com/voxire/onion/internal/platform/auth"
+	"github.com/voxire/onion/internal/platform/cache/cacher"
+	cacheKeys "github.com/voxire/onion/internal/platform/cache/keys"
 	errorModels "github.com/voxire/onion/internal/platform/errors"
 	"github.com/voxire/onion/internal/platform/logger"
 	paddlePkg "github.com/voxire/onion/internal/platform/paddle"
@@ -116,32 +118,42 @@ func (h *MySubscriptionHandler) Serve(ctx context.Context, _ *MySubscriptionRequ
 		return MySubscriptionResponse{}, errorModels.PermissionDeniedServerError()
 	}
 
-	sub, err := h.Service.GetMySubscription(ctx, device.User.UserID)
+	res, err := cacher.Of[MySubscriptionResponse]().GetOrComputeSingle(
+		ctx,
+		cacheKeys.Subscription(device.User.UserID),
+		func(ctx context.Context) (MySubscriptionResponse, error) {
+			sub, err := h.Service.GetMySubscription(ctx, device.User.UserID)
+			if err != nil {
+				if errors.Is(err, domain.ErrSubscriptionNotFound) {
+					return MySubscriptionResponse{Subscription: nil}, nil
+				}
+				return MySubscriptionResponse{}, err
+			}
+			return MySubscriptionResponse{
+				Subscription: &SubscriptionPayload{
+					ID:                   sub.ID,
+					PlanName:             sub.PlanName,
+					PlanSlug:             sub.PlanSlug,
+					Apps:                 sub.Apps,
+					PricePerSeatCents:    sub.PricePerSeatCents,
+					Status:               sub.Status,
+					SeatCount:            sub.SeatCount,
+					TrialEndsAt:          sub.TrialEndsAt,
+					NextBillingDate:      sub.NextBillingDate,
+					PaddleSubscriptionID: sub.PaddleSubscriptionID,
+				},
+			}, nil
+		},
+		cacher.WithExpiry(ctx, 10*time.Minute),
+	)
 	if err != nil {
-		if errors.Is(err, domain.ErrSubscriptionNotFound) {
-			return MySubscriptionResponse{Subscription: nil}, nil
-		}
 		return MySubscriptionResponse{}, &errorModels.ServerError{
 			HTTPCode: http.StatusInternalServerError,
 			Code:     http.StatusInternalServerError,
 			Message:  "Failed to get subscription",
 		}
 	}
-
-	return MySubscriptionResponse{
-		Subscription: &SubscriptionPayload{
-			ID:                   sub.ID,
-			PlanName:             sub.PlanName,
-			PlanSlug:             sub.PlanSlug,
-			Apps:                 sub.Apps,
-			PricePerSeatCents:    sub.PricePerSeatCents,
-			Status:               sub.Status,
-			SeatCount:            sub.SeatCount,
-			TrialEndsAt:          sub.TrialEndsAt,
-			NextBillingDate:      sub.NextBillingDate,
-			PaddleSubscriptionID: sub.PaddleSubscriptionID,
-		},
-	}, nil
+	return res, nil
 }
 
 // ─── Billing Detail (current month) ──────────────────────────────────────────
@@ -326,6 +338,12 @@ func (h *UpsertSubscriptionHandler) Serve(ctx context.Context, req *UpsertSubscr
 			Code:     http.StatusInternalServerError,
 			Message:  "Failed to update subscription",
 		}
+	}
+
+	// Wipe the subscription + me caches: /me depends on plan_slug.
+	if cache := cacher.GetRedisCache(); cache != nil {
+		cache.DeleteByPattern(ctx, cacheKeys.SubscriptionPrefix(device.User.UserID))
+		cache.DeleteByPattern(ctx, cacheKeys.UserPrefix(device.User.UserID))
 	}
 
 	return UpsertSubscriptionResponse{Message: "Subscription updated"}, nil
