@@ -4,11 +4,21 @@ import (
 	"context"
 	"fmt"
 	"strings"
+	"time"
 
 	"github.com/voxire/onion/internal/modules/pos_kds/internal/domain"
 	"github.com/voxire/onion/internal/modules/pos_kds/internal/infrastructure"
+	"github.com/voxire/onion/internal/platform/cache/cacher"
+	cacheKeys "github.com/voxire/onion/internal/platform/cache/keys"
 	"github.com/voxire/onion/internal/platform/wsbus"
 )
+
+// KDS active orders are kitchen tickets — extremely time-sensitive. The TTL
+// is intentionally short and any item-status mutation also invalidates the
+// scope explicitly.
+const kdsCacheTTL = 10 * time.Second
+
+const kdsScope = "pos_kds"
 
 type repository interface {
 	ListActiveOrders(ctx context.Context, ownerID int64) ([]domain.KDSOrder, error)
@@ -24,8 +34,20 @@ func NewService(ctx context.Context) *Service {
 	return &Service{repo: infrastructure.NewRepository(ctx)}
 }
 
+func invalidateKDSScope(ctx context.Context, ownerID int64) {
+	if cache := cacher.GetRedisCache(); cache != nil {
+		cache.DeleteByPattern(ctx, cacheKeys.ScopedPrefix(kdsScope, ownerID))
+	}
+}
+
 func (s *Service) ListActiveOrders(ctx context.Context, ownerID int64) ([]domain.KDSOrder, error) {
-	return s.repo.ListActiveOrders(ctx, ownerID)
+	return cacher.Of[[]domain.KDSOrder]().GetOrComputeSingle(ctx,
+		cacheKeys.Scoped(kdsScope, ownerID, "active"),
+		func(ctx context.Context) ([]domain.KDSOrder, error) {
+			return s.repo.ListActiveOrders(ctx, ownerID)
+		},
+		cacher.WithExpiry(ctx, kdsCacheTTL),
+	)
 }
 
 // ListActiveOrdersByStation returns active KDS orders routed to the given station.
@@ -33,7 +55,7 @@ func (s *Service) ListActiveOrders(ctx context.Context, ownerID int64) ([]domain
 // substring match against the order kitchen_notes field until a dedicated station
 // column is added to the schema.
 func (s *Service) ListActiveOrdersByStation(ctx context.Context, ownerID int64, station string) ([]domain.KDSOrder, error) {
-	orders, err := s.repo.ListActiveOrders(ctx, ownerID)
+	orders, err := s.ListActiveOrders(ctx, ownerID)
 	if err != nil {
 		return nil, err
 	}
@@ -54,6 +76,7 @@ func (s *Service) UpdateItemStatus(ctx context.Context, input domain.UpdateItemS
 	if err := s.repo.UpdateItemStatus(ctx, input); err != nil {
 		return err
 	}
+	invalidateKDSScope(ctx, input.OwnerID)
 	wsbus.Publish(wsbus.Event{
 		Topic:    fmt.Sprintf("owner:%d", input.OwnerID),
 		Type:     "pos:kds:item:updated",
@@ -66,6 +89,7 @@ func (s *Service) UpdateItemStatusByItemID(ctx context.Context, ownerID, itemID 
 	if err := s.repo.UpdateItemStatusByItemID(ctx, ownerID, itemID, status); err != nil {
 		return err
 	}
+	invalidateKDSScope(ctx, ownerID)
 	wsbus.Publish(wsbus.Event{
 		Topic:    fmt.Sprintf("owner:%d", ownerID),
 		Type:     "pos:kds:item:updated",

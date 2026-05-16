@@ -3,11 +3,19 @@ package application
 import (
 	"context"
 	"fmt"
+	"time"
 
 	"github.com/voxire/onion/internal/modules/pos_receipts/internal/domain"
 	"github.com/voxire/onion/internal/modules/pos_receipts/internal/infrastructure"
+	"github.com/voxire/onion/internal/platform/cache/cacher"
+	cacheKeys "github.com/voxire/onion/internal/platform/cache/keys"
 	emailPkg "github.com/voxire/onion/internal/platform/email"
 )
+
+// Receipts are effectively immutable once printed/paid; cache aggressively.
+// Past-date list queries piggyback on the orders namespace so any order/
+// refund mutation can invalidate them via OrderPrefix.
+const receiptsCacheTTL = 5 * time.Minute
 
 type repository interface {
 	List(ctx context.Context, ownerID int64, dateFrom, dateTo string) ([]domain.Receipt, error)
@@ -23,11 +31,23 @@ func NewService(ctx context.Context) *Service {
 }
 
 func (s *Service) List(ctx context.Context, ownerID int64, dateFrom, dateTo string) ([]domain.Receipt, error) {
-	return s.repo.List(ctx, ownerID, dateFrom, dateTo)
+	key := fmt.Sprintf("%s|receipts|f=%s|t=%s", cacheKeys.OrdersList(ownerID), dateFrom, dateTo)
+	return cacher.Of[[]domain.Receipt]().GetOrComputeSingle(ctx, key,
+		func(ctx context.Context) ([]domain.Receipt, error) {
+			return s.repo.List(ctx, ownerID, dateFrom, dateTo)
+		},
+		cacher.WithExpiry(ctx, receiptsCacheTTL),
+	)
 }
 
 func (s *Service) Get(ctx context.Context, ownerID, id int64) (*domain.Receipt, error) {
-	return s.repo.Get(ctx, ownerID, id)
+	key := fmt.Sprintf("%s|receipt=%d", cacheKeys.OrdersList(ownerID), id)
+	return cacher.Of[*domain.Receipt]().GetOrComputeSingle(ctx, key,
+		func(ctx context.Context) (*domain.Receipt, error) {
+			return s.repo.Get(ctx, ownerID, id)
+		},
+		cacher.WithExpiry(ctx, receiptsCacheTTL),
+	)
 }
 
 // EmailReceipt emails a previously-generated receipt to the provided address.

@@ -3,13 +3,28 @@ package application
 import (
 	"context"
 	"errors"
+	"fmt"
 	"strings"
+	"time"
 
 	"github.com/voxire/onion/internal/modules/pos_users/internal/domain"
 	"github.com/voxire/onion/internal/modules/pos_users/internal/infrastructure"
+	"github.com/voxire/onion/internal/platform/cache/cacher"
+	cacheKeys "github.com/voxire/onion/internal/platform/cache/keys"
 	"github.com/voxire/onion/internal/platform/logger"
 	"github.com/voxire/onion/internal/platform/utils/passwordutils"
 )
+
+const (
+	posUsersScope = "pos_users"
+	posUsersTTL   = 2 * time.Minute
+)
+
+func invalidatePosUsersScope(ctx context.Context, ownerID int64) {
+	if cache := cacher.GetRedisCache(); cache != nil {
+		cache.DeleteByPattern(ctx, cacheKeys.ScopedPrefix(posUsersScope, ownerID))
+	}
+}
 
 // ErrInvalidInput signals that a caller-supplied field (e.g. empty PIN on
 // a create call) violates a service-layer invariant. Handlers translate
@@ -25,19 +40,31 @@ func NewService(ctx context.Context) *Service {
 }
 
 func (s *Service) ListByOwner(ctx context.Context, ownerID int64) ([]domain.POSUser, error) {
-	users, err := s.repo.ListByOwner(ctx, ownerID)
-	if err != nil {
-		return nil, err
-	}
-	return scrubSecrets(users), nil
+	return cacher.Of[[]domain.POSUser]().GetOrComputeSingle(ctx,
+		cacheKeys.Scoped(posUsersScope, ownerID, "by_owner"),
+		func(ctx context.Context) ([]domain.POSUser, error) {
+			users, err := s.repo.ListByOwner(ctx, ownerID)
+			if err != nil {
+				return nil, err
+			}
+			return scrubSecrets(users), nil
+		},
+		cacher.WithExpiry(ctx, posUsersTTL),
+	)
 }
 
 func (s *Service) ListByLocation(ctx context.Context, ownerID, locationID int64) ([]domain.POSUser, error) {
-	users, err := s.repo.ListByLocation(ctx, ownerID, locationID)
-	if err != nil {
-		return nil, err
-	}
-	return scrubSecrets(users), nil
+	key := cacheKeys.Scoped(posUsersScope, ownerID, fmt.Sprintf("by_loc=%d", locationID))
+	return cacher.Of[[]domain.POSUser]().GetOrComputeSingle(ctx, key,
+		func(ctx context.Context) ([]domain.POSUser, error) {
+			users, err := s.repo.ListByLocation(ctx, ownerID, locationID)
+			if err != nil {
+				return nil, err
+			}
+			return scrubSecrets(users), nil
+		},
+		cacher.WithExpiry(ctx, posUsersTTL),
+	)
 }
 
 // Create hashes the plaintext PIN with bcrypt cost 12 before persisting and
@@ -56,7 +83,12 @@ func (s *Service) Create(ctx context.Context, ownerID, createdBy int64, input do
 	// Zero the plaintext on the input struct so a slip further down the
 	// call stack (logging, error-wrap) cannot surface it.
 	input.PIN = ""
-	return s.repo.Create(ctx, ownerID, createdBy, input, hashed)
+	id, err := s.repo.Create(ctx, ownerID, createdBy, input, hashed)
+	if err != nil {
+		return 0, err
+	}
+	invalidatePosUsersScope(ctx, ownerID)
+	return id, nil
 }
 
 // Update rewrites a pos_user's profile fields. If the caller supplied a new
@@ -68,18 +100,25 @@ func (s *Service) Update(ctx context.Context, ownerID, id int64, input domain.Up
 	if err := s.repo.Update(ctx, ownerID, id, input); err != nil {
 		return err
 	}
-	if newPIN == "" {
-		return nil
+	if newPIN != "" {
+		hashed, err := passwordutils.HashPIN(newPIN)
+		if err != nil {
+			return err
+		}
+		if err := s.repo.UpdatePINHash(ctx, ownerID, id, hashed); err != nil {
+			return err
+		}
 	}
-	hashed, err := passwordutils.HashPIN(newPIN)
-	if err != nil {
-		return err
-	}
-	return s.repo.UpdatePINHash(ctx, ownerID, id, hashed)
+	invalidatePosUsersScope(ctx, ownerID)
+	return nil
 }
 
 func (s *Service) Deactivate(ctx context.Context, ownerID, id int64) error {
-	return s.repo.Deactivate(ctx, ownerID, id)
+	if err := s.repo.Deactivate(ctx, ownerID, id); err != nil {
+		return err
+	}
+	invalidatePosUsersScope(ctx, ownerID)
+	return nil
 }
 
 // VerifyPIN authenticates a pos_user by (ownerID, display name, pin) and

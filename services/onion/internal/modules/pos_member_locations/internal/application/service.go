@@ -2,9 +2,18 @@ package application
 
 import (
 	"context"
+	"fmt"
+	"time"
 
 	"github.com/voxire/onion/internal/modules/pos_member_locations/internal/domain"
 	"github.com/voxire/onion/internal/modules/pos_member_locations/internal/infrastructure"
+	"github.com/voxire/onion/internal/platform/cache/cacher"
+	cacheKeys "github.com/voxire/onion/internal/platform/cache/keys"
+)
+
+const (
+	posMemberLocsScope = "pos_member_locations"
+	posMemberLocsTTL   = 5 * time.Minute
 )
 
 type Service struct{ repo *infrastructure.Repository }
@@ -13,18 +22,45 @@ func NewService(ctx context.Context) *Service {
 	return &Service{repo: infrastructure.NewRepository(ctx)}
 }
 
+func invalidatePosMemberLocsScope(ctx context.Context, businessID int64) {
+	if cache := cacher.GetRedisCache(); cache != nil {
+		cache.DeleteByPattern(ctx, cacheKeys.ScopedPrefix(posMemberLocsScope, businessID))
+	}
+}
+
 func (s *Service) ListForUser(ctx context.Context, businessID, userID int64) ([]domain.MemberLocation, error) {
-	return s.repo.ListForUser(ctx, businessID, userID)
+	key := cacheKeys.Scoped(posMemberLocsScope, businessID, fmt.Sprintf("for|u=%d", userID))
+	return cacher.Of[[]domain.MemberLocation]().GetOrComputeSingle(ctx, key,
+		func(ctx context.Context) ([]domain.MemberLocation, error) {
+			return s.repo.ListForUser(ctx, businessID, userID)
+		},
+		cacher.WithExpiry(ctx, posMemberLocsTTL),
+	)
 }
 
 func (s *Service) GetMyLocations(ctx context.Context, businessID, userID int64) ([]infrastructure.MyLocation, error) {
-	return s.repo.GetMyLocations(ctx, businessID, userID)
+	key := cacheKeys.Scoped(posMemberLocsScope, businessID, fmt.Sprintf("mine|u=%d", userID))
+	return cacher.Of[[]infrastructure.MyLocation]().GetOrComputeSingle(ctx, key,
+		func(ctx context.Context) ([]infrastructure.MyLocation, error) {
+			return s.repo.GetMyLocations(ctx, businessID, userID)
+		},
+		cacher.WithExpiry(ctx, posMemberLocsTTL),
+	)
 }
 
 func (s *Service) Assign(ctx context.Context, businessID, userID, locationID int64, canManagePOSUsers, canManageTerminals, canViewReports bool) (int64, error) {
-	return s.repo.Assign(ctx, businessID, userID, locationID, canManagePOSUsers, canManageTerminals, canViewReports)
+	id, err := s.repo.Assign(ctx, businessID, userID, locationID, canManagePOSUsers, canManageTerminals, canViewReports)
+	if err != nil {
+		return 0, err
+	}
+	invalidatePosMemberLocsScope(ctx, businessID)
+	return id, nil
 }
 
 func (s *Service) Remove(ctx context.Context, businessID, id int64) error {
-	return s.repo.Remove(ctx, businessID, id)
+	if err := s.repo.Remove(ctx, businessID, id); err != nil {
+		return err
+	}
+	invalidatePosMemberLocsScope(ctx, businessID)
+	return nil
 }
