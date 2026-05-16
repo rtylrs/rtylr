@@ -28,7 +28,7 @@ import {
   Search,
   Sparkles,
 } from 'lucide-react';
-import { CaretPanel, CaretButton, useCaretStore } from '@voxire/caret';
+import { CaretPanel, CaretButton, useCaretStore, useCaretSettingsStore } from '@voxire/caret';
 import { useUserStore } from '../shared/stores/userStore';
 import { useThemeStore } from '../shared/stores/themeStore';
 import { useApps } from '../shared/hooks/queries/useApps';
@@ -293,6 +293,7 @@ const DefaultLayout: React.FC<DefaultLayoutProps> = ({ children }) => {
   useOnboardingTour();
 
   const { isOpen: caretOpen } = useCaretStore();
+  const caretWidth = useCaretSettingsStore((s) => s.panelWidth);
   const userId = Number(user?.id) || 0;
   const unreadCount = Array.isArray(notifications)
     ? notifications.filter((n) => !n.read).length
@@ -541,10 +542,10 @@ const DefaultLayout: React.FC<DefaultLayoutProps> = ({ children }) => {
           {/* Caret AI — inline third column, pushes content left */}
           <div
             style={{
-              width: caretOpen ? '360px' : '0px',
+              width: caretOpen ? `${caretWidth}px` : '0px',
               flexShrink: 0,
-              overflow: 'hidden',
-              transition: 'width 0.25s cubic-bezier(0.4, 0, 0.2, 1)',
+              overflow: 'visible',
+              transition: caretOpen ? 'none' : 'width 0.25s cubic-bezier(0.4, 0, 0.2, 1)',
             }}
           >
             <CaretPanel
