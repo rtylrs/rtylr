@@ -1,6 +1,7 @@
 package domain
 
 import (
+	"context"
 	"errors"
 	"time"
 )
@@ -53,14 +54,14 @@ type Token struct {
 }
 
 type Repository interface {
-	GetClient(clientID string) (*Client, error)
-	SaveAuthCode(code *AuthCode) error
-	GetAuthCode(code string) (*AuthCode, error)
-	MarkAuthCodeUsed(code string) error
-	SaveToken(token *Token) error
-	GetTokenByRefresh(refreshToken string) (*Token, error)
-	RevokeToken(refreshToken string) error
-	GetUserPasswordHash(userID int64) (string, error)
-	GetUserIDByEmail(email string) (int64, error)
-	GetUserBusinessIDAndRole(userID int64) (businessID int64, role string, err error)
+	GetClient(ctx context.Context, clientID string) (*Client, error)
+	SaveAuthCode(ctx context.Context, code *AuthCode) error
+	GetAuthCode(ctx context.Context, code string) (*AuthCode, error)
+	MarkAuthCodeUsed(ctx context.Context, code string) error
+	SaveToken(ctx context.Context, token *Token) error
+	GetTokenByRefresh(ctx context.Context, refreshToken string) (*Token, error)
+	RevokeToken(ctx context.Context, refreshToken string) error
+	GetUserPasswordHash(ctx context.Context, userID int64) (string, error)
+	GetUserIDByEmail(ctx context.Context, email string) (int64, error)
+	GetUserBusinessIDAndRole(ctx context.Context, userID int64) (businessID int64, role string, err error)
 }

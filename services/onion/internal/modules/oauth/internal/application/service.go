@@ -39,16 +39,16 @@ func NewService(ctx context.Context) *Service {
 func (s *Service) GetClient(ctx context.Context, clientID string) (*domain.Client, error) {
 	key := "cache:oauth:client:" + clientID
 	return cacher.Of[*domain.Client]().GetOrComputeSingle(ctx, key,
-		func(_ context.Context) (*domain.Client, error) {
-			return s.repo.GetClient(clientID)
+		func(ctx context.Context) (*domain.Client, error) {
+			return s.repo.GetClient(ctx, clientID)
 		},
 		cacher.WithExpiry(ctx, oauthClientTTL),
 	)
 }
 
 // ValidateAuthRequest validates client_id, redirect_uri, scope and returns the client.
-func (s *Service) ValidateAuthRequest(_ context.Context, clientID, redirectURI, scope string) (*domain.Client, error) {
-	client, err := s.repo.GetClient(clientID)
+func (s *Service) ValidateAuthRequest(ctx context.Context, clientID, redirectURI, scope string) (*domain.Client, error) {
+	client, err := s.repo.GetClient(ctx, clientID)
 	if err != nil {
 		return nil, err
 	}
@@ -65,13 +65,13 @@ func (s *Service) ValidateAuthRequest(_ context.Context, clientID, redirectURI, 
 }
 
 // Login validates email+password and returns the user ID.
-func (s *Service) Login(_ context.Context, email, password string) (int64, error) {
-	userID, err := s.repo.GetUserIDByEmail(email)
+func (s *Service) Login(ctx context.Context, email, password string) (int64, error) {
+	userID, err := s.repo.GetUserIDByEmail(ctx, email)
 	if err != nil {
 		return 0, errors.New("invalid credentials")
 	}
 
-	hash, err := s.repo.GetUserPasswordHash(userID)
+	hash, err := s.repo.GetUserPasswordHash(ctx, userID)
 	if err != nil {
 		return 0, errors.New("invalid credentials")
 	}
@@ -84,7 +84,7 @@ func (s *Service) Login(_ context.Context, email, password string) (int64, error
 }
 
 // IssueAuthCode creates and stores a new authorization code.
-func (s *Service) IssueAuthCode(_ context.Context, clientID string, userID int64, redirectURI, scope, codeChallenge, codeChallengeMethod string) (string, error) {
+func (s *Service) IssueAuthCode(ctx context.Context, clientID string, userID int64, redirectURI, scope, codeChallenge, codeChallengeMethod string) (string, error) {
 	raw := make([]byte, 32)
 	if _, err := rand.Read(raw); err != nil {
 		return "", err
@@ -102,7 +102,7 @@ func (s *Service) IssueAuthCode(_ context.Context, clientID string, userID int64
 		ExpiresAt:           time.Now().Add(10 * time.Minute),
 	}
 
-	if err := s.repo.SaveAuthCode(authCode); err != nil {
+	if err := s.repo.SaveAuthCode(ctx, authCode); err != nil {
 		return "", err
 	}
 
@@ -110,8 +110,8 @@ func (s *Service) IssueAuthCode(_ context.Context, clientID string, userID int64
 }
 
 // ExchangeCode exchanges an authorization code for access+refresh tokens.
-func (s *Service) ExchangeCode(_ context.Context, clientID, code, codeVerifier, redirectURI string) (accessToken, refreshToken string, expiresIn int, err error) {
-	authCode, err := s.repo.GetAuthCode(code)
+func (s *Service) ExchangeCode(ctx context.Context, clientID, code, codeVerifier, redirectURI string) (accessToken, refreshToken string, expiresIn int, err error) {
+	authCode, err := s.repo.GetAuthCode(ctx, code)
 	if err != nil {
 		return "", "", 0, domain.ErrCodeNotFound
 	}
@@ -136,11 +136,11 @@ func (s *Service) ExchangeCode(_ context.Context, clientID, code, codeVerifier, 
 		return "", "", 0, domain.ErrCodeVerifierFailed
 	}
 
-	if err := s.repo.MarkAuthCodeUsed(code); err != nil {
+	if err := s.repo.MarkAuthCodeUsed(ctx, code); err != nil {
 		return "", "", 0, err
 	}
 
-	businessID, role, _ := s.repo.GetUserBusinessIDAndRole(authCode.UserID)
+	businessID, role, _ := s.repo.GetUserBusinessIDAndRole(ctx, authCode.UserID)
 
 	claims := &OAuthTokenClaims{
 		UserID:     authCode.UserID,
@@ -168,7 +168,7 @@ func (s *Service) ExchangeCode(_ context.Context, clientID, code, codeVerifier, 
 		ExpiresAt:    time.Now().Add(24 * time.Hour),
 	}
 
-	if err := s.repo.SaveToken(token); err != nil {
+	if err := s.repo.SaveToken(ctx, token); err != nil {
 		return "", "", 0, err
 	}
 
@@ -177,7 +177,7 @@ func (s *Service) ExchangeCode(_ context.Context, clientID, code, codeVerifier, 
 
 // RefreshTokens exchanges a refresh token for a new access token.
 func (s *Service) RefreshTokens(ctx context.Context, clientID, refreshToken string) (accessToken, newRefreshToken string, expiresIn int, err error) {
-	token, err := s.repo.GetTokenByRefresh(refreshToken)
+	token, err := s.repo.GetTokenByRefresh(ctx, refreshToken)
 	if err != nil {
 		return "", "", 0, domain.ErrTokenNotFound
 	}
@@ -194,11 +194,11 @@ func (s *Service) RefreshTokens(ctx context.Context, clientID, refreshToken stri
 		return "", "", 0, domain.ErrTokenNotFound
 	}
 
-	if err := s.repo.RevokeToken(refreshToken); err != nil {
+	if err := s.repo.RevokeToken(ctx, refreshToken); err != nil {
 		return "", "", 0, err
 	}
 
-	businessID, role, _ := s.repo.GetUserBusinessIDAndRole(token.UserID)
+	businessID, role, _ := s.repo.GetUserBusinessIDAndRole(ctx, token.UserID)
 
 	claims := &OAuthTokenClaims{
 		UserID:     token.UserID,
@@ -226,7 +226,7 @@ func (s *Service) RefreshTokens(ctx context.Context, clientID, refreshToken stri
 		ExpiresAt:    time.Now().Add(24 * time.Hour),
 	}
 
-	if err := s.repo.SaveToken(newToken); err != nil {
+	if err := s.repo.SaveToken(ctx, newToken); err != nil {
 		return "", "", 0, err
 	}
 
@@ -234,8 +234,8 @@ func (s *Service) RefreshTokens(ctx context.Context, clientID, refreshToken stri
 }
 
 // RevokeToken marks a refresh token as revoked.
-func (s *Service) RevokeToken(_ context.Context, refreshToken string) error {
-	return s.repo.RevokeToken(refreshToken)
+func (s *Service) RevokeToken(ctx context.Context, refreshToken string) error {
+	return s.repo.RevokeToken(ctx, refreshToken)
 }
 
 func isAllowedRedirectURI(allowed []string, requested string) bool {

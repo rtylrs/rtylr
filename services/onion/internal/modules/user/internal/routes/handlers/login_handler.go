@@ -55,7 +55,7 @@ func (h *LoginHandler) Serve(ctx context.Context, req *LoginRequest) (LoginRespo
 		}
 
 		return LoginResponse{}, &errorModels.ServerError{
-			Code:    http.StatusTeapot,
+			Code:    http.StatusInternalServerError,
 			Message: "Authentication failed",
 		}
 	}
@@ -80,7 +80,7 @@ func (h *LoginHandler) Serve(ctx context.Context, req *LoginRequest) (LoginRespo
 	token, err := h.UserService.GenerateTokenWithPlatform(ctx, userId, platformClaims)
 	if err != nil {
 		return LoginResponse{}, &errorModels.ServerError{
-			Code:    http.StatusTeapot,
+			Code:    http.StatusInternalServerError,
 			Message: "Failed to generate authentication token",
 		}
 	}
@@ -88,7 +88,7 @@ func (h *LoginHandler) Serve(ctx context.Context, req *LoginRequest) (LoginRespo
 	user, err := h.UserService.GetUserByID(ctx, userId)
 	if err != nil {
 		return LoginResponse{}, &errorModels.ServerError{
-			Code:    http.StatusTeapot,
+			Code:    http.StatusInternalServerError,
 			Message: "Failed to retrieve user information",
 		}
 	}

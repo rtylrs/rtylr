@@ -100,7 +100,7 @@ func (h *RegisterHandler) Serve(ctx context.Context, req *RegisterRequest) (Regi
 			}
 		default:
 			return RegisterResponse{}, &errorModels.ServerError{
-				Code:    http.StatusTeapot,
+				Code:    http.StatusInternalServerError,
 				Message: "Registration failed",
 			}
 		}
@@ -155,7 +155,7 @@ func (h *RegisterHandler) Serve(ctx context.Context, req *RegisterRequest) (Regi
 	token, err := h.UserService.GenerateTokenWithPlatform(ctx, userId, platformClaims)
 	if err != nil {
 		return RegisterResponse{}, &errorModels.ServerError{
-			Code:    http.StatusTeapot,
+			Code:    http.StatusInternalServerError,
 			Message: "Failed to generate authentication token",
 		}
 	}

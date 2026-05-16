@@ -231,12 +231,17 @@ func (h *GenerateTextStreamHandler) setupSSEHeaders(w http.ResponseWriter) {
 }
 
 func (h *GenerateTextStreamHandler) monitorClientDisconnect(r *http.Request) chan bool {
-	clientGone := make(chan bool)
+	// Buffer of 1 so the goroutine never blocks if the stream loop
+	// already exited via another case (tokenChan close / ctx.Done) —
+	// otherwise the send below leaked one goroutine per SSE request.
+	clientGone := make(chan bool, 1)
 
 	go func() {
 		<-r.Context().Done()
-
-		clientGone <- true
+		select {
+		case clientGone <- true:
+		default:
+		}
 	}()
 
 	return clientGone
@@ -323,12 +328,16 @@ func (h *GenerateTextStreamHandler) storeAIResponse(ctx context.Context, session
 			logger.Int("user_id", userID))
 	}
 
+	// Decouple from the request context — when the SSE handler returns,
+	// the request context is canceled and the summarize call would
+	// abort before it ever starts. We still keep the parent's logger
+	// scope so trace ids survive.
 	go func() {
-		timeoutCtx, cancel := context.WithTimeout(ctx, 30*time.Second)
+		bg, cancel := context.WithTimeout(context.WithoutCancel(ctx), 30*time.Second)
 		defer cancel()
 
-		if summarizeErr := h.MemoryService.GetService().SummarizeSession(timeoutCtx, sessionID, userID); summarizeErr != nil {
-			logger.Ctx(ctx).Warn("Failed to summarize session",
+		if summarizeErr := h.MemoryService.GetService().SummarizeSession(bg, sessionID, userID); summarizeErr != nil {
+			logger.Ctx(bg).Warn("Failed to summarize session",
 				logger.Error(summarizeErr),
 				logger.String("session_id", sessionID),
 				logger.Int("user_id", userID))
