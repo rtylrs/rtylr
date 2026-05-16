@@ -2,12 +2,12 @@ package application
 
 import (
 	"context"
-	"fmt"
 	"time"
 
 	"github.com/voxire/onion/internal/modules/inventory/internal/domain"
 	"github.com/voxire/onion/internal/modules/inventory/internal/infrastructure"
 	"github.com/voxire/onion/internal/platform/cache/cacher"
+	cacheKeys "github.com/voxire/onion/internal/platform/cache/keys"
 	"github.com/voxire/onion/internal/platform/logger"
 )
 
@@ -25,13 +25,20 @@ func NewService(ctx context.Context) *Service {
 	}
 }
 
+// Inventory views live under the product namespace because they are derived
+// from product stock — wiping ProductPrefix covers every inventory view too.
+func invalidateInventoryScope(ctx context.Context, ownerID int64) {
+	if cache := cacher.GetRedisCache(); cache != nil {
+		cache.DeleteByPattern(ctx, cacheKeys.ProductPrefix(ownerID))
+	}
+}
+
 func (s *Service) AdjustInventory(ctx context.Context, ownerID int64, input domain.InventoryAdjustInput) error {
-	err := s.repo.AdjustInventory(ctx, ownerID, input.ProductID, input.Change, input.Type, input.Notes)
-	if err != nil {
+	if err := s.repo.AdjustInventory(ctx, ownerID, input.ProductID, input.Change, input.Type, input.Notes); err != nil {
 		return err
 	}
 
-	s.invalidateCache(ctx, ownerID)
+	invalidateInventoryScope(ctx, ownerID)
 
 	lowStock, lowErr := s.repo.GetLowStockProducts(ctx, ownerID)
 	if lowErr != nil {
@@ -47,31 +54,31 @@ func (s *Service) AdjustInventory(ctx context.Context, ownerID int64, input doma
 }
 
 func (s *Service) GetInventoryReport(ctx context.Context, ownerID int64) ([]domain.InventoryReportItem, error) {
-	cacheKey := fmt.Sprintf("inventory:report:%d", ownerID)
-
-	return cacher.Of[[]domain.InventoryReportItem]().GetOrComputeSingle(ctx, cacheKey, func(ctx context.Context) ([]domain.InventoryReportItem, error) {
-		return s.repo.GetInventoryReport(ctx, ownerID)
-	}, cacher.WithExpiry(ctx, inventoryCacheTTL))
+	return cacher.Of[[]domain.InventoryReportItem]().GetOrComputeSingle(ctx,
+		cacheKeys.InventoryReport(ownerID),
+		func(ctx context.Context) ([]domain.InventoryReportItem, error) {
+			return s.repo.GetInventoryReport(ctx, ownerID)
+		},
+		cacher.WithExpiry(ctx, inventoryCacheTTL),
+	)
 }
 
 func (s *Service) GetLowStockProducts(ctx context.Context, ownerID int64) ([]domain.InventoryReportItem, error) {
-	cacheKey := fmt.Sprintf("inventory:low_stock:%d", ownerID)
-
-	return cacher.Of[[]domain.InventoryReportItem]().GetOrComputeSingle(ctx, cacheKey, func(ctx context.Context) ([]domain.InventoryReportItem, error) {
-		return s.repo.GetLowStockProducts(ctx, ownerID)
-	}, cacher.WithExpiry(ctx, inventoryCacheTTL))
+	return cacher.Of[[]domain.InventoryReportItem]().GetOrComputeSingle(ctx,
+		cacheKeys.InventoryLowStock(ownerID),
+		func(ctx context.Context) ([]domain.InventoryReportItem, error) {
+			return s.repo.GetLowStockProducts(ctx, ownerID)
+		},
+		cacher.WithExpiry(ctx, inventoryCacheTTL),
+	)
 }
 
 func (s *Service) GetValuation(ctx context.Context, ownerID int64) ([]domain.ValuationItem, error) {
-	cacheKey := fmt.Sprintf("inventory:valuation:%d", ownerID)
-
-	return cacher.Of[[]domain.ValuationItem]().GetOrComputeSingle(ctx, cacheKey, func(ctx context.Context) ([]domain.ValuationItem, error) {
-		return s.repo.GetValuation(ctx, ownerID)
-	}, cacher.WithExpiry(ctx, inventoryCacheTTL))
-}
-
-func (s *Service) invalidateCache(ctx context.Context, ownerID int64) {
-	reportKey := fmt.Sprintf("inventory:report:%d", ownerID)
-	lowStockKey := fmt.Sprintf("inventory:low_stock:%d", ownerID)
-	cacher.Of[[]domain.InventoryReportItem]().Invalidate(ctx, []string{reportKey, lowStockKey})
+	return cacher.Of[[]domain.ValuationItem]().GetOrComputeSingle(ctx,
+		cacheKeys.InventoryValuation(ownerID),
+		func(ctx context.Context) ([]domain.ValuationItem, error) {
+			return s.repo.GetValuation(ctx, ownerID)
+		},
+		cacher.WithExpiry(ctx, inventoryCacheTTL),
+	)
 }

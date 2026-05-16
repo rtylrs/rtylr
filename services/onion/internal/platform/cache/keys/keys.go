@@ -124,6 +124,21 @@ func ProductPrefix(ownerID int64) string {
 	return fmt.Sprintf("%sproduct:%d:*", Namespace, ownerID)
 }
 
+// Inventory views live under the product namespace because they are
+// derived from product stock and must be invalidated whenever a product
+// changes — wiping ProductPrefix wipes these too.
+func InventoryReport(ownerID int64) string {
+	return fmt.Sprintf("%sproduct:%d:inventory:report", Namespace, ownerID)
+}
+
+func InventoryLowStock(ownerID int64) string {
+	return fmt.Sprintf("%sproduct:%d:inventory:low_stock", Namespace, ownerID)
+}
+
+func InventoryValuation(ownerID int64) string {
+	return fmt.Sprintf("%sproduct:%d:inventory:valuation", Namespace, ownerID)
+}
+
 func Customer(ownerID, customerID int64) string {
 	return fmt.Sprintf("%scustomer:%d:%d", Namespace, ownerID, customerID)
 }
