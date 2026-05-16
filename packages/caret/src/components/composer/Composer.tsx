@@ -1,12 +1,12 @@
-import React, { useCallback, useEffect, useRef, useState } from 'react';
-import { caretTokens, caretRadius } from '../../ui/tokens';
-import ModePicker from './ModePicker';
-import ModelPicker from './ModelPicker';
-import MicButton from './MicButton';
-import AttachButton from './AttachButton';
-import SendButton from './SendButton';
-import StopButton from './StopButton';
-import { useAutosize } from '../../hooks/useAutosize';
+import React, { useCallback, useEffect, useRef, useState } from "react";
+import { caretTokens, caretRadius } from "../../ui/tokens";
+import ModePicker from "./ModePicker";
+import ModelPicker from "./ModelPicker";
+import MicButton from "./MicButton";
+import AttachButton from "./AttachButton";
+import SendButton from "./SendButton";
+import StopButton from "./StopButton";
+import { useAutosize } from "../../hooks/useAutosize";
 
 export interface ComposerProps {
   isStreaming: boolean;
@@ -22,10 +22,10 @@ export const Composer: React.FC<ComposerProps> = ({
   onSubmit,
   onStop,
   onAttach,
-  placeholder = 'Ask Caret anything…',
+  placeholder = "Ask Caret anything…",
   autoFocus = true,
 }) => {
-  const [value, setValue] = useState('');
+  const [value, setValue] = useState("");
   const taRef = useRef<HTMLTextAreaElement>(null);
   useAutosize(taRef, value);
 
@@ -37,11 +37,11 @@ export const Composer: React.FC<ComposerProps> = ({
     const trimmed = value.trim();
     if (!trimmed || isStreaming) return;
     onSubmit(trimmed);
-    setValue('');
+    setValue("");
   }, [value, isStreaming, onSubmit]);
 
   const handleKey = (e: React.KeyboardEvent<HTMLTextAreaElement>): void => {
-    if (e.key === 'Enter' && !e.shiftKey) {
+    if (e.key === "Enter" && !e.shiftKey) {
       e.preventDefault();
       send();
     }
@@ -55,8 +55,8 @@ export const Composer: React.FC<ComposerProps> = ({
         border: `1px solid ${caretTokens.border}`,
         borderRadius: caretRadius.lg,
         padding: 8,
-        display: 'flex',
-        flexDirection: 'column',
+        display: "flex",
+        flexDirection: "column",
         gap: 6,
       }}
     >
@@ -69,22 +69,26 @@ export const Composer: React.FC<ComposerProps> = ({
         rows={1}
         aria-label="Message Caret"
         style={{
-          resize: 'none',
-          width: '100%',
-          background: 'transparent',
-          border: 'none',
-          outline: 'none',
+          resize: "none",
+          width: "100%",
+          background: "transparent",
+          border: "none",
+          outline: "none",
           color: caretTokens.text,
           fontSize: 14,
-          lineHeight: 1.5,
-          padding: '4px 6px',
-          fontFamily: 'inherit',
+          lineHeight: "20px",
+          padding: "4px 6px",
+          fontFamily: "inherit",
+          minHeight: 28,
+          maxHeight: 180,
+          overflowY: "auto",
+          boxSizing: "content-box",
         }}
       />
       <div
         style={{
-          display: 'flex',
-          alignItems: 'center',
+          display: "flex",
+          alignItems: "center",
           gap: 6,
         }}
       >
@@ -94,7 +98,10 @@ export const Composer: React.FC<ComposerProps> = ({
         {onAttach && <AttachButton onFiles={onAttach} />}
         <MicButton
           onTranscript={(text) =>
-            setValue((prev) => (prev.length && !prev.endsWith(' ') ? prev + ' ' : prev) + text)
+            setValue(
+              (prev) =>
+                (prev.length && !prev.endsWith(" ") ? prev + " " : prev) + text,
+            )
           }
         />
         {isStreaming ? (

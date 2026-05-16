@@ -1,4 +1,4 @@
-import { useLayoutEffect, useRef } from 'react';
+import { useLayoutEffect } from "react";
 
 /**
  * Make a textarea grow as the user types, capped at `maxRows`. Pass the
@@ -7,21 +7,25 @@ import { useLayoutEffect, useRef } from 'react';
 export function useAutosize(
   ref: React.RefObject<HTMLTextAreaElement | null>,
   value: string,
-  maxRows = 8
+  maxRows = 6,
 ): void {
-  const baseHeightRef = useRef<number | null>(null);
-
   useLayoutEffect(() => {
     const el = ref.current;
     if (!el) return;
-    if (baseHeightRef.current == null) {
-      // Measure one-row height once.
-      const computed = window.getComputedStyle(el);
-      const lineHeight = parseFloat(computed.lineHeight || '20');
-      baseHeightRef.current = lineHeight;
-    }
-    el.style.height = 'auto';
-    const maxPx = (baseHeightRef.current ?? 20) * maxRows + 16;
-    el.style.height = `${Math.min(el.scrollHeight, maxPx)}px`;
+    // Reset to single-row height first so scrollHeight reflects only the
+    // current content, then grow up to the cap.
+    el.style.height = "auto";
+    const computed = window.getComputedStyle(el);
+    const parsedLineHeight = parseFloat(computed.lineHeight);
+    const lineHeight =
+      Number.isFinite(parsedLineHeight) && parsedLineHeight > 0
+        ? parsedLineHeight
+        : 20;
+    const padTop = parseFloat(computed.paddingTop) || 0;
+    const padBottom = parseFloat(computed.paddingBottom) || 0;
+    const minHeight = lineHeight + padTop + padBottom;
+    const maxHeight = lineHeight * maxRows + padTop + padBottom;
+    const next = Math.min(Math.max(el.scrollHeight, minHeight), maxHeight);
+    el.style.height = `${next}px`;
   }, [ref, value, maxRows]);
 }
