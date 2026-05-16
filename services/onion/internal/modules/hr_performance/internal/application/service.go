@@ -4,12 +4,27 @@ import (
 	"context"
 	"encoding/json"
 	"errors"
+	"fmt"
 	"strconv"
+	"time"
 
 	"github.com/voxire/onion/internal/modules/hr_performance/internal/domain"
 	"github.com/voxire/onion/internal/modules/hr_performance/internal/infrastructure"
+	"github.com/voxire/onion/internal/platform/cache/cacher"
+	cacheKeys "github.com/voxire/onion/internal/platform/cache/keys"
 	"github.com/voxire/onion/internal/platform/logger"
 )
+
+const (
+	hrPerformanceScope = "hr_performance"
+	hrPerformanceTTL   = 5 * time.Minute
+)
+
+func invalidateHRPerformanceScope(ctx context.Context, ownerID int64) {
+	if cache := cacher.GetRedisCache(); cache != nil {
+		cache.DeleteByPattern(ctx, cacheKeys.ScopedPrefix(hrPerformanceScope, ownerID))
+	}
+}
 
 type Service struct {
 	repo *infrastructure.Repository
@@ -24,15 +39,21 @@ func NewService(ctx context.Context) *Service {
 // ===== Config =====
 
 func (s *Service) GetPerformanceConfig(ctx context.Context, ownerID int64) (*domain.PerformanceConfigRecord, error) {
-	cfg, err := s.repo.GetPerformanceConfig(ctx, ownerID)
-	if errors.Is(err, domain.ErrPerformanceConfigNotFound) {
-		logger.Ctx(ctx).Debug("no performance config, using defaults", logger.Any("owner_id", ownerID))
-		return domain.DefaultPerformanceConfig(), nil
-	}
-	if err != nil {
-		return nil, err
-	}
-	return cfg, nil
+	return cacher.Of[*domain.PerformanceConfigRecord]().GetOrComputeSingle(ctx,
+		cacheKeys.Scoped(hrPerformanceScope, ownerID, "config"),
+		func(ctx context.Context) (*domain.PerformanceConfigRecord, error) {
+			cfg, err := s.repo.GetPerformanceConfig(ctx, ownerID)
+			if errors.Is(err, domain.ErrPerformanceConfigNotFound) {
+				logger.Ctx(ctx).Debug("no performance config, using defaults", logger.Any("owner_id", ownerID))
+				return domain.DefaultPerformanceConfig(), nil
+			}
+			if err != nil {
+				return nil, err
+			}
+			return cfg, nil
+		},
+		cacher.WithExpiry(ctx, hrPerformanceTTL),
+	)
 }
 
 func (s *Service) UpsertPerformanceConfig(ctx context.Context, ownerID int64, params domain.UpsertConfigParams) (*domain.PerformanceConfigRecord, error) {
@@ -43,7 +64,11 @@ func (s *Service) UpsertPerformanceConfig(ctx context.Context, ownerID int64, pa
 		params.RatingMin = 1
 		params.RatingMax = 5
 	}
-	return s.repo.UpsertPerformanceConfig(ctx, ownerID, params)
+	rec, err := s.repo.UpsertPerformanceConfig(ctx, ownerID, params)
+	if err == nil {
+		invalidateHRPerformanceScope(ctx, ownerID)
+	}
+	return rec, err
 }
 
 // ===== Review Cycles =====
@@ -52,7 +77,11 @@ func (s *Service) CreateReviewCycle(ctx context.Context, ownerID int64, params d
 	if params.CycleType == "" {
 		params.CycleType = "annual"
 	}
-	return s.repo.CreateReviewCycle(ctx, ownerID, params)
+	rec, err := s.repo.CreateReviewCycle(ctx, ownerID, params)
+	if err == nil {
+		invalidateHRPerformanceScope(ctx, ownerID)
+	}
+	return rec, err
 }
 
 func (s *Service) OpenReviewCycle(ctx context.Context, ownerID, cycleID int64) error {
@@ -66,7 +95,11 @@ func (s *Service) OpenReviewCycle(ctx context.Context, ownerID, cycleID int64) e
 	if cycle.Status != "draft" {
 		return domain.ErrCycleNotDraft
 	}
-	return s.repo.OpenReviewCycle(ctx, ownerID, cycleID)
+	if err := s.repo.OpenReviewCycle(ctx, ownerID, cycleID); err != nil {
+		return err
+	}
+	invalidateHRPerformanceScope(ctx, ownerID)
+	return nil
 }
 
 func (s *Service) ListReviewCycles(ctx context.Context, ownerID int64, params domain.ListCyclesParams) ([]domain.ReviewCycleRecord, int64, error) {
@@ -76,13 +109,29 @@ func (s *Service) ListReviewCycles(ctx context.Context, ownerID int64, params do
 	if params.Limit > 100 {
 		params.Limit = 100
 	}
-	return s.repo.ListReviewCycles(ctx, ownerID, params.Limit, params.Offset)
+	type lr struct {
+		Items []domain.ReviewCycleRecord
+		Total int64
+	}
+	key := cacheKeys.Scoped(hrPerformanceScope, ownerID, fmt.Sprintf("cycles|l=%d|o=%d", params.Limit, params.Offset))
+	res, err := cacher.Of[lr]().GetOrComputeSingle(ctx, key,
+		func(ctx context.Context) (lr, error) {
+			items, total, err := s.repo.ListReviewCycles(ctx, ownerID, params.Limit, params.Offset)
+			return lr{Items: items, Total: total}, err
+		},
+		cacher.WithExpiry(ctx, hrPerformanceTTL),
+	)
+	return res.Items, res.Total, err
 }
 
 // ===== Goals =====
 
 func (s *Service) CreateGoal(ctx context.Context, ownerID int64, params domain.CreateGoalParams) (*domain.ReviewGoalRecord, error) {
-	return s.repo.CreateGoal(ctx, ownerID, params)
+	rec, err := s.repo.CreateGoal(ctx, ownerID, params)
+	if err == nil {
+		invalidateHRPerformanceScope(ctx, ownerID)
+	}
+	return rec, err
 }
 
 func (s *Service) UpdateGoal(ctx context.Context, ownerID, goalID int64, params domain.UpdateGoalParams) error {
@@ -93,7 +142,11 @@ func (s *Service) UpdateGoal(ctx context.Context, ownerID, goalID int64, params 
 	if params.Status == "" {
 		params.Status = "active"
 	}
-	return s.repo.UpdateGoal(ctx, ownerID, goalID, params)
+	if err := s.repo.UpdateGoal(ctx, ownerID, goalID, params); err != nil {
+		return err
+	}
+	invalidateHRPerformanceScope(ctx, ownerID)
+	return nil
 }
 
 func (s *Service) ListGoals(ctx context.Context, ownerID int64, params domain.ListGoalsParams) ([]domain.ReviewGoalRecord, int64, error) {
@@ -103,7 +156,19 @@ func (s *Service) ListGoals(ctx context.Context, ownerID int64, params domain.Li
 	if params.Limit > 100 {
 		params.Limit = 100
 	}
-	return s.repo.ListGoals(ctx, ownerID, params.EmployeeID, params.ReviewCycleID, params.Limit, params.Offset)
+	type lr struct {
+		Items []domain.ReviewGoalRecord
+		Total int64
+	}
+	key := cacheKeys.Scoped(hrPerformanceScope, ownerID, fmt.Sprintf("goals|e=%d|c=%d|l=%d|o=%d", params.EmployeeID, params.ReviewCycleID, params.Limit, params.Offset))
+	res, err := cacher.Of[lr]().GetOrComputeSingle(ctx, key,
+		func(ctx context.Context) (lr, error) {
+			items, total, err := s.repo.ListGoals(ctx, ownerID, params.EmployeeID, params.ReviewCycleID, params.Limit, params.Offset)
+			return lr{Items: items, Total: total}, err
+		},
+		cacher.WithExpiry(ctx, hrPerformanceTTL),
+	)
+	return res.Items, res.Total, err
 }
 
 // ===== Reviews =====
@@ -115,10 +180,23 @@ func (s *Service) ListReviews(ctx context.Context, ownerID int64, params domain.
 	if params.Limit > 100 {
 		params.Limit = 100
 	}
-	if params.EmployeeID > 0 {
-		return s.repo.ListPerformanceReviewsByEmployee(ctx, ownerID, params.CycleID, params.EmployeeID, params.Limit, params.Offset)
+	type lr struct {
+		Items []domain.PerformanceReviewRecord
+		Total int64
 	}
-	return s.repo.ListPerformanceReviews(ctx, ownerID, params.CycleID, params.Limit, params.Offset)
+	key := cacheKeys.Scoped(hrPerformanceScope, ownerID, fmt.Sprintf("reviews|c=%d|e=%d|l=%d|o=%d", params.CycleID, params.EmployeeID, params.Limit, params.Offset))
+	res, err := cacher.Of[lr]().GetOrComputeSingle(ctx, key,
+		func(ctx context.Context) (lr, error) {
+			if params.EmployeeID > 0 {
+				items, total, err := s.repo.ListPerformanceReviewsByEmployee(ctx, ownerID, params.CycleID, params.EmployeeID, params.Limit, params.Offset)
+				return lr{Items: items, Total: total}, err
+			}
+			items, total, err := s.repo.ListPerformanceReviews(ctx, ownerID, params.CycleID, params.Limit, params.Offset)
+			return lr{Items: items, Total: total}, err
+		},
+		cacher.WithExpiry(ctx, hrPerformanceTTL),
+	)
+	return res.Items, res.Total, err
 }
 
 func (s *Service) SubmitReview(ctx context.Context, ownerID, reviewID int64, rating, narrative string) error {
@@ -139,7 +217,11 @@ func (s *Service) SubmitReview(ctx context.Context, ownerID, reviewID int64, rat
 		return err
 	}
 
-	return s.repo.UpdateReviewSubmission(ctx, ownerID, reviewID, rating, narrative)
+	if err := s.repo.UpdateReviewSubmission(ctx, ownerID, reviewID, rating, narrative); err != nil {
+		return err
+	}
+	invalidateHRPerformanceScope(ctx, ownerID)
+	return nil
 }
 
 func (s *Service) CompleteReview(ctx context.Context, ownerID, reviewID int64) error {
@@ -150,7 +232,11 @@ func (s *Service) CompleteReview(ctx context.Context, ownerID, reviewID int64) e
 	if review.Status != "submitted" {
 		return domain.ErrReviewNotSubmitted
 	}
-	return s.repo.UpdateReviewStatus(ctx, ownerID, reviewID, "completed")
+	if err := s.repo.UpdateReviewStatus(ctx, ownerID, reviewID, "completed"); err != nil {
+		return err
+	}
+	invalidateHRPerformanceScope(ctx, ownerID)
+	return nil
 }
 
 func (s *Service) ShareReviewWithEmployee(ctx context.Context, ownerID, reviewID int64) error {
@@ -164,7 +250,11 @@ func (s *Service) ShareReviewWithEmployee(ctx context.Context, ownerID, reviewID
 	if review.Status != "submitted" && review.Status != "completed" {
 		return domain.ErrReviewNotSubmitted
 	}
-	return s.repo.ShareReview(ctx, ownerID, reviewID)
+	if err := s.repo.ShareReview(ctx, ownerID, reviewID); err != nil {
+		return err
+	}
+	invalidateHRPerformanceScope(ctx, ownerID)
+	return nil
 }
 
 // ===== Helpers =====
