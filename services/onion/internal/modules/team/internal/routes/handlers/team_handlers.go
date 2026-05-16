@@ -9,13 +9,18 @@ import (
 	"time"
 
 	"github.com/go-chi/chi/v5"
+
 	"github.com/voxire/onion/internal/modules/team/internal/application"
 	"github.com/voxire/onion/internal/modules/team/internal/domain"
 	authPkg "github.com/voxire/onion/internal/platform/auth"
+	"github.com/voxire/onion/internal/platform/cache/cacher"
+	cacheKeys "github.com/voxire/onion/internal/platform/cache/keys"
 	emailPkg "github.com/voxire/onion/internal/platform/email"
 	errorModels "github.com/voxire/onion/internal/platform/errors"
 	hubv1 "github.com/voxire/voxie/gen/go/hub/v1"
 )
+
+const meCacheTTL = 5 * time.Minute
 
 // ─── List Staff Users ─────────────────────────────────────────────────────────
 
@@ -486,7 +491,17 @@ func (h *MeHandler) Serve(ctx context.Context, req *MeRequest) (MeResponse, *err
 	userID := device.User.UserID
 	businessID := device.User.BusinessID
 
-	email, fullName, apps, role, err := h.Service.GetMeByBusiness(ctx, businessID, userID)
+	// Cache key is per-user: any team/role/subscription change invalidates
+	// `cache:user:{id}:*`, which wipes this entry too.
+	cacheKey := cacheKeys.UserMe(userID)
+	cached, err := cacher.Of[MeResponse]().GetOrComputeSingle(
+		ctx,
+		cacheKey,
+		func(ctx context.Context) (MeResponse, error) {
+			return h.computeMe(ctx, userID, businessID)
+		},
+		cacher.WithExpiry(ctx, meCacheTTL),
+	)
 	if err != nil {
 		if errors.Is(err, domain.ErrUserNotFound) {
 			return MeResponse{}, &errorModels.ServerError{
@@ -495,12 +510,19 @@ func (h *MeHandler) Serve(ctx context.Context, req *MeRequest) (MeResponse, *err
 				Message:  "User not found",
 			}
 		}
-
 		return MeResponse{}, &errorModels.ServerError{
 			HTTPCode: http.StatusInternalServerError,
 			Code:     http.StatusInternalServerError,
 			Message:  "Failed to get user info",
 		}
+	}
+	return cached, nil
+}
+
+func (h *MeHandler) computeMe(ctx context.Context, userID, businessID int64) (MeResponse, error) {
+	email, fullName, apps, role, err := h.Service.GetMeByBusiness(ctx, businessID, userID)
+	if err != nil {
+		return MeResponse{}, err
 	}
 
 	if apps == nil {
