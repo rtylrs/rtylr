@@ -2,9 +2,18 @@ package application
 
 import (
 	"context"
+	"fmt"
+	"time"
 
 	"github.com/voxire/onion/internal/modules/shifts/internal/domain"
 	"github.com/voxire/onion/internal/modules/shifts/internal/infrastructure"
+	"github.com/voxire/onion/internal/platform/cache/cacher"
+	cacheKeys "github.com/voxire/onion/internal/platform/cache/keys"
+)
+
+const (
+	shiftsScope = "shifts"
+	shiftsTTL   = 2 * time.Minute
 )
 
 type repository interface {
@@ -22,18 +31,43 @@ func NewService(ctx context.Context) *Service {
 	return &Service{repo: infrastructure.NewRepository(ctx)}
 }
 
+func invalidateShiftsScope(ctx context.Context, ownerID int64) {
+	if cache := cacher.GetRedisCache(); cache != nil {
+		cache.DeleteByPattern(ctx, cacheKeys.ScopedPrefix(shiftsScope, ownerID))
+	}
+}
+
 func (s *Service) ListShifts(ctx context.Context, ownerID, staffID int64, date string) ([]domain.Shift, error) {
-	return s.repo.ListShifts(ctx, ownerID, staffID, date)
+	key := cacheKeys.Scoped(shiftsScope, ownerID, fmt.Sprintf("list|s=%d|d=%s", staffID, date))
+	return cacher.Of[[]domain.Shift]().GetOrComputeSingle(ctx, key,
+		func(ctx context.Context) ([]domain.Shift, error) {
+			return s.repo.ListShifts(ctx, ownerID, staffID, date)
+		},
+		cacher.WithExpiry(ctx, shiftsTTL),
+	)
 }
 
 func (s *Service) CreateShift(ctx context.Context, input domain.ShiftInput) (int64, error) {
-	return s.repo.CreateShift(ctx, input)
+	id, err := s.repo.CreateShift(ctx, input)
+	if err != nil {
+		return 0, err
+	}
+	invalidateShiftsScope(ctx, input.OwnerID)
+	return id, nil
 }
 
 func (s *Service) UpdateShift(ctx context.Context, ownerID int64, input domain.ShiftUpdateInput) error {
-	return s.repo.UpdateShift(ctx, ownerID, input)
+	if err := s.repo.UpdateShift(ctx, ownerID, input); err != nil {
+		return err
+	}
+	invalidateShiftsScope(ctx, ownerID)
+	return nil
 }
 
 func (s *Service) DeleteShift(ctx context.Context, ownerID, shiftID int64) error {
-	return s.repo.DeleteShift(ctx, ownerID, shiftID)
+	if err := s.repo.DeleteShift(ctx, ownerID, shiftID); err != nil {
+		return err
+	}
+	invalidateShiftsScope(ctx, ownerID)
+	return nil
 }

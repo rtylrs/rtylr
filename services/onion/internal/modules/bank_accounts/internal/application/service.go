@@ -2,9 +2,17 @@ package application
 
 import (
 	"context"
+	"time"
 
 	"github.com/voxire/onion/internal/modules/bank_accounts/internal/domain"
 	"github.com/voxire/onion/internal/modules/bank_accounts/internal/infrastructure"
+	"github.com/voxire/onion/internal/platform/cache/cacher"
+	cacheKeys "github.com/voxire/onion/internal/platform/cache/keys"
+)
+
+const (
+	bankAccountsScope = "bank_accounts"
+	bankAccountsTTL   = 5 * time.Minute
 )
 
 type repository interface {
@@ -20,10 +28,27 @@ func NewService(ctx context.Context) *Service {
 	return &Service{repo: infrastructure.NewRepository(ctx)}
 }
 
+func invalidateBankAccountsScope(ctx context.Context, ownerID int64) {
+	if cache := cacher.GetRedisCache(); cache != nil {
+		cache.DeleteByPattern(ctx, cacheKeys.ScopedPrefix(bankAccountsScope, ownerID))
+	}
+}
+
 func (s *Service) List(ctx context.Context, ownerID int64) ([]domain.BankAccount, error) {
-	return s.repo.List(ctx, ownerID)
+	return cacher.Of[[]domain.BankAccount]().GetOrComputeSingle(ctx,
+		cacheKeys.Scoped(bankAccountsScope, ownerID, "list"),
+		func(ctx context.Context) ([]domain.BankAccount, error) {
+			return s.repo.List(ctx, ownerID)
+		},
+		cacher.WithExpiry(ctx, bankAccountsTTL),
+	)
 }
 
 func (s *Service) Create(ctx context.Context, ownerID int64, input domain.BankAccountInput) (int64, error) {
-	return s.repo.Create(ctx, ownerID, input)
+	id, err := s.repo.Create(ctx, ownerID, input)
+	if err != nil {
+		return 0, err
+	}
+	invalidateBankAccountsScope(ctx, ownerID)
+	return id, nil
 }
