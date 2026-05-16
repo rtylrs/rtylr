@@ -11,9 +11,19 @@ import (
 
 	"github.com/voxire/onion/internal/modules/memory/internal/domain"
 	"github.com/voxire/onion/internal/modules/memory/internal/infrastructure"
+	"github.com/voxire/onion/internal/platform/cache/cacher"
+	cacheKeys "github.com/voxire/onion/internal/platform/cache/keys"
 	"github.com/voxire/onion/internal/platform/logger"
 	"github.com/voxire/onion/internal/platform/snips"
 )
+
+const memoryTTL = 30 * time.Second
+
+func invalidateMemoryScope(ctx context.Context, userID int) {
+	if cache := cacher.GetRedisCache(); cache != nil {
+		cache.DeleteByPattern(ctx, cacheKeys.UserPrefix(int64(userID)))
+	}
+}
 
 var ErrAIClientNotAvailable = errors.New("AI client not available for summarization")
 
@@ -50,6 +60,7 @@ func (s *Service) CreateSession(ctx context.Context, userID int, title string) (
 		UpdatedAt: time.Now(),
 	}
 
+	defer invalidateMemoryScope(ctx, userID)
 	return s.repository.CreateChatSession(ctx, session)
 }
 
@@ -59,10 +70,17 @@ func (s *Service) ListUserSessions(ctx context.Context, userID, limit, offset in
 	if userID <= 0 {
 		return nil, errors.New("user id is required")
 	}
-	return s.repository.ListUserSessions(ctx, userID, limit, offset)
+	key := cacheKeys.Scoped("user", int64(userID), fmt.Sprintf("memory_sessions|l=%d|o=%d", limit, offset))
+	return cacher.Of[[]domain.ChatSession]().GetOrComputeSingle(ctx, key,
+		func(ctx context.Context) ([]domain.ChatSession, error) {
+			return s.repository.ListUserSessions(ctx, userID, limit, offset)
+		},
+		cacher.WithExpiry(ctx, memoryTTL),
+	)
 }
 
 func (s *Service) StoreMessage(ctx context.Context, sessionID string, userID int, role, content string, tokensUsed int) (*domain.ConversationMessage, error) {
+	defer invalidateMemoryScope(ctx, userID)
 	message := &domain.ConversationMessage{
 		SessionID:  sessionID,
 		UserID:     userID,
@@ -266,17 +284,22 @@ func (s *Service) SearchMemories(ctx context.Context, userID int, query string) 
 }
 
 func (s *Service) GetUserStats(ctx context.Context, userID int) (*domain.UserStats, error) {
-	stats, err := s.repository.GetSessionStats(ctx, userID)
-	if err != nil {
-		return nil, fmt.Errorf("failed to get user stats: %w", err)
-	}
-
-	return &domain.UserStats{
-		TotalMessages:       stats.TotalMessages,
-		TotalSessions:       stats.TotalSessions,
-		AvgTokensPerMessage: stats.AvgTokensPerMessage,
-		TotalTokensUsed:     stats.TotalTokensUsed,
-	}, nil
+	return cacher.Of[*domain.UserStats]().GetOrComputeSingle(ctx,
+		cacheKeys.Scoped("user", int64(userID), "memory_stats"),
+		func(ctx context.Context) (*domain.UserStats, error) {
+			stats, err := s.repository.GetSessionStats(ctx, userID)
+			if err != nil {
+				return nil, fmt.Errorf("failed to get user stats: %w", err)
+			}
+			return &domain.UserStats{
+				TotalMessages:       stats.TotalMessages,
+				TotalSessions:       stats.TotalSessions,
+				AvgTokensPerMessage: stats.AvgTokensPerMessage,
+				TotalTokensUsed:     stats.TotalTokensUsed,
+			}, nil
+		},
+		cacher.WithExpiry(ctx, memoryTTL),
+	)
 }
 
 func (s *Service) Close() error {
