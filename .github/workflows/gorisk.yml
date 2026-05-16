@@ -1,0 +1,37 @@
+name: gorisk
+
+# Supply-chain risk scan — maps what node_modules can *do* (network, fs,
+# exec, unsafe), not just CVEs. SARIF feeds the Security tab; the job
+# blocks the merge on medium+ findings so a risky transitive dep can't
+# land silently.
+on:
+  pull_request:
+    branches: [main]
+    paths-ignore:
+      - '**.md'
+      - 'docs/**'
+  push:
+    branches: [main]
+  workflow_dispatch:
+
+permissions:
+  contents: read
+  security-events: write # SARIF upload to Code Scanning
+  pull-requests: read
+
+jobs:
+  scan:
+    name: gorisk supply-chain scan
+    runs-on: blacksmith-2vcpu-ubuntu-2404
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          submodules: recursive
+          token: ${{ secrets.PAT_TOKEN }}
+
+      - name: gorisk
+        uses: 1homsi/gorisk@main
+        with:
+          fail-on: medium
+          sarif: true
+          lang: node
