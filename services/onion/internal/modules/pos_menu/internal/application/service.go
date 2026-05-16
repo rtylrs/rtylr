@@ -2,10 +2,15 @@ package application
 
 import (
 	"context"
+	"time"
 
 	"github.com/voxire/onion/internal/modules/pos_menu/internal/domain"
 	"github.com/voxire/onion/internal/modules/pos_menu/internal/infrastructure"
+	"github.com/voxire/onion/internal/platform/cache/cacher"
+	cacheKeys "github.com/voxire/onion/internal/platform/cache/keys"
 )
+
+const menuCacheTTL = 5 * time.Minute
 
 type repository interface {
 	List(ctx context.Context, ownerID int64) ([]domain.MenuItem, error)
@@ -20,10 +25,27 @@ func NewService(ctx context.Context) *Service {
 	return &Service{repo: infrastructure.NewRepository(ctx)}
 }
 
+func invalidateMenuScope(ctx context.Context, ownerID int64) {
+	if cache := cacher.GetRedisCache(); cache != nil {
+		cache.DeleteByPattern(ctx, cacheKeys.MenuPrefix(ownerID))
+	}
+}
+
 func (s *Service) List(ctx context.Context, ownerID int64) ([]domain.MenuItem, error) {
-	return s.repo.List(ctx, ownerID)
+	return cacher.Of[[]domain.MenuItem]().GetOrComputeSingle(ctx,
+		cacheKeys.MenusList(ownerID),
+		func(ctx context.Context) ([]domain.MenuItem, error) {
+			return s.repo.List(ctx, ownerID)
+		},
+		cacher.WithExpiry(ctx, menuCacheTTL),
+	)
 }
 
 func (s *Service) QuickCreate(ctx context.Context, ownerID int64, input domain.MenuItemInput) (int64, error) {
-	return s.repo.QuickCreate(ctx, ownerID, input)
+	id, err := s.repo.QuickCreate(ctx, ownerID, input)
+	if err != nil {
+		return 0, err
+	}
+	invalidateMenuScope(ctx, ownerID)
+	return id, nil
 }

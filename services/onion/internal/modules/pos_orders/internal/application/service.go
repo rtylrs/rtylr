@@ -4,13 +4,24 @@ import (
 	"context"
 	"errors"
 	"fmt"
+	"time"
 
 	"github.com/voxire/onion/internal/modules/pos_orders/internal/domain"
 	"github.com/voxire/onion/internal/modules/pos_orders/internal/infrastructure"
+	"github.com/voxire/onion/internal/platform/cache/cacher"
+	cacheKeys "github.com/voxire/onion/internal/platform/cache/keys"
 	"github.com/voxire/onion/internal/platform/logger"
 	"github.com/voxire/onion/internal/platform/paddle"
 	"github.com/voxire/onion/internal/platform/wsbus"
 )
+
+const ordersCacheTTL = 30 * time.Second
+
+func invalidateOrderScope(ctx context.Context, ownerID int64) {
+	if cache := cacher.GetRedisCache(); cache != nil {
+		cache.DeleteByPattern(ctx, cacheKeys.OrderPrefix(ownerID))
+	}
+}
 
 // PaddlePaymentResult mirrors paddle.POSPaymentResult for the service surface.
 type PaddlePaymentResult struct {
@@ -139,11 +150,24 @@ func (s *Service) CloseSession(ctx context.Context, ownerID int64, input domain.
 // ─── Orders ──────────────────────────────────────────────────────────────────
 
 func (s *Service) ListOrders(ctx context.Context, ownerID, sessionID int64, status, dateFrom, dateTo string) ([]domain.Order, error) {
-	return s.repo.ListOrders(ctx, ownerID, sessionID, status, dateFrom, dateTo)
+	key := fmt.Sprintf("%s|sess=%d|st=%s|f=%s|t=%s",
+		cacheKeys.OrdersList(ownerID), sessionID, status, dateFrom, dateTo)
+	return cacher.Of[[]domain.Order]().GetOrComputeSingle(ctx, key,
+		func(ctx context.Context) ([]domain.Order, error) {
+			return s.repo.ListOrders(ctx, ownerID, sessionID, status, dateFrom, dateTo)
+		},
+		cacher.WithExpiry(ctx, ordersCacheTTL),
+	)
 }
 
 func (s *Service) GetOrder(ctx context.Context, ownerID, orderID int64) (*domain.Order, error) {
-	return s.repo.GetOrder(ctx, ownerID, orderID)
+	return cacher.Of[*domain.Order]().GetOrComputeSingle(ctx,
+		cacheKeys.Order(ownerID, orderID),
+		func(ctx context.Context) (*domain.Order, error) {
+			return s.repo.GetOrder(ctx, ownerID, orderID)
+		},
+		cacher.WithExpiry(ctx, ordersCacheTTL),
+	)
 }
 
 func (s *Service) CreateOrder(ctx context.Context, ownerID, staffID int64, input domain.OrderInput) (int64, error) {
@@ -169,6 +193,8 @@ func (s *Service) CreateOrder(ctx context.Context, ownerID, staffID int64, input
 		return 0, err
 	}
 
+	invalidateOrderScope(ctx, ownerID)
+
 	wsbus.Publish(wsbus.Event{
 		Topic:    fmt.Sprintf("owner:%d", ownerID),
 		Type:     "pos:order:created",
@@ -179,10 +205,17 @@ func (s *Service) CreateOrder(ctx context.Context, ownerID, staffID int64, input
 }
 
 func (s *Service) UpdateOrderStatus(ctx context.Context, ownerID, orderID int64, status domain.OrderStatus) error {
-	return s.repo.UpdateOrderStatus(ctx, ownerID, orderID, status)
+	if err := s.repo.UpdateOrderStatus(ctx, ownerID, orderID, status); err != nil {
+		return err
+	}
+	invalidateOrderScope(ctx, ownerID)
+	return nil
 }
 
 func (s *Service) UpdateOrderItemStatus(ctx context.Context, orderID, itemID int64, status domain.ItemStatus) error {
+	// orderID alone doesn't identify the owner; rely on the caller's
+	// upstream invalidation (handler-level or follow-up mutation) and on
+	// the short TTL to age this out quickly.
 	return s.repo.UpdateOrderItemStatus(ctx, orderID, itemID, status)
 }
 
@@ -194,6 +227,8 @@ func (s *Service) ProcessPayment(ctx context.Context, ownerID int64, input domai
 	if err := s.repo.ProcessPayment(ctx, ownerID, input.OrderID, input); err != nil {
 		return err
 	}
+
+	invalidateOrderScope(ctx, ownerID)
 
 	sessionID, err := s.repo.GetOrderSessionID(ctx, input.OrderID)
 	if err != nil || sessionID == 0 {
@@ -222,6 +257,8 @@ func (s *Service) ProcessRefund(ctx context.Context, ownerID, refundedBy int64, 
 		return 0, err
 	}
 
+	invalidateOrderScope(ctx, ownerID)
+
 	sessionID, err := s.repo.GetOrderSessionID(ctx, input.OrderID)
 	if err == nil && sessionID > 0 {
 		if updateErr := s.repo.UpdateSessionRefundTotals(ctx, sessionID, input.Amount); updateErr != nil {
@@ -241,23 +278,46 @@ func (s *Service) ProcessRefund(ctx context.Context, ownerID, refundedBy int64, 
 // ─── Split / Discount / Void / Hold ─────────────────────────────────────────
 
 func (s *Service) SplitOrder(ctx context.Context, ownerID, orderID int64, splits [][]int64) ([]int64, error) {
-	return s.repo.SplitOrder(ctx, ownerID, orderID, splits)
+	ids, err := s.repo.SplitOrder(ctx, ownerID, orderID, splits)
+	if err != nil {
+		return nil, err
+	}
+	invalidateOrderScope(ctx, ownerID)
+	return ids, nil
 }
 
 func (s *Service) ApplyDiscount(ctx context.Context, ownerID int64, input domain.DiscountInput) error {
-	return s.repo.ApplyDiscount(ctx, ownerID, input)
+	if err := s.repo.ApplyDiscount(ctx, ownerID, input); err != nil {
+		return err
+	}
+	invalidateOrderScope(ctx, ownerID)
+	return nil
 }
 
 func (s *Service) VoidOrder(ctx context.Context, ownerID, orderID int64, reason string) error {
-	return s.repo.VoidOrder(ctx, ownerID, orderID, reason)
+	if err := s.repo.VoidOrder(ctx, ownerID, orderID, reason); err != nil {
+		return err
+	}
+	invalidateOrderScope(ctx, ownerID)
+	return nil
 }
 
 func (s *Service) HoldOrder(ctx context.Context, ownerID, orderID int64, reason string) error {
-	return s.repo.HoldOrder(ctx, ownerID, orderID, reason)
+	if err := s.repo.HoldOrder(ctx, ownerID, orderID, reason); err != nil {
+		return err
+	}
+	invalidateOrderScope(ctx, ownerID)
+	return nil
 }
 
 func (s *Service) ListHeldOrders(ctx context.Context, ownerID int64) ([]domain.Order, error) {
-	return s.repo.ListHeldOrders(ctx, ownerID)
+	key := fmt.Sprintf("%s|held", cacheKeys.OrdersList(ownerID))
+	return cacher.Of[[]domain.Order]().GetOrComputeSingle(ctx, key,
+		func(ctx context.Context) ([]domain.Order, error) {
+			return s.repo.ListHeldOrders(ctx, ownerID)
+		},
+		cacher.WithExpiry(ctx, ordersCacheTTL),
+	)
 }
 
 func (s *Service) SendToKitchen(ctx context.Context, ownerID, orderID int64) error {
@@ -271,6 +331,7 @@ func (s *Service) SendToKitchen(ctx context.Context, ownerID, orderID int64) err
 	if err := s.repo.UpdateOrderStatus(ctx, ownerID, orderID, domain.OrderStatusPreparing); err != nil {
 		return err
 	}
+	invalidateOrderScope(ctx, ownerID)
 	wsbus.Publish(wsbus.Event{
 		Topic:    fmt.Sprintf("owner:%d", ownerID),
 		Type:     "pos:order:preparing",
@@ -280,7 +341,11 @@ func (s *Service) SendToKitchen(ctx context.Context, ownerID, orderID int64) err
 }
 
 func (s *Service) VoidOrderItem(ctx context.Context, ownerID, orderID, itemID int64) error {
-	return s.repo.VoidOrderItem(ctx, ownerID, orderID, itemID)
+	if err := s.repo.VoidOrderItem(ctx, ownerID, orderID, itemID); err != nil {
+		return err
+	}
+	invalidateOrderScope(ctx, ownerID)
+	return nil
 }
 
 func (s *Service) TransferTable(ctx context.Context, ownerID, orderID, newTableID int64) error {
@@ -291,7 +356,11 @@ func (s *Service) TransferTable(ctx context.Context, ownerID, orderID, newTableI
 	if order.Status == domain.OrderStatusPaid || order.Status == domain.OrderStatusVoided || order.Status == domain.OrderStatusCancelled {
 		return domain.ErrOrderCannotBeTransferred
 	}
-	return s.repo.TransferTable(ctx, ownerID, orderID, order.TableID, newTableID)
+	if err := s.repo.TransferTable(ctx, ownerID, orderID, order.TableID, newTableID); err != nil {
+		return err
+	}
+	invalidateOrderScope(ctx, ownerID)
+	return nil
 }
 
 // ─── Paddle billing ─────────────────────────────────────────────────────────
@@ -373,7 +442,13 @@ func (s *Service) HandlePaddleTransactionCompleted(ctx context.Context, txID, ev
 // ─── Dashboard ───────────────────────────────────────────────────────────────
 
 func (s *Service) GetDashboardStats(ctx context.Context, ownerID int64) (domain.DashboardStats, error) {
-	return s.repo.GetDashboardStats(ctx, ownerID)
+	key := fmt.Sprintf("%s|dashboard", cacheKeys.OrdersList(ownerID))
+	return cacher.Of[domain.DashboardStats]().GetOrComputeSingle(ctx, key,
+		func(ctx context.Context) (domain.DashboardStats, error) {
+			return s.repo.GetDashboardStats(ctx, ownerID)
+		},
+		cacher.WithExpiry(ctx, ordersCacheTTL),
+	)
 }
 
 // ─── Public Online Ordering ──────────────────────────────────────────────────
