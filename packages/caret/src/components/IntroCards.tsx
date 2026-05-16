@@ -1,5 +1,5 @@
-import React from "react";
-import { caretTokens, caretRadius } from "../ui/tokens";
+import React from 'react';
+import { caretTokens, caretRadius } from '../ui/tokens';
 
 export interface IntroCard {
   id: string;
@@ -17,10 +17,10 @@ export interface IntroCardsProps {
 export const IntroCards: React.FC<IntroCardsProps> = ({ cards, onSelect }) => (
   <div
     style={{
-      display: "grid",
-      gridTemplateColumns: "repeat(2, minmax(0, 1fr))",
+      display: 'grid',
+      gridTemplateColumns: 'repeat(2, minmax(0, 1fr))',
       gap: 8,
-      width: "100%",
+      width: '100%',
       maxWidth: 360,
     }}
   >
@@ -30,18 +30,16 @@ export const IntroCards: React.FC<IntroCardsProps> = ({ cards, onSelect }) => (
         type="button"
         onClick={() => onSelect(c.prompt)}
         style={{
-          textAlign: "left",
-          padding: "10px 12px",
+          textAlign: 'left',
+          padding: '10px 12px',
           borderRadius: caretRadius.md,
           background: caretTokens.surface,
           border: `1px solid ${caretTokens.border}`,
           color: caretTokens.text,
-          cursor: "pointer",
+          cursor: 'pointer',
         }}
       >
-        <div style={{ fontSize: 12.5, fontWeight: 600, marginBottom: 4 }}>
-          {c.title}
-        </div>
+        <div style={{ fontSize: 12.5, fontWeight: 600, marginBottom: 4 }}>{c.title}</div>
         <div
           style={{
             fontSize: 11.5,

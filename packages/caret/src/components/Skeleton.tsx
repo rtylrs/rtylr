@@ -1,5 +1,5 @@
-import React from "react";
-import { caretRadius } from "../ui/tokens";
+import React from 'react';
+import { caretRadius } from '../ui/tokens';
 
 export interface SkeletonProps {
   width?: number | string;
@@ -9,21 +9,21 @@ export interface SkeletonProps {
 
 /** Animated placeholder block while content loads. */
 export const Skeleton: React.FC<SkeletonProps> = ({
-  width = "100%",
+  width = '100%',
   height = 12,
   radius = caretRadius.sm,
 }) => (
   <span
     aria-hidden="true"
     style={{
-      display: "inline-block",
+      display: 'inline-block',
       width,
       height,
       borderRadius: radius,
       background:
-        "linear-gradient(90deg, rgba(255,255,255,0.04), rgba(255,255,255,0.12), rgba(255,255,255,0.04))",
-      backgroundSize: "200% 100%",
-      animation: "caret-shimmer 1.2s linear infinite",
+        'linear-gradient(90deg, rgba(255,255,255,0.04), rgba(255,255,255,0.12), rgba(255,255,255,0.04))',
+      backgroundSize: '200% 100%',
+      animation: 'caret-shimmer 1.2s linear infinite',
     }}
   />
 );
