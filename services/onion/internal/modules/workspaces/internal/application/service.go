@@ -8,9 +8,22 @@ import (
 
 	"github.com/voxire/onion/internal/modules/workspaces/internal/domain"
 	"github.com/voxire/onion/internal/modules/workspaces/internal/infrastructure"
+	"github.com/voxire/onion/internal/platform/cache/cacher"
+	cacheKeys "github.com/voxire/onion/internal/platform/cache/keys"
 	"github.com/voxire/onion/internal/platform/logger"
 	"github.com/voxire/onion/internal/platform/wsbus"
 )
+
+const (
+	workspacesScope = "workspaces"
+	workspacesTTL   = 2 * time.Minute
+)
+
+func invalidateWorkspacesScope(ctx context.Context, ownerID int64) {
+	if cache := cacher.GetRedisCache(); cache != nil {
+		cache.DeleteByPattern(ctx, cacheKeys.ScopedPrefix(workspacesScope, ownerID))
+	}
+}
 
 type Service struct {
 	repo *infrastructure.Repository
@@ -29,10 +42,17 @@ func NewService(ctx context.Context) *Service {
 // ─────────────────────────────────────────────
 
 func (s *Service) ListWorkspaces(ctx context.Context, ownerID int64) ([]domain.Workspace, error) {
-	return s.repo.GetWorkspacesByOwner(ctx, ownerID)
+	return cacher.Of[[]domain.Workspace]().GetOrComputeSingle(ctx,
+		cacheKeys.Scoped(workspacesScope, ownerID, "list"),
+		func(ctx context.Context) ([]domain.Workspace, error) {
+			return s.repo.GetWorkspacesByOwner(ctx, ownerID)
+		},
+		cacher.WithExpiry(ctx, workspacesTTL),
+	)
 }
 
 func (s *Service) CreateWorkspace(ctx context.Context, input domain.WorkspaceInput) (domain.Workspace, error) {
+	defer invalidateWorkspacesScope(ctx, input.OwnerID)
 	count, err := s.repo.CountWorkspacesByOwner(ctx, input.OwnerID)
 	if err != nil {
 		return domain.Workspace{}, err
@@ -58,10 +78,12 @@ func (s *Service) CreateWorkspace(ctx context.Context, input domain.WorkspaceInp
 }
 
 func (s *Service) UpdateWorkspace(ctx context.Context, input domain.UpdateWorkspaceInput) error {
+	defer invalidateWorkspacesScope(ctx, input.OwnerID)
 	return s.repo.UpdateWorkspace(ctx, input)
 }
 
 func (s *Service) DeleteWorkspace(ctx context.Context, id, ownerID int64) error {
+	defer invalidateWorkspacesScope(ctx, ownerID)
 	return s.repo.DeleteWorkspace(ctx, id, ownerID)
 }
 
@@ -122,6 +144,7 @@ func (s *Service) ListProjects(ctx context.Context, workspaceID, ownerID int64) 
 }
 
 func (s *Service) CreateProject(ctx context.Context, input domain.ProjectInput) (domain.Project, error) {
+	defer invalidateWorkspacesScope(ctx, input.OwnerID)
 	id, err := s.repo.CreateProject(ctx, input)
 	if err != nil {
 		return domain.Project{}, err
@@ -146,10 +169,12 @@ func (s *Service) CreateProject(ctx context.Context, input domain.ProjectInput) 
 }
 
 func (s *Service) UpdateProject(ctx context.Context, input domain.UpdateProjectInput) error {
+	defer invalidateWorkspacesScope(ctx, input.OwnerID)
 	return s.repo.UpdateProject(ctx, input)
 }
 
 func (s *Service) DeleteProject(ctx context.Context, id, ownerID int64) error {
+	defer invalidateWorkspacesScope(ctx, ownerID)
 	return s.repo.ArchiveProject(ctx, id, ownerID)
 }
 
@@ -205,6 +230,7 @@ func (s *Service) ListTasks(ctx context.Context, filter domain.ListTasksFilter) 
 }
 
 func (s *Service) CreateTask(ctx context.Context, input domain.TaskInput) (domain.Task, error) {
+	defer invalidateWorkspacesScope(ctx, input.OwnerID)
 	id, err := s.repo.CreateTask(ctx, input)
 	if err != nil {
 		return domain.Task{}, err
@@ -262,6 +288,7 @@ func (s *Service) GetTaskDetail(ctx context.Context, taskID int64) (domain.TaskD
 }
 
 func (s *Service) UpdateTask(ctx context.Context, input domain.UpdateTaskInput, userID int64) error {
+	defer invalidateWorkspacesScope(ctx, input.OwnerID)
 	existing, err := s.repo.GetTaskByID(ctx, input.ID)
 	if err != nil {
 		return err
@@ -317,11 +344,18 @@ func (s *Service) UpdateTaskStatus(ctx context.Context, input domain.UpdateTaskS
 }
 
 func (s *Service) DeleteTask(ctx context.Context, taskID, ownerID int64) error {
+	defer invalidateWorkspacesScope(ctx, ownerID)
 	return s.repo.DeleteTask(ctx, taskID, ownerID)
 }
 
 func (s *Service) GetMyTasks(ctx context.Context, userID int64) ([]domain.Task, error) {
-	return s.repo.GetMyTasks(ctx, userID)
+	return cacher.Of[[]domain.Task]().GetOrComputeSingle(ctx,
+		cacheKeys.Scoped("user", userID, "workspace_tasks"),
+		func(ctx context.Context) ([]domain.Task, error) {
+			return s.repo.GetMyTasks(ctx, userID)
+		},
+		cacher.WithExpiry(ctx, workspacesTTL),
+	)
 }
 
 func (s *Service) SearchTasks(ctx context.Context, workspaceID int64, q string) ([]domain.Task, error) {
