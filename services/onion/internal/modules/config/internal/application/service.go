@@ -3,11 +3,13 @@ package application
 import (
 	"context"
 	"errors"
+	"strconv"
 	"time"
 
 	"github.com/voxire/onion/internal/modules/config/internal/domain"
 	"github.com/voxire/onion/internal/modules/config/internal/infrastructure"
 	"github.com/voxire/onion/internal/platform/cache/cacher"
+	cacheKeys "github.com/voxire/onion/internal/platform/cache/keys"
 )
 
 const ConfigCacheTTL = 500 * time.Minute // 500 minutes = 8 hours
@@ -36,7 +38,8 @@ func (s *Service) GetGlobalConfig(ctx context.Context) (domain.Config, error) {
 }
 
 func (s *Service) GetConfig(ctx context.Context, ownerID string) (domain.Config, error) {
-	cacheKey := "config:" + ownerID
+	idN, _ := strconv.ParseInt(ownerID, 10, 64)
+	cacheKey := cacheKeys.BusinessConfig(idN)
 
 	return cacher.Of[domain.Config]().GetOrComputeSingle(ctx, cacheKey, func(ctx context.Context) (domain.Config, error) {
 		cfg, err := s.repo.GetConfig(ctx, ownerID)
@@ -63,7 +66,10 @@ func (s *Service) UpdateConfig(ctx context.Context, ownerID string, input domain
 	if err != nil {
 		return err
 	}
-	cacher.Of[domain.Config]().Invalidate(ctx, []string{"config:" + ownerID})
+	idN, _ := strconv.ParseInt(ownerID, 10, 64)
+	if cache := cacher.GetRedisCache(); cache != nil {
+		cache.DeleteByPattern(ctx, cacheKeys.BusinessPrefix(idN))
+	}
 	return nil
 }
 
