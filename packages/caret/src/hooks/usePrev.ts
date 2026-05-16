@@ -1,4 +1,4 @@
-import { useEffect, useRef } from "react";
+import { useEffect, useRef } from 'react';
 
 /** Returns the previous render's value. */
 export function usePrev<T>(value: T): T | undefined {

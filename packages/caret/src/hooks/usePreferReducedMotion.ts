@@ -1,6 +1,6 @@
-import { useMediaQuery } from "./useMediaQuery";
+import { useMediaQuery } from './useMediaQuery';
 
 /** Wrap useMediaQuery for the reduced-motion preference. */
 export function usePreferReducedMotion(): boolean {
-  return useMediaQuery("(prefers-reduced-motion: reduce)");
+  return useMediaQuery('(prefers-reduced-motion: reduce)');
 }

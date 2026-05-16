@@ -1,4 +1,4 @@
-import { useEffect, useRef } from "react";
+import { useEffect, useRef } from 'react';
 
 /** Returns a ref that always points at the latest value. */
 export function useLatest<T>(value: T): React.RefObject<T> {
