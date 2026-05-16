@@ -1,6 +1,6 @@
 pub mod brand;
 pub mod escpos;
-pub mod kds_formatter;
+pub mod kds;
 pub mod network_scan;
 pub mod printer_listing;
 pub mod probe;

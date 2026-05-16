@@ -1,7 +1,7 @@
 //! KDS-ticket Tauri commands.
 
 use crate::hardware::escpos::FORM_FEED;
-use crate::hardware::kds_formatter::{format_ticket_text, KdsTicket};
+use crate::hardware::kds::formatter::{format_ticket_text, KdsTicket};
 use crate::transport::{network, serial};
 use crate::validation::{
     kds::validate_kds_ticket,
@@ -43,7 +43,7 @@ pub fn send_kds_ticket_network(
 #[cfg(test)]
 mod tests {
     use super::*;
-    use crate::hardware::kds_formatter::KdsItem;
+    use crate::hardware::kds::formatter::KdsItem;
     use std::io::Read;
     use std::net::TcpListener;
     use std::thread;

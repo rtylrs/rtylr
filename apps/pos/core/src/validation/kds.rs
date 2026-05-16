@@ -1,6 +1,6 @@
 //! KDS-ticket validation.
 
-use crate::hardware::kds_formatter::{KdsItem, KdsTicket};
+use crate::hardware::kds::formatter::{KdsItem, KdsTicket};
 use crate::validation::money::validate_quantity;
 use crate::validation::text::{validate_optional, validate_printable};
 
