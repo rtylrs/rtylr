@@ -43,6 +43,7 @@ import (
 	"github.com/voxire/onion/internal/modules/cycles"
 	"github.com/voxire/onion/internal/modules/departments"
 	"github.com/voxire/onion/internal/modules/documents"
+	"github.com/voxire/onion/internal/modules/cacheops"
 	"github.com/voxire/onion/internal/modules/echo"
 	"github.com/voxire/onion/internal/modules/expenses"
 	"github.com/voxire/onion/internal/modules/feedback"
@@ -337,6 +338,7 @@ type apiModules struct {
 	Cycles                *cycles.Module
 	Departments           *departments.Module
 	Documents             *documents.Module
+	CacheOps              *cacheops.Module
 	Echo                  *echo.Module
 	Expenses              *expenses.Module
 	Feedback              *feedback.Module
@@ -472,6 +474,7 @@ func initializeModules(ctx context.Context) *apiModules {
 		Cycles:                cycles.NewModule(ctx),
 		Departments:           departments.NewModule(ctx),
 		Documents:             documents.NewModule(ctx),
+		CacheOps:              cacheops.NewModule(),
 		Echo:                  echo.NewModule(ctx, memoryModule),
 		Expenses:              expenses.NewModule(ctx),
 		Feedback:              feedback.NewModule(ctx),
