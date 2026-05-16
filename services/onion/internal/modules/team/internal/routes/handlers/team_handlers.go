@@ -217,6 +217,13 @@ func (h *InviteUserHandler) Serve(ctx context.Context, req *InviteUserRequest) (
 		_ = h.Service.AddGroupMembers(ctx, ownerID, req.GroupID, ownerID, []int64{userID})
 	}
 
+	// New team member changes the owner's team list cache + the new user's
+	// /me payload (apps/permissions just got attached).
+	if cache := cacher.GetRedisCache(); cache != nil {
+		cache.DeleteByPattern(ctx, cacheKeys.BusinessPrefix(device.User.BusinessID))
+		cache.DeleteByPattern(ctx, cacheKeys.UserPrefix(userID))
+	}
+
 	// Only send invite email if no password was set manually
 	if req.Password == "" && token != "" {
 		go func() {
@@ -355,6 +362,11 @@ func (h *UpdatePermissionsHandler) Serve(ctx context.Context, req *UpdatePermiss
 		}
 	}
 
+	if cache := cacher.GetRedisCache(); cache != nil {
+		cache.DeleteByPattern(ctx, cacheKeys.UserPrefix(req.UserID))
+		cache.DeleteByPattern(ctx, cacheKeys.BusinessPrefix(device.User.BusinessID))
+	}
+
 	return UpdatePermissionsResponse{Message: "Permissions updated"}, nil
 }
 
@@ -396,6 +408,13 @@ func (h *DeactivateUserHandler) Serve(ctx context.Context, req *DeactivateUserRe
 			Code:     http.StatusInternalServerError,
 			Message:  "Failed to deactivate user",
 		}
+	}
+
+	// Invalidate the deactivated user's /me + the owner's team list.
+	cache := cacher.GetRedisCache()
+	if cache != nil {
+		cache.DeleteByPattern(ctx, cacheKeys.UserPrefix(req.UserID))
+		cache.DeleteByPattern(ctx, cacheKeys.BusinessPrefix(device.User.BusinessID))
 	}
 
 	// Record the seat change asynchronously so billing stays accurate.
@@ -601,6 +620,10 @@ func (h *MarkOnboardedHandler) Serve(ctx context.Context, _ *MarkOnboardedReques
 			Code:     http.StatusInternalServerError,
 			Message:  "Failed to update",
 		}
+	}
+
+	if cache := cacher.GetRedisCache(); cache != nil {
+		cache.DeleteByPattern(ctx, cacheKeys.UserPrefix(device.User.UserID))
 	}
 
 	return MarkOnboardedResponse{Message: "Onboarding complete"}, nil
