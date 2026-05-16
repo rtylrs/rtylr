@@ -33,7 +33,18 @@ func RegisterCacheRoutes(ctx context.Context, r *chi.Mux) {
 
 		_, serverErr := handler.Serve(ctx, &req)
 		if serverErr != nil {
-			w.WriteHeader(http.StatusInternalServerError)
+			// Mirror writeServerError: fall back to Code (the app
+			// status) when HTTPCode is unset, so a 400 "unknown
+			// invalidation type" stops being reported as 500.
+			status := serverErr.HTTPCode
+			if status == 0 {
+				if serverErr.Code >= 400 && serverErr.Code < 600 {
+					status = serverErr.Code
+				} else {
+					status = http.StatusInternalServerError
+				}
+			}
+			w.WriteHeader(status)
 
 			response := map[string]interface{}{
 				"error": serverErr.Message,
