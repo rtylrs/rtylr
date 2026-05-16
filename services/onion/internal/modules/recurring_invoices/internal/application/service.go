@@ -2,9 +2,17 @@ package application
 
 import (
 	"context"
+	"time"
 
 	"github.com/voxire/onion/internal/modules/recurring_invoices/internal/domain"
 	"github.com/voxire/onion/internal/modules/recurring_invoices/internal/infrastructure"
+	"github.com/voxire/onion/internal/platform/cache/cacher"
+	cacheKeys "github.com/voxire/onion/internal/platform/cache/keys"
+)
+
+const (
+	recurringInvoicesScope = "recurring_invoices"
+	recurringInvoicesTTL   = 10 * time.Minute
 )
 
 type repository interface {
@@ -22,22 +30,51 @@ func NewService(ctx context.Context) *Service {
 	return &Service{repo: infrastructure.NewRepository(ctx)}
 }
 
+func invalidateRecurringInvoicesScope(ctx context.Context, ownerID int64) {
+	if cache := cacher.GetRedisCache(); cache != nil {
+		cache.DeleteByPattern(ctx, cacheKeys.ScopedPrefix(recurringInvoicesScope, ownerID))
+	}
+}
+
 func (s *Service) List(ctx context.Context, ownerID int64) ([]domain.RecurringInvoice, error) {
-	return s.repo.List(ctx, ownerID)
+	return cacher.Of[[]domain.RecurringInvoice]().GetOrComputeSingle(ctx,
+		cacheKeys.Scoped(recurringInvoicesScope, ownerID, "list"),
+		func(ctx context.Context) ([]domain.RecurringInvoice, error) {
+			return s.repo.List(ctx, ownerID)
+		},
+		cacher.WithExpiry(ctx, recurringInvoicesTTL),
+	)
 }
 
 func (s *Service) Create(ctx context.Context, ownerID int64, input domain.RecurringInvoiceInput) (int64, error) {
-	return s.repo.Create(ctx, ownerID, input)
+	id, err := s.repo.Create(ctx, ownerID, input)
+	if err != nil {
+		return 0, err
+	}
+	invalidateRecurringInvoicesScope(ctx, ownerID)
+	return id, nil
 }
 
 func (s *Service) Update(ctx context.Context, ownerID, id int64, input domain.RecurringInvoiceInput) error {
-	return s.repo.Update(ctx, ownerID, id, input)
+	if err := s.repo.Update(ctx, ownerID, id, input); err != nil {
+		return err
+	}
+	invalidateRecurringInvoicesScope(ctx, ownerID)
+	return nil
 }
 
 func (s *Service) Pause(ctx context.Context, ownerID, id int64) error {
-	return s.repo.SetActive(ctx, ownerID, id, false)
+	if err := s.repo.SetActive(ctx, ownerID, id, false); err != nil {
+		return err
+	}
+	invalidateRecurringInvoicesScope(ctx, ownerID)
+	return nil
 }
 
 func (s *Service) Resume(ctx context.Context, ownerID, id int64) error {
-	return s.repo.SetActive(ctx, ownerID, id, true)
+	if err := s.repo.SetActive(ctx, ownerID, id, true); err != nil {
+		return err
+	}
+	invalidateRecurringInvoicesScope(ctx, ownerID)
+	return nil
 }

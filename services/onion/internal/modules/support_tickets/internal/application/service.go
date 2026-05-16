@@ -2,9 +2,18 @@ package application
 
 import (
 	"context"
+	"fmt"
+	"time"
 
 	"github.com/voxire/onion/internal/modules/support_tickets/internal/domain"
 	"github.com/voxire/onion/internal/modules/support_tickets/internal/infrastructure"
+	"github.com/voxire/onion/internal/platform/cache/cacher"
+	cacheKeys "github.com/voxire/onion/internal/platform/cache/keys"
+)
+
+const (
+	supportTicketsScope = "support_tickets"
+	supportTicketsTTL   = 30 * time.Second
 )
 
 type Service struct {
@@ -17,26 +26,75 @@ func NewService(ctx context.Context) *Service {
 	}
 }
 
+func invalidateSupportTicketsScope(ctx context.Context, businessID int64) {
+	if cache := cacher.GetRedisCache(); cache != nil {
+		cache.DeleteByPattern(ctx, cacheKeys.ScopedPrefix(supportTicketsScope, businessID))
+	}
+}
+
+type ticketsListResult struct {
+	Items []domain.Ticket
+	Total int
+}
+
 func (s *Service) List(ctx context.Context, businessID int64, status string, page, pageSize int) ([]domain.Ticket, int, error) {
-	return s.repo.List(ctx, businessID, status, page, pageSize)
+	key := cacheKeys.Scoped(supportTicketsScope, businessID, fmt.Sprintf("list|s=%s|p=%d|ps=%d", status, page, pageSize))
+	res, err := cacher.Of[ticketsListResult]().GetOrComputeSingle(ctx, key,
+		func(ctx context.Context) (ticketsListResult, error) {
+			items, total, err := s.repo.List(ctx, businessID, status, page, pageSize)
+			return ticketsListResult{Items: items, Total: total}, err
+		},
+		cacher.WithExpiry(ctx, supportTicketsTTL),
+	)
+	return res.Items, res.Total, err
 }
 
 func (s *Service) GetByID(ctx context.Context, businessID, id int64) (*domain.Ticket, error) {
-	return s.repo.GetByID(ctx, businessID, id)
+	key := cacheKeys.Scoped(supportTicketsScope, businessID, fmt.Sprintf("id=%d", id))
+	return cacher.Of[*domain.Ticket]().GetOrComputeSingle(ctx, key,
+		func(ctx context.Context) (*domain.Ticket, error) {
+			return s.repo.GetByID(ctx, businessID, id)
+		},
+		cacher.WithExpiry(ctx, supportTicketsTTL),
+	)
 }
 
 func (s *Service) Create(ctx context.Context, input domain.TicketInput) (int64, error) {
-	return s.repo.Create(ctx, input)
+	id, err := s.repo.Create(ctx, input)
+	if err != nil {
+		return 0, err
+	}
+	invalidateSupportTicketsScope(ctx, input.BusinessID)
+	return id, nil
 }
 
 func (s *Service) Update(ctx context.Context, input domain.TicketUpdateInput) error {
-	return s.repo.Update(ctx, input)
+	if err := s.repo.Update(ctx, input); err != nil {
+		return err
+	}
+	invalidateSupportTicketsScope(ctx, input.BusinessID)
+	return nil
 }
 
+// Messages are scoped by ticketID, not businessID, so they use a separate
+// global key family that's wiped on every message create.
 func (s *Service) ListMessages(ctx context.Context, ticketID int64) ([]domain.Message, error) {
-	return s.repo.ListMessages(ctx, ticketID)
+	key := cacheKeys.Scoped("support_ticket_messages", ticketID, "list")
+	return cacher.Of[[]domain.Message]().GetOrComputeSingle(ctx, key,
+		func(ctx context.Context) ([]domain.Message, error) {
+			return s.repo.ListMessages(ctx, ticketID)
+		},
+		cacher.WithExpiry(ctx, supportTicketsTTL),
+	)
 }
 
 func (s *Service) CreateMessage(ctx context.Context, input domain.MessageInput) (int64, error) {
-	return s.repo.CreateMessage(ctx, input)
+	id, err := s.repo.CreateMessage(ctx, input)
+	if err != nil {
+		return 0, err
+	}
+	if cache := cacher.GetRedisCache(); cache != nil {
+		cache.DeleteByPattern(ctx, cacheKeys.ScopedPrefix("support_ticket_messages", input.TicketID))
+	}
+	return id, nil
 }
