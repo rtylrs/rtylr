@@ -1,9 +1,9 @@
-import React from "react";
-import { caretTokens, caretRadius } from "../ui/tokens";
-import MessageBlocks from "./MessageBlocks";
-import MessageActions from "./MessageActions";
-import StreamingDot from "./blocks/StreamingDot";
-import type { CaretMessage, ContentBlock } from "../types/message";
+import React from 'react';
+import { caretTokens, caretRadius } from '../ui/tokens';
+import MessageBlocks from './MessageBlocks';
+import MessageActions from './MessageActions';
+import StreamingDot from './blocks/StreamingDot';
+import type { CaretMessage, ContentBlock } from '../types/message';
 
 export interface MessageBubbleProps {
   message: CaretMessage;
@@ -18,12 +18,12 @@ export interface MessageBubbleProps {
 function blocksToText(blocks: ContentBlock[]): string {
   return blocks
     .map((b) => {
-      if (b.type === "text") return b.content;
-      if (b.type === "thinking") return "";
+      if (b.type === 'text') return b.content;
+      if (b.type === 'thinking') return '';
       return `[tool:${b.name}]`;
     })
     .filter(Boolean)
-    .join("\n");
+    .join('\n');
 }
 
 export const MessageBubble: React.FC<MessageBubbleProps> = ({
@@ -34,39 +34,37 @@ export const MessageBubble: React.FC<MessageBubbleProps> = ({
   onDenyTool,
   onRetry,
 }) => {
-  const isUser = message.role === "user";
+  const isUser = message.role === 'user';
   const blocks: ContentBlock[] =
     message.blocks.length > 0
       ? message.blocks
       : message.content
-        ? [{ id: `${message.id}-text`, type: "text", content: message.content }]
+        ? [{ id: `${message.id}-text`, type: 'text', content: message.content }]
         : [];
 
-  const text = isUser
-    ? (message.content ?? blocksToText(blocks))
-    : blocksToText(blocks);
+  const text = isUser ? (message.content ?? blocksToText(blocks)) : blocksToText(blocks);
 
   // User message — right-aligned bubble (ChatGPT-style).
   if (isUser) {
     return (
       <div
         style={{
-          display: "flex",
-          justifyContent: "flex-end",
-          margin: "14px 0",
+          display: 'flex',
+          justifyContent: 'flex-end',
+          margin: '14px 0',
         }}
       >
         <div
           style={{
-            maxWidth: "85%",
-            padding: "8px 12px",
+            maxWidth: '85%',
+            padding: '8px 12px',
             borderRadius: caretRadius.lg,
             background: caretTokens.accent,
-            color: "#ffffff",
+            color: '#ffffff',
             fontSize: 14,
             lineHeight: 1.5,
-            whiteSpace: "pre-wrap",
-            wordBreak: "break-word",
+            whiteSpace: 'pre-wrap',
+            wordBreak: 'break-word',
           }}
         >
           {text}
@@ -77,7 +75,7 @@ export const MessageBubble: React.FC<MessageBubbleProps> = ({
 
   // Assistant message — full-width plain text, no avatar, no bubble (ChatGPT-style).
   return (
-    <div style={{ margin: "14px 0" }}>
+    <div style={{ margin: '14px 0' }}>
       <div
         style={{
           color: caretTokens.text,
@@ -93,7 +91,7 @@ export const MessageBubble: React.FC<MessageBubbleProps> = ({
         />
         {isStreaming && <StreamingDot />}
       </div>
-      {!isStreaming && blocks.some((b) => b.type === "text") && (
+      {!isStreaming && blocks.some((b) => b.type === 'text') && (
         <MessageActions text={text} onRetry={onRetry} />
       )}
     </div>

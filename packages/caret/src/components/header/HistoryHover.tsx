@@ -1,10 +1,10 @@
-import React, { useRef, useState } from "react";
-import { History, MessageSquare } from "lucide-react";
-import { caretTokens, caretRadius } from "../../ui/tokens";
-import IconButton from "../../ui/IconButton";
-import Tooltip from "../../ui/Tooltip";
-import { useChatsStore } from "../../stores/chatsStore";
-import { useCaretUIStore } from "../../stores/uiStore";
+import React, { useRef, useState } from 'react';
+import { History, MessageSquare } from 'lucide-react';
+import { caretTokens, caretRadius } from '../../ui/tokens';
+import IconButton from '../../ui/IconButton';
+import Tooltip from '../../ui/Tooltip';
+import { useChatsStore } from '../../stores/chatsStore';
+import { useCaretUIStore } from '../../stores/uiStore';
 
 /** History icon button that reveals a hover dropdown of recent chats. */
 export const HistoryHover: React.FC = () => {
@@ -28,7 +28,7 @@ export const HistoryHover: React.FC = () => {
 
   return (
     <span
-      style={{ position: "relative", display: "inline-flex" }}
+      style={{ position: 'relative', display: 'inline-flex' }}
       onMouseEnter={enter}
       onMouseLeave={leave}
     >
@@ -36,8 +36,8 @@ export const HistoryHover: React.FC = () => {
         <IconButton
           size="md"
           label="History"
-          active={view === "history"}
-          onClick={() => setView("history")}
+          active={view === 'history'}
+          onClick={() => setView('history')}
         >
           <History size={13} />
         </IconButton>
@@ -47,27 +47,27 @@ export const HistoryHover: React.FC = () => {
         <div
           role="menu"
           style={{
-            position: "absolute",
-            top: "calc(100% + 4px)",
+            position: 'absolute',
+            top: 'calc(100% + 4px)',
             right: 0,
             minWidth: 240,
             maxHeight: 280,
-            overflowY: "auto",
+            overflowY: 'auto',
             background: caretTokens.surface,
             border: `1px solid ${caretTokens.border}`,
             borderRadius: caretRadius.lg,
             padding: 4,
             zIndex: 200,
-            boxShadow: "0 8px 24px rgba(0,0,0,0.35)",
+            boxShadow: '0 8px 24px rgba(0,0,0,0.35)',
           }}
         >
           <div
             style={{
-              padding: "4px 8px",
+              padding: '4px 8px',
               fontSize: 10,
               fontWeight: 600,
               color: caretTokens.textDim,
-              textTransform: "uppercase",
+              textTransform: 'uppercase',
               letterSpacing: 0.4,
             }}
           >
@@ -79,45 +79,40 @@ export const HistoryHover: React.FC = () => {
               type="button"
               onClick={() => {
                 setActive(c.id);
-                setView("chat");
+                setView('chat');
                 setOpen(false);
               }}
               style={{
-                display: "flex",
-                alignItems: "center",
+                display: 'flex',
+                alignItems: 'center',
                 gap: 6,
-                width: "100%",
-                padding: "6px 8px",
-                background: "transparent",
-                border: "none",
+                width: '100%',
+                padding: '6px 8px',
+                background: 'transparent',
+                border: 'none',
                 borderRadius: caretRadius.sm,
                 color: caretTokens.text,
                 fontSize: 12.5,
-                cursor: "pointer",
-                textAlign: "left",
+                cursor: 'pointer',
+                textAlign: 'left',
               }}
               onMouseEnter={(e) => {
-                (e.currentTarget as HTMLButtonElement).style.background =
-                  caretTokens.surfaceHigh;
+                (e.currentTarget as HTMLButtonElement).style.background = caretTokens.surfaceHigh;
               }}
               onMouseLeave={(e) => {
-                (e.currentTarget as HTMLButtonElement).style.background =
-                  "transparent";
+                (e.currentTarget as HTMLButtonElement).style.background = 'transparent';
               }}
             >
-              <MessageSquare
-                size={11}
-                style={{ color: caretTokens.textDim, flexShrink: 0 }}
-              />
+              <MessageSquare size={11} style={{ color: caretTokens.textDim, flexShrink: 0 }} />
               <span
                 style={{
                   flex: 1,
-                  whiteSpace: "nowrap",
-                  overflow: "hidden",
-                  textOverflow: "ellipsis",
+                  whiteSpace: 'nowrap',
+                  overflow: 'hidden',
+                  textOverflow: 'ellipsis',
                 }}
               >
-                {c.title || "New chat"}
+                {c.title || 'New chat'}
               </span>
             </button>
           ))}

@@ -1,11 +1,11 @@
-import React from "react";
-import { Sparkles, Settings, X, Plus } from "lucide-react";
-import { caretTokens } from "../../ui/tokens";
-import IconButton from "../../ui/IconButton";
-import Tooltip from "../../ui/Tooltip";
-import { useCaretStore } from "../../stores/caretStore";
-import { useCaretUIStore } from "../../stores/uiStore";
-import HistoryHover from "./HistoryHover";
+import React from 'react';
+import { Sparkles, Settings, X, Plus } from 'lucide-react';
+import { caretTokens } from '../../ui/tokens';
+import IconButton from '../../ui/IconButton';
+import Tooltip from '../../ui/Tooltip';
+import { useCaretStore } from '../../stores/caretStore';
+import { useCaretUIStore } from '../../stores/uiStore';
+import HistoryHover from './HistoryHover';
 
 export interface HeaderBarProps {
   onNewChat?: () => void;
@@ -20,39 +20,30 @@ export const HeaderBar: React.FC<HeaderBarProps> = ({ onNewChat }) => {
     <div
       style={{
         height: 44,
-        display: "flex",
-        alignItems: "center",
+        display: 'flex',
+        alignItems: 'center',
         gap: 4,
-        padding: "0 8px",
+        padding: '0 8px',
         borderBottom: `1px solid ${caretTokens.border}`,
         flexShrink: 0,
       }}
     >
       <div
         style={{
-          display: "flex",
-          alignItems: "center",
+          display: 'flex',
+          alignItems: 'center',
           gap: 6,
-          padding: "0 4px",
+          padding: '0 4px',
         }}
       >
         <Sparkles size={14} style={{ color: caretTokens.accent }} />
-        <span
-          style={{ color: caretTokens.text, fontSize: 13, fontWeight: 600 }}
-        >
-          Caret
-        </span>
+        <span style={{ color: caretTokens.text, fontSize: 13, fontWeight: 600 }}>Caret</span>
       </div>
 
       <span style={{ flex: 1 }} />
 
       <Tooltip label="Chat">
-        <IconButton
-          size="md"
-          label="Chat"
-          active={view === "chat"}
-          onClick={() => setView("chat")}
-        >
+        <IconButton size="md" label="Chat" active={view === 'chat'} onClick={() => setView('chat')}>
           <Sparkles size={13} />
         </IconButton>
       </Tooltip>
@@ -63,8 +54,8 @@ export const HeaderBar: React.FC<HeaderBarProps> = ({ onNewChat }) => {
         <IconButton
           size="md"
           label="Settings"
-          active={view === "settings"}
-          onClick={() => setView("settings")}
+          active={view === 'settings'}
+          onClick={() => setView('settings')}
         >
           <Settings size={13} />
         </IconButton>

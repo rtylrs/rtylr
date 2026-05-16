@@ -1,9 +1,9 @@
-import React from "react";
-import { Compass, Wand2, BarChart3, LifeBuoy } from "lucide-react";
-import Menu from "../../ui/Menu";
-import Pill from "../../ui/Pill";
-import { useCaretSettingsStore } from "../../stores/settingsStore";
-import { CARET_MODES, type CaretMode } from "../../types/mode";
+import React from 'react';
+import { Compass, Wand2, BarChart3, LifeBuoy } from 'lucide-react';
+import Menu from '../../ui/Menu';
+import Pill from '../../ui/Pill';
+import { useCaretSettingsStore } from '../../stores/settingsStore';
+import { CARET_MODES, type CaretMode } from '../../types/mode';
 
 const MODE_ICON: Record<CaretMode, React.ReactNode> = {
   ask: <Compass size={11} />,
