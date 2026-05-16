@@ -31,7 +31,6 @@ const Triage = React.lazy(() => import('../features/triage/Triage'));
 const FocusToday = React.lazy(() => import('../features/focus-today/FocusToday'));
 const Archive = React.lazy(() => import('../features/archive/Archive'));
 const WorkspaceManager = React.lazy(() => import('../features/workspace-manager/WorkspaceManager'));
-const Backlog = React.lazy(() => import('../features/backlog/Backlog'));
 
 function withLayout(element: React.ReactNode): React.ReactNode {
   return (
@@ -103,7 +102,9 @@ const appRoutes: RouteObject[] = [
   { path: '/team', element: previewRoute(<Team />) },
   { path: '/triage', element: withLayout(<Triage />) },
   { path: '/archive', element: withLayout(<Archive />) },
-  { path: '/backlog', element: withLayout(<Backlog />) },
+  // Backlog is now a column inside My Tasks. Keep the URL alive so
+  // old bookmarks don't 404 — just redirect to /my-issues.
+  { path: '/backlog', element: <Navigate to="/my-issues" replace /> },
   { path: '/inbox', element: withLayout(<Inbox />) },
   { path: '/settings', element: withLayout(<FlowSettings />) },
   { path: '*', element: <Navigate to={`/w/${PERSONAL_WORKSPACE_ID}`} replace /> },

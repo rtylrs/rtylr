@@ -388,8 +388,15 @@ const FlowLayout: React.FC<FlowLayoutProps> = ({ children }) => {
     root.style.setProperty('--accent-border', hexToRgba(color, 0.3));
     root.style.setProperty('--accent-focus', hexToRgba(color, 0.5));
   }, [activeWorkspace.color]);
+  // Hide the auto-provisioned "Inbox" project — it's the backend's
+  // bucket for quick-captured personal tasks (My Tasks page) and isn't
+  // meant to surface in the project list. Match by name + icon so
+  // user-created projects literally named "Inbox" still show.
   const workspaceProjects = projects.filter(
-    (p) => p.workspaceId === currentWorkspaceId && !p.archived
+    (p) =>
+      p.workspaceId === currentWorkspaceId &&
+      !p.archived &&
+      !(p.name === 'Inbox' && p.icon === '📥')
   );
 
   const myIssuesCount = tasks.filter(
@@ -645,7 +652,8 @@ const FlowLayout: React.FC<FlowLayoutProps> = ({ children }) => {
                   exact
                 />
                 <SidebarLink to="/triage" icon={Eye} label="Triage" />
-                <SidebarLink to="/backlog" icon={Inbox} label="Backlog" />
+                {/* Backlog is now a column inside /my-issues — no
+                    standalone sidebar entry. */}
               </nav>
 
               <div className="flex flex-col gap-2">

@@ -8,7 +8,11 @@ import { apiTaskToTask } from '../../shared/lib/taskMapper';
 import TaskRow from '../../shared/components/TaskRow';
 import EmptyState from '../../shared/components/EmptyState';
 
+// Backlog lives here as the leftmost column instead of as its own
+// sidebar tab — keeping unscheduled work next to active work means a
+// single view covers personal task management end-to-end.
 const KANBAN_COLUMNS: { status: string; label: string; color: string }[] = [
+  { status: 'backlog', label: 'Backlog', color: '#6b7280' },
   { status: 'todo', label: 'Todo', color: '#9ca3af' },
   { status: 'in_progress', label: 'In Progress', color: '#3b82f6' },
   { status: 'in_review', label: 'In Review', color: '#f59e0b' },
@@ -138,8 +142,10 @@ const QuickAddRow: React.FC = () => {
   const submit = (): void => {
     const trimmed = title.trim();
     if (!trimmed) return;
+    // Personal tasks land in Backlog so the leftmost column actually
+    // collects new captures instead of jamming them into Todo.
     createTask.mutate(
-      { workspaceId: '', projectId: '', title: trimmed },
+      { workspaceId: '', projectId: '', title: trimmed, status: 'backlog' },
       { onSuccess: () => setTitle('') }
     );
   };
@@ -159,7 +165,7 @@ const QuickAddRow: React.FC = () => {
             submit();
           }
         }}
-        placeholder="Add a task and press Enter — lands in your Inbox"
+        placeholder="Add a personal task and press Enter"
         disabled={createTask.isPending}
         className="flex-1 bg-transparent outline-none text-[13px] placeholder:opacity-50"
         style={{ color: 'var(--flow-text)' }}
