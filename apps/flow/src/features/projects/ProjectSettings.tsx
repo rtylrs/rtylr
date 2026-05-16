@@ -23,6 +23,7 @@ import {
   useTransferProjectOwnership,
   useInviteProjectMember,
 } from './useProjectMembers';
+import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogDescription } from '@voxire/ui';
 import { useFlowTeam } from '../../shared/hooks/queries/useFlowTeam';
 import Breadcrumbs from '../../shared/components/Breadcrumbs';
 import type { ApiProjectMember } from '../../shared/services/flowApi';
@@ -62,6 +63,12 @@ const ProjectSettings: React.FC = () => {
   const [showAddMember, setShowAddMember] = useState(false);
   const [newEmail, setNewEmail] = useState('');
   const [newRole, setNewRole] = useState<'manager' | 'member' | 'viewer'>('member');
+
+  // Type-to-confirm modal state for project deletion. Native confirm()
+  // is too easy to click through; the user has to retype the project
+  // name to enable the destructive button.
+  const [confirmDelete, setConfirmDelete] = useState(false);
+  const [deleteTypedName, setDeleteTypedName] = useState('');
 
   const otherWorkspaces = workspaces.filter((w) => w.id !== (project?.workspaceId ?? workspaceId));
 
@@ -577,20 +584,79 @@ const ProjectSettings: React.FC = () => {
               style={{ background: '#ef4444', color: '#fff' }}
               disabled={deleteProject.isPending}
               onClick={() => {
-                if (!window.confirm('Delete this project? This cannot be undone.')) return;
-                deleteProject.mutate(projectId!, {
-                  onSuccess: () => {
-                    toast.success('Project deleted');
-                    navigate(`/w/${project.workspaceId}`);
-                  },
-                  onError: () => toast.error('Failed to delete project'),
-                });
+                setDeleteTypedName('');
+                setConfirmDelete(true);
               }}
             >
               {deleteProject.isPending ? 'Deleting...' : 'Delete'}
             </button>
           </div>
         )}
+
+        {/* Type-to-confirm delete modal */}
+        <Dialog
+          open={confirmDelete}
+          onOpenChange={(o) => {
+            setConfirmDelete(o);
+            if (!o) setDeleteTypedName('');
+          }}
+        >
+          <DialogContent className="max-w-md">
+            <DialogHeader>
+              <DialogTitle className="text-[14px] font-semibold flex items-center gap-2">
+                <Trash2 size={14} style={{ color: '#ef4444' }} />
+                Delete project
+              </DialogTitle>
+              <DialogDescription className="text-[12px]">
+                This permanently archives <strong>{project?.name}</strong> and all its tasks. To
+                confirm, retype the project name below.
+              </DialogDescription>
+            </DialogHeader>
+            <input
+              autoFocus
+              type="text"
+              value={deleteTypedName}
+              onChange={(e) => setDeleteTypedName(e.target.value)}
+              placeholder={project?.name ?? ''}
+              className="w-full rounded-lg px-3 py-2 text-[13px] outline-none mt-2"
+              style={{
+                background: 'var(--flow-input-bg)',
+                border: '1px solid var(--flow-border)',
+                color: 'var(--flow-text)',
+              }}
+            />
+            <div className="flex justify-end gap-2 mt-4">
+              <button
+                type="button"
+                onClick={() => setConfirmDelete(false)}
+                className="px-3 py-1.5 rounded-lg text-[12px] font-medium"
+                style={{ color: 'var(--flow-text-muted)' }}
+              >
+                Cancel
+              </button>
+              <button
+                type="button"
+                disabled={
+                  deleteTypedName.trim() !== (project?.name ?? '') || deleteProject.isPending
+                }
+                onClick={() => {
+                  deleteProject.mutate(projectId!, {
+                    onSuccess: () => {
+                      toast.success('Project deleted');
+                      setConfirmDelete(false);
+                      navigate(`/w/${project!.workspaceId}`);
+                    },
+                    onError: () => toast.error('Failed to delete project'),
+                  });
+                }}
+                className="px-3 py-1.5 rounded-lg text-[12px] font-semibold disabled:opacity-40"
+                style={{ background: '#ef4444', color: '#fff' }}
+              >
+                {deleteProject.isPending ? 'Deleting…' : 'Delete project'}
+              </button>
+            </div>
+          </DialogContent>
+        </Dialog>
       </div>
     </div>
   );
