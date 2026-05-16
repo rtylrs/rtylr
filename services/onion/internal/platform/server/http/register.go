@@ -109,7 +109,22 @@ func wrapHandler[Req, Res any](ctx context.Context, handler HandlerFunc[Req, Res
 
 				return
 			}
-		case "GET", "DELETE":
+		case "DELETE":
+			// DELETE can ride with either a JSON body (the FE pattern
+			// for {"id": N}) or query params. RFC 9110 doesn't forbid
+			// a body, just discourages relying on it. Prefer body when
+			// present so handlers don't have to special-case the FE
+			// shape; fall back to query params otherwise.
+			if r.Body != nil && r.ContentLength != 0 {
+				if err := json.NewDecoder(r.Body).Decode(&req); err != nil && err != io.EOF {
+					writeBadRequest(ctx, w)
+
+					return
+				}
+			} else {
+				parseQueryParams(r, &req)
+			}
+		case "GET":
 			parseQueryParams(r, &req)
 		}
 
@@ -200,8 +215,16 @@ func parseQueryParams[Req any](r *http.Request, req *Req) {
 func writeServerError(ctx context.Context, w http.ResponseWriter, serverError *errors.ServerError) {
 	w.Header().Set("Content-Type", "application/json")
 
+	// Most call sites set Code (the app-level status) and leave HTTPCode
+	// blank. Falling back to Code keeps a 400 from being silently
+	// promoted to a 500 just because HTTPCode wasn't filled in. Only
+	// promote to 500 when neither is set.
 	if serverError.HTTPCode == 0 {
-		serverError.HTTPCode = http.StatusInternalServerError
+		if serverError.Code >= 400 && serverError.Code < 600 {
+			serverError.HTTPCode = serverError.Code
+		} else {
+			serverError.HTTPCode = http.StatusInternalServerError
+		}
 	}
 
 	w.WriteHeader(serverError.HTTPCode)
