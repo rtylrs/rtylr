@@ -3,12 +3,26 @@ package application
 import (
 	"context"
 	"encoding/json"
+	"fmt"
 	"time"
 
 	"github.com/voxire/onion/internal/modules/hr_core/internal/domain"
 	"github.com/voxire/onion/internal/modules/hr_core/internal/infrastructure"
+	"github.com/voxire/onion/internal/platform/cache/cacher"
+	cacheKeys "github.com/voxire/onion/internal/platform/cache/keys"
 	"github.com/voxire/onion/internal/platform/logger"
 )
+
+const (
+	hrCoreScope = "hr_core"
+	hrCoreTTL   = 5 * time.Minute
+)
+
+func invalidateHRCoreScope(ctx context.Context, ownerID int64) {
+	if cache := cacher.GetRedisCache(); cache != nil {
+		cache.DeleteByPattern(ctx, cacheKeys.ScopedPrefix(hrCoreScope, ownerID))
+	}
+}
 
 type Service struct {
 	repo *infrastructure.Repository
@@ -27,14 +41,33 @@ func (s *Service) ListEmployees(ctx context.Context, ownerID int64, limit, offse
 	if limit > 100 {
 		limit = 100
 	}
-	return s.repo.ListEmployees(ctx, ownerID, domain.ListEmployeesParams{Limit: limit, Offset: offset})
+	type lr struct {
+		Items []domain.EmployeeRecord
+		Total int64
+	}
+	key := cacheKeys.Scoped(hrCoreScope, ownerID, fmt.Sprintf("emps|l=%d|o=%d", limit, offset))
+	res, err := cacher.Of[lr]().GetOrComputeSingle(ctx, key,
+		func(ctx context.Context) (lr, error) {
+			items, total, err := s.repo.ListEmployees(ctx, ownerID, domain.ListEmployeesParams{Limit: limit, Offset: offset})
+			return lr{Items: items, Total: total}, err
+		},
+		cacher.WithExpiry(ctx, hrCoreTTL),
+	)
+	return res.Items, res.Total, err
 }
 
 func (s *Service) GetEmployee(ctx context.Context, ownerID, employeeID int64) (*domain.EmployeeRecord, error) {
-	return s.repo.GetEmployee(ctx, ownerID, employeeID)
+	key := cacheKeys.Scoped(hrCoreScope, ownerID, fmt.Sprintf("emp=%d", employeeID))
+	return cacher.Of[*domain.EmployeeRecord]().GetOrComputeSingle(ctx, key,
+		func(ctx context.Context) (*domain.EmployeeRecord, error) {
+			return s.repo.GetEmployee(ctx, ownerID, employeeID)
+		},
+		cacher.WithExpiry(ctx, hrCoreTTL),
+	)
 }
 
 func (s *Service) CreateEmployee(ctx context.Context, ownerID int64, emp domain.EmployeeRecord) (*domain.EmployeeRecord, error) {
+	defer invalidateHRCoreScope(ctx, ownerID)
 	if err := s.SeedDefaultRoles(ctx, ownerID); err != nil {
 		logger.Ctx(ctx).Error("failed to seed default roles during employee creation", logger.Any("owner_id", ownerID), logger.Error(err))
 	}
@@ -50,12 +83,14 @@ func (s *Service) CreateEmployee(ctx context.Context, ownerID int64, emp domain.
 }
 
 func (s *Service) UpdateEmployee(ctx context.Context, ownerID int64, emp domain.EmployeeRecord) (*domain.EmployeeRecord, error) {
+	defer invalidateHRCoreScope(ctx, ownerID)
 	return s.repo.UpdateEmployee(ctx, ownerID, emp)
 }
 
 // --- Invites ---
 
 func (s *Service) InviteEmployee(ctx context.Context, ownerID int64, emp domain.EmployeeRecord) (string, error) {
+	defer invalidateHRCoreScope(ctx, ownerID)
 	emp.Status = "invited"
 	if emp.EmploymentType == "" {
 		emp.EmploymentType = "full_time"
@@ -107,35 +142,57 @@ func (s *Service) AcceptInvite(ctx context.Context, token string, userID int64) 
 // --- Locations ---
 
 func (s *Service) ListLocations(ctx context.Context, ownerID int64) ([]domain.LocationRecord, error) {
-	return s.repo.ListLocations(ctx, ownerID)
+	return cacher.Of[[]domain.LocationRecord]().GetOrComputeSingle(ctx,
+		cacheKeys.Scoped(hrCoreScope, ownerID, "locations"),
+		func(ctx context.Context) ([]domain.LocationRecord, error) {
+			return s.repo.ListLocations(ctx, ownerID)
+		},
+		cacher.WithExpiry(ctx, hrCoreTTL),
+	)
 }
 
 func (s *Service) CreateLocation(ctx context.Context, ownerID int64, loc domain.LocationRecord) (*domain.LocationRecord, error) {
+	defer invalidateHRCoreScope(ctx, ownerID)
 	return s.repo.CreateLocation(ctx, ownerID, loc)
 }
 
 func (s *Service) UpdateLocation(ctx context.Context, ownerID int64, loc domain.LocationRecord) (*domain.LocationRecord, error) {
+	defer invalidateHRCoreScope(ctx, ownerID)
 	return s.repo.UpdateLocation(ctx, ownerID, loc)
 }
 
 // --- Departments ---
 
 func (s *Service) ListDepartments(ctx context.Context, ownerID, locationID int64) ([]domain.DepartmentRecord, error) {
-	return s.repo.ListDepartments(ctx, ownerID, locationID)
+	key := cacheKeys.Scoped(hrCoreScope, ownerID, fmt.Sprintf("depts|l=%d", locationID))
+	return cacher.Of[[]domain.DepartmentRecord]().GetOrComputeSingle(ctx, key,
+		func(ctx context.Context) ([]domain.DepartmentRecord, error) {
+			return s.repo.ListDepartments(ctx, ownerID, locationID)
+		},
+		cacher.WithExpiry(ctx, hrCoreTTL),
+	)
 }
 
 func (s *Service) CreateDepartment(ctx context.Context, ownerID int64, dept domain.DepartmentRecord) (*domain.DepartmentRecord, error) {
+	defer invalidateHRCoreScope(ctx, ownerID)
 	return s.repo.CreateDepartment(ctx, ownerID, dept)
 }
 
 func (s *Service) UpdateDepartment(ctx context.Context, ownerID int64, dept domain.DepartmentRecord) (*domain.DepartmentRecord, error) {
+	defer invalidateHRCoreScope(ctx, ownerID)
 	return s.repo.UpdateDepartment(ctx, ownerID, dept)
 }
 
 // --- Work Schedules ---
 
 func (s *Service) ListWorkSchedules(ctx context.Context, ownerID int64) ([]domain.WorkScheduleRecord, error) {
-	return s.repo.ListWorkSchedules(ctx, ownerID)
+	return cacher.Of[[]domain.WorkScheduleRecord]().GetOrComputeSingle(ctx,
+		cacheKeys.Scoped(hrCoreScope, ownerID, "work_schedules"),
+		func(ctx context.Context) ([]domain.WorkScheduleRecord, error) {
+			return s.repo.ListWorkSchedules(ctx, ownerID)
+		},
+		cacher.WithExpiry(ctx, hrCoreTTL),
+	)
 }
 
 func (s *Service) GetEffectiveSchedule(ctx context.Context, ownerID, employeeID int64) (*domain.WorkScheduleRecord, error) {
@@ -183,28 +240,39 @@ func (s *Service) GetEffectiveSchedule(ctx context.Context, ownerID, employeeID 
 }
 
 func (s *Service) CreateWorkSchedule(ctx context.Context, ownerID int64, ws domain.WorkScheduleRecord) (*domain.WorkScheduleRecord, error) {
+	defer invalidateHRCoreScope(ctx, ownerID)
 	return s.repo.CreateWorkSchedule(ctx, ownerID, ws)
 }
 
 func (s *Service) UpdateWorkSchedule(ctx context.Context, ownerID int64, ws domain.WorkScheduleRecord) (*domain.WorkScheduleRecord, error) {
+	defer invalidateHRCoreScope(ctx, ownerID)
 	return s.repo.UpdateWorkSchedule(ctx, ownerID, ws)
 }
 
 // --- Roles & Permissions ---
 
 func (s *Service) ListRoles(ctx context.Context, ownerID int64) ([]domain.RoleRecord, error) {
-	return s.repo.ListRoles(ctx, ownerID)
+	return cacher.Of[[]domain.RoleRecord]().GetOrComputeSingle(ctx,
+		cacheKeys.Scoped(hrCoreScope, ownerID, "roles"),
+		func(ctx context.Context) ([]domain.RoleRecord, error) {
+			return s.repo.ListRoles(ctx, ownerID)
+		},
+		cacher.WithExpiry(ctx, hrCoreTTL),
+	)
 }
 
 func (s *Service) CreateRole(ctx context.Context, ownerID int64, role domain.RoleRecord) (*domain.RoleRecord, error) {
+	defer invalidateHRCoreScope(ctx, ownerID)
 	return s.repo.CreateRole(ctx, ownerID, role)
 }
 
 func (s *Service) UpdateRole(ctx context.Context, ownerID int64, role domain.RoleRecord) (*domain.RoleRecord, error) {
+	defer invalidateHRCoreScope(ctx, ownerID)
 	return s.repo.UpdateRole(ctx, ownerID, role)
 }
 
 func (s *Service) AssignRole(ctx context.Context, ownerID, employeeID, roleID int64) error {
+	defer invalidateHRCoreScope(ctx, ownerID)
 	return s.repo.AssignRole(ctx, ownerID, employeeID, roleID)
 }
 
@@ -252,20 +320,34 @@ func (s *Service) CompleteSetupStep(ctx context.Context, ownerID int64, stepKey 
 }
 
 func (s *Service) GetHRConfig(ctx context.Context, ownerID int64) (*domain.HRCompanyConfigRecord, error) {
-	return s.repo.GetHRConfig(ctx, ownerID)
+	return cacher.Of[*domain.HRCompanyConfigRecord]().GetOrComputeSingle(ctx,
+		cacheKeys.Scoped(hrCoreScope, ownerID, "hr_config"),
+		func(ctx context.Context) (*domain.HRCompanyConfigRecord, error) {
+			return s.repo.GetHRConfig(ctx, ownerID)
+		},
+		cacher.WithExpiry(ctx, 10*time.Minute),
+	)
 }
 
 func (s *Service) UpsertHRConfig(ctx context.Context, ownerID int64, cfg domain.HRCompanyConfigRecord) (*domain.HRCompanyConfigRecord, error) {
+	defer invalidateHRCoreScope(ctx, ownerID)
 	return s.repo.UpsertHRConfig(ctx, ownerID, cfg)
 }
 
 // --- Approval Chains ---
 
 func (s *Service) GetApprovalChain(ctx context.Context, ownerID int64, requestType string) (*domain.ApprovalChainRecord, error) {
-	return s.repo.GetApprovalChain(ctx, ownerID, requestType)
+	key := cacheKeys.Scoped(hrCoreScope, ownerID, fmt.Sprintf("approval|t=%s", requestType))
+	return cacher.Of[*domain.ApprovalChainRecord]().GetOrComputeSingle(ctx, key,
+		func(ctx context.Context) (*domain.ApprovalChainRecord, error) {
+			return s.repo.GetApprovalChain(ctx, ownerID, requestType)
+		},
+		cacher.WithExpiry(ctx, hrCoreTTL),
+	)
 }
 
 func (s *Service) UpsertApprovalChain(ctx context.Context, ownerID int64, chain domain.ApprovalChainRecord) (*domain.ApprovalChainRecord, error) {
+	defer invalidateHRCoreScope(ctx, ownerID)
 	return s.repo.UpsertApprovalChain(ctx, ownerID, chain)
 }
 
