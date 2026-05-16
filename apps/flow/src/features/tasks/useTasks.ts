@@ -111,47 +111,71 @@ export function useUpdateTaskStatus() {
   });
 }
 
+// Bulk operations: report partial-success accurately and ALWAYS
+// invalidate caches on settle, so items that did succeed don't show
+// stale state when one item in the batch fails.
+type BulkResult = { ok: number; failed: number };
+
+async function bulkSettle<T>(items: T[], op: (item: T) => Promise<unknown>): Promise<BulkResult> {
+  const results = await Promise.allSettled(items.map((item) => op(item)));
+  let ok = 0;
+  let failed = 0;
+  for (const r of results) {
+    if (r.status === 'fulfilled') ok++;
+    else failed++;
+  }
+  return { ok, failed };
+}
+
+function reportBulk(result: BulkResult, successKey: string, failKey: string) {
+  if (result.failed === 0) {
+    toast.success(t(successKey, { count: result.ok }));
+  } else if (result.ok === 0) {
+    toast.error(t(failKey));
+  } else {
+    toast.warning(
+      `${result.ok} updated, ${result.failed} failed — refreshing the list to show current state.`
+    );
+  }
+}
+
 export function useBulkUpdateStatus() {
   const qc = useQueryClient();
-  return useMutation({
-    mutationFn: async ({ ids, status }: { ids: string[]; status: ApiTask['status'] }) => {
-      await Promise.all(ids.map((id) => unwrap(flowApi.updateTaskStatus(id, status))));
-    },
-    onSuccess: (_data, { ids }) => {
+  return useMutation<BulkResult, unknown, { ids: string[]; status: ApiTask['status'] }>({
+    mutationFn: ({ ids, status }) =>
+      bulkSettle(ids, (id) => unwrap(flowApi.updateTaskStatus(id, status))),
+    onSettled: () => {
       qc.invalidateQueries({ queryKey: ['tasks'] });
       qc.invalidateQueries({ queryKey: ['my-tasks'] });
-      toast.success(t('toasts.task.bulkUpdated', { count: ids.length }));
     },
+    onSuccess: (res) => reportBulk(res, 'toasts.task.bulkUpdated', 'toasts.task.bulkUpdateFailed'),
     onError: () => toast.error(t('toasts.task.bulkUpdateFailed')),
   });
 }
 
 export function useBulkUpdatePriority() {
   const qc = useQueryClient();
-  return useMutation({
-    mutationFn: async ({ ids, priority }: { ids: string[]; priority: ApiTask['priority'] }) => {
-      await Promise.all(ids.map((id) => unwrap(flowApi.updateTask(id, { priority }))));
-    },
-    onSuccess: (_data, { ids }) => {
+  return useMutation<BulkResult, unknown, { ids: string[]; priority: ApiTask['priority'] }>({
+    mutationFn: ({ ids, priority }) =>
+      bulkSettle(ids, (id) => unwrap(flowApi.updateTask(id, { priority }))),
+    onSettled: () => {
       qc.invalidateQueries({ queryKey: ['tasks'] });
       qc.invalidateQueries({ queryKey: ['my-tasks'] });
-      toast.success(t('toasts.task.bulkUpdated', { count: ids.length }));
     },
+    onSuccess: (res) => reportBulk(res, 'toasts.task.bulkUpdated', 'toasts.task.bulkUpdateFailed'),
     onError: () => toast.error(t('toasts.task.bulkUpdateFailed')),
   });
 }
 
 export function useBulkDelete() {
   const qc = useQueryClient();
-  return useMutation({
-    mutationFn: async (ids: string[]) => {
-      await Promise.all(ids.map((id) => unwrap(flowApi.deleteTask(id))));
-    },
-    onSuccess: (_data, ids) => {
+  return useMutation<BulkResult, unknown, string[]>({
+    mutationFn: (ids) => bulkSettle(ids, (id) => unwrap(flowApi.deleteTask(id))),
+    onSettled: () => {
       qc.invalidateQueries({ queryKey: ['tasks'] });
       qc.invalidateQueries({ queryKey: ['my-tasks'] });
-      toast.success(t('toasts.task.bulkDeleted', { count: ids.length }));
     },
+    onSuccess: (res) => reportBulk(res, 'toasts.task.bulkDeleted', 'toasts.task.bulkDeleteFailed'),
     onError: () => toast.error(t('toasts.task.bulkDeleteFailed')),
   });
 }

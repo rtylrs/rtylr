@@ -385,6 +385,11 @@ const TaskDetail: React.FC = () => {
             </button>
             <button
               onClick={() => {
+                // Archive is a local store action (no async API result
+                // surfaced here), so showing the toast immediately is
+                // acceptable. Keeping navigate(-1) after so the user
+                // ends up where they expect even if the store rejects
+                // a duplicate archive call.
                 archiveTask(task.id);
                 toast.success(t('toasts.task.archived'));
                 navigate(-1);
@@ -397,13 +402,22 @@ const TaskDetail: React.FC = () => {
             </button>
             <button
               onClick={() => {
-                deleteTask(task.id);
-                toast.success(t('toasts.task.deleted'));
-                navigate(-1);
+                // Wait for the mutation to actually succeed before
+                // toasting + navigating away — otherwise on API
+                // failure the user sees a success toast, leaves the
+                // page, and the task is still alive in cache.
+                deleteTaskMut.mutate(task.id, {
+                  onSuccess: () => {
+                    toast.success(t('toasts.task.deleted'));
+                    navigate(-1);
+                  },
+                  // useDeleteTask already toasts on error.
+                });
               }}
               className="h-7 w-7 rounded flex items-center justify-center hover:bg-[var(--flow-hover)]"
               style={{ color: '#ef4444' }}
               title="Delete"
+              disabled={deleteTaskMut.isPending}
             >
               <Trash2 size={12} />
             </button>
