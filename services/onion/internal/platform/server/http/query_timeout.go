@@ -12,11 +12,7 @@ import (
 	"github.com/voxire/onion/internal/platform/logger"
 )
 
-// isLongLivedRequest returns true for requests that intentionally hold
-// the connection open past the 15s hard timeout (WebSocket upgrades,
-// SSE streams, file uploads). Applying the request timeout to these
-// generates a permanent stream of "exceeded hard timeout" warnings on
-// every successful connection.
+// isLongLivedRequest matches WS / SSE / Upgrade so the 15s timeout doesn't fire.
 func isLongLivedRequest(r *http.Request) bool {
 	if strings.EqualFold(r.Header.Get("Upgrade"), "websocket") {
 		return true
@@ -43,13 +39,8 @@ const (
 	SlowQueryThreshold = 5 * time.Second
 )
 
-// RequestTimeoutMiddleware enforces a hard 15 s deadline on every request
-// and logs a structured warning for any request that exceeds 5 s.
-//
-// WebSocket / SSE / Upgrade requests bypass the deadline entirely —
-// they are designed to live longer than 15 s, and applying the timeout
-// here either kills them prematurely or floods logs with false-positive
-// "exceeded hard timeout" warnings on every successful connection.
+// RequestTimeoutMiddleware enforces a 15s hard deadline and warns on >5s.
+// Skips long-lived (WS/SSE/Upgrade) requests.
 func RequestTimeoutMiddleware(next http.Handler) http.Handler {
 	return http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
 		if isLongLivedRequest(r) {
@@ -97,9 +88,6 @@ func (t *timeoutResponseWriter) WriteHeader(code int) {
 	t.ResponseWriter.WriteHeader(code)
 }
 
-// Hijack passes the underlying connection up so WebSocket upgrades
-// work even when this middleware is in the chain. See metrics.go for
-// the same pattern.
 func (t *timeoutResponseWriter) Hijack() (net.Conn, *bufio.ReadWriter, error) {
 	h, ok := t.ResponseWriter.(http.Hijacker)
 	if !ok {

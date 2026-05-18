@@ -66,10 +66,6 @@ func (s *statusRecorder) WriteHeader(code int) {
 	s.ResponseWriter.WriteHeader(code)
 }
 
-// Hijack passes the underlying connection up so WebSocket upgrades
-// work even when this middleware is in the chain. Without it, the
-// wsbus accept path returned "http.ResponseWriter does not implement
-// http.Hijacker" and every realtime client failed to connect.
 func (s *statusRecorder) Hijack() (net.Conn, *bufio.ReadWriter, error) {
 	h, ok := s.ResponseWriter.(http.Hijacker)
 	if !ok {

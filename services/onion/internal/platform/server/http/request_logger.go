@@ -71,6 +71,11 @@ func RequestLoggerMiddleware(ctx context.Context) func(next http.Handler) http.H
 					return
 				}
 
+				// SecurityMiddleware already batched these.
+				if isMaliciousPath(r.URL.Path) {
+					return
+				}
+
 				requestKey := generateRequestKey(r, responseWriter.statusCode)
 				shouldReport, count := duplicateDetector.ShouldReport(requestKey)
 
