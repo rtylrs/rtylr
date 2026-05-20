@@ -24,6 +24,8 @@ func TestDefaultUsesFlociWhenEnabled(t *testing.T) {
 	t.Setenv("R2_ACCESS_KEY_ID", "")
 	t.Setenv("R2_SECRET_ACCESS_KEY", "")
 	t.Setenv("R2_BUCKET_NAME", "")
+	t.Setenv("AWS_ACCESS_KEY_ID", "mock")
+	t.Setenv("AWS_SECRET_ACCESS_KEY", "mock")
 
 	originalConfig := config.GlobalConfig
 	config.GlobalConfig = nil
