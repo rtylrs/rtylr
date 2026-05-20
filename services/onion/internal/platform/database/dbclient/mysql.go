@@ -14,6 +14,7 @@ import (
 
 	_ "github.com/go-sql-driver/mysql" // register MySQL driver
 
+	"github.com/voxire/onion/internal/platform/config"
 	"github.com/voxire/onion/internal/platform/logger"
 )
 
@@ -84,7 +85,12 @@ func Connect(ctx context.Context) error {
 
 	client.mainDB = mainDB
 
-	loggingDSN := os.Getenv("LOGGING_DATABASE_URL")
+	var loggingDSN string
+	if config.GlobalConfig != nil {
+		loggingDSN = config.GlobalConfig.LoggingDatabaseURL
+	} else {
+		loggingDSN = os.Getenv("LOGGING_DATABASE_URL")
+	}
 	if loggingDSN != "" {
 		loggingDB, loggingErr := openDB(ctx, loggingDSN)
 		if loggingErr != nil {
@@ -146,7 +152,14 @@ func openDB(ctx context.Context, dsn string) (*sql.DB, error) {
 }
 
 func resolveMainDSN() string {
-	if remoteDSN := os.Getenv("DATABASE_URL"); remoteDSN != "" {
+	var remoteDSN string
+	if config.GlobalConfig != nil {
+		remoteDSN = config.GlobalConfig.DatabaseURL
+	} else {
+		remoteDSN = os.Getenv("DATABASE_URL")
+	}
+
+	if remoteDSN != "" {
 		return remoteDSN
 	}
 
@@ -217,6 +230,18 @@ func normalizeDSN(dsn string) string {
 }
 
 func intEnvOrDefault(key string, def int) int {
+	if config.GlobalConfig != nil {
+		switch key {
+		case "DB_MAX_OPEN_CONNS":
+			if config.GlobalConfig.DBMaxOpenConns > 0 {
+				return config.GlobalConfig.DBMaxOpenConns
+			}
+		case "DB_MAX_IDLE_CONNS":
+			if config.GlobalConfig.DBMaxIdleConns > 0 {
+				return config.GlobalConfig.DBMaxIdleConns
+			}
+		}
+	}
 	v := os.Getenv(key)
 	if v == "" {
 		return def
@@ -229,6 +254,18 @@ func intEnvOrDefault(key string, def int) int {
 }
 
 func durationEnvOrDefault(key string, def time.Duration) time.Duration {
+	if config.GlobalConfig != nil {
+		switch key {
+		case "DB_CONN_MAX_LIFETIME":
+			if config.GlobalConfig.DBConnMaxLifetime > 0 {
+				return config.GlobalConfig.DBConnMaxLifetime
+			}
+		case "DB_CONN_MAX_IDLE_TIME":
+			if config.GlobalConfig.DBConnMaxIdleTime > 0 {
+				return config.GlobalConfig.DBConnMaxIdleTime
+			}
+		}
+	}
 	v := os.Getenv(key)
 	if v == "" {
 		return def
@@ -241,6 +278,30 @@ func durationEnvOrDefault(key string, def time.Duration) time.Duration {
 }
 
 func getEnvOrDefault(key, defaultValue string) string {
+	if config.GlobalConfig != nil {
+		switch key {
+		case "DB_HOST":
+			if config.GlobalConfig.DBHost != "" {
+				return config.GlobalConfig.DBHost
+			}
+		case "DB_PORT":
+			if config.GlobalConfig.DBPort != "" {
+				return config.GlobalConfig.DBPort
+			}
+		case "DB_NAME":
+			if config.GlobalConfig.DBName != "" {
+				return config.GlobalConfig.DBName
+			}
+		case "DB_USER":
+			if config.GlobalConfig.DBUser != "" {
+				return config.GlobalConfig.DBUser
+			}
+		case "DB_PASSWORD":
+			if config.GlobalConfig.DBPass != "" {
+				return config.GlobalConfig.DBPass
+			}
+		}
+	}
 	if value := os.Getenv(key); value != "" {
 		return value
 	}

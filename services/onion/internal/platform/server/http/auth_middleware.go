@@ -9,6 +9,7 @@ import (
 	"strings"
 
 	authPkg "github.com/voxire/onion/internal/platform/auth"
+	"github.com/voxire/onion/internal/platform/config"
 	"github.com/voxire/onion/internal/platform/errors"
 	"github.com/voxire/onion/internal/platform/logger"
 )
@@ -101,7 +102,12 @@ func processTokenAuthentication(ctx context.Context, token, path, remoteAddr str
 }
 
 func GetAuthMiddlewareFunc(accessPolicy *RouteAccessPolicy, tokenValidatorResolver authPkg.TokenValidatorResolver) MiddlewareFunc {
-	internalToken := os.Getenv("INTERNAL_TOKEN")
+	var internalToken string
+	if config.GlobalConfig != nil {
+		internalToken = config.GlobalConfig.InternalToken
+	} else {
+		internalToken = os.Getenv("INTERNAL_TOKEN")
+	}
 
 	return func(next http.Handler) http.Handler {
 		return http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {

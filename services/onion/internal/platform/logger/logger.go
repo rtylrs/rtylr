@@ -9,6 +9,8 @@ import (
 	"time"
 
 	axiomSlog "github.com/axiomhq/axiom-go/adapters/slog"
+
+	"github.com/voxire/onion/internal/platform/config"
 )
 
 type ctxKey struct{}
@@ -31,7 +33,16 @@ var globalAxiomHandler *axiomSlog.Handler
 func SetupLogger() {
 	stdoutHandler := slog.NewJSONHandler(os.Stdout, &slog.HandlerOptions{})
 
-	if os.Getenv("AXIOM_TOKEN") == "" || os.Getenv("AXIOM_DATASET") == "" {
+	var token, dataset string
+	if config.GlobalConfig != nil {
+		token = config.GlobalConfig.AxiomToken
+		dataset = config.GlobalConfig.AxiomDataset
+	} else {
+		token = os.Getenv("AXIOM_TOKEN")
+		dataset = os.Getenv("AXIOM_DATASET")
+	}
+
+	if token == "" || dataset == "" {
 		slog.SetDefault(slog.New(stdoutHandler))
 		return
 	}
