@@ -8,13 +8,19 @@ import (
 
 	"github.com/resend/resend-go/v2"
 
+	"github.com/voxire/onion/internal/platform/config"
 	"github.com/voxire/onion/internal/platform/logger"
 )
 
 var client *resend.Client
 
 func Initialize() {
-	apiKey := os.Getenv("RESEND_API_KEY")
+	var apiKey string
+	if config.GlobalConfig != nil {
+		apiKey = config.GlobalConfig.ResendKey
+	} else {
+		apiKey = os.Getenv("RESEND_API_KEY")
+	}
 	if apiKey == "" {
 		logger.Global().Warn("RESEND_API_KEY not set, email sending will be disabled")
 		return

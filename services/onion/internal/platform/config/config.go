@@ -15,15 +15,27 @@ const (
 )
 
 func GetOpenAIAPIKey() string {
+	if GlobalConfig != nil {
+		return GlobalConfig.OpenAIAPIKey
+	}
 	return os.Getenv(OpenAIAPIKeyEnvVar)
 }
 
 func GetOpenAIOrgID() string {
+	if GlobalConfig != nil {
+		return GlobalConfig.OpenAIOrgID
+	}
 	return os.Getenv(OpenAIOrgIDEnvVar)
 }
 
 func GetOpenAIBaseURL() string {
-	baseURL := os.Getenv(OpenAIBaseURLEnvVar)
+	var baseURL string
+	if GlobalConfig != nil {
+		baseURL = GlobalConfig.OpenAIBaseURL
+	} else {
+		baseURL = os.Getenv(OpenAIBaseURLEnvVar)
+	}
+
 	if baseURL == "" {
 		return "https://api.openai.com/v1"
 	}
@@ -36,6 +48,9 @@ func IsOpenAIConfigured() bool {
 }
 
 func GetGeminiAPIKey() string {
+	if GlobalConfig != nil {
+		return GlobalConfig.GeminiAPIKey
+	}
 	return os.Getenv(GeminiAPIKeyEnvVar)
 }
 

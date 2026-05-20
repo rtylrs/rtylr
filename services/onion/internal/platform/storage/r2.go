@@ -17,6 +17,8 @@ import (
 	"github.com/aws/aws-sdk-go-v2/aws"
 	awsconfig "github.com/aws/aws-sdk-go-v2/config"
 	"github.com/aws/aws-sdk-go-v2/service/s3"
+
+	"github.com/voxire/onion/internal/platform/config"
 )
 
 const (
@@ -95,10 +97,34 @@ type storageSettings struct {
 
 func resolveSettingsFromEnv() (storageSettings, error) {
 	if flociEnabled() {
+		endpoint := defaultFlociEndpoint
+		region := defaultFlociRegion
+		bucket := defaultFlociBucket
+		if config.GlobalConfig != nil {
+			if config.GlobalConfig.FlociEndpoint != "" {
+				endpoint = config.GlobalConfig.FlociEndpoint
+			}
+			if config.GlobalConfig.FlociRegion != "" {
+				region = config.GlobalConfig.FlociRegion
+			}
+			if config.GlobalConfig.FlociBucket != "" {
+				bucket = config.GlobalConfig.FlociBucket
+			}
+		} else {
+			if val := os.Getenv(flociEndpointEnv); val != "" {
+				endpoint = val
+			}
+			if val := os.Getenv(flociRegionEnv); val != "" {
+				region = val
+			}
+			if val := os.Getenv(flociBucketEnv); val != "" {
+				bucket = val
+			}
+		}
 		return storageSettings{
-			endpoint: envOrDefault(flociEndpointEnv, defaultFlociEndpoint),
-			region:   envOrDefault(flociRegionEnv, defaultFlociRegion),
-			bucket:   envOrDefault(flociBucketEnv, defaultFlociBucket),
+			endpoint: endpoint,
+			region:   region,
+			bucket:   bucket,
 		}, nil
 	}
 
@@ -106,12 +132,22 @@ func resolveSettingsFromEnv() (storageSettings, error) {
 }
 
 func resolveS3SettingsFromEnv() (storageSettings, error) {
-	bucket := os.Getenv("S3_BUCKET_NAME")
+	var bucket string
+	if config.GlobalConfig != nil {
+		bucket = config.GlobalConfig.S3BucketName
+	} else {
+		bucket = os.Getenv("S3_BUCKET_NAME")
+	}
 	if bucket == "" {
 		return storageSettings{}, ErrNotConfigured
 	}
 
-	region := os.Getenv("S3_REGION")
+	var region string
+	if config.GlobalConfig != nil {
+		region = config.GlobalConfig.S3Region
+	} else {
+		region = os.Getenv("S3_REGION")
+	}
 	if region == "" {
 		region = "eu-west-1"
 	}
@@ -123,19 +159,11 @@ func resolveS3SettingsFromEnv() (storageSettings, error) {
 }
 
 func flociEnabled() bool {
-	return envBool(flociEnabledEnv)
-}
-
-func envBool(key string) bool {
-	value := strings.ToLower(strings.TrimSpace(os.Getenv(key)))
-	return value == "true" || value == "1" || value == "yes"
-}
-
-func envOrDefault(key, fallback string) string {
-	if value := strings.TrimSpace(os.Getenv(key)); value != "" {
-		return value
+	if config.GlobalConfig != nil {
+		return config.GlobalConfig.FlociEnabled
 	}
-	return fallback
+	value := strings.ToLower(strings.TrimSpace(os.Getenv(flociEnabledEnv)))
+	return value == "true" || value == "1" || value == "yes"
 }
 
 // AllowedResumeContentTypes is the whitelist for the resume upload

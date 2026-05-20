@@ -24,6 +24,7 @@ import (
 	"google.golang.org/api/option"
 	sheetsv4 "google.golang.org/api/sheets/v4"
 
+	"github.com/voxire/onion/internal/platform/config"
 	"github.com/voxire/onion/internal/platform/logger"
 )
 
@@ -35,16 +36,24 @@ var (
 	sheetID string
 )
 
-// Initialize reads env vars and creates the Sheets client. Call once at startup.
 func Initialize(ctx context.Context) {
 	once.Do(func() {
-		sheetID = os.Getenv("GOOGLE_SHEETS_LEAD_SHEET_ID")
+		if config.GlobalConfig != nil {
+			sheetID = config.GlobalConfig.GoogleSheetsLeadSheetID
+		} else {
+			sheetID = os.Getenv("GOOGLE_SHEETS_LEAD_SHEET_ID")
+		}
 		if sheetID == "" {
 			logger.Global().Warn("GOOGLE_SHEETS_LEAD_SHEET_ID not set — Sheets logging disabled")
 			return
 		}
 
-		encoded := os.Getenv("GOOGLE_SHEETS_CREDENTIALS")
+		var encoded string
+		if config.GlobalConfig != nil {
+			encoded = config.GlobalConfig.GoogleSheetsCredentials
+		} else {
+			encoded = os.Getenv("GOOGLE_SHEETS_CREDENTIALS")
+		}
 		if encoded == "" {
 			logger.Global().Warn("GOOGLE_SHEETS_CREDENTIALS not set — Sheets logging disabled")
 			return

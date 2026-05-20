@@ -12,6 +12,8 @@ import (
 	"strings"
 	"sync/atomic"
 	"time"
+
+	"github.com/voxire/onion/internal/platform/config"
 )
 
 // /metrics endpoint — Prometheus text format. Behind basic auth so
@@ -82,8 +84,14 @@ func (s *statusRecorder) Hijack() (net.Conn, *bufio.ReadWriter, error) {
 // If either is empty the endpoint returns 404 — makes the feature
 // opt-in rather than accidentally exposed on staging.
 func MetricsHandler() http.HandlerFunc {
-	user := os.Getenv("METRICS_USER")
-	pass := os.Getenv("METRICS_PASS")
+	var user, pass string
+	if config.GlobalConfig != nil {
+		user = config.GlobalConfig.MetricsUser
+		pass = config.GlobalConfig.MetricsPass
+	} else {
+		user = os.Getenv("METRICS_USER")
+		pass = os.Getenv("METRICS_PASS")
+	}
 	enabled := user != "" && pass != ""
 
 	return func(w http.ResponseWriter, r *http.Request) {
