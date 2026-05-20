@@ -21,7 +21,7 @@ func GetRedisURL() string {
 }
 
 const (
-	InMemoryCacheMaxSizeMbEnvVar   = "INMEMORY_CACHE_MAX_SIZE_MB"
+	InMemoryCacheMaxSizeMbEnvVar = "INMEMORY_CACHE_MAX_SIZE_MB"
 )
 
 // Redis Configuration.
@@ -70,5 +70,3 @@ func GetInMemoryCacheMaxSizeMb() int {
 
 	return size
 }
-
-

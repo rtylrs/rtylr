@@ -124,21 +124,25 @@ func ApplicationsHandler(svc *application.Service) http.HandlerFunc {
 
 		w.Header().Set("Content-Type", "application/json")
 		w.WriteHeader(http.StatusOK)
-		_ = json.NewEncoder(w).Encode(map[string]interface{}{
+		if err := json.NewEncoder(w).Encode(map[string]interface{}{
 			"id":      id,
 			"message": "Application received",
 			"status":  "success",
-		})
+		}); err != nil {
+			logger.Global().Error("Failed to encode application success response", logger.Error(err))
+		}
 	}
 }
 
 func writeApplyError(w http.ResponseWriter, code int, msg string) {
 	w.Header().Set("Content-Type", "application/json")
 	w.WriteHeader(code)
-	_ = json.NewEncoder(w).Encode(errorModels.ErrorResponse{
+	if err := json.NewEncoder(w).Encode(errorModels.ErrorResponse{
 		Error:  errorModels.ServerError{Code: code, Message: msg},
 		Status: "error",
-	})
+	}); err != nil {
+		logger.Global().Error("Failed to encode application error response", logger.Error(err))
+	}
 }
 
 // slugify lowercases and turns whitespace + slashes into hyphens for

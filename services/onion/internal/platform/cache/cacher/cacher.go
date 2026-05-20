@@ -8,6 +8,7 @@ import (
 	"reflect"
 	"strconv"
 	"strings"
+	"sync"
 	"time"
 
 	"github.com/voxire/onion/internal/platform/logger"
@@ -656,8 +657,18 @@ func (c Cache[M]) transformMapKeys(keyVals map[string]M) map[string]M {
 	return maputils.MapKeys(keyVals, c.appendIdentifierPrefix)
 }
 
+var typeNameCache sync.Map
+
 func (c Cache[M]) getModelIdentifier() string {
-	return reflect.TypeOf(*new(M)).String()
+	t := reflect.TypeOf(*new(M))
+	if val, ok := typeNameCache.Load(t); ok {
+		if str, ok := val.(string); ok {
+			return str
+		}
+	}
+	name := t.String()
+	typeNameCache.Store(t, name)
+	return name
 }
 
 func (c Cache[M]) appendIdentifierPrefix(s string) string {

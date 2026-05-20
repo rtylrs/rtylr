@@ -69,5 +69,3 @@ func RemoteOnly() ClientOption {
 		c.memoryOnly = false
 	}
 }
-
-

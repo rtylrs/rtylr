@@ -10,7 +10,8 @@ import (
 // them out of the stream and dispatches the call asynchronously.
 //
 // Format on the wire (one per fenced JSON block, surrounded by sentinels):
-//   <tool>{"name":"crm.list_customers","input":{"limit":10}}</tool>
+//
+//	<tool>{"name":"crm.list_customers","input":{"limit":10}}</tool>
 type ToolCallMarker struct {
 	Name  string         `json:"name"`
 	Input map[string]any `json:"input"`
@@ -22,7 +23,6 @@ var toolBlockRe = regexp.MustCompile(`(?s)<tool>\s*(\{.*?\})\s*</tool>`)
 // remainder string contains the original input with each block removed so
 // the visible text doesn't include the raw JSON markers.
 func ExtractToolCalls(s string) (calls []ToolCallMarker, remainder string) {
-	remainder = s
 	matches := toolBlockRe.FindAllStringSubmatchIndex(s, -1)
 	if len(matches) == 0 {
 		return nil, s

@@ -203,7 +203,7 @@ func (s *Service) CreateCheckout(ctx context.Context, ownerID int64, planSlug, o
 
 // HandlePaddleWebhook processes a verified Paddle webhook event.
 // It updates the subscription record based on the event type.
-func (s *Service) HandlePaddleWebhook(ctx context.Context, event paddlePkg.WebhookEvent, data paddlePkg.SubscriptionData) error {
+func (s *Service) HandlePaddleWebhook(ctx context.Context, _ paddlePkg.WebhookEvent, data paddlePkg.SubscriptionData) error {
 	// Map Paddle subscription ID → owner ID
 	ownerID, err := s.repo.GetOwnerIDByPaddleSubscription(ctx, data.ID)
 	if err != nil {

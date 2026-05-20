@@ -56,7 +56,7 @@ func Initialize(ctx context.Context) {
 			return
 		}
 
-		creds, err := google.CredentialsFromJSON(ctx, jsonKey, sheetsv4.SpreadsheetsScope)
+		creds, err := google.CredentialsFromJSONWithType(ctx, jsonKey, google.ServiceAccount, sheetsv4.SpreadsheetsScope)
 		if err != nil {
 			logger.Global().Error("Failed to parse Google service account credentials", logger.Error(err))
 			return

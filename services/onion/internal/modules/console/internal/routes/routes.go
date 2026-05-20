@@ -12,6 +12,7 @@ import (
 	"github.com/voxire/onion/internal/modules/console/internal/routes/handlers"
 	authPkg "github.com/voxire/onion/internal/platform/auth"
 	errorModels "github.com/voxire/onion/internal/platform/errors"
+	"github.com/voxire/onion/internal/platform/logger"
 	serverHttp "github.com/voxire/onion/internal/platform/server/http"
 )
 
@@ -94,16 +95,20 @@ func RegisterRoutes(ctx context.Context, router *chi.Mux, service *application.S
 func writeJSON(w http.ResponseWriter, status int, v any) {
 	w.Header().Set("Content-Type", "application/json")
 	w.WriteHeader(status)
-	_ = json.NewEncoder(w).Encode(v)
+	if err := json.NewEncoder(w).Encode(v); err != nil {
+		logger.Global().Error("Failed to encode JSON response", logger.Error(err))
+	}
 }
 
 func writeError(w http.ResponseWriter, status int, msg string) {
 	w.Header().Set("Content-Type", "application/json")
 	w.WriteHeader(status)
-	_ = json.NewEncoder(w).Encode(errorModels.ErrorResponse{
+	if err := json.NewEncoder(w).Encode(errorModels.ErrorResponse{
 		Error:  errorModels.ServerError{Code: status, Message: msg},
 		Status: "error",
-	})
+	}); err != nil {
+		logger.Global().Error("Failed to encode error response", logger.Error(err))
+	}
 }
 
 func getIDParam(r *http.Request, param string) (int64, bool) {
