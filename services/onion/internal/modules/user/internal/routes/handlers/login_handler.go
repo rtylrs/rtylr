@@ -9,6 +9,7 @@ import (
 	"github.com/voxire/onion/internal/modules/user/internal/application"
 	authPkg "github.com/voxire/onion/internal/platform/auth"
 	errorModels "github.com/voxire/onion/internal/platform/errors"
+	"github.com/voxire/onion/internal/platform/logger"
 	authv1 "github.com/voxire/voxie/gen/go/auth/v1"
 )
 
@@ -54,6 +55,7 @@ func (h *LoginHandler) Serve(ctx context.Context, req *LoginRequest) (LoginRespo
 			}
 		}
 
+		logger.Ctx(ctx).Error("login: Authenticate failed", logger.Error(err))
 		return LoginResponse{}, &errorModels.ServerError{
 			Code:    http.StatusInternalServerError,
 			Message: "Authentication failed",
@@ -79,6 +81,7 @@ func (h *LoginHandler) Serve(ctx context.Context, req *LoginRequest) (LoginRespo
 
 	token, err := h.UserService.GenerateTokenWithPlatform(ctx, userId, platformClaims)
 	if err != nil {
+		logger.Ctx(ctx).Error("login: GenerateTokenWithPlatform failed", logger.Error(err))
 		return LoginResponse{}, &errorModels.ServerError{
 			Code:    http.StatusInternalServerError,
 			Message: "Failed to generate authentication token",
@@ -87,6 +90,7 @@ func (h *LoginHandler) Serve(ctx context.Context, req *LoginRequest) (LoginRespo
 
 	user, err := h.UserService.GetUserByID(ctx, userId)
 	if err != nil {
+		logger.Ctx(ctx).Error("login: GetUserByID failed", logger.Error(err))
 		return LoginResponse{}, &errorModels.ServerError{
 			Code:    http.StatusInternalServerError,
 			Message: "Failed to retrieve user information",
