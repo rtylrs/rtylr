@@ -6,6 +6,8 @@ import (
 	"sync"
 	"testing"
 	"time"
+
+	"github.com/voxire/onion/internal/platform/config"
 )
 
 func resetDefaultStorageForTest() {
@@ -22,8 +24,15 @@ func TestDefaultUsesFlociWhenEnabled(t *testing.T) {
 	t.Setenv("R2_ACCESS_KEY_ID", "")
 	t.Setenv("R2_SECRET_ACCESS_KEY", "")
 	t.Setenv("R2_BUCKET_NAME", "")
+
+	originalConfig := config.GlobalConfig
+	config.GlobalConfig = nil
+
 	resetDefaultStorageForTest()
-	t.Cleanup(resetDefaultStorageForTest)
+	t.Cleanup(func() {
+		resetDefaultStorageForTest()
+		config.GlobalConfig = originalConfig
+	})
 
 	client, err := Default()
 	if err != nil {
