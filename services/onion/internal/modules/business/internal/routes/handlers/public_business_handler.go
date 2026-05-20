@@ -7,7 +7,6 @@ import (
 	"net/http"
 
 	"github.com/voxire/onion/internal/modules/business/internal/application"
-	"github.com/voxire/onion/internal/platform/database/dbclient"
 	errorModels "github.com/voxire/onion/internal/platform/errors"
 	"github.com/voxire/onion/internal/platform/logger"
 )
@@ -24,11 +23,6 @@ func PublicBusinessRoutes() []string {
 }
 
 type PublicBusinessHandler struct {
-	// Service is wired for symmetry with the rest of the module even
-	// though the public fetch bypasses it — the query shape is too
-	// simple to justify threading through a service method that
-	// would never be reused internally (every other service method
-	// is owner-scoped).
 	Service *application.Service
 }
 
@@ -56,17 +50,8 @@ func (h *PublicBusinessHandler) Validate(_ context.Context, req *PublicBusinessR
 }
 
 func (h *PublicBusinessHandler) Serve(ctx context.Context, req *PublicBusinessRequest) (PublicBusinessResponse, *errorModels.ServerError) {
-	// Direct query — the business module doesn't own the public
-	// `businesses` row read today (its service is scoped to
-	// `business_profile` rows). Since this is a single tight query
-	// over always-public columns, the hand-rolled read here is
-	// cleaner than expanding the service surface.
-	const q = `SELECT id, name, COALESCE(logo_url, ''), COALESCE(currency, 'USD'), COALESCE(timezone, 'UTC')
-	           FROM businesses WHERE id = ? AND is_active = TRUE LIMIT 1`
-
-	var res PublicBusinessResponse
-	row := dbclient.Pool().QueryRowContext(ctx, q, req.BusinessID)
-	if err := row.Scan(&res.ID, &res.Name, &res.LogoURL, &res.Currency, &res.Timezone); err != nil {
+	res, err := h.Service.GetPublicBusiness(ctx, req.BusinessID)
+	if err != nil {
 		if errors.Is(err, sql.ErrNoRows) {
 			return PublicBusinessResponse{}, &errorModels.ServerError{
 				HTTPCode: http.StatusNotFound,
@@ -84,5 +69,11 @@ func (h *PublicBusinessHandler) Serve(ctx context.Context, req *PublicBusinessRe
 			Message:  "Failed to load business",
 		}
 	}
-	return res, nil
+	return PublicBusinessResponse{
+		ID:       res.ID,
+		Name:     res.Name,
+		LogoURL:  res.LogoURL,
+		Currency: res.Currency,
+		Timezone: res.Timezone,
+	}, nil
 }

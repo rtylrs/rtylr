@@ -5,7 +5,6 @@ import (
 	"crypto/rand"
 	"database/sql"
 	"encoding/hex"
-	"encoding/json"
 	"errors"
 	"strings"
 	"time"
@@ -14,7 +13,6 @@ import (
 	"github.com/voxire/onion/internal/modules/team/internal/infrastructure"
 	"github.com/voxire/onion/internal/platform/cache/cacher"
 	cacheKeys "github.com/voxire/onion/internal/platform/cache/keys"
-	"github.com/voxire/onion/internal/platform/database/dbclient"
 	"github.com/voxire/onion/internal/platform/utils/passwordutils"
 )
 
@@ -39,9 +37,9 @@ type Service struct {
 	repo *infrastructure.Repository
 }
 
-func NewService(ctx context.Context) *Service {
+func NewService(_ context.Context, db *sql.DB) *Service {
 	return &Service{
-		repo: infrastructure.NewRepository(ctx),
+		repo: infrastructure.NewRepository(db),
 	}
 }
 
@@ -370,35 +368,12 @@ func (s *Service) DeactivateUser(ctx context.Context, ownerID, businessID, userI
 
 // GetOwnerApps returns the list of apps the owner is subscribed to.
 func (s *Service) GetOwnerApps(ctx context.Context, ownerID int64) ([]string, error) {
-	var appsJSON string
-	// cross-schema read from subscriptions + plans — approved for owner app resolution
-	err := dbclient.Pool().QueryRowContext(ctx,
-		`SELECT p.apps FROM subscriptions s JOIN plans p ON p.id = s.plan_id WHERE s.owner_id = ?`,
-		ownerID).Scan(&appsJSON)
-	if err != nil {
-		return nil, err
-	}
-
-	var apps []string
-	if jsonErr := json.Unmarshal([]byte(appsJSON), &apps); jsonErr != nil {
-		return []string{}, nil
-	}
-
-	return apps, nil
+	return s.repo.GetOwnerApps(ctx, ownerID)
 }
 
 // GetOwnerSubscriptionInfo returns the plan slug and status for the owner's subscription.
 func (s *Service) GetOwnerSubscriptionInfo(ctx context.Context, ownerID int64) (string, string, error) {
-	var planSlug, status string
-	// cross-schema read from subscriptions + plans — approved for owner subscription info
-	err := dbclient.Pool().QueryRowContext(ctx,
-		`SELECT p.slug, s.status FROM subscriptions s JOIN plans p ON p.id = s.plan_id WHERE s.owner_id = ?`,
-		ownerID).Scan(&planSlug, &status)
-	if err != nil {
-		return "", "", err
-	}
-
-	return planSlug, status, nil
+	return s.repo.GetOwnerSubscriptionInfo(ctx, ownerID)
 }
 
 // RecordSeatChange updates the billing seat_periods table after a team member is added or removed.
@@ -410,32 +385,7 @@ func (s *Service) RecordSeatChange(ctx context.Context, ownerID int64) {
 		return
 	}
 
-	now := time.Now()
-	yesterday := now.AddDate(0, 0, -1)
-	billingMonth := time.Date(now.Year(), now.Month(), 1, 0, 0, 0, 0, time.UTC)
-
-	var subscriptionID int64
-	var pricePerSeatCents int
-	// cross-schema read from subscriptions — approved for seat period management
-	if scanErr := dbclient.Pool().QueryRowContext(ctx,
-		`SELECT id, price_per_seat_cents FROM subscriptions WHERE owner_id = ?`, ownerID,
-	).Scan(&subscriptionID, &pricePerSeatCents); scanErr != nil {
-		return
-	}
-
-	// cross-schema write to seat_periods — approved for seat billing accuracy
-	_, _ = dbclient.Pool().ExecContext(ctx,
-		`UPDATE seat_periods SET period_end = ? WHERE subscription_id = ? AND period_end IS NULL`,
-		yesterday, subscriptionID)
-
-	_, _ = dbclient.Pool().ExecContext(ctx,
-		`INSERT INTO seat_periods (subscription_id, owner_id, seat_count, price_per_seat_cents, period_start, billing_month)
-		 VALUES (?, ?, ?, ?, ?, ?)`,
-		subscriptionID, ownerID, newCount, pricePerSeatCents, now, billingMonth)
-
-	_, _ = dbclient.Pool().ExecContext(ctx,
-		`UPDATE subscriptions SET seat_count = ?, updated_at = CURRENT_TIMESTAMP WHERE owner_id = ?`,
-		newCount, ownerID)
+	_ = s.repo.RecordSeatChange(ctx, ownerID, newCount)
 }
 
 // ─── Groups ──────────────────────────────────────────────────────────────────

@@ -985,7 +985,6 @@ REDIS_PASSWORD=
 
 # In-memory cache
 INMEMORY_CACHE_MAX_SIZE_MB=64
-CACHED_MARSHALLING_ENABLED=true
 
 # AI integrations (optional — echo module)
 OPENAI_API_KEY=

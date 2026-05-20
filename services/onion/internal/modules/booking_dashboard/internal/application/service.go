@@ -6,18 +6,21 @@ import (
 	"time"
 
 	"github.com/voxire/onion/internal/modules/booking_dashboard/internal/domain"
+	"github.com/voxire/onion/internal/modules/booking_dashboard/internal/infrastructure"
 	"github.com/voxire/onion/internal/platform/cache/cacher"
 	cacheKeys "github.com/voxire/onion/internal/platform/cache/keys"
-	"github.com/voxire/onion/internal/platform/database/dbclient"
-	"github.com/voxire/onion/internal/platform/logger"
 )
 
 const bookingDashboardTTL = 1 * time.Minute
 
-type Service struct{ pool *sql.DB }
+type Service struct {
+	repo domain.Repository
+}
 
-func NewService(_ context.Context) *Service {
-	return &Service{pool: dbclient.Pool()}
+func NewService(_ context.Context, db *sql.DB) *Service {
+	return &Service{
+		repo: infrastructure.NewRepository(db),
+	}
 }
 
 func (s *Service) GetDashboard(ctx context.Context, ownerID int64) (domain.DashboardData, error) {
@@ -38,36 +41,20 @@ func (s *Service) fetchDashboard(ctx context.Context, ownerID int64) (domain.Das
 
 	var data domain.DashboardData
 
-	err := s.pool.QueryRowContext(ctx,
-		"SELECT COUNT(*) FROM booking_appointments WHERE owner_id = ? AND start_time >= ? AND start_time < ?",
-		ownerID, startOfDay, endOfDay).Scan(&data.TodayCount)
+	todayCount, err := s.repo.GetTodayCount(ctx, ownerID, startOfDay, endOfDay)
 	if err != nil {
-		logger.Ctx(ctx).Error("Failed to get today count", logger.Error(err))
 		return data, err
 	}
+	data.TodayCount = todayCount
 
-	err = s.pool.QueryRowContext(ctx,
-		"SELECT COUNT(*) FROM booking_appointments WHERE owner_id = ? AND start_time >= ? AND status IN ('pending','confirmed')",
-		ownerID, endOfDay).Scan(&data.UpcomingCount)
+	upcomingCount, err := s.repo.GetUpcomingCount(ctx, ownerID, endOfDay)
 	if err != nil {
-		logger.Ctx(ctx).Error("Failed to get upcoming count", logger.Error(err))
 		return data, err
 	}
+	data.UpcomingCount = upcomingCount
 
-	var totalMonth, cancelledMonth int
-	err = s.pool.QueryRowContext(ctx,
-		"SELECT COUNT(*) FROM booking_appointments WHERE owner_id = ? AND start_time >= ?",
-		ownerID, startOfMonth).Scan(&totalMonth)
+	totalMonth, cancelledMonth, err := s.repo.GetMonthCounts(ctx, ownerID, startOfMonth)
 	if err != nil {
-		logger.Ctx(ctx).Error("Failed to get total month count", logger.Error(err))
-		return data, err
-	}
-
-	err = s.pool.QueryRowContext(ctx,
-		"SELECT COUNT(*) FROM booking_appointments WHERE owner_id = ? AND start_time >= ? AND status = 'cancelled'",
-		ownerID, startOfMonth).Scan(&cancelledMonth)
-	if err != nil {
-		logger.Ctx(ctx).Error("Failed to get cancelled month count", logger.Error(err))
 		return data, err
 	}
 
@@ -75,19 +62,11 @@ func (s *Service) fetchDashboard(ctx context.Context, ownerID int64) (domain.Das
 		data.CancellationRate = float64(cancelledMonth) / float64(totalMonth) * 100
 	}
 
-	var revenue sql.NullFloat64
-	err = s.pool.QueryRowContext(ctx,
-		`SELECT COALESCE(SUM(bs.price), 0) FROM booking_appointments ba
-		 JOIN booking_services bs ON ba.service_id = bs.id
-		 WHERE ba.owner_id = ? AND ba.start_time >= ? AND ba.status IN ('completed','confirmed')`,
-		ownerID, startOfMonth).Scan(&revenue)
+	revenue, err := s.repo.GetMonthRevenue(ctx, ownerID, startOfMonth)
 	if err != nil {
-		logger.Ctx(ctx).Error("Failed to get revenue", logger.Error(err))
 		return data, err
 	}
-	if revenue.Valid {
-		data.Revenue = revenue.Float64
-	}
+	data.Revenue = revenue
 
 	return data, nil
 }

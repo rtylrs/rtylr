@@ -2,16 +2,12 @@ package handlers
 
 import (
 	"context"
-	"database/sql"
-	"errors"
 	"net/http"
 	"net/netip"
 	"strings"
-	"time"
 
 	"github.com/voxire/onion/internal/modules/user/internal/application"
 	authPkg "github.com/voxire/onion/internal/platform/auth"
-	"github.com/voxire/onion/internal/platform/database/dbclient"
 	errorModels "github.com/voxire/onion/internal/platform/errors"
 	"github.com/voxire/onion/internal/platform/logger"
 	authv1 "github.com/voxire/voxie/gen/go/auth/v1"
@@ -33,39 +29,14 @@ type RegisterHandler struct {
 }
 
 type RegisterRequest struct {
-	Email        string `json:"email"`
-	Password     string `json:"password"`
+	Email        string `json:"email" validate:"required,email"`
+	Password     string `json:"password" validate:"required,min=8"`
 	Name         string `json:"name"`
 	BusinessName string `json:"business_name"`
 	PlanSlug     string `json:"plan_slug"`
 }
 
 type RegisterResponse = authv1.RegisterResponse
-
-func (h *RegisterHandler) Validate(_ context.Context, req *RegisterRequest) *errorModels.ServerError {
-	if req.Email == "" || req.Password == "" {
-		return &errorModels.ServerError{
-			Code:    http.StatusBadRequest,
-			Message: "Email and password are required",
-		}
-	}
-
-	if err := h.UserService.ValidateEmail(req.Email); err != nil {
-		return &errorModels.ServerError{
-			Code:    http.StatusBadRequest,
-			Message: "Invalid email format",
-		}
-	}
-
-	if err := h.UserService.ValidatePassword(req.Password); err != nil {
-		return &errorModels.ServerError{
-			Code:    http.StatusBadRequest,
-			Message: "Password must be at least 8 characters long and contain uppercase, lowercase, and numeric characters",
-		}
-	}
-
-	return nil
-}
 
 func (h *RegisterHandler) Serve(ctx context.Context, req *RegisterRequest) (RegisterResponse, *errorModels.ServerError) {
 	var clientIP netip.Addr
@@ -82,28 +53,7 @@ func (h *RegisterHandler) Serve(ctx context.Context, req *RegisterRequest) (Regi
 
 	userId, err := h.UserService.Register(ctx, registerData)
 	if err != nil {
-		switch {
-		case errors.Is(err, application.ErrUserAlreadyExists):
-			return RegisterResponse{}, &errorModels.ServerError{
-				Code:    http.StatusConflict,
-				Message: "User with this email already exists",
-			}
-		case errors.Is(err, application.ErrInvalidEmail):
-			return RegisterResponse{}, &errorModels.ServerError{
-				Code:    http.StatusBadRequest,
-				Message: "Invalid email format",
-			}
-		case errors.Is(err, application.ErrWeakPassword):
-			return RegisterResponse{}, &errorModels.ServerError{
-				Code:    http.StatusBadRequest,
-				Message: "Password does not meet security requirements",
-			}
-		default:
-			return RegisterResponse{}, &errorModels.ServerError{
-				Code:    http.StatusInternalServerError,
-				Message: "Registration failed",
-			}
-		}
+		return RegisterResponse{}, errorModels.FromError(err, "Registration failed")
 	}
 
 	// Create business for this user (they are the owner)
@@ -123,7 +73,7 @@ func (h *RegisterHandler) Serve(ctx context.Context, req *RegisterRequest) (Regi
 	if planSlug == "" {
 		planSlug = "starter"
 	}
-	if subErr := assignSubscription(ctx, userId, planSlug); subErr != nil {
+	if subErr := h.UserService.AssignSubscription(ctx, userId, planSlug); subErr != nil {
 		logger.Ctx(ctx).Warn("failed to assign subscription on registration",
 			logger.String("plan_slug", planSlug),
 			logger.Error(subErr),
@@ -167,29 +117,4 @@ func (h *RegisterHandler) Serve(ctx context.Context, req *RegisterRequest) (Regi
 		Email:   registerData.Email,
 		Name:    registerData.FullName,
 	}, nil
-}
-
-// assignSubscription looks up the plan by slug and creates a trial subscription for the owner.
-func assignSubscription(ctx context.Context, ownerID int64, planSlug string) error {
-	var planID int64
-	// cross-schema read from plans — approved for subscription assignment on registration
-	err := dbclient.Pool().QueryRowContext(ctx,
-		`SELECT id FROM plans WHERE slug = ? AND is_active = TRUE`,
-		planSlug).Scan(&planID)
-	if err != nil {
-		if errors.Is(err, sql.ErrNoRows) {
-			return errors.New("plan not found: " + planSlug)
-		}
-
-		return err
-	}
-
-	trialEnd := time.Now().AddDate(0, 0, 14)
-	_, execErr := dbclient.Pool().ExecContext(ctx,
-		`INSERT INTO subscriptions (owner_id, plan_id, status, trial_ends_at)
-		 VALUES (?, ?, 'trial', ?)
-		 ON DUPLICATE KEY UPDATE plan_id = VALUES(plan_id), updated_at = CURRENT_TIMESTAMP`,
-		ownerID, planID, trialEnd)
-
-	return execErr
 }

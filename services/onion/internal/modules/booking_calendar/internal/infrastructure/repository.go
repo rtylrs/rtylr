@@ -1,0 +1,64 @@
+package infrastructure
+
+import (
+	"context"
+	"database/sql"
+	"time"
+
+	"github.com/voxire/onion/internal/modules/booking_calendar/internal/domain"
+	"github.com/voxire/onion/internal/platform/logger"
+)
+
+type Repository struct {
+	pool *sql.DB
+}
+
+func NewRepository(db *sql.DB) *Repository {
+	return &Repository{
+		pool: db,
+	}
+}
+
+func (r *Repository) FetchAppointments(ctx context.Context, ownerID int64, from, to string) ([]domain.CalendarAppointment, error) {
+	query := `SELECT id, service_id, customer_name, start_time, end_time, status
+		FROM booking_appointments WHERE owner_id = ? AND start_time >= ? AND start_time < ? ORDER BY start_time ASC`
+
+	rows, err := r.pool.QueryContext(ctx, query, ownerID, from, to)
+	if err != nil {
+		logger.Ctx(ctx).Error("Failed to fetch appointments", logger.Error(err))
+		return nil, err
+	}
+	defer rows.Close()
+
+	var appts []domain.CalendarAppointment
+	for rows.Next() {
+		var (
+			id        int64
+			serviceID sql.NullInt64
+			custName  sql.NullString
+			startTime time.Time
+			endTime   time.Time
+			status    sql.NullString
+		)
+		if err := rows.Scan(&id, &serviceID, &custName, &startTime, &endTime, &status); err != nil {
+			return nil, err
+		}
+		appt := domain.CalendarAppointment{
+			ID:        id,
+			StartTime: startTime.Format("2006-01-02T15:04:05Z07:00"),
+			EndTime:   endTime.Format("2006-01-02T15:04:05Z07:00"),
+		}
+		if serviceID.Valid {
+			appt.ServiceID = serviceID.Int64
+		}
+		if custName.Valid {
+			appt.CustomerName = custName.String
+		}
+		if status.Valid {
+			appt.Status = status.String
+		}
+		appts = append(appts, appt)
+	}
+
+	return appts, rows.Err()
+}

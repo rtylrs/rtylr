@@ -19,6 +19,10 @@ func (m *mockRepo) GetProfile(_ context.Context, ownerID int64) (domain.Business
 	return m.profile, m.err
 }
 
+func (m *mockRepo) GetPublicBusiness(_ context.Context, businessID int64) (domain.PublicBusiness, error) {
+	return domain.PublicBusiness{ID: businessID}, m.err
+}
+
 func TestGetProfile_Delegates(t *testing.T) {
 	want := domain.BusinessProfile{SiteName: "Acme", Currency: "USD"}
 	m := &mockRepo{profile: want}

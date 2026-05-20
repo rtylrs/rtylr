@@ -26,14 +26,21 @@ const (
 )
 
 // Cache is a generic cache implementation with support for in-memory and Redis storage.
-type Cache[M any] struct{}
+type Cache[M any] struct {
+	namespace string
+}
 
 // Of returns a Cache instance for the specified type.
 func Of[C any]() Cache[C] {
 	return Cache[C]{}
 }
 
-func (c Cache[M]) unmarshal(bytes []byte, model *M, _ cacherConfiguration) error {
+// OfWithNamespace returns a Cache instance with an explicit namespace prefix.
+func OfWithNamespace[C any](namespace string) Cache[C] {
+	return Cache[C]{namespace: namespace}
+}
+
+func (c Cache[M]) unmarshal(bytes []byte, model *M) error {
 	return json.Unmarshal(bytes, model)
 }
 
@@ -281,7 +288,7 @@ func (c Cache[M]) getMultiByTransformedKeys(ctx context.Context, transformedKeys
 		}
 
 		model := new(M)
-		if err := c.unmarshal(bytes, model, configuration); err != nil {
+		if err := c.unmarshal(bytes, model); err != nil {
 			logger.Ctx(ctx).Warn("Error while unmarshalling data from cache store",
 				logger.String("key", key),
 				logger.Error(err),
@@ -322,7 +329,7 @@ func (c Cache[M]) GetMulti(ctx context.Context, keys []string, options ...Client
 		}
 
 		model := new(M)
-		if err := c.unmarshal(bytes, model, configuration); err != nil {
+		if err := c.unmarshal(bytes, model); err != nil {
 			logger.Ctx(ctx).Warn("Error while unmarshalling data from cache store",
 				logger.String("key", key),
 				logger.Error(err),
@@ -419,8 +426,7 @@ func (c Cache[M]) HashDelete(ctx context.Context, id, hashKey string) {
 }
 
 // HashGet retrieves a value of a certain field in a Redis hash.
-func (c Cache[M]) HashGet(ctx context.Context, id, field string, options ...ClientOption) (M, bool) {
-	configuration := getConfiguration(options...)
+func (c Cache[M]) HashGet(ctx context.Context, id, field string, _ ...ClientOption) (M, bool) {
 	key := c.appendHashIdentifierPrefix(id)
 	bytes := getRedisCache().HGet(ctx, key, field)
 
@@ -429,7 +435,7 @@ func (c Cache[M]) HashGet(ctx context.Context, id, field string, options ...Clie
 	}
 
 	model := new(M)
-	if err := c.unmarshal(bytes, model, configuration); err != nil {
+	if err := c.unmarshal(bytes, model); err != nil {
 		logger.Ctx(ctx).Warn("Error while unmarshalling data from redis",
 			logger.String("key", key),
 			logger.String("field", field),
@@ -443,15 +449,14 @@ func (c Cache[M]) HashGet(ctx context.Context, id, field string, options ...Clie
 }
 
 // HashGetAll retrieves all key-value pairs of a Redis hash.
-func (c Cache[M]) HashGetAll(ctx context.Context, id string, options ...ClientOption) map[string]M {
-	configuration := getConfiguration(options...)
+func (c Cache[M]) HashGetAll(ctx context.Context, id string, _ ...ClientOption) map[string]M {
 	key := c.appendHashIdentifierPrefix(id)
 	redisResults := getRedisCache().HGetAll(ctx, key)
 	results := make(map[string]M, len(redisResults))
 
 	for k, v := range redisResults {
 		model := new(M)
-		if err := c.unmarshal(v, model, configuration); err != nil {
+		if err := c.unmarshal(v, model); err != nil {
 			logger.Ctx(ctx).Warn("Error while unmarshalling hash data from redis",
 				logger.String("key", key),
 				logger.Error(err),
@@ -660,6 +665,9 @@ func (c Cache[M]) transformMapKeys(keyVals map[string]M) map[string]M {
 var typeNameCache sync.Map
 
 func (c Cache[M]) getModelIdentifier() string {
+	if c.namespace != "" {
+		return c.namespace
+	}
 	t := reflect.TypeOf(*new(M))
 	if val, ok := typeNameCache.Load(t); ok {
 		if str, ok := val.(string); ok {

@@ -3,15 +3,21 @@ package http
 import (
 	"context"
 	"encoding/json"
+	stdErrors "errors"
+	"fmt"
 	"io"
 	"net/http"
 	"strconv"
+	"strings"
 
 	"github.com/go-chi/chi/v5"
+	"github.com/go-playground/validator/v10"
 
 	"github.com/voxire/onion/internal/platform/errors"
 	"github.com/voxire/onion/internal/platform/logger"
 )
+
+var validateInstance = validator.New()
 
 type MiddlewareFunc func(next http.Handler) http.Handler
 
@@ -174,6 +180,28 @@ func writeBadRequest(ctx context.Context, w http.ResponseWriter) {
 }
 
 func validateRequest[Req any](ctx context.Context, handler interface{}, req *Req) *errors.ServerError {
+	// First run structural validation using struct tags if present
+	if err := validateInstance.Struct(req); err != nil {
+		var msg string
+		var validationErrs validator.ValidationErrors
+		if stdErrors.As(err, &validationErrs) {
+			var fields []string
+			for _, ve := range validationErrs {
+				fields = append(fields, fmt.Sprintf("%s (%s)", ve.Field(), ve.Tag()))
+			}
+			msg = "Validation failed for fields: " + strings.Join(fields, ", ")
+		} else {
+			msg = "Validation error: " + err.Error()
+		}
+
+		return &errors.ServerError{
+			HTTPCode: http.StatusBadRequest,
+			Code:     http.StatusBadRequest,
+			Message:  msg,
+		}
+	}
+
+	// Then run custom logic validation if the handler implements ValidatorFunc
 	if v, ok := handler.(ValidatorFunc[Req]); ok {
 		if err := v.Validate(ctx, req); err != nil {
 			return err

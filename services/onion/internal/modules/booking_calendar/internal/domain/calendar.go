@@ -1,5 +1,11 @@
 package domain
 
+import "context"
+
+type Repository interface {
+	FetchAppointments(ctx context.Context, ownerID int64, from, to string) ([]CalendarAppointment, error)
+}
+
 type CalendarDay struct {
 	Date         string                `json:"date"`
 	Appointments []CalendarAppointment `json:"appointments"`

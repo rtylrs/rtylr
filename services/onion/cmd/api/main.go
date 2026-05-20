@@ -144,6 +144,7 @@ import (
 	"github.com/voxire/onion/internal/modules/workspaces"
 	authPkg "github.com/voxire/onion/internal/platform/auth"
 	"github.com/voxire/onion/internal/platform/cache"
+	platformConfig "github.com/voxire/onion/internal/platform/config"
 	"github.com/voxire/onion/internal/platform/database/dbclient"
 	emailPkg "github.com/voxire/onion/internal/platform/email"
 	"github.com/voxire/onion/internal/platform/logger"
@@ -193,6 +194,10 @@ func main() {
 
 	loadDotEnv()
 	logger.SetupLogger()
+
+	if _, err := platformConfig.LoadAndValidate(); err != nil {
+		logger.Global().Fatal("Configuration validation failed", logger.Error(err))
+	}
 
 	shutdownCtx, stop := signal.NotifyContext(context.Background(), os.Interrupt, syscall.SIGTERM)
 	defer stop()
@@ -455,14 +460,14 @@ func initializeModules(ctx context.Context) *apiModules {
 		Subscriptions:         subscriptions.NewModule(ctx),
 		Bills:                 bills.NewModule(ctx),
 		BookingAppointments:   bookingappointments.NewModule(ctx),
-		BookingCalendar:       bookingcalendar.NewModule(ctx),
-		BookingDashboard:      bookingdashboard.NewModule(ctx),
+		BookingCalendar:       bookingcalendar.NewModule(ctx, dbclient.Pool()),
+		BookingDashboard:      bookingdashboard.NewModule(ctx, dbclient.Pool()),
 		BookingReminders:      bookingreminders.NewModule(ctx),
 		BookingResources:      bookingresources.NewModule(ctx),
 		BookingServices:       bookingservices.NewModule(ctx),
 		BookingWaitlist:       bookingwaitlist.NewModule(ctx),
 		Brands:                brands.NewModule(ctx),
-		Business:              business.NewModule(ctx),
+		Business:              business.NewModule(ctx, dbclient.Pool()),
 		Campaigns:             campaigns.NewModule(ctx),
 		Careers:               careers.NewModule(ctx),
 		Categories:            categories.NewModule(ctx),
@@ -559,12 +564,12 @@ func initializeModules(ctx context.Context) *apiModules {
 		SupportTickets:        supporttickets.NewModule(ctx),
 		Suppliers:             suppliers.NewModule(ctx),
 		Tax:                   tax.NewModule(ctx),
-		Team:                  team.NewModule(ctx),
+		Team:                  team.NewModule(ctx, dbclient.Pool()),
 		Templates:             templates.NewModule(ctx),
 		TimeOff:               timeoff.NewModule(ctx),
 		Timesheets:            timesheets.NewModule(ctx),
 		Training:              training.NewModule(ctx),
-		User:                  user.NewModule(ctx),
+		User:                  user.NewModule(ctx, dbclient.Pool()),
 		Variants:              variants.NewModule(ctx),
 		Views:                 views.NewModule(ctx),
 		Voxhire:               voxhire.NewModule(ctx),

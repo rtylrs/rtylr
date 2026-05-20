@@ -2,7 +2,9 @@ package errors
 
 import (
 	"encoding/json"
+	"errors"
 	"net/http"
+	"strings"
 )
 
 type Dialog struct {
@@ -74,4 +76,71 @@ func (e ErrorResponse) GetDialog() (Dialog, bool) {
 	}
 
 	return *e.Error.ErrorDialog, true
+}
+
+// FromError maps common sentinel errors (e.g. database and standard domain errors)
+// to a structured ServerError with correct HTTP status codes.
+func FromError(err error, fallbackMessage string) *ServerError {
+	if err == nil {
+		return nil
+	}
+
+	// If it's already a ServerError, return it as-is
+	se := &ServerError{}
+	if errors.As(err, &se) {
+		return se
+	}
+
+	errStr := err.Error()
+
+	// Handle sql.ErrNoRows or typical "not found" sentinels
+	if errStr == "sql: no rows in result set" || strings.Contains(strings.ToLower(errStr), "not found") {
+		return &ServerError{
+			HTTPCode: http.StatusNotFound,
+			Code:     http.StatusNotFound,
+			Message:  errStr,
+		}
+	}
+
+	// Handle duplicate key / constraint errors
+	if strings.Contains(strings.ToLower(errStr), "duplicate") || strings.Contains(strings.ToLower(errStr), "already exists") {
+		return &ServerError{
+			HTTPCode: http.StatusConflict,
+			Code:     http.StatusConflict,
+			Message:  errStr,
+		}
+	}
+
+	// Handle validation errors / bad requests
+	if strings.Contains(strings.ToLower(errStr), "invalid") ||
+		strings.Contains(strings.ToLower(errStr), "weak") ||
+		strings.Contains(strings.ToLower(errStr), "required") ||
+		strings.Contains(strings.ToLower(errStr), "validation") {
+		return &ServerError{
+			HTTPCode: http.StatusBadRequest,
+			Code:     http.StatusBadRequest,
+			Message:  errStr,
+		}
+	}
+
+	// Handle permission issues
+	if strings.Contains(strings.ToLower(errStr), "denied") || strings.Contains(strings.ToLower(errStr), "unauthorized") {
+		return &ServerError{
+			HTTPCode: http.StatusForbidden,
+			Code:     http.StatusForbidden,
+			Message:  errStr,
+		}
+	}
+
+	// Fallback to internal server error
+	msg := fallbackMessage
+	if msg == "" {
+		msg = errStr
+	}
+
+	return &ServerError{
+		HTTPCode: http.StatusInternalServerError,
+		Code:     http.StatusInternalServerError,
+		Message:  msg,
+	}
 }

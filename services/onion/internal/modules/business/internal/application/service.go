@@ -2,6 +2,7 @@ package application
 
 import (
 	"context"
+	"database/sql"
 	"time"
 
 	"github.com/voxire/onion/internal/modules/business/internal/domain"
@@ -14,15 +15,16 @@ const businessProfileCacheTTL = 10 * time.Minute
 
 type repository interface {
 	GetProfile(ctx context.Context, ownerID int64) (domain.BusinessProfile, error)
+	GetPublicBusiness(ctx context.Context, businessID int64) (domain.PublicBusiness, error)
 }
 
 type Service struct {
 	repo repository
 }
 
-func NewService(ctx context.Context) *Service {
+func NewService(_ context.Context, db *sql.DB) *Service {
 	return &Service{
-		repo: infrastructure.NewRepository(ctx),
+		repo: infrastructure.NewRepository(db),
 	}
 }
 
@@ -35,4 +37,8 @@ func (s *Service) GetProfile(ctx context.Context, ownerID int64) (domain.Busines
 		},
 		cacher.WithExpiry(ctx, businessProfileCacheTTL),
 	)
+}
+
+func (s *Service) GetPublicBusiness(ctx context.Context, businessID int64) (domain.PublicBusiness, error) {
+	return s.repo.GetPublicBusiness(ctx, businessID)
 }

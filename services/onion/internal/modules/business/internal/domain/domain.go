@@ -11,3 +11,11 @@ type BusinessProfile struct {
 	Timezone     string `json:"timezone"`
 	Plan         string `json:"plan"`
 }
+
+type PublicBusiness struct {
+	ID       int64  `json:"id"`
+	Name     string `json:"name"`
+	LogoURL  string `json:"logo_url"`
+	Currency string `json:"currency"`
+	Timezone string `json:"timezone"`
+}

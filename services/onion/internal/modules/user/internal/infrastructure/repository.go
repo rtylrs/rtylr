@@ -3,10 +3,12 @@ package infrastructure
 import (
 	"context"
 	"database/sql"
+	"errors"
+	"fmt"
+	"time"
 
 	"github.com/voxire/onion/internal/modules/user/internal/domain"
 	"github.com/voxire/onion/internal/modules/user/internal/infrastructure/persistence/sqlc"
-	"github.com/voxire/onion/internal/platform/database/dbclient"
 	"github.com/voxire/onion/internal/platform/logger"
 )
 
@@ -15,12 +17,10 @@ type Repository struct {
 	pool    *sql.DB
 }
 
-func NewRepository(_ context.Context) *Repository {
-	pool := dbclient.Pool()
-
+func NewRepository(db *sql.DB) *Repository {
 	return &Repository{
-		queries: sqlc.New(pool),
-		pool:    pool,
+		queries: sqlc.New(db),
+		pool:    db,
 	}
 }
 
@@ -181,4 +181,30 @@ func (r *Repository) RecordLogin(ctx context.Context, userID int64, email, metho
 		IpAddress: sql.NullString{String: ip, Valid: ip != ""},
 		Success:   sql.NullBool{Bool: success, Valid: true},
 	})
+}
+
+// AssignSubscription looks up the plan by slug and creates a trial subscription for the owner.
+func (r *Repository) AssignSubscription(ctx context.Context, ownerID int64, planSlug string) error {
+	var planID int64
+	// cross-schema read from plans — approved for subscription assignment on registration
+	err := r.pool.QueryRowContext(ctx,
+		`SELECT id FROM plans WHERE slug = ? AND is_active = TRUE`,
+		planSlug).Scan(&planID)
+	if err != nil {
+		if errors.Is(err, sql.ErrNoRows) {
+			return fmt.Errorf("plan not found: %s", planSlug)
+		}
+
+		return err
+	}
+
+	trialEnd := time.Now().AddDate(0, 0, 14)
+	// cross-schema write to subscriptions — approved for trial creation on registration
+	_, execErr := r.pool.ExecContext(ctx,
+		`INSERT INTO subscriptions (owner_id, plan_id, status, trial_ends_at)
+		 VALUES (?, ?, 'trial', ?)
+		 ON DUPLICATE KEY UPDATE plan_id = VALUES(plan_id), updated_at = CURRENT_TIMESTAMP`,
+		ownerID, planID, trialEnd)
+
+	return execErr
 }

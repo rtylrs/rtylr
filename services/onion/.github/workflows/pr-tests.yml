@@ -39,7 +39,6 @@ jobs:
       APP_ENV: test
       REDIS_ENABLED: "false"
       INMEMORY_CACHE_MAX_SIZE_MB: "32"
-      CACHED_MARSHALLING_ENABLED: "false"
       CI: "true"
 
     steps:

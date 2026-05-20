@@ -2,6 +2,7 @@ package user
 
 import (
 	"context"
+	"database/sql"
 
 	"github.com/go-chi/chi/v5"
 
@@ -49,9 +50,9 @@ func (v *userTokenValidator) ValidateTokenFull(ctx context.Context, token string
 	}, nil
 }
 
-func NewModule(ctx context.Context) *Module {
-	userRepo := infrastructure.NewRepository(ctx)
-	userService := application.NewService(ctx)
+func NewModule(ctx context.Context, db *sql.DB) *Module {
+	userRepo := infrastructure.NewRepository(db)
+	userService := application.NewService(ctx, db)
 
 	module := &Module{
 		UserService:    userService,
