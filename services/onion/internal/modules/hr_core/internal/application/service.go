@@ -2,6 +2,7 @@ package application
 
 import (
 	"context"
+	"database/sql"
 	"encoding/json"
 	"fmt"
 	"time"
@@ -28,8 +29,8 @@ type Service struct {
 	repo *infrastructure.Repository
 }
 
-func NewService(ctx context.Context) *Service {
-	return &Service{repo: infrastructure.NewRepository(ctx)}
+func NewService(_ context.Context, db *sql.DB) *Service {
+	return &Service{repo: infrastructure.NewRepository(db)}
 }
 
 // --- Employees ---

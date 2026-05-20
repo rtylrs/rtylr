@@ -6,12 +6,15 @@ import (
 
 	"github.com/voxire/onion/internal/modules/pos_member_locations/internal/domain"
 	"github.com/voxire/onion/internal/modules/pos_member_locations/internal/infrastructure/persistence/sqlc"
-	"github.com/voxire/onion/internal/platform/database/dbclient"
 )
 
-type Repository struct{}
+type Repository struct {
+	pool *sql.DB
+}
 
-func NewRepository(_ context.Context) *Repository { return &Repository{} }
+func NewRepository(db *sql.DB) *Repository {
+	return &Repository{pool: db}
+}
 
 type MyLocation struct {
 	LocationID int64  `json:"locationId"`
@@ -21,7 +24,7 @@ type MyLocation struct {
 }
 
 func (r *Repository) ListForUser(ctx context.Context, businessID, userID int64) ([]domain.MemberLocation, error) {
-	q := sqlc.New(dbclient.Pool())
+	q := sqlc.New(r.pool)
 	rows, err := q.ListMemberLocations(ctx, sqlc.ListMemberLocationsParams{BusinessID: businessID, UserID: userID})
 	if err != nil {
 		return nil, err
@@ -39,7 +42,7 @@ func (r *Repository) ListForUser(ctx context.Context, businessID, userID int64) 
 }
 
 func (r *Repository) GetMyLocations(ctx context.Context, businessID, userID int64) ([]MyLocation, error) {
-	q := sqlc.New(dbclient.Pool())
+	q := sqlc.New(r.pool)
 	rows, err := q.GetMyLocations(ctx, sqlc.GetMyLocationsParams{BusinessID: businessID, UserID: userID})
 	if err != nil {
 		return nil, err
@@ -55,7 +58,7 @@ func (r *Repository) GetMyLocations(ctx context.Context, businessID, userID int6
 }
 
 func (r *Repository) Assign(ctx context.Context, businessID, userID, locationID int64, canManagePOSUsers, canManageTerminals, canViewReports bool) (int64, error) {
-	q := sqlc.New(dbclient.Pool())
+	q := sqlc.New(r.pool)
 	res, err := q.AssignMemberToLocation(ctx, sqlc.AssignMemberToLocationParams{
 		BusinessID:         businessID,
 		UserID:             userID,
@@ -72,6 +75,6 @@ func (r *Repository) Assign(ctx context.Context, businessID, userID, locationID 
 }
 
 func (r *Repository) Remove(ctx context.Context, businessID, id int64) error {
-	q := sqlc.New(dbclient.Pool())
+	q := sqlc.New(r.pool)
 	return q.RemoveMemberFromLocation(ctx, sqlc.RemoveMemberFromLocationParams{BusinessID: businessID, ID: id})
 }

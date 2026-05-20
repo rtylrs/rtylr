@@ -2,6 +2,7 @@ package application
 
 import (
 	"context"
+	"database/sql"
 	"errors"
 	"strconv"
 	"time"
@@ -25,8 +26,8 @@ type Service struct {
 	repo repository
 }
 
-func NewService(ctx context.Context) *Service {
-	repo := infrastructure.NewRepository(ctx)
+func NewService(_ context.Context, db *sql.DB) *Service {
+	repo := infrastructure.NewRepository(db)
 
 	return &Service{
 		repo: repo,

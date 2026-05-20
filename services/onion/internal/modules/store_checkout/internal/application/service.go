@@ -2,6 +2,7 @@ package application
 
 import (
 	"context"
+	"database/sql"
 
 	"github.com/voxire/onion/internal/modules/store_checkout/internal/domain"
 	"github.com/voxire/onion/internal/modules/store_checkout/internal/infrastructure"
@@ -16,8 +17,8 @@ type repository interface {
 
 type Service struct{ repo repository }
 
-func NewService(ctx context.Context) *Service {
-	return &Service{repo: infrastructure.NewRepository(ctx)}
+func NewService(_ context.Context, db *sql.DB) *Service {
+	return &Service{repo: infrastructure.NewRepository(db)}
 }
 
 // store_checkout is write-only — no cached reads here. Mutations still wipe

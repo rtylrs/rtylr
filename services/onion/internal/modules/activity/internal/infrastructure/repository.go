@@ -2,10 +2,10 @@ package infrastructure
 
 import (
 	"context"
+	"database/sql"
 
 	"github.com/voxire/onion/internal/modules/activity/internal/domain"
 	"github.com/voxire/onion/internal/modules/activity/internal/infrastructure/persistence/sqlc"
-	"github.com/voxire/onion/internal/platform/database/dbclient"
 	"github.com/voxire/onion/internal/platform/logger"
 )
 
@@ -13,9 +13,9 @@ type Repository struct {
 	queries *sqlc.Queries
 }
 
-func NewRepository(_ context.Context) *Repository {
+func NewRepository(db *sql.DB) *Repository {
 	return &Repository{
-		queries: sqlc.New(dbclient.Pool()),
+		queries: sqlc.New(db),
 	}
 }
 

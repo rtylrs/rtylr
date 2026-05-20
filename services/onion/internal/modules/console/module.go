@@ -2,6 +2,7 @@ package console
 
 import (
 	"context"
+	"database/sql"
 	"time"
 
 	"github.com/go-chi/chi/v5"
@@ -15,8 +16,8 @@ type Module struct {
 	service *application.Service
 }
 
-func NewModule(ctx context.Context) *Module {
-	svc := application.NewService(ctx)
+func NewModule(ctx context.Context, db *sql.DB) *Module {
+	svc := application.NewService(ctx, db)
 
 	jwtSecret, _ := ctx.Value(jwtutils.JWTSecretKey).(string)
 	jwtDuration, _ := ctx.Value(jwtutils.JWTDurationKey).(time.Duration)

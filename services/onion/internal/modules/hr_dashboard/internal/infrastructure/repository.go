@@ -6,16 +6,15 @@ import (
 	"encoding/json"
 
 	"github.com/voxire/onion/internal/modules/hr_dashboard/internal/domain"
-	"github.com/voxire/onion/internal/platform/database/dbclient"
 )
 
 type Repository struct {
 	db *sql.DB
 }
 
-func NewRepository(_ context.Context) *Repository {
+func NewRepository(db *sql.DB) *Repository {
 	return &Repository{
-		db: dbclient.Pool(),
+		db: db,
 	}
 }
 

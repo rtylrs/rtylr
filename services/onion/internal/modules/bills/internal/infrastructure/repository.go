@@ -9,16 +9,19 @@ import (
 
 	"github.com/voxire/onion/internal/modules/bills/internal/domain"
 	"github.com/voxire/onion/internal/modules/bills/internal/infrastructure/persistence/sqlc"
-	"github.com/voxire/onion/internal/platform/database/dbclient"
 	"github.com/voxire/onion/internal/platform/logger"
 )
 
 type Repository struct {
+	pool    *sql.DB
 	queries *sqlc.Queries
 }
 
-func NewRepository(_ context.Context) *Repository {
-	return &Repository{queries: sqlc.New(dbclient.Pool())}
+func NewRepository(db *sql.DB) *Repository {
+	return &Repository{
+		queries: sqlc.New(db),
+		pool:    db,
+	}
 }
 
 func (r *Repository) Get(ctx context.Context, ownerID, id int64) (domain.Bill, error) {

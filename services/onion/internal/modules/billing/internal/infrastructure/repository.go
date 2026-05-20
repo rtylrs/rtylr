@@ -5,16 +5,15 @@ import (
 	"database/sql"
 
 	"github.com/voxire/onion/internal/modules/billing/internal/domain"
-	"github.com/voxire/onion/internal/platform/database/dbclient"
 )
 
 type Repository struct {
 	pool *sql.DB
 }
 
-func NewRepository(_ context.Context) *Repository {
+func NewRepository(db *sql.DB) *Repository {
 	return &Repository{
-		pool: dbclient.Pool(),
+		pool: db,
 	}
 }
 

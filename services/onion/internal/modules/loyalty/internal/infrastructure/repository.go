@@ -8,17 +8,17 @@ import (
 
 	"github.com/voxire/onion/internal/modules/loyalty/internal/domain"
 	"github.com/voxire/onion/internal/modules/loyalty/internal/infrastructure/persistence/sqlc"
-	"github.com/voxire/onion/internal/platform/database/dbclient"
 	"github.com/voxire/onion/internal/platform/logger"
 )
 
 type Repository struct {
+	pool    *sql.DB
 	queries *sqlc.Queries
 }
 
-func NewRepository(_ context.Context) *Repository {
+func NewRepository(db *sql.DB) *Repository {
 	return &Repository{
-		queries: sqlc.New(dbclient.Pool()),
+		queries: sqlc.New(db),
 	}
 }
 
@@ -190,7 +190,7 @@ func (r *Repository) ListMembers(ctx context.Context, ownerID int64, limit, offs
 		offset = 0
 	}
 	// cross-schema read from crm_customers — loyalty members projection
-	rows, err := dbclient.Pool().QueryContext(ctx, `
+	rows, err := r.pool.QueryContext(ctx, `
 		SELECT id, owner_id,
 		       CONCAT_WS(' ', first_name, COALESCE(last_name, '')) AS name,
 		       COALESCE(loyalty_points, 0),
@@ -247,7 +247,7 @@ func (r *Repository) ListRewards(ctx context.Context, ownerID int64, activeOnly 
 	}
 	q += " ORDER BY points_cost ASC, id ASC"
 
-	rows, err := dbclient.Pool().QueryContext(ctx, q, args...)
+	rows, err := r.pool.QueryContext(ctx, q, args...)
 	if err != nil {
 		logger.Ctx(ctx).Error("Failed to list loyalty rewards", logger.Error(err))
 		return nil, err
@@ -293,7 +293,7 @@ func (r *Repository) UpsertReward(ctx context.Context, rw domain.LoyaltyReward) 
 		stock = sql.NullInt64{Int64: int64(*rw.Stock), Valid: true}
 	}
 	if rw.ID == 0 {
-		res, err := dbclient.Pool().ExecContext(ctx, `
+		res, err := r.pool.ExecContext(ctx, `
 			INSERT INTO crm_loyalty_rewards (owner_id, name, description, category, points_cost, stock, icon, active)
 			VALUES (?, ?, ?, ?, ?, ?, ?, ?)`,
 			rw.OwnerID, rw.Name, rw.Description, rw.Category, rw.PointsCost, stock, rw.Icon, rw.Active)
@@ -307,7 +307,7 @@ func (r *Repository) UpsertReward(ctx context.Context, rw domain.LoyaltyReward) 
 		}
 		return id, nil
 	}
-	_, err := dbclient.Pool().ExecContext(ctx, `
+	_, err := r.pool.ExecContext(ctx, `
 		UPDATE crm_loyalty_rewards
 		SET name = ?, description = ?, category = ?, points_cost = ?, stock = ?, icon = ?, active = ?
 		WHERE id = ? AND owner_id = ?`,

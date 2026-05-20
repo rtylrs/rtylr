@@ -2,6 +2,7 @@ package application
 
 import (
 	"context"
+	"database/sql"
 	"errors"
 	"fmt"
 	"time"
@@ -57,8 +58,8 @@ type Service struct {
 	JWT  *jwtutils.JWTHelper
 }
 
-func NewService(ctx context.Context) *Service {
-	return &Service{repo: infrastructure.NewRepository(ctx)}
+func NewService(_ context.Context, db *sql.DB) *Service {
+	return &Service{repo: infrastructure.NewRepository(db)}
 }
 
 func (s *Service) Initialize(ctx context.Context, jwtSecret string, jwtDuration time.Duration) {

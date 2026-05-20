@@ -9,7 +9,6 @@ import (
 	"time"
 
 	"github.com/voxire/onion/internal/modules/oauth/internal/domain"
-	"github.com/voxire/onion/internal/platform/database/dbclient"
 )
 
 type Repository struct {
@@ -19,8 +18,8 @@ type Repository struct {
 // NewRepository accepts a ctx for parity with other modules but no longer
 // stashes it on the struct — every method takes ctx as the first arg so
 // request cancellation / deadlines / trace ids propagate correctly.
-func NewRepository(_ context.Context) *Repository {
-	return &Repository{db: dbclient.Pool()}
+func NewRepository(db *sql.DB) *Repository {
+	return &Repository{db: db}
 }
 
 func (r *Repository) GetClient(ctx context.Context, clientID string) (*domain.Client, error) {

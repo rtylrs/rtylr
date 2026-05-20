@@ -1,12 +1,10 @@
 package infrastructure
 
 import (
-	"context"
 	"database/sql"
 	"strconv"
 	"time"
 
-	"github.com/voxire/onion/internal/platform/database/dbclient"
 	"github.com/voxire/onion/internal/platform/logger"
 )
 
@@ -21,8 +19,8 @@ type Repository struct {
 	pool *sql.DB
 }
 
-func NewRepository(_ context.Context) *Repository {
-	return &Repository{pool: dbclient.Pool()}
+func NewRepository(db *sql.DB) *Repository {
+	return &Repository{pool: db}
 }
 
 // decimalToMinorUnits converts a DECIMAL(10,2) string/bytes value read out

@@ -7,17 +7,17 @@ import (
 
 	"github.com/voxire/onion/internal/modules/feedback/internal/domain"
 	"github.com/voxire/onion/internal/modules/feedback/internal/infrastructure/persistence/sqlc"
-	"github.com/voxire/onion/internal/platform/database/dbclient"
 	"github.com/voxire/onion/internal/platform/logger"
 )
 
 type Repository struct {
+	pool    *sql.DB
 	queries *sqlc.Queries
 }
 
-func NewRepository(_ context.Context) *Repository {
+func NewRepository(db *sql.DB) *Repository {
 	return &Repository{
-		queries: sqlc.New(dbclient.Pool()),
+		queries: sqlc.New(db),
 	}
 }
 
@@ -64,7 +64,7 @@ func (r *Repository) List(ctx context.Context, ownerID int64, filters domain.Lis
 
 	var total int64
 
-	if err := dbclient.Pool().QueryRowContext(ctx,
+	if err := r.pool.QueryRowContext(ctx,
 		"SELECT COUNT(*) FROM crm_feedback WHERE "+whereSQL, args...).Scan(&total); err != nil {
 		logger.Ctx(ctx).Error("Failed to count feedback",
 			logger.Error(err),
@@ -77,7 +77,7 @@ func (r *Repository) List(ctx context.Context, ownerID int64, filters domain.Lis
 	listArgs := append([]interface{}{}, args...)
 	listArgs = append(listArgs, pageSize, offset)
 
-	rows, err := dbclient.Pool().QueryContext(ctx,
+	rows, err := r.pool.QueryContext(ctx,
 		"SELECT id, owner_id, customer_id, type, score, comment, source, created_at "+
 			"FROM crm_feedback WHERE "+whereSQL+
 			" ORDER BY created_at DESC LIMIT ? OFFSET ?", listArgs...)

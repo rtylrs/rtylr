@@ -8,15 +8,14 @@ import (
 	"time"
 
 	"github.com/voxire/onion/internal/modules/subscriptions/internal/domain"
-	"github.com/voxire/onion/internal/platform/database/dbclient"
 )
 
 type Repository struct {
 	db *sql.DB
 }
 
-func NewRepository(_ context.Context) *Repository {
-	return &Repository{db: dbclient.Pool()}
+func NewRepository(db *sql.DB) *Repository {
+	return &Repository{db: db}
 }
 
 // ── Plans ─────────────────────────────────────────────────────────────────────
