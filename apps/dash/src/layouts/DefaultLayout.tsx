@@ -377,6 +377,8 @@ const DefaultLayout: React.FC<DefaultLayoutProps> = ({ children }) => {
               <DropdownMenuTrigger>
                 <button className="flex items-center gap-2.5 w-full px-3 py-2 rounded-lg transition-colors duration-150 hover:bg-[var(--dash-hover)]">
                   <Avatar
+                    src={`https://api.dicebear.com/9.x/avataaars/svg?seed=${encodeURIComponent(userEmail || userName || 'user')}`}
+                    alt={userName || 'User'}
                     initials={getInitials(userName)}
                     size="sm"
                     className="shrink-0"
