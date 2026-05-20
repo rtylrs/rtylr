@@ -100,10 +100,16 @@ func TestEnableDisable_Delegates(t *testing.T) {
 }
 
 func TestIsEnabled(t *testing.T) {
-	s := &Service{repo: &mockRepo{enabled: []domain.BusinessAddon{
-		{AddonID: "y", IsEnabled: true},
-		{AddonID: "z", IsEnabled: false},
-	}}}
+	s := &Service{repo: &mockRepo{
+		all: []domain.Addon{
+			{ID: "y", Name: "Addon Y"},
+			{ID: "z", Name: "Addon Z"},
+		},
+		enabled: []domain.BusinessAddon{
+			{AddonID: "y", IsEnabled: true},
+			{AddonID: "z", IsEnabled: false},
+		},
+	}}
 	if !s.IsEnabled(context.Background(), 1, "y") {
 		t.Error("expected y enabled")
 	}
