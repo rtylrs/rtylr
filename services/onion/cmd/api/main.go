@@ -661,13 +661,6 @@ func setupRoutes(ctx context.Context, r *chi.Mux) {
 	http.RegisterStatusRoutes(ctx, r)
 
 	http.AutoRegisterRoutes(ctx, modules, r)
-
-	// Explicit registration guard: if AutoRegisterRoutes skipped HRDashboard via
-	// reflection, this call will register it. If it was already registered, chi
-	// will panic with "routing duplicate" — remove this line if that happens.
-	if modules.HRDashboard != nil {
-		modules.HRDashboard.RegisterRoutes(ctx, r)
-	}
 }
 
 type apiServer struct{}

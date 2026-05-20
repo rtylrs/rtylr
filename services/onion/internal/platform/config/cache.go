@@ -22,7 +22,6 @@ func GetRedisURL() string {
 
 const (
 	InMemoryCacheMaxSizeMbEnvVar   = "INMEMORY_CACHE_MAX_SIZE_MB"
-	CachedMarshallingEnabledEnvVar = "CACHED_MARSHALLING_ENABLED"
 )
 
 // Redis Configuration.
@@ -72,6 +71,4 @@ func GetInMemoryCacheMaxSizeMb() int {
 	return size
 }
 
-func IsCachedMarshallingEnabled() bool {
-	return strings.ToLower(os.Getenv(CachedMarshallingEnabledEnvVar)) == "true"
-}
+

@@ -4,7 +4,6 @@ import (
 	"context"
 	"time"
 
-	"github.com/voxire/onion/internal/platform/config"
 	"github.com/voxire/onion/internal/platform/logger"
 )
 
@@ -17,7 +16,6 @@ type cacherConfiguration struct {
 	memoryOnly          bool
 	remoteOnly          bool
 	evictionProbability float32
-	cachedMarshalling   bool
 }
 
 func getDefaultConfiguration() cacherConfiguration {
@@ -26,7 +24,6 @@ func getDefaultConfiguration() cacherConfiguration {
 		memoryOnly:          false,
 		remoteOnly:          false,
 		evictionProbability: 0,
-		cachedMarshalling:   false,
 	}
 }
 
@@ -73,10 +70,4 @@ func RemoteOnly() ClientOption {
 	}
 }
 
-func WithCachedMarshalling() ClientOption {
-	return func(c *cacherConfiguration) {
-		if config.IsCachedMarshallingEnabled() {
-			c.cachedMarshalling = true
-		}
-	}
-}
+

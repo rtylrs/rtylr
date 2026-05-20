@@ -154,7 +154,7 @@ func Ctx(ctx context.Context) *Logger {
 }
 
 func (l *Logger) Info(msg string, fields ...Field) {
-	l.LogAttrs(l.ctx, slog.LevelInfo, "\""+msg+"\"", convertFields(fields)...)
+	l.LogAttrs(l.ctx, slog.LevelInfo, msg, convertFields(fields)...)
 }
 
 func (l *Logger) Debug(msg string, fields ...Field) {
