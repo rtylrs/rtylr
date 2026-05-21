@@ -72,6 +72,7 @@ type ConfigPayload struct {
 	EnableNewsletterSignup bool     `json:"enable_newsletter_signup"`
 	AboutContent           string   `json:"about_content"`
 	FooterSubText          string   `json:"footer_sub_text"`
+	Slug                   string   `json:"slug"`
 }
 
 type GetConfigByOwnerResponse struct {
@@ -131,6 +132,7 @@ func newConfigPayload(config domain.Config) *ConfigPayload {
 		EnableNewsletterSignup: config.EnableNewsletterSignup,
 		AboutContent:           config.AboutContent,
 		FooterSubText:          config.FooterSubText,
+		Slug:                   config.BusinessSlug,
 	}
 }
 

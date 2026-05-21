@@ -51,6 +51,19 @@ func (r *Repository) GetConfig(ctx context.Context, ownerID string) (domain.Conf
 	var config domain.Config
 	config.FromRows(rows[0])
 
+	// Enrich with business slug from the businesses table. owner_id on
+	// businesses maps to the same numeric user id used by configs, so
+	// we can resolve it cheaply with a single targeted query without
+	// reaching into the business module.
+	var slug sql.NullString
+	if err := r.pool.QueryRowContext(ctx,
+		`SELECT slug FROM businesses WHERE owner_id = ? LIMIT 1`, ownerIDInt,
+	).Scan(&slug); err != nil && !errors.Is(err, sql.ErrNoRows) {
+		logger.Ctx(ctx).Warn("Failed to load business slug for config", logger.Error(err))
+	} else if slug.Valid {
+		config.BusinessSlug = slug.String
+	}
+
 	return config, nil
 }
 

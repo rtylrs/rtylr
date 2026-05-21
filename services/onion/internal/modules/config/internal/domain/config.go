@@ -26,6 +26,7 @@ type Config struct {
 	EnableNewsletterSignup bool
 	AboutContent           string
 	FooterSubText          string
+	BusinessSlug           string
 }
 
 func (c *Config) FromRows(row sqlc.GetConfigRow) {
