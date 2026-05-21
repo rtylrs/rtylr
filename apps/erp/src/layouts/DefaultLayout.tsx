@@ -4,7 +4,7 @@ import TrialBanner from '../shared/components/TrialBanner';
 import { useForesightLinks } from '@voxire/utils';
 import { useLocation, Link, useNavigate } from 'react-router-dom';
 import { motion, AnimatePresence } from 'motion/react';
-import { APP_URLS } from '@voxire/config';
+import { APP_URLS, getAvatarUrl } from '@voxire/config';
 import { signOut, useUserStore } from '@voxire/auth';
 import { CaretPanel, CaretButton, useCaretStore } from '@voxire/caret';
 import {
@@ -126,16 +126,6 @@ function getPageTitle(pathname: string): string {
   if (routeLabels[pathname]) return routeLabels[pathname];
   const match = Object.keys(routeLabels).find((key) => pathname.startsWith(key) && key !== '/');
   return match ? routeLabels[match] : 'ERP';
-}
-
-function getInitials(name?: string | null): string {
-  if (!name) return '?';
-  return name
-    .split(' ')
-    .map((n) => n[0])
-    .join('')
-    .toUpperCase()
-    .slice(0, 2);
 }
 
 type Theme = 'dark' | 'light' | 'system';
@@ -430,12 +420,12 @@ const DefaultLayout: React.FC<DefaultLayoutProps> = ({ children }) => {
                   (e.currentTarget as HTMLElement).style.background = 'transparent';
                 }}
               >
-                <span
-                  className="flex items-center justify-center h-6 w-6 rounded-full text-[10px] font-bold shrink-0"
-                  style={{ background: 'rgba(245,158,11,0.15)', color: '#f59e0b' }}
-                >
-                  {getInitials(userName)}
-                </span>
+                <img
+                  src={getAvatarUrl(userEmail || userName)}
+                  alt={userName}
+                  className="h-6 w-6 rounded-full shrink-0 object-cover"
+                  style={{ background: 'rgba(245,158,11,0.15)' }}
+                />
                 <div className="flex flex-col items-start min-w-0 flex-1">
                   <span
                     className="text-xs font-medium truncate w-full text-left"

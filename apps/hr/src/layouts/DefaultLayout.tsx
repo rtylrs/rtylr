@@ -2,7 +2,7 @@ import React, { useEffect, useRef, useState } from 'react';
 import { useLocation, Link } from 'react-router-dom';
 import { motion, AnimatePresence } from 'motion/react';
 import { useTranslation } from 'react-i18next';
-import { APP_URLS } from '@voxire/config';
+import { APP_URLS, getAvatarUrl } from '@voxire/config';
 import { signOut } from '@voxire/auth';
 import {
   LayoutDashboard,
@@ -303,15 +303,6 @@ function UserMenu({ theme, setTheme }: { theme: Theme; setTheme: (t: Theme) => v
   const userEmail = rawUser?.email || rawUser?.emailAddress || null;
   const userName = rawUser?.name || rawUser?.firstName || userEmail || 'User';
 
-  function getInitials(name: string) {
-    return name
-      .split(' ')
-      .map((n: string) => n[0])
-      .join('')
-      .toUpperCase()
-      .slice(0, 2);
-  }
-
   return (
     <div style={{ position: 'relative' }}>
       <button
@@ -335,24 +326,18 @@ function UserMenu({ theme, setTheme }: { theme: Theme; setTheme: (t: Theme) => v
           ((e.currentTarget as HTMLButtonElement).style.background = 'transparent')
         }
       >
-        {/* Avatar */}
-        <span
+        <img
+          src={getAvatarUrl(userEmail || userName)}
+          alt={userName}
           style={{
-            display: 'flex',
-            alignItems: 'center',
-            justifyContent: 'center',
             height: 28,
             width: 28,
             borderRadius: '8px',
             background: 'rgba(139,92,246,0.15)',
-            color: ACCENT,
-            fontSize: '11px',
-            fontWeight: 700,
             flexShrink: 0,
+            objectFit: 'cover',
           }}
-        >
-          {getInitials(userName)}
-        </span>
+        />
         <div
           style={{
             display: 'flex',

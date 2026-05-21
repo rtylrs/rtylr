@@ -32,14 +32,14 @@ import {
   X,
   Shield,
 } from 'lucide-react';
-import { APP_URLS, useFeatureFlag, FLAG_KEYS } from '@voxire/config';
+import { APP_URLS, useFeatureFlag, FLAG_KEYS, getAvatarUrl } from '@voxire/config';
 import { CaretPanel, CaretButton, useCaretStore } from '@voxire/caret';
 import { useForesightLinks } from '@voxire/utils';
 import { signOut, useUserStore as useAuthUserStore } from '@voxire/auth';
 import { useUserStore } from '../shared/stores/userStore';
 import { useThemeStore } from '../shared/stores/themeStore';
 import { useFlowStore } from '../shared/stores/flowStore';
-import { cn, getInitials } from '../shared/lib/utils';
+import { cn } from '../shared/lib/utils';
 import CommandBar from '../shared/components/CommandBar';
 import QuickCreate from '../shared/components/QuickCreate';
 import BulkEditBar from '../shared/components/BulkEditBar';
@@ -869,15 +869,12 @@ const FlowLayout: React.FC<FlowLayoutProps> = ({ children }) => {
                 onClick={() => setUserMenuOpen((o) => !o)}
                 className="flex items-center gap-2.5 w-full px-3 py-2 rounded-md transition-colors hover:bg-[var(--flow-hover)]"
               >
-                <span
-                  className="h-6 w-6 rounded-full flex items-center justify-center text-[10px] font-bold shrink-0"
-                  style={{
-                    background: 'var(--accent-muted)',
-                    color: 'var(--accent)',
-                  }}
-                >
-                  {getInitials(userName)}
-                </span>
+                <img
+                  src={getAvatarUrl(userEmail || userName)}
+                  alt={userName}
+                  className="h-6 w-6 rounded-full shrink-0 object-cover"
+                  style={{ background: 'var(--accent-muted)' }}
+                />
                 <div className="flex flex-col items-start min-w-0 flex-1">
                   <span
                     className="text-[12px] font-medium truncate w-full text-left"

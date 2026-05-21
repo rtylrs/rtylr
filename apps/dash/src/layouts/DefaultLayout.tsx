@@ -5,7 +5,7 @@ import { motion, AnimatePresence } from 'motion/react';
 import { useQuery } from '@tanstack/react-query';
 import { unwrap } from '@voxire/api';
 import { safe } from '../shared/lib/api';
-import { APP_URLS } from '@voxire/config';
+import { APP_URLS, getAvatarUrl } from '@voxire/config';
 import { signOut } from '@voxire/auth';
 import {
   LayoutDashboard,
@@ -377,7 +377,7 @@ const DefaultLayout: React.FC<DefaultLayoutProps> = ({ children }) => {
               <DropdownMenuTrigger>
                 <button className="flex items-center gap-2.5 w-full px-3 py-2 rounded-lg transition-colors duration-150 hover:bg-[var(--dash-hover)]">
                   <Avatar
-                    src={`https://api.dicebear.com/9.x/fun-emoji/svg?seed=${encodeURIComponent(userEmail || userName || 'user')}`}
+                    src={getAvatarUrl(userEmail || userName)}
                     alt={userName || 'User'}
                     initials={getInitials(userName)}
                     size="sm"

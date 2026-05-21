@@ -3,7 +3,7 @@ import { cn } from '@voxire/ui';
 import { useLocation, Link } from 'react-router-dom';
 import { useForesightLinks } from '@voxire/utils';
 import { motion, AnimatePresence } from 'motion/react';
-import { APP_URLS } from '@voxire/config';
+import { APP_URLS, getAvatarUrl } from '@voxire/config';
 import { signOut, useUserStore } from '@voxire/auth';
 import { CaretPanel, CaretButton, useCaretStore } from '@voxire/caret';
 import {
@@ -62,16 +62,6 @@ function getPageTitle(pathname: string): string {
   if (routeLabels[pathname]) return routeLabels[pathname];
   const match = Object.keys(routeLabels).find((key) => pathname.startsWith(key) && key !== '/');
   return match ? routeLabels[match] : 'Insights';
-}
-
-function getInitials(name?: string | null): string {
-  if (!name) return '?';
-  return name
-    .split(' ')
-    .map((n) => n[0])
-    .join('')
-    .toUpperCase()
-    .slice(0, 2);
 }
 
 type Theme = 'dark' | 'light' | 'system';
@@ -276,12 +266,12 @@ const DefaultLayout: React.FC<DefaultLayoutProps> = ({ children }) => {
                   (e.currentTarget as HTMLElement).style.background = 'transparent';
                 }}
               >
-                <span
-                  className="flex items-center justify-center h-6 w-6 rounded-full text-[10px] font-bold shrink-0"
-                  style={{ background: 'rgba(99,102,241,0.15)', color: ACCENT }}
-                >
-                  {getInitials(userName)}
-                </span>
+                <img
+                  src={getAvatarUrl(userEmail || userName)}
+                  alt={userName}
+                  className="h-6 w-6 rounded-full shrink-0 object-cover"
+                  style={{ background: 'rgba(99,102,241,0.15)' }}
+                />
                 <div className="flex flex-col items-start min-w-0 flex-1">
                   <span
                     className="text-xs font-medium truncate w-full text-left"
