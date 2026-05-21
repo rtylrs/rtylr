@@ -29,6 +29,7 @@ CREATE TABLE IF NOT EXISTS hr_locations (
     id BIGINT NOT NULL AUTO_INCREMENT PRIMARY KEY,
     owner_id BIGINT NOT NULL,
     name VARCHAR(255) NOT NULL,
+    slug VARCHAR(80) NULL,
     address TEXT,
     city VARCHAR(100),
     country VARCHAR(100),
@@ -36,9 +37,11 @@ CREATE TABLE IF NOT EXISTS hr_locations (
     latitude DOUBLE NULL,
     longitude DOUBLE NULL,
     is_default BOOLEAN NOT NULL DEFAULT FALSE,
+    is_active BOOLEAN NOT NULL DEFAULT TRUE,
     created_at TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP,
     updated_at TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
-    INDEX idx_hr_locations_owner (owner_id)
+    INDEX idx_hr_locations_owner (owner_id),
+    UNIQUE KEY uniq_hr_locations_owner_slug (owner_id, slug)
 );
 
 CREATE TABLE IF NOT EXISTS hr_work_schedules (
