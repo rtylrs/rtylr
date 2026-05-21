@@ -28,9 +28,22 @@ export function getLogoUrl(appId?: string, theme: 'dark' | 'light' = 'light'): s
   return ASSETS.logos[theme];
 }
 
-export const AVATAR_STYLE = 'thumbs';
+export const AVATAR_STYLES = ['thumbs', 'bottts-neutral', 'fun-emoji', 'lorelei'] as const;
+export type AvatarStyle = (typeof AVATAR_STYLES)[number];
 
-export function getAvatarUrl(seed?: string | null): string {
-  const s = encodeURIComponent(seed || 'user');
-  return `https://api.dicebear.com/9.x/${AVATAR_STYLE}/svg?seed=${s}`;
+function hashSeed(s: string): number {
+  let h = 0;
+  for (let i = 0; i < s.length; i++) h = (h * 31 + s.charCodeAt(i)) >>> 0;
+  return h;
+}
+
+export function pickAvatarStyle(seed?: string | null): AvatarStyle {
+  const key = (seed || 'user').trim().toLowerCase();
+  return AVATAR_STYLES[hashSeed(key) % AVATAR_STYLES.length];
+}
+
+export function getAvatarUrl(seed?: string | null, style?: AvatarStyle): string {
+  const key = seed || 'user';
+  const chosen = style || pickAvatarStyle(key);
+  return `https://api.dicebear.com/9.x/${chosen}/svg?seed=${encodeURIComponent(key)}`;
 }
