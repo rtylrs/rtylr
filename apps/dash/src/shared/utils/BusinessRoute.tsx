@@ -13,6 +13,7 @@ import {
   BarChart3,
 } from 'lucide-react';
 import { unwrap } from '@voxire/api';
+import { Avatar } from '@voxire/ui';
 import { useUserStore, type StoredUser } from '../stores/userStore';
 import { useConfigStore } from '../stores/configStore';
 import { safe } from '../lib/api';
@@ -128,25 +129,9 @@ function StaffView({ user }: { user: StoredUser }): React.JSX.Element {
             type="button"
             onClick={() => setMenuOpen(!menuOpen)}
             aria-label="User menu"
-            style={{
-              width: 36,
-              height: 36,
-              borderRadius: '50%',
-              border: 'none',
-              padding: 0,
-              cursor: 'pointer',
-              background: '#4583C4',
-              overflow: 'hidden',
-              display: 'flex',
-              alignItems: 'center',
-              justifyContent: 'center',
-            }}
+            style={{ border: 'none', padding: 0, background: 'transparent', cursor: 'pointer' }}
           >
-            <img
-              src={avatarUrl}
-              alt={fullName || 'User'}
-              style={{ width: '100%', height: '100%', objectFit: 'cover' }}
-            />
+            <Avatar src={avatarUrl} alt={fullName || 'User'} size="md" />
           </button>
           {menuOpen && (
             <div

@@ -3,6 +3,7 @@ import { useLocation, Link } from 'react-router-dom';
 import { motion, AnimatePresence } from 'motion/react';
 import { useTranslation } from 'react-i18next';
 import { APP_URLS, getAvatarUrl } from '@voxire/config';
+import { Avatar } from '@voxire/ui';
 import { signOut } from '@voxire/auth';
 import {
   LayoutDashboard,
@@ -326,16 +327,15 @@ function UserMenu({ theme, setTheme }: { theme: Theme; setTheme: (t: Theme) => v
           ((e.currentTarget as HTMLButtonElement).style.background = 'transparent')
         }
       >
-        <img
+        <Avatar
           src={getAvatarUrl(userEmail || userName)}
           alt={userName}
+          size="sm"
           style={{
             height: 28,
             width: 28,
             borderRadius: '8px',
             background: 'rgba(139,92,246,0.15)',
-            flexShrink: 0,
-            objectFit: 'cover',
           }}
         />
         <div

@@ -33,6 +33,7 @@ import {
   Shield,
 } from 'lucide-react';
 import { APP_URLS, useFeatureFlag, FLAG_KEYS, getAvatarUrl } from '@voxire/config';
+import { Avatar } from '@voxire/ui';
 import { CaretPanel, CaretButton, useCaretStore } from '@voxire/caret';
 import { useForesightLinks } from '@voxire/utils';
 import { signOut, useUserStore as useAuthUserStore } from '@voxire/auth';
@@ -869,10 +870,11 @@ const FlowLayout: React.FC<FlowLayoutProps> = ({ children }) => {
                 onClick={() => setUserMenuOpen((o) => !o)}
                 className="flex items-center gap-2.5 w-full px-3 py-2 rounded-md transition-colors hover:bg-[var(--flow-hover)]"
               >
-                <img
+                <Avatar
                   src={getAvatarUrl(userEmail || userName)}
                   alt={userName}
-                  className="h-6 w-6 rounded-full shrink-0 object-cover"
+                  size="sm"
+                  className="h-6 w-6"
                   style={{ background: 'var(--accent-muted)' }}
                 />
                 <div className="flex flex-col items-start min-w-0 flex-1">

@@ -1,5 +1,5 @@
 import React, { useEffect, useRef, useState } from 'react';
-import { cn } from '@voxire/ui';
+import { cn, Avatar } from '@voxire/ui';
 import { useLocation, Link } from 'react-router-dom';
 import { useForesightLinks } from '@voxire/utils';
 import { motion, AnimatePresence } from 'motion/react';
@@ -266,10 +266,11 @@ const DefaultLayout: React.FC<DefaultLayoutProps> = ({ children }) => {
                   (e.currentTarget as HTMLElement).style.background = 'transparent';
                 }}
               >
-                <img
+                <Avatar
                   src={getAvatarUrl(userEmail || userName)}
                   alt={userName}
-                  className="h-6 w-6 rounded-full shrink-0 object-cover"
+                  size="sm"
+                  className="h-6 w-6"
                   style={{ background: 'rgba(99,102,241,0.15)' }}
                 />
                 <div className="flex flex-col items-start min-w-0 flex-1">
