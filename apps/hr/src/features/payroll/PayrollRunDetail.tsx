@@ -5,7 +5,7 @@ import { useVirtualizer } from '@tanstack/react-virtual';
 import { CheckCircle, Download, ArrowLeft } from 'lucide-react';
 import { useGetPayrollRun, useApprovePayrollRun } from '../../shared/hooks/queries/usePayroll';
 import type { PayrollEntryPayload } from '../../shared/hooks/queries/usePayroll';
-import ErrorBoundary from '../../shared/components/ErrorBoundary';
+import { ErrorBoundary } from '@voxire/ui';
 import { SectionHeader, Button, Skeleton, Pill, Breadcrumbs } from '../../shared/components/ui';
 
 const STATUS_COLORS: Record<string, string> = {

@@ -3,7 +3,7 @@ import { RouteObject, Navigate } from 'react-router-dom';
 import { AppFlagGuard, FLAG_KEYS } from '@voxire/config';
 import FlowLayout from '../layouts/FlowLayout';
 import { PERSONAL_WORKSPACE_ID } from '../shared/lib/personalWorkspace';
-import ErrorBoundary from '../shared/components/ErrorBoundary';
+import { ErrorBoundary } from '@voxire/ui';
 
 const WorkspaceDashboard = React.lazy(
   () => import('../features/workspace-dashboard/WorkspaceDashboard')

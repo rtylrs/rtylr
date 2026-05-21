@@ -19,7 +19,7 @@ import {
   Select,
   Label,
 } from '../../shared/components/ui';
-import ErrorBoundary from '../../shared/components/ErrorBoundary';
+import { ErrorBoundary } from '@voxire/ui';
 
 const DAY_KEYS = ['mon', 'tue', 'wed', 'thu', 'fri', 'sat', 'sun'] as const;
 

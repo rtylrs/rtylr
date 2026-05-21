@@ -3,7 +3,7 @@ import { Routes, Route, Navigate } from 'react-router-dom';
 import { AppGuard } from '@voxire/auth';
 import { unwrap } from '@voxire/api';
 import { safe } from './shared/lib/api';
-import ErrorBoundary from './shared/components/ErrorBoundary';
+import { ErrorBoundary } from '@voxire/ui';
 import HRConfigRoute from './features/setup-wizard/HRConfigRoute';
 import DefaultLayout from './layouts/DefaultLayout';
 import WizardLayout from './layouts/WizardLayout';

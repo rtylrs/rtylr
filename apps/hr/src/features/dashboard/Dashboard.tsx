@@ -25,7 +25,7 @@ import { useHRDashboard } from './useDashboard';
 import { useStaff } from '../staff/useStaff';
 import { useExpiringDocuments, useOvertimeAlerts } from '../../shared/hooks/useHrExtras';
 import { useHRConfigStore } from '../../shared/stores/hrConfigStore';
-import ErrorBoundary from '../../shared/components/ErrorBoundary';
+import { ErrorBoundary } from '@voxire/ui';
 import BirthdayWidget from '../../shared/components/BirthdayWidget';
 import AnniversaryWidget from '../../shared/components/AnniversaryWidget';
 import { Card, StatCard, useIsMobile, Skeleton } from '../../shared/components/ui';

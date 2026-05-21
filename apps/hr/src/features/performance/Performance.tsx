@@ -2,7 +2,7 @@ import React, { useState } from 'react';
 import { useTranslation } from 'react-i18next';
 import { useNavigate } from 'react-router-dom';
 import { BarChart3 } from 'lucide-react';
-import ErrorBoundary from '../../shared/components/ErrorBoundary';
+import { ErrorBoundary } from '@voxire/ui';
 import {
   SectionHeader,
   Button,
