@@ -77,6 +77,80 @@ export interface PublicMenuBundle {
   items: PublicMenuItem[];
 }
 
+export interface PublicLocationSummary {
+  id: number;
+  name: string;
+  slug: string;
+  address: string;
+  timezone: string;
+  isActive: boolean;
+}
+
+export interface PublicBusinessBySlugBundle {
+  business: PublicBusiness & { slug: string };
+  locations: PublicLocationSummary[];
+}
+
+interface PublicBusinessBySlugApi {
+  business: {
+    id: number;
+    name: string;
+    slug: string;
+    logo_url: string;
+    currency: string;
+    timezone: string;
+  };
+  locations: {
+    id: number;
+    name: string;
+    slug: string;
+    address: string;
+    timezone: string;
+    is_active: boolean;
+  }[];
+}
+
+export function usePublicBusinessBySlug(slug: string | null): {
+  data: PublicBusinessBySlugBundle | undefined;
+  isLoading: boolean;
+  isError: boolean;
+} {
+  const query = useQuery({
+    queryKey: ['public-business-by-slug', slug],
+    queryFn: async (): Promise<PublicBusinessBySlugBundle> => {
+      if (!slug) throw new Error('slug required');
+      const res = await api.get<PublicBusinessBySlugApi>('/pos/public/business/by-slug', {
+        params: { slug },
+      });
+      return {
+        business: {
+          id: res.data.business.id,
+          name: res.data.business.name,
+          slug: res.data.business.slug,
+          logoUrl: res.data.business.logo_url,
+          currency: res.data.business.currency,
+          timezone: res.data.business.timezone,
+        },
+        locations: (res.data.locations ?? []).map((l) => ({
+          id: l.id,
+          name: l.name,
+          slug: l.slug,
+          address: l.address,
+          timezone: l.timezone,
+          isActive: l.is_active,
+        })),
+      };
+    },
+    enabled: !!slug,
+    staleTime: 60_000,
+  });
+  return {
+    data: query.data,
+    isLoading: query.isLoading,
+    isError: query.isError,
+  };
+}
+
 export function usePublicMenu(businessId: number | null): {
   data: PublicMenuBundle | undefined;
   isLoading: boolean;

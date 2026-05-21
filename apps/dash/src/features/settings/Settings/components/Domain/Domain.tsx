@@ -23,11 +23,18 @@ import {
 } from '../../../../../shared/components/ui';
 import { cn } from '../../../../../shared/lib/utils';
 import { useUserStore } from '../../../../../shared/stores/userStore';
+import { useConfigStore } from '../../../../../shared/stores/configStore';
 
 const Domain: React.FC = () => {
   const user = useUserStore((s) => s.user);
-  const subdomain = user?.businessName?.toLowerCase().replace(/\s+/g, '-') ?? 'your-business';
-  const menuUrl = `${subdomain}.rtylr.com`;
+  const websiteData = useConfigStore((s) => s.websiteData) as { slug?: string } | undefined;
+  const fallbackSlug =
+    user?.businessName
+      ?.toLowerCase()
+      .replace(/\s+/g, '-')
+      .replace(/[^a-z0-9-]/g, '') ?? 'your-business';
+  const slug = websiteData?.slug || fallbackSlug;
+  const menuUrl = `menu.rtylr.com/${slug}`;
 
   const [copied, setCopied] = useState(false);
   const [dnsOpen, setDnsOpen] = useState(true);

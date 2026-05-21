@@ -1,6 +1,9 @@
 import React, { useState, ChangeEvent, useEffect } from 'react';
 import { useBusinessStore } from '../../../../../shared/stores/businessStore';
-import { useUpdateBusiness } from '../../../../../shared/hooks/queries/useBusiness';
+import {
+  useUpdateBusiness,
+  useSetBusinessSlug,
+} from '../../../../../shared/hooks/queries/useBusiness';
 import { useUserStore } from '../../../../../shared/stores/userStore';
 import { useConfigStore } from '../../../../../shared/stores/configStore';
 import {
@@ -19,6 +22,8 @@ const General: React.FC = () => {
   const { user } = useUserStore();
   const { websiteData, contactInfo } = useConfigStore();
   const updateBusiness = useUpdateBusiness();
+  const setSlug = useSetBusinessSlug();
+  const [slug, setSlugInput] = useState('');
 
   const [formData, setFormData] = useState({
     storeName: '',
@@ -54,6 +59,11 @@ const General: React.FC = () => {
       }));
     }
   }, [user, websiteData, contactInfo]);
+
+  useEffect(() => {
+    const w = websiteData as { slug?: string } | undefined;
+    if (w?.slug) setSlugInput(w.slug);
+  }, [websiteData]);
 
   const handleInputChange = (e: ChangeEvent<HTMLInputElement>) => {
     const { name, value } = e.target;
@@ -105,6 +115,35 @@ const General: React.FC = () => {
                 value={formData.senderEmail}
                 onChange={handleInputChange}
               />
+            </div>
+            <div className="space-y-1.5">
+              <Label>Public slug</Label>
+              <div className="flex gap-2 items-center">
+                <span
+                  className="text-xs whitespace-nowrap"
+                  style={{ color: 'var(--dash-text-muted)' }}
+                >
+                  menu.rtylr.com/
+                </span>
+                <Input
+                  name="slug"
+                  value={slug}
+                  placeholder="your-business"
+                  onChange={(e) =>
+                    setSlugInput(e.target.value.toLowerCase().replace(/[^a-z0-9-]/g, ''))
+                  }
+                />
+                <Button
+                  type="button"
+                  disabled={!slug || setSlug.isPending}
+                  onClick={() => setSlug.mutate(slug)}
+                >
+                  {setSlug.isPending ? 'Saving...' : 'Save slug'}
+                </Button>
+              </div>
+              <p className="text-xs" style={{ color: 'var(--dash-text-dim)' }}>
+                Lowercase letters, numbers, and hyphens. Up to 80 chars.
+              </p>
             </div>
           </CardContent>
         </Card>

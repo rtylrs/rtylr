@@ -3,6 +3,24 @@ import { useMutation, useQueryClient } from '@tanstack/react-query';
 import { safe } from '../../lib/api';
 import { toast } from 'sonner';
 
+export const useSetBusinessSlug = () => {
+  const queryClient = useQueryClient();
+  return useMutation({
+    mutationFn: async (slug: string) => {
+      return unwrap(safe.put('/business/me/slug', { slug }));
+    },
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ['business'] });
+      queryClient.invalidateQueries({ queryKey: ['user'] });
+      toast.success('Slug updated');
+    },
+    onError: (error: unknown) => {
+      const err = error as { message?: string };
+      toast.error(err.message || 'Failed to update slug');
+    },
+  });
+};
+
 export const useUpdateBusiness = () => {
   const queryClient = useQueryClient();
 

@@ -1,0 +1,101 @@
+import React, { useMemo } from 'react';
+import { useParams, useNavigate } from 'react-router-dom';
+import { FullScreenLoader } from '@voxire/components';
+import { GridLayout, MenuCategoryData, BusinessInfo, CartItem } from '@voxire/menu';
+import { usePublicBusinessBySlug, usePublicMenu } from '../../../shared/hooks/usePublicMenu';
+import { useCartStore } from '../../../shared/stores/cartStore';
+
+/**
+ * Mounted at `/:slug/:location`. Resolves the business by slug, picks
+ * the matching location, then reuses the existing POS-backed menu
+ * fetch keyed by business_id. (For now items live per business, not
+ * per location — when POS adds location-scoped menus this hook will
+ * thread `location_id` through.)
+ */
+
+const onlineOrderingEnabled = import.meta.env.VITE_ONLINE_ORDERING_ENABLED === 'true';
+
+const LocationMenu: React.FC = (): React.JSX.Element => {
+  const { slug: rawSlug, location: rawLoc } = useParams<{ slug: string; location: string }>();
+  const navigate = useNavigate();
+  const slug = (rawSlug ?? '').toLowerCase();
+  const locationSlug = (rawLoc ?? '').toLowerCase();
+
+  const { data: biz, isLoading: bizLoading, isError: bizError } = usePublicBusinessBySlug(slug);
+  const businessId = biz?.business.id ?? null;
+  const { data: menu, isLoading: menuLoading, isError: menuError } = usePublicMenu(businessId);
+
+  const location = biz?.locations.find((l) => l.slug === locationSlug);
+  const { clearCart, setBusinessId, addItem } = useCartStore();
+
+  const categories = useMemo<MenuCategoryData[]>(() => {
+    if (!menu) return [];
+    const items = menu.items
+      .filter((i) => i.isActive)
+      .map((i) => ({
+        id: String(i.id),
+        name: i.name,
+        price: i.salePrice,
+        currency: menu.business.currency,
+        description: undefined,
+        image: undefined,
+      }));
+    return [{ id: 'all', name: 'Menu', items }];
+  }, [menu]);
+
+  if (bizLoading || menuLoading) return <FullScreenLoader />;
+  if (bizError || !biz) {
+    return (
+      <div style={{ padding: 32, textAlign: 'center' }}>
+        <h1 style={{ fontSize: 18, fontWeight: 600 }}>Business not found</h1>
+      </div>
+    );
+  }
+  if (!location) {
+    return (
+      <div style={{ padding: 32, textAlign: 'center' }}>
+        <h1 style={{ fontSize: 18, fontWeight: 600 }}>Location not found</h1>
+        <p style={{ fontSize: 13, opacity: 0.7 }}>
+          <a href={`/${slug}`}>← Back to {biz.business.name}</a>
+        </p>
+      </div>
+    );
+  }
+  if (menuError) {
+    return (
+      <div style={{ padding: 32, textAlign: 'center' }}>
+        <h1 style={{ fontSize: 18, fontWeight: 600 }}>Couldn't load the menu</h1>
+      </div>
+    );
+  }
+
+  const businessInfo: BusinessInfo = {
+    id: biz.business.id,
+    name: `${biz.business.name} — ${location.name}`,
+    logoUrl: biz.business.logoUrl,
+    currency: biz.business.currency,
+  };
+
+  const onAddToCart = (item: CartItem): void => {
+    if (!onlineOrderingEnabled) return;
+    setBusinessId(biz.business.id);
+    addItem(item);
+  };
+
+  const onPlaceOrder = (): void => {
+    if (!onlineOrderingEnabled) return;
+    navigate('/checkout');
+  };
+
+  return (
+    <GridLayout
+      business={businessInfo}
+      categories={categories}
+      onAddToCart={onlineOrderingEnabled ? onAddToCart : undefined}
+      onPlaceOrder={onlineOrderingEnabled ? onPlaceOrder : undefined}
+      onClearCart={onlineOrderingEnabled ? clearCart : undefined}
+    />
+  );
+};
+
+export default LocationMenu;
