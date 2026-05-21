@@ -20,6 +20,8 @@ message Business {
   string country = 11;
   string plan = 12;
   string created_at = 13;
+  // URL-safe slug. Powers public surfaces like menu.rtylr.com/<slug>.
+  string slug = 14;
 }
 
 message GetBusinessRequest {
@@ -40,8 +42,41 @@ message UpdateBusinessRequest {
   string website = 7;
   string timezone = 8;
   string currency = 9;
+  optional string slug = 10;
 }
 
 message UpdateBusinessResponse {
   Business business = 1;
+}
+
+// ── Public lookup ───────────────────────────────────────────────────
+// Powers menu.rtylr.com/<slug>: resolves a public slug into a business
+// summary plus its visible locations so the menu app can render a
+// location picker before drilling into a specific menu.
+
+message PublicLocation {
+  int64 id = 1;
+  string name = 2;
+  string slug = 3;
+  string address = 4;
+  string timezone = 5;
+  bool is_active = 6;
+}
+
+message PublicBusinessSummary {
+  int64 id = 1;
+  string name = 2;
+  string slug = 3;
+  string logo_url = 4;
+  string currency = 5;
+  string type = 6;
+}
+
+message LookupBusinessBySlugRequest {
+  string slug = 1;
+}
+
+message LookupBusinessBySlugResponse {
+  PublicBusinessSummary business = 1;
+  repeated PublicLocation locations = 2;
 }

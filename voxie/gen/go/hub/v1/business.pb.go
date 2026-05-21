@@ -22,20 +22,22 @@ const (
 )
 
 type Business struct {
-	state         protoimpl.MessageState `protogen:"open.v1"`
-	Id            int64                  `protobuf:"varint,1,opt,name=id,proto3" json:"id,omitempty"`
-	Name          string                 `protobuf:"bytes,2,opt,name=name,proto3" json:"name,omitempty"`
-	Type          string                 `protobuf:"bytes,3,opt,name=type,proto3" json:"type,omitempty"` // restaurant, retail, services, etc.
-	LogoUrl       string                 `protobuf:"bytes,4,opt,name=logo_url,json=logoUrl,proto3" json:"logo_url,omitempty"`
-	Address       string                 `protobuf:"bytes,5,opt,name=address,proto3" json:"address,omitempty"`
-	Phone         string                 `protobuf:"bytes,6,opt,name=phone,proto3" json:"phone,omitempty"`
-	Email         string                 `protobuf:"bytes,7,opt,name=email,proto3" json:"email,omitempty"`
-	Website       string                 `protobuf:"bytes,8,opt,name=website,proto3" json:"website,omitempty"`
-	Timezone      string                 `protobuf:"bytes,9,opt,name=timezone,proto3" json:"timezone,omitempty"`
-	Currency      string                 `protobuf:"bytes,10,opt,name=currency,proto3" json:"currency,omitempty"`
-	Country       string                 `protobuf:"bytes,11,opt,name=country,proto3" json:"country,omitempty"`
-	Plan          string                 `protobuf:"bytes,12,opt,name=plan,proto3" json:"plan,omitempty"`
-	CreatedAt     string                 `protobuf:"bytes,13,opt,name=created_at,json=createdAt,proto3" json:"created_at,omitempty"`
+	state     protoimpl.MessageState `protogen:"open.v1"`
+	Id        int64                  `protobuf:"varint,1,opt,name=id,proto3" json:"id,omitempty"`
+	Name      string                 `protobuf:"bytes,2,opt,name=name,proto3" json:"name,omitempty"`
+	Type      string                 `protobuf:"bytes,3,opt,name=type,proto3" json:"type,omitempty"` // restaurant, retail, services, etc.
+	LogoUrl   string                 `protobuf:"bytes,4,opt,name=logo_url,json=logoUrl,proto3" json:"logo_url,omitempty"`
+	Address   string                 `protobuf:"bytes,5,opt,name=address,proto3" json:"address,omitempty"`
+	Phone     string                 `protobuf:"bytes,6,opt,name=phone,proto3" json:"phone,omitempty"`
+	Email     string                 `protobuf:"bytes,7,opt,name=email,proto3" json:"email,omitempty"`
+	Website   string                 `protobuf:"bytes,8,opt,name=website,proto3" json:"website,omitempty"`
+	Timezone  string                 `protobuf:"bytes,9,opt,name=timezone,proto3" json:"timezone,omitempty"`
+	Currency  string                 `protobuf:"bytes,10,opt,name=currency,proto3" json:"currency,omitempty"`
+	Country   string                 `protobuf:"bytes,11,opt,name=country,proto3" json:"country,omitempty"`
+	Plan      string                 `protobuf:"bytes,12,opt,name=plan,proto3" json:"plan,omitempty"`
+	CreatedAt string                 `protobuf:"bytes,13,opt,name=created_at,json=createdAt,proto3" json:"created_at,omitempty"`
+	// URL-safe slug. Powers public surfaces like menu.rtylr.com/<slug>.
+	Slug          string `protobuf:"bytes,14,opt,name=slug,proto3" json:"slug,omitempty"`
 	unknownFields protoimpl.UnknownFields
 	sizeCache     protoimpl.SizeCache
 }
@@ -161,6 +163,13 @@ func (x *Business) GetCreatedAt() string {
 	return ""
 }
 
+func (x *Business) GetSlug() string {
+	if x != nil {
+		return x.Slug
+	}
+	return ""
+}
+
 type GetBusinessRequest struct {
 	state         protoimpl.MessageState `protogen:"open.v1"`
 	BusinessId    int64                  `protobuf:"varint,1,opt,name=business_id,json=businessId,proto3" json:"business_id,omitempty"`
@@ -260,6 +269,7 @@ type UpdateBusinessRequest struct {
 	Website       string                 `protobuf:"bytes,7,opt,name=website,proto3" json:"website,omitempty"`
 	Timezone      string                 `protobuf:"bytes,8,opt,name=timezone,proto3" json:"timezone,omitempty"`
 	Currency      string                 `protobuf:"bytes,9,opt,name=currency,proto3" json:"currency,omitempty"`
+	Slug          *string                `protobuf:"bytes,10,opt,name=slug,proto3,oneof" json:"slug,omitempty"`
 	unknownFields protoimpl.UnknownFields
 	sizeCache     protoimpl.SizeCache
 }
@@ -357,6 +367,13 @@ func (x *UpdateBusinessRequest) GetCurrency() string {
 	return ""
 }
 
+func (x *UpdateBusinessRequest) GetSlug() string {
+	if x != nil && x.Slug != nil {
+		return *x.Slug
+	}
+	return ""
+}
+
 type UpdateBusinessResponse struct {
 	state         protoimpl.MessageState `protogen:"open.v1"`
 	Business      *Business              `protobuf:"bytes,1,opt,name=business,proto3" json:"business,omitempty"`
@@ -401,11 +418,275 @@ func (x *UpdateBusinessResponse) GetBusiness() *Business {
 	return nil
 }
 
+type PublicLocation struct {
+	state         protoimpl.MessageState `protogen:"open.v1"`
+	Id            int64                  `protobuf:"varint,1,opt,name=id,proto3" json:"id,omitempty"`
+	Name          string                 `protobuf:"bytes,2,opt,name=name,proto3" json:"name,omitempty"`
+	Slug          string                 `protobuf:"bytes,3,opt,name=slug,proto3" json:"slug,omitempty"`
+	Address       string                 `protobuf:"bytes,4,opt,name=address,proto3" json:"address,omitempty"`
+	Timezone      string                 `protobuf:"bytes,5,opt,name=timezone,proto3" json:"timezone,omitempty"`
+	IsActive      bool                   `protobuf:"varint,6,opt,name=is_active,json=isActive,proto3" json:"is_active,omitempty"`
+	unknownFields protoimpl.UnknownFields
+	sizeCache     protoimpl.SizeCache
+}
+
+func (x *PublicLocation) Reset() {
+	*x = PublicLocation{}
+	mi := &file_hub_v1_business_proto_msgTypes[5]
+	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
+	ms.StoreMessageInfo(mi)
+}
+
+func (x *PublicLocation) String() string {
+	return protoimpl.X.MessageStringOf(x)
+}
+
+func (*PublicLocation) ProtoMessage() {}
+
+func (x *PublicLocation) ProtoReflect() protoreflect.Message {
+	mi := &file_hub_v1_business_proto_msgTypes[5]
+	if x != nil {
+		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
+		if ms.LoadMessageInfo() == nil {
+			ms.StoreMessageInfo(mi)
+		}
+		return ms
+	}
+	return mi.MessageOf(x)
+}
+
+// Deprecated: Use PublicLocation.ProtoReflect.Descriptor instead.
+func (*PublicLocation) Descriptor() ([]byte, []int) {
+	return file_hub_v1_business_proto_rawDescGZIP(), []int{5}
+}
+
+func (x *PublicLocation) GetId() int64 {
+	if x != nil {
+		return x.Id
+	}
+	return 0
+}
+
+func (x *PublicLocation) GetName() string {
+	if x != nil {
+		return x.Name
+	}
+	return ""
+}
+
+func (x *PublicLocation) GetSlug() string {
+	if x != nil {
+		return x.Slug
+	}
+	return ""
+}
+
+func (x *PublicLocation) GetAddress() string {
+	if x != nil {
+		return x.Address
+	}
+	return ""
+}
+
+func (x *PublicLocation) GetTimezone() string {
+	if x != nil {
+		return x.Timezone
+	}
+	return ""
+}
+
+func (x *PublicLocation) GetIsActive() bool {
+	if x != nil {
+		return x.IsActive
+	}
+	return false
+}
+
+type PublicBusinessSummary struct {
+	state         protoimpl.MessageState `protogen:"open.v1"`
+	Id            int64                  `protobuf:"varint,1,opt,name=id,proto3" json:"id,omitempty"`
+	Name          string                 `protobuf:"bytes,2,opt,name=name,proto3" json:"name,omitempty"`
+	Slug          string                 `protobuf:"bytes,3,opt,name=slug,proto3" json:"slug,omitempty"`
+	LogoUrl       string                 `protobuf:"bytes,4,opt,name=logo_url,json=logoUrl,proto3" json:"logo_url,omitempty"`
+	Currency      string                 `protobuf:"bytes,5,opt,name=currency,proto3" json:"currency,omitempty"`
+	Type          string                 `protobuf:"bytes,6,opt,name=type,proto3" json:"type,omitempty"`
+	unknownFields protoimpl.UnknownFields
+	sizeCache     protoimpl.SizeCache
+}
+
+func (x *PublicBusinessSummary) Reset() {
+	*x = PublicBusinessSummary{}
+	mi := &file_hub_v1_business_proto_msgTypes[6]
+	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
+	ms.StoreMessageInfo(mi)
+}
+
+func (x *PublicBusinessSummary) String() string {
+	return protoimpl.X.MessageStringOf(x)
+}
+
+func (*PublicBusinessSummary) ProtoMessage() {}
+
+func (x *PublicBusinessSummary) ProtoReflect() protoreflect.Message {
+	mi := &file_hub_v1_business_proto_msgTypes[6]
+	if x != nil {
+		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
+		if ms.LoadMessageInfo() == nil {
+			ms.StoreMessageInfo(mi)
+		}
+		return ms
+	}
+	return mi.MessageOf(x)
+}
+
+// Deprecated: Use PublicBusinessSummary.ProtoReflect.Descriptor instead.
+func (*PublicBusinessSummary) Descriptor() ([]byte, []int) {
+	return file_hub_v1_business_proto_rawDescGZIP(), []int{6}
+}
+
+func (x *PublicBusinessSummary) GetId() int64 {
+	if x != nil {
+		return x.Id
+	}
+	return 0
+}
+
+func (x *PublicBusinessSummary) GetName() string {
+	if x != nil {
+		return x.Name
+	}
+	return ""
+}
+
+func (x *PublicBusinessSummary) GetSlug() string {
+	if x != nil {
+		return x.Slug
+	}
+	return ""
+}
+
+func (x *PublicBusinessSummary) GetLogoUrl() string {
+	if x != nil {
+		return x.LogoUrl
+	}
+	return ""
+}
+
+func (x *PublicBusinessSummary) GetCurrency() string {
+	if x != nil {
+		return x.Currency
+	}
+	return ""
+}
+
+func (x *PublicBusinessSummary) GetType() string {
+	if x != nil {
+		return x.Type
+	}
+	return ""
+}
+
+type LookupBusinessBySlugRequest struct {
+	state         protoimpl.MessageState `protogen:"open.v1"`
+	Slug          string                 `protobuf:"bytes,1,opt,name=slug,proto3" json:"slug,omitempty"`
+	unknownFields protoimpl.UnknownFields
+	sizeCache     protoimpl.SizeCache
+}
+
+func (x *LookupBusinessBySlugRequest) Reset() {
+	*x = LookupBusinessBySlugRequest{}
+	mi := &file_hub_v1_business_proto_msgTypes[7]
+	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
+	ms.StoreMessageInfo(mi)
+}
+
+func (x *LookupBusinessBySlugRequest) String() string {
+	return protoimpl.X.MessageStringOf(x)
+}
+
+func (*LookupBusinessBySlugRequest) ProtoMessage() {}
+
+func (x *LookupBusinessBySlugRequest) ProtoReflect() protoreflect.Message {
+	mi := &file_hub_v1_business_proto_msgTypes[7]
+	if x != nil {
+		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
+		if ms.LoadMessageInfo() == nil {
+			ms.StoreMessageInfo(mi)
+		}
+		return ms
+	}
+	return mi.MessageOf(x)
+}
+
+// Deprecated: Use LookupBusinessBySlugRequest.ProtoReflect.Descriptor instead.
+func (*LookupBusinessBySlugRequest) Descriptor() ([]byte, []int) {
+	return file_hub_v1_business_proto_rawDescGZIP(), []int{7}
+}
+
+func (x *LookupBusinessBySlugRequest) GetSlug() string {
+	if x != nil {
+		return x.Slug
+	}
+	return ""
+}
+
+type LookupBusinessBySlugResponse struct {
+	state         protoimpl.MessageState `protogen:"open.v1"`
+	Business      *PublicBusinessSummary `protobuf:"bytes,1,opt,name=business,proto3" json:"business,omitempty"`
+	Locations     []*PublicLocation      `protobuf:"bytes,2,rep,name=locations,proto3" json:"locations,omitempty"`
+	unknownFields protoimpl.UnknownFields
+	sizeCache     protoimpl.SizeCache
+}
+
+func (x *LookupBusinessBySlugResponse) Reset() {
+	*x = LookupBusinessBySlugResponse{}
+	mi := &file_hub_v1_business_proto_msgTypes[8]
+	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
+	ms.StoreMessageInfo(mi)
+}
+
+func (x *LookupBusinessBySlugResponse) String() string {
+	return protoimpl.X.MessageStringOf(x)
+}
+
+func (*LookupBusinessBySlugResponse) ProtoMessage() {}
+
+func (x *LookupBusinessBySlugResponse) ProtoReflect() protoreflect.Message {
+	mi := &file_hub_v1_business_proto_msgTypes[8]
+	if x != nil {
+		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
+		if ms.LoadMessageInfo() == nil {
+			ms.StoreMessageInfo(mi)
+		}
+		return ms
+	}
+	return mi.MessageOf(x)
+}
+
+// Deprecated: Use LookupBusinessBySlugResponse.ProtoReflect.Descriptor instead.
+func (*LookupBusinessBySlugResponse) Descriptor() ([]byte, []int) {
+	return file_hub_v1_business_proto_rawDescGZIP(), []int{8}
+}
+
+func (x *LookupBusinessBySlugResponse) GetBusiness() *PublicBusinessSummary {
+	if x != nil {
+		return x.Business
+	}
+	return nil
+}
+
+func (x *LookupBusinessBySlugResponse) GetLocations() []*PublicLocation {
+	if x != nil {
+		return x.Locations
+	}
+	return nil
+}
+
 var File_hub_v1_business_proto protoreflect.FileDescriptor
 
 const file_hub_v1_business_proto_rawDesc = "" +
 	"\n" +
-	"\x15hub/v1/business.proto\x12\x06hub.v1\"\xc2\x02\n" +
+	"\x15hub/v1/business.proto\x12\x06hub.v1\"\xd6\x02\n" +
 	"\bBusiness\x12\x0e\n" +
 	"\x02id\x18\x01 \x01(\x03R\x02id\x12\x12\n" +
 	"\x04name\x18\x02 \x01(\tR\x04name\x12\x12\n" +
@@ -421,12 +702,13 @@ const file_hub_v1_business_proto_rawDesc = "" +
 	"\acountry\x18\v \x01(\tR\acountry\x12\x12\n" +
 	"\x04plan\x18\f \x01(\tR\x04plan\x12\x1d\n" +
 	"\n" +
-	"created_at\x18\r \x01(\tR\tcreatedAt\"5\n" +
+	"created_at\x18\r \x01(\tR\tcreatedAt\x12\x12\n" +
+	"\x04slug\x18\x0e \x01(\tR\x04slug\"5\n" +
 	"\x12GetBusinessRequest\x12\x1f\n" +
 	"\vbusiness_id\x18\x01 \x01(\x03R\n" +
 	"businessId\"C\n" +
 	"\x13GetBusinessResponse\x12,\n" +
-	"\bbusiness\x18\x01 \x01(\v2\x10.hub.v1.BusinessR\bbusiness\"\xf8\x01\n" +
+	"\bbusiness\x18\x01 \x01(\v2\x10.hub.v1.BusinessR\bbusiness\"\x9a\x02\n" +
 	"\x15UpdateBusinessRequest\x12\x1f\n" +
 	"\vbusiness_id\x18\x01 \x01(\x03R\n" +
 	"businessId\x12\x12\n" +
@@ -437,9 +719,31 @@ const file_hub_v1_business_proto_rawDesc = "" +
 	"\x05email\x18\x06 \x01(\tR\x05email\x12\x18\n" +
 	"\awebsite\x18\a \x01(\tR\awebsite\x12\x1a\n" +
 	"\btimezone\x18\b \x01(\tR\btimezone\x12\x1a\n" +
-	"\bcurrency\x18\t \x01(\tR\bcurrency\"F\n" +
+	"\bcurrency\x18\t \x01(\tR\bcurrency\x12\x17\n" +
+	"\x04slug\x18\n" +
+	" \x01(\tH\x00R\x04slug\x88\x01\x01B\a\n" +
+	"\x05_slug\"F\n" +
 	"\x16UpdateBusinessResponse\x12,\n" +
-	"\bbusiness\x18\x01 \x01(\v2\x10.hub.v1.BusinessR\bbusinessB'Z%github.com/voxire/voxie/gen/go/hub/v1b\x06proto3"
+	"\bbusiness\x18\x01 \x01(\v2\x10.hub.v1.BusinessR\bbusiness\"\x9b\x01\n" +
+	"\x0ePublicLocation\x12\x0e\n" +
+	"\x02id\x18\x01 \x01(\x03R\x02id\x12\x12\n" +
+	"\x04name\x18\x02 \x01(\tR\x04name\x12\x12\n" +
+	"\x04slug\x18\x03 \x01(\tR\x04slug\x12\x18\n" +
+	"\aaddress\x18\x04 \x01(\tR\aaddress\x12\x1a\n" +
+	"\btimezone\x18\x05 \x01(\tR\btimezone\x12\x1b\n" +
+	"\tis_active\x18\x06 \x01(\bR\bisActive\"\x9a\x01\n" +
+	"\x15PublicBusinessSummary\x12\x0e\n" +
+	"\x02id\x18\x01 \x01(\x03R\x02id\x12\x12\n" +
+	"\x04name\x18\x02 \x01(\tR\x04name\x12\x12\n" +
+	"\x04slug\x18\x03 \x01(\tR\x04slug\x12\x19\n" +
+	"\blogo_url\x18\x04 \x01(\tR\alogoUrl\x12\x1a\n" +
+	"\bcurrency\x18\x05 \x01(\tR\bcurrency\x12\x12\n" +
+	"\x04type\x18\x06 \x01(\tR\x04type\"1\n" +
+	"\x1bLookupBusinessBySlugRequest\x12\x12\n" +
+	"\x04slug\x18\x01 \x01(\tR\x04slug\"\x8f\x01\n" +
+	"\x1cLookupBusinessBySlugResponse\x129\n" +
+	"\bbusiness\x18\x01 \x01(\v2\x1d.hub.v1.PublicBusinessSummaryR\bbusiness\x124\n" +
+	"\tlocations\x18\x02 \x03(\v2\x16.hub.v1.PublicLocationR\tlocationsB'Z%github.com/voxire/voxie/gen/go/hub/v1b\x06proto3"
 
 var (
 	file_hub_v1_business_proto_rawDescOnce sync.Once
@@ -453,22 +757,28 @@ func file_hub_v1_business_proto_rawDescGZIP() []byte {
 	return file_hub_v1_business_proto_rawDescData
 }
 
-var file_hub_v1_business_proto_msgTypes = make([]protoimpl.MessageInfo, 5)
+var file_hub_v1_business_proto_msgTypes = make([]protoimpl.MessageInfo, 9)
 var file_hub_v1_business_proto_goTypes = []any{
-	(*Business)(nil),               // 0: hub.v1.Business
-	(*GetBusinessRequest)(nil),     // 1: hub.v1.GetBusinessRequest
-	(*GetBusinessResponse)(nil),    // 2: hub.v1.GetBusinessResponse
-	(*UpdateBusinessRequest)(nil),  // 3: hub.v1.UpdateBusinessRequest
-	(*UpdateBusinessResponse)(nil), // 4: hub.v1.UpdateBusinessResponse
+	(*Business)(nil),                     // 0: hub.v1.Business
+	(*GetBusinessRequest)(nil),           // 1: hub.v1.GetBusinessRequest
+	(*GetBusinessResponse)(nil),          // 2: hub.v1.GetBusinessResponse
+	(*UpdateBusinessRequest)(nil),        // 3: hub.v1.UpdateBusinessRequest
+	(*UpdateBusinessResponse)(nil),       // 4: hub.v1.UpdateBusinessResponse
+	(*PublicLocation)(nil),               // 5: hub.v1.PublicLocation
+	(*PublicBusinessSummary)(nil),        // 6: hub.v1.PublicBusinessSummary
+	(*LookupBusinessBySlugRequest)(nil),  // 7: hub.v1.LookupBusinessBySlugRequest
+	(*LookupBusinessBySlugResponse)(nil), // 8: hub.v1.LookupBusinessBySlugResponse
 }
 var file_hub_v1_business_proto_depIdxs = []int32{
 	0, // 0: hub.v1.GetBusinessResponse.business:type_name -> hub.v1.Business
 	0, // 1: hub.v1.UpdateBusinessResponse.business:type_name -> hub.v1.Business
-	2, // [2:2] is the sub-list for method output_type
-	2, // [2:2] is the sub-list for method input_type
-	2, // [2:2] is the sub-list for extension type_name
-	2, // [2:2] is the sub-list for extension extendee
-	0, // [0:2] is the sub-list for field type_name
+	6, // 2: hub.v1.LookupBusinessBySlugResponse.business:type_name -> hub.v1.PublicBusinessSummary
+	5, // 3: hub.v1.LookupBusinessBySlugResponse.locations:type_name -> hub.v1.PublicLocation
+	4, // [4:4] is the sub-list for method output_type
+	4, // [4:4] is the sub-list for method input_type
+	4, // [4:4] is the sub-list for extension type_name
+	4, // [4:4] is the sub-list for extension extendee
+	0, // [0:4] is the sub-list for field type_name
 }
 
 func init() { file_hub_v1_business_proto_init() }
@@ -476,13 +786,14 @@ func file_hub_v1_business_proto_init() {
 	if File_hub_v1_business_proto != nil {
 		return
 	}
+	file_hub_v1_business_proto_msgTypes[3].OneofWrappers = []any{}
 	type x struct{}
 	out := protoimpl.TypeBuilder{
 		File: protoimpl.DescBuilder{
 			GoPackagePath: reflect.TypeOf(x{}).PkgPath(),
 			RawDescriptor: unsafe.Slice(unsafe.StringData(file_hub_v1_business_proto_rawDesc), len(file_hub_v1_business_proto_rawDesc)),
 			NumEnums:      0,
-			NumMessages:   5,
+			NumMessages:   9,
 			NumExtensions: 0,
 			NumServices:   0,
 		},

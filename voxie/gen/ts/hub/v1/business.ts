@@ -21,6 +21,8 @@ export interface Business {
   country: string;
   plan: string;
   createdAt: string;
+  /** URL-safe slug. Powers public surfaces like menu.rtylr.com/<slug>. */
+  slug: string;
 }
 
 export interface GetBusinessRequest {
@@ -41,8 +43,36 @@ export interface UpdateBusinessRequest {
   website: string;
   timezone: string;
   currency: string;
+  slug?: string | undefined;
 }
 
 export interface UpdateBusinessResponse {
   business: Business | undefined;
+}
+
+export interface PublicLocation {
+  id: number;
+  name: string;
+  slug: string;
+  address: string;
+  timezone: string;
+  isActive: boolean;
+}
+
+export interface PublicBusinessSummary {
+  id: number;
+  name: string;
+  slug: string;
+  logoUrl: string;
+  currency: string;
+  type: string;
+}
+
+export interface LookupBusinessBySlugRequest {
+  slug: string;
+}
+
+export interface LookupBusinessBySlugResponse {
+  business: PublicBusinessSummary | undefined;
+  locations: PublicLocation[];
 }

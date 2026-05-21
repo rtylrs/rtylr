@@ -25,6 +25,11 @@ export interface LocationPayload {
   createdAt: number;
   /** Unix timestamp when this location was last updated. */
   updatedAt: number;
+  /**
+   * URL-safe slug, scoped per business. Powers public URLs like
+   * menu.rtylr.com/<business-slug>/<location-slug>.
+   */
+  slug: string;
 }
 
 export interface CreateLocationRequest {
@@ -33,7 +38,11 @@ export interface CreateLocationRequest {
   /** Full street address of the location. */
   address: string;
   /** IANA timezone identifier; absent to use tenant default. */
-  timezone?: string | undefined;
+  timezone?:
+    | string
+    | undefined;
+  /** Optional URL-safe slug; auto-generated from name if absent. */
+  slug?: string | undefined;
 }
 
 export interface CreateLocationResponse {
@@ -57,7 +66,11 @@ export interface UpdateLocationRequest {
     | string
     | undefined;
   /** New active status; absent to keep current. */
-  isActive?: boolean | undefined;
+  isActive?:
+    | boolean
+    | undefined;
+  /** New slug; absent to keep current. */
+  slug?: string | undefined;
 }
 
 export interface UpdateLocationResponse {

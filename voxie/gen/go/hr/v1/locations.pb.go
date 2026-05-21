@@ -38,7 +38,10 @@ type LocationPayload struct {
 	// Unix timestamp when this location was created.
 	CreatedAt int64 `protobuf:"varint,7,opt,name=created_at,json=createdAt,proto3" json:"created_at,omitempty"`
 	// Unix timestamp when this location was last updated.
-	UpdatedAt     int64 `protobuf:"varint,8,opt,name=updated_at,json=updatedAt,proto3" json:"updated_at,omitempty"`
+	UpdatedAt int64 `protobuf:"varint,8,opt,name=updated_at,json=updatedAt,proto3" json:"updated_at,omitempty"`
+	// URL-safe slug, scoped per business. Powers public URLs like
+	// menu.rtylr.com/<business-slug>/<location-slug>.
+	Slug          string `protobuf:"bytes,9,opt,name=slug,proto3" json:"slug,omitempty"`
 	unknownFields protoimpl.UnknownFields
 	sizeCache     protoimpl.SizeCache
 }
@@ -129,6 +132,13 @@ func (x *LocationPayload) GetUpdatedAt() int64 {
 	return 0
 }
 
+func (x *LocationPayload) GetSlug() string {
+	if x != nil {
+		return x.Slug
+	}
+	return ""
+}
+
 type CreateLocationRequest struct {
 	state protoimpl.MessageState `protogen:"open.v1"`
 	// Human-readable name of the location.
@@ -136,7 +146,9 @@ type CreateLocationRequest struct {
 	// Full street address of the location.
 	Address string `protobuf:"bytes,2,opt,name=address,proto3" json:"address,omitempty"`
 	// IANA timezone identifier; absent to use tenant default.
-	Timezone      *string `protobuf:"bytes,3,opt,name=timezone,proto3,oneof" json:"timezone,omitempty"`
+	Timezone *string `protobuf:"bytes,3,opt,name=timezone,proto3,oneof" json:"timezone,omitempty"`
+	// Optional URL-safe slug; auto-generated from name if absent.
+	Slug          *string `protobuf:"bytes,4,opt,name=slug,proto3,oneof" json:"slug,omitempty"`
 	unknownFields protoimpl.UnknownFields
 	sizeCache     protoimpl.SizeCache
 }
@@ -188,6 +200,13 @@ func (x *CreateLocationRequest) GetAddress() string {
 func (x *CreateLocationRequest) GetTimezone() string {
 	if x != nil && x.Timezone != nil {
 		return *x.Timezone
+	}
+	return ""
+}
+
+func (x *CreateLocationRequest) GetSlug() string {
+	if x != nil && x.Slug != nil {
+		return *x.Slug
 	}
 	return ""
 }
@@ -248,7 +267,9 @@ type UpdateLocationRequest struct {
 	// New timezone; absent to keep current.
 	Timezone *string `protobuf:"bytes,4,opt,name=timezone,proto3,oneof" json:"timezone,omitempty"`
 	// New active status; absent to keep current.
-	IsActive      *bool `protobuf:"varint,5,opt,name=is_active,json=isActive,proto3,oneof" json:"is_active,omitempty"`
+	IsActive *bool `protobuf:"varint,5,opt,name=is_active,json=isActive,proto3,oneof" json:"is_active,omitempty"`
+	// New slug; absent to keep current.
+	Slug          *string `protobuf:"bytes,6,opt,name=slug,proto3,oneof" json:"slug,omitempty"`
 	unknownFields protoimpl.UnknownFields
 	sizeCache     protoimpl.SizeCache
 }
@@ -316,6 +337,13 @@ func (x *UpdateLocationRequest) GetIsActive() bool {
 		return *x.IsActive
 	}
 	return false
+}
+
+func (x *UpdateLocationRequest) GetSlug() string {
+	if x != nil && x.Slug != nil {
+		return *x.Slug
+	}
+	return ""
 }
 
 type UpdateLocationResponse struct {
@@ -412,7 +440,7 @@ var File_hr_v1_locations_proto protoreflect.FileDescriptor
 
 const file_hr_v1_locations_proto_rawDesc = "" +
 	"\n" +
-	"\x15hr/v1/locations.proto\x12\x05hr.v1\"\xf3\x01\n" +
+	"\x15hr/v1/locations.proto\x12\x05hr.v1\"\x87\x02\n" +
 	"\x0fLocationPayload\x12\x0e\n" +
 	"\x02id\x18\x01 \x01(\x03R\x02id\x12\x19\n" +
 	"\bowner_id\x18\x02 \x01(\x03R\aownerId\x12\x12\n" +
@@ -423,27 +451,32 @@ const file_hr_v1_locations_proto_rawDesc = "" +
 	"\n" +
 	"created_at\x18\a \x01(\x03R\tcreatedAt\x12\x1d\n" +
 	"\n" +
-	"updated_at\x18\b \x01(\x03R\tupdatedAtB\v\n" +
-	"\t_timezone\"s\n" +
+	"updated_at\x18\b \x01(\x03R\tupdatedAt\x12\x12\n" +
+	"\x04slug\x18\t \x01(\tR\x04slugB\v\n" +
+	"\t_timezone\"\x95\x01\n" +
 	"\x15CreateLocationRequest\x12\x12\n" +
 	"\x04name\x18\x01 \x01(\tR\x04name\x12\x18\n" +
 	"\aaddress\x18\x02 \x01(\tR\aaddress\x12\x1f\n" +
-	"\btimezone\x18\x03 \x01(\tH\x00R\btimezone\x88\x01\x01B\v\n" +
-	"\t_timezone\"L\n" +
+	"\btimezone\x18\x03 \x01(\tH\x00R\btimezone\x88\x01\x01\x12\x17\n" +
+	"\x04slug\x18\x04 \x01(\tH\x01R\x04slug\x88\x01\x01B\v\n" +
+	"\t_timezoneB\a\n" +
+	"\x05_slug\"L\n" +
 	"\x16CreateLocationResponse\x122\n" +
-	"\blocation\x18\x01 \x01(\v2\x16.hr.v1.LocationPayloadR\blocation\"\xd2\x01\n" +
+	"\blocation\x18\x01 \x01(\v2\x16.hr.v1.LocationPayloadR\blocation\"\xf4\x01\n" +
 	"\x15UpdateLocationRequest\x12\x0e\n" +
 	"\x02id\x18\x01 \x01(\x03R\x02id\x12\x17\n" +
 	"\x04name\x18\x02 \x01(\tH\x00R\x04name\x88\x01\x01\x12\x1d\n" +
 	"\aaddress\x18\x03 \x01(\tH\x01R\aaddress\x88\x01\x01\x12\x1f\n" +
 	"\btimezone\x18\x04 \x01(\tH\x02R\btimezone\x88\x01\x01\x12 \n" +
-	"\tis_active\x18\x05 \x01(\bH\x03R\bisActive\x88\x01\x01B\a\n" +
+	"\tis_active\x18\x05 \x01(\bH\x03R\bisActive\x88\x01\x01\x12\x17\n" +
+	"\x04slug\x18\x06 \x01(\tH\x04R\x04slug\x88\x01\x01B\a\n" +
 	"\x05_nameB\n" +
 	"\n" +
 	"\b_addressB\v\n" +
 	"\t_timezoneB\f\n" +
 	"\n" +
-	"_is_active\"L\n" +
+	"_is_activeB\a\n" +
+	"\x05_slug\"L\n" +
 	"\x16UpdateLocationResponse\x122\n" +
 	"\blocation\x18\x01 \x01(\v2\x16.hr.v1.LocationPayloadR\blocation\"M\n" +
 	"\x15ListLocationsResponse\x124\n" +

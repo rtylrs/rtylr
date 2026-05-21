@@ -23,6 +23,9 @@ message LocationPayload {
   int64 created_at = 7;
   // Unix timestamp when this location was last updated.
   int64 updated_at = 8;
+  // URL-safe slug, scoped per business. Powers public URLs like
+  // menu.rtylr.com/<business-slug>/<location-slug>.
+  string slug = 9;
 }
 
 // ── Create ─────────────────────────────────────────────────────────
@@ -34,6 +37,8 @@ message CreateLocationRequest {
   string address = 2;
   // IANA timezone identifier; absent to use tenant default.
   optional string timezone = 3;
+  // Optional URL-safe slug; auto-generated from name if absent.
+  optional string slug = 4;
 }
 
 message CreateLocationResponse {
@@ -54,6 +59,8 @@ message UpdateLocationRequest {
   optional string timezone = 4;
   // New active status; absent to keep current.
   optional bool is_active = 5;
+  // New slug; absent to keep current.
+  optional string slug = 6;
 }
 
 message UpdateLocationResponse {
