@@ -15,7 +15,22 @@ type BusinessProfile struct {
 type PublicBusiness struct {
 	ID       int64  `json:"id"`
 	Name     string `json:"name"`
+	Slug     string `json:"slug"`
 	LogoURL  string `json:"logo_url"`
 	Currency string `json:"currency"`
 	Timezone string `json:"timezone"`
+}
+
+type PublicLocation struct {
+	ID       int64  `json:"id"`
+	Name     string `json:"name"`
+	Slug     string `json:"slug"`
+	Address  string `json:"address"`
+	Timezone string `json:"timezone"`
+	IsActive bool   `json:"is_active"`
+}
+
+type SlugLookupResult struct {
+	Business  PublicBusiness   `json:"business"`
+	Locations []PublicLocation `json:"locations"`
 }

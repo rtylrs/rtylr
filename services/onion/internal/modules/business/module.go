@@ -26,7 +26,9 @@ func (m *Module) RegisterRoutes(ctx context.Context, router *chi.Mux, _ ...inter
 }
 
 func (m *Module) GetAnonymousRoutes() []string {
-	// Public business header for the customer-facing menu app.
+	// Public reads for the customer-facing menu app.
 	// Every other route in this module requires a JWT.
-	return handlers.PublicBusinessRoutes()
+	out := handlers.PublicBusinessRoutes()
+	out = append(out, handlers.PublicBusinessBySlugRoutes()...)
+	return out
 }

@@ -22,4 +22,14 @@ func RegisterRoutes(ctx context.Context, router *chi.Mux, service *application.S
 		ctx, router, handlers.PublicBusinessRoutes(),
 		&handlers.PublicBusinessHandler{Service: service},
 	)
+
+	serverHttp.RegisterGETWithValidation[handlers.PublicBusinessBySlugRequest, handlers.PublicBusinessBySlugResponse](
+		ctx, router, handlers.PublicBusinessBySlugRoutes(),
+		&handlers.PublicBusinessBySlugHandler{Service: service},
+	)
+
+	serverHttp.RegisterPUTWithValidation[handlers.SetSlugRequest, handlers.SetSlugResponse](
+		ctx, router, handlers.BusinessSlugRoutes(),
+		&handlers.SetSlugHandler{Service: service},
+	)
 }
