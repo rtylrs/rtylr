@@ -1,5 +1,6 @@
 import React, { useState, useEffect, useMemo } from 'react';
-import { Search, Loader2 } from 'lucide-react';
+import { Search, Loader2, Check } from 'lucide-react';
+import { AnimatePresence, motion } from 'motion/react';
 import { useBusinessStore, type BusinessType } from '../../../../../shared/stores/businessStore';
 import { useUpdateBusiness } from '../../../../../shared/hooks/queries/useBusiness';
 import { useIndustries } from '../../../../../shared/hooks/queries/useIndustries';
@@ -54,8 +55,10 @@ const BusinessTypeSettings: React.FC = () => {
     updateBusiness.mutate({ data: { businessType: selected } });
   };
 
+  const hasSelection = !!selected;
+
   return (
-    <div className="space-y-6">
+    <div className={cn('space-y-6', hasSelection && 'pb-24')}>
       <div>
         <h1 className="text-xl font-bold" style={{ color: 'var(--dash-text)' }}>
           Industry
@@ -126,17 +129,50 @@ const BusinessTypeSettings: React.FC = () => {
         </div>
       )}
 
-      {selected && (
-        <div className="flex items-center justify-between pt-1">
-          <p className="text-sm" style={{ color: 'var(--dash-text-muted)' }}>
-            Selected:{' '}
-            <span style={{ color: 'var(--dash-text)', fontWeight: 500 }}>{selectedLabel}</span>
-          </p>
-          <Button onClick={handleSave} disabled={updateBusiness.isPending}>
-            {updateBusiness.isPending ? 'Saving...' : 'Save changes'}
-          </Button>
-        </div>
-      )}
+      <AnimatePresence>
+        {hasSelection && (
+          <motion.div
+            key="save-footer"
+            initial={{ y: 96, opacity: 0 }}
+            animate={{ y: 0, opacity: 1 }}
+            exit={{ y: 96, opacity: 0 }}
+            transition={{ type: 'spring', stiffness: 380, damping: 30, mass: 0.6 }}
+            className="fixed bottom-4 left-1/2 -translate-x-1/2 z-40"
+          >
+            <div
+              className="flex items-center gap-4 pl-4 pr-2 py-2 rounded-full shadow-lg"
+              style={{
+                background: 'var(--dash-card)',
+                border: '1px solid var(--dash-border)',
+                boxShadow: '0 10px 28px -8px rgba(0,0,0,0.18)',
+                backdropFilter: 'blur(8px)',
+              }}
+            >
+              <div className="flex items-center gap-2 min-w-0">
+                <span
+                  className="h-6 w-6 rounded-full flex items-center justify-center shrink-0"
+                  style={{ background: 'rgba(69,131,196,0.15)', color: '#4583C4' }}
+                >
+                  <Check size={13} />
+                </span>
+                <p className="text-sm truncate" style={{ color: 'var(--dash-text-muted)' }}>
+                  Selected:{' '}
+                  <span style={{ color: 'var(--dash-text)', fontWeight: 600 }}>
+                    {selectedLabel}
+                  </span>
+                </p>
+              </div>
+              <Button
+                onClick={handleSave}
+                disabled={updateBusiness.isPending}
+                className="rounded-full"
+              >
+                {updateBusiness.isPending ? 'Saving...' : 'Save changes'}
+              </Button>
+            </div>
+          </motion.div>
+        )}
+      </AnimatePresence>
     </div>
   );
 };
