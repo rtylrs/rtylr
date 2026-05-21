@@ -27,3 +27,10 @@ export function getLogoUrl(appId?: string, theme: 'dark' | 'light' = 'light'): s
   }
   return ASSETS.logos[theme];
 }
+
+export const AVATAR_STYLE = 'fun-emoji';
+
+export function getAvatarUrl(seed?: string | null): string {
+  const s = encodeURIComponent(seed || 'user');
+  return `https://api.dicebear.com/9.x/${AVATAR_STYLE}/svg?seed=${s}`;
+}
