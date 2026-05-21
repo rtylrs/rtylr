@@ -1,4 +1,4 @@
-import React, { useCallback, useEffect } from 'react';
+import React, { useCallback, useEffect, useState } from 'react';
 import '../styles/index.css';
 import { caretTokens } from '../ui/tokens';
 import { useCaretStore } from '../stores/caretStore';
@@ -55,6 +55,20 @@ const CaretPanel: React.FC<CaretPanelProps> = ({ systemContext, userId, apiBaseU
     if (isOpen && view === 'history' && messages.length === 0) setView('chat');
   }, [isOpen, view, messages.length, setView]);
 
+  const [introPlaying, setIntroPlaying] = useState(false);
+  useEffect(() => {
+    if (!isOpen || variant === 'inline') return;
+    try {
+      if (localStorage.getItem('caret:intro-shown') === '1') return;
+      localStorage.setItem('caret:intro-shown', '1');
+    } catch {
+      return;
+    }
+    setIntroPlaying(true);
+    const timer = window.setTimeout(() => setIntroPlaying(false), 1500);
+    return () => window.clearTimeout(timer);
+  }, [isOpen, variant]);
+
   const onApprove = (id: string): void => setToolStatus(id, 'approved');
   const onDeny = (id: string): void => setToolStatus(id, 'denied');
 
@@ -82,12 +96,17 @@ const CaretPanel: React.FC<CaretPanelProps> = ({ systemContext, userId, apiBaseU
           display: 'flex',
           flexDirection: 'column',
           transform: isOpen ? 'translateX(0)' : 'translateX(100%)',
-          transition: 'transform 0.25s cubic-bezier(0.4, 0, 0.2, 1)',
+          transition: introPlaying ? 'none' : 'transform 0.25s cubic-bezier(0.4, 0, 0.2, 1)',
           willChange: 'transform',
         };
 
   return (
-    <aside role="complementary" aria-label="Caret AI assistant" style={rootStyle}>
+    <aside
+      role="complementary"
+      aria-label="Caret AI assistant"
+      className={introPlaying ? 'caret-intro' : undefined}
+      style={rootStyle}
+    >
       <span
         role="separator"
         aria-orientation="vertical"
