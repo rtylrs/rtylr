@@ -59,10 +59,13 @@ async function fetchPublicBusiness(businessId: number): Promise<PublicBusiness> 
   };
 }
 
-async function fetchPublicMenu(businessId: number): Promise<PublicMenuItem[]> {
-  const res = await api.get<MenuApiResponse>('/pos/public/menu', {
-    params: { business_id: businessId },
-  });
+async function fetchPublicMenu(
+  businessId: number,
+  locationId?: number | null
+): Promise<PublicMenuItem[]> {
+  const params: Record<string, number> = { business_id: businessId };
+  if (locationId && locationId > 0) params.location_id = locationId;
+  const res = await api.get<MenuApiResponse>('/pos/public/menu', { params });
   return (res.data.items ?? []).map((i) => ({
     id: i.id,
     name: i.name,
@@ -151,13 +154,16 @@ export function usePublicBusinessBySlug(slug: string | null): {
   };
 }
 
-export function usePublicMenu(businessId: number | null): {
+export function usePublicMenu(
+  businessId: number | null,
+  locationId?: number | null
+): {
   data: PublicMenuBundle | undefined;
   isLoading: boolean;
   isError: boolean;
 } {
   const query = useQuery({
-    queryKey: ['public-menu', businessId],
+    queryKey: ['public-menu', businessId, locationId ?? null],
     queryFn: async (): Promise<PublicMenuBundle> => {
       if (businessId == null) {
         throw new Error('business_id required');
@@ -168,7 +174,7 @@ export function usePublicMenu(businessId: number | null): {
       // render.
       const [business, items] = await Promise.all([
         fetchPublicBusiness(businessId),
-        fetchPublicMenu(businessId),
+        fetchPublicMenu(businessId, locationId),
       ]);
       return { business, items };
     },

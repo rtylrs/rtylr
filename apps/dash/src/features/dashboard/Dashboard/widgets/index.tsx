@@ -1,7 +1,6 @@
 import React from 'react';
 import { KpiRevenue, KpiOrders, KpiTeam, KpiInvoices } from './KpisWidget';
 import ActivityWidget from './ActivityWidget';
-import ChangelogWidget from './ChangelogWidget';
 import QuickActionsWidget from './QuickActionsWidget';
 import TeamWidget from './TeamWidget';
 import LowStockWidget from './LowStockWidget';
@@ -19,7 +18,6 @@ const WIDGET_COMPONENTS: Record<string, React.FC> = {
   'kpi-team': KpiTeam,
   'kpi-invoices': KpiInvoices,
   activity: ActivityWidget,
-  changelog: ChangelogWidget,
   'quick-actions': QuickActionsWidget,
   team: TeamWidget,
   'low-stock': LowStockWidget,

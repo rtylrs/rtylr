@@ -61,15 +61,6 @@ export const WIDGET_CATALOG: WidgetConfig[] = [
     minH: 3,
   },
   {
-    id: 'changelog',
-    label: "What's New",
-    description: 'Latest platform updates and features',
-    defaultW: 1,
-    defaultH: 4,
-    minW: 1,
-    minH: 3,
-  },
-  {
     id: 'quick-actions',
     label: 'Quick Actions',
     description: 'Shortcuts to common tasks',
@@ -168,8 +159,7 @@ export const DEFAULT_LAYOUT = [
   { i: 'kpi-team', x: 2, y: 0, w: 1, h: 2 },
   { i: 'kpi-invoices', x: 3, y: 0, w: 1, h: 2 },
   { i: 'activity', x: 0, y: 2, w: 2, h: 4 },
-  { i: 'changelog', x: 2, y: 2, w: 1, h: 4 },
-  { i: 'quick-actions', x: 3, y: 2, w: 1, h: 4 },
+  { i: 'quick-actions', x: 2, y: 2, w: 1, h: 4 },
 ];
 
 const STORAGE_KEY = 'rtylr-dashboard-layout';
