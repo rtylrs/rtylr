@@ -28,7 +28,7 @@ export function getLogoUrl(appId?: string, theme: 'dark' | 'light' = 'light'): s
   return ASSETS.logos[theme];
 }
 
-export const AVATAR_STYLES = ['thumbs', 'bottts-neutral', 'fun-emoji', 'lorelei'] as const;
+export const AVATAR_STYLES = ['thumbs', 'bottts-neutral', 'fun-emoji', 'lorelei-neutral'] as const;
 export type AvatarStyle = (typeof AVATAR_STYLES)[number];
 
 function hashSeed(s: string): number {
