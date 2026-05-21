@@ -5,7 +5,8 @@ CREATE TABLE IF NOT EXISTS pos_locations (
     address TEXT,
     phone VARCHAR(50),
     is_active BOOLEAN DEFAULT TRUE,
-    created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
+    created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+    INDEX idx_pos_locations_owner (owner_id)
 );
 
 CREATE TABLE IF NOT EXISTS pos_tables (
@@ -18,7 +19,9 @@ CREATE TABLE IF NOT EXISTS pos_tables (
     current_session_order_id BIGINT DEFAULT NULL,
     qr_code_url TEXT,
     created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
-    updated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP
+    updated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
+    INDEX idx_pos_tables_owner (owner_id),
+    INDEX idx_pos_tables_owner_location (owner_id, location_id)
 );
 
 CREATE TABLE IF NOT EXISTS pos_sessions (
@@ -39,7 +42,10 @@ CREATE TABLE IF NOT EXISTS pos_sessions (
     total_refunds DECIMAL(10,2) DEFAULT 0,
     opened_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
     closed_at TIMESTAMP NULL,
-    notes TEXT
+    notes TEXT,
+    INDEX idx_pos_sessions_owner_status (owner_id, status),
+    INDEX idx_pos_sessions_owner_location (owner_id, location_id),
+    INDEX idx_pos_sessions_staff (staff_id)
 );
 
 CREATE TABLE IF NOT EXISTS pos_orders (
@@ -67,7 +73,13 @@ CREATE TABLE IF NOT EXISTS pos_orders (
     kitchen_notes TEXT,
     created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
     updated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
-    paid_at TIMESTAMP NULL
+    paid_at TIMESTAMP NULL,
+    INDEX idx_pos_orders_owner_status (owner_id, status),
+    INDEX idx_pos_orders_owner_session (owner_id, session_id),
+    INDEX idx_pos_orders_owner_location (owner_id, location_id),
+    INDEX idx_pos_orders_owner_created (owner_id, created_at),
+    INDEX idx_pos_orders_customer (customer_id),
+    INDEX idx_pos_orders_staff (staff_id)
 );
 
 CREATE TABLE IF NOT EXISTS pos_order_items (
@@ -84,7 +96,9 @@ CREATE TABLE IF NOT EXISTS pos_order_items (
     total DECIMAL(10,2) NOT NULL,
     notes TEXT,
     status ENUM('pending','preparing','ready','served','cancelled') DEFAULT 'pending',
-    created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
+    created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+    INDEX idx_pos_order_items_order (order_id),
+    INDEX idx_pos_order_items_order_status (order_id, status)
 );
 
 CREATE TABLE IF NOT EXISTS pos_refunds (
@@ -94,7 +108,9 @@ CREATE TABLE IF NOT EXISTS pos_refunds (
     amount DECIMAL(10,2) NOT NULL,
     reason TEXT,
     refunded_by BIGINT,
-    refunded_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
+    refunded_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+    INDEX idx_pos_refunds_owner (owner_id),
+    INDEX idx_pos_refunds_order (order_id)
 );
 
 CREATE TABLE IF NOT EXISTS pos_modifiers (
@@ -105,7 +121,8 @@ CREATE TABLE IF NOT EXISTS pos_modifiers (
     group_name VARCHAR(255),
     is_required BOOLEAN DEFAULT FALSE,
     created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
-    updated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP
+    updated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
+    INDEX idx_pos_modifiers_owner (owner_id)
 );
 
 CREATE TABLE IF NOT EXISTS pos_combos (
@@ -117,7 +134,8 @@ CREATE TABLE IF NOT EXISTS pos_combos (
     items JSON,
     is_active BOOLEAN DEFAULT TRUE,
     created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
-    updated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP
+    updated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
+    INDEX idx_pos_combos_owner (owner_id)
 );
 
 CREATE TABLE IF NOT EXISTS pos_gift_cards (
@@ -131,7 +149,8 @@ CREATE TABLE IF NOT EXISTS pos_gift_cards (
     is_active BOOLEAN DEFAULT TRUE,
     expires_at TIMESTAMP NULL,
     created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
-    updated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP
+    updated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
+    INDEX idx_pos_gift_cards_owner (owner_id)
 );
 
 CREATE TABLE IF NOT EXISTS pos_manager_pins (
@@ -139,7 +158,8 @@ CREATE TABLE IF NOT EXISTS pos_manager_pins (
     owner_id BIGINT NOT NULL,
     staff_id BIGINT NOT NULL,
     pin VARCHAR(10) NOT NULL,
-    created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
+    created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+    INDEX idx_pos_manager_pins_owner_staff (owner_id, staff_id)
 );
 
 CREATE TABLE IF NOT EXISTS pos_users (
