@@ -10,6 +10,12 @@ import (
 	"github.com/voxire/onion/internal/platform/logger"
 )
 
+// serverCtx is the context passed by Start() when the HTTP server boots.
+// Rate limiters created before Start is called (e.g. package-level vars)
+// use context.Background() and are effectively immortal — that's fine for
+// singletons that last the whole process.
+var serverCtx = context.Background()
+
 type SecurityRateLimiter struct {
 	requests map[string][]time.Time
 	mutex    sync.RWMutex
@@ -21,7 +27,7 @@ type SecurityRateLimiter struct {
 }
 
 func NewSecurityRateLimiter(limit int, window time.Duration) *SecurityRateLimiter {
-	ctx, cancel := context.WithCancel(context.Background())
+	ctx, cancel := context.WithCancel(serverCtx)
 
 	return &SecurityRateLimiter{
 		requests: make(map[string][]time.Time),
