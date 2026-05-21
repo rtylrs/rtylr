@@ -91,7 +91,7 @@ const Changelog: React.FC = () => {
             </div>
             <ul className="list-disc pl-5 flex flex-col gap-1">
               {entry.changes.map((change, idx) => (
-                <li key={idx} className="text-sm" style={{ color: '#374151' }}>
+                <li key={idx} className="text-sm" style={{ color: 'var(--docs-text)' }}>
                   {change}
                 </li>
               ))}

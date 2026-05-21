@@ -84,8 +84,11 @@
     background: transparent;
   }
   ::-webkit-scrollbar-thumb {
-    background: #d1d5db;
+    background: var(--docs-border);
     border-radius: 9999px;
+  }
+  ::-webkit-scrollbar-thumb:hover {
+    background: var(--docs-text-dim);
   }
 }
 
@@ -117,7 +120,7 @@
   font-size: 1rem;
   line-height: 1.75;
   margin-bottom: 1.25rem;
-  color: #374151;
+  color: var(--docs-text);
 }
 .docs-prose ul,
 .docs-prose ol {
@@ -128,7 +131,10 @@
   font-size: 1rem;
   line-height: 1.75;
   margin-bottom: 0.25rem;
-  color: #374151;
+  color: var(--docs-text);
+}
+.docs-prose strong {
+  color: var(--docs-text);
 }
 .docs-prose code {
   font-size: 0.875rem;

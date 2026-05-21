@@ -1,31 +1,109 @@
 import React from 'react';
 import { Link, useNavigate } from 'react-router-dom';
-import { Search, ArrowRight, Book, Code, Layers, Zap } from 'lucide-react';
+import {
+  Search,
+  ArrowRight,
+  Book,
+  Code,
+  Zap,
+  Sparkles,
+  ShoppingCart,
+  Package,
+  Users,
+  Headphones,
+  Wallet,
+  CalendarCheck,
+  Store as StoreIcon,
+  ListChecks,
+  BarChart3,
+  LayoutGrid,
+} from 'lucide-react';
 
-const featuredGuides = [
+interface AppCard {
+  slug: string;
+  name: string;
+  tagline: string;
+  icon: React.ReactNode;
+  accent: string;
+}
+
+const apps: AppCard[] = [
   {
-    title: 'Introduction',
-    description: 'Learn what rtylr is and how it can help your business.',
-    href: '/docs/introduction',
-    icon: <Book size={18} />,
+    slug: 'hub',
+    name: 'Hub',
+    tagline: 'Business command center — branches, team, settings, billing.',
+    icon: <LayoutGrid size={18} />,
+    accent: '#4583c4',
   },
   {
-    title: 'Quick Start',
-    description: 'Get up and running in minutes with this step-by-step guide.',
-    href: '/docs/quick-start',
-    icon: <Zap size={18} />,
+    slug: 'pos',
+    name: 'POS',
+    tagline: 'Multi-branch, multi-terminal point of sale with offline mode.',
+    icon: <ShoppingCart size={18} />,
+    accent: '#4583c4',
   },
   {
-    title: 'API Reference',
-    description: 'Build integrations with the rtylr REST API.',
-    href: '/api',
-    icon: <Code size={18} />,
+    slug: 'erp',
+    name: 'ERP',
+    tagline: 'Inventory, suppliers, purchase orders, multi-location stock.',
+    icon: <Package size={18} />,
+    accent: '#f59e0b',
   },
   {
-    title: 'Platform Overview',
-    description: 'Explore the apps that make up the rtylr platform.',
-    href: '/docs/hub',
-    icon: <Layers size={18} />,
+    slug: 'hr',
+    name: 'HR',
+    tagline: 'Employees, shifts, leave, payroll, performance.',
+    icon: <Users size={18} />,
+    accent: '#8b5cf6',
+  },
+  {
+    slug: 'crm',
+    name: 'CRM',
+    tagline: 'Customers, deals, loyalty, segments, marketing.',
+    icon: <Sparkles size={18} />,
+    accent: '#ec4899',
+  },
+  {
+    slug: 'finance',
+    name: 'Finance',
+    tagline: 'Invoices, payments, P&L, balance sheet, cash flow.',
+    icon: <Wallet size={18} />,
+    accent: '#10b981',
+  },
+  {
+    slug: 'flow',
+    name: 'Flow',
+    tagline: 'Projects, tasks, kanban, automations across the business.',
+    icon: <ListChecks size={18} />,
+    accent: '#6366f1',
+  },
+  {
+    slug: 'store',
+    name: 'Store',
+    tagline: 'Online storefront with custom domains and checkout.',
+    icon: <StoreIcon size={18} />,
+    accent: '#0ea5e9',
+  },
+  {
+    slug: 'book',
+    name: 'Book',
+    tagline: 'Appointments, reservations, calendar, reminders.',
+    icon: <CalendarCheck size={18} />,
+    accent: '#14b8a6',
+  },
+  {
+    slug: 'support',
+    name: 'Support',
+    tagline: 'Shared inbox, tickets, SLAs, knowledge base.',
+    icon: <Headphones size={18} />,
+    accent: '#f97316',
+  },
+  {
+    slug: 'insights',
+    name: 'Insights',
+    tagline: 'Cross-app analytics, dashboards, custom reports.',
+    icon: <BarChart3 size={18} />,
+    accent: '#3b82f6',
   },
 ];
 
@@ -42,16 +120,14 @@ const Home: React.FC = () => {
 
   return (
     <div>
-      {/* Hero */}
       <div className="mb-10">
         <h1 className="text-3xl font-bold mb-3" style={{ color: 'var(--docs-text)' }}>
           rtylr Documentation
         </h1>
         <p className="text-base mb-6" style={{ color: 'var(--docs-text-muted)' }}>
-          Everything you need to build, configure, and integrate with rtylr.
+          Pick an app to see what it does, every feature it ships with, and how to use it.
         </p>
 
-        {/* Search */}
         <form onSubmit={handleSearch} className="max-w-lg">
           <div className="relative">
             <Search
@@ -75,26 +151,30 @@ const Home: React.FC = () => {
         </form>
       </div>
 
-      {/* Featured Guides */}
-      <div className="mb-10">
+      <div className="mb-12">
         <h2
           className="text-sm font-semibold uppercase tracking-wider mb-4"
           style={{ color: 'var(--docs-text-muted)' }}
         >
-          Getting Started
+          Apps
         </h2>
-        <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
-          {featuredGuides.map((guide) => (
+        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-3">
+          {apps.map((app) => (
             <Link
-              key={guide.href}
-              to={guide.href}
-              className="group flex flex-col p-4 rounded-lg border no-underline transition-colors"
+              key={app.slug}
+              to={`/docs/${app.slug}`}
+              className="group flex flex-col p-4 rounded-lg border no-underline transition-all hover:-translate-y-0.5"
               style={{ borderColor: 'var(--docs-border)', background: 'var(--docs-bg)' }}
             >
               <div className="flex items-center gap-2 mb-2">
-                <span style={{ color: 'var(--docs-accent)' }}>{guide.icon}</span>
-                <span className="text-sm font-medium" style={{ color: 'var(--docs-text)' }}>
-                  {guide.title}
+                <span
+                  className="h-7 w-7 rounded-md inline-flex items-center justify-center"
+                  style={{ background: `${app.accent}1A`, color: app.accent }}
+                >
+                  {app.icon}
+                </span>
+                <span className="text-sm font-semibold" style={{ color: 'var(--docs-text)' }}>
+                  {app.name}
                 </span>
                 <ArrowRight
                   size={14}
@@ -103,36 +183,67 @@ const Home: React.FC = () => {
                 />
               </div>
               <p className="text-sm" style={{ color: 'var(--docs-text-muted)' }}>
-                {guide.description}
+                {app.tagline}
               </p>
             </Link>
           ))}
         </div>
       </div>
 
-      {/* Quick Links */}
-      <div>
+      <div className="mb-10">
         <h2
           className="text-sm font-semibold uppercase tracking-wider mb-4"
           style={{ color: 'var(--docs-text-muted)' }}
         >
-          Popular Topics
+          Get Started
         </h2>
-        <div className="flex flex-col gap-1">
+        <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
           {[
-            { label: 'Authentication', href: '/docs/authentication' },
-            { label: 'Team Management', href: '/docs/team-management' },
-            { label: 'Webhooks', href: '/docs/webhooks' },
-            { label: 'Changelog', href: '/changelog' },
-          ].map((link) => (
+            {
+              title: 'Introduction',
+              description: 'What rtylr is and how it fits your business.',
+              href: '/docs/introduction',
+              icon: <Book size={16} />,
+            },
+            {
+              title: 'Quick Start',
+              description: 'From sign-up to first sale in minutes.',
+              href: '/docs/quick-start',
+              icon: <Zap size={16} />,
+            },
+            {
+              title: 'API Reference',
+              description: 'Build integrations with the rtylr REST API.',
+              href: '/api',
+              icon: <Code size={16} />,
+            },
+            {
+              title: 'Changelog',
+              description: 'Everything that shipped, sorted by date.',
+              href: '/changelog',
+              icon: <Sparkles size={16} />,
+            },
+          ].map((card) => (
             <Link
-              key={link.href}
-              to={link.href}
-              className="flex items-center gap-2 px-3 py-2 text-sm rounded-md no-underline transition-colors"
-              style={{ color: 'var(--docs-accent)' }}
+              key={card.href}
+              to={card.href}
+              className="group flex items-start gap-3 p-4 rounded-lg border no-underline transition-all hover:-translate-y-0.5"
+              style={{ borderColor: 'var(--docs-border)', background: 'var(--docs-bg)' }}
             >
-              <ArrowRight size={12} />
-              {link.label}
+              <span
+                className="h-8 w-8 rounded-md inline-flex items-center justify-center shrink-0"
+                style={{ background: 'var(--docs-accent-bg)', color: 'var(--docs-accent)' }}
+              >
+                {card.icon}
+              </span>
+              <div className="flex-1 min-w-0">
+                <p className="text-sm font-medium mb-0.5" style={{ color: 'var(--docs-text)' }}>
+                  {card.title}
+                </p>
+                <p className="text-sm" style={{ color: 'var(--docs-text-muted)' }}>
+                  {card.description}
+                </p>
+              </div>
             </Link>
           ))}
         </div>

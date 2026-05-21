@@ -302,10 +302,7 @@ const HeaderDesktop: React.FC = () => {
                 >
                   Blog
                 </h6>
-                <h6
-                  onClick={() => handleNavigation('/changelog')}
-                  onMouseEnter={() => prefetchRoute('/changelog')}
-                >
+                <h6 onClick={() => handleExternalLink('https://docs.rtylr.com/changelog')}>
                   Changelog
                 </h6>
                 <h6 onClick={() => handleExternalLink('https://docs.rtylr.com')}>Documentation</h6>

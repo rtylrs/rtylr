@@ -315,9 +315,15 @@ const HeaderMobile: React.FC = () => {
                   <Link href="/blog" onClick={() => handleNavigation('/blog')}>
                     Blog
                   </Link>
-                  <Link href="/changelog" onClick={() => handleNavigation('/changelog')}>
+                  <a
+                    href="https://docs.rtylr.com/changelog"
+                    onClick={(e) => {
+                      e.preventDefault();
+                      handleExternalLink('https://docs.rtylr.com/changelog');
+                    }}
+                  >
                     Changelog
-                  </Link>
+                  </a>
                   <a
                     href="#"
                     onClick={(e) => {
