@@ -2,6 +2,7 @@ package application
 
 import (
 	"context"
+	"database/sql"
 	"errors"
 	"fmt"
 	"strings"
@@ -32,8 +33,8 @@ type Service struct {
 	aiClient   *snips.Client
 }
 
-func NewService(ctx context.Context) *Service {
-	repo := infrastructure.NewRepository(ctx)
+func NewService(ctx context.Context, db *sql.DB) *Service {
+	repo := infrastructure.NewRepository(db)
 
 	aiClient, err := snips.NewClient(ctx)
 	if err != nil {

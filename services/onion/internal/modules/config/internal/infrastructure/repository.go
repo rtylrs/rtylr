@@ -9,7 +9,6 @@ import (
 
 	"github.com/voxire/onion/internal/modules/config/internal/domain"
 	"github.com/voxire/onion/internal/modules/config/internal/infrastructure/persistence/sqlc"
-	"github.com/voxire/onion/internal/platform/database/dbclient"
 	"github.com/voxire/onion/internal/platform/logger"
 	"github.com/voxire/onion/internal/platform/utils/convert"
 )
@@ -19,8 +18,8 @@ type Repository struct {
 	pool    *sql.DB
 }
 
-func NewRepository(_ context.Context) *Repository {
-	pool := dbclient.Pool()
+func NewRepository(db *sql.DB) *Repository {
+	pool := db
 
 	return &Repository{
 		queries: sqlc.New(pool),

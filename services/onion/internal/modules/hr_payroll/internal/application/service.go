@@ -2,6 +2,7 @@ package application
 
 import (
 	"context"
+	"database/sql"
 	"fmt"
 	"time"
 
@@ -30,9 +31,9 @@ type Service struct {
 	notifier         domain.NotificationDispatcher
 }
 
-func NewService(ctx context.Context, approvalProvider domain.ApprovalChainProvider) *Service {
+func NewService(_ context.Context, db *sql.DB, approvalProvider domain.ApprovalChainProvider) *Service {
 	return &Service{
-		repo:             infrastructure.NewRepository(ctx),
+		repo:             infrastructure.NewRepository(db),
 		approvalProvider: approvalProvider,
 		financePoster:    noopFinancePoster{},
 		notifier:         noopNotifier{},

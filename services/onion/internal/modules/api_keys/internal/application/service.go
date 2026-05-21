@@ -4,6 +4,7 @@ import (
 	"context"
 	"crypto/rand"
 	"crypto/sha256"
+	"database/sql"
 	"encoding/hex"
 	"errors"
 	"time"
@@ -29,9 +30,9 @@ type Service struct {
 	repo repository
 }
 
-func NewService(ctx context.Context) *Service {
+func NewService(_ context.Context, db *sql.DB) *Service {
 	return &Service{
-		repo: infrastructure.NewRepository(ctx),
+		repo: infrastructure.NewRepository(db),
 	}
 }
 

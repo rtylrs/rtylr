@@ -5,7 +5,6 @@ import (
 	"database/sql"
 
 	"github.com/voxire/onion/internal/modules/websitelead/internal/domain"
-	"github.com/voxire/onion/internal/platform/database/dbclient"
 	"github.com/voxire/onion/internal/platform/logger"
 )
 
@@ -13,9 +12,8 @@ type Repository struct {
 	db *sql.DB
 }
 
-func NewRepository(ctx context.Context) *Repository {
-	db := dbclient.Pool()
-	autoMigrate(ctx, db)
+func NewRepository(db *sql.DB) *Repository {
+	autoMigrate(context.Background(), db)
 	return &Repository{db: db}
 }
 

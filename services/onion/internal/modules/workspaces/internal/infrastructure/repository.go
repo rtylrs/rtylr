@@ -11,7 +11,6 @@ import (
 
 	"github.com/voxire/onion/internal/modules/workspaces/internal/domain"
 	"github.com/voxire/onion/internal/modules/workspaces/internal/infrastructure/persistence/sqlc"
-	"github.com/voxire/onion/internal/platform/database/dbclient"
 	"github.com/voxire/onion/internal/platform/logger"
 )
 
@@ -20,8 +19,8 @@ type Repository struct {
 	pool    *sql.DB
 }
 
-func NewRepository(_ context.Context) *Repository {
-	pool := dbclient.Pool()
+func NewRepository(db *sql.DB) *Repository {
+	pool := db
 	return &Repository{
 		queries: sqlc.New(pool),
 		pool:    pool,
@@ -413,7 +412,7 @@ func (r *Repository) UpdateTask(ctx context.Context, input domain.UpdateTaskInpu
 	// Raw query so partial updates (e.g. title-only) don't overwrite status/priority/completed_at.
 	// COALESCE(?, col) preserves the existing value when the param is NULL.
 	// The completed_at CASE only fires when a non-NULL status is explicitly supplied.
-	_, err = dbclient.Pool().ExecContext(ctx, `
+	_, err = r.pool.ExecContext(ctx, `
 		UPDATE flow_tasks
 		SET title       = ?,
 		    description = COALESCE(?, description),
@@ -532,7 +531,7 @@ func (r *Repository) DeleteComment(ctx context.Context, commentID, userID int64)
 // before the row disappears.
 func (r *Repository) GetCommentTaskID(ctx context.Context, commentID int64) (int64, error) {
 	var taskID int64
-	err := dbclient.Pool().QueryRowContext(ctx, "SELECT task_id FROM flow_comments WHERE id = ?", commentID).Scan(&taskID)
+	err := r.pool.QueryRowContext(ctx, "SELECT task_id FROM flow_comments WHERE id = ?", commentID).Scan(&taskID)
 	if err != nil {
 		return 0, err
 	}

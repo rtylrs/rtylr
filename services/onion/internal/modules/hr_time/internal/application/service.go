@@ -2,6 +2,7 @@ package application
 
 import (
 	"context"
+	"database/sql"
 	"errors"
 	"fmt"
 	"time"
@@ -30,9 +31,9 @@ type Service struct {
 	flowReader       domain.FlowTaskReader
 }
 
-func NewService(ctx context.Context, approvalProvider domain.ApprovalChainProvider, flowReader domain.FlowTaskReader) *Service {
+func NewService(_ context.Context, db *sql.DB, approvalProvider domain.ApprovalChainProvider, flowReader domain.FlowTaskReader) *Service {
 	return &Service{
-		repo:             infrastructure.NewRepository(ctx),
+		repo:             infrastructure.NewRepository(db),
 		approvalProvider: approvalProvider,
 		flowReader:       flowReader,
 	}

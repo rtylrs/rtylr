@@ -4,6 +4,7 @@ import (
 	"context"
 	"crypto/rand"
 	"crypto/sha256"
+	"database/sql"
 	"encoding/base64"
 	"encoding/hex"
 	"errors"
@@ -28,10 +29,10 @@ type Service struct {
 	jwt  *jwtutils.JWTHelper
 }
 
-func NewService(ctx context.Context) *Service {
+func NewService(ctx context.Context, db *sql.DB) *Service {
 	secret, _ := ctx.Value(jwtutils.JWTSecretKey).(string)
 	return &Service{
-		repo: infrastructure.NewRepository(ctx),
+		repo: infrastructure.NewRepository(db),
 		jwt:  jwtutils.NewJWTHelperWithDuration(secret, "rtylr", 24*time.Hour),
 	}
 }

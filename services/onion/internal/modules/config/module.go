@@ -2,6 +2,7 @@ package config
 
 import (
 	"context"
+	"database/sql"
 
 	"github.com/go-chi/chi/v5"
 
@@ -15,8 +16,8 @@ type Module struct {
 	ConfigService *application.Service
 }
 
-func NewModule(ctx context.Context) *Module {
-	configService := application.NewService(ctx)
+func NewModule(ctx context.Context, db *sql.DB) *Module {
+	configService := application.NewService(ctx, db)
 
 	module := &Module{
 		ConfigService: configService,

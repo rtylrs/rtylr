@@ -11,16 +11,19 @@ import (
 
 	"github.com/voxire/onion/internal/modules/quotes/internal/domain"
 	"github.com/voxire/onion/internal/modules/quotes/internal/infrastructure/persistence/sqlc"
-	"github.com/voxire/onion/internal/platform/database/dbclient"
 	"github.com/voxire/onion/internal/platform/logger"
 )
 
 type Repository struct {
+	pool    *sql.DB
 	queries *sqlc.Queries
 }
 
-func NewRepository(_ context.Context) *Repository {
-	return &Repository{queries: sqlc.New(dbclient.Pool())}
+func NewRepository(db *sql.DB) *Repository {
+	return &Repository{
+		queries: sqlc.New(db),
+		pool:    db,
+	}
 }
 
 func (r *Repository) List(ctx context.Context, ownerID int64) ([]domain.Quote, error) {
@@ -119,7 +122,7 @@ func (r *Repository) Get(ctx context.Context, ownerID, id int64) (domain.Quote, 
 // here because the operation must be atomic. No cross-module Go imports are
 // introduced — we use dbclient + raw SQL at the infrastructure layer only.
 func (r *Repository) ConvertToInvoice(ctx context.Context, ownerID, quoteID int64) (int64, error) {
-	db := dbclient.Pool()
+	db := r.pool
 
 	tx, err := db.BeginTx(ctx, nil)
 	if err != nil {

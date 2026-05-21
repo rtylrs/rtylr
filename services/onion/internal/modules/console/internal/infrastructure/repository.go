@@ -5,8 +5,6 @@ import (
 	"database/sql"
 	"fmt"
 	"time"
-
-	"github.com/voxire/onion/internal/platform/database/dbclient"
 )
 
 type UserRow struct {
@@ -86,8 +84,8 @@ type Repository struct {
 	pool *sql.DB
 }
 
-func NewRepository(_ context.Context) *Repository {
-	return &Repository{pool: dbclient.Pool()}
+func NewRepository(db *sql.DB) *Repository {
+	return &Repository{pool: db}
 }
 
 // ── Auth ──────────────────────────────────────────────────────────────────────

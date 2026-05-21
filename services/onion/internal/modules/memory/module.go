@@ -2,6 +2,7 @@ package memory
 
 import (
 	"context"
+	"database/sql"
 
 	"github.com/go-chi/chi/v5"
 
@@ -13,8 +14,8 @@ type Module struct {
 	memoryService *application.Service
 }
 
-func NewModule(ctx context.Context) *Module {
-	memoryService := application.NewService(ctx)
+func NewModule(ctx context.Context, db *sql.DB) *Module {
+	memoryService := application.NewService(ctx, db)
 
 	return &Module{
 		memoryService: memoryService,

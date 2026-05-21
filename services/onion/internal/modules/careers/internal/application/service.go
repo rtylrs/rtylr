@@ -2,6 +2,7 @@ package application
 
 import (
 	"context"
+	"database/sql"
 	"time"
 
 	"github.com/voxire/onion/internal/modules/careers/internal/domain"
@@ -15,8 +16,8 @@ type Service struct {
 	repo *infrastructure.Repository
 }
 
-func NewService(ctx context.Context) *Service {
-	return &Service{repo: infrastructure.NewRepository(ctx)}
+func NewService(_ context.Context, db *sql.DB) *Service {
+	return &Service{repo: infrastructure.NewRepository(db)}
 }
 
 // GetActiveCareers is a public/global read; cached under a single fixed key

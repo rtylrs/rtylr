@@ -2,6 +2,7 @@ package hr_equipment
 
 import (
 	"context"
+	"database/sql"
 
 	"github.com/go-chi/chi/v5"
 
@@ -42,10 +43,10 @@ type Module struct {
 	service *application.Service
 }
 
-func NewModule(ctx context.Context, hrCoreModule *hrcore.Module) *Module {
+func NewModule(ctx context.Context, db *sql.DB, hrCoreModule *hrcore.Module) *Module {
 	adapter := &hrCoreApprovalAdapter{core: hrCoreModule}
 	return &Module{
-		service: application.NewService(ctx, adapter),
+		service: application.NewService(ctx, db, adapter),
 	}
 }
 

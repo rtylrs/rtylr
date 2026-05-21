@@ -2,6 +2,7 @@ package application
 
 import (
 	"context"
+	"database/sql"
 	"fmt"
 	"time"
 
@@ -27,8 +28,8 @@ type Service struct {
 	repo repository
 }
 
-func NewService(ctx context.Context) *Service {
-	return &Service{repo: infrastructure.NewRepository(ctx)}
+func NewService(_ context.Context, db *sql.DB) *Service {
+	return &Service{repo: infrastructure.NewRepository(db)}
 }
 
 func invalidateShiftsScope(ctx context.Context, ownerID int64) {

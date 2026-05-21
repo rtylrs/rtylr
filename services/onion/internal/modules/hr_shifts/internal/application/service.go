@@ -2,6 +2,7 @@ package application
 
 import (
 	"context"
+	"database/sql"
 	"fmt"
 	"time"
 
@@ -28,9 +29,9 @@ type Service struct {
 	leaveConflictChecker domain.LeaveConflictChecker
 }
 
-func NewService(ctx context.Context, leaveChecker domain.LeaveConflictChecker) *Service {
+func NewService(_ context.Context, db *sql.DB, leaveChecker domain.LeaveConflictChecker) *Service {
 	return &Service{
-		repo:                 infrastructure.NewRepository(ctx),
+		repo:                 infrastructure.NewRepository(db),
 		leaveConflictChecker: leaveChecker,
 	}
 }

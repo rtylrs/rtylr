@@ -2,6 +2,7 @@ package hr_core
 
 import (
 	"context"
+	"database/sql"
 
 	"github.com/go-chi/chi/v5"
 
@@ -28,9 +29,9 @@ type Module struct {
 	service *application.Service
 }
 
-func NewModule(ctx context.Context) *Module {
+func NewModule(ctx context.Context, db *sql.DB) *Module {
 	return &Module{
-		service: application.NewService(ctx),
+		service: application.NewService(ctx, db),
 	}
 }
 

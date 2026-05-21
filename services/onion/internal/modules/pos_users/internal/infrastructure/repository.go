@@ -9,7 +9,6 @@ import (
 
 	"github.com/voxire/onion/internal/modules/pos_users/internal/domain"
 	"github.com/voxire/onion/internal/modules/pos_users/internal/infrastructure/persistence/sqlc"
-	"github.com/voxire/onion/internal/platform/database/dbclient"
 	"github.com/voxire/onion/internal/platform/logger"
 )
 
@@ -17,12 +16,16 @@ import (
 // matches the (owner_id, display_name) pair.
 var ErrUserNotFound = errors.New("pos user not found")
 
-type Repository struct{}
+type Repository struct {
+	pool *sql.DB
+}
 
-func NewRepository(_ context.Context) *Repository { return &Repository{} }
+func NewRepository(db *sql.DB) *Repository {
+	return &Repository{pool: db}
+}
 
 func (r *Repository) ListByOwner(ctx context.Context, ownerID int64) ([]domain.POSUser, error) {
-	q := sqlc.New(dbclient.Pool())
+	q := sqlc.New(r.pool)
 	rows, err := q.ListPOSUsersByOwner(ctx, ownerID)
 	if err != nil {
 		return nil, err
@@ -35,7 +38,7 @@ func (r *Repository) ListByOwner(ctx context.Context, ownerID int64) ([]domain.P
 }
 
 func (r *Repository) ListByLocation(ctx context.Context, ownerID, locationID int64) ([]domain.POSUser, error) {
-	q := sqlc.New(dbclient.Pool())
+	q := sqlc.New(r.pool)
 	rows, err := q.ListPOSUsersByLocation(ctx, sqlc.ListPOSUsersByLocationParams{OwnerID: ownerID, LocationID: locationID})
 	if err != nil {
 		return nil, err
@@ -51,7 +54,7 @@ func (r *Repository) ListByLocation(ctx context.Context, ownerID, locationID int
 // the service layer is responsible for producing it so this layer never
 // handles plaintext PINs.
 func (r *Repository) Create(ctx context.Context, ownerID, createdBy int64, input domain.CreatePOSUserInput, hashedPIN string) (int64, error) {
-	q := sqlc.New(dbclient.Pool())
+	q := sqlc.New(r.pool)
 	res, err := q.CreatePOSUser(ctx, sqlc.CreatePOSUserParams{
 		OwnerID:          ownerID,
 		LocationID:       input.LocationID,
@@ -79,7 +82,7 @@ func (r *Repository) Create(ctx context.Context, ownerID, createdBy int64, input
 // Update mutates non-PIN fields on a pos_user. PIN rotation goes through
 // UpdatePINHash, which enforces that only a bcrypt hash can be written.
 func (r *Repository) Update(ctx context.Context, ownerID, id int64, input domain.UpdatePOSUserInput) error {
-	q := sqlc.New(dbclient.Pool())
+	q := sqlc.New(r.pool)
 	return q.UpdatePOSUser(ctx, sqlc.UpdatePOSUserParams{
 		Name:             input.Name,
 		Role:             sqlc.NullPosUsersRole{PosUsersRole: sqlc.PosUsersRole(input.Role), Valid: true},
@@ -101,7 +104,7 @@ func (r *Repository) UpdatePINHash(ctx context.Context, ownerID, id int64, hashe
 	if hashedPIN == "" {
 		return errors.New("refusing to write empty pin hash")
 	}
-	q := sqlc.New(dbclient.Pool())
+	q := sqlc.New(r.pool)
 	return q.UpdatePOSUserPINHash(ctx, sqlc.UpdatePOSUserPINHashParams{
 		PinHash: sql.NullString{String: hashedPIN, Valid: true},
 		OwnerID: ownerID,
@@ -110,7 +113,7 @@ func (r *Repository) UpdatePINHash(ctx context.Context, ownerID, id int64, hashe
 }
 
 func (r *Repository) Deactivate(ctx context.Context, ownerID, id int64) error {
-	q := sqlc.New(dbclient.Pool())
+	q := sqlc.New(r.pool)
 	return q.DeactivatePOSUser(ctx, sqlc.DeactivatePOSUserParams{OwnerID: ownerID, ID: id})
 }
 
@@ -119,7 +122,7 @@ func (r *Repository) Deactivate(ctx context.Context, ownerID, id int64) error {
 // so the service layer can decide how to verify; the caller is expected to
 // zero those fields before returning anything to the transport layer.
 func (r *Repository) FindByDisplayName(ctx context.Context, ownerID int64, displayName string) (*domain.POSUser, error) {
-	q := sqlc.New(dbclient.Pool())
+	q := sqlc.New(r.pool)
 	row, err := q.FindPOSUserForPINVerify(ctx, sqlc.FindPOSUserForPINVerifyParams{OwnerID: ownerID, Name: displayName})
 	if err != nil {
 		if errors.Is(err, sql.ErrNoRows) {

@@ -2,6 +2,7 @@ package application
 
 import (
 	"context"
+	"database/sql"
 	"time"
 
 	"github.com/voxire/onion/internal/modules/inventory/internal/domain"
@@ -17,8 +18,8 @@ type Service struct {
 	repo *infrastructure.Repository
 }
 
-func NewService(ctx context.Context) *Service {
-	repo := infrastructure.NewRepository(ctx)
+func NewService(_ context.Context, db *sql.DB) *Service {
+	repo := infrastructure.NewRepository(db)
 
 	return &Service{
 		repo: repo,

@@ -2,6 +2,7 @@ package application
 
 import (
 	"context"
+	"database/sql"
 	"time"
 
 	"github.com/voxire/onion/internal/modules/reviews/internal/domain"
@@ -24,8 +25,8 @@ type Service struct {
 	repo repository
 }
 
-func NewService(ctx context.Context) *Service {
-	return &Service{repo: infrastructure.NewRepository(ctx)}
+func NewService(_ context.Context, db *sql.DB) *Service {
+	return &Service{repo: infrastructure.NewRepository(db)}
 }
 
 func invalidateReviewsScope(ctx context.Context, ownerID int64) {

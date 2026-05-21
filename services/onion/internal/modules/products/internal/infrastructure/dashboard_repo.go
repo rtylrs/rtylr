@@ -5,7 +5,6 @@ import (
 	"database/sql"
 
 	"github.com/voxire/onion/internal/modules/products/internal/domain"
-	"github.com/voxire/onion/internal/platform/database/dbclient"
 	"github.com/voxire/onion/internal/platform/logger"
 )
 
@@ -14,7 +13,7 @@ import (
 // because MySQL optimises simple COUNT(*) scans extremely well.
 func (r *Repository) GetDashboard(ctx context.Context, ownerID int64) (domain.DashboardStats, error) {
 	var stats domain.DashboardStats
-	db := dbclient.Pool()
+	db := r.pool
 
 	// Total active products.
 	if err := db.QueryRowContext(ctx,
@@ -97,7 +96,7 @@ func (r *Repository) GetDashboard(ctx context.Context, ownerID int64) (domain.Da
 }
 
 func (r *Repository) topLowStockItems(ctx context.Context, ownerID int64, limit int) ([]domain.LowStockItem, error) {
-	rows, err := dbclient.Pool().QueryContext(ctx, `
+	rows, err := r.pool.QueryContext(ctx, `
 		SELECT p.id, p.name, COALESCE(p.sku, ''),
 		       p.stock_quantity, COALESCE(p.low_stock_threshold, 0),
 		       ''
@@ -131,7 +130,7 @@ func (r *Repository) topLowStockItems(ctx context.Context, ownerID int64, limit 
 
 func (r *Repository) recentPurchaseOrders(ctx context.Context, ownerID int64, limit int) ([]domain.RecentPO, error) {
 	// cross-schema read from erp_suppliers — join for display name
-	rows, err := dbclient.Pool().QueryContext(ctx, `
+	rows, err := r.pool.QueryContext(ctx, `
 		SELECT po.id, po.po_number, COALESCE(s.name, 'Unknown'),
 		       po.status, po.total, po.created_at
 		FROM erp_purchase_orders po
@@ -167,7 +166,7 @@ func (r *Repository) recentPurchaseOrders(ctx context.Context, ownerID int64, li
 
 func (r *Repository) topCategories(ctx context.Context, ownerID int64, limit int) ([]domain.TopCategory, error) {
 	// cross-schema read from erp_categories — join for display name
-	rows, err := dbclient.Pool().QueryContext(ctx, `
+	rows, err := r.pool.QueryContext(ctx, `
 		SELECT COALESCE(c.name, 'Uncategorized') AS name,
 		       COUNT(p.id) AS product_count
 		FROM erp_products p
@@ -202,7 +201,7 @@ func (r *Repository) topCategories(ctx context.Context, ownerID int64, limit int
 // sales-history integration the suggested qty is just the recorded
 // reorder_quantity; confidence is "low" to flag this to the UI.
 func (r *Repository) ListReorderSuggestions(ctx context.Context, ownerID int64) ([]domain.ReorderSuggestion, error) {
-	rows, err := dbclient.Pool().QueryContext(ctx, `
+	rows, err := r.pool.QueryContext(ctx, `
 		SELECT id, name, COALESCE(sku, ''),
 		       stock_quantity,
 		       COALESCE(low_stock_threshold, 0),

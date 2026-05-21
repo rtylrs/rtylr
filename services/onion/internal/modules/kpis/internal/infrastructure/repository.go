@@ -6,7 +6,6 @@ import (
 	"errors"
 
 	"github.com/voxire/onion/internal/modules/kpis/internal/domain"
-	"github.com/voxire/onion/internal/platform/database/dbclient"
 	"github.com/voxire/onion/internal/platform/logger"
 )
 
@@ -14,9 +13,9 @@ type Repository struct {
 	pool *sql.DB
 }
 
-func NewRepository(_ context.Context) *Repository {
+func NewRepository(db *sql.DB) *Repository {
 	return &Repository{
-		pool: dbclient.Pool(),
+		pool: db,
 	}
 }
 
