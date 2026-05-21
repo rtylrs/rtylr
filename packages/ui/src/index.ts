@@ -14,6 +14,9 @@ export type { AlertProps } from './components/Alert';
 
 export { Switch } from './components/Switch';
 
+export { Avatar } from './components/Avatar';
+export type { AvatarProps, AvatarSize } from './components/Avatar';
+
 export {
   Dialog,
   DialogTrigger,
