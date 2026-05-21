@@ -40,7 +40,7 @@ const ActivityWidget: React.FC = () => {
             </p>
           </div>
         ) : (
-          activity.map((e) => <ActivityEntryRow key={e.id} entry={e} />)
+          activity.map((e, i) => <ActivityEntryRow key={e.id} entry={e} index={i} />)
         )}
       </div>
     </div>

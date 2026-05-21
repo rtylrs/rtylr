@@ -1,4 +1,5 @@
 import React from 'react';
+import { motion } from 'motion/react';
 import { AlertCircle, AlertTriangle, Info } from 'lucide-react';
 import AppBadge from './AppBadge';
 import type { ActivityEntry as ActivityEntryType } from '../../hooks/queries/useActivity';
@@ -19,15 +20,21 @@ function formatRelative(iso: string): string {
 export interface ActivityEntryProps {
   entry: ActivityEntryType;
   showIp?: boolean;
+  index?: number;
 }
 
-export const ActivityEntryRow: React.FC<ActivityEntryProps> = ({ entry, showIp }) => {
+export const ActivityEntryRow: React.FC<ActivityEntryProps> = ({ entry, showIp, index = 0 }) => {
   const sev = entry.severity ?? 'info';
   const Icon = sev === 'critical' ? AlertCircle : sev === 'warning' ? AlertTriangle : Info;
   const iconColor = sev === 'critical' ? '#ef4444' : sev === 'warning' ? '#f59e0b' : '#4583C4';
 
   return (
-    <div className="flex items-start gap-3 px-4 py-3 rounded-lg transition-colors hover:bg-[var(--dash-hover)]">
+    <motion.div
+      className="flex items-start gap-3 px-4 py-3 rounded-lg hover:bg-[var(--dash-hover)]"
+      initial={{ opacity: 0, y: 8 }}
+      animate={{ opacity: 1, y: 0 }}
+      transition={{ duration: 0.26, ease: [0.22, 1, 0.36, 1], delay: Math.min(index, 12) * 0.03 }}
+    >
       <div
         className="h-8 w-8 rounded-lg flex items-center justify-center shrink-0 mt-0.5"
         style={{ background: `${iconColor}15` }}
@@ -55,7 +62,7 @@ export const ActivityEntryRow: React.FC<ActivityEntryProps> = ({ entry, showIp }
           )}
         </div>
       </div>
-    </div>
+    </motion.div>
   );
 };
 

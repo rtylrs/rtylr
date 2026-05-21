@@ -98,8 +98,8 @@ const Activity: React.FC = () => {
           </div>
         ) : (
           <div className="p-2">
-            {filtered.map((e) => (
-              <ActivityEntryRow key={e.id} entry={e} />
+            {filtered.map((e, i) => (
+              <ActivityEntryRow key={e.id} entry={e} index={i} />
             ))}
           </div>
         )}

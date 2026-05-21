@@ -1,5 +1,6 @@
 import React from 'react';
 import { useNavigate } from 'react-router-dom';
+import { motion } from 'motion/react';
 import { MoreHorizontal } from 'lucide-react';
 import { Avatar } from '../ui';
 import AppBadge from './AppBadge';
@@ -31,15 +32,19 @@ function formatRelative(iso?: string): string {
 export interface TeamMemberRowProps {
   member: TeamMember;
   onMenu?: (member: TeamMember) => void;
+  index?: number;
 }
 
-export const TeamMemberRow: React.FC<TeamMemberRowProps> = ({ member, onMenu }) => {
+export const TeamMemberRow: React.FC<TeamMemberRowProps> = ({ member, onMenu, index = 0 }) => {
   const navigate = useNavigate();
 
   return (
-    <div
-      className="flex items-center gap-3 px-4 py-3 rounded-lg transition-colors cursor-pointer hover:bg-[var(--dash-hover)]"
+    <motion.div
+      className="flex items-center gap-3 px-4 py-3 rounded-lg cursor-pointer hover:bg-[var(--dash-hover)]"
       onClick={() => navigate(`/team/${member.id}`)}
+      initial={{ opacity: 0, y: 8 }}
+      animate={{ opacity: 1, y: 0 }}
+      transition={{ duration: 0.28, ease: [0.22, 1, 0.36, 1], delay: Math.min(index, 12) * 0.03 }}
     >
       <Avatar
         initials={getInitials(member.name)}
@@ -91,7 +96,7 @@ export const TeamMemberRow: React.FC<TeamMemberRowProps> = ({ member, onMenu }) 
       >
         <MoreHorizontal size={14} />
       </button>
-    </div>
+    </motion.div>
   );
 };
 

@@ -181,8 +181,8 @@ const MemberDetail: React.FC = (): React.JSX.Element => {
           </p>
         ) : (
           <div className="-mx-5">
-            {memberActivity.map((a) => (
-              <ActivityEntryRow key={a.id} entry={a} />
+            {memberActivity.map((a, i) => (
+              <ActivityEntryRow key={a.id} entry={a} index={i} />
             ))}
           </div>
         )}
