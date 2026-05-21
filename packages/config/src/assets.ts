@@ -28,7 +28,7 @@ export function getLogoUrl(appId?: string, theme: 'dark' | 'light' = 'light'): s
   return ASSETS.logos[theme];
 }
 
-export const AVATAR_STYLE = 'fun-emoji';
+export const AVATAR_STYLE = 'thumbs';
 
 export function getAvatarUrl(seed?: string | null): string {
   const s = encodeURIComponent(seed || 'user');
