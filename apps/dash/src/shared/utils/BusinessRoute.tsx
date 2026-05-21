@@ -1,6 +1,6 @@
 import { Outlet, useLocation } from 'react-router-dom';
 import { useEffect, useState } from 'react';
-import { APP_URLS } from '@voxire/config';
+import { APP_URLS, getAvatarUrl } from '@voxire/config';
 import { signOut } from '@voxire/auth';
 import {
   MonitorSpeaker,
@@ -107,12 +107,7 @@ function StaffView({ user }: { user: StoredUser }): React.JSX.Element {
     }
   };
 
-  const initials = fullName
-    .split(' ')
-    .map((n: string) => n[0])
-    .join('')
-    .toUpperCase()
-    .slice(0, 2);
+  const avatarUrl = getAvatarUrl(user?.email || fullName);
 
   return (
     <div style={{ minHeight: '100vh', background: 'var(--dash-bg, #fafafa)' }}>
@@ -138,17 +133,20 @@ function StaffView({ user }: { user: StoredUser }): React.JSX.Element {
               height: 36,
               borderRadius: '50%',
               border: 'none',
+              padding: 0,
               cursor: 'pointer',
               background: '#4583C4',
-              color: '#fff',
-              fontSize: 13,
-              fontWeight: 600,
+              overflow: 'hidden',
               display: 'flex',
               alignItems: 'center',
               justifyContent: 'center',
             }}
           >
-            {initials}
+            <img
+              src={avatarUrl}
+              alt={fullName || 'User'}
+              style={{ width: '100%', height: '100%', objectFit: 'cover' }}
+            />
           </button>
           {menuOpen && (
             <div
