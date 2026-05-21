@@ -133,7 +133,7 @@ const SidebarNavItem: React.FC<NavItem> = ({ label, path, icon: Icon }) => {
       to={path}
       data-tour={label.toLowerCase()}
       className={cn(
-        'relative flex items-center gap-3 px-3 py-2 rounded-lg text-sm font-medium transition-colors duration-150',
+        'group relative flex items-center gap-3 px-3 py-2 rounded-lg text-sm font-medium transition-colors duration-150',
         isActive ? '' : 'hover:bg-[var(--dash-hover)]'
       )}
       style={{ color: isActive ? 'var(--dash-text)' : 'var(--dash-text-muted)' }}
@@ -146,12 +146,21 @@ const SidebarNavItem: React.FC<NavItem> = ({ label, path, icon: Icon }) => {
           transition={{ type: 'spring', stiffness: 400, damping: 35 }}
         />
       )}
-      <Icon size={16} className="relative shrink-0" />
+      <motion.span
+        className="relative inline-flex shrink-0"
+        whileHover={{ scale: 1.18, rotate: -4 }}
+        transition={{ type: 'spring', stiffness: 500, damping: 18 }}
+      >
+        <Icon size={16} />
+      </motion.span>
       <span className="relative">{label}</span>
       {isActive && (
-        <span
+        <motion.span
           className="relative ml-auto h-1 w-1 rounded-full shrink-0"
           style={{ background: '#4583C4' }}
+          initial={{ scale: 0 }}
+          animate={{ scale: 1 }}
+          transition={{ type: 'spring', stiffness: 600, damping: 20 }}
         />
       )}
     </Link>

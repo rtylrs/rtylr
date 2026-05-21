@@ -1,4 +1,5 @@
 import React from 'react';
+import { motion, useMotionValue, useTransform, animate } from 'motion/react';
 import { ArrowDownRight, ArrowUpRight, Minus } from 'lucide-react';
 import { cn } from '../../lib/utils';
 
@@ -11,7 +12,19 @@ export interface StatCardProps {
   accent?: string;
   className?: string;
   onClick?: () => void;
+  /** Index in the parent grid — drives stagger-in delay. */
+  index?: number;
 }
+
+const CountUp: React.FC<{ to: number; format?: (n: number) => string }> = ({ to, format }) => {
+  const mv = useMotionValue(0);
+  const rounded = useTransform(mv, (v) => (format ? format(v) : Math.round(v).toLocaleString()));
+  React.useEffect(() => {
+    const controls = animate(mv, to, { duration: 0.9, ease: [0.22, 1, 0.36, 1] });
+    return controls.stop;
+  }, [mv, to]);
+  return <motion.span>{rounded}</motion.span>;
+};
 
 export const StatCard: React.FC<StatCardProps> = ({
   label,
@@ -22,20 +35,24 @@ export const StatCard: React.FC<StatCardProps> = ({
   accent = '#4583C4',
   className,
   onClick,
+  index = 0,
 }) => {
   const hasTrend = typeof trendPct === 'number';
   const trendPositive = hasTrend && (trendPct ?? 0) > 0;
   const trendNegative = hasTrend && (trendPct ?? 0) < 0;
 
+  const numericValue = typeof value === 'number' ? value : null;
+  const displayValue = numericValue !== null ? <CountUp to={numericValue} /> : value;
+
   return (
-    <div
-      className={cn(
-        'rounded-xl p-4 transition-colors',
-        onClick && 'cursor-pointer hover:bg-[var(--dash-hover)]',
-        className
-      )}
+    <motion.div
+      className={cn('rounded-xl p-4', onClick && 'cursor-pointer', className)}
       style={{ background: 'var(--dash-card)', border: '1px solid var(--dash-border)' }}
       onClick={onClick}
+      initial={{ opacity: 0, y: 12 }}
+      animate={{ opacity: 1, y: 0 }}
+      transition={{ duration: 0.32, ease: [0.22, 1, 0.36, 1], delay: index * 0.05 }}
+      whileHover={{ y: -3, boxShadow: '0 12px 28px -12px rgba(0,0,0,0.18)' }}
     >
       <div className="flex items-center justify-between mb-3">
         <p
@@ -54,7 +71,7 @@ export const StatCard: React.FC<StatCardProps> = ({
         )}
       </div>
       <p className="text-2xl font-bold" style={{ color: 'var(--dash-text)' }}>
-        {value}
+        {displayValue}
       </p>
       <div className="flex items-center gap-1.5 mt-1">
         {hasTrend && (
@@ -80,7 +97,7 @@ export const StatCard: React.FC<StatCardProps> = ({
           </span>
         )}
       </div>
-    </div>
+    </motion.div>
   );
 };
 
