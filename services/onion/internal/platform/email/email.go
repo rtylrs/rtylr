@@ -5,6 +5,7 @@ import (
 	"errors"
 	"fmt"
 	"os"
+	"strings"
 
 	"github.com/resend/resend-go/v2"
 
@@ -70,7 +71,7 @@ func Send(ctx context.Context, params SendParams) (string, error) {
 	if err != nil {
 		logger.Ctx(ctx).Error("Failed to send email via Resend",
 			logger.Error(err),
-			logger.String("to", fmt.Sprintf("%v", params.To)),
+			logger.String("to", strings.Join(params.To, ",")),
 			logger.String("subject", params.Subject),
 		)
 		return "", fmt.Errorf("failed to send email: %w", err)
@@ -78,7 +79,7 @@ func Send(ctx context.Context, params SendParams) (string, error) {
 
 	logger.Ctx(ctx).Info("Email sent via Resend",
 		logger.String("id", sent.Id),
-		logger.String("to", fmt.Sprintf("%v", params.To)),
+		logger.String("to", strings.Join(params.To, ",")),
 		logger.String("subject", params.Subject),
 	)
 

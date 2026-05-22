@@ -2,7 +2,6 @@ package async
 
 import (
 	"context"
-	"fmt"
 	"reflect"
 	"sync"
 	"time"
@@ -21,7 +20,8 @@ func ScheduleFunc(ctx context.Context, task ScheduledFunc, duration time.Duratio
 		task()
 	}, duration)
 	if err != nil {
-		logger.Ctx(ctx).Warn(fmt.Sprintf("Error while scheduling '%s'", taskName),
+		logger.Ctx(ctx).Warn("error while scheduling task",
+			logger.String("task", taskName),
 			logger.Error(err),
 		)
 	}
@@ -41,7 +41,7 @@ type ScheduledProvider[T any] struct {
 func NewScheduledProvider[T any](ctx context.Context, fetch func(context.Context) (T, bool), duration time.Duration) *ScheduledProvider[T] {
 	initialValue, success := fetch(ctx)
 	if !success {
-		logger.Ctx(ctx).Warn(fmt.Sprintf("Error while fetching initial value for '%s'", identifier[T]()))
+		logger.Ctx(ctx).Warn("error while fetching initial value", logger.String("type", identifier[T]()))
 	}
 
 	provider := &ScheduledProvider[T]{
@@ -58,7 +58,8 @@ func NewScheduledProvider[T any](ctx context.Context, fetch func(context.Context
 		chrono.WithTime(time.Now().Add(duration)),
 	)
 	if err != nil {
-		logger.Ctx(ctx).Warn(fmt.Sprintf("Error while scheduling '%s'", identifier[T]()),
+		logger.Ctx(ctx).Warn("error while scheduling provider",
+			logger.String("type", identifier[T]()),
 			logger.Error(err),
 		)
 	}
