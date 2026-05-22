@@ -597,7 +597,7 @@ func (r *Repository) GetOwnerSubscriptionInfo(ctx context.Context, ownerID int64
 
 // RecordSeatChange updates the billing seat_periods table after a team member is added or removed.
 func (r *Repository) RecordSeatChange(ctx context.Context, ownerID int64, newCount int) error {
-	now := time.Now()
+	now := time.Now().UTC()
 	yesterday := now.AddDate(0, 0, -1)
 	billingMonth := time.Date(now.Year(), now.Month(), 1, 0, 0, 0, 0, time.UTC)
 

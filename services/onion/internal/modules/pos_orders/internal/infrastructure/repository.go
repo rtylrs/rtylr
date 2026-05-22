@@ -619,7 +619,7 @@ func (r *Repository) ProcessPayment(ctx context.Context, ownerID, orderID int64,
 		changeDue = 0
 	}
 
-	now := time.Now()
+	now := time.Now().UTC()
 
 	err = qtx.MarkOrderPaid(ctx, sqlc.MarkOrderPaidParams{
 		PaymentMethod: sqlc.NullPosOrdersPaymentMethod{PosOrdersPaymentMethod: sqlc.PosOrdersPaymentMethod(input.PaymentMethod), Valid: true},

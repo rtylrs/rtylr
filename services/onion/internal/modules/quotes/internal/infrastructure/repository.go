@@ -152,7 +152,7 @@ func (r *Repository) ConvertToInvoice(ctx context.Context, ownerID, quoteID int6
 		return 0, domain.ErrQuoteAlreadyConverted
 	}
 
-	invoiceNumber := fmt.Sprintf("Q%d-%d", quoteID, time.Now().UnixNano())
+	invoiceNumber := fmt.Sprintf("Q%d-%d", quoteID, time.Now().UTC().UnixNano())
 	issueDate := time.Now().UTC()
 	// Fallback: quotes don't track an explicit due date, so default to
 	// issue_date + 30 days. If the quote had a valid_until we use that.

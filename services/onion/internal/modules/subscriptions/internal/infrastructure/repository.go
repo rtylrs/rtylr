@@ -170,9 +170,9 @@ func (r *Repository) GetSubscription(ctx context.Context, ownerID int64) (*domai
 }
 
 func (r *Repository) UpsertSubscription(ctx context.Context, ownerID, planID int64, trialDays int) error {
-	trialEnd := time.Now().AddDate(0, 0, trialDays)
+	trialEnd := time.Now().UTC().AddDate(0, 0, trialDays)
 	// next_billing_date is always the 1st of next month
-	now := time.Now()
+	now := time.Now().UTC()
 	nextBilling := time.Date(now.Year(), now.Month()+1, 1, 0, 0, 0, 0, time.UTC)
 
 	_, err := r.db.ExecContext(ctx,
@@ -287,7 +287,7 @@ func (r *Repository) GetPeriodsForMonth(ctx context.Context, ownerID int64, mont
 
 func (r *Repository) GetBillingHistory(ctx context.Context, ownerID int64, limit int) ([]domain.BillingHistoryMonth, error) {
 	// Get distinct billing months that have closed periods (past months)
-	now := time.Now()
+	now := time.Now().UTC()
 	currentMonth := time.Date(now.Year(), now.Month(), 1, 0, 0, 0, 0, time.UTC)
 
 	rows, err := r.db.QueryContext(ctx,
@@ -352,7 +352,7 @@ func (r *Repository) GetBillingHistory(ctx context.Context, ownerID int64, limit
 
 // computeLineItem calculates the amount for a seat period based on daily proration.
 func computeLineItem(seatCount, pricePerSeatCents int, start time.Time, end *time.Time, billingMonth time.Time) domain.BillingLineItem {
-	effectiveEnd := time.Now()
+	effectiveEnd := time.Now().UTC()
 	if end != nil {
 		effectiveEnd = *end
 	}
