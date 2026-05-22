@@ -99,6 +99,11 @@ func (h *LoginHandler) Serve(ctx context.Context, req *LoginRequest) (LoginRespo
 
 	// Record login + run idempotent post-login hooks (non-blocking).
 	go func() {
+		defer func() {
+			if r := recover(); r != nil {
+				logger.Global().Error("goroutine panicked", logger.Any("panic", r))
+			}
+		}()
 		taskCtx, cancel := context.WithTimeout(context.WithoutCancel(ctx), 10*time.Second)
 		defer cancel()
 

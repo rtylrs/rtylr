@@ -15,6 +15,7 @@ import (
 	authPkg "github.com/voxire/onion/internal/platform/auth"
 	emailPkg "github.com/voxire/onion/internal/platform/email"
 	errorModels "github.com/voxire/onion/internal/platform/errors"
+	"github.com/voxire/onion/internal/platform/logger"
 	hubv1 "github.com/voxire/voxie/gen/go/hub/v1"
 )
 
@@ -200,6 +201,11 @@ func (h *InviteUserHandler) Serve(ctx context.Context, req *InviteUserRequest) (
 
 	// Record the seat change asynchronously so billing stays accurate.
 	go func() {
+		defer func() {
+			if r := recover(); r != nil {
+				logger.Global().Error("goroutine panicked", logger.Any("panic", r))
+			}
+		}()
 		bgCtx, cancel := context.WithTimeout(context.WithoutCancel(ctx), 10*time.Second)
 		defer cancel()
 		h.Service.RecordSeatChange(bgCtx, ownerID)
@@ -212,6 +218,11 @@ func (h *InviteUserHandler) Serve(ctx context.Context, req *InviteUserRequest) (
 	// Only send invite email if no password was set manually
 	if req.Password == "" && token != "" {
 		go func() {
+			defer func() {
+				if r := recover(); r != nil {
+					logger.Global().Error("goroutine panicked", logger.Any("panic", r))
+				}
+			}()
 			taskCtx, cancel := context.WithTimeout(context.WithoutCancel(ctx), 10*time.Second)
 			defer cancel()
 
@@ -392,6 +403,11 @@ func (h *DeactivateUserHandler) Serve(ctx context.Context, req *DeactivateUserRe
 
 	// Record the seat change asynchronously so billing stays accurate.
 	go func() {
+		defer func() {
+			if r := recover(); r != nil {
+				logger.Global().Error("goroutine panicked", logger.Any("panic", r))
+			}
+		}()
 		bgCtx, cancel := context.WithTimeout(context.WithoutCancel(ctx), 10*time.Second)
 		defer cancel()
 		h.Service.RecordSeatChange(bgCtx, ownerID)
@@ -441,6 +457,11 @@ func (h *DeactivateMemberHandler) Serve(ctx context.Context, _ *DeactivateMember
 
 	// Record the seat change asynchronously so billing stays accurate.
 	go func() {
+		defer func() {
+			if r := recover(); r != nil {
+				logger.Global().Error("goroutine panicked", logger.Any("panic", r))
+			}
+		}()
 		bgCtx, cancel := context.WithTimeout(context.WithoutCancel(ctx), 10*time.Second)
 		defer cancel()
 		h.Service.RecordSeatChange(bgCtx, ownerID)
@@ -572,6 +593,11 @@ func (h *RequestAccessHandler) Serve(ctx context.Context, req *RequestAccessRequ
 
 	// Send email to business owner (non-blocking)
 	go func() {
+		defer func() {
+			if r := recover(); r != nil {
+				logger.Global().Error("goroutine panicked", logger.Any("panic", r))
+			}
+		}()
 		taskCtx, cancel := context.WithTimeout(context.WithoutCancel(ctx), 10*time.Second)
 		defer cancel()
 
