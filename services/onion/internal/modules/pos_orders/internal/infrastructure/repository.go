@@ -202,7 +202,7 @@ func (r *Repository) ListSessions(ctx context.Context, ownerID, locationID int64
 		args = append(args, dateTo)
 	}
 
-	query += ` ORDER BY opened_at DESC`
+	query += ` ORDER BY opened_at DESC LIMIT 500`
 
 	rows, err := r.pool.QueryContext(ctx, query, args...)
 	if err != nil {
@@ -361,7 +361,7 @@ func (r *Repository) ListOrders(ctx context.Context, ownerID, sessionID int64, s
 		args = append(args, dateTo)
 	}
 
-	query += ` ORDER BY created_at DESC`
+	query += ` ORDER BY created_at DESC LIMIT 500`
 
 	rows, err := r.pool.QueryContext(ctx, query, args...)
 	if err != nil {

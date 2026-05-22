@@ -9,11 +9,12 @@ import (
 	"github.com/go-chi/chi/v5"
 	"github.com/go-chi/chi/v5/middleware"
 
+	"github.com/voxire/onion/internal/platform/database/dbclient"
 	"github.com/voxire/onion/internal/platform/logger"
 	"github.com/voxire/onion/internal/platform/observability"
 )
 
-const serverShutdownTimeoutSeconds = 5
+const serverShutdownTimeoutSeconds = 20
 
 func Start(ctx context.Context, runMode ChiRunMode, port string) error {
 	// Register the server context so rate-limiter cleanup goroutines stop
@@ -51,12 +52,18 @@ func Start(ctx context.Context, runMode ChiRunMode, port string) error {
 	// METRICS_USER/METRICS_PASS aren't set, so it stays opt-in.
 	r.Get("/metrics", MetricsHandler())
 
-	r.Get("/health", func(w http.ResponseWriter, _ *http.Request) {
+	r.Get("/health", func(w http.ResponseWriter, r *http.Request) {
 		w.Header().Set("Content-Type", "application/json")
+		pingCtx, cancel := context.WithTimeout(r.Context(), 2*time.Second)
+		defer cancel()
+		if db := dbclient.Pool(); db == nil || db.PingContext(pingCtx) != nil {
+			w.WriteHeader(http.StatusServiceUnavailable)
+			_, _ = w.Write([]byte(`{"status":"unhealthy"}`))
+			return
+		}
 		w.WriteHeader(http.StatusOK)
-
 		if _, err := w.Write([]byte(`{"status":"ok"}`)); err != nil {
-			logger.Ctx(ctx).Warn("Failed to write response", logger.Error(err))
+			logger.Ctx(ctx).Warn("Failed to write health response", logger.Error(err))
 		}
 	})
 

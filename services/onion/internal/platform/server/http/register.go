@@ -110,6 +110,7 @@ func wrapHandler[Req, Res any](ctx context.Context, handler HandlerFunc[Req, Res
 
 		switch r.Method {
 		case "POST", "PUT", "PATCH":
+			r.Body = http.MaxBytesReader(w, r.Body, 4<<20) // 4 MiB
 			if err := json.NewDecoder(r.Body).Decode(&req); err != nil && err != io.EOF {
 				writeBadRequest(ctx, w)
 
@@ -122,6 +123,7 @@ func wrapHandler[Req, Res any](ctx context.Context, handler HandlerFunc[Req, Res
 			// present so handlers don't have to special-case the FE
 			// shape; fall back to query params otherwise.
 			if r.Body != nil && r.ContentLength != 0 {
+				r.Body = http.MaxBytesReader(w, r.Body, 4<<20) // 4 MiB
 				if err := json.NewDecoder(r.Body).Decode(&req); err != nil && err != io.EOF {
 					writeBadRequest(ctx, w)
 
