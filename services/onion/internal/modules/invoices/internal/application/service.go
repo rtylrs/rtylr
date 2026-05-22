@@ -334,7 +334,6 @@ func (s *Service) SendInvoice(ctx context.Context, ownerID, invoiceID int64) err
 			Text:    text,
 		}); sendErr != nil {
 			logger.Ctx(ctx).Warn("failed to email invoice",
-				logger.String("client_email", inv.ClientEmail),
 				logger.Error(sendErr),
 			)
 		}

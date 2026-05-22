@@ -292,7 +292,6 @@ func (s *Service) sendAutoReply(ctx context.Context, lead domain.LeadInput) {
 	if emailErr != nil {
 		logger.Ctx(ctx).Warn("Failed to send auto-reply to lead",
 			logger.Error(emailErr),
-			logger.String("lead_email", lead.Email),
 		)
 	}
 }
