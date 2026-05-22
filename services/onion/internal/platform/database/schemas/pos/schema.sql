@@ -74,6 +74,7 @@ CREATE TABLE IF NOT EXISTS pos_orders (
     created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
     updated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
     paid_at TIMESTAMP NULL,
+    UNIQUE KEY uq_pos_orders_number (owner_id, order_number),
     INDEX idx_pos_orders_owner_status (owner_id, status),
     INDEX idx_pos_orders_owner_session (owner_id, session_id),
     INDEX idx_pos_orders_owner_location (owner_id, location_id),
