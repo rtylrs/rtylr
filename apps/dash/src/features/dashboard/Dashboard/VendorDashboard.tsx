@@ -12,6 +12,7 @@ import {
   saveLayout,
   loadActiveWidgets,
   saveActiveWidgets,
+  DEFAULT_LAYOUT,
 } from './widgets';
 
 import 'react-grid-layout/css/styles.css';
@@ -107,18 +108,10 @@ const AdminDashboard: React.FC = () => {
   );
 
   const resetLayout = useCallback(() => {
-    const dl = [
-      { i: 'kpi-revenue', x: 0, y: 0, w: 1, h: 2 },
-      { i: 'kpi-orders', x: 1, y: 0, w: 1, h: 2 },
-      { i: 'kpi-team', x: 2, y: 0, w: 1, h: 2 },
-      { i: 'kpi-invoices', x: 3, y: 0, w: 1, h: 2 },
-      { i: 'activity', x: 0, y: 2, w: 2, h: 4 },
-      { i: 'quick-actions', x: 2, y: 2, w: 1, h: 4 },
-    ];
-    const ids = dl.map((l) => l.i);
-    setLayouts({ lg: dl });
+    const ids = DEFAULT_LAYOUT.map((l) => l.i);
+    setLayouts({ lg: DEFAULT_LAYOUT });
     setActiveWidgets(ids);
-    saveLayout(dl);
+    saveLayout(DEFAULT_LAYOUT);
     saveActiveWidgets(ids);
     setShowCatalog(false);
   }, []);

@@ -160,6 +160,7 @@ export const DEFAULT_LAYOUT = [
   { i: 'kpi-invoices', x: 3, y: 0, w: 1, h: 2 },
   { i: 'activity', x: 0, y: 2, w: 2, h: 4 },
   { i: 'quick-actions', x: 2, y: 2, w: 1, h: 4 },
+  { i: 'team', x: 0, y: 6, w: 2, h: 3 },
 ];
 
 const STORAGE_KEY = 'rtylr-dashboard-layout';
