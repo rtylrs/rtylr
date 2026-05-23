@@ -19,7 +19,7 @@ const serverShutdownTimeoutSeconds = 20
 func Start(ctx context.Context, runMode ChiRunMode, port string) error {
 	// Register the server context so rate-limiter cleanup goroutines stop
 	// when this server instance shuts down (avoids accumulation on restart).
-	serverCtx := ctx
+	serverCtx = ctx
 
 	r := chi.NewRouter()
 
