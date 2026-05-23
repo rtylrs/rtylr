@@ -23,6 +23,14 @@ func (m *mockRepo) GetPublicBusiness(_ context.Context, businessID int64) (domai
 	return domain.PublicBusiness{ID: businessID}, m.err
 }
 
+func (m *mockRepo) LookupBySlug(_ context.Context, _ string) (domain.SlugLookupResult, error) {
+	return domain.SlugLookupResult{}, m.err
+}
+
+func (m *mockRepo) UpdateSlug(_ context.Context, _ int64, _ string) error {
+	return m.err
+}
+
 func TestGetProfile_Delegates(t *testing.T) {
 	want := domain.BusinessProfile{SiteName: "Acme", Currency: "USD"}
 	m := &mockRepo{profile: want}

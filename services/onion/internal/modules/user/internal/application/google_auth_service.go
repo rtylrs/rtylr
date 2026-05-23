@@ -6,7 +6,6 @@ import (
 	"encoding/hex"
 	"errors"
 	"net/netip"
-	"os"
 	"strings"
 
 	"google.golang.org/api/idtoken"
@@ -61,7 +60,7 @@ func (s *Service) GoogleAuth(
 	signupIP netip.Addr,
 	deviceInfo string,
 ) (*GoogleAuthResult, error) {
-	clientID := strings.TrimSpace(os.Getenv("GOOGLE_OAUTH_CLIENT_ID"))
+	clientID := strings.TrimSpace(s.googleClientID)
 	if clientID == "" {
 		return nil, ErrGoogleOAuthNotConfigured
 	}

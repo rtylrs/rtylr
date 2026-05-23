@@ -11,15 +11,19 @@ import (
 )
 
 type Module struct {
-	service *application.Service
+	service    *application.Service
+	authAppURL string
 }
 
-func NewModule(ctx context.Context, db *sql.DB) *Module {
-	return &Module{service: application.NewService(ctx, db)}
+func NewModule(ctx context.Context, db *sql.DB, authAppURL string) *Module {
+	return &Module{
+		service:    application.NewService(ctx, db),
+		authAppURL: authAppURL,
+	}
 }
 
 func (m *Module) RegisterRoutes(ctx context.Context, router *chi.Mux, _ ...interface{}) {
-	routes.RegisterRoutes(ctx, router, m.service)
+	routes.RegisterRoutes(ctx, router, m.service, m.authAppURL)
 }
 
 func (m *Module) GetAnonymousRoutes() []string {

@@ -19,19 +19,21 @@ const (
 )
 
 type AppConfig struct {
-	DatabaseURL string
-	DBHost      string
-	DBPort      string
-	DBUser      string
-	DBPass      string
-	DBName      string
-	JWTSecret   string
-	JWTDuration time.Duration
-	ResendKey   string
-	AppEnv      string
-	AppRelease  string
-	Port        string
-	Hostname    string
+	DatabaseURL         string
+	DBHost              string
+	DBPort              string
+	DBUser              string
+	DBPass              string
+	DBName              string
+	JWTSecret           string
+	JWTDuration         time.Duration
+	ResendKey           string
+	AppEnv              string
+	AppRelease          string
+	Port                string
+	Hostname            string
+	AuthAppURL          string
+	GoogleOAuthClientID string
 
 	// DB Connection Pool configuration
 	DBMaxOpenConns    int
@@ -145,19 +147,21 @@ func LoadAndValidate() (*AppConfig, error) {
 	}
 
 	cfg := &AppConfig{
-		DatabaseURL: os.Getenv("DATABASE_URL"),
-		DBHost:      os.Getenv("DB_HOST"),
-		DBPort:      os.Getenv("DB_PORT"),
-		DBUser:      os.Getenv("DB_USER"),
-		DBPass:      os.Getenv("DB_PASSWORD"),
-		DBName:      os.Getenv("DB_NAME"),
-		JWTSecret:   os.Getenv("JWT_SECRET"),
-		JWTDuration: jwtDuration,
-		ResendKey:   os.Getenv("RESEND_API_KEY"),
-		AppEnv:      os.Getenv("APP_ENV"),
-		AppRelease:  os.Getenv("APP_RELEASE"),
-		Port:        os.Getenv("PORT"),
-		Hostname:    os.Getenv("HOSTNAME"),
+		DatabaseURL:         os.Getenv("DATABASE_URL"),
+		DBHost:              os.Getenv("DB_HOST"),
+		DBPort:              os.Getenv("DB_PORT"),
+		DBUser:              os.Getenv("DB_USER"),
+		DBPass:              os.Getenv("DB_PASSWORD"),
+		DBName:              os.Getenv("DB_NAME"),
+		JWTSecret:           os.Getenv("JWT_SECRET"),
+		JWTDuration:         jwtDuration,
+		ResendKey:           os.Getenv("RESEND_API_KEY"),
+		AppEnv:              os.Getenv("APP_ENV"),
+		AppRelease:          os.Getenv("APP_RELEASE"),
+		Port:                os.Getenv("PORT"),
+		Hostname:            os.Getenv("HOSTNAME"),
+		AuthAppURL:          os.Getenv("AUTH_APP_URL"),
+		GoogleOAuthClientID: os.Getenv("GOOGLE_OAUTH_CLIENT_ID"),
 
 		DBMaxOpenConns:    dbMaxOpenConns,
 		DBMaxIdleConns:    dbMaxIdleConns,
@@ -216,6 +220,10 @@ func LoadAndValidate() (*AppConfig, error) {
 
 	if cfg.Port == "" {
 		cfg.Port = "9999"
+	}
+
+	if cfg.AuthAppURL == "" {
+		cfg.AuthAppURL = "https://auth.rtylr.com"
 	}
 
 	var missing []string

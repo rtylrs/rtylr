@@ -35,17 +35,19 @@ var (
 )
 
 type Service struct {
-	repo      *infrastructure.Repository
-	validator *Validator
-	JWT       *jwtutils.JWTHelper
+	repo           *infrastructure.Repository
+	validator      *Validator
+	JWT            *jwtutils.JWTHelper
+	googleClientID string
 }
 
-func NewService(_ context.Context, db *sql.DB) *Service {
+func NewService(_ context.Context, db *sql.DB, googleClientID string) *Service {
 	repo := infrastructure.NewRepository(db)
 
 	return &Service{
-		repo:      repo,
-		validator: NewValidator(),
+		repo:           repo,
+		validator:      NewValidator(),
+		googleClientID: googleClientID,
 	}
 }
 
