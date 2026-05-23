@@ -1,4 +1,4 @@
-import React from 'react';
+import React, { useState } from 'react';
 import { AppIcon } from '../AppIcon';
 import { WindowType } from '../../stores/useDesktopStore';
 
@@ -10,6 +10,30 @@ interface TitleBarProps {
   onMaximize?: () => void;
 }
 
+const CloseIcon = () => (
+  <svg width="6" height="6" viewBox="0 0 6 6" fill="none">
+    <path d="M1 1l4 4M5 1L1 5" stroke="rgba(0,0,0,0.55)" strokeWidth="1.2" strokeLinecap="round" />
+  </svg>
+);
+
+const MinimizeIcon = () => (
+  <svg width="6" height="6" viewBox="0 0 6 6" fill="none">
+    <path d="M1 3h4" stroke="rgba(0,0,0,0.55)" strokeWidth="1.2" strokeLinecap="round" />
+  </svg>
+);
+
+const MaximizeIcon = () => (
+  <svg width="6" height="6" viewBox="0 0 6 6" fill="none">
+    <path
+      d="M1 5L5 1M3 1h2v2"
+      stroke="rgba(0,0,0,0.55)"
+      strokeWidth="1.1"
+      strokeLinecap="round"
+      strokeLinejoin="round"
+    />
+  </svg>
+);
+
 export const TitleBar: React.FC<TitleBarProps> = ({
   type,
   title,
@@ -17,6 +41,8 @@ export const TitleBar: React.FC<TitleBarProps> = ({
   onMinimize,
   onMaximize,
 }) => {
+  const [groupHovered, setGroupHovered] = useState(false);
+
   return (
     <div
       className="window-titlebar"
@@ -35,7 +61,11 @@ export const TitleBar: React.FC<TitleBarProps> = ({
       }}
     >
       {/* Traffic lights */}
-      <div style={{ display: 'flex', gap: 6, marginRight: 4 }}>
+      <div
+        style={{ display: 'flex', gap: 6, marginRight: 4 }}
+        onMouseEnter={() => setGroupHovered(true)}
+        onMouseLeave={() => setGroupHovered(false)}
+      >
         <button
           onClick={(e) => {
             e.stopPropagation();
@@ -49,9 +79,14 @@ export const TitleBar: React.FC<TitleBarProps> = ({
             border: 'none',
             cursor: 'pointer',
             padding: 0,
+            display: 'flex',
+            alignItems: 'center',
+            justifyContent: 'center',
           }}
           aria-label="Close"
-        />
+        >
+          {groupHovered && <CloseIcon />}
+        </button>
         <button
           onClick={(e) => {
             e.stopPropagation();
@@ -65,9 +100,14 @@ export const TitleBar: React.FC<TitleBarProps> = ({
             border: 'none',
             cursor: 'pointer',
             padding: 0,
+            display: 'flex',
+            alignItems: 'center',
+            justifyContent: 'center',
           }}
           aria-label="Minimize"
-        />
+        >
+          {groupHovered && <MinimizeIcon />}
+        </button>
         <button
           onClick={(e) => {
             e.stopPropagation();
@@ -81,9 +121,14 @@ export const TitleBar: React.FC<TitleBarProps> = ({
             border: 'none',
             cursor: 'pointer',
             padding: 0,
+            display: 'flex',
+            alignItems: 'center',
+            justifyContent: 'center',
           }}
           aria-label="Maximize"
-        />
+        >
+          {groupHovered && <MaximizeIcon />}
+        </button>
       </div>
 
       <AppIcon type={type} size={13} color="rgba(255,255,255,0.55)" strokeWidth={1.75} />
