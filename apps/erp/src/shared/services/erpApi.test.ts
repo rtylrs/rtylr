@@ -109,7 +109,7 @@ describe('erpApi', () => {
   // Purchase Orders
   it('listPurchaseOrders calls GET /erp/purchase-orders', () => {
     erpApi.listPurchaseOrders();
-    expect(safe.get).toHaveBeenCalledWith('/erp/purchase-orders');
+    expect(safe.get).toHaveBeenCalledWith('/erp/purchase-orders', { params: undefined });
   });
 
   it('updatePurchaseOrderStatus calls PUT /erp/purchase-orders/status', () => {
