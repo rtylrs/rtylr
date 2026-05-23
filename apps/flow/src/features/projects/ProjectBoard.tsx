@@ -53,7 +53,7 @@ interface Lane {
 /**
  * Partition a column's tasks into lanes. Every column renders the same
  * set of lane keys in the same order so rows line up horizontally across
- * columns — this is the "swimlane" effect.
+ * columns - this is the "swimlane" effect.
  */
 function buildLanes(
   allLaneKeys: { key: string; label: string }[],
@@ -117,7 +117,7 @@ function buildLaneIndex(tasks: Task[], groupBy: GroupKey): { key: string; label:
     ];
   }
 
-  // assignee — build from data, keep stable order by first-seen.
+  // assignee - build from data, keep stable order by first-seen.
   const seen = new Map<string, string>();
   for (const t of tasks) {
     const k = laneKeyFor(t, groupBy);
@@ -133,7 +133,7 @@ function loadGroupBy(projectId: string): GroupKey {
       return raw;
     }
   } catch {
-    // localStorage unavailable (SSR / private mode) — fall through.
+    // localStorage unavailable (SSR / private mode) - fall through.
   }
   return 'none';
 }
@@ -183,11 +183,11 @@ const ProjectBoard: React.FC = () => {
 
   // Tasks mapped to Task shape for TaskCard. Computed BEFORE any early
   // return so the useMemo below always runs in the same hook slot on
-  // every render (React #310 otherwise — conditional hook order).
+  // every render (React #310 otherwise - conditional hook order).
   const tasks: Task[] = useMemo(() => apiTasks.map(apiTaskToTask), [apiTasks]);
 
   // Precompute the ordered lane index across all tasks so every column
-  // renders the same rows in the same order — otherwise empty columns
+  // renders the same rows in the same order - otherwise empty columns
   // would silently skip lanes and the swimlane grid misaligns.
   const laneIndex = useMemo(() => buildLaneIndex(tasks, groupBy), [tasks, groupBy]);
 
@@ -270,7 +270,7 @@ const ProjectBoard: React.FC = () => {
         rightSlot={<GroupByPicker groupBy={groupBy} onChange={setGroupBy} />}
       />
 
-      {/* Tightened kanban canvas — the previous p-6 / gap-4 combo wasted
+      {/* Tightened kanban canvas - the previous p-6 / gap-4 combo wasted
           too much room on laptop screens. These values stay reasonable
           down to narrow viewports because the column snaps to 248px. */}
       <div className="min-h-0 flex-1 overflow-auto">
@@ -425,7 +425,7 @@ const KanbanColumn: React.FC<{
   };
 
   // Total count for the column header pill (stays accurate regardless
-  // of group-by — it's the sum of tasks across all lanes).
+  // of group-by - it's the sum of tasks across all lanes).
   const colTaskCount = lanes.reduce((n, l) => n + l.tasks.length, 0);
 
   return (
@@ -443,7 +443,7 @@ const KanbanColumn: React.FC<{
         transition: 'background 0.15s, border 0.15s',
       }}
     >
-      {/* Column header — tighter. 24px tall, no wasteful vertical padding. */}
+      {/* Column header - tighter. 24px tall, no wasteful vertical padding. */}
       <div className="flex items-center gap-1.5 px-1.5 h-7 mb-1.5 group/header">
         <span className="h-2 w-2 rounded-full shrink-0" style={{ background: col.color }} />
 

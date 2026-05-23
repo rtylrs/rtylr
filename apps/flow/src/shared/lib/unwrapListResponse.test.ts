@@ -36,7 +36,7 @@ describe('unwrapListResponse', () => {
     expect(unwrapListResponse({ tasks: null }, 'tasks')).toEqual([]);
   });
 
-  it('uses the correct key — sibling keys do not bleed through', () => {
+  it('uses the correct key - sibling keys do not bleed through', () => {
     const envelope = { projects: ['p1'], tasks: ['t1', 't2'] };
     expect(unwrapListResponse(envelope, 'projects')).toEqual(['p1']);
     expect(unwrapListResponse(envelope, 'tasks')).toEqual(['t1', 't2']);

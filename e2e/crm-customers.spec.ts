@@ -47,7 +47,7 @@ const FAKE_CUSTOMER = {
 
 // State held between `page.route()` handlers so we can simulate a real
 // list that grows and shrinks across requests. Resetting in beforeEach
-// guarantees test isolation — each spec runs against a known baseline.
+// guarantees test isolation - each spec runs against a known baseline.
 let customers: Array<Record<string, unknown>> = [];
 let lastCreatePayload: Record<string, unknown> | null = null;
 let lastUpdatePayload: Record<string, unknown> | null = null;
@@ -55,7 +55,7 @@ let lastDeletePayload: Record<string, unknown> | null = null;
 
 async function seedAuth(page: Page): Promise<void> {
   // Seed the cookie before first navigation so AppGuard's synchronous
-  // token check passes on the very first render — otherwise it would
+  // token check passes on the very first render - otherwise it would
   // redirect to auth.rtylr.com and the test would leave the CRM origin.
   await page.context().addCookies([
     {
@@ -68,7 +68,7 @@ async function seedAuth(page: Page): Promise<void> {
 }
 
 async function stubCrmAPI(page: Page): Promise<void> {
-  // Catch-all stub — anything that reaches `localhost:9999` without a
+  // Catch-all stub - anything that reaches `localhost:9999` without a
   // more-specific handler returns an empty object rather than hitting
   // the real backend. Registered first so specific handlers below take
   // precedence (Playwright runs routes in reverse-registration order).
@@ -86,7 +86,7 @@ async function stubCrmAPI(page: Page): Promise<void> {
   });
 
   // Dashboard + every sibling list endpoint is stubbed as an empty
-  // envelope — the specs only assert on the customers flow, but the
+  // envelope - the specs only assert on the customers flow, but the
   // DefaultLayout sidebar and prefetched hooks will hit these.
   const emptyList = (key: string): string => JSON.stringify({ [key]: [] });
   await page.route(/\/crm\/dashboard$/, (route: Route) =>
@@ -114,7 +114,7 @@ async function stubCrmAPI(page: Page): Promise<void> {
     route.fulfill({ status: 200, contentType: 'application/json', body: emptyList('campaigns') })
   );
 
-  // Customer list / create / update / delete — the single POST endpoint
+  // Customer list / create / update / delete - the single POST endpoint
   // disambiguates action via `_action` in the body, matching the real
   // Go handler contract in `onion/crm/customers`.
   await page.route(/\/crm\/customers/, async (route: Route) => {
@@ -225,7 +225,7 @@ test.describe.skip('CRM customers flow', () => {
     await expect(page.getByRole('heading', { name: /No customers found/i })).toBeVisible({
       timeout: 15_000,
     });
-    // The empty-state CTA button duplicates the header action — both
+    // The empty-state CTA button duplicates the header action - both
     // should land the user on /customers/new.
     await expect(page.getByRole('button', { name: /New customer/i }).first()).toBeVisible();
   });
@@ -242,7 +242,7 @@ test.describe.skip('CRM customers flow', () => {
       .click();
     await expect(page).toHaveURL(/\/customers\/new$/);
 
-    // Step 1: info — name is required to advance. The Next button
+    // Step 1: info - name is required to advance. The Next button
     // only enables after React commits the name-field state. We use
     // keyboard Tab + Enter instead of click() so we don't race the
     // re-render (button transition styles trigger Playwright's
@@ -253,14 +253,14 @@ test.describe.skip('CRM customers flow', () => {
     await expect(page.getByRole('button', { name: /^Next/i })).toBeEnabled();
     await page.getByRole('button', { name: /^Next/i }).click({ force: true });
 
-    // Step 2: contact — email or phone required.
+    // Step 2: contact - email or phone required.
     const emailInput = page.getByPlaceholder('jane@example.com');
     await emailInput.click();
     await emailInput.pressSequentially('jamie@example.com', { delay: 10 });
     await expect(page.getByRole('button', { name: /^Next/i })).toBeEnabled();
     await page.getByRole('button', { name: /^Next/i }).click({ force: true });
 
-    // Step 3: consent — submit.
+    // Step 3: consent - submit.
     await expect(page.getByRole('button', { name: /^Create customer/i })).toBeEnabled();
     await page.getByRole('button', { name: /^Create customer/i }).click({ force: true });
 
@@ -278,7 +278,7 @@ test.describe.skip('CRM customers flow', () => {
 
   test('open customer detail, edit notes, and delete', async ({ page }) => {
     // Seed a pre-existing customer so the detail page has something to
-    // load — mirrors the "you already have customers" happy path.
+    // load - mirrors the "you already have customers" happy path.
     customers = [{ ...FAKE_CUSTOMER }];
 
     await page.goto(`${CRM_URL}/customers/${FAKE_CUSTOMER.id}`);
@@ -286,7 +286,7 @@ test.describe.skip('CRM customers flow', () => {
       timeout: 15_000,
     });
 
-    // Add a tag — triggers the update mutation with tags[].
+    // Add a tag - triggers the update mutation with tags[].
     await page.getByPlaceholder('Add tag...').fill('e2e');
     await page.getByRole('button', { name: /^Add$/ }).click();
 
@@ -296,7 +296,7 @@ test.describe.skip('CRM customers flow', () => {
       expect(Array.isArray((lastUpdatePayload as Record<string, unknown>).tags)).toBe(true);
     }).toPass({ timeout: 5_000 });
 
-    // Delete — the confirm modal must open, confirm dispatches the
+    // Delete - the confirm modal must open, confirm dispatches the
     // mutation, and the app should navigate back to /customers.
     // The header-action "Delete" button is the trigger; the modal's
     // footer "Delete" is the confirm. After the modal opens there are

@@ -43,7 +43,7 @@ function MyApp({ Component, pageProps }: AppProps) {
         <I18nextProvider i18n={i18next}>
           <Component {...pageProps} />
           {/* Strict opt-in banner. Shows only until the visitor
-              accepts or declines — then cookies-granted unlocks the
+              accepts or declines - then cookies-granted unlocks the
               PostHog init wired in bootObservability. */}
           <CookieBanner />
         </I18nextProvider>

@@ -87,7 +87,7 @@ const Products: React.FC = () => {
           <>
             <ImportCSV
               onImport={(rows) =>
-                toast.info(`${rows.length} rows parsed — bulk import coming soon`)
+                toast.info(`${rows.length} rows parsed - bulk import coming soon`)
               }
               expectedColumns={['name', 'sku', 'category', 'stock']}
             />

@@ -67,7 +67,7 @@ function baseCareer(overrides: Partial<RecruitCareer> = {}): RecruitCareer {
   };
 }
 
-// Clean every DOM mutation between tests — applySEO reuses meta tags,
+// Clean every DOM mutation between tests - applySEO reuses meta tags,
 // loadAnalytics injects <script> tags, emitJobPostingJSONLD pins a
 // specific script id. Without reset the tests cross-contaminate.
 beforeEach(() => {
@@ -89,7 +89,7 @@ describe('applySEO', () => {
       pageKind: 'career',
       careerTitle: 'Senior Engineer',
     });
-    expect(document.title).toBe('Senior Engineer — Acme');
+    expect(document.title).toBe('Senior Engineer - Acme');
   });
 
   it('falls back to "Careers at {brand}" when no metaTitle', () => {
@@ -142,7 +142,7 @@ describe('loadAnalytics', () => {
     expect(document.getElementById('recruit-pixel-999')).not.toBeNull();
   });
 
-  it('is idempotent — calling twice adds one tag per platform', () => {
+  it('is idempotent - calling twice adds one tag per platform', () => {
     loadAnalytics(baseCustomization({ gaMeasurementId: 'G-X', metaPixelId: '1' }));
     loadAnalytics(baseCustomization({ gaMeasurementId: 'G-X', metaPixelId: '1' }));
     expect(document.querySelectorAll('script[id="recruit-ga-G-X"]').length).toBe(1);
@@ -196,7 +196,7 @@ describe('emitJobPostingJSONLD', () => {
   });
 
   it('replaces the previous JSON-LD block on re-emit', () => {
-    // Simulates a route change from one role to another — we don't
+    // Simulates a route change from one role to another - we don't
     // want both JSON-LD blobs in the DOM at the same time.
     emitJobPostingJSONLD(baseCareer({ title: 'Old', slug: 'old' }), baseCustomization());
     emitJobPostingJSONLD(baseCareer({ title: 'New', slug: 'new' }), baseCustomization());

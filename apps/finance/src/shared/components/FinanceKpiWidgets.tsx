@@ -30,7 +30,7 @@ const FinanceKpiWidgets: React.FC = () => {
       label: 'Receivable',
       value:
         isLoading || !dash ? (
-          '—'
+          '-'
         ) : (
           <MoneyDisplay amount={dash.totalReceivable} fractionDigits={0} />
         ),
@@ -43,7 +43,7 @@ const FinanceKpiWidgets: React.FC = () => {
       label: 'Expenses MTD',
       value:
         isLoading || !dash ? (
-          '—'
+          '-'
         ) : (
           <MoneyDisplay amount={dash.totalExpensesMtd} fractionDigits={0} />
         ),
@@ -55,7 +55,7 @@ const FinanceKpiWidgets: React.FC = () => {
     {
       label: 'Net Profit MTD',
       value:
-        isLoading || !dash ? '—' : <MoneyDisplay amount={dash.netProfitMtd} fractionDigits={0} />,
+        isLoading || !dash ? '-' : <MoneyDisplay amount={dash.netProfitMtd} fractionDigits={0} />,
       hint: 'month to date',
       icon: TrendingUp,
       colorVar: '--finance-profit',
@@ -64,7 +64,7 @@ const FinanceKpiWidgets: React.FC = () => {
     {
       label: 'Overdue',
       value:
-        isLoading || !dash ? '—' : <MoneyDisplay amount={dash.overdueAmount} fractionDigits={0} />,
+        isLoading || !dash ? '-' : <MoneyDisplay amount={dash.overdueAmount} fractionDigits={0} />,
       hint: 'past due date',
       icon: Clock,
       colorVar: '--finance-overdue',

@@ -5,11 +5,11 @@ import { unwrap } from '@voxire/api';
 import { safe } from '../../../../shared/lib/api';
 
 /**
- * Invoice aging buckets — accounts-receivable at a glance. Hits
+ * Invoice aging buckets - accounts-receivable at a glance. Hits
  * `/insights/financial/invoice-aging`, renders four stacked buckets:
  * 0-30d, 31-60d, 61-90d, 90+ overdue. Dollar totals + invoice counts.
  *
- * Most businesses will stare at the 90+ bucket — that's the column
+ * Most businesses will stare at the 90+ bucket - that's the column
  * styled red. The healthy 0-30 sits in muted green.
  */
 

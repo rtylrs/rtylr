@@ -8,10 +8,10 @@
 
 The Go backend needs to interact with PostgreSQL. Options:
 
-1. **GORM** — ORM with auto-migration, associations, hooks
-2. **sqlx** — Lightweight SQL mapper with struct scanning
-3. **sqlc** — Generates type-safe Go code from SQL queries
-4. **Raw database/sql** — Standard library, manual scanning
+1. **GORM** - ORM with auto-migration, associations, hooks
+2. **sqlx** - Lightweight SQL mapper with struct scanning
+3. **sqlc** - Generates type-safe Go code from SQL queries
+4. **Raw database/sql** - Standard library, manual scanning
 
 ## Decision
 

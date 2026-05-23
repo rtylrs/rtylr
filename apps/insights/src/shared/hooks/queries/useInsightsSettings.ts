@@ -24,7 +24,7 @@ export const useInsightsSettings = (): UseQueryResult<InsightsSettingsResponse> 
 // NOTE: the backend GET /insights/settings handler is live, but a matching
 // PUT /insights/settings is not yet wired in onion/internal/modules/insights.
 // The mutation below targets the expected contract and will start working
-// once the backend ships the update handler — the frontend is intentionally
+// once the backend ships the update handler - the frontend is intentionally
 // ready in advance so the Settings screen can land together with the server
 // change.
 export const useUpdateInsightsSettings = (): UseMutationResult<

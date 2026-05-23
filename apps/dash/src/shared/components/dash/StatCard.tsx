@@ -12,7 +12,7 @@ export interface StatCardProps {
   accent?: string;
   className?: string;
   onClick?: () => void;
-  /** Index in the parent grid — drives stagger-in delay. */
+  /** Index in the parent grid - drives stagger-in delay. */
   index?: number;
 }
 

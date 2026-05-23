@@ -1,6 +1,6 @@
 # Authentication
 
-rtylr uses cookie-based SSO across all apps. A single JWT stored in a cookie on the `.rtylr.com` domain is shared by every subdomain. No per-app login sessions exist — authenticate once, access everything your role permits.
+rtylr uses cookie-based SSO across all apps. A single JWT stored in a cookie on the `.rtylr.com` domain is shared by every subdomain. No per-app login sessions exist - authenticate once, access everything your role permits.
 
 ---
 
@@ -140,13 +140,13 @@ import { ProtectedRoute } from '@voxire/auth';
 
 - Reads the `token` cookie synchronously on render
 - If absent: `window.location.href = ${AUTH_URL}?redirect=${appId}` and returns `null`
-- If present: renders `children` immediately (no network call — the API will 401 if the token is expired)
+- If present: renders `children` immediately (no network call - the API will 401 if the token is expired)
 
 ---
 
 ## `RoleGuard`
 
-Conditionally renders UI based on the current user's role. Does not redirect — it simply shows or hides content.
+Conditionally renders UI based on the current user's role. Does not redirect - it simply shows or hides content.
 
 ```tsx
 import { RoleGuard } from '@voxire/auth';
@@ -167,16 +167,16 @@ function AdminPanel() {
 
 | Prop       | Type               | Default | Description                            |
 | ---------- | ------------------ | ------- | -------------------------------------- |
-| `allowed`  | `UserRole[]`       | —       | Roles that may see `children`          |
-| `role`     | `UserRole \| null` | —       | The current user's role from the store |
+| `allowed`  | `UserRole[]`       | -       | Roles that may see `children`          |
+| `role`     | `UserRole \| null` | -       | The current user's role from the store |
 | `fallback` | `ReactNode`        | `null`  | Rendered when role is not in `allowed` |
-| `children` | `ReactNode`        | —       | Rendered when role is allowed          |
+| `children` | `ReactNode`        | -       | Rendered when role is allowed          |
 
 ---
 
 ## User Store (`useUserStore`)
 
-Zustand store from `@voxire/auth`. Persisted to `localStorage` under the key `rtylr:voxire:user`. The `token` is intentionally excluded from persistence — it lives only in the cookie.
+Zustand store from `@voxire/auth`. Persisted to `localStorage` under the key `rtylr:voxire:user`. The `token` is intentionally excluded from persistence - it lives only in the cookie.
 
 ```ts
 import { useUserStore } from '@voxire/auth';

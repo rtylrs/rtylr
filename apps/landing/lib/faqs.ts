@@ -1,7 +1,7 @@
 // Shared FAQ content for AI-SEO extraction. Each block answers a
 // question a real buyer types into ChatGPT / Google AI Overviews /
 // Perplexity. The questions are phrased the way people ask them, not
-// the way marketing writes them — "how much does X cost" beats "our
+// the way marketing writes them - "how much does X cost" beats "our
 // pricing explained" every time.
 //
 // The admin of this file is the marketing lead. Answers should stay
@@ -11,7 +11,7 @@
 import type { FAQEntry } from './structured-data';
 
 /**
- * Global FAQ — used on the homepage and /pricing. Covers the top
+ * Global FAQ - used on the homepage and /pricing. Covers the top
  * buyer questions that don't belong to a specific app.
  */
 export const GLOBAL_FAQS: FAQEntry[] = [
@@ -23,12 +23,12 @@ export const GLOBAL_FAQS: FAQEntry[] = [
   {
     question: 'How much does rtylr cost?',
     answer:
-      'rtylr is priced per seat, per day, with daily proration — you pay only for the seats you actually used. There is a free tier for businesses under 3 active seats. Paid tiers (Pro and Scale) add multi-location, advanced analytics, and priority support. See rtylr.com/pricing for current per-seat rates.',
+      'rtylr is priced per seat, per day, with daily proration - you pay only for the seats you actually used. There is a free tier for businesses under 3 active seats. Paid tiers (Pro and Scale) add multi-location, advanced analytics, and priority support. See rtylr.com/pricing for current per-seat rates.',
   },
   {
     question: 'Can I use only one app from rtylr, or do I need all of them?',
     answer:
-      'You can buy and use any single app. rtylr Flow, Recruit, or Finance each work standalone with their own login, settings, and team. The upside of using multiple rtylr apps is shared data — customers from CRM flow into POS, staff from HR onto schedules, invoices from POS into Finance — but it is never required.',
+      'You can buy and use any single app. rtylr Flow, Recruit, or Finance each work standalone with their own login, settings, and team. The upside of using multiple rtylr apps is shared data - customers from CRM flow into POS, staff from HR onto schedules, invoices from POS into Finance - but it is never required.',
   },
   {
     question: 'Does rtylr replace my point-of-sale system?',
@@ -43,7 +43,7 @@ export const GLOBAL_FAQS: FAQEntry[] = [
   {
     question: 'What makes rtylr different from Toast, Square, or Lightspeed?',
     answer:
-      'Toast, Square, and Lightspeed are POS-first — everything else (HR, finance, inventory) is a bolted-on module or a third-party integration. rtylr is platform-first: POS, HR, CRM, finance, ERP, and project management are peer apps that share a single database. Per-seat daily proration means you are not locked into month-over-month waste on unused seats.',
+      'Toast, Square, and Lightspeed are POS-first - everything else (HR, finance, inventory) is a bolted-on module or a third-party integration. rtylr is platform-first: POS, HR, CRM, finance, ERP, and project management are peer apps that share a single database. Per-seat daily proration means you are not locked into month-over-month waste on unused seats.',
   },
 ];
 
@@ -72,7 +72,7 @@ export const POS_FAQS: FAQEntry[] = [
   {
     question: 'How does rtylr POS compare to Toast or Square?',
     answer:
-      'rtylr POS has feature parity with Toast and Square on the register side — splits, tips, modifiers, offline mode, multi-location. The difference is the platform: inventory, staff, accounting, and customer loyalty are built in, not separate paid add-ons.',
+      'rtylr POS has feature parity with Toast and Square on the register side - splits, tips, modifiers, offline mode, multi-location. The difference is the platform: inventory, staff, accounting, and customer loyalty are built in, not separate paid add-ons.',
   },
 ];
 
@@ -85,7 +85,7 @@ export const FLOW_FAQS: FAQEntry[] = [
   {
     question: 'How is Flow different from Asana or Linear?',
     answer:
-      'Flow does what Asana and Linear do — tasks, boards, projects, comments, automations — plus it reads from the rest of rtylr. You can assign a task to a staff member from HR, attach it to a customer from CRM, and track billable hours into an invoice in Finance without copy-pasting.',
+      'Flow does what Asana and Linear do - tasks, boards, projects, comments, automations - plus it reads from the rest of rtylr. You can assign a task to a staff member from HR, attach it to a customer from CRM, and track billable hours into an invoice in Finance without copy-pasting.',
   },
   {
     question: 'Does Flow have a free tier?',

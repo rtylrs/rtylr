@@ -1,7 +1,7 @@
 {
   "name": "@rtylr/hr",
   "version": "0.0.0",
-  "description": "HR — Staff, shifts, payroll",
+  "description": "HR - Staff, shifts, payroll",
   "type": "module",
   "scripts": {
     "dev": "vite",

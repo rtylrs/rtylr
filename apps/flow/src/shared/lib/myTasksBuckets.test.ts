@@ -29,7 +29,7 @@ function baseTask(overrides: Partial<Task> = {}): Task {
 }
 
 // ---------------------------------------------------------------------------
-// Tests — pin "now" so relative bucket logic is deterministic
+// Tests - pin "now" so relative bucket logic is deterministic
 // ---------------------------------------------------------------------------
 
 describe('bucketForMyTask', () => {

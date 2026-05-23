@@ -1,7 +1,7 @@
 {
   "name": "@rtylr/finance",
   "version": "0.0.0",
-  "description": "Finance — rtylr",
+  "description": "Finance - rtylr",
   "type": "module",
   "scripts": {
     "dev": "vite",

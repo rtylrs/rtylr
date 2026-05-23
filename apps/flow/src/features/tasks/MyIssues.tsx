@@ -9,7 +9,7 @@ import TaskRow from '../../shared/components/TaskRow';
 import EmptyState from '../../shared/components/EmptyState';
 
 // Backlog lives here as the leftmost column instead of as its own
-// sidebar tab — keeping unscheduled work next to active work means a
+// sidebar tab - keeping unscheduled work next to active work means a
 // single view covers personal task management end-to-end.
 const KANBAN_COLUMNS: { status: string; label: string; color: string }[] = [
   { status: 'backlog', label: 'Backlog', color: '#6b7280' },

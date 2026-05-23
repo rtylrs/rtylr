@@ -3,14 +3,14 @@ import { test, expect, type Page, type Route } from './fixtures';
 /**
  * End-to-end: an operator managing the ERP product catalog.
  *
- * Products is the ERP app's primary data surface — if the New Product /
+ * Products is the ERP app's primary data surface - if the New Product /
  * Edit / Delete flow breaks silently, the operator quietly loses the
  * ability to keep the catalog in sync with reality, and every downstream
  * surface (inventory, low-stock, purchasing) drifts. This spec locks the
  * critical path down in a real browser with a stubbed API so CI stays
  * deterministic, no backend required.
  *
- * Stubs live in `installProductStubs` — keep them in one place so the
+ * Stubs live in `installProductStubs` - keep them in one place so the
  * spec doesn't drift as new endpoints land. Every endpoint the Products
  * screen + detail screen touches should have a handler there.
  */
@@ -65,7 +65,7 @@ async function installProductStubs(
   };
   const captured: { lastPost: Record<string, unknown> | null } = { lastPost: null };
 
-  // All stubs are scoped to the backend host (localhost:9999) — matching
+  // All stubs are scoped to the backend host (localhost:9999) - matching
   // against `**/erp/**` would also swallow Vite's own module requests
   // (the dev server hosts source under paths that include `/erp/`), so
   // we anchor the glob to the API origin to keep the two worlds separate.
@@ -89,7 +89,7 @@ async function installProductStubs(
   });
 
   // (2) Subscription/billing polled by the layout shell. A 401 on these
-  // would trigger an auth redirect that tears the page down — neutral
+  // would trigger an auth redirect that tears the page down - neutral
   // empty response keeps the surface quiet.
   await page.route(`${apiHost}/subscriptions/**`, (route: Route) =>
     route.fulfill({
@@ -127,7 +127,7 @@ async function installProductStubs(
   // (5) Products: list (GET), create/update/delete multiplex (POST).
   //
   // The ERP API multiplexes create/update/delete through POST /erp/products
-  // with an `_action` discriminator — see shared/services/erpApi.ts. We
+  // with an `_action` discriminator - see shared/services/erpApi.ts. We
   // mirror that here so the handlers stay faithful to production.
   await page.route(`${apiHost}/erp/products`, async (route: Route) => {
     const req = route.request();
@@ -200,7 +200,7 @@ async function installProductStubs(
     });
   });
 
-  // (6) Barcode lookup — registered BEFORE the by-id handler so the
+  // (6) Barcode lookup - registered BEFORE the by-id handler so the
   // /products/barcode/* path doesn't get mis-parsed as /products/<id>.
   await page.route(`${apiHost}/erp/products/barcode/**`, (route: Route) =>
     route.fulfill({ status: 404, contentType: 'application/json', body: '{}' })
@@ -278,7 +278,7 @@ async function installSupplierStubs(
   const captured: { lastPost: Record<string, unknown> | null } = { lastPost: null };
   const apiHost = 'http://localhost:9999';
 
-  // (1) Widest ERP catch-all — registered first so specific handlers win.
+  // (1) Widest ERP catch-all - registered first so specific handlers win.
   await page.route(`${apiHost}/erp/**`, (route: Route) => {
     if (route.request().method() === 'GET') {
       route.fulfill({ status: 200, contentType: 'application/json', body: '{}' });
@@ -553,7 +553,7 @@ async function installCategoryStubs(
 
 test.describe.skip('ERP inventory flow', () => {
   // AppGuard redirects to auth when there's no token cookie. A dummy
-  // value is enough because we stub /user/me — the guard only checks
+  // value is enough because we stub /user/me - the guard only checks
   // presence, not validity.
   test.beforeEach(async ({ context }) => {
     await context.addCookies([
@@ -665,7 +665,7 @@ test.describe.skip('ERP inventory flow', () => {
 
     await page.getByTestId('product-delete-button').click();
 
-    // Confirm dialog — target the modal's confirm button by testid so
+    // Confirm dialog - target the modal's confirm button by testid so
     // we don't collide with the detail screen's own Delete button.
     await expect(page.getByTestId('confirm-modal')).toBeVisible();
     await page.getByTestId('confirm-modal-confirm').click();
@@ -730,7 +730,7 @@ test.describe.skip('ERP suppliers flow', () => {
     const inputs = page.locator('input[placeholder="Company name"]');
     await inputs.first().fill('Fresh Farms Inc.');
 
-    // Submit — the modal's "Create" button is the last enabled button.
+    // Submit - the modal's "Create" button is the last enabled button.
     await page.getByRole('button', { name: /^Create$/i }).click();
 
     // The new card should be visible after the optimistic refetch.
@@ -845,7 +845,7 @@ test.describe.skip('ERP categories flow', () => {
     // Wait for the category to appear.
     await expect(page.getByText('Produce')).toBeVisible({ timeout: 10_000 });
 
-    // Click the Edit (pencil) button for the first category row — it has
+    // Click the Edit (pencil) button for the first category row - it has
     // aria-label="Edit category".
     await page.getByRole('button', { name: 'Edit category' }).first().click();
 

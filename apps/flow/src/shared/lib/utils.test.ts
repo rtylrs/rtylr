@@ -3,7 +3,7 @@ import { describe, it, expect, beforeEach, vi, afterEach } from 'vitest';
 import { cn, getInitials, formatDate } from './utils';
 
 // ---------------------------------------------------------------------------
-// cn — className merger
+// cn - className merger
 // ---------------------------------------------------------------------------
 
 describe('cn', () => {

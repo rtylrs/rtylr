@@ -1,7 +1,7 @@
 {
   "name": "@rtylr/crm",
   "version": "0.0.0",
-  "description": "CRM — Customer Relationship Management",
+  "description": "CRM - Customer Relationship Management",
   "type": "module",
   "scripts": {
     "dev": "vite",

@@ -74,7 +74,7 @@ const OUTCOME_ICONS: Record<TouchpointOutcome, React.ReactNode> = {
 };
 
 function formatDate(iso: string): string {
-  if (!iso) return '—';
+  if (!iso) return '-';
   return new Date(iso).toLocaleDateString('en-US', {
     month: 'short',
     day: 'numeric',
@@ -934,7 +934,7 @@ const InfoRow: React.FC<{ label: string; value: string }> = ({ label, value }) =
     >
       {label}
     </p>
-    <p style={{ fontSize: '13px', color: 'var(--hub-text)', margin: 0 }}>{value || '—'}</p>
+    <p style={{ fontSize: '13px', color: 'var(--hub-text)', margin: 0 }}>{value || '-'}</p>
   </div>
 );
 

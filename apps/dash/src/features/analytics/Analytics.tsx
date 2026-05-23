@@ -52,25 +52,25 @@ const Analytics: React.FC = () => {
   const statCards = [
     {
       label: 'Revenue Today',
-      value: isLoading ? '—' : `$${(kpis?.revenueToday ?? 0).toFixed(2)}`,
+      value: isLoading ? '-' : `$${(kpis?.revenueToday ?? 0).toFixed(2)}`,
       icon: DollarSign,
       iconClass: 'text-emerald-600 bg-emerald-500/15',
     },
     {
       label: 'Orders Today',
-      value: isLoading ? '—' : String(kpis?.ordersToday ?? 0),
+      value: isLoading ? '-' : String(kpis?.ordersToday ?? 0),
       icon: ShoppingBag,
       iconClass: 'text-blue-600 bg-blue-500/15',
     },
     {
       label: 'Avg Order Value',
-      value: isLoading ? '—' : `$${avgOrderValue.toFixed(2)}`,
+      value: isLoading ? '-' : `$${avgOrderValue.toFixed(2)}`,
       icon: TrendingUp,
       iconClass: 'text-violet-600 bg-violet-500/15',
     },
     {
       label: 'New Customers',
-      value: isLoading ? '—' : String(kpis?.newCustomers ?? 0),
+      value: isLoading ? '-' : String(kpis?.newCustomers ?? 0),
       icon: Star,
       iconClass: 'text-amber-600 bg-amber-500/15',
     },

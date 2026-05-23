@@ -8,9 +8,9 @@
 
 POS terminals must work when internet connectivity is unreliable. A cashier can't tell a customer "sorry, the WiFi is down" during checkout. Options:
 
-1. **Always-online** — require internet, show error when offline
-2. **Service Worker cache** — cache API responses for offline reads
-3. **IndexedDB via Dexie** — full local database with sync capability
+1. **Always-online** - require internet, show error when offline
+2. **Service Worker cache** - cache API responses for offline reads
+3. **IndexedDB via Dexie** - full local database with sync capability
 
 ## Decision
 

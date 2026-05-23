@@ -8,8 +8,8 @@
 
 With 14 apps, some having 15+ screens, the codebase was becoming hard to navigate. Options considered:
 
-1. **Flat by type**: `screens/`, `hooks/`, `services/`, `components/` — all screens in one folder, all hooks in another
-2. **Feature-based**: `features/{name}/Screen.tsx + useX.ts` — co-locate screen, hooks, and local components
+1. **Flat by type**: `screens/`, `hooks/`, `services/`, `components/` - all screens in one folder, all hooks in another
+2. **Feature-based**: `features/{name}/Screen.tsx + useX.ts` - co-locate screen, hooks, and local components
 
 ## Decision
 

@@ -12,7 +12,7 @@ import type { ApiTask } from '../services/flowApi';
  *    assigneeName, assigneeInitials, identifier, subtaskCount). Fall back to
  *    derived values when missing so the UI never renders `undefined`.
  *
- * Do NOT shallow-spread the API task (`...t`) — that leaks numeric IDs
+ * Do NOT shallow-spread the API task (`...t`) - that leaks numeric IDs
  * through `as any` into a store typed as strings and the bug comes back.
  */
 export function apiTaskToTask(t: ApiTask): Task {

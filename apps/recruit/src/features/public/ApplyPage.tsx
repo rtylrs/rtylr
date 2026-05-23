@@ -14,16 +14,16 @@ import { applySEO, loadAnalytics } from '../../shared/lib/seo';
 import NotFound from './NotFound';
 
 /**
- * ApplyPage — form at recruit.rtylr.com/:slug/:careerSlug/apply.
+ * ApplyPage - form at recruit.rtylr.com/:slug/:careerSlug/apply.
  *
  * MVP scope: name, email, phone, resume URL (linked from wherever the
- * candidate already hosts it — Drive, Dropbox, personal site), cover
+ * candidate already hosts it - Drive, Dropbox, personal site), cover
  * letter. Native multipart resume upload is a follow-up; storing a URL
  * keeps the schema stable across that change.
  *
  * The form renders the shared Header so branding carries across the
  * apply flow. It intentionally doesn't route through the template
- * resolver — templates diverge on marketing surfaces, but the apply
+ * resolver - templates diverge on marketing surfaces, but the apply
  * form is a utility and benefits from a single consistent shape.
  */
 const ApplyPage: React.FC = (): React.JSX.Element => {
@@ -56,13 +56,13 @@ const ApplyPage: React.FC = (): React.JSX.Element => {
     setAnswers((prev) => ({ ...prev, [String(fieldId)]: value }));
   }
 
-  // GDPR consent — shown only when the business has require_consent
+  // GDPR consent - shown only when the business has require_consent
   // on. The checkbox is required, which means the form won't submit
   // without it.
   const [consented, setConsented] = useState(false);
 
   // File upload state. `resumeFile` is the picked File, `uploadedKey`
-  // is the R2 object key we got back after a successful upload — the
+  // is the R2 object key we got back after a successful upload - the
   // distinction matters because we want to show "uploaded ✓" state
   // without re-uploading the same file on every re-render.
   const [resumeFile, setResumeFile] = useState<File | null>(null);
@@ -81,7 +81,7 @@ const ApplyPage: React.FC = (): React.JSX.Element => {
     try {
       const key = await uploadResume({ file, slug, careerSlug });
       setUploadedKey(key);
-      // Clear the manual URL input — we'll use the uploaded key instead.
+      // Clear the manual URL input - we'll use the uploaded key instead.
       setResumeUrl('');
     } catch (err) {
       const msg = err instanceof Error ? err.message : 'Upload failed';
@@ -116,7 +116,7 @@ const ApplyPage: React.FC = (): React.JSX.Element => {
 
   const onSubmit = (e: React.FormEvent) => {
     e.preventDefault();
-    // Client-side required check before hitting the API — better UX
+    // Client-side required check before hitting the API - better UX
     // than a round-trip 400. The backend still accepts whatever it's
     // given since we can't yet validate kind-specific rules
     // server-side.
@@ -151,7 +151,7 @@ const ApplyPage: React.FC = (): React.JSX.Element => {
           setDone(true);
           toast.success('Application received');
         },
-        onError: () => toast.error("Couldn't submit — try again"),
+        onError: () => toast.error("Couldn't submit - try again"),
       }
     );
   };
@@ -200,7 +200,7 @@ const ApplyPage: React.FC = (): React.JSX.Element => {
 
         <h1 className="mt-6 text-3xl font-semibold tracking-tight">Apply for {career.title}</h1>
         <p className="mt-2 text-sm" style={{ color: 'var(--recruit-muted)' }}>
-          {customization.brandName} — {career.location || 'Remote'}
+          {customization.brandName} - {career.location || 'Remote'}
         </p>
 
         <form onSubmit={onSubmit} className="mt-8 space-y-5">
@@ -289,7 +289,7 @@ const ApplyPage: React.FC = (): React.JSX.Element => {
           </Field>
 
           {/* Fallback for candidates who'd rather link out. Hidden when
-              a file is picked — two resume sources on one form is
+              a file is picked - two resume sources on one form is
               confusing. */}
           {!resumeFile && !uploadedKey && (
             <Field label="…or paste a link" hint="Google Drive, Dropbox, personal site">
@@ -344,7 +344,7 @@ const ApplyPage: React.FC = (): React.JSX.Element => {
                 {customization.privacyUrl && (
                   <>
                     {' '}
-                    — see the{' '}
+                    - see the{' '}
                     <a
                       href={customization.privacyUrl}
                       target="_blank"

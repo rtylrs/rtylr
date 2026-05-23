@@ -1,9 +1,9 @@
 import { test, expect } from './fixtures';
 
 /**
- * Insights e2e — dashboard loads, pillar screens switch, scheduled
+ * Insights e2e - dashboard loads, pillar screens switch, scheduled
  * reports CRUD works through the UI. All /insights/* endpoints are
- * stubbed via page.route() — the whole namespace landed as a new
+ * stubbed via page.route() - the whole namespace landed as a new
  * backend module this session so this spec nails the contract.
  */
 

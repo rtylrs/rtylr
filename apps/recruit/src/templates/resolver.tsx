@@ -105,13 +105,13 @@ export function applyBrand(customization: Customization | undefined): void {
   root.style.setProperty('--recruit-surface', defaults.surface);
   root.style.setProperty('--recruit-border', defaults.border);
 
-  // Typography — loadFontPairing injects the Google Fonts <link> if
+  // Typography - loadFontPairing injects the Google Fonts <link> if
   // needed and returns the family names to slot into our CSS vars.
   const pairing = loadFontPairing(customization.fontPairing);
   root.style.setProperty('--recruit-font-body', pairing.body);
   root.style.setProperty('--recruit-font-display', pairing.heading);
 
-  // Favicon swap — this is the small nicety that makes a tenant's
+  // Favicon swap - this is the small nicety that makes a tenant's
   // careers page feel properly theirs in the browser tab.
   if (customization.faviconUrl) {
     let link = document.querySelector<HTMLLinkElement>('link[rel="icon"]');

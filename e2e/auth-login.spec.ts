@@ -3,7 +3,7 @@ import { test, expect } from './fixtures';
 /**
  * Auth login spec. Rate-limited backend (5/min/IP) plus strict-mode
  * role selectors so the assertions survive UI tweaks. API is stubbed
- * via `page.route()` — never hits localhost:9999.
+ * via `page.route()` - never hits localhost:9999.
  */
 
 const AUTH_URL = process.env.AUTH_URL ?? 'http://localhost:5176';
@@ -32,7 +32,7 @@ async function stubAuth(page: import('@playwright/test').Page): Promise<void> {
     });
   });
 
-  // Google auth stub — never hit Firebase/Google in CI.
+  // Google auth stub - never hit Firebase/Google in CI.
   await page.route('**/auth/register/google', (route) =>
     route.fulfill({
       status: 200,
@@ -47,7 +47,7 @@ async function stubAuth(page: import('@playwright/test').Page): Promise<void> {
     })
   );
 
-  // Register endpoint — keeps the /register spec path self-contained.
+  // Register endpoint - keeps the /register spec path self-contained.
   await page.route('**/auth/register', (route) =>
     route.fulfill({
       status: 200,
@@ -71,7 +71,7 @@ test.describe('Auth login', () => {
   test('login form renders with email + password fields', async ({ page }) => {
     await page.goto(AUTH_URL);
     await expect(page.getByRole('textbox', { name: /email/i }).first()).toBeVisible();
-    // Password is usually not a role=textbox in Playwright — select by input type.
+    // Password is usually not a role=textbox in Playwright - select by input type.
     await expect(page.locator('input[type="password"]').first()).toBeVisible();
   });
 
@@ -90,7 +90,7 @@ test.describe('Auth login', () => {
       .first()
       .click();
 
-    // Cookie setting is the stable signal — visible UI state varies.
+    // Cookie setting is the stable signal - visible UI state varies.
     await page.waitForTimeout(500);
     const cookies = await page.context().cookies();
     const tokenCookie = cookies.find((c) => c.name === 'token');
@@ -100,7 +100,7 @@ test.describe('Auth login', () => {
   test('register page loads', async ({ page }) => {
     await page.goto(`${AUTH_URL}/register`);
     // The register flow is a multi-step wizard (plan picker first,
-    // then email). We don't pin to a specific step — just that the
+    // then email). We don't pin to a specific step - just that the
     // page mounts past the SPA shell. A heading is the stable anchor.
     await expect(page.getByRole('heading').first()).toBeVisible({ timeout: 10_000 });
   });

@@ -4,7 +4,7 @@ import { toast } from 'sonner';
 import { safe } from '../../lib/api';
 import type { Customization, FormField, RecruitCareer, Section } from '../../lib/types';
 
-// Public (anonymous) hooks — used by the candidate-facing pages.
+// Public (anonymous) hooks - used by the candidate-facing pages.
 // Every request is scoped by the URL slug so we don't need auth.
 
 interface ListPublicCareersResponse {
@@ -75,7 +75,7 @@ export function useSubmitApplication() {
 // Upload flow: ask the backend for a presigned R2 URL, PUT the file
 // directly to R2, then submit the application with the returned key.
 // We intentionally expose this as a plain helper (not a useMutation)
-// because the PUT step talks to Cloudflare, not our backend — the
+// because the PUT step talks to Cloudflare, not our backend - the
 // axios client's base URL and auth-cookie logic shouldn't apply.
 
 interface ResumeUploadURLBody {
@@ -100,7 +100,7 @@ async function requestUploadURL(body: ResumeUploadURLBody): Promise<ResumeUpload
  * uploadResume asks the backend for a presigned URL, uploads the file
  * to R2, and returns the R2 object key on success. Any step that
  * errors bubbles up with a readable message so the form can render it
- * inline. We deliberately don't do chunked/multipart uploads — the
+ * inline. We deliberately don't do chunked/multipart uploads - the
  * hard ceiling is 10 MB and a single PUT is plenty for resumes.
  */
 export async function uploadResume(args: {
@@ -117,7 +117,7 @@ export async function uploadResume(args: {
 
   if (args.file.size > presigned.maxBytes) {
     throw new Error(
-      `File is ${(args.file.size / 1024 / 1024).toFixed(1)} MB — max is ${(
+      `File is ${(args.file.size / 1024 / 1024).toFixed(1)} MB - max is ${(
         presigned.maxBytes /
         1024 /
         1024
@@ -127,7 +127,7 @@ export async function uploadResume(args: {
 
   // Direct PUT to R2. Axios would add auth headers we don't want here,
   // so we drop to fetch. The Content-Type header must match what we
-  // sent to the presigner — R2 signs that value in.
+  // sent to the presigner - R2 signs that value in.
   const putRes = await fetch(presigned.uploadUrl, {
     method: 'PUT',
     body: args.file,

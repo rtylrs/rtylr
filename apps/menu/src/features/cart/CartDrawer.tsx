@@ -39,7 +39,7 @@ const CartDrawer = ({ isOpen, onClose, currency = 'USD' }: CartDrawerProps): Rea
             onClick={onClose}
           />
 
-          {/* Drawer — slides from right on desktop, slides from bottom on mobile */}
+          {/* Drawer - slides from right on desktop, slides from bottom on mobile */}
           <motion.aside
             aria-label="Cart"
             style={{
@@ -238,7 +238,7 @@ const CartDrawer = ({ isOpen, onClose, currency = 'USD' }: CartDrawerProps): Rea
 
 export default CartDrawer;
 
-// Floating cart trigger button — rendered outside the drawer, always visible
+// Floating cart trigger button - rendered outside the drawer, always visible
 interface CartButtonProps {
   onClick: () => void;
   currency?: string;

@@ -8,18 +8,18 @@
 
 We have a Go backend (`onion`) and 14 React frontend apps that need to share type definitions for API request/response shapes. Options considered:
 
-1. **npm package** — publish generated TypeScript types to a private npm registry
-2. **Go module** — publish generated `.pb.go` files as a Go module
-3. **Git submodule** — single repo (`voxie`) containing `.proto` files + generated code for both languages, included as a submodule in both repos
+1. **npm package** - publish generated TypeScript types to a private npm registry
+2. **Go module** - publish generated `.pb.go` files as a Go module
+3. **Git submodule** - single repo (`voxie`) containing `.proto` files + generated code for both languages, included as a submodule in both repos
 
 ## Decision
 
 Git submodule. The `voxie` repo contains:
 
-- `proto/{app}/v1/{concern}.proto` — source of truth
-- `gen/go/{app}/v1/*.pb.go` — generated Go types (committed)
-- `gen/ts/{app}/v1/*.ts` — generated TypeScript types (committed)
-- `buf.gen.yaml` — buf generation config
+- `proto/{app}/v1/{concern}.proto` - source of truth
+- `gen/go/{app}/v1/*.pb.go` - generated Go types (committed)
+- `gen/ts/{app}/v1/*.ts` - generated TypeScript types (committed)
+- `buf.gen.yaml` - buf generation config
 
 Both `rtylr` (frontend) and `onion` (backend) include `voxie` as a submodule. Frontend re-exports via `@voxire/contracts` package.
 

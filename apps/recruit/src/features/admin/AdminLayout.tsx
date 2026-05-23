@@ -5,7 +5,7 @@ import { APP_URLS } from '@voxire/config';
 import { signOut } from '@voxire/auth';
 
 /**
- * AdminLayout — wraps the authenticated admin routes under /admin.
+ * AdminLayout - wraps the authenticated admin routes under /admin.
  * The public careers pages share the same app but render through the
  * template resolver and bypass this shell entirely.
  */

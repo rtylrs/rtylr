@@ -83,7 +83,7 @@ export const QuickCreate: React.FC = () => {
     const uid = getCurrentUserId();
 
     try {
-      // Backend returns { task: ApiTask }. Unwrap before use — direct
+      // Backend returns { task: ApiTask }. Unwrap before use - direct
       // access on the envelope would crash at runtime (TS catches it now).
       const res = await createTaskMutation.mutateAsync({
         title: title.trim(),

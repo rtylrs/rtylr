@@ -1,5 +1,5 @@
 /** Hard-coded Caret feature flags. Eventually backed by the platform's
- *  feature-flag service — for now this is a single source of truth. */
+ *  feature-flag service - for now this is a single source of truth. */
 export const CARET_FEATURES = {
   /** Show the speech-to-text mic button. */
   voiceInput: true,

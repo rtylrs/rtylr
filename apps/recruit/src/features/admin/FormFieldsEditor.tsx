@@ -21,13 +21,13 @@ import {
 import type { FormField, FormFieldKind } from '../../shared/lib/types';
 
 /**
- * FormFieldsEditor — lets the HR admin add custom questions to the
+ * FormFieldsEditor - lets the HR admin add custom questions to the
  * apply form for a specific role. Baseline (name/email/resume/cover
  * letter) isn't editable; everything here appears after it on the
  * public apply page.
  *
  * The editor is inline rather than its own route because it's always
- * edited in the context of a role — bouncing to a separate screen
+ * edited in the context of a role - bouncing to a separate screen
  * would make the connection between question and role unclear.
  */
 

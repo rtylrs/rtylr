@@ -3,7 +3,7 @@ import { beforeEach, describe, expect, it } from 'vitest';
 import { FONT_PAIRINGS, loadFontPairing, resolvePairing } from './fonts';
 
 /**
- * Font resolver tests — these guard the resolver against silently
+ * Font resolver tests - these guard the resolver against silently
  * falling back to the wrong pairing (one of the longest-to-debug
  * classes of UI bugs: the whole page renders in Plus Jakarta because
  * a typo in a font key).
@@ -19,7 +19,7 @@ describe('resolvePairing', () => {
   });
 
   it('returns default pairing for an unknown id', () => {
-    // A stale database value shouldn't render a broken font stack —
+    // A stale database value shouldn't render a broken font stack -
     // fall through to the safe default.
     expect(resolvePairing('jakarta-fruncis').id).toBe('default');
   });
@@ -49,7 +49,7 @@ describe('resolvePairing', () => {
 
 describe('loadFontPairing', () => {
   beforeEach(() => {
-    // Reset between tests — the function injects <link> tags into
+    // Reset between tests - the function injects <link> tags into
     // document.head and we need each test to start from a clean slate.
     document.head.querySelectorAll('link[id^="recruit-font-"]').forEach((el) => el.remove());
   });
@@ -62,7 +62,7 @@ describe('loadFontPairing', () => {
     expect(link?.href).toContain('Fraunces');
   });
 
-  it('is idempotent — calling twice only injects one tag', () => {
+  it('is idempotent - calling twice only injects one tag', () => {
     loadFontPairing('jakarta-fraunces');
     loadFontPairing('jakarta-fraunces');
     const links = document.head.querySelectorAll('link[id="recruit-font-jakarta-fraunces"]');

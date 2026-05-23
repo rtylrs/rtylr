@@ -6,15 +6,15 @@ import { usePublicMenu } from '../../../shared/hooks/usePublicMenu';
 import { useCartStore } from '../../../shared/stores/cartStore';
 
 /**
- * PosMenu — public customer-facing menu for POS-backed businesses.
+ * PosMenu - public customer-facing menu for POS-backed businesses.
  *
  * Route: `/b/:businessId` (numeric, e.g. `/b/42`).
  *
  * Different from the legacy `/:id` flow (which routes to the old
  * mongo-backed menu). This one consumes the new `/pos/public/*`
  * anonymous endpoints shipped earlier this session. A single
- * business doesn't need categories today — the pos_menu table
- * stores flat items — so we synthesise one "All" category for the
+ * business doesn't need categories today - the pos_menu table
+ * stores flat items - so we synthesise one "All" category for the
  * GridLayout to render.
  *
  * Online ordering is gated by the VITE_ONLINE_ORDERING_ENABLED env
@@ -79,7 +79,7 @@ const PosMenu: React.FC = (): React.JSX.Element => {
         name: item.name,
         unitPrice: item.price,
       });
-      // Sync quantity > 1 — addItem always sets qty=1 on first add,
+      // Sync quantity > 1 - addItem always sets qty=1 on first add,
       // so we call it (qty-1) more times for items already at higher qty.
       for (let i = 1; i < item.quantity; i++) {
         addItem({

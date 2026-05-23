@@ -1,7 +1,7 @@
 import { describe, it, expect } from 'vitest';
 import { emailTemplates } from './emailTemplates';
 
-// ─── emailTemplates — pure function unit tests ────────────────────────────────
+// ─── emailTemplates - pure function unit tests ────────────────────────────────
 //
 // These templates have zero external dependencies: they take a plain context
 // object and return { subject, body }. No mocks are needed.
@@ -15,7 +15,7 @@ describe('emailTemplates.birthday', () => {
 
   it('defaults company to "rtylr" in the body', () => {
     const result = emailTemplates.birthday({ name: 'Alice' });
-    // The birthday subject only contains the recipient's name — company
+    // The birthday subject only contains the recipient's name - company
     // appears only in the body and closing signature.
     expect(result.body).toContain('rtylr');
   });

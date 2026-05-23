@@ -31,7 +31,7 @@ const apps: AppCard[] = [
   {
     slug: 'hub',
     name: 'Hub',
-    tagline: 'Business command center — branches, team, settings, billing.',
+    tagline: 'Business command center - branches, team, settings, billing.',
     icon: <LayoutGrid size={18} />,
     accent: '#4583c4',
   },

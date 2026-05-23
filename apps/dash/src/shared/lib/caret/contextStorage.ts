@@ -1,5 +1,5 @@
 /** Tiny in-memory cache keyed by chat id. Used by features that don't need
- *  persistence — only fast access during a single page session. */
+ *  persistence - only fast access during a single page session. */
 const cache = new Map<string, unknown>();
 
 export function readContext<T>(key: string): T | undefined {

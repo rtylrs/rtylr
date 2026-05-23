@@ -1,6 +1,6 @@
 /**
  * Manage the browser Notifications permission for Caret push notifications.
- * Surface-level helpers — actual notification triggering is up to callers.
+ * Surface-level helpers - actual notification triggering is up to callers.
  */
 
 export type NotifyState = 'granted' | 'denied' | 'default' | 'unsupported';

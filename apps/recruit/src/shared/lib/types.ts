@@ -98,7 +98,7 @@ export interface Section {
   updatedAt: string;
 }
 
-// Parsed shapes of items_json per kind — used by both the admin editor
+// Parsed shapes of items_json per kind - used by both the admin editor
 // and the public template renderers.
 export interface PerkItem {
   icon?: string; // lucide icon name
@@ -115,7 +115,7 @@ export interface ValueItem {
 }
 
 // FormFieldKind is the discriminator for custom question types. Kept
-// narrow — the apply form renderer and the builder both switch on
+// narrow - the apply form renderer and the builder both switch on
 // this, and allowing arbitrary strings on the client would turn into
 // silent "nothing renders" bugs.
 export type FormFieldKind =

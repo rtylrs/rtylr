@@ -111,7 +111,7 @@ const InviteAccept: React.FC = () => {
   }
 
   // Success, redirect to the app they were invited to, falling back to dash.
-  // Validate the first app is a known AppId before indexing APP_URLS — an
+  // Validate the first app is a known AppId before indexing APP_URLS - an
   // empty/malformed apps array used to slip through `as AppId | undefined`.
   const firstApp =
     apps.length > 0 && (apps[0] as string) in APP_URLS ? (apps[0] as AppId) : undefined;

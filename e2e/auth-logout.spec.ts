@@ -5,7 +5,7 @@ import { test, expect } from './fixtures';
  * silent failure: clicking Sign out cleared a host-only cookie but
  * left the `.rtylr.com` parent-domain cookie alive, so auth.rtylr.com
  * saw the token on the next navigation and bounced the user right
- * back in. This spec asserts the user-visible behavior — cookie is
+ * back in. This spec asserts the user-visible behavior - cookie is
  * gone after click, the URL navigates away from dash, and reloading
  * the protected page does not auto-rebound into the app.
  *
@@ -75,7 +75,7 @@ test.describe('Sign out clears the auth cookie', () => {
 
     // Pre-set the token cookie the same way the auth app would after
     // a successful login. Localhost cookies are host-only by default;
-    // that's fine — the regression we're catching is "click does
+    // that's fine - the regression we're catching is "click does
     // nothing", not the Domain= attribute drift (which is unit-tested).
     await context.addCookies([
       {
@@ -116,7 +116,7 @@ test.describe('Sign out clears the auth cookie', () => {
     await signOut.click();
 
     // The handler navigates via window.location.href to AUTH_URL.
-    // Wait for the navigation rather than racing it — dash redirects
+    // Wait for the navigation rather than racing it - dash redirects
     // to auth.rtylr.com (or AUTH_URL in dev), so URL pattern is
     // "anywhere except dash".
     await page.waitForURL((url) => !url.toString().startsWith(DASH_URL), { timeout: 15_000 });
@@ -137,7 +137,7 @@ test.describe('Sign out clears the auth cookie', () => {
   }) => {
     await stubBackend(page);
 
-    // Start without a cookie — this simulates a user landing on dash
+    // Start without a cookie - this simulates a user landing on dash
     // post-logout. The expected behavior is a clean redirect, not a
     // momentary flash of the dashboard.
     await context.clearCookies();

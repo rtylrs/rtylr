@@ -7,7 +7,7 @@ import { applySEO, loadAnalytics, emitJobPostingJSONLD } from '../../shared/lib/
 import NotFound from './NotFound';
 
 /**
- * CareerDetail — the single-role page at recruit.rtylr.com/:slug/:careerSlug.
+ * CareerDetail - the single-role page at recruit.rtylr.com/:slug/:careerSlug.
  * Template choice comes from the owning business's customization; the
  * same resolver pattern as CareersIndex keeps the two pages visually
  * consistent.

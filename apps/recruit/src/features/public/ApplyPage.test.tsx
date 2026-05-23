@@ -8,7 +8,7 @@ import ApplyPage from './ApplyPage';
 import type { Customization, RecruitCareer } from '../../shared/lib/types';
 
 /**
- * Integration test for the candidate apply flow — the most important
+ * Integration test for the candidate apply flow - the most important
  * conversion surface in the recruit product. Covers:
  *
  *   - render the form using data returned by the public-career query
@@ -152,7 +152,7 @@ describe('ApplyPage integration', () => {
     await waitFor(() => {
       expect(screen.getByText(/you're in\./i)).toBeInTheDocument();
     });
-    // Form is gone — no more submit button on screen.
+    // Form is gone - no more submit button on screen.
     expect(screen.queryByRole('button', { name: /submit application/i })).toBeNull();
   });
 
@@ -160,7 +160,7 @@ describe('ApplyPage integration', () => {
     submitMutate.mockReset();
     renderAt('/acme/backend-engineer/apply');
     fireEvent.click(screen.getByRole('button', { name: /submit application/i }));
-    // Required inputs block form submission at the DOM level — the
+    // Required inputs block form submission at the DOM level - the
     // mutate shouldn't fire.
     expect(submitMutate).not.toHaveBeenCalled();
   });

@@ -3,7 +3,7 @@ import type { FontPairingId } from '../shared/lib/types';
 /**
  * FONT_PAIRINGS is the complete set of typography choices a business
  * can pick in the admin. We deliberately don't expose a freeform
- * Google Fonts picker — too many bad pairings, and the template
+ * Google Fonts picker - too many bad pairings, and the template
  * designs assume specific proportions. Adding a new pairing means
  * editing this file and refreshing in the admin picker.
  *
@@ -75,7 +75,7 @@ export function resolvePairing(id: string | undefined): FontPairing {
 
 /**
  * loadFontPairing injects a <link rel="stylesheet"> tag pointing at
- * fonts.googleapis.com. Idempotent — if the same pairing is already
+ * fonts.googleapis.com. Idempotent - if the same pairing is already
  * loaded, it's a no-op. Switching pairings leaves stale link tags in
  * the DOM which is fine: Google Fonts caches aggressively and the
  * stale tag won't affect rendering.

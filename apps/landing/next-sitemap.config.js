@@ -1,11 +1,11 @@
 /**
- * next-sitemap config — generates sitemap.xml + robots.txt at build
+ * next-sitemap config - generates sitemap.xml + robots.txt at build
  * time so new pages are picked up without anyone remembering to edit
  * the static XML.
  *
  * We keep this separate from next.config.js because next-sitemap has
  * its own CLI and config loader. `pnpm run build` now runs
- * `next build && next-sitemap` — see the app's package.json.
+ * `next build && next-sitemap` - see the app's package.json.
  *
  * The generator reads `out/` (the SSG export dir) after build and
  * writes the sitemap to the same `out/` so the Cloudflare Pages deploy
@@ -15,7 +15,7 @@
 /** @type {import('next-sitemap').IConfig} */
 module.exports = {
   siteUrl: 'https://rtylr.com',
-  generateRobotsTxt: false, // we maintain robots.txt by hand — it has AI-bot allowances
+  generateRobotsTxt: false, // we maintain robots.txt by hand - it has AI-bot allowances
   outDir: '../../dist/landing', // matches next.config.js output directory
   exclude: ['/404', '/homepage-legacy*'],
   // Trailing slashes match next.config's trailingSlash: true so the
@@ -23,7 +23,7 @@ module.exports = {
   trailingSlash: true,
   changefreq: 'weekly',
   priority: 0.7,
-  // Per-path priority overrides — homepage, product pages, and
+  // Per-path priority overrides - homepage, product pages, and
   // pricing earn higher priority than legal or newsroom.
   transform: async (config, path) => {
     // Normalise both sides so "/pos" and "/pos/" hit the same bucket.

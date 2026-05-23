@@ -6,7 +6,7 @@ import { safe } from '../../lib/api';
 import { toast } from 'sonner';
 import { useTranslation } from 'react-i18next';
 
-// No proto type yet — define locally. Price-list endpoints are still
+// No proto type yet - define locally. Price-list endpoints are still
 // being landed on the backend; hooks are flag-gated via APP_ERP so
 // they are inert when the ERP surface is dark.
 export interface PriceList {

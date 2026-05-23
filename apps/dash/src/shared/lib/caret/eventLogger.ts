@@ -1,6 +1,6 @@
 /**
  * Tiny analytics shim for Caret panel interactions. Currently a no-op in
- * production — wired up so the rest of the codebase can call
+ * production - wired up so the rest of the codebase can call
  * `logEvent(...)` and we can hook PostHog/Segment later without an audit.
  */
 
@@ -19,7 +19,7 @@ export function logEvent(name: string, props?: Record<string, unknown>): void {
     try {
       fn(event);
     } catch {
-      // ignore — single listener failure shouldn't poison the rest
+      // ignore - single listener failure shouldn't poison the rest
     }
   }
 }

@@ -61,7 +61,7 @@ const PrintPOButton: React.FC<PrintPOButtonProps> = ({ order }) => {
         </tr>
       </thead>
       <tbody>
-        <tr><td>1</td><td>${order.items} item${order.items !== 1 ? 's' : ''} — see order details</td><td>${order.items}</td></tr>
+        <tr><td>1</td><td>${order.items} item${order.items !== 1 ? 's' : ''} - see order details</td><td>${order.items}</td></tr>
       </tbody>
     </table>
     <p class="total">Total: ${order.total}</p>

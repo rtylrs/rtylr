@@ -9,31 +9,31 @@ rtylr/
 ├── onion/                     # Go backend (all modules in one process)
 │   ├── cmd/api/main.go        # Entry point, server wires all modules
 │   ├── internal/
-│   │   ├── modules/           # Domain modules — one module per bounded context (products, inventory, staff, customers, invoices, etc.)
+│   │   ├── modules/           # Domain modules - one module per bounded context (products, inventory, staff, customers, invoices, etc.)
 │   │   └── platform/          # Cross-cutting concerns (auth, db, cache, http, logger)
 │   └── scripts/               # migrate.sh, setup.sh, lint.sh, etc.
 └── rtylr/                     # Turborepo monorepo (frontend)
     ├── apps/
-    │   ├── hub/               # Port 5175 — Command center
-    │   ├── auth/              # Port 5176 — SSO login/register
-    │   ├── menu/              # Port 5177 — Customer-facing digital menu
-    │   ├── pos/               # Port 5178 — Point of sale
-    │   ├── erp/               # Port 5179 — Inventory & purchasing
-    │   ├── hr/                # Port 5180 — Staff & payroll
-    │   ├── crm/               # Port 5181 — Customers & loyalty
-    │   ├── finance/           # Port 5182 — Invoices & expenses
-    │   ├── flow/              # Port 5183 — Projects & tasks
-    │   ├── landing/           # Port 4200 — Marketing site (Next.js)
+    │   ├── hub/               # Port 5175 - Command center
+    │   ├── auth/              # Port 5176 - SSO login/register
+    │   ├── menu/              # Port 5177 - Customer-facing digital menu
+    │   ├── pos/               # Port 5178 - Point of sale
+    │   ├── erp/               # Port 5179 - Inventory & purchasing
+    │   ├── hr/                # Port 5180 - Staff & payroll
+    │   ├── crm/               # Port 5181 - Customers & loyalty
+    │   ├── finance/           # Port 5182 - Invoices & expenses
+    │   ├── flow/              # Port 5183 - Projects & tasks
+    │   ├── landing/           # Port 4200 - Marketing site (Next.js)
     │   └── vbitez/            # Alias app (legacy)
     └── packages/
-        ├── api/               # @voxire/api    — Axios client
-        ├── auth/              # @voxire/auth   — Cookie helpers, guards, user store
-        ├── types/             # @voxire/types  — Shared TypeScript types
-        ├── config/            # @voxire/config — APP_URLS, APP_CONFIG
-        ├── ui/                # @voxire/ui     — Shared UI components
-        ├── components/        # @voxire/components — Additional components
+        ├── api/               # @voxire/api    - Axios client
+        ├── auth/              # @voxire/auth   - Cookie helpers, guards, user store
+        ├── types/             # @voxire/types  - Shared TypeScript types
+        ├── config/            # @voxire/config - APP_URLS, APP_CONFIG
+        ├── ui/                # @voxire/ui     - Shared UI components
+        ├── components/        # @voxire/components - Additional components
         ├── assets/            # @voxire/assets
-        ├── menu/              # @voxire/menu   — Shared menu components
+        ├── menu/              # @voxire/menu   - Shared menu components
         ├── tailwind-config/   # Shared Tailwind config
         └── utils/             # @voxire/utils
 ```
@@ -112,7 +112,7 @@ Every API request:
 ```
 apps/*
   └─ @voxire/auth      (guards, user store, cookie helpers)
-  └─ @voxire/api       (axios client — reads token from cookie)
+  └─ @voxire/api       (axios client - reads token from cookie)
   └─ @voxire/types     (TypeScript types for all domains)
   └─ @voxire/config    (APP_URLS, APP_CONFIG keyed by AppId)
   └─ @voxire/ui        (shared components)
@@ -123,44 +123,44 @@ apps/*
 
 ## Backend Module Architecture
 
-The backend follows **domain-level modules** — each module is a single bounded domain context, NOT an app-level wrapper. A domain module owns its routes, service, repository, and domain types.
+The backend follows **domain-level modules** - each module is a single bounded domain context, NOT an app-level wrapper. A domain module owns its routes, service, repository, and domain types.
 
 ```
 internal/modules/
-├── user/          — auth, registration, profile, /user/me
-├── config/        — business config and themes
-├── careers/       — job openings (public)
-├── echo/          — AI SSE streaming (depends on memory)
-├── memory/        — AI conversation memory and context
-├── products/      — product catalog CRUD
-├── inventory/     — stock levels, adjustments, low-stock alerts
-├── suppliers/     — supplier management
-├── purchase_orders/ — purchasing from suppliers
-├── staff/         — employee profiles (HR)
-├── departments/   — org chart (HR)
-├── shifts/        — scheduling + clock-in/out (HR)
-├── payroll/       — payroll runs and records (HR)
-├── time_off/      — leave requests and approvals (HR)
-├── customers/     — customer records, visits, dashboard (CRM)
-├── loyalty/       — points, rewards, config (CRM)
-├── campaigns/     — marketing campaigns (CRM)
-├── segments/      — customer segments (CRM)
-├── invoices/      — invoice CRUD, payments, status (Finance)
-├── expenses/      — expense tracking and categories (Finance)
-├── tax/           — tax config + P&L report (Finance)
-├── workspaces/    — project workspaces (Flow)
-├── projects/      — projects within workspaces (Flow)
-├── tasks/         — tasks + labels (Flow)
-├── pos_orders/    — sales orders (POS)
-├── pos_tables/    — table management (POS)
-├── pos_sessions/  — cash register sessions (POS)
-├── pos_locations/ — store locations (POS)
-└── team/          — staff users, invites, app permissions (Hub)
+├── user/          - auth, registration, profile, /user/me
+├── config/        - business config and themes
+├── careers/       - job openings (public)
+├── echo/          - AI SSE streaming (depends on memory)
+├── memory/        - AI conversation memory and context
+├── products/      - product catalog CRUD
+├── inventory/     - stock levels, adjustments, low-stock alerts
+├── suppliers/     - supplier management
+├── purchase_orders/ - purchasing from suppliers
+├── staff/         - employee profiles (HR)
+├── departments/   - org chart (HR)
+├── shifts/        - scheduling + clock-in/out (HR)
+├── payroll/       - payroll runs and records (HR)
+├── time_off/      - leave requests and approvals (HR)
+├── customers/     - customer records, visits, dashboard (CRM)
+├── loyalty/       - points, rewards, config (CRM)
+├── campaigns/     - marketing campaigns (CRM)
+├── segments/      - customer segments (CRM)
+├── invoices/      - invoice CRUD, payments, status (Finance)
+├── expenses/      - expense tracking and categories (Finance)
+├── tax/           - tax config + P&L report (Finance)
+├── workspaces/    - project workspaces (Flow)
+├── projects/      - projects within workspaces (Flow)
+├── tasks/         - tasks + labels (Flow)
+├── pos_orders/    - sales orders (POS)
+├── pos_tables/    - table management (POS)
+├── pos_sessions/  - cash register sessions (POS)
+├── pos_locations/ - store locations (POS)
+└── team/          - staff users, invites, app permissions (Hub)
 ```
 
 ## Backend Documentation
 
 All backend-specific documentation lives in `onion/docs/`:
 
-- [`onion/docs/backend.md`](../../onion/docs/backend.md) — Architecture, handler pattern, middleware, module structure
-- [`onion/docs/database.md`](../../onion/docs/database.md) — Schema overview, migrations, multi-tenancy pattern
+- [`onion/docs/backend.md`](../../onion/docs/backend.md) - Architecture, handler pattern, middleware, module structure
+- [`onion/docs/database.md`](../../onion/docs/database.md) - Schema overview, migrations, multi-tenancy pattern

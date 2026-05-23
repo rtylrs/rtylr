@@ -21,7 +21,7 @@ const PLAN_COLORS: Record<ContractPlan, { bg: string; color: string }> = {
 };
 
 function formatDate(iso: string): string {
-  if (!iso) return '—';
+  if (!iso) return '-';
   return new Date(iso).toLocaleDateString('en-US', {
     month: 'short',
     day: 'numeric',
@@ -470,7 +470,7 @@ const DetailItem: React.FC<{ label: string; value: string }> = ({ label, value }
     <p
       style={{ fontSize: '13px', color: 'var(--hub-text)', margin: 0, textTransform: 'capitalize' }}
     >
-      {value || '—'}
+      {value || '-'}
     </p>
   </div>
 );

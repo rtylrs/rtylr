@@ -32,7 +32,7 @@ const FEATURES: Feature[] = [
     category: 'POS',
     title: 'A register that keeps up with real service.',
     description:
-      'Tickets, tables, splits, tips, and every payment type — card, Apple Pay, cash, gift, comp. Works offline when the WiFi doesn’t. < 200ms per checkout.',
+      'Tickets, tables, splits, tips, and every payment type - card, Apple Pay, cash, gift, comp. Works offline when the WiFi doesn’t. < 200ms per checkout.',
     ctaText: 'Open POS',
     Demo: POSDemo,
   },
@@ -59,7 +59,7 @@ const FEATURES: Feature[] = [
     category: 'CRM',
     title: 'Every customer, remembered.',
     description:
-      'Every POS sale enriches the profile. Segment by spend, visit cadence, birthday, tags. Send the campaign from the same app — no Mailchimp detour required.',
+      'Every POS sale enriches the profile. Segment by spend, visit cadence, birthday, tags. Send the campaign from the same app - no Mailchimp detour required.',
     ctaText: 'Open CRM',
     Demo: CRMDemo,
   },

@@ -21,7 +21,7 @@ export function writeJson<T>(key: string, value: T): void {
   try {
     localStorage.setItem(NS + key, JSON.stringify(value));
   } catch {
-    // ignore — caller treats persistence as best effort
+    // ignore - caller treats persistence as best effort
   }
 }
 

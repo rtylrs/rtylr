@@ -105,7 +105,7 @@ export const FinanceDemo = ({ isActive }: { isActive: boolean }): React.JSX.Elem
               {m.label}
             </div>
             <div style={{ fontSize: 18, fontWeight: 700, color: '#e8e6e1', marginBottom: 4 }}>
-              {shown ? `$${(m.value / 1000).toFixed(1)}k` : '—'}
+              {shown ? `$${(m.value / 1000).toFixed(1)}k` : '-'}
             </div>
             <div style={{ fontSize: 11, color: '#22c55e' }}>{pctChange(m.value, m.prev)} MoM</div>
           </div>

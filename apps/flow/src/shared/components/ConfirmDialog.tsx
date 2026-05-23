@@ -8,7 +8,7 @@ import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogDescription } f
 //     destructive button (use for project / workspace deletion).
 //
 // Stays controlled so callers don't need to thread their own open
-// state — they just call useConfirm() and `await confirm(...)`.
+// state - they just call useConfirm() and `await confirm(...)`.
 
 export interface ConfirmDialogProps {
   open: boolean;

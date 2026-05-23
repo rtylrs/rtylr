@@ -132,7 +132,7 @@ const SegmentDetail: React.FC = () => {
         {[
           { label: 'Customers', value: segment.customerCount.toLocaleString() },
           { label: 'Trend', value: segment.trend },
-          { label: 'Avg Spend', value: '—' },
+          { label: 'Avg Spend', value: '-' },
         ].map((s) => (
           <Card key={s.label}>
             <div

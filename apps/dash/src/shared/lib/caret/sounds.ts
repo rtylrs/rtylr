@@ -37,7 +37,7 @@ function tone(frequency: number, durationMs: number, gain = 0.04): void {
     g.gain.exponentialRampToValueAtTime(0.0001, c.currentTime + durationMs / 1000);
     osc.stop(c.currentTime + durationMs / 1000);
   } catch {
-    // ignore — user hasn't interacted yet, or audio is disabled
+    // ignore - user hasn't interacted yet, or audio is disabled
   }
 }
 

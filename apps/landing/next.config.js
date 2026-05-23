@@ -2,7 +2,7 @@
 
 /**
  * Landing-site Next config. Turbopack is the default bundler in
- * Next 16 — we rely on it.
+ * Next 16 - we rely on it.
  *
  * The previous `webpack: (config) => ...` block defined path
  * aliases (`@app`, `@pages`, `@components`, …) that were declared
@@ -10,7 +10,7 @@
  * (grep across .ts/.tsx/.scss/.css came back empty). Dropping the
  * block is cleaner than migrating dead code to `turbopack.rules` /
  * `turbopack.resolveAlias`. If a future screen needs a short alias,
- * add the single entry to `turbopack.resolveAlias` then — don't
+ * add the single entry to `turbopack.resolveAlias` then - don't
  * re-introduce the kitchen-sink list.
  */
 const nextConfig = {

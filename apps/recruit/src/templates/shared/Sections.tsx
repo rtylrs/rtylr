@@ -131,7 +131,7 @@ const TestimonialBlock: React.FC<{ section: Section }> = ({ section }) => (
     </blockquote>
     {section.mediaUrl && (
       <div className="mt-6 text-sm" style={{ color: 'var(--recruit-muted)' }}>
-        — {section.mediaUrl}
+        - {section.mediaUrl}
       </div>
     )}
   </section>

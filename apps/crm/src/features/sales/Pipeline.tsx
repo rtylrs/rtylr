@@ -269,7 +269,7 @@ const Pipeline: React.FC = () => {
                   ))}
                 </div>
 
-                {/* Add button — only on Cold column */}
+                {/* Add button - only on Cold column */}
                 {key === 'cold' && (
                   <button
                     onClick={() => setCreateOpen(true)}

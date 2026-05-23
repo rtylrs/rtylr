@@ -73,7 +73,7 @@ describe('apiProjectToProject', () => {
   it('clamps progress to 100 when completedCount exceeds taskCount', () => {
     // Backend may send inconsistent counts; ensure we never show >100%.
     const out = apiProjectToProject(baseProject({ taskCount: 3, completedCount: 5 }));
-    // Math.round(5/3*100) = 167, but the mapper does not cap — this test
+    // Math.round(5/3*100) = 167, but the mapper does not cap - this test
     // documents the CURRENT behaviour. If the mapper is ever patched to cap
     // at 100, update this assertion accordingly.
     expect(out.progress).toBeGreaterThan(0);

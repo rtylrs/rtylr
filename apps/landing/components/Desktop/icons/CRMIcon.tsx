@@ -36,9 +36,9 @@ export const CRMIcon = ({ size = 44 }: { size?: number }) => (
       strokeWidth="1"
       strokeDasharray="2 2"
     />
-    {/* Center person — head */}
+    {/* Center person - head */}
     <circle cx="22" cy="12" r="5.5" fill="rgba(255,255,255,0.88)" />
-    {/* Center person — body arc */}
+    {/* Center person - body arc */}
     <path
       d="M12 26c0-5.523 4.477-10 10-10s10 4.477 10 10"
       stroke="rgba(255,255,255,0.88)"

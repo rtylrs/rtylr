@@ -108,7 +108,7 @@ export const WIDGET_CATALOG: WidgetConfig[] = [
   {
     id: 'invoice-aging',
     label: 'Invoice Aging',
-    description: 'A/R buckets — 0-30, 31-60, 61-90, 90+ days',
+    description: 'A/R buckets - 0-30, 31-60, 61-90, 90+ days',
     defaultW: 2,
     defaultH: 3,
     minW: 1,

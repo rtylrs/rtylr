@@ -425,7 +425,7 @@ const DefaultLayout: React.FC<DefaultLayoutProps> = ({ children }) => {
             </AnimatePresence>
           </div>
 
-          {/* Caret AI — inline third column, pushes content left */}
+          {/* Caret AI - inline third column, pushes content left */}
           <div
             style={{
               width: caretOpen ? '360px' : '0px',

@@ -6,7 +6,7 @@ import {
   anniversarySchema,
 } from './staff';
 
-// ─── staff Zod schemas — pure parse/validation tests ─────────────────────────
+// ─── staff Zod schemas - pure parse/validation tests ─────────────────────────
 
 describe('staffMemberSchema', () => {
   it('parses a valid staff member with numeric id', () => {

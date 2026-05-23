@@ -24,7 +24,7 @@ const ResetPassword: React.FC = () => {
     } catch (error) {
       // Surface a generic message rather than leaking provider strings
       // (those leak whether the address exists in Firebase). The error
-      // is intentionally swallowed here — the UI already conveys
+      // is intentionally swallowed here - the UI already conveys
       // failure, and adding telemetry is the P0 ops-hardening job.
       void error;
       setMessage(t('auth.reset.genericError'));

@@ -1,7 +1,7 @@
 {
   "name": "@rtylr/recruit",
   "version": "0.0.0",
-  "description": "Recruit — rtylr careers sites + candidate ATS",
+  "description": "Recruit - rtylr careers sites + candidate ATS",
   "type": "module",
   "scripts": {
     "dev": "vite",

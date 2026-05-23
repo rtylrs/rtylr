@@ -2,7 +2,7 @@ import type { Customization, RecruitCareer } from './types';
 
 /**
  * SEO / analytics helpers for the public careers pages. Everything is
- * DOM-side because the app is a SPA — we don't have SSR. That means:
+ * DOM-side because the app is a SPA - we don't have SSR. That means:
  *   - <title> is set imperatively
  *   - meta tags are upserted (create-or-update)
  *   - GA4 and Meta Pixel scripts are injected once, guarded by marker
@@ -10,7 +10,7 @@ import type { Customization, RecruitCareer } from './types';
  *   - JobPosting structured data is injected per-role
  *
  * Missing IDs are a no-op; a business that never pastes a GA ID sees
- * zero tracking script on their page. That's the design — opt-in.
+ * zero tracking script on their page. That's the design - opt-in.
  */
 
 function upsertMeta(attrKey: 'name' | 'property', attrValue: string, content: string): void {
@@ -51,7 +51,7 @@ export function applySEO(
   const brand = customization.brandName || 'Careers';
   const title =
     context?.pageKind === 'career' && context.careerTitle
-      ? `${context.careerTitle} — ${brand}`
+      ? `${context.careerTitle} - ${brand}`
       : customization.metaTitle || `Careers at ${brand}`;
   document.title = title;
 
@@ -65,7 +65,7 @@ export function applySEO(
   upsertMeta('property', 'og:description', description);
   upsertMeta('property', 'og:type', 'website');
 
-  // OG image — the server-rendered preview at /recruit/public/og. The
+  // OG image - the server-rendered preview at /recruit/public/og. The
   // slug query is set on every call so LinkedIn's crawler gets a fresh
   // image after branding edits.
   const apiBase = (import.meta.env.VITE_API_URL as string | undefined) ?? 'https://api.voxire.com';
@@ -119,7 +119,7 @@ export function loadAnalytics(customization: Customization): void {
  * emitJobPostingJSONLD drops a <script type="application/ld+json"> tag
  * on the page describing the role in schema.org JobPosting shape.
  * Google Jobs ingests these and surfaces listings in search.
- * Idempotent — removes the previous block before inserting the new one.
+ * Idempotent - removes the previous block before inserting the new one.
  */
 export function emitJobPostingJSONLD(career: RecruitCareer, customization: Customization): void {
   if (typeof document === 'undefined') return;
@@ -131,7 +131,7 @@ export function emitJobPostingJSONLD(career: RecruitCareer, customization: Custo
   const apiBase = (import.meta.env.VITE_API_URL as string | undefined) ?? 'https://api.voxire.com';
   const url = `${typeof window !== 'undefined' ? window.location.origin : ''}/${customization.slug}/${career.slug}`;
 
-  // Conservative JSON-LD — only emit fields we actually have values
+  // Conservative JSON-LD - only emit fields we actually have values
   // for. Google tolerates missing recommended fields, but strings
   // filled with empty placeholders look bad in search snippets.
   const payload: Record<string, unknown> = {

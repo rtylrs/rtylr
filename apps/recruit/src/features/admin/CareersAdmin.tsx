@@ -14,7 +14,7 @@ import type { RecruitCareer } from '../../shared/lib/types';
 import CareerEditor from './CareerEditor';
 
 /**
- * CareersAdmin — the HR-facing list of this business's openings. Lets
+ * CareersAdmin - the HR-facing list of this business's openings. Lets
  * an admin create, edit, publish/unpublish, and archive roles. The
  * editor opens as a side drawer rather than a separate route so the
  * list stays visible (and rank-ordered by created_at) while editing.
@@ -93,8 +93,8 @@ const CareersAdmin: React.FC = (): React.JSX.Element => {
                   style={{ borderColor: '#1f1f1f' }}
                 >
                   <td className="px-4 py-3 font-medium">{c.title}</td>
-                  <td className="px-4 py-3 text-sm text-white/70">{c.department || '—'}</td>
-                  <td className="px-4 py-3 text-sm text-white/70">{c.location || '—'}</td>
+                  <td className="px-4 py-3 text-sm text-white/70">{c.department || '-'}</td>
+                  <td className="px-4 py-3 text-sm text-white/70">{c.location || '-'}</td>
                   <td className="px-4 py-3">
                     <span
                       className="inline-block rounded-full px-2.5 py-0.5 text-xs font-medium"

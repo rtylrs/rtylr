@@ -2,7 +2,7 @@ import React from 'react';
 import { APP_URLS } from '@voxire/config';
 
 /**
- * NotFound — rendered when a slug or career slug doesn't resolve.
+ * NotFound - rendered when a slug or career slug doesn't resolve.
  * Deliberately neutral (no brand context to draw on) and gently
  * points back at the marketing site rather than stranding the visitor.
  */

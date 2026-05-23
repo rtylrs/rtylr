@@ -3,7 +3,7 @@ import { useQuery } from '@tanstack/react-query';
 import type { UseQueryResult } from '@tanstack/react-query';
 import { safe } from '../../lib/api';
 
-// No proto type yet — define locally.
+// No proto type yet - define locally.
 export interface ExpiryItem {
   productId: number;
   name: string;

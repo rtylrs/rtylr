@@ -34,7 +34,7 @@ export const AppWindow: React.FC<AppWindowProps> = ({ window: win, animationsEna
         transition={
           animationsEnabled ? { type: 'spring', stiffness: 400, damping: 28 } : { duration: 0 }
         }
-        // z-index lives here — this full-desktop overlay establishes the stacking context
+        // z-index lives here - this full-desktop overlay establishes the stacking context
         // so desktop icons (z=50) are always below all open windows (z=601+)
         style={{ position: 'absolute', inset: 0, pointerEvents: 'none', zIndex: win.zIndex }}
       >

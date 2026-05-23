@@ -342,7 +342,7 @@ const DefaultLayout: React.FC = () => {
               <SidebarNavItem key={item.path} {...item} />
             ))}
 
-            {/* Sales Pipeline — add-on gated */}
+            {/* Sales Pipeline - add-on gated */}
             {salesPipelineEnabled && (
               <>
                 <p
@@ -634,7 +634,7 @@ const DefaultLayout: React.FC = () => {
             </AnimatePresence>
           </div>
 
-          {/* Caret AI — inline third column, pushes content left */}
+          {/* Caret AI - inline third column, pushes content left */}
           <div
             style={{
               width: caretOpen ? '360px' : '0px',

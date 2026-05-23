@@ -2,7 +2,7 @@ import { useQuery } from '@tanstack/react-query';
 import api from '../lib/api';
 
 /**
- * usePublicMenu — hits the new `/pos/public/*` anonymous endpoints
+ * usePublicMenu - hits the new `/pos/public/*` anonymous endpoints
  * the backend exposed this session. Complements the legacy
  * `/menu/{mongoId}` flow; this one is for POS-powered menus keyed by
  * numeric `business_id`.
@@ -168,7 +168,7 @@ export function usePublicMenu(
       if (businessId == null) {
         throw new Error('business_id required');
       }
-      // Two-trip parallel. If either fails the whole bundle fails —
+      // Two-trip parallel. If either fails the whole bundle fails -
       // a menu without a business header renders poorly and vice
       // versa, so we'd rather show the error state once than half-
       // render.

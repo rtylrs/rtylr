@@ -345,7 +345,7 @@ const Subscription: React.FC = (): React.JSX.Element => {
       {/* Tier plans */}
       <SettingSection
         title="Full suite plans"
-        description="Every app, one subscription. Priced per seat — only pay for what you use."
+        description="Every app, one subscription. Priced per seat - only pay for what you use."
       >
         {plansLoading ? (
           <div className="space-y-3">
@@ -376,7 +376,7 @@ const Subscription: React.FC = (): React.JSX.Element => {
       {soloPlans.length > 0 && (
         <SettingSection
           title="Single-app plans"
-          description="Only need one tool? Start with a solo plan — upgrade to the suite anytime."
+          description="Only need one tool? Start with a solo plan - upgrade to the suite anytime."
         >
           <div className="grid grid-cols-1 md:grid-cols-2 gap-3">
             {soloPlans.map((plan) => (

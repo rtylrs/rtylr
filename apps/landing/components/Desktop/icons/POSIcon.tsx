@@ -21,7 +21,7 @@ export const POSIcon = ({ size = 44 }: { size?: number }) => (
     />
     {/* Screen face */}
     <rect x="8" y="8" width="28" height="18" rx="2" fill="#0d1117" />
-    {/* Screen content — receipt lines */}
+    {/* Screen content - receipt lines */}
     <rect x="11" y="11" width="9" height="1.5" rx="0.75" fill="rgba(255,255,255,0.7)" />
     <rect x="11" y="14" width="6" height="1.5" rx="0.75" fill="rgba(255,255,255,0.4)" />
     <rect x="11" y="17" width="7" height="1.5" rx="0.75" fill="rgba(255,255,255,0.4)" />

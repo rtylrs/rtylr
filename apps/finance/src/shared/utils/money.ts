@@ -1,5 +1,5 @@
 // Central money helper. All money fields on the wire are integer minor units
-// (cents). Hooks NEVER divide by 100 inline — they pass the raw minor value
+// (cents). Hooks NEVER divide by 100 inline - they pass the raw minor value
 // through, and display components call `formatMoney` which handles the
 // conversion via `minorToMajor`.
 //

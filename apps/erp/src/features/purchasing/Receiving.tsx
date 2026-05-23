@@ -31,7 +31,7 @@ const Receiving: React.FC = () => {
     setLines([
       {
         sku: order.id.toString(),
-        name: `PO-${order.id} — All items (${order.supplier})`,
+        name: `PO-${order.id} - All items (${order.supplier})`,
         expected: order.items,
         received: order.items,
       },

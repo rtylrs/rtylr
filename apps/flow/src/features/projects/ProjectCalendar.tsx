@@ -8,7 +8,7 @@ import { useProjectRealtime } from '../../shared/lib/useProjectRealtime';
 import ProjectViewTabs from './ProjectViewTabs';
 
 /**
- * ProjectCalendar — month grid with tasks placed on their due_date.
+ * ProjectCalendar - month grid with tasks placed on their due_date.
  * Clicking a task should open its detail (wired via Link in a later pass);
  * for now tasks render as compact chips on the owning day.
  */

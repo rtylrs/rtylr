@@ -329,7 +329,7 @@ const Register: React.FC = (): React.JSX.Element => {
       >
         <div className="flex flex-col gap-3">
           <p className="text-[11px] font-semibold text-[#bbb] uppercase tracking-wider">
-            Full suite — every app, one subscription
+            Full suite - every app, one subscription
           </p>
           <div className="flex flex-col gap-2">
             {tierPlans.map((plan) => (

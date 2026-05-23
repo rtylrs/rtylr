@@ -431,7 +431,7 @@ export const flowApi = {
 
   getSubtasks: (id: string) => safe.get<{ subtasks: ApiSubtask[] }>(`/flow/tasks/${id}/subtasks`),
 
-  // Backend returns { task_id, message } — not the created subtask itself.
+  // Backend returns { task_id, message } - not the created subtask itself.
   // Caller must refetch subtasks to see it appear.
   createSubtask: (taskId: string, data: { title: string; assigneeId?: string }) =>
     safe.post<{ task_id: number; message: string }>(`/flow/tasks/${taskId}/subtasks`, data),

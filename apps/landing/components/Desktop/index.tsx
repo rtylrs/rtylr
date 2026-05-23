@@ -20,7 +20,7 @@ const WALLPAPERS: Record<Wallpaper, string> = {
 };
 
 // Only the window chrome (frame + titlebar) flips between light/dark.
-// Window content always stays dark — apps maintain their own appearance.
+// Window content always stays dark - apps maintain their own appearance.
 const DARK_VARS = {
   '--win-bg': 'rgba(22,22,24,0.97)',
   '--win-border': 'rgba(255,255,255,0.1)',
@@ -90,7 +90,7 @@ export const Desktop: React.FC = () => {
       <WallpaperOverlay wallpaper={wallpaper} />
       <MenuBar />
 
-      {/* Desktop area — below menu bar */}
+      {/* Desktop area - below menu bar */}
       <div
         style={{
           position: 'absolute',

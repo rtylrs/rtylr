@@ -5,7 +5,7 @@ import { safe } from '../../lib/api';
 import { toast } from 'sonner';
 import { useTranslation } from 'react-i18next';
 
-// No proto type yet — define locally.
+// No proto type yet - define locally.
 export interface StockTake {
   id: number;
   name: string;

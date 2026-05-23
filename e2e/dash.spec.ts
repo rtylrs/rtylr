@@ -11,7 +11,7 @@ const DASH_URL = process.env.DASH_URL ?? 'http://localhost:5175';
 async function primeAuthCookie(context: import('@playwright/test').BrowserContext): Promise<void> {
   // The auth flow sets `token` on `.rtylr.com` / `localhost` with path=/.
   // In Playwright the cookie needs an explicit domain that matches the
-  // baseURL — `localhost` for local dev.
+  // baseURL - `localhost` for local dev.
   await context.addCookies([
     {
       name: 'token',
@@ -49,7 +49,7 @@ async function stubDashAPIs(page: import('@playwright/test').Page): Promise<void
   );
 
   // Insights-backed widgets added this session. Stub with empty
-  // shapes — widgets render their empty state, which is the
+  // shapes - widgets render their empty state, which is the
   // behaviour we actually want to verify.
   await page.route('**/insights/revenue/by-app', (route) =>
     route.fulfill({
@@ -73,7 +73,7 @@ async function stubDashAPIs(page: import('@playwright/test').Page): Promise<void
     })
   );
 
-  // Team, activity, notifications, low-stock, orders, invoices —
+  // Team, activity, notifications, low-stock, orders, invoices -
   // generic 200 empty response lets every widget render.
   await page.route(
     /\/(team|activity|notifications|erp\/inventory|erp\/products|hr\/time-off|user\/me|get-configs|business\/me)/,
@@ -96,7 +96,7 @@ test.describe.skip('Dash', () => {
     await page.goto(DASH_URL);
     // Broad smoke: app mounted past Suspense/protected shell when
     // at least one interactive element is on screen. Don't pin to a
-    // specific landmark — the dashboard layout evolves.
+    // specific landmark - the dashboard layout evolves.
     await page.waitForTimeout(1500);
     const count = await page.locator('button, a, h1, h2, [role]').count();
     expect(count).toBeGreaterThan(0);

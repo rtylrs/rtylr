@@ -107,7 +107,7 @@ const Login: React.FC = (): React.JSX.Element => {
     }
   }, [isAuthenticated]);
 
-  // Generic error message regardless of cause — never leak whether the
+  // Generic error message regardless of cause - never leak whether the
   // email exists in our system. The audit (auth.md P1 #5) flagged the
   // earlier "User not found" vs "Wrong password" split as a user-
   // enumeration vector.

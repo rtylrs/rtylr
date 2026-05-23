@@ -6,13 +6,13 @@ export default function Document() {
       <Head>
         <meta charSet="UTF-8" />
 
-        {/* Global canonical — per-page canonicals in HelmetContainer
+        {/* Global canonical - per-page canonicals in HelmetContainer
             override this via next/head merge semantics. The fallback
             is the homepage, which is the right default for any
             not-yet-patched page. */}
         <link rel="canonical" href="https://rtylr.com" />
 
-        {/* PWA manifest — installable on iOS / Android */}
+        {/* PWA manifest - installable on iOS / Android */}
         <link rel="manifest" href="/site.webmanifest" />
         <meta name="theme-color" content="#0a0a0a" />
 

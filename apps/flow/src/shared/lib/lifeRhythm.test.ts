@@ -28,7 +28,7 @@ describe('todayIso', () => {
 });
 
 // ---------------------------------------------------------------------------
-// isDueToday — pin system clock
+// isDueToday - pin system clock
 // ---------------------------------------------------------------------------
 
 describe('isDueToday', () => {
@@ -62,7 +62,7 @@ describe('isDueToday', () => {
 });
 
 // ---------------------------------------------------------------------------
-// mondayStartMs — pinned to a known Saturday
+// mondayStartMs - pinned to a known Saturday
 // ---------------------------------------------------------------------------
 
 describe('mondayStartMs', () => {
@@ -157,13 +157,13 @@ describe('isQuietNow', () => {
     expect(isQuietNow('22:00', '07:00')).toBe(false);
   });
 
-  it('handles overnight quiet window — now after start', () => {
+  it('handles overnight quiet window - now after start', () => {
     vi.useFakeTimers();
     vi.setSystemTime(new Date('2026-05-02T23:30:00')); // 23:30
     expect(isQuietNow('22:00', '07:00')).toBe(true);
   });
 
-  it('handles overnight quiet window — now before end', () => {
+  it('handles overnight quiet window - now before end', () => {
     vi.useFakeTimers();
     vi.setSystemTime(new Date('2026-05-02T06:00:00')); // 06:00
     expect(isQuietNow('22:00', '07:00')).toBe(true);

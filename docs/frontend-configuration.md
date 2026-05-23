@@ -19,13 +19,13 @@ All frontend apps live in `rtylr/rtylr/apps/`. They are React + Vite SPAs (excep
 | Landing | `@rtylr/landing` | `rtylr.com`            | 4200       | Next.js 15    |
 | vbitez  | `vbitez`         | (desktop app, not web) | 5178       | Tauri + React |
 
-> **vbitez is the POS.** It's a Tauri-based desktop app, not deployed to Cloudflare Pages. There is no `@rtylr/pos` web app — all POS functionality lives in vbitez.
+> **vbitez is the POS.** It's a Tauri-based desktop app, not deployed to Cloudflare Pages. There is no `@rtylr/pos` web app - all POS functionality lives in vbitez.
 
 ---
 
 ## Cloudflare Pages Configuration (per app)
 
-Each app is its own Cloudflare Pages project. **The git repo root is already the monorepo root** (it contains `pnpm-workspace.yaml`, `apps/`, `packages/`), so the Cloudflare Pages "Root directory" setting must be **empty** (or `/`). Do NOT set Root directory to `rtylr` — there is no `rtylr/` subdirectory inside the repo.
+Each app is its own Cloudflare Pages project. **The git repo root is already the monorepo root** (it contains `pnpm-workspace.yaml`, `apps/`, `packages/`), so the Cloudflare Pages "Root directory" setting must be **empty** (or `/`). Do NOT set Root directory to `rtylr` - there is no `rtylr/` subdirectory inside the repo.
 
 ### Common Settings (all projects)
 
@@ -58,11 +58,11 @@ Paths are relative to the repo root (= the monorepo root).
 
 > **vbitez is not listed** because it's a desktop Tauri app, not deployed to Cloudflare Pages. vbitez is built and distributed as a native desktop binary via `pnpm --filter vbitez run tauri:build`.
 
-> **Note on build output paths:** These are relative to the Root directory. Since Root directory is `rtylr`, `apps/flow/dist` resolves to the absolute path `rtylr/apps/flow/dist` on the build machine. Do NOT prefix these with `rtylr/` — that would produce `rtylr/rtylr/apps/flow/dist` which does not exist.
+> **Note on build output paths:** These are relative to the Root directory. Since Root directory is `rtylr`, `apps/flow/dist` resolves to the absolute path `rtylr/apps/flow/dist` on the build machine. Do NOT prefix these with `rtylr/` - that would produce `rtylr/rtylr/apps/flow/dist` which does not exist.
 
 ---
 
-## Watch Paths (IMPORTANT — avoid unnecessary builds)
+## Watch Paths (IMPORTANT - avoid unnecessary builds)
 
 By default, Cloudflare Pages rebuilds an app on **every commit**, even if nothing in that app changed. This wastes build minutes. Fix it with **Include watch path** in each Pages project's Build configuration.
 
@@ -103,7 +103,7 @@ Set these in each Cloudflare Pages project's Settings → Environment Variables:
 
 | Variable       | Value                     | Notes                        |
 | -------------- | ------------------------- | ---------------------------- |
-| `VITE_API_URL` | `https://api.voxire.dev/` | All Vite apps — API base URL |
+| `VITE_API_URL` | `https://api.voxire.dev/` | All Vite apps - API base URL |
 
 > **Note:** `NEXT_PUBLIC_API_URL` for the landing app if you expose API calls from Next.js pages.
 
@@ -155,7 +155,7 @@ Auth is cookie-based. The token is set on `.rtylr.com` so all subdomains share i
 setCookie("token", jwt, { domain: ".rtylr.com", path: "/", secure: true, sameSite: "Lax" })
 ```
 
-The Cloudflare Pages apps don't need any special headers for this — it works out of the box since all apps are on `*.rtylr.com`.
+The Cloudflare Pages apps don't need any special headers for this - it works out of the box since all apps are on `*.rtylr.com`.
 
 ---
 
@@ -190,7 +190,7 @@ pnpm turbo build --filter=@rtylr/erp
 
 ## API Client (all apps)
 
-Each app has `src/lib/api.ts` — an axios client that reads the `token` cookie and attaches it as a Bearer token:
+Each app has `src/lib/api.ts` - an axios client that reads the `token` cookie and attaches it as a Bearer token:
 
 ```typescript
 import axios from 'axios';

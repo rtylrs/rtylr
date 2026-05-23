@@ -122,7 +122,7 @@ describe('applyBrand', () => {
   });
 
   it('picks the editorial template defaults for an editorial customization', () => {
-    // Ensures the template-scoped fallback dictionary is wired up —
+    // Ensures the template-scoped fallback dictionary is wired up -
     // editorial bg is #ffffff not the neutral minimal #fafaf9.
     applyBrand(baseCustomization({ template: 'editorial' }));
     expect(document.documentElement.style.getPropertyValue('--recruit-bg')).toBe('#ffffff');

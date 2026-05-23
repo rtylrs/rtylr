@@ -9,14 +9,14 @@ import type { TemplateId, FontPairingId } from '../../shared/lib/types';
 import { FONT_PAIRINGS } from '../../templates/fonts';
 
 /**
- * CustomizationAdmin — edits every knob a business can turn on their
+ * CustomizationAdmin - edits every knob a business can turn on their
  * careers page. Laid out as four tabbed sections so the form isn't a
  * 20-field wall:
  *
- *   Brand      — slug, name, tagline, about, logo, favicon, header HTML
- *   Palette    — template pick + five color fields with a live preview
- *   Typography — font-pairing picker with sample rendering
- *   Media      — hero image for bold/editorial templates
+ *   Brand      - slug, name, tagline, about, logo, favicon, header HTML
+ *   Palette    - template pick + five color fields with a live preview
+ *   Typography - font-pairing picker with sample rendering
+ *   Media      - hero image for bold/editorial templates
  *
  * The Save button lives in a sticky footer so it stays reachable
  * regardless of which tab is open.
@@ -166,7 +166,7 @@ const CustomizationAdmin: React.FC = (): React.JSX.Element => {
       },
       {
         onSuccess: () => toast.success('Careers page saved'),
-        onError: () => toast.error("Couldn't save — check your slug is unique"),
+        onError: () => toast.error("Couldn't save - check your slug is unique"),
       }
     );
   };
@@ -183,7 +183,7 @@ const CustomizationAdmin: React.FC = (): React.JSX.Element => {
 
   return (
     <div className="flex min-h-screen flex-col">
-      {/* Header — title + preview link. Stays pinned above the tabs. */}
+      {/* Header - title + preview link. Stays pinned above the tabs. */}
       <div
         className="sticky top-0 z-20 border-b px-10 py-6"
         style={{ borderColor: '#1f1f1f', background: '#0a0a0a' }}
@@ -261,7 +261,7 @@ const CustomizationAdmin: React.FC = (): React.JSX.Element => {
               </Field>
               <Field
                 label="Custom header HTML"
-                hint="Advanced — raw HTML strip above the brand header"
+                hint="Advanced - raw HTML strip above the brand header"
               >
                 <Textarea value={headerHtml} onChange={setHeaderHtml} rows={3} />
               </Field>
@@ -272,7 +272,7 @@ const CustomizationAdmin: React.FC = (): React.JSX.Element => {
             <Section maxWidth={1000}>
               <div className="flex items-baseline justify-between">
                 <p className="text-sm text-white/60">
-                  Pick a template first — it sets the structural layout. Then tune the palette.
+                  Pick a template first - it sets the structural layout. Then tune the palette.
                   Empty fields fall back to the template's default.
                 </p>
                 <button
@@ -327,7 +327,7 @@ const CustomizationAdmin: React.FC = (): React.JSX.Element => {
                   />
                 </div>
 
-                {/* Live preview — shows a miniature hero so the admin
+                {/* Live preview - shows a miniature hero so the admin
                     can see the palette land without navigating away. */}
                 <PalettePreview
                   primary={primaryColor || '#111111'}
@@ -344,7 +344,7 @@ const CustomizationAdmin: React.FC = (): React.JSX.Element => {
           {tab === 'typography' && (
             <Section maxWidth={720}>
               <p className="text-sm text-white/60">
-                Five curated pairings. Fonts load on demand from Google Fonts — picking one doesn't
+                Five curated pairings. Fonts load on demand from Google Fonts - picking one doesn't
                 block the save.
               </p>
               <div className="mt-6 space-y-3">
@@ -492,7 +492,7 @@ const CustomizationAdmin: React.FC = (): React.JSX.Element => {
                 )}
               </Field>
 
-              {/* OG card preview — a live PNG rendered by the backend
+              {/* OG card preview - a live PNG rendered by the backend
                   from whatever is saved. The admin sees what LinkedIn
                   will scrape when someone shares their URL. */}
               {slug && (
@@ -637,7 +637,7 @@ const ColorField: React.FC<{
 
 /**
  * PalettePreview renders a tiny faux careers-page hero using the live
- * form values. Not pixel-accurate to any one template — the point is
+ * form values. Not pixel-accurate to any one template - the point is
  * showing the admin whether their colors read together before they hit
  * save and alt-tab to their public page.
  */

@@ -17,7 +17,7 @@ interface NavSection {
 // keeping `/docs/:slug` paths from ever 404'ing. The hash-routed
 // non-doc pages (`/api`, `/changelog`) are passed through unchecked.
 // See vault audit docs.md P1: sidebar drift used to require manual
-// sync — this filter flips it to fail-closed at render time.
+// sync - this filter flips it to fail-closed at render time.
 function pruneToContent(items: NavItem[]): NavItem[] {
   return items.filter((it) => {
     if (!it.href.startsWith('/docs/')) return true;

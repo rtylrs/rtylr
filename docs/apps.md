@@ -4,9 +4,9 @@ Each rtylr app is a standalone React + Vite SPA served on its own subdomain. The
 
 ---
 
-## Hub — `hub.rtylr.com` (port 5175)
+## Hub - `hub.rtylr.com` (port 5175)
 
-**Purpose:** Universal command center for business owners and admins. Hub is the primary management app — it controls menus, analytics, QR codes, visual design, settings, and user management for the whole account.
+**Purpose:** Universal command center for business owners and admins. Hub is the primary management app - it controls menus, analytics, QR codes, visual design, settings, and user management for the whole account.
 
 **Allowed roles:** `owner`, `admin`, `operator`
 
@@ -41,7 +41,7 @@ Each rtylr app is a standalone React + Vite SPA served on its own subdomain. The
 
 ---
 
-## Auth — `auth.rtylr.com` (port 5176)
+## Auth - `auth.rtylr.com` (port 5176)
 
 **Purpose:** Cross-app authentication. All apps redirect here when no `token` cookie is found. After login the token is set as a cookie on `.rtylr.com` and the user is redirected back via the `?redirect=<appId>` query parameter.
 
@@ -63,7 +63,7 @@ Each rtylr app is a standalone React + Vite SPA served on its own subdomain. The
 
 ---
 
-## Menu — `menu.rtylr.com` (port 5177)
+## Menu - `menu.rtylr.com` (port 5177)
 
 **Purpose:** Customer-facing digital menu. Publicly accessible (no auth required). Customers scan a QR code and land here to browse the menu, add items, and place orders.
 
@@ -80,7 +80,7 @@ The menu app uses public routes that display the storefront menu. Route structur
 
 ---
 
-## POS — `pos.rtylr.com` (port 5178)
+## POS - `pos.rtylr.com` (port 5178)
 
 **Purpose:** Point-of-sale terminal for floor and counter sales. Staff use this to take orders, manage tables, process payments, and close shifts.
 
@@ -103,7 +103,7 @@ The menu app uses public routes that display the storefront menu. Route structur
 
 ---
 
-## ERP — `erp.rtylr.com` (port 5179)
+## ERP - `erp.rtylr.com` (port 5179)
 
 **Purpose:** Inventory management, purchasing, and supplier relations. Tracks stock levels, cost of goods, and purchase orders.
 
@@ -125,9 +125,9 @@ The menu app uses public routes that display the storefront menu. Route structur
 
 ---
 
-## HR — `hr.rtylr.com` (port 5180)
+## HR - `hr.rtylr.com` (port 5180)
 
-**Purpose:** Human resources management — staff records, shift scheduling, payroll processing, and time-off requests.
+**Purpose:** Human resources management - staff records, shift scheduling, payroll processing, and time-off requests.
 
 **Allowed roles:** `owner`, `admin`, `operator`, `staff` (staff can view their own data)
 
@@ -149,9 +149,9 @@ The menu app uses public routes that display the storefront menu. Route structur
 
 ---
 
-## CRM — `crm.rtylr.com` (port 5181)
+## CRM - `crm.rtylr.com` (port 5181)
 
-**Purpose:** Customer relationship management — customer profiles, loyalty program, marketing campaigns, and audience segments.
+**Purpose:** Customer relationship management - customer profiles, loyalty program, marketing campaigns, and audience segments.
 
 **Allowed roles:** `owner`, `admin`, `operator`
 
@@ -173,9 +173,9 @@ The menu app uses public routes that display the storefront menu. Route structur
 
 ---
 
-## Finance — `finance.rtylr.com` (port 5182)
+## Finance - `finance.rtylr.com` (port 5182)
 
-**Purpose:** Financial management — invoicing, expense tracking, profit & loss reporting, and tax configuration.
+**Purpose:** Financial management - invoicing, expense tracking, profit & loss reporting, and tax configuration.
 
 **Allowed roles:** `owner`, `admin`
 
@@ -197,9 +197,9 @@ The menu app uses public routes that display the storefront menu. Route structur
 
 ---
 
-## Flow — `flow.rtylr.com` (port 5183)
+## Flow - `flow.rtylr.com` (port 5183)
 
-**Purpose:** Project and task management for teams — similar to Linear or Asana. Workspaces contain projects, projects contain tasks, tasks support subtasks and comments.
+**Purpose:** Project and task management for teams - similar to Linear or Asana. Workspaces contain projects, projects contain tasks, tasks support subtasks and comments.
 
 **Allowed roles:** `owner`, `admin`, `operator`, `staff`
 
@@ -223,7 +223,7 @@ The menu app uses public routes that display the storefront menu. Route structur
 
 ---
 
-## Landing — `rtylr.com` (port 4200)
+## Landing - `rtylr.com` (port 4200)
 
 **Purpose:** Marketing site. Built with Next.js 15 (SSR). No authentication required.
 

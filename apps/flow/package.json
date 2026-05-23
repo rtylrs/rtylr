@@ -1,7 +1,7 @@
 {
   "name": "@rtylr/flow",
   "version": "0.0.0",
-  "description": "Flow — Project & Task Manager",
+  "description": "Flow - Project & Task Manager",
   "type": "module",
   "scripts": {
     "dev": "vite",

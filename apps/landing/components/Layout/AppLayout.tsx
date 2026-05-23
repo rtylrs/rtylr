@@ -52,7 +52,7 @@ const AppLayout: React.FC<AppLayoutProps> = ({ children }) => {
 
   return (
     <React.Fragment>
-      <HelmetContainer title={'rtylr — The OS for your business'} favicon={'/favicon.ico'} />
+      <HelmetContainer title={'rtylr - The OS for your business'} favicon={'/favicon.ico'} />
 
       {/* Toolbar and Cookies components temporarily commented out */}
       {/* {(role && role === 'admin') ||

@@ -27,7 +27,7 @@ interface Props {
 }
 
 /**
- * CareerEditor — side drawer for create + edit. Controlled form; the
+ * CareerEditor - side drawer for create + edit. Controlled form; the
  * parent decides whether the payload is a create or an update based on
  * whether `career` was passed in.
  */
@@ -164,7 +164,7 @@ const CareerEditor: React.FC<Props> = ({ career, onClose, onSave }) => {
             <span className="text-sm">Publish this role to the careers page</span>
           </label>
 
-          {/* Custom application questions — only editable after the
+          {/* Custom application questions - only editable after the
               role exists. For new roles, the admin saves first, reopens
               the editor, and then this block shows up. Keeps the
               form-field CRUD logic tied to a known career_id. */}

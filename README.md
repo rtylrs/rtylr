@@ -12,7 +12,7 @@ Frontend monorepo with 13 apps and 13 shared packages. pnpm workspaces + Turbore
 
 | App      | Port | Package           | Description                                                    |
 | -------- | ---- | ----------------- | -------------------------------------------------------------- |
-| Dash     | 5175 | `dash`            | Account center — billing, plan, profile. Entry point from auth |
+| Dash     | 5175 | `dash`            | Account center - billing, plan, profile. Entry point from auth |
 | Auth     | 5176 | `@rtylr/auth`     | Login, register, password reset, invite accept                 |
 | Menu     | 5177 | `@rtylr/menu`     | Customer-facing digital menu with QR codes                     |
 | POS      | 5178 | `vbitez`          | Point of sale terminal (Tauri v2 desktop)                      |
@@ -24,9 +24,9 @@ Frontend monorepo with 13 apps and 13 shared packages. pnpm workspaces + Turbore
 | Recruit  | 5184 | `@rtylr/recruit`  | Candidate careers sites + HR submissions inbox                 |
 | Insights | 5187 | `@rtylr/insights` | Cross-app analytics, revenue, operations, reports              |
 | Docs     | 5186 | `@rtylr/docs`     | Internal + public product documentation                        |
-| Landing  | 4200 | `@rtylr/landing`  | Marketing site — rtylr.com (Next.js 15 static export)          |
+| Landing  | 4200 | `@rtylr/landing`  | Marketing site - rtylr.com (Next.js 15 static export)          |
 
-Apps are standalone — each has its own auth gate (via `@voxire/auth` `AppGuard`),
+Apps are standalone - each has its own auth gate (via `@voxire/auth` `AppGuard`),
 its own settings, and its own in-app team/invite flow. Dash is the account
 center, not a hub-of-apps. A business can buy one app and use it without ever
 touching the others.

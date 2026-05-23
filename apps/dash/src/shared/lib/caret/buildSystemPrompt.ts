@@ -1,7 +1,7 @@
 import { CARET_MODES, type CaretMode } from '@voxire/caret';
 
 /** Assemble the full system prompt the backend should use. Today the
- *  backend constructs this itself — this helper exists so the dash side
+ *  backend constructs this itself - this helper exists so the dash side
  *  can surface a preview/debug view of the actual prompt that will be sent. */
 export interface BuildSystemPromptInput {
   mode: CaretMode;

@@ -6,7 +6,7 @@ import Header from '../shared/Header';
 import Sections from '../shared/Sections';
 import type { IndexProps } from '../resolver';
 
-// Minimal — clean single-column list. Calm neutral palette, strong
+// Minimal - clean single-column list. Calm neutral palette, strong
 // hierarchy. Works for every business without customisation; the
 // default template choice for new customers.
 const MinimalIndex: React.FC<IndexProps> = ({ careers, customization, sections }) => {

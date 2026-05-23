@@ -1,7 +1,7 @@
 import type { Config } from 'tailwindcss';
 
 // The recruit app renders multiple visual templates (minimal, editorial,
-// bold) — the palette below is only the accent default. Each template
+// bold) - the palette below is only the accent default. Each template
 // layers its own tokens on top via CSS custom properties so a business
 // can repaint their careers page without touching Tailwind.
 const config: Config = {

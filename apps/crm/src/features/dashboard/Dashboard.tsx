@@ -417,7 +417,7 @@ const Dashboard: React.FC = () => {
               marginTop: '2px',
             }}
           >
-            {topSegment?.name ?? '—'}
+            {topSegment?.name ?? '-'}
           </div>
           <div style={{ fontSize: '11px', color: 'var(--hub-text-muted)' }}>
             {topSegment

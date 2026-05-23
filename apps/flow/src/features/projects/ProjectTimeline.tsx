@@ -7,7 +7,7 @@ import { useProjectRealtime } from '../../shared/lib/useProjectRealtime';
 import ProjectViewTabs from './ProjectViewTabs';
 
 /**
- * ProjectTimeline — a lightweight Gantt-style view. Each task is drawn as
+ * ProjectTimeline - a lightweight Gantt-style view. Each task is drawn as
  * a bar spanning `start_date` → `due_date`. Tasks without dates are stacked
  * at the top in an "Unscheduled" row so they're visible and draggable in.
  *

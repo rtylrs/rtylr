@@ -16,7 +16,7 @@
  * It accepts either a raw array (legacy) or the enveloped object so the
  * switch is gradual.
  *
- * For a stronger guarantee see `listEndpoint()` below — it bakes the key
+ * For a stronger guarantee see `listEndpoint()` below - it bakes the key
  * into the endpoint declaration so TS catches a wrong key at compile time.
  */
 export function unwrapListResponse<T>(res: unknown, key: string): T[] {

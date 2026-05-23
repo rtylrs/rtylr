@@ -1,10 +1,10 @@
-# CLAUDE.md — rtylr Frontend
+# CLAUDE.md - rtylr Frontend
 
 ## 1. PROJECT IDENTITY
 
-- **Product:** RTYLR — an all-in-one commerce operating system ("Buy rtylr, buy a whole business powered by AI.")
+- **Product:** RTYLR - an all-in-one commerce operating system ("Buy rtylr, buy a whole business powered by AI.")
 - **Repo role:** Frontend monorepo. Contains every customer-facing and operator-facing web app, plus all shared packages.
-- **Built by:** Voxire — Abed El-Fattah Amouneh & Mohammad Homsi
+- **Built by:** Voxire - Abed El-Fattah Amouneh & Mohammad Homsi
 - **Business email:** info@voxire.com
 - **WhatsApp:** +961 3 940 708
 
@@ -41,7 +41,7 @@ If you create a new convention that other developers will need to follow (a new 
 
 ### Updating Documentation
 
-**Always update `rtylr/docs/` when you make architectural or pattern-level changes.** This includes adding a new shared package, changing the API layer, changing the auth flow, adding a new app, or changing how routing works. The `docs/` folder is the authoritative reference for the team — keep it current.
+**Always update `rtylr/docs/` when you make architectural or pattern-level changes.** This includes adding a new shared package, changing the API layer, changing the auth flow, adding a new app, or changing how routing works. The `docs/` folder is the authoritative reference for the team - keep it current.
 
 ---
 
@@ -49,7 +49,7 @@ If you create a new convention that other developers will need to follow (a new 
 
 **Before adding any new npm package**, check whether an existing workspace package or already-installed dependency already covers the need. Check:
 
-1. `packages/ui`, `packages/utils`, `packages/components` — shared primitives
+1. `packages/ui`, `packages/utils`, `packages/components` - shared primitives
 2. The app's own `package.json` devDependencies and dependencies
 3. The root `package.json` shared devDependencies
 
@@ -63,7 +63,7 @@ Before adding any new library, check its size on [bundlephobia.com](https://bund
 // ❌ imports the entire lodash bundle (~72 kB gzipped)
 import _ from 'lodash';
 
-// ✅ tree-shakeable — only debounce is bundled
+// ✅ tree-shakeable - only debounce is bundled
 import debounce from 'lodash/debounce';
 ```
 
@@ -78,47 +78,47 @@ Run `pnpm --filter <app> build` and inspect the Vite output chunk sizes after ad
 ```
 rtylr/
 ├── apps/
-│   ├── hub/          Port 5175 — Command center (menu, orders, analytics, settings, team)
-│   ├── auth/         Port 5176 — Cross-app SSO login/register
-│   ├── menu/         Port 5177 — Customer-facing digital menu (public, no auth)
-│   ├── vbitez/       POS — Tauri desktop app (not a web app; built as native binary)
-│   ├── erp/          Port 5179 — Inventory & purchasing
-│   ├── hr/           Port 5180 — Staff, shifts, payroll
-│   ├── crm/          Port 5181 — Customers, loyalty, campaigns
-│   ├── finance/      Port 5182 — Invoices, expenses, P&L
-│   ├── flow/         Port 5183 — Projects & tasks
+│   ├── hub/          Port 5175 - Command center (menu, orders, analytics, settings, team)
+│   ├── auth/         Port 5176 - Cross-app SSO login/register
+│   ├── menu/         Port 5177 - Customer-facing digital menu (public, no auth)
+│   ├── vbitez/       POS - Tauri desktop app (not a web app; built as native binary)
+│   ├── erp/          Port 5179 - Inventory & purchasing
+│   ├── hr/           Port 5180 - Staff, shifts, payroll
+│   ├── crm/          Port 5181 - Customers, loyalty, campaigns
+│   ├── finance/      Port 5182 - Invoices, expenses, P&L
+│   ├── flow/         Port 5183 - Projects & tasks
 │   ├── docs/         Internal docs viewer app
 │   ├── insights/     Analytics deep-dive app
-│   └── landing/      Port 4200 — Marketing site (Next.js 15 SSG)
+│   └── landing/      Port 4200 - Marketing site (Next.js 15 SSG)
 ├── packages/
-│   ├── api/          @voxire/api      — Axios client, safeFetch, ResultAsync
-│   ├── auth/         @voxire/auth     — ProtectedRoute, RoleGuard, useUserStore, cookie helpers
-│   ├── types/        @voxire/types    — Shared TypeScript interfaces (no runtime)
-│   ├── config/       @voxire/config   — APP_URLS, APP_CONFIG (ports, domains, allowed roles)
-│   ├── ui/           @voxire/ui       — Shared low-level components
-│   ├── components/   @voxire/components — Higher-level shared components
-│   ├── assets/       @voxire/assets   — Shared static assets
-│   ├── menu/         @voxire/menu     — Shared menu display components
-│   ├── tailwind-config/ @voxire/tailwind-config — Shared Tailwind preset
-│   ├── utils/        @voxire/utils    — Shared utility functions
-│   └── contracts/    @voxire/contracts — Re-exported voxie generated TypeScript types
-├── voxie/            Git submodule — proto contracts + generated TS/Go types
+│   ├── api/          @voxire/api      - Axios client, safeFetch, ResultAsync
+│   ├── auth/         @voxire/auth     - ProtectedRoute, RoleGuard, useUserStore, cookie helpers
+│   ├── types/        @voxire/types    - Shared TypeScript interfaces (no runtime)
+│   ├── config/       @voxire/config   - APP_URLS, APP_CONFIG (ports, domains, allowed roles)
+│   ├── ui/           @voxire/ui       - Shared low-level components
+│   ├── components/   @voxire/components - Higher-level shared components
+│   ├── assets/       @voxire/assets   - Shared static assets
+│   ├── menu/         @voxire/menu     - Shared menu display components
+│   ├── tailwind-config/ @voxire/tailwind-config - Shared Tailwind preset
+│   ├── utils/        @voxire/utils    - Shared utility functions
+│   └── contracts/    @voxire/contracts - Re-exported voxie generated TypeScript types
+├── voxie/            Git submodule - proto contracts + generated TS/Go types
 ├── docs/             Architecture docs + ADRs (authoritative)
 ├── e2e/              Playwright e2e tests
 ├── test/             Shared test utilities
 ├── pnpm-workspace.yaml
 ├── turbo.json
 ├── tsconfig.base.json
-└── package.json      Root — shared devDependencies and scripts
+└── package.json      Root - shared devDependencies and scripts
 ```
 
-### App Structure (Vite apps — all except landing)
+### App Structure (Vite apps - all except landing)
 
 Each Vite app follows this internal structure:
 
 ```
 apps/<name>/src/
-├── features/         Feature modules — the most important directory
+├── features/         Feature modules - the most important directory
 │   └── <feature>/
 │       ├── <Feature>.tsx         Main screen component
 │       ├── <SubScreen>.tsx       Additional screens
@@ -138,8 +138,8 @@ apps/<name>/src/
 │   └── AppRoutes.tsx Route definitions (RouteObject[])
 ├── layouts/          Layout wrappers (AppLayout, NoSidebarLayout, etc.)
 ├── locales/          i18n JSON files (en.json, ar.json, fr.json)
-├── App.tsx           Root component — routes, ChartJS init, i18n setup
-└── main.tsx          Entry point — React root, QueryClient, BrowserRouter
+├── App.tsx           Root component - routes, ChartJS init, i18n setup
+└── main.tsx          Entry point - React root, QueryClient, BrowserRouter
 ```
 
 ### Naming Conventions
@@ -185,12 +185,12 @@ Use this decision rule when creating a new component:
 
 Don't duplicate a component that already exists in a shared package. Read the shared packages before building new UI.
 
-### Lazy Loading — REQUIRED
+### Lazy Loading - REQUIRED
 
 **All route-level components must be lazy-loaded.** This keeps the initial bundle small and only loads code when the user navigates to that route.
 
 ```tsx
-// ✅ correct — lazy load every route component
+// ✅ correct - lazy load every route component
 const Team = React.lazy(() => import('../features/team/Team'));
 const TeamMember = React.lazy(() => import('../features/team/TeamMember'));
 
@@ -202,18 +202,18 @@ const TeamMember = React.lazy(() => import('../features/team/TeamMember'));
   </Routes>
 </Suspense>;
 
-// ❌ wrong — eager import bloats the initial bundle
+// ❌ wrong - eager import bloats the initial bundle
 import Team from '../features/team/Team';
 ```
 
-Never eagerly import a page-level component. Layout components (`AppLayout`, etc.) are the exception — they are always needed and can be eagerly imported.
+Never eagerly import a page-level component. Layout components (`AppLayout`, etc.) are the exception - they are always needed and can be eagerly imported.
 
 ### Error Boundary Placement
 
 Every top-level route group must be wrapped in an `<ErrorBoundary>`. This prevents a crash in one feature from taking down the entire app.
 
 ```tsx
-// Wrap the route tree — one boundary per app at minimum
+// Wrap the route tree - one boundary per app at minimum
 <ErrorBoundary fallback={<AppErrorFallback />}>
   <Suspense fallback={<PageLoader />}>
     <AppRoutes />
@@ -226,7 +226,7 @@ Add a second, tighter boundary around any feature that loads third-party integra
 **Dashboard widgets must each have their own `<ErrorBoundary>`.** A shared boundary around all widgets means one broken widget crashes the entire dashboard. Wrap every widget individually:
 
 ```tsx
-// ✅ correct — fault-isolated widgets
+// ✅ correct - fault-isolated widgets
 <ErrorBoundary fallback={<WidgetError label={t('dashboard.widgets.errorFallback')} />}>
   <HeadcountWidget />
 </ErrorBoundary>
@@ -234,7 +234,7 @@ Add a second, tighter boundary around any feature that loads third-party integra
   <PayrollCostWidget />
 </ErrorBoundary>
 
-// ❌ wrong — one crash kills everything
+// ❌ wrong - one crash kills everything
 <ErrorBoundary fallback={<DashboardError />}>
   <HeadcountWidget />
   <PayrollCostWidget />
@@ -337,7 +337,7 @@ const configSchema = z.object({ maintanance: z.boolean(), ... });
 const parsed = configSchema.parse(response.data.config);
 ```
 
-### Internationalisation (i18n) — NON-NEGOTIABLE
+### Internationalisation (i18n) - NON-NEGOTIABLE
 
 **All user-facing strings must go through i18next.** No hardcoded English text in JSX or component logic.
 
@@ -346,7 +346,7 @@ const parsed = configSchema.parse(response.data.config);
 const { t } = useTranslation();
 return <button>{t('team.inviteUser')}</button>;
 
-// ❌ wrong — hardcoded string
+// ❌ wrong - hardcoded string
 return <button>Invite User</button>;
 ```
 
@@ -360,7 +360,7 @@ Never ship a new UI element without a translation key, even in early development
 
 ### Authentication Pattern
 
-- `ProtectedRoute` from `@voxire/auth` wraps each app's entry. Reads the `token` cookie synchronously — no network call.
+- `ProtectedRoute` from `@voxire/auth` wraps each app's entry. Reads the `token` cookie synchronously - no network call.
 - `RoleGuard` from `@voxire/auth` gates UI elements by role.
 - `useUserStore` from `@voxire/auth` is the single source of truth for user identity.
 - **Never read the token from a store or prop.** Always read it via the cookie mechanism in `@voxire/api` or `@voxire/auth`.
@@ -382,13 +382,13 @@ Hub wraps its entire route tree in a `<BusinessRoute>` component (see `apps/hub/
 - `@voxire/types` contains non-proto types (legacy and shared domain types).
 - Never copy-paste type shapes from contracts. Import them.
 
-### Landing App — SSG Limitations
+### Landing App - SSG Limitations
 
 `apps/landing/` uses Next.js 15 with `output: 'export'`. This means:
 
 - **No server-side rendering.** No `getServerSideProps`. No API routes (`pages/api/`).
 - **No Next.js Middleware.** No `middleware.ts`.
-- **No automatic image optimization** via `<Image>` with external URLs — use static imports or CDN URLs only.
+- **No automatic image optimization** via `<Image>` with external URLs - use static imports or CDN URLs only.
 - All pages are pre-rendered at build time as static HTML. Data fetching must happen client-side or at build time via `getStaticProps`.
 
 Do not add server-dependent Next.js features to the landing app. It is a static site.
@@ -409,7 +409,7 @@ Do not add server-dependent Next.js features to the landing app. It is a static 
 | `/pricing`  | `pages/pricing/index.tsx`  |
 | `/404`      | `pages/404.tsx`            |
 
-> `pages/homepage-legacy/` is a legacy version — do not add new code there.
+> `pages/homepage-legacy/` is a legacy version - do not add new code there.
 
 ### Hub (`apps/hub/`, port 5175)
 
@@ -476,10 +476,10 @@ admin: { DEFAULT: '#262626', bg: 'var(--hub-bg)', border: 'var(--hub-border)' }
 
 CSS variables are set at runtime based on the business's chosen theme (loaded from the `themes` table).
 
-### Mobile-First — NON-NEGOTIABLE
+### Mobile-First - NON-NEGOTIABLE
 
 - Write CSS mobile-first: breakpoints use `min-width` only. **No `max-width` queries on new code.**
-- All `<input>`, `<select>`, `<textarea>` elements must have `font-size: 16px` minimum — prevents iOS auto-zoom.
+- All `<input>`, `<select>`, `<textarea>` elements must have `font-size: 16px` minimum - prevents iOS auto-zoom.
 - All interactive touch targets must be ≥ 44×44px.
 
 ### Accessibility (a11y) Requirements
@@ -487,9 +487,9 @@ CSS variables are set at runtime based on the business's chosen theme (loaded fr
 Every interactive element must be keyboard-navigable and screen-reader accessible:
 
 - All `<button>` and `<a>` elements must have a visible label or `aria-label`. Never use an icon-only button without `aria-label`.
-- Modals must trap focus when open and restore focus to the trigger when closed. Use the Radix `Dialog` primitive — it handles this automatically.
+- Modals must trap focus when open and restore focus to the trigger when closed. Use the Radix `Dialog` primitive - it handles this automatically.
 - Color contrast must meet WCAG 2.1 AA: 4.5:1 for normal text, 3:1 for large text and UI components.
-- Form inputs must have associated `<label>` elements (or `aria-label`). Never rely on `placeholder` as the only label — placeholders disappear on input.
+- Form inputs must have associated `<label>` elements (or `aria-label`). Never rely on `placeholder` as the only label - placeholders disappear on input.
 - Images that convey information need descriptive `alt` text. Decorative images use `alt=""`.
 - Loading states must announce themselves to screen readers: use `aria-live="polite"` on the container that updates.
 
@@ -504,14 +504,14 @@ Do not ship a new screen or component without verifying it is navigable by keybo
 
 ---
 
-## 7. CODE QUALITY RULES — NON-NEGOTIABLE
+## 7. CODE QUALITY RULES - NON-NEGOTIABLE
 
 1. **TypeScript strict mode is ON** (`"strict": true` in all tsconfigs). Never use `any`, `@ts-ignore`, or unsafe type assertions. If unavoidable, add a comment explaining why.
 2. **No commented-out code** in commits. Delete dead code.
 3. **No `console.log`** in committed code. Use structured error reporting or remove.
 4. **Every function must have an explicit return type.** `const foo = (): string => { ... }` not `const foo = () => { ... }`.
 5. **Zod validation** on all external data boundaries: API responses, form inputs, env vars, localStorage reads.
-6. **Never bypass the `safeFetch` / `ResultAsync` pattern** for API calls. No raw `axios.get(...)` in components or hooks — always go through `safe.get/post/...`.
+6. **Never bypass the `safeFetch` / `ResultAsync` pattern** for API calls. No raw `axios.get(...)` in components or hooks - always go through `safe.get/post/...`.
 7. **No direct DOM manipulation** outside of custom hooks.
 8. **No inline styles** except for dynamic CSS variable values that cannot be expressed in Tailwind.
 9. **No hardcoded hex color literals anywhere in component code.** Every color must reference a CSS custom property (`var(--hr-status-approved)`, `var(--hr-error)`, etc.) defined in `globals.css`. Never write `#10b981`, `#ef4444`, `color: '#8b5cf6'`, or any hex string inline. For opacity variants where the Pill component uses string concatenation, use `color-mix(in srgb, var(--hr-xxx) 30%, transparent)` via the `style` prop. If a new semantic color is needed, add it to `:root` in `globals.css` first, then reference it.
@@ -524,18 +524,18 @@ Do not ship a new screen or component without verifying it is navigable by keybo
 
 ## 8. CONFIGURABILITY RULES
 
-RTYLR is a multi-tenant SaaS product sold to restaurants, agencies, law firms, retail groups, and every other type of business. **This shapes every UI decision.** A restaurant and a law firm have different workflows, different terminology, different policies — but both subscribe to the same app. Every feature the frontend renders must be driven by the company's configuration, not by assumptions we bake into the code.
+RTYLR is a multi-tenant SaaS product sold to restaurants, agencies, law firms, retail groups, and every other type of business. **This shapes every UI decision.** A restaurant and a law firm have different workflows, different terminology, different policies - but both subscribe to the same app. Every feature the frontend renders must be driven by the company's configuration, not by assumptions we bake into the code.
 
 ### The developer checklist
 
 Before hardcoding any behavior, ask both of these questions. If either answer is yes, the value or behavior must come from company config, not from a constant or conditional in the component:
 
-1. **"Would a restaurant and a law firm want this to behave differently?"** — If two types of businesses would expect different behavior, it is not a product rule. It is a configuration.
-2. **"Is this a business rule or a product rule?"** — Product rules (routing, auth flow, pagination) are fixed. Business rules (role names, approval flows, visible features, leave types, notification preferences) are always configurable.
+1. **"Would a restaurant and a law firm want this to behave differently?"** - If two types of businesses would expect different behavior, it is not a product rule. It is a configuration.
+2. **"Is this a business rule or a product rule?"** - Product rules (routing, auth flow, pagination) are fixed. Business rules (role names, approval flows, visible features, leave types, notification preferences) are always configurable.
 
-If you can answer "no" to both with confidence, hardcoding is acceptable — but add a comment explaining the decision so the next developer understands it was intentional.
+If you can answer "no" to both with confidence, hardcoding is acceptable - but add a comment explaining the decision so the next developer understands it was intentional.
 
-### Things that must never be hardcoded — ever
+### Things that must never be hardcoded - ever
 
 ```tsx
 // ❌ NEVER hardcode a role name in permission logic
@@ -576,14 +576,14 @@ Every RTYLR app has a config guard component (e.g. `BusinessRoute` in Hub, `HRCo
 2. Stores the config in a Zustand store with `persist` so it survives page refresh.
 3. Redirects to the setup wizard if config is incomplete.
 
-Feature components read from this store to decide what to show — they never make their own assumptions about what the company has configured.
+Feature components read from this store to decide what to show - they never make their own assumptions about what the company has configured.
 
 ### Fallback behavior when config is missing
 
 A company may not have finished their setup. The UI must handle this gracefully:
 
 - **Non-critical features** (dashboard widgets, display preferences, optional analytics): render with a sensible default or show an empty state. Do not block the user or show an error.
-- **Critical features** (payroll run, timesheet submission, leave requests that require a configured policy): show a clear, actionable prompt — "Set up your payroll configuration first" with a link to Settings. Do not allow the operation to proceed silently with assumed values when money or compliance is involved.
+- **Critical features** (payroll run, timesheet submission, leave requests that require a configured policy): show a clear, actionable prompt - "Set up your payroll configuration first" with a link to Settings. Do not allow the operation to proceed silently with assumed values when money or compliance is involved.
 
 ```tsx
 // Non-critical: empty state, not an error
@@ -613,7 +613,7 @@ const RunPayrollButton = (): React.JSX.Element => {
 ### Scope and the boy scout rule
 
 - **All new code** must follow these rules without exception.
-- **Existing code**: when you open a file to make any change, fix any hardcoded business rule you encounter in that file before committing. Leave the code more configurable than you found it. You are not required to audit the entire codebase — only the files you touch.
+- **Existing code**: when you open a file to make any change, fix any hardcoded business rule you encounter in that file before committing. Leave the code more configurable than you found it. You are not required to audit the entire codebase - only the files you touch.
 - This is a **strong guideline**. If hardcoding is genuinely right (a true product constant that will never differ between customers), document the reason in a comment. Never use this exception for business rules.
 
 ---
@@ -624,7 +624,7 @@ Never commit secrets. Never expose sensitive data to the browser. Follow these r
 
 - **No secrets in code.** API keys, JWT secrets, DB passwords, and tokens must live in `.env` files and never be committed. Use `VITE_` prefix only for values that are intentionally public (they are inlined into the bundle).
 - **Never trust `localStorage` for auth.** The JWT token is stored in an `httpOnly` cookie managed by the backend. Never store tokens in `localStorage`, `sessionStorage`, or Zustand.
-- **Validate on the server, not just the client.** Frontend validation (Zod, form rules) is for UX only — the backend must independently validate all inputs. Never skip server-side validation because the frontend already checked.
+- **Validate on the server, not just the client.** Frontend validation (Zod, form rules) is for UX only - the backend must independently validate all inputs. Never skip server-side validation because the frontend already checked.
 - **No `dangerouslySetInnerHTML`** with user-supplied content. This is an XSS vector. If rich text rendering is required, use a sanitised rendering library (e.g., DOMPurify) and document the decision.
 - **Never log PII** (email, phone, user IDs) to the browser console in committed code.
 - **Dependency audits:** Run `pnpm audit` periodically and before major releases. Address high/critical vulnerabilities before shipping.
@@ -646,14 +646,14 @@ Never commit secrets. Never expose sensitive data to the browser. Follow these r
 
 | Issue                                                                                                    | File / Location                           | Priority |
 | -------------------------------------------------------------------------------------------------------- | ----------------------------------------- | -------- |
-| `tsconfig.base.json` lacks `strict: true` at root level — individual app tsconfigs must set it           | `tsconfig.base.json`                      | High     |
+| `tsconfig.base.json` lacks `strict: true` at root level - individual app tsconfigs must set it           | `tsconfig.base.json`                      | High     |
 | `console.error` / `console.log` calls exist in query hooks (e.g., `useGetConfig`)                        | `apps/hub/src/shared/hooks/queries/`      | Medium   |
-| Hub's `AppRoutes.tsx` has a `.jsx` import (`MenuWithId.jsx`) — mixed extensions                          | `apps/hub/src/routes/AppRoutes.tsx`       | Low      |
-| Legacy `pages/homepage-legacy/` directory in landing — dead code not removed                             | `apps/landing/pages/homepage-legacy/`     | Low      |
-| Menu app uses Redux (legacy, not Zustand) — inconsistent with all other apps                             | `apps/menu/`                              | Medium   |
-| `useUserStore` in Hub has `[key: string]: unknown` index signature on `StoredUser` — weakens type safety | `apps/hub/src/shared/stores/userStore.ts` | Medium   |
+| Hub's `AppRoutes.tsx` has a `.jsx` import (`MenuWithId.jsx`) - mixed extensions                          | `apps/hub/src/routes/AppRoutes.tsx`       | Low      |
+| Legacy `pages/homepage-legacy/` directory in landing - dead code not removed                             | `apps/landing/pages/homepage-legacy/`     | Low      |
+| Menu app uses Redux (legacy, not Zustand) - inconsistent with all other apps                             | `apps/menu/`                              | Medium   |
+| `useUserStore` in Hub has `[key: string]: unknown` index signature on `StoredUser` - weakens type safety | `apps/hub/src/shared/stores/userStore.ts` | Medium   |
 | `vbitez` (POS desktop app) is on same port 5178 as POS web entry in some configs                         | Cloudflare config docs                    | Low      |
-| No `.env.example` visible in repo root — environment setup requires reading docs                         | Root                                      | Medium   |
+| No `.env.example` visible in repo root - environment setup requires reading docs                         | Root                                      | Medium   |
 
 ---
 
@@ -678,18 +678,18 @@ Run these steps at the start of every new session before touching any file:
 1. Check Cloudflare Pages dashboard → [FILL IN: your Cloudflare Pages project URL] → Deployments tab. Look for a failed or rolled-back deployment.
 2. Roll back to the last known good deployment: Cloudflare Pages → Deployments → find the last green deploy → "Retry deployment" or pin it as the active deployment.
 3. Check the browser console for JavaScript errors. A white screen in production is almost always a runtime error in a component that lacks an `<ErrorBoundary>`.
-4. Check `pnpm typecheck` and `pnpm build` locally on the `main` branch — if either fails, the deploy pipeline may have bypassed type errors.
+4. Check `pnpm typecheck` and `pnpm build` locally on the `main` branch - if either fails, the deploy pipeline may have bypassed type errors.
 
 ### API errors affecting all users (frontend side)
 
 1. Open the browser Network tab and check whether the failing requests are returning 5xx from `api.voxire.dev` or failing in the frontend itself.
-2. If 5xx: the issue is in the backend — follow the `onion` incident guide.
+2. If 5xx: the issue is in the backend - follow the `onion` incident guide.
 3. If the request never leaves the browser (CORS error, network error): check that `VITE_API_URL` is set correctly in the Cloudflare Pages environment variables for this project.
 
 ### Monitoring
 
 - **Error tracking:** Axiom + PostHog are planned but not yet configured. Until they are live, check Cloudflare Pages deployment logs and the browser console for client-side errors.
-- **Escalation:** Contact Abed El-Fattah Amouneh directly — info@voxire.com / +961 3 940 708.
+- **Escalation:** Contact Abed El-Fattah Amouneh directly - info@voxire.com / +961 3 940 708.
 
 ---
 

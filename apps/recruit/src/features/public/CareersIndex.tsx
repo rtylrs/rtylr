@@ -7,7 +7,7 @@ import { applySEO, loadAnalytics } from '../../shared/lib/seo';
 import NotFound from './NotFound';
 
 /**
- * CareersIndex — the list page at recruit.rtylr.com/:slug.
+ * CareersIndex - the list page at recruit.rtylr.com/:slug.
  *
  * Resolves the tenant by slug (the backend does the mapping, we just
  * ask), applies the brand color to the page-wide CSS variable, and

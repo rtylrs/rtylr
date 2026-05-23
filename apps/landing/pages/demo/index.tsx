@@ -129,7 +129,7 @@ const DemoPage = (): JSX.Element => {
           <div className={styles.container}>
             <div className={styles.formWrapper}>
               {submitted ? (
-                // Inline success state — nicer than a native alert().
+                // Inline success state - nicer than a native alert().
                 // Keeps the page branded and tells the user the exact
                 // next step so they're not left wondering.
                 <>

@@ -1,7 +1,7 @@
 import { test, expect } from './fixtures';
 
 /**
- * Recruit admin e2e — complements recruit-apply.spec.ts which only
+ * Recruit admin e2e - complements recruit-apply.spec.ts which only
  * exercises the public candidate flow. This one cookie-primes past
  * AppGuard, stubs the admin endpoints, and walks the list +
  * status-change buttons that HR recruiters use.
@@ -78,7 +78,7 @@ async function stubRecruitAdminAPIs(page: import('@playwright/test').Page): Prom
     })
   );
 
-  // Status-change PUT — asserts the button actually fires.
+  // Status-change PUT - asserts the button actually fires.
   await page.route('**/recruit/submissions/status', (route) =>
     route.fulfill({
       status: 200,
@@ -95,7 +95,7 @@ async function stubRecruitAdminAPIs(page: import('@playwright/test').Page): Prom
     })
   );
 
-  // Fall-through for anything else — return empty JSON so no widget
+  // Fall-through for anything else - return empty JSON so no widget
   // blocks on network errors.
   await page.route(/\/recruit\/.*/, (route) => {
     if (route.request().url().includes('public')) return route.continue();

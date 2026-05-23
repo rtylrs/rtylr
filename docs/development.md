@@ -8,7 +8,7 @@
 | pnpm    | 10.33.0 | `npm install -g pnpm@10.33.0` |
 | Go      | 1.25+   | https://go.dev/dl/            |
 | MySQL   | 8.0+    | Local or remote               |
-| Redis   | 7+      | Optional — can be disabled    |
+| Redis   | 7+      | Optional - can be disabled    |
 
 ---
 

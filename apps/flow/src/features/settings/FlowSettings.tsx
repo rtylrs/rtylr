@@ -867,7 +867,7 @@ const TeamSection: React.FC = () => {
                 <option value="">Select a team member…</option>
                 {candidates.map((m) => (
                   <option key={m.id} value={m.id}>
-                    {m.name} — {m.email}
+                    {m.name} - {m.email}
                   </option>
                 ))}
               </select>

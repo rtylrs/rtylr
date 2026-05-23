@@ -355,7 +355,7 @@
     "flowImport": {
       "importing": "Importing from Flow…",
       "success": "Imported {{imported}} entries",
-      "successWithSkipped": "Imported {{imported}} entries ({{skipped}} skipped — already imported)",
+      "successWithSkipped": "Imported {{imported}} entries ({{skipped}} skipped - already imported)",
       "noEntries": "No new entries to import from Flow",
       "error": "Failed to import from Flow"
     },
@@ -661,7 +661,7 @@
       "enableDeductions": "Enable deductions",
       "enableBonuses": "Enable bonuses",
       "saved": "Payroll configuration saved",
-      "notConfiguredNotice": "Payroll is not yet configured — fill in the form to get started"
+      "notConfiguredNotice": "Payroll is not yet configured - fill in the form to get started"
     }
   },
   "shifts": {

@@ -116,7 +116,7 @@ async function stubBaseRoutes(page: Page): Promise<void> {
     })
   );
 
-  // Customers list — empty, not under test here.
+  // Customers list - empty, not under test here.
   await page.route(/\/crm\/customers(\?|$)/, (route: Route) =>
     route.fulfill({
       status: 200,
@@ -293,7 +293,7 @@ test.describe.skip('CRM segments list flow', () => {
       })
     );
 
-    // Segments list — returns our VIP Customers segment.
+    // Segments list - returns our VIP Customers segment.
     await page.route(/\/crm\/segments(\?|$)/, (route: Route) =>
       route.fulfill({
         status: 200,
@@ -350,7 +350,7 @@ test.describe.skip('CRM customer import UI', () => {
       })
     );
 
-    // Import endpoint stub — captures the POST body for later assertion.
+    // Import endpoint stub - captures the POST body for later assertion.
     await page.route(/\/crm\/customers\/import$/, (route: Route) =>
       route.fulfill({
         status: 200,
@@ -363,7 +363,7 @@ test.describe.skip('CRM customer import UI', () => {
   test('import page renders the CSV upload area', async ({ page }) => {
     await page.goto(`${CRM_URL}/customers/import`);
 
-    // ImportCustomers renders a file input and a heading — assert the UI is
+    // ImportCustomers renders a file input and a heading - assert the UI is
     // present without triggering an actual file upload (which requires OS
     // picker interaction not supported in Playwright headless).
     await expect(page.getByRole('heading', { name: /import customers/i })).toBeVisible({

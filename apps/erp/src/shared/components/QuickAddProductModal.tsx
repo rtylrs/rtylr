@@ -100,7 +100,7 @@ const QuickAddProductModal: React.FC<QuickAddProductModalProps> = ({
         resetAndClose();
       },
       onError: () => {
-        // Surface a real failure toast instead of faking success — the
+        // Surface a real failure toast instead of faking success - the
         // previous behaviour masked backend outages and lost user data.
         toast.error(t('erp.products.toast.createFailed'));
       },

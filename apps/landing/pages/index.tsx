@@ -14,7 +14,7 @@ import IntegrationsSection from '../components/home/IntegrationsSection/Integrat
 import CTASection from '../components/home/CTASection/CTASection';
 import styles from './index.module.scss';
 
-// DesktopOrWebsite handles mode detection client-side — never SSR
+// DesktopOrWebsite handles mode detection client-side - never SSR
 // Bots crawl the static HTML content rendered below via SSG
 const DesktopOrWebsite = dynamic(
   () =>
@@ -62,11 +62,11 @@ const HomePage = (): JSX.Element => {
   return (
     <>
       <HelmetContainer {...SEO_PROPS} />
-      {/* Static HTML for SEO — always in the DOM, hidden in OS mode by the overlay */}
+      {/* Static HTML for SEO - always in the DOM, hidden in OS mode by the overlay */}
       <noscript>
         <WebsiteContent />
       </noscript>
-      {/* Client-side mode switcher — renders Desktop or Website */}
+      {/* Client-side mode switcher - renders Desktop or Website */}
       <DesktopOrWebsite websiteContent={<WebsiteContent />} />
     </>
   );

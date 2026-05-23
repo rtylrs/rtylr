@@ -124,7 +124,7 @@ const Domain: React.FC = () => {
         </CardContent>
       </Card>
 
-      {/* Section 2, Custom Domain — disabled */}
+      {/* Section 2, Custom Domain - disabled */}
       <div className="opacity-50 pointer-events-none select-none">
         <Card>
           <CardHeader>

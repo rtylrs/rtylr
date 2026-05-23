@@ -10,7 +10,7 @@ import type { ApiTask } from '../services/flowApi';
  *     to disappear after drag-to-move (sectionId mismatch)
  *   - missing display fields (projectName, assigneeName) rendered
  *     `undefined` in the UI
- * We're not testing every field — just the coercion + fallback logic
+ * We're not testing every field - just the coercion + fallback logic
  * that's actually dangerous to get wrong.
  */
 
@@ -33,7 +33,7 @@ describe('apiTaskToTask', () => {
   it('stringifies numeric wire IDs', () => {
     // The wire sends `id: 42` as a JSON number even though the
     // hand-rolled ApiTask lies about it being a string. The mapper
-    // must always stringify — regression guard for the "moved tasks
+    // must always stringify - regression guard for the "moved tasks
     // vanish from the board" bug.
     const input = baseApiTask({
       id: 42 as unknown as string,

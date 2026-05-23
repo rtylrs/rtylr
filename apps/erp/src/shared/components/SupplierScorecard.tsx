@@ -28,7 +28,7 @@ const Metric: React.FC<{
         </>
       ) : (
         <span className="text-sm" style={{ color: 'var(--hub-text-dim)' }}>
-          —
+          -
         </span>
       )}
     </p>

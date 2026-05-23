@@ -7,7 +7,7 @@ import styles from './TestimonialsSection.module.scss';
 const testimonials = [
   {
     quote:
-      'We used to close the books on the 8th of every month. Now we close them on the 2nd — nothing needs reconciling.',
+      'We used to close the books on the 8th of every month. Now we close them on the 2nd - nothing needs reconciling.',
     author: 'Layla Ahmed',
     role: 'Owner, Byblos Kitchen',
     company: 'Restaurant · 3 branches',
@@ -47,7 +47,7 @@ const testimonials = [
   },
   {
     quote:
-      'The task is linked to the invoice, the customer, the shift. I stopped opening four tabs for four apps — I just open Flow.',
+      'The task is linked to the invoice, the customer, the shift. I stopped opening four tabs for four apps - I just open Flow.',
     author: 'Jad Maalof',
     role: 'Manager, Tech Store Pro',
     company: 'Retail',

@@ -403,7 +403,7 @@ const TaskDetail: React.FC = () => {
             <button
               onClick={() => {
                 // Wait for the mutation to actually succeed before
-                // toasting + navigating away — otherwise on API
+                // toasting + navigating away - otherwise on API
                 // failure the user sees a success toast, leaves the
                 // page, and the task is still alive in cache.
                 deleteTaskMut.mutate(task.id, {

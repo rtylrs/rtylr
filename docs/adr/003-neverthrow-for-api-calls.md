@@ -8,9 +8,9 @@
 
 API calls can fail in many ways: network errors, 401s, 500s, validation errors. Without explicit error handling, these failures are silent or produce cryptic errors. Options considered:
 
-1. **Try/catch everywhere** — verbose, easy to forget, error types are `unknown`
-2. **Axios interceptors only** — handles auth redirects but doesn't give callers typed errors
-3. **neverthrow Result type** — forces callers to handle both success and error paths
+1. **Try/catch everywhere** - verbose, easy to forget, error types are `unknown`
+2. **Axios interceptors only** - handles auth redirects but doesn't give callers typed errors
+3. **neverthrow Result type** - forces callers to handle both success and error paths
 
 ## Decision
 
@@ -30,7 +30,7 @@ useMutation({ mutationFn: (data) => unwrap(taskService.create(data)) });
 - **Compile-time safety**: You can't accidentally ignore an error. `ResultAsync` forces you to handle `.match()`, `.map()`, or `unwrap()`.
 - **Structured errors**: `ApiError.code` is an enum (`NETWORK_ERROR`, `UNAUTHORIZED`, `VALIDATION_ERROR`, `SERVER_ERROR`). No more `if (err.response?.status === 401)` scattered everywhere.
 - **Composable**: Results chain with `.andThen()`, `.map()`, `.orElse()`. Complex flows (fetch user, then fetch their projects) compose cleanly.
-- **React Query bridge**: `unwrap()` converts `ResultAsync<T, ApiError>` to `Promise<T>` that throws on error — exactly what React Query's `queryFn`/`mutationFn` expects.
+- **React Query bridge**: `unwrap()` converts `ResultAsync<T, ApiError>` to `Promise<T>` that throws on error - exactly what React Query's `queryFn`/`mutationFn` expects.
 
 ## Trade-offs
 

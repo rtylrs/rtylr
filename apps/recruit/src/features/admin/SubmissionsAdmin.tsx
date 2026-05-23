@@ -12,7 +12,7 @@ import {
 import type { Submission } from '../../shared/lib/types';
 
 /**
- * SubmissionsAdmin — HR-facing inbox for all candidate applications.
+ * SubmissionsAdmin - HR-facing inbox for all candidate applications.
  * Kept deliberately simple (no kanban, no stages swimlane) for MVP;
  * the status dropdown on each row is enough to move a candidate
  * through the funnel.
@@ -69,7 +69,7 @@ const SubmissionsAdmin: React.FC = (): React.JSX.Element => {
                     </div>
                   </div>
                   <div className="mt-0.5 text-sm text-white/70">
-                    Applied for <span className="text-white">{s.careerTitle || '—'}</span>
+                    Applied for <span className="text-white">{s.careerTitle || '-'}</span>
                   </div>
                   <div className="mt-3 flex flex-wrap items-center gap-x-4 gap-y-1 text-xs text-white/60">
                     <a
@@ -106,7 +106,7 @@ const SubmissionsAdmin: React.FC = (): React.JSX.Element => {
                     <p className="mt-3 line-clamp-3 text-sm text-white/70">{s.coverLetter}</p>
                   )}
 
-                  {/* Custom question answers — shown after the cover
+                  {/* Custom question answers - shown after the cover
                       letter so the reviewer sees them in reading order.
                       We render labels only once we've fetched the field
                       definitions for this submission's career. */}
@@ -181,7 +181,7 @@ const CustomAnswers: React.FC<{ submission: Submission }> = ({ submission }) => 
         return (
           <div key={id} className="flex gap-2 text-xs">
             <span className="min-w-[140px] text-white/50">{field?.label ?? `Question ${id}`}</span>
-            <span className="text-white/80">{display || '—'}</span>
+            <span className="text-white/80">{display || '-'}</span>
           </div>
         );
       })}

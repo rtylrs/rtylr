@@ -14,18 +14,18 @@ rtylr has complex role requirements:
 
 These permissions must be checked in every app. Options:
 
-1. **Per-app role checks** — each app implements its own permission logic
-2. **Backend-only** — server returns allowed actions, frontend just renders
-3. **Shared package** — single `@voxire/permissions` package with typed roles, capabilities, and guards
+1. **Per-app role checks** - each app implements its own permission logic
+2. **Backend-only** - server returns allowed actions, frontend just renders
+3. **Shared package** - single `@voxire/permissions` package with typed roles, capabilities, and guards
 
 ## Decision
 
 `@voxire/permissions` package with:
 
-- `roles.ts` — PlatformRole, POSRole enums with role hierarchy
-- `capabilities.ts` — 100+ Resource types as a union type
-- `matrix.ts` — permission matrix mapping roles to capabilities, with inheritance
-- `guards.ts` — `canAccessApp()`, `canPOSAction()`, `can()`, `canAll()`, `canAny()`
+- `roles.ts` - PlatformRole, POSRole enums with role hierarchy
+- `capabilities.ts` - 100+ Resource types as a union type
+- `matrix.ts` - permission matrix mapping roles to capabilities, with inheritance
+- `guards.ts` - `canAccessApp()`, `canPOSAction()`, `can()`, `canAll()`, `canAny()`
 
 ## Rationale
 

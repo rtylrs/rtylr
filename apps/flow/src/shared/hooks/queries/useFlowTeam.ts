@@ -28,7 +28,7 @@ interface ListMembersResponse {
 interface GrantPayload {
   userId: string;
   // Member's existing apps and role come from useFlowTeam so the
-  // permissions update is additive — we only flip Flow on, nothing
+  // permissions update is additive - we only flip Flow on, nothing
   // else is touched.
   apps: string[];
   role: string;
@@ -38,7 +38,7 @@ interface GrantPayload {
 
 // useFlowTeam returns every member of the business. Flow-specific
 // filters (current members vs. grant candidates) are applied in the UI
-// against each member's `.apps` array — there is no separate Flow-only
+// against each member's `.apps` array - there is no separate Flow-only
 // endpoint, so the same query backs both lists.
 export const useFlowTeam = (): ReturnType<typeof useQuery<FlowTeamMember[]>> =>
   useQuery<FlowTeamMember[]>({

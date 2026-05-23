@@ -8,7 +8,7 @@ import {
   overtimeAlertSchema,
 } from './shifts';
 
-// ─── Zod schema unit tests — no mocks, no network ────────────────────────────
+// ─── Zod schema unit tests - no mocks, no network ────────────────────────────
 //
 // Each schema has a valid "happy path" case plus edge-case coercions and the
 // `.catch()` fallback that exists on every enum field.

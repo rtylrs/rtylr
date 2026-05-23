@@ -1,7 +1,7 @@
 import { describe, it, expect } from 'vitest';
 import { payrollConfigSchema, payrollRunEntrySchema, payrollRunSchema } from './payroll';
 
-// ─── payroll Zod schemas — pure parse/validation tests ───────────────────────
+// ─── payroll Zod schemas - pure parse/validation tests ───────────────────────
 
 describe('payrollConfigSchema', () => {
   it('parses a valid payroll config', () => {

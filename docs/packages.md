@@ -109,7 +109,7 @@ await api.post('/erp/products', { name: 'Flour', costPrice: 1.5, salePrice: 3.0 
 
 **Source:** `packages/types/src/`
 
-TypeScript types for every domain in the platform. No runtime code — types only.
+TypeScript types for every domain in the platform. No runtime code - types only.
 
 ### Exports by file
 
@@ -216,15 +216,15 @@ interface PurchaseOrder {
 }
 ```
 
-**`hr.ts`** — Staff, Shift, PayrollRecord, TimeOffRequest types
+**`hr.ts`** - Staff, Shift, PayrollRecord, TimeOffRequest types
 
-**`crm.ts`** — Customer, LoyaltyTransaction, LoyaltyConfig, Segment, Campaign types
+**`crm.ts`** - Customer, LoyaltyTransaction, LoyaltyConfig, Segment, Campaign types
 
-**`finance.ts`** — Invoice, InvoiceItem, Payment, Expense, ExpenseCategory, TaxConfig types
+**`finance.ts`** - Invoice, InvoiceItem, Payment, Expense, ExpenseCategory, TaxConfig types
 
-**`flow.ts`** — Workspace, Project, Task, TaskComment, Label types
+**`flow.ts`** - Workspace, Project, Task, TaskComment, Label types
 
-**`business.ts`** — Business-level shared types
+**`business.ts`** - Business-level shared types
 
 ### Usage
 

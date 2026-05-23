@@ -30,14 +30,21 @@ interface HelmetContainerProps {
 
 // Defaults applied when a page doesn't pass explicit props. Centralised
 // so missing metadata on any page still produces a coherent social
-// card and a valid twitter preview — the audit finding was that most
+// card and a valid twitter preview - the audit finding was that most
 // pages had title+description but no OG image or Twitter card, which
 // made every shared link render as a text-only preview.
-const DEFAULT_OG_IMAGE = 'https://rtylr.com/images/home/hero-banner-top-bar-bg.webp';
+const OG_BASE = 'https://rtylr.com';
 const DEFAULT_OG_SITE_NAME = 'rtylr';
 const DEFAULT_OG_LOCALE = 'en_US';
 const DEFAULT_OG_TYPE = 'website';
 const DEFAULT_TWITTER_CARD = 'summary_large_image';
+
+function buildOgImageUrl(title: string, description: string): string {
+  const params = new URLSearchParams();
+  params.set('title', title);
+  if (description) params.set('description', description);
+  return `${OG_BASE}/api/og?${params.toString()}`;
+}
 
 function HelmetContainer({
   title = 'rtylr · Your entire business, one platform.',
@@ -59,16 +66,14 @@ function HelmetContainer({
   canonical = '',
   structuredData,
 }: HelmetContainerProps) {
-  // Apply defaults lazily so a caller that wants to opt OUT of an OG
-  // tag (by passing an empty string) can do so if we ever need it.
-  // For now nothing opts out — every page benefits from the defaults.
-  const effectiveImage = image || DEFAULT_OG_IMAGE;
+  // Use the dynamic /api/og route unless the caller passes an explicit image.
+  const effectiveImage = image || buildOgImageUrl(title, ogDescription || description);
   const effectiveOgType = ogType || DEFAULT_OG_TYPE;
   const effectiveOgLocale = ogLocale || DEFAULT_OG_LOCALE;
   const effectiveOgSiteName = ogSiteName || DEFAULT_OG_SITE_NAME;
   const effectiveTwitterCard = twitterCard || DEFAULT_TWITTER_CARD;
   // If a page passes `canonical` we use that; otherwise we fall back
-  // to `url`. Both callers are common across the codebase — the
+  // to `url`. Both callers are common across the codebase - the
   // canonical prop is the new name we're threading in; url is the
   // legacy name most pages already pass.
   const effectiveCanonical = canonical || url;

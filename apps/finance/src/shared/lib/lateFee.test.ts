@@ -11,7 +11,7 @@ function todayOffset(dueDate: string, daysAfterDue: number): Date {
   return d;
 }
 
-describe('computeLateFee — not yet late', () => {
+describe('computeLateFee - not yet late', () => {
   it('returns isLate=false when today equals dueDate', () => {
     const result = computeLateFee({
       amount: 1000,
@@ -53,7 +53,7 @@ describe('computeLateFee — not yet late', () => {
   });
 });
 
-describe('computeLateFee — simple (non-compounding)', () => {
+describe('computeLateFee - simple (non-compounding)', () => {
   it('applies a flat percentage fee after grace period', () => {
     const today = todayOffset('2026-04-01', 10); // 10 days late, grace = 5 → 5 days late
     const result = computeLateFee({
@@ -94,7 +94,7 @@ describe('computeLateFee — simple (non-compounding)', () => {
   });
 });
 
-describe('computeLateFee — compounding monthly (default)', () => {
+describe('computeLateFee - compounding monthly (default)', () => {
   it('compounds over one month (exactly 30 days late)', () => {
     const today = todayOffset('2026-04-01', 30);
     const result = computeLateFee({
@@ -154,7 +154,7 @@ describe('computeLateFee — compounding monthly (default)', () => {
   });
 });
 
-describe('computeLateFee — edge cases', () => {
+describe('computeLateFee - edge cases', () => {
   it('handles zero amount', () => {
     const today = todayOffset('2026-04-01', 30);
     const result = computeLateFee({

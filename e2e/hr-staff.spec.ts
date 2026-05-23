@@ -3,7 +3,7 @@ import { test, expect, type Page, type Route } from './fixtures';
 /**
  * End-to-end: an HR operator managing staff and shifts.
  *
- * Staff and shifts are the HR app's primary data surfaces — if the list
+ * Staff and shifts are the HR app's primary data surfaces - if the list
  * screens break silently, the operator loses visibility into who is scheduled
  * and what employees are active. This spec locks the critical read path down
  * in a real browser with stubbed APIs so CI stays deterministic; no backend
@@ -80,7 +80,7 @@ async function installHrStubs(
     shifts: [...(initial.shifts ?? [])],
   };
 
-  // (1) Widest HR catch-all — handles any endpoint not explicitly matched.
+  // (1) Widest HR catch-all - handles any endpoint not explicitly matched.
   await page.route(`${apiHost}/hr/**`, (route: Route) => {
     if (route.request().method() === 'GET') {
       route.fulfill({ status: 200, contentType: 'application/json', body: '{}' });
@@ -94,7 +94,7 @@ async function installHrStubs(
   });
 
   // (2) Subscription/billing polled by the layout shell. A 401 would
-  // trigger an auth redirect — neutral empty response keeps the surface quiet.
+  // trigger an auth redirect - neutral empty response keeps the surface quiet.
   await page.route(`${apiHost}/subscriptions/**`, (route: Route) =>
     route.fulfill({
       status: 200,
@@ -112,7 +112,7 @@ async function installHrStubs(
     })
   );
 
-  // (4) HR config/settings — HRConfigRoute loads this before rendering features.
+  // (4) HR config/settings - HRConfigRoute loads this before rendering features.
   await page.route(`${apiHost}/hr/dashboard`, async (route: Route) => {
     await route.fulfill({
       status: 200,
@@ -129,7 +129,7 @@ async function installHrStubs(
     });
   });
 
-  // (5) Staff list — GET /hr/staff.
+  // (5) Staff list - GET /hr/staff.
   await page.route(`${apiHost}/hr/staff`, async (route: Route) => {
     const req = route.request();
     if (req.method() === 'GET') {
@@ -147,7 +147,7 @@ async function installHrStubs(
     });
   });
 
-  // (6) Shifts list — GET /hr/shifts.
+  // (6) Shifts list - GET /hr/shifts.
   await page.route(`${apiHost}/hr/shifts`, async (route: Route) => {
     const req = route.request();
     if (req.method() === 'GET') {
@@ -165,7 +165,7 @@ async function installHrStubs(
     });
   });
 
-  // (7) Staff detail — GET /hr/staff/detail?id=<n>. Registered last so it
+  // (7) Staff detail - GET /hr/staff/detail?id=<n>. Registered last so it
   // wins over the wider /hr/staff catch-all.
   await page.route(/localhost:9999\/hr\/staff\/detail(\?.*)?$/, async (route: Route) => {
     const url = new URL(route.request().url());
@@ -191,12 +191,12 @@ async function installHrStubs(
 
 test.describe.skip('HR staff list', () => {
   // AppGuard redirects to auth when there is no token cookie. A dummy value is
-  // enough because we stub /user/me — the guard only checks presence.
+  // enough because we stub /user/me - the guard only checks presence.
   test.beforeEach(async ({ context }) => {
     await context.addCookies([{ name: 'token', value: 'test-token', url: HR_URL }]);
   });
 
-  test('smoke — HR app mounts without crashing', async ({ page }) => {
+  test('smoke - HR app mounts without crashing', async ({ page }) => {
     await installHrStubs(page, {});
     await page.goto(HR_URL);
     // Any visible text confirms the React tree rendered without a white screen.

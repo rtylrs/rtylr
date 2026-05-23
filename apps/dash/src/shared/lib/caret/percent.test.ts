@@ -9,6 +9,6 @@ describe('formatPercent', () => {
     expect(formatPercent(0.123, 1)).toBe('12.3%');
   });
   it('handles non-finite values', () => {
-    expect(formatPercent(NaN)).toBe('—');
+    expect(formatPercent(NaN)).toBe('-');
   });
 });

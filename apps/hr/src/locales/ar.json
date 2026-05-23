@@ -355,7 +355,7 @@
     "flowImport": {
       "importing": "جاري الاستيراد من Flow…",
       "success": "تم استيراد {{imported}} إدخالات",
-      "successWithSkipped": "تم استيراد {{imported}} إدخالات ({{skipped}} تم تخطيها — مستوردة مسبقاً)",
+      "successWithSkipped": "تم استيراد {{imported}} إدخالات ({{skipped}} تم تخطيها - مستوردة مسبقاً)",
       "noEntries": "لا توجد إدخالات جديدة للاستيراد من Flow",
       "error": "فشل الاستيراد من Flow"
     },
@@ -661,7 +661,7 @@
       "enableDeductions": "تفعيل الخصومات",
       "enableBonuses": "تفعيل المكافآت",
       "saved": "تم حفظ تهيئة الرواتب",
-      "notConfiguredNotice": "لم يتم تكوين الرواتب بعد — أكمل النموذج للبدء"
+      "notConfiguredNotice": "لم يتم تكوين الرواتب بعد - أكمل النموذج للبدء"
     }
   },
   "shifts": {

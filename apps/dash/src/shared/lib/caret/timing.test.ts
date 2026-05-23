@@ -12,6 +12,6 @@ describe('formatDurationMs', () => {
     expect(formatDurationMs(125_000)).toBe('2m 5s');
   });
   it('handles invalid input', () => {
-    expect(formatDurationMs(NaN)).toBe('—');
+    expect(formatDurationMs(NaN)).toBe('-');
   });
 });

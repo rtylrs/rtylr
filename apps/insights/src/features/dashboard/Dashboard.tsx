@@ -94,28 +94,28 @@ const Dashboard: React.FC = (): React.JSX.Element => {
   const stats = [
     {
       label: t('insights.dashboard.cards.revenue'),
-      value: data ? formatMoney(data.revenue.value) : '—',
+      value: data ? formatMoney(data.revenue.value) : '-',
       deltaPct: data?.revenue.deltaPct ?? 0,
       icon: DollarSign,
       sparkline: true,
     },
     {
       label: t('insights.dashboard.cards.customers'),
-      value: data ? formatNumber(data.customers.value) : '—',
+      value: data ? formatNumber(data.customers.value) : '-',
       deltaPct: data?.customers.deltaPct ?? 0,
       icon: Users,
       sparkline: false,
     },
     {
       label: t('insights.dashboard.cards.orders'),
-      value: data ? formatNumber(data.orders.value) : '—',
+      value: data ? formatNumber(data.orders.value) : '-',
       deltaPct: data?.orders.deltaPct ?? 0,
       icon: ShoppingCart,
       sparkline: false,
     },
     {
       label: t('insights.dashboard.cards.margin'),
-      value: data ? `${data.margin.value.toFixed(1)}%` : '—',
+      value: data ? `${data.margin.value.toFixed(1)}%` : '-',
       deltaPct: data?.margin.deltaPct ?? 0,
       icon: Percent,
       sparkline: false,

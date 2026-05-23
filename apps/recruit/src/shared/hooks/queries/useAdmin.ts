@@ -4,7 +4,7 @@ import { toast } from 'sonner';
 import { safe } from '../../lib/api';
 import type { Customization, FormField, RecruitCareer, Section, Submission } from '../../lib/types';
 
-// Admin hooks — require auth. Every mutation invalidates the matching
+// Admin hooks - require auth. Every mutation invalidates the matching
 // list query so the HR team sees edits live without a manual refresh.
 
 interface ListCareersResponse {
@@ -143,7 +143,7 @@ export function useUpdateSubmissionStatus() {
   });
 }
 
-// Resume links are signed on demand — we never expose the raw R2 URL
+// Resume links are signed on demand - we never expose the raw R2 URL
 // in the list payload, so a screenshot of the admin table doesn't
 // expose anything persistent. The returned URL is good for one hour.
 interface ResumeDownloadResponse {

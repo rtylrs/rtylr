@@ -6,7 +6,7 @@ import Header from '../shared/Header';
 import Sections from '../shared/Sections';
 import type { IndexProps } from '../resolver';
 
-// Editorial — magazine-style. Serif display type, generous whitespace,
+// Editorial - magazine-style. Serif display type, generous whitespace,
 // hero panel with the tagline blown up. For businesses that want their
 // careers page to read like a feature story rather than a job board.
 const EditorialIndex: React.FC<IndexProps> = ({ careers, customization, sections }) => {

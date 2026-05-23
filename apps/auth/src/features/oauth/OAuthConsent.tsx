@@ -64,7 +64,7 @@ const OAuthConsent: React.FC = (): React.JSX.Element => {
   // If the request is missing required params, show an error immediately.
   useEffect((): void => {
     if (!params.clientId || !params.redirectUri || !params.codeChallenge) {
-      setError('Invalid authorization request — missing required parameters.');
+      setError('Invalid authorization request - missing required parameters.');
     }
   }, [params]);
 

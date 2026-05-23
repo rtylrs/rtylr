@@ -71,7 +71,7 @@ export function useSendPurchaseOrder() {
   const qc = useQueryClient();
   return useMutation({
     // Send transitions a draft PO into 'sent' status. Backend hangs
-    // off updatePurchaseOrderStatus for now — when a dedicated
+    // off updatePurchaseOrderStatus for now - when a dedicated
     // /send endpoint is added (with the supplier email side-effect),
     // swap the mutationFn here and the call sites stay unchanged.
     mutationFn: (id: number) => unwrap(erpApi.updatePurchaseOrderStatus(id, 'sent')),

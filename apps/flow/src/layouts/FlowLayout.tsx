@@ -259,7 +259,7 @@ const FlowLayout: React.FC<FlowLayoutProps> = ({ children }) => {
   };
 
   // Effective workspace list: prefer live API data, fall back to store, guarantee Personal.
-  // Always map through apiWorkspaceToWorkspace so IDs are strings — URL params are strings
+  // Always map through apiWorkspaceToWorkspace so IDs are strings - URL params are strings
   // and === comparisons would silently fail against numeric API IDs.
   const liveWorkspaces = useMemo<Workspace[]>(() => {
     const list =
@@ -285,7 +285,7 @@ const FlowLayout: React.FC<FlowLayoutProps> = ({ children }) => {
   // Hydrate the store so other consumers (tasks, etc.) see fresh data.
   // IDs from the wire are numeric; the Zustand store keys them as strings
   // (URL params and active-id comparisons are strings), so always route
-  // through the mapper — never `setWorkspaces(apiWorkspaces as any)`.
+  // through the mapper - never `setWorkspaces(apiWorkspaces as any)`.
   useEffect(() => {
     if (apiWorkspaces && apiWorkspaces.length > 0) {
       setWorkspaces(apiWorkspaces.map(apiWorkspaceToWorkspace));
@@ -325,7 +325,7 @@ const FlowLayout: React.FC<FlowLayoutProps> = ({ children }) => {
   const caretUserId = Number(userId) || 0;
   const realtimeTopics = useMemo(() => {
     const t: string[] = [];
-    // Only subscribe to a numeric workspace id — "personal" is not a
+    // Only subscribe to a numeric workspace id - "personal" is not a
     // valid server-side topic (it's a client-only sentinel).
     if (currentWorkspaceId && currentWorkspaceId !== PERSONAL_WORKSPACE_ID) {
       t.push(`workspace:${currentWorkspaceId}`);
@@ -388,7 +388,7 @@ const FlowLayout: React.FC<FlowLayoutProps> = ({ children }) => {
     root.style.setProperty('--accent-border', hexToRgba(color, 0.3));
     root.style.setProperty('--accent-focus', hexToRgba(color, 0.5));
   }, [activeWorkspace.color]);
-  // Hide the auto-provisioned "Inbox" project — it's the backend's
+  // Hide the auto-provisioned "Inbox" project - it's the backend's
   // bucket for quick-captured personal tasks (My Tasks page) and isn't
   // meant to surface in the project list. Match by name + icon so
   // user-created projects literally named "Inbox" still show.
@@ -652,7 +652,7 @@ const FlowLayout: React.FC<FlowLayoutProps> = ({ children }) => {
                   exact
                 />
                 <SidebarLink to="/triage" icon={Eye} label="Triage" />
-                {/* Backlog is now a column inside /my-issues — no
+                {/* Backlog is now a column inside /my-issues - no
                     standalone sidebar entry. */}
               </nav>
 
@@ -1131,7 +1131,7 @@ const FlowLayout: React.FC<FlowLayoutProps> = ({ children }) => {
             </AnimatePresence>
           </div>
 
-          {/* Caret AI — inline third column, pushes content left */}
+          {/* Caret AI - inline third column, pushes content left */}
           <div
             style={{
               width: caretOpen ? '360px' : '0px',

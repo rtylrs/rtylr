@@ -9,7 +9,7 @@ import { useCartStore } from '../../../shared/stores/cartStore';
  * Mounted at `/:slug/:location`. Resolves the business by slug, picks
  * the matching location, then reuses the existing POS-backed menu
  * fetch keyed by business_id. (For now items live per business, not
- * per location — when POS adds location-scoped menus this hook will
+ * per location - when POS adds location-scoped menus this hook will
  * thread `location_id` through.)
  */
 
@@ -74,7 +74,7 @@ const LocationMenu: React.FC = (): React.JSX.Element => {
 
   const businessInfo: BusinessInfo = {
     id: biz.business.id,
-    name: `${biz.business.name} — ${location.name}`,
+    name: `${biz.business.name} - ${location.name}`,
     logoUrl: biz.business.logoUrl,
     currency: biz.business.currency,
   };

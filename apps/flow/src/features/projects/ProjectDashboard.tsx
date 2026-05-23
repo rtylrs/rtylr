@@ -7,7 +7,7 @@ import { useProjectRealtime } from '../../shared/lib/useProjectRealtime';
 import ProjectViewTabs from './ProjectViewTabs';
 
 /**
- * ProjectDashboard — one-glance health view. Four tiles across the top:
+ * ProjectDashboard - one-glance health view. Four tiles across the top:
  *   Total · Done · In progress · Overdue
  * Then a status breakdown bar and a grouped-by-assignee distribution card.
  *

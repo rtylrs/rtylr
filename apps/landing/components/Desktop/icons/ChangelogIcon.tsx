@@ -26,7 +26,7 @@ export const ChangelogIcon = ({ size = 44 }: { size?: number }) => (
       stroke="rgba(255,255,255,0.12)"
       strokeWidth="0.6"
     />
-    {/* Tick marks — 12 positions */}
+    {/* Tick marks - 12 positions */}
     {Array.from({ length: 12 }).map((_, i) => {
       const angle = (Math.PI * 2 * i) / 12;
       const isMajor = i % 3 === 0;
@@ -45,7 +45,7 @@ export const ChangelogIcon = ({ size = 44 }: { size?: number }) => (
         />
       );
     })}
-    {/* Hour hand — pointing ~10 o'clock */}
+    {/* Hour hand - pointing ~10 o'clock */}
     <line
       x1="22"
       y1="22"
@@ -55,7 +55,7 @@ export const ChangelogIcon = ({ size = 44 }: { size?: number }) => (
       strokeWidth="1.75"
       strokeLinecap="round"
     />
-    {/* Minute hand — pointing ~2 o'clock */}
+    {/* Minute hand - pointing ~2 o'clock */}
     <line
       x1="22"
       y1="22"

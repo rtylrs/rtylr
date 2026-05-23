@@ -41,7 +41,7 @@ const VIEWS: ViewDef[] = [
     label: 'Board',
     icon: LayoutGrid,
     path: (w, p) => `/w/${w}/p/${p}`,
-    // The default project route is board — matches anything that isn't
+    // The default project route is board - matches anything that isn't
     // explicitly another view.
     match: (p) => /\/w\/[^/]+\/p\/[^/]+$/.test(p) || p.endsWith('/board'),
   },
@@ -153,7 +153,7 @@ const ProjectViewTabs: React.FC<ProjectViewTabsProps> = ({
           <SettingsIcon size={13} />
         </Link>
 
-        {/* Primary CTA. White text on teal — the old near-black-on-teal
+        {/* Primary CTA. White text on teal - the old near-black-on-teal
             combo was failing WCAG on anything but the darkest teal. */}
         <button
           onClick={onNewTask}

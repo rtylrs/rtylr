@@ -134,7 +134,7 @@ function reportBulk(result: BulkResult, successKey: string, failKey: string) {
     toast.error(t(failKey));
   } else {
     toast.warning(
-      `${result.ok} updated, ${result.failed} failed — refreshing the list to show current state.`
+      `${result.ok} updated, ${result.failed} failed - refreshing the list to show current state.`
     );
   }
 }

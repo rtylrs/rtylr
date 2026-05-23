@@ -3,7 +3,7 @@
  * This helper accepts either a raw array or an enveloped response so the
  * schema parse never sees undefined (which would throw).
  *
- * Pass one or more candidate keys — the first matching array wins.
+ * Pass one or more candidate keys - the first matching array wins.
  */
 export function unwrapList<T>(res: unknown, ...keys: string[]): T[] {
   if (Array.isArray(res)) return res as T[];

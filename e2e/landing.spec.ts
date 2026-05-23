@@ -3,7 +3,7 @@ import { test, expect } from './fixtures';
 /**
  * Landing-site e2e. Strict-mode selectors (role + name) so assertions
  * don't go stale when we add another "Pricing" or "Free" somewhere on
- * the page — which has happened before and burned this spec.
+ * the page - which has happened before and burned this spec.
  */
 
 const LANDING_URL = process.env.LANDING_URL ?? 'http://localhost:4200';
@@ -18,14 +18,14 @@ test.describe('Landing page', () => {
 
   test('desktop has the Pricing icon', async ({ page }) => {
     await page.goto(LANDING_URL);
-    // The landing is now a desktop OS experience — Pricing is a
+    // The landing is now a desktop OS experience - Pricing is a
     // clickable icon on the desktop, not a nav link.
     await expect(page.getByRole('button', { name: /^Pricing$/i }).first()).toBeVisible();
   });
 
   test('pricing page renders the plan heading', async ({ page }) => {
     await page.goto(`${LANDING_URL}/pricing`);
-    // Heading is unique per page so it's a stable anchor — beats
+    // Heading is unique per page so it's a stable anchor - beats
     // scanning for "Free"/"Pro"/"Scale" which appear 11 times.
     await expect(page.getByRole('heading', { name: /per seat, per day/i })).toBeVisible();
   });
@@ -50,7 +50,7 @@ test.describe('Landing page', () => {
   });
 
   test('robots.txt advertises the sitemap + AI-bot allowances', async ({ request }) => {
-    // Pure HTTP GET — no browser needed.
+    // Pure HTTP GET - no browser needed.
     const res = await request.get(`${LANDING_URL}/robots.txt`);
     expect(res.status()).toBe(200);
     const body = await res.text();

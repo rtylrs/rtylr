@@ -8,10 +8,10 @@
 
 With 14 frontend apps, we need a state management solution that's lightweight, TypeScript-native, and doesn't impose boilerplate. Options considered:
 
-1. **Redux Toolkit** — industry standard, large ecosystem, significant boilerplate
-2. **Zustand** — minimal API, TypeScript-first, no providers/context
-3. **Jotai** — atomic state model, good for fine-grained reactivity
-4. **React Context** — built-in, no dependencies, but re-render issues at scale
+1. **Redux Toolkit** - industry standard, large ecosystem, significant boilerplate
+2. **Zustand** - minimal API, TypeScript-first, no providers/context
+3. **Jotai** - atomic state model, good for fine-grained reactivity
+4. **React Context** - built-in, no dependencies, but re-render issues at scale
 
 ## Decision
 
@@ -23,7 +23,7 @@ Zustand for client/UI state (cart, theme, selected workspace, UI toggles). TanSt
 - **No context providers**: Stores are module-level singletons. No `<Provider>` wrapping needed, which matters when you have 14 apps.
 - **TypeScript inference**: Full type inference without manual typing of actions/selectors. `useFlowStore((s) => s.tasks)` is fully typed.
 - **Bundle size**: ~1.2KB gzipped vs Redux Toolkit's ~11KB. Matters when apps load in POS terminals.
-- **Server state separation**: TanStack Query handles fetching, caching, background refetching, optimistic updates. Zustand only holds things React Query can't — UI preferences, cart state, selected IDs.
+- **Server state separation**: TanStack Query handles fetching, caching, background refetching, optimistic updates. Zustand only holds things React Query can't - UI preferences, cart state, selected IDs.
 
 ## Trade-offs
 

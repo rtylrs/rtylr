@@ -1,7 +1,7 @@
 import { test, expect } from './fixtures';
 
 /**
- * End-to-end: Finance — Expenses, Bills, Profit & Loss, Tax screens.
+ * End-to-end: Finance - Expenses, Bills, Profit & Loss, Tax screens.
  *
  * Every `/finance/*` call is stubbed via `page.route()` so the spec runs
  * without a backend. The AppGuard is satisfied the same way as the invoice
@@ -62,14 +62,14 @@ async function seedAuth(page: import('@playwright/test').Page): Promise<void> {
 
 // ── beforeEach helper: place auth cookie ─────────────────────────────────
 
-test.describe.skip('Finance — Expenses list', () => {
+test.describe.skip('Finance - Expenses list', () => {
   test.beforeEach(async ({ context, page }) => {
     await context.addCookies([{ name: 'token', value: 'e2e-stub-token', url: FINANCE_URL }]);
     await seedAuth(page);
   });
 
   test('renders two expense rows from stub data', async ({ page }) => {
-    // Stub GET /finance/expenses — envelope format used by the Go backend.
+    // Stub GET /finance/expenses - envelope format used by the Go backend.
     await page.route('**/finance/expenses', async (route) => {
       if (route.request().method() !== 'GET') {
         await route.continue();
@@ -148,7 +148,7 @@ test.describe.skip('Finance — Expenses list', () => {
 
 // ── Bills list ────────────────────────────────────────────────────────────
 
-test.describe.skip('Finance — Bills list', () => {
+test.describe.skip('Finance - Bills list', () => {
   test.beforeEach(async ({ context, page }) => {
     await context.addCookies([{ name: 'token', value: 'e2e-stub-token', url: FINANCE_URL }]);
     await seedAuth(page);
@@ -206,7 +206,7 @@ test.describe.skip('Finance — Bills list', () => {
 
 // ── Profit & Loss ─────────────────────────────────────────────────────────
 
-test.describe.skip('Finance — Profit & Loss report', () => {
+test.describe.skip('Finance - Profit & Loss report', () => {
   test.beforeEach(async ({ context, page }) => {
     await context.addCookies([{ name: 'token', value: 'e2e-stub-token', url: FINANCE_URL }]);
     await seedAuth(page);
@@ -270,7 +270,7 @@ test.describe.skip('Finance — Profit & Loss report', () => {
 
 // ── Tax rates screen ──────────────────────────────────────────────────────
 
-test.describe.skip('Finance — Tax rates screen', () => {
+test.describe.skip('Finance - Tax rates screen', () => {
   test.beforeEach(async ({ context, page }) => {
     await context.addCookies([{ name: 'token', value: 'e2e-stub-token', url: FINANCE_URL }]);
     await seedAuth(page);

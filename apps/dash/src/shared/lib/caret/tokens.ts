@@ -1,5 +1,5 @@
 /** Caret design-token mirror for dash. The @voxire/caret package keeps
- *  these internal — duplicating the small set here avoids cross-package
+ *  these internal - duplicating the small set here avoids cross-package
  *  surface churn. Update the values together when the package's
  *  `ui/tokens` constants change. */
 export const caretTokens = {

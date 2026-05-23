@@ -4,7 +4,7 @@
  * the config store at the call site.
  */
 export function formatCurrency(value: number, currency = 'USD', locale = 'en-US'): string {
-  if (!Number.isFinite(value)) return '—';
+  if (!Number.isFinite(value)) return '-';
   return new Intl.NumberFormat(locale, {
     style: 'currency',
     currency,

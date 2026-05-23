@@ -68,7 +68,7 @@ export function getDefaultCookieDomain(): string | undefined {
     // Leading dot is required so the cookie is visible to every
     // subdomain (auth, dash, vbitez, recruit, ...). Without it the
     // cookie becomes "host-only" on auth.rtylr.com and no other app
-    // sees the session — which is how we landed in the split-brain
+    // sees the session - which is how we landed in the split-brain
     // SSO state pre-launch. Matches @voxire/auth's implementation.
     return '.rtylr.com';
   }

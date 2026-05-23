@@ -2,7 +2,7 @@ import { describe, it, expect } from 'vitest';
 import { unwrapList } from './unwrapList';
 
 // ---------------------------------------------------------------------------
-// unwrapList — normalises ERP envelope responses to a plain array
+// unwrapList - normalises ERP envelope responses to a plain array
 // ---------------------------------------------------------------------------
 
 describe('unwrapList', () => {

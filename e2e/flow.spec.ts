@@ -126,7 +126,7 @@ async function installFlowStubs(
   const tasks = opts.tasks ?? [];
   const notifications = opts.notifications ?? [];
 
-  // (0) Broadest catch-all — intercepts any request to localhost:9999 that
+  // (0) Broadest catch-all - intercepts any request to localhost:9999 that
   //     isn't covered by a more-specific handler below.  Prevents unstubbed
   //     calls (e.g. Caret /memory/chats, realtime ws upgrade fallback) from
   //     reaching the real API and delaying the networkidle signal.
@@ -147,7 +147,7 @@ async function installFlowStubs(
     }
   });
 
-  // (1) Catch-all for any /flow/* endpoint not handled below — returns empty
+  // (1) Catch-all for any /flow/* endpoint not handled below - returns empty
   //     envelopes so the shell doesn't throw on missing data.
   await page.route(`${API_HOST}/flow/**`, (route: Route) => {
     const method = route.request().method();
@@ -197,7 +197,7 @@ async function installFlowStubs(
       })
   );
 
-  // (3) Workspaces — regex to match with or without query params.
+  // (3) Workspaces - regex to match with or without query params.
   await page.route(/localhost:9999\/flow\/workspaces(\?.*)?$/, (route: Route) =>
     route.fulfill({
       status: 200,
@@ -206,7 +206,7 @@ async function installFlowStubs(
     })
   );
 
-  // (4) Dashboard stats — regex to match ?workspace_id=... query param.
+  // (4) Dashboard stats - regex to match ?workspace_id=... query param.
   await page.route(/localhost:9999\/flow\/dashboard(\?.*)?$/, (route: Route) =>
     route.fulfill({
       status: 200,
@@ -231,7 +231,7 @@ async function installFlowStubs(
     })
   );
 
-  // (6) Tasks for a project — regex to match ?project_id=... query param.
+  // (6) Tasks for a project - regex to match ?project_id=... query param.
   await page.route(/localhost:9999\/flow\/tasks(\?.*)?$/, (route: Route) => {
     const url = new URL(route.request().url());
     const projectId = url.searchParams.get('project_id');
@@ -251,7 +251,7 @@ async function installFlowStubs(
     })
   );
 
-  // (7) Projects: GET list + POST create — regex excludes /columns sub-path.
+  // (7) Projects: GET list + POST create - regex excludes /columns sub-path.
   await page.route(/localhost:9999\/flow\/projects(\?.*)?$/, async (route: Route) => {
     const req = route.request();
     if (req.method() === 'GET') {
@@ -297,7 +297,7 @@ async function installFlowStubs(
 
 // ── Tests ──────────────────────────────────────────────────────────────────
 
-test.describe('Flow — smoke', () => {
+test.describe('Flow - smoke', () => {
   test.beforeEach(async ({ page, context }) => {
     await primeAuthCookie(context);
     // Minimal stubs just to get the shell up; content is not asserted here.
@@ -323,7 +323,7 @@ test.describe('Flow — smoke', () => {
   });
 });
 
-test.describe('Flow — project list', () => {
+test.describe('Flow - project list', () => {
   test.beforeEach(async ({ context }) => {
     await primeAuthCookie(context);
   });
@@ -338,7 +338,7 @@ test.describe('Flow — project list', () => {
     await page.waitForLoadState('networkidle', { timeout: 30_000 });
 
     // Both project names must appear somewhere in the rendered output.
-    // Use toBeAttached rather than toBeVisible — the cards animate in from
+    // Use toBeAttached rather than toBeVisible - the cards animate in from
     // opacity:0 and headless Chrome may not run Framer Motion transitions,
     // so visibility checks would be flaky even though the DOM is correct.
     await expect(page.getByText('Alpha Project').first()).toBeAttached({ timeout: 10_000 });
@@ -353,7 +353,7 @@ test.describe('Flow — project list', () => {
   });
 });
 
-test.describe('Flow — task board', () => {
+test.describe('Flow - task board', () => {
   test.beforeEach(async ({ context }) => {
     await primeAuthCookie(context);
   });
@@ -421,7 +421,7 @@ test.describe('Flow — task board', () => {
   });
 });
 
-test.describe('Flow — inbox', () => {
+test.describe('Flow - inbox', () => {
   test.beforeEach(async ({ context }) => {
     await primeAuthCookie(context);
   });

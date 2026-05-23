@@ -8,9 +8,9 @@
 
 With 100+ modules, the backend needs a consistent structure that prevents coupling. Options:
 
-1. **Flat handlers** — routes directly call database
-2. **MVC** — models, views, controllers
-3. **Onion/Clean Architecture** — domain, application, infrastructure layers with inward dependencies
+1. **Flat handlers** - routes directly call database
+2. **MVC** - models, views, controllers
+3. **Onion/Clean Architecture** - domain, application, infrastructure layers with inward dependencies
 
 ## Decision
 
@@ -34,7 +34,7 @@ Dependencies flow inward: handlers -> application -> repository. Domain has no e
 
 - **Testability**: Services can be tested with mock repositories. Handlers can be tested with mock services. Each layer is independently testable.
 - **Business logic isolation**: The application layer contains ALL business rules. Handlers only parse HTTP requests and format responses. Repositories only execute SQL.
-- **Enforced by convention**: "Handler should not talk to a DB. That should happen only on repo." — this rule prevents data access logic from leaking into HTTP handlers.
+- **Enforced by convention**: "Handler should not talk to a DB. That should happen only on repo." - this rule prevents data access logic from leaking into HTTP handlers.
 - **Module independence**: Each module is self-contained. Module A doesn't import Module B's internals. Cross-module communication goes through service interfaces.
 
 ## Trade-offs

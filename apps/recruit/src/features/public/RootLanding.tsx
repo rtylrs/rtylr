@@ -3,7 +3,7 @@ import { APP_URLS } from '@voxire/config';
 import { ArrowRight } from 'lucide-react';
 
 /**
- * RootLanding — what a candidate sees if they hit recruit.rtylr.com
+ * RootLanding - what a candidate sees if they hit recruit.rtylr.com
  * with no business slug. Almost nobody reaches this in practice (the
  * entry is always a direct link to a business's page), but we render
  * a tight marketing blurb rather than a 404 so crawlers get something
@@ -20,7 +20,7 @@ const RootLanding: React.FC = (): React.JSX.Element => (
       without the careers-site tax.
     </h1>
     <p className="mt-6 max-w-xl text-base" style={{ color: 'var(--recruit-muted)' }}>
-      Post roles, collect applications, and move candidates through your funnel — all from the same
+      Post roles, collect applications, and move candidates through your funnel - all from the same
       account you run the rest of your business from.
     </p>
     <div className="mt-10 flex items-center gap-3">

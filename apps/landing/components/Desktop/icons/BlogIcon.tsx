@@ -8,7 +8,7 @@ export const BlogIcon = ({ size = 44 }: { size?: number }) => (
     fill="none"
     xmlns="http://www.w3.org/2000/svg"
   >
-    {/* RSS wave 1 — outermost */}
+    {/* RSS wave 1 - outermost */}
     <path
       d="M8 38c0-16.569 13.431-30 30-30"
       stroke="rgba(255,80,60,0.3)"
@@ -24,7 +24,7 @@ export const BlogIcon = ({ size = 44 }: { size?: number }) => (
       strokeLinecap="round"
       fill="none"
     />
-    {/* RSS wave 3 — innermost */}
+    {/* RSS wave 3 - innermost */}
     <path
       d="M8 22c0-7.732 6.268-14 14-14"
       stroke="rgba(255,80,60,0.85)"

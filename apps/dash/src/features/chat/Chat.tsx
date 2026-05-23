@@ -17,7 +17,7 @@ const Chat: React.FC = () => {
   const userId = Number(user?.id) || 0;
   const apiBaseUrl = import.meta.env.VITE_API_URL ?? 'https://api.voxire.com/';
   const systemContext =
-    'User is in the Dash app (business command center — KPIs, orders, staff overview)';
+    'User is in the Dash app (business command center - KPIs, orders, staff overview)';
 
   const { messages, isStreaming } = useCaretStore();
   const { sendMessage } = useCaretStream({ userId, apiBaseUrl, systemContext });

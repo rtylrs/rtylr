@@ -8,7 +8,7 @@ export const ERPIcon = ({ size = 44 }: { size?: number }) => (
     fill="none"
     xmlns="http://www.w3.org/2000/svg"
   >
-    {/* Isometric cube — top face */}
+    {/* Isometric cube - top face */}
     <path d="M22 7L36 14.5V22L22 29.5L8 22V14.5L22 7Z" fill="none" />
     <path
       d="M22 7L36 14.5L22 22L8 14.5L22 7Z"

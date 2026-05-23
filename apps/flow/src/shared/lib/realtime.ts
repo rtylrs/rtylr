@@ -3,7 +3,7 @@ import { getRealtimeClient, type RealtimeEvent } from '@voxire/api';
 
 /**
  * getToken reads the auth cookie set by the auth app. The cookie is
- * marked HttpOnly in production — but we intentionally use a
+ * marked HttpOnly in production - but we intentionally use a
  * non-HttpOnly `token` cookie for the JWT so the WebSocket handshake
  * can pass it via query string. The http-only cookie for session
  * identity remains separate.
@@ -30,7 +30,7 @@ const client = getRealtimeClient({
 /**
  * Subscribe to one or more realtime topics for the lifetime of the
  * component. The handler fires on every matching event. Subscriptions
- * are reference-counted — if ten components subscribe to
+ * are reference-counted - if ten components subscribe to
  * `project:5`, the server only sees one subscription.
  *
  * The handler should be stable across renders (wrap in useCallback or

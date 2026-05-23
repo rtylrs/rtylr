@@ -28,7 +28,7 @@ export function createStreamBuffer(onFlush: (chunk: string) => void): StreamBuff
       if (raf == null && typeof requestAnimationFrame !== 'undefined') {
         raf = requestAnimationFrame(flush);
       } else if (raf == null) {
-        // SSR path — flush synchronously
+        // SSR path - flush synchronously
         flush();
       }
     },

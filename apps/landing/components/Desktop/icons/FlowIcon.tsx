@@ -37,7 +37,7 @@ export const FlowIcon = ({ size = 44 }: { size?: number }) => (
       strokeLinecap="round"
       strokeDasharray="2 2"
     />
-    {/* Top trigger node — circle */}
+    {/* Top trigger node - circle */}
     <circle cx="22" cy="9" r="4.5" fill="rgba(255,255,255,0.9)" />
     <circle cx="22" cy="9" r="2" fill="rgba(30,30,40,1)" />
     {/* Middle decision diamond */}

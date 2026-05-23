@@ -28,7 +28,7 @@ function write(store: Store): void {
   try {
     localStorage.setItem(STORAGE_KEY, JSON.stringify(store));
   } catch {
-    // ignore quota errors — approvals are best-effort
+    // ignore quota errors - approvals are best-effort
   }
 }
 

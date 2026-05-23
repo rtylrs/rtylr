@@ -6,7 +6,7 @@ describe('formatCurrency', () => {
     expect(formatCurrency(1234.5)).toContain('1,234');
   });
   it('handles infinite values gracefully', () => {
-    expect(formatCurrency(NaN)).toBe('—');
+    expect(formatCurrency(NaN)).toBe('-');
   });
   it('respects the currency argument', () => {
     expect(formatCurrency(10, 'EUR', 'en-GB')).toContain('€');

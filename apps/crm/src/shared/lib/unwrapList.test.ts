@@ -30,7 +30,7 @@ describe('unwrapList', () => {
 
   it('picks the first matching key when multiple candidate keys are supplied', () => {
     const payload = { campaigns: [{ id: 10 }], items: [{ id: 99 }] };
-    // 'campaigns' is listed first — should win.
+    // 'campaigns' is listed first - should win.
     expect(unwrapList(payload, 'campaigns', 'items')).toStrictEqual([{ id: 10 }]);
   });
 

@@ -401,7 +401,7 @@ function BusinessRoute(): React.JSX.Element | null {
               setAboutContent({ aboutContent: config.aboutContent ?? null });
             })
             .catch(() => {
-              // config is non-critical — missing config won't block the app
+              // config is non-critical - missing config won't block the app
             });
         }
       })

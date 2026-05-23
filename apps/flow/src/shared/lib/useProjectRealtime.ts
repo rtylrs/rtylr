@@ -13,11 +13,11 @@ import { useRealtime } from './realtime';
  * logic here keeps us from reinventing it per screen and keeps the
  * invalidation set in sync.
  *
- * Events the current user caused are skipped — react-query's mutation
+ * Events the current user caused are skipped - react-query's mutation
  * onSuccess has already invalidated, refetching twice is wasteful and
  * produces flicker when an optimistic UI is in flight.
  *
- * Pass an empty string (or no projectId) to disable — the hook becomes
+ * Pass an empty string (or no projectId) to disable - the hook becomes
  * a no-op. This is safer than requiring callers to branch.
  */
 export function useProjectRealtime(projectId: string | undefined): void {
@@ -29,7 +29,7 @@ export function useProjectRealtime(projectId: string | undefined): void {
       if (e.actor_id && currentUserId && String(e.actor_id) === currentUserId) {
         return;
       }
-      // Invalidation is keyed by prefix — react-query invalidates every
+      // Invalidation is keyed by prefix - react-query invalidates every
       // query whose key starts with the given array, which is exactly
       // what we want here (any filter of tasks, columns for this
       // project, the overview aggregate, etc.).

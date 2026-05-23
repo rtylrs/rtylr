@@ -13,18 +13,18 @@ const isLocalhost =
   (window.location.hostname === 'localhost' || window.location.hostname === '127.0.0.1');
 
 const PublicRoutes = [
-  // POS-backed public menu — numeric business id under /b/ so the
+  // POS-backed public menu - numeric business id under /b/ so the
   // path is unambiguous vs the slug-or-legacy-id catch-all.
   { path: '/b/:businessId', element: <PosMenu /> },
 
-  // Online ordering flow — accessible from any menu
+  // Online ordering flow - accessible from any menu
   { path: '/checkout', element: <Checkout /> },
   { path: '/order-status/:id', element: <OrderStatus /> },
 
   // New public surface: menu.rtylr.com/<business-slug>/<location-slug>
   { path: '/:slug/:location', element: <LocationMenu /> },
 
-  // menu.rtylr.com/<slug> — landing that lists active locations.
+  // menu.rtylr.com/<slug> - landing that lists active locations.
   // SlugLanding also handles the legacy 24-char mongo ID fallback so
   // pre-existing QR codes keep resolving on the same surface.
   { path: '/:slug', element: <SlugLanding /> },

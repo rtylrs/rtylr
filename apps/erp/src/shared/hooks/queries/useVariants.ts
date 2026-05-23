@@ -3,7 +3,7 @@ import { useQuery } from '@tanstack/react-query';
 import type { UseQueryResult } from '@tanstack/react-query';
 import { safe } from '../../lib/api';
 
-// No proto type yet — define locally. See docs/ERP-CONTRACTS.md follow-up.
+// No proto type yet - define locally. See docs/ERP-CONTRACTS.md follow-up.
 export interface ProductVariant {
   id: number;
   productId: number;

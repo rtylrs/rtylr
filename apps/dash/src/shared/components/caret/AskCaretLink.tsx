@@ -16,7 +16,7 @@ export const AskCaretLink: React.FC<AskCaretLinkProps> = ({ prompt, children }) 
       type="button"
       onClick={() => {
         open();
-        // The actual send is wired by Caret's panel — the user can edit before sending.
+        // The actual send is wired by Caret's panel - the user can edit before sending.
         sessionStorage.setItem('caret-pending-prompt', prompt);
       }}
       style={{

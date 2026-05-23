@@ -8,9 +8,9 @@
 
 Go uses PascalCase for exported fields with `json:"snake_case"` tags. TypeScript/JavaScript conventions use camelCase. This creates a mismatch. Options:
 
-1. **camelCase everywhere** — Go JSON tags use camelCase (non-standard for Go APIs)
-2. **snake_case everywhere** — TypeScript code uses snake_case (non-standard for JS)
-3. **Automatic conversion** — Backend uses snake_case, frontend uses camelCase, interceptor converts
+1. **camelCase everywhere** - Go JSON tags use camelCase (non-standard for Go APIs)
+2. **snake_case everywhere** - TypeScript code uses snake_case (non-standard for JS)
+3. **Automatic conversion** - Backend uses snake_case, frontend uses camelCase, interceptor converts
 
 ## Decision
 

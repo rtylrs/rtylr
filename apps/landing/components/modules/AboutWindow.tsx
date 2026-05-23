@@ -112,7 +112,7 @@ export default function AboutWindow(): React.JSX.Element {
             Stop the CSV life.
           </h2>
           <p style={{ fontSize: 14, color: 'rgba(255,255,255,0.5)', lineHeight: 1.75, margin: 0 }}>
-            Commerce software should work the way commerce does — one sale, one inventory drop, one
+            Commerce software should work the way commerce does - one sale, one inventory drop, one
             payroll line, one customer record. Not seven apps pretending they talk to each other.
             rtylr replaces the whole stack with a single platform where everything updates at once,
             because it's all the same database underneath.
@@ -143,7 +143,7 @@ export default function AboutWindow(): React.JSX.Element {
             One platform. Six modules.
           </h2>
           <p style={{ fontSize: 14, color: 'rgba(255,255,255,0.5)', lineHeight: 1.75, margin: 0 }}>
-            POS, ERP, CRM, HR, Finance & Flow — built as a unified system from the ground up, not
+            POS, ERP, CRM, HR, Finance & Flow - built as a unified system from the ground up, not
             stitched together from acquisitions. Every module shares the same data model, the same
             permissions layer, and the same AI core.
           </p>

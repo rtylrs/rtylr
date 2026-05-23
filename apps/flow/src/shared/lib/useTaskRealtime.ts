@@ -8,14 +8,14 @@ import { useRealtime } from './realtime';
 /**
  * Subscribe to a single task's realtime channel. Used by TaskDetail so
  * an open detail screen refreshes comments, activity, and the task body
- * whenever someone else on the team edits it — without polling and
+ * whenever someone else on the team edits it - without polling and
  * without subscribing to the whole project firehose.
  *
  * Self-authored events are ignored (the mutation's onSuccess already
  * invalidated), which avoids the flicker that would otherwise happen
  * when optimistic UI is in flight.
  *
- * Pass an empty string (or no taskId) to disable — the hook becomes a
+ * Pass an empty string (or no taskId) to disable - the hook becomes a
  * no-op. Safer than forcing callers to branch.
  */
 export function useTaskRealtime(taskId: string | undefined): void {

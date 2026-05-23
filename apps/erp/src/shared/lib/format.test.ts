@@ -56,7 +56,7 @@ describe('formatNumber', () => {
 });
 
 // ---------------------------------------------------------------------------
-// formatDate — uses real Date so we just check format, not relative labels
+// formatDate - uses real Date so we just check format, not relative labels
 // ---------------------------------------------------------------------------
 
 describe('formatDate', () => {
@@ -97,7 +97,7 @@ describe('formatDateTime', () => {
 });
 
 // ---------------------------------------------------------------------------
-// timeAgo — pin "now" with fake timers
+// timeAgo - pin "now" with fake timers
 // ---------------------------------------------------------------------------
 
 describe('timeAgo', () => {

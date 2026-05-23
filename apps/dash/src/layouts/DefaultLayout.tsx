@@ -550,7 +550,7 @@ const DefaultLayout: React.FC<DefaultLayoutProps> = ({ children }) => {
             </AnimatePresence>
           </div>
 
-          {/* Caret AI — inline third column, pushes content left */}
+          {/* Caret AI - inline third column, pushes content left */}
           <div
             style={{
               width: caretOpen ? `${caretWidth}px` : '0px',
@@ -564,7 +564,7 @@ const DefaultLayout: React.FC<DefaultLayoutProps> = ({ children }) => {
               appId="dash"
               userId={userId}
               apiBaseUrl={import.meta.env.VITE_API_URL ?? 'https://api.voxire.com/'}
-              systemContext="User is in the Dash app (business command center — KPIs, orders, staff overview)"
+              systemContext="User is in the Dash app (business command center - KPIs, orders, staff overview)"
             />
           </div>
         </div>

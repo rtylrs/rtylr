@@ -10,7 +10,7 @@ import {
 } from './structured-data';
 
 /**
- * JSON-LD structured data is the silent half of SEO — Google, Perplexity,
+ * JSON-LD structured data is the silent half of SEO - Google, Perplexity,
  * and ChatGPT all parse these blobs but users never see them, so a broken
  * schema can go unnoticed for weeks. These tests pin the shape and the
  * field semantics so a refactor can't quietly regress the AI-SEO wiring.

@@ -5,7 +5,7 @@ import { APP_URLS } from '@voxire/config';
  * router-friendly relative paths when they point at the dash app, or
  * `target=_blank` external URLs when they point at sibling apps.
  *
- * Caret answers often contain links like "[order](pos://orders/42)" —
+ * Caret answers often contain links like "[order](pos://orders/42)" -
  * this helper translates those custom schemes to real URLs.
  */
 export interface RewrittenLink {

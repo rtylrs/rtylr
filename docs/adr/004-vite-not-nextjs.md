@@ -8,9 +8,9 @@
 
 rtylr is a multi-app platform with 14 frontend apps. Each app is a separate SPA deployed independently. Options considered:
 
-1. **Next.js** — SSR/SSG, file-based routing, API routes, image optimization
-2. **Vite** — fast HMR, minimal config, pure SPA output
-3. **Remix** — nested routing, server-first, progressive enhancement
+1. **Next.js** - SSR/SSG, file-based routing, API routes, image optimization
+2. **Vite** - fast HMR, minimal config, pure SPA output
+3. **Remix** - nested routing, server-first, progressive enhancement
 
 ## Decision
 

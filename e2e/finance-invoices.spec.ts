@@ -51,8 +51,8 @@ async function stubFinanceAPI(
     })
   );
 
-  // GET /finance/invoices — list.
-  // POST /finance/invoices — create, delete (soft), update.
+  // GET /finance/invoices - list.
+  // POST /finance/invoices - create, delete (soft), update.
   await page.route('**/finance/invoices', async (route) => {
     const method = route.request().method();
     if (method === 'GET') {
@@ -130,7 +130,7 @@ async function stubFinanceAPI(
     });
   });
 
-  // POST /finance/invoices/status — mark-paid / status change.
+  // POST /finance/invoices/status - mark-paid / status change.
   await page.route('**/finance/invoices/status', async (route) => {
     const body = route.request().postDataJSON() ?? {};
     const idx = store.findIndex((r) => r.id === body.id);
@@ -199,7 +199,7 @@ test.describe.skip('Finance invoices flow', () => {
     await stubFinanceAPI(page, []);
     await page.goto(`${FINANCE_URL}/invoices`);
 
-    // Seed a row by hitting the POST endpoint directly — the full new-invoice
+    // Seed a row by hitting the POST endpoint directly - the full new-invoice
     // wizard is four steps of UI we cover in a separate dedicated spec. Here
     // we're asserting the list re-fetches after a create.
     await page.evaluate(async () => {
@@ -254,7 +254,7 @@ test.describe.skip('Finance invoices flow', () => {
       timeout: 15_000,
     });
 
-    // motion/react animates on mount — settle before the first click so
+    // motion/react animates on mount - settle before the first click so
     // playwright's stability check doesn't retry against a moving element.
     await page.waitForTimeout(700);
 

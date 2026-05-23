@@ -2,7 +2,7 @@ import { defineConfig, devices } from '@playwright/test';
 
 /**
  * End-to-end tests run against real dev servers booted by Playwright.
- * Every spec uses `page.route()` to stub API calls — we never hit the
+ * Every spec uses `page.route()` to stub API calls - we never hit the
  * real `api.voxire.com` in tests, so CI is deterministic and we don't
  * pollute prod data.
  *
@@ -18,24 +18,24 @@ export default defineConfig({
   testDir: './e2e',
   fullyParallel: true,
   forbidOnly: !!process.env.CI,
-  // Real dev servers are flakier than jsdom — two retries covers the
+  // Real dev servers are flakier than jsdom - two retries covers the
   // common "port warmed up mid-test" race without masking real bugs.
   retries: process.env.CI ? 2 : 0,
   // Single worker in CI because all specs share the same dev servers
   // and port contention is worse than sequential runtime.
   workers: process.env.CI ? 1 : undefined,
   reporter: process.env.CI ? 'github' : 'html',
-  // 60s ceiling is generous — a slow dev server boot can eat 20s by
+  // 60s ceiling is generous - a slow dev server boot can eat 20s by
   // itself, and a spec that visits 3 pages with hydration each needs
   // the headroom.
   timeout: 60_000,
 
   use: {
-    // Default baseURL — individual specs override via `page.goto()`.
+    // Default baseURL - individual specs override via `page.goto()`.
     baseURL: 'http://localhost:4200',
     trace: 'on-first-retry',
     screenshot: 'only-on-failure',
-    // Capture videos only when a test fails and is retried — keeps
+    // Capture videos only when a test fails and is retried - keeps
     // successful-run artifacts small.
     video: 'retain-on-failure',
   },
@@ -50,7 +50,7 @@ export default defineConfig({
   webServer: [
     {
       command: 'pnpm --filter @rtylr/landing dev',
-      // Use url (not port) so Playwright makes a real HTTP GET — this
+      // Use url (not port) so Playwright makes a real HTTP GET - this
       // triggers Vite's dep pre-bundling before tests start, preventing
       // mid-test page reloads caused by first-request dep optimisation.
       url: 'http://localhost:4200',

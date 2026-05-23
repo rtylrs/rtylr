@@ -1,5 +1,5 @@
 // Schema.org builders for per-page JSON-LD. Each function returns the
-// raw object we hand to HelmetContainer's `structuredData` prop — the
+// raw object we hand to HelmetContainer's `structuredData` prop - the
 // component stringifies + embeds.
 //
 // Keeping these in one file means a rename of a field (e.g. the

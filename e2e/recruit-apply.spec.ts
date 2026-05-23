@@ -5,11 +5,11 @@ import { test, expect } from './fixtures';
  *
  * This is the recruit product's primary conversion surface. If this
  * flow breaks silently, the business loses applications without
- * knowing — so we lock it down in an integration test that drives a
+ * knowing - so we lock it down in an integration test that drives a
  * real browser through the real app, stubbing only the API layer.
  *
  * API calls are intercepted via `page.route()` so the test doesn't
- * depend on `localhost:9999` — CI stays deterministic, no backend
+ * depend on `localhost:9999` - CI stays deterministic, no backend
  * required, no prod data pollution.
  */
 
@@ -71,7 +71,7 @@ const FAKE_CAREER = {
 /**
  * stubRecruitAPI installs route handlers for every backend endpoint
  * the recruit public pages call. Keep this in one place so specs don't
- * drift — every new endpoint used by the UI should get a stub here.
+ * drift - every new endpoint used by the UI should get a stub here.
  */
 async function stubRecruitAPI(page: import('@playwright/test').Page) {
   // Shape-match the GET /recruit/public/career?slug=...&career_slug=... response.
@@ -109,7 +109,7 @@ async function stubRecruitAPI(page: import('@playwright/test').Page) {
     });
   });
 
-  // Suppress analytics / OG image calls — not the subject of this spec.
+  // Suppress analytics / OG image calls - not the subject of this spec.
   await page.route('**/recruit/public/og*', (route) => route.fulfill({ status: 204 }));
 }
 
@@ -164,7 +164,7 @@ test.describe('Recruit apply flow', () => {
   });
 
   test('404 renders when the slug is unknown', async ({ page }) => {
-    // Re-route to return 404 — simulates a mistyped business slug.
+    // Re-route to return 404 - simulates a mistyped business slug.
     await page.route('**/recruit/public/careers*', (route) =>
       route.fulfill({
         status: 404,

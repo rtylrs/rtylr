@@ -1,7 +1,7 @@
 import { test, expect } from './fixtures';
 
 /**
- * Public menu e2e — /b/:businessId hits the new anonymous `/pos/public/*`
+ * Public menu e2e - /b/:businessId hits the new anonymous `/pos/public/*`
  * endpoints that landed this session. No auth required, matches the
  * "diner scans QR, no account" contract from CLAUDE.md.
  */
@@ -55,7 +55,7 @@ test.describe.skip('Public menu (POS-backed)', () => {
 
   test('numeric business id renders menu items', async ({ page }) => {
     await page.goto(`${MENU_URL}/b/42`);
-    // Stub data includes Cold Brew + Croissant — at least one should
+    // Stub data includes Cold Brew + Croissant - at least one should
     // appear. We don't assert both because menu layout components
     // rotate display order across redesigns.
     await page.waitForTimeout(1500);

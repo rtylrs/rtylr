@@ -28,12 +28,12 @@ import {
 import type { Section, SectionKind, PerkItem, FaqItem, ValueItem } from '../../shared/lib/types';
 
 /**
- * SectionsAdmin — the editor for the content blocks that sit between
+ * SectionsAdmin - the editor for the content blocks that sit between
  * the hero and the jobs list on a business's careers page. Laid out
  * as a draggable list of rows; each row expands inline to its editor
  * so the admin keeps context of where it lives in the page.
  *
- * Drag-and-drop uses the native HTML5 drag API (no library) — good
+ * Drag-and-drop uses the native HTML5 drag API (no library) - good
  * enough for a dozen sections, no bundle weight.
  */
 
@@ -47,7 +47,7 @@ const KIND_META: Record<KnownKind, { icon: React.ReactNode; label: string; blurb
   perks: {
     icon: <Sparkles className="h-4 w-4" />,
     label: 'Perks',
-    blurb: 'Icon grid — healthcare, remote, learning budget, etc.',
+    blurb: 'Icon grid - healthcare, remote, learning budget, etc.',
   },
   culture: {
     icon: <Users className="h-4 w-4" />,
@@ -287,7 +287,7 @@ const SectionsAdmin: React.FC = (): React.JSX.Element => {
   );
 };
 
-// ── AddSectionPicker — grid of kinds to drop in ──────────────────────
+// ── AddSectionPicker - grid of kinds to drop in ──────────────────────
 
 const AddSectionPicker: React.FC<{
   onPick: (kind: SectionKind) => void;
@@ -326,7 +326,7 @@ const AddSectionPicker: React.FC<{
   </div>
 );
 
-// ── SectionEditor — per-kind forms ───────────────────────────────────
+// ── SectionEditor - per-kind forms ───────────────────────────────────
 
 const SectionEditor: React.FC<{
   section: Section;
@@ -398,7 +398,7 @@ const SectionEditor: React.FC<{
       )}
 
       {(section.kind === 'culture' || section.kind === 'testimonial') && (
-        <Field label="Photo URL" hint="Optional — square or landscape">
+        <Field label="Photo URL" hint="Optional - square or landscape">
           <Input value={mediaUrl} onChange={setMediaUrl} type="url" />
         </Field>
       )}

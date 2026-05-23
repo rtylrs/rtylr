@@ -28,7 +28,7 @@ function ensureRegion(): HTMLElement | null {
 export function announce(message: string): void {
   const r = ensureRegion();
   if (!r) return;
-  // Some screen readers ignore duplicate text — toggle to force re-read.
+  // Some screen readers ignore duplicate text - toggle to force re-read.
   r.textContent = '';
   if (timer) clearTimeout(timer);
   timer = setTimeout(() => {

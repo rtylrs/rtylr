@@ -4,7 +4,7 @@ import type { UseQueryResult } from '@tanstack/react-query';
 import type { PurchaseOrder } from '@voxire/contracts/erp/v1/purchase_orders';
 import { safe } from '../../lib/api';
 
-// No proto type yet — define locally.
+// No proto type yet - define locally.
 export interface LowStockDashboardItem {
   name: string;
   sku: string;
