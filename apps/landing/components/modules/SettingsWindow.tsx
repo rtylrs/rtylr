@@ -13,6 +13,7 @@ const COLOR_MODES: {
 ];
 
 const WALLPAPERS: { key: Wallpaper; label: string; color: string }[] = [
+  { key: 'slate', label: 'Slate', color: 'linear-gradient(135deg, #1a1a2e 0%, #16213e 100%)' },
   {
     key: 'midnight',
     label: 'Midnight',
@@ -24,7 +25,6 @@ const WALLPAPERS: { key: Wallpaper; label: string; color: string }[] = [
     color: 'linear-gradient(135deg, #0d1b2a 0%, #1a2a1a 50%, #0d1b2a 100%)',
   },
   { key: 'dusk', label: 'Dusk', color: 'linear-gradient(135deg, #1a0a2e 0%, #2d1b4e 100%)' },
-  { key: 'slate', label: 'Slate', color: 'linear-gradient(135deg, #1a1a2e 0%, #16213e 100%)' },
   { key: 'forest', label: 'Forest', color: 'linear-gradient(135deg, #0d1f0d 0%, #1a2e1a 100%)' },
 ];
 

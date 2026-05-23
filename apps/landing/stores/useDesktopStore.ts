@@ -76,9 +76,9 @@ export const useDesktopStore = create<DesktopState>()(
       windows: [],
       globalZ: 600,
       iconPositions: {},
-      experience: 'website',
+      experience: 'os',
       colorMode: 'system',
-      wallpaper: 'midnight',
+      wallpaper: 'slate',
       animationsEnabled: true,
 
       addWindow: (type, url?) => {

@@ -3,6 +3,7 @@ import dynamic from 'next/dynamic';
 import { useDesktopStore, Wallpaper } from '../../stores/useDesktopStore';
 import { MenuBar } from '../MenuBar';
 import { DesktopIcons } from './DesktopIcons';
+import { WallpaperOverlay } from './WallpaperOverlay';
 import { useKeyboardShortcuts } from '../../hooks/desktop/useKeyboardShortcuts';
 
 const AppWindow = dynamic(() => import('../AppWindow').then((m) => ({ default: m.AppWindow })), {
@@ -10,10 +11,10 @@ const AppWindow = dynamic(() => import('../AppWindow').then((m) => ({ default: m
 });
 
 const WALLPAPERS: Record<Wallpaper, string> = {
+  slate: 'linear-gradient(145deg, #0e0e1e 0%, #101428 100%)',
   midnight: 'linear-gradient(145deg, #0a0a0f 0%, #111116 40%, #0d0d14 100%)',
   aurora: 'linear-gradient(145deg, #0a1628 0%, #0d1a0d 50%, #0a1628 100%)',
   dusk: 'linear-gradient(145deg, #120820 0%, #1e1030 50%, #120820 100%)',
-  slate: 'linear-gradient(145deg, #0e0e1e 0%, #101428 100%)',
   forest: 'linear-gradient(145deg, #091409 0%, #112011 100%)',
 };
 
@@ -40,6 +41,7 @@ export const Desktop: React.FC = () => {
         fontFamily: "'Inter', system-ui, sans-serif",
       }}
     >
+      <WallpaperOverlay wallpaper={wallpaper} />
       <MenuBar />
 
       {/* Desktop area — below menu bar */}
