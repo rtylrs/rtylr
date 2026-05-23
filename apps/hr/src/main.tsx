@@ -4,10 +4,13 @@ import { BrowserRouter } from 'react-router-dom';
 import { QueryClientProvider } from '@tanstack/react-query';
 import { I18nextProvider } from 'react-i18next';
 import { Toaster } from 'sonner';
+import { bootObservability } from '@voxire/observability';
 import App from './App';
 import i18next from './shared/services/i18next';
 import { queryClient } from './shared/lib/react-query';
 import './globals.css';
+
+bootObservability({ app: 'hr' });
 
 const stored = localStorage.getItem('hr-theme') || 'light';
 const systemDark = window.matchMedia('(prefers-color-scheme: dark)').matches;
