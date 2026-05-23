@@ -58,7 +58,10 @@ const SkeletonTableRow: React.FC = () => (
 );
 
 const Purchasing: React.FC = () => {
-  const { data: orders = [], isLoading } = usePurchaseOrders();
+  const [page, setPage] = useState(1);
+  const { data: ordersResult, isLoading } = usePurchaseOrders({ page });
+  const orders = ordersResult?.orders ?? [];
+  const hasMore = ordersResult?.hasMore ?? false;
   const approveMut = useApprovePurchaseOrder();
   const sendMut = useSendPurchaseOrder();
   const createMut = useCreatePurchaseOrder();
@@ -370,6 +373,32 @@ const Purchasing: React.FC = () => {
                 {createMut.isPending ? 'Creating…' : 'Create Draft'}
               </button>
             </div>
+          </div>
+        </div>
+      )}
+
+      {(page > 1 || hasMore) && (
+        <div className="flex items-center justify-between px-1 py-3">
+          <span className="text-xs" style={{ color: 'var(--erp-text-dim)' }}>
+            Page {page}
+          </span>
+          <div className="flex items-center gap-2">
+            <button
+              onClick={() => setPage((p) => Math.max(1, p - 1))}
+              disabled={page <= 1}
+              className="px-3 py-1.5 rounded-md text-xs font-medium disabled:opacity-30"
+              style={{ background: 'var(--erp-hover)', color: 'var(--erp-text-muted)' }}
+            >
+              Prev
+            </button>
+            <button
+              onClick={() => setPage((p) => p + 1)}
+              disabled={!hasMore}
+              className="px-3 py-1.5 rounded-md text-xs font-medium disabled:opacity-30"
+              style={{ background: 'var(--erp-hover)', color: 'var(--erp-text-muted)' }}
+            >
+              Next
+            </button>
           </div>
         </div>
       )}

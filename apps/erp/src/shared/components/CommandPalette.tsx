@@ -46,7 +46,8 @@ const CommandPalette: React.FC<CommandPaletteProps> = ({ open, onClose }) => {
   const [activeIdx, setActiveIdx] = useState(0);
   const { data: products = [] } = useProducts();
   const { data: suppliers = [] } = useSuppliers();
-  const { data: orders = [] } = usePurchaseOrders();
+  const { data: ordersResult } = usePurchaseOrders();
+  const orders = ordersResult?.orders ?? [];
 
   useEffect(() => {
     if (!open) setQ('');

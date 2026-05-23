@@ -7,14 +7,34 @@ import { erpApi, PurchaseOrder } from '../../shared/services/erpApi';
 import { purchaseOrderSchema } from '../../shared/schemas/purchaseOrders';
 import { unwrapList } from '../../shared/lib/unwrapList';
 
-export function usePurchaseOrders() {
-  return useQuery({
-    queryKey: ['purchase-orders'],
-    queryFn: async () => {
-      const res = await unwrap(erpApi.listPurchaseOrders());
-      return z
+interface UsePurchaseOrdersParams {
+  page?: number;
+  pageSize?: number;
+}
+
+export interface PurchaseOrdersResult {
+  orders: PurchaseOrder[];
+  hasMore: boolean;
+  page: number;
+  pageSize: number;
+}
+
+export function usePurchaseOrders(params: UsePurchaseOrdersParams = {}) {
+  const { page = 1, pageSize = 50 } = params;
+  return useQuery<PurchaseOrdersResult>({
+    queryKey: ['purchase-orders', { page, pageSize }],
+    queryFn: async (): Promise<PurchaseOrdersResult> => {
+      const res = await unwrap(erpApi.listPurchaseOrders({ page, page_size: pageSize }));
+      const raw = res as unknown as Record<string, unknown>;
+      const orders = z
         .array(purchaseOrderSchema)
         .parse(unwrapList(res, 'purchase_orders', 'orders')) as PurchaseOrder[];
+      return {
+        orders,
+        hasMore: Boolean(raw.has_more),
+        page: Number(raw.page ?? page),
+        pageSize: Number(raw.page_size ?? pageSize),
+      };
     },
   });
 }

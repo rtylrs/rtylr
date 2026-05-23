@@ -15,18 +15,37 @@ import { useTranslation } from 'react-i18next';
 
 interface ListPurchaseOrdersParams {
   status?: string;
+  page?: number;
+  pageSize?: number;
+}
+
+export interface PurchaseOrderListResult {
+  purchaseOrders: PurchaseOrder[];
+  hasMore: boolean;
+  page: number;
+  pageSize: number;
 }
 
 export const useListPurchaseOrders = (
   params: ListPurchaseOrdersParams = {}
-): UseQueryResult<PurchaseOrder[]> => {
-  return useQuery<PurchaseOrder[]>({
-    queryKey: ['erp-purchase-orders', 'filter', params],
-    queryFn: async (): Promise<PurchaseOrder[]> => {
+): UseQueryResult<PurchaseOrderListResult> => {
+  const { status, page = 1, pageSize = 50 } = params;
+  return useQuery<PurchaseOrderListResult>({
+    queryKey: ['erp-purchase-orders', 'filter', { status, page, pageSize }],
+    queryFn: async (): Promise<PurchaseOrderListResult> => {
       const res = await unwrap(
-        safe.get<ListPurchaseOrdersResponse>('/erp/purchase-orders', { params })
+        safe.get<unknown>('/erp/purchase-orders', {
+          params: { status, page, page_size: pageSize },
+        })
       );
-      return (res as ListPurchaseOrdersResponse).purchaseOrders ?? [];
+      const raw = res as Record<string, unknown>;
+      const purchaseOrders = (raw.purchase_orders ?? []) as PurchaseOrder[];
+      return {
+        purchaseOrders,
+        hasMore: Boolean(raw.has_more),
+        page: Number(raw.page ?? page),
+        pageSize: Number(raw.page_size ?? pageSize),
+      };
     },
   });
 };

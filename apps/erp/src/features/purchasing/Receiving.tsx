@@ -19,7 +19,8 @@ interface ReceiveLine {
 }
 
 const Receiving: React.FC = () => {
-  const { data: orders = [], isLoading } = usePurchaseOrders();
+  const { data: ordersResult, isLoading } = usePurchaseOrders();
+  const orders = ordersResult?.orders ?? [];
   const updateStatus = useUpdatePurchaseOrderStatus();
   const open = orders.filter((o) => o.status === 'Sent' || o.status === 'Approved');
   const [selectedId, setSelectedId] = useState<number | null>(null);
