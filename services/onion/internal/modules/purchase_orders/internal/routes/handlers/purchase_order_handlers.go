@@ -26,11 +26,16 @@ type ListPurchaseOrdersHandler struct {
 }
 
 type ListPurchaseOrdersRequest struct {
-	Status string `json:"status"`
+	Status   string `json:"status"`
+	Page     int64  `json:"page"`
+	PageSize int64  `json:"page_size"`
 }
 
 type ListPurchaseOrdersResponse struct {
 	PurchaseOrders []*erpv1.PurchaseOrder `json:"purchase_orders"`
+	Page           int64                  `json:"page"`
+	PageSize       int64                  `json:"page_size"`
+	HasMore        bool                   `json:"has_more"`
 }
 
 func newPurchaseOrderPayload(po domain.PurchaseOrder) *erpv1.PurchaseOrder {
@@ -85,7 +90,7 @@ func (h *ListPurchaseOrdersHandler) Serve(ctx context.Context, req *ListPurchase
 		}
 	}
 
-	orders, err := h.Service.ListPurchaseOrders(ctx, authUser.UserID, req.Status)
+	orders, hasMore, err := h.Service.ListPurchaseOrders(ctx, authUser.UserID, req.Status, req.Page, req.PageSize)
 	if err != nil {
 		return ListPurchaseOrdersResponse{}, &errorModels.ServerError{
 			Code:     http.StatusInternalServerError,
@@ -99,7 +104,15 @@ func (h *ListPurchaseOrdersHandler) Serve(ctx context.Context, req *ListPurchase
 		payloads = append(payloads, newPurchaseOrderPayload(po))
 	}
 
-	return ListPurchaseOrdersResponse{PurchaseOrders: payloads}, nil
+	page := req.Page
+	if page < 1 {
+		page = 1
+	}
+	pageSize := req.PageSize
+	if pageSize < 1 {
+		pageSize = 50
+	}
+	return ListPurchaseOrdersResponse{PurchaseOrders: payloads, Page: page, PageSize: pageSize, HasMore: hasMore}, nil
 }
 
 // ─── Create Purchase Order ────────────────────────────────────────────────────

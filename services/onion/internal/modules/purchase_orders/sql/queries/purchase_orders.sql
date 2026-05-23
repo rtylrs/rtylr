@@ -3,14 +3,16 @@ SELECT id, owner_id, supplier_id, po_number, status, subtotal, tax_amount, total
        expected_delivery, received_at, notes, created_by, created_at, updated_at
 FROM erp_purchase_orders
 WHERE owner_id = ?
-ORDER BY created_at DESC;
+ORDER BY created_at DESC
+LIMIT ? OFFSET ?;
 
 -- name: ListPurchaseOrdersByStatus :many
 SELECT id, owner_id, supplier_id, po_number, status, subtotal, tax_amount, total,
        expected_delivery, received_at, notes, created_by, created_at, updated_at
 FROM erp_purchase_orders
 WHERE owner_id = ? AND status = ?
-ORDER BY created_at DESC;
+ORDER BY created_at DESC
+LIMIT ? OFFSET ?;
 
 -- name: GetPurchaseOrderItems :many
 SELECT id, purchase_order_id, product_id, quantity_ordered, quantity_received, unit_cost, total_cost

@@ -26,7 +26,7 @@ func NewRepository(db *sql.DB) *Repository {
 	}
 }
 
-func (r *Repository) ListPurchaseOrders(ctx context.Context, ownerID int64, status string) ([]domain.PurchaseOrder, error) {
+func (r *Repository) ListPurchaseOrders(ctx context.Context, ownerID int64, status string, limit, offset int32) ([]domain.PurchaseOrder, error) {
 	var rows []sqlc.ErpPurchaseOrder
 	var err error
 
@@ -34,9 +34,15 @@ func (r *Repository) ListPurchaseOrders(ctx context.Context, ownerID int64, stat
 		rows, err = r.queries.ListPurchaseOrdersByStatus(ctx, sqlc.ListPurchaseOrdersByStatusParams{
 			OwnerID: ownerID,
 			Status:  sqlc.NullErpPurchaseOrdersStatus{ErpPurchaseOrdersStatus: sqlc.ErpPurchaseOrdersStatus(status), Valid: true},
+			Limit:   limit,
+			Offset:  offset,
 		})
 	} else {
-		rows, err = r.queries.ListPurchaseOrders(ctx, ownerID)
+		rows, err = r.queries.ListPurchaseOrders(ctx, sqlc.ListPurchaseOrdersParams{
+			OwnerID: ownerID,
+			Limit:   limit,
+			Offset:  offset,
+		})
 	}
 
 	if err != nil {

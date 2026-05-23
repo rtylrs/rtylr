@@ -26,12 +26,34 @@ func (s *Service) GetByID(ctx context.Context, ownerID, id int64) (domain.Purcha
 	return s.repo.GetByID(ctx, ownerID, id)
 }
 
-func (s *Service) ListPurchaseOrders(ctx context.Context, ownerID int64, status string) ([]domain.PurchaseOrder, error) {
-	cacheKey := fmt.Sprintf("purchase_orders:%d:%s", ownerID, status)
+func (s *Service) ListPurchaseOrders(ctx context.Context, ownerID int64, status string, page, pageSize int64) ([]domain.PurchaseOrder, bool, error) {
+	limit, offset := paginate(page, pageSize)
+	cacheKey := fmt.Sprintf("purchase_orders:%d:%s|p=%d|ps=%d", ownerID, status, page, pageSize)
 
-	return cacher.Of[[]domain.PurchaseOrder]().GetOrComputeSingle(ctx, cacheKey, func(ctx context.Context) ([]domain.PurchaseOrder, error) {
-		return s.repo.ListPurchaseOrders(ctx, ownerID, status)
+	rows, err := cacher.Of[[]domain.PurchaseOrder]().GetOrComputeSingle(ctx, cacheKey, func(ctx context.Context) ([]domain.PurchaseOrder, error) {
+		return s.repo.ListPurchaseOrders(ctx, ownerID, status, int32(limit+1), int32(offset))
 	}, cacher.WithExpiry(ctx, poCacheTTL))
+	if err != nil {
+		return nil, false, err
+	}
+	hasMore := len(rows) > limit
+	if hasMore {
+		rows = rows[:limit]
+	}
+	return rows, hasMore, nil
+}
+
+func paginate(page, pageSize int64) (int, int) {
+	if page < 1 {
+		page = 1
+	}
+	if pageSize < 1 {
+		pageSize = 50
+	}
+	if pageSize > 500 {
+		pageSize = 500
+	}
+	return int(pageSize), int((page - 1) * pageSize)
 }
 
 func (s *Service) CreatePurchaseOrder(ctx context.Context, ownerID int64, input domain.PurchaseOrderInput, createdBy int64) (int64, error) {
