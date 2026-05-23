@@ -16,6 +16,7 @@ export const AppWindow: React.FC<AppWindowProps> = ({ window: win, animationsEna
   const minimizeWindow = useDesktopStore((s) => s.minimizeWindow);
   const updateWindowPosition = useDesktopStore((s) => s.updateWindowPosition);
   const updateWindowSize = useDesktopStore((s) => s.updateWindowSize);
+  const [dragging, setDragging] = React.useState(false);
 
   const handleClose = useCallback(() => closeWindow(win.id), [win.id, closeWindow]);
   const handleMinimize = useCallback(() => minimizeWindow(win.id), [win.id, minimizeWindow]);
@@ -43,9 +44,17 @@ export const AppWindow: React.FC<AppWindowProps> = ({ window: win, animationsEna
           style={{ contain: 'layout style', pointerEvents: 'auto' }}
           dragHandleClassName="window-titlebar"
           bounds="parent"
-          onDragStart={handleFocus}
-          onDragStop={(_e, d) => updateWindowPosition(win.id, d.x, d.y)}
+          onDragStart={() => {
+            handleFocus();
+            setDragging(true);
+          }}
+          onDragStop={(_e, d) => {
+            setDragging(false);
+            updateWindowPosition(win.id, d.x, d.y);
+          }}
+          onResizeStart={() => setDragging(true)}
           onResizeStop={(_e, _dir, ref, _delta, pos) => {
+            setDragging(false);
             updateWindowSize(win.id, parseInt(ref.style.width), parseInt(ref.style.height));
             updateWindowPosition(win.id, pos.x, pos.y);
           }}
@@ -85,6 +94,8 @@ export const AppWindow: React.FC<AppWindowProps> = ({ window: win, animationsEna
             />
             <div style={{ flex: 1, position: 'relative', overflow: 'hidden' }}>
               <WindowContent type={win.type} url={win.url} />
+              {/* Blocks iframe from stealing mouse events during drag/resize */}
+              {dragging && <div style={{ position: 'absolute', inset: 0, zIndex: 10 }} />}
             </div>
           </div>
         </Rnd>
