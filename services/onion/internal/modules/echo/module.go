@@ -6,16 +6,16 @@ import (
 	"github.com/go-chi/chi/v5"
 
 	"github.com/voxire/onion/internal/modules/echo/internal/application"
+	"github.com/voxire/onion/internal/modules/echo/internal/handlers"
 	"github.com/voxire/onion/internal/modules/echo/internal/routes"
-	"github.com/voxire/onion/internal/modules/memory"
 )
 
 type Module struct {
 	snipsService  *application.Service
-	memoryService *memory.Module
+	memoryService handlers.MemoryService
 }
 
-func NewModule(ctx context.Context, memoryService *memory.Module) *Module {
+func NewModule(ctx context.Context, memoryService handlers.MemoryService) *Module {
 	snipsService, err := application.NewService(ctx)
 	if err != nil {
 		snipsService = nil

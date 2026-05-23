@@ -29,3 +29,19 @@ func (m *Module) GetService() *application.Service {
 func (m *Module) RegisterRoutes(ctx context.Context, router *chi.Mux, _ ...interface{}) {
 	routes.RegisterRoutes(ctx, router, m.memoryService)
 }
+
+func (m *Module) CreateSession(ctx context.Context, userID int, title string) (string, error) {
+	session, err := m.memoryService.CreateSession(ctx, userID, title)
+	if err != nil {
+		return "", err
+	}
+	return session.SessionID, nil
+}
+
+func (m *Module) StoreMessage(ctx context.Context, sessionID string, userID int, role, content string, tokens int) (any, error) {
+	return m.memoryService.StoreMessage(ctx, sessionID, userID, role, content, tokens)
+}
+
+func (m *Module) SummarizeSession(ctx context.Context, sessionID string, userID int) error {
+	return m.memoryService.SummarizeSession(ctx, sessionID, userID)
+}

@@ -11,11 +11,17 @@ import (
 	"time"
 
 	"github.com/voxire/onion/internal/modules/echo/internal/application"
-	"github.com/voxire/onion/internal/modules/memory"
 	errorModels "github.com/voxire/onion/internal/platform/errors"
 	"github.com/voxire/onion/internal/platform/logger"
 	"github.com/voxire/onion/internal/platform/snips"
 )
+
+type MemoryService interface {
+	CreateSession(ctx context.Context, userID int, title string) (string, error)
+	StoreMessage(ctx context.Context, sessionID string, userID int, role, content string, tokens int) (any, error)
+	SummarizeSession(ctx context.Context, sessionID string, userID int) error
+	BuildEnhancedPrompt(ctx context.Context, sessionID string, userID int, currentRequest string) string
+}
 
 const caretSystemPreamble = "You are Caret, an AI business assistant for rtylr."
 
@@ -29,7 +35,7 @@ func GenerateTextStreamRoutes() []string {
 
 type GenerateTextStreamHandler struct {
 	AiService     *application.Service
-	MemoryService *memory.Module
+	MemoryService MemoryService
 }
 
 type GenerateTextStreamRequest struct {
@@ -104,7 +110,7 @@ func (h *GenerateTextStreamHandler) ServeHTTP(w http.ResponseWriter, r *http.Req
 		return
 	}
 
-	if h.MemoryService == nil || h.MemoryService.GetService() == nil {
+	if h.MemoryService == nil {
 		log.Error("Memory service not available")
 		http.Error(w, "Memory service not available", http.StatusInternalServerError)
 
@@ -167,14 +173,14 @@ func (h *GenerateTextStreamHandler) setupSessionAndStoreMessage(ctx context.Cont
 	if req.SessionID == "" {
 		log.Info("Creating new session for user", logger.Int("user_id", int(req.UserID)))
 
-		session, err := h.MemoryService.GetService().CreateSession(ctx, int(req.UserID), "Auto-generated session")
+		sessionID, err := h.MemoryService.CreateSession(ctx, int(req.UserID), "Auto-generated session")
 		if err != nil {
 			log.Error("Failed to create session", logger.Error(err), logger.Int("user_id", int(req.UserID)))
 
 			return fmt.Errorf("failed to create session: %w", err)
 		}
 
-		req.SessionID = session.SessionID
+		req.SessionID = sessionID
 		log.Info("Session created successfully", logger.String("session_id", req.SessionID))
 	} else {
 		log.Info("Using existing session", logger.String("session_id", req.SessionID))
@@ -185,7 +191,7 @@ func (h *GenerateTextStreamHandler) setupSessionAndStoreMessage(ctx context.Cont
 		logger.Int("user_id", int(req.UserID)),
 		logger.String("role", "user"))
 
-	_, err := h.MemoryService.GetService().StoreMessage(ctx, req.SessionID, int(req.UserID), "user", req.Prompt, len(req.Prompt)/4)
+	_, err := h.MemoryService.StoreMessage(ctx, req.SessionID, int(req.UserID), "user", req.Prompt, len(req.Prompt)/4)
 	if err != nil {
 		log.Error("Failed to store message", logger.Error(err),
 			logger.String("session_id", req.SessionID),
@@ -320,7 +326,7 @@ func (h *GenerateTextStreamHandler) processAndStreamToken(w http.ResponseWriter,
 }
 
 func (h *GenerateTextStreamHandler) storeAIResponse(ctx context.Context, sessionID string, userID int, response string) {
-	_, err := h.MemoryService.GetService().StoreMessage(ctx, sessionID, userID, "assistant", response, len(response)/4)
+	_, err := h.MemoryService.StoreMessage(ctx, sessionID, userID, "assistant", response, len(response)/4)
 	if err != nil {
 		logger.Ctx(ctx).Error("Failed to store AI response",
 			logger.Error(err),
@@ -336,7 +342,7 @@ func (h *GenerateTextStreamHandler) storeAIResponse(ctx context.Context, session
 		bg, cancel := context.WithTimeout(context.WithoutCancel(ctx), 30*time.Second)
 		defer cancel()
 
-		if summarizeErr := h.MemoryService.GetService().SummarizeSession(bg, sessionID, userID); summarizeErr != nil {
+		if summarizeErr := h.MemoryService.SummarizeSession(bg, sessionID, userID); summarizeErr != nil {
 			logger.Ctx(bg).Warn("Failed to summarize session",
 				logger.Error(summarizeErr),
 				logger.String("session_id", sessionID),

@@ -50,9 +50,9 @@ func (v *userTokenValidator) ValidateTokenFull(ctx context.Context, token string
 	}, nil
 }
 
-func NewModule(ctx context.Context, db *sql.DB) *Module {
+func NewModule(ctx context.Context, db *sql.DB, googleClientID string) *Module {
 	userRepo := infrastructure.NewRepository(db)
-	userService := application.NewService(ctx, db)
+	userService := application.NewService(ctx, db, googleClientID)
 
 	module := &Module{
 		UserService:    userService,

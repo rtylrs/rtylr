@@ -10,9 +10,12 @@ import (
 	serverHttp "github.com/voxire/onion/internal/platform/server/http"
 )
 
-func RegisterRoutes(ctx context.Context, router *chi.Mux, service *application.Service) {
+func RegisterRoutes(ctx context.Context, router *chi.Mux, service *application.Service, authAppURL string) {
 	// Authorize: raw handler that redirects browser to auth.rtylr.com/oauth
-	authorizeHandler := &handlers.AuthorizeHandler{Service: service}
+	authorizeHandler := &handlers.AuthorizeHandler{
+		Service:    service,
+		AuthAppURL: authAppURL,
+	}
 	router.Get("/oauth/authorize", authorizeHandler.ServeHTTP)
 
 	// Issue: called by auth.rtylr.com after user logs in + grants consent (requires Bearer token)

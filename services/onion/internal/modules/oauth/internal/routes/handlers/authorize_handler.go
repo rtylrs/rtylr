@@ -4,7 +4,6 @@ import (
 	"context"
 	"net/http"
 	"net/url"
-	"os"
 
 	"github.com/voxire/onion/internal/modules/oauth/internal/application"
 	authPkg "github.com/voxire/onion/internal/platform/auth"
@@ -16,7 +15,8 @@ import (
 // It validates the request and redirects the browser to auth.rtylr.com/oauth
 // where the user completes login + consent via the frontend app.
 type AuthorizeHandler struct {
-	Service *application.Service
+	Service    *application.Service
+	AuthAppURL string
 }
 
 func (h *AuthorizeHandler) ServeHTTP(w http.ResponseWriter, r *http.Request) {
@@ -35,7 +35,7 @@ func (h *AuthorizeHandler) ServeHTTP(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	authFrontend := os.Getenv("AUTH_APP_URL")
+	authFrontend := h.AuthAppURL
 	if authFrontend == "" {
 		authFrontend = "https://auth.rtylr.com"
 	}
