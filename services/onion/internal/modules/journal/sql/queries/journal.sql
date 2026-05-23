@@ -2,7 +2,8 @@
 SELECT id, owner_id, date, description, status, posted_at, created_at
 FROM finance_journal_entries
 WHERE owner_id = ?
-ORDER BY date DESC;
+ORDER BY date DESC
+LIMIT ? OFFSET ?;
 
 -- name: GetJournalEntry :one
 SELECT id, owner_id, date, description, status, posted_at, created_at

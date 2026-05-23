@@ -57,19 +57,25 @@ func newPayload(e domain.JournalEntry) JournalEntryPayload {
 func ListRoutes() []string { return []string{"/finance/journal"} }
 
 type (
-	ListHandler  struct{ Service *application.Service }
-	ListRequest  struct{}
+	ListHandler struct{ Service *application.Service }
+	ListRequest struct {
+		Page     int64 `json:"page"`
+		PageSize int64 `json:"page_size"`
+	}
 	ListResponse struct {
-		Entries []JournalEntryPayload `json:"entries"`
+		Entries  []JournalEntryPayload `json:"entries"`
+		Page     int64                 `json:"page"`
+		PageSize int64                 `json:"page_size"`
+		HasMore  bool                  `json:"has_more"`
 	}
 )
 
-func (h *ListHandler) Serve(ctx context.Context, _ *ListRequest) (ListResponse, *errorModels.ServerError) {
+func (h *ListHandler) Serve(ctx context.Context, req *ListRequest) (ListResponse, *errorModels.ServerError) {
 	device := authPkg.DeviceCtx(ctx)
 	if device.IsAnonymous || device.User == nil {
 		return ListResponse{}, errorModels.PermissionDeniedServerError()
 	}
-	items, err := h.Service.List(ctx, device.User.UserID)
+	items, hasMore, err := h.Service.List(ctx, device.User.UserID, req.Page, req.PageSize)
 	if err != nil {
 		return ListResponse{}, &errorModels.ServerError{Code: http.StatusInternalServerError, Message: "Failed to list journal entries"}
 	}
@@ -77,7 +83,15 @@ func (h *ListHandler) Serve(ctx context.Context, _ *ListRequest) (ListResponse, 
 	for _, item := range items {
 		payloads = append(payloads, newPayload(item))
 	}
-	return ListResponse{Entries: payloads}, nil
+	page := req.Page
+	if page < 1 {
+		page = 1
+	}
+	pageSize := req.PageSize
+	if pageSize < 1 {
+		pageSize = 50
+	}
+	return ListResponse{Entries: payloads, Page: page, PageSize: pageSize, HasMore: hasMore}, nil
 }
 
 func CreateRoutes() []string { return []string{"/finance/journal"} }

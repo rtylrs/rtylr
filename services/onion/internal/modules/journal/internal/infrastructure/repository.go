@@ -26,8 +26,12 @@ func NewRepository(db *sql.DB) *Repository {
 	}
 }
 
-func (r *Repository) List(ctx context.Context, ownerID int64) ([]domain.JournalEntry, error) {
-	rows, err := r.queries.ListJournalEntries(ctx, ownerID)
+func (r *Repository) List(ctx context.Context, ownerID int64, limit, offset int32) ([]domain.JournalEntry, error) {
+	rows, err := r.queries.ListJournalEntries(ctx, sqlc.ListJournalEntriesParams{
+		OwnerID: ownerID,
+		Limit:   limit,
+		Offset:  offset,
+	})
 	if err != nil {
 		logger.Ctx(ctx).Error("Failed to list journal entries", logger.Error(err))
 		return nil, err
