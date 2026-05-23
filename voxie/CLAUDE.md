@@ -14,7 +14,6 @@
 
 - Feature branches are the **default**. Prefix: `feat/`, `fix/`, `chore/`, `refactor/`
 - **Direct push to `main`** is acceptable ONLY for: trivial fixes to `.proto` comments or formatting. Structural or type-breaking changes always go through a branch.
-- Commit author is **Abed El-Fattah Amouneh** only. No `Co-Authored-By` trailers — ever.
 - **No `.md` files** in commits except `CLAUDE.md` itself.
 - **Atomic commits** — one logical unit per commit. A new proto field + its generated code = one commit.
 - Commit message format: short imperative, no conventional prefix. `add staff user payload proto` not `feat: add staff user payload proto`.
