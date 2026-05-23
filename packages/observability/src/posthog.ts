@@ -1,9 +1,7 @@
 import posthog from 'posthog-js';
 
 /**
- * PostHog initialisation for every rtylr frontend app. EU region
- * (Frankfurt) — locked by the plan so EU candidate applications
- * don't cross borders.
+ * PostHog initialisation for every rtylr frontend app. US region.
  *
  * Gated on consent: this is only called by `@voxire/consent` after
  * the user has accepted cookies. Never call `initPostHog` directly
@@ -25,11 +23,11 @@ export function initPostHog(opts: InitPostHogOptions): void {
   if (!key) return;
 
   posthog.init(key, {
-    // EU Frankfurt — confirmed region for this project. Changing
+    // US region — confirmed region for this project. Changing
     // this means re-migrating every existing event, so it's nailed
     // here rather than read from env.
-    api_host: 'https://eu.i.posthog.com',
-    ui_host: 'https://eu.posthog.com',
+    api_host: 'https://us.i.posthog.com',
+    ui_host: 'https://us.posthog.com',
     // We handle consent upstream (strict opt-in). When PostHog
     // sees `opt_out_persistence_by_default: true`, it won't write
     // its persistence cookie until we explicitly opt in.
