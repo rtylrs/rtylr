@@ -6,50 +6,51 @@ import styles from './TestimonialsSection.module.scss';
 
 const testimonials = [
   {
-    quote: 'كنا نقفل الحسابات في الثامن من كل شهر. هلق بنقفلها بالثاني، ما في شي لازم نسوي تسوية.',
-    author: 'ليلى أحمد',
-    role: 'صاحبة مطعم، مطبخ بيبلوس',
-    company: 'مطعم · ٣ فروع',
+    quote:
+      'We used to close the books on the 8th of every month. Now we close them on the 2nd — nothing needs reconciling.',
+    author: 'Layla Ahmed',
+    role: 'Owner, Byblos Kitchen',
+    company: 'Restaurant · 3 branches',
     image: 'https://placehold.co/80x80/d6b88e/1a1612?text=LA',
   },
   {
     quote:
-      'النادل وصل لـ٢٠ زيارة وrtylr كتب إيميل الشكر لحاله. مديري سألني إذا أنا ضبطتها. ما ضبطتها.',
-    author: 'كريم منصور',
-    role: 'مدير عام، مطعم التراس',
-    company: 'مطعم',
+      "The waiter hit 20 visits and rtylr sent the thank-you email on its own. My manager asked if I set it up. I didn't.",
+    author: 'Karim Mansour',
+    role: 'General Manager, The Terrace',
+    company: 'Restaurant',
     image: 'https://placehold.co/80x80/c9a48a/1a1612?text=KM',
   },
   {
     quote:
-      'انقطع الإنترنت ليلة السبت وعنا ٢٠٠ طاولة. الكاشير ما وقف. ما كنت أتوقع برنامج يقدر يعمل هيك.',
-    author: 'طارق الزين',
-    role: 'صاحب، كافيه الجبل',
-    company: 'مطعم',
+      "The internet went down on a Saturday night with 200 tables. The cashier didn't stop. I didn't expect software to handle that.",
+    author: 'Tarek Zein',
+    role: 'Owner, Mountain Café',
+    company: 'Restaurant',
     image: 'https://placehold.co/80x80/b89a8a/1a1612?text=TZ',
   },
   {
     quote:
-      'الجدول كان على واتساب. هلق الدوام بينشر بأربع ضغطات والرواتب بتتسوى تلقائي كل أحد بالليل.',
-    author: 'سارة الحلبي',
-    role: 'مسؤولة عمليات، سلسلة Urban',
-    company: 'ريتيل · ٥ فروع',
+      'Schedules used to live on WhatsApp. Now shifts go out in four taps and payroll runs automatically every Sunday night.',
+    author: 'Sara Halabi',
+    role: 'Operations Manager, Urban Chain',
+    company: 'Retail · 5 branches',
     image: 'https://placehold.co/80x80/a89680/1a1612?text=SH',
   },
   {
     quote:
-      'التحويل من النظام القديم وفّر علينا تقريباً ٦٠٠ دولار على كل فرع كل شهر. وهاد قبل ما أحسب الإضافات.',
-    author: 'نادين فرحات',
-    role: 'مؤسسة، ماركت الطازج',
-    company: 'بقالة · ٤ فروع',
+      "Switching from the old system saved us roughly $600 per branch per month. And that's before I count the add-ons.",
+    author: 'Nadine Farhat',
+    role: 'Founder, Fresh Market',
+    company: 'Grocery · 4 branches',
     image: 'https://placehold.co/80x80/d6b88e/1a1612?text=NF',
   },
   {
     quote:
-      'المهمة مربوطة بالفاتورة، بالزبون، بالدوام. بطّلت أفتح أربع تابات لأربع برامج، بس بفتح Flow.',
-    author: 'جاد معلوف',
-    role: 'مدير، Tech Store Pro',
-    company: 'ريتيل',
+      'The task is linked to the invoice, the customer, the shift. I stopped opening four tabs for four apps — I just open Flow.',
+    author: 'Jad Maalof',
+    role: 'Manager, Tech Store Pro',
+    company: 'Retail',
     image: 'https://placehold.co/80x80/c9a48a/1a1612?text=JM',
   },
 ];
