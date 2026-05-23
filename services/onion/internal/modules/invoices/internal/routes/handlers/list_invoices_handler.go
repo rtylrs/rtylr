@@ -24,10 +24,15 @@ type ListInvoicesRequest struct {
 	Search   string `json:"search"`
 	DateFrom string `json:"date_from"`
 	DateTo   string `json:"date_to"`
+	Page     int64  `json:"page"`
+	PageSize int64  `json:"page_size"`
 }
 
 type ListInvoicesResponse struct {
 	Invoices []*finv1.InvoiceSummary `json:"invoices"`
+	Page     int64                   `json:"page"`
+	PageSize int64                   `json:"page_size"`
+	HasMore  bool                    `json:"has_more"`
 }
 
 func newInvoiceSummary(inv domain.Invoice) *finv1.InvoiceSummary {
@@ -55,7 +60,7 @@ func newInvoiceSummary(inv domain.Invoice) *finv1.InvoiceSummary {
 func (h *ListInvoicesHandler) Serve(ctx context.Context, req *ListInvoicesRequest) (ListInvoicesResponse, *errorModels.ServerError) {
 	device := authPkg.DeviceCtx(ctx)
 
-	invoices, err := h.FinanceService.ListInvoices(ctx, device.User.UserID, req.Status, req.Search, req.DateFrom, req.DateTo)
+	invoices, hasMore, err := h.FinanceService.ListInvoices(ctx, device.User.UserID, req.Status, req.Search, req.DateFrom, req.DateTo, req.Page, req.PageSize)
 	if err != nil {
 		return ListInvoicesResponse{}, &errorModels.ServerError{
 			Code:    http.StatusInternalServerError,
@@ -68,5 +73,13 @@ func (h *ListInvoicesHandler) Serve(ctx context.Context, req *ListInvoicesReques
 		summaries = append(summaries, newInvoiceSummary(inv))
 	}
 
-	return ListInvoicesResponse{Invoices: summaries}, nil
+	page := req.Page
+	if page < 1 {
+		page = 1
+	}
+	pageSize := req.PageSize
+	if pageSize < 1 {
+		pageSize = 50
+	}
+	return ListInvoicesResponse{Invoices: summaries, Page: page, PageSize: pageSize, HasMore: hasMore}, nil
 }

@@ -24,6 +24,8 @@ type ListExpensesRequest struct {
 	Search     string `json:"search"`
 	DateFrom   string `json:"date_from"`
 	DateTo     string `json:"date_to"`
+	Page       int64  `json:"page"`
+	PageSize   int64  `json:"page_size"`
 }
 
 type ExpensePayload struct {
@@ -46,6 +48,9 @@ type ExpensePayload struct {
 
 type ListExpensesResponse struct {
 	Expenses []ExpensePayload `json:"expenses"`
+	Page     int64            `json:"page"`
+	PageSize int64            `json:"page_size"`
+	HasMore  bool             `json:"has_more"`
 }
 
 func newExpensePayload(e domain.Expense) ExpensePayload {
@@ -71,7 +76,7 @@ func newExpensePayload(e domain.Expense) ExpensePayload {
 func (h *ListExpensesHandler) Serve(ctx context.Context, req *ListExpensesRequest) (ListExpensesResponse, *errorModels.ServerError) {
 	device := authPkg.DeviceCtx(ctx)
 
-	expenses, err := h.FinanceService.ListExpenses(ctx, device.User.UserID, req.CategoryID, req.Search, req.DateFrom, req.DateTo)
+	expenses, hasMore, err := h.FinanceService.ListExpenses(ctx, device.User.UserID, req.CategoryID, req.Search, req.DateFrom, req.DateTo, req.Page, req.PageSize)
 	if err != nil {
 		return ListExpensesResponse{}, &errorModels.ServerError{
 			Code:    http.StatusInternalServerError,
@@ -84,5 +89,13 @@ func (h *ListExpensesHandler) Serve(ctx context.Context, req *ListExpensesReques
 		payloads = append(payloads, newExpensePayload(e))
 	}
 
-	return ListExpensesResponse{Expenses: payloads}, nil
+	page := req.Page
+	if page < 1 {
+		page = 1
+	}
+	pageSize := req.PageSize
+	if pageSize < 1 {
+		pageSize = 50
+	}
+	return ListExpensesResponse{Expenses: payloads, Page: page, PageSize: pageSize, HasMore: hasMore}, nil
 }

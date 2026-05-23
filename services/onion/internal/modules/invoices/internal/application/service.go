@@ -41,14 +41,36 @@ func NewService(_ context.Context, db *sql.DB) *Service {
 // Invoices
 // ---------------------------------------------------------------------------
 
-func (s *Service) ListInvoices(ctx context.Context, ownerID int64, status, search, dateFrom, dateTo string) ([]domain.Invoice, error) {
-	key := cacheKeys.Scoped(invoicesScope, ownerID, fmt.Sprintf("list|s=%s|q=%s|f=%s|t=%s", status, search, dateFrom, dateTo))
-	return cacher.Of[[]domain.Invoice]().GetOrComputeSingle(ctx, key,
+func (s *Service) ListInvoices(ctx context.Context, ownerID int64, status, search, dateFrom, dateTo string, page, pageSize int64) ([]domain.Invoice, bool, error) {
+	limit, offset := paginateInvoices(page, pageSize)
+	key := cacheKeys.Scoped(invoicesScope, ownerID, fmt.Sprintf("list|s=%s|q=%s|f=%s|t=%s|p=%d|ps=%d", status, search, dateFrom, dateTo, page, pageSize))
+	rows, err := cacher.Of[[]domain.Invoice]().GetOrComputeSingle(ctx, key,
 		func(ctx context.Context) ([]domain.Invoice, error) {
-			return s.repo.ListInvoices(ctx, ownerID, status, search, dateFrom, dateTo)
+			return s.repo.ListInvoices(ctx, ownerID, status, search, dateFrom, dateTo, limit+1, offset)
 		},
 		cacher.WithExpiry(ctx, invoicesTTL),
 	)
+	if err != nil {
+		return nil, false, err
+	}
+	hasMore := len(rows) > limit
+	if hasMore {
+		rows = rows[:limit]
+	}
+	return rows, hasMore, nil
+}
+
+func paginateInvoices(page, pageSize int64) (int, int) {
+	if page < 1 {
+		page = 1
+	}
+	if pageSize < 1 {
+		pageSize = 50
+	}
+	if pageSize > 500 {
+		pageSize = 500
+	}
+	return int(pageSize), int((page - 1) * pageSize)
 }
 
 func (s *Service) GetInvoice(ctx context.Context, ownerID, invoiceID int64) (*domain.Invoice, error) {
@@ -421,18 +443,23 @@ func (s *Service) RecordPayment(ctx context.Context, ownerID int64, input domain
 // Expenses
 // ---------------------------------------------------------------------------
 
-func (s *Service) ListExpenses(ctx context.Context, ownerID, categoryID int64, search, dateFrom, dateTo string) ([]domain.Expense, error) {
-	key := cacheKeys.Scoped(invoicesScope, ownerID, fmt.Sprintf("expenses|c=%d|q=%s|f=%s|t=%s", categoryID, search, dateFrom, dateTo))
-	return cacher.Of[[]domain.Expense]().GetOrComputeSingle(ctx, key,
+func (s *Service) ListExpenses(ctx context.Context, ownerID, categoryID int64, search, dateFrom, dateTo string, page, pageSize int64) ([]domain.Expense, bool, error) {
+	limit, offset := paginateInvoices(page, pageSize)
+	key := cacheKeys.Scoped(invoicesScope, ownerID, fmt.Sprintf("expenses|c=%d|q=%s|f=%s|t=%s|p=%d|ps=%d", categoryID, search, dateFrom, dateTo, page, pageSize))
+	rows, err := cacher.Of[[]domain.Expense]().GetOrComputeSingle(ctx, key,
 		func(ctx context.Context) ([]domain.Expense, error) {
-			return s.listExpensesImpl(ctx, ownerID, categoryID, search, dateFrom, dateTo)
+			return s.repo.ListExpenses(ctx, ownerID, categoryID, search, dateFrom, dateTo, limit+1, offset)
 		},
 		cacher.WithExpiry(ctx, invoicesTTL),
 	)
-}
-
-func (s *Service) listExpensesImpl(ctx context.Context, ownerID, categoryID int64, search, dateFrom, dateTo string) ([]domain.Expense, error) {
-	return s.repo.ListExpenses(ctx, ownerID, categoryID, search, dateFrom, dateTo)
+	if err != nil {
+		return nil, false, err
+	}
+	hasMore := len(rows) > limit
+	if hasMore {
+		rows = rows[:limit]
+	}
+	return rows, hasMore, nil
 }
 
 func (s *Service) CreateExpense(ctx context.Context, ownerID int64, input domain.ExpenseInput) (*domain.Expense, error) {

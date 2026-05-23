@@ -31,7 +31,7 @@ func NewRepository(db *sql.DB) *Repository {
 // Invoices
 // ---------------------------------------------------------------------------
 
-func (r *Repository) ListInvoices(ctx context.Context, ownerID int64, status, search, dateFrom, dateTo string) ([]domain.Invoice, error) {
+func (r *Repository) ListInvoices(ctx context.Context, ownerID int64, status, search, dateFrom, dateTo string, limit, offset int) ([]domain.Invoice, error) {
 	// Dynamic filters require raw SQL since sqlc cannot handle optional WHERE clauses.
 	query := `
 		SELECT id, owner_id, invoice_number, client_name, client_email, client_address, client_tax_id,
@@ -64,7 +64,8 @@ func (r *Repository) ListInvoices(ctx context.Context, ownerID int64, status, se
 		args = append(args, dateTo)
 	}
 
-	query += " ORDER BY created_at DESC"
+	query += " ORDER BY created_at DESC LIMIT ? OFFSET ?"
+	args = append(args, limit, offset)
 
 	rows, err := r.pool.QueryContext(ctx, query, args...)
 	if err != nil {
@@ -367,7 +368,7 @@ func (r *Repository) GetPaymentsByInvoice(ctx context.Context, invoiceID int64) 
 // Expenses
 // ---------------------------------------------------------------------------
 
-func (r *Repository) ListExpenses(ctx context.Context, ownerID, categoryID int64, search, dateFrom, dateTo string) ([]domain.Expense, error) {
+func (r *Repository) ListExpenses(ctx context.Context, ownerID, categoryID int64, search, dateFrom, dateTo string, limit, offset int) ([]domain.Expense, error) {
 	// Dynamic filters require raw SQL.
 	query := `
 		SELECT id, owner_id, category_id, description, amount, currency, expense_date, vendor,
@@ -398,7 +399,8 @@ func (r *Repository) ListExpenses(ctx context.Context, ownerID, categoryID int64
 		args = append(args, dateTo)
 	}
 
-	query += " ORDER BY expense_date DESC"
+	query += " ORDER BY expense_date DESC LIMIT ? OFFSET ?"
+	args = append(args, limit, offset)
 
 	rows, err := r.pool.QueryContext(ctx, query, args...)
 	if err != nil {
