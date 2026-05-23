@@ -9,7 +9,7 @@ on:
 
 jobs:
   # ── Quality gates ──────────────────────────────────────────────────
-  # These stay in the calling repo — they reference this repo's scripts
+  # These stay in the calling repo - they reference this repo's scripts
   # (pnpm turbo typecheck/lint/build) and there's no duplication across
   # repos to extract.
 
@@ -57,7 +57,7 @@ jobs:
   # ── End-to-end (Playwright) ────────────────────────────────────────
   # Real browser, real Vite dev servers, API stubbed per-test via
   # page.route(). Lives in its own job so Vitest failures don't waste
-  # Playwright's boot time. Hard-gated now that specs are green — if
+  # Playwright's boot time. Hard-gated now that specs are green - if
   # a test goes flaky, tighten the selector rather than re-enabling
   # continue-on-error.
   e2e:
