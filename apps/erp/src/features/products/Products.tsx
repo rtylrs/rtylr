@@ -34,7 +34,8 @@ const Products: React.FC = () => {
   const [showAdd, setShowAdd] = useState(false);
 
   const mergedFilters: ProductFilters = { ...filters, search: debouncedSearch };
-  const { data: products = [], isLoading } = useProducts(mergedFilters);
+  const { data: productResult, isLoading } = useProducts(mergedFilters);
+  const products = productResult?.products ?? [];
   const { data: categories = [] } = useCategories();
   const { data: brands = [] } = useBrands();
   const deleteMut = useDeleteProduct();

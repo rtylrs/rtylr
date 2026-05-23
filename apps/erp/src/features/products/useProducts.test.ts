@@ -88,7 +88,7 @@ describe('useProducts', () => {
     const { result } = renderHook(() => useProducts(), { wrapper: createWrapper() });
     await waitFor(() => expect(result.current.isSuccess).toBe(true));
 
-    expect(result.current.data).toHaveLength(3);
+    expect(result.current.data?.products).toHaveLength(3);
   });
 
   it('applies client-side search filter', async () => {
@@ -99,7 +99,7 @@ describe('useProducts', () => {
     });
     await waitFor(() => expect(result.current.isSuccess).toBe(true));
 
-    expect(result.current.data).toHaveLength(2);
+    expect(result.current.data?.products).toHaveLength(2);
   });
 
   it('applies client-side category filter', async () => {
@@ -110,8 +110,8 @@ describe('useProducts', () => {
     });
     await waitFor(() => expect(result.current.isSuccess).toBe(true));
 
-    expect(result.current.data).toHaveLength(2);
-    expect(result.current.data!.every((p) => p.category === 'Electronics')).toBe(true);
+    expect(result.current.data?.products).toHaveLength(2);
+    expect(result.current.data?.products.every((p) => p.category === 'Electronics')).toBe(true);
   });
 
   it('applies client-side brand filter', async () => {
@@ -122,8 +122,8 @@ describe('useProducts', () => {
     });
     await waitFor(() => expect(result.current.isSuccess).toBe(true));
 
-    expect(result.current.data).toHaveLength(1);
-    expect(result.current.data![0].name).toBe('Widget B');
+    expect(result.current.data?.products).toHaveLength(1);
+    expect(result.current.data?.products[0].name).toBe('Widget B');
   });
 
   it('applies client-side status filter', async () => {
@@ -134,7 +134,7 @@ describe('useProducts', () => {
     });
     await waitFor(() => expect(result.current.isSuccess).toBe(true));
 
-    expect(result.current.data).toHaveLength(1);
+    expect(result.current.data?.products).toHaveLength(1);
   });
 
   it('sorts by name ascending', async () => {
@@ -145,8 +145,8 @@ describe('useProducts', () => {
     });
     await waitFor(() => expect(result.current.isSuccess).toBe(true));
 
-    expect(result.current.data![0].name).toBe('Gadget C');
-    expect(result.current.data![2].name).toBe('Widget B');
+    expect(result.current.data?.products[0].name).toBe('Gadget C');
+    expect(result.current.data?.products[2].name).toBe('Widget B');
   });
 
   it('sorts by price descending', async () => {
@@ -157,7 +157,7 @@ describe('useProducts', () => {
     });
     await waitFor(() => expect(result.current.isSuccess).toBe(true));
 
-    expect(result.current.data![0].salePrice).toBe(30);
+    expect(result.current.data?.products[0].salePrice).toBe(30);
   });
 
   it('handles null response from API', async () => {
@@ -166,7 +166,7 @@ describe('useProducts', () => {
     const { result } = renderHook(() => useProducts(), { wrapper: createWrapper() });
     await waitFor(() => expect(result.current.isSuccess).toBe(true));
 
-    expect(result.current.data).toEqual([]);
+    expect(result.current.data?.products).toEqual([]);
   });
 });
 

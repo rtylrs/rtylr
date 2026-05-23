@@ -24,7 +24,8 @@ const inputStyle: React.CSSProperties = {
 };
 
 const StockTakes: React.FC = () => {
-  const { data: stockTakes = [], isLoading } = useStockTakes();
+  const { data: stockTakeResult, isLoading } = useStockTakes();
+  const stockTakes = stockTakeResult?.stockTakes ?? [];
   const { data: warehouses = [] } = useWarehouses();
   const createMut = useCreateStockTake();
   const [showCreate, setShowCreate] = useState(false);

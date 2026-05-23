@@ -10,7 +10,8 @@ import { toast } from 'sonner';
 const AMBER = '#f59e0b';
 
 const Barcodes: React.FC = () => {
-  const { data: products = [], isLoading } = useProducts();
+  const { data: productResult, isLoading } = useProducts();
+  const products = productResult?.products ?? [];
   const [selected, setSelected] = useState<Set<number>>(new Set());
   const [copies, setCopies] = useState(1);
 

@@ -79,7 +79,8 @@ const SkeletonCard: React.FC = () => (
 
 const Suppliers: React.FC = () => {
   const { t } = useTranslation();
-  const { data: suppliers = [], isLoading } = useSuppliers();
+  const { data: supplierResult, isLoading } = useSuppliers();
+  const suppliers = supplierResult?.suppliers ?? [];
   const createMut = useCreateSupplier();
   const [showScorecards, setShowScorecards] = useState(false);
   const [showCreate, setShowCreate] = useState(false);

@@ -65,7 +65,8 @@ const Purchasing: React.FC = () => {
   const approveMut = useApprovePurchaseOrder();
   const sendMut = useSendPurchaseOrder();
   const createMut = useCreatePurchaseOrder();
-  const { data: suppliers = [] } = useSuppliers();
+  const { data: supplierResult } = useSuppliers();
+  const suppliers = supplierResult?.suppliers ?? [];
   const [filter, setFilter] = useState<PurchaseOrder['status'] | 'All'>('All');
   const [showCreate, setShowCreate] = useState(false);
   const [newSupplierId, setNewSupplierId] = useState('');

@@ -44,8 +44,10 @@ const CommandPalette: React.FC<CommandPaletteProps> = ({ open, onClose }) => {
   const nav = useNavigate();
   const [q, setQ] = useState('');
   const [activeIdx, setActiveIdx] = useState(0);
-  const { data: products = [] } = useProducts();
-  const { data: suppliers = [] } = useSuppliers();
+  const { data: productResult } = useProducts();
+  const { data: supplierResult } = useSuppliers();
+  const products = productResult?.products ?? [];
+  const suppliers = supplierResult?.suppliers ?? [];
   const { data: ordersResult } = usePurchaseOrders();
   const orders = ordersResult?.orders ?? [];
 

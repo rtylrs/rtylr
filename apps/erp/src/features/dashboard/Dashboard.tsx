@@ -65,8 +65,10 @@ const itemVariants = {
 const Dashboard: React.FC = () => {
   const { data: lowStockData, isLoading: lowStockLoading } = useLowStock();
   const { data: ordersResult, isLoading: ordersLoading } = usePurchaseOrders();
-  const { data: productsData, isLoading: productsLoading } = useProducts();
-  const { data: suppliersData, isLoading: suppliersLoading } = useSuppliers();
+  const { data: productsResult, isLoading: productsLoading } = useProducts();
+  const { data: suppliersResult, isLoading: suppliersLoading } = useSuppliers();
+  const productsData = productsResult?.products ?? [];
+  const suppliersData = suppliersResult?.suppliers ?? [];
   const { data: activityData = [] } = useActivity(8);
 
   const isLoading = lowStockLoading || ordersLoading || productsLoading || suppliersLoading;

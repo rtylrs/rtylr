@@ -19,7 +19,8 @@ function statusConfig(status: StockTransfer['status']) {
 }
 
 const StockTransfers: React.FC = () => {
-  const { data: transfers = [], isLoading } = useStockTransfers();
+  const { data: transferResult, isLoading } = useStockTransfers();
+  const transfers = transferResult?.transfers ?? [];
   const createMut = useCreateStockTransfer();
   const [showCreate, setShowCreate] = useState(false);
   const [fromName, setFromName] = useState('');

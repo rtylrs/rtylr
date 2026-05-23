@@ -62,7 +62,8 @@ const Inventory: React.FC = () => {
   const { t } = useTranslation();
   const navigate = useNavigate();
   const [search, setSearch] = useState('');
-  const { data: products = [], isLoading } = useProducts();
+  const { data: productResult, isLoading } = useProducts();
+  const products = productResult?.products ?? [];
 
   // Client-side search filters mock data; real API uses search param on mount
   const filtered = isLoading

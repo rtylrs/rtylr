@@ -11,12 +11,28 @@ import {
 import { supplierSchema } from '../../shared/schemas/suppliers';
 import { unwrapList } from '../../shared/lib/unwrapList';
 
-export function useSuppliers() {
-  return useQuery({
-    queryKey: ['suppliers'],
+export interface SupplierListResult {
+  suppliers: Supplier[];
+  hasMore: boolean;
+  page: number;
+  pageSize: number;
+}
+
+export interface UseSupplierParams {
+  page?: number;
+  pageSize?: number;
+}
+
+export function useSuppliers(params: UseSupplierParams = {}) {
+  const page = params.page ?? 1;
+  const pageSize = params.pageSize ?? 50;
+  return useQuery<SupplierListResult>({
+    queryKey: ['suppliers', { page, pageSize }],
     queryFn: async () => {
-      const res = await unwrap(erpApi.listSuppliers());
-      return z.array(supplierSchema).parse(unwrapList(res, 'suppliers')) as Supplier[];
+      const res = await unwrap(erpApi.listSuppliers({ page, page_size: pageSize }));
+      const suppliers = z.array(supplierSchema).parse(unwrapList(res, 'suppliers')) as Supplier[];
+      const hasMore = (res as unknown as Record<string, unknown>)?.has_more === true;
+      return { suppliers, hasMore, page, pageSize };
     },
   });
 }

@@ -19,8 +19,15 @@ export interface ProductFilters {
   status?: Product['status'];
   sort?: 'name' | 'stock' | 'price' | 'category';
   sortDir?: 'asc' | 'desc';
-  limit?: number;
-  offset?: number;
+  page?: number;
+  pageSize?: number;
+}
+
+export interface ProductListResult {
+  products: Product[];
+  hasMore: boolean;
+  page: number;
+  pageSize: number;
 }
 
 function applyFilters(list: Product[], f?: ProductFilters): Product[] {
@@ -53,19 +60,23 @@ function applyFilters(list: Product[], f?: ProductFilters): Product[] {
 }
 
 export function useProducts(filters?: ProductFilters) {
-  return useQuery({
-    queryKey: ['products', filters],
+  const page = filters?.page ?? 1;
+  const pageSize = filters?.pageSize ?? 50;
+  return useQuery<ProductListResult>({
+    queryKey: ['products', { ...filters, page, pageSize }],
     queryFn: async () => {
-      const data = await unwrap(
+      const res = await unwrap(
         erpApi.listProducts({
           search: filters?.search,
-          categoryId: filters?.categoryId,
-          limit: filters?.limit,
-          offset: filters?.offset,
+          category_id: filters?.categoryId,
+          page,
+          page_size: pageSize,
         })
       );
-      const parsed = z.array(productSchema).parse(unwrapList(data, 'products')) as Product[];
-      return applyFilters(parsed, filters);
+      const parsed = z.array(productSchema).parse(unwrapList(res, 'products')) as Product[];
+      const products = applyFilters(parsed, filters);
+      const hasMore = (res as unknown as Record<string, unknown>)?.has_more === true;
+      return { products, hasMore, page, pageSize };
     },
   });
 }

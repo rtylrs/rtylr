@@ -210,9 +210,9 @@ export const erpApi = {
   // Products
   listProducts: (params?: {
     search?: string;
-    categoryId?: number;
-    limit?: number;
-    offset?: number;
+    category_id?: number;
+    page?: number;
+    page_size?: number;
   }) => safe.get<Product[]>('/erp/products', { params }),
   getProduct: (id: number) => safe.get<Product>(`/erp/products/${id}`),
   createProduct: (data: CreateProductInput) => safe.post<Product>('/erp/products', data),
@@ -246,16 +246,19 @@ export const erpApi = {
     safe.put<Warehouse>('/erp/warehouses', data),
 
   // Stock transfers
-  listStockTransfers: () => safe.get<StockTransfer[]>('/erp/stock-transfers'),
+  listStockTransfers: (params?: { page?: number; page_size?: number }) =>
+    safe.get<StockTransfer[]>('/erp/stock-transfers', { params }),
   createStockTransfer: (data: Partial<StockTransfer>) =>
     safe.post<StockTransfer>('/erp/stock-transfers', data),
 
   // Stock takes
-  listStockTakes: () => safe.get<StockTake[]>('/erp/stock-takes'),
+  listStockTakes: (params?: { page?: number; page_size?: number }) =>
+    safe.get<StockTake[]>('/erp/stock-takes', { params }),
   createStockTake: (data: Partial<StockTake>) => safe.post<StockTake>('/erp/stock-takes', data),
 
   // Suppliers
-  listSuppliers: () => safe.get<Supplier[]>('/erp/suppliers'),
+  listSuppliers: (params?: { page?: number; page_size?: number }) =>
+    safe.get<Supplier[]>('/erp/suppliers', { params }),
   createSupplier: (data: CreateSupplierInput) => safe.post<Supplier>('/erp/suppliers', data),
   updateSupplier: (data: UpdateSupplierInput) => safe.put<Supplier>('/erp/suppliers', data),
   deleteSupplier: (id: number) =>

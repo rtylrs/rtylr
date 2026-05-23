@@ -15,7 +15,8 @@ const SupplierSelect: React.FC<SupplierSelectProps> = ({
 }) => {
   const [open, setOpen] = useState(false);
   const [q, setQ] = useState('');
-  const { data: suppliers = [] } = useSuppliers();
+  const { data: supplierResult } = useSuppliers();
+  const suppliers = supplierResult?.suppliers ?? [];
 
   const filtered = useMemo(
     () => suppliers.filter((s) => s.name.toLowerCase().includes(q.toLowerCase())),

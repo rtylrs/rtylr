@@ -11,7 +11,8 @@ const AMBER = '#f59e0b';
 type Method = 'FIFO' | 'LIFO' | 'WAC';
 
 const Valuation: React.FC = () => {
-  const { data: products = [], isLoading } = useProducts();
+  const { data: productResult, isLoading } = useProducts();
+  const products = productResult?.products ?? [];
   const [method, setMethod] = useState<Method>('WAC');
 
   const summary = useMemo(() => {

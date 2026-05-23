@@ -20,7 +20,7 @@ describe('erpApi', () => {
 
   // Products
   it('listProducts calls GET /erp/products with params', () => {
-    const params = { search: 'widget', limit: 10 };
+    const params = { search: 'widget', page_size: 10 };
     erpApi.listProducts(params);
     expect(safe.get).toHaveBeenCalledWith('/erp/products', { params });
   });
@@ -80,18 +80,18 @@ describe('erpApi', () => {
   // Stock transfers & takes
   it('listStockTransfers calls GET /erp/stock-transfers', () => {
     erpApi.listStockTransfers();
-    expect(safe.get).toHaveBeenCalledWith('/erp/stock-transfers');
+    expect(safe.get).toHaveBeenCalledWith('/erp/stock-transfers', { params: undefined });
   });
 
   it('listStockTakes calls GET /erp/stock-takes', () => {
     erpApi.listStockTakes();
-    expect(safe.get).toHaveBeenCalledWith('/erp/stock-takes');
+    expect(safe.get).toHaveBeenCalledWith('/erp/stock-takes', { params: undefined });
   });
 
   // Suppliers
   it('listSuppliers calls GET /erp/suppliers', () => {
     erpApi.listSuppliers();
-    expect(safe.get).toHaveBeenCalledWith('/erp/suppliers');
+    expect(safe.get).toHaveBeenCalledWith('/erp/suppliers', { params: undefined });
   });
 
   it('createSupplier calls POST /erp/suppliers', () => {
