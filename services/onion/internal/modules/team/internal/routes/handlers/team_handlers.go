@@ -25,7 +25,10 @@ func ListUsersRoutes() []string { return []string{"/team/users", "/team/members"
 
 type ListUsersHandler struct{ Service *application.Service }
 
-type ListUsersRequest struct{}
+type ListUsersRequest struct {
+	Page     int64 `json:"page"`
+	PageSize int64 `json:"page_size"`
+}
 
 type StaffUserWithGroupsPayload struct {
 	*hubv1.StaffUserPayload
@@ -33,7 +36,10 @@ type StaffUserWithGroupsPayload struct {
 }
 
 type ListUsersResponse struct {
-	Users []StaffUserWithGroupsPayload `json:"users"`
+	Users    []StaffUserWithGroupsPayload `json:"users"`
+	Page     int64                        `json:"page"`
+	PageSize int64                        `json:"page_size"`
+	HasMore  bool                         `json:"has_more"`
 }
 
 func newProtoStaffUser(u domain.StaffUser) *hubv1.StaffUserPayload {
@@ -53,13 +59,13 @@ func newProtoStaffUser(u domain.StaffUser) *hubv1.StaffUserPayload {
 	}
 }
 
-func (h *ListUsersHandler) Serve(ctx context.Context, _ *ListUsersRequest) (ListUsersResponse, *errorModels.ServerError) {
+func (h *ListUsersHandler) Serve(ctx context.Context, req *ListUsersRequest) (ListUsersResponse, *errorModels.ServerError) {
 	device := authPkg.DeviceCtx(ctx)
 	if device.User == nil {
 		return ListUsersResponse{}, errorModels.PermissionDeniedServerError()
 	}
 
-	users, err := h.Service.ListStaffUsersByBusiness(ctx, device.User.BusinessID)
+	users, hasMore, err := h.Service.ListStaffUsersByBusiness(ctx, device.User.BusinessID, req.Page, req.PageSize)
 	if err != nil {
 		return ListUsersResponse{}, &errorModels.ServerError{
 			HTTPCode: http.StatusInternalServerError,
@@ -78,7 +84,15 @@ func (h *ListUsersHandler) Serve(ctx context.Context, _ *ListUsersRequest) (List
 			Groups:           groups,
 		})
 	}
-	return ListUsersResponse{Users: payloads}, nil
+	page := req.Page
+	if page < 1 {
+		page = 1
+	}
+	pageSize := req.PageSize
+	if pageSize < 1 {
+		pageSize = 50
+	}
+	return ListUsersResponse{Users: payloads, Page: page, PageSize: pageSize, HasMore: hasMore}, nil
 }
 
 func GetMemberByIDRoutes() []string { return []string{"/team/members/{id}"} }

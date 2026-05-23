@@ -45,7 +45,8 @@ SELECT u.id, u.email, COALESCE(u.full_name,'') AS full_name, u.created_at,
 FROM user_app_permissions p
 JOIN users u ON u.id = p.user_id
 WHERE p.owner_id = ?
-ORDER BY u.created_at DESC;
+ORDER BY u.created_at DESC
+LIMIT ? OFFSET ?;
 
 -- name: GetStaffUserByID :one
 SELECT u.id, u.email, COALESCE(u.full_name,'') AS full_name, u.created_at,

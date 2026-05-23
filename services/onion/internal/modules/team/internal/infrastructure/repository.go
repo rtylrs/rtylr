@@ -157,8 +157,12 @@ func (r *Repository) CreateUser(ctx context.Context, email, passwordHash, fullNa
 
 // ─── Staff listing (join users + permissions) ─────────────────────────────────
 
-func (r *Repository) ListStaffUsers(ctx context.Context, ownerID int64) ([]domain.StaffUser, error) {
-	rows, err := r.queries.ListStaffUsers(ctx, ownerID)
+func (r *Repository) ListStaffUsers(ctx context.Context, ownerID int64, limit, offset int32) ([]domain.StaffUser, error) {
+	rows, err := r.queries.ListStaffUsers(ctx, sqlc.ListStaffUsersParams{
+		OwnerID: ownerID,
+		Limit:   limit,
+		Offset:  offset,
+	})
 	if err != nil {
 		logger.Ctx(ctx).Error("Failed to list staff users", logger.Error(err))
 

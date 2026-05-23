@@ -6,6 +6,7 @@ import (
 	"database/sql"
 	"encoding/hex"
 	"errors"
+	"fmt"
 	"strings"
 	"time"
 
@@ -43,27 +44,59 @@ func NewService(_ context.Context, db *sql.DB) *Service {
 	}
 }
 
-func (s *Service) ListStaffUsers(ctx context.Context, ownerID int64) ([]domain.StaffUser, error) {
-	return s.repo.ListStaffUsers(ctx, ownerID)
+func (s *Service) ListStaffUsers(ctx context.Context, ownerID, page, pageSize int64) ([]domain.StaffUser, bool, error) {
+	limit, offset := paginateTeam(page, pageSize)
+	rows, err := s.repo.ListStaffUsers(ctx, ownerID, int32(limit+1), int32(offset))
+	if err != nil {
+		return nil, false, err
+	}
+	hasMore := len(rows) > limit
+	if hasMore {
+		rows = rows[:limit]
+	}
+	return rows, hasMore, nil
 }
 
 // ListStaffUsersByBusiness resolves the business owner and lists all staff
 // under that owner. Lets non-owner members see the full team, not just the
 // rows they personally own (which would be empty). Result is cached per
 // businessID and invalidated by any team mutation under that business.
-func (s *Service) ListStaffUsersByBusiness(ctx context.Context, businessID int64) ([]domain.StaffUser, error) {
-	return cacher.Of[[]domain.StaffUser]().GetOrComputeSingle(
+func (s *Service) ListStaffUsersByBusiness(ctx context.Context, businessID, page, pageSize int64) ([]domain.StaffUser, bool, error) {
+	limit, offset := paginateTeam(page, pageSize)
+	key := fmt.Sprintf("%s|p=%d|ps=%d", cacheKeys.BusinessTeam(businessID), page, pageSize)
+	rows, err := cacher.Of[[]domain.StaffUser]().GetOrComputeSingle(
 		ctx,
-		cacheKeys.BusinessTeam(businessID),
+		key,
 		func(ctx context.Context) ([]domain.StaffUser, error) {
 			_, ownerID, err := s.repo.GetBusinessByID(ctx, businessID)
 			if err != nil {
 				return nil, err
 			}
-			return s.repo.ListStaffUsers(ctx, ownerID)
+			return s.repo.ListStaffUsers(ctx, ownerID, int32(limit+1), int32(offset))
 		},
 		cacher.WithExpiry(ctx, teamCacheTTL),
 	)
+	if err != nil {
+		return nil, false, err
+	}
+	hasMore := len(rows) > limit
+	if hasMore {
+		rows = rows[:limit]
+	}
+	return rows, hasMore, nil
+}
+
+func paginateTeam(page, pageSize int64) (int, int) {
+	if page < 1 {
+		page = 1
+	}
+	if pageSize < 1 {
+		pageSize = 50
+	}
+	if pageSize > 500 {
+		pageSize = 500
+	}
+	return int(pageSize), int((page - 1) * pageSize)
 }
 
 // GetMyProfile builds the composite /user/me payload (identity + business +
