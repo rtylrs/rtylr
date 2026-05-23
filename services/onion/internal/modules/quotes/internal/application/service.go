@@ -3,6 +3,7 @@ package application
 import (
 	"context"
 	"database/sql"
+	"fmt"
 	"time"
 
 	"github.com/voxire/onion/internal/modules/quotes/internal/domain"
@@ -17,7 +18,7 @@ const (
 )
 
 type repository interface {
-	List(ctx context.Context, ownerID int64) ([]domain.Quote, error)
+	List(ctx context.Context, ownerID int64, limit, offset int32) ([]domain.Quote, error)
 	Create(ctx context.Context, ownerID int64, input domain.QuoteInput) (int64, error)
 	Update(ctx context.Context, ownerID, id int64, input domain.QuoteInput) error
 	Delete(ctx context.Context, ownerID, id int64) error
@@ -38,14 +39,36 @@ func invalidateQuotesScope(ctx context.Context, ownerID int64) {
 	}
 }
 
-func (s *Service) List(ctx context.Context, ownerID int64) ([]domain.Quote, error) {
-	return cacher.Of[[]domain.Quote]().GetOrComputeSingle(ctx,
-		cacheKeys.Scoped(quotesScope, ownerID, "list"),
+func (s *Service) List(ctx context.Context, ownerID, page, pageSize int64) ([]domain.Quote, bool, error) {
+	limit, offset := paginate(page, pageSize)
+	key := cacheKeys.Scoped(quotesScope, ownerID, fmt.Sprintf("list|p=%d|ps=%d", page, pageSize))
+	rows, err := cacher.Of[[]domain.Quote]().GetOrComputeSingle(ctx, key,
 		func(ctx context.Context) ([]domain.Quote, error) {
-			return s.repo.List(ctx, ownerID)
+			return s.repo.List(ctx, ownerID, int32(limit+1), int32(offset))
 		},
 		cacher.WithExpiry(ctx, quotesTTL),
 	)
+	if err != nil {
+		return nil, false, err
+	}
+	hasMore := len(rows) > limit
+	if hasMore {
+		rows = rows[:limit]
+	}
+	return rows, hasMore, nil
+}
+
+func paginate(page, pageSize int64) (int, int) {
+	if page < 1 {
+		page = 1
+	}
+	if pageSize < 1 {
+		pageSize = 50
+	}
+	if pageSize > 500 {
+		pageSize = 500
+	}
+	return int(pageSize), int((page - 1) * pageSize)
 }
 
 func (s *Service) Create(ctx context.Context, ownerID int64, input domain.QuoteInput) (int64, error) {
