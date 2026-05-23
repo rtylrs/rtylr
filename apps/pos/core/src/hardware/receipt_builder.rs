@@ -1,7 +1,7 @@
 //! Pure ESC/POS receipt-byte builder.
 //!
 //! All I/O lives in `crate::transport`; this module is `no_std`-compatible in
-//! spirit — just inputs in, bytes out, no side effects.
+//! spirit - just inputs in, bytes out, no side effects.
 
 use serde::Deserialize;
 

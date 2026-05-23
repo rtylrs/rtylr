@@ -128,7 +128,7 @@ describe('inventory end-to-end flow', () => {
     const rawMixed = [
       // snake_case id + qty + threshold (typical server response)
       { item_id: 10, name: 'Oat Milk', current_qty: 1, unit: 'L', low_stock_threshold: 5 },
-      // camelCase id + qty with snake_case threshold (hybrid — clients that normalise some fields)
+      // camelCase id + qty with snake_case threshold (hybrid - clients that normalise some fields)
       { itemId: 11, name: 'Syrup', currentQty: 3, unit: 'bottles', low_stock_threshold: 10 },
     ];
 

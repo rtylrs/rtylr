@@ -107,16 +107,16 @@ fn probe_tcp(host: &str, port: u16) -> DeviceStatus {
             let (device_type, detail) = match port {
                 9100 => {
                     if probe_escpos_protocol(&mut stream) {
-                        ("thermal_escpos_confirmed", "ESC/POS status byte received — thermal printer confirmed")
+                        ("thermal_escpos_confirmed", "ESC/POS status byte received - thermal printer confirmed")
                     } else {
-                        ("thermal_escpos", "Connected on port 9100 — ESC/POS assumed (no status response)")
+                        ("thermal_escpos", "Connected on port 9100 - ESC/POS assumed (no status response)")
                     }
                 }
                 6101 => {
                     if probe_zpl_protocol(&mut stream) {
-                        ("zpl_label_confirmed", "Zebra ZPL response received — label printer confirmed")
+                        ("zpl_label_confirmed", "Zebra ZPL response received - label printer confirmed")
                     } else {
-                        ("zpl_label", "Connected on port 6101 — ZPL assumed (no identification response)")
+                        ("zpl_label", "Connected on port 6101 - ZPL assumed (no identification response)")
                     }
                 }
                 8008 | 8043 => {
@@ -124,7 +124,7 @@ fn probe_tcp(host: &str, port: u16) -> DeviceStatus {
                     if probe_epos_http(host, port) {
                         ("epson_epos_confirmed", "Epson ePOS-Print HTTP response confirmed")
                     } else {
-                        ("epson_epos", "Connected on ePOS port — Epson ePOS assumed (no HTTP response)")
+                        ("epson_epos", "Connected on ePOS port - Epson ePOS assumed (no HTTP response)")
                     }
                 }
                 _ => (device_type_hint, "TCP connection established"),
@@ -132,7 +132,7 @@ fn probe_tcp(host: &str, port: u16) -> DeviceStatus {
             DeviceStatus {
                 name,
                 status: "ok".to_string(),
-                message: format!("{}:{} reachable — {}", host, port, detail),
+                message: format!("{}:{} reachable - {}", host, port, detail),
                 device_type: device_type.to_string(),
             }
         }

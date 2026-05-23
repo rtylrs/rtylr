@@ -23,7 +23,7 @@ pub const SIZE_NORMAL: &[u8] = &[0x1B, 0x21, 0x00];
 pub const DRAWER_PIN2: &[u8] = &[0x1B, 0x70, 0x00, 0x19, 0xFA];
 pub const DRAWER_PIN5: &[u8] = &[0x1B, 0x70, 0x01, 0x19, 0xFA];
 
-/// ESC/POS DLE EOT 1 — real-time status transmission request.
+/// ESC/POS DLE EOT 1 - real-time status transmission request.
 /// A conforming printer responds with a 1-byte status packet within ~100 ms.
 pub const STATUS_REQUEST: &[u8] = &[0x10, 0x04, 0x01];
 
@@ -51,7 +51,7 @@ mod tests {
 
     #[test]
     fn invalid_pin_falls_back_to_pin2() {
-        // Anything not exactly 5 maps to pin 2 — this is the documented behavior
+        // Anything not exactly 5 maps to pin 2 - this is the documented behavior
         // for the higher-level validation layer (see validation::drawer).
         assert_eq!(drawer_bytes(0), DRAWER_PIN2);
         assert_eq!(drawer_bytes(99), DRAWER_PIN2);

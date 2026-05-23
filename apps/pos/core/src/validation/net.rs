@@ -45,13 +45,13 @@ pub fn validate_subnet_prefix(prefix: &str) -> Result<String, String> {
     let parts: Vec<&str> = prefix.split('.').collect();
     if parts.len() != 3 {
         return Err(format!(
-            "Invalid subnet prefix '{}' — expected format: \"192.168.1\"",
+            "Invalid subnet prefix '{}' - expected format: \"192.168.1\"",
             prefix
         ));
     }
     for p in &parts {
         if p.parse::<u8>().is_err() {
-            return Err(format!("Invalid subnet prefix '{}' — octet '{}' is not 0-255", prefix, p));
+            return Err(format!("Invalid subnet prefix '{}' - octet '{}' is not 0-255", prefix, p));
         }
     }
     Ok(prefix.to_string())
@@ -77,7 +77,7 @@ pub fn validate_ipv4_target(ip: &str) -> Result<Ipv4Addr, String> {
     Ok(parsed)
 }
 
-/// Baud rate — accepts 0 as "use default 9600", else must be in whitelist.
+/// Baud rate - accepts 0 as "use default 9600", else must be in whitelist.
 pub fn validate_baud(baud: u32) -> Result<u32, String> {
     if baud == 0 {
         return Ok(9600);

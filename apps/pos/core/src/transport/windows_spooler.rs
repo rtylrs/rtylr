@@ -80,7 +80,7 @@ pub fn write_raw(printer_name: &str, data: &[u8], doc_name: &str) -> Result<(), 
     }
 }
 
-/// Open + close the printer handle (no writes) — used by health probes.
+/// Open + close the printer handle (no writes) - used by health probes.
 #[allow(unused_variables)]
 pub fn probe_open(printer_name: &str) -> Result<(), String> {
     #[cfg(windows)]

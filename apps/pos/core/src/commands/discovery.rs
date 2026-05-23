@@ -1,4 +1,4 @@
-//! Tauri commands for hardware discovery. Thin wrappers — all logic lives
+//! Tauri commands for hardware discovery. Thin wrappers - all logic lives
 //! in `crate::hardware`.
 
 use crate::hardware::{network_scan, printer_listing, serial_listing};

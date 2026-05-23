@@ -27,7 +27,7 @@ mod tests {
     fn row_clamps_overflow_to_zero_gap() {
         let mut buf = Vec::new();
         write_row(&mut buf, "longlabel", "longvalue", 5);
-        // No panic, no negative — gap is saturated to zero
+        // No panic, no negative - gap is saturated to zero
         assert!(buf.ends_with(&[0x0A]));
     }
 }

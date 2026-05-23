@@ -88,7 +88,7 @@ pub fn validate_receipt(data: &ReceiptData) -> Result<(), String> {
         ));
     }
 
-    // Drawer pin — only validate if a kick was requested.
+    // Drawer pin - only validate if a kick was requested.
     if data.open_drawer {
         let pin = data.drawer_pin.unwrap_or(2);
         validate_drawer_pin(pin)?;
@@ -212,7 +212,7 @@ mod tests {
     fn rejects_discount_exceeding_subtotal() {
         let mut r = good_receipt();
         r.discount_amount = 99.00;
-        // recompute total to satisfy the totals invariant — but discount > subtotal should still trip
+        // recompute total to satisfy the totals invariant - but discount > subtotal should still trip
         r.total = r.subtotal - r.discount_amount + r.tax_amount + r.tip_amount;
         r.amount_paid = r.total.max(0.0);
         r.change_due = (r.amount_paid - r.total).max(0.0);

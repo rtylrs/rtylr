@@ -1,7 +1,7 @@
-// Cash drawer — legacy Windows-spooler path
+// Cash drawer - legacy Windows-spooler path
 export { openConfiguredCashDrawer } from './cashDrawerHardware';
 
-// Cash drawer — cross-platform (serial + network)
+// Cash drawer - cross-platform (serial + network)
 export { openDrawerSerial, openDrawerNetwork } from './crossPlatformDrawer';
 export type { DrawerResult, DrawerPin } from './crossPlatformDrawer';
 

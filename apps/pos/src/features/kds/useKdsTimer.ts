@@ -3,7 +3,7 @@ import { useEffect, useState } from 'react';
 /**
  * Returns a tick counter that increments every second.
  * Components use this to trigger elapsed-time recalculations without
- * storing per-order timers — a single counter re-renders all tickets.
+ * storing per-order timers - a single counter re-renders all tickets.
  */
 export function useKdsTick(): number {
   const [tick, setTick] = useState(0);

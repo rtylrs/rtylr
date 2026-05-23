@@ -132,7 +132,7 @@ describe('redeem points → discount applied before checkout', () => {
   });
 
   it('caps redemption so discount does not exceed order total', async () => {
-    // Order total $8, customer has 2000 points ($20 value) — capped at 800 points
+    // Order total $8, customer has 2000 points ($20 value) - capped at 800 points
     const { maxRedeemablePoints } = await import('./loyaltyWorkflow');
     const capped = maxRedeemablePoints(2000, 8.0);
     expect(capped).toBe(800); // floor(8.0 / 0.01)

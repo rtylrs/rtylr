@@ -8,12 +8,12 @@
 /// Reject the ESC/POS / KDS control characters that would corrupt the
 /// printed output or trigger commands mid-text.
 pub const FORBIDDEN_CONTROL_BYTES: &[u8] = &[
-    0x00,       // NUL — truncates Windows spool jobs
-    0x07,       // BEL — beeps in some printers, unprintable elsewhere
+    0x00,       // NUL - truncates Windows spool jobs
+    0x07,       // BEL - beeps in some printers, unprintable elsewhere
     0x0B,       // VT
-    0x0C,       // FF — end-of-ticket marker for KDS, cannot appear in body
-    0x1B,       // ESC — starts an ESC/POS command sequence
-    0x1C, 0x1D, 0x1E, 0x1F, // FS / GS / RS / US — used as ESC/POS prefixes
+    0x0C,       // FF - end-of-ticket marker for KDS, cannot appear in body
+    0x1B,       // ESC - starts an ESC/POS command sequence
+    0x1C, 0x1D, 0x1E, 0x1F, // FS / GS / RS / US - used as ESC/POS prefixes
 ];
 
 /// Validate that a string contains no control bytes that could corrupt
@@ -39,7 +39,7 @@ pub fn validate_printable(label: &str, value: &str, max_len: usize) -> Result<St
     Ok(trimmed.to_string())
 }
 
-/// Convenience for optional fields — None passes through unchanged.
+/// Convenience for optional fields - None passes through unchanged.
 pub fn validate_optional(label: &str, value: &Option<String>, max_len: usize) -> Result<(), String> {
     if let Some(v) = value {
         validate_printable(label, v, max_len)?;
@@ -89,7 +89,7 @@ mod tests {
 
     #[test]
     fn accepts_unicode_and_emoji() {
-        assert!(validate_printable("name", "Café — €5", 100).is_ok());
+        assert!(validate_printable("name", "Café - €5", 100).is_ok());
     }
 
     #[test]

@@ -247,7 +247,7 @@ const Payment: React.FC = () => {
               initial={{ opacity: 0 }}
               animate={{ opacity: 1 }}
             >
-              Payment confirmed — tap Charge to complete
+              Payment confirmed - tap Charge to complete
             </motion.div>
           )}
 

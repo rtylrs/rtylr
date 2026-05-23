@@ -72,7 +72,7 @@ export const useEmployeeSessionStore = create<EmployeeSessionState & EmployeeSes
           const response = await api.post('/employees/pin', { pin: normalizedPin });
           // Strip any PIN-shaped field the backend returns before
           // putting the employee in a persisted store. Earlier shape
-          // included `pin?: string` which would land in localStorage —
+          // included `pin?: string` which would land in localStorage -
           // a security gap (audit P0 #7).
           const raw = response.data.employee as Record<string, unknown> & {
             pin?: unknown;

@@ -122,14 +122,14 @@ describe('full sale flow: order → receipt → drawer', () => {
     expect(receiptData.items[0].name).toBe('Espresso');
   });
 
-  it('checkout succeeds even when printer is offline — hardware failure is independent', async () => {
+  it('checkout succeeds even when printer is offline - hardware failure is independent', async () => {
     vi.mocked(printReceipt).mockResolvedValue({ status: 'failed', error: 'printer offline' });
 
     const { checkoutResult, hardwareResult } = await runFullSale();
 
     // Payment went through
     expect(checkoutResult).toEqual({ status: 'online', orderId: 500 });
-    // Hardware failed — but the payment is not rolled back
+    // Hardware failed - but the payment is not rolled back
     expect(hardwareResult).toEqual({ kind: 'print_failed', error: 'printer offline' });
   });
 

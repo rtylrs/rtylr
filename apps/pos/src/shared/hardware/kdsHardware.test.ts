@@ -34,7 +34,7 @@ beforeEach(() => {
   vi.clearAllMocks();
 });
 
-describe('sendKdsTicket — none transport', () => {
+describe('sendKdsTicket - none transport', () => {
   it('returns skipped immediately without invoking Tauri', async () => {
     const result = await sendKdsTicket(kdsConfig({ transport: 'none' }), ticket);
     expect(result).toEqual({ status: 'skipped' });
@@ -42,7 +42,7 @@ describe('sendKdsTicket — none transport', () => {
   });
 });
 
-describe('sendKdsTicket — serial transport', () => {
+describe('sendKdsTicket - serial transport', () => {
   it('invokes send_kds_ticket_serial with correct payload and returns sent', async () => {
     vi.mocked(invoke).mockResolvedValue('Ticket sent via serial COM3');
 
@@ -86,7 +86,7 @@ describe('sendKdsTicket — serial transport', () => {
   });
 });
 
-describe('sendKdsTicket — network transport', () => {
+describe('sendKdsTicket - network transport', () => {
   it('invokes send_kds_ticket_network with correct host and port', async () => {
     vi.mocked(invoke).mockResolvedValue('Ticket sent via TCP 192.168.1.50:9100');
 

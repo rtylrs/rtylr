@@ -83,7 +83,7 @@ const OrdersScreen: React.FC = () => {
       <div className="p-5 max-w-5xl space-y-4">
         {reopenMode && (
           <div className="p-3 rounded-lg bg-amber-500/10 border border-amber-500/30 text-amber-300 text-xs">
-            Manager override approved — select a paid order below to reopen it.
+            Manager override approved - select a paid order below to reopen it.
           </div>
         )}
         <SearchBar value={search} onChange={setSearch} placeholder="Search orders..." />

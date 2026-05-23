@@ -6,7 +6,7 @@ import { useUserStore } from '../stores/userStore';
 
 /**
  * Subscribes to stock-out and low-stock realtime events and surfaces
- * actionable toasts to staff. Runs once per session — deduplicates by
+ * actionable toasts to staff. Runs once per session - deduplicates by
  * product ID so the same product only triggers one toast per 5 minutes.
  */
 export function useStockAlerts(): void {

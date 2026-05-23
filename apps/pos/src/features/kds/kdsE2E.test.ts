@@ -21,7 +21,7 @@ import { mapKdsOrders, buildKdsStatusUpdate, KDS_ITEM_ID_ERROR } from './kdsWork
 import { posService } from '../../shared/services/posService';
 import { unwrap } from '@voxire/api';
 
-// Raw API shape (snake_case + numeric id) — as the server returns it.
+// Raw API shape (snake_case + numeric id) - as the server returns it.
 const rawOrder = {
   id: 7,
   order_number: 'ORD-007',
@@ -80,7 +80,7 @@ describe('KDS end-to-end flow', () => {
     const orders = mapKdsOrders([rawOrder]);
     expect(orders[0].items).toHaveLength(2);
 
-    // Only update the first item (id 42) — simulate a single service call.
+    // Only update the first item (id 42) - simulate a single service call.
     const update = buildKdsStatusUpdate('42', 'served');
     await unwrap(posService.updateKDSItemStatus(update.itemId, update.status));
 
@@ -88,7 +88,7 @@ describe('KDS end-to-end flow', () => {
     expect(posService.updateKDSItemStatus).toHaveBeenCalledTimes(1);
     expect(posService.updateKDSItemStatus).toHaveBeenCalledWith(42, 'served');
 
-    // The mapped order still has 2 items — marking one done doesn't remove the other.
+    // The mapped order still has 2 items - marking one done doesn't remove the other.
     expect(orders[0].items).toHaveLength(2);
   });
 

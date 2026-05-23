@@ -15,7 +15,7 @@ pub fn write_all(port_name: &str, baud: u32, timeout_ms: u64, data: &[u8]) -> Re
     Ok(())
 }
 
-/// Opens the port without writing — used by hardware health checks.
+/// Opens the port without writing - used by hardware health checks.
 pub fn probe_open(port_name: &str, baud: u32, timeout_ms: u64) -> Result<(), String> {
     serialport::new(port_name, baud)
         .timeout(Duration::from_millis(timeout_ms))

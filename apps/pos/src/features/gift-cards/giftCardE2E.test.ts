@@ -89,7 +89,7 @@ describe('gift card issue → redeem', () => {
     expect(result).toEqual({ ok: false, error: 'Card not found' });
   });
 
-  it('applies gift card as discount — reduces order total', () => {
+  it('applies gift card as discount - reduces order total', () => {
     const store = makeStore();
 
     issueGiftCard({ codeInput: 'GC-PROMO', amountInput: '15', issue: store.issue });

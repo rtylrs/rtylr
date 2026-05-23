@@ -62,7 +62,7 @@ describe('manager override → reopen paid order', () => {
     expect(verifyOrder).toBeLessThan(reopenOrder);
   });
 
-  it('wrong PIN blocks reopen — reopenOrder is never called', async () => {
+  it('wrong PIN blocks reopen - reopenOrder is never called', async () => {
     vi.mocked(posService.verifyManagerPin).mockResolvedValue(
       { verified: false } as never,
     );

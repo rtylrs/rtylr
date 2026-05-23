@@ -87,7 +87,7 @@ describe('offline queue sync under network failures', () => {
     expect(result.attempted).toBe(0);
     expect(syncFn).not.toHaveBeenCalled();
 
-    // Entry still in queue as 'failed' — needs manual retry or re-queue
+    // Entry still in queue as 'failed' - needs manual retry or re-queue
     const queue = useOfflineQueueStore.getState().queue;
     expect(queue.find((e) => e.order.id === 'order-fail')?.status).toBe('failed');
   });
@@ -113,7 +113,7 @@ describe('offline queue sync under network failures', () => {
       order,
       method: 'cash',
       createOrder: vi.fn(async () => {
-        throw new Error('ECONNREFUSED — server unreachable');
+        throw new Error('ECONNREFUSED - server unreachable');
       }),
       chargeOrder: vi.fn(),
       enqueueOffline,
@@ -156,7 +156,7 @@ describe('offline queue sync under network failures', () => {
 
     expect(useOfflineQueueStore.getState().queue).toHaveLength(1);
 
-    // Network recovers — sync
+    // Network recovers - sync
     const syncFn = vi.fn(async () => undefined);
     const result = await syncPendingOfflineOrders(syncFn);
 

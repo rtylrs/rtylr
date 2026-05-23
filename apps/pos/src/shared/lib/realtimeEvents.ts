@@ -147,7 +147,7 @@ export function isPosEvent<T extends PosRealtimeEvent>(
   return event.type === type;
 }
 
-/** All KDS-relevant event types — used by useKdsStream to filter the bus. */
+/** All KDS-relevant event types - used by useKdsStream to filter the bus. */
 export const KDS_EVENT_TYPES = new Set<PosEventType>([
   'pos:order:created',
   'pos:order:preparing',

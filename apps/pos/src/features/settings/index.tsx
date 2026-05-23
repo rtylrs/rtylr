@@ -166,7 +166,7 @@ const SettingsScreen: React.FC = () => {
                   {printers.map((p) => (
                     <option key={p.name} value={p.name}>
                       {p.name}
-                      {p.isDefault ? ' (default)' : ''} — {p.connectionType}
+                      {p.isDefault ? ' (default)' : ''} - {p.connectionType}
                     </option>
                   ))}
                 </select>
@@ -191,7 +191,7 @@ const SettingsScreen: React.FC = () => {
                     onChange={(e) => s.setPrinter({ serialPort: e.target.value })}
                     className={SELECT_CLS}
                   >
-                    <option value="">— select port —</option>
+                    <option value="">- select port -</option>
                     {serialPorts.map((p) => (
                       <option key={p.portName} value={p.portName}>
                         {p.portName}
@@ -321,7 +321,7 @@ const SettingsScreen: React.FC = () => {
                     onChange={(e) => s.setKdsHardware({ serialPort: e.target.value })}
                     className={SELECT_CLS}
                   >
-                    <option value="">— select port —</option>
+                    <option value="">- select port -</option>
                     {serialPorts.map((p) => (
                       <option key={p.portName} value={p.portName}>
                         {p.portName}

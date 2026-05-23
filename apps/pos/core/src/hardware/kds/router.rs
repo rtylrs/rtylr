@@ -2,12 +2,12 @@
 //!
 //! A POS order typically contains items from multiple stations (grill,
 //! fry, cold, expo). The router takes one incoming `KdsTicket` and
-//! produces N `StationTicket`s — one per station the order touches —
+//! produces N `StationTicket`s - one per station the order touches -
 //! all sharing the parent order number so expo can re-assemble them.
 //!
 //! Rule lookup is deterministic and total: every item resolves to
 //! exactly one station, with `expo` (or whatever the configured
-//! fallback is) as the catch-all. This is intentional — failing to
+//! fallback is) as the catch-all. This is intentional - failing to
 //! route an item silently is far worse than over-routing.
 
 use serde::{Deserialize, Serialize};
@@ -270,7 +270,7 @@ mod tests {
 
     #[test]
     fn route_ticket_is_deterministic_in_station_order() {
-        // Stations come out in first-encounter order — important for
+        // Stations come out in first-encounter order - important for
         // tests and for UI ordering.
         let cfg = cfg();
         let t = ticket(vec![item("Fries"), item("Cheeseburger"), item("Fries")]);

@@ -70,7 +70,7 @@ beforeEach(() => {
 
 // ── printReceiptAndOpenDrawer ─────────────────────────────────────────────────
 
-describe('printReceiptAndOpenDrawer — Windows transport', () => {
+describe('printReceiptAndOpenDrawer - Windows transport', () => {
   it('prints then kicks drawer via Windows spooler and returns ok', async () => {
     vi.mocked(printReceipt).mockResolvedValue({ status: 'ok' });
     vi.mocked(openConfiguredCashDrawer).mockResolvedValue({ status: 'ok' });
@@ -126,7 +126,7 @@ describe('printReceiptAndOpenDrawer — Windows transport', () => {
   });
 });
 
-describe('printReceiptAndOpenDrawer — Serial transport', () => {
+describe('printReceiptAndOpenDrawer - Serial transport', () => {
   it('embeds drawer kick in ESC/POS stream (no separate drawer call)', async () => {
     vi.mocked(printReceipt).mockResolvedValue({ status: 'ok' });
 
@@ -136,7 +136,7 @@ describe('printReceiptAndOpenDrawer — Serial transport', () => {
     });
 
     expect(result).toEqual({ kind: 'ok' });
-    // Drawer kick is embedded in the receipt stream — no separate spooler call
+    // Drawer kick is embedded in the receipt stream - no separate spooler call
     expect(openConfiguredCashDrawer).not.toHaveBeenCalled();
     // Receipt data should have openDrawer: true
     const receiptArg = vi.mocked(printReceipt).mock.calls[0][1];
@@ -144,7 +144,7 @@ describe('printReceiptAndOpenDrawer — Serial transport', () => {
   });
 });
 
-describe('printReceiptAndOpenDrawer — Network transport', () => {
+describe('printReceiptAndOpenDrawer - Network transport', () => {
   it('embeds drawer kick in ESC/POS stream over TCP', async () => {
     vi.mocked(printReceipt).mockResolvedValue({ status: 'ok' });
 

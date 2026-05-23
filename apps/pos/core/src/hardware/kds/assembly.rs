@@ -7,7 +7,7 @@
 //! whether the order is ready as a whole, and never release a partial
 //! order by accident.
 //!
-//! Pure logic — no I/O, no timers. Wire it to the item state machine
+//! Pure logic - no I/O, no timers. Wire it to the item state machine
 //! by passing each station's worst-state-among-its-items in.
 
 use serde::{Deserialize, Serialize};
@@ -102,7 +102,7 @@ impl OrderAssembly {
     }
 
     /// True only when every station's portion is complete. An empty
-    /// assembly is *not* complete — releasing a no-station order would
+    /// assembly is *not* complete - releasing a no-station order would
     /// hand off nothing.
     pub fn is_releasable(&self) -> bool {
         !self.stations.is_empty()
@@ -155,7 +155,7 @@ mod tests {
 
     #[test]
     fn aggregate_station_with_only_voided_items_is_complete() {
-        // No active work outstanding — expo isn't blocked by a fully
+        // No active work outstanding - expo isn't blocked by a fully
         // voided station portion.
         let p = aggregate_station("cold", vec![Voided, Voided]);
         assert_eq!(p.total_items, 0);

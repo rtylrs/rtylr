@@ -5,7 +5,7 @@
 //! they're not allowed, absurdly large amounts that signal a bug upstream).
 //!
 //! Anywhere this module is used you should consider whether the upstream
-//! type could be a fixed-point cents integer instead — but for receipt-
+//! type could be a fixed-point cents integer instead - but for receipt-
 //! printing inputs that come from JS, f64 is what we get.
 
 pub const MAX_RECEIPT_AMOUNT: f64 = 1_000_000.0;

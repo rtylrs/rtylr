@@ -61,12 +61,12 @@ describe('calculateRedemptionDiscount', () => {
 
 describe('maxRedeemablePoints', () => {
   it('caps at available balance when balance is limiting factor', () => {
-    // 50 points = $0.50, order is $10 — balance is the limit
+    // 50 points = $0.50, order is $10 - balance is the limit
     expect(maxRedeemablePoints(50, 10)).toBe(50);
   });
 
   it('caps at order total when total is the limiting factor', () => {
-    // 1000 points = $10.00, order is $5 — 500 points max
+    // 1000 points = $10.00, order is $5 - 500 points max
     expect(maxRedeemablePoints(1000, 5)).toBe(500);
   });
 

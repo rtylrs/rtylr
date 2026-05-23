@@ -1,6 +1,6 @@
 import React, { useState } from 'react';
 import useColors from '../../shared/hooks/useColors';
-// @ts-expect-error — @root/package.json is resolved at build time by
+// @ts-expect-error - @root/package.json is resolved at build time by
 // the @root alias in vite.config; tsc lacks the JSON module
 // declaration. We treat it as `{ version: string }` below.
 import PackageJsonRaw from '@root/package.json';

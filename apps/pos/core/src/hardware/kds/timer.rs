@@ -2,13 +2,13 @@
 //!
 //! Two pure-function concerns live here:
 //!
-//! 1. **Visual tier** — Given a target cook time and how long an item
+//! 1. **Visual tier** - Given a target cook time and how long an item
 //!    has been queued/cooking, return a colored "tier" (`Fresh /
 //!    Warning / Overdue`). This is the single visual cue cooks
 //!    actually use; we keep the calculation pure so it can be unit-
 //!    tested without wall-clock injection.
 //!
-//! 2. **Quote times** — An exponential-weighted moving average of
+//! 2. **Quote times** - An exponential-weighted moving average of
 //!    recent completed cook times per station, used by the POS to
 //!    show "≈ N min" when adding a new item. EWMA is preferred over
 //!    a sliding window because it adapts to load shifts without
@@ -19,11 +19,11 @@ use serde::{Deserialize, Serialize};
 #[derive(Clone, Copy, Debug, PartialEq, Eq, Serialize, Deserialize)]
 #[serde(rename_all = "snake_case")]
 pub enum CookTier {
-    /// Below 80% of target — green.
+    /// Below 80% of target - green.
     Fresh,
-    /// Between 80% and 100% — yellow.
+    /// Between 80% and 100% - yellow.
     Warning,
-    /// Over 100% of target — red.
+    /// Over 100% of target - red.
     Overdue,
 }
 
@@ -31,7 +31,7 @@ pub enum CookTier {
 ///
 /// `elapsed_seconds` and `target_seconds` are u64 to avoid f64 drift
 /// over long shifts. A `target_seconds` of 0 always returns Overdue
-/// (defensive — a misconfigured target shouldn't silently report green).
+/// (defensive - a misconfigured target shouldn't silently report green).
 pub fn cook_tier(elapsed_seconds: u64, target_seconds: u64) -> CookTier {
     if target_seconds == 0 {
         return CookTier::Overdue;
@@ -118,7 +118,7 @@ mod tests {
 
     #[test]
     fn zero_target_is_always_overdue() {
-        // Misconfigured target — never silently report green.
+        // Misconfigured target - never silently report green.
         assert_eq!(cook_tier(0, 0), CookTier::Overdue);
         assert_eq!(cook_tier(100, 0), CookTier::Overdue);
     }

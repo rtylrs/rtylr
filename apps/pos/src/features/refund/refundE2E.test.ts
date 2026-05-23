@@ -36,7 +36,7 @@ const splitReceipt: Receipt = {
   ],
 };
 
-describe('processRefund — full cash refund', () => {
+describe('processRefund - full cash refund', () => {
   it('calls API with receipt total and triggers cash drawer adjustment', async () => {
     const refundOrder = vi.fn(async () => undefined);
     const recordCashRefund = vi.fn();
@@ -59,7 +59,7 @@ describe('processRefund — full cash refund', () => {
   });
 });
 
-describe('processRefund — full card refund', () => {
+describe('processRefund - full card refund', () => {
   it('calls API with receipt total but does not trigger cash drawer', async () => {
     const refundOrder = vi.fn(async () => undefined);
     const recordCashRefund = vi.fn();
@@ -80,7 +80,7 @@ describe('processRefund — full card refund', () => {
   });
 });
 
-describe('processRefund — partial refund', () => {
+describe('processRefund - partial refund', () => {
   it('sends only the partial amount and adjusts drawer accordingly', async () => {
     const refundOrder = vi.fn(async () => undefined);
     const recordCashRefund = vi.fn();
@@ -119,7 +119,7 @@ describe('processRefund — partial refund', () => {
   });
 });
 
-describe('processRefund — split payment receipt', () => {
+describe('processRefund - split payment receipt', () => {
   it('caps cash drawer refund to cash portion when partial refund exceeds it', async () => {
     const refundOrder = vi.fn(async () => undefined);
     const recordCashRefund = vi.fn();
@@ -136,12 +136,12 @@ describe('processRefund — split payment receipt', () => {
     });
 
     expect(refundOrder).toHaveBeenCalledWith(3, { amount: 40, reason: 'Partial' });
-    // Cash drawer only gets back the $30 that was cash — not the card portion
+    // Cash drawer only gets back the $30 that was cash - not the card portion
     expect(recordCashRefund).toHaveBeenCalledWith(30, '3');
   });
 });
 
-describe('processRefund — API failure', () => {
+describe('processRefund - API failure', () => {
   it('does not record cash refund if API call throws', async () => {
     const refundOrder = vi.fn(async () => {
       throw new Error('Network error');

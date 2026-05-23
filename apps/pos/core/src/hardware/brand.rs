@@ -12,7 +12,7 @@ pub fn classify_thermal_brand(vid: Option<u16>, manufacturer: Option<&str>) -> &
         Some(0x0dd4) => "bematech",    // Bematech S/A (Brazilian market)
         Some(0x20d1) => "elgin",       // Elgin (Brazilian market)
         Some(0x0404) => "ncr",         // NCR Corporation
-        Some(0x1a86) => "citizen",     // Citizen Systems (also CH340 clone — check product)
+        Some(0x1a86) => "citizen",     // Citizen Systems (also CH340 clone - check product)
         Some(0x0425) => "custom",      // Custom S.p.A. (kiosk/ticket printers)
         Some(0x154f) => "sewoo",       // Sewoo Tech (Korean POS printers)
         Some(0x0fe6) => "datecs",      // Datecs Ltd (fiscal printers)

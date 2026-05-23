@@ -58,7 +58,7 @@ function makeStore() {
 }
 
 describe('gift card → checkout', () => {
-  it('$20 gift card covers partial $50 order — customer pays $30 remaining', async () => {
+  it('$20 gift card covers partial $50 order - customer pays $30 remaining', async () => {
     const store = makeStore();
     issueGiftCard({ codeInput: 'GC-PAY', amountInput: '20', issue: store.issue });
 
@@ -96,7 +96,7 @@ describe('gift card → checkout', () => {
     );
   });
 
-  it('gift card with enough balance covers full order — charge is $0 remainder', async () => {
+  it('gift card with enough balance covers full order - charge is $0 remainder', async () => {
     const store = makeStore();
     issueGiftCard({ codeInput: 'GC-FULL', amountInput: '100', issue: store.issue });
 

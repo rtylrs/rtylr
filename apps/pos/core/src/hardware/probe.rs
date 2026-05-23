@@ -46,7 +46,7 @@ pub fn probe_zpl_protocol(stream: &mut std::net::TcpStream) -> bool {
 }
 
 /// Probe an Epson ePOS-Print HTTP endpoint (port 8008/8043).
-/// Returns `true` when the device answers with HTTP 200 or 400 — either
+/// Returns `true` when the device answers with HTTP 200 or 400 - either
 /// confirms an ePOS HTTP server is present.
 pub fn probe_epos_http(host: &str, port: u16) -> bool {
     let addr_str = format!("{}:{}", host, port);

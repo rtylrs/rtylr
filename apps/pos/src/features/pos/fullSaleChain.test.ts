@@ -71,7 +71,7 @@ beforeEach(() => {
 // ── Helper: run the complete sale chain ───────────────────────────────────────
 
 async function runCompleteSale() {
-  // Stage 1 — Process checkout (create + charge order on server)
+  // Stage 1 - Process checkout (create + charge order on server)
   const order = buildCheckoutOrder({
     id: 'local-chain-1',
     items: [item],
@@ -94,7 +94,7 @@ async function runCompleteSale() {
     recordCashSale: vi.fn(),
   });
 
-  // Stage 2 — Print receipt + kick cash drawer
+  // Stage 2 - Print receipt + kick cash drawer
   const hardwareResult = await printReceiptAndOpenDrawer({
     printer,
     items: [item],
@@ -111,7 +111,7 @@ async function runCompleteSale() {
     kickDrawer: true,
   });
 
-  // Stage 3 — Send ticket to kitchen display
+  // Stage 3 - Send ticket to kitchen display
   const kdsResult = await sendKdsTicket(kds, {
     orderNumber: `ORD-${(checkoutResult as { orderId: number }).orderId}`,
     station: 'KITCHEN',
@@ -128,7 +128,7 @@ async function runCompleteSale() {
     createdAt: '2026-05-13T12:00:00.000Z',
   });
 
-  // Stage 4 — Decrement inventory for sold items
+  // Stage 4 - Decrement inventory for sold items
   const stockAction = buildStockAction({
     itemId: item.productId,
     action: 'adjust',
@@ -189,7 +189,7 @@ describe('complete sale chain: checkout → receipt → drawer → KDS → inven
 
     // Payment still went through
     expect(checkoutResult).toEqual({ status: 'online', orderId: 999 });
-    // Hardware failed independently — payment not rolled back
+    // Hardware failed independently - payment not rolled back
     expect(hardwareResult).toEqual({ kind: 'print_failed', error: 'printer offline' });
   });
 
@@ -256,7 +256,7 @@ describe('complete sale chain: checkout → receipt → drawer → KDS → inven
     expect(checkoutResult).toEqual({ status: 'queued' });
     expect(enqueueOffline).toHaveBeenCalledWith(order);
 
-    // Hardware still fires — customer gets receipt even offline
+    // Hardware still fires - customer gets receipt even offline
     const hardwareResult = await printReceiptAndOpenDrawer({
       printer,
       items: [item],

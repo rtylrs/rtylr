@@ -48,7 +48,7 @@ pub enum ItemEvent {
     Bump,
     /// Recall the most recently bumped item back to `Ready`.
     Recall,
-    /// Void the item — terminal.
+    /// Void the item - terminal.
     Void,
 }
 
@@ -155,7 +155,7 @@ mod tests {
 
     #[test]
     fn cold_items_can_skip_cooking_and_go_straight_to_ready() {
-        // Salads, drinks, etc — fire-and-forget from queue to ready
+        // Salads, drinks, etc - fire-and-forget from queue to ready
         assert_eq!(transition(Queued, MarkReady).unwrap(), Ready);
     }
 
@@ -184,7 +184,7 @@ mod tests {
     fn void_not_allowed_from_terminal_states() {
         assert!(transition(Voided, Void).is_err());
         // Bumped is reachable-from-recall, so voiding a bumped item is
-        // not a state-machine concern — refunds happen elsewhere.
+        // not a state-machine concern - refunds happen elsewhere.
         assert!(transition(Bumped, Void).is_err());
     }
 
@@ -222,7 +222,7 @@ mod tests {
     fn apply_if_version_is_idempotent_for_stale_callers() {
         let mut r = ItemRecord::new_queued();
         r.apply(StartCooking).unwrap();
-        // Caller still thinks we're at version 0 — should no-op
+        // Caller still thinks we're at version 0 - should no-op
         let res = r.apply_if_version(StartCooking, 0).unwrap();
         assert_eq!(res, Cooking); // returns current state
         assert_eq!(r.version, 1); // unchanged

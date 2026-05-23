@@ -1,5 +1,5 @@
 /**
- * End-to-end: session lifecycle — open → cash movement → close with variance.
+ * End-to-end: session lifecycle - open → cash movement → close with variance.
  *
  * Chains posService.openSession → posService.cashDrop → buildCloseSessionPayload
  * → closeSessionWithFallback → posService.closeSession in the correct order.
@@ -99,7 +99,7 @@ describe('session lifecycle end-to-end', () => {
   });
 
   it('cash movement is queued when backend is unreachable during shift', async () => {
-    // cashDrop throws — should be caught by the caller and enqueued.
+    // cashDrop throws - should be caught by the caller and enqueued.
     vi.mocked(posService.cashDrop).mockRejectedValue(new Error('Network Error') as never);
     vi.mocked(posService.closeSession).mockResolvedValue(undefined as never);
 
