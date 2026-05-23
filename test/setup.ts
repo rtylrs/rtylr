@@ -2,6 +2,15 @@ import '@testing-library/jest-dom/vitest';
 import { cleanup } from '@testing-library/react';
 import { afterEach, vi } from 'vitest';
 
+// Suppress happy-dom's DOMException AbortError noise on test teardown
+const originalConsoleError = console.error;
+console.error = (...args: unknown[]) => {
+  const msg = args[0];
+  if (typeof msg === 'string' && msg.includes('AbortError')) return;
+  if (msg instanceof DOMException && msg.name === 'AbortError') return;
+  originalConsoleError(...args);
+};
+
 // Cleanup after each test
 afterEach(() => {
   cleanup();

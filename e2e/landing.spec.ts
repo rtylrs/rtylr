@@ -16,11 +16,11 @@ test.describe('Landing page', () => {
     await expect(page.getByRole('heading', { level: 1 })).toBeVisible();
   });
 
-  test('header has the Pricing link', async ({ page }) => {
+  test('desktop has the Pricing icon', async ({ page }) => {
     await page.goto(LANDING_URL);
-    // `.first()` avoids the strict-mode violation when "Pricing"
-    // appears in the header, pricing section, and footer.
-    await expect(page.getByRole('link', { name: /^Pricing$/ }).first()).toBeVisible();
+    // The landing is now a desktop OS experience — Pricing is a
+    // clickable icon on the desktop, not a nav link.
+    await expect(page.getByRole('button', { name: /^Pricing$/i }).first()).toBeVisible();
   });
 
   test('pricing page renders the plan heading', async ({ page }) => {
