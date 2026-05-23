@@ -80,6 +80,18 @@ func RegisterPOSTWithValidationAndMiddleware[Req, Res any](
 	}
 }
 
+func RegisterPATCH[Req, Res any](ctx context.Context, router *chi.Mux, paths []string, handler HandlerFunc[Req, Res]) {
+	for _, path := range paths {
+		router.Patch(path, wrapHandler(ctx, handler, false))
+	}
+}
+
+func RegisterPATCHWithValidation[Req, Res any](ctx context.Context, router *chi.Mux, paths []string, handler HandlerFunc[Req, Res]) {
+	for _, path := range paths {
+		router.Patch(path, wrapHandler(ctx, handler, true))
+	}
+}
+
 func RegisterPUT[Req, Res any](ctx context.Context, router *chi.Mux, paths []string, handler HandlerFunc[Req, Res]) {
 	for _, path := range paths {
 		router.Put(path, wrapHandler(ctx, handler, false))

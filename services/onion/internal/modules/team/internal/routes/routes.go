@@ -62,8 +62,8 @@ func RegisterRoutes(ctx context.Context, router *chi.Mux, service *application.S
 		&handlers.RequestAccessHandler{Service: service},
 	)
 
-	// POST /team/members/{id}/deactivate — convenience path-param deactivation for per-app UIs
-	serverHttp.RegisterPOST[handlers.DeactivateMemberRequest, handlers.DeactivateMemberResponse](
+	// PATCH /team/members/{id}/deactivate — convenience path-param deactivation for per-app UIs
+	serverHttp.RegisterPATCH[handlers.DeactivateMemberRequest, handlers.DeactivateMemberResponse](
 		ctx, router, handlers.DeactivateMemberRoutes(),
 		&handlers.DeactivateMemberHandler{Service: service},
 	)

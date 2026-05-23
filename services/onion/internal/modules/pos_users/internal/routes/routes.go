@@ -27,10 +27,10 @@ func RegisterRoutes(ctx context.Context, router *chi.Mux, svc *application.Servi
 	http.RegisterPOSTWithValidation[handlers.CreatePOSUserRequest, handlers.CreatePOSUserResponse](
 		ctx, router, handlers.POSUserCreateRoutes(), &handlers.CreatePOSUserHandler{Service: svc},
 	)
-	http.RegisterPOSTWithValidation[handlers.UpdatePOSUserRequest, handlers.UpdatePOSUserResponse](
+	http.RegisterPATCHWithValidation[handlers.UpdatePOSUserRequest, handlers.UpdatePOSUserResponse](
 		ctx, router, handlers.POSUserUpdateRoutes(), &handlers.UpdatePOSUserHandler{Service: svc},
 	)
-	http.RegisterPOSTWithValidation[handlers.DeactivatePOSUserRequest, handlers.DeactivatePOSUserResponse](
+	http.RegisterPATCHWithValidation[handlers.DeactivatePOSUserRequest, handlers.DeactivatePOSUserResponse](
 		ctx, router, handlers.POSUserDeactivateRoutes(), &handlers.DeactivatePOSUserHandler{Service: svc},
 	)
 	// verify-pin is validation-gated AND rate-limited. Main already

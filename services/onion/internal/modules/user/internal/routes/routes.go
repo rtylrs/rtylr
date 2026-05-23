@@ -59,7 +59,7 @@ func RegisterRoutes(ctx context.Context, router *chi.Mux, userService *applicati
 		&handlers.AccountHandler{UserService: userService},
 	)
 
-	http.RegisterPOSTWithValidation[handlers.UpdateProfileRequest, handlers.UpdateProfileResponse](
+	http.RegisterPATCHWithValidation[handlers.UpdateProfileRequest, handlers.UpdateProfileResponse](
 		ctx,
 		router,
 		handlers.UpdateProfileRoutes(),
