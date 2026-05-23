@@ -12,7 +12,8 @@ export type WindowType =
   | 'about'
   | 'docs'
   | 'pricing'
-  | 'landing';
+  | 'landing'
+  | 'shortcuts';
 export type Experience = 'os' | 'website';
 export type ColorMode = 'system' | 'light' | 'dark';
 export type Wallpaper = 'midnight' | 'aurora' | 'dusk' | 'slate' | 'forest';
@@ -55,17 +56,18 @@ interface DesktopState {
 }
 
 const WINDOW_DEFAULTS: Record<WindowType, { title: string; width: number; height: number }> = {
-  pos: { title: 'POS', width: 720, height: 460 },
-  erp: { title: 'ERP', width: 680, height: 440 },
-  crm: { title: 'CRM', width: 680, height: 440 },
-  hr: { title: 'HR', width: 640, height: 420 },
-  finance: { title: 'Finance', width: 660, height: 440 },
-  flow: { title: 'Flow', width: 640, height: 420 },
-  settings: { title: 'Display Options', width: 480, height: 400 },
-  about: { title: 'About rtylr', width: 440, height: 360 },
-  docs: { title: 'Docs', width: 640, height: 480 },
-  pricing: { title: 'Pricing', width: 700, height: 520 },
+  pos: { title: 'POS', width: 860, height: 560 },
+  erp: { title: 'ERP', width: 860, height: 560 },
+  crm: { title: 'CRM', width: 860, height: 560 },
+  hr: { title: 'HR', width: 860, height: 560 },
+  finance: { title: 'Finance', width: 860, height: 560 },
+  flow: { title: 'Flow', width: 860, height: 560 },
+  settings: { title: 'Display Options', width: 500, height: 420 },
+  about: { title: 'About rtylr', width: 900, height: 600 },
+  docs: { title: 'Docs', width: 860, height: 580 },
+  pricing: { title: 'Pricing', width: 860, height: 580 },
   landing: { title: 'rtylr.com', width: 1100, height: 760 },
+  shortcuts: { title: 'Keyboard Shortcuts', width: 480, height: 460 },
 };
 
 let idCounter = 0;

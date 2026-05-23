@@ -4,6 +4,7 @@ import { useDesktopStore, Wallpaper } from '../../stores/useDesktopStore';
 import { MenuBar } from '../MenuBar';
 import { DesktopIcons } from './DesktopIcons';
 import { WallpaperOverlay } from './WallpaperOverlay';
+import { BottomDock } from './BottomDock';
 import { useKeyboardShortcuts } from '../../hooks/desktop/useKeyboardShortcuts';
 
 const AppWindow = dynamic(() => import('../AppWindow').then((m) => ({ default: m.AppWindow })), {
@@ -62,6 +63,8 @@ export const Desktop: React.FC = () => {
         {windows.map((win) => (
           <AppWindow key={win.id} window={win} animationsEnabled={animationsEnabled} />
         ))}
+
+        <BottomDock />
       </div>
     </div>
   );

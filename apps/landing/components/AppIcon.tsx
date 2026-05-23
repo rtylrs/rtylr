@@ -11,6 +11,7 @@ import {
   BookOpen,
   CreditCard,
   Globe,
+  Keyboard,
   Layers,
   LucideProps,
 } from 'lucide-react';
@@ -28,6 +29,7 @@ const WINDOW_ICONS: Record<WindowType, React.FC<LucideProps>> = {
   docs: BookOpen,
   pricing: CreditCard,
   landing: Globe,
+  shortcuts: Keyboard,
 };
 
 interface AppIconProps extends LucideProps {

@@ -2,6 +2,7 @@ import React, { Suspense, lazy } from 'react';
 import { WindowType } from '../../stores/useDesktopStore';
 
 const POSWindow = lazy(() => import('../modules/POSWindow'));
+const ShortcutsWindow = lazy(() => import('../modules/ShortcutsWindow'));
 const ERPWindow = lazy(() => import('../modules/ERPWindow'));
 const CRMWindow = lazy(() => import('../modules/CRMWindow'));
 const HRWindow = lazy(() => import('../modules/HRWindow'));
@@ -23,6 +24,7 @@ const LOADERS: Partial<Record<WindowType, React.LazyExoticComponent<() => React.
   about: AboutWindow,
   landing: LandingWindow,
   pricing: PricingWindow,
+  shortcuts: ShortcutsWindow,
 };
 
 const Spinner = () => (

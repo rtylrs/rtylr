@@ -33,8 +33,11 @@ export const MenuBar: React.FC = () => {
   ];
 
   const moreItems = [
-    { label: 'Keyboard Shortcuts', onClick: () => {} },
-    { label: 'System Status', onClick: () => {} },
+    { label: 'Keyboard Shortcuts', onClick: () => addWindow('shortcuts' as WindowType) },
+    {
+      label: 'System Status',
+      onClick: () => addWindow('docs' as WindowType, 'https://status.rtylr.com'),
+    },
     { separator: true as const },
     { label: 'Pricing', onClick: () => addWindow('pricing' as WindowType) },
   ];
