@@ -1,4 +1,4 @@
-import React from 'react';
+import React, { useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { motion } from 'motion/react';
 import { Plus, Paperclip, Check } from 'lucide-react';
@@ -109,10 +109,10 @@ const CategoryBar: React.FC<{ expenses: Expense[] }> = ({ expenses }) => {
 
 const Expenses: React.FC = () => {
   const navigate = useNavigate();
-  const { data: fetchedExpenses, isLoading: loading } = useExpenses();
-  const expenses: Expense[] = fetchedExpenses || [];
-  // loading flag is exposed for future skeleton treatment; reference to
-  // preserve parity with other list screens without stripping the hook.
+  const [page, setPage] = useState(1);
+  const { data, isLoading: loading } = useExpenses({ page });
+  const expenses: Expense[] = data?.expenses ?? [];
+  const hasMore = data?.hasMore ?? false;
   void loading;
 
   const grandTotal = expenses.reduce((s, e) => s + e.amount, 0);
@@ -300,6 +300,32 @@ const Expenses: React.FC = () => {
           </tfoot>
         </table>
       </div>
+
+      {(page > 1 || hasMore) && (
+        <div className="flex items-center justify-between px-1 py-3">
+          <p className="text-xs" style={{ color: 'var(--hub-text-dim)' }}>
+            Page {page}
+          </p>
+          <div className="flex items-center gap-2">
+            <button
+              onClick={() => setPage((p) => Math.max(1, p - 1))}
+              disabled={page <= 1}
+              className="px-3 py-1.5 rounded-md text-xs font-medium transition-colors disabled:opacity-30"
+              style={{ background: 'var(--hub-hover)', color: 'var(--hub-text-muted)' }}
+            >
+              Prev
+            </button>
+            <button
+              onClick={() => setPage((p) => p + 1)}
+              disabled={!hasMore}
+              className="px-3 py-1.5 rounded-md text-xs font-medium transition-colors disabled:opacity-30"
+              style={{ background: 'var(--hub-hover)', color: 'var(--hub-text-muted)' }}
+            >
+              Next
+            </button>
+          </div>
+        </div>
+      )}
     </motion.div>
   );
 };

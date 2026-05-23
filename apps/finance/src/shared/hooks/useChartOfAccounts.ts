@@ -35,13 +35,35 @@ export function useCreateAccount() {
   });
 }
 
-export function useJournal() {
-  return useQuery({
-    queryKey: ['journal'],
-    queryFn: async () => {
-      const res = await unwrap(safe.get<unknown>('/finance/journal'));
-      const raw = unwrapList(res, 'entries', 'journal');
-      return z.array(journalEntrySchema).parse(Array.isArray(raw) ? raw : []);
+interface UseJournalParams {
+  page?: number;
+  pageSize?: number;
+}
+
+export interface JournalResult {
+  entries: z.infer<typeof journalEntrySchema>[];
+  hasMore: boolean;
+  page: number;
+  pageSize: number;
+}
+
+export function useJournal(params: UseJournalParams = {}) {
+  const { page = 1, pageSize = 50 } = params;
+  return useQuery<JournalResult>({
+    queryKey: ['journal', { page, pageSize }],
+    queryFn: async (): Promise<JournalResult> => {
+      const res = await unwrap(
+        safe.get<unknown>('/finance/journal', { params: { page, page_size: pageSize } })
+      );
+      const raw = res as Record<string, unknown>;
+      const list = unwrapList(res, 'entries', 'journal');
+      const entries = z.array(journalEntrySchema).parse(Array.isArray(list) ? list : []);
+      return {
+        entries,
+        hasMore: Boolean(raw.has_more),
+        page: Number(raw.page ?? page),
+        pageSize: Number(raw.page_size ?? pageSize),
+      };
     },
   });
 }

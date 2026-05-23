@@ -33,10 +33,12 @@ const Invoices: React.FC = () => {
   const [selected, setSelected] = useState<Set<string>>(new Set());
   const [showBulkSend, setShowBulkSend] = useState(false);
   const [sendTarget, setSendTarget] = useState<Invoice | null>(null);
-  const { data: fetchedInvoices, isLoading: loading } = useInvoices();
+  const [page, setPage] = useState(1);
+  const { data, isLoading: loading } = useInvoices({ page });
   const updateStatus = useUpdateInvoiceStatus();
   const navigate = useNavigate();
-  const invoices: Invoice[] = fetchedInvoices || [];
+  const invoices: Invoice[] = data?.invoices ?? [];
+  const hasMore = data?.hasMore ?? false;
 
   const markPaid = (inv: Invoice): void => {
     updateStatus.mutate(
@@ -269,6 +271,32 @@ const Invoices: React.FC = () => {
               ))}
             </tbody>
           </table>
+        </div>
+      )}
+
+      {(page > 1 || hasMore) && (
+        <div className="flex items-center justify-between px-1 py-3">
+          <p className="text-xs" style={{ color: 'var(--hub-text-dim)' }}>
+            Page {page}
+          </p>
+          <div className="flex items-center gap-2">
+            <button
+              onClick={() => setPage((p) => Math.max(1, p - 1))}
+              disabled={page <= 1}
+              className="px-3 py-1.5 rounded-md text-xs font-medium transition-colors disabled:opacity-30"
+              style={{ background: 'var(--hub-hover)', color: 'var(--hub-text-muted)' }}
+            >
+              Prev
+            </button>
+            <button
+              onClick={() => setPage((p) => p + 1)}
+              disabled={!hasMore}
+              className="px-3 py-1.5 rounded-md text-xs font-medium transition-colors disabled:opacity-30"
+              style={{ background: 'var(--hub-hover)', color: 'var(--hub-text-muted)' }}
+            >
+              Next
+            </button>
+          </div>
         </div>
       )}
 

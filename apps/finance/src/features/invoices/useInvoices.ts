@@ -7,12 +7,34 @@ import type { Invoice } from '../../shared/services/financeApi';
 import { invoiceSchema } from '../../shared/schemas/invoices';
 import { unwrapList } from '../../shared/lib/unwrapList';
 
-export function useInvoices() {
-  return useQuery<Invoice[]>({
-    queryKey: ['invoices'],
-    queryFn: async (): Promise<Invoice[]> => {
-      const res = await unwrap(safe.get<unknown>('/finance/invoices'));
-      return z.array(invoiceSchema).parse(unwrapList(res, 'invoices')) as Invoice[];
+interface UseInvoicesParams {
+  page?: number;
+  pageSize?: number;
+}
+
+export interface InvoiceListResult {
+  invoices: Invoice[];
+  hasMore: boolean;
+  page: number;
+  pageSize: number;
+}
+
+export function useInvoices(params: UseInvoicesParams = {}) {
+  const { page = 1, pageSize = 50 } = params;
+  return useQuery<InvoiceListResult>({
+    queryKey: ['invoices', { page, pageSize }],
+    queryFn: async (): Promise<InvoiceListResult> => {
+      const res = await unwrap(
+        safe.get<unknown>('/finance/invoices', { params: { page, page_size: pageSize } })
+      );
+      const raw = res as Record<string, unknown>;
+      const invoices = z.array(invoiceSchema).parse(unwrapList(res, 'invoices')) as Invoice[];
+      return {
+        invoices,
+        hasMore: Boolean(raw.has_more),
+        page: Number(raw.page ?? page),
+        pageSize: Number(raw.page_size ?? pageSize),
+      };
     },
   });
 }

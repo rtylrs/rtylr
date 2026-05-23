@@ -7,12 +7,34 @@ import type { Expense, ExpenseCategory } from '../../shared/services/financeApi'
 import { expenseSchema, expenseCategorySchema } from '../../shared/schemas/expenses';
 import { unwrapList } from '../../shared/lib/unwrapList';
 
-export function useExpenses() {
-  return useQuery<Expense[]>({
-    queryKey: ['expenses'],
-    queryFn: async (): Promise<Expense[]> => {
-      const res = await unwrap(safe.get<unknown>('/finance/expenses'));
-      return z.array(expenseSchema).parse(unwrapList(res, 'expenses')) as Expense[];
+interface UseExpensesParams {
+  page?: number;
+  pageSize?: number;
+}
+
+export interface ExpenseListResult {
+  expenses: Expense[];
+  hasMore: boolean;
+  page: number;
+  pageSize: number;
+}
+
+export function useExpenses(params: UseExpensesParams = {}) {
+  const { page = 1, pageSize = 50 } = params;
+  return useQuery<ExpenseListResult>({
+    queryKey: ['expenses', { page, pageSize }],
+    queryFn: async (): Promise<ExpenseListResult> => {
+      const res = await unwrap(
+        safe.get<unknown>('/finance/expenses', { params: { page, page_size: pageSize } })
+      );
+      const raw = res as Record<string, unknown>;
+      const expenses = z.array(expenseSchema).parse(unwrapList(res, 'expenses')) as Expense[];
+      return {
+        expenses,
+        hasMore: Boolean(raw.has_more),
+        page: Number(raw.page ?? page),
+        pageSize: Number(raw.page_size ?? pageSize),
+      };
     },
   });
 }

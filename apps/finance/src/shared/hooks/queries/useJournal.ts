@@ -10,20 +10,37 @@ import type {
 import { safe } from '../../lib/api';
 
 interface ListJournalParams {
-  limit: number;
-  offset: number;
+  page?: number;
+  pageSize?: number;
   fromDate?: string;
   toDate?: string;
 }
 
-export const useListJournal = (params: ListJournalParams) => {
-  return useQuery<ListJournalEntriesResponse>({
-    queryKey: ['journal', 'filter', params],
-    queryFn: async (): Promise<ListJournalEntriesResponse> => {
+export interface JournalListResult {
+  entries: ListJournalEntriesResponse['entries'];
+  hasMore: boolean;
+  page: number;
+  pageSize: number;
+}
+
+export const useListJournal = (params: ListJournalParams = {}) => {
+  const { page = 1, pageSize = 50, fromDate, toDate } = params;
+  return useQuery<JournalListResult>({
+    queryKey: ['journal', 'filter', { page, pageSize, fromDate, toDate }],
+    queryFn: async (): Promise<JournalListResult> => {
       const res = await unwrap(
-        safe.get<ListJournalEntriesResponse>('/finance/journal', { params })
+        safe.get<unknown>('/finance/journal', {
+          params: { page, page_size: pageSize, from_date: fromDate, to_date: toDate },
+        })
       );
-      return res as ListJournalEntriesResponse;
+      const raw = res as Record<string, unknown>;
+      const rawRes = res as ListJournalEntriesResponse;
+      return {
+        entries: rawRes.entries ?? [],
+        hasMore: Boolean(raw.has_more),
+        page: Number(raw.page ?? page),
+        pageSize: Number(raw.page_size ?? pageSize),
+      };
     },
   });
 };

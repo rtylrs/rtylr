@@ -147,7 +147,10 @@ const NewQuoteModal: React.FC<{ open: boolean; onClose: () => void }> = ({ open,
 
 const Quotes: React.FC = () => {
   const { t } = useTranslation();
-  const { data = [], isLoading } = useQuotes();
+  const [page, setPage] = useState(1);
+  const { data: result, isLoading } = useQuotes({ page });
+  const data = result?.quotes ?? [];
+  const hasMore = result?.hasMore ?? false;
   const convertQuote = useConvertQuote();
   const updateStatus = useUpdateQuoteStatus();
   const total = data.reduce((s: number, q) => s + (q.amount ?? 0), 0);
@@ -307,6 +310,32 @@ const Quotes: React.FC = () => {
               ))}
             </tbody>
           </table>
+        </div>
+      )}
+
+      {(page > 1 || hasMore) && (
+        <div className="flex items-center justify-between px-1 py-3">
+          <p className="text-xs" style={{ color: 'var(--hub-text-dim)' }}>
+            Page {page}
+          </p>
+          <div className="flex items-center gap-2">
+            <button
+              onClick={() => setPage((p) => Math.max(1, p - 1))}
+              disabled={page <= 1}
+              className="px-3 py-1.5 rounded-md text-xs font-medium transition-colors disabled:opacity-30"
+              style={{ background: 'var(--hub-hover)', color: 'var(--hub-text-muted)' }}
+            >
+              Prev
+            </button>
+            <button
+              onClick={() => setPage((p) => p + 1)}
+              disabled={!hasMore}
+              className="px-3 py-1.5 rounded-md text-xs font-medium transition-colors disabled:opacity-30"
+              style={{ background: 'var(--hub-hover)', color: 'var(--hub-text-muted)' }}
+            >
+              Next
+            </button>
+          </div>
         </div>
       )}
     </motion.div>

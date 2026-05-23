@@ -9,7 +9,10 @@ import { useJournal, useCreateJournalEntry } from '../../shared/hooks/useChartOf
 import { cardStyle, primaryBtn, ghostBtn, inputStyle } from '../../shared/lib/tokens';
 
 const Journal: React.FC = () => {
-  const { data = [], isLoading } = useJournal();
+  const [page, setPage] = useState(1);
+  const { data: journalData, isLoading } = useJournal({ page });
+  const data = journalData?.entries ?? [];
+  const hasMore = journalData?.hasMore ?? false;
   const createMut = useCreateJournalEntry();
   const [showCreate, setShowCreate] = useState(false);
   const [memo, setMemo] = useState('');
@@ -272,6 +275,35 @@ const Journal: React.FC = () => {
                 {createMut.isPending ? 'Creating…' : 'Create'}
               </button>
             </div>
+          </div>
+        </div>
+      )}
+
+      {(page > 1 || hasMore) && (
+        <div
+          style={{
+            display: 'flex',
+            alignItems: 'center',
+            justifyContent: 'space-between',
+            padding: '8px 0',
+          }}
+        >
+          <span style={{ fontSize: 12, color: 'var(--hub-text-dim)' }}>Page {page}</span>
+          <div style={{ display: 'flex', gap: 8 }}>
+            <button
+              style={{ ...ghostBtn, padding: '4px 12px', opacity: page <= 1 ? 0.3 : 1 }}
+              onClick={() => setPage((p) => Math.max(1, p - 1))}
+              disabled={page <= 1}
+            >
+              Prev
+            </button>
+            <button
+              style={{ ...ghostBtn, padding: '4px 12px', opacity: !hasMore ? 0.3 : 1 }}
+              onClick={() => setPage((p) => p + 1)}
+              disabled={!hasMore}
+            >
+              Next
+            </button>
           </div>
         </div>
       )}

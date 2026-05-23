@@ -6,12 +6,34 @@ import { safe } from '../../shared/lib/api';
 import { quoteSchema } from '../../shared/schemas/quotes';
 import { unwrapList } from '../../shared/lib/unwrapList';
 
-export function useQuotes() {
-  return useQuery({
-    queryKey: ['quotes'],
-    queryFn: async () => {
-      const res = await unwrap(safe.get<unknown>('/finance/quotes'));
-      return z.array(quoteSchema).parse(unwrapList(res, 'quotes'));
+interface UseQuotesParams {
+  page?: number;
+  pageSize?: number;
+}
+
+export interface QuoteListResult {
+  quotes: ReturnType<typeof quoteSchema.parse>[];
+  hasMore: boolean;
+  page: number;
+  pageSize: number;
+}
+
+export function useQuotes(params: UseQuotesParams = {}) {
+  const { page = 1, pageSize = 50 } = params;
+  return useQuery<QuoteListResult>({
+    queryKey: ['quotes', { page, pageSize }],
+    queryFn: async (): Promise<QuoteListResult> => {
+      const res = await unwrap(
+        safe.get<unknown>('/finance/quotes', { params: { page, page_size: pageSize } })
+      );
+      const raw = res as Record<string, unknown>;
+      const quotes = z.array(quoteSchema).parse(unwrapList(res, 'quotes'));
+      return {
+        quotes,
+        hasMore: Boolean(raw.has_more),
+        page: Number(raw.page ?? page),
+        pageSize: Number(raw.page_size ?? pageSize),
+      };
     },
   });
 }
