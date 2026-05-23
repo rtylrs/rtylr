@@ -48,7 +48,8 @@ const GroupDetail = (): React.JSX.Element => {
   const updateGroup = useUpdateGroup(id);
   const addMembers = useAddGroupMembers(id);
   const removeMember = useRemoveGroupMember(id);
-  const { data: allMembers = [] } = useTeam();
+  const { data: teamData } = useTeam({ pageSize: 50 });
+  const allMembers = teamData?.members ?? [];
 
   const [tab, setTab] = useState<'apps' | 'members'>('apps');
   const [name, setName] = useState('');

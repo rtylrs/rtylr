@@ -9,14 +9,30 @@ import { toast } from 'sonner';
 export type { TeamMember } from '../../schemas/team';
 type TeamMember = z.infer<typeof teamMemberSchema> & { status: string };
 
-export const useTeam = () => {
-  return useQuery<TeamMember[]>({
-    queryKey: ['team'],
-    queryFn: async () => {
-      const res = await unwrap(safe.get('/team/members'));
-      const raw = res?.users ?? res?.members ?? res;
-      if (!Array.isArray(raw)) return [];
-      return raw.map((m: StaffUserPayload) => {
+interface UseTeamParams {
+  page?: number;
+  pageSize?: number;
+}
+
+export interface TeamListResult {
+  members: TeamMember[];
+  hasMore: boolean;
+  page: number;
+  pageSize: number;
+}
+
+export const useTeam = (params: UseTeamParams = {}) => {
+  const { page = 1, pageSize = 50 } = params;
+  return useQuery<TeamListResult>({
+    queryKey: ['team', { page, pageSize }],
+    queryFn: async (): Promise<TeamListResult> => {
+      const res = await unwrap(
+        safe.get('/team/members', { params: { page, page_size: pageSize } })
+      );
+      const raw = res as Record<string, unknown>;
+      const list = raw.users ?? raw.members ?? res;
+      const arr = Array.isArray(list) ? list : [];
+      const members = arr.map((m: StaffUserPayload) => {
         const parsed = teamMemberSchema.parse(m);
         return {
           ...parsed,
@@ -25,6 +41,12 @@ export const useTeam = () => {
           groups: parsed.groups ?? [],
         } as TeamMember;
       });
+      return {
+        members,
+        hasMore: Boolean(raw.has_more),
+        page: Number(raw.page ?? page),
+        pageSize: Number(raw.page_size ?? pageSize),
+      };
     },
     staleTime: 30_000,
   });

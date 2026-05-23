@@ -47,8 +47,8 @@ const ITEMS_PER_PAGE = 10;
 
 const Team: React.FC = (): React.JSX.Element => {
   const navigate = useNavigate();
-  const { data: membersRaw = [], isLoading } = useTeam();
-  const members = Array.isArray(membersRaw) ? membersRaw : [];
+  const { data: teamData, isLoading } = useTeam({ pageSize: 50 });
+  const members = teamData?.members ?? [];
   const deactivate = useDeactivateMember();
   const [query, setQuery] = useState('');
   const [roleFilter, setRoleFilter] = useState<string>('all');
