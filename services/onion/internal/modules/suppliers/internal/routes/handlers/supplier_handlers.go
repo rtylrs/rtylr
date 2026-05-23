@@ -21,10 +21,16 @@ type ListSuppliersHandler struct {
 	Service *application.Service
 }
 
-type ListSuppliersRequest struct{}
+type ListSuppliersRequest struct {
+	Page     int64 `json:"page"`
+	PageSize int64 `json:"page_size"`
+}
 
 type ListSuppliersResponse struct {
 	Suppliers []*erpv1.Supplier `json:"suppliers"`
+	HasMore   bool              `json:"has_more"`
+	Page      int64             `json:"page"`
+	PageSize  int64             `json:"page_size"`
 }
 
 func newSupplierPayload(s domain.Supplier) *erpv1.Supplier {
@@ -46,7 +52,7 @@ func newSupplierPayload(s domain.Supplier) *erpv1.Supplier {
 	}
 }
 
-func (h *ListSuppliersHandler) Serve(ctx context.Context, _ *ListSuppliersRequest) (ListSuppliersResponse, *errorModels.ServerError) {
+func (h *ListSuppliersHandler) Serve(ctx context.Context, req *ListSuppliersRequest) (ListSuppliersResponse, *errorModels.ServerError) {
 	authUser, ok := authPkg.GetAuthUser(ctx)
 	if !ok {
 		return ListSuppliersResponse{}, &errorModels.ServerError{
@@ -56,7 +62,7 @@ func (h *ListSuppliersHandler) Serve(ctx context.Context, _ *ListSuppliersReques
 		}
 	}
 
-	suppliers, err := h.Service.ListSuppliers(ctx, authUser.UserID)
+	suppliers, hasMore, err := h.Service.ListSuppliers(ctx, authUser.UserID, req.Page, req.PageSize)
 	if err != nil {
 		return ListSuppliersResponse{}, &errorModels.ServerError{
 			Code:     http.StatusInternalServerError,
@@ -70,7 +76,15 @@ func (h *ListSuppliersHandler) Serve(ctx context.Context, _ *ListSuppliersReques
 		payloads = append(payloads, newSupplierPayload(s))
 	}
 
-	return ListSuppliersResponse{Suppliers: payloads}, nil
+	page := req.Page
+	if page < 1 {
+		page = 1
+	}
+	pageSize := req.PageSize
+	if pageSize < 1 {
+		pageSize = 50
+	}
+	return ListSuppliersResponse{Suppliers: payloads, HasMore: hasMore, Page: page, PageSize: pageSize}, nil
 }
 
 // ─── Create Supplier ──────────────────────────────────────────────────────────

@@ -24,30 +24,76 @@ func NewRepository(db *sql.DB) *Repository {
 	}
 }
 
-func (r *Repository) ListStockTakes(ctx context.Context, ownerID int64) ([]domain.StockTake, error) {
-	rows, err := r.queries.ListStockTakes(ctx, ownerID)
+func (r *Repository) ListStockTakes(ctx context.Context, ownerID int64, limit, offset int) ([]domain.StockTake, bool, error) {
+	const q = `
+		SELECT id, owner_id, warehouse_id, status, notes, started_at, completed_at, created_at
+		FROM erp_stock_takes
+		WHERE owner_id = ?
+		ORDER BY created_at DESC
+		LIMIT ? OFFSET ?`
+
+	rows, err := r.pool.QueryContext(ctx, q, ownerID, limit+1, offset)
 	if err != nil {
 		logger.Ctx(ctx).Error("Failed to list stock takes", logger.Error(err))
-
-		return nil, err
+		return nil, false, err
 	}
+	defer rows.Close()
 
 	var stockTakes []domain.StockTake
+	for rows.Next() {
+		var s domain.StockTake
+		var warehouseID sql.NullInt64
+		var status, notes sql.NullString
+		var startedAt, completedAt, createdAt sql.NullTime
 
-	for _, row := range rows {
-		stockTakes = append(stockTakes, stockTakeFromRow(row))
+		if err := rows.Scan(
+			&s.ID, &s.OwnerID, &warehouseID, &status, &notes,
+			&startedAt, &completedAt, &createdAt,
+		); err != nil {
+			logger.Ctx(ctx).Error("Failed to scan stock take row", logger.Error(err))
+			return nil, false, err
+		}
+
+		if warehouseID.Valid {
+			s.WarehouseID = warehouseID.Int64
+		}
+		if status.Valid {
+			s.Status = domain.StockTakeStatus(status.String)
+		}
+		if notes.Valid {
+			s.Notes = notes.String
+		}
+		if startedAt.Valid {
+			s.StartedAt = startedAt.Time.Format("2006-01-02T15:04:05Z07:00")
+		}
+		if completedAt.Valid {
+			s.CompletedAt = completedAt.Time.Format("2006-01-02T15:04:05Z07:00")
+		}
+		if createdAt.Valid {
+			s.CreatedAt = createdAt.Time
+		}
+
+		stockTakes = append(stockTakes, s)
+	}
+
+	if err := rows.Err(); err != nil {
+		return nil, false, err
+	}
+
+	hasMore := len(stockTakes) > limit
+	if hasMore {
+		stockTakes = stockTakes[:limit]
 	}
 
 	for i := range stockTakes {
 		items, err := r.getStockTakeItems(ctx, stockTakes[i].ID)
 		if err != nil {
-			return nil, err
+			return nil, false, err
 		}
-
 		stockTakes[i].Items = items
 	}
 
-	return stockTakes, nil
+	return stockTakes, hasMore, nil
 }
 
 func (r *Repository) getStockTakeItems(ctx context.Context, stockTakeID int64) ([]domain.StockTakeItem, error) {

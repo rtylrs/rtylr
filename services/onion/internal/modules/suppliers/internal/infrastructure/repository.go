@@ -23,59 +23,88 @@ func NewRepository(db *sql.DB) *Repository {
 	}
 }
 
-func (r *Repository) ListSuppliers(ctx context.Context, ownerID int64) ([]domain.Supplier, error) {
-	rows, err := r.queries.ListSuppliers(ctx, ownerID)
+func (r *Repository) ListSuppliers(ctx context.Context, ownerID int64, limit, offset int) ([]domain.Supplier, bool, error) {
+	const q = `
+		SELECT id, owner_id, name, email, phone, address, city, country,
+		       tax_id, payment_terms, notes, is_active, created_at, updated_at
+		FROM erp_suppliers
+		WHERE owner_id = ?
+		ORDER BY name ASC
+		LIMIT ? OFFSET ?`
+
+	rows, err := r.pool.QueryContext(ctx, q, ownerID, limit+1, offset)
 	if err != nil {
 		logger.Ctx(ctx).Error("Failed to list suppliers", logger.Error(err))
-		return nil, err
+		return nil, false, err
 	}
+	defer rows.Close()
 
 	var suppliers []domain.Supplier
-	for _, row := range rows {
+	for rows.Next() {
 		var s domain.Supplier
-		s.ID = row.ID
-		s.OwnerID = row.OwnerID
-		s.Name = row.Name
+		var email, phone, address, city, country, taxID, paymentTerms, notes sql.NullString
+		var isActive sql.NullBool
+		var createdAt, updatedAt sql.NullTime
 
-		if row.Email.Valid {
-			s.Email = row.Email.String
+		if err := rows.Scan(
+			&s.ID, &s.OwnerID, &s.Name,
+			&email, &phone, &address, &city, &country,
+			&taxID, &paymentTerms, &notes, &isActive,
+			&createdAt, &updatedAt,
+		); err != nil {
+			logger.Ctx(ctx).Error("Failed to scan supplier row", logger.Error(err))
+			return nil, false, err
 		}
-		if row.Phone.Valid {
-			s.Phone = row.Phone.String
+
+		if email.Valid {
+			s.Email = email.String
 		}
-		if row.Address.Valid {
-			s.Address = row.Address.String
+		if phone.Valid {
+			s.Phone = phone.String
 		}
-		if row.City.Valid {
-			s.City = row.City.String
+		if address.Valid {
+			s.Address = address.String
 		}
-		if row.Country.Valid {
-			s.Country = row.Country.String
+		if city.Valid {
+			s.City = city.String
 		}
-		if row.TaxID.Valid {
-			s.TaxID = row.TaxID.String
+		if country.Valid {
+			s.Country = country.String
 		}
-		if row.PaymentTerms.Valid {
-			s.PaymentTerms = row.PaymentTerms.String
+		if taxID.Valid {
+			s.TaxID = taxID.String
 		}
-		if row.Notes.Valid {
-			s.Notes = row.Notes.String
+		if paymentTerms.Valid {
+			s.PaymentTerms = paymentTerms.String
 		}
-		if row.IsActive.Valid {
-			s.IsActive = row.IsActive.Bool
+		if notes.Valid {
+			s.Notes = notes.String
 		}
-		if row.CreatedAt.Valid {
-			s.CreatedAt = row.CreatedAt.Time
+		if isActive.Valid {
+			s.IsActive = isActive.Bool
 		}
-		if row.UpdatedAt.Valid {
-			s.UpdatedAt = row.UpdatedAt.Time
+		if createdAt.Valid {
+			s.CreatedAt = createdAt.Time
+		}
+		if updatedAt.Valid {
+			s.UpdatedAt = updatedAt.Time
 		}
 
 		suppliers = append(suppliers, s)
 	}
 
-	return suppliers, nil
+	if err := rows.Err(); err != nil {
+		return nil, false, err
+	}
+
+	hasMore := len(suppliers) > limit
+	if hasMore {
+		suppliers = suppliers[:limit]
+	}
+
+	return suppliers, hasMore, nil
 }
+
 
 func (r *Repository) CreateSupplier(ctx context.Context, ownerID int64, input domain.SupplierInput) (int64, error) {
 	result, err := r.queries.CreateSupplier(ctx, sqlc.CreateSupplierParams{

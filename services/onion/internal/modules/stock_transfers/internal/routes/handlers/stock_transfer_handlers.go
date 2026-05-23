@@ -20,7 +20,10 @@ type ListStockTransfersHandler struct {
 	Service *application.Service
 }
 
-type ListStockTransfersRequest struct{}
+type ListStockTransfersRequest struct {
+	Page     int64 `json:"page"`
+	PageSize int64 `json:"page_size"`
+}
 
 type StockTransferItemPayload struct {
 	ID         int64   `json:"id"`
@@ -44,6 +47,9 @@ type StockTransferPayload struct {
 
 type ListStockTransfersResponse struct {
 	StockTransfers []StockTransferPayload `json:"stock_transfers"`
+	HasMore        bool                   `json:"has_more"`
+	Page           int64                  `json:"page"`
+	PageSize       int64                  `json:"page_size"`
 }
 
 func newStockTransferPayload(t domain.StockTransfer) StockTransferPayload {
@@ -71,7 +77,7 @@ func newStockTransferPayload(t domain.StockTransfer) StockTransferPayload {
 	}
 }
 
-func (h *ListStockTransfersHandler) Serve(ctx context.Context, _ *ListStockTransfersRequest) (ListStockTransfersResponse, *errorModels.ServerError) {
+func (h *ListStockTransfersHandler) Serve(ctx context.Context, req *ListStockTransfersRequest) (ListStockTransfersResponse, *errorModels.ServerError) {
 	authUser, ok := authPkg.GetAuthUser(ctx)
 	if !ok {
 		return ListStockTransfersResponse{}, &errorModels.ServerError{
@@ -81,7 +87,7 @@ func (h *ListStockTransfersHandler) Serve(ctx context.Context, _ *ListStockTrans
 		}
 	}
 
-	transfers, err := h.Service.ListStockTransfers(ctx, authUser.UserID)
+	transfers, hasMore, err := h.Service.ListStockTransfers(ctx, authUser.UserID, req.Page, req.PageSize)
 	if err != nil {
 		return ListStockTransfersResponse{}, &errorModels.ServerError{
 			Code:     http.StatusInternalServerError,
@@ -95,7 +101,15 @@ func (h *ListStockTransfersHandler) Serve(ctx context.Context, _ *ListStockTrans
 		payloads = append(payloads, newStockTransferPayload(t))
 	}
 
-	return ListStockTransfersResponse{StockTransfers: payloads}, nil
+	page := req.Page
+	if page < 1 {
+		page = 1
+	}
+	pageSize := req.PageSize
+	if pageSize < 1 {
+		pageSize = 50
+	}
+	return ListStockTransfersResponse{StockTransfers: payloads, HasMore: hasMore, Page: page, PageSize: pageSize}, nil
 }
 
 // --- Create Stock Transfer ---------------------------------------------------

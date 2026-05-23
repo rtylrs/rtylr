@@ -33,13 +33,37 @@ func invalidateProductScope(ctx context.Context, ownerID int64) {
 	}
 }
 
-func (s *Service) ListProducts(ctx context.Context, ownerID int64, search string, categoryID, limit, offset int) ([]domain.Product, error) {
-	key := fmt.Sprintf("%s|s=%s|c=%d|l=%d|o=%d",
-		cacheKeys.ProductsList(ownerID), search, categoryID, limit, offset)
+func paginateProducts(page, pageSize int64) (int, int) {
+	if page < 1 {
+		page = 1
+	}
+	if pageSize < 1 {
+		pageSize = 50
+	}
+	if pageSize > 500 {
+		pageSize = 500
+	}
+	return int(pageSize), int((page - 1) * pageSize)
+}
 
-	return cacher.Of[[]domain.Product]().GetOrComputeSingle(ctx, key, func(ctx context.Context) ([]domain.Product, error) {
-		return s.repo.ListProducts(ctx, ownerID, search, categoryID, limit, offset)
+func (s *Service) ListProducts(ctx context.Context, ownerID int64, search string, categoryID, page, pageSize int64) ([]domain.Product, bool, error) {
+	limit, offset := paginateProducts(page, pageSize)
+	key := fmt.Sprintf("%s|s=%s|c=%d|p=%d|ps=%d",
+		cacheKeys.ProductsList(ownerID), search, categoryID, page, pageSize)
+
+	type pageResult struct {
+		items   []domain.Product
+		hasMore bool
+	}
+
+	res, err := cacher.Of[pageResult]().GetOrComputeSingle(ctx, key, func(ctx context.Context) (pageResult, error) {
+		items, hasMore, err := s.repo.ListProducts(ctx, ownerID, search, int(categoryID), limit, offset)
+		return pageResult{items: items, hasMore: hasMore}, err
 	}, cacher.WithExpiry(ctx, productsCacheTTL))
+	if err != nil {
+		return nil, false, err
+	}
+	return res.items, res.hasMore, nil
 }
 
 func (s *Service) CreateProduct(ctx context.Context, ownerID int64, input domain.ProductInput) (int64, error) {

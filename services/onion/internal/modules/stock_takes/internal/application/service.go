@@ -14,7 +14,7 @@ import (
 const stockTakesCacheTTL = 5 * time.Minute
 
 type repository interface {
-	ListStockTakes(ctx context.Context, ownerID int64) ([]domain.StockTake, error)
+	ListStockTakes(ctx context.Context, ownerID int64, limit, offset int) ([]domain.StockTake, bool, error)
 	CreateStockTake(ctx context.Context, ownerID int64, input domain.StockTakeInput) (int64, error)
 	UpdateStockTake(ctx context.Context, ownerID int64, input domain.StockTakeUpdateInput) error
 }
@@ -31,12 +31,36 @@ func NewService(_ context.Context, db *sql.DB) *Service {
 	}
 }
 
-func (s *Service) ListStockTakes(ctx context.Context, ownerID int64) ([]domain.StockTake, error) {
-	cacheKey := fmt.Sprintf("stock_takes:%d", ownerID)
+func paginateStockTakes(page, pageSize int64) (int, int) {
+	if page < 1 {
+		page = 1
+	}
+	if pageSize < 1 {
+		pageSize = 50
+	}
+	if pageSize > 500 {
+		pageSize = 500
+	}
+	return int(pageSize), int((page - 1) * pageSize)
+}
 
-	return cacher.Of[[]domain.StockTake]().GetOrComputeSingle(ctx, cacheKey, func(ctx context.Context) ([]domain.StockTake, error) {
-		return s.repo.ListStockTakes(ctx, ownerID)
+func (s *Service) ListStockTakes(ctx context.Context, ownerID, page, pageSize int64) ([]domain.StockTake, bool, error) {
+	limit, offset := paginateStockTakes(page, pageSize)
+	cacheKey := fmt.Sprintf("stock_takes:%d|p=%d|ps=%d", ownerID, page, pageSize)
+
+	type pageResult struct {
+		items   []domain.StockTake
+		hasMore bool
+	}
+
+	res, err := cacher.Of[pageResult]().GetOrComputeSingle(ctx, cacheKey, func(ctx context.Context) (pageResult, error) {
+		items, hasMore, err := s.repo.ListStockTakes(ctx, ownerID, limit, offset)
+		return pageResult{items: items, hasMore: hasMore}, err
 	}, cacher.WithExpiry(ctx, stockTakesCacheTTL))
+	if err != nil {
+		return nil, false, err
+	}
+	return res.items, res.hasMore, nil
 }
 
 func (s *Service) CreateStockTake(ctx context.Context, ownerID int64, input domain.StockTakeInput) (int64, error) {
@@ -63,5 +87,7 @@ func (s *Service) UpdateStockTake(ctx context.Context, ownerID int64, input doma
 
 func (s *Service) invalidateCache(ctx context.Context, ownerID int64) {
 	prefix := fmt.Sprintf("stock_takes:%d", ownerID)
-	cacher.Of[[]domain.StockTake]().Invalidate(ctx, []string{prefix})
+	if cache := cacher.GetRedisCache(); cache != nil {
+		cache.DeleteByPattern(ctx, prefix)
+	}
 }

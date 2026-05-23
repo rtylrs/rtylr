@@ -26,9 +26,7 @@ func NewRepository(db *sql.DB) *Repository {
 	}
 }
 
-func (r *Repository) ListProducts(ctx context.Context, ownerID int64, search string, categoryID, limit, offset int) ([]domain.Product, error) {
-	// ListProducts uses dynamic query building (search, categoryID, limit/offset)
-	// which cannot be expressed as a single static sqlc query.
+func (r *Repository) ListProducts(ctx context.Context, ownerID int64, search string, categoryID, limit, offset int) ([]domain.Product, bool, error) {
 	query := `
 		SELECT id, owner_id, category_id, supplier_id, name, sku, barcode, description,
 		       unit, cost_price, sale_price, stock_quantity, low_stock_threshold,
@@ -49,17 +47,12 @@ func (r *Repository) ListProducts(ctx context.Context, ownerID int64, search str
 		args = append(args, categoryID)
 	}
 
-	query += ` ORDER BY name ASC`
-
-	if limit > 0 {
-		query += fmt.Sprintf(` LIMIT %d OFFSET %d`, limit, offset)
-	}
+	query += fmt.Sprintf(` ORDER BY name ASC LIMIT %d OFFSET %d`, limit+1, offset)
 
 	rows, err := r.pool.QueryContext(ctx, query, args...)
 	if err != nil {
 		logger.Ctx(ctx).Error("Failed to list products", logger.Error(err))
-
-		return nil, err
+		return nil, false, err
 	}
 
 	defer rows.Close()
@@ -70,14 +63,22 @@ func (r *Repository) ListProducts(ctx context.Context, ownerID int64, search str
 		var p domain.Product
 		if err := p.FromRow(rows); err != nil {
 			logger.Ctx(ctx).Error("Failed to scan product row", logger.Error(err))
-
-			return nil, err
+			return nil, false, err
 		}
 
 		products = append(products, p)
 	}
 
-	return products, rows.Err()
+	if err := rows.Err(); err != nil {
+		return nil, false, err
+	}
+
+	hasMore := len(products) > limit
+	if hasMore {
+		products = products[:limit]
+	}
+
+	return products, hasMore, nil
 }
 
 func (r *Repository) GetProduct(ctx context.Context, ownerID, id int64) (domain.Product, error) {

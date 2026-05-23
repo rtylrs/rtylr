@@ -14,7 +14,7 @@ import (
 const supplierCacheTTL = 5 * time.Minute
 
 type repository interface {
-	ListSuppliers(ctx context.Context, ownerID int64) ([]domain.Supplier, error)
+	ListSuppliers(ctx context.Context, ownerID int64, limit, offset int) ([]domain.Supplier, bool, error)
 	CreateSupplier(ctx context.Context, ownerID int64, input domain.SupplierInput) (int64, error)
 	UpdateSupplier(ctx context.Context, ownerID, id int64, input domain.SupplierInput) error
 	DeleteSupplier(ctx context.Context, ownerID, id int64) error
@@ -28,12 +28,36 @@ func NewService(_ context.Context, db *sql.DB) *Service {
 	return &Service{repo: infrastructure.NewRepository(db)}
 }
 
-func (s *Service) ListSuppliers(ctx context.Context, ownerID int64) ([]domain.Supplier, error) {
-	cacheKey := fmt.Sprintf("suppliers:%d", ownerID)
+func paginateSuppliers(page, pageSize int64) (int, int) {
+	if page < 1 {
+		page = 1
+	}
+	if pageSize < 1 {
+		pageSize = 50
+	}
+	if pageSize > 500 {
+		pageSize = 500
+	}
+	return int(pageSize), int((page - 1) * pageSize)
+}
 
-	return cacher.Of[[]domain.Supplier]().GetOrComputeSingle(ctx, cacheKey, func(ctx context.Context) ([]domain.Supplier, error) {
-		return s.repo.ListSuppliers(ctx, ownerID)
+func (s *Service) ListSuppliers(ctx context.Context, ownerID, page, pageSize int64) ([]domain.Supplier, bool, error) {
+	limit, offset := paginateSuppliers(page, pageSize)
+	cacheKey := fmt.Sprintf("suppliers:%d|p=%d|ps=%d", ownerID, page, pageSize)
+
+	type pageResult struct {
+		items   []domain.Supplier
+		hasMore bool
+	}
+
+	res, err := cacher.Of[pageResult]().GetOrComputeSingle(ctx, cacheKey, func(ctx context.Context) (pageResult, error) {
+		items, hasMore, err := s.repo.ListSuppliers(ctx, ownerID, limit, offset)
+		return pageResult{items: items, hasMore: hasMore}, err
 	}, cacher.WithExpiry(ctx, supplierCacheTTL))
+	if err != nil {
+		return nil, false, err
+	}
+	return res.items, res.hasMore, nil
 }
 
 func (s *Service) CreateSupplier(ctx context.Context, ownerID int64, input domain.SupplierInput) (int64, error) {
@@ -63,6 +87,8 @@ func (s *Service) DeleteSupplier(ctx context.Context, ownerID, id int64) error {
 }
 
 func (s *Service) invalidateCache(ctx context.Context, ownerID int64) {
-	cacheKey := fmt.Sprintf("suppliers:%d", ownerID)
-	cacher.Of[[]domain.Supplier]().Invalidate(ctx, []string{cacheKey})
+	prefix := fmt.Sprintf("suppliers:%d", ownerID)
+	if cache := cacher.GetRedisCache(); cache != nil {
+		cache.DeleteByPattern(ctx, prefix)
+	}
 }

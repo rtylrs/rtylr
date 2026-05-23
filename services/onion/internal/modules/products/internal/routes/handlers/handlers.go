@@ -24,12 +24,15 @@ type ListProductsHandler struct {
 type ListProductsRequest struct {
 	Search     string `json:"search"`
 	CategoryID int    `json:"category_id"`
-	Limit      int    `json:"limit"`
-	Offset     int    `json:"offset"`
+	Page       int64  `json:"page"`
+	PageSize   int64  `json:"page_size"`
 }
 
 type ListProductsResponse struct {
 	Products []*erpv1.Product `json:"products"`
+	HasMore  bool             `json:"has_more"`
+	Page     int64            `json:"page"`
+	PageSize int64            `json:"page_size"`
 }
 
 func newProductPayload(p domain.Product) *erpv1.Product {
@@ -65,7 +68,7 @@ func (h *ListProductsHandler) Serve(ctx context.Context, req *ListProductsReques
 		}
 	}
 
-	products, err := h.Service.ListProducts(ctx, authUser.UserID, req.Search, req.CategoryID, req.Limit, req.Offset)
+	products, hasMore, err := h.Service.ListProducts(ctx, authUser.UserID, req.Search, int64(req.CategoryID), req.Page, req.PageSize)
 	if err != nil {
 		return ListProductsResponse{}, &errorModels.ServerError{
 			Code:     http.StatusInternalServerError,
@@ -79,7 +82,15 @@ func (h *ListProductsHandler) Serve(ctx context.Context, req *ListProductsReques
 		payloads = append(payloads, newProductPayload(p))
 	}
 
-	return ListProductsResponse{Products: payloads}, nil
+	page := req.Page
+	if page < 1 {
+		page = 1
+	}
+	pageSize := req.PageSize
+	if pageSize < 1 {
+		pageSize = 50
+	}
+	return ListProductsResponse{Products: payloads, HasMore: hasMore, Page: page, PageSize: pageSize}, nil
 }
 
 // ─── Create Product ───────────────────────────────────────────────────────────

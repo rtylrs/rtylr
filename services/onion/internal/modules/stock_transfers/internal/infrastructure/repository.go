@@ -24,30 +24,69 @@ func NewRepository(db *sql.DB) *Repository {
 	}
 }
 
-func (r *Repository) ListStockTransfers(ctx context.Context, ownerID int64) ([]domain.StockTransfer, error) {
-	rows, err := r.queries.ListStockTransfers(ctx, ownerID)
+func (r *Repository) ListStockTransfers(ctx context.Context, ownerID int64, limit, offset int) ([]domain.StockTransfer, bool, error) {
+	const q = `
+		SELECT id, owner_id, from_warehouse_id, to_warehouse_id, status, notes, created_at, updated_at
+		FROM erp_stock_transfers
+		WHERE owner_id = ?
+		ORDER BY created_at DESC
+		LIMIT ? OFFSET ?`
+
+	rows, err := r.pool.QueryContext(ctx, q, ownerID, limit+1, offset)
 	if err != nil {
 		logger.Ctx(ctx).Error("Failed to list stock transfers", logger.Error(err))
-
-		return nil, err
+		return nil, false, err
 	}
+	defer rows.Close()
 
 	var transfers []domain.StockTransfer
+	for rows.Next() {
+		var t domain.StockTransfer
+		var status, notes sql.NullString
+		var createdAt, updatedAt sql.NullTime
 
-	for _, row := range rows {
-		transfers = append(transfers, stockTransferFromRow(row))
+		if err := rows.Scan(
+			&t.ID, &t.OwnerID, &t.FromWarehouseID, &t.ToWarehouseID,
+			&status, &notes, &createdAt, &updatedAt,
+		); err != nil {
+			logger.Ctx(ctx).Error("Failed to scan stock transfer row", logger.Error(err))
+			return nil, false, err
+		}
+
+		if status.Valid {
+			t.Status = domain.StockTransferStatus(status.String)
+		}
+		if notes.Valid {
+			t.Notes = notes.String
+		}
+		if createdAt.Valid {
+			t.CreatedAt = createdAt.Time
+		}
+		if updatedAt.Valid {
+			t.UpdatedAt = updatedAt.Time
+		}
+
+		transfers = append(transfers, t)
+	}
+
+	if err := rows.Err(); err != nil {
+		return nil, false, err
+	}
+
+	hasMore := len(transfers) > limit
+	if hasMore {
+		transfers = transfers[:limit]
 	}
 
 	for i := range transfers {
 		items, err := r.getTransferItems(ctx, transfers[i].ID)
 		if err != nil {
-			return nil, err
+			return nil, false, err
 		}
-
 		transfers[i].Items = items
 	}
 
-	return transfers, nil
+	return transfers, hasMore, nil
 }
 
 func (r *Repository) getTransferItems(ctx context.Context, transferID int64) ([]domain.StockTransferItem, error) {

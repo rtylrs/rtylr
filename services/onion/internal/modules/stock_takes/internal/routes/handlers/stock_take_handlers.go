@@ -20,7 +20,10 @@ type ListStockTakesHandler struct {
 	Service *application.Service
 }
 
-type ListStockTakesRequest struct{}
+type ListStockTakesRequest struct {
+	Page     int64 `json:"page"`
+	PageSize int64 `json:"page_size"`
+}
 
 type StockTakeItemPayload struct {
 	ID          int64   `json:"id"`
@@ -46,6 +49,9 @@ type StockTakePayload struct {
 
 type ListStockTakesResponse struct {
 	StockTakes []StockTakePayload `json:"stock_takes"`
+	HasMore    bool               `json:"has_more"`
+	Page       int64              `json:"page"`
+	PageSize   int64              `json:"page_size"`
 }
 
 func newStockTakePayload(s domain.StockTake) StockTakePayload {
@@ -75,7 +81,7 @@ func newStockTakePayload(s domain.StockTake) StockTakePayload {
 	}
 }
 
-func (h *ListStockTakesHandler) Serve(ctx context.Context, _ *ListStockTakesRequest) (ListStockTakesResponse, *errorModels.ServerError) {
+func (h *ListStockTakesHandler) Serve(ctx context.Context, req *ListStockTakesRequest) (ListStockTakesResponse, *errorModels.ServerError) {
 	authUser, ok := authPkg.GetAuthUser(ctx)
 	if !ok {
 		return ListStockTakesResponse{}, &errorModels.ServerError{
@@ -85,7 +91,7 @@ func (h *ListStockTakesHandler) Serve(ctx context.Context, _ *ListStockTakesRequ
 		}
 	}
 
-	stockTakes, err := h.Service.ListStockTakes(ctx, authUser.UserID)
+	stockTakes, hasMore, err := h.Service.ListStockTakes(ctx, authUser.UserID, req.Page, req.PageSize)
 	if err != nil {
 		return ListStockTakesResponse{}, &errorModels.ServerError{
 			Code:     http.StatusInternalServerError,
@@ -99,7 +105,15 @@ func (h *ListStockTakesHandler) Serve(ctx context.Context, _ *ListStockTakesRequ
 		payloads = append(payloads, newStockTakePayload(s))
 	}
 
-	return ListStockTakesResponse{StockTakes: payloads}, nil
+	page := req.Page
+	if page < 1 {
+		page = 1
+	}
+	pageSize := req.PageSize
+	if pageSize < 1 {
+		pageSize = 50
+	}
+	return ListStockTakesResponse{StockTakes: payloads, HasMore: hasMore, Page: page, PageSize: pageSize}, nil
 }
 
 // --- Create Stock Take -------------------------------------------------------
