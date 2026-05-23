@@ -1,6 +1,6 @@
-import React, { useEffect } from 'react';
+import React, { useEffect, useState } from 'react';
 import dynamic from 'next/dynamic';
-import { useDesktopStore, Wallpaper } from '../../stores/useDesktopStore';
+import { useDesktopStore, Wallpaper, ColorMode } from '../../stores/useDesktopStore';
 import { MenuBar } from '../MenuBar';
 import { DesktopIcons } from './DesktopIcons';
 import { WallpaperOverlay } from './WallpaperOverlay';
@@ -19,28 +19,73 @@ const WALLPAPERS: Record<Wallpaper, string> = {
   forest: 'linear-gradient(145deg, #091409 0%, #112011 100%)',
 };
 
+// Only the window chrome (frame + titlebar) flips between light/dark.
+// Window content always stays dark — apps maintain their own appearance.
+const DARK_VARS = {
+  '--win-bg': 'rgba(22,22,24,0.97)',
+  '--win-border': 'rgba(255,255,255,0.1)',
+  '--win-shadow': '0 24px 80px rgba(0,0,0,0.6), 0 4px 12px rgba(0,0,0,0.4)',
+  '--titlebar-bg': 'rgba(30,30,32,0.98)',
+  '--titlebar-border': 'rgba(255,255,255,0.08)',
+  '--titlebar-text': 'rgba(255,255,255,0.7)',
+  '--titlebar-icon': 'rgba(255,255,255,0.55)',
+};
+
+const LIGHT_VARS = {
+  '--win-bg': 'rgba(242,242,244,0.97)',
+  '--win-border': 'rgba(0,0,0,0.12)',
+  '--win-shadow': '0 24px 80px rgba(0,0,0,0.18), 0 4px 12px rgba(0,0,0,0.1)',
+  '--titlebar-bg': 'rgba(225,225,228,0.98)',
+  '--titlebar-border': 'rgba(0,0,0,0.08)',
+  '--titlebar-text': 'rgba(0,0,0,0.7)',
+  '--titlebar-icon': 'rgba(0,0,0,0.55)',
+};
+
+function resolveMode(colorMode: ColorMode, systemDark: boolean): 'light' | 'dark' {
+  if (colorMode === 'dark') return 'dark';
+  if (colorMode === 'light') return 'light';
+  return systemDark ? 'dark' : 'light';
+}
+
 export const Desktop: React.FC = () => {
   const windows = useDesktopStore((s) => s.windows);
   const wallpaper = useDesktopStore((s) => s.wallpaper);
+  const colorMode = useDesktopStore((s) => s.colorMode);
   const animationsEnabled = useDesktopStore((s) => s.animationsEnabled);
   const addWindow = useDesktopStore((s) => s.addWindow);
 
+  const [systemDark, setSystemDark] = useState(false);
+
   useKeyboardShortcuts();
+
+  useEffect(() => {
+    const mq = window.matchMedia('(prefers-color-scheme: dark)');
+    setSystemDark(mq.matches);
+    const handler = (e: MediaQueryListEvent) => setSystemDark(e.matches);
+    mq.addEventListener('change', handler);
+    return () => mq.removeEventListener('change', handler);
+  }, []);
 
   useEffect(() => {
     if (windows.length === 0) addWindow('landing');
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
 
+  const theme = resolveMode(colorMode, systemDark);
+  const vars = theme === 'dark' ? DARK_VARS : LIGHT_VARS;
+
   return (
     <div
-      style={{
-        position: 'fixed',
-        inset: 0,
-        background: WALLPAPERS[wallpaper],
-        overflow: 'hidden',
-        fontFamily: "'Inter', system-ui, sans-serif",
-      }}
+      style={
+        {
+          position: 'fixed',
+          inset: 0,
+          background: WALLPAPERS[wallpaper],
+          overflow: 'hidden',
+          fontFamily: "'Inter', system-ui, sans-serif",
+          ...vars,
+        } as React.CSSProperties
+      }
     >
       <WallpaperOverlay wallpaper={wallpaper} />
       <MenuBar />

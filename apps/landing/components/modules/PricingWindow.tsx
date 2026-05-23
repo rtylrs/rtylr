@@ -33,7 +33,7 @@ export default function PricingWindow(): React.JSX.Element {
     <div
       style={{
         height: '100%',
-        background: 'var(--app-background)',
+        background: '#151515',
         overflowY: 'auto',
         padding: '24px 20px',
       }}

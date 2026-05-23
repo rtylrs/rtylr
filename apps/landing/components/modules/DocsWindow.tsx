@@ -25,7 +25,7 @@ export default function DocsWindow(): React.JSX.Element {
     <div
       style={{
         height: '100%',
-        background: 'var(--app-background)',
+        background: '#151515',
         overflowY: 'auto',
         padding: '20px 24px',
       }}

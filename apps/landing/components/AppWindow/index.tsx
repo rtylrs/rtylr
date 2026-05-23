@@ -69,11 +69,12 @@ export const AppWindow: React.FC<AppWindowProps> = ({ window: win, animationsEna
               height: '100%',
               display: 'flex',
               flexDirection: 'column',
-              background: 'rgba(22,22,24,0.97)',
-              border: '1px solid rgba(255,255,255,0.1)',
+              background: 'var(--win-bg, rgba(22,22,24,0.97))',
+              border: '1px solid var(--win-border, rgba(255,255,255,0.1))',
               borderRadius: 10,
               overflow: 'hidden',
-              boxShadow: '0 24px 80px rgba(0,0,0,0.6), 0 4px 12px rgba(0,0,0,0.4)',
+              boxShadow:
+                'var(--win-shadow, 0 24px 80px rgba(0,0,0,0.6), 0 4px 12px rgba(0,0,0,0.4))',
             }}
           >
             <TitleBar

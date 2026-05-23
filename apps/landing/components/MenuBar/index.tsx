@@ -39,7 +39,7 @@ export const MenuBar: React.FC = () => {
       onClick: () => addWindow('docs' as WindowType, 'https://status.rtylr.com'),
     },
     { separator: true as const },
-    { label: 'Pricing', onClick: () => addWindow('pricing' as WindowType) },
+    { label: 'Pricing', onClick: () => addWindow('pricing' as WindowType, '/pricing?embed=1') },
   ];
 
   return (
@@ -66,7 +66,12 @@ export const MenuBar: React.FC = () => {
         <MenuBarMenu label="Products" items={productsItems} />
         <MenuBarMenu
           label="Pricing"
-          items={[{ label: 'Pricing Plans', onClick: () => addWindow('pricing' as WindowType) }]}
+          items={[
+            {
+              label: 'Pricing Plans',
+              onClick: () => addWindow('pricing' as WindowType, '/pricing?embed=1'),
+            },
+          ]}
         />
         <MenuBarMenu label="Docs" items={docsItems} />
         <MenuBarMenu label="Blog" items={[{ label: 'Blog', onClick: () => {} }]} />

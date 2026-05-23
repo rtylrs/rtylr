@@ -12,7 +12,7 @@ export default function LandingWindow(): React.JSX.Element {
         height: '100%',
         overflowY: 'auto',
         overflowX: 'hidden',
-        background: 'var(--app-background)',
+        background: '#151515',
       }}
     >
       <HeroSection />

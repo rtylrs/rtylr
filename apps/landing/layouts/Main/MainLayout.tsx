@@ -13,6 +13,7 @@ const MainLayout: React.FC<{
 }> = React.memo(
   ({ children, hasPadding = true, paddingTop = '30px', hasHeader = true, hasFooter = true }) => {
     const router = useRouter();
+    const isEmbed = router.query.embed === '1';
     const [isHomePage, setIsHomePage] = useState(true);
 
     useEffect(() => {
@@ -32,6 +33,10 @@ const MainLayout: React.FC<{
       }),
       [marginTop]
     );
+
+    if (isEmbed) {
+      return <>{children}</>;
+    }
 
     return (
       <div style={{ position: 'relative' }}>

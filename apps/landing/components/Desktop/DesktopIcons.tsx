@@ -42,6 +42,7 @@ const ICONS: DesktopIconDef[] = [
     label: 'Pricing',
     svgIcon: PricingIcon,
     windowType: 'pricing',
+    windowUrl: '/pricing?embed=1',
     defaultPos: { x: 20, y: 286 },
   },
   {

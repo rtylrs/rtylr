@@ -43,7 +43,7 @@ export default function SettingsWindow(): React.JSX.Element {
     <div
       style={{
         height: '100%',
-        background: 'var(--app-background)',
+        background: '#151515',
         padding: '24px',
         display: 'flex',
         flexDirection: 'column',

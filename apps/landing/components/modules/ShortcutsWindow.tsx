@@ -15,7 +15,7 @@ export default function ShortcutsWindow(): React.JSX.Element {
       style={{
         height: '100%',
         overflowY: 'auto',
-        background: 'var(--app-background)',
+        background: '#151515',
         color: '#e8e6e1',
         fontFamily: "'Inter', system-ui, sans-serif",
         padding: '32px 36px',

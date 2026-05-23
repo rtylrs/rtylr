@@ -51,8 +51,8 @@ export const TitleBar: React.FC<TitleBarProps> = ({
         alignItems: 'center',
         height: 38,
         padding: '0 12px',
-        background: 'rgba(30,30,32,0.98)',
-        borderBottom: '1px solid rgba(255,255,255,0.08)',
+        background: 'var(--titlebar-bg, rgba(30,30,32,0.98))',
+        borderBottom: '1px solid var(--titlebar-border, rgba(255,255,255,0.08))',
         borderRadius: '10px 10px 0 0',
         userSelect: 'none',
         cursor: 'grab',
@@ -131,8 +131,20 @@ export const TitleBar: React.FC<TitleBarProps> = ({
         </button>
       </div>
 
-      <AppIcon type={type} size={13} color="rgba(255,255,255,0.55)" strokeWidth={1.75} />
-      <span style={{ fontSize: 12, fontWeight: 500, color: 'rgba(255,255,255,0.7)', flex: 1 }}>
+      <AppIcon
+        type={type}
+        size={13}
+        color="var(--titlebar-icon, rgba(255,255,255,0.55))"
+        strokeWidth={1.75}
+      />
+      <span
+        style={{
+          fontSize: 12,
+          fontWeight: 500,
+          color: 'var(--titlebar-text, rgba(255,255,255,0.7))',
+          flex: 1,
+        }}
+      >
         {title}
       </span>
     </div>
