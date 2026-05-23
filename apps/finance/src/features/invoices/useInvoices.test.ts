@@ -42,20 +42,12 @@ describe('useInvoices', () => {
   });
 
   it('fetches invoices on mount', async () => {
-    const invoices = [
-      {
-        id: 'inv-1',
-        amount: 500,
-        client: 'Acme',
-        dueDate: '2026-05-01',
-        issuedDate: '2026-04-01',
-        status: 'Draft' as const,
-      },
-    ];
-    (safe.get as ReturnType<typeof vi.fn>).mockResolvedValue(invoices);
+    (safe.get as ReturnType<typeof vi.fn>).mockResolvedValue({ invoices: [], has_more: false });
     const { result } = renderHook(() => useInvoices(), { wrapper: createWrapper() });
     await waitFor(() => expect(result.current.isSuccess).toBe(true));
-    expect(safe.get).toHaveBeenCalledWith('/finance/invoices');
+    expect(safe.get).toHaveBeenCalledWith('/finance/invoices', {
+      params: { page: 1, page_size: 50 },
+    });
   });
 
   it('starts in loading state', () => {

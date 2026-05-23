@@ -60,8 +60,8 @@ describe('useTeam', () => {
     const { result } = renderHook(() => useTeam(), { wrapper: createWrapper() });
     await waitFor(() => expect(result.current.isSuccess).toBe(true));
 
-    expect(result.current.data).toHaveLength(1);
-    expect(result.current.data![0].name).toBe('Alice');
+    expect(result.current.data?.members).toHaveLength(1);
+    expect(result.current.data?.members[0].name).toBe('Alice');
   });
 
   it('fetches team members from .members key', async () => {
@@ -74,7 +74,7 @@ describe('useTeam', () => {
     const { result } = renderHook(() => useTeam(), { wrapper: createWrapper() });
     await waitFor(() => expect(result.current.isSuccess).toBe(true));
 
-    expect(result.current.data).toHaveLength(1);
+    expect(result.current.data?.members).toHaveLength(1);
   });
 
   it('prefers fullName over name', async () => {
@@ -95,7 +95,7 @@ describe('useTeam', () => {
     const { result } = renderHook(() => useTeam(), { wrapper: createWrapper() });
     await waitFor(() => expect(result.current.isSuccess).toBe(true));
 
-    expect(result.current.data![0].name).toBe('Full Name');
+    expect(result.current.data?.members[0].name).toBe('Full Name');
   });
 
   it('falls back to email when no name', async () => {
@@ -106,7 +106,7 @@ describe('useTeam', () => {
     const { result } = renderHook(() => useTeam(), { wrapper: createWrapper() });
     await waitFor(() => expect(result.current.isSuccess).toBe(true));
 
-    expect(result.current.data![0].name).toBe('fallback@test.com');
+    expect(result.current.data?.members[0].name).toBe('fallback@test.com');
   });
 
   it('returns empty array for non-array response', async () => {
@@ -115,7 +115,7 @@ describe('useTeam', () => {
     const { result } = renderHook(() => useTeam(), { wrapper: createWrapper() });
     await waitFor(() => expect(result.current.isSuccess).toBe(true));
 
-    expect(result.current.data).toEqual([]);
+    expect(result.current.data?.members).toEqual([]);
   });
 
   it('handles API error', async () => {

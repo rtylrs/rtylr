@@ -41,20 +41,12 @@ describe('useExpenses', () => {
   });
 
   it('fetches expenses on mount', async () => {
-    const input = [
-      {
-        id: 'exp-1',
-        amount: 100,
-        date: '2026-04-01',
-        description: 'Office supplies',
-        category: 'Supplies',
-        receipt: false,
-      },
-    ];
-    (safe.get as ReturnType<typeof vi.fn>).mockResolvedValue(input);
+    (safe.get as ReturnType<typeof vi.fn>).mockResolvedValue({ expenses: [], has_more: false });
     const { result } = renderHook(() => useExpenses(), { wrapper: createWrapper() });
     await waitFor(() => expect(result.current.isSuccess).toBe(true));
-    expect(safe.get).toHaveBeenCalledWith('/finance/expenses');
+    expect(safe.get).toHaveBeenCalledWith('/finance/expenses', {
+      params: { page: 1, page_size: 50 },
+    });
   });
 
   it('starts in loading state', () => {
