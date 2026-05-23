@@ -7,7 +7,7 @@ const PLANS = [
     price: '$49',
     period: '/mo',
     desc: 'For small teams getting started',
-    features: ['POS · vbitez', 'Basic ERP', 'Up to 3 users', 'Email support'],
+    features: ['POS', 'Basic ERP', 'Up to 3 users', 'Email support'],
     highlight: false,
   },
   {

@@ -8,39 +8,65 @@ export const ChangelogIcon = ({ size = 44 }: { size?: number }) => (
     fill="none"
     xmlns="http://www.w3.org/2000/svg"
   >
-    {/* Clock face */}
+    {/* Outer ring */}
     <circle
       cx="22"
       cy="22"
-      r="14"
-      fill="rgba(255,255,255,0.08)"
-      stroke="rgba(255,255,255,0.35)"
+      r="16"
+      fill="rgba(255,255,255,0.06)"
+      stroke="rgba(255,255,255,0.28)"
       strokeWidth="1"
     />
-    <circle cx="22" cy="22" r="1.8" fill="rgba(255,255,255,0.9)" />
-    {/* Hour hand */}
-    <path d="M22 22L22 12" stroke="rgba(255,255,255,0.9)" strokeWidth="1.5" strokeLinecap="round" />
-    {/* Minute hand */}
-    <path d="M22 22L29 26" stroke="rgba(255,220,80,1)" strokeWidth="1.5" strokeLinecap="round" />
-    {/* Tick marks */}
-    {[0, 60, 120, 180, 240, 300].map((deg, i) => {
-      const r = (Math.PI * deg) / 180;
-      const x1 = 22 + 12 * Math.sin(r);
-      const y1 = 22 - 12 * Math.cos(r);
-      const x2 = 22 + 10 * Math.sin(r);
-      const y2 = 22 - 10 * Math.cos(r);
+    {/* Inner ring */}
+    <circle
+      cx="22"
+      cy="22"
+      r="12"
+      fill="rgba(255,255,255,0.04)"
+      stroke="rgba(255,255,255,0.12)"
+      strokeWidth="0.6"
+    />
+    {/* Tick marks — 12 positions */}
+    {Array.from({ length: 12 }).map((_, i) => {
+      const angle = (Math.PI * 2 * i) / 12;
+      const isMajor = i % 3 === 0;
+      const r1 = isMajor ? 13.5 : 14.5;
+      const r2 = 16;
       return (
         <line
           key={i}
-          x1={x1}
-          y1={y1}
-          x2={x2}
-          y2={y2}
-          stroke="rgba(255,255,255,0.4)"
-          strokeWidth="1"
+          x1={22 + r1 * Math.sin(angle)}
+          y1={22 - r1 * Math.cos(angle)}
+          x2={22 + r2 * Math.sin(angle)}
+          y2={22 - r2 * Math.cos(angle)}
+          stroke={isMajor ? 'rgba(255,255,255,0.55)' : 'rgba(255,255,255,0.25)'}
+          strokeWidth={isMajor ? 1.2 : 0.75}
           strokeLinecap="round"
         />
       );
     })}
+    {/* Hour hand — pointing ~10 o'clock */}
+    <line
+      x1="22"
+      y1="22"
+      x2="16"
+      y2="14"
+      stroke="rgba(255,255,255,0.9)"
+      strokeWidth="1.75"
+      strokeLinecap="round"
+    />
+    {/* Minute hand — pointing ~2 o'clock */}
+    <line
+      x1="22"
+      y1="22"
+      x2="28.5"
+      y2="15"
+      stroke="rgba(255,210,60,1)"
+      strokeWidth="1.5"
+      strokeLinecap="round"
+    />
+    {/* Center cap */}
+    <circle cx="22" cy="22" r="2" fill="rgba(255,255,255,0.9)" />
+    <circle cx="22" cy="22" r="0.9" fill="#111" />
   </svg>
 );

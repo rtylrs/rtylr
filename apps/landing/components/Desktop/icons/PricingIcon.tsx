@@ -8,17 +8,39 @@ export const PricingIcon = ({ size = 44 }: { size?: number }) => (
     fill="none"
     xmlns="http://www.w3.org/2000/svg"
   >
-    {/* Tag shape */}
+    {/* Tag outline */}
     <path
-      d="M10 10h14l10 12-10 12H10V10Z"
-      fill="rgba(255,255,255,0.1)"
+      d="M9 9h16l11 13-11 13H9V9Z"
+      fill="rgba(255,255,255,0.08)"
       stroke="rgba(255,255,255,0.35)"
-      strokeWidth="0.75"
+      strokeWidth="0.9"
+      strokeLinejoin="round"
     />
     {/* Tag hole */}
-    <circle cx="14" cy="16" r="2.5" fill="rgba(255,255,255,0.4)" />
-    {/* Price lines */}
-    <rect x="14" y="22" width="12" height="2" rx="1" fill="rgba(255,255,255,0.8)" />
-    <rect x="14" y="26" width="8" height="1.5" rx="0.75" fill="rgba(255,220,60,1)" />
+    <circle
+      cx="13.5"
+      cy="15.5"
+      r="2.5"
+      fill="rgba(255,255,255,0.0)"
+      stroke="rgba(255,255,255,0.45)"
+      strokeWidth="1"
+    />
+    {/* Tiers / pricing rows */}
+    <rect x="13" y="21" width="14" height="2" rx="1" fill="rgba(255,255,255,0.75)" />
+    <rect x="13" y="25" width="10" height="1.75" rx="0.875" fill="rgba(255,210,60,0.9)" />
+    <rect x="13" y="29" width="7" height="1.5" rx="0.75" fill="rgba(255,255,255,0.3)" />
+    {/* Star / best-value badge */}
+    <circle
+      cx="33"
+      cy="11"
+      r="5"
+      fill="rgba(255,210,60,0.18)"
+      stroke="rgba(255,210,60,0.6)"
+      strokeWidth="0.8"
+    />
+    <path
+      d="M33 8.5l0.75 2h2l-1.6 1.2 0.6 2L33 12.5l-1.75 1.2 0.6-2L30.25 10.5h2L33 8.5Z"
+      fill="rgba(255,210,60,1)"
+    />
   </svg>
 );

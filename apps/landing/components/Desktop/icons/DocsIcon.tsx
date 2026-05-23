@@ -8,16 +8,19 @@ export const DocsIcon = ({ size = 44 }: { size?: number }) => (
     fill="none"
     xmlns="http://www.w3.org/2000/svg"
   >
-    {/* Book spine */}
-    <rect x="10" y="8" width="5" height="28" rx="1.5" fill="rgba(255,255,255,0.25)" />
-    {/* Pages */}
-    <rect x="14" y="8" width="20" height="28" rx="2" fill="rgba(255,255,255,0.88)" />
-    {/* Text lines */}
-    <rect x="18" y="14" width="12" height="2" rx="1" fill="rgba(10,20,40,0.55)" />
-    <rect x="18" y="19" width="10" height="1.5" rx="0.75" fill="rgba(10,20,40,0.35)" />
-    <rect x="18" y="23" width="12" height="1.5" rx="0.75" fill="rgba(10,20,40,0.35)" />
-    <rect x="18" y="27" width="8" height="1.5" rx="0.75" fill="rgba(10,20,40,0.35)" />
-    {/* Bookmark */}
-    <path d="M28 8v8l-2.5-2-2.5 2V8h5Z" fill="rgba(100,160,255,0.9)" />
+    {/* Shadow page behind */}
+    <rect x="14" y="10" width="21" height="27" rx="2.5" fill="rgba(255,255,255,0.07)" />
+    {/* Spine */}
+    <rect x="9" y="7" width="5.5" height="30" rx="1.5" fill="rgba(255,255,255,0.22)" />
+    {/* Main page */}
+    <rect x="13" y="7" width="22" height="30" rx="2.5" fill="rgba(255,255,255,0.92)" />
+    {/* Page lines */}
+    <rect x="17" y="13" width="14" height="2" rx="1" fill="rgba(15,25,50,0.55)" />
+    <rect x="17" y="18" width="11" height="1.5" rx="0.75" fill="rgba(15,25,50,0.3)" />
+    <rect x="17" y="22" width="14" height="1.5" rx="0.75" fill="rgba(15,25,50,0.3)" />
+    <rect x="17" y="26" width="9" height="1.5" rx="0.75" fill="rgba(15,25,50,0.3)" />
+    <rect x="17" y="30" width="12" height="1.5" rx="0.75" fill="rgba(15,25,50,0.2)" />
+    {/* Bookmark ribbon */}
+    <path d="M29 7v11l-3-2.5-3 2.5V7h6Z" fill="rgba(90,160,255,0.9)" />
   </svg>
 );

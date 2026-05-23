@@ -12,7 +12,7 @@ import {
 
 const DOCS_SECTIONS: { icon: React.FC<LucideProps>; title: string; desc: string }[] = [
   { icon: Rocket, title: 'Getting Started', desc: 'Set up your workspace in minutes' },
-  { icon: Utensils, title: 'POS · vbitez', desc: 'Orders, tables, kitchen display' },
+  { icon: Utensils, title: 'POS', desc: 'Orders, tables, kitchen display' },
   { icon: Package, title: 'ERP', desc: 'Inventory, suppliers, purchase orders' },
   { icon: Users, title: 'CRM', desc: 'Contacts, pipelines, campaigns' },
   { icon: UserCheck, title: 'HR', desc: 'Staff, shifts, payroll, leave' },

@@ -55,7 +55,7 @@ interface DesktopState {
 }
 
 const WINDOW_DEFAULTS: Record<WindowType, { title: string; width: number; height: number }> = {
-  pos: { title: 'POS · vbitez', width: 720, height: 460 },
+  pos: { title: 'POS', width: 720, height: 460 },
   erp: { title: 'ERP', width: 680, height: 440 },
   crm: { title: 'CRM', width: 680, height: 440 },
   hr: { title: 'HR', width: 640, height: 420 },
@@ -65,7 +65,7 @@ const WINDOW_DEFAULTS: Record<WindowType, { title: string; width: number; height
   about: { title: 'About rtylr', width: 440, height: 360 },
   docs: { title: 'Docs', width: 640, height: 480 },
   pricing: { title: 'Pricing', width: 700, height: 520 },
-  landing: { title: 'rtylr.com', width: 1100, height: 660 },
+  landing: { title: 'rtylr.com', width: 1100, height: 760 },
 };
 
 let idCounter = 0;

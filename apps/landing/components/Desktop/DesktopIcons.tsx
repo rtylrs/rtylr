@@ -15,7 +15,7 @@ import { WindowType } from '../../stores/useDesktopStore';
 const ICONS: DesktopIconDef[] = [
   {
     key: 'pos',
-    label: 'POS · vbitez',
+    label: 'POS',
     svgIcon: POSIcon,
     windowType: 'pos',
     defaultPos: { x: 20, y: 16 },

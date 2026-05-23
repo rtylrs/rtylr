@@ -8,7 +8,7 @@ export const MenuBar: React.FC = () => {
   const addWindow = useDesktopStore((s) => s.addWindow);
 
   const productsItems = [
-    { label: 'POS · vbitez', onClick: () => addWindow('pos' as WindowType) },
+    { label: 'POS', onClick: () => addWindow('pos' as WindowType) },
     { label: 'ERP', onClick: () => addWindow('erp' as WindowType) },
     { label: 'CRM', onClick: () => addWindow('crm' as WindowType) },
     { label: 'HR', onClick: () => addWindow('hr' as WindowType) },
