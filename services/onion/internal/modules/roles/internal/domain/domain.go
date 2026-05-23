@@ -3,11 +3,11 @@ package domain
 import "time"
 
 type Role struct {
-	ID          int64    `json:"id"`
-	OwnerID     int64    `json:"owner_id"`
-	Name        string   `json:"name"`
-	Permissions []string `json:"permissions"`
-	IsSystem    bool     `json:"is_system"`
+	ID          int64     `json:"id"`
+	OwnerID     int64     `json:"owner_id"`
+	Name        string    `json:"name"`
+	Permissions []string  `json:"permissions"`
+	IsSystem    bool      `json:"is_system"`
 	CreatedAt   time.Time `json:"created_at"`
 	UpdatedAt   time.Time `json:"updated_at"`
 }

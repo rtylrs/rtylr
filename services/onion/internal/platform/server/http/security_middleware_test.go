@@ -38,7 +38,7 @@ func TestIsMaliciousPath(t *testing.T) {
 }
 
 func TestHasSuspiciousHeaders(t *testing.T) {
-	r := httptest.NewRequest(http.MethodGet, "/", nil)
+	r := httptest.NewRequest(http.MethodGet, "/", http.NoBody)
 	if hasSuspiciousHeaders(r) {
 		t.Error("clean request should have no suspicious headers")
 	}
@@ -50,7 +50,7 @@ func TestHasSuspiciousHeaders(t *testing.T) {
 }
 
 func TestIsLegitimateTraffic_AcceptsBrowsersOnPublicPaths(t *testing.T) {
-	r := httptest.NewRequest(http.MethodGet, "/health", nil)
+	r := httptest.NewRequest(http.MethodGet, "/health", http.NoBody)
 	r.Header.Set("User-Agent", "Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7)")
 	if !isLegitimateTraffic(r) {
 		t.Error("Mozilla on /health should look legitimate")
@@ -61,7 +61,7 @@ func TestIsLegitimateTraffic_RejectsBrowserOnPrivateAPI(t *testing.T) {
 	// Regression: previously /erp/products matched because every path contains
 	// "/", which short-circuited the legitimate-paths check to true. Only the
 	// explicit allowlist should match now.
-	r := httptest.NewRequest(http.MethodGet, "/erp/products", nil)
+	r := httptest.NewRequest(http.MethodGet, "/erp/products", http.NoBody)
 	r.Header.Set("User-Agent", "Mozilla/5.0")
 	if isLegitimateTraffic(r) {
 		t.Error("/erp/products is a private API, browser UA should not make it legitimate")
@@ -69,7 +69,7 @@ func TestIsLegitimateTraffic_RejectsBrowserOnPrivateAPI(t *testing.T) {
 }
 
 func TestIsLegitimateTraffic_RejectsScannerUA(t *testing.T) {
-	r := httptest.NewRequest(http.MethodGet, "/health", nil)
+	r := httptest.NewRequest(http.MethodGet, "/health", http.NoBody)
 	r.Header.Set("User-Agent", "sqlmap/1.0")
 	if isLegitimateTraffic(r) {
 		t.Error("sqlmap should not look legitimate")
@@ -78,14 +78,14 @@ func TestIsLegitimateTraffic_RejectsScannerUA(t *testing.T) {
 
 func TestIsLegitimateTraffic_NeedsBothAgentAndPath(t *testing.T) {
 	// A scanner UA on a public path is not legitimate.
-	r := httptest.NewRequest(http.MethodGet, "/health", nil)
+	r := httptest.NewRequest(http.MethodGet, "/health", http.NoBody)
 	r.Header.Set("User-Agent", "nikto/2.1")
 	if isLegitimateTraffic(r) {
 		t.Error("scanner UA should not be legitimate even on /health")
 	}
 
 	// A real browser with no UA at all is not legitimate.
-	r = httptest.NewRequest(http.MethodGet, "/health", nil)
+	r = httptest.NewRequest(http.MethodGet, "/health", http.NoBody)
 	r.Header.Del("User-Agent")
 	if isLegitimateTraffic(r) {
 		t.Error("missing UA should not be legitimate")
@@ -105,7 +105,7 @@ func TestHasSuspiciousParams(t *testing.T) {
 		{"CMD=ls", true}, // case insensitive
 	}
 	for _, tc := range cases {
-		r := httptest.NewRequest(http.MethodGet, "/?"+tc.query, nil)
+		r := httptest.NewRequest(http.MethodGet, "/?"+tc.query, http.NoBody)
 		if got := hasSuspiciousParams(r); got != tc.want {
 			t.Errorf("hasSuspiciousParams(%q) = %v, want %v", tc.query, got, tc.want)
 		}

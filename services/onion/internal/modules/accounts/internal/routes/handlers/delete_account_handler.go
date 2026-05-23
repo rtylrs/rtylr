@@ -7,6 +7,7 @@ import (
 	"strconv"
 
 	"github.com/go-chi/chi/v5"
+
 	"github.com/voxire/onion/internal/modules/accounts/internal/application"
 	"github.com/voxire/onion/internal/modules/accounts/internal/domain"
 	authPkg "github.com/voxire/onion/internal/platform/auth"

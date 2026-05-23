@@ -5,19 +5,20 @@ import (
 	"encoding/json"
 	"net/http"
 
-	hubv1 "github.com/voxire/voxie/gen/go/hub/v1"
-
 	"github.com/voxire/onion/internal/modules/integrations/internal/application"
 	authPkg "github.com/voxire/onion/internal/platform/auth"
 	errorModels "github.com/voxire/onion/internal/platform/errors"
+	hubv1 "github.com/voxire/voxie/gen/go/hub/v1"
 )
 
 func IntegrationRoutes() []string { return []string{"/integrations"} }
 
 // -- List --
 
-type ListHandler struct{ Service *application.Service }
-type ListRequest struct{}
+type (
+	ListHandler struct{ Service *application.Service }
+	ListRequest struct{}
+)
 
 type ListResponse struct {
 	Integrations []*hubv1.Integration `json:"integrations"`
@@ -44,7 +45,7 @@ func (h *ListHandler) Serve(ctx context.Context, _ *ListRequest) (ListResponse, 
 			Id:        i.ID,
 			Provider:  i.Provider,
 			Status:    string(i.Status),
-			Config:    json.RawMessage(i.Config),
+			Config:    i.Config,
 			CreatedAt: i.CreatedAt.Format("2006-01-02T15:04:05Z07:00"),
 		}
 		if i.ConnectedAt != nil {

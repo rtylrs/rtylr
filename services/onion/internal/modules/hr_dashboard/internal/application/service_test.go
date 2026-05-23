@@ -17,6 +17,7 @@ type mockRepo struct {
 func (m *mockRepo) GetWidgets(_ context.Context, _ int64) ([]*domain.DashboardWidget, error) {
 	return m.widgets, m.getErr
 }
+
 func (m *mockRepo) UpsertWidgets(_ context.Context, _ int64, _ []*domain.DashboardWidget) error {
 	return m.upsertErr
 }

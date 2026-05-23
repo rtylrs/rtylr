@@ -2,8 +2,10 @@ package config
 
 import (
 	"context"
+	"database/sql"
 
 	"github.com/go-chi/chi/v5"
+
 	"github.com/voxire/onion/internal/modules/config/internal/application"
 	"github.com/voxire/onion/internal/modules/config/internal/routes"
 	"github.com/voxire/onion/internal/modules/config/internal/routes/handlers"
@@ -14,8 +16,8 @@ type Module struct {
 	ConfigService *application.Service
 }
 
-func NewModule(ctx context.Context) *Module {
-	configService := application.NewService(ctx)
+func NewModule(ctx context.Context, db *sql.DB) *Module {
+	configService := application.NewService(ctx, db)
 
 	module := &Module{
 		ConfigService: configService,
@@ -35,5 +37,6 @@ func (m *Module) RegisterRoutes(ctx context.Context, router *chi.Mux, _ ...inter
 func (m *Module) GetAnonymousRoutes() []string {
 	return sliceutils.Concat(
 		handlers.ConfigByOwnerRoutes(),
+		handlers.IndustriesRoutes(),
 	)
 }

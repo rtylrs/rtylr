@@ -2,6 +2,7 @@ package application
 
 import (
 	"context"
+	"database/sql"
 
 	"github.com/voxire/onion/internal/modules/pos_manager/internal/domain"
 	"github.com/voxire/onion/internal/modules/pos_manager/internal/infrastructure"
@@ -15,8 +16,8 @@ type Service struct {
 	repo repository
 }
 
-func NewService(ctx context.Context) *Service {
-	return &Service{repo: infrastructure.NewRepository(ctx)}
+func NewService(_ context.Context, db *sql.DB) *Service {
+	return &Service{repo: infrastructure.NewRepository(db)}
 }
 
 func (s *Service) VerifyPIN(ctx context.Context, ownerID int64, pin string) (*domain.VerifyResult, error) {

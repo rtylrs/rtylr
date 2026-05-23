@@ -2,6 +2,7 @@ package application
 
 import (
 	"context"
+	"database/sql"
 	"fmt"
 	"time"
 
@@ -14,8 +15,8 @@ const cacheTTL = 5 * time.Minute
 
 type Service struct{ repo *infrastructure.Repository }
 
-func NewService(ctx context.Context) *Service {
-	return &Service{repo: infrastructure.NewRepository(ctx)}
+func NewService(_ context.Context, db *sql.DB) *Service {
+	return &Service{repo: infrastructure.NewRepository(db)}
 }
 
 func (s *Service) List(ctx context.Context, ownerID int64) ([]domain.StoreCategory, error) {

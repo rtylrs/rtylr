@@ -3,11 +3,14 @@ package jwtutils
 import (
 	"context"
 	"errors"
+	"net/http"
 	"net/url"
 	"os"
 	"time"
 
 	"github.com/golang-jwt/jwt/v5"
+
+	"github.com/voxire/onion/internal/platform/config"
 	"github.com/voxire/onion/internal/platform/logger"
 )
 
@@ -120,21 +123,54 @@ const (
 )
 
 func InitializeJWT(ctx context.Context) (context.Context, error) {
-	jwtSecret := os.Getenv("JWT_SECRET")
-	if jwtSecret == "" {
-		return ctx, errors.New("JWT_SECRET environment variable is not set")
+	var jwtSecret string
+	var jwtDuration time.Duration
+
+	if config.GlobalConfig != nil {
+		jwtSecret = config.GlobalConfig.JWTSecret
+		jwtDuration = config.GlobalConfig.JWTDuration
+	} else {
+		jwtSecret = os.Getenv("JWT_SECRET")
+		if d := os.Getenv("JWT_DURATION"); d != "" {
+			if parsed, err := time.ParseDuration(d); err == nil {
+				jwtDuration = parsed
+			}
+		}
 	}
 
-	jwtDuration := time.Duration(0)
-
-	if durationStr := os.Getenv("JWT_DURATION"); durationStr != "" {
-		if duration, err := time.ParseDuration(durationStr); err == nil {
-			jwtDuration = duration
-		}
+	if jwtSecret == "" {
+		return ctx, errors.New("JWT_SECRET environment variable is not set")
 	}
 
 	ctx = context.WithValue(ctx, JWTSecretKey, jwtSecret)
 	ctx = context.WithValue(ctx, JWTDurationKey, jwtDuration)
 
 	return ctx, nil
+}
+
+// JWTMiddleware injects the JWT secret and duration from env into every
+// request context so handlers can call ctx.Value(JWTSecretKey).
+func JWTMiddleware() func(http.Handler) http.Handler {
+	var secret string
+	var duration time.Duration
+
+	if config.GlobalConfig != nil {
+		secret = config.GlobalConfig.JWTSecret
+		duration = config.GlobalConfig.JWTDuration
+	} else {
+		secret = os.Getenv("JWT_SECRET")
+		if d := os.Getenv("JWT_DURATION"); d != "" {
+			if parsed, err := time.ParseDuration(d); err == nil {
+				duration = parsed
+			}
+		}
+	}
+
+	return func(next http.Handler) http.Handler {
+		return http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
+			ctx := context.WithValue(r.Context(), JWTSecretKey, secret)
+			ctx = context.WithValue(ctx, JWTDurationKey, duration)
+			next.ServeHTTP(w, r.WithContext(ctx))
+		})
+	}
 }

@@ -3,13 +3,21 @@ package http
 import (
 	"context"
 	"encoding/json"
+	stdErrors "errors"
+	"fmt"
+	"io"
 	"net/http"
 	"strconv"
+	"strings"
 
 	"github.com/go-chi/chi/v5"
+	"github.com/go-playground/validator/v10"
+
 	"github.com/voxire/onion/internal/platform/errors"
 	"github.com/voxire/onion/internal/platform/logger"
 )
+
+var validateInstance = validator.New()
 
 type MiddlewareFunc func(next http.Handler) http.Handler
 
@@ -64,8 +72,7 @@ func RegisterPOSTWithValidationAndMiddleware[Req, Res any](
 	middlewares ...MiddlewareFunc,
 ) {
 	for _, path := range paths {
-		h := http.HandlerFunc(wrapHandler(ctx, handler, true))
-		var final http.Handler = h
+		var final http.Handler = wrapHandler(ctx, handler, true)
 		for i := len(middlewares) - 1; i >= 0; i-- {
 			final = middlewares[i](final)
 		}
@@ -103,12 +110,29 @@ func wrapHandler[Req, Res any](ctx context.Context, handler HandlerFunc[Req, Res
 
 		switch r.Method {
 		case "POST", "PUT", "PATCH":
-			if err := json.NewDecoder(r.Body).Decode(&req); err != nil {
+			r.Body = http.MaxBytesReader(w, r.Body, 4<<20) // 4 MiB
+			if err := json.NewDecoder(r.Body).Decode(&req); err != nil && err != io.EOF {
 				writeBadRequest(ctx, w)
 
 				return
 			}
-		case "GET", "DELETE":
+		case "DELETE":
+			// DELETE can ride with either a JSON body (the FE pattern
+			// for {"id": N}) or query params. RFC 9110 doesn't forbid
+			// a body, just discourages relying on it. Prefer body when
+			// present so handlers don't have to special-case the FE
+			// shape; fall back to query params otherwise.
+			if r.Body != nil && r.ContentLength != 0 {
+				r.Body = http.MaxBytesReader(w, r.Body, 4<<20) // 4 MiB
+				if err := json.NewDecoder(r.Body).Decode(&req); err != nil && err != io.EOF {
+					writeBadRequest(ctx, w)
+
+					return
+				}
+			} else {
+				parseQueryParams(r, &req)
+			}
+		case "GET":
 			parseQueryParams(r, &req)
 		}
 
@@ -158,6 +182,28 @@ func writeBadRequest(ctx context.Context, w http.ResponseWriter) {
 }
 
 func validateRequest[Req any](ctx context.Context, handler interface{}, req *Req) *errors.ServerError {
+	// First run structural validation using struct tags if present
+	if err := validateInstance.Struct(req); err != nil {
+		var msg string
+		var validationErrs validator.ValidationErrors
+		if stdErrors.As(err, &validationErrs) {
+			var fields []string
+			for _, ve := range validationErrs {
+				fields = append(fields, fmt.Sprintf("%s (%s)", ve.Field(), ve.Tag()))
+			}
+			msg = "Validation failed for fields: " + strings.Join(fields, ", ")
+		} else {
+			msg = "Validation error: " + err.Error()
+		}
+
+		return &errors.ServerError{
+			HTTPCode: http.StatusBadRequest,
+			Code:     http.StatusBadRequest,
+			Message:  msg,
+		}
+	}
+
+	// Then run custom logic validation if the handler implements ValidatorFunc
 	if v, ok := handler.(ValidatorFunc[Req]); ok {
 		if err := v.Validate(ctx, req); err != nil {
 			return err
@@ -199,8 +245,16 @@ func parseQueryParams[Req any](r *http.Request, req *Req) {
 func writeServerError(ctx context.Context, w http.ResponseWriter, serverError *errors.ServerError) {
 	w.Header().Set("Content-Type", "application/json")
 
+	// Most call sites set Code (the app-level status) and leave HTTPCode
+	// blank. Falling back to Code keeps a 400 from being silently
+	// promoted to a 500 just because HTTPCode wasn't filled in. Only
+	// promote to 500 when neither is set.
 	if serverError.HTTPCode == 0 {
-		serverError.HTTPCode = http.StatusInternalServerError
+		if serverError.Code >= 400 && serverError.Code < 600 {
+			serverError.HTTPCode = serverError.Code
+		} else {
+			serverError.HTTPCode = http.StatusInternalServerError
+		}
 	}
 
 	w.WriteHeader(serverError.HTTPCode)

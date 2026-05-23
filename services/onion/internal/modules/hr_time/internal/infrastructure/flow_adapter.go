@@ -3,10 +3,10 @@ package infrastructure
 import (
 	"context"
 	"database/sql"
+	"errors"
 	"time"
 
 	"github.com/voxire/onion/internal/modules/hr_time/internal/domain"
-	"github.com/voxire/onion/internal/platform/database/dbclient"
 	"github.com/voxire/onion/internal/platform/logger"
 )
 
@@ -14,8 +14,8 @@ type FlowAdapter struct {
 	pool *sql.DB
 }
 
-func NewFlowAdapter() *FlowAdapter {
-	return &FlowAdapter{pool: dbclient.Pool()}
+func NewFlowAdapter(db *sql.DB) *FlowAdapter {
+	return &FlowAdapter{pool: db}
 }
 
 func (a *FlowAdapter) GetCompletedTasksForEmployee(ctx context.Context, ownerID, employeeID int64, periodStart, periodEnd string) ([]domain.FlowTaskRecord, error) {
@@ -34,7 +34,7 @@ func (a *FlowAdapter) GetCompletedTasksForEmployee(ctx context.Context, ownerID,
 		employeeID, ownerID,
 	).Scan(&userID)
 	if err != nil {
-		if err == sql.ErrNoRows {
+		if errors.Is(err, sql.ErrNoRows) {
 			return nil, nil
 		}
 		logger.Ctx(ctx).Error("flow adapter: failed to resolve employee user_id",

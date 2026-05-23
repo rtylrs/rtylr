@@ -4,16 +4,22 @@ import (
 	"context"
 	"crypto/rand"
 	"crypto/sha256"
+	"database/sql"
 	"encoding/hex"
 	"errors"
+	"time"
 
 	"github.com/voxire/onion/internal/modules/api_keys/internal/domain"
 	"github.com/voxire/onion/internal/modules/api_keys/internal/infrastructure"
+	"github.com/voxire/onion/internal/platform/cache/cacher"
+	cacheKeys "github.com/voxire/onion/internal/platform/cache/keys"
 )
 
-// repository captures the subset of Repository methods used by the service.
-// Holding it as an interface lets the service be tested without a real DB
-// while keeping NewService wiring identical to other modules.
+const (
+	apiKeysScope = "api_keys"
+	apiKeysTTL   = 5 * time.Minute
+)
+
 type repository interface {
 	List(ctx context.Context, ownerID int64) ([]domain.APIKey, error)
 	Create(ctx context.Context, ownerID int64, name, keyHash, keyPrefix string, scopes []string) (int64, error)
@@ -24,39 +30,47 @@ type Service struct {
 	repo repository
 }
 
-func NewService(ctx context.Context) *Service {
+func NewService(_ context.Context, db *sql.DB) *Service {
 	return &Service{
-		repo: infrastructure.NewRepository(ctx),
+		repo: infrastructure.NewRepository(db),
+	}
+}
+
+func invalidateAPIKeysScope(ctx context.Context, ownerID int64) {
+	if cache := cacher.GetRedisCache(); cache != nil {
+		cache.DeleteByPattern(ctx, cacheKeys.ScopedPrefix(apiKeysScope, ownerID))
 	}
 }
 
 func (s *Service) List(ctx context.Context, ownerID int64) ([]domain.APIKey, error) {
-	return s.repo.List(ctx, ownerID)
+	return cacher.Of[[]domain.APIKey]().GetOrComputeSingle(ctx,
+		cacheKeys.Scoped(apiKeysScope, ownerID, "list"),
+		func(ctx context.Context) ([]domain.APIKey, error) {
+			return s.repo.List(ctx, ownerID)
+		},
+		cacher.WithExpiry(ctx, apiKeysTTL),
+	)
 }
 
 func (s *Service) Create(ctx context.Context, ownerID int64, input domain.CreateAPIKeyInput) (int64, string, error) {
 	if input.Name == "" {
 		return 0, "", errors.New("name is required")
 	}
-
 	rawKey, err := generateAPIKey()
 	if err != nil {
 		return 0, "", err
 	}
-
 	prefix := rawKey[:8]
 	hash := hashKey(rawKey)
-
 	scopes := input.Scopes
 	if scopes == nil {
 		scopes = []string{}
 	}
-
 	id, err := s.repo.Create(ctx, ownerID, input.Name, hash, prefix, scopes)
 	if err != nil {
 		return 0, "", err
 	}
-
+	invalidateAPIKeysScope(ctx, ownerID)
 	return id, rawKey, nil
 }
 
@@ -64,7 +78,11 @@ func (s *Service) Revoke(ctx context.Context, ownerID, keyID int64) error {
 	if keyID == 0 {
 		return errors.New("key id is required")
 	}
-	return s.repo.Revoke(ctx, ownerID, keyID)
+	if err := s.repo.Revoke(ctx, ownerID, keyID); err != nil {
+		return err
+	}
+	invalidateAPIKeysScope(ctx, ownerID)
+	return nil
 }
 
 func generateAPIKey() (string, error) {

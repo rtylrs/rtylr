@@ -3,12 +3,12 @@ package infrastructure
 import (
 	"context"
 	"database/sql"
+	"errors"
 	"fmt"
 	"strconv"
 
 	"github.com/voxire/onion/internal/modules/pos_stock_movements/internal/domain"
 	"github.com/voxire/onion/internal/modules/pos_stock_movements/internal/infrastructure/persistence/sqlc"
-	"github.com/voxire/onion/internal/platform/database/dbclient"
 	"github.com/voxire/onion/internal/platform/logger"
 )
 
@@ -17,8 +17,8 @@ type Repository struct {
 	pool    *sql.DB
 }
 
-func NewRepository(_ context.Context) *Repository {
-	pool := dbclient.Pool()
+func NewRepository(db *sql.DB) *Repository {
+	pool := db
 	return &Repository{
 		queries: sqlc.New(pool),
 		pool:    pool,
@@ -201,7 +201,7 @@ func (r *Repository) GetInventoryItem(ctx context.Context, businessID, branchID,
 		ProductID:  productID,
 	})
 	if err != nil {
-		if err == sql.ErrNoRows {
+		if errors.Is(err, sql.ErrNoRows) {
 			return domain.BranchInventory{}, domain.ErrInventoryNotFound
 		}
 		logger.Ctx(ctx).Error("Failed to get inventory item", logger.Error(err))

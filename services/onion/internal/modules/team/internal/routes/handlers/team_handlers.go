@@ -9,13 +9,14 @@ import (
 	"time"
 
 	"github.com/go-chi/chi/v5"
-	hubv1 "github.com/voxire/voxie/gen/go/hub/v1"
 
 	"github.com/voxire/onion/internal/modules/team/internal/application"
 	"github.com/voxire/onion/internal/modules/team/internal/domain"
 	authPkg "github.com/voxire/onion/internal/platform/auth"
 	emailPkg "github.com/voxire/onion/internal/platform/email"
 	errorModels "github.com/voxire/onion/internal/platform/errors"
+	"github.com/voxire/onion/internal/platform/logger"
+	hubv1 "github.com/voxire/voxie/gen/go/hub/v1"
 )
 
 // ─── List Staff Users ─────────────────────────────────────────────────────────
@@ -58,9 +59,7 @@ func (h *ListUsersHandler) Serve(ctx context.Context, _ *ListUsersRequest) (List
 		return ListUsersResponse{}, errorModels.PermissionDeniedServerError()
 	}
 
-	ownerID := device.User.UserID
-
-	users, err := h.Service.ListStaffUsers(ctx, ownerID)
+	users, err := h.Service.ListStaffUsersByBusiness(ctx, device.User.BusinessID)
 	if err != nil {
 		return ListUsersResponse{}, &errorModels.ServerError{
 			HTTPCode: http.StatusInternalServerError,
@@ -68,7 +67,6 @@ func (h *ListUsersHandler) Serve(ctx context.Context, _ *ListUsersRequest) (List
 			Message:  "Failed to list users",
 		}
 	}
-
 	payloads := make([]StaffUserWithGroupsPayload, 0, len(users))
 	for _, u := range users {
 		groups := make([]GroupSummaryPayload, 0, len(u.Groups))
@@ -80,7 +78,6 @@ func (h *ListUsersHandler) Serve(ctx context.Context, _ *ListUsersRequest) (List
 			Groups:           groups,
 		})
 	}
-
 	return ListUsersResponse{Users: payloads}, nil
 }
 
@@ -187,7 +184,7 @@ func (h *InviteUserHandler) Serve(ctx context.Context, req *InviteUserRequest) (
 		role = domain.RoleStaff
 	}
 
-	userID, token, err := h.Service.InviteUser(ctx, ownerID, domain.InviteUserInput{
+	userID, token, err := h.Service.InviteUser(ctx, ownerID, device.User.BusinessID, domain.InviteUserInput{
 		Email:    req.Email,
 		FullName: req.FullName,
 		Password: req.Password,
@@ -204,6 +201,11 @@ func (h *InviteUserHandler) Serve(ctx context.Context, req *InviteUserRequest) (
 
 	// Record the seat change asynchronously so billing stays accurate.
 	go func() {
+		defer func() {
+			if r := recover(); r != nil {
+				logger.Global().Error("goroutine panicked", logger.Any("panic", r))
+			}
+		}()
 		bgCtx, cancel := context.WithTimeout(context.WithoutCancel(ctx), 10*time.Second)
 		defer cancel()
 		h.Service.RecordSeatChange(bgCtx, ownerID)
@@ -216,6 +218,11 @@ func (h *InviteUserHandler) Serve(ctx context.Context, req *InviteUserRequest) (
 	// Only send invite email if no password was set manually
 	if req.Password == "" && token != "" {
 		go func() {
+			defer func() {
+				if r := recover(); r != nil {
+					logger.Global().Error("goroutine panicked", logger.Any("panic", r))
+				}
+			}()
 			taskCtx, cancel := context.WithTimeout(context.WithoutCancel(ctx), 10*time.Second)
 			defer cancel()
 
@@ -339,7 +346,7 @@ func (h *UpdatePermissionsHandler) Serve(ctx context.Context, req *UpdatePermiss
 		apps = []string{}
 	}
 
-	if err := h.Service.UpdatePermissions(ctx, ownerID, domain.UpdatePermissionsInput{
+	if err := h.Service.UpdatePermissions(ctx, ownerID, device.User.BusinessID, domain.UpdatePermissionsInput{
 		UserID: req.UserID,
 		Apps:   apps,
 		Role:   domain.Role(req.Role),
@@ -386,7 +393,7 @@ func (h *DeactivateUserHandler) Serve(ctx context.Context, req *DeactivateUserRe
 
 	ownerID := device.User.UserID
 
-	if err := h.Service.DeactivateUser(ctx, ownerID, req.UserID); err != nil {
+	if err := h.Service.DeactivateUser(ctx, ownerID, device.User.BusinessID, req.UserID); err != nil {
 		return DeactivateUserResponse{}, &errorModels.ServerError{
 			HTTPCode: http.StatusInternalServerError,
 			Code:     http.StatusInternalServerError,
@@ -396,6 +403,11 @@ func (h *DeactivateUserHandler) Serve(ctx context.Context, req *DeactivateUserRe
 
 	// Record the seat change asynchronously so billing stays accurate.
 	go func() {
+		defer func() {
+			if r := recover(); r != nil {
+				logger.Global().Error("goroutine panicked", logger.Any("panic", r))
+			}
+		}()
 		bgCtx, cancel := context.WithTimeout(context.WithoutCancel(ctx), 10*time.Second)
 		defer cancel()
 		h.Service.RecordSeatChange(bgCtx, ownerID)
@@ -435,7 +447,7 @@ func (h *DeactivateMemberHandler) Serve(ctx context.Context, _ *DeactivateMember
 
 	ownerID := device.User.UserID
 
-	if err := h.Service.DeactivateUser(ctx, ownerID, memberID); err != nil {
+	if err := h.Service.DeactivateUser(ctx, ownerID, device.User.BusinessID, memberID); err != nil {
 		return DeactivateMemberResponse{}, &errorModels.ServerError{
 			HTTPCode: http.StatusInternalServerError,
 			Code:     http.StatusInternalServerError,
@@ -445,6 +457,11 @@ func (h *DeactivateMemberHandler) Serve(ctx context.Context, _ *DeactivateMember
 
 	// Record the seat change asynchronously so billing stays accurate.
 	go func() {
+		defer func() {
+			if r := recover(); r != nil {
+				logger.Global().Error("goroutine panicked", logger.Any("panic", r))
+			}
+		}()
 		bgCtx, cancel := context.WithTimeout(context.WithoutCancel(ctx), 10*time.Second)
 		defer cancel()
 		h.Service.RecordSeatChange(bgCtx, ownerID)
@@ -464,30 +481,27 @@ type MeRequest struct {
 }
 
 type MeResponse struct {
-	ID                 int64                      `json:"id"`
-	Email              string                     `json:"email"`
-	FullName           string                     `json:"full_name"`
-	Apps               []string                   `json:"apps"`
-	Role               string                     `json:"role"`
-	BusinessID         int64                      `json:"business_id"`
-	BusinessName       string                     `json:"business_name"`
-	IsOwner            bool                       `json:"is_owner"`
-	Onboarded          bool                       `json:"onboarded"`
-	PlanSlug           string                     `json:"plan_slug"`
-	SubscriptionStatus string                     `json:"subscription_status"`
-	EffectiveResources map[string]string          `json:"effective_resources"`
+	ID                 int64             `json:"id"`
+	Email              string            `json:"email"`
+	FullName           string            `json:"full_name"`
+	Apps               []string          `json:"apps"`
+	Role               string            `json:"role"`
+	BusinessID         int64             `json:"business_id"`
+	BusinessName       string            `json:"business_name"`
+	IsOwner            bool              `json:"is_owner"`
+	Onboarded          bool              `json:"onboarded"`
+	PlanSlug           string            `json:"plan_slug"`
+	SubscriptionStatus string            `json:"subscription_status"`
+	EffectiveResources map[string]string `json:"effective_resources"`
 }
 
-func (h *MeHandler) Serve(ctx context.Context, req *MeRequest) (MeResponse, *errorModels.ServerError) {
+func (h *MeHandler) Serve(ctx context.Context, _ *MeRequest) (MeResponse, *errorModels.ServerError) {
 	device := authPkg.DeviceCtx(ctx)
 	if device.User == nil {
 		return MeResponse{}, errorModels.PermissionDeniedServerError()
 	}
 
-	userID := device.User.UserID
-	businessID := device.User.BusinessID
-
-	email, fullName, apps, role, err := h.Service.GetMeByBusiness(ctx, businessID, userID)
+	profile, err := h.Service.GetMyProfile(ctx, device.User.UserID, device.User.BusinessID)
 	if err != nil {
 		if errors.Is(err, domain.ErrUserNotFound) {
 			return MeResponse{}, &errorModels.ServerError{
@@ -496,7 +510,6 @@ func (h *MeHandler) Serve(ctx context.Context, req *MeRequest) (MeResponse, *err
 				Message:  "User not found",
 			}
 		}
-
 		return MeResponse{}, &errorModels.ServerError{
 			HTTPCode: http.StatusInternalServerError,
 			Code:     http.StatusInternalServerError,
@@ -504,67 +517,20 @@ func (h *MeHandler) Serve(ctx context.Context, req *MeRequest) (MeResponse, *err
 		}
 	}
 
-	if apps == nil {
-		apps = []string{}
-	}
-
-	// Get business name
-	businessName, isOwner := h.Service.GetBusinessInfo(ctx, businessID, userID)
-
-	var planSlug, subscriptionStatus string
-
-	// If user is the owner, resolve apps from their subscription plan
-	if isOwner {
-		role = "owner"
-		ownerApps, appsErr := h.Service.GetOwnerApps(ctx, userID)
-		if appsErr != nil || len(ownerApps) == 0 {
-			apps = []string{"pos", "erp", "hr", "crm", "finance", "flow"}
-		} else {
-			apps = ownerApps
-		}
-
-		slug, status, subErr := h.Service.GetOwnerSubscriptionInfo(ctx, userID)
-		if subErr == nil {
-			planSlug = slug
-			subscriptionStatus = status
-		}
-	}
-
-	effectiveResources := map[string]string{}
-	if !isOwner {
-		resPerms, resErr := h.Service.GetUserEffectiveResources(ctx, businessID, userID)
-		if resErr == nil {
-			for key, level := range resPerms {
-				effectiveResources[key] = string(level)
-			}
-		}
-	}
-
-	return MeResponse{
-		ID:                 userID,
-		Email:              email,
-		FullName:           fullName,
-		Apps:               apps,
-		Role:               string(role),
-		BusinessID:         businessID,
-		BusinessName:       businessName,
-		IsOwner:            isOwner,
-		Onboarded:          h.Service.IsOnboarded(ctx, userID),
-		PlanSlug:           planSlug,
-		SubscriptionStatus: subscriptionStatus,
-		EffectiveResources: effectiveResources,
-	}, nil
+	return MeResponse(profile), nil
 }
 
 // ─── Mark Onboarded ─────────────────────────────────────────────────────────
 
 func MarkOnboardedRoutes() []string { return []string{"/user/onboarded"} }
 
-type MarkOnboardedHandler struct{ Service *application.Service }
-type MarkOnboardedRequest struct{}
-type MarkOnboardedResponse struct {
-	Message string `json:"message"`
-}
+type (
+	MarkOnboardedHandler  struct{ Service *application.Service }
+	MarkOnboardedRequest  struct{}
+	MarkOnboardedResponse struct {
+		Message string `json:"message"`
+	}
+)
 
 func (h *MarkOnboardedHandler) Serve(ctx context.Context, _ *MarkOnboardedRequest) (MarkOnboardedResponse, *errorModels.ServerError) {
 	device := authPkg.DeviceCtx(ctx)
@@ -627,6 +593,11 @@ func (h *RequestAccessHandler) Serve(ctx context.Context, req *RequestAccessRequ
 
 	// Send email to business owner (non-blocking)
 	go func() {
+		defer func() {
+			if r := recover(); r != nil {
+				logger.Global().Error("goroutine panicked", logger.Any("panic", r))
+			}
+		}()
 		taskCtx, cancel := context.WithTimeout(context.WithoutCancel(ctx), 10*time.Second)
 		defer cancel()
 

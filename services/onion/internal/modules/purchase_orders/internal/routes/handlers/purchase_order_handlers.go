@@ -2,14 +2,17 @@ package handlers
 
 import (
 	"context"
+	"errors"
 	"net/http"
+	"strconv"
 
-	erpv1 "github.com/voxire/voxie/gen/go/erp/v1"
+	"github.com/go-chi/chi/v5"
 
 	"github.com/voxire/onion/internal/modules/purchase_orders/internal/application"
 	"github.com/voxire/onion/internal/modules/purchase_orders/internal/domain"
 	authPkg "github.com/voxire/onion/internal/platform/auth"
 	errorModels "github.com/voxire/onion/internal/platform/errors"
+	erpv1 "github.com/voxire/voxie/gen/go/erp/v1"
 )
 
 // ─── List Purchase Orders ─────────────────────────────────────────────────────
@@ -33,7 +36,7 @@ type ListPurchaseOrdersResponse struct {
 func newPurchaseOrderPayload(po domain.PurchaseOrder) *erpv1.PurchaseOrder {
 	payload := &erpv1.PurchaseOrder{
 		Id:         po.ID,
-		OwnerId:   po.OwnerID,
+		OwnerId:    po.OwnerID,
 		SupplierId: po.SupplierID,
 		PoNumber:   po.PONumber,
 		Status:     string(po.Status),
@@ -266,4 +269,56 @@ func (h *UpdatePurchaseOrderStatusHandler) Serve(ctx context.Context, req *Updat
 	}
 
 	return UpdatePurchaseOrderStatusResponse{Message: "Purchase order status updated successfully"}, nil
+}
+
+// ─── Get Purchase Order by ID ─────────────────────────────────────────────────
+
+func GetPurchaseOrderRoutes() []string {
+	return []string{"/erp/purchase-orders/{id}"}
+}
+
+type GetPurchaseOrderHandler struct {
+	Service *application.Service
+}
+
+type GetPurchaseOrderRequest struct{}
+
+type GetPurchaseOrderResponse struct {
+	PurchaseOrder *erpv1.PurchaseOrder `json:"purchase_order"`
+}
+
+func (h *GetPurchaseOrderHandler) Serve(ctx context.Context, _ *GetPurchaseOrderRequest) (GetPurchaseOrderResponse, *errorModels.ServerError) {
+	authUser, ok := authPkg.GetAuthUser(ctx)
+	if !ok {
+		return GetPurchaseOrderResponse{}, &errorModels.ServerError{
+			Code:     http.StatusUnauthorized,
+			HTTPCode: http.StatusUnauthorized,
+			Message:  "unauthorized",
+		}
+	}
+	idStr := chi.URLParamFromCtx(ctx, "id")
+	id, err := strconv.ParseInt(idStr, 10, 64)
+	if err != nil {
+		return GetPurchaseOrderResponse{}, &errorModels.ServerError{
+			Code:     http.StatusBadRequest,
+			HTTPCode: http.StatusBadRequest,
+			Message:  "Invalid purchase order ID",
+		}
+	}
+	po, getErr := h.Service.GetByID(ctx, authUser.UserID, id)
+	if getErr != nil {
+		if errors.Is(getErr, domain.ErrPurchaseOrderNotFound) {
+			return GetPurchaseOrderResponse{}, &errorModels.ServerError{
+				Code:     http.StatusNotFound,
+				HTTPCode: http.StatusNotFound,
+				Message:  "Purchase order not found",
+			}
+		}
+		return GetPurchaseOrderResponse{}, &errorModels.ServerError{
+			Code:     http.StatusInternalServerError,
+			HTTPCode: http.StatusInternalServerError,
+			Message:  "Failed to get purchase order",
+		}
+	}
+	return GetPurchaseOrderResponse{PurchaseOrder: newPurchaseOrderPayload(po)}, nil
 }

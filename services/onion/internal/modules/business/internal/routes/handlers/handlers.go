@@ -11,8 +11,10 @@ import (
 
 func BusinessMeRoutes() []string { return []string{"/business/me"} }
 
-type GetProfileHandler struct{ Service *application.Service }
-type GetProfileRequest struct{}
+type (
+	GetProfileHandler struct{ Service *application.Service }
+	GetProfileRequest struct{}
+)
 
 type GetProfileResponse struct {
 	ID           int64  `json:"id"`

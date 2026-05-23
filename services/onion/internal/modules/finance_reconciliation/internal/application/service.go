@@ -2,11 +2,20 @@ package application
 
 import (
 	"context"
+	"database/sql"
 	"math"
 	"sort"
+	"time"
 
 	"github.com/voxire/onion/internal/modules/finance_reconciliation/internal/domain"
 	"github.com/voxire/onion/internal/modules/finance_reconciliation/internal/infrastructure"
+	"github.com/voxire/onion/internal/platform/cache/cacher"
+	cacheKeys "github.com/voxire/onion/internal/platform/cache/keys"
+)
+
+const (
+	financeReconScope = "finance_reconciliation"
+	financeReconTTL   = 2 * time.Minute
 )
 
 // maxSuggestions caps the suggestion list so the response stays small even
@@ -35,11 +44,21 @@ type Service struct {
 	repo repository
 }
 
-func NewService(ctx context.Context) *Service {
-	return &Service{repo: infrastructure.NewRepository(ctx)}
+func NewService(_ context.Context, db *sql.DB) *Service {
+	return &Service{repo: infrastructure.NewRepository(db)}
 }
 
 func (s *Service) Overview(ctx context.Context, ownerID int64) (domain.ReconciliationOverview, error) {
+	return cacher.Of[domain.ReconciliationOverview]().GetOrComputeSingle(ctx,
+		cacheKeys.Scoped(financeReconScope, ownerID, "overview"),
+		func(ctx context.Context) (domain.ReconciliationOverview, error) {
+			return s.computeOverview(ctx, ownerID)
+		},
+		cacher.WithExpiry(ctx, financeReconTTL),
+	)
+}
+
+func (s *Service) computeOverview(ctx context.Context, ownerID int64) (domain.ReconciliationOverview, error) {
 	bankTxns, err := s.repo.ListUnmatchedBankFeeds(ctx, ownerID)
 	if err != nil {
 		return domain.ReconciliationOverview{}, err
@@ -80,7 +99,13 @@ func (s *Service) Match(ctx context.Context, ownerID int64, input domain.MatchIn
 		return 0, domain.ErrBankFeedNotFound
 	}
 
-	return s.repo.CreateMatch(ctx, ownerID, input)
+	id, err := s.repo.CreateMatch(ctx, ownerID, input)
+	if err == nil {
+		if cache := cacher.GetRedisCache(); cache != nil {
+			cache.DeleteByPattern(ctx, cacheKeys.ScopedPrefix(financeReconScope, ownerID))
+		}
+	}
+	return id, err
 }
 
 // computeSuggestions scores every (bank_txn × target) pair by amount and date

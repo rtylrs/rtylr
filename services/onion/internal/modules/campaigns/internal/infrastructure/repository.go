@@ -8,7 +8,6 @@ import (
 
 	"github.com/voxire/onion/internal/modules/campaigns/internal/domain"
 	"github.com/voxire/onion/internal/modules/campaigns/internal/infrastructure/persistence/sqlc"
-	"github.com/voxire/onion/internal/platform/database/dbclient"
 	"github.com/voxire/onion/internal/platform/logger"
 )
 
@@ -16,9 +15,9 @@ type Repository struct {
 	queries *sqlc.Queries
 }
 
-func NewRepository(_ context.Context) *Repository {
+func NewRepository(db *sql.DB) *Repository {
 	return &Repository{
-		queries: sqlc.New(dbclient.Pool()),
+		queries: sqlc.New(db),
 	}
 }
 
@@ -178,4 +177,11 @@ func nullableTime(t *time.Time) sql.NullTime {
 	}
 
 	return sql.NullTime{Time: *t, Valid: true}
+}
+
+func (r *Repository) Delete(ctx context.Context, ownerID, id int64) error {
+	return r.queries.DeleteCampaign(ctx, sqlc.DeleteCampaignParams{
+		ID:      id,
+		OwnerID: ownerID,
+	})
 }

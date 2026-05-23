@@ -10,7 +10,6 @@ import (
 
 	"github.com/voxire/onion/internal/modules/expenses/internal/domain"
 	"github.com/voxire/onion/internal/modules/expenses/internal/infrastructure/persistence/sqlc"
-	"github.com/voxire/onion/internal/platform/database/dbclient"
 	"github.com/voxire/onion/internal/platform/logger"
 )
 
@@ -19,8 +18,8 @@ type Repository struct {
 	pool    *sql.DB
 }
 
-func NewRepository(_ context.Context) *Repository {
-	pool := dbclient.Pool()
+func NewRepository(db *sql.DB) *Repository {
+	pool := db
 
 	return &Repository{
 		queries: sqlc.New(pool),
@@ -107,6 +106,25 @@ func (r *Repository) Delete(ctx context.Context, ownerID, id int64) error {
 	})
 	if err != nil {
 		logger.Ctx(ctx).Error("Failed to delete expense", logger.Error(err))
+		return err
+	}
+	rows, err := result.RowsAffected()
+	if err != nil {
+		return err
+	}
+	if rows == 0 {
+		return domain.ErrExpenseNotFound
+	}
+	return nil
+}
+
+func (r *Repository) UpdateStatus(ctx context.Context, ownerID, id int64, status string) error {
+	result, err := r.pool.ExecContext(ctx,
+		`UPDATE expenses SET status = ? WHERE id = ? AND owner_id = ?`,
+		status, id, ownerID,
+	)
+	if err != nil {
+		logger.Ctx(ctx).Error("Failed to update expense status", logger.Error(err))
 		return err
 	}
 	rows, err := result.RowsAffected()

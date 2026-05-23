@@ -19,12 +19,15 @@ type mockRepo struct {
 func (m *mockRepo) List(_ context.Context, _ int64) ([]domain.Terminal, error) {
 	return m.list, nil
 }
+
 func (m *mockRepo) Create(_ context.Context, _ domain.TerminalInput) (int64, error) {
 	return m.createID, m.createErr
 }
+
 func (m *mockRepo) Update(_ context.Context, _ domain.TerminalUpdateInput) error {
 	return m.updErr
 }
+
 func (m *mockRepo) Heartbeat(_ context.Context, _, _ int64) error {
 	return m.hbErr
 }

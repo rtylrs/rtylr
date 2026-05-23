@@ -2,10 +2,12 @@ package handlers
 
 import (
 	"context"
+	"errors"
 	"net/http"
 	"strconv"
 
 	"github.com/go-chi/chi/v5"
+
 	"github.com/voxire/onion/internal/modules/hr_equipment/internal/application"
 	"github.com/voxire/onion/internal/modules/hr_equipment/internal/domain"
 	authPkg "github.com/voxire/onion/internal/platform/auth"
@@ -46,10 +48,10 @@ func (h *AssignAssetHandler) Serve(ctx context.Context, req *AssignAssetRequest)
 
 	err := h.Service.AssignAsset(ctx, device.User.UserID, assetID, req.EmployeeID)
 	if err != nil {
-		if err == domain.ErrAssetNotFound {
+		if errors.Is(err, domain.ErrAssetNotFound) {
 			return AssignAssetResponse{}, &errorModels.ServerError{HTTPCode: http.StatusNotFound, Code: http.StatusNotFound, Message: "Asset not found"}
 		}
-		if err == domain.ErrAssetAlreadyAssigned {
+		if errors.Is(err, domain.ErrAssetAlreadyAssigned) {
 			return AssignAssetResponse{}, &errorModels.ServerError{HTTPCode: http.StatusConflict, Code: http.StatusConflict, Message: "Asset is already assigned"}
 		}
 		logger.Ctx(ctx).Error("failed to assign asset", logger.Any("owner_id", device.User.UserID), logger.Any("asset_id", assetID), logger.Error(err))

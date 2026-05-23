@@ -3,13 +3,13 @@ package infrastructure
 import (
 	"context"
 	"database/sql"
+	"errors"
 	"fmt"
 	"strconv"
 	"time"
 
 	"github.com/voxire/onion/internal/modules/invoices/internal/domain"
 	"github.com/voxire/onion/internal/modules/invoices/internal/infrastructure/persistence/sqlc"
-	"github.com/voxire/onion/internal/platform/database/dbclient"
 	"github.com/voxire/onion/internal/platform/logger"
 )
 
@@ -18,8 +18,8 @@ type Repository struct {
 	pool    *sql.DB
 }
 
-func NewRepository(_ context.Context) *Repository {
-	pool := dbclient.Pool()
+func NewRepository(db *sql.DB) *Repository {
+	pool := db
 
 	return &Repository{
 		queries: sqlc.New(pool),
@@ -96,7 +96,7 @@ func (r *Repository) GetInvoiceByID(ctx context.Context, ownerID, invoiceID int6
 		OwnerID: ownerID,
 	})
 	if err != nil {
-		if err == sql.ErrNoRows {
+		if errors.Is(err, sql.ErrNoRows) {
 			return nil, domain.ErrInvoiceNotFound
 		}
 		logger.Ctx(ctx).Error("Failed to get invoice by ID", logger.Error(err))
@@ -367,7 +367,7 @@ func (r *Repository) GetPaymentsByInvoice(ctx context.Context, invoiceID int64) 
 // Expenses
 // ---------------------------------------------------------------------------
 
-func (r *Repository) ListExpenses(ctx context.Context, ownerID int64, categoryID int64, search, dateFrom, dateTo string) ([]domain.Expense, error) {
+func (r *Repository) ListExpenses(ctx context.Context, ownerID, categoryID int64, search, dateFrom, dateTo string) ([]domain.Expense, error) {
 	// Dynamic filters require raw SQL.
 	query := `
 		SELECT id, owner_id, category_id, description, amount, currency, expense_date, vendor,
@@ -430,7 +430,7 @@ func (r *Repository) GetExpenseByID(ctx context.Context, ownerID, expenseID int6
 		OwnerID: ownerID,
 	})
 	if err != nil {
-		if err == sql.ErrNoRows {
+		if errors.Is(err, sql.ErrNoRows) {
 			return nil, domain.ErrExpenseNotFound
 		}
 		logger.Ctx(ctx).Error("Failed to get expense by ID", logger.Error(err))

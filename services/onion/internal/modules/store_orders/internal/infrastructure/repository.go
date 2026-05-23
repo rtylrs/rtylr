@@ -7,7 +7,6 @@ import (
 
 	"github.com/voxire/onion/internal/modules/store_orders/internal/domain"
 	"github.com/voxire/onion/internal/modules/store_orders/internal/infrastructure/persistence/sqlc"
-	"github.com/voxire/onion/internal/platform/database/dbclient"
 	"github.com/voxire/onion/internal/platform/logger"
 )
 
@@ -16,8 +15,8 @@ type Repository struct {
 	pool    *sql.DB
 }
 
-func NewRepository(_ context.Context) *Repository {
-	pool := dbclient.Pool()
+func NewRepository(db *sql.DB) *Repository {
+	pool := db
 	return &Repository{queries: sqlc.New(pool), pool: pool}
 }
 
@@ -112,31 +111,53 @@ func (r *Repository) Update(ctx context.Context, ownerID, id int64, input domain
 
 func orderFromRow(row sqlc.StoreOrder) domain.StoreOrder {
 	o := domain.StoreOrder{ID: row.ID, OwnerID: row.OwnerID}
-	if row.CustomerEmail.Valid { o.CustomerEmail = row.CustomerEmail.String }
-	if row.CustomerName.Valid { o.CustomerName = row.CustomerName.String }
-	if row.CustomerPhone.Valid { o.CustomerPhone = row.CustomerPhone.String }
-	if row.Status.Valid { o.Status = string(row.Status.StoreOrdersStatus) }
+	if row.CustomerEmail.Valid {
+		o.CustomerEmail = row.CustomerEmail.String
+	}
+	if row.CustomerName.Valid {
+		o.CustomerName = row.CustomerName.String
+	}
+	if row.CustomerPhone.Valid {
+		o.CustomerPhone = row.CustomerPhone.String
+	}
+	if row.Status.Valid {
+		o.Status = string(row.Status.StoreOrdersStatus)
+	}
 	o.Subtotal, _ = strconv.ParseFloat(row.Subtotal, 64)
 	o.Tax, _ = strconv.ParseFloat(row.Tax, 64)
 	o.ShippingCost, _ = strconv.ParseFloat(row.ShippingCost, 64)
 	o.Total, _ = strconv.ParseFloat(row.Total, 64)
-	if row.ShippingAddress != nil { o.ShippingAddress = string(row.ShippingAddress) }
-	if row.Notes.Valid { o.Notes = row.Notes.String }
-	if row.CreatedAt.Valid { o.CreatedAt = row.CreatedAt.Time }
-	if row.UpdatedAt.Valid { o.UpdatedAt = row.UpdatedAt.Time }
+	if row.ShippingAddress != nil {
+		o.ShippingAddress = string(row.ShippingAddress)
+	}
+	if row.Notes.Valid {
+		o.Notes = row.Notes.String
+	}
+	if row.CreatedAt.Valid {
+		o.CreatedAt = row.CreatedAt.Time
+	}
+	if row.UpdatedAt.Valid {
+		o.UpdatedAt = row.UpdatedAt.Time
+	}
 	return o
 }
 
 func itemFromRow(row sqlc.StoreOrderItem) domain.StoreOrderItem {
 	i := domain.StoreOrderItem{ID: row.ID, OrderID: row.OrderID, Name: row.Name, Quantity: int(row.Quantity)}
-	if row.ProductID.Valid { i.ProductID = row.ProductID.Int64 }
+	if row.ProductID.Valid {
+		i.ProductID = row.ProductID.Int64
+	}
 	i.Price, _ = strconv.ParseFloat(row.Price, 64)
 	i.Total, _ = strconv.ParseFloat(row.Total, 64)
-	if row.CreatedAt.Valid { i.CreatedAt = row.CreatedAt.Time }
+	if row.CreatedAt.Valid {
+		i.CreatedAt = row.CreatedAt.Time
+	}
 	return i
 }
 
 func nullJSON(s string) []byte {
-	if s == "" { return nil }
+	if s == "" {
+		return nil
+	}
 	return []byte(s)
 }

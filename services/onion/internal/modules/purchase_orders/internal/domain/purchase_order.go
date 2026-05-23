@@ -7,7 +7,7 @@ import (
 )
 
 var (
-	ErrPurchaseOrderNotFound      = errors.New("purchase order not found")
+	ErrPurchaseOrderNotFound        = errors.New("purchase order not found")
 	ErrPurchaseOrderAlreadyApproved = errors.New("purchase order already approved")
 )
 

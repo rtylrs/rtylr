@@ -2,18 +2,34 @@ package application
 
 import (
 	"context"
+	"database/sql"
+	"fmt"
+	"time"
 
 	"github.com/voxire/onion/internal/modules/hr_documents/internal/domain"
 	"github.com/voxire/onion/internal/modules/hr_documents/internal/infrastructure"
+	"github.com/voxire/onion/internal/platform/cache/cacher"
+	cacheKeys "github.com/voxire/onion/internal/platform/cache/keys"
+)
+
+const (
+	hrDocumentsScope = "hr_documents"
+	hrDocumentsTTL   = 5 * time.Minute
 )
 
 type Service struct {
 	repo *infrastructure.Repository
 }
 
-func NewService(ctx context.Context) *Service {
+func NewService(_ context.Context, db *sql.DB) *Service {
 	return &Service{
-		repo: infrastructure.NewRepository(ctx),
+		repo: infrastructure.NewRepository(db),
+	}
+}
+
+func invalidateHRDocumentsScope(ctx context.Context, ownerID int64) {
+	if cache := cacher.GetRedisCache(); cache != nil {
+		cache.DeleteByPattern(ctx, cacheKeys.ScopedPrefix(hrDocumentsScope, ownerID))
 	}
 }
 
@@ -21,16 +37,24 @@ func (s *Service) UploadDocument(ctx context.Context, ownerID int64, params doma
 	if params.StorageMode != "stored" && params.StorageMode != "linked" {
 		return nil, domain.ErrStorageModeInvalid
 	}
-
 	if params.StorageMode == "stored" && params.FileURL == "" {
 		return nil, domain.ErrStorageModeInvalid
 	}
-
 	if params.StorageMode == "linked" && params.ExternalURL == "" {
 		return nil, domain.ErrStorageModeInvalid
 	}
 
-	return s.repo.CreateDocument(ctx, ownerID, params)
+	rec, err := s.repo.CreateDocument(ctx, ownerID, params)
+	if err != nil {
+		return nil, err
+	}
+	invalidateHRDocumentsScope(ctx, ownerID)
+	return rec, nil
+}
+
+type listDocumentsResult struct {
+	Records []domain.EmployeeDocumentRecord
+	Total   int64
 }
 
 func (s *Service) ListDocuments(ctx context.Context, ownerID, employeeID int64, limit, offset int32) ([]domain.EmployeeDocumentRecord, int64, error) {
@@ -40,8 +64,15 @@ func (s *Service) ListDocuments(ctx context.Context, ownerID, employeeID int64, 
 	if limit > 100 {
 		limit = 100
 	}
-
-	return s.repo.ListDocuments(ctx, ownerID, employeeID, limit, offset)
+	key := cacheKeys.Scoped(hrDocumentsScope, ownerID, fmt.Sprintf("list|e=%d|l=%d|o=%d", employeeID, limit, offset))
+	res, err := cacher.Of[listDocumentsResult]().GetOrComputeSingle(ctx, key,
+		func(ctx context.Context) (listDocumentsResult, error) {
+			recs, total, err := s.repo.ListDocuments(ctx, ownerID, employeeID, limit, offset)
+			return listDocumentsResult{Records: recs, Total: total}, err
+		},
+		cacher.WithExpiry(ctx, hrDocumentsTTL),
+	)
+	return res.Records, res.Total, err
 }
 
 func (s *Service) ListExpiringDocuments(ctx context.Context, ownerID int64, days, limit, offset int32) ([]domain.EmployeeDocumentRecord, int64, error) {
@@ -54,19 +85,34 @@ func (s *Service) ListExpiringDocuments(ctx context.Context, ownerID int64, days
 	if limit > 100 {
 		limit = 100
 	}
-
-	return s.repo.ListExpiringDocuments(ctx, ownerID, days, limit, offset)
+	key := cacheKeys.Scoped(hrDocumentsScope, ownerID, fmt.Sprintf("exp|d=%d|l=%d|o=%d", days, limit, offset))
+	res, err := cacher.Of[listDocumentsResult]().GetOrComputeSingle(ctx, key,
+		func(ctx context.Context) (listDocumentsResult, error) {
+			recs, total, err := s.repo.ListExpiringDocuments(ctx, ownerID, days, limit, offset)
+			return listDocumentsResult{Records: recs, Total: total}, err
+		},
+		cacher.WithExpiry(ctx, hrDocumentsTTL),
+	)
+	return res.Records, res.Total, err
 }
 
 func (s *Service) GetDocument(ctx context.Context, ownerID, id int64) (*domain.EmployeeDocumentRecord, error) {
-	return s.repo.GetDocument(ctx, ownerID, id)
+	key := cacheKeys.Scoped(hrDocumentsScope, ownerID, fmt.Sprintf("id=%d", id))
+	return cacher.Of[*domain.EmployeeDocumentRecord]().GetOrComputeSingle(ctx, key,
+		func(ctx context.Context) (*domain.EmployeeDocumentRecord, error) {
+			return s.repo.GetDocument(ctx, ownerID, id)
+		},
+		cacher.WithExpiry(ctx, hrDocumentsTTL),
+	)
 }
 
 func (s *Service) DeleteDocument(ctx context.Context, ownerID, id int64) error {
-	_, err := s.repo.GetDocument(ctx, ownerID, id)
-	if err != nil {
+	if _, err := s.repo.GetDocument(ctx, ownerID, id); err != nil {
 		return err
 	}
-
-	return s.repo.DeleteDocument(ctx, ownerID, id)
+	if err := s.repo.DeleteDocument(ctx, ownerID, id); err != nil {
+		return err
+	}
+	invalidateHRDocumentsScope(ctx, ownerID)
+	return nil
 }

@@ -2,8 +2,10 @@ package hr_time
 
 import (
 	"context"
+	"database/sql"
 
 	"github.com/go-chi/chi/v5"
+
 	hrcore "github.com/voxire/onion/internal/modules/hr_core"
 	"github.com/voxire/onion/internal/modules/hr_time/internal/application"
 	"github.com/voxire/onion/internal/modules/hr_time/internal/domain"
@@ -43,11 +45,11 @@ type Module struct {
 	service *application.Service
 }
 
-func NewModule(ctx context.Context, hrCoreModule *hrcore.Module) *Module {
+func NewModule(ctx context.Context, db *sql.DB, hrCoreModule *hrcore.Module) *Module {
 	approvalAdapter := &hrCoreApprovalAdapter{core: hrCoreModule}
-	flowAdapter := infrastructure.NewFlowAdapter()
+	flowAdapter := infrastructure.NewFlowAdapter(db)
 	return &Module{
-		service: application.NewService(ctx, approvalAdapter, flowAdapter),
+		service: application.NewService(ctx, db, approvalAdapter, flowAdapter),
 	}
 }
 

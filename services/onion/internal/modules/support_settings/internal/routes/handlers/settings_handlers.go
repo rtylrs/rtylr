@@ -13,11 +13,13 @@ import (
 func GetSettingsRoutes() []string    { return []string{"/support/settings"} }
 func UpdateSettingsRoutes() []string { return []string{"/support/settings"} }
 
-type GetSettingsHandler struct{ Service *application.Service }
-type GetSettingsRequest struct{}
-type GetSettingsResponse struct {
-	Settings *domain.Settings `json:"settings"`
-}
+type (
+	GetSettingsHandler  struct{ Service *application.Service }
+	GetSettingsRequest  struct{}
+	GetSettingsResponse struct {
+		Settings *domain.Settings `json:"settings"`
+	}
+)
 
 func (h *GetSettingsHandler) Serve(ctx context.Context, _ *GetSettingsRequest) (GetSettingsResponse, *errorModels.ServerError) {
 	device := authPkg.DeviceCtx(ctx)
@@ -31,13 +33,16 @@ func (h *GetSettingsHandler) Serve(ctx context.Context, _ *GetSettingsRequest) (
 	return GetSettingsResponse{Settings: s}, nil
 }
 
-type UpdateSettingsHandler struct{ Service *application.Service }
-type UpdateSettingsRequest struct {
-	AutoAssign        bool   `json:"auto_assign"`
-	SLAHours          int    `json:"sla_hours"`
-	BusinessHours     string `json:"business_hours"`
-	NotificationEmail string `json:"notification_email"`
-}
+type (
+	UpdateSettingsHandler struct{ Service *application.Service }
+	UpdateSettingsRequest struct {
+		AutoAssign        bool   `json:"auto_assign"`
+		SLAHours          int    `json:"sla_hours"`
+		BusinessHours     string `json:"business_hours"`
+		NotificationEmail string `json:"notification_email"`
+	}
+)
+
 type UpdateSettingsResponse struct {
 	Message string `json:"message"`
 }

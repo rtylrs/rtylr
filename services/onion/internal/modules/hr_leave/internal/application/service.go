@@ -2,21 +2,36 @@ package application
 
 import (
 	"context"
+	"database/sql"
+	"fmt"
 	"time"
 
 	"github.com/voxire/onion/internal/modules/hr_leave/internal/domain"
 	"github.com/voxire/onion/internal/modules/hr_leave/internal/infrastructure"
+	"github.com/voxire/onion/internal/platform/cache/cacher"
+	cacheKeys "github.com/voxire/onion/internal/platform/cache/keys"
 	"github.com/voxire/onion/internal/platform/logger"
 )
+
+const (
+	hrLeaveScope = "hr_leave"
+	hrLeaveTTL   = 2 * time.Minute
+)
+
+func invalidateHRLeaveScope(ctx context.Context, ownerID int64) {
+	if cache := cacher.GetRedisCache(); cache != nil {
+		cache.DeleteByPattern(ctx, cacheKeys.ScopedPrefix(hrLeaveScope, ownerID))
+	}
+}
 
 type Service struct {
 	repo             *infrastructure.Repository
 	approvalProvider domain.ApprovalChainProvider
 }
 
-func NewService(ctx context.Context, approvalProvider domain.ApprovalChainProvider) *Service {
+func NewService(_ context.Context, db *sql.DB, approvalProvider domain.ApprovalChainProvider) *Service {
 	return &Service{
-		repo:             infrastructure.NewRepository(ctx),
+		repo:             infrastructure.NewRepository(db),
 		approvalProvider: approvalProvider,
 	}
 }
@@ -31,16 +46,25 @@ func (s *Service) ListLeaveTypes(ctx context.Context, ownerID int64, params doma
 		params.Limit = 100
 	}
 
-	types, total, err := s.repo.ListLeaveTypes(ctx, ownerID, params)
-	if err != nil {
-		return nil, 0, err
+	type lr struct {
+		Types []domain.LeaveTypeRecord
+		Total int64
 	}
-
-	if total == 0 {
-		return nil, 0, domain.ErrLeaveNotConfigured
-	}
-
-	return types, total, nil
+	key := cacheKeys.Scoped(hrLeaveScope, ownerID, fmt.Sprintf("types|l=%d|o=%d", params.Limit, params.Offset))
+	res, err := cacher.Of[lr]().GetOrComputeSingle(ctx, key,
+		func(ctx context.Context) (lr, error) {
+			types, total, err := s.repo.ListLeaveTypes(ctx, ownerID, params)
+			if err != nil {
+				return lr{}, err
+			}
+			if total == 0 {
+				return lr{}, domain.ErrLeaveNotConfigured
+			}
+			return lr{Types: types, Total: total}, nil
+		},
+		cacher.WithExpiry(ctx, hrLeaveTTL),
+	)
+	return res.Types, res.Total, err
 }
 
 func (s *Service) CreateLeaveType(ctx context.Context, ownerID int64, lt domain.LeaveTypeRecord) (*domain.LeaveTypeRecord, error) {
@@ -48,11 +72,19 @@ func (s *Service) CreateLeaveType(ctx context.Context, ownerID int64, lt domain.
 		lt.Name = "Unnamed Leave Type"
 	}
 	lt.IsActive = true
-	return s.repo.CreateLeaveType(ctx, ownerID, lt)
+	rec, err := s.repo.CreateLeaveType(ctx, ownerID, lt)
+	if err == nil {
+		invalidateHRLeaveScope(ctx, ownerID)
+	}
+	return rec, err
 }
 
 func (s *Service) UpdateLeaveType(ctx context.Context, ownerID int64, lt domain.LeaveTypeRecord) error {
-	return s.repo.UpdateLeaveType(ctx, ownerID, lt)
+	if err := s.repo.UpdateLeaveType(ctx, ownerID, lt); err != nil {
+		return err
+	}
+	invalidateHRLeaveScope(ctx, ownerID)
+	return nil
 }
 
 // --- Leave Requests ---
@@ -128,6 +160,7 @@ func (s *Service) CreateLeaveRequest(ctx context.Context, ownerID int64, req dom
 			logger.Any("owner_id", ownerID), logger.Any("employee_id", req.EmployeeID), logger.Error(addErr))
 	}
 
+	invalidateHRLeaveScope(ctx, ownerID)
 	return created, nil
 }
 
@@ -138,10 +171,22 @@ func (s *Service) ListLeaveRequests(ctx context.Context, ownerID int64, params d
 	if params.Limit > 100 {
 		params.Limit = 100
 	}
-	return s.repo.ListLeaveRequests(ctx, ownerID, params)
+	type lr struct {
+		Items []domain.LeaveRequestRecord
+		Total int64
+	}
+	key := cacheKeys.Scoped(hrLeaveScope, ownerID, fmt.Sprintf("reqs|l=%d|o=%d", params.Limit, params.Offset))
+	res, err := cacher.Of[lr]().GetOrComputeSingle(ctx, key,
+		func(ctx context.Context) (lr, error) {
+			items, total, err := s.repo.ListLeaveRequests(ctx, ownerID, params)
+			return lr{Items: items, Total: total}, err
+		},
+		cacher.WithExpiry(ctx, hrLeaveTTL),
+	)
+	return res.Items, res.Total, err
 }
 
-func (s *Service) ApproveLeave(ctx context.Context, ownerID, requestID, approverID int64) error {
+func (s *Service) ApproveLeave(ctx context.Context, ownerID, requestID int64) error {
 	req, err := s.repo.GetLeaveRequest(ctx, ownerID, requestID)
 	if err != nil {
 		return err
@@ -162,7 +207,11 @@ func (s *Service) ApproveLeave(ctx context.Context, ownerID, requestID, approver
 		}
 
 		if req.CurrentApprovalLevel+1 < chain.TotalLevels {
-			return s.repo.AdvanceLeaveApprovalLevel(ctx, ownerID, requestID)
+			if err := s.repo.AdvanceLeaveApprovalLevel(ctx, ownerID, requestID); err != nil {
+				return err
+			}
+			invalidateHRLeaveScope(ctx, ownerID)
+			return nil
 		}
 	}
 
@@ -183,6 +232,7 @@ func (s *Service) ApproveLeave(ctx context.Context, ownerID, requestID, approver
 			logger.Any("owner_id", ownerID), logger.Any("request_id", requestID), logger.Error(addErr))
 	}
 
+	invalidateHRLeaveScope(ctx, ownerID)
 	return nil
 }
 
@@ -209,10 +259,21 @@ func (s *Service) RejectLeave(ctx context.Context, ownerID, requestID int64, rea
 			logger.Any("owner_id", ownerID), logger.Any("request_id", requestID), logger.Error(subErr))
 	}
 
+	invalidateHRLeaveScope(ctx, ownerID)
 	return nil
 }
 
 func (s *Service) GetLeaveBalances(ctx context.Context, ownerID, employeeID int64, year int32) ([]domain.LeaveBalanceRecord, error) {
+	key := cacheKeys.Scoped(hrLeaveScope, ownerID, fmt.Sprintf("balances|e=%d|y=%d", employeeID, year))
+	return cacher.Of[[]domain.LeaveBalanceRecord]().GetOrComputeSingle(ctx, key,
+		func(ctx context.Context) ([]domain.LeaveBalanceRecord, error) {
+			return s.fetchBalances(ctx, ownerID, employeeID, year)
+		},
+		cacher.WithExpiry(ctx, hrLeaveTTL),
+	)
+}
+
+func (s *Service) fetchBalances(ctx context.Context, ownerID, employeeID int64, year int32) ([]domain.LeaveBalanceRecord, error) {
 	if year == 0 {
 		year = int32(time.Now().Year())
 	}
@@ -220,7 +281,13 @@ func (s *Service) GetLeaveBalances(ctx context.Context, ownerID, employeeID int6
 }
 
 func (s *Service) GetLeaveCalendar(ctx context.Context, ownerID int64, params domain.LeaveCalendarParams) ([]domain.LeaveRequestRecord, error) {
-	return s.repo.ListLeaveCalendar(ctx, ownerID, params.DateFrom, params.DateTo)
+	key := cacheKeys.Scoped(hrLeaveScope, ownerID, fmt.Sprintf("calendar|f=%s|t=%s", params.DateFrom, params.DateTo))
+	return cacher.Of[[]domain.LeaveRequestRecord]().GetOrComputeSingle(ctx, key,
+		func(ctx context.Context) ([]domain.LeaveRequestRecord, error) {
+			return s.repo.ListLeaveCalendar(ctx, ownerID, params.DateFrom, params.DateTo)
+		},
+		cacher.WithExpiry(ctx, hrLeaveTTL),
+	)
 }
 
 // --- Background Job: Monthly Accrual ---

@@ -3,6 +3,7 @@ package http
 import (
 	"fmt"
 	"net/http"
+	"strconv"
 	"strings"
 	"sync"
 	"time"
@@ -178,7 +179,7 @@ func formatMapToList(m map[string]int) string {
 func formatMap(m map[string]int) string {
 	parts := make([]string, 0, len(m))
 	for key, count := range m {
-		parts = append(parts, key+":"+string(rune(count+'0')))
+		parts = append(parts, key+":"+strconv.Itoa(count))
 	}
 
 	return strings.Join(parts, ",")

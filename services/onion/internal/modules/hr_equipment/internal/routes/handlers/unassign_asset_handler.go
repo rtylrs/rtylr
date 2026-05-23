@@ -2,10 +2,12 @@ package handlers
 
 import (
 	"context"
+	"errors"
 	"net/http"
 	"strconv"
 
 	"github.com/go-chi/chi/v5"
+
 	"github.com/voxire/onion/internal/modules/hr_equipment/internal/application"
 	"github.com/voxire/onion/internal/modules/hr_equipment/internal/domain"
 	authPkg "github.com/voxire/onion/internal/platform/auth"
@@ -37,7 +39,7 @@ func (h *UnassignAssetHandler) Serve(ctx context.Context, _ *UnassignAssetReques
 
 	err := h.Service.UnassignAsset(ctx, device.User.UserID, assetID)
 	if err != nil {
-		if err == domain.ErrAssetNotFound {
+		if errors.Is(err, domain.ErrAssetNotFound) {
 			return UnassignAssetResponse{}, &errorModels.ServerError{HTTPCode: http.StatusNotFound, Code: http.StatusNotFound, Message: "Asset not found"}
 		}
 		logger.Ctx(ctx).Error("failed to unassign asset", logger.Any("owner_id", device.User.UserID), logger.Any("asset_id", assetID), logger.Error(err))

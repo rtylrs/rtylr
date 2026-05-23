@@ -3,9 +3,9 @@ package infrastructure
 import (
 	"context"
 	"database/sql"
+	"errors"
 
 	"github.com/voxire/onion/internal/modules/security/internal/domain"
-	"github.com/voxire/onion/internal/platform/database/dbclient"
 	"github.com/voxire/onion/internal/platform/logger"
 )
 
@@ -13,9 +13,9 @@ type Repository struct {
 	pool *sql.DB
 }
 
-func NewRepository(_ context.Context) *Repository {
+func NewRepository(db *sql.DB) *Repository {
 	return &Repository{
-		pool: dbclient.Pool(),
+		pool: db,
 	}
 }
 
@@ -27,7 +27,7 @@ func (r *Repository) GetSecuritySettings(ctx context.Context, userID int64) (dom
 		`SELECT COALESCE(two_factor_enabled, FALSE) FROM users WHERE id = ?`, userID,
 	).Scan(&twoFAEnabled)
 	if err != nil {
-		if err == sql.ErrNoRows {
+		if errors.Is(err, sql.ErrNoRows) {
 			return domain.SecuritySettings{
 				TwoFactorEnabled: false,
 				ActiveSessions:   []domain.ActiveSession{},
@@ -69,6 +69,9 @@ func (r *Repository) GetLoginHistory(ctx context.Context, userID int64) ([]domai
 			continue
 		}
 		entries = append(entries, e)
+	}
+	if err := rows.Err(); err != nil {
+		return nil, err
 	}
 	return entries, nil
 }

@@ -22,6 +22,24 @@ var ValidApps = map[string]struct{}{
 	"flow":    {},
 }
 
+// MyProfile is the composite /user/me payload that the team service builds
+// from several sub-queries. Lives in domain so it can be cached as a single
+// blob keyed by user id.
+type MyProfile struct {
+	ID                 int64             `json:"id"`
+	Email              string            `json:"email"`
+	FullName           string            `json:"full_name"`
+	Apps               []string          `json:"apps"`
+	Role               string            `json:"role"`
+	BusinessID         int64             `json:"business_id"`
+	BusinessName       string            `json:"business_name"`
+	IsOwner            bool              `json:"is_owner"`
+	Onboarded          bool              `json:"onboarded"`
+	PlanSlug           string            `json:"plan_slug"`
+	SubscriptionStatus string            `json:"subscription_status"`
+	EffectiveResources map[string]string `json:"effective_resources"`
+}
+
 type Role string
 
 const (

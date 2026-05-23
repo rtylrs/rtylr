@@ -23,14 +23,17 @@ type mockRepo struct {
 func (m *mockRepo) List(_ context.Context, _ int64) ([]domain.Automation, error) {
 	return m.listResult, m.listErr
 }
+
 func (m *mockRepo) Create(_ context.Context, input domain.AutomationInput) (int64, error) {
 	m.createGot = input
 	return m.createID, m.createErr
 }
+
 func (m *mockRepo) Update(_ context.Context, input domain.AutomationUpdateInput) error {
 	m.updateGot = input
 	return m.updateErr
 }
+
 func (m *mockRepo) Delete(_ context.Context, owner, id int64) error {
 	m.deleteGot.owner = owner
 	m.deleteGot.id = id

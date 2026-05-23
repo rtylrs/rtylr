@@ -68,7 +68,8 @@ func ServePOSWebSocket(w http.ResponseWriter, r *http.Request) {
 	}
 
 	ctx := context.WithValue(r.Context(), authPkg.AuthUserKey, &authPkg.AuthUser{
-		UserID: claims.UserID,
+		UserID:     claims.UserID,
+		BusinessID: claims.BusinessID,
 	})
 	hub.ServeWS(w, r.WithContext(ctx), claims.UserID)
 }

@@ -153,9 +153,9 @@ type LabelInput struct {
 }
 
 type DashboardStats struct {
-	OpenTasks           int64
-	InProgressTasks     int64
-	CompletedThisWeek   int64
-	OverdueTasks        int64
-	MyTasks             []Task
+	OpenTasks         int64
+	InProgressTasks   int64
+	CompletedThisWeek int64
+	OverdueTasks      int64
+	MyTasks           []Task
 }

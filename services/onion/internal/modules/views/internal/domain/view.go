@@ -5,9 +5,7 @@ import (
 	"time"
 )
 
-var (
-	ErrViewNotFound = errors.New("view not found")
-)
+var ErrViewNotFound = errors.New("view not found")
 
 type View struct {
 	ID          int64
@@ -33,11 +31,11 @@ type ViewInput struct {
 }
 
 type ViewUpdateInput struct {
-	ID          int64
-	OwnerID     int64
-	Name        string
-	Filters     []byte
-	SortBy      string
-	GroupBy     string
-	IsDefault   bool
+	ID        int64
+	OwnerID   int64
+	Name      string
+	Filters   []byte
+	SortBy    string
+	GroupBy   string
+	IsDefault bool
 }

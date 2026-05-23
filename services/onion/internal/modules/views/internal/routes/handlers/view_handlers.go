@@ -8,11 +8,11 @@ import (
 	"strconv"
 
 	"github.com/go-chi/chi/v5"
-	authPkg "github.com/voxire/onion/internal/platform/auth"
-	errorModels "github.com/voxire/onion/internal/platform/errors"
 
 	"github.com/voxire/onion/internal/modules/views/internal/application"
 	"github.com/voxire/onion/internal/modules/views/internal/domain"
+	authPkg "github.com/voxire/onion/internal/platform/auth"
+	errorModels "github.com/voxire/onion/internal/platform/errors"
 )
 
 type ViewPayload struct {
@@ -51,10 +51,13 @@ func newViewPayload(v domain.View) ViewPayload {
 
 func ViewListRoutes() []string { return []string{"/flow/views"} }
 
-type ListViewsHandler struct{ Service *application.Service }
-type ListViewsRequest struct {
-	WorkspaceID int64 `json:"workspace_id"`
-}
+type (
+	ListViewsHandler struct{ Service *application.Service }
+	ListViewsRequest struct {
+		WorkspaceID int64 `json:"workspace_id"`
+	}
+)
+
 type ListViewsResponse struct {
 	Views []ViewPayload `json:"views"`
 }
@@ -198,11 +201,13 @@ func (h *UpdateViewHandler) Serve(ctx context.Context, req *UpdateViewRequest) (
 
 func ViewDeleteRoutes() []string { return []string{"/flow/views/{id}"} }
 
-type DeleteViewHandler struct{ Service *application.Service }
-type DeleteViewRequest struct{}
-type DeleteViewResponse struct {
-	Message string `json:"message"`
-}
+type (
+	DeleteViewHandler  struct{ Service *application.Service }
+	DeleteViewRequest  struct{}
+	DeleteViewResponse struct {
+		Message string `json:"message"`
+	}
+)
 
 func (h *DeleteViewHandler) Serve(ctx context.Context, _ *DeleteViewRequest) (DeleteViewResponse, *errorModels.ServerError) {
 	device := authPkg.DeviceCtx(ctx)

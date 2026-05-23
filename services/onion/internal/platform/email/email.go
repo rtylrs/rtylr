@@ -2,17 +2,26 @@ package email
 
 import (
 	"context"
+	"errors"
 	"fmt"
 	"os"
+	"strings"
 
 	"github.com/resend/resend-go/v2"
+
+	"github.com/voxire/onion/internal/platform/config"
 	"github.com/voxire/onion/internal/platform/logger"
 )
 
 var client *resend.Client
 
 func Initialize() {
-	apiKey := os.Getenv("RESEND_API_KEY")
+	var apiKey string
+	if config.GlobalConfig != nil {
+		apiKey = config.GlobalConfig.ResendKey
+	} else {
+		apiKey = os.Getenv("RESEND_API_KEY")
+	}
 	if apiKey == "" {
 		logger.Global().Warn("RESEND_API_KEY not set, email sending will be disabled")
 		return
@@ -38,7 +47,7 @@ type SendParams struct {
 func Send(ctx context.Context, params SendParams) (string, error) {
 	if client == nil {
 		logger.Ctx(ctx).Warn("Email sending disabled (no RESEND_API_KEY)")
-		return "", fmt.Errorf("email sending disabled")
+		return "", errors.New("email sending disabled")
 	}
 
 	from := params.From
@@ -62,7 +71,7 @@ func Send(ctx context.Context, params SendParams) (string, error) {
 	if err != nil {
 		logger.Ctx(ctx).Error("Failed to send email via Resend",
 			logger.Error(err),
-			logger.String("to", fmt.Sprintf("%v", params.To)),
+			logger.String("to", strings.Join(params.To, ",")),
 			logger.String("subject", params.Subject),
 		)
 		return "", fmt.Errorf("failed to send email: %w", err)
@@ -70,14 +79,14 @@ func Send(ctx context.Context, params SendParams) (string, error) {
 
 	logger.Ctx(ctx).Info("Email sent via Resend",
 		logger.String("id", sent.Id),
-		logger.String("to", fmt.Sprintf("%v", params.To)),
+		logger.String("to", strings.Join(params.To, ",")),
 		logger.String("subject", params.Subject),
 	)
 
 	return sent.Id, nil
 }
 
-// SendInvitation sends a team invitation email
+// SendInvitation sends a team invitation email.
 func SendInvitation(ctx context.Context, toEmail, inviterName, businessName, inviteLink string) (string, error) {
 	html := fmt.Sprintf(`
 		<div style="font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif; max-width: 480px; margin: 0 auto; padding: 40px 20px;">
@@ -101,7 +110,7 @@ func SendInvitation(ctx context.Context, toEmail, inviterName, businessName, inv
 	})
 }
 
-// SendPasswordReset sends a password reset email
+// SendPasswordReset sends a password reset email.
 func SendPasswordReset(ctx context.Context, toEmail, resetLink string) (string, error) {
 	html := fmt.Sprintf(`
 		<div style="font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif; max-width: 480px; margin: 0 auto; padding: 40px 20px;">
@@ -125,7 +134,7 @@ func SendPasswordReset(ctx context.Context, toEmail, resetLink string) (string, 
 	})
 }
 
-// SendWelcome sends a welcome email after registration
+// SendWelcome sends a welcome email after registration.
 func SendWelcome(ctx context.Context, toEmail, name string) (string, error) {
 	greeting := "there"
 	if name != "" {
@@ -151,7 +160,7 @@ func SendWelcome(ctx context.Context, toEmail, name string) (string, error) {
 	})
 }
 
-// SendInvoice sends an invoice email
+// SendInvoice sends an invoice email.
 func SendInvoice(ctx context.Context, toEmail, customerName, invoiceNumber, amount, dueDate, viewLink string) (string, error) {
 	html := fmt.Sprintf(`
 		<div style="font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif; max-width: 480px; margin: 0 auto; padding: 40px 20px;">

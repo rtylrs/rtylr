@@ -36,8 +36,8 @@ type DashboardSnapshot struct {
 
 // RevenuePoint is a single daily revenue sample in minor units.
 type RevenuePoint struct {
-	Date            string `json:"date"`
-	AmountMinorUnits int64 `json:"amount_minor_units"`
+	Date             string `json:"date"`
+	AmountMinorUnits int64  `json:"amount_minor_units"`
 }
 
 // DateRange represents an [from, to] inclusive date window.

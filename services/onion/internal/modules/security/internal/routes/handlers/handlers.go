@@ -4,23 +4,24 @@ import (
 	"context"
 	"net/http"
 
-	hubv1 "github.com/voxire/voxie/gen/go/hub/v1"
-
 	"github.com/voxire/onion/internal/modules/security/internal/application"
 	"github.com/voxire/onion/internal/modules/security/internal/domain"
 	authPkg "github.com/voxire/onion/internal/platform/auth"
 	errorModels "github.com/voxire/onion/internal/platform/errors"
+	hubv1 "github.com/voxire/voxie/gen/go/hub/v1"
 )
 
-func SecurityRoutes() []string       { return []string{"/security"} }
-func TwoFARoutes() []string          { return []string{"/security/2fa"} }
-func LoginHistoryRoutes() []string   { return []string{"/security/login-history"} }
-func InvalidateRoutes() []string     { return []string{"/security/invalidate-sessions"} }
+func SecurityRoutes() []string     { return []string{"/security"} }
+func TwoFARoutes() []string        { return []string{"/security/2fa"} }
+func LoginHistoryRoutes() []string { return []string{"/security/login-history"} }
+func InvalidateRoutes() []string   { return []string{"/security/invalidate-sessions"} }
 
 // -- Get Security Settings --
 
-type GetSettingsHandler struct{ Service *application.Service }
-type GetSettingsRequest struct{}
+type (
+	GetSettingsHandler struct{ Service *application.Service }
+	GetSettingsRequest struct{}
+)
 
 type GetSettingsResponse struct {
 	State *hubv1.SecurityState `json:"state"`
@@ -98,8 +99,10 @@ func (h *Toggle2FAHandler) Serve(ctx context.Context, req *Toggle2FARequest) (To
 
 // -- Login History --
 
-type LoginHistoryHandler struct{ Service *application.Service }
-type LoginHistoryRequest struct{}
+type (
+	LoginHistoryHandler struct{ Service *application.Service }
+	LoginHistoryRequest struct{}
+)
 
 type LoginHistoryResponse struct {
 	History []*hubv1.LoginEntry `json:"history"`
@@ -137,11 +140,13 @@ func (h *LoginHistoryHandler) Serve(ctx context.Context, _ *LoginHistoryRequest)
 
 // -- Invalidate All Sessions --
 
-type InvalidateSessionsHandler struct{ Service *application.Service }
-type InvalidateSessionsRequest struct{}
-type InvalidateSessionsResponse struct {
-	Message string `json:"message"`
-}
+type (
+	InvalidateSessionsHandler  struct{ Service *application.Service }
+	InvalidateSessionsRequest  struct{}
+	InvalidateSessionsResponse struct {
+		Message string `json:"message"`
+	}
+)
 
 func (h *InvalidateSessionsHandler) Serve(ctx context.Context, _ *InvalidateSessionsRequest) (InvalidateSessionsResponse, *errorModels.ServerError) {
 	device := authPkg.DeviceCtx(ctx)

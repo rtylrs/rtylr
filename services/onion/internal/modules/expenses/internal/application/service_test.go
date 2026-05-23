@@ -22,15 +22,30 @@ type mockRepo struct {
 func (m *mockRepo) List(_ context.Context, _ int64) ([]domain.Expense, error) {
 	return m.listResult, m.listErr
 }
+
+func (m *mockRepo) GetByID(_ context.Context, _, _ int64) (domain.Expense, error) {
+	if len(m.listResult) > 0 {
+		return m.listResult[0], m.listErr
+	}
+	return domain.Expense{}, m.listErr
+}
+
 func (m *mockRepo) Create(_ context.Context, _ domain.ExpenseInput) (int64, error) {
 	return m.createID, m.createErr
 }
+
 func (m *mockRepo) Update(_ context.Context, _ domain.ExpenseUpdateInput) error {
 	return m.updErr
 }
+
+func (m *mockRepo) UpdateStatus(_ context.Context, _, _ int64, _ string) error {
+	return m.updErr
+}
+
 func (m *mockRepo) Delete(_ context.Context, _, _ int64) error {
 	return m.delErr
 }
+
 func (m *mockRepo) ListCategories(_ context.Context, _ int64) ([]domain.ExpenseCategory, error) {
 	return m.catResult, m.catErr
 }

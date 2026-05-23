@@ -5,11 +5,10 @@ import (
 	"net/http"
 	"time"
 
-	authPkg "github.com/voxire/onion/internal/platform/auth"
-	errorModels "github.com/voxire/onion/internal/platform/errors"
-
 	"github.com/voxire/onion/internal/modules/loyalty/internal/application"
 	"github.com/voxire/onion/internal/modules/loyalty/internal/domain"
+	authPkg "github.com/voxire/onion/internal/platform/auth"
+	errorModels "github.com/voxire/onion/internal/platform/errors"
 )
 
 // ─── List Members ─────────────────────────────────────────────────────────────

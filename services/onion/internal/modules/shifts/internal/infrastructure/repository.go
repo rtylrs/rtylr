@@ -7,7 +7,6 @@ import (
 
 	"github.com/voxire/onion/internal/modules/shifts/internal/domain"
 	"github.com/voxire/onion/internal/modules/shifts/internal/infrastructure/persistence/sqlc"
-	"github.com/voxire/onion/internal/platform/database/dbclient"
 	"github.com/voxire/onion/internal/platform/logger"
 )
 
@@ -16,8 +15,8 @@ type Repository struct {
 	pool    *sql.DB
 }
 
-func NewRepository(_ context.Context) *Repository {
-	pool := dbclient.Pool()
+func NewRepository(db *sql.DB) *Repository {
+	pool := db
 
 	return &Repository{
 		queries: sqlc.New(pool),
@@ -25,7 +24,7 @@ func NewRepository(_ context.Context) *Repository {
 	}
 }
 
-func (r *Repository) ListShifts(ctx context.Context, ownerID int64, staffID int64, date string) ([]domain.Shift, error) {
+func (r *Repository) ListShifts(ctx context.Context, ownerID, staffID int64, date string) ([]domain.Shift, error) {
 	// Dynamic WHERE clauses - keep on pool
 	query := `
 		SELECT id, owner_id, staff_id, department_id, date, start_time, end_time,

@@ -7,11 +7,11 @@ import (
 	"strconv"
 
 	"github.com/go-chi/chi/v5"
-	authPkg "github.com/voxire/onion/internal/platform/auth"
-	errorModels "github.com/voxire/onion/internal/platform/errors"
 
 	"github.com/voxire/onion/internal/modules/pos_sessions/internal/application"
 	"github.com/voxire/onion/internal/modules/pos_sessions/internal/domain"
+	authPkg "github.com/voxire/onion/internal/platform/auth"
+	errorModels "github.com/voxire/onion/internal/platform/errors"
 )
 
 type SessionPayload struct {
@@ -52,11 +52,13 @@ func newSessionPayload(s domain.Session) SessionPayload {
 
 func SessionListRoutes() []string { return []string{"/pos/sessions"} }
 
-type ListSessionsHandler struct{ Service *application.Service }
-type ListSessionsRequest struct{}
-type ListSessionsResponse struct {
-	Sessions []SessionPayload `json:"sessions"`
-}
+type (
+	ListSessionsHandler  struct{ Service *application.Service }
+	ListSessionsRequest  struct{}
+	ListSessionsResponse struct {
+		Sessions []SessionPayload `json:"sessions"`
+	}
+)
 
 func (h *ListSessionsHandler) Serve(ctx context.Context, _ *ListSessionsRequest) (ListSessionsResponse, *errorModels.ServerError) {
 	device := authPkg.DeviceCtx(ctx)
@@ -78,11 +80,13 @@ func (h *ListSessionsHandler) Serve(ctx context.Context, _ *ListSessionsRequest)
 
 func SessionGetRoutes() []string { return []string{"/pos/sessions/{id}"} }
 
-type GetSessionHandler struct{ Service *application.Service }
-type GetSessionRequest struct{}
-type GetSessionResponse struct {
-	Session *SessionPayload `json:"session"`
-}
+type (
+	GetSessionHandler  struct{ Service *application.Service }
+	GetSessionRequest  struct{}
+	GetSessionResponse struct {
+		Session *SessionPayload `json:"session"`
+	}
+)
 
 func (h *GetSessionHandler) Serve(ctx context.Context, _ *GetSessionRequest) (GetSessionResponse, *errorModels.ServerError) {
 	device := authPkg.DeviceCtx(ctx)

@@ -3,9 +3,9 @@ package infrastructure
 import (
 	"context"
 	"database/sql"
+	"errors"
 
 	"github.com/voxire/onion/internal/modules/flow_insights/internal/domain"
-	"github.com/voxire/onion/internal/platform/database/dbclient"
 	"github.com/voxire/onion/internal/platform/logger"
 )
 
@@ -13,9 +13,9 @@ type Repository struct {
 	pool *sql.DB
 }
 
-func NewRepository(_ context.Context) *Repository {
+func NewRepository(db *sql.DB) *Repository {
 	return &Repository{
-		pool: dbclient.Pool(),
+		pool: db,
 	}
 }
 
@@ -36,7 +36,7 @@ func (r *Repository) GetInsightsStats(ctx context.Context, ownerID int64) (domai
 			COUNT(CASE WHEN status NOT IN ('done','cancelled') AND due_date < CURDATE() THEN 1 END) AS overdue_count
 		FROM flow_tasks WHERE owner_id = ?
 	`, ownerID).Scan(&stats.TotalTasks, &stats.CompletedTasks, &stats.OverdueCount)
-	if err != nil && err != sql.ErrNoRows {
+	if err != nil && !errors.Is(err, sql.ErrNoRows) {
 		logger.Ctx(ctx).Error("GetInsightsStats: total query failed", logger.Error(err))
 		return stats, err
 	}
@@ -50,7 +50,7 @@ func (r *Repository) GetInsightsStats(ctx context.Context, ownerID int64) (domai
 		SELECT COALESCE(AVG(DATEDIFF(completed_at, created_at)), 0) AS avg_days
 		FROM flow_tasks WHERE owner_id = ? AND status = 'done' AND completed_at IS NOT NULL
 	`, ownerID).Scan(&stats.AvgCompletionDays)
-	if err != nil && err != sql.ErrNoRows {
+	if err != nil && !errors.Is(err, sql.ErrNoRows) {
 		logger.Ctx(ctx).Error("GetInsightsStats: avg completion failed", logger.Error(err))
 	}
 
@@ -61,7 +61,7 @@ func (r *Repository) GetInsightsStats(ctx context.Context, ownerID int64) (domai
 		  AND completed_at >= DATE_SUB(CURDATE(), INTERVAL WEEKDAY(CURDATE()) DAY)
 		  AND completed_at < DATE_ADD(DATE_SUB(CURDATE(), INTERVAL WEEKDAY(CURDATE()) DAY), INTERVAL 7 DAY)
 	`, ownerID).Scan(&stats.VelocityThisWeek)
-	if err != nil && err != sql.ErrNoRows {
+	if err != nil && !errors.Is(err, sql.ErrNoRows) {
 		logger.Ctx(ctx).Error("GetInsightsStats: velocity this week failed", logger.Error(err))
 	}
 
@@ -72,7 +72,7 @@ func (r *Repository) GetInsightsStats(ctx context.Context, ownerID int64) (domai
 		  AND completed_at >= DATE_SUB(DATE_SUB(CURDATE(), INTERVAL WEEKDAY(CURDATE()) DAY), INTERVAL 7 DAY)
 		  AND completed_at < DATE_SUB(CURDATE(), INTERVAL WEEKDAY(CURDATE()) DAY)
 	`, ownerID).Scan(&stats.VelocityLastWeek)
-	if err != nil && err != sql.ErrNoRows {
+	if err != nil && !errors.Is(err, sql.ErrNoRows) {
 		logger.Ctx(ctx).Error("GetInsightsStats: velocity last week failed", logger.Error(err))
 	}
 
@@ -91,6 +91,9 @@ func (r *Repository) GetInsightsStats(ctx context.Context, ownerID int64) (domai
 				stats.TasksByStatus[s] = c
 			}
 		}
+		if err := statusRows.Err(); err != nil {
+			logger.Ctx(ctx).Error("GetInsightsStats: tasks by status rows failed", logger.Error(err))
+		}
 	}
 
 	// Tasks by priority
@@ -107,6 +110,9 @@ func (r *Repository) GetInsightsStats(ctx context.Context, ownerID int64) (domai
 			if err := priorityRows.Scan(&s, &c); err == nil {
 				stats.TasksByPriority[s] = c
 			}
+		}
+		if err := priorityRows.Err(); err != nil {
+			logger.Ctx(ctx).Error("GetInsightsStats: tasks by priority rows failed", logger.Error(err))
 		}
 	}
 

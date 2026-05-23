@@ -4,13 +4,13 @@ import (
 	"context"
 	"database/sql"
 	"encoding/json"
+	"errors"
 	"fmt"
 	"strconv"
 	"time"
 
 	"github.com/voxire/onion/internal/modules/hr_performance/internal/domain"
 	"github.com/voxire/onion/internal/modules/hr_performance/internal/infrastructure/persistence/sqlc"
-	"github.com/voxire/onion/internal/platform/database/dbclient"
 	"github.com/voxire/onion/internal/platform/logger"
 )
 
@@ -19,8 +19,8 @@ type Repository struct {
 	pool    *sql.DB
 }
 
-func NewRepository(_ context.Context) *Repository {
-	pool := dbclient.Pool()
+func NewRepository(db *sql.DB) *Repository {
+	pool := db
 	return &Repository{
 		queries: sqlc.New(pool),
 		pool:    pool,
@@ -32,7 +32,7 @@ func NewRepository(_ context.Context) *Repository {
 func (r *Repository) GetPerformanceConfig(ctx context.Context, ownerID int64) (*domain.PerformanceConfigRecord, error) {
 	row, err := r.queries.GetPerformanceConfig(ctx, ownerID)
 	if err != nil {
-		if err == sql.ErrNoRows {
+		if errors.Is(err, sql.ErrNoRows) {
 			return nil, domain.ErrPerformanceConfigNotFound
 		}
 		return nil, err
@@ -99,7 +99,7 @@ func (r *Repository) GetReviewCycle(ctx context.Context, ownerID, id int64) (*do
 		ID:      id,
 	})
 	if err != nil {
-		if err == sql.ErrNoRows {
+		if errors.Is(err, sql.ErrNoRows) {
 			return nil, domain.ErrReviewCycleNotFound
 		}
 		return nil, err
@@ -224,7 +224,7 @@ func (r *Repository) GetPerformanceReview(ctx context.Context, ownerID, id int64
 		ID:      id,
 	})
 	if err != nil {
-		if err == sql.ErrNoRows {
+		if errors.Is(err, sql.ErrNoRows) {
 			return nil, domain.ErrReviewNotFound
 		}
 		return nil, err
@@ -343,7 +343,7 @@ func (r *Repository) GetGoal(ctx context.Context, ownerID, id int64) (*domain.Re
 		ID:      id,
 	})
 	if err != nil {
-		if err == sql.ErrNoRows {
+		if errors.Is(err, sql.ErrNoRows) {
 			return nil, domain.ErrGoalNotFound
 		}
 		return nil, err

@@ -7,11 +7,11 @@ import (
 	"strconv"
 
 	"github.com/go-chi/chi/v5"
-	authPkg "github.com/voxire/onion/internal/platform/auth"
-	errorModels "github.com/voxire/onion/internal/platform/errors"
 
 	"github.com/voxire/onion/internal/modules/pos_combos/internal/application"
 	"github.com/voxire/onion/internal/modules/pos_combos/internal/domain"
+	authPkg "github.com/voxire/onion/internal/platform/auth"
+	errorModels "github.com/voxire/onion/internal/platform/errors"
 )
 
 type ComboPayload struct {
@@ -44,11 +44,13 @@ func newComboPayload(c domain.Combo) ComboPayload {
 
 func ListCombosRoutes() []string { return []string{"/pos/menu/combos", "/pos/combos"} }
 
-type ListCombosHandler struct{ Service *application.Service }
-type ListCombosRequest struct{}
-type ListCombosResponse struct {
-	Combos []ComboPayload `json:"combos"`
-}
+type (
+	ListCombosHandler  struct{ Service *application.Service }
+	ListCombosRequest  struct{}
+	ListCombosResponse struct {
+		Combos []ComboPayload `json:"combos"`
+	}
+)
 
 func (h *ListCombosHandler) Serve(ctx context.Context, _ *ListCombosRequest) (ListCombosResponse, *errorModels.ServerError) {
 	device := authPkg.DeviceCtx(ctx)
@@ -164,11 +166,13 @@ func (h *UpdateComboHandler) Serve(ctx context.Context, req *UpdateComboRequest)
 
 func DeleteComboRoutes() []string { return []string{"/pos/menu/combos/{id}"} }
 
-type DeleteComboHandler struct{ Service *application.Service }
-type DeleteComboRequest struct{}
-type DeleteComboResponse struct {
-	Message string `json:"message"`
-}
+type (
+	DeleteComboHandler  struct{ Service *application.Service }
+	DeleteComboRequest  struct{}
+	DeleteComboResponse struct {
+		Message string `json:"message"`
+	}
+)
 
 func (h *DeleteComboHandler) Serve(ctx context.Context, _ *DeleteComboRequest) (DeleteComboResponse, *errorModels.ServerError) {
 	device := authPkg.DeviceCtx(ctx)

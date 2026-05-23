@@ -5,13 +5,12 @@ import (
 	"errors"
 	"net/http"
 
-	posv1 "github.com/voxire/voxie/gen/go/pos/v1"
-
 	"github.com/voxire/onion/internal/modules/pos_users/internal/application"
 	"github.com/voxire/onion/internal/modules/pos_users/internal/domain"
 	authPkg "github.com/voxire/onion/internal/platform/auth"
 	errorModels "github.com/voxire/onion/internal/platform/errors"
 	"github.com/voxire/onion/internal/platform/logger"
+	posv1 "github.com/voxire/voxie/gen/go/pos/v1"
 )
 
 // toProtoPOSUser intentionally does NOT carry the PIN or any hash of it

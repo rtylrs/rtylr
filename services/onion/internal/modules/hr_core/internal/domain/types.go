@@ -100,27 +100,27 @@ type SetupStepRecord struct {
 }
 
 type HRCompanyConfigRecord struct {
-	ID                    int64   `json:"id"`
-	OwnerID               int64   `json:"owner_id"`
-	CompanyName           string  `json:"company_name"`
-	FiscalYearStartMonth  int32   `json:"fiscal_year_start_month"`
-	DefaultCurrency       string  `json:"default_currency"`
-	DefaultTimezone       string  `json:"default_timezone"`
-	DefaultWorkScheduleID int64   `json:"default_work_schedule_id"`
-	OvertimeEnabled       bool    `json:"overtime_enabled"`
-	OvertimeMultiplier    float64 `json:"overtime_multiplier"`
+	ID                    int64     `json:"id"`
+	OwnerID               int64     `json:"owner_id"`
+	CompanyName           string    `json:"company_name"`
+	FiscalYearStartMonth  int32     `json:"fiscal_year_start_month"`
+	DefaultCurrency       string    `json:"default_currency"`
+	DefaultTimezone       string    `json:"default_timezone"`
+	DefaultWorkScheduleID int64     `json:"default_work_schedule_id"`
+	OvertimeEnabled       bool      `json:"overtime_enabled"`
+	OvertimeMultiplier    float64   `json:"overtime_multiplier"`
 	CreatedAt             time.Time `json:"created_at"`
 	UpdatedAt             time.Time `json:"updated_at"`
 }
 
 type ApprovalChainRecord struct {
-	ID          int64                    `json:"id"`
-	OwnerID     int64                    `json:"owner_id"`
-	RequestType string                   `json:"request_type"`
-	Name        string                   `json:"name"`
+	ID          int64                      `json:"id"`
+	OwnerID     int64                      `json:"owner_id"`
+	RequestType string                     `json:"request_type"`
+	Name        string                     `json:"name"`
 	Levels      []ApprovalChainLevelRecord `json:"levels"`
-	CreatedAt   time.Time                `json:"created_at"`
-	UpdatedAt   time.Time                `json:"updated_at"`
+	CreatedAt   time.Time                  `json:"created_at"`
+	UpdatedAt   time.Time                  `json:"updated_at"`
 }
 
 type ApprovalChainLevelRecord struct {

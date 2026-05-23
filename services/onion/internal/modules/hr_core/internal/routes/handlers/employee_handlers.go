@@ -7,38 +7,38 @@ import (
 	"strconv"
 
 	"github.com/go-chi/chi/v5"
-	hrv1 "github.com/voxire/voxie/gen/go/hr/v1"
 
 	"github.com/voxire/onion/internal/modules/hr_core/internal/application"
 	"github.com/voxire/onion/internal/modules/hr_core/internal/domain"
 	authPkg "github.com/voxire/onion/internal/platform/auth"
 	errorModels "github.com/voxire/onion/internal/platform/errors"
 	"github.com/voxire/onion/internal/platform/logger"
+	hrv1 "github.com/voxire/voxie/gen/go/hr/v1"
 )
 
 func employeeToProto(e domain.EmployeeRecord) *hrv1.Staff {
 	return &hrv1.Staff{
 		Id:                    e.ID,
-		OwnerId:              e.OwnerID,
-		UserId:               e.UserID,
-		DepartmentId:         e.DepartmentID,
-		FirstName:            e.FirstName,
-		LastName:             e.LastName,
-		Email:                e.Email,
-		Phone:                e.Phone,
-		EmploymentType:       e.EmploymentType,
-		Status:               e.Status,
-		Salary:               e.Salary,
-		HourlyRate:           e.HourlyRate,
-		OvertimeRate:         e.OvertimeRate,
-		StartDate:            e.StartDate.Format("2006-01-02"),
-		EndDate:              e.EndDate.Format("2006-01-02"),
-		Address:              e.Address,
-		EmergencyContactName: e.EmergencyContactName,
+		OwnerId:               e.OwnerID,
+		UserId:                e.UserID,
+		DepartmentId:          e.DepartmentID,
+		FirstName:             e.FirstName,
+		LastName:              e.LastName,
+		Email:                 e.Email,
+		Phone:                 e.Phone,
+		EmploymentType:        e.EmploymentType,
+		Status:                e.Status,
+		Salary:                e.Salary,
+		HourlyRate:            e.HourlyRate,
+		OvertimeRate:          e.OvertimeRate,
+		StartDate:             e.StartDate.Format("2006-01-02"),
+		EndDate:               e.EndDate.Format("2006-01-02"),
+		Address:               e.Address,
+		EmergencyContactName:  e.EmergencyContactName,
 		EmergencyContactPhone: e.EmergencyContactPhone,
-		Notes:                e.Notes,
-		CreatedAt:            e.CreatedAt.Format("2006-01-02T15:04:05Z"),
-		UpdatedAt:            e.UpdatedAt.Format("2006-01-02T15:04:05Z"),
+		Notes:                 e.Notes,
+		CreatedAt:             e.CreatedAt.Format("2006-01-02T15:04:05Z"),
+		UpdatedAt:             e.UpdatedAt.Format("2006-01-02T15:04:05Z"),
 	}
 }
 
@@ -192,24 +192,24 @@ func UpdateEmployeeRoutes() []string { return []string{"/hr/employees/{id}"} }
 type UpdateEmployeeHandler struct{ Service *application.Service }
 
 type UpdateEmployeeRequest struct {
-	DepartmentID   int64   `json:"department_id"`
-	LocationID     int64   `json:"location_id"`
-	WorkScheduleID int64   `json:"work_schedule_id"`
-	FirstName      string  `json:"first_name"`
-	LastName       string  `json:"last_name"`
-	Email          string  `json:"email"`
-	Phone          string  `json:"phone"`
-	EmploymentType string  `json:"employment_type"`
-	Status         string  `json:"status"`
-	Salary         float64 `json:"salary"`
-	HourlyRate     float64 `json:"hourly_rate"`
-	OvertimeRate   float64 `json:"overtime_rate"`
-	StartDate      string  `json:"start_date"`
-	EndDate        string  `json:"end_date"`
-	Address        string  `json:"address"`
-	EmergencyContactName  string `json:"emergency_contact_name"`
-	EmergencyContactPhone string `json:"emergency_contact_phone"`
-	Notes          string  `json:"notes"`
+	DepartmentID          int64   `json:"department_id"`
+	LocationID            int64   `json:"location_id"`
+	WorkScheduleID        int64   `json:"work_schedule_id"`
+	FirstName             string  `json:"first_name"`
+	LastName              string  `json:"last_name"`
+	Email                 string  `json:"email"`
+	Phone                 string  `json:"phone"`
+	EmploymentType        string  `json:"employment_type"`
+	Status                string  `json:"status"`
+	Salary                float64 `json:"salary"`
+	HourlyRate            float64 `json:"hourly_rate"`
+	OvertimeRate          float64 `json:"overtime_rate"`
+	StartDate             string  `json:"start_date"`
+	EndDate               string  `json:"end_date"`
+	Address               string  `json:"address"`
+	EmergencyContactName  string  `json:"emergency_contact_name"`
+	EmergencyContactPhone string  `json:"emergency_contact_phone"`
+	Notes                 string  `json:"notes"`
 }
 
 type UpdateEmployeeResponse struct {

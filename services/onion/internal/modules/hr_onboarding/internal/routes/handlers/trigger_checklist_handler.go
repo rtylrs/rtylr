@@ -2,15 +2,16 @@ package handlers
 
 import (
 	"context"
+	"errors"
 	"net/http"
 	"time"
 
-	hrv1 "github.com/voxire/voxie/gen/go/hr/v1"
 	"github.com/voxire/onion/internal/modules/hr_onboarding/internal/application"
 	"github.com/voxire/onion/internal/modules/hr_onboarding/internal/domain"
 	authPkg "github.com/voxire/onion/internal/platform/auth"
 	errorModels "github.com/voxire/onion/internal/platform/errors"
 	"github.com/voxire/onion/internal/platform/logger"
+	hrv1 "github.com/voxire/voxie/gen/go/hr/v1"
 )
 
 func TriggerChecklistRoutes() []string { return []string{"/hr/onboarding/checklists/trigger"} }
@@ -60,7 +61,7 @@ func (h *TriggerChecklistHandler) Serve(ctx context.Context, req *TriggerCheckli
 
 	checklist, err := h.Service.TriggerChecklist(ctx, device.User.UserID, req.EmployeeID, req.TemplateID, triggerDate)
 	if err != nil {
-		if err == domain.ErrTemplateNotFound {
+		if errors.Is(err, domain.ErrTemplateNotFound) {
 			return TriggerChecklistResponse{}, &errorModels.ServerError{HTTPCode: http.StatusNotFound, Code: http.StatusNotFound, Message: "Template not found"}
 		}
 		logger.Ctx(ctx).Error("failed to trigger onboarding checklist", logger.Any("owner_id", device.User.UserID), logger.Any("employee_id", req.EmployeeID), logger.Error(err))

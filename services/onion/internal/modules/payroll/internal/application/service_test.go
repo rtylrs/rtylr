@@ -27,12 +27,15 @@ type mockRepo struct {
 func (m *mockRepo) ListPayrollRecords(_ context.Context, _ int64, _ string) ([]domain.PayrollRecord, error) {
 	return m.listResult, m.listErr
 }
+
 func (m *mockRepo) GetCompletedShiftsForPeriod(_ context.Context, _ int64, _, _ time.Time) ([]domain.ShiftSummary, error) {
 	return m.shifts, m.shiftErr
 }
+
 func (m *mockRepo) GetStaffPayRates(_ context.Context, _, _ int64) (domain.StaffPayRates, error) {
 	return m.rates, m.ratesErr
 }
+
 func (m *mockRepo) CreatePayrollRecord(_ context.Context, _, _ int64, _, _ time.Time, _ string, regular, overtime, base, ot, net float64) (int64, error) {
 	m.createGot.regular = regular
 	m.createGot.overtime = overtime
@@ -41,6 +44,7 @@ func (m *mockRepo) CreatePayrollRecord(_ context.Context, _, _ int64, _, _ time.
 	m.createGot.net = net
 	return m.createID, m.createErr
 }
+
 func (m *mockRepo) MarkPayrollPaid(_ context.Context, _, _ int64) error {
 	return m.markErr
 }

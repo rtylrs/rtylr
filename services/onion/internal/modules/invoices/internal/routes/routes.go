@@ -4,6 +4,7 @@ import (
 	"context"
 
 	"github.com/go-chi/chi/v5"
+
 	"github.com/voxire/onion/internal/modules/invoices/internal/application"
 	"github.com/voxire/onion/internal/modules/invoices/internal/routes/handlers"
 	"github.com/voxire/onion/internal/platform/server/http"
@@ -58,6 +59,13 @@ func RegisterRoutes(ctx context.Context, router *chi.Mux, financeService *applic
 		router,
 		handlers.RecordPaymentRoutes(),
 		&handlers.RecordPaymentHandler{FinanceService: financeService},
+	)
+
+	http.RegisterPOSTWithValidation[handlers.SendInvoiceRequest, handlers.SendInvoiceResponse](
+		ctx,
+		router,
+		handlers.SendInvoiceRoutes(),
+		&handlers.SendInvoiceHandler{FinanceService: financeService},
 	)
 
 	// Expenses

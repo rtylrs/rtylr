@@ -12,9 +12,9 @@ import (
 // — we silently fall back to defaults when the tenant has not yet
 // created a row, per the fallback rules in CLAUDE.md §8.
 type SettingsPayload struct {
-	DefaultCurrency  string `json:"default_currency"`
-	FiscalYearStart  string `json:"fiscal_year_start"`
-	Timezone         string `json:"timezone"`
+	DefaultCurrency string `json:"default_currency"`
+	FiscalYearStart string `json:"fiscal_year_start"`
+	Timezone        string `json:"timezone"`
 }
 
 // defaultSettings is the in-code fallback. Product-level defaults; if a

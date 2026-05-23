@@ -2,8 +2,10 @@ package hr_shifts
 
 import (
 	"context"
+	"database/sql"
 
 	"github.com/go-chi/chi/v5"
+
 	"github.com/voxire/onion/internal/modules/hr_shifts/internal/application"
 	"github.com/voxire/onion/internal/modules/hr_shifts/internal/routes"
 )
@@ -12,9 +14,9 @@ type Module struct {
 	service *application.Service
 }
 
-func NewModule(ctx context.Context) *Module {
+func NewModule(ctx context.Context, db *sql.DB) *Module {
 	return &Module{
-		service: application.NewService(ctx, nil),
+		service: application.NewService(ctx, db, nil),
 	}
 }
 

@@ -2,6 +2,7 @@ package handlers
 
 import (
 	"context"
+	"errors"
 	"net/http"
 
 	"github.com/voxire/onion/internal/modules/invoices/internal/application"
@@ -88,7 +89,7 @@ func (h *UpdateExpenseHandler) Serve(ctx context.Context, req *UpdateExpenseRequ
 
 	e, err := h.FinanceService.UpdateExpense(ctx, device.User.UserID, req.ID, input)
 	if err != nil {
-		if err == domain.ErrExpenseNotFound {
+		if errors.Is(err, domain.ErrExpenseNotFound) {
 			return UpdateExpenseResponse{}, &errorModels.ServerError{
 				Code:    http.StatusNotFound,
 				Message: "Expense not found",

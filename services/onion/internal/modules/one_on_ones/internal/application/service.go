@@ -2,9 +2,18 @@ package application
 
 import (
 	"context"
+	"database/sql"
+	"time"
 
 	"github.com/voxire/onion/internal/modules/one_on_ones/internal/domain"
 	"github.com/voxire/onion/internal/modules/one_on_ones/internal/infrastructure"
+	"github.com/voxire/onion/internal/platform/cache/cacher"
+	cacheKeys "github.com/voxire/onion/internal/platform/cache/keys"
+)
+
+const (
+	oneOnOnesScope = "one_on_ones"
+	oneOnOnesTTL   = 5 * time.Minute
 )
 
 type repository interface {
@@ -16,14 +25,31 @@ type Service struct {
 	repo repository
 }
 
-func NewService(ctx context.Context) *Service {
-	return &Service{repo: infrastructure.NewRepository(ctx)}
+func NewService(_ context.Context, db *sql.DB) *Service {
+	return &Service{repo: infrastructure.NewRepository(db)}
+}
+
+func invalidateOneOnOnesScope(ctx context.Context, ownerID int64) {
+	if cache := cacher.GetRedisCache(); cache != nil {
+		cache.DeleteByPattern(ctx, cacheKeys.ScopedPrefix(oneOnOnesScope, ownerID))
+	}
 }
 
 func (s *Service) List(ctx context.Context, ownerID int64) ([]domain.OneOnOne, error) {
-	return s.repo.List(ctx, ownerID)
+	return cacher.Of[[]domain.OneOnOne]().GetOrComputeSingle(ctx,
+		cacheKeys.Scoped(oneOnOnesScope, ownerID, "list"),
+		func(ctx context.Context) ([]domain.OneOnOne, error) {
+			return s.repo.List(ctx, ownerID)
+		},
+		cacher.WithExpiry(ctx, oneOnOnesTTL),
+	)
 }
 
 func (s *Service) Create(ctx context.Context, ownerID int64, input domain.OneOnOneInput) (int64, error) {
-	return s.repo.Create(ctx, ownerID, input)
+	id, err := s.repo.Create(ctx, ownerID, input)
+	if err != nil {
+		return 0, err
+	}
+	invalidateOneOnOnesScope(ctx, ownerID)
+	return id, nil
 }

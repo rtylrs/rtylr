@@ -4,12 +4,11 @@ import (
 	"context"
 	"net/http"
 
-	finv1 "github.com/voxire/voxie/gen/go/finance/v1"
-
 	"github.com/voxire/onion/internal/modules/invoices/internal/application"
 	"github.com/voxire/onion/internal/modules/invoices/internal/domain"
 	authPkg "github.com/voxire/onion/internal/platform/auth"
 	errorModels "github.com/voxire/onion/internal/platform/errors"
+	finv1 "github.com/voxire/voxie/gen/go/finance/v1"
 )
 
 func ListInvoicesRoutes() []string {

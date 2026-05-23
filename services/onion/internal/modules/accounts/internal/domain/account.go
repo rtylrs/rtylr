@@ -31,9 +31,7 @@ type AccountTreeNode struct {
 }
 
 func (a *Account) FromRow(row *sql.Rows) error {
-	var (
-		currency sql.NullString
-	)
+	var currency sql.NullString
 
 	err := row.Scan(
 		&a.ID, &a.OwnerID, &a.Name, &a.Type, &currency,

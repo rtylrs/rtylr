@@ -20,12 +20,15 @@ type mockRepo struct {
 func (m *mockRepo) ListAll(_ context.Context) ([]domain.Addon, error) {
 	return m.all, m.allErr
 }
+
 func (m *mockRepo) ListForBusiness(_ context.Context, _ int64) ([]domain.BusinessAddon, error) {
 	return m.enabled, m.bizErr
 }
+
 func (m *mockRepo) Enable(_ context.Context, _ int64, _ string) error {
 	return m.enErr
 }
+
 func (m *mockRepo) Disable(_ context.Context, _ int64, _ string) error {
 	return m.disErr
 }
@@ -97,10 +100,16 @@ func TestEnableDisable_Delegates(t *testing.T) {
 }
 
 func TestIsEnabled(t *testing.T) {
-	s := &Service{repo: &mockRepo{enabled: []domain.BusinessAddon{
-		{AddonID: "y", IsEnabled: true},
-		{AddonID: "z", IsEnabled: false},
-	}}}
+	s := &Service{repo: &mockRepo{
+		all: []domain.Addon{
+			{ID: "y", Name: "Addon Y"},
+			{ID: "z", Name: "Addon Z"},
+		},
+		enabled: []domain.BusinessAddon{
+			{AddonID: "y", IsEnabled: true},
+			{AddonID: "z", IsEnabled: false},
+		},
+	}}
 	if !s.IsEnabled(context.Background(), 1, "y") {
 		t.Error("expected y enabled")
 	}

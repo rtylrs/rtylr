@@ -4,9 +4,9 @@ import (
 	"context"
 	"net/http"
 
-	errorModels "github.com/voxire/onion/internal/platform/errors"
 	"github.com/voxire/onion/internal/modules/memory/internal/application"
 	"github.com/voxire/onion/internal/modules/memory/internal/domain"
+	errorModels "github.com/voxire/onion/internal/platform/errors"
 )
 
 func SessionRoutes() []string {

@@ -6,9 +6,10 @@ import (
 	"fmt"
 
 	"github.com/google/generative-ai-go/genai"
+	"google.golang.org/api/option"
+
 	"github.com/voxire/onion/internal/platform/config"
 	"github.com/voxire/onion/internal/platform/logger"
-	"google.golang.org/api/option"
 )
 
 var (

@@ -1,4 +1,4 @@
-package models
+package auth
 
 import "context"
 
@@ -8,6 +8,7 @@ const (
 	AuthUserKey ContextKey = "auth_user"
 )
 
+//nolint:revive // stutter is preferred over changing struct name across hundreds of files
 type AuthUser struct {
 	UserID         int64  `json:"user_id"`
 	BusinessID     int64  `json:"business_id"`

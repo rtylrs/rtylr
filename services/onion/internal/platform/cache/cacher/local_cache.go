@@ -6,6 +6,7 @@ import (
 	"time"
 
 	"github.com/allegro/bigcache/v3"
+
 	"github.com/voxire/onion/internal/platform/config"
 	"github.com/voxire/onion/internal/platform/logger"
 )

@@ -1,7 +1,11 @@
 package config
 
 import (
+	"fmt"
 	"os"
+	"strconv"
+	"strings"
+	"time"
 )
 
 const (
@@ -14,16 +18,254 @@ const (
 	GeminiAPIKeyEnvVar = "GEMINI_API_KEY"
 )
 
+type AppConfig struct {
+	DatabaseURL         string
+	DBHost              string
+	DBPort              string
+	DBUser              string
+	DBPass              string
+	DBName              string
+	JWTSecret           string
+	JWTDuration         time.Duration
+	ResendKey           string
+	AppEnv              string
+	AppRelease          string
+	Port                string
+	Hostname            string
+	AuthAppURL          string
+	GoogleOAuthClientID string
+
+	// DB Connection Pool configuration
+	DBMaxOpenConns    int
+	DBMaxIdleConns    int
+	DBConnMaxLifetime time.Duration
+	DBConnMaxIdleTime time.Duration
+
+	// OpenAI & Gemini
+	OpenAIAPIKey  string
+	OpenAIOrgID   string
+	OpenAIBaseURL string
+	GeminiAPIKey  string
+
+	// Redis & Cache
+	RedisURL               string
+	RedisHosts             []string
+	RedisUsername          string
+	RedisPassword          string
+	RedisEnabled           bool
+	InMemoryCacheMaxSizeMb int
+
+	// Paddle
+	PaddleAPIKey        string
+	PaddleWebhookSecret string
+	PaddleClientToken   string
+	PaddleSandbox       bool
+
+	// Database Logging
+	LoggingDatabaseURL string
+
+	// Axiom logging
+	AxiomToken   string
+	AxiomDataset string
+
+	// Sentry
+	SentryDSN string
+
+	// Google Sheets
+	GoogleSheetsLeadSheetID string
+	GoogleSheetsCredentials string
+
+	// AWS S3 & Floci Storage
+	S3BucketName  string
+	S3Region      string
+	FlociEnabled  bool
+	FlociEndpoint string
+	FlociRegion   string
+	FlociBucket   string
+
+	// Internal Auth
+	InternalToken string
+
+	// Metrics Auth
+	MetricsUser string
+	MetricsPass string
+}
+
+var GlobalConfig *AppConfig
+
+// LoadAndValidate reads the environment configuration at startup,
+// validating the presence of critical variables.
+func LoadAndValidate() (*AppConfig, error) {
+	var jwtDuration time.Duration
+	if d := os.Getenv("JWT_DURATION"); d != "" {
+		if parsed, err := time.ParseDuration(d); err == nil {
+			jwtDuration = parsed
+		}
+	}
+
+	hosts := os.Getenv("REDIS_HOSTS")
+	var redisHosts []string
+	if hosts != "" {
+		redisHosts = strings.Split(hosts, ",")
+	} else {
+		redisHosts = []string{"localhost:6379"}
+	}
+
+	inMemoryCacheMaxSizeMb := 0
+	if sizeStr := os.Getenv("INMEMORY_CACHE_MAX_SIZE_MB"); sizeStr != "" {
+		if parsed, err := strconv.Atoi(sizeStr); err == nil {
+			inMemoryCacheMaxSizeMb = parsed
+		}
+	}
+
+	var dbMaxOpenConns int
+	if maxOpenStr := os.Getenv("DB_MAX_OPEN_CONNS"); maxOpenStr != "" {
+		if parsed, err := strconv.Atoi(maxOpenStr); err == nil && parsed > 0 {
+			dbMaxOpenConns = parsed
+		}
+	}
+
+	var dbMaxIdleConns int
+	if maxIdleStr := os.Getenv("DB_MAX_IDLE_CONNS"); maxIdleStr != "" {
+		if parsed, err := strconv.Atoi(maxIdleStr); err == nil && parsed > 0 {
+			dbMaxIdleConns = parsed
+		}
+	}
+
+	var dbConnMaxLifetime time.Duration
+	if lifetimeStr := os.Getenv("DB_CONN_MAX_LIFETIME"); lifetimeStr != "" {
+		if parsed, err := time.ParseDuration(lifetimeStr); err == nil && parsed > 0 {
+			dbConnMaxLifetime = parsed
+		}
+	}
+
+	var dbConnMaxIdleTime time.Duration
+	if idleTimeStr := os.Getenv("DB_CONN_MAX_IDLE_TIME"); idleTimeStr != "" {
+		if parsed, err := time.ParseDuration(idleTimeStr); err == nil && parsed > 0 {
+			dbConnMaxIdleTime = parsed
+		}
+	}
+
+	cfg := &AppConfig{
+		DatabaseURL:         os.Getenv("DATABASE_URL"),
+		DBHost:              os.Getenv("DB_HOST"),
+		DBPort:              os.Getenv("DB_PORT"),
+		DBUser:              os.Getenv("DB_USER"),
+		DBPass:              os.Getenv("DB_PASSWORD"),
+		DBName:              os.Getenv("DB_NAME"),
+		JWTSecret:           os.Getenv("JWT_SECRET"),
+		JWTDuration:         jwtDuration,
+		ResendKey:           os.Getenv("RESEND_API_KEY"),
+		AppEnv:              os.Getenv("APP_ENV"),
+		AppRelease:          os.Getenv("APP_RELEASE"),
+		Port:                os.Getenv("PORT"),
+		Hostname:            os.Getenv("HOSTNAME"),
+		AuthAppURL:          os.Getenv("AUTH_APP_URL"),
+		GoogleOAuthClientID: os.Getenv("GOOGLE_OAUTH_CLIENT_ID"),
+
+		DBMaxOpenConns:    dbMaxOpenConns,
+		DBMaxIdleConns:    dbMaxIdleConns,
+		DBConnMaxLifetime: dbConnMaxLifetime,
+		DBConnMaxIdleTime: dbConnMaxIdleTime,
+
+		// OpenAI & Gemini
+		OpenAIAPIKey:  os.Getenv("OPENAI_API_KEY"),
+		OpenAIOrgID:   os.Getenv("OPENAI_ORG_ID"),
+		OpenAIBaseURL: os.Getenv("OPENAI_BASE_URL"),
+		GeminiAPIKey:  os.Getenv("GEMINI_API_KEY"),
+
+		// Redis & Cache
+		RedisURL:               os.Getenv("REDIS_URL"),
+		RedisHosts:             redisHosts,
+		RedisUsername:          os.Getenv("REDIS_USERNAME"),
+		RedisPassword:          os.Getenv("REDIS_PASSWORD"),
+		RedisEnabled:           strings.ToLower(os.Getenv("REDIS_ENABLED")) == "true",
+		InMemoryCacheMaxSizeMb: inMemoryCacheMaxSizeMb,
+
+		// Paddle
+		PaddleAPIKey:        os.Getenv("PADDLE_API_KEY"),
+		PaddleWebhookSecret: os.Getenv("PADDLE_WEBHOOK_SECRET"),
+		PaddleClientToken:   os.Getenv("PADDLE_CLIENT_TOKEN"),
+		PaddleSandbox:       os.Getenv("PADDLE_SANDBOX") == "true",
+
+		// Database Logging
+		LoggingDatabaseURL: os.Getenv("LOGGING_DATABASE_URL"),
+
+		// Axiom logging
+		AxiomToken:   os.Getenv("AXIOM_TOKEN"),
+		AxiomDataset: os.Getenv("AXIOM_DATASET"),
+
+		// Sentry
+		SentryDSN: os.Getenv("SENTRY_DSN"),
+
+		// Google Sheets
+		GoogleSheetsLeadSheetID: os.Getenv("GOOGLE_SHEETS_LEAD_SHEET_ID"),
+		GoogleSheetsCredentials: os.Getenv("GOOGLE_SHEETS_CREDENTIALS"),
+
+		// AWS S3 & Floci Storage
+		S3BucketName:  os.Getenv("S3_BUCKET_NAME"),
+		S3Region:      os.Getenv("S3_REGION"),
+		FlociEnabled:  strings.ToLower(strings.TrimSpace(os.Getenv("FLOCI_ENABLED"))) == "true",
+		FlociEndpoint: os.Getenv("FLOCI_ENDPOINT"),
+		FlociRegion:   os.Getenv("FLOCI_REGION"),
+		FlociBucket:   os.Getenv("FLOCI_BUCKET"),
+
+		// Internal Auth
+		InternalToken: os.Getenv("INTERNAL_TOKEN"),
+
+		// Metrics Auth
+		MetricsUser: os.Getenv("METRICS_USER"),
+		MetricsPass: os.Getenv("METRICS_PASS"),
+	}
+
+	if cfg.Port == "" {
+		cfg.Port = "9999"
+	}
+
+	if cfg.AuthAppURL == "" {
+		cfg.AuthAppURL = "https://auth.rtylr.com"
+	}
+
+	var missing []string
+
+	// Validate critical environment variables
+	if cfg.DatabaseURL == "" && (cfg.DBHost == "" || cfg.DBName == "" || cfg.DBUser == "") {
+		missing = append(missing, "DATABASE_URL (or DB_HOST, DB_NAME, DB_USER)")
+	}
+	if cfg.JWTSecret == "" {
+		missing = append(missing, "JWT_SECRET")
+	}
+
+	if len(missing) > 0 {
+		return nil, fmt.Errorf("missing critical environment variable(s): %s", strings.Join(missing, ", "))
+	}
+
+	GlobalConfig = cfg
+	return cfg, nil
+}
+
 func GetOpenAIAPIKey() string {
+	if GlobalConfig != nil {
+		return GlobalConfig.OpenAIAPIKey
+	}
 	return os.Getenv(OpenAIAPIKeyEnvVar)
 }
 
 func GetOpenAIOrgID() string {
+	if GlobalConfig != nil {
+		return GlobalConfig.OpenAIOrgID
+	}
 	return os.Getenv(OpenAIOrgIDEnvVar)
 }
 
 func GetOpenAIBaseURL() string {
-	baseURL := os.Getenv(OpenAIBaseURLEnvVar)
+	var baseURL string
+	if GlobalConfig != nil {
+		baseURL = GlobalConfig.OpenAIBaseURL
+	} else {
+		baseURL = os.Getenv(OpenAIBaseURLEnvVar)
+	}
+
 	if baseURL == "" {
 		return "https://api.openai.com/v1"
 	}
@@ -36,6 +278,9 @@ func IsOpenAIConfigured() bool {
 }
 
 func GetGeminiAPIKey() string {
+	if GlobalConfig != nil {
+		return GlobalConfig.GeminiAPIKey
+	}
 	return os.Getenv(GeminiAPIKeyEnvVar)
 }
 

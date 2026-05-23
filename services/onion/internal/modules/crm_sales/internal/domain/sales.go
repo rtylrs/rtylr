@@ -6,10 +6,10 @@ import (
 )
 
 var (
-	ErrLeadNotFound      = errors.New("lead not found")
-	ErrContactNotFound   = errors.New("contact not found")
+	ErrLeadNotFound       = errors.New("lead not found")
+	ErrContactNotFound    = errors.New("contact not found")
 	ErrTouchpointNotFound = errors.New("touchpoint not found")
-	ErrContractNotFound  = errors.New("contract not found")
+	ErrContractNotFound   = errors.New("contract not found")
 )
 
 type LeadStage string
@@ -111,11 +111,11 @@ type Touchpoint struct {
 }
 
 type CreateTouchpointRequest struct {
-	LeadID       int64  `json:"lead_id"`
-	ContactID    *int64 `json:"contact_id"`
-	Type         string `json:"type"`
-	Outcome      string `json:"outcome"`
-	Notes        string `json:"notes"`
+	LeadID       int64   `json:"lead_id"`
+	ContactID    *int64  `json:"contact_id"`
+	Type         string  `json:"type"`
+	Outcome      string  `json:"outcome"`
+	Notes        string  `json:"notes"`
 	NextFollowUp *string `json:"next_follow_up"`
 }
 
@@ -126,8 +126,8 @@ type Contract struct {
 	Plan         string    `json:"plan"`
 	MRR          float64   `json:"mrr"`
 	Seats        int       `json:"seats"`
-	SignedAt      *string   `json:"signed_at"`
-	SignedByName  string    `json:"signed_by_name"`
+	SignedAt     *string   `json:"signed_at"`
+	SignedByName string    `json:"signed_by_name"`
 	ClosedBy     *int64    `json:"closed_by"`
 	Notes        string    `json:"notes"`
 	CreatedAt    time.Time `json:"created_at"`
@@ -139,8 +139,8 @@ type CreateContractRequest struct {
 	Plan         string  `json:"plan"`
 	MRR          float64 `json:"mrr"`
 	Seats        int     `json:"seats"`
-	SignedAt      *string `json:"signed_at"`
-	SignedByName  string  `json:"signed_by_name"`
+	SignedAt     *string `json:"signed_at"`
+	SignedByName string  `json:"signed_by_name"`
 	ClosedBy     *int64  `json:"closed_by"`
 	Notes        string  `json:"notes"`
 }
@@ -149,8 +149,8 @@ type UpdateContractRequest struct {
 	Plan         string  `json:"plan"`
 	MRR          float64 `json:"mrr"`
 	Seats        int     `json:"seats"`
-	SignedAt      *string `json:"signed_at"`
-	SignedByName  string  `json:"signed_by_name"`
+	SignedAt     *string `json:"signed_at"`
+	SignedByName string  `json:"signed_by_name"`
 	ClosedBy     *int64  `json:"closed_by"`
 	Notes        string  `json:"notes"`
 }

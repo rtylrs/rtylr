@@ -4,22 +4,26 @@ import (
 	"context"
 	"database/sql"
 	"encoding/json"
+	"errors"
 	"fmt"
 	"strconv"
 	"time"
 
 	"github.com/voxire/onion/internal/modules/quotes/internal/domain"
 	"github.com/voxire/onion/internal/modules/quotes/internal/infrastructure/persistence/sqlc"
-	"github.com/voxire/onion/internal/platform/database/dbclient"
 	"github.com/voxire/onion/internal/platform/logger"
 )
 
 type Repository struct {
+	pool    *sql.DB
 	queries *sqlc.Queries
 }
 
-func NewRepository(_ context.Context) *Repository {
-	return &Repository{queries: sqlc.New(dbclient.Pool())}
+func NewRepository(db *sql.DB) *Repository {
+	return &Repository{
+		queries: sqlc.New(db),
+		pool:    db,
+	}
 }
 
 func (r *Repository) List(ctx context.Context, ownerID int64) ([]domain.Quote, error) {
@@ -103,7 +107,7 @@ func (r *Repository) Delete(ctx context.Context, ownerID, id int64) error {
 func (r *Repository) Get(ctx context.Context, ownerID, id int64) (domain.Quote, error) {
 	row, err := r.queries.GetQuote(ctx, sqlc.GetQuoteParams{ID: id, OwnerID: ownerID})
 	if err != nil {
-		if err == sql.ErrNoRows {
+		if errors.Is(err, sql.ErrNoRows) {
 			return domain.Quote{}, domain.ErrQuoteNotFound
 		}
 		logger.Ctx(ctx).Error("Failed to get quote", logger.Error(err))
@@ -118,7 +122,7 @@ func (r *Repository) Get(ctx context.Context, ownerID, id int64) (domain.Quote, 
 // here because the operation must be atomic. No cross-module Go imports are
 // introduced — we use dbclient + raw SQL at the infrastructure layer only.
 func (r *Repository) ConvertToInvoice(ctx context.Context, ownerID, quoteID int64) (int64, error) {
-	db := dbclient.Pool()
+	db := r.pool
 
 	tx, err := db.BeginTx(ctx, nil)
 	if err != nil {
@@ -136,7 +140,7 @@ func (r *Repository) ConvertToInvoice(ctx context.Context, ownerID, quoteID int6
 	quoteRow, err := qtx.GetQuote(ctx, sqlc.GetQuoteParams{ID: quoteID, OwnerID: ownerID})
 	if err != nil {
 		_ = tx.Rollback()
-		if err == sql.ErrNoRows {
+		if errors.Is(err, sql.ErrNoRows) {
 			return 0, domain.ErrQuoteNotFound
 		}
 		logger.Ctx(ctx).Error("Failed to load quote for conversion", logger.Error(err))
@@ -148,7 +152,7 @@ func (r *Repository) ConvertToInvoice(ctx context.Context, ownerID, quoteID int6
 		return 0, domain.ErrQuoteAlreadyConverted
 	}
 
-	invoiceNumber := fmt.Sprintf("Q%d-%d", quoteID, time.Now().UnixNano())
+	invoiceNumber := fmt.Sprintf("Q%d-%d", quoteID, time.Now().UTC().UnixNano())
 	issueDate := time.Now().UTC()
 	// Fallback: quotes don't track an explicit due date, so default to
 	// issue_date + 30 days. If the quote had a valid_until we use that.

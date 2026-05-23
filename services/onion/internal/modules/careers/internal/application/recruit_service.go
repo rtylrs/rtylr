@@ -103,8 +103,10 @@ func (s *Service) UpdateSubmissionStatus(ctx context.Context, ownerID, submissio
 // into a 404.
 var ErrNotFound = errors.New("not found")
 
-var slugInvalid = regexp.MustCompile(`[^a-z0-9-]+`)
-var slugCollapse = regexp.MustCompile(`-+`)
+var (
+	slugInvalid  = regexp.MustCompile(`[^a-z0-9-]+`)
+	slugCollapse = regexp.MustCompile(`-+`)
+)
 
 // slugify lowercases, strips non-alphanumerics, collapses repeated
 // dashes. Accepts partially-slugged input ("Backend Engineer" →

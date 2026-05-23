@@ -11,6 +11,7 @@ import (
 
 	"github.com/getsentry/sentry-go"
 
+	"github.com/voxire/onion/internal/platform/config"
 	"github.com/voxire/onion/internal/platform/logger"
 )
 
@@ -20,13 +21,24 @@ import (
 // events get shipped before the process exits; calling flush on a
 // disabled hub is a no-op.
 func InitSentry(ctx context.Context) (flush func()) {
-	dsn := os.Getenv("SENTRY_DSN")
+	var dsn string
+	if config.GlobalConfig != nil {
+		dsn = config.GlobalConfig.SentryDSN
+	} else {
+		dsn = os.Getenv("SENTRY_DSN")
+	}
+
 	if dsn == "" {
 		logger.Ctx(ctx).Info("sentry disabled: SENTRY_DSN not set")
 		return func() {}
 	}
 
-	env := os.Getenv("APP_ENV")
+	var env string
+	if config.GlobalConfig != nil {
+		env = config.GlobalConfig.AppEnv
+	} else {
+		env = os.Getenv("APP_ENV")
+	}
 	if env == "" {
 		env = "production"
 	}
@@ -34,7 +46,19 @@ func InitSentry(ctx context.Context) (flush func()) {
 	// Release string lets Sentry group events across deploys. The
 	// build pipeline can stamp this with the git SHA; if absent, we
 	// leave it empty and Sentry groups by version-in-event only.
-	release := os.Getenv("APP_RELEASE")
+	var release string
+	if config.GlobalConfig != nil {
+		release = config.GlobalConfig.AppRelease
+	} else {
+		release = os.Getenv("APP_RELEASE")
+	}
+
+	var hostname string
+	if config.GlobalConfig != nil {
+		hostname = config.GlobalConfig.Hostname
+	} else {
+		hostname = os.Getenv("HOSTNAME")
+	}
 
 	err := sentry.Init(sentry.ClientOptions{
 		Dsn:              dsn,
@@ -47,7 +71,7 @@ func InitSentry(ctx context.Context) (flush func()) {
 		TracesSampleRate: 0.2,
 		// Enrich events with the runtime host — helps when a single
 		// region is misbehaving.
-		ServerName: os.Getenv("HOSTNAME"),
+		ServerName: hostname,
 	})
 	if err != nil {
 		logger.Ctx(ctx).Error("sentry init failed", logger.Error(err))

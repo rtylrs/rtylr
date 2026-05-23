@@ -4,22 +4,23 @@ import (
 	"context"
 	"database/sql"
 	"encoding/json"
+	"errors"
 	"time"
 
 	"github.com/voxire/onion/internal/modules/team/internal/domain"
 	"github.com/voxire/onion/internal/modules/team/internal/infrastructure/persistence/sqlc"
-	"github.com/voxire/onion/internal/platform/database/dbclient"
 	"github.com/voxire/onion/internal/platform/logger"
 )
 
-
 type Repository struct {
 	queries *sqlc.Queries
+	pool    *sql.DB
 }
 
-func NewRepository(_ context.Context) *Repository {
+func NewRepository(db *sql.DB) *Repository {
 	return &Repository{
-		queries: sqlc.New(dbclient.Pool()),
+		queries: sqlc.New(db),
+		pool:    db,
 	}
 }
 
@@ -52,7 +53,7 @@ func (r *Repository) GetPermissionByBusiness(ctx context.Context, businessID, us
 func (r *Repository) GetPermissionByUserID(ctx context.Context, userID int64) (*domain.UserAppPermission, error) {
 	row, err := r.queries.GetPermissionByUserID(ctx, userID)
 	if err != nil {
-		if err == sql.ErrNoRows {
+		if errors.Is(err, sql.ErrNoRows) {
 			return nil, nil
 		}
 
@@ -129,7 +130,7 @@ func (r *Repository) GetUserByEmail(ctx context.Context, email string) (int64, s
 func (r *Repository) GetUserByID(ctx context.Context, id int64) (string, string, error) {
 	row, err := r.queries.GetUserByID(ctx, id)
 	if err != nil {
-		if err == sql.ErrNoRows {
+		if errors.Is(err, sql.ErrNoRows) {
 			return "", "", domain.ErrUserNotFound
 		}
 
@@ -204,7 +205,7 @@ func (r *Repository) GetStaffUserByID(ctx context.Context, ownerID, businessID, 
 		UserID:     userID,
 	})
 	if err != nil {
-		if err == sql.ErrNoRows {
+		if errors.Is(err, sql.ErrNoRows) {
 			return nil, domain.ErrUserNotFound
 		}
 
@@ -306,9 +307,8 @@ func (r *Repository) CreateAccessRequest(ctx context.Context, businessID, userID
 // ─── Onboarding ─────────────────────────────────────────────────────────────
 
 func (r *Repository) IsOnboarded(ctx context.Context, userID int64) bool {
-	pool := dbclient.Pool()
 	var onboarded bool
-	err := pool.QueryRowContext(ctx, "SELECT COALESCE(onboarded, FALSE) FROM users WHERE id = ?", userID).Scan(&onboarded)
+	err := r.pool.QueryRowContext(ctx, "SELECT COALESCE(onboarded, FALSE) FROM users WHERE id = ?", userID).Scan(&onboarded)
 	if err != nil {
 		return false
 	}
@@ -316,8 +316,7 @@ func (r *Repository) IsOnboarded(ctx context.Context, userID int64) bool {
 }
 
 func (r *Repository) MarkOnboarded(ctx context.Context, userID int64) error {
-	pool := dbclient.Pool()
-	_, err := pool.ExecContext(ctx, "UPDATE users SET onboarded = TRUE WHERE id = ?", userID)
+	_, err := r.pool.ExecContext(ctx, "UPDATE users SET onboarded = TRUE WHERE id = ?", userID)
 	return err
 }
 
@@ -356,7 +355,7 @@ func permissionFromRow(id, ownerID, userID int64, apps json.RawMessage, role sql
 // CountActiveMembers returns the number of active non-owner team members for an owner.
 func (r *Repository) CountActiveMembers(ctx context.Context, ownerID int64) (int, error) {
 	var count int
-	err := dbclient.Pool().QueryRowContext(ctx,
+	err := r.pool.QueryRowContext(ctx,
 		`SELECT COUNT(*) FROM user_app_permissions WHERE owner_id = ? AND is_active = 1`,
 		ownerID).Scan(&count)
 	if err != nil {
@@ -565,4 +564,65 @@ func (r *Repository) GetUserEffectiveResources(ctx context.Context, ownerID, use
 		}
 	}
 	return effective, nil
+}
+
+// GetOwnerApps returns the list of apps the owner is subscribed to.
+func (r *Repository) GetOwnerApps(ctx context.Context, ownerID int64) ([]string, error) {
+	var appsJSON string
+	// cross-schema read from subscriptions + plans — approved for owner app resolution
+	err := r.pool.QueryRowContext(ctx,
+		`SELECT p.apps FROM subscriptions s JOIN plans p ON p.id = s.plan_id WHERE s.owner_id = ?`,
+		ownerID).Scan(&appsJSON)
+	if err != nil {
+		return nil, err
+	}
+
+	var apps []string
+	if jsonErr := json.Unmarshal([]byte(appsJSON), &apps); jsonErr != nil {
+		return []string{}, nil
+	}
+
+	return apps, nil
+}
+
+// GetOwnerSubscriptionInfo returns the plan slug and status for the owner's subscription.
+func (r *Repository) GetOwnerSubscriptionInfo(ctx context.Context, ownerID int64) (string, string, error) {
+	var planSlug, status string
+	// cross-schema read from subscriptions + plans — approved for owner subscription info
+	err := r.pool.QueryRowContext(ctx,
+		`SELECT p.slug, s.status FROM subscriptions s JOIN plans p ON p.id = s.plan_id WHERE s.owner_id = ?`,
+		ownerID).Scan(&planSlug, &status)
+	return planSlug, status, err
+}
+
+// RecordSeatChange updates the billing seat_periods table after a team member is added or removed.
+func (r *Repository) RecordSeatChange(ctx context.Context, ownerID int64, newCount int) error {
+	now := time.Now().UTC()
+	yesterday := now.AddDate(0, 0, -1)
+	billingMonth := time.Date(now.Year(), now.Month(), 1, 0, 0, 0, 0, time.UTC)
+
+	var subscriptionID int64
+	var pricePerSeatCents int
+	// cross-schema read from subscriptions — approved for seat period management
+	if err := r.pool.QueryRowContext(ctx,
+		`SELECT id, price_per_seat_cents FROM subscriptions WHERE owner_id = ?`, ownerID,
+	).Scan(&subscriptionID, &pricePerSeatCents); err != nil {
+		return err
+	}
+
+	// cross-schema write to seat_periods — approved for seat billing accuracy
+	_, _ = r.pool.ExecContext(ctx,
+		`UPDATE seat_periods SET period_end = ? WHERE subscription_id = ? AND period_end IS NULL`,
+		yesterday, subscriptionID)
+
+	_, _ = r.pool.ExecContext(ctx,
+		`INSERT INTO seat_periods (subscription_id, owner_id, seat_count, price_per_seat_cents, period_start, billing_month)
+		 VALUES (?, ?, ?, ?, ?, ?)`,
+		subscriptionID, ownerID, newCount, pricePerSeatCents, now, billingMonth)
+
+	_, _ = r.pool.ExecContext(ctx,
+		`UPDATE subscriptions SET seat_count = ?, updated_at = CURRENT_TIMESTAMP WHERE owner_id = ?`,
+		newCount, ownerID)
+
+	return nil
 }

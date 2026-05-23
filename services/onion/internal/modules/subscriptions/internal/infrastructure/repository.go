@@ -8,15 +8,14 @@ import (
 	"time"
 
 	"github.com/voxire/onion/internal/modules/subscriptions/internal/domain"
-	"github.com/voxire/onion/internal/platform/database/dbclient"
 )
 
 type Repository struct {
 	db *sql.DB
 }
 
-func NewRepository(_ context.Context) *Repository {
-	return &Repository{db: dbclient.Pool()}
+func NewRepository(db *sql.DB) *Repository {
+	return &Repository{db: db}
 }
 
 // ── Plans ─────────────────────────────────────────────────────────────────────
@@ -35,7 +34,8 @@ const planSelectCols = `id, name, slug, apps, price_per_seat_cents,
 // Reused by all three GetPlan* entrypoints.
 func scanPlan(scanner interface {
 	Scan(dest ...any) error
-}) (domain.Plan, error) {
+},
+) (domain.Plan, error) {
 	var p domain.Plan
 	var appsJSON, featuresJSON string
 	var maxSeats, maxLocations sql.NullInt64
@@ -138,7 +138,7 @@ func (r *Repository) GetSubscription(ctx context.Context, ownerID int64) (*domai
 		&sub.Status, &sub.SeatCount, &trialEndsAt, &nextBillingDate,
 		&periodEndsAt, &paddleSubID, &paddleCustID, &sub.CreatedAt)
 	if err != nil {
-		if err == sql.ErrNoRows {
+		if errors.Is(err, sql.ErrNoRows) {
 			return nil, domain.ErrSubscriptionNotFound
 		}
 		return nil, err
@@ -170,9 +170,9 @@ func (r *Repository) GetSubscription(ctx context.Context, ownerID int64) (*domai
 }
 
 func (r *Repository) UpsertSubscription(ctx context.Context, ownerID, planID int64, trialDays int) error {
-	trialEnd := time.Now().AddDate(0, 0, trialDays)
+	trialEnd := time.Now().UTC().AddDate(0, 0, trialDays)
 	// next_billing_date is always the 1st of next month
-	now := time.Now()
+	now := time.Now().UTC()
 	nextBilling := time.Date(now.Year(), now.Month()+1, 1, 0, 0, 0, 0, time.UTC)
 
 	_, err := r.db.ExecContext(ctx,
@@ -191,7 +191,7 @@ func (r *Repository) GetOwnerApps(ctx context.Context, ownerID int64) ([]string,
 		`SELECT p.apps FROM subscriptions s JOIN plans p ON p.id = s.plan_id WHERE s.owner_id = ?`,
 		ownerID).Scan(&appsJSON)
 	if err != nil {
-		if err == sql.ErrNoRows {
+		if errors.Is(err, sql.ErrNoRows) {
 			return nil, domain.ErrSubscriptionNotFound
 		}
 		return nil, err
@@ -227,7 +227,7 @@ func (r *Repository) GetActivePeriod(ctx context.Context, subscriptionID int64) 
 		&sp.ID, &sp.SubscriptionID, &sp.OwnerID, &sp.SeatCount, &sp.PricePerSeatCents,
 		&sp.PeriodStart, &periodEnd, &sp.BillingMonth)
 	if err != nil {
-		if err == sql.ErrNoRows {
+		if errors.Is(err, sql.ErrNoRows) {
 			return nil, nil
 		}
 		return nil, err
@@ -287,7 +287,7 @@ func (r *Repository) GetPeriodsForMonth(ctx context.Context, ownerID int64, mont
 
 func (r *Repository) GetBillingHistory(ctx context.Context, ownerID int64, limit int) ([]domain.BillingHistoryMonth, error) {
 	// Get distinct billing months that have closed periods (past months)
-	now := time.Now()
+	now := time.Now().UTC()
 	currentMonth := time.Date(now.Year(), now.Month(), 1, 0, 0, 0, 0, time.UTC)
 
 	rows, err := r.db.QueryContext(ctx,
@@ -352,7 +352,7 @@ func (r *Repository) GetBillingHistory(ctx context.Context, ownerID int64, limit
 
 // computeLineItem calculates the amount for a seat period based on daily proration.
 func computeLineItem(seatCount, pricePerSeatCents int, start time.Time, end *time.Time, billingMonth time.Time) domain.BillingLineItem {
-	effectiveEnd := time.Now()
+	effectiveEnd := time.Now().UTC()
 	if end != nil {
 		effectiveEnd = *end
 	}

@@ -1,17 +1,20 @@
 package http
 
 import (
+	"bufio"
 	"bytes"
 	"context"
 	"encoding/json"
 	"fmt"
 	"io"
+	"net"
 	"net/http"
 	"strings"
 	"sync"
 	"time"
 
 	"github.com/go-chi/chi/v5"
+
 	"github.com/voxire/onion/internal/platform/logger"
 )
 
@@ -50,6 +53,13 @@ func RequestLoggerMiddleware(ctx context.Context) func(next http.Handler) http.H
 			sanitizedQuery := sanitizeMap(r.URL.Query())
 			sanitizedHeaders := sanitizeMap(r.Header)
 
+			// WebSocket upgrades require the raw ResponseWriter for Hijack;
+			// skip wrapping and let the connection pass through unlogged.
+			if strings.EqualFold(r.Header.Get("Upgrade"), "websocket") {
+				next.ServeHTTP(w, r)
+				return
+			}
+
 			responseWriter := &ResponseWriter{ResponseWriter: w, statusCode: http.StatusOK}
 
 			next.ServeHTTP(responseWriter, r)
@@ -58,6 +68,11 @@ func RequestLoggerMiddleware(ctx context.Context) func(next http.Handler) http.H
 
 			go func() {
 				if responseWriter.statusCode < 400 {
+					return
+				}
+
+				// SecurityMiddleware already batched these.
+				if isMaliciousPath(r.URL.Path) {
 					return
 				}
 
@@ -90,6 +105,15 @@ func (rw *ResponseWriter) WriteHeader(code int) {
 
 func (rw *ResponseWriter) Write(b []byte) (int, error) {
 	return rw.ResponseWriter.Write(b)
+}
+
+// Hijack delegates to the underlying ResponseWriter so WebSocket upgrades work.
+func (rw *ResponseWriter) Hijack() (net.Conn, *bufio.ReadWriter, error) {
+	h, ok := rw.ResponseWriter.(http.Hijacker)
+	if !ok {
+		return nil, nil, fmt.Errorf("underlying ResponseWriter does not implement http.Hijacker")
+	}
+	return h.Hijack()
 }
 
 type RateLimiter struct {

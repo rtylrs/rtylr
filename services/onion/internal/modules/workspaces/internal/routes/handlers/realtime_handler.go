@@ -78,7 +78,8 @@ func ServeRealtime(w http.ResponseWriter, r *http.Request) {
 	// Attach the userID to the request context so downstream observers
 	// (log, metrics) can see it.
 	ctx := context.WithValue(r.Context(), authPkg.AuthUserKey, &authPkg.AuthUser{
-		UserID: claims.UserID,
+		UserID:     claims.UserID,
+		BusinessID: claims.BusinessID,
 	})
 	hub.ServeWS(w, r.WithContext(ctx), claims.UserID)
 }

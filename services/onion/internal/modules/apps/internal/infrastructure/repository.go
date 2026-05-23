@@ -4,17 +4,16 @@ import (
 	"context"
 	"database/sql"
 	"encoding/json"
-
-	"github.com/voxire/onion/internal/platform/database/dbclient"
+	"errors"
 )
 
 type Repository struct {
 	pool *sql.DB
 }
 
-func NewRepository(_ context.Context) *Repository {
+func NewRepository(db *sql.DB) *Repository {
 	return &Repository{
-		pool: dbclient.Pool(),
+		pool: db,
 	}
 }
 
@@ -36,6 +35,9 @@ func (r *Repository) GetEnabledAddons(ctx context.Context, businessID int64) map
 			enabled[addonID] = true
 		}
 	}
+	if err := rows.Err(); err != nil {
+		return map[string]bool{}
+	}
 	return enabled
 }
 
@@ -47,7 +49,7 @@ func (r *Repository) GetUserAllowedApps(ctx context.Context, businessID, userID 
 		businessID, businessID, userID,
 	).Scan(&appsJSON)
 	if err != nil {
-		if err == sql.ErrNoRows {
+		if errors.Is(err, sql.ErrNoRows) {
 			return []string{}
 		}
 		return []string{}

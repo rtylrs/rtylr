@@ -35,11 +35,13 @@ func newPayload(b domain.Bill) BillPayload {
 
 func ListRoutes() []string { return []string{"/finance/bills"} }
 
-type ListHandler struct{ Service *application.Service }
-type ListRequest struct{}
-type ListResponse struct {
-	Bills []BillPayload `json:"bills"`
-}
+type (
+	ListHandler  struct{ Service *application.Service }
+	ListRequest  struct{}
+	ListResponse struct {
+		Bills []BillPayload `json:"bills"`
+	}
+)
 
 func (h *ListHandler) Serve(ctx context.Context, _ *ListRequest) (ListResponse, *errorModels.ServerError) {
 	device := authPkg.DeviceCtx(ctx)
@@ -59,15 +61,18 @@ func (h *ListHandler) Serve(ctx context.Context, _ *ListRequest) (ListResponse, 
 
 func CreateRoutes() []string { return []string{"/finance/bills"} }
 
-type CreateHandler struct{ Service *application.Service }
-type CreateRequest struct {
-	SupplierID  int64   `json:"supplier_id"`
-	Amount      float64 `json:"amount"`
-	Currency    string  `json:"currency"`
-	DueDate     string  `json:"due_date"`
-	Status      string  `json:"status"`
-	Description string  `json:"description"`
-}
+type (
+	CreateHandler struct{ Service *application.Service }
+	CreateRequest struct {
+		SupplierID  int64   `json:"supplier_id"`
+		Amount      float64 `json:"amount"`
+		Currency    string  `json:"currency"`
+		DueDate     string  `json:"due_date"`
+		Status      string  `json:"status"`
+		Description string  `json:"description"`
+	}
+)
+
 type CreateResponse struct {
 	ID      int64  `json:"id"`
 	Message string `json:"message"`
@@ -101,16 +106,19 @@ func (h *CreateHandler) Serve(ctx context.Context, req *CreateRequest) (CreateRe
 
 func UpdateRoutes() []string { return []string{"/finance/bills"} }
 
-type UpdateHandler struct{ Service *application.Service }
-type UpdateRequest struct {
-	ID          int64   `json:"id"`
-	SupplierID  int64   `json:"supplier_id"`
-	Amount      float64 `json:"amount"`
-	Currency    string  `json:"currency"`
-	DueDate     string  `json:"due_date"`
-	Status      string  `json:"status"`
-	Description string  `json:"description"`
-}
+type (
+	UpdateHandler struct{ Service *application.Service }
+	UpdateRequest struct {
+		ID          int64   `json:"id"`
+		SupplierID  int64   `json:"supplier_id"`
+		Amount      float64 `json:"amount"`
+		Currency    string  `json:"currency"`
+		DueDate     string  `json:"due_date"`
+		Status      string  `json:"status"`
+		Description string  `json:"description"`
+	}
+)
+
 type UpdateResponse struct {
 	Message string `json:"message"`
 }

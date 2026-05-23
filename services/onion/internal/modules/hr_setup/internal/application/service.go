@@ -2,21 +2,29 @@ package application
 
 import (
 	"context"
+	"database/sql"
 	"time"
 
 	"github.com/voxire/onion/internal/modules/hr_setup/internal/domain"
 	"github.com/voxire/onion/internal/modules/hr_setup/internal/infrastructure"
+	"github.com/voxire/onion/internal/platform/cache/cacher"
+	cacheKeys "github.com/voxire/onion/internal/platform/cache/keys"
+)
+
+const (
+	hrSetupScope = "hr_setup"
+	hrSetupTTL   = 5 * time.Minute
 )
 
 var validStepKeys = map[string]struct{}{
-	"company_profile":  {},
-	"work_schedule":    {},
-	"org_structure":    {},
-	"locations":        {},
+	"company_profile":   {},
+	"work_schedule":     {},
+	"org_structure":     {},
+	"locations":         {},
 	"roles_permissions": {},
-	"payroll":          {},
-	"notifications":    {},
-	"employees":        {},
+	"payroll":           {},
+	"notifications":     {},
+	"employees":         {},
 }
 
 type repository interface {
@@ -30,40 +38,63 @@ type Service struct {
 	repo repository
 }
 
-func NewService(ctx context.Context) *Service {
+func NewService(_ context.Context, db *sql.DB) *Service {
 	return &Service{
-		repo: infrastructure.NewRepository(ctx),
+		repo: infrastructure.NewRepository(db),
 	}
 }
 
+func invalidateHRSetupScope(ctx context.Context, ownerID int64) {
+	if cache := cacher.GetRedisCache(); cache != nil {
+		cache.DeleteByPattern(ctx, cacheKeys.ScopedPrefix(hrSetupScope, ownerID))
+	}
+}
+
+type setupStatus struct {
+	Steps      []*domain.SetupStep
+	IsComplete bool
+}
+
 func (s *Service) GetSetupStatus(ctx context.Context, ownerID int64) ([]*domain.SetupStep, bool, error) {
-	steps, err := s.repo.GetSetupSteps(ctx, ownerID)
-	if err != nil {
-		return nil, false, err
-	}
-
-	completedCount := 0
-	for _, step := range steps {
-		if step.CompletedAt != nil {
-			completedCount++
-		}
-	}
-
-	isComplete := completedCount >= len(validStepKeys)
-
-	return steps, isComplete, nil
+	res, err := cacher.Of[setupStatus]().GetOrComputeSingle(ctx,
+		cacheKeys.Scoped(hrSetupScope, ownerID, "status"),
+		func(ctx context.Context) (setupStatus, error) {
+			steps, err := s.repo.GetSetupSteps(ctx, ownerID)
+			if err != nil {
+				return setupStatus{}, err
+			}
+			completed := 0
+			for _, step := range steps {
+				if step.CompletedAt != nil {
+					completed++
+				}
+			}
+			return setupStatus{Steps: steps, IsComplete: completed >= len(validStepKeys)}, nil
+		},
+		cacher.WithExpiry(ctx, hrSetupTTL),
+	)
+	return res.Steps, res.IsComplete, err
 }
 
 func (s *Service) CompleteSetupStep(ctx context.Context, ownerID int64, stepKey string) error {
 	if _, ok := validStepKeys[stepKey]; !ok {
 		return domain.ErrInvalidStepKey
 	}
-
-	return s.repo.UpsertSetupStep(ctx, ownerID, stepKey, time.Now())
+	if err := s.repo.UpsertSetupStep(ctx, ownerID, stepKey, time.Now()); err != nil {
+		return err
+	}
+	invalidateHRSetupScope(ctx, ownerID)
+	return nil
 }
 
 func (s *Service) GetHRConfig(ctx context.Context, ownerID int64) (*domain.HRConfig, error) {
-	return s.repo.GetHRConfig(ctx, ownerID)
+	return cacher.Of[*domain.HRConfig]().GetOrComputeSingle(ctx,
+		cacheKeys.Scoped(hrSetupScope, ownerID, "config"),
+		func(ctx context.Context) (*domain.HRConfig, error) {
+			return s.repo.GetHRConfig(ctx, ownerID)
+		},
+		cacher.WithExpiry(ctx, hrSetupTTL),
+	)
 }
 
 func (s *Service) UpsertHRConfig(ctx context.Context, ownerID int64, setupCompletedAt *int64) (*domain.HRConfig, error) {
@@ -72,6 +103,10 @@ func (s *Service) UpsertHRConfig(ctx context.Context, ownerID int64, setupComple
 		t := time.Unix(*setupCompletedAt, 0)
 		completedAt = &t
 	}
-
-	return s.repo.UpsertHRConfig(ctx, ownerID, completedAt)
+	cfg, err := s.repo.UpsertHRConfig(ctx, ownerID, completedAt)
+	if err != nil {
+		return nil, err
+	}
+	invalidateHRSetupScope(ctx, ownerID)
+	return cfg, nil
 }

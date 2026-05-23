@@ -5,13 +5,12 @@ import (
 	"errors"
 	"net/http"
 
-	hrv1 "github.com/voxire/voxie/gen/go/hr/v1"
-
 	"github.com/voxire/onion/internal/modules/hr_payroll/internal/application"
 	"github.com/voxire/onion/internal/modules/hr_payroll/internal/domain"
 	authPkg "github.com/voxire/onion/internal/platform/auth"
 	errorModels "github.com/voxire/onion/internal/platform/errors"
 	"github.com/voxire/onion/internal/platform/logger"
+	hrv1 "github.com/voxire/voxie/gen/go/hr/v1"
 )
 
 func GetPayrollRunRoutes() []string { return []string{"/hr/payroll/runs/{id}"} }
@@ -23,7 +22,7 @@ type GetPayrollRunRequest struct {
 }
 
 type GetPayrollRunResponse struct {
-	Run     *hrv1.PayrollRunPayload    `json:"run"`
+	Run     *hrv1.PayrollRunPayload     `json:"run"`
 	Entries []*hrv1.PayrollEntryPayload `json:"entries"`
 }
 

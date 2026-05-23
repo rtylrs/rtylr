@@ -2,20 +2,34 @@ package application
 
 import (
 	"context"
+	"database/sql"
 	"fmt"
 	"time"
 
 	"github.com/voxire/onion/internal/modules/subscriptions/internal/domain"
 	"github.com/voxire/onion/internal/modules/subscriptions/internal/infrastructure"
+	"github.com/voxire/onion/internal/platform/cache/cacher"
+	cacheKeys "github.com/voxire/onion/internal/platform/cache/keys"
 	paddlePkg "github.com/voxire/onion/internal/platform/paddle"
 )
+
+const subscriptionCacheTTL = 10 * time.Minute
+
+// invalidateSubscriptionScope clears every subscription + user-scoped cache
+// entry for the owner. Called by every mutation that changes plan/seat/state.
+func invalidateSubscriptionScope(ctx context.Context, ownerID int64) {
+	if cache := cacher.GetRedisCache(); cache != nil {
+		cache.DeleteByPattern(ctx, cacheKeys.SubscriptionPrefix(ownerID))
+		cache.DeleteByPattern(ctx, cacheKeys.UserPrefix(ownerID))
+	}
+}
 
 type Service struct {
 	repo domain.Repository
 }
 
-func NewService(ctx context.Context) *Service {
-	return &Service{repo: infrastructure.NewRepository(ctx)}
+func NewService(_ context.Context, db *sql.DB) *Service {
+	return &Service{repo: infrastructure.NewRepository(db)}
 }
 
 func (s *Service) ListPlans(ctx context.Context) ([]domain.Plan, error) {
@@ -23,7 +37,14 @@ func (s *Service) ListPlans(ctx context.Context) ([]domain.Plan, error) {
 }
 
 func (s *Service) GetMySubscription(ctx context.Context, ownerID int64) (*domain.Subscription, error) {
-	return s.repo.GetSubscription(ctx, ownerID)
+	return cacher.Of[*domain.Subscription]().GetOrComputeSingle(
+		ctx,
+		cacheKeys.Subscription(ownerID),
+		func(ctx context.Context) (*domain.Subscription, error) {
+			return s.repo.GetSubscription(ctx, ownerID)
+		},
+		cacher.WithExpiry(ctx, subscriptionCacheTTL),
+	)
 }
 
 func (s *Service) UpsertSubscription(ctx context.Context, ownerID int64, planSlug string) error {
@@ -35,6 +56,7 @@ func (s *Service) UpsertSubscription(ctx context.Context, ownerID int64, planSlu
 	if upsertErr := s.repo.UpsertSubscription(ctx, ownerID, plan.ID, plan.TrialDays); upsertErr != nil {
 		return upsertErr
 	}
+	defer invalidateSubscriptionScope(ctx, ownerID)
 
 	// Ensure a seat period exists for the current month.
 	sub, err := s.repo.GetSubscription(ctx, ownerID)
@@ -128,7 +150,11 @@ func (s *Service) RecordSeatChange(ctx context.Context, ownerID int64, newSeatCo
 	}
 
 	// Update seat_count on the subscription.
-	return s.repo.UpdateSeatCount(ctx, ownerID, newSeatCount)
+	if err := s.repo.UpdateSeatCount(ctx, ownerID, newSeatCount); err != nil {
+		return err
+	}
+	invalidateSubscriptionScope(ctx, ownerID)
+	return nil
 }
 
 // computeLineItem mirrors the infrastructure helper for use in the service layer.
@@ -163,7 +189,7 @@ func computeLineItem(seatCount, pricePerSeatCents int, start time.Time, end *tim
 // ── Paddle ─────────────────────────────────────────────────────────────────────
 
 // CreateCheckout creates a Paddle transaction for the given plan and returns the checkout URL.
-func (s *Service) CreateCheckout(ctx context.Context, ownerID int64, planSlug string, ownerEmail string) (string, error) {
+func (s *Service) CreateCheckout(ctx context.Context, ownerID int64, planSlug, ownerEmail string) (string, error) {
 	plan, err := s.repo.GetPlanBySlug(ctx, planSlug)
 	if err != nil {
 		return "", err
@@ -178,7 +204,7 @@ func (s *Service) CreateCheckout(ctx context.Context, ownerID int64, planSlug st
 
 // HandlePaddleWebhook processes a verified Paddle webhook event.
 // It updates the subscription record based on the event type.
-func (s *Service) HandlePaddleWebhook(ctx context.Context, event paddlePkg.WebhookEvent, data paddlePkg.SubscriptionData) error {
+func (s *Service) HandlePaddleWebhook(ctx context.Context, _ paddlePkg.WebhookEvent, data paddlePkg.SubscriptionData) error {
 	// Map Paddle subscription ID → owner ID
 	ownerID, err := s.repo.GetOwnerIDByPaddleSubscription(ctx, data.ID)
 	if err != nil {
@@ -204,5 +230,9 @@ func (s *Service) HandlePaddleWebhook(ctx context.Context, event paddlePkg.Webho
 		status = "trial"
 	}
 
-	return s.repo.UpdatePaddleSubscription(ctx, ownerID, data.ID, data.CustomerID, status)
+	if err := s.repo.UpdatePaddleSubscription(ctx, ownerID, data.ID, data.CustomerID, status); err != nil {
+		return err
+	}
+	invalidateSubscriptionScope(ctx, ownerID)
+	return nil
 }

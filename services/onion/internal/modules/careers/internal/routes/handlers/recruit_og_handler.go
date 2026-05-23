@@ -3,7 +3,7 @@ package handlers
 import (
 	"bytes"
 	"context"
-	"crypto/sha1"
+	"crypto/sha256"
 	"encoding/hex"
 	"image/color"
 	"net/http"
@@ -87,7 +87,7 @@ func PublicOGHandler(careersService *application.Service) http.HandlerFunc {
 // image. If any of them change (brand name, tagline, colors) the
 // caches flush naturally because the ETag flips.
 func ogCardETag(c domain.Customization) string {
-	h := sha1.New()
+	h := sha256.New()
 	h.Write([]byte(c.BrandName))
 	h.Write([]byte{0})
 	h.Write([]byte(c.Tagline))
@@ -172,9 +172,9 @@ func renderOGCard(_ context.Context, c domain.Customization) ([]byte, error) {
 		Close() error
 	}
 	for size >= 56 {
-		face, err := opentype.NewFace(boldFont, &opentype.FaceOptions{Size: size, DPI: 72})
-		if err != nil {
-			return nil, err
+		face, faceErr := opentype.NewFace(boldFont, &opentype.FaceOptions{Size: size, DPI: 72})
+		if faceErr != nil {
+			return nil, faceErr
 		}
 		dc.SetFontFace(face)
 		tw, _ := dc.MeasureString(brandName)
@@ -187,9 +187,9 @@ func renderOGCard(_ context.Context, c domain.Customization) ([]byte, error) {
 	}
 	if brandFace == nil {
 		// Safety net — never loop below 56px without setting something.
-		face, err := opentype.NewFace(boldFont, &opentype.FaceOptions{Size: 56, DPI: 72})
-		if err != nil {
-			return nil, err
+		face, faceErr := opentype.NewFace(boldFont, &opentype.FaceOptions{Size: 56, DPI: 72})
+		if faceErr != nil {
+			return nil, faceErr
 		}
 		dc.SetFontFace(face)
 		brandFace = face
@@ -271,4 +271,3 @@ func parseHexOr(hexStr string, fallback color.RGBA) color.RGBA {
 	}
 	return color.RGBA{R: bytesBuf[0], G: bytesBuf[1], B: bytesBuf[2], A: 0xff}
 }
-

@@ -1,4 +1,4 @@
-.PHONY: onion setup build build-all generate lint test run run-api dev sql-check sql-case-check local-env-up local-env-down local-env-logs
+.PHONY: onion setup build build-all generate lint test run run-api dev sql-check sql-case-check local-env-up local-env-down local-env-logs local-env-mindsdb-init
 
 onion: sql-check test build
 	@echo "✅ Onion project is ready!"
@@ -45,6 +45,9 @@ local-env-down:
 
 local-env-logs:
 	docker compose -p onion-env -f local-env/docker-compose.yml logs -f
+
+local-env-mindsdb-init:
+	./local-env/mindsdb/bootstrap.sh
 
 sql-check:
 	./scripts/check_sql_case.sh

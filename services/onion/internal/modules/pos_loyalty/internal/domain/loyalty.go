@@ -6,10 +6,10 @@ import (
 )
 
 var (
-	ErrConfigNotFound       = errors.New("loyalty config not found")
-	ErrInsufficientPoints   = errors.New("insufficient loyalty points")
-	ErrLoyaltyNotEnabled    = errors.New("loyalty program is not enabled")
-	ErrMinRedeemNotReached  = errors.New("minimum redeem points not reached")
+	ErrConfigNotFound      = errors.New("loyalty config not found")
+	ErrInsufficientPoints  = errors.New("insufficient loyalty points")
+	ErrLoyaltyNotEnabled   = errors.New("loyalty program is not enabled")
+	ErrMinRedeemNotReached = errors.New("minimum redeem points not reached")
 )
 
 type LoyaltyConfig struct {

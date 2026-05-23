@@ -6,9 +6,9 @@ import (
 )
 
 var (
-	ErrLoyaltyConfigNotFound  = errors.New("loyalty config not found")
-	ErrInsufficientPoints     = errors.New("insufficient loyalty points")
-	ErrTransactionNotFound    = errors.New("loyalty transaction not found")
+	ErrLoyaltyConfigNotFound = errors.New("loyalty config not found")
+	ErrInsufficientPoints    = errors.New("insufficient loyalty points")
+	ErrTransactionNotFound   = errors.New("loyalty transaction not found")
 )
 
 type LoyaltyTransaction struct {
@@ -24,14 +24,14 @@ type LoyaltyTransaction struct {
 }
 
 type LoyaltyConfig struct {
-	ID                   int64     `json:"id"`
-	OwnerID              int64     `json:"owner_id"`
-	PointsPerDollar      float64   `json:"points_per_dollar"`
-	MinRedemptionPoints  int       `json:"min_redemption_points"`
-	PointsValue          float64   `json:"points_value"`
-	IsActive             bool      `json:"is_active"`
-	CreatedAt            time.Time `json:"created_at"`
-	UpdatedAt            time.Time `json:"updated_at"`
+	ID                  int64     `json:"id"`
+	OwnerID             int64     `json:"owner_id"`
+	PointsPerDollar     float64   `json:"points_per_dollar"`
+	MinRedemptionPoints int       `json:"min_redemption_points"`
+	PointsValue         float64   `json:"points_value"`
+	IsActive            bool      `json:"is_active"`
+	CreatedAt           time.Time `json:"created_at"`
+	UpdatedAt           time.Time `json:"updated_at"`
 }
 
 type AwardInput struct {

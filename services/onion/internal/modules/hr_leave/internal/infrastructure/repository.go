@@ -3,13 +3,13 @@ package infrastructure
 import (
 	"context"
 	"database/sql"
+	"errors"
 	"fmt"
 	"strconv"
 	"time"
 
 	"github.com/voxire/onion/internal/modules/hr_leave/internal/domain"
 	"github.com/voxire/onion/internal/modules/hr_leave/internal/infrastructure/persistence/sqlc"
-	"github.com/voxire/onion/internal/platform/database/dbclient"
 	"github.com/voxire/onion/internal/platform/logger"
 )
 
@@ -18,8 +18,8 @@ type Repository struct {
 	pool    *sql.DB
 }
 
-func NewRepository(_ context.Context) *Repository {
-	pool := dbclient.Pool()
+func NewRepository(db *sql.DB) *Repository {
+	pool := db
 	return &Repository{
 		queries: sqlc.New(pool),
 		pool:    pool,
@@ -55,7 +55,7 @@ func (r *Repository) ListLeaveTypes(ctx context.Context, ownerID int64, params d
 func (r *Repository) GetLeaveType(ctx context.Context, ownerID, leaveTypeID int64) (*domain.LeaveTypeRecord, error) {
 	row, err := r.queries.GetLeaveType(ctx, sqlc.GetLeaveTypeParams{OwnerID: ownerID, ID: leaveTypeID})
 	if err != nil {
-		if err == sql.ErrNoRows {
+		if errors.Is(err, sql.ErrNoRows) {
 			return nil, domain.ErrLeaveTypeNotFound
 		}
 		logger.Ctx(ctx).Error("failed to get leave type", logger.Any("owner_id", ownerID), logger.Any("leave_type_id", leaveTypeID), logger.Error(err))
@@ -152,7 +152,7 @@ func (r *Repository) ListLeaveRequests(ctx context.Context, ownerID int64, param
 func (r *Repository) GetLeaveRequest(ctx context.Context, ownerID, requestID int64) (*domain.LeaveRequestRecord, error) {
 	row, err := r.queries.GetLeaveRequest(ctx, sqlc.GetLeaveRequestParams{OwnerID: ownerID, ID: requestID})
 	if err != nil {
-		if err == sql.ErrNoRows {
+		if errors.Is(err, sql.ErrNoRows) {
 			return nil, domain.ErrLeaveRequestNotFound
 		}
 		logger.Ctx(ctx).Error("failed to get leave request", logger.Any("owner_id", ownerID), logger.Any("request_id", requestID), logger.Error(err))
@@ -293,7 +293,7 @@ func (r *Repository) GetLeaveBalance(ctx context.Context, ownerID, employeeID, l
 		Year:        year,
 	})
 	if err != nil {
-		if err == sql.ErrNoRows {
+		if errors.Is(err, sql.ErrNoRows) {
 			return &domain.LeaveBalanceRecord{
 				OwnerID:     ownerID,
 				EmployeeID:  employeeID,
@@ -352,7 +352,7 @@ func (r *Repository) SubtractPendingDays(ctx context.Context, ownerID, employeeI
 	})
 }
 
-func (r *Repository) ListBalancesForAccrual(ctx context.Context, ownerID int64, year int32, currentMonth int32) ([]domain.LeaveBalanceRecord, error) {
+func (r *Repository) ListBalancesForAccrual(ctx context.Context, ownerID int64, year, currentMonth int32) ([]domain.LeaveBalanceRecord, error) {
 	rows, err := r.queries.ListBalancesForAccrual(ctx, sqlc.ListBalancesForAccrualParams{
 		OwnerID:          ownerID,
 		Year:             year,

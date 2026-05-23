@@ -3,11 +3,13 @@ package handlers
 import (
 	"context"
 	"database/sql"
+	"errors"
 	"fmt"
 	"net/http"
 	"strconv"
 
 	"github.com/go-chi/chi/v5"
+
 	"github.com/voxire/onion/internal/modules/pos_orders/internal/application"
 	errorModels "github.com/voxire/onion/internal/platform/errors"
 )
@@ -124,7 +126,7 @@ func (h *GetPublicOrderStatusHandler) Serve(ctx context.Context, _ *GetPublicOrd
 
 	orderNumber, status, err := h.Service.GetPublicOrderStatus(ctx, orderID)
 	if err != nil {
-		if err == sql.ErrNoRows {
+		if errors.Is(err, sql.ErrNoRows) {
 			return GetPublicOrderStatusResponse{}, &errorModels.ServerError{
 				HTTPCode: http.StatusNotFound,
 				Code:     http.StatusNotFound,

@@ -8,6 +8,7 @@ import (
 	"time"
 
 	"github.com/go-chi/chi/v5"
+
 	"github.com/voxire/onion/internal/modules/pos_orders/internal/application"
 	"github.com/voxire/onion/internal/modules/pos_orders/internal/domain"
 	authPkg "github.com/voxire/onion/internal/platform/auth"
@@ -340,7 +341,9 @@ func (h *GetOrderDetailHandler) Serve(ctx context.Context, req *GetOrderDetailRe
 
 // ─── Update Order Status ──────────────────────────────────────────────────────
 
-func UpdateOrderStatusRoutes() []string { return []string{"/pos/orders/status", "/pos/orders/{id}/status"} }
+func UpdateOrderStatusRoutes() []string {
+	return []string{"/pos/orders/status", "/pos/orders/{id}/status"}
+}
 
 type UpdateOrderStatusHandler struct{ Service *application.Service }
 
@@ -460,7 +463,9 @@ func (h *UpdateOrderItemStatusHandler) Serve(ctx context.Context, req *UpdateOrd
 
 // ─── Process Payment ──────────────────────────────────────────────────────────
 
-func ProcessPaymentRoutes() []string { return []string{"/pos/orders/payment", "/pos/orders/{id}/payment"} }
+func ProcessPaymentRoutes() []string {
+	return []string{"/pos/orders/payment", "/pos/orders/{id}/payment"}
+}
 
 type ProcessPaymentHandler struct{ Service *application.Service }
 

@@ -31,11 +31,13 @@ func newPayload(d domain.Document) DocumentPayload {
 
 func ListRoutes() []string { return []string{"/hr/documents"} }
 
-type ListHandler struct{ Service *application.Service }
-type ListRequest struct{}
-type ListResponse struct {
-	Documents []DocumentPayload `json:"documents"`
-}
+type (
+	ListHandler  struct{ Service *application.Service }
+	ListRequest  struct{}
+	ListResponse struct {
+		Documents []DocumentPayload `json:"documents"`
+	}
+)
 
 func (h *ListHandler) Serve(ctx context.Context, _ *ListRequest) (ListResponse, *errorModels.ServerError) {
 	device := authPkg.DeviceCtx(ctx)
@@ -55,14 +57,17 @@ func (h *ListHandler) Serve(ctx context.Context, _ *ListRequest) (ListResponse, 
 
 func CreateRoutes() []string { return []string{"/hr/documents"} }
 
-type CreateHandler struct{ Service *application.Service }
-type CreateRequest struct {
-	StaffID    int64  `json:"staff_id"`
-	Name       string `json:"name"`
-	Type       string `json:"type"`
-	FileURL    string `json:"file_url"`
-	ExpiryDate string `json:"expiry_date"`
-}
+type (
+	CreateHandler struct{ Service *application.Service }
+	CreateRequest struct {
+		StaffID    int64  `json:"staff_id"`
+		Name       string `json:"name"`
+		Type       string `json:"type"`
+		FileURL    string `json:"file_url"`
+		ExpiryDate string `json:"expiry_date"`
+	}
+)
+
 type CreateResponse struct {
 	ID      int64  `json:"id"`
 	Message string `json:"message"`
@@ -93,10 +98,13 @@ func (h *CreateHandler) Serve(ctx context.Context, req *CreateRequest) (CreateRe
 
 func DeleteRoutes() []string { return []string{"/hr/documents"} }
 
-type DeleteHandler struct{ Service *application.Service }
-type DeleteRequest struct {
-	ID int64 `json:"id"`
-}
+type (
+	DeleteHandler struct{ Service *application.Service }
+	DeleteRequest struct {
+		ID int64 `json:"id"`
+	}
+)
+
 type DeleteResponse struct {
 	Message string `json:"message"`
 }

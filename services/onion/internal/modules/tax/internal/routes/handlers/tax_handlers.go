@@ -4,19 +4,20 @@ import (
 	"context"
 	"net/http"
 
-	authPkg "github.com/voxire/onion/internal/platform/auth"
-	errorModels "github.com/voxire/onion/internal/platform/errors"
-
 	"github.com/voxire/onion/internal/modules/tax/internal/application"
 	"github.com/voxire/onion/internal/modules/tax/internal/domain"
+	authPkg "github.com/voxire/onion/internal/platform/auth"
+	errorModels "github.com/voxire/onion/internal/platform/errors"
 )
 
 // ─── Get Tax Config ───────────────────────────────────────────────────────────
 
 func TaxConfigGetRoutes() []string { return []string{"/finance/tax"} }
 
-type GetTaxConfigHandler struct{ Service *application.Service }
-type GetTaxConfigRequest struct{}
+type (
+	GetTaxConfigHandler struct{ Service *application.Service }
+	GetTaxConfigRequest struct{}
+)
 
 type TaxConfigPayload struct {
 	ID          int64   `json:"id"`
@@ -93,8 +94,10 @@ func (h *UpdateTaxConfigHandler) Serve(ctx context.Context, req *UpdateTaxConfig
 
 func PLReportRoutes() []string { return []string{"/finance/pl"} }
 
-type GetPLReportHandler struct{ Service *application.Service }
-type GetPLReportRequest struct{}
+type (
+	GetPLReportHandler struct{ Service *application.Service }
+	GetPLReportRequest struct{}
+)
 
 type PLReportResponse struct {
 	TotalRevenue  float64 `json:"total_revenue"`

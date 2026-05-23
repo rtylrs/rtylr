@@ -36,11 +36,13 @@ func stepToPayload(s domain.SetupStepRecord) *SetupStepPayload {
 
 func GetSetupStatusRoutes() []string { return []string{"/hr/setup/status"} }
 
-type GetSetupStatusHandler struct{ Service *application.Service }
-type GetSetupStatusRequest struct{}
-type GetSetupStatusResponse struct {
-	Steps []*SetupStepPayload `json:"steps"`
-}
+type (
+	GetSetupStatusHandler  struct{ Service *application.Service }
+	GetSetupStatusRequest  struct{}
+	GetSetupStatusResponse struct {
+		Steps []*SetupStepPayload `json:"steps"`
+	}
+)
 
 func (h *GetSetupStatusHandler) Serve(ctx context.Context, _ *GetSetupStatusRequest) (GetSetupStatusResponse, *errorModels.ServerError) {
 	device := authPkg.DeviceCtx(ctx)
@@ -65,11 +67,13 @@ func (h *GetSetupStatusHandler) Serve(ctx context.Context, _ *GetSetupStatusRequ
 
 func CompleteSetupStepRoutes() []string { return []string{"/hr/setup/steps/{step_key}/complete"} }
 
-type CompleteSetupStepHandler struct{ Service *application.Service }
-type CompleteSetupStepRequest struct{}
-type CompleteSetupStepResponse struct {
-	Step *SetupStepPayload `json:"step"`
-}
+type (
+	CompleteSetupStepHandler  struct{ Service *application.Service }
+	CompleteSetupStepRequest  struct{}
+	CompleteSetupStepResponse struct {
+		Step *SetupStepPayload `json:"step"`
+	}
+)
 
 func (h *CompleteSetupStepHandler) Serve(ctx context.Context, _ *CompleteSetupStepRequest) (CompleteSetupStepResponse, *errorModels.ServerError) {
 	device := authPkg.DeviceCtx(ctx)

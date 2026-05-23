@@ -29,6 +29,7 @@ type mockRepo struct {
 func (m *mockRepo) List(_ context.Context, _ int64) ([]domain.Webhook, error) {
 	return m.listResult, m.listErr
 }
+
 func (m *mockRepo) Create(_ context.Context, ownerID int64, url, secret string, events []string) (int64, error) {
 	m.createGot.ownerID = ownerID
 	m.createGot.url = url
@@ -36,6 +37,7 @@ func (m *mockRepo) Create(_ context.Context, ownerID int64, url, secret string, 
 	m.createGot.events = events
 	return m.createID, m.createErr
 }
+
 func (m *mockRepo) Delete(_ context.Context, ownerID, id int64) error {
 	m.deleteGot.ownerID = ownerID
 	m.deleteGot.id = id

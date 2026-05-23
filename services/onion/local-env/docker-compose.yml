@@ -41,6 +41,28 @@ services:
       - onion_floci:/app/data
       - ./floci/init:/etc/floci/init/ready.d:ro
 
+  mindsdb:
+    image: mindsdb/mindsdb:latest
+    restart: on-failure
+    depends_on:
+      db:
+        condition: service_healthy
+    environment:
+      MINDSDB_APIS: "http,mysql,mongodb"
+      MINDSDB_DEFAULT_PROJECT: onion
+    ports:
+      - "47334:47334" # HTTP API + GUI
+      - "47335:47335" # MySQL-wire protocol
+    volumes:
+      - onion_mindsdb:/root/mdb_storage
+      - ./mindsdb/init:/mdb_init:ro
+    healthcheck:
+      test: ["CMD", "curl", "-fsS", "http://localhost:47334/api/status"]
+      interval: 5s
+      timeout: 5s
+      retries: 30
+
 volumes:
   onion_mysql:
   onion_floci:
+  onion_mindsdb:

@@ -18,7 +18,7 @@ func TestSanitizeError_NilStaysNil(t *testing.T) {
 func TestSanitizeError_HidesUnderlyingError(t *testing.T) {
 	original := errors.New("connection string admin:secret@db.internal/payroll")
 	sanitized := SanitizeError(original)
-	if sanitized == original {
+	if errors.Is(sanitized, original) {
 		t.Fatal("expected a new error, got the original (would leak internals)")
 	}
 	if strings.Contains(sanitized.Error(), "secret") || strings.Contains(sanitized.Error(), "internal") {
@@ -34,7 +34,7 @@ func TestSecureErrorMiddleware_HappyPath(t *testing.T) {
 		w.WriteHeader(http.StatusTeapot)
 	}))
 
-	req := httptest.NewRequest(http.MethodGet, "/x", nil)
+	req := httptest.NewRequest(http.MethodGet, "/x", http.NoBody)
 	rec := httptest.NewRecorder()
 	handler.ServeHTTP(rec, req)
 
@@ -48,7 +48,7 @@ func TestSecureErrorMiddleware_RecoversFromPanic(t *testing.T) {
 		panic("unexpected boom")
 	}))
 
-	req := httptest.NewRequest(http.MethodGet, "/x", nil)
+	req := httptest.NewRequest(http.MethodGet, "/x", http.NoBody)
 	rec := httptest.NewRecorder()
 
 	// Must not panic out of the middleware.

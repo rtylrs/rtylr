@@ -7,13 +7,13 @@ import (
 
 func TestFirstWord(t *testing.T) {
 	cases := map[string]string{
-		"":                "",
-		"Alice":           "Alice",
-		"Alice Smith":     "Alice",
-		"Alice Mary Doe":  "Alice",
-		"Alice\tSmith":    "Alice",
-		" leading space":  "",
-		"NoSpaces12345":   "NoSpaces12345",
+		"":               "",
+		"Alice":          "Alice",
+		"Alice Smith":    "Alice",
+		"Alice Mary Doe": "Alice",
+		"Alice\tSmith":   "Alice",
+		" leading space": "",
+		"NoSpaces12345":  "NoSpaces12345",
 	}
 	for in, want := range cases {
 		if got := firstWord(in); got != want {

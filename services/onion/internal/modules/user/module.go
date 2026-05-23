@@ -2,8 +2,10 @@ package user
 
 import (
 	"context"
+	"database/sql"
 
 	"github.com/go-chi/chi/v5"
+
 	"github.com/voxire/onion/internal/modules/user/internal/application"
 	"github.com/voxire/onion/internal/modules/user/internal/infrastructure"
 	"github.com/voxire/onion/internal/modules/user/internal/routes"
@@ -48,9 +50,9 @@ func (v *userTokenValidator) ValidateTokenFull(ctx context.Context, token string
 	}, nil
 }
 
-func NewModule(ctx context.Context) *Module {
-	userRepo := infrastructure.NewRepository(ctx)
-	userService := application.NewService(ctx)
+func NewModule(ctx context.Context, db *sql.DB, googleClientID string) *Module {
+	userRepo := infrastructure.NewRepository(db)
+	userService := application.NewService(ctx, db, googleClientID)
 
 	module := &Module{
 		UserService:    userService,

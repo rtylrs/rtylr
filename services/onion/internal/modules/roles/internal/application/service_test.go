@@ -33,12 +33,14 @@ type mockRepo struct {
 func (m *mockRepo) List(_ context.Context, _ int64) ([]domain.Role, error) {
 	return m.listResult, m.listErr
 }
+
 func (m *mockRepo) Create(_ context.Context, ownerID int64, name string, perms []string) (int64, error) {
 	m.createGot.ownerID = ownerID
 	m.createGot.name = name
 	m.createGot.perms = perms
 	return m.createID, m.createErr
 }
+
 func (m *mockRepo) Update(_ context.Context, ownerID, roleID int64, name string, perms []string) error {
 	m.updateGot.ownerID = ownerID
 	m.updateGot.roleID = roleID
@@ -46,6 +48,7 @@ func (m *mockRepo) Update(_ context.Context, ownerID, roleID int64, name string,
 	m.updateGot.perms = perms
 	return m.updateErr
 }
+
 func (m *mockRepo) Delete(_ context.Context, ownerID, roleID int64) error {
 	m.deleteGot.ownerID = ownerID
 	m.deleteGot.roleID = roleID

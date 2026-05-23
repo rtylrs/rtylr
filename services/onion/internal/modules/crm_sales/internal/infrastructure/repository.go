@@ -4,10 +4,8 @@ import (
 	"context"
 	"database/sql"
 	"errors"
-	"strconv"
 
 	"github.com/voxire/onion/internal/modules/crm_sales/internal/domain"
-	"github.com/voxire/onion/internal/platform/database/dbclient"
 	"github.com/voxire/onion/internal/platform/logger"
 )
 
@@ -15,8 +13,8 @@ type Repository struct {
 	db *sql.DB
 }
 
-func NewRepository(_ context.Context) *Repository {
-	return &Repository{db: dbclient.Pool()}
+func NewRepository(db *sql.DB) *Repository {
+	return &Repository{db: db}
 }
 
 // ---------------------------------------------------------------------------
@@ -674,17 +672,4 @@ func nullableFloat64(v *float64) sql.NullFloat64 {
 		return sql.NullFloat64{}
 	}
 	return sql.NullFloat64{Float64: *v, Valid: true}
-}
-
-// parseFloat64 is kept for future use in other scan helpers that may read
-// string-encoded decimals from older schema columns.
-func parseFloat64(s string) float64 {
-	if s == "" {
-		return 0
-	}
-	f, err := strconv.ParseFloat(s, 64)
-	if err != nil {
-		return 0
-	}
-	return f
 }

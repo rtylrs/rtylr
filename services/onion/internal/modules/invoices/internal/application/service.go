@@ -2,20 +2,35 @@ package application
 
 import (
 	"context"
+	"database/sql"
 	"fmt"
 	"time"
 
 	"github.com/voxire/onion/internal/modules/invoices/internal/domain"
 	"github.com/voxire/onion/internal/modules/invoices/internal/infrastructure"
+	"github.com/voxire/onion/internal/platform/cache/cacher"
+	cacheKeys "github.com/voxire/onion/internal/platform/cache/keys"
+	emailPkg "github.com/voxire/onion/internal/platform/email"
 	"github.com/voxire/onion/internal/platform/logger"
 )
+
+const (
+	invoicesScope = "invoices"
+	invoicesTTL   = 5 * time.Minute
+)
+
+func invalidateInvoicesScope(ctx context.Context, ownerID int64) {
+	if cache := cacher.GetRedisCache(); cache != nil {
+		cache.DeleteByPattern(ctx, cacheKeys.ScopedPrefix(invoicesScope, ownerID))
+	}
+}
 
 type Service struct {
 	repo *infrastructure.Repository
 }
 
-func NewService(ctx context.Context) *Service {
-	repo := infrastructure.NewRepository(ctx)
+func NewService(_ context.Context, db *sql.DB) *Service {
+	repo := infrastructure.NewRepository(db)
 
 	return &Service{
 		repo: repo,
@@ -27,7 +42,13 @@ func NewService(ctx context.Context) *Service {
 // ---------------------------------------------------------------------------
 
 func (s *Service) ListInvoices(ctx context.Context, ownerID int64, status, search, dateFrom, dateTo string) ([]domain.Invoice, error) {
-	return s.repo.ListInvoices(ctx, ownerID, status, search, dateFrom, dateTo)
+	key := cacheKeys.Scoped(invoicesScope, ownerID, fmt.Sprintf("list|s=%s|q=%s|f=%s|t=%s", status, search, dateFrom, dateTo))
+	return cacher.Of[[]domain.Invoice]().GetOrComputeSingle(ctx, key,
+		func(ctx context.Context) ([]domain.Invoice, error) {
+			return s.repo.ListInvoices(ctx, ownerID, status, search, dateFrom, dateTo)
+		},
+		cacher.WithExpiry(ctx, invoicesTTL),
+	)
 }
 
 func (s *Service) GetInvoice(ctx context.Context, ownerID, invoiceID int64) (*domain.Invoice, error) {
@@ -54,6 +75,7 @@ func (s *Service) GetInvoice(ctx context.Context, ownerID, invoiceID int64) (*do
 }
 
 func (s *Service) CreateInvoice(ctx context.Context, ownerID int64, input domain.InvoiceInput) (*domain.Invoice, error) {
+	defer invalidateInvoicesScope(ctx, ownerID)
 	issueDate, err := time.Parse("2006-01-02", input.IssueDate)
 	if err != nil {
 		logger.Ctx(ctx).Error("Failed to parse issue date", logger.Error(err))
@@ -174,6 +196,7 @@ func (s *Service) CreateInvoice(ctx context.Context, ownerID int64, input domain
 }
 
 func (s *Service) UpdateInvoice(ctx context.Context, ownerID, invoiceID int64, input domain.InvoiceUpdateInput) (*domain.Invoice, error) {
+	defer invalidateInvoicesScope(ctx, ownerID)
 	existing, err := s.repo.GetInvoiceByID(ctx, ownerID, invoiceID)
 	if err != nil {
 		return nil, err
@@ -278,10 +301,49 @@ func (s *Service) UpdateInvoice(ctx context.Context, ownerID, invoiceID int64, i
 }
 
 func (s *Service) UpdateInvoiceStatus(ctx context.Context, ownerID, invoiceID int64, status string) error {
+	defer invalidateInvoicesScope(ctx, ownerID)
 	return s.repo.UpdateInvoiceStatus(ctx, ownerID, invoiceID, status)
 }
 
+func (s *Service) SendInvoice(ctx context.Context, ownerID, invoiceID int64) error {
+	defer invalidateInvoicesScope(ctx, ownerID)
+	inv, err := s.GetInvoice(ctx, ownerID, invoiceID)
+	if err != nil {
+		return err
+	}
+
+	if err := s.repo.UpdateInvoiceStatus(ctx, ownerID, invoiceID, "sent"); err != nil {
+		return err
+	}
+
+	if inv.ClientEmail != "" && emailPkg.IsEnabled() {
+		subject := fmt.Sprintf("Invoice %s from rtylr", inv.InvoiceNumber)
+		html := fmt.Sprintf(
+			"<p>Dear %s,</p><p>Please find attached invoice <strong>%s</strong> for <strong>%.2f %s</strong> due on %s.</p>",
+			inv.ClientName, inv.InvoiceNumber, inv.Total, inv.Currency, inv.DueDate.Format("2006-01-02"),
+		)
+		text := fmt.Sprintf(
+			"Invoice %s\nAmount: %.2f %s\nDue: %s\n",
+			inv.InvoiceNumber, inv.Total, inv.Currency, inv.DueDate.Format("2006-01-02"),
+		)
+
+		if _, sendErr := emailPkg.Send(ctx, emailPkg.SendParams{
+			To:      []string{inv.ClientEmail},
+			Subject: subject,
+			HTML:    html,
+			Text:    text,
+		}); sendErr != nil {
+			logger.Ctx(ctx).Warn("failed to email invoice",
+				logger.Error(sendErr),
+			)
+		}
+	}
+
+	return nil
+}
+
 func (s *Service) DeleteInvoice(ctx context.Context, ownerID, invoiceID int64) error {
+	defer invalidateInvoicesScope(ctx, ownerID)
 	return s.repo.DeleteInvoice(ctx, ownerID, invoiceID)
 }
 
@@ -290,6 +352,7 @@ func (s *Service) DeleteInvoice(ctx context.Context, ownerID, invoiceID int64) e
 // ---------------------------------------------------------------------------
 
 func (s *Service) RecordPayment(ctx context.Context, ownerID int64, input domain.PaymentInput) (*domain.Payment, error) {
+	defer invalidateInvoicesScope(ctx, ownerID)
 	inv, err := s.repo.GetInvoiceByID(ctx, ownerID, input.InvoiceID)
 	if err != nil {
 		return nil, err
@@ -358,11 +421,22 @@ func (s *Service) RecordPayment(ctx context.Context, ownerID int64, input domain
 // Expenses
 // ---------------------------------------------------------------------------
 
-func (s *Service) ListExpenses(ctx context.Context, ownerID int64, categoryID int64, search, dateFrom, dateTo string) ([]domain.Expense, error) {
+func (s *Service) ListExpenses(ctx context.Context, ownerID, categoryID int64, search, dateFrom, dateTo string) ([]domain.Expense, error) {
+	key := cacheKeys.Scoped(invoicesScope, ownerID, fmt.Sprintf("expenses|c=%d|q=%s|f=%s|t=%s", categoryID, search, dateFrom, dateTo))
+	return cacher.Of[[]domain.Expense]().GetOrComputeSingle(ctx, key,
+		func(ctx context.Context) ([]domain.Expense, error) {
+			return s.listExpensesImpl(ctx, ownerID, categoryID, search, dateFrom, dateTo)
+		},
+		cacher.WithExpiry(ctx, invoicesTTL),
+	)
+}
+
+func (s *Service) listExpensesImpl(ctx context.Context, ownerID, categoryID int64, search, dateFrom, dateTo string) ([]domain.Expense, error) {
 	return s.repo.ListExpenses(ctx, ownerID, categoryID, search, dateFrom, dateTo)
 }
 
 func (s *Service) CreateExpense(ctx context.Context, ownerID int64, input domain.ExpenseInput) (*domain.Expense, error) {
+	defer invalidateInvoicesScope(ctx, ownerID)
 	expenseDate, err := time.Parse("2006-01-02", input.ExpenseDate)
 	if err != nil {
 		logger.Ctx(ctx).Error("Failed to parse expense date", logger.Error(err))
@@ -406,6 +480,7 @@ func (s *Service) CreateExpense(ctx context.Context, ownerID int64, input domain
 }
 
 func (s *Service) UpdateExpense(ctx context.Context, ownerID, expenseID int64, input domain.ExpenseInput) (*domain.Expense, error) {
+	defer invalidateInvoicesScope(ctx, ownerID)
 	existing, err := s.repo.GetExpenseByID(ctx, ownerID, expenseID)
 	if err != nil {
 		return nil, err
@@ -446,6 +521,7 @@ func (s *Service) UpdateExpense(ctx context.Context, ownerID, expenseID int64, i
 }
 
 func (s *Service) DeleteExpense(ctx context.Context, ownerID, expenseID int64) error {
+	defer invalidateInvoicesScope(ctx, ownerID)
 	return s.repo.DeleteExpense(ctx, ownerID, expenseID)
 }
 
@@ -454,10 +530,21 @@ func (s *Service) DeleteExpense(ctx context.Context, ownerID, expenseID int64) e
 // ---------------------------------------------------------------------------
 
 func (s *Service) ListExpenseCategories(ctx context.Context, ownerID int64) ([]domain.ExpenseCategory, error) {
+	key := cacheKeys.Scoped(invoicesScope, ownerID, "expense_cats")
+	return cacher.Of[[]domain.ExpenseCategory]().GetOrComputeSingle(ctx, key,
+		func(ctx context.Context) ([]domain.ExpenseCategory, error) {
+			return s.listExpenseCategoriesImpl(ctx, ownerID)
+		},
+		cacher.WithExpiry(ctx, 10*time.Minute),
+	)
+}
+
+func (s *Service) listExpenseCategoriesImpl(ctx context.Context, ownerID int64) ([]domain.ExpenseCategory, error) {
 	return s.repo.ListExpenseCategories(ctx, ownerID)
 }
 
 func (s *Service) CreateExpenseCategory(ctx context.Context, ownerID int64, input domain.ExpenseCategoryInput) (*domain.ExpenseCategory, error) {
+	defer invalidateInvoicesScope(ctx, ownerID)
 	c := domain.ExpenseCategory{
 		OwnerID: ownerID,
 		Name:    input.Name,

@@ -3,13 +3,13 @@ package infrastructure
 import (
 	"context"
 	"database/sql"
+	"errors"
 	"fmt"
 	"strconv"
 	"time"
 
 	"github.com/voxire/onion/internal/modules/hr_overtime/internal/domain"
 	"github.com/voxire/onion/internal/modules/hr_overtime/internal/infrastructure/persistence/sqlc"
-	"github.com/voxire/onion/internal/platform/database/dbclient"
 	"github.com/voxire/onion/internal/platform/logger"
 )
 
@@ -18,8 +18,8 @@ type Repository struct {
 	pool    *sql.DB
 }
 
-func NewRepository(_ context.Context) *Repository {
-	pool := dbclient.Pool()
+func NewRepository(db *sql.DB) *Repository {
+	pool := db
 	return &Repository{
 		queries: sqlc.New(pool),
 		pool:    pool,
@@ -53,7 +53,7 @@ func (r *Repository) ListOvertimeRequests(ctx context.Context, ownerID int64, pa
 func (r *Repository) GetOvertimeRequest(ctx context.Context, ownerID, requestID int64) (*domain.OvertimeRequestRecord, error) {
 	row, err := r.queries.GetOvertimeRequest(ctx, sqlc.GetOvertimeRequestParams{OwnerID: ownerID, ID: requestID})
 	if err != nil {
-		if err == sql.ErrNoRows {
+		if errors.Is(err, sql.ErrNoRows) {
 			return nil, domain.ErrOvertimeRequestNotFound
 		}
 		logger.Ctx(ctx).Error("failed to get overtime request", logger.Any("owner_id", ownerID), logger.Any("request_id", requestID), logger.Error(err))
@@ -141,7 +141,7 @@ func (r *Repository) ListFlaggedForDate(ctx context.Context, ownerID int64, date
 func (r *Repository) GetOvertimeConfig(ctx context.Context, ownerID int64) (*domain.OvertimeConfigRecord, error) {
 	row, err := r.queries.GetOvertimeConfig(ctx, ownerID)
 	if err != nil {
-		if err == sql.ErrNoRows {
+		if errors.Is(err, sql.ErrNoRows) {
 			return nil, domain.ErrOvertimeConfigNotFound
 		}
 		return nil, err

@@ -4,17 +4,18 @@ import (
 	"context"
 	"net/http"
 
-	hubv1 "github.com/voxire/voxie/gen/go/hub/v1"
-
 	"github.com/voxire/onion/internal/modules/kpis/internal/application"
 	authPkg "github.com/voxire/onion/internal/platform/auth"
 	errorModels "github.com/voxire/onion/internal/platform/errors"
+	hubv1 "github.com/voxire/voxie/gen/go/hub/v1"
 )
 
 func KPIRoutes() []string { return []string{"/hub/kpis"} }
 
-type KPIHandler struct{ Service *application.Service }
-type KPIRequest struct{}
+type (
+	KPIHandler struct{ Service *application.Service }
+	KPIRequest struct{}
+)
 
 type KPIResponse = hubv1.GetKPIsResponse
 

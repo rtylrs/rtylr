@@ -13,42 +13,65 @@ import (
 func CreateRoutes() []string   { return []string{"/store/checkout/create"} }
 func CompleteRoutes() []string { return []string{"/store/checkout/complete"} }
 
-type CreateHandler struct{ Service *application.Service }
-type CreateRequest struct {
-	SessionID     string  `json:"session_id"`
-	CustomerEmail string  `json:"customer_email"`
-	Items         string  `json:"items"`
-	Subtotal      float64 `json:"subtotal"`
-	Tax           float64 `json:"tax"`
-	Total         float64 `json:"total"`
-}
-type CreateResponse struct { ID int64 `json:"id"`; Message string `json:"message"` }
+type (
+	CreateHandler struct{ Service *application.Service }
+	CreateRequest struct {
+		SessionID     string  `json:"session_id"`
+		CustomerEmail string  `json:"customer_email"`
+		Items         string  `json:"items"`
+		Subtotal      float64 `json:"subtotal"`
+		Tax           float64 `json:"tax"`
+		Total         float64 `json:"total"`
+	}
+)
 
-func (h *CreateHandler) Validate(_ context.Context, _ *CreateRequest) *errorModels.ServerError { return nil }
+type CreateResponse struct {
+	ID      int64  `json:"id"`
+	Message string `json:"message"`
+}
+
+func (h *CreateHandler) Validate(_ context.Context, _ *CreateRequest) *errorModels.ServerError {
+	return nil
+}
 
 func (h *CreateHandler) Serve(ctx context.Context, req *CreateRequest) (CreateResponse, *errorModels.ServerError) {
 	authUser, ok := authPkg.GetAuthUser(ctx)
-	if !ok { return CreateResponse{}, &errorModels.ServerError{Code: http.StatusUnauthorized, HTTPCode: http.StatusUnauthorized, Message: "unauthorized"} }
+	if !ok {
+		return CreateResponse{}, &errorModels.ServerError{Code: http.StatusUnauthorized, HTTPCode: http.StatusUnauthorized, Message: "unauthorized"}
+	}
 	id, err := h.Service.Create(ctx, authUser.UserID, domain.CheckoutCreateInput{
 		SessionID: req.SessionID, CustomerEmail: req.CustomerEmail, Items: req.Items,
 		Subtotal: req.Subtotal, Tax: req.Tax, Total: req.Total,
 	})
-	if err != nil { return CreateResponse{}, &errorModels.ServerError{Code: http.StatusInternalServerError, HTTPCode: http.StatusInternalServerError, Message: "Failed to create checkout"} }
+	if err != nil {
+		return CreateResponse{}, &errorModels.ServerError{Code: http.StatusInternalServerError, HTTPCode: http.StatusInternalServerError, Message: "Failed to create checkout"}
+	}
 	return CreateResponse{ID: id, Message: "Checkout created"}, nil
 }
 
-type CompleteHandler struct{ Service *application.Service }
-type CompleteRequest struct { ID int64 `json:"id"` }
-type CompleteResponse struct { Message string `json:"message"` }
+type (
+	CompleteHandler struct{ Service *application.Service }
+	CompleteRequest struct {
+		ID int64 `json:"id"`
+	}
+)
+
+type CompleteResponse struct {
+	Message string `json:"message"`
+}
 
 func (h *CompleteHandler) Validate(_ context.Context, req *CompleteRequest) *errorModels.ServerError {
-	if req.ID == 0 { return &errorModels.ServerError{Code: http.StatusBadRequest, HTTPCode: http.StatusBadRequest, Message: "ID is required"} }
+	if req.ID == 0 {
+		return &errorModels.ServerError{Code: http.StatusBadRequest, HTTPCode: http.StatusBadRequest, Message: "ID is required"}
+	}
 	return nil
 }
 
 func (h *CompleteHandler) Serve(ctx context.Context, req *CompleteRequest) (CompleteResponse, *errorModels.ServerError) {
 	authUser, ok := authPkg.GetAuthUser(ctx)
-	if !ok { return CompleteResponse{}, &errorModels.ServerError{Code: http.StatusUnauthorized, HTTPCode: http.StatusUnauthorized, Message: "unauthorized"} }
+	if !ok {
+		return CompleteResponse{}, &errorModels.ServerError{Code: http.StatusUnauthorized, HTTPCode: http.StatusUnauthorized, Message: "unauthorized"}
+	}
 	if err := h.Service.Complete(ctx, authUser.UserID, req.ID); err != nil {
 		return CompleteResponse{}, &errorModels.ServerError{Code: http.StatusInternalServerError, HTTPCode: http.StatusInternalServerError, Message: "Failed to complete checkout"}
 	}

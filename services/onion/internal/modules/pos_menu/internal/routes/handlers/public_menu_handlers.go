@@ -4,10 +4,9 @@ import (
 	"context"
 	"net/http"
 
-	posv1 "github.com/voxire/voxie/gen/go/pos/v1"
-
 	"github.com/voxire/onion/internal/modules/pos_menu/internal/application"
 	errorModels "github.com/voxire/onion/internal/platform/errors"
+	posv1 "github.com/voxire/voxie/gen/go/pos/v1"
 )
 
 // Public read path for the customer-facing menu app. This endpoint
@@ -35,6 +34,12 @@ type PublicListMenuItemsHandler struct{ Service *application.Service }
 
 type PublicListMenuItemsRequest struct {
 	BusinessID int64 `json:"business_id"`
+	// Optional. Accepted now so menu.rtylr.com/<biz>/<loc> can pass
+	// it through; server-side per-location filtering kicks in when
+	// pos_menu_items get a location_id column. Until then this is
+	// ignored so callers don't need to special-case multi-location
+	// vs single-location tenants.
+	LocationID int64 `json:"location_id"`
 }
 
 type PublicListMenuItemsResponse struct {

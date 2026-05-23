@@ -6,12 +6,12 @@ import (
 	"strconv"
 
 	"github.com/go-chi/chi/v5"
-	posv1 "github.com/voxire/voxie/gen/go/pos/v1"
 
 	"github.com/voxire/onion/internal/modules/pos_terminals/internal/application"
 	"github.com/voxire/onion/internal/modules/pos_terminals/internal/domain"
 	authPkg "github.com/voxire/onion/internal/platform/auth"
 	errorModels "github.com/voxire/onion/internal/platform/errors"
+	posv1 "github.com/voxire/voxie/gen/go/pos/v1"
 )
 
 func toProtoTerminal(t domain.Terminal) *posv1.Terminal {
@@ -35,11 +35,13 @@ func toProtoTerminal(t domain.Terminal) *posv1.Terminal {
 
 func TerminalListRoutes() []string { return []string{"/pos/terminals"} }
 
-type ListTerminalsHandler struct{ Service *application.Service }
-type ListTerminalsRequest struct{}
-type ListTerminalsResponse struct {
-	Terminals []*posv1.Terminal `json:"terminals"`
-}
+type (
+	ListTerminalsHandler  struct{ Service *application.Service }
+	ListTerminalsRequest  struct{}
+	ListTerminalsResponse struct {
+		Terminals []*posv1.Terminal `json:"terminals"`
+	}
+)
 
 func (h *ListTerminalsHandler) Serve(ctx context.Context, _ *ListTerminalsRequest) (ListTerminalsResponse, *errorModels.ServerError) {
 	device := authPkg.DeviceCtx(ctx)

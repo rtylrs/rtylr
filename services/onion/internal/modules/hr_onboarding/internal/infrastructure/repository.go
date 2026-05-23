@@ -3,12 +3,12 @@ package infrastructure
 import (
 	"context"
 	"database/sql"
+	"errors"
 	"fmt"
 	"time"
 
 	"github.com/voxire/onion/internal/modules/hr_onboarding/internal/domain"
 	"github.com/voxire/onion/internal/modules/hr_onboarding/internal/infrastructure/persistence/sqlc"
-	"github.com/voxire/onion/internal/platform/database/dbclient"
 )
 
 type Repository struct {
@@ -16,8 +16,8 @@ type Repository struct {
 	pool    *sql.DB
 }
 
-func NewRepository(_ context.Context) *Repository {
-	pool := dbclient.Pool()
+func NewRepository(db *sql.DB) *Repository {
+	pool := db
 	return &Repository{
 		queries: sqlc.New(pool),
 		pool:    pool,
@@ -49,7 +49,7 @@ func (r *Repository) GetTemplate(ctx context.Context, ownerID, id int64) (*domai
 		ID:      id,
 	})
 	if err != nil {
-		if err == sql.ErrNoRows {
+		if errors.Is(err, sql.ErrNoRows) {
 			return nil, domain.ErrTemplateNotFound
 		}
 		return nil, err
@@ -224,7 +224,7 @@ func (r *Repository) GetEmployeeChecklist(ctx context.Context, ownerID, employee
 		ID:         checklistID,
 	})
 	if err != nil {
-		if err == sql.ErrNoRows {
+		if errors.Is(err, sql.ErrNoRows) {
 			return nil, domain.ErrChecklistNotFound
 		}
 		return nil, err
@@ -304,7 +304,7 @@ func (r *Repository) GetChecklistItem(ctx context.Context, ownerID, itemID int64
 		ID:      itemID,
 	})
 	if err != nil {
-		if err == sql.ErrNoRows {
+		if errors.Is(err, sql.ErrNoRows) {
 			return nil, domain.ErrChecklistItemNotFound
 		}
 		return nil, err

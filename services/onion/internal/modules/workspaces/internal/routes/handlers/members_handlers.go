@@ -69,10 +69,13 @@ func toProjMemberPayload(m domain.ProjectMember) ProjectMemberPayload {
 
 func ListWorkspaceMembersRoutes() []string { return []string{"/flow/workspaces/members"} }
 
-type ListWorkspaceMembersHandler struct{ FlowService *application.Service }
-type ListWorkspaceMembersRequest struct {
-	WorkspaceID WorkspaceIDField `json:"workspace_id"`
-}
+type (
+	ListWorkspaceMembersHandler struct{ FlowService *application.Service }
+	ListWorkspaceMembersRequest struct {
+		WorkspaceID WorkspaceIDField `json:"workspace_id"`
+	}
+)
+
 type ListWorkspaceMembersResponse struct {
 	Members []WorkspaceMemberPayload `json:"members"`
 }
@@ -113,13 +116,18 @@ func (h *ListWorkspaceMembersHandler) Serve(ctx context.Context, req *ListWorksp
 
 func UpdateWorkspaceMemberRoleRoutes() []string { return []string{"/flow/workspaces/member/role"} }
 
-type UpdateWorkspaceMemberRoleHandler struct{ FlowService *application.Service }
-type UpdateWorkspaceMemberRoleRequest struct {
-	WorkspaceID JSONID `json:"workspace_id"`
-	UserID      JSONID `json:"user_id"`
-	Role        string `json:"role"`
+type (
+	UpdateWorkspaceMemberRoleHandler struct{ FlowService *application.Service }
+	UpdateWorkspaceMemberRoleRequest struct {
+		WorkspaceID JSONID `json:"workspace_id"`
+		UserID      JSONID `json:"user_id"`
+		Role        string `json:"role"`
+	}
+)
+
+type UpdateWorkspaceMemberRoleResponse struct {
+	Message string `json:"message"`
 }
-type UpdateWorkspaceMemberRoleResponse struct{ Message string `json:"message"` }
 
 func (h *UpdateWorkspaceMemberRoleHandler) Validate(_ context.Context, req *UpdateWorkspaceMemberRoleRequest) *errorModels.ServerError {
 	if req.WorkspaceID.IsZero() {
@@ -155,10 +163,13 @@ func (h *UpdateWorkspaceMemberRoleHandler) Serve(ctx context.Context, req *Updat
 
 func ListProjectMembersRoutes() []string { return []string{"/flow/projects/members"} }
 
-type ListProjectMembersHandler struct{ FlowService *application.Service }
-type ListProjectMembersRequest struct {
-	ProjectID JSONID `json:"project_id"`
-}
+type (
+	ListProjectMembersHandler struct{ FlowService *application.Service }
+	ListProjectMembersRequest struct {
+		ProjectID JSONID `json:"project_id"`
+	}
+)
+
 type ListProjectMembersResponse struct {
 	Members []ProjectMemberPayload `json:"members"`
 }
@@ -193,13 +204,18 @@ func (h *ListProjectMembersHandler) Serve(ctx context.Context, req *ListProjectM
 
 func AddProjectMemberRoutes() []string { return []string{"/flow/projects/member"} }
 
-type AddProjectMemberHandler struct{ FlowService *application.Service }
-type AddProjectMemberRequest struct {
-	ProjectID JSONID `json:"project_id"`
-	UserID    JSONID `json:"user_id"`
-	Role      string `json:"role"`
+type (
+	AddProjectMemberHandler struct{ FlowService *application.Service }
+	AddProjectMemberRequest struct {
+		ProjectID JSONID `json:"project_id"`
+		UserID    JSONID `json:"user_id"`
+		Role      string `json:"role"`
+	}
+)
+
+type AddProjectMemberResponse struct {
+	Message string `json:"message"`
 }
-type AddProjectMemberResponse struct{ Message string `json:"message"` }
 
 func (h *AddProjectMemberHandler) Validate(_ context.Context, req *AddProjectMemberRequest) *errorModels.ServerError {
 	if req.ProjectID.IsZero() {
@@ -234,12 +250,17 @@ func (h *AddProjectMemberHandler) Serve(ctx context.Context, req *AddProjectMemb
 
 func RemoveProjectMemberRoutes() []string { return []string{"/flow/projects/member"} }
 
-type RemoveProjectMemberHandler struct{ FlowService *application.Service }
-type RemoveProjectMemberRequest struct {
-	ProjectID JSONID `json:"project_id"`
-	UserID    JSONID `json:"user_id"`
+type (
+	RemoveProjectMemberHandler struct{ FlowService *application.Service }
+	RemoveProjectMemberRequest struct {
+		ProjectID JSONID `json:"project_id"`
+		UserID    JSONID `json:"user_id"`
+	}
+)
+
+type RemoveProjectMemberResponse struct {
+	Message string `json:"message"`
 }
-type RemoveProjectMemberResponse struct{ Message string `json:"message"` }
 
 func (h *RemoveProjectMemberHandler) Validate(_ context.Context, req *RemoveProjectMemberRequest) *errorModels.ServerError {
 	if req.ProjectID.IsZero() {
@@ -271,13 +292,18 @@ func (h *RemoveProjectMemberHandler) Serve(ctx context.Context, req *RemoveProje
 
 func UpdateProjectMemberRoleRoutes() []string { return []string{"/flow/projects/member/role"} }
 
-type UpdateProjectMemberRoleHandler struct{ FlowService *application.Service }
-type UpdateProjectMemberRoleRequest struct {
-	ProjectID JSONID `json:"project_id"`
-	UserID    JSONID `json:"user_id"`
-	Role      string `json:"role"`
+type (
+	UpdateProjectMemberRoleHandler struct{ FlowService *application.Service }
+	UpdateProjectMemberRoleRequest struct {
+		ProjectID JSONID `json:"project_id"`
+		UserID    JSONID `json:"user_id"`
+		Role      string `json:"role"`
+	}
+)
+
+type UpdateProjectMemberRoleResponse struct {
+	Message string `json:"message"`
 }
-type UpdateProjectMemberRoleResponse struct{ Message string `json:"message"` }
 
 func (h *UpdateProjectMemberRoleHandler) Validate(_ context.Context, req *UpdateProjectMemberRoleRequest) *errorModels.ServerError {
 	if req.ProjectID.IsZero() {
@@ -313,12 +339,17 @@ func (h *UpdateProjectMemberRoleHandler) Serve(ctx context.Context, req *UpdateP
 
 func TransferProjectOwnershipRoutes() []string { return []string{"/flow/projects/transfer"} }
 
-type TransferProjectOwnershipHandler struct{ FlowService *application.Service }
-type TransferProjectOwnershipRequest struct {
-	ProjectID  JSONID `json:"project_id"`
-	NewOwnerID JSONID `json:"new_owner_id"`
+type (
+	TransferProjectOwnershipHandler struct{ FlowService *application.Service }
+	TransferProjectOwnershipRequest struct {
+		ProjectID  JSONID `json:"project_id"`
+		NewOwnerID JSONID `json:"new_owner_id"`
+	}
+)
+
+type TransferProjectOwnershipResponse struct {
+	Message string `json:"message"`
 }
-type TransferProjectOwnershipResponse struct{ Message string `json:"message"` }
 
 func (h *TransferProjectOwnershipHandler) Validate(_ context.Context, req *TransferProjectOwnershipRequest) *errorModels.ServerError {
 	if req.ProjectID.IsZero() {
@@ -352,13 +383,18 @@ func (h *TransferProjectOwnershipHandler) Serve(ctx context.Context, req *Transf
 
 func InviteProjectMemberByEmailRoutes() []string { return []string{"/flow/projects/member/invite"} }
 
-type InviteProjectMemberByEmailHandler struct{ FlowService *application.Service }
-type InviteProjectMemberByEmailRequest struct {
-	ProjectID JSONID `json:"project_id"`
-	Email     string `json:"email"`
-	Role      string `json:"role"`
+type (
+	InviteProjectMemberByEmailHandler struct{ FlowService *application.Service }
+	InviteProjectMemberByEmailRequest struct {
+		ProjectID JSONID `json:"project_id"`
+		Email     string `json:"email"`
+		Role      string `json:"role"`
+	}
+)
+
+type InviteProjectMemberByEmailResponse struct {
+	Message string `json:"message"`
 }
-type InviteProjectMemberByEmailResponse struct{ Message string `json:"message"` }
 
 func (h *InviteProjectMemberByEmailHandler) Validate(_ context.Context, req *InviteProjectMemberByEmailRequest) *errorModels.ServerError {
 	if req.ProjectID.IsZero() {

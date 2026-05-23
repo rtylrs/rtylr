@@ -2,60 +2,101 @@ package application
 
 import (
 	"context"
+	"database/sql"
 	"fmt"
 	"time"
 
 	"github.com/voxire/onion/internal/modules/customers/internal/domain"
 	"github.com/voxire/onion/internal/modules/customers/internal/infrastructure"
 	"github.com/voxire/onion/internal/platform/cache/cacher"
+	cacheKeys "github.com/voxire/onion/internal/platform/cache/keys"
 	"github.com/voxire/onion/internal/platform/logger"
 )
 
 const (
 	dashboardCacheTTL = 5 * time.Minute
 	loyaltyCacheTTL   = 30 * time.Minute
+	customerCacheTTL  = 2 * time.Minute
 )
+
+// invalidateCustomerScope wipes every customer-related cache entry for the
+// owner. Called by every mutation (create/update/delete/loyalty change).
+func invalidateCustomerScope(ctx context.Context, ownerID int64) {
+	if cache := cacher.GetRedisCache(); cache != nil {
+		cache.DeleteByPattern(ctx, cacheKeys.CustomerPrefix(ownerID))
+	}
+}
 
 type Service struct {
 	repo *infrastructure.Repository
 }
 
-func NewService(ctx context.Context) *Service {
+func NewService(_ context.Context, db *sql.DB) *Service {
 	return &Service{
-		repo: infrastructure.NewRepository(ctx),
+		repo: infrastructure.NewRepository(db),
 	}
 }
 
 // ─── Customers ────────────────────────────────────────────────────────────────
 
 func (s *Service) ListCustomers(ctx context.Context, filter domain.CustomerListFilter) (domain.CustomerListResult, error) {
-	customers, total, err := s.repo.ListCustomers(ctx, filter)
-	if err != nil {
-		return domain.CustomerListResult{}, err
-	}
-
-	return domain.CustomerListResult{
-		Customers: customers,
-		Total:     total,
-		Page:      filter.Page,
-		PageSize:  filter.PageSize,
-	}, nil
+	key := fmt.Sprintf(
+		"%s|s=%s|t=%s|tag=%s|p=%d|ps=%d",
+		cacheKeys.CustomersList(filter.OwnerID),
+		filter.Search, filter.Tier, filter.Tag, filter.Page, filter.PageSize,
+	)
+	return cacher.Of[domain.CustomerListResult]().GetOrComputeSingle(
+		ctx,
+		key,
+		func(ctx context.Context) (domain.CustomerListResult, error) {
+			customers, total, err := s.repo.ListCustomers(ctx, filter)
+			if err != nil {
+				return domain.CustomerListResult{}, err
+			}
+			return domain.CustomerListResult{
+				Customers: customers,
+				Total:     total,
+				Page:      filter.Page,
+				PageSize:  filter.PageSize,
+			}, nil
+		},
+		cacher.WithExpiry(ctx, customerCacheTTL),
+	)
 }
 
 func (s *Service) GetCustomer(ctx context.Context, ownerID, customerID int64) (domain.Customer, error) {
-	return s.repo.GetCustomerByID(ctx, ownerID, customerID)
+	return cacher.Of[domain.Customer]().GetOrComputeSingle(
+		ctx,
+		cacheKeys.Customer(ownerID, customerID),
+		func(ctx context.Context) (domain.Customer, error) {
+			return s.repo.GetCustomerByID(ctx, ownerID, customerID)
+		},
+		cacher.WithExpiry(ctx, customerCacheTTL),
+	)
 }
 
 func (s *Service) CreateCustomer(ctx context.Context, input domain.CustomerInput) (int64, error) {
-	return s.repo.CreateCustomer(ctx, input)
+	id, err := s.repo.CreateCustomer(ctx, input)
+	if err == nil {
+		invalidateCustomerScope(ctx, input.OwnerID)
+	}
+	return id, err
 }
 
 func (s *Service) UpdateCustomer(ctx context.Context, input domain.CustomerUpdateInput) error {
-	return s.repo.UpdateCustomer(ctx, input)
+	if err := s.repo.UpdateCustomer(ctx, input); err != nil {
+		return err
+	}
+	invalidateCustomerScope(ctx, input.OwnerID)
+	return nil
 }
 
 func (s *Service) DeleteCustomer(ctx context.Context, ownerID, customerID int64) error {
-	return s.repo.DeleteCustomer(ctx, ownerID, customerID)
+	if err := s.repo.DeleteCustomer(ctx, ownerID, customerID); err != nil {
+		return err
+	}
+	invalidateCustomerScope(ctx, ownerID)
+	return nil
 }
 
 func (s *Service) RecordVisit(ctx context.Context, input domain.RecordVisitInput) error {

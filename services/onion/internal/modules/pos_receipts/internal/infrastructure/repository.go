@@ -9,7 +9,6 @@ import (
 
 	"github.com/voxire/onion/internal/modules/pos_receipts/internal/domain"
 	"github.com/voxire/onion/internal/modules/pos_receipts/internal/infrastructure/persistence/sqlc"
-	"github.com/voxire/onion/internal/platform/database/dbclient"
 	"github.com/voxire/onion/internal/platform/logger"
 )
 
@@ -18,8 +17,8 @@ type Repository struct {
 	pool    *sql.DB
 }
 
-func NewRepository(_ context.Context) *Repository {
-	pool := dbclient.Pool()
+func NewRepository(db *sql.DB) *Repository {
+	pool := db
 	return &Repository{
 		queries: sqlc.New(pool),
 		pool:    pool,
@@ -31,8 +30,8 @@ func (r *Repository) List(ctx context.Context, ownerID int64, dateFrom, dateTo s
 
 	if dateFrom != "" && dateTo != "" {
 		rows, err := r.queries.ListReceiptsWithDateRange(ctx, sqlc.ListReceiptsWithDateRangeParams{
-			OwnerID: ownerID,
-			PaidAt:  sql.NullTime{Time: parseTime(dateFrom), Valid: true},
+			OwnerID:  ownerID,
+			PaidAt:   sql.NullTime{Time: parseTime(dateFrom), Valid: true},
 			PaidAt_2: sql.NullTime{Time: parseTime(dateTo), Valid: true},
 		})
 		if err != nil {
@@ -121,5 +120,5 @@ func decimalToFloat(s string) float64 {
 
 func parseTime(s string) (t time.Time) {
 	t, _ = time.Parse("2006-01-02", s)
-	return
+	return t
 }

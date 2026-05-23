@@ -41,7 +41,7 @@ func (h *ApproveLeaveHandler) Serve(ctx context.Context, req *ApproveLeaveReques
 
 	var err error
 	if req.Approved {
-		err = h.Service.ApproveLeave(ctx, device.User.UserID, req.RequestID, device.User.UserID)
+		err = h.Service.ApproveLeave(ctx, device.User.UserID, req.RequestID)
 	} else {
 		err = h.Service.RejectLeave(ctx, device.User.UserID, req.RequestID, req.RejectionReason)
 	}

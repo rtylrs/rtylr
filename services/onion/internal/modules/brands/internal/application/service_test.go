@@ -24,16 +24,19 @@ type mockRepo struct {
 func (m *mockRepo) ListBrands(_ context.Context, _ int64) ([]domain.Brand, error) {
 	return nil, nil
 }
+
 func (m *mockRepo) CreateBrand(_ context.Context, _ int64, input domain.BrandInput) (int64, error) {
 	m.createGot = input
 	return m.createID, m.createErr
 }
+
 func (m *mockRepo) UpdateBrand(_ context.Context, owner, id int64, input domain.BrandInput) error {
 	m.updateGot.owner = owner
 	m.updateGot.id = id
 	m.updateGot.input = input
 	return m.updateErr
 }
+
 func (m *mockRepo) DeleteBrand(_ context.Context, owner, id int64) error {
 	m.deleteGot.owner = owner
 	m.deleteGot.id = id

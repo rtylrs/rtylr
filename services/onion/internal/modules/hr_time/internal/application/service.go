@@ -2,13 +2,28 @@ package application
 
 import (
 	"context"
+	"database/sql"
 	"errors"
+	"fmt"
 	"time"
 
 	"github.com/voxire/onion/internal/modules/hr_time/internal/domain"
 	"github.com/voxire/onion/internal/modules/hr_time/internal/infrastructure"
+	"github.com/voxire/onion/internal/platform/cache/cacher"
+	cacheKeys "github.com/voxire/onion/internal/platform/cache/keys"
 	"github.com/voxire/onion/internal/platform/logger"
 )
+
+const (
+	hrTimeScope = "hr_time"
+	hrTimeTTL   = 2 * time.Minute
+)
+
+func invalidateHRTimeScope(ctx context.Context, ownerID int64) {
+	if cache := cacher.GetRedisCache(); cache != nil {
+		cache.DeleteByPattern(ctx, cacheKeys.ScopedPrefix(hrTimeScope, ownerID))
+	}
+}
 
 type Service struct {
 	repo             *infrastructure.Repository
@@ -16,9 +31,9 @@ type Service struct {
 	flowReader       domain.FlowTaskReader
 }
 
-func NewService(ctx context.Context, approvalProvider domain.ApprovalChainProvider, flowReader domain.FlowTaskReader) *Service {
+func NewService(_ context.Context, db *sql.DB, approvalProvider domain.ApprovalChainProvider, flowReader domain.FlowTaskReader) *Service {
 	return &Service{
-		repo:             infrastructure.NewRepository(ctx),
+		repo:             infrastructure.NewRepository(db),
 		approvalProvider: approvalProvider,
 		flowReader:       flowReader,
 	}
@@ -46,18 +61,30 @@ func (s *Service) CreateTimeEntry(ctx context.Context, ownerID int64, entry doma
 		entry.Source = "manual"
 	}
 
-	return s.repo.CreateTimeEntry(ctx, ownerID, entry)
+	rec, err := s.repo.CreateTimeEntry(ctx, ownerID, entry)
+	if err == nil {
+		invalidateHRTimeScope(ctx, ownerID)
+	}
+	return rec, err
 }
 
 func (s *Service) UpdateTimeEntry(ctx context.Context, ownerID int64, entry domain.TimeEntryRecord) (*domain.TimeEntryRecord, error) {
 	if entry.DurationMinutes <= 0 {
 		return nil, domain.ErrInvalidDuration
 	}
-	return s.repo.UpdateTimeEntry(ctx, ownerID, entry)
+	rec, err := s.repo.UpdateTimeEntry(ctx, ownerID, entry)
+	if err == nil {
+		invalidateHRTimeScope(ctx, ownerID)
+	}
+	return rec, err
 }
 
 func (s *Service) DeleteTimeEntry(ctx context.Context, ownerID, entryID int64) error {
-	return s.repo.DeleteTimeEntry(ctx, ownerID, entryID)
+	if err := s.repo.DeleteTimeEntry(ctx, ownerID, entryID); err != nil {
+		return err
+	}
+	invalidateHRTimeScope(ctx, ownerID)
+	return nil
 }
 
 func (s *Service) ListTimeEntries(ctx context.Context, ownerID int64, params domain.ListTimeEntriesParams) ([]domain.TimeEntryRecord, int64, error) {
@@ -67,7 +94,19 @@ func (s *Service) ListTimeEntries(ctx context.Context, ownerID int64, params dom
 	if params.Limit > 100 {
 		params.Limit = 100
 	}
-	return s.repo.ListTimeEntries(ctx, ownerID, params)
+	type lr struct {
+		Items []domain.TimeEntryRecord
+		Total int64
+	}
+	key := cacheKeys.Scoped(hrTimeScope, ownerID, fmt.Sprintf("entries|l=%d|o=%d|e=%d", params.Limit, params.Offset, params.EmployeeID))
+	res, err := cacher.Of[lr]().GetOrComputeSingle(ctx, key,
+		func(ctx context.Context) (lr, error) {
+			items, total, err := s.repo.ListTimeEntries(ctx, ownerID, params)
+			return lr{Items: items, Total: total}, err
+		},
+		cacher.WithExpiry(ctx, hrTimeTTL),
+	)
+	return res.Items, res.Total, err
 }
 
 // --- Timesheets ---
@@ -81,12 +120,16 @@ func (s *Service) GetOrCreateTimesheet(ctx context.Context, ownerID, employeeID 
 		return ts, nil
 	}
 
-	return s.repo.UpsertTimesheet(ctx, ownerID, domain.TimesheetRecord{
+	rec, err := s.repo.UpsertTimesheet(ctx, ownerID, domain.TimesheetRecord{
 		EmployeeID:  employeeID,
 		PeriodStart: periodStart,
 		PeriodEnd:   periodEnd,
 		Status:      "draft",
 	})
+	if err == nil {
+		invalidateHRTimeScope(ctx, ownerID)
+	}
+	return rec, err
 }
 
 func (s *Service) GetTimesheetForPeriod(ctx context.Context, ownerID, employeeID int64, periodStart string) (*domain.TimesheetRecord, error) {
@@ -101,7 +144,13 @@ func (s *Service) GetTimesheetForPeriod(ctx context.Context, ownerID, employeeID
 }
 
 func (s *Service) GetTimesheet(ctx context.Context, ownerID, timesheetID int64) (*domain.TimesheetRecord, error) {
-	return s.repo.GetTimesheet(ctx, ownerID, timesheetID)
+	key := cacheKeys.Scoped(hrTimeScope, ownerID, fmt.Sprintf("ts=%d", timesheetID))
+	return cacher.Of[*domain.TimesheetRecord]().GetOrComputeSingle(ctx, key,
+		func(ctx context.Context) (*domain.TimesheetRecord, error) {
+			return s.repo.GetTimesheet(ctx, ownerID, timesheetID)
+		},
+		cacher.WithExpiry(ctx, hrTimeTTL),
+	)
 }
 
 func (s *Service) ListTimesheets(ctx context.Context, ownerID int64, params domain.ListTimesheetsParams) ([]domain.TimesheetRecord, int64, error) {
@@ -111,7 +160,19 @@ func (s *Service) ListTimesheets(ctx context.Context, ownerID int64, params doma
 	if params.Limit > 100 {
 		params.Limit = 100
 	}
-	return s.repo.ListTimesheets(ctx, ownerID, params)
+	type lr struct {
+		Items []domain.TimesheetRecord
+		Total int64
+	}
+	key := cacheKeys.Scoped(hrTimeScope, ownerID, fmt.Sprintf("ts_list|e=%d|l=%d|o=%d", params.EmployeeID, params.Limit, params.Offset))
+	res, err := cacher.Of[lr]().GetOrComputeSingle(ctx, key,
+		func(ctx context.Context) (lr, error) {
+			items, total, err := s.repo.ListTimesheets(ctx, ownerID, params)
+			return lr{Items: items, Total: total}, err
+		},
+		cacher.WithExpiry(ctx, hrTimeTTL),
+	)
+	return res.Items, res.Total, err
 }
 
 func (s *Service) SubmitTimesheet(ctx context.Context, ownerID, timesheetID int64) (*domain.TimesheetRecord, error) {
@@ -123,7 +184,11 @@ func (s *Service) SubmitTimesheet(ctx context.Context, ownerID, timesheetID int6
 		return nil, domain.ErrTimesheetAlreadySubmitted
 	}
 
-	return s.repo.SubmitTimesheet(ctx, ownerID, timesheetID)
+	rec, err := s.repo.SubmitTimesheet(ctx, ownerID, timesheetID)
+	if err == nil {
+		invalidateHRTimeScope(ctx, ownerID)
+	}
+	return rec, err
 }
 
 func (s *Service) ApproveTimesheet(ctx context.Context, ownerID, timesheetID, approverID int64) (*domain.TimesheetRecord, error) {
@@ -155,14 +220,24 @@ func (s *Service) ApproveTimesheet(ctx context.Context, ownerID, timesheetID, ap
 			logger.Ctx(ctx).Error("failed to record final approval action", logger.Any("owner_id", ownerID), logger.Error(lockErr))
 		}
 
-		return s.repo.GetTimesheet(ctx, ownerID, timesheetID)
+		rec, err := s.repo.GetTimesheet(ctx, ownerID, timesheetID)
+		invalidateHRTimeScope(ctx, ownerID)
+		return rec, err
 	}
 
-	return s.repo.AdvanceApprovalLevel(ctx, ownerID, timesheetID, approverID)
+	rec, err := s.repo.AdvanceApprovalLevel(ctx, ownerID, timesheetID, approverID)
+	if err == nil {
+		invalidateHRTimeScope(ctx, ownerID)
+	}
+	return rec, err
 }
 
 func (s *Service) RejectTimesheet(ctx context.Context, ownerID, timesheetID int64, reason string) (*domain.TimesheetRecord, error) {
-	return s.repo.RejectTimesheet(ctx, ownerID, timesheetID, reason)
+	rec, err := s.repo.RejectTimesheet(ctx, ownerID, timesheetID, reason)
+	if err == nil {
+		invalidateHRTimeScope(ctx, ownerID)
+	}
+	return rec, err
 }
 
 // --- Flow Import ---

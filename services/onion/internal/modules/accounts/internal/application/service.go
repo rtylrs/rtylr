@@ -2,9 +2,18 @@ package application
 
 import (
 	"context"
+	"database/sql"
+	"time"
 
 	"github.com/voxire/onion/internal/modules/accounts/internal/domain"
 	"github.com/voxire/onion/internal/modules/accounts/internal/infrastructure"
+	"github.com/voxire/onion/internal/platform/cache/cacher"
+	cacheKeys "github.com/voxire/onion/internal/platform/cache/keys"
+)
+
+const (
+	accountsScope = "accounts"
+	accountsTTL   = 10 * time.Minute
 )
 
 type repository interface {
@@ -19,31 +28,62 @@ type Service struct {
 	repo repository
 }
 
-func NewService(ctx context.Context) *Service {
-	return &Service{repo: infrastructure.NewRepository(ctx)}
+func NewService(_ context.Context, db *sql.DB) *Service {
+	return &Service{repo: infrastructure.NewRepository(db)}
+}
+
+func invalidateAccountsScope(ctx context.Context, ownerID int64) {
+	if cache := cacher.GetRedisCache(); cache != nil {
+		cache.DeleteByPattern(ctx, cacheKeys.ScopedPrefix(accountsScope, ownerID))
+	}
 }
 
 func (s *Service) List(ctx context.Context, ownerID int64) ([]domain.Account, error) {
-	return s.repo.List(ctx, ownerID)
+	return cacher.Of[[]domain.Account]().GetOrComputeSingle(ctx,
+		cacheKeys.Scoped(accountsScope, ownerID, "list"),
+		func(ctx context.Context) ([]domain.Account, error) {
+			return s.repo.List(ctx, ownerID)
+		},
+		cacher.WithExpiry(ctx, accountsTTL),
+	)
 }
 
 func (s *Service) Create(ctx context.Context, ownerID int64, input domain.AccountInput) (int64, error) {
-	return s.repo.Create(ctx, ownerID, input)
+	id, err := s.repo.Create(ctx, ownerID, input)
+	if err != nil {
+		return 0, err
+	}
+	invalidateAccountsScope(ctx, ownerID)
+	return id, nil
 }
 
 func (s *Service) Update(ctx context.Context, ownerID, id int64, input domain.AccountInput) error {
-	return s.repo.Update(ctx, ownerID, id, input)
+	if err := s.repo.Update(ctx, ownerID, id, input); err != nil {
+		return err
+	}
+	invalidateAccountsScope(ctx, ownerID)
+	return nil
 }
 
 func (s *Service) Delete(ctx context.Context, ownerID, id int64) error {
-	return s.repo.Delete(ctx, ownerID, id)
+	if err := s.repo.Delete(ctx, ownerID, id); err != nil {
+		return err
+	}
+	invalidateAccountsScope(ctx, ownerID)
+	return nil
 }
 
-// ChartOfAccounts returns the owner's accounts arranged as a tree keyed by
-// parent_id. Rows with NULL parent_id (or whose parent is missing/belongs to
-// another owner) are returned as top-level nodes, so orphaned entries stay
-// visible instead of being silently dropped.
 func (s *Service) ChartOfAccounts(ctx context.Context, ownerID int64) ([]*domain.AccountTreeNode, error) {
+	return cacher.Of[[]*domain.AccountTreeNode]().GetOrComputeSingle(ctx,
+		cacheKeys.Scoped(accountsScope, ownerID, "tree"),
+		func(ctx context.Context) ([]*domain.AccountTreeNode, error) {
+			return s.buildChartOfAccounts(ctx, ownerID)
+		},
+		cacher.WithExpiry(ctx, accountsTTL),
+	)
+}
+
+func (s *Service) buildChartOfAccounts(ctx context.Context, ownerID int64) ([]*domain.AccountTreeNode, error) {
 	accounts, err := s.repo.ListForTree(ctx, ownerID)
 	if err != nil {
 		return nil, err
@@ -69,8 +109,8 @@ func (s *Service) ChartOfAccounts(ctx context.Context, ownerID int64) ([]*domain
 		}
 		parent, ok := nodes[a.ParentID]
 		if !ok {
-			// Orphaned: parent missing (deleted or cross-owner). Surface as
-			// a root so the frontend doesn't silently lose the account.
+			// Orphaned: parent missing or cross-owner. Surface as root so
+			// the frontend doesn't silently lose it.
 			roots = append(roots, node)
 			continue
 		}

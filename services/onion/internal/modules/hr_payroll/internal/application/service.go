@@ -2,12 +2,27 @@ package application
 
 import (
 	"context"
+	"database/sql"
+	"fmt"
 	"time"
 
 	"github.com/voxire/onion/internal/modules/hr_payroll/internal/domain"
 	"github.com/voxire/onion/internal/modules/hr_payroll/internal/infrastructure"
+	"github.com/voxire/onion/internal/platform/cache/cacher"
+	cacheKeys "github.com/voxire/onion/internal/platform/cache/keys"
 	"github.com/voxire/onion/internal/platform/logger"
 )
+
+const (
+	hrPayrollScope = "hr_payroll"
+	hrPayrollTTL   = 5 * time.Minute
+)
+
+func invalidateHRPayrollScope(ctx context.Context, ownerID int64) {
+	if cache := cacher.GetRedisCache(); cache != nil {
+		cache.DeleteByPattern(ctx, cacheKeys.ScopedPrefix(hrPayrollScope, ownerID))
+	}
+}
 
 type Service struct {
 	repo             *infrastructure.Repository
@@ -16,9 +31,9 @@ type Service struct {
 	notifier         domain.NotificationDispatcher
 }
 
-func NewService(ctx context.Context, approvalProvider domain.ApprovalChainProvider) *Service {
+func NewService(_ context.Context, db *sql.DB, approvalProvider domain.ApprovalChainProvider) *Service {
 	return &Service{
-		repo:             infrastructure.NewRepository(ctx),
+		repo:             infrastructure.NewRepository(db),
 		approvalProvider: approvalProvider,
 		financePoster:    noopFinancePoster{},
 		notifier:         noopNotifier{},
@@ -64,11 +79,17 @@ func (noopNotifier) Dispatch(ctx context.Context, event domain.NotificationEvent
 }
 
 func (s *Service) GetPayrollConfig(ctx context.Context, ownerID int64) (*domain.PayrollConfigRecord, error) {
-	cfg, err := s.repo.GetPayrollConfig(ctx, ownerID)
-	if err != nil {
-		return nil, err
-	}
-	return cfg, nil
+	return cacher.Of[*domain.PayrollConfigRecord]().GetOrComputeSingle(ctx,
+		cacheKeys.Scoped(hrPayrollScope, ownerID, "config"),
+		func(ctx context.Context) (*domain.PayrollConfigRecord, error) {
+			cfg, err := s.repo.GetPayrollConfig(ctx, ownerID)
+			if err != nil {
+				return nil, err
+			}
+			return cfg, nil
+		},
+		cacher.WithExpiry(ctx, hrPayrollTTL),
+	)
 }
 
 func (s *Service) UpsertPayrollConfig(ctx context.Context, ownerID int64, cfg domain.PayrollConfigRecord) error {
@@ -78,10 +99,12 @@ func (s *Service) UpsertPayrollConfig(ctx context.Context, ownerID int64, cfg do
 	if cfg.PayDayOfMonth <= 0 || cfg.PayDayOfMonth > 28 {
 		cfg.PayDayOfMonth = 28
 	}
+	defer invalidateHRPayrollScope(ctx, ownerID)
 	return s.repo.UpsertPayrollConfig(ctx, ownerID, cfg)
 }
 
 func (s *Service) TriggerPayrollRun(ctx context.Context, ownerID, createdBy int64, periodStart, periodEnd string) (*domain.PayrollRunRecord, []domain.PayrollEntryRecord, error) {
+	defer invalidateHRPayrollScope(ctx, ownerID)
 	startDate, err := time.Parse("2006-01-02", periodStart)
 	if err != nil {
 		return nil, nil, domain.ErrInvalidDateRange
@@ -218,6 +241,7 @@ func (s *Service) TriggerPayrollRun(ctx context.Context, ownerID, createdBy int6
 }
 
 func (s *Service) ApprovePayrollRun(ctx context.Context, ownerID, runID, approverID int64) error {
+	defer invalidateHRPayrollScope(ctx, ownerID)
 	run, err := s.repo.GetPayrollRun(ctx, ownerID, runID)
 	if err != nil {
 		return err
@@ -241,6 +265,7 @@ func (s *Service) ApprovePayrollRun(ctx context.Context, ownerID, runID, approve
 }
 
 func (s *Service) ExportPayrollToFinance(ctx context.Context, ownerID, runID int64) error {
+	defer invalidateHRPayrollScope(ctx, ownerID)
 	run, err := s.repo.GetPayrollRun(ctx, ownerID, runID)
 	if err != nil {
 		return err
@@ -316,7 +341,19 @@ func (s *Service) ListPayrollRuns(ctx context.Context, ownerID int64, params dom
 	if params.Limit > 100 {
 		params.Limit = 100
 	}
-	return s.repo.ListPayrollRuns(ctx, ownerID, params)
+	type lr struct {
+		Items []domain.PayrollRunRecord
+		Total int64
+	}
+	key := cacheKeys.Scoped(hrPayrollScope, ownerID, fmt.Sprintf("runs|l=%d|o=%d", params.Limit, params.Offset))
+	res, err := cacher.Of[lr]().GetOrComputeSingle(ctx, key,
+		func(ctx context.Context) (lr, error) {
+			items, total, err := s.repo.ListPayrollRuns(ctx, ownerID, params)
+			return lr{Items: items, Total: total}, err
+		},
+		cacher.WithExpiry(ctx, hrPayrollTTL),
+	)
+	return res.Items, res.Total, err
 }
 
 func (s *Service) GetPayrollRun(ctx context.Context, ownerID, runID int64) (*domain.PayrollRunRecord, []domain.PayrollEntryRecord, error) {

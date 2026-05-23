@@ -6,11 +6,11 @@ import (
 	"net/http"
 	"time"
 
-	authv1 "github.com/voxire/voxie/gen/go/auth/v1"
-
 	"github.com/voxire/onion/internal/modules/user/internal/application"
 	authPkg "github.com/voxire/onion/internal/platform/auth"
 	errorModels "github.com/voxire/onion/internal/platform/errors"
+	"github.com/voxire/onion/internal/platform/logger"
+	authv1 "github.com/voxire/voxie/gen/go/auth/v1"
 )
 
 func LoginRoutes() []string {
@@ -55,8 +55,9 @@ func (h *LoginHandler) Serve(ctx context.Context, req *LoginRequest) (LoginRespo
 			}
 		}
 
+		logger.Ctx(ctx).Error("login: Authenticate failed", logger.Error(err))
 		return LoginResponse{}, &errorModels.ServerError{
-			Code:    http.StatusTeapot,
+			Code:    http.StatusInternalServerError,
 			Message: "Authentication failed",
 		}
 	}
@@ -80,29 +81,33 @@ func (h *LoginHandler) Serve(ctx context.Context, req *LoginRequest) (LoginRespo
 
 	token, err := h.UserService.GenerateTokenWithPlatform(ctx, userId, platformClaims)
 	if err != nil {
+		logger.Ctx(ctx).Error("login: GenerateTokenWithPlatform failed", logger.Error(err))
 		return LoginResponse{}, &errorModels.ServerError{
-			Code:    http.StatusTeapot,
+			Code:    http.StatusInternalServerError,
 			Message: "Failed to generate authentication token",
 		}
 	}
 
 	user, err := h.UserService.GetUserByID(ctx, userId)
 	if err != nil {
+		logger.Ctx(ctx).Error("login: GetUserByID failed", logger.Error(err))
 		return LoginResponse{}, &errorModels.ServerError{
-			Code:    http.StatusTeapot,
+			Code:    http.StatusInternalServerError,
 			Message: "Failed to retrieve user information",
 		}
 	}
 
 	// Record login + run idempotent post-login hooks (non-blocking).
 	go func() {
+		defer func() {
+			if r := recover(); r != nil {
+				logger.Global().Error("goroutine panicked", logger.Any("panic", r))
+			}
+		}()
 		taskCtx, cancel := context.WithTimeout(context.WithoutCancel(ctx), 10*time.Second)
 		defer cancel()
 
-		ip := ""
-		if device := authPkg.DeviceCtx(ctx); device.User != nil {
-			ip = device.User.IP
-		}
+		ip := authPkg.DeviceCtx(ctx).IP
 		_ = h.UserService.RecordLogin(taskCtx, userId, req.Email, "email", ip, true)
 
 		if h.OnUserLogin != nil {

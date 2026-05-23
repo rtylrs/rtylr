@@ -10,10 +10,10 @@ import (
 
 // ShiftMetricsPayload is the /insights/operations/shifts response.
 type ShiftMetricsPayload struct {
-	Scheduled       int64   `json:"scheduled"`
-	Completed       int64   `json:"completed"`
-	NoShows         int64   `json:"no_shows"`
-	CompletionRate  float64 `json:"completion_rate_pct"`
+	Scheduled      int64   `json:"scheduled"`
+	Completed      int64   `json:"completed"`
+	NoShows        int64   `json:"no_shows"`
+	CompletionRate float64 `json:"completion_rate_pct"`
 }
 
 // GetShiftMetrics returns scheduled/completed counts for the window.

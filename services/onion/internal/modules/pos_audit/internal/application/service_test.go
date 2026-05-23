@@ -18,6 +18,7 @@ type mockRepo struct {
 func (m *mockRepo) List(_ context.Context, _ domain.AuditLogFilter) ([]domain.AuditLog, error) {
 	return m.list, m.listErr
 }
+
 func (m *mockRepo) Create(_ context.Context, _ domain.AuditLogInput) (int64, error) {
 	return m.createID, m.createErr
 }

@@ -63,7 +63,7 @@ func (h *InviteEmployeeHandler) Serve(ctx context.Context, req *InviteEmployeeRe
 
 	token, err := h.Service.InviteEmployee(ctx, device.User.UserID, emp)
 	if err != nil {
-		logger.Ctx(ctx).Error("failed to invite employee", logger.Any("owner_id", device.User.UserID), logger.String("email", req.Email), logger.Error(err))
+		logger.Ctx(ctx).Error("failed to invite employee", logger.Any("owner_id", device.User.UserID), logger.Error(err))
 		return InviteEmployeeResponse{}, &errorModels.ServerError{HTTPCode: http.StatusInternalServerError, Code: http.StatusInternalServerError, Message: "Failed to invite employee"}
 	}
 
@@ -81,9 +81,9 @@ type VerifyInviteRequest struct {
 }
 
 type VerifyInviteResponse struct {
-	Valid      bool   `json:"valid"`
-	EmployeeID int64  `json:"employee_id"`
-	OwnerID    int64  `json:"owner_id"`
+	Valid      bool  `json:"valid"`
+	EmployeeID int64 `json:"employee_id"`
+	OwnerID    int64 `json:"owner_id"`
 }
 
 func (h *VerifyInviteHandler) Serve(ctx context.Context, req *VerifyInviteRequest) (VerifyInviteResponse, *errorModels.ServerError) {

@@ -7,7 +7,6 @@ import (
 
 	"github.com/voxire/onion/internal/modules/pos_kds/internal/domain"
 	"github.com/voxire/onion/internal/modules/pos_kds/internal/infrastructure/persistence/sqlc"
-	"github.com/voxire/onion/internal/platform/database/dbclient"
 	"github.com/voxire/onion/internal/platform/logger"
 )
 
@@ -16,8 +15,8 @@ type Repository struct {
 	pool    *sql.DB
 }
 
-func NewRepository(_ context.Context) *Repository {
-	pool := dbclient.Pool()
+func NewRepository(db *sql.DB) *Repository {
+	pool := db
 	return &Repository{
 		queries: sqlc.New(pool),
 		pool:    pool,
@@ -89,7 +88,7 @@ func (r *Repository) UpdateItemStatus(ctx context.Context, input domain.UpdateIt
 
 // UpdateItemStatusByItemID updates a KDS item status by item id alone, resolving the
 // owning order via join. Owner-scoped to prevent cross-tenant mutation.
-func (r *Repository) UpdateItemStatusByItemID(ctx context.Context, ownerID int64, itemID int64, status string) error {
+func (r *Repository) UpdateItemStatusByItemID(ctx context.Context, ownerID, itemID int64, status string) error {
 	err := r.queries.UpdateKDSItemStatusByItemID(ctx, sqlc.UpdateKDSItemStatusByItemIDParams{
 		Status:  sqlc.NullPosOrderItemsStatus{PosOrderItemsStatus: sqlc.PosOrderItemsStatus(status), Valid: true},
 		ID:      itemID,

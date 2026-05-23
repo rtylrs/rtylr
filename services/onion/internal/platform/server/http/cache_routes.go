@@ -6,6 +6,7 @@ import (
 	"net/http"
 
 	"github.com/go-chi/chi/v5"
+
 	"github.com/voxire/onion/internal/platform/cache/invalidation"
 	"github.com/voxire/onion/internal/platform/logger"
 )
@@ -32,7 +33,14 @@ func RegisterCacheRoutes(ctx context.Context, r *chi.Mux) {
 
 		_, serverErr := handler.Serve(ctx, &req)
 		if serverErr != nil {
-			w.WriteHeader(http.StatusInternalServerError)
+			// models.ServerError only carries Code (no HTTPCode), so
+			// trust it directly when it's a valid 4xx/5xx and only
+			// fall back to 500 when Code is unset / out of range.
+			status := serverErr.Code
+			if status < 400 || status >= 600 {
+				status = http.StatusInternalServerError
+			}
+			w.WriteHeader(status)
 
 			response := map[string]interface{}{
 				"error": serverErr.Message,

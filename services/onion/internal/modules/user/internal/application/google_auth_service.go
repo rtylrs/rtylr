@@ -6,13 +6,13 @@ import (
 	"encoding/hex"
 	"errors"
 	"net/netip"
-	"os"
 	"strings"
+
+	"google.golang.org/api/idtoken"
 
 	"github.com/voxire/onion/internal/modules/user/internal/domain"
 	"github.com/voxire/onion/internal/platform/logger"
 	"github.com/voxire/onion/internal/platform/utils/passwordutils"
-	"google.golang.org/api/idtoken"
 )
 
 // GoogleAuthResult is what the handler returns to the frontend. IsNew
@@ -60,7 +60,7 @@ func (s *Service) GoogleAuth(
 	signupIP netip.Addr,
 	deviceInfo string,
 ) (*GoogleAuthResult, error) {
-	clientID := strings.TrimSpace(os.Getenv("GOOGLE_OAUTH_CLIENT_ID"))
+	clientID := strings.TrimSpace(s.googleClientID)
 	if clientID == "" {
 		return nil, ErrGoogleOAuthNotConfigured
 	}

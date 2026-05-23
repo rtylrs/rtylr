@@ -3,12 +3,12 @@ package infrastructure
 import (
 	"context"
 	"database/sql"
+	"errors"
 	"fmt"
 	"strconv"
 
 	"github.com/voxire/onion/internal/modules/pos_loyalty/internal/domain"
 	"github.com/voxire/onion/internal/modules/pos_loyalty/internal/infrastructure/persistence/sqlc"
-	"github.com/voxire/onion/internal/platform/database/dbclient"
 	"github.com/voxire/onion/internal/platform/logger"
 )
 
@@ -17,8 +17,8 @@ type Repository struct {
 	pool    *sql.DB
 }
 
-func NewRepository(_ context.Context) *Repository {
-	pool := dbclient.Pool()
+func NewRepository(db *sql.DB) *Repository {
+	pool := db
 	return &Repository{
 		queries: sqlc.New(pool),
 		pool:    pool,
@@ -28,7 +28,7 @@ func NewRepository(_ context.Context) *Repository {
 func (r *Repository) GetConfig(ctx context.Context, businessID int64) (domain.LoyaltyConfig, error) {
 	row, err := r.queries.GetLoyaltyConfig(ctx, businessID)
 	if err != nil {
-		if err == sql.ErrNoRows {
+		if errors.Is(err, sql.ErrNoRows) {
 			return domain.LoyaltyConfig{}, domain.ErrConfigNotFound
 		}
 		logger.Ctx(ctx).Error("Failed to get loyalty config", logger.Error(err))
@@ -40,7 +40,7 @@ func (r *Repository) GetConfig(ctx context.Context, businessID int64) (domain.Lo
 		IsEnabled:       row.IsEnabled.Bool,
 		PointsPerDollar: decimalToFloat(row.PointsPerDollar.String),
 		RedemptionRate:  decimalToFloat(row.RedemptionRate.String),
-		MinRedeemPoints: int32(row.MinRedeemPoints.Int32),
+		MinRedeemPoints: row.MinRedeemPoints.Int32,
 		CreatedAt:       row.CreatedAt.Time,
 		UpdatedAt:       row.UpdatedAt.Time,
 	}, nil

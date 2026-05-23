@@ -2,10 +2,12 @@ package handlers
 
 import (
 	"context"
+	"errors"
 	"net/http"
 	"strconv"
 
 	"github.com/go-chi/chi/v5"
+
 	"github.com/voxire/onion/internal/modules/crm_sales/internal/application"
 	"github.com/voxire/onion/internal/modules/crm_sales/internal/domain"
 	authPkg "github.com/voxire/onion/internal/platform/auth"
@@ -50,11 +52,13 @@ func (h *ListContactsHandler) Serve(ctx context.Context, req *ListContactsReques
 
 func ListLeadTouchpointsRoutes() []string { return []string{"/crm/sales/leads/{id}/touchpoints"} }
 
-type ListLeadTouchpointsHandler struct{ Service *application.Service }
-type ListLeadTouchpointsRequest struct{}
-type ListLeadTouchpointsResponse struct {
-	Touchpoints []domain.Touchpoint `json:"touchpoints"`
-}
+type (
+	ListLeadTouchpointsHandler  struct{ Service *application.Service }
+	ListLeadTouchpointsRequest  struct{}
+	ListLeadTouchpointsResponse struct {
+		Touchpoints []domain.Touchpoint `json:"touchpoints"`
+	}
+)
 
 func (h *ListLeadTouchpointsHandler) Serve(ctx context.Context, _ *ListLeadTouchpointsRequest) (ListLeadTouchpointsResponse, *errorModels.ServerError) {
 	device := authPkg.DeviceCtx(ctx)
@@ -185,7 +189,7 @@ func (h *UpdateContactHandler) Serve(ctx context.Context, req *UpdateContactRequ
 		Notes:     req.Notes,
 	})
 	if err != nil {
-		if err == domain.ErrContactNotFound {
+		if errors.Is(err, domain.ErrContactNotFound) {
 			return UpdateContactResponse{}, &errorModels.ServerError{HTTPCode: http.StatusNotFound, Code: http.StatusNotFound, Message: "Contact not found"}
 		}
 		logger.Ctx(ctx).Error("failed to update contact", logger.Any("owner_id", device.User.UserID), logger.Any("contact_id", id), logger.Error(err))
@@ -201,11 +205,13 @@ func (h *UpdateContactHandler) Serve(ctx context.Context, req *UpdateContactRequ
 
 func DeleteContactRoutes() []string { return []string{"/crm/sales/contacts/{id}"} }
 
-type DeleteContactHandler struct{ Service *application.Service }
-type DeleteContactRequest struct{}
-type DeleteContactResponse struct {
-	Success bool `json:"success"`
-}
+type (
+	DeleteContactHandler  struct{ Service *application.Service }
+	DeleteContactRequest  struct{}
+	DeleteContactResponse struct {
+		Success bool `json:"success"`
+	}
+)
 
 func (h *DeleteContactHandler) Serve(ctx context.Context, _ *DeleteContactRequest) (DeleteContactResponse, *errorModels.ServerError) {
 	device := authPkg.DeviceCtx(ctx)
@@ -220,7 +226,7 @@ func (h *DeleteContactHandler) Serve(ctx context.Context, _ *DeleteContactReques
 	}
 
 	if err := h.Service.DeleteContact(ctx, id, device.User.UserID); err != nil {
-		if err == domain.ErrContactNotFound {
+		if errors.Is(err, domain.ErrContactNotFound) {
 			return DeleteContactResponse{}, &errorModels.ServerError{HTTPCode: http.StatusNotFound, Code: http.StatusNotFound, Message: "Contact not found"}
 		}
 		logger.Ctx(ctx).Error("failed to delete contact", logger.Any("owner_id", device.User.UserID), logger.Any("contact_id", id), logger.Error(err))

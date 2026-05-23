@@ -1,8 +1,8 @@
 package domain
 
 import (
-	"github.com/voxire/onion/internal/platform/utils/convert"
 	sqlc "github.com/voxire/onion/internal/modules/careers/internal/infrastructure/persistence/sqlc"
+	"github.com/voxire/onion/internal/platform/utils/convert"
 )
 
 type Career struct {

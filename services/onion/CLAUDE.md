@@ -17,7 +17,6 @@
 
 - Feature branches are the **default**. Prefix: `feat/`, `fix/`, `chore/`, `refactor/`, `style/`
 - **Direct push to `main`** is acceptable ONLY for: single-file hotfixes or trivial config changes (e.g., a typo in an error message). Every multi-file or logic-bearing change goes through a branch.
-- Commit author is **Abed El-Fattah Amouneh** only. No `Co-Authored-By` trailers — ever.
 - **No `.md` files** in commits except `CLAUDE.md` itself.
 - **Atomic commits** — one logical unit per commit. Don't bundle unrelated changes.
 - Commit message format: short imperative phrase, no conventional prefix. `add team invite handler` not `feat: add team invite handler`.
@@ -985,7 +984,6 @@ REDIS_PASSWORD=
 
 # In-memory cache
 INMEMORY_CACHE_MAX_SIZE_MB=64
-CACHED_MARSHALLING_ENABLED=true
 
 # AI integrations (optional — echo module)
 OPENAI_API_KEY=

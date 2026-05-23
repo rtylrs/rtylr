@@ -3,13 +3,13 @@ package infrastructure
 import (
 	"context"
 	"database/sql"
+	"errors"
 	"fmt"
 	"strconv"
 	"time"
 
 	"github.com/voxire/onion/internal/modules/payroll/internal/domain"
 	"github.com/voxire/onion/internal/modules/payroll/internal/infrastructure/persistence/sqlc"
-	"github.com/voxire/onion/internal/platform/database/dbclient"
 	"github.com/voxire/onion/internal/platform/logger"
 )
 
@@ -18,8 +18,8 @@ type Repository struct {
 	pool    *sql.DB
 }
 
-func NewRepository(_ context.Context) *Repository {
-	pool := dbclient.Pool()
+func NewRepository(db *sql.DB) *Repository {
+	pool := db
 
 	return &Repository{
 		queries: sqlc.New(pool),
@@ -102,7 +102,7 @@ func (r *Repository) MarkPayrollPaid(ctx context.Context, ownerID, payrollID int
 	}
 
 	if affected == 0 {
-		return fmt.Errorf("payroll record not found or already paid")
+		return errors.New("payroll record not found or already paid")
 	}
 
 	return nil

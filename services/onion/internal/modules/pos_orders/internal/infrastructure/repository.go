@@ -3,13 +3,13 @@ package infrastructure
 import (
 	"context"
 	"database/sql"
+	"errors"
 	"fmt"
 	"strconv"
 	"time"
 
 	"github.com/voxire/onion/internal/modules/pos_orders/internal/domain"
 	"github.com/voxire/onion/internal/modules/pos_orders/internal/infrastructure/persistence/sqlc"
-	"github.com/voxire/onion/internal/platform/database/dbclient"
 	"github.com/voxire/onion/internal/platform/logger"
 )
 
@@ -18,8 +18,8 @@ type Repository struct {
 	pool    *sql.DB
 }
 
-func NewRepository(_ context.Context) *Repository {
-	pool := dbclient.Pool()
+func NewRepository(db *sql.DB) *Repository {
+	pool := db
 	return &Repository{
 		queries: sqlc.New(pool),
 		pool:    pool,
@@ -66,7 +66,7 @@ func (r *Repository) CreateLocation(ctx context.Context, ownerID int64, input do
 
 // ─── Tables ──────────────────────────────────────────────────────────────────
 
-func (r *Repository) ListTables(ctx context.Context, ownerID int64, locationID int64, status string) ([]domain.Table, error) {
+func (r *Repository) ListTables(ctx context.Context, ownerID, locationID int64, status string) ([]domain.Table, error) {
 	// ListTablesByOwner returns all tables; we filter in-memory for locationID/status
 	// since the sqlc query doesn't support optional filters.
 	rows, err := r.queries.ListTablesByOwner(ctx, ownerID)
@@ -163,7 +163,7 @@ func (r *Repository) GetCurrentOpenSession(ctx context.Context, ownerID, staffID
 		StaffID: staffID,
 	})
 	if err != nil {
-		if err == sql.ErrNoRows {
+		if errors.Is(err, sql.ErrNoRows) {
 			return nil, nil
 		}
 		logger.Ctx(ctx).Error("Failed to get current open session", logger.Error(err))
@@ -202,7 +202,7 @@ func (r *Repository) ListSessions(ctx context.Context, ownerID, locationID int64
 		args = append(args, dateTo)
 	}
 
-	query += ` ORDER BY opened_at DESC`
+	query += ` ORDER BY opened_at DESC LIMIT 500`
 
 	rows, err := r.pool.QueryContext(ctx, query, args...)
 	if err != nil {
@@ -273,14 +273,14 @@ func (r *Repository) GetSessionTotals(ctx context.Context, sessionID int64) (tot
 	row, err := r.queries.GetSessionTotals(ctx, sql.NullInt64{Int64: sessionID, Valid: true})
 	if err != nil {
 		logger.Ctx(ctx).Error("Failed to get session totals", logger.Error(err))
-		return
+		return totalSales, cashSales, cardSales, onlineSales, totalOrders, err
 	}
 	totalSales = interfaceToFloat(row.TotalSales)
 	cashSales = interfaceToFloat(row.CashSales)
 	cardSales = interfaceToFloat(row.CardSales)
 	onlineSales = interfaceToFloat(row.OnlineSales)
 	totalOrders = int(row.TotalOrders)
-	return
+	return totalSales, cashSales, cardSales, onlineSales, totalOrders, err
 }
 
 func (r *Repository) UpdateSessionTotals(ctx context.Context, sessionID int64, totalSales, cashSales, cardSales, onlineSales float64, totalOrders int) error {
@@ -305,7 +305,7 @@ func (r *Repository) GetSessionByID(ctx context.Context, ownerID, sessionID int6
 		ID:      sessionID,
 	})
 	if err != nil {
-		if err == sql.ErrNoRows {
+		if errors.Is(err, sql.ErrNoRows) {
 			return nil, domain.ErrSessionNotFound
 		}
 		logger.Ctx(ctx).Error("Failed to get session by id", logger.Error(err))
@@ -361,7 +361,7 @@ func (r *Repository) ListOrders(ctx context.Context, ownerID, sessionID int64, s
 		args = append(args, dateTo)
 	}
 
-	query += ` ORDER BY created_at DESC`
+	query += ` ORDER BY created_at DESC LIMIT 500`
 
 	rows, err := r.pool.QueryContext(ctx, query, args...)
 	if err != nil {
@@ -391,7 +391,7 @@ func (r *Repository) GetOrder(ctx context.Context, ownerID, orderID int64) (*dom
 		ID:      orderID,
 	})
 	if err != nil {
-		if err == sql.ErrNoRows {
+		if errors.Is(err, sql.ErrNoRows) {
 			return nil, domain.ErrOrderNotFound
 		}
 		logger.Ctx(ctx).Error("Failed to get pos order", logger.Error(err))
@@ -606,7 +606,7 @@ func (r *Repository) ProcessPayment(ctx context.Context, ownerID, orderID int64,
 		ID:      orderID,
 	})
 	if err != nil {
-		if err == sql.ErrNoRows {
+		if errors.Is(err, sql.ErrNoRows) {
 			return domain.ErrOrderNotFound
 		}
 		logger.Ctx(ctx).Error("Failed to get order for payment", logger.Error(err))
@@ -619,7 +619,7 @@ func (r *Repository) ProcessPayment(ctx context.Context, ownerID, orderID int64,
 		changeDue = 0
 	}
 
-	now := time.Now()
+	now := time.Now().UTC()
 
 	err = qtx.MarkOrderPaid(ctx, sqlc.MarkOrderPaidParams{
 		PaymentMethod: sqlc.NullPosOrdersPaymentMethod{PosOrdersPaymentMethod: sqlc.PosOrdersPaymentMethod(input.PaymentMethod), Valid: true},
@@ -719,7 +719,7 @@ func (r *Repository) VoidOrderItem(ctx context.Context, ownerID, orderID, itemID
 		itemID, orderID,
 	).Scan(&itemStatus); scanErr != nil {
 		_ = tx.Rollback()
-		if scanErr == sql.ErrNoRows {
+		if errors.Is(scanErr, sql.ErrNoRows) {
 			return domain.ErrOrderNotFound
 		}
 		logger.Ctx(ctx).Error("Failed to fetch order item for void", logger.Error(scanErr))
@@ -938,7 +938,7 @@ func (r *Repository) ApplyDiscount(ctx context.Context, ownerID int64, input dom
 		ID:      input.OrderID,
 	})
 	if err != nil {
-		if err == sql.ErrNoRows {
+		if errors.Is(err, sql.ErrNoRows) {
 			return domain.ErrOrderNotFound
 		}
 		return err
@@ -1097,38 +1097,6 @@ func sessionFromRow(row sqlc.PosSession) *domain.Session {
 	return s
 }
 
-func orderFromRow(row sqlc.PosOrder) domain.Order {
-	o := domain.Order{
-		ID:             row.ID,
-		OwnerID:        row.OwnerID,
-		SessionID:      row.SessionID.Int64,
-		TableID:        row.TableID.Int64,
-		LocationID:     row.LocationID.Int64,
-		OrderNumber:    row.OrderNumber,
-		Type:           domain.OrderType(row.Type.PosOrdersType),
-		Status:         domain.OrderStatus(row.Status.PosOrdersStatus),
-		CustomerID:     row.CustomerID.Int64,
-		CustomerName:   row.CustomerName.String,
-		StaffID:        row.StaffID.Int64,
-		Subtotal:       decimalToFloat(row.Subtotal.String),
-		DiscountAmount: decimalToFloat(row.DiscountAmount.String),
-		TaxAmount:      decimalToFloat(row.TaxAmount.String),
-		Total:          decimalToFloat(row.Total.String),
-		PaymentMethod:  domain.PaymentMethod(row.PaymentMethod.PosOrdersPaymentMethod),
-		PaymentStatus:  domain.PaymentStatus(row.PaymentStatus.PosOrdersPaymentStatus),
-		AmountPaid:     decimalToFloat(row.AmountPaid.String),
-		ChangeDue:      decimalToFloat(row.ChangeDue.String),
-		Notes:          row.Notes.String,
-		KitchenNotes:   row.KitchenNotes.String,
-		CreatedAt:      row.CreatedAt.Time,
-		UpdatedAt:      row.UpdatedAt.Time,
-	}
-	if row.PaidAt.Valid {
-		o.PaidAt = &row.PaidAt.Time
-	}
-	return o
-}
-
 func scanOrderRow(rows *sql.Rows) (domain.Order, error) {
 	var o domain.Order
 	var paidAt sql.NullTime
@@ -1221,9 +1189,9 @@ func (r *Repository) CreatePublicOrder(ctx context.Context, ownerID int64, order
 
 	res, err := tx.ExecContext(ctx,
 		`INSERT INTO pos_orders
-		 (owner_id, order_number, type, status, customer_name, subtotal, total, payment_status, notes, created_at, updated_at)
-		 VALUES (?, ?, 'online', 'pending', ?, ?, ?, 'unpaid', ?, NOW(), NOW())`,
-		ownerID, orderNumber, nullableString(customerName), floatToDecimal(subtotal), floatToDecimal(subtotal), nullableString(notes),
+		 (owner_id, order_number, type, status, customer_name, customer_phone, subtotal, total, payment_status, notes, created_at, updated_at)
+		 VALUES (?, ?, 'online', 'pending', ?, ?, ?, ?, 'unpaid', ?, NOW(), NOW())`,
+		ownerID, orderNumber, nullableString(customerName), nullableString(customerPhone), floatToDecimal(subtotal), floatToDecimal(subtotal), nullableString(notes),
 	)
 	if err != nil {
 		logger.Ctx(ctx).Error("Failed to insert public order", logger.Error(err))
@@ -1262,7 +1230,7 @@ func (r *Repository) GetPublicOrderStatus(ctx context.Context, orderID int64) (o
 		orderID,
 	)
 	err = row.Scan(&orderNumber, &status)
-	return
+	return orderNumber, status, err
 }
 
 func nullableString(s string) interface{} {

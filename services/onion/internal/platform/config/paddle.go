@@ -10,18 +10,30 @@ const (
 )
 
 func GetPaddleAPIKey() string {
+	if GlobalConfig != nil {
+		return GlobalConfig.PaddleAPIKey
+	}
 	return os.Getenv(PaddleAPIKeyEnvVar)
 }
 
 func GetPaddleWebhookSecret() string {
+	if GlobalConfig != nil {
+		return GlobalConfig.PaddleWebhookSecret
+	}
 	return os.Getenv(PaddleWebhookSecretEnvVar)
 }
 
 func GetPaddleClientToken() string {
+	if GlobalConfig != nil {
+		return GlobalConfig.PaddleClientToken
+	}
 	return os.Getenv(PaddleClientTokenEnvVar)
 }
 
 func IsPaddleSandbox() bool {
+	if GlobalConfig != nil {
+		return GlobalConfig.PaddleSandbox
+	}
 	return os.Getenv(PaddleSandboxEnvVar) == "true"
 }
 

@@ -2,25 +2,25 @@ package domain
 
 // InsightsStats represents task velocity and completion statistics.
 type InsightsStats struct {
-	TotalTasks       int64            `json:"totalTasks"`
-	CompletedTasks   int64            `json:"completedTasks"`
-	CompletionRate   float64          `json:"completionRate"`
-	AvgCompletionDays float64         `json:"avgCompletionDays"`
-	VelocityThisWeek int64            `json:"velocityThisWeek"`
-	VelocityLastWeek int64            `json:"velocityLastWeek"`
-	OverdueCount     int64            `json:"overdueCount"`
-	TasksByStatus    map[string]int64 `json:"tasksByStatus"`
-	TasksByPriority  map[string]int64 `json:"tasksByPriority"`
+	TotalTasks        int64            `json:"totalTasks"`
+	CompletedTasks    int64            `json:"completedTasks"`
+	CompletionRate    float64          `json:"completionRate"`
+	AvgCompletionDays float64          `json:"avgCompletionDays"`
+	VelocityThisWeek  int64            `json:"velocityThisWeek"`
+	VelocityLastWeek  int64            `json:"velocityLastWeek"`
+	OverdueCount      int64            `json:"overdueCount"`
+	TasksByStatus     map[string]int64 `json:"tasksByStatus"`
+	TasksByPriority   map[string]int64 `json:"tasksByPriority"`
 }
 
 // TeamMemberWorkload represents per-member task distribution.
 type TeamMemberWorkload struct {
-	UserID         int64  `json:"userId"`
-	Name           string `json:"name"`
-	TotalTasks     int64  `json:"totalTasks"`
-	CompletedTasks int64  `json:"completedTasks"`
-	InProgressTasks int64 `json:"inProgressTasks"`
-	OverdueTasks   int64  `json:"overdueTasks"`
+	UserID          int64  `json:"userId"`
+	Name            string `json:"name"`
+	TotalTasks      int64  `json:"totalTasks"`
+	CompletedTasks  int64  `json:"completedTasks"`
+	InProgressTasks int64  `json:"inProgressTasks"`
+	OverdueTasks    int64  `json:"overdueTasks"`
 }
 
 // TeamWorkloadResult is the full team workload response.

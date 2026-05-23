@@ -2,14 +2,14 @@ package handlers
 
 import (
 	"context"
+	"errors"
 	"net/http"
-
-	finv1 "github.com/voxire/voxie/gen/go/finance/v1"
 
 	"github.com/voxire/onion/internal/modules/invoices/internal/application"
 	"github.com/voxire/onion/internal/modules/invoices/internal/domain"
 	authPkg "github.com/voxire/onion/internal/platform/auth"
 	errorModels "github.com/voxire/onion/internal/platform/errors"
+	finv1 "github.com/voxire/voxie/gen/go/finance/v1"
 )
 
 func UpdateInvoiceRoutes() []string {
@@ -107,7 +107,7 @@ func (h *UpdateInvoiceHandler) Serve(ctx context.Context, req *UpdateInvoiceRequ
 
 	inv, err := h.FinanceService.UpdateInvoice(ctx, device.User.UserID, req.ID, input)
 	if err != nil {
-		if err == domain.ErrInvoiceNotFound {
+		if errors.Is(err, domain.ErrInvoiceNotFound) {
 			return UpdateInvoiceResponse{}, &errorModels.ServerError{
 				Code:    http.StatusNotFound,
 				Message: "Invoice not found",

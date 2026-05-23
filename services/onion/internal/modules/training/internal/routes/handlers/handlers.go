@@ -30,11 +30,13 @@ func newPayload(t domain.TrainingCourse) TrainingCoursePayload {
 
 func ListRoutes() []string { return []string{"/hr/training"} }
 
-type ListHandler struct{ Service *application.Service }
-type ListRequest struct{}
-type ListResponse struct {
-	Courses []TrainingCoursePayload `json:"courses"`
-}
+type (
+	ListHandler  struct{ Service *application.Service }
+	ListRequest  struct{}
+	ListResponse struct {
+		Courses []TrainingCoursePayload `json:"courses"`
+	}
+)
 
 func (h *ListHandler) Serve(ctx context.Context, _ *ListRequest) (ListResponse, *errorModels.ServerError) {
 	device := authPkg.DeviceCtx(ctx)
@@ -54,13 +56,16 @@ func (h *ListHandler) Serve(ctx context.Context, _ *ListRequest) (ListResponse, 
 
 func CreateRoutes() []string { return []string{"/hr/training"} }
 
-type CreateHandler struct{ Service *application.Service }
-type CreateRequest struct {
-	Name          string  `json:"name"`
-	Description   string  `json:"description"`
-	DurationHours float64 `json:"duration_hours"`
-	IsRequired    bool    `json:"is_required"`
-}
+type (
+	CreateHandler struct{ Service *application.Service }
+	CreateRequest struct {
+		Name          string  `json:"name"`
+		Description   string  `json:"description"`
+		DurationHours float64 `json:"duration_hours"`
+		IsRequired    bool    `json:"is_required"`
+	}
+)
+
 type CreateResponse struct {
 	ID      int64  `json:"id"`
 	Message string `json:"message"`

@@ -19,6 +19,7 @@ type mockRepo struct {
 func (m *mockRepo) List(_ context.Context, _ int64, _, _ int) ([]domain.Customer, int, error) {
 	return m.list, m.total, m.listEr
 }
+
 func (m *mockRepo) GetByID(_ context.Context, _, _ int64) (*domain.Customer, error) {
 	return m.cust, m.getEr
 }

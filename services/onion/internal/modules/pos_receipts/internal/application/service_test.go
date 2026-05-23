@@ -18,6 +18,7 @@ type mockRepo struct {
 func (m *mockRepo) List(_ context.Context, _ int64, _, _ string) ([]domain.Receipt, error) {
 	return m.list, m.listErr
 }
+
 func (m *mockRepo) Get(_ context.Context, _, _ int64) (*domain.Receipt, error) {
 	return m.receipt, m.getErr
 }

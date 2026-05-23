@@ -10,7 +10,7 @@ import (
 // HeadcountSnapshot carries the current active headcount alongside the
 // value as-of one month ago so the service can produce a MoM delta.
 type HeadcountSnapshot struct {
-	ActiveHeadcount    int64
+	ActiveHeadcount      int64
 	HeadcountOneMonthAgo int64
 }
 

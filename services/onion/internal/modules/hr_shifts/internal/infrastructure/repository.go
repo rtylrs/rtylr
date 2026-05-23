@@ -3,11 +3,11 @@ package infrastructure
 import (
 	"context"
 	"database/sql"
+	"errors"
 	"time"
 
 	"github.com/voxire/onion/internal/modules/hr_shifts/internal/domain"
 	"github.com/voxire/onion/internal/modules/hr_shifts/internal/infrastructure/persistence/sqlc"
-	"github.com/voxire/onion/internal/platform/database/dbclient"
 	"github.com/voxire/onion/internal/platform/logger"
 )
 
@@ -16,8 +16,8 @@ type Repository struct {
 	pool    *sql.DB
 }
 
-func NewRepository(_ context.Context) *Repository {
-	pool := dbclient.Pool()
+func NewRepository(db *sql.DB) *Repository {
+	pool := db
 	return &Repository{
 		queries: sqlc.New(pool),
 		pool:    pool,
@@ -51,7 +51,7 @@ func (r *Repository) ListShifts(ctx context.Context, ownerID int64, params domai
 func (r *Repository) GetShift(ctx context.Context, ownerID, shiftID int64) (*domain.ShiftRecord, error) {
 	row, err := r.queries.GetShift(ctx, sqlc.GetShiftParams{OwnerID: ownerID, ID: shiftID})
 	if err != nil {
-		if err == sql.ErrNoRows {
+		if errors.Is(err, sql.ErrNoRows) {
 			return nil, domain.ErrShiftNotFound
 		}
 		logger.Ctx(ctx).Error("failed to get shift", logger.Any("owner_id", ownerID), logger.Any("shift_id", shiftID), logger.Error(err))

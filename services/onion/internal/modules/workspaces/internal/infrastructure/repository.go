@@ -11,7 +11,6 @@ import (
 
 	"github.com/voxire/onion/internal/modules/workspaces/internal/domain"
 	"github.com/voxire/onion/internal/modules/workspaces/internal/infrastructure/persistence/sqlc"
-	"github.com/voxire/onion/internal/platform/database/dbclient"
 	"github.com/voxire/onion/internal/platform/logger"
 )
 
@@ -20,8 +19,8 @@ type Repository struct {
 	pool    *sql.DB
 }
 
-func NewRepository(_ context.Context) *Repository {
-	pool := dbclient.Pool()
+func NewRepository(db *sql.DB) *Repository {
+	pool := db
 	return &Repository{
 		queries: sqlc.New(pool),
 		pool:    pool,
@@ -413,7 +412,7 @@ func (r *Repository) UpdateTask(ctx context.Context, input domain.UpdateTaskInpu
 	// Raw query so partial updates (e.g. title-only) don't overwrite status/priority/completed_at.
 	// COALESCE(?, col) preserves the existing value when the param is NULL.
 	// The completed_at CASE only fires when a non-NULL status is explicitly supplied.
-	_, err = dbclient.Pool().ExecContext(ctx, `
+	_, err = r.pool.ExecContext(ctx, `
 		UPDATE flow_tasks
 		SET title       = ?,
 		    description = COALESCE(?, description),
@@ -532,7 +531,7 @@ func (r *Repository) DeleteComment(ctx context.Context, commentID, userID int64)
 // before the row disappears.
 func (r *Repository) GetCommentTaskID(ctx context.Context, commentID int64) (int64, error) {
 	var taskID int64
-	err := dbclient.Pool().QueryRowContext(ctx, "SELECT task_id FROM flow_comments WHERE id = ?", commentID).Scan(&taskID)
+	err := r.pool.QueryRowContext(ctx, "SELECT task_id FROM flow_comments WHERE id = ?", commentID).Scan(&taskID)
 	if err != nil {
 		return 0, err
 	}
@@ -845,60 +844,6 @@ func marshalLabels(labels []int64) (json.RawMessage, error) {
 		return json.RawMessage("[]"), nil
 	}
 	return json.Marshal(labels)
-}
-
-func taskFromFlowTask(row sqlc.FlowTask) domain.Task {
-	t := domain.Task{
-		ID:          row.ID,
-		ProjectID:   row.ProjectID,
-		WorkspaceID: row.WorkspaceID,
-		OwnerID:     row.OwnerID,
-		Title:       row.Title,
-		Description: row.Description.String,
-		Status:      string(row.Status.FlowTasksStatus),
-		Priority:    string(row.Priority.FlowTasksPriority),
-		ReporterID:  row.ReporterID,
-		SortOrder:   int(row.SortOrder.Int32),
-		CreatedAt:   row.CreatedAt.Time,
-		UpdatedAt:   row.UpdatedAt.Time,
-	}
-
-	if row.ParentTaskID.Valid {
-		t.ParentTaskID = &row.ParentTaskID.Int64
-	}
-	if row.AssigneeID.Valid {
-		t.AssigneeID = &row.AssigneeID.Int64
-	}
-	if row.DueDate.Valid {
-		t.DueDate = &row.DueDate.Time
-	}
-	if row.StartDate.Valid {
-		t.StartDate = &row.StartDate.Time
-	}
-	if row.CompletedAt.Valid {
-		t.CompletedAt = &row.CompletedAt.Time
-	}
-	if row.EstimatedHours.Valid {
-		f, _ := strconv.ParseFloat(row.EstimatedHours.String, 64)
-		t.EstimatedHours = &f
-	}
-	if row.ActualHours.Valid {
-		f, _ := strconv.ParseFloat(row.ActualHours.String, 64)
-		t.ActualHours = &f
-	}
-	if len(row.Labels) > 0 {
-		_ = json.Unmarshal(row.Labels, &t.Labels)
-	}
-
-	return t
-}
-
-func tasksFromRows(rows []sqlc.FlowTask) []domain.Task {
-	var tasks []domain.Task
-	for _, row := range rows {
-		tasks = append(tasks, taskFromFlowTask(row))
-	}
-	return tasks
 }
 
 // enrichedTaskColumns is the column list used by every task read path.
@@ -1430,7 +1375,6 @@ func (r *Repository) LookupUserByEmail(ctx context.Context, email string) (int64
 	}
 	return id, true, nil
 }
-
 
 // ─────────────────────────────────────────────────────────────────────────────
 // Membership checks (used by realtime topic auth).

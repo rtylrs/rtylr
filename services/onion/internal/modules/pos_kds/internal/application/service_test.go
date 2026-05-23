@@ -9,18 +9,20 @@ import (
 )
 
 type mockRepo struct {
-	orders   []domain.KDSOrder
-	listErr  error
-	upErr    error
-	upIDErr  error
+	orders  []domain.KDSOrder
+	listErr error
+	upErr   error
+	upIDErr error
 }
 
 func (m *mockRepo) ListActiveOrders(_ context.Context, _ int64) ([]domain.KDSOrder, error) {
 	return m.orders, m.listErr
 }
+
 func (m *mockRepo) UpdateItemStatus(_ context.Context, _ domain.UpdateItemStatusInput) error {
 	return m.upErr
 }
+
 func (m *mockRepo) UpdateItemStatusByItemID(_ context.Context, _, _ int64, _ string) error {
 	return m.upIDErr
 }

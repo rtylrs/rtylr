@@ -1,7 +1,10 @@
 package http
 
 import (
+	"bufio"
 	"crypto/subtle"
+	"fmt"
+	"net"
 	"net/http"
 	"os"
 	"runtime"
@@ -9,6 +12,8 @@ import (
 	"strings"
 	"sync/atomic"
 	"time"
+
+	"github.com/voxire/onion/internal/platform/config"
 )
 
 // /metrics endpoint — Prometheus text format. Behind basic auth so
@@ -63,6 +68,14 @@ func (s *statusRecorder) WriteHeader(code int) {
 	s.ResponseWriter.WriteHeader(code)
 }
 
+func (s *statusRecorder) Hijack() (net.Conn, *bufio.ReadWriter, error) {
+	h, ok := s.ResponseWriter.(http.Hijacker)
+	if !ok {
+		return nil, nil, fmt.Errorf("underlying ResponseWriter does not implement http.Hijacker")
+	}
+	return h.Hijack()
+}
+
 // MetricsHandler serves the Prometheus-format scrape. Expected env:
 //
 //	METRICS_USER=rtylr-scraper
@@ -71,8 +84,14 @@ func (s *statusRecorder) WriteHeader(code int) {
 // If either is empty the endpoint returns 404 — makes the feature
 // opt-in rather than accidentally exposed on staging.
 func MetricsHandler() http.HandlerFunc {
-	user := os.Getenv("METRICS_USER")
-	pass := os.Getenv("METRICS_PASS")
+	var user, pass string
+	if config.GlobalConfig != nil {
+		user = config.GlobalConfig.MetricsUser
+		pass = config.GlobalConfig.MetricsPass
+	} else {
+		user = os.Getenv("METRICS_USER")
+		pass = os.Getenv("METRICS_PASS")
+	}
 	enabled := user != "" && pass != ""
 
 	return func(w http.ResponseWriter, r *http.Request) {

@@ -6,14 +6,14 @@ import "time"
 // Fields are additive — new counters can be appended without breaking
 // the frontend because missing fields deserialize to zero values.
 type DashboardStats struct {
-	TotalProducts   int             `json:"total_products"`
-	LowStockCount   int             `json:"low_stock_count"`
-	PendingOrders   int             `json:"pending_orders"`
-	TotalSuppliers  int             `json:"total_suppliers"`
-	InventoryValue  float64         `json:"inventory_value"`
-	LowStockItems   []LowStockItem  `json:"low_stock_items"`
-	RecentOrders    []RecentPO      `json:"recent_orders"`
-	TopCategories   []TopCategory   `json:"top_categories"`
+	TotalProducts  int            `json:"total_products"`
+	LowStockCount  int            `json:"low_stock_count"`
+	PendingOrders  int            `json:"pending_orders"`
+	TotalSuppliers int            `json:"total_suppliers"`
+	InventoryValue float64        `json:"inventory_value"`
+	LowStockItems  []LowStockItem `json:"low_stock_items"`
+	RecentOrders   []RecentPO     `json:"recent_orders"`
+	TopCategories  []TopCategory  `json:"top_categories"`
 }
 
 // LowStockItem surfaces on the dashboard sidebar. Canonical source is the
@@ -49,15 +49,15 @@ type TopCategory struct {
 // products whose stock is at or below their reorder threshold, and
 // estimates suggested quantity based on the recorded reorder_quantity.
 type ReorderSuggestion struct {
-	ProductID        int64   `json:"product_id"`
-	Name             string  `json:"name"`
-	SKU              string  `json:"sku"`
-	CurrentStock     float64 `json:"current_stock"`
-	ReorderPoint     float64 `json:"reorder_point"`
-	SuggestedQty     float64 `json:"suggested_quantity"`
-	AvgDailySales    float64 `json:"avg_daily_sales"`
-	LeadTimeDays     int     `json:"lead_time_days"`
-	Confidence       string  `json:"confidence"` // "high" | "medium" | "low"
+	ProductID     int64   `json:"product_id"`
+	Name          string  `json:"name"`
+	SKU           string  `json:"sku"`
+	CurrentStock  float64 `json:"current_stock"`
+	ReorderPoint  float64 `json:"reorder_point"`
+	SuggestedQty  float64 `json:"suggested_quantity"`
+	AvgDailySales float64 `json:"avg_daily_sales"`
+	LeadTimeDays  int     `json:"lead_time_days"`
+	Confidence    string  `json:"confidence"` // "high" | "medium" | "low"
 }
 
 // ExpiryItem is a row on the Expiry screen. Until batch tracking is

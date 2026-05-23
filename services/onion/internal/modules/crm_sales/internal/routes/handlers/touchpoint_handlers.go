@@ -2,10 +2,12 @@ package handlers
 
 import (
 	"context"
+	"errors"
 	"net/http"
 	"strconv"
 
 	"github.com/go-chi/chi/v5"
+
 	"github.com/voxire/onion/internal/modules/crm_sales/internal/application"
 	"github.com/voxire/onion/internal/modules/crm_sales/internal/domain"
 	authPkg "github.com/voxire/onion/internal/platform/auth"
@@ -69,11 +71,13 @@ func (h *CreateTouchpointHandler) Serve(ctx context.Context, req *CreateTouchpoi
 
 func DeleteTouchpointRoutes() []string { return []string{"/crm/sales/touchpoints/{id}"} }
 
-type DeleteTouchpointHandler struct{ Service *application.Service }
-type DeleteTouchpointRequest struct{}
-type DeleteTouchpointResponse struct {
-	Success bool `json:"success"`
-}
+type (
+	DeleteTouchpointHandler  struct{ Service *application.Service }
+	DeleteTouchpointRequest  struct{}
+	DeleteTouchpointResponse struct {
+		Success bool `json:"success"`
+	}
+)
 
 func (h *DeleteTouchpointHandler) Serve(ctx context.Context, _ *DeleteTouchpointRequest) (DeleteTouchpointResponse, *errorModels.ServerError) {
 	device := authPkg.DeviceCtx(ctx)
@@ -88,7 +92,7 @@ func (h *DeleteTouchpointHandler) Serve(ctx context.Context, _ *DeleteTouchpoint
 	}
 
 	if err := h.Service.DeleteTouchpoint(ctx, id, device.User.UserID); err != nil {
-		if err == domain.ErrTouchpointNotFound {
+		if errors.Is(err, domain.ErrTouchpointNotFound) {
 			return DeleteTouchpointResponse{}, &errorModels.ServerError{HTTPCode: http.StatusNotFound, Code: http.StatusNotFound, Message: "Touchpoint not found"}
 		}
 		logger.Ctx(ctx).Error("failed to delete touchpoint", logger.Any("owner_id", device.User.UserID), logger.Any("touchpoint_id", id), logger.Error(err))

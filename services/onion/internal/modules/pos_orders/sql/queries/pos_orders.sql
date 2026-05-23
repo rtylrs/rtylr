@@ -1,6 +1,6 @@
 -- name: ListLocationsByOwner :many
 SELECT id, owner_id, name, address, phone, is_active, created_at
-FROM pos_locations WHERE owner_id = ? ORDER BY name ASC;
+FROM pos_locations WHERE owner_id = ? ORDER BY name ASC LIMIT 500;
 
 -- name: CreateLocation :execresult
 INSERT INTO pos_locations (owner_id, name, address, phone) VALUES (?, ?, ?, ?);
@@ -8,7 +8,7 @@ INSERT INTO pos_locations (owner_id, name, address, phone) VALUES (?, ?, ?, ?);
 -- name: ListTablesByOwner :many
 SELECT id, owner_id, location_id, name, capacity, status,
        current_session_order_id, qr_code_url, created_at, updated_at
-FROM pos_tables WHERE owner_id = ? ORDER BY name ASC;
+FROM pos_tables WHERE owner_id = ? ORDER BY name ASC LIMIT 1000;
 
 -- name: CreatePosTable :execresult
 INSERT INTO pos_tables (owner_id, location_id, name, capacity, qr_code_url)
@@ -87,7 +87,7 @@ SELECT id, owner_id, session_id, table_id, location_id,
        terminal_id, branch_id, tip_amount, void_reason, voided_by, voided_at, exchange_order_id
 FROM pos_orders
 WHERE owner_id = ?
-ORDER BY created_at DESC;
+ORDER BY created_at DESC LIMIT 500;
 
 -- name: GetOrder :one
 SELECT id, owner_id, session_id, table_id, location_id,
@@ -228,8 +228,8 @@ SELECT COUNT(*) FROM business_addons WHERE business_id = ? AND addon_id = 'onlin
 
 -- name: CreateOnlineOrder :execresult
 INSERT INTO pos_orders
-(owner_id, order_number, type, status, customer_name, subtotal, total, payment_status, notes, kitchen_notes)
-VALUES (?, ?, 'online', 'pending', ?, ?, ?, 'unpaid', ?, ?);
+(owner_id, order_number, type, status, customer_name, customer_phone, subtotal, total, payment_status, notes, kitchen_notes)
+VALUES (?, ?, 'online', 'pending', ?, ?, ?, ?, 'unpaid', ?, ?);
 
 -- name: GetPublicOrderStatus :one
 SELECT id, order_number, status FROM pos_orders WHERE id = ? LIMIT 1;

@@ -4,6 +4,7 @@ import (
 	"context"
 
 	"github.com/go-chi/chi/v5"
+
 	"github.com/voxire/onion/internal/modules/campaigns/internal/application"
 	"github.com/voxire/onion/internal/modules/campaigns/internal/routes/handlers"
 	"github.com/voxire/onion/internal/platform/server/http"
@@ -33,5 +34,10 @@ func RegisterRoutes(ctx context.Context, router *chi.Mux, svc *application.Servi
 	http.RegisterPUTWithValidation[handlers.UpdateCampaignStatusRequest, handlers.UpdateCampaignStatusResponse](
 		ctx, router, handlers.CampaignStatusRoutes(),
 		&handlers.UpdateCampaignStatusHandler{Service: svc},
+	)
+
+	http.RegisterDELETE[handlers.DeleteCampaignRequest, handlers.DeleteCampaignResponse](
+		ctx, router, handlers.CampaignDeleteRoutes(),
+		&handlers.DeleteCampaignHandler{Service: svc},
 	)
 }

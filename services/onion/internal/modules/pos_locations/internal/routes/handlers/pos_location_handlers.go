@@ -7,11 +7,11 @@ import (
 	"strconv"
 
 	"github.com/go-chi/chi/v5"
-	authPkg "github.com/voxire/onion/internal/platform/auth"
-	errorModels "github.com/voxire/onion/internal/platform/errors"
 
 	"github.com/voxire/onion/internal/modules/pos_locations/internal/application"
 	"github.com/voxire/onion/internal/modules/pos_locations/internal/domain"
+	authPkg "github.com/voxire/onion/internal/platform/auth"
+	errorModels "github.com/voxire/onion/internal/platform/errors"
 )
 
 type LocationPayload struct {
@@ -42,11 +42,13 @@ func newLocationPayload(l domain.Location) LocationPayload {
 
 func LocationListRoutes() []string { return []string{"/pos/locations"} }
 
-type ListLocationsHandler struct{ Service *application.Service }
-type ListLocationsRequest struct{}
-type ListLocationsResponse struct {
-	Locations []LocationPayload `json:"locations"`
-}
+type (
+	ListLocationsHandler  struct{ Service *application.Service }
+	ListLocationsRequest  struct{}
+	ListLocationsResponse struct {
+		Locations []LocationPayload `json:"locations"`
+	}
+)
 
 func (h *ListLocationsHandler) Serve(ctx context.Context, _ *ListLocationsRequest) (ListLocationsResponse, *errorModels.ServerError) {
 	device := authPkg.DeviceCtx(ctx)

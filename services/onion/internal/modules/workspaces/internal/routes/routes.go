@@ -4,6 +4,7 @@ import (
 	"context"
 
 	"github.com/go-chi/chi/v5"
+
 	"github.com/voxire/onion/internal/modules/workspaces/internal/application"
 	"github.com/voxire/onion/internal/modules/workspaces/internal/routes/handlers"
 	"github.com/voxire/onion/internal/platform/server/http"
@@ -402,5 +403,4 @@ func RegisterRoutes(ctx context.Context, router *chi.Mux, flowService *applicati
 		ctx, router, handlers.UpdateUserSettingsRoutes(),
 		&handlers.UpdateUserSettingsHandler{FlowService: flowService},
 	)
-
 }

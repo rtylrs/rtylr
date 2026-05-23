@@ -11,12 +11,12 @@ import (
 // total lines up with what the customer has actually paid, not what they
 // may have an open invoice for.
 type TopCustomerRow struct {
-	CustomerID        int64
-	FirstName         string
-	LastName          string
-	Email             string
+	CustomerID         int64
+	FirstName          string
+	LastName           string
+	Email              string
 	LifetimeSpendMinor int64
-	OrderCount        int64
+	OrderCount         int64
 }
 
 // GetTopCustomers returns up to `limit` customers by lifetime POS spend.

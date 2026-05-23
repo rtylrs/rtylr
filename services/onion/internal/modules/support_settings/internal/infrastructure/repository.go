@@ -4,10 +4,10 @@ import (
 	"context"
 	"database/sql"
 	"encoding/json"
+	"errors"
 
 	"github.com/voxire/onion/internal/modules/support_settings/internal/domain"
 	"github.com/voxire/onion/internal/modules/support_settings/internal/infrastructure/persistence/sqlc"
-	"github.com/voxire/onion/internal/platform/database/dbclient"
 	"github.com/voxire/onion/internal/platform/logger"
 )
 
@@ -15,16 +15,16 @@ type Repository struct {
 	queries *sqlc.Queries
 }
 
-func NewRepository(_ context.Context) *Repository {
+func NewRepository(db *sql.DB) *Repository {
 	return &Repository{
-		queries: sqlc.New(dbclient.Pool()),
+		queries: sqlc.New(db),
 	}
 }
 
 func (r *Repository) Get(ctx context.Context, businessID int64) (*domain.Settings, error) {
 	row, err := r.queries.GetSettings(ctx, businessID)
 	if err != nil {
-		if err == sql.ErrNoRows {
+		if errors.Is(err, sql.ErrNoRows) {
 			return &domain.Settings{BusinessID: businessID, SLAHours: 24}, nil
 		}
 		logger.Ctx(ctx).Error("Failed to get support settings", logger.Error(err))

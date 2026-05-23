@@ -2,11 +2,13 @@ package application
 
 import (
 	"context"
+	"database/sql"
 	"fmt"
 	"math"
 	"time"
 
 	"github.com/google/uuid"
+
 	"github.com/voxire/onion/internal/modules/hr_attendance/internal/domain"
 	"github.com/voxire/onion/internal/modules/hr_attendance/internal/infrastructure"
 	"github.com/voxire/onion/internal/platform/cache/cacher"
@@ -17,8 +19,8 @@ type Service struct {
 	repo *infrastructure.Repository
 }
 
-func NewService(ctx context.Context) *Service {
-	return &Service{repo: infrastructure.NewRepository(ctx)}
+func NewService(_ context.Context, db *sql.DB) *Service {
+	return &Service{repo: infrastructure.NewRepository(db)}
 }
 
 func (s *Service) ClockIn(ctx context.Context, ownerID int64, record domain.AttendanceRecordRecord) (*domain.AttendanceRecordRecord, error) {

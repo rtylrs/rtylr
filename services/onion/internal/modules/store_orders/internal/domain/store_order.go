@@ -53,6 +53,6 @@ type OrderItemInput struct {
 }
 
 type StoreOrderDetail struct {
-	Order StoreOrder      `json:"order"`
+	Order StoreOrder       `json:"order"`
 	Items []StoreOrderItem `json:"items"`
 }

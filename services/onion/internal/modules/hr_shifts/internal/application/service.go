@@ -2,22 +2,36 @@ package application
 
 import (
 	"context"
+	"database/sql"
 	"fmt"
 	"time"
 
 	"github.com/voxire/onion/internal/modules/hr_shifts/internal/domain"
 	"github.com/voxire/onion/internal/modules/hr_shifts/internal/infrastructure"
+	"github.com/voxire/onion/internal/platform/cache/cacher"
+	cacheKeys "github.com/voxire/onion/internal/platform/cache/keys"
 	"github.com/voxire/onion/internal/platform/logger"
 )
+
+const (
+	hrShiftsScope = "hr_shifts"
+	hrShiftsTTL   = 2 * time.Minute
+)
+
+func invalidateHRShiftsScope(ctx context.Context, ownerID int64) {
+	if cache := cacher.GetRedisCache(); cache != nil {
+		cache.DeleteByPattern(ctx, cacheKeys.ScopedPrefix(hrShiftsScope, ownerID))
+	}
+}
 
 type Service struct {
 	repo                 *infrastructure.Repository
 	leaveConflictChecker domain.LeaveConflictChecker
 }
 
-func NewService(ctx context.Context, leaveChecker domain.LeaveConflictChecker) *Service {
+func NewService(_ context.Context, db *sql.DB, leaveChecker domain.LeaveConflictChecker) *Service {
 	return &Service{
-		repo:                 infrastructure.NewRepository(ctx),
+		repo:                 infrastructure.NewRepository(db),
 		leaveConflictChecker: leaveChecker,
 	}
 }
@@ -29,18 +43,38 @@ func (s *Service) ListShifts(ctx context.Context, ownerID int64, params domain.L
 	if params.Limit > 100 {
 		params.Limit = 100
 	}
-	return s.repo.ListShifts(ctx, ownerID, params)
+	type lr struct {
+		Items []domain.ShiftRecord
+		Total int64
+	}
+	key := cacheKeys.Scoped(hrShiftsScope, ownerID, fmt.Sprintf("list|l=%d|o=%d", params.Limit, params.Offset))
+	res, err := cacher.Of[lr]().GetOrComputeSingle(ctx, key,
+		func(ctx context.Context) (lr, error) {
+			items, total, err := s.repo.ListShifts(ctx, ownerID, params)
+			return lr{Items: items, Total: total}, err
+		},
+		cacher.WithExpiry(ctx, hrShiftsTTL),
+	)
+	return res.Items, res.Total, err
 }
 
 func (s *Service) CreateShift(ctx context.Context, ownerID int64, shift domain.ShiftRecord) (*domain.ShiftRecord, error) {
 	if shift.Color == "" {
 		shift.Color = "#4CAF50"
 	}
-	return s.repo.CreateShift(ctx, ownerID, shift)
+	rec, err := s.repo.CreateShift(ctx, ownerID, shift)
+	if err == nil {
+		invalidateHRShiftsScope(ctx, ownerID)
+	}
+	return rec, err
 }
 
 func (s *Service) UpdateShift(ctx context.Context, ownerID int64, shift domain.ShiftRecord) error {
-	return s.repo.UpdateShift(ctx, ownerID, shift)
+	if err := s.repo.UpdateShift(ctx, ownerID, shift); err != nil {
+		return err
+	}
+	invalidateHRShiftsScope(ctx, ownerID)
+	return nil
 }
 
 func (s *Service) GetRoster(ctx context.Context, ownerID int64, params domain.RosterParams) ([]domain.ShiftAssignmentRecord, []domain.ConflictInfo, error) {
@@ -103,10 +137,14 @@ func (s *Service) CreateShiftAssignment(ctx context.Context, ownerID int64, assi
 		}
 	}
 
-	return s.repo.CreateShiftAssignment(ctx, ownerID, assignment)
+	rec, err := s.repo.CreateShiftAssignment(ctx, ownerID, assignment)
+	if err == nil {
+		invalidateHRShiftsScope(ctx, ownerID)
+	}
+	return rec, err
 }
 
-func (s *Service) PublishRoster(ctx context.Context, ownerID int64, locationID int64, weekStart string) error {
+func (s *Service) PublishRoster(ctx context.Context, ownerID, locationID int64, weekStart string) error {
 	ws, err := time.Parse("2006-01-02", weekStart)
 	if err != nil {
 		return err
@@ -117,6 +155,7 @@ func (s *Service) PublishRoster(ctx context.Context, ownerID int64, locationID i
 		return err
 	}
 
+	invalidateHRShiftsScope(ctx, ownerID)
 	logger.Ctx(ctx).Info("roster published",
 		logger.Any("owner_id", ownerID),
 		logger.Any("location_id", locationID),

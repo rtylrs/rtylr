@@ -13,15 +13,22 @@ type mockRepo struct {
 	theme     domain.Theme
 	getErr    error
 	createErr error
+	updateErr error
 	themeErr  error
 }
 
 func (m *mockRepo) GetConfig(_ context.Context, _ string) (domain.Config, error) {
 	return m.config, m.getErr
 }
+
 func (m *mockRepo) CreateConfig(_ context.Context, _ domain.ConfigInput) error {
 	return m.createErr
 }
+
+func (m *mockRepo) UpdateConfig(_ context.Context, _ domain.ConfigInput) error {
+	return m.updateErr
+}
+
 func (m *mockRepo) GetThemeByOwnerID(_ context.Context, _ string) (domain.Theme, error) {
 	return m.theme, m.themeErr
 }

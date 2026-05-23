@@ -2,10 +2,12 @@ package handlers
 
 import (
 	"context"
+	"errors"
 	"net/http"
 	"strconv"
 
 	"github.com/go-chi/chi/v5"
+
 	"github.com/voxire/onion/internal/modules/crm_sales/internal/application"
 	"github.com/voxire/onion/internal/modules/crm_sales/internal/domain"
 	authPkg "github.com/voxire/onion/internal/platform/auth"
@@ -19,11 +21,13 @@ import (
 
 func GetPipelineRoutes() []string { return []string{"/crm/sales/pipeline"} }
 
-type GetPipelineHandler struct{ Service *application.Service }
-type GetPipelineRequest struct{}
-type GetPipelineResponse struct {
-	Pipeline []domain.PipelineSummary `json:"pipeline"`
-}
+type (
+	GetPipelineHandler  struct{ Service *application.Service }
+	GetPipelineRequest  struct{}
+	GetPipelineResponse struct {
+		Pipeline []domain.PipelineSummary `json:"pipeline"`
+	}
+)
 
 func (h *GetPipelineHandler) Serve(ctx context.Context, _ *GetPipelineRequest) (GetPipelineResponse, *errorModels.ServerError) {
 	device := authPkg.DeviceCtx(ctx)
@@ -46,11 +50,13 @@ func (h *GetPipelineHandler) Serve(ctx context.Context, _ *GetPipelineRequest) (
 
 func ListLeadsRoutes() []string { return []string{"/crm/sales/leads"} }
 
-type ListLeadsHandler struct{ Service *application.Service }
-type ListLeadsRequest struct{}
-type ListLeadsResponse struct {
-	Leads []domain.Lead `json:"leads"`
-}
+type (
+	ListLeadsHandler  struct{ Service *application.Service }
+	ListLeadsRequest  struct{}
+	ListLeadsResponse struct {
+		Leads []domain.Lead `json:"leads"`
+	}
+)
 
 func (h *ListLeadsHandler) Serve(ctx context.Context, _ *ListLeadsRequest) (ListLeadsResponse, *errorModels.ServerError) {
 	device := authPkg.DeviceCtx(ctx)
@@ -127,11 +133,13 @@ func (h *CreateLeadHandler) Serve(ctx context.Context, req *CreateLeadRequest) (
 
 func GetLeadRoutes() []string { return []string{"/crm/sales/leads/{id}"} }
 
-type GetLeadHandler struct{ Service *application.Service }
-type GetLeadRequest struct{}
-type GetLeadResponse struct {
-	Lead domain.Lead `json:"lead"`
-}
+type (
+	GetLeadHandler  struct{ Service *application.Service }
+	GetLeadRequest  struct{}
+	GetLeadResponse struct {
+		Lead domain.Lead `json:"lead"`
+	}
+)
 
 func (h *GetLeadHandler) Serve(ctx context.Context, _ *GetLeadRequest) (GetLeadResponse, *errorModels.ServerError) {
 	device := authPkg.DeviceCtx(ctx)
@@ -147,7 +155,7 @@ func (h *GetLeadHandler) Serve(ctx context.Context, _ *GetLeadRequest) (GetLeadR
 
 	lead, err := h.Service.GetLead(ctx, id, device.User.UserID)
 	if err != nil {
-		if err == domain.ErrLeadNotFound {
+		if errors.Is(err, domain.ErrLeadNotFound) {
 			return GetLeadResponse{}, &errorModels.ServerError{HTTPCode: http.StatusNotFound, Code: http.StatusNotFound, Message: "Lead not found"}
 		}
 		logger.Ctx(ctx).Error("failed to get lead", logger.Any("owner_id", device.User.UserID), logger.Any("lead_id", id), logger.Error(err))
@@ -210,7 +218,7 @@ func (h *UpdateLeadHandler) Serve(ctx context.Context, req *UpdateLeadRequest) (
 		Notes:        req.Notes,
 	})
 	if err != nil {
-		if err == domain.ErrLeadNotFound {
+		if errors.Is(err, domain.ErrLeadNotFound) {
 			return UpdateLeadResponse{}, &errorModels.ServerError{HTTPCode: http.StatusNotFound, Code: http.StatusNotFound, Message: "Lead not found"}
 		}
 		logger.Ctx(ctx).Error("failed to update lead", logger.Any("owner_id", device.User.UserID), logger.Any("lead_id", id), logger.Error(err))
@@ -226,11 +234,13 @@ func (h *UpdateLeadHandler) Serve(ctx context.Context, req *UpdateLeadRequest) (
 
 func DeleteLeadRoutes() []string { return []string{"/crm/sales/leads/{id}"} }
 
-type DeleteLeadHandler struct{ Service *application.Service }
-type DeleteLeadRequest struct{}
-type DeleteLeadResponse struct {
-	Success bool `json:"success"`
-}
+type (
+	DeleteLeadHandler  struct{ Service *application.Service }
+	DeleteLeadRequest  struct{}
+	DeleteLeadResponse struct {
+		Success bool `json:"success"`
+	}
+)
 
 func (h *DeleteLeadHandler) Serve(ctx context.Context, _ *DeleteLeadRequest) (DeleteLeadResponse, *errorModels.ServerError) {
 	device := authPkg.DeviceCtx(ctx)
@@ -245,7 +255,7 @@ func (h *DeleteLeadHandler) Serve(ctx context.Context, _ *DeleteLeadRequest) (De
 	}
 
 	if err := h.Service.DeleteLead(ctx, id, device.User.UserID); err != nil {
-		if err == domain.ErrLeadNotFound {
+		if errors.Is(err, domain.ErrLeadNotFound) {
 			return DeleteLeadResponse{}, &errorModels.ServerError{HTTPCode: http.StatusNotFound, Code: http.StatusNotFound, Message: "Lead not found"}
 		}
 		logger.Ctx(ctx).Error("failed to delete lead", logger.Any("owner_id", device.User.UserID), logger.Any("lead_id", id), logger.Error(err))

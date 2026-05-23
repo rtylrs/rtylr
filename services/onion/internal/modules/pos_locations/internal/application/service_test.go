@@ -18,9 +18,11 @@ type mockRepo struct {
 func (m *mockRepo) List(_ context.Context, _ int64) ([]domain.Location, error) {
 	return m.list, nil
 }
+
 func (m *mockRepo) Create(_ context.Context, _ domain.LocationInput) (int64, error) {
 	return m.createID, m.createErr
 }
+
 func (m *mockRepo) Update(_ context.Context, _ domain.LocationUpdateInput) error {
 	return m.updErr
 }

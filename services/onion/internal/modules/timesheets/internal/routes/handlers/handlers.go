@@ -20,10 +20,13 @@ type TimesheetEntryPayload struct {
 
 func ListRoutes() []string { return []string{"/hr/timesheets"} }
 
-type ListHandler struct{ Service *application.Service }
-type ListRequest struct {
-	WeekStart string `json:"week_start"`
-}
+type (
+	ListHandler struct{ Service *application.Service }
+	ListRequest struct {
+		WeekStart string `json:"week_start"`
+	}
+)
+
 type ListResponse struct {
 	Timesheets []TimesheetEntryPayload `json:"timesheets"`
 }

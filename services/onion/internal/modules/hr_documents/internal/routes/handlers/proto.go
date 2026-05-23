@@ -1,8 +1,8 @@
 package handlers
 
 import (
-	hrv1 "github.com/voxire/voxie/gen/go/hr/v1"
 	"github.com/voxire/onion/internal/modules/hr_documents/internal/domain"
+	hrv1 "github.com/voxire/voxie/gen/go/hr/v1"
 )
 
 func documentToProto(d domain.EmployeeDocumentRecord) *hrv1.EmployeeDocumentPayload {

@@ -1,9 +1,8 @@
 package handlers
 
 import (
-	"net/http"
-
 	"context"
+	"net/http"
 	"strconv"
 
 	"github.com/voxire/onion/internal/modules/workspaces/internal/application"

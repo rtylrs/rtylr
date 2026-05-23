@@ -16,8 +16,10 @@ func PermissionRoutes() []string { return []string{"/permissions"} }
 
 // -- List Roles --
 
-type ListRolesHandler struct{ Service *application.Service }
-type ListRolesRequest struct{}
+type (
+	ListRolesHandler struct{ Service *application.Service }
+	ListRolesRequest struct{}
+)
 
 type RolePayload struct {
 	ID          int64     `json:"id"`
@@ -200,8 +202,10 @@ func (h *DeleteRoleHandler) Serve(ctx context.Context, req *DeleteRoleRequest) (
 
 // -- List Permissions --
 
-type ListPermissionsHandler struct{ Service *application.Service }
-type ListPermissionsRequest struct{}
+type (
+	ListPermissionsHandler struct{ Service *application.Service }
+	ListPermissionsRequest struct{}
+)
 
 type PermissionPayload struct {
 	Key         string `json:"key"`

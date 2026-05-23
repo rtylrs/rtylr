@@ -7,11 +7,10 @@ import (
 
 	"github.com/voxire/onion/internal/modules/store_checkout/internal/domain"
 	"github.com/voxire/onion/internal/modules/store_checkout/internal/infrastructure/persistence/sqlc"
-	"github.com/voxire/onion/internal/platform/database/dbclient"
 	"github.com/voxire/onion/internal/platform/logger"
 )
 
-// ensure domain is used
+// ensure domain is used.
 var _ = domain.Checkout{}
 
 type Repository struct {
@@ -19,8 +18,8 @@ type Repository struct {
 	pool    *sql.DB
 }
 
-func NewRepository(_ context.Context) *Repository {
-	pool := dbclient.Pool()
+func NewRepository(db *sql.DB) *Repository {
+	pool := db
 	return &Repository{queries: sqlc.New(pool), pool: pool}
 }
 
@@ -52,6 +51,8 @@ func (r *Repository) Complete(ctx context.Context, ownerID, id int64) error {
 }
 
 func nullJSON(s string) []byte {
-	if s == "" { return nil }
+	if s == "" {
+		return nil
+	}
 	return []byte(s)
 }

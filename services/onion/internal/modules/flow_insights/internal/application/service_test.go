@@ -18,9 +18,11 @@ type mockRepo struct {
 func (m *mockRepo) GetInsightsStats(_ context.Context, _ int64) (domain.InsightsStats, error) {
 	return m.stats, m.err
 }
+
 func (m *mockRepo) GetTeamWorkload(_ context.Context, _ int64) (domain.TeamWorkloadResult, error) {
 	return m.team, m.err
 }
+
 func (m *mockRepo) GetRoadmap(_ context.Context, _ int64) (domain.RoadmapResult, error) {
 	return m.roadmap, m.err
 }

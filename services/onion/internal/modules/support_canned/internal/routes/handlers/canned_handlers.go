@@ -15,11 +15,13 @@ func CreateCannedRoutes() []string { return []string{"/support/canned"} }
 func UpdateCannedRoutes() []string { return []string{"/support/canned"} }
 func DeleteCannedRoutes() []string { return []string{"/support/canned"} }
 
-type ListCannedHandler struct{ Service *application.Service }
-type ListCannedRequest struct{}
-type ListCannedResponse struct {
-	CannedResponses []domain.CannedResponse `json:"canned_responses"`
-}
+type (
+	ListCannedHandler  struct{ Service *application.Service }
+	ListCannedRequest  struct{}
+	ListCannedResponse struct {
+		CannedResponses []domain.CannedResponse `json:"canned_responses"`
+	}
+)
 
 func (h *ListCannedHandler) Serve(ctx context.Context, _ *ListCannedRequest) (ListCannedResponse, *errorModels.ServerError) {
 	device := authPkg.DeviceCtx(ctx)
@@ -33,13 +35,16 @@ func (h *ListCannedHandler) Serve(ctx context.Context, _ *ListCannedRequest) (Li
 	return ListCannedResponse{CannedResponses: items}, nil
 }
 
-type CreateCannedHandler struct{ Service *application.Service }
-type CreateCannedRequest struct {
-	Name     string `json:"name"`
-	Body     string `json:"body"`
-	Category string `json:"category"`
-	Shortcut string `json:"shortcut"`
-}
+type (
+	CreateCannedHandler struct{ Service *application.Service }
+	CreateCannedRequest struct {
+		Name     string `json:"name"`
+		Body     string `json:"body"`
+		Category string `json:"category"`
+		Shortcut string `json:"shortcut"`
+	}
+)
+
 type CreateCannedResponse struct {
 	CannedResponseID int64  `json:"canned_response_id"`
 	Message          string `json:"message"`
@@ -70,14 +75,17 @@ func (h *CreateCannedHandler) Serve(ctx context.Context, req *CreateCannedReques
 	return CreateCannedResponse{CannedResponseID: id, Message: "Canned response created"}, nil
 }
 
-type UpdateCannedHandler struct{ Service *application.Service }
-type UpdateCannedRequest struct {
-	ID       int64  `json:"id"`
-	Name     string `json:"name"`
-	Body     string `json:"body"`
-	Category string `json:"category"`
-	Shortcut string `json:"shortcut"`
-}
+type (
+	UpdateCannedHandler struct{ Service *application.Service }
+	UpdateCannedRequest struct {
+		ID       int64  `json:"id"`
+		Name     string `json:"name"`
+		Body     string `json:"body"`
+		Category string `json:"category"`
+		Shortcut string `json:"shortcut"`
+	}
+)
+
 type UpdateCannedResponse struct {
 	Message string `json:"message"`
 }
@@ -103,10 +111,13 @@ func (h *UpdateCannedHandler) Serve(ctx context.Context, req *UpdateCannedReques
 	return UpdateCannedResponse{Message: "Canned response updated"}, nil
 }
 
-type DeleteCannedHandler struct{ Service *application.Service }
-type DeleteCannedRequest struct {
-	ID int64 `json:"id"`
-}
+type (
+	DeleteCannedHandler struct{ Service *application.Service }
+	DeleteCannedRequest struct {
+		ID int64 `json:"id"`
+	}
+)
+
 type DeleteCannedResponse struct {
 	Message string `json:"message"`
 }

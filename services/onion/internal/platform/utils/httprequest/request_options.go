@@ -9,6 +9,7 @@ import (
 	"time"
 
 	"github.com/beevik/etree"
+
 	"github.com/voxire/onion/internal/platform/logger"
 )
 

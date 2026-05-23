@@ -127,15 +127,15 @@ type ReorderSuggestionsHandler struct{ Service *application.Service }
 type ReorderSuggestionsRequest struct{}
 
 type ReorderSuggestionPayload struct {
-	ProductID       int64   `json:"product_id"`
-	Name            string  `json:"name"`
-	SKU             string  `json:"sku"`
-	CurrentStock    float64 `json:"current_stock"`
-	ReorderPoint    float64 `json:"reorder_point"`
-	SuggestedQty    float64 `json:"suggested_quantity"`
-	AvgDailySales   float64 `json:"avg_daily_sales"`
-	LeadTimeDays    int     `json:"lead_time_days"`
-	Confidence      string  `json:"confidence"`
+	ProductID     int64   `json:"product_id"`
+	Name          string  `json:"name"`
+	SKU           string  `json:"sku"`
+	CurrentStock  float64 `json:"current_stock"`
+	ReorderPoint  float64 `json:"reorder_point"`
+	SuggestedQty  float64 `json:"suggested_quantity"`
+	AvgDailySales float64 `json:"avg_daily_sales"`
+	LeadTimeDays  int     `json:"lead_time_days"`
+	Confidence    string  `json:"confidence"`
 }
 
 type ReorderSuggestionsResponse struct {

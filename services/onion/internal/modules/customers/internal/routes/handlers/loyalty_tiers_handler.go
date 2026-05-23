@@ -8,13 +8,12 @@ import (
 	"strconv"
 
 	"github.com/go-chi/chi/v5"
-	crmv1 "github.com/voxire/voxie/gen/go/crm/v1"
-
-	authPkg "github.com/voxire/onion/internal/platform/auth"
-	errorModels "github.com/voxire/onion/internal/platform/errors"
 
 	"github.com/voxire/onion/internal/modules/customers/internal/application"
 	"github.com/voxire/onion/internal/modules/customers/internal/domain"
+	authPkg "github.com/voxire/onion/internal/platform/auth"
+	errorModels "github.com/voxire/onion/internal/platform/errors"
+	crmv1 "github.com/voxire/voxie/gen/go/crm/v1"
 )
 
 func LoyaltyTiersListRoutes() []string {
@@ -36,7 +35,7 @@ func LoyaltyTiersDeleteRoutes() []string {
 func newLoyaltyTierPayload(t domain.LoyaltyTier) *crmv1.LoyaltyTier {
 	return &crmv1.LoyaltyTier{
 		Id:          t.ID,
-		OwnerId:    t.OwnerID,
+		OwnerId:     t.OwnerID,
 		Name:        t.Name,
 		MinPoints:   int64(t.MinPoints),
 		DiscountPct: t.DiscountPct,

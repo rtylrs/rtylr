@@ -2,14 +2,14 @@ package handlers
 
 import (
 	"context"
+	"errors"
 	"net/http"
-
-	hrv1 "github.com/voxire/voxie/gen/go/hr/v1"
 
 	"github.com/voxire/onion/internal/modules/staff/internal/application"
 	"github.com/voxire/onion/internal/modules/staff/internal/domain"
 	authPkg "github.com/voxire/onion/internal/platform/auth"
 	errorModels "github.com/voxire/onion/internal/platform/errors"
+	hrv1 "github.com/voxire/voxie/gen/go/hr/v1"
 )
 
 // ─── List Staff ───────────────────────────────────────────────────────────────
@@ -36,9 +36,9 @@ func newStaffPayload(s domain.Staff) *hrv1.Staff {
 		FirstName: s.FirstName, LastName: s.LastName, Email: s.Email, Phone: s.Phone,
 		Role: s.Role, EmploymentType: s.EmploymentType, Status: s.Status,
 		Salary: s.Salary, HourlyRate: s.HourlyRate, OvertimeRate: s.OvertimeRate,
-		StartDate: s.StartDate.Format("2006-01-02T15:04:05Z"),
-		EndDate:   s.EndDate.Format("2006-01-02T15:04:05Z"),
-		Address:   s.Address,
+		StartDate:            s.StartDate.Format("2006-01-02T15:04:05Z"),
+		EndDate:              s.EndDate.Format("2006-01-02T15:04:05Z"),
+		Address:              s.Address,
 		EmergencyContactName: s.EmergencyContactName, EmergencyContactPhone: s.EmergencyContactPhone,
 		Apps: s.Apps, Notes: s.Notes,
 		CreatedAt: s.CreatedAt.Format("2006-01-02T15:04:05Z"),
@@ -271,7 +271,7 @@ func (h *GetStaffHandler) Serve(ctx context.Context, req *GetStaffRequest) (GetS
 
 	s, err := h.Service.GetStaffByID(ctx, device.User.UserID, req.ID)
 	if err != nil {
-		if err == domain.ErrStaffNotFound {
+		if errors.Is(err, domain.ErrStaffNotFound) {
 			return GetStaffResponse{}, &errorModels.ServerError{Code: http.StatusNotFound, Message: "Staff member not found"}
 		}
 		return GetStaffResponse{}, &errorModels.ServerError{Code: http.StatusInternalServerError, Message: "Failed to get staff member"}

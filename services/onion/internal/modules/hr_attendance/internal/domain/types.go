@@ -22,16 +22,16 @@ type AttendanceRecordRecord struct {
 }
 
 type AttendanceConfigRecord struct {
-	ID                  int64   `json:"id"`
-	OwnerID             int64   `json:"owner_id"`
-	AppEnabled          bool    `json:"app_enabled"`
-	QREnabled           bool    `json:"qr_enabled"`
-	GPSEnabled          bool    `json:"gps_enabled"`
-	PinEnabled          bool    `json:"pin_enabled"`
-	FacialEnabled       bool    `json:"facial_enabled"`
-	GeofenceRadiusM     int32   `json:"geofence_radius_m"`
-	DefaultLocationLat  float64 `json:"default_location_lat"`
-	DefaultLocationLng  float64 `json:"default_location_lng"`
+	ID                 int64   `json:"id"`
+	OwnerID            int64   `json:"owner_id"`
+	AppEnabled         bool    `json:"app_enabled"`
+	QREnabled          bool    `json:"qr_enabled"`
+	GPSEnabled         bool    `json:"gps_enabled"`
+	PinEnabled         bool    `json:"pin_enabled"`
+	FacialEnabled      bool    `json:"facial_enabled"`
+	GeofenceRadiusM    int32   `json:"geofence_radius_m"`
+	DefaultLocationLat float64 `json:"default_location_lat"`
+	DefaultLocationLng float64 `json:"default_location_lng"`
 }
 
 type ListAttendanceParams struct {

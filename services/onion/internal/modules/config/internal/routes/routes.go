@@ -4,6 +4,7 @@ import (
 	"context"
 
 	"github.com/go-chi/chi/v5"
+
 	"github.com/voxire/onion/internal/modules/config/internal/application"
 	"github.com/voxire/onion/internal/modules/config/internal/routes/handlers"
 	"github.com/voxire/onion/internal/platform/server/http"
@@ -22,5 +23,19 @@ func RegisterRoutes(ctx context.Context, router *chi.Mux, configService *applica
 		router,
 		handlers.CreateConfigRoutes(),
 		&handlers.CreateConfigHandler{ConfigService: configService},
+	)
+
+	http.RegisterPUT[handlers.UpdateConfigRequest, handlers.UpdateConfigResponse](
+		ctx,
+		router,
+		handlers.UpdateConfigRoutes(),
+		&handlers.UpdateConfigHandler{ConfigService: configService},
+	)
+
+	http.RegisterGET[handlers.GetIndustriesRequest, handlers.GetIndustriesResponse](
+		ctx,
+		router,
+		handlers.IndustriesRoutes(),
+		&handlers.GetIndustriesHandler{},
 	)
 }

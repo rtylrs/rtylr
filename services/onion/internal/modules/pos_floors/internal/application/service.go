@@ -2,9 +2,19 @@ package application
 
 import (
 	"context"
+	"database/sql"
+	"fmt"
+	"time"
 
 	"github.com/voxire/onion/internal/modules/pos_floors/internal/domain"
 	"github.com/voxire/onion/internal/modules/pos_floors/internal/infrastructure"
+	"github.com/voxire/onion/internal/platform/cache/cacher"
+	cacheKeys "github.com/voxire/onion/internal/platform/cache/keys"
+)
+
+const (
+	posFloorsScope = "pos_floors"
+	posFloorsTTL   = 5 * time.Minute
 )
 
 type repository interface {
@@ -18,22 +28,47 @@ type Service struct {
 	repo repository
 }
 
-func NewService(ctx context.Context) *Service {
-	return &Service{repo: infrastructure.NewRepository(ctx)}
+func NewService(_ context.Context, db *sql.DB) *Service {
+	return &Service{repo: infrastructure.NewRepository(db)}
+}
+
+func invalidatePosFloorsScope(ctx context.Context, businessID int64) {
+	if cache := cacher.GetRedisCache(); cache != nil {
+		cache.DeleteByPattern(ctx, cacheKeys.ScopedPrefix(posFloorsScope, businessID))
+	}
 }
 
 func (s *Service) List(ctx context.Context, businessID, branchID int64) ([]domain.Floor, error) {
-	return s.repo.List(ctx, businessID, branchID)
+	key := cacheKeys.Scoped(posFloorsScope, businessID, fmt.Sprintf("list|b=%d", branchID))
+	return cacher.Of[[]domain.Floor]().GetOrComputeSingle(ctx, key,
+		func(ctx context.Context) ([]domain.Floor, error) {
+			return s.repo.List(ctx, businessID, branchID)
+		},
+		cacher.WithExpiry(ctx, posFloorsTTL),
+	)
 }
 
 func (s *Service) Create(ctx context.Context, input domain.FloorInput) (int64, error) {
-	return s.repo.Create(ctx, input)
+	id, err := s.repo.Create(ctx, input)
+	if err != nil {
+		return 0, err
+	}
+	invalidatePosFloorsScope(ctx, input.BusinessID)
+	return id, nil
 }
 
 func (s *Service) Update(ctx context.Context, input domain.FloorUpdateInput) error {
-	return s.repo.Update(ctx, input)
+	if err := s.repo.Update(ctx, input); err != nil {
+		return err
+	}
+	invalidatePosFloorsScope(ctx, input.BusinessID)
+	return nil
 }
 
 func (s *Service) Delete(ctx context.Context, businessID, id int64) error {
-	return s.repo.Delete(ctx, businessID, id)
+	if err := s.repo.Delete(ctx, businessID, id); err != nil {
+		return err
+	}
+	invalidatePosFloorsScope(ctx, businessID)
+	return nil
 }

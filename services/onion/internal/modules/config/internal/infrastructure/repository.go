@@ -9,7 +9,6 @@ import (
 
 	"github.com/voxire/onion/internal/modules/config/internal/domain"
 	"github.com/voxire/onion/internal/modules/config/internal/infrastructure/persistence/sqlc"
-	"github.com/voxire/onion/internal/platform/database/dbclient"
 	"github.com/voxire/onion/internal/platform/logger"
 	"github.com/voxire/onion/internal/platform/utils/convert"
 )
@@ -19,8 +18,8 @@ type Repository struct {
 	pool    *sql.DB
 }
 
-func NewRepository(_ context.Context) *Repository {
-	pool := dbclient.Pool()
+func NewRepository(db *sql.DB) *Repository {
+	pool := db
 
 	return &Repository{
 		queries: sqlc.New(pool),
@@ -51,6 +50,19 @@ func (r *Repository) GetConfig(ctx context.Context, ownerID string) (domain.Conf
 
 	var config domain.Config
 	config.FromRows(rows[0])
+
+	// Enrich with business slug from the businesses table. owner_id on
+	// businesses maps to the same numeric user id used by configs, so
+	// we can resolve it cheaply with a single targeted query without
+	// reaching into the business module.
+	var slug sql.NullString
+	if err := r.pool.QueryRowContext(ctx,
+		`SELECT slug FROM businesses WHERE owner_id = ? LIMIT 1`, ownerIDInt,
+	).Scan(&slug); err != nil && !errors.Is(err, sql.ErrNoRows) {
+		logger.Ctx(ctx).Warn("Failed to load business slug for config", logger.Error(err))
+	} else if slug.Valid {
+		config.BusinessSlug = slug.String
+	}
 
 	return config, nil
 }
@@ -107,6 +119,63 @@ func (r *Repository) GetThemeByOwnerID(ctx context.Context, ownerID string) (dom
 	}
 
 	return theme, nil
+}
+
+func (r *Repository) UpdateConfig(ctx context.Context, input domain.ConfigInput) error {
+	ownerIDInt, err := strconv.Atoi(input.OwnerId)
+	if err != nil {
+		logger.Ctx(ctx).Error("Failed to parse owner ID", logger.Error(err))
+		return err
+	}
+
+	metaTagsJSON, marshalErr := json.Marshal(input.MetaTags)
+	if marshalErr != nil {
+		logger.Ctx(ctx).Error("Failed to marshal meta tags", logger.Error(marshalErr))
+		return marshalErr
+	}
+
+	_, execErr := r.pool.ExecContext(ctx, `
+		UPDATE config SET
+			site_name = ?,
+			logo_url = ?,
+			favicon_url = ?,
+			meta_tags = ?,
+			contact_email = ?,
+			contact_number = ?,
+			instagram = ?,
+			maintenance_mode = ?,
+			maintenance_notice = ?,
+			addons_enabled = ?,
+			enable_reviews = ?,
+			enable_wishlist = ?,
+			enable_newsletter_signup = ?,
+			about_content = ?,
+			footer_sub_text = ?
+		WHERE owner_id = ?
+	`,
+		sql.NullString{String: input.SiteName, Valid: input.SiteName != ""},
+		sql.NullString{String: input.LogoUrl, Valid: input.LogoUrl != ""},
+		sql.NullString{String: input.FaviconUrl, Valid: input.FaviconUrl != ""},
+		metaTagsJSON,
+		input.ContactEmail,
+		input.ContactNumber,
+		sql.NullString{String: input.Instagram, Valid: input.Instagram != ""},
+		input.MaintenanceMode,
+		sql.NullString{String: input.MaintenanceNotice, Valid: input.MaintenanceNotice != ""},
+		input.AddonsEnabled,
+		input.EnableReviews,
+		input.EnableWishlist,
+		input.EnableNewsletterSignup,
+		input.AboutContent,
+		sql.NullString{String: input.FooterSubText, Valid: input.FooterSubText != ""},
+		ownerIDInt,
+	)
+	if execErr != nil {
+		logger.Ctx(ctx).Error("Failed to update config", logger.Error(execErr))
+		return execErr
+	}
+
+	return nil
 }
 
 func (r *Repository) CreateConfig(ctx context.Context, input domain.ConfigInput) error {

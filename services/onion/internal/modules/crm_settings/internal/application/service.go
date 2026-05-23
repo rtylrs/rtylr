@@ -2,9 +2,18 @@ package application
 
 import (
 	"context"
+	"database/sql"
+	"time"
 
 	"github.com/voxire/onion/internal/modules/crm_settings/internal/domain"
 	"github.com/voxire/onion/internal/modules/crm_settings/internal/infrastructure"
+	"github.com/voxire/onion/internal/platform/cache/cacher"
+	cacheKeys "github.com/voxire/onion/internal/platform/cache/keys"
+)
+
+const (
+	crmSettingsScope = "crm_settings"
+	crmSettingsTTL   = 10 * time.Minute
 )
 
 type repository interface {
@@ -16,16 +25,32 @@ type Service struct {
 	repo repository
 }
 
-func NewService(ctx context.Context) *Service {
+func NewService(_ context.Context, db *sql.DB) *Service {
 	return &Service{
-		repo: infrastructure.NewRepository(ctx),
+		repo: infrastructure.NewRepository(db),
+	}
+}
+
+func invalidateCRMSettingsScope(ctx context.Context, ownerID int64) {
+	if cache := cacher.GetRedisCache(); cache != nil {
+		cache.DeleteByPattern(ctx, cacheKeys.ScopedPrefix(crmSettingsScope, ownerID))
 	}
 }
 
 func (s *Service) Get(ctx context.Context, ownerID int64) (domain.Settings, error) {
-	return s.repo.Get(ctx, ownerID)
+	return cacher.Of[domain.Settings]().GetOrComputeSingle(ctx,
+		cacheKeys.Scoped(crmSettingsScope, ownerID, "settings"),
+		func(ctx context.Context) (domain.Settings, error) {
+			return s.repo.Get(ctx, ownerID)
+		},
+		cacher.WithExpiry(ctx, crmSettingsTTL),
+	)
 }
 
 func (s *Service) Upsert(ctx context.Context, input domain.SettingsInput) error {
-	return s.repo.Upsert(ctx, input)
+	if err := s.repo.Upsert(ctx, input); err != nil {
+		return err
+	}
+	invalidateCRMSettingsScope(ctx, input.OwnerID)
+	return nil
 }

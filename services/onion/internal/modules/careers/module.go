@@ -2,8 +2,10 @@ package careers
 
 import (
 	"context"
+	"database/sql"
 
 	"github.com/go-chi/chi/v5"
+
 	"github.com/voxire/onion/internal/modules/careers/internal/application"
 	"github.com/voxire/onion/internal/modules/careers/internal/routes"
 	"github.com/voxire/onion/internal/modules/careers/internal/routes/handlers"
@@ -13,8 +15,8 @@ type Module struct {
 	CareersService *application.Service
 }
 
-func NewModule(ctx context.Context) *Module {
-	careersService := application.NewService(ctx)
+func NewModule(ctx context.Context, db *sql.DB) *Module {
+	careersService := application.NewService(ctx, db)
 
 	return &Module{
 		CareersService: careersService,

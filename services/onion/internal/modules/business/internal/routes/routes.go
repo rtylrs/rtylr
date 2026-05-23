@@ -4,6 +4,7 @@ import (
 	"context"
 
 	"github.com/go-chi/chi/v5"
+
 	"github.com/voxire/onion/internal/modules/business/internal/application"
 	"github.com/voxire/onion/internal/modules/business/internal/routes/handlers"
 	serverHttp "github.com/voxire/onion/internal/platform/server/http"
@@ -20,5 +21,15 @@ func RegisterRoutes(ctx context.Context, router *chi.Mux, service *application.S
 	serverHttp.RegisterGETWithValidation[handlers.PublicBusinessRequest, handlers.PublicBusinessResponse](
 		ctx, router, handlers.PublicBusinessRoutes(),
 		&handlers.PublicBusinessHandler{Service: service},
+	)
+
+	serverHttp.RegisterGETWithValidation[handlers.PublicBusinessBySlugRequest, handlers.PublicBusinessBySlugResponse](
+		ctx, router, handlers.PublicBusinessBySlugRoutes(),
+		&handlers.PublicBusinessBySlugHandler{Service: service},
+	)
+
+	serverHttp.RegisterPUTWithValidation[handlers.SetSlugRequest, handlers.SetSlugResponse](
+		ctx, router, handlers.BusinessSlugRoutes(),
+		&handlers.SetSlugHandler{Service: service},
 	)
 }

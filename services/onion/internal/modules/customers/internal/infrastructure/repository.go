@@ -12,7 +12,6 @@ import (
 
 	"github.com/voxire/onion/internal/modules/customers/internal/domain"
 	"github.com/voxire/onion/internal/modules/customers/internal/infrastructure/persistence/sqlc"
-	"github.com/voxire/onion/internal/platform/database/dbclient"
 	"github.com/voxire/onion/internal/platform/logger"
 )
 
@@ -21,8 +20,8 @@ type Repository struct {
 	pool    *sql.DB
 }
 
-func NewRepository(_ context.Context) *Repository {
-	pool := dbclient.Pool()
+func NewRepository(db *sql.DB) *Repository {
+	pool := db
 
 	return &Repository{
 		queries: sqlc.New(pool),
@@ -97,13 +96,16 @@ func (r *Repository) listCustomersFiltered(ctx context.Context, filter domain.Cu
 
 	if filter.Tag != "" {
 		whereClauses = append(whereClauses, "JSON_CONTAINS(tags, ?)")
-		tagJSON, _ := json.Marshal(filter.Tag)
+		tagJSON, err := json.Marshal(filter.Tag)
+		if err != nil {
+			return nil, 0, err
+		}
 		args = append(args, string(tagJSON))
 	}
 
 	where := strings.Join(whereClauses, " AND ")
 
-	countQuery := fmt.Sprintf("SELECT COUNT(*) FROM crm_customers WHERE %s", where)
+	countQuery := "SELECT COUNT(*) FROM crm_customers WHERE " + where
 	var total int
 
 	if err := r.pool.QueryRowContext(ctx, countQuery, args...).Scan(&total); err != nil {

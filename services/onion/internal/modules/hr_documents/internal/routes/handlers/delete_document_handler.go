@@ -2,10 +2,12 @@ package handlers
 
 import (
 	"context"
+	"errors"
 	"net/http"
 	"strconv"
 
 	"github.com/go-chi/chi/v5"
+
 	"github.com/voxire/onion/internal/modules/hr_documents/internal/application"
 	"github.com/voxire/onion/internal/modules/hr_documents/internal/domain"
 	authPkg "github.com/voxire/onion/internal/platform/auth"
@@ -37,7 +39,7 @@ func (h *DeleteDocumentHandler) Serve(ctx context.Context, _ *DeleteDocumentRequ
 
 	err := h.Service.DeleteDocument(ctx, device.User.UserID, docID)
 	if err != nil {
-		if err == domain.ErrDocumentNotFound {
+		if errors.Is(err, domain.ErrDocumentNotFound) {
 			return DeleteDocumentResponse{}, &errorModels.ServerError{HTTPCode: http.StatusNotFound, Code: http.StatusNotFound, Message: "Document not found"}
 		}
 		logger.Ctx(ctx).Error("failed to delete document", logger.Any("owner_id", device.User.UserID), logger.Any("document_id", docID), logger.Error(err))

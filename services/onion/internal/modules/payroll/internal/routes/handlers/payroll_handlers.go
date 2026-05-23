@@ -31,9 +31,9 @@ type legacyPayrollPayload struct {
 	CreatedAt     string  `json:"created_at"`
 }
 
-func ListPayrollRoutes() []string      { return []string{"/hr/payroll"} }
-func RunPayrollRoutes() []string       { return []string{"/hr/payroll/run"} }
-func MarkPayrollPaidRoutes() []string  { return []string{"/hr/payroll/mark-paid"} }
+func ListPayrollRoutes() []string     { return []string{"/hr/payroll"} }
+func RunPayrollRoutes() []string      { return []string{"/hr/payroll/run"} }
+func MarkPayrollPaidRoutes() []string { return []string{"/hr/payroll/mark-paid"} }
 
 func newPayrollPayload(p domain.PayrollRecord) *legacyPayrollPayload {
 	return &legacyPayrollPayload{
@@ -49,10 +49,13 @@ func newPayrollPayload(p domain.PayrollRecord) *legacyPayrollPayload {
 
 // ─── List ────────────────────────────────────────────────────────────────────
 
-type ListPayrollHandler struct{ Service *application.Service }
-type ListPayrollRequest struct {
-	PeriodLabel string `json:"period_label"`
-}
+type (
+	ListPayrollHandler struct{ Service *application.Service }
+	ListPayrollRequest struct {
+		PeriodLabel string `json:"period_label"`
+	}
+)
+
 type ListPayrollResponse struct {
 	Records []*legacyPayrollPayload `json:"records"`
 }
