@@ -10,6 +10,10 @@ import { PricingIcon } from './icons/PricingIcon';
 import { DocsIcon } from './icons/DocsIcon';
 import { BlogIcon } from './icons/BlogIcon';
 import { ChangelogIcon } from './icons/ChangelogIcon';
+import { TerminalIcon } from './icons/TerminalIcon';
+import { DoomIcon } from './icons/DoomIcon';
+import { StatusIcon } from './icons/StatusIcon';
+import { SnakeIcon } from './icons/SnakeIcon';
 import { Globe, Keyboard } from 'lucide-react';
 
 const ICON_MAP: Record<WindowType, React.FC<{ size?: number }>> = {
@@ -49,6 +53,10 @@ const ICON_MAP: Record<WindowType, React.FC<{ size?: number }>> = {
   shortcuts: ({ size = 28 }) => (
     <Keyboard size={size} color="rgba(255,255,255,0.8)" strokeWidth={1.5} />
   ),
+  terminal: TerminalIcon,
+  doom: DoomIcon,
+  status: StatusIcon,
+  snake: SnakeIcon,
 };
 
 export const BottomDock: React.FC = () => {

@@ -10,6 +10,10 @@ import { PricingIcon } from './icons/PricingIcon';
 import { DocsIcon } from './icons/DocsIcon';
 import { BlogIcon } from './icons/BlogIcon';
 import { ChangelogIcon } from './icons/ChangelogIcon';
+import { TerminalIcon } from './icons/TerminalIcon';
+import { DoomIcon } from './icons/DoomIcon';
+import { StatusIcon } from './icons/StatusIcon';
+import { SnakeIcon } from './icons/SnakeIcon';
 import { WindowType } from '../../stores/useDesktopStore';
 
 const ICONS: DesktopIconDef[] = [
@@ -68,6 +72,36 @@ const ICONS: DesktopIconDef[] = [
     windowType: 'docs',
     windowUrl: 'https://docs.rtylr.com/changelog',
     defaultPos: { x: 110, y: 376 },
+  },
+  {
+    key: 'terminal',
+    label: 'Terminal',
+    svgIcon: TerminalIcon,
+    windowType: 'terminal',
+    defaultPos: { x: 20, y: 466 },
+  },
+  {
+    key: 'snake',
+    label: 'Snake',
+    svgIcon: SnakeIcon,
+    windowType: 'snake',
+    defaultPos: { x: 110, y: 466 },
+  },
+  {
+    key: 'doom',
+    label: 'Doom',
+    svgIcon: DoomIcon,
+    windowType: 'doom',
+    windowUrl: 'https://silentspacemarine.com/',
+    defaultPos: { x: 20, y: 556 },
+  },
+  {
+    key: 'status',
+    label: 'Status',
+    svgIcon: StatusIcon,
+    windowType: 'status',
+    windowUrl: 'https://status.rtylr.com',
+    defaultPos: { x: 110, y: 556 },
   },
 ];
 

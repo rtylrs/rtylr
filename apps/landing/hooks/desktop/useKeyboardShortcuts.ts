@@ -4,6 +4,7 @@ import { useDesktopStore } from '../../stores/useDesktopStore';
 export function useKeyboardShortcuts() {
   const closeAllWindows = useDesktopStore((s) => s.closeAllWindows);
   const setExperience = useDesktopStore((s) => s.setExperience);
+  const setSpotlightOpen = useDesktopStore((s) => s.setSpotlightOpen);
 
   useEffect(() => {
     const handler = (e: KeyboardEvent) => {
@@ -15,8 +16,12 @@ export function useKeyboardShortcuts() {
         e.preventDefault();
         setExperience('website');
       }
+      if (e.metaKey && e.key === ' ') {
+        e.preventDefault();
+        setSpotlightOpen(true);
+      }
     };
     window.addEventListener('keydown', handler);
     return () => window.removeEventListener('keydown', handler);
-  }, [closeAllWindows, setExperience]);
+  }, [closeAllWindows, setExperience, setSpotlightOpen]);
 }

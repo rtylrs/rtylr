@@ -1,10 +1,12 @@
-import React, { useEffect, useState } from 'react';
+import React, { useEffect, useState, useCallback } from 'react';
 import dynamic from 'next/dynamic';
 import { useDesktopStore, Wallpaper, ColorMode } from '../../stores/useDesktopStore';
 import { MenuBar } from '../MenuBar';
 import { DesktopIcons } from './DesktopIcons';
 import { WallpaperOverlay } from './WallpaperOverlay';
 import { BottomDock } from './BottomDock';
+import { Spotlight } from './Spotlight';
+import { DesktopContextMenu } from './DesktopContextMenu';
 import { useKeyboardShortcuts } from '../../hooks/desktop/useKeyboardShortcuts';
 
 const AppWindow = dynamic(() => import('../AppWindow').then((m) => ({ default: m.AppWindow })), {
@@ -55,8 +57,14 @@ export const Desktop: React.FC = () => {
   const addWindow = useDesktopStore((s) => s.addWindow);
 
   const [systemDark, setSystemDark] = useState(false);
+  const [contextMenu, setContextMenu] = useState<{ x: number; y: number } | null>(null);
 
   useKeyboardShortcuts();
+
+  const handleContextMenu = useCallback((e: React.MouseEvent) => {
+    e.preventDefault();
+    setContextMenu({ x: e.clientX, y: e.clientY });
+  }, []);
 
   useEffect(() => {
     const mq = window.matchMedia('(prefers-color-scheme: dark)');
@@ -76,6 +84,8 @@ export const Desktop: React.FC = () => {
 
   return (
     <div
+      onContextMenu={handleContextMenu}
+      onClick={() => setContextMenu(null)}
       style={
         {
           position: 'fixed',
@@ -111,6 +121,15 @@ export const Desktop: React.FC = () => {
 
         <BottomDock />
       </div>
+
+      <Spotlight />
+      {contextMenu && (
+        <DesktopContextMenu
+          x={contextMenu.x}
+          y={contextMenu.y}
+          onClose={() => setContextMenu(null)}
+        />
+      )}
     </div>
   );
 };

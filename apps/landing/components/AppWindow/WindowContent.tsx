@@ -12,6 +12,8 @@ const SettingsWindow = lazy(() => import('../modules/SettingsWindow'));
 const AboutWindow = lazy(() => import('../modules/AboutWindow'));
 const LandingWindow = lazy(() => import('../modules/LandingWindow'));
 const PricingWindow = lazy(() => import('../modules/PricingWindow'));
+const TerminalWindow = lazy(() => import('../modules/TerminalWindow'));
+const SnakeWindow = lazy(() => import('../modules/SnakeWindow'));
 
 const LOADERS: Partial<Record<WindowType, React.LazyExoticComponent<() => React.JSX.Element>>> = {
   pos: POSWindow,
@@ -25,6 +27,8 @@ const LOADERS: Partial<Record<WindowType, React.LazyExoticComponent<() => React.
   landing: LandingWindow,
   pricing: PricingWindow,
   shortcuts: ShortcutsWindow,
+  terminal: TerminalWindow,
+  snake: SnakeWindow,
 };
 
 const Spinner = () => (
@@ -54,7 +58,7 @@ export const WindowContent: React.FC<WindowContentProps> = ({ type, url }) => {
       <iframe
         src={url}
         style={{ width: '100%', height: '100%', border: 'none', display: 'block' }}
-        sandbox="allow-scripts allow-same-origin allow-forms allow-popups"
+        sandbox="allow-scripts allow-same-origin allow-forms allow-popups allow-pointer-lock"
         title={type}
       />
     );
