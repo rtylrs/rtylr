@@ -95,7 +95,6 @@ const ICONS: DesktopIconDef[] = [
     label: 'Status',
     svgIcon: StatusIcon,
     windowType: 'status',
-    windowUrl: 'https://status.rtylr.com',
     defaultPos: { x: 88, y: 336 },
   },
 ];

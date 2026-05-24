@@ -14,6 +14,7 @@ const LandingWindow = lazy(() => import('../modules/LandingWindow'));
 const PricingWindow = lazy(() => import('../modules/PricingWindow'));
 const TerminalWindow = lazy(() => import('../modules/TerminalWindow'));
 const SnakeWindow = lazy(() => import('../modules/SnakeWindow'));
+const StatusWindow = lazy(() => import('../modules/StatusWindow'));
 
 const LOADERS: Partial<Record<WindowType, React.LazyExoticComponent<() => React.JSX.Element>>> = {
   pos: POSWindow,
@@ -29,6 +30,7 @@ const LOADERS: Partial<Record<WindowType, React.LazyExoticComponent<() => React.
   shortcuts: ShortcutsWindow,
   terminal: TerminalWindow,
   snake: SnakeWindow,
+  status: StatusWindow,
 };
 
 const Spinner = () => (
