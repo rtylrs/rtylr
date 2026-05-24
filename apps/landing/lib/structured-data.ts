@@ -215,3 +215,63 @@ export function pricingPageSchema(opts: {
     ],
   };
 }
+
+export function organizationSchema(): Record<string, unknown> {
+  return {
+    '@context': 'https://schema.org',
+    '@type': 'Organization',
+    name: 'rtylr',
+    url: BASE,
+    logo: `${BASE}/favicon/android-chrome-512x512.png`,
+    description:
+      'All-in-one business OS for modern teams. POS, ERP, CRM, HR, Finance, and Flow in a single platform.',
+    foundingDate: '2024',
+    sameAs: ['https://voxire.com'],
+    contactPoint: {
+      '@type': 'ContactPoint',
+      contactType: 'customer support',
+      email: 'info@voxire.com',
+      availableLanguage: ['English', 'Arabic', 'French'],
+    },
+  };
+}
+
+export function webSiteSchema(): Record<string, unknown> {
+  return {
+    '@context': 'https://schema.org',
+    '@type': 'WebSite',
+    name: 'rtylr',
+    url: BASE,
+    description: 'Your entire business, one platform.',
+    publisher: { '@type': 'Organization', name: 'rtylr', url: BASE },
+    potentialAction: {
+      '@type': 'SearchAction',
+      target: { '@type': 'EntryPoint', urlTemplate: `${BASE}/search?q={search_term_string}` },
+      'query-input': 'required name=search_term_string',
+    },
+  };
+}
+
+export function webPageSchema(opts: {
+  name: string;
+  path: string;
+  description: string;
+}): Record<string, unknown> {
+  return {
+    '@context': 'https://schema.org',
+    '@graph': [
+      {
+        '@type': 'WebPage',
+        name: opts.name,
+        url: `${BASE}${opts.path}`,
+        description: opts.description,
+        isPartOf: { '@type': 'WebSite', name: 'rtylr', url: BASE },
+        publisher: ORG,
+      },
+      breadcrumbList([
+        { label: 'rtylr', path: '/' },
+        { label: opts.name, path: opts.path },
+      ]),
+    ],
+  };
+}

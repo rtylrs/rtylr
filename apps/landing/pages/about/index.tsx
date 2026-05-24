@@ -6,6 +6,7 @@ import { navigateExternal } from '../../lib/navigation';
 import AppLayout from '../../components/Layout/AppLayout';
 import MainLayout from '../../layouts/Main/MainLayout';
 import HelmetContainer from '../../components/HelmetContainer';
+import { organizationSchema } from '../../lib/structured-data';
 import {
   blurFadeIn,
   staggerBlur,
@@ -67,9 +68,10 @@ const AboutPage = (): JSX.Element => {
     <AppLayout>
       <MainLayout>
         <HelmetContainer
-          title="About | rtylr"
+          title="About rtylr · The All-in-One Business OS for Modern Teams"
           description="We're building the operating system for commerce. One platform for POS, ERP, HR, CRM, Finance, Flow, and Insights."
           canonical="https://rtylr.com/about/"
+          structuredData={organizationSchema()}
         />
 
         <div className={styles.aboutPage}>

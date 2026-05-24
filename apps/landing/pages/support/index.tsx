@@ -18,6 +18,7 @@ import {
 import AppLayout from '../../components/Layout/AppLayout';
 import MainLayout from '../../layouts/Main/MainLayout';
 import HelmetContainer from '../../components/HelmetContainer';
+import { webPageSchema } from '../../lib/structured-data';
 import { blurFadeIn, staggerBlur, viewportOnce } from '../../lib/animations';
 import styles from './support.module.scss';
 
@@ -145,9 +146,15 @@ const SupportPage = (): JSX.Element => {
     <AppLayout>
       <MainLayout>
         <HelmetContainer
-          title="Help Center | rtylr"
+          title="Help Center · Guides, Billing & Support | rtylr"
           description="Getting started, billing, team, configuration, integrations, security, everything you need to use rtylr."
           canonical="https://rtylr.com/support/"
+          structuredData={webPageSchema({
+            name: 'Help Center',
+            path: '/support/',
+            description:
+              'Getting started, billing, team, configuration, integrations, security, everything you need to use rtylr.',
+          })}
         />
 
         <div className={styles.page}>

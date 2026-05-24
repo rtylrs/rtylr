@@ -16,6 +16,7 @@ import {
 import AppLayout from '../../components/Layout/AppLayout';
 import MainLayout from '../../layouts/Main/MainLayout';
 import HelmetContainer from '../../components/HelmetContainer';
+import { webPageSchema } from '../../lib/structured-data';
 import { APP_URLS } from '@voxire/config';
 import { navigateExternal } from '../../lib/navigation';
 import { blurFadeIn, staggerBlur, viewportOnce } from '../../lib/animations';
@@ -216,9 +217,15 @@ const IntegrationsPage = (): JSX.Element => {
     <AppLayout>
       <MainLayout>
         <HelmetContainer
-          title="Integrations | rtylr"
+          title="Integrations · Payments, Accounting & 100+ App Connections | rtylr"
           description="Every service rtylr connects to, payments, accounting, delivery, comms, hardware, and productivity."
           canonical="https://rtylr.com/integrations/"
+          structuredData={webPageSchema({
+            name: 'Integrations',
+            path: '/integrations/',
+            description:
+              'Every service rtylr connects to, payments, accounting, delivery, comms, hardware, and productivity.',
+          })}
         />
 
         <div className={styles.page}>

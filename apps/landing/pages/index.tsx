@@ -3,6 +3,7 @@ import dynamic from 'next/dynamic';
 import AppLayout from '../components/Layout/AppLayout';
 import MainLayout from '../layouts/Main/MainLayout';
 import HelmetContainer from '../components/HelmetContainer';
+import { webSiteSchema, organizationSchema } from '../lib/structured-data';
 import HeroSection from '../components/home/HeroSection/HeroSection';
 import ProductsSection from '../components/home/ProductsSection/ProductsSection';
 import ParallaxShowcase from '../components/home/ParallaxShowcase/ParallaxShowcase';
@@ -36,6 +37,10 @@ const SEO_PROPS = {
   twitterCard: 'summary_large_image' as const,
   keywords:
     'POS, ERP, HR, CRM, Finance, Flow, business OS, inventory management, payroll, loyalty programs, invoicing, project management, restaurant software, retail software, AI',
+  structuredData: {
+    '@context': 'https://schema.org',
+    '@graph': [webSiteSchema(), organizationSchema()],
+  },
 };
 
 const WebsiteContent = (): JSX.Element => (

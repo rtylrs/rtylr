@@ -16,6 +16,7 @@ import type { LucideIcon } from 'lucide-react';
 import AppLayout from '../../components/Layout/AppLayout';
 import MainLayout from '../../layouts/Main/MainLayout';
 import HelmetContainer from '../../components/HelmetContainer';
+import { webPageSchema } from '../../lib/structured-data';
 import { blurFadeIn, staggerBlur, viewportOnce } from '../../lib/animations';
 import styles from './hardware.module.scss';
 
@@ -107,9 +108,15 @@ const HardwarePage = (): JSX.Element => {
     <AppLayout>
       <MainLayout>
         <HelmetContainer
-          title="Hardware | rtylr"
+          title="Hardware · Certified POS Terminals, Printers & Peripherals | rtylr"
           description="Tested and certified hardware ecosystem designed for rtylr POS. Every device is optimized out of the box."
           canonical="https://rtylr.com/hardware/"
+          structuredData={webPageSchema({
+            name: 'Hardware',
+            path: '/hardware/',
+            description:
+              'Tested and certified hardware ecosystem designed for rtylr POS. Every device is optimized out of the box.',
+          })}
         />
 
         <div className={styles.hardwarePage}>
