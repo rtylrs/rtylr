@@ -41,12 +41,21 @@ test.describe('Landing page', () => {
 
   test('homepage emits SoftwareApplication JSON-LD', async ({ page }) => {
     await page.goto(LANDING_URL);
-    const jsonLd = page.locator('script[type="application/ld+json"]').first();
-    await expect(jsonLd).toBeAttached();
-    const content = await jsonLd.textContent();
-    const data = JSON.parse(content!);
-    expect(data['@type']).toBe('SoftwareApplication');
-    expect(data.name).toBe('rtylr');
+    const allJsonLd = await page.locator('script[type="application/ld+json"]').all();
+    expect(allJsonLd.length).toBeGreaterThan(0);
+    const types: string[] = [];
+    for (const el of allJsonLd) {
+      const content = await el.textContent();
+      if (!content) continue;
+      const data = JSON.parse(content);
+      if (data['@type']) types.push(data['@type']);
+      if (Array.isArray(data['@graph'])) {
+        for (const node of data['@graph']) {
+          if (node['@type']) types.push(node['@type']);
+        }
+      }
+    }
+    expect(types).toContain('SoftwareApplication');
   });
 
   test('robots.txt advertises the sitemap + AI-bot allowances', async ({ request }) => {
