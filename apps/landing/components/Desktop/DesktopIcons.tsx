@@ -87,7 +87,6 @@ const ICONS: DesktopIconDef[] = [
     label: 'Doom',
     svgIcon: DoomIcon,
     windowType: 'doom',
-    windowUrl: 'https://archive.org/embed/doom-1993',
     defaultPos: { x: 16, y: 336 },
   },
   {

@@ -1,4 +1,4 @@
-import React, { Suspense, lazy } from 'react';
+import React, { Suspense, lazy, Component } from 'react';
 import { WindowType } from '../../stores/useDesktopStore';
 
 const POSWindow = lazy(() => import('../modules/POSWindow'));
@@ -15,6 +15,7 @@ const PricingWindow = lazy(() => import('../modules/PricingWindow'));
 const TerminalWindow = lazy(() => import('../modules/TerminalWindow'));
 const SnakeWindow = lazy(() => import('../modules/SnakeWindow'));
 const StatusWindow = lazy(() => import('../modules/StatusWindow'));
+const DoomWindow = lazy(() => import('../modules/DoomWindow'));
 
 const LOADERS: Partial<Record<WindowType, React.LazyExoticComponent<() => React.JSX.Element>>> = {
   pos: POSWindow,
@@ -31,6 +32,7 @@ const LOADERS: Partial<Record<WindowType, React.LazyExoticComponent<() => React.
   terminal: TerminalWindow,
   snake: SnakeWindow,
   status: StatusWindow,
+  doom: DoomWindow,
 };
 
 const Spinner = () => (
@@ -44,9 +46,57 @@ const Spinner = () => (
       fontSize: 13,
     }}
   >
-    Loading…
+    Loading...
   </div>
 );
+
+const ChunkError = () => (
+  <div
+    style={{
+      display: 'flex',
+      flexDirection: 'column',
+      alignItems: 'center',
+      justifyContent: 'center',
+      height: '100%',
+      gap: 12,
+      color: 'rgba(255,255,255,0.4)',
+      fontSize: 13,
+    }}
+  >
+    <span>Failed to load window.</span>
+    <button
+      onClick={() => window.location.reload()}
+      style={{
+        fontSize: 12,
+        color: 'rgba(255,255,255,0.5)',
+        background: 'none',
+        border: '1px solid rgba(255,255,255,0.15)',
+        borderRadius: 6,
+        padding: '6px 14px',
+        cursor: 'pointer',
+      }}
+    >
+      Reload page
+    </button>
+  </div>
+);
+
+interface BoundaryState {
+  error: boolean;
+}
+
+class ChunkErrorBoundary extends Component<React.PropsWithChildren, BoundaryState> {
+  state: BoundaryState = { error: false };
+
+  static getDerivedStateFromError(): BoundaryState {
+    return { error: true };
+  }
+
+  render() {
+    if (this.state.error) return <ChunkError />;
+    return this.props.children;
+  }
+}
 
 interface WindowContentProps {
   type: WindowType;
@@ -54,7 +104,6 @@ interface WindowContentProps {
 }
 
 export const WindowContent: React.FC<WindowContentProps> = ({ type, url }) => {
-  // If a URL is provided, render an iframe (used for docs, about, changelog, blog, etc.)
   if (url) {
     return (
       <iframe
@@ -66,12 +115,14 @@ export const WindowContent: React.FC<WindowContentProps> = ({ type, url }) => {
     );
   }
 
-  const Component = LOADERS[type];
-  if (!Component) return <Spinner />;
+  const WindowComponent = LOADERS[type];
+  if (!WindowComponent) return <Spinner />;
 
   return (
-    <Suspense fallback={<Spinner />}>
-      <Component />
-    </Suspense>
+    <ChunkErrorBoundary>
+      <Suspense fallback={<Spinner />}>
+        <WindowComponent />
+      </Suspense>
+    </ChunkErrorBoundary>
   );
 };
