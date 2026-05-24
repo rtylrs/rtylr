@@ -13,7 +13,11 @@ export type WindowType =
   | 'docs'
   | 'pricing'
   | 'landing'
-  | 'shortcuts';
+  | 'shortcuts'
+  | 'terminal'
+  | 'doom'
+  | 'status'
+  | 'snake';
 export type Experience = 'os' | 'website';
 export type ColorMode = 'system' | 'light' | 'dark';
 export type Wallpaper = 'midnight' | 'aurora' | 'dusk' | 'slate' | 'forest';
@@ -39,8 +43,10 @@ interface DesktopState {
   colorMode: ColorMode;
   wallpaper: Wallpaper;
   animationsEnabled: boolean;
+  spotlightOpen: boolean;
 
   addWindow: (type: WindowType, url?: string) => void;
+  setSpotlightOpen: (v: boolean) => void;
   closeWindow: (id: string) => void;
   bringToFront: (id: string) => void;
   minimizeWindow: (id: string) => void;
@@ -68,6 +74,10 @@ const WINDOW_DEFAULTS: Record<WindowType, { title: string; width: number; height
   pricing: { title: 'Pricing', width: 860, height: 580 },
   landing: { title: 'rtylr.com', width: 1100, height: 760 },
   shortcuts: { title: 'Keyboard Shortcuts', width: 480, height: 460 },
+  terminal: { title: 'Terminal', width: 700, height: 460 },
+  doom: { title: 'Doom', width: 860, height: 580 },
+  status: { title: 'System Status', width: 860, height: 560 },
+  snake: { title: 'Snake', width: 520, height: 520 },
 };
 
 let idCounter = 0;
@@ -82,6 +92,7 @@ export const useDesktopStore = create<DesktopState>()(
       colorMode: 'system',
       wallpaper: 'slate',
       animationsEnabled: true,
+      spotlightOpen: false,
 
       addWindow: (type, url?) => {
         const existing = get().windows.find((w) => w.type === type);
@@ -169,6 +180,7 @@ export const useDesktopStore = create<DesktopState>()(
       setColorMode: (colorMode) => set({ colorMode }),
       setWallpaper: (wallpaper) => set({ wallpaper }),
       setAnimationsEnabled: (animationsEnabled) => set({ animationsEnabled }),
+      setSpotlightOpen: (spotlightOpen) => set({ spotlightOpen }),
       setIconPosition: (key, pos) =>
         set((s) => ({ iconPositions: { ...s.iconPositions, [key]: pos } })),
     }),
