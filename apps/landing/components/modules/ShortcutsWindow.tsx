@@ -1,12 +1,14 @@
 import React from 'react';
 
 const SHORTCUTS = [
+  { keys: ['⌘', 'Space'], desc: 'Open Spotlight search' },
   { keys: ['Shift', 'M'], desc: 'Toggle OS / Website mode' },
   { keys: ['Shift', 'X'], desc: 'Close all windows' },
   { keys: ['⌘', 'W'], desc: 'Close focused window' },
   { keys: ['⌘', 'M'], desc: 'Minimize focused window' },
   { keys: ['⌘', ','], desc: 'Open Display Options' },
   { keys: ['⌘', 'K'], desc: 'Open Keyboard Shortcuts' },
+  { keys: ['Right-click'], desc: 'Desktop context menu' },
 ];
 
 export default function ShortcutsWindow(): React.JSX.Element {

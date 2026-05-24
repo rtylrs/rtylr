@@ -16,30 +16,25 @@ import { StatusIcon } from './icons/StatusIcon';
 import { SnakeIcon } from './icons/SnakeIcon';
 import { WindowType } from '../../stores/useDesktopStore';
 
+// 3-column grid: col1=x:16, col2=x:88, col3=x:160, row-height=80px -> max ~412px total
 const ICONS: DesktopIconDef[] = [
-  {
-    key: 'pos',
-    label: 'POS',
-    svgIcon: POSIcon,
-    windowType: 'pos',
-    defaultPos: { x: 20, y: 16 },
-  },
-  { key: 'erp', label: 'ERP', svgIcon: ERPIcon, windowType: 'erp', defaultPos: { x: 110, y: 16 } },
-  { key: 'crm', label: 'CRM', svgIcon: CRMIcon, windowType: 'crm', defaultPos: { x: 20, y: 106 } },
-  { key: 'hr', label: 'HR', svgIcon: HRIcon, windowType: 'hr', defaultPos: { x: 110, y: 106 } },
+  { key: 'pos', label: 'POS', svgIcon: POSIcon, windowType: 'pos', defaultPos: { x: 16, y: 16 } },
+  { key: 'erp', label: 'ERP', svgIcon: ERPIcon, windowType: 'erp', defaultPos: { x: 88, y: 16 } },
+  { key: 'crm', label: 'CRM', svgIcon: CRMIcon, windowType: 'crm', defaultPos: { x: 160, y: 16 } },
+  { key: 'hr', label: 'HR', svgIcon: HRIcon, windowType: 'hr', defaultPos: { x: 16, y: 96 } },
   {
     key: 'finance',
     label: 'Finance',
     svgIcon: FinanceIcon,
     windowType: 'finance',
-    defaultPos: { x: 20, y: 196 },
+    defaultPos: { x: 88, y: 96 },
   },
   {
     key: 'flow',
     label: 'Flow',
     svgIcon: FlowIcon,
     windowType: 'flow',
-    defaultPos: { x: 110, y: 196 },
+    defaultPos: { x: 160, y: 96 },
   },
   {
     key: 'pricing',
@@ -47,7 +42,7 @@ const ICONS: DesktopIconDef[] = [
     svgIcon: PricingIcon,
     windowType: 'pricing',
     windowUrl: '/pricing?embed=1',
-    defaultPos: { x: 20, y: 286 },
+    defaultPos: { x: 16, y: 176 },
   },
   {
     key: 'docs',
@@ -55,7 +50,7 @@ const ICONS: DesktopIconDef[] = [
     svgIcon: DocsIcon,
     windowType: 'docs',
     windowUrl: 'https://docs.rtylr.com',
-    defaultPos: { x: 110, y: 286 },
+    defaultPos: { x: 88, y: 176 },
   },
   {
     key: 'blog',
@@ -63,7 +58,7 @@ const ICONS: DesktopIconDef[] = [
     svgIcon: BlogIcon,
     windowType: 'docs',
     windowUrl: 'https://blog.rtylr.com',
-    defaultPos: { x: 20, y: 376 },
+    defaultPos: { x: 160, y: 176 },
   },
   {
     key: 'changelog',
@@ -71,29 +66,29 @@ const ICONS: DesktopIconDef[] = [
     svgIcon: ChangelogIcon,
     windowType: 'docs',
     windowUrl: 'https://docs.rtylr.com/changelog',
-    defaultPos: { x: 110, y: 376 },
+    defaultPos: { x: 16, y: 256 },
   },
   {
     key: 'terminal',
     label: 'Terminal',
     svgIcon: TerminalIcon,
     windowType: 'terminal',
-    defaultPos: { x: 20, y: 466 },
+    defaultPos: { x: 88, y: 256 },
   },
   {
     key: 'snake',
     label: 'Snake',
     svgIcon: SnakeIcon,
     windowType: 'snake',
-    defaultPos: { x: 110, y: 466 },
+    defaultPos: { x: 160, y: 256 },
   },
   {
     key: 'doom',
     label: 'Doom',
     svgIcon: DoomIcon,
     windowType: 'doom',
-    windowUrl: 'https://silentspacemarine.com/',
-    defaultPos: { x: 20, y: 556 },
+    windowUrl: 'https://archive.org/embed/doom-1993',
+    defaultPos: { x: 16, y: 336 },
   },
   {
     key: 'status',
@@ -101,7 +96,7 @@ const ICONS: DesktopIconDef[] = [
     svgIcon: StatusIcon,
     windowType: 'status',
     windowUrl: 'https://status.rtylr.com',
-    defaultPos: { x: 110, y: 556 },
+    defaultPos: { x: 88, y: 336 },
   },
 ];
 
