@@ -65,11 +65,11 @@ function runCommand(
   }
 
   if (lower === 'cat pricing.txt') {
-    return 'rtylr starts at $49/mo — everything your business needs, one flat price. Visit /pricing for details.';
+    return 'rtylr starts at $49/mo - everything your business needs, one flat price. Visit /pricing for details.';
   }
 
   if (lower === 'cat about.txt') {
-    return 'rtylr is an all-in-one business OS — POS, ERP, CRM, HR, Finance & Flow — built for modern retail and hospitality.';
+    return 'rtylr is an all-in-one business OS - POS, ERP, CRM, HR, Finance & Flow - built for modern retail and hospitality.';
   }
 
   if (lower === 'ping rtylr.com') {
@@ -138,7 +138,7 @@ function runCommand(
 export default function TerminalWindow() {
   const addWindow = useDesktopStore((s) => s.addWindow);
   const [history, setHistory] = useState<HistoryEntry[]>([
-    { type: 'output', text: 'rtylr Terminal v1.0 — type "help" for commands' },
+    { type: 'output', text: 'rtylr Terminal v1.0 - type "help" for commands' },
   ]);
   const [input, setInput] = useState('');
   const [cmdHistory, setCmdHistory] = useState<string[]>([]);
