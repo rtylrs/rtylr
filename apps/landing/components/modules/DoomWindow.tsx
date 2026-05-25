@@ -1,69 +1,84 @@
-import React, { useEffect, useRef } from 'react';
+import React from 'react';
 
-const JSDOS_JS = 'https://v8.js-dos.com/latest/js-dos.js';
-const JSDOS_CSS = 'https://v8.js-dos.com/latest/js-dos.css';
-const DOOM_BUNDLE =
-  'https://cdn.dos.zone/original/2X/1/11fc26d58f8869aee0e34ce2bb1f4b04543ee2b3.jsdos';
-
-declare global {
-  interface Window {
-    // eslint-disable-next-line @typescript-eslint/no-explicit-any
-    Dos?: (el: HTMLElement, opts: Record<string, unknown>) => void;
-  }
-}
+const DOOM_URL = 'https://archive.org/embed/doom-1993';
 
 export default function DoomWindow(): React.JSX.Element {
-  const containerRef = useRef<HTMLDivElement>(null);
-  const initializedRef = useRef(false);
-
-  useEffect(() => {
-    if (initializedRef.current) return;
-
-    let cssEl: HTMLLinkElement | null = null;
-    let scriptEl: HTMLScriptElement | null = null;
-
-    const initDos = (): void => {
-      if (!containerRef.current || !window.Dos) return;
-      initializedRef.current = true;
-      window.Dos(containerRef.current, {
-        url: DOOM_BUNDLE,
-        theme: 'dark',
-        noCloud: true,
-      });
-    };
-
-    if (!document.querySelector(`link[href="${JSDOS_CSS}"]`)) {
-      cssEl = document.createElement('link');
-      cssEl.rel = 'stylesheet';
-      cssEl.href = JSDOS_CSS;
-      document.head.appendChild(cssEl);
-    }
-
-    if (window.Dos) {
-      initDos();
-    } else if (!document.querySelector(`script[src="${JSDOS_JS}"]`)) {
-      scriptEl = document.createElement('script');
-      scriptEl.src = JSDOS_JS;
-      scriptEl.onload = initDos;
-      document.head.appendChild(scriptEl);
-    } else {
-      const poll = setInterval(() => {
-        if (window.Dos) {
-          clearInterval(poll);
-          initDos();
-        }
-      }, 100);
-    }
-
-    return () => {
-      initializedRef.current = false;
-    };
-  }, []);
-
   return (
     <div
-      ref={containerRef}
-      style={{ width: '100%', height: '100%', background: '#000', display: 'block' }}
-    />
+      style={{
+        height: '100%',
+        background: '#000',
+        color: '#fff',
+        fontFamily: 'monospace',
+        display: 'flex',
+        flexDirection: 'column',
+        alignItems: 'center',
+        justifyContent: 'center',
+        gap: 24,
+        userSelect: 'none',
+      }}
+    >
+      <pre
+        style={{
+          color: '#b91c1c',
+          fontSize: 10,
+          lineHeight: 1.2,
+          letterSpacing: 1,
+          textAlign: 'center',
+          margin: 0,
+        }}
+      >
+        {[
+          ' ####   #####   #####  ##   ##',
+          ' ## ##  ##  ##  ## ##  ### ###',
+          ' ##  ## #####   ##  ## ## # ##',
+          ' ## ##  ##  ##  ## ##  ##   ##',
+          ' ####   ##  ##  #####  ##   ##',
+        ].join('\n')}
+      </pre>
+
+      <div style={{ color: 'rgba(255,255,255,0.35)', fontSize: 11, letterSpacing: 2 }}>
+        ID SOFTWARE 1993
+      </div>
+
+      <div style={{ display: 'flex', flexDirection: 'column', alignItems: 'center', gap: 10 }}>
+        <a
+          href={DOOM_URL}
+          target="_blank"
+          rel="noreferrer"
+          style={{
+            display: 'inline-block',
+            padding: '10px 28px',
+            background: '#b91c1c',
+            color: '#fff',
+            fontFamily: 'monospace',
+            fontSize: 13,
+            fontWeight: 700,
+            letterSpacing: 2,
+            textDecoration: 'none',
+            borderRadius: 4,
+          }}
+        >
+          PLAY DOOM
+        </a>
+        <span style={{ color: 'rgba(255,255,255,0.2)', fontSize: 10 }}>
+          Opens in a new tab (Internet Archive)
+        </span>
+      </div>
+
+      <div
+        style={{
+          borderTop: '1px solid rgba(255,255,255,0.07)',
+          paddingTop: 20,
+          color: 'rgba(255,255,255,0.25)',
+          fontSize: 10,
+          letterSpacing: 1,
+          textAlign: 'center',
+          lineHeight: 2,
+        }}
+      >
+        WASD / ARROW KEYS TO MOVE &nbsp; CTRL TO SHOOT &nbsp; SPACE TO USE
+      </div>
+    </div>
   );
 }

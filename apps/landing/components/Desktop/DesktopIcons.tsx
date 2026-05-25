@@ -16,27 +16,24 @@ import { StatusIcon } from './icons/StatusIcon';
 import { SnakeIcon } from './icons/SnakeIcon';
 import { WindowType } from '../../stores/useDesktopStore';
 
-// 2-column grid anchored to bottom-left.
-// col1=x:8, col2=x:80, row-height=80px, rows read top-to-bottom within the container.
-// Container sits at bottom of desktop so these positions are container-relative.
 const ICONS: DesktopIconDef[] = [
-  { key: 'pos', label: 'POS', svgIcon: POSIcon, windowType: 'pos', defaultPos: { x: 8, y: 0 } },
-  { key: 'erp', label: 'ERP', svgIcon: ERPIcon, windowType: 'erp', defaultPos: { x: 80, y: 0 } },
-  { key: 'crm', label: 'CRM', svgIcon: CRMIcon, windowType: 'crm', defaultPos: { x: 8, y: 80 } },
-  { key: 'hr', label: 'HR', svgIcon: HRIcon, windowType: 'hr', defaultPos: { x: 80, y: 80 } },
+  { key: 'pos', label: 'POS', svgIcon: POSIcon, windowType: 'pos', defaultPos: { x: 0, y: 0 } },
+  { key: 'erp', label: 'ERP', svgIcon: ERPIcon, windowType: 'erp', defaultPos: { x: 0, y: 0 } },
+  { key: 'crm', label: 'CRM', svgIcon: CRMIcon, windowType: 'crm', defaultPos: { x: 0, y: 0 } },
+  { key: 'hr', label: 'HR', svgIcon: HRIcon, windowType: 'hr', defaultPos: { x: 0, y: 0 } },
   {
     key: 'finance',
     label: 'Finance',
     svgIcon: FinanceIcon,
     windowType: 'finance',
-    defaultPos: { x: 8, y: 160 },
+    defaultPos: { x: 0, y: 0 },
   },
   {
     key: 'flow',
     label: 'Flow',
     svgIcon: FlowIcon,
     windowType: 'flow',
-    defaultPos: { x: 80, y: 160 },
+    defaultPos: { x: 0, y: 0 },
   },
   {
     key: 'pricing',
@@ -44,7 +41,7 @@ const ICONS: DesktopIconDef[] = [
     svgIcon: PricingIcon,
     windowType: 'pricing',
     windowUrl: '/pricing?embed=1',
-    defaultPos: { x: 8, y: 240 },
+    defaultPos: { x: 0, y: 0 },
   },
   {
     key: 'docs',
@@ -52,7 +49,7 @@ const ICONS: DesktopIconDef[] = [
     svgIcon: DocsIcon,
     windowType: 'docs',
     windowUrl: 'https://docs.rtylr.com',
-    defaultPos: { x: 80, y: 240 },
+    defaultPos: { x: 0, y: 0 },
   },
   {
     key: 'blog',
@@ -60,7 +57,7 @@ const ICONS: DesktopIconDef[] = [
     svgIcon: BlogIcon,
     windowType: 'docs',
     windowUrl: 'https://blog.rtylr.com',
-    defaultPos: { x: 8, y: 320 },
+    defaultPos: { x: 0, y: 0 },
   },
   {
     key: 'changelog',
@@ -68,48 +65,52 @@ const ICONS: DesktopIconDef[] = [
     svgIcon: ChangelogIcon,
     windowType: 'docs',
     windowUrl: 'https://docs.rtylr.com/changelog',
-    defaultPos: { x: 80, y: 320 },
+    defaultPos: { x: 0, y: 0 },
   },
   {
     key: 'terminal',
     label: 'Terminal',
     svgIcon: TerminalIcon,
     windowType: 'terminal',
-    defaultPos: { x: 8, y: 400 },
+    defaultPos: { x: 0, y: 0 },
   },
   {
     key: 'snake',
     label: 'Snake',
     svgIcon: SnakeIcon,
     windowType: 'snake',
-    defaultPos: { x: 80, y: 400 },
+    defaultPos: { x: 0, y: 0 },
   },
   {
     key: 'doom',
     label: 'Doom',
     svgIcon: DoomIcon,
     windowType: 'doom',
-    defaultPos: { x: 8, y: 480 },
+    defaultPos: { x: 0, y: 0 },
   },
   {
     key: 'status',
     label: 'Status',
     svgIcon: StatusIcon,
     windowType: 'status',
-    defaultPos: { x: 80, y: 480 },
+    defaultPos: { x: 0, y: 0 },
   },
 ];
 
-// Container anchored to bottom-left. Icons position themselves absolutely within it.
-// Height = 7 rows × 80px + icon height (~60px) = 620px so all icons fit.
+// Flex column that wraps to a second column when icons overflow the desktop height.
+// Icons fill top-to-bottom in col 1, overflow goes to col 2.
 export const DesktopIcons: React.FC = () => (
   <div
     style={{
       position: 'absolute',
-      bottom: 24,
+      top: 16,
       left: 16,
-      width: 152,
-      height: 560,
+      bottom: 16,
+      display: 'flex',
+      flexDirection: 'column',
+      flexWrap: 'wrap',
+      alignContent: 'flex-start',
+      gap: '4px 8px',
       pointerEvents: 'none',
     }}
   >

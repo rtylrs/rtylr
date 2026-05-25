@@ -65,6 +65,7 @@ export const TitleBar: React.FC<TitleBarProps> = ({
         style={{ display: 'flex', gap: 6, marginRight: 4 }}
         onMouseEnter={() => setGroupHovered(true)}
         onMouseLeave={() => setGroupHovered(false)}
+        onMouseDown={(e) => e.stopPropagation()}
       >
         <button
           onClick={(e) => {

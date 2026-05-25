@@ -17,55 +17,9 @@ interface DraggableIconProps {
 
 export const DraggableIcon: React.FC<DraggableIconProps> = ({ def }) => {
   const addWindow = useDesktopStore((s) => s.addWindow);
-  const iconPositions = useDesktopStore((s) => s.iconPositions);
-  const setIconPosition = useDesktopStore((s) => s.setIconPosition);
-
-  const pos = iconPositions[def.key] ?? def.defaultPos;
-
-  const dragging = useRef(false);
   const hasDragged = useRef(false);
-  const startMouse = useRef({ x: 0, y: 0 });
-  const startPos = useRef({ x: 0, y: 0 });
-  const [isDragging, setIsDragging] = useState(false);
-  const [currentPos, setCurrentPos] = useState(pos);
+  const [active, setActive] = useState(false);
   const SvgIcon = def.svgIcon;
-
-  const handleMouseDown = useCallback(
-    (e: React.MouseEvent) => {
-      e.preventDefault();
-      dragging.current = true;
-      hasDragged.current = false;
-      startMouse.current = { x: e.clientX, y: e.clientY };
-      startPos.current = currentPos;
-
-      const onMove = (ev: MouseEvent) => {
-        if (!dragging.current) return;
-        const dx = ev.clientX - startMouse.current.x;
-        const dy = ev.clientY - startMouse.current.y;
-        if (Math.abs(dx) > 4 || Math.abs(dy) > 4) {
-          hasDragged.current = true;
-          setIsDragging(true);
-        }
-        if (hasDragged.current) {
-          setCurrentPos({ x: startPos.current.x + dx, y: startPos.current.y + dy });
-        }
-      };
-
-      const onUp = () => {
-        dragging.current = false;
-        setIsDragging(false);
-        if (hasDragged.current) {
-          setIconPosition(def.key, currentPos);
-        }
-        window.removeEventListener('mousemove', onMove);
-        window.removeEventListener('mouseup', onUp);
-      };
-
-      window.addEventListener('mousemove', onMove);
-      window.addEventListener('mouseup', onUp);
-    },
-    [currentPos, def.key, setIconPosition]
-  );
 
   const handleClick = useCallback(() => {
     if (hasDragged.current) return;
@@ -75,30 +29,28 @@ export const DraggableIcon: React.FC<DraggableIconProps> = ({ def }) => {
 
   return (
     <div
-      onMouseDown={handleMouseDown}
       onClick={handleClick}
+      onMouseDown={() => setActive(true)}
+      onMouseUp={() => setActive(false)}
+      onMouseLeave={() => setActive(false)}
       style={{
-        position: 'absolute',
-        left: currentPos.x,
-        top: currentPos.y,
         display: 'flex',
         flexDirection: 'column',
         alignItems: 'center',
         gap: 5,
-        cursor: isDragging ? 'grabbing' : 'pointer',
+        cursor: 'pointer',
         userSelect: 'none',
-        width: 64,
-        zIndex: isDragging ? 599 : 50,
+        width: 72,
+        flexShrink: 0,
         pointerEvents: 'auto',
+        padding: '6px 4px',
       }}
     >
       <div
         style={{
-          transform: isDragging ? 'scale(1.1) translateY(-4px)' : 'scale(1)',
-          transition: isDragging ? 'none' : 'transform 0.12s ease',
-          filter: isDragging
-            ? 'drop-shadow(0 12px 20px rgba(0,0,0,0.6))'
-            : 'drop-shadow(0 3px 8px rgba(0,0,0,0.4))',
+          transform: active ? 'scale(0.92)' : 'scale(1)',
+          transition: 'transform 0.1s ease',
+          filter: 'drop-shadow(0 3px 8px rgba(0,0,0,0.4))',
         }}
       >
         <SvgIcon size={52} />
@@ -112,7 +64,7 @@ export const DraggableIcon: React.FC<DraggableIconProps> = ({ def }) => {
           textAlign: 'center',
           lineHeight: 1.3,
           textShadow: '0 1px 5px rgba(0,0,0,0.9)',
-          maxWidth: 64,
+          maxWidth: 68,
           overflow: 'hidden',
           whiteSpace: 'nowrap',
           textOverflow: 'ellipsis',
