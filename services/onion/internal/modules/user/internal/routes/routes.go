@@ -87,4 +87,18 @@ func RegisterRoutes(ctx context.Context, router *chi.Mux, userService *applicati
 		handlers.DeleteAccountRoutes(),
 		&handlers.DeleteAccountHandler{UserService: userService},
 	)
+
+	http.RegisterPOSTWithValidationAndMiddleware[handlers.PasswordResetRequestBody, handlers.PasswordResetRequestResponse](
+		ctx,
+		router,
+		handlers.PasswordResetRequestRoutes(),
+		&handlers.PasswordResetRequestHandler{UserService: userService},
+		http.PerRouteRateLimit(3, time.Minute),
+	)
+	http.RegisterPOSTWithValidation[handlers.PasswordResetConfirmBody, handlers.PasswordResetConfirmResponse](
+		ctx,
+		router,
+		handlers.PasswordResetConfirmRoutes(),
+		&handlers.PasswordResetConfirmHandler{UserService: userService},
+	)
 }
