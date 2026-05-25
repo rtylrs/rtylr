@@ -57,6 +57,7 @@ require (
 	github.com/google/go-querystring v1.2.0 // indirect
 	github.com/klauspost/compress v1.18.5 // indirect
 	github.com/leodido/go-urn v1.4.0 // indirect
+	github.com/workos/workos-go/v4 v4.46.1 // indirect
 )
 
 require (

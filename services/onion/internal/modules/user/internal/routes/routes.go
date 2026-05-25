@@ -41,7 +41,7 @@ func RegisterRoutes(ctx context.Context, router *chi.Mux, userService *applicati
 		&handlers.LoginHandler{UserService: userService, ProvisionerResolver: provisionerResolver, OnUserLogin: userLoginCb},
 		http.PerRouteRateLimit(5, time.Minute),
 	)
-	// Google auth shares the tighter auth-endpoint budget — same
+	// Google auth shares the tighter auth-endpoint budget -- same
 	// 5/min/IP as /login. Both the login-by-google and signup-by-google
 	// branches land in this handler.
 	http.RegisterPOSTWithValidationAndMiddleware[handlers.GoogleAuthRequest, handlers.GoogleAuthResponse](
@@ -50,6 +50,14 @@ func RegisterRoutes(ctx context.Context, router *chi.Mux, userService *applicati
 		handlers.GoogleAuthRoutes(),
 		&handlers.GoogleAuthHandler{UserService: userService, OnUserCreated: userCreatedCb, OnUserLogin: userLoginCb},
 		http.PerRouteRateLimit(5, time.Minute),
+	)
+	// GET /auth/google/authorize -- returns the WorkOS Google OAuth consent URL.
+	// No rate-limit beyond global; the response is just a redirect URL.
+	http.RegisterGET[handlers.GoogleAuthorizeRequest, handlers.GoogleAuthorizeResponse](
+		ctx,
+		router,
+		handlers.GoogleAuthorizeRoutes(),
+		&handlers.GoogleAuthorizeHandler{UserService: userService},
 	)
 
 	http.RegisterGET[handlers.GetProfileRequest, handlers.GetProfileResponse](

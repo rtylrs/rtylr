@@ -39,6 +39,7 @@ type Service struct {
 	validator      *Validator
 	JWT            *jwtutils.JWTHelper
 	googleClientID string
+	workOSProvider *WorkOSProvider
 }
 
 func NewService(_ context.Context, db *sql.DB, googleClientID string) *Service {
@@ -49,6 +50,13 @@ func NewService(_ context.Context, db *sql.DB, googleClientID string) *Service {
 		validator:      NewValidator(),
 		googleClientID: googleClientID,
 	}
+}
+
+// WithWorkOSProvider attaches a WorkOS provider to the service.
+// Call this after NewService when WorkOS credentials are available.
+func (s *Service) WithWorkOSProvider(p *WorkOSProvider) *Service {
+	s.workOSProvider = p
+	return s
 }
 
 func (s *Service) Initialize(ctx context.Context) bool {

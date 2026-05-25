@@ -8,8 +8,6 @@ import (
 	"net/netip"
 	"strings"
 
-	"google.golang.org/api/idtoken"
-
 	"github.com/voxire/onion/internal/modules/user/internal/domain"
 	"github.com/voxire/onion/internal/platform/logger"
 	"github.com/voxire/onion/internal/platform/utils/passwordutils"
@@ -31,21 +29,11 @@ var (
 	ErrGoogleEmailUnverified    = errors.New("google email unverified")
 )
 
-// tokenVerifier is the minimal surface the service needs; the real
-// implementation is google.golang.org/api/idtoken.Validate but stubbing
-// this in tests means we don't need network access or a real Google
-// project during unit tests.
-type tokenVerifier func(ctx context.Context, idToken, audience string) (*idtoken.Payload, error)
-
-// Default to the real Google verifier. Test double can swap it.
-var verifyGoogleToken tokenVerifier = idtoken.Validate
-
-// GoogleAuth verifies a Google-issued ID token, then either logs in
-// the matching user (by verified email) or provisions a new account.
+// GoogleAuth exchanges a WorkOS auth code for user info, then either logs
+// in the matching user (by verified email) or provisions a new account.
 //
 // Account linking rule (locked in the plan):
-//   - email_verified === true on the Google payload,
-//   - AND a local user exists with that email,
+//   - a local user exists with that email,
 //   - THEN issue a token to that existing user, flip auth_provider
 //     to 'google' if it was previously 'password'.
 //   - Otherwise create a new user with auth_provider='google' and a
@@ -55,35 +43,24 @@ var verifyGoogleToken tokenVerifier = idtoken.Validate
 // so we can forensically match signups across auth types.
 func (s *Service) GoogleAuth(
 	ctx context.Context,
-	idTokenStr string,
+	code string,
 	businessName string,
 	signupIP netip.Addr,
 	deviceInfo string,
 ) (*GoogleAuthResult, error) {
-	clientID := strings.TrimSpace(s.googleClientID)
-	if clientID == "" {
+	if s.workOSProvider == nil || s.workOSProvider.clientID == "" {
 		return nil, ErrGoogleOAuthNotConfigured
 	}
 
-	payload, err := verifyGoogleToken(ctx, idTokenStr, clientID)
+	googleUser, err := s.workOSProvider.AuthenticateWithCode(ctx, code)
 	if err != nil {
-		logger.Ctx(ctx).Warn("google id token validation failed", logger.Error(err))
+		logger.Ctx(ctx).Warn("workos code exchange failed", logger.Error(err))
 		return nil, ErrGoogleTokenInvalid
 	}
 
-	email, _ := payload.Claims["email"].(string)
-	emailVerified, _ := payload.Claims["email_verified"].(bool)
-	fullName, _ := payload.Claims["name"].(string)
-
-	email = strings.ToLower(strings.TrimSpace(email))
+	email := strings.ToLower(strings.TrimSpace(googleUser.Email))
 	if email == "" {
 		return nil, ErrGoogleTokenInvalid
-	}
-	if !emailVerified {
-		// We explicitly refuse to link unverified Google emails — it's
-		// the one vector where someone could hijack an existing rtylr
-		// account by claiming an email they don't own.
-		return nil, ErrGoogleEmailUnverified
 	}
 
 	// Try to link by email first.
@@ -96,7 +73,7 @@ func (s *Service) GoogleAuth(
 		return &GoogleAuthResult{UserID: existing.ID, Token: token, IsNew: false}, nil
 	}
 
-	// Create a new user. Password hash is a random 64 hex chars —
+	// Create a new user. Password hash is a random 64 hex chars --
 	// bcrypt of that string, never handed out. User can set a real
 	// password later via the "forgot password" flow.
 	randomFiller := make([]byte, 32)
@@ -111,7 +88,7 @@ func (s *Service) GoogleAuth(
 	newUser := &domain.User{
 		Email:            email,
 		PasswordHash:     pwHash,
-		FullName:         fullName,
+		FullName:         googleUser.Name,
 		SignupIPAddress:  signupIP.String(),
 		SignupDeviceInfo: deviceInfo,
 	}
@@ -122,7 +99,7 @@ func (s *Service) GoogleAuth(
 	}
 
 	// Optional: create a business if the signup flow collected a name.
-	// Mirrors the existing Register flow — failure here is logged but
+	// Mirrors the existing Register flow -- failure here is logged but
 	// non-fatal; user can complete business setup from the dashboard.
 	businessName = strings.TrimSpace(businessName)
 	if businessName != "" {
@@ -146,4 +123,13 @@ func (s *Service) GoogleAuth(
 	}
 
 	return &GoogleAuthResult{UserID: userID, Token: token, IsNew: true}, nil
+}
+
+// GoogleAuthorizationURL returns the WorkOS-hosted Google OAuth consent URL
+// the frontend should redirect the user to.
+func (s *Service) GoogleAuthorizationURL() (string, error) {
+	if s.workOSProvider == nil || s.workOSProvider.clientID == "" {
+		return "", ErrGoogleOAuthNotConfigured
+	}
+	return s.workOSProvider.GetAuthorizationURL()
 }

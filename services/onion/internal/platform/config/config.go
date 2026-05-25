@@ -35,6 +35,11 @@ type AppConfig struct {
 	AuthAppURL          string
 	GoogleOAuthClientID string
 
+	// WorkOS
+	WorkOSAPIKey     string
+	WorkOSClientID   string
+	WorkOSRedirectURI string
+
 	// DB Connection Pool configuration
 	DBMaxOpenConns    int
 	DBMaxIdleConns    int
@@ -162,6 +167,11 @@ func LoadAndValidate() (*AppConfig, error) {
 		Hostname:            os.Getenv("HOSTNAME"),
 		AuthAppURL:          os.Getenv("AUTH_APP_URL"),
 		GoogleOAuthClientID: os.Getenv("GOOGLE_OAUTH_CLIENT_ID"),
+
+		// WorkOS
+		WorkOSAPIKey:      os.Getenv("WORKOS_API_KEY"),
+		WorkOSClientID:    os.Getenv("WORKOS_CLIENT_ID"),
+		WorkOSRedirectURI: os.Getenv("WORKOS_REDIRECT_URI"),
 
 		DBMaxOpenConns:    dbMaxOpenConns,
 		DBMaxIdleConns:    dbMaxIdleConns,

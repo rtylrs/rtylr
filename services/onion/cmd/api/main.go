@@ -566,7 +566,14 @@ func initializeModules(ctx context.Context) *apiModules {
 		TimeOff:               timeoff.NewModule(ctx, dbclient.Pool()),
 		Timesheets:            timesheets.NewModule(ctx, dbclient.Pool()),
 		Training:              training.NewModule(ctx, dbclient.Pool()),
-		User:                  user.NewModule(ctx, dbclient.Pool(), platformConfig.GlobalConfig.GoogleOAuthClientID),
+		User: func() *user.Module {
+				m := user.NewModule(ctx, dbclient.Pool(), platformConfig.GlobalConfig.GoogleOAuthClientID)
+				cfg := platformConfig.GlobalConfig
+				if cfg.WorkOSClientID != "" {
+					m.WithWorkOS(cfg.WorkOSAPIKey, cfg.WorkOSClientID, cfg.WorkOSRedirectURI)
+				}
+				return m
+			}(),
 		Variants:              variants.NewModule(ctx, dbclient.Pool()),
 		Views:                 views.NewModule(ctx, dbclient.Pool()),
 		Voxhire:               voxhire.NewModule(ctx, dbclient.Pool()),

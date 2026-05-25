@@ -12,13 +12,20 @@ import (
 	authv1 "github.com/voxire/voxie/gen/go/auth/v1"
 )
 
-// GoogleAuthRoutes is the single endpoint the frontend already calls
-// (`POST /auth/register/google`). The name is a little misleading —
+// GoogleAuthRoutes is the single endpoint the frontend calls
+// (`POST /auth/register/google`). The name is a little misleading --
 // it handles both login and signup since we can't tell the difference
 // until we've resolved the verified email against our users table.
 func GoogleAuthRoutes() []string {
 	return []string{
 		"/auth/register/google",
+	}
+}
+
+// GoogleAuthorizeRoutes returns the route for the authorization URL endpoint.
+func GoogleAuthorizeRoutes() []string {
+	return []string{
+		"/auth/google/authorize",
 	}
 }
 
@@ -32,28 +39,28 @@ type GoogleAuthHandler struct {
 }
 
 type GoogleAuthRequest struct {
-	IDToken      string `json:"id_token"`
+	Code         string `json:"code"`
 	BusinessName string `json:"business_name"`
 }
 
 type GoogleAuthResponse = authv1.LoginResponse
 
 func (h *GoogleAuthHandler) Validate(_ context.Context, req *GoogleAuthRequest) *errorModels.ServerError {
-	if strings.TrimSpace(req.IDToken) == "" {
+	if strings.TrimSpace(req.Code) == "" {
 		return &errorModels.ServerError{
 			Code:    http.StatusBadRequest,
-			Message: "id_token is required",
+			Message: "code is required",
 		}
 	}
 	return nil
 }
 
 func (h *GoogleAuthHandler) Serve(ctx context.Context, req *GoogleAuthRequest) (GoogleAuthResponse, *errorModels.ServerError) {
-	// Signup IP is optional — the platform auth middleware doesn't
+	// Signup IP is optional -- the platform auth middleware doesn't
 	// always populate it for anonymous routes, so we best-effort it.
 	var signupIP netip.Addr
 
-	result, err := h.UserService.GoogleAuth(ctx, req.IDToken, req.BusinessName, signupIP, "")
+	result, err := h.UserService.GoogleAuth(ctx, req.Code, req.BusinessName, signupIP, "")
 	if err != nil {
 		switch {
 		case errors.Is(err, application.ErrGoogleOAuthNotConfigured):
@@ -73,7 +80,7 @@ func (h *GoogleAuthHandler) Serve(ctx context.Context, req *GoogleAuthRequest) (
 		case errors.Is(err, application.ErrGoogleTokenInvalid):
 			return GoogleAuthResponse{}, &errorModels.ServerError{
 				Code:    http.StatusUnauthorized,
-				Message: "Google token is invalid or expired",
+				Message: "Google code is invalid or expired",
 			}
 		default:
 			return GoogleAuthResponse{}, &errorModels.ServerError{
@@ -83,7 +90,7 @@ func (h *GoogleAuthHandler) Serve(ctx context.Context, req *GoogleAuthRequest) (
 		}
 	}
 
-	// Fire new-user / login hooks asynchronously — these are
+	// Fire new-user / login hooks asynchronously -- these are
 	// idempotent (personal-workspace creation) and should never block
 	// the user's first response.
 	if result.IsNew && h.OnUserCreated != nil {
@@ -108,4 +115,33 @@ func (h *GoogleAuthHandler) Serve(ctx context.Context, req *GoogleAuthRequest) (
 		Email:   user.Email,
 		Name:    user.FullName,
 	}, nil
+}
+
+// GoogleAuthorizeHandler handles GET /auth/google/authorize.
+// It returns the WorkOS Google OAuth consent URL the frontend should redirect to.
+type GoogleAuthorizeHandler struct {
+	UserService *application.Service
+}
+
+type GoogleAuthorizeRequest struct{}
+
+type GoogleAuthorizeResponse struct {
+	URL string `json:"url"`
+}
+
+func (h *GoogleAuthorizeHandler) Serve(_ context.Context, _ *GoogleAuthorizeRequest) (GoogleAuthorizeResponse, *errorModels.ServerError) {
+	url, err := h.UserService.GoogleAuthorizationURL()
+	if err != nil {
+		if errors.Is(err, application.ErrGoogleOAuthNotConfigured) {
+			return GoogleAuthorizeResponse{}, &errorModels.ServerError{
+				Code:    http.StatusServiceUnavailable,
+				Message: "Google login is not configured on this server",
+			}
+		}
+		return GoogleAuthorizeResponse{}, &errorModels.ServerError{
+			Code:    http.StatusInternalServerError,
+			Message: "Failed to generate Google authorization URL",
+		}
+	}
+	return GoogleAuthorizeResponse{URL: url}, nil
 }

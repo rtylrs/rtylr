@@ -65,6 +65,14 @@ func NewModule(ctx context.Context, db *sql.DB, googleClientID string) *Module {
 	return module
 }
 
+// WithWorkOS configures the module to use WorkOS for Google OAuth.
+// apiKey, clientID, and redirectURI come from the WorkOS dashboard.
+func (m *Module) WithWorkOS(apiKey, clientID, redirectURI string) *Module {
+	p := application.NewWorkOSProvider(apiKey, clientID, redirectURI)
+	m.UserService.WithWorkOSProvider(p)
+	return m
+}
+
 func (m *Module) GetService() *application.Service {
 	return m.UserService
 }
@@ -90,5 +98,6 @@ func (m *Module) GetAnonymousRoutes() []string {
 		handlers.LoginRoutes(),
 		handlers.RegisterRoutes(),
 		handlers.GoogleAuthRoutes(),
+		handlers.GoogleAuthorizeRoutes(),
 	)
 }
