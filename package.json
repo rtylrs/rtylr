@@ -45,7 +45,6 @@
     "dexie": "^4.4.2",
     "dexie-react-hooks": "^4.4.0",
     "file-saver": "^2.0.5",
-    "firebase": "^12.12.1",
     "html2canvas": "^1.4.1",
     "i18n-iso-countries": "^7.14.0",
     "i18next": "^26.0.6",

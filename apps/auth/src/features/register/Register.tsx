@@ -2,7 +2,6 @@ import React, { useEffect, useMemo, useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { useQuery } from '@tanstack/react-query';
 import { AlertCircle, ArrowLeft, Check, Loader2 } from 'lucide-react';
-import { GoogleAuthProvider, signInWithPopup, getIdToken } from 'firebase/auth';
 import { FaGoogle } from 'react-icons/fa';
 import { APP_URLS } from '@voxire/config';
 
@@ -10,8 +9,7 @@ import { unwrap } from '@voxire/api';
 import { safe } from '../../shared/lib/api';
 import notify from '../../shared/lib/notify/notify';
 import { useUserStore } from '../../shared/stores/userStore';
-import { useRegisterRestaurant, useGoogleAuth } from '../../shared/hooks/useAuth';
-import { auth } from '../../firebase';
+import { useRegisterRestaurant } from '../../shared/hooks/useAuth';
 import { Button } from '@voxire/components';
 import AuthShell from '../../shared/components/AuthShell';
 import PasswordStrengthMeter, {
@@ -168,7 +166,6 @@ type Step = 'plan' | 'details';
 
 const Register: React.FC = (): React.JSX.Element => {
   const navigate = useNavigate();
-  const provider = new GoogleAuthProvider();
   const [name, setName] = useState('');
   const [businessName, setBusinessName] = useState('');
   const [email, setEmail] = useState('');
@@ -181,7 +178,6 @@ const Register: React.FC = (): React.JSX.Element => {
   const pwScore = scorePassword(password);
   const { isAuthenticated, loading, error, role, clearError } = useUserStore();
   const registerMutation = useRegisterRestaurant();
-  const googleAuthMutation = useGoogleAuth();
 
   const redirectParam = useMemo((): string | null => {
     const params = new URLSearchParams(window.location.search);
@@ -239,16 +235,11 @@ const Register: React.FC = (): React.JSX.Element => {
 
   const handleGoogle = async (): Promise<void> => {
     try {
-      const result = await signInWithPopup(auth, provider);
-      const idToken = await getIdToken(result.user);
-      googleAuthMutation.mutate(
-        { idToken },
-        {
-          onSuccess: () => {
-            window.location.href = getRedirectUrl(redirectParam);
-          },
-        }
-      );
+      const res = await fetch('/auth/google/authorize');
+      if (!res.ok) throw new Error('Google sign-up is currently unavailable');
+      const { url } = (await res.json()) as { url: string };
+      if (redirectParam) localStorage.setItem('google_auth_redirect', redirectParam);
+      window.location.href = url;
     } catch (err) {
       notify.error((err as Error).message);
     }

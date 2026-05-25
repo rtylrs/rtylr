@@ -2,13 +2,11 @@ import React, { useState, useEffect, useMemo } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { useTranslation } from 'react-i18next';
 import { AlertCircle } from 'lucide-react';
-import { GoogleAuthProvider, signInWithPopup, getIdToken } from 'firebase/auth';
 import { FaGoogle } from 'react-icons/fa';
 import { APP_URLS, APP_CONFIG } from '@voxire/config';
 
 import { useUserStore } from '../../shared/stores/userStore';
-import { useLogin, useGoogleAuth } from '../../shared/hooks/useAuth';
-import { auth } from '../../firebase';
+import { useLogin } from '../../shared/hooks/useAuth';
 import notify from '../../shared/lib/notify/notify';
 import { unwrap } from '@voxire/api';
 import { safe } from '../../shared/lib/api';
@@ -37,10 +35,8 @@ function getAppDisplayName(redirectParam: string | null): string | null {
 const Login: React.FC = (): React.JSX.Element => {
   const navigate = useNavigate();
   const { t } = useTranslation();
-  const provider = new GoogleAuthProvider();
   const { isAuthenticated, loading, error, clearError } = useUserStore();
   const loginMutation = useLogin();
-  const googleAuthMutation = useGoogleAuth();
 
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
@@ -88,9 +84,11 @@ const Login: React.FC = (): React.JSX.Element => {
 
   const handleGoogle = async (): Promise<void> => {
     try {
-      const result = await signInWithPopup(auth, provider);
-      const idToken = await getIdToken(result.user);
-      googleAuthMutation.mutate({ idToken }, { onSuccess: () => void redirectTo() });
+      const res = await fetch('/auth/google/authorize');
+      if (!res.ok) throw new Error('Google login is currently unavailable');
+      const { url } = (await res.json()) as { url: string };
+      if (redirectParam) localStorage.setItem('google_auth_redirect', redirectParam);
+      window.location.href = url;
     } catch (err) {
       notify.error((err as Error).message);
     }

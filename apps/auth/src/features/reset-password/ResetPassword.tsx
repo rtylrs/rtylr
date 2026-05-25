@@ -3,9 +3,10 @@ import { useNavigate } from 'react-router-dom';
 import { useTranslation } from 'react-i18next';
 import { AlertCircle, ArrowLeft, CheckCircle2 } from 'lucide-react';
 
-import { auth } from '../../firebase';
 import { ASSETS } from '@voxire/config';
 import { Button } from '@voxire/components';
+import { unwrap } from '@voxire/api';
+import { safe } from '../../shared/lib/api';
 
 const ResetPassword: React.FC = () => {
   const navigate = useNavigate();
@@ -18,15 +19,10 @@ const ResetPassword: React.FC = () => {
   const handleReset = async (): Promise<void> => {
     setLoading(true);
     try {
-      await auth.sendPasswordResetEmail(email);
+      await unwrap(safe.post('/auth/password-reset/request', { email }));
       setRequestSent(true);
       setMessage(t('auth.reset.successMessage'));
-    } catch (error) {
-      // Surface a generic message rather than leaking provider strings
-      // (those leak whether the address exists in Firebase). The error
-      // is intentionally swallowed here - the UI already conveys
-      // failure, and adding telemetry is the P0 ops-hardening job.
-      void error;
+    } catch {
       setMessage(t('auth.reset.genericError'));
     } finally {
       setLoading(false);

@@ -18,7 +18,7 @@ interface RegisterPayload {
 }
 
 interface GoogleAuthPayload {
-  idToken: string;
+  code: string;
 }
 
 interface AuthResponse {
