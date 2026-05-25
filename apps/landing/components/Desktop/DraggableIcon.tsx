@@ -89,6 +89,7 @@ export const DraggableIcon: React.FC<DraggableIconProps> = ({ def }) => {
         userSelect: 'none',
         width: 64,
         zIndex: isDragging ? 599 : 50,
+        pointerEvents: 'auto',
       }}
     >
       <div

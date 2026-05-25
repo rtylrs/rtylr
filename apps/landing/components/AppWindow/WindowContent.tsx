@@ -35,29 +35,26 @@ const LOADERS: Partial<Record<WindowType, React.LazyExoticComponent<() => React.
   doom: DoomWindow,
 };
 
+const DARK_FILL = {
+  width: '100%',
+  height: '100%',
+  background: 'rgba(18,18,20,0.98)',
+  display: 'flex',
+  alignItems: 'center',
+  justifyContent: 'center',
+} as const;
+
 const Spinner = () => (
-  <div
-    style={{
-      display: 'flex',
-      alignItems: 'center',
-      justifyContent: 'center',
-      height: '100%',
-      color: 'rgba(255,255,255,0.3)',
-      fontSize: 13,
-    }}
-  >
-    Loading...
+  <div style={DARK_FILL}>
+    <span style={{ color: 'rgba(255,255,255,0.3)', fontSize: 13 }}>Loading...</span>
   </div>
 );
 
 const ChunkError = () => (
   <div
     style={{
-      display: 'flex',
+      ...DARK_FILL,
       flexDirection: 'column',
-      alignItems: 'center',
-      justifyContent: 'center',
-      height: '100%',
       gap: 12,
       color: 'rgba(255,255,255,0.4)',
       fontSize: 13,

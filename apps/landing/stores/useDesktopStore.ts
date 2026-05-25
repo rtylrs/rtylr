@@ -186,7 +186,12 @@ export const useDesktopStore = create<DesktopState>()(
     }),
     {
       name: 'rtylr-desktop',
+      version: 2,
       storage: createJSONStorage(() => localStorage),
+      migrate: (persisted) => ({
+        ...(persisted as object),
+        iconPositions: {},
+      }),
       partialize: (s) => ({
         experience: s.experience,
         colorMode: s.colorMode,

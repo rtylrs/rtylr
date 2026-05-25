@@ -16,25 +16,27 @@ import { StatusIcon } from './icons/StatusIcon';
 import { SnakeIcon } from './icons/SnakeIcon';
 import { WindowType } from '../../stores/useDesktopStore';
 
-// 3-column grid: col1=x:16, col2=x:88, col3=x:160, row-height=80px -> max ~412px total
+// 2-column grid anchored to bottom-left.
+// col1=x:8, col2=x:80, row-height=80px, rows read top-to-bottom within the container.
+// Container sits at bottom of desktop so these positions are container-relative.
 const ICONS: DesktopIconDef[] = [
-  { key: 'pos', label: 'POS', svgIcon: POSIcon, windowType: 'pos', defaultPos: { x: 16, y: 16 } },
-  { key: 'erp', label: 'ERP', svgIcon: ERPIcon, windowType: 'erp', defaultPos: { x: 88, y: 16 } },
-  { key: 'crm', label: 'CRM', svgIcon: CRMIcon, windowType: 'crm', defaultPos: { x: 160, y: 16 } },
-  { key: 'hr', label: 'HR', svgIcon: HRIcon, windowType: 'hr', defaultPos: { x: 16, y: 96 } },
+  { key: 'pos', label: 'POS', svgIcon: POSIcon, windowType: 'pos', defaultPos: { x: 8, y: 0 } },
+  { key: 'erp', label: 'ERP', svgIcon: ERPIcon, windowType: 'erp', defaultPos: { x: 80, y: 0 } },
+  { key: 'crm', label: 'CRM', svgIcon: CRMIcon, windowType: 'crm', defaultPos: { x: 8, y: 80 } },
+  { key: 'hr', label: 'HR', svgIcon: HRIcon, windowType: 'hr', defaultPos: { x: 80, y: 80 } },
   {
     key: 'finance',
     label: 'Finance',
     svgIcon: FinanceIcon,
     windowType: 'finance',
-    defaultPos: { x: 88, y: 96 },
+    defaultPos: { x: 8, y: 160 },
   },
   {
     key: 'flow',
     label: 'Flow',
     svgIcon: FlowIcon,
     windowType: 'flow',
-    defaultPos: { x: 160, y: 96 },
+    defaultPos: { x: 80, y: 160 },
   },
   {
     key: 'pricing',
@@ -42,7 +44,7 @@ const ICONS: DesktopIconDef[] = [
     svgIcon: PricingIcon,
     windowType: 'pricing',
     windowUrl: '/pricing?embed=1',
-    defaultPos: { x: 16, y: 176 },
+    defaultPos: { x: 8, y: 240 },
   },
   {
     key: 'docs',
@@ -50,7 +52,7 @@ const ICONS: DesktopIconDef[] = [
     svgIcon: DocsIcon,
     windowType: 'docs',
     windowUrl: 'https://docs.rtylr.com',
-    defaultPos: { x: 88, y: 176 },
+    defaultPos: { x: 80, y: 240 },
   },
   {
     key: 'blog',
@@ -58,7 +60,7 @@ const ICONS: DesktopIconDef[] = [
     svgIcon: BlogIcon,
     windowType: 'docs',
     windowUrl: 'https://blog.rtylr.com',
-    defaultPos: { x: 160, y: 176 },
+    defaultPos: { x: 8, y: 320 },
   },
   {
     key: 'changelog',
@@ -66,42 +68,53 @@ const ICONS: DesktopIconDef[] = [
     svgIcon: ChangelogIcon,
     windowType: 'docs',
     windowUrl: 'https://docs.rtylr.com/changelog',
-    defaultPos: { x: 16, y: 256 },
+    defaultPos: { x: 80, y: 320 },
   },
   {
     key: 'terminal',
     label: 'Terminal',
     svgIcon: TerminalIcon,
     windowType: 'terminal',
-    defaultPos: { x: 88, y: 256 },
+    defaultPos: { x: 8, y: 400 },
   },
   {
     key: 'snake',
     label: 'Snake',
     svgIcon: SnakeIcon,
     windowType: 'snake',
-    defaultPos: { x: 160, y: 256 },
+    defaultPos: { x: 80, y: 400 },
   },
   {
     key: 'doom',
     label: 'Doom',
     svgIcon: DoomIcon,
     windowType: 'doom',
-    defaultPos: { x: 16, y: 336 },
+    defaultPos: { x: 8, y: 480 },
   },
   {
     key: 'status',
     label: 'Status',
     svgIcon: StatusIcon,
     windowType: 'status',
-    defaultPos: { x: 88, y: 336 },
+    defaultPos: { x: 80, y: 480 },
   },
 ];
 
+// Container anchored to bottom-left. Icons position themselves absolutely within it.
+// Height = 7 rows × 80px + icon height (~60px) = 620px so all icons fit.
 export const DesktopIcons: React.FC = () => (
-  <>
+  <div
+    style={{
+      position: 'absolute',
+      bottom: 24,
+      left: 16,
+      width: 152,
+      height: 560,
+      pointerEvents: 'none',
+    }}
+  >
     {ICONS.map((def) => (
       <DraggableIcon key={def.key} def={def} />
     ))}
-  </>
+  </div>
 );
