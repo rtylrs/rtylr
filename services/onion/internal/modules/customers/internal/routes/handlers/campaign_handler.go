@@ -162,9 +162,13 @@ func (h *CreateCampaignHandler) Serve(ctx context.Context, req *CreateCampaignRe
 
 	if req.ScheduledAt != "" {
 		t, err := time.Parse("2006-01-02T15:04:05Z", req.ScheduledAt)
-		if err == nil {
-			input.ScheduledAt = &t
+		if err != nil {
+			return CreateCampaignResponse{}, &errorModels.ServerError{
+				Code:    http.StatusBadRequest,
+				Message: "Invalid scheduled_at format, expected RFC3339 (YYYY-MM-DDTHH:MM:SSZ)",
+			}
 		}
+		input.ScheduledAt = &t
 	}
 
 	id, err := h.CRMService.CreateCampaign(ctx, input)
@@ -243,9 +247,13 @@ func (h *UpdateCampaignHandler) Serve(ctx context.Context, req *UpdateCampaignRe
 
 	if req.ScheduledAt != "" {
 		t, err := time.Parse("2006-01-02T15:04:05Z", req.ScheduledAt)
-		if err == nil {
-			input.ScheduledAt = &t
+		if err != nil {
+			return UpdateCampaignResponse{}, &errorModels.ServerError{
+				Code:    http.StatusBadRequest,
+				Message: "Invalid scheduled_at format, expected RFC3339 (YYYY-MM-DDTHH:MM:SSZ)",
+			}
 		}
+		input.ScheduledAt = &t
 	}
 
 	if err := h.CRMService.UpdateCampaign(ctx, input); err != nil {
