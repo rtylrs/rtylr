@@ -1,0 +1,294 @@
+package infrastructure_test
+
+import (
+	"context"
+	"testing"
+
+	"github.com/voxire/onion/internal/modules/purchase_orders/internal/domain"
+	"github.com/voxire/onion/internal/modules/purchase_orders/internal/infrastructure"
+	"github.com/voxire/onion/internal/testutil"
+)
+
+const fixtureSupplierID int64 = 5101
+
+func TestListPurchaseOrders_ReturnsNoError(t *testing.T) {
+	db := testutil.OpenDB(t)
+	repo := infrastructure.NewRepository(db)
+	ctx := context.Background()
+
+	orders, err := repo.ListPurchaseOrders(ctx, testutil.OwnerID, "", 20, 0)
+	if err != nil {
+		t.Fatalf("ListPurchaseOrders: unexpected error: %v", err)
+	}
+	if orders == nil {
+		t.Fatal("ListPurchaseOrders: expected non-nil slice, got nil")
+	}
+}
+
+func TestListPurchaseOrders_WrongOwner_ReturnsEmpty(t *testing.T) {
+	db := testutil.OpenDB(t)
+	repo := infrastructure.NewRepository(db)
+	ctx := context.Background()
+
+	orders, err := repo.ListPurchaseOrders(ctx, 0, "", 20, 0)
+	if err != nil {
+		t.Fatalf("ListPurchaseOrders(ownerID=0): unexpected error: %v", err)
+	}
+	if len(orders) != 0 {
+		t.Fatalf("ListPurchaseOrders(ownerID=0): expected 0 rows, got %d", len(orders))
+	}
+}
+
+func TestCreatePurchaseOrder_ReturnsInsertedID(t *testing.T) {
+	db := testutil.OpenDB(t)
+	repo := infrastructure.NewRepository(db)
+	ctx := context.Background()
+
+	input := domain.PurchaseOrderInput{
+		SupplierID: fixtureSupplierID,
+		PONumber:   "PO-INT-001",
+		TaxAmount:  5.0,
+		Items: []domain.PurchaseOrderItemInput{
+			{ProductID: 5201, QuantityOrdered: 2, UnitCost: 10.0},
+		},
+	}
+
+	id, err := repo.CreatePurchaseOrder(ctx, testutil.OwnerID, input, testutil.OwnerID)
+	if err != nil {
+		t.Fatalf("CreatePurchaseOrder: unexpected error: %v", err)
+	}
+	if id <= 0 {
+		t.Fatalf("CreatePurchaseOrder: expected positive ID, got %d", id)
+	}
+}
+
+func TestCreatePurchaseOrder_AppearsInList(t *testing.T) {
+	db := testutil.OpenDB(t)
+	repo := infrastructure.NewRepository(db)
+	ctx := context.Background()
+
+	input := domain.PurchaseOrderInput{
+		SupplierID: fixtureSupplierID,
+		PONumber:   "PO-INT-002",
+		TaxAmount:  0,
+		Items: []domain.PurchaseOrderItemInput{
+			{ProductID: 5202, QuantityOrdered: 1, UnitCost: 5.0},
+		},
+	}
+
+	id, err := repo.CreatePurchaseOrder(ctx, testutil.OwnerID, input, testutil.OwnerID)
+	if err != nil {
+		t.Fatalf("CreatePurchaseOrder: %v", err)
+	}
+
+	orders, err := repo.ListPurchaseOrders(ctx, testutil.OwnerID, "", 100, 0)
+	if err != nil {
+		t.Fatalf("ListPurchaseOrders: %v", err)
+	}
+
+	var found bool
+	for _, o := range orders {
+		if o.ID == id {
+			found = true
+			break
+		}
+	}
+	if !found {
+		t.Fatalf("created purchase order id=%d not found in list", id)
+	}
+}
+
+func TestGetByID_ExistingPurchaseOrder(t *testing.T) {
+	db := testutil.OpenDB(t)
+	repo := infrastructure.NewRepository(db)
+	ctx := context.Background()
+
+	input := domain.PurchaseOrderInput{
+		SupplierID: fixtureSupplierID,
+		PONumber:   "PO-INT-003",
+		TaxAmount:  2.5,
+		Items: []domain.PurchaseOrderItemInput{
+			{ProductID: 5201, QuantityOrdered: 3, UnitCost: 8.0},
+		},
+	}
+
+	id, err := repo.CreatePurchaseOrder(ctx, testutil.OwnerID, input, testutil.OwnerID)
+	if err != nil {
+		t.Fatalf("CreatePurchaseOrder: %v", err)
+	}
+
+	po, err := repo.GetByID(ctx, testutil.OwnerID, id)
+	if err != nil {
+		t.Fatalf("GetByID(id=%d): unexpected error: %v", id, err)
+	}
+	if po.ID != id {
+		t.Errorf("GetByID: ID mismatch: got %d, want %d", po.ID, id)
+	}
+}
+
+func TestGetByID_NotFound_ReturnsError(t *testing.T) {
+	db := testutil.OpenDB(t)
+	repo := infrastructure.NewRepository(db)
+	ctx := context.Background()
+
+	_, err := repo.GetByID(ctx, testutil.OwnerID, 0)
+	if err == nil {
+		t.Fatal("GetByID(id=0): expected error for non-existent PO, got nil")
+	}
+}
+
+func TestGetPurchaseOrderStatus_DefaultIsDraft(t *testing.T) {
+	db := testutil.OpenDB(t)
+	repo := infrastructure.NewRepository(db)
+	ctx := context.Background()
+
+	input := domain.PurchaseOrderInput{
+		SupplierID: fixtureSupplierID,
+		PONumber:   "PO-INT-004",
+		Items: []domain.PurchaseOrderItemInput{
+			{ProductID: 5201, QuantityOrdered: 1, UnitCost: 10.0},
+		},
+	}
+
+	id, err := repo.CreatePurchaseOrder(ctx, testutil.OwnerID, input, testutil.OwnerID)
+	if err != nil {
+		t.Fatalf("CreatePurchaseOrder: %v", err)
+	}
+
+	status, err := repo.GetPurchaseOrderStatus(ctx, testutil.OwnerID, id)
+	if err != nil {
+		t.Fatalf("GetPurchaseOrderStatus: %v", err)
+	}
+	if status != "draft" {
+		t.Errorf("expected status=draft, got %q", status)
+	}
+}
+
+func TestGetPurchaseOrderStatus_NotFound_ReturnsError(t *testing.T) {
+	db := testutil.OpenDB(t)
+	repo := infrastructure.NewRepository(db)
+	ctx := context.Background()
+
+	_, err := repo.GetPurchaseOrderStatus(ctx, testutil.OwnerID, 0)
+	if err == nil {
+		t.Fatal("GetPurchaseOrderStatus(id=0): expected error, got nil")
+	}
+}
+
+func TestUpdatePurchaseOrderStatus_UpdatesToCancelled(t *testing.T) {
+	db := testutil.OpenDB(t)
+	repo := infrastructure.NewRepository(db)
+	ctx := context.Background()
+
+	id, err := repo.CreatePurchaseOrder(ctx, testutil.OwnerID, domain.PurchaseOrderInput{
+		SupplierID: fixtureSupplierID,
+		PONumber:   "PO-INT-005",
+		Items: []domain.PurchaseOrderItemInput{
+			{ProductID: 5201, QuantityOrdered: 1, UnitCost: 1.0},
+		},
+	}, testutil.OwnerID)
+	if err != nil {
+		t.Fatalf("CreatePurchaseOrder: %v", err)
+	}
+
+	err = repo.UpdatePurchaseOrderStatus(ctx, testutil.OwnerID, id, string(domain.POStatusCancelled))
+	if err != nil {
+		t.Fatalf("UpdatePurchaseOrderStatus: %v", err)
+	}
+
+	status, err := repo.GetPurchaseOrderStatus(ctx, testutil.OwnerID, id)
+	if err != nil {
+		t.Fatalf("GetPurchaseOrderStatus: %v", err)
+	}
+	if status != string(domain.POStatusCancelled) {
+		t.Errorf("expected cancelled, got %q", status)
+	}
+}
+
+func TestListPurchaseOrders_FilterByStatus(t *testing.T) {
+	db := testutil.OpenDB(t)
+	repo := infrastructure.NewRepository(db)
+	ctx := context.Background()
+
+	// Create a PO to set to approved
+	id, err := repo.CreatePurchaseOrder(ctx, testutil.OwnerID, domain.PurchaseOrderInput{
+		SupplierID: fixtureSupplierID,
+		PONumber:   "PO-INT-FILT-001",
+		Items: []domain.PurchaseOrderItemInput{
+			{ProductID: 5201, QuantityOrdered: 1, UnitCost: 1.0},
+		},
+	}, testutil.OwnerID)
+	if err != nil {
+		t.Fatalf("CreatePurchaseOrder: %v", err)
+	}
+
+	err = repo.ApprovePurchaseOrder(ctx, testutil.OwnerID, id)
+	if err != nil {
+		t.Fatalf("ApprovePurchaseOrder: %v", err)
+	}
+
+	orders, err := repo.ListPurchaseOrders(ctx, testutil.OwnerID, string(domain.POStatusApproved), 50, 0)
+	if err != nil {
+		t.Fatalf("ListPurchaseOrders(status=approved): %v", err)
+	}
+	for _, o := range orders {
+		if o.Status != domain.POStatusApproved {
+			t.Errorf("expected status=approved, got %q (id=%d)", o.Status, o.ID)
+		}
+	}
+}
+
+func TestGetPurchaseOrderItems_ReturnedWithOrder(t *testing.T) {
+	db := testutil.OpenDB(t)
+	repo := infrastructure.NewRepository(db)
+	ctx := context.Background()
+
+	input := domain.PurchaseOrderInput{
+		SupplierID: fixtureSupplierID,
+		PONumber:   "PO-INT-ITEMS-001",
+		Items: []domain.PurchaseOrderItemInput{
+			{ProductID: 5201, QuantityOrdered: 2, UnitCost: 10.0},
+			{ProductID: 5202, QuantityOrdered: 4, UnitCost: 3.5},
+		},
+	}
+
+	id, err := repo.CreatePurchaseOrder(ctx, testutil.OwnerID, input, testutil.OwnerID)
+	if err != nil {
+		t.Fatalf("CreatePurchaseOrder: %v", err)
+	}
+
+	items, err := repo.GetPurchaseOrderItems(ctx, id)
+	if err != nil {
+		t.Fatalf("GetPurchaseOrderItems: %v", err)
+	}
+	if len(items) != 2 {
+		t.Fatalf("expected 2 items, got %d", len(items))
+	}
+}
+
+func TestListPurchaseOrders_ScopedToOwner(t *testing.T) {
+	db := testutil.OpenDB(t)
+	repo := infrastructure.NewRepository(db)
+	ctx := context.Background()
+
+	_, err := repo.CreatePurchaseOrder(ctx, testutil.OwnerID, domain.PurchaseOrderInput{
+		SupplierID: fixtureSupplierID,
+		PONumber:   "PO-INT-SCOPE-001",
+		Items: []domain.PurchaseOrderItemInput{
+			{ProductID: 5201, QuantityOrdered: 1, UnitCost: 1.0},
+		},
+	}, testutil.OwnerID)
+	if err != nil {
+		t.Fatalf("CreatePurchaseOrder: %v", err)
+	}
+
+	other, err := repo.ListPurchaseOrders(ctx, testutil.OwnerID+9999, "", 50, 0)
+	if err != nil {
+		t.Fatalf("ListPurchaseOrders(other owner): %v", err)
+	}
+	for _, o := range other {
+		if o.OwnerID == testutil.OwnerID {
+			t.Errorf("other-owner list contains ownerID=%d record", testutil.OwnerID)
+		}
+	}
+}

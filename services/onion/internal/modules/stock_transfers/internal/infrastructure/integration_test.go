@@ -1,0 +1,336 @@
+package infrastructure_test
+
+import (
+	"context"
+	"testing"
+
+	"github.com/voxire/onion/internal/modules/stock_transfers/internal/domain"
+	"github.com/voxire/onion/internal/modules/stock_transfers/internal/infrastructure"
+	"github.com/voxire/onion/internal/testutil"
+)
+
+func TestListStockTransfers_ReturnsNoError(t *testing.T) {
+	db := testutil.OpenDB(t)
+	repo := infrastructure.NewRepository(db)
+	ctx := context.Background()
+
+	transfers, _, err := repo.ListStockTransfers(ctx, testutil.OwnerID, 20, 0)
+	if err != nil {
+		t.Fatalf("stock_transfers.ListStockTransfers: unexpected error: %v", err)
+	}
+	if transfers == nil {
+		t.Fatal("stock_transfers.ListStockTransfers: expected non-nil slice, got nil")
+	}
+}
+
+func TestListStockTransfers_WrongOwner_ReturnsEmpty(t *testing.T) {
+	db := testutil.OpenDB(t)
+	repo := infrastructure.NewRepository(db)
+	ctx := context.Background()
+
+	transfers, _, err := repo.ListStockTransfers(ctx, 0, 20, 0)
+	if err != nil {
+		t.Fatalf("stock_transfers.ListStockTransfers(ownerID=0): unexpected error: %v", err)
+	}
+	if len(transfers) != 0 {
+		t.Fatalf("stock_transfers.ListStockTransfers(ownerID=0): expected 0 rows, got %d", len(transfers))
+	}
+}
+
+func TestCreateStockTransfer_ReturnsInsertedID(t *testing.T) {
+	db := testutil.OpenDB(t)
+	repo := infrastructure.NewRepository(db)
+	ctx := context.Background()
+
+	input := domain.StockTransferInput{
+		FromWarehouseID: 1,
+		ToWarehouseID:   2,
+		Notes:           "Integration test transfer",
+		Items: []domain.StockTransferItemInput{
+			{ProductID: 5201, Quantity: 3.0},
+		},
+	}
+
+	id, err := repo.CreateStockTransfer(ctx, testutil.OwnerID, input)
+	if err != nil {
+		t.Fatalf("stock_transfers.CreateStockTransfer: unexpected error: %v", err)
+	}
+	if id <= 0 {
+		t.Fatalf("stock_transfers.CreateStockTransfer: expected positive ID, got %d", id)
+	}
+}
+
+func TestCreateStockTransfer_AppearsInList(t *testing.T) {
+	db := testutil.OpenDB(t)
+	repo := infrastructure.NewRepository(db)
+	ctx := context.Background()
+
+	input := domain.StockTransferInput{
+		FromWarehouseID: 1,
+		ToWarehouseID:   2,
+		Notes:           "Appears In List",
+		Items: []domain.StockTransferItemInput{
+			{ProductID: 5202, Quantity: 2.0},
+		},
+	}
+
+	id, err := repo.CreateStockTransfer(ctx, testutil.OwnerID, input)
+	if err != nil {
+		t.Fatalf("stock_transfers.CreateStockTransfer: %v", err)
+	}
+
+	transfers, _, err := repo.ListStockTransfers(ctx, testutil.OwnerID, 100, 0)
+	if err != nil {
+		t.Fatalf("stock_transfers.ListStockTransfers: %v", err)
+	}
+
+	var found bool
+	for _, tr := range transfers {
+		if tr.ID == id {
+			found = true
+			break
+		}
+	}
+	if !found {
+		t.Fatalf("created stock transfer id=%d not found in list", id)
+	}
+}
+
+func TestCreateStockTransfer_OwnerIDSet(t *testing.T) {
+	db := testutil.OpenDB(t)
+	repo := infrastructure.NewRepository(db)
+	ctx := context.Background()
+
+	id, err := repo.CreateStockTransfer(ctx, testutil.OwnerID, domain.StockTransferInput{
+		FromWarehouseID: 1,
+		ToWarehouseID:   2,
+		Items: []domain.StockTransferItemInput{
+			{ProductID: 5201, Quantity: 1.0},
+		},
+	})
+	if err != nil {
+		t.Fatalf("stock_transfers.CreateStockTransfer: %v", err)
+	}
+
+	transfers, _, err := repo.ListStockTransfers(ctx, testutil.OwnerID, 100, 0)
+	if err != nil {
+		t.Fatalf("stock_transfers.ListStockTransfers: %v", err)
+	}
+
+	for _, tr := range transfers {
+		if tr.ID == id {
+			if tr.OwnerID != testutil.OwnerID {
+				t.Errorf("OwnerID mismatch: got %d, want %d", tr.OwnerID, testutil.OwnerID)
+			}
+			return
+		}
+	}
+	t.Fatalf("created stock transfer id=%d not found", id)
+}
+
+func TestCreateStockTransfer_DefaultStatusIsPending(t *testing.T) {
+	db := testutil.OpenDB(t)
+	repo := infrastructure.NewRepository(db)
+	ctx := context.Background()
+
+	id, err := repo.CreateStockTransfer(ctx, testutil.OwnerID, domain.StockTransferInput{
+		FromWarehouseID: 1,
+		ToWarehouseID:   2,
+		Items: []domain.StockTransferItemInput{
+			{ProductID: 5201, Quantity: 1.0},
+		},
+	})
+	if err != nil {
+		t.Fatalf("stock_transfers.CreateStockTransfer: %v", err)
+	}
+
+	transfers, _, err := repo.ListStockTransfers(ctx, testutil.OwnerID, 100, 0)
+	if err != nil {
+		t.Fatalf("stock_transfers.ListStockTransfers: %v", err)
+	}
+
+	for _, tr := range transfers {
+		if tr.ID == id {
+			if tr.Status != "pending" {
+				t.Errorf("expected default status=pending, got %q", tr.Status)
+			}
+			return
+		}
+	}
+	t.Fatalf("created stock transfer id=%d not found", id)
+}
+
+func TestUpdateStockTransferStatus_ChangesToCompleted(t *testing.T) {
+	db := testutil.OpenDB(t)
+	repo := infrastructure.NewRepository(db)
+	ctx := context.Background()
+
+	id, err := repo.CreateStockTransfer(ctx, testutil.OwnerID, domain.StockTransferInput{
+		FromWarehouseID: 1,
+		ToWarehouseID:   2,
+		Items: []domain.StockTransferItemInput{
+			{ProductID: 5201, Quantity: 1.0},
+		},
+	})
+	if err != nil {
+		t.Fatalf("stock_transfers.CreateStockTransfer: %v", err)
+	}
+
+	err = repo.UpdateStockTransferStatus(ctx, testutil.OwnerID, id, "completed")
+	if err != nil {
+		t.Fatalf("stock_transfers.UpdateStockTransferStatus: %v", err)
+	}
+
+	transfers, _, err := repo.ListStockTransfers(ctx, testutil.OwnerID, 100, 0)
+	if err != nil {
+		t.Fatalf("stock_transfers.ListStockTransfers after update: %v", err)
+	}
+
+	for _, tr := range transfers {
+		if tr.ID == id {
+			if tr.Status != "completed" {
+				t.Errorf("expected status=completed, got %q", tr.Status)
+			}
+			return
+		}
+	}
+	t.Fatalf("updated stock transfer id=%d not found", id)
+}
+
+func TestCreateStockTransfer_ItemsLoaded(t *testing.T) {
+	db := testutil.OpenDB(t)
+	repo := infrastructure.NewRepository(db)
+	ctx := context.Background()
+
+	input := domain.StockTransferInput{
+		FromWarehouseID: 1,
+		ToWarehouseID:   2,
+		Items: []domain.StockTransferItemInput{
+			{ProductID: 5201, Quantity: 2.0},
+			{ProductID: 5202, Quantity: 5.0},
+		},
+	}
+
+	id, err := repo.CreateStockTransfer(ctx, testutil.OwnerID, input)
+	if err != nil {
+		t.Fatalf("stock_transfers.CreateStockTransfer: %v", err)
+	}
+
+	transfers, _, err := repo.ListStockTransfers(ctx, testutil.OwnerID, 100, 0)
+	if err != nil {
+		t.Fatalf("stock_transfers.ListStockTransfers: %v", err)
+	}
+
+	for _, tr := range transfers {
+		if tr.ID == id {
+			if len(tr.Items) != 2 {
+				t.Errorf("expected 2 transfer items, got %d", len(tr.Items))
+			}
+			return
+		}
+	}
+	t.Fatalf("created stock transfer id=%d not found", id)
+}
+
+func TestListStockTransfers_HasMoreFalseWhenBelowLimit(t *testing.T) {
+	db := testutil.OpenDB(t)
+	repo := infrastructure.NewRepository(db)
+	ctx := context.Background()
+
+	_, hasMore, err := repo.ListStockTransfers(ctx, testutil.OwnerID, 1000, 0)
+	if err != nil {
+		t.Fatalf("stock_transfers.ListStockTransfers: %v", err)
+	}
+	if hasMore {
+		t.Error("expected hasMore=false when limit > total rows")
+	}
+}
+
+func TestListStockTransfers_HasMoreTrueWhenOverLimit(t *testing.T) {
+	db := testutil.OpenDB(t)
+	repo := infrastructure.NewRepository(db)
+	ctx := context.Background()
+
+	// Seed at least 2
+	for i := 0; i < 2; i++ {
+		_, err := repo.CreateStockTransfer(ctx, testutil.OwnerID, domain.StockTransferInput{
+			FromWarehouseID: 1,
+			ToWarehouseID:   2,
+			Items: []domain.StockTransferItemInput{
+				{ProductID: 5201, Quantity: 1.0},
+			},
+		})
+		if err != nil {
+			t.Fatalf("seed transfer[%d]: %v", i, err)
+		}
+	}
+
+	_, hasMore, err := repo.ListStockTransfers(ctx, testutil.OwnerID, 1, 0)
+	if err != nil {
+		t.Fatalf("stock_transfers.ListStockTransfers(limit=1): %v", err)
+	}
+	if !hasMore {
+		t.Error("expected hasMore=true when total rows > limit=1")
+	}
+}
+
+func TestListStockTransfers_PaginationOffset(t *testing.T) {
+	db := testutil.OpenDB(t)
+	repo := infrastructure.NewRepository(db)
+	ctx := context.Background()
+
+	for i := 0; i < 3; i++ {
+		_, err := repo.CreateStockTransfer(ctx, testutil.OwnerID, domain.StockTransferInput{
+			FromWarehouseID: 1,
+			ToWarehouseID:   2,
+			Items: []domain.StockTransferItemInput{
+				{ProductID: 5201, Quantity: 1.0},
+			},
+		})
+		if err != nil {
+			t.Fatalf("seed transfer[%d]: %v", i, err)
+		}
+	}
+
+	page0, _, err := repo.ListStockTransfers(ctx, testutil.OwnerID, 2, 0)
+	if err != nil {
+		t.Fatalf("List page 0: %v", err)
+	}
+	page1, _, err := repo.ListStockTransfers(ctx, testutil.OwnerID, 2, 2)
+	if err != nil {
+		t.Fatalf("List page 1: %v", err)
+	}
+
+	if len(page0) > 0 && len(page1) > 0 {
+		if page0[0].ID == page1[0].ID {
+			t.Error("pagination offset not working: first items on both pages are identical")
+		}
+	}
+}
+
+func TestListStockTransfers_ScopedToOwner(t *testing.T) {
+	db := testutil.OpenDB(t)
+	repo := infrastructure.NewRepository(db)
+	ctx := context.Background()
+
+	_, err := repo.CreateStockTransfer(ctx, testutil.OwnerID, domain.StockTransferInput{
+		FromWarehouseID: 1,
+		ToWarehouseID:   2,
+		Items: []domain.StockTransferItemInput{
+			{ProductID: 5201, Quantity: 1.0},
+		},
+	})
+	if err != nil {
+		t.Fatalf("seed transfer: %v", err)
+	}
+
+	other, _, err := repo.ListStockTransfers(ctx, testutil.OwnerID+9999, 50, 0)
+	if err != nil {
+		t.Fatalf("ListStockTransfers(other owner): %v", err)
+	}
+	for _, tr := range other {
+		if tr.OwnerID == testutil.OwnerID {
+			t.Errorf("other-owner list contains ownerID=%d record", testutil.OwnerID)
+		}
+	}
+}
