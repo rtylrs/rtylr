@@ -5,6 +5,7 @@ import (
 	"errors"
 	"net/http"
 	"strconv"
+	"strings"
 
 	"github.com/go-chi/chi/v5"
 
@@ -143,13 +144,13 @@ type CreateEmployeeResponse struct {
 }
 
 func (h *CreateEmployeeHandler) Validate(_ context.Context, req *CreateEmployeeRequest) *errorModels.ServerError {
-	if req.FirstName == "" {
+	if strings.TrimSpace(req.FirstName) == "" {
 		return &errorModels.ServerError{Code: http.StatusBadRequest, Message: "first_name is required"}
 	}
-	if req.LastName == "" {
+	if strings.TrimSpace(req.LastName) == "" {
 		return &errorModels.ServerError{Code: http.StatusBadRequest, Message: "last_name is required"}
 	}
-	if req.Email == "" {
+	if strings.TrimSpace(req.Email) == "" {
 		return &errorModels.ServerError{Code: http.StatusBadRequest, Message: "email is required"}
 	}
 	return nil
@@ -217,10 +218,10 @@ type UpdateEmployeeResponse struct {
 }
 
 func (h *UpdateEmployeeHandler) Validate(_ context.Context, req *UpdateEmployeeRequest) *errorModels.ServerError {
-	if req.FirstName == "" {
+	if strings.TrimSpace(req.FirstName) == "" {
 		return &errorModels.ServerError{Code: http.StatusBadRequest, Message: "first_name is required"}
 	}
-	if req.LastName == "" {
+	if strings.TrimSpace(req.LastName) == "" {
 		return &errorModels.ServerError{Code: http.StatusBadRequest, Message: "last_name is required"}
 	}
 	return nil
