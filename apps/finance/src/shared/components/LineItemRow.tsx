@@ -39,7 +39,10 @@ const LineItemRow: React.FC<LineItemRowProps> = ({ item, onChange, onRemove, dis
         <input
           type="number"
           value={item.quantity}
-          onChange={(e) => onChange({ ...item, quantity: parseFloat(e.target.value) || 0 })}
+          onChange={(e) => {
+            const v = parseFloat(e.target.value);
+            if (!isNaN(v) && v > 0) onChange({ ...item, quantity: v });
+          }}
           disabled={disabled}
           style={{ ...inputStyle, textAlign: 'right' }}
         />
@@ -56,7 +59,10 @@ const LineItemRow: React.FC<LineItemRowProps> = ({ item, onChange, onRemove, dis
           type="number"
           step="0.1"
           value={item.taxRate}
-          onChange={(e) => onChange({ ...item, taxRate: parseFloat(e.target.value) || 0 })}
+          onChange={(e) => {
+            const v = parseFloat(e.target.value);
+            if (!isNaN(v) && v >= 0) onChange({ ...item, taxRate: v });
+          }}
           disabled={disabled}
           style={{ ...inputStyle, textAlign: 'right' }}
         />

@@ -251,7 +251,10 @@ const NewInvoice: React.FC = () => {
                 <input
                   type="number"
                   value={discount}
-                  onChange={(e) => setDiscount(parseFloat(e.target.value) || 0)}
+                  onChange={(e) => {
+                    const v = parseFloat(e.target.value);
+                    if (!isNaN(v) && v >= 0) setDiscount(v);
+                  }}
                   style={{ ...inputStyle, marginTop: 6 }}
                 />
               </div>
