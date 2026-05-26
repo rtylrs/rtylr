@@ -4,6 +4,7 @@ import (
 	"context"
 	"net/http"
 	"strconv"
+	"strings"
 
 	"github.com/go-chi/chi/v5"
 
@@ -81,7 +82,7 @@ type CreateHRCoreDepartmentResponse struct {
 }
 
 func (h *CreateHRCoreDepartmentHandler) Validate(_ context.Context, req *CreateHRCoreDepartmentRequest) *errorModels.ServerError {
-	if req.Name == "" {
+	if strings.TrimSpace(req.Name) == "" {
 		return &errorModels.ServerError{Code: http.StatusBadRequest, Message: "name is required"}
 	}
 	return nil
@@ -122,7 +123,7 @@ type UpdateHRCoreDepartmentResponse struct {
 }
 
 func (h *UpdateHRCoreDepartmentHandler) Validate(_ context.Context, req *UpdateHRCoreDepartmentRequest) *errorModels.ServerError {
-	if req.Name == "" {
+	if strings.TrimSpace(req.Name) == "" {
 		return &errorModels.ServerError{Code: http.StatusBadRequest, Message: "name is required"}
 	}
 	return nil
