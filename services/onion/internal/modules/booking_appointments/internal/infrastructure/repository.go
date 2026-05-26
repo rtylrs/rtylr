@@ -54,8 +54,16 @@ func (r *Repository) ListToday(ctx context.Context, ownerID int64) ([]domain.App
 }
 
 func (r *Repository) Create(ctx context.Context, ownerID int64, input domain.AppointmentInput) (int64, error) {
-	startTime, _ := time.Parse("2006-01-02T15:04:05Z07:00", input.StartTime)
-	endTime, _ := time.Parse("2006-01-02T15:04:05Z07:00", input.EndTime)
+	startTime, err := time.Parse("2006-01-02T15:04:05Z07:00", input.StartTime)
+	if err != nil {
+		logger.Ctx(ctx).Error("Failed to parse start_time", logger.Error(err))
+		return 0, err
+	}
+	endTime, err := time.Parse("2006-01-02T15:04:05Z07:00", input.EndTime)
+	if err != nil {
+		logger.Ctx(ctx).Error("Failed to parse end_time", logger.Error(err))
+		return 0, err
+	}
 	result, err := r.queries.CreateAppointment(ctx, sqlc.CreateAppointmentParams{
 		OwnerID:       ownerID,
 		ServiceID:     sql.NullInt64{Int64: input.ServiceID, Valid: input.ServiceID != 0},
