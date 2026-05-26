@@ -17,8 +17,19 @@ const (
 	loyaltyTTL   = 5 * time.Minute
 )
 
+type repository interface {
+	ListTransactions(ctx context.Context, ownerID, customerID int64, page, pageSize int) ([]domain.LoyaltyTransaction, int, error)
+	CreateTransaction(ctx context.Context, input domain.AwardInput, txType string) error
+	CreateRedeemTransaction(ctx context.Context, input domain.RedeemInput) error
+	GetConfig(ctx context.Context, ownerID int64) (domain.LoyaltyConfig, error)
+	UpsertConfig(ctx context.Context, input domain.LoyaltyConfigInput) error
+	ListMembers(ctx context.Context, ownerID int64, limit, offset int) ([]domain.LoyaltyMember, error)
+	ListRewards(ctx context.Context, ownerID int64, activeOnly bool) ([]domain.LoyaltyReward, error)
+	UpsertReward(ctx context.Context, rw domain.LoyaltyReward) (int64, error)
+}
+
 type Service struct {
-	repo *infrastructure.Repository
+	repo repository
 }
 
 func NewService(_ context.Context, db *sql.DB) *Service {
