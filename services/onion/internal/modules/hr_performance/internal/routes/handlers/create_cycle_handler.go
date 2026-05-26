@@ -3,6 +3,7 @@ package handlers
 import (
 	"context"
 	"net/http"
+	"strings"
 	"time"
 
 	"github.com/voxire/onion/internal/modules/hr_performance/internal/application"
@@ -29,7 +30,7 @@ type CreateCycleResponse struct {
 }
 
 func (h *CreateCycleHandler) Validate(_ context.Context, req *CreateCycleRequest) *errorModels.ServerError {
-	if req.Name == "" {
+	if strings.TrimSpace(req.Name) == "" {
 		return &errorModels.ServerError{HTTPCode: http.StatusBadRequest, Code: http.StatusBadRequest, Message: "name is required"}
 	}
 	if req.PeriodStart == "" {
