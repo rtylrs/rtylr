@@ -3,6 +3,7 @@ package handlers
 import (
 	"context"
 	"net/http"
+	"strings"
 
 	"github.com/voxire/onion/internal/modules/support_canned/internal/application"
 	"github.com/voxire/onion/internal/modules/support_canned/internal/domain"
@@ -51,10 +52,10 @@ type CreateCannedResponse struct {
 }
 
 func (h *CreateCannedHandler) Validate(_ context.Context, req *CreateCannedRequest) *errorModels.ServerError {
-	if req.Name == "" {
+	if strings.TrimSpace(req.Name) == "" {
 		return &errorModels.ServerError{Code: http.StatusBadRequest, Message: "Name is required"}
 	}
-	if req.Body == "" {
+	if strings.TrimSpace(req.Body) == "" {
 		return &errorModels.ServerError{Code: http.StatusBadRequest, Message: "Body is required"}
 	}
 	return nil
