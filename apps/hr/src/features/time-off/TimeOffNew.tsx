@@ -40,6 +40,10 @@ const TimeOffNew: React.FC = () => {
       toast.error('Select a date range');
       return;
     }
+    if (endDate < startDate) {
+      toast.error('End date cannot be before start date');
+      return;
+    }
     submit.mutate(
       { staffId, staffName: who.name, type, startDate, endDate, reason },
       {
