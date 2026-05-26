@@ -15,6 +15,8 @@ import (
 	errorModels "github.com/voxire/onion/internal/platform/errors"
 )
 
+const journalDateLayout = "2006-01-02"
+
 type JournalLinePayload struct {
 	ID        int64   `json:"id"`
 	EntryID   int64   `json:"entry_id"`
@@ -117,6 +119,9 @@ type CreateResponse struct {
 func (h *CreateHandler) Validate(_ context.Context, req *CreateRequest) *errorModels.ServerError {
 	if req.Date == "" {
 		return &errorModels.ServerError{Code: http.StatusBadRequest, Message: "date is required"}
+	}
+	if _, err := time.Parse(journalDateLayout, req.Date); err != nil {
+		return &errorModels.ServerError{Code: http.StatusBadRequest, Message: "date must be in YYYY-MM-DD format"}
 	}
 	if len(req.Lines) == 0 {
 		return &errorModels.ServerError{Code: http.StatusBadRequest, Message: "at least one line is required"}
