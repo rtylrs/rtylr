@@ -4,6 +4,9 @@ import (
 	"context"
 	"errors"
 	"net/http"
+	"strconv"
+
+	"github.com/go-chi/chi/v5"
 
 	"github.com/voxire/onion/internal/modules/hr_payroll/internal/application"
 	"github.com/voxire/onion/internal/modules/hr_payroll/internal/domain"
@@ -32,12 +35,18 @@ func (h *GetPayrollRunHandler) Serve(ctx context.Context, req *GetPayrollRunRequ
 		return GetPayrollRunResponse{}, errorModels.PermissionDeniedServerError()
 	}
 
-	run, entries, err := h.Service.GetPayrollRun(ctx, device.User.UserID, req.ID)
+	idStr := chi.URLParamFromCtx(ctx, "id")
+	id, parseErr := strconv.ParseInt(idStr, 10, 64)
+	if parseErr != nil {
+		return GetPayrollRunResponse{}, &errorModels.ServerError{HTTPCode: http.StatusBadRequest, Code: http.StatusBadRequest, Message: "Invalid payroll run id"}
+	}
+
+	run, entries, err := h.Service.GetPayrollRun(ctx, device.User.UserID, id)
 	if err != nil {
 		if errors.Is(err, domain.ErrPayrollRunNotFound) {
 			return GetPayrollRunResponse{}, &errorModels.ServerError{HTTPCode: http.StatusNotFound, Code: http.StatusNotFound, Message: "Payroll run not found"}
 		}
-		logger.Ctx(ctx).Error("failed to get payroll run", logger.Any("owner_id", device.User.UserID), logger.Any("run_id", req.ID), logger.Error(err))
+		logger.Ctx(ctx).Error("failed to get payroll run", logger.Any("owner_id", device.User.UserID), logger.Any("run_id", id), logger.Error(err))
 		return GetPayrollRunResponse{}, &errorModels.ServerError{HTTPCode: http.StatusInternalServerError, Code: http.StatusInternalServerError, Message: "Failed to get payroll run"}
 	}
 
