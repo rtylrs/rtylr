@@ -24,8 +24,17 @@ COPY voxie ./voxie
 RUN chmod +x scripts/*.sh
 RUN bash scripts/generate_sqlc.sh
 
+ARG VERSION=dev
+ARG COMMIT=unknown
+ARG BUILD_TIME=unknown
+
 RUN CGO_ENABLED=0 GOOS=linux GOARCH=amd64 \
-    go build -ldflags="-s -w" -o /app/api ./cmd/api
+    go build \
+    -ldflags="-s -w \
+      -X 'github.com/voxire/onion/internal/platform/server/http.Version=${VERSION}' \
+      -X 'github.com/voxire/onion/internal/platform/server/http.Commit=${COMMIT}' \
+      -X 'github.com/voxire/onion/internal/platform/server/http.BuildTime=${BUILD_TIME}'" \
+    -o /app/api ./cmd/api
 
 # Final stage — minimal image
 FROM alpine:latest
