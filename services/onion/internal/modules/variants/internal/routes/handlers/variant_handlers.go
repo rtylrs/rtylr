@@ -3,6 +3,7 @@ package handlers
 import (
 	"context"
 	"net/http"
+	"strings"
 
 	"github.com/voxire/onion/internal/modules/variants/internal/application"
 	"github.com/voxire/onion/internal/modules/variants/internal/domain"
@@ -125,7 +126,7 @@ func (h *CreateVariantHandler) Validate(_ context.Context, req *CreateVariantReq
 		}
 	}
 
-	if req.Name == "" {
+	if strings.TrimSpace(req.Name) == "" {
 		return &errorModels.ServerError{
 			Code:     http.StatusBadRequest,
 			HTTPCode: http.StatusBadRequest,
@@ -206,7 +207,7 @@ func (h *UpdateVariantHandler) Validate(_ context.Context, req *UpdateVariantReq
 		}
 	}
 
-	if req.Name == "" {
+	if strings.TrimSpace(req.Name) == "" {
 		return &errorModels.ServerError{
 			Code:     http.StatusBadRequest,
 			HTTPCode: http.StatusBadRequest,
