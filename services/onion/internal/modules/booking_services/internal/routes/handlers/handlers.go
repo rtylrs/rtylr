@@ -3,6 +3,7 @@ package handlers
 import (
 	"context"
 	"net/http"
+	"strings"
 
 	"github.com/voxire/onion/internal/modules/booking_services/internal/application"
 	"github.com/voxire/onion/internal/modules/booking_services/internal/domain"
@@ -53,8 +54,12 @@ type CreateResponse struct {
 }
 
 func (h *CreateHandler) Validate(_ context.Context, req *CreateRequest) *errorModels.ServerError {
+	req.Name = strings.TrimSpace(req.Name)
 	if req.Name == "" {
 		return &errorModels.ServerError{Code: http.StatusBadRequest, HTTPCode: http.StatusBadRequest, Message: "Name is required"}
+	}
+	if req.DurationMinutes <= 0 {
+		return &errorModels.ServerError{Code: http.StatusBadRequest, HTTPCode: http.StatusBadRequest, Message: "duration_minutes must be greater than 0"}
 	}
 	return nil
 }
@@ -91,6 +96,13 @@ type UpdateResponse struct {
 func (h *UpdateHandler) Validate(_ context.Context, req *UpdateRequest) *errorModels.ServerError {
 	if req.ID == 0 {
 		return &errorModels.ServerError{Code: http.StatusBadRequest, HTTPCode: http.StatusBadRequest, Message: "ID is required"}
+	}
+	req.Name = strings.TrimSpace(req.Name)
+	if req.Name == "" {
+		return &errorModels.ServerError{Code: http.StatusBadRequest, HTTPCode: http.StatusBadRequest, Message: "Name is required"}
+	}
+	if req.DurationMinutes <= 0 {
+		return &errorModels.ServerError{Code: http.StatusBadRequest, HTTPCode: http.StatusBadRequest, Message: "duration_minutes must be greater than 0"}
 	}
 	return nil
 }
