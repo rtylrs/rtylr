@@ -349,6 +349,7 @@ type CheckoutResponse struct {
 }
 
 func (h *CheckoutHandler) Validate(_ context.Context, req *CheckoutRequest) *errorModels.ServerError {
+	req.PlanSlug = strings.TrimSpace(req.PlanSlug)
 	if req.PlanSlug == "" {
 		return &errorModels.ServerError{
 			HTTPCode: http.StatusBadRequest,
