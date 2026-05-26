@@ -5,6 +5,7 @@ import (
 	"errors"
 	"net/http"
 	"strconv"
+	"time"
 
 	"github.com/go-chi/chi/v5"
 
@@ -167,6 +168,17 @@ func (h *CreatePurchaseOrderHandler) Validate(_ context.Context, req *CreatePurc
 			Message:  "At least one item is required",
 		}
 	}
+
+	if req.ExpectedDelivery != "" {
+		if _, err := time.Parse("2006-01-02", req.ExpectedDelivery); err != nil {
+			return &errorModels.ServerError{
+				Code:     http.StatusBadRequest,
+				HTTPCode: http.StatusBadRequest,
+				Message:  "expected_delivery must be in YYYY-MM-DD format",
+			}
+		}
+	}
+
 	return nil
 }
 
