@@ -7,6 +7,30 @@ import (
 	"github.com/voxire/onion/internal/modules/benefits/internal/domain"
 )
 
+func TestCreateHandler_Validate_MissingName(t *testing.T) {
+	h := &CreateHandler{}
+	req := &CreateRequest{Name: ""}
+	if err := h.Validate(nil, req); err == nil {
+		t.Error("expected error for missing name")
+	}
+}
+
+func TestCreateHandler_Validate_WhitespaceName(t *testing.T) {
+	h := &CreateHandler{}
+	req := &CreateRequest{Name: "   "}
+	if err := h.Validate(nil, req); err == nil {
+		t.Error("expected error for whitespace-only name")
+	}
+}
+
+func TestCreateHandler_Validate_Valid(t *testing.T) {
+	h := &CreateHandler{}
+	req := &CreateRequest{Name: "Health Plan"}
+	if err := h.Validate(nil, req); err != nil {
+		t.Errorf("unexpected error: %v", err)
+	}
+}
+
 func TestNewPayload_RoundTrip(t *testing.T) {
 	now := time.Date(2026, 4, 28, 0, 0, 0, 0, time.UTC)
 	in := domain.BenefitPlan{
