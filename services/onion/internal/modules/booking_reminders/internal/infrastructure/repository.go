@@ -34,7 +34,11 @@ func (r *Repository) List(ctx context.Context, ownerID int64) ([]domain.Reminder
 }
 
 func (r *Repository) Create(ctx context.Context, ownerID int64, input domain.ReminderInput) (int64, error) {
-	scheduledAt, _ := time.Parse("2006-01-02T15:04:05Z07:00", input.ScheduledAt)
+	scheduledAt, err := time.Parse("2006-01-02T15:04:05Z07:00", input.ScheduledAt)
+	if err != nil && input.ScheduledAt != "" {
+		logger.Ctx(ctx).Error("Failed to parse scheduled_at", logger.Error(err))
+		return 0, err
+	}
 	result, err := r.queries.CreateReminder(ctx, sqlc.CreateReminderParams{
 		OwnerID:       ownerID,
 		AppointmentID: sql.NullInt64{Int64: input.AppointmentID, Valid: input.AppointmentID != 0},
