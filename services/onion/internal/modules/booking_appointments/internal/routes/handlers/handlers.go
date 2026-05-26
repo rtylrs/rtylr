@@ -4,6 +4,7 @@ import (
 	"context"
 	"net/http"
 	"strings"
+	"time"
 
 	"github.com/voxire/onion/internal/modules/booking_appointments/internal/application"
 	"github.com/voxire/onion/internal/modules/booking_appointments/internal/domain"
@@ -90,6 +91,12 @@ func (h *CreateHandler) Validate(_ context.Context, req *CreateRequest) *errorMo
 	req.EndTime = strings.TrimSpace(req.EndTime)
 	if req.StartTime == "" || req.EndTime == "" {
 		return &errorModels.ServerError{Code: http.StatusBadRequest, HTTPCode: http.StatusBadRequest, Message: "Start and end time are required"}
+	}
+	if _, err := time.Parse("2006-01-02T15:04:05Z07:00", req.StartTime); err != nil {
+		return &errorModels.ServerError{Code: http.StatusBadRequest, HTTPCode: http.StatusBadRequest, Message: "start_time must be in RFC3339 format"}
+	}
+	if _, err := time.Parse("2006-01-02T15:04:05Z07:00", req.EndTime); err != nil {
+		return &errorModels.ServerError{Code: http.StatusBadRequest, HTTPCode: http.StatusBadRequest, Message: "end_time must be in RFC3339 format"}
 	}
 	return nil
 }
