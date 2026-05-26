@@ -117,6 +117,9 @@ func (h *AcceptInviteHandler) Validate(_ context.Context, req *AcceptInviteReque
 	if req.Token == "" {
 		return &errorModels.ServerError{Code: http.StatusBadRequest, Message: "token is required"}
 	}
+	if req.UserID == 0 {
+		return &errorModels.ServerError{Code: http.StatusBadRequest, Message: "user_id is required"}
+	}
 	return nil
 }
 
