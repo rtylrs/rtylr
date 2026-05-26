@@ -34,7 +34,10 @@ const Warehouses: React.FC = () => {
   const [newManager, setNewManager] = useState('');
 
   const handleCreate = async (): Promise<void> => {
-    if (!newName.trim()) return;
+    if (!newName.trim()) {
+      toast.error('Warehouse name is required');
+      return;
+    }
     try {
       await createMut.mutateAsync({
         name: newName.trim(),

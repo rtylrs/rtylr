@@ -27,7 +27,10 @@ const StockTransfers: React.FC = () => {
   const [toName, setToName] = useState('');
 
   const handleCreate = async (): Promise<void> => {
-    if (!fromName.trim() || !toName.trim()) return;
+    if (!fromName.trim() || !toName.trim()) {
+      toast.error('Source and destination locations are required');
+      return;
+    }
     try {
       await createMut.mutateAsync({
         fromName: fromName.trim(),

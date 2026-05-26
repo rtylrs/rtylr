@@ -26,7 +26,10 @@ const Categories: React.FC = () => {
   const [editName, setEditName] = useState('');
 
   const handleCreate = async (): Promise<void> => {
-    if (!newName.trim()) return;
+    if (!newName.trim()) {
+      toast.error('Category name is required');
+      return;
+    }
     try {
       await createMut.mutateAsync({ name: newName.trim() });
       toast.success(`Category "${newName}" created`);

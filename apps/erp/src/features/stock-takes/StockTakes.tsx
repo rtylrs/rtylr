@@ -33,7 +33,10 @@ const StockTakes: React.FC = () => {
   const [newWarehouseId, setNewWarehouseId] = useState<number>(0);
 
   const handleCreate = async (): Promise<void> => {
-    if (!newName.trim()) return;
+    if (!newName.trim()) {
+      toast.error('Stock take name is required');
+      return;
+    }
     try {
       await createMut.mutateAsync({
         name: newName.trim(),

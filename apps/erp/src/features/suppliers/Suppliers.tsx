@@ -92,7 +92,10 @@ const Suppliers: React.FC = () => {
   const activeCount = suppliers.filter((s) => s.status === 'Active').length;
 
   const handleCreate = async (): Promise<void> => {
-    if (!newName.trim()) return;
+    if (!newName.trim()) {
+      toast.error('Supplier name is required');
+      return;
+    }
     try {
       await createMut.mutateAsync({
         name: newName.trim(),

@@ -32,7 +32,10 @@ const Brands: React.FC = () => {
   const [newDescription, setNewDescription] = useState('');
 
   const handleCreate = async (): Promise<void> => {
-    if (!newName.trim()) return;
+    if (!newName.trim()) {
+      toast.error('Brand name is required');
+      return;
+    }
     try {
       await createMut.mutateAsync({ name: newName.trim(), description: newDescription.trim() });
       toast.success('Brand created');
