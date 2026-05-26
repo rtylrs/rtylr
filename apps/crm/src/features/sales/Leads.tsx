@@ -1,5 +1,6 @@
 import React, { useState } from 'react';
 import { useNavigate } from 'react-router-dom';
+import { toast } from 'sonner';
 import { Plus, Search, Trash2, Eye } from 'lucide-react';
 import { AnimatePresence, motion } from 'motion/react';
 import { useLeads, useDeleteLead } from '../../shared/hooks/queries/useSales';
@@ -88,8 +89,13 @@ const Leads: React.FC = () => {
 
   const handleDelete = (): void => {
     if (deleteId === null) return;
-    deleteLead.mutate(deleteId);
-    setDeleteId(null);
+    deleteLead.mutate(deleteId, {
+      onSuccess: () => {
+        toast.success('Lead deleted');
+        setDeleteId(null);
+      },
+      onError: () => toast.error('Failed to delete lead'),
+    });
   };
 
   return (
