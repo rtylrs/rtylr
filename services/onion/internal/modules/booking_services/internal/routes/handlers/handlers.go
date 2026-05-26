@@ -61,6 +61,9 @@ func (h *CreateHandler) Validate(_ context.Context, req *CreateRequest) *errorMo
 	if req.DurationMinutes <= 0 {
 		return &errorModels.ServerError{Code: http.StatusBadRequest, HTTPCode: http.StatusBadRequest, Message: "duration_minutes must be greater than 0"}
 	}
+	if req.Price < 0 {
+		return &errorModels.ServerError{Code: http.StatusBadRequest, HTTPCode: http.StatusBadRequest, Message: "price must not be negative"}
+	}
 	return nil
 }
 
@@ -103,6 +106,9 @@ func (h *UpdateHandler) Validate(_ context.Context, req *UpdateRequest) *errorMo
 	}
 	if req.DurationMinutes <= 0 {
 		return &errorModels.ServerError{Code: http.StatusBadRequest, HTTPCode: http.StatusBadRequest, Message: "duration_minutes must be greater than 0"}
+	}
+	if req.Price < 0 {
+		return &errorModels.ServerError{Code: http.StatusBadRequest, HTTPCode: http.StatusBadRequest, Message: "price must not be negative"}
 	}
 	return nil
 }
