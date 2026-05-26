@@ -25,15 +25,44 @@ func invalidateInvoicesScope(ctx context.Context, ownerID int64) {
 	}
 }
 
+type repository interface {
+	ListInvoices(ctx context.Context, ownerID int64, status, search, dateFrom, dateTo string, limit, offset int) ([]domain.Invoice, error)
+	GetInvoiceByID(ctx context.Context, ownerID, invoiceID int64) (*domain.Invoice, error)
+	CreateInvoice(ctx context.Context, ownerID int64, inv domain.Invoice) (int64, error)
+	CreateInvoiceItems(ctx context.Context, invoiceID int64, items []domain.InvoiceItem) error
+	GetInvoiceItems(ctx context.Context, invoiceID int64) ([]domain.InvoiceItem, error)
+	DeleteInvoiceItems(ctx context.Context, invoiceID int64) error
+	UpdateInvoice(ctx context.Context, ownerID int64, inv domain.Invoice) error
+	UpdateInvoiceStatus(ctx context.Context, ownerID, invoiceID int64, status string) error
+	UpdateInvoicePaymentTotals(ctx context.Context, invoiceID int64, amountPaid, amountDue float64, status string, paidDate *time.Time) error
+	DeleteInvoice(ctx context.Context, ownerID, invoiceID int64) error
+	CountInvoiceSequence(ctx context.Context, ownerID int64, year int) (int64, error)
+	CreatePayment(ctx context.Context, ownerID int64, p domain.Payment) (int64, error)
+	GetPaymentsByInvoice(ctx context.Context, invoiceID int64) ([]domain.Payment, error)
+	ListExpenses(ctx context.Context, ownerID, categoryID int64, search, dateFrom, dateTo string, limit, offset int) ([]domain.Expense, error)
+	GetExpenseByID(ctx context.Context, ownerID, expenseID int64) (*domain.Expense, error)
+	CreateExpense(ctx context.Context, ownerID int64, e domain.Expense) (int64, error)
+	UpdateExpense(ctx context.Context, ownerID int64, e domain.Expense) error
+	DeleteExpense(ctx context.Context, ownerID, expenseID int64) error
+	ListExpenseCategories(ctx context.Context, ownerID int64) ([]domain.ExpenseCategory, error)
+	CreateExpenseCategory(ctx context.Context, ownerID int64, c domain.ExpenseCategory) (int64, error)
+	ListTaxConfigs(ctx context.Context, ownerID int64) ([]domain.TaxConfig, error)
+	CreateTaxConfig(ctx context.Context, ownerID int64, t domain.TaxConfig) (int64, error)
+	SumPaidInvoices(ctx context.Context, ownerID int64, dateFrom, dateTo string) (float64, error)
+	SumExpenses(ctx context.Context, ownerID int64, dateFrom, dateTo string) (float64, error)
+	SumTotalReceivable(ctx context.Context, ownerID int64) (float64, error)
+	SumOverdueAmount(ctx context.Context, ownerID int64) (float64, error)
+	SumTaxCollected(ctx context.Context, ownerID int64, dateFrom, dateTo string) (float64, error)
+	SumTaxOwed(ctx context.Context, ownerID int64, dateFrom, dateTo string) (float64, error)
+}
+
 type Service struct {
-	repo *infrastructure.Repository
+	repo repository
 }
 
 func NewService(_ context.Context, db *sql.DB) *Service {
-	repo := infrastructure.NewRepository(db)
-
 	return &Service{
-		repo: repo,
+		repo: infrastructure.NewRepository(db),
 	}
 }
 
