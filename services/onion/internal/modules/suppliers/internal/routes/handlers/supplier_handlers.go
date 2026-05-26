@@ -4,6 +4,7 @@ import (
 	"context"
 	"errors"
 	"net/http"
+	"strings"
 
 	"github.com/voxire/onion/internal/modules/suppliers/internal/application"
 	"github.com/voxire/onion/internal/modules/suppliers/internal/domain"
@@ -117,6 +118,7 @@ type CreateSupplierResponse struct {
 }
 
 func (h *CreateSupplierHandler) Validate(_ context.Context, req *CreateSupplierRequest) *errorModels.ServerError {
+	req.Name = strings.TrimSpace(req.Name)
 	if req.Name == "" {
 		return &errorModels.ServerError{
 			Code:     http.StatusBadRequest,
@@ -198,6 +200,7 @@ func (h *UpdateSupplierHandler) Validate(_ context.Context, req *UpdateSupplierR
 			Message:  "Supplier ID is required",
 		}
 	}
+	req.Name = strings.TrimSpace(req.Name)
 	if req.Name == "" {
 		return &errorModels.ServerError{
 			Code:     http.StatusBadRequest,
