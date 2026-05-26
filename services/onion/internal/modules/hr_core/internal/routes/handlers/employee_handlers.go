@@ -6,6 +6,7 @@ import (
 	"net/http"
 	"strconv"
 	"strings"
+	"time"
 
 	"github.com/go-chi/chi/v5"
 
@@ -153,6 +154,11 @@ func (h *CreateEmployeeHandler) Validate(_ context.Context, req *CreateEmployeeR
 	if strings.TrimSpace(req.Email) == "" {
 		return &errorModels.ServerError{Code: http.StatusBadRequest, Message: "email is required"}
 	}
+	if req.StartDate != "" {
+		if _, err := time.Parse("2006-01-02", req.StartDate); err != nil {
+			return &errorModels.ServerError{Code: http.StatusBadRequest, Message: "start_date must be in YYYY-MM-DD format"}
+		}
+	}
 	return nil
 }
 
@@ -175,6 +181,11 @@ func (h *CreateEmployeeHandler) Serve(ctx context.Context, req *CreateEmployeeRe
 		HourlyRate:     req.HourlyRate,
 		OvertimeRate:   req.OvertimeRate,
 		Address:        req.Address,
+	}
+	if req.StartDate != "" {
+		if t, err := time.Parse("2006-01-02", req.StartDate); err == nil {
+			emp.StartDate = t
+		}
 	}
 
 	created, err := h.Service.CreateEmployee(ctx, device.User.UserID, emp)
