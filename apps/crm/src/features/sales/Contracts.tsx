@@ -1,4 +1,5 @@
 import React, { useState } from 'react';
+import { toast } from 'sonner';
 import { ChevronDown, ChevronUp, Plus, FileText } from 'lucide-react';
 import { AnimatePresence, motion } from 'motion/react';
 import { useContracts, useLeads, useCreateContract } from '../../shared/hooks/queries/useSales';
@@ -75,7 +76,10 @@ const Contracts: React.FC = () => {
   };
 
   const handleSubmit = (): void => {
-    if (!form.leadId || !form.signedAt || !form.signedBy) return;
+    if (!form.leadId || !form.signedAt || !form.signedBy) {
+      toast.error('Lead, signed date, and signed by are required');
+      return;
+    }
     createContract.mutate(
       {
         leadId: Number(form.leadId),
