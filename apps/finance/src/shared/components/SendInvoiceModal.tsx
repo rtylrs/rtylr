@@ -35,8 +35,17 @@ const SendInvoiceModal: React.FC<SendInvoiceModalProps> = ({
   const { mutate: sendInvoice, isPending: sending } = useSendInvoice();
 
   const handleSend = (): void => {
-    if (!to) {
+    if (!to.trim()) {
       toast.error('Recipient required');
+      return;
+    }
+    const emailRe = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+    if (!emailRe.test(to.trim())) {
+      toast.error('Please enter a valid email address');
+      return;
+    }
+    if (cc.trim() && !emailRe.test(cc.trim())) {
+      toast.error('CC must be a valid email address');
       return;
     }
     sendInvoice(

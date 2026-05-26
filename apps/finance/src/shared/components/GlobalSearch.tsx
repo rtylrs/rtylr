@@ -114,8 +114,13 @@ const GlobalSearch: React.FC<GlobalSearchProps> = ({ open, onClose }) => {
   }, [query, clients]);
 
   useEffect(() => {
+    setIndex(0);
+  }, [results]);
+
+  useEffect(() => {
     if (!open) return;
     const handler = (e: KeyboardEvent) => {
+      if (results.length === 0) return;
       if (e.key === 'ArrowDown') {
         e.preventDefault();
         setIndex((i) => Math.min(i + 1, results.length - 1));
