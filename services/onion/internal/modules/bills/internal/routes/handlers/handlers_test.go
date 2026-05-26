@@ -1,6 +1,7 @@
 package handlers
 
 import (
+	"context"
 	"testing"
 	"time"
 
@@ -35,5 +36,45 @@ func TestNewPayload_AllFieldsRoundTrip(t *testing.T) {
 	}
 	if out.Status != in.Status || out.Description != in.Description {
 		t.Errorf("status/description didn't round-trip")
+	}
+}
+
+func TestCreateHandler_Validate_MissingSupplierID(t *testing.T) {
+	h := &CreateHandler{}
+	req := &CreateRequest{SupplierID: 0, Amount: 100, DueDate: "2026-06-01"}
+	if err := h.Validate(context.Background(), req); err == nil {
+		t.Error("expected error for missing supplier_id")
+	}
+}
+
+func TestCreateHandler_Validate_InvalidAmount(t *testing.T) {
+	h := &CreateHandler{}
+	req := &CreateRequest{SupplierID: 1, Amount: 0, DueDate: "2026-06-01"}
+	if err := h.Validate(context.Background(), req); err == nil {
+		t.Error("expected error for zero amount")
+	}
+}
+
+func TestCreateHandler_Validate_MissingDueDate(t *testing.T) {
+	h := &CreateHandler{}
+	req := &CreateRequest{SupplierID: 1, Amount: 100, DueDate: ""}
+	if err := h.Validate(context.Background(), req); err == nil {
+		t.Error("expected error for missing due_date")
+	}
+}
+
+func TestCreateHandler_Validate_BadDueDateFormat(t *testing.T) {
+	h := &CreateHandler{}
+	req := &CreateRequest{SupplierID: 1, Amount: 100, DueDate: "01/06/2026"}
+	if err := h.Validate(context.Background(), req); err == nil {
+		t.Error("expected error for bad date format")
+	}
+}
+
+func TestCreateHandler_Validate_Valid(t *testing.T) {
+	h := &CreateHandler{}
+	req := &CreateRequest{SupplierID: 1, Amount: 100, DueDate: "2026-06-01"}
+	if err := h.Validate(context.Background(), req); err != nil {
+		t.Errorf("unexpected error: %v", err)
 	}
 }
