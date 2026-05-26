@@ -5,6 +5,7 @@ import (
 	"errors"
 	"net/http"
 	"strconv"
+	"strings"
 
 	"github.com/go-chi/chi/v5"
 
@@ -32,10 +33,10 @@ type UpdateAccountResponse struct {
 }
 
 func (h *UpdateAccountHandler) Validate(_ context.Context, req *UpdateAccountRequest) *errorModels.ServerError {
-	if req.Name == "" {
+	if strings.TrimSpace(req.Name) == "" {
 		return &errorModels.ServerError{HTTPCode: http.StatusBadRequest, Code: http.StatusBadRequest, Message: "name is required"}
 	}
-	if req.Type == "" {
+	if strings.TrimSpace(req.Type) == "" {
 		return &errorModels.ServerError{HTTPCode: http.StatusBadRequest, Code: http.StatusBadRequest, Message: "type is required"}
 	}
 	return nil
