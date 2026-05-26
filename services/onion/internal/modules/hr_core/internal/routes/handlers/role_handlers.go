@@ -4,6 +4,7 @@ import (
 	"context"
 	"net/http"
 	"strconv"
+	"strings"
 
 	"github.com/go-chi/chi/v5"
 
@@ -83,7 +84,7 @@ type CreateRoleResponse struct {
 }
 
 func (h *CreateRoleHandler) Validate(_ context.Context, req *CreateRoleRequest) *errorModels.ServerError {
-	if req.Name == "" {
+	if strings.TrimSpace(req.Name) == "" {
 		return &errorModels.ServerError{Code: http.StatusBadRequest, Message: "name is required"}
 	}
 	return nil
@@ -123,7 +124,7 @@ type UpdateRoleResponse struct {
 }
 
 func (h *UpdateRoleHandler) Validate(_ context.Context, req *UpdateRoleRequest) *errorModels.ServerError {
-	if req.Name == "" {
+	if strings.TrimSpace(req.Name) == "" {
 		return &errorModels.ServerError{Code: http.StatusBadRequest, Message: "name is required"}
 	}
 	return nil
