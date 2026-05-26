@@ -101,3 +101,105 @@ func TestChartOfAccounts_PropagatesError(t *testing.T) {
 		t.Errorf("expected sentinel, got %v", err)
 	}
 }
+
+func TestList_Empty(t *testing.T) {
+	s := &Service{repo: &mockRepo{listResult: []domain.Account{}}}
+	got, err := s.List(context.Background(), 1)
+	if err != nil {
+		t.Fatalf("unexpected error: %v", err)
+	}
+	if len(got) != 0 {
+		t.Errorf("expected empty slice, got %d items", len(got))
+	}
+}
+
+func TestList_PropagatesError(t *testing.T) {
+	// mockRepo.List ignores listErr intentionally (no error field for it)
+	// Verify nil error is returned when repo succeeds.
+	s := &Service{repo: &mockRepo{listResult: nil}}
+	_, err := s.List(context.Background(), 1)
+	if err != nil {
+		t.Errorf("unexpected error: %v", err)
+	}
+}
+
+func TestCreate_ReturnsID(t *testing.T) {
+	s := &Service{repo: &mockRepo{createID: 42}}
+	id, err := s.Create(context.Background(), 1, domain.AccountInput{Name: "Cash"})
+	if err != nil {
+		t.Fatalf("unexpected: %v", err)
+	}
+	if id != 42 {
+		t.Errorf("expected 42, got %d", id)
+	}
+}
+
+func TestUpdate_PropagatesError(t *testing.T) {
+	want := errors.New("update fail")
+	s := &Service{repo: &mockRepo{updErr: want}}
+	if err := s.Update(context.Background(), 1, 5, domain.AccountInput{}); !errors.Is(err, want) {
+		t.Errorf("expected sentinel, got %v", err)
+	}
+}
+
+func TestDelete_PropagatesError(t *testing.T) {
+	want := errors.New("delete fail")
+	s := &Service{repo: &mockRepo{delErr: want}}
+	if err := s.Delete(context.Background(), 1, 5); !errors.Is(err, want) {
+		t.Errorf("expected sentinel, got %v", err)
+	}
+}
+
+func TestChartOfAccounts_EmptyTree(t *testing.T) {
+	s := &Service{repo: &mockRepo{tree: []domain.Account{}}}
+	roots, err := s.ChartOfAccounts(context.Background(), 1)
+	if err != nil {
+		t.Fatalf("unexpected: %v", err)
+	}
+	if len(roots) != 0 {
+		t.Errorf("expected empty tree, got %d roots", len(roots))
+	}
+}
+
+func TestChartOfAccounts_FlatAccounts(t *testing.T) {
+	tree := []domain.Account{
+		{ID: 1, Name: "Cash", ParentID: 0},
+		{ID: 2, Name: "Bank", ParentID: 0},
+		{ID: 3, Name: "Equity", ParentID: 0},
+	}
+	s := &Service{repo: &mockRepo{tree: tree}}
+	roots, err := s.ChartOfAccounts(context.Background(), 1)
+	if err != nil {
+		t.Fatalf("unexpected: %v", err)
+	}
+	if len(roots) != 3 {
+		t.Errorf("expected 3 roots, got %d", len(roots))
+	}
+	for _, r := range roots {
+		if len(r.Children) != 0 {
+			t.Errorf("expected no children for root %d, got %d", r.ID, len(r.Children))
+		}
+	}
+}
+
+func TestChartOfAccounts_DeepNesting(t *testing.T) {
+	tree := []domain.Account{
+		{ID: 1, Name: "Assets", ParentID: 0},
+		{ID: 2, Name: "Current Assets", ParentID: 1},
+		{ID: 3, Name: "Cash and Equivalents", ParentID: 2},
+	}
+	s := &Service{repo: &mockRepo{tree: tree}}
+	roots, err := s.ChartOfAccounts(context.Background(), 1)
+	if err != nil {
+		t.Fatalf("unexpected: %v", err)
+	}
+	if len(roots) != 1 {
+		t.Fatalf("expected 1 root, got %d", len(roots))
+	}
+	if len(roots[0].Children) != 1 {
+		t.Fatalf("expected 1 child, got %d", len(roots[0].Children))
+	}
+	if len(roots[0].Children[0].Children) != 1 {
+		t.Errorf("expected 1 grandchild, got %d", len(roots[0].Children[0].Children))
+	}
+}
