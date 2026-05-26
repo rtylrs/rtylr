@@ -127,3 +127,90 @@ func TestIsEnabled_RepoError(t *testing.T) {
 		t.Error("expected false on repo error")
 	}
 }
+
+func TestListAll_Empty(t *testing.T) {
+	s := &Service{repo: &mockRepo{all: []domain.Addon{}}}
+	got, err := s.ListAll(context.Background())
+	if err != nil {
+		t.Fatalf("unexpected: %v", err)
+	}
+	if len(got) != 0 {
+		t.Errorf("expected empty, got %d", len(got))
+	}
+}
+
+func TestListAll_PropagatesError(t *testing.T) {
+	want := errors.New("db down")
+	s := &Service{repo: &mockRepo{allErr: want}}
+	if _, err := s.ListAll(context.Background()); !errors.Is(err, want) {
+		t.Errorf("expected sentinel, got %v", err)
+	}
+}
+
+func TestEnable_PropagatesError(t *testing.T) {
+	want := errors.New("enable fail")
+	s := &Service{repo: &mockRepo{enErr: want}}
+	if err := s.Enable(context.Background(), 1, "x"); !errors.Is(err, want) {
+		t.Errorf("expected sentinel, got %v", err)
+	}
+}
+
+func TestDisable_PropagatesError(t *testing.T) {
+	want := errors.New("disable fail")
+	s := &Service{repo: &mockRepo{disErr: want}}
+	if err := s.Disable(context.Background(), 1, "x"); !errors.Is(err, want) {
+		t.Errorf("expected sentinel, got %v", err)
+	}
+}
+
+func TestListForBusiness_Empty(t *testing.T) {
+	s := &Service{repo: &mockRepo{all: []domain.Addon{}, enabled: []domain.BusinessAddon{}}}
+	got, err := s.ListForBusiness(context.Background(), 1)
+	if err != nil {
+		t.Fatalf("unexpected: %v", err)
+	}
+	if len(got) != 0 {
+		t.Errorf("expected empty result, got %d", len(got))
+	}
+}
+
+func TestListForBusiness_AllDisabled(t *testing.T) {
+	all := []domain.Addon{
+		{ID: "a", Name: "Addon A"},
+		{ID: "b", Name: "Addon B"},
+	}
+	s := &Service{repo: &mockRepo{all: all, enabled: []domain.BusinessAddon{}}}
+	got, err := s.ListForBusiness(context.Background(), 1)
+	if err != nil {
+		t.Fatalf("unexpected: %v", err)
+	}
+	if len(got) != 2 {
+		t.Fatalf("expected 2 items, got %d", len(got))
+	}
+	for _, item := range got {
+		if item.IsEnabled {
+			t.Errorf("expected all disabled, but %s is enabled", item.AddonID)
+		}
+	}
+}
+
+func TestIsEnabled_NotFound(t *testing.T) {
+	s := &Service{repo: &mockRepo{
+		all:     []domain.Addon{{ID: "x", Name: "X"}},
+		enabled: []domain.BusinessAddon{{AddonID: "x", IsEnabled: true}},
+	}}
+	if s.IsEnabled(context.Background(), 1, "unknown") {
+		t.Error("expected false for unknown addon")
+	}
+}
+
+func TestListForBusiness_BizErrPropagates(t *testing.T) {
+	want := errors.New("biz err")
+	s := &Service{repo: &mockRepo{
+		all:    []domain.Addon{{ID: "a"}},
+		bizErr: want,
+	}}
+	if _, err := s.ListForBusiness(context.Background(), 1); !errors.Is(err, want) {
+		t.Errorf("expected sentinel from ListForBusiness repo, got %v", err)
+	}
+}
