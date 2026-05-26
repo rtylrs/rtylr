@@ -3,6 +3,7 @@ package handlers
 import (
 	"context"
 	"net/http"
+	"strings"
 
 	"github.com/voxire/onion/internal/modules/price_lists/internal/application"
 	"github.com/voxire/onion/internal/modules/price_lists/internal/domain"
@@ -97,7 +98,7 @@ type CreatePriceListResponse struct {
 }
 
 func (h *CreatePriceListHandler) Validate(_ context.Context, req *CreatePriceListRequest) *errorModels.ServerError {
-	if req.Name == "" {
+	if strings.TrimSpace(req.Name) == "" {
 		return &errorModels.ServerError{
 			Code:     http.StatusBadRequest,
 			HTTPCode: http.StatusBadRequest,
