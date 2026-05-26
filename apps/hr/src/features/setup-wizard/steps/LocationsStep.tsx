@@ -1,4 +1,5 @@
 import React, { useState } from 'react';
+import { toast } from 'sonner';
 import { useTranslation } from 'react-i18next';
 import { Plus, Trash2 } from 'lucide-react';
 import { TIMEZONES } from '@voxire/config';
@@ -34,7 +35,10 @@ const LocationsStep = ({ onNext, onBack, isSubmitting }: LocationsStepProps): Re
   const addLocation = (): void => {
     const name = newName.trim();
     const address = newAddress.trim();
-    if (!name || !address) return;
+    if (!name || !address) {
+      toast.error('Location name and address are required');
+      return;
+    }
     setLocations((prev) => [...prev, { name, address, timezone: newTimezone || undefined }]);
     setNewName('');
     setNewAddress('');

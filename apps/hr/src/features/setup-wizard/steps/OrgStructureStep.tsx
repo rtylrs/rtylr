@@ -1,4 +1,5 @@
 import React, { useState } from 'react';
+import { toast } from 'sonner';
 import { useTranslation } from 'react-i18next';
 import { Plus, Trash2 } from 'lucide-react';
 import StepContainer from '../components/StepContainer';
@@ -24,7 +25,10 @@ const OrgStructureStep = ({
 
   const addDepartment = (): void => {
     const trimmed = newName.trim();
-    if (!trimmed) return;
+    if (!trimmed) {
+      toast.error('Department name is required');
+      return;
+    }
     setDepartments((prev) => [...prev, { name: trimmed }]);
     setNewName('');
   };
