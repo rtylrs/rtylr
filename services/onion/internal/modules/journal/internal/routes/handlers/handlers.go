@@ -5,6 +5,7 @@ import (
 	"errors"
 	"net/http"
 	"strconv"
+	"strings"
 	"time"
 
 	"github.com/go-chi/chi/v5"
@@ -117,6 +118,7 @@ type CreateResponse struct {
 }
 
 func (h *CreateHandler) Validate(_ context.Context, req *CreateRequest) *errorModels.ServerError {
+	req.Date = strings.TrimSpace(req.Date)
 	if req.Date == "" {
 		return &errorModels.ServerError{Code: http.StatusBadRequest, Message: "date is required"}
 	}
