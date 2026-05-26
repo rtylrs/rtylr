@@ -72,6 +72,16 @@ type UpdateTaxConfigResponse struct {
 	Message string `json:"message"`
 }
 
+func (h *UpdateTaxConfigHandler) Validate(_ context.Context, req *UpdateTaxConfigRequest) *errorModels.ServerError {
+	if req.TaxName == "" {
+		return &errorModels.ServerError{Code: http.StatusBadRequest, Message: "Tax name is required"}
+	}
+	if req.TaxRate < 0 {
+		return &errorModels.ServerError{Code: http.StatusBadRequest, Message: "Tax rate must not be negative"}
+	}
+	return nil
+}
+
 func (h *UpdateTaxConfigHandler) Serve(ctx context.Context, req *UpdateTaxConfigRequest) (UpdateTaxConfigResponse, *errorModels.ServerError) {
 	device := authPkg.DeviceCtx(ctx)
 	if device.User == nil {
