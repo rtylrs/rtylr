@@ -292,6 +292,9 @@ func (h *UpdateEmployeeHandler) Serve(ctx context.Context, req *UpdateEmployeeRe
 
 	updated, err := h.Service.UpdateEmployee(ctx, device.User.UserID, emp)
 	if err != nil {
+		if errors.Is(err, domain.ErrEmployeeNotFound) {
+			return UpdateEmployeeResponse{}, &errorModels.ServerError{HTTPCode: http.StatusNotFound, Code: http.StatusNotFound, Message: "Employee not found"}
+		}
 		logger.Ctx(ctx).Error("failed to update employee", logger.Any("owner_id", device.User.UserID), logger.Any("employee_id", id), logger.Error(err))
 		return UpdateEmployeeResponse{}, &errorModels.ServerError{HTTPCode: http.StatusInternalServerError, Code: http.StatusInternalServerError, Message: "Failed to update employee"}
 	}
