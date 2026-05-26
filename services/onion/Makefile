@@ -11,10 +11,18 @@ build:
 
 # Build all service binaries
 build-all:
-	@echo "🔨 Building API binary..."
+	@echo "Building API binary..."
 	@mkdir -p ./bin
-	go build -o ./bin/api ./cmd/api/main.go
-	@echo "✅ API binary built successfully!"
+	@VERSION=$$(git describe --tags --always --dirty 2>/dev/null || echo "dev"); \
+	 COMMIT=$$(git rev-parse --short HEAD 2>/dev/null || echo "unknown"); \
+	 BUILD_TIME=$$(date -u +%Y-%m-%dT%H:%M:%SZ); \
+	 go build \
+	   -ldflags="-s -w \
+	     -X 'github.com/voxire/onion/internal/platform/server/http.Version=$$VERSION' \
+	     -X 'github.com/voxire/onion/internal/platform/server/http.Commit=$$COMMIT' \
+	     -X 'github.com/voxire/onion/internal/platform/server/http.BuildTime=$$BUILD_TIME'" \
+	   -o ./bin/api ./cmd/api/main.go
+	@echo "API binary built successfully!"
 
 generate:
 	./scripts/generate_sqlc.sh
