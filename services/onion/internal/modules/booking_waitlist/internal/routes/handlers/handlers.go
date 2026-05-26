@@ -3,6 +3,7 @@ package handlers
 import (
 	"context"
 	"net/http"
+	"strings"
 
 	"github.com/voxire/onion/internal/modules/booking_waitlist/internal/application"
 	"github.com/voxire/onion/internal/modules/booking_waitlist/internal/domain"
@@ -51,7 +52,11 @@ type CreateResponse struct {
 	Message string `json:"message"`
 }
 
-func (h *CreateHandler) Validate(_ context.Context, _ *CreateRequest) *errorModels.ServerError {
+func (h *CreateHandler) Validate(_ context.Context, req *CreateRequest) *errorModels.ServerError {
+	req.CustomerName = strings.TrimSpace(req.CustomerName)
+	if req.CustomerName == "" {
+		return &errorModels.ServerError{Code: http.StatusBadRequest, HTTPCode: http.StatusBadRequest, Message: "customer_name is required"}
+	}
 	return nil
 }
 
