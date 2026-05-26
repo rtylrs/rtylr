@@ -18,7 +18,7 @@ type mockRepo struct {
 	convErr   error
 }
 
-func (m *mockRepo) List(_ context.Context, _ int64) ([]domain.Quote, error) {
+func (m *mockRepo) List(_ context.Context, _ int64, _, _ int32) ([]domain.Quote, error) {
 	return m.list, nil
 }
 
@@ -40,7 +40,7 @@ func (m *mockRepo) ConvertToInvoice(_ context.Context, _, _ int64) (int64, error
 
 func TestList_Delegates(t *testing.T) {
 	s := &Service{repo: &mockRepo{list: []domain.Quote{{ID: 1}}}}
-	got, _ := s.List(context.Background(), 1)
+	got, _, _ := s.List(context.Background(), 1, 1, 20)
 	if len(got) != 1 {
 		t.Errorf("got %d", len(got))
 	}

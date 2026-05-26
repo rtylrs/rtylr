@@ -15,7 +15,7 @@ type mockRepo struct {
 	postErr   error
 }
 
-func (m *mockRepo) List(_ context.Context, _ int64) ([]domain.JournalEntry, error) {
+func (m *mockRepo) List(_ context.Context, _ int64, _, _ int32) ([]domain.JournalEntry, error) {
 	return m.list, nil
 }
 
@@ -29,7 +29,7 @@ func (m *mockRepo) Post(_ context.Context, _, _ int64) error {
 
 func TestList_Delegates(t *testing.T) {
 	s := &Service{repo: &mockRepo{list: []domain.JournalEntry{{ID: 1}}}}
-	got, _ := s.List(context.Background(), 1)
+	got, _, _ := s.List(context.Background(), 1, 1, 20)
 	if len(got) != 1 {
 		t.Errorf("got %d", len(got))
 	}

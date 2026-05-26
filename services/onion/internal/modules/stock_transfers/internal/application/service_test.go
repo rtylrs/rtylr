@@ -14,8 +14,8 @@ type mockRepo struct {
 	updErr    error
 }
 
-func (m *mockRepo) ListStockTransfers(_ context.Context, _ int64) ([]domain.StockTransfer, error) {
-	return nil, nil
+func (m *mockRepo) ListStockTransfers(_ context.Context, _ int64, _, _ int) ([]domain.StockTransfer, bool, error) {
+	return nil, false, nil
 }
 
 func (m *mockRepo) CreateStockTransfer(_ context.Context, _ int64, _ domain.StockTransferInput) (int64, error) {

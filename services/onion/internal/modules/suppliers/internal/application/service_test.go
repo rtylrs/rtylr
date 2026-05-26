@@ -15,8 +15,8 @@ type mockRepo struct {
 	deleteErr error
 }
 
-func (m *mockRepo) ListSuppliers(_ context.Context, _ int64) ([]domain.Supplier, error) {
-	return nil, nil
+func (m *mockRepo) ListSuppliers(_ context.Context, _ int64, _, _ int) ([]domain.Supplier, bool, error) {
+	return nil, false, nil
 }
 
 func (m *mockRepo) CreateSupplier(_ context.Context, _ int64, _ domain.SupplierInput) (int64, error) {

@@ -48,7 +48,7 @@ func TestCreateHandler_Validate_RequiresAppointmentID(t *testing.T) {
 
 func TestCreateHandler_Validate_AcceptsValidRequest(t *testing.T) {
 	h := &CreateHandler{}
-	if err := h.Validate(context.Background(), &CreateRequest{AppointmentID: 1, Type: "sms"}); err != nil {
+	if err := h.Validate(context.Background(), &CreateRequest{AppointmentID: 1, Type: "sms", ScheduledAt: "2026-05-26T10:00:00Z"}); err != nil {
 		t.Errorf("unexpected error: %+v", err)
 	}
 }
