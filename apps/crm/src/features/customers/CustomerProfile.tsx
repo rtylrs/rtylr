@@ -72,7 +72,10 @@ const CustomerProfile: React.FC = () => {
   const consent = customer.consent || { email: true, sms: false, marketing: true };
 
   const handleAddTag = () => {
-    if (!newTag.trim()) return;
+    if (!newTag.trim()) {
+      toast.error('Tag name is required');
+      return;
+    }
     const tagName = newTag.trim();
     const updated = [...tags, tagName];
     update.mutate(
