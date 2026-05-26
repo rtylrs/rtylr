@@ -24,8 +24,20 @@ func invalidateHRShiftsScope(ctx context.Context, ownerID int64) {
 	}
 }
 
+type repository interface {
+	ListShifts(ctx context.Context, ownerID int64, params domain.ListShiftsParams) ([]domain.ShiftRecord, int64, error)
+	GetShift(ctx context.Context, ownerID, shiftID int64) (*domain.ShiftRecord, error)
+	CreateShift(ctx context.Context, ownerID int64, shift domain.ShiftRecord) (*domain.ShiftRecord, error)
+	UpdateShift(ctx context.Context, ownerID int64, shift domain.ShiftRecord) error
+	ListShiftsByLocation(ctx context.Context, ownerID, locationID int64) ([]domain.ShiftRecord, error)
+	ListRosterAssignments(ctx context.Context, ownerID int64, weekStart, weekEnd string) ([]domain.ShiftAssignmentRecord, error)
+	CreateShiftAssignment(ctx context.Context, ownerID int64, assignment domain.ShiftAssignmentRecord) (*domain.ShiftAssignmentRecord, error)
+	PublishRosterAssignments(ctx context.Context, ownerID int64, weekStart, weekEnd string) error
+	ListEmployeeAssignmentsForDate(ctx context.Context, ownerID, employeeID int64, date string) ([]domain.ShiftAssignmentRecord, error)
+}
+
 type Service struct {
-	repo                 *infrastructure.Repository
+	repo                 repository
 	leaveConflictChecker domain.LeaveConflictChecker
 }
 
