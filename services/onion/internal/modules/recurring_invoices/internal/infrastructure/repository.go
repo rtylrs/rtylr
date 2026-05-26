@@ -50,7 +50,11 @@ func (r *Repository) List(ctx context.Context, ownerID int64) ([]domain.Recurrin
 }
 
 func (r *Repository) Create(ctx context.Context, ownerID int64, input domain.RecurringInvoiceInput) (int64, error) {
-	nextDate, _ := time.Parse("2006-01-02", input.NextInvoiceDate)
+	nextDate, err := time.Parse("2006-01-02", input.NextInvoiceDate)
+	if err != nil {
+		logger.Ctx(ctx).Error("Failed to parse next_invoice_date", logger.Error(err))
+		return 0, err
+	}
 
 	res, err := r.queries.CreateRecurringInvoice(ctx, sqlc.CreateRecurringInvoiceParams{
 		OwnerID:           ownerID,
@@ -69,9 +73,13 @@ func (r *Repository) Create(ctx context.Context, ownerID int64, input domain.Rec
 }
 
 func (r *Repository) Update(ctx context.Context, ownerID, id int64, input domain.RecurringInvoiceInput) error {
-	nextDate, _ := time.Parse("2006-01-02", input.NextInvoiceDate)
+	nextDate, err := time.Parse("2006-01-02", input.NextInvoiceDate)
+	if err != nil {
+		logger.Ctx(ctx).Error("Failed to parse next_invoice_date", logger.Error(err))
+		return err
+	}
 
-	err := r.queries.UpdateRecurringInvoice(ctx, sqlc.UpdateRecurringInvoiceParams{
+	err = r.queries.UpdateRecurringInvoice(ctx, sqlc.UpdateRecurringInvoiceParams{
 		TemplateInvoiceID: input.TemplateInvoiceID,
 		Frequency:         sqlc.FinanceRecurringInvoicesFrequency(input.Frequency),
 		NextInvoiceDate:   nextDate,
