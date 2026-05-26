@@ -5,6 +5,7 @@ import (
 	"errors"
 	"net/http"
 	"strconv"
+	"strings"
 
 	"github.com/go-chi/chi/v5"
 
@@ -85,6 +86,7 @@ type CreateModifierResponse struct {
 }
 
 func (h *CreateModifierHandler) Validate(_ context.Context, req *CreateModifierRequest) *errorModels.ServerError {
+	req.Name = strings.TrimSpace(req.Name)
 	if req.Name == "" {
 		return &errorModels.ServerError{Code: http.StatusBadRequest, Message: "Name is required"}
 	}
@@ -126,6 +128,7 @@ type UpdateModifierResponse struct {
 }
 
 func (h *UpdateModifierHandler) Validate(_ context.Context, req *UpdateModifierRequest) *errorModels.ServerError {
+	req.Name = strings.TrimSpace(req.Name)
 	if req.Name == "" {
 		return &errorModels.ServerError{Code: http.StatusBadRequest, Message: "Name is required"}
 	}
