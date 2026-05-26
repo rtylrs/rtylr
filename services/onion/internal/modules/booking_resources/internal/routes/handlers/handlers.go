@@ -3,6 +3,7 @@ package handlers
 import (
 	"context"
 	"net/http"
+	"strings"
 
 	"github.com/voxire/onion/internal/modules/booking_resources/internal/application"
 	"github.com/voxire/onion/internal/modules/booking_resources/internal/domain"
@@ -51,6 +52,7 @@ type CreateResponse struct {
 }
 
 func (h *CreateHandler) Validate(_ context.Context, req *CreateRequest) *errorModels.ServerError {
+	req.Name = strings.TrimSpace(req.Name)
 	if req.Name == "" {
 		return &errorModels.ServerError{Code: http.StatusBadRequest, HTTPCode: http.StatusBadRequest, Message: "Name is required"}
 	}
