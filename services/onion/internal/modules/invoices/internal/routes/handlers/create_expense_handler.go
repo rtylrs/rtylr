@@ -3,6 +3,8 @@ package handlers
 import (
 	"context"
 	"net/http"
+	"strings"
+	"time"
 
 	"github.com/voxire/onion/internal/modules/invoices/internal/application"
 	"github.com/voxire/onion/internal/modules/invoices/internal/domain"
@@ -37,7 +39,7 @@ type CreateExpenseResponse struct {
 }
 
 func (h *CreateExpenseHandler) Validate(_ context.Context, req *CreateExpenseRequest) *errorModels.ServerError {
-	if req.Description == "" {
+	if strings.TrimSpace(req.Description) == "" {
 		return &errorModels.ServerError{
 			Code:    http.StatusBadRequest,
 			Message: "Description is required",
@@ -51,10 +53,17 @@ func (h *CreateExpenseHandler) Validate(_ context.Context, req *CreateExpenseReq
 		}
 	}
 
-	if req.ExpenseDate == "" {
+	if strings.TrimSpace(req.ExpenseDate) == "" {
 		return &errorModels.ServerError{
 			Code:    http.StatusBadRequest,
 			Message: "Expense date is required",
+		}
+	}
+
+	if _, err := time.Parse("2006-01-02", req.ExpenseDate); err != nil {
+		return &errorModels.ServerError{
+			Code:    http.StatusBadRequest,
+			Message: "Expense date must be in YYYY-MM-DD format",
 		}
 	}
 
