@@ -5,6 +5,7 @@ import (
 	"encoding/json"
 	"errors"
 	"net/http"
+	"strings"
 
 	"github.com/voxire/onion/internal/modules/templates/internal/application"
 	"github.com/voxire/onion/internal/modules/templates/internal/domain"
@@ -111,21 +112,21 @@ type CreateTemplateResponse struct {
 }
 
 func (h *CreateTemplateHandler) Validate(_ context.Context, req *CreateTemplateRequest) *errorModels.ServerError {
-	if req.Name == "" {
+	if strings.TrimSpace(req.Name) == "" {
 		return &errorModels.ServerError{
 			Code:    http.StatusBadRequest,
 			Message: "Template name is required",
 		}
 	}
 
-	if req.Type == "" {
+	if strings.TrimSpace(req.Type) == "" {
 		return &errorModels.ServerError{
 			Code:    http.StatusBadRequest,
 			Message: "Template type is required",
 		}
 	}
 
-	if req.Body == "" {
+	if strings.TrimSpace(req.Body) == "" {
 		return &errorModels.ServerError{
 			Code:    http.StatusBadRequest,
 			Message: "Template body is required",

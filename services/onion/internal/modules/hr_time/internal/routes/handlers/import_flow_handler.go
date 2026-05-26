@@ -3,6 +3,7 @@ package handlers
 import (
 	"context"
 	"net/http"
+	"time"
 
 	"github.com/voxire/onion/internal/modules/hr_time/internal/application"
 	authPkg "github.com/voxire/onion/internal/platform/auth"
@@ -35,6 +36,12 @@ func (h *ImportFlowHandler) Validate(_ context.Context, req *ImportFlowRequest) 
 	}
 	if req.PeriodEnd == "" {
 		return &errorModels.ServerError{Code: http.StatusBadRequest, Message: "period_end is required"}
+	}
+	if _, err := time.Parse("2006-01-02", req.PeriodStart); err != nil {
+		return &errorModels.ServerError{Code: http.StatusBadRequest, Message: "period_start must be in YYYY-MM-DD format"}
+	}
+	if _, err := time.Parse("2006-01-02", req.PeriodEnd); err != nil {
+		return &errorModels.ServerError{Code: http.StatusBadRequest, Message: "period_end must be in YYYY-MM-DD format"}
 	}
 	return nil
 }
