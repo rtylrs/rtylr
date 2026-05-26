@@ -156,6 +156,14 @@ func (h *CreateStockTransferHandler) Validate(_ context.Context, req *CreateStoc
 		}
 	}
 
+	if len(req.Items) == 0 {
+		return &errorModels.ServerError{
+			Code:     http.StatusBadRequest,
+			HTTPCode: http.StatusBadRequest,
+			Message:  "At least one item is required",
+		}
+	}
+
 	return nil
 }
 
