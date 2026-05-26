@@ -22,8 +22,12 @@ const NewExpense: React.FC = () => {
   const createExpense = useCreateExpense();
 
   const handleSave = (): void => {
-    if (!description || !amount || !category) {
-      toast.error('Description, amount and category are required');
+    if (!description.trim() || !category) {
+      toast.error('Description and category are required');
+      return;
+    }
+    if (amount <= 0) {
+      toast.error('Amount must be greater than zero');
       return;
     }
     createExpense.mutate(

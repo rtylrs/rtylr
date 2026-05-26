@@ -284,8 +284,10 @@ const Tax: React.FC = () => {
                     value={r.rate}
                     step={0.5}
                     onChange={(e) => {
+                      const parsed = parseFloat(e.target.value);
+                      if (isNaN(parsed)) return;
                       const next = [...editableRates];
-                      next[i] = { ...next[i], rate: parseFloat(e.target.value) };
+                      next[i] = { ...next[i], rate: parsed };
                       setRates(next);
                     }}
                     style={{
@@ -320,15 +322,22 @@ const Tax: React.FC = () => {
               opacity: saveRates.isPending ? 0.6 : 1,
             }}
             onClick={() => {
-              // Persist each edited rate via the mutation
-              editableRates.forEach((r) => {
+              const invalid = editableRates.find((r) => isNaN(r.rate) || r.rate < 0);
+              if (invalid) {
+                toast.error('Tax rates must be valid non-negative numbers');
+                return;
+              }
+              const last = editableRates[editableRates.length - 1];
+              editableRates.forEach((r, idx) => {
                 saveRates.mutate(r, {
                   onSuccess: () => {
-                    toast.success('Tax rates saved');
-                    setShowConfig(false);
+                    if (r === last) {
+                      toast.success('Tax rates saved');
+                      setShowConfig(false);
+                    }
                   },
                   onError: () => {
-                    toast.error('Failed to save tax rates');
+                    toast.error(`Failed to save rate: ${r.name}`);
                   },
                 });
               });
