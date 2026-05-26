@@ -3,6 +3,7 @@ package handlers
 import (
 	"context"
 	"net/http"
+	"strings"
 
 	"github.com/voxire/onion/internal/modules/insights/internal/application"
 	authPkg "github.com/voxire/onion/internal/platform/auth"
@@ -21,6 +22,12 @@ type GetShiftMetricsRequest struct {
 }
 
 type GetShiftMetricsResponse = application.ShiftMetricsPayload
+
+func (h *GetShiftMetricsHandler) Validate(_ context.Context, req *GetShiftMetricsRequest) *errorModels.ServerError {
+	req.From = strings.TrimSpace(req.From)
+	req.To = strings.TrimSpace(req.To)
+	return nil
+}
 
 func (h *GetShiftMetricsHandler) Serve(ctx context.Context, req *GetShiftMetricsRequest) (GetShiftMetricsResponse, *errorModels.ServerError) {
 	device := authPkg.DeviceCtx(ctx)
