@@ -5,6 +5,7 @@ import (
 	"errors"
 	"net/http"
 	"strconv"
+	"time"
 
 	"github.com/go-chi/chi/v5"
 
@@ -44,6 +45,9 @@ func (h *UpdateTimeEntryHandler) Validate(_ context.Context, req *UpdateTimeEntr
 	}
 	if req.Date == "" {
 		return &errorModels.ServerError{Code: http.StatusBadRequest, Message: "date is required"}
+	}
+	if _, err := time.Parse("2006-01-02", req.Date); err != nil {
+		return &errorModels.ServerError{Code: http.StatusBadRequest, Message: "date must be in YYYY-MM-DD format"}
 	}
 	return nil
 }
