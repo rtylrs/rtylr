@@ -240,6 +240,29 @@ type ListSessionsResponse struct {
 	Sessions []SessionPayload `json:"sessions"`
 }
 
+func (h *ListSessionsHandler) Validate(_ context.Context, req *ListSessionsRequest) *errorModels.ServerError {
+	const layout = "2006-01-02"
+	if req.DateFrom != "" {
+		if _, err := time.Parse(layout, req.DateFrom); err != nil {
+			return &errorModels.ServerError{
+				HTTPCode: http.StatusBadRequest,
+				Code:     http.StatusBadRequest,
+				Message:  "date_from must be in YYYY-MM-DD format",
+			}
+		}
+	}
+	if req.DateTo != "" {
+		if _, err := time.Parse(layout, req.DateTo); err != nil {
+			return &errorModels.ServerError{
+				HTTPCode: http.StatusBadRequest,
+				Code:     http.StatusBadRequest,
+				Message:  "date_to must be in YYYY-MM-DD format",
+			}
+		}
+	}
+	return nil
+}
+
 func (h *ListSessionsHandler) Serve(ctx context.Context, req *ListSessionsRequest) (ListSessionsResponse, *errorModels.ServerError) {
 	device := authPkg.DeviceCtx(ctx)
 	if device.User == nil {
