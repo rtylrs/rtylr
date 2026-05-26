@@ -3,6 +3,7 @@ package handlers
 import (
 	"context"
 	"net/http"
+	"strings"
 
 	"github.com/voxire/onion/internal/modules/finance_reports/internal/application"
 	authPkg "github.com/voxire/onion/internal/platform/auth"
@@ -61,6 +62,11 @@ type CashFlowResponse struct {
 	OperatingOutflow float64 `json:"operating_outflow"`
 	NetOperating     float64 `json:"net_operating"`
 	NetCashFlow      float64 `json:"net_cash_flow"`
+}
+
+func (h *CashFlowHandler) Validate(_ context.Context, req *CashFlowRequest) *errorModels.ServerError {
+	req.Period = strings.TrimSpace(req.Period)
+	return nil
 }
 
 func (h *CashFlowHandler) Serve(ctx context.Context, req *CashFlowRequest) (CashFlowResponse, *errorModels.ServerError) {
