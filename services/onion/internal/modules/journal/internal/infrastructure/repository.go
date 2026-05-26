@@ -137,7 +137,11 @@ func (r *Repository) GetLines(ctx context.Context, entryID int64) ([]domain.Jour
 }
 
 func (r *Repository) Create(ctx context.Context, ownerID int64, input domain.JournalEntryInput) (int64, error) {
-	entryDate, _ := time.Parse("2006-01-02", input.Date)
+	entryDate, err := time.Parse("2006-01-02", input.Date)
+	if err != nil {
+		logger.Ctx(ctx).Error("Failed to parse journal entry date", logger.Error(err))
+		return 0, err
+	}
 
 	res, err := r.queries.CreateJournalEntry(ctx, sqlc.CreateJournalEntryParams{
 		OwnerID:     ownerID,
