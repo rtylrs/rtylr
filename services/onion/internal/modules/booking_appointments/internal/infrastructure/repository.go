@@ -85,9 +85,17 @@ func (r *Repository) Create(ctx context.Context, ownerID int64, input domain.App
 }
 
 func (r *Repository) Update(ctx context.Context, ownerID, id int64, input domain.AppointmentInput) error {
-	startTime, _ := time.Parse("2006-01-02T15:04:05Z07:00", input.StartTime)
-	endTime, _ := time.Parse("2006-01-02T15:04:05Z07:00", input.EndTime)
-	err := r.queries.UpdateAppointment(ctx, sqlc.UpdateAppointmentParams{
+	startTime, err := time.Parse("2006-01-02T15:04:05Z07:00", input.StartTime)
+	if err != nil {
+		logger.Ctx(ctx).Error("Failed to parse start_time", logger.Error(err))
+		return err
+	}
+	endTime, err := time.Parse("2006-01-02T15:04:05Z07:00", input.EndTime)
+	if err != nil {
+		logger.Ctx(ctx).Error("Failed to parse end_time", logger.Error(err))
+		return err
+	}
+	err = r.queries.UpdateAppointment(ctx, sqlc.UpdateAppointmentParams{
 		ServiceID:     sql.NullInt64{Int64: input.ServiceID, Valid: input.ServiceID != 0},
 		ResourceID:    sql.NullInt64{Int64: input.ResourceID, Valid: input.ResourceID != 0},
 		StaffID:       sql.NullInt64{Int64: input.StaffID, Valid: input.StaffID != 0},
