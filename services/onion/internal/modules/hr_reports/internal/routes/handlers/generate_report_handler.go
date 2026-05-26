@@ -7,6 +7,7 @@ import (
 	"fmt"
 	"net/http"
 	"sort"
+	"strings"
 	"time"
 
 	"github.com/voxire/onion/internal/modules/hr_reports/internal/application"
@@ -50,6 +51,16 @@ func (h *GenerateReportHandler) ServeHTTP(w http.ResponseWriter, r *http.Request
 			HTTPCode: http.StatusBadRequest,
 			Code:     http.StatusBadRequest,
 			Message:  "Invalid request body",
+		})
+		return
+	}
+
+	req.ReportType = strings.TrimSpace(req.ReportType)
+	if req.ReportType == "" {
+		writeError(w, &errorModels.ServerError{
+			HTTPCode: http.StatusBadRequest,
+			Code:     http.StatusBadRequest,
+			Message:  "report_type is required",
 		})
 		return
 	}
