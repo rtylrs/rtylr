@@ -24,6 +24,13 @@ type ApprovePayrollRunResponse struct {
 	Success bool `json:"success"`
 }
 
+func (h *ApprovePayrollRunHandler) Validate(_ context.Context, req *ApprovePayrollRunRequest) *errorModels.ServerError {
+	if req.RunID == 0 {
+		return &errorModels.ServerError{HTTPCode: http.StatusBadRequest, Code: http.StatusBadRequest, Message: "run_id is required"}
+	}
+	return nil
+}
+
 func (h *ApprovePayrollRunHandler) Serve(ctx context.Context, req *ApprovePayrollRunRequest) (ApprovePayrollRunResponse, *errorModels.ServerError) {
 	device := authPkg.DeviceCtx(ctx)
 	if device.IsAnonymous || device.User == nil {
