@@ -21,8 +21,8 @@ const TipSelector: React.FC<TipSelectorProps> = ({ subtotal, onTipChange }) => {
   const pickCustom = (v: string) => {
     setCustom(v);
     setSelected(null);
-    const n = parseFloat(v) || 0;
-    onTipChange(n);
+    const n = parseFloat(v);
+    onTipChange(!isNaN(n) && n >= 0 ? n : 0);
   };
 
   return (
