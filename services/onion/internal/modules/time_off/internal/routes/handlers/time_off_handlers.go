@@ -3,6 +3,7 @@ package handlers
 import (
 	"context"
 	"net/http"
+	"time"
 
 	"github.com/voxire/onion/internal/modules/time_off/internal/application"
 	"github.com/voxire/onion/internal/modules/time_off/internal/domain"
@@ -10,6 +11,12 @@ import (
 	errorModels "github.com/voxire/onion/internal/platform/errors"
 	hrv1 "github.com/voxire/voxie/gen/go/hr/v1"
 )
+
+func isValidTimeOffDate(s string) bool {
+	_, err1 := time.Parse("2006-01-02", s)
+	_, err2 := time.Parse(time.RFC3339, s)
+	return err1 == nil || err2 == nil
+}
 
 func ListTimeOffRoutes() []string    { return []string{"/hr/time-off"} }
 func SubmitTimeOffRoutes() []string  { return []string{"/hr/time-off"} }
@@ -82,8 +89,14 @@ func (h *SubmitTimeOffHandler) Validate(_ context.Context, req *SubmitTimeOffReq
 	if req.StartDate == "" {
 		return &errorModels.ServerError{Code: http.StatusBadRequest, Message: "start_date is required"}
 	}
+	if !isValidTimeOffDate(req.StartDate) {
+		return &errorModels.ServerError{Code: http.StatusBadRequest, Message: "start_date is not a valid date"}
+	}
 	if req.EndDate == "" {
 		return &errorModels.ServerError{Code: http.StatusBadRequest, Message: "end_date is required"}
+	}
+	if !isValidTimeOffDate(req.EndDate) {
+		return &errorModels.ServerError{Code: http.StatusBadRequest, Message: "end_date is not a valid date"}
 	}
 	if req.DaysCount <= 0 {
 		return &errorModels.ServerError{Code: http.StatusBadRequest, Message: "days_count must be greater than 0"}
