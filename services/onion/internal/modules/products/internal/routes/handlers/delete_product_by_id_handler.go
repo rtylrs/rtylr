@@ -2,12 +2,14 @@ package handlers
 
 import (
 	"context"
+	"errors"
 	"net/http"
 	"strconv"
 
 	"github.com/go-chi/chi/v5"
 
 	"github.com/voxire/onion/internal/modules/products/internal/application"
+	"github.com/voxire/onion/internal/modules/products/internal/domain"
 	authPkg "github.com/voxire/onion/internal/platform/auth"
 	errorModels "github.com/voxire/onion/internal/platform/errors"
 )
@@ -52,6 +54,13 @@ func (h *DeleteProductByIDHandler) Serve(ctx context.Context, _ *DeleteProductBy
 	}
 
 	if err := h.Service.DeleteProduct(ctx, authUser.UserID, id); err != nil {
+		if errors.Is(err, domain.ErrProductNotFound) {
+			return DeleteProductByIDResponse{}, &errorModels.ServerError{
+				Code:     http.StatusNotFound,
+				HTTPCode: http.StatusNotFound,
+				Message:  "Product not found",
+			}
+		}
 		return DeleteProductByIDResponse{}, &errorModels.ServerError{
 			Code:     http.StatusInternalServerError,
 			HTTPCode: http.StatusInternalServerError,
