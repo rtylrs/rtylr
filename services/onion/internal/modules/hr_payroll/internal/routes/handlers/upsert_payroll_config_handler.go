@@ -29,6 +29,9 @@ func (h *UpsertPayrollConfigHandler) Validate(_ context.Context, req *UpsertPayr
 	if req.PeriodType != "" && req.PeriodType != "weekly" && req.PeriodType != "biweekly" && req.PeriodType != "monthly" {
 		return &errorModels.ServerError{HTTPCode: http.StatusBadRequest, Code: http.StatusBadRequest, Message: "period_type must be weekly, biweekly, or monthly"}
 	}
+	if req.PeriodType == "monthly" && req.PayDayOfMonth != 0 && (req.PayDayOfMonth < 1 || req.PayDayOfMonth > 28) {
+		return &errorModels.ServerError{HTTPCode: http.StatusBadRequest, Code: http.StatusBadRequest, Message: "pay_day_of_month must be between 1 and 28"}
+	}
 	return nil
 }
 
