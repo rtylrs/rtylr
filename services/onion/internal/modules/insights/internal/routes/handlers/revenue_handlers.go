@@ -3,6 +3,7 @@ package handlers
 import (
 	"context"
 	"net/http"
+	"strings"
 
 	"github.com/voxire/onion/internal/modules/insights/internal/application"
 	"github.com/voxire/onion/internal/modules/insights/internal/domain"
@@ -26,6 +27,12 @@ type GetRevenueSeriesRequest struct {
 
 type GetRevenueSeriesResponse struct {
 	Series []domain.RevenuePoint `json:"series"`
+}
+
+func (h *GetRevenueSeriesHandler) Validate(_ context.Context, req *GetRevenueSeriesRequest) *errorModels.ServerError {
+	req.From = strings.TrimSpace(req.From)
+	req.To = strings.TrimSpace(req.To)
+	return nil
 }
 
 func (h *GetRevenueSeriesHandler) Serve(ctx context.Context, req *GetRevenueSeriesRequest) (GetRevenueSeriesResponse, *errorModels.ServerError) {
