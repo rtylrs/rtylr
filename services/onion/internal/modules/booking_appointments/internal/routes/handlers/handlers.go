@@ -142,6 +142,18 @@ func (h *UpdateHandler) Validate(_ context.Context, req *UpdateRequest) *errorMo
 	if req.ID == 0 {
 		return &errorModels.ServerError{Code: http.StatusBadRequest, HTTPCode: http.StatusBadRequest, Message: "ID is required"}
 	}
+	req.StartTime = strings.TrimSpace(req.StartTime)
+	req.EndTime = strings.TrimSpace(req.EndTime)
+	if req.StartTime != "" {
+		if _, err := time.Parse("2006-01-02T15:04:05Z07:00", req.StartTime); err != nil {
+			return &errorModels.ServerError{Code: http.StatusBadRequest, HTTPCode: http.StatusBadRequest, Message: "start_time must be in RFC3339 format"}
+		}
+	}
+	if req.EndTime != "" {
+		if _, err := time.Parse("2006-01-02T15:04:05Z07:00", req.EndTime); err != nil {
+			return &errorModels.ServerError{Code: http.StatusBadRequest, HTTPCode: http.StatusBadRequest, Message: "end_time must be in RFC3339 format"}
+		}
+	}
 	return nil
 }
 
