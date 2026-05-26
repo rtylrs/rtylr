@@ -4,6 +4,7 @@ import (
 	"context"
 	"net/http"
 	"strconv"
+	"strings"
 
 	"github.com/voxire/onion/internal/modules/insights/internal/application"
 	authPkg "github.com/voxire/onion/internal/platform/auth"
@@ -22,6 +23,11 @@ type GetBestSellersRequest struct {
 
 type GetBestSellersResponse struct {
 	Products []application.BestSellerPayload `json:"products"`
+}
+
+func (h *GetBestSellersHandler) Validate(_ context.Context, req *GetBestSellersRequest) *errorModels.ServerError {
+	req.Limit = strings.TrimSpace(req.Limit)
+	return nil
 }
 
 func (h *GetBestSellersHandler) Serve(ctx context.Context, req *GetBestSellersRequest) (GetBestSellersResponse, *errorModels.ServerError) {
