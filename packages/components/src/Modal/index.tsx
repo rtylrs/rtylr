@@ -22,15 +22,17 @@ const Modal: React.FC<ModalProps> = ({
   children,
 }) => {
   useEffect(() => {
-    if (open) {
-      document.body.style.overflow = 'hidden';
-    } else {
-      document.body.style.overflow = '';
-    }
+    if (!open) return;
+    document.body.style.overflow = 'hidden';
+    const handleEscape = (e: KeyboardEvent) => {
+      if (e.key === 'Escape') onClose();
+    };
+    document.addEventListener('keydown', handleEscape);
     return () => {
       document.body.style.overflow = '';
+      document.removeEventListener('keydown', handleEscape);
     };
-  }, [open]);
+  }, [open, onClose]);
 
   if (!open) return null;
 
