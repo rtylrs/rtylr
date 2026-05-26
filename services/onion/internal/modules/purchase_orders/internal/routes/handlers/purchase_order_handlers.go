@@ -5,6 +5,7 @@ import (
 	"errors"
 	"net/http"
 	"strconv"
+	"strings"
 	"time"
 
 	"github.com/go-chi/chi/v5"
@@ -154,7 +155,7 @@ func (h *CreatePurchaseOrderHandler) Validate(_ context.Context, req *CreatePurc
 			Message:  "Supplier ID is required",
 		}
 	}
-	if req.PONumber == "" {
+	if strings.TrimSpace(req.PONumber) == "" {
 		return &errorModels.ServerError{
 			Code:     http.StatusBadRequest,
 			HTTPCode: http.StatusBadRequest,
