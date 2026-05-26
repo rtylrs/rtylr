@@ -23,7 +23,7 @@ func registerSettingsRoutes(ctx context.Context, router *chi.Mux, svc *applicati
 		ctx, router, handlers.ListScheduledReportsRoutes(),
 		&handlers.ListScheduledReportsHandler{Service: svc},
 	)
-	serverHttp.RegisterPOST[handlers.CreateScheduledReportRequest, handlers.CreateScheduledReportResponse](
+	serverHttp.RegisterPOSTWithValidation[handlers.CreateScheduledReportRequest, handlers.CreateScheduledReportResponse](
 		ctx, router, handlers.CreateScheduledReportRoutes(),
 		&handlers.CreateScheduledReportHandler{Service: svc},
 	)
