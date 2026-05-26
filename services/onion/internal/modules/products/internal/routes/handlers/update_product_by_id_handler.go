@@ -56,6 +56,22 @@ func (h *UpdateProductByIDHandler) Validate(_ context.Context, req *UpdateProduc
 		}
 	}
 
+	if req.CostPrice < 0 {
+		return &errorModels.ServerError{
+			Code:     http.StatusBadRequest,
+			HTTPCode: http.StatusBadRequest,
+			Message:  "Cost price must not be negative",
+		}
+	}
+
+	if req.SalePrice < 0 {
+		return &errorModels.ServerError{
+			Code:     http.StatusBadRequest,
+			HTTPCode: http.StatusBadRequest,
+			Message:  "Sale price must not be negative",
+		}
+	}
+
 	return nil
 }
 
