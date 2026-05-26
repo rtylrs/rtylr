@@ -41,13 +41,21 @@ const PriceLists: React.FC = () => {
   const [newMultiplier, setNewMultiplier] = useState('1.0');
 
   const handleCreate = async (): Promise<void> => {
-    if (!newName.trim()) return;
+    if (!newName.trim()) {
+      toast.error('Price list name is required');
+      return;
+    }
+    const multiplier = parseFloat(newMultiplier);
+    if (isNaN(multiplier) || multiplier <= 0) {
+      toast.error('Multiplier must be a positive number');
+      return;
+    }
     try {
       await createMut.mutateAsync({
         name: newName.trim(),
         description: newDescription.trim(),
         tier: newTier,
-        multiplier: parseFloat(newMultiplier) || 1,
+        multiplier,
       });
       toast.success('Price list created');
       setShowCreate(false);
