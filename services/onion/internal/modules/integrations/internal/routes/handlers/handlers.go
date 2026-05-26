@@ -115,7 +115,7 @@ type DisconnectResponse struct {
 }
 
 func (h *DisconnectHandler) Validate(_ context.Context, req *DisconnectRequest) *errorModels.ServerError {
-	if req.ID == 0 {
+	if req.ID <= 0 {
 		return &errorModels.ServerError{
 			HTTPCode: http.StatusBadRequest,
 			Code:     http.StatusBadRequest,
