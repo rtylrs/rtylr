@@ -1026,7 +1026,11 @@ const FlowLayout: React.FC<FlowLayoutProps> = ({ children }) => {
                       onKeyDown={(e) => {
                         if (e.key === 'Enter') {
                           e.preventDefault();
-                          if (!newProjectName.trim() || !currentWorkspaceId) return;
+                          if (!newProjectName.trim()) {
+                            toast.error('Project name is required');
+                            return;
+                          }
+                          if (!currentWorkspaceId) return;
                           createProject.mutate(
                             {
                               workspaceId: currentWorkspaceId,
