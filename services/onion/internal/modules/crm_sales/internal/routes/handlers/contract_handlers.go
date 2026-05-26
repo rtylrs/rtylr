@@ -166,6 +166,9 @@ func (h *UpdateContractHandler) Validate(_ context.Context, req *UpdateContractR
 	if strings.TrimSpace(req.Plan) == "" {
 		return &errorModels.ServerError{HTTPCode: http.StatusBadRequest, Code: http.StatusBadRequest, Message: "plan is required"}
 	}
+	if req.MRR < 0 {
+		return &errorModels.ServerError{HTTPCode: http.StatusBadRequest, Code: http.StatusBadRequest, Message: "mrr must not be negative"}
+	}
 	return nil
 }
 
