@@ -32,7 +32,7 @@ func (h *GetTopCustomersHandler) Serve(ctx context.Context, req *GetTopCustomers
 	var limit int32 = 10
 	if req.Limit != "" {
 		parsed, err := strconv.ParseInt(req.Limit, 10, 32)
-		if err != nil {
+		if err != nil || parsed <= 0 {
 			return GetTopCustomersResponse{}, &errorModels.ServerError{
 				HTTPCode: http.StatusBadRequest,
 				Code:     http.StatusBadRequest,
