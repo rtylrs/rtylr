@@ -74,6 +74,15 @@ func (h *GenerateReportHandler) ServeHTTP(w http.ResponseWriter, r *http.Request
 		return
 	}
 
+	if dateTo.Before(dateFrom) {
+		writeError(w, &errorModels.ServerError{
+			HTTPCode: http.StatusBadRequest,
+			Code:     http.StatusBadRequest,
+			Message:  "date_to must not be before date_from",
+		})
+		return
+	}
+
 	params := domain.ReportParams{
 		OwnerID:      device.User.UserID,
 		DateFrom:     dateFrom,
