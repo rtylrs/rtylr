@@ -51,6 +51,15 @@ func (h *RecordPaymentHandler) Validate(_ context.Context, req *RecordPaymentReq
 		}
 	}
 
+	if req.PaymentDate != "" {
+		if _, err := time.Parse("2006-01-02", req.PaymentDate); err != nil {
+			return &errorModels.ServerError{
+				Code:    http.StatusBadRequest,
+				Message: "Payment date must be in YYYY-MM-DD format",
+			}
+		}
+	}
+
 	return nil
 }
 
