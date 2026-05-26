@@ -5,6 +5,7 @@ import (
 	"errors"
 	"net/http"
 	"strconv"
+	"strings"
 
 	"github.com/go-chi/chi/v5"
 
@@ -105,7 +106,7 @@ type CreateContactResponse struct {
 }
 
 func (h *CreateContactHandler) Validate(_ context.Context, req *CreateContactRequest) *errorModels.ServerError {
-	if req.Name == "" {
+	if strings.TrimSpace(req.Name) == "" {
 		return &errorModels.ServerError{HTTPCode: http.StatusBadRequest, Code: http.StatusBadRequest, Message: "name is required"}
 	}
 	if req.LeadID == 0 {
@@ -161,7 +162,7 @@ type UpdateContactResponse struct {
 }
 
 func (h *UpdateContactHandler) Validate(_ context.Context, req *UpdateContactRequest) *errorModels.ServerError {
-	if req.Name == "" {
+	if strings.TrimSpace(req.Name) == "" {
 		return &errorModels.ServerError{HTTPCode: http.StatusBadRequest, Code: http.StatusBadRequest, Message: "name is required"}
 	}
 	return nil
