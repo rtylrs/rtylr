@@ -107,6 +107,20 @@ func (h *CreateLoyaltyTierHandler) Validate(_ context.Context, req *CreateLoyalt
 		}
 	}
 
+	if req.MinPoints < 0 {
+		return &errorModels.ServerError{
+			Code:    http.StatusBadRequest,
+			Message: "Minimum points must not be negative",
+		}
+	}
+
+	if req.DiscountPct < 0 {
+		return &errorModels.ServerError{
+			Code:    http.StatusBadRequest,
+			Message: "Discount percentage must not be negative",
+		}
+	}
+
 	return nil
 }
 
@@ -170,6 +184,20 @@ func (h *UpdateLoyaltyTierHandler) Validate(_ context.Context, req *UpdateLoyalt
 		return &errorModels.ServerError{
 			Code:    http.StatusBadRequest,
 			Message: "Tier name is required",
+		}
+	}
+
+	if req.MinPoints < 0 {
+		return &errorModels.ServerError{
+			Code:    http.StatusBadRequest,
+			Message: "Minimum points must not be negative",
+		}
+	}
+
+	if req.DiscountPct < 0 {
+		return &errorModels.ServerError{
+			Code:    http.StatusBadRequest,
+			Message: "Discount percentage must not be negative",
 		}
 	}
 
