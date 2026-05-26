@@ -1,5 +1,6 @@
 import React, { useState } from 'react';
 import { useTranslation } from 'react-i18next';
+import { toast } from 'sonner';
 import { createCycleSchema } from '../../shared/schemas/performance';
 import type { CreateCycleForm as CreateCycleFormData } from '../../shared/schemas/performance';
 import { useCreateReviewCycle } from '../../shared/hooks/queries/usePerformance';
@@ -58,6 +59,7 @@ const CreateCycleForm = ({ open, onClose }: CreateCycleFormProps): React.JSX.Ele
           setReviewTypes([]);
           onClose();
         },
+        onError: () => toast.error('Failed to create review cycle'),
       }
     );
   };
