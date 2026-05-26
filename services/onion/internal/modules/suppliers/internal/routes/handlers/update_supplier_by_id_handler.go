@@ -2,6 +2,7 @@ package handlers
 
 import (
 	"context"
+	"errors"
 	"net/http"
 	"strconv"
 
@@ -88,6 +89,13 @@ func (h *UpdateSupplierByIDHandler) Serve(ctx context.Context, req *UpdateSuppli
 	}
 
 	if err := h.Service.UpdateSupplier(ctx, authUser.UserID, id, input); err != nil {
+		if errors.Is(err, domain.ErrSupplierNotFound) {
+			return UpdateSupplierByIDResponse{}, &errorModels.ServerError{
+				Code:     http.StatusNotFound,
+				HTTPCode: http.StatusNotFound,
+				Message:  "Supplier not found",
+			}
+		}
 		return UpdateSupplierByIDResponse{}, &errorModels.ServerError{
 			Code:     http.StatusInternalServerError,
 			HTTPCode: http.StatusInternalServerError,
@@ -137,6 +145,13 @@ func (h *DeleteSupplierByIDHandler) Serve(ctx context.Context, _ *DeleteSupplier
 	}
 
 	if err := h.Service.DeleteSupplier(ctx, authUser.UserID, id); err != nil {
+		if errors.Is(err, domain.ErrSupplierNotFound) {
+			return DeleteSupplierByIDResponse{}, &errorModels.ServerError{
+				Code:     http.StatusNotFound,
+				HTTPCode: http.StatusNotFound,
+				Message:  "Supplier not found",
+			}
+		}
 		return DeleteSupplierByIDResponse{}, &errorModels.ServerError{
 			Code:     http.StatusInternalServerError,
 			HTTPCode: http.StatusInternalServerError,
