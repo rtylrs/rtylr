@@ -11,6 +11,21 @@ import (
 	errorModels "github.com/voxire/onion/internal/platform/errors"
 )
 
+var expiryDateLayouts = []string{
+	"2006-01-02",
+	time.RFC3339,
+	"2006-01-02 15:04:05",
+}
+
+func isValidExpiryDate(s string) bool {
+	for _, layout := range expiryDateLayouts {
+		if _, err := time.Parse(layout, s); err == nil {
+			return true
+		}
+	}
+	return false
+}
+
 type DocumentPayload struct {
 	ID         int64     `json:"id"`
 	OwnerID    int64     `json:"owner_id"`
@@ -76,6 +91,9 @@ type CreateResponse struct {
 func (h *CreateHandler) Validate(_ context.Context, req *CreateRequest) *errorModels.ServerError {
 	if req.Name == "" {
 		return &errorModels.ServerError{Code: http.StatusBadRequest, Message: "name is required"}
+	}
+	if req.ExpiryDate != "" && !isValidExpiryDate(req.ExpiryDate) {
+		return &errorModels.ServerError{Code: http.StatusBadRequest, Message: "expiry_date is not a valid date"}
 	}
 	return nil
 }
