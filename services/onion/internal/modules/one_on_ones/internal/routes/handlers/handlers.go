@@ -11,6 +11,22 @@ import (
 	errorModels "github.com/voxire/onion/internal/platform/errors"
 )
 
+var scheduledAtLayouts = []string{
+	time.RFC3339,
+	"2006-01-02 15:04:05",
+	"2006-01-02T15:04:05",
+	"2006-01-02",
+}
+
+func isValidScheduledAt(s string) bool {
+	for _, layout := range scheduledAtLayouts {
+		if _, err := time.Parse(layout, s); err == nil {
+			return true
+		}
+	}
+	return false
+}
+
 type OneOnOnePayload struct {
 	ID          int64     `json:"id"`
 	OwnerID     int64     `json:"owner_id"`
@@ -85,6 +101,9 @@ func (h *CreateHandler) Validate(_ context.Context, req *CreateRequest) *errorMo
 	}
 	if req.ScheduledAt == "" {
 		return &errorModels.ServerError{Code: http.StatusBadRequest, Message: "scheduledAt is required"}
+	}
+	if !isValidScheduledAt(req.ScheduledAt) {
+		return &errorModels.ServerError{Code: http.StatusBadRequest, Message: "scheduledAt is not a valid date"}
 	}
 	return nil
 }
