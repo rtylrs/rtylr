@@ -2,6 +2,7 @@ import { defineConfig } from 'vite';
 import path from 'path';
 import react from '@vitejs/plugin-react';
 import svgr from 'vite-plugin-svgr';
+import { versionPlugin } from '../../vite-plugin-version.ts';
 
 export default defineConfig(() => ({
   root: __dirname,
@@ -14,6 +15,7 @@ export default defineConfig(() => ({
         ref: true,
       },
     }),
+    versionPlugin(),
   ],
   resolve: {
     alias: {
