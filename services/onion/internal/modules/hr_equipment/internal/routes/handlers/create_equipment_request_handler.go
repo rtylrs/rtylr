@@ -3,6 +3,7 @@ package handlers
 import (
 	"context"
 	"net/http"
+	"strings"
 
 	"github.com/voxire/onion/internal/modules/hr_equipment/internal/application"
 	"github.com/voxire/onion/internal/modules/hr_equipment/internal/domain"
@@ -32,8 +33,12 @@ func (h *CreateEquipmentRequestHandler) Validate(_ context.Context, req *CreateE
 	if req.EmployeeID == 0 {
 		return &errorModels.ServerError{HTTPCode: http.StatusBadRequest, Code: http.StatusBadRequest, Message: "employee_id is required"}
 	}
+	req.ItemName = strings.TrimSpace(req.ItemName)
 	if req.ItemName == "" {
 		return &errorModels.ServerError{HTTPCode: http.StatusBadRequest, Code: http.StatusBadRequest, Message: "item_name is required"}
+	}
+	if req.Quantity <= 0 {
+		return &errorModels.ServerError{HTTPCode: http.StatusBadRequest, Code: http.StatusBadRequest, Message: "quantity must be greater than 0"}
 	}
 	return nil
 }

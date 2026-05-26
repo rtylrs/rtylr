@@ -3,6 +3,7 @@ package handlers
 import (
 	"context"
 	"net/http"
+	"strings"
 
 	"github.com/voxire/onion/internal/modules/hr_equipment/internal/application"
 	"github.com/voxire/onion/internal/modules/hr_equipment/internal/domain"
@@ -31,11 +32,16 @@ type CreateAssetResponse struct {
 }
 
 func (h *CreateAssetHandler) Validate(_ context.Context, req *CreateAssetRequest) *errorModels.ServerError {
+	req.Name = strings.TrimSpace(req.Name)
 	if req.Name == "" {
 		return &errorModels.ServerError{HTTPCode: http.StatusBadRequest, Code: http.StatusBadRequest, Message: "name is required"}
 	}
+	req.Category = strings.TrimSpace(req.Category)
 	if req.Category == "" {
 		return &errorModels.ServerError{HTTPCode: http.StatusBadRequest, Code: http.StatusBadRequest, Message: "category is required"}
+	}
+	if req.PurchasePrice < 0 {
+		return &errorModels.ServerError{HTTPCode: http.StatusBadRequest, Code: http.StatusBadRequest, Message: "purchase_price must be non-negative"}
 	}
 	return nil
 }
