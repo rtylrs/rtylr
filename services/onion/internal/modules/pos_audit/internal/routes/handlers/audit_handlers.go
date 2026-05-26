@@ -5,6 +5,7 @@ import (
 	"encoding/json"
 	"net/http"
 	"strings"
+	"time"
 
 	"github.com/voxire/onion/internal/modules/pos_audit/internal/application"
 	"github.com/voxire/onion/internal/modules/pos_audit/internal/domain"
@@ -50,6 +51,30 @@ type (
 
 type ListAuditResponse struct {
 	Logs []*posv1.AuditLog `json:"logs"`
+}
+
+func (h *ListAuditHandler) Validate(_ context.Context, req *ListAuditRequest) *errorModels.ServerError {
+	const layout = "2006-01-02"
+	if req.StartDate != nil {
+		*req.StartDate = strings.TrimSpace(*req.StartDate)
+		if _, err := time.Parse(layout, *req.StartDate); err != nil {
+			return &errorModels.ServerError{Code: http.StatusBadRequest, Message: "Invalid start_date format, expected YYYY-MM-DD"}
+		}
+	}
+	if req.EndDate != nil {
+		*req.EndDate = strings.TrimSpace(*req.EndDate)
+		if _, err := time.Parse(layout, *req.EndDate); err != nil {
+			return &errorModels.ServerError{Code: http.StatusBadRequest, Message: "Invalid end_date format, expected YYYY-MM-DD"}
+		}
+	}
+	if req.StartDate != nil && req.EndDate != nil {
+		start, _ := time.Parse(layout, *req.StartDate)
+		end, _ := time.Parse(layout, *req.EndDate)
+		if end.Before(start) {
+			return &errorModels.ServerError{Code: http.StatusBadRequest, Message: "end_date must not be before start_date"}
+		}
+	}
+	return nil
 }
 
 func (h *ListAuditHandler) Serve(ctx context.Context, req *ListAuditRequest) (ListAuditResponse, *errorModels.ServerError) {
