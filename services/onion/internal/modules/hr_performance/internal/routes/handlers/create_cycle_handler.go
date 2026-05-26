@@ -3,6 +3,7 @@ package handlers
 import (
 	"context"
 	"net/http"
+	"time"
 
 	"github.com/voxire/onion/internal/modules/hr_performance/internal/application"
 	"github.com/voxire/onion/internal/modules/hr_performance/internal/domain"
@@ -36,6 +37,12 @@ func (h *CreateCycleHandler) Validate(_ context.Context, req *CreateCycleRequest
 	}
 	if req.PeriodEnd == "" {
 		return &errorModels.ServerError{HTTPCode: http.StatusBadRequest, Code: http.StatusBadRequest, Message: "period_end is required"}
+	}
+	if _, err := time.Parse("2006-01-02", req.PeriodStart); err != nil {
+		return &errorModels.ServerError{HTTPCode: http.StatusBadRequest, Code: http.StatusBadRequest, Message: "period_start must be in YYYY-MM-DD format"}
+	}
+	if _, err := time.Parse("2006-01-02", req.PeriodEnd); err != nil {
+		return &errorModels.ServerError{HTTPCode: http.StatusBadRequest, Code: http.StatusBadRequest, Message: "period_end must be in YYYY-MM-DD format"}
 	}
 	return nil
 }
