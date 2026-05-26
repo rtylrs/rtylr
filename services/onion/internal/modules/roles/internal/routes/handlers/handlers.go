@@ -136,6 +136,13 @@ func (h *UpdateRoleHandler) Validate(_ context.Context, req *UpdateRoleRequest) 
 			Message:  "Role id is required",
 		}
 	}
+	if req.Name == "" {
+		return &errorModels.ServerError{
+			HTTPCode: http.StatusBadRequest,
+			Code:     http.StatusBadRequest,
+			Message:  "Name is required",
+		}
+	}
 	return nil
 }
 
