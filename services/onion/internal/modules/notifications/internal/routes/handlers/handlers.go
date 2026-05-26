@@ -118,7 +118,7 @@ func (h *MarkReadByIDHandler) Serve(ctx context.Context, _ *MarkReadByIDRequest)
 
 	idStr := chi.URLParamFromCtx(ctx, "id")
 	id, err := strconv.ParseInt(idStr, 10, 64)
-	if err != nil || id == 0 {
+	if err != nil || id <= 0 {
 		return MarkReadResponse{}, &errorModels.ServerError{
 			HTTPCode: http.StatusBadRequest,
 			Code:     http.StatusBadRequest,
