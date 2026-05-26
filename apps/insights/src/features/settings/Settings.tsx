@@ -1,5 +1,6 @@
 import React, { useState, useEffect } from 'react';
 import { motion } from 'motion/react';
+import { toast } from 'sonner';
 import { Settings as SettingsIcon, Clock, Loader2, Trash2 } from 'lucide-react';
 import { useTranslation } from 'react-i18next';
 import appConfig from '../../app.json';
@@ -49,15 +50,20 @@ const Settings: React.FC = (): React.JSX.Element => {
   const scheduledList = scheduledRes?.scheduledReports ?? [];
 
   const handleSave = (): void => {
-    updateSettings.mutate({
-      defaultCurrency,
-      fiscalYearStart,
-      timezone,
-    });
+    updateSettings.mutate(
+      { defaultCurrency, fiscalYearStart, timezone },
+      {
+        onSuccess: () => toast.success('Settings saved'),
+        onError: () => toast.error('Failed to save settings'),
+      }
+    );
   };
 
   const handleDeleteScheduled = (id: number): void => {
-    deleteScheduled.mutate(id);
+    deleteScheduled.mutate(id, {
+      onSuccess: () => toast.success('Scheduled report deleted'),
+      onError: () => toast.error('Failed to delete scheduled report'),
+    });
   };
 
   return (
