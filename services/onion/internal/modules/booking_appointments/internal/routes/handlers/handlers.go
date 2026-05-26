@@ -3,6 +3,7 @@ package handlers
 import (
 	"context"
 	"net/http"
+	"strings"
 
 	"github.com/voxire/onion/internal/modules/booking_appointments/internal/application"
 	"github.com/voxire/onion/internal/modules/booking_appointments/internal/domain"
@@ -78,6 +79,15 @@ type CreateResponse struct {
 }
 
 func (h *CreateHandler) Validate(_ context.Context, req *CreateRequest) *errorModels.ServerError {
+	if req.ServiceID == 0 {
+		return &errorModels.ServerError{Code: http.StatusBadRequest, HTTPCode: http.StatusBadRequest, Message: "service_id is required"}
+	}
+	req.CustomerName = strings.TrimSpace(req.CustomerName)
+	if req.CustomerName == "" {
+		return &errorModels.ServerError{Code: http.StatusBadRequest, HTTPCode: http.StatusBadRequest, Message: "customer_name is required"}
+	}
+	req.StartTime = strings.TrimSpace(req.StartTime)
+	req.EndTime = strings.TrimSpace(req.EndTime)
 	if req.StartTime == "" || req.EndTime == "" {
 		return &errorModels.ServerError{Code: http.StatusBadRequest, HTTPCode: http.StatusBadRequest, Message: "Start and end time are required"}
 	}
