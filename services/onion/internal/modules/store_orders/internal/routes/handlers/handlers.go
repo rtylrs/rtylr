@@ -47,6 +47,13 @@ type DetailResponse struct {
 	Items []domain.StoreOrderItem `json:"items"`
 }
 
+func (h *DetailHandler) Validate(_ context.Context, req *DetailRequest) *errorModels.ServerError {
+	if req.ID == 0 {
+		return &errorModels.ServerError{Code: http.StatusBadRequest, HTTPCode: http.StatusBadRequest, Message: "ID is required"}
+	}
+	return nil
+}
+
 func (h *DetailHandler) Serve(ctx context.Context, req *DetailRequest) (DetailResponse, *errorModels.ServerError) {
 	authUser, ok := authPkg.GetAuthUser(ctx)
 	if !ok {
