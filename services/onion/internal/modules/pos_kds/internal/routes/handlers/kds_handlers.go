@@ -4,6 +4,7 @@ import (
 	"context"
 	"net/http"
 	"strconv"
+	"strings"
 
 	"github.com/go-chi/chi/v5"
 
@@ -55,6 +56,7 @@ type UpdateKDSItemByIDResponse struct {
 }
 
 func (h *UpdateKDSItemByIDHandler) Validate(_ context.Context, req *UpdateKDSItemByIDRequest) *errorModels.ServerError {
+	req.Status = strings.TrimSpace(req.Status)
 	if req.Status == "" {
 		return &errorModels.ServerError{Code: http.StatusBadRequest, Message: "Status is required"}
 	}
@@ -94,6 +96,7 @@ type UpdateKDSItemResponse struct {
 }
 
 func (h *UpdateKDSItemHandler) Validate(_ context.Context, req *UpdateKDSItemRequest) *errorModels.ServerError {
+	req.Status = strings.TrimSpace(req.Status)
 	if req.Status == "" {
 		return &errorModels.ServerError{Code: http.StatusBadRequest, Message: "Status is required"}
 	}
