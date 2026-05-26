@@ -32,12 +32,20 @@ const Variants: React.FC = () => {
   const [newPrice, setNewPrice] = useState('');
 
   const handleCreate = async (): Promise<void> => {
-    if (!newName.trim()) return;
+    if (!newName.trim()) {
+      toast.error('Variant name is required');
+      return;
+    }
+    const price = parseFloat(newPrice) || 0;
+    if (price < 0) {
+      toast.error('Price cannot be negative');
+      return;
+    }
     try {
       await createMut.mutateAsync({
         name: newName.trim(),
         sku: newSku.trim(),
-        price: parseFloat(newPrice) || 0,
+        price,
         stock: 0,
         attributes: {},
       });
