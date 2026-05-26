@@ -3,6 +3,7 @@ package handlers
 import (
 	"context"
 	"net/http"
+	"strings"
 
 	"github.com/voxire/onion/internal/modules/brands/internal/application"
 	"github.com/voxire/onion/internal/modules/brands/internal/domain"
@@ -99,7 +100,7 @@ type CreateBrandResponse struct {
 }
 
 func (h *CreateBrandHandler) Validate(_ context.Context, req *CreateBrandRequest) *errorModels.ServerError {
-	if req.Name == "" {
+	if strings.TrimSpace(req.Name) == "" {
 		return &errorModels.ServerError{
 			Code:     http.StatusBadRequest,
 			HTTPCode: http.StatusBadRequest,
@@ -168,7 +169,7 @@ func (h *UpdateBrandHandler) Validate(_ context.Context, req *UpdateBrandRequest
 		}
 	}
 
-	if req.Name == "" {
+	if strings.TrimSpace(req.Name) == "" {
 		return &errorModels.ServerError{
 			Code:     http.StatusBadRequest,
 			HTTPCode: http.StatusBadRequest,
