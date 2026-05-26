@@ -169,6 +169,23 @@ func (h *CreatePurchaseOrderHandler) Validate(_ context.Context, req *CreatePurc
 		}
 	}
 
+	for _, item := range req.Items {
+		if item.QuantityOrdered <= 0 {
+			return &errorModels.ServerError{
+				Code:     http.StatusBadRequest,
+				HTTPCode: http.StatusBadRequest,
+				Message:  "Item quantity_ordered must be greater than zero",
+			}
+		}
+		if item.UnitCost < 0 {
+			return &errorModels.ServerError{
+				Code:     http.StatusBadRequest,
+				HTTPCode: http.StatusBadRequest,
+				Message:  "Item unit_cost cannot be negative",
+			}
+		}
+	}
+
 	if req.ExpectedDelivery != "" {
 		if _, err := time.Parse("2006-01-02", req.ExpectedDelivery); err != nil {
 			return &errorModels.ServerError{
