@@ -1,4 +1,5 @@
 import React, { useEffect, useMemo, useRef, useState } from 'react';
+import { toast } from 'sonner';
 import { useParams } from 'react-router-dom';
 import { ChevronDown, Plus, Trash2 } from 'lucide-react';
 import { useFlowStore } from '../../shared/stores/flowStore';
@@ -229,7 +230,10 @@ const ProjectBoard: React.FC = () => {
 
   const handleAddColumn = () => {
     const name = newColumnName.trim();
-    if (!name) return;
+    if (!name) {
+      toast.error('Column name is required');
+      return;
+    }
     createColumn.mutate({
       workspaceId: activeWorkspaceId || project.workspaceId,
       name,

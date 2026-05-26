@@ -103,7 +103,10 @@ const WorkspacesSection: React.FC = () => {
 
   const handleCreate = (): void => {
     const name = wsName.trim();
-    if (!name) return;
+    if (!name) {
+      toast.error('Workspace name is required');
+      return;
+    }
     createWorkspace.mutate(
       { name, color: wsColor },
       {
@@ -618,7 +621,10 @@ const LabelsSection: React.FC = () => {
 
   const handleCreate = () => {
     const name = newName.trim();
-    if (!name) return;
+    if (!name) {
+      toast.error(t('errors.generic'));
+      return;
+    }
     if (!workspaceId) {
       toast.error(t('toasts.workspace.noActive'));
       return;

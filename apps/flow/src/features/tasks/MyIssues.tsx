@@ -1,4 +1,5 @@
 import React, { useMemo, useState } from 'react';
+import { toast } from 'sonner';
 import { motion } from 'motion/react';
 import { ListTodo, Plus } from 'lucide-react';
 import { useMyIssues } from './useMyIssues';
@@ -141,7 +142,10 @@ const QuickAddRow: React.FC = () => {
 
   const submit = (): void => {
     const trimmed = title.trim();
-    if (!trimmed) return;
+    if (!trimmed) {
+      toast.error('Task title is required');
+      return;
+    }
     // Personal tasks land in Backlog so the leftmost column actually
     // collects new captures instead of jamming them into Todo.
     createTask.mutate(
