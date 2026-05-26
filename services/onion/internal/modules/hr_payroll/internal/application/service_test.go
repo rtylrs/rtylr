@@ -65,3 +65,91 @@ func TestSetNotifier_RealOverridesNoop(t *testing.T) {
 		t.Fatalf("expected notifier replaced with spy")
 	}
 }
+
+func TestSetFinancePoster_NilIsIgnored(t *testing.T) {
+	s := &Service{financePoster: noopFinancePoster{}}
+	s.SetFinancePoster(nil)
+	if _, ok := s.financePoster.(noopFinancePoster); !ok {
+		t.Fatalf("expected financePoster to remain noopFinancePoster after SetFinancePoster(nil)")
+	}
+}
+
+type spyFinancePoster struct {
+	entries []domain.PayrollJournalEntry
+}
+
+func (s *spyFinancePoster) PostPayrollJournal(_ context.Context, entry domain.PayrollJournalEntry) error {
+	s.entries = append(s.entries, entry)
+	return nil
+}
+
+func TestSetFinancePoster_RealOverridesNoop(t *testing.T) {
+	s := &Service{financePoster: noopFinancePoster{}}
+	spy := &spyFinancePoster{}
+	s.SetFinancePoster(spy)
+	if s.financePoster != spy {
+		t.Fatalf("expected financePoster replaced with spy")
+	}
+}
+
+func TestTriggerPayrollRun_EqualDatesRejected(t *testing.T) {
+	s := &Service{}
+	_, _, err := s.TriggerPayrollRun(context.Background(), 1, 1, "2026-05-01", "2026-05-01")
+	if !errors.Is(err, domain.ErrInvalidDateRange) {
+		t.Errorf("equal dates should return ErrInvalidDateRange, got %v", err)
+	}
+}
+
+func TestTriggerPayrollRun_StartAfterEndRejected(t *testing.T) {
+	s := &Service{}
+	_, _, err := s.TriggerPayrollRun(context.Background(), 1, 1, "2026-06-30", "2026-06-01")
+	if !errors.Is(err, domain.ErrInvalidDateRange) {
+		t.Errorf("start after end should return ErrInvalidDateRange, got %v", err)
+	}
+}
+
+func TestTriggerPayrollRun_MalformedStartDate(t *testing.T) {
+	s := &Service{}
+	_, _, err := s.TriggerPayrollRun(context.Background(), 1, 1, "01/04/2026", "2026-04-30")
+	if !errors.Is(err, domain.ErrInvalidDateRange) {
+		t.Errorf("malformed start date should return ErrInvalidDateRange, got %v", err)
+	}
+}
+
+func TestTriggerPayrollRun_MalformedEndDate(t *testing.T) {
+	s := &Service{}
+	_, _, err := s.TriggerPayrollRun(context.Background(), 1, 1, "2026-04-01", "30-04-2026")
+	if !errors.Is(err, domain.ErrInvalidDateRange) {
+		t.Errorf("malformed end date should return ErrInvalidDateRange, got %v", err)
+	}
+}
+
+func TestTriggerPayrollRun_BothDatesBlank(t *testing.T) {
+	s := &Service{}
+	_, _, err := s.TriggerPayrollRun(context.Background(), 1, 1, "", "")
+	if !errors.Is(err, domain.ErrInvalidDateRange) {
+		t.Errorf("blank dates should return ErrInvalidDateRange, got %v", err)
+	}
+}
+
+func TestNoopFinancePoster_IsFinanceJournalPoster(t *testing.T) {
+	var _ domain.FinanceJournalPoster = noopFinancePoster{}
+}
+
+func TestNoopNotifier_IsNotificationDispatcher(t *testing.T) {
+	var _ domain.NotificationDispatcher = noopNotifier{}
+}
+
+func TestSpyNotifier_CollectsEvents(t *testing.T) {
+	spy := &spyNotifier{}
+	err := spy.Dispatch(context.Background(), domain.NotificationEvent{OwnerID: 1, Type: "payroll.payslip"})
+	if err != nil {
+		t.Fatalf("unexpected error: %v", err)
+	}
+	if len(spy.events) != 1 {
+		t.Errorf("expected 1 event, got %d", len(spy.events))
+	}
+	if spy.events[0].Type != "payroll.payslip" {
+		t.Errorf("unexpected event type: %s", spy.events[0].Type)
+	}
+}
