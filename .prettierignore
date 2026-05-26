@@ -7,3 +7,4 @@ coverage
 *.min.js
 *.min.css
 voxie
+**/next-env.d.ts
