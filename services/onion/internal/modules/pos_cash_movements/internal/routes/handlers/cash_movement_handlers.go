@@ -3,6 +3,7 @@ package handlers
 import (
 	"context"
 	"net/http"
+	"strings"
 
 	"github.com/voxire/onion/internal/modules/pos_cash_movements/internal/application"
 	"github.com/voxire/onion/internal/modules/pos_cash_movements/internal/domain"
@@ -171,7 +172,7 @@ func (h *CashAdjustHandler) Serve(ctx context.Context, req *CashAdjustRequest) (
 	if req.SessionID == 0 || req.BranchID == 0 {
 		return CashAdjustResponse{}, &errorModels.ServerError{Code: http.StatusBadRequest, Message: "sessionId and branchId are required"}
 	}
-	if req.Reason == nil || *req.Reason == "" {
+	if req.Reason == nil || strings.TrimSpace(*req.Reason) == "" {
 		return CashAdjustResponse{}, &errorModels.ServerError{Code: http.StatusBadRequest, Message: "reason is required for adjustments"}
 	}
 	id, err := h.Service.CashAdjust(ctx, domain.CreateCashMovementInput{
