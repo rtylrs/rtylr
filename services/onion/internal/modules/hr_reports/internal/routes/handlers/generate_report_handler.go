@@ -65,6 +65,9 @@ func (h *GenerateReportHandler) ServeHTTP(w http.ResponseWriter, r *http.Request
 		return
 	}
 
+	req.DateFrom = strings.TrimSpace(req.DateFrom)
+	req.DateTo = strings.TrimSpace(req.DateTo)
+
 	dateFrom, err := time.Parse("2006-01-02", req.DateFrom)
 	if err != nil {
 		writeError(w, &errorModels.ServerError{
