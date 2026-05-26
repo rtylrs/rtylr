@@ -118,6 +118,11 @@ func (h *CreateExpenseHandler) Validate(_ context.Context, req *CreateExpenseReq
 	if req.Amount <= 0 {
 		return &errorModels.ServerError{Code: http.StatusBadRequest, Message: "Amount must be greater than zero"}
 	}
+	if req.ExpenseDate != "" {
+		if _, err := time.Parse("2006-01-02", req.ExpenseDate); err != nil {
+			return &errorModels.ServerError{Code: http.StatusBadRequest, Message: "expense_date must be in YYYY-MM-DD format"}
+		}
+	}
 	return nil
 }
 
@@ -171,6 +176,11 @@ type UpdateExpenseResponse struct {
 func (h *UpdateExpenseHandler) Validate(_ context.Context, req *UpdateExpenseRequest) *errorModels.ServerError {
 	if req.Amount <= 0 {
 		return &errorModels.ServerError{Code: http.StatusBadRequest, Message: "Amount must be greater than zero"}
+	}
+	if req.ExpenseDate != "" {
+		if _, err := time.Parse("2006-01-02", req.ExpenseDate); err != nil {
+			return &errorModels.ServerError{Code: http.StatusBadRequest, Message: "expense_date must be in YYYY-MM-DD format"}
+		}
 	}
 	return nil
 }
