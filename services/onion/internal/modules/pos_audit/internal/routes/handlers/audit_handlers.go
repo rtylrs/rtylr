@@ -4,6 +4,7 @@ import (
 	"context"
 	"encoding/json"
 	"net/http"
+	"strings"
 
 	"github.com/voxire/onion/internal/modules/pos_audit/internal/application"
 	"github.com/voxire/onion/internal/modules/pos_audit/internal/domain"
@@ -97,9 +98,11 @@ type CreateAuditResponse struct {
 }
 
 func (h *CreateAuditHandler) Validate(_ context.Context, req *CreateAuditRequest) *errorModels.ServerError {
+	req.Action = strings.TrimSpace(req.Action)
 	if req.Action == "" {
 		return &errorModels.ServerError{Code: http.StatusBadRequest, Message: "Action is required"}
 	}
+	req.EntityType = strings.TrimSpace(req.EntityType)
 	if req.EntityType == "" {
 		return &errorModels.ServerError{Code: http.StatusBadRequest, Message: "Entity type is required"}
 	}
