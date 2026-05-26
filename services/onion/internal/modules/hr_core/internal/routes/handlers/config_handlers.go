@@ -4,6 +4,7 @@ import (
 	"context"
 	"errors"
 	"net/http"
+	"strings"
 
 	"github.com/voxire/onion/internal/modules/hr_core/internal/application"
 	"github.com/voxire/onion/internal/modules/hr_core/internal/domain"
@@ -88,6 +89,7 @@ type UpsertHRConfigResponse struct {
 }
 
 func (h *UpsertHRConfigHandler) Validate(_ context.Context, req *UpsertHRConfigRequest) *errorModels.ServerError {
+	req.CompanyName = strings.TrimSpace(req.CompanyName)
 	if req.CompanyName == "" {
 		return &errorModels.ServerError{Code: http.StatusBadRequest, Message: "company_name is required"}
 	}
