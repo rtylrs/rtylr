@@ -255,7 +255,10 @@ const TeamTab: React.FC = () => {
   const [showInvite, setShowInvite] = useState(false);
 
   const handleInvite = (): void => {
-    if (!email.trim() || !fullName.trim()) return;
+    if (!email.trim() || !fullName.trim()) {
+      toast.error('Email and full name are required');
+      return;
+    }
     invite.mutate(
       { email: email.trim(), fullName: fullName.trim(), role: 'member' },
       {

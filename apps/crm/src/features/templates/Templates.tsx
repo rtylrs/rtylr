@@ -22,7 +22,10 @@ const Templates: React.FC = () => {
   const [newCategory, setNewCategory] = useState('general');
 
   const handleCreate = async (): Promise<void> => {
-    if (!newName.trim() || !newBody.trim()) return;
+    if (!newName.trim() || !newBody.trim()) {
+      toast.error('Template name and body are required');
+      return;
+    }
     try {
       await createMut.mutateAsync({
         name: newName.trim(),

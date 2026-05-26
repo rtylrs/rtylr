@@ -1,4 +1,5 @@
 import React, { useState } from 'react';
+import { toast } from 'sonner';
 import { Gift, Package, Plus, X } from 'lucide-react';
 import { useLoyaltyRewards, useUpsertReward } from '../../shared/hooks/queries/useLoyalty';
 import { PageHeader, Card, EmptyState, Button, SkeletonList } from '../../shared/components/ui';
@@ -22,7 +23,10 @@ const AddRewardModal: React.FC<{ onClose: () => void }> = ({ onClose }) => {
   });
 
   const handleSubmit = (): void => {
-    if (!form.name.trim()) return;
+    if (!form.name.trim()) {
+      toast.error('Reward name is required');
+      return;
+    }
     upsert.mutate({ data: { ...form, active: true } }, { onSuccess: () => onClose() });
   };
 

@@ -1,4 +1,5 @@
 import React, { useState } from 'react';
+import { toast } from 'sonner';
 import { useCreateLead } from '../../../shared/hooks/queries/useSales';
 import type { LeadStage } from '../../../shared/hooks/queries/useSales';
 import { Modal, Button, Input, Select, Textarea } from '../../../shared/components/ui';
@@ -22,7 +23,10 @@ const CreateLeadModal: React.FC<Props> = ({ open, onClose }) => {
   });
 
   const handleSubmit = (): void => {
-    if (!form.company.trim()) return;
+    if (!form.company.trim()) {
+      toast.error('Company name is required');
+      return;
+    }
     createLead.mutate(
       {
         company: form.company,
