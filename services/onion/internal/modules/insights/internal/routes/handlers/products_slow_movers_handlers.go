@@ -4,6 +4,7 @@ import (
 	"context"
 	"net/http"
 	"strconv"
+	"strings"
 
 	"github.com/voxire/onion/internal/modules/insights/internal/application"
 	authPkg "github.com/voxire/onion/internal/platform/auth"
@@ -22,6 +23,11 @@ type GetSlowMoversRequest struct {
 
 type GetSlowMoversResponse struct {
 	Products []application.SlowMoverPayload `json:"products"`
+}
+
+func (h *GetSlowMoversHandler) Validate(_ context.Context, req *GetSlowMoversRequest) *errorModels.ServerError {
+	req.Days = strings.TrimSpace(req.Days)
+	return nil
 }
 
 func (h *GetSlowMoversHandler) Serve(ctx context.Context, req *GetSlowMoversRequest) (GetSlowMoversResponse, *errorModels.ServerError) {
