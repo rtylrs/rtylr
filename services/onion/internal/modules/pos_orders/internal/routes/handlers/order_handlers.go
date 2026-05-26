@@ -134,6 +134,29 @@ type ListOrdersResponse struct {
 	Orders []OrderPayload `json:"orders"`
 }
 
+func (h *ListOrdersHandler) Validate(_ context.Context, req *ListOrdersRequest) *errorModels.ServerError {
+	const layout = "2006-01-02"
+	if req.DateFrom != "" {
+		if _, err := time.Parse(layout, req.DateFrom); err != nil {
+			return &errorModels.ServerError{
+				HTTPCode: http.StatusBadRequest,
+				Code:     http.StatusBadRequest,
+				Message:  "date_from must be in YYYY-MM-DD format",
+			}
+		}
+	}
+	if req.DateTo != "" {
+		if _, err := time.Parse(layout, req.DateTo); err != nil {
+			return &errorModels.ServerError{
+				HTTPCode: http.StatusBadRequest,
+				Code:     http.StatusBadRequest,
+				Message:  "date_to must be in YYYY-MM-DD format",
+			}
+		}
+	}
+	return nil
+}
+
 func (h *ListOrdersHandler) Serve(ctx context.Context, req *ListOrdersRequest) (ListOrdersResponse, *errorModels.ServerError) {
 	device := authPkg.DeviceCtx(ctx)
 	if device.User == nil {
