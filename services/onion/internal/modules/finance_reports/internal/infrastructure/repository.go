@@ -76,8 +76,16 @@ func (r *Repository) SumPaidInvoicesInRange(ctx context.Context, ownerID int64, 
 }
 
 func (r *Repository) SumExpensesInRange(ctx context.Context, ownerID int64, dateFrom, dateTo string) (float64, error) {
-	dfTime, _ := time.Parse("2006-01-02", dateFrom)
-	dtTime, _ := time.Parse("2006-01-02", dateTo)
+	dfTime, err := time.Parse("2006-01-02", dateFrom)
+	if err != nil && dateFrom != "" {
+		logger.Ctx(ctx).Error("Failed to parse dateFrom", logger.Error(err))
+		return 0, err
+	}
+	dtTime, err := time.Parse("2006-01-02", dateTo)
+	if err != nil && dateTo != "" {
+		logger.Ctx(ctx).Error("Failed to parse dateTo", logger.Error(err))
+		return 0, err
+	}
 
 	result, err := r.queries.SumExpensesInRange(ctx, sqlc.SumExpensesInRangeParams{
 		OwnerID:         ownerID,
