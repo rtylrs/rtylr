@@ -107,3 +107,84 @@ func TestDisconnect_DelegatesIDs(t *testing.T) {
 		t.Errorf("disconnect args: %+v", m.disconnGot)
 	}
 }
+
+func TestDisconnect_PropagatesRepoError(t *testing.T) {
+	want := errors.New("disconnect failed")
+	s := &Service{repo: &mockRepo{disconnErr: want}}
+	if err := s.Disconnect(context.Background(), 1, 10); !errors.Is(err, want) {
+		t.Errorf("expected sentinel, got %v", err)
+	}
+}
+
+func TestList_PropagatesError(t *testing.T) {
+	want := errors.New("list failed")
+	s := &Service{repo: &mockRepo{listErr: want}}
+	_, err := s.List(context.Background(), 1)
+	if !errors.Is(err, want) {
+		t.Errorf("expected sentinel, got %v", err)
+	}
+}
+
+func TestList_ReturnsEmpty(t *testing.T) {
+	s := &Service{repo: &mockRepo{listResult: []domain.Integration{}}}
+	got, err := s.List(context.Background(), 1)
+	if err != nil {
+		t.Fatalf("unexpected error: %v", err)
+	}
+	if len(got) != 0 {
+		t.Errorf("expected empty slice, got %d", len(got))
+	}
+}
+
+func TestList_ReturnsMultiple(t *testing.T) {
+	integrations := []domain.Integration{
+		{ID: 1, Provider: "stripe"},
+		{ID: 2, Provider: "slack"},
+	}
+	s := &Service{repo: &mockRepo{listResult: integrations}}
+	got, err := s.List(context.Background(), 1)
+	if err != nil {
+		t.Fatalf("unexpected error: %v", err)
+	}
+	if len(got) != 2 {
+		t.Errorf("expected 2, got %d", len(got))
+	}
+}
+
+func TestConnect_DelegatesOwnerID(t *testing.T) {
+	m := &mockRepo{connectID: 1}
+	s := &Service{repo: m}
+	_, _ = s.Connect(context.Background(), 55, "stripe", nil)
+	if m.connectGot.ownerID != 55 {
+		t.Errorf("expected ownerID 55, got %d", m.connectGot.ownerID)
+	}
+}
+
+func TestConnect_DelegatesProvider(t *testing.T) {
+	m := &mockRepo{connectID: 1}
+	s := &Service{repo: m}
+	_, _ = s.Connect(context.Background(), 1, "shopify", nil)
+	if m.connectGot.provider != "shopify" {
+		t.Errorf("expected provider shopify, got %q", m.connectGot.provider)
+	}
+}
+
+func TestDisconnect_ZeroIntegrationIDError(t *testing.T) {
+	s := &Service{repo: &mockRepo{}}
+	err := s.Disconnect(context.Background(), 1, 0)
+	if err == nil {
+		t.Fatal("expected error for zero integration ID")
+	}
+}
+
+func TestConnect_ReturnsGeneratedID(t *testing.T) {
+	m := &mockRepo{connectID: 77}
+	s := &Service{repo: m}
+	id, err := s.Connect(context.Background(), 1, "hubspot", json.RawMessage(`{}`))
+	if err != nil {
+		t.Fatalf("unexpected error: %v", err)
+	}
+	if id != 77 {
+		t.Errorf("expected 77, got %d", id)
+	}
+}
