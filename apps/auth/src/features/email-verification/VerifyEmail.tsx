@@ -34,7 +34,10 @@ const VerifyEmail: React.FC = () => {
 
   const handleResend = (): void => {
     const email = params.get('email') ?? '';
-    if (!email) return;
+    if (!email) {
+      notify.error('No email address found to resend verification');
+      return;
+    }
     resendMutation.mutate(
       { email },
       {
