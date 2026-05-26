@@ -7,6 +7,7 @@ import (
 	"io"
 	"net/http"
 	"strconv"
+	"strings"
 	"time"
 
 	"github.com/voxire/onion/internal/modules/subscriptions/internal/application"
@@ -296,6 +297,7 @@ type UpsertSubscriptionResponse struct {
 }
 
 func (h *UpsertSubscriptionHandler) Validate(_ context.Context, req *UpsertSubscriptionRequest) *errorModels.ServerError {
+	req.PlanSlug = strings.TrimSpace(req.PlanSlug)
 	if req.PlanSlug == "" {
 		return &errorModels.ServerError{
 			HTTPCode: http.StatusBadRequest,
