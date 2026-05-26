@@ -1,4 +1,5 @@
 import React, { useState } from 'react';
+import { toast } from 'sonner';
 import { useTranslation } from 'react-i18next';
 import { Plus, FileText } from 'lucide-react';
 import {
@@ -30,7 +31,10 @@ const ChecklistTemplates = (): React.JSX.Element => {
   const templates = data?.templates ?? [];
 
   const handleCreate = (): void => {
-    if (!name.trim()) return;
+    if (!name.trim()) {
+      toast.error('Template name is required');
+      return;
+    }
     createTemplate.mutate(
       { name, triggerType },
       {
