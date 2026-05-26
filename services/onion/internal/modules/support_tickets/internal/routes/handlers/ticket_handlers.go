@@ -3,6 +3,7 @@ package handlers
 import (
 	"context"
 	"net/http"
+	"strings"
 
 	"github.com/voxire/onion/internal/modules/support_tickets/internal/application"
 	"github.com/voxire/onion/internal/modules/support_tickets/internal/domain"
@@ -108,10 +109,10 @@ type CreateTicketResponse struct {
 }
 
 func (h *CreateTicketHandler) Validate(_ context.Context, req *CreateTicketRequest) *errorModels.ServerError {
-	if req.Subject == "" {
+	if strings.TrimSpace(req.Subject) == "" {
 		return &errorModels.ServerError{Code: http.StatusBadRequest, Message: "Subject is required"}
 	}
-	if req.CustomerEmail == "" {
+	if strings.TrimSpace(req.CustomerEmail) == "" {
 		return &errorModels.ServerError{Code: http.StatusBadRequest, Message: "Customer email is required"}
 	}
 	return nil
