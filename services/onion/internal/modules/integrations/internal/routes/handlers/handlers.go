@@ -4,6 +4,7 @@ import (
 	"context"
 	"encoding/json"
 	"net/http"
+	"strings"
 
 	"github.com/voxire/onion/internal/modules/integrations/internal/application"
 	authPkg "github.com/voxire/onion/internal/platform/auth"
@@ -72,6 +73,7 @@ type ConnectResponse struct {
 }
 
 func (h *ConnectHandler) Validate(_ context.Context, req *ConnectRequest) *errorModels.ServerError {
+	req.Provider = strings.TrimSpace(req.Provider)
 	if req.Provider == "" {
 		return &errorModels.ServerError{
 			HTTPCode: http.StatusBadRequest,
