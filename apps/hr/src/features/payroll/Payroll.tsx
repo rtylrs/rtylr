@@ -1,6 +1,7 @@
 import React, { useState } from 'react';
 import { Link } from 'react-router-dom';
 import { useTranslation } from 'react-i18next';
+import { toast } from 'sonner';
 import { Play, DollarSign, TrendingUp, Users, Clock, Settings } from 'lucide-react';
 import { motion } from 'motion/react';
 import { useListPayrollRuns, useTriggerPayrollRun } from '../../shared/hooks/queries/usePayroll';
@@ -80,7 +81,13 @@ const Payroll = (): React.JSX.Element => {
     const now = new Date();
     const start = new Date(now.getFullYear(), now.getMonth(), 1).toISOString().split('T')[0];
     const end = new Date(now.getFullYear(), now.getMonth() + 1, 0).toISOString().split('T')[0];
-    triggerRun.mutate({ periodStart: start, periodEnd: end });
+    triggerRun.mutate(
+      { periodStart: start, periodEnd: end },
+      {
+        onSuccess: () => toast.success('Payroll run triggered'),
+        onError: () => toast.error('Failed to trigger payroll run'),
+      }
+    );
   };
 
   return (
