@@ -2,6 +2,7 @@ import React, { useCallback, useMemo, useRef, useState } from 'react';
 import { useParams } from 'react-router-dom';
 import { useTranslation } from 'react-i18next';
 import { useVirtualizer } from '@tanstack/react-virtual';
+import { toast } from 'sonner';
 import { Share2 } from 'lucide-react';
 import type {
   PerformanceReviewPayload,
@@ -63,7 +64,13 @@ function ReviewsTab({ cycleId }: { cycleId: number }): React.JSX.Element {
 
   const handleShare = useCallback(
     (reviewId: number): void => {
-      shareMutation.mutate({ reviewId });
+      shareMutation.mutate(
+        { reviewId },
+        {
+          onSuccess: () => toast.success('Review shared with employee'),
+          onError: () => toast.error('Failed to share review'),
+        }
+      );
     },
     [shareMutation]
   );
