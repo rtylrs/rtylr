@@ -24,8 +24,16 @@ const Journal: React.FC = () => {
   const [amount, setAmount] = useState('');
 
   const handleCreate = async (): Promise<void> => {
-    if (!memo.trim() || !amount) return;
-    const amt = parseFloat(amount);
+    if (!memo.trim()) {
+      toast.error('Memo is required');
+      return;
+    }
+    const parsedAmount = parseFloat(amount);
+    if (!amount || isNaN(parsedAmount) || parsedAmount <= 0) {
+      toast.error('Amount must be greater than zero');
+      return;
+    }
+    const amt = parsedAmount;
     try {
       await createMut.mutateAsync({
         date,

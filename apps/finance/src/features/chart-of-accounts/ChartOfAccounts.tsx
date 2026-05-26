@@ -1,4 +1,5 @@
 import React, { useState } from 'react';
+import { toast } from 'sonner';
 import { motion } from 'motion/react';
 import { Plus, Search } from 'lucide-react';
 import PageHeader from '../../shared/components/PageHeader';
@@ -30,7 +31,10 @@ const ChartOfAccounts: React.FC = () => {
   const [newCode, setNewCode] = useState('');
 
   const handleCreate = async (): Promise<void> => {
-    if (!newName.trim()) return;
+    if (!newName.trim()) {
+      toast.error('Account name is required');
+      return;
+    }
     try {
       await createMut.mutateAsync({
         name: newName.trim(),
