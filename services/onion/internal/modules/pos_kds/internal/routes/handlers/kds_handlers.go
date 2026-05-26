@@ -108,13 +108,13 @@ func (h *UpdateKDSItemHandler) Serve(ctx context.Context, req *UpdateKDSItemRequ
 
 	orderIDStr := chi.URLParamFromCtx(ctx, "orderId")
 	orderID, err := strconv.ParseInt(orderIDStr, 10, 64)
-	if err != nil {
+	if err != nil || orderID <= 0 {
 		return UpdateKDSItemResponse{}, &errorModels.ServerError{Code: http.StatusBadRequest, Message: "Invalid order ID"}
 	}
 
 	itemIDStr := chi.URLParamFromCtx(ctx, "itemId")
 	itemID, err := strconv.ParseInt(itemIDStr, 10, 64)
-	if err != nil {
+	if err != nil || itemID <= 0 {
 		return UpdateKDSItemResponse{}, &errorModels.ServerError{Code: http.StatusBadRequest, Message: "Invalid item ID"}
 	}
 
