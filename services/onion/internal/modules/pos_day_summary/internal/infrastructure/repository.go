@@ -29,7 +29,11 @@ func (r *Repository) GetDaySummary(ctx context.Context, ownerID int64, date stri
 	var summary domain.DaySummary
 
 	if date != "" {
-		t, _ := time.Parse("2006-01-02", date)
+		t, parseErr := time.Parse("2006-01-02", date)
+		if parseErr != nil {
+			logger.Ctx(ctx).Error("Failed to parse date for GetDaySummary", logger.Error(parseErr))
+			return summary, parseErr
+		}
 		row, err := r.queries.GetDaySummaryByDate(ctx, sqlc.GetDaySummaryByDateParams{
 			OwnerID: ownerID,
 			PaidAt:  sql.NullTime{Time: t, Valid: true},
