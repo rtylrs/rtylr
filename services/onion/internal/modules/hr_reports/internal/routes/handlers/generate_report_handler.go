@@ -66,7 +66,24 @@ func (h *GenerateReportHandler) ServeHTTP(w http.ResponseWriter, r *http.Request
 	}
 
 	req.DateFrom = strings.TrimSpace(req.DateFrom)
+	if req.DateFrom == "" {
+		writeError(w, &errorModels.ServerError{
+			HTTPCode: http.StatusBadRequest,
+			Code:     http.StatusBadRequest,
+			Message:  "date_from is required",
+		})
+		return
+	}
+
 	req.DateTo = strings.TrimSpace(req.DateTo)
+	if req.DateTo == "" {
+		writeError(w, &errorModels.ServerError{
+			HTTPCode: http.StatusBadRequest,
+			Code:     http.StatusBadRequest,
+			Message:  "date_to is required",
+		})
+		return
+	}
 
 	dateFrom, err := time.Parse("2006-01-02", req.DateFrom)
 	if err != nil {
