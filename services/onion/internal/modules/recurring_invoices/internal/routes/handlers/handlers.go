@@ -93,6 +93,9 @@ func (h *CreateHandler) Validate(_ context.Context, req *CreateRequest) *errorMo
 	if req.NextInvoiceDate == "" {
 		return &errorModels.ServerError{Code: http.StatusBadRequest, Message: "nextInvoiceDate is required"}
 	}
+	if _, err := time.Parse("2006-01-02", req.NextInvoiceDate); err != nil {
+		return &errorModels.ServerError{Code: http.StatusBadRequest, Message: "nextInvoiceDate must be in YYYY-MM-DD format"}
+	}
 	return nil
 }
 
@@ -147,6 +150,9 @@ func (h *UpdateHandler) Validate(_ context.Context, req *UpdateRequest) *errorMo
 	}
 	if req.NextInvoiceDate == "" {
 		return &errorModels.ServerError{Code: http.StatusBadRequest, Message: "nextInvoiceDate is required"}
+	}
+	if _, err := time.Parse("2006-01-02", req.NextInvoiceDate); err != nil {
+		return &errorModels.ServerError{Code: http.StatusBadRequest, Message: "nextInvoiceDate must be in YYYY-MM-DD format"}
 	}
 	return nil
 }
