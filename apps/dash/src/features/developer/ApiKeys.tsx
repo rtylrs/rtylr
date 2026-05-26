@@ -45,7 +45,10 @@ const ApiKeys: React.FC = () => {
   const [toRevoke, setToRevoke] = useState<ApiKey | null>(null);
 
   const submitCreate = async () => {
-    if (!name.trim()) return;
+    if (!name.trim()) {
+      toast.error('API key name is required');
+      return;
+    }
     try {
       const result = await create.mutateAsync({ name, scopes });
       setShowKey(result.key);

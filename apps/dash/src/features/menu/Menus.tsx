@@ -1,4 +1,5 @@
 import React, { useState } from 'react';
+import { toast } from 'sonner';
 import { useNavigate } from 'react-router-dom';
 import { Plus, UtensilsCrossed, Search, MoreHorizontal, CheckCircle } from 'lucide-react';
 import { useUserStore } from '../../shared/stores/userStore';
@@ -56,7 +57,11 @@ const Menus: React.FC = () => {
   );
 
   const handleCreate = () => {
-    if (!newMenuName.trim() || !userId) return;
+    if (!newMenuName.trim()) {
+      toast.error('Menu name is required');
+      return;
+    }
+    if (!userId) return;
     createMenu.mutate(
       { restaurantId: userId, menuName: newMenuName },
       {

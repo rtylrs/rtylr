@@ -55,7 +55,10 @@ const Account: React.FC = () => {
   });
 
   const handlePasswordSave = (): void => {
-    if (!currentPassword.trim() || !newPassword.trim()) return;
+    if (!currentPassword.trim() || !newPassword.trim()) {
+      toast.error('Current and new password are required');
+      return;
+    }
     if (newPassword !== confirmPassword) {
       toast.error('Passwords do not match');
       return;

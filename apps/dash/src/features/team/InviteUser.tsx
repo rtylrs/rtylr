@@ -1,4 +1,5 @@
 import React, { useState } from 'react';
+import { toast } from 'sonner';
 import { useNavigate } from 'react-router-dom';
 import { useQuery } from '@tanstack/react-query';
 import {
@@ -132,7 +133,10 @@ const InviteUser: React.FC = (): React.JSX.Element => {
 
   const submitSingle = async (e: React.FormEvent): Promise<void> => {
     e.preventDefault();
-    if (!email.trim() || !name.trim()) return;
+    if (!email.trim() || !name.trim()) {
+      toast.error('Email and name are required');
+      return;
+    }
     try {
       await invite.mutateAsync({
         email,

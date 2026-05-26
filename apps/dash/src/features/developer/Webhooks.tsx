@@ -1,4 +1,5 @@
 import React, { useState } from 'react';
+import { toast } from 'sonner';
 import { Webhook as WebhookIcon, Plus } from 'lucide-react';
 import {
   Button,
@@ -47,7 +48,14 @@ const Webhooks: React.FC = () => {
   const [toDelete, setToDelete] = useState<Webhook | null>(null);
 
   const submitCreate = async () => {
-    if (!url.trim() || events.length === 0) return;
+    if (!url.trim()) {
+      toast.error('Webhook URL is required');
+      return;
+    }
+    if (events.length === 0) {
+      toast.error('Select at least one event');
+      return;
+    }
     try {
       await create.mutateAsync({ url, events });
       setUrl('');
