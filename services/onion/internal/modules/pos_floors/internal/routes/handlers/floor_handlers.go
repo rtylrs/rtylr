@@ -4,6 +4,7 @@ import (
 	"context"
 	"net/http"
 	"strconv"
+	"strings"
 
 	"github.com/go-chi/chi/v5"
 
@@ -78,7 +79,7 @@ type CreateFloorResponse struct {
 }
 
 func (h *CreateFloorHandler) Validate(_ context.Context, req *CreateFloorRequest) *errorModels.ServerError {
-	if req.Name == "" {
+	if strings.TrimSpace(req.Name) == "" {
 		return &errorModels.ServerError{Code: http.StatusBadRequest, Message: "Name is required"}
 	}
 	if req.BranchID == 0 {
@@ -120,7 +121,7 @@ type UpdateFloorResponse struct {
 }
 
 func (h *UpdateFloorHandler) Validate(_ context.Context, req *UpdateFloorRequest) *errorModels.ServerError {
-	if req.Name == "" {
+	if strings.TrimSpace(req.Name) == "" {
 		return &errorModels.ServerError{Code: http.StatusBadRequest, Message: "Name is required"}
 	}
 	return nil
