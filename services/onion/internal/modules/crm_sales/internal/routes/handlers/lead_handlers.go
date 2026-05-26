@@ -5,6 +5,7 @@ import (
 	"errors"
 	"net/http"
 	"strconv"
+	"strings"
 
 	"github.com/go-chi/chi/v5"
 
@@ -97,7 +98,7 @@ type CreateLeadResponse struct {
 }
 
 func (h *CreateLeadHandler) Validate(_ context.Context, req *CreateLeadRequest) *errorModels.ServerError {
-	if req.CompanyName == "" {
+	if strings.TrimSpace(req.CompanyName) == "" {
 		return &errorModels.ServerError{HTTPCode: http.StatusBadRequest, Code: http.StatusBadRequest, Message: "company_name is required"}
 	}
 	return nil
@@ -189,7 +190,7 @@ type UpdateLeadResponse struct {
 }
 
 func (h *UpdateLeadHandler) Validate(_ context.Context, req *UpdateLeadRequest) *errorModels.ServerError {
-	if req.CompanyName == "" {
+	if strings.TrimSpace(req.CompanyName) == "" {
 		return &errorModels.ServerError{HTTPCode: http.StatusBadRequest, Code: http.StatusBadRequest, Message: "company_name is required"}
 	}
 	return nil
