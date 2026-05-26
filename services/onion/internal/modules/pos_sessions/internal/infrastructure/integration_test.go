@@ -1,0 +1,229 @@
+package infrastructure_test
+
+import (
+	"context"
+	"errors"
+	"testing"
+
+	"github.com/voxire/onion/internal/modules/pos_sessions/internal/domain"
+	"github.com/voxire/onion/internal/modules/pos_sessions/internal/infrastructure"
+	"github.com/voxire/onion/internal/testutil"
+)
+
+func TestSessions_List_NoError(t *testing.T) {
+	db := testutil.OpenDB(t)
+	repo := infrastructure.NewRepository(db)
+
+	sessions, err := repo.List(context.Background(), testutil.OwnerID)
+	if err != nil {
+		t.Fatalf("List: %v", err)
+	}
+	_ = sessions
+}
+
+func TestSessions_List_ReturnsNonNilSlice(t *testing.T) {
+	db := testutil.OpenDB(t)
+	repo := infrastructure.NewRepository(db)
+
+	sessions, err := repo.List(context.Background(), testutil.OwnerID)
+	if err != nil {
+		t.Fatalf("List: %v", err)
+	}
+	if sessions == nil {
+		t.Fatal("expected non-nil slice, got nil")
+	}
+}
+
+func TestSessions_List_WrongOwnerReturnsEmpty(t *testing.T) {
+	db := testutil.OpenDB(t)
+	repo := infrastructure.NewRepository(db)
+
+	sessions, err := repo.List(context.Background(), 999999)
+	if err != nil {
+		t.Fatalf("List wrong owner: %v", err)
+	}
+	if len(sessions) != 0 {
+		t.Fatalf("expected 0 sessions for unknown owner, got %d", len(sessions))
+	}
+}
+
+func TestSessions_List_AllBelongToOwner(t *testing.T) {
+	db := testutil.OpenDB(t)
+	repo := infrastructure.NewRepository(db)
+
+	sessions, err := repo.List(context.Background(), testutil.OwnerID)
+	if err != nil {
+		t.Fatalf("List: %v", err)
+	}
+	for i, s := range sessions {
+		if s.OwnerID != testutil.OwnerID {
+			t.Errorf("sessions[%d].OwnerID = %d, want %d", i, s.OwnerID, testutil.OwnerID)
+		}
+	}
+}
+
+func TestSessions_List_AllHaveNonZeroID(t *testing.T) {
+	db := testutil.OpenDB(t)
+	repo := infrastructure.NewRepository(db)
+
+	sessions, err := repo.List(context.Background(), testutil.OwnerID)
+	if err != nil {
+		t.Fatalf("List: %v", err)
+	}
+	for i, s := range sessions {
+		if s.ID == 0 {
+			t.Errorf("sessions[%d].ID is zero", i)
+		}
+	}
+}
+
+func TestSessions_List_AllHaveNonEmptyStatus(t *testing.T) {
+	db := testutil.OpenDB(t)
+	repo := infrastructure.NewRepository(db)
+
+	sessions, err := repo.List(context.Background(), testutil.OwnerID)
+	if err != nil {
+		t.Fatalf("List: %v", err)
+	}
+	for i, s := range sessions {
+		if s.Status == "" {
+			t.Errorf("sessions[%d].Status is empty", i)
+		}
+	}
+}
+
+func TestSessions_Get_FixtureSession3201_StatusOpen(t *testing.T) {
+	db := testutil.OpenDB(t)
+	repo := infrastructure.NewRepository(db)
+
+	session, err := repo.Get(context.Background(), testutil.OwnerID, 3201)
+	if err != nil {
+		t.Fatalf("Get session 3201: %v", err)
+	}
+	if session == nil {
+		t.Fatal("expected non-nil session for id=3201")
+	}
+	if session.Status != "open" {
+		t.Errorf("session 3201 Status = %q, want 'open'", session.Status)
+	}
+}
+
+func TestSessions_Get_FixtureSession3201_TotalSales250(t *testing.T) {
+	db := testutil.OpenDB(t)
+	repo := infrastructure.NewRepository(db)
+
+	session, err := repo.Get(context.Background(), testutil.OwnerID, 3201)
+	if err != nil {
+		t.Fatalf("Get session 3201: %v", err)
+	}
+	if session.TotalSales != 250 {
+		t.Errorf("session 3201 TotalSales = %f, want 250", session.TotalSales)
+	}
+}
+
+func TestSessions_Get_FixtureSession3201_OpeningCash100(t *testing.T) {
+	db := testutil.OpenDB(t)
+	repo := infrastructure.NewRepository(db)
+
+	session, err := repo.Get(context.Background(), testutil.OwnerID, 3201)
+	if err != nil {
+		t.Fatalf("Get session 3201: %v", err)
+	}
+	if session.OpeningFloat != 100 {
+		t.Errorf("session 3201 OpeningFloat = %f, want 100", session.OpeningFloat)
+	}
+}
+
+func TestSessions_Get_UnknownIDReturnsNotFound(t *testing.T) {
+	db := testutil.OpenDB(t)
+	repo := infrastructure.NewRepository(db)
+
+	_, err := repo.Get(context.Background(), testutil.OwnerID, 9999999)
+	if !errors.Is(err, domain.ErrSessionNotFound) {
+		t.Fatalf("expected ErrSessionNotFound, got %v", err)
+	}
+}
+
+func TestSessions_Get_WrongOwnerReturnsNotFound(t *testing.T) {
+	db := testutil.OpenDB(t)
+	repo := infrastructure.NewRepository(db)
+
+	_, err := repo.Get(context.Background(), 999999, 3201)
+	if !errors.Is(err, domain.ErrSessionNotFound) {
+		t.Fatalf("expected ErrSessionNotFound for wrong owner, got %v", err)
+	}
+}
+
+func TestSessions_Open_ThenGetReturnsStatusOpen(t *testing.T) {
+	db := testutil.OpenDB(t)
+	repo := infrastructure.NewRepository(db)
+	ctx := context.Background()
+
+	locID := int64(3001)
+	id, err := repo.Open(ctx, domain.OpenSessionInput{
+		OwnerID:      testutil.OwnerID,
+		LocationID:   &locID,
+		OpeningFloat: 50.0,
+	})
+	if err != nil {
+		t.Fatalf("Open: %v", err)
+	}
+	if id == 0 {
+		t.Fatal("Open returned ID=0")
+	}
+
+	session, err := repo.Get(ctx, testutil.OwnerID, id)
+	if err != nil {
+		t.Fatalf("Get new session: %v", err)
+	}
+	if session.Status != "open" {
+		t.Errorf("new session Status = %q, want 'open'", session.Status)
+	}
+}
+
+func TestSessions_Close_ChangesStatus(t *testing.T) {
+	db := testutil.OpenDB(t)
+	repo := infrastructure.NewRepository(db)
+	ctx := context.Background()
+
+	locID := int64(3001)
+	id, err := repo.Open(ctx, domain.OpenSessionInput{
+		OwnerID:      testutil.OwnerID,
+		LocationID:   &locID,
+		OpeningFloat: 100.0,
+	})
+	if err != nil {
+		t.Fatalf("Open: %v", err)
+	}
+
+	err = repo.Close(ctx, domain.CloseSessionInput{
+		ID:           id,
+		OwnerID:      testutil.OwnerID,
+		ClosingFloat: 120.0,
+	})
+	if err != nil {
+		t.Fatalf("Close: %v", err)
+	}
+
+	session, err := repo.Get(ctx, testutil.OwnerID, id)
+	if err != nil {
+		t.Fatalf("Get after close: %v", err)
+	}
+	if session.Status == "open" {
+		t.Error("expected session status to change after Close")
+	}
+}
+
+func TestSessions_Close_UnknownIDReturnsNotFound(t *testing.T) {
+	db := testutil.OpenDB(t)
+	repo := infrastructure.NewRepository(db)
+
+	err := repo.Close(context.Background(), domain.CloseSessionInput{
+		ID:           9999999,
+		OwnerID:      testutil.OwnerID,
+		ClosingFloat: 0,
+	})
+	if !errors.Is(err, domain.ErrSessionNotFound) {
+		t.Fatalf("expected ErrSessionNotFound, got %v", err)
+	}
+}
