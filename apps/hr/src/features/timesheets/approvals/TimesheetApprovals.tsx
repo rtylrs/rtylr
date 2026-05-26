@@ -1,6 +1,7 @@
 import React, { useState } from 'react';
 import { useTranslation } from 'react-i18next';
 import { motion } from 'motion/react';
+import { toast } from 'sonner';
 import { CheckCircle, XCircle, Clock, Users } from 'lucide-react';
 import {
   useListTimesheets,
@@ -36,7 +37,13 @@ const TimesheetApprovals = (): React.JSX.Element => {
   const [rejectionReason, setRejectionReason] = useState('');
 
   const handleApprove = (timesheetId: number): void => {
-    approveMutation.mutate({ timesheetId, approved: true });
+    approveMutation.mutate(
+      { timesheetId, approved: true },
+      {
+        onSuccess: () => toast.success('Timesheet approved'),
+        onError: () => toast.error('Failed to approve timesheet'),
+      }
+    );
   };
 
   const handleReject = (): void => {
