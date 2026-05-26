@@ -2,6 +2,7 @@ package handlers
 
 import (
 	"context"
+	"errors"
 	"net/http"
 
 	"github.com/voxire/onion/internal/modules/suppliers/internal/application"
@@ -231,6 +232,13 @@ func (h *UpdateSupplierHandler) Serve(ctx context.Context, req *UpdateSupplierRe
 	}
 
 	if err := h.Service.UpdateSupplier(ctx, authUser.UserID, req.ID, input); err != nil {
+		if errors.Is(err, domain.ErrSupplierNotFound) {
+			return UpdateSupplierResponse{}, &errorModels.ServerError{
+				Code:     http.StatusNotFound,
+				HTTPCode: http.StatusNotFound,
+				Message:  "Supplier not found",
+			}
+		}
 		return UpdateSupplierResponse{}, &errorModels.ServerError{
 			Code:     http.StatusInternalServerError,
 			HTTPCode: http.StatusInternalServerError,
