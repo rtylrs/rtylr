@@ -3,6 +3,7 @@ package handlers
 import (
 	"context"
 	"net/http"
+	"strings"
 
 	"github.com/voxire/onion/internal/modules/hr_performance/internal/application"
 	"github.com/voxire/onion/internal/modules/hr_performance/internal/domain"
@@ -30,7 +31,7 @@ type CreateGoalResponse struct {
 }
 
 func (h *CreateGoalHandler) Validate(_ context.Context, req *CreateGoalRequest) *errorModels.ServerError {
-	if req.Title == "" {
+	if strings.TrimSpace(req.Title) == "" {
 		return &errorModels.ServerError{HTTPCode: http.StatusBadRequest, Code: http.StatusBadRequest, Message: "title is required"}
 	}
 	if req.EmployeeID == 0 {
