@@ -181,7 +181,10 @@ const GeneralTab: React.FC = () => {
           <input
             type="number"
             value={settings.lowStockThreshold}
-            onChange={(e) => settings.setLowStockThreshold(parseInt(e.target.value) || 0)}
+            onChange={(e) => {
+              const v = parseInt(e.target.value, 10);
+              if (!isNaN(v) && v >= 0) settings.setLowStockThreshold(v);
+            }}
             className="w-20 px-2 py-1.5 rounded-lg text-xs outline-none"
             style={{
               background: 'var(--hub-input-bg)',
