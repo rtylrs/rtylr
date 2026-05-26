@@ -76,7 +76,11 @@ export const QuickCreate: React.FC = () => {
   }, [quickCreateOpen, projects, activeWorkspaceId]);
 
   const submit = async () => {
-    if (!title.trim() || !projectId) return;
+    if (!title.trim()) {
+      toast.error('Task title is required');
+      return;
+    }
+    if (!projectId) return;
     const project = projects.find((p) => p.id === projectId);
     if (!project) return;
 

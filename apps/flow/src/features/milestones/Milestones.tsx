@@ -96,7 +96,10 @@ const Milestones: React.FC = () => {
           <div className="flex gap-2">
             <button
               onClick={() => {
-                if (!newName.trim()) return;
+                if (!newName.trim()) {
+                  toast.error(t('errors.generic'));
+                  return;
+                }
                 createMilestone.mutate(
                   { name: newName, targetDate: newDate || new Date().toISOString().slice(0, 10) },
                   {

@@ -73,7 +73,10 @@ const Calendar: React.FC = () => {
   };
 
   const submitCreate = () => {
-    if (!newTitle.trim()) return;
+    if (!newTitle.trim()) {
+      toast.error(t('errors.generic'));
+      return;
+    }
     const projectId = newProjectId || projects[0]?.id;
     if (!projectId || !activeWorkspaceId) {
       toast.error(t('toasts.task.selectProjectFirst'));
