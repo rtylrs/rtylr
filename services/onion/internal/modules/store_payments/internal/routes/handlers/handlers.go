@@ -3,6 +3,7 @@ package handlers
 import (
 	"context"
 	"net/http"
+	"strings"
 
 	"github.com/voxire/onion/internal/modules/store_payments/internal/application"
 	"github.com/voxire/onion/internal/modules/store_payments/internal/domain"
@@ -49,7 +50,7 @@ type CreateResponse struct {
 }
 
 func (h *CreateHandler) Validate(_ context.Context, req *CreateRequest) *errorModels.ServerError {
-	if req.Provider == "" {
+	if strings.TrimSpace(req.Provider) == "" {
 		return &errorModels.ServerError{Code: http.StatusBadRequest, HTTPCode: http.StatusBadRequest, Message: "Provider is required"}
 	}
 	return nil
