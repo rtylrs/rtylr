@@ -5,6 +5,8 @@ import (
 	"errors"
 	"net/http"
 	"strconv"
+	"strings"
+	"time"
 
 	"github.com/go-chi/chi/v5"
 
@@ -36,7 +38,15 @@ type UpdateQuoteByIDResponse struct {
 	Message string `json:"message"`
 }
 
-func (h *UpdateQuoteByIDHandler) Validate(_ context.Context, _ *UpdateQuoteByIDRequest) *errorModels.ServerError {
+func (h *UpdateQuoteByIDHandler) Validate(_ context.Context, req *UpdateQuoteByIDRequest) *errorModels.ServerError {
+	if strings.TrimSpace(req.CustomerName) == "" {
+		return &errorModels.ServerError{Code: http.StatusBadRequest, Message: "customerName is required"}
+	}
+	if req.ValidUntil != "" {
+		if _, err := time.Parse("2006-01-02", req.ValidUntil); err != nil {
+			return &errorModels.ServerError{Code: http.StatusBadRequest, Message: "validUntil must be in YYYY-MM-DD format"}
+		}
+	}
 	return nil
 }
 

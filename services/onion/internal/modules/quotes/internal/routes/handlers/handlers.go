@@ -3,6 +3,7 @@ package handlers
 import (
 	"context"
 	"net/http"
+	"strings"
 	"time"
 
 	"github.com/voxire/onion/internal/modules/quotes/internal/application"
@@ -108,8 +109,13 @@ type CreateResponse struct {
 }
 
 func (h *CreateHandler) Validate(_ context.Context, req *CreateRequest) *errorModels.ServerError {
-	if req.CustomerName == "" {
+	if strings.TrimSpace(req.CustomerName) == "" {
 		return &errorModels.ServerError{Code: http.StatusBadRequest, Message: "customerName is required"}
+	}
+	if req.ValidUntil != "" {
+		if _, err := time.Parse("2006-01-02", req.ValidUntil); err != nil {
+			return &errorModels.ServerError{Code: http.StatusBadRequest, Message: "validUntil must be in YYYY-MM-DD format"}
+		}
 	}
 	return nil
 }
@@ -163,6 +169,14 @@ type UpdateResponse struct {
 func (h *UpdateHandler) Validate(_ context.Context, req *UpdateRequest) *errorModels.ServerError {
 	if req.ID == 0 {
 		return &errorModels.ServerError{Code: http.StatusBadRequest, Message: "id is required"}
+	}
+	if strings.TrimSpace(req.CustomerName) == "" {
+		return &errorModels.ServerError{Code: http.StatusBadRequest, Message: "customerName is required"}
+	}
+	if req.ValidUntil != "" {
+		if _, err := time.Parse("2006-01-02", req.ValidUntil); err != nil {
+			return &errorModels.ServerError{Code: http.StatusBadRequest, Message: "validUntil must be in YYYY-MM-DD format"}
+		}
 	}
 	return nil
 }
