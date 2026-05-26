@@ -4,6 +4,7 @@ import (
 	"context"
 	"errors"
 	"net/http"
+	"strings"
 
 	"github.com/voxire/onion/internal/modules/hr_documents/internal/application"
 	"github.com/voxire/onion/internal/modules/hr_documents/internal/domain"
@@ -34,10 +35,10 @@ func (h *UploadDocumentHandler) Validate(_ context.Context, req *UploadDocumentR
 	if req.EmployeeID == 0 {
 		return &errorModels.ServerError{HTTPCode: http.StatusBadRequest, Code: http.StatusBadRequest, Message: "employee_id is required"}
 	}
-	if req.Title == "" {
+	if strings.TrimSpace(req.Title) == "" {
 		return &errorModels.ServerError{HTTPCode: http.StatusBadRequest, Code: http.StatusBadRequest, Message: "title is required"}
 	}
-	if req.StorageMode == "" {
+	if strings.TrimSpace(req.StorageMode) == "" {
 		return &errorModels.ServerError{HTTPCode: http.StatusBadRequest, Code: http.StatusBadRequest, Message: "storage_mode is required"}
 	}
 	return nil
