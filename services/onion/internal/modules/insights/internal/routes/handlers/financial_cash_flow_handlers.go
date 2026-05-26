@@ -3,6 +3,7 @@ package handlers
 import (
 	"context"
 	"net/http"
+	"strings"
 
 	"github.com/voxire/onion/internal/modules/insights/internal/application"
 	authPkg "github.com/voxire/onion/internal/platform/auth"
@@ -22,6 +23,12 @@ type GetCashFlowRequest struct {
 
 type GetCashFlowResponse struct {
 	Series []application.CashFlowPointPayload `json:"series"`
+}
+
+func (h *GetCashFlowHandler) Validate(_ context.Context, req *GetCashFlowRequest) *errorModels.ServerError {
+	req.From = strings.TrimSpace(req.From)
+	req.To = strings.TrimSpace(req.To)
+	return nil
 }
 
 func (h *GetCashFlowHandler) Serve(ctx context.Context, req *GetCashFlowRequest) (GetCashFlowResponse, *errorModels.ServerError) {
