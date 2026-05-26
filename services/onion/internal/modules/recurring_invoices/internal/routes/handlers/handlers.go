@@ -3,6 +3,7 @@ package handlers
 import (
 	"context"
 	"net/http"
+	"strings"
 	"time"
 
 	"github.com/voxire/onion/internal/modules/recurring_invoices/internal/application"
@@ -87,9 +88,11 @@ func (h *CreateHandler) Validate(_ context.Context, req *CreateRequest) *errorMo
 	if req.TemplateInvoiceID == 0 {
 		return &errorModels.ServerError{Code: http.StatusBadRequest, Message: "templateInvoiceId is required"}
 	}
+	req.Frequency = strings.TrimSpace(req.Frequency)
 	if req.Frequency == "" {
 		return &errorModels.ServerError{Code: http.StatusBadRequest, Message: "frequency is required"}
 	}
+	req.NextInvoiceDate = strings.TrimSpace(req.NextInvoiceDate)
 	if req.NextInvoiceDate == "" {
 		return &errorModels.ServerError{Code: http.StatusBadRequest, Message: "nextInvoiceDate is required"}
 	}
@@ -145,9 +148,11 @@ func (h *UpdateHandler) Validate(_ context.Context, req *UpdateRequest) *errorMo
 	if req.ID == 0 {
 		return &errorModels.ServerError{Code: http.StatusBadRequest, Message: "id is required"}
 	}
+	req.Frequency = strings.TrimSpace(req.Frequency)
 	if req.Frequency == "" {
 		return &errorModels.ServerError{Code: http.StatusBadRequest, Message: "frequency is required"}
 	}
+	req.NextInvoiceDate = strings.TrimSpace(req.NextInvoiceDate)
 	if req.NextInvoiceDate == "" {
 		return &errorModels.ServerError{Code: http.StatusBadRequest, Message: "nextInvoiceDate is required"}
 	}
