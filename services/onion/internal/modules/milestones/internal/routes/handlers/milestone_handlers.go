@@ -110,6 +110,11 @@ func (h *CreateMilestoneHandler) Validate(_ context.Context, req *CreateMileston
 	if req.ProjectID == 0 {
 		return &errorModels.ServerError{Code: http.StatusBadRequest, Message: "Project ID is required"}
 	}
+	if req.TargetDate != "" {
+		if _, err := time.Parse("2006-01-02", req.TargetDate); err != nil {
+			return &errorModels.ServerError{Code: http.StatusBadRequest, Message: "target_date must be in YYYY-MM-DD format"}
+		}
+	}
 	return nil
 }
 
@@ -156,6 +161,11 @@ type UpdateMilestoneResponse struct {
 func (h *UpdateMilestoneHandler) Validate(_ context.Context, req *UpdateMilestoneRequest) *errorModels.ServerError {
 	if req.Name == "" {
 		return &errorModels.ServerError{Code: http.StatusBadRequest, Message: "Name is required"}
+	}
+	if req.TargetDate != "" {
+		if _, err := time.Parse("2006-01-02", req.TargetDate); err != nil {
+			return &errorModels.ServerError{Code: http.StatusBadRequest, Message: "target_date must be in YYYY-MM-DD format"}
+		}
 	}
 	return nil
 }
