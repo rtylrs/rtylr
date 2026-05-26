@@ -4,6 +4,8 @@ import (
 	"context"
 	"errors"
 	"net/http"
+	"strings"
+	"time"
 
 	"github.com/voxire/onion/internal/modules/hr_leave/internal/application"
 	"github.com/voxire/onion/internal/modules/hr_leave/internal/domain"
@@ -37,8 +39,16 @@ func (h *CreateLeaveRequestHandler) Validate(_ context.Context, req *CreateLeave
 	if req.LeaveTypeID == 0 {
 		return &errorModels.ServerError{HTTPCode: http.StatusBadRequest, Code: http.StatusBadRequest, Message: "leave_type_id is required"}
 	}
+	req.StartDate = strings.TrimSpace(req.StartDate)
+	req.EndDate = strings.TrimSpace(req.EndDate)
 	if req.StartDate == "" || req.EndDate == "" {
 		return &errorModels.ServerError{HTTPCode: http.StatusBadRequest, Code: http.StatusBadRequest, Message: "start_date and end_date are required"}
+	}
+	if _, err := time.Parse("2006-01-02", req.StartDate); err != nil {
+		return &errorModels.ServerError{HTTPCode: http.StatusBadRequest, Code: http.StatusBadRequest, Message: "start_date must be in YYYY-MM-DD format"}
+	}
+	if _, err := time.Parse("2006-01-02", req.EndDate); err != nil {
+		return &errorModels.ServerError{HTTPCode: http.StatusBadRequest, Code: http.StatusBadRequest, Message: "end_date must be in YYYY-MM-DD format"}
 	}
 	if req.TotalDays <= 0 {
 		return &errorModels.ServerError{HTTPCode: http.StatusBadRequest, Code: http.StatusBadRequest, Message: "total_days must be greater than 0"}

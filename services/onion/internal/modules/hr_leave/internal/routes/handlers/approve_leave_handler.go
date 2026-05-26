@@ -4,6 +4,7 @@ import (
 	"context"
 	"errors"
 	"net/http"
+	"strings"
 
 	"github.com/voxire/onion/internal/modules/hr_leave/internal/application"
 	"github.com/voxire/onion/internal/modules/hr_leave/internal/domain"
@@ -29,6 +30,9 @@ type ApproveLeaveResponse struct {
 func (h *ApproveLeaveHandler) Validate(_ context.Context, req *ApproveLeaveRequest) *errorModels.ServerError {
 	if req.RequestID == 0 {
 		return &errorModels.ServerError{HTTPCode: http.StatusBadRequest, Code: http.StatusBadRequest, Message: "request_id is required"}
+	}
+	if !req.Approved && strings.TrimSpace(req.RejectionReason) == "" {
+		return &errorModels.ServerError{HTTPCode: http.StatusBadRequest, Code: http.StatusBadRequest, Message: "rejection_reason is required when rejecting a leave request"}
 	}
 	return nil
 }
