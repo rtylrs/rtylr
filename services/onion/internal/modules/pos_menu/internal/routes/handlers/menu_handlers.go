@@ -3,6 +3,7 @@ package handlers
 import (
 	"context"
 	"net/http"
+	"strings"
 
 	"github.com/voxire/onion/internal/modules/pos_menu/internal/application"
 	"github.com/voxire/onion/internal/modules/pos_menu/internal/domain"
@@ -71,8 +72,12 @@ type CreateMenuItemResponse struct {
 }
 
 func (h *CreateMenuItemHandler) Validate(_ context.Context, req *CreateMenuItemRequest) *errorModels.ServerError {
+	req.Name = strings.TrimSpace(req.Name)
 	if req.Name == "" {
 		return &errorModels.ServerError{Code: http.StatusBadRequest, Message: "Name is required"}
+	}
+	if req.SalePrice < 0 {
+		return &errorModels.ServerError{Code: http.StatusBadRequest, Message: "Sale price must be zero or greater"}
 	}
 	return nil
 }
