@@ -127,6 +127,7 @@ type UpdateScheduledReportRequest struct {
 type UpdateScheduledReportResponse = application.ScheduledReportPayload
 
 func (h *UpdateScheduledReportHandler) Validate(_ context.Context, req *UpdateScheduledReportRequest) *errorModels.ServerError {
+	req.TemplateID = strings.TrimSpace(req.TemplateID)
 	if req.TemplateID == "" {
 		return &errorModels.ServerError{
 			HTTPCode: http.StatusBadRequest,
@@ -134,6 +135,7 @@ func (h *UpdateScheduledReportHandler) Validate(_ context.Context, req *UpdateSc
 			Message:  "template_id is required",
 		}
 	}
+	req.Cadence = strings.TrimSpace(req.Cadence)
 	if req.Cadence == "" {
 		return &errorModels.ServerError{
 			HTTPCode: http.StatusBadRequest,
@@ -141,6 +143,7 @@ func (h *UpdateScheduledReportHandler) Validate(_ context.Context, req *UpdateSc
 			Message:  "cadence is required",
 		}
 	}
+	req.Recipient = strings.TrimSpace(req.Recipient)
 	if req.Recipient == "" {
 		return &errorModels.ServerError{
 			HTTPCode: http.StatusBadRequest,
