@@ -3,6 +3,7 @@ package handlers
 import (
 	"context"
 	"net/http"
+	"strings"
 
 	"github.com/voxire/onion/internal/modules/warehouses/internal/application"
 	"github.com/voxire/onion/internal/modules/warehouses/internal/domain"
@@ -112,7 +113,7 @@ type CreateWarehouseResponse struct {
 }
 
 func (h *CreateWarehouseHandler) Validate(_ context.Context, req *CreateWarehouseRequest) *errorModels.ServerError {
-	if req.Name == "" {
+	if strings.TrimSpace(req.Name) == "" {
 		return &errorModels.ServerError{
 			Code:     http.StatusBadRequest,
 			HTTPCode: http.StatusBadRequest,
@@ -191,7 +192,7 @@ func (h *UpdateWarehouseHandler) Validate(_ context.Context, req *UpdateWarehous
 		}
 	}
 
-	if req.Name == "" {
+	if strings.TrimSpace(req.Name) == "" {
 		return &errorModels.ServerError{
 			Code:     http.StatusBadRequest,
 			HTTPCode: http.StatusBadRequest,
