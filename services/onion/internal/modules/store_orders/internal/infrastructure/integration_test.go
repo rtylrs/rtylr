@@ -1,0 +1,222 @@
+package infrastructure_test
+
+import (
+	"context"
+	"testing"
+
+	"github.com/voxire/onion/internal/modules/store_orders/internal/domain"
+	"github.com/voxire/onion/internal/modules/store_orders/internal/infrastructure"
+	"github.com/voxire/onion/internal/testutil"
+)
+
+func TestStoreOrders_List_NoError(t *testing.T) {
+	db := testutil.OpenDB(t)
+	repo := infrastructure.NewRepository(db)
+	_, err := repo.List(context.Background(), testutil.OwnerID)
+	if err != nil {
+		t.Fatalf("List: %v", err)
+	}
+}
+
+func TestStoreOrders_List_OwnerScoped(t *testing.T) {
+	db := testutil.OpenDB(t)
+	repo := infrastructure.NewRepository(db)
+	items, err := repo.List(context.Background(), testutil.OwnerID)
+	if err != nil {
+		t.Fatalf("List: %v", err)
+	}
+	for _, o := range items {
+		if o.OwnerID != testutil.OwnerID {
+			t.Errorf("expected owner_id %d, got %d", testutil.OwnerID, o.OwnerID)
+		}
+	}
+}
+
+func TestStoreOrders_Create_ReturnsPositiveID(t *testing.T) {
+	db := testutil.OpenDB(t)
+	repo := infrastructure.NewRepository(db)
+	id, err := repo.Create(context.Background(), testutil.OwnerID, domain.StoreOrderInput{
+		CustomerEmail: "customer@example.com",
+		CustomerName:  "Test Customer",
+		Status:        "pending",
+		Subtotal:      99.0,
+		Tax:           9.9,
+		ShippingCost:  5.0,
+		Total:         113.9,
+	})
+	if err != nil {
+		t.Fatalf("Create: %v", err)
+	}
+	if id <= 0 {
+		t.Fatalf("expected positive ID, got %d", id)
+	}
+}
+
+func TestStoreOrders_Create_WithItems(t *testing.T) {
+	db := testutil.OpenDB(t)
+	repo := infrastructure.NewRepository(db)
+	input := domain.StoreOrderInput{
+		CustomerEmail: "items@example.com",
+		Status:        "pending",
+		Subtotal:      50.0,
+		Tax:           5.0,
+		Total:         55.0,
+		Items: []domain.OrderItemInput{
+			{Name: "Widget", Quantity: 2, Price: 25.0, Total: 50.0},
+		},
+	}
+	id, err := repo.Create(context.Background(), testutil.OwnerID, input)
+	if err != nil {
+		t.Fatalf("Create with items: %v", err)
+	}
+	if id <= 0 {
+		t.Errorf("expected positive ID, got %d", id)
+	}
+}
+
+func TestStoreOrders_GetDetail_ReturnsOrder(t *testing.T) {
+	db := testutil.OpenDB(t)
+	repo := infrastructure.NewRepository(db)
+	id, err := repo.Create(context.Background(), testutil.OwnerID, domain.StoreOrderInput{
+		CustomerName: "Detail Test",
+		Status:       "pending",
+		Subtotal:     10.0,
+		Tax:          1.0,
+		Total:        11.0,
+	})
+	if err != nil {
+		t.Fatalf("Create: %v", err)
+	}
+
+	detail, err := repo.GetDetail(context.Background(), testutil.OwnerID, id)
+	if err != nil {
+		t.Fatalf("GetDetail: %v", err)
+	}
+	if detail.Order.ID != id {
+		t.Errorf("expected order ID %d, got %d", id, detail.Order.ID)
+	}
+}
+
+func TestStoreOrders_GetDetail_IncludesItems(t *testing.T) {
+	db := testutil.OpenDB(t)
+	repo := infrastructure.NewRepository(db)
+	id, err := repo.Create(context.Background(), testutil.OwnerID, domain.StoreOrderInput{
+		Status:   "pending",
+		Subtotal: 30.0,
+		Total:    30.0,
+		Items: []domain.OrderItemInput{
+			{Name: "Gadget", Quantity: 1, Price: 30.0, Total: 30.0},
+		},
+	})
+	if err != nil {
+		t.Fatalf("Create: %v", err)
+	}
+
+	detail, err := repo.GetDetail(context.Background(), testutil.OwnerID, id)
+	if err != nil {
+		t.Fatalf("GetDetail: %v", err)
+	}
+	if len(detail.Items) != 1 {
+		t.Errorf("expected 1 item, got %d", len(detail.Items))
+	}
+	if detail.Items[0].Name != "Gadget" {
+		t.Errorf("expected item name Gadget, got %s", detail.Items[0].Name)
+	}
+}
+
+func TestStoreOrders_Update_ChangesStatus(t *testing.T) {
+	db := testutil.OpenDB(t)
+	repo := infrastructure.NewRepository(db)
+	id, err := repo.Create(context.Background(), testutil.OwnerID, domain.StoreOrderInput{
+		Status: "pending", Subtotal: 5.0, Total: 5.0,
+	})
+	if err != nil {
+		t.Fatalf("Create: %v", err)
+	}
+
+	if err := repo.Update(context.Background(), testutil.OwnerID, id, domain.StoreOrderInput{
+		Status: "shipped", Subtotal: 5.0, Total: 5.0,
+	}); err != nil {
+		t.Fatalf("Update: %v", err)
+	}
+
+	detail, err := repo.GetDetail(context.Background(), testutil.OwnerID, id)
+	if err != nil {
+		t.Fatalf("GetDetail after Update: %v", err)
+	}
+	if detail.Order.Status != "shipped" {
+		t.Errorf("expected status shipped, got %s", detail.Order.Status)
+	}
+}
+
+func TestStoreOrders_List_UnknownOwner_Empty(t *testing.T) {
+	db := testutil.OpenDB(t)
+	repo := infrastructure.NewRepository(db)
+	items, err := repo.List(context.Background(), 9999999)
+	if err != nil {
+		t.Fatalf("List: %v", err)
+	}
+	if len(items) != 0 {
+		t.Errorf("expected 0 for unknown owner, got %d", len(items))
+	}
+}
+
+func TestStoreOrders_Create_AppearsInList(t *testing.T) {
+	db := testutil.OpenDB(t)
+	repo := infrastructure.NewRepository(db)
+	id, err := repo.Create(context.Background(), testutil.OwnerID, domain.StoreOrderInput{
+		CustomerEmail: "appears@example.com",
+		Status:        "pending",
+		Total:         15.0,
+	})
+	if err != nil {
+		t.Fatalf("Create: %v", err)
+	}
+
+	items, err := repo.List(context.Background(), testutil.OwnerID)
+	if err != nil {
+		t.Fatalf("List: %v", err)
+	}
+	found := false
+	for _, o := range items {
+		if o.ID == id {
+			found = true
+		}
+	}
+	if !found {
+		t.Errorf("created order id=%d not found in list", id)
+	}
+}
+
+func TestStoreOrders_GetDetail_CrossOwner_Fails(t *testing.T) {
+	db := testutil.OpenDB(t)
+	repo := infrastructure.NewRepository(db)
+	id, err := repo.Create(context.Background(), testutil.OwnerID, domain.StoreOrderInput{
+		Status: "pending", Total: 5.0,
+	})
+	if err != nil {
+		t.Fatalf("Create: %v", err)
+	}
+
+	_, err = repo.GetDetail(context.Background(), 9999999, id)
+	if err == nil {
+		t.Error("expected error when fetching order with wrong owner")
+	}
+}
+
+func TestStoreOrders_Create_WithShippingAddress(t *testing.T) {
+	db := testutil.OpenDB(t)
+	repo := infrastructure.NewRepository(db)
+	id, err := repo.Create(context.Background(), testutil.OwnerID, domain.StoreOrderInput{
+		Status:          "pending",
+		Subtotal:        25.0,
+		Total:           25.0,
+		ShippingAddress: `{"street":"123 Main St","city":"Testville"}`,
+	})
+	if err != nil {
+		t.Fatalf("Create with shipping address: %v", err)
+	}
+	if id <= 0 {
+		t.Errorf("expected positive ID, got %d", id)
+	}
+}
