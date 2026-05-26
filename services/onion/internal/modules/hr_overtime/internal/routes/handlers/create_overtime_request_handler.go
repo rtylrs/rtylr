@@ -3,6 +3,7 @@ package handlers
 import (
 	"context"
 	"net/http"
+	"time"
 
 	"github.com/voxire/onion/internal/modules/hr_overtime/internal/application"
 	"github.com/voxire/onion/internal/modules/hr_overtime/internal/domain"
@@ -33,6 +34,9 @@ func (h *CreateOvertimeRequestHandler) Validate(_ context.Context, req *CreateOv
 	}
 	if req.Date == "" {
 		return &errorModels.ServerError{HTTPCode: http.StatusBadRequest, Code: http.StatusBadRequest, Message: "date is required"}
+	}
+	if _, err := time.Parse("2006-01-02", req.Date); err != nil {
+		return &errorModels.ServerError{HTTPCode: http.StatusBadRequest, Code: http.StatusBadRequest, Message: "date must be in YYYY-MM-DD format"}
 	}
 	if req.PlannedExtraMinutes <= 0 {
 		return &errorModels.ServerError{HTTPCode: http.StatusBadRequest, Code: http.StatusBadRequest, Message: "planned_extra_minutes must be greater than 0"}
