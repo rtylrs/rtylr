@@ -3,6 +3,7 @@ package handlers
 import (
 	"context"
 	"net/http"
+	"strings"
 
 	"github.com/voxire/onion/internal/modules/store_shipping/internal/application"
 	"github.com/voxire/onion/internal/modules/store_shipping/internal/domain"
@@ -51,8 +52,11 @@ type CreateResponse struct {
 }
 
 func (h *CreateHandler) Validate(_ context.Context, req *CreateRequest) *errorModels.ServerError {
-	if req.Name == "" {
+	if strings.TrimSpace(req.Name) == "" {
 		return &errorModels.ServerError{Code: http.StatusBadRequest, HTTPCode: http.StatusBadRequest, Message: "Name is required"}
+	}
+	if req.Price < 0 {
+		return &errorModels.ServerError{Code: http.StatusBadRequest, HTTPCode: http.StatusBadRequest, Message: "Price cannot be negative"}
 	}
 	return nil
 }
