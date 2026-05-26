@@ -1,0 +1,104 @@
+package handlers
+
+import (
+	"context"
+	"net/http"
+	"testing"
+)
+
+// UploadDocumentHandler.Validate is the only pure validation entry point in
+// this package; all other handlers embed the auth check inside Serve and
+// therefore require a running service.  These tests cover all documented
+// validation rules without touching the database.
+
+func TestUploadDocumentHandler_Validate_MissingEmployeeID(t *testing.T) {
+	h := &UploadDocumentHandler{}
+	se := h.Validate(context.Background(), &UploadDocumentRequest{
+		Title:       "Passport",
+		StorageMode: "stored",
+	})
+	if se == nil {
+		t.Fatal("expected validation error, got nil")
+	}
+	if se.HTTPCode != http.StatusBadRequest {
+		t.Errorf("expected 400, got %d", se.HTTPCode)
+	}
+}
+
+func TestUploadDocumentHandler_Validate_MissingTitle(t *testing.T) {
+	h := &UploadDocumentHandler{}
+	se := h.Validate(context.Background(), &UploadDocumentRequest{
+		EmployeeID:  1,
+		StorageMode: "stored",
+	})
+	if se == nil {
+		t.Fatal("expected validation error for missing title")
+	}
+	if se.HTTPCode != http.StatusBadRequest {
+		t.Errorf("expected 400, got %d", se.HTTPCode)
+	}
+}
+
+func TestUploadDocumentHandler_Validate_MissingStorageMode(t *testing.T) {
+	h := &UploadDocumentHandler{}
+	se := h.Validate(context.Background(), &UploadDocumentRequest{
+		EmployeeID: 1,
+		Title:      "Contract",
+	})
+	if se == nil {
+		t.Fatal("expected validation error for missing storage_mode")
+	}
+	if se.HTTPCode != http.StatusBadRequest {
+		t.Errorf("expected 400, got %d", se.HTTPCode)
+	}
+}
+
+func TestUploadDocumentHandler_Validate_AllFieldsPresent_ReturnsNil(t *testing.T) {
+	h := &UploadDocumentHandler{}
+	se := h.Validate(context.Background(), &UploadDocumentRequest{
+		EmployeeID:  1,
+		Title:       "Contract",
+		StorageMode: "stored",
+		FileURL:     "https://storage.example.com/file.pdf",
+	})
+	if se != nil {
+		t.Errorf("expected no validation error, got %v", se)
+	}
+}
+
+func TestUploadDocumentHandler_Validate_WhitespaceTitle_Rejected(t *testing.T) {
+	h := &UploadDocumentHandler{}
+	se := h.Validate(context.Background(), &UploadDocumentRequest{
+		EmployeeID:  1,
+		Title:       "   ",
+		StorageMode: "stored",
+	})
+	if se == nil {
+		t.Fatal("expected validation error for whitespace-only title")
+	}
+}
+
+func TestUploadDocumentHandler_Validate_WhitespaceStorageMode_Rejected(t *testing.T) {
+	h := &UploadDocumentHandler{}
+	se := h.Validate(context.Background(), &UploadDocumentRequest{
+		EmployeeID:  1,
+		Title:       "Passport",
+		StorageMode: "  ",
+	})
+	if se == nil {
+		t.Fatal("expected validation error for whitespace-only storage_mode")
+	}
+}
+
+func TestUploadDocumentHandler_Validate_LinkedMode_ReturnsNil(t *testing.T) {
+	h := &UploadDocumentHandler{}
+	se := h.Validate(context.Background(), &UploadDocumentRequest{
+		EmployeeID:  5,
+		Title:       "External Link",
+		StorageMode: "linked",
+		ExternalURL: "https://drive.google.com/doc/123",
+	})
+	if se != nil {
+		t.Errorf("expected nil for valid linked request, got %v", se)
+	}
+}
