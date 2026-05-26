@@ -3,11 +3,14 @@ package handlers
 import (
 	"context"
 	"net/http"
+	"regexp"
 
 	"github.com/voxire/onion/internal/modules/pos_day_summary/internal/application"
 	authPkg "github.com/voxire/onion/internal/platform/auth"
 	errorModels "github.com/voxire/onion/internal/platform/errors"
 )
+
+var reDate = regexp.MustCompile(`^\d{4}-\d{2}-\d{2}$`)
 
 func DaySummaryRoutes() []string { return []string{"/pos/day-summary"} }
 
@@ -24,6 +27,16 @@ type DaySummaryResponse struct {
 	TotalRefunds     float64            `json:"total_refunds"`
 	TotalOrders      int                `json:"total_orders"`
 	PaymentBreakdown map[string]float64 `json:"payment_breakdown"`
+}
+
+func (h *DaySummaryHandler) Validate(_ context.Context, req *DaySummaryRequest) *errorModels.ServerError {
+	if req.Date == "" {
+		return &errorModels.ServerError{Code: http.StatusBadRequest, Message: "date is required"}
+	}
+	if !reDate.MatchString(req.Date) {
+		return &errorModels.ServerError{Code: http.StatusBadRequest, Message: "date must be in YYYY-MM-DD format"}
+	}
+	return nil
 }
 
 func (h *DaySummaryHandler) Serve(ctx context.Context, req *DaySummaryRequest) (DaySummaryResponse, *errorModels.ServerError) {
