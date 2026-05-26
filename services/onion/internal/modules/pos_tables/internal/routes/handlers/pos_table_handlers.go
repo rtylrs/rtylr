@@ -5,6 +5,7 @@ import (
 	"errors"
 	"net/http"
 	"strconv"
+	"strings"
 
 	"github.com/go-chi/chi/v5"
 
@@ -75,7 +76,7 @@ type CreateTableResponse struct {
 }
 
 func (h *CreateTableHandler) Validate(_ context.Context, req *CreateTableRequest) *errorModels.ServerError {
-	if req.Label == "" {
+	if strings.TrimSpace(req.Label) == "" {
 		return &errorModels.ServerError{Code: http.StatusBadRequest, Message: "Label is required"}
 	}
 	return nil
@@ -116,7 +117,7 @@ type UpdateTableResponse struct {
 }
 
 func (h *UpdateTableHandler) Validate(_ context.Context, req *UpdateTableRequest) *errorModels.ServerError {
-	if req.Label == "" {
+	if strings.TrimSpace(req.Label) == "" {
 		return &errorModels.ServerError{Code: http.StatusBadRequest, Message: "Label is required"}
 	}
 	return nil
