@@ -3,6 +3,7 @@ package handlers
 import (
 	"context"
 	"net/http"
+	"strings"
 
 	"github.com/voxire/onion/internal/modules/booking_reminders/internal/application"
 	"github.com/voxire/onion/internal/modules/booking_reminders/internal/domain"
@@ -73,6 +74,14 @@ type CreateResponse struct {
 func (h *CreateHandler) Validate(_ context.Context, req *CreateRequest) *errorModels.ServerError {
 	if req.AppointmentID == 0 {
 		return &errorModels.ServerError{Code: http.StatusBadRequest, HTTPCode: http.StatusBadRequest, Message: "Appointment ID is required"}
+	}
+	req.Type = strings.TrimSpace(req.Type)
+	if req.Type == "" {
+		return &errorModels.ServerError{Code: http.StatusBadRequest, HTTPCode: http.StatusBadRequest, Message: "Type is required"}
+	}
+	req.ScheduledAt = strings.TrimSpace(req.ScheduledAt)
+	if req.ScheduledAt == "" {
+		return &errorModels.ServerError{Code: http.StatusBadRequest, HTTPCode: http.StatusBadRequest, Message: "scheduled_at is required"}
 	}
 	return nil
 }
