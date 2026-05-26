@@ -6,6 +6,7 @@ import (
 	"net/http"
 	"strconv"
 	"strings"
+	"time"
 
 	"github.com/go-chi/chi/v5"
 
@@ -48,6 +49,21 @@ type ListReceiptsRequest struct {
 
 type ListReceiptsResponse struct {
 	Receipts []ReceiptPayload `json:"receipts"`
+}
+
+func (h *ListReceiptsHandler) Validate(_ context.Context, req *ListReceiptsRequest) *errorModels.ServerError {
+	const dateLayout = "2006-01-02"
+	if req.From != "" {
+		if _, err := time.Parse(dateLayout, req.From); err != nil {
+			return &errorModels.ServerError{Code: http.StatusBadRequest, Message: "from must be a valid date in YYYY-MM-DD format"}
+		}
+	}
+	if req.To != "" {
+		if _, err := time.Parse(dateLayout, req.To); err != nil {
+			return &errorModels.ServerError{Code: http.StatusBadRequest, Message: "to must be a valid date in YYYY-MM-DD format"}
+		}
+	}
+	return nil
 }
 
 // --- Email Receipt ---
