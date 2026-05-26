@@ -5,6 +5,7 @@ import (
 	"errors"
 	"net/http"
 	"strconv"
+	"strings"
 	"time"
 
 	"github.com/go-chi/chi/v5"
@@ -107,6 +108,7 @@ type CreateCycleResponse struct {
 }
 
 func (h *CreateCycleHandler) Validate(_ context.Context, req *CreateCycleRequest) *errorModels.ServerError {
+	req.Name = strings.TrimSpace(req.Name)
 	if req.Name == "" {
 		return &errorModels.ServerError{Code: http.StatusBadRequest, Message: "Name is required"}
 	}
@@ -171,6 +173,7 @@ type UpdateCycleResponse struct {
 }
 
 func (h *UpdateCycleHandler) Validate(_ context.Context, req *UpdateCycleRequest) *errorModels.ServerError {
+	req.Name = strings.TrimSpace(req.Name)
 	if req.Name == "" {
 		return &errorModels.ServerError{Code: http.StatusBadRequest, Message: "Name is required"}
 	}
