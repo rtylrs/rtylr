@@ -72,6 +72,9 @@ func (h *CreateContractHandler) Validate(_ context.Context, req *CreateContractR
 	if req.LeadID == 0 {
 		return &errorModels.ServerError{HTTPCode: http.StatusBadRequest, Code: http.StatusBadRequest, Message: "lead_id is required"}
 	}
+	if req.MRR < 0 {
+		return &errorModels.ServerError{HTTPCode: http.StatusBadRequest, Code: http.StatusBadRequest, Message: "mrr must not be negative"}
+	}
 	return nil
 }
 
