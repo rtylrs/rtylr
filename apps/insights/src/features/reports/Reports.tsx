@@ -1,5 +1,6 @@
 import React from 'react';
 import { motion } from 'motion/react';
+import { toast } from 'sonner';
 import { FileText, Download, Loader2 } from 'lucide-react';
 import { useTranslation } from 'react-i18next';
 import {
@@ -56,7 +57,15 @@ const Reports: React.FC = (): React.JSX.Element => {
           </a>
           <button
             type="button"
-            onClick={() => generateRevenue.mutate({})}
+            onClick={() =>
+              generateRevenue.mutate(
+                {},
+                {
+                  onSuccess: () => toast.success('Report generated'),
+                  onError: () => toast.error('Failed to generate report'),
+                }
+              )
+            }
             disabled={generateRevenue.isPending}
             className="flex items-center gap-1 px-3 py-1.5 rounded-md text-xs font-medium"
             style={{ background: 'var(--accent)', color: 'var(--accent-fg)' }}
