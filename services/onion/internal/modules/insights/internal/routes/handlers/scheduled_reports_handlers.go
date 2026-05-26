@@ -5,6 +5,7 @@ import (
 	"errors"
 	"net/http"
 	"strconv"
+	"strings"
 
 	"github.com/go-chi/chi/v5"
 
@@ -58,6 +59,7 @@ type CreateScheduledReportRequest struct {
 type CreateScheduledReportResponse = application.ScheduledReportPayload
 
 func (h *CreateScheduledReportHandler) Validate(_ context.Context, req *CreateScheduledReportRequest) *errorModels.ServerError {
+	req.TemplateID = strings.TrimSpace(req.TemplateID)
 	if req.TemplateID == "" {
 		return &errorModels.ServerError{
 			HTTPCode: http.StatusBadRequest,
@@ -65,6 +67,7 @@ func (h *CreateScheduledReportHandler) Validate(_ context.Context, req *CreateSc
 			Message:  "template_id is required",
 		}
 	}
+	req.Cadence = strings.TrimSpace(req.Cadence)
 	if req.Cadence == "" {
 		return &errorModels.ServerError{
 			HTTPCode: http.StatusBadRequest,
@@ -72,6 +75,7 @@ func (h *CreateScheduledReportHandler) Validate(_ context.Context, req *CreateSc
 			Message:  "cadence is required",
 		}
 	}
+	req.Recipient = strings.TrimSpace(req.Recipient)
 	if req.Recipient == "" {
 		return &errorModels.ServerError{
 			HTTPCode: http.StatusBadRequest,
