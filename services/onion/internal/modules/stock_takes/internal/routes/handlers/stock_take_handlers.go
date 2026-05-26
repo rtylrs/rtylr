@@ -143,7 +143,23 @@ type CreateStockTakeResponse struct {
 	Message     string `json:"message"`
 }
 
-func (h *CreateStockTakeHandler) Validate(_ context.Context, _ *CreateStockTakeRequest) *errorModels.ServerError {
+func (h *CreateStockTakeHandler) Validate(_ context.Context, req *CreateStockTakeRequest) *errorModels.ServerError {
+	if req.WarehouseID == 0 {
+		return &errorModels.ServerError{
+			Code:     http.StatusBadRequest,
+			HTTPCode: http.StatusBadRequest,
+			Message:  "Warehouse ID is required",
+		}
+	}
+
+	if len(req.Items) == 0 {
+		return &errorModels.ServerError{
+			Code:     http.StatusBadRequest,
+			HTTPCode: http.StatusBadRequest,
+			Message:  "At least one item is required",
+		}
+	}
+
 	return nil
 }
 
