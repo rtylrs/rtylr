@@ -228,6 +228,16 @@ type UpdateLoyaltyConfigResponse struct {
 	Message string `json:"message"`
 }
 
+func (h *UpdateLoyaltyConfigHandler) Validate(_ context.Context, req *UpdateLoyaltyConfigRequest) *errorModels.ServerError {
+	if req.PointsPerDollar <= 0 {
+		return &errorModels.ServerError{Code: http.StatusBadRequest, Message: "points_per_dollar must be greater than zero"}
+	}
+	if req.PointsValue <= 0 {
+		return &errorModels.ServerError{Code: http.StatusBadRequest, Message: "points_value must be greater than zero"}
+	}
+	return nil
+}
+
 func (h *UpdateLoyaltyConfigHandler) Serve(ctx context.Context, req *UpdateLoyaltyConfigRequest) (UpdateLoyaltyConfigResponse, *errorModels.ServerError) {
 	device := authPkg.DeviceCtx(ctx)
 	if device.User == nil {

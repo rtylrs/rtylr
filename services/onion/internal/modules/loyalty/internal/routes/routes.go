@@ -31,7 +31,7 @@ func RegisterRoutes(ctx context.Context, router *chi.Mux, svc *application.Servi
 		&handlers.GetLoyaltyConfigHandler{Service: svc},
 	)
 
-	http.RegisterPUT[handlers.UpdateLoyaltyConfigRequest, handlers.UpdateLoyaltyConfigResponse](
+	http.RegisterPUTWithValidation[handlers.UpdateLoyaltyConfigRequest, handlers.UpdateLoyaltyConfigResponse](
 		ctx, router, handlers.LoyaltyConfigUpdateRoutes(),
 		&handlers.UpdateLoyaltyConfigHandler{Service: svc},
 	)
