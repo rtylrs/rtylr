@@ -5,6 +5,7 @@ import (
 	"errors"
 	"net/http"
 	"strconv"
+	"strings"
 
 	"github.com/go-chi/chi/v5"
 
@@ -88,8 +89,12 @@ type CreateComboResponse struct {
 }
 
 func (h *CreateComboHandler) Validate(_ context.Context, req *CreateComboRequest) *errorModels.ServerError {
+	req.Name = strings.TrimSpace(req.Name)
 	if req.Name == "" {
 		return &errorModels.ServerError{Code: http.StatusBadRequest, Message: "Name is required"}
+	}
+	if req.Price < 0 {
+		return &errorModels.ServerError{Code: http.StatusBadRequest, Message: "Price must be zero or greater"}
 	}
 	return nil
 }
@@ -131,8 +136,12 @@ type UpdateComboResponse struct {
 }
 
 func (h *UpdateComboHandler) Validate(_ context.Context, req *UpdateComboRequest) *errorModels.ServerError {
+	req.Name = strings.TrimSpace(req.Name)
 	if req.Name == "" {
 		return &errorModels.ServerError{Code: http.StatusBadRequest, Message: "Name is required"}
+	}
+	if req.Price < 0 {
+		return &errorModels.ServerError{Code: http.StatusBadRequest, Message: "Price must be zero or greater"}
 	}
 	return nil
 }
