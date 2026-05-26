@@ -631,6 +631,7 @@ func setupRoutes(ctx context.Context, r *chi.Mux) {
 
 	accessPolicy := http.NewRouteAccessPolicy()
 	accessPolicy.RegisterAnonymousRoutes("/health")
+	accessPolicy.RegisterAnonymousRoutes("/version")
 	accessPolicy.RegisterAnonymousRoutes("/flow/ws")
 
 	provisionerResolver := authPkg.NewStaticPlatformProvisionerResolver(
@@ -668,6 +669,7 @@ func setupRoutes(ctx context.Context, r *chi.Mux) {
 
 	http.RegisterCacheRoutes(ctx, r)
 	http.RegisterStatusRoutes(ctx, r)
+	http.RegisterVersionRoutes(r)
 
 	http.AutoRegisterRoutes(ctx, modules, r)
 }
