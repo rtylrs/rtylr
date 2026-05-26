@@ -5,6 +5,7 @@ import (
 	"errors"
 	"net/http"
 	"strconv"
+	"strings"
 
 	"github.com/go-chi/chi/v5"
 
@@ -159,7 +160,7 @@ type UpdateContractResponse struct {
 }
 
 func (h *UpdateContractHandler) Validate(_ context.Context, req *UpdateContractRequest) *errorModels.ServerError {
-	if req.Plan == "" {
+	if strings.TrimSpace(req.Plan) == "" {
 		return &errorModels.ServerError{HTTPCode: http.StatusBadRequest, Code: http.StatusBadRequest, Message: "plan is required"}
 	}
 	return nil
