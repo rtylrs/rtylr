@@ -30,7 +30,10 @@ type CreateResponse struct {
 	Message string `json:"message"`
 }
 
-func (h *CreateHandler) Validate(_ context.Context, _ *CreateRequest) *errorModels.ServerError {
+func (h *CreateHandler) Validate(_ context.Context, req *CreateRequest) *errorModels.ServerError {
+	if req.SessionID == "" {
+		return &errorModels.ServerError{Code: http.StatusBadRequest, HTTPCode: http.StatusBadRequest, Message: "session_id is required"}
+	}
 	return nil
 }
 
