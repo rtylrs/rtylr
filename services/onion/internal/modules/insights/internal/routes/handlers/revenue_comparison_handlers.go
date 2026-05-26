@@ -3,6 +3,7 @@ package handlers
 import (
 	"context"
 	"net/http"
+	"strings"
 
 	"github.com/voxire/onion/internal/modules/insights/internal/application"
 	authPkg "github.com/voxire/onion/internal/platform/auth"
@@ -26,6 +27,12 @@ type GetRevenueComparisonResponse struct {
 	ThisPeriod int64   `json:"this_period"`
 	LastPeriod int64   `json:"last_period"`
 	DeltaPct   float64 `json:"delta_pct"`
+}
+
+func (h *GetRevenueComparisonHandler) Validate(_ context.Context, req *GetRevenueComparisonRequest) *errorModels.ServerError {
+	req.From = strings.TrimSpace(req.From)
+	req.To = strings.TrimSpace(req.To)
+	return nil
 }
 
 func (h *GetRevenueComparisonHandler) Serve(ctx context.Context, req *GetRevenueComparisonRequest) (GetRevenueComparisonResponse, *errorModels.ServerError) {
