@@ -5,6 +5,7 @@ import (
 	"errors"
 	"net/http"
 	"strconv"
+	"strings"
 
 	"github.com/go-chi/chi/v5"
 
@@ -33,7 +34,7 @@ type AddItemToTemplateResponse struct {
 }
 
 func (h *AddItemToTemplateHandler) Validate(_ context.Context, req *AddItemToTemplateRequest) *errorModels.ServerError {
-	if req.Title == "" {
+	if strings.TrimSpace(req.Title) == "" {
 		return &errorModels.ServerError{HTTPCode: http.StatusBadRequest, Code: http.StatusBadRequest, Message: "title is required"}
 	}
 	return nil
