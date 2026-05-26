@@ -183,9 +183,10 @@ const GeneralTab: React.FC = () => {
             <input
               type="number"
               value={settings.lateFeeGraceDays}
-              onChange={(e) =>
-                settings.setSetting('lateFeeGraceDays', parseInt(e.target.value) || 0)
-              }
+              onChange={(e) => {
+                const v = parseInt(e.target.value, 10);
+                if (!isNaN(v) && v >= 0) settings.setSetting('lateFeeGraceDays', v);
+              }}
               style={inputStyle}
             />
           </Field>
