@@ -29,7 +29,7 @@ func RegisterRoutes(ctx context.Context, router *chi.Mux, service *application.S
 	serverHttp.RegisterPOSTWithValidation[handlers.TriggerPayrollRunRequest, handlers.TriggerPayrollRunResponse](
 		ctx, router, handlers.TriggerPayrollRunRoutes(), &handlers.TriggerPayrollRunHandler{Service: service},
 	)
-	serverHttp.RegisterPOST[handlers.ApprovePayrollRunRequest, handlers.ApprovePayrollRunResponse](
+	serverHttp.RegisterPOSTWithValidation[handlers.ApprovePayrollRunRequest, handlers.ApprovePayrollRunResponse](
 		ctx, router, handlers.ApprovePayrollRunRoutes(), &handlers.ApprovePayrollRunHandler{Service: service},
 	)
 	serverHttp.RegisterPOST[handlers.ExportPayrollRequest, handlers.ExportPayrollResponse](
