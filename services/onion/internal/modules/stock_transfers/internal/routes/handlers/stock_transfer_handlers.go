@@ -240,6 +240,20 @@ func (h *UpdateStockTransferStatusHandler) Validate(_ context.Context, req *Upda
 		}
 	}
 
+	validStatuses := map[string]struct{}{
+		string(domain.StockTransferStatusDraft):     {},
+		string(domain.StockTransferStatusInTransit): {},
+		string(domain.StockTransferStatusReceived):  {},
+		string(domain.StockTransferStatusCancelled): {},
+	}
+	if _, ok := validStatuses[req.Status]; !ok {
+		return &errorModels.ServerError{
+			Code:     http.StatusBadRequest,
+			HTTPCode: http.StatusBadRequest,
+			Message:  "Invalid status. Must be one of: draft, in_transit, received, cancelled",
+		}
+	}
+
 	return nil
 }
 
