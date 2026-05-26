@@ -3,6 +3,7 @@ package handlers
 import (
 	"context"
 	"net/http"
+	"strings"
 
 	"github.com/voxire/onion/internal/modules/hr_shifts/internal/application"
 	"github.com/voxire/onion/internal/modules/hr_shifts/internal/domain"
@@ -32,7 +33,7 @@ func (h *CreateShiftHandler) Validate(_ context.Context, req *CreateShiftRequest
 	if req.LocationID == 0 {
 		return &errorModels.ServerError{HTTPCode: http.StatusBadRequest, Code: http.StatusBadRequest, Message: "location_id is required"}
 	}
-	if req.Name == "" {
+	if strings.TrimSpace(req.Name) == "" {
 		return &errorModels.ServerError{HTTPCode: http.StatusBadRequest, Code: http.StatusBadRequest, Message: "name is required"}
 	}
 	if req.StartTime == "" || req.EndTime == "" {
