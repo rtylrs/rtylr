@@ -78,7 +78,11 @@ func (r *Repository) Create(ctx context.Context, ownerID int64, input domain.Bil
 		currency = "USD"
 	}
 
-	dueDate, _ := time.Parse("2006-01-02", input.DueDate)
+	dueDate, err := time.Parse("2006-01-02", input.DueDate)
+	if err != nil {
+		logger.Ctx(ctx).Error("Failed to parse due_date", logger.Error(err))
+		return 0, err
+	}
 
 	res, err := r.queries.CreateBill(ctx, sqlc.CreateBillParams{
 		OwnerID:     ownerID,
@@ -98,9 +102,13 @@ func (r *Repository) Create(ctx context.Context, ownerID int64, input domain.Bil
 }
 
 func (r *Repository) Update(ctx context.Context, ownerID, id int64, input domain.BillInput) error {
-	dueDate, _ := time.Parse("2006-01-02", input.DueDate)
+	dueDate, err := time.Parse("2006-01-02", input.DueDate)
+	if err != nil && input.DueDate != "" {
+		logger.Ctx(ctx).Error("Failed to parse due_date", logger.Error(err))
+		return err
+	}
 
-	err := r.queries.UpdateBill(ctx, sqlc.UpdateBillParams{
+	err = r.queries.UpdateBill(ctx, sqlc.UpdateBillParams{
 		SupplierID:  sql.NullInt64{Int64: input.SupplierID, Valid: input.SupplierID != 0},
 		Amount:      fmtFloat(input.Amount),
 		Currency:    nullableString(input.Currency),
