@@ -142,6 +142,12 @@ func (h *UpdateHandler) Validate(_ context.Context, req *UpdateRequest) *errorMo
 	if req.ID == 0 {
 		return &errorModels.ServerError{Code: http.StatusBadRequest, Message: "id is required"}
 	}
+	if req.Frequency == "" {
+		return &errorModels.ServerError{Code: http.StatusBadRequest, Message: "frequency is required"}
+	}
+	if req.NextInvoiceDate == "" {
+		return &errorModels.ServerError{Code: http.StatusBadRequest, Message: "nextInvoiceDate is required"}
+	}
 	return nil
 }
 
