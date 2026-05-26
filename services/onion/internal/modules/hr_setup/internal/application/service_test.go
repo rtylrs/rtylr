@@ -116,3 +116,89 @@ func TestValidStepKeys_CoversExpectedSurface(t *testing.T) {
 			len(validStepKeys), len(expected))
 	}
 }
+
+func TestGetSetupStatus_EmptySteps(t *testing.T) {
+	s := &Service{repo: &mockRepo{steps: []*domain.SetupStep{}}}
+	steps, complete, err := s.GetSetupStatus(context.Background(), 1)
+	if err != nil {
+		t.Fatalf("unexpected error: %v", err)
+	}
+	if len(steps) != 0 {
+		t.Errorf("expected 0 steps, got %d", len(steps))
+	}
+	if complete {
+		t.Error("expected complete=false for empty steps")
+	}
+}
+
+func TestGetSetupStatus_PropagatesError(t *testing.T) {
+	want := errors.New("db error")
+	s := &Service{repo: &mockRepo{stepsErr: want}}
+	_, _, err := s.GetSetupStatus(context.Background(), 1)
+	if !errors.Is(err, want) {
+		t.Errorf("expected sentinel, got %v", err)
+	}
+}
+
+func TestGetSetupStatus_AllIncompleteMeansNotComplete(t *testing.T) {
+	steps := make([]*domain.SetupStep, 0, len(validStepKeys))
+	for k := range validStepKeys {
+		steps = append(steps, &domain.SetupStep{StepKey: k, CompletedAt: nil})
+	}
+	s := &Service{repo: &mockRepo{steps: steps}}
+	_, complete, _ := s.GetSetupStatus(context.Background(), 1)
+	if complete {
+		t.Error("no completed steps should yield complete=false")
+	}
+}
+
+func TestGetHRConfig_PropagatesError(t *testing.T) {
+	want := errors.New("cfg error")
+	s := &Service{repo: &mockRepo{cfgErr: want}}
+	_, err := s.GetHRConfig(context.Background(), 1)
+	if !errors.Is(err, want) {
+		t.Errorf("expected sentinel, got %v", err)
+	}
+}
+
+func TestGetHRConfig_ReturnsConfig(t *testing.T) {
+	cfg := &domain.HRConfig{ID: 5, OwnerID: 1}
+	s := &Service{repo: &mockRepo{cfg: cfg}}
+	got, err := s.GetHRConfig(context.Background(), 1)
+	if err != nil {
+		t.Fatalf("unexpected error: %v", err)
+	}
+	if got.ID != 5 {
+		t.Errorf("expected ID 5, got %d", got.ID)
+	}
+}
+
+func TestUpsertHRConfig_WithTimestamp(t *testing.T) {
+	ts := int64(1700000000)
+	s := &Service{repo: &mockRepo{cfg: &domain.HRConfig{ID: 1}}}
+	got, err := s.UpsertHRConfig(context.Background(), 1, &ts)
+	if err != nil {
+		t.Fatalf("unexpected error: %v", err)
+	}
+	if got == nil {
+		t.Error("expected non-nil config")
+	}
+}
+
+func TestCompleteSetupStep_PropagatesRepoError(t *testing.T) {
+	want := errors.New("repo error")
+	s := &Service{repo: &mockRepo{upStepEr: want}}
+	err := s.CompleteSetupStep(context.Background(), 1, "payroll")
+	if !errors.Is(err, want) {
+		t.Errorf("expected sentinel, got %v", err)
+	}
+}
+
+func TestCompleteSetupStep_AcceptsAllValidKeys(t *testing.T) {
+	for k := range validStepKeys {
+		s := &Service{repo: &mockRepo{}}
+		if err := s.CompleteSetupStep(context.Background(), 1, k); err != nil {
+			t.Errorf("key %q should be accepted, got %v", k, err)
+		}
+	}
+}
