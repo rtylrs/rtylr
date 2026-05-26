@@ -3,6 +3,7 @@ package handlers
 import (
 	"context"
 	"net/http"
+	"strings"
 
 	"github.com/voxire/onion/internal/modules/pos_manager/internal/application"
 	authPkg "github.com/voxire/onion/internal/platform/auth"
@@ -24,6 +25,7 @@ type VerifyPINResponse struct {
 }
 
 func (h *VerifyPINHandler) Validate(_ context.Context, req *VerifyPINRequest) *errorModels.ServerError {
+	req.PIN = strings.TrimSpace(req.PIN)
 	if req.PIN == "" {
 		return &errorModels.ServerError{Code: http.StatusBadRequest, Message: "PIN is required"}
 	}
