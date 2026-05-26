@@ -635,8 +635,16 @@ func (r *Repository) SumPaidInvoices(ctx context.Context, ownerID int64, dateFro
 }
 
 func (r *Repository) SumExpenses(ctx context.Context, ownerID int64, dateFrom, dateTo string) (float64, error) {
-	dfTime, _ := time.Parse("2006-01-02", dateFrom)
-	dtTime, _ := time.Parse("2006-01-02", dateTo)
+	dfTime, err := time.Parse("2006-01-02", dateFrom)
+	if err != nil && dateFrom != "" {
+		logger.Ctx(ctx).Error("Failed to parse dateFrom for SumExpenses", logger.Error(err))
+		return 0, err
+	}
+	dtTime, err := time.Parse("2006-01-02", dateTo)
+	if err != nil && dateTo != "" {
+		logger.Ctx(ctx).Error("Failed to parse dateTo for SumExpenses", logger.Error(err))
+		return 0, err
+	}
 
 	result, err := r.queries.SumExpenses(ctx, sqlc.SumExpensesParams{
 		OwnerID:         ownerID,
@@ -690,8 +698,16 @@ func (r *Repository) SumTaxCollected(ctx context.Context, ownerID int64, dateFro
 }
 
 func (r *Repository) SumTaxOwed(ctx context.Context, ownerID int64, dateFrom, dateTo string) (float64, error) {
-	dfTime, _ := time.Parse("2006-01-02", dateFrom)
-	dtTime, _ := time.Parse("2006-01-02", dateTo)
+	dfTime, err := time.Parse("2006-01-02", dateFrom)
+	if err != nil && dateFrom != "" {
+		logger.Ctx(ctx).Error("Failed to parse dateFrom for SumTaxOwed", logger.Error(err))
+		return 0, err
+	}
+	dtTime, err := time.Parse("2006-01-02", dateTo)
+	if err != nil && dateTo != "" {
+		logger.Ctx(ctx).Error("Failed to parse dateTo for SumTaxOwed", logger.Error(err))
+		return 0, err
+	}
 
 	result, err := r.queries.SumTaxOwed(ctx, sqlc.SumTaxOwedParams{
 		OwnerID:         ownerID,
