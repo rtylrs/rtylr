@@ -4,6 +4,7 @@ import (
 	"context"
 	"net/http"
 	"strconv"
+	"strings"
 
 	"github.com/go-chi/chi/v5"
 
@@ -82,7 +83,7 @@ type CreateWorkScheduleResponse struct {
 }
 
 func (h *CreateWorkScheduleHandler) Validate(_ context.Context, req *CreateWorkScheduleRequest) *errorModels.ServerError {
-	if req.Name == "" {
+	if strings.TrimSpace(req.Name) == "" {
 		return &errorModels.ServerError{Code: http.StatusBadRequest, Message: "name is required"}
 	}
 	return nil
@@ -122,7 +123,7 @@ type UpdateWorkScheduleResponse struct {
 }
 
 func (h *UpdateWorkScheduleHandler) Validate(_ context.Context, req *UpdateWorkScheduleRequest) *errorModels.ServerError {
-	if req.Name == "" {
+	if strings.TrimSpace(req.Name) == "" {
 		return &errorModels.ServerError{Code: http.StatusBadRequest, Message: "name is required"}
 	}
 	return nil
