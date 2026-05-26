@@ -3,6 +3,7 @@ package handlers
 import (
 	"context"
 	"net/http"
+	"strings"
 
 	"github.com/voxire/onion/internal/modules/products/internal/application"
 	"github.com/voxire/onion/internal/modules/products/internal/domain"
@@ -125,6 +126,7 @@ type CreateProductResponse struct {
 }
 
 func (h *CreateProductHandler) Validate(_ context.Context, req *CreateProductRequest) *errorModels.ServerError {
+	req.Name = strings.TrimSpace(req.Name)
 	if req.Name == "" {
 		return &errorModels.ServerError{
 			Code:     http.StatusBadRequest,
@@ -233,6 +235,7 @@ func (h *UpdateProductHandler) Validate(_ context.Context, req *UpdateProductReq
 		}
 	}
 
+	req.Name = strings.TrimSpace(req.Name)
 	if req.Name == "" {
 		return &errorModels.ServerError{
 			Code:     http.StatusBadRequest,
