@@ -17,8 +17,26 @@ const (
 	hrOnboardingTTL   = 5 * time.Minute
 )
 
+type repository interface {
+	CreateTemplate(ctx context.Context, ownerID int64, params domain.CreateTemplateParams) (*domain.ChecklistTemplateRecord, error)
+	GetTemplate(ctx context.Context, ownerID, id int64) (*domain.ChecklistTemplateRecord, error)
+	ListTemplates(ctx context.Context, ownerID int64, limit, offset int32) ([]domain.ChecklistTemplateRecord, int64, error)
+	UpdateTemplate(ctx context.Context, ownerID, id int64, params domain.UpdateTemplateParams) error
+	CreateTemplateItem(ctx context.Context, ownerID, templateID int64, params domain.CreateTemplateItemParams) (*domain.ChecklistItemRecord, error)
+	ListTemplateItems(ctx context.Context, ownerID, templateID int64) ([]domain.ChecklistItemRecord, error)
+	TriggerChecklist(ctx context.Context, ownerID, employeeID, templateID int64, triggerDate time.Time) (*domain.EmployeeChecklistRecord, error)
+	GetEmployeeChecklist(ctx context.Context, ownerID, employeeID, checklistID int64) (*domain.EmployeeChecklistRecord, error)
+	ListEmployeeChecklists(ctx context.Context, ownerID, employeeID int64, limit, offset int32) ([]domain.EmployeeChecklistRecord, int64, error)
+	UpdateEmployeeChecklistStatus(ctx context.Context, ownerID, checklistID int64, status string) error
+	CreateEmployeeChecklistItem(ctx context.Context, ownerID, employeeChecklistID, checklistItemID, assignedToEmployeeID int64, dueDate string) error
+	GetChecklistItem(ctx context.Context, ownerID, itemID int64) (*domain.EmployeeChecklistItemRecord, error)
+	CompleteChecklistItem(ctx context.Context, ownerID, itemID, completedBy int64) error
+	GetChecklistCompletionStats(ctx context.Context, ownerID, checklistID int64) (total, completed int, err error)
+	ListEmployeeChecklistItems(ctx context.Context, ownerID, employeeChecklistID int64) ([]domain.EmployeeChecklistItemRecord, error)
+}
+
 type Service struct {
-	repo *infrastructure.Repository
+	repo repository
 }
 
 func NewService(_ context.Context, db *sql.DB) *Service {
