@@ -36,6 +36,13 @@ func (h *RecordVisitHandler) Validate(_ context.Context, req *RecordVisitRequest
 		}
 	}
 
+	if req.Amount < 0 {
+		return &errorModels.ServerError{
+			Code:    http.StatusBadRequest,
+			Message: "Amount must not be negative",
+		}
+	}
+
 	return nil
 }
 
