@@ -4,6 +4,8 @@ import (
 	"context"
 	"errors"
 	"net/http"
+	"strings"
+	"time"
 
 	"github.com/voxire/onion/internal/modules/invoices/internal/application"
 	"github.com/voxire/onion/internal/modules/invoices/internal/domain"
@@ -49,24 +51,38 @@ func (h *UpdateInvoiceHandler) Validate(_ context.Context, req *UpdateInvoiceReq
 		}
 	}
 
-	if req.ClientName == "" {
+	if strings.TrimSpace(req.ClientName) == "" {
 		return &errorModels.ServerError{
 			Code:    http.StatusBadRequest,
 			Message: "Client name is required",
 		}
 	}
 
-	if req.IssueDate == "" {
+	if strings.TrimSpace(req.IssueDate) == "" {
 		return &errorModels.ServerError{
 			Code:    http.StatusBadRequest,
 			Message: "Issue date is required",
 		}
 	}
 
-	if req.DueDate == "" {
+	if _, err := time.Parse("2006-01-02", req.IssueDate); err != nil {
+		return &errorModels.ServerError{
+			Code:    http.StatusBadRequest,
+			Message: "Issue date must be in YYYY-MM-DD format",
+		}
+	}
+
+	if strings.TrimSpace(req.DueDate) == "" {
 		return &errorModels.ServerError{
 			Code:    http.StatusBadRequest,
 			Message: "Due date is required",
+		}
+	}
+
+	if _, err := time.Parse("2006-01-02", req.DueDate); err != nil {
+		return &errorModels.ServerError{
+			Code:    http.StatusBadRequest,
+			Message: "Due date must be in YYYY-MM-DD format",
 		}
 	}
 
