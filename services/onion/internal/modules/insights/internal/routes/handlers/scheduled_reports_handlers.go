@@ -122,6 +122,31 @@ type UpdateScheduledReportRequest struct {
 
 type UpdateScheduledReportResponse = application.ScheduledReportPayload
 
+func (h *UpdateScheduledReportHandler) Validate(_ context.Context, req *UpdateScheduledReportRequest) *errorModels.ServerError {
+	if req.TemplateID == "" {
+		return &errorModels.ServerError{
+			HTTPCode: http.StatusBadRequest,
+			Code:     http.StatusBadRequest,
+			Message:  "template_id is required",
+		}
+	}
+	if req.Cadence == "" {
+		return &errorModels.ServerError{
+			HTTPCode: http.StatusBadRequest,
+			Code:     http.StatusBadRequest,
+			Message:  "cadence is required",
+		}
+	}
+	if req.Recipient == "" {
+		return &errorModels.ServerError{
+			HTTPCode: http.StatusBadRequest,
+			Code:     http.StatusBadRequest,
+			Message:  "recipient is required",
+		}
+	}
+	return nil
+}
+
 func (h *UpdateScheduledReportHandler) Serve(ctx context.Context, req *UpdateScheduledReportRequest) (UpdateScheduledReportResponse, *errorModels.ServerError) {
 	device := authPkg.DeviceCtx(ctx)
 	if device.User == nil {
