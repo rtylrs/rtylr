@@ -3,6 +3,7 @@ package handlers
 import (
 	"context"
 	"net/http"
+	"strings"
 
 	"github.com/voxire/onion/internal/modules/store_products/internal/application"
 	"github.com/voxire/onion/internal/modules/store_products/internal/domain"
@@ -56,7 +57,7 @@ type CreateResponse struct {
 }
 
 func (h *CreateHandler) Validate(_ context.Context, req *CreateRequest) *errorModels.ServerError {
-	if req.Title == "" {
+	if strings.TrimSpace(req.Title) == "" {
 		return &errorModels.ServerError{Code: http.StatusBadRequest, HTTPCode: http.StatusBadRequest, Message: "Title is required"}
 	}
 	return nil
