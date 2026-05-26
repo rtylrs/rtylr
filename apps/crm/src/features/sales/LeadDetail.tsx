@@ -1,4 +1,5 @@
 import React, { useState } from 'react';
+import { toast } from 'sonner';
 import { useParams, useNavigate } from 'react-router-dom';
 import {
   Phone,
@@ -130,7 +131,11 @@ const LeadDetail: React.FC = () => {
   });
 
   const submitTouchpoint = (): void => {
-    if (!leadId || !tpForm.notes.trim()) return;
+    if (!tpForm.notes.trim()) {
+      toast.error('Notes are required');
+      return;
+    }
+    if (!leadId) return;
     createTouchpoint.mutate(
       {
         leadId,
@@ -164,7 +169,11 @@ const LeadDetail: React.FC = () => {
   const [contactForm, setContactForm] = useState({ name: '', role: '', phone: '', email: '' });
 
   const submitContact = (): void => {
-    if (!leadId || !contactForm.name.trim()) return;
+    if (!contactForm.name.trim()) {
+      toast.error('Contact name is required');
+      return;
+    }
+    if (!leadId) return;
     createContact.mutate(
       { leadId, ...contactForm },
       {
