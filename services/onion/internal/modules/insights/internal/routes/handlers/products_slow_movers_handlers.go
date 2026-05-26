@@ -32,7 +32,7 @@ func (h *GetSlowMoversHandler) Serve(ctx context.Context, req *GetSlowMoversRequ
 	var days int32 = 60
 	if req.Days != "" {
 		parsed, err := strconv.ParseInt(req.Days, 10, 32)
-		if err != nil {
+		if err != nil || parsed <= 0 {
 			return GetSlowMoversResponse{}, &errorModels.ServerError{
 				HTTPCode: http.StatusBadRequest,
 				Code:     http.StatusBadRequest,
