@@ -1,16 +1,91 @@
 package application
 
 import (
+	"context"
+	"errors"
 	"testing"
 	"time"
+
+	"github.com/voxire/onion/internal/modules/subscriptions/internal/domain"
+	paddlePkg "github.com/voxire/onion/internal/platform/paddle"
 )
+
+// ─── mock repository ──────────────────────────────────────────────────────────
+
+type mockRepo struct {
+	plans       []domain.Plan
+	plan        *domain.Plan
+	subscription *domain.Subscription
+	ownerApps   []string
+	billingHistory []domain.BillingHistoryMonth
+	activePeriod *domain.SeatPeriod
+	ownerID     int64
+	listPlansErr   error
+	planBySlugErr  error
+	getSubErr      error
+	upsertSubErr   error
+	getAppsErr     error
+	getPeriodsErr  error
+	getActivePeriodErr error
+	closePeriodErr error
+	openPeriodErr  error
+	updateSeatErr  error
+	billingHistErr error
+	paddleUpdateErr error
+	paddleOwnerErr  error
+}
+
+func (m *mockRepo) ListPlans(_ context.Context) ([]domain.Plan, error) {
+	return m.plans, m.listPlansErr
+}
+func (m *mockRepo) GetPlanBySlug(_ context.Context, _ string) (*domain.Plan, error) {
+	return m.plan, m.planBySlugErr
+}
+func (m *mockRepo) GetPlanByID(_ context.Context, _ int64) (*domain.Plan, error) {
+	return m.plan, m.planBySlugErr
+}
+func (m *mockRepo) GetSubscription(_ context.Context, _ int64) (*domain.Subscription, error) {
+	return m.subscription, m.getSubErr
+}
+func (m *mockRepo) UpsertSubscription(_ context.Context, _, _ int64, _ int) error {
+	return m.upsertSubErr
+}
+func (m *mockRepo) GetOwnerApps(_ context.Context, _ int64) ([]string, error) {
+	return m.ownerApps, m.getAppsErr
+}
+func (m *mockRepo) GetPeriodsForMonth(_ context.Context, _ int64, _ time.Time) ([]domain.SeatPeriod, error) {
+	return nil, m.getPeriodsErr
+}
+func (m *mockRepo) GetActivePeriod(_ context.Context, _ int64) (*domain.SeatPeriod, error) {
+	return m.activePeriod, m.getActivePeriodErr
+}
+func (m *mockRepo) CloseActivePeriod(_ context.Context, _ int64, _ time.Time) error {
+	return m.closePeriodErr
+}
+func (m *mockRepo) OpenPeriod(_ context.Context, _, _ int64, _, _ int, _, _ time.Time) error {
+	return m.openPeriodErr
+}
+func (m *mockRepo) UpdateSeatCount(_ context.Context, _ int64, _ int) error {
+	return m.updateSeatErr
+}
+func (m *mockRepo) GetBillingHistory(_ context.Context, _ int64, _ int) ([]domain.BillingHistoryMonth, error) {
+	return m.billingHistory, m.billingHistErr
+}
+func (m *mockRepo) UpdatePaddleSubscription(_ context.Context, _ int64, _, _, _ string) error {
+	return m.paddleUpdateErr
+}
+func (m *mockRepo) GetOwnerIDByPaddleSubscription(_ context.Context, _ string) (int64, error) {
+	return m.ownerID, m.paddleOwnerErr
+}
+
+// ─── tests ─────────────────────────────────────────────────────────────────────
 
 func TestComputeLineItem_FullMonth(t *testing.T) {
 	billing := time.Date(2026, 4, 1, 0, 0, 0, 0, time.UTC)
 	end := time.Date(2026, 4, 30, 23, 59, 59, 0, time.UTC)
 	li := computeLineItem(10, 1000, billing, &end, billing)
 
-	// April has 30 days. 10 seats × 30 days × $10 / 30 = $100 = 10000 cents.
+	// April has 30 days. 10 seats x 30 days x $10 / 30 = $100 = 10000 cents.
 	if li.AmountCents != 10000 {
 		t.Errorf("expected 10000 cents, got %d", li.AmountCents)
 	}
@@ -25,7 +100,7 @@ func TestComputeLineItem_PartialMonth(t *testing.T) {
 	end := time.Date(2026, 4, 30, 0, 0, 0, 0, time.UTC)
 
 	li := computeLineItem(10, 3000, start, &end, billing)
-	// 10 seats × 15 days (16→30 inclusive) × $30 / 30 days = $150 = 15000 cents.
+	// 10 seats x 15 days (16->30 inclusive) x $30 / 30 days = $150 = 15000 cents.
 	if li.AmountCents != 15000 {
 		t.Errorf("expected 15000 cents for half-month, got %d", li.AmountCents)
 	}
@@ -51,8 +126,123 @@ func TestComputeLineItem_NeverNegativeOrTooSmall(t *testing.T) {
 	end := time.Date(2026, 4, 5, 0, 0, 0, 0, time.UTC)
 
 	li := computeLineItem(10, 3000, start, &end, billing)
-	// Bottoms out at 1 day: 10 × 1 × 3000 / 30 = 1000.
+	// Bottoms out at 1 day: 10 x 1 x 3000 / 30 = 1000.
 	if li.AmountCents != 1000 {
 		t.Errorf("expected 1000 cents (1-day floor), got %d", li.AmountCents)
+	}
+}
+
+func TestListPlans_Delegates(t *testing.T) {
+	plans := []domain.Plan{{ID: 1, Name: "Starter"}, {ID: 2, Name: "Pro"}}
+	s := &Service{repo: &mockRepo{plans: plans}}
+	got, err := s.ListPlans(context.Background())
+	if err != nil || len(got) != 2 {
+		t.Errorf("got %v err %v", got, err)
+	}
+}
+
+func TestListPlans_PropagatesError(t *testing.T) {
+	want := errors.New("db fail")
+	s := &Service{repo: &mockRepo{listPlansErr: want}}
+	if _, err := s.ListPlans(context.Background()); !errors.Is(err, want) {
+		t.Errorf("expected sentinel, got %v", err)
+	}
+}
+
+func TestGetMySubscription_PropagatesError(t *testing.T) {
+	want := errors.New("not found")
+	s := &Service{repo: &mockRepo{getSubErr: want}}
+	if _, err := s.GetMySubscription(context.Background(), 1); !errors.Is(err, want) {
+		t.Errorf("expected sentinel, got %v", err)
+	}
+}
+
+func TestGetMySubscription_ReturnsSubscription(t *testing.T) {
+	sub := &domain.Subscription{ID: 1, PlanName: "Pro", Status: "active"}
+	s := &Service{repo: &mockRepo{subscription: sub}}
+	got, err := s.GetMySubscription(context.Background(), 1)
+	if err != nil || got == nil || got.PlanName != "Pro" {
+		t.Errorf("got %v err %v", got, err)
+	}
+}
+
+func TestGetOwnerApps_Delegates(t *testing.T) {
+	apps := []string{"pos", "erp"}
+	s := &Service{repo: &mockRepo{ownerApps: apps}}
+	got, err := s.GetOwnerApps(context.Background(), 1)
+	if err != nil || len(got) != 2 {
+		t.Errorf("got %v err %v", got, err)
+	}
+}
+
+func TestGetOwnerApps_PropagatesError(t *testing.T) {
+	want := errors.New("fail")
+	s := &Service{repo: &mockRepo{getAppsErr: want}}
+	if _, err := s.GetOwnerApps(context.Background(), 1); !errors.Is(err, want) {
+		t.Errorf("expected sentinel, got %v", err)
+	}
+}
+
+func TestGetBillingHistory_Delegates(t *testing.T) {
+	history := []domain.BillingHistoryMonth{{TotalCents: 1000}}
+	s := &Service{repo: &mockRepo{billingHistory: history}}
+	got, err := s.GetBillingHistory(context.Background(), 1, 6)
+	if err != nil || len(got) != 1 {
+		t.Errorf("got %v err %v", got, err)
+	}
+}
+
+func TestGetBillingHistory_PropagatesError(t *testing.T) {
+	want := errors.New("db fail")
+	s := &Service{repo: &mockRepo{billingHistErr: want}}
+	if _, err := s.GetBillingHistory(context.Background(), 1, 6); !errors.Is(err, want) {
+		t.Errorf("expected sentinel, got %v", err)
+	}
+}
+
+func TestHandlePaddleWebhook_ResolvesOwnerFromCustomData(t *testing.T) {
+	// When GetOwnerIDByPaddleSubscription fails but custom_data has owner_id
+	s := &Service{repo: &mockRepo{paddleOwnerErr: errors.New("not found")}}
+	data := paddlePkg.SubscriptionData{
+		ID:         "sub_123",
+		Status:     "active",
+		CustomData: map[string]string{"owner_id": "42"},
+	}
+	err := s.HandlePaddleWebhook(context.Background(), paddlePkg.WebhookEvent{}, data)
+	// Will fail at UpdatePaddleSubscription since the mock returns nil for that,
+	// meaning the owner resolution succeeded and we got to the repo call.
+	if err != nil {
+		t.Errorf("unexpected error: %v", err)
+	}
+}
+
+func TestHandlePaddleWebhook_FailsWithNoOwnerInfo(t *testing.T) {
+	s := &Service{repo: &mockRepo{paddleOwnerErr: errors.New("not found")}}
+	data := paddlePkg.SubscriptionData{
+		ID:         "sub_xyz",
+		Status:     "active",
+		CustomData: map[string]string{},
+	}
+	if err := s.HandlePaddleWebhook(context.Background(), paddlePkg.WebhookEvent{}, data); err == nil {
+		t.Fatal("expected error when owner cannot be resolved")
+	}
+}
+
+func TestComputeLineItem_SingleSeat(t *testing.T) {
+	billing := time.Date(2026, 3, 1, 0, 0, 0, 0, time.UTC)
+	end := time.Date(2026, 3, 31, 0, 0, 0, 0, time.UTC)
+	// March has 31 days. 1 seat x 31 days x 500 / 31 = 500 cents.
+	li := computeLineItem(1, 500, billing, &end, billing)
+	if li.AmountCents != 500 {
+		t.Errorf("expected 500 cents, got %d", li.AmountCents)
+	}
+}
+
+func TestComputeLineItem_PeriodEndPreservedOnResult(t *testing.T) {
+	billing := time.Date(2026, 4, 1, 0, 0, 0, 0, time.UTC)
+	end := time.Date(2026, 4, 15, 0, 0, 0, 0, time.UTC)
+	li := computeLineItem(1, 100, billing, &end, billing)
+	if li.PeriodEnd == nil {
+		t.Error("expected PeriodEnd to be preserved")
 	}
 }
