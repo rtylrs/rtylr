@@ -1,5 +1,6 @@
 import React, { useState, useMemo, useRef } from 'react';
 import { useTranslation } from 'react-i18next';
+import { toast } from 'sonner';
 import { Send, ChevronLeft, ChevronRight, AlertTriangle } from 'lucide-react';
 import { useVirtualizer } from '@tanstack/react-virtual';
 import {
@@ -101,12 +102,18 @@ const RosterBuilderInner = (): React.JSX.Element => {
     if (selectedShiftId === 0) return;
     assignMutation.mutate(
       { staffId: assignModal.staffId, shiftId: selectedShiftId, date: assignModal.date },
-      { onSuccess: () => setAssignModal({ open: false, staffId: 0, date: '' }) }
+      {
+        onSuccess: () => setAssignModal({ open: false, staffId: 0, date: '' }),
+        onError: () => toast.error('Failed to assign shift'),
+      }
     );
   };
 
   const handlePublish = (): void => {
-    publishMutation.mutate(weekStart);
+    publishMutation.mutate(weekStart, {
+      onSuccess: () => toast.success('Roster published'),
+      onError: () => toast.error('Failed to publish roster'),
+    });
   };
 
   const hasConflicts = entries.some((e) => e.assignments.some((a) => a.conflict));
