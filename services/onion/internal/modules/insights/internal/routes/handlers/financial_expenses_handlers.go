@@ -3,6 +3,7 @@ package handlers
 import (
 	"context"
 	"net/http"
+	"strings"
 
 	"github.com/voxire/onion/internal/modules/insights/internal/application"
 	authPkg "github.com/voxire/onion/internal/platform/auth"
@@ -22,6 +23,12 @@ type GetExpensesByCategoryRequest struct {
 
 type GetExpensesByCategoryResponse struct {
 	Categories []application.ExpenseByCategoryPayload `json:"categories"`
+}
+
+func (h *GetExpensesByCategoryHandler) Validate(_ context.Context, req *GetExpensesByCategoryRequest) *errorModels.ServerError {
+	req.From = strings.TrimSpace(req.From)
+	req.To = strings.TrimSpace(req.To)
+	return nil
 }
 
 func (h *GetExpensesByCategoryHandler) Serve(ctx context.Context, req *GetExpensesByCategoryRequest) (GetExpensesByCategoryResponse, *errorModels.ServerError) {
