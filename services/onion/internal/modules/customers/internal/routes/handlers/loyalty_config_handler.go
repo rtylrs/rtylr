@@ -93,6 +93,28 @@ type UpdateLoyaltyConfigResponse struct {
 	Message string `json:"message"`
 }
 
+func (h *UpdateLoyaltyConfigHandler) Validate(_ context.Context, req *UpdateLoyaltyConfigRequest) *errorModels.ServerError {
+	if req.PointsPerCurrencyUnit < 0 {
+		return &errorModels.ServerError{
+			Code:    http.StatusBadRequest,
+			Message: "Points per currency unit must not be negative",
+		}
+	}
+	if req.CurrencyPerPoint < 0 {
+		return &errorModels.ServerError{
+			Code:    http.StatusBadRequest,
+			Message: "Currency per point must not be negative",
+		}
+	}
+	if req.BronzeDiscountPct < 0 || req.SilverDiscountPct < 0 || req.GoldDiscountPct < 0 || req.PlatinumDiscountPct < 0 {
+		return &errorModels.ServerError{
+			Code:    http.StatusBadRequest,
+			Message: "Discount percentages must not be negative",
+		}
+	}
+	return nil
+}
+
 func (h *UpdateLoyaltyConfigHandler) Serve(ctx context.Context, req *UpdateLoyaltyConfigRequest) (UpdateLoyaltyConfigResponse, *errorModels.ServerError) {
 	device := authPkg.DeviceCtx(ctx)
 	if device.User == nil {
