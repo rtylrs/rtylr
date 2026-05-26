@@ -4,6 +4,7 @@ import (
 	"context"
 	"errors"
 	"net/http"
+	"time"
 
 	"github.com/voxire/onion/internal/modules/hr_time/internal/application"
 	"github.com/voxire/onion/internal/modules/hr_time/internal/domain"
@@ -44,6 +45,9 @@ func (h *CreateTimeEntryHandler) Validate(_ context.Context, req *CreateTimeEntr
 	}
 	if req.Date == "" {
 		return &errorModels.ServerError{Code: http.StatusBadRequest, Message: "date is required"}
+	}
+	if _, err := time.Parse("2006-01-02", req.Date); err != nil {
+		return &errorModels.ServerError{Code: http.StatusBadRequest, Message: "date must be in YYYY-MM-DD format"}
 	}
 	return nil
 }
