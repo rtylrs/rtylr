@@ -65,6 +65,19 @@ type UpdateConfigResponse struct {
 	Message string `json:"message"`
 }
 
+func (h *UpdateConfigHandler) Validate(_ context.Context, req *UpdateConfigRequest) *errorModels.ServerError {
+	if req.PointsPerDollar < 0 {
+		return &errorModels.ServerError{Code: http.StatusBadRequest, Message: "points_per_dollar must be non-negative"}
+	}
+	if req.RedemptionRate < 0 {
+		return &errorModels.ServerError{Code: http.StatusBadRequest, Message: "redemption_rate must be non-negative"}
+	}
+	if req.MinRedeemPoints < 0 {
+		return &errorModels.ServerError{Code: http.StatusBadRequest, Message: "min_redeem_points must be non-negative"}
+	}
+	return nil
+}
+
 func (h *UpdateConfigHandler) Serve(ctx context.Context, req *UpdateConfigRequest) (UpdateConfigResponse, *errorModels.ServerError) {
 	device := authPkg.DeviceCtx(ctx)
 	if device.User == nil {
