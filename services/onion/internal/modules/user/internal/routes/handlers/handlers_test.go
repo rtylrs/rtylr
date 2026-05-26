@@ -1,0 +1,142 @@
+package handlers
+
+import (
+	"context"
+	"testing"
+)
+
+func TestLoginHandler_Validate_RequiresEmail(t *testing.T) {
+	h := &LoginHandler{}
+	req := &LoginRequest{Email: "", Password: "secret123"}
+	if err := h.Validate(context.Background(), req); err == nil {
+		t.Fatal("expected error when email is empty")
+	}
+}
+
+func TestLoginHandler_Validate_RequiresPassword(t *testing.T) {
+	h := &LoginHandler{}
+	req := &LoginRequest{Email: "alice@example.com", Password: ""}
+	if err := h.Validate(context.Background(), req); err == nil {
+		t.Fatal("expected error when password is empty")
+	}
+}
+
+func TestLoginHandler_Validate_HappyPath(t *testing.T) {
+	h := &LoginHandler{}
+	req := &LoginRequest{Email: "alice@example.com", Password: "hunter2"}
+	if err := h.Validate(context.Background(), req); err != nil {
+		t.Errorf("unexpected error: %v", err)
+	}
+}
+
+func TestLoginHandler_Validate_BothEmpty(t *testing.T) {
+	h := &LoginHandler{}
+	req := &LoginRequest{}
+	if err := h.Validate(context.Background(), req); err == nil {
+		t.Fatal("expected error when both fields are empty")
+	}
+}
+
+func TestChangePasswordHandler_Validate_RequiresCurrentPassword(t *testing.T) {
+	h := &ChangePasswordHandler{}
+	req := &ChangePasswordRequest{CurrentPassword: "", NewPassword: "newpass123"}
+	if err := h.Validate(context.Background(), req); err == nil {
+		t.Fatal("expected error when current password is empty")
+	}
+}
+
+func TestChangePasswordHandler_Validate_RequiresNewPassword(t *testing.T) {
+	h := &ChangePasswordHandler{}
+	req := &ChangePasswordRequest{CurrentPassword: "oldpass", NewPassword: ""}
+	if err := h.Validate(context.Background(), req); err == nil {
+		t.Fatal("expected error when new password is empty")
+	}
+}
+
+func TestChangePasswordHandler_Validate_HappyPath(t *testing.T) {
+	h := &ChangePasswordHandler{}
+	req := &ChangePasswordRequest{CurrentPassword: "oldpass", NewPassword: "newpass123"}
+	if err := h.Validate(context.Background(), req); err != nil {
+		t.Errorf("unexpected error: %v", err)
+	}
+}
+
+func TestChangePasswordHandler_Validate_BothEmpty(t *testing.T) {
+	h := &ChangePasswordHandler{}
+	req := &ChangePasswordRequest{}
+	if err := h.Validate(context.Background(), req); err == nil {
+		t.Fatal("expected error when both fields are empty")
+	}
+}
+
+func TestDeleteAccountHandler_Validate_RequiresPassword(t *testing.T) {
+	h := &DeleteAccountHandler{}
+	req := &DeleteAccountRequest{Password: ""}
+	if err := h.Validate(context.Background(), req); err == nil {
+		t.Fatal("expected error when password is empty")
+	}
+}
+
+func TestDeleteAccountHandler_Validate_HappyPath(t *testing.T) {
+	h := &DeleteAccountHandler{}
+	req := &DeleteAccountRequest{Password: "mypassword"}
+	if err := h.Validate(context.Background(), req); err != nil {
+		t.Errorf("unexpected error: %v", err)
+	}
+}
+
+func TestUpdateProfileHandler_Validate_RequiresName(t *testing.T) {
+	h := &UpdateProfileHandler{}
+	req := &UpdateProfileRequest{Name: ""}
+	if err := h.Validate(context.Background(), req); err == nil {
+		t.Fatal("expected error when name is empty")
+	}
+}
+
+func TestUpdateProfileHandler_Validate_HappyPath(t *testing.T) {
+	h := &UpdateProfileHandler{}
+	req := &UpdateProfileRequest{Name: "Alice Smith"}
+	if err := h.Validate(context.Background(), req); err != nil {
+		t.Errorf("unexpected error: %v", err)
+	}
+}
+
+func TestPasswordResetRequestHandler_Validate_RequiresEmail(t *testing.T) {
+	h := &PasswordResetRequestHandler{}
+	req := &PasswordResetRequestBody{Email: ""}
+	if err := h.Validate(context.Background(), req); err == nil {
+		t.Fatal("expected error when email is empty")
+	}
+}
+
+func TestPasswordResetRequestHandler_Validate_HappyPath(t *testing.T) {
+	h := &PasswordResetRequestHandler{}
+	req := &PasswordResetRequestBody{Email: "bob@example.com"}
+	if err := h.Validate(context.Background(), req); err != nil {
+		t.Errorf("unexpected error: %v", err)
+	}
+}
+
+func TestPasswordResetConfirmHandler_Validate_RequiresToken(t *testing.T) {
+	h := &PasswordResetConfirmHandler{}
+	req := &PasswordResetConfirmBody{Token: "", Password: "newpass"}
+	if err := h.Validate(context.Background(), req); err == nil {
+		t.Fatal("expected error when token is empty")
+	}
+}
+
+func TestPasswordResetConfirmHandler_Validate_RequiresPassword(t *testing.T) {
+	h := &PasswordResetConfirmHandler{}
+	req := &PasswordResetConfirmBody{Token: "abc123", Password: ""}
+	if err := h.Validate(context.Background(), req); err == nil {
+		t.Fatal("expected error when password is empty")
+	}
+}
+
+func TestPasswordResetConfirmHandler_Validate_HappyPath(t *testing.T) {
+	h := &PasswordResetConfirmHandler{}
+	req := &PasswordResetConfirmBody{Token: "abc123xyz", Password: "newpassword"}
+	if err := h.Validate(context.Background(), req); err != nil {
+		t.Errorf("unexpected error: %v", err)
+	}
+}
