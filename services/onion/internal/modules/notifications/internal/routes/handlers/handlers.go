@@ -71,7 +71,7 @@ type MarkReadResponse struct {
 }
 
 func (h *MarkReadHandler) Validate(_ context.Context, req *MarkReadRequest) *errorModels.ServerError {
-	if req.ID == 0 {
+	if req.ID <= 0 {
 		return &errorModels.ServerError{
 			HTTPCode: http.StatusBadRequest,
 			Code:     http.StatusBadRequest,
