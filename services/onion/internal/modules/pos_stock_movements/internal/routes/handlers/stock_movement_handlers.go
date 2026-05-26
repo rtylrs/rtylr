@@ -114,13 +114,20 @@ type AdjustStockResponse struct {
 	Message    string `json:"message"`
 }
 
+func (h *AdjustStockHandler) Validate(_ context.Context, req *AdjustStockRequest) *errorModels.ServerError {
+	if req.BranchID == 0 || req.ProductID == 0 {
+		return &errorModels.ServerError{Code: http.StatusBadRequest, Message: "branchId and productId are required"}
+	}
+	if req.Quantity == 0 {
+		return &errorModels.ServerError{Code: http.StatusBadRequest, Message: "quantity must be non-zero"}
+	}
+	return nil
+}
+
 func (h *AdjustStockHandler) Serve(ctx context.Context, req *AdjustStockRequest) (AdjustStockResponse, *errorModels.ServerError) {
 	device := authPkg.DeviceCtx(ctx)
 	if device.User == nil {
 		return AdjustStockResponse{}, errorModels.PermissionDeniedServerError()
-	}
-	if req.BranchID == 0 || req.ProductID == 0 {
-		return AdjustStockResponse{}, &errorModels.ServerError{Code: http.StatusBadRequest, Message: "branchId and productId are required"}
 	}
 	id, err := h.Service.AdjustStock(ctx, domain.AdjustStockInput{
 		BusinessID: device.User.BusinessID, BranchID: req.BranchID, ProductID: req.ProductID,
