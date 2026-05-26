@@ -3,6 +3,7 @@ package handlers
 import (
 	"context"
 	"net/http"
+	"strings"
 
 	"github.com/voxire/onion/internal/modules/webhooks/internal/application"
 	authPkg "github.com/voxire/onion/internal/platform/auth"
@@ -75,7 +76,7 @@ type CreateResponse struct {
 }
 
 func (h *CreateHandler) Validate(_ context.Context, req *CreateRequest) *errorModels.ServerError {
-	if req.URL == "" {
+	if strings.TrimSpace(req.URL) == "" {
 		return &errorModels.ServerError{
 			HTTPCode: http.StatusBadRequest,
 			Code:     http.StatusBadRequest,
