@@ -14,15 +14,20 @@ import (
 
 const inventoryCacheTTL = 5 * time.Minute
 
+type repository interface {
+	AdjustInventory(ctx context.Context, ownerID, productID int64, change float64, txType domain.InventoryTransactionType, notes string) error
+	GetInventoryReport(ctx context.Context, ownerID int64) ([]domain.InventoryReportItem, error)
+	GetLowStockProducts(ctx context.Context, ownerID int64) ([]domain.InventoryReportItem, error)
+	GetValuation(ctx context.Context, ownerID int64) ([]domain.ValuationItem, error)
+}
+
 type Service struct {
-	repo *infrastructure.Repository
+	repo repository
 }
 
 func NewService(_ context.Context, db *sql.DB) *Service {
-	repo := infrastructure.NewRepository(db)
-
 	return &Service{
-		repo: repo,
+		repo: infrastructure.NewRepository(db),
 	}
 }
 
