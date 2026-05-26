@@ -82,9 +82,13 @@ func (h *UpdateCustomerHandler) Serve(ctx context.Context, req *UpdateCustomerRe
 
 	if req.DateOfBirth != "" {
 		t, err := time.Parse("2006-01-02", req.DateOfBirth)
-		if err == nil {
-			input.DateOfBirth = &t
+		if err != nil {
+			return UpdateCustomerResponse{}, &errorModels.ServerError{
+				Code:    http.StatusBadRequest,
+				Message: "Invalid date of birth format, expected YYYY-MM-DD",
+			}
 		}
+		input.DateOfBirth = &t
 	}
 
 	if err := h.CRMService.UpdateCustomer(ctx, input); err != nil {
