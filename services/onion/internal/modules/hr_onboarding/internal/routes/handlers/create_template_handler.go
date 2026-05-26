@@ -3,6 +3,7 @@ package handlers
 import (
 	"context"
 	"net/http"
+	"strings"
 
 	"github.com/voxire/onion/internal/modules/hr_onboarding/internal/application"
 	"github.com/voxire/onion/internal/modules/hr_onboarding/internal/domain"
@@ -27,7 +28,7 @@ type CreateTemplateResponse struct {
 }
 
 func (h *CreateTemplateHandler) Validate(_ context.Context, req *CreateTemplateRequest) *errorModels.ServerError {
-	if req.Name == "" {
+	if strings.TrimSpace(req.Name) == "" {
 		return &errorModels.ServerError{HTTPCode: http.StatusBadRequest, Code: http.StatusBadRequest, Message: "name is required"}
 	}
 	return nil
