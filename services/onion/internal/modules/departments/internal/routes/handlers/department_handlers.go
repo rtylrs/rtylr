@@ -3,6 +3,7 @@ package handlers
 import (
 	"context"
 	"net/http"
+	"strings"
 
 	"github.com/voxire/onion/internal/modules/departments/internal/application"
 	"github.com/voxire/onion/internal/modules/departments/internal/domain"
@@ -63,7 +64,7 @@ type CreateDepartmentResponse struct {
 }
 
 func (h *CreateDepartmentHandler) Validate(_ context.Context, req *CreateDepartmentRequest) *errorModels.ServerError {
-	if req.Name == "" {
+	if strings.TrimSpace(req.Name) == "" {
 		return &errorModels.ServerError{Code: http.StatusBadRequest, Message: "name is required"}
 	}
 	return nil
@@ -99,7 +100,7 @@ func (h *UpdateDepartmentHandler) Validate(_ context.Context, req *UpdateDepartm
 	if req.ID == 0 {
 		return &errorModels.ServerError{Code: http.StatusBadRequest, Message: "id is required"}
 	}
-	if req.Name == "" {
+	if strings.TrimSpace(req.Name) == "" {
 		return &errorModels.ServerError{Code: http.StatusBadRequest, Message: "name is required"}
 	}
 	return nil
