@@ -159,6 +159,16 @@ func (h *CreateSubtaskHandler) Validate(_ context.Context, req *CreateSubtaskReq
 	if req.Title == "" {
 		return &errorModels.ServerError{Code: http.StatusBadRequest, Message: "Title is required"}
 	}
+	if req.DueDate != nil {
+		if _, err := time.Parse("2006-01-02", *req.DueDate); err != nil {
+			return &errorModels.ServerError{Code: http.StatusBadRequest, Message: "due_date must be in YYYY-MM-DD format"}
+		}
+	}
+	if req.StartDate != nil {
+		if _, err := time.Parse("2006-01-02", *req.StartDate); err != nil {
+			return &errorModels.ServerError{Code: http.StatusBadRequest, Message: "start_date must be in YYYY-MM-DD format"}
+		}
+	}
 	return nil
 }
 

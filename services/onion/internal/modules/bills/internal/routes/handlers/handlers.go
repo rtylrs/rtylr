@@ -79,11 +79,17 @@ type CreateResponse struct {
 }
 
 func (h *CreateHandler) Validate(_ context.Context, req *CreateRequest) *errorModels.ServerError {
+	if req.SupplierID <= 0 {
+		return &errorModels.ServerError{Code: http.StatusBadRequest, Message: "supplier_id is required"}
+	}
 	if req.Amount <= 0 {
 		return &errorModels.ServerError{Code: http.StatusBadRequest, Message: "amount must be greater than zero"}
 	}
 	if req.DueDate == "" {
-		return &errorModels.ServerError{Code: http.StatusBadRequest, Message: "dueDate is required"}
+		return &errorModels.ServerError{Code: http.StatusBadRequest, Message: "due_date is required"}
+	}
+	if _, err := time.Parse("2006-01-02", req.DueDate); err != nil {
+		return &errorModels.ServerError{Code: http.StatusBadRequest, Message: "due_date must be in YYYY-MM-DD format"}
 	}
 	return nil
 }
@@ -126,6 +132,14 @@ type UpdateResponse struct {
 func (h *UpdateHandler) Validate(_ context.Context, req *UpdateRequest) *errorModels.ServerError {
 	if req.ID == 0 {
 		return &errorModels.ServerError{Code: http.StatusBadRequest, Message: "id is required"}
+	}
+	if req.Amount <= 0 {
+		return &errorModels.ServerError{Code: http.StatusBadRequest, Message: "amount must be greater than zero"}
+	}
+	if req.DueDate != "" {
+		if _, err := time.Parse("2006-01-02", req.DueDate); err != nil {
+			return &errorModels.ServerError{Code: http.StatusBadRequest, Message: "due_date must be in YYYY-MM-DD format"}
+		}
 	}
 	return nil
 }
