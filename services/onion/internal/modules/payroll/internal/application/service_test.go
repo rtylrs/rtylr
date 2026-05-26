@@ -96,3 +96,120 @@ func TestMarkPayrollPaid_PropagatesError(t *testing.T) {
 		t.Errorf("expected sentinel, got %v", err)
 	}
 }
+
+func TestMarkPayrollPaid_HappyPath(t *testing.T) {
+	s := &Service{repo: &mockRepo{}}
+	if err := s.MarkPayrollPaid(context.Background(), 1, 5); err != nil {
+		t.Errorf("unexpected error: %v", err)
+	}
+}
+
+func TestRunPayroll_NoShiftsReturnsZero(t *testing.T) {
+	m := &mockRepo{shifts: []domain.ShiftSummary{}}
+	s := &Service{repo: m}
+	count, err := s.RunPayroll(context.Background(), 1, domain.PayrollRunInput{
+		PeriodStart: "2026-04-01",
+		PeriodEnd:   "2026-04-30",
+	})
+	if err != nil {
+		t.Fatalf("unexpected error: %v", err)
+	}
+	if count != 0 {
+		t.Errorf("expected 0 records for no shifts, got %d", count)
+	}
+}
+
+func TestRunPayroll_SkipsStaffWhenRatesError(t *testing.T) {
+	m := &mockRepo{
+		shifts:   []domain.ShiftSummary{{StaffID: 1, TotalHours: 8}},
+		ratesErr: errors.New("no rates"),
+	}
+	s := &Service{repo: m}
+	count, err := s.RunPayroll(context.Background(), 1, domain.PayrollRunInput{
+		PeriodStart: "2026-04-01",
+		PeriodEnd:   "2026-04-30",
+	})
+	if err != nil {
+		t.Fatalf("unexpected error: %v", err)
+	}
+	if count != 0 {
+		t.Errorf("expected 0 due to rates error, got %d", count)
+	}
+}
+
+func TestRunPayroll_ComputesSalaryBasedPay(t *testing.T) {
+	m := &mockRepo{
+		shifts: []domain.ShiftSummary{{StaffID: 2, TotalHours: 0, TotalOvertimeHours: 0}},
+		rates:  domain.StaffPayRates{Salary: 36500}, // 36500/365 = 100/day
+	}
+	s := &Service{repo: m}
+	count, err := s.RunPayroll(context.Background(), 1, domain.PayrollRunInput{
+		PeriodStart: "2026-04-01",
+		PeriodEnd:   "2026-04-30", // 29 days
+	})
+	if err != nil {
+		t.Fatalf("unexpected error: %v", err)
+	}
+	if count != 1 {
+		t.Errorf("expected 1 record, got %d", count)
+	}
+}
+
+func TestRunPayroll_OvertimeUsesExplicitRate(t *testing.T) {
+	m := &mockRepo{
+		shifts: []domain.ShiftSummary{{StaffID: 3, TotalHours: 50, TotalOvertimeHours: 10}},
+		rates:  domain.StaffPayRates{HourlyRate: 10, OvertimeRate: 20}, // explicit OT rate
+	}
+	s := &Service{repo: m}
+	_, err := s.RunPayroll(context.Background(), 1, domain.PayrollRunInput{
+		PeriodStart: "2026-04-01",
+		PeriodEnd:   "2026-04-30",
+	})
+	if err != nil {
+		t.Fatalf("unexpected error: %v", err)
+	}
+	// 40 regular × 10 = 400, 10 OT × 20 = 200, net 600
+	if m.createGot.base != 400 || m.createGot.ot != 200 || m.createGot.net != 600 {
+		t.Errorf("pay with explicit OT rate wrong: %+v", m.createGot)
+	}
+}
+
+func TestRunPayroll_ShiftsError(t *testing.T) {
+	want := errors.New("shift error")
+	m := &mockRepo{shiftErr: want}
+	s := &Service{repo: m}
+	if _, err := s.RunPayroll(context.Background(), 1, domain.PayrollRunInput{
+		PeriodStart: "2026-04-01",
+		PeriodEnd:   "2026-04-30",
+	}); !errors.Is(err, want) {
+		t.Errorf("expected shift error, got %v", err)
+	}
+}
+
+func TestRunPayroll_RegularHoursNotNegative(t *testing.T) {
+	// OT > Total would give negative regular hours; service clamps to 0.
+	m := &mockRepo{
+		shifts: []domain.ShiftSummary{{StaffID: 4, TotalHours: 5, TotalOvertimeHours: 10}},
+		rates:  domain.StaffPayRates{HourlyRate: 10},
+	}
+	s := &Service{repo: m}
+	_, _ = s.RunPayroll(context.Background(), 1, domain.PayrollRunInput{
+		PeriodStart: "2026-04-01",
+		PeriodEnd:   "2026-04-30",
+	})
+	if m.createGot.regular < 0 {
+		t.Errorf("regular hours should be clamped to >= 0, got %f", m.createGot.regular)
+	}
+}
+
+func TestListPayrollRecords_ReturnsRecords(t *testing.T) {
+	records := []domain.PayrollRecord{{ID: 1}, {ID: 2}}
+	s := &Service{repo: &mockRepo{listResult: records}}
+	got, err := s.ListPayrollRecords(context.Background(), 1, "2026-04")
+	if err != nil {
+		t.Fatalf("unexpected error: %v", err)
+	}
+	if len(got) != 2 {
+		t.Errorf("expected 2 records, got %d", len(got))
+	}
+}
