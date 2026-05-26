@@ -133,6 +133,22 @@ func (h *CreateProductHandler) Validate(_ context.Context, req *CreateProductReq
 		}
 	}
 
+	if req.CostPrice < 0 {
+		return &errorModels.ServerError{
+			Code:     http.StatusBadRequest,
+			HTTPCode: http.StatusBadRequest,
+			Message:  "Cost price must not be negative",
+		}
+	}
+
+	if req.SalePrice < 0 {
+		return &errorModels.ServerError{
+			Code:     http.StatusBadRequest,
+			HTTPCode: http.StatusBadRequest,
+			Message:  "Sale price must not be negative",
+		}
+	}
+
 	return nil
 }
 
@@ -222,6 +238,22 @@ func (h *UpdateProductHandler) Validate(_ context.Context, req *UpdateProductReq
 			Code:     http.StatusBadRequest,
 			HTTPCode: http.StatusBadRequest,
 			Message:  "Product name is required",
+		}
+	}
+
+	if req.CostPrice < 0 {
+		return &errorModels.ServerError{
+			Code:     http.StatusBadRequest,
+			HTTPCode: http.StatusBadRequest,
+			Message:  "Cost price must not be negative",
+		}
+	}
+
+	if req.SalePrice < 0 {
+		return &errorModels.ServerError{
+			Code:     http.StatusBadRequest,
+			HTTPCode: http.StatusBadRequest,
+			Message:  "Sale price must not be negative",
 		}
 	}
 
