@@ -235,6 +235,16 @@ func (h *UpdateEmployeeHandler) Validate(_ context.Context, req *UpdateEmployeeR
 	if strings.TrimSpace(req.LastName) == "" {
 		return &errorModels.ServerError{Code: http.StatusBadRequest, Message: "last_name is required"}
 	}
+	if req.StartDate != "" {
+		if _, err := time.Parse("2006-01-02", req.StartDate); err != nil {
+			return &errorModels.ServerError{Code: http.StatusBadRequest, Message: "start_date must be in YYYY-MM-DD format"}
+		}
+	}
+	if req.EndDate != "" {
+		if _, err := time.Parse("2006-01-02", req.EndDate); err != nil {
+			return &errorModels.ServerError{Code: http.StatusBadRequest, Message: "end_date must be in YYYY-MM-DD format"}
+		}
+	}
 	return nil
 }
 
@@ -268,6 +278,16 @@ func (h *UpdateEmployeeHandler) Serve(ctx context.Context, req *UpdateEmployeeRe
 		EmergencyContactName:  req.EmergencyContactName,
 		EmergencyContactPhone: req.EmergencyContactPhone,
 		Notes:                 req.Notes,
+	}
+	if req.StartDate != "" {
+		if t, err := time.Parse("2006-01-02", req.StartDate); err == nil {
+			emp.StartDate = t
+		}
+	}
+	if req.EndDate != "" {
+		if t, err := time.Parse("2006-01-02", req.EndDate); err == nil {
+			emp.EndDate = t
+		}
 	}
 
 	updated, err := h.Service.UpdateEmployee(ctx, device.User.UserID, emp)
