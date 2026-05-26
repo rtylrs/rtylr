@@ -49,7 +49,9 @@
       "salePrice": "Sale price"
     },
     "validation": {
-      "requiredFields": "Please fill required fields"
+      "requiredFields": "Please fill required fields",
+      "negativeCost": "Cost price cannot be negative",
+      "negativePrice": "Sale price cannot be negative"
     }
   },
   "inventory": {

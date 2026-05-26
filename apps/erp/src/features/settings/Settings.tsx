@@ -1,4 +1,5 @@
 import React, { useState } from 'react';
+import { toast } from 'sonner';
 import { motion } from 'motion/react';
 import {
   Settings as SettingsIcon,
@@ -140,7 +141,10 @@ const GeneralTab: React.FC = () => {
             type="number"
             step="0.01"
             value={settings.taxRate}
-            onChange={(e) => settings.setTaxRate(parseFloat(e.target.value) || 0)}
+            onChange={(e) => {
+              const v = parseFloat(e.target.value);
+              if (!isNaN(v) && v >= 0) settings.setTaxRate(v);
+            }}
             className="w-20 px-2 py-1.5 rounded-lg text-xs outline-none"
             style={{
               background: 'var(--hub-input-bg)',
@@ -251,7 +255,10 @@ const TeamTab: React.FC = () => {
   const [showInvite, setShowInvite] = useState(false);
 
   const handleInvite = (): void => {
-    if (!email.trim() || !fullName.trim()) return;
+    if (!email.trim() || !fullName.trim()) {
+      toast.error('Email and full name are required');
+      return;
+    }
     invite.mutate(
       { email: email.trim(), fullName: fullName.trim(), role: 'member' },
       {

@@ -69,14 +69,24 @@ const QuickAddProductModal: React.FC<QuickAddProductModalProps> = ({
       toast.error(t('erp.products.validation.requiredFields'));
       return;
     }
+    const parsedCost = parseFloat(costPrice);
+    const parsedSale = parseFloat(salePrice);
+    if (!isNaN(parsedCost) && parsedCost < 0) {
+      toast.error(t('erp.products.validation.negativeCost'));
+      return;
+    }
+    if (!isNaN(parsedSale) && parsedSale < 0) {
+      toast.error(t('erp.products.validation.negativePrice'));
+      return;
+    }
     const payload = {
       name,
       sku,
       category,
       stock: parseInt(stock) || 0,
       lowStock: editing?.lowStock ?? 10,
-      costPrice: parseFloat(costPrice) || 0,
-      salePrice: parseFloat(salePrice) || 0,
+      costPrice: isNaN(parsedCost) ? 0 : parsedCost,
+      salePrice: isNaN(parsedSale) ? 0 : parsedSale,
       unit,
     };
     if (isEdit && editing) {
