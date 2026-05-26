@@ -69,3 +69,99 @@ func TestValidCadencesAndChannelsHaveExpectedKeys(t *testing.T) {
 		}
 	}
 }
+
+func TestValidateScheduledReport_AllCadences(t *testing.T) {
+	for cadence := range validCadences {
+		p := ScheduledReportPayload{
+			TemplateID: "tmpl",
+			Cadence:    cadence,
+			Channel:    "email",
+			Recipient:  "user@test.com",
+		}
+		if err := validateScheduledReport(p); err != nil {
+			t.Errorf("cadence %q should be valid, got %v", cadence, err)
+		}
+	}
+}
+
+func TestValidateScheduledReport_AllChannels(t *testing.T) {
+	for channel := range validChannels {
+		p := ScheduledReportPayload{
+			TemplateID: "tmpl",
+			Cadence:    "weekly",
+			Channel:    channel,
+			Recipient:  "user@test.com",
+		}
+		if err := validateScheduledReport(p); err != nil {
+			t.Errorf("channel %q should be valid, got %v", channel, err)
+		}
+	}
+}
+
+func TestValidateScheduledReport_EmptyCadence(t *testing.T) {
+	p := ScheduledReportPayload{TemplateID: "t", Cadence: "", Channel: "email", Recipient: "a@b"}
+	err := validateScheduledReport(p)
+	if err == nil || !strings.Contains(err.Error(), "cadence") {
+		t.Fatalf("empty cadence should fail with cadence mention, got %v", err)
+	}
+}
+
+func TestValidateScheduledReport_EmptyChannel(t *testing.T) {
+	p := ScheduledReportPayload{TemplateID: "t", Cadence: "daily", Channel: "", Recipient: "a@b"}
+	err := validateScheduledReport(p)
+	if err == nil || !strings.Contains(err.Error(), "channel") {
+		t.Fatalf("empty channel should fail with channel mention, got %v", err)
+	}
+}
+
+func TestValidateScheduledReport_AllFieldsPresent(t *testing.T) {
+	p := ScheduledReportPayload{
+		TemplateID: "quarterly_revenue",
+		Cadence:    "monthly",
+		Channel:    "slack",
+		Recipient:  "alerts@company.com",
+		IsActive:   true,
+	}
+	if err := validateScheduledReport(p); err != nil {
+		t.Fatalf("all valid fields should pass, got %v", err)
+	}
+}
+
+func TestValidateScheduledReport_CaseSensitiveCadence(t *testing.T) {
+	p := ScheduledReportPayload{TemplateID: "t", Cadence: "Daily", Channel: "email", Recipient: "a@b"}
+	err := validateScheduledReport(p)
+	if err == nil {
+		t.Fatal("cadence matching should be case-sensitive")
+	}
+}
+
+func TestValidateScheduledReport_CaseSensitiveChannel(t *testing.T) {
+	p := ScheduledReportPayload{TemplateID: "t", Cadence: "daily", Channel: "Email", Recipient: "a@b"}
+	err := validateScheduledReport(p)
+	if err == nil {
+		t.Fatal("channel matching should be case-sensitive")
+	}
+}
+
+func TestValidCadences_DoesNotContainYearly(t *testing.T) {
+	if validCadences["yearly"] {
+		t.Error("yearly should not be a valid cadence")
+	}
+}
+
+func TestValidChannels_DoesNotContainSMS(t *testing.T) {
+	if validChannels["sms"] {
+		t.Error("sms should not be a valid channel")
+	}
+}
+
+func TestValidateScheduledReport_MissingRecipientAndTemplate(t *testing.T) {
+	p := ScheduledReportPayload{Cadence: "daily", Channel: "email"}
+	err := validateScheduledReport(p)
+	if err == nil {
+		t.Fatal("missing template_id should fail")
+	}
+	if !strings.Contains(err.Error(), "template_id") {
+		t.Fatalf("expected error mentioning template_id, got %v", err)
+	}
+}
