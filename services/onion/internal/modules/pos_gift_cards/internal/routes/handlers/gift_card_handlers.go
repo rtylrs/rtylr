@@ -4,6 +4,8 @@ import (
 	"context"
 	"errors"
 	"net/http"
+	"strings"
+	"time"
 
 	"github.com/go-chi/chi/v5"
 
@@ -95,11 +97,17 @@ type CreateGiftCardResponse struct {
 }
 
 func (h *CreateGiftCardHandler) Validate(_ context.Context, req *CreateGiftCardRequest) *errorModels.ServerError {
+	req.Code = strings.TrimSpace(req.Code)
 	if req.Code == "" {
 		return &errorModels.ServerError{Code: http.StatusBadRequest, Message: "Code is required"}
 	}
 	if req.InitialAmount <= 0 {
 		return &errorModels.ServerError{Code: http.StatusBadRequest, Message: "Initial amount must be greater than zero"}
+	}
+	if req.ExpiresAt != "" {
+		if _, err := time.Parse("2006-01-02", req.ExpiresAt); err != nil {
+			return &errorModels.ServerError{Code: http.StatusBadRequest, Message: "expires_at must be a valid date in YYYY-MM-DD format"}
+		}
 	}
 	return nil
 }
@@ -224,6 +232,7 @@ type RedeemGiftCardResponse struct {
 }
 
 func (h *RedeemGiftCardHandler) Validate(_ context.Context, req *RedeemGiftCardRequest) *errorModels.ServerError {
+	req.Code = strings.TrimSpace(req.Code)
 	if req.Code == "" {
 		return &errorModels.ServerError{Code: http.StatusBadRequest, Message: "Code is required"}
 	}
