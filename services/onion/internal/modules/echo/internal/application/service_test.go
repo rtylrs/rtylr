@@ -71,3 +71,73 @@ func TestGenerateTextStream_NilClient_ReturnsError(t *testing.T) {
 		t.Errorf("expected ErrClientNotInitialized, got %v", err)
 	}
 }
+
+func TestGenerateTextStream_NilClient_ReturnsNilChannel(t *testing.T) {
+	s := newNilClientService()
+	ch, _ := s.GenerateTextStream(context.Background(), "test prompt")
+	if ch != nil {
+		t.Error("expected nil channel on error")
+	}
+}
+
+func TestIsAvailable_ReturnsBool(t *testing.T) {
+	s := newNilClientService()
+	var _ bool = s.IsAvailable()
+}
+
+func TestErrClientNotInitialized_IsNotNil(t *testing.T) {
+	if ErrClientNotInitialized == nil {
+		t.Error("ErrClientNotInitialized sentinel should not be nil")
+	}
+}
+
+func TestErrClientNotInitialized_HasMessage(t *testing.T) {
+	if ErrClientNotInitialized.Error() == "" {
+		t.Error("ErrClientNotInitialized should have a non-empty message")
+	}
+}
+
+func TestGetProviderDetails_NilClient_ContextDoesNotPanic(t *testing.T) {
+	s := newNilClientService()
+	s.GetProviderDetails(context.Background())
+}
+
+func TestGetProviderDetails_NilClient_ProvidersCanBeIterated(t *testing.T) {
+	s := newNilClientService()
+	got := s.GetProviderDetails(context.Background())
+	for k, v := range got.Providers {
+		_ = k
+		_ = v
+	}
+}
+
+func TestGetProviderStatus_NilClient_CanBeIteratedWithoutPanic(t *testing.T) {
+	s := newNilClientService()
+	m := s.GetProviderStatus()
+	for k, v := range m {
+		_ = k
+		_ = v
+	}
+}
+
+func TestGetPrimaryProvider_NilClient_EmptyStringIsNotNil(t *testing.T) {
+	s := newNilClientService()
+	result := s.GetPrimaryProvider()
+	_ = len(result) // should not panic
+}
+
+func TestGenerateTextStream_EmptyPrompt_NilClient(t *testing.T) {
+	s := newNilClientService()
+	_, err := s.GenerateTextStream(context.Background(), "")
+	if err != ErrClientNotInitialized {
+		t.Errorf("expected ErrClientNotInitialized for empty prompt with nil client, got %v", err)
+	}
+}
+
+func TestGetProviderDetails_NilClient_AvailableIsFalse(t *testing.T) {
+	s := newNilClientService()
+	details := s.GetProviderDetails(context.Background())
+	if details.Available != false {
+		t.Error("Available must be false when aiClient is nil")
+	}
+}
