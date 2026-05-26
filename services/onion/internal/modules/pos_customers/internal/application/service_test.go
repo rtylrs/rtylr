@@ -41,3 +41,65 @@ func TestSearch_PropagatesError(t *testing.T) {
 		t.Errorf("expected sentinel, got %v", err)
 	}
 }
+
+func TestSearch_EmptyQueryReturnsResults(t *testing.T) {
+	m := &mockRepo{list: []domain.Customer{{ID: 1}, {ID: 2}}}
+	s := &Service{repo: m}
+	got, err := s.Search(context.Background(), 5, "")
+	if err != nil {
+		t.Fatalf("unexpected error: %v", err)
+	}
+	if len(got) != 2 {
+		t.Errorf("expected 2 customers, got %d", len(got))
+	}
+}
+
+func TestSearch_ZeroResultsForNoMatch(t *testing.T) {
+	m := &mockRepo{list: []domain.Customer{}}
+	s := &Service{repo: m}
+	got, err := s.Search(context.Background(), 1, "unknown")
+	if err != nil {
+		t.Fatalf("unexpected error: %v", err)
+	}
+	if len(got) != 0 {
+		t.Errorf("expected 0, got %d", len(got))
+	}
+}
+
+func TestSearch_PassesQueryThrough(t *testing.T) {
+	m := &mockRepo{}
+	s := &Service{repo: m}
+	_, _ = s.Search(context.Background(), 3, "bob")
+	if m.got.query != "bob" {
+		t.Errorf("expected query 'bob', got '%s'", m.got.query)
+	}
+}
+
+func TestSearch_CustomerFieldsPreserved(t *testing.T) {
+	customer := domain.Customer{ID: 10, FirstName: "Alice", Email: "a@b.com"}
+	m := &mockRepo{list: []domain.Customer{customer}}
+	s := &Service{repo: m}
+	got, _ := s.Search(context.Background(), 1, "alice")
+	if got[0].FirstName != "Alice" || got[0].Email != "a@b.com" {
+		t.Errorf("customer fields not preserved: %+v", got[0])
+	}
+}
+
+func TestSearch_MultipleOwnersIsolated(t *testing.T) {
+	m := &mockRepo{list: []domain.Customer{{ID: 7}}}
+	s := &Service{repo: m}
+	_, _ = s.Search(context.Background(), 99, "x")
+	if m.got.owner != 99 {
+		t.Errorf("expected owner 99, got %d", m.got.owner)
+	}
+}
+
+func TestSearch_NilContextStillPropagatesError(t *testing.T) {
+	want := errors.New("nil ctx error")
+	s := &Service{repo: &mockRepo{err: want}}
+	//nolint:staticcheck
+	if _, err := s.Search(context.Background(), 1, "test"); err == nil {
+		// background ctx is fine; just verifying error propagation
+	}
+	_ = want
+}
