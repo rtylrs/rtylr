@@ -3,6 +3,7 @@ package handlers
 import (
 	"context"
 	"errors"
+	"fmt"
 	"net/http"
 	"strconv"
 	"strings"
@@ -238,5 +239,12 @@ func (h *DeleteScheduledReportHandler) Serve(ctx context.Context, _ *DeleteSched
 // parseIDParam lifts the {id} chi URL param into an int64 with validation.
 func parseIDParam(ctx context.Context) (int64, error) {
 	raw := chi.URLParamFromCtx(ctx, "id")
-	return strconv.ParseInt(raw, 10, 64)
+	id, err := strconv.ParseInt(raw, 10, 64)
+	if err != nil {
+		return 0, err
+	}
+	if id <= 0 {
+		return 0, fmt.Errorf("id must be a positive integer")
+	}
+	return id, nil
 }
