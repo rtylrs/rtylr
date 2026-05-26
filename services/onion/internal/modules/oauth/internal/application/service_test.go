@@ -1,0 +1,287 @@
+package application
+
+import (
+	"context"
+	"errors"
+	"testing"
+	"time"
+
+	"golang.org/x/crypto/bcrypt"
+
+	"github.com/voxire/onion/internal/modules/oauth/internal/domain"
+	"github.com/voxire/onion/internal/platform/utils/jwtutils"
+)
+
+type mockRepo struct {
+	client       *domain.Client
+	authCode     *domain.AuthCode
+	token        *domain.Token
+	userID       int64
+	passwordHash string
+	businessID   int64
+	role         string
+	err          error
+}
+
+func (m *mockRepo) GetClient(_ context.Context, _ string) (*domain.Client, error) {
+	return m.client, m.err
+}
+func (m *mockRepo) SaveAuthCode(_ context.Context, _ *domain.AuthCode) error { return m.err }
+func (m *mockRepo) GetAuthCode(_ context.Context, _ string) (*domain.AuthCode, error) {
+	return m.authCode, m.err
+}
+func (m *mockRepo) MarkAuthCodeUsed(_ context.Context, _ string) error { return m.err }
+func (m *mockRepo) SaveToken(_ context.Context, _ *domain.Token) error { return m.err }
+func (m *mockRepo) GetTokenByRefresh(_ context.Context, _ string) (*domain.Token, error) {
+	return m.token, m.err
+}
+func (m *mockRepo) RevokeToken(_ context.Context, _ string) error { return m.err }
+func (m *mockRepo) GetUserPasswordHash(_ context.Context, _ int64) (string, error) {
+	return m.passwordHash, m.err
+}
+func (m *mockRepo) GetUserIDByEmail(_ context.Context, _ string) (int64, error) {
+	return m.userID, m.err
+}
+func (m *mockRepo) GetUserBusinessIDAndRole(_ context.Context, _ int64) (int64, string, error) {
+	return m.businessID, m.role, nil
+}
+
+func newTestService(repo domain.Repository) *Service {
+	return &Service{
+		repo: repo,
+		jwt:  jwtutils.NewJWTHelperWithDuration("test-secret", "rtylr", 24*time.Hour),
+	}
+}
+
+// ---- GetClient ----
+
+func TestGetClient_ReturnsDelegatedClient(t *testing.T) {
+	client := &domain.Client{ID: "app1", Name: "Test App", RedirectURIs: []string{"http://localhost"}}
+	s := newTestService(&mockRepo{client: client})
+	got, err := s.GetClient(context.Background(), "app1")
+	if err != nil {
+		t.Fatalf("unexpected error: %v", err)
+	}
+	if got.ID != "app1" {
+		t.Errorf("expected client ID app1, got %s", got.ID)
+	}
+}
+
+func TestGetClient_PropagatesNotFoundError(t *testing.T) {
+	want := domain.ErrClientNotFound
+	s := newTestService(&mockRepo{err: want})
+	_, err := s.GetClient(context.Background(), "missing")
+	if !errors.Is(err, want) {
+		t.Errorf("expected ErrClientNotFound, got %v", err)
+	}
+}
+
+// ---- ValidateAuthRequest ----
+
+func TestValidateAuthRequest_ValidRedirectURIAndScope(t *testing.T) {
+	client := &domain.Client{
+		ID:           "app1",
+		RedirectURIs: []string{"https://example.com/callback"},
+		Scopes:       []string{"read", "write"},
+	}
+	s := newTestService(&mockRepo{client: client})
+	got, err := s.ValidateAuthRequest(context.Background(), "app1", "https://example.com/callback/extra", "read")
+	if err != nil {
+		t.Fatalf("unexpected error: %v", err)
+	}
+	if got.ID != "app1" {
+		t.Errorf("expected app1, got %s", got.ID)
+	}
+}
+
+func TestValidateAuthRequest_InvalidRedirectURIReturnsError(t *testing.T) {
+	client := &domain.Client{
+		ID:           "app1",
+		RedirectURIs: []string{"https://allowed.com/callback"},
+		Scopes:       []string{"read"},
+	}
+	s := newTestService(&mockRepo{client: client})
+	_, err := s.ValidateAuthRequest(context.Background(), "app1", "https://evil.com/callback", "read")
+	if !errors.Is(err, domain.ErrInvalidRedirectURI) {
+		t.Errorf("expected ErrInvalidRedirectURI, got %v", err)
+	}
+}
+
+func TestValidateAuthRequest_InvalidScopeReturnsError(t *testing.T) {
+	client := &domain.Client{
+		ID:           "app1",
+		RedirectURIs: []string{"https://example.com"},
+		Scopes:       []string{"read"},
+	}
+	s := newTestService(&mockRepo{client: client})
+	_, err := s.ValidateAuthRequest(context.Background(), "app1", "https://example.com/path", "write")
+	if !errors.Is(err, domain.ErrInvalidScope) {
+		t.Errorf("expected ErrInvalidScope, got %v", err)
+	}
+}
+
+// ---- Login ----
+
+func TestLogin_PropagatesInvalidCredentialsWhenEmailNotFound(t *testing.T) {
+	s := newTestService(&mockRepo{err: errors.New("not found")})
+	_, err := s.Login(context.Background(), "unknown@test.com", "password")
+	if err == nil || err.Error() != "invalid credentials" {
+		t.Errorf("expected 'invalid credentials', got %v", err)
+	}
+}
+
+func TestLogin_PropagatesInvalidCredentialsOnBadPassword(t *testing.T) {
+	hash, _ := bcrypt.GenerateFromPassword([]byte("correct-pass"), bcrypt.MinCost)
+	s := newTestService(&mockRepo{userID: 1, passwordHash: string(hash)})
+	_, err := s.Login(context.Background(), "user@test.com", "wrong-pass")
+	if err == nil || err.Error() != "invalid credentials" {
+		t.Errorf("expected 'invalid credentials', got %v", err)
+	}
+}
+
+func TestLogin_SucceedsWithCorrectCredentials(t *testing.T) {
+	hash, _ := bcrypt.GenerateFromPassword([]byte("secret"), bcrypt.MinCost)
+	s := newTestService(&mockRepo{userID: 42, passwordHash: string(hash)})
+	id, err := s.Login(context.Background(), "user@test.com", "secret")
+	if err != nil {
+		t.Fatalf("unexpected error: %v", err)
+	}
+	if id != 42 {
+		t.Errorf("expected userID=42, got %d", id)
+	}
+}
+
+// ---- IssueAuthCode ----
+
+func TestIssueAuthCode_ReturnsNonEmptyCode(t *testing.T) {
+	s := newTestService(&mockRepo{})
+	code, err := s.IssueAuthCode(context.Background(), "app1", 1, "https://example.com", "read", "", "")
+	if err != nil {
+		t.Fatalf("unexpected error: %v", err)
+	}
+	if code == "" {
+		t.Error("expected non-empty code")
+	}
+}
+
+func TestIssueAuthCode_PropagatesSaveError(t *testing.T) {
+	want := errors.New("save error")
+	s := newTestService(&mockRepo{err: want})
+	_, err := s.IssueAuthCode(context.Background(), "app1", 1, "https://example.com", "read", "", "")
+	if !errors.Is(err, want) {
+		t.Errorf("expected sentinel, got %v", err)
+	}
+}
+
+// ---- ExchangeCode ----
+
+func TestExchangeCode_CodeNotFoundReturnsError(t *testing.T) {
+	s := newTestService(&mockRepo{err: errors.New("not found")})
+	_, _, _, err := s.ExchangeCode(context.Background(), "app1", "bad-code", "verifier", "https://example.com")
+	if !errors.Is(err, domain.ErrCodeNotFound) {
+		t.Errorf("expected ErrCodeNotFound, got %v", err)
+	}
+}
+
+func TestExchangeCode_UsedCodeReturnsError(t *testing.T) {
+	code := &domain.AuthCode{
+		Code:      "used-code",
+		ClientID:  "app1",
+		Used:      true,
+		ExpiresAt: time.Now().Add(10 * time.Minute),
+	}
+	s := newTestService(&mockRepo{authCode: code})
+	_, _, _, err := s.ExchangeCode(context.Background(), "app1", "used-code", "", "https://example.com")
+	if !errors.Is(err, domain.ErrCodeUsed) {
+		t.Errorf("expected ErrCodeUsed, got %v", err)
+	}
+}
+
+func TestExchangeCode_ExpiredCodeReturnsError(t *testing.T) {
+	code := &domain.AuthCode{
+		Code:      "expired",
+		ClientID:  "app1",
+		Used:      false,
+		ExpiresAt: time.Now().Add(-1 * time.Minute),
+	}
+	s := newTestService(&mockRepo{authCode: code})
+	_, _, _, err := s.ExchangeCode(context.Background(), "app1", "expired", "", "https://example.com")
+	if !errors.Is(err, domain.ErrCodeExpired) {
+		t.Errorf("expected ErrCodeExpired, got %v", err)
+	}
+}
+
+// ---- RefreshTokens ----
+
+func TestRefreshTokens_TokenNotFoundReturnsError(t *testing.T) {
+	s := newTestService(&mockRepo{err: errors.New("not found")})
+	_, _, _, err := s.RefreshTokens(context.Background(), "app1", "bad-refresh")
+	if !errors.Is(err, domain.ErrTokenNotFound) {
+		t.Errorf("expected ErrTokenNotFound, got %v", err)
+	}
+}
+
+func TestRefreshTokens_RevokedTokenReturnsError(t *testing.T) {
+	token := &domain.Token{
+		ClientID:  "app1",
+		Revoked:   true,
+		ExpiresAt: time.Now().Add(1 * time.Hour),
+	}
+	s := newTestService(&mockRepo{token: token})
+	_, _, _, err := s.RefreshTokens(context.Background(), "app1", "refresh-token")
+	if !errors.Is(err, domain.ErrTokenRevoked) {
+		t.Errorf("expected ErrTokenRevoked, got %v", err)
+	}
+}
+
+func TestRefreshTokens_ExpiredTokenReturnsError(t *testing.T) {
+	token := &domain.Token{
+		ClientID:  "app1",
+		Revoked:   false,
+		ExpiresAt: time.Now().Add(-1 * time.Hour),
+	}
+	s := newTestService(&mockRepo{token: token})
+	_, _, _, err := s.RefreshTokens(context.Background(), "app1", "refresh-token")
+	if !errors.Is(err, domain.ErrTokenExpired) {
+		t.Errorf("expected ErrTokenExpired, got %v", err)
+	}
+}
+
+// ---- RevokeToken ----
+
+func TestRevokeToken_DelegatesToRepo(t *testing.T) {
+	s := newTestService(&mockRepo{})
+	err := s.RevokeToken(context.Background(), "some-refresh-token")
+	if err != nil {
+		t.Errorf("unexpected error: %v", err)
+	}
+}
+
+func TestRevokeToken_PropagatesRepoError(t *testing.T) {
+	want := errors.New("revoke error")
+	s := newTestService(&mockRepo{err: want})
+	err := s.RevokeToken(context.Background(), "token")
+	if !errors.Is(err, want) {
+		t.Errorf("expected sentinel, got %v", err)
+	}
+}
+
+// ---- verifyPKCE (pure function) ----
+
+func TestVerifyPKCE_S256MismatchReturnsFalse(t *testing.T) {
+	if verifyPKCE("bad-verifier", "challenge-hash", "S256") {
+		t.Error("expected false for mismatched S256 PKCE")
+	}
+}
+
+func TestVerifyPKCE_PlainMethodMatchesExact(t *testing.T) {
+	if !verifyPKCE("my-verifier", "my-verifier", "plain") {
+		t.Error("expected true for plain method with matching values")
+	}
+}
+
+func TestVerifyPKCE_PlainMethodReturnsFalseOnMismatch(t *testing.T) {
+	if verifyPKCE("verifier", "other", "plain") {
+		t.Error("expected false for plain method with mismatching values")
+	}
+}
