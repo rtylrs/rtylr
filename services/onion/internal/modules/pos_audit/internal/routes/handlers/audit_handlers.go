@@ -131,7 +131,10 @@ func (h *CreateAuditHandler) Validate(_ context.Context, req *CreateAuditRequest
 	if req.EntityType == "" {
 		return &errorModels.ServerError{Code: http.StatusBadRequest, Message: "Entity type is required"}
 	}
-	if req.EmployeeID == 0 {
+	if req.BranchID <= 0 {
+		return &errorModels.ServerError{Code: http.StatusBadRequest, Message: "Branch ID is required"}
+	}
+	if req.EmployeeID <= 0 {
 		return &errorModels.ServerError{Code: http.StatusBadRequest, Message: "Employee ID is required"}
 	}
 	return nil
