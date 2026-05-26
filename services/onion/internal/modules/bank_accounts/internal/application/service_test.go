@@ -57,3 +57,68 @@ func TestCreate_PropagatesError(t *testing.T) {
 		t.Errorf("expected %v, got %v", want, err)
 	}
 }
+
+func TestList_Empty(t *testing.T) {
+	s := &Service{repo: &mockRepo{listResult: []domain.BankAccount{}}}
+	got, err := s.List(context.Background(), 1)
+	if err != nil {
+		t.Fatalf("unexpected: %v", err)
+	}
+	if len(got) != 0 {
+		t.Errorf("expected empty, got %d", len(got))
+	}
+}
+
+func TestList_PropagatesError(t *testing.T) {
+	want := errors.New("list fail")
+	s := &Service{repo: &mockRepo{listErr: want}}
+	if _, err := s.List(context.Background(), 1); !errors.Is(err, want) {
+		t.Errorf("expected sentinel, got %v", err)
+	}
+}
+
+func TestList_MultipleAccounts(t *testing.T) {
+	accounts := []domain.BankAccount{
+		{ID: 1, Name: "Operating"},
+		{ID: 2, Name: "Savings"},
+		{ID: 3, Name: "Payroll"},
+	}
+	s := &Service{repo: &mockRepo{listResult: accounts}}
+	got, err := s.List(context.Background(), 1)
+	if err != nil {
+		t.Fatalf("unexpected: %v", err)
+	}
+	if len(got) != 3 {
+		t.Errorf("expected 3, got %d", len(got))
+	}
+}
+
+func TestCreate_ReturnsCorrectID(t *testing.T) {
+	s := &Service{repo: &mockRepo{createID: 55}}
+	id, err := s.Create(context.Background(), 1, domain.BankAccountInput{Name: "Checking"})
+	if err != nil {
+		t.Fatalf("unexpected: %v", err)
+	}
+	if id != 55 {
+		t.Errorf("expected 55, got %d", id)
+	}
+}
+
+func TestCreate_ForwardsOwnerID(t *testing.T) {
+	m := &mockRepo{createID: 1}
+	s := &Service{repo: m}
+	_, _ = s.Create(context.Background(), 99, domain.BankAccountInput{Name: "Test"})
+	if m.createGot.ownerID != 99 {
+		t.Errorf("expected ownerID 99, got %d", m.createGot.ownerID)
+	}
+}
+
+func TestCreate_ForwardsInput(t *testing.T) {
+	m := &mockRepo{createID: 1}
+	s := &Service{repo: m}
+	input := domain.BankAccountInput{Name: "Petty Cash", Institution: "Local Bank", Currency: "USD"}
+	_, _ = s.Create(context.Background(), 1, input)
+	if m.createGot.input.Name != "Petty Cash" || m.createGot.input.Institution != "Local Bank" {
+		t.Errorf("input not forwarded: %+v", m.createGot.input)
+	}
+}

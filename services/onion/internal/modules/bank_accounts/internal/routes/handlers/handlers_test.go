@@ -47,3 +47,27 @@ func TestNewPayload_HandlesZeroValue(t *testing.T) {
 		t.Errorf("zero value should pass through cleanly: %+v", out)
 	}
 }
+
+func TestCreateHandler_Validate_MissingName(t *testing.T) {
+	h := &CreateHandler{}
+	req := &CreateRequest{Name: ""}
+	if err := h.Validate(nil, req); err == nil {
+		t.Error("expected error for missing name")
+	}
+}
+
+func TestCreateHandler_Validate_WhitespaceName(t *testing.T) {
+	h := &CreateHandler{}
+	req := &CreateRequest{Name: "   "}
+	if err := h.Validate(nil, req); err == nil {
+		t.Error("expected error for whitespace-only name")
+	}
+}
+
+func TestCreateHandler_Validate_Valid(t *testing.T) {
+	h := &CreateHandler{}
+	req := &CreateRequest{Name: "Operating"}
+	if err := h.Validate(nil, req); err != nil {
+		t.Errorf("unexpected error: %v", err)
+	}
+}
