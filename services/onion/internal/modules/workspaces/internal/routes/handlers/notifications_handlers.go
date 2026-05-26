@@ -4,6 +4,7 @@ import (
 	"context"
 	"net/http"
 	"strconv"
+	"strings"
 
 	"github.com/voxire/onion/internal/modules/workspaces/internal/application"
 	"github.com/voxire/onion/internal/modules/workspaces/internal/domain"
@@ -80,7 +81,15 @@ type MarkNotificationReadRequest struct {
 
 type MarkNotificationReadResponse struct{}
 
-func (r *MarkNotificationReadRequest) Validate() *errorModels.ServerError { return nil }
+func (r *MarkNotificationReadRequest) Validate() *errorModels.ServerError {
+	if strings.TrimSpace(r.ID) == "" {
+		return &errorModels.ServerError{Code: http.StatusBadRequest, Message: "Notification id is required"}
+	}
+	if n, err := strconv.ParseInt(r.ID, 10, 64); err != nil || n <= 0 {
+		return &errorModels.ServerError{Code: http.StatusBadRequest, Message: "Invalid notification id"}
+	}
+	return nil
+}
 
 type MarkNotificationReadHandler struct{ FlowService *application.Service }
 
@@ -90,7 +99,10 @@ func (h *MarkNotificationReadHandler) Serve(ctx context.Context, r *MarkNotifica
 		return MarkNotificationReadResponse{}, errorModels.PermissionDeniedServerError()
 	}
 
-	id, _ := strconv.ParseInt(r.ID, 10, 64)
+	id, err := strconv.ParseInt(r.ID, 10, 64)
+	if err != nil || id <= 0 {
+		return MarkNotificationReadResponse{}, &errorModels.ServerError{Code: http.StatusBadRequest, Message: "Invalid notification id"}
+	}
 	if err := h.FlowService.MarkNotificationRead(ctx, id, authUser.UserID); err != nil {
 		return MarkNotificationReadResponse{}, &errorModels.ServerError{Code: http.StatusInternalServerError, Message: err.Error()}
 	}
