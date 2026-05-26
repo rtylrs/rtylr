@@ -3,6 +3,7 @@ package handlers
 import (
 	"context"
 	"net/http"
+	"strings"
 
 	"github.com/voxire/onion/internal/modules/booking_calendar/internal/application"
 	"github.com/voxire/onion/internal/modules/booking_calendar/internal/domain"
@@ -22,6 +23,18 @@ type (
 
 type CalendarResponse struct {
 	Days []domain.CalendarDay `json:"days"`
+}
+
+func (h *CalendarHandler) Validate(_ context.Context, req *CalendarRequest) *errorModels.ServerError {
+	req.From = strings.TrimSpace(req.From)
+	req.To = strings.TrimSpace(req.To)
+	if req.From == "" {
+		return &errorModels.ServerError{Code: http.StatusBadRequest, HTTPCode: http.StatusBadRequest, Message: "from is required"}
+	}
+	if req.To == "" {
+		return &errorModels.ServerError{Code: http.StatusBadRequest, HTTPCode: http.StatusBadRequest, Message: "to is required"}
+	}
+	return nil
 }
 
 func (h *CalendarHandler) Serve(ctx context.Context, req *CalendarRequest) (CalendarResponse, *errorModels.ServerError) {

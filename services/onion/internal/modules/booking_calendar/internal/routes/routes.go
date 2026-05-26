@@ -11,5 +11,5 @@ import (
 )
 
 func RegisterRoutes(ctx context.Context, router *chi.Mux, service *application.Service) {
-	http.RegisterGET[handlers.CalendarRequest, handlers.CalendarResponse](ctx, router, handlers.CalendarRoutes(), &handlers.CalendarHandler{Service: service})
+	http.RegisterGETWithValidation[handlers.CalendarRequest, handlers.CalendarResponse](ctx, router, handlers.CalendarRoutes(), &handlers.CalendarHandler{Service: service})
 }
