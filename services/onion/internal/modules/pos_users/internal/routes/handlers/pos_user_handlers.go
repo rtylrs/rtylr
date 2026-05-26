@@ -4,6 +4,7 @@ import (
 	"context"
 	"errors"
 	"net/http"
+	"strings"
 
 	"github.com/voxire/onion/internal/modules/pos_users/internal/application"
 	"github.com/voxire/onion/internal/modules/pos_users/internal/domain"
@@ -104,9 +105,11 @@ type CreatePOSUserResponse struct {
 }
 
 func (h *CreatePOSUserHandler) Validate(_ context.Context, req *CreatePOSUserRequest) *errorModels.ServerError {
+	req.Name = strings.TrimSpace(req.Name)
 	if req.Name == "" {
 		return &errorModels.ServerError{HTTPCode: http.StatusBadRequest, Code: http.StatusBadRequest, Message: "Name is required"}
 	}
+	req.PIN = strings.TrimSpace(req.PIN)
 	if req.PIN == "" {
 		return &errorModels.ServerError{HTTPCode: http.StatusBadRequest, Code: http.StatusBadRequest, Message: "PIN is required"}
 	}
