@@ -4,6 +4,7 @@ import (
 	"context"
 	"errors"
 	"net/http"
+	"strings"
 
 	"github.com/voxire/onion/internal/modules/hr_core/internal/application"
 	"github.com/voxire/onion/internal/modules/hr_core/internal/domain"
@@ -33,6 +34,9 @@ type InviteEmployeeResponse struct {
 }
 
 func (h *InviteEmployeeHandler) Validate(_ context.Context, req *InviteEmployeeRequest) *errorModels.ServerError {
+	req.Email = strings.TrimSpace(req.Email)
+	req.FirstName = strings.TrimSpace(req.FirstName)
+	req.LastName = strings.TrimSpace(req.LastName)
 	if req.Email == "" {
 		return &errorModels.ServerError{Code: http.StatusBadRequest, Message: "email is required"}
 	}
