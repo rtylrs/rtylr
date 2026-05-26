@@ -3,6 +3,7 @@ package handlers
 import (
 	"context"
 	"net/http"
+	"time"
 
 	"github.com/voxire/onion/internal/modules/timesheets/internal/application"
 	authPkg "github.com/voxire/onion/internal/platform/auth"
@@ -29,6 +30,15 @@ type (
 
 type ListResponse struct {
 	Timesheets []TimesheetEntryPayload `json:"timesheets"`
+}
+
+func (h *ListHandler) Validate(_ context.Context, req *ListRequest) *errorModels.ServerError {
+	if req.WeekStart != "" {
+		if _, err := time.Parse("2006-01-02", req.WeekStart); err != nil {
+			return &errorModels.ServerError{Code: http.StatusBadRequest, Message: "week_start must be a date in YYYY-MM-DD format"}
+		}
+	}
+	return nil
 }
 
 func (h *ListHandler) Serve(ctx context.Context, req *ListRequest) (ListResponse, *errorModels.ServerError) {
