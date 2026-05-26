@@ -3,6 +3,7 @@ package handlers
 import (
 	"context"
 	"net/http"
+	"strings"
 
 	"github.com/voxire/onion/internal/modules/insights/internal/application"
 	authPkg "github.com/voxire/onion/internal/platform/auth"
@@ -48,6 +49,13 @@ type UpdateSettingsRequest struct {
 }
 
 type UpdateSettingsResponse = application.SettingsPayload
+
+func (h *UpdateSettingsHandler) Validate(_ context.Context, req *UpdateSettingsRequest) *errorModels.ServerError {
+	req.DefaultCurrency = strings.TrimSpace(req.DefaultCurrency)
+	req.FiscalYearStart = strings.TrimSpace(req.FiscalYearStart)
+	req.Timezone = strings.TrimSpace(req.Timezone)
+	return nil
+}
 
 func (h *UpdateSettingsHandler) Serve(ctx context.Context, req *UpdateSettingsRequest) (UpdateSettingsResponse, *errorModels.ServerError) {
 	device := authPkg.DeviceCtx(ctx)
