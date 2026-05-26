@@ -227,12 +227,34 @@ type UpdateStockTakeResponse struct {
 	Message string `json:"message"`
 }
 
+var validStockTakeStatuses = map[string]struct{}{
+	string(domain.StockTakeStatusDraft):      {},
+	string(domain.StockTakeStatusInProgress): {},
+	string(domain.StockTakeStatusCompleted):  {},
+}
+
 func (h *UpdateStockTakeHandler) Validate(_ context.Context, req *UpdateStockTakeRequest) *errorModels.ServerError {
 	if req.ID == 0 {
 		return &errorModels.ServerError{
 			Code:     http.StatusBadRequest,
 			HTTPCode: http.StatusBadRequest,
 			Message:  "Stock take ID is required",
+		}
+	}
+
+	if req.Status == "" {
+		return &errorModels.ServerError{
+			Code:     http.StatusBadRequest,
+			HTTPCode: http.StatusBadRequest,
+			Message:  "Status is required",
+		}
+	}
+
+	if _, ok := validStockTakeStatuses[req.Status]; !ok {
+		return &errorModels.ServerError{
+			Code:     http.StatusBadRequest,
+			HTTPCode: http.StatusBadRequest,
+			Message:  "Invalid status. Must be one of: draft, in_progress, completed",
 		}
 	}
 
