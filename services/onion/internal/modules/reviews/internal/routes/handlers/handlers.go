@@ -88,6 +88,9 @@ func (h *CreateHandler) Validate(_ context.Context, req *CreateRequest) *errorMo
 	if req.StaffID == 0 {
 		return &errorModels.ServerError{Code: http.StatusBadRequest, Message: "staffId is required"}
 	}
+	if req.Period == "" {
+		return &errorModels.ServerError{Code: http.StatusBadRequest, Message: "period is required"}
+	}
 	return nil
 }
 
