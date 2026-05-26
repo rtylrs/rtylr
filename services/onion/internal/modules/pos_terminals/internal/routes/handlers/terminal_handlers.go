@@ -4,6 +4,7 @@ import (
 	"context"
 	"net/http"
 	"strconv"
+	"strings"
 
 	"github.com/go-chi/chi/v5"
 
@@ -77,7 +78,7 @@ type CreateTerminalResponse struct {
 }
 
 func (h *CreateTerminalHandler) Validate(_ context.Context, req *CreateTerminalRequest) *errorModels.ServerError {
-	if req.Name == "" {
+	if strings.TrimSpace(req.Name) == "" {
 		return &errorModels.ServerError{Code: http.StatusBadRequest, Message: "Name is required"}
 	}
 	if req.BranchID == 0 {
@@ -121,7 +122,7 @@ type UpdateTerminalResponse struct {
 }
 
 func (h *UpdateTerminalHandler) Validate(_ context.Context, req *UpdateTerminalRequest) *errorModels.ServerError {
-	if req.Name == "" {
+	if strings.TrimSpace(req.Name) == "" {
 		return &errorModels.ServerError{Code: http.StatusBadRequest, Message: "Name is required"}
 	}
 	return nil
