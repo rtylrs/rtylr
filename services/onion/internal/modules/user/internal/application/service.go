@@ -14,6 +14,7 @@ import (
 	"github.com/voxire/onion/internal/modules/user/internal/infrastructure"
 	"github.com/voxire/onion/internal/platform/cache/cacher"
 	cacheKeys "github.com/voxire/onion/internal/platform/cache/keys"
+	"github.com/voxire/onion/internal/platform/email"
 	"github.com/voxire/onion/internal/platform/logger"
 	"github.com/voxire/onion/internal/platform/utils/jwtutils"
 	"github.com/voxire/onion/internal/platform/utils/passwordutils"
@@ -36,6 +37,7 @@ var (
 
 type Service struct {
 	repo           *infrastructure.Repository
+	db             *sql.DB
 	validator      *Validator
 	JWT            *jwtutils.JWTHelper
 	googleClientID string
@@ -47,6 +49,7 @@ func NewService(_ context.Context, db *sql.DB, googleClientID string) *Service {
 
 	return &Service{
 		repo:           repo,
+		db:             db,
 		validator:      NewValidator(),
 		googleClientID: googleClientID,
 	}
@@ -125,7 +128,18 @@ func (s *Service) Register(ctx context.Context, data RegisterUserData) (int64, e
 		data.DeviceInfo,
 	)
 
-	return s.repo.CreateUser(ctx, user)
+	userID, err := s.repo.CreateUser(ctx, user)
+	if err != nil {
+		return 0, err
+	}
+
+	if s.db != nil {
+		if qErr := email.EnqueueWelcome(ctx, s.db, normalizedEmail, normalizedFullName); qErr != nil {
+			logger.Ctx(ctx).Warn("failed to enqueue welcome email", logger.Error(qErr))
+		}
+	}
+
+	return userID, nil
 }
 
 func (s *Service) RegisterLegacy(ctx context.Context, email, password, fullName string) (int64, error) {

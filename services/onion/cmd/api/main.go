@@ -146,6 +146,7 @@ import (
 	platformConfig "github.com/voxire/onion/internal/platform/config"
 	"github.com/voxire/onion/internal/platform/database/dbclient"
 	emailPkg "github.com/voxire/onion/internal/platform/email"
+	"github.com/voxire/onion/internal/platform/emailqueue"
 	"github.com/voxire/onion/internal/platform/logger"
 	"github.com/voxire/onion/internal/platform/observability"
 	"github.com/voxire/onion/internal/platform/server/http"
@@ -293,6 +294,8 @@ func run(ctx context.Context) error {
 
 	emailPkg.Initialize()
 	sheetsPkg.Initialize(ctx)
+
+	go emailqueue.NewWorker(dbclient.Pool(), 5*time.Second).Run(ctx)
 
 	readyTime := time.Now()
 	startupDuration := readyTime.Sub(startTime)
