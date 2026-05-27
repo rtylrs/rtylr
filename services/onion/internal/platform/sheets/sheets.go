@@ -44,7 +44,7 @@ func Initialize(ctx context.Context) {
 			sheetID = os.Getenv("GOOGLE_SHEETS_LEAD_SHEET_ID")
 		}
 		if sheetID == "" {
-			logger.Global().Warn("GOOGLE_SHEETS_LEAD_SHEET_ID not set — Sheets logging disabled")
+			logger.Global().Debug("GOOGLE_SHEETS_LEAD_SHEET_ID not set — Sheets logging disabled")
 			return
 		}
 
@@ -55,7 +55,7 @@ func Initialize(ctx context.Context) {
 			encoded = os.Getenv("GOOGLE_SHEETS_CREDENTIALS")
 		}
 		if encoded == "" {
-			logger.Global().Warn("GOOGLE_SHEETS_CREDENTIALS not set — Sheets logging disabled")
+			logger.Global().Debug("GOOGLE_SHEETS_CREDENTIALS not set — Sheets logging disabled")
 			return
 		}
 

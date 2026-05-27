@@ -38,8 +38,7 @@ func NewService(ctx context.Context, db *sql.DB) *Service {
 
 	aiClient, err := snips.NewClient(ctx)
 	if err != nil {
-		logger.Ctx(ctx).Warn("AI client not available for memory summarization", logger.Error(err))
-
+		logger.Ctx(ctx).Debug("AI client not available for memory summarization", logger.Error(err))
 		aiClient = nil
 	}
 
