@@ -1,0 +1,340 @@
+package infrastructure_test
+
+import (
+	"context"
+	"testing"
+
+	"github.com/voxire/onion/internal/modules/booking_appointments/internal/domain"
+	"github.com/voxire/onion/internal/modules/booking_appointments/internal/infrastructure"
+	"github.com/voxire/onion/internal/testutil"
+)
+
+const (
+	apptStartTime = "2026-06-01T09:00:00Z"
+	apptEndTime   = "2026-06-01T10:00:00Z"
+)
+
+func baseAppointmentInput() domain.AppointmentInput {
+	return domain.AppointmentInput{
+		CustomerName:  "Jane Doe",
+		CustomerEmail: "jane@example.com",
+		CustomerPhone: "555-1234",
+		StartTime:     apptStartTime,
+		EndTime:       apptEndTime,
+		Status:        "confirmed",
+		Notes:         "First visit",
+	}
+}
+
+func TestListAppointments_ZeroOwner_ReturnsEmpty(t *testing.T) {
+	db := testutil.OpenDB(t)
+	repo := infrastructure.NewRepository(db)
+	ctx := context.Background()
+
+	items, err := repo.List(ctx, 0)
+	if err != nil {
+		t.Fatalf("List: %v", err)
+	}
+	if len(items) != 0 {
+		t.Errorf("expected 0 items for owner 0, got %d", len(items))
+	}
+}
+
+func TestListAppointments_IsNotNil(t *testing.T) {
+	db := testutil.OpenDB(t)
+	repo := infrastructure.NewRepository(db)
+	ctx := context.Background()
+
+	items, err := repo.List(ctx, testutil.OwnerID)
+	if err != nil {
+		t.Fatalf("List: %v", err)
+	}
+	if items == nil {
+		t.Fatal("expected non-nil slice, got nil")
+	}
+}
+
+func TestListTodayAppointments_IsNotNil(t *testing.T) {
+	db := testutil.OpenDB(t)
+	repo := infrastructure.NewRepository(db)
+	ctx := context.Background()
+
+	items, err := repo.ListToday(ctx, testutil.OwnerID)
+	if err != nil {
+		t.Fatalf("ListToday: %v", err)
+	}
+	if items == nil {
+		t.Fatal("expected non-nil slice, got nil")
+	}
+}
+
+func TestListTodayAppointments_ZeroOwner_ReturnsEmpty(t *testing.T) {
+	db := testutil.OpenDB(t)
+	repo := infrastructure.NewRepository(db)
+	ctx := context.Background()
+
+	items, err := repo.ListToday(ctx, 0)
+	if err != nil {
+		t.Fatalf("ListToday: %v", err)
+	}
+	if len(items) != 0 {
+		t.Errorf("expected 0 items for owner 0, got %d", len(items))
+	}
+}
+
+func TestCreateAppointment_PersistsAndReturnsID(t *testing.T) {
+	db := testutil.OpenDB(t)
+	repo := infrastructure.NewRepository(db)
+	ctx := context.Background()
+
+	id, err := repo.Create(ctx, testutil.OwnerID, baseAppointmentInput())
+	if err != nil {
+		t.Fatalf("Create: %v", err)
+	}
+	if id <= 0 {
+		t.Fatalf("expected positive ID, got %d", id)
+	}
+	t.Cleanup(func() { _ = repo.Delete(ctx, testutil.OwnerID, id) })
+}
+
+func TestCreateAppointment_CustomerNameIsStored(t *testing.T) {
+	db := testutil.OpenDB(t)
+	repo := infrastructure.NewRepository(db)
+	ctx := context.Background()
+
+	input := baseAppointmentInput()
+	input.CustomerName = "Alice Smith"
+	id, err := repo.Create(ctx, testutil.OwnerID, input)
+	if err != nil {
+		t.Fatalf("Create: %v", err)
+	}
+	t.Cleanup(func() { _ = repo.Delete(ctx, testutil.OwnerID, id) })
+
+	items, err := repo.List(ctx, testutil.OwnerID)
+	if err != nil {
+		t.Fatalf("List: %v", err)
+	}
+	for _, a := range items {
+		if a.ID == id {
+			if a.CustomerName != "Alice Smith" {
+				t.Errorf("expected customer name Alice Smith, got %s", a.CustomerName)
+			}
+			return
+		}
+	}
+	t.Errorf("appointment id=%d not found in list", id)
+}
+
+func TestCreateAppointment_CustomerEmailIsStored(t *testing.T) {
+	db := testutil.OpenDB(t)
+	repo := infrastructure.NewRepository(db)
+	ctx := context.Background()
+
+	input := baseAppointmentInput()
+	input.CustomerEmail = "bob@test.com"
+	id, err := repo.Create(ctx, testutil.OwnerID, input)
+	if err != nil {
+		t.Fatalf("Create: %v", err)
+	}
+	t.Cleanup(func() { _ = repo.Delete(ctx, testutil.OwnerID, id) })
+
+	items, err := repo.List(ctx, testutil.OwnerID)
+	if err != nil {
+		t.Fatalf("List: %v", err)
+	}
+	for _, a := range items {
+		if a.ID == id {
+			if a.CustomerEmail != "bob@test.com" {
+				t.Errorf("expected email bob@test.com, got %s", a.CustomerEmail)
+			}
+			return
+		}
+	}
+	t.Errorf("appointment id=%d not found in list", id)
+}
+
+func TestCreateAppointment_StatusIsStored(t *testing.T) {
+	db := testutil.OpenDB(t)
+	repo := infrastructure.NewRepository(db)
+	ctx := context.Background()
+
+	input := baseAppointmentInput()
+	input.Status = "confirmed"
+	id, err := repo.Create(ctx, testutil.OwnerID, input)
+	if err != nil {
+		t.Fatalf("Create: %v", err)
+	}
+	t.Cleanup(func() { _ = repo.Delete(ctx, testutil.OwnerID, id) })
+
+	items, err := repo.List(ctx, testutil.OwnerID)
+	if err != nil {
+		t.Fatalf("List: %v", err)
+	}
+	for _, a := range items {
+		if a.ID == id {
+			if a.Status != "confirmed" {
+				t.Errorf("expected status confirmed, got %s", a.Status)
+			}
+			return
+		}
+	}
+	t.Errorf("appointment id=%d not found in list", id)
+}
+
+func TestCreateAppointment_StartTimeIsStored(t *testing.T) {
+	db := testutil.OpenDB(t)
+	repo := infrastructure.NewRepository(db)
+	ctx := context.Background()
+
+	id, err := repo.Create(ctx, testutil.OwnerID, baseAppointmentInput())
+	if err != nil {
+		t.Fatalf("Create: %v", err)
+	}
+	t.Cleanup(func() { _ = repo.Delete(ctx, testutil.OwnerID, id) })
+
+	items, err := repo.List(ctx, testutil.OwnerID)
+	if err != nil {
+		t.Fatalf("List: %v", err)
+	}
+	for _, a := range items {
+		if a.ID == id {
+			if a.StartTime.IsZero() {
+				t.Errorf("expected non-zero start time")
+			}
+			return
+		}
+	}
+	t.Errorf("appointment id=%d not found in list", id)
+}
+
+func TestUpdateAppointment_ChangesCustomerName(t *testing.T) {
+	db := testutil.OpenDB(t)
+	repo := infrastructure.NewRepository(db)
+	ctx := context.Background()
+
+	id, err := repo.Create(ctx, testutil.OwnerID, baseAppointmentInput())
+	if err != nil {
+		t.Fatalf("Create: %v", err)
+	}
+	t.Cleanup(func() { _ = repo.Delete(ctx, testutil.OwnerID, id) })
+
+	updated := baseAppointmentInput()
+	updated.CustomerName = "Updated Customer"
+	if err := repo.Update(ctx, testutil.OwnerID, id, updated); err != nil {
+		t.Fatalf("Update: %v", err)
+	}
+
+	items, err := repo.List(ctx, testutil.OwnerID)
+	if err != nil {
+		t.Fatalf("List: %v", err)
+	}
+	for _, a := range items {
+		if a.ID == id && a.CustomerName != "Updated Customer" {
+			t.Errorf("expected customer name Updated Customer, got %s", a.CustomerName)
+		}
+	}
+}
+
+func TestUpdateAppointment_ChangesStatus(t *testing.T) {
+	db := testutil.OpenDB(t)
+	repo := infrastructure.NewRepository(db)
+	ctx := context.Background()
+
+	id, err := repo.Create(ctx, testutil.OwnerID, baseAppointmentInput())
+	if err != nil {
+		t.Fatalf("Create: %v", err)
+	}
+	t.Cleanup(func() { _ = repo.Delete(ctx, testutil.OwnerID, id) })
+
+	updated := baseAppointmentInput()
+	updated.Status = "cancelled"
+	if err := repo.Update(ctx, testutil.OwnerID, id, updated); err != nil {
+		t.Fatalf("Update: %v", err)
+	}
+
+	items, err := repo.List(ctx, testutil.OwnerID)
+	if err != nil {
+		t.Fatalf("List: %v", err)
+	}
+	for _, a := range items {
+		if a.ID == id && a.Status != "cancelled" {
+			t.Errorf("expected status cancelled, got %s", a.Status)
+		}
+	}
+}
+
+func TestDeleteAppointment_RemovesRow(t *testing.T) {
+	db := testutil.OpenDB(t)
+	repo := infrastructure.NewRepository(db)
+	ctx := context.Background()
+
+	id, err := repo.Create(ctx, testutil.OwnerID, baseAppointmentInput())
+	if err != nil {
+		t.Fatalf("Create: %v", err)
+	}
+
+	if err := repo.Delete(ctx, testutil.OwnerID, id); err != nil {
+		t.Fatalf("Delete: %v", err)
+	}
+
+	items, err := repo.List(ctx, testutil.OwnerID)
+	if err != nil {
+		t.Fatalf("List: %v", err)
+	}
+	for _, a := range items {
+		if a.ID == id {
+			t.Errorf("deleted appointment id=%d still in list", id)
+		}
+	}
+}
+
+func TestCreate_ThenList_FindsAppointment(t *testing.T) {
+	db := testutil.OpenDB(t)
+	repo := infrastructure.NewRepository(db)
+	ctx := context.Background()
+
+	id, err := repo.Create(ctx, testutil.OwnerID, baseAppointmentInput())
+	if err != nil {
+		t.Fatalf("Create: %v", err)
+	}
+	t.Cleanup(func() { _ = repo.Delete(ctx, testutil.OwnerID, id) })
+
+	items, err := repo.List(ctx, testutil.OwnerID)
+	if err != nil {
+		t.Fatalf("List: %v", err)
+	}
+	for _, a := range items {
+		if a.ID == id {
+			return
+		}
+	}
+	t.Errorf("appointment id=%d not found after create", id)
+}
+
+func TestCreateAppointment_NotesAreStored(t *testing.T) {
+	db := testutil.OpenDB(t)
+	repo := infrastructure.NewRepository(db)
+	ctx := context.Background()
+
+	input := baseAppointmentInput()
+	input.Notes = "Allergic to lavender"
+	id, err := repo.Create(ctx, testutil.OwnerID, input)
+	if err != nil {
+		t.Fatalf("Create: %v", err)
+	}
+	t.Cleanup(func() { _ = repo.Delete(ctx, testutil.OwnerID, id) })
+
+	items, err := repo.List(ctx, testutil.OwnerID)
+	if err != nil {
+		t.Fatalf("List: %v", err)
+	}
+	for _, a := range items {
+		if a.ID == id {
+			if a.Notes != "Allergic to lavender" {
+				t.Errorf("expected notes 'Allergic to lavender', got %s", a.Notes)
+			}
+			return
+		}
+	}
+	t.Errorf("appointment id=%d not found in list", id)
+}

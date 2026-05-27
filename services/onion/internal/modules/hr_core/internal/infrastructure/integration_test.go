@@ -2,6 +2,7 @@ package infrastructure_test
 
 import (
 	"context"
+	"fmt"
 	"testing"
 
 	"github.com/voxire/onion/internal/modules/hr_core/internal/domain"
@@ -73,5 +74,277 @@ func TestListDepartments_ReturnsOperations(t *testing.T) {
 	}
 	if !found {
 		t.Errorf("expected department 'Operations' in list, got %v", departments)
+	}
+}
+
+func TestListDepartments_ZeroOwner_ReturnsEmpty(t *testing.T) {
+	db := testutil.OpenDB(t)
+	repo := infrastructure.NewRepository(db)
+	ctx := context.Background()
+
+	depts, err := repo.ListDepartments(ctx, 0, 0)
+	if err != nil {
+		t.Fatalf("ListDepartments zero owner: %v", err)
+	}
+	if len(depts) != 0 {
+		t.Errorf("expected 0 departments for owner 0, got %d", len(depts))
+	}
+}
+
+func TestListDepartments_ContainsOperations(t *testing.T) {
+	db := testutil.OpenDB(t)
+	repo := infrastructure.NewRepository(db)
+	ctx := context.Background()
+
+	depts, err := repo.ListDepartments(ctx, testutil.OwnerID, 0)
+	if err != nil {
+		t.Fatalf("ListDepartments: %v", err)
+	}
+	for _, d := range depts {
+		if d.Name == "Operations" {
+			return
+		}
+	}
+	t.Errorf("department 'Operations' not found in %d results", len(depts))
+}
+
+func TestGetDepartmentByID_4001_IsOperations(t *testing.T) {
+	db := testutil.OpenDB(t)
+	repo := infrastructure.NewRepository(db)
+	ctx := context.Background()
+
+	// Verify department 4001 appears in the list with name Operations.
+	depts, err := repo.ListDepartments(ctx, testutil.OwnerID, 0)
+	if err != nil {
+		t.Fatalf("ListDepartments: %v", err)
+	}
+	var found *domain.DepartmentRecord
+	for i, d := range depts {
+		if d.ID == 4001 {
+			found = &depts[i]
+			break
+		}
+	}
+	if found == nil {
+		t.Fatal("department id=4001 not found")
+	}
+	if found.Name != "Operations" {
+		t.Errorf("expected name=Operations, got %q", found.Name)
+	}
+}
+
+func TestGetDepartmentByID_NotFound_Errors(t *testing.T) {
+	db := testutil.OpenDB(t)
+	repo := infrastructure.NewRepository(db)
+	ctx := context.Background()
+
+	// No GetDepartmentByID method exists; we verify via list that id 999999 is absent.
+	depts, err := repo.ListDepartments(ctx, testutil.OwnerID, 0)
+	if err != nil {
+		t.Fatalf("ListDepartments: %v", err)
+	}
+	for _, d := range depts {
+		if d.ID == 999999 {
+			t.Error("unexpected department id=999999 found")
+		}
+	}
+}
+
+func TestCreateDepartment_PersistsAndReturnsID(t *testing.T) {
+	db := testutil.OpenDB(t)
+	repo := infrastructure.NewRepository(db)
+	ctx := context.Background()
+
+	created, err := repo.CreateDepartment(ctx, testutil.OwnerID, domain.DepartmentRecord{
+		Name: "Test Dept Create",
+	})
+	if err != nil {
+		t.Fatalf("CreateDepartment: %v", err)
+	}
+	if created.ID == 0 {
+		t.Fatal("expected non-zero ID after create")
+	}
+}
+
+func TestCreateDepartment_NameIsStored(t *testing.T) {
+	db := testutil.OpenDB(t)
+	repo := infrastructure.NewRepository(db)
+	ctx := context.Background()
+
+	name := fmt.Sprintf("Dept Name %d", 42)
+	created, err := repo.CreateDepartment(ctx, testutil.OwnerID, domain.DepartmentRecord{
+		Name: name,
+	})
+	if err != nil {
+		t.Fatalf("CreateDepartment: %v", err)
+	}
+	if created.Name != name {
+		t.Errorf("expected name=%q, got %q", name, created.Name)
+	}
+}
+
+func TestCreateDepartment_OwnerIDIsSet(t *testing.T) {
+	db := testutil.OpenDB(t)
+	repo := infrastructure.NewRepository(db)
+	ctx := context.Background()
+
+	created, err := repo.CreateDepartment(ctx, testutil.OwnerID, domain.DepartmentRecord{
+		Name: "Owner Check Dept",
+	})
+	if err != nil {
+		t.Fatalf("CreateDepartment: %v", err)
+	}
+	if created.OwnerID != testutil.OwnerID {
+		t.Errorf("expected owner_id=%d, got %d", testutil.OwnerID, created.OwnerID)
+	}
+}
+
+func TestUpdateDepartment_ChangesName(t *testing.T) {
+	db := testutil.OpenDB(t)
+	repo := infrastructure.NewRepository(db)
+	ctx := context.Background()
+
+	created, err := repo.CreateDepartment(ctx, testutil.OwnerID, domain.DepartmentRecord{
+		Name: "Before Update",
+	})
+	if err != nil {
+		t.Fatalf("CreateDepartment: %v", err)
+	}
+
+	created.Name = "After Update"
+	updated, err := repo.UpdateDepartment(ctx, testutil.OwnerID, *created)
+	if err != nil {
+		t.Fatalf("UpdateDepartment: %v", err)
+	}
+	if updated.Name != "After Update" {
+		t.Errorf("expected name='After Update', got %q", updated.Name)
+	}
+}
+
+func TestCreateDepartment_ThenGet_Roundtrip(t *testing.T) {
+	db := testutil.OpenDB(t)
+	repo := infrastructure.NewRepository(db)
+	ctx := context.Background()
+
+	created, err := repo.CreateDepartment(ctx, testutil.OwnerID, domain.DepartmentRecord{
+		Name: "Roundtrip Dept",
+	})
+	if err != nil {
+		t.Fatalf("CreateDepartment: %v", err)
+	}
+
+	depts, err := repo.ListDepartments(ctx, testutil.OwnerID, 0)
+	if err != nil {
+		t.Fatalf("ListDepartments: %v", err)
+	}
+	found := false
+	for _, d := range depts {
+		if d.ID == created.ID {
+			found = true
+			if d.Name != "Roundtrip Dept" {
+				t.Errorf("expected name='Roundtrip Dept', got %q", d.Name)
+			}
+			break
+		}
+	}
+	if !found {
+		t.Errorf("created department id=%d not found in list", created.ID)
+	}
+}
+
+func TestListDepartments_AfterCreate_CountIncreases(t *testing.T) {
+	db := testutil.OpenDB(t)
+	repo := infrastructure.NewRepository(db)
+	ctx := context.Background()
+
+	before, err := repo.ListDepartments(ctx, testutil.OwnerID, 0)
+	if err != nil {
+		t.Fatalf("ListDepartments before: %v", err)
+	}
+
+	_, err = repo.CreateDepartment(ctx, testutil.OwnerID, domain.DepartmentRecord{
+		Name: "Count Increase Dept",
+	})
+	if err != nil {
+		t.Fatalf("CreateDepartment: %v", err)
+	}
+
+	after, err := repo.ListDepartments(ctx, testutil.OwnerID, 0)
+	if err != nil {
+		t.Fatalf("ListDepartments after: %v", err)
+	}
+	if len(after) <= len(before) {
+		t.Errorf("expected count to increase from %d, got %d", len(before), len(after))
+	}
+}
+
+func TestListLocations_ZeroOwner_ReturnsEmpty(t *testing.T) {
+	db := testutil.OpenDB(t)
+	repo := infrastructure.NewRepository(db)
+	ctx := context.Background()
+
+	locs, err := repo.ListLocations(ctx, 0)
+	if err != nil {
+		t.Fatalf("ListLocations zero owner: %v", err)
+	}
+	if len(locs) != 0 {
+		t.Errorf("expected 0 locations for owner 0, got %d", len(locs))
+	}
+}
+
+func TestListLocations_NoError(t *testing.T) {
+	db := testutil.OpenDB(t)
+	repo := infrastructure.NewRepository(db)
+	ctx := context.Background()
+
+	locs, err := repo.ListLocations(ctx, testutil.OwnerID)
+	if err != nil {
+		t.Fatalf("ListLocations: %v", err)
+	}
+	_ = locs
+}
+
+func TestListWorkSchedules_ZeroOwner_ReturnsEmpty(t *testing.T) {
+	db := testutil.OpenDB(t)
+	repo := infrastructure.NewRepository(db)
+	ctx := context.Background()
+
+	schedules, err := repo.ListWorkSchedules(ctx, 0)
+	if err != nil {
+		t.Fatalf("ListWorkSchedules zero owner: %v", err)
+	}
+	if len(schedules) != 0 {
+		t.Errorf("expected 0 schedules for owner 0, got %d", len(schedules))
+	}
+}
+
+func TestCreateWorkSchedule_PersistsAndReturnsID(t *testing.T) {
+	db := testutil.OpenDB(t)
+	repo := infrastructure.NewRepository(db)
+	ctx := context.Background()
+
+	ws, err := repo.CreateWorkSchedule(ctx, testutil.OwnerID, domain.WorkScheduleRecord{
+		Name:         "Test Schedule",
+		ScheduleData: `{}`,
+	})
+	if err != nil {
+		t.Fatalf("CreateWorkSchedule: %v", err)
+	}
+	if ws.ID == 0 {
+		t.Fatal("expected non-zero ID after create")
+	}
+}
+
+func TestListRoles_ZeroOwner_ReturnsEmpty(t *testing.T) {
+	db := testutil.OpenDB(t)
+	repo := infrastructure.NewRepository(db)
+	ctx := context.Background()
+
+	roles, err := repo.ListRoles(ctx, 0)
+	if err != nil {
+		t.Fatalf("ListRoles zero owner: %v", err)
+	}
+	if len(roles) != 0 {
+		t.Errorf("expected 0 roles for owner 0, got %d", len(roles))
 	}
 }

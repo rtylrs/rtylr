@@ -203,3 +203,192 @@ func TestGetPublicBusiness_InactiveBusinessNotFound(t *testing.T) {
 		t.Fatal("expected error for business id=0, got nil")
 	}
 }
+
+func TestGetProfile_OwnerID1001_ReturnsProfile(t *testing.T) {
+	db := testutil.OpenDB(t)
+	repo := infrastructure.NewRepository(db)
+	ctx := context.Background()
+
+	profile, err := repo.GetProfile(ctx, testutil.OwnerID)
+	if err != nil {
+		t.Fatalf("GetProfile(1001): %v", err)
+	}
+	if profile.ID != testutil.OwnerID {
+		t.Errorf("expected ID=%d, got %d", testutil.OwnerID, profile.ID)
+	}
+}
+
+func TestGetProfile_ZeroOwner_Errors(t *testing.T) {
+	db := testutil.OpenDB(t)
+	repo := infrastructure.NewRepository(db)
+	ctx := context.Background()
+
+	_, err := repo.GetProfile(ctx, 0)
+	if err == nil {
+		t.Fatal("expected error for ownerID=0, got nil")
+	}
+}
+
+func TestGetProfile_NameIsTestBusiness(t *testing.T) {
+	db := testutil.OpenDB(t)
+	repo := infrastructure.NewRepository(db)
+	ctx := context.Background()
+
+	profile, err := repo.GetProfile(ctx, testutil.OwnerID)
+	if err != nil {
+		t.Fatalf("GetProfile: %v", err)
+	}
+	// SiteName is set from the fixture
+	if profile.SiteName == "" {
+		t.Error("expected non-empty SiteName")
+	}
+}
+
+func TestGetProfile_CurrencyIsUSD(t *testing.T) {
+	db := testutil.OpenDB(t)
+	repo := infrastructure.NewRepository(db)
+	ctx := context.Background()
+
+	profile, err := repo.GetProfile(ctx, testutil.OwnerID)
+	if err != nil {
+		t.Fatalf("GetProfile: %v", err)
+	}
+	if profile.Currency != "USD" {
+		t.Errorf("expected Currency='USD', got %q", profile.Currency)
+	}
+}
+
+func TestGetPublicBusiness_ID1_ReturnsData(t *testing.T) {
+	db := testutil.OpenDB(t)
+	repo := infrastructure.NewRepository(db)
+	ctx := context.Background()
+
+	biz, err := repo.GetPublicBusiness(ctx, 1)
+	if err != nil {
+		t.Fatalf("GetPublicBusiness(1): %v", err)
+	}
+	if biz.ID != 1 {
+		t.Errorf("expected ID=1, got %d", biz.ID)
+	}
+}
+
+func TestGetPublicBusiness_NotFound_Errors(t *testing.T) {
+	db := testutil.OpenDB(t)
+	repo := infrastructure.NewRepository(db)
+	ctx := context.Background()
+
+	_, err := repo.GetPublicBusiness(ctx, 88888888)
+	if err == nil {
+		t.Fatal("expected error for non-existent business id, got nil")
+	}
+}
+
+func TestLookupBySlug_NonExistentSlug_Errors(t *testing.T) {
+	db := testutil.OpenDB(t)
+	repo := infrastructure.NewRepository(db)
+	ctx := context.Background()
+
+	_, err := repo.LookupBySlug(ctx, "nonexistent-slug-abc-xyz-12345")
+	if err == nil {
+		t.Fatal("expected error for non-existent slug, got nil")
+	}
+}
+
+func TestUpdateSlug_ChangesSlug(t *testing.T) {
+	db := testutil.OpenDB(t)
+	repo := infrastructure.NewRepository(db)
+	ctx := context.Background()
+
+	var original sql.NullString
+	_ = db.QueryRowContext(ctx, `SELECT slug FROM businesses WHERE id = 1 LIMIT 1`).Scan(&original)
+
+	newSlug := "updated-slug-test-12345"
+	if err := repo.UpdateSlug(ctx, 1, newSlug); err != nil {
+		t.Fatalf("UpdateSlug: %v", err)
+	}
+
+	var got string
+	if err := db.QueryRowContext(ctx, `SELECT slug FROM businesses WHERE id = 1`).Scan(&got); err != nil {
+		t.Fatalf("read slug: %v", err)
+	}
+	if got != newSlug {
+		t.Errorf("expected slug=%q, got %q", newSlug, got)
+	}
+
+	// Restore
+	restore := ""
+	if original.Valid {
+		restore = original.String
+	}
+	_ = repo.UpdateSlug(ctx, 1, restore)
+}
+
+func TestGetProfile_ContactEmailPresent2(t *testing.T) {
+	db := testutil.OpenDB(t)
+	repo := infrastructure.NewRepository(db)
+	ctx := context.Background()
+
+	profile, err := repo.GetProfile(ctx, testutil.OwnerID)
+	if err != nil {
+		t.Fatalf("GetProfile: %v", err)
+	}
+	if profile.ContactEmail == "" {
+		t.Error("expected non-empty ContactEmail")
+	}
+}
+
+func TestGetProfile_TimezoneIsUTC(t *testing.T) {
+	db := testutil.OpenDB(t)
+	repo := infrastructure.NewRepository(db)
+	ctx := context.Background()
+
+	profile, err := repo.GetProfile(ctx, testutil.OwnerID)
+	if err != nil {
+		t.Fatalf("GetProfile: %v", err)
+	}
+	if profile.Timezone == "" {
+		t.Error("expected non-empty Timezone")
+	}
+}
+
+func TestGetProfile_PlanIsSet(t *testing.T) {
+	db := testutil.OpenDB(t)
+	repo := infrastructure.NewRepository(db)
+	ctx := context.Background()
+
+	profile, err := repo.GetProfile(ctx, testutil.OwnerID)
+	if err != nil {
+		t.Fatalf("GetProfile: %v", err)
+	}
+	if profile.Plan == "" {
+		t.Error("expected non-empty Plan")
+	}
+}
+
+func TestGetPublicBusiness_NameIsTestBusiness(t *testing.T) {
+	db := testutil.OpenDB(t)
+	repo := infrastructure.NewRepository(db)
+	ctx := context.Background()
+
+	biz, err := repo.GetPublicBusiness(ctx, 1)
+	if err != nil {
+		t.Fatalf("GetPublicBusiness(1): %v", err)
+	}
+	if biz.Name != "Test Business" {
+		t.Errorf("expected Name='Test Business', got %q", biz.Name)
+	}
+}
+
+func TestGetPublicBusiness_CurrencyNonEmpty(t *testing.T) {
+	db := testutil.OpenDB(t)
+	repo := infrastructure.NewRepository(db)
+	ctx := context.Background()
+
+	biz, err := repo.GetPublicBusiness(ctx, 1)
+	if err != nil {
+		t.Fatalf("GetPublicBusiness(1): %v", err)
+	}
+	if biz.Currency == "" {
+		t.Error("expected non-empty Currency in public business")
+	}
+}

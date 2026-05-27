@@ -239,3 +239,253 @@ func TestRevoke_ThenNotInList(t *testing.T) {
 		}
 	}
 }
+
+func TestCreate_IDsAreUnique(t *testing.T) {
+	db := testutil.OpenDB(t)
+	repo := infrastructure.NewRepository(db)
+	ctx := context.Background()
+
+	id1, err := repo.Create(ctx, testutil.OwnerID, "unique-key-a", "hash-ua1", "sk_ua", []string{})
+	if err != nil {
+		t.Fatalf("Create A: %v", err)
+	}
+	id2, err := repo.Create(ctx, testutil.OwnerID, "unique-key-b", "hash-ub1", "sk_ub", []string{})
+	if err != nil {
+		t.Fatalf("Create B: %v", err)
+	}
+	if id1 == id2 {
+		t.Errorf("expected unique IDs, both got %d", id1)
+	}
+}
+
+func TestCreate_AfterCreate_CountIncreases(t *testing.T) {
+	db := testutil.OpenDB(t)
+	repo := infrastructure.NewRepository(db)
+	ctx := context.Background()
+
+	before, err := repo.List(ctx, testutil.OwnerID)
+	if err != nil {
+		t.Fatalf("List before: %v", err)
+	}
+
+	_, err = repo.Create(ctx, testutil.OwnerID, "count-inc-key", "hash-ci1", "sk_ci", []string{})
+	if err != nil {
+		t.Fatalf("Create: %v", err)
+	}
+
+	after, err := repo.List(ctx, testutil.OwnerID)
+	if err != nil {
+		t.Fatalf("List after: %v", err)
+	}
+	if len(after) != len(before)+1 {
+		t.Errorf("expected count +1: before=%d after=%d", len(before), len(after))
+	}
+}
+
+func TestCreate_MultipleScopesStored(t *testing.T) {
+	db := testutil.OpenDB(t)
+	repo := infrastructure.NewRepository(db)
+	ctx := context.Background()
+
+	scopes := []string{"orders:read", "products:read", "customers:write"}
+	id, err := repo.Create(ctx, testutil.OwnerID, "multi-scope-key", "hash-ms1", "sk_ms", scopes)
+	if err != nil {
+		t.Fatalf("Create: %v", err)
+	}
+
+	keys, err := repo.List(ctx, testutil.OwnerID)
+	if err != nil {
+		t.Fatalf("List: %v", err)
+	}
+	for _, k := range keys {
+		if k.ID == id {
+			if len(k.Scopes) != len(scopes) {
+				t.Errorf("Scopes len = %d, want %d", len(k.Scopes), len(scopes))
+			}
+			return
+		}
+	}
+	t.Errorf("key id=%d not found", id)
+}
+
+func TestList_KeysHaveNonZeroID(t *testing.T) {
+	db := testutil.OpenDB(t)
+	repo := infrastructure.NewRepository(db)
+	ctx := context.Background()
+
+	_, _ = repo.Create(ctx, testutil.OwnerID, "id-check-key", "hash-ic1", "sk_ic", []string{})
+
+	keys, err := repo.List(ctx, testutil.OwnerID)
+	if err != nil {
+		t.Fatalf("List: %v", err)
+	}
+	for i, k := range keys {
+		if k.ID == 0 {
+			t.Errorf("keys[%d].ID is zero", i)
+		}
+	}
+}
+
+func TestRevoke_NonExistent_NoError(t *testing.T) {
+	db := testutil.OpenDB(t)
+	repo := infrastructure.NewRepository(db)
+	ctx := context.Background()
+
+	err := repo.Revoke(ctx, testutil.OwnerID, 9999999)
+	if err != nil {
+		t.Fatalf("Revoke non-existent: %v", err)
+	}
+}
+
+func TestCreate_SingleScopeStored(t *testing.T) {
+	db := testutil.OpenDB(t)
+	repo := infrastructure.NewRepository(db)
+	ctx := context.Background()
+
+	scopes := []string{"reports:read"}
+	id, err := repo.Create(ctx, testutil.OwnerID, "single-scope-key", "hash-ss1", "sk_ss", scopes)
+	if err != nil {
+		t.Fatalf("Create: %v", err)
+	}
+
+	keys, err := repo.List(ctx, testutil.OwnerID)
+	if err != nil {
+		t.Fatalf("List: %v", err)
+	}
+	for _, k := range keys {
+		if k.ID == id {
+			if len(k.Scopes) != 1 {
+				t.Errorf("expected 1 scope, got %d", len(k.Scopes))
+			}
+			return
+		}
+	}
+	t.Errorf("key id=%d not found", id)
+}
+
+func TestCreate_NameStored(t *testing.T) {
+	db := testutil.OpenDB(t)
+	repo := infrastructure.NewRepository(db)
+	ctx := context.Background()
+
+	const want = "my-production-key"
+	id, err := repo.Create(ctx, testutil.OwnerID, want, "hash-name-stored", "sk_ns", []string{})
+	if err != nil {
+		t.Fatalf("Create: %v", err)
+	}
+
+	keys, err := repo.List(ctx, testutil.OwnerID)
+	if err != nil {
+		t.Fatalf("List: %v", err)
+	}
+	for _, k := range keys {
+		if k.ID == id {
+			if k.Name != want {
+				t.Errorf("Name = %q, want %q", k.Name, want)
+			}
+			return
+		}
+	}
+	t.Errorf("key id=%d not found", id)
+}
+
+func TestCreate_PrefixStored(t *testing.T) {
+	db := testutil.OpenDB(t)
+	repo := infrastructure.NewRepository(db)
+	ctx := context.Background()
+
+	const want = "sk_prod"
+	id, err := repo.Create(ctx, testutil.OwnerID, "prefix-stored-key", "hash-pfx-stored", want, []string{})
+	if err != nil {
+		t.Fatalf("Create: %v", err)
+	}
+
+	keys, err := repo.List(ctx, testutil.OwnerID)
+	if err != nil {
+		t.Fatalf("List: %v", err)
+	}
+	for _, k := range keys {
+		if k.ID == id {
+			if k.KeyPrefix != want {
+				t.Errorf("KeyPrefix = %q, want %q", k.KeyPrefix, want)
+			}
+			return
+		}
+	}
+	t.Errorf("key id=%d not found", id)
+}
+
+func TestList_ZeroOwner_ReturnsEmpty(t *testing.T) {
+	db := testutil.OpenDB(t)
+	repo := infrastructure.NewRepository(db)
+	ctx := context.Background()
+
+	keys, err := repo.List(ctx, 0)
+	if err != nil {
+		t.Fatalf("List: %v", err)
+	}
+	if len(keys) != 0 {
+		t.Errorf("expected 0 keys for owner_id=0, got %d", len(keys))
+	}
+}
+
+func TestRevoke_CreatedKey_NoLongerInList(t *testing.T) {
+	db := testutil.OpenDB(t)
+	repo := infrastructure.NewRepository(db)
+	ctx := context.Background()
+
+	id, err := repo.Create(ctx, testutil.OwnerID, "revoke-list-check", "hash-rlc1", "sk_rlc", []string{"read"})
+	if err != nil {
+		t.Fatalf("Create: %v", err)
+	}
+
+	if err := repo.Revoke(ctx, testutil.OwnerID, id); err != nil {
+		t.Fatalf("Revoke: %v", err)
+	}
+
+	keys, err := repo.List(ctx, testutil.OwnerID)
+	if err != nil {
+		t.Fatalf("List: %v", err)
+	}
+	for _, k := range keys {
+		if k.ID == id {
+			t.Errorf("revoked key id=%d still in list", id)
+		}
+	}
+}
+
+func TestCreate_TwoRevoke_One_OtherStillPresent(t *testing.T) {
+	db := testutil.OpenDB(t)
+	repo := infrastructure.NewRepository(db)
+	ctx := context.Background()
+
+	id1, err := repo.Create(ctx, testutil.OwnerID, "keep-key", "hash-kk1", "sk_kk", []string{})
+	if err != nil {
+		t.Fatalf("Create keep: %v", err)
+	}
+	id2, err := repo.Create(ctx, testutil.OwnerID, "revoke-key", "hash-rk1", "sk_rk", []string{})
+	if err != nil {
+		t.Fatalf("Create revoke: %v", err)
+	}
+
+	if err := repo.Revoke(ctx, testutil.OwnerID, id2); err != nil {
+		t.Fatalf("Revoke: %v", err)
+	}
+
+	keys, err := repo.List(ctx, testutil.OwnerID)
+	if err != nil {
+		t.Fatalf("List: %v", err)
+	}
+	foundKeep := false
+	for _, k := range keys {
+		if k.ID == id1 {
+			foundKeep = true
+		}
+		if k.ID == id2 {
+			t.Errorf("revoked key id=%d still present", id2)
+		}
+	}
+	if !foundKeep {
+		t.Errorf("kept key id=%d not found after revoking sibling", id1)
+	}
+}

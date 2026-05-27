@@ -4,6 +4,7 @@ import (
 	"context"
 	"testing"
 
+	"github.com/voxire/onion/internal/modules/products/internal/domain"
 	"github.com/voxire/onion/internal/modules/products/internal/infrastructure"
 	"github.com/voxire/onion/internal/testutil"
 )
@@ -73,5 +74,281 @@ func TestListProducts_FilterByCategoryReturnsMains(t *testing.T) {
 		if p.CategoryID != 5002 {
 			t.Errorf("product %q (id=%d) has category_id=%d, want 5002", p.Name, p.ID, p.CategoryID)
 		}
+	}
+}
+
+func TestListProducts_ZeroOwner_ReturnsEmpty(t *testing.T) {
+	db := testutil.OpenDB(t)
+	repo := infrastructure.NewRepository(db)
+	ctx := context.Background()
+
+	products, _, err := repo.ListProducts(ctx, 0, "", 0, 10, 0)
+	if err != nil {
+		t.Fatalf("unexpected error: %v", err)
+	}
+	if len(products) != 0 {
+		t.Fatalf("expected 0 products for ownerID=0, got %d", len(products))
+	}
+}
+
+func TestListProducts_SearchBurger_FindsProduct(t *testing.T) {
+	db := testutil.OpenDB(t)
+	repo := infrastructure.NewRepository(db)
+	ctx := context.Background()
+
+	products, _, err := repo.ListProducts(ctx, testutil.OwnerID, "Burger", 0, 10, 0)
+	if err != nil {
+		t.Fatalf("unexpected error: %v", err)
+	}
+	if len(products) == 0 {
+		t.Fatal("expected at least one product matching 'Burger', got none")
+	}
+	found := false
+	for _, p := range products {
+		if p.Name == "Burger" {
+			found = true
+			break
+		}
+	}
+	if !found {
+		t.Error("product named 'Burger' not found in search results")
+	}
+}
+
+func TestListProducts_SearchNonExistent_ReturnsEmpty(t *testing.T) {
+	db := testutil.OpenDB(t)
+	repo := infrastructure.NewRepository(db)
+	ctx := context.Background()
+
+	products, _, err := repo.ListProducts(ctx, testutil.OwnerID, "xyzNoSuchProduct999", 0, 10, 0)
+	if err != nil {
+		t.Fatalf("unexpected error: %v", err)
+	}
+	if len(products) != 0 {
+		t.Fatalf("expected 0 results for nonsense search, got %d", len(products))
+	}
+}
+
+func TestListProducts_ByCategoryID5002_ReturnsMains(t *testing.T) {
+	db := testutil.OpenDB(t)
+	repo := infrastructure.NewRepository(db)
+	ctx := context.Background()
+
+	products, _, err := repo.ListProducts(ctx, testutil.OwnerID, "", 5002, 10, 0)
+	if err != nil {
+		t.Fatalf("unexpected error: %v", err)
+	}
+	for _, p := range products {
+		if p.CategoryID != 5002 {
+			t.Errorf("product id=%d has category_id=%d, want 5002", p.ID, p.CategoryID)
+		}
+	}
+}
+
+func TestListProducts_PaginationLimit1_ReturnsOne(t *testing.T) {
+	db := testutil.OpenDB(t)
+	repo := infrastructure.NewRepository(db)
+	ctx := context.Background()
+
+	products, _, err := repo.ListProducts(ctx, testutil.OwnerID, "", 0, 1, 0)
+	if err != nil {
+		t.Fatalf("unexpected error: %v", err)
+	}
+	if len(products) != 1 {
+		t.Fatalf("expected exactly 1 product with limit=1, got %d", len(products))
+	}
+}
+
+func TestGetProduct_Burger_NameAndSKU(t *testing.T) {
+	db := testutil.OpenDB(t)
+	repo := infrastructure.NewRepository(db)
+	ctx := context.Background()
+
+	p, err := repo.GetProduct(ctx, testutil.OwnerID, 5201)
+	if err != nil {
+		t.Fatalf("GetProduct(5201): %v", err)
+	}
+	if p.Name != "Burger" {
+		t.Errorf("expected Name=Burger, got %q", p.Name)
+	}
+	if p.SKU != "BURG-1" {
+		t.Errorf("expected SKU=BURG-1, got %q", p.SKU)
+	}
+}
+
+func TestGetProduct_Soda_PriceIsCorrect(t *testing.T) {
+	db := testutil.OpenDB(t)
+	repo := infrastructure.NewRepository(db)
+	ctx := context.Background()
+
+	p, err := repo.GetProduct(ctx, testutil.OwnerID, 5202)
+	if err != nil {
+		t.Fatalf("GetProduct(5202): %v", err)
+	}
+	if p.Name != "Soda" {
+		t.Errorf("expected Name=Soda, got %q", p.Name)
+	}
+	if p.SKU != "SODA-1" {
+		t.Errorf("expected SKU=SODA-1, got %q", p.SKU)
+	}
+}
+
+func TestGetProduct_Salad_LowStock(t *testing.T) {
+	db := testutil.OpenDB(t)
+	repo := infrastructure.NewRepository(db)
+	ctx := context.Background()
+
+	p, err := repo.GetProduct(ctx, testutil.OwnerID, 5203)
+	if err != nil {
+		t.Fatalf("GetProduct(5203): %v", err)
+	}
+	if p.StockQuantity != 4.0 {
+		t.Errorf("Salad (id=5203): expected stock=4, got %.2f", p.StockQuantity)
+	}
+}
+
+func TestGetProduct_NonExistent_Errors(t *testing.T) {
+	db := testutil.OpenDB(t)
+	repo := infrastructure.NewRepository(db)
+	ctx := context.Background()
+
+	_, err := repo.GetProduct(ctx, testutil.OwnerID, 9999999)
+	if err == nil {
+		t.Fatal("expected error for non-existent product, got nil")
+	}
+}
+
+func TestGetProductByBarcode_NotFound_Errors(t *testing.T) {
+	db := testutil.OpenDB(t)
+	repo := infrastructure.NewRepository(db)
+	ctx := context.Background()
+
+	_, err := repo.GetProductByBarcode(ctx, testutil.OwnerID, "BARCODE-DOES-NOT-EXIST-XYZ")
+	if err == nil {
+		t.Fatal("expected error for non-existent barcode, got nil")
+	}
+}
+
+func TestCreateProduct_PersistsAndReturnsID(t *testing.T) {
+	db := testutil.OpenDB(t)
+	repo := infrastructure.NewRepository(db)
+	ctx := context.Background()
+
+	id, err := repo.CreateProduct(ctx, testutil.OwnerID, domain.ProductInput{
+		Name:      "Test Create Product",
+		SKU:       "TCP-001",
+		CostPrice: 3.0,
+		SalePrice: 6.0,
+		IsActive:  true,
+	})
+	if err != nil {
+		t.Fatalf("CreateProduct: %v", err)
+	}
+	if id <= 0 {
+		t.Fatalf("expected positive ID, got %d", id)
+	}
+	t.Cleanup(func() { _ = repo.DeleteProduct(ctx, testutil.OwnerID, id) })
+}
+
+func TestCreateProduct_NameIsStored(t *testing.T) {
+	db := testutil.OpenDB(t)
+	repo := infrastructure.NewRepository(db)
+	ctx := context.Background()
+
+	const wantName = "Name Storage Test Product"
+	id, err := repo.CreateProduct(ctx, testutil.OwnerID, domain.ProductInput{
+		Name:     wantName,
+		IsActive: true,
+	})
+	if err != nil {
+		t.Fatalf("CreateProduct: %v", err)
+	}
+	t.Cleanup(func() { _ = repo.DeleteProduct(ctx, testutil.OwnerID, id) })
+
+	p, err := repo.GetProduct(ctx, testutil.OwnerID, id)
+	if err != nil {
+		t.Fatalf("GetProduct: %v", err)
+	}
+	if p.Name != wantName {
+		t.Errorf("expected Name=%q, got %q", wantName, p.Name)
+	}
+}
+
+func TestCreateProduct_SKUIsStored(t *testing.T) {
+	db := testutil.OpenDB(t)
+	repo := infrastructure.NewRepository(db)
+	ctx := context.Background()
+
+	const wantSKU = "SKU-STORE-001"
+	id, err := repo.CreateProduct(ctx, testutil.OwnerID, domain.ProductInput{
+		Name:     "SKU Store Test",
+		SKU:      wantSKU,
+		IsActive: true,
+	})
+	if err != nil {
+		t.Fatalf("CreateProduct: %v", err)
+	}
+	t.Cleanup(func() { _ = repo.DeleteProduct(ctx, testutil.OwnerID, id) })
+
+	p, err := repo.GetProduct(ctx, testutil.OwnerID, id)
+	if err != nil {
+		t.Fatalf("GetProduct: %v", err)
+	}
+	if p.SKU != wantSKU {
+		t.Errorf("expected SKU=%q, got %q", wantSKU, p.SKU)
+	}
+}
+
+func TestUpdateProduct_ChangesName(t *testing.T) {
+	db := testutil.OpenDB(t)
+	repo := infrastructure.NewRepository(db)
+	ctx := context.Background()
+
+	id, err := repo.CreateProduct(ctx, testutil.OwnerID, domain.ProductInput{
+		Name:     "Before Rename",
+		IsActive: true,
+	})
+	if err != nil {
+		t.Fatalf("CreateProduct: %v", err)
+	}
+	t.Cleanup(func() { _ = repo.DeleteProduct(ctx, testutil.OwnerID, id) })
+
+	err = repo.UpdateProduct(ctx, testutil.OwnerID, id, domain.ProductInput{
+		Name:     "After Rename",
+		IsActive: true,
+	})
+	if err != nil {
+		t.Fatalf("UpdateProduct: %v", err)
+	}
+
+	p, err := repo.GetProduct(ctx, testutil.OwnerID, id)
+	if err != nil {
+		t.Fatalf("GetProduct after update: %v", err)
+	}
+	if p.Name != "After Rename" {
+		t.Errorf("expected Name=After Rename, got %q", p.Name)
+	}
+}
+
+func TestDeleteProduct_RemovesRow(t *testing.T) {
+	db := testutil.OpenDB(t)
+	repo := infrastructure.NewRepository(db)
+	ctx := context.Background()
+
+	id, err := repo.CreateProduct(ctx, testutil.OwnerID, domain.ProductInput{
+		Name:     "To Be Deleted Product",
+		IsActive: true,
+	})
+	if err != nil {
+		t.Fatalf("CreateProduct: %v", err)
+	}
+
+	if err := repo.DeleteProduct(ctx, testutil.OwnerID, id); err != nil {
+		t.Fatalf("DeleteProduct: %v", err)
+	}
+
+	_, err = repo.GetProduct(ctx, testutil.OwnerID, id)
+	if err == nil {
+		t.Fatal("expected error after deletion, got nil")
 	}
 }

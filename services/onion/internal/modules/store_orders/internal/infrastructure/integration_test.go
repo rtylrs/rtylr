@@ -220,3 +220,243 @@ func TestStoreOrders_Create_WithShippingAddress(t *testing.T) {
 		t.Errorf("expected positive ID, got %d", id)
 	}
 }
+
+func TestStoreOrders_List_IsNotNil(t *testing.T) {
+	db := testutil.OpenDB(t)
+	repo := infrastructure.NewRepository(db)
+	items, err := repo.List(context.Background(), testutil.OwnerID)
+	if err != nil {
+		t.Fatalf("List: %v", err)
+	}
+	if items == nil {
+		t.Fatal("expected non-nil slice")
+	}
+}
+
+func TestStoreOrders_Create_CustomerEmailStored(t *testing.T) {
+	db := testutil.OpenDB(t)
+	repo := infrastructure.NewRepository(db)
+	const want = "email-stored@example.com"
+	id, err := repo.Create(context.Background(), testutil.OwnerID, domain.StoreOrderInput{
+		CustomerEmail: want, Status: "pending", Total: 10.0,
+	})
+	if err != nil {
+		t.Fatalf("Create: %v", err)
+	}
+
+	detail, err := repo.GetDetail(context.Background(), testutil.OwnerID, id)
+	if err != nil {
+		t.Fatalf("GetDetail: %v", err)
+	}
+	if detail.Order.CustomerEmail != want {
+		t.Errorf("CustomerEmail = %q, want %q", detail.Order.CustomerEmail, want)
+	}
+}
+
+func TestStoreOrders_Create_CustomerNameStored(t *testing.T) {
+	db := testutil.OpenDB(t)
+	repo := infrastructure.NewRepository(db)
+	const want = "Jane Doe"
+	id, err := repo.Create(context.Background(), testutil.OwnerID, domain.StoreOrderInput{
+		CustomerName: want, Status: "pending", Total: 5.0,
+	})
+	if err != nil {
+		t.Fatalf("Create: %v", err)
+	}
+
+	detail, err := repo.GetDetail(context.Background(), testutil.OwnerID, id)
+	if err != nil {
+		t.Fatalf("GetDetail: %v", err)
+	}
+	if detail.Order.CustomerName != want {
+		t.Errorf("CustomerName = %q, want %q", detail.Order.CustomerName, want)
+	}
+}
+
+func TestStoreOrders_Create_StatusIsStored(t *testing.T) {
+	db := testutil.OpenDB(t)
+	repo := infrastructure.NewRepository(db)
+	const want = "processing"
+	id, err := repo.Create(context.Background(), testutil.OwnerID, domain.StoreOrderInput{
+		Status: want, Total: 8.0,
+	})
+	if err != nil {
+		t.Fatalf("Create: %v", err)
+	}
+
+	detail, err := repo.GetDetail(context.Background(), testutil.OwnerID, id)
+	if err != nil {
+		t.Fatalf("GetDetail: %v", err)
+	}
+	if detail.Order.Status != want {
+		t.Errorf("Status = %q, want %q", detail.Order.Status, want)
+	}
+}
+
+func TestStoreOrders_GetDetail_OwnerIDMatches(t *testing.T) {
+	db := testutil.OpenDB(t)
+	repo := infrastructure.NewRepository(db)
+	id, err := repo.Create(context.Background(), testutil.OwnerID, domain.StoreOrderInput{
+		Status: "pending", Total: 10.0,
+	})
+	if err != nil {
+		t.Fatalf("Create: %v", err)
+	}
+
+	detail, err := repo.GetDetail(context.Background(), testutil.OwnerID, id)
+	if err != nil {
+		t.Fatalf("GetDetail: %v", err)
+	}
+	if detail.Order.OwnerID != testutil.OwnerID {
+		t.Errorf("OwnerID = %d, want %d", detail.Order.OwnerID, testutil.OwnerID)
+	}
+}
+
+func TestStoreOrders_Create_MultipleItems(t *testing.T) {
+	db := testutil.OpenDB(t)
+	repo := infrastructure.NewRepository(db)
+	id, err := repo.Create(context.Background(), testutil.OwnerID, domain.StoreOrderInput{
+		Status:   "pending",
+		Subtotal: 70.0,
+		Total:    70.0,
+		Items: []domain.OrderItemInput{
+			{Name: "ItemA", Quantity: 2, Price: 20.0, Total: 40.0},
+			{Name: "ItemB", Quantity: 1, Price: 30.0, Total: 30.0},
+		},
+	})
+	if err != nil {
+		t.Fatalf("Create: %v", err)
+	}
+
+	detail, err := repo.GetDetail(context.Background(), testutil.OwnerID, id)
+	if err != nil {
+		t.Fatalf("GetDetail: %v", err)
+	}
+	if len(detail.Items) != 2 {
+		t.Errorf("expected 2 items, got %d", len(detail.Items))
+	}
+}
+
+func TestStoreOrders_Update_ChangesCustomerEmail(t *testing.T) {
+	db := testutil.OpenDB(t)
+	repo := infrastructure.NewRepository(db)
+	id, err := repo.Create(context.Background(), testutil.OwnerID, domain.StoreOrderInput{
+		CustomerEmail: "old@example.com", Status: "pending", Total: 5.0,
+	})
+	if err != nil {
+		t.Fatalf("Create: %v", err)
+	}
+
+	if err := repo.Update(context.Background(), testutil.OwnerID, id, domain.StoreOrderInput{
+		CustomerEmail: "new@example.com", Status: "pending", Total: 5.0,
+	}); err != nil {
+		t.Fatalf("Update: %v", err)
+	}
+
+	detail, err := repo.GetDetail(context.Background(), testutil.OwnerID, id)
+	if err != nil {
+		t.Fatalf("GetDetail: %v", err)
+	}
+	if detail.Order.CustomerEmail != "new@example.com" {
+		t.Errorf("CustomerEmail = %q, want new@example.com", detail.Order.CustomerEmail)
+	}
+}
+
+func TestStoreOrders_Update_NoError(t *testing.T) {
+	db := testutil.OpenDB(t)
+	repo := infrastructure.NewRepository(db)
+	id, err := repo.Create(context.Background(), testutil.OwnerID, domain.StoreOrderInput{
+		Status: "pending", Total: 3.0,
+	})
+	if err != nil {
+		t.Fatalf("Create: %v", err)
+	}
+
+	err = repo.Update(context.Background(), testutil.OwnerID, id, domain.StoreOrderInput{
+		Status: "completed", Total: 3.0,
+	})
+	if err != nil {
+		t.Fatalf("Update: %v", err)
+	}
+}
+
+func TestStoreOrders_List_AfterCreate_CountIncreases(t *testing.T) {
+	db := testutil.OpenDB(t)
+	repo := infrastructure.NewRepository(db)
+	before, err := repo.List(context.Background(), testutil.OwnerID)
+	if err != nil {
+		t.Fatalf("List before: %v", err)
+	}
+
+	_, err = repo.Create(context.Background(), testutil.OwnerID, domain.StoreOrderInput{
+		Status: "pending", Total: 1.0,
+	})
+	if err != nil {
+		t.Fatalf("Create: %v", err)
+	}
+
+	after, err := repo.List(context.Background(), testutil.OwnerID)
+	if err != nil {
+		t.Fatalf("List after: %v", err)
+	}
+	if len(after) != len(before)+1 {
+		t.Errorf("expected count +1: before=%d after=%d", len(before), len(after))
+	}
+}
+
+func TestStoreOrders_Create_IDsAreUnique(t *testing.T) {
+	db := testutil.OpenDB(t)
+	repo := infrastructure.NewRepository(db)
+	id1, err := repo.Create(context.Background(), testutil.OwnerID, domain.StoreOrderInput{Status: "pending", Total: 1.0})
+	if err != nil {
+		t.Fatalf("Create A: %v", err)
+	}
+	id2, err := repo.Create(context.Background(), testutil.OwnerID, domain.StoreOrderInput{Status: "pending", Total: 2.0})
+	if err != nil {
+		t.Fatalf("Create B: %v", err)
+	}
+	if id1 == id2 {
+		t.Errorf("expected unique IDs, both got %d", id1)
+	}
+}
+
+func TestStoreOrders_Create_ZeroOwnerReturnsEmpty(t *testing.T) {
+	db := testutil.OpenDB(t)
+	repo := infrastructure.NewRepository(db)
+	items, err := repo.List(context.Background(), 0)
+	if err != nil {
+		t.Fatalf("List: %v", err)
+	}
+	if len(items) != 0 {
+		t.Errorf("expected 0 items for owner_id=0, got %d", len(items))
+	}
+}
+
+func TestStoreOrders_GetDetail_NonExistent_Fails(t *testing.T) {
+	db := testutil.OpenDB(t)
+	repo := infrastructure.NewRepository(db)
+	_, err := repo.GetDetail(context.Background(), testutil.OwnerID, 9999999)
+	if err == nil {
+		t.Error("expected error for non-existent order, got nil")
+	}
+}
+
+func TestStoreOrders_Create_TotalIsStored(t *testing.T) {
+	db := testutil.OpenDB(t)
+	repo := infrastructure.NewRepository(db)
+	const want = 123.45
+	id, err := repo.Create(context.Background(), testutil.OwnerID, domain.StoreOrderInput{
+		Status: "pending", Subtotal: 100.0, Tax: 23.45, Total: want,
+	})
+	if err != nil {
+		t.Fatalf("Create: %v", err)
+	}
+
+	detail, err := repo.GetDetail(context.Background(), testutil.OwnerID, id)
+	if err != nil {
+		t.Fatalf("GetDetail: %v", err)
+	}
+	if detail.Order.Total != want {
+		t.Errorf("Total = %v, want %v", detail.Order.Total, want)
+	}
+}

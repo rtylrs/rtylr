@@ -181,3 +181,195 @@ func TestWebhooks_Create_Multiple(t *testing.T) {
 		t.Errorf("expected %d webhooks, got %d", len(urls), len(ids))
 	}
 }
+
+func TestWebhooks_Create_SecretStored(t *testing.T) {
+	db := testutil.OpenDB(t)
+	repo := infrastructure.NewRepository(db)
+	id, err := repo.Create(context.Background(), testutil.OwnerID,
+		"https://example.com/secret-test",
+		"mysupersecret",
+		[]string{"order.paid"},
+	)
+	if err != nil {
+		t.Fatalf("Create: %v", err)
+	}
+	t.Cleanup(func() { _ = repo.Delete(context.Background(), testutil.OwnerID, id) })
+
+	webhooks, _ := repo.List(context.Background(), testutil.OwnerID)
+	for _, w := range webhooks {
+		if w.ID == id && w.Secret != "mysupersecret" {
+			t.Errorf("expected secret 'mysupersecret', got %s", w.Secret)
+		}
+	}
+}
+
+func TestWebhooks_List_EachHasPositiveID(t *testing.T) {
+	db := testutil.OpenDB(t)
+	repo := infrastructure.NewRepository(db)
+	id, err := repo.Create(context.Background(), testutil.OwnerID,
+		"https://example.com/id-check-wh",
+		"secret",
+		[]string{"test"},
+	)
+	if err != nil {
+		t.Fatalf("Create: %v", err)
+	}
+	t.Cleanup(func() { _ = repo.Delete(context.Background(), testutil.OwnerID, id) })
+
+	webhooks, err := repo.List(context.Background(), testutil.OwnerID)
+	if err != nil {
+		t.Fatalf("List: %v", err)
+	}
+	for _, w := range webhooks {
+		if w.ID <= 0 {
+			t.Errorf("webhook has non-positive ID: %d", w.ID)
+		}
+	}
+}
+
+func TestWebhooks_List_EachHasNonEmptyURL(t *testing.T) {
+	db := testutil.OpenDB(t)
+	repo := infrastructure.NewRepository(db)
+	id, err := repo.Create(context.Background(), testutil.OwnerID,
+		"https://example.com/url-check-wh",
+		"secret",
+		[]string{"test"},
+	)
+	if err != nil {
+		t.Fatalf("Create: %v", err)
+	}
+	t.Cleanup(func() { _ = repo.Delete(context.Background(), testutil.OwnerID, id) })
+
+	webhooks, err := repo.List(context.Background(), testutil.OwnerID)
+	if err != nil {
+		t.Fatalf("List: %v", err)
+	}
+	for _, w := range webhooks {
+		if w.URL == "" {
+			t.Errorf("webhook id=%d has empty URL", w.ID)
+		}
+	}
+}
+
+func TestWebhooks_Delete_WrongOwner_NoError(t *testing.T) {
+	db := testutil.OpenDB(t)
+	repo := infrastructure.NewRepository(db)
+	// Deleting against wrong owner or non-existent ID should not error.
+	err := repo.Delete(context.Background(), 9999999, 9999999)
+	if err != nil {
+		t.Fatalf("Delete non-existent: %v", err)
+	}
+}
+
+func TestWebhooks_Create_SingleEvent(t *testing.T) {
+	db := testutil.OpenDB(t)
+	repo := infrastructure.NewRepository(db)
+	id, err := repo.Create(context.Background(), testutil.OwnerID,
+		"https://example.com/single-event-wh",
+		"secret",
+		[]string{"shipment.delivered"},
+	)
+	if err != nil {
+		t.Fatalf("Create: %v", err)
+	}
+	t.Cleanup(func() { _ = repo.Delete(context.Background(), testutil.OwnerID, id) })
+
+	webhooks, _ := repo.List(context.Background(), testutil.OwnerID)
+	for _, w := range webhooks {
+		if w.ID == id && len(w.Events) != 1 {
+			t.Errorf("expected 1 event, got %d", len(w.Events))
+		}
+	}
+}
+
+func TestWebhooks_Create_UniqueIDsForDifferentURLs(t *testing.T) {
+	db := testutil.OpenDB(t)
+	repo := infrastructure.NewRepository(db)
+	id1, err := repo.Create(context.Background(), testutil.OwnerID,
+		"https://example.com/unique-1",
+		"secret",
+		[]string{"test"},
+	)
+	if err != nil {
+		t.Fatalf("Create 1: %v", err)
+	}
+	id2, err := repo.Create(context.Background(), testutil.OwnerID,
+		"https://example.com/unique-2",
+		"secret",
+		[]string{"test"},
+	)
+	if err != nil {
+		t.Fatalf("Create 2: %v", err)
+	}
+	t.Cleanup(func() {
+		_ = repo.Delete(context.Background(), testutil.OwnerID, id1)
+		_ = repo.Delete(context.Background(), testutil.OwnerID, id2)
+	})
+	if id1 == id2 {
+		t.Errorf("expected distinct IDs, got %d and %d", id1, id2)
+	}
+}
+
+func TestWebhooks_List_AfterDeleteAll_CountDecreases(t *testing.T) {
+	db := testutil.OpenDB(t)
+	repo := infrastructure.NewRepository(db)
+	id, err := repo.Create(context.Background(), testutil.OwnerID,
+		"https://example.com/delete-count-wh",
+		"secret",
+		[]string{"test"},
+	)
+	if err != nil {
+		t.Fatalf("Create: %v", err)
+	}
+
+	before, err := repo.List(context.Background(), testutil.OwnerID)
+	if err != nil {
+		t.Fatalf("List before delete: %v", err)
+	}
+
+	if err := repo.Delete(context.Background(), testutil.OwnerID, id); err != nil {
+		t.Fatalf("Delete: %v", err)
+	}
+
+	after, err := repo.List(context.Background(), testutil.OwnerID)
+	if err != nil {
+		t.Fatalf("List after delete: %v", err)
+	}
+	if len(after) >= len(before) {
+		t.Errorf("expected fewer webhooks after delete: before=%d after=%d", len(before), len(after))
+	}
+}
+
+func TestWebhooks_List_ReturnedSliceNotNil(t *testing.T) {
+	db := testutil.OpenDB(t)
+	repo := infrastructure.NewRepository(db)
+	webhooks, err := repo.List(context.Background(), testutil.OwnerID)
+	if err != nil {
+		t.Fatalf("List: %v", err)
+	}
+	if webhooks == nil {
+		t.Fatal("expected non-nil slice from List")
+	}
+}
+
+func TestWebhooks_Create_ManyEvents(t *testing.T) {
+	db := testutil.OpenDB(t)
+	repo := infrastructure.NewRepository(db)
+	events := []string{"a.b", "c.d", "e.f", "g.h", "i.j"}
+	id, err := repo.Create(context.Background(), testutil.OwnerID,
+		"https://example.com/many-events-wh",
+		"secret",
+		events,
+	)
+	if err != nil {
+		t.Fatalf("Create: %v", err)
+	}
+	t.Cleanup(func() { _ = repo.Delete(context.Background(), testutil.OwnerID, id) })
+
+	webhooks, _ := repo.List(context.Background(), testutil.OwnerID)
+	for _, w := range webhooks {
+		if w.ID == id && len(w.Events) != len(events) {
+			t.Errorf("expected %d events, got %d", len(events), len(w.Events))
+		}
+	}
+}

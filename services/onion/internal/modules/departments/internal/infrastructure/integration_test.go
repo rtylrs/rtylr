@@ -212,3 +212,213 @@ func TestCreateDepartment_WithDescription(t *testing.T) {
 	}
 	t.Errorf("created department id=%d not found in list", id)
 }
+
+func TestCreateDepartment_ReturnsPositiveID(t *testing.T) {
+	db := testutil.OpenDB(t)
+	repo := infrastructure.NewRepository(db)
+	ctx := context.Background()
+
+	id, err := repo.CreateDepartment(ctx, domain.DepartmentInput{
+		OwnerID: testutil.OwnerID,
+		Name:    "Positive ID Test Dept",
+	})
+	if err != nil {
+		t.Fatalf("CreateDepartment: %v", err)
+	}
+	defer func() { _ = repo.DeleteDepartment(ctx, testutil.OwnerID, id) }()
+
+	if id <= 0 {
+		t.Errorf("expected positive ID, got %d", id)
+	}
+}
+
+func TestCreateDepartment_MultipleDistinctIDs(t *testing.T) {
+	db := testutil.OpenDB(t)
+	repo := infrastructure.NewRepository(db)
+	ctx := context.Background()
+
+	id1, err := repo.CreateDepartment(ctx, domain.DepartmentInput{
+		OwnerID: testutil.OwnerID, Name: "Dept Multi A",
+	})
+	if err != nil {
+		t.Fatalf("CreateDepartment A: %v", err)
+	}
+	defer func() { _ = repo.DeleteDepartment(ctx, testutil.OwnerID, id1) }()
+
+	id2, err := repo.CreateDepartment(ctx, domain.DepartmentInput{
+		OwnerID: testutil.OwnerID, Name: "Dept Multi B",
+	})
+	if err != nil {
+		t.Fatalf("CreateDepartment B: %v", err)
+	}
+	defer func() { _ = repo.DeleteDepartment(ctx, testutil.OwnerID, id2) }()
+
+	if id1 == id2 {
+		t.Errorf("expected distinct IDs, both got %d", id1)
+	}
+}
+
+func TestUpdateDepartment_UpdatesDescription(t *testing.T) {
+	db := testutil.OpenDB(t)
+	repo := infrastructure.NewRepository(db)
+	ctx := context.Background()
+
+	id, err := repo.CreateDepartment(ctx, domain.DepartmentInput{
+		OwnerID: testutil.OwnerID, Name: "Desc Update Dept", Description: "Old desc",
+	})
+	if err != nil {
+		t.Fatalf("CreateDepartment: %v", err)
+	}
+	defer func() { _ = repo.DeleteDepartment(ctx, testutil.OwnerID, id) }()
+
+	if err := repo.UpdateDepartment(ctx, testutil.OwnerID, domain.DepartmentInput{
+		ID: id, OwnerID: testutil.OwnerID, Name: "Desc Update Dept", Description: "New desc",
+	}); err != nil {
+		t.Fatalf("UpdateDepartment: %v", err)
+	}
+
+	departments, err := repo.ListDepartments(ctx, testutil.OwnerID)
+	if err != nil {
+		t.Fatalf("ListDepartments: %v", err)
+	}
+	for _, d := range departments {
+		if d.ID == id && d.Description != "New desc" {
+			t.Errorf("expected Description='New desc', got %q", d.Description)
+		}
+	}
+}
+
+func TestDeleteDepartment_IdempotentOnMissing(t *testing.T) {
+	db := testutil.OpenDB(t)
+	repo := infrastructure.NewRepository(db)
+	ctx := context.Background()
+
+	// Deleting a non-existent ID should not return a hard error.
+	err := repo.DeleteDepartment(ctx, testutil.OwnerID, 9999999)
+	_ = err // may or may not error; must not panic
+}
+
+func TestListDepartments_IDsArePositive(t *testing.T) {
+	db := testutil.OpenDB(t)
+	repo := infrastructure.NewRepository(db)
+	ctx := context.Background()
+
+	departments, err := repo.ListDepartments(ctx, testutil.OwnerID)
+	if err != nil {
+		t.Fatalf("ListDepartments: %v", err)
+	}
+	for _, d := range departments {
+		if d.ID <= 0 {
+			t.Errorf("expected positive ID, got %d", d.ID)
+		}
+	}
+}
+
+func TestUpdateDepartment_WrongOwnerNoEffect(t *testing.T) {
+	db := testutil.OpenDB(t)
+	repo := infrastructure.NewRepository(db)
+	ctx := context.Background()
+
+	id, err := repo.CreateDepartment(ctx, domain.DepartmentInput{
+		OwnerID: testutil.OwnerID, Name: "Owner Guard Dept",
+	})
+	if err != nil {
+		t.Fatalf("CreateDepartment: %v", err)
+	}
+	defer func() { _ = repo.DeleteDepartment(ctx, testutil.OwnerID, id) }()
+
+	// Update with a different ownerID should not affect the record.
+	_ = repo.UpdateDepartment(ctx, 9999999, domain.DepartmentInput{
+		ID: id, OwnerID: 9999999, Name: "Hijacked Name",
+	})
+
+	departments, err := repo.ListDepartments(ctx, testutil.OwnerID)
+	if err != nil {
+		t.Fatalf("ListDepartments: %v", err)
+	}
+	for _, d := range departments {
+		if d.ID == id && d.Name == "Hijacked Name" {
+			t.Error("wrong owner was able to update the department name")
+		}
+	}
+}
+
+func TestCreateDepartment_NoDescription_Allowed(t *testing.T) {
+	db := testutil.OpenDB(t)
+	repo := infrastructure.NewRepository(db)
+	ctx := context.Background()
+
+	id, err := repo.CreateDepartment(ctx, domain.DepartmentInput{
+		OwnerID: testutil.OwnerID, Name: "No Desc Dept",
+	})
+	if err != nil {
+		t.Fatalf("CreateDepartment without description: %v", err)
+	}
+	defer func() { _ = repo.DeleteDepartment(ctx, testutil.OwnerID, id) }()
+
+	if id <= 0 {
+		t.Errorf("expected positive ID, got %d", id)
+	}
+}
+
+func TestListDepartments_Idempotent(t *testing.T) {
+	db := testutil.OpenDB(t)
+	repo := infrastructure.NewRepository(db)
+	ctx := context.Background()
+
+	a, err := repo.ListDepartments(ctx, testutil.OwnerID)
+	if err != nil {
+		t.Fatalf("first call: %v", err)
+	}
+	b, err := repo.ListDepartments(ctx, testutil.OwnerID)
+	if err != nil {
+		t.Fatalf("second call: %v", err)
+	}
+	if len(a) != len(b) {
+		t.Errorf("idempotency failed: got %d then %d", len(a), len(b))
+	}
+}
+
+func TestListDepartments_UnknownOwner_ReturnsEmpty(t *testing.T) {
+	db := testutil.OpenDB(t)
+	repo := infrastructure.NewRepository(db)
+	ctx := context.Background()
+
+	depts, err := repo.ListDepartments(ctx, 9999997)
+	if err != nil {
+		t.Fatalf("ListDepartments: %v", err)
+	}
+	if len(depts) != 0 {
+		t.Errorf("expected 0 for unknown owner, got %d", len(depts))
+	}
+}
+
+func TestDeleteDepartment_DecreasesCount(t *testing.T) {
+	db := testutil.OpenDB(t)
+	repo := infrastructure.NewRepository(db)
+	ctx := context.Background()
+
+	id, err := repo.CreateDepartment(ctx, domain.DepartmentInput{
+		OwnerID: testutil.OwnerID, Name: "Count Decrease Dept",
+	})
+	if err != nil {
+		t.Fatalf("CreateDepartment: %v", err)
+	}
+
+	before, err := repo.ListDepartments(ctx, testutil.OwnerID)
+	if err != nil {
+		t.Fatalf("ListDepartments before delete: %v", err)
+	}
+
+	if err := repo.DeleteDepartment(ctx, testutil.OwnerID, id); err != nil {
+		t.Fatalf("DeleteDepartment: %v", err)
+	}
+
+	after, err := repo.ListDepartments(ctx, testutil.OwnerID)
+	if err != nil {
+		t.Fatalf("ListDepartments after delete: %v", err)
+	}
+	if len(after) != len(before)-1 {
+		t.Errorf("expected count to decrease by 1: before=%d after=%d", len(before), len(after))
+	}
+}

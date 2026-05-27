@@ -234,3 +234,257 @@ func TestLoyalty_ListTransactions_TransactionsHaveNonEmptyType(t *testing.T) {
 		}
 	}
 }
+
+func TestLoyalty_UpsertConfig_DisableThenEnable(t *testing.T) {
+	db := testutil.OpenDB(t)
+	repo := infrastructure.NewRepository(db)
+	ctx := context.Background()
+
+	err := repo.UpsertConfig(ctx, domain.UpdateLoyaltyConfigInput{
+		BusinessID:      fixtureBusinessID,
+		IsEnabled:       false,
+		PointsPerDollar: 1.0,
+		RedemptionRate:  0.01,
+		MinRedeemPoints: 10,
+	})
+	if err != nil {
+		t.Fatalf("UpsertConfig disable: %v", err)
+	}
+
+	err = repo.UpsertConfig(ctx, domain.UpdateLoyaltyConfigInput{
+		BusinessID:      fixtureBusinessID,
+		IsEnabled:       true,
+		PointsPerDollar: 1.0,
+		RedemptionRate:  0.01,
+		MinRedeemPoints: 10,
+	})
+	if err != nil {
+		t.Fatalf("UpsertConfig enable: %v", err)
+	}
+
+	cfg, err := repo.GetConfig(ctx, fixtureBusinessID)
+	if err != nil {
+		t.Fatalf("GetConfig: %v", err)
+	}
+	if !cfg.IsEnabled {
+		t.Error("expected IsEnabled=true after re-enable")
+	}
+}
+
+func TestLoyalty_CreateTransaction_WithOrderID(t *testing.T) {
+	db := testutil.OpenDB(t)
+	repo := infrastructure.NewRepository(db)
+	ctx := context.Background()
+
+	const customerID int64 = 8810
+	orderID := int64(5001)
+	note := "order earn"
+
+	id, err := repo.CreateTransaction(ctx, fixtureBusinessID, customerID, &orderID, "earn", 20, 20, &note)
+	if err != nil {
+		t.Fatalf("CreateTransaction with orderID: %v", err)
+	}
+	if id == 0 {
+		t.Fatal("expected non-zero transaction ID")
+	}
+
+	txns, err := repo.ListTransactions(ctx, fixtureBusinessID, customerID)
+	if err != nil {
+		t.Fatalf("ListTransactions: %v", err)
+	}
+	found := false
+	for _, tx := range txns {
+		if tx.ID == id {
+			found = true
+			if tx.OrderID == nil || *tx.OrderID != orderID {
+				t.Errorf("expected OrderID=%d, got %v", orderID, tx.OrderID)
+			}
+			break
+		}
+	}
+	if !found {
+		t.Errorf("transaction id=%d not in list", id)
+	}
+}
+
+func TestLoyalty_CreateTransaction_WithNilNote(t *testing.T) {
+	db := testutil.OpenDB(t)
+	repo := infrastructure.NewRepository(db)
+	ctx := context.Background()
+
+	const customerID int64 = 8811
+
+	id, err := repo.CreateTransaction(ctx, fixtureBusinessID, customerID, nil, "earn", 5, 5, nil)
+	if err != nil {
+		t.Fatalf("CreateTransaction with nil note: %v", err)
+	}
+	if id == 0 {
+		t.Fatal("expected non-zero transaction ID")
+	}
+}
+
+func TestLoyalty_GetBalance_AfterMultipleEarns(t *testing.T) {
+	db := testutil.OpenDB(t)
+	repo := infrastructure.NewRepository(db)
+	ctx := context.Background()
+
+	const customerID int64 = 8812
+	note := "multi earn"
+
+	_, _ = repo.CreateTransaction(ctx, fixtureBusinessID, customerID, nil, "earn", 10, 10, &note)
+	_, _ = repo.CreateTransaction(ctx, fixtureBusinessID, customerID, nil, "earn", 5, 15, &note)
+
+	balance, err := repo.GetBalance(ctx, fixtureBusinessID, customerID)
+	if err != nil {
+		t.Fatalf("GetBalance: %v", err)
+	}
+	if balance <= 0 {
+		t.Errorf("expected positive balance, got %d", balance)
+	}
+}
+
+func TestLoyalty_UpsertConfig_PointsPerDollarUpdated(t *testing.T) {
+	db := testutil.OpenDB(t)
+	repo := infrastructure.NewRepository(db)
+	ctx := context.Background()
+
+	err := repo.UpsertConfig(ctx, domain.UpdateLoyaltyConfigInput{
+		BusinessID:      fixtureBusinessID,
+		IsEnabled:       true,
+		PointsPerDollar: 3.0,
+		RedemptionRate:  0.01,
+		MinRedeemPoints: 10,
+	})
+	if err != nil {
+		t.Fatalf("UpsertConfig: %v", err)
+	}
+
+	cfg, err := repo.GetConfig(ctx, fixtureBusinessID)
+	if err != nil {
+		t.Fatalf("GetConfig: %v", err)
+	}
+	if cfg.PointsPerDollar != 3.0 {
+		t.Errorf("PointsPerDollar = %f, want 3.0", cfg.PointsPerDollar)
+	}
+}
+
+func TestLoyalty_ListTransactions_BusinessIDMatches(t *testing.T) {
+	db := testutil.OpenDB(t)
+	repo := infrastructure.NewRepository(db)
+	ctx := context.Background()
+
+	const customerID int64 = 8813
+	note := "biz id check"
+	_, err := repo.CreateTransaction(ctx, fixtureBusinessID, customerID, nil, "earn", 7, 7, &note)
+	if err != nil {
+		t.Fatalf("CreateTransaction: %v", err)
+	}
+
+	txns, err := repo.ListTransactions(ctx, fixtureBusinessID, customerID)
+	if err != nil {
+		t.Fatalf("ListTransactions: %v", err)
+	}
+	for i, tx := range txns {
+		if tx.BusinessID != fixtureBusinessID {
+			t.Errorf("txns[%d].BusinessID = %d, want %d", i, tx.BusinessID, fixtureBusinessID)
+		}
+	}
+}
+
+func TestLoyalty_ListTransactions_CustomerIDMatches(t *testing.T) {
+	db := testutil.OpenDB(t)
+	repo := infrastructure.NewRepository(db)
+	ctx := context.Background()
+
+	const customerID int64 = 8814
+	note := "cust id check"
+	_, err := repo.CreateTransaction(ctx, fixtureBusinessID, customerID, nil, "earn", 3, 3, &note)
+	if err != nil {
+		t.Fatalf("CreateTransaction: %v", err)
+	}
+
+	txns, err := repo.ListTransactions(ctx, fixtureBusinessID, customerID)
+	if err != nil {
+		t.Fatalf("ListTransactions: %v", err)
+	}
+	for i, tx := range txns {
+		if tx.CustomerID != customerID {
+			t.Errorf("txns[%d].CustomerID = %d, want %d", i, tx.CustomerID, customerID)
+		}
+	}
+}
+
+func TestLoyalty_CreateTransaction_RedeemType(t *testing.T) {
+	db := testutil.OpenDB(t)
+	repo := infrastructure.NewRepository(db)
+	ctx := context.Background()
+
+	const customerID int64 = 8815
+	earnNote := "redeem test earn"
+	_, err := repo.CreateTransaction(ctx, fixtureBusinessID, customerID, nil, "earn", 50, 50, &earnNote)
+	if err != nil {
+		t.Fatalf("CreateTransaction earn: %v", err)
+	}
+
+	redeemNote := "redeem test redeem"
+	id, err := repo.CreateTransaction(ctx, fixtureBusinessID, customerID, nil, "redeem", -30, 20, &redeemNote)
+	if err != nil {
+		t.Fatalf("CreateTransaction redeem: %v", err)
+	}
+	if id == 0 {
+		t.Fatal("expected non-zero transaction ID for redeem")
+	}
+}
+
+func TestLoyalty_GetConfig_RedemptionRateField(t *testing.T) {
+	db := testutil.OpenDB(t)
+	repo := infrastructure.NewRepository(db)
+	ctx := context.Background()
+
+	err := repo.UpsertConfig(ctx, domain.UpdateLoyaltyConfigInput{
+		BusinessID:      fixtureBusinessID,
+		IsEnabled:       true,
+		PointsPerDollar: 1.0,
+		RedemptionRate:  0.02,
+		MinRedeemPoints: 10,
+	})
+	if err != nil {
+		t.Fatalf("UpsertConfig: %v", err)
+	}
+
+	cfg, err := repo.GetConfig(ctx, fixtureBusinessID)
+	if err != nil {
+		t.Fatalf("GetConfig: %v", err)
+	}
+	if cfg.RedemptionRate != 0.02 {
+		t.Errorf("RedemptionRate = %f, want 0.02", cfg.RedemptionRate)
+	}
+}
+
+func TestLoyalty_UpsertConfig_Idempotent(t *testing.T) {
+	db := testutil.OpenDB(t)
+	repo := infrastructure.NewRepository(db)
+	ctx := context.Background()
+
+	input := domain.UpdateLoyaltyConfigInput{
+		BusinessID:      fixtureBusinessID,
+		IsEnabled:       true,
+		PointsPerDollar: 1.5,
+		RedemptionRate:  0.01,
+		MinRedeemPoints: 25,
+	}
+	if err := repo.UpsertConfig(ctx, input); err != nil {
+		t.Fatalf("UpsertConfig first: %v", err)
+	}
+	if err := repo.UpsertConfig(ctx, input); err != nil {
+		t.Fatalf("UpsertConfig second: %v", err)
+	}
+
+	cfg, err := repo.GetConfig(ctx, fixtureBusinessID)
+	if err != nil {
+		t.Fatalf("GetConfig: %v", err)
+	}
+	if cfg.MinRedeemPoints != 25 {
+		t.Errorf("MinRedeemPoints = %d, want 25", cfg.MinRedeemPoints)
+	}
+}

@@ -193,3 +193,291 @@ func TestStoreCategories_Create_WithImageURL(t *testing.T) {
 		t.Errorf("expected positive ID, got %d", id)
 	}
 }
+
+func TestListStoreCategories_ZeroOwner_ReturnsEmpty(t *testing.T) {
+	db := testutil.OpenDB(t)
+	repo := infrastructure.NewRepository(db)
+	ctx := context.Background()
+
+	items, err := repo.List(ctx, 0)
+	if err != nil {
+		t.Fatalf("List: %v", err)
+	}
+	if len(items) != 0 {
+		t.Errorf("expected 0 items for owner 0, got %d", len(items))
+	}
+}
+
+func TestListStoreCategories_IsNotNil(t *testing.T) {
+	db := testutil.OpenDB(t)
+	repo := infrastructure.NewRepository(db)
+	ctx := context.Background()
+
+	items, err := repo.List(ctx, testutil.OwnerID)
+	if err != nil {
+		t.Fatalf("List: %v", err)
+	}
+	if items == nil {
+		t.Fatal("expected non-nil slice, got nil")
+	}
+}
+
+func TestCreateStoreCategory_PersistsAndReturnsID(t *testing.T) {
+	db := testutil.OpenDB(t)
+	repo := infrastructure.NewRepository(db)
+	ctx := context.Background()
+
+	id, err := repo.Create(ctx, testutil.OwnerID, domain.StoreCategoryInput{
+		Name: "PersistCat",
+		Slug: "persist-cat",
+	})
+	if err != nil {
+		t.Fatalf("Create: %v", err)
+	}
+	if id <= 0 {
+		t.Fatalf("expected positive ID, got %d", id)
+	}
+	t.Cleanup(func() { _ = repo.Delete(ctx, testutil.OwnerID, id) })
+}
+
+func TestCreateStoreCategory_NameIsStored(t *testing.T) {
+	db := testutil.OpenDB(t)
+	repo := infrastructure.NewRepository(db)
+	ctx := context.Background()
+
+	id, err := repo.Create(ctx, testutil.OwnerID, domain.StoreCategoryInput{
+		Name: "NameStoredCat",
+		Slug: "name-stored-cat",
+	})
+	if err != nil {
+		t.Fatalf("Create: %v", err)
+	}
+	t.Cleanup(func() { _ = repo.Delete(ctx, testutil.OwnerID, id) })
+
+	items, err := repo.List(ctx, testutil.OwnerID)
+	if err != nil {
+		t.Fatalf("List: %v", err)
+	}
+	for _, c := range items {
+		if c.ID == id {
+			if c.Name != "NameStoredCat" {
+				t.Errorf("expected name NameStoredCat, got %s", c.Name)
+			}
+			return
+		}
+	}
+	t.Errorf("category id=%d not found in list", id)
+}
+
+func TestUpdateStoreCategory_ChangesName(t *testing.T) {
+	db := testutil.OpenDB(t)
+	repo := infrastructure.NewRepository(db)
+	ctx := context.Background()
+
+	id, err := repo.Create(ctx, testutil.OwnerID, domain.StoreCategoryInput{
+		Name: "OldCatName",
+		Slug: "old-cat-name",
+	})
+	if err != nil {
+		t.Fatalf("Create: %v", err)
+	}
+	t.Cleanup(func() { _ = repo.Delete(ctx, testutil.OwnerID, id) })
+
+	if err := repo.Update(ctx, testutil.OwnerID, id, domain.StoreCategoryInput{
+		Name: "NewCatName",
+		Slug: "new-cat-name",
+	}); err != nil {
+		t.Fatalf("Update: %v", err)
+	}
+
+	items, err := repo.List(ctx, testutil.OwnerID)
+	if err != nil {
+		t.Fatalf("List: %v", err)
+	}
+	for _, c := range items {
+		if c.ID == id && c.Name != "NewCatName" {
+			t.Errorf("expected name NewCatName, got %s", c.Name)
+		}
+	}
+}
+
+func TestDeleteStoreCategory_RemovesRow(t *testing.T) {
+	db := testutil.OpenDB(t)
+	repo := infrastructure.NewRepository(db)
+	ctx := context.Background()
+
+	id, err := repo.Create(ctx, testutil.OwnerID, domain.StoreCategoryInput{
+		Name: "DeleteCat",
+		Slug: "delete-cat-row",
+	})
+	if err != nil {
+		t.Fatalf("Create: %v", err)
+	}
+
+	if err := repo.Delete(ctx, testutil.OwnerID, id); err != nil {
+		t.Fatalf("Delete: %v", err)
+	}
+
+	items, err := repo.List(ctx, testutil.OwnerID)
+	if err != nil {
+		t.Fatalf("List: %v", err)
+	}
+	for _, c := range items {
+		if c.ID == id {
+			t.Errorf("deleted category id=%d still in list", id)
+		}
+	}
+}
+
+func TestCreate_ThenList_FindsCategory(t *testing.T) {
+	db := testutil.OpenDB(t)
+	repo := infrastructure.NewRepository(db)
+	ctx := context.Background()
+
+	id, err := repo.Create(ctx, testutil.OwnerID, domain.StoreCategoryInput{
+		Name: "FindMeCat",
+		Slug: "find-me-cat",
+	})
+	if err != nil {
+		t.Fatalf("Create: %v", err)
+	}
+	t.Cleanup(func() { _ = repo.Delete(ctx, testutil.OwnerID, id) })
+
+	items, err := repo.List(ctx, testutil.OwnerID)
+	if err != nil {
+		t.Fatalf("List: %v", err)
+	}
+	for _, c := range items {
+		if c.ID == id {
+			return
+		}
+	}
+	t.Errorf("category id=%d not found after create", id)
+}
+
+func TestDeleteStoreCategory_NonExistentIsNoop(t *testing.T) {
+	db := testutil.OpenDB(t)
+	repo := infrastructure.NewRepository(db)
+	ctx := context.Background()
+
+	if err := repo.Delete(ctx, testutil.OwnerID, 99999999); err != nil {
+		t.Fatalf("Delete non-existent: %v", err)
+	}
+}
+
+func TestListStoreCategories_AfterCreate_CountIncreases(t *testing.T) {
+	db := testutil.OpenDB(t)
+	repo := infrastructure.NewRepository(db)
+	ctx := context.Background()
+
+	before, err := repo.List(ctx, testutil.OwnerID)
+	if err != nil {
+		t.Fatalf("List before: %v", err)
+	}
+
+	id, err := repo.Create(ctx, testutil.OwnerID, domain.StoreCategoryInput{
+		Name: "CountCat",
+		Slug: "count-cat",
+	})
+	if err != nil {
+		t.Fatalf("Create: %v", err)
+	}
+	t.Cleanup(func() { _ = repo.Delete(ctx, testutil.OwnerID, id) })
+
+	after, err := repo.List(ctx, testutil.OwnerID)
+	if err != nil {
+		t.Fatalf("List after: %v", err)
+	}
+	if len(after) <= len(before) {
+		t.Errorf("expected count to increase: before=%d, after=%d", len(before), len(after))
+	}
+}
+
+func TestCreateStoreCategory_DescriptionIsStored(t *testing.T) {
+	db := testutil.OpenDB(t)
+	repo := infrastructure.NewRepository(db)
+	ctx := context.Background()
+
+	id, err := repo.Create(ctx, testutil.OwnerID, domain.StoreCategoryInput{
+		Name:        "DescCat",
+		Slug:        "desc-cat",
+		Description: "A test category with description",
+	})
+	if err != nil {
+		t.Fatalf("Create: %v", err)
+	}
+	t.Cleanup(func() { _ = repo.Delete(ctx, testutil.OwnerID, id) })
+
+	items, err := repo.List(ctx, testutil.OwnerID)
+	if err != nil {
+		t.Fatalf("List: %v", err)
+	}
+	for _, c := range items {
+		if c.ID == id {
+			if c.Description != "A test category with description" {
+				t.Errorf("expected description stored, got %s", c.Description)
+			}
+			return
+		}
+	}
+	t.Errorf("category id=%d not found in list", id)
+}
+
+func TestUpdateStoreCategory_ChangesDescription(t *testing.T) {
+	db := testutil.OpenDB(t)
+	repo := infrastructure.NewRepository(db)
+	ctx := context.Background()
+
+	id, err := repo.Create(ctx, testutil.OwnerID, domain.StoreCategoryInput{
+		Name:        "DescUpdateCat",
+		Slug:        "desc-update-cat",
+		Description: "Old description",
+	})
+	if err != nil {
+		t.Fatalf("Create: %v", err)
+	}
+	t.Cleanup(func() { _ = repo.Delete(ctx, testutil.OwnerID, id) })
+
+	if err := repo.Update(ctx, testutil.OwnerID, id, domain.StoreCategoryInput{
+		Name:        "DescUpdateCat",
+		Slug:        "desc-update-cat",
+		Description: "New description",
+	}); err != nil {
+		t.Fatalf("Update: %v", err)
+	}
+
+	items, err := repo.List(ctx, testutil.OwnerID)
+	if err != nil {
+		t.Fatalf("List: %v", err)
+	}
+	for _, c := range items {
+		if c.ID == id && c.Description != "New description" {
+			t.Errorf("expected description New description, got %s", c.Description)
+		}
+	}
+}
+
+func TestListStoreCategories_MultipleOwners_Scoped(t *testing.T) {
+	db := testutil.OpenDB(t)
+	repo := infrastructure.NewRepository(db)
+	ctx := context.Background()
+
+	id, err := repo.Create(ctx, testutil.OwnerID, domain.StoreCategoryInput{
+		Name: "ScopedCat",
+		Slug: "scoped-cat",
+	})
+	if err != nil {
+		t.Fatalf("Create: %v", err)
+	}
+	t.Cleanup(func() { _ = repo.Delete(ctx, testutil.OwnerID, id) })
+
+	other, err := repo.List(ctx, 9999999)
+	if err != nil {
+		t.Fatalf("List other owner: %v", err)
+	}
+	for _, c := range other {
+		if c.ID == id {
+			t.Errorf("category id=%d leaked to another owner", id)
+		}
+	}
+}

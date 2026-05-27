@@ -221,3 +221,238 @@ func TestGetWidgets_OrderedByPosition(t *testing.T) {
 		t.Errorf("first widget should be 'c' (y=0), got %q", got[0].WidgetType)
 	}
 }
+
+func TestUpsertWidgets_WidgetTypeIsStored(t *testing.T) {
+	db := testutil.OpenDB(t)
+	repo := infrastructure.NewRepository(db)
+	ctx := context.Background()
+
+	const isolatedOwner int64 = 9_999_906
+	defer func() { _ = repo.UpsertWidgets(ctx, isolatedOwner, []*domain.DashboardWidget{}) }()
+
+	if err := repo.UpsertWidgets(ctx, isolatedOwner, []*domain.DashboardWidget{
+		{OwnerID: isolatedOwner, WidgetType: "headcount_widget", Width: 2, Height: 2, Config: []byte("{}")},
+	}); err != nil {
+		t.Fatalf("UpsertWidgets: %v", err)
+	}
+
+	got, err := repo.GetWidgets(ctx, isolatedOwner)
+	if err != nil {
+		t.Fatalf("GetWidgets: %v", err)
+	}
+	if len(got) == 0 {
+		t.Fatal("expected at least 1 widget")
+	}
+	if got[0].WidgetType != "headcount_widget" {
+		t.Errorf("expected widget_type 'headcount_widget', got %q", got[0].WidgetType)
+	}
+}
+
+func TestUpsertWidgets_PositionIsStored(t *testing.T) {
+	db := testutil.OpenDB(t)
+	repo := infrastructure.NewRepository(db)
+	ctx := context.Background()
+
+	const isolatedOwner int64 = 9_999_907
+	defer func() { _ = repo.UpsertWidgets(ctx, isolatedOwner, []*domain.DashboardWidget{}) }()
+
+	if err := repo.UpsertWidgets(ctx, isolatedOwner, []*domain.DashboardWidget{
+		{OwnerID: isolatedOwner, WidgetType: "pos_check", PositionX: 3, PositionY: 5, Width: 2, Height: 2, Config: []byte("{}")},
+	}); err != nil {
+		t.Fatalf("UpsertWidgets: %v", err)
+	}
+
+	got, err := repo.GetWidgets(ctx, isolatedOwner)
+	if err != nil {
+		t.Fatalf("GetWidgets: %v", err)
+	}
+	if len(got) == 0 {
+		t.Fatal("expected 1 widget")
+	}
+	if got[0].PositionX != 3 || got[0].PositionY != 5 {
+		t.Errorf("expected position (3,5), got (%d,%d)", got[0].PositionX, got[0].PositionY)
+	}
+}
+
+func TestUpsertWidgets_SizeIsStored(t *testing.T) {
+	db := testutil.OpenDB(t)
+	repo := infrastructure.NewRepository(db)
+	ctx := context.Background()
+
+	const isolatedOwner int64 = 9_999_908
+	defer func() { _ = repo.UpsertWidgets(ctx, isolatedOwner, []*domain.DashboardWidget{}) }()
+
+	if err := repo.UpsertWidgets(ctx, isolatedOwner, []*domain.DashboardWidget{
+		{OwnerID: isolatedOwner, WidgetType: "size_check", Width: 4, Height: 3, Config: []byte("{}")},
+	}); err != nil {
+		t.Fatalf("UpsertWidgets: %v", err)
+	}
+
+	got, err := repo.GetWidgets(ctx, isolatedOwner)
+	if err != nil {
+		t.Fatalf("GetWidgets: %v", err)
+	}
+	if len(got) == 0 {
+		t.Fatal("expected 1 widget")
+	}
+	if got[0].Width != 4 || got[0].Height != 3 {
+		t.Errorf("expected size (4,3), got (%d,%d)", got[0].Width, got[0].Height)
+	}
+}
+
+func TestUpsertWidgets_ConfigJSONIsRoundTripped(t *testing.T) {
+	db := testutil.OpenDB(t)
+	repo := infrastructure.NewRepository(db)
+	ctx := context.Background()
+
+	const isolatedOwner int64 = 9_999_909
+	defer func() { _ = repo.UpsertWidgets(ctx, isolatedOwner, []*domain.DashboardWidget{}) }()
+
+	configJSON := []byte(`{"title":"Headcount","color":"blue"}`)
+	if err := repo.UpsertWidgets(ctx, isolatedOwner, []*domain.DashboardWidget{
+		{OwnerID: isolatedOwner, WidgetType: "cfg_rt", Width: 1, Height: 1, Config: configJSON},
+	}); err != nil {
+		t.Fatalf("UpsertWidgets: %v", err)
+	}
+
+	got, err := repo.GetWidgets(ctx, isolatedOwner)
+	if err != nil {
+		t.Fatalf("GetWidgets: %v", err)
+	}
+	if len(got) == 0 {
+		t.Fatal("expected 1 widget")
+	}
+	// Config should be non-nil and valid JSON.
+	if len(got[0].Config) == 0 {
+		t.Error("expected non-empty config after upsert")
+	}
+}
+
+func TestUpsertWidgets_MultipleWidgetsSameOwner(t *testing.T) {
+	db := testutil.OpenDB(t)
+	repo := infrastructure.NewRepository(db)
+	ctx := context.Background()
+
+	const isolatedOwner int64 = 9_999_910
+	defer func() { _ = repo.UpsertWidgets(ctx, isolatedOwner, []*domain.DashboardWidget{}) }()
+
+	widgets := []*domain.DashboardWidget{
+		{OwnerID: isolatedOwner, WidgetType: "w1", Width: 1, Height: 1, Config: []byte("{}")},
+		{OwnerID: isolatedOwner, WidgetType: "w2", Width: 1, Height: 1, Config: []byte("{}")},
+		{OwnerID: isolatedOwner, WidgetType: "w3", Width: 1, Height: 1, Config: []byte("{}")},
+	}
+	if err := repo.UpsertWidgets(ctx, isolatedOwner, widgets); err != nil {
+		t.Fatalf("UpsertWidgets: %v", err)
+	}
+
+	got, err := repo.GetWidgets(ctx, isolatedOwner)
+	if err != nil {
+		t.Fatalf("GetWidgets: %v", err)
+	}
+	if len(got) != 3 {
+		t.Errorf("expected 3 widgets, got %d", len(got))
+	}
+}
+
+func TestUpsertWidgets_OwnerIsolation(t *testing.T) {
+	db := testutil.OpenDB(t)
+	repo := infrastructure.NewRepository(db)
+	ctx := context.Background()
+
+	const ownerA int64 = 9_999_911
+	const ownerB int64 = 9_999_912
+	defer func() {
+		_ = repo.UpsertWidgets(ctx, ownerA, []*domain.DashboardWidget{})
+		_ = repo.UpsertWidgets(ctx, ownerB, []*domain.DashboardWidget{})
+	}()
+
+	_ = repo.UpsertWidgets(ctx, ownerA, []*domain.DashboardWidget{
+		{OwnerID: ownerA, WidgetType: "owner_a", Width: 1, Height: 1, Config: []byte("{}")},
+	})
+	_ = repo.UpsertWidgets(ctx, ownerB, []*domain.DashboardWidget{
+		{OwnerID: ownerB, WidgetType: "owner_b", Width: 1, Height: 1, Config: []byte("{}")},
+	})
+
+	gotA, err := repo.GetWidgets(ctx, ownerA)
+	if err != nil {
+		t.Fatalf("GetWidgets ownerA: %v", err)
+	}
+	for _, w := range gotA {
+		if w.OwnerID != ownerA {
+			t.Errorf("ownerA widget has owner_id %d", w.OwnerID)
+		}
+	}
+}
+
+func TestUpsertWidgets_UpdatedAtChanges(t *testing.T) {
+	db := testutil.OpenDB(t)
+	repo := infrastructure.NewRepository(db)
+	ctx := context.Background()
+
+	const isolatedOwner int64 = 9_999_913
+	defer func() { _ = repo.UpsertWidgets(ctx, isolatedOwner, []*domain.DashboardWidget{}) }()
+
+	w := &domain.DashboardWidget{OwnerID: isolatedOwner, WidgetType: "ts_check", Width: 1, Height: 1, Config: []byte("{}")}
+	_ = repo.UpsertWidgets(ctx, isolatedOwner, []*domain.DashboardWidget{w})
+
+	first, _ := repo.GetWidgets(ctx, isolatedOwner)
+
+	// Upsert again -- UpdatedAt should be >= CreatedAt.
+	_ = repo.UpsertWidgets(ctx, isolatedOwner, []*domain.DashboardWidget{w})
+	second, err := repo.GetWidgets(ctx, isolatedOwner)
+	if err != nil {
+		t.Fatalf("GetWidgets second: %v", err)
+	}
+	if len(second) == 0 || len(first) == 0 {
+		t.Skip("no widgets returned")
+	}
+	if second[0].UpdatedAt.Before(first[0].CreatedAt) {
+		t.Errorf("UpdatedAt %v should not be before CreatedAt %v", second[0].UpdatedAt, first[0].CreatedAt)
+	}
+}
+
+func TestGetWidgets_EmptyConfigIsValidJSON(t *testing.T) {
+	db := testutil.OpenDB(t)
+	repo := infrastructure.NewRepository(db)
+	ctx := context.Background()
+
+	const isolatedOwner int64 = 9_999_914
+	defer func() { _ = repo.UpsertWidgets(ctx, isolatedOwner, []*domain.DashboardWidget{}) }()
+
+	_ = repo.UpsertWidgets(ctx, isolatedOwner, []*domain.DashboardWidget{
+		{OwnerID: isolatedOwner, WidgetType: "empty_cfg", Width: 1, Height: 1, Config: []byte("{}")},
+	})
+
+	got, err := repo.GetWidgets(ctx, isolatedOwner)
+	if err != nil {
+		t.Fatalf("GetWidgets: %v", err)
+	}
+	for _, w := range got {
+		if !json.Valid(w.Config) {
+			t.Errorf("widget %d has invalid JSON config", w.ID)
+		}
+	}
+}
+
+func TestGetWidgets_CountMatchesUpserted(t *testing.T) {
+	db := testutil.OpenDB(t)
+	repo := infrastructure.NewRepository(db)
+	ctx := context.Background()
+
+	const isolatedOwner int64 = 9_999_915
+	defer func() { _ = repo.UpsertWidgets(ctx, isolatedOwner, []*domain.DashboardWidget{}) }()
+
+	widgets := []*domain.DashboardWidget{
+		{OwnerID: isolatedOwner, WidgetType: "cnt1", Width: 1, Height: 1, Config: []byte("{}")},
+		{OwnerID: isolatedOwner, WidgetType: "cnt2", Width: 1, Height: 1, Config: []byte("{}")},
+	}
+	_ = repo.UpsertWidgets(ctx, isolatedOwner, widgets)
+
+	got, err := repo.GetWidgets(ctx, isolatedOwner)
+	if err != nil {
+		t.Fatalf("GetWidgets: %v", err)
+	}
+	if len(got) != 2 {
+		t.Errorf("expected 2 widgets, got %d", len(got))
+	}
+}

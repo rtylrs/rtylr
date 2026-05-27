@@ -188,3 +188,284 @@ func TestVariants_UpdateVariant_Price(t *testing.T) {
 		t.Fatalf("UpdateVariant price: %v", err)
 	}
 }
+
+func TestListVariants_ZeroOwner_ReturnsEmpty(t *testing.T) {
+	db := testutil.OpenDB(t)
+	repo := infrastructure.NewRepository(db)
+	variants, err := repo.ListVariants(context.Background(), 0, 0)
+	if err != nil {
+		t.Fatalf("ListVariants(ownerID=0): %v", err)
+	}
+	if len(variants) != 0 {
+		t.Fatalf("expected 0 variants for ownerID=0, got %d", len(variants))
+	}
+}
+
+func TestListVariants_NoVariants_ReturnsEmpty(t *testing.T) {
+	db := testutil.OpenDB(t)
+	repo := infrastructure.NewRepository(db)
+	// product ID 9999999 does not exist for this owner
+	variants, err := repo.ListVariants(context.Background(), testutil.OwnerID, 9999999)
+	if err != nil {
+		t.Fatalf("ListVariants(productID=9999999): %v", err)
+	}
+	if len(variants) != 0 {
+		t.Fatalf("expected 0 variants for non-existent product, got %d", len(variants))
+	}
+}
+
+func TestCreateVariant_PersistsAndReturnsID(t *testing.T) {
+	db := testutil.OpenDB(t)
+	repo := infrastructure.NewRepository(db)
+	id, err := repo.CreateVariant(context.Background(), testutil.OwnerID, domain.VariantInput{
+		ProductID: variantsProductID,
+		Name:      "Persist Test Variant",
+		SalePrice: 7.5,
+		IsActive:  true,
+	})
+	if err != nil {
+		t.Fatalf("CreateVariant: %v", err)
+	}
+	if id <= 0 {
+		t.Fatalf("expected positive ID, got %d", id)
+	}
+	t.Cleanup(func() { _ = repo.DeleteVariant(context.Background(), testutil.OwnerID, id) })
+}
+
+func TestCreateVariant_NameIsStored(t *testing.T) {
+	db := testutil.OpenDB(t)
+	repo := infrastructure.NewRepository(db)
+	const wantName = "NameStoreVariant"
+	id, err := repo.CreateVariant(context.Background(), testutil.OwnerID, domain.VariantInput{
+		ProductID: variantsProductID,
+		Name:      wantName,
+		SalePrice: 9.0,
+		IsActive:  true,
+	})
+	if err != nil {
+		t.Fatalf("CreateVariant: %v", err)
+	}
+	t.Cleanup(func() { _ = repo.DeleteVariant(context.Background(), testutil.OwnerID, id) })
+
+	variants, err := repo.ListVariants(context.Background(), testutil.OwnerID, variantsProductID)
+	if err != nil {
+		t.Fatalf("ListVariants: %v", err)
+	}
+	for _, v := range variants {
+		if v.ID == id {
+			if v.Name != wantName {
+				t.Errorf("expected Name=%q, got %q", wantName, v.Name)
+			}
+			return
+		}
+	}
+	t.Fatalf("created variant id=%d not found in list", id)
+}
+
+func TestCreateVariant_ProductIDIsStored(t *testing.T) {
+	db := testutil.OpenDB(t)
+	repo := infrastructure.NewRepository(db)
+	id, err := repo.CreateVariant(context.Background(), testutil.OwnerID, domain.VariantInput{
+		ProductID: variantsProductID,
+		Name:      "ProductIDVariant",
+		SalePrice: 5.0,
+		IsActive:  true,
+	})
+	if err != nil {
+		t.Fatalf("CreateVariant: %v", err)
+	}
+	t.Cleanup(func() { _ = repo.DeleteVariant(context.Background(), testutil.OwnerID, id) })
+
+	variants, err := repo.ListVariants(context.Background(), testutil.OwnerID, variantsProductID)
+	if err != nil {
+		t.Fatalf("ListVariants: %v", err)
+	}
+	for _, v := range variants {
+		if v.ID == id {
+			if v.ProductID != variantsProductID {
+				t.Errorf("expected ProductID=%d, got %d", variantsProductID, v.ProductID)
+			}
+			return
+		}
+	}
+	t.Fatalf("created variant id=%d not found in list", id)
+}
+
+func TestCreateVariant_PriceIsStored(t *testing.T) {
+	db := testutil.OpenDB(t)
+	repo := infrastructure.NewRepository(db)
+	const wantPrice = 42.99
+	id, err := repo.CreateVariant(context.Background(), testutil.OwnerID, domain.VariantInput{
+		ProductID: variantsProductID,
+		Name:      "PriceStoreVariant",
+		SalePrice: wantPrice,
+		IsActive:  true,
+	})
+	if err != nil {
+		t.Fatalf("CreateVariant: %v", err)
+	}
+	t.Cleanup(func() { _ = repo.DeleteVariant(context.Background(), testutil.OwnerID, id) })
+
+	variants, err := repo.ListVariants(context.Background(), testutil.OwnerID, variantsProductID)
+	if err != nil {
+		t.Fatalf("ListVariants: %v", err)
+	}
+	for _, v := range variants {
+		if v.ID == id {
+			if v.SalePrice != wantPrice {
+				t.Errorf("expected SalePrice=%.2f, got %.2f", wantPrice, v.SalePrice)
+			}
+			return
+		}
+	}
+	t.Fatalf("created variant id=%d not found in list", id)
+}
+
+func TestUpdateVariant_ChangesName(t *testing.T) {
+	db := testutil.OpenDB(t)
+	repo := infrastructure.NewRepository(db)
+	id, err := repo.CreateVariant(context.Background(), testutil.OwnerID, domain.VariantInput{
+		ProductID: variantsProductID, Name: "OriginalVariantName", SalePrice: 5.0, IsActive: true,
+	})
+	if err != nil {
+		t.Fatalf("CreateVariant: %v", err)
+	}
+	t.Cleanup(func() { _ = repo.DeleteVariant(context.Background(), testutil.OwnerID, id) })
+
+	if err := repo.UpdateVariant(context.Background(), testutil.OwnerID, id, domain.VariantInput{
+		ProductID: variantsProductID, Name: "UpdatedVariantName", SalePrice: 5.0, IsActive: true,
+	}); err != nil {
+		t.Fatalf("UpdateVariant: %v", err)
+	}
+
+	variants, err := repo.ListVariants(context.Background(), testutil.OwnerID, variantsProductID)
+	if err != nil {
+		t.Fatalf("ListVariants: %v", err)
+	}
+	for _, v := range variants {
+		if v.ID == id && v.Name != "UpdatedVariantName" {
+			t.Errorf("expected Name=UpdatedVariantName, got %q", v.Name)
+		}
+	}
+}
+
+func TestUpdateVariant_ChangesPrice(t *testing.T) {
+	db := testutil.OpenDB(t)
+	repo := infrastructure.NewRepository(db)
+	id, err := repo.CreateVariant(context.Background(), testutil.OwnerID, domain.VariantInput{
+		ProductID: variantsProductID, Name: "ChangePriceVariant", SalePrice: 10.0, IsActive: true,
+	})
+	if err != nil {
+		t.Fatalf("CreateVariant: %v", err)
+	}
+	t.Cleanup(func() { _ = repo.DeleteVariant(context.Background(), testutil.OwnerID, id) })
+
+	const newPrice = 99.99
+	if err := repo.UpdateVariant(context.Background(), testutil.OwnerID, id, domain.VariantInput{
+		ProductID: variantsProductID, Name: "ChangePriceVariant", SalePrice: newPrice, IsActive: true,
+	}); err != nil {
+		t.Fatalf("UpdateVariant: %v", err)
+	}
+
+	variants, err := repo.ListVariants(context.Background(), testutil.OwnerID, variantsProductID)
+	if err != nil {
+		t.Fatalf("ListVariants: %v", err)
+	}
+	for _, v := range variants {
+		if v.ID == id {
+			if v.SalePrice != newPrice {
+				t.Errorf("expected SalePrice=%.2f, got %.2f", newPrice, v.SalePrice)
+			}
+			return
+		}
+	}
+}
+
+func TestDeleteVariant_RemovesRow(t *testing.T) {
+	db := testutil.OpenDB(t)
+	repo := infrastructure.NewRepository(db)
+	id, err := repo.CreateVariant(context.Background(), testutil.OwnerID, domain.VariantInput{
+		ProductID: variantsProductID, Name: "DeleteRowVariant", SalePrice: 1.0, IsActive: true,
+	})
+	if err != nil {
+		t.Fatalf("CreateVariant: %v", err)
+	}
+
+	if err := repo.DeleteVariant(context.Background(), testutil.OwnerID, id); err != nil {
+		t.Fatalf("DeleteVariant: %v", err)
+	}
+
+	variants, err := repo.ListVariants(context.Background(), testutil.OwnerID, variantsProductID)
+	if err != nil {
+		t.Fatalf("ListVariants after delete: %v", err)
+	}
+	for _, v := range variants {
+		if v.ID == id {
+			t.Errorf("deleted variant id=%d still appears in list", id)
+		}
+	}
+}
+
+func TestDeleteVariant_NonExistentIsNoop(t *testing.T) {
+	db := testutil.OpenDB(t)
+	repo := infrastructure.NewRepository(db)
+	// Deleting a non-existent variant should not return an error
+	err := repo.DeleteVariant(context.Background(), testutil.OwnerID, 9999999)
+	if err != nil {
+		t.Fatalf("DeleteVariant(non-existent): expected no error, got %v", err)
+	}
+}
+
+func TestCreate_ThenList_FindsVariant(t *testing.T) {
+	db := testutil.OpenDB(t)
+	repo := infrastructure.NewRepository(db)
+	id, err := repo.CreateVariant(context.Background(), testutil.OwnerID, domain.VariantInput{
+		ProductID: variantsProductID,
+		Name:      "RoundtripVariant",
+		SalePrice: 12.0,
+		IsActive:  true,
+	})
+	if err != nil {
+		t.Fatalf("CreateVariant: %v", err)
+	}
+	t.Cleanup(func() { _ = repo.DeleteVariant(context.Background(), testutil.OwnerID, id) })
+
+	variants, err := repo.ListVariants(context.Background(), testutil.OwnerID, variantsProductID)
+	if err != nil {
+		t.Fatalf("ListVariants: %v", err)
+	}
+	found := false
+	for _, v := range variants {
+		if v.ID == id {
+			found = true
+			break
+		}
+	}
+	if !found {
+		t.Fatalf("created variant id=%d not found in list", id)
+	}
+}
+
+func TestListVariants_WrongOwner_ReturnsEmpty(t *testing.T) {
+	db := testutil.OpenDB(t)
+	repo := infrastructure.NewRepository(db)
+	// Create a variant for the real owner
+	id, err := repo.CreateVariant(context.Background(), testutil.OwnerID, domain.VariantInput{
+		ProductID: variantsProductID, Name: "OwnerScopedVariant", SalePrice: 5.0, IsActive: true,
+	})
+	if err != nil {
+		t.Fatalf("CreateVariant: %v", err)
+	}
+	t.Cleanup(func() { _ = repo.DeleteVariant(context.Background(), testutil.OwnerID, id) })
+
+	// Query with a different owner — should not see the above variant
+	variants, err := repo.ListVariants(context.Background(), testutil.OwnerID+9999, variantsProductID)
+	if err != nil {
+		t.Fatalf("ListVariants(wrong owner): %v", err)
+	}
+	for _, v := range variants {
+		if v.OwnerID == testutil.OwnerID {
+			t.Errorf("wrong-owner query returned variant with ownerID=%d", testutil.OwnerID)
+		}
+	}
+}

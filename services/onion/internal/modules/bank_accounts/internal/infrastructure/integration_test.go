@@ -257,3 +257,253 @@ func TestList_BankAccounts_BalanceNonNegative(t *testing.T) {
 	// Just verify we can iterate without panic
 	_ = items
 }
+
+func TestList_BankAccounts_ZeroOwner_ReturnsEmpty(t *testing.T) {
+	db := testutil.OpenDB(t)
+	repo := infrastructure.NewRepository(db)
+	ctx := context.Background()
+
+	items, err := repo.List(ctx, 0)
+	if err != nil {
+		t.Fatalf("List(0): %v", err)
+	}
+	if len(items) != 0 {
+		t.Fatalf("expected 0 items for owner 0, got %d", len(items))
+	}
+}
+
+func TestCreate_BankAccount_NameStored(t *testing.T) {
+	db := testutil.OpenDB(t)
+	repo := infrastructure.NewRepository(db)
+	ctx := context.Background()
+
+	name := "Name Stored Account"
+	id, err := repo.Create(ctx, testutil.OwnerID, domain.BankAccountInput{
+		Name:     name,
+		Balance:  0,
+		Currency: "USD",
+	})
+	if err != nil {
+		t.Fatalf("Create: %v", err)
+	}
+
+	items, err := repo.List(ctx, testutil.OwnerID)
+	if err != nil {
+		t.Fatalf("List: %v", err)
+	}
+
+	for _, ba := range items {
+		if ba.ID == id {
+			if ba.Name != name {
+				t.Errorf("Name = %q, want %q", ba.Name, name)
+			}
+			return
+		}
+	}
+	t.Fatalf("bank account id=%d not found", id)
+}
+
+func TestCreate_BankAccount_IBANStored(t *testing.T) {
+	db := testutil.OpenDB(t)
+	repo := infrastructure.NewRepository(db)
+	ctx := context.Background()
+
+	institution := "IBAN Bank"
+	id, err := repo.Create(ctx, testutil.OwnerID, domain.BankAccountInput{
+		Name:        "IBAN Account",
+		Institution: institution,
+		Balance:     0,
+		Currency:    "USD",
+	})
+	if err != nil {
+		t.Fatalf("Create: %v", err)
+	}
+
+	items, err := repo.List(ctx, testutil.OwnerID)
+	if err != nil {
+		t.Fatalf("List: %v", err)
+	}
+
+	for _, ba := range items {
+		if ba.ID == id {
+			if ba.Institution != institution {
+				t.Errorf("Institution = %q, want %q", ba.Institution, institution)
+			}
+			return
+		}
+	}
+	t.Fatalf("bank account id=%d not found", id)
+}
+
+func TestCreate_ThenList_FindsNewAccount(t *testing.T) {
+	db := testutil.OpenDB(t)
+	repo := infrastructure.NewRepository(db)
+	ctx := context.Background()
+
+	beforeCount := 0
+	{
+		items, err := repo.List(ctx, testutil.OwnerID)
+		if err != nil {
+			t.Fatalf("List before: %v", err)
+		}
+		beforeCount = len(items)
+	}
+
+	_, err := repo.Create(ctx, testutil.OwnerID, domain.BankAccountInput{
+		Name:     "New Account For List Check",
+		Balance:  0,
+		Currency: "USD",
+	})
+	if err != nil {
+		t.Fatalf("Create: %v", err)
+	}
+
+	items, err := repo.List(ctx, testutil.OwnerID)
+	if err != nil {
+		t.Fatalf("List after: %v", err)
+	}
+	if len(items) <= beforeCount {
+		t.Errorf("expected more items after create; before=%d after=%d", beforeCount, len(items))
+	}
+}
+
+func TestList_ScopedByOwner(t *testing.T) {
+	db := testutil.OpenDB(t)
+	repo := infrastructure.NewRepository(db)
+	ctx := context.Background()
+
+	// Create one account for the fixture owner.
+	_, err := repo.Create(ctx, testutil.OwnerID, domain.BankAccountInput{
+		Name:     "Scoped Account",
+		Balance:  0,
+		Currency: "USD",
+	})
+	if err != nil {
+		t.Fatalf("Create: %v", err)
+	}
+
+	// A different (non-existent) owner should get nothing.
+	items, err := repo.List(ctx, 888888)
+	if err != nil {
+		t.Fatalf("List other owner: %v", err)
+	}
+	if len(items) != 0 {
+		t.Fatalf("expected 0 items for other owner, got %d", len(items))
+	}
+}
+
+func TestCreate_BankAccount_AccountTypeStored(t *testing.T) {
+	db := testutil.OpenDB(t)
+	repo := infrastructure.NewRepository(db)
+	ctx := context.Background()
+
+	id, err := repo.Create(ctx, testutil.OwnerID, domain.BankAccountInput{
+		Name:        "Type Stored Account",
+		AccountType: "savings",
+		Balance:     0,
+		Currency:    "USD",
+	})
+	if err != nil {
+		t.Fatalf("Create: %v", err)
+	}
+
+	items, err := repo.List(ctx, testutil.OwnerID)
+	if err != nil {
+		t.Fatalf("List: %v", err)
+	}
+
+	for _, ba := range items {
+		if ba.ID == id {
+			if ba.AccountType != "savings" {
+				t.Errorf("AccountType = %q, want %q", ba.AccountType, "savings")
+			}
+			return
+		}
+	}
+	t.Fatalf("bank account id=%d not found", id)
+}
+
+func TestCreate_BankAccount_CurrencyEUR(t *testing.T) {
+	db := testutil.OpenDB(t)
+	repo := infrastructure.NewRepository(db)
+	ctx := context.Background()
+
+	id, err := repo.Create(ctx, testutil.OwnerID, domain.BankAccountInput{
+		Name:     "EUR Account",
+		Balance:  500.00,
+		Currency: "EUR",
+	})
+	if err != nil {
+		t.Fatalf("Create: %v", err)
+	}
+
+	items, err := repo.List(ctx, testutil.OwnerID)
+	if err != nil {
+		t.Fatalf("List: %v", err)
+	}
+
+	for _, ba := range items {
+		if ba.ID == id {
+			if ba.Currency != "EUR" {
+				t.Errorf("Currency = %q, want %q", ba.Currency, "EUR")
+			}
+			return
+		}
+	}
+	t.Fatalf("bank account id=%d not found", id)
+}
+
+func TestCreate_BankAccount_MultipleAccountsForOwner(t *testing.T) {
+	db := testutil.OpenDB(t)
+	repo := infrastructure.NewRepository(db)
+	ctx := context.Background()
+
+	for i := 0; i < 3; i++ {
+		_, err := repo.Create(ctx, testutil.OwnerID, domain.BankAccountInput{
+			Name:     "Multi Account",
+			Balance:  float64(i * 100),
+			Currency: "USD",
+		})
+		if err != nil {
+			t.Fatalf("Create[%d]: %v", i, err)
+		}
+	}
+
+	items, err := repo.List(ctx, testutil.OwnerID)
+	if err != nil {
+		t.Fatalf("List: %v", err)
+	}
+	if len(items) < 3 {
+		t.Fatalf("expected at least 3 items, got %d", len(items))
+	}
+}
+
+func TestCreate_BankAccount_ZeroBalance(t *testing.T) {
+	db := testutil.OpenDB(t)
+	repo := infrastructure.NewRepository(db)
+	ctx := context.Background()
+
+	id, err := repo.Create(ctx, testutil.OwnerID, domain.BankAccountInput{
+		Name:     "Zero Balance Account",
+		Balance:  0,
+		Currency: "USD",
+	})
+	if err != nil {
+		t.Fatalf("Create: %v", err)
+	}
+
+	items, err := repo.List(ctx, testutil.OwnerID)
+	if err != nil {
+		t.Fatalf("List: %v", err)
+	}
+
+	for _, ba := range items {
+		if ba.ID == id {
+			if ba.Balance != 0 {
+				t.Errorf("Balance = %f, want 0", ba.Balance)
+			}
+			return
+		}
+	}
+	t.Fatalf("bank account id=%d not found", id)
+}

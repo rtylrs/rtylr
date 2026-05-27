@@ -154,3 +154,151 @@ func TestGetUserAllowedApps_ChatUser(t *testing.T) {
 		t.Fatal("expected non-nil slice for chat user")
 	}
 }
+
+func TestGetEnabledAddons_ReturnsNonNilForBusiness1(t *testing.T) {
+	db := testutil.OpenDB(t)
+	repo := infrastructure.NewRepository(db)
+	ctx := context.Background()
+
+	result := repo.GetEnabledAddons(ctx, 1)
+	if result == nil {
+		t.Fatal("expected non-nil map")
+	}
+}
+
+func TestGetEnabledAddons_MultipleCalls_SameResult(t *testing.T) {
+	db := testutil.OpenDB(t)
+	repo := infrastructure.NewRepository(db)
+	ctx := context.Background()
+
+	a := repo.GetEnabledAddons(ctx, 1)
+	b := repo.GetEnabledAddons(ctx, 1)
+	if len(a) != len(b) {
+		t.Errorf("results differ between calls: %d vs %d", len(a), len(b))
+	}
+}
+
+func TestGetUserAllowedApps_NegativeUserID_ReturnsEmpty(t *testing.T) {
+	db := testutil.OpenDB(t)
+	repo := infrastructure.NewRepository(db)
+	ctx := context.Background()
+
+	apps := repo.GetUserAllowedApps(ctx, 1, -1)
+	if len(apps) != 0 {
+		t.Errorf("expected 0 apps for negative user ID, got %d", len(apps))
+	}
+}
+
+func TestGetEnabledAddons_NegativeBusinessID_ReturnsEmpty(t *testing.T) {
+	db := testutil.OpenDB(t)
+	repo := infrastructure.NewRepository(db)
+	ctx := context.Background()
+
+	result := repo.GetEnabledAddons(ctx, -1)
+	if result == nil {
+		t.Fatal("expected non-nil map")
+	}
+	if len(result) != 0 {
+		t.Errorf("expected 0 entries for negative businessID, got %d", len(result))
+	}
+}
+
+func TestGetUserAllowedApps_SameBusiness_DifferentUsers(t *testing.T) {
+	db := testutil.OpenDB(t)
+	repo := infrastructure.NewRepository(db)
+	ctx := context.Background()
+
+	apps1 := repo.GetUserAllowedApps(ctx, 1, testutil.OwnerID)
+	apps2 := repo.GetUserAllowedApps(ctx, 1, 1002)
+	// Just ensure both return non-nil and don't panic
+	if apps1 == nil || apps2 == nil {
+		t.Fatal("expected non-nil slices for both users")
+	}
+}
+
+func TestGetEnabledAddons_AllValuesTrue(t *testing.T) {
+	db := testutil.OpenDB(t)
+	repo := infrastructure.NewRepository(db)
+	ctx := context.Background()
+
+	addons := repo.GetEnabledAddons(ctx, 1)
+	for k, v := range addons {
+		if !v {
+			t.Errorf("addon %q has value false; only enabled addons should be in map", k)
+		}
+	}
+}
+
+func TestGetUserAllowedApps_ConsistentTwoCalls(t *testing.T) {
+	db := testutil.OpenDB(t)
+	repo := infrastructure.NewRepository(db)
+	ctx := context.Background()
+
+	first := repo.GetUserAllowedApps(ctx, 1, testutil.OwnerID)
+	second := repo.GetUserAllowedApps(ctx, 1, testutil.OwnerID)
+	if len(first) != len(second) {
+		t.Errorf("inconsistent results: %d vs %d", len(first), len(second))
+	}
+}
+
+func TestGetEnabledAddons_KeysAreStrings(t *testing.T) {
+	db := testutil.OpenDB(t)
+	repo := infrastructure.NewRepository(db)
+	ctx := context.Background()
+
+	addons := repo.GetEnabledAddons(ctx, 1)
+	for k := range addons {
+		if k == "" {
+			t.Error("found empty key in enabled addons map")
+		}
+	}
+}
+
+func TestGetUserAllowedApps_ZeroUserID_ReturnsEmpty(t *testing.T) {
+	db := testutil.OpenDB(t)
+	repo := infrastructure.NewRepository(db)
+	ctx := context.Background()
+
+	apps := repo.GetUserAllowedApps(ctx, 1, 0)
+	if len(apps) != 0 {
+		t.Errorf("expected 0 apps for userID=0, got %d", len(apps))
+	}
+}
+
+func TestGetEnabledAddons_UnknownBusinessReturnsEmptyNotNil(t *testing.T) {
+	db := testutil.OpenDB(t)
+	repo := infrastructure.NewRepository(db)
+	ctx := context.Background()
+
+	result := repo.GetEnabledAddons(ctx, 888888)
+	if result == nil {
+		t.Fatal("expected non-nil map even for unknown business")
+	}
+	if len(result) != 0 {
+		t.Errorf("expected empty map, got %d entries", len(result))
+	}
+}
+
+func TestGetUserAllowedApps_AppStringsAreNonEmpty(t *testing.T) {
+	db := testutil.OpenDB(t)
+	repo := infrastructure.NewRepository(db)
+	ctx := context.Background()
+
+	apps := repo.GetUserAllowedApps(ctx, 1, testutil.OwnerID)
+	for i, a := range apps {
+		if a == "" {
+			t.Errorf("apps[%d] is empty string", i)
+		}
+	}
+}
+
+func TestGetEnabledAddons_BusinessZero_ReturnsNonNilMap(t *testing.T) {
+	db := testutil.OpenDB(t)
+	repo := infrastructure.NewRepository(db)
+	ctx := context.Background()
+
+	result := repo.GetEnabledAddons(ctx, 0)
+	if result == nil {
+		t.Fatal("expected non-nil map for businessID=0")
+	}
+}

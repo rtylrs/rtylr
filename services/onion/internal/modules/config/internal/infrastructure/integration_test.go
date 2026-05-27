@@ -162,3 +162,309 @@ func TestGetConfig_MetaTagsIsSlice(t *testing.T) {
 		t.Error("expected non-nil MetaTags slice")
 	}
 }
+
+func TestGetThemeByOwnerID_UnknownOwnerReturnsEmpty(t *testing.T) {
+	db := testutil.OpenDB(t)
+	repo := infrastructure.NewRepository(db)
+	ctx := context.Background()
+
+	theme, err := repo.GetThemeByOwnerID(ctx, "999888777")
+	if err != nil {
+		t.Fatalf("GetThemeByOwnerID for unknown owner: %v", err)
+	}
+	if theme.ID != 0 {
+		t.Errorf("expected zero ID for unknown owner, got %d", theme.ID)
+	}
+}
+
+func TestUpdateConfig_ContactEmailRoundTrip(t *testing.T) {
+	db := testutil.OpenDB(t)
+	repo := infrastructure.NewRepository(db)
+	ctx := context.Background()
+
+	ownerStr := strconv.FormatInt(testutil.OwnerID, 10)
+	original, err := repo.GetConfig(ctx, ownerStr)
+	if err != nil {
+		t.Fatalf("GetConfig original: %v", err)
+	}
+
+	newEmail := "integration-test@example.com"
+	input := domain.ConfigInput{
+		OwnerId:      ownerStr,
+		SiteName:     original.SiteName,
+		ContactEmail: newEmail,
+	}
+	if err := repo.UpdateConfig(ctx, input); err != nil {
+		t.Fatalf("UpdateConfig: %v", err)
+	}
+	t.Cleanup(func() {
+		_ = repo.UpdateConfig(ctx, domain.ConfigInput{
+			OwnerId:      ownerStr,
+			SiteName:     original.SiteName,
+			ContactEmail: original.ContactEmail,
+		})
+	})
+
+	updated, err := repo.GetConfig(ctx, ownerStr)
+	if err != nil {
+		t.Fatalf("GetConfig after update: %v", err)
+	}
+	if updated.ContactEmail != newEmail {
+		t.Errorf("ContactEmail = %q, want %q", updated.ContactEmail, newEmail)
+	}
+}
+
+func TestUpdateConfig_MaintenanceModeRoundTrip(t *testing.T) {
+	db := testutil.OpenDB(t)
+	repo := infrastructure.NewRepository(db)
+	ctx := context.Background()
+
+	ownerStr := strconv.FormatInt(testutil.OwnerID, 10)
+	original, err := repo.GetConfig(ctx, ownerStr)
+	if err != nil {
+		t.Fatalf("GetConfig: %v", err)
+	}
+
+	if err := repo.UpdateConfig(ctx, domain.ConfigInput{
+		OwnerId:         ownerStr,
+		SiteName:        original.SiteName,
+		ContactEmail:    original.ContactEmail,
+		MaintenanceMode: true,
+	}); err != nil {
+		t.Fatalf("UpdateConfig: %v", err)
+	}
+	t.Cleanup(func() {
+		_ = repo.UpdateConfig(ctx, domain.ConfigInput{
+			OwnerId:         ownerStr,
+			SiteName:        original.SiteName,
+			ContactEmail:    original.ContactEmail,
+			MaintenanceMode: original.MaintenanceMode,
+		})
+	})
+
+	updated, err := repo.GetConfig(ctx, ownerStr)
+	if err != nil {
+		t.Fatalf("GetConfig after maintenance update: %v", err)
+	}
+	if !updated.MaintenanceMode {
+		t.Error("expected MaintenanceMode=true after update")
+	}
+}
+
+func TestGetConfig_OwnerId_IsString(t *testing.T) {
+	db := testutil.OpenDB(t)
+	repo := infrastructure.NewRepository(db)
+	ctx := context.Background()
+
+	ownerStr := strconv.FormatInt(testutil.OwnerID, 10)
+	cfg, err := repo.GetConfig(ctx, ownerStr)
+	if err != nil {
+		t.Fatalf("GetConfig: %v", err)
+	}
+	if cfg.OwnerId == "" {
+		t.Error("expected non-empty OwnerId string in config")
+	}
+}
+
+func TestUpdateConfig_EnableReviewsRoundTrip(t *testing.T) {
+	db := testutil.OpenDB(t)
+	repo := infrastructure.NewRepository(db)
+	ctx := context.Background()
+
+	ownerStr := strconv.FormatInt(testutil.OwnerID, 10)
+	original, err := repo.GetConfig(ctx, ownerStr)
+	if err != nil {
+		t.Fatalf("GetConfig: %v", err)
+	}
+
+	if err := repo.UpdateConfig(ctx, domain.ConfigInput{
+		OwnerId:       ownerStr,
+		SiteName:      original.SiteName,
+		ContactEmail:  original.ContactEmail,
+		EnableReviews: true,
+	}); err != nil {
+		t.Fatalf("UpdateConfig: %v", err)
+	}
+	t.Cleanup(func() {
+		_ = repo.UpdateConfig(ctx, domain.ConfigInput{
+			OwnerId:       ownerStr,
+			SiteName:      original.SiteName,
+			ContactEmail:  original.ContactEmail,
+			EnableReviews: original.EnableReviews,
+		})
+	})
+
+	updated, err := repo.GetConfig(ctx, ownerStr)
+	if err != nil {
+		t.Fatalf("GetConfig after update: %v", err)
+	}
+	if !updated.EnableReviews {
+		t.Error("expected EnableReviews=true after update")
+	}
+}
+
+func TestGetConfig_SiteNameNonEmpty(t *testing.T) {
+	db := testutil.OpenDB(t)
+	repo := infrastructure.NewRepository(db)
+	ctx := context.Background()
+
+	cfg, err := repo.GetConfig(ctx, strconv.FormatInt(testutil.OwnerID, 10))
+	if err != nil {
+		t.Fatalf("GetConfig: %v", err)
+	}
+	if cfg.SiteName == "" {
+		t.Error("expected non-empty SiteName")
+	}
+}
+
+func TestUpdateConfig_Idempotent(t *testing.T) {
+	db := testutil.OpenDB(t)
+	repo := infrastructure.NewRepository(db)
+	ctx := context.Background()
+
+	ownerStr := strconv.FormatInt(testutil.OwnerID, 10)
+	original, err := repo.GetConfig(ctx, ownerStr)
+	if err != nil {
+		t.Fatalf("GetConfig: %v", err)
+	}
+
+	input := domain.ConfigInput{
+		OwnerId:      ownerStr,
+		SiteName:     original.SiteName,
+		ContactEmail: original.ContactEmail,
+	}
+	if err := repo.UpdateConfig(ctx, input); err != nil {
+		t.Fatalf("UpdateConfig first: %v", err)
+	}
+	if err := repo.UpdateConfig(ctx, input); err != nil {
+		t.Fatalf("UpdateConfig second: %v", err)
+	}
+
+	after, err := repo.GetConfig(ctx, ownerStr)
+	if err != nil {
+		t.Fatalf("GetConfig after: %v", err)
+	}
+	if after.SiteName != original.SiteName {
+		t.Errorf("SiteName changed unexpectedly: %q", after.SiteName)
+	}
+}
+
+func TestGetConfig_FooterSubTextField(t *testing.T) {
+	db := testutil.OpenDB(t)
+	repo := infrastructure.NewRepository(db)
+	ctx := context.Background()
+
+	ownerStr := strconv.FormatInt(testutil.OwnerID, 10)
+	cfg, err := repo.GetConfig(ctx, ownerStr)
+	if err != nil {
+		t.Fatalf("GetConfig: %v", err)
+	}
+	_ = cfg.FooterSubText
+}
+
+func TestUpdateConfig_FooterSubTextRoundTrip(t *testing.T) {
+	db := testutil.OpenDB(t)
+	repo := infrastructure.NewRepository(db)
+	ctx := context.Background()
+
+	ownerStr := strconv.FormatInt(testutil.OwnerID, 10)
+	original, err := repo.GetConfig(ctx, ownerStr)
+	if err != nil {
+		t.Fatalf("GetConfig: %v", err)
+	}
+
+	newFooter := "Integration Test Footer"
+	if err := repo.UpdateConfig(ctx, domain.ConfigInput{
+		OwnerId:       ownerStr,
+		SiteName:      original.SiteName,
+		ContactEmail:  original.ContactEmail,
+		FooterSubText: newFooter,
+	}); err != nil {
+		t.Fatalf("UpdateConfig: %v", err)
+	}
+	t.Cleanup(func() {
+		_ = repo.UpdateConfig(ctx, domain.ConfigInput{
+			OwnerId:       ownerStr,
+			SiteName:      original.SiteName,
+			ContactEmail:  original.ContactEmail,
+			FooterSubText: original.FooterSubText,
+		})
+	})
+
+	updated, err := repo.GetConfig(ctx, ownerStr)
+	if err != nil {
+		t.Fatalf("GetConfig after footer update: %v", err)
+	}
+	if updated.FooterSubText != newFooter {
+		t.Errorf("FooterSubText = %q, want %q", updated.FooterSubText, newFooter)
+	}
+}
+
+func TestGetConfig_BusinessSlugField(t *testing.T) {
+	db := testutil.OpenDB(t)
+	repo := infrastructure.NewRepository(db)
+	ctx := context.Background()
+
+	cfg, err := repo.GetConfig(ctx, strconv.FormatInt(testutil.OwnerID, 10))
+	if err != nil {
+		t.Fatalf("GetConfig: %v", err)
+	}
+	_ = cfg.BusinessSlug
+}
+
+func TestGetConfig_AddonsEnabledField(t *testing.T) {
+	db := testutil.OpenDB(t)
+	repo := infrastructure.NewRepository(db)
+	ctx := context.Background()
+
+	cfg, err := repo.GetConfig(ctx, strconv.FormatInt(testutil.OwnerID, 10))
+	if err != nil {
+		t.Fatalf("GetConfig: %v", err)
+	}
+	_ = cfg.AddonsEnabled
+}
+
+func TestUpdateConfig_MultipleFieldsRoundTrip(t *testing.T) {
+	db := testutil.OpenDB(t)
+	repo := infrastructure.NewRepository(db)
+	ctx := context.Background()
+
+	ownerStr := strconv.FormatInt(testutil.OwnerID, 10)
+	original, err := repo.GetConfig(ctx, ownerStr)
+	if err != nil {
+		t.Fatalf("GetConfig: %v", err)
+	}
+
+	input := domain.ConfigInput{
+		OwnerId:       ownerStr,
+		SiteName:      "Multi Field Test",
+		ContactEmail:  "multi@example.com",
+		FooterSubText: "Multi Footer",
+		EnableReviews: true,
+		EnableWishlist: true,
+	}
+	if err := repo.UpdateConfig(ctx, input); err != nil {
+		t.Fatalf("UpdateConfig: %v", err)
+	}
+	t.Cleanup(func() {
+		_ = repo.UpdateConfig(ctx, domain.ConfigInput{
+			OwnerId:        ownerStr,
+			SiteName:       original.SiteName,
+			ContactEmail:   original.ContactEmail,
+			FooterSubText:  original.FooterSubText,
+			EnableReviews:  original.EnableReviews,
+			EnableWishlist: original.EnableWishlist,
+		})
+	})
+
+	updated, err := repo.GetConfig(ctx, ownerStr)
+	if err != nil {
+		t.Fatalf("GetConfig after multi-field update: %v", err)
+	}
+	if updated.SiteName != "Multi Field Test" {
+		t.Errorf("SiteName = %q, want 'Multi Field Test'", updated.SiteName)
+	}
+	if updated.ContactEmail != "multi@example.com" {
+		t.Errorf("ContactEmail = %q, want 'multi@example.com'", updated.ContactEmail)
+	}
+}

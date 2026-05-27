@@ -202,3 +202,227 @@ func TestListMembers_UnknownOwner_ReturnsEmpty(t *testing.T) {
 		t.Errorf("expected 0 members for unknown owner, got %d", len(members))
 	}
 }
+
+func TestUpsertConfig_PointsPerDollarRoundTrip(t *testing.T) {
+	db := testutil.OpenDB(t)
+	repo := infrastructure.NewRepository(db)
+	ctx := context.Background()
+
+	if err := repo.UpsertConfig(ctx, domain.LoyaltyConfigInput{
+		OwnerID:         testutil.OwnerID,
+		PointsPerDollar: 5.0,
+		PointsValue:     0.01,
+		IsActive:        true,
+	}); err != nil {
+		t.Fatalf("UpsertConfig: %v", err)
+	}
+
+	cfg, err := repo.GetConfig(ctx, testutil.OwnerID)
+	if err != nil {
+		t.Fatalf("GetConfig: %v", err)
+	}
+	if cfg.PointsPerDollar != 5.0 {
+		t.Errorf("PointsPerDollar = %v, want 5.0", cfg.PointsPerDollar)
+	}
+}
+
+func TestUpsertConfig_IsActiveRoundTrip(t *testing.T) {
+	db := testutil.OpenDB(t)
+	repo := infrastructure.NewRepository(db)
+	ctx := context.Background()
+
+	if err := repo.UpsertConfig(ctx, domain.LoyaltyConfigInput{
+		OwnerID:  testutil.OwnerID,
+		IsActive: false,
+	}); err != nil {
+		t.Fatalf("UpsertConfig IsActive=false: %v", err)
+	}
+
+	cfg, err := repo.GetConfig(ctx, testutil.OwnerID)
+	if err != nil {
+		t.Fatalf("GetConfig: %v", err)
+	}
+	if cfg.IsActive != false {
+		t.Errorf("expected IsActive=false, got %v", cfg.IsActive)
+	}
+}
+
+func TestGetConfig_OwnerIDIsSet(t *testing.T) {
+	db := testutil.OpenDB(t)
+	repo := infrastructure.NewRepository(db)
+	ctx := context.Background()
+
+	if err := repo.UpsertConfig(ctx, domain.LoyaltyConfigInput{
+		OwnerID:  testutil.OwnerID,
+		IsActive: true,
+	}); err != nil {
+		t.Fatalf("UpsertConfig: %v", err)
+	}
+
+	cfg, err := repo.GetConfig(ctx, testutil.OwnerID)
+	if err != nil {
+		t.Fatalf("GetConfig: %v", err)
+	}
+	if cfg.OwnerID != testutil.OwnerID {
+		t.Errorf("OwnerID = %d, want %d", cfg.OwnerID, testutil.OwnerID)
+	}
+}
+
+func TestListTransactions_ZeroOwner_ReturnsEmpty(t *testing.T) {
+	db := testutil.OpenDB(t)
+	repo := infrastructure.NewRepository(db)
+	ctx := context.Background()
+
+	txs, total, err := repo.ListTransactions(ctx, 0, 0, 1, 20)
+	if err != nil {
+		t.Fatalf("ListTransactions(ownerID=0): %v", err)
+	}
+	if total != 0 || len(txs) != 0 {
+		t.Fatalf("expected 0 transactions for ownerID=0, got total=%d len=%d", total, len(txs))
+	}
+}
+
+func TestCreateTransaction_Award_NoError(t *testing.T) {
+	db := testutil.OpenDB(t)
+	repo := infrastructure.NewRepository(db)
+	ctx := context.Background()
+
+	err := repo.CreateTransaction(ctx, domain.AwardInput{
+		OwnerID:     testutil.OwnerID,
+		CustomerID:  5301,
+		Points:      100,
+		Description: "integration test award",
+	}, "award")
+	if err != nil {
+		t.Fatalf("CreateTransaction award: %v", err)
+	}
+}
+
+func TestCreateTransaction_AppearsInList(t *testing.T) {
+	db := testutil.OpenDB(t)
+	repo := infrastructure.NewRepository(db)
+	ctx := context.Background()
+
+	if err := repo.CreateTransaction(ctx, domain.AwardInput{
+		OwnerID:     testutil.OwnerID,
+		CustomerID:  5302,
+		Points:      50,
+		Description: "list check award",
+	}, "award"); err != nil {
+		t.Fatalf("CreateTransaction: %v", err)
+	}
+
+	txs, total, err := repo.ListTransactions(ctx, testutil.OwnerID, 5302, 1, 50)
+	if err != nil {
+		t.Fatalf("ListTransactions: %v", err)
+	}
+	if total == 0 || len(txs) == 0 {
+		t.Fatal("expected at least one transaction after create")
+	}
+}
+
+func TestListRewards_ActiveOnly_NoError(t *testing.T) {
+	db := testutil.OpenDB(t)
+	repo := infrastructure.NewRepository(db)
+	ctx := context.Background()
+
+	rewards, err := repo.ListRewards(ctx, testutil.OwnerID, true)
+	if err != nil {
+		t.Fatalf("ListRewards(activeOnly=true): %v", err)
+	}
+	_ = rewards
+}
+
+func TestUpsertReward_Update_NoError(t *testing.T) {
+	db := testutil.OpenDB(t)
+	repo := infrastructure.NewRepository(db)
+	ctx := context.Background()
+
+	id, err := repo.UpsertReward(ctx, domain.LoyaltyReward{
+		OwnerID:    testutil.OwnerID,
+		Name:       "Update Test Reward",
+		Category:   "general",
+		PointsCost: 200,
+		Active:     true,
+	})
+	if err != nil {
+		t.Fatalf("UpsertReward create: %v", err)
+	}
+
+	_, err = repo.UpsertReward(ctx, domain.LoyaltyReward{
+		ID:         id,
+		OwnerID:    testutil.OwnerID,
+		Name:       "Updated Reward Name",
+		Category:   "general",
+		PointsCost: 300,
+		Active:     true,
+	})
+	if err != nil {
+		t.Fatalf("UpsertReward update: %v", err)
+	}
+}
+
+func TestListRewards_ZeroOwner_ReturnsEmpty(t *testing.T) {
+	db := testutil.OpenDB(t)
+	repo := infrastructure.NewRepository(db)
+	ctx := context.Background()
+
+	rewards, err := repo.ListRewards(ctx, 0, false)
+	if err != nil {
+		t.Fatalf("ListRewards(ownerID=0): %v", err)
+	}
+	if len(rewards) != 0 {
+		t.Fatalf("expected 0 rewards for ownerID=0, got %d", len(rewards))
+	}
+}
+
+func TestUpsertReward_AppearsInList(t *testing.T) {
+	db := testutil.OpenDB(t)
+	repo := infrastructure.NewRepository(db)
+	ctx := context.Background()
+
+	id, err := repo.UpsertReward(ctx, domain.LoyaltyReward{
+		OwnerID:    testutil.OwnerID,
+		Name:       "Listed Reward",
+		Category:   "general",
+		PointsCost: 150,
+		Active:     true,
+	})
+	if err != nil {
+		t.Fatalf("UpsertReward: %v", err)
+	}
+
+	rewards, err := repo.ListRewards(ctx, testutil.OwnerID, false)
+	if err != nil {
+		t.Fatalf("ListRewards: %v", err)
+	}
+	for _, r := range rewards {
+		if r.ID == id {
+			return
+		}
+	}
+	t.Fatalf("reward id=%d not found in list", id)
+}
+
+func TestListMembers_PaginationOffsetWorks(t *testing.T) {
+	db := testutil.OpenDB(t)
+	repo := infrastructure.NewRepository(db)
+	ctx := context.Background()
+
+	all, err := repo.ListMembers(ctx, testutil.OwnerID, 100, 0)
+	if err != nil {
+		t.Fatalf("ListMembers(offset=0): %v", err)
+	}
+
+	if len(all) < 2 {
+		t.Skip("fewer than 2 members; skipping pagination test")
+	}
+
+	page2, err := repo.ListMembers(ctx, testutil.OwnerID, 100, 1)
+	if err != nil {
+		t.Fatalf("ListMembers(offset=1): %v", err)
+	}
+	if len(page2) >= len(all) {
+		t.Errorf("expected offset=1 to return fewer results: all=%d offset1=%d", len(all), len(page2))
+	}
+}

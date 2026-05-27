@@ -275,3 +275,255 @@ func TestCreate_Bill_DefaultCurrencyUSD(t *testing.T) {
 		t.Errorf("Currency = %q, want %q", bill.Currency, "USD")
 	}
 }
+
+func TestList_Bills_ZeroOwner_ReturnsEmpty(t *testing.T) {
+	db := testutil.OpenDB(t)
+	repo := infrastructure.NewRepository(db)
+	ctx := context.Background()
+
+	items, err := repo.List(ctx, 0)
+	if err != nil {
+		t.Fatalf("List(0): %v", err)
+	}
+	if len(items) != 0 {
+		t.Fatalf("expected 0 items for owner 0, got %d", len(items))
+	}
+}
+
+func TestCreate_Bill_AmountStored(t *testing.T) {
+	db := testutil.OpenDB(t)
+	repo := infrastructure.NewRepository(db)
+	ctx := context.Background()
+
+	id, err := repo.Create(ctx, testutil.OwnerID, domain.BillInput{
+		Amount:   456.78,
+		Currency: "USD",
+		DueDate:  "2026-12-01",
+		Status:   "pending",
+	})
+	if err != nil {
+		t.Fatalf("Create: %v", err)
+	}
+
+	bill, err := repo.Get(ctx, testutil.OwnerID, id)
+	if err != nil {
+		t.Fatalf("Get: %v", err)
+	}
+	if bill.Amount != 456.78 {
+		t.Errorf("Amount = %f, want 456.78", bill.Amount)
+	}
+}
+
+func TestCreate_Bill_VendorStored(t *testing.T) {
+	db := testutil.OpenDB(t)
+	repo := infrastructure.NewRepository(db)
+	ctx := context.Background()
+
+	desc := "Electricity bill"
+	id, err := repo.Create(ctx, testutil.OwnerID, domain.BillInput{
+		Amount:      200.00,
+		Currency:    "USD",
+		DueDate:     "2026-11-15",
+		Status:      "pending",
+		Description: desc,
+	})
+	if err != nil {
+		t.Fatalf("Create: %v", err)
+	}
+
+	bill, err := repo.Get(ctx, testutil.OwnerID, id)
+	if err != nil {
+		t.Fatalf("Get: %v", err)
+	}
+	if bill.Description != desc {
+		t.Errorf("Description = %q, want %q", bill.Description, desc)
+	}
+}
+
+func TestCreate_Bill_WithSupplier(t *testing.T) {
+	db := testutil.OpenDB(t)
+	repo := infrastructure.NewRepository(db)
+	ctx := context.Background()
+
+	// Use fixture supplier id=5101
+	id, err := repo.Create(ctx, testutil.OwnerID, domain.BillInput{
+		SupplierID: 5101,
+		Amount:     350.00,
+		Currency:   "USD",
+		DueDate:    "2026-10-31",
+		Status:     "pending",
+	})
+	if err != nil {
+		t.Fatalf("Create with supplier: %v", err)
+	}
+
+	bill, err := repo.Get(ctx, testutil.OwnerID, id)
+	if err != nil {
+		t.Fatalf("Get: %v", err)
+	}
+	if bill.SupplierID != 5101 {
+		t.Errorf("SupplierID = %d, want 5101", bill.SupplierID)
+	}
+}
+
+func TestUpdate_Bill_ChangesStatus(t *testing.T) {
+	db := testutil.OpenDB(t)
+	repo := infrastructure.NewRepository(db)
+	ctx := context.Background()
+
+	id, err := repo.Create(ctx, testutil.OwnerID, domain.BillInput{
+		Amount:  55.00,
+		DueDate: "2026-09-01",
+		Status:  "pending",
+	})
+	if err != nil {
+		t.Fatalf("Create: %v", err)
+	}
+
+	if err := repo.Update(ctx, testutil.OwnerID, id, domain.BillInput{
+		Amount:  55.00,
+		DueDate: "2026-09-01",
+		Status:  "paid",
+	}); err != nil {
+		t.Fatalf("Update: %v", err)
+	}
+
+	bill, err := repo.Get(ctx, testutil.OwnerID, id)
+	if err != nil {
+		t.Fatalf("Get after update: %v", err)
+	}
+	if bill.Status != "paid" {
+		t.Errorf("Status = %q, want %q", bill.Status, "paid")
+	}
+}
+
+func TestUpdate_Bill_ChangesDescription(t *testing.T) {
+	db := testutil.OpenDB(t)
+	repo := infrastructure.NewRepository(db)
+	ctx := context.Background()
+
+	id, err := repo.Create(ctx, testutil.OwnerID, domain.BillInput{
+		Amount:      60.00,
+		Currency:    "USD",
+		DueDate:     "2026-08-15",
+		Status:      "pending",
+		Description: "Original description",
+	})
+	if err != nil {
+		t.Fatalf("Create: %v", err)
+	}
+
+	if err := repo.Update(ctx, testutil.OwnerID, id, domain.BillInput{
+		Amount:      60.00,
+		Currency:    "USD",
+		DueDate:     "2026-08-15",
+		Status:      "pending",
+		Description: "Updated description",
+	}); err != nil {
+		t.Fatalf("Update: %v", err)
+	}
+
+	bill, err := repo.Get(ctx, testutil.OwnerID, id)
+	if err != nil {
+		t.Fatalf("Get after update: %v", err)
+	}
+	if bill.Description != "Updated description" {
+		t.Errorf("Description = %q, want %q", bill.Description, "Updated description")
+	}
+}
+
+func TestCreate_Bill_DefaultStatusPending(t *testing.T) {
+	db := testutil.OpenDB(t)
+	repo := infrastructure.NewRepository(db)
+	ctx := context.Background()
+
+	// Omit status; repository should default to "pending".
+	id, err := repo.Create(ctx, testutil.OwnerID, domain.BillInput{
+		Amount:  35.00,
+		DueDate: "2026-07-01",
+	})
+	if err != nil {
+		t.Fatalf("Create: %v", err)
+	}
+
+	bill, err := repo.Get(ctx, testutil.OwnerID, id)
+	if err != nil {
+		t.Fatalf("Get: %v", err)
+	}
+	if bill.Status != "pending" {
+		t.Errorf("Status = %q, want %q", bill.Status, "pending")
+	}
+}
+
+func TestList_Bills_ItemsHaveNonZeroID(t *testing.T) {
+	db := testutil.OpenDB(t)
+	repo := infrastructure.NewRepository(db)
+	ctx := context.Background()
+
+	_, _ = repo.Create(ctx, testutil.OwnerID, domain.BillInput{
+		Amount: 11.00, DueDate: "2026-06-01", Status: "pending",
+	})
+
+	items, err := repo.List(ctx, testutil.OwnerID)
+	if err != nil {
+		t.Fatalf("List: %v", err)
+	}
+	for i, b := range items {
+		if b.ID == 0 {
+			t.Errorf("items[%d].ID is 0", i)
+		}
+	}
+}
+
+func TestCreate_Bill_CurrencyEUR(t *testing.T) {
+	db := testutil.OpenDB(t)
+	repo := infrastructure.NewRepository(db)
+	ctx := context.Background()
+
+	id, err := repo.Create(ctx, testutil.OwnerID, domain.BillInput{
+		Amount:   80.00,
+		Currency: "EUR",
+		DueDate:  "2026-05-31",
+		Status:   "pending",
+	})
+	if err != nil {
+		t.Fatalf("Create: %v", err)
+	}
+
+	bill, err := repo.Get(ctx, testutil.OwnerID, id)
+	if err != nil {
+		t.Fatalf("Get: %v", err)
+	}
+	if bill.Currency != "EUR" {
+		t.Errorf("Currency = %q, want %q", bill.Currency, "EUR")
+	}
+}
+
+func TestCreate_ThenList_FindsNewBill(t *testing.T) {
+	db := testutil.OpenDB(t)
+	repo := infrastructure.NewRepository(db)
+	ctx := context.Background()
+
+	beforeItems, err := repo.List(ctx, testutil.OwnerID)
+	if err != nil {
+		t.Fatalf("List before: %v", err)
+	}
+	beforeCount := len(beforeItems)
+
+	_, err = repo.Create(ctx, testutil.OwnerID, domain.BillInput{
+		Amount:  999.00,
+		DueDate: "2026-12-31",
+		Status:  "pending",
+	})
+	if err != nil {
+		t.Fatalf("Create: %v", err)
+	}
+
+	afterItems, err := repo.List(ctx, testutil.OwnerID)
+	if err != nil {
+		t.Fatalf("List after: %v", err)
+	}
+	if len(afterItems) <= beforeCount {
+		t.Errorf("expected more items after create; before=%d after=%d", beforeCount, len(afterItems))
+	}
+}

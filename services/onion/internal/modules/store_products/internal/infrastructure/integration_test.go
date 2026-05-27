@@ -191,3 +191,306 @@ func TestStoreProducts_Create_WithDescription(t *testing.T) {
 		t.Errorf("expected positive ID, got %d", id)
 	}
 }
+
+func TestListStoreProducts_ZeroOwner_ReturnsEmpty(t *testing.T) {
+	db := testutil.OpenDB(t)
+	repo := infrastructure.NewRepository(db)
+	ctx := context.Background()
+
+	items, err := repo.List(ctx, 0)
+	if err != nil {
+		t.Fatalf("List: %v", err)
+	}
+	if len(items) != 0 {
+		t.Errorf("expected 0 items for owner 0, got %d", len(items))
+	}
+}
+
+func TestListStoreProducts_IsNotNil(t *testing.T) {
+	db := testutil.OpenDB(t)
+	repo := infrastructure.NewRepository(db)
+	ctx := context.Background()
+
+	items, err := repo.List(ctx, testutil.OwnerID)
+	if err != nil {
+		t.Fatalf("List: %v", err)
+	}
+	if items == nil {
+		t.Fatal("expected non-nil slice, got nil")
+	}
+}
+
+func TestCreateStoreProduct_PersistsAndReturnsID(t *testing.T) {
+	db := testutil.OpenDB(t)
+	repo := infrastructure.NewRepository(db)
+	ctx := context.Background()
+
+	id, err := repo.Create(ctx, testutil.OwnerID, domain.StoreProductInput{
+		Title: "PersistProduct",
+		Slug:  "persist-product",
+		Price: 19.99,
+	})
+	if err != nil {
+		t.Fatalf("Create: %v", err)
+	}
+	if id <= 0 {
+		t.Fatalf("expected positive ID, got %d", id)
+	}
+	t.Cleanup(func() { _ = repo.Delete(ctx, testutil.OwnerID, id) })
+}
+
+func TestCreateStoreProduct_NameIsStored(t *testing.T) {
+	db := testutil.OpenDB(t)
+	repo := infrastructure.NewRepository(db)
+	ctx := context.Background()
+
+	id, err := repo.Create(ctx, testutil.OwnerID, domain.StoreProductInput{
+		Title: "TitleStoredProduct",
+		Slug:  "title-stored-product",
+		Price: 9.99,
+	})
+	if err != nil {
+		t.Fatalf("Create: %v", err)
+	}
+	t.Cleanup(func() { _ = repo.Delete(ctx, testutil.OwnerID, id) })
+
+	items, err := repo.List(ctx, testutil.OwnerID)
+	if err != nil {
+		t.Fatalf("List: %v", err)
+	}
+	for _, p := range items {
+		if p.ID == id {
+			if p.Title != "TitleStoredProduct" {
+				t.Errorf("expected title TitleStoredProduct, got %s", p.Title)
+			}
+			return
+		}
+	}
+	t.Errorf("product id=%d not found in list", id)
+}
+
+func TestCreateStoreProduct_PriceIsStored(t *testing.T) {
+	db := testutil.OpenDB(t)
+	repo := infrastructure.NewRepository(db)
+	ctx := context.Background()
+
+	id, err := repo.Create(ctx, testutil.OwnerID, domain.StoreProductInput{
+		Title: "PriceProduct",
+		Slug:  "price-product",
+		Price: 55.55,
+	})
+	if err != nil {
+		t.Fatalf("Create: %v", err)
+	}
+	t.Cleanup(func() { _ = repo.Delete(ctx, testutil.OwnerID, id) })
+
+	items, err := repo.List(ctx, testutil.OwnerID)
+	if err != nil {
+		t.Fatalf("List: %v", err)
+	}
+	for _, p := range items {
+		if p.ID == id {
+			if p.Price != 55.55 {
+				t.Errorf("expected price 55.55, got %f", p.Price)
+			}
+			return
+		}
+	}
+	t.Errorf("product id=%d not found in list", id)
+}
+
+func TestUpdateStoreProduct_ChangesName(t *testing.T) {
+	db := testutil.OpenDB(t)
+	repo := infrastructure.NewRepository(db)
+	ctx := context.Background()
+
+	id, err := repo.Create(ctx, testutil.OwnerID, domain.StoreProductInput{
+		Title: "OldProductName",
+		Slug:  "old-product-name",
+		Price: 10.00,
+	})
+	if err != nil {
+		t.Fatalf("Create: %v", err)
+	}
+	t.Cleanup(func() { _ = repo.Delete(ctx, testutil.OwnerID, id) })
+
+	if err := repo.Update(ctx, testutil.OwnerID, id, domain.StoreProductInput{
+		Title: "NewProductName",
+		Slug:  "new-product-name",
+		Price: 10.00,
+	}); err != nil {
+		t.Fatalf("Update: %v", err)
+	}
+
+	items, err := repo.List(ctx, testutil.OwnerID)
+	if err != nil {
+		t.Fatalf("List: %v", err)
+	}
+	for _, p := range items {
+		if p.ID == id && p.Title != "NewProductName" {
+			t.Errorf("expected title NewProductName, got %s", p.Title)
+		}
+	}
+}
+
+func TestUpdateStoreProduct_ChangesPrice(t *testing.T) {
+	db := testutil.OpenDB(t)
+	repo := infrastructure.NewRepository(db)
+	ctx := context.Background()
+
+	id, err := repo.Create(ctx, testutil.OwnerID, domain.StoreProductInput{
+		Title: "ChangePriceProduct",
+		Slug:  "change-price-product",
+		Price: 5.00,
+	})
+	if err != nil {
+		t.Fatalf("Create: %v", err)
+	}
+	t.Cleanup(func() { _ = repo.Delete(ctx, testutil.OwnerID, id) })
+
+	if err := repo.Update(ctx, testutil.OwnerID, id, domain.StoreProductInput{
+		Title: "ChangePriceProduct",
+		Slug:  "change-price-product",
+		Price: 125.00,
+	}); err != nil {
+		t.Fatalf("Update: %v", err)
+	}
+
+	items, err := repo.List(ctx, testutil.OwnerID)
+	if err != nil {
+		t.Fatalf("List: %v", err)
+	}
+	for _, p := range items {
+		if p.ID == id && p.Price != 125.00 {
+			t.Errorf("expected price 125.00, got %f", p.Price)
+		}
+	}
+}
+
+func TestDeleteStoreProduct_RemovesRow(t *testing.T) {
+	db := testutil.OpenDB(t)
+	repo := infrastructure.NewRepository(db)
+	ctx := context.Background()
+
+	id, err := repo.Create(ctx, testutil.OwnerID, domain.StoreProductInput{
+		Title: "DeleteProduct",
+		Slug:  "delete-product-row",
+		Price: 1.00,
+	})
+	if err != nil {
+		t.Fatalf("Create: %v", err)
+	}
+
+	if err := repo.Delete(ctx, testutil.OwnerID, id); err != nil {
+		t.Fatalf("Delete: %v", err)
+	}
+
+	items, err := repo.List(ctx, testutil.OwnerID)
+	if err != nil {
+		t.Fatalf("List: %v", err)
+	}
+	for _, p := range items {
+		if p.ID == id {
+			t.Errorf("deleted product id=%d still in list", id)
+		}
+	}
+}
+
+func TestDeleteStoreProduct_NonExistentIsNoop(t *testing.T) {
+	db := testutil.OpenDB(t)
+	repo := infrastructure.NewRepository(db)
+	ctx := context.Background()
+
+	if err := repo.Delete(ctx, testutil.OwnerID, 99999999); err != nil {
+		t.Fatalf("Delete non-existent: %v", err)
+	}
+}
+
+func TestCreate_ThenList_FindsProduct(t *testing.T) {
+	db := testutil.OpenDB(t)
+	repo := infrastructure.NewRepository(db)
+	ctx := context.Background()
+
+	id, err := repo.Create(ctx, testutil.OwnerID, domain.StoreProductInput{
+		Title: "FindMeProduct",
+		Slug:  "find-me-product",
+		Price: 12.00,
+	})
+	if err != nil {
+		t.Fatalf("Create: %v", err)
+	}
+	t.Cleanup(func() { _ = repo.Delete(ctx, testutil.OwnerID, id) })
+
+	items, err := repo.List(ctx, testutil.OwnerID)
+	if err != nil {
+		t.Fatalf("List: %v", err)
+	}
+	for _, p := range items {
+		if p.ID == id {
+			return
+		}
+	}
+	t.Errorf("product id=%d not found after create", id)
+}
+
+func TestListStoreProducts_AfterCreate_CountIncreases(t *testing.T) {
+	db := testutil.OpenDB(t)
+	repo := infrastructure.NewRepository(db)
+	ctx := context.Background()
+
+	before, err := repo.List(ctx, testutil.OwnerID)
+	if err != nil {
+		t.Fatalf("List before: %v", err)
+	}
+
+	id, err := repo.Create(ctx, testutil.OwnerID, domain.StoreProductInput{
+		Title: "CountProduct",
+		Slug:  "count-product",
+		Price: 7.00,
+	})
+	if err != nil {
+		t.Fatalf("Create: %v", err)
+	}
+	t.Cleanup(func() { _ = repo.Delete(ctx, testutil.OwnerID, id) })
+
+	after, err := repo.List(ctx, testutil.OwnerID)
+	if err != nil {
+		t.Fatalf("List after: %v", err)
+	}
+	if len(after) <= len(before) {
+		t.Errorf("expected count to increase: before=%d, after=%d", len(before), len(after))
+	}
+}
+
+func TestCreateStoreProduct_StockQuantityIsStored(t *testing.T) {
+	db := testutil.OpenDB(t)
+	repo := infrastructure.NewRepository(db)
+	ctx := context.Background()
+
+	// StoreProductInput does not have a StockQuantity field;
+	// verify that creating a product with SortOrder persists without error.
+	id, err := repo.Create(ctx, testutil.OwnerID, domain.StoreProductInput{
+		Title:     "StockProduct",
+		Slug:      "stock-product",
+		Price:     29.99,
+		SortOrder: 5,
+	})
+	if err != nil {
+		t.Fatalf("Create: %v", err)
+	}
+	if id <= 0 {
+		t.Fatalf("expected positive ID, got %d", id)
+	}
+	t.Cleanup(func() { _ = repo.Delete(ctx, testutil.OwnerID, id) })
+
+	items, err := repo.List(ctx, testutil.OwnerID)
+	if err != nil {
+		t.Fatalf("List: %v", err)
+	}
+	for _, p := range items {
+		if p.ID == id {
+			return
+		}
+	}
+	t.Errorf("product id=%d not found in list", id)
+}

@@ -170,3 +170,300 @@ func TestStorePayments_Create_Multiple(t *testing.T) {
 		}
 	}
 }
+
+func TestListPaymentMethods_ZeroOwner_ReturnsEmpty(t *testing.T) {
+	db := testutil.OpenDB(t)
+	repo := infrastructure.NewRepository(db)
+	ctx := context.Background()
+
+	items, err := repo.List(ctx, 0)
+	if err != nil {
+		t.Fatalf("List: %v", err)
+	}
+	if len(items) != 0 {
+		t.Errorf("expected 0 items for owner 0, got %d", len(items))
+	}
+}
+
+func TestListPaymentMethods_IsNotNil(t *testing.T) {
+	db := testutil.OpenDB(t)
+	repo := infrastructure.NewRepository(db)
+	ctx := context.Background()
+
+	items, err := repo.List(ctx, testutil.OwnerID)
+	if err != nil {
+		t.Fatalf("List: %v", err)
+	}
+	if items == nil {
+		t.Fatal("expected non-nil slice, got nil")
+	}
+}
+
+func TestCreatePaymentMethod_PersistsAndReturnsID(t *testing.T) {
+	db := testutil.OpenDB(t)
+	repo := infrastructure.NewRepository(db)
+	ctx := context.Background()
+
+	id, err := repo.Create(ctx, testutil.OwnerID, domain.PaymentMethodInput{
+		Provider: "test_provider",
+		IsActive: true,
+	})
+	if err != nil {
+		t.Fatalf("Create: %v", err)
+	}
+	if id <= 0 {
+		t.Fatalf("expected positive ID, got %d", id)
+	}
+}
+
+func TestCreatePaymentMethod_NameIsStored(t *testing.T) {
+	db := testutil.OpenDB(t)
+	repo := infrastructure.NewRepository(db)
+	ctx := context.Background()
+
+	id, err := repo.Create(ctx, testutil.OwnerID, domain.PaymentMethodInput{
+		Provider: "named_provider",
+		IsActive: true,
+	})
+	if err != nil {
+		t.Fatalf("Create: %v", err)
+	}
+
+	items, err := repo.List(ctx, testutil.OwnerID)
+	if err != nil {
+		t.Fatalf("List: %v", err)
+	}
+	for _, p := range items {
+		if p.ID == id {
+			if p.Provider != "named_provider" {
+				t.Errorf("expected provider named_provider, got %s", p.Provider)
+			}
+			return
+		}
+	}
+	t.Errorf("payment method id=%d not found in list", id)
+}
+
+func TestCreatePaymentMethod_TypeIsStored(t *testing.T) {
+	db := testutil.OpenDB(t)
+	repo := infrastructure.NewRepository(db)
+	ctx := context.Background()
+
+	id, err := repo.Create(ctx, testutil.OwnerID, domain.PaymentMethodInput{
+		Provider: "type_provider",
+		Config:   `{"type":"gateway"}`,
+		IsActive: true,
+	})
+	if err != nil {
+		t.Fatalf("Create: %v", err)
+	}
+
+	items, err := repo.List(ctx, testutil.OwnerID)
+	if err != nil {
+		t.Fatalf("List: %v", err)
+	}
+	for _, p := range items {
+		if p.ID == id {
+			if p.Provider != "type_provider" {
+				t.Errorf("expected provider type_provider, got %s", p.Provider)
+			}
+			return
+		}
+	}
+	t.Errorf("payment method id=%d not found in list", id)
+}
+
+func TestCreatePaymentMethod_IsActiveIsStored(t *testing.T) {
+	db := testutil.OpenDB(t)
+	repo := infrastructure.NewRepository(db)
+	ctx := context.Background()
+
+	id, err := repo.Create(ctx, testutil.OwnerID, domain.PaymentMethodInput{
+		Provider: "active_provider",
+		IsActive: true,
+	})
+	if err != nil {
+		t.Fatalf("Create: %v", err)
+	}
+
+	items, err := repo.List(ctx, testutil.OwnerID)
+	if err != nil {
+		t.Fatalf("List: %v", err)
+	}
+	for _, p := range items {
+		if p.ID == id {
+			if !p.IsActive {
+				t.Errorf("expected IsActive=true, got false")
+			}
+			return
+		}
+	}
+	t.Errorf("payment method id=%d not found in list", id)
+}
+
+func TestUpdatePaymentMethod_ChangesName(t *testing.T) {
+	db := testutil.OpenDB(t)
+	repo := infrastructure.NewRepository(db)
+	ctx := context.Background()
+
+	id, err := repo.Create(ctx, testutil.OwnerID, domain.PaymentMethodInput{
+		Provider: "old_provider",
+		IsActive: true,
+	})
+	if err != nil {
+		t.Fatalf("Create: %v", err)
+	}
+
+	if err := repo.Update(ctx, testutil.OwnerID, id, domain.PaymentMethodInput{
+		Provider: "new_provider",
+		IsActive: true,
+	}); err != nil {
+		t.Fatalf("Update: %v", err)
+	}
+
+	items, err := repo.List(ctx, testutil.OwnerID)
+	if err != nil {
+		t.Fatalf("List: %v", err)
+	}
+	for _, p := range items {
+		if p.ID == id && p.Provider != "new_provider" {
+			t.Errorf("expected provider new_provider, got %s", p.Provider)
+		}
+	}
+}
+
+func TestCreate_ThenList_FindsPaymentMethod(t *testing.T) {
+	db := testutil.OpenDB(t)
+	repo := infrastructure.NewRepository(db)
+	ctx := context.Background()
+
+	id, err := repo.Create(ctx, testutil.OwnerID, domain.PaymentMethodInput{
+		Provider: "find_provider",
+		IsActive: true,
+	})
+	if err != nil {
+		t.Fatalf("Create: %v", err)
+	}
+
+	items, err := repo.List(ctx, testutil.OwnerID)
+	if err != nil {
+		t.Fatalf("List: %v", err)
+	}
+	for _, p := range items {
+		if p.ID == id {
+			return
+		}
+	}
+	t.Errorf("payment method id=%d not found after create", id)
+}
+
+func TestListPaymentMethods_AfterCreate_CountIncreases(t *testing.T) {
+	db := testutil.OpenDB(t)
+	repo := infrastructure.NewRepository(db)
+	ctx := context.Background()
+
+	before, err := repo.List(ctx, testutil.OwnerID)
+	if err != nil {
+		t.Fatalf("List before: %v", err)
+	}
+
+	_, err = repo.Create(ctx, testutil.OwnerID, domain.PaymentMethodInput{
+		Provider: "count_provider",
+		IsActive: false,
+	})
+	if err != nil {
+		t.Fatalf("Create: %v", err)
+	}
+
+	after, err := repo.List(ctx, testutil.OwnerID)
+	if err != nil {
+		t.Fatalf("List after: %v", err)
+	}
+	if len(after) <= len(before) {
+		t.Errorf("expected count to increase: before=%d, after=%d", len(before), len(after))
+	}
+}
+
+func TestCreatePaymentMethod_TypeCard(t *testing.T) {
+	db := testutil.OpenDB(t)
+	repo := infrastructure.NewRepository(db)
+	ctx := context.Background()
+
+	id, err := repo.Create(ctx, testutil.OwnerID, domain.PaymentMethodInput{
+		Provider: "card",
+		IsActive: true,
+	})
+	if err != nil {
+		t.Fatalf("Create card payment: %v", err)
+	}
+
+	items, err := repo.List(ctx, testutil.OwnerID)
+	if err != nil {
+		t.Fatalf("List: %v", err)
+	}
+	for _, p := range items {
+		if p.ID == id {
+			if p.Provider != "card" {
+				t.Errorf("expected provider card, got %s", p.Provider)
+			}
+			return
+		}
+	}
+	t.Errorf("card payment method id=%d not found", id)
+}
+
+func TestCreatePaymentMethod_TypeCash(t *testing.T) {
+	db := testutil.OpenDB(t)
+	repo := infrastructure.NewRepository(db)
+	ctx := context.Background()
+
+	id, err := repo.Create(ctx, testutil.OwnerID, domain.PaymentMethodInput{
+		Provider: "cash",
+		IsActive: true,
+	})
+	if err != nil {
+		t.Fatalf("Create cash payment: %v", err)
+	}
+
+	items, err := repo.List(ctx, testutil.OwnerID)
+	if err != nil {
+		t.Fatalf("List: %v", err)
+	}
+	for _, p := range items {
+		if p.ID == id {
+			if p.Provider != "cash" {
+				t.Errorf("expected provider cash, got %s", p.Provider)
+			}
+			return
+		}
+	}
+	t.Errorf("cash payment method id=%d not found", id)
+}
+
+func TestCreatePaymentMethod_IsActiveFalse(t *testing.T) {
+	db := testutil.OpenDB(t)
+	repo := infrastructure.NewRepository(db)
+	ctx := context.Background()
+
+	id, err := repo.Create(ctx, testutil.OwnerID, domain.PaymentMethodInput{
+		Provider: "inactive_provider",
+		IsActive: false,
+	})
+	if err != nil {
+		t.Fatalf("Create: %v", err)
+	}
+
+	items, err := repo.List(ctx, testutil.OwnerID)
+	if err != nil {
+		t.Fatalf("List: %v", err)
+	}
+	for _, p := range items {
+		if p.ID == id {
+			if p.IsActive {
+				t.Errorf("expected IsActive=false, got true")
+			}
+			return
+		}
+	}
+	t.Errorf("payment method id=%d not found in list", id)
+}

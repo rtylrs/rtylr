@@ -171,3 +171,180 @@ func TestListActivity_LimitTen(t *testing.T) {
 		t.Fatalf("expected at most 10 items, got %d", len(items))
 	}
 }
+
+func TestListActivity_LimitHundred(t *testing.T) {
+	db := testutil.OpenDB(t)
+	repo := infrastructure.NewRepository(db)
+	ctx := context.Background()
+
+	items, err := repo.ListActivity(ctx, testutil.OwnerID, 100)
+	if err != nil {
+		t.Fatalf("ListActivity(limit=100): %v", err)
+	}
+	if len(items) > 100 {
+		t.Fatalf("expected at most 100 items, got %d", len(items))
+	}
+}
+
+func TestListActivity_LimitFive(t *testing.T) {
+	db := testutil.OpenDB(t)
+	repo := infrastructure.NewRepository(db)
+	ctx := context.Background()
+
+	items, err := repo.ListActivity(ctx, testutil.OwnerID, 5)
+	if err != nil {
+		t.Fatalf("ListActivity(limit=5): %v", err)
+	}
+	if len(items) > 5 {
+		t.Fatalf("expected at most 5 items, got %d", len(items))
+	}
+}
+
+func TestListActivity_LimitFifty(t *testing.T) {
+	db := testutil.OpenDB(t)
+	repo := infrastructure.NewRepository(db)
+	ctx := context.Background()
+
+	items, err := repo.ListActivity(ctx, testutil.OwnerID, 50)
+	if err != nil {
+		t.Fatalf("ListActivity(limit=50): %v", err)
+	}
+	if len(items) > 50 {
+		t.Fatalf("expected at most 50 items, got %d", len(items))
+	}
+}
+
+func TestListActivity_LimitTwoHundred(t *testing.T) {
+	db := testutil.OpenDB(t)
+	repo := infrastructure.NewRepository(db)
+	ctx := context.Background()
+
+	items, err := repo.ListActivity(ctx, testutil.OwnerID, 200)
+	if err != nil {
+		t.Fatalf("ListActivity(limit=200): %v", err)
+	}
+	if len(items) > 200 {
+		t.Fatalf("expected at most 200 items, got %d", len(items))
+	}
+}
+
+func TestListActivity_IdempotentCallsReturnSameCount(t *testing.T) {
+	db := testutil.OpenDB(t)
+	repo := infrastructure.NewRepository(db)
+	ctx := context.Background()
+
+	items1, err := repo.ListActivity(ctx, testutil.OwnerID, 50)
+	if err != nil {
+		t.Fatalf("ListActivity first: %v", err)
+	}
+	items2, err := repo.ListActivity(ctx, testutil.OwnerID, 50)
+	if err != nil {
+		t.Fatalf("ListActivity second: %v", err)
+	}
+	if len(items1) != len(items2) {
+		t.Errorf("idempotent calls returned different counts: %d vs %d", len(items1), len(items2))
+	}
+}
+
+func TestListActivity_ItemsHaveNonNegativeEntityID(t *testing.T) {
+	db := testutil.OpenDB(t)
+	repo := infrastructure.NewRepository(db)
+	ctx := context.Background()
+
+	items, err := repo.ListActivity(ctx, testutil.OwnerID, 50)
+	if err != nil {
+		t.Fatalf("ListActivity: %v", err)
+	}
+	for i, item := range items {
+		if item.EntityID < 0 {
+			t.Errorf("item[%d].EntityID is negative", i)
+		}
+	}
+}
+
+func TestListActivity_ItemsHaveCreatedAt(t *testing.T) {
+	db := testutil.OpenDB(t)
+	repo := infrastructure.NewRepository(db)
+	ctx := context.Background()
+
+	items, err := repo.ListActivity(ctx, testutil.OwnerID, 50)
+	if err != nil {
+		t.Fatalf("ListActivity: %v", err)
+	}
+	for i, item := range items {
+		if item.CreatedAt.IsZero() {
+			t.Errorf("item[%d].CreatedAt is zero", i)
+		}
+	}
+}
+
+func TestListActivity_AnotherUnknownOwnerEmpty(t *testing.T) {
+	db := testutil.OpenDB(t)
+	repo := infrastructure.NewRepository(db)
+	ctx := context.Background()
+
+	items, err := repo.ListActivity(ctx, 7777777, 50)
+	if err != nil {
+		t.Fatalf("ListActivity unknown owner: %v", err)
+	}
+	if len(items) != 0 {
+		t.Fatalf("expected 0 items for unknown owner 7777777, got %d", len(items))
+	}
+}
+
+func TestListActivity_LimitTwenty(t *testing.T) {
+	db := testutil.OpenDB(t)
+	repo := infrastructure.NewRepository(db)
+	ctx := context.Background()
+
+	items, err := repo.ListActivity(ctx, testutil.OwnerID, 20)
+	if err != nil {
+		t.Fatalf("ListActivity(limit=20): %v", err)
+	}
+	if len(items) > 20 {
+		t.Fatalf("expected at most 20 items, got %d", len(items))
+	}
+}
+
+func TestListActivity_LimitOneLessThanFifty(t *testing.T) {
+	db := testutil.OpenDB(t)
+	repo := infrastructure.NewRepository(db)
+	ctx := context.Background()
+
+	items, err := repo.ListActivity(ctx, testutil.OwnerID, 49)
+	if err != nil {
+		t.Fatalf("ListActivity(limit=49): %v", err)
+	}
+	if len(items) > 49 {
+		t.Fatalf("expected at most 49 items, got %d", len(items))
+	}
+}
+
+func TestListActivity_ReturnedCountNotExceedsLimit(t *testing.T) {
+	db := testutil.OpenDB(t)
+	repo := infrastructure.NewRepository(db)
+	ctx := context.Background()
+
+	const limit = 15
+	items, err := repo.ListActivity(ctx, testutil.OwnerID, limit)
+	if err != nil {
+		t.Fatalf("ListActivity(limit=%d): %v", limit, err)
+	}
+	if len(items) > limit {
+		t.Fatalf("expected at most %d items, got %d", limit, len(items))
+	}
+}
+
+func TestListActivity_LimitTwoReturnsTwoOrFewer(t *testing.T) {
+	db := testutil.OpenDB(t)
+	repo := infrastructure.NewRepository(db)
+	ctx := context.Background()
+
+	items, err := repo.ListActivity(ctx, testutil.OwnerID, 2)
+	if err != nil {
+		t.Fatalf("ListActivity(limit=2): %v", err)
+	}
+	if len(items) > 2 {
+		t.Fatalf("expected at most 2 items, got %d", len(items))
+	}
+}

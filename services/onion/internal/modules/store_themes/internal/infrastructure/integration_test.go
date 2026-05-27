@@ -171,3 +171,250 @@ func TestStoreThemes_Update_AllFields(t *testing.T) {
 		t.Fatalf("Update all fields: %v", err)
 	}
 }
+
+func TestStoreThemes_List_IsNotNil(t *testing.T) {
+	db := testutil.OpenDB(t)
+	repo := infrastructure.NewRepository(db)
+	items, err := repo.List(context.Background(), testutil.OwnerID)
+	if err != nil {
+		t.Fatalf("List: %v", err)
+	}
+	if items == nil {
+		t.Fatal("expected non-nil slice")
+	}
+}
+
+func TestStoreThemes_Create_FontIsStored(t *testing.T) {
+	db := testutil.OpenDB(t)
+	repo := infrastructure.NewRepository(db)
+	const want = "Helvetica"
+	id, err := repo.Create(context.Background(), testutil.OwnerID, domain.ThemeInput{
+		Name: "FontTheme", Font: want,
+	})
+	if err != nil {
+		t.Fatalf("Create: %v", err)
+	}
+
+	items, err := repo.List(context.Background(), testutil.OwnerID)
+	if err != nil {
+		t.Fatalf("List: %v", err)
+	}
+	for _, th := range items {
+		if th.ID == id {
+			if th.Font != want {
+				t.Errorf("Font = %q, want %q", th.Font, want)
+			}
+			return
+		}
+	}
+	t.Errorf("theme id=%d not found", id)
+}
+
+func TestStoreThemes_Create_HeaderStyleIsStored(t *testing.T) {
+	db := testutil.OpenDB(t)
+	repo := infrastructure.NewRepository(db)
+	const want = "fixed"
+	id, err := repo.Create(context.Background(), testutil.OwnerID, domain.ThemeInput{
+		Name: "HeaderTheme", HeaderStyle: want,
+	})
+	if err != nil {
+		t.Fatalf("Create: %v", err)
+	}
+
+	items, err := repo.List(context.Background(), testutil.OwnerID)
+	if err != nil {
+		t.Fatalf("List: %v", err)
+	}
+	for _, th := range items {
+		if th.ID == id {
+			if th.HeaderStyle != want {
+				t.Errorf("HeaderStyle = %q, want %q", th.HeaderStyle, want)
+			}
+			return
+		}
+	}
+	t.Errorf("theme id=%d not found", id)
+}
+
+func TestStoreThemes_Create_FooterStyleIsStored(t *testing.T) {
+	db := testutil.OpenDB(t)
+	repo := infrastructure.NewRepository(db)
+	const want = "compact"
+	id, err := repo.Create(context.Background(), testutil.OwnerID, domain.ThemeInput{
+		Name: "FooterTheme", FooterStyle: want,
+	})
+	if err != nil {
+		t.Fatalf("Create: %v", err)
+	}
+
+	items, err := repo.List(context.Background(), testutil.OwnerID)
+	if err != nil {
+		t.Fatalf("List: %v", err)
+	}
+	for _, th := range items {
+		if th.ID == id {
+			if th.FooterStyle != want {
+				t.Errorf("FooterStyle = %q, want %q", th.FooterStyle, want)
+			}
+			return
+		}
+	}
+	t.Errorf("theme id=%d not found", id)
+}
+
+func TestStoreThemes_List_AfterCreate_CountIncreases(t *testing.T) {
+	db := testutil.OpenDB(t)
+	repo := infrastructure.NewRepository(db)
+	before, err := repo.List(context.Background(), testutil.OwnerID)
+	if err != nil {
+		t.Fatalf("List before: %v", err)
+	}
+
+	_, err = repo.Create(context.Background(), testutil.OwnerID, domain.ThemeInput{Name: "CountTheme"})
+	if err != nil {
+		t.Fatalf("Create: %v", err)
+	}
+
+	after, err := repo.List(context.Background(), testutil.OwnerID)
+	if err != nil {
+		t.Fatalf("List after: %v", err)
+	}
+	if len(after) != len(before)+1 {
+		t.Errorf("expected count +1: before=%d after=%d", len(before), len(after))
+	}
+}
+
+func TestStoreThemes_Create_IDsAreUnique(t *testing.T) {
+	db := testutil.OpenDB(t)
+	repo := infrastructure.NewRepository(db)
+	id1, err := repo.Create(context.Background(), testutil.OwnerID, domain.ThemeInput{Name: "UniqueThemeA"})
+	if err != nil {
+		t.Fatalf("Create A: %v", err)
+	}
+	id2, err := repo.Create(context.Background(), testutil.OwnerID, domain.ThemeInput{Name: "UniqueThemeB"})
+	if err != nil {
+		t.Fatalf("Create B: %v", err)
+	}
+	if id1 == id2 {
+		t.Errorf("expected unique IDs, both got %d", id1)
+	}
+}
+
+func TestStoreThemes_Update_Font(t *testing.T) {
+	db := testutil.OpenDB(t)
+	repo := infrastructure.NewRepository(db)
+	id, err := repo.Create(context.Background(), testutil.OwnerID, domain.ThemeInput{
+		Name: "UpdateFontTheme", Font: "Arial",
+	})
+	if err != nil {
+		t.Fatalf("Create: %v", err)
+	}
+
+	if err := repo.Update(context.Background(), testutil.OwnerID, id, domain.ThemeInput{
+		Name: "UpdateFontTheme", Font: "Georgia",
+	}); err != nil {
+		t.Fatalf("Update font: %v", err)
+	}
+}
+
+func TestStoreThemes_Update_CustomCSS(t *testing.T) {
+	db := testutil.OpenDB(t)
+	repo := infrastructure.NewRepository(db)
+	id, err := repo.Create(context.Background(), testutil.OwnerID, domain.ThemeInput{
+		Name: "UpdateCSSTheme",
+	})
+	if err != nil {
+		t.Fatalf("Create: %v", err)
+	}
+
+	if err := repo.Update(context.Background(), testutil.OwnerID, id, domain.ThemeInput{
+		Name:      "UpdateCSSTheme",
+		CustomCSS: "p { font-size: 16px; }",
+	}); err != nil {
+		t.Fatalf("Update CSS: %v", err)
+	}
+}
+
+func TestStoreThemes_Update_ReflectedInList(t *testing.T) {
+	db := testutil.OpenDB(t)
+	repo := infrastructure.NewRepository(db)
+	id, err := repo.Create(context.Background(), testutil.OwnerID, domain.ThemeInput{Name: "ReflectTheme"})
+	if err != nil {
+		t.Fatalf("Create: %v", err)
+	}
+
+	if err := repo.Update(context.Background(), testutil.OwnerID, id, domain.ThemeInput{
+		Name: "ReflectThemeUpdated",
+	}); err != nil {
+		t.Fatalf("Update: %v", err)
+	}
+
+	items, err := repo.List(context.Background(), testutil.OwnerID)
+	if err != nil {
+		t.Fatalf("List: %v", err)
+	}
+	for _, th := range items {
+		if th.ID == id {
+			if th.Name != "ReflectThemeUpdated" {
+				t.Errorf("Name = %q, want ReflectThemeUpdated", th.Name)
+			}
+			return
+		}
+	}
+	t.Errorf("theme id=%d not found after update", id)
+}
+
+func TestStoreThemes_ZeroOwner_ReturnsEmpty(t *testing.T) {
+	db := testutil.OpenDB(t)
+	repo := infrastructure.NewRepository(db)
+	items, err := repo.List(context.Background(), 0)
+	if err != nil {
+		t.Fatalf("List: %v", err)
+	}
+	if len(items) != 0 {
+		t.Errorf("expected 0 for owner_id=0, got %d", len(items))
+	}
+}
+
+func TestStoreThemes_List_EachHasNonZeroID(t *testing.T) {
+	db := testutil.OpenDB(t)
+	repo := infrastructure.NewRepository(db)
+	_, _ = repo.Create(context.Background(), testutil.OwnerID, domain.ThemeInput{Name: "IDCheckTheme"})
+
+	items, err := repo.List(context.Background(), testutil.OwnerID)
+	if err != nil {
+		t.Fatalf("List: %v", err)
+	}
+	for i, th := range items {
+		if th.ID == 0 {
+			t.Errorf("items[%d].ID is zero", i)
+		}
+	}
+}
+
+func TestStoreThemes_Create_PrimaryColorIsStored(t *testing.T) {
+	db := testutil.OpenDB(t)
+	repo := infrastructure.NewRepository(db)
+	const want = "#ABCDEF"
+	id, err := repo.Create(context.Background(), testutil.OwnerID, domain.ThemeInput{
+		Name:         "PrimaryColorTheme",
+		PrimaryColor: want,
+	})
+	if err != nil {
+		t.Fatalf("Create: %v", err)
+	}
+
+	items, err := repo.List(context.Background(), testutil.OwnerID)
+	if err != nil {
+		t.Fatalf("List: %v", err)
+	}
+	for _, th := range items {
+		if th.ID == id {
+			if th.PrimaryColor != want {
+				t.Errorf("PrimaryColor = %q, want %q", th.PrimaryColor, want)
+			}
+			return
+		}
+	}
+	t.Errorf("theme id=%d not found", id)
+}

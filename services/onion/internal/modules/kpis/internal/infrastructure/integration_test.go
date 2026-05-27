@@ -157,3 +157,174 @@ func TestGetKPIs_Idempotent(t *testing.T) {
 		t.Errorf("CustomerCount not idempotent: %d vs %d", first.CustomerCount, second.CustomerCount)
 	}
 }
+
+func TestGetKPIs_NegativeOwner_ReturnsZeros(t *testing.T) {
+	db := testutil.OpenDB(t)
+	repo := infrastructure.NewRepository(db)
+	ctx := context.Background()
+
+	kpis, err := repo.GetKPIs(ctx, -1)
+	if err != nil {
+		t.Fatalf("GetKPIs owner=-1: %v", err)
+	}
+	if kpis.CustomerCount != 0 {
+		t.Errorf("CustomerCount = %d, want 0 for negative owner", kpis.CustomerCount)
+	}
+}
+
+func TestGetKPIs_ZeroOwner_ReturnsZeros(t *testing.T) {
+	db := testutil.OpenDB(t)
+	repo := infrastructure.NewRepository(db)
+	ctx := context.Background()
+
+	kpis, err := repo.GetKPIs(ctx, 0)
+	if err != nil {
+		t.Fatalf("GetKPIs owner=0: %v", err)
+	}
+	if kpis.CustomerCount != 0 {
+		t.Errorf("CustomerCount = %d, want 0 for owner=0", kpis.CustomerCount)
+	}
+}
+
+func TestGetKPIs_OrderCountNonNegative_NewOwner(t *testing.T) {
+	db := testutil.OpenDB(t)
+	repo := infrastructure.NewRepository(db)
+	ctx := context.Background()
+
+	kpis, err := repo.GetKPIs(ctx, 9999999)
+	if err != nil {
+		t.Fatalf("GetKPIs new owner: %v", err)
+	}
+	if kpis.OrderCount < 0 {
+		t.Errorf("OrderCount is negative for new owner: %d", kpis.OrderCount)
+	}
+}
+
+func TestGetKPIs_RevenueNonNegative_NewOwner(t *testing.T) {
+	db := testutil.OpenDB(t)
+	repo := infrastructure.NewRepository(db)
+	ctx := context.Background()
+
+	kpis, err := repo.GetKPIs(ctx, 9999999)
+	if err != nil {
+		t.Fatalf("GetKPIs new owner: %v", err)
+	}
+	if kpis.Revenue < 0 {
+		t.Errorf("Revenue is negative for new owner: %f", kpis.Revenue)
+	}
+}
+
+func TestGetKPIs_LowStockCount_NewOwner_IsZero(t *testing.T) {
+	db := testutil.OpenDB(t)
+	repo := infrastructure.NewRepository(db)
+	ctx := context.Background()
+
+	kpis, err := repo.GetKPIs(ctx, 9999999)
+	if err != nil {
+		t.Fatalf("GetKPIs new owner: %v", err)
+	}
+	if kpis.LowStockCount < 0 {
+		t.Errorf("LowStockCount is negative: %d", kpis.LowStockCount)
+	}
+}
+
+func TestGetKPIs_StaffCountAtLeastFixture(t *testing.T) {
+	db := testutil.OpenDB(t)
+	repo := infrastructure.NewRepository(db)
+	ctx := context.Background()
+
+	kpis, err := repo.GetKPIs(ctx, testutil.OwnerID)
+	if err != nil {
+		t.Fatalf("GetKPIs: %v", err)
+	}
+	// Fixture has at least Alice (4101) and Bob (4102) in hr_staff.
+	if kpis.StaffCount < 2 {
+		t.Errorf("StaffCount = %d, expected >= 2 (fixture staff)", kpis.StaffCount)
+	}
+}
+
+func TestGetKPIs_RevenueIdempotent(t *testing.T) {
+	db := testutil.OpenDB(t)
+	repo := infrastructure.NewRepository(db)
+	ctx := context.Background()
+
+	first, err := repo.GetKPIs(ctx, testutil.OwnerID)
+	if err != nil {
+		t.Fatalf("first GetKPIs: %v", err)
+	}
+	second, err := repo.GetKPIs(ctx, testutil.OwnerID)
+	if err != nil {
+		t.Fatalf("second GetKPIs: %v", err)
+	}
+	if first.Revenue != second.Revenue {
+		t.Errorf("Revenue not stable: %f vs %f", first.Revenue, second.Revenue)
+	}
+}
+
+func TestGetKPIs_OrderCountIdempotent(t *testing.T) {
+	db := testutil.OpenDB(t)
+	repo := infrastructure.NewRepository(db)
+	ctx := context.Background()
+
+	first, err := repo.GetKPIs(ctx, testutil.OwnerID)
+	if err != nil {
+		t.Fatalf("first GetKPIs: %v", err)
+	}
+	second, err := repo.GetKPIs(ctx, testutil.OwnerID)
+	if err != nil {
+		t.Fatalf("second GetKPIs: %v", err)
+	}
+	if first.OrderCount != second.OrderCount {
+		t.Errorf("OrderCount not stable: %d vs %d", first.OrderCount, second.OrderCount)
+	}
+}
+
+func TestGetKPIs_LargeOwnerID_ReturnsZeros(t *testing.T) {
+	db := testutil.OpenDB(t)
+	repo := infrastructure.NewRepository(db)
+	ctx := context.Background()
+
+	kpis, err := repo.GetKPIs(ctx, 1<<40)
+	if err != nil {
+		t.Fatalf("GetKPIs large owner: %v", err)
+	}
+	if kpis.CustomerCount != 0 {
+		t.Errorf("CustomerCount = %d, want 0 for new owner", kpis.CustomerCount)
+	}
+}
+
+func TestGetKPIs_StaffCountIdempotent(t *testing.T) {
+	db := testutil.OpenDB(t)
+	repo := infrastructure.NewRepository(db)
+	ctx := context.Background()
+
+	first, err := repo.GetKPIs(ctx, testutil.OwnerID)
+	if err != nil {
+		t.Fatalf("first GetKPIs: %v", err)
+	}
+	second, err := repo.GetKPIs(ctx, testutil.OwnerID)
+	if err != nil {
+		t.Fatalf("second GetKPIs: %v", err)
+	}
+	if first.StaffCount != second.StaffCount {
+		t.Errorf("StaffCount not stable: %d vs %d", first.StaffCount, second.StaffCount)
+	}
+}
+
+func TestGetKPIs_LowStockCountIdempotent(t *testing.T) {
+	db := testutil.OpenDB(t)
+	repo := infrastructure.NewRepository(db)
+	ctx := context.Background()
+
+	first, err := repo.GetKPIs(ctx, testutil.OwnerID)
+	if err != nil {
+		t.Fatalf("first GetKPIs: %v", err)
+	}
+	second, err := repo.GetKPIs(ctx, testutil.OwnerID)
+	if err != nil {
+		t.Fatalf("second GetKPIs: %v", err)
+	}
+	if first.LowStockCount != second.LowStockCount {
+		t.Errorf("LowStockCount not stable: %d vs %d", first.LowStockCount, second.LowStockCount)
+	}
+}

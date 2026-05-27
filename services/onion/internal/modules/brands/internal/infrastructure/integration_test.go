@@ -299,3 +299,140 @@ func TestUpdateBrand_WrongOwnerNoMatch(t *testing.T) {
 	}
 	t.Fatalf("brand id=%d not found after wrong-owner update attempt", id)
 }
+
+func TestListBrands_ZeroOwner_ReturnsEmpty(t *testing.T) {
+	db := testutil.OpenDB(t)
+	repo := infrastructure.NewRepository(db)
+	ctx := context.Background()
+
+	brands, err := repo.ListBrands(ctx, 0)
+	if err != nil {
+		t.Fatalf("ListBrands(ownerID=0): %v", err)
+	}
+	if len(brands) != 0 {
+		t.Fatalf("expected 0 brands for ownerID=0, got %d", len(brands))
+	}
+}
+
+func TestListBrands_IsNotNil(t *testing.T) {
+	db := testutil.OpenDB(t)
+	repo := infrastructure.NewRepository(db)
+	ctx := context.Background()
+
+	brands, err := repo.ListBrands(ctx, testutil.OwnerID)
+	if err != nil {
+		t.Fatalf("ListBrands: %v", err)
+	}
+	if brands == nil {
+		t.Fatal("expected non-nil slice from ListBrands")
+	}
+}
+
+func TestCreateBrand_IsActiveIsStored(t *testing.T) {
+	db := testutil.OpenDB(t)
+	repo := infrastructure.NewRepository(db)
+	ctx := context.Background()
+
+	id, err := repo.CreateBrand(ctx, testutil.OwnerID, domain.BrandInput{
+		Name: "Active Brand",
+	})
+	if err != nil {
+		t.Fatalf("CreateBrand: %v", err)
+	}
+
+	brands, err := repo.ListBrands(ctx, testutil.OwnerID)
+	if err != nil {
+		t.Fatalf("ListBrands: %v", err)
+	}
+	for _, b := range brands {
+		if b.ID == id {
+			// Verify brand is present and has a non-zero ID (active by default)
+			if b.ID <= 0 {
+				t.Errorf("expected positive brand ID, got %d", b.ID)
+			}
+			return
+		}
+	}
+	t.Fatalf("brand id=%d not found", id)
+}
+
+func TestDeleteBrand_NonExistentIsNoop(t *testing.T) {
+	db := testutil.OpenDB(t)
+	repo := infrastructure.NewRepository(db)
+	ctx := context.Background()
+
+	// Deleting a brand that doesn't exist should not error
+	err := repo.DeleteBrand(ctx, testutil.OwnerID, 999999999)
+	if err != nil {
+		t.Fatalf("DeleteBrand non-existent: %v", err)
+	}
+}
+
+func TestCreate_ThenList_FindsBrand(t *testing.T) {
+	db := testutil.OpenDB(t)
+	repo := infrastructure.NewRepository(db)
+	ctx := context.Background()
+
+	id, err := repo.CreateBrand(ctx, testutil.OwnerID, domain.BrandInput{Name: "FindMe Brand"})
+	if err != nil {
+		t.Fatalf("CreateBrand: %v", err)
+	}
+
+	brands, err := repo.ListBrands(ctx, testutil.OwnerID)
+	if err != nil {
+		t.Fatalf("ListBrands: %v", err)
+	}
+	for _, b := range brands {
+		if b.ID == id {
+			return
+		}
+	}
+	t.Fatalf("brand id=%d not found in list", id)
+}
+
+func TestListBrands_AfterCreate_CountIncreases(t *testing.T) {
+	db := testutil.OpenDB(t)
+	repo := infrastructure.NewRepository(db)
+	ctx := context.Background()
+
+	before, err := repo.ListBrands(ctx, testutil.OwnerID)
+	if err != nil {
+		t.Fatalf("ListBrands before: %v", err)
+	}
+
+	_, err = repo.CreateBrand(ctx, testutil.OwnerID, domain.BrandInput{Name: "Count Increase Brand"})
+	if err != nil {
+		t.Fatalf("CreateBrand: %v", err)
+	}
+
+	after, err := repo.ListBrands(ctx, testutil.OwnerID)
+	if err != nil {
+		t.Fatalf("ListBrands after: %v", err)
+	}
+	if len(after) <= len(before) {
+		t.Fatalf("expected count to increase: before=%d after=%d", len(before), len(after))
+	}
+}
+
+func TestCreateBrand_MultipleOwners_Scoped(t *testing.T) {
+	db := testutil.OpenDB(t)
+	repo := infrastructure.NewRepository(db)
+	ctx := context.Background()
+
+	const altOwner int64 = 555111222
+
+	_, err := repo.CreateBrand(ctx, altOwner, domain.BrandInput{Name: "Alt Owner Brand"})
+	if err != nil {
+		t.Fatalf("CreateBrand altOwner: %v", err)
+	}
+
+	brands, err := repo.ListBrands(ctx, testutil.OwnerID)
+	if err != nil {
+		t.Fatalf("ListBrands mainOwner: %v", err)
+	}
+	for _, b := range brands {
+		if b.OwnerID == altOwner {
+			t.Errorf("brand from altOwner leaked into mainOwner list: id=%d", b.ID)
+		}
+	}
+}

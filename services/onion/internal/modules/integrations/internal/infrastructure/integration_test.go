@@ -162,3 +162,191 @@ func TestDisconnect_NonExistentID_NoError(t *testing.T) {
 		t.Fatalf("Disconnect non-existent: %v", err)
 	}
 }
+
+func TestConnectIntegration_ReturnsPositiveID(t *testing.T) {
+	db := testutil.OpenDB(t)
+	repo := infrastructure.NewRepository(db)
+	ctx := context.Background()
+
+	id, err := repo.Connect(ctx, testutil.OwnerID, "test_positive_id", json.RawMessage(`{}`))
+	if err != nil {
+		t.Fatalf("Connect: %v", err)
+	}
+	if id <= 0 {
+		t.Fatalf("expected positive ID, got %d", id)
+	}
+}
+
+func TestConnectIntegration_IDsAreUnique(t *testing.T) {
+	db := testutil.OpenDB(t)
+	repo := infrastructure.NewRepository(db)
+	ctx := context.Background()
+
+	id1, err := repo.Connect(ctx, testutil.OwnerID, "test_unique_a", json.RawMessage(`{}`))
+	if err != nil {
+		t.Fatalf("Connect A: %v", err)
+	}
+	id2, err := repo.Connect(ctx, testutil.OwnerID, "test_unique_b", json.RawMessage(`{}`))
+	if err != nil {
+		t.Fatalf("Connect B: %v", err)
+	}
+	if id1 == id2 {
+		t.Errorf("expected unique IDs, both got %d", id1)
+	}
+}
+
+func TestListIntegrations_EachHasNonZeroID(t *testing.T) {
+	db := testutil.OpenDB(t)
+	repo := infrastructure.NewRepository(db)
+	ctx := context.Background()
+
+	_, _ = repo.Connect(ctx, testutil.OwnerID, "test_id_check", json.RawMessage(`{}`))
+
+	integrations, err := repo.List(ctx, testutil.OwnerID)
+	if err != nil {
+		t.Fatalf("List: %v", err)
+	}
+	for i, intg := range integrations {
+		if intg.ID == 0 {
+			t.Errorf("integrations[%d].ID is zero", i)
+		}
+	}
+}
+
+func TestDisconnect_RemovesFromList(t *testing.T) {
+	db := testutil.OpenDB(t)
+	repo := infrastructure.NewRepository(db)
+	ctx := context.Background()
+
+	id, err := repo.Connect(ctx, testutil.OwnerID, "test_disconnect_list", json.RawMessage(`{}`))
+	if err != nil {
+		t.Fatalf("Connect: %v", err)
+	}
+
+	if err := repo.Disconnect(ctx, testutil.OwnerID, id); err != nil {
+		t.Fatalf("Disconnect: %v", err)
+	}
+
+	integrations, err := repo.List(ctx, testutil.OwnerID)
+	if err != nil {
+		t.Fatalf("List after disconnect: %v", err)
+	}
+	for _, intg := range integrations {
+		if intg.ID == id {
+			t.Errorf("disconnected integration id=%d still in list", id)
+		}
+	}
+}
+
+func TestConnectIntegration_WithComplexConfig(t *testing.T) {
+	db := testutil.OpenDB(t)
+	repo := infrastructure.NewRepository(db)
+	ctx := context.Background()
+
+	cfg := json.RawMessage(`{"api_key":"sk-abc","base_url":"https://api.example.com","timeout":30}`)
+	id, err := repo.Connect(ctx, testutil.OwnerID, "test_complex_cfg", cfg)
+	if err != nil {
+		t.Fatalf("Connect: %v", err)
+	}
+	if id <= 0 {
+		t.Errorf("expected positive ID, got %d", id)
+	}
+}
+
+func TestListIntegrations_AfterConnect_CountIncreases(t *testing.T) {
+	db := testutil.OpenDB(t)
+	repo := infrastructure.NewRepository(db)
+	ctx := context.Background()
+
+	before, err := repo.List(ctx, testutil.OwnerID)
+	if err != nil {
+		t.Fatalf("List before: %v", err)
+	}
+
+	_, err = repo.Connect(ctx, testutil.OwnerID, "test_count_check", json.RawMessage(`{}`))
+	if err != nil {
+		t.Fatalf("Connect: %v", err)
+	}
+
+	after, err := repo.List(ctx, testutil.OwnerID)
+	if err != nil {
+		t.Fatalf("List after: %v", err)
+	}
+	if len(after) != len(before)+1 {
+		t.Errorf("expected count +1: before=%d after=%d", len(before), len(after))
+	}
+}
+
+func TestListIntegrations_IsNotNil(t *testing.T) {
+	db := testutil.OpenDB(t)
+	repo := infrastructure.NewRepository(db)
+	ctx := context.Background()
+
+	integrations, err := repo.List(ctx, testutil.OwnerID)
+	if err != nil {
+		t.Fatalf("List: %v", err)
+	}
+	if integrations == nil {
+		t.Fatal("expected non-nil slice")
+	}
+}
+
+func TestConnectIntegration_ZeroOwner_NoError(t *testing.T) {
+	db := testutil.OpenDB(t)
+	repo := infrastructure.NewRepository(db)
+	ctx := context.Background()
+
+	id, err := repo.Connect(ctx, 0, "test_zero_owner", json.RawMessage(`{}`))
+	if err != nil {
+		t.Fatalf("Connect with owner=0: %v", err)
+	}
+	if id <= 0 {
+		t.Errorf("expected positive ID, got %d", id)
+	}
+}
+
+func TestListIntegrations_EachHasNonEmptyProvider(t *testing.T) {
+	db := testutil.OpenDB(t)
+	repo := infrastructure.NewRepository(db)
+	ctx := context.Background()
+
+	_, _ = repo.Connect(ctx, testutil.OwnerID, "test_provider_nonempty", json.RawMessage(`{}`))
+
+	integrations, err := repo.List(ctx, testutil.OwnerID)
+	if err != nil {
+		t.Fatalf("List: %v", err)
+	}
+	for i, intg := range integrations {
+		if intg.Provider == "" {
+			t.Errorf("integrations[%d].Provider is empty", i)
+		}
+	}
+}
+
+func TestDisconnect_WrongOwner_DoesNotRemove(t *testing.T) {
+	db := testutil.OpenDB(t)
+	repo := infrastructure.NewRepository(db)
+	ctx := context.Background()
+
+	id, err := repo.Connect(ctx, testutil.OwnerID, "test_wrong_owner_disc", json.RawMessage(`{}`))
+	if err != nil {
+		t.Fatalf("Connect: %v", err)
+	}
+
+	_ = repo.Disconnect(ctx, 999999, id)
+
+	integrations, err := repo.List(ctx, testutil.OwnerID)
+	if err != nil {
+		t.Fatalf("List after wrong-owner disconnect: %v", err)
+	}
+	found := false
+	for _, intg := range integrations {
+		if intg.ID == id {
+			found = true
+			break
+		}
+	}
+	if !found {
+		t.Errorf("integration id=%d should still exist after wrong-owner disconnect", id)
+	}
+}

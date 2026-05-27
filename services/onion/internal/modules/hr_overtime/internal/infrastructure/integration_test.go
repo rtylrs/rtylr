@@ -211,3 +211,252 @@ func TestListOvertimeRequests_RecordFieldsPopulated(t *testing.T) {
 		}
 	}
 }
+
+func TestCreateOvertimeRequest_EmployeeIDIsStored(t *testing.T) {
+	db := testutil.OpenDB(t)
+	repo := infrastructure.NewRepository(db)
+	ctx := context.Background()
+
+	created, err := repo.CreateOvertimeRequest(ctx, testutil.OwnerID, domain.OvertimeRequestRecord{
+		EmployeeID:           4101,
+		Date:                 "2026-04-01",
+		PlannedExtraMinutes:  45,
+		Status:               "pending",
+		CurrentApprovalLevel: 1,
+	})
+	if err != nil {
+		t.Fatalf("CreateOvertimeRequest: %v", err)
+	}
+	if created.EmployeeID != 4101 {
+		t.Errorf("expected employee_id=4101, got %d", created.EmployeeID)
+	}
+}
+
+func TestCreateOvertimeRequest_HoursIsStored(t *testing.T) {
+	db := testutil.OpenDB(t)
+	repo := infrastructure.NewRepository(db)
+	ctx := context.Background()
+
+	created, err := repo.CreateOvertimeRequest(ctx, testutil.OwnerID, domain.OvertimeRequestRecord{
+		EmployeeID:           4102,
+		Date:                 "2026-04-02",
+		PlannedExtraMinutes:  120,
+		Status:               "pending",
+		CurrentApprovalLevel: 1,
+	})
+	if err != nil {
+		t.Fatalf("CreateOvertimeRequest: %v", err)
+	}
+	if created.PlannedExtraMinutes != 120 {
+		t.Errorf("expected 120 planned minutes, got %d", created.PlannedExtraMinutes)
+	}
+}
+
+func TestCreateOvertimeRequest_DateIsStored(t *testing.T) {
+	db := testutil.OpenDB(t)
+	repo := infrastructure.NewRepository(db)
+	ctx := context.Background()
+
+	created, err := repo.CreateOvertimeRequest(ctx, testutil.OwnerID, domain.OvertimeRequestRecord{
+		EmployeeID:           4101,
+		Date:                 "2026-04-15",
+		PlannedExtraMinutes:  30,
+		Status:               "pending",
+		CurrentApprovalLevel: 1,
+	})
+	if err != nil {
+		t.Fatalf("CreateOvertimeRequest: %v", err)
+	}
+	if created.Date != "2026-04-15" {
+		t.Errorf("expected date='2026-04-15', got %q", created.Date)
+	}
+}
+
+func TestCreateOvertimeRequest_StatusIsPending(t *testing.T) {
+	db := testutil.OpenDB(t)
+	repo := infrastructure.NewRepository(db)
+	ctx := context.Background()
+
+	created, err := repo.CreateOvertimeRequest(ctx, testutil.OwnerID, domain.OvertimeRequestRecord{
+		EmployeeID:           4101,
+		Date:                 "2026-05-01",
+		PlannedExtraMinutes:  60,
+		Status:               "pending",
+		CurrentApprovalLevel: 1,
+	})
+	if err != nil {
+		t.Fatalf("CreateOvertimeRequest: %v", err)
+	}
+	if created.Status != "pending" {
+		t.Errorf("expected status='pending', got %q", created.Status)
+	}
+}
+
+func TestApproveOvertimeRequest_ChangesStatus(t *testing.T) {
+	db := testutil.OpenDB(t)
+	repo := infrastructure.NewRepository(db)
+	ctx := context.Background()
+
+	created, err := repo.CreateOvertimeRequest(ctx, testutil.OwnerID, domain.OvertimeRequestRecord{
+		EmployeeID:           4101,
+		Date:                 "2026-05-10",
+		PlannedExtraMinutes:  90,
+		Status:               "pending",
+		CurrentApprovalLevel: 1,
+	})
+	if err != nil {
+		t.Fatalf("CreateOvertimeRequest: %v", err)
+	}
+
+	if err := repo.ApproveOvertimeRequest(ctx, testutil.OwnerID, created.ID, 4101, 1.5); err != nil {
+		t.Fatalf("ApproveOvertimeRequest: %v", err)
+	}
+
+	got, err := repo.GetOvertimeRequest(ctx, testutil.OwnerID, created.ID)
+	if err != nil {
+		t.Fatalf("GetOvertimeRequest after approve: %v", err)
+	}
+	if got.Status != "approved" {
+		t.Errorf("expected status='approved', got %q", got.Status)
+	}
+}
+
+func TestRejectOvertimeRequest_ChangesStatus(t *testing.T) {
+	db := testutil.OpenDB(t)
+	repo := infrastructure.NewRepository(db)
+	ctx := context.Background()
+
+	created, err := repo.CreateOvertimeRequest(ctx, testutil.OwnerID, domain.OvertimeRequestRecord{
+		EmployeeID:           4102,
+		Date:                 "2026-05-15",
+		PlannedExtraMinutes:  60,
+		Status:               "pending",
+		CurrentApprovalLevel: 1,
+	})
+	if err != nil {
+		t.Fatalf("CreateOvertimeRequest: %v", err)
+	}
+
+	if err := repo.RejectOvertimeRequest(ctx, testutil.OwnerID, created.ID); err != nil {
+		t.Fatalf("RejectOvertimeRequest: %v", err)
+	}
+
+	got, err := repo.GetOvertimeRequest(ctx, testutil.OwnerID, created.ID)
+	if err != nil {
+		t.Fatalf("GetOvertimeRequest after reject: %v", err)
+	}
+	if got.Status != "rejected" {
+		t.Errorf("expected status='rejected', got %q", got.Status)
+	}
+}
+
+func TestUpsertOvertimeConfig_Persists(t *testing.T) {
+	db := testutil.OpenDB(t)
+	repo := infrastructure.NewRepository(db)
+	ctx := context.Background()
+
+	err := repo.UpsertOvertimeConfig(ctx, testutil.OwnerID, domain.OvertimeConfigRecord{
+		DefaultMultiplier:     1.5,
+		DailyThresholdMinutes: 480,
+	})
+	if err != nil {
+		t.Fatalf("UpsertOvertimeConfig: %v", err)
+	}
+
+	cfg, err := repo.GetOvertimeConfig(ctx, testutil.OwnerID)
+	if err != nil {
+		t.Fatalf("GetOvertimeConfig after upsert: %v", err)
+	}
+	if cfg.OwnerID != testutil.OwnerID {
+		t.Errorf("expected owner_id=%d, got %d", testutil.OwnerID, cfg.OwnerID)
+	}
+}
+
+func TestUpsertOvertimeConfig_MultiplierIsStored(t *testing.T) {
+	db := testutil.OpenDB(t)
+	repo := infrastructure.NewRepository(db)
+	ctx := context.Background()
+
+	err := repo.UpsertOvertimeConfig(ctx, testutil.OwnerID, domain.OvertimeConfigRecord{
+		DefaultMultiplier:     2.0,
+		DailyThresholdMinutes: 600,
+	})
+	if err != nil {
+		t.Fatalf("UpsertOvertimeConfig: %v", err)
+	}
+
+	cfg, err := repo.GetOvertimeConfig(ctx, testutil.OwnerID)
+	if err != nil {
+		t.Fatalf("GetOvertimeConfig: %v", err)
+	}
+	if cfg.DefaultMultiplier != 2.0 {
+		t.Errorf("expected multiplier=2.0, got %v", cfg.DefaultMultiplier)
+	}
+}
+
+func TestCreateFlaggedOvertimeRequest_NoError(t *testing.T) {
+	db := testutil.OpenDB(t)
+	repo := infrastructure.NewRepository(db)
+	ctx := context.Background()
+
+	err := repo.CreateFlaggedOvertimeRequest(ctx, testutil.OwnerID, 4101, "2026-06-01", 30)
+	if err != nil {
+		t.Fatalf("CreateFlaggedOvertimeRequest: %v", err)
+	}
+}
+
+func TestListFlaggedForDate_AfterCreate_ContainsRecord(t *testing.T) {
+	db := testutil.OpenDB(t)
+	repo := infrastructure.NewRepository(db)
+	ctx := context.Background()
+
+	date := "2026-06-20"
+	if err := repo.CreateFlaggedOvertimeRequest(ctx, testutil.OwnerID, 4101, date, 45); err != nil {
+		t.Fatalf("CreateFlaggedOvertimeRequest: %v", err)
+	}
+
+	records, err := repo.ListFlaggedForDate(ctx, testutil.OwnerID, date)
+	if err != nil {
+		t.Fatalf("ListFlaggedForDate: %v", err)
+	}
+	found := false
+	for _, r := range records {
+		if r.EmployeeID == 4101 && r.Date == date {
+			found = true
+			break
+		}
+	}
+	if !found {
+		t.Errorf("expected flagged record for employee 4101 on %q", date)
+	}
+}
+
+func TestListOvertimeRequests_AfterCreate_CountIncreases(t *testing.T) {
+	db := testutil.OpenDB(t)
+	repo := infrastructure.NewRepository(db)
+	ctx := context.Background()
+
+	_, total1, err := repo.ListOvertimeRequests(ctx, testutil.OwnerID, domain.ListOvertimeRequestsParams{Limit: 200, Offset: 0})
+	if err != nil {
+		t.Fatalf("ListOvertimeRequests before: %v", err)
+	}
+
+	_, err = repo.CreateOvertimeRequest(ctx, testutil.OwnerID, domain.OvertimeRequestRecord{
+		EmployeeID:           4101,
+		Date:                 "2026-07-01",
+		PlannedExtraMinutes:  75,
+		Status:               "pending",
+		CurrentApprovalLevel: 1,
+	})
+	if err != nil {
+		t.Fatalf("CreateOvertimeRequest: %v", err)
+	}
+
+	_, total2, err := repo.ListOvertimeRequests(ctx, testutil.OwnerID, domain.ListOvertimeRequestsParams{Limit: 200, Offset: 0})
+	if err != nil {
+		t.Fatalf("ListOvertimeRequests after: %v", err)
+	}
+	if total2 <= total1 {
+		t.Errorf("expected total to increase from %d, got %d", total1, total2)
+	}
+}

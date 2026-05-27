@@ -195,3 +195,246 @@ func TestSupportKnowledge_Create_WithCategory(t *testing.T) {
 		t.Errorf("expected positive ID, got %d", id)
 	}
 }
+
+func TestSupportKnowledge_Create_FieldsPersisted(t *testing.T) {
+	db := testutil.OpenDB(t)
+	repo := infrastructure.NewRepository(db)
+	id, err := repo.Create(context.Background(), domain.ArticleInput{
+		BusinessID:  testKBBusinessID,
+		Title:       "Field Persistence Test",
+		Slug:        "field-persistence-test",
+		Body:        "Detailed body content",
+		Category:    "technical",
+		IsPublished: true,
+	})
+	if err != nil {
+		t.Fatalf("Create: %v", err)
+	}
+	t.Cleanup(func() { _ = repo.Delete(context.Background(), testKBBusinessID, id) })
+
+	items, _, err := repo.List(context.Background(), testKBBusinessID, 1, 100)
+	if err != nil {
+		t.Fatalf("List: %v", err)
+	}
+	for _, a := range items {
+		if a.ID == id {
+			if a.Title != "Field Persistence Test" {
+				t.Errorf("expected title 'Field Persistence Test', got %s", a.Title)
+			}
+			if a.Slug != "field-persistence-test" {
+				t.Errorf("expected slug 'field-persistence-test', got %s", a.Slug)
+			}
+			if a.Body != "Detailed body content" {
+				t.Errorf("expected body 'Detailed body content', got %s", a.Body)
+			}
+			if a.Category != "technical" {
+				t.Errorf("expected category 'technical', got %s", a.Category)
+			}
+			return
+		}
+	}
+	t.Errorf("created article id=%d not found in list", id)
+}
+
+func TestSupportKnowledge_List_PageSize1_ReturnsAtMostOne(t *testing.T) {
+	db := testutil.OpenDB(t)
+	repo := infrastructure.NewRepository(db)
+	id, _ := repo.Create(context.Background(), domain.ArticleInput{
+		BusinessID: testKBBusinessID, Title: "Page1Test", Slug: "page1-test", Body: "body",
+	})
+	t.Cleanup(func() { _ = repo.Delete(context.Background(), testKBBusinessID, id) })
+
+	items, _, err := repo.List(context.Background(), testKBBusinessID, 1, 1)
+	if err != nil {
+		t.Fatalf("List pageSize=1: %v", err)
+	}
+	if len(items) > 1 {
+		t.Errorf("expected at most 1 item, got %d", len(items))
+	}
+}
+
+func TestSupportKnowledge_Update_Body(t *testing.T) {
+	db := testutil.OpenDB(t)
+	repo := infrastructure.NewRepository(db)
+	id, err := repo.Create(context.Background(), domain.ArticleInput{
+		BusinessID: testKBBusinessID, Title: "BodyUpdate", Slug: "body-update", Body: "old body",
+	})
+	if err != nil {
+		t.Fatalf("Create: %v", err)
+	}
+	t.Cleanup(func() { _ = repo.Delete(context.Background(), testKBBusinessID, id) })
+
+	if err := repo.Update(context.Background(), testKBBusinessID, id, domain.ArticleInput{
+		BusinessID: testKBBusinessID, Title: "BodyUpdate", Slug: "body-update", Body: "new body",
+	}); err != nil {
+		t.Fatalf("Update: %v", err)
+	}
+
+	items, _, _ := repo.List(context.Background(), testKBBusinessID, 1, 100)
+	for _, a := range items {
+		if a.ID == id && a.Body != "new body" {
+			t.Errorf("expected body 'new body', got %s", a.Body)
+		}
+	}
+}
+
+func TestSupportKnowledge_Update_Category(t *testing.T) {
+	db := testutil.OpenDB(t)
+	repo := infrastructure.NewRepository(db)
+	id, err := repo.Create(context.Background(), domain.ArticleInput{
+		BusinessID: testKBBusinessID, Title: "CatUpdate", Slug: "cat-update", Body: "body", Category: "general",
+	})
+	if err != nil {
+		t.Fatalf("Create: %v", err)
+	}
+	t.Cleanup(func() { _ = repo.Delete(context.Background(), testKBBusinessID, id) })
+
+	if err := repo.Update(context.Background(), testKBBusinessID, id, domain.ArticleInput{
+		BusinessID: testKBBusinessID, Title: "CatUpdate", Slug: "cat-update", Body: "body", Category: "advanced",
+	}); err != nil {
+		t.Fatalf("Update category: %v", err)
+	}
+
+	items, _, _ := repo.List(context.Background(), testKBBusinessID, 1, 100)
+	for _, a := range items {
+		if a.ID == id && a.Category != "advanced" {
+			t.Errorf("expected category 'advanced', got %s", a.Category)
+		}
+	}
+}
+
+func TestSupportKnowledge_List_TotalNonNegative(t *testing.T) {
+	db := testutil.OpenDB(t)
+	repo := infrastructure.NewRepository(db)
+	_, total, err := repo.List(context.Background(), testKBBusinessID, 1, 20)
+	if err != nil {
+		t.Fatalf("List: %v", err)
+	}
+	if total < 0 {
+		t.Errorf("expected total >= 0, got %d", total)
+	}
+}
+
+func TestSupportKnowledge_Delete_WrongBusiness_NoError(t *testing.T) {
+	db := testutil.OpenDB(t)
+	repo := infrastructure.NewRepository(db)
+	err := repo.Delete(context.Background(), 9999999, 9999999)
+	if err != nil {
+		t.Fatalf("Delete non-existent: %v", err)
+	}
+}
+
+func TestSupportKnowledge_Create_Multiple_AllAppearInList(t *testing.T) {
+	db := testutil.OpenDB(t)
+	repo := infrastructure.NewRepository(db)
+	slugs := []string{"multi-kb-a", "multi-kb-b", "multi-kb-c"}
+	ids := make([]int64, 0, len(slugs))
+	for i, slug := range slugs {
+		id, err := repo.Create(context.Background(), domain.ArticleInput{
+			BusinessID: testKBBusinessID,
+			Title:      "MultiKB " + slug,
+			Slug:       slug,
+			Body:       "body",
+		})
+		if err != nil {
+			t.Fatalf("Create [%d]: %v", i, err)
+		}
+		ids = append(ids, id)
+	}
+	t.Cleanup(func() {
+		for _, id := range ids {
+			_ = repo.Delete(context.Background(), testKBBusinessID, id)
+		}
+	})
+
+	items, _, err := repo.List(context.Background(), testKBBusinessID, 1, 100)
+	if err != nil {
+		t.Fatalf("List: %v", err)
+	}
+	found := make(map[int64]bool)
+	for _, a := range items {
+		found[a.ID] = true
+	}
+	for _, id := range ids {
+		if !found[id] {
+			t.Errorf("article id=%d not found in list", id)
+		}
+	}
+}
+
+func TestSupportKnowledge_List_EachHasPositiveID(t *testing.T) {
+	db := testutil.OpenDB(t)
+	repo := infrastructure.NewRepository(db)
+	id, err := repo.Create(context.Background(), domain.ArticleInput{
+		BusinessID: testKBBusinessID, Title: "IDCheck", Slug: "id-check-kb", Body: "body",
+	})
+	if err != nil {
+		t.Fatalf("Create: %v", err)
+	}
+	t.Cleanup(func() { _ = repo.Delete(context.Background(), testKBBusinessID, id) })
+
+	items, _, err := repo.List(context.Background(), testKBBusinessID, 1, 100)
+	if err != nil {
+		t.Fatalf("List: %v", err)
+	}
+	for _, a := range items {
+		if a.ID <= 0 {
+			t.Errorf("article has non-positive ID: %d", a.ID)
+		}
+	}
+}
+
+func TestSupportKnowledge_List_EachHasNonEmptyTitle(t *testing.T) {
+	db := testutil.OpenDB(t)
+	repo := infrastructure.NewRepository(db)
+	id, err := repo.Create(context.Background(), domain.ArticleInput{
+		BusinessID: testKBBusinessID, Title: "TitleCheck", Slug: "title-check-kb", Body: "body",
+	})
+	if err != nil {
+		t.Fatalf("Create: %v", err)
+	}
+	t.Cleanup(func() { _ = repo.Delete(context.Background(), testKBBusinessID, id) })
+
+	items, _, err := repo.List(context.Background(), testKBBusinessID, 1, 100)
+	if err != nil {
+		t.Fatalf("List: %v", err)
+	}
+	for _, a := range items {
+		if a.Title == "" {
+			t.Errorf("article id=%d has empty title", a.ID)
+		}
+	}
+}
+
+func TestSupportKnowledge_List_BusinessScoped(t *testing.T) {
+	db := testutil.OpenDB(t)
+	repo := infrastructure.NewRepository(db)
+	id, err := repo.Create(context.Background(), domain.ArticleInput{
+		BusinessID: testKBBusinessID, Title: "ScopeCheck", Slug: "scope-check-kb", Body: "body",
+	})
+	if err != nil {
+		t.Fatalf("Create: %v", err)
+	}
+	t.Cleanup(func() { _ = repo.Delete(context.Background(), testKBBusinessID, id) })
+
+	items, _, err := repo.List(context.Background(), testKBBusinessID, 1, 100)
+	if err != nil {
+		t.Fatalf("List: %v", err)
+	}
+	for _, a := range items {
+		if a.BusinessID != testKBBusinessID {
+			t.Errorf("expected business_id %d, got %d", testKBBusinessID, a.BusinessID)
+		}
+	}
+}
+
+func TestSupportKnowledge_Update_WrongBusiness_NoError(t *testing.T) {
+	db := testutil.OpenDB(t)
+	repo := infrastructure.NewRepository(db)
+	err := repo.Update(context.Background(), 9999999, 9999999, domain.ArticleInput{
+		BusinessID: 9999999, Title: "ghost", Slug: "ghost", Body: "ghost",
+	})
+	if err != nil {
+		t.Fatalf("Update on missing row: %v", err)
+	}
+}

@@ -253,3 +253,232 @@ func TestListRoles_ScopedToOwner(t *testing.T) {
 		}
 	}
 }
+
+func TestCreateRole_EmptyPermissions_NoError(t *testing.T) {
+	db := testutil.OpenDB(t)
+	repo := infrastructure.NewRepository(db)
+	ctx := context.Background()
+
+	id, err := repo.Create(ctx, testutil.OwnerID, "Empty Perms Role", []string{})
+	if err != nil {
+		t.Fatalf("roles.Create empty permissions: %v", err)
+	}
+	if id <= 0 {
+		t.Fatalf("expected positive ID, got %d", id)
+	}
+}
+
+func TestUpdateRole_PermissionsChange(t *testing.T) {
+	db := testutil.OpenDB(t)
+	repo := infrastructure.NewRepository(db)
+	ctx := context.Background()
+
+	id, err := repo.Create(ctx, testutil.OwnerID, "PermsChange Role", []string{"read"})
+	if err != nil {
+		t.Fatalf("roles.Create: %v", err)
+	}
+
+	if err := repo.Update(ctx, testutil.OwnerID, id, "PermsChange Role", []string{"read", "write", "delete"}); err != nil {
+		t.Fatalf("roles.Update: %v", err)
+	}
+
+	roles, err := repo.List(ctx, testutil.OwnerID)
+	if err != nil {
+		t.Fatalf("roles.List: %v", err)
+	}
+	for _, r := range roles {
+		if r.ID == id && len(r.Permissions) != 3 {
+			t.Errorf("expected 3 permissions after update, got %d", len(r.Permissions))
+		}
+	}
+}
+
+func TestDeleteRole_WrongOwner_NoError(t *testing.T) {
+	db := testutil.OpenDB(t)
+	repo := infrastructure.NewRepository(db)
+	ctx := context.Background()
+
+	// Delete with wrong owner and non-existent ID; should not error (no matching row).
+	err := repo.Delete(ctx, 9999999, 9999999)
+	if err != nil {
+		t.Fatalf("roles.Delete(wrong owner, non-existent): %v", err)
+	}
+}
+
+func TestCreateRole_Multiple_AllInList(t *testing.T) {
+	db := testutil.OpenDB(t)
+	repo := infrastructure.NewRepository(db)
+	ctx := context.Background()
+
+	names := []string{"Multi Role A", "Multi Role B", "Multi Role C"}
+	ids := make([]int64, 0, len(names))
+	for _, name := range names {
+		id, err := repo.Create(ctx, testutil.OwnerID, name, []string{"read"})
+		if err != nil {
+			t.Fatalf("roles.Create %s: %v", name, err)
+		}
+		ids = append(ids, id)
+	}
+
+	roles, err := repo.List(ctx, testutil.OwnerID)
+	if err != nil {
+		t.Fatalf("roles.List: %v", err)
+	}
+	found := make(map[int64]bool)
+	for _, r := range roles {
+		found[r.ID] = true
+	}
+	for _, id := range ids {
+		if !found[id] {
+			t.Errorf("role id=%d not found in list", id)
+		}
+	}
+}
+
+func TestUpdateRole_NotFound_NoError(t *testing.T) {
+	db := testutil.OpenDB(t)
+	repo := infrastructure.NewRepository(db)
+	ctx := context.Background()
+
+	// Update on a non-existent role should succeed silently (0 rows updated).
+	err := repo.Update(ctx, testutil.OwnerID, 9999999, "Ghost Role", []string{"read"})
+	if err != nil {
+		t.Fatalf("roles.Update non-existent: %v", err)
+	}
+}
+
+func TestCreateRole_UniqueIDsForDifferentNames(t *testing.T) {
+	db := testutil.OpenDB(t)
+	repo := infrastructure.NewRepository(db)
+	ctx := context.Background()
+
+	id1, err := repo.Create(ctx, testutil.OwnerID, "Unique Role X", []string{})
+	if err != nil {
+		t.Fatalf("roles.Create 1: %v", err)
+	}
+	id2, err := repo.Create(ctx, testutil.OwnerID, "Unique Role Y", []string{})
+	if err != nil {
+		t.Fatalf("roles.Create 2: %v", err)
+	}
+	if id1 == id2 {
+		t.Errorf("expected distinct IDs for different roles, got %d and %d", id1, id2)
+	}
+}
+
+func TestListRoles_ReturnedSliceNotNil(t *testing.T) {
+	db := testutil.OpenDB(t)
+	repo := infrastructure.NewRepository(db)
+	ctx := context.Background()
+
+	roles, err := repo.List(ctx, testutil.OwnerID)
+	if err != nil {
+		t.Fatalf("roles.List: %v", err)
+	}
+	if roles == nil {
+		t.Fatal("expected non-nil slice from List")
+	}
+}
+
+func TestUpdateRole_NameAndPermissionsUpdated(t *testing.T) {
+	db := testutil.OpenDB(t)
+	repo := infrastructure.NewRepository(db)
+	ctx := context.Background()
+
+	id, err := repo.Create(ctx, testutil.OwnerID, "Original Role", []string{"view"})
+	if err != nil {
+		t.Fatalf("roles.Create: %v", err)
+	}
+
+	if err := repo.Update(ctx, testutil.OwnerID, id, "Renamed Role", []string{"view", "edit"}); err != nil {
+		t.Fatalf("roles.Update: %v", err)
+	}
+
+	roles, err := repo.List(ctx, testutil.OwnerID)
+	if err != nil {
+		t.Fatalf("roles.List: %v", err)
+	}
+	for _, r := range roles {
+		if r.ID == id {
+			if r.Name != "Renamed Role" {
+				t.Errorf("expected name 'Renamed Role', got %s", r.Name)
+			}
+			if len(r.Permissions) != 2 {
+				t.Errorf("expected 2 permissions, got %d", len(r.Permissions))
+			}
+			return
+		}
+	}
+	t.Fatalf("updated role id=%d not found in list", id)
+}
+
+func TestListRoles_OwnerIDMatchesQuery(t *testing.T) {
+	db := testutil.OpenDB(t)
+	repo := infrastructure.NewRepository(db)
+	ctx := context.Background()
+
+	id, err := repo.Create(ctx, testutil.OwnerID, "OwnerID Check Role", []string{})
+	if err != nil {
+		t.Fatalf("roles.Create: %v", err)
+	}
+	_ = id
+
+	roles, err := repo.List(ctx, testutil.OwnerID)
+	if err != nil {
+		t.Fatalf("roles.List: %v", err)
+	}
+	for _, r := range roles {
+		if r.OwnerID != testutil.OwnerID {
+			t.Errorf("role id=%d has OwnerID=%d, want %d", r.ID, r.OwnerID, testutil.OwnerID)
+		}
+	}
+}
+
+func TestDeleteRole_ThenNotInList(t *testing.T) {
+	db := testutil.OpenDB(t)
+	repo := infrastructure.NewRepository(db)
+	ctx := context.Background()
+
+	id, err := repo.Create(ctx, testutil.OwnerID, "Lifecycle Role", []string{"read"})
+	if err != nil {
+		t.Fatalf("roles.Create: %v", err)
+	}
+
+	if err := repo.Delete(ctx, testutil.OwnerID, id); err != nil {
+		t.Fatalf("roles.Delete: %v", err)
+	}
+
+	roles, err := repo.List(ctx, testutil.OwnerID)
+	if err != nil {
+		t.Fatalf("roles.List: %v", err)
+	}
+	for _, r := range roles {
+		if r.ID == id {
+			t.Errorf("deleted role id=%d still present in list", id)
+		}
+	}
+}
+
+func TestCreateRole_SinglePermission_Stored(t *testing.T) {
+	db := testutil.OpenDB(t)
+	repo := infrastructure.NewRepository(db)
+	ctx := context.Background()
+
+	id, err := repo.Create(ctx, testutil.OwnerID, "Single Perm Role", []string{"admin"})
+	if err != nil {
+		t.Fatalf("roles.Create: %v", err)
+	}
+
+	roles, err := repo.List(ctx, testutil.OwnerID)
+	if err != nil {
+		t.Fatalf("roles.List: %v", err)
+	}
+	for _, r := range roles {
+		if r.ID == id {
+			if len(r.Permissions) != 1 || r.Permissions[0] != "admin" {
+				t.Errorf("expected permissions [admin], got %v", r.Permissions)
+			}
+			return
+		}
+	}
+	t.Fatalf("role id=%d not found in list", id)
+}

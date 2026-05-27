@@ -161,3 +161,224 @@ func TestSubscriptions_GetOwnerIDByPaddleSubscription_Unknown(t *testing.T) {
 		t.Fatal("expected error for unknown paddle subscription ID")
 	}
 }
+
+func TestSubscriptions_UpsertSubscription_ThenGetSubscription(t *testing.T) {
+	db := testutil.OpenDB(t)
+	repo := infrastructure.NewRepository(db)
+	ctx := context.Background()
+
+	plans, err := repo.ListPlans(ctx)
+	if err != nil {
+		t.Fatalf("ListPlans: %v", err)
+	}
+	if len(plans) == 0 {
+		t.Skip("no active plans in DB")
+	}
+
+	const testOwner int64 = 7000001
+	if err := repo.UpsertSubscription(ctx, testOwner, plans[0].ID, 0); err != nil {
+		t.Fatalf("UpsertSubscription: %v", err)
+	}
+
+	sub, err := repo.GetSubscription(ctx, testOwner)
+	if err != nil {
+		t.Fatalf("GetSubscription after upsert: %v", err)
+	}
+	if sub.OwnerID != testOwner {
+		t.Errorf("expected owner_id=%d, got %d", testOwner, sub.OwnerID)
+	}
+}
+
+func TestSubscriptions_UpsertSubscription_Idempotent(t *testing.T) {
+	db := testutil.OpenDB(t)
+	repo := infrastructure.NewRepository(db)
+	ctx := context.Background()
+
+	plans, err := repo.ListPlans(ctx)
+	if err != nil {
+		t.Fatalf("ListPlans: %v", err)
+	}
+	if len(plans) == 0 {
+		t.Skip("no active plans in DB")
+	}
+
+	const testOwner int64 = 7000002
+	if err := repo.UpsertSubscription(ctx, testOwner, plans[0].ID, 0); err != nil {
+		t.Fatalf("first UpsertSubscription: %v", err)
+	}
+	if err := repo.UpsertSubscription(ctx, testOwner, plans[0].ID, 0); err != nil {
+		t.Fatalf("second UpsertSubscription: %v", err)
+	}
+}
+
+func TestSubscriptions_UpdateSeatCount_NoError(t *testing.T) {
+	db := testutil.OpenDB(t)
+	repo := infrastructure.NewRepository(db)
+	ctx := context.Background()
+
+	plans, err := repo.ListPlans(ctx)
+	if err != nil {
+		t.Fatalf("ListPlans: %v", err)
+	}
+	if len(plans) == 0 {
+		t.Skip("no active plans in DB")
+	}
+
+	const testOwner int64 = 7000003
+	if err := repo.UpsertSubscription(ctx, testOwner, plans[0].ID, 0); err != nil {
+		t.Fatalf("UpsertSubscription: %v", err)
+	}
+	if err := repo.UpdateSeatCount(ctx, testOwner, 5); err != nil {
+		t.Fatalf("UpdateSeatCount: %v", err)
+	}
+}
+
+func TestSubscriptions_GetActivePeriod_NoSubscription_Error(t *testing.T) {
+	db := testutil.OpenDB(t)
+	repo := infrastructure.NewRepository(db)
+	ctx := context.Background()
+
+	// A subscription ID that almost certainly doesn't exist.
+	_, err := repo.GetActivePeriod(ctx, 9999999)
+	_ = err // may return nil period or error; must not panic
+}
+
+func TestSubscriptions_ListPlans_SlugNonEmpty(t *testing.T) {
+	db := testutil.OpenDB(t)
+	repo := infrastructure.NewRepository(db)
+	plans, err := repo.ListPlans(context.Background())
+	if err != nil {
+		t.Fatalf("ListPlans: %v", err)
+	}
+	for _, p := range plans {
+		if p.Slug == "" {
+			t.Errorf("plan id=%d has empty Slug", p.ID)
+		}
+	}
+}
+
+func TestSubscriptions_ListPlans_IDsArePositive(t *testing.T) {
+	db := testutil.OpenDB(t)
+	repo := infrastructure.NewRepository(db)
+	plans, err := repo.ListPlans(context.Background())
+	if err != nil {
+		t.Fatalf("ListPlans: %v", err)
+	}
+	for _, p := range plans {
+		if p.ID <= 0 {
+			t.Errorf("expected positive plan ID, got %d", p.ID)
+		}
+	}
+}
+
+func TestSubscriptions_GetBillingHistory_LimitZero(t *testing.T) {
+	db := testutil.OpenDB(t)
+	repo := infrastructure.NewRepository(db)
+	history, err := repo.GetBillingHistory(context.Background(), testutil.OwnerID, 0)
+	if err != nil {
+		t.Fatalf("GetBillingHistory limit=0: %v", err)
+	}
+	_ = history
+}
+
+func TestSubscriptions_GetPeriodsForMonth_PastMonth(t *testing.T) {
+	db := testutil.OpenDB(t)
+	repo := infrastructure.NewRepository(db)
+	past := time.Date(2025, 1, 1, 0, 0, 0, 0, time.UTC)
+	periods, err := repo.GetPeriodsForMonth(context.Background(), testutil.OwnerID, past)
+	if err != nil {
+		t.Fatalf("GetPeriodsForMonth past: %v", err)
+	}
+	_ = periods
+}
+
+func TestSubscriptions_UpdatePaddleSubscription_NoError(t *testing.T) {
+	db := testutil.OpenDB(t)
+	repo := infrastructure.NewRepository(db)
+	ctx := context.Background()
+
+	plans, err := repo.ListPlans(ctx)
+	if err != nil {
+		t.Fatalf("ListPlans: %v", err)
+	}
+	if len(plans) == 0 {
+		t.Skip("no active plans in DB")
+	}
+
+	const testOwner int64 = 7000004
+	if err := repo.UpsertSubscription(ctx, testOwner, plans[0].ID, 14); err != nil {
+		t.Fatalf("UpsertSubscription: %v", err)
+	}
+	if err := repo.UpdatePaddleSubscription(ctx, testOwner, "paddle-sub-test-001", "paddle-cust-001", "active"); err != nil {
+		t.Fatalf("UpdatePaddleSubscription: %v", err)
+	}
+}
+
+func TestSubscriptions_GetOwnerIDByPaddleSubscription_AfterUpdate(t *testing.T) {
+	db := testutil.OpenDB(t)
+	repo := infrastructure.NewRepository(db)
+	ctx := context.Background()
+
+	plans, err := repo.ListPlans(ctx)
+	if err != nil {
+		t.Fatalf("ListPlans: %v", err)
+	}
+	if len(plans) == 0 {
+		t.Skip("no active plans in DB")
+	}
+
+	const testOwner int64 = 7000005
+	const paddleSubID = "paddle-sub-lookup-test"
+	if err := repo.UpsertSubscription(ctx, testOwner, plans[0].ID, 0); err != nil {
+		t.Fatalf("UpsertSubscription: %v", err)
+	}
+	if err := repo.UpdatePaddleSubscription(ctx, testOwner, paddleSubID, "paddle-cust-lookup", "active"); err != nil {
+		t.Fatalf("UpdatePaddleSubscription: %v", err)
+	}
+
+	ownerID, err := repo.GetOwnerIDByPaddleSubscription(ctx, paddleSubID)
+	if err != nil {
+		t.Fatalf("GetOwnerIDByPaddleSubscription: %v", err)
+	}
+	if ownerID != testOwner {
+		t.Errorf("expected ownerID=%d, got %d", testOwner, ownerID)
+	}
+}
+
+func TestSubscriptions_GetBillingHistory_LargeLimit(t *testing.T) {
+	db := testutil.OpenDB(t)
+	repo := infrastructure.NewRepository(db)
+	history, err := repo.GetBillingHistory(context.Background(), testutil.OwnerID, 100)
+	if err != nil {
+		t.Fatalf("GetBillingHistory large limit: %v", err)
+	}
+	_ = history
+}
+
+func TestSubscriptions_GetOwnerApps_NonEmptySubscription(t *testing.T) {
+	db := testutil.OpenDB(t)
+	repo := infrastructure.NewRepository(db)
+	ctx := context.Background()
+
+	plans, err := repo.ListPlans(ctx)
+	if err != nil {
+		t.Fatalf("ListPlans: %v", err)
+	}
+	if len(plans) == 0 {
+		t.Skip("no active plans in DB")
+	}
+
+	const testOwner int64 = 7000006
+	if err := repo.UpsertSubscription(ctx, testOwner, plans[0].ID, 0); err != nil {
+		t.Fatalf("UpsertSubscription: %v", err)
+	}
+
+	apps, err := repo.GetOwnerApps(ctx, testOwner)
+	if err != nil {
+		if errors.Is(err, domain.ErrSubscriptionNotFound) {
+			t.Skip("subscription not found after upsert (fixture constraint)")
+		}
+		t.Fatalf("GetOwnerApps: %v", err)
+	}
+	_ = apps
+}

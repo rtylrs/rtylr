@@ -195,3 +195,249 @@ func TestWarehouses_CreateWarehouse_WithCapacity(t *testing.T) {
 		t.Errorf("expected positive ID, got %d", id)
 	}
 }
+
+func TestWarehouses_CreateWarehouse_UniqueIDs(t *testing.T) {
+	db := testutil.OpenDB(t)
+	repo := infrastructure.NewRepository(db)
+	ctx := context.Background()
+
+	id1, err := repo.CreateWarehouse(ctx, testutil.OwnerID, domain.WarehouseInput{Name: "WH-Unique-1", IsActive: true})
+	if err != nil {
+		t.Fatalf("CreateWarehouse 1: %v", err)
+	}
+	t.Cleanup(func() { _ = repo.DeleteWarehouse(ctx, testutil.OwnerID, id1) })
+
+	id2, err := repo.CreateWarehouse(ctx, testutil.OwnerID, domain.WarehouseInput{Name: "WH-Unique-2", IsActive: true})
+	if err != nil {
+		t.Fatalf("CreateWarehouse 2: %v", err)
+	}
+	t.Cleanup(func() { _ = repo.DeleteWarehouse(ctx, testutil.OwnerID, id2) })
+
+	if id1 == id2 {
+		t.Errorf("expected distinct IDs, both got %d", id1)
+	}
+}
+
+func TestWarehouses_UpdateWarehouse_Country(t *testing.T) {
+	db := testutil.OpenDB(t)
+	repo := infrastructure.NewRepository(db)
+	ctx := context.Background()
+
+	id, err := repo.CreateWarehouse(ctx, testutil.OwnerID, domain.WarehouseInput{
+		Name: "Country WH", Country: "US", IsActive: true,
+	})
+	if err != nil {
+		t.Fatalf("CreateWarehouse: %v", err)
+	}
+	t.Cleanup(func() { _ = repo.DeleteWarehouse(ctx, testutil.OwnerID, id) })
+
+	if err := repo.UpdateWarehouse(ctx, testutil.OwnerID, id, domain.WarehouseInput{
+		Name: "Country WH", Country: "CA", IsActive: true,
+	}); err != nil {
+		t.Fatalf("UpdateWarehouse country: %v", err)
+	}
+
+	warehouses, _ := repo.ListWarehouses(ctx, testutil.OwnerID)
+	for _, w := range warehouses {
+		if w.ID == id && w.Country != "CA" {
+			t.Errorf("expected Country=CA, got %s", w.Country)
+		}
+	}
+}
+
+func TestWarehouses_UpdateWarehouse_Capacity(t *testing.T) {
+	db := testutil.OpenDB(t)
+	repo := infrastructure.NewRepository(db)
+	ctx := context.Background()
+
+	id, err := repo.CreateWarehouse(ctx, testutil.OwnerID, domain.WarehouseInput{
+		Name: "Cap WH", Capacity: 100, IsActive: true,
+	})
+	if err != nil {
+		t.Fatalf("CreateWarehouse: %v", err)
+	}
+	t.Cleanup(func() { _ = repo.DeleteWarehouse(ctx, testutil.OwnerID, id) })
+
+	if err := repo.UpdateWarehouse(ctx, testutil.OwnerID, id, domain.WarehouseInput{
+		Name: "Cap WH", Capacity: 9999, IsActive: true,
+	}); err != nil {
+		t.Fatalf("UpdateWarehouse capacity: %v", err)
+	}
+}
+
+func TestWarehouses_CreateWarehouse_Inactive(t *testing.T) {
+	db := testutil.OpenDB(t)
+	repo := infrastructure.NewRepository(db)
+	ctx := context.Background()
+
+	id, err := repo.CreateWarehouse(ctx, testutil.OwnerID, domain.WarehouseInput{
+		Name: "Inactive WH", IsActive: false,
+	})
+	if err != nil {
+		t.Fatalf("CreateWarehouse inactive: %v", err)
+	}
+	t.Cleanup(func() { _ = repo.DeleteWarehouse(ctx, testutil.OwnerID, id) })
+	if id <= 0 {
+		t.Errorf("expected positive ID, got %d", id)
+	}
+}
+
+func TestWarehouses_ListWarehouses_NamesAreNonEmpty(t *testing.T) {
+	db := testutil.OpenDB(t)
+	repo := infrastructure.NewRepository(db)
+	ctx := context.Background()
+
+	id, err := repo.CreateWarehouse(ctx, testutil.OwnerID, domain.WarehouseInput{Name: "Named WH", IsActive: true})
+	if err != nil {
+		t.Fatalf("CreateWarehouse: %v", err)
+	}
+	t.Cleanup(func() { _ = repo.DeleteWarehouse(ctx, testutil.OwnerID, id) })
+
+	warehouses, err := repo.ListWarehouses(ctx, testutil.OwnerID)
+	if err != nil {
+		t.Fatalf("ListWarehouses: %v", err)
+	}
+	for _, w := range warehouses {
+		if w.Name == "" {
+			t.Errorf("warehouse id=%d has empty Name", w.ID)
+		}
+	}
+}
+
+func TestWarehouses_UpdateWarehouse_Address(t *testing.T) {
+	db := testutil.OpenDB(t)
+	repo := infrastructure.NewRepository(db)
+	ctx := context.Background()
+
+	id, err := repo.CreateWarehouse(ctx, testutil.OwnerID, domain.WarehouseInput{
+		Name: "Addr WH", Address: "Old Address", IsActive: true,
+	})
+	if err != nil {
+		t.Fatalf("CreateWarehouse: %v", err)
+	}
+	t.Cleanup(func() { _ = repo.DeleteWarehouse(ctx, testutil.OwnerID, id) })
+
+	if err := repo.UpdateWarehouse(ctx, testutil.OwnerID, id, domain.WarehouseInput{
+		Name: "Addr WH", Address: "New Address 123", IsActive: true,
+	}); err != nil {
+		t.Fatalf("UpdateWarehouse address: %v", err)
+	}
+}
+
+func TestWarehouses_CreateWarehouse_ManagerName(t *testing.T) {
+	db := testutil.OpenDB(t)
+	repo := infrastructure.NewRepository(db)
+	ctx := context.Background()
+
+	id, err := repo.CreateWarehouse(ctx, testutil.OwnerID, domain.WarehouseInput{
+		Name: "Managed WH", ManagerName: "John Manager", IsActive: true,
+	})
+	if err != nil {
+		t.Fatalf("CreateWarehouse with manager: %v", err)
+	}
+	t.Cleanup(func() { _ = repo.DeleteWarehouse(ctx, testutil.OwnerID, id) })
+
+	warehouses, _ := repo.ListWarehouses(ctx, testutil.OwnerID)
+	for _, w := range warehouses {
+		if w.ID == id && w.ManagerName != "John Manager" {
+			t.Errorf("expected ManagerName='John Manager', got %q", w.ManagerName)
+		}
+	}
+}
+
+func TestWarehouses_DeleteWarehouse_WrongOwnerFails(t *testing.T) {
+	db := testutil.OpenDB(t)
+	repo := infrastructure.NewRepository(db)
+	ctx := context.Background()
+
+	id, err := repo.CreateWarehouse(ctx, testutil.OwnerID, domain.WarehouseInput{
+		Name: "Protected WH", IsActive: true,
+	})
+	if err != nil {
+		t.Fatalf("CreateWarehouse: %v", err)
+	}
+	t.Cleanup(func() { _ = repo.DeleteWarehouse(ctx, testutil.OwnerID, id) })
+
+	// Attempt to delete with wrong owner -- should silently not delete it.
+	_ = repo.DeleteWarehouse(ctx, 9999999, id)
+
+	warehouses, _ := repo.ListWarehouses(ctx, testutil.OwnerID)
+	found := false
+	for _, w := range warehouses {
+		if w.ID == id {
+			found = true
+		}
+	}
+	if !found {
+		t.Error("warehouse was deleted by wrong owner -- owner isolation violated")
+	}
+}
+
+func TestWarehouses_ListWarehouses_IDsArePositive(t *testing.T) {
+	db := testutil.OpenDB(t)
+	repo := infrastructure.NewRepository(db)
+	ctx := context.Background()
+
+	id, err := repo.CreateWarehouse(ctx, testutil.OwnerID, domain.WarehouseInput{Name: "ID Check WH", IsActive: true})
+	if err != nil {
+		t.Fatalf("CreateWarehouse: %v", err)
+	}
+	t.Cleanup(func() { _ = repo.DeleteWarehouse(ctx, testutil.OwnerID, id) })
+
+	warehouses, err := repo.ListWarehouses(ctx, testutil.OwnerID)
+	if err != nil {
+		t.Fatalf("ListWarehouses: %v", err)
+	}
+	for _, w := range warehouses {
+		if w.ID <= 0 {
+			t.Errorf("expected positive ID, got %d", w.ID)
+		}
+	}
+}
+
+func TestWarehouses_CreateWarehouse_FullAddress(t *testing.T) {
+	db := testutil.OpenDB(t)
+	repo := infrastructure.NewRepository(db)
+	ctx := context.Background()
+
+	id, err := repo.CreateWarehouse(ctx, testutil.OwnerID, domain.WarehouseInput{
+		Name:    "Full Addr WH",
+		Address: "456 Industrial Blvd",
+		City:    "Metropolis",
+		Country: "US",
+		IsActive: true,
+	})
+	if err != nil {
+		t.Fatalf("CreateWarehouse full address: %v", err)
+	}
+	t.Cleanup(func() { _ = repo.DeleteWarehouse(ctx, testutil.OwnerID, id) })
+
+	warehouses, _ := repo.ListWarehouses(ctx, testutil.OwnerID)
+	for _, w := range warehouses {
+		if w.ID == id {
+			if w.City != "Metropolis" {
+				t.Errorf("expected City=Metropolis, got %s", w.City)
+			}
+			return
+		}
+	}
+	t.Errorf("warehouse id=%d not found", id)
+}
+
+func TestWarehouses_ListWarehouses_Idempotent(t *testing.T) {
+	db := testutil.OpenDB(t)
+	repo := infrastructure.NewRepository(db)
+	ctx := context.Background()
+
+	a, err := repo.ListWarehouses(ctx, testutil.OwnerID)
+	if err != nil {
+		t.Fatalf("first: %v", err)
+	}
+	b, err := repo.ListWarehouses(ctx, testutil.OwnerID)
+	if err != nil {
+		t.Fatalf("second: %v", err)
+	}
+	if len(a) != len(b) {
+		t.Errorf("idempotency: got %d then %d", len(a), len(b))
+	}
+}

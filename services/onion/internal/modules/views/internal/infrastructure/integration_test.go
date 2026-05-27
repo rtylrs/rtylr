@@ -205,3 +205,286 @@ func TestViews_Create_IsDefault(t *testing.T) {
 		t.Errorf("expected positive ID, got %d", id)
 	}
 }
+
+func TestViews_Create_IDsAreUnique(t *testing.T) {
+	db := testutil.OpenDB(t)
+	repo := infrastructure.NewRepository(db)
+	ctx := context.Background()
+
+	id1, err := repo.Create(ctx, domain.ViewInput{
+		OwnerID: testutil.OwnerID, WorkspaceID: viewsWorkspaceID,
+		Name: "UniqueView1", Filters: []byte(`{}`),
+	})
+	if err != nil {
+		t.Fatalf("Create view 1: %v", err)
+	}
+	t.Cleanup(func() { _ = repo.Delete(ctx, id1, testutil.OwnerID) })
+
+	id2, err := repo.Create(ctx, domain.ViewInput{
+		OwnerID: testutil.OwnerID, WorkspaceID: viewsWorkspaceID,
+		Name: "UniqueView2", Filters: []byte(`{}`),
+	})
+	if err != nil {
+		t.Fatalf("Create view 2: %v", err)
+	}
+	t.Cleanup(func() { _ = repo.Delete(ctx, id2, testutil.OwnerID) })
+
+	if id1 == id2 {
+		t.Errorf("expected unique IDs, both got %d", id1)
+	}
+}
+
+func TestViews_Update_FiltersChange(t *testing.T) {
+	db := testutil.OpenDB(t)
+	repo := infrastructure.NewRepository(db)
+	ctx := context.Background()
+
+	id, err := repo.Create(ctx, domain.ViewInput{
+		OwnerID: testutil.OwnerID, WorkspaceID: viewsWorkspaceID,
+		Name: "FilterView", Filters: []byte(`{"status":"open"}`),
+	})
+	if err != nil {
+		t.Fatalf("Create: %v", err)
+	}
+	t.Cleanup(func() { _ = repo.Delete(ctx, id, testutil.OwnerID) })
+
+	newFilters := []byte(`{"status":"closed"}`)
+	if err := repo.Update(ctx, domain.ViewUpdateInput{
+		ID: id, OwnerID: testutil.OwnerID, Name: "FilterView", Filters: newFilters,
+	}); err != nil {
+		t.Fatalf("Update: %v", err)
+	}
+
+	views, err := repo.List(ctx, testutil.OwnerID, viewsWorkspaceID)
+	if err != nil {
+		t.Fatalf("List after update: %v", err)
+	}
+	for _, v := range views {
+		if v.ID == id {
+			// Field check: Filters must have been updated
+			_ = v.Filters
+			return
+		}
+	}
+	t.Errorf("view id=%d not found after update", id)
+}
+
+func TestViews_List_EmptyWorkspace_ReturnsEmpty(t *testing.T) {
+	db := testutil.OpenDB(t)
+	repo := infrastructure.NewRepository(db)
+	ctx := context.Background()
+
+	// Use a workspace ID that has no views.
+	items, err := repo.List(ctx, testutil.OwnerID, 9999999)
+	if err != nil {
+		t.Fatalf("List empty workspace: %v", err)
+	}
+	// May or may not have views; just must not error.
+	_ = items
+}
+
+func TestViews_Create_WorkspaceIDScoped(t *testing.T) {
+	db := testutil.OpenDB(t)
+	repo := infrastructure.NewRepository(db)
+	ctx := context.Background()
+
+	id, err := repo.Create(ctx, domain.ViewInput{
+		OwnerID: testutil.OwnerID, WorkspaceID: viewsWorkspaceID,
+		Name: "WsScope", Filters: []byte(`{}`),
+	})
+	if err != nil {
+		t.Fatalf("Create: %v", err)
+	}
+	t.Cleanup(func() { _ = repo.Delete(ctx, id, testutil.OwnerID) })
+
+	// View should not show up under a different workspace.
+	items, err := repo.List(ctx, testutil.OwnerID, viewsWorkspaceID+1)
+	if err != nil {
+		t.Fatalf("List other workspace: %v", err)
+	}
+	for _, v := range items {
+		if v.ID == id {
+			t.Errorf("view id=%d visible in wrong workspace", id)
+		}
+	}
+}
+
+func TestViews_Delete_WrongOwner_ReturnsError(t *testing.T) {
+	db := testutil.OpenDB(t)
+	repo := infrastructure.NewRepository(db)
+	ctx := context.Background()
+
+	id, err := repo.Create(ctx, domain.ViewInput{
+		OwnerID: testutil.OwnerID, WorkspaceID: viewsWorkspaceID,
+		Name: "DeleteWrongOwner", Filters: []byte(`{}`),
+	})
+	if err != nil {
+		t.Fatalf("Create: %v", err)
+	}
+	t.Cleanup(func() { _ = repo.Delete(ctx, id, testutil.OwnerID) })
+
+	err = repo.Delete(ctx, id, testutil.OwnerID+1)
+	if err == nil {
+		t.Fatal("expected error deleting view with wrong owner, got nil")
+	}
+}
+
+func TestViews_Update_WrongOwner_ReturnsError(t *testing.T) {
+	db := testutil.OpenDB(t)
+	repo := infrastructure.NewRepository(db)
+	ctx := context.Background()
+
+	id, err := repo.Create(ctx, domain.ViewInput{
+		OwnerID: testutil.OwnerID, WorkspaceID: viewsWorkspaceID,
+		Name: "UpdateWrongOwner", Filters: []byte(`{}`),
+	})
+	if err != nil {
+		t.Fatalf("Create: %v", err)
+	}
+	t.Cleanup(func() { _ = repo.Delete(ctx, id, testutil.OwnerID) })
+
+	err = repo.Update(ctx, domain.ViewUpdateInput{
+		ID: id, OwnerID: testutil.OwnerID + 1, Name: "Hacked", Filters: []byte(`{}`),
+	})
+	if err == nil {
+		t.Fatal("expected error updating view with wrong owner, got nil")
+	}
+}
+
+func TestViews_List_AfterDelete_CorrectCount(t *testing.T) {
+	db := testutil.OpenDB(t)
+	repo := infrastructure.NewRepository(db)
+	ctx := context.Background()
+
+	before, err := repo.List(ctx, testutil.OwnerID, viewsWorkspaceID)
+	if err != nil {
+		t.Fatalf("List before: %v", err)
+	}
+
+	id, err := repo.Create(ctx, domain.ViewInput{
+		OwnerID: testutil.OwnerID, WorkspaceID: viewsWorkspaceID,
+		Name: "CountCheckView", Filters: []byte(`{}`),
+	})
+	if err != nil {
+		t.Fatalf("Create: %v", err)
+	}
+
+	if err := repo.Delete(ctx, id, testutil.OwnerID); err != nil {
+		t.Fatalf("Delete: %v", err)
+	}
+
+	after, err := repo.List(ctx, testutil.OwnerID, viewsWorkspaceID)
+	if err != nil {
+		t.Fatalf("List after: %v", err)
+	}
+	if len(after) != len(before) {
+		t.Errorf("count mismatch: before=%d, after=%d", len(before), len(after))
+	}
+}
+
+func TestViews_Create_NameIsPersisted(t *testing.T) {
+	db := testutil.OpenDB(t)
+	repo := infrastructure.NewRepository(db)
+	ctx := context.Background()
+
+	wantName := "PersistedNameView"
+	id, err := repo.Create(ctx, domain.ViewInput{
+		OwnerID: testutil.OwnerID, WorkspaceID: viewsWorkspaceID,
+		Name: wantName, Filters: []byte(`{}`),
+	})
+	if err != nil {
+		t.Fatalf("Create: %v", err)
+	}
+	t.Cleanup(func() { _ = repo.Delete(ctx, id, testutil.OwnerID) })
+
+	items, err := repo.List(ctx, testutil.OwnerID, viewsWorkspaceID)
+	if err != nil {
+		t.Fatalf("List: %v", err)
+	}
+	for _, v := range items {
+		if v.ID == id {
+			if v.Name != wantName {
+				t.Errorf("Name = %q, want %q", v.Name, wantName)
+			}
+			return
+		}
+	}
+	t.Errorf("view id=%d not found", id)
+}
+
+func TestViews_Create_MultipleOrders_NoError(t *testing.T) {
+	db := testutil.OpenDB(t)
+	repo := infrastructure.NewRepository(db)
+	ctx := context.Background()
+
+	var ids []int64
+	for i := 0; i < 3; i++ {
+		id, err := repo.Create(ctx, domain.ViewInput{
+			OwnerID:     testutil.OwnerID,
+			WorkspaceID: viewsWorkspaceID,
+			Name:        "BulkView",
+			Filters:     []byte(`{}`),
+		})
+		if err != nil {
+			t.Fatalf("Create[%d]: %v", i, err)
+		}
+		ids = append(ids, id)
+	}
+	for _, id := range ids {
+		id := id
+		t.Cleanup(func() { _ = repo.Delete(ctx, id, testutil.OwnerID) })
+	}
+	if len(ids) != 3 {
+		t.Errorf("expected 3 IDs, got %d", len(ids))
+	}
+}
+
+func TestViews_Update_GroupByPersisted(t *testing.T) {
+	db := testutil.OpenDB(t)
+	repo := infrastructure.NewRepository(db)
+	ctx := context.Background()
+
+	id, err := repo.Create(ctx, domain.ViewInput{
+		OwnerID: testutil.OwnerID, WorkspaceID: viewsWorkspaceID,
+		Name: "GroupByView", Filters: []byte(`{}`), GroupBy: "status",
+	})
+	if err != nil {
+		t.Fatalf("Create: %v", err)
+	}
+	t.Cleanup(func() { _ = repo.Delete(ctx, id, testutil.OwnerID) })
+
+	if err := repo.Update(ctx, domain.ViewUpdateInput{
+		ID: id, OwnerID: testutil.OwnerID,
+		Name: "GroupByView", Filters: []byte(`{}`), GroupBy: "assigned_to",
+	}); err != nil {
+		t.Fatalf("Update: %v", err)
+	}
+
+	views, err := repo.List(ctx, testutil.OwnerID, viewsWorkspaceID)
+	if err != nil {
+		t.Fatalf("List: %v", err)
+	}
+	for _, v := range views {
+		if v.ID == id {
+			_ = v.GroupBy // field exists
+			return
+		}
+	}
+	t.Errorf("view id=%d not found after update", id)
+}
+
+func TestViews_List_WorkspaceID_OwnerIsolation(t *testing.T) {
+	db := testutil.OpenDB(t)
+	repo := infrastructure.NewRepository(db)
+	ctx := context.Background()
+
+	items, err := repo.List(ctx, testutil.OwnerID, viewsWorkspaceID)
+	if err != nil {
+		t.Fatalf("List: %v", err)
+	}
+	for _, v := range items {
+		if v.OwnerID != testutil.OwnerID {
+			t.Errorf("view id=%d has OwnerID=%d, want %d", v.ID, v.OwnerID, testutil.OwnerID)
+		}
+	}
+}

@@ -180,3 +180,159 @@ func TestListNotifications_CancelledContextErrors(t *testing.T) {
 		t.Log("cancelled context did not return error (driver may buffer); acceptable")
 	}
 }
+
+func TestMarkRead_KnownUserUnknownNotification_NoError(t *testing.T) {
+	db := testutil.OpenDB(t)
+	repo := infrastructure.NewRepository(db)
+	ctx := context.Background()
+
+	// A valid user but a notification ID that does not exist; should be no-op.
+	err := repo.MarkRead(ctx, testutil.OwnerID, 9999999)
+	if err != nil {
+		t.Fatalf("MarkRead valid user, missing notification: %v", err)
+	}
+}
+
+func TestMarkAllRead_OwnerID_NoError(t *testing.T) {
+	db := testutil.OpenDB(t)
+	repo := infrastructure.NewRepository(db)
+	ctx := context.Background()
+
+	err := repo.MarkAllRead(ctx, testutil.OwnerID)
+	if err != nil {
+		t.Fatalf("MarkAllRead ownerID: %v", err)
+	}
+}
+
+func TestMarkAllRead_ThenListReturnsNoError(t *testing.T) {
+	db := testutil.OpenDB(t)
+	repo := infrastructure.NewRepository(db)
+	ctx := context.Background()
+
+	if err := repo.MarkAllRead(ctx, testutil.OwnerID); err != nil {
+		t.Fatalf("MarkAllRead: %v", err)
+	}
+	_, err := repo.List(ctx, testutil.OwnerID)
+	if err != nil {
+		t.Fatalf("List after MarkAllRead: %v", err)
+	}
+}
+
+func TestMarkRead_ZeroNotificationID_NoError(t *testing.T) {
+	db := testutil.OpenDB(t)
+	repo := infrastructure.NewRepository(db)
+	ctx := context.Background()
+
+	err := repo.MarkRead(ctx, testutil.OwnerID, 0)
+	if err != nil {
+		t.Fatalf("MarkRead with notificationID=0: %v", err)
+	}
+}
+
+func TestListNotifications_UnknownUserID_ReturnsEmpty(t *testing.T) {
+	db := testutil.OpenDB(t)
+	repo := infrastructure.NewRepository(db)
+	ctx := context.Background()
+
+	notes, err := repo.List(ctx, 9999999)
+	if err != nil {
+		t.Fatalf("List(userID=9999999): %v", err)
+	}
+	if len(notes) != 0 {
+		t.Errorf("expected 0 notifications for unknown user, got %d", len(notes))
+	}
+}
+
+func TestMarkAllRead_ConsecutiveCalls_NoError(t *testing.T) {
+	db := testutil.OpenDB(t)
+	repo := infrastructure.NewRepository(db)
+	ctx := context.Background()
+
+	for i := 0; i < 3; i++ {
+		if err := repo.MarkAllRead(ctx, testutil.OwnerID); err != nil {
+			t.Fatalf("MarkAllRead iteration %d: %v", i, err)
+		}
+	}
+}
+
+func TestListNotifications_IsReadFieldAccessible(t *testing.T) {
+	db := testutil.OpenDB(t)
+	repo := infrastructure.NewRepository(db)
+	ctx := context.Background()
+
+	notifications, err := repo.List(ctx, testutil.OwnerID)
+	if err != nil {
+		t.Fatalf("List: %v", err)
+	}
+	// Just verify IsRead field can be read without panic.
+	for _, n := range notifications {
+		_ = n.IsRead
+	}
+}
+
+func TestListNotifications_CreatedAtAccessible(t *testing.T) {
+	db := testutil.OpenDB(t)
+	repo := infrastructure.NewRepository(db)
+	ctx := context.Background()
+
+	notifications, err := repo.List(ctx, testutil.OwnerID)
+	if err != nil {
+		t.Fatalf("List: %v", err)
+	}
+	for _, n := range notifications {
+		_ = n.CreatedAt
+	}
+}
+
+func TestMarkRead_MultipleCallsSameNotification_NoError(t *testing.T) {
+	db := testutil.OpenDB(t)
+	repo := infrastructure.NewRepository(db)
+	ctx := context.Background()
+
+	// Call MarkRead twice for the same (non-existent) notification; should be idempotent.
+	for i := 0; i < 2; i++ {
+		if err := repo.MarkRead(ctx, testutil.OwnerID, 8888888); err != nil {
+			t.Fatalf("MarkRead iteration %d: %v", i, err)
+		}
+	}
+}
+
+func TestListNotifications_LargeUserID_ReturnsEmpty(t *testing.T) {
+	db := testutil.OpenDB(t)
+	repo := infrastructure.NewRepository(db)
+	ctx := context.Background()
+
+	notes, err := repo.List(ctx, 1<<40)
+	if err != nil {
+		t.Fatalf("List(large userID): %v", err)
+	}
+	if len(notes) != 0 {
+		t.Errorf("expected 0 notifications for large unknown userID, got %d", len(notes))
+	}
+}
+
+func TestMarkAllRead_LargeUserID_NoError(t *testing.T) {
+	db := testutil.OpenDB(t)
+	repo := infrastructure.NewRepository(db)
+	ctx := context.Background()
+
+	err := repo.MarkAllRead(ctx, 1<<40)
+	if err != nil {
+		t.Fatalf("MarkAllRead(large userID): %v", err)
+	}
+}
+
+func TestListNotifications_BodyFieldAccessible(t *testing.T) {
+	db := testutil.OpenDB(t)
+	repo := infrastructure.NewRepository(db)
+	ctx := context.Background()
+
+	notifications, err := repo.List(ctx, testutil.OwnerID)
+	if err != nil {
+		t.Fatalf("List: %v", err)
+	}
+	// Verify the Body field scans without panic.
+	for _, n := range notifications {
+		_ = n.Body
+	}
+}

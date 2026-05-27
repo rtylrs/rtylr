@@ -51,3 +51,311 @@ func TestListAllActiveLeaveTypes_NoError(t *testing.T) {
 	}
 	_ = types
 }
+
+func TestListLeaveRequests_ZeroOwner_ReturnsEmpty(t *testing.T) {
+	db := testutil.OpenDB(t)
+	repo := infrastructure.NewRepository(db)
+	ctx := context.Background()
+
+	requests, total, err := repo.ListLeaveRequests(ctx, 0, domain.ListLeaveRequestsParams{
+		Limit:  100,
+		Offset: 0,
+	})
+	if err != nil {
+		t.Fatalf("ListLeaveRequests zero owner: %v", err)
+	}
+	if total != 0 || len(requests) != 0 {
+		t.Errorf("expected empty for owner 0, got total=%d records=%d", total, len(requests))
+	}
+}
+
+func TestListLeaveTypes_ZeroOwner_ReturnsEmpty(t *testing.T) {
+	db := testutil.OpenDB(t)
+	repo := infrastructure.NewRepository(db)
+	ctx := context.Background()
+
+	types, total, err := repo.ListLeaveTypes(ctx, 0, domain.ListLeaveTypesParams{
+		Limit:  100,
+		Offset: 0,
+	})
+	if err != nil {
+		t.Fatalf("ListLeaveTypes zero owner: %v", err)
+	}
+	if total != 0 || len(types) != 0 {
+		t.Errorf("expected empty for owner 0, got total=%d records=%d", total, len(types))
+	}
+}
+
+func TestCreateLeaveType_PersistsAndReturnsID(t *testing.T) {
+	db := testutil.OpenDB(t)
+	repo := infrastructure.NewRepository(db)
+	ctx := context.Background()
+
+	lt, err := repo.CreateLeaveType(ctx, testutil.OwnerID, domain.LeaveTypeRecord{
+		Name:             "Test Annual Leave",
+		IsPaid:           true,
+		RequiresApproval: true,
+		IsActive:         true,
+	})
+	if err != nil {
+		t.Fatalf("CreateLeaveType: %v", err)
+	}
+	if lt.ID == 0 {
+		t.Fatal("expected non-zero ID after create")
+	}
+}
+
+func TestCreateLeaveType_NameIsStored(t *testing.T) {
+	db := testutil.OpenDB(t)
+	repo := infrastructure.NewRepository(db)
+	ctx := context.Background()
+
+	lt, err := repo.CreateLeaveType(ctx, testutil.OwnerID, domain.LeaveTypeRecord{
+		Name:     "Sick Leave Test",
+		IsActive: true,
+	})
+	if err != nil {
+		t.Fatalf("CreateLeaveType: %v", err)
+	}
+	if lt.Name != "Sick Leave Test" {
+		t.Errorf("expected name='Sick Leave Test', got %q", lt.Name)
+	}
+}
+
+func TestCreateLeaveRequest_PersistsAndReturnsID(t *testing.T) {
+	db := testutil.OpenDB(t)
+	repo := infrastructure.NewRepository(db)
+	ctx := context.Background()
+
+	// Create a leave type first.
+	lt, err := repo.CreateLeaveType(ctx, testutil.OwnerID, domain.LeaveTypeRecord{
+		Name:     "Leave For Request Test",
+		IsActive: true,
+	})
+	if err != nil {
+		t.Fatalf("CreateLeaveType: %v", err)
+	}
+
+	req, err := repo.CreateLeaveRequest(ctx, testutil.OwnerID, domain.LeaveRequestRecord{
+		EmployeeID:           4101,
+		LeaveTypeID:          lt.ID,
+		StartDate:            "2026-08-01",
+		EndDate:              "2026-08-03",
+		TotalDays:            3,
+		Status:               "pending",
+		CurrentApprovalLevel: 1,
+	})
+	if err != nil {
+		t.Fatalf("CreateLeaveRequest: %v", err)
+	}
+	if req.ID == 0 {
+		t.Fatal("expected non-zero ID after create")
+	}
+}
+
+func TestCreateLeaveRequest_EmployeeIDIsStored(t *testing.T) {
+	db := testutil.OpenDB(t)
+	repo := infrastructure.NewRepository(db)
+	ctx := context.Background()
+
+	lt, err := repo.CreateLeaveType(ctx, testutil.OwnerID, domain.LeaveTypeRecord{
+		Name:     "EmpID Check Leave",
+		IsActive: true,
+	})
+	if err != nil {
+		t.Fatalf("CreateLeaveType: %v", err)
+	}
+
+	req, err := repo.CreateLeaveRequest(ctx, testutil.OwnerID, domain.LeaveRequestRecord{
+		EmployeeID:           4102,
+		LeaveTypeID:          lt.ID,
+		StartDate:            "2026-09-01",
+		EndDate:              "2026-09-02",
+		TotalDays:            2,
+		Status:               "pending",
+		CurrentApprovalLevel: 1,
+	})
+	if err != nil {
+		t.Fatalf("CreateLeaveRequest: %v", err)
+	}
+	if req.EmployeeID != 4102 {
+		t.Errorf("expected employee_id=4102, got %d", req.EmployeeID)
+	}
+}
+
+func TestCreateLeaveRequest_StatusIsPending(t *testing.T) {
+	db := testutil.OpenDB(t)
+	repo := infrastructure.NewRepository(db)
+	ctx := context.Background()
+
+	lt, err := repo.CreateLeaveType(ctx, testutil.OwnerID, domain.LeaveTypeRecord{
+		Name:     "Status Check Leave",
+		IsActive: true,
+	})
+	if err != nil {
+		t.Fatalf("CreateLeaveType: %v", err)
+	}
+
+	req, err := repo.CreateLeaveRequest(ctx, testutil.OwnerID, domain.LeaveRequestRecord{
+		EmployeeID:           4101,
+		LeaveTypeID:          lt.ID,
+		StartDate:            "2026-10-01",
+		EndDate:              "2026-10-01",
+		TotalDays:            1,
+		Status:               "pending",
+		CurrentApprovalLevel: 1,
+	})
+	if err != nil {
+		t.Fatalf("CreateLeaveRequest: %v", err)
+	}
+	if req.Status != "pending" {
+		t.Errorf("expected status='pending', got %q", req.Status)
+	}
+}
+
+func TestListLeaveRequests_ByEmployee_4101(t *testing.T) {
+	db := testutil.OpenDB(t)
+	repo := infrastructure.NewRepository(db)
+	ctx := context.Background()
+
+	// List all and verify any returned records for OwnerID have valid fields.
+	requests, _, err := repo.ListLeaveRequests(ctx, testutil.OwnerID, domain.ListLeaveRequestsParams{
+		Limit:  100,
+		Offset: 0,
+	})
+	if err != nil {
+		t.Fatalf("ListLeaveRequests: %v", err)
+	}
+	for _, r := range requests {
+		if r.OwnerID != testutil.OwnerID {
+			t.Errorf("request %d has wrong owner_id %d", r.ID, r.OwnerID)
+		}
+	}
+}
+
+func TestApproveLeaveRequest_ChangesStatus(t *testing.T) {
+	db := testutil.OpenDB(t)
+	repo := infrastructure.NewRepository(db)
+	ctx := context.Background()
+
+	lt, err := repo.CreateLeaveType(ctx, testutil.OwnerID, domain.LeaveTypeRecord{
+		Name:     "Approve Test Leave",
+		IsActive: true,
+	})
+	if err != nil {
+		t.Fatalf("CreateLeaveType: %v", err)
+	}
+
+	req, err := repo.CreateLeaveRequest(ctx, testutil.OwnerID, domain.LeaveRequestRecord{
+		EmployeeID:           4101,
+		LeaveTypeID:          lt.ID,
+		StartDate:            "2026-11-01",
+		EndDate:              "2026-11-01",
+		TotalDays:            1,
+		Status:               "pending",
+		CurrentApprovalLevel: 1,
+	})
+	if err != nil {
+		t.Fatalf("CreateLeaveRequest: %v", err)
+	}
+
+	if err := repo.ApproveLeaveRequest(ctx, testutil.OwnerID, req.ID); err != nil {
+		t.Fatalf("ApproveLeaveRequest: %v", err)
+	}
+
+	got, err := repo.GetLeaveRequest(ctx, testutil.OwnerID, req.ID)
+	if err != nil {
+		t.Fatalf("GetLeaveRequest after approve: %v", err)
+	}
+	if got.Status != "approved" {
+		t.Errorf("expected status='approved', got %q", got.Status)
+	}
+}
+
+func TestRejectLeaveRequest_ChangesStatus(t *testing.T) {
+	db := testutil.OpenDB(t)
+	repo := infrastructure.NewRepository(db)
+	ctx := context.Background()
+
+	lt, err := repo.CreateLeaveType(ctx, testutil.OwnerID, domain.LeaveTypeRecord{
+		Name:     "Reject Test Leave",
+		IsActive: true,
+	})
+	if err != nil {
+		t.Fatalf("CreateLeaveType: %v", err)
+	}
+
+	req, err := repo.CreateLeaveRequest(ctx, testutil.OwnerID, domain.LeaveRequestRecord{
+		EmployeeID:           4102,
+		LeaveTypeID:          lt.ID,
+		StartDate:            "2026-12-01",
+		EndDate:              "2026-12-01",
+		TotalDays:            1,
+		Status:               "pending",
+		CurrentApprovalLevel: 1,
+	})
+	if err != nil {
+		t.Fatalf("CreateLeaveRequest: %v", err)
+	}
+
+	if err := repo.RejectLeaveRequest(ctx, testutil.OwnerID, req.ID, "not approved"); err != nil {
+		t.Fatalf("RejectLeaveRequest: %v", err)
+	}
+
+	got, err := repo.GetLeaveRequest(ctx, testutil.OwnerID, req.ID)
+	if err != nil {
+		t.Fatalf("GetLeaveRequest after reject: %v", err)
+	}
+	if got.Status != "rejected" {
+		t.Errorf("expected status='rejected', got %q", got.Status)
+	}
+}
+
+func TestGetLeaveRequest_NotFound_Errors(t *testing.T) {
+	db := testutil.OpenDB(t)
+	repo := infrastructure.NewRepository(db)
+	ctx := context.Background()
+
+	_, err := repo.GetLeaveRequest(ctx, testutil.OwnerID, 999999999)
+	if err == nil {
+		t.Error("expected error for non-existent leave request, got nil")
+	}
+}
+
+func TestListLeaveBalances_ZeroOwner_ReturnsEmpty(t *testing.T) {
+	db := testutil.OpenDB(t)
+	repo := infrastructure.NewRepository(db)
+	ctx := context.Background()
+
+	balances, err := repo.ListLeaveBalances(ctx, 0, 4101, 2026)
+	if err != nil {
+		t.Fatalf("ListLeaveBalances zero owner: %v", err)
+	}
+	if len(balances) != 0 {
+		t.Errorf("expected 0 balances for owner 0, got %d", len(balances))
+	}
+}
+
+func TestListLeaveCalendar_NoError(t *testing.T) {
+	db := testutil.OpenDB(t)
+	repo := infrastructure.NewRepository(db)
+	ctx := context.Background()
+
+	records, err := repo.ListLeaveCalendar(ctx, testutil.OwnerID, "2026-01-01", "2026-12-31")
+	if err != nil {
+		t.Fatalf("ListLeaveCalendar: %v", err)
+	}
+	_ = records
+}
+
+func TestListDistinctOwnerIDs_NoError(t *testing.T) {
+	db := testutil.OpenDB(t)
+	repo := infrastructure.NewRepository(db)
+	ctx := context.Background()
+
+	ids, err := repo.ListDistinctOwnerIDs(ctx)
+	if err != nil {
+		t.Fatalf("ListDistinctOwnerIDs: %v", err)
+	}
+	_ = ids
+}

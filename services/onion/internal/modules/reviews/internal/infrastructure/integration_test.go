@@ -295,3 +295,275 @@ func TestCreateMultipleReviews_CountIncreases(t *testing.T) {
 		t.Fatalf("expected list to grow: before=%d after=%d", len(before), len(after))
 	}
 }
+
+func TestCreateReview_RatingPersisted(t *testing.T) {
+	db := testutil.OpenDB(t)
+	repo := infrastructure.NewRepository(db)
+	ctx := context.Background()
+
+	id, err := repo.Create(ctx, testutil.OwnerID, domain.ReviewInput{
+		StaffID: fixtureStaffIDForReviews,
+		Rating:  4.0,
+		Status:  "draft",
+	})
+	if err != nil {
+		t.Fatalf("reviews.Create: %v", err)
+	}
+
+	reviews, err := repo.List(ctx, testutil.OwnerID)
+	if err != nil {
+		t.Fatalf("reviews.List: %v", err)
+	}
+	for _, r := range reviews {
+		if r.ID == id {
+			if r.Rating != 4.0 {
+				t.Errorf("Rating = %v, want 4.0", r.Rating)
+			}
+			return
+		}
+	}
+	t.Fatalf("review id=%d not found", id)
+}
+
+func TestCreateReview_PeriodPersisted(t *testing.T) {
+	db := testutil.OpenDB(t)
+	repo := infrastructure.NewRepository(db)
+	ctx := context.Background()
+
+	id, err := repo.Create(ctx, testutil.OwnerID, domain.ReviewInput{
+		StaffID: fixtureStaffIDForReviews,
+		Period:  "Q4-2026",
+		Status:  "draft",
+	})
+	if err != nil {
+		t.Fatalf("reviews.Create: %v", err)
+	}
+
+	reviews, err := repo.List(ctx, testutil.OwnerID)
+	if err != nil {
+		t.Fatalf("reviews.List: %v", err)
+	}
+	for _, r := range reviews {
+		if r.ID == id {
+			if r.Period != "Q4-2026" {
+				t.Errorf("Period = %q, want Q4-2026", r.Period)
+			}
+			return
+		}
+	}
+	t.Fatalf("review id=%d not found", id)
+}
+
+func TestCreateReview_NotesPersisted(t *testing.T) {
+	db := testutil.OpenDB(t)
+	repo := infrastructure.NewRepository(db)
+	ctx := context.Background()
+
+	id, err := repo.Create(ctx, testutil.OwnerID, domain.ReviewInput{
+		StaffID: fixtureStaffIDForReviews,
+		Notes:   "Integration test notes",
+		Status:  "draft",
+	})
+	if err != nil {
+		t.Fatalf("reviews.Create: %v", err)
+	}
+
+	reviews, err := repo.List(ctx, testutil.OwnerID)
+	if err != nil {
+		t.Fatalf("reviews.List: %v", err)
+	}
+	for _, r := range reviews {
+		if r.ID == id {
+			if r.Notes != "Integration test notes" {
+				t.Errorf("Notes = %q, want %q", r.Notes, "Integration test notes")
+			}
+			return
+		}
+	}
+	t.Fatalf("review id=%d not found", id)
+}
+
+func TestCreateReview_GoalsRatingPersisted(t *testing.T) {
+	db := testutil.OpenDB(t)
+	repo := infrastructure.NewRepository(db)
+	ctx := context.Background()
+
+	id, err := repo.Create(ctx, testutil.OwnerID, domain.ReviewInput{
+		StaffID:     fixtureStaffIDForReviews,
+		GoalsRating: 3.5,
+		Status:      "draft",
+	})
+	if err != nil {
+		t.Fatalf("reviews.Create: %v", err)
+	}
+
+	reviews, err := repo.List(ctx, testutil.OwnerID)
+	if err != nil {
+		t.Fatalf("reviews.List: %v", err)
+	}
+	for _, r := range reviews {
+		if r.ID == id {
+			if r.GoalsRating != 3.5 {
+				t.Errorf("GoalsRating = %v, want 3.5", r.GoalsRating)
+			}
+			return
+		}
+	}
+	t.Fatalf("review id=%d not found", id)
+}
+
+func TestCreateReview_ValuesRatingPersisted(t *testing.T) {
+	db := testutil.OpenDB(t)
+	repo := infrastructure.NewRepository(db)
+	ctx := context.Background()
+
+	id, err := repo.Create(ctx, testutil.OwnerID, domain.ReviewInput{
+		StaffID:      fixtureStaffIDForReviews,
+		ValuesRating: 5.0,
+		Status:       "draft",
+	})
+	if err != nil {
+		t.Fatalf("reviews.Create: %v", err)
+	}
+
+	reviews, err := repo.List(ctx, testutil.OwnerID)
+	if err != nil {
+		t.Fatalf("reviews.List: %v", err)
+	}
+	for _, r := range reviews {
+		if r.ID == id {
+			if r.ValuesRating != 5.0 {
+				t.Errorf("ValuesRating = %v, want 5.0", r.ValuesRating)
+			}
+			return
+		}
+	}
+	t.Fatalf("review id=%d not found", id)
+}
+
+func TestCreateReview_SkillsRatingPersisted(t *testing.T) {
+	db := testutil.OpenDB(t)
+	repo := infrastructure.NewRepository(db)
+	ctx := context.Background()
+
+	id, err := repo.Create(ctx, testutil.OwnerID, domain.ReviewInput{
+		StaffID:      fixtureStaffIDForReviews,
+		SkillsRating: 2.5,
+		Status:       "draft",
+	})
+	if err != nil {
+		t.Fatalf("reviews.Create: %v", err)
+	}
+
+	reviews, err := repo.List(ctx, testutil.OwnerID)
+	if err != nil {
+		t.Fatalf("reviews.List: %v", err)
+	}
+	for _, r := range reviews {
+		if r.ID == id {
+			if r.SkillsRating != 2.5 {
+				t.Errorf("SkillsRating = %v, want 2.5", r.SkillsRating)
+			}
+			return
+		}
+	}
+	t.Fatalf("review id=%d not found", id)
+}
+
+func TestCreateReview_StatusSubmittedPersisted(t *testing.T) {
+	db := testutil.OpenDB(t)
+	repo := infrastructure.NewRepository(db)
+	ctx := context.Background()
+
+	id, err := repo.Create(ctx, testutil.OwnerID, domain.ReviewInput{
+		StaffID: fixtureStaffIDForReviews,
+		Status:  "submitted",
+	})
+	if err != nil {
+		t.Fatalf("reviews.Create: %v", err)
+	}
+
+	reviews, err := repo.List(ctx, testutil.OwnerID)
+	if err != nil {
+		t.Fatalf("reviews.List: %v", err)
+	}
+	for _, r := range reviews {
+		if r.ID == id {
+			if r.Status != "submitted" {
+				t.Errorf("Status = %q, want submitted", r.Status)
+			}
+			return
+		}
+	}
+	t.Fatalf("review id=%d not found", id)
+}
+
+func TestListReviews_AllHaveStaffID(t *testing.T) {
+	db := testutil.OpenDB(t)
+	repo := infrastructure.NewRepository(db)
+	ctx := context.Background()
+
+	_, _ = repo.Create(ctx, testutil.OwnerID, domain.ReviewInput{
+		StaffID: fixtureStaffIDForReviews,
+		Status:  "draft",
+	})
+
+	reviews, err := repo.List(ctx, testutil.OwnerID)
+	if err != nil {
+		t.Fatalf("reviews.List: %v", err)
+	}
+	for _, r := range reviews {
+		if r.StaffID == 0 {
+			t.Errorf("review id=%d has zero StaffID", r.ID)
+		}
+	}
+}
+
+func TestListReviews_AllBelongToOwner(t *testing.T) {
+	db := testutil.OpenDB(t)
+	repo := infrastructure.NewRepository(db)
+	ctx := context.Background()
+
+	_, _ = repo.Create(ctx, testutil.OwnerID, domain.ReviewInput{
+		StaffID: fixtureStaffIDForReviews,
+		Status:  "draft",
+	})
+
+	reviews, err := repo.List(ctx, testutil.OwnerID)
+	if err != nil {
+		t.Fatalf("reviews.List: %v", err)
+	}
+	for _, r := range reviews {
+		if r.OwnerID != testutil.OwnerID {
+			t.Errorf("review id=%d has OwnerID=%d, want %d", r.ID, r.OwnerID, testutil.OwnerID)
+		}
+	}
+}
+
+func TestCreateReview_CreatedAtIsPopulated(t *testing.T) {
+	db := testutil.OpenDB(t)
+	repo := infrastructure.NewRepository(db)
+	ctx := context.Background()
+
+	id, err := repo.Create(ctx, testutil.OwnerID, domain.ReviewInput{
+		StaffID: fixtureStaffIDForReviews,
+		Status:  "draft",
+	})
+	if err != nil {
+		t.Fatalf("reviews.Create: %v", err)
+	}
+
+	reviews, err := repo.List(ctx, testutil.OwnerID)
+	if err != nil {
+		t.Fatalf("reviews.List: %v", err)
+	}
+	for _, r := range reviews {
+		if r.ID == id {
+			if r.CreatedAt.IsZero() {
+				t.Error("expected CreatedAt to be non-zero")
+			}
+			return
+		}
+	}
+	t.Fatalf("review id=%d not found", id)
+}

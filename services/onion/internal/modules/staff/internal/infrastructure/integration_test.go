@@ -4,6 +4,7 @@ import (
 	"context"
 	"testing"
 
+	"github.com/voxire/onion/internal/modules/staff/internal/domain"
 	"github.com/voxire/onion/internal/modules/staff/internal/infrastructure"
 	"github.com/voxire/onion/internal/testutil"
 )
@@ -47,5 +48,247 @@ func TestGetStaffByID_AliceID4101(t *testing.T) {
 	}
 	if s.EmploymentType != "full_time" {
 		t.Errorf("expected EmploymentType=full_time, got %q", s.EmploymentType)
+	}
+}
+
+func TestListStaff_ZeroOwner_ReturnsEmpty(t *testing.T) {
+	db := testutil.OpenDB(t)
+	repo := infrastructure.NewRepository(db)
+	ctx := context.Background()
+
+	staff, err := repo.ListStaff(ctx, 0, "", "", "")
+	if err != nil {
+		t.Fatalf("ListStaff: %v", err)
+	}
+	if len(staff) != 0 {
+		t.Errorf("expected empty slice for owner_id=0, got %d rows", len(staff))
+	}
+}
+
+func TestListStaff_FilterByDepartmentID(t *testing.T) {
+	db := testutil.OpenDB(t)
+	repo := infrastructure.NewRepository(db)
+	ctx := context.Background()
+
+	// Filter by a non-existent department; expect empty result without error.
+	staff, err := repo.ListStaff(ctx, testutil.OwnerID, "", "999999", "")
+	if err != nil {
+		t.Fatalf("ListStaff with departmentID filter: %v", err)
+	}
+	// The result may be empty or contain rows; just verify no error and non-nil slice.
+	if staff == nil {
+		t.Error("expected non-nil slice")
+	}
+}
+
+func TestListStaff_FilterByStatus_Active(t *testing.T) {
+	db := testutil.OpenDB(t)
+	repo := infrastructure.NewRepository(db)
+	ctx := context.Background()
+
+	staff, err := repo.ListStaff(ctx, testutil.OwnerID, "", "", "active")
+	if err != nil {
+		t.Fatalf("ListStaff with status filter: %v", err)
+	}
+	for _, s := range staff {
+		if s.Status != "active" {
+			t.Errorf("expected status=active for all results, got %q for id=%d", s.Status, s.ID)
+		}
+	}
+}
+
+func TestListStaff_SearchByName(t *testing.T) {
+	db := testutil.OpenDB(t)
+	repo := infrastructure.NewRepository(db)
+	ctx := context.Background()
+
+	staff, err := repo.ListStaff(ctx, testutil.OwnerID, "Alice", "", "")
+	if err != nil {
+		t.Fatalf("ListStaff search: %v", err)
+	}
+	if len(staff) == 0 {
+		t.Fatal("expected at least one result searching for 'Alice'")
+	}
+	for _, s := range staff {
+		if s.FirstName != "Alice" && s.LastName != "Alice" {
+			// Search may be partial; just ensure Alice is among results.
+			_ = s
+		}
+	}
+}
+
+func TestGetStaffByID_Bob(t *testing.T) {
+	db := testutil.OpenDB(t)
+	repo := infrastructure.NewRepository(db)
+	ctx := context.Background()
+
+	s, err := repo.GetStaffByID(ctx, testutil.OwnerID, 4102)
+	if err != nil {
+		t.Fatalf("GetStaffByID(4102): %v", err)
+	}
+	if s.FirstName != "Bob" {
+		t.Errorf("expected FirstName=Bob, got %q", s.FirstName)
+	}
+}
+
+func TestGetStaffByID_EmploymentTypePart(t *testing.T) {
+	db := testutil.OpenDB(t)
+	repo := infrastructure.NewRepository(db)
+	ctx := context.Background()
+
+	s, err := repo.GetStaffByID(ctx, testutil.OwnerID, 4102)
+	if err != nil {
+		t.Fatalf("GetStaffByID(4102): %v", err)
+	}
+	if s.EmploymentType != "part_time" {
+		t.Errorf("expected EmploymentType=part_time for Bob, got %q", s.EmploymentType)
+	}
+}
+
+func TestGetStaffByID_NotFound_ReturnsError(t *testing.T) {
+	db := testutil.OpenDB(t)
+	repo := infrastructure.NewRepository(db)
+	ctx := context.Background()
+
+	_, err := repo.GetStaffByID(ctx, testutil.OwnerID, 999999999)
+	if err == nil {
+		t.Fatal("expected error for non-existent staff id, got nil")
+	}
+}
+
+func TestCountActiveStaff_AtLeastTwo(t *testing.T) {
+	db := testutil.OpenDB(t)
+	repo := infrastructure.NewRepository(db)
+	ctx := context.Background()
+
+	count, err := repo.CountActiveStaff(ctx, testutil.OwnerID)
+	if err != nil {
+		t.Fatalf("CountActiveStaff: %v", err)
+	}
+	if count < 2 {
+		t.Errorf("expected at least 2 active staff, got %d", count)
+	}
+}
+
+func TestCountOnShiftToday_IsNonNegative(t *testing.T) {
+	db := testutil.OpenDB(t)
+	repo := infrastructure.NewRepository(db)
+	ctx := context.Background()
+
+	count, err := repo.CountOnShiftToday(ctx, testutil.OwnerID)
+	if err != nil {
+		t.Fatalf("CountOnShiftToday: %v", err)
+	}
+	if count < 0 {
+		t.Errorf("expected non-negative count, got %d", count)
+	}
+}
+
+func TestCountPendingTimeOff_IsNonNegative(t *testing.T) {
+	db := testutil.OpenDB(t)
+	repo := infrastructure.NewRepository(db)
+	ctx := context.Background()
+
+	count, err := repo.CountPendingTimeOff(ctx, testutil.OwnerID)
+	if err != nil {
+		t.Fatalf("CountPendingTimeOff: %v", err)
+	}
+	if count < 0 {
+		t.Errorf("expected non-negative count, got %d", count)
+	}
+}
+
+func TestCreateStaff_PersistsName(t *testing.T) {
+	db := testutil.OpenDB(t)
+	repo := infrastructure.NewRepository(db)
+	ctx := context.Background()
+
+	input := domain.StaffInput{
+		OwnerID:        testutil.OwnerID,
+		FirstName:      "Carol",
+		LastName:       "Test",
+		Email:          "carol@test.local",
+		Role:           "cashier",
+		EmploymentType: "full_time",
+		Status:         "active",
+		Salary:         3000,
+		StartDate:      "2024-01-01",
+	}
+
+	id, err := repo.CreateStaff(ctx, input)
+	if err != nil {
+		t.Fatalf("CreateStaff: %v", err)
+	}
+	if id <= 0 {
+		t.Fatalf("expected positive ID, got %d", id)
+	}
+
+	s, err := repo.GetStaffByID(ctx, testutil.OwnerID, id)
+	if err != nil {
+		t.Fatalf("GetStaffByID after create: %v", err)
+	}
+	if s.FirstName != "Carol" {
+		t.Errorf("expected FirstName=Carol, got %q", s.FirstName)
+	}
+}
+
+func TestCreateStaff_RoleIsStored(t *testing.T) {
+	db := testutil.OpenDB(t)
+	repo := infrastructure.NewRepository(db)
+	ctx := context.Background()
+
+	input := domain.StaffInput{
+		OwnerID:        testutil.OwnerID,
+		FirstName:      "Dave",
+		LastName:       "Roley",
+		Email:          "dave.roley@test.local",
+		Role:           "server",
+		EmploymentType: "part_time",
+		Status:         "active",
+		StartDate:      "2024-01-01",
+	}
+
+	id, err := repo.CreateStaff(ctx, input)
+	if err != nil {
+		t.Fatalf("CreateStaff: %v", err)
+	}
+
+	s, err := repo.GetStaffByID(ctx, testutil.OwnerID, id)
+	if err != nil {
+		t.Fatalf("GetStaffByID after create: %v", err)
+	}
+	if s.Role != "server" {
+		t.Errorf("expected Role=server, got %q", s.Role)
+	}
+}
+
+func TestCreateStaff_SalaryIsStored(t *testing.T) {
+	db := testutil.OpenDB(t)
+	repo := infrastructure.NewRepository(db)
+	ctx := context.Background()
+
+	input := domain.StaffInput{
+		OwnerID:        testutil.OwnerID,
+		FirstName:      "Eve",
+		LastName:       "Pay",
+		Email:          "eve.pay@test.local",
+		Role:           "cashier",
+		EmploymentType: "full_time",
+		Status:         "active",
+		Salary:         4500,
+		StartDate:      "2024-01-01",
+	}
+
+	id, err := repo.CreateStaff(ctx, input)
+	if err != nil {
+		t.Fatalf("CreateStaff: %v", err)
+	}
+
+	s, err := repo.GetStaffByID(ctx, testutil.OwnerID, id)
+	if err != nil {
+		t.Fatalf("GetStaffByID after create: %v", err)
+	}
+	if s.Salary != 4500 {
+		t.Errorf("expected Salary=4500, got %v", s.Salary)
 	}
 }

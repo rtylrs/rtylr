@@ -131,3 +131,267 @@ func TestGetCustomerByID_JamieBronze(t *testing.T) {
 		t.Errorf("GetCustomerByID(5301): expected email='jamie@test.local', got %q", c.Email)
 	}
 }
+
+func TestListCustomers_ZeroOwner_ReturnsEmpty(t *testing.T) {
+	db := testutil.OpenDB(t)
+	repo := infrastructure.NewRepository(db)
+	ctx := context.Background()
+
+	customers, total, err := repo.ListCustomers(ctx, domain.CustomerListFilter{
+		OwnerID:  0,
+		Page:     1,
+		PageSize: 50,
+	})
+	if err != nil {
+		t.Fatalf("ListCustomers(ownerID=0): unexpected error: %v", err)
+	}
+	if total != 0 || len(customers) != 0 {
+		t.Fatalf("expected 0 customers for ownerID=0, got total=%d len=%d", total, len(customers))
+	}
+}
+
+func TestListCustomers_SearchJamie_FindsCustomer(t *testing.T) {
+	db := testutil.OpenDB(t)
+	repo := infrastructure.NewRepository(db)
+	ctx := context.Background()
+
+	customers, _, err := repo.ListCustomers(ctx, domain.CustomerListFilter{
+		OwnerID:  testutil.OwnerID,
+		Search:   "Jamie",
+		Page:     1,
+		PageSize: 20,
+	})
+	if err != nil {
+		t.Fatalf("ListCustomers search 'Jamie': %v", err)
+	}
+	found := false
+	for _, c := range customers {
+		if c.ID == 5301 {
+			found = true
+		}
+	}
+	if !found {
+		t.Error("expected customer id=5301 (Jamie) in search results")
+	}
+}
+
+func TestListCustomers_SearchNonExistent_ReturnsEmpty(t *testing.T) {
+	db := testutil.OpenDB(t)
+	repo := infrastructure.NewRepository(db)
+	ctx := context.Background()
+
+	customers, total, err := repo.ListCustomers(ctx, domain.CustomerListFilter{
+		OwnerID:  testutil.OwnerID,
+		Search:   "xyzzy_no_such_customer_9999",
+		Page:     1,
+		PageSize: 20,
+	})
+	if err != nil {
+		t.Fatalf("ListCustomers search non-existent: %v", err)
+	}
+	if total != 0 || len(customers) != 0 {
+		t.Fatalf("expected 0 results for non-existent search, got total=%d len=%d", total, len(customers))
+	}
+}
+
+func TestListCustomers_Pagination_LimitWorks(t *testing.T) {
+	db := testutil.OpenDB(t)
+	repo := infrastructure.NewRepository(db)
+	ctx := context.Background()
+
+	customers, _, err := repo.ListCustomers(ctx, domain.CustomerListFilter{
+		OwnerID:  testutil.OwnerID,
+		Page:     1,
+		PageSize: 1,
+	})
+	if err != nil {
+		t.Fatalf("ListCustomers pageSize=1: %v", err)
+	}
+	if len(customers) > 1 {
+		t.Fatalf("expected at most 1 customer with pageSize=1, got %d", len(customers))
+	}
+}
+
+func TestGetCustomerByID_5301_IsJamie(t *testing.T) {
+	db := testutil.OpenDB(t)
+	repo := infrastructure.NewRepository(db)
+	ctx := context.Background()
+
+	c, err := repo.GetCustomerByID(ctx, testutil.OwnerID, 5301)
+	if err != nil {
+		t.Fatalf("GetCustomerByID(5301): %v", err)
+	}
+	if c.FirstName != "Jamie" {
+		t.Errorf("expected FirstName='Jamie', got %q", c.FirstName)
+	}
+}
+
+func TestGetCustomerByID_5302_IsAlex(t *testing.T) {
+	db := testutil.OpenDB(t)
+	repo := infrastructure.NewRepository(db)
+	ctx := context.Background()
+
+	c, err := repo.GetCustomerByID(ctx, testutil.OwnerID, 5302)
+	if err != nil {
+		t.Fatalf("GetCustomerByID(5302): %v", err)
+	}
+	if c.FirstName != "Alex" {
+		t.Errorf("expected FirstName='Alex', got %q", c.FirstName)
+	}
+}
+
+func TestGetCustomerByID_NotFound_Errors(t *testing.T) {
+	db := testutil.OpenDB(t)
+	repo := infrastructure.NewRepository(db)
+	ctx := context.Background()
+
+	_, err := repo.GetCustomerByID(ctx, testutil.OwnerID, 999999999)
+	if err == nil {
+		t.Fatal("expected error for non-existent customer, got nil")
+	}
+}
+
+func TestGetCustomerByID_WrongOwner_Errors(t *testing.T) {
+	db := testutil.OpenDB(t)
+	repo := infrastructure.NewRepository(db)
+	ctx := context.Background()
+
+	_, err := repo.GetCustomerByID(ctx, 999999, 5301)
+	if err == nil {
+		t.Fatal("expected error when fetching customer with wrong ownerID, got nil")
+	}
+}
+
+func TestCreateCustomer_PersistsAndReturnsID(t *testing.T) {
+	db := testutil.OpenDB(t)
+	repo := infrastructure.NewRepository(db)
+	ctx := context.Background()
+
+	id, err := repo.CreateCustomer(ctx, domain.CustomerInput{
+		OwnerID:   testutil.OwnerID,
+		FirstName: "Test",
+		LastName:  "Create",
+		Email:     "test.create@test.local",
+	})
+	if err != nil {
+		t.Fatalf("CreateCustomer: %v", err)
+	}
+	if id <= 0 {
+		t.Fatalf("expected positive ID, got %d", id)
+	}
+}
+
+func TestCreateCustomer_EmailIsStored(t *testing.T) {
+	db := testutil.OpenDB(t)
+	repo := infrastructure.NewRepository(db)
+	ctx := context.Background()
+
+	email := "email.stored@test.local"
+	id, err := repo.CreateCustomer(ctx, domain.CustomerInput{
+		OwnerID:   testutil.OwnerID,
+		FirstName: "Email",
+		LastName:  "Test",
+		Email:     email,
+	})
+	if err != nil {
+		t.Fatalf("CreateCustomer: %v", err)
+	}
+
+	c, err := repo.GetCustomerByID(ctx, testutil.OwnerID, id)
+	if err != nil {
+		t.Fatalf("GetCustomerByID after create: %v", err)
+	}
+	if c.Email != email {
+		t.Errorf("Email = %q, want %q", c.Email, email)
+	}
+}
+
+func TestUpdateCustomerLoyalty_IncreasesPoints(t *testing.T) {
+	db := testutil.OpenDB(t)
+	repo := infrastructure.NewRepository(db)
+	ctx := context.Background()
+
+	if err := repo.UpdateCustomerLoyalty(ctx, 5301, 999, "bronze"); err != nil {
+		t.Fatalf("UpdateCustomerLoyalty: %v", err)
+	}
+
+	c, err := repo.GetCustomerByID(ctx, testutil.OwnerID, 5301)
+	if err != nil {
+		t.Fatalf("GetCustomerByID after loyalty update: %v", err)
+	}
+	if c.LoyaltyPoints != 999 {
+		t.Errorf("expected LoyaltyPoints=999, got %d", c.LoyaltyPoints)
+	}
+
+	// Restore
+	_ = repo.UpdateCustomerLoyalty(ctx, 5301, 50, "bronze")
+}
+
+func TestUpdateCustomerLoyalty_ChangesToGold(t *testing.T) {
+	db := testutil.OpenDB(t)
+	repo := infrastructure.NewRepository(db)
+	ctx := context.Background()
+
+	if err := repo.UpdateCustomerLoyalty(ctx, 5301, 2000, "gold"); err != nil {
+		t.Fatalf("UpdateCustomerLoyalty: %v", err)
+	}
+
+	c, err := repo.GetCustomerByID(ctx, testutil.OwnerID, 5301)
+	if err != nil {
+		t.Fatalf("GetCustomerByID after tier update: %v", err)
+	}
+	if c.LoyaltyTier != "gold" {
+		t.Errorf("expected LoyaltyTier='gold', got %q", c.LoyaltyTier)
+	}
+
+	// Restore
+	_ = repo.UpdateCustomerLoyalty(ctx, 5301, 50, "bronze")
+}
+
+func TestRecordVisit_IncreasesVisitCount(t *testing.T) {
+	db := testutil.OpenDB(t)
+	repo := infrastructure.NewRepository(db)
+	ctx := context.Background()
+
+	before, err := repo.GetCustomerByID(ctx, testutil.OwnerID, 5301)
+	if err != nil {
+		t.Fatalf("GetCustomerByID before visit: %v", err)
+	}
+
+	if err := repo.RecordVisit(ctx, testutil.OwnerID, 5301, 25.00); err != nil {
+		t.Fatalf("RecordVisit: %v", err)
+	}
+
+	after, err := repo.GetCustomerByID(ctx, testutil.OwnerID, 5301)
+	if err != nil {
+		t.Fatalf("GetCustomerByID after visit: %v", err)
+	}
+	if after.VisitCount <= before.VisitCount {
+		t.Errorf("expected VisitCount to increase: before=%d after=%d", before.VisitCount, after.VisitCount)
+	}
+}
+
+func TestDeleteCustomer_RemovesRow(t *testing.T) {
+	db := testutil.OpenDB(t)
+	repo := infrastructure.NewRepository(db)
+	ctx := context.Background()
+
+	id, err := repo.CreateCustomer(ctx, domain.CustomerInput{
+		OwnerID:   testutil.OwnerID,
+		FirstName: "Delete",
+		LastName:  "Me",
+		Email:     "delete.me@test.local",
+	})
+	if err != nil {
+		t.Fatalf("CreateCustomer: %v", err)
+	}
+
+	if err := repo.DeleteCustomer(ctx, testutil.OwnerID, id); err != nil {
+		t.Fatalf("DeleteCustomer: %v", err)
+	}
+
+	_, err = repo.GetCustomerByID(ctx, testutil.OwnerID, id)
+	if err == nil {
+		t.Fatal("expected error after delete, got nil")
+	}
+}

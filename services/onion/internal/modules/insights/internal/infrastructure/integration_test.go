@@ -147,3 +147,183 @@ func TestGetDashboard_EndOfYear_NoError(t *testing.T) {
 	}
 	_ = snap
 }
+
+func TestGetTopCustomers_NoError(t *testing.T) {
+	db := testutil.OpenDB(t)
+	repo := infrastructure.NewRepository(db)
+	ctx := context.Background()
+
+	rows, err := repo.GetTopCustomers(ctx, testutil.OwnerID, 10)
+	if err != nil {
+		t.Fatalf("GetTopCustomers: %v", err)
+	}
+	if len(rows) > 10 {
+		t.Errorf("expected at most 10 rows, got %d", len(rows))
+	}
+}
+
+func TestGetTopCustomers_UnknownOwner_ReturnsEmpty(t *testing.T) {
+	db := testutil.OpenDB(t)
+	repo := infrastructure.NewRepository(db)
+	ctx := context.Background()
+
+	rows, err := repo.GetTopCustomers(ctx, 9999999, 10)
+	if err != nil {
+		t.Fatalf("GetTopCustomers unknown owner: %v", err)
+	}
+	if len(rows) != 0 {
+		t.Errorf("expected 0 rows for unknown owner, got %d", len(rows))
+	}
+}
+
+func TestGetInvoiceAging_NoError(t *testing.T) {
+	db := testutil.OpenDB(t)
+	repo := infrastructure.NewRepository(db)
+	ctx := context.Background()
+
+	rows, err := repo.GetInvoiceAging(ctx, testutil.OwnerID)
+	if err != nil {
+		t.Fatalf("GetInvoiceAging: %v", err)
+	}
+	_ = rows
+}
+
+func TestGetHeadcount_NoError(t *testing.T) {
+	db := testutil.OpenDB(t)
+	repo := infrastructure.NewRepository(db)
+	ctx := context.Background()
+
+	snap, err := repo.GetHeadcount(ctx, testutil.OwnerID)
+	if err != nil {
+		t.Fatalf("GetHeadcount: %v", err)
+	}
+	if snap.ActiveHeadcount < 0 {
+		t.Errorf("ActiveHeadcount is negative: %d", snap.ActiveHeadcount)
+	}
+}
+
+func TestGetLTVDistribution_NoError(t *testing.T) {
+	db := testutil.OpenDB(t)
+	repo := infrastructure.NewRepository(db)
+	ctx := context.Background()
+
+	rows, err := repo.GetLTVDistribution(ctx, testutil.OwnerID)
+	if err != nil {
+		t.Fatalf("GetLTVDistribution: %v", err)
+	}
+	_ = rows
+}
+
+func TestGetSlowMovers_NoError(t *testing.T) {
+	db := testutil.OpenDB(t)
+	repo := infrastructure.NewRepository(db)
+	ctx := context.Background()
+
+	rows, err := repo.GetSlowMovers(ctx, testutil.OwnerID, 90)
+	if err != nil {
+		t.Fatalf("GetSlowMovers: %v", err)
+	}
+	_ = rows
+}
+
+func TestListScheduledReports_NoError(t *testing.T) {
+	db := testutil.OpenDB(t)
+	repo := infrastructure.NewRepository(db)
+	ctx := context.Background()
+
+	rows, err := repo.ListScheduledReports(ctx, testutil.OwnerID)
+	if err != nil {
+		t.Fatalf("ListScheduledReports: %v", err)
+	}
+	_ = rows
+}
+
+func TestCreateAndDeleteScheduledReport_RoundTrip(t *testing.T) {
+	db := testutil.OpenDB(t)
+	repo := infrastructure.NewRepository(db)
+	ctx := context.Background()
+
+	id, err := repo.CreateScheduledReport(ctx, infrastructure.ScheduledReportRow{
+		OwnerID:    testutil.OwnerID,
+		TemplateID: "weekly_revenue",
+		Cadence:    "weekly",
+		Channel:    "email",
+		Recipient:  "test@example.com",
+		IsActive:   true,
+	})
+	if err != nil {
+		t.Fatalf("CreateScheduledReport: %v", err)
+	}
+	if id <= 0 {
+		t.Fatalf("expected positive ID, got %d", id)
+	}
+
+	if err := repo.DeleteScheduledReport(ctx, testutil.OwnerID, id); err != nil {
+		t.Fatalf("DeleteScheduledReport: %v", err)
+	}
+}
+
+func TestGetSettings_UnknownOwner_ReturnsNotFound(t *testing.T) {
+	db := testutil.OpenDB(t)
+	repo := infrastructure.NewRepository(db)
+	ctx := context.Background()
+
+	_, err := repo.GetSettings(ctx, 9999999)
+	if err == nil {
+		t.Fatal("expected ErrSettingsNotFound for unknown owner, got nil")
+	}
+}
+
+func TestUpsertSettings_RoundTrip(t *testing.T) {
+	db := testutil.OpenDB(t)
+	repo := infrastructure.NewRepository(db)
+	ctx := context.Background()
+
+	row := infrastructure.SettingsRow{
+		OwnerID:         testutil.OwnerID,
+		DefaultCurrency: "USD",
+		FiscalYearStart: "01-01",
+		Timezone:        "UTC",
+	}
+	if err := repo.UpsertSettings(ctx, row); err != nil {
+		t.Fatalf("UpsertSettings: %v", err)
+	}
+
+	got, err := repo.GetSettings(ctx, testutil.OwnerID)
+	if err != nil {
+		t.Fatalf("GetSettings after upsert: %v", err)
+	}
+	if got.DefaultCurrency != row.DefaultCurrency {
+		t.Errorf("DefaultCurrency = %q, want %q", got.DefaultCurrency, row.DefaultCurrency)
+	}
+	if got.Timezone != row.Timezone {
+		t.Errorf("Timezone = %q, want %q", got.Timezone, row.Timezone)
+	}
+}
+
+func TestGetProductKPIs_NoError(t *testing.T) {
+	db := testutil.OpenDB(t)
+	repo := infrastructure.NewRepository(db)
+	ctx := context.Background()
+
+	kpis, err := repo.GetProductKPIs(ctx, testutil.OwnerID)
+	if err != nil {
+		t.Fatalf("GetProductKPIs: %v", err)
+	}
+	_ = kpis
+}
+
+func TestGetRevenueComparison_NoError(t *testing.T) {
+	db := testutil.OpenDB(t)
+	repo := infrastructure.NewRepository(db)
+	ctx := context.Background()
+
+	from := time.Date(2026, 1, 1, 0, 0, 0, 0, time.UTC)
+	to := time.Date(2026, 12, 31, 23, 59, 59, 0, time.UTC)
+
+	row, err := repo.GetRevenueComparison(ctx, testutil.OwnerID, from, to)
+	if err != nil {
+		t.Fatalf("GetRevenueComparison: %v", err)
+	}
+	_ = row
+}

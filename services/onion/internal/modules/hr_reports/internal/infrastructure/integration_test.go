@@ -211,3 +211,189 @@ func TestGeneratePayrollSummaryReport_NarrowDateRange_NoError(t *testing.T) {
 	}
 	_ = rows
 }
+
+func TestGenerateHeadcountReport_ZeroOwner_ReturnsEmpty(t *testing.T) {
+	db := testutil.OpenDB(t)
+	repo := infrastructure.NewRepository(db)
+	ctx := context.Background()
+
+	rows, err := repo.GenerateHeadcountReport(ctx, 0, baseParams())
+	if err != nil {
+		t.Fatalf("GenerateHeadcountReport zero owner: %v", err)
+	}
+	if len(rows) != 0 {
+		t.Errorf("expected 0 rows for owner 0, got %d", len(rows))
+	}
+}
+
+func TestGenerateAttendanceSummaryReport_ZeroOwner_ReturnsEmpty(t *testing.T) {
+	db := testutil.OpenDB(t)
+	repo := infrastructure.NewRepository(db)
+	ctx := context.Background()
+
+	rows, err := repo.GenerateAttendanceSummaryReport(ctx, 0, baseParams())
+	if err != nil {
+		t.Fatalf("GenerateAttendanceSummaryReport zero owner: %v", err)
+	}
+	if len(rows) != 0 {
+		t.Errorf("expected 0 rows for owner 0, got %d", len(rows))
+	}
+}
+
+func TestGenerateLeaveSummaryReport_ZeroOwner_ReturnsEmpty(t *testing.T) {
+	db := testutil.OpenDB(t)
+	repo := infrastructure.NewRepository(db)
+	ctx := context.Background()
+
+	rows, err := repo.GenerateLeaveSummaryReport(ctx, 0, baseParams())
+	if err != nil {
+		t.Fatalf("GenerateLeaveSummaryReport zero owner: %v", err)
+	}
+	if len(rows) != 0 {
+		t.Errorf("expected 0 rows for owner 0, got %d", len(rows))
+	}
+}
+
+func TestGeneratePayrollSummaryReport_ZeroOwner_ReturnsEmpty(t *testing.T) {
+	db := testutil.OpenDB(t)
+	repo := infrastructure.NewRepository(db)
+	ctx := context.Background()
+
+	rows, err := repo.GeneratePayrollSummaryReport(ctx, 0, baseParams())
+	if err != nil {
+		t.Fatalf("GeneratePayrollSummaryReport zero owner: %v", err)
+	}
+	if len(rows) != 0 {
+		t.Errorf("expected 0 rows for owner 0, got %d", len(rows))
+	}
+}
+
+func TestGenerateOvertimeSummaryReport_ZeroOwner_ReturnsEmpty(t *testing.T) {
+	db := testutil.OpenDB(t)
+	repo := infrastructure.NewRepository(db)
+	ctx := context.Background()
+
+	rows, err := repo.GenerateOvertimeSummaryReport(ctx, 0, baseParams())
+	if err != nil {
+		t.Fatalf("GenerateOvertimeSummaryReport zero owner: %v", err)
+	}
+	if len(rows) != 0 {
+		t.Errorf("expected 0 rows for owner 0, got %d", len(rows))
+	}
+}
+
+func TestGenerateTimesheetSummaryReport_ZeroOwner_ReturnsEmpty(t *testing.T) {
+	db := testutil.OpenDB(t)
+	repo := infrastructure.NewRepository(db)
+	ctx := context.Background()
+
+	rows, err := repo.GenerateTimesheetSummaryReport(ctx, 0, baseParams())
+	if err != nil {
+		t.Fatalf("GenerateTimesheetSummaryReport zero owner: %v", err)
+	}
+	if len(rows) != 0 {
+		t.Errorf("expected 0 rows for owner 0, got %d", len(rows))
+	}
+}
+
+func TestGenerateLeaveSummaryReport_HasExpectedKeys(t *testing.T) {
+	db := testutil.OpenDB(t)
+	repo := infrastructure.NewRepository(db)
+	ctx := context.Background()
+
+	rows, err := repo.GenerateLeaveSummaryReport(ctx, testutil.OwnerID, baseParams())
+	if err != nil {
+		t.Fatalf("GenerateLeaveSummaryReport: %v", err)
+	}
+	want := []string{"employee_id", "employee_name", "leave_type", "used_days"}
+	for i, row := range rows {
+		for _, key := range want {
+			if _, ok := row[key]; !ok {
+				t.Errorf("row %d missing key %q", i, key)
+			}
+		}
+	}
+}
+
+func TestGenerateOvertimeSummaryReport_HasExpectedKeys(t *testing.T) {
+	db := testutil.OpenDB(t)
+	repo := infrastructure.NewRepository(db)
+	ctx := context.Background()
+
+	rows, err := repo.GenerateOvertimeSummaryReport(ctx, testutil.OwnerID, baseParams())
+	if err != nil {
+		t.Fatalf("GenerateOvertimeSummaryReport: %v", err)
+	}
+	want := []string{"employee_id", "employee_name", "approved_overtime_minutes"}
+	for i, row := range rows {
+		for _, key := range want {
+			if _, ok := row[key]; !ok {
+				t.Errorf("row %d missing key %q", i, key)
+			}
+		}
+	}
+}
+
+func TestGenerateHeadcountReport_WithEmployeeFilter_NoError(t *testing.T) {
+	db := testutil.OpenDB(t)
+	repo := infrastructure.NewRepository(db)
+	ctx := context.Background()
+
+	empID := int64(4101)
+	params := baseParams()
+	params.EmployeeID = &empID
+
+	rows, err := repo.GenerateHeadcountReport(ctx, testutil.OwnerID, params)
+	if err != nil {
+		t.Fatalf("GenerateHeadcountReport with employee filter: %v", err)
+	}
+	_ = rows
+}
+
+func TestGenerateLeaveSummaryReport_WithDepartmentFilter_NoError(t *testing.T) {
+	db := testutil.OpenDB(t)
+	repo := infrastructure.NewRepository(db)
+	ctx := context.Background()
+
+	deptID := int64(4001)
+	params := baseParams()
+	params.DepartmentID = &deptID
+
+	rows, err := repo.GenerateLeaveSummaryReport(ctx, testutil.OwnerID, params)
+	if err != nil {
+		t.Fatalf("GenerateLeaveSummaryReport with dept filter: %v", err)
+	}
+	_ = rows
+}
+
+func TestGenerateOvertimeSummaryReport_WithEmployeeFilter_NoError(t *testing.T) {
+	db := testutil.OpenDB(t)
+	repo := infrastructure.NewRepository(db)
+	ctx := context.Background()
+
+	empID := int64(4102)
+	params := baseParams()
+	params.EmployeeID = &empID
+
+	rows, err := repo.GenerateOvertimeSummaryReport(ctx, testutil.OwnerID, params)
+	if err != nil {
+		t.Fatalf("GenerateOvertimeSummaryReport with employee filter: %v", err)
+	}
+	_ = rows
+}
+
+func TestGenerateTimesheetSummaryReport_WithDepartmentFilter_NoError(t *testing.T) {
+	db := testutil.OpenDB(t)
+	repo := infrastructure.NewRepository(db)
+	ctx := context.Background()
+
+	deptID := int64(4001)
+	params := baseParams()
+	params.DepartmentID = &deptID
+
+	rows, err := repo.GenerateTimesheetSummaryReport(ctx, testutil.OwnerID, params)
+	if err != nil {
+		t.Fatalf("GenerateTimesheetSummaryReport with dept filter: %v", err)
+	}
+	_ = rows
+}

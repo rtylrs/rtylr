@@ -166,3 +166,177 @@ func TestVoxhire_AutoMigrate_TablesExist(t *testing.T) {
 		t.Fatalf("voxhire_talent_applications not accessible: %v", err)
 	}
 }
+
+func TestVoxhire_CreateCompanyLead_UniqueIDs(t *testing.T) {
+	db := testutil.OpenDB(t)
+	repo := infrastructure.NewRepository(db)
+	ctx := context.Background()
+
+	id1, err := repo.CreateCompanyLead(ctx, domain.CompanyLeadInput{
+		CompanyName: "Unique Corp A", ContactName: "A", WorkEmail: "a@example.com", Role: "Dev",
+	})
+	if err != nil {
+		t.Fatalf("CreateCompanyLead A: %v", err)
+	}
+	id2, err := repo.CreateCompanyLead(ctx, domain.CompanyLeadInput{
+		CompanyName: "Unique Corp B", ContactName: "B", WorkEmail: "b@example.com", Role: "Dev",
+	})
+	if err != nil {
+		t.Fatalf("CreateCompanyLead B: %v", err)
+	}
+	if id1 == id2 {
+		t.Errorf("expected distinct IDs, both got %d", id1)
+	}
+}
+
+func TestVoxhire_CreateCompanyLead_HeadcountVariants(t *testing.T) {
+	db := testutil.OpenDB(t)
+	repo := infrastructure.NewRepository(db)
+	ctx := context.Background()
+
+	for _, hc := range []string{"1-5", "5-10", "10-50", "50-200", "200+"} {
+		id, err := repo.CreateCompanyLead(ctx, domain.CompanyLeadInput{
+			CompanyName: "HC Corp", WorkEmail: "hc@example.com", Role: "PM", Headcount: hc,
+		})
+		if err != nil {
+			t.Fatalf("headcount=%s: %v", hc, err)
+		}
+		if id <= 0 {
+			t.Errorf("headcount=%s: expected positive ID", hc)
+		}
+	}
+}
+
+func TestVoxhire_CreateCompanyLead_TimelineVariants(t *testing.T) {
+	db := testutil.OpenDB(t)
+	repo := infrastructure.NewRepository(db)
+	ctx := context.Background()
+
+	for _, tl := range []string{"immediately", "1-3 months", "3-6 months", "6+ months"} {
+		id, err := repo.CreateCompanyLead(ctx, domain.CompanyLeadInput{
+			CompanyName: "TL Corp", WorkEmail: "tl@example.com", Role: "Eng", Timeline: tl,
+		})
+		if err != nil {
+			t.Fatalf("timeline=%s: %v", tl, err)
+		}
+		if id <= 0 {
+			t.Errorf("timeline=%s: expected positive ID", tl)
+		}
+	}
+}
+
+func TestVoxhire_CreateCompanyLead_EmptyMessage(t *testing.T) {
+	db := testutil.OpenDB(t)
+	repo := infrastructure.NewRepository(db)
+	id, err := repo.CreateCompanyLead(context.Background(), domain.CompanyLeadInput{
+		CompanyName: "No Message Corp", WorkEmail: "nm@example.com", Role: "Dev", Message: "",
+	})
+	if err != nil {
+		t.Fatalf("CreateCompanyLead empty message: %v", err)
+	}
+	if id <= 0 {
+		t.Errorf("expected positive ID, got %d", id)
+	}
+}
+
+func TestVoxhire_CreateTalentApplication_PhoneOptional(t *testing.T) {
+	db := testutil.OpenDB(t)
+	repo := infrastructure.NewRepository(db)
+	id, err := repo.CreateTalentApplication(context.Background(), domain.TalentApplicationInput{
+		FullName: "No Phone Person", Email: "nophone@example.com", Track: "engineering", Consent: true,
+	})
+	if err != nil {
+		t.Fatalf("CreateTalentApplication no phone: %v", err)
+	}
+	if id <= 0 {
+		t.Errorf("expected positive ID, got %d", id)
+	}
+}
+
+func TestVoxhire_CreateTalentApplication_CVKeyOptional(t *testing.T) {
+	db := testutil.OpenDB(t)
+	repo := infrastructure.NewRepository(db)
+	id, err := repo.CreateTalentApplication(context.Background(), domain.TalentApplicationInput{
+		FullName: "No CV Person", Email: "nocv@example.com", Track: "design", Consent: true, CVKey: "",
+	})
+	if err != nil {
+		t.Fatalf("CreateTalentApplication no cv: %v", err)
+	}
+	if id <= 0 {
+		t.Errorf("expected positive ID, got %d", id)
+	}
+}
+
+func TestVoxhire_CreateTalentApplication_UniqueIDs(t *testing.T) {
+	db := testutil.OpenDB(t)
+	repo := infrastructure.NewRepository(db)
+	ctx := context.Background()
+
+	id1, err := repo.CreateTalentApplication(ctx, domain.TalentApplicationInput{
+		FullName: "Person One", Email: "one@example.com", Track: "engineering",
+	})
+	if err != nil {
+		t.Fatalf("application 1: %v", err)
+	}
+	id2, err := repo.CreateTalentApplication(ctx, domain.TalentApplicationInput{
+		FullName: "Person Two", Email: "two@example.com", Track: "design",
+	})
+	if err != nil {
+		t.Fatalf("application 2: %v", err)
+	}
+	if id1 == id2 {
+		t.Errorf("expected distinct IDs, both got %d", id1)
+	}
+}
+
+func TestVoxhire_CreateTalentApplication_WithLinkedIn(t *testing.T) {
+	db := testutil.OpenDB(t)
+	repo := infrastructure.NewRepository(db)
+	id, err := repo.CreateTalentApplication(context.Background(), domain.TalentApplicationInput{
+		FullName:    "LinkedIn User",
+		Email:       "linkedin@example.com",
+		Track:       "sales",
+		LinkedinURL: "https://linkedin.com/in/testuser",
+		Consent:     true,
+	})
+	if err != nil {
+		t.Fatalf("CreateTalentApplication with linkedin: %v", err)
+	}
+	if id <= 0 {
+		t.Errorf("expected positive ID, got %d", id)
+	}
+}
+
+func TestVoxhire_CreateCompanyLead_LongMessage(t *testing.T) {
+	db := testutil.OpenDB(t)
+	repo := infrastructure.NewRepository(db)
+	longMsg := "We are a fast-growing startup in the fintech space and we need a full-stack engineering team that can integrate seamlessly with our existing codebase and deliver results in a tight timeline."
+	id, err := repo.CreateCompanyLead(context.Background(), domain.CompanyLeadInput{
+		CompanyName: "Long Msg Corp", WorkEmail: "longmsg@example.com", Role: "Dev", Message: longMsg,
+	})
+	if err != nil {
+		t.Fatalf("CreateCompanyLead long message: %v", err)
+	}
+	if id <= 0 {
+		t.Errorf("expected positive ID, got %d", id)
+	}
+}
+
+func TestVoxhire_CreateTalentApplication_ExperienceVariants(t *testing.T) {
+	db := testutil.OpenDB(t)
+	repo := infrastructure.NewRepository(db)
+	ctx := context.Background()
+
+	for _, exp := range []string{"0-2", "2-5", "5-10", "10+"} {
+		id, err := repo.CreateTalentApplication(ctx, domain.TalentApplicationInput{
+			FullName: "Exp User", Email: "exp@example.com", Track: "engineering",
+			YearsExperience: exp, Consent: true,
+		})
+		if err != nil {
+			t.Fatalf("experience=%s: %v", exp, err)
+		}
+		if id <= 0 {
+			t.Errorf("experience=%s: expected positive ID", exp)
+		}
+	}
+}

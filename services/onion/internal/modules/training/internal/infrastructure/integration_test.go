@@ -178,3 +178,199 @@ func TestTraining_Create_Multiple(t *testing.T) {
 		}
 	}
 }
+
+func TestTraining_Create_UniqueIDs(t *testing.T) {
+	db := testutil.OpenDB(t)
+	repo := infrastructure.NewRepository(db)
+	ctx := context.Background()
+
+	id1, err := repo.Create(ctx, testutil.OwnerID, domain.TrainingCourseInput{Name: "Unique A"})
+	if err != nil {
+		t.Fatalf("Create A: %v", err)
+	}
+	id2, err := repo.Create(ctx, testutil.OwnerID, domain.TrainingCourseInput{Name: "Unique B"})
+	if err != nil {
+		t.Fatalf("Create B: %v", err)
+	}
+	if id1 == id2 {
+		t.Errorf("expected distinct IDs, both got %d", id1)
+	}
+}
+
+func TestTraining_List_NamesAreNonEmpty(t *testing.T) {
+	db := testutil.OpenDB(t)
+	repo := infrastructure.NewRepository(db)
+	ctx := context.Background()
+
+	_, _ = repo.Create(ctx, testutil.OwnerID, domain.TrainingCourseInput{Name: "Named Course"})
+
+	items, err := repo.List(ctx, testutil.OwnerID)
+	if err != nil {
+		t.Fatalf("List: %v", err)
+	}
+	for _, c := range items {
+		if c.Name == "" {
+			t.Errorf("course id=%d has empty Name", c.ID)
+		}
+	}
+}
+
+func TestTraining_Create_DurationStoredCorrectly(t *testing.T) {
+	db := testutil.OpenDB(t)
+	repo := infrastructure.NewRepository(db)
+	ctx := context.Background()
+
+	const wantDuration = 6.5
+	id, err := repo.Create(ctx, testutil.OwnerID, domain.TrainingCourseInput{
+		Name: "Duration Test Course", DurationHours: wantDuration,
+	})
+	if err != nil {
+		t.Fatalf("Create: %v", err)
+	}
+
+	items, err := repo.List(ctx, testutil.OwnerID)
+	if err != nil {
+		t.Fatalf("List: %v", err)
+	}
+	for _, c := range items {
+		if c.ID == id {
+			if c.DurationHours != wantDuration {
+				t.Errorf("expected DurationHours=%.1f, got %.1f", wantDuration, c.DurationHours)
+			}
+			return
+		}
+	}
+	t.Errorf("created course id=%d not found", id)
+}
+
+func TestTraining_List_IDsArePositive(t *testing.T) {
+	db := testutil.OpenDB(t)
+	repo := infrastructure.NewRepository(db)
+	ctx := context.Background()
+
+	items, err := repo.List(ctx, testutil.OwnerID)
+	if err != nil {
+		t.Fatalf("List: %v", err)
+	}
+	for _, c := range items {
+		if c.ID <= 0 {
+			t.Errorf("expected positive ID, got %d", c.ID)
+		}
+	}
+}
+
+func TestTraining_Create_IsolatedByOwner(t *testing.T) {
+	db := testutil.OpenDB(t)
+	repo := infrastructure.NewRepository(db)
+	ctx := context.Background()
+
+	_, _ = repo.Create(ctx, testutil.OwnerID, domain.TrainingCourseInput{Name: "Owner A Course"})
+
+	otherItems, err := repo.List(ctx, 8888888)
+	if err != nil {
+		t.Fatalf("List other owner: %v", err)
+	}
+	for _, c := range otherItems {
+		if c.OwnerID == testutil.OwnerID {
+			t.Errorf("owner isolation violated: found course belonging to OwnerID=%d", c.OwnerID)
+		}
+	}
+}
+
+func TestTraining_Create_LongDescription(t *testing.T) {
+	db := testutil.OpenDB(t)
+	repo := infrastructure.NewRepository(db)
+	longDesc := "This is a comprehensive training course covering all aspects of workplace safety, " +
+		"including fire drills, evacuation procedures, first aid fundamentals, and OSHA compliance guidelines."
+	id, err := repo.Create(context.Background(), testutil.OwnerID, domain.TrainingCourseInput{
+		Name: "Long Desc Course", Description: longDesc, DurationHours: 8.0,
+	})
+	if err != nil {
+		t.Fatalf("Create long desc: %v", err)
+	}
+	if id <= 0 {
+		t.Errorf("expected positive ID, got %d", id)
+	}
+}
+
+func TestTraining_Create_HalfHourDuration(t *testing.T) {
+	db := testutil.OpenDB(t)
+	repo := infrastructure.NewRepository(db)
+	id, err := repo.Create(context.Background(), testutil.OwnerID, domain.TrainingCourseInput{
+		Name: "Quick Onboard", DurationHours: 0.5,
+	})
+	if err != nil {
+		t.Fatalf("Create half-hour: %v", err)
+	}
+	if id <= 0 {
+		t.Errorf("expected positive ID, got %d", id)
+	}
+}
+
+func TestTraining_Create_LongDuration(t *testing.T) {
+	db := testutil.OpenDB(t)
+	repo := infrastructure.NewRepository(db)
+	id, err := repo.Create(context.Background(), testutil.OwnerID, domain.TrainingCourseInput{
+		Name: "Intensive Bootcamp", DurationHours: 80.0, IsRequired: true,
+	})
+	if err != nil {
+		t.Fatalf("Create long duration: %v", err)
+	}
+	if id <= 0 {
+		t.Errorf("expected positive ID, got %d", id)
+	}
+}
+
+func TestTraining_List_OwnerIDFieldSet(t *testing.T) {
+	db := testutil.OpenDB(t)
+	repo := infrastructure.NewRepository(db)
+	ctx := context.Background()
+
+	_, _ = repo.Create(ctx, testutil.OwnerID, domain.TrainingCourseInput{Name: "Owner Field Test"})
+
+	items, err := repo.List(ctx, testutil.OwnerID)
+	if err != nil {
+		t.Fatalf("List: %v", err)
+	}
+	for _, c := range items {
+		if c.OwnerID != testutil.OwnerID {
+			t.Errorf("expected OwnerID=%d, got %d", testutil.OwnerID, c.OwnerID)
+		}
+	}
+}
+
+func TestTraining_Create_Idempotent_SameNameAllowed(t *testing.T) {
+	db := testutil.OpenDB(t)
+	repo := infrastructure.NewRepository(db)
+	ctx := context.Background()
+
+	id1, err := repo.Create(ctx, testutil.OwnerID, domain.TrainingCourseInput{Name: "Duplicate Name"})
+	if err != nil {
+		t.Fatalf("Create 1: %v", err)
+	}
+	id2, err := repo.Create(ctx, testutil.OwnerID, domain.TrainingCourseInput{Name: "Duplicate Name"})
+	if err != nil {
+		t.Fatalf("Create 2: %v", err)
+	}
+	if id1 == id2 {
+		t.Errorf("expected distinct IDs even for same name, both got %d", id1)
+	}
+}
+
+func TestTraining_List_Idempotent(t *testing.T) {
+	db := testutil.OpenDB(t)
+	repo := infrastructure.NewRepository(db)
+	ctx := context.Background()
+
+	a, err := repo.List(ctx, testutil.OwnerID)
+	if err != nil {
+		t.Fatalf("first: %v", err)
+	}
+	b, err := repo.List(ctx, testutil.OwnerID)
+	if err != nil {
+		t.Fatalf("second: %v", err)
+	}
+	if len(a) != len(b) {
+		t.Errorf("idempotency: got %d then %d", len(a), len(b))
+	}
+}
