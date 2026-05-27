@@ -2,6 +2,7 @@ package infrastructure_test
 
 import (
 	"context"
+	"errors"
 	"testing"
 
 	"github.com/voxire/onion/internal/modules/tax/internal/domain"
@@ -13,7 +14,7 @@ func TestTax_GetConfig_NoError(t *testing.T) {
 	db := testutil.OpenDB(t)
 	repo := infrastructure.NewRepository(db)
 	_, err := repo.GetConfig(context.Background(), testutil.OwnerID)
-	if err != nil && err != domain.ErrTaxConfigNotFound {
+	if err != nil && !errors.Is(err, domain.ErrTaxConfigNotFound) {
 		t.Fatalf("GetConfig: %v", err)
 	}
 }
@@ -83,7 +84,7 @@ func TestTax_GetConfig_UnknownOwner_NotFound(t *testing.T) {
 	if err == nil {
 		t.Fatal("expected ErrTaxConfigNotFound for unknown owner")
 	}
-	if err != domain.ErrTaxConfigNotFound {
+	if !errors.Is(err, domain.ErrTaxConfigNotFound) {
 		t.Errorf("expected ErrTaxConfigNotFound, got %v", err)
 	}
 }

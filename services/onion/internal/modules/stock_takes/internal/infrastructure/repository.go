@@ -267,38 +267,6 @@ func (r *Repository) UpdateStockTake(ctx context.Context, ownerID int64, input d
 	return nil
 }
 
-func stockTakeFromRow(row sqlc.ErpStockTake) domain.StockTake {
-	var s domain.StockTake
-	s.ID = row.ID
-	s.OwnerID = row.OwnerID
-
-	if row.WarehouseID.Valid {
-		s.WarehouseID = row.WarehouseID.Int64
-	}
-
-	if row.Status.Valid {
-		s.Status = domain.StockTakeStatus(row.Status.ErpStockTakesStatus)
-	}
-
-	if row.Notes.Valid {
-		s.Notes = row.Notes.String
-	}
-
-	if row.StartedAt.Valid {
-		s.StartedAt = row.StartedAt.Time.Format("2006-01-02T15:04:05Z07:00")
-	}
-
-	if row.CompletedAt.Valid {
-		s.CompletedAt = row.CompletedAt.Time.Format("2006-01-02T15:04:05Z07:00")
-	}
-
-	if row.CreatedAt.Valid {
-		s.CreatedAt = row.CreatedAt.Time
-	}
-
-	return s
-}
-
 func nullString(s string) sql.NullString {
 	return sql.NullString{String: s, Valid: s != ""}
 }

@@ -1,12 +1,13 @@
 package testutil
 
 import (
+	"context"
 	"database/sql"
 	"fmt"
 	"os"
 	"testing"
 
-	_ "github.com/go-sql-driver/mysql"
+	_ "github.com/go-sql-driver/mysql" // registers the mysql driver with database/sql
 )
 
 // OpenDB returns a *sql.DB connected to the test MySQL instance.
@@ -35,8 +36,8 @@ func OpenDB(t *testing.T) *sql.DB {
 		t.Fatalf("sql.Open: %v", err)
 	}
 
-	if err := db.Ping(); err != nil {
-		t.Fatalf("db.Ping: %v", err)
+	if err := db.PingContext(context.Background()); err != nil {
+		t.Fatalf("db.PingContext: %v", err)
 	}
 
 	t.Cleanup(func() { _ = db.Close() })

@@ -2,6 +2,7 @@ package infrastructure_test
 
 import (
 	"context"
+	"errors"
 	"testing"
 
 	"github.com/voxire/onion/internal/modules/hr_performance/internal/domain"
@@ -60,7 +61,7 @@ func TestGetReviewCycle_NotFoundReturnsError(t *testing.T) {
 	ctx := context.Background()
 
 	_, err := repo.GetReviewCycle(ctx, testutil.OwnerID, 999999999)
-	if err != domain.ErrReviewCycleNotFound {
+	if !errors.Is(err, domain.ErrReviewCycleNotFound) {
 		t.Errorf("expected ErrReviewCycleNotFound, got %v", err)
 	}
 }
@@ -118,7 +119,7 @@ func TestGetPerformanceReview_NotFoundReturnsError(t *testing.T) {
 	ctx := context.Background()
 
 	_, err := repo.GetPerformanceReview(ctx, testutil.OwnerID, 999999999)
-	if err != domain.ErrReviewNotFound {
+	if !errors.Is(err, domain.ErrReviewNotFound) {
 		t.Errorf("expected ErrReviewNotFound, got %v", err)
 	}
 }
@@ -206,7 +207,7 @@ func TestGetPerformanceConfig_NilOrNoError(t *testing.T) {
 	ctx := context.Background()
 
 	cfg, err := repo.GetPerformanceConfig(ctx, testutil.OwnerID)
-	if err != nil && err != domain.ErrPerformanceConfigNotFound {
+	if err != nil && !errors.Is(err, domain.ErrPerformanceConfigNotFound) {
 		t.Fatalf("GetPerformanceConfig unexpected error: %v", err)
 	}
 	if cfg != nil && cfg.OwnerID != testutil.OwnerID {

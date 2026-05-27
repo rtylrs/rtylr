@@ -27,7 +27,7 @@ type ApprovePayrollRunResponse struct {
 	Success bool `json:"success"`
 }
 
-func (h *ApprovePayrollRunHandler) Serve(ctx context.Context, req *ApprovePayrollRunRequest) (ApprovePayrollRunResponse, *errorModels.ServerError) {
+func (h *ApprovePayrollRunHandler) Serve(ctx context.Context, _ *ApprovePayrollRunRequest) (ApprovePayrollRunResponse, *errorModels.ServerError) {
 	device := authPkg.DeviceCtx(ctx)
 	if device.IsAnonymous || device.User == nil {
 		return ApprovePayrollRunResponse{}, errorModels.PermissionDeniedServerError()

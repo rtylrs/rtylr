@@ -2,6 +2,7 @@ package infrastructure_test
 
 import (
 	"context"
+	"errors"
 	"testing"
 
 	"github.com/voxire/onion/internal/modules/pos_combos/internal/domain"
@@ -236,7 +237,7 @@ func TestUpdateCombo_UnknownIDReturnsErrComboNotFound(t *testing.T) {
 
 	input := domain.ComboInput{Name: "ghost", Price: 1.00, Items: `[]`, IsActive: false}
 	err := repo.Update(ctx, testutil.OwnerID, 0, input)
-	if err != domain.ErrComboNotFound {
+	if !errors.Is(err, domain.ErrComboNotFound) {
 		t.Errorf("expected ErrComboNotFound, got %v", err)
 	}
 }
@@ -247,7 +248,7 @@ func TestDeleteCombo_UnknownIDReturnsErrComboNotFound(t *testing.T) {
 	ctx := context.Background()
 
 	err := repo.Delete(ctx, testutil.OwnerID, 0)
-	if err != domain.ErrComboNotFound {
+	if !errors.Is(err, domain.ErrComboNotFound) {
 		t.Errorf("expected ErrComboNotFound, got %v", err)
 	}
 }

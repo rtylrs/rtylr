@@ -409,6 +409,7 @@ linters:
             - github.com/getsentry/sentry-go
             - github.com/coder/websocket
             - github.com/axiomhq/axiom-go
+            - github.com/workos/workos-go
           # Packages that are not allowed
           deny:
             - pkg: "github.com/sirupsen/logrus"
@@ -450,6 +451,7 @@ linters:
           - github.com/getsentry/sentry-go
           - github.com/coder/websocket
           - github.com/axiomhq/axiom-go
+          - github.com/workos/workos-go
 
         # List of allowed module domains
         domains:
@@ -473,6 +475,7 @@ linters:
           - github.com/getsentry
           - github.com/coder
           - github.com/axiomhq
+          - github.com/workos
 
       blocked:
         # List of blocked modules

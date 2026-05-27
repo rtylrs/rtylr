@@ -567,20 +567,20 @@ func initializeModules(ctx context.Context) *apiModules {
 		Timesheets:            timesheets.NewModule(ctx, dbclient.Pool()),
 		Training:              training.NewModule(ctx, dbclient.Pool()),
 		User: func() *user.Module {
-				m := user.NewModule(ctx, dbclient.Pool(), platformConfig.GlobalConfig.GoogleOAuthClientID)
-				cfg := platformConfig.GlobalConfig
-				if cfg.WorkOSClientID != "" {
-					m.WithWorkOS(cfg.WorkOSAPIKey, cfg.WorkOSClientID, cfg.WorkOSRedirectURI)
-				}
-				return m
-			}(),
-		Variants:              variants.NewModule(ctx, dbclient.Pool()),
-		Views:                 views.NewModule(ctx, dbclient.Pool()),
-		Voxhire:               voxhire.NewModule(ctx, dbclient.Pool()),
-		Warehouses:            warehouses.NewModule(ctx, dbclient.Pool()),
-		Webhooks:              webhooks.NewModule(ctx, dbclient.Pool()),
-		WebsiteLead:           websitelead.NewModule(ctx, dbclient.Pool()),
-		Workspaces:            workspaces.NewModule(ctx, dbclient.Pool()),
+			m := user.NewModule(ctx, dbclient.Pool(), platformConfig.GlobalConfig.GoogleOAuthClientID)
+			cfg := platformConfig.GlobalConfig
+			if cfg.WorkOSClientID != "" {
+				m.WithWorkOS(cfg.WorkOSAPIKey, cfg.WorkOSClientID, cfg.WorkOSRedirectURI)
+			}
+			return m
+		}(),
+		Variants:    variants.NewModule(ctx, dbclient.Pool()),
+		Views:       views.NewModule(ctx, dbclient.Pool()),
+		Voxhire:     voxhire.NewModule(ctx, dbclient.Pool()),
+		Warehouses:  warehouses.NewModule(ctx, dbclient.Pool()),
+		Webhooks:    webhooks.NewModule(ctx, dbclient.Pool()),
+		WebsiteLead: websitelead.NewModule(ctx, dbclient.Pool()),
+		Workspaces:  workspaces.NewModule(ctx, dbclient.Pool()),
 	}
 }
 

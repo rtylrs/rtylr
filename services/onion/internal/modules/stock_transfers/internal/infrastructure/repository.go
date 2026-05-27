@@ -189,32 +189,6 @@ func (r *Repository) UpdateStockTransferStatus(ctx context.Context, ownerID, id 
 	return nil
 }
 
-func stockTransferFromRow(row sqlc.ErpStockTransfer) domain.StockTransfer {
-	var t domain.StockTransfer
-	t.ID = row.ID
-	t.OwnerID = row.OwnerID
-	t.FromWarehouseID = row.FromWarehouseID
-	t.ToWarehouseID = row.ToWarehouseID
-
-	if row.Status.Valid {
-		t.Status = domain.StockTransferStatus(row.Status.ErpStockTransfersStatus)
-	}
-
-	if row.Notes.Valid {
-		t.Notes = row.Notes.String
-	}
-
-	if row.CreatedAt.Valid {
-		t.CreatedAt = row.CreatedAt.Time
-	}
-
-	if row.UpdatedAt.Valid {
-		t.UpdatedAt = row.UpdatedAt.Time
-	}
-
-	return t
-}
-
 func nullString(s string) sql.NullString {
 	return sql.NullString{String: s, Valid: s != ""}
 }

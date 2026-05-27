@@ -2,6 +2,7 @@ package application
 
 import (
 	"context"
+	"errors"
 	"testing"
 )
 
@@ -67,7 +68,7 @@ func TestGenerateTextStream_NilClient_ReturnsError(t *testing.T) {
 	if err == nil {
 		t.Fatal("expected error from nil client")
 	}
-	if err != ErrClientNotInitialized {
+	if !errors.Is(err, ErrClientNotInitialized) {
 		t.Errorf("expected ErrClientNotInitialized, got %v", err)
 	}
 }
@@ -80,7 +81,7 @@ func TestGenerateTextStream_NilClient_ReturnsNilChannel(t *testing.T) {
 	}
 }
 
-func TestIsAvailable_ReturnsBool(t *testing.T) {
+func TestIsAvailable_ReturnsBool(_ *testing.T) {
 	s := newNilClientService()
 	var _ bool = s.IsAvailable()
 }
@@ -97,12 +98,12 @@ func TestErrClientNotInitialized_HasMessage(t *testing.T) {
 	}
 }
 
-func TestGetProviderDetails_NilClient_ContextDoesNotPanic(t *testing.T) {
+func TestGetProviderDetails_NilClient_ContextDoesNotPanic(_ *testing.T) {
 	s := newNilClientService()
 	s.GetProviderDetails(context.Background())
 }
 
-func TestGetProviderDetails_NilClient_ProvidersCanBeIterated(t *testing.T) {
+func TestGetProviderDetails_NilClient_ProvidersCanBeIterated(_ *testing.T) {
 	s := newNilClientService()
 	got := s.GetProviderDetails(context.Background())
 	for k, v := range got.Providers {
@@ -111,7 +112,7 @@ func TestGetProviderDetails_NilClient_ProvidersCanBeIterated(t *testing.T) {
 	}
 }
 
-func TestGetProviderStatus_NilClient_CanBeIteratedWithoutPanic(t *testing.T) {
+func TestGetProviderStatus_NilClient_CanBeIteratedWithoutPanic(_ *testing.T) {
 	s := newNilClientService()
 	m := s.GetProviderStatus()
 	for k, v := range m {
@@ -120,7 +121,7 @@ func TestGetProviderStatus_NilClient_CanBeIteratedWithoutPanic(t *testing.T) {
 	}
 }
 
-func TestGetPrimaryProvider_NilClient_EmptyStringIsNotNil(t *testing.T) {
+func TestGetPrimaryProvider_NilClient_EmptyStringIsNotNil(_ *testing.T) {
 	s := newNilClientService()
 	result := s.GetPrimaryProvider()
 	_ = len(result) // should not panic
@@ -129,7 +130,7 @@ func TestGetPrimaryProvider_NilClient_EmptyStringIsNotNil(t *testing.T) {
 func TestGenerateTextStream_EmptyPrompt_NilClient(t *testing.T) {
 	s := newNilClientService()
 	_, err := s.GenerateTextStream(context.Background(), "")
-	if err != ErrClientNotInitialized {
+	if !errors.Is(err, ErrClientNotInitialized) {
 		t.Errorf("expected ErrClientNotInitialized for empty prompt with nil client, got %v", err)
 	}
 }

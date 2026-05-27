@@ -115,7 +115,6 @@ func TestCreate_ForwardsOwnerID(t *testing.T) {
 	if err != nil || id != 1 {
 		t.Errorf("unexpected id=%d err=%v", id, err)
 	}
-
 }
 
 func TestList_PreservesOrder(t *testing.T) {

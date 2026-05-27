@@ -27,7 +27,7 @@ type ExportPayrollResponse struct {
 	Success bool `json:"success"`
 }
 
-func (h *ExportPayrollHandler) Serve(ctx context.Context, req *ExportPayrollRequest) (ExportPayrollResponse, *errorModels.ServerError) {
+func (h *ExportPayrollHandler) Serve(ctx context.Context, _ *ExportPayrollRequest) (ExportPayrollResponse, *errorModels.ServerError) {
 	device := authPkg.DeviceCtx(ctx)
 	if device.IsAnonymous || device.User == nil {
 		return ExportPayrollResponse{}, errorModels.PermissionDeniedServerError()

@@ -10,17 +10,17 @@ import (
 )
 
 type mockDashboardRepo struct {
-	todayCount    int
-	upcomingCount int
-	totalMonth    int
+	todayCount     int
+	upcomingCount  int
+	totalMonth     int
 	cancelledMonth int
-	revenue       float64
-	err           error
+	revenue        float64
+	err            error
 	// per-method override
-	errToday     error
-	errUpcoming  error
-	errMonth     error
-	errRevenue   error
+	errToday    error
+	errUpcoming error
+	errMonth    error
+	errRevenue  error
 }
 
 func (m *mockDashboardRepo) GetTodayCount(_ context.Context, _ int64, _, _ time.Time) (int, error) {

@@ -163,11 +163,9 @@ func TestGetEmployeePINHash_NotSetReturnsError(t *testing.T) {
 	ctx := context.Background()
 
 	// Employee 4101 exists but PIN may not be set.
+	// Both are acceptable outcomes: ErrPINNotSet or empty hash. The important thing is no panic.
 	hash, err := repo.GetEmployeePINHash(ctx, testutil.OwnerID, 4101)
-	if err == nil && hash == "" {
-		// Both are acceptable outcomes: ErrPINNotSet or empty hash.
-	}
-	// The important thing is it does not panic or return a DB error.
+	_ = err
 	_ = hash
 }
 

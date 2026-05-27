@@ -27,9 +27,11 @@ type mockStoreProdRepo struct {
 func (m *mockStoreProdRepo) List(_ context.Context, _ int64) ([]domain.StoreProduct, error) {
 	return m.list, m.listErr
 }
+
 func (m *mockStoreProdRepo) Create(_ context.Context, _ int64, _ domain.StoreProductInput) (int64, error) {
 	return m.createID, m.createErr
 }
+
 func (m *mockStoreProdRepo) Update(_ context.Context, _, _ int64, _ domain.StoreProductInput) error {
 	return m.updateErr
 }
@@ -40,12 +42,15 @@ type storeProdTestService struct{ repo storeProdRepo }
 func (s *storeProdTestService) List(ctx context.Context, ownerID int64) ([]domain.StoreProduct, error) {
 	return s.repo.List(ctx, ownerID)
 }
+
 func (s *storeProdTestService) Create(ctx context.Context, ownerID int64, input domain.StoreProductInput) (int64, error) {
 	return s.repo.Create(ctx, ownerID, input)
 }
+
 func (s *storeProdTestService) Update(ctx context.Context, ownerID, id int64, input domain.StoreProductInput) error {
 	return s.repo.Update(ctx, ownerID, id, input)
 }
+
 func (s *storeProdTestService) Delete(ctx context.Context, ownerID, id int64) error {
 	return s.repo.Delete(ctx, ownerID, id)
 }

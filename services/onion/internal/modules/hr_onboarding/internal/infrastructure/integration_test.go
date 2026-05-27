@@ -2,6 +2,7 @@ package infrastructure_test
 
 import (
 	"context"
+	"errors"
 	"testing"
 	"time"
 
@@ -75,7 +76,7 @@ func TestGetTemplate_NotFoundReturnsError(t *testing.T) {
 	ctx := context.Background()
 
 	_, err := repo.GetTemplate(ctx, testutil.OwnerID, 999999999)
-	if err != domain.ErrTemplateNotFound {
+	if !errors.Is(err, domain.ErrTemplateNotFound) {
 		t.Errorf("expected ErrTemplateNotFound, got %v", err)
 	}
 }

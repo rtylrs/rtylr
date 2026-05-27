@@ -36,8 +36,8 @@ type AppConfig struct {
 	GoogleOAuthClientID string
 
 	// WorkOS
-	WorkOSAPIKey     string
-	WorkOSClientID   string
+	WorkOSAPIKey      string
+	WorkOSClientID    string
 	WorkOSRedirectURI string
 
 	// DB Connection Pool configuration

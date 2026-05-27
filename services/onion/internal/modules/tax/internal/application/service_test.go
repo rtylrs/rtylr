@@ -37,9 +37,9 @@ func TestGetConfig_Delegates(t *testing.T) {
 
 func TestGetConfig_ReturnsConfig(t *testing.T) {
 	cfg := domain.TaxConfig{
-		OwnerID: 5,
-		TaxName: "VAT",
-		TaxRate: 0.20,
+		OwnerID:  5,
+		TaxName:  "VAT",
+		TaxRate:  0.20,
 		IsActive: true,
 	}
 	s := &Service{repo: &mockRepo{cfg: cfg}}

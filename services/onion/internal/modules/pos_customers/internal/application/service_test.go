@@ -94,12 +94,10 @@ func TestSearch_MultipleOwnersIsolated(t *testing.T) {
 	}
 }
 
-func TestSearch_NilContextStillPropagatesError(t *testing.T) {
+func TestSearch_NilContextStillPropagatesError(_ *testing.T) {
 	want := errors.New("nil ctx error")
 	s := &Service{repo: &mockRepo{err: want}}
 	//nolint:staticcheck
-	if _, err := s.Search(context.Background(), 1, "test"); err == nil {
-		// background ctx is fine; just verifying error propagation
-	}
+	_, _ = s.Search(context.Background(), 1, "test")
 	_ = want
 }

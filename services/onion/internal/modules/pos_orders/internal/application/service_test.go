@@ -73,7 +73,7 @@ func TestCreateTable_RejectsEmptyName(t *testing.T) {
 func TestCreateTable_DefaultsCapacityToFour(t *testing.T) {
 	// Service sets default capacity = 4 when <= 0.
 	// We can verify the guard runs without hitting a repo.
-	input := domain.TableInput{Name: "T1", Capacity: 0}
+	input := domain.TableInput{Name: "T1"}
 	if input.Name == "" {
 		t.Error("table name should be set")
 	}

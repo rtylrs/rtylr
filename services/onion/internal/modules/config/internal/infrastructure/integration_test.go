@@ -2,12 +2,12 @@ package infrastructure_test
 
 import (
 	"context"
+	"strconv"
 	"testing"
 
 	"github.com/voxire/onion/internal/modules/config/internal/domain"
 	"github.com/voxire/onion/internal/modules/config/internal/infrastructure"
 	"github.com/voxire/onion/internal/testutil"
-	"strconv"
 )
 
 func TestGetConfig_ReturnsSiteNameTestSite(t *testing.T) {

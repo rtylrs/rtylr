@@ -54,28 +54,28 @@ func TestAdjustStock_Validate_AllZeroFails(t *testing.T) {
 // ─── Request struct field checks ─────────────────────────────────────────────
 
 func TestReceiveStockRequest_PositiveQuantity(t *testing.T) {
-	req := &ReceiveStockRequest{BranchID: 1, ProductID: 2, Quantity: 100}
+	req := &ReceiveStockRequest{Quantity: 100}
 	if req.Quantity <= 0 {
 		t.Error("expected positive quantity")
 	}
 }
 
 func TestReceiveStockRequest_ZeroQuantity(t *testing.T) {
-	req := &ReceiveStockRequest{BranchID: 1, ProductID: 2, Quantity: 0}
+	req := &ReceiveStockRequest{Quantity: 0}
 	if req.Quantity > 0 {
 		t.Error("zero quantity should fail the handler guard")
 	}
 }
 
 func TestWasteStockRequest_PositiveQuantity(t *testing.T) {
-	req := &WasteStockRequest{BranchID: 1, ProductID: 2, Quantity: 5}
+	req := &WasteStockRequest{Quantity: 5}
 	if req.Quantity <= 0 {
 		t.Error("expected positive quantity")
 	}
 }
 
 func TestTransferStockRequest_RequiresBothBranches(t *testing.T) {
-	req := &TransferStockRequest{FromBranchID: 1, ToBranchID: 2, ProductID: 3, Quantity: 10}
+	req := &TransferStockRequest{FromBranchID: 1, ToBranchID: 2}
 	if req.FromBranchID == 0 || req.ToBranchID == 0 {
 		t.Error("both branches should be set")
 	}
@@ -83,7 +83,7 @@ func TestTransferStockRequest_RequiresBothBranches(t *testing.T) {
 
 func TestTransferStockRequest_SameBranchAllowed(t *testing.T) {
 	// The data layer may reject same-branch transfers, but the request struct allows it.
-	req := &TransferStockRequest{FromBranchID: 1, ToBranchID: 1, ProductID: 2, Quantity: 3}
+	req := &TransferStockRequest{FromBranchID: 1, ToBranchID: 1}
 	if req.FromBranchID != req.ToBranchID {
 		t.Error("same branch should be representable")
 	}

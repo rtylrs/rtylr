@@ -9,24 +9,27 @@ import (
 )
 
 type mockRepo struct {
-	requests    []domain.OvertimeRequestRecord
-	request     *domain.OvertimeRequestRecord
-	totalReqs   int64
-	config      *domain.OvertimeConfigRecord
-	ownerIDs    []int64
-	flagged     []domain.OvertimeRequestRecord
-	err         error
+	requests  []domain.OvertimeRequestRecord
+	request   *domain.OvertimeRequestRecord
+	totalReqs int64
+	config    *domain.OvertimeConfigRecord
+	ownerIDs  []int64
+	flagged   []domain.OvertimeRequestRecord
+	err       error
 }
 
 func (m *mockRepo) ListOvertimeRequests(_ context.Context, _ int64, _ domain.ListOvertimeRequestsParams) ([]domain.OvertimeRequestRecord, int64, error) {
 	return m.requests, m.totalReqs, m.err
 }
+
 func (m *mockRepo) GetOvertimeRequest(_ context.Context, _, _ int64) (*domain.OvertimeRequestRecord, error) {
 	return m.request, m.err
 }
+
 func (m *mockRepo) CreateOvertimeRequest(_ context.Context, _ int64, req domain.OvertimeRequestRecord) (*domain.OvertimeRequestRecord, error) {
 	return &req, m.err
 }
+
 func (m *mockRepo) ApproveOvertimeRequest(_ context.Context, _, _, _ int64, _ float64) error {
 	return m.err
 }
@@ -35,15 +38,19 @@ func (m *mockRepo) RejectOvertimeRequest(_ context.Context, _, _ int64) error   
 func (m *mockRepo) CreateFlaggedOvertimeRequest(_ context.Context, _, _ int64, _ string, _ int32) error {
 	return m.err
 }
+
 func (m *mockRepo) ListFlaggedForDate(_ context.Context, _ int64, _ string) ([]domain.OvertimeRequestRecord, error) {
 	return m.flagged, m.err
 }
+
 func (m *mockRepo) GetOvertimeConfig(_ context.Context, _ int64) (*domain.OvertimeConfigRecord, error) {
 	return m.config, m.err
 }
+
 func (m *mockRepo) UpsertOvertimeConfig(_ context.Context, _ int64, _ domain.OvertimeConfigRecord) error {
 	return m.err
 }
+
 func (m *mockRepo) ListAllConfiguredOwnerIDs(_ context.Context) ([]int64, error) {
 	return m.ownerIDs, m.err
 }

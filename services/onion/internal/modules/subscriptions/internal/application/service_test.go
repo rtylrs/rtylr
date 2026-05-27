@@ -13,67 +13,80 @@ import (
 // ─── mock repository ──────────────────────────────────────────────────────────
 
 type mockRepo struct {
-	plans       []domain.Plan
-	plan        *domain.Plan
-	subscription *domain.Subscription
-	ownerApps   []string
-	billingHistory []domain.BillingHistoryMonth
-	activePeriod *domain.SeatPeriod
-	ownerID     int64
-	listPlansErr   error
-	planBySlugErr  error
-	getSubErr      error
-	upsertSubErr   error
-	getAppsErr     error
-	getPeriodsErr  error
+	plans              []domain.Plan
+	plan               *domain.Plan
+	subscription       *domain.Subscription
+	ownerApps          []string
+	billingHistory     []domain.BillingHistoryMonth
+	activePeriod       *domain.SeatPeriod
+	ownerID            int64
+	listPlansErr       error
+	planBySlugErr      error
+	getSubErr          error
+	upsertSubErr       error
+	getAppsErr         error
+	getPeriodsErr      error
 	getActivePeriodErr error
-	closePeriodErr error
-	openPeriodErr  error
-	updateSeatErr  error
-	billingHistErr error
-	paddleUpdateErr error
-	paddleOwnerErr  error
+	closePeriodErr     error
+	openPeriodErr      error
+	updateSeatErr      error
+	billingHistErr     error
+	paddleUpdateErr    error
+	paddleOwnerErr     error
 }
 
 func (m *mockRepo) ListPlans(_ context.Context) ([]domain.Plan, error) {
 	return m.plans, m.listPlansErr
 }
+
 func (m *mockRepo) GetPlanBySlug(_ context.Context, _ string) (*domain.Plan, error) {
 	return m.plan, m.planBySlugErr
 }
+
 func (m *mockRepo) GetPlanByID(_ context.Context, _ int64) (*domain.Plan, error) {
 	return m.plan, m.planBySlugErr
 }
+
 func (m *mockRepo) GetSubscription(_ context.Context, _ int64) (*domain.Subscription, error) {
 	return m.subscription, m.getSubErr
 }
+
 func (m *mockRepo) UpsertSubscription(_ context.Context, _, _ int64, _ int) error {
 	return m.upsertSubErr
 }
+
 func (m *mockRepo) GetOwnerApps(_ context.Context, _ int64) ([]string, error) {
 	return m.ownerApps, m.getAppsErr
 }
+
 func (m *mockRepo) GetPeriodsForMonth(_ context.Context, _ int64, _ time.Time) ([]domain.SeatPeriod, error) {
 	return nil, m.getPeriodsErr
 }
+
 func (m *mockRepo) GetActivePeriod(_ context.Context, _ int64) (*domain.SeatPeriod, error) {
 	return m.activePeriod, m.getActivePeriodErr
 }
+
 func (m *mockRepo) CloseActivePeriod(_ context.Context, _ int64, _ time.Time) error {
 	return m.closePeriodErr
 }
+
 func (m *mockRepo) OpenPeriod(_ context.Context, _, _ int64, _, _ int, _, _ time.Time) error {
 	return m.openPeriodErr
 }
+
 func (m *mockRepo) UpdateSeatCount(_ context.Context, _ int64, _ int) error {
 	return m.updateSeatErr
 }
+
 func (m *mockRepo) GetBillingHistory(_ context.Context, _ int64, _ int) ([]domain.BillingHistoryMonth, error) {
 	return m.billingHistory, m.billingHistErr
 }
+
 func (m *mockRepo) UpdatePaddleSubscription(_ context.Context, _ int64, _, _, _ string) error {
 	return m.paddleUpdateErr
 }
+
 func (m *mockRepo) GetOwnerIDByPaddleSubscription(_ context.Context, _ string) (int64, error) {
 	return m.ownerID, m.paddleOwnerErr
 }

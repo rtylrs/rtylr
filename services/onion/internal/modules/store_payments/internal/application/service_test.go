@@ -25,9 +25,11 @@ type mockPayRepo struct {
 func (m *mockPayRepo) List(_ context.Context, _ int64) ([]domain.PaymentMethod, error) {
 	return m.list, m.listErr
 }
+
 func (m *mockPayRepo) Create(_ context.Context, _ int64, _ domain.PaymentMethodInput) (int64, error) {
 	return m.createID, m.createErr
 }
+
 func (m *mockPayRepo) Update(_ context.Context, _, _ int64, _ domain.PaymentMethodInput) error {
 	return m.updateErr
 }
@@ -37,9 +39,11 @@ type payTestService struct{ repo storePayRepo }
 func (s *payTestService) List(ctx context.Context, ownerID int64) ([]domain.PaymentMethod, error) {
 	return s.repo.List(ctx, ownerID)
 }
+
 func (s *payTestService) Create(ctx context.Context, ownerID int64, input domain.PaymentMethodInput) (int64, error) {
 	return s.repo.Create(ctx, ownerID, input)
 }
+
 func (s *payTestService) Update(ctx context.Context, ownerID, id int64, input domain.PaymentMethodInput) error {
 	return s.repo.Update(ctx, ownerID, id, input)
 }

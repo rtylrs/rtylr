@@ -37,7 +37,7 @@ func TestAssign_Validate_RejectsBothZero(t *testing.T) {
 }
 
 func TestAssign_Validate_PermissionsDefaultFalse(t *testing.T) {
-	req := &AssignLocationRequest{UserID: 1, LocationID: 2}
+	req := &AssignLocationRequest{}
 	if req.CanManagePOSUsers || req.CanManageTerminals || req.CanViewReports {
 		t.Error("all permission flags should default to false")
 	}

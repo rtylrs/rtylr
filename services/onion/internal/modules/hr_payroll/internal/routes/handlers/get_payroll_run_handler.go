@@ -29,7 +29,7 @@ type GetPayrollRunResponse struct {
 	Entries []*hrv1.PayrollEntryPayload `json:"entries"`
 }
 
-func (h *GetPayrollRunHandler) Serve(ctx context.Context, req *GetPayrollRunRequest) (GetPayrollRunResponse, *errorModels.ServerError) {
+func (h *GetPayrollRunHandler) Serve(ctx context.Context, _ *GetPayrollRunRequest) (GetPayrollRunResponse, *errorModels.ServerError) {
 	device := authPkg.DeviceCtx(ctx)
 	if device.IsAnonymous || device.User == nil {
 		return GetPayrollRunResponse{}, errorModels.PermissionDeniedServerError()

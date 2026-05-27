@@ -132,11 +132,11 @@ func TestTriggerPayrollRun_BothDatesBlank(t *testing.T) {
 	}
 }
 
-func TestNoopFinancePoster_IsFinanceJournalPoster(t *testing.T) {
+func TestNoopFinancePoster_IsFinanceJournalPoster(_ *testing.T) {
 	var _ domain.FinanceJournalPoster = noopFinancePoster{}
 }
 
-func TestNoopNotifier_IsNotificationDispatcher(t *testing.T) {
+func TestNoopNotifier_IsNotificationDispatcher(_ *testing.T) {
 	var _ domain.NotificationDispatcher = noopNotifier{}
 }
 

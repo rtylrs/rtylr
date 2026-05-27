@@ -5,6 +5,7 @@ import (
 	"os"
 	"os/signal"
 	"syscall"
+
 	platformConfig "github.com/voxire/onion/internal/platform/config"
 	"github.com/voxire/onion/internal/platform/database/dbclient"
 	emailPkg "github.com/voxire/onion/internal/platform/email"

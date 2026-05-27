@@ -39,9 +39,11 @@ func (m *mockRepo) RevokeToken(_ context.Context, _ string) error { return m.err
 func (m *mockRepo) GetUserPasswordHash(_ context.Context, _ int64) (string, error) {
 	return m.passwordHash, m.err
 }
+
 func (m *mockRepo) GetUserIDByEmail(_ context.Context, _ string) (int64, error) {
 	return m.userID, m.err
 }
+
 func (m *mockRepo) GetUserBusinessIDAndRole(_ context.Context, _ int64) (int64, string, error) {
 	return m.businessID, m.role, nil
 }

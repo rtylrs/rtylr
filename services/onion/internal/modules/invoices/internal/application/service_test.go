@@ -29,15 +29,19 @@ type mockRepo struct {
 func (m *mockRepo) ListInvoices(_ context.Context, _ int64, _, _, _, _ string, _, _ int) ([]domain.Invoice, error) {
 	return m.invoices, m.err
 }
+
 func (m *mockRepo) GetInvoiceByID(_ context.Context, _, _ int64) (*domain.Invoice, error) {
 	return m.invoice, m.err
 }
+
 func (m *mockRepo) CreateInvoice(_ context.Context, _ int64, _ domain.Invoice) (int64, error) {
 	return m.generatedID, m.err
 }
+
 func (m *mockRepo) CreateInvoiceItems(_ context.Context, _ int64, _ []domain.InvoiceItem) error {
 	return m.err
 }
+
 func (m *mockRepo) GetInvoiceItems(_ context.Context, _ int64) ([]domain.InvoiceItem, error) {
 	return m.items, m.err
 }
@@ -53,18 +57,23 @@ func (m *mockRepo) DeleteInvoice(_ context.Context, _, _ int64) error { return m
 func (m *mockRepo) CountInvoiceSequence(_ context.Context, _ int64, _ int) (int64, error) {
 	return m.seqCount, m.err
 }
+
 func (m *mockRepo) CreatePayment(_ context.Context, _ int64, _ domain.Payment) (int64, error) {
 	return m.generatedID, m.err
 }
+
 func (m *mockRepo) GetPaymentsByInvoice(_ context.Context, _ int64) ([]domain.Payment, error) {
 	return m.payments, m.err
 }
-func (m *mockRepo) ListExpenses(_ context.Context, _ int64, _ int64, _, _, _ string, _, _ int) ([]domain.Expense, error) {
+
+func (m *mockRepo) ListExpenses(_ context.Context, _, _ int64, _, _, _ string, _, _ int) ([]domain.Expense, error) {
 	return m.expenses, m.err
 }
+
 func (m *mockRepo) GetExpenseByID(_ context.Context, _, _ int64) (*domain.Expense, error) {
 	return m.expense, m.err
 }
+
 func (m *mockRepo) CreateExpense(_ context.Context, _ int64, _ domain.Expense) (int64, error) {
 	return m.generatedID, m.err
 }
@@ -73,30 +82,39 @@ func (m *mockRepo) DeleteExpense(_ context.Context, _, _ int64) error           
 func (m *mockRepo) ListExpenseCategories(_ context.Context, _ int64) ([]domain.ExpenseCategory, error) {
 	return m.categories, m.err
 }
+
 func (m *mockRepo) CreateExpenseCategory(_ context.Context, _ int64, _ domain.ExpenseCategory) (int64, error) {
 	return m.generatedID, m.err
 }
+
 func (m *mockRepo) ListTaxConfigs(_ context.Context, _ int64) ([]domain.TaxConfig, error) {
 	return m.taxConfigs, m.err
 }
+
 func (m *mockRepo) CreateTaxConfig(_ context.Context, _ int64, _ domain.TaxConfig) (int64, error) {
 	return m.generatedID, m.err
 }
+
 func (m *mockRepo) SumPaidInvoices(_ context.Context, _ int64, _, _ string) (float64, error) {
 	return m.sumVal, m.err
 }
+
 func (m *mockRepo) SumExpenses(_ context.Context, _ int64, _, _ string) (float64, error) {
 	return m.sumVal, m.err
 }
+
 func (m *mockRepo) SumTotalReceivable(_ context.Context, _ int64) (float64, error) {
 	return m.sumVal, m.err
 }
+
 func (m *mockRepo) SumOverdueAmount(_ context.Context, _ int64) (float64, error) {
 	return m.sumVal, m.err
 }
+
 func (m *mockRepo) SumTaxCollected(_ context.Context, _ int64, _, _ string) (float64, error) {
 	return m.sumVal, m.err
 }
+
 func (m *mockRepo) SumTaxOwed(_ context.Context, _ int64, _, _ string) (float64, error) {
 	return m.sumVal, m.err
 }

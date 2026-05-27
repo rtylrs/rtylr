@@ -2,6 +2,7 @@ package infrastructure_test
 
 import (
 	"context"
+	"errors"
 	"testing"
 
 	"github.com/voxire/onion/internal/modules/loyalty/internal/domain"
@@ -15,7 +16,7 @@ func TestGetConfig_NotFoundOrPresent(t *testing.T) {
 	ctx := context.Background()
 
 	cfg, err := repo.GetConfig(ctx, testutil.OwnerID)
-	if err != nil && err != domain.ErrLoyaltyConfigNotFound {
+	if err != nil && !errors.Is(err, domain.ErrLoyaltyConfigNotFound) {
 		t.Fatalf("GetConfig unexpected error: %v", err)
 	}
 	_ = cfg

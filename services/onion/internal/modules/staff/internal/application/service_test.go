@@ -24,16 +24,16 @@ type staffRepo interface {
 }
 
 type mockStaffRepo struct {
-	list      []domain.Staff
-	listErr   error
-	staff     *domain.Staff
-	staffErr  error
-	createID  int64
-	createErr error
-	updateErr error
-	deleteErr error
-	clockInErr  error
-	clockOutErr error
+	list           []domain.Staff
+	listErr        error
+	staff          *domain.Staff
+	staffErr       error
+	createID       int64
+	createErr      error
+	updateErr      error
+	deleteErr      error
+	clockInErr     error
+	clockOutErr    error
 	activeCount    int
 	activeErr      error
 	onShiftCount   int
@@ -47,15 +47,19 @@ type mockStaffRepo struct {
 func (m *mockStaffRepo) ListStaff(_ context.Context, _ int64, _, _, _ string) ([]domain.Staff, error) {
 	return m.list, m.listErr
 }
+
 func (m *mockStaffRepo) CreateStaff(_ context.Context, _ domain.StaffInput) (int64, error) {
 	return m.createID, m.createErr
 }
+
 func (m *mockStaffRepo) UpdateStaff(_ context.Context, _ int64, _ domain.StaffUpdateInput) error {
 	return m.updateErr
 }
+
 func (m *mockStaffRepo) GetStaffByID(_ context.Context, _, _ int64) (*domain.Staff, error) {
 	return m.staff, m.staffErr
 }
+
 func (m *mockStaffRepo) DeleteStaff(_ context.Context, _, _ int64) error {
 	return m.deleteErr
 }
@@ -64,12 +68,15 @@ func (m *mockStaffRepo) ClockOut(_ context.Context, _, _ int64) error { return m
 func (m *mockStaffRepo) CountActiveStaff(_ context.Context, _ int64) (int, error) {
 	return m.activeCount, m.activeErr
 }
+
 func (m *mockStaffRepo) CountOnShiftToday(_ context.Context, _ int64) (int, error) {
 	return m.onShiftCount, m.onShiftErr
 }
+
 func (m *mockStaffRepo) CountPendingTimeOff(_ context.Context, _ int64) (int, error) {
 	return m.pendingTOCount, m.pendingTOErr
 }
+
 func (m *mockStaffRepo) CountDraftPayroll(_ context.Context, _ int64) (int, error) {
 	return m.draftPayCount, m.draftPayErr
 }
@@ -80,24 +87,31 @@ type testService struct{ repo staffRepo }
 func (s *testService) ListStaff(ctx context.Context, ownerID int64, search, departmentID, status string) ([]domain.Staff, error) {
 	return s.repo.ListStaff(ctx, ownerID, search, departmentID, status)
 }
+
 func (s *testService) CreateStaff(ctx context.Context, input domain.StaffInput) (int64, error) {
 	return s.repo.CreateStaff(ctx, input)
 }
+
 func (s *testService) UpdateStaff(ctx context.Context, ownerID int64, input domain.StaffUpdateInput) error {
 	return s.repo.UpdateStaff(ctx, ownerID, input)
 }
+
 func (s *testService) GetStaffByID(ctx context.Context, ownerID, staffID int64) (*domain.Staff, error) {
 	return s.repo.GetStaffByID(ctx, ownerID, staffID)
 }
+
 func (s *testService) DeleteStaff(ctx context.Context, ownerID, staffID int64) error {
 	return s.repo.DeleteStaff(ctx, ownerID, staffID)
 }
+
 func (s *testService) ClockIn(ctx context.Context, ownerID, staffID int64) error {
 	return s.repo.ClockIn(ctx, ownerID, staffID)
 }
+
 func (s *testService) ClockOut(ctx context.Context, ownerID, staffID int64) error {
 	return s.repo.ClockOut(ctx, ownerID, staffID)
 }
+
 func (s *testService) GetDashboardStats(ctx context.Context, ownerID int64) (domain.DashboardStats, error) {
 	total, err := s.repo.CountActiveStaff(ctx, ownerID)
 	if err != nil {

@@ -118,7 +118,7 @@ func TestUpdateTicketHandler_Validate_NonZeroIDPasses(t *testing.T) {
 	}
 }
 
-func TestGetTicketHandler_Validate_NegativeIDFails(t *testing.T) {
+func TestGetTicketHandler_Validate_NegativeIDFails(_ *testing.T) {
 	// ID is int64 and 0 is sentinel for "not provided"; negative technically non-zero
 	// but this documents the current behavior
 	h := &GetTicketHandler{}

@@ -19,14 +19,14 @@ type securityRepo interface {
 }
 
 type mockSecurityRepo struct {
-	settings     domain.SecuritySettings
-	settingsErr  error
-	history      []domain.LoginEntry
-	historyErr   error
-	setTFAErr    error
+	settings      domain.SecuritySettings
+	settingsErr   error
+	history       []domain.LoginEntry
+	historyErr    error
+	setTFAErr     error
 	invalidateErr error
-	recordErr    error
-	recordedArgs struct {
+	recordErr     error
+	recordedArgs  struct {
 		email, method, ip, userAgent string
 		success                      bool
 	}

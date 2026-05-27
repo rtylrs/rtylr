@@ -10,52 +10,63 @@ import (
 )
 
 type mockRepo struct {
-	template      *domain.ChecklistTemplateRecord
-	templates     []domain.ChecklistTemplateRecord
-	totalTmpl     int64
-	item          *domain.ChecklistItemRecord
-	checklistItem *domain.EmployeeChecklistItemRecord
-	checklist     *domain.EmployeeChecklistRecord
-	checklists    []domain.EmployeeChecklistRecord
-	totalCklst    int64
-	totalItems    int
+	template       *domain.ChecklistTemplateRecord
+	templates      []domain.ChecklistTemplateRecord
+	totalTmpl      int64
+	item           *domain.ChecklistItemRecord
+	checklistItem  *domain.EmployeeChecklistItemRecord
+	checklist      *domain.EmployeeChecklistRecord
+	checklists     []domain.EmployeeChecklistRecord
+	totalCklst     int64
+	totalItems     int
 	completedItems int
-	err           error
+	err            error
 }
 
 func (m *mockRepo) CreateTemplate(_ context.Context, _ int64, _ domain.CreateTemplateParams) (*domain.ChecklistTemplateRecord, error) {
 	return m.template, m.err
 }
+
 func (m *mockRepo) GetTemplate(_ context.Context, _, _ int64) (*domain.ChecklistTemplateRecord, error) {
 	return m.template, m.err
 }
+
 func (m *mockRepo) ListTemplates(_ context.Context, _ int64, _, _ int32) ([]domain.ChecklistTemplateRecord, int64, error) {
 	return m.templates, m.totalTmpl, m.err
 }
+
 func (m *mockRepo) UpdateTemplate(_ context.Context, _, _ int64, _ domain.UpdateTemplateParams) error {
 	return m.err
 }
+
 func (m *mockRepo) CreateTemplateItem(_ context.Context, _, _ int64, _ domain.CreateTemplateItemParams) (*domain.ChecklistItemRecord, error) {
 	return m.item, m.err
 }
+
 func (m *mockRepo) ListTemplateItems(_ context.Context, _, _ int64) ([]domain.ChecklistItemRecord, error) {
 	return nil, m.err
 }
+
 func (m *mockRepo) TriggerChecklist(_ context.Context, _, _, _ int64, _ time.Time) (*domain.EmployeeChecklistRecord, error) {
 	return m.checklist, m.err
 }
+
 func (m *mockRepo) GetEmployeeChecklist(_ context.Context, _, _, _ int64) (*domain.EmployeeChecklistRecord, error) {
 	return m.checklist, m.err
 }
+
 func (m *mockRepo) ListEmployeeChecklists(_ context.Context, _, _ int64, _, _ int32) ([]domain.EmployeeChecklistRecord, int64, error) {
 	return m.checklists, m.totalCklst, m.err
 }
+
 func (m *mockRepo) UpdateEmployeeChecklistStatus(_ context.Context, _, _ int64, _ string) error {
 	return m.err
 }
+
 func (m *mockRepo) CreateEmployeeChecklistItem(_ context.Context, _, _, _, _ int64, _ string) error {
 	return m.err
 }
+
 func (m *mockRepo) GetChecklistItem(_ context.Context, _, _ int64) (*domain.EmployeeChecklistItemRecord, error) {
 	return m.checklistItem, m.err
 }
@@ -63,6 +74,7 @@ func (m *mockRepo) CompleteChecklistItem(_ context.Context, _, _, _ int64) error
 func (m *mockRepo) GetChecklistCompletionStats(_ context.Context, _, _ int64) (int, int, error) {
 	return m.totalItems, m.completedItems, m.err
 }
+
 func (m *mockRepo) ListEmployeeChecklistItems(_ context.Context, _, _ int64) ([]domain.EmployeeChecklistItemRecord, error) {
 	return nil, m.err
 }

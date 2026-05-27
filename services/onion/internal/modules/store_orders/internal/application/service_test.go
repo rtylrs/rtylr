@@ -28,12 +28,15 @@ type mockOrderRepo struct {
 func (m *mockOrderRepo) List(_ context.Context, _ int64) ([]domain.StoreOrder, error) {
 	return m.list, m.listErr
 }
+
 func (m *mockOrderRepo) GetDetail(_ context.Context, _, _ int64) (domain.StoreOrderDetail, error) {
 	return m.detail, m.detailErr
 }
+
 func (m *mockOrderRepo) Create(_ context.Context, _ int64, _ domain.StoreOrderInput) (int64, error) {
 	return m.createID, m.createErr
 }
+
 func (m *mockOrderRepo) Update(_ context.Context, _, _ int64, _ domain.StoreOrderInput) error {
 	return m.updateErr
 }
@@ -43,12 +46,15 @@ type orderTestService struct{ repo storeOrderRepo }
 func (s *orderTestService) List(ctx context.Context, ownerID int64) ([]domain.StoreOrder, error) {
 	return s.repo.List(ctx, ownerID)
 }
+
 func (s *orderTestService) GetDetail(ctx context.Context, ownerID, orderID int64) (domain.StoreOrderDetail, error) {
 	return s.repo.GetDetail(ctx, ownerID, orderID)
 }
+
 func (s *orderTestService) Create(ctx context.Context, ownerID int64, input domain.StoreOrderInput) (int64, error) {
 	return s.repo.Create(ctx, ownerID, input)
 }
+
 func (s *orderTestService) Update(ctx context.Context, ownerID, id int64, input domain.StoreOrderInput) error {
 	return s.repo.Update(ctx, ownerID, id, input)
 }

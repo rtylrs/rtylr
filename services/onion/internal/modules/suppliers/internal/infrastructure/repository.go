@@ -105,7 +105,6 @@ func (r *Repository) ListSuppliers(ctx context.Context, ownerID int64, limit, of
 	return suppliers, hasMore, nil
 }
 
-
 func (r *Repository) CreateSupplier(ctx context.Context, ownerID int64, input domain.SupplierInput) (int64, error) {
 	result, err := r.queries.CreateSupplier(ctx, sqlc.CreateSupplierParams{
 		OwnerID:      ownerID,

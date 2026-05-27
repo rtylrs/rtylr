@@ -60,14 +60,14 @@ func TestUpdateConfig_Validate_ZeroIsEnabled(t *testing.T) {
 // ─── Request struct default values ───────────────────────────────────────────
 
 func TestEarnPointsRequest_ZeroCustomerID(t *testing.T) {
-	req := &EarnPointsRequest{Points: 10}
+	req := &EarnPointsRequest{}
 	if req.CustomerID != 0 {
 		t.Error("expected zero customer id")
 	}
 }
 
 func TestRedeemPointsRequest_ZeroPoints(t *testing.T) {
-	req := &RedeemPointsRequest{CustomerID: 1}
+	req := &RedeemPointsRequest{}
 	if req.Points != 0 {
 		t.Error("expected zero points")
 	}

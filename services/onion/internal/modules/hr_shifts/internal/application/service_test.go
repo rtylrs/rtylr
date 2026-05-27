@@ -13,7 +13,6 @@ type mockRepo struct {
 	shift       *domain.ShiftRecord
 	totalShifts int64
 	assignments []domain.ShiftAssignmentRecord
-	assignment  *domain.ShiftAssignmentRecord
 	dateAssigns []domain.ShiftAssignmentRecord
 	err         error
 }
@@ -21,9 +20,11 @@ type mockRepo struct {
 func (m *mockRepo) ListShifts(_ context.Context, _ int64, _ domain.ListShiftsParams) ([]domain.ShiftRecord, int64, error) {
 	return m.shifts, m.totalShifts, m.err
 }
+
 func (m *mockRepo) GetShift(_ context.Context, _, _ int64) (*domain.ShiftRecord, error) {
 	return m.shift, m.err
 }
+
 func (m *mockRepo) CreateShift(_ context.Context, _ int64, shift domain.ShiftRecord) (*domain.ShiftRecord, error) {
 	return &shift, m.err
 }
@@ -31,15 +32,19 @@ func (m *mockRepo) UpdateShift(_ context.Context, _ int64, _ domain.ShiftRecord)
 func (m *mockRepo) ListShiftsByLocation(_ context.Context, _, _ int64) ([]domain.ShiftRecord, error) {
 	return m.shifts, m.err
 }
+
 func (m *mockRepo) ListRosterAssignments(_ context.Context, _ int64, _, _ string) ([]domain.ShiftAssignmentRecord, error) {
 	return m.assignments, m.err
 }
+
 func (m *mockRepo) CreateShiftAssignment(_ context.Context, _ int64, a domain.ShiftAssignmentRecord) (*domain.ShiftAssignmentRecord, error) {
 	return &a, m.err
 }
+
 func (m *mockRepo) PublishRosterAssignments(_ context.Context, _ int64, _, _ string) error {
 	return m.err
 }
+
 func (m *mockRepo) ListEmployeeAssignmentsForDate(_ context.Context, _, _ int64, _ string) ([]domain.ShiftAssignmentRecord, error) {
 	return m.dateAssigns, m.err
 }

@@ -27,9 +27,11 @@ type mockCatRepo struct {
 func (m *mockCatRepo) List(_ context.Context, _ int64) ([]domain.StoreCategory, error) {
 	return m.list, m.listErr
 }
+
 func (m *mockCatRepo) Create(_ context.Context, _ int64, _ domain.StoreCategoryInput) (int64, error) {
 	return m.createID, m.createErr
 }
+
 func (m *mockCatRepo) Update(_ context.Context, _, _ int64, _ domain.StoreCategoryInput) error {
 	return m.updateErr
 }
@@ -40,12 +42,15 @@ type catTestService struct{ repo storeCatRepo }
 func (s *catTestService) List(ctx context.Context, ownerID int64) ([]domain.StoreCategory, error) {
 	return s.repo.List(ctx, ownerID)
 }
+
 func (s *catTestService) Create(ctx context.Context, ownerID int64, input domain.StoreCategoryInput) (int64, error) {
 	return s.repo.Create(ctx, ownerID, input)
 }
+
 func (s *catTestService) Update(ctx context.Context, ownerID, id int64, input domain.StoreCategoryInput) error {
 	return s.repo.Update(ctx, ownerID, id, input)
 }
+
 func (s *catTestService) Delete(ctx context.Context, ownerID, id int64) error {
 	return s.repo.Delete(ctx, ownerID, id)
 }

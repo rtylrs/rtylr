@@ -2,6 +2,7 @@ package infrastructure_test
 
 import (
 	"context"
+	"errors"
 	"testing"
 
 	"github.com/voxire/onion/internal/modules/hr_documents/internal/domain"
@@ -80,7 +81,7 @@ func TestGetDocument_NotFoundReturnsError(t *testing.T) {
 	if err == nil {
 		t.Fatal("expected error for non-existent document, got nil")
 	}
-	if err != domain.ErrDocumentNotFound {
+	if !errors.Is(err, domain.ErrDocumentNotFound) {
 		t.Errorf("expected ErrDocumentNotFound, got %v", err)
 	}
 }
@@ -140,7 +141,7 @@ func TestDeleteDocument_RemovesRecord(t *testing.T) {
 	}
 
 	_, err = repo.GetDocument(ctx, testutil.OwnerID, created.ID)
-	if err != domain.ErrDocumentNotFound {
+	if !errors.Is(err, domain.ErrDocumentNotFound) {
 		t.Errorf("expected ErrDocumentNotFound after delete, got %v", err)
 	}
 }
@@ -215,7 +216,7 @@ func TestGetDocument_WrongOwnerReturnsNotFound(t *testing.T) {
 	defer func() { _ = repo.DeleteDocument(ctx, testutil.OwnerID, created.ID) }()
 
 	_, err = repo.GetDocument(ctx, 0, created.ID)
-	if err != domain.ErrDocumentNotFound {
+	if !errors.Is(err, domain.ErrDocumentNotFound) {
 		t.Errorf("expected ErrDocumentNotFound for wrong owner, got %v", err)
 	}
 }

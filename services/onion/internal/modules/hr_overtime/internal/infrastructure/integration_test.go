@@ -2,6 +2,7 @@ package infrastructure_test
 
 import (
 	"context"
+	"errors"
 	"testing"
 
 	"github.com/voxire/onion/internal/modules/hr_overtime/internal/domain"
@@ -86,7 +87,7 @@ func TestGetOvertimeRequest_NotFoundReturnsError(t *testing.T) {
 	ctx := context.Background()
 
 	_, err := repo.GetOvertimeRequest(ctx, testutil.OwnerID, 999999999)
-	if err != domain.ErrOvertimeRequestNotFound {
+	if !errors.Is(err, domain.ErrOvertimeRequestNotFound) {
 		t.Errorf("expected ErrOvertimeRequestNotFound, got %v", err)
 	}
 }
@@ -154,7 +155,7 @@ func TestGetOvertimeConfig_NilOrNoError(t *testing.T) {
 
 	cfg, err := repo.GetOvertimeConfig(ctx, testutil.OwnerID)
 	// If config does not exist it returns ErrOvertimeConfigNotFound.
-	if err != nil && err != domain.ErrOvertimeConfigNotFound {
+	if err != nil && !errors.Is(err, domain.ErrOvertimeConfigNotFound) {
 		t.Fatalf("GetOvertimeConfig unexpected error: %v", err)
 	}
 	if cfg != nil && cfg.OwnerID != testutil.OwnerID {

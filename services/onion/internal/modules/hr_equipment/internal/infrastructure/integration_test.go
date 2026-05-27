@@ -2,6 +2,7 @@ package infrastructure_test
 
 import (
 	"context"
+	"errors"
 	"testing"
 
 	"github.com/voxire/onion/internal/modules/hr_equipment/internal/domain"
@@ -109,7 +110,7 @@ func TestGetEquipmentRequest_NotFoundReturnsError(t *testing.T) {
 	ctx := context.Background()
 
 	_, err := repo.GetEquipmentRequest(ctx, testutil.OwnerID, 999999999)
-	if err != domain.ErrEquipmentRequestNotFound {
+	if !errors.Is(err, domain.ErrEquipmentRequestNotFound) {
 		t.Errorf("expected ErrEquipmentRequestNotFound, got %v", err)
 	}
 }
@@ -171,7 +172,7 @@ func TestGetAsset_NotFoundReturnsError(t *testing.T) {
 	ctx := context.Background()
 
 	_, err := repo.GetAsset(ctx, testutil.OwnerID, 999999999)
-	if err != domain.ErrAssetNotFound {
+	if !errors.Is(err, domain.ErrAssetNotFound) {
 		t.Errorf("expected ErrAssetNotFound, got %v", err)
 	}
 }

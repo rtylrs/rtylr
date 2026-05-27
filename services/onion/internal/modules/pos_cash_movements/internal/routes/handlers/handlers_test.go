@@ -37,21 +37,21 @@ func TestCashDropRequest_ValidFields(t *testing.T) {
 }
 
 func TestCashDropRequest_ZeroAmount(t *testing.T) {
-	req := &CashDropRequest{BranchID: 1, SessionID: 1, Amount: 0}
+	req := &CashDropRequest{Amount: 0}
 	if req.Amount > 0 {
 		t.Error("zero amount should fail guard")
 	}
 }
 
 func TestCashDropRequest_NegativeAmount(t *testing.T) {
-	req := &CashDropRequest{BranchID: 1, SessionID: 1, Amount: -10}
+	req := &CashDropRequest{Amount: -10}
 	if req.Amount > 0 {
 		t.Error("negative amount should fail guard")
 	}
 }
 
 func TestCashDropRequest_MissingBranchID(t *testing.T) {
-	req := &CashDropRequest{SessionID: 1, Amount: 20}
+	req := &CashDropRequest{}
 	if req.BranchID != 0 {
 		t.Error("expected zero BranchID")
 	}
@@ -67,7 +67,7 @@ func TestCashPickupRequest_ValidFields(t *testing.T) {
 }
 
 func TestCashPickupRequest_MissingSessionID(t *testing.T) {
-	req := &CashPickupRequest{BranchID: 1, Amount: 10}
+	req := &CashPickupRequest{}
 	if req.SessionID != 0 {
 		t.Error("expected zero SessionID")
 	}
@@ -77,19 +77,14 @@ func TestCashPickupRequest_MissingSessionID(t *testing.T) {
 
 func TestCashAdjustRequest_RequiresReason(t *testing.T) {
 	reason := "drawer recount"
-	req := &CashAdjustRequest{
-		BranchID:  1,
-		SessionID: 2,
-		Amount:    -15,
-		Reason:    &reason,
-	}
+	req := &CashAdjustRequest{Reason: &reason}
 	if req.Reason == nil || *req.Reason == "" {
 		t.Error("reason should be set")
 	}
 }
 
 func TestCashAdjustRequest_NilReason(t *testing.T) {
-	req := &CashAdjustRequest{BranchID: 1, SessionID: 1, Amount: 5, Reason: nil}
+	req := &CashAdjustRequest{Reason: nil}
 	if req.Reason != nil {
 		t.Error("expected nil reason")
 	}

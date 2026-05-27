@@ -2,6 +2,7 @@ package infrastructure_test
 
 import (
 	"context"
+	"errors"
 	"testing"
 	"time"
 
@@ -61,7 +62,7 @@ func TestSubscriptions_GetPlanBySlug_Unknown_ReturnsError(t *testing.T) {
 	if err == nil {
 		t.Fatal("expected error for unknown plan slug, got nil")
 	}
-	if err != domain.ErrPlanNotFound {
+	if !errors.Is(err, domain.ErrPlanNotFound) {
 		t.Errorf("expected ErrPlanNotFound, got %v", err)
 	}
 }
@@ -100,7 +101,7 @@ func TestSubscriptions_GetSubscription_Owner(t *testing.T) {
 	repo := infrastructure.NewRepository(db)
 	sub, err := repo.GetSubscription(context.Background(), testutil.OwnerID)
 	if err != nil {
-		if err == domain.ErrSubscriptionNotFound {
+		if errors.Is(err, domain.ErrSubscriptionNotFound) {
 			t.Skip("fixture owner has no subscription")
 		}
 		t.Fatalf("GetSubscription: %v", err)
@@ -124,7 +125,7 @@ func TestSubscriptions_GetOwnerApps_Owner(t *testing.T) {
 	repo := infrastructure.NewRepository(db)
 	apps, err := repo.GetOwnerApps(context.Background(), testutil.OwnerID)
 	if err != nil {
-		if err == domain.ErrSubscriptionNotFound {
+		if errors.Is(err, domain.ErrSubscriptionNotFound) {
 			t.Skip("fixture owner has no subscription")
 		}
 		t.Fatalf("GetOwnerApps: %v", err)

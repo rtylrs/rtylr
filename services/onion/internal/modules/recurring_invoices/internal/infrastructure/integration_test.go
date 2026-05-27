@@ -37,7 +37,7 @@ func TestListRecurringInvoices_WrongOwner_ReturnsEmpty(t *testing.T) {
 	}
 }
 
-func seedRecurringInvoice(t *testing.T, ctx context.Context, repo *infrastructure.Repository, ownerID int64, freq string) (int64, error) {
+func seedRecurringInvoice(ctx context.Context, t *testing.T, repo *infrastructure.Repository, ownerID int64, freq string) (int64, error) {
 	t.Helper()
 	// We need a template_invoice_id -- use 0 and let the DB accept it.
 	input := domain.RecurringInvoiceInput{
@@ -54,7 +54,7 @@ func TestCreateRecurringInvoice_ReturnsInsertedID(t *testing.T) {
 	repo := infrastructure.NewRepository(db)
 	ctx := context.Background()
 
-	id, err := seedRecurringInvoice(t, ctx, repo, testutil.OwnerID, "monthly")
+	id, err := seedRecurringInvoice(ctx, t, repo, testutil.OwnerID, "monthly")
 	if err != nil {
 		t.Fatalf("recurring_invoices.Create: unexpected error: %v", err)
 	}
@@ -68,7 +68,7 @@ func TestCreateRecurringInvoice_AppearsInList(t *testing.T) {
 	repo := infrastructure.NewRepository(db)
 	ctx := context.Background()
 
-	id, err := seedRecurringInvoice(t, ctx, repo, testutil.OwnerID, "weekly")
+	id, err := seedRecurringInvoice(ctx, t, repo, testutil.OwnerID, "weekly")
 	if err != nil {
 		t.Fatalf("recurring_invoices.Create: %v", err)
 	}
@@ -95,7 +95,7 @@ func TestCreateRecurringInvoice_FrequencyPersisted(t *testing.T) {
 	repo := infrastructure.NewRepository(db)
 	ctx := context.Background()
 
-	id, err := seedRecurringInvoice(t, ctx, repo, testutil.OwnerID, "monthly")
+	id, err := seedRecurringInvoice(ctx, t, repo, testutil.OwnerID, "monthly")
 	if err != nil {
 		t.Fatalf("recurring_invoices.Create: %v", err)
 	}
@@ -152,7 +152,7 @@ func TestSetActive_DisablesRecurringInvoice(t *testing.T) {
 	repo := infrastructure.NewRepository(db)
 	ctx := context.Background()
 
-	id, err := seedRecurringInvoice(t, ctx, repo, testutil.OwnerID, "weekly")
+	id, err := seedRecurringInvoice(ctx, t, repo, testutil.OwnerID, "weekly")
 	if err != nil {
 		t.Fatalf("recurring_invoices.Create: %v", err)
 	}
@@ -194,7 +194,7 @@ func TestUpdateRecurringInvoice_FrequencyChanges(t *testing.T) {
 	repo := infrastructure.NewRepository(db)
 	ctx := context.Background()
 
-	id, err := seedRecurringInvoice(t, ctx, repo, testutil.OwnerID, "monthly")
+	id, err := seedRecurringInvoice(ctx, t, repo, testutil.OwnerID, "monthly")
 	if err != nil {
 		t.Fatalf("recurring_invoices.Create: %v", err)
 	}
@@ -230,7 +230,7 @@ func TestListRecurringInvoices_EachHasPositiveID(t *testing.T) {
 	repo := infrastructure.NewRepository(db)
 	ctx := context.Background()
 
-	_, err := seedRecurringInvoice(t, ctx, repo, testutil.OwnerID, "monthly")
+	_, err := seedRecurringInvoice(ctx, t, repo, testutil.OwnerID, "monthly")
 	if err != nil {
 		t.Fatalf("seed: %v", err)
 	}
@@ -252,7 +252,7 @@ func TestListRecurringInvoices_ScopedToOwner(t *testing.T) {
 	repo := infrastructure.NewRepository(db)
 	ctx := context.Background()
 
-	_, err := seedRecurringInvoice(t, ctx, repo, testutil.OwnerID, "monthly")
+	_, err := seedRecurringInvoice(ctx, t, repo, testutil.OwnerID, "monthly")
 	if err != nil {
 		t.Fatalf("seed: %v", err)
 	}
@@ -273,7 +273,7 @@ func TestListRecurringInvoices_EachHasNonZeroOwnerID(t *testing.T) {
 	repo := infrastructure.NewRepository(db)
 	ctx := context.Background()
 
-	_, err := seedRecurringInvoice(t, ctx, repo, testutil.OwnerID, "weekly")
+	_, err := seedRecurringInvoice(ctx, t, repo, testutil.OwnerID, "weekly")
 	if err != nil {
 		t.Fatalf("seed: %v", err)
 	}

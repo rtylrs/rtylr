@@ -2,6 +2,7 @@ package infrastructure_test
 
 import (
 	"context"
+	"errors"
 	"testing"
 	"time"
 
@@ -89,7 +90,7 @@ func TestGetHRConfig_NotFoundOrPresent(t *testing.T) {
 	ctx := context.Background()
 
 	cfg, err := repo.GetHRConfig(ctx, testutil.OwnerID)
-	if err != nil && err != domain.ErrConfigNotFound {
+	if err != nil && !errors.Is(err, domain.ErrConfigNotFound) {
 		t.Fatalf("GetHRConfig unexpected error: %v", err)
 	}
 	// Either not found (nil) or a valid config -- both are fine.
