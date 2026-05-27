@@ -14,6 +14,9 @@ CREATE TABLE IF NOT EXISTS email_jobs (
     scheduled_at TIMESTAMP      NOT NULL DEFAULT CURRENT_TIMESTAMP,
     sent_at      TIMESTAMP      NULL,
     created_at   TIMESTAMP      NOT NULL DEFAULT CURRENT_TIMESTAMP,
+    updated_at   TIMESTAMP      NOT NULL DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
+    job_id       VARCHAR(36)    NULL DEFAULT NULL,
 
-    INDEX idx_pending_priority (status, priority DESC, scheduled_at ASC)
+    INDEX idx_pending_priority (status, priority DESC, scheduled_at ASC),
+    INDEX idx_job_id (job_id)
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;
