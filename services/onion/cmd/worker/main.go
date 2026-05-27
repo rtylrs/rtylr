@@ -5,8 +5,6 @@ import (
 	"os"
 	"os/signal"
 	"syscall"
-	"time"
-
 	platformConfig "github.com/voxire/onion/internal/platform/config"
 	"github.com/voxire/onion/internal/platform/database/dbclient"
 	emailPkg "github.com/voxire/onion/internal/platform/email"
@@ -35,8 +33,8 @@ func main() {
 
 	logger.Global().Info("email worker starting")
 
-	worker := emailqueue.NewWorker(dbclient.Pool(), 5*time.Second)
-	worker.Run(ctx)
+	pool := emailqueue.NewPool(dbclient.Pool())
+	pool.Run(ctx)
 
 	logger.Global().Info("email worker stopped")
 }

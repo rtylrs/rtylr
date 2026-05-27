@@ -3,37 +3,39 @@ package emailqueue
 import (
 	"context"
 	"database/sql"
+	"sync/atomic"
 	"time"
+
+	"github.com/google/uuid"
 
 	"github.com/voxire/onion/internal/platform/email"
 	"github.com/voxire/onion/internal/platform/logger"
 )
 
-// Priority levels — higher number = sent first.
 const (
-	PriorityCritical = 10 // password reset, security alerts
-	PriorityHigh     = 5  // invitations, billing emails
-	PriorityNormal   = 1  // welcome emails, marketing
+	PriorityCritical = 10
+	PriorityHigh     = 5
+	PriorityNormal   = 1
+	maxWorkers       = 50
 )
 
 // Job holds everything needed to send one email.
 type Job struct {
-	Priority  int
-	To        string
-	Subject   string
-	HTML      string
-	Text      string
-	From      string
-	ReplyTo   string
+	Priority int
+	To       string
+	Subject  string
+	HTML     string
+	Text     string
+	From     string
+	ReplyTo  string
 }
 
-// Enqueue inserts a job into email_jobs to be sent by the worker.
+// Enqueue inserts a job into email_jobs to be sent by the pool.
 func Enqueue(ctx context.Context, db *sql.DB, job Job) error {
 	priority := job.Priority
 	if priority <= 0 {
 		priority = PriorityNormal
 	}
-
 	_, err := db.ExecContext(ctx, `
 		INSERT INTO email_jobs (priority, to_email, subject, html, text_body, from_email, reply_to)
 		VALUES (?, ?, ?, ?, ?, ?, ?)`,
@@ -42,51 +44,106 @@ func Enqueue(ctx context.Context, db *sql.DB, job Job) error {
 	return err
 }
 
-// Worker polls email_jobs and sends pending emails in priority order.
-// Call Run in a goroutine; it blocks until ctx is cancelled.
-type Worker struct {
-	db       *sql.DB
-	interval time.Duration
+// Pool watches the email_jobs table and spawns up to maxWorkers goroutines
+// to send emails concurrently. Each goroutine claims jobs via a unique job_id
+// so no two goroutines process the same row.
+type Pool struct {
+	db     *sql.DB
+	sem    chan struct{}
+	active atomic.Int32
 }
 
-func NewWorker(db *sql.DB, interval time.Duration) *Worker {
-	if interval <= 0 {
-		interval = 5 * time.Second
+func NewPool(db *sql.DB) *Pool {
+	return &Pool{
+		db:  db,
+		sem: make(chan struct{}, maxWorkers),
 	}
-	return &Worker{db: db, interval: interval}
 }
 
-func (w *Worker) Run(ctx context.Context) {
-	logger.Ctx(ctx).Info("email queue worker started")
-	ticker := time.NewTicker(w.interval)
-	defer ticker.Stop()
+func (p *Pool) Run(ctx context.Context) {
+	logger.Ctx(ctx).Info("email pool started")
+
+	watchTick := time.NewTicker(500 * time.Millisecond)
+	defer watchTick.Stop()
+
+	recoveryTick := time.NewTicker(60 * time.Second)
+	defer recoveryTick.Stop()
 
 	for {
 		select {
 		case <-ctx.Done():
-			logger.Ctx(ctx).Info("email queue worker stopped")
+			// Drain semaphore — wait for all active goroutines to finish.
+			for i := 0; i < maxWorkers; i++ {
+				p.sem <- struct{}{}
+			}
+			logger.Ctx(ctx).Info("email pool stopped")
 			return
-		case <-ticker.C:
-			w.flush(ctx)
+		case <-recoveryTick.C:
+			p.recoverStuck(ctx)
+		case <-watchTick.C:
+			p.spawnWorkers(ctx)
 		}
 	}
 }
 
-func (w *Worker) flush(ctx context.Context) {
-	for {
-		sent := w.processOne(ctx)
-		if !sent {
+func (p *Pool) spawnWorkers(ctx context.Context) {
+	var pending int
+	row := p.db.QueryRowContext(ctx,
+		`SELECT COUNT(*) FROM email_jobs WHERE status = 'pending' AND job_id IS NULL AND scheduled_at <= NOW()`)
+	if err := row.Scan(&pending); err != nil || pending == 0 {
+		return
+	}
+
+	current := int(p.active.Load())
+	want := min(pending, maxWorkers)
+	toSpawn := want - current
+	if toSpawn <= 0 {
+		return
+	}
+
+	for i := 0; i < toSpawn; i++ {
+		select {
+		case p.sem <- struct{}{}:
+			p.active.Add(1)
+			go func() {
+				defer func() {
+					<-p.sem
+					p.active.Add(-1)
+				}()
+				p.drain(ctx)
+			}()
+		default:
 			return
 		}
 	}
 }
 
-func (w *Worker) processOne(ctx context.Context) bool {
-	tx, err := w.db.BeginTx(ctx, nil)
+func (p *Pool) drain(ctx context.Context) {
+	for ctx.Err() == nil {
+		if !p.processOne(ctx) {
+			return
+		}
+	}
+}
+
+func (p *Pool) processOne(ctx context.Context) bool {
+	claimID := uuid.New().String()
+
+	res, err := p.db.ExecContext(ctx, `
+		UPDATE email_jobs
+		SET job_id = ?, status = 'processing'
+		WHERE status = 'pending' AND job_id IS NULL AND scheduled_at <= NOW()
+		ORDER BY priority DESC, scheduled_at ASC
+		LIMIT 1`,
+		claimID,
+	)
 	if err != nil {
 		return false
 	}
-	defer func() { _ = tx.Rollback() }()
+	n, err := res.RowsAffected()
+	if err != nil || n == 0 {
+		return false
+	}
 
 	var (
 		id        int64
@@ -100,26 +157,11 @@ func (w *Worker) processOne(ctx context.Context) bool {
 		maxAtt    int
 	)
 
-	err = tx.QueryRowContext(ctx, `
+	err = p.db.QueryRowContext(ctx, `
 		SELECT id, to_email, subject, html, text_body, from_email, reply_to, attempts, max_attempts
-		FROM email_jobs
-		WHERE status = 'pending' AND scheduled_at <= NOW()
-		ORDER BY priority DESC, scheduled_at ASC
-		LIMIT 1
-		FOR UPDATE SKIP LOCKED`,
+		FROM email_jobs WHERE job_id = ?`, claimID,
 	).Scan(&id, &toEmail, &subject, &htmlBody, &textBody, &fromEmail, &replyTo, &attempts, &maxAtt)
-	if err == sql.ErrNoRows {
-		return false
-	}
 	if err != nil {
-		return false
-	}
-
-	_, err = tx.ExecContext(ctx, `UPDATE email_jobs SET status='processing' WHERE id=?`, id)
-	if err != nil {
-		return false
-	}
-	if err = tx.Commit(); err != nil {
 		return false
 	}
 
@@ -143,23 +185,39 @@ func (w *Worker) processOne(ctx context.Context) bool {
 	if sendErr != nil {
 		newAttempts := attempts + 1
 		newStatus := "pending"
+		var newJobID *string // nil resets job_id to NULL so it can be retried
 		if newAttempts >= maxAtt {
 			newStatus = "failed"
 		}
-		_, _ = w.db.ExecContext(ctx, `
+		_, _ = p.db.ExecContext(ctx, `
 			UPDATE email_jobs
-			SET status=?, attempts=?, last_error=?, scheduled_at=DATE_ADD(NOW(), INTERVAL ? SECOND)
-			WHERE id=?`,
-			newStatus, newAttempts, sendErr.Error(), retryDelay(newAttempts), id,
+			SET status = ?, attempts = ?, last_error = ?, job_id = ?,
+			    scheduled_at = DATE_ADD(NOW(), INTERVAL ? SECOND)
+			WHERE id = ?`,
+			newStatus, newAttempts, sendErr.Error(), newJobID, retryDelay(newAttempts), id,
 		)
 	} else {
-		_, _ = w.db.ExecContext(ctx, `
-			UPDATE email_jobs SET status='sent', sent_at=NOW(), attempts=? WHERE id=?`,
+		_, _ = p.db.ExecContext(ctx, `
+			UPDATE email_jobs SET status = 'sent', sent_at = NOW(), attempts = ?, job_id = NULL WHERE id = ?`,
 			attempts+1, id,
 		)
 	}
 
 	return true
+}
+
+func (p *Pool) recoverStuck(ctx context.Context) {
+	res, err := p.db.ExecContext(ctx, `
+		UPDATE email_jobs
+		SET status = 'pending', job_id = NULL
+		WHERE status = 'processing' AND updated_at < DATE_SUB(NOW(), INTERVAL 5 MINUTE)`)
+	if err != nil {
+		logger.Ctx(ctx).Error("stuck job recovery failed", logger.Error(err))
+		return
+	}
+	if n, _ := res.RowsAffected(); n > 0 {
+		logger.Ctx(ctx).Info("recovered stuck email jobs", logger.Int("count", int(n)))
+	}
 }
 
 func retryDelay(attempt int) int {
