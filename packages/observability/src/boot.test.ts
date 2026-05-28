@@ -2,7 +2,7 @@ import { afterEach, beforeEach, describe, expect, test, vi } from 'vitest';
 import { bootObservability } from './boot';
 
 /**
- * Smoke tests for bootObservability — the helper every app calls
+ * Smoke tests for bootObservability - the helper every app calls
  * once at startup. Exercises:
  *   - undecided consent → only Sentry inits, PostHog stays off
  *   - consent already granted → both init
@@ -65,7 +65,7 @@ describe('bootObservability', () => {
     // in the file may leave dangling event listeners on `window`
     // (boot.ts only removes its listener after a 'granted' event), so
     // counting precisely would be brittle. The contract this test
-    // proves is "the event causes init" — that's what we check.
+    // proves is "the event causes init" - that's what we check.
     expect(initPostHogMock).toHaveBeenCalledWith({ app: 'recruit' });
     expect(enableReplaysMock).toHaveBeenCalled();
   });

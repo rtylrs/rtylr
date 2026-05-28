@@ -21,7 +21,7 @@ interface UseConsent {
 
 export function useConsent(): UseConsent {
   // Start as null (hidden) until after mount. Reading the cookie in
-  // useState() causes an SSR/hydration mismatch — server always
+  // useState() causes an SSR/hydration mismatch - server always
   // returns 'undecided' while the client may return 'granted', forcing
   // React to remount the subtree and producing a flash. null means
   // "not yet determined": the banner stays invisible on the first

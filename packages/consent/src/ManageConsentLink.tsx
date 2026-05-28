@@ -9,7 +9,7 @@ import { useConsent } from './useConsent';
  *
  * Renders nothing while the banner itself is showing (`undecided`) to
  * avoid a duplicate UI affordance. Otherwise renders an unstyled
- * <button> that consumers wrap in their footer's link styling — pass
+ * <button> that consumers wrap in their footer's link styling - pass
  * `className` to inherit whatever footer-link class the host site uses.
  *
  * Behavior: clicking calls `clearConsent()` which deletes the cookie

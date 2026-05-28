@@ -45,7 +45,7 @@ export const APP_CONFIG: Record<
   flow: { name: 'Flow', devPort: 5183, allowedRoles: ['owner', 'admin', 'operator', 'staff'] },
   insights: { name: 'Insights', devPort: 5187, allowedRoles: ['owner', 'admin'] },
   // Recruit is public on the candidate side; the admin side is gated to
-  // owner/admin only. allowedRoles reflects the admin gate — the public
+  // owner/admin only. allowedRoles reflects the admin gate - the public
   // pages don't go through AppGuard at all.
   recruit: { name: 'Recruit', devPort: 5184, allowedRoles: ['owner', 'admin'] },
   landing: { name: 'Landing', devPort: 4200, allowedRoles: [] },

@@ -66,7 +66,7 @@ describe('cookies helpers', () => {
     // Belt + suspenders: every logout site does both calls. If either
     // is removed, the e2e logout spec will fail in Chromium where
     // Domain= semantics are enforced. Here we just verify the
-    // local-observable end state — cookie is gone after both calls.
+    // local-observable end state - cookie is gone after both calls.
     setCookie('token', 'fake-jwt');
     expect(getCookie('token')).toBe('fake-jwt');
     removeCookie('token', { domain: getDefaultCookieDomain() });

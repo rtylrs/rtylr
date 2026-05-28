@@ -3,7 +3,7 @@ import * as Sentry from '@sentry/react';
 /**
  * Sentry initialisation shared across every rtylr frontend app.
  *
- * Reads `VITE_SENTRY_DSN` from env. A missing DSN is not an error —
+ * Reads `VITE_SENTRY_DSN` from env. A missing DSN is not an error -
  * local dev and preview builds run without it. Calling `initSentry`
  * twice is a no-op thanks to Sentry's internal guard.
  *
@@ -15,7 +15,7 @@ import * as Sentry from '@sentry/react';
 interface InitSentryOptions {
   /** App identifier ("flow", "dash", etc.). Surfaces in Sentry `tags.app`. */
   app: string;
-  /** Release tag — typically the git SHA. Groups events across deploys. */
+  /** Release tag - typically the git SHA. Groups events across deploys. */
   release?: string;
 }
 
@@ -37,10 +37,10 @@ export function initSentry(opts: InitSentryOptions): void {
     dsn,
     environment,
     release: opts.release,
-    // Performance tracing at 10 % — enough to spot regressions without
+    // Performance tracing at 10 % - enough to spot regressions without
     // burning the quota on every page view.
     tracesSampleRate: 0.1,
-    // Session Replay is off by default. Enable via consent — see
+    // Session Replay is off by default. Enable via consent - see
     // packages/consent's handler which calls `enableSentryReplay()`.
     replaysSessionSampleRate: 0,
     replaysOnErrorSampleRate: 0,
@@ -64,7 +64,7 @@ export function initSentry(opts: InitSentryOptions): void {
 }
 
 /**
- * Call from the consent package when the user accepts cookies —
+ * Call from the consent package when the user accepts cookies -
  * flips replays on for session recording (on error only; full-session
  * recording is too invasive and PII-heavy for a B2B SaaS).
  */

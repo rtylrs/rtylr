@@ -17,10 +17,10 @@ import { useConsent } from './useConsent';
 interface CookieBannerProps {
   privacyUrl?: string;
   className?: string;
-  /** Called after the user accepts — good hook for initialising
+  /** Called after the user accepts - good hook for initialising
    *  analytics that depends on consent. */
   onAccept?: () => void;
-  /** Called after the user declines — clear any residual tracking. */
+  /** Called after the user declines - clear any residual tracking. */
   onDecline?: () => void;
 }
 

@@ -86,7 +86,7 @@ export interface PermissionContext {
   assignedLocationIds?: number[];
 }
 
-/** Universal permission check — combines platform role, POS role, and app assignments */
+/** Universal permission check - combines platform role, POS role, and app assignments */
 export function can(ctx: PermissionContext, resource: Resource): boolean {
   // Owner bypasses everything
   if (ctx.platformRole === 'owner') return true;
