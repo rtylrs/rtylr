@@ -48,6 +48,9 @@ func (s *Service) List(ctx context.Context, ownerID int64) ([]domain.Combo, erro
 }
 
 func (s *Service) Create(ctx context.Context, ownerID int64, input domain.ComboInput) (int64, error) {
+	if err := domain.ValidateComboInput(input); err != nil {
+		return 0, err
+	}
 	id, err := s.repo.Create(ctx, ownerID, input)
 	if err != nil {
 		return 0, err
