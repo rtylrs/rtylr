@@ -40,17 +40,26 @@ func TestList_Delegates(t *testing.T) {
 	}
 }
 
+func TestCreate_ValidationRejectsEmpty(t *testing.T) {
+	s := &Service{repo: &mockRepo{}}
+	if _, err := s.Create(context.Background(), domain.TableInput{}); err == nil {
+		t.Error("expected validation error for empty input")
+	}
+}
+
 func TestCreate_PropagatesError(t *testing.T) {
 	want := errors.New("boom")
 	s := &Service{repo: &mockRepo{createErr: want}}
-	if _, err := s.Create(context.Background(), domain.TableInput{}); !errors.Is(err, want) {
+	validInput := domain.TableInput{OwnerID: 1, Label: "T1"}
+	if _, err := s.Create(context.Background(), validInput); !errors.Is(err, want) {
 		t.Errorf("expected sentinel, got %v", err)
 	}
 }
 
 func TestUpdateAndDelete_HappyPath(t *testing.T) {
 	s := &Service{repo: &mockRepo{}}
-	if err := s.Update(context.Background(), domain.TableUpdateInput{}); err != nil {
+	validUpdate := domain.TableUpdateInput{ID: 1, OwnerID: 1, Label: "T1"}
+	if err := s.Update(context.Background(), validUpdate); err != nil {
 		t.Errorf("unexpected: %v", err)
 	}
 	if err := s.Delete(context.Background(), 1, 5); err != nil {
@@ -91,16 +100,24 @@ func TestCreate_ReturnsID(t *testing.T) {
 
 func TestCreate_ZeroIDOnError(t *testing.T) {
 	s := &Service{repo: &mockRepo{createErr: errors.New("fail"), createID: 5}}
-	id, _ := s.Create(context.Background(), domain.TableInput{})
+	id, _ := s.Create(context.Background(), domain.TableInput{OwnerID: 1, Label: "T1"})
 	if id != 0 {
 		t.Errorf("expected 0 on error, got %d", id)
+	}
+}
+
+func TestUpdate_ValidationRejectsEmpty(t *testing.T) {
+	s := &Service{repo: &mockRepo{}}
+	if err := s.Update(context.Background(), domain.TableUpdateInput{}); err == nil {
+		t.Error("expected validation error for empty input")
 	}
 }
 
 func TestUpdate_PropagatesError(t *testing.T) {
 	want := errors.New("update fail")
 	s := &Service{repo: &mockRepo{updErr: want}}
-	if err := s.Update(context.Background(), domain.TableUpdateInput{}); !errors.Is(err, want) {
+	validInput := domain.TableUpdateInput{ID: 1, OwnerID: 1, Label: "T1"}
+	if err := s.Update(context.Background(), validInput); !errors.Is(err, want) {
 		t.Errorf("expected sentinel, got %v", err)
 	}
 }
@@ -115,7 +132,7 @@ func TestDelete_PropagatesError(t *testing.T) {
 
 func TestUpdate_WithStatusChange(t *testing.T) {
 	s := &Service{repo: &mockRepo{}}
-	if err := s.Update(context.Background(), domain.TableUpdateInput{ID: 1, Status: "occupied"}); err != nil {
+	if err := s.Update(context.Background(), domain.TableUpdateInput{ID: 1, OwnerID: 1, Label: "T1", Status: "occupied"}); err != nil {
 		t.Errorf("unexpected: %v", err)
 	}
 }
