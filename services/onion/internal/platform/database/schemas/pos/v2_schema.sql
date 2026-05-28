@@ -67,7 +67,7 @@ CREATE TABLE IF NOT EXISTS pos_order_payments (
 
 -- ── Add modifiers JSON to order items ────────────────────────────
 ALTER TABLE pos_order_items
-  ADD COLUMN IF NOT EXISTS modifiers JSON DEFAULT (JSON_ARRAY()),
+  ADD COLUMN modifiers JSON DEFAULT (JSON_ARRAY()),
   ADD COLUMN combo_id BIGINT DEFAULT NULL,
   ADD COLUMN variant_name VARCHAR(255) DEFAULT NULL;
 
