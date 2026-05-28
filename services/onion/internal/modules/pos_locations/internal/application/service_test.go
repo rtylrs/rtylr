@@ -35,18 +35,34 @@ func TestList_Delegates(t *testing.T) {
 	}
 }
 
+func TestCreate_ValidationRejectsBlankInput(t *testing.T) {
+	s := &Service{repo: &mockRepo{}}
+	if _, err := s.Create(context.Background(), domain.LocationInput{}); err == nil {
+		t.Error("expected validation error for empty input")
+	}
+}
+
 func TestCreate_PropagatesError(t *testing.T) {
 	want := errors.New("boom")
 	s := &Service{repo: &mockRepo{createErr: want}}
-	if _, err := s.Create(context.Background(), domain.LocationInput{}); !errors.Is(err, want) {
+	validInput := domain.LocationInput{OwnerID: 1, Name: "HQ"}
+	if _, err := s.Create(context.Background(), validInput); !errors.Is(err, want) {
 		t.Errorf("expected sentinel, got %v", err)
+	}
+}
+
+func TestUpdate_ValidationRejectsBlankInput(t *testing.T) {
+	s := &Service{repo: &mockRepo{}}
+	if err := s.Update(context.Background(), domain.LocationUpdateInput{}); err == nil {
+		t.Error("expected validation error for empty input")
 	}
 }
 
 func TestUpdate_PropagatesError(t *testing.T) {
 	want := errors.New("boom")
 	s := &Service{repo: &mockRepo{updErr: want}}
-	if err := s.Update(context.Background(), domain.LocationUpdateInput{}); !errors.Is(err, want) {
+	validInput := domain.LocationUpdateInput{ID: 1, OwnerID: 1, Name: "HQ"}
+	if err := s.Update(context.Background(), validInput); !errors.Is(err, want) {
 		t.Errorf("expected sentinel, got %v", err)
 	}
 }
