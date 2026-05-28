@@ -174,6 +174,58 @@ func (r *Repository) Create(ctx context.Context, ownerID int64, input domain.Jou
 	return entryID, nil
 }
 
+// CountByStatus returns how many journal entries the owner has for each
+// status (e.g. "draft", "posted"). An empty map is returned when the owner
+// has no entries.
+func (r *Repository) CountByStatus(ctx context.Context, ownerID int64) (map[string]int64, error) {
+	const q = `
+		SELECT status, COUNT(*) AS cnt
+		FROM finance_journal_entries
+		WHERE owner_id = ?
+		GROUP BY status`
+
+	rows, err := r.pool.QueryContext(ctx, q, ownerID)
+	if err != nil {
+		logger.Ctx(ctx).Error("Failed to count journal entries by status", logger.Error(err))
+		return nil, err
+	}
+	defer rows.Close()
+
+	counts := make(map[string]int64)
+	for rows.Next() {
+		var s string
+		var cnt int64
+		if scanErr := rows.Scan(&s, &cnt); scanErr != nil {
+			return nil, scanErr
+		}
+		counts[s] = cnt
+	}
+
+	return counts, rows.Err()
+}
+
+// SumLinesByAccountID returns the total debit and credit amounts posted to a
+// given chart-of-accounts ID across all posted journal entries for an owner.
+func (r *Repository) SumLinesByAccountID(ctx context.Context, ownerID, accountID int64) (debit, credit float64, err error) {
+	const q = `
+		SELECT
+			COALESCE(SUM(CAST(l.debit AS REAL)), 0),
+			COALESCE(SUM(CAST(l.credit AS REAL)), 0)
+		FROM finance_journal_lines l
+		JOIN finance_journal_entries e ON e.id = l.entry_id
+		WHERE e.owner_id = ?
+		  AND l.account_id = ?
+		  AND e.status = 'posted'`
+
+	err = r.pool.QueryRowContext(ctx, q, ownerID, accountID).Scan(&debit, &credit)
+	if err != nil {
+		logger.Ctx(ctx).Error("Failed to sum journal lines by account", logger.Error(err))
+		return 0, 0, err
+	}
+
+	return debit, credit, nil
+}
+
 // ---------------------------------------------------------------------------
 // Conversion helpers
 // ---------------------------------------------------------------------------
