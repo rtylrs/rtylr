@@ -1,5 +1,5 @@
 import React from 'react';
-import { useParams, useNavigate } from 'react-router-dom';
+import { useParams, useNavigate } from '@tanstack/react-router';
 import { ArrowLeft, Mail, MessageSquare, PieChart } from 'lucide-react';
 import { useGetSegment, useSegmentCustomers } from '../../shared/hooks/queries/useSegments';
 import { Breadcrumbs, Button, Card, EmptyState, SkeletonList } from '../../shared/components/ui';
@@ -7,7 +7,7 @@ import { CustomerAvatar, TierBadge } from '../../shared/components/crm';
 import { getTier } from '../../shared/lib/tiers';
 
 const SegmentDetail: React.FC = () => {
-  const { id } = useParams<{ id: string }>();
+  const { id } = useParams({ strict: false });
   const navigate = useNavigate();
   const segmentId = Number(id);
   const {
@@ -43,7 +43,7 @@ const SegmentDetail: React.FC = () => {
     <div style={{ maxWidth: '1100px' }}>
       <Breadcrumbs items={[{ label: 'Segments', to: '/segments' }, { label: segment.name }]} />
       <button
-        onClick={() => navigate('/segments')}
+        onClick={() => navigate({ to: '/segments' })}
         style={{
           background: 'transparent',
           border: 'none',
@@ -105,14 +105,14 @@ const SegmentDetail: React.FC = () => {
           <div style={{ display: 'flex', gap: '6px' }}>
             <Button
               variant="outline"
-              onClick={() => navigate(`/campaigns/email?segment=${segment.id}`)}
+              onClick={() => navigate({ to: `/campaigns/email?segment=${segment.id}` })}
             >
               <Mail size={13} />
               Email
             </Button>
             <Button
               variant="primary"
-              onClick={() => navigate(`/campaigns/sms?segment=${segment.id}`)}
+              onClick={() => navigate({ to: `/campaigns/sms?segment=${segment.id}` })}
             >
               <MessageSquare size={13} />
               SMS
@@ -186,7 +186,7 @@ const SegmentDetail: React.FC = () => {
             {customers.map((c, i) => (
               <div
                 key={c.id}
-                onClick={() => navigate(`/customers/${c.id}`)}
+                onClick={() => navigate({ to: `/customers/${c.id}` })}
                 style={{
                   display: 'flex',
                   alignItems: 'center',

@@ -1,5 +1,5 @@
 import React, { useState } from 'react';
-import { useNavigate } from 'react-router-dom';
+import { useNavigate } from '@tanstack/react-router';
 import { toast } from 'sonner';
 import { Save, Plus, Zap, Mail, Clock, GitBranch, MessageSquare, Gift } from 'lucide-react';
 import { useCreateAutomation } from '../../shared/hooks/queries/useAutomations';
@@ -75,7 +75,7 @@ const AutomationBuilder: React.FC = () => {
       {
         onSuccess: () => {
           toast.success('Automation saved');
-          navigate('/automations');
+          navigate({ to: '/automations' });
         },
         onError: () => {
           toast.error('Failed to save automation');

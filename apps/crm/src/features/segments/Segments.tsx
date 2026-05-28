@@ -1,5 +1,5 @@
 import React, { useMemo, useState } from 'react';
-import { useNavigate } from 'react-router-dom';
+import { useNavigate } from '@tanstack/react-router';
 import { motion, AnimatePresence } from 'motion/react';
 import { toast } from 'sonner';
 import {
@@ -592,7 +592,7 @@ const Segments: React.FC = () => {
             key={segment.id}
             segment={segment}
             index={i}
-            onClick={() => navigate(`/segments/${segment.id}`)}
+            onClick={() => navigate({ to: `/segments/${segment.id}` })}
             onDelete={() => setConfirmDeleteId(segment.id)}
             deletePending={removeSegment.isPending}
           />

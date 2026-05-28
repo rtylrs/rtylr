@@ -1,5 +1,5 @@
 import React, { useState } from 'react';
-import { useNavigate } from 'react-router-dom';
+import { useNavigate } from '@tanstack/react-router';
 import { toast } from 'sonner';
 import { Plus, Search, Trash2, Eye } from 'lucide-react';
 import { AnimatePresence, motion } from 'motion/react';
@@ -273,7 +273,7 @@ const Leads: React.FC = () => {
                     onMouseLeave={(e) => {
                       (e.currentTarget as HTMLElement).style.background = 'transparent';
                     }}
-                    onClick={() => navigate(`/sales/leads/${lead.id}`)}
+                    onClick={() => navigate({ to: `/sales/leads/${lead.id}` })}
                   >
                     <td style={{ padding: '12px 16px' }}>
                       <p
@@ -327,7 +327,7 @@ const Leads: React.FC = () => {
                       <div style={{ display: 'flex', gap: '6px' }}>
                         <button
                           aria-label="View lead"
-                          onClick={() => navigate(`/sales/leads/${lead.id}`)}
+                          onClick={() => navigate({ to: `/sales/leads/${lead.id}` })}
                           style={{
                             height: '28px',
                             width: '28px',

@@ -1,5 +1,5 @@
 import React, { useState } from 'react';
-import { useNavigate } from 'react-router-dom';
+import { useNavigate } from '@tanstack/react-router';
 import { toast } from 'sonner';
 import { FileText, Mail, MessageSquare, Plus, Copy } from 'lucide-react';
 import { useTemplates, useCreateTemplate } from '../../shared/hooks/queries/useTemplates';
@@ -47,13 +47,13 @@ const Templates: React.FC = () => {
 
   const useTemplate = (t: (typeof templates)[number]) => {
     if (t.channel === 'email') {
-      navigate(
-        `/campaigns/email?name=${encodeURIComponent(t.name)}&subject=${encodeURIComponent(
+      navigate({
+        to: `/campaigns/email?name=${encodeURIComponent(t.name)}&subject=${encodeURIComponent(
           t.subject || ''
-        )}&body=${encodeURIComponent(t.body)}`
-      );
+        )}&body=${encodeURIComponent(t.body)}`,
+      });
     } else {
-      navigate('/campaigns/sms');
+      navigate({ to: '/campaigns/sms' });
     }
   };
 

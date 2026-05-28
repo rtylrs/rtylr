@@ -1,5 +1,5 @@
 import React, { useState } from 'react';
-import { useNavigate } from 'react-router-dom';
+import { useNavigate } from '@tanstack/react-router';
 import { motion, AnimatePresence } from 'motion/react';
 import { toast } from 'sonner';
 import {
@@ -193,14 +193,14 @@ const Customers: React.FC = () => {
         subtitle={`${customers.length} total customers`}
         actions={
           <>
-            <Button variant="outline" onClick={() => navigate('/customers/import')}>
+            <Button variant="outline" onClick={() => navigate({ to: '/customers/import' })}>
               <Upload size={13} />
               Import
             </Button>
             <Button variant="outline" onClick={exportCsv}>
               Export CSV
             </Button>
-            <Button variant="primary" onClick={() => navigate('/customers/new')}>
+            <Button variant="primary" onClick={() => navigate({ to: '/customers/new' })}>
               <Plus size={13} />
               New customer
             </Button>
@@ -344,7 +344,7 @@ const Customers: React.FC = () => {
                 : 'Create your first customer to get started.'
             }
             action={
-              <Button variant="primary" onClick={() => navigate('/customers/new')}>
+              <Button variant="primary" onClick={() => navigate({ to: '/customers/new' })}>
                 <Plus size={13} />
                 New customer
               </Button>
@@ -535,7 +535,7 @@ const Customers: React.FC = () => {
                         {isExpanded && (
                           <ExpandedDetail
                             customer={c}
-                            onView={() => navigate(`/customers/${c.id}`)}
+                            onView={() => navigate({ to: `/customers/${c.id}` })}
                           />
                         )}
                       </AnimatePresence>

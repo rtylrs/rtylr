@@ -1,6 +1,6 @@
 import React, { useState } from 'react';
 import { toast } from 'sonner';
-import { useParams, useNavigate } from 'react-router-dom';
+import { useParams, useNavigate } from '@tanstack/react-router';
 import {
   Phone,
   Mail,
@@ -84,7 +84,7 @@ function formatDate(iso: string): string {
 }
 
 const LeadDetail: React.FC = () => {
-  const { id } = useParams<{ id: string }>();
+  const { id } = useParams({ strict: false });
   const leadId = id ? Number(id) : undefined;
   const navigate = useNavigate();
 
@@ -116,7 +116,7 @@ const LeadDetail: React.FC = () => {
   const handleDeleteLead = (): void => {
     if (!leadId) return;
     deleteLead.mutate(leadId, {
-      onSuccess: () => navigate('/sales/leads'),
+      onSuccess: () => navigate({ to: '/sales/leads' }),
     });
   };
 
@@ -243,7 +243,7 @@ const LeadDetail: React.FC = () => {
       <div style={{ display: 'flex', alignItems: 'center', gap: '12px' }}>
         <button
           aria-label="Back to leads"
-          onClick={() => navigate('/sales/leads')}
+          onClick={() => navigate({ to: '/sales/leads' })}
           style={{
             background: 'transparent',
             border: 'none',

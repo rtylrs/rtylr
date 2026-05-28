@@ -1,5 +1,5 @@
 import React, { useState } from 'react';
-import { useNavigate } from 'react-router-dom';
+import { useNavigate } from '@tanstack/react-router';
 import { toast } from 'sonner';
 import { Zap, Plus, Play, Pause, Trash2, Cake, UserPlus, RotateCcw, Star } from 'lucide-react';
 import {
@@ -64,7 +64,7 @@ const Automations: React.FC = () => {
         title="Automations"
         subtitle={`${automations.length} workflows configured`}
         actions={
-          <Button variant="primary" onClick={() => navigate('/automations/new')}>
+          <Button variant="primary" onClick={() => navigate({ to: '/automations/new' })}>
             <Plus size={13} />
             New automation
           </Button>
@@ -82,7 +82,7 @@ const Automations: React.FC = () => {
             title="No automations yet"
             description="Set up drip campaigns, birthday greetings, and win-back flows."
             action={
-              <Button variant="primary" onClick={() => navigate('/automations/new')}>
+              <Button variant="primary" onClick={() => navigate({ to: '/automations/new' })}>
                 <Plus size={13} />
                 Create one
               </Button>
@@ -102,7 +102,7 @@ const Automations: React.FC = () => {
             return (
               <div
                 key={a.id}
-                onClick={() => navigate(`/automations/${a.id}`)}
+                onClick={() => navigate({ to: `/automations/${a.id}` })}
                 style={{
                   background: 'var(--hub-card)',
                   border: '1px solid var(--hub-border)',

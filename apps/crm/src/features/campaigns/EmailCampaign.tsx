@@ -1,5 +1,5 @@
 import React, { useState } from 'react';
-import { useNavigate, useSearchParams } from 'react-router-dom';
+import { useNavigate, useRouterState } from '@tanstack/react-router';
 import { toast } from 'sonner';
 import { Send, Save, Eye } from 'lucide-react';
 import { useCreateCampaign } from '../../shared/hooks/queries/useCampaigns';
@@ -10,17 +10,17 @@ import { EmailEditor } from '../../shared/components/crm';
 
 const EmailCampaign: React.FC = () => {
   const navigate = useNavigate();
-  const [searchParams] = useSearchParams();
+  const searchStr = useRouterState({ select: (s) => s.location.searchStr });
   const create = useCreateCampaign();
   const { data: fetchedSegments } = useListSegments();
   const { data: fetchedTemplates } = useTemplates();
   const segments = fetchedSegments ?? [];
   const templates = (fetchedTemplates ?? []).filter((t) => t.channel === 'email');
 
-  const [name, setName] = useState(searchParams.get('name') || '');
+  const [name, setName] = useState(new URLSearchParams(searchStr).get('name') || '');
   const [segmentId, setSegmentId] = useState<number>(segments[0]?.id || 0);
-  const [subject, setSubject] = useState(searchParams.get('subject') || '');
-  const [body, setBody] = useState(searchParams.get('body') || '');
+  const [subject, setSubject] = useState(new URLSearchParams(searchStr).get('subject') || '');
+  const [body, setBody] = useState(new URLSearchParams(searchStr).get('body') || '');
   const [previewOpen, setPreviewOpen] = useState(false);
 
   const applyTemplate = (templateId: string) => {
@@ -46,7 +46,7 @@ const EmailCampaign: React.FC = () => {
       {
         onSuccess: () => {
           toast.success(send ? 'Campaign sent' : 'Draft saved');
-          navigate('/campaigns');
+          navigate({ to: '/campaigns' });
         },
         onError: () => {
           toast.error(send ? 'Failed to send campaign' : 'Failed to save draft');

@@ -1,5 +1,5 @@
 import React, { useState } from 'react';
-import { useNavigate } from 'react-router-dom';
+import { useNavigate } from '@tanstack/react-router';
 import { toast } from 'sonner';
 import { Plus, Save } from 'lucide-react';
 import { useCreateSegment } from '../../shared/hooks/queries/useSegments';
@@ -45,7 +45,7 @@ const SegmentBuilder: React.FC = () => {
       {
         onSuccess: () => {
           toast.success('Segment created');
-          navigate('/segments');
+          navigate({ to: '/segments' });
         },
         onError: () => {
           toast.error('Failed to create segment');

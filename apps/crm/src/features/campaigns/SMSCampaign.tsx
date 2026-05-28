@@ -1,5 +1,5 @@
 import React, { useState } from 'react';
-import { useNavigate } from 'react-router-dom';
+import { useNavigate } from '@tanstack/react-router';
 import { toast } from 'sonner';
 import { Send, Save } from 'lucide-react';
 import { useCreateCampaign } from '../../shared/hooks/queries/useCampaigns';
@@ -36,7 +36,7 @@ const SMSCampaign: React.FC = () => {
       {
         onSuccess: () => {
           toast.success(send ? 'SMS campaign sent' : 'Draft saved');
-          navigate('/campaigns');
+          navigate({ to: '/campaigns' });
         },
         onError: () => {
           toast.error(send ? 'Failed to send SMS campaign' : 'Failed to save draft');

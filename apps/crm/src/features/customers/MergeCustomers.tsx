@@ -1,5 +1,5 @@
 import React, { useState } from 'react';
-import { useNavigate, useSearchParams } from 'react-router-dom';
+import { useNavigate, useRouterState } from '@tanstack/react-router';
 import { toast } from 'sonner';
 import { Users, ArrowRight } from 'lucide-react';
 import { useListCustomers, useMergeCustomers } from '../../shared/hooks/queries/useCustomers';
@@ -9,13 +9,13 @@ import { getTier } from '../../shared/lib/tiers';
 
 const MergeCustomers: React.FC = () => {
   const navigate = useNavigate();
-  const [searchParams] = useSearchParams();
+  const searchStr = useRouterState({ select: (s) => s.location.searchStr });
   const merge = useMergeCustomers();
   const { data: fetched } = useListCustomers({ limit: 200, offset: 0 });
   const customers = fetched ?? [];
 
   const [primaryId, setPrimaryId] = useState<number | null>(
-    Number(searchParams.get('primary')) || null
+    Number(new URLSearchParams(searchStr).get('primary')) || null
   );
   const [secondaryId, setSecondaryId] = useState<number | null>(null);
 
@@ -29,7 +29,7 @@ const MergeCustomers: React.FC = () => {
       {
         onSuccess: () => {
           toast.success('Customers merged');
-          navigate('/customers');
+          navigate({ to: '/customers' });
         },
         onError: () => {
           toast.error('Failed to merge customers');
@@ -185,7 +185,7 @@ const MergeCustomers: React.FC = () => {
       {renderPreview()}
 
       <div style={{ display: 'flex', justifyContent: 'flex-end', gap: '8px', marginTop: '16px' }}>
-        <Button variant="outline" onClick={() => navigate('/customers')}>
+        <Button variant="outline" onClick={() => navigate({ to: '/customers' })}>
           Cancel
         </Button>
         <Button

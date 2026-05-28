@@ -1,5 +1,5 @@
 import React, { createContext, useContext, useEffect, useState } from 'react';
-import { useNavigate } from 'react-router-dom';
+import { useNavigate } from '@tanstack/react-router';
 import { CommandPalette } from './CommandPalette';
 
 interface ShortcutsContextValue {
@@ -36,17 +36,17 @@ export const ShortcutsProvider: React.FC<React.PropsWithChildren> = ({ children 
       }
       if (e.key === 'n' && !e.metaKey && !e.ctrlKey) {
         e.preventDefault();
-        navigate('/customers/new');
+        navigate({ to: '/customers/new' });
         return;
       }
       if (e.shiftKey && e.key.toLowerCase() === 's') {
         e.preventDefault();
-        navigate('/segments');
+        navigate({ to: '/segments' });
         return;
       }
       if (e.shiftKey && e.key.toLowerCase() === 'c') {
         e.preventDefault();
-        navigate('/campaigns');
+        navigate({ to: '/campaigns' });
         return;
       }
     };

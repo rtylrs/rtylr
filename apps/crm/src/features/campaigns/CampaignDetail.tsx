@@ -1,5 +1,5 @@
 import React from 'react';
-import { useParams, useNavigate } from 'react-router-dom';
+import { useParams, useNavigate } from '@tanstack/react-router';
 import {
   ArrowLeft,
   Send,
@@ -14,7 +14,7 @@ import { Breadcrumbs, Card, SkeletonList, EmptyState } from '../../shared/compon
 import { CampaignStatsCard } from '../../shared/components/crm';
 
 const CampaignDetail: React.FC = () => {
-  const { id } = useParams<{ id: string }>();
+  const { id } = useParams({ strict: false });
   const navigate = useNavigate();
   const campaignId = Number(id);
   const {
@@ -52,7 +52,7 @@ const CampaignDetail: React.FC = () => {
     <div style={{ maxWidth: '1200px' }}>
       <Breadcrumbs items={[{ label: 'Campaigns', to: '/campaigns' }, { label: campaign.name }]} />
       <button
-        onClick={() => navigate('/campaigns')}
+        onClick={() => navigate({ to: '/campaigns' })}
         style={{
           background: 'transparent',
           border: 'none',
