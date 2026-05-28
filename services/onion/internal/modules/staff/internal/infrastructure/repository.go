@@ -163,7 +163,7 @@ func (r *Repository) CreateStaff(ctx context.Context, input domain.StaffInput) (
 		staffStatus = "active"
 	}
 
-	var appsJSON json.RawMessage
+	appsJSON := json.RawMessage("[]")
 	if input.Apps != "" {
 		appsJSON = json.RawMessage(input.Apps)
 	}
@@ -199,7 +199,7 @@ func (r *Repository) CreateStaff(ctx context.Context, input domain.StaffInput) (
 }
 
 func (r *Repository) UpdateStaff(ctx context.Context, ownerID int64, input domain.StaffUpdateInput) error {
-	var appsJSON json.RawMessage
+	appsJSON := json.RawMessage("[]")
 	if input.Apps != "" {
 		appsJSON = json.RawMessage(input.Apps)
 	}
