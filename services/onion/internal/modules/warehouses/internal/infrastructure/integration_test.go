@@ -441,3 +441,62 @@ func TestWarehouses_ListWarehouses_Idempotent(t *testing.T) {
 		t.Errorf("idempotency: got %d then %d", len(a), len(b))
 	}
 }
+
+func TestWarehouses_GetWarehouseByID_Created(t *testing.T) {
+	db := testutil.OpenDB(t)
+	repo := infrastructure.NewRepository(db)
+	ctx := context.Background()
+
+	id, err := repo.CreateWarehouse(ctx, testutil.OwnerID, domain.WarehouseInput{
+		Name:    "GetByID Test WH",
+		City:    "TestCity",
+		Country: "US",
+		IsActive: true,
+	})
+	if err != nil {
+		t.Fatalf("CreateWarehouse: %v", err)
+	}
+	t.Cleanup(func() { _ = repo.DeleteWarehouse(ctx, testutil.OwnerID, id) })
+
+	w, err := repo.GetWarehouseByID(ctx, testutil.OwnerID, id)
+	if err != nil {
+		t.Fatalf("GetWarehouseByID: %v", err)
+	}
+	if w.ID != id {
+		t.Errorf("expected ID=%d, got %d", id, w.ID)
+	}
+	if w.Name != "GetByID Test WH" {
+		t.Errorf("expected Name='GetByID Test WH', got %q", w.Name)
+	}
+}
+
+func TestWarehouses_GetWarehouseByID_NotFound(t *testing.T) {
+	db := testutil.OpenDB(t)
+	repo := infrastructure.NewRepository(db)
+	ctx := context.Background()
+
+	_, err := repo.GetWarehouseByID(ctx, testutil.OwnerID, 9999999)
+	if err != domain.ErrWarehouseNotFound {
+		t.Fatalf("expected ErrWarehouseNotFound, got %v", err)
+	}
+}
+
+func TestWarehouses_GetWarehouseByID_WrongOwner(t *testing.T) {
+	db := testutil.OpenDB(t)
+	repo := infrastructure.NewRepository(db)
+	ctx := context.Background()
+
+	id, err := repo.CreateWarehouse(ctx, testutil.OwnerID, domain.WarehouseInput{
+		Name:     "Owner Scope WH",
+		IsActive: true,
+	})
+	if err != nil {
+		t.Fatalf("CreateWarehouse: %v", err)
+	}
+	t.Cleanup(func() { _ = repo.DeleteWarehouse(ctx, testutil.OwnerID, id) })
+
+	_, err = repo.GetWarehouseByID(ctx, 9999999, id)
+	if err != domain.ErrWarehouseNotFound {
+		t.Fatalf("expected ErrWarehouseNotFound for wrong owner, got %v", err)
+	}
+}
