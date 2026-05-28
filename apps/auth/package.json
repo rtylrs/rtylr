@@ -10,6 +10,7 @@
     "typecheck": "tsc --noEmit"
   },
   "dependencies": {
+    "@tanstack/react-router": "^1.170.8",
     "@voxire/api": "workspace:*",
     "@voxire/auth": "workspace:*",
     "@voxire/i18n": "workspace:*",
