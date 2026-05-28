@@ -64,3 +64,35 @@ func TestRedeem_PropagatesError(t *testing.T) {
 		t.Errorf("expected sentinel, got %v", err)
 	}
 }
+
+func TestCreate_RejectsBlankCode(t *testing.T) {
+	s := &Service{repo: &mockRepo{}}
+	_, err := s.Create(context.Background(), 1, domain.GiftCardInput{InitialAmount: 50})
+	if err == nil {
+		t.Fatal("expected error for blank code")
+	}
+}
+
+func TestCreate_RejectsZeroAmount(t *testing.T) {
+	s := &Service{repo: &mockRepo{}}
+	_, err := s.Create(context.Background(), 1, domain.GiftCardInput{Code: "GC1", InitialAmount: 0})
+	if err == nil {
+		t.Fatal("expected error for zero initial amount")
+	}
+}
+
+func TestRedeem_RejectsBlankCode(t *testing.T) {
+	s := &Service{repo: &mockRepo{}}
+	_, err := s.Redeem(context.Background(), 1, domain.RedeemInput{Amount: 10})
+	if err == nil {
+		t.Fatal("expected error for blank code")
+	}
+}
+
+func TestRedeem_RejectsZeroAmount(t *testing.T) {
+	s := &Service{repo: &mockRepo{}}
+	_, err := s.Redeem(context.Background(), 1, domain.RedeemInput{Code: "GC1", Amount: 0})
+	if err == nil {
+		t.Fatal("expected error for zero amount")
+	}
+}
