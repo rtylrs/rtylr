@@ -28,9 +28,9 @@ func (r *Repository) ListCareers(ctx context.Context, ownerID int64, publishedOn
 	            COALESCE(is_published, false), is_active,
 	            created_at, updated_at
 	        FROM careers
-	        WHERE owner_id = ?`
+	        WHERE owner_id = ? AND is_active = true`
 	if publishedOnly {
-		q += " AND is_published = true AND is_active = true"
+		q += " AND is_published = true"
 	}
 	q += " ORDER BY created_at DESC"
 

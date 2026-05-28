@@ -3,6 +3,7 @@ package infrastructure
 import (
 	"context"
 	"database/sql"
+	"errors"
 
 	"github.com/voxire/onion/internal/modules/pos_terminals/internal/domain"
 	"github.com/voxire/onion/internal/modules/pos_terminals/internal/infrastructure/persistence/sqlc"
@@ -82,13 +83,20 @@ func (r *Repository) Update(ctx context.Context, input domain.TerminalUpdateInpu
 }
 
 func (r *Repository) Heartbeat(ctx context.Context, terminalID, businessID int64) error {
-	err := r.queries.UpdateTerminalHeartbeat(ctx, sqlc.UpdateTerminalHeartbeatParams{
-		ID:         terminalID,
-		BusinessID: businessID,
-	})
+	result, err := r.pool.ExecContext(ctx,
+		`UPDATE pos_terminals SET last_seen_at = NOW() WHERE id = ? AND business_id = ?`,
+		terminalID, businessID,
+	)
 	if err != nil {
 		logger.Ctx(ctx).Error("Failed to update terminal heartbeat", logger.Error(err))
 		return err
+	}
+	rows, err := result.RowsAffected()
+	if err != nil {
+		return err
+	}
+	if rows == 0 {
+		return errors.New("terminal not found")
 	}
 	return nil
 }

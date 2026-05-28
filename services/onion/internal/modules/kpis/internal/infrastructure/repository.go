@@ -24,7 +24,7 @@ func (r *Repository) GetKPIs(ctx context.Context, ownerID int64) (domain.KPISumm
 
 	// Staff count
 	err := r.pool.QueryRowContext(ctx,
-		`SELECT COUNT(*) FROM user_app_permissions WHERE owner_id = ? AND is_active = TRUE`, ownerID,
+		`SELECT COUNT(*) FROM hr_staff WHERE owner_id = ? AND status = 'active'`, ownerID,
 	).Scan(&kpi.StaffCount)
 	if err != nil && !errors.Is(err, sql.ErrNoRows) {
 		logger.Ctx(ctx).Error("Failed to get staff count", logger.Error(err))

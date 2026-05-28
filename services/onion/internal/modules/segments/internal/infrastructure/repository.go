@@ -107,7 +107,7 @@ func (r *Repository) Update(ctx context.Context, input domain.SegmentUpdateInput
 }
 
 func (r *Repository) Delete(ctx context.Context, ownerID, id int64) error {
-	result, err := r.queries.DeleteSegment(ctx, sqlc.DeleteSegmentParams{
+	_, err := r.queries.DeleteSegment(ctx, sqlc.DeleteSegmentParams{
 		ID:      id,
 		OwnerID: ownerID,
 	})
@@ -115,15 +115,6 @@ func (r *Repository) Delete(ctx context.Context, ownerID, id int64) error {
 		logger.Ctx(ctx).Error("Failed to delete segment", logger.Error(err))
 
 		return err
-	}
-
-	rows, err := result.RowsAffected()
-	if err != nil {
-		return err
-	}
-
-	if rows == 0 {
-		return domain.ErrSegmentNotFound
 	}
 
 	return nil

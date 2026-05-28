@@ -79,20 +79,13 @@ func (r *Repository) Update(ctx context.Context, input domain.TableUpdateInput) 
 }
 
 func (r *Repository) Delete(ctx context.Context, ownerID, id int64) error {
-	result, err := r.queries.DeleteTable(ctx, sqlc.DeleteTableParams{
+	_, err := r.queries.DeleteTable(ctx, sqlc.DeleteTableParams{
 		ID:      id,
 		OwnerID: ownerID,
 	})
 	if err != nil {
 		logger.Ctx(ctx).Error("Failed to delete table", logger.Error(err))
 		return err
-	}
-	rows, err := result.RowsAffected()
-	if err != nil {
-		return err
-	}
-	if rows == 0 {
-		return domain.ErrTableNotFound
 	}
 	return nil
 }

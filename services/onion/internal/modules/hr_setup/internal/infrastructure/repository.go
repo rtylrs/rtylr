@@ -29,7 +29,7 @@ func (r *Repository) GetSetupSteps(ctx context.Context, ownerID int64) ([]*domai
 	}
 	defer rows.Close()
 
-	var steps []*domain.SetupStep
+	steps := make([]*domain.SetupStep, 0)
 	for rows.Next() {
 		var s domain.SetupStep
 		if err := rows.Scan(&s.ID, &s.OwnerID, &s.StepKey, &s.CompletedAt); err != nil {
