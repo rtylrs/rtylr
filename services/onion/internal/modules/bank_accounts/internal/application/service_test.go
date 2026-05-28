@@ -9,11 +9,15 @@ import (
 )
 
 type mockRepo struct {
-	listResult []domain.BankAccount
-	listErr    error
-	createID   int64
-	createErr  error
-	createGot  struct {
+	listResult    []domain.BankAccount
+	listErr       error
+	createID      int64
+	createErr     error
+	totalBalance  float64
+	totalBalErr   error
+	connectedCnt  int64
+	connectedErr  error
+	createGot     struct {
 		ownerID int64
 		input   domain.BankAccountInput
 	}
@@ -27,6 +31,14 @@ func (m *mockRepo) Create(_ context.Context, ownerID int64, input domain.BankAcc
 	m.createGot.ownerID = ownerID
 	m.createGot.input = input
 	return m.createID, m.createErr
+}
+
+func (m *mockRepo) TotalBalance(_ context.Context, _ int64) (float64, error) {
+	return m.totalBalance, m.totalBalErr
+}
+
+func (m *mockRepo) CountConnected(_ context.Context, _ int64) (int64, error) {
+	return m.connectedCnt, m.connectedErr
 }
 
 func TestList_Delegates(t *testing.T) {
@@ -120,5 +132,59 @@ func TestCreate_ForwardsInput(t *testing.T) {
 	_, _ = s.Create(context.Background(), 1, input)
 	if m.createGot.input.Name != "Petty Cash" || m.createGot.input.Institution != "Local Bank" {
 		t.Errorf("input not forwarded: %+v", m.createGot.input)
+	}
+}
+
+func TestTotalBalance_Delegates(t *testing.T) {
+	s := &Service{repo: &mockRepo{totalBalance: 9999.99}}
+	got, err := s.TotalBalance(context.Background(), 1)
+	if err != nil {
+		t.Fatalf("unexpected: %v", err)
+	}
+	if got != 9999.99 {
+		t.Errorf("expected 9999.99, got %f", got)
+	}
+}
+
+func TestTotalBalance_PropagatesError(t *testing.T) {
+	want := errors.New("db err")
+	s := &Service{repo: &mockRepo{totalBalErr: want}}
+	if _, err := s.TotalBalance(context.Background(), 1); !errors.Is(err, want) {
+		t.Errorf("expected sentinel, got %v", err)
+	}
+}
+
+func TestTotalBalance_ZeroWhenNoAccounts(t *testing.T) {
+	s := &Service{repo: &mockRepo{totalBalance: 0}}
+	got, err := s.TotalBalance(context.Background(), 1)
+	if err != nil || got != 0 {
+		t.Errorf("expected (0, nil), got (%f, %v)", got, err)
+	}
+}
+
+func TestConnectedCount_Delegates(t *testing.T) {
+	s := &Service{repo: &mockRepo{connectedCnt: 3}}
+	got, err := s.ConnectedCount(context.Background(), 1)
+	if err != nil {
+		t.Fatalf("unexpected: %v", err)
+	}
+	if got != 3 {
+		t.Errorf("expected 3, got %d", got)
+	}
+}
+
+func TestConnectedCount_PropagatesError(t *testing.T) {
+	want := errors.New("conn err")
+	s := &Service{repo: &mockRepo{connectedErr: want}}
+	if _, err := s.ConnectedCount(context.Background(), 1); !errors.Is(err, want) {
+		t.Errorf("expected sentinel, got %v", err)
+	}
+}
+
+func TestConnectedCount_ZeroWhenNoneConnected(t *testing.T) {
+	s := &Service{repo: &mockRepo{connectedCnt: 0}}
+	got, err := s.ConnectedCount(context.Background(), 1)
+	if err != nil || got != 0 {
+		t.Errorf("expected (0, nil), got (%d, %v)", got, err)
 	}
 }
