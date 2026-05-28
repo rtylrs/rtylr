@@ -311,6 +311,9 @@ func (s *Service) SplitOrder(ctx context.Context, ownerID, orderID int64, splits
 }
 
 func (s *Service) ApplyDiscount(ctx context.Context, ownerID int64, input domain.DiscountInput) error {
+	if err := domain.ValidateDiscountInput(input); err != nil {
+		return err
+	}
 	if err := s.repo.ApplyDiscount(ctx, ownerID, input); err != nil {
 		return err
 	}
