@@ -25,6 +25,10 @@ func NewRepository(db *sql.DB) *Repository {
 func (r *Repository) GetProfile(ctx context.Context, ownerID int64) (domain.BusinessProfile, error) {
 	var profile domain.BusinessProfile
 
+	if ownerID == 0 {
+		return profile, errors.New("ownerID must be non-zero")
+	}
+
 	row, err := r.queries.GetBusinessProfile(ctx, int32(ownerID))
 	if err != nil && !errors.Is(err, sql.ErrNoRows) {
 		logger.Ctx(ctx).Error("Failed to get business profile", logger.Error(err))
