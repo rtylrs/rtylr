@@ -4,7 +4,7 @@ CREATE TABLE IF NOT EXISTS hub_api_keys (
     name VARCHAR(255) NOT NULL,
     key_hash VARCHAR(255) NOT NULL,
     key_prefix VARCHAR(10) NOT NULL,
-    scopes JSON NULL,
+    scopes JSON DEFAULT (JSON_ARRAY()),
     last_used_at TIMESTAMP NULL,
     expires_at TIMESTAMP NULL,
     is_active BOOLEAN NOT NULL DEFAULT TRUE,
