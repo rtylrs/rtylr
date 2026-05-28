@@ -18,11 +18,11 @@ VALUES
     (3201, 1001, 3001, 1002, 'open', 100.00, 250.00, 2)
 ON DUPLICATE KEY UPDATE status = VALUES(status);
 
-INSERT INTO pos_orders (id, owner_id, session_id, table_id, location_id, order_number, type, status, customer_name, staff_id, subtotal)
+INSERT INTO pos_orders (id, owner_id, session_id, table_id, location_id, order_number, type, status, payment_status, customer_name, staff_id, subtotal)
 VALUES
-    (3301, 1001, 3201, 3101, 3001, 'ORD-1', 'dine_in', 'paid',     'Walk-in', 1002, 150.00),
-    (3302, 1001, 3201, 3102, 3001, 'ORD-2', 'dine_in', 'refunded', 'Walk-in', 1002, 100.00)
-ON DUPLICATE KEY UPDATE status = VALUES(status);
+    (3301, 1001, 3201, 3101, 3001, 'ORD-1', 'dine_in', 'paid',     'paid',    'Walk-in', 1002, 150.00),
+    (3302, 1001, 3201, 3102, 3001, 'ORD-2', 'dine_in', 'refunded', 'refunded','Walk-in', 1002, 100.00)
+ON DUPLICATE KEY UPDATE status = VALUES(status), payment_status = VALUES(payment_status);
 
 INSERT INTO pos_order_items (id, order_id, name, quantity, unit_price, total)
 VALUES
