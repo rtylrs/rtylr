@@ -417,3 +417,100 @@ func TestListInvoices_SearchByCustomer(t *testing.T) {
 		t.Errorf("created invoice id=%d not found when searching by client name", invID)
 	}
 }
+
+func TestCountInvoicesByStatus_NoError(t *testing.T) {
+	db := testutil.OpenDB(t)
+	repo := infrastructure.NewRepository(db)
+	ctx := context.Background()
+
+	counts, err := repo.CountInvoicesByStatus(ctx, testutil.OwnerID)
+	if err != nil {
+		t.Fatalf("CountInvoicesByStatus: %v", err)
+	}
+	// Returned map may be empty if owner has no invoices; just assert no error.
+	_ = counts
+}
+
+func TestCountInvoicesByStatus_ZeroOwnerReturnsEmptyMap(t *testing.T) {
+	db := testutil.OpenDB(t)
+	repo := infrastructure.NewRepository(db)
+	ctx := context.Background()
+
+	counts, err := repo.CountInvoicesByStatus(ctx, 0)
+	if err != nil {
+		t.Fatalf("CountInvoicesByStatus(ownerID=0): %v", err)
+	}
+	if len(counts) != 0 {
+		t.Errorf("expected empty map for ownerID=0, got %v", counts)
+	}
+}
+
+func TestCountInvoicesByStatus_ReflectsCreatedInvoice(t *testing.T) {
+	db := testutil.OpenDB(t)
+	repo := infrastructure.NewRepository(db)
+	ctx := context.Background()
+
+	id, err := repo.CreateInvoice(ctx, testutil.OwnerID, domain.Invoice{
+		InvoiceNumber: "CNT-001",
+		ClientName:    "Count Corp",
+		IssueDate:     time.Now(),
+		DueDate:       time.Now().Add(30 * 24 * time.Hour),
+		Currency:      "USD",
+		Status:        "draft",
+	})
+	if err != nil {
+		t.Fatalf("CreateInvoice: %v", err)
+	}
+	t.Cleanup(func() {
+		db.ExecContext(ctx, "DELETE FROM finance_invoices WHERE id = ?", id)
+	})
+
+	counts, err := repo.CountInvoicesByStatus(ctx, testutil.OwnerID)
+	if err != nil {
+		t.Fatalf("CountInvoicesByStatus: %v", err)
+	}
+	if counts["draft"] <= 0 {
+		t.Errorf("expected at least 1 draft invoice, got %d", counts["draft"])
+	}
+}
+
+func TestGetOverdueInvoices_NoError(t *testing.T) {
+	db := testutil.OpenDB(t)
+	repo := infrastructure.NewRepository(db)
+	ctx := context.Background()
+
+	overdue, err := repo.GetOverdueInvoices(ctx, testutil.OwnerID, "")
+	if err != nil {
+		t.Fatalf("GetOverdueInvoices: %v", err)
+	}
+	_ = overdue
+}
+
+func TestGetOverdueInvoices_ZeroOwnerReturnsEmpty(t *testing.T) {
+	db := testutil.OpenDB(t)
+	repo := infrastructure.NewRepository(db)
+	ctx := context.Background()
+
+	overdue, err := repo.GetOverdueInvoices(ctx, 0, "")
+	if err != nil {
+		t.Fatalf("GetOverdueInvoices(ownerID=0): %v", err)
+	}
+	if len(overdue) != 0 {
+		t.Errorf("expected empty slice for ownerID=0, got %d", len(overdue))
+	}
+}
+
+func TestGetOverdueInvoices_FutureCutoffReturnsNone(t *testing.T) {
+	db := testutil.OpenDB(t)
+	repo := infrastructure.NewRepository(db)
+	ctx := context.Background()
+
+	// A past cutoff means nothing is "overdue before year 2000".
+	overdue, err := repo.GetOverdueInvoices(ctx, testutil.OwnerID, "2000-01-01")
+	if err != nil {
+		t.Fatalf("GetOverdueInvoices past cutoff: %v", err)
+	}
+	if len(overdue) != 0 {
+		t.Errorf("expected 0 overdue before year 2000, got %d", len(overdue))
+	}
+}
