@@ -31,12 +31,17 @@ func (r *Repository) CreateAttendanceRecord(ctx context.Context, ownerID int64, 
 		return nil, err
 	}
 
+	clockInAt := record.ClockInAt
+	if clockInAt.IsZero() {
+		clockInAt = time.Now()
+	}
+
 	result, err := r.queries.CreateAttendanceRecord(ctx, sqlc.CreateAttendanceRecordParams{
 		OwnerID:       ownerID,
 		EmployeeID:    record.EmployeeID,
 		LocationID:    record.LocationID,
 		Date:          date,
-		ClockInAt:     record.ClockInAt,
+		ClockInAt:     clockInAt,
 		ClockInMethod: record.ClockInMethod,
 		ClockInLat:    nullFloat64(record.ClockInLat),
 		ClockInLng:    nullFloat64(record.ClockInLng),
@@ -98,6 +103,11 @@ func (r *Repository) ListAttendance(ctx context.Context, ownerID int64, params d
 		return nil, 0, err
 	}
 
+	// When EmployeeID is 0, query all employees for the owner.
+	if params.EmployeeID == 0 {
+		return r.listAllAttendance(ctx, ownerID, dateFrom, dateTo, params.Limit, params.Offset)
+	}
+
 	total, err := r.queries.CountAttendance(ctx, sqlc.CountAttendanceParams{
 		OwnerID:    ownerID,
 		EmployeeID: params.EmployeeID,
@@ -125,6 +135,50 @@ func (r *Repository) ListAttendance(ctx context.Context, ownerID int64, params d
 	records := make([]domain.AttendanceRecordRecord, 0, len(rows))
 	for _, row := range rows {
 		records = append(records, attendanceFromRow(row))
+	}
+	return records, total, nil
+}
+
+func (r *Repository) listAllAttendance(ctx context.Context, ownerID int64, dateFrom, dateTo time.Time, limit, offset int32) ([]domain.AttendanceRecordRecord, int64, error) {
+	var total int64
+	err := r.pool.QueryRowContext(ctx,
+		`SELECT COUNT(*) FROM hr_attendance_records WHERE owner_id = ? AND date >= ? AND date <= ?`,
+		ownerID, dateFrom, dateTo,
+	).Scan(&total)
+	if err != nil {
+		return nil, 0, err
+	}
+
+	rows, err := r.pool.QueryContext(ctx,
+		`SELECT id, owner_id, employee_id, location_id, date, clock_in_at, clock_out_at,
+		        duration_minutes, clock_in_method, clock_in_lat, clock_in_lng,
+		        is_late, late_minutes, status, created_at, updated_at
+		 FROM hr_attendance_records
+		 WHERE owner_id = ? AND date >= ? AND date <= ?
+		 ORDER BY date DESC, clock_in_at DESC
+		 LIMIT ? OFFSET ?`,
+		ownerID, dateFrom, dateTo, limit, offset,
+	)
+	if err != nil {
+		return nil, 0, err
+	}
+	defer rows.Close()
+
+	records := make([]domain.AttendanceRecordRecord, 0)
+	for rows.Next() {
+		var row sqlc.HrAttendanceRecord
+		if err := rows.Scan(
+			&row.ID, &row.OwnerID, &row.EmployeeID, &row.LocationID,
+			&row.Date, &row.ClockInAt, &row.ClockOutAt,
+			&row.DurationMinutes, &row.ClockInMethod, &row.ClockInLat, &row.ClockInLng,
+			&row.IsLate, &row.LateMinutes, &row.Status, &row.CreatedAt, &row.UpdatedAt,
+		); err != nil {
+			return nil, 0, err
+		}
+		records = append(records, attendanceFromRow(row))
+	}
+	if err := rows.Err(); err != nil {
+		return nil, 0, err
 	}
 	return records, total, nil
 }
