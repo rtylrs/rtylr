@@ -14,7 +14,7 @@ func TestListProducts_ReturnsAllFixtureProducts(t *testing.T) {
 	repo := infrastructure.NewRepository(db)
 	ctx := context.Background()
 
-	products, _, err := repo.ListProducts(ctx, testutil.OwnerID, "", 0, 10, 0)
+	products, _, err := repo.ListProducts(ctx, testutil.OwnerID, "", 0, 1000, 0)
 	if err != nil {
 		t.Fatalf("unexpected error: %v", err)
 	}
@@ -39,7 +39,7 @@ func TestListProducts_SaladHasLowStock(t *testing.T) {
 	repo := infrastructure.NewRepository(db)
 	ctx := context.Background()
 
-	products, _, err := repo.ListProducts(ctx, testutil.OwnerID, "", 0, 10, 0)
+	products, _, err := repo.ListProducts(ctx, testutil.OwnerID, "", 0, 1000, 0)
 	if err != nil {
 		t.Fatalf("unexpected error: %v", err)
 	}
