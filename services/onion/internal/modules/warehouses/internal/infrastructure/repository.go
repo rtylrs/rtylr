@@ -143,6 +143,69 @@ func (r *Repository) DeleteWarehouse(ctx context.Context, ownerID, id int64) err
 	return nil
 }
 
+// GetWarehouseByID fetches a single warehouse by primary key for the given owner.
+// Returns ErrWarehouseNotFound when no matching row exists.
+func (r *Repository) GetWarehouseByID(ctx context.Context, ownerID, id int64) (domain.Warehouse, error) {
+	const q = `
+		SELECT id, owner_id, name, address, city, country,
+		       manager_name, capacity, is_default, is_active,
+		       created_at, updated_at
+		FROM erp_warehouses
+		WHERE owner_id = ? AND id = ?
+		LIMIT 1`
+
+	row := r.pool.QueryRowContext(ctx, q, ownerID, id)
+
+	var w domain.Warehouse
+	var address, city, country, managerName sql.NullString
+	var capacity sql.NullInt64
+	var isDefault, isActive sql.NullBool
+	var createdAt, updatedAt sql.NullTime
+
+	err := row.Scan(
+		&w.ID, &w.OwnerID, &w.Name,
+		&address, &city, &country, &managerName, &capacity,
+		&isDefault, &isActive, &createdAt, &updatedAt,
+	)
+	if err != nil {
+		if err == sql.ErrNoRows {
+			return domain.Warehouse{}, domain.ErrWarehouseNotFound
+		}
+		logger.Ctx(ctx).Error("Failed to get warehouse by ID", logger.Error(err))
+		return domain.Warehouse{}, err
+	}
+
+	if address.Valid {
+		w.Address = address.String
+	}
+	if city.Valid {
+		w.City = city.String
+	}
+	if country.Valid {
+		w.Country = country.String
+	}
+	if managerName.Valid {
+		w.ManagerName = managerName.String
+	}
+	if capacity.Valid {
+		w.Capacity = capacity.Int64
+	}
+	if isDefault.Valid {
+		w.IsDefault = isDefault.Bool
+	}
+	if isActive.Valid {
+		w.IsActive = isActive.Bool
+	}
+	if createdAt.Valid {
+		w.CreatedAt = createdAt.Time
+	}
+	if updatedAt.Valid {
+		w.UpdatedAt = updatedAt.Time
+	}
+
+	return w, nil
+}
+
 func nullString(s string) sql.NullString {
 	return sql.NullString{String: s, Valid: s != ""}
 }
