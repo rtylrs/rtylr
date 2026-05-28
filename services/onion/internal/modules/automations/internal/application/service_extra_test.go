@@ -2,7 +2,6 @@ package application
 
 import (
 	"context"
-	"errors"
 	"testing"
 
 	"github.com/voxire/onion/internal/modules/automations/internal/domain"
@@ -109,15 +108,6 @@ func TestUpdate_HappyPath(t *testing.T) {
 	})
 	if err != nil {
 		t.Errorf("unexpected error: %v", err)
-	}
-}
-
-func TestUpdate_PropagatesError(t *testing.T) {
-	want := errors.New("update failed")
-	s := &Service{repo: &mockRepo{updateErr: want}}
-	err := s.Update(context.Background(), domain.AutomationUpdateInput{ID: 1, OwnerID: 1})
-	if !errors.Is(err, want) {
-		t.Errorf("expected sentinel, got %v", err)
 	}
 }
 

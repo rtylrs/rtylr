@@ -228,7 +228,6 @@ func (r *Repository) ListMembers(ctx context.Context, ownerID int64, limit, offs
 		if lastActive.Valid {
 			m.LastActiveAt = lastActive.Time
 		}
-		m.Initials = initialsFromName(m.Name)
 		members = append(members, m)
 	}
 	if rowsErr := rows.Err(); rowsErr != nil {

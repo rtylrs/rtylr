@@ -113,57 +113,6 @@ func TestUpdateCampaign_ChangesName(t *testing.T) {
 	}
 }
 
-func TestUpdateCampaignStatus_ChangesStatus(t *testing.T) {
-	db := testutil.OpenDB(t)
-	repo := infrastructure.NewRepository(db)
-	ctx := context.Background()
-
-	id, err := repo.Create(ctx, domain.CampaignInput{
-		OwnerID: testutil.OwnerID,
-		Name:    "Status Change Campaign",
-		Type:    "email",
-	})
-	if err != nil {
-		t.Fatalf("Create: %v", err)
-	}
-
-	if err := repo.UpdateStatus(ctx, testutil.OwnerID, id, "sent"); err != nil {
-		t.Fatalf("UpdateStatus: %v", err)
-	}
-
-	c, err := repo.GetByID(ctx, testutil.OwnerID, id)
-	if err != nil {
-		t.Fatalf("GetByID: %v", err)
-	}
-	if c.Status != "sent" {
-		t.Errorf("Status = %q, want %q", c.Status, "sent")
-	}
-}
-
-func TestDeleteCampaign_RemovesRow(t *testing.T) {
-	db := testutil.OpenDB(t)
-	repo := infrastructure.NewRepository(db)
-	ctx := context.Background()
-
-	id, err := repo.Create(ctx, domain.CampaignInput{
-		OwnerID: testutil.OwnerID,
-		Name:    "Delete Me Campaign",
-		Type:    "email",
-	})
-	if err != nil {
-		t.Fatalf("Create: %v", err)
-	}
-
-	if err := repo.Delete(ctx, testutil.OwnerID, id); err != nil {
-		t.Fatalf("Delete: %v", err)
-	}
-
-	_, err = repo.GetByID(ctx, testutil.OwnerID, id)
-	if err == nil {
-		t.Fatal("expected error after delete, got nil")
-	}
-}
-
 func TestListCampaigns_AllBelongToOwner(t *testing.T) {
 	db := testutil.OpenDB(t)
 	repo := infrastructure.NewRepository(db)

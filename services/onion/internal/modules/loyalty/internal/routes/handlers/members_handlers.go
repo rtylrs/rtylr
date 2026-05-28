@@ -55,7 +55,7 @@ func (h *ListMembersHandler) Serve(ctx context.Context, req *ListMembersRequest)
 		payloads = append(payloads, MemberPayload{
 			ID:           m.ID,
 			Name:         m.Name,
-			Initials:     m.Initials,
+			Initials:     m.Initials(),
 			Points:       m.Points,
 			Tier:         m.Tier,
 			Visits:       m.Visits,

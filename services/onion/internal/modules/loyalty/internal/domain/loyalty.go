@@ -66,7 +66,6 @@ type LoyaltyMember struct {
 	ID           int64     `json:"id"`
 	OwnerID      int64     `json:"owner_id"`
 	Name         string    `json:"name"`
-	Initials     string    `json:"initials"`
 	Points       int       `json:"points"`
 	Tier         string    `json:"tier"`
 	Visits       int       `json:"visits"`
