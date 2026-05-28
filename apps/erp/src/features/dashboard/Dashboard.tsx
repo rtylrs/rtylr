@@ -11,7 +11,7 @@ import {
   Activity,
   PackagePlus,
 } from 'lucide-react';
-import { Link } from 'react-router-dom';
+import { Link } from '@tanstack/react-router';
 import { LowStockItem, PurchaseOrder } from '../../shared/services/erpApi';
 import { useLowStock } from '../inventory/useInventory';
 import { usePurchaseOrders } from '../purchasing/usePurchaseOrders';

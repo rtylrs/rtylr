@@ -2,7 +2,7 @@ import React, { useEffect, useRef, useState } from 'react';
 import { cn, Avatar } from '@voxire/ui';
 import TrialBanner from '../shared/components/TrialBanner';
 import { useForesightLinks } from '@voxire/utils';
-import { useLocation, Link, useNavigate } from 'react-router-dom';
+import { Link, useNavigate, useRouterState, Outlet } from '@tanstack/react-router';
 import { motion, AnimatePresence } from 'motion/react';
 import { APP_URLS, getAvatarUrl } from '@voxire/config';
 import { signOut, useUserStore } from '@voxire/auth';
@@ -141,8 +141,8 @@ function applyTheme(theme: Theme) {
 }
 
 const SidebarNavItem: React.FC<NavItem> = ({ label, path, icon: Icon }) => {
-  const location = useLocation();
-  const isActive = path === '/' ? location.pathname === '/' : location.pathname.startsWith(path);
+  const pathname = useRouterState({ select: (s) => s.location.pathname });
+  const isActive = path === '/' ? pathname === '/' : pathname.startsWith(path);
 
   return (
     <Link
@@ -179,12 +179,8 @@ const SidebarNavItem: React.FC<NavItem> = ({ label, path, icon: Icon }) => {
   );
 };
 
-interface DefaultLayoutProps {
-  children?: React.ReactNode;
-}
-
-const DefaultLayout: React.FC<DefaultLayoutProps> = ({ children }) => {
-  const location = useLocation();
+const DefaultLayout: React.FC = () => {
+  const pathname = useRouterState({ select: (s) => s.location.pathname });
   const navigate = useNavigate();
   const [theme, setThemeState] = useState<Theme>(() => {
     return (localStorage.getItem('rtylr-erp-theme') as Theme) || 'dark';
@@ -221,7 +217,7 @@ const DefaultLayout: React.FC<DefaultLayoutProps> = ({ children }) => {
   const erpUser = useUserStore((s) => s.user);
   const userId = Number(erpUser?.id) || 0;
   const { isOpen: caretOpen } = useCaretStore();
-  const pageTitle = getPageTitle(location.pathname);
+  const pageTitle = getPageTitle(pathname);
 
   useEffect(() => {
     applyTheme(theme);
@@ -229,7 +225,7 @@ const DefaultLayout: React.FC<DefaultLayoutProps> = ({ children }) => {
 
   useEffect(() => {
     setSidebarOpen(false);
-  }, [location.pathname]);
+  }, [pathname]);
 
   const rawUser = (() => {
     try {
@@ -286,16 +282,16 @@ const DefaultLayout: React.FC<DefaultLayoutProps> = ({ children }) => {
       } else if (e.shiftKey) {
         if (e.key === 'I' || e.key === 'i') {
           e.preventDefault();
-          navigate('/inventory');
+          navigate({ to: '/inventory' });
         } else if (e.key === 'P' || e.key === 'p') {
           e.preventDefault();
-          navigate('/purchasing');
+          navigate({ to: '/purchasing' });
         } else if (e.key === 'S' || e.key === 's') {
           e.preventDefault();
-          navigate('/suppliers');
+          navigate({ to: '/suppliers' });
         } else if (e.key === 'D' || e.key === 'd') {
           e.preventDefault();
-          navigate('/');
+          navigate({ to: '/' });
         }
       }
     };
@@ -599,14 +595,14 @@ const DefaultLayout: React.FC<DefaultLayoutProps> = ({ children }) => {
             <TrialBanner />
             <AnimatePresence mode="wait">
               <motion.main
-                key={location.pathname}
+                key={pathname}
                 initial={{ opacity: 0, y: 6 }}
                 animate={{ opacity: 1, y: 0 }}
                 exit={{ opacity: 0, y: -4 }}
                 transition={{ duration: 0.18, ease: 'easeOut' }}
                 className="flex-1 overflow-y-auto p-6"
               >
-                {children}
+                <Outlet />
               </motion.main>
             </AnimatePresence>
           </div>

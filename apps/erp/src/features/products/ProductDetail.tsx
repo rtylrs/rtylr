@@ -1,5 +1,5 @@
 import React, { useState } from 'react';
-import { useParams, Link, useNavigate } from 'react-router-dom';
+import { useParams, Link, useNavigate } from '@tanstack/react-router';
 import { motion } from 'motion/react';
 import { ArrowLeft, Edit3, Trash2, Package, TrendingUp, Clock, Tag, Truck } from 'lucide-react';
 import { toast } from 'sonner';
@@ -55,7 +55,7 @@ const MiniLineChart: React.FC<{ data: number[]; color: string; height?: number }
 const ProductDetail: React.FC = () => {
   const { t } = useTranslation();
   const navigate = useNavigate();
-  const { id } = useParams<{ id: string }>();
+  const { id } = useParams({ strict: false });
   const productId = id ? parseInt(id) : undefined;
   const { data: product, isLoading } = useProduct(productId);
   const { data: variants = [] } = useVariants(productId);
@@ -69,7 +69,7 @@ const ProductDetail: React.FC = () => {
       onSuccess: () => {
         toast.success(t('erp.products.toast.deleted'));
         setConfirmDelete(false);
-        navigate('/products');
+        navigate({ to: '/products' });
       },
       onError: () => {
         toast.error(t('erp.products.toast.deleteFailed'));

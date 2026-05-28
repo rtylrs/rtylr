@@ -1,5 +1,5 @@
 import React, { useEffect, useMemo, useState } from 'react';
-import { useNavigate } from 'react-router-dom';
+import { useNavigate } from '@tanstack/react-router';
 import { Search, Package, Users, ShoppingCart, LayoutDashboard, ArrowRight } from 'lucide-react';
 import { useProducts } from '../../features/products/useProducts';
 import { useSuppliers } from '../../features/suppliers/useSuppliers';
@@ -117,7 +117,7 @@ const CommandPalette: React.FC<CommandPaletteProps> = ({ open, onClose }) => {
         e.preventDefault();
         const r = results[activeIdx];
         if (r) {
-          nav(r.to);
+          nav({ to: r.to });
           onClose();
         }
       } else if (e.key === 'Escape') {
@@ -178,7 +178,7 @@ const CommandPalette: React.FC<CommandPaletteProps> = ({ open, onClose }) => {
                 <button
                   key={`${r.type}-${r.label}-${i}`}
                   onClick={() => {
-                    nav(r.to);
+                    nav({ to: r.to });
                     onClose();
                   }}
                   onMouseEnter={() => setActiveIdx(i)}

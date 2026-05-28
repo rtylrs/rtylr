@@ -19,7 +19,7 @@ import QuickAddProductModal from '../../shared/components/QuickAddProductModal';
 import PageHeader from '../../shared/components/PageHeader';
 import { formatCurrency } from '../../shared/lib/format';
 import { toast } from 'sonner';
-import { Link } from 'react-router-dom';
+import { Link } from '@tanstack/react-router';
 
 const AMBER = '#f59e0b';
 
@@ -257,7 +257,8 @@ const Products: React.FC = () => {
                   className="cursor-pointer"
                 />
                 <Link
-                  to={`/products/${p.id}`}
+                  to="/products/$id"
+                  params={{ id: String(p.id) }}
                   className="text-sm font-medium hover:underline"
                   style={{ color: 'var(--hub-text)', textDecoration: 'none' }}
                 >

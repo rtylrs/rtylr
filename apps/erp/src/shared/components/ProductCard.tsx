@@ -1,5 +1,5 @@
 import React from 'react';
-import { Link } from 'react-router-dom';
+import { Link } from '@tanstack/react-router';
 import { Package } from 'lucide-react';
 import { Product } from '../services/erpApi';
 import { formatCurrency } from '../lib/format';
@@ -46,7 +46,8 @@ const ProductCard: React.FC<ProductCardProps> = ({ product, selected, onToggle, 
         </div>
         <div className="flex-1 min-w-0">
           <Link
-            to={`/products/${product.id}`}
+            to="/products/$id"
+            params={{ id: String(product.id) }}
             className="text-sm font-medium truncate block hover:underline"
             style={{ color: 'var(--hub-text)', textDecoration: 'none' }}
           >

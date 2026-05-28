@@ -1,7 +1,7 @@
 import React, { useState } from 'react';
 import { motion, type Variants } from 'motion/react';
 import { Search, Plus } from 'lucide-react';
-import { useNavigate } from 'react-router-dom';
+import { useNavigate } from '@tanstack/react-router';
 import { useTranslation } from 'react-i18next';
 import { Product } from '../../shared/services/erpApi';
 import { useProducts } from '../products/useProducts';
@@ -89,7 +89,7 @@ const Inventory: React.FC = () => {
         </h2>
         <button
           data-testid="inventory-add-product-button"
-          onClick={() => navigate('/products')}
+          onClick={() => navigate({ to: '/products' })}
           className="flex items-center gap-2 px-3 py-2 rounded-lg text-sm font-medium transition-colors"
           style={{ background: AMBER, color: '#000' }}
           onMouseEnter={(e) => {
