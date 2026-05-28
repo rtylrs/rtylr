@@ -67,3 +67,66 @@ func TestConvertToInvoice_Delegates(t *testing.T) {
 		t.Errorf("id=%d err=%v", id, err)
 	}
 }
+
+func TestCreate_ReturnsID(t *testing.T) {
+	s := &Service{repo: &mockRepo{createID: 77}}
+	id, err := s.Create(context.Background(), 1, domain.QuoteInput{CustomerName: "Test"})
+	if err != nil {
+		t.Fatalf("unexpected error: %v", err)
+	}
+	if id != 77 {
+		t.Errorf("expected id=77, got %d", id)
+	}
+}
+
+func TestList_EmptyRepoReturnsEmpty(t *testing.T) {
+	s := &Service{repo: &mockRepo{list: []domain.Quote{}}}
+	got, hasMore, err := s.List(context.Background(), 1, 1, 20)
+	if err != nil {
+		t.Fatalf("unexpected error: %v", err)
+	}
+	if len(got) != 0 || hasMore {
+		t.Errorf("expected empty non-paged result, got len=%d hasMore=%v", len(got), hasMore)
+	}
+}
+
+func TestList_HasMoreWhenResultExceedsPageSize(t *testing.T) {
+	quotes := make([]domain.Quote, 21)
+	for i := range quotes {
+		quotes[i].ID = int64(i + 1)
+	}
+	s := &Service{repo: &mockRepo{list: quotes}}
+	got, hasMore, err := s.List(context.Background(), 1, 1, 20)
+	if err != nil {
+		t.Fatalf("unexpected error: %v", err)
+	}
+	if !hasMore {
+		t.Error("expected hasMore=true when repo returns limit+1 rows")
+	}
+	if len(got) != 20 {
+		t.Errorf("expected 20 rows, got %d", len(got))
+	}
+}
+
+func TestUpdate_HappyPath(t *testing.T) {
+	s := &Service{repo: &mockRepo{}}
+	if err := s.Update(context.Background(), 1, 5, domain.QuoteInput{CustomerName: "Updated"}); err != nil {
+		t.Errorf("unexpected error: %v", err)
+	}
+}
+
+func TestDelete_HappyPath(t *testing.T) {
+	s := &Service{repo: &mockRepo{}}
+	if err := s.Delete(context.Background(), 1, 5); err != nil {
+		t.Errorf("unexpected error: %v", err)
+	}
+}
+
+func TestConvertToInvoice_PropagatesError(t *testing.T) {
+	want := errors.New("already converted")
+	s := &Service{repo: &mockRepo{convErr: want}}
+	_, err := s.ConvertToInvoice(context.Background(), 1, 5)
+	if !errors.Is(err, want) {
+		t.Errorf("expected sentinel, got %v", err)
+	}
+}
