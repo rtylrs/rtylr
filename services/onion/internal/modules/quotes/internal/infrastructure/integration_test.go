@@ -533,3 +533,53 @@ func TestListQuotes_ScopedToOwner(t *testing.T) {
 		}
 	}
 }
+
+func TestCountByStatus_Quotes_NoError(t *testing.T) {
+	db := testutil.OpenDB(t)
+	repo := infrastructure.NewRepository(db)
+	ctx := context.Background()
+
+	counts, err := repo.CountByStatus(ctx, testutil.OwnerID)
+	if err != nil {
+		t.Fatalf("CountByStatus: %v", err)
+	}
+	_ = counts
+}
+
+func TestCountByStatus_Quotes_ZeroOwnerReturnsEmpty(t *testing.T) {
+	db := testutil.OpenDB(t)
+	repo := infrastructure.NewRepository(db)
+	ctx := context.Background()
+
+	counts, err := repo.CountByStatus(ctx, 0)
+	if err != nil {
+		t.Fatalf("CountByStatus(ownerID=0): %v", err)
+	}
+	if len(counts) != 0 {
+		t.Errorf("expected empty map for ownerID=0, got %v", counts)
+	}
+}
+
+func TestCountByStatus_Quotes_ReflectsCreatedQuote(t *testing.T) {
+	db := testutil.OpenDB(t)
+	repo := infrastructure.NewRepository(db)
+	ctx := context.Background()
+
+	id, err := repo.Create(ctx, testutil.OwnerID, domain.QuoteInput{
+		CustomerName: "CountByStatus Customer",
+		Status:       "draft",
+		Total:        100,
+	})
+	if err != nil {
+		t.Fatalf("Create: %v", err)
+	}
+	t.Cleanup(func() { _ = repo.Delete(ctx, testutil.OwnerID, id) })
+
+	counts, err := repo.CountByStatus(ctx, testutil.OwnerID)
+	if err != nil {
+		t.Fatalf("CountByStatus: %v", err)
+	}
+	if counts["draft"] <= 0 {
+		t.Errorf("expected at least 1 draft quote, got %d", counts["draft"])
+	}
+}
