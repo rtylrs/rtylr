@@ -40,17 +40,26 @@ func TestList_Delegates(t *testing.T) {
 	}
 }
 
+func TestCreate_ValidationRejectsEmpty(t *testing.T) {
+	s := &Service{repo: &mockRepo{}}
+	if _, err := s.Create(context.Background(), domain.TerminalInput{}); err == nil {
+		t.Error("expected validation error for empty input")
+	}
+}
+
 func TestCreate_PropagatesError(t *testing.T) {
 	want := errors.New("boom")
 	s := &Service{repo: &mockRepo{createErr: want}}
-	if _, err := s.Create(context.Background(), domain.TerminalInput{}); !errors.Is(err, want) {
+	validInput := domain.TerminalInput{BusinessID: 1, BranchID: 1, Name: "POS-1"}
+	if _, err := s.Create(context.Background(), validInput); !errors.Is(err, want) {
 		t.Errorf("expected sentinel, got %v", err)
 	}
 }
 
 func TestUpdateAndHeartbeat_HappyPath(t *testing.T) {
 	s := &Service{repo: &mockRepo{}}
-	if err := s.Update(context.Background(), domain.TerminalUpdateInput{}); err != nil {
+	validUpdate := domain.TerminalUpdateInput{ID: 1, BusinessID: 1, Name: "POS-1"}
+	if err := s.Update(context.Background(), validUpdate); err != nil {
 		t.Errorf("unexpected: %v", err)
 	}
 	if err := s.Heartbeat(context.Background(), 5, 1); err != nil {
@@ -80,7 +89,7 @@ func TestList_EmptyTerminals(t *testing.T) {
 
 func TestCreate_ReturnsID(t *testing.T) {
 	s := &Service{repo: &mockRepo{createID: 88}}
-	id, err := s.Create(context.Background(), domain.TerminalInput{BusinessID: 1, Name: "POS-1"})
+	id, err := s.Create(context.Background(), domain.TerminalInput{BusinessID: 1, BranchID: 1, Name: "POS-1"})
 	if err != nil {
 		t.Fatalf("unexpected error: %v", err)
 	}
@@ -91,7 +100,7 @@ func TestCreate_ReturnsID(t *testing.T) {
 
 func TestCreate_ZeroIDOnError(t *testing.T) {
 	s := &Service{repo: &mockRepo{createErr: errors.New("fail"), createID: 50}}
-	id, _ := s.Create(context.Background(), domain.TerminalInput{})
+	id, _ := s.Create(context.Background(), domain.TerminalInput{BusinessID: 1, BranchID: 1, Name: "POS-1"})
 	if id != 0 {
 		t.Errorf("expected 0 on error, got %d", id)
 	}
@@ -100,7 +109,8 @@ func TestCreate_ZeroIDOnError(t *testing.T) {
 func TestUpdate_PropagatesError(t *testing.T) {
 	want := errors.New("update fail")
 	s := &Service{repo: &mockRepo{updErr: want}}
-	if err := s.Update(context.Background(), domain.TerminalUpdateInput{}); !errors.Is(err, want) {
+	validInput := domain.TerminalUpdateInput{ID: 1, BusinessID: 1, Name: "POS-1"}
+	if err := s.Update(context.Background(), validInput); !errors.Is(err, want) {
 		t.Errorf("expected sentinel, got %v", err)
 	}
 }
@@ -118,6 +128,7 @@ func TestCreate_WithDeviceID(t *testing.T) {
 	s := &Service{repo: &mockRepo{createID: 5}}
 	id, err := s.Create(context.Background(), domain.TerminalInput{
 		BusinessID: 1,
+		BranchID:   1,
 		Name:       "Terminal-2",
 		DeviceID:   &devID,
 	})
@@ -128,7 +139,7 @@ func TestCreate_WithDeviceID(t *testing.T) {
 
 func TestUpdate_IsActiveFlag(t *testing.T) {
 	s := &Service{repo: &mockRepo{}}
-	if err := s.Update(context.Background(), domain.TerminalUpdateInput{ID: 1, IsActive: false}); err != nil {
+	if err := s.Update(context.Background(), domain.TerminalUpdateInput{ID: 1, BusinessID: 1, Name: "POS-1", IsActive: false}); err != nil {
 		t.Errorf("deactivating terminal should succeed: %v", err)
 	}
 }
