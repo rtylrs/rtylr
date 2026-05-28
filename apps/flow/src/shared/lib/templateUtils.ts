@@ -1,10 +1,7 @@
 import type { TaskTemplate, Task } from '../stores/flowStore';
 
 /** Find a template by its ID. */
-export function findTemplateById(
-  templates: TaskTemplate[],
-  id: string
-): TaskTemplate | undefined {
+export function findTemplateById(templates: TaskTemplate[], id: string): TaskTemplate | undefined {
   return templates.find((t) => t.id === id);
 }
 
@@ -26,7 +23,17 @@ export function taskFromTemplate(
   template: TaskTemplate,
   projectId: string,
   workspaceId: string
-): Omit<Task, 'id' | 'assignee' | 'assigneeInitials' | 'assigneeId' | 'createdAt' | 'updatedAt' | 'identifier' | 'projectName'> {
+): Omit<
+  Task,
+  | 'id'
+  | 'assignee'
+  | 'assigneeInitials'
+  | 'assigneeId'
+  | 'createdAt'
+  | 'updatedAt'
+  | 'identifier'
+  | 'projectName'
+> {
   return {
     title: template.title,
     description: template.description,
