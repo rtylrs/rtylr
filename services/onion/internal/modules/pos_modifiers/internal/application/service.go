@@ -48,6 +48,9 @@ func (s *Service) List(ctx context.Context, ownerID int64) ([]domain.Modifier, e
 }
 
 func (s *Service) Create(ctx context.Context, ownerID int64, input domain.ModifierInput) (int64, error) {
+	if err := domain.ValidateModifierInput(input); err != nil {
+		return 0, err
+	}
 	id, err := s.repo.Create(ctx, ownerID, input)
 	if err != nil {
 		return 0, err
