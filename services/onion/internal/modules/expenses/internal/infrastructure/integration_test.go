@@ -372,3 +372,109 @@ func TestCreateExpense_ThenAppearsInList(t *testing.T) {
 		t.Fatalf("expense id=%d not found in list", id)
 	}
 }
+
+func TestSumByOwner_NoError(t *testing.T) {
+	db := testutil.OpenDB(t)
+	repo := infrastructure.NewRepository(db)
+	ctx := context.Background()
+
+	total, err := repo.SumByOwner(ctx, testutil.OwnerID)
+	if err != nil {
+		t.Fatalf("SumByOwner: %v", err)
+	}
+	if total < 0 {
+		t.Errorf("expected non-negative total, got %f", total)
+	}
+}
+
+func TestSumByOwner_ZeroOwnerReturnsZero(t *testing.T) {
+	db := testutil.OpenDB(t)
+	repo := infrastructure.NewRepository(db)
+	ctx := context.Background()
+
+	total, err := repo.SumByOwner(ctx, 0)
+	if err != nil {
+		t.Fatalf("SumByOwner(ownerID=0): %v", err)
+	}
+	if total != 0 {
+		t.Errorf("expected 0 for ownerID=0, got %f", total)
+	}
+}
+
+func TestSumByOwner_ReflectsCreatedExpense(t *testing.T) {
+	db := testutil.OpenDB(t)
+	repo := infrastructure.NewRepository(db)
+	ctx := context.Background()
+
+	id, err := repo.Create(ctx, domain.ExpenseInput{
+		OwnerID:     testutil.OwnerID,
+		Amount:      250.00,
+		Currency:    "USD",
+		Description: "SumByOwner test expense",
+		ExpenseDate: time.Now(),
+	})
+	if err != nil {
+		t.Fatalf("Create: %v", err)
+	}
+	t.Cleanup(func() { _ = repo.Delete(ctx, testutil.OwnerID, id) })
+
+	total, err := repo.SumByOwner(ctx, testutil.OwnerID)
+	if err != nil {
+		t.Fatalf("SumByOwner: %v", err)
+	}
+	if total < 250.00 {
+		t.Errorf("expected total >= 250.00, got %f", total)
+	}
+}
+
+func TestCountByCategory_NoError(t *testing.T) {
+	db := testutil.OpenDB(t)
+	repo := infrastructure.NewRepository(db)
+	ctx := context.Background()
+
+	counts, err := repo.CountByCategory(ctx, testutil.OwnerID)
+	if err != nil {
+		t.Fatalf("CountByCategory: %v", err)
+	}
+	_ = counts
+}
+
+func TestCountByCategory_ZeroOwnerReturnsEmpty(t *testing.T) {
+	db := testutil.OpenDB(t)
+	repo := infrastructure.NewRepository(db)
+	ctx := context.Background()
+
+	counts, err := repo.CountByCategory(ctx, 0)
+	if err != nil {
+		t.Fatalf("CountByCategory(ownerID=0): %v", err)
+	}
+	if len(counts) != 0 {
+		t.Errorf("expected empty map for ownerID=0, got %v", counts)
+	}
+}
+
+func TestCountByCategory_UncategorisedBucket(t *testing.T) {
+	db := testutil.OpenDB(t)
+	repo := infrastructure.NewRepository(db)
+	ctx := context.Background()
+
+	id, err := repo.Create(ctx, domain.ExpenseInput{
+		OwnerID:     testutil.OwnerID,
+		Amount:      15.00,
+		Currency:    "USD",
+		Description: "Uncategorised expense",
+		ExpenseDate: time.Now(),
+	})
+	if err != nil {
+		t.Fatalf("Create: %v", err)
+	}
+	t.Cleanup(func() { _ = repo.Delete(ctx, testutil.OwnerID, id) })
+
+	counts, err := repo.CountByCategory(ctx, testutil.OwnerID)
+	if err != nil {
+		t.Fatalf("CountByCategory: %v", err)
+	}
+	if counts["uncategorised"] <= 0 {
+		t.Errorf("expected at least 1 uncategorised expense, got %d", counts["uncategorised"])
+	}
+}
