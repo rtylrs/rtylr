@@ -99,6 +99,44 @@ func (r *Repository) SumExpensesInRange(ctx context.Context, ownerID int64, date
 	return toFloat64FromInterface(result), nil
 }
 
+// NetProfit computes revenue minus expenses for the given date range. A
+// positive value means a profit; a negative value means a loss.
+func (r *Repository) NetProfit(ctx context.Context, ownerID int64, dateFrom, dateTo string) (float64, error) {
+	revenue, err := r.SumPaidInvoicesInRange(ctx, ownerID, dateFrom, dateTo)
+	if err != nil {
+		return 0, err
+	}
+
+	expenses, err := r.SumExpensesInRange(ctx, ownerID, dateFrom, dateTo)
+	if err != nil {
+		return 0, err
+	}
+
+	return revenue - expenses, nil
+}
+
+// WorkingCapital returns current assets (bank balances + receivables) minus
+// current liabilities (payables). A positive value indicates the owner can
+// meet its short-term obligations.
+func (r *Repository) WorkingCapital(ctx context.Context, ownerID int64) (float64, error) {
+	bankBal, err := r.SumBankBalances(ctx, ownerID)
+	if err != nil {
+		return 0, err
+	}
+
+	receivables, err := r.SumReceivables(ctx, ownerID)
+	if err != nil {
+		return 0, err
+	}
+
+	payables, err := r.SumPayables(ctx, ownerID)
+	if err != nil {
+		return 0, err
+	}
+
+	return (bankBal + receivables) - payables, nil
+}
+
 // ---------------------------------------------------------------------------
 // Conversion helpers
 // ---------------------------------------------------------------------------
