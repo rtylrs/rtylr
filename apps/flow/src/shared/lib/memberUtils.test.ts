@@ -128,7 +128,11 @@ describe('sortMembersByRole', () => {
 
 describe('totalTeamCapacity', () => {
   it('sums capacity across all members', () => {
-    const members = [makeMember({ capacity: 40 }), makeMember({ capacity: 20 }), makeMember({ capacity: 30 })];
+    const members = [
+      makeMember({ capacity: 40 }),
+      makeMember({ capacity: 20 }),
+      makeMember({ capacity: 30 }),
+    ];
     expect(totalTeamCapacity(members)).toBe(90);
   });
 

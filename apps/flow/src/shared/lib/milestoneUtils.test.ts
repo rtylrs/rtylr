@@ -74,7 +74,10 @@ describe('sortMilestonesByDate', () => {
   });
 
   it('does not mutate the original array', () => {
-    const milestones = [makeMilestone({ targetDate: '2026-12-01' }), makeMilestone({ targetDate: '2026-01-01' })];
+    const milestones = [
+      makeMilestone({ targetDate: '2026-12-01' }),
+      makeMilestone({ targetDate: '2026-01-01' }),
+    ];
     const original = [...milestones];
     sortMilestonesByDate(milestones);
     expect(milestones).toEqual(original);

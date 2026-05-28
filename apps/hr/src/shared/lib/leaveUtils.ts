@@ -69,7 +69,7 @@ export function hasOverlap(
   newStart: string,
   newEnd: string,
   existingStart: string,
-  existingEnd: string,
+  existingEnd: string
 ): boolean {
   const ns = new Date(newStart).getTime();
   const ne = new Date(newEnd).getTime();

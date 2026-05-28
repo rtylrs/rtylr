@@ -33,7 +33,9 @@ export function filterMilestonesByStatus(
 }
 
 /** Group milestones by their status. */
-export function groupMilestonesByStatus(milestones: Milestone[]): Map<Milestone['status'], Milestone[]> {
+export function groupMilestonesByStatus(
+  milestones: Milestone[]
+): Map<Milestone['status'], Milestone[]> {
   const map = new Map<Milestone['status'], Milestone[]>();
   for (const m of milestones) {
     const group = map.get(m.status) ?? [];

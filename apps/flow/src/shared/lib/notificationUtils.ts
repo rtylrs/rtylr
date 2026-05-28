@@ -21,9 +21,10 @@ export function sortByTimestamp(notifications: Notification[]): Notification[] {
 }
 
 /** Group notifications into read and unread buckets. */
-export function partitionByRead(
-  notifications: Notification[]
-): { read: Notification[]; unread: Notification[] } {
+export function partitionByRead(notifications: Notification[]): {
+  read: Notification[];
+  unread: Notification[];
+} {
   const read: Notification[] = [];
   const unread: Notification[] = [];
   for (const n of notifications) {
