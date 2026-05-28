@@ -274,7 +274,7 @@ func TestUpsertPayrollConfig_Persists(t *testing.T) {
 
 	err := repo.UpsertPayrollConfig(ctx, testutil.OwnerID, domain.PayrollConfigRecord{
 		PeriodType:    "monthly",
-		PayDayOfMonth: 25,
+		PayDayOfMonth: 28,
 	})
 	if err != nil {
 		t.Fatalf("UpsertPayrollConfig: %v", err)
