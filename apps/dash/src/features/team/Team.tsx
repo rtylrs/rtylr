@@ -1,5 +1,5 @@
 import React, { useMemo, useState } from 'react';
-import { useNavigate } from 'react-router-dom';
+import { useNavigate } from '@tanstack/react-router';
 import { useQuery } from '@tanstack/react-query';
 import {
   Search,
@@ -173,11 +173,11 @@ const Team: React.FC = (): React.JSX.Element => {
           </p>
         </div>
         <div className="flex items-center gap-2">
-          <Button variant="outline" onClick={() => navigate('/team/groups')}>
+          <Button variant="outline" onClick={() => navigate({ to: '/team/groups' })}>
             <FolderOpen size={14} />
             Groups
           </Button>
-          <Button onClick={() => navigate('/team/invite')}>
+          <Button onClick={() => navigate({ to: '/team/invite' })}>
             <UserPlus size={14} />
             Invite member
           </Button>
@@ -246,7 +246,7 @@ const Team: React.FC = (): React.JSX.Element => {
               title={query ? 'No members match your search' : 'No team members yet'}
               description="Invite your first team member to get started."
               actionLabel="Invite member"
-              onAction={() => navigate('/team/invite')}
+              onAction={() => navigate({ to: '/team/invite' })}
             />
           </div>
         ) : (
@@ -284,7 +284,7 @@ const Team: React.FC = (): React.JSX.Element => {
                   key={m.id}
                   className="grid grid-cols-12 gap-3 items-center px-5 py-3 transition-colors hover:bg-[var(--dash-hover)] cursor-pointer"
                   style={{ borderBottom: '1px solid var(--dash-border)' }}
-                  onClick={() => navigate(`/team/${m.id}`)}
+                  onClick={() => navigate({ to: `/team/${m.id}` })}
                 >
                   {/* Checkbox */}
                   <div className="col-span-1" onClick={(e) => e.stopPropagation()}>
@@ -397,7 +397,7 @@ const Team: React.FC = (): React.JSX.Element => {
                           className="flex items-center gap-2 w-full px-3 py-2 text-xs font-medium text-left hover:bg-[var(--dash-hover)]"
                           style={{ color: 'var(--dash-text-muted)' }}
                           onClick={() => {
-                            navigate(`/team/${m.id}`);
+                            navigate({ to: `/team/${m.id}` });
                             setMenuOpen(null);
                           }}
                         >
@@ -417,7 +417,7 @@ const Team: React.FC = (): React.JSX.Element => {
                           className="flex items-center gap-2 w-full px-3 py-2 text-xs font-medium text-left hover:bg-[var(--dash-hover)]"
                           style={{ color: 'var(--dash-text-muted)' }}
                           onClick={() => {
-                            navigate(`/team/${m.id}`);
+                            navigate({ to: `/team/${m.id}` });
                             setMenuOpen(null);
                           }}
                         >

@@ -1,5 +1,5 @@
 import React from 'react';
-import { NavLink, Outlet, useNavigate } from 'react-router-dom';
+import { Link, Outlet, useNavigate, useRouterState } from '@tanstack/react-router';
 import {
   User,
   Building2,
@@ -61,6 +61,7 @@ function getNavGroups(isOwner: boolean): NavGroup[] {
 
 const SettingsLayout: React.FC = () => {
   const navigate = useNavigate();
+  const pathname = useRouterState({ select: (s) => s.location.pathname });
   const { user } = useUserStore();
   const isOwner = user?.isOwner !== false;
   const navGroups = getNavGroups(isOwner);
@@ -78,7 +79,7 @@ const SettingsLayout: React.FC = () => {
           style={{ borderBottom: '1px solid var(--dash-border)' }}
         >
           <button
-            onClick={() => navigate('/')}
+            onClick={() => navigate({ to: '/' })}
             className="h-6 w-6 rounded-md flex items-center justify-center transition-colors hover:bg-[var(--dash-hover)]"
             style={{ color: 'var(--dash-text-muted)' }}
           >
@@ -100,25 +101,26 @@ const SettingsLayout: React.FC = () => {
                 {group.label}
               </p>
               <div className="space-y-0.5">
-                {group.items.map(({ label, path, icon: Icon }) => (
-                  <NavLink
-                    key={path}
-                    to={path}
-                    className={({ isActive }) =>
-                      cn(
+                {group.items.map(({ label, path, icon: Icon }) => {
+                  const isActive = pathname === path;
+                  return (
+                    <Link
+                      key={path}
+                      to={path}
+                      className={cn(
                         'flex items-center gap-2.5 px-3 py-2 rounded-lg text-sm transition-colors',
                         isActive ? 'bg-[var(--dash-active)]' : 'hover:bg-[var(--dash-hover)]'
-                      )
-                    }
-                    style={({ isActive }) => ({
-                      color: isActive ? 'var(--dash-text)' : 'var(--dash-text-muted)',
-                      fontWeight: isActive ? 500 : undefined,
-                    })}
-                  >
-                    <Icon size={14} {...({ className: 'shrink-0' } as any)} />
-                    {label}
-                  </NavLink>
-                ))}
+                      )}
+                      style={{
+                        color: isActive ? 'var(--dash-text)' : 'var(--dash-text-muted)',
+                        fontWeight: isActive ? 500 : undefined,
+                      }}
+                    >
+                      <Icon size={14} {...({ className: 'shrink-0' } as any)} />
+                      {label}
+                    </Link>
+                  );
+                })}
               </div>
             </div>
           ))}

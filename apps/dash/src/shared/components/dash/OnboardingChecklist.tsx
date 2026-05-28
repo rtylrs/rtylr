@@ -1,7 +1,7 @@
 import React from 'react';
 import { Check, Circle, ArrowRight } from 'lucide-react';
 import { motion } from 'motion/react';
-import { useNavigate } from 'react-router-dom';
+import { useNavigate } from '@tanstack/react-router';
 import { APP_URLS } from '@voxire/config';
 
 export interface OnboardingStep {
@@ -115,7 +115,7 @@ export const OnboardingChecklist: React.FC<OnboardingChecklistProps> = ({
                 if (isExternal) {
                   window.open(step.href, '_blank', 'noopener');
                 } else {
-                  navigate(step.href);
+                  navigate({ to: step.href });
                 }
               }}
               className="group flex items-center gap-3 w-full px-3 py-2.5 rounded-lg text-left transition-colors hover:bg-[var(--dash-hover)]"

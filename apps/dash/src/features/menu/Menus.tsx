@@ -1,6 +1,6 @@
 import React, { useState } from 'react';
 import { toast } from 'sonner';
-import { useNavigate } from 'react-router-dom';
+import { useNavigate } from '@tanstack/react-router';
 import { Plus, UtensilsCrossed, Search, MoreHorizontal, CheckCircle } from 'lucide-react';
 import { useUserStore } from '../../shared/stores/userStore';
 import {
@@ -177,7 +177,7 @@ const Menus: React.FC = () => {
                           </button>
                         </DropdownMenuTrigger>
                         <DropdownMenuContent align="end">
-                          <DropdownMenuItem onClick={() => navigate(`/menu/${menu._id}`)}>
+                          <DropdownMenuItem onClick={() => navigate({ to: `/menu/${menu._id}` })}>
                             View Menu
                           </DropdownMenuItem>
                           {!isActive && (
@@ -196,7 +196,7 @@ const Menus: React.FC = () => {
                     variant="outline"
                     size="sm"
                     className="w-full"
-                    onClick={() => navigate(`/menu/${menu._id}`)}
+                    onClick={() => navigate({ to: `/menu/${menu._id}` })}
                   >
                     View Menu
                   </Button>

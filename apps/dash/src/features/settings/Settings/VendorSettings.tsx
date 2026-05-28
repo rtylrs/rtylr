@@ -6,7 +6,7 @@ import {
   Translate as Languages,
   Scales as Gavel,
 } from 'phosphor-react';
-import { useNavigate } from 'react-router-dom';
+import { useNavigate } from '@tanstack/react-router';
 import appConfig from '../../../app.json';
 
 const VendorSettings = () => {
@@ -23,7 +23,7 @@ const VendorSettings = () => {
           <div
             className="settings-content"
             onClick={() => {
-              navigate('/settings/general');
+              navigate({ to: '/settings/general' });
             }}
           >
             <h2>General</h2>

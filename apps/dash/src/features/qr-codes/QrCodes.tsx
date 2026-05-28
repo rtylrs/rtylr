@@ -1,5 +1,5 @@
 import React from 'react';
-import { useNavigate } from 'react-router-dom';
+import { useNavigate } from '@tanstack/react-router';
 import { Plus, QrCode as QrCodeIcon, Copy, ExternalLink } from 'lucide-react';
 import { useQuery } from '@tanstack/react-query';
 import { toast } from 'sonner';
@@ -57,7 +57,7 @@ const QrCodes: React.FC = () => {
             Manage your table QR codes
           </p>
         </div>
-        <Button size="sm" onClick={() => navigate('/qr-codes/create')}>
+        <Button size="sm" onClick={() => navigate({ to: '/qr-codes/create' })}>
           <Plus size={14} />
           Generate QR Code
         </Button>
@@ -94,7 +94,7 @@ const QrCodes: React.FC = () => {
                       <Button
                         size="sm"
                         variant="outline"
-                        onClick={() => navigate('/qr-codes/create')}
+                        onClick={() => navigate({ to: '/qr-codes/create' })}
                       >
                         <Plus size={13} />
                         Generate your first QR code

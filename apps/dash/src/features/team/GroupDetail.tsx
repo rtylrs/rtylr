@@ -1,5 +1,5 @@
 import React, { useEffect, useState } from 'react';
-import { useNavigate, useParams } from 'react-router-dom';
+import { useNavigate, useParams } from '@tanstack/react-router';
 import { useTranslation } from 'react-i18next';
 import { ArrowLeft, Save, Users, Plus, X } from 'lucide-react';
 import { motion } from 'motion/react';
@@ -39,7 +39,7 @@ const PRESET_COLORS = [
 
 const GroupDetail = (): React.JSX.Element => {
   const { t } = useTranslation();
-  const { id } = useParams<{ id: string }>();
+  const { id } = useParams({ strict: false });
   const navigate = useNavigate();
   const isNew = id === 'new';
 
@@ -109,7 +109,7 @@ const GroupDetail = (): React.JSX.Element => {
           color,
           resourcePermissions,
         });
-        navigate(`/team/groups/${created.id}`, { replace: true });
+        navigate({ to: `/team/groups/${created.id}`, replace: true });
       } else {
         await updateGroup.mutateAsync({ name, description, color, resourcePermissions });
       }
@@ -149,7 +149,7 @@ const GroupDetail = (): React.JSX.Element => {
       <div className="flex items-center justify-between">
         <div className="flex items-center gap-3">
           <button
-            onClick={() => navigate('/team/groups')}
+            onClick={() => navigate({ to: '/team/groups' })}
             aria-label={t('team.groupDetail.backAriaLabel')}
             className="h-8 w-8 rounded-lg flex items-center justify-center hover:bg-[var(--dash-hover)] transition-colors"
             style={{ color: 'var(--dash-text-muted)' }}

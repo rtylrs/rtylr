@@ -1,5 +1,5 @@
 import React from 'react';
-import { useNavigate } from 'react-router-dom';
+import { useNavigate } from '@tanstack/react-router';
 import { UserPlus, Package, FileText, BarChart3 } from 'lucide-react';
 
 const actions = [
@@ -25,7 +25,7 @@ const QuickActionsWidget: React.FC = () => {
           return (
             <button
               key={a.label}
-              onClick={() => navigate(a.path)}
+              onClick={() => navigate({ to: a.path })}
               className="flex items-center gap-2.5 w-full px-3 py-2.5 rounded-lg text-xs font-medium transition-colors text-left hover:bg-[var(--dash-hover)]"
               style={{ color: 'var(--dash-text-muted)' }}
             >

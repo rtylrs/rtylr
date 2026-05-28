@@ -1,5 +1,5 @@
 import React, { useMemo } from 'react';
-import { useLocation } from 'react-router-dom';
+import { useRouterState } from '@tanstack/react-router';
 import { useUserStore } from '../../stores/userStore';
 import { buildDashSystemContext, suggestionsFor } from '../../lib/caret';
 
@@ -13,21 +13,21 @@ interface CaretContextValue {
 const CaretContext = React.createContext<CaretContextValue | null>(null);
 
 export const CaretContextProvider: React.FC<React.PropsWithChildren> = ({ children }) => {
-  const location = useLocation();
+  const pathname = useRouterState({ select: (s) => s.location.pathname });
   const { user } = useUserStore();
 
   const value = useMemo<CaretContextValue>(() => {
     const businessName = user?.businessName;
     return {
       systemContext: buildDashSystemContext({
-        pathname: location.pathname,
+        pathname: pathname,
         businessName,
       }),
-      suggestions: suggestionsFor(location.pathname),
+      suggestions: suggestionsFor(pathname),
       userId: Number(user?.id) || 0,
       businessName,
     };
-  }, [location.pathname, user?.businessName, user?.id]);
+  }, [pathname, user?.businessName, user?.id]);
 
   return <CaretContext.Provider value={value}>{children}</CaretContext.Provider>;
 };

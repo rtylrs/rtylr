@@ -1,5 +1,5 @@
 import React, { useMemo, useState } from 'react';
-import { useNavigate } from 'react-router-dom';
+import { useNavigate } from '@tanstack/react-router';
 import { useCaretChats } from '../../shared/hooks/queries/useCaretChats';
 import { useCaretStore } from '@voxire/caret';
 import { groupChatsByDate, scoreChat } from '../../shared/lib/caret';
@@ -27,7 +27,7 @@ const CaretHistoryPage: React.FC = () => {
   const onSelect = (id: string): void => {
     setSessionId(id);
     openPanel();
-    navigate('/');
+    navigate({ to: '/' });
   };
 
   return (

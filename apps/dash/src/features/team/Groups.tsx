@@ -1,5 +1,5 @@
 import React, { useState } from 'react';
-import { useNavigate } from 'react-router-dom';
+import { useNavigate } from '@tanstack/react-router';
 import { useTranslation } from 'react-i18next';
 import { Users, Plus, Search, Trash2, ChevronRight } from 'lucide-react';
 import { motion } from 'motion/react';
@@ -49,7 +49,7 @@ const Groups = (): React.JSX.Element => {
             {t('team.groups.subtitle')}
           </p>
         </div>
-        <Button onClick={() => navigate('/team/groups/new')}>
+        <Button onClick={() => navigate({ to: '/team/groups/new' })}>
           <Plus size={14} /> {t('team.groups.newGroup')}
         </Button>
       </motion.div>
@@ -83,7 +83,7 @@ const Groups = (): React.JSX.Element => {
               title={query ? t('team.groups.noGroupsMatch') : t('team.groups.noGroupsTitle')}
               description={t('team.groups.noGroupsDescription')}
               actionLabel={t('team.groups.newGroup')}
-              onAction={() => navigate('/team/groups/new')}
+              onAction={() => navigate({ to: '/team/groups/new' })}
             />
           </div>
         ) : (
@@ -110,7 +110,7 @@ const Groups = (): React.JSX.Element => {
                   key={g.id}
                   className="grid grid-cols-12 gap-3 items-center px-5 py-3.5 cursor-pointer hover:bg-[var(--dash-hover)] transition-colors"
                   style={{ borderBottom: '1px solid var(--dash-border)' }}
-                  onClick={() => navigate(`/team/groups/${g.id}`)}
+                  onClick={() => navigate({ to: `/team/groups/${g.id}` })}
                 >
                   {/* Name */}
                   <div className="col-span-5 flex items-center gap-3 min-w-0">
