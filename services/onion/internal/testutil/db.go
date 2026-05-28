@@ -16,10 +16,7 @@ import (
 func OpenDB(t *testing.T) *sql.DB {
 	t.Helper()
 
-	host := os.Getenv("DB_HOST")
-	if host == "" {
-		t.Skip("DB_HOST not set — skipping integration test")
-	}
+	host := envOr("DB_HOST", "127.0.0.1")
 
 	port := envOr("DB_PORT", "3306")
 	user := envOr("DB_USER", "onion")
