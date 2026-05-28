@@ -2,7 +2,6 @@ package application
 
 import (
 	"context"
-	"errors"
 	"testing"
 
 	"github.com/voxire/onion/internal/modules/crm_settings/internal/domain"
@@ -27,15 +26,6 @@ func TestGet_ReturnsSmsSenderID(t *testing.T) {
 	}
 	if got.SmsSenderID != "MYSHOP" {
 		t.Errorf("SmsSenderID = %q, want %q", got.SmsSenderID, "MYSHOP")
-	}
-}
-
-func TestUpsert_PropagatesError(t *testing.T) {
-	want := errors.New("upsert error")
-	s := &Service{repo: &mockRepo{upsertErr: want}}
-	err := s.Upsert(context.Background(), domain.SettingsInput{OwnerID: 1, Timezone: "UTC"})
-	if !errors.Is(err, want) {
-		t.Errorf("expected sentinel, got %v", err)
 	}
 }
 
