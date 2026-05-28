@@ -2,7 +2,7 @@ CREATE TABLE IF NOT EXISTS hub_webhooks (
     id BIGINT NOT NULL AUTO_INCREMENT PRIMARY KEY,
     owner_id BIGINT NOT NULL,
     url VARCHAR(2048) NOT NULL,
-    events JSON NULL,
+    events JSON DEFAULT (JSON_ARRAY()),
     secret VARCHAR(255) NOT NULL,
     is_active BOOLEAN NOT NULL DEFAULT TRUE,
     last_triggered_at TIMESTAMP NULL,
