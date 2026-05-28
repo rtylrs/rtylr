@@ -16,6 +16,7 @@ interface BuildCheckoutOrderParams {
   subtotal: number;
   tax: number;
   total: number;
+  tip?: number;
   employeeId?: string | number | null;
   createdAt: string;
 }
@@ -50,6 +51,7 @@ export function buildCheckoutOrder({
   subtotal,
   tax,
   total,
+  tip = 0,
   employeeId,
   createdAt,
 }: BuildCheckoutOrderParams): Order {
@@ -65,7 +67,7 @@ export function buildCheckoutOrder({
     })),
     subtotal,
     tax,
-    tip: 0,
+    tip,
     discount: 0,
     total,
     createdAt,

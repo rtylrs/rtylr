@@ -21,6 +21,7 @@ import { useCashDrawerStore } from '../../shared/stores/cashDrawerStore';
 import { printReceiptAndOpenDrawer, openDrawer } from './paymentHardware';
 import { resetAfterCheckout } from './checkoutState';
 import QrPayPanel from './QrPayPanel';
+import TipSelector from '../../shared/components/TipSelector';
 import { earnPointsAfterPayment } from '../loyalty/loyaltyWorkflow';
 
 const fmt = (n: number): string =>
@@ -40,11 +41,13 @@ const Payment: React.FC = () => {
   const [processing, setProcessing] = useState(false);
   const [cashAmount, setCashAmount] = useState('');
   const [qrConfirmed, setQrConfirmed] = useState(false);
+  const [tip, setTip] = useState(0);
 
   const subtotal = total();
   const tax = subtotal * taxRate;
-  const grandTotal = subtotal + tax;
+  const grandTotal = subtotal + tax + tip;
   const cashTender = buildCashTender(cashAmount, grandTotal);
+  const serverOrderId = useCartStore((s) => s.serverOrderId);
 
   const handleCharge = async (): Promise<void> => {
     setProcessing(true);
@@ -55,6 +58,7 @@ const Payment: React.FC = () => {
         subtotal,
         tax,
         total: grandTotal,
+        tip,
         employeeId: employee?.id,
         createdAt: new Date().toISOString(),
       });
@@ -104,7 +108,7 @@ const Payment: React.FC = () => {
         subtotal,
         taxAmount: tax,
         discountAmount: 0,
-        tipAmount: 0,
+        tipAmount: tip,
         total: grandTotal,
         paymentMethod: method,
         amountPaid: isCash ? (cashTender.received || grandTotal) : grandTotal,
@@ -157,7 +161,25 @@ const Payment: React.FC = () => {
           >
             ← Back to POS
           </button>
-          <h1 className="text-xl font-bold text-pos-text">Payment</h1>
+          <div className="flex items-center justify-between">
+            <h1 className="text-xl font-bold text-pos-text">Payment</h1>
+            <div className="flex gap-2">
+              <button
+                className="text-xs text-pos-muted hover:text-pos-text border border-pos-border rounded-lg px-3 py-1.5 transition-colors"
+                onClick={() => navigate(serverOrderId ? `/split-bill/${serverOrderId}` : '/split-bill/current')}
+              >
+                Split Bill
+              </button>
+              {serverOrderId && (
+                <button
+                  className="text-xs text-pos-muted hover:text-pos-text border border-pos-border rounded-lg px-3 py-1.5 transition-colors"
+                  onClick={() => navigate(`/payment/${serverOrderId}`)}
+                >
+                  Multi-pay
+                </button>
+              )}
+            </div>
+          </div>
 
           {/* Summary */}
           <div className="space-y-2 text-sm">
@@ -178,11 +200,19 @@ const Payment: React.FC = () => {
               <span>Tax ({(taxRate * 100).toFixed(0)}%)</span>
               <span>{fmt(tax)}</span>
             </div>
+            {tip > 0 && (
+              <div className="flex justify-between text-pos-muted">
+                <span>Tip</span>
+                <span>{fmt(tip)}</span>
+              </div>
+            )}
             <div className="flex justify-between font-bold text-pos-text text-base pt-1">
               <span>Total</span>
               <span>{fmt(grandTotal)}</span>
             </div>
           </div>
+
+          <TipSelector subtotal={subtotal} onTipChange={setTip} />
 
           {/* Method selector */}
           <div className="flex gap-2">
