@@ -27,7 +27,7 @@ func (r *Repository) List(ctx context.Context, ownerID int64) ([]domain.APIKey, 
 		return nil, err
 	}
 
-	var keys []domain.APIKey
+	keys := make([]domain.APIKey, 0, len(rows))
 	for _, row := range rows {
 		var k domain.APIKey
 		k.ID = row.ID
