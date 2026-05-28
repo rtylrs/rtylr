@@ -22,7 +22,7 @@ CREATE TABLE IF NOT EXISTS hr_setup_steps (
     completed_at TIMESTAMP NULL,
     created_at TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP,
     updated_at TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
-    INDEX idx_setup_owner_key (owner_id, step_key)
+    UNIQUE KEY uq_hr_setup_steps_owner_step (owner_id, step_key)
 );
 
 CREATE TABLE IF NOT EXISTS hr_locations (

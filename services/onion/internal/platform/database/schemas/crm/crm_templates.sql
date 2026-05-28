@@ -2,7 +2,7 @@ CREATE TABLE IF NOT EXISTS crm_templates (
     id BIGINT NOT NULL AUTO_INCREMENT PRIMARY KEY,
     owner_id BIGINT NOT NULL,
     name VARCHAR(255) NOT NULL,
-    type ENUM('email','sms') NOT NULL,
+    type ENUM('email','sms','push') NOT NULL,
     subject VARCHAR(500),
     body TEXT NOT NULL,
     variables JSON,
