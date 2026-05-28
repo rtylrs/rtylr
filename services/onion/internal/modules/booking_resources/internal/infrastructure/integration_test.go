@@ -64,7 +64,7 @@ func TestCreateResource_NameIsStored(t *testing.T) {
 
 	id, err := repo.Create(ctx, testutil.OwnerID, domain.ResourceInput{
 		Name:     "Chair 1",
-		Type:     "chair",
+		Type:     "station",
 		Capacity: 1,
 		IsActive: true,
 	})

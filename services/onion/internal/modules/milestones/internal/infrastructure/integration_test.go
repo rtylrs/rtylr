@@ -159,7 +159,7 @@ func TestUpdateMilestone_NoError(t *testing.T) {
 		ID:      id,
 		OwnerID: testutil.OwnerID,
 		Name:    "Updated Milestone Name",
-		Status:  "in_progress",
+		Status:  "active",
 	})
 	if err != nil {
 		t.Fatalf("Update milestone: %v", err)
@@ -392,7 +392,7 @@ func TestUpdateMilestone_ChangesDescription(t *testing.T) {
 		OwnerID:     testutil.OwnerID,
 		Name:        "DescUpdateMilestone",
 		Description: newDesc,
-		Status:      "in_progress",
+		Status:      "active",
 	}); err != nil {
 		t.Fatalf("Update: %v", err)
 	}

@@ -151,8 +151,8 @@ func TestCreateStockTransfer_DefaultStatusIsPending(t *testing.T) {
 
 	for _, tr := range transfers {
 		if tr.ID == id {
-			if tr.Status != "pending" {
-				t.Errorf("expected default status=pending, got %q", tr.Status)
+			if tr.Status != "draft" {
+				t.Errorf("expected default status=draft, got %q", tr.Status)
 			}
 			return
 		}
@@ -176,7 +176,7 @@ func TestUpdateStockTransferStatus_ChangesToCompleted(t *testing.T) {
 		t.Fatalf("stock_transfers.CreateStockTransfer: %v", err)
 	}
 
-	err = repo.UpdateStockTransferStatus(ctx, testutil.OwnerID, id, "completed")
+	err = repo.UpdateStockTransferStatus(ctx, testutil.OwnerID, id, "received")
 	if err != nil {
 		t.Fatalf("stock_transfers.UpdateStockTransferStatus: %v", err)
 	}
@@ -188,8 +188,8 @@ func TestUpdateStockTransferStatus_ChangesToCompleted(t *testing.T) {
 
 	for _, tr := range transfers {
 		if tr.ID == id {
-			if tr.Status != "completed" {
-				t.Errorf("expected status=completed, got %q", tr.Status)
+			if tr.Status != "received" {
+				t.Errorf("expected status=received, got %q", tr.Status)
 			}
 			return
 		}
