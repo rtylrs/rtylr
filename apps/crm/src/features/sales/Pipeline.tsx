@@ -1,5 +1,5 @@
 import React, { useMemo, useState } from 'react';
-import { useNavigate } from 'react-router-dom';
+import { useNavigate } from '@tanstack/react-router';
 import { Plus, TrendingUp } from 'lucide-react';
 import { motion } from 'motion/react';
 import { usePipeline, useLeads } from '../../shared/hooks/queries/useSales';
@@ -264,7 +264,7 @@ const Pipeline: React.FC = () => {
                     <LeadCard
                       key={lead.id}
                       lead={lead}
-                      onClick={() => navigate(`/sales/leads/${lead.id}`)}
+                      onClick={() => navigate({ to: `/sales/leads/${lead.id}` })}
                     />
                   ))}
                 </div>

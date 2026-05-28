@@ -1,6 +1,6 @@
 import { ChevronDown, ChevronUp } from 'lucide-react';
 import React from 'react';
-import { useNavigate } from 'react-router-dom';
+import { useNavigate } from '@tanstack/react-router';
 
 const FreeAccount: React.FC<{}> = () => {
   const [open, setOpen] = React.useState<boolean>(true);
@@ -26,7 +26,7 @@ const FreeAccount: React.FC<{}> = () => {
         <div className="free-account-content">
           <p>You are currently using a free tier.</p>
         </div>
-        <button className="upgrade-button" onClick={() => navigate('/settings/billing')}>
+        <button className="upgrade-button" onClick={() => navigate({ to: '/settings/billing' })}>
           Select a Plan
         </button>
       </div>

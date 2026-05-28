@@ -1,5 +1,5 @@
 import React from 'react';
-import { Link, useLocation } from 'react-router-dom';
+import { Link, useRouterState } from '@tanstack/react-router';
 import { ChevronRight, Home } from 'lucide-react';
 
 const ROUTE_LABELS: Record<string, string> = {
@@ -37,8 +37,8 @@ const ROUTE_LABELS: Record<string, string> = {
 };
 
 export const Breadcrumbs: React.FC<{ className?: string }> = ({ className }) => {
-  const location = useLocation();
-  const segments = location.pathname.split('/').filter(Boolean);
+  const pathname = useRouterState({ select: (s) => s.location.pathname });
+  const segments = pathname.split('/').filter(Boolean);
   if (segments.length === 0) return null;
 
   return (

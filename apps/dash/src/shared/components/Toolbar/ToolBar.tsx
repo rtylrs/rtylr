@@ -7,7 +7,7 @@ import {
   Warning,
 } from 'phosphor-react';
 import { useEffect, useState, useRef } from 'react';
-import { useNavigate } from 'react-router-dom';
+import { useNavigate } from '@tanstack/react-router';
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogDescription } from '@voxire/ui';
 import { useUserStore } from '../../stores/userStore';
 import { useFullscreen } from '../../hooks/useFullscreen';
@@ -81,7 +81,7 @@ const ToolBarContent: React.FC = () => {
 
   const toolbarNavigate = (path: string) => {
     setMenuOpen(false);
-    navigate(path);
+    navigate({ to: path });
   };
 
   const [confirmClearStorage, setConfirmClearStorage] = useState(false);

@@ -1,5 +1,5 @@
 import React, { useMemo } from 'react';
-import { useSearchParams, Link } from 'react-router-dom';
+import { useRouterState, Link } from '@tanstack/react-router';
 import { FileText } from 'lucide-react';
 import { content } from '../../shared/content';
 
@@ -10,8 +10,8 @@ interface SearchResult {
 }
 
 const SearchResults: React.FC = () => {
-  const [searchParams] = useSearchParams();
-  const query = searchParams.get('q') || '';
+  const searchStr = useRouterState({ select: (s) => s.location.searchStr });
+  const query = new URLSearchParams(searchStr).get('q') || '';
 
   const results = useMemo<SearchResult[]>(() => {
     if (!query.trim()) return [];
@@ -74,7 +74,8 @@ const SearchResults: React.FC = () => {
         {results.map((result) => (
           <Link
             key={result.slug}
-            to={`/docs/${result.slug}`}
+            to="/docs/$slug"
+            params={{ slug: result.slug }}
             className="flex items-start gap-3 p-4 rounded-lg border no-underline transition-colors"
             style={{ borderColor: 'var(--docs-border)', background: 'var(--docs-bg)' }}
           >

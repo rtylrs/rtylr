@@ -1,5 +1,5 @@
 import React, { useState } from 'react';
-import { Outlet, Link, useLocation, useNavigate } from 'react-router-dom';
+import { Outlet, Link, useLocation, useNavigate } from '@tanstack/react-router';
 import { Search, Book, Layers, Users, Code, FileText, ChevronRight } from 'lucide-react';
 import { content } from '../shared/content';
 
@@ -100,7 +100,7 @@ const DocsLayout: React.FC = () => {
   const handleSearch = (e: React.FormEvent) => {
     e.preventDefault();
     if (searchQuery.trim()) {
-      navigate(`/search?q=${encodeURIComponent(searchQuery.trim())}`);
+      navigate({ to: '/search', search: { q: searchQuery.trim() } });
     }
   };
 

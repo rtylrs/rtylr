@@ -1,5 +1,5 @@
 import React, { useState } from 'react';
-import { useNavigate } from 'react-router-dom';
+import { useNavigate } from '@tanstack/react-router';
 import { toast } from 'sonner';
 import { Check, ArrowLeft, ArrowRight } from 'lucide-react';
 import { useCreateCustomer } from '../../shared/hooks/queries/useCustomers';
@@ -72,7 +72,7 @@ const CreateCustomer: React.FC = () => {
       {
         onSuccess: () => {
           toast.success('Customer created');
-          navigate('/customers');
+          navigate({ to: '/customers' });
         },
         onError: () => {
           toast.error('Failed to create customer');
@@ -227,7 +227,7 @@ const CreateCustomer: React.FC = () => {
         <Button
           variant="outline"
           disabled={step === 0}
-          onClick={() => (step > 0 ? setStep(step - 1) : navigate('/customers'))}
+          onClick={() => (step > 0 ? setStep(step - 1) : navigate({ to: '/customers' }))}
         >
           <ArrowLeft size={13} />
           {step === 0 ? 'Cancel' : 'Back'}

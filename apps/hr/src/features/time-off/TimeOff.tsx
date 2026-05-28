@@ -1,5 +1,5 @@
 import React, { useState } from 'react';
-import { Link } from 'react-router-dom';
+import { Link } from '@tanstack/react-router';
 import { toast } from 'sonner';
 import { Plus, Calendar } from 'lucide-react';
 import { useTimeOff, useApproveTimeOff } from '../../shared/hooks/useHrExtras';

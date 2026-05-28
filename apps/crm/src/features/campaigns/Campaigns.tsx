@@ -1,5 +1,5 @@
 import React, { useState } from 'react';
-import { useNavigate } from 'react-router-dom';
+import { useNavigate } from '@tanstack/react-router';
 import { motion, AnimatePresence } from 'motion/react';
 import { toast } from 'sonner';
 import {
@@ -361,11 +361,11 @@ const Campaigns: React.FC = () => {
 
   const handleEdit = (c: Campaign): void => {
     if (c.status === 'Completed') {
-      navigate(`/campaigns/${c.id}`);
+      navigate({ to: `/campaigns/${c.id}` });
       return;
     }
     const target = c.channel === 'SMS' ? '/campaigns/sms' : '/campaigns/email';
-    navigate(`${target}?id=${c.id}&name=${encodeURIComponent(c.name)}`);
+    navigate({ to: `${target}?id=${c.id}&name=${encodeURIComponent(c.name)}` });
   };
 
   const handleDelete = (id: number): void => {
@@ -397,7 +397,7 @@ const Campaigns: React.FC = () => {
         </div>
         <div style={{ display: 'flex', gap: '8px' }}>
           <button
-            onClick={() => navigate('/campaigns/sms')}
+            onClick={() => navigate({ to: '/campaigns/sms' })}
             style={{
               display: 'flex',
               alignItems: 'center',
@@ -415,7 +415,7 @@ const Campaigns: React.FC = () => {
             <MessageSquare size={14} /> New SMS
           </button>
           <button
-            onClick={() => navigate('/campaigns/email')}
+            onClick={() => navigate({ to: '/campaigns/email' })}
             style={{
               display: 'flex',
               alignItems: 'center',
@@ -489,7 +489,7 @@ const Campaigns: React.FC = () => {
               key={c.id}
               campaign={c}
               index={i}
-              onClick={() => navigate(`/campaigns/${c.id}`)}
+              onClick={() => navigate({ to: `/campaigns/${c.id}` })}
               onLaunch={() => handleLaunch(c.id)}
               onPause={() => handlePause(c.id)}
               onEdit={() => handleEdit(c)}

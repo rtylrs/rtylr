@@ -1,5 +1,5 @@
 import React from 'react';
-import { Link } from 'react-router-dom';
+import { Link } from '@tanstack/react-router';
 import { ChevronRight } from 'lucide-react';
 
 interface Crumb {
@@ -25,7 +25,7 @@ export const Breadcrumbs: React.FC<BreadcrumbsProps> = ({ items }) => {
           )}
           {c.to ? (
             <Link
-              to={c.to}
+              to={c.to as string}
               className="min-w-0 max-w-[42vw] truncate hover:text-[var(--flow-text)] transition-colors sm:max-w-[12rem]"
               style={{ color: 'var(--flow-text-muted)' }}
             >

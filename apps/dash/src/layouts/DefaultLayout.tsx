@@ -1,5 +1,5 @@
 import React, { useRef } from 'react';
-import { useLocation, useNavigate, Link } from 'react-router-dom';
+import { useNavigate, Link, useRouterState } from '@tanstack/react-router';
 import { useForesightLinks } from '@voxire/utils';
 import { motion, AnimatePresence } from 'motion/react';
 import { useQuery } from '@tanstack/react-query';
@@ -125,8 +125,8 @@ function getInitials(name?: string | null): string {
 }
 
 const SidebarNavItem: React.FC<NavItem> = ({ label, path, icon: Icon }) => {
-  const location = useLocation();
-  const isActive = path === '/' ? location.pathname === '/' : location.pathname.startsWith(path);
+  const pathname = useRouterState({ select: (s) => s.location.pathname });
+  const isActive = path === '/' ? pathname === '/' : pathname.startsWith(path);
 
   return (
     <Link
@@ -172,8 +172,8 @@ const SidebarSection: React.FC<{
   icon: React.ComponentType<{ size?: number; className?: string }>;
   items: NavItem[];
 }> = ({ label, icon: Icon, items }) => {
-  const location = useLocation();
-  const isActive = items.some((item) => location.pathname.startsWith(item.path));
+  const pathname = useRouterState({ select: (s) => s.location.pathname });
+  const isActive = items.some((item) => pathname.startsWith(item.path));
   const [open, setOpen] = React.useState(isActive);
 
   return (
@@ -264,7 +264,7 @@ interface DefaultLayoutProps {
 }
 
 const DefaultLayout: React.FC<DefaultLayoutProps> = ({ children }) => {
-  const location = useLocation();
+  const pathname = useRouterState({ select: (s) => s.location.pathname });
   const navigate = useNavigate();
   const { user, logout } = useUserStore();
   const { theme, setTheme } = useThemeStore();
@@ -307,7 +307,7 @@ const DefaultLayout: React.FC<DefaultLayoutProps> = ({ children }) => {
   const unreadCount = Array.isArray(notifications)
     ? notifications.filter((n) => !n.read).length
     : 0;
-  const pageTitle = getPageTitle(location.pathname);
+  const pageTitle = getPageTitle(pathname);
   const userEmail = user?.email || null;
   const userName = user?.fullName || 'User';
   const businessName = user?.businessName || 'My Business';
@@ -368,12 +368,12 @@ const DefaultLayout: React.FC<DefaultLayoutProps> = ({ children }) => {
               data-tour="settings"
               className={cn(
                 'flex items-center gap-3 px-3 py-2 rounded-lg text-sm transition-colors duration-150 mb-0.5',
-                location.pathname.startsWith('/settings')
+                pathname.startsWith('/settings')
                   ? 'bg-[var(--dash-active)]'
                   : 'hover:bg-[var(--dash-hover)]'
               )}
               style={{
-                color: location.pathname.startsWith('/settings')
+                color: pathname.startsWith('/settings')
                   ? 'var(--dash-text)'
                   : 'var(--dash-text-muted)',
               }}
@@ -518,7 +518,7 @@ const DefaultLayout: React.FC<DefaultLayoutProps> = ({ children }) => {
                 </button>
                 <CaretButton data-tour="caret" />
                 <button
-                  onClick={() => navigate('/notifications')}
+                  onClick={() => navigate({ to: '/notifications' })}
                   className="relative h-7 w-7 rounded-lg flex items-center justify-center transition-colors duration-150 hover:bg-[var(--dash-hover)]"
                   style={{ color: 'var(--dash-text-muted)' }}
                   aria-label="Notifications"
@@ -538,7 +538,7 @@ const DefaultLayout: React.FC<DefaultLayoutProps> = ({ children }) => {
             {/* Page content */}
             <AnimatePresence mode="wait">
               <motion.main
-                key={location.pathname}
+                key={pathname}
                 initial={{ opacity: 0, y: 12, filter: 'blur(4px)' }}
                 animate={{ opacity: 1, y: 0, filter: 'blur(0px)' }}
                 exit={{ opacity: 0, y: -8, filter: 'blur(2px)' }}

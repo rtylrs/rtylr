@@ -2,13 +2,13 @@ import { useEffect, useState } from 'react';
 import useAsync from '../../shared/hooks/useAsync';
 import api from '../../shared/lib/api';
 const menuApi = { getMenuWithMenuId: ({ id }) => api.get(`/menu/${id}`) };
-import { useParams } from 'react-router-dom';
+import { useParams } from '@tanstack/react-router';
 
 function MenuWithId() {
   const [categories, setCategories] = useState([]);
   const [restaurant, setRestaurant] = useState({});
   const [status, setStatus] = useState('idle');
-  const { id } = useParams();
+  const { id } = useParams({ strict: false });
   const getMenu = useAsync({
     fn: menuApi.getMenuWithMenuId,
     onSuccess: () => {

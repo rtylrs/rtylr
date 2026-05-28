@@ -1,6 +1,6 @@
 import React from 'react';
 import { motion } from 'motion/react';
-import { Link } from 'react-router-dom';
+import { Link } from '@tanstack/react-router';
 import { Map as MapIcon } from 'lucide-react';
 import { useRoadmap } from './useRoadmap';
 import { formatDate } from '../../shared/lib/utils';
@@ -37,7 +37,7 @@ const Roadmap: React.FC = () => {
             transition={{ duration: 0.18, delay: i * 0.04 }}
           >
             <Link
-              to={`/w/${p.workspaceId}/p/${p.id}/overview`}
+              to={`/w/${p.workspaceId}/p/${p.id}/overview` as string}
               className="block rounded-xl p-5"
               style={{
                 background: 'var(--flow-card)',

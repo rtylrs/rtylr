@@ -1,6 +1,6 @@
 import React from 'react';
 import { Activity, ArrowUpRight } from 'lucide-react';
-import { useNavigate } from 'react-router-dom';
+import { useNavigate } from '@tanstack/react-router';
 import { useActivity } from '../../../../shared/hooks/queries/useActivity';
 import { ActivityEntryRow } from '../../../../shared/components/dash';
 
@@ -22,7 +22,7 @@ const ActivityWidget: React.FC = () => {
           </p>
         </div>
         <button
-          onClick={() => navigate('/audit')}
+          onClick={() => navigate({ to: '/audit' })}
           className="flex items-center gap-1 text-xs font-medium"
           style={{ color: '#4583C4' }}
         >

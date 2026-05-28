@@ -1,5 +1,5 @@
 import React from 'react';
-import { useNavigate } from 'react-router-dom';
+import { useNavigate } from '@tanstack/react-router';
 import { motion } from 'motion/react';
 import { MoreHorizontal } from 'lucide-react';
 import { Avatar } from '../ui';
@@ -41,7 +41,7 @@ export const TeamMemberRow: React.FC<TeamMemberRowProps> = ({ member, onMenu, in
   return (
     <motion.div
       className="flex items-center gap-3 px-4 py-3 rounded-lg cursor-pointer hover:bg-[var(--dash-hover)]"
-      onClick={() => navigate(`/team/${member.id}`)}
+      onClick={() => navigate({ to: `/team/${member.id}` })}
       initial={{ opacity: 0, y: 8 }}
       animate={{ opacity: 1, y: 0 }}
       transition={{ duration: 0.28, ease: [0.22, 1, 0.36, 1], delay: Math.min(index, 12) * 0.03 }}

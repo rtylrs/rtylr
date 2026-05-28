@@ -1,5 +1,5 @@
 import React, { useState } from 'react';
-import { useNavigate, useParams } from 'react-router-dom';
+import { useNavigate, useParams } from '@tanstack/react-router';
 import { ArrowLeft, Mail, Shield, Clock, UserX, X } from 'lucide-react';
 import { useQuery } from '@tanstack/react-query';
 import { unwrap } from '@voxire/api';
@@ -36,7 +36,7 @@ function getInitials(name?: string | null): string {
 }
 
 const MemberDetail: React.FC = (): React.JSX.Element => {
-  const { id } = useParams<{ id: string }>();
+  const { id } = useParams({ strict: false });
   const navigate = useNavigate();
   const { data: member, isLoading } = useMember(id);
   const { data: activity = [] } = useActivity(10);
@@ -84,7 +84,7 @@ const MemberDetail: React.FC = (): React.JSX.Element => {
           title="Member not found"
           description="This member may have been deactivated or removed."
           actionLabel="Back to team"
-          onAction={() => navigate('/team')}
+          onAction={() => navigate({ to: '/team' })}
         />
       </div>
     );
@@ -198,7 +198,7 @@ const MemberDetail: React.FC = (): React.JSX.Element => {
               Groups
             </p>
             <button
-              onClick={() => navigate('/team/groups')}
+              onClick={() => navigate({ to: '/team/groups' })}
               className="text-xs"
               style={{ color: '#4583C4' }}
             >
@@ -288,7 +288,7 @@ const MemberDetail: React.FC = (): React.JSX.Element => {
         onConfirm={async () => {
           try {
             await deactivate.mutateAsync(member.id);
-            navigate('/team');
+            navigate({ to: '/team' });
           } catch {
             // onError in hook handles toast
           }

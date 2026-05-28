@@ -1,5 +1,5 @@
 import { useEffect, useRef } from 'react';
-import { useNavigate } from 'react-router-dom';
+import { useNavigate } from '@tanstack/react-router';
 import { useCommandPalette } from '../stores/commandPaletteStore';
 
 /**
@@ -46,7 +46,7 @@ export const useKeyboardShortcuts = () => {
       // "n" = new (invite)
       if (e.key.toLowerCase() === 'n' && !e.metaKey && !e.ctrlKey && !e.altKey) {
         e.preventDefault();
-        navigate('/team/invite');
+        navigate({ to: '/team/invite' });
         return;
       }
 
@@ -79,7 +79,7 @@ export const useKeyboardShortcuts = () => {
         };
         if (routes[k]) {
           e.preventDefault();
-          navigate(routes[k]);
+          navigate({ to: routes[k] as string });
         }
         chordRef.current = null;
       }

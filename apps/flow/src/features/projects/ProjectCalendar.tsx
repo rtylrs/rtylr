@@ -1,5 +1,5 @@
 import React, { useMemo, useState } from 'react';
-import { useParams, useNavigate } from 'react-router-dom';
+import { useParams, useNavigate } from '@tanstack/react-router';
 import { ChevronLeft, ChevronRight } from 'lucide-react';
 import { useFlowStore } from '../../shared/stores/flowStore';
 import { useTasks } from '../tasks/useTasks';
@@ -13,10 +13,7 @@ import ProjectViewTabs from './ProjectViewTabs';
  * for now tasks render as compact chips on the owning day.
  */
 const ProjectCalendar: React.FC = () => {
-  const { workspaceId = PERSONAL_WORKSPACE_ID, projectId = '' } = useParams<{
-    workspaceId: string;
-    projectId: string;
-  }>();
+  const { workspaceId = PERSONAL_WORKSPACE_ID, projectId = '' } = useParams({ strict: false });
 
   useProjectRealtime(projectId);
 
@@ -178,7 +175,7 @@ const ProjectCalendar: React.FC = () => {
                             cursor: 'pointer',
                           }}
                           title={t.title}
-                          onClick={() => navigate(`/task/${t.id}`)}
+                          onClick={() => navigate({ to: `/task/${t.id}` as string })}
                         >
                           {t.title}
                         </div>

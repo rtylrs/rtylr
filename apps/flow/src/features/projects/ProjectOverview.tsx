@@ -1,5 +1,5 @@
 import React from 'react';
-import { useParams } from 'react-router-dom';
+import { useParams } from '@tanstack/react-router';
 import { motion } from 'motion/react';
 import {
   Activity,
@@ -24,10 +24,7 @@ const HEALTH: Record<string, { color: string; label: string }> = {
 };
 
 const ProjectOverview: React.FC = () => {
-  const { workspaceId = PERSONAL_WORKSPACE_ID, projectId = '' } = useParams<{
-    workspaceId: string;
-    projectId: string;
-  }>();
+  const { workspaceId = PERSONAL_WORKSPACE_ID, projectId = '' } = useParams({ strict: false });
   useProjectRealtime(projectId);
 
   const { data, isLoading } = useProjectOverview(projectId);

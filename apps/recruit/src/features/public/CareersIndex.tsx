@@ -1,5 +1,5 @@
 import React, { useEffect } from 'react';
-import { useParams } from 'react-router-dom';
+import { useParams } from '@tanstack/react-router';
 
 import { useBusinessCareers } from '../../shared/hooks/queries/usePublic';
 import { applyBrand, resolveIndex } from '../../templates/resolver';
@@ -14,7 +14,7 @@ import NotFound from './NotFound';
  * then hands off to whichever template the business selected.
  */
 const CareersIndex: React.FC = (): React.JSX.Element => {
-  const { slug } = useParams<{ slug: string }>();
+  const { slug } = useParams({ strict: false });
   const { data, isLoading, error } = useBusinessCareers(slug);
 
   useEffect(() => {

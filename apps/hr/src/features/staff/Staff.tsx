@@ -1,7 +1,7 @@
 import React, { useState, useEffect, useRef } from 'react';
 import { motion } from 'motion/react';
 import type { Variants } from 'motion/react';
-import { Link } from 'react-router-dom';
+import { Link } from '@tanstack/react-router';
 import { useTranslation } from 'react-i18next';
 import { UserPlus, Mail, Search, Users } from 'lucide-react';
 import { StaffMember } from '../../shared/services/hrApi';
@@ -199,7 +199,10 @@ const Staff: React.FC = () => {
           const av = avatarColors[i % avatarColors.length];
           return (
             <motion.div key={s.id} variants={cardAnim} whileHover={{ scale: 1.015 }}>
-              <Link to={`/staff/${s.id}`} style={{ textDecoration: 'none', display: 'block' }}>
+              <Link
+                to={`/staff/${s.id}` as any}
+                style={{ textDecoration: 'none', display: 'block' }}
+              >
                 <div
                   style={{
                     background: 'var(--hr-card)',

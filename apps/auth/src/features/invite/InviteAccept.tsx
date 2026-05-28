@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from 'react';
-import { useParams, useNavigate } from 'react-router-dom';
+import { useParams, useNavigate } from '@tanstack/react-router';
 import { AlertCircle } from 'lucide-react';
 import { Button } from '@voxire/components';
 import { APP_URLS } from '@voxire/config';
@@ -9,7 +9,7 @@ import { safe } from '../../shared/lib/api';
 import type { AppId } from '@voxire/types';
 
 const InviteAccept: React.FC = () => {
-  const { token } = useParams<{ token: string }>();
+  const { token } = useParams({ strict: false });
   const navigate = useNavigate();
 
   const [email, setEmail] = useState('');
@@ -90,7 +90,7 @@ const InviteAccept: React.FC = () => {
           <p className="text-sm text-[#666]">
             <button
               className="text-[#4583C4] font-medium hover:underline underline-offset-2"
-              onClick={() => navigate('/')}
+              onClick={() => navigate({ to: '/' })}
             >
               Go to sign in
             </button>

@@ -2,7 +2,7 @@ import React, { useMemo, useCallback, useState } from 'react';
 import { motion } from 'motion/react';
 import type { Variants } from 'motion/react';
 import { useTranslation } from 'react-i18next';
-import { Link } from 'react-router-dom';
+import { Link } from '@tanstack/react-router';
 import {
   Users,
   Clock,
@@ -838,7 +838,7 @@ const Dashboard: React.FC = () => {
               {recentHires.map((s) => (
                 <li key={s.id} style={{ fontSize: 12 }}>
                   <Link
-                    to={`/staff/${s.id}`}
+                    to={`/staff/${s.id}` as any}
                     style={{ textDecoration: 'none', color: 'var(--hr-text)' }}
                   >
                     <div style={{ fontWeight: 600 }}>{s.name}</div>

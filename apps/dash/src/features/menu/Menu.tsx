@@ -1,6 +1,6 @@
 import { Spinner } from '@voxire/components';
 import { useEffect, useState } from 'react';
-import { useNavigate } from 'react-router-dom';
+import { useNavigate } from '@tanstack/react-router';
 import CreateCategoryModal from './Components/CreateCategoryModal';
 import { useMenuStore } from '../../shared/stores/menuStore';
 import { useUserStore } from '../../shared/stores/userStore';
@@ -100,9 +100,7 @@ const Menu: React.FC<{}> = () => {
             <button
               className="px-3 py-1.5 text-sm bg-accent text-white rounded-lg hover:opacity-90 transition-opacity"
               onClick={() => {
-                navigate('/create-item', {
-                  state: { categoryId: category.itemId },
-                });
+                navigate({ to: '/create-item', search: { categoryId: category.itemId } });
               }}
             >
               Add a product
@@ -233,7 +231,7 @@ const Menu: React.FC<{}> = () => {
             Create Category
           </button>
           <button
-            onClick={() => navigate('/create-banner')}
+            onClick={() => navigate({ to: '/create-banner' })}
             className="px-4 py-2 text-sm font-medium bg-accent text-white rounded-lg hover:opacity-90 transition-opacity"
           >
             Create Banner

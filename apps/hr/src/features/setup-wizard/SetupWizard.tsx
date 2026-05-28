@@ -1,5 +1,5 @@
 import React, { useEffect, useState } from 'react';
-import { useNavigate } from 'react-router-dom';
+import { useNavigate } from '@tanstack/react-router';
 import { useTranslation } from 'react-i18next';
 import {
   useGetSetupStatus,
@@ -84,7 +84,7 @@ const SetupWizard = (): React.JSX.Element => {
   }
 
   if (data?.isComplete) {
-    navigate('/', { replace: true });
+    navigate({ to: '/', replace: true });
     return <PageLoader />;
   }
 
@@ -102,7 +102,7 @@ const SetupWizard = (): React.JSX.Element => {
         { setupCompletedAt: Math.floor(Date.now() / 1000) },
         {
           onSuccess: () => {
-            navigate('/', { replace: true });
+            navigate({ to: '/', replace: true });
           },
         }
       );

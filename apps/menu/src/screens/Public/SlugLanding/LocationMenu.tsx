@@ -1,5 +1,5 @@
 import React, { useMemo } from 'react';
-import { useParams, useNavigate } from 'react-router-dom';
+import { useParams, useNavigate } from '@tanstack/react-router';
 import { FullScreenLoader } from '@voxire/components';
 import { GridLayout, MenuCategoryData, BusinessInfo, CartItem } from '@voxire/menu';
 import { usePublicBusinessBySlug, usePublicMenu } from '../../../shared/hooks/usePublicMenu';
@@ -16,7 +16,7 @@ import { useCartStore } from '../../../shared/stores/cartStore';
 const onlineOrderingEnabled = import.meta.env.VITE_ONLINE_ORDERING_ENABLED === 'true';
 
 const LocationMenu: React.FC = (): React.JSX.Element => {
-  const { slug: rawSlug, location: rawLoc } = useParams<{ slug: string; location: string }>();
+  const { slug: rawSlug, location: rawLoc } = useParams({ strict: false });
   const navigate = useNavigate();
   const slug = (rawSlug ?? '').toLowerCase();
   const locationSlug = (rawLoc ?? '').toLowerCase();
@@ -59,7 +59,7 @@ const LocationMenu: React.FC = (): React.JSX.Element => {
       <div style={{ padding: 32, textAlign: 'center' }}>
         <h1 style={{ fontSize: 18, fontWeight: 600 }}>Location not found</h1>
         <p style={{ fontSize: 13, opacity: 0.7 }}>
-          <a href={`/${slug}`}>← Back to {biz.business.name}</a>
+          <a href={`/${slug}`}>Back to {biz.business.name}</a>
         </p>
       </div>
     );
@@ -87,7 +87,7 @@ const LocationMenu: React.FC = (): React.JSX.Element => {
 
   const onPlaceOrder = (): void => {
     if (!onlineOrderingEnabled) return;
-    navigate('/checkout');
+    navigate({ to: '/checkout' });
   };
 
   return (

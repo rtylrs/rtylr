@@ -1,5 +1,5 @@
 import React from 'react';
-import { Link } from 'react-router-dom';
+import { Link } from '@tanstack/react-router';
 import { AlertTriangle } from 'lucide-react';
 import MoneyDisplay from './MoneyDisplay';
 import { cardStyle, ACCENT } from '../lib/tokens';
@@ -48,7 +48,8 @@ const OverdueInvoicesWidget: React.FC<OverdueInvoicesWidgetProps> = ({ items }) 
           {items.slice(0, 6).map((item) => (
             <Link
               key={item.id}
-              to={`/invoices/${item.id}`}
+              to="/invoices/$id"
+              params={{ id: String(item.id) }}
               style={{
                 display: 'flex',
                 alignItems: 'center',

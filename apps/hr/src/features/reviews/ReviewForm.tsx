@@ -1,5 +1,5 @@
 import React, { useState } from 'react';
-import { useNavigate, Link } from 'react-router-dom';
+import { useNavigate, Link } from '@tanstack/react-router';
 import { toast } from 'sonner';
 import { useStaff } from '../staff/useStaff';
 import { useCreateReview } from '../../shared/hooks/useHrExtras';
@@ -58,7 +58,7 @@ const ReviewForm: React.FC = () => {
       {
         onSuccess: () => {
           toast.success('Review created');
-          nav('/reviews');
+          nav({ to: '/reviews' });
         },
       }
     );

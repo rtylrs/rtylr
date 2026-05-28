@@ -1,5 +1,5 @@
 import React, { useEffect } from 'react';
-import { useParams } from 'react-router-dom';
+import { useParams } from '@tanstack/react-router';
 
 import { usePublicCareer } from '../../shared/hooks/queries/usePublic';
 import { applyBrand, resolveJob } from '../../templates/resolver';
@@ -13,7 +13,10 @@ import NotFound from './NotFound';
  * consistent.
  */
 const CareerDetail: React.FC = (): React.JSX.Element => {
-  const { slug = '', careerSlug = '' } = useParams<{ slug: string; careerSlug: string }>();
+  const { slug = '', careerSlug = '' } = useParams({ strict: false }) as {
+    slug?: string;
+    careerSlug?: string;
+  };
   const { data, isLoading, error } = usePublicCareer(slug, careerSlug);
 
   useEffect(() => {

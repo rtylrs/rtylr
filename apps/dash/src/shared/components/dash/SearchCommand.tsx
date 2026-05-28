@@ -1,6 +1,6 @@
 import React, { useEffect, useMemo, useRef, useState } from 'react';
 import { createPortal } from 'react-dom';
-import { useNavigate } from 'react-router-dom';
+import { useNavigate } from '@tanstack/react-router';
 import {
   Search,
   LayoutDashboard,
@@ -48,7 +48,7 @@ export const SearchCommand: React.FC = () => {
 
   const items: CommandItem[] = useMemo(() => {
     const go = (path: string) => () => {
-      navigate(path);
+      navigate({ to: path });
       setOpen(false);
       setQuery('');
     };

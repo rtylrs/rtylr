@@ -1,5 +1,5 @@
 import React, { useState } from 'react';
-import { Link } from 'react-router-dom';
+import { Link } from '@tanstack/react-router';
 import { useTranslation } from 'react-i18next';
 import { toast } from 'sonner';
 import { Play, DollarSign, TrendingUp, Users, Clock, Settings } from 'lucide-react';
@@ -192,7 +192,7 @@ const Payroll = (): React.JSX.Element => {
           {filteredRuns.map((run: PayrollRunPayload) => (
             <Link
               key={run.id}
-              to={`/payroll/${run.id}`}
+              to={`/payroll/${run.id}` as any}
               style={{ textDecoration: 'none', color: 'inherit' }}
             >
               <Card

@@ -1,5 +1,5 @@
 import React from 'react';
-import { useSearchParams, Link } from 'react-router-dom';
+import { useRouterState, Link } from '@tanstack/react-router';
 import { useTranslation } from 'react-i18next';
 import { ArrowLeft, FileText } from 'lucide-react';
 import { useGetPayrollRun } from '../../shared/hooks/queries/usePayroll';
@@ -62,11 +62,10 @@ const BreakdownRow = ({ label, value, color, bold }: BreakdownRowProps): React.J
 
 const PaySlip = (): React.JSX.Element => {
   const { t } = useTranslation();
-  const [searchParams] = useSearchParams();
-  const runId = searchParams.get('runId') ? Number(searchParams.get('runId')) : undefined;
-  const employeeId = searchParams.get('employeeId')
-    ? Number(searchParams.get('employeeId'))
-    : undefined;
+  const searchStr = useRouterState({ select: (s) => s.location.searchStr });
+  const sp = new URLSearchParams(searchStr);
+  const runId = sp.get('runId') ? Number(sp.get('runId')) : undefined;
+  const employeeId = sp.get('employeeId') ? Number(sp.get('employeeId')) : undefined;
 
   const { data: run, isLoading } = useGetPayrollRun(runId);
 

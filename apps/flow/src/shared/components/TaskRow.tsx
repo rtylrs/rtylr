@@ -1,6 +1,6 @@
 import React, { useEffect, useRef, useState } from 'react';
 import { createPortal } from 'react-dom';
-import { useNavigate } from 'react-router-dom';
+import { useNavigate } from '@tanstack/react-router';
 import { toast } from 'sonner';
 import { ExternalLink, Trash2, Copy } from 'lucide-react';
 import { Task, useFlowStore } from '../stores/flowStore';
@@ -81,7 +81,7 @@ const TaskContextMenu: React.FC<{
         onMouseEnter={(e) => (e.currentTarget.style.background = 'var(--flow-hover)')}
         onMouseLeave={(e) => (e.currentTarget.style.background = 'transparent')}
         onClick={() => {
-          navigate(`/task/${menu.taskId}`);
+          navigate({ to: `/task/${menu.taskId}` as string });
           onClose();
         }}
       >
@@ -156,7 +156,7 @@ export const TaskRow: React.FC<TaskRowProps> = ({ task, showProject, selected, o
             toggleSelectTask(task.id);
             onSelect?.(e);
           } else {
-            navigate(`/task/${task.id}`);
+            navigate({ to: `/task/${task.id}` as string });
           }
         }}
         onContextMenu={handleContextMenu}

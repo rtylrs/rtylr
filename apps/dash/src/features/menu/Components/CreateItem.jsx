@@ -1,12 +1,12 @@
 import { useEffect, useState } from 'react';
-import { useLocation, useNavigate } from 'react-router-dom';
+import { useNavigate, useRouterState } from '@tanstack/react-router';
 import { useMenuStore } from '../../../shared/stores/menuStore';
 
 function CreateItem() {
   const navigate = useNavigate();
-  const location = useLocation();
+  const searchStr = useRouterState({ select: (s) => s.location.searchStr });
   const { addMenuItem } = useMenuStore();
-  const categoryId = location.state?.categoryId;
+  const categoryId = new URLSearchParams(searchStr).get('categoryId');
   const [name, setName] = useState('');
   const [description, setDescription] = useState('');
   const [price, setPrice] = useState('');
@@ -22,9 +22,9 @@ function CreateItem() {
 
   useEffect(() => {
     if (!categoryId) {
-      navigate(-1);
+      window.history.back();
     }
-  }, [categoryId, navigate]);
+  }, [categoryId]);
 
   const handleInputChange = (e, setState) => {
     setState(e.target.value.split(',').map((item) => item.trim()));
@@ -53,7 +53,7 @@ function CreateItem() {
     };
 
     addMenuItem(categoryId, item).then(() => {
-      navigate(-1);
+      window.history.back();
     });
   };
 
@@ -169,7 +169,7 @@ function CreateItem() {
           </label>
         </div>
         <button type="submit">Save</button>
-        <button type="button" onClick={() => navigate(-1)}>
+        <button type="button" onClick={() => window.history.back()}>
           Cancel
         </button>
       </form>

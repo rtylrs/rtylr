@@ -1,8 +1,8 @@
-import { useLocation } from 'react-router-dom';
+import { useRouterState } from '@tanstack/react-router';
 import { getLayoutTypeForRoute } from '../utils/layoutConfig';
 import { LayoutType } from '../../layouts/types';
 
 export const useLayout = (): LayoutType => {
-  const location = useLocation();
-  return getLayoutTypeForRoute(location.pathname);
+  const pathname = useRouterState({ select: (s) => s.location.pathname });
+  return getLayoutTypeForRoute(pathname);
 };

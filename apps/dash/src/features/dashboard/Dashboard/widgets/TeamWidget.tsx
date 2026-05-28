@@ -1,6 +1,6 @@
 import React from 'react';
 import { Users, ArrowUpRight } from 'lucide-react';
-import { useNavigate } from 'react-router-dom';
+import { useNavigate } from '@tanstack/react-router';
 import { useQuery } from '@tanstack/react-query';
 import { unwrap } from '@voxire/api';
 import { safe } from '../../../../shared/lib/api';
@@ -44,7 +44,7 @@ const TeamWidget: React.FC = () => {
           </p>
         </div>
         <button
-          onClick={() => navigate('/team')}
+          onClick={() => navigate({ to: '/team' })}
           className="flex items-center gap-1 text-xs font-medium"
           style={{ color: '#4583C4' }}
         >
@@ -58,7 +58,7 @@ const TeamWidget: React.FC = () => {
               No team members yet
             </p>
             <button
-              onClick={() => navigate('/team/invite')}
+              onClick={() => navigate({ to: '/team/invite' })}
               className="text-xs font-medium mt-2"
               style={{ color: '#4583C4' }}
             >

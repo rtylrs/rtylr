@@ -1,6 +1,6 @@
 import React, { useEffect, useRef, useState } from 'react';
 import { cn, Avatar } from '@voxire/ui';
-import { useLocation, Link } from 'react-router-dom';
+import { useLocation, Link, Outlet } from '@tanstack/react-router';
 import { useForesightLinks } from '@voxire/utils';
 import { motion, AnimatePresence } from 'motion/react';
 import { APP_URLS, getAvatarUrl } from '@voxire/config';
@@ -115,11 +115,7 @@ const SidebarNavItem: React.FC<NavItem> = ({ label, path, icon: Icon }) => {
   );
 };
 
-interface DefaultLayoutProps {
-  children?: React.ReactNode;
-}
-
-const DefaultLayout: React.FC<DefaultLayoutProps> = ({ children }) => {
+const DefaultLayout: React.FC = () => {
   const { t } = useTranslation();
   const location = useLocation();
   const [theme, setThemeState] = useState<Theme>(() => {
@@ -420,7 +416,7 @@ const DefaultLayout: React.FC<DefaultLayoutProps> = ({ children }) => {
                 transition={{ duration: 0.18, ease: 'easeOut' }}
                 className="flex-1 overflow-y-auto p-6"
               >
-                {children}
+                <Outlet />
               </motion.main>
             </AnimatePresence>
           </div>

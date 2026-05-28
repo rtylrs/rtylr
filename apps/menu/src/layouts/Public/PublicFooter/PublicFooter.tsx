@@ -1,5 +1,5 @@
 import { FaInstagram } from 'react-icons/fa';
-import { Link } from 'react-router-dom';
+import { Link } from '@tanstack/react-router';
 import PackageJson from '@root/package.json';
 import { useConfigStore } from '../../../stores/configStore';
 import React from 'react';

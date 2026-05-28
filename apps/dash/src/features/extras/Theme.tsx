@@ -1,6 +1,6 @@
 import React, { useState } from 'react';
 import { Palette, Upload } from 'lucide-react';
-import { useNavigate } from 'react-router-dom';
+import { useNavigate } from '@tanstack/react-router';
 import { Button, Input, Label } from '../../shared/components/ui';
 import { Breadcrumbs, SettingSection } from '../../shared/components/dash';
 
@@ -44,7 +44,7 @@ const ThemeCustomizer: React.FC = () => {
         title="Accent color"
         description="Applied to primary buttons, links, and highlights."
         footer={
-          <Button size="sm" onClick={() => navigate('/design')}>
+          <Button size="sm" onClick={() => navigate({ to: '/design' })}>
             Open full design editor
           </Button>
         }

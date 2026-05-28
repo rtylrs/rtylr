@@ -1,5 +1,5 @@
 import React, { useState } from 'react';
-import { useNavigate } from 'react-router-dom';
+import { useNavigate } from '@tanstack/react-router';
 import api from '../../shared/lib/api';
 import { useCartStore } from '../../shared/stores/cartStore';
 
@@ -86,7 +86,7 @@ const Checkout = (): React.JSX.Element => {
       const res = await api.post<PlaceOrderResponse>('/pos/public/orders', body);
       const { order_id, order_number } = res.data;
       clearCart();
-      void navigate(`/order-status/${order_id}?number=${encodeURIComponent(order_number)}`);
+      void navigate({ to: `/order-status/${order_id}?number=${encodeURIComponent(order_number)}` });
     } catch {
       setErrorMessage('Failed to place order. Please try again.');
     } finally {
@@ -111,7 +111,7 @@ const Checkout = (): React.JSX.Element => {
           Your cart is empty
         </p>
         <button
-          onClick={() => void navigate(-1)}
+          onClick={() => window.history.back()}
           style={{
             background: 'var(--menu-accent, #03aed2)',
             color: 'var(--menu-accent-text, #ffffff)',
@@ -142,7 +142,7 @@ const Checkout = (): React.JSX.Element => {
     >
       {/* Back */}
       <button
-        onClick={() => void navigate(-1)}
+        onClick={() => window.history.back()}
         aria-label="Go back"
         style={{
           background: 'transparent',
@@ -231,7 +231,7 @@ const Checkout = (): React.JSX.Element => {
                   <textarea
                     value={item.notes}
                     onChange={(e) => setItemNote(item.menuItemId, e.target.value)}
-                    placeholder="e.g. no pickles, extra sauce…"
+                    placeholder="e.g. no pickles, extra sauce..."
                     rows={2}
                     style={{
                       width: '100%',
@@ -351,7 +351,7 @@ const Checkout = (): React.JSX.Element => {
             id="checkout-notes"
             value={orderNotes}
             onChange={(e) => setOrderNotes(e.target.value)}
-            placeholder="Any special instructions for the whole order…"
+            placeholder="Any special instructions for the whole order..."
             rows={3}
             style={{
               width: '100%',
@@ -403,7 +403,7 @@ const Checkout = (): React.JSX.Element => {
             gap: 8,
           }}
         >
-          {submitting ? 'Placing Order…' : `Place Order · ${formatPrice(total())}`}
+          {submitting ? 'Placing Order...' : `Place Order · ${formatPrice(total())}`}
         </button>
       </form>
     </div>

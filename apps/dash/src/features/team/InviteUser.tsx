@@ -1,6 +1,6 @@
 import React, { useState } from 'react';
 import { toast } from 'sonner';
-import { useNavigate } from 'react-router-dom';
+import { useNavigate } from '@tanstack/react-router';
 import { useQuery } from '@tanstack/react-query';
 import {
   Send,
@@ -145,7 +145,7 @@ const InviteUser: React.FC = (): React.JSX.Element => {
         apps: selectedApps,
         ...(singleGroupId ? { groupId: Number(singleGroupId) } : {}),
       });
-      navigate('/team');
+      navigate({ to: '/team' });
     } catch {
       // onError in hook handles toast
     }
@@ -498,7 +498,7 @@ const InviteUser: React.FC = (): React.JSX.Element => {
           <div className="flex items-center justify-end gap-3 pt-2">
             <button
               type="button"
-              onClick={() => navigate('/team')}
+              onClick={() => navigate({ to: '/team' })}
               className="px-4 py-2 rounded-lg text-sm font-medium"
               style={{ color: 'var(--dash-text-muted)' }}
             >
@@ -592,7 +592,7 @@ const InviteUser: React.FC = (): React.JSX.Element => {
           <div className="flex items-center justify-end gap-3 pt-2">
             <button
               type="button"
-              onClick={() => navigate('/team')}
+              onClick={() => navigate({ to: '/team' })}
               className="px-4 py-2 rounded-lg text-sm font-medium"
               style={{ color: 'var(--dash-text-muted)' }}
             >

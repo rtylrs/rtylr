@@ -1,5 +1,5 @@
 import React, { useRef, useCallback } from 'react';
-import { useParams, Link } from 'react-router-dom';
+import { useParams, Link } from '@tanstack/react-router';
 import { useTranslation } from 'react-i18next';
 import { useVirtualizer } from '@tanstack/react-virtual';
 import { CheckCircle, Download, ArrowLeft } from 'lucide-react';
@@ -29,7 +29,7 @@ const COLUMNS = '2fr 1fr 1fr 1fr 1fr 1fr 1fr';
 const MIN_WIDTH = 860;
 
 const PayrollRunDetailContent = (): React.JSX.Element => {
-  const { id } = useParams<{ id: string }>();
+  const { id } = useParams({ strict: false });
   const runId = id ? Number(id) : undefined;
   const { t } = useTranslation();
   const { data: run, isLoading } = useGetPayrollRun(runId);

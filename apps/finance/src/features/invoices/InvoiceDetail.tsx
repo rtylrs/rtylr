@@ -1,5 +1,5 @@
 import React, { useState } from 'react';
-import { useParams, useNavigate } from 'react-router-dom';
+import { useParams, useNavigate } from '@tanstack/react-router';
 import { motion } from 'motion/react';
 import { Send, Copy, XCircle, CreditCard, Printer } from 'lucide-react';
 import { toast } from 'sonner';
@@ -17,7 +17,7 @@ import { SkeletonRow } from '../../shared/components/Skeleton';
 import { ACCENT, cardStyle, ghostBtn, primaryBtn } from '../../shared/lib/tokens';
 
 const InvoiceDetail: React.FC = () => {
-  const { id } = useParams<{ id: string }>();
+  const { id } = useParams({ strict: false });
   const navigate = useNavigate();
   const { data: invoice, isLoading } = useInvoice(id);
   const deleteInvoice = useDeleteInvoice();
@@ -69,7 +69,7 @@ const InvoiceDetail: React.FC = () => {
             <button
               style={ghostBtn}
               onClick={() => {
-                navigate(`/invoices/new?clone=${invoice.id}`);
+                navigate({ to: `/invoices/new?clone=${invoice.id}` });
                 toast.success('Cloning invoice');
               }}
             >
@@ -238,7 +238,7 @@ const InvoiceDetail: React.FC = () => {
             onSuccess: () => {
               toast.success(`Invoice ${invoice.id} voided`);
               setShowVoid(false);
-              navigate('/invoices');
+              navigate({ to: '/invoices' });
             },
             onError: () => toast.error(`Failed to void invoice ${invoice.id}`),
           })

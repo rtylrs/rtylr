@@ -1,9 +1,9 @@
-import { useLocation } from 'react-router-dom';
+import { useRouterState } from '@tanstack/react-router';
 import { useMemo } from 'react';
 import { suggestionsFor } from '../../lib/caret';
 
 /** Returns the suggestion array to show in Caret's empty state. */
 export function useCaretSuggestions(): string[] {
-  const location = useLocation();
-  return useMemo(() => suggestionsFor(location.pathname), [location.pathname]);
+  const pathname = useRouterState({ select: (s) => s.location.pathname });
+  return useMemo(() => suggestionsFor(pathname), [pathname]);
 }

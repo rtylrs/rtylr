@@ -1,5 +1,5 @@
 import React from 'react';
-import { useNavigate } from 'react-router-dom';
+import { useNavigate } from '@tanstack/react-router';
 import { motion } from 'motion/react';
 import Skeleton from 'react-loading-skeleton';
 import 'react-loading-skeleton/dist/skeleton.css';
@@ -258,7 +258,7 @@ const Dashboard: React.FC = () => {
           initial={{ opacity: 0, y: 8 }}
           animate={{ opacity: 1, y: 0 }}
           transition={{ delay: 0.22 }}
-          onClick={() => navigate('/customers/new')}
+          onClick={() => navigate({ to: '/customers/new' })}
           style={{
             background: 'var(--hub-card)',
             border: '1px solid var(--hub-border)',
@@ -366,7 +366,7 @@ const Dashboard: React.FC = () => {
           initial={{ opacity: 0, y: 8 }}
           animate={{ opacity: 1, y: 0 }}
           transition={{ delay: 0.3 }}
-          onClick={() => topSegment && navigate(`/segments/${topSegment.id}`)}
+          onClick={() => topSegment && navigate({ to: `/segments/${topSegment.id}` })}
           style={{
             background: 'var(--hub-card)',
             border: '1px solid var(--hub-border)',
@@ -458,7 +458,9 @@ const Dashboard: React.FC = () => {
             </span>
           </div>
           <button
-            onClick={() => navigate('/campaigns/email?segment=atrisk')}
+            onClick={() =>
+              navigate({ to: '/campaigns/email', search: { segment: 'atrisk' } as any })
+            }
             style={{
               fontSize: '12px',
               color: '#3b82f6',
@@ -485,7 +487,7 @@ const Dashboard: React.FC = () => {
           {atRisk.slice(0, 4).map((c) => (
             <div
               key={c.id}
-              onClick={() => navigate(`/customers/${c.id}`)}
+              onClick={() => navigate({ to: `/customers/${c.id}` })}
               style={{
                 display: 'flex',
                 alignItems: 'center',

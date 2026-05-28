@@ -1,5 +1,5 @@
 import React, { useEffect, useMemo, useState } from 'react';
-import { useNavigate } from 'react-router-dom';
+import { useNavigate } from '@tanstack/react-router';
 import {
   Search,
   FileText,
@@ -131,7 +131,7 @@ const GlobalSearch: React.FC<GlobalSearchProps> = ({ open, onClose }) => {
         e.preventDefault();
         const r = results[index];
         if (r) {
-          navigate(r.to);
+          navigate({ to: r.to });
           onClose();
         }
       }
@@ -181,7 +181,7 @@ const GlobalSearch: React.FC<GlobalSearchProps> = ({ open, onClose }) => {
               key={r.id}
               onMouseEnter={() => setIndex(i)}
               onClick={() => {
-                navigate(r.to);
+                navigate({ to: r.to });
                 onClose();
               }}
               style={{

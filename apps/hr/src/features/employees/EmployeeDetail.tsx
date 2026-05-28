@@ -1,5 +1,5 @@
 import React, { useState } from 'react';
-import { useParams, useNavigate } from 'react-router-dom';
+import { useParams, useNavigate } from '@tanstack/react-router';
 import { useTranslation } from 'react-i18next';
 import { ArrowLeft } from 'lucide-react';
 import { useGetEmployee } from '../../shared/hooks/queries/useEmployees';
@@ -10,7 +10,7 @@ type Tab = 'personal' | 'employment' | 'documents';
 const EmployeeDetail = (): React.JSX.Element => {
   const { t } = useTranslation();
   const navigate = useNavigate();
-  const { id } = useParams<{ id: string }>();
+  const { id } = useParams({ strict: false });
   const employeeId = id ? Number(id) : undefined;
   const { data: employee, isLoading } = useGetEmployee(employeeId);
   const [activeTab, setActiveTab] = useState<Tab>('personal');
@@ -33,7 +33,7 @@ const EmployeeDetail = (): React.JSX.Element => {
           {t('errors.notFound')}
         </p>
         <button
-          onClick={() => navigate('/employees')}
+          onClick={() => navigate({ to: '/employees' })}
           className="rounded-lg px-4 py-2 text-sm font-medium"
           style={{ background: 'var(--accent)', color: '#fff' }}
         >
@@ -72,7 +72,7 @@ const EmployeeDetail = (): React.JSX.Element => {
     <div className="flex flex-col gap-6">
       <div className="flex items-center gap-3">
         <button
-          onClick={() => navigate('/employees')}
+          onClick={() => navigate({ to: '/employees' })}
           className="rounded-lg p-2 transition-colors"
           style={{ background: 'var(--hr-hover)', color: 'var(--hr-text-muted)' }}
           aria-label={t('common.back')}

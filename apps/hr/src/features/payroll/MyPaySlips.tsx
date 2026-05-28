@@ -1,5 +1,5 @@
 import React from 'react';
-import { Link } from 'react-router-dom';
+import { Link } from '@tanstack/react-router';
 import { useTranslation } from 'react-i18next';
 import { FileText, DollarSign } from 'lucide-react';
 import { useListPayrollRuns } from '../../shared/hooks/queries/usePayroll';
@@ -43,7 +43,7 @@ const MyPaySlips = (): React.JSX.Element => {
           {runs.map((run: PayrollRunPayload) => (
             <Link
               key={run.id}
-              to={`/payroll/my-payslips/view?runId=${run.id}`}
+              to={`/payroll/my-payslips/view?runId=${run.id}` as any}
               style={{ textDecoration: 'none', color: 'inherit' }}
             >
               <Card

@@ -1,5 +1,5 @@
 import React from 'react';
-import { Link } from 'react-router-dom';
+import { Link } from '@tanstack/react-router';
 import { ArrowLeft } from 'lucide-react';
 
 import Header from '../shared/Header';
@@ -11,7 +11,7 @@ const EditorialJob: React.FC<JobProps> = ({ career, customization, slug }) => {
       <Header customization={customization} compact />
       <main className="mx-auto max-w-3xl px-6 py-16">
         <Link
-          to={`/${slug}`}
+          to={`/${slug}` as any}
           className="inline-flex items-center gap-2 text-xs uppercase tracking-[0.2em]"
           style={{ color: 'var(--recruit-muted)' }}
         >
@@ -59,7 +59,7 @@ const EditorialJob: React.FC<JobProps> = ({ career, customization, slug }) => {
 
         <div className="mt-16">
           <Link
-            to={`/${slug}/${career.slug}/apply`}
+            to={`/${slug}/${career.slug}/apply` as any}
             className="inline-flex items-center gap-2 border-2 px-8 py-4 text-sm font-semibold uppercase tracking-wider transition hover:bg-[var(--recruit-accent)] hover:text-white"
             style={{ borderColor: 'var(--recruit-accent)', color: 'var(--recruit-accent)' }}
           >

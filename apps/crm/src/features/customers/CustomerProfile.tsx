@@ -1,5 +1,5 @@
 import React, { useState } from 'react';
-import { useParams, useNavigate } from 'react-router-dom';
+import { useParams, useNavigate } from '@tanstack/react-router';
 import { motion } from 'motion/react';
 import { toast } from 'sonner';
 import {
@@ -34,7 +34,7 @@ import {
 import { getTier, pointsToNextTier } from '../../shared/lib/tiers';
 
 const CustomerProfile: React.FC = () => {
-  const { id } = useParams<{ id: string }>();
+  const { id } = useParams({ strict: false });
   const navigate = useNavigate();
   const customerId = Number(id);
   const { data: fetched, isLoading } = useGetCustomerFull(customerId);
@@ -133,7 +133,7 @@ const CustomerProfile: React.FC = () => {
     remove.mutate(customer.id, {
       onSuccess: () => {
         toast.success('Customer deleted');
-        navigate('/customers');
+        navigate({ to: '/customers' });
       },
       onError: () => {
         toast.error('Failed to delete customer');
@@ -152,7 +152,7 @@ const CustomerProfile: React.FC = () => {
     <div style={{ maxWidth: '1100px' }}>
       <Breadcrumbs items={[{ label: 'Customers', to: '/customers' }, { label: customer.name }]} />
       <button
-        onClick={() => navigate('/customers')}
+        onClick={() => navigate({ to: '/customers' })}
         style={{
           background: 'transparent',
           border: 'none',
@@ -233,7 +233,7 @@ const CustomerProfile: React.FC = () => {
           </Button>
           <Button
             variant="outline"
-            onClick={() => navigate('/customers/merge?primary=' + customer.id)}
+            onClick={() => navigate({ to: '/customers/merge?primary=' + customer.id })}
           >
             <Users size={13} />
             Merge

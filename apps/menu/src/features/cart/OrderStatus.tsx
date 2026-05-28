@@ -1,5 +1,5 @@
 import React, { useCallback, useEffect, useRef, useState } from 'react';
-import { useNavigate, useParams, useSearchParams } from 'react-router-dom';
+import { useNavigate, useParams, useRouterState } from '@tanstack/react-router';
 import api from '../../shared/lib/api';
 import { useCartStore } from '../../shared/stores/cartStore';
 
@@ -24,12 +24,12 @@ const statusIndex = (s: OrderStatusValue): number =>
   STATUS_STEPS.findIndex((step) => step.key === s);
 
 const OrderStatus = (): React.JSX.Element => {
-  const { id } = useParams<{ id: string }>();
-  const [searchParams] = useSearchParams();
+  const { id } = useParams({ strict: false });
+  const searchStr = useRouterState({ select: (s) => s.location.searchStr });
   const navigate = useNavigate();
   const { clearCart } = useCartStore();
 
-  const orderNumber = searchParams.get('number') ?? '';
+  const orderNumber = new URLSearchParams(searchStr).get('number') ?? '';
 
   const [status, setStatus] = useState<OrderStatusValue | null>(null);
   const [estimatedMinutes, setEstimatedMinutes] = useState<number | null>(null);
@@ -65,7 +65,7 @@ const OrderStatus = (): React.JSX.Element => {
 
   const handleOrderAnother = (): void => {
     clearCart();
-    void navigate(-1);
+    window.history.back();
   };
 
   const currentIndex = status != null ? statusIndex(status) : -1;
@@ -165,7 +165,7 @@ const OrderStatus = (): React.JSX.Element => {
             }}
           >
             {status === 'received' && 'Order received!'}
-            {status === 'preparing' && 'Being prepared…'}
+            {status === 'preparing' && 'Being prepared...'}
             {status === 'ready' && 'Ready for pickup!'}
             {status === 'done' && 'Order complete!'}
           </p>
@@ -174,7 +174,7 @@ const OrderStatus = (): React.JSX.Element => {
 
       {/* Loading state */}
       {status == null && !fetchError && (
-        <p style={{ color: 'rgba(0,0,0,0.4)', fontSize: '15px' }}>Loading order status…</p>
+        <p style={{ color: 'rgba(0,0,0,0.4)', fontSize: '15px' }}>Loading order status...</p>
       )}
 
       {/* Error state */}

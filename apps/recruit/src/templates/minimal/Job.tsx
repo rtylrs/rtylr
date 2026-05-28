@@ -1,5 +1,5 @@
 import React from 'react';
-import { Link } from 'react-router-dom';
+import { Link } from '@tanstack/react-router';
 import { ArrowLeft, MapPin, Briefcase, Clock, Award } from 'lucide-react';
 
 import Header from '../shared/Header';
@@ -11,7 +11,7 @@ const MinimalJob: React.FC<JobProps> = ({ career, customization, slug }) => {
       <Header customization={customization} compact />
       <main className="mx-auto max-w-3xl px-6 py-12">
         <Link
-          to={`/${slug}`}
+          to={`/${slug}` as any}
           className="inline-flex items-center gap-2 text-sm font-medium hover:underline"
           style={{ color: 'var(--recruit-muted)' }}
         >
@@ -83,7 +83,7 @@ const MinimalJob: React.FC<JobProps> = ({ career, customization, slug }) => {
         )}
 
         <Link
-          to={`/${slug}/${career.slug}/apply`}
+          to={`/${slug}/${career.slug}/apply` as any}
           className="mt-12 inline-flex items-center gap-2 rounded-lg px-6 py-3 text-sm font-semibold text-white transition hover:opacity-90"
           style={{ background: 'var(--recruit-accent)' }}
         >

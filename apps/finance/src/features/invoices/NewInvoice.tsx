@@ -1,5 +1,5 @@
 import React, { useState } from 'react';
-import { useNavigate } from 'react-router-dom';
+import { useNavigate } from '@tanstack/react-router';
 import { motion } from 'motion/react';
 import { ChevronRight, Plus, ArrowLeft, Save } from 'lucide-react';
 import { toast } from 'sonner';
@@ -99,7 +99,7 @@ const NewInvoice: React.FC = () => {
       {
         onSuccess: () => {
           toast.success(`Invoice ${invoiceNumber} saved as ${status}`);
-          navigate('/invoices');
+          navigate({ to: '/invoices' });
         },
         onError: () => toast.error('Failed to save invoice'),
       }
@@ -294,7 +294,7 @@ const NewInvoice: React.FC = () => {
       <div style={{ display: 'flex', justifyContent: 'space-between' }}>
         <button
           style={ghostBtn}
-          onClick={() => (step === 0 ? navigate('/invoices') : setStep(step - 1))}
+          onClick={() => (step === 0 ? navigate({ to: '/invoices' }) : setStep(step - 1))}
         >
           <ArrowLeft size={13} /> {step === 0 ? 'Cancel' : 'Back'}
         </button>

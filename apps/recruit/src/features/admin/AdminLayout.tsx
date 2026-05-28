@@ -1,5 +1,5 @@
 import React from 'react';
-import { NavLink, Outlet } from 'react-router-dom';
+import { Link, Outlet, useLocation } from '@tanstack/react-router';
 import { Briefcase, Inbox, Palette, ArrowLeft, LayoutGrid } from 'lucide-react';
 import { APP_URLS } from '@voxire/config';
 import { signOut } from '@voxire/auth';
@@ -64,18 +64,20 @@ const AdminLink: React.FC<{ to: string; icon: React.ReactNode; label: string }> 
   to,
   icon,
   label,
-}) => (
-  <NavLink
-    to={to}
-    className={({ isActive }) =>
-      `flex items-center gap-3 rounded-md px-3 py-2 text-sm font-medium transition ${
+}) => {
+  const location = useLocation();
+  const isActive = location.pathname === to || location.pathname.startsWith(to + '/');
+  return (
+    <Link
+      to={to as any}
+      className={`flex items-center gap-3 rounded-md px-3 py-2 text-sm font-medium transition ${
         isActive ? 'bg-white/5 text-white' : 'text-white/70 hover:bg-white/5 hover:text-white'
-      }`
-    }
-  >
-    {icon}
-    {label}
-  </NavLink>
-);
+      }`}
+    >
+      {icon}
+      {label}
+    </Link>
+  );
+};
 
 export default AdminLayout;

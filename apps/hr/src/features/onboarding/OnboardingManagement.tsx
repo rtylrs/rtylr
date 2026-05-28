@@ -1,6 +1,6 @@
 import React from 'react';
 import { useTranslation } from 'react-i18next';
-import { useNavigate } from 'react-router-dom';
+import { useNavigate } from '@tanstack/react-router';
 import { Rocket, AlertTriangle } from 'lucide-react';
 import { useGetEmployeeChecklist } from '../../shared/hooks/queries/useOnboarding';
 import type { EmployeeChecklistPayload } from '@voxire/contracts/hr/v1/onboarding';
@@ -39,7 +39,7 @@ const OnboardingManagement = (): React.JSX.Element => {
         title={t('onboardingMgmt.management.title')}
         subtitle={t('onboardingMgmt.management.subtitle')}
         right={
-          <Button variant="secondary" onClick={() => navigate('/onboarding/templates')}>
+          <Button variant="secondary" onClick={() => navigate({ to: '/onboarding/templates' })}>
             {t('onboardingMgmt.management.manageTemplates')}
           </Button>
         }

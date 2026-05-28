@@ -1,6 +1,6 @@
 import React from 'react';
 import { useTranslation } from 'react-i18next';
-import { Link } from 'react-router-dom';
+import { Link } from '@tanstack/react-router';
 import { CheckSquare } from 'lucide-react';
 import WidgetShell from './WidgetShell';
 

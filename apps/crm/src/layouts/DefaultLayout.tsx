@@ -1,7 +1,7 @@
 import React, { useEffect, useRef, useState } from 'react';
 import { cn } from '@voxire/ui';
 import TrialBanner from '../shared/components/TrialBanner';
-import { useLocation, useNavigate, Link, Outlet } from 'react-router-dom';
+import { useLocation, useNavigate, Link, Outlet } from '@tanstack/react-router';
 import { motion, AnimatePresence } from 'motion/react';
 import { APP_URLS } from '@voxire/config';
 import { signOut, useUserStore } from '@voxire/auth';

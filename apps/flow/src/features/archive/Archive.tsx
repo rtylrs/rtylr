@@ -1,5 +1,5 @@
 import React, { useMemo } from 'react';
-import { useNavigate } from 'react-router-dom';
+import { useNavigate } from '@tanstack/react-router';
 import { Archive as ArchiveIcon, RotateCcw } from 'lucide-react';
 import { toast } from 'sonner';
 import { useTranslation } from 'react-i18next';
@@ -46,7 +46,7 @@ const Archive: React.FC = () => {
             >
               <PriorityIcon priority={task.priority} size={12} />
               <button
-                onClick={() => navigate(`/task/${task.id}`)}
+                onClick={() => navigate({ to: `/task/${task.id}` as string })}
                 className="flex-1 text-left text-[12px] truncate"
                 style={{ color: 'var(--flow-text-muted)', textDecoration: 'line-through' }}
               >

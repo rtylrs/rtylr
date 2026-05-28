@@ -1,4 +1,4 @@
-import { Outlet, useLocation } from 'react-router-dom';
+import { Outlet, useRouterState } from '@tanstack/react-router';
 import { useEffect, useState } from 'react';
 import { APP_URLS, getAvatarUrl } from '@voxire/config';
 import { signOut } from '@voxire/auth';
@@ -369,7 +369,7 @@ function BusinessRoute(): React.JSX.Element | null {
   const { user, setUser, setToken } = useUserStore();
   const { setWebsiteData, setContactInfo, setMaintanance, setAboutContent } = useConfigStore();
   const [loading, setLoading] = useState(true);
-  const location = useLocation();
+  const pathname = useRouterState({ select: (s) => s.location.pathname });
 
   useEffect((): void => {
     if (!token) {
@@ -442,11 +442,7 @@ function BusinessRoute(): React.JSX.Element | null {
   // Staff users (non-owner) see the app cards launcher.
   // Account settings are always accessible regardless of role.
   const staffAllowedPaths = ['/settings/account'];
-  if (
-    user &&
-    user.isOwner === false &&
-    !staffAllowedPaths.some((p) => location.pathname.startsWith(p))
-  ) {
+  if (user && user.isOwner === false && !staffAllowedPaths.some((p) => pathname.startsWith(p))) {
     return <StaffView user={user} />;
   }
 

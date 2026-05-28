@@ -1,5 +1,5 @@
 import React, { useState } from 'react';
-import { useNavigate } from 'react-router-dom';
+import { useNavigate } from '@tanstack/react-router';
 import { toast } from 'sonner';
 import { Upload, FileText, Check } from 'lucide-react';
 import { useImportCustomerRows } from '../../shared/hooks/queries/useCustomers';
@@ -55,7 +55,7 @@ const ImportCustomers: React.FC = () => {
       {
         onSuccess: () => {
           toast.success(`Imported ${payload.length} customers`);
-          navigate('/customers');
+          navigate({ to: '/customers' });
         },
         onError: () => {
           toast.error('Failed to import customers');
@@ -235,7 +235,7 @@ const ImportCustomers: React.FC = () => {
           <div
             style={{ display: 'flex', justifyContent: 'flex-end', gap: '8px', marginTop: '16px' }}
           >
-            <Button variant="outline" onClick={() => navigate('/customers')}>
+            <Button variant="outline" onClick={() => navigate({ to: '/customers' })}>
               Cancel
             </Button>
             <Button

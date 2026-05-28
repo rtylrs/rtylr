@@ -1,5 +1,5 @@
 import React, { useEffect, useRef, useState } from 'react';
-import { Link, useNavigate, useParams } from 'react-router-dom';
+import { Link, useNavigate, useParams } from '@tanstack/react-router';
 import { toast } from 'sonner';
 import { ArrowLeft, Check, Upload, FileText, X } from 'lucide-react';
 
@@ -27,7 +27,10 @@ import NotFound from './NotFound';
  * form is a utility and benefits from a single consistent shape.
  */
 const ApplyPage: React.FC = (): React.JSX.Element => {
-  const { slug = '', careerSlug = '' } = useParams<{ slug: string; careerSlug: string }>();
+  const { slug = '', careerSlug = '' } = useParams({ strict: false }) as {
+    slug?: string;
+    careerSlug?: string;
+  };
   const navigate = useNavigate();
 
   const { data, isLoading, error } = usePublicCareer(slug, careerSlug);
@@ -173,7 +176,7 @@ const ApplyPage: React.FC = (): React.JSX.Element => {
             {customization.brandName} team will review and reach out if there's a fit.
           </p>
           <button
-            onClick={() => navigate(`/${slug}`)}
+            onClick={() => navigate({ to: `/${slug}` as any })}
             className="mt-8 inline-flex items-center gap-2 rounded-lg border px-5 py-2.5 text-sm font-medium"
             style={{ borderColor: 'var(--recruit-border)' }}
           >
@@ -190,7 +193,7 @@ const ApplyPage: React.FC = (): React.JSX.Element => {
       <Header customization={customization} compact />
       <main className="mx-auto max-w-xl px-6 py-12">
         <Link
-          to={`/${slug}/${careerSlug}`}
+          to={`/${slug}/${careerSlug}` as any}
           className="inline-flex items-center gap-2 text-sm font-medium hover:underline"
           style={{ color: 'var(--recruit-muted)' }}
         >

@@ -1,5 +1,5 @@
 import React, { useMemo } from 'react';
-import { Link } from 'react-router-dom';
+import { Link } from '@tanstack/react-router';
 import { motion } from 'motion/react';
 import { Sun, Pin } from 'lucide-react';
 import { useTranslation } from 'react-i18next';
@@ -119,7 +119,7 @@ const FocusRow: React.FC<{
     transition={{ delay: index * 0.04 }}
   >
     <Link
-      to={`/task/${task.id}`}
+      to={`/task/${task.id}` as string}
       className="flex items-center gap-3 px-4 py-3.5 hover:bg-[var(--flow-hover)] transition-colors"
     >
       <PriorityIcon priority={task.priority} />

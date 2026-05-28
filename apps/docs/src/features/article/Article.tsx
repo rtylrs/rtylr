@@ -1,10 +1,10 @@
 import React from 'react';
-import { useParams, Link } from 'react-router-dom';
+import { useParams, Link } from '@tanstack/react-router';
 import { ChevronLeft } from 'lucide-react';
 import { content } from '../../shared/content';
 
 const Article: React.FC = () => {
-  const { slug } = useParams<{ slug: string }>();
+  const { slug } = useParams({ strict: false });
   const article = slug ? content[slug] : undefined;
 
   if (!article) {

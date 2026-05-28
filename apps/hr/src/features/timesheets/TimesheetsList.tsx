@@ -1,6 +1,6 @@
 import React, { useState } from 'react';
 import { useTranslation } from 'react-i18next';
-import { useNavigate } from 'react-router-dom';
+import { useNavigate } from '@tanstack/react-router';
 import { motion } from 'motion/react';
 import { FileText, ChevronRight } from 'lucide-react';
 import { useListTimesheets } from '../../shared/hooks/queries/useTimesheets';
@@ -98,7 +98,7 @@ const TimesheetsList = (): React.JSX.Element => {
                   padding: '14px 16px',
                   cursor: 'pointer',
                 }}
-                onClick={() => navigate(`/timesheets/${ts.id}`)}
+                onClick={() => navigate({ to: `/timesheets/${ts.id}` as any })}
               >
                 <div style={{ flex: 1, minWidth: 0 }}>
                   <div

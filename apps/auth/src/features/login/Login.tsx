@@ -1,5 +1,5 @@
 import React, { useState, useEffect, useMemo } from 'react';
-import { useNavigate } from 'react-router-dom';
+import { useNavigate } from '@tanstack/react-router';
 import { useTranslation } from 'react-i18next';
 import { AlertCircle } from 'lucide-react';
 import { FaGoogle } from 'react-icons/fa';
@@ -126,7 +126,9 @@ const Login: React.FC = (): React.JSX.Element => {
               type="button"
               className="text-[#4583C4] font-medium hover:underline underline-offset-2"
               onClick={() =>
-                navigate(redirectParam ? `/register?redirect=${redirectParam}` : '/register')
+                navigate({
+                  to: redirectParam ? `/register?redirect=${redirectParam}` : '/register',
+                })
               }
             >
               {t('auth.login.createOne')}
@@ -193,7 +195,7 @@ const Login: React.FC = (): React.JSX.Element => {
           <button
             type="button"
             className="text-xs text-[#4583C4] hover:underline underline-offset-2"
-            onClick={() => navigate('/password-reset')}
+            onClick={() => navigate({ to: '/password-reset' })}
           >
             {t('auth.login.forgotPassword')}
           </button>

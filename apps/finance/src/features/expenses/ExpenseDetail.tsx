@@ -1,5 +1,5 @@
 import React from 'react';
-import { useParams } from 'react-router-dom';
+import { useParams } from '@tanstack/react-router';
 import { motion } from 'motion/react';
 import { CheckCircle, XCircle } from 'lucide-react';
 import PageHeader from '../../shared/components/PageHeader';
@@ -26,7 +26,7 @@ const approvalStyle: Record<string, React.CSSProperties> = {
 };
 
 const ExpenseDetail: React.FC = () => {
-  const { id } = useParams<{ id: string }>();
+  const { id } = useParams({ strict: false });
   const { data: expense, isLoading } = useExpenseById(id);
   const approveMut = useApproveExpense();
   const rejectMut = useRejectExpense();

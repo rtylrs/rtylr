@@ -1,5 +1,5 @@
 import React, { useCallback, useMemo, useRef, useState } from 'react';
-import { useParams } from 'react-router-dom';
+import { useParams } from '@tanstack/react-router';
 import { useTranslation } from 'react-i18next';
 import { useVirtualizer } from '@tanstack/react-virtual';
 import { toast } from 'sonner';
@@ -265,7 +265,7 @@ function GoalsTab({ cycleId }: { cycleId: number }): React.JSX.Element {
 
 const ReviewCycleDetail = (): React.JSX.Element => {
   const { t } = useTranslation();
-  const { id } = useParams<{ id: string }>();
+  const { id } = useParams({ strict: false });
   const cycleId = Number(id) || 0;
   const { data: cycle, isLoading } = useGetReviewCycle(cycleId);
 

@@ -1,5 +1,5 @@
 import React, { useState, useMemo } from 'react';
-import { useNavigate } from 'react-router-dom';
+import { useNavigate } from '@tanstack/react-router';
 import { useTranslation } from 'react-i18next';
 import { z } from 'zod';
 import { useUserStore } from '@voxire/auth';
@@ -77,7 +77,7 @@ const LeaveRequestForm = (): React.JSX.Element => {
         totalDays: daysBetween(startDate, endDate),
         notes,
       },
-      { onSuccess: () => navigate('/leave') }
+      { onSuccess: () => navigate({ to: '/leave' }) }
     );
   };
 
@@ -108,7 +108,7 @@ const LeaveRequestForm = (): React.JSX.Element => {
         <p style={{ fontSize: 12, color: 'var(--hr-text-muted)', margin: '0 0 16px' }}>
           {t('leave.configureLeaveTypes')}
         </p>
-        <Button variant="primary" onClick={() => navigate('/settings')}>
+        <Button variant="primary" onClick={() => navigate({ to: '/settings' })}>
           {t('leave.goToSettings')}
         </Button>
       </Card>
@@ -203,7 +203,7 @@ const LeaveRequestForm = (): React.JSX.Element => {
           </div>
 
           <div style={{ display: 'flex', justifyContent: 'flex-end', gap: 8 }}>
-            <Button type="button" variant="ghost" onClick={() => navigate('/leave')}>
+            <Button type="button" variant="ghost" onClick={() => navigate({ to: '/leave' })}>
               {t('common.cancel')}
             </Button>
             <Button type="submit" variant="primary" disabled={createRequest.isPending}>
