@@ -1,18 +1,12 @@
 import type { Workspace } from '../stores/flowStore';
 
 /** Find a workspace by its ID. */
-export function findWorkspaceById(
-  workspaces: Workspace[],
-  id: string
-): Workspace | undefined {
+export function findWorkspaceById(workspaces: Workspace[], id: string): Workspace | undefined {
   return workspaces.find((w) => w.id === id);
 }
 
 /** Find a workspace by its name (case-insensitive). */
-export function findWorkspaceByName(
-  workspaces: Workspace[],
-  name: string
-): Workspace | undefined {
+export function findWorkspaceByName(workspaces: Workspace[], name: string): Workspace | undefined {
   const lower = name.trim().toLowerCase();
   return workspaces.find((w) => w.name.toLowerCase() === lower);
 }
