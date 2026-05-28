@@ -42,18 +42,34 @@ func TestList_Delegates(t *testing.T) {
 	}
 }
 
+func TestOpen_ValidationRejectsEmptyInput(t *testing.T) {
+	s := &Service{repo: &mockRepo{}}
+	if _, err := s.Open(context.Background(), domain.OpenSessionInput{}); err == nil {
+		t.Error("expected validation error for empty input")
+	}
+}
+
 func TestOpen_PropagatesError(t *testing.T) {
 	want := errors.New("boom")
 	s := &Service{repo: &mockRepo{openErr: want}}
-	if _, err := s.Open(context.Background(), domain.OpenSessionInput{}); !errors.Is(err, want) {
+	validInput := domain.OpenSessionInput{OwnerID: 1}
+	if _, err := s.Open(context.Background(), validInput); !errors.Is(err, want) {
 		t.Errorf("expected sentinel, got %v", err)
+	}
+}
+
+func TestClose_ValidationRejectsEmptyInput(t *testing.T) {
+	s := &Service{repo: &mockRepo{}}
+	if err := s.Close(context.Background(), domain.CloseSessionInput{}); err == nil {
+		t.Error("expected validation error for empty input")
 	}
 }
 
 func TestClose_PropagatesError(t *testing.T) {
 	want := errors.New("boom")
 	s := &Service{repo: &mockRepo{closeErr: want}}
-	if err := s.Close(context.Background(), domain.CloseSessionInput{}); !errors.Is(err, want) {
+	validInput := domain.CloseSessionInput{ID: 1, OwnerID: 1}
+	if err := s.Close(context.Background(), validInput); !errors.Is(err, want) {
 		t.Errorf("expected sentinel, got %v", err)
 	}
 }
