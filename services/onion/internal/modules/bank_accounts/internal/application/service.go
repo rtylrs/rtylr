@@ -19,6 +19,8 @@ const (
 type repository interface {
 	List(ctx context.Context, ownerID int64) ([]domain.BankAccount, error)
 	Create(ctx context.Context, ownerID int64, input domain.BankAccountInput) (int64, error)
+	TotalBalance(ctx context.Context, ownerID int64) (float64, error)
+	CountConnected(ctx context.Context, ownerID int64) (int64, error)
 }
 
 type Service struct {
@@ -52,4 +54,17 @@ func (s *Service) Create(ctx context.Context, ownerID int64, input domain.BankAc
 	}
 	invalidateBankAccountsScope(ctx, ownerID)
 	return id, nil
+}
+
+// TotalBalance returns the aggregate balance across all bank accounts for the
+// owner. It queries the database directly (no cache) because balance data is
+// time-sensitive and should never be stale.
+func (s *Service) TotalBalance(ctx context.Context, ownerID int64) (float64, error) {
+	return s.repo.TotalBalance(ctx, ownerID)
+}
+
+// ConnectedCount returns how many accounts have is_connected=TRUE for the
+// owner. Useful for showing integration status in the dashboard.
+func (s *Service) ConnectedCount(ctx context.Context, ownerID int64) (int64, error) {
+	return s.repo.CountConnected(ctx, ownerID)
 }
