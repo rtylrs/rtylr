@@ -209,6 +209,52 @@ func (r *Repository) CreateMatch(ctx context.Context, ownerID int64, input domai
 	return res.LastInsertId()
 }
 
+// CountMatches returns the total number of reconciliation matches created for
+// the owner, regardless of target type.
+func (r *Repository) CountMatches(ctx context.Context, ownerID int64) (int64, error) {
+	const q = `
+		SELECT COUNT(*)
+		FROM finance_reconciliation_matches
+		WHERE owner_id = ?`
+
+	var cnt int64
+	if err := r.pool.QueryRowContext(ctx, q, ownerID).Scan(&cnt); err != nil {
+		logger.Ctx(ctx).Error("Failed to count reconciliation matches", logger.Error(err))
+		return 0, err
+	}
+
+	return cnt, nil
+}
+
+// CountMatchesByTargetType returns the number of matches for each target
+// type ("invoice", "expense") for the given owner.
+func (r *Repository) CountMatchesByTargetType(ctx context.Context, ownerID int64) (map[string]int64, error) {
+	const q = `
+		SELECT target_type, COUNT(*) AS cnt
+		FROM finance_reconciliation_matches
+		WHERE owner_id = ?
+		GROUP BY target_type`
+
+	rows, err := r.pool.QueryContext(ctx, q, ownerID)
+	if err != nil {
+		logger.Ctx(ctx).Error("Failed to count matches by target type", logger.Error(err))
+		return nil, err
+	}
+	defer rows.Close()
+
+	counts := make(map[string]int64)
+	for rows.Next() {
+		var ttype string
+		var cnt int64
+		if scanErr := rows.Scan(&ttype, &cnt); scanErr != nil {
+			return nil, scanErr
+		}
+		counts[ttype] = cnt
+	}
+
+	return counts, rows.Err()
+}
+
 // ---------------------------------------------------------------------------
 // Conversion helpers
 // ---------------------------------------------------------------------------
