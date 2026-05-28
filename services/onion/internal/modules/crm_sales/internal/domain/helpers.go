@@ -61,6 +61,36 @@ func (l *Lead) HasAssignee() bool {
 	return l.AssignedTo != nil
 }
 
+// HasEmail returns true when the contact has an email address.
+func (c *Contact) HasEmail() bool {
+	return c.Email != ""
+}
+
+// HasPhone returns true when the contact has a phone number.
+func (c *Contact) HasPhone() bool {
+	return c.Phone != ""
+}
+
+// HasLinkedIn returns true when the contact has a LinkedIn profile set.
+func (c *Contact) HasLinkedIn() bool {
+	return c.LinkedIn != ""
+}
+
+// IsPrimaryContact returns true when this contact is the primary contact for a lead.
+func (c *Contact) IsPrimaryContact() bool {
+	return c.IsPrimary
+}
+
+// HasNextFollowUp returns true when the touchpoint has a scheduled follow-up.
+func (tp *Touchpoint) HasNextFollowUp() bool {
+	return tp.NextFollowUp != nil && *tp.NextFollowUp != ""
+}
+
+// HasContact returns true when the touchpoint is linked to a specific contact.
+func (tp *Touchpoint) HasContact() bool {
+	return tp.ContactID != nil
+}
+
 // ValidateCreateLeadRequest checks required fields.
 // Returns a non-empty string if the request is invalid.
 func ValidateCreateLeadRequest(req CreateLeadRequest) string {
