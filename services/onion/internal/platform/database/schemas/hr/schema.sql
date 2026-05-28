@@ -4,6 +4,7 @@ CREATE TABLE IF NOT EXISTS hr_departments (
     name VARCHAR(255) NOT NULL,
     description TEXT,
     manager_staff_id BIGINT,
+    location_id BIGINT DEFAULT NULL,
     created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
     updated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP
 );
@@ -28,7 +29,7 @@ CREATE TABLE IF NOT EXISTS hr_staff (
     address TEXT,
     emergency_contact_name VARCHAR(200),
     emergency_contact_phone VARCHAR(50),
-    apps JSON COMMENT 'Which rtylr apps this staff member can access',
+    apps JSON DEFAULT (JSON_ARRAY()) COMMENT 'Which rtylr apps this staff member can access',
     notes TEXT,
     created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
     updated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP
@@ -37,20 +38,24 @@ CREATE TABLE IF NOT EXISTS hr_staff (
 CREATE TABLE IF NOT EXISTS hr_shifts (
     id BIGINT NOT NULL AUTO_INCREMENT PRIMARY KEY,
     owner_id BIGINT NOT NULL,
-    staff_id BIGINT NOT NULL,
-    department_id BIGINT,
-    date DATE NOT NULL,
-    start_time TIME NOT NULL,
-    end_time TIME NOT NULL,
+    staff_id BIGINT DEFAULT NULL,
+    department_id BIGINT DEFAULT NULL,
+    date DATE DEFAULT NULL,
+    start_time TIME NOT NULL DEFAULT '00:00:00',
+    end_time TIME NOT NULL DEFAULT '00:00:00',
     break_duration_minutes INT DEFAULT 0,
     status ENUM('scheduled','in_progress','completed','absent','cancelled') DEFAULT 'scheduled',
     clock_in_at TIMESTAMP NULL,
     clock_out_at TIMESTAMP NULL,
-    hours_worked DECIMAL(5,2),
+    hours_worked DECIMAL(5,2) DEFAULT NULL,
     overtime_hours DECIMAL(5,2) DEFAULT 0,
     notes TEXT,
+    location_id BIGINT DEFAULT NULL,
+    name VARCHAR(100) DEFAULT NULL,
+    color VARCHAR(10) DEFAULT '#4CAF50',
     created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
-    updated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP
+    updated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
+    INDEX idx_shifts_owner (owner_id)
 );
 
 CREATE TABLE IF NOT EXISTS hr_time_off_requests (
@@ -114,7 +119,7 @@ CREATE TABLE IF NOT EXISTS hr_one_on_ones (
     staff_id BIGINT NOT NULL,
     scheduled_at TIMESTAMP NOT NULL,
     notes TEXT,
-    action_items JSON,
+    action_items JSON DEFAULT (JSON_ARRAY()),
     status ENUM('scheduled','completed','cancelled') DEFAULT 'scheduled',
     created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
 );
