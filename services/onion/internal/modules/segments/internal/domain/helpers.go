@@ -40,3 +40,13 @@ func ValidateSegmentUpdateInput(input SegmentUpdateInput) string {
 	}
 	return ""
 }
+
+// IsPopulated returns true when the segment has been calculated and has at least one customer.
+func (s *Segment) IsPopulated() bool {
+	return s.CustomerCount > 0
+}
+
+// IsEmpty returns true when the segment has been calculated and has no customers.
+func (s *Segment) IsEmpty() bool {
+	return s.CustomerCount == 0
+}
