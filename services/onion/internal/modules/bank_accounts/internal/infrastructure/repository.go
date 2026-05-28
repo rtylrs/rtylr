@@ -61,6 +61,38 @@ func (r *Repository) Create(ctx context.Context, ownerID int64, input domain.Ban
 	return res.LastInsertId()
 }
 
+// TotalBalance returns the sum of all account balances for the owner.
+func (r *Repository) TotalBalance(ctx context.Context, ownerID int64) (float64, error) {
+	const q = `
+		SELECT COALESCE(SUM(CAST(balance AS REAL)), 0)
+		FROM finance_bank_accounts
+		WHERE owner_id = ?`
+
+	var total float64
+	if err := r.pool.QueryRowContext(ctx, q, ownerID).Scan(&total); err != nil {
+		logger.Ctx(ctx).Error("Failed to sum bank account balances", logger.Error(err))
+		return 0, err
+	}
+
+	return total, nil
+}
+
+// CountConnected returns the number of bank accounts with is_connected = TRUE.
+func (r *Repository) CountConnected(ctx context.Context, ownerID int64) (int64, error) {
+	const q = `
+		SELECT COUNT(*)
+		FROM finance_bank_accounts
+		WHERE owner_id = ? AND is_connected = TRUE`
+
+	var cnt int64
+	if err := r.pool.QueryRowContext(ctx, q, ownerID).Scan(&cnt); err != nil {
+		logger.Ctx(ctx).Error("Failed to count connected bank accounts", logger.Error(err))
+		return 0, err
+	}
+
+	return cnt, nil
+}
+
 // ---------------------------------------------------------------------------
 // Mapping helpers
 // ---------------------------------------------------------------------------
