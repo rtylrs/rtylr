@@ -109,3 +109,29 @@ func (lc *LoyaltyConfig) LoyaltyConfigIsEnabled() bool {
 func (lc *LoyaltyConfig) HasPointsExpiry() bool {
 	return lc.PointsExpiryDays > 0
 }
+
+// ValidateLoyaltyTierInput checks required fields for creating a loyalty tier.
+func ValidateLoyaltyTierInput(input LoyaltyTierInput) string {
+	if input.OwnerID <= 0 {
+		return "owner_id is required"
+	}
+	if input.Name == "" {
+		return "tier name is required"
+	}
+	return ""
+}
+
+// HasPerks returns true when the loyalty tier has perks defined.
+func (lt *LoyaltyTier) HasPerks() bool {
+	return len(lt.Perks) > 0 && string(lt.Perks) != "null" && string(lt.Perks) != "[]"
+}
+
+// HasDiscount returns true when the loyalty tier provides a non-zero discount.
+func (lt *LoyaltyTier) HasDiscount() bool {
+	return lt.DiscountPct > 0
+}
+
+// IsEarned returns true when a customer has enough points to qualify for this tier.
+func (lt *LoyaltyTier) IsEarned(points int) bool {
+	return points >= lt.MinPoints
+}
