@@ -51,6 +51,16 @@ func TotalPipelineCount(summaries []PipelineSummary) int {
 	return total
 }
 
+// HasNotes returns true when the lead has notes attached.
+func (l *Lead) HasNotes() bool {
+	return l.Notes != ""
+}
+
+// HasAssignee returns true when the lead has been assigned to a team member.
+func (l *Lead) HasAssignee() bool {
+	return l.AssignedTo != nil
+}
+
 // ValidateCreateLeadRequest checks required fields.
 // Returns a non-empty string if the request is invalid.
 func ValidateCreateLeadRequest(req CreateLeadRequest) string {
@@ -58,4 +68,25 @@ func ValidateCreateLeadRequest(req CreateLeadRequest) string {
 		return "company name is required"
 	}
 	return ""
+}
+
+// ValidateCreateContractRequest checks required fields for creating a contract.
+func ValidateCreateContractRequest(req CreateContractRequest) string {
+	if req.LeadID <= 0 {
+		return "lead_id is required"
+	}
+	if req.Plan == "" {
+		return "plan is required"
+	}
+	return ""
+}
+
+// HasMRRValue returns true when the contract has a non-zero MRR value.
+func (c *Contract) HasMRRValue() bool {
+	return c.MRR > 0
+}
+
+// HasSignedBy returns true when the contract records who signed it.
+func (c *Contract) HasSignedBy() bool {
+	return c.SignedByName != ""
 }
