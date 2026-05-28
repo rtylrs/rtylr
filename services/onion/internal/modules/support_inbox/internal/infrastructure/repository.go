@@ -51,7 +51,7 @@ func (r *Repository) ListInbox(ctx context.Context, businessID int64, page, page
 			CustomerName:  row.CustomerName,
 			CustomerEmail: row.CustomerEmail,
 			Subject:       row.Subject,
-			LastMessage:   row.LastMessage,
+			LastMessage:   row.LastMessage.String,
 			MessageCount:  int(row.MessageCount),
 		}
 		if row.Status.Valid {
