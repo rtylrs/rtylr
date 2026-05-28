@@ -96,9 +96,9 @@ CREATE TABLE IF NOT EXISTS finance_expenses (
 
 CREATE TABLE IF NOT EXISTS finance_tax_config (
     id BIGINT NOT NULL AUTO_INCREMENT PRIMARY KEY,
-    owner_id BIGINT NOT NULL,
-    name VARCHAR(100) NOT NULL,
-    rate DECIMAL(5,2) NOT NULL,
+    owner_id BIGINT NOT NULL UNIQUE,
+    name VARCHAR(100) NOT NULL DEFAULT '',
+    rate DECIMAL(5,2) NOT NULL DEFAULT 0,
     type ENUM('vat','sales_tax','gst','other') DEFAULT 'vat',
     is_default BOOLEAN DEFAULT FALSE,
     is_active BOOLEAN DEFAULT TRUE,
@@ -126,7 +126,7 @@ CREATE TABLE IF NOT EXISTS finance_quotes (
     customer_name VARCHAR(255) NOT NULL,
     customer_email VARCHAR(255),
     status ENUM('draft','sent','accepted','rejected','expired','converted') DEFAULT 'draft',
-    items JSON,
+    items JSON DEFAULT (JSON_ARRAY()),
     subtotal DECIMAL(10,2) DEFAULT 0,
     tax DECIMAL(10,2) DEFAULT 0,
     discount DECIMAL(10,2) DEFAULT 0,
