@@ -68,7 +68,7 @@ func (r *Repository) List(ctx context.Context, filter domain.AuditLogFilter) ([]
 }
 
 func (r *Repository) Create(ctx context.Context, input domain.AuditLogInput) (int64, error) {
-	var details json.RawMessage
+	details := json.RawMessage("{}")
 	if input.Details != nil {
 		details = *input.Details
 	}

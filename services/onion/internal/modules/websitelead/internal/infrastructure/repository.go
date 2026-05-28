@@ -34,12 +34,7 @@ func autoMigrate(ctx context.Context, db *sql.DB) {
 	`)
 	if err != nil {
 		logger.Ctx(ctx).Error("Failed to auto-migrate voxire_website_leads table", logger.Error(err))
-		return
 	}
-
-	// Idempotent: add phone column if the table already exists without it.
-	_, _ = db.ExecContext(ctx,
-		`ALTER TABLE voxire_website_leads ADD COLUMN IF NOT EXISTS phone VARCHAR(50) AFTER email`)
 }
 
 func (r *Repository) Create(ctx context.Context, input domain.LeadInput) (int64, error) {

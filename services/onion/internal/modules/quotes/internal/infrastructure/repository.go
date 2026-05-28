@@ -388,7 +388,7 @@ func parseFloatNull(s sql.NullString) float64 {
 
 func rawJSON(s string) json.RawMessage {
 	if s == "" {
-		return nil
+		return json.RawMessage("[]")
 	}
 	return json.RawMessage(s)
 }

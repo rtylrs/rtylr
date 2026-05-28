@@ -157,7 +157,7 @@ func itemFromRow(row sqlc.StoreOrderItem) domain.StoreOrderItem {
 
 func nullJSON(s string) []byte {
 	if s == "" {
-		return nil
+		return []byte("{}")
 	}
 	return []byte(s)
 }

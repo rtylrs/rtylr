@@ -63,7 +63,7 @@ func (r *Repository) Create(ctx context.Context, ownerID int64, input domain.One
 		status = "scheduled"
 	}
 
-	var actionItems json.RawMessage
+	actionItems := json.RawMessage("[]")
 	if input.ActionItems != "" {
 		actionItems = json.RawMessage(input.ActionItems)
 	}

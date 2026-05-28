@@ -56,7 +56,7 @@ func (r *Repository) Get(ctx context.Context, businessID int64) (*domain.Setting
 }
 
 func (r *Repository) Upsert(ctx context.Context, input domain.SettingsInput) error {
-	var bh json.RawMessage
+	bh := json.RawMessage("{}")
 	if input.BusinessHours != "" {
 		bh = json.RawMessage(input.BusinessHours)
 	}

@@ -38,7 +38,7 @@ func (r *Repository) ListActivity(ctx context.Context, ownerID int64, limit int)
 		return nil, err
 	}
 
-	var activities []domain.ActivityLog
+	activities := make([]domain.ActivityLog, 0, len(rows))
 
 	for _, row := range rows {
 		var a domain.ActivityLog
