@@ -60,3 +60,56 @@ func TestSync_StubReturnsZero(t *testing.T) {
 		t.Errorf("expected (0, nil), got (%d, %v)", n, err)
 	}
 }
+
+func TestList_ReturnsTransactions(t *testing.T) {
+	txns := []domain.BankFeedTransaction{{ID: 1}, {ID: 2}}
+	s := &Service{repo: &mockRepo{list: txns, total: 2}}
+	got, total, err := s.List(context.Background(), 1, 10, 0)
+	if err != nil {
+		t.Fatalf("unexpected error: %v", err)
+	}
+	if len(got) != 2 {
+		t.Errorf("expected 2 transactions, got %d", len(got))
+	}
+	if total != 2 {
+		t.Errorf("expected total=2, got %d", total)
+	}
+}
+
+func TestList_EmptyRepoReturnsEmpty(t *testing.T) {
+	s := &Service{repo: &mockRepo{list: []domain.BankFeedTransaction{}, total: 0}}
+	got, total, err := s.List(context.Background(), 1, 10, 0)
+	if err != nil {
+		t.Fatalf("unexpected error: %v", err)
+	}
+	if len(got) != 0 || total != 0 {
+		t.Errorf("expected empty result, got len=%d total=%d", len(got), total)
+	}
+}
+
+func TestList_PassesOffsetToRepo(t *testing.T) {
+	m := &mockRepo{}
+	s := &Service{repo: m}
+	_, _, _ = s.List(context.Background(), 1, 10, 5)
+	if m.gotOff != 5 {
+		t.Errorf("expected offset 5, got %d", m.gotOff)
+	}
+}
+
+func TestList_PassesLimitToRepo(t *testing.T) {
+	m := &mockRepo{}
+	s := &Service{repo: m}
+	_, _, _ = s.List(context.Background(), 1, 50, 0)
+	if m.gotLim != 50 {
+		t.Errorf("expected limit 50, got %d", m.gotLim)
+	}
+}
+
+func TestList_NegativeLimitDefaultsTo20(t *testing.T) {
+	m := &mockRepo{}
+	s := &Service{repo: m}
+	_, _, _ = s.List(context.Background(), 1, -5, 0)
+	if m.gotLim != 20 {
+		t.Errorf("expected default limit 20 for negative input, got %d", m.gotLim)
+	}
+}
