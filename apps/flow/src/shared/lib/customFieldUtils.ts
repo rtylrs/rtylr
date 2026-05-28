@@ -13,16 +13,11 @@ export function fieldsForProject(
   fields: CustomFieldDefinition[],
   projectId: string
 ): CustomFieldDefinition[] {
-  return [...fields]
-    .filter((f) => f.projectId === projectId)
-    .sort((a, b) => a.order - b.order);
+  return [...fields].filter((f) => f.projectId === projectId).sort((a, b) => a.order - b.order);
 }
 
 /** Returns the value of a custom field for a task. */
-export function getFieldValue(
-  task: Task,
-  fieldId: string
-): string | number | undefined {
+export function getFieldValue(task: Task, fieldId: string): string | number | undefined {
   return task.customFieldValues?.[fieldId];
 }
 

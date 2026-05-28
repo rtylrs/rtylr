@@ -25,22 +25,21 @@ export function spanInDays(start: string, end: string): number {
 
 /** Returns milestones that fall within a given date range. */
 export function milestonesInRange(milestones: Milestone[], range: DateRange): Milestone[] {
-  return milestones.filter(
-    (m) => m.targetDate >= range.start && m.targetDate <= range.end
-  );
+  return milestones.filter((m) => m.targetDate >= range.start && m.targetDate <= range.end);
 }
 
 /** Returns projects whose start/target date overlaps with the range. */
 export function projectsInRange(projects: Project[], range: DateRange): Project[] {
-  return projects.filter((p) =>
-    rangesOverlap({ start: p.startDate, end: p.targetDate }, range)
-  );
+  return projects.filter((p) => rangesOverlap({ start: p.startDate, end: p.targetDate }, range));
 }
 
 /** Returns the earliest start date among all projects (or empty string). */
 export function earliestProjectStart(projects: Project[]): string {
   if (projects.length === 0) return '';
-  return projects.reduce((min, p) => (p.startDate < min ? p.startDate : min), projects[0].startDate);
+  return projects.reduce(
+    (min, p) => (p.startDate < min ? p.startDate : min),
+    projects[0].startDate
+  );
 }
 
 /** Returns the latest target date among all projects (or empty string). */

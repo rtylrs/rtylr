@@ -46,15 +46,30 @@ function makeProject(overrides: Partial<Project>): Project {
 
 describe('rangesOverlap', () => {
   it('returns true for overlapping ranges', () => {
-    expect(rangesOverlap({ start: '2026-01-01', end: '2026-06-30' }, { start: '2026-05-01', end: '2026-12-31' })).toBe(true);
+    expect(
+      rangesOverlap(
+        { start: '2026-01-01', end: '2026-06-30' },
+        { start: '2026-05-01', end: '2026-12-31' }
+      )
+    ).toBe(true);
   });
 
   it('returns false for non-overlapping ranges', () => {
-    expect(rangesOverlap({ start: '2026-01-01', end: '2026-03-31' }, { start: '2026-05-01', end: '2026-12-31' })).toBe(false);
+    expect(
+      rangesOverlap(
+        { start: '2026-01-01', end: '2026-03-31' },
+        { start: '2026-05-01', end: '2026-12-31' }
+      )
+    ).toBe(false);
   });
 
   it('returns true for adjacent ranges (touching)', () => {
-    expect(rangesOverlap({ start: '2026-01-01', end: '2026-05-01' }, { start: '2026-05-01', end: '2026-12-31' })).toBe(true);
+    expect(
+      rangesOverlap(
+        { start: '2026-01-01', end: '2026-05-01' },
+        { start: '2026-05-01', end: '2026-12-31' }
+      )
+    ).toBe(true);
   });
 });
 
