@@ -2,10 +2,16 @@
 -- approved payroll run with two entries (covers payroll export, list,
 -- and entry-fetch flows).
 
-INSERT INTO hr_departments (id, owner_id, name, description)
+INSERT INTO hr_departments (id, owner_id, location_id, name, description)
 VALUES
-    (4001, 1001, 'Operations', 'Floor + kitchen staff')
-ON DUPLICATE KEY UPDATE name = VALUES(name);
+    (4001, 1001, 0, 'Operations', 'Floor + kitchen staff')
+ON DUPLICATE KEY UPDATE name = VALUES(name), location_id = VALUES(location_id);
+
+INSERT INTO hr_employees (id, owner_id, department_id, first_name, last_name, email, employment_type, status, salary, hourly_rate, overtime_rate, start_date)
+VALUES
+    (4101, 1001, 4001, 'Alice', 'Worker', 'alice@test.local', 'full_time', 'active', 1200.00, NULL, NULL, '2025-01-01'),
+    (4102, 1001, 4001, 'Bob',   'Hourly', 'bob@test.local',   'part_time', 'active', NULL,    8.00, 12.00, '2025-03-01')
+ON DUPLICATE KEY UPDATE email = VALUES(email);
 
 INSERT INTO hr_staff (id, owner_id, department_id, first_name, last_name, email, role, employment_type, status, salary, hourly_rate, overtime_rate, start_date, apps)
 VALUES
@@ -16,7 +22,7 @@ ON DUPLICATE KEY UPDATE email = VALUES(email), apps = VALUES(apps);
 INSERT INTO hr_payroll_config (id, owner_id, period_type, pay_day_of_month, overtime_enabled)
 VALUES
     (4201, 1001, 'monthly', 28, TRUE)
-ON DUPLICATE KEY UPDATE period_type = VALUES(period_type);
+ON DUPLICATE KEY UPDATE period_type = VALUES(period_type), pay_day_of_month = VALUES(pay_day_of_month);
 
 INSERT INTO hr_payroll_runs (id, owner_id, period_start, period_end, status, created_by, total_gross, total_net)
 VALUES
