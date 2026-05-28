@@ -237,6 +237,30 @@ func (r *Repository) DeleteProduct(ctx context.Context, ownerID, id int64) error
 	return nil
 }
 
+// CountProducts returns the total number of products for the given owner,
+// optionally filtered by category. Pass categoryID=0 to count all categories.
+func (r *Repository) CountProducts(ctx context.Context, ownerID int64, categoryID int) (int64, error) {
+	var (
+		count int64
+		err   error
+	)
+
+	if categoryID > 0 {
+		const q = `SELECT COUNT(*) FROM erp_products WHERE owner_id = ? AND category_id = ?`
+		err = r.pool.QueryRowContext(ctx, q, ownerID, categoryID).Scan(&count)
+	} else {
+		const q = `SELECT COUNT(*) FROM erp_products WHERE owner_id = ?`
+		err = r.pool.QueryRowContext(ctx, q, ownerID).Scan(&count)
+	}
+
+	if err != nil {
+		logger.Ctx(ctx).Error("Failed to count products", logger.Error(err))
+		return 0, err
+	}
+
+	return count, nil
+}
+
 func productFromRow(row sqlc.ErpProduct) domain.Product {
 	var p domain.Product
 	p.ID = row.ID
