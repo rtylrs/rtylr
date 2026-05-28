@@ -90,7 +90,7 @@ CREATE TABLE IF NOT EXISTS pos_audit_log (
     action VARCHAR(100) NOT NULL,
     entity_type VARCHAR(50) NOT NULL,
     entity_id BIGINT DEFAULT NULL,
-    details JSON,
+    details JSON DEFAULT (JSON_OBJECT()),
     ip_address VARCHAR(45),
     created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
     INDEX idx_audit_business (business_id, created_at),

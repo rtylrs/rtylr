@@ -61,7 +61,7 @@ CREATE TABLE IF NOT EXISTS support_settings (
     business_id BIGINT NOT NULL UNIQUE,
     auto_assign BOOLEAN DEFAULT FALSE,
     sla_hours INT DEFAULT 24,
-    business_hours JSON,
+    business_hours JSON DEFAULT (JSON_OBJECT()),
     notification_email VARCHAR(320),
     created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
     updated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP

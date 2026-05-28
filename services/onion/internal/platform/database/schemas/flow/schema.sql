@@ -6,6 +6,7 @@ CREATE TABLE IF NOT EXISTS flow_workspaces (
     icon VARCHAR(50) DEFAULT '🚀',
     color VARCHAR(20) DEFAULT '#4583C4',
     is_default BOOLEAN DEFAULT FALSE,
+    is_personal BOOLEAN DEFAULT FALSE,
     created_by BIGINT NOT NULL,
     created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
     updated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP
@@ -61,7 +62,7 @@ CREATE TABLE IF NOT EXISTS flow_tasks (
     parent_task_id BIGINT DEFAULT NULL,
     title VARCHAR(500) NOT NULL,
     description TEXT,
-    status ENUM('todo','in_progress','in_review','done','cancelled') DEFAULT 'todo',
+    status ENUM('backlog','todo','in_progress','in_review','done','cancelled') DEFAULT 'todo',
     priority ENUM('none','low','medium','high','urgent') DEFAULT 'none',
     assignee_id BIGINT,
     reporter_id BIGINT NOT NULL,
@@ -70,6 +71,7 @@ CREATE TABLE IF NOT EXISTS flow_tasks (
     completed_at TIMESTAMP NULL,
     estimated_hours DECIMAL(6,2),
     actual_hours DECIMAL(6,2),
+    section_id BIGINT DEFAULT NULL,
     sort_order INT DEFAULT 0,
     labels JSON COMMENT 'Array of label IDs',
     created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
@@ -153,4 +155,17 @@ CREATE TABLE IF NOT EXISTS flow_views (
     is_default BOOLEAN DEFAULT FALSE,
     created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
     updated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP
+);
+
+CREATE TABLE IF NOT EXISTS flow_project_columns (
+    id BIGINT NOT NULL AUTO_INCREMENT PRIMARY KEY,
+    project_id BIGINT NOT NULL,
+    workspace_id BIGINT NOT NULL,
+    name VARCHAR(255) NOT NULL,
+    color VARCHAR(20) DEFAULT '#6366f1',
+    sort_order INT DEFAULT 0,
+    created_by BIGINT NOT NULL,
+    created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+    updated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
+    INDEX idx_flow_columns_project (project_id)
 );

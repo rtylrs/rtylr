@@ -29,6 +29,7 @@ CREATE TABLE IF NOT EXISTS erp_products (
     owner_id BIGINT NOT NULL,
     category_id BIGINT,
     supplier_id BIGINT,
+    brand_id BIGINT DEFAULT NULL,
     name VARCHAR(255) NOT NULL,
     sku VARCHAR(100),
     barcode VARCHAR(100),

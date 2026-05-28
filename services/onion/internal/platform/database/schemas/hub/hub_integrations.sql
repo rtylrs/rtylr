@@ -3,7 +3,7 @@ CREATE TABLE IF NOT EXISTS hub_integrations (
     owner_id BIGINT NOT NULL,
     provider VARCHAR(50) NOT NULL,
     status VARCHAR(20) NOT NULL DEFAULT 'connected',
-    config JSON NULL,
+    config JSON NOT NULL DEFAULT (JSON_OBJECT()),
     connected_at TIMESTAMP NULL,
     created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
 );

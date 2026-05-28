@@ -4,7 +4,7 @@ CREATE TABLE IF NOT EXISTS config (
     site_name TEXT NULL,
     logo_url TEXT NULL,
     favicon_url TEXT NULL,
-    meta_tags JSON NULL,
+    meta_tags JSON NULL DEFAULT (JSON_ARRAY()),
     contact_email TEXT NOT NULL,
     contact_number TEXT NOT NULL,
     instagram TEXT NULL,
@@ -16,6 +16,7 @@ CREATE TABLE IF NOT EXISTS config (
     enable_newsletter_signup BOOLEAN DEFAULT FALSE,
     about_content TEXT NOT NULL,
     footer_sub_text TEXT NULL,
+    business_slug VARCHAR(255) NULL,
     created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
     updated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
     updated_by INT NULL
