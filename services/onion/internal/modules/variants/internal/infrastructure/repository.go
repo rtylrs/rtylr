@@ -117,6 +117,31 @@ func (r *Repository) DeleteVariant(ctx context.Context, ownerID, id int64) error
 	return nil
 }
 
+// CountVariants returns the number of variants for a given owner.
+// Pass productID=0 to count across all products, or a positive productID to
+// limit the count to that product.
+func (r *Repository) CountVariants(ctx context.Context, ownerID, productID int64) (int64, error) {
+	var (
+		count int64
+		err   error
+	)
+
+	if productID > 0 {
+		const q = `SELECT COUNT(*) FROM erp_product_variants WHERE owner_id = ? AND product_id = ?`
+		err = r.pool.QueryRowContext(ctx, q, ownerID, productID).Scan(&count)
+	} else {
+		const q = `SELECT COUNT(*) FROM erp_product_variants WHERE owner_id = ?`
+		err = r.pool.QueryRowContext(ctx, q, ownerID).Scan(&count)
+	}
+
+	if err != nil {
+		logger.Ctx(ctx).Error("Failed to count variants", logger.Error(err))
+		return 0, err
+	}
+
+	return count, nil
+}
+
 func variantFromRow(row sqlc.ErpProductVariant) domain.Variant {
 	var v domain.Variant
 	v.ID = row.ID
