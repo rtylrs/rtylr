@@ -24,9 +24,36 @@ func (a *Automation) HasTrigger() bool {
 	return a.TriggerType != ""
 }
 
+// HasRuns returns true if the automation has been executed at least once.
+func (a *Automation) HasRuns() bool {
+	return a.RunCount > 0
+}
+
+// HasLastRun returns true if the automation recorded a last run timestamp.
+func (a *Automation) HasLastRun() bool {
+	return a.LastRunAt != nil
+}
+
 // ValidateAutomationInput checks if the required fields are present.
 // Returns a non-empty error string if invalid.
 func ValidateAutomationInput(input AutomationInput) string {
+	if input.Name == "" {
+		return "automation name is required"
+	}
+	if input.TriggerType == "" {
+		return "trigger type is required"
+	}
+	return ""
+}
+
+// ValidateAutomationUpdateInput checks required fields for updating an automation.
+func ValidateAutomationUpdateInput(input AutomationUpdateInput) string {
+	if input.ID <= 0 {
+		return "automation id is required"
+	}
+	if input.OwnerID <= 0 {
+		return "owner_id is required"
+	}
 	if input.Name == "" {
 		return "automation name is required"
 	}
