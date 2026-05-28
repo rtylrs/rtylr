@@ -272,6 +272,34 @@ VALUES (?,?,?,?,?,?,?,?,?)`
 	return invoiceID, nil
 }
 
+// CountByStatus returns the number of quotes in each status for the owner.
+func (r *Repository) CountByStatus(ctx context.Context, ownerID int64) (map[string]int64, error) {
+	const q = `
+		SELECT status, COUNT(*) AS cnt
+		FROM finance_quotes
+		WHERE owner_id = ?
+		GROUP BY status`
+
+	rows, err := r.pool.QueryContext(ctx, q, ownerID)
+	if err != nil {
+		logger.Ctx(ctx).Error("Failed to count quotes by status", logger.Error(err))
+		return nil, err
+	}
+	defer rows.Close()
+
+	counts := make(map[string]int64)
+	for rows.Next() {
+		var s string
+		var cnt int64
+		if scanErr := rows.Scan(&s, &cnt); scanErr != nil {
+			return nil, scanErr
+		}
+		counts[s] = cnt
+	}
+
+	return counts, rows.Err()
+}
+
 func nullableStringInput(s string) sql.NullString {
 	return sql.NullString{String: s, Valid: s != ""}
 }
