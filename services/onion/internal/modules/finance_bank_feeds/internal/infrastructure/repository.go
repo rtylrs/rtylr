@@ -65,6 +65,43 @@ func (r *Repository) List(ctx context.Context, ownerID int64, limit, offset int3
 	return items, total, nil
 }
 
+// SumAmountByAccountID returns the net amount (sum of AmountMinorUnits) for
+// all feed transactions belonging to a specific bank account. Positive values
+// indicate net credits; negative values indicate net debits.
+func (r *Repository) SumAmountByAccountID(ctx context.Context, ownerID, bankAccountID int64) (int64, error) {
+	const q = `
+		SELECT COALESCE(SUM(amount_minor_units), 0)
+		FROM finance_bank_feed_transactions
+		WHERE owner_id = ? AND bank_account_id = ?`
+
+	var sum int64
+	if err := r.pool.QueryRowContext(ctx, q, ownerID, bankAccountID).Scan(&sum); err != nil {
+		logger.Ctx(ctx).Error("Failed to sum bank feed amounts by account", logger.Error(err))
+		return 0, err
+	}
+
+	return sum, nil
+}
+
+// CountUnmatched returns the number of transactions that have neither a
+// matched_expense_id nor a matched_invoice_id.
+func (r *Repository) CountUnmatched(ctx context.Context, ownerID int64) (int64, error) {
+	const q = `
+		SELECT COUNT(*)
+		FROM finance_bank_feed_transactions
+		WHERE owner_id = ?
+		  AND matched_expense_id IS NULL
+		  AND matched_invoice_id IS NULL`
+
+	var cnt int64
+	if err := r.pool.QueryRowContext(ctx, q, ownerID).Scan(&cnt); err != nil {
+		logger.Ctx(ctx).Error("Failed to count unmatched bank feed transactions", logger.Error(err))
+		return 0, err
+	}
+
+	return cnt, nil
+}
+
 // ---------------------------------------------------------------------------
 // Conversion helpers
 // ---------------------------------------------------------------------------
