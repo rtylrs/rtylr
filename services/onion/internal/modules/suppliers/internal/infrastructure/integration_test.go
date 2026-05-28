@@ -354,3 +354,69 @@ func TestDeleteSupplier_NonExistentIsNoop(t *testing.T) {
 		t.Errorf("expected no error deleting non-existent supplier, got: %v", err)
 	}
 }
+
+func TestGetSupplierByID_FixtureSupplier(t *testing.T) {
+	db := testutil.OpenDB(t)
+	repo := infrastructure.NewRepository(db)
+	ctx := context.Background()
+
+	s, err := repo.GetSupplierByID(ctx, testutil.OwnerID, 5101)
+	if err != nil {
+		t.Fatalf("GetSupplierByID(5101): %v", err)
+	}
+	if s.ID != 5101 {
+		t.Errorf("expected ID=5101, got %d", s.ID)
+	}
+	if s.Name != "Test Supplier" {
+		t.Errorf("expected Name='Test Supplier', got %q", s.Name)
+	}
+}
+
+func TestGetSupplierByID_NotFound(t *testing.T) {
+	db := testutil.OpenDB(t)
+	repo := infrastructure.NewRepository(db)
+	ctx := context.Background()
+
+	_, err := repo.GetSupplierByID(ctx, testutil.OwnerID, 9999999)
+	if err != domain.ErrSupplierNotFound {
+		t.Fatalf("expected ErrSupplierNotFound, got %v", err)
+	}
+}
+
+func TestGetSupplierByID_WrongOwner_NotFound(t *testing.T) {
+	db := testutil.OpenDB(t)
+	repo := infrastructure.NewRepository(db)
+	ctx := context.Background()
+
+	// Supplier 5101 belongs to owner 1001; a different owner should not see it.
+	_, err := repo.GetSupplierByID(ctx, 9999999, 5101)
+	if err != domain.ErrSupplierNotFound {
+		t.Fatalf("expected ErrSupplierNotFound for wrong owner, got %v", err)
+	}
+}
+
+func TestGetSupplierByID_CreatedThenFetched(t *testing.T) {
+	db := testutil.OpenDB(t)
+	repo := infrastructure.NewRepository(db)
+	ctx := context.Background()
+
+	id, err := repo.CreateSupplier(ctx, testutil.OwnerID, domain.SupplierInput{
+		Name:     "FetchByID Supplier",
+		Email:    "fetchbyid@test.local",
+		IsActive: true,
+	})
+	if err != nil {
+		t.Fatalf("CreateSupplier: %v", err)
+	}
+
+	s, err := repo.GetSupplierByID(ctx, testutil.OwnerID, id)
+	if err != nil {
+		t.Fatalf("GetSupplierByID: %v", err)
+	}
+	if s.Name != "FetchByID Supplier" {
+		t.Errorf("expected Name='FetchByID Supplier', got %q", s.Name)
+	}
+	if s.Email != "fetchbyid@test.local" {
+		t.Errorf("expected Email='fetchbyid@test.local', got %q", s.Email)
+	}
+}
