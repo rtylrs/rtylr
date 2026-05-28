@@ -40,17 +40,26 @@ func TestList_Delegates(t *testing.T) {
 	}
 }
 
+func TestCreate_ValidationRejectsEmpty(t *testing.T) {
+	s := &Service{repo: &mockRepo{}}
+	if _, err := s.Create(context.Background(), domain.FloorInput{}); err == nil {
+		t.Error("expected validation error for empty input")
+	}
+}
+
 func TestCreate_PropagatesError(t *testing.T) {
 	want := errors.New("boom")
 	s := &Service{repo: &mockRepo{createErr: want}}
-	if _, err := s.Create(context.Background(), domain.FloorInput{}); !errors.Is(err, want) {
+	validInput := domain.FloorInput{BusinessID: 1, BranchID: 1, Name: "Main"}
+	if _, err := s.Create(context.Background(), validInput); !errors.Is(err, want) {
 		t.Errorf("expected sentinel, got %v", err)
 	}
 }
 
 func TestUpdateAndDelete_HappyPath(t *testing.T) {
 	s := &Service{repo: &mockRepo{}}
-	if err := s.Update(context.Background(), domain.FloorUpdateInput{}); err != nil {
+	validUpdate := domain.FloorUpdateInput{ID: 1, BusinessID: 1, Name: "Main"}
+	if err := s.Update(context.Background(), validUpdate); err != nil {
 		t.Errorf("unexpected: %v", err)
 	}
 	if err := s.Delete(context.Background(), 1, 5); err != nil {
@@ -80,7 +89,7 @@ func TestList_EmptyFloors(t *testing.T) {
 
 func TestCreate_ReturnsID(t *testing.T) {
 	s := &Service{repo: &mockRepo{createID: 55}}
-	id, err := s.Create(context.Background(), domain.FloorInput{BusinessID: 1, Name: "Main"})
+	id, err := s.Create(context.Background(), domain.FloorInput{BusinessID: 1, BranchID: 1, Name: "Main"})
 	if err != nil {
 		t.Fatalf("unexpected error: %v", err)
 	}
@@ -91,7 +100,7 @@ func TestCreate_ReturnsID(t *testing.T) {
 
 func TestCreate_ZeroIDOnError(t *testing.T) {
 	s := &Service{repo: &mockRepo{createErr: errors.New("fail"), createID: 99}}
-	id, _ := s.Create(context.Background(), domain.FloorInput{})
+	id, _ := s.Create(context.Background(), domain.FloorInput{BusinessID: 1, BranchID: 1, Name: "Main"})
 	if id != 0 {
 		t.Errorf("expected 0 on error, got %d", id)
 	}
@@ -100,7 +109,8 @@ func TestCreate_ZeroIDOnError(t *testing.T) {
 func TestUpdate_PropagatesError(t *testing.T) {
 	want := errors.New("update fail")
 	s := &Service{repo: &mockRepo{updErr: want}}
-	if err := s.Update(context.Background(), domain.FloorUpdateInput{}); !errors.Is(err, want) {
+	validInput := domain.FloorUpdateInput{ID: 1, BusinessID: 1, Name: "Ground"}
+	if err := s.Update(context.Background(), validInput); !errors.Is(err, want) {
 		t.Errorf("expected sentinel, got %v", err)
 	}
 }
@@ -123,7 +133,7 @@ func TestDelete_ZeroIDAllowed(t *testing.T) {
 func TestUpdate_InputPreserved(t *testing.T) {
 	// Ensure the mock receives the exact input (no mutation in the service).
 	s := &Service{repo: &mockRepo{}}
-	if err := s.Update(context.Background(), domain.FloorUpdateInput{ID: 10, Name: "Ground Floor"}); err != nil {
+	if err := s.Update(context.Background(), domain.FloorUpdateInput{ID: 10, BusinessID: 1, Name: "Ground Floor"}); err != nil {
 		t.Errorf("unexpected: %v", err)
 	}
 }
