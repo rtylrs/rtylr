@@ -5,6 +5,12 @@ CREATE TABLE IF NOT EXISTS pos_locations (
     address TEXT,
     phone VARCHAR(50),
     is_active BOOLEAN DEFAULT TRUE,
+    timezone VARCHAR(50) DEFAULT 'UTC',
+    currency VARCHAR(10) DEFAULT 'USD',
+    tax_rate DECIMAL(5,2) DEFAULT 0.00,
+    receipt_header TEXT,
+    receipt_footer TEXT,
+    business_id BIGINT NOT NULL DEFAULT 0,
     created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
     INDEX idx_pos_locations_owner (owner_id)
 );

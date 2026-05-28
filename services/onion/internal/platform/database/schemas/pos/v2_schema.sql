@@ -2,15 +2,6 @@
 -- POS V2 Schema: Multi-branch, multi-terminal, full engine
 -- ═══════════════════════════════════════════════════════════════════
 
--- ── Branches (enhanced locations) ────────────────────────────────
-ALTER TABLE pos_locations
-  ADD COLUMN timezone VARCHAR(50) DEFAULT 'UTC',
-  ADD COLUMN currency VARCHAR(10) DEFAULT 'USD',
-  ADD COLUMN tax_rate DECIMAL(5,2) DEFAULT 0.00,
-  ADD COLUMN receipt_header TEXT,
-  ADD COLUMN receipt_footer TEXT,
-  ADD COLUMN business_id BIGINT NOT NULL DEFAULT 0;
-
 -- ── Floors (per branch) ──────────────────────────────────────────
 CREATE TABLE IF NOT EXISTS pos_floors (
     id BIGINT NOT NULL AUTO_INCREMENT PRIMARY KEY,

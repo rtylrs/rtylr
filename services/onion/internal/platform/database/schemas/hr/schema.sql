@@ -5,6 +5,8 @@ CREATE TABLE IF NOT EXISTS hr_departments (
     description TEXT,
     manager_staff_id BIGINT,
     location_id BIGINT DEFAULT NULL,
+    parent_department_id BIGINT DEFAULT NULL,
+    default_work_schedule_id BIGINT DEFAULT NULL,
     created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
     updated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP
 );
