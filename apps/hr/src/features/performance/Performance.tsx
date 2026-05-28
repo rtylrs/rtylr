@@ -1,6 +1,6 @@
 import React, { useState } from 'react';
 import { useTranslation } from 'react-i18next';
-import { useNavigate } from 'react-router-dom';
+import { useNavigate } from '@tanstack/react-router';
 import { BarChart3 } from 'lucide-react';
 import { ErrorBoundary } from '@voxire/ui';
 import {
@@ -37,7 +37,7 @@ function CycleCard({ cycle }: { cycle: ReviewCyclePayload }): React.JSX.Element 
     <>
       <Card
         style={{ cursor: 'pointer' }}
-        onClick={() => navigate(`/performance/cycles/${cycle.id}`)}
+        onClick={() => navigate({ to: `/performance/cycles/${cycle.id}` as any })}
       >
         <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between' }}>
           <h3 style={{ margin: 0, fontSize: 14, fontWeight: 600, color: 'var(--hr-text)' }}>

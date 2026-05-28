@@ -1,5 +1,5 @@
 import React from 'react';
-import { Navigate, Outlet } from 'react-router-dom';
+import { Navigate, Outlet } from '@tanstack/react-router';
 import { useGetHRConfig } from '../../shared/hooks/queries/useSetup';
 import { useHRConfigStore } from '../../shared/stores/hrConfigStore';
 

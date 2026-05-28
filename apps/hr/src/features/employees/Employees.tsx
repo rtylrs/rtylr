@@ -1,5 +1,5 @@
 import React, { useRef, useState } from 'react';
-import { useNavigate } from 'react-router-dom';
+import { useNavigate } from '@tanstack/react-router';
 import { useTranslation } from 'react-i18next';
 import { useVirtualizer } from '@tanstack/react-virtual';
 import { Plus, Search } from 'lucide-react';
@@ -56,7 +56,7 @@ const Employees = (): React.JSX.Element => {
           {t('employees.directory')}
         </h1>
         <button
-          onClick={() => navigate('/employees/new')}
+          onClick={() => navigate({ to: '/employees/new' })}
           className="flex items-center gap-2 rounded-lg px-4 py-2 text-sm font-medium"
           style={{ background: 'var(--accent)', color: '#fff' }}
         >
@@ -153,7 +153,7 @@ const Employees = (): React.JSX.Element => {
                         transform: `translateY(${virtualRow.start}px)`,
                         borderTop: '1px solid var(--hr-border)',
                       }}
-                      onClick={() => navigate(`/employees/${emp.id}`)}
+                      onClick={() => navigate({ to: `/employees/${emp.id}` as any })}
                       onMouseEnter={(e) => {
                         (e.currentTarget as HTMLDivElement).style.background = 'var(--hr-hover)';
                       }}

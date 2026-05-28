@@ -1,5 +1,5 @@
 import React from 'react';
-import { useParams, Link } from 'react-router-dom';
+import { useParams, Link } from '@tanstack/react-router';
 import {
   Mail,
   Phone,
@@ -33,7 +33,7 @@ import { initials, paletteFor } from '../../shared/components/EmployeeCard';
 
 const EmployeeProfile: React.FC = () => {
   const isMobile = useIsMobile(900);
-  const { id } = useParams<{ id: string }>();
+  const { id } = useParams({ strict: false });
   const staffId = id ? parseInt(id, 10) : undefined;
   const { data: staff, isLoading } = useStaffById(staffId);
   const { data: profile } = useEmployeeProfile(staffId);

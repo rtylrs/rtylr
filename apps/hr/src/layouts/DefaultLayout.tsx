@@ -1,5 +1,5 @@
 import React, { useEffect, useRef, useState } from 'react';
-import { useLocation, Link } from 'react-router-dom';
+import { useLocation, Link } from '@tanstack/react-router';
 import { motion, AnimatePresence } from 'motion/react';
 import { useTranslation } from 'react-i18next';
 import { APP_URLS, getAvatarUrl } from '@voxire/config';

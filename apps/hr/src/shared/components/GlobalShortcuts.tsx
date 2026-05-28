@@ -1,5 +1,5 @@
 import React, { useEffect } from 'react';
-import { useNavigate } from 'react-router-dom';
+import { useNavigate } from '@tanstack/react-router';
 import { toast } from 'sonner';
 
 /**
@@ -20,7 +20,7 @@ const GlobalShortcuts: React.FC = () => {
 
       switch (e.key.toLowerCase()) {
         case 'n':
-          navigate('/staff');
+          navigate({ to: '/staff' });
           toast('Tip: click "New hire" to add a staff member', { duration: 2000 });
           break;
         case '/':
@@ -28,10 +28,10 @@ const GlobalShortcuts: React.FC = () => {
           window.dispatchEvent(new CustomEvent('hr:focus-search'));
           break;
         case 't':
-          navigate('/time-off');
+          navigate({ to: '/time-off' });
           break;
         case 's':
-          navigate('/schedule');
+          navigate({ to: '/schedule' });
           break;
         default:
           break;

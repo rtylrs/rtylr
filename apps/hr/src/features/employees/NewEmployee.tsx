@@ -1,5 +1,5 @@
 import React, { useState } from 'react';
-import { useNavigate } from 'react-router-dom';
+import { useNavigate } from '@tanstack/react-router';
 import { useTranslation } from 'react-i18next';
 import { ArrowLeft } from 'lucide-react';
 import { employeeSchema, type EmployeeFormData } from '../../shared/schemas/employeeSchema';
@@ -50,7 +50,7 @@ const NewEmployee = ({ onCancel, isWizardMode }: NewEmployeeProps): React.JSX.El
         if (isWizardMode && onCancel) {
           onCancel();
         } else {
-          navigate('/employees');
+          navigate({ to: '/employees' });
         }
       },
     });
@@ -60,7 +60,7 @@ const NewEmployee = ({ onCancel, isWizardMode }: NewEmployeeProps): React.JSX.El
     if (isWizardMode && onCancel) {
       onCancel();
     } else {
-      navigate('/employees');
+      navigate({ to: '/employees' });
     }
   };
 

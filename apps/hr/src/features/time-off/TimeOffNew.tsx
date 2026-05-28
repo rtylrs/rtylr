@@ -1,5 +1,5 @@
 import React, { useState } from 'react';
-import { useNavigate, Link } from 'react-router-dom';
+import { useNavigate, Link } from '@tanstack/react-router';
 import { toast } from 'sonner';
 import { useStaff } from '../staff/useStaff';
 import { useSubmitTimeOff } from '../../shared/hooks/useHrExtras';
@@ -49,7 +49,7 @@ const TimeOffNew: React.FC = () => {
       {
         onSuccess: () => {
           toast.success('Time off request submitted');
-          nav('/time-off');
+          nav({ to: '/time-off' });
         },
         onError: () => toast.error('Failed to submit'),
       }

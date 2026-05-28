@@ -1,6 +1,6 @@
 import React, { useMemo } from 'react';
 import { useTranslation } from 'react-i18next';
-import { useParams, useNavigate } from 'react-router-dom';
+import { useParams, useNavigate } from '@tanstack/react-router';
 import { motion } from 'motion/react';
 import { ArrowLeft, Send, AlertCircle } from 'lucide-react';
 import { useGetTimesheet, useSubmitTimesheet } from '../../shared/hooks/queries/useTimesheets';
@@ -52,7 +52,7 @@ const STATUS_COLORS: Record<string, string> = {
 
 const TimesheetDetail = (): React.JSX.Element => {
   const { t } = useTranslation();
-  const { id } = useParams<{ id: string }>();
+  const { id } = useParams({ strict: false });
   const navigate = useNavigate();
   const timesheetId = id ? parseInt(id, 10) : undefined;
   const { data: timesheet, isLoading } = useGetTimesheet(timesheetId);
@@ -74,7 +74,7 @@ const TimesheetDetail = (): React.JSX.Element => {
     return (
       <div style={{ textAlign: 'center', padding: 40 }}>
         <p style={{ color: 'var(--hr-text-muted)' }}>{t('errors.notFound')}</p>
-        <Button variant="ghost" onClick={() => navigate('/timesheets')}>
+        <Button variant="ghost" onClick={() => navigate({ to: '/timesheets' })}>
           {t('common.back')}
         </Button>
       </div>

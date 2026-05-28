@@ -1,5 +1,5 @@
 import React, { useState } from 'react';
-import { Link } from 'react-router-dom';
+import { Link } from '@tanstack/react-router';
 import { useTranslation } from 'react-i18next';
 import { Plus, Calendar, Clock } from 'lucide-react';
 import { useListLeaveRequests, useApproveLeave } from '../../shared/hooks/queries/useLeave';
