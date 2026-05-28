@@ -17,7 +17,7 @@ CREATE TABLE IF NOT EXISTS store_products (
     title VARCHAR(255) NOT NULL,
     slug VARCHAR(255),
     description TEXT,
-    images JSON,
+    images JSON DEFAULT (JSON_ARRAY()),
     price DECIMAL(10,2) NOT NULL DEFAULT 0,
     compare_at_price DECIMAL(10,2) DEFAULT 0,
     is_published BOOLEAN DEFAULT FALSE,
@@ -44,7 +44,7 @@ CREATE TABLE IF NOT EXISTS store_orders (
     customer_email VARCHAR(255),
     customer_name VARCHAR(255),
     customer_phone VARCHAR(50),
-    status ENUM('pending','confirmed','processing','shipped','delivered','cancelled','refunded') DEFAULT 'pending',
+    status ENUM('pending','confirmed','processing','shipped','delivered','cancelled','refunded','completed') DEFAULT 'pending',
     subtotal DECIMAL(10,2) NOT NULL DEFAULT 0,
     tax DECIMAL(10,2) NOT NULL DEFAULT 0,
     shipping_cost DECIMAL(10,2) NOT NULL DEFAULT 0,
@@ -94,7 +94,7 @@ CREATE TABLE IF NOT EXISTS store_payment_methods (
     id BIGINT NOT NULL AUTO_INCREMENT PRIMARY KEY,
     owner_id BIGINT NOT NULL,
     provider VARCHAR(100) NOT NULL,
-    config JSON,
+    config JSON DEFAULT (JSON_OBJECT()),
     is_active BOOLEAN DEFAULT TRUE,
     created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
 );
