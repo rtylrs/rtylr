@@ -446,6 +446,78 @@ func TestCreate_ThenList_FindsVariant(t *testing.T) {
 	}
 }
 
+func TestCountVariants_AllOwner_NonNegative(t *testing.T) {
+	db := testutil.OpenDB(t)
+	repo := infrastructure.NewRepository(db)
+	ctx := context.Background()
+
+	count, err := repo.CountVariants(ctx, testutil.OwnerID, 0)
+	if err != nil {
+		t.Fatalf("CountVariants: %v", err)
+	}
+	if count < 0 {
+		t.Errorf("expected non-negative count, got %d", count)
+	}
+}
+
+func TestCountVariants_ZeroOwner_ReturnsZero(t *testing.T) {
+	db := testutil.OpenDB(t)
+	repo := infrastructure.NewRepository(db)
+	ctx := context.Background()
+
+	count, err := repo.CountVariants(ctx, 0, 0)
+	if err != nil {
+		t.Fatalf("CountVariants(ownerID=0): %v", err)
+	}
+	if count != 0 {
+		t.Errorf("expected 0 for ownerID=0, got %d", count)
+	}
+}
+
+func TestCountVariants_AfterCreate_Increases(t *testing.T) {
+	db := testutil.OpenDB(t)
+	repo := infrastructure.NewRepository(db)
+	ctx := context.Background()
+
+	before, err := repo.CountVariants(ctx, testutil.OwnerID, variantsProductID)
+	if err != nil {
+		t.Fatalf("CountVariants before: %v", err)
+	}
+
+	id, err := repo.CreateVariant(ctx, testutil.OwnerID, domain.VariantInput{
+		ProductID: variantsProductID,
+		Name:      "Count Test Variant",
+		SalePrice: 5.0,
+		IsActive:  true,
+	})
+	if err != nil {
+		t.Fatalf("CreateVariant: %v", err)
+	}
+	t.Cleanup(func() { _ = repo.DeleteVariant(ctx, testutil.OwnerID, id) })
+
+	after, err := repo.CountVariants(ctx, testutil.OwnerID, variantsProductID)
+	if err != nil {
+		t.Fatalf("CountVariants after: %v", err)
+	}
+	if after != before+1 {
+		t.Errorf("expected count to increase by 1, before=%d after=%d", before, after)
+	}
+}
+
+func TestCountVariants_UnknownProduct_ReturnsZero(t *testing.T) {
+	db := testutil.OpenDB(t)
+	repo := infrastructure.NewRepository(db)
+	ctx := context.Background()
+
+	count, err := repo.CountVariants(ctx, testutil.OwnerID, 9999999)
+	if err != nil {
+		t.Fatalf("CountVariants unknown product: %v", err)
+	}
+	if count != 0 {
+		t.Errorf("expected 0 for unknown product, got %d", count)
+	}
+}
+
 func TestListVariants_WrongOwner_ReturnsEmpty(t *testing.T) {
 	db := testutil.OpenDB(t)
 	repo := infrastructure.NewRepository(db)
