@@ -20,8 +20,8 @@ VALUES
     (5203, 1001, 5002, 5101, 'Salad',  'SAL-1',  3.00,   8.00,  4.00, 10.00, TRUE, TRUE)
 ON DUPLICATE KEY UPDATE name = VALUES(name);
 
-INSERT INTO crm_customers (id, owner_id, first_name, last_name, email, phone, loyalty_points, total_spent, visit_count, loyalty_tier)
+INSERT INTO crm_customers (id, owner_id, first_name, last_name, email, phone, loyalty_points, total_spent, visit_count, loyalty_tier, tags)
 VALUES
-    (5301, 1001, 'Jamie', 'Bronze', 'jamie@test.local', '+961-3-100000', 50,  100.00, 5,  'bronze'),
-    (5302, 1001, 'Alex',  'Gold',   'alex@test.local',  '+961-3-200000', 1500, 2500.00, 30, 'gold')
-ON DUPLICATE KEY UPDATE email = VALUES(email);
+    (5301, 1001, 'Jamie', 'Bronze', 'jamie@test.local', '+961-3-100000', 50,  100.00, 5,  'bronze', '[]'),
+    (5302, 1001, 'Alex',  'Gold',   'alex@test.local',  '+961-3-200000', 1500, 2500.00, 30, 'gold',   '[]')
+ON DUPLICATE KEY UPDATE email = VALUES(email), tags = VALUES(tags);
