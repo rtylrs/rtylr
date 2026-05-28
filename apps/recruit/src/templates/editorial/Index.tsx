@@ -1,5 +1,5 @@
 import React from 'react';
-import { Link } from 'react-router-dom';
+import { Link } from '@tanstack/react-router';
 import { MapPin } from 'lucide-react';
 
 import Header from '../shared/Header';
@@ -48,7 +48,7 @@ const EditorialIndex: React.FC<IndexProps> = ({ careers, customization, sections
             careers.map((c) => (
               <Link
                 key={c.id}
-                to={`/${customization.slug}/${c.slug}`}
+                to={`/${customization.slug}/${c.slug}` as any}
                 className="group grid grid-cols-1 gap-2 py-8 transition sm:grid-cols-[1fr_auto] sm:items-center sm:gap-8"
               >
                 <div>

@@ -1,5 +1,5 @@
 import React from 'react';
-import { Link } from 'react-router-dom';
+import { Link } from '@tanstack/react-router';
 import { ArrowUpRight } from 'lucide-react';
 
 import Header from '../shared/Header';
@@ -51,7 +51,7 @@ const BoldIndex: React.FC<IndexProps> = ({ careers, customization, sections }) =
             careers.map((c) => (
               <Link
                 key={c.id}
-                to={`/${customization.slug}/${c.slug}`}
+                to={`/${customization.slug}/${c.slug}` as any}
                 className="group flex items-center justify-between border-b py-8 transition hover:pl-4"
                 style={{ borderColor: 'var(--recruit-border)' }}
               >

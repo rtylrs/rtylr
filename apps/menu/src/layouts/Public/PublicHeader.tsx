@@ -1,6 +1,6 @@
 import React, { useState, useEffect, useCallback, useMemo } from 'react';
 import { FaBars, FaChevronDown, FaSignOutAlt, FaTimes } from 'react-icons/fa';
-import { Link, useLocation, useNavigate } from 'react-router-dom';
+import { Link, useNavigate, useRouterState } from '@tanstack/react-router';
 
 import { Button } from '@voxire/components';
 import useColors from '../../shared/hooks/useColors';
@@ -20,17 +20,14 @@ const Header: React.FC = () => {
   const [languageDropdown, setLanguageDropdown] = useState(false);
   const [language, setLanguage] = useState<string>('en');
 
-  const location = useLocation();
+  const pathname = useRouterState({ select: (s) => s.location.pathname });
   const navigate = useNavigate();
   const { primary } = useColors();
   const { width } = useWindowDimensions();
   const token = localStorage.getItem('token');
 
   const isMobile = useMemo(() => width < 968, [width]);
-  const isQuestionnaire = useMemo(
-    () => location.pathname.includes('/auth/questionnaire'),
-    [location.pathname]
-  );
+  const isQuestionnaire = useMemo(() => pathname.includes('/auth/questionnaire'), [pathname]);
   const isInnerPage = useMemo(() => document.location.pathname !== '/', []);
 
   useEffect(() => {
@@ -96,21 +93,21 @@ const Header: React.FC = () => {
   }, []);
 
   const handleClick = useCallback(() => {
-    navigate('/');
+    navigate({ to: '/' });
   }, [navigate]);
 
   const handleLogoClick = useCallback(() => {
-    navigate('/');
+    navigate({ to: '/' });
   }, [navigate]);
 
   const handleLoginClick = useCallback(() => {
-    navigate('/auth/login');
+    navigate({ to: '/auth/login' });
   }, [navigate]);
 
   const handleNavigation = useCallback(
     (path: string) => {
       setDropdown(false);
-      navigate(path);
+      navigate({ to: path });
     },
     [navigate]
   );

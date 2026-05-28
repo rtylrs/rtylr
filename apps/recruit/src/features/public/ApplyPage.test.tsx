@@ -1,7 +1,13 @@
 import React from 'react';
 import { describe, expect, it, vi } from 'vitest';
-import { render, screen, fireEvent, waitFor } from '@testing-library/react';
-import { MemoryRouter, Route, Routes } from 'react-router-dom';
+import { render, screen, fireEvent, waitFor, act } from '@testing-library/react';
+import {
+  createMemoryHistory,
+  createRootRoute,
+  createRoute,
+  createRouter,
+  RouterProvider,
+} from '@tanstack/react-router';
 import { QueryClient, QueryClientProvider } from '@tanstack/react-query';
 
 import ApplyPage from './ApplyPage';
@@ -100,22 +106,34 @@ vi.mock('sonner', () => ({
   },
 }));
 
-function renderAt(path: string) {
+async function renderAt(path: string) {
   const qc = new QueryClient({ defaultOptions: { queries: { retry: false } } });
-  return render(
-    <QueryClientProvider client={qc}>
-      <MemoryRouter initialEntries={[path]}>
-        <Routes>
-          <Route path=":slug/:careerSlug/apply" element={<ApplyPage />} />
-        </Routes>
-      </MemoryRouter>
-    </QueryClientProvider>
-  );
+  const history = createMemoryHistory({ initialEntries: [path] });
+  const rootRoute = createRootRoute();
+  const applyRoute = createRoute({
+    getParentRoute: () => rootRoute,
+    path: '/$slug/$careerSlug/apply',
+    component: ApplyPage,
+  });
+  const router = createRouter({
+    routeTree: rootRoute.addChildren([applyRoute]),
+    history,
+  });
+  await router.load();
+  let result: ReturnType<typeof render>;
+  await act(async () => {
+    result = render(
+      <QueryClientProvider client={qc}>
+        <RouterProvider router={router} />
+      </QueryClientProvider>
+    );
+  });
+  return result!;
 }
 
 describe('ApplyPage integration', () => {
-  it('renders the role title and brand name in the header', () => {
-    renderAt('/acme/backend-engineer/apply');
+  it('renders the role title and brand name in the header', async () => {
+    await renderAt('/acme/backend-engineer/apply');
     expect(screen.getByText('Apply for Backend Engineer')).toBeInTheDocument();
     // Header shows the business brand, not "rtylr".
     expect(screen.getAllByText(/Acme/).length).toBeGreaterThan(0);
@@ -128,7 +146,7 @@ describe('ApplyPage integration', () => {
       opts.onSuccess?.();
     });
 
-    renderAt('/acme/backend-engineer/apply');
+    await renderAt('/acme/backend-engineer/apply');
 
     const nameInput = screen.getByRole('textbox', { name: /full name/i });
     const emailInput = screen.getByRole('textbox', { name: /^email/i });
@@ -156,9 +174,9 @@ describe('ApplyPage integration', () => {
     expect(screen.queryByRole('button', { name: /submit application/i })).toBeNull();
   });
 
-  it('does not submit when required fields are empty (browser validation)', () => {
+  it('does not submit when required fields are empty (browser validation)', async () => {
     submitMutate.mockReset();
-    renderAt('/acme/backend-engineer/apply');
+    await renderAt('/acme/backend-engineer/apply');
     fireEvent.click(screen.getByRole('button', { name: /submit application/i }));
     // Required inputs block form submission at the DOM level - the
     // mutate shouldn't fire.
