@@ -48,6 +48,9 @@ func (s *Service) List(ctx context.Context, ownerID int64) ([]domain.Table, erro
 }
 
 func (s *Service) Create(ctx context.Context, input domain.TableInput) (int64, error) {
+	if err := domain.ValidateTableInput(input); err != nil {
+		return 0, err
+	}
 	id, err := s.repo.Create(ctx, input)
 	if err != nil {
 		return 0, err
@@ -57,6 +60,9 @@ func (s *Service) Create(ctx context.Context, input domain.TableInput) (int64, e
 }
 
 func (s *Service) Update(ctx context.Context, input domain.TableUpdateInput) error {
+	if err := domain.ValidateTableUpdateInput(input); err != nil {
+		return err
+	}
 	if err := s.repo.Update(ctx, input); err != nil {
 		return err
 	}
