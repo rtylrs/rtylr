@@ -1,5 +1,5 @@
 import React, { useEffect, useMemo, useState } from 'react';
-import { useNavigate } from 'react-router-dom';
+import { useNavigate } from '@tanstack/react-router';
 import { useQuery } from '@tanstack/react-query';
 import { AlertCircle, ArrowLeft, Check, Loader2 } from 'lucide-react';
 import { FaGoogle } from 'react-icons/fa';
@@ -311,7 +311,7 @@ const Register: React.FC = (): React.JSX.Element => {
             <button
               type="button"
               className="text-[#4583C4] font-medium hover:underline underline-offset-2"
-              onClick={() => navigate('/')}
+              onClick={() => navigate({ to: '/' })}
             >
               Sign in
             </button>
@@ -385,7 +385,7 @@ const Register: React.FC = (): React.JSX.Element => {
             <button
               type="button"
               className="text-[#4583C4] font-medium hover:underline underline-offset-2"
-              onClick={() => navigate(redirectParam ? `/?redirect=${redirectParam}` : '/')}
+              onClick={() => navigate({ to: redirectParam ? `/?redirect=${redirectParam}` : '/' })}
             >
               Sign in
             </button>

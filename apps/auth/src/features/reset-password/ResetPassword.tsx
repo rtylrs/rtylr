@@ -1,5 +1,5 @@
 import React, { useState } from 'react';
-import { useNavigate } from 'react-router-dom';
+import { useNavigate } from '@tanstack/react-router';
 import { useTranslation } from 'react-i18next';
 import { AlertCircle, ArrowLeft, CheckCircle2 } from 'lucide-react';
 
@@ -108,7 +108,7 @@ const ResetPassword: React.FC = () => {
         <div className="mt-6 text-center">
           <button
             type="button"
-            onClick={() => navigate('/')}
+            onClick={() => navigate({ to: '/' })}
             className="inline-flex items-center gap-1.5 text-sm text-[#4583C4] font-medium hover:underline underline-offset-2"
           >
             <ArrowLeft className="h-4 w-4" />

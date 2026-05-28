@@ -1,5 +1,5 @@
 import React, { useMemo, useState } from 'react';
-import { useNavigate } from 'react-router-dom';
+import { useNavigate } from '@tanstack/react-router';
 import { AlertCircle, CheckCircle2 } from 'lucide-react';
 import { ASSETS } from '@voxire/config';
 import { Button } from '@voxire/components';
@@ -73,7 +73,7 @@ const ResetPasswordConfirm: React.FC = () => {
               variant="primary"
               fullWidth
               height={40}
-              onClick={() => navigate('/')}
+              onClick={() => navigate({ to: '/' })}
             >
               Go to sign in
             </Button>

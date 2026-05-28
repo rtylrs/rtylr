@@ -1,5 +1,5 @@
 import { useEffect, useState } from 'react';
-import { useNavigate, useParams } from 'react-router-dom';
+import { useNavigate, useParams } from '@tanstack/react-router';
 import { CheckCircle2, AlertCircle, Loader2 } from 'lucide-react';
 
 import { unwrap } from '@voxire/api';
@@ -9,7 +9,7 @@ import { Button } from '@voxire/components';
 
 const EmailVerification = () => {
   const navigate = useNavigate();
-  const { token } = useParams();
+  const { token } = useParams({ strict: false });
   const [message, setMessage] = useState('');
   const [loading, setLoading] = useState(true);
   const [success, setSuccess] = useState(false);
@@ -58,7 +58,7 @@ const EmailVerification = () => {
                 variant="primary"
                 fullWidth
                 height={40}
-                onClick={() => navigate('/')}
+                onClick={() => navigate({ to: '/' })}
               >
                 Continue to sign in
               </Button>
@@ -77,7 +77,7 @@ const EmailVerification = () => {
                 variant="outline"
                 fullWidth
                 height={40}
-                onClick={() => navigate('/')}
+                onClick={() => navigate({ to: '/' })}
               >
                 Back to sign in
               </Button>

@@ -1,6 +1,6 @@
 import React, { useState, useEffect, useCallback } from 'react';
 import { FaChevronDown } from 'react-icons/fa';
-import { useNavigate } from 'react-router-dom';
+import { useNavigate } from '@tanstack/react-router';
 import { ASSETS } from '@voxire/config';
 
 import { selectLanguage } from '../../shared/services/i18next';
@@ -59,12 +59,12 @@ const Header: React.FC = () => {
       <div
         className="header-logo"
         style={{ cursor: 'pointer' }}
-        onClick={() => navigate('/')}
+        onClick={() => navigate({ to: '/' })}
         role="button"
         aria-label="Go to home"
         tabIndex={0}
         onKeyDown={(e) => {
-          if (e.key === 'Enter' || e.key === ' ') navigate('/');
+          if (e.key === 'Enter' || e.key === ' ') navigate({ to: '/' });
         }}
       >
         <img src={ASSETS.logos.dark} alt="Logo" />

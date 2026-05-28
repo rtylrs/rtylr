@@ -1,5 +1,5 @@
 import React, { useEffect, useState } from 'react';
-import { useNavigate, useSearchParams } from 'react-router-dom';
+import { useNavigate, useRouterState } from '@tanstack/react-router';
 import { Mail, CheckCircle2, AlertCircle, Loader2 } from 'lucide-react';
 
 import { ASSETS } from '@voxire/config';
@@ -11,7 +11,8 @@ type Status = 'loading' | 'success' | 'error';
 
 const VerifyEmail: React.FC = () => {
   const navigate = useNavigate();
-  const [params] = useSearchParams();
+  const searchStr = useRouterState({ select: (s) => s.location.searchStr });
+  const params = new URLSearchParams(searchStr);
   const verifyMutation = useEmailVerification();
   const resendMutation = useResendVerificationEmail();
   const [status, setStatus] = useState<Status>('loading');
@@ -80,7 +81,7 @@ const VerifyEmail: React.FC = () => {
                 variant="primary"
                 fullWidth
                 height={40}
-                onClick={() => navigate('/')}
+                onClick={() => navigate({ to: '/' })}
               >
                 Continue to sign in
               </Button>
@@ -116,7 +117,7 @@ const VerifyEmail: React.FC = () => {
         <div className="mt-6">
           <button
             type="button"
-            onClick={() => navigate('/')}
+            onClick={() => navigate({ to: '/' })}
             className="text-sm text-[#4583C4] font-medium hover:underline underline-offset-2"
           >
             Back to sign in
