@@ -126,6 +126,51 @@ func (r *Repository) Update(ctx context.Context, ownerID, id int64, input domain
 	return nil
 }
 
+// SumByStatus returns the total bill amount for a given status and owner.
+// It returns 0 when the owner has no bills with that status.
+func (r *Repository) SumByStatus(ctx context.Context, ownerID int64, status string) (float64, error) {
+	const q = `
+		SELECT COALESCE(SUM(CAST(amount AS REAL)), 0)
+		FROM finance_bills
+		WHERE owner_id = ? AND status = ?`
+
+	var result float64
+	if err := r.pool.QueryRowContext(ctx, q, ownerID, status).Scan(&result); err != nil {
+		logger.Ctx(ctx).Error("Failed to sum bills by status", logger.Error(err))
+		return 0, err
+	}
+
+	return result, nil
+}
+
+// CountByStatus returns the number of bills in each status for the owner.
+func (r *Repository) CountByStatus(ctx context.Context, ownerID int64) (map[string]int64, error) {
+	const q = `
+		SELECT status, COUNT(*) AS cnt
+		FROM finance_bills
+		WHERE owner_id = ?
+		GROUP BY status`
+
+	rows, err := r.pool.QueryContext(ctx, q, ownerID)
+	if err != nil {
+		logger.Ctx(ctx).Error("Failed to count bills by status", logger.Error(err))
+		return nil, err
+	}
+	defer rows.Close()
+
+	counts := make(map[string]int64)
+	for rows.Next() {
+		var s string
+		var cnt int64
+		if scanErr := rows.Scan(&s, &cnt); scanErr != nil {
+			return nil, scanErr
+		}
+		counts[s] = cnt
+	}
+
+	return counts, rows.Err()
+}
+
 // ---------------------------------------------------------------------------
 // Mapping helpers
 // ---------------------------------------------------------------------------
