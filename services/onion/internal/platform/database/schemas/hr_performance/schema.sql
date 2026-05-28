@@ -4,7 +4,7 @@ CREATE TABLE IF NOT EXISTS hr_performance_config (
     rating_scale_type VARCHAR(50) NOT NULL DEFAULT 'numeric',
     rating_min INT NOT NULL DEFAULT 1,
     rating_max INT NOT NULL DEFAULT 5,
-    rating_labels JSON,
+    rating_labels JSON DEFAULT (JSON_ARRAY()),
     peer_feedback_enabled BOOLEAN NOT NULL DEFAULT FALSE,
     created_at TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP,
     updated_at TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
