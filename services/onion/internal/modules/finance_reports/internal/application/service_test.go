@@ -135,3 +135,91 @@ func looksLikeDate(s string) bool {
 	}
 	return s[4] == '-' && s[7] == '-'
 }
+
+func TestGetBalanceSheet_CashIsForwarded(t *testing.T) {
+	m := &mockRepo{cash: 999, byType: map[string]float64{}}
+	s := &Service{repo: m}
+	bs, err := s.GetBalanceSheet(context.Background(), 1)
+	if err != nil {
+		t.Fatalf("err: %v", err)
+	}
+	if bs.CashBalance != 999 {
+		t.Errorf("CashBalance = %v, want 999", bs.CashBalance)
+	}
+}
+
+func TestGetBalanceSheet_ReceivablesForwarded(t *testing.T) {
+	m := &mockRepo{recv: 300, byType: map[string]float64{}}
+	s := &Service{repo: m}
+	bs, err := s.GetBalanceSheet(context.Background(), 1)
+	if err != nil {
+		t.Fatalf("err: %v", err)
+	}
+	if bs.AccountsReceivable != 300 {
+		t.Errorf("AccountsReceivable = %v, want 300", bs.AccountsReceivable)
+	}
+}
+
+func TestGetBalanceSheet_PayablesForwarded(t *testing.T) {
+	m := &mockRepo{pay: 150, byType: map[string]float64{}}
+	s := &Service{repo: m}
+	bs, err := s.GetBalanceSheet(context.Background(), 1)
+	if err != nil {
+		t.Fatalf("err: %v", err)
+	}
+	if bs.AccountsPayable != 150 {
+		t.Errorf("AccountsPayable = %v, want 150", bs.AccountsPayable)
+	}
+}
+
+func TestGetCashFlow_PeriodIsForwarded(t *testing.T) {
+	s := &Service{repo: &mockRepo{}}
+	cf, err := s.GetCashFlow(context.Background(), 1, "year")
+	if err != nil {
+		t.Fatalf("err: %v", err)
+	}
+	if cf.Period != "year" {
+		t.Errorf("Period = %q, want 'year'", cf.Period)
+	}
+}
+
+func TestGetCashFlow_InflowAndOutflowForwarded(t *testing.T) {
+	m := &mockRepo{inflow: 500, outflow: 200}
+	s := &Service{repo: m}
+	cf, err := s.GetCashFlow(context.Background(), 1, "month")
+	if err != nil {
+		t.Fatalf("err: %v", err)
+	}
+	if cf.OperatingInflow != 500 {
+		t.Errorf("OperatingInflow = %v, want 500", cf.OperatingInflow)
+	}
+	if cf.OperatingOutflow != 200 {
+		t.Errorf("OperatingOutflow = %v, want 200", cf.OperatingOutflow)
+	}
+}
+
+func TestGetCashFlow_NetCashFlowEqualsNetOperating(t *testing.T) {
+	m := &mockRepo{inflow: 750, outflow: 250}
+	s := &Service{repo: m}
+	cf, err := s.GetCashFlow(context.Background(), 1, "quarter")
+	if err != nil {
+		t.Fatalf("err: %v", err)
+	}
+	if cf.NetCashFlow != cf.NetOperating {
+		t.Errorf("NetCashFlow (%v) != NetOperating (%v)", cf.NetCashFlow, cf.NetOperating)
+	}
+}
+
+func TestResolvePeriodRange_YearEndsDecember(t *testing.T) {
+	_, to := resolvePeriodRange("year")
+	if !strings.HasSuffix(to, "-12-31") {
+		t.Errorf("year end should end with -12-31, got %q", to)
+	}
+}
+
+func TestResolvePeriodRange_MonthStartsFirstDay(t *testing.T) {
+	from, _ := resolvePeriodRange("month")
+	if !strings.HasSuffix(from, "-01") {
+		t.Errorf("month start should end with -01, got %q", from)
+	}
+}
