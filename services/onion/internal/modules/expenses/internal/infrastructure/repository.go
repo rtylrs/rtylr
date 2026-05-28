@@ -157,6 +157,52 @@ func (r *Repository) ListCategories(ctx context.Context, ownerID int64) ([]domai
 	return cats, nil
 }
 
+// SumByOwner returns the total expense amount for the given owner, regardless
+// of category or date.
+func (r *Repository) SumByOwner(ctx context.Context, ownerID int64) (float64, error) {
+	const q = `
+		SELECT COALESCE(SUM(CAST(amount AS REAL)), 0)
+		FROM finance_expenses
+		WHERE owner_id = ?`
+
+	var total float64
+	if err := r.pool.QueryRowContext(ctx, q, ownerID).Scan(&total); err != nil {
+		logger.Ctx(ctx).Error("Failed to sum expenses", logger.Error(err))
+		return 0, err
+	}
+
+	return total, nil
+}
+
+// CountByCategory returns the number of expenses in each category for the owner.
+// The map key is the category_id (as a string) or "uncategorised" for null values.
+func (r *Repository) CountByCategory(ctx context.Context, ownerID int64) (map[string]int64, error) {
+	const q = `
+		SELECT COALESCE(CAST(category_id AS TEXT), 'uncategorised'), COUNT(*) AS cnt
+		FROM finance_expenses
+		WHERE owner_id = ?
+		GROUP BY category_id`
+
+	rows, err := r.pool.QueryContext(ctx, q, ownerID)
+	if err != nil {
+		logger.Ctx(ctx).Error("Failed to count expenses by category", logger.Error(err))
+		return nil, err
+	}
+	defer rows.Close()
+
+	counts := make(map[string]int64)
+	for rows.Next() {
+		var cat string
+		var cnt int64
+		if scanErr := rows.Scan(&cat, &cnt); scanErr != nil {
+			return nil, scanErr
+		}
+		counts[cat] = cnt
+	}
+
+	return counts, rows.Err()
+}
+
 // ---------------------------------------------------------------------------
 // Mapping helpers
 // ---------------------------------------------------------------------------
