@@ -76,7 +76,7 @@ CREATE TABLE IF NOT EXISTS pos_order_payments (
 
 -- ── Add modifiers JSON to order items ────────────────────────────
 ALTER TABLE pos_order_items
-  ADD COLUMN modifiers JSON DEFAULT NULL,
+  ADD COLUMN IF NOT EXISTS modifiers JSON DEFAULT (JSON_ARRAY()),
   ADD COLUMN combo_id BIGINT DEFAULT NULL,
   ADD COLUMN variant_name VARCHAR(255) DEFAULT NULL;
 
@@ -105,7 +105,7 @@ CREATE TABLE IF NOT EXISTS pos_cash_movements (
     terminal_id BIGINT DEFAULT NULL,
     session_id BIGINT NOT NULL,
     employee_id BIGINT NOT NULL,
-    type ENUM('drop','pickup','adjustment','float','tip_out') NOT NULL,
+    type ENUM('drop','pickup','adjustment','float','tip_out','cash_in','cash_out') NOT NULL,
     amount DECIMAL(10,2) NOT NULL,
     reason TEXT,
     approved_by BIGINT DEFAULT NULL,
