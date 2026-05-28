@@ -26,7 +26,7 @@ CREATE TABLE IF NOT EXISTS crm_loyalty_transactions (
     id BIGINT NOT NULL AUTO_INCREMENT PRIMARY KEY,
     owner_id BIGINT NOT NULL,
     customer_id BIGINT NOT NULL,
-    type ENUM('earn','redeem','adjust','expire') NOT NULL,
+    type ENUM('earn','redeem','adjust','expire','award') NOT NULL,
     points INT NOT NULL,
     balance_before INT NOT NULL,
     balance_after INT NOT NULL,
