@@ -124,7 +124,7 @@ func (r *Repository) ListStaff(ctx context.Context, ownerID int64, search, depar
 	}
 	defer rows.Close()
 
-	var staff []domain.Staff
+	staff := make([]domain.Staff, 0)
 	for rows.Next() {
 		var s domain.Staff
 		if err := s.FromRow(rows); err != nil {

@@ -334,7 +334,7 @@ func (r *Repository) ListOrders(ctx context.Context, ownerID, sessionID int64, s
 		SELECT id, owner_id, COALESCE(session_id,0), COALESCE(table_id,0), COALESCE(location_id,0),
 		       order_number, type, status, COALESCE(customer_id,0), COALESCE(customer_name,''),
 		       COALESCE(staff_id,0), subtotal, discount_amount, tax_amount, total,
-		       payment_method, payment_status, amount_paid, change_due,
+		       COALESCE(payment_method,''), COALESCE(payment_status,''), COALESCE(amount_paid,0), COALESCE(change_due,0),
 		       COALESCE(notes,''), COALESCE(kitchen_notes,''), created_at, updated_at, paid_at
 		FROM pos_orders
 		WHERE owner_id = ?`
@@ -475,7 +475,7 @@ func (r *Repository) CreateOrder(ctx context.Context, ownerID, staffID int64, or
 		StaffID:       nullInt64(staffID),
 		Subtotal:      sql.NullString{String: floatToDecimal(subtotal), Valid: true},
 		Total:         sql.NullString{String: floatToDecimal(total), Valid: true},
-		PaymentMethod: sqlc.NullPosOrdersPaymentMethod{PosOrdersPaymentMethod: sqlc.PosOrdersPaymentMethod(input.PaymentMethod), Valid: true},
+		PaymentMethod: sqlc.NullPosOrdersPaymentMethod{PosOrdersPaymentMethod: sqlc.PosOrdersPaymentMethod(input.PaymentMethod), Valid: input.PaymentMethod != ""},
 		Notes:         nullString(input.Notes),
 		KitchenNotes:  nullString(input.KitchenNotes),
 	})
@@ -1100,16 +1100,20 @@ func sessionFromRow(row sqlc.PosSession) *domain.Session {
 func scanOrderRow(rows *sql.Rows) (domain.Order, error) {
 	var o domain.Order
 	var paidAt sql.NullTime
+	var paymentMethod, paymentStatus sql.NullString
 
 	if err := rows.Scan(
 		&o.ID, &o.OwnerID, &o.SessionID, &o.TableID, &o.LocationID,
 		&o.OrderNumber, &o.Type, &o.Status, &o.CustomerID, &o.CustomerName,
 		&o.StaffID, &o.Subtotal, &o.DiscountAmount, &o.TaxAmount, &o.Total,
-		&o.PaymentMethod, &o.PaymentStatus, &o.AmountPaid, &o.ChangeDue,
+		&paymentMethod, &paymentStatus, &o.AmountPaid, &o.ChangeDue,
 		&o.Notes, &o.KitchenNotes, &o.CreatedAt, &o.UpdatedAt, &paidAt,
 	); err != nil {
 		return domain.Order{}, err
 	}
+
+	o.PaymentMethod = domain.PaymentMethod(paymentMethod.String)
+	o.PaymentStatus = domain.PaymentStatus(paymentStatus.String)
 
 	if paidAt.Valid {
 		o.PaidAt = &paidAt.Time

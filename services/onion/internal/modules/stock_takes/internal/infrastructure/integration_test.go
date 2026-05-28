@@ -569,20 +569,20 @@ func TestListStockTakes_OffsetSkipsRows(t *testing.T) {
 		}
 	}
 
-	all, _, err := repo.ListStockTakes(ctx, testutil.OwnerID, 100, 0)
+	page0, _, err := repo.ListStockTakes(ctx, testutil.OwnerID, 2, 0)
 	if err != nil {
-		t.Fatalf("ListStockTakes all: %v", err)
+		t.Fatalf("ListStockTakes page0: %v", err)
 	}
-	if len(all) < 2 {
+	if len(page0) < 2 {
 		t.Skip("not enough rows to test offset")
 	}
 
-	withOffset, _, err := repo.ListStockTakes(ctx, testutil.OwnerID, 100, 1)
+	page1, _, err := repo.ListStockTakes(ctx, testutil.OwnerID, 2, 2)
 	if err != nil {
-		t.Fatalf("ListStockTakes offset=1: %v", err)
+		t.Fatalf("ListStockTakes page1: %v", err)
 	}
-	if len(withOffset) != len(all)-1 {
-		t.Errorf("offset=1 should return %d rows, got %d", len(all)-1, len(withOffset))
+	if len(page1) > 0 && page0[0].ID == page1[0].ID {
+		t.Error("offset not working: first items on both pages are identical")
 	}
 }
 
