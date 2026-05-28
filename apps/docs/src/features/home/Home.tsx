@@ -1,5 +1,5 @@
 import React from 'react';
-import { Link, useNavigate } from 'react-router-dom';
+import { Link, useNavigate } from '@tanstack/react-router';
 import {
   Search,
   ArrowRight,
@@ -114,7 +114,7 @@ const Home: React.FC = () => {
   const handleSearch = (e: React.FormEvent) => {
     e.preventDefault();
     if (searchQuery.trim()) {
-      navigate(`/search?q=${encodeURIComponent(searchQuery.trim())}`);
+      navigate({ to: '/search', search: { q: searchQuery.trim() } });
     }
   };
 
@@ -162,7 +162,8 @@ const Home: React.FC = () => {
           {apps.map((app) => (
             <Link
               key={app.slug}
-              to={`/docs/${app.slug}`}
+              to="/docs/$slug"
+              params={{ slug: app.slug }}
               className="group flex flex-col p-4 rounded-lg border no-underline transition-all hover:-translate-y-0.5"
               style={{ borderColor: 'var(--docs-border)', background: 'var(--docs-bg)' }}
             >

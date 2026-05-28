@@ -1,16 +1,14 @@
 import React from 'react';
 import ReactDOM from 'react-dom/client';
-import { BrowserRouter } from 'react-router-dom';
+import { RouterProvider } from '@tanstack/react-router';
 import { bootObservability } from '@voxire/observability';
-import App from './App';
+import { router } from './router';
 import './globals.css';
 
 bootObservability({ app: 'docs' });
 
 ReactDOM.createRoot(document.getElementById('root')!).render(
   <React.StrictMode>
-    <BrowserRouter>
-      <App />
-    </BrowserRouter>
+    <RouterProvider router={router} />
   </React.StrictMode>
 );
