@@ -177,6 +177,10 @@ func TestCreateShiftAssignment_NoError(t *testing.T) {
 		t.Fatalf("CreateShift for assignment test: %v", err)
 	}
 
+	t.Cleanup(func() {
+		db.ExecContext(context.Background(), "DELETE FROM hr_shift_assignments WHERE owner_id = ? AND employee_id = ? AND date = ?", testutil.OwnerID, int64(4101), "2025-07-01")
+	})
+
 	assignment := domain.ShiftAssignmentRecord{
 		EmployeeID: 4101,
 		ShiftID:    shift.ID,
@@ -315,6 +319,10 @@ func TestCreateShiftAssignment_AssignmentHasScheduledStatus(t *testing.T) {
 		t.Fatalf("CreateShift: %v", err)
 	}
 
+	t.Cleanup(func() {
+		db.ExecContext(context.Background(), "DELETE FROM hr_shift_assignments WHERE owner_id = ? AND employee_id = ? AND date = ?", testutil.OwnerID, int64(4102), "2025-08-01")
+	})
+
 	assignment := domain.ShiftAssignmentRecord{
 		EmployeeID: 4102,
 		ShiftID:    shift.ID,
@@ -399,6 +407,9 @@ func TestCreateShiftAssignment_EmployeeIDStored(t *testing.T) {
 	}
 
 	const empID int64 = 4103
+	t.Cleanup(func() {
+		db.ExecContext(context.Background(), "DELETE FROM hr_shift_assignments WHERE owner_id = ? AND employee_id = ? AND date = ?", testutil.OwnerID, empID, "2025-10-01")
+	})
 	created, err := repo.CreateShiftAssignment(ctx, testutil.OwnerID, domain.ShiftAssignmentRecord{
 		EmployeeID: empID,
 		ShiftID:    shift.ID,

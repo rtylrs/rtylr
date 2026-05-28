@@ -80,6 +80,9 @@ func TestCreateAndGetReviewCycle_RoundTrip(t *testing.T) {
 	if err != nil {
 		t.Fatalf("CreateReviewCycle: %v", err)
 	}
+	t.Cleanup(func() {
+		db.ExecContext(context.Background(), "DELETE FROM hr_performance_review_cycles WHERE owner_id = ? AND name = ?", testutil.OwnerID, "Q1 2026 Review")
+	})
 	if created.ID == 0 {
 		t.Fatal("expected non-zero ID after create")
 	}
@@ -105,6 +108,9 @@ func TestCreateReviewCycle_DateFields(t *testing.T) {
 	if err != nil {
 		t.Fatalf("CreateReviewCycle: %v", err)
 	}
+	t.Cleanup(func() {
+		db.ExecContext(context.Background(), "DELETE FROM hr_performance_review_cycles WHERE owner_id = ? AND name = ?", testutil.OwnerID, "Date Check Cycle")
+	})
 	if created.PeriodStart != "2026-01-01" {
 		t.Errorf("PeriodStart mismatch: got %q", created.PeriodStart)
 	}
@@ -139,6 +145,9 @@ func TestListPerformanceReviews_NoError(t *testing.T) {
 	if err != nil {
 		t.Fatalf("CreateReviewCycle: %v", err)
 	}
+	t.Cleanup(func() {
+		db.ExecContext(context.Background(), "DELETE FROM hr_performance_review_cycles WHERE owner_id = ? AND name = ?", testutil.OwnerID, "Review List Test Cycle")
+	})
 
 	reviews, total, err := repo.ListPerformanceReviews(ctx, testutil.OwnerID, cycle.ID, 50, 0)
 	if err != nil {
@@ -190,6 +199,9 @@ func TestListGoals_NoError(t *testing.T) {
 	if err != nil {
 		t.Fatalf("CreateReviewCycle: %v", err)
 	}
+	t.Cleanup(func() {
+		db.ExecContext(context.Background(), "DELETE FROM hr_performance_review_cycles WHERE owner_id = ? AND name = ?", testutil.OwnerID, "Goals List Cycle")
+	})
 
 	goals, total, err := repo.ListGoals(ctx, testutil.OwnerID, 4101, cycle.ID, 50, 0)
 	if err != nil {
@@ -243,6 +255,9 @@ func TestCreateReviewCycle_NameIsStored(t *testing.T) {
 	if err != nil {
 		t.Fatalf("CreateReviewCycle: %v", err)
 	}
+	t.Cleanup(func() {
+		db.ExecContext(context.Background(), "DELETE FROM hr_performance_review_cycles WHERE owner_id = ? AND name = ?", testutil.OwnerID, "Name Storage Check")
+	})
 	if created.Name != "Name Storage Check" {
 		t.Errorf("expected name='Name Storage Check', got %q", created.Name)
 	}
@@ -262,6 +277,9 @@ func TestCreateReviewCycle_CycleTypeIsStored(t *testing.T) {
 	if err != nil {
 		t.Fatalf("CreateReviewCycle: %v", err)
 	}
+	t.Cleanup(func() {
+		db.ExecContext(context.Background(), "DELETE FROM hr_performance_review_cycles WHERE owner_id = ? AND name = ?", testutil.OwnerID, "Type Check Cycle")
+	})
 	if created.CycleType != "annual" {
 		t.Errorf("expected cycle_type='annual', got %q", created.CycleType)
 	}
@@ -281,6 +299,9 @@ func TestGetReviewCycle_RoundTrip(t *testing.T) {
 	if err != nil {
 		t.Fatalf("CreateReviewCycle: %v", err)
 	}
+	t.Cleanup(func() {
+		db.ExecContext(context.Background(), "DELETE FROM hr_performance_review_cycles WHERE owner_id = ? AND name = ?", testutil.OwnerID, "GetByID Cycle")
+	})
 
 	got, err := repo.GetReviewCycle(ctx, testutil.OwnerID, created.ID)
 	if err != nil {
@@ -308,6 +329,9 @@ func TestUpdateReviewCycleStatus_Changes(t *testing.T) {
 	if err != nil {
 		t.Fatalf("CreateReviewCycle: %v", err)
 	}
+	t.Cleanup(func() {
+		db.ExecContext(context.Background(), "DELETE FROM hr_performance_review_cycles WHERE owner_id = ? AND name = ?", testutil.OwnerID, "Status Update Cycle")
+	})
 
 	if err := repo.UpdateReviewCycleStatus(ctx, testutil.OwnerID, created.ID, "closed"); err != nil {
 		t.Fatalf("UpdateReviewCycleStatus: %v", err)
@@ -336,6 +360,9 @@ func TestCreatePerformanceReview_NoError(t *testing.T) {
 	if err != nil {
 		t.Fatalf("CreateReviewCycle: %v", err)
 	}
+	t.Cleanup(func() {
+		db.ExecContext(context.Background(), "DELETE FROM hr_performance_review_cycles WHERE owner_id = ? AND name = ?", testutil.OwnerID, "Review Create Cycle")
+	})
 
 	err = repo.CreatePerformanceReview(ctx, testutil.OwnerID, 4101, cycle.ID, 4101, "self")
 	if err != nil {
@@ -357,6 +384,9 @@ func TestListPerformanceReviews_AfterCreate_CountIncreases(t *testing.T) {
 	if err != nil {
 		t.Fatalf("CreateReviewCycle: %v", err)
 	}
+	t.Cleanup(func() {
+		db.ExecContext(context.Background(), "DELETE FROM hr_performance_review_cycles WHERE owner_id = ? AND name = ?", testutil.OwnerID, "Count Increase Review Cycle")
+	})
 
 	_, total1, err := repo.ListPerformanceReviews(ctx, testutil.OwnerID, cycle.ID, 100, 0)
 	if err != nil {
@@ -426,6 +456,9 @@ func TestCreateGoal_PersistsAndReturnsID(t *testing.T) {
 	if err != nil {
 		t.Fatalf("CreateReviewCycle: %v", err)
 	}
+	t.Cleanup(func() {
+		db.ExecContext(context.Background(), "DELETE FROM hr_performance_review_cycles WHERE owner_id = ? AND name = ?", testutil.OwnerID, "Goal Cycle")
+	})
 
 	goal, err := repo.CreateGoal(ctx, testutil.OwnerID, domain.CreateGoalParams{
 		EmployeeID:    4101,
@@ -455,6 +488,9 @@ func TestGetGoal_RoundTrip(t *testing.T) {
 	if err != nil {
 		t.Fatalf("CreateReviewCycle: %v", err)
 	}
+	t.Cleanup(func() {
+		db.ExecContext(context.Background(), "DELETE FROM hr_performance_review_cycles WHERE owner_id = ? AND name = ?", testutil.OwnerID, "GetGoal Cycle")
+	})
 
 	goal, err := repo.CreateGoal(ctx, testutil.OwnerID, domain.CreateGoalParams{
 		EmployeeID:    4101,
@@ -500,6 +536,9 @@ func TestListPerformanceReviewsByEmployee_NoError(t *testing.T) {
 	if err != nil {
 		t.Fatalf("CreateReviewCycle: %v", err)
 	}
+	t.Cleanup(func() {
+		db.ExecContext(context.Background(), "DELETE FROM hr_performance_review_cycles WHERE owner_id = ? AND name = ?", testutil.OwnerID, "ByEmployee Cycle")
+	})
 
 	reviews, total, err := repo.ListPerformanceReviewsByEmployee(ctx, testutil.OwnerID, cycle.ID, 4101, 50, 0)
 	if err != nil {
@@ -525,6 +564,9 @@ func TestUpdateReviewSubmission_NoError(t *testing.T) {
 	if err != nil {
 		t.Fatalf("CreateReviewCycle: %v", err)
 	}
+	t.Cleanup(func() {
+		db.ExecContext(context.Background(), "DELETE FROM hr_performance_review_cycles WHERE owner_id = ? AND name = ?", testutil.OwnerID, "Submission Cycle")
+	})
 
 	if err := repo.CreatePerformanceReview(ctx, testutil.OwnerID, 4101, cycle.ID, 4101, "self"); err != nil {
 		t.Fatalf("CreatePerformanceReview: %v", err)

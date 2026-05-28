@@ -103,6 +103,10 @@ func TestMemberLocations_Assign_ThenListContainsNew(t *testing.T) {
 
 	const testUser int64 = 7701
 
+	t.Cleanup(func() {
+		db.ExecContext(context.Background(), "DELETE FROM pos_member_locations WHERE user_id = ? AND location_id = ?", testUser, int64(3001))
+	})
+
 	id, err := repo.Assign(ctx, fixtureBusinessID, testUser, 3001, false, false, true)
 	if err != nil {
 		t.Fatalf("Assign: %v", err)

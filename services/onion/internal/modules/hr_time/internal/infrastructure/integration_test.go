@@ -163,6 +163,10 @@ func TestUpsertTimesheet_AndGet(t *testing.T) {
 		TotalMinutes:         0,
 	}
 
+	t.Cleanup(func() {
+		db.ExecContext(context.Background(), "DELETE FROM hr_timesheets WHERE owner_id = ? AND employee_id = ? AND period_start = ?", testutil.OwnerID, int64(4101), "2025-05-01")
+	})
+
 	created, err := repo.UpsertTimesheet(ctx, testutil.OwnerID, ts)
 	if err != nil {
 		t.Fatalf("UpsertTimesheet: %v", err)

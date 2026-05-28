@@ -95,9 +95,10 @@ func TestCareers_CreateCareer_ReturnsPositiveID(t *testing.T) {
 	repo := infrastructure.NewRepository(db)
 	ctx := context.Background()
 
+	slug := fmt.Sprintf("integration-test-role-%d", testutil.OwnerID)
 	id, err := repo.CreateCareer(ctx, domain.RecruitCareerInput{
 		OwnerID:     testutil.OwnerID,
-		Slug:        fmt.Sprintf("integration-test-role-%d", testutil.OwnerID),
+		Slug:        slug,
 		Title:       "Integration Test Role",
 		IsPublished: false,
 	})
@@ -107,7 +108,9 @@ func TestCareers_CreateCareer_ReturnsPositiveID(t *testing.T) {
 	if id <= 0 {
 		t.Fatalf("expected positive ID, got %d", id)
 	}
-	t.Cleanup(func() { _ = repo.DeleteCareer(ctx, testutil.OwnerID, id) })
+	t.Cleanup(func() {
+		db.ExecContext(context.Background(), "DELETE FROM careers WHERE owner_id = ? AND slug = ?", testutil.OwnerID, slug)
+	})
 }
 
 func TestCareers_CreateCareer_AppearsInList(t *testing.T) {
@@ -121,7 +124,9 @@ func TestCareers_CreateCareer_AppearsInList(t *testing.T) {
 	if err != nil {
 		t.Fatalf("CreateCareer: %v", err)
 	}
-	t.Cleanup(func() { _ = repo.DeleteCareer(ctx, testutil.OwnerID, id) })
+	t.Cleanup(func() {
+		db.ExecContext(context.Background(), "DELETE FROM careers WHERE owner_id = ? AND slug = ?", testutil.OwnerID, "appear-in-list-role")
+	})
 
 	careers, err := repo.ListCareers(ctx, testutil.OwnerID, false)
 	if err != nil {
@@ -165,7 +170,9 @@ func TestCareers_UpdateCareer_ChangesTitle(t *testing.T) {
 	if err != nil {
 		t.Fatalf("CreateCareer: %v", err)
 	}
-	t.Cleanup(func() { _ = repo.DeleteCareer(ctx, testutil.OwnerID, id) })
+	t.Cleanup(func() {
+		db.ExecContext(context.Background(), "DELETE FROM careers WHERE owner_id = ? AND slug = ?", testutil.OwnerID, "update-career-slug")
+	})
 
 	if err := repo.UpdateCareer(ctx, domain.RecruitCareerInput{
 		ID: id, OwnerID: testutil.OwnerID, Slug: "update-career-slug", Title: "New Title",
@@ -195,6 +202,9 @@ func TestCareers_DeleteCareer_RemovesFromList(t *testing.T) {
 	if err != nil {
 		t.Fatalf("CreateCareer: %v", err)
 	}
+	t.Cleanup(func() {
+		db.ExecContext(context.Background(), "DELETE FROM careers WHERE owner_id = ? AND slug = ?", testutil.OwnerID, "delete-career-slug")
+	})
 
 	if err := repo.DeleteCareer(ctx, testutil.OwnerID, id); err != nil {
 		t.Fatalf("DeleteCareer: %v", err)
@@ -220,7 +230,9 @@ func TestCareers_GetCareerBySlug_ReturnsCareer(t *testing.T) {
 	if err != nil {
 		t.Fatalf("CreateCareer: %v", err)
 	}
-	t.Cleanup(func() { _ = repo.DeleteCareer(ctx, testutil.OwnerID, id) })
+	t.Cleanup(func() {
+		db.ExecContext(context.Background(), "DELETE FROM careers WHERE owner_id = ? AND slug = ?", testutil.OwnerID, slug)
+	})
 
 	career, err := repo.GetCareerBySlug(ctx, testutil.OwnerID, slug)
 	if err != nil {
@@ -243,7 +255,9 @@ func TestCareers_SaveApplication_ReturnsPositiveID(t *testing.T) {
 	if err != nil {
 		t.Fatalf("CreateCareer: %v", err)
 	}
-	t.Cleanup(func() { _ = repo.DeleteCareer(ctx, testutil.OwnerID, careerID) })
+	t.Cleanup(func() {
+		db.ExecContext(context.Background(), "DELETE FROM careers WHERE owner_id = ? AND slug = ?", testutil.OwnerID, "apply-career-slug")
+	})
 
 	appID, err := repo.SaveApplication(ctx, domain.ApplicationInput{
 		JobID: careerID,
@@ -351,7 +365,9 @@ func TestCareers_ListCareers_PublishedOnlyFilter(t *testing.T) {
 	if err != nil {
 		t.Fatalf("CreateCareer: %v", err)
 	}
-	t.Cleanup(func() { _ = repo.DeleteCareer(ctx, testutil.OwnerID, id) })
+	t.Cleanup(func() {
+		db.ExecContext(context.Background(), "DELETE FROM careers WHERE owner_id = ? AND slug = ?", testutil.OwnerID, "unpublished-career")
+	})
 
 	published, err := repo.ListCareers(ctx, testutil.OwnerID, true)
 	if err != nil {

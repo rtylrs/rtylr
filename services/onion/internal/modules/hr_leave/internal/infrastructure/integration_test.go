@@ -100,6 +100,9 @@ func TestCreateLeaveType_PersistsAndReturnsID(t *testing.T) {
 	if err != nil {
 		t.Fatalf("CreateLeaveType: %v", err)
 	}
+	t.Cleanup(func() {
+		db.ExecContext(context.Background(), "DELETE FROM hr_leave_types WHERE owner_id = ? AND name = ?", testutil.OwnerID, "Test Annual Leave")
+	})
 	if lt.ID == 0 {
 		t.Fatal("expected non-zero ID after create")
 	}
@@ -117,6 +120,9 @@ func TestCreateLeaveType_NameIsStored(t *testing.T) {
 	if err != nil {
 		t.Fatalf("CreateLeaveType: %v", err)
 	}
+	t.Cleanup(func() {
+		db.ExecContext(context.Background(), "DELETE FROM hr_leave_types WHERE owner_id = ? AND name = ?", testutil.OwnerID, "Sick Leave Test")
+	})
 	if lt.Name != "Sick Leave Test" {
 		t.Errorf("expected name='Sick Leave Test', got %q", lt.Name)
 	}
@@ -135,6 +141,9 @@ func TestCreateLeaveRequest_PersistsAndReturnsID(t *testing.T) {
 	if err != nil {
 		t.Fatalf("CreateLeaveType: %v", err)
 	}
+	t.Cleanup(func() {
+		db.ExecContext(context.Background(), "DELETE FROM hr_leave_types WHERE owner_id = ? AND name = ?", testutil.OwnerID, "Leave For Request Test")
+	})
 
 	req, err := repo.CreateLeaveRequest(ctx, testutil.OwnerID, domain.LeaveRequestRecord{
 		EmployeeID:           4101,
@@ -165,6 +174,9 @@ func TestCreateLeaveRequest_EmployeeIDIsStored(t *testing.T) {
 	if err != nil {
 		t.Fatalf("CreateLeaveType: %v", err)
 	}
+	t.Cleanup(func() {
+		db.ExecContext(context.Background(), "DELETE FROM hr_leave_types WHERE owner_id = ? AND name = ?", testutil.OwnerID, "EmpID Check Leave")
+	})
 
 	req, err := repo.CreateLeaveRequest(ctx, testutil.OwnerID, domain.LeaveRequestRecord{
 		EmployeeID:           4102,
@@ -195,6 +207,9 @@ func TestCreateLeaveRequest_StatusIsPending(t *testing.T) {
 	if err != nil {
 		t.Fatalf("CreateLeaveType: %v", err)
 	}
+	t.Cleanup(func() {
+		db.ExecContext(context.Background(), "DELETE FROM hr_leave_types WHERE owner_id = ? AND name = ?", testutil.OwnerID, "Status Check Leave")
+	})
 
 	req, err := repo.CreateLeaveRequest(ctx, testutil.OwnerID, domain.LeaveRequestRecord{
 		EmployeeID:           4101,
@@ -245,6 +260,9 @@ func TestApproveLeaveRequest_ChangesStatus(t *testing.T) {
 	if err != nil {
 		t.Fatalf("CreateLeaveType: %v", err)
 	}
+	t.Cleanup(func() {
+		db.ExecContext(context.Background(), "DELETE FROM hr_leave_types WHERE owner_id = ? AND name = ?", testutil.OwnerID, "Approve Test Leave")
+	})
 
 	req, err := repo.CreateLeaveRequest(ctx, testutil.OwnerID, domain.LeaveRequestRecord{
 		EmployeeID:           4101,
@@ -284,6 +302,9 @@ func TestRejectLeaveRequest_ChangesStatus(t *testing.T) {
 	if err != nil {
 		t.Fatalf("CreateLeaveType: %v", err)
 	}
+	t.Cleanup(func() {
+		db.ExecContext(context.Background(), "DELETE FROM hr_leave_types WHERE owner_id = ? AND name = ?", testutil.OwnerID, "Reject Test Leave")
+	})
 
 	req, err := repo.CreateLeaveRequest(ctx, testutil.OwnerID, domain.LeaveRequestRecord{
 		EmployeeID:           4102,

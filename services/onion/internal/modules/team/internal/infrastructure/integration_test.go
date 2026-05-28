@@ -138,6 +138,9 @@ func TestTeam_CreateGroup_AppearsInList(t *testing.T) {
 func TestTeam_CreateInviteToken_NoError(t *testing.T) {
 	db := testutil.OpenDB(t)
 	repo := infrastructure.NewRepository(db)
+	t.Cleanup(func() {
+		db.ExecContext(context.Background(), "DELETE FROM invite_tokens WHERE token = ?", "test-invite-token-xyz")
+	})
 	err := repo.CreateInviteToken(context.Background(), teamStaffUserID, testutil.OwnerID,
 		"test-invite-token-xyz", time.Now().Add(24*time.Hour))
 	if err != nil {
@@ -150,6 +153,9 @@ func TestTeam_GetInviteToken_ReturnsData(t *testing.T) {
 	repo := infrastructure.NewRepository(db)
 	token := "get-invite-token-abc"
 	expiry := time.Now().Add(1 * time.Hour)
+	t.Cleanup(func() {
+		db.ExecContext(context.Background(), "DELETE FROM invite_tokens WHERE token = ?", token)
+	})
 	if err := repo.CreateInviteToken(context.Background(), teamStaffUserID, testutil.OwnerID, token, expiry); err != nil {
 		t.Fatalf("CreateInviteToken: %v", err)
 	}
