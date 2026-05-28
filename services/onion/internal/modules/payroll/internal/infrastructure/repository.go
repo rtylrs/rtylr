@@ -131,8 +131,15 @@ func (r *Repository) GetCompletedShiftsForPeriod(ctx context.Context, ownerID in
 	var summaries []domain.ShiftSummary
 	for rows.Next() {
 		var s domain.ShiftSummary
-		if err := rows.Scan(&s.StaffID, &s.TotalHours, &s.TotalOvertimeHours); err != nil {
+		var totalHours, totalOvertime sql.NullFloat64
+		if err := rows.Scan(&s.StaffID, &totalHours, &totalOvertime); err != nil {
 			return nil, err
+		}
+		if totalHours.Valid {
+			s.TotalHours = totalHours.Float64
+		}
+		if totalOvertime.Valid {
+			s.TotalOvertimeHours = totalOvertime.Float64
 		}
 		summaries = append(summaries, s)
 	}
