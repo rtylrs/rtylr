@@ -1,4 +1,4 @@
-import React, { useCallback, useEffect, useRef, useState } from 'react';
+import React, { useCallback, useEffect, useMemo, useRef, useState } from 'react';
 import ScreenLayout from '../../layouts/ScreenLayout';
 import EmptyState from '../../shared/components/EmptyState';
 import Skeleton from '../../shared/components/Skeleton';
@@ -29,6 +29,14 @@ const KDSScreen: React.FC = () => {
   const setStation = useSettingsStore((s) => s.setKdsStation);
   const kdsHardware = useSettingsStore((s) => s.kdsHardware);
   const { orders, loading, setStatus } = useKDSOrders(station === 'all' ? undefined : station);
+
+  const availableStations = useMemo(() => {
+    const seen = new Set<string>();
+    for (const o of orders) {
+      if (o.station && o.station !== 'Kitchen') seen.add(o.station);
+    }
+    return Array.from(seen).sort();
+  }, [orders]);
   const tick = useKdsTick();
   const [selectedIdx, setSelectedIdx] = useState(0);
   const containerRef = useRef<HTMLDivElement>(null);
@@ -112,10 +120,11 @@ const KDSScreen: React.FC = () => {
           className="h-10 px-3 rounded-lg bg-white/10 text-pos-text text-sm"
         >
           <option value="all">All stations</option>
-          <option value="grill">Grill</option>
-          <option value="fry">Fry</option>
-          <option value="bar">Bar</option>
-          <option value="cold">Cold</option>
+          {availableStations.map((s) => (
+            <option key={s} value={s.toLowerCase()}>
+              {s}
+            </option>
+          ))}
         </select>
       }
     >
