@@ -507,3 +507,82 @@ func TestCreate_BankAccount_ZeroBalance(t *testing.T) {
 	}
 	t.Fatalf("bank account id=%d not found", id)
 }
+
+func TestTotalBalance_NoError(t *testing.T) {
+	db := testutil.OpenDB(t)
+	repo := infrastructure.NewRepository(db)
+	ctx := context.Background()
+
+	total, err := repo.TotalBalance(ctx, testutil.OwnerID)
+	if err != nil {
+		t.Fatalf("TotalBalance: %v", err)
+	}
+	if total < 0 {
+		t.Errorf("expected non-negative total, got %f", total)
+	}
+}
+
+func TestTotalBalance_ZeroOwnerReturnsZero(t *testing.T) {
+	db := testutil.OpenDB(t)
+	repo := infrastructure.NewRepository(db)
+	ctx := context.Background()
+
+	total, err := repo.TotalBalance(ctx, 0)
+	if err != nil {
+		t.Fatalf("TotalBalance(ownerID=0): %v", err)
+	}
+	if total != 0 {
+		t.Errorf("expected 0 for ownerID=0, got %f", total)
+	}
+}
+
+func TestTotalBalance_ReflectsCreatedAccount(t *testing.T) {
+	db := testutil.OpenDB(t)
+	repo := infrastructure.NewRepository(db)
+	ctx := context.Background()
+
+	_, err := repo.Create(ctx, testutil.OwnerID, domain.BankAccountInput{
+		Name:     "Balance Test Account",
+		Balance:  5000.00,
+		Currency: "USD",
+	})
+	if err != nil {
+		t.Fatalf("Create: %v", err)
+	}
+
+	total, err := repo.TotalBalance(ctx, testutil.OwnerID)
+	if err != nil {
+		t.Fatalf("TotalBalance: %v", err)
+	}
+	if total < 5000.00 {
+		t.Errorf("expected total >= 5000.00 after create, got %f", total)
+	}
+}
+
+func TestCountConnected_NoError(t *testing.T) {
+	db := testutil.OpenDB(t)
+	repo := infrastructure.NewRepository(db)
+	ctx := context.Background()
+
+	cnt, err := repo.CountConnected(ctx, testutil.OwnerID)
+	if err != nil {
+		t.Fatalf("CountConnected: %v", err)
+	}
+	if cnt < 0 {
+		t.Errorf("expected non-negative count, got %d", cnt)
+	}
+}
+
+func TestCountConnected_ZeroOwnerReturnsZero(t *testing.T) {
+	db := testutil.OpenDB(t)
+	repo := infrastructure.NewRepository(db)
+	ctx := context.Background()
+
+	cnt, err := repo.CountConnected(ctx, 0)
+	if err != nil {
+		t.Fatalf("CountConnected(ownerID=0): %v", err)
+	}
+	if cnt != 0 {
+		t.Errorf("expected 0 for ownerID=0, got %d", cnt)
+	}
+}
