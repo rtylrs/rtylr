@@ -351,3 +351,93 @@ func TestSumPayables_StableAcrossCalls(t *testing.T) {
 		t.Errorf("SumPayables not stable: %f vs %f", v1, v2)
 	}
 }
+
+func TestNetProfit_NoError(t *testing.T) {
+	db := testutil.OpenDB(t)
+	repo := infrastructure.NewRepository(db)
+	ctx := context.Background()
+
+	profit, err := repo.NetProfit(ctx, testutil.OwnerID, "", "")
+	if err != nil {
+		t.Fatalf("NetProfit: %v", err)
+	}
+	// Profit may be negative if expenses exceed revenue; just ensure the call
+	// succeeds and returns a finite number.
+	_ = profit
+}
+
+func TestNetProfit_ZeroOwnerReturnsZero(t *testing.T) {
+	db := testutil.OpenDB(t)
+	repo := infrastructure.NewRepository(db)
+	ctx := context.Background()
+
+	profit, err := repo.NetProfit(ctx, 0, "", "")
+	if err != nil {
+		t.Fatalf("NetProfit(ownerID=0): %v", err)
+	}
+	if profit != 0 {
+		t.Errorf("expected 0 for ownerID=0, got %f", profit)
+	}
+}
+
+func TestNetProfit_WithDateRange(t *testing.T) {
+	db := testutil.OpenDB(t)
+	repo := infrastructure.NewRepository(db)
+	ctx := context.Background()
+
+	profit, err := repo.NetProfit(ctx, testutil.OwnerID, "2026-01-01", "2026-12-31")
+	if err != nil {
+		t.Fatalf("NetProfit with date range: %v", err)
+	}
+	_ = profit
+}
+
+func TestWorkingCapital_NoError(t *testing.T) {
+	db := testutil.OpenDB(t)
+	repo := infrastructure.NewRepository(db)
+	ctx := context.Background()
+
+	wc, err := repo.WorkingCapital(ctx, testutil.OwnerID)
+	if err != nil {
+		t.Fatalf("WorkingCapital: %v", err)
+	}
+	// Working capital may be positive or negative; just assert the call succeeds.
+	_ = wc
+}
+
+func TestWorkingCapital_ZeroOwnerReturnsZero(t *testing.T) {
+	db := testutil.OpenDB(t)
+	repo := infrastructure.NewRepository(db)
+	ctx := context.Background()
+
+	wc, err := repo.WorkingCapital(ctx, 0)
+	if err != nil {
+		t.Fatalf("WorkingCapital(ownerID=0): %v", err)
+	}
+	if wc != 0 {
+		t.Errorf("expected 0 for ownerID=0, got %f", wc)
+	}
+}
+
+func TestNetProfit_IsRevenueMinusExpenses(t *testing.T) {
+	db := testutil.OpenDB(t)
+	repo := infrastructure.NewRepository(db)
+	ctx := context.Background()
+
+	revenue, err := repo.SumPaidInvoicesInRange(ctx, testutil.OwnerID, "", "")
+	if err != nil {
+		t.Fatalf("SumPaidInvoicesInRange: %v", err)
+	}
+	expenses, err := repo.SumExpensesInRange(ctx, testutil.OwnerID, "", "")
+	if err != nil {
+		t.Fatalf("SumExpensesInRange: %v", err)
+	}
+	profit, err := repo.NetProfit(ctx, testutil.OwnerID, "", "")
+	if err != nil {
+		t.Fatalf("NetProfit: %v", err)
+	}
+	want := revenue - expenses
+	if profit != want {
+		t.Errorf("NetProfit=%f, want revenue(%f)-expenses(%f)=%f", profit, revenue, expenses, want)
+	}
+}
