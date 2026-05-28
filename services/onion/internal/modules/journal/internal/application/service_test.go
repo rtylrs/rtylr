@@ -50,3 +50,69 @@ func TestPost_PropagatesError(t *testing.T) {
 		t.Errorf("expected sentinel, got %v", err)
 	}
 }
+
+func TestCreate_ReturnsID(t *testing.T) {
+	s := &Service{repo: &mockRepo{createID: 42}}
+	id, err := s.Create(context.Background(), 1, domain.JournalEntryInput{})
+	if err != nil {
+		t.Fatalf("unexpected error: %v", err)
+	}
+	if id != 42 {
+		t.Errorf("expected id=42, got %d", id)
+	}
+}
+
+func TestPost_HappyPath(t *testing.T) {
+	s := &Service{repo: &mockRepo{}}
+	if err := s.Post(context.Background(), 1, 10); err != nil {
+		t.Errorf("unexpected error: %v", err)
+	}
+}
+
+func TestList_EmptyRepoReturnsEmpty(t *testing.T) {
+	s := &Service{repo: &mockRepo{list: []domain.JournalEntry{}}}
+	got, hasMore, err := s.List(context.Background(), 1, 1, 20)
+	if err != nil {
+		t.Fatalf("unexpected error: %v", err)
+	}
+	if len(got) != 0 {
+		t.Errorf("expected 0 entries, got %d", len(got))
+	}
+	if hasMore {
+		t.Error("expected hasMore=false for empty list")
+	}
+}
+
+func TestList_HasMoreWhenResultExceedsPageSize(t *testing.T) {
+	entries := make([]domain.JournalEntry, 21)
+	for i := range entries {
+		entries[i].ID = int64(i + 1)
+	}
+	s := &Service{repo: &mockRepo{list: entries}}
+	got, hasMore, err := s.List(context.Background(), 1, 1, 20)
+	if err != nil {
+		t.Fatalf("unexpected error: %v", err)
+	}
+	if !hasMore {
+		t.Error("expected hasMore=true when repo returns limit+1 rows")
+	}
+	if len(got) != 20 {
+		t.Errorf("expected 20 rows, got %d", len(got))
+	}
+}
+
+func TestList_PageSizeDefaultsTo50(t *testing.T) {
+	s := &Service{repo: &mockRepo{}}
+	_, _, err := s.List(context.Background(), 1, 1, 0)
+	if err != nil {
+		t.Fatalf("unexpected error with pageSize=0: %v", err)
+	}
+}
+
+func TestList_PageDefaultsTo1(t *testing.T) {
+	s := &Service{repo: &mockRepo{}}
+	_, _, err := s.List(context.Background(), 1, 0, 20)
+	if err != nil {
+		t.Fatalf("unexpected error with page=0: %v", err)
+	}
+}
