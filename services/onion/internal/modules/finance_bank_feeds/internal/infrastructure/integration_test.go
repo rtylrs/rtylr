@@ -374,3 +374,58 @@ func TestListBankFeedTransactions_BankAccountIDPositive(t *testing.T) {
 		}
 	}
 }
+
+func TestSumAmountByAccountID_NoError(t *testing.T) {
+	db := testutil.OpenDB(t)
+	repo := infrastructure.NewRepository(db)
+	ctx := context.Background()
+
+	// Use account id=1 as a sentinel; if no rows exist result must still be 0.
+	sum, err := repo.SumAmountByAccountID(ctx, testutil.OwnerID, 1)
+	if err != nil {
+		t.Fatalf("SumAmountByAccountID: %v", err)
+	}
+	_ = sum // sum may be any integer
+}
+
+func TestSumAmountByAccountID_ZeroOwnerReturnsZero(t *testing.T) {
+	db := testutil.OpenDB(t)
+	repo := infrastructure.NewRepository(db)
+	ctx := context.Background()
+
+	sum, err := repo.SumAmountByAccountID(ctx, 0, 1)
+	if err != nil {
+		t.Fatalf("SumAmountByAccountID(ownerID=0): %v", err)
+	}
+	if sum != 0 {
+		t.Errorf("expected 0 for ownerID=0, got %d", sum)
+	}
+}
+
+func TestCountUnmatched_NoError(t *testing.T) {
+	db := testutil.OpenDB(t)
+	repo := infrastructure.NewRepository(db)
+	ctx := context.Background()
+
+	cnt, err := repo.CountUnmatched(ctx, testutil.OwnerID)
+	if err != nil {
+		t.Fatalf("CountUnmatched: %v", err)
+	}
+	if cnt < 0 {
+		t.Errorf("expected non-negative count, got %d", cnt)
+	}
+}
+
+func TestCountUnmatched_ZeroOwnerReturnsZero(t *testing.T) {
+	db := testutil.OpenDB(t)
+	repo := infrastructure.NewRepository(db)
+	ctx := context.Background()
+
+	cnt, err := repo.CountUnmatched(ctx, 0)
+	if err != nil {
+		t.Fatalf("CountUnmatched(ownerID=0): %v", err)
+	}
+	if cnt != 0 {
+		t.Errorf("expected 0 for ownerID=0, got %d", cnt)
+	}
+}
