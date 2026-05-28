@@ -143,6 +143,28 @@ func (r *Repository) DeleteWarehouse(ctx context.Context, ownerID, id int64) err
 	return nil
 }
 
+// CountWarehouses returns the total number of warehouses for the given owner.
+// Pass activeOnly=true to count only active warehouses.
+func (r *Repository) CountWarehouses(ctx context.Context, ownerID int64, activeOnly bool) (int64, error) {
+	var count int64
+	var err error
+
+	if activeOnly {
+		const q = `SELECT COUNT(*) FROM erp_warehouses WHERE owner_id = ? AND is_active = 1`
+		err = r.pool.QueryRowContext(ctx, q, ownerID).Scan(&count)
+	} else {
+		const q = `SELECT COUNT(*) FROM erp_warehouses WHERE owner_id = ?`
+		err = r.pool.QueryRowContext(ctx, q, ownerID).Scan(&count)
+	}
+
+	if err != nil {
+		logger.Ctx(ctx).Error("Failed to count warehouses", logger.Error(err))
+		return 0, err
+	}
+
+	return count, nil
+}
+
 // GetWarehouseByID fetches a single warehouse by primary key for the given owner.
 // Returns ErrWarehouseNotFound when no matching row exists.
 func (r *Repository) GetWarehouseByID(ctx context.Context, ownerID, id int64) (domain.Warehouse, error) {
