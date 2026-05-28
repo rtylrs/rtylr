@@ -1,10 +1,11 @@
 import type { ProjectSection, Task } from '../stores/flowStore';
 
 /** Returns sections for a specific project, sorted by order. */
-export function sectionsForProject(sections: ProjectSection[], projectId: string): ProjectSection[] {
-  return [...sections]
-    .filter((s) => s.projectId === projectId)
-    .sort((a, b) => a.order - b.order);
+export function sectionsForProject(
+  sections: ProjectSection[],
+  projectId: string
+): ProjectSection[] {
+  return [...sections].filter((s) => s.projectId === projectId).sort((a, b) => a.order - b.order);
 }
 
 /** Find a section by its ID. */

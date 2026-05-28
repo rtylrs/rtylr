@@ -25,10 +25,7 @@ function makeEntry(overrides: Partial<ActivityEntry>): ActivityEntry {
 
 describe('activityForTask', () => {
   it('returns entries for the given task', () => {
-    const activity = [
-      makeEntry({ id: 'a', taskId: 't1' }),
-      makeEntry({ id: 'b', taskId: 't2' }),
-    ];
+    const activity = [makeEntry({ id: 'a', taskId: 't1' }), makeEntry({ id: 'b', taskId: 't2' })];
     expect(activityForTask(activity, 't1').map((e) => e.id)).toEqual(['a']);
   });
 });
