@@ -70,3 +70,32 @@ type JournalLineInput struct {
 	Debit     float64 `json:"debit"`
 	Credit    float64 `json:"credit"`
 }
+
+// IsPosted reports whether the entry has been posted to the ledger.
+func (j *JournalEntry) IsPosted() bool {
+	return j.Status == "posted"
+}
+
+// IsDraft reports whether the entry is still in draft state and has not been
+// posted yet.
+func (j *JournalEntry) IsDraft() bool {
+	return j.Status == "draft" || j.Status == ""
+}
+
+// TotalDebits returns the sum of all debit amounts across the entry's lines.
+func (j *JournalEntry) TotalDebits() float64 {
+	var total float64
+	for _, l := range j.Lines {
+		total += l.Debit
+	}
+	return total
+}
+
+// TotalCredits returns the sum of all credit amounts across the entry's lines.
+func (j *JournalEntry) TotalCredits() float64 {
+	var total float64
+	for _, l := range j.Lines {
+		total += l.Credit
+	}
+	return total
+}
