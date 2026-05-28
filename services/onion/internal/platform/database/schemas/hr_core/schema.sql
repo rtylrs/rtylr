@@ -17,7 +17,7 @@ CREATE TABLE IF NOT EXISTS hr_setup_steps (
     id BIGINT NOT NULL AUTO_INCREMENT PRIMARY KEY,
     owner_id BIGINT NOT NULL,
     step_key VARCHAR(100) NOT NULL,
-    step_label VARCHAR(255) NOT NULL,
+    step_label VARCHAR(255) NOT NULL DEFAULT '',
     is_completed BOOLEAN NOT NULL DEFAULT FALSE,
     completed_at TIMESTAMP NULL,
     created_at TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP,
@@ -165,11 +165,14 @@ CREATE TABLE IF NOT EXISTS hr_leave_balances (
     owner_id BIGINT NOT NULL,
     employee_id BIGINT NOT NULL,
     leave_type_id BIGINT NOT NULL,
-    balance DECIMAL(6,1) NOT NULL DEFAULT 0,
-    used DECIMAL(6,1) NOT NULL DEFAULT 0,
     year INT NOT NULL,
+    entitled_days DECIMAL(10,2) NOT NULL DEFAULT 0,
+    used_days DECIMAL(10,2) NOT NULL DEFAULT 0,
+    pending_days DECIMAL(10,2) NOT NULL DEFAULT 0,
+    last_accrual_month INT NOT NULL DEFAULT 0,
     created_at TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP,
     updated_at TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
-    UNIQUE KEY uk_hr_leave_balance (owner_id, employee_id, leave_type_id, year),
-    INDEX idx_hr_balances_employee (owner_id, employee_id)
+    UNIQUE KEY uk_leave_balance (owner_id, employee_id, leave_type_id, year),
+    INDEX idx_leave_balances_owner (owner_id),
+    INDEX idx_leave_balances_employee (owner_id, employee_id)
 );
