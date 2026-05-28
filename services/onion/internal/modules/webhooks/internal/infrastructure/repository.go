@@ -27,12 +27,13 @@ func (r *Repository) List(ctx context.Context, ownerID int64) ([]domain.Webhook,
 		return nil, err
 	}
 
-	var webhooks []domain.Webhook
+	webhooks := make([]domain.Webhook, 0, len(rows))
 	for _, row := range rows {
 		var w domain.Webhook
 		w.ID = row.ID
 		w.OwnerID = row.OwnerID
 		w.URL = row.Url
+		w.Secret = row.Secret
 		w.IsActive = row.IsActive
 		if row.LastTriggeredAt.Valid {
 			w.LastTriggeredAt = &row.LastTriggeredAt.Time

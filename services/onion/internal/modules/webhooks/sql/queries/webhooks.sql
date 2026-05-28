@@ -1,5 +1,5 @@
 -- name: ListWebhooks :many
-SELECT id, owner_id, url, events, is_active, last_triggered_at, created_at, updated_at
+SELECT id, owner_id, url, events, secret, is_active, last_triggered_at, created_at, updated_at
 FROM hub_webhooks
 WHERE owner_id = ?
 ORDER BY created_at DESC;
