@@ -168,6 +168,74 @@ func (r *Repository) DeleteSupplier(ctx context.Context, ownerID, id int64) erro
 	return nil
 }
 
+// GetSupplierByID fetches a single supplier by its primary key for the given owner.
+// Returns ErrSupplierNotFound when no matching row exists.
+func (r *Repository) GetSupplierByID(ctx context.Context, ownerID, id int64) (domain.Supplier, error) {
+	const q = `
+		SELECT id, owner_id, name, email, phone, address, city, country,
+		       tax_id, payment_terms, notes, is_active, created_at, updated_at
+		FROM erp_suppliers
+		WHERE owner_id = ? AND id = ?
+		LIMIT 1`
+
+	row := r.pool.QueryRowContext(ctx, q, ownerID, id)
+
+	var s domain.Supplier
+	var email, phone, address, city, country, taxID, paymentTerms, notes sql.NullString
+	var isActive sql.NullBool
+	var createdAt, updatedAt sql.NullTime
+
+	err := row.Scan(
+		&s.ID, &s.OwnerID, &s.Name,
+		&email, &phone, &address, &city, &country,
+		&taxID, &paymentTerms, &notes, &isActive,
+		&createdAt, &updatedAt,
+	)
+	if err != nil {
+		if err == sql.ErrNoRows {
+			return domain.Supplier{}, domain.ErrSupplierNotFound
+		}
+		logger.Ctx(ctx).Error("Failed to get supplier by ID", logger.Error(err))
+		return domain.Supplier{}, err
+	}
+
+	if email.Valid {
+		s.Email = email.String
+	}
+	if phone.Valid {
+		s.Phone = phone.String
+	}
+	if address.Valid {
+		s.Address = address.String
+	}
+	if city.Valid {
+		s.City = city.String
+	}
+	if country.Valid {
+		s.Country = country.String
+	}
+	if taxID.Valid {
+		s.TaxID = taxID.String
+	}
+	if paymentTerms.Valid {
+		s.PaymentTerms = paymentTerms.String
+	}
+	if notes.Valid {
+		s.Notes = notes.String
+	}
+	if isActive.Valid {
+		s.IsActive = isActive.Bool
+	}
+	if createdAt.Valid {
+		s.CreatedAt = createdAt.Time
+	}
+	if updatedAt.Valid {
+		s.UpdatedAt = updatedAt.Time
+	}
+
+	return s, nil
+}
+
 func nullString(s string) sql.NullString {
 	return sql.NullString{String: s, Valid: s != ""}
 }
