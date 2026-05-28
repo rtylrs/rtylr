@@ -48,6 +48,9 @@ func (s *Service) List(ctx context.Context, businessID int64) ([]domain.Terminal
 }
 
 func (s *Service) Create(ctx context.Context, input domain.TerminalInput) (int64, error) {
+	if err := domain.ValidateTerminalInput(input); err != nil {
+		return 0, err
+	}
 	id, err := s.repo.Create(ctx, input)
 	if err != nil {
 		return 0, err
@@ -57,6 +60,9 @@ func (s *Service) Create(ctx context.Context, input domain.TerminalInput) (int64
 }
 
 func (s *Service) Update(ctx context.Context, input domain.TerminalUpdateInput) error {
+	if err := domain.ValidateTerminalUpdateInput(input); err != nil {
+		return err
+	}
 	if err := s.repo.Update(ctx, input); err != nil {
 		return err
 	}
