@@ -1,5 +1,5 @@
 -- name: GetPerformanceConfig :one
-SELECT id, owner_id, rating_scale_type, rating_min, rating_max, rating_labels, peer_feedback_enabled, created_at, updated_at
+SELECT id, owner_id, rating_scale_type, rating_min, rating_max, COALESCE(rating_labels, '[]') AS rating_labels, peer_feedback_enabled, created_at, updated_at
 FROM hr_performance_config
 WHERE owner_id = ?;
 

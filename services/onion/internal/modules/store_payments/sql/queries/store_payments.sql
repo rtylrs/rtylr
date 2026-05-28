@@ -1,5 +1,5 @@
 -- name: ListPaymentMethods :many
-SELECT id, owner_id, provider, config, is_active, created_at
+SELECT id, owner_id, provider, COALESCE(config, '{}') AS config, is_active, created_at
 FROM store_payment_methods WHERE owner_id = ? ORDER BY provider ASC;
 
 -- name: CreatePaymentMethod :execresult

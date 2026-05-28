@@ -1,6 +1,6 @@
 -- name: ListVariantsByProduct :many
 SELECT id, owner_id, product_id, name, sku, barcode,
-       cost_price, sale_price, stock_quantity, attributes, is_active,
+       cost_price, sale_price, stock_quantity, COALESCE(attributes, '[]') AS attributes, is_active,
        created_at, updated_at
 FROM erp_product_variants
 WHERE owner_id = ? AND product_id = ?
@@ -8,7 +8,7 @@ ORDER BY name ASC;
 
 -- name: ListVariantsByOwner :many
 SELECT id, owner_id, product_id, name, sku, barcode,
-       cost_price, sale_price, stock_quantity, attributes, is_active,
+       cost_price, sale_price, stock_quantity, COALESCE(attributes, '[]') AS attributes, is_active,
        created_at, updated_at
 FROM erp_product_variants
 WHERE owner_id = ?
