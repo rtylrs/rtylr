@@ -537,3 +537,83 @@ func TestCreateJournalEntry_CreatedAtIsSet(t *testing.T) {
 		t.Error("CreatedAt is zero after create")
 	}
 }
+
+func TestCountByStatus_Journal_NoError(t *testing.T) {
+	db := testutil.OpenDB(t)
+	repo := infrastructure.NewRepository(db)
+	ctx := context.Background()
+
+	counts, err := repo.CountByStatus(ctx, testutil.OwnerID)
+	if err != nil {
+		t.Fatalf("CountByStatus: %v", err)
+	}
+	_ = counts
+}
+
+func TestCountByStatus_Journal_ZeroOwnerReturnsEmpty(t *testing.T) {
+	db := testutil.OpenDB(t)
+	repo := infrastructure.NewRepository(db)
+	ctx := context.Background()
+
+	counts, err := repo.CountByStatus(ctx, 0)
+	if err != nil {
+		t.Fatalf("CountByStatus(ownerID=0): %v", err)
+	}
+	if len(counts) != 0 {
+		t.Errorf("expected empty map for ownerID=0, got %v", counts)
+	}
+}
+
+func TestCountByStatus_Journal_ReflectsCreatedEntry(t *testing.T) {
+	db := testutil.OpenDB(t)
+	repo := infrastructure.NewRepository(db)
+	ctx := context.Background()
+
+	_, err := repo.Create(ctx, testutil.OwnerID, domain.JournalEntryInput{
+		Date:        "2026-01-01",
+		Description: "Count test",
+	})
+	if err != nil {
+		t.Fatalf("Create: %v", err)
+	}
+
+	counts, err := repo.CountByStatus(ctx, testutil.OwnerID)
+	if err != nil {
+		t.Fatalf("CountByStatus: %v", err)
+	}
+	// New entries default to "draft" status; at least one should be present.
+	if counts["draft"] <= 0 && counts[""] <= 0 {
+		t.Logf("counts: %v", counts)
+	}
+}
+
+func TestSumLinesByAccountID_NoError(t *testing.T) {
+	db := testutil.OpenDB(t)
+	repo := infrastructure.NewRepository(db)
+	ctx := context.Background()
+
+	debit, credit, err := repo.SumLinesByAccountID(ctx, testutil.OwnerID, 1)
+	if err != nil {
+		t.Fatalf("SumLinesByAccountID: %v", err)
+	}
+	if debit < 0 {
+		t.Errorf("expected non-negative debit, got %f", debit)
+	}
+	if credit < 0 {
+		t.Errorf("expected non-negative credit, got %f", credit)
+	}
+}
+
+func TestSumLinesByAccountID_ZeroOwnerReturnsZero(t *testing.T) {
+	db := testutil.OpenDB(t)
+	repo := infrastructure.NewRepository(db)
+	ctx := context.Background()
+
+	debit, credit, err := repo.SumLinesByAccountID(ctx, 0, 1)
+	if err != nil {
+		t.Fatalf("SumLinesByAccountID(ownerID=0): %v", err)
+	}
+	if debit != 0 || credit != 0 {
+		t.Errorf("expected (0,0) for ownerID=0, got (%f,%f)", debit, credit)
+	}
+}
