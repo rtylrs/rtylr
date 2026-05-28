@@ -330,6 +330,90 @@ func TestUpdateProduct_ChangesName(t *testing.T) {
 	}
 }
 
+func TestCountProducts_OwnerHasProducts(t *testing.T) {
+	db := testutil.OpenDB(t)
+	repo := infrastructure.NewRepository(db)
+	ctx := context.Background()
+
+	count, err := repo.CountProducts(ctx, testutil.OwnerID, 0)
+	if err != nil {
+		t.Fatalf("CountProducts: %v", err)
+	}
+	if count <= 0 {
+		t.Errorf("expected at least 1 product for fixture owner, got %d", count)
+	}
+}
+
+func TestCountProducts_ZeroOwner_ReturnsZero(t *testing.T) {
+	db := testutil.OpenDB(t)
+	repo := infrastructure.NewRepository(db)
+	ctx := context.Background()
+
+	count, err := repo.CountProducts(ctx, 0, 0)
+	if err != nil {
+		t.Fatalf("CountProducts(ownerID=0): %v", err)
+	}
+	if count != 0 {
+		t.Errorf("expected 0 for ownerID=0, got %d", count)
+	}
+}
+
+func TestCountProducts_ByCategoryID5002(t *testing.T) {
+	db := testutil.OpenDB(t)
+	repo := infrastructure.NewRepository(db)
+	ctx := context.Background()
+
+	count, err := repo.CountProducts(ctx, testutil.OwnerID, 5002)
+	if err != nil {
+		t.Fatalf("CountProducts by category: %v", err)
+	}
+	if count <= 0 {
+		t.Errorf("expected at least 1 product in category 5002, got %d", count)
+	}
+}
+
+func TestCountProducts_UnknownCategory_ReturnsZero(t *testing.T) {
+	db := testutil.OpenDB(t)
+	repo := infrastructure.NewRepository(db)
+	ctx := context.Background()
+
+	count, err := repo.CountProducts(ctx, testutil.OwnerID, 9999999)
+	if err != nil {
+		t.Fatalf("CountProducts unknown category: %v", err)
+	}
+	if count != 0 {
+		t.Errorf("expected 0 for unknown category, got %d", count)
+	}
+}
+
+func TestCountProducts_AfterCreate_Increases(t *testing.T) {
+	db := testutil.OpenDB(t)
+	repo := infrastructure.NewRepository(db)
+	ctx := context.Background()
+
+	before, err := repo.CountProducts(ctx, testutil.OwnerID, 0)
+	if err != nil {
+		t.Fatalf("CountProducts before: %v", err)
+	}
+
+	id, err := repo.CreateProduct(ctx, testutil.OwnerID, domain.ProductInput{
+		Name:     "Count Test Product",
+		IsActive: true,
+	})
+	if err != nil {
+		t.Fatalf("CreateProduct: %v", err)
+	}
+	t.Cleanup(func() { _ = repo.DeleteProduct(ctx, testutil.OwnerID, id) })
+
+	after, err := repo.CountProducts(ctx, testutil.OwnerID, 0)
+	if err != nil {
+		t.Fatalf("CountProducts after: %v", err)
+	}
+	if after != before+1 {
+		t.Errorf("expected count to increase by 1, before=%d after=%d", before, after)
+	}
+}
+
 func TestDeleteProduct_RemovesRow(t *testing.T) {
 	db := testutil.OpenDB(t)
 	repo := infrastructure.NewRepository(db)
