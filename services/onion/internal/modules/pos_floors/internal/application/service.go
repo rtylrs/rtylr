@@ -49,6 +49,9 @@ func (s *Service) List(ctx context.Context, businessID, branchID int64) ([]domai
 }
 
 func (s *Service) Create(ctx context.Context, input domain.FloorInput) (int64, error) {
+	if err := domain.ValidateFloorInput(input); err != nil {
+		return 0, err
+	}
 	id, err := s.repo.Create(ctx, input)
 	if err != nil {
 		return 0, err
@@ -58,6 +61,9 @@ func (s *Service) Create(ctx context.Context, input domain.FloorInput) (int64, e
 }
 
 func (s *Service) Update(ctx context.Context, input domain.FloorUpdateInput) error {
+	if err := domain.ValidateFloorUpdateInput(input); err != nil {
+		return err
+	}
 	if err := s.repo.Update(ctx, input); err != nil {
 		return err
 	}
