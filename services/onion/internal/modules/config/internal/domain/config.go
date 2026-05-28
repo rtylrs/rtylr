@@ -34,7 +34,11 @@ func (c *Config) FromRows(row sqlc.GetConfigRow) {
 	c.SiteName = convert.ToString(row.SiteName)
 	c.LogoUrl = convert.ToString(row.LogoUrl)
 	c.FaviconUrl = convert.ToString(row.FaviconUrl)
-	c.MetaTags = convert.ToStringSlice(row.MetaTags)
+	if tags := convert.ToStringSlice(row.MetaTags); tags != nil {
+		c.MetaTags = tags
+	} else {
+		c.MetaTags = []string{}
+	}
 	c.ContactEmail = row.ContactEmail
 	c.ContactNumber = row.ContactNumber
 	c.Instagram = convert.ToString(row.Instagram)
