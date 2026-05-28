@@ -355,6 +355,73 @@ func TestDeleteSupplier_NonExistentIsNoop(t *testing.T) {
 	}
 }
 
+func TestCountSuppliers_OwnerHasSuppliers(t *testing.T) {
+	db := testutil.OpenDB(t)
+	repo := infrastructure.NewRepository(db)
+	ctx := context.Background()
+
+	count, err := repo.CountSuppliers(ctx, testutil.OwnerID, false)
+	if err != nil {
+		t.Fatalf("CountSuppliers: %v", err)
+	}
+	if count <= 0 {
+		t.Errorf("expected at least 1 supplier, got %d", count)
+	}
+}
+
+func TestCountSuppliers_ZeroOwner_ReturnsZero(t *testing.T) {
+	db := testutil.OpenDB(t)
+	repo := infrastructure.NewRepository(db)
+	ctx := context.Background()
+
+	count, err := repo.CountSuppliers(ctx, 0, false)
+	if err != nil {
+		t.Fatalf("CountSuppliers(ownerID=0): %v", err)
+	}
+	if count != 0 {
+		t.Errorf("expected 0 for ownerID=0, got %d", count)
+	}
+}
+
+func TestCountSuppliers_AfterCreate_Increases(t *testing.T) {
+	db := testutil.OpenDB(t)
+	repo := infrastructure.NewRepository(db)
+	ctx := context.Background()
+
+	before, err := repo.CountSuppliers(ctx, testutil.OwnerID, false)
+	if err != nil {
+		t.Fatalf("CountSuppliers before: %v", err)
+	}
+
+	id, err := repo.CreateSupplier(ctx, testutil.OwnerID, domain.SupplierInput{Name: "Count Test Supplier", IsActive: true})
+	if err != nil {
+		t.Fatalf("CreateSupplier: %v", err)
+	}
+	_ = id
+
+	after, err := repo.CountSuppliers(ctx, testutil.OwnerID, false)
+	if err != nil {
+		t.Fatalf("CountSuppliers after: %v", err)
+	}
+	if after != before+1 {
+		t.Errorf("expected count to increase by 1, before=%d after=%d", before, after)
+	}
+}
+
+func TestCountSuppliers_ActiveOnly(t *testing.T) {
+	db := testutil.OpenDB(t)
+	repo := infrastructure.NewRepository(db)
+	ctx := context.Background()
+
+	count, err := repo.CountSuppliers(ctx, testutil.OwnerID, true)
+	if err != nil {
+		t.Fatalf("CountSuppliers(activeOnly): %v", err)
+	}
+	if count < 0 {
+		t.Errorf("expected non-negative count, got %d", count)
+	}
+}
+
 func TestGetSupplierByID_FixtureSupplier(t *testing.T) {
 	db := testutil.OpenDB(t)
 	repo := infrastructure.NewRepository(db)
