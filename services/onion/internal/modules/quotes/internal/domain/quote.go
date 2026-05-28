@@ -73,3 +73,27 @@ type QuoteInput struct {
 	ValidUntil    string  `json:"valid_until"`
 	Notes         string  `json:"notes"`
 }
+
+// IsExpired reports whether the quote has passed its ValidUntil date and has
+// not been accepted or declined.
+func (q *Quote) IsExpired() bool {
+	if q.Status == "accepted" || q.Status == "declined" {
+		return false
+	}
+	if q.ValidUntil.IsZero() {
+		return false
+	}
+	return time.Now().After(q.ValidUntil)
+}
+
+// IsEditable reports whether the quote can still be modified. Only draft and
+// sent quotes may be edited.
+func (q *Quote) IsEditable() bool {
+	return q.Status == "draft" || q.Status == "sent"
+}
+
+// NetTotal returns the quote total after applying the discount and adding tax.
+// This mirrors the stored Total but can be used for verification.
+func (q *Quote) NetTotal() float64 {
+	return q.Subtotal - q.Discount + q.Tax
+}
