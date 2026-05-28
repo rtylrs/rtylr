@@ -1,5 +1,5 @@
 import React, { useState } from 'react';
-import { Link, useNavigate } from 'react-router-dom';
+import { Link, useNavigate } from '@tanstack/react-router';
 import { motion } from 'motion/react';
 import { Plus, Send, CheckCircle, Eye, FileText, Download, FileSpreadsheet } from 'lucide-react';
 import { toast } from 'sonner';
@@ -110,7 +110,7 @@ const Invoices: React.FC = () => {
             <Link to="/invoices/recurring" style={{ ...ghostBtn, textDecoration: 'none' }}>
               Recurring
             </Link>
-            <button style={primaryBtn} onClick={() => navigate('/invoices/new')}>
+            <button style={primaryBtn} onClick={() => navigate({ to: '/invoices/new' })}>
               <Plus size={15} /> New Invoice
             </button>
           </>
@@ -128,7 +128,7 @@ const Invoices: React.FC = () => {
           title="No invoices yet"
           description="Create your first invoice to start billing clients."
           action={
-            <button style={primaryBtn} onClick={() => navigate('/invoices/new')}>
+            <button style={primaryBtn} onClick={() => navigate({ to: '/invoices/new' })}>
               <Plus size={13} /> New Invoice
             </button>
           }
@@ -178,7 +178,8 @@ const Invoices: React.FC = () => {
                   </td>
                   <td style={{ padding: '12px 16px', fontSize: 13, fontWeight: 600 }}>
                     <Link
-                      to={`/invoices/${inv.id}`}
+                      to="/invoices/$id"
+                      params={{ id: String(inv.id) }}
                       style={{
                         display: 'flex',
                         alignItems: 'center',
@@ -229,7 +230,8 @@ const Invoices: React.FC = () => {
                   <td style={{ padding: '12px 16px' }}>
                     <div style={{ display: 'flex', gap: 6 }}>
                       <Link
-                        to={`/invoices/${inv.id}`}
+                        to="/invoices/$id"
+                        params={{ id: String(inv.id) }}
                         style={{ ...ghostBtn, padding: '4px 10px', textDecoration: 'none' }}
                       >
                         <Eye size={12} /> View

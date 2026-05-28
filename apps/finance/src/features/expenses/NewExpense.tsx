@@ -1,5 +1,5 @@
 import React, { useState } from 'react';
-import { useNavigate } from 'react-router-dom';
+import { useNavigate } from '@tanstack/react-router';
 import { motion } from 'motion/react';
 import { Save, ArrowLeft } from 'lucide-react';
 import { toast } from 'sonner';
@@ -35,7 +35,7 @@ const NewExpense: React.FC = () => {
       {
         onSuccess: () => {
           toast.success('Expense submitted');
-          navigate('/expenses');
+          navigate({ to: '/expenses' });
         },
         onError: () => toast.error('Failed to submit expense'),
       }
@@ -127,7 +127,7 @@ const NewExpense: React.FC = () => {
       <div style={{ display: 'flex', justifyContent: 'space-between' }}>
         <button
           style={ghostBtn}
-          onClick={() => navigate('/expenses')}
+          onClick={() => navigate({ to: '/expenses' })}
           disabled={createExpense.isPending}
         >
           <ArrowLeft size={13} /> Cancel

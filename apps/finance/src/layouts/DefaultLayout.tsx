@@ -3,7 +3,7 @@ import { signOut, useUserStore } from '@voxire/auth';
 import { CaretPanel, CaretButton, useCaretStore } from '@voxire/caret';
 import TrialBanner from '../shared/components/TrialBanner';
 import { useForesightLinks } from '@voxire/utils';
-import { useLocation, useNavigate, Link, Outlet } from 'react-router-dom';
+import { useNavigate, Link, Outlet, useRouterState } from '@tanstack/react-router';
 import { motion, AnimatePresence } from 'motion/react';
 import { APP_URLS } from '@voxire/config';
 import {
@@ -139,11 +139,9 @@ function applyTheme(t: Theme) {
 }
 
 const SidebarNavItem: React.FC<NavItem> = ({ label, path, icon: Icon }) => {
-  const location = useLocation();
+  const pathname = useRouterState({ select: (s) => s.location.pathname });
   const isActive =
-    path === '/'
-      ? location.pathname === '/'
-      : location.pathname === path || location.pathname.startsWith(path + '/');
+    path === '/' ? pathname === '/' : pathname === path || pathname.startsWith(path + '/');
 
   return (
     <Link
@@ -185,9 +183,9 @@ const SidebarNavItem: React.FC<NavItem> = ({ label, path, icon: Icon }) => {
 };
 
 const DefaultLayout: React.FC = () => {
-  const location = useLocation();
+  const pathname = useRouterState({ select: (s) => s.location.pathname });
   const navigate = useNavigate();
-  const pageTitle = getPageTitle(location.pathname);
+  const pageTitle = getPageTitle(pathname);
   const [theme, setThemeState] = useState<Theme>(
     () => (localStorage.getItem('finance-theme') as Theme) || 'dark'
   );
@@ -237,10 +235,10 @@ const DefaultLayout: React.FC = () => {
       if (isEditing) return;
       if (e.key === 'n') {
         e.preventDefault();
-        navigate('/invoices/new');
+        navigate({ to: '/invoices/new' });
       } else if (e.key === 'e') {
         e.preventDefault();
-        navigate('/expenses/new');
+        navigate({ to: '/expenses/new' });
       } else if (e.key === 'Escape') {
         setSearchOpen(false);
       }
@@ -487,7 +485,7 @@ const DefaultLayout: React.FC = () => {
             <TrialBanner />
             <AnimatePresence mode="wait">
               <motion.main
-                key={location.pathname}
+                key={pathname}
                 initial={{ opacity: 0, y: 6 }}
                 animate={{ opacity: 1, y: 0 }}
                 exit={{ opacity: 0, y: -4 }}

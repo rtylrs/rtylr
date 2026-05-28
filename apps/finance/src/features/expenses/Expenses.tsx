@@ -1,5 +1,5 @@
 import React, { useState } from 'react';
-import { useNavigate } from 'react-router-dom';
+import { useNavigate } from '@tanstack/react-router';
 import { motion } from 'motion/react';
 import { Plus, Paperclip, Check } from 'lucide-react';
 import { Expense } from '../../shared/services/financeApi';
@@ -135,7 +135,7 @@ const Expenses: React.FC = () => {
           </p>
         </div>
         <button
-          onClick={() => navigate('/expenses/new')}
+          onClick={() => navigate({ to: '/expenses/new' })}
           style={{
             display: 'flex',
             alignItems: 'center',
