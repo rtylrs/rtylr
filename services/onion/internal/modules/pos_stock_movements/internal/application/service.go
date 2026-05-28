@@ -42,6 +42,9 @@ func (s *Service) ListMovements(ctx context.Context, businessID, branchID, produ
 }
 
 func (s *Service) ReceiveStock(ctx context.Context, input domain.ReceiveStockInput) (int64, error) {
+	if err := domain.ValidateReceiveStockInput(input); err != nil {
+		return 0, err
+	}
 	id, err := s.repo.CreateMovement(ctx, input.BusinessID, input.BranchID, input.ProductID, "receive", input.Quantity, nil, nil, input.Note, input.EmployeeID)
 	if err != nil {
 		return 0, err
@@ -78,6 +81,9 @@ func (s *Service) RecordWaste(ctx context.Context, input domain.WasteStockInput)
 }
 
 func (s *Service) TransferStock(ctx context.Context, input domain.TransferStockInput) (int64, error) {
+	if err := domain.ValidateTransferStockInput(input); err != nil {
+		return 0, err
+	}
 	if _, err := s.repo.CreateMovement(ctx, input.BusinessID, input.FromBranchID, input.ProductID, "transfer_out", -input.Quantity, nil, nil, input.Note, input.EmployeeID); err != nil {
 		return 0, err
 	}
