@@ -70,6 +70,9 @@ func (s *Service) GetBalance(ctx context.Context, businessID, customerID int64) 
 }
 
 func (s *Service) EarnPoints(ctx context.Context, input domain.EarnPointsInput) (int64, error) {
+	if err := domain.ValidateEarnPointsInput(input); err != nil {
+		return 0, err
+	}
 	currentBalance, err := s.repo.GetBalance(ctx, input.BusinessID, input.CustomerID)
 	if err != nil {
 		return 0, err
@@ -85,6 +88,9 @@ func (s *Service) EarnPoints(ctx context.Context, input domain.EarnPointsInput) 
 }
 
 func (s *Service) RedeemPoints(ctx context.Context, input domain.RedeemPointsInput) (int64, error) {
+	if err := domain.ValidateRedeemPointsInput(input); err != nil {
+		return 0, err
+	}
 	currentBalance, err := s.repo.GetBalance(ctx, input.BusinessID, input.CustomerID)
 	if err != nil {
 		return 0, err
