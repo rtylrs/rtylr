@@ -86,6 +86,8 @@ func TestCreateAndGetTemplate_RoundTrip(t *testing.T) {
 	repo := infrastructure.NewRepository(db)
 	ctx := context.Background()
 
+	db.ExecContext(ctx, "DELETE FROM hr_onboarding_checklist_templates WHERE owner_id = ? AND name = ?", testutil.OwnerID, "Integration Test Onboarding")
+
 	created, err := repo.CreateTemplate(ctx, testutil.OwnerID, domain.CreateTemplateParams{
 		Name:        "Integration Test Onboarding",
 		TriggerType: "hire",
@@ -93,6 +95,9 @@ func TestCreateAndGetTemplate_RoundTrip(t *testing.T) {
 	if err != nil {
 		t.Fatalf("CreateTemplate: %v", err)
 	}
+	t.Cleanup(func() {
+		db.ExecContext(ctx, "DELETE FROM hr_onboarding_checklist_templates WHERE id = ?", created.ID)
+	})
 	if created.ID == 0 {
 		t.Fatal("expected non-zero ID after create")
 	}
@@ -106,6 +111,7 @@ func TestCreateTemplateItem_AddsItemToTemplate(t *testing.T) {
 	repo := infrastructure.NewRepository(db)
 	ctx := context.Background()
 
+	db.ExecContext(ctx, "DELETE FROM hr_onboarding_checklist_templates WHERE owner_id = ? AND name = ?", testutil.OwnerID, "Template With Item")
 	tmpl, err := repo.CreateTemplate(ctx, testutil.OwnerID, domain.CreateTemplateParams{
 		Name:        "Template With Item",
 		TriggerType: "hire",
@@ -113,6 +119,9 @@ func TestCreateTemplateItem_AddsItemToTemplate(t *testing.T) {
 	if err != nil {
 		t.Fatalf("CreateTemplate: %v", err)
 	}
+	t.Cleanup(func() {
+		db.ExecContext(context.Background(), "DELETE FROM hr_onboarding_checklist_templates WHERE id = ?", tmpl.ID)
+	})
 
 	item, err := repo.CreateTemplateItem(ctx, testutil.OwnerID, tmpl.ID, domain.CreateTemplateItemParams{
 		Title:         "Complete paperwork",
@@ -135,9 +144,16 @@ func TestListTemplateItems_ReturnsItemsForTemplate(t *testing.T) {
 	repo := infrastructure.NewRepository(db)
 	ctx := context.Background()
 
-	tmpl, _ := repo.CreateTemplate(ctx, testutil.OwnerID, domain.CreateTemplateParams{
+	db.ExecContext(ctx, "DELETE FROM hr_onboarding_checklist_templates WHERE owner_id = ? AND name = ?", testutil.OwnerID, "List Items Test")
+	tmpl, err := repo.CreateTemplate(ctx, testutil.OwnerID, domain.CreateTemplateParams{
 		Name:        "List Items Test",
 		TriggerType: "hire",
+	})
+	if err != nil {
+		t.Fatalf("CreateTemplate: %v", err)
+	}
+	t.Cleanup(func() {
+		db.ExecContext(context.Background(), "DELETE FROM hr_onboarding_checklist_templates WHERE id = ?", tmpl.ID)
 	})
 	_, _ = repo.CreateTemplateItem(ctx, testutil.OwnerID, tmpl.ID, domain.CreateTemplateItemParams{
 		Title:         "Task A",
@@ -159,6 +175,7 @@ func TestTriggerChecklist_CreatesEmployeeChecklist(t *testing.T) {
 	repo := infrastructure.NewRepository(db)
 	ctx := context.Background()
 
+	db.ExecContext(ctx, "DELETE FROM hr_onboarding_checklist_templates WHERE owner_id = ? AND name = ?", testutil.OwnerID, "Trigger Test Template")
 	tmpl, err := repo.CreateTemplate(ctx, testutil.OwnerID, domain.CreateTemplateParams{
 		Name:        "Trigger Test Template",
 		TriggerType: "hire",
@@ -166,6 +183,9 @@ func TestTriggerChecklist_CreatesEmployeeChecklist(t *testing.T) {
 	if err != nil {
 		t.Fatalf("CreateTemplate: %v", err)
 	}
+	t.Cleanup(func() {
+		db.ExecContext(context.Background(), "DELETE FROM hr_onboarding_checklist_templates WHERE id = ?", tmpl.ID)
+	})
 	_, _ = repo.CreateTemplateItem(ctx, testutil.OwnerID, tmpl.ID, domain.CreateTemplateItemParams{
 		Title:         "Welcome task",
 		AssigneeRole:  "employee",
@@ -227,6 +247,7 @@ func TestUpdateTemplate_NameChanges(t *testing.T) {
 	repo := infrastructure.NewRepository(db)
 	ctx := context.Background()
 
+	db.ExecContext(ctx, "DELETE FROM hr_onboarding_checklist_templates WHERE owner_id = ? AND name IN (?,?)", testutil.OwnerID, "Before Update Template", "After Update Template")
 	tmpl, err := repo.CreateTemplate(ctx, testutil.OwnerID, domain.CreateTemplateParams{
 		Name:        "Before Update Template",
 		TriggerType: "hire",
@@ -234,6 +255,9 @@ func TestUpdateTemplate_NameChanges(t *testing.T) {
 	if err != nil {
 		t.Fatalf("CreateTemplate: %v", err)
 	}
+	t.Cleanup(func() {
+		db.ExecContext(context.Background(), "DELETE FROM hr_onboarding_checklist_templates WHERE id = ?", tmpl.ID)
+	})
 
 	err = repo.UpdateTemplate(ctx, testutil.OwnerID, tmpl.ID, domain.UpdateTemplateParams{
 		Name:        "After Update Template",
@@ -257,6 +281,7 @@ func TestGetTemplate_ReturnsOwnerID(t *testing.T) {
 	repo := infrastructure.NewRepository(db)
 	ctx := context.Background()
 
+	db.ExecContext(ctx, "DELETE FROM hr_onboarding_checklist_templates WHERE owner_id = ? AND name = ?", testutil.OwnerID, "Owner ID Check Template")
 	tmpl, err := repo.CreateTemplate(ctx, testutil.OwnerID, domain.CreateTemplateParams{
 		Name:        "Owner ID Check Template",
 		TriggerType: "hire",
@@ -264,6 +289,9 @@ func TestGetTemplate_ReturnsOwnerID(t *testing.T) {
 	if err != nil {
 		t.Fatalf("CreateTemplate: %v", err)
 	}
+	t.Cleanup(func() {
+		db.ExecContext(context.Background(), "DELETE FROM hr_onboarding_checklist_templates WHERE id = ?", tmpl.ID)
+	})
 
 	got, err := repo.GetTemplate(ctx, testutil.OwnerID, tmpl.ID)
 	if err != nil {
@@ -279,6 +307,7 @@ func TestCreateTemplateItem_DueOffsetDaysStored(t *testing.T) {
 	repo := infrastructure.NewRepository(db)
 	ctx := context.Background()
 
+	db.ExecContext(ctx, "DELETE FROM hr_onboarding_checklist_templates WHERE owner_id = ? AND name = ?", testutil.OwnerID, "Due Offset Template")
 	tmpl, err := repo.CreateTemplate(ctx, testutil.OwnerID, domain.CreateTemplateParams{
 		Name:        "Due Offset Template",
 		TriggerType: "hire",
@@ -286,6 +315,9 @@ func TestCreateTemplateItem_DueOffsetDaysStored(t *testing.T) {
 	if err != nil {
 		t.Fatalf("CreateTemplate: %v", err)
 	}
+	t.Cleanup(func() {
+		db.ExecContext(context.Background(), "DELETE FROM hr_onboarding_checklist_templates WHERE id = ?", tmpl.ID)
+	})
 
 	item, err := repo.CreateTemplateItem(ctx, testutil.OwnerID, tmpl.ID, domain.CreateTemplateItemParams{
 		Title:         "Offset Task",
@@ -330,6 +362,7 @@ func TestUpdateEmployeeChecklistStatus_NoError(t *testing.T) {
 	repo := infrastructure.NewRepository(db)
 	ctx := context.Background()
 
+	db.ExecContext(ctx, "DELETE FROM hr_onboarding_checklist_templates WHERE owner_id = ? AND name = ?", testutil.OwnerID, "Status Update Template")
 	tmpl, err := repo.CreateTemplate(ctx, testutil.OwnerID, domain.CreateTemplateParams{
 		Name:        "Status Update Template",
 		TriggerType: "hire",
@@ -337,6 +370,9 @@ func TestUpdateEmployeeChecklistStatus_NoError(t *testing.T) {
 	if err != nil {
 		t.Fatalf("CreateTemplate: %v", err)
 	}
+	t.Cleanup(func() {
+		db.ExecContext(context.Background(), "DELETE FROM hr_onboarding_checklist_templates WHERE id = ?", tmpl.ID)
+	})
 	_, _ = repo.CreateTemplateItem(ctx, testutil.OwnerID, tmpl.ID, domain.CreateTemplateItemParams{
 		Title:         "Status task",
 		AssigneeRole:  "hr",
@@ -359,6 +395,7 @@ func TestGetChecklistCompletionStats_TotalEqualsItemCount(t *testing.T) {
 	repo := infrastructure.NewRepository(db)
 	ctx := context.Background()
 
+	db.ExecContext(ctx, "DELETE FROM hr_onboarding_checklist_templates WHERE owner_id = ? AND name = ?", testutil.OwnerID, "Stats Template")
 	tmpl, err := repo.CreateTemplate(ctx, testutil.OwnerID, domain.CreateTemplateParams{
 		Name:        "Stats Template",
 		TriggerType: "hire",
@@ -366,6 +403,9 @@ func TestGetChecklistCompletionStats_TotalEqualsItemCount(t *testing.T) {
 	if err != nil {
 		t.Fatalf("CreateTemplate: %v", err)
 	}
+	t.Cleanup(func() {
+		db.ExecContext(context.Background(), "DELETE FROM hr_onboarding_checklist_templates WHERE id = ?", tmpl.ID)
+	})
 	for i := 0; i < 3; i++ {
 		_, _ = repo.CreateTemplateItem(ctx, testutil.OwnerID, tmpl.ID, domain.CreateTemplateItemParams{
 			Title:         "Stats task",
@@ -396,6 +436,7 @@ func TestListEmployeeChecklistItems_ReturnsItems(t *testing.T) {
 	repo := infrastructure.NewRepository(db)
 	ctx := context.Background()
 
+	db.ExecContext(ctx, "DELETE FROM hr_onboarding_checklist_templates WHERE owner_id = ? AND name = ?", testutil.OwnerID, "List Items Checklist Template")
 	tmpl, err := repo.CreateTemplate(ctx, testutil.OwnerID, domain.CreateTemplateParams{
 		Name:        "List Items Checklist Template",
 		TriggerType: "hire",
@@ -403,6 +444,9 @@ func TestListEmployeeChecklistItems_ReturnsItems(t *testing.T) {
 	if err != nil {
 		t.Fatalf("CreateTemplate: %v", err)
 	}
+	t.Cleanup(func() {
+		db.ExecContext(context.Background(), "DELETE FROM hr_onboarding_checklist_templates WHERE id = ?", tmpl.ID)
+	})
 	_, _ = repo.CreateTemplateItem(ctx, testutil.OwnerID, tmpl.ID, domain.CreateTemplateItemParams{
 		Title:         "List check task",
 		AssigneeRole:  "hr",
@@ -428,6 +472,7 @@ func TestCreateTemplate_TriggerTypeStored(t *testing.T) {
 	repo := infrastructure.NewRepository(db)
 	ctx := context.Background()
 
+	db.ExecContext(ctx, "DELETE FROM hr_onboarding_checklist_templates WHERE owner_id = ? AND name = ?", testutil.OwnerID, "Trigger Type Test")
 	tmpl, err := repo.CreateTemplate(ctx, testutil.OwnerID, domain.CreateTemplateParams{
 		Name:        "Trigger Type Test",
 		TriggerType: "termination",
@@ -435,6 +480,9 @@ func TestCreateTemplate_TriggerTypeStored(t *testing.T) {
 	if err != nil {
 		t.Fatalf("CreateTemplate: %v", err)
 	}
+	t.Cleanup(func() {
+		db.ExecContext(context.Background(), "DELETE FROM hr_onboarding_checklist_templates WHERE id = ?", tmpl.ID)
+	})
 	if tmpl.TriggerType != "termination" {
 		t.Errorf("TriggerType = %q, want 'termination'", tmpl.TriggerType)
 	}
@@ -445,6 +493,7 @@ func TestTriggerChecklist_StatusIsInProgress(t *testing.T) {
 	repo := infrastructure.NewRepository(db)
 	ctx := context.Background()
 
+	db.ExecContext(ctx, "DELETE FROM hr_onboarding_checklist_templates WHERE owner_id = ? AND name = ?", testutil.OwnerID, "In Progress Status Template")
 	tmpl, err := repo.CreateTemplate(ctx, testutil.OwnerID, domain.CreateTemplateParams{
 		Name:        "In Progress Status Template",
 		TriggerType: "hire",
@@ -452,6 +501,9 @@ func TestTriggerChecklist_StatusIsInProgress(t *testing.T) {
 	if err != nil {
 		t.Fatalf("CreateTemplate: %v", err)
 	}
+	t.Cleanup(func() {
+		db.ExecContext(context.Background(), "DELETE FROM hr_onboarding_checklist_templates WHERE id = ?", tmpl.ID)
+	})
 	_, _ = repo.CreateTemplateItem(ctx, testutil.OwnerID, tmpl.ID, domain.CreateTemplateItemParams{
 		Title:         "In progress task",
 		AssigneeRole:  "manager",

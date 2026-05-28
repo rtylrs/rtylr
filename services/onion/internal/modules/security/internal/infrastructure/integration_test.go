@@ -95,6 +95,14 @@ func TestRecordLogin_IncreasesHistoryCount(t *testing.T) {
 	repo := infrastructure.NewRepository(db)
 	ctx := context.Background()
 
+	// Remove all login history entries for this owner to start fresh,
+	// since GetLoginHistory is capped at 20. With 20 entries already
+	// present, adding one more would not increase the returned count.
+	db.ExecContext(ctx, "DELETE FROM login_history WHERE user_id = ?", testutil.OwnerID)
+	t.Cleanup(func() {
+		db.ExecContext(ctx, "DELETE FROM login_history WHERE user_id = ?", testutil.OwnerID)
+	})
+
 	before, err := repo.GetLoginHistory(ctx, testutil.OwnerID)
 	if err != nil {
 		t.Fatalf("GetLoginHistory before: %v", err)

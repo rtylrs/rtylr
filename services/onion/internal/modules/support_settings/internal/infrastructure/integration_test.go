@@ -2,12 +2,23 @@ package infrastructure_test
 
 import (
 	"context"
+	"encoding/json"
+	"reflect"
 	"testing"
 
 	"github.com/voxire/onion/internal/modules/support_settings/internal/domain"
 	"github.com/voxire/onion/internal/modules/support_settings/internal/infrastructure"
 	"github.com/voxire/onion/internal/testutil"
 )
+
+func jsonEqual(t *testing.T, want, got string) bool {
+	t.Helper()
+	var wm, gm interface{}
+	if json.Unmarshal([]byte(want), &wm) != nil || json.Unmarshal([]byte(got), &gm) != nil {
+		return want == got
+	}
+	return reflect.DeepEqual(wm, gm)
+}
 
 const testSSBusinessID int64 = 1
 
@@ -124,7 +135,7 @@ func TestSupportSettings_Upsert_WithBusinessHours(t *testing.T) {
 	if err != nil {
 		t.Fatalf("Get: %v", err)
 	}
-	if s.BusinessHours != bh {
+	if !jsonEqual(t, bh, s.BusinessHours) {
 		t.Errorf("expected business hours %s, got %s", bh, s.BusinessHours)
 	}
 }
@@ -213,7 +224,7 @@ func TestSupportSettings_Upsert_MultipleFields_AllPersist(t *testing.T) {
 	if s.NotificationEmail != "alerts@company.com" {
 		t.Errorf("expected email alerts@company.com, got %s", s.NotificationEmail)
 	}
-	if s.BusinessHours != bh {
+	if !jsonEqual(t, bh, s.BusinessHours) {
 		t.Errorf("expected business hours %s, got %s", bh, s.BusinessHours)
 	}
 }

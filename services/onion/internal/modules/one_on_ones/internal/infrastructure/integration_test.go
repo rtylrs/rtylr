@@ -2,6 +2,8 @@ package infrastructure_test
 
 import (
 	"context"
+	"encoding/json"
+	"reflect"
 	"testing"
 
 	"github.com/voxire/onion/internal/modules/one_on_ones/internal/domain"
@@ -376,7 +378,15 @@ func TestCreateOneOnOne_ActionItemsStored(t *testing.T) {
 	}
 	for _, item := range items {
 		if item.ID == id {
-			if item.ActionItems != want {
+			var gotSlice, wantSlice []string
+			if err := json.Unmarshal([]byte(item.ActionItems), &gotSlice); err != nil {
+				t.Errorf("ActionItems is not valid JSON: %q", item.ActionItems)
+				return
+			}
+			if err := json.Unmarshal([]byte(want), &wantSlice); err != nil {
+				t.Fatalf("want is not valid JSON: %q", want)
+			}
+			if !reflect.DeepEqual(gotSlice, wantSlice) {
 				t.Errorf("ActionItems = %q, want %q", item.ActionItems, want)
 			}
 			return

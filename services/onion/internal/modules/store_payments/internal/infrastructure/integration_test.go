@@ -2,6 +2,8 @@ package infrastructure_test
 
 import (
 	"context"
+	"encoding/json"
+	"reflect"
 	"testing"
 
 	"github.com/voxire/onion/internal/modules/store_payments/internal/domain"
@@ -150,8 +152,13 @@ func TestStorePayments_Create_WithConfig(t *testing.T) {
 
 	items, _ := repo.List(context.Background(), testutil.OwnerID)
 	for _, p := range items {
-		if p.ID == id && p.Config != config {
-			t.Errorf("expected config %s, got %s", config, p.Config)
+		if p.ID == id {
+			var wantMap, gotMap map[string]interface{}
+			json.Unmarshal([]byte(config), &wantMap)
+			json.Unmarshal([]byte(p.Config), &gotMap)
+			if !reflect.DeepEqual(gotMap, wantMap) {
+				t.Errorf("expected config %s, got %s", config, p.Config)
+			}
 		}
 	}
 }
