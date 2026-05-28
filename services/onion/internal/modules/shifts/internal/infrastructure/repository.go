@@ -30,7 +30,7 @@ func (r *Repository) ListShifts(ctx context.Context, ownerID, staffID int64, dat
 		SELECT id, owner_id, staff_id, department_id, date, start_time, end_time,
 		       break_duration_minutes, status, clock_in_at, clock_out_at,
 		       hours_worked, overtime_hours, notes, created_at, updated_at
-		FROM hr_shifts WHERE owner_id = ?`
+		FROM hr_shifts WHERE owner_id = ? AND staff_id IS NOT NULL`
 
 	args := []interface{}{ownerID}
 
@@ -121,11 +121,12 @@ func parseDate(s string) time.Time {
 }
 
 func parseTime(s string) time.Time {
+	ref := time.Date(1970, 1, 1, 0, 0, 0, 0, time.UTC)
 	if t, err := time.Parse("15:04:05", s); err == nil {
-		return t
+		return ref.Add(time.Duration(t.Hour())*time.Hour + time.Duration(t.Minute())*time.Minute + time.Duration(t.Second())*time.Second)
 	}
 	if t, err := time.Parse("15:04", s); err == nil {
-		return t
+		return ref.Add(time.Duration(t.Hour())*time.Hour + time.Duration(t.Minute())*time.Minute)
 	}
-	return time.Time{}
+	return ref
 }
