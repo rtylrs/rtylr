@@ -168,6 +168,28 @@ func (r *Repository) DeleteSupplier(ctx context.Context, ownerID, id int64) erro
 	return nil
 }
 
+// CountSuppliers returns the total number of suppliers for the given owner.
+// Pass activeOnly=true to count only active suppliers.
+func (r *Repository) CountSuppliers(ctx context.Context, ownerID int64, activeOnly bool) (int64, error) {
+	var count int64
+	var err error
+
+	if activeOnly {
+		const q = `SELECT COUNT(*) FROM erp_suppliers WHERE owner_id = ? AND is_active = 1`
+		err = r.pool.QueryRowContext(ctx, q, ownerID).Scan(&count)
+	} else {
+		const q = `SELECT COUNT(*) FROM erp_suppliers WHERE owner_id = ?`
+		err = r.pool.QueryRowContext(ctx, q, ownerID).Scan(&count)
+	}
+
+	if err != nil {
+		logger.Ctx(ctx).Error("Failed to count suppliers", logger.Error(err))
+		return 0, err
+	}
+
+	return count, nil
+}
+
 // GetSupplierByID fetches a single supplier by its primary key for the given owner.
 // Returns ErrSupplierNotFound when no matching row exists.
 func (r *Repository) GetSupplierByID(ctx context.Context, ownerID, id int64) (domain.Supplier, error) {
