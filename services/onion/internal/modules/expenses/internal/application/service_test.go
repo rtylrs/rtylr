@@ -84,3 +84,76 @@ func TestListCategories_Delegates(t *testing.T) {
 		t.Errorf("got %v", got)
 	}
 }
+
+func TestList_EmptyReturnsEmpty(t *testing.T) {
+	s := &Service{repo: &mockRepo{listResult: []domain.Expense{}}}
+	got, err := s.List(context.Background(), 1)
+	if err != nil {
+		t.Fatalf("unexpected error: %v", err)
+	}
+	if len(got) != 0 {
+		t.Errorf("expected 0, got %d", len(got))
+	}
+}
+
+func TestList_PropagatesError(t *testing.T) {
+	want := errors.New("list fail")
+	s := &Service{repo: &mockRepo{listErr: want}}
+	if _, err := s.List(context.Background(), 1); !errors.Is(err, want) {
+		t.Errorf("expected sentinel, got %v", err)
+	}
+}
+
+func TestCreate_ReturnsID(t *testing.T) {
+	s := &Service{repo: &mockRepo{createID: 55}}
+	id, err := s.Create(context.Background(), domain.ExpenseInput{})
+	if err != nil {
+		t.Fatalf("unexpected: %v", err)
+	}
+	if id != 55 {
+		t.Errorf("expected 55, got %d", id)
+	}
+}
+
+func TestUpdate_PropagatesError(t *testing.T) {
+	want := errors.New("update fail")
+	s := &Service{repo: &mockRepo{updErr: want}}
+	if err := s.Update(context.Background(), domain.ExpenseUpdateInput{}); !errors.Is(err, want) {
+		t.Errorf("expected sentinel, got %v", err)
+	}
+}
+
+func TestDelete_PropagatesError(t *testing.T) {
+	want := errors.New("delete fail")
+	s := &Service{repo: &mockRepo{delErr: want}}
+	if err := s.Delete(context.Background(), 1, 5); !errors.Is(err, want) {
+		t.Errorf("expected sentinel, got %v", err)
+	}
+}
+
+func TestUpdateStatus_HappyPath(t *testing.T) {
+	s := &Service{repo: &mockRepo{}}
+	if err := s.UpdateStatus(context.Background(), 1, 5, "approved"); err != nil {
+		t.Errorf("unexpected: %v", err)
+	}
+}
+
+func TestUpdateStatus_PropagatesError(t *testing.T) {
+	want := errors.New("status fail")
+	s := &Service{repo: &mockRepo{updErr: want}}
+	if err := s.UpdateStatus(context.Background(), 1, 5, "approved"); !errors.Is(err, want) {
+		t.Errorf("expected sentinel, got %v", err)
+	}
+}
+
+func TestGetByID_ReturnsFirstResult(t *testing.T) {
+	exp := domain.Expense{ID: 7, Amount: 100}
+	s := &Service{repo: &mockRepo{listResult: []domain.Expense{exp}}}
+	got, err := s.GetByID(context.Background(), 1, 7)
+	if err != nil {
+		t.Fatalf("unexpected: %v", err)
+	}
+	if got.ID != 7 {
+		t.Errorf("expected id=7, got %d", got.ID)
+	}
+}
