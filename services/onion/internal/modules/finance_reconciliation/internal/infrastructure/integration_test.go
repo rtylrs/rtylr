@@ -385,3 +385,57 @@ func TestListUnmatchedInvoices_DueDateAfterOrEqualIssueDate(t *testing.T) {
 		}
 	}
 }
+
+func TestCountMatches_NoError(t *testing.T) {
+	db := testutil.OpenDB(t)
+	repo := infrastructure.NewRepository(db)
+	ctx := context.Background()
+
+	cnt, err := repo.CountMatches(ctx, testutil.OwnerID)
+	if err != nil {
+		t.Fatalf("CountMatches: %v", err)
+	}
+	if cnt < 0 {
+		t.Errorf("expected non-negative count, got %d", cnt)
+	}
+}
+
+func TestCountMatches_ZeroOwnerReturnsZero(t *testing.T) {
+	db := testutil.OpenDB(t)
+	repo := infrastructure.NewRepository(db)
+	ctx := context.Background()
+
+	cnt, err := repo.CountMatches(ctx, 0)
+	if err != nil {
+		t.Fatalf("CountMatches(ownerID=0): %v", err)
+	}
+	if cnt != 0 {
+		t.Errorf("expected 0 for ownerID=0, got %d", cnt)
+	}
+}
+
+func TestCountMatchesByTargetType_NoError(t *testing.T) {
+	db := testutil.OpenDB(t)
+	repo := infrastructure.NewRepository(db)
+	ctx := context.Background()
+
+	counts, err := repo.CountMatchesByTargetType(ctx, testutil.OwnerID)
+	if err != nil {
+		t.Fatalf("CountMatchesByTargetType: %v", err)
+	}
+	_ = counts
+}
+
+func TestCountMatchesByTargetType_ZeroOwnerReturnsEmpty(t *testing.T) {
+	db := testutil.OpenDB(t)
+	repo := infrastructure.NewRepository(db)
+	ctx := context.Background()
+
+	counts, err := repo.CountMatchesByTargetType(ctx, 0)
+	if err != nil {
+		t.Fatalf("CountMatchesByTargetType(ownerID=0): %v", err)
+	}
+	if len(counts) != 0 {
+		t.Errorf("expected empty map for ownerID=0, got %v", counts)
+	}
+}
