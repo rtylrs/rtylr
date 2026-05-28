@@ -1,5 +1,5 @@
 import React, { useMemo, useState, useCallback } from 'react';
-import { Link, useParams } from 'react-router-dom';
+import { Link, useParams } from '@tanstack/react-router';
 import { motion } from 'motion/react';
 import { toast } from 'sonner';
 import {
@@ -84,7 +84,7 @@ const statCard = (
 );
 
 const WorkspaceDashboard: React.FC = () => {
-  const { workspaceId = PERSONAL_WORKSPACE_ID } = useParams<{ workspaceId: string }>();
+  const { workspaceId = PERSONAL_WORKSPACE_ID } = useParams({ strict: false });
   const { user } = useUserStore();
   const { tasks, projects, workspaces, members } = useFlowStore();
 
@@ -387,7 +387,7 @@ const WorkspaceDashboard: React.FC = () => {
               Projects
             </h2>
             <Link
-              to={`/w/${workspaceId}`}
+              to={`/w/${workspaceId}` as string}
               className="flex items-center gap-1 text-[11px] transition-colors hover:opacity-70"
               style={{ color: 'var(--accent)' }}
             >
@@ -410,7 +410,7 @@ const WorkspaceDashboard: React.FC = () => {
                   transition={{ duration: 0.18, delay: 0.2 + i * 0.05 }}
                 >
                   <Link
-                    to={`/w/${workspaceId}/p/${project.id}`}
+                    to={`/w/${workspaceId}/p/${project.id}` as string}
                     className="block p-3 rounded-lg transition-colors hover:bg-[var(--flow-hover)]"
                   >
                     <div className="flex items-center gap-2 mb-2.5">

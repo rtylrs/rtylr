@@ -1,6 +1,6 @@
 import React, { useEffect, useMemo, useRef, useState } from 'react';
 import { toast } from 'sonner';
-import { useParams } from 'react-router-dom';
+import { useParams } from '@tanstack/react-router';
 import { ChevronDown, Plus, Trash2 } from 'lucide-react';
 import { useFlowStore } from '../../shared/stores/flowStore';
 import { useTasks } from '../tasks/useTasks';
@@ -148,10 +148,7 @@ function saveGroupBy(projectId: string, key: GroupKey): void {
 }
 
 const ProjectBoard: React.FC = () => {
-  const { workspaceId = PERSONAL_WORKSPACE_ID, projectId = '' } = useParams<{
-    workspaceId: string;
-    projectId: string;
-  }>();
+  const { workspaceId = PERSONAL_WORKSPACE_ID, projectId = '' } = useParams({ strict: false });
 
   const { projects, selectedTaskIds, toggleSelectTask, activeWorkspaceId } = useFlowStore();
   const moveTask = useMoveTaskToColumn();

@@ -1,5 +1,5 @@
 import React, { useRef, useState } from 'react';
-import { useParams, useNavigate } from 'react-router-dom';
+import { useParams, useNavigate } from '@tanstack/react-router';
 import { toast } from 'sonner';
 import { useTranslation } from 'react-i18next';
 import {
@@ -36,7 +36,7 @@ const ROLE_META: Record<string, { icon: React.ReactNode; color: string }> = {
 
 const ProjectSettings: React.FC = () => {
   const { t } = useTranslation();
-  const { projectId, workspaceId } = useParams<{ projectId: string; workspaceId: string }>();
+  const { projectId, workspaceId } = useParams({ strict: false });
   const navigate = useNavigate();
   const { projects, workspaces } = useFlowStore();
   const project = projects.find((p) => p.id === projectId);
@@ -388,7 +388,7 @@ const ProjectSettings: React.FC = () => {
                               {
                                 onSuccess: () => {
                                   toast.success('Project moved');
-                                  navigate(`/w/${targetWorkspaceId}`);
+                                  navigate({ to: `/w/${targetWorkspaceId}` as string });
                                 },
                                 onError: () => {
                                   toast.error('Failed to move project');
@@ -644,7 +644,7 @@ const ProjectSettings: React.FC = () => {
                     onSuccess: () => {
                       toast.success('Project deleted');
                       setConfirmDelete(false);
-                      navigate(`/w/${project!.workspaceId}`);
+                      navigate({ to: `/w/${project!.workspaceId}` as string });
                     },
                     onError: () => toast.error('Failed to delete project'),
                   });

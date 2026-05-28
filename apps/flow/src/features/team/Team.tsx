@@ -5,7 +5,7 @@ import { useTeamWorkload } from './useTeamWorkload';
 import WorkloadBar from '../../shared/components/WorkloadBar';
 import PriorityIcon from '../../shared/components/PriorityIcon';
 import StatusIcon from '../../shared/components/StatusIcon';
-import { useNavigate } from 'react-router-dom';
+import { useNavigate } from '@tanstack/react-router';
 
 const Team: React.FC = () => {
   const { data: members = [], isLoading } = useTeamWorkload();
@@ -59,7 +59,7 @@ const Team: React.FC = () => {
                 {m.tasks.slice(0, 5).map((t) => (
                   <button
                     key={t.id}
-                    onClick={() => navigate(`/task/${t.id}`)}
+                    onClick={() => navigate({ to: `/task/${t.id}` as string })}
                     className="w-full flex items-center gap-2 py-1 text-left hover:bg-[var(--flow-hover)] rounded px-1.5"
                   >
                     <PriorityIcon priority={t.priority} size={11} />

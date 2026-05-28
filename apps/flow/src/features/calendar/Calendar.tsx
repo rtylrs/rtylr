@@ -1,7 +1,7 @@
 import React, { useMemo, useState } from 'react';
 import { motion, AnimatePresence } from 'motion/react';
 import { ChevronLeft, ChevronRight, X } from 'lucide-react';
-import { useNavigate } from 'react-router-dom';
+import { useNavigate } from '@tanstack/react-router';
 import { toast } from 'sonner';
 import { useTranslation } from 'react-i18next';
 import { useTasks, useCreateTask } from '../tasks/useTasks';
@@ -197,7 +197,7 @@ const Calendar: React.FC = () => {
                       key={t.id}
                       onClick={(e) => {
                         e.stopPropagation();
-                        navigate(`/task/${t.id}`);
+                        navigate({ to: `/task/${t.id}` as string });
                       }}
                       className="w-full text-left px-1.5 py-0.5 rounded text-[10px] truncate flex items-center gap-1 hover:bg-[var(--flow-hover)]"
                       style={{

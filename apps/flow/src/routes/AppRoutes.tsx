@@ -1,5 +1,5 @@
 import React, { Suspense } from 'react';
-import { RouteObject, Navigate } from 'react-router-dom';
+import { Navigate } from '@tanstack/react-router';
 import { AppFlagGuard, FLAG_KEYS } from '@voxire/config';
 import FlowLayout from '../layouts/FlowLayout';
 import { PERSONAL_WORKSPACE_ID } from '../shared/lib/personalWorkspace';
@@ -67,15 +67,22 @@ function previewRoute(element: React.ReactNode): React.ReactNode {
   return (
     <AppFlagGuard
       flag={FLAG_KEYS.APP_FLOW_PREVIEW_ROUTES}
-      fallback={<Navigate to={`/w/${PERSONAL_WORKSPACE_ID}`} replace />}
+      fallback={
+        <Navigate to="/w/$workspaceId" params={{ workspaceId: PERSONAL_WORKSPACE_ID }} replace />
+      }
     >
       {withLayout(element)}
     </AppFlagGuard>
   );
 }
 
-const appRoutes: RouteObject[] = [
-  { path: '/', element: <Navigate to={`/w/${PERSONAL_WORKSPACE_ID}`} replace /> },
+const appRoutes = [
+  {
+    path: '/',
+    element: (
+      <Navigate to="/w/$workspaceId" params={{ workspaceId: PERSONAL_WORKSPACE_ID }} replace />
+    ),
+  },
   { path: '/w/:workspaceId', element: withLayout(<WorkspaceDashboard />) },
   { path: '/w/:workspaceId/members', element: withLayout(<WorkspaceManager />) },
   { path: '/w/:workspaceId/p/:projectId', element: withLayout(<ProjectBoard />) },
@@ -104,7 +111,12 @@ const appRoutes: RouteObject[] = [
   { path: '/archive', element: withLayout(<Archive />) },
   { path: '/inbox', element: withLayout(<Inbox />) },
   { path: '/settings', element: withLayout(<FlowSettings />) },
-  { path: '*', element: <Navigate to={`/w/${PERSONAL_WORKSPACE_ID}`} replace /> },
+  {
+    path: '*',
+    element: (
+      <Navigate to="/w/$workspaceId" params={{ workspaceId: PERSONAL_WORKSPACE_ID }} replace />
+    ),
+  },
 ];
 
 export default appRoutes;

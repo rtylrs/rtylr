@@ -1,5 +1,5 @@
 import React from 'react';
-import { Link, useLocation } from 'react-router-dom';
+import { Link, useLocation } from '@tanstack/react-router';
 import {
   Activity,
   LayoutGrid,
@@ -126,7 +126,7 @@ const ProjectViewTabs: React.FC<ProjectViewTabsProps> = ({
             return (
               <Link
                 key={v.key}
-                to={v.path(workspaceId, projectId)}
+                to={v.path(workspaceId, projectId) as string}
                 className={[
                   'flex items-center gap-1.5 px-2 py-1 rounded text-[11px] font-medium transition-colors',
                   active ? '' : 'hover:bg-[var(--flow-hover)]',
@@ -145,7 +145,7 @@ const ProjectViewTabs: React.FC<ProjectViewTabsProps> = ({
         </div>
 
         <Link
-          to={`/w/${workspaceId}/p/${projectId}/settings`}
+          to={`/w/${workspaceId}/p/${projectId}/settings` as string}
           className="h-7 w-7 rounded flex items-center justify-center hover:bg-[var(--flow-hover)] transition-colors"
           style={{ color: 'var(--flow-text-dim)' }}
           aria-label="Project settings"

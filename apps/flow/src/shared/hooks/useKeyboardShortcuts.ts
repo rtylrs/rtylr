@@ -1,5 +1,5 @@
 import { useEffect } from 'react';
-import { useNavigate } from 'react-router-dom';
+import { useNavigate } from '@tanstack/react-router';
 import { useFlowStore } from '../stores/flowStore';
 
 // Keyboard shortcuts: global.
@@ -61,34 +61,34 @@ export function useKeyboardShortcuts() {
         e.preventDefault();
         switch (e.key) {
           case 'i':
-            navigate('/inbox');
+            navigate({ to: '/inbox' });
             break;
           case 'm':
-            navigate('/my-issues');
+            navigate({ to: '/my-issues' });
             break;
           case 'd':
-            navigate(`/w/${activeWorkspaceId}`);
+            navigate({ to: `/w/${activeWorkspaceId}` as string });
             break;
           case 'c':
-            navigate('/calendar');
+            navigate({ to: '/calendar' });
             break;
           case 't':
-            navigate('/timeline');
+            navigate({ to: '/timeline' });
             break;
           case 'r':
-            navigate('/roadmap');
+            navigate({ to: '/roadmap' });
             break;
           case 's':
-            navigate('/insights');
+            navigate({ to: '/insights' });
             break;
           case 'y':
-            navigate('/cycles');
+            navigate({ to: '/cycles' });
             break;
           case 'x':
-            navigate('/triage');
+            navigate({ to: '/triage' });
             break;
           case 'f':
-            navigate('/today');
+            navigate({ to: '/today' });
             break;
         }
         lastKey = '';

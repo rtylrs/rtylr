@@ -1,5 +1,5 @@
 import React, { useMemo } from 'react';
-import { useParams } from 'react-router-dom';
+import { useParams } from '@tanstack/react-router';
 import { useFlowStore } from '../../shared/stores/flowStore';
 import { useTasks } from '../tasks/useTasks';
 import { PERSONAL_WORKSPACE_ID } from '../../shared/lib/personalWorkspace';
@@ -15,10 +15,7 @@ import ProjectViewTabs from './ProjectViewTabs';
  * that the frontend doesn't yet call). For now this is a read-only canvas.
  */
 const ProjectTimeline: React.FC = () => {
-  const { workspaceId = PERSONAL_WORKSPACE_ID, projectId = '' } = useParams<{
-    workspaceId: string;
-    projectId: string;
-  }>();
+  const { workspaceId = PERSONAL_WORKSPACE_ID, projectId = '' } = useParams({ strict: false });
 
   useProjectRealtime(projectId);
 

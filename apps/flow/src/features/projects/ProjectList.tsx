@@ -1,5 +1,5 @@
 import React, { useMemo, useState } from 'react';
-import { Link, useParams } from 'react-router-dom';
+import { Link, useParams } from '@tanstack/react-router';
 import { motion, AnimatePresence } from 'motion/react';
 import {
   Plus,
@@ -196,10 +196,7 @@ const StatusGroup: React.FC<{
 };
 
 const ProjectList: React.FC = () => {
-  const { workspaceId = PERSONAL_WORKSPACE_ID, projectId = 'p-web' } = useParams<{
-    workspaceId: string;
-    projectId: string;
-  }>();
+  const { workspaceId = PERSONAL_WORKSPACE_ID, projectId = 'p-web' } = useParams({ strict: false });
 
   useProjectRealtime(projectId);
 
@@ -260,7 +257,7 @@ const ProjectList: React.FC = () => {
           }}
         >
           <Link
-            to={`/w/${workspaceId}/p/${projectId}`}
+            to={`/w/${workspaceId}/p/${projectId}` as string}
             className="flex items-center gap-1.5 px-3 py-1.5 rounded-md text-[12px] font-medium transition-colors hover:bg-[var(--flow-hover)] no-underline"
             style={{ color: 'var(--flow-text-muted)' }}
           >

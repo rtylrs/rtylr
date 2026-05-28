@@ -1,5 +1,5 @@
 import React, { useEffect, useRef, useState } from 'react';
-import { useNavigate } from 'react-router-dom';
+import { useNavigate } from '@tanstack/react-router';
 import { motion, AnimatePresence } from 'motion/react';
 import { toast } from 'sonner';
 import { ChevronRight, Calendar, User, CircleUser, FolderInput, Flag, Gauge } from 'lucide-react';
@@ -101,7 +101,7 @@ export const QuickCreate: React.FC = () => {
       const taskId = String(task.id);
       toast.success(`Created ${task.identifier ?? taskId}`, { description: task.title });
       setQuickCreateOpen(false);
-      navigate(`/task/${taskId}`);
+      navigate({ to: `/task/${taskId}` as string });
     } catch {
       // error toast handled by mutation onError
     }

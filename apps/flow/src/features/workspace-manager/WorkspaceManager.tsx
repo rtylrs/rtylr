@@ -3,7 +3,7 @@ import { motion } from 'motion/react';
 import { Users, Plus, Trash2, Shield, Eye, Crown, Search } from 'lucide-react';
 
 import { toast } from 'sonner';
-import { useParams } from 'react-router-dom';
+import { useParams } from '@tanstack/react-router';
 import {
   useWorkspaceMembers,
   useAddWorkspaceMember,
@@ -129,7 +129,7 @@ const MemberRow: React.FC<{
 };
 
 const WorkspaceManager: React.FC = () => {
-  const { workspaceId } = useParams<{ workspaceId: string }>();
+  const { workspaceId } = useParams({ strict: false });
   const wsId = workspaceId ?? '';
   const { data: members = [], isLoading } = useWorkspaceMembers(wsId);
   const addMember = useAddWorkspaceMember(wsId);

@@ -1,10 +1,10 @@
 import { Suspense } from 'react';
 import ReactDOM from 'react-dom/client';
-import { BrowserRouter } from 'react-router-dom';
+import { RouterProvider } from '@tanstack/react-router';
 import { Toaster } from 'sonner';
 import { QueryClient, QueryClientProvider } from '@tanstack/react-query';
 import { bootObservability } from '@voxire/observability';
-import App from './App';
+import { router } from './router';
 import { initTheme } from './shared/stores/themeStore';
 import './shared/services/i18next';
 import './globals.css';
@@ -43,14 +43,12 @@ if (rootElement) {
               fontSize: '14px',
             }}
           >
-            Loading Flow…
+            Loading Flow...
           </div>
         }
       >
-        <BrowserRouter>
-          <App />
-          <Toaster expand={false} richColors />
-        </BrowserRouter>
+        <RouterProvider router={router} />
+        <Toaster expand={false} richColors />
       </Suspense>
     </QueryClientProvider>
   );

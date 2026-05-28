@@ -1,7 +1,7 @@
 import React, { useState, useEffect, useMemo, useRef } from 'react';
 import { toast } from 'sonner';
 import TrialBanner from '../shared/components/TrialBanner';
-import { Link, useLocation, useNavigate, useParams } from 'react-router-dom';
+import { Link, useLocation, useNavigate, useParams } from '@tanstack/react-router';
 import { motion, AnimatePresence } from 'motion/react';
 import {
   Inbox,
@@ -210,7 +210,7 @@ interface FlowLayoutProps {
 const FlowLayout: React.FC<FlowLayoutProps> = ({ children }) => {
   const location = useLocation();
   const navigate = useNavigate();
-  const { workspaceId } = useParams<{ workspaceId: string }>();
+  const { workspaceId } = useParams({ strict: false });
   const showPreviewRoutes = useFeatureFlag(FLAG_KEYS.APP_FLOW_PREVIEW_ROUTES);
 
   const { toggle: toggleSidebarSection, isCollapsed: isSidebarSectionCollapsed } =
@@ -278,7 +278,7 @@ const FlowLayout: React.FC<FlowLayoutProps> = ({ children }) => {
   // actual first workspace ID so all downstream API calls use a real numeric ID.
   useEffect(() => {
     if (workspaceId === PERSONAL_WORKSPACE_ID && apiWorkspaces && apiWorkspaces.length > 0) {
-      navigate(`/w/${apiWorkspaces[0].id}`, { replace: true });
+      navigate({ to: `/w/${apiWorkspaces[0].id}` as string, replace: true });
     }
   }, [workspaceId, apiWorkspaces, navigate]);
 
@@ -581,7 +581,7 @@ const FlowLayout: React.FC<FlowLayoutProps> = ({ children }) => {
                       key={ws.id}
                       onClick={() => {
                         setActiveWorkspace(ws.id);
-                        navigate(`/w/${ws.id}`);
+                        navigate({ to: `/w/${ws.id}` as string });
                         setWorkspaceSwitcherOpen(false);
                       }}
                       className="w-full flex items-center gap-2.5 px-3 py-2 text-[12px] text-left transition-colors hover:bg-[var(--flow-hover)]"

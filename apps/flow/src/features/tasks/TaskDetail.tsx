@@ -1,5 +1,5 @@
 import React, { useState } from 'react';
-import { useParams, useNavigate } from 'react-router-dom';
+import { useParams, useNavigate } from '@tanstack/react-router';
 import { motion } from 'motion/react';
 import { toast } from 'sonner';
 import { useTranslation } from 'react-i18next';
@@ -171,7 +171,7 @@ function activityIcon(action: string): React.ComponentType<{ size?: number }> {
 
 const TaskDetail: React.FC = () => {
   const { t } = useTranslation();
-  const { id } = useParams<{ id: string }>();
+  const { id } = useParams({ strict: false });
   const navigate = useNavigate();
   useTaskRealtime(id);
   const { data: taskData, isLoading } = useTask(id);
@@ -355,7 +355,7 @@ const TaskDetail: React.FC = () => {
         >
           <div className="flex min-w-0 items-center gap-2 sm:gap-3">
             <button
-              onClick={() => navigate(-1)}
+              onClick={() => window.history.back()}
               className="h-6 w-6 rounded flex items-center justify-center hover:bg-[var(--flow-hover)]"
               style={{ color: 'var(--flow-text-muted)' }}
             >
@@ -387,12 +387,12 @@ const TaskDetail: React.FC = () => {
               onClick={() => {
                 // Archive is a local store action (no async API result
                 // surfaced here), so showing the toast immediately is
-                // acceptable. Keeping navigate(-1) after so the user
+                // acceptable. Keeping window.history.back() after so the user
                 // ends up where they expect even if the store rejects
                 // a duplicate archive call.
                 archiveTask(task.id);
                 toast.success(t('toasts.task.archived'));
-                navigate(-1);
+                window.history.back();
               }}
               className="h-7 w-7 rounded flex items-center justify-center hover:bg-[var(--flow-hover)]"
               style={{ color: 'var(--flow-text-muted)' }}
@@ -409,7 +409,7 @@ const TaskDetail: React.FC = () => {
                 deleteTaskMut.mutate(task.id, {
                   onSuccess: () => {
                     toast.success(t('toasts.task.deleted'));
-                    navigate(-1);
+                    window.history.back();
                   },
                   // useDeleteTask already toasts on error.
                 });
@@ -918,7 +918,7 @@ const TaskDetail: React.FC = () => {
               <div key={dt.id} className="flex items-center justify-between gap-1">
                 <button
                   type="button"
-                  onClick={() => navigate(`/task/${dt.id}`)}
+                  onClick={() => navigate({ to: `/task/${dt.id}` as string })}
                   className="text-[11px] text-left truncate flex-1 hover:underline"
                   style={{ color: 'var(--accent)' }}
                 >
