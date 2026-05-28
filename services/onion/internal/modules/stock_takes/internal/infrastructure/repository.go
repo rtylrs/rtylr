@@ -29,7 +29,7 @@ func (r *Repository) ListStockTakes(ctx context.Context, ownerID int64, limit, o
 		SELECT id, owner_id, warehouse_id, status, notes, started_at, completed_at, created_at
 		FROM erp_stock_takes
 		WHERE owner_id = ?
-		ORDER BY created_at DESC
+		ORDER BY created_at DESC, id DESC
 		LIMIT ? OFFSET ?`
 
 	rows, err := r.pool.QueryContext(ctx, q, ownerID, limit+1, offset)
