@@ -32,3 +32,13 @@ func ValidateSettingsInput(input SettingsInput) string {
 	}
 	return ""
 }
+
+// IsFullyConfigured returns true when all critical sending fields are set.
+func (s *Settings) IsFullyConfigured() bool {
+	return s.FromEmail != "" && s.FromName != "" && s.Timezone != ""
+}
+
+// HasSmsCapability returns true when the settings have an SMS sender ID configured.
+func (s *Settings) HasSmsCapability() bool {
+	return s.SmsSenderID != ""
+}
