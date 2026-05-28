@@ -67,3 +67,32 @@ type MatchInput struct {
 	TargetID   int64
 	MatchedBy  int64
 }
+
+// IsExactAmountMatch reports whether the suggestion has zero amount difference
+// (the bank transaction amount equals the target amount exactly).
+func (s *MatchSuggestion) IsExactAmountMatch() bool {
+	return s.AmountMinorUnits == 0
+}
+
+// IsHighConfidence reports whether the suggestion qualifies as high confidence
+// based on score threshold. Scores below 500 are considered high confidence.
+func (s *MatchSuggestion) IsHighConfidence() bool {
+	return s.Score < 500
+}
+
+// IsValidTargetType reports whether the target type is one of the known
+// reconciliation target types.
+func IsValidTargetType(targetType string) bool {
+	return targetType == TargetTypeInvoice || targetType == TargetTypeExpense
+}
+
+// HasSuggestions reports whether the overview has any match suggestions.
+func (o *ReconciliationOverview) HasSuggestions() bool {
+	return len(o.Suggestions) > 0
+}
+
+// HasUnmatchedItems reports whether there are any unmatched bank transactions
+// or unmatched invoices in the overview.
+func (o *ReconciliationOverview) HasUnmatchedItems() bool {
+	return len(o.UnmatchedBankTxns) > 0 || len(o.UnmatchedInvoices) > 0
+}
