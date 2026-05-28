@@ -1,5 +1,5 @@
 import React, { useEffect, useRef, useState } from 'react';
-import { useLocation, Link } from '@tanstack/react-router';
+import { useRouterState, Link } from '@tanstack/react-router';
 import { motion, AnimatePresence } from 'motion/react';
 import { useTranslation } from 'react-i18next';
 import { APP_URLS, getAvatarUrl } from '@voxire/config';
@@ -54,7 +54,7 @@ import CommandPalette from '../shared/components/CommandPalette';
 import GlobalShortcuts from '../shared/components/GlobalShortcuts';
 import { useMediaQuery } from '../shared/components/ui';
 
-/* ── Types ── */
+/* -- Types -- */
 interface NavItem {
   i18nKey: string;
   path: string;
@@ -63,7 +63,7 @@ interface NavItem {
   configGuard?: (timeTrackingModel: string, config: HRCompanyConfigPayload | null) => boolean;
 }
 
-/* ── Nav config ── */
+/* -- Nav config -- */
 const ACCENT = '#8b5cf6';
 
 interface NavSection {
@@ -206,7 +206,7 @@ const routeLabelKeys: Record<string, string> = {
   '/reports': 'nav.reports',
 };
 
-/* ── Theme helpers ── */
+/* -- Theme helpers -- */
 type Theme = 'light' | 'dark' | 'system';
 
 function useTheme(): [Theme, (t: Theme) => void] {
@@ -225,11 +225,11 @@ function useTheme(): [Theme, (t: Theme) => void] {
   return [theme, setTheme];
 }
 
-/* ── Sidebar nav item ── */
+/* -- Sidebar nav item -- */
 const SidebarNavItem: React.FC<NavItem> = ({ i18nKey, path, icon: Icon }) => {
   const { t } = useTranslation();
-  const location = useLocation();
-  const isActive = path === '/' ? location.pathname === '/' : location.pathname.startsWith(path);
+  const pathname = useRouterState({ select: (s) => s.location.pathname });
+  const isActive = path === '/' ? pathname === '/' : pathname.startsWith(path);
   const label = t(i18nKey);
 
   return (
@@ -248,10 +248,10 @@ const SidebarNavItem: React.FC<NavItem> = ({ i18nKey, path, icon: Icon }) => {
         color: isActive ? 'var(--hr-text)' : 'var(--hr-text-muted)',
         transition: 'color 0.15s',
       }}
-      onMouseEnter={(e) => {
+      onMouseEnter={(e: React.MouseEvent<HTMLAnchorElement>) => {
         if (!isActive) (e.currentTarget as HTMLAnchorElement).style.background = 'var(--hr-hover)';
       }}
-      onMouseLeave={(e) => {
+      onMouseLeave={(e: React.MouseEvent<HTMLAnchorElement>) => {
         if (!isActive) (e.currentTarget as HTMLAnchorElement).style.background = 'transparent';
       }}
     >
@@ -289,7 +289,7 @@ const SidebarNavItem: React.FC<NavItem> = ({ i18nKey, path, icon: Icon }) => {
   );
 };
 
-/* ── User dropdown ── */
+/* -- User dropdown -- */
 function UserMenu({ theme, setTheme }: { theme: Theme; setTheme: (t: Theme) => void }) {
   const { t } = useTranslation();
   const [open, setOpen] = useState(false);
@@ -320,10 +320,10 @@ function UserMenu({ theme, setTheme }: { theme: Theme; setTheme: (t: Theme) => v
           cursor: 'pointer',
           transition: 'background 0.15s',
         }}
-        onMouseEnter={(e) =>
+        onMouseEnter={(e: React.MouseEvent<HTMLButtonElement>) =>
           ((e.currentTarget as HTMLButtonElement).style.background = 'var(--hr-hover)')
         }
-        onMouseLeave={(e) =>
+        onMouseLeave={(e: React.MouseEvent<HTMLButtonElement>) =>
           ((e.currentTarget as HTMLButtonElement).style.background = 'transparent')
         }
       >
@@ -460,10 +460,10 @@ function UserMenu({ theme, setTheme }: { theme: Theme; setTheme: (t: Theme) => v
                 cursor: 'pointer',
                 textAlign: 'left',
               }}
-              onMouseEnter={(e) =>
+              onMouseEnter={(e: React.MouseEvent<HTMLButtonElement>) =>
                 ((e.currentTarget as HTMLButtonElement).style.background = 'rgba(239,68,68,0.08)')
               }
-              onMouseLeave={(e) =>
+              onMouseLeave={(e: React.MouseEvent<HTMLButtonElement>) =>
                 ((e.currentTarget as HTMLButtonElement).style.background = 'transparent')
               }
             >
@@ -477,14 +477,14 @@ function UserMenu({ theme, setTheme }: { theme: Theme; setTheme: (t: Theme) => v
   );
 }
 
-/* ── DefaultLayout ── */
+/* -- DefaultLayout -- */
 interface DefaultLayoutProps {
   children?: React.ReactNode;
 }
 
 const DefaultLayout: React.FC<DefaultLayoutProps> = ({ children }) => {
   const { t } = useTranslation();
-  const location = useLocation();
+  const pathname = useRouterState({ select: (s) => s.location.pathname });
   const [theme, setTheme] = useTheme();
   const isMobile = useMediaQuery('(max-width: 960px)');
   const [mobileNavOpen, setMobileNavOpen] = useState(false);
@@ -534,24 +534,24 @@ const DefaultLayout: React.FC<DefaultLayoutProps> = ({ children }) => {
     setCollapsedSections((prev) => ({ ...prev, [key]: !prev[key] }));
   };
 
-  const getPageTitle = (pathname: string): string => {
-    if (routeLabelKeys[pathname]) return t(routeLabelKeys[pathname]);
-    if (pathname.startsWith('/staff/')) return t('layout.routes.employeeProfile');
-    if (pathname.startsWith('/reviews/')) return t('layout.routes.performanceReviews');
-    if (pathname.startsWith('/timesheets/')) return t('layout.routes.timesheetDetail');
-    if (pathname.startsWith('/time-off/')) return t('nav.timeOff');
-    if (pathname.startsWith('/payroll/my-payslips')) return t('nav.myPaySlips');
-    if (pathname.startsWith('/payroll/')) return t('layout.routes.payrollRunDetail');
-    if (pathname.startsWith('/performance/cycles/')) return t('layout.routes.reviewCycleDetail');
-    if (pathname.startsWith('/equipment/')) return t('nav.assets');
-    if (pathname.startsWith('/onboarding/')) return t('layout.routes.checklistTemplates');
+  const getPageTitle = (p: string): string => {
+    if (routeLabelKeys[p]) return t(routeLabelKeys[p]);
+    if (p.startsWith('/staff/')) return t('layout.routes.employeeProfile');
+    if (p.startsWith('/reviews/')) return t('layout.routes.performanceReviews');
+    if (p.startsWith('/timesheets/')) return t('layout.routes.timesheetDetail');
+    if (p.startsWith('/time-off/')) return t('nav.timeOff');
+    if (p.startsWith('/payroll/my-payslips')) return t('nav.myPaySlips');
+    if (p.startsWith('/payroll/')) return t('layout.routes.payrollRunDetail');
+    if (p.startsWith('/performance/cycles/')) return t('layout.routes.reviewCycleDetail');
+    if (p.startsWith('/equipment/')) return t('nav.assets');
+    if (p.startsWith('/onboarding/')) return t('layout.routes.checklistTemplates');
     return t('layout.hr');
   };
-  const pageTitle = getPageTitle(location.pathname);
+  const pageTitle = getPageTitle(pathname);
 
   useEffect(() => {
     setMobileNavOpen(false);
-  }, [location.pathname, isMobile]);
+  }, [pathname, isMobile]);
 
   return (
     <div
@@ -623,10 +623,10 @@ const DefaultLayout: React.FC<DefaultLayoutProps> = ({ children }) => {
               marginTop: '2px',
               transition: 'color 0.15s',
             }}
-            onMouseEnter={(e) =>
+            onMouseEnter={(e: React.MouseEvent<HTMLAnchorElement>) =>
               ((e.currentTarget as HTMLAnchorElement).style.color = 'var(--hr-text-muted)')
             }
-            onMouseLeave={(e) =>
+            onMouseLeave={(e: React.MouseEvent<HTMLAnchorElement>) =>
               ((e.currentTarget as HTMLAnchorElement).style.color = 'var(--hr-text-dim)')
             }
           >
@@ -801,10 +801,10 @@ const DefaultLayout: React.FC<DefaultLayoutProps> = ({ children }) => {
                 color: 'var(--hr-text-muted)',
                 fontSize: 11,
               }}
-              onMouseEnter={(e) =>
+              onMouseEnter={(e: React.MouseEvent<HTMLButtonElement>) =>
                 ((e.currentTarget as HTMLButtonElement).style.background = 'var(--hr-active)')
               }
-              onMouseLeave={(e) =>
+              onMouseLeave={(e: React.MouseEvent<HTMLButtonElement>) =>
                 ((e.currentTarget as HTMLButtonElement).style.background = 'var(--hr-hover)')
               }
               aria-label="Open command palette"
@@ -841,10 +841,10 @@ const DefaultLayout: React.FC<DefaultLayoutProps> = ({ children }) => {
                 color: 'var(--hr-text-muted)',
                 transition: 'background 0.15s',
               }}
-              onMouseEnter={(e) =>
+              onMouseEnter={(e: React.MouseEvent<HTMLButtonElement>) =>
                 ((e.currentTarget as HTMLButtonElement).style.background = 'var(--hr-hover)')
               }
-              onMouseLeave={(e) =>
+              onMouseLeave={(e: React.MouseEvent<HTMLButtonElement>) =>
                 ((e.currentTarget as HTMLButtonElement).style.background = 'transparent')
               }
             >
@@ -856,7 +856,7 @@ const DefaultLayout: React.FC<DefaultLayoutProps> = ({ children }) => {
         {/* Page content */}
         <AnimatePresence mode="wait">
           <motion.main
-            key={location.pathname}
+            key={pathname}
             initial={{ opacity: 0, y: 6 }}
             animate={{ opacity: 1, y: 0 }}
             exit={{ opacity: 0, y: -4 }}
