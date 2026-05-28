@@ -59,6 +59,9 @@ func (s *Service) Get(ctx context.Context, ownerID, id int64) (*domain.Session, 
 }
 
 func (s *Service) Open(ctx context.Context, input domain.OpenSessionInput) (int64, error) {
+	if err := domain.ValidateOpenSessionInput(input); err != nil {
+		return 0, err
+	}
 	id, err := s.repo.Open(ctx, input)
 	if err != nil {
 		return 0, err
@@ -68,6 +71,9 @@ func (s *Service) Open(ctx context.Context, input domain.OpenSessionInput) (int6
 }
 
 func (s *Service) Close(ctx context.Context, input domain.CloseSessionInput) error {
+	if err := domain.ValidateCloseSessionInput(input); err != nil {
+		return err
+	}
 	if err := s.repo.Close(ctx, input); err != nil {
 		return err
 	}
