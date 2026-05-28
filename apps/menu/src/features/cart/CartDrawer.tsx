@@ -1,5 +1,5 @@
 import React, { useState } from 'react';
-import { useNavigate } from 'react-router-dom';
+import { useNavigate } from '@tanstack/react-router';
 import { AnimatePresence, motion } from 'motion/react';
 import { useCartStore } from '../../shared/stores/cartStore';
 
@@ -18,7 +18,7 @@ const CartDrawer = ({ isOpen, onClose, currency = 'USD' }: CartDrawerProps): Rea
 
   const handleProceed = (): void => {
     onClose();
-    void navigate('/checkout');
+    void navigate({ to: '/checkout' });
   };
 
   return (

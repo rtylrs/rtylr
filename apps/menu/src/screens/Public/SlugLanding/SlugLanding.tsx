@@ -1,5 +1,5 @@
 import React from 'react';
-import { useParams, useNavigate, Link } from 'react-router-dom';
+import { useParams, useNavigate, Link } from '@tanstack/react-router';
 import { FullScreenLoader } from '@voxire/components';
 import { usePublicBusinessBySlug } from '../../../shared/hooks/usePublicMenu';
 import Menu from '../Menu/Menu';
@@ -19,7 +19,7 @@ import Menu from '../Menu/Menu';
 const isMongoId = (s: string): boolean => /^[a-f0-9]{24}$/i.test(s);
 
 const SlugLanding: React.FC = (): React.JSX.Element => {
-  const { slug: raw } = useParams<{ slug: string }>();
+  const { slug: raw } = useParams({ strict: false });
   const navigate = useNavigate();
   const slug = (raw ?? '').toLowerCase();
 
@@ -28,7 +28,7 @@ const SlugLanding: React.FC = (): React.JSX.Element => {
   React.useEffect(() => {
     if (data && data.locations.length === 1) {
       const loc = data.locations[0];
-      if (loc.slug) navigate(`/${slug}/${loc.slug}`, { replace: true });
+      if (loc.slug) navigate({ to: `/${slug}/${loc.slug}`, replace: true });
     }
   }, [data, slug, navigate]);
 

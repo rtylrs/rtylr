@@ -1,5 +1,5 @@
 import React, { useEffect, useState } from 'react';
-import { useParams } from 'react-router-dom';
+import { useParams } from '@tanstack/react-router';
 import { FullScreenLoader } from '@voxire/components';
 import {
   GridLayout,
@@ -70,7 +70,7 @@ function applyTheme(theme: ThemeConfig) {
 }
 
 const Menu: React.FC = () => {
-  const { id } = useParams<{ id: string }>();
+  const { id } = useParams({ strict: false });
   const [categories, setCategories] = useState<MenuCategoryData[]>([]);
   const [business, setBusiness] = useState<BusinessInfo | null>(null);
   const [layout, setLayout] = useState<LayoutType>('grid');

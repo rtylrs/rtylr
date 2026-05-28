@@ -1,5 +1,5 @@
 import React, { useMemo } from 'react';
-import { useParams, useNavigate } from 'react-router-dom';
+import { useParams, useNavigate } from '@tanstack/react-router';
 import { FullScreenLoader } from '@voxire/components';
 import { GridLayout, MenuCategoryData, BusinessInfo, CartItem } from '@voxire/menu';
 import { usePublicMenu } from '../../../shared/hooks/usePublicMenu';
@@ -25,7 +25,7 @@ import { useCartStore } from '../../../shared/stores/cartStore';
 const onlineOrderingEnabled = import.meta.env.VITE_ONLINE_ORDERING_ENABLED === 'true';
 
 const PosMenu: React.FC = (): React.JSX.Element => {
-  const { businessId: raw } = useParams<{ businessId: string }>();
+  const { businessId: raw } = useParams({ strict: false });
   const navigate = useNavigate();
   const parsed = raw != null ? Number(raw) : NaN;
   const businessId = Number.isFinite(parsed) && parsed > 0 ? parsed : null;
@@ -89,7 +89,7 @@ const PosMenu: React.FC = (): React.JSX.Element => {
         });
       }
     });
-    void navigate('/checkout');
+    void navigate({ to: '/checkout' });
   };
 
   if (businessId == null) {
