@@ -49,6 +49,9 @@ func (s *Service) List(ctx context.Context, ownerID int64) ([]domain.GiftCard, e
 }
 
 func (s *Service) Create(ctx context.Context, ownerID int64, input domain.GiftCardInput) (int64, error) {
+	if err := domain.ValidateGiftCardInput(input); err != nil {
+		return 0, err
+	}
 	id, err := s.repo.Create(ctx, ownerID, input)
 	if err != nil {
 		return 0, err
@@ -68,6 +71,9 @@ func (s *Service) GetByCode(ctx context.Context, ownerID int64, code string) (*d
 }
 
 func (s *Service) Redeem(ctx context.Context, ownerID int64, input domain.RedeemInput) (*domain.GiftCard, error) {
+	if err := domain.ValidateRedeemInput(input); err != nil {
+		return nil, err
+	}
 	card, err := s.repo.Redeem(ctx, ownerID, input)
 	if err != nil {
 		return nil, err
