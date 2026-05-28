@@ -473,7 +473,7 @@ func (h *UpdateOrderItemStatusHandler) Serve(ctx context.Context, req *UpdateOrd
 		return UpdateOrderItemStatusResponse{}, errorModels.PermissionDeniedServerError()
 	}
 
-	if err := h.Service.UpdateOrderItemStatus(ctx, req.OrderID, req.ItemID, domain.ItemStatus(req.Status)); err != nil {
+	if err := h.Service.UpdateOrderItemStatus(ctx, device.User.UserID, req.OrderID, req.ItemID, domain.ItemStatus(req.Status)); err != nil {
 		return UpdateOrderItemStatusResponse{}, &errorModels.ServerError{
 			HTTPCode: http.StatusInternalServerError,
 			Code:     http.StatusInternalServerError,

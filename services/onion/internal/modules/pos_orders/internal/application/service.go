@@ -89,7 +89,17 @@ func (s *Service) UpdateTableStatus(ctx context.Context, ownerID, tableID int64,
 		return errors.New("table id is required")
 	}
 
-	return s.repo.UpdateTableStatus(ctx, ownerID, tableID, status)
+	if err := s.repo.UpdateTableStatus(ctx, ownerID, tableID, status); err != nil {
+		return err
+	}
+
+	wsbus.Publish(wsbus.Event{
+		Topic:    fmt.Sprintf("owner:%d", ownerID),
+		Type:     "pos:table:status",
+		EntityID: tableID,
+	})
+
+	return nil
 }
 
 func (s *Service) DeleteTable(ctx context.Context, ownerID, tableID int64) error {
@@ -213,11 +223,18 @@ func (s *Service) UpdateOrderStatus(ctx context.Context, ownerID, orderID int64,
 	return nil
 }
 
-func (s *Service) UpdateOrderItemStatus(ctx context.Context, orderID, itemID int64, status domain.ItemStatus) error {
-	// orderID alone doesn't identify the owner; rely on the caller's
-	// upstream invalidation (handler-level or follow-up mutation) and on
-	// the short TTL to age this out quickly.
-	return s.repo.UpdateOrderItemStatus(ctx, orderID, itemID, status)
+func (s *Service) UpdateOrderItemStatus(ctx context.Context, ownerID, orderID, itemID int64, status domain.ItemStatus) error {
+	if err := s.repo.UpdateOrderItemStatus(ctx, orderID, itemID, status); err != nil {
+		return err
+	}
+
+	wsbus.Publish(wsbus.Event{
+		Topic:    fmt.Sprintf("owner:%d", ownerID),
+		Type:     "pos:kds:item:updated",
+		EntityID: itemID,
+	})
+
+	return nil
 }
 
 func (s *Service) ProcessPayment(ctx context.Context, ownerID int64, input domain.PaymentInput) error {
@@ -228,6 +245,12 @@ func (s *Service) ProcessPayment(ctx context.Context, ownerID int64, input domai
 	if err := s.repo.ProcessPayment(ctx, ownerID, input.OrderID, input); err != nil {
 		return err
 	}
+
+	wsbus.Publish(wsbus.Event{
+		Topic:    fmt.Sprintf("owner:%d", ownerID),
+		Type:     "pos:order:paid",
+		EntityID: input.OrderID,
+	})
 
 	invalidateOrderScope(ctx, ownerID)
 
@@ -299,6 +322,13 @@ func (s *Service) VoidOrder(ctx context.Context, ownerID, orderID int64, reason 
 	if err := s.repo.VoidOrder(ctx, ownerID, orderID, reason); err != nil {
 		return err
 	}
+
+	wsbus.Publish(wsbus.Event{
+		Topic:    fmt.Sprintf("owner:%d", ownerID),
+		Type:     "pos:order:voided",
+		EntityID: orderID,
+	})
+
 	invalidateOrderScope(ctx, ownerID)
 	return nil
 }
