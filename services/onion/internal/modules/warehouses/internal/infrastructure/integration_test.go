@@ -442,6 +442,85 @@ func TestWarehouses_ListWarehouses_Idempotent(t *testing.T) {
 	}
 }
 
+func TestWarehouses_CountWarehouses_All(t *testing.T) {
+	db := testutil.OpenDB(t)
+	repo := infrastructure.NewRepository(db)
+	ctx := context.Background()
+
+	id, err := repo.CreateWarehouse(ctx, testutil.OwnerID, domain.WarehouseInput{Name: "Count WH", IsActive: true})
+	if err != nil {
+		t.Fatalf("CreateWarehouse: %v", err)
+	}
+	t.Cleanup(func() { _ = repo.DeleteWarehouse(ctx, testutil.OwnerID, id) })
+
+	count, err := repo.CountWarehouses(ctx, testutil.OwnerID, false)
+	if err != nil {
+		t.Fatalf("CountWarehouses: %v", err)
+	}
+	if count <= 0 {
+		t.Errorf("expected at least 1 warehouse, got %d", count)
+	}
+}
+
+func TestWarehouses_CountWarehouses_ActiveOnly(t *testing.T) {
+	db := testutil.OpenDB(t)
+	repo := infrastructure.NewRepository(db)
+	ctx := context.Background()
+
+	id, err := repo.CreateWarehouse(ctx, testutil.OwnerID, domain.WarehouseInput{Name: "Active Count WH", IsActive: true})
+	if err != nil {
+		t.Fatalf("CreateWarehouse: %v", err)
+	}
+	t.Cleanup(func() { _ = repo.DeleteWarehouse(ctx, testutil.OwnerID, id) })
+
+	count, err := repo.CountWarehouses(ctx, testutil.OwnerID, true)
+	if err != nil {
+		t.Fatalf("CountWarehouses(activeOnly): %v", err)
+	}
+	if count <= 0 {
+		t.Errorf("expected at least 1 active warehouse, got %d", count)
+	}
+}
+
+func TestWarehouses_CountWarehouses_ZeroOwner(t *testing.T) {
+	db := testutil.OpenDB(t)
+	repo := infrastructure.NewRepository(db)
+	ctx := context.Background()
+
+	count, err := repo.CountWarehouses(ctx, 0, false)
+	if err != nil {
+		t.Fatalf("CountWarehouses(ownerID=0): %v", err)
+	}
+	if count != 0 {
+		t.Errorf("expected 0 for ownerID=0, got %d", count)
+	}
+}
+
+func TestWarehouses_CountWarehouses_AfterCreate_Increases(t *testing.T) {
+	db := testutil.OpenDB(t)
+	repo := infrastructure.NewRepository(db)
+	ctx := context.Background()
+
+	before, err := repo.CountWarehouses(ctx, testutil.OwnerID, false)
+	if err != nil {
+		t.Fatalf("CountWarehouses before: %v", err)
+	}
+
+	id, err := repo.CreateWarehouse(ctx, testutil.OwnerID, domain.WarehouseInput{Name: "New WH", IsActive: true})
+	if err != nil {
+		t.Fatalf("CreateWarehouse: %v", err)
+	}
+	t.Cleanup(func() { _ = repo.DeleteWarehouse(ctx, testutil.OwnerID, id) })
+
+	after, err := repo.CountWarehouses(ctx, testutil.OwnerID, false)
+	if err != nil {
+		t.Fatalf("CountWarehouses after: %v", err)
+	}
+	if after != before+1 {
+		t.Errorf("expected count to increase by 1, before=%d after=%d", before, after)
+	}
+}
+
 func TestWarehouses_GetWarehouseByID_Created(t *testing.T) {
 	db := testutil.OpenDB(t)
 	repo := infrastructure.NewRepository(db)
