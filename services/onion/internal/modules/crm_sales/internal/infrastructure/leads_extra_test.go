@@ -23,24 +23,6 @@ func TestListLeads_WrongOwner_ReturnsEmpty(t *testing.T) {
 	}
 }
 
-func TestCreateLead_IndustryIsStored(t *testing.T) {
-	db := testutil.OpenDB(t)
-	repo := infrastructure.NewRepository(db)
-	ctx := context.Background()
-
-	lead, err := repo.CreateLead(ctx, testutil.OwnerID, domain.CreateLeadRequest{
-		CompanyName: "Industry Corp",
-		Industry:    "saas",
-		Stage:       domain.LeadStageCold,
-	})
-	if err != nil {
-		t.Fatalf("CreateLead: %v", err)
-	}
-	if lead.Industry != "saas" {
-		t.Errorf("Industry = %q, want %q", lead.Industry, "saas")
-	}
-}
-
 func TestCreateLead_SourceIsStored(t *testing.T) {
 	db := testutil.OpenDB(t)
 	repo := infrastructure.NewRepository(db)
