@@ -339,3 +339,117 @@ func TestCreateInvoice_RejectsInvalidIssueDate(t *testing.T) {
 		t.Error("expected parse error, got nil")
 	}
 }
+
+// ---- GetPLReport ----
+
+func TestGetPLReport_NetProfitIsRevenueMinusExpenses(t *testing.T) {
+	// sumVal is returned for both SumPaidInvoices and SumExpenses
+	// Revenue=200, Expenses=200 => NetProfit=0 (same sumVal)
+	// Use different repo calls by using err=nil and sumVal for all sums
+	m := &mockRepo{sumVal: 500}
+	s := &Service{repo: m}
+	report, err := s.GetPLReport(context.Background(), 1, "month", "2024-03-15")
+	if err != nil {
+		t.Fatalf("unexpected error: %v", err)
+	}
+	// revenue=500, expenses=500, netProfit=0
+	if report.NetProfit != 0 {
+		t.Errorf("expected net profit 0 (revenue=expenses), got %f", report.NetProfit)
+	}
+	if report.Revenue != 500 {
+		t.Errorf("expected revenue=500, got %f", report.Revenue)
+	}
+}
+
+func TestGetPLReport_PropagatesRevenueError(t *testing.T) {
+	want := errors.New("revenue err")
+	s := &Service{repo: &mockRepo{err: want}}
+	_, err := s.GetPLReport(context.Background(), 1, "month", "2024-03-15")
+	if !errors.Is(err, want) {
+		t.Errorf("expected sentinel, got %v", err)
+	}
+}
+
+func TestGetPLReport_PeriodPassedThrough(t *testing.T) {
+	s := &Service{repo: &mockRepo{sumVal: 0}}
+	report, err := s.GetPLReport(context.Background(), 1, "year", "2024-06-01")
+	if err != nil {
+		t.Fatalf("unexpected error: %v", err)
+	}
+	if report.Period != "year" {
+		t.Errorf("expected period=year, got %s", report.Period)
+	}
+}
+
+func TestGetPLReport_MarginPctZeroWhenNoRevenue(t *testing.T) {
+	s := &Service{repo: &mockRepo{sumVal: 0}}
+	report, err := s.GetPLReport(context.Background(), 1, "month", "2024-03-01")
+	if err != nil {
+		t.Fatalf("unexpected error: %v", err)
+	}
+	if report.MarginPct != 0 {
+		t.Errorf("expected margin=0 when revenue=0, got %f", report.MarginPct)
+	}
+}
+
+// ---- GetDashboard ----
+
+func TestGetDashboard_PropagatesReceivableError(t *testing.T) {
+	want := errors.New("receivable err")
+	s := &Service{repo: &mockRepo{err: want}}
+	_, err := s.GetDashboard(context.Background(), 1)
+	if !errors.Is(err, want) {
+		t.Errorf("expected sentinel, got %v", err)
+	}
+}
+
+func TestGetDashboard_ReturnsZeroValuesForEmptyRepo(t *testing.T) {
+	s := &Service{repo: &mockRepo{sumVal: 0}}
+	dash, err := s.GetDashboard(context.Background(), 1)
+	if err != nil {
+		t.Fatalf("unexpected error: %v", err)
+	}
+	if dash.TotalReceivable != 0 || dash.OverdueAmount != 0 {
+		t.Errorf("expected zero dashboard, got %+v", dash)
+	}
+}
+
+// ---- GetTaxReport ----
+
+func TestGetTaxReport_PropagatesError(t *testing.T) {
+	want := errors.New("tax err")
+	s := &Service{repo: &mockRepo{err: want}}
+	_, err := s.GetTaxReport(context.Background(), 1, "month", "2024-03-15")
+	if !errors.Is(err, want) {
+		t.Errorf("expected sentinel, got %v", err)
+	}
+}
+
+func TestGetTaxReport_PeriodPassedThrough(t *testing.T) {
+	s := &Service{repo: &mockRepo{sumVal: 0}}
+	report, err := s.GetTaxReport(context.Background(), 1, "quarter", "2024-04-01")
+	if err != nil {
+		t.Fatalf("unexpected error: %v", err)
+	}
+	if report.Period != "quarter" {
+		t.Errorf("expected period=quarter, got %s", report.Period)
+	}
+}
+
+// ---- UpdateInvoiceStatus ----
+
+func TestUpdateInvoiceStatus_HappyPath(t *testing.T) {
+	s := &Service{repo: &mockRepo{}}
+	err := s.UpdateInvoiceStatus(context.Background(), 1, 10, "sent")
+	if err != nil {
+		t.Errorf("unexpected error: %v", err)
+	}
+}
+
+func TestUpdateInvoiceStatus_PropagatesError(t *testing.T) {
+	want := errors.New("status err")
+	s := &Service{repo: &mockRepo{err: want}}
+	if err := s.UpdateInvoiceStatus(context.Background(), 1, 10, "sent"); !errors.Is(err, want) {
+		t.Errorf("expected sentinel, got %v", err)
+	}
+}
