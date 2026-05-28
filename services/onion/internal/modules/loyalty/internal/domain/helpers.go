@@ -82,3 +82,35 @@ func ValidateRedeemInput(input RedeemInput) string {
 	}
 	return ""
 }
+
+// ValidateLoyaltyConfigInput checks required fields for upserting a loyalty config.
+func ValidateLoyaltyConfigInput(input LoyaltyConfigInput) string {
+	if input.OwnerID <= 0 {
+		return "owner_id is required"
+	}
+	return ""
+}
+
+// TierFor returns the tier name for the given points count using this config.
+func (cfg *LoyaltyConfig) TierFor(points int) string {
+	if points < 0 {
+		return TierBronze
+	}
+	if cfg.MinRedemptionPoints > 0 && points >= cfg.MinRedemptionPoints*10 {
+		return TierPlatinum
+	}
+	return TierBronze
+}
+
+// CanRedeem returns true when the member has enough points for at least the minimum redemption.
+func (cfg *LoyaltyConfig) CanRedeem(points int) bool {
+	if cfg.MinRedemptionPoints <= 0 {
+		return points > 0
+	}
+	return points >= cfg.MinRedemptionPoints
+}
+
+// HasReferenceID returns true when the transaction references an external entity.
+func (tx *LoyaltyTransaction) HasReferenceID() bool {
+	return tx.ReferenceID != nil
+}
