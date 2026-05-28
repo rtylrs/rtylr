@@ -527,3 +527,105 @@ func TestCreate_ThenList_FindsNewBill(t *testing.T) {
 		t.Errorf("expected more items after create; before=%d after=%d", beforeCount, len(afterItems))
 	}
 }
+
+func TestSumByStatus_NoError(t *testing.T) {
+	db := testutil.OpenDB(t)
+	repo := infrastructure.NewRepository(db)
+	ctx := context.Background()
+
+	sum, err := repo.SumByStatus(ctx, testutil.OwnerID, "pending")
+	if err != nil {
+		t.Fatalf("SumByStatus: %v", err)
+	}
+	if sum < 0 {
+		t.Errorf("expected non-negative sum, got %f", sum)
+	}
+}
+
+func TestSumByStatus_ZeroOwnerReturnsZero(t *testing.T) {
+	db := testutil.OpenDB(t)
+	repo := infrastructure.NewRepository(db)
+	ctx := context.Background()
+
+	sum, err := repo.SumByStatus(ctx, 0, "pending")
+	if err != nil {
+		t.Fatalf("SumByStatus(ownerID=0): %v", err)
+	}
+	if sum != 0 {
+		t.Errorf("expected 0 for ownerID=0, got %f", sum)
+	}
+}
+
+func TestSumByStatus_ReflectsCreatedBill(t *testing.T) {
+	db := testutil.OpenDB(t)
+	repo := infrastructure.NewRepository(db)
+	ctx := context.Background()
+
+	id, err := repo.Create(ctx, testutil.OwnerID, domain.BillInput{
+		Amount:  123.45,
+		DueDate: "2026-12-31",
+		Status:  "pending",
+	})
+	if err != nil {
+		t.Fatalf("Create: %v", err)
+	}
+	t.Cleanup(func() { _ = repo.Delete(ctx, testutil.OwnerID, id) })
+
+	sum, err := repo.SumByStatus(ctx, testutil.OwnerID, "pending")
+	if err != nil {
+		t.Fatalf("SumByStatus: %v", err)
+	}
+	if sum < 123.45 {
+		t.Errorf("expected sum >= 123.45, got %f", sum)
+	}
+}
+
+func TestCountByStatus_NoError(t *testing.T) {
+	db := testutil.OpenDB(t)
+	repo := infrastructure.NewRepository(db)
+	ctx := context.Background()
+
+	counts, err := repo.CountByStatus(ctx, testutil.OwnerID)
+	if err != nil {
+		t.Fatalf("CountByStatus: %v", err)
+	}
+	_ = counts
+}
+
+func TestCountByStatus_ZeroOwnerReturnsEmpty(t *testing.T) {
+	db := testutil.OpenDB(t)
+	repo := infrastructure.NewRepository(db)
+	ctx := context.Background()
+
+	counts, err := repo.CountByStatus(ctx, 0)
+	if err != nil {
+		t.Fatalf("CountByStatus(ownerID=0): %v", err)
+	}
+	if len(counts) != 0 {
+		t.Errorf("expected empty map for ownerID=0, got %v", counts)
+	}
+}
+
+func TestCountByStatus_ReflectsCreatedBill(t *testing.T) {
+	db := testutil.OpenDB(t)
+	repo := infrastructure.NewRepository(db)
+	ctx := context.Background()
+
+	id, err := repo.Create(ctx, testutil.OwnerID, domain.BillInput{
+		Amount:  50.00,
+		DueDate: "2026-11-30",
+		Status:  "pending",
+	})
+	if err != nil {
+		t.Fatalf("Create: %v", err)
+	}
+	t.Cleanup(func() { _ = repo.Delete(ctx, testutil.OwnerID, id) })
+
+	counts, err := repo.CountByStatus(ctx, testutil.OwnerID)
+	if err != nil {
+		t.Fatalf("CountByStatus: %v", err)
+	}
+	if counts["pending"] <= 0 {
+		t.Errorf("expected at least 1 pending bill, got %d", counts["pending"])
+	}
+}
