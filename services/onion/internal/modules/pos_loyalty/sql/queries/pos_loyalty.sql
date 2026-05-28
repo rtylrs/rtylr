@@ -23,6 +23,9 @@ INSERT INTO pos_loyalty_transactions (business_id, customer_id, order_id, type, 
 VALUES (?, ?, ?, ?, ?, ?, ?);
 
 -- name: GetLoyaltyBalance :one
-SELECT COALESCE(SUM(points), 0) AS balance
-FROM pos_loyalty_transactions
-WHERE business_id = ? AND customer_id = ?;
+SELECT COALESCE(
+  (SELECT balance_after FROM pos_loyalty_transactions
+   WHERE business_id = ? AND customer_id = ?
+   ORDER BY id DESC LIMIT 1),
+  0
+) AS balance;
