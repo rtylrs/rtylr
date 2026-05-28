@@ -57,3 +57,22 @@ type BillInput struct {
 	Status      string  `json:"status"`
 	Description string  `json:"description"`
 }
+
+// IsPaid reports whether the bill has been fully paid.
+func (b *Bill) IsPaid() bool {
+	return b.Status == "paid"
+}
+
+// IsOverdue reports whether the bill is past its due date and not paid.
+func (b *Bill) IsOverdue() bool {
+	if b.IsPaid() {
+		return false
+	}
+	return time.Now().After(b.DueDate)
+}
+
+// DaysUntilDue returns the number of full days remaining until the bill's due
+// date. Negative values mean the bill is already past due.
+func (b *Bill) DaysUntilDue() int {
+	return int(time.Until(b.DueDate).Hours() / 24)
+}
