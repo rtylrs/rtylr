@@ -48,6 +48,34 @@ export function getBillStatusLabel(status: BillStatus): string {
 }
 
 /**
+ * Returns the number of days a bill is overdue relative to a reference date.
+ * Returns 0 when the bill is not overdue or dueDate is null.
+ */
+export function daysOverdue(dueDate: string | null | undefined, today?: string): number {
+  if (!dueDate) return 0;
+  const ref = today ?? new Date().toISOString().slice(0, 10);
+  if (dueDate >= ref) return 0;
+  const due = new Date(dueDate).getTime();
+  const now = new Date(ref).getTime();
+  return Math.floor((now - due) / (1000 * 60 * 60 * 24));
+}
+
+/**
+ * Returns an urgency tier for a bill based on how many days overdue it is.
+ * "low" = not overdue, "medium" = 1-7 days, "high" = 8-30 days, "critical" = over 30 days.
+ */
+export function getBillUrgency(
+  dueDate: string | null | undefined,
+  today?: string
+): 'low' | 'medium' | 'high' | 'critical' {
+  const days = daysOverdue(dueDate, today);
+  if (days === 0) return 'low';
+  if (days <= 7) return 'medium';
+  if (days <= 30) return 'high';
+  return 'critical';
+}
+
+/**
  * Derives the effective bill status based on amount paid and due date.
  */
 export function deriveBillStatus(
