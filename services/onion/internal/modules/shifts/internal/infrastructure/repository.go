@@ -32,7 +32,8 @@ func (r *Repository) ListShifts(ctx context.Context, ownerID, staffID int64, dat
 		       hours_worked, overtime_hours, notes, created_at, updated_at
 		FROM hr_shifts WHERE owner_id = ? AND staff_id IS NOT NULL`
 
-	args := []interface{}{ownerID}
+	args := make([]interface{}, 0, 3)
+	args = append(args, ownerID)
 
 	if staffID != 0 {
 		query += ` AND staff_id = ?`
