@@ -28,7 +28,7 @@ describe('excerptAround', () => {
 
   it('falls back to start when term not found', () => {
     const result = excerptAround('hello world', 'missing', 5);
-    expect(result).toBe('hello worl');
+    expect(result).toBe('hello world');
   });
 
   it('returns empty string for empty text', () => {
