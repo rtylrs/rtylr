@@ -72,7 +72,10 @@ describe('searchCareers', () => {
 
 describe('searchSubmissions', () => {
   it('filters by candidate name', () => {
-    const subs = [makeSubmission({ candidateName: 'Alice' }), makeSubmission({ candidateName: 'Bob' })];
+    const subs = [
+      makeSubmission({ candidateName: 'Alice' }),
+      makeSubmission({ candidateName: 'Bob' }),
+    ];
     expect(searchSubmissions(subs, 'alice')).toHaveLength(1);
   });
 

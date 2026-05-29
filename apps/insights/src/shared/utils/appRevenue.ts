@@ -34,7 +34,10 @@ export function appValues(shares: AppRevenueShare[]): number[] {
  * findAppShare returns the revenue share for a specific app name.
  * Returns undefined when the app is not found.
  */
-export function findAppShare(shares: AppRevenueShare[], appName: string): AppRevenueShare | undefined {
+export function findAppShare(
+  shares: AppRevenueShare[],
+  appName: string
+): AppRevenueShare | undefined {
   return shares.find((s) => s.app === appName);
 }
 

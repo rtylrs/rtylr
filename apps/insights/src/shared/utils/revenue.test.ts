@@ -61,12 +61,16 @@ describe('revenueSeriesValues', () => {
 
 describe('weeklyTotals', () => {
   it('groups into 7-day chunks and sums each', () => {
-    const series = Array.from({ length: 14 }, (_, i) => makePoint(`2026-01-${String(i + 1).padStart(2, '0')}`, 10));
+    const series = Array.from({ length: 14 }, (_, i) =>
+      makePoint(`2026-01-${String(i + 1).padStart(2, '0')}`, 10)
+    );
     expect(weeklyTotals(series)).toEqual([70, 70]);
   });
 
   it('includes partial week as last group', () => {
-    const series = Array.from({ length: 8 }, (_, i) => makePoint(`2026-01-${String(i + 1).padStart(2, '0')}`, 10));
+    const series = Array.from({ length: 8 }, (_, i) =>
+      makePoint(`2026-01-${String(i + 1).padStart(2, '0')}`, 10)
+    );
     expect(weeklyTotals(series)).toEqual([70, 10]);
   });
 

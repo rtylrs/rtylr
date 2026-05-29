@@ -1,5 +1,11 @@
 import { describe, it, expect } from 'vitest';
-import { chartColor, assignColors, hexToRgb, relativeLuminance, contrastingTextColor } from './color';
+import {
+  chartColor,
+  assignColors,
+  hexToRgb,
+  relativeLuminance,
+  contrastingTextColor,
+} from './color';
 
 describe('chartColor', () => {
   it('returns a color string for index 0', () => {
