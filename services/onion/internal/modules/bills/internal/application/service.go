@@ -3,7 +3,7 @@ package application
 import (
 	"context"
 	"database/sql"
-	"fmt"
+	"strconv"
 	"time"
 
 	"github.com/voxire/onion/internal/modules/bills/internal/domain"
@@ -50,7 +50,7 @@ func (s *Service) List(ctx context.Context, ownerID int64) ([]domain.Bill, error
 }
 
 func (s *Service) GetBill(ctx context.Context, ownerID, id int64) (domain.Bill, error) {
-	key := cacheKeys.Scoped(billsScope, ownerID, fmt.Sprintf("id=%d", id))
+	key := cacheKeys.Scoped(billsScope, ownerID, "id="+strconv.FormatInt(id, 10))
 	return cacher.Of[domain.Bill]().GetOrComputeSingle(ctx, key,
 		func(ctx context.Context) (domain.Bill, error) {
 			return s.repo.Get(ctx, ownerID, id)
