@@ -43,10 +43,10 @@ export type CampaignStats = z.infer<typeof campaignStatsSchema>;
 
 // -- Domain constants ---------------------------------------------------------
 
-export const CAMPAIGN_STATUSES = ["draft", "scheduled", "active", "paused", "completed"] as const;
+export const CAMPAIGN_STATUSES = ['draft', 'scheduled', 'active', 'paused', 'completed'] as const;
 export type CampaignStatus = (typeof CAMPAIGN_STATUSES)[number];
 
-export const CAMPAIGN_CHANNELS = ["email", "sms", "push"] as const;
+export const CAMPAIGN_CHANNELS = ['email', 'sms', 'push'] as const;
 export type CampaignChannel = (typeof CAMPAIGN_CHANNELS)[number];
 
 // -- Type guards --------------------------------------------------------------
@@ -60,33 +60,33 @@ export function isCampaignChannel(value: string): value is CampaignChannel {
 }
 
 export function isActiveCampaign(campaign: Campaign): boolean {
-  return campaign.status === "active";
+  return campaign.status === 'active';
 }
 
 export function isDraftCampaign(campaign: Campaign): boolean {
-  return campaign.status === "draft";
+  return campaign.status === 'draft';
 }
 
 export function isScheduledCampaign(campaign: Campaign): boolean {
-  return campaign.status === "scheduled";
+  return campaign.status === 'scheduled';
 }
 
 export function isCompletedCampaign(campaign: Campaign): boolean {
-  return campaign.status === "completed";
+  return campaign.status === 'completed';
 }
 
 export const CAMPAIGN_STATUS_LABELS: Record<CampaignStatus, string> = {
-  draft: "Draft",
-  scheduled: "Scheduled",
-  active: "Active",
-  paused: "Paused",
-  completed: "Completed",
+  draft: 'Draft',
+  scheduled: 'Scheduled',
+  active: 'Active',
+  paused: 'Paused',
+  completed: 'Completed',
 };
 
 export const CAMPAIGN_CHANNEL_LABELS: Record<CampaignChannel, string> = {
-  email: "Email",
-  sms: "SMS",
-  push: "Push Notification",
+  email: 'Email',
+  sms: 'SMS',
+  push: 'Push Notification',
 };
 
 export function campaignStatusLabel(status: CampaignStatus): string {
