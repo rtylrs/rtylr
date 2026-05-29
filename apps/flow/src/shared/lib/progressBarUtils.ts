@@ -14,7 +14,7 @@ export function progressColor(percent: number): 'success' | 'warning' | 'danger'
 
 /** Returns a health color based on project health status. */
 export function healthColor(
-  health: 'on_track' | 'at_risk' | 'off_track',
+  health: 'on_track' | 'at_risk' | 'off_track'
 ): 'green' | 'yellow' | 'red' {
   const map: Record<'on_track' | 'at_risk' | 'off_track', 'green' | 'yellow' | 'red'> = {
     on_track: 'green',
