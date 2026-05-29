@@ -1,46 +1,45 @@
-import { describe, it, expect, vi, afterEach } from 'vitest';
+import { describe, it, expect, vi, beforeEach } from 'vitest';
 import { getCookie, setCookie, removeCookie, getDefaultCookieDomain } from './cookies';
 
-let cookieStore = '';
+// Use a writable property on document.prototype to intercept cookie access
+const cookies: Map<string, string> = new Map();
+let rawCookie = '';
 
-function mockCookie() {
-  const proto = Object.getPrototypeOf(document);
-  Object.defineProperty(proto, 'cookie', {
-    configurable: true,
-    get() {
-      return cookieStore;
-    },
-    set(val: string) {
-      cookieStore = val;
-    },
-  });
-}
+// Override document.cookie via prototype in a way happy-dom supports
+const DocumentProto = Object.getPrototypeOf(document);
+const origDescriptor = Object.getOwnPropertyDescriptor(DocumentProto, 'cookie');
 
-mockCookie();
+Object.defineProperty(DocumentProto, 'cookie', {
+  configurable: true,
+  get(): string {
+    return rawCookie;
+  },
+  set(val: string): void {
+    rawCookie = val;
+  },
+});
 
-afterEach(() => {
-  cookieStore = '';
-  vi.restoreAllMocks();
+beforeEach(() => {
+  rawCookie = '';
 });
 
 describe('getCookie', () => {
   it('returns null when cookie does not exist', () => {
-    cookieStore = '';
     expect(getCookie('nonexistent')).toBeNull();
   });
 
   it('returns the value of an existing cookie', () => {
-    cookieStore = 'theme=dark; lang=en';
+    rawCookie = 'theme=dark; lang=en';
     expect(getCookie('theme')).toBe('dark');
   });
 
   it('returns null for empty document.cookie', () => {
-    cookieStore = '';
+    rawCookie = '';
     expect(getCookie('anything')).toBeNull();
   });
 
   it('decodes URI-encoded cookie values', () => {
-    cookieStore = 'name=hello%20world';
+    rawCookie = 'name=hello%20world';
     expect(getCookie('name')).toBe('hello world');
   });
 });
@@ -48,34 +47,34 @@ describe('getCookie', () => {
 describe('setCookie', () => {
   it('sets a basic cookie without options', () => {
     setCookie('token', 'abc123');
-    expect(cookieStore).toContain('token=abc123');
+    expect(rawCookie).toContain('token=abc123');
   });
 
   it('includes Expires when days is provided', () => {
     setCookie('token', 'abc123', { days: 7 });
-    expect(cookieStore).toContain('Expires=');
+    expect(rawCookie).toContain('Expires=');
   });
 
   it('includes Domain when provided', () => {
     setCookie('token', 'abc123', { domain: '.rtylr.com' });
-    expect(cookieStore).toContain('Domain=.rtylr.com');
+    expect(rawCookie).toContain('Domain=.rtylr.com');
   });
 
   it('includes SameSite', () => {
     setCookie('x', 'y', { sameSite: 'strict' });
-    expect(cookieStore).toContain('SameSite=strict');
+    expect(rawCookie).toContain('SameSite=strict');
   });
 });
 
 describe('removeCookie', () => {
   it('sets cookie with expired date to remove it', () => {
     removeCookie('token');
-    expect(cookieStore).toContain('Expires=Thu, 01 Jan 1970');
+    expect(rawCookie).toContain('Expires=Thu, 01 Jan 1970');
   });
 
   it('includes Domain when provided', () => {
     removeCookie('token', { domain: '.rtylr.com' });
-    expect(cookieStore).toContain('Domain=.rtylr.com');
+    expect(rawCookie).toContain('Domain=.rtylr.com');
   });
 });
 
