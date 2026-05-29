@@ -30,6 +30,7 @@ describe('getCookie', () => {
 
   it('returns null for empty document.cookie', () => {
     Object.defineProperty(document, 'cookie', {
+      configurable: true,
       writable: true,
       value: '',
     });
@@ -38,6 +39,7 @@ describe('getCookie', () => {
 
   it('decodes URI-encoded cookie values', () => {
     Object.defineProperty(document, 'cookie', {
+      configurable: true,
       writable: true,
       value: 'name=hello%20world',
     });
@@ -88,6 +90,8 @@ describe('removeCookie', () => {
 describe('getDefaultCookieDomain', () => {
   it('returns undefined for localhost', () => {
     Object.defineProperty(window, 'location', {
+      configurable: true,
+      writable: true,
       value: { hostname: 'localhost' },
       writable: true,
     });
@@ -96,6 +100,8 @@ describe('getDefaultCookieDomain', () => {
 
   it('returns .rtylr.com for rtylr.com hostname', () => {
     Object.defineProperty(window, 'location', {
+      configurable: true,
+      writable: true,
       value: { hostname: 'rtylr.com' },
       writable: true,
     });
@@ -104,6 +110,8 @@ describe('getDefaultCookieDomain', () => {
 
   it('returns .rtylr.com for subdomain of rtylr.com', () => {
     Object.defineProperty(window, 'location', {
+      configurable: true,
+      writable: true,
       value: { hostname: 'app.rtylr.com' },
       writable: true,
     });
