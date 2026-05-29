@@ -143,7 +143,7 @@ func computeSuggestions(bankTxns []domain.UnmatchedBankTransaction, invoices, ex
 		return nil
 	}
 
-	suggestions := make([]domain.MatchSuggestion, 0)
+	suggestions := make([]domain.MatchSuggestion, 0, len(bankTxns))
 	for _, bt := range bankTxns {
 		bankAmt := absInt64(bt.AmountMinorUnits)
 		bankDate := bt.OccurredAt.Unix() / 86400
