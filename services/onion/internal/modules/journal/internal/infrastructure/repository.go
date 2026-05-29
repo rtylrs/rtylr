@@ -37,7 +37,7 @@ func (r *Repository) List(ctx context.Context, ownerID int64, limit, offset int3
 		return nil, err
 	}
 
-	var entries []domain.JournalEntry
+	entries := make([]domain.JournalEntry, 0, len(rows))
 	for _, row := range rows {
 		entry := domain.JournalEntry{
 			ID:          row.ID,
