@@ -5,6 +5,7 @@ import AppLayout from '../../components/Layout/AppLayout';
 import MainLayout from '../../layouts/Main/MainLayout';
 import HelmetContainer from '../../components/HelmetContainer';
 import { blurFadeIn, staggerBlur } from '../../lib/animations';
+import { webPageSchema } from '../../lib/structured-data';
 import styles from './blog.module.scss';
 
 const BlogPage = (): JSX.Element => {
@@ -15,6 +16,11 @@ const BlogPage = (): JSX.Element => {
           title="Blog | rtylr"
           description="Product, engineering, and playbooks from the rtylr team."
           canonical="https://rtylr.com/blog/"
+          structuredData={webPageSchema({
+            name: 'Blog',
+            path: '/blog/',
+            description: 'Product, engineering, and playbooks from the rtylr team.',
+          })}
         />
 
         <div className={styles.page}>
