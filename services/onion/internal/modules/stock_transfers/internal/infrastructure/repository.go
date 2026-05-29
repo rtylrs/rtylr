@@ -39,7 +39,7 @@ func (r *Repository) ListStockTransfers(ctx context.Context, ownerID int64, limi
 	}
 	defer rows.Close()
 
-	var transfers []domain.StockTransfer
+	transfers := make([]domain.StockTransfer, 0, limit+1)
 	for rows.Next() {
 		var t domain.StockTransfer
 		var status, notes sql.NullString
