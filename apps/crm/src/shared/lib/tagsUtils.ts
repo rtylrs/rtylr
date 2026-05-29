@@ -41,3 +41,21 @@ export function tagFrequency(lists: string[][]): Record<string, number> {
   }
   return freq;
 }
+
+export function topTags(lists: string[][], limit: number): string[] {
+  const freq = tagFrequency(lists);
+  return Object.entries(freq)
+    .sort(([, a], [, b]) => b - a)
+    .slice(0, limit)
+    .map(([tag]) => tag);
+}
+
+export function renameTags(tags: string[], from: string, to: string): string[] {
+  const normFrom = normaliseTag(from);
+  return tags.map((t) => (normaliseTag(t) === normFrom ? normaliseTag(to) : t));
+}
+
+export function filterTagsByPrefix(tags: string[], prefix: string): string[] {
+  const normPrefix = normaliseTag(prefix);
+  return tags.filter((t) => normaliseTag(t).startsWith(normPrefix));
+}

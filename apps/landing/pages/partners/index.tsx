@@ -17,6 +17,7 @@ import AppLayout from '../../components/Layout/AppLayout';
 import MainLayout from '../../layouts/Main/MainLayout';
 import HelmetContainer from '../../components/HelmetContainer';
 import { blurFadeIn, staggerBlur, viewportOnce } from '../../lib/animations';
+import { webPageSchema } from '../../lib/structured-data';
 import styles from './partners.module.scss';
 
 const TRACKS = [
@@ -106,12 +107,6 @@ const PartnersPage = (): JSX.Element => {
           title="Partner Program | rtylr"
           description="Build with rtylr. Implementation partners, technology partners, solution partners, and hardware partners, terms, tiers, and how to apply."
           canonical="https://rtylr.com/partners/"
-          structuredData={webPageSchema({
-            name: 'Partner Program',
-            path: '/partners/',
-            description:
-              'Build with rtylr. Implementation partners, technology partners, solution partners, and hardware partners.',
-          })}
           structuredData={webPageSchema({
             name: 'Partner Program',
             path: '/partners/',
