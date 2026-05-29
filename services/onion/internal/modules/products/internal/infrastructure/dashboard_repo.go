@@ -218,7 +218,7 @@ func (r *Repository) ListReorderSuggestions(ctx context.Context, ownerID int64) 
 	}
 	defer closeRows(ctx, rows)
 
-	out := make([]domain.ReorderSuggestion, 0)
+	out := make([]domain.ReorderSuggestion, 0, 100)
 	for rows.Next() {
 		var s domain.ReorderSuggestion
 		if err := rows.Scan(&s.ProductID, &s.Name, &s.SKU,
