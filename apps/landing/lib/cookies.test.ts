@@ -4,6 +4,7 @@ import { getCookie, setCookie, removeCookie, getDefaultCookieDomain } from './co
 beforeEach(() => {
   // Reset document.cookie before each test
   Object.defineProperty(document, 'cookie', {
+    configurable: true,
     writable: true,
     value: '',
   });
@@ -20,6 +21,7 @@ describe('getCookie', () => {
 
   it('returns the value of an existing cookie', () => {
     Object.defineProperty(document, 'cookie', {
+      configurable: true,
       writable: true,
       value: 'theme=dark; lang=en',
     });
