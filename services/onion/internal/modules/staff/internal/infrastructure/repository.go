@@ -98,7 +98,8 @@ func (r *Repository) ListStaff(ctx context.Context, ownerID int64, search, depar
 		FROM hr_staff
 		WHERE owner_id = ?`
 
-	args := []interface{}{ownerID}
+	args := make([]interface{}, 0, 7)
+	args = append(args, ownerID)
 
 	if search != "" {
 		query += ` AND (first_name LIKE ? OR last_name LIKE ? OR email LIKE ? OR role LIKE ?)`
