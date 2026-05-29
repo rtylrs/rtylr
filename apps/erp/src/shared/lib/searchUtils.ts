@@ -63,10 +63,7 @@ export function uniqueStrings(values: string[]): string[] {
  * Returns unique values for the given key from an array of objects,
  * preserving insertion order.
  */
-export function uniqueValues<T extends Record<string, unknown>>(
-  items: T[],
-  key: keyof T
-): T[keyof T][] {
+export function uniqueValues<T extends Record<string, unknown>>(items: T[], key: keyof T): T[keyof T][] {
   const seen = new Set<unknown>();
   const result: T[keyof T][] = [];
   for (const item of items) {
