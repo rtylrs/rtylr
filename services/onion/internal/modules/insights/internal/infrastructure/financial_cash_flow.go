@@ -28,7 +28,11 @@ func (r *Repository) GetCashFlowSeries(ctx context.Context, ownerID int64, from,
 		return nil, err
 	}
 
-	out := make([]CashFlowDayRow, 0)
+	days := int(to.Sub(from).Hours()/24) + 1
+	if days < 0 {
+		days = 0
+	}
+	out := make([]CashFlowDayRow, 0, days)
 	for d := from; !d.After(to); d = d.AddDate(0, 0, 1) {
 		key := d.Format("2006-01-02")
 		out = append(out, CashFlowDayRow{
