@@ -3,7 +3,7 @@ package application
 import (
 	"context"
 	"database/sql"
-	"fmt"
+	"strconv"
 	"time"
 
 	"github.com/voxire/onion/internal/modules/staff/internal/domain"
@@ -51,7 +51,7 @@ func (s *Service) ClockOut(ctx context.Context, ownerID, staffID int64) error {
 }
 
 func (s *Service) GetDashboardStats(ctx context.Context, ownerID int64) (domain.DashboardStats, error) {
-	cacheKey := fmt.Sprintf("staff:dashboard:%d", ownerID)
+	cacheKey := "staff:dashboard:" + strconv.FormatInt(ownerID, 10)
 
 	return cacher.Of[domain.DashboardStats]().GetOrComputeSingle(ctx, cacheKey, func(ctx context.Context) (domain.DashboardStats, error) {
 		var stats domain.DashboardStats
