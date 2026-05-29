@@ -91,12 +91,13 @@ func (s *Service) computeVisibleApps(ctx context.Context, businessID, userID int
 		return out
 	}
 
-	allowed := make(map[string]bool)
-	for _, id := range s.GetUserAllowedApps(ctx, businessID, userID) {
+	allowedApps := s.GetUserAllowedApps(ctx, businessID, userID)
+	allowed := make(map[string]bool, len(allowedApps))
+	for _, id := range allowedApps {
 		allowed[id] = true
 	}
 
-	out := make([]domain.App, 0)
+	out := make([]domain.App, 0, len(all))
 	for _, a := range all {
 		if allowed[a.ID] {
 			out = append(out, project(a))
