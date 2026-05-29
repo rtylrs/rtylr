@@ -3,7 +3,6 @@ package application
 import (
 	"context"
 	"database/sql"
-	"fmt"
 	"time"
 
 	"github.com/voxire/onion/internal/modules/booking_calendar/internal/domain"
@@ -25,7 +24,7 @@ func NewService(_ context.Context, db *sql.DB) *Service {
 }
 
 func (s *Service) GetCalendar(ctx context.Context, ownerID int64, from, to string) ([]domain.CalendarDay, error) {
-	key := cacheKeys.Scoped("booking_calendar", ownerID, fmt.Sprintf("cal|f=%s|t=%s", from, to))
+	key := cacheKeys.Scoped("booking_calendar", ownerID, "cal|f="+from+"|t="+to)
 	return cacher.Of[[]domain.CalendarDay]().GetOrComputeSingle(ctx, key,
 		func(ctx context.Context) ([]domain.CalendarDay, error) {
 			return s.fetchCalendar(ctx, ownerID, from, to)
