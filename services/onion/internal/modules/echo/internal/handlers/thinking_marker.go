@@ -20,7 +20,7 @@ func ExtractThinkingBlocks(s string) (blocks []ThinkingBlock, remainder string) 
 		return nil, s
 	}
 	blocks = make([]ThinkingBlock, 0, len(matches))
-	var out []byte
+	out := make([]byte, 0, len(s))
 	last := 0
 	for _, m := range matches {
 		out = append(out, s[last:m[0]]...)
