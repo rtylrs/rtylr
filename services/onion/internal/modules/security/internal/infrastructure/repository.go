@@ -62,7 +62,7 @@ func (r *Repository) GetLoginHistory(ctx context.Context, userID int64) ([]domai
 	}
 	defer rows.Close()
 
-	var entries []domain.LoginEntry
+	entries := make([]domain.LoginEntry, 0, 20)
 	for rows.Next() {
 		var e domain.LoginEntry
 		if err := rows.Scan(&e.Email, &e.Method, &e.IP, &e.UserAgent, &e.Success, &e.CreatedAt); err != nil {
