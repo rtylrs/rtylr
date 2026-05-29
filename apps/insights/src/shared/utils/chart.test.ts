@@ -1,11 +1,5 @@
 import { describe, it, expect } from 'vitest';
-import {
-  reindexByLabel,
-  topN,
-  aggregateByLabel,
-  fillMissingDates,
-  pctShare,
-} from './chart';
+import { reindexByLabel, topN, aggregateByLabel, fillMissingDates, pctShare } from './chart';
 
 describe('reindexByLabel', () => {
   it('zips labels and values into LabeledPoint objects', () => {

@@ -95,7 +95,13 @@ describe('useCreateSupplier', () => {
     const newSupplier = { ...sampleSuppliers[0], id: 3 };
     mockErpApi.createSupplier.mockResolvedValue(newSupplier);
     const { result } = renderHook(() => useCreateSupplier(), { wrapper: createWrapper() });
-    const input = { name: 'New Supplier', contactName: 'Carol', email: 'c@c.com', phone: '777', categories: [] };
+    const input = {
+      name: 'New Supplier',
+      contactName: 'Carol',
+      email: 'c@c.com',
+      phone: '777',
+      categories: [],
+    };
     await act(async () => {
       await result.current.mutateAsync(input);
     });

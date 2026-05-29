@@ -25,8 +25,22 @@ function createWrapper() {
 }
 
 const samplePriceLists = [
-  { id: 1, name: 'Retail', description: 'Standard retail', tier: 'Retail' as const, multiplier: 1.0, activeCount: 100 },
-  { id: 2, name: 'Wholesale', description: 'Wholesale pricing', tier: 'Wholesale' as const, multiplier: 0.8, activeCount: 50 },
+  {
+    id: 1,
+    name: 'Retail',
+    description: 'Standard retail',
+    tier: 'Retail' as const,
+    multiplier: 1.0,
+    activeCount: 100,
+  },
+  {
+    id: 2,
+    name: 'Wholesale',
+    description: 'Wholesale pricing',
+    tier: 'Wholesale' as const,
+    multiplier: 0.8,
+    activeCount: 50,
+  },
 ];
 
 describe('usePriceLists', () => {
@@ -66,12 +80,23 @@ describe('useCreatePriceList', () => {
   beforeEach(() => vi.clearAllMocks());
 
   it('calls createPriceList with data', async () => {
-    const newList = { id: 3, name: 'VIP', description: '', tier: 'VIP' as const, multiplier: 0.7, activeCount: 0 };
+    const newList = {
+      id: 3,
+      name: 'VIP',
+      description: '',
+      tier: 'VIP' as const,
+      multiplier: 0.7,
+      activeCount: 0,
+    };
     mockErpApi.createPriceList.mockResolvedValue(newList);
     const { result } = renderHook(() => useCreatePriceList(), { wrapper: createWrapper() });
     await act(async () => {
       await result.current.mutateAsync({ name: 'VIP', tier: 'VIP', multiplier: 0.7 });
     });
-    expect(mockErpApi.createPriceList).toHaveBeenCalledWith({ name: 'VIP', tier: 'VIP', multiplier: 0.7 });
+    expect(mockErpApi.createPriceList).toHaveBeenCalledWith({
+      name: 'VIP',
+      tier: 'VIP',
+      multiplier: 0.7,
+    });
   });
 });

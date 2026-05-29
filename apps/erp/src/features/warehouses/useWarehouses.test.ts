@@ -27,8 +27,24 @@ function createWrapper() {
 }
 
 const sampleWarehouses = [
-  { id: 1, name: 'Main', address: '123 Main St', manager: 'Alice', capacity: 1000, used: 750, isDefault: true },
-  { id: 2, name: 'Secondary', address: '456 Side Ave', manager: 'Bob', capacity: 500, used: 200, isDefault: false },
+  {
+    id: 1,
+    name: 'Main',
+    address: '123 Main St',
+    manager: 'Alice',
+    capacity: 1000,
+    used: 750,
+    isDefault: true,
+  },
+  {
+    id: 2,
+    name: 'Secondary',
+    address: '456 Side Ave',
+    manager: 'Bob',
+    capacity: 500,
+    used: 200,
+    isDefault: false,
+  },
 ];
 
 describe('useWarehouses', () => {
@@ -59,7 +75,15 @@ describe('useCreateWarehouse', () => {
   beforeEach(() => vi.clearAllMocks());
 
   it('calls createWarehouse with data', async () => {
-    mockErpApi.createWarehouse.mockResolvedValue({ id: 3, name: 'New WH', address: '', manager: '', capacity: 100, used: 0, isDefault: false });
+    mockErpApi.createWarehouse.mockResolvedValue({
+      id: 3,
+      name: 'New WH',
+      address: '',
+      manager: '',
+      capacity: 100,
+      used: 0,
+      isDefault: false,
+    });
     const { result } = renderHook(() => useCreateWarehouse(), { wrapper: createWrapper() });
     await act(async () => {
       await result.current.mutateAsync({ name: 'New WH' });
