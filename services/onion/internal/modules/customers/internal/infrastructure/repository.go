@@ -133,7 +133,7 @@ func (r *Repository) listCustomersFiltered(ctx context.Context, filter domain.Cu
 	}
 	defer rows.Close()
 
-	customers := make([]domain.Customer, 0)
+	customers := make([]domain.Customer, 0, filter.PageSize)
 
 	for rows.Next() {
 		c, scanErr := scanCustomerRaw(rows)
