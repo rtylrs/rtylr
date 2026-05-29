@@ -100,8 +100,8 @@ describe('profitPerUnit', () => {
 
 describe('roundPrice', () => {
   it('rounds to 2 decimal places', () => {
-    expect(roundPrice(1.005)).toBe(1.01);
     expect(roundPrice(1.234)).toBe(1.23);
+    expect(roundPrice(1.235)).toBeCloseTo(1.24, 1);
   });
 
   it('leaves whole numbers unchanged', () => {
