@@ -3,7 +3,7 @@ package application
 import (
 	"context"
 	"database/sql"
-	"fmt"
+	"strconv"
 	"time"
 
 	"github.com/voxire/onion/internal/modules/booking_waitlist/internal/domain"
@@ -20,7 +20,7 @@ func NewService(_ context.Context, db *sql.DB) *Service {
 }
 
 func (s *Service) List(ctx context.Context, ownerID int64) ([]domain.WaitlistEntry, error) {
-	cacheKey := fmt.Sprintf("booking_waitlist:%d", ownerID)
+	cacheKey := "booking_waitlist:" + strconv.FormatInt(ownerID, 10)
 	return cacher.Of[[]domain.WaitlistEntry]().GetOrComputeSingle(ctx, cacheKey, func(ctx context.Context) ([]domain.WaitlistEntry, error) {
 		return s.repo.List(ctx, ownerID)
 	}, cacher.WithExpiry(ctx, cacheTTL))
@@ -44,5 +44,5 @@ func (s *Service) Update(ctx context.Context, ownerID, id int64, input domain.Wa
 }
 
 func (s *Service) invalidateCache(ctx context.Context, ownerID int64) {
-	cacher.Of[[]domain.WaitlistEntry]().Invalidate(ctx, []string{fmt.Sprintf("booking_waitlist:%d", ownerID)})
+	cacher.Of[[]domain.WaitlistEntry]().Invalidate(ctx, []string{"booking_waitlist:" + strconv.FormatInt(ownerID, 10)})
 }
