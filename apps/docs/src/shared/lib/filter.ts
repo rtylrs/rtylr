@@ -11,7 +11,10 @@ export interface DocItem {
 /**
  * Filters items by a search query matching title (case-insensitive).
  */
-export function filterByQuery<T extends Pick<DocItem, 'title' | 'tags'>>(items: T[], query: string): T[] {
+export function filterByQuery<T extends Pick<DocItem, 'title' | 'tags'>>(
+  items: T[],
+  query: string
+): T[] {
   const q = query.toLowerCase().trim();
   if (!q) return items;
   return items.filter(
