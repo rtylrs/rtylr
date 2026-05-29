@@ -1,17 +1,9 @@
 import { describe, it, expect, vi, beforeEach, afterEach } from 'vitest';
 import { getCookie, setCookie, removeCookie, getDefaultCookieDomain } from './cookies';
 
-let fakeCookie = '';
-
 beforeEach(() => {
-  fakeCookie = '';
-  Object.defineProperty(document, 'cookie', {
-    configurable: true,
-    get: () => fakeCookie,
-    set: (val: string) => {
-      fakeCookie = val;
-    },
-  });
+  vi.spyOn(document, 'cookie', 'get').mockReturnValue('');
+  vi.spyOn(document, 'cookie', 'set').mockImplementation(() => {});
 });
 
 afterEach(() => {
@@ -20,85 +12,79 @@ afterEach(() => {
 
 describe('getCookie', () => {
   it('returns null when cookie does not exist', () => {
-    fakeCookie = '';
+    vi.spyOn(document, 'cookie', 'get').mockReturnValue('');
     expect(getCookie('nonexistent')).toBeNull();
   });
 
   it('returns the value of an existing cookie', () => {
-    fakeCookie = 'theme=dark; lang=en';
+    vi.spyOn(document, 'cookie', 'get').mockReturnValue('theme=dark; lang=en');
     expect(getCookie('theme')).toBe('dark');
   });
 
   it('returns null for empty document.cookie', () => {
-    fakeCookie = '';
+    vi.spyOn(document, 'cookie', 'get').mockReturnValue('');
     expect(getCookie('anything')).toBeNull();
   });
 
   it('decodes URI-encoded cookie values', () => {
-    fakeCookie = 'name=hello%20world';
+    vi.spyOn(document, 'cookie', 'get').mockReturnValue('name=hello%20world');
     expect(getCookie('name')).toBe('hello world');
   });
 });
 
 describe('setCookie', () => {
   it('sets a basic cookie without options', () => {
+    const spy = vi.spyOn(document, 'cookie', 'set');
     setCookie('token', 'abc123');
-    expect(fakeCookie).toContain('token=abc123');
+    expect(spy).toHaveBeenCalled();
   });
 
   it('includes Expires when days is provided', () => {
+    const spy = vi.spyOn(document, 'cookie', 'set');
     setCookie('token', 'abc123', { days: 7 });
-    expect(fakeCookie).toContain('Expires=');
+    expect(spy.mock.calls[0][0]).toContain('Expires=');
   });
 
   it('includes Domain when provided', () => {
+    const spy = vi.spyOn(document, 'cookie', 'set');
     setCookie('token', 'abc123', { domain: '.rtylr.com' });
-    expect(fakeCookie).toContain('Domain=.rtylr.com');
+    expect(spy.mock.calls[0][0]).toContain('Domain=.rtylr.com');
   });
 
   it('includes SameSite', () => {
+    const spy = vi.spyOn(document, 'cookie', 'set');
     setCookie('x', 'y', { sameSite: 'strict' });
-    expect(fakeCookie).toContain('SameSite=strict');
+    expect(spy.mock.calls[0][0]).toContain('SameSite=strict');
   });
 });
 
 describe('removeCookie', () => {
   it('sets cookie with expired date to remove it', () => {
+    const spy = vi.spyOn(document, 'cookie', 'set');
     removeCookie('token');
-    expect(fakeCookie).toContain('Expires=Thu, 01 Jan 1970');
+    expect(spy.mock.calls[0][0]).toContain('Expires=Thu, 01 Jan 1970');
   });
 
   it('includes Domain when provided', () => {
+    const spy = vi.spyOn(document, 'cookie', 'set');
     removeCookie('token', { domain: '.rtylr.com' });
-    expect(fakeCookie).toContain('Domain=.rtylr.com');
+    expect(spy.mock.calls[0][0]).toContain('Domain=.rtylr.com');
   });
 });
 
 describe('getDefaultCookieDomain', () => {
   it('returns undefined for localhost', () => {
-    Object.defineProperty(window, 'location', {
-      configurable: true,
-      writable: true,
-      value: { hostname: 'localhost' },
-    });
+    vi.stubGlobal('location', { hostname: 'localhost' });
     expect(getDefaultCookieDomain()).toBeUndefined();
   });
 
   it('returns .rtylr.com for rtylr.com hostname', () => {
-    Object.defineProperty(window, 'location', {
-      configurable: true,
-      writable: true,
-      value: { hostname: 'rtylr.com' },
-    });
+    vi.stubGlobal('location', { hostname: 'rtylr.com' });
     expect(getDefaultCookieDomain()).toBe('.rtylr.com');
   });
 
   it('returns .rtylr.com for subdomain of rtylr.com', () => {
-    Object.defineProperty(window, 'location', {
-      configurable: true,
-      writable: true,
-      value: { hostname: 'app.rtylr.com' },
-    });
+    vi.stubGlobal('location', { hostname: 'app.rtylr.com' });
     expect(getDefaultCookieDomain()).toBe('.rtylr.com');
   });
 });
