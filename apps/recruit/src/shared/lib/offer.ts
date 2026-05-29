@@ -1,6 +1,12 @@
 // Offer management helpers for the recruit admin panel.
 
-export type OfferStatus = 'draft' | 'pending_approval' | 'sent' | 'accepted' | 'declined' | 'expired';
+export type OfferStatus =
+  | 'draft'
+  | 'pending_approval'
+  | 'sent'
+  | 'accepted'
+  | 'declined'
+  | 'expired';
 
 export interface Offer {
   id: string;
@@ -59,7 +65,7 @@ export function daysUntilExpiry(offer: Offer, referenceDate: string): number | n
  */
 export function acceptanceRate(offers: Offer[]): number {
   const sent = offers.filter(
-    (o) => o.status === 'accepted' || o.status === 'declined' || o.status === 'expired',
+    (o) => o.status === 'accepted' || o.status === 'declined' || o.status === 'expired'
   );
   if (sent.length === 0) return 0;
   const accepted = offers.filter((o) => o.status === 'accepted').length;

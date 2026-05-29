@@ -11,7 +11,7 @@ import type { Offer } from './offer';
 
 function makeOffer(
   status: 'draft' | 'pending_approval' | 'sent' | 'accepted' | 'declined' | 'expired',
-  expiresAt?: string,
+  expiresAt?: string
 ): Offer {
   return {
     id: 'o1',
