@@ -3,7 +3,6 @@ package infrastructure
 import (
 	"context"
 	"database/sql"
-	"fmt"
 	"strconv"
 
 	"github.com/voxire/onion/internal/modules/reviews/internal/domain"
@@ -84,10 +83,10 @@ func (r *Repository) Create(ctx context.Context, ownerID int64, input domain.Rev
 		StaffID:      input.StaffID,
 		ReviewerID:   sql.NullInt64{Int64: input.ReviewerID, Valid: input.ReviewerID != 0},
 		Period:       sql.NullString{String: input.Period, Valid: input.Period != ""},
-		Rating:       sql.NullString{String: fmt.Sprintf("%g", input.Rating), Valid: true},
-		GoalsRating:  sql.NullString{String: fmt.Sprintf("%g", input.GoalsRating), Valid: true},
-		ValuesRating: sql.NullString{String: fmt.Sprintf("%g", input.ValuesRating), Valid: true},
-		SkillsRating: sql.NullString{String: fmt.Sprintf("%g", input.SkillsRating), Valid: true},
+		Rating:       sql.NullString{String: strconv.FormatFloat(input.Rating, 'g', -1, 64), Valid: true},
+		GoalsRating:  sql.NullString{String: strconv.FormatFloat(input.GoalsRating, 'g', -1, 64), Valid: true},
+		ValuesRating: sql.NullString{String: strconv.FormatFloat(input.ValuesRating, 'g', -1, 64), Valid: true},
+		SkillsRating: sql.NullString{String: strconv.FormatFloat(input.SkillsRating, 'g', -1, 64), Valid: true},
 		Notes:        sql.NullString{String: input.Notes, Valid: input.Notes != ""},
 		Status:       sqlc.NullHrReviewsStatus{HrReviewsStatus: sqlc.HrReviewsStatus(status), Valid: true},
 	})
