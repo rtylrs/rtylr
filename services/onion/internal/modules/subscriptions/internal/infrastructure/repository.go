@@ -302,8 +302,8 @@ func (r *Repository) GetBillingHistory(ctx context.Context, ownerID int64, limit
 	}
 	defer rows.Close()
 
-	monthMap := make(map[string]*domain.BillingHistoryMonth)
-	monthOrder := make([]string, 0)
+	monthMap := make(map[string]*domain.BillingHistoryMonth, limit)
+	monthOrder := make([]string, 0, limit)
 
 	for rows.Next() {
 		var billingMonth time.Time
@@ -316,8 +316,9 @@ func (r *Repository) GetBillingHistory(ctx context.Context, ownerID int64, limit
 		}
 
 		key := billingMonth.Format("2006-01")
-		if _, exists := monthMap[key]; !exists {
-			m := &domain.BillingHistoryMonth{
+		m, exists := monthMap[key]
+		if !exists {
+			m = &domain.BillingHistoryMonth{
 				Month:  billingMonth,
 				Status: "paid",
 			}
@@ -332,8 +333,8 @@ func (r *Repository) GetBillingHistory(ctx context.Context, ownerID int64, limit
 		}
 
 		item := computeLineItem(seatCount, pricePerSeatCents, periodStart, endDate, billingMonth)
-		monthMap[key].LineItems = append(monthMap[key].LineItems, item)
-		monthMap[key].TotalCents += item.AmountCents
+		m.LineItems = append(m.LineItems, item)
+		m.TotalCents += item.AmountCents
 	}
 
 	if err := rows.Err(); err != nil {
