@@ -3,7 +3,7 @@ package application
 import (
 	"context"
 	"database/sql"
-	"fmt"
+	"strconv"
 	"time"
 
 	"github.com/voxire/onion/internal/modules/campaigns/internal/domain"
@@ -51,7 +51,7 @@ func (s *Service) List(ctx context.Context, ownerID int64) ([]domain.Campaign, e
 }
 
 func (s *Service) GetByID(ctx context.Context, ownerID, id int64) (domain.Campaign, error) {
-	key := cacheKeys.Scoped(campaignsScope, ownerID, fmt.Sprintf("id=%d", id))
+	key := cacheKeys.Scoped(campaignsScope, ownerID, "id="+strconv.FormatInt(id, 10))
 	return cacher.Of[domain.Campaign]().GetOrComputeSingle(ctx, key,
 		func(ctx context.Context) (domain.Campaign, error) {
 			return s.repo.GetByID(ctx, ownerID, id)
