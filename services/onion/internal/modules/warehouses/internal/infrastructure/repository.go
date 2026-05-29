@@ -31,7 +31,7 @@ func (r *Repository) ListWarehouses(ctx context.Context, ownerID int64) ([]domai
 		return nil, err
 	}
 
-	var warehouses []domain.Warehouse
+	warehouses := make([]domain.Warehouse, 0, len(rows))
 
 	for _, row := range rows {
 		var w domain.Warehouse
