@@ -50,7 +50,7 @@ func (r *Repository) ListPurchaseOrders(ctx context.Context, ownerID int64, stat
 		return nil, err
 	}
 
-	var orders []domain.PurchaseOrder
+	orders := make([]domain.PurchaseOrder, 0, len(rows))
 	for _, row := range rows {
 		orders = append(orders, purchaseOrderFromRow(row))
 	}
@@ -92,7 +92,7 @@ func (r *Repository) GetPurchaseOrderItems(ctx context.Context, purchaseOrderID 
 		return nil, err
 	}
 
-	var items []domain.PurchaseOrderItem
+	items := make([]domain.PurchaseOrderItem, 0, len(rows))
 	for _, row := range rows {
 		var item domain.PurchaseOrderItem
 		item.ID = row.ID
