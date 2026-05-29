@@ -170,7 +170,7 @@ func (s *Service) TriggerPayrollRun(ctx context.Context, ownerID, createdBy int6
 
 	periodDays := endDate.Sub(startDate).Hours() / 24
 
-	var entries []domain.PayrollEntryRecord
+	entries := make([]domain.PayrollEntryRecord, 0, len(employees))
 	var totalGross, totalNet float64
 
 	for _, emp := range employees {
