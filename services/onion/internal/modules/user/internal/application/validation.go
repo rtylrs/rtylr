@@ -7,7 +7,12 @@ import (
 	"github.com/voxire/onion/internal/modules/user/internal/infrastructure"
 )
 
-var emailRegex = regexp.MustCompile(`^[a-zA-Z0-9._%+-]+@[a-zA-Z0-9.-]+\.[a-zA-Z]{2,}$`)
+var (
+	emailRegex    = regexp.MustCompile(`^[a-zA-Z0-9._%+-]+@[a-zA-Z0-9.-]+\.[a-zA-Z]{2,}$`)
+	passwordUpper = regexp.MustCompile(`[A-Z]`)
+	passwordLower = regexp.MustCompile(`[a-z]`)
+	passwordDigit = regexp.MustCompile(`\d`)
+)
 
 type Validator struct{}
 
@@ -33,15 +38,15 @@ func (v *Validator) ValidatePassword(password string) error {
 		return infrastructure.ErrInvalidPassword
 	}
 
-	if !regexp.MustCompile(`[A-Z]`).MatchString(password) {
+	if !passwordUpper.MatchString(password) {
 		return infrastructure.ErrInvalidPassword
 	}
 
-	if !regexp.MustCompile(`[a-z]`).MatchString(password) {
+	if !passwordLower.MatchString(password) {
 		return infrastructure.ErrInvalidPassword
 	}
 
-	if !regexp.MustCompile(`\d`).MatchString(password) {
+	if !passwordDigit.MatchString(password) {
 		return infrastructure.ErrInvalidPassword
 	}
 
