@@ -2,6 +2,20 @@
   padding: 120px 0;
   background: var(--app-background);
   position: relative;
+  overflow: hidden;
+
+  &::before {
+    content: '';
+    position: absolute;
+    top: 8%;
+    left: 50%;
+    transform: translateX(-50%);
+    width: 820px;
+    height: 460px;
+    background: radial-gradient(ellipse at center, rgba(232, 230, 225, 0.055) 0%, transparent 70%);
+    pointer-events: none;
+    z-index: 0;
+  }
 }
 
 .container {
@@ -10,6 +24,7 @@
   padding: 0 50px;
   text-align: center;
   position: relative;
+  z-index: 1;
 }
 
 .header {
@@ -86,12 +101,21 @@
     background: rgba(255, 255, 255, 0.02);
 
     .iconWrapper {
-      border-color: rgba(255, 255, 255, 0.22);
-      background: rgba(255, 255, 255, 0.06);
+      border-color: rgba(232, 230, 225, 0.3);
+      background: rgba(255, 255, 255, 0.08);
+      transform: translateY(-4px);
+      box-shadow:
+        0 1px 0 rgba(255, 255, 255, 0.15) inset,
+        0 0 24px -4px rgba(232, 230, 225, 0.28),
+        0 12px 24px -8px rgba(0, 0, 0, 0.6);
 
       svg {
         color: #e8e6e1;
       }
+    }
+
+    .integrationName {
+      color: #ffffff;
     }
   }
 }
@@ -101,11 +125,18 @@
   height: 56px;
   border-radius: 14px;
   border: 1px solid rgba(255, 255, 255, 0.1);
-  background: rgba(255, 255, 255, 0.04);
+  background: linear-gradient(180deg, rgba(255, 255, 255, 0.07) 0%, rgba(255, 255, 255, 0.03) 100%);
   display: flex;
   align-items: center;
   justify-content: center;
-  transition: all 0.3s ease;
+  box-shadow:
+    0 1px 0 rgba(255, 255, 255, 0.06) inset,
+    0 6px 14px -6px rgba(0, 0, 0, 0.5);
+  transition:
+    border-color 0.3s ease,
+    background 0.3s ease,
+    transform 0.35s var(--ease-out-soft),
+    box-shadow 0.35s var(--ease-out-soft);
 
   svg {
     color: rgba(255, 255, 255, 0.7);
@@ -119,6 +150,7 @@
   color: rgba(255, 255, 255, 0.85);
   letter-spacing: 0.01em;
   text-align: center;
+  transition: color 0.3s ease;
 }
 
 .footnote {
