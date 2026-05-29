@@ -106,6 +106,12 @@ const PartnersPage = (): JSX.Element => {
           title="Partner Program | rtylr"
           description="Build with rtylr. Implementation partners, technology partners, solution partners, and hardware partners, terms, tiers, and how to apply."
           canonical="https://rtylr.com/partners/"
+          structuredData={webPageSchema({
+            name: 'Partner Program',
+            path: '/partners/',
+            description:
+              'Build with rtylr. Implementation partners, technology partners, solution partners, and hardware partners.',
+          })}
         />
 
         <div className={styles.page}>

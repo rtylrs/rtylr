@@ -16,6 +16,7 @@ import AppLayout from '../../components/Layout/AppLayout';
 import MainLayout from '../../layouts/Main/MainLayout';
 import HelmetContainer from '../../components/HelmetContainer';
 import { blurFadeIn, staggerBlur, viewportOnce } from '../../lib/animations';
+import { webPageSchema } from '../../lib/structured-data';
 import styles from './trust.module.scss';
 
 const PILLARS = [
@@ -74,6 +75,11 @@ const TrustPage = (): JSX.Element => {
           title="Trust Center | rtylr"
           description="Security, privacy, compliance, uptime, and vendor transparency, everything customers need before they commit."
           canonical="https://rtylr.com/trust/"
+          structuredData={webPageSchema({
+            name: 'Trust Center',
+            path: '/trust/',
+            description: 'Security, privacy, compliance, uptime, and vendor transparency.',
+          })}
         />
 
         <div className={styles.page}>
