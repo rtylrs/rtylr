@@ -3,7 +3,7 @@ package application
 import (
 	"context"
 	"database/sql"
-	"fmt"
+	"strconv"
 	"time"
 
 	"github.com/voxire/onion/internal/modules/store_orders/internal/domain"
@@ -20,7 +20,7 @@ func NewService(_ context.Context, db *sql.DB) *Service {
 }
 
 func (s *Service) List(ctx context.Context, ownerID int64) ([]domain.StoreOrder, error) {
-	cacheKey := fmt.Sprintf("store_orders:%d", ownerID)
+	cacheKey := "store_orders:" + strconv.FormatInt(ownerID, 10)
 	return cacher.Of[[]domain.StoreOrder]().GetOrComputeSingle(ctx, cacheKey, func(ctx context.Context) ([]domain.StoreOrder, error) {
 		return s.repo.List(ctx, ownerID)
 	}, cacher.WithExpiry(ctx, cacheTTL))
@@ -48,6 +48,6 @@ func (s *Service) Update(ctx context.Context, ownerID, id int64, input domain.St
 }
 
 func (s *Service) invalidateCache(ctx context.Context, ownerID int64) {
-	prefix := fmt.Sprintf("store_orders:%d", ownerID)
+	prefix := "store_orders:" + strconv.FormatInt(ownerID, 10)
 	cacher.Of[[]domain.StoreOrder]().Invalidate(ctx, []string{prefix})
 }
