@@ -104,7 +104,7 @@ func (r *Repository) getStockTakeItems(ctx context.Context, stockTakeID int64) (
 		return nil, err
 	}
 
-	var items []domain.StockTakeItem
+	items := make([]domain.StockTakeItem, 0, len(rows))
 
 	for _, row := range rows {
 		var item domain.StockTakeItem
