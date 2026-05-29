@@ -73,9 +73,7 @@ describe('lastItemIndex', () => {
 
 describe('paginationLabel', () => {
   it('produces correct label for first page', () => {
-    expect(paginationLabel({ page: 1, pageSize: 10, total: 100 })).toBe(
-      'Showing 1 - 10 of 100'
-    );
+    expect(paginationLabel({ page: 1, pageSize: 10, total: 100 })).toBe('Showing 1 - 10 of 100');
   });
 
   it('produces correct label for partial last page', () => {

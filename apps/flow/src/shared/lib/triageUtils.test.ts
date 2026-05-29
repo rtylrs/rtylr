@@ -93,7 +93,9 @@ describe('triageScore', () => {
 
   it('scores 4 for a completely empty task', () => {
     expect(
-      triageScore(makeTask({ status: 'backlog', assigneeId: '', dueDate: '', priority: 'no_priority' })),
+      triageScore(
+        makeTask({ status: 'backlog', assigneeId: '', dueDate: '', priority: 'no_priority' })
+      )
     ).toBe(4);
   });
 
@@ -107,7 +109,13 @@ describe('sortByTriageScore', () => {
   it('sorts highest score first', () => {
     const tasks = [
       makeTask({ id: 'a' }),
-      makeTask({ id: 'b', status: 'backlog', assigneeId: '', dueDate: '', priority: 'no_priority' }),
+      makeTask({
+        id: 'b',
+        status: 'backlog',
+        assigneeId: '',
+        dueDate: '',
+        priority: 'no_priority',
+      }),
     ];
     expect(sortByTriageScore(tasks)[0].id).toBe('b');
   });

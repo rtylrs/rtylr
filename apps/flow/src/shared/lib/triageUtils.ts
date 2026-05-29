@@ -32,12 +32,7 @@ export function unestimatedTasks(tasks: Task[]): Task[] {
 export function triageNeeded(tasks: Task[]): Task[] {
   return tasks.filter((t) => {
     if (t.status === 'done' || t.status === 'cancelled') return false;
-    return (
-      t.status === 'backlog' ||
-      !t.assigneeId ||
-      !t.dueDate ||
-      t.priority === 'no_priority'
-    );
+    return t.status === 'backlog' || !t.assigneeId || !t.dueDate || t.priority === 'no_priority';
   });
 }
 

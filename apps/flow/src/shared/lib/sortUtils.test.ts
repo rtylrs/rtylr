@@ -26,12 +26,18 @@ function makeTask(overrides: Partial<Task>): Task {
 
 describe('sortTasks by priority', () => {
   it('sorts urgent first in asc direction', () => {
-    const tasks = [makeTask({ id: 'a', priority: 'low' }), makeTask({ id: 'b', priority: 'urgent' })];
+    const tasks = [
+      makeTask({ id: 'a', priority: 'low' }),
+      makeTask({ id: 'b', priority: 'urgent' }),
+    ];
     expect(sortTasks(tasks, 'priority', 'asc')[0].id).toBe('b');
   });
 
   it('sorts low first in desc direction', () => {
-    const tasks = [makeTask({ id: 'a', priority: 'low' }), makeTask({ id: 'b', priority: 'urgent' })];
+    const tasks = [
+      makeTask({ id: 'a', priority: 'low' }),
+      makeTask({ id: 'b', priority: 'urgent' }),
+    ];
     expect(sortTasks(tasks, 'priority', 'desc')[0].id).toBe('a');
   });
 });
@@ -53,7 +59,10 @@ describe('sortTasks by dueDate', () => {
   });
 
   it('places empty due dates last', () => {
-    const tasks = [makeTask({ id: 'a', dueDate: '' }), makeTask({ id: 'b', dueDate: '2026-01-01' })];
+    const tasks = [
+      makeTask({ id: 'a', dueDate: '' }),
+      makeTask({ id: 'b', dueDate: '2026-01-01' }),
+    ];
     expect(sortTasks(tasks, 'dueDate', 'asc')[0].id).toBe('b');
   });
 });

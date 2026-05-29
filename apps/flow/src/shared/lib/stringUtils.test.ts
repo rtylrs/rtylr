@@ -52,7 +52,7 @@ describe('truncate', () => {
   });
 
   it('uses custom ellipsis', () => {
-    expect(truncate('hello world', 7, '…')).toBe('hello h…');
+    expect(truncate('hello world', 7, '…')).toBe('hello …');
   });
 });
 

@@ -59,11 +59,7 @@ export function projectsByCompletion(projects: Project[]): Project[] {
 /** Returns the number of overdue tasks (past due date, not done or cancelled). */
 export function overdueCount(tasks: Task[], today: string): number {
   return tasks.filter(
-    (t) =>
-      t.dueDate &&
-      t.dueDate < today &&
-      t.status !== 'done' &&
-      t.status !== 'cancelled',
+    (t) => t.dueDate && t.dueDate < today && t.status !== 'done' && t.status !== 'cancelled'
   ).length;
 }
 

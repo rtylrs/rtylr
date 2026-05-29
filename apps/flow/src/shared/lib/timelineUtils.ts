@@ -55,17 +55,18 @@ export function sortTimelineItems(items: TimelineItem[]): TimelineItem[] {
 export function itemsInRange(
   items: TimelineItem[],
   rangeStart: string,
-  rangeEnd: string,
+  rangeEnd: string
 ): TimelineItem[] {
-  return items.filter(
-    (item) => item.startDate <= rangeEnd && item.endDate >= rangeStart,
-  );
+  return items.filter((item) => item.startDate <= rangeEnd && item.endDate >= rangeStart);
 }
 
 /** Returns the earliest start date from a list of timeline items. */
 export function earliestStart(items: TimelineItem[]): string | null {
   if (items.length === 0) return null;
-  return items.reduce((min, item) => (item.startDate < min ? item.startDate : min), items[0].startDate);
+  return items.reduce(
+    (min, item) => (item.startDate < min ? item.startDate : min),
+    items[0].startDate
+  );
 }
 
 /** Returns the latest end date from a list of timeline items. */

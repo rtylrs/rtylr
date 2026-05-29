@@ -47,11 +47,7 @@ export function paginationLabel(state: PaginationState): string {
  * Build a list of page numbers to display in a paginator.
  * Always includes first and last page; adds ellipsis placeholders (0) for gaps.
  */
-export function pageNumbers(
-  currentPage: number,
-  pages: number,
-  windowSize = 2
-): (number | 0)[] {
+export function pageNumbers(currentPage: number, pages: number, windowSize = 2): (number | 0)[] {
   if (pages <= 0) return [];
   const set = new Set<number>();
   set.add(1);

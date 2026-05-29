@@ -107,8 +107,20 @@ describe('projectToTimelineItem', () => {
 describe('sortTimelineItems', () => {
   it('sorts by start date ascending', () => {
     const items = [
-      { id: 'a', label: 'A', startDate: '2026-06-01', endDate: '2026-06-30', type: 'task' as const },
-      { id: 'b', label: 'B', startDate: '2026-01-01', endDate: '2026-01-31', type: 'task' as const },
+      {
+        id: 'a',
+        label: 'A',
+        startDate: '2026-06-01',
+        endDate: '2026-06-30',
+        type: 'task' as const,
+      },
+      {
+        id: 'b',
+        label: 'B',
+        startDate: '2026-01-01',
+        endDate: '2026-01-31',
+        type: 'task' as const,
+      },
     ];
     expect(sortTimelineItems(items)[0].id).toBe('b');
   });
@@ -117,8 +129,20 @@ describe('sortTimelineItems', () => {
 describe('itemsInRange', () => {
   it('returns items overlapping the range', () => {
     const items = [
-      { id: 'a', label: 'A', startDate: '2026-06-01', endDate: '2026-06-30', type: 'task' as const },
-      { id: 'b', label: 'B', startDate: '2026-12-01', endDate: '2026-12-31', type: 'task' as const },
+      {
+        id: 'a',
+        label: 'A',
+        startDate: '2026-06-01',
+        endDate: '2026-06-30',
+        type: 'task' as const,
+      },
+      {
+        id: 'b',
+        label: 'B',
+        startDate: '2026-12-01',
+        endDate: '2026-12-31',
+        type: 'task' as const,
+      },
     ];
     expect(itemsInRange(items, '2026-06-01', '2026-07-31').length).toBe(1);
   });
@@ -127,8 +151,20 @@ describe('itemsInRange', () => {
 describe('earliestStart', () => {
   it('returns the earliest start date', () => {
     const items = [
-      { id: 'a', label: 'A', startDate: '2026-06-01', endDate: '2026-06-30', type: 'task' as const },
-      { id: 'b', label: 'B', startDate: '2026-01-01', endDate: '2026-01-31', type: 'task' as const },
+      {
+        id: 'a',
+        label: 'A',
+        startDate: '2026-06-01',
+        endDate: '2026-06-30',
+        type: 'task' as const,
+      },
+      {
+        id: 'b',
+        label: 'B',
+        startDate: '2026-01-01',
+        endDate: '2026-01-31',
+        type: 'task' as const,
+      },
     ];
     expect(earliestStart(items)).toBe('2026-01-01');
   });
@@ -141,8 +177,20 @@ describe('earliestStart', () => {
 describe('latestEnd', () => {
   it('returns the latest end date', () => {
     const items = [
-      { id: 'a', label: 'A', startDate: '2026-01-01', endDate: '2026-06-30', type: 'task' as const },
-      { id: 'b', label: 'B', startDate: '2026-01-01', endDate: '2026-12-31', type: 'task' as const },
+      {
+        id: 'a',
+        label: 'A',
+        startDate: '2026-01-01',
+        endDate: '2026-06-30',
+        type: 'task' as const,
+      },
+      {
+        id: 'b',
+        label: 'B',
+        startDate: '2026-01-01',
+        endDate: '2026-12-31',
+        type: 'task' as const,
+      },
     ];
     expect(latestEnd(items)).toBe('2026-12-31');
   });

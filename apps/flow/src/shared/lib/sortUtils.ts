@@ -5,11 +5,14 @@ import { statusOrder } from './statusUtils';
 export type TaskSortKey = 'priority' | 'status' | 'dueDate' | 'created' | 'updated' | 'title';
 export type SortDir = 'asc' | 'desc';
 
+// Priority asc = highest priority first (urgent before low).
+// Priority desc = lowest priority first (low before urgent).
 function byPriority(a: Task, b: Task, dir: SortDir): number {
-  const diff = priorityWeight(a.priority) - priorityWeight(b.priority);
+  const diff = priorityWeight(b.priority) - priorityWeight(a.priority);
   return dir === 'asc' ? diff : -diff;
 }
 
+// Status asc = earliest pipeline stage first (backlog before done).
 function byStatus(a: Task, b: Task, dir: SortDir): number {
   const diff = statusOrder(a.status) - statusOrder(b.status);
   return dir === 'asc' ? diff : -diff;
@@ -55,7 +58,7 @@ export function sortTasks(tasks: Task[], key: TaskSortKey, dir: SortDir = 'asc')
 /** Sorts tasks by multiple keys in order of precedence. */
 export function sortTasksMultiKey(
   tasks: Task[],
-  criteria: Array<{ key: TaskSortKey; dir: SortDir }>,
+  criteria: Array<{ key: TaskSortKey; dir: SortDir }>
 ): Task[] {
   return [...tasks].sort((a, b) => {
     for (const { key, dir } of criteria) {

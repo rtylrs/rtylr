@@ -34,10 +34,7 @@ function makeTask(overrides: Partial<Task>): Task {
 
 describe('focusPinnedTasks', () => {
   it('returns tasks with focusPin=true', () => {
-    const tasks = [
-      makeTask({ id: 'a', focusPin: true }),
-      makeTask({ id: 'b', focusPin: false }),
-    ];
+    const tasks = [makeTask({ id: 'a', focusPin: true }), makeTask({ id: 'b', focusPin: false })];
     expect(focusPinnedTasks(tasks).map((t) => t.id)).toEqual(['a']);
   });
 });
@@ -99,10 +96,7 @@ describe('tasksWithinEffortBudget', () => {
 
 describe('tasksWithDecisionNote', () => {
   it('returns tasks with a decision note', () => {
-    const tasks = [
-      makeTask({ id: 'a', decisionNote: 'Use approach X' }),
-      makeTask({ id: 'b' }),
-    ];
+    const tasks = [makeTask({ id: 'a', decisionNote: 'Use approach X' }), makeTask({ id: 'b' })];
     expect(tasksWithDecisionNote(tasks).map((t) => t.id)).toEqual(['a']);
   });
 });

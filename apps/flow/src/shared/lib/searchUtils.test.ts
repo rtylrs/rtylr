@@ -97,7 +97,10 @@ describe('searchProjects', () => {
 
 describe('searchMembers', () => {
   it('finds by name', () => {
-    const members = [makeMember({ name: 'Alice' }), makeMember({ name: 'Bob', email: 'bob@x.com' })];
+    const members = [
+      makeMember({ name: 'Alice' }),
+      makeMember({ name: 'Bob', email: 'bob@x.com' }),
+    ];
     expect(searchMembers(members, 'alice').length).toBe(1);
   });
 

@@ -31,7 +31,7 @@ export function clampPage(page: number, count: number, pageSize: number): number
 export function pageRange(
   page: number,
   count: number,
-  pageSize: number,
+  pageSize: number
 ): { start: number; end: number; total: number } {
   if (count === 0) return { start: 0, end: 0, total: 0 };
   const start = (page - 1) * pageSize + 1;
@@ -40,11 +40,7 @@ export function pageRange(
 }
 
 /** Returns a list of page numbers to display in a paginator (with -1 for ellipsis). */
-export function pageNumbers(
-  currentPage: number,
-  total: number,
-  windowSize = 2,
-): (number | -1)[] {
+export function pageNumbers(currentPage: number, total: number, windowSize = 2): (number | -1)[] {
   const pages: (number | -1)[] = [];
   const max = total;
   if (max <= 1) return total === 1 ? [1] : [];

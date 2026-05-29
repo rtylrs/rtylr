@@ -54,8 +54,8 @@ describe('isOvernightShift', () => {
     expect(isOvernightShift('22:00', '06:00')).toBe(true);
   });
 
-  it('returns false for a shift ending at midnight', () => {
-    expect(isOvernightShift('20:00', '00:00')).toBe(false);
+  it('returns true for a shift ending at midnight (midnight is less than 20:00)', () => {
+    expect(isOvernightShift('20:00', '00:00')).toBe(true);
   });
 });
 

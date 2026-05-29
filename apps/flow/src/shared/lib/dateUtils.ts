@@ -57,18 +57,19 @@ export function formatDateShort(date: string): string {
 
 /** Adds the given number of days to an ISO date string, returning a new ISO string. */
 export function addDays(date: string, days: number): string {
-  const d = new Date(date + 'T00:00:00');
-  d.setDate(d.getDate() + days);
-  return d.toISOString().slice(0, 10);
+  const [y, m, d] = date.split('-').map(Number);
+  const dt = new Date(Date.UTC(y, m - 1, d + days));
+  return dt.toISOString().slice(0, 10);
 }
 
 /** Returns the ISO start-of-week (Monday) for a given date string. */
 export function startOfWeek(date: string): string {
-  const d = new Date(date + 'T00:00:00');
-  const day = d.getDay(); // 0 = Sunday
+  const [y, m, d] = date.split('-').map(Number);
+  const dt = new Date(Date.UTC(y, m - 1, d));
+  const day = dt.getUTCDay(); // 0 = Sunday
   const diff = day === 0 ? -6 : 1 - day;
-  d.setDate(d.getDate() + diff);
-  return d.toISOString().slice(0, 10);
+  dt.setUTCDate(dt.getUTCDate() + diff);
+  return dt.toISOString().slice(0, 10);
 }
 
 /** Returns the ISO end-of-week (Sunday) for a given date string. */
