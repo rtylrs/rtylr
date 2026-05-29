@@ -5,7 +5,6 @@ import (
 	"database/sql"
 	"encoding/json"
 	"errors"
-	"fmt"
 	"strconv"
 	"time"
 
@@ -953,7 +952,7 @@ func scanEnrichedTask(ctx context.Context, rows *sql.Rows) (domain.Task, error) 
 	}
 	t.AssigneeInitials = initialsOf(t.AssigneeName)
 	if t.Identifier == "" {
-		t.Identifier = fmt.Sprintf("T-%d", t.ID)
+		t.Identifier = "T-" + strconv.FormatInt(t.ID, 10)
 	}
 	return t, nil
 }
@@ -1036,7 +1035,7 @@ func scanTasksRaw(ctx context.Context, rows *sql.Rows) ([]domain.Task, error) {
 				logger.Ctx(ctx).Warn("failed to unmarshal task labels", logger.Error(unErr))
 			}
 		}
-		t.Identifier = fmt.Sprintf("T-%d", t.ID)
+		t.Identifier = "T-" + strconv.FormatInt(t.ID, 10)
 		tasks = append(tasks, t)
 	}
 	return tasks, rows.Err()
