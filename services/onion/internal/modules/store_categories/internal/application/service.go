@@ -3,7 +3,7 @@ package application
 import (
 	"context"
 	"database/sql"
-	"fmt"
+	"strconv"
 	"time"
 
 	"github.com/voxire/onion/internal/modules/store_categories/internal/domain"
@@ -20,7 +20,7 @@ func NewService(_ context.Context, db *sql.DB) *Service {
 }
 
 func (s *Service) List(ctx context.Context, ownerID int64) ([]domain.StoreCategory, error) {
-	cacheKey := fmt.Sprintf("store_categories:%d", ownerID)
+	cacheKey := "store_categories:" + strconv.FormatInt(ownerID, 10)
 	return cacher.Of[[]domain.StoreCategory]().GetOrComputeSingle(ctx, cacheKey, func(ctx context.Context) ([]domain.StoreCategory, error) {
 		return s.repo.List(ctx, ownerID)
 	}, cacher.WithExpiry(ctx, cacheTTL))
@@ -52,6 +52,6 @@ func (s *Service) Delete(ctx context.Context, ownerID, id int64) error {
 }
 
 func (s *Service) invalidateCache(ctx context.Context, ownerID int64) {
-	prefix := fmt.Sprintf("store_categories:%d", ownerID)
+	prefix := "store_categories:" + strconv.FormatInt(ownerID, 10)
 	cacher.Of[[]domain.StoreCategory]().Invalidate(ctx, []string{prefix})
 }
