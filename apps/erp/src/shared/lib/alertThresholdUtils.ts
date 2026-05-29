@@ -22,8 +22,8 @@ export interface ThresholdEvaluation {
 
 /** Evaluate whether a value exceeds a threshold and return severity. */
 export function evaluateThreshold(threshold: Threshold, currentValue: number): ThresholdSeverity {
-  if (currentValue >= threshold.criticalValue) return 'critical';
-  if (currentValue >= threshold.warningValue) return 'warning';
+  if (currentValue <= threshold.criticalValue) return 'critical';
+  if (currentValue <= threshold.warningValue) return 'warning';
   return 'info';
 }
 
