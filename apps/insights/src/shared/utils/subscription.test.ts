@@ -11,7 +11,7 @@ import type { Subscription } from './subscription';
 
 function makeSub(
   status: 'trial' | 'active' | 'past_due' | 'cancelled' | 'paused',
-  mrr = 99,
+  mrr = 99
 ): Subscription {
   return {
     id: 's1',
