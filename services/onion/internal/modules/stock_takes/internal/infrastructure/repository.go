@@ -39,7 +39,7 @@ func (r *Repository) ListStockTakes(ctx context.Context, ownerID int64, limit, o
 	}
 	defer rows.Close()
 
-	var stockTakes []domain.StockTake
+	stockTakes := make([]domain.StockTake, 0, limit+1)
 	for rows.Next() {
 		var s domain.StockTake
 		var warehouseID sql.NullInt64
