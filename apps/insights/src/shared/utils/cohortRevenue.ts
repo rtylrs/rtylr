@@ -48,7 +48,7 @@ export function avgCohortRevenue(cohorts: CohortRevenuePeriod[], period: number)
  */
 export function highestLtvCohort(
   cohorts: CohortRevenuePeriod[],
-  period: number,
+  period: number
 ): CohortRevenuePeriod | undefined {
   if (cohorts.length === 0) return undefined;
   return cohorts.reduce((best, c) => (ltv(c, period) > ltv(best, period) ? c : best));

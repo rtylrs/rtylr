@@ -11,7 +11,7 @@ import type { CohortRevenuePeriod } from './cohortRevenue';
 function makeCohort(
   cohortDate: string,
   periods: number[],
-  initialSize: number,
+  initialSize: number
 ): CohortRevenuePeriod {
   return { cohortDate, periods, initialSize };
 }
@@ -56,10 +56,7 @@ describe('bestRevenuePeriod', () => {
 
 describe('avgCohortRevenue', () => {
   it('returns average revenue across cohorts at a period', () => {
-    const cohorts = [
-      makeCohort('Jan', [1000, 800], 100),
-      makeCohort('Feb', [1200, 900], 100),
-    ];
+    const cohorts = [makeCohort('Jan', [1000, 800], 100), makeCohort('Feb', [1200, 900], 100)];
     expect(avgCohortRevenue(cohorts, 0)).toBe(1100);
   });
 
@@ -70,10 +67,7 @@ describe('avgCohortRevenue', () => {
 
 describe('highestLtvCohort', () => {
   it('returns cohort with highest LTV', () => {
-    const cohorts = [
-      makeCohort('Jan', [1000, 800], 100),
-      makeCohort('Feb', [500, 400], 100),
-    ];
+    const cohorts = [makeCohort('Jan', [1000, 800], 100), makeCohort('Feb', [500, 400], 100)];
     expect(highestLtvCohort(cohorts, 1)?.cohortDate).toBe('Jan');
   });
 
