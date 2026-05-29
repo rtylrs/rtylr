@@ -95,10 +95,7 @@ describe('labeledTasks', () => {
 describe('taskCountByLabel', () => {
   it('counts tasks per label', () => {
     const labels = [makeLabel({ id: 'l1' }), makeLabel({ id: 'l2', name: 'Feature' })];
-    const tasks = [
-      makeTask({ labelIds: ['l1'] }),
-      makeTask({ labelIds: ['l1', 'l2'] }),
-    ];
+    const tasks = [makeTask({ labelIds: ['l1'] }), makeTask({ labelIds: ['l1', 'l2'] })];
     const counts = taskCountByLabel(tasks, labels);
     expect(counts.get('l1')).toBe(2);
     expect(counts.get('l2')).toBe(1);

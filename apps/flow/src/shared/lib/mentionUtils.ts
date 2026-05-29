@@ -35,10 +35,6 @@ export function buildMention(member: Member): string {
 export function mentionCandidates(members: Member[], query: string): Member[] {
   const q = query.toLowerCase();
   return members
-    .filter(
-      (m) =>
-        m.name.toLowerCase().includes(q) ||
-        m.email.toLowerCase().startsWith(q),
-    )
+    .filter((m) => m.name.toLowerCase().includes(q) || m.email.toLowerCase().startsWith(q))
     .sort((a, b) => a.name.localeCompare(b.name));
 }

@@ -31,22 +31,18 @@ export function isSelectAll(e: KeyboardEvent): boolean {
 /** Returns true if the event targets an input or textarea element. */
 export function isInInputField(e: KeyboardEvent): boolean {
   const target = e.target as HTMLElement;
-  return (
-    target.tagName === 'INPUT' ||
-    target.tagName === 'TEXTAREA' ||
-    target.isContentEditable
-  );
+  return target.tagName === 'INPUT' || target.tagName === 'TEXTAREA' || target.isContentEditable;
 }
 
 /** A mapping of common keyboard shortcut descriptions. */
 export const KEYBOARD_SHORTCUTS: Record<string, string> = {
-  'c': 'Create task',
-  'n': 'New project',
+  c: 'Create task',
+  n: 'New project',
   '/': 'Search',
-  'f': 'Filter',
+  f: 'Filter',
   'g i': 'Go to Inbox',
   'g m': 'Go to My Tasks',
-  'Escape': 'Close dialog',
+  Escape: 'Close dialog',
 } as const;
 
 /** Returns the shortcut description for a key, or null. */

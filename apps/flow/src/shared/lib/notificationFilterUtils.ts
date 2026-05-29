@@ -18,7 +18,7 @@ export function unreadCount(notifications: Notification[]): number {
 /** Returns notifications of a specific type. */
 export function notificationsByType(
   notifications: Notification[],
-  type: Notification['type'],
+  type: Notification['type']
 ): Notification[] {
   return notifications.filter((n) => n.type === type);
 }
@@ -29,7 +29,10 @@ export function sortNotificationsDesc(notifications: Notification[]): Notificati
 }
 
 /** Returns notifications for a specific task. */
-export function notificationsForTask(notifications: Notification[], taskId: string): Notification[] {
+export function notificationsForTask(
+  notifications: Notification[],
+  taskId: string
+): Notification[] {
   return notifications.filter((n) => n.taskId === taskId);
 }
 

@@ -1,6 +1,13 @@
 import { describe, it, expect, beforeEach } from 'vitest';
 
-import { getItem, setItem, removeItem, hasItem, flowKey, FLOW_STORAGE_PREFIX } from './storageUtils';
+import {
+  getItem,
+  setItem,
+  removeItem,
+  hasItem,
+  flowKey,
+  FLOW_STORAGE_PREFIX,
+} from './storageUtils';
 
 beforeEach(() => {
   localStorage.clear();

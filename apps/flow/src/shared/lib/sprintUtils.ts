@@ -40,10 +40,7 @@ export function predictability(cycle: Cycle): number {
 /** Returns incomplete tasks carried over from a cycle. */
 export function carryoverTasks(tasks: Task[], cycleId: string): Task[] {
   return tasks.filter(
-    (t) =>
-      t.cycleId === cycleId &&
-      t.status !== 'done' &&
-      t.status !== 'cancelled',
+    (t) => t.cycleId === cycleId && t.status !== 'done' && t.status !== 'cancelled'
   );
 }
 
