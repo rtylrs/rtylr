@@ -2,11 +2,14 @@ import { describe, expect, it } from 'vitest';
 
 import {
   breadcrumbList,
+  faqPageSchema,
+  organizationContactSchema,
+  organizationSchema,
+  pricingPageSchema,
   productSchema,
   productWithBreadcrumbs,
-  organizationContactSchema,
-  faqPageSchema,
-  pricingPageSchema,
+  webPageSchema,
+  webSiteSchema,
 } from './structured-data';
 
 /**
@@ -159,5 +162,74 @@ describe('pricingPageSchema', () => {
     });
     const product = out['@graph'] as Array<{ offers: { offers: Array<{ price: string }> } }>;
     expect(product[0].offers.offers[0].price).toBe('Custom');
+  });
+});
+
+describe('organizationSchema', () => {
+  it('emits an Organization type', () => {
+    const out = organizationSchema();
+    expect(out['@type']).toBe('Organization');
+    expect(out['@context']).toBe('https://schema.org');
+  });
+
+  it('includes the rtylr name and URL', () => {
+    const out = organizationSchema();
+    expect(out.name).toBe('rtylr');
+    expect(out.url).toBe('https://rtylr.com');
+  });
+
+  it('includes a logo URL', () => {
+    const out = organizationSchema() as { logo: string };
+    expect(out.logo).toContain('rtylr.com');
+  });
+
+  it('includes the founding date', () => {
+    const out = organizationSchema() as { foundingDate: string };
+    expect(out.foundingDate).toBe('2024');
+  });
+});
+
+describe('webSiteSchema', () => {
+  it('emits a WebSite type with correct URL', () => {
+    const out = webSiteSchema();
+    expect(out['@type']).toBe('WebSite');
+    expect(out.url).toBe('https://rtylr.com');
+  });
+
+  it('includes a SearchAction for sitelinks search', () => {
+    const out = webSiteSchema() as {
+      potentialAction: { '@type': string; 'query-input': string };
+    };
+    expect(out.potentialAction['@type']).toBe('SearchAction');
+    expect(out.potentialAction['query-input']).toContain('search_term_string');
+  });
+
+  it('includes the site name and description', () => {
+    const out = webSiteSchema();
+    expect(out.name).toBe('rtylr');
+    expect(typeof out.description).toBe('string');
+  });
+});
+
+describe('webPageSchema', () => {
+  it('emits a @graph with WebPage and BreadcrumbList', () => {
+    const out = webPageSchema({ name: 'Blog', path: '/blog/', description: 'Blog posts.' });
+    const graph = out['@graph'] as Array<Record<string, unknown>>;
+    expect(graph).toHaveLength(2);
+    expect(graph[0]['@type']).toBe('WebPage');
+    expect(graph[1]['@type']).toBe('BreadcrumbList');
+  });
+
+  it('builds the correct WebPage URL', () => {
+    const out = webPageSchema({ name: 'Support', path: '/support/', description: 'Help.' });
+    const graph = out['@graph'] as Array<{ url?: string }>;
+    expect(graph[0].url).toBe('https://rtylr.com/support/');
+  });
+
+  it('includes the page name and description', () => {
+    const out = webPageSchema({ name: 'Trust', path: '/trust/', description: 'Security.' });
+    const graph = out['@graph'] as Array<{ name?: string; description?: string }>;
+    expect(graph[0].name).toBe('Trust');
+    expect(graph[0].description).toBe('Security.');
   });
 });
