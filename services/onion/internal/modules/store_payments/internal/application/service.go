@@ -3,7 +3,7 @@ package application
 import (
 	"context"
 	"database/sql"
-	"fmt"
+	"strconv"
 	"time"
 
 	"github.com/voxire/onion/internal/modules/store_payments/internal/domain"
@@ -20,7 +20,7 @@ func NewService(_ context.Context, db *sql.DB) *Service {
 }
 
 func (s *Service) List(ctx context.Context, ownerID int64) ([]domain.PaymentMethod, error) {
-	cacheKey := fmt.Sprintf("store_payments:%d", ownerID)
+	cacheKey := "store_payments:" + strconv.FormatInt(ownerID, 10)
 	return cacher.Of[[]domain.PaymentMethod]().GetOrComputeSingle(ctx, cacheKey, func(ctx context.Context) ([]domain.PaymentMethod, error) {
 		return s.repo.List(ctx, ownerID)
 	}, cacher.WithExpiry(ctx, cacheTTL))
@@ -44,5 +44,5 @@ func (s *Service) Update(ctx context.Context, ownerID, id int64, input domain.Pa
 }
 
 func (s *Service) invalidateCache(ctx context.Context, ownerID int64) {
-	cacher.Of[[]domain.PaymentMethod]().Invalidate(ctx, []string{fmt.Sprintf("store_payments:%d", ownerID)})
+	cacher.Of[[]domain.PaymentMethod]().Invalidate(ctx, []string{"store_payments:" + strconv.FormatInt(ownerID, 10)})
 }
