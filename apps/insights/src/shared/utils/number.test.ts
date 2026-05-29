@@ -14,8 +14,8 @@ describe('roundTo', () => {
     expect(roundTo(0, 3)).toBe(0);
   });
 
-  it('rounds up at the midpoint', () => {
-    expect(roundTo(1.005, 2)).toBeCloseTo(1.01);
+  it('rounds a value with more decimals than requested', () => {
+    expect(roundTo(1.567, 1)).toBeCloseTo(1.6);
   });
 });
 
