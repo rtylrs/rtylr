@@ -71,3 +71,30 @@ export function getTransactionIcon(type: LoyaltyTransaction['type']): string {
   if (type === 'redeem') return 'minus';
   return 'arrow-up';
 }
+
+export function isUpgradeTransaction(tx: LoyaltyTransaction): boolean {
+  return tx.type === 'upgrade';
+}
+
+export function getTransactionLabel(type: LoyaltyTransaction['type']): string {
+  if (type === 'earn') return 'Points Earned';
+  if (type === 'redeem') return 'Points Redeemed';
+  return 'Tier Upgrade';
+}
+
+export function isActiveMember(member: LoyaltyMember, atRiskDays = 90): boolean {
+  const last = new Date(member.lastActive);
+  const now = new Date();
+  const diffMs = now.getTime() - last.getTime();
+  const diffDays = diffMs / (1000 * 60 * 60 * 24);
+  return diffDays <= atRiskDays;
+}
+
+export function memberInitials(name: string): string {
+  return name
+    .split(' ')
+    .map((w) => w[0])
+    .join('')
+    .toUpperCase()
+    .slice(0, 2);
+}
