@@ -164,7 +164,7 @@ func (r *Repository) listAllAttendance(ctx context.Context, ownerID int64, dateF
 	}
 	defer rows.Close()
 
-	records := make([]domain.AttendanceRecordRecord, 0)
+	records := make([]domain.AttendanceRecordRecord, 0, limit)
 	for rows.Next() {
 		var row sqlc.HrAttendanceRecord
 		if err := rows.Scan(
