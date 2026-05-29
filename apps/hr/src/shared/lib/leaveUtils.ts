@@ -77,3 +77,44 @@ export function hasOverlap(
   const ee = new Date(existingEnd).getTime();
   return ns <= ee && ne >= es;
 }
+
+/**
+ * Returns the accrual rate per month for a given annual allowance.
+ * Rounds to two decimal places.
+ */
+export function monthlyAccrualRate(annualDays: number): number {
+  return Math.round((annualDays / 12) * 100) / 100;
+}
+
+/**
+ * Returns true when a leave request spans a weekend (Saturday or Sunday).
+ */
+export function includesWeekend(startIso: string, endIso: string): boolean {
+  const start = new Date(startIso);
+  const end = new Date(endIso);
+  const current = new Date(start);
+  while (current <= end) {
+    const day = current.getUTCDay();
+    if (day === 0 || day === 6) return true;
+    current.setUTCDate(current.getUTCDate() + 1);
+  }
+  return false;
+}
+
+/**
+ * Returns a summary string describing a leave period.
+ * Example: "5 working days (Jan 6 - Jan 10, 2025)"
+ */
+export function leavePeriodSummary(startIso: string, endIso: string, locale = 'en-US'): string {
+  const workDays = workingDaysBetween(startIso, endIso);
+  const startLabel = new Date(startIso).toLocaleDateString(locale, {
+    month: 'short',
+    day: 'numeric',
+  });
+  const endLabel = new Date(endIso).toLocaleDateString(locale, {
+    month: 'short',
+    day: 'numeric',
+    year: 'numeric',
+  });
+  return `${formatLeaveDuration(workDays)} (${startLabel} - ${endLabel})`;
+}
