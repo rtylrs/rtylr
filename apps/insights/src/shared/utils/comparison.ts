@@ -53,7 +53,6 @@ export function compareRanges(
  * calendar month in the previous year.
  */
 export function sameMonthLastYear(range: DateRange): DateRange {
-  const shiftYear = (iso: string) =>
-    (parseInt(iso.slice(0, 4)) - 1).toString() + iso.slice(4);
+  const shiftYear = (iso: string) => (parseInt(iso.slice(0, 4)) - 1).toString() + iso.slice(4);
   return { from: shiftYear(range.from), to: shiftYear(range.to) };
 }

@@ -45,7 +45,11 @@ describe('trackPageView', () => {
     const gtag = vi.fn();
     vi.stubGlobal('window', { gtag, fbq: undefined });
     trackPageView('/careers', 'Careers');
-    expect(gtag).toHaveBeenCalledWith('event', 'page_view', expect.objectContaining({ page_path: '/careers' }));
+    expect(gtag).toHaveBeenCalledWith(
+      'event',
+      'page_view',
+      expect.objectContaining({ page_path: '/careers' })
+    );
     vi.unstubAllGlobals();
   });
 
@@ -69,7 +73,11 @@ describe('trackJobView', () => {
     const gtag = vi.fn();
     vi.stubGlobal('window', { gtag, fbq: undefined });
     trackJobView('Senior Engineer', 'senior-engineer');
-    expect(gtag).toHaveBeenCalledWith('event', 'view_item', expect.objectContaining({ item_name: 'Senior Engineer' }));
+    expect(gtag).toHaveBeenCalledWith(
+      'event',
+      'view_item',
+      expect.objectContaining({ item_name: 'Senior Engineer' })
+    );
     vi.unstubAllGlobals();
   });
 });
@@ -79,7 +87,11 @@ describe('trackApplicationStart', () => {
     const gtag = vi.fn();
     vi.stubGlobal('window', { gtag, fbq: undefined });
     trackApplicationStart('Frontend Developer');
-    expect(gtag).toHaveBeenCalledWith('event', 'begin_checkout', expect.objectContaining({ item_name: 'Frontend Developer' }));
+    expect(gtag).toHaveBeenCalledWith(
+      'event',
+      'begin_checkout',
+      expect.objectContaining({ item_name: 'Frontend Developer' })
+    );
     vi.unstubAllGlobals();
   });
 });
@@ -89,7 +101,11 @@ describe('trackApplicationSubmit', () => {
     const gtag = vi.fn();
     vi.stubGlobal('window', { gtag, fbq: undefined });
     trackApplicationSubmit('Backend Developer');
-    expect(gtag).toHaveBeenCalledWith('event', 'purchase', expect.objectContaining({ item_name: 'Backend Developer' }));
+    expect(gtag).toHaveBeenCalledWith(
+      'event',
+      'purchase',
+      expect.objectContaining({ item_name: 'Backend Developer' })
+    );
     vi.unstubAllGlobals();
   });
 
@@ -97,7 +113,11 @@ describe('trackApplicationSubmit', () => {
     const fbq = vi.fn();
     vi.stubGlobal('window', { fbq, gtag: undefined });
     trackApplicationSubmit('Backend Developer');
-    expect(fbq).toHaveBeenCalledWith('track', 'Lead', expect.objectContaining({ content_name: 'Backend Developer' }));
+    expect(fbq).toHaveBeenCalledWith(
+      'track',
+      'Lead',
+      expect.objectContaining({ content_name: 'Backend Developer' })
+    );
     vi.unstubAllGlobals();
   });
 });

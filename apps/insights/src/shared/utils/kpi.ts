@@ -17,10 +17,7 @@ export function deltaLabel(deltaPct: number, decimals = 1): string {
  * deltaDirection returns 'up', 'down', or 'flat' for a delta
  * percentage, using the threshold to avoid noise on tiny moves.
  */
-export function deltaDirection(
-  deltaPct: number,
-  flatThreshold = 0.5
-): 'up' | 'down' | 'flat' {
+export function deltaDirection(deltaPct: number, flatThreshold = 0.5): 'up' | 'down' | 'flat' {
   if (deltaPct > flatThreshold) return 'up';
   if (deltaPct < -flatThreshold) return 'down';
   return 'flat';
@@ -30,10 +27,7 @@ export function deltaDirection(
  * kpiColor returns the semantic color name for a KPI delta, taking
  * whether higher-is-better into account.
  */
-export function kpiColor(
-  deltaPct: number,
-  higherIsBetter = true
-): 'green' | 'red' | 'gray' {
+export function kpiColor(deltaPct: number, higherIsBetter = true): 'green' | 'red' | 'gray' {
   const dir = deltaDirection(deltaPct);
   if (dir === 'flat') return 'gray';
   if (dir === 'up') return higherIsBetter ? 'green' : 'red';

@@ -49,10 +49,7 @@ describe('buildPipeline', () => {
   });
 
   it('excludes rejected submissions', () => {
-    const subs = [
-      makeSubmission({ status: 'pending' }),
-      makeSubmission({ status: 'rejected' }),
-    ];
+    const subs = [makeSubmission({ status: 'pending' }), makeSubmission({ status: 'rejected' })];
     const pipeline = buildPipeline(subs);
     // rejected is not included in any stage count
     const total = pipeline.reduce((sum, s) => sum + s.count, 0);
