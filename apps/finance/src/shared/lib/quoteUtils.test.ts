@@ -6,6 +6,8 @@ import {
   daysUntilExpiry,
   getQuoteStatusLabel,
   resolveExpiryDate,
+  quoteConversionRate,
+  getQuoteStatusColor,
 } from './quoteUtils';
 
 describe('isAccepted', () => {
@@ -95,5 +97,30 @@ describe('resolveExpiryDate', () => {
 
   it('returns null when neither is set', () => {
     expect(resolveExpiryDate({})).toBeNull();
+  });
+});
+
+describe('quoteConversionRate', () => {
+  it('returns percentage of accepted quotes', () => {
+    expect(quoteConversionRate(10, 3)).toBe(30);
+    expect(quoteConversionRate(4, 1)).toBe(25);
+  });
+
+  it('returns 0 when total is 0', () => {
+    expect(quoteConversionRate(0, 0)).toBe(0);
+  });
+
+  it('returns 100 when all accepted', () => {
+    expect(quoteConversionRate(5, 5)).toBe(100);
+  });
+});
+
+describe('getQuoteStatusColor', () => {
+  it('returns correct color for each status', () => {
+    expect(getQuoteStatusColor('Draft')).toBe('gray');
+    expect(getQuoteStatusColor('Sent')).toBe('blue');
+    expect(getQuoteStatusColor('Accepted')).toBe('green');
+    expect(getQuoteStatusColor('Rejected')).toBe('red');
+    expect(getQuoteStatusColor('Expired')).toBe('orange');
   });
 });
