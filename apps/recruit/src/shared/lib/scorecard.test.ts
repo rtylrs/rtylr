@@ -9,7 +9,12 @@ import {
 } from './scorecard';
 import type { ScorecardCriteria } from './scorecard';
 
-function makeCriteria(name: string, score: number, maxScore: number, weight = 1): ScorecardCriteria {
+function makeCriteria(
+  name: string,
+  score: number,
+  maxScore: number,
+  weight = 1
+): ScorecardCriteria {
   return { id: name, name, weight, score, maxScore };
 }
 

@@ -36,20 +36,14 @@ export function passesThreshold(criteria: ScorecardCriteria[], threshold: number
 /**
  * weakCriteria returns criteria scoring below a given percentage threshold.
  */
-export function weakCriteria(
-  criteria: ScorecardCriteria[],
-  threshold = 60,
-): ScorecardCriteria[] {
+export function weakCriteria(criteria: ScorecardCriteria[], threshold = 60): ScorecardCriteria[] {
   return criteria.filter((c) => criteriaScore(c) < threshold);
 }
 
 /**
  * topCriteria returns criteria scoring at or above a given percentage threshold.
  */
-export function topCriteria(
-  criteria: ScorecardCriteria[],
-  threshold = 80,
-): ScorecardCriteria[] {
+export function topCriteria(criteria: ScorecardCriteria[], threshold = 80): ScorecardCriteria[] {
   return criteria.filter((c) => criteriaScore(c) >= threshold);
 }
 
