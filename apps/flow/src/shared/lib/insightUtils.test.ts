@@ -191,10 +191,7 @@ describe('overdueCount', () => {
 
 describe('estimatedTaskPercent', () => {
   it('returns percentage of tasks with estimate', () => {
-    const tasks = [
-      makeTask({ estimate: 2 }),
-      makeTask({ estimate: undefined }),
-    ];
+    const tasks = [makeTask({ estimate: 2 }), makeTask({ estimate: undefined })];
     expect(estimatedTaskPercent(tasks)).toBe(50);
   });
 
