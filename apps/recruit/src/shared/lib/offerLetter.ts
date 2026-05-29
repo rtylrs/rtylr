@@ -7,7 +7,7 @@ export function formatSalaryRange(
   min: number,
   max: number,
   currency: string,
-  locale = 'en-US',
+  locale = 'en-US'
 ): string {
   const fmt = new Intl.NumberFormat(locale, {
     style: 'currency',
