@@ -35,7 +35,7 @@ func (r *Repository) ListLocations(ctx context.Context, ownerID int64) ([]domain
 		return nil, err
 	}
 
-	var locations []domain.Location
+	locations := make([]domain.Location, 0, len(rows))
 	for _, row := range rows {
 		locations = append(locations, domain.Location{
 			ID:        row.ID,
@@ -75,7 +75,7 @@ func (r *Repository) ListTables(ctx context.Context, ownerID, locationID int64, 
 		return nil, err
 	}
 
-	var tables []domain.Table
+	tables := make([]domain.Table, 0, len(rows))
 	for _, row := range rows {
 		if locationID > 0 && row.LocationID.Int64 != locationID {
 			continue
@@ -564,7 +564,7 @@ func (r *Repository) GetOrderItems(ctx context.Context, orderID int64) ([]domain
 		return nil, err
 	}
 
-	var items []domain.OrderItem
+	items := make([]domain.OrderItem, 0, len(rows))
 	for _, row := range rows {
 		items = append(items, domain.OrderItem{
 			ID:             row.ID,
