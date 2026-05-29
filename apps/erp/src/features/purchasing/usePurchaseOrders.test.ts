@@ -88,7 +88,9 @@ describe('useCreatePurchaseOrder', () => {
     mockErpApi.createPurchaseOrder.mockResolvedValue({ id: 2, supplierId: 10 });
     const { result } = renderHook(() => useCreatePurchaseOrder(), { wrapper: createWrapper() });
     await act(async () => {
-      await result.current.mutateAsync({ supplierId: 10, items: [] } as unknown as Parameters<typeof result.current.mutateAsync>[0]);
+      await result.current.mutateAsync({ supplierId: 10, items: [] } as unknown as Parameters<
+        typeof result.current.mutateAsync
+      >[0]);
     });
     expect(mockErpApi.createPurchaseOrder).toHaveBeenCalledWith({ supplierId: 10, items: [] });
   });
