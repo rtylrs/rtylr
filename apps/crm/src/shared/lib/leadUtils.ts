@@ -62,3 +62,24 @@ export function winRate(leads: Lead[]): number {
   const won = closed.filter((l) => l.status === 'won').length;
   return Math.round((won / closed.length) * 100);
 }
+
+export function averageLeadValue(leads: Lead[]): number {
+  if (leads.length === 0) return 0;
+  return leads.reduce((sum, l) => sum + l.value, 0) / leads.length;
+}
+
+export function sortByValue(leads: Lead[], dir: 'asc' | 'desc' = 'desc'): Lead[] {
+  return [...leads].sort((a, b) => (dir === 'asc' ? a.value - b.value : b.value - a.value));
+}
+
+export function sortByDate(leads: Lead[], field: 'createdAt' | 'updatedAt' = 'createdAt'): Lead[] {
+  return [...leads].sort((a, b) => b[field].localeCompare(a[field]));
+}
+
+export function groupByStatus(leads: Lead[]): Record<LeadStatus, Lead[]> {
+  const groups = {} as Record<LeadStatus, Lead[]>;
+  for (const lead of leads) {
+    (groups[lead.status] ??= []).push(lead);
+  }
+  return groups;
+}
