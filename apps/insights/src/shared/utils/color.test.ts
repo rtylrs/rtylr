@@ -25,7 +25,7 @@ describe('assignColors', () => {
   });
 
   it('returns empty object for empty keys', () => {
-    expect(assignColors({})).toEqual({});
+    expect(assignColors([])).toEqual({});
   });
 });
 
