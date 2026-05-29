@@ -1,7 +1,25 @@
 import { describe, it, expect } from 'vitest';
-import { colSpanForSize, rowSpanForSize, visibleWidgets, toggleWidgetVisibility, setAllVisible, reorderWidget, countByVariant, sizeLabel, type WidgetConfig } from './widgetUtils';
+import {
+  colSpanForSize,
+  rowSpanForSize,
+  visibleWidgets,
+  toggleWidgetVisibility,
+  setAllVisible,
+  reorderWidget,
+  countByVariant,
+  sizeLabel,
+  type WidgetConfig,
+} from './widgetUtils';
 
-const w = (overrides: Partial<WidgetConfig> = {}): WidgetConfig => ({ id: 'w1', title: 'W', size: 'md', variant: 'stat', visible: true, order: 1, ...overrides });
+const w = (overrides: Partial<WidgetConfig> = {}): WidgetConfig => ({
+  id: 'w1',
+  title: 'W',
+  size: 'md',
+  variant: 'stat',
+  visible: true,
+  order: 1,
+  ...overrides,
+});
 
 describe('colSpanForSize', () => {
   it('sm=3', () => expect(colSpanForSize('sm')).toBe(3));
@@ -15,7 +33,11 @@ describe('rowSpanForSize', () => {
 
 describe('visibleWidgets', () => {
   it('returns visible sorted', () => {
-    const widgets = [w({ id: 'a', visible: true, order: 2 }), w({ id: 'b', visible: false, order: 1 }), w({ id: 'c', visible: true, order: 1 })];
+    const widgets = [
+      w({ id: 'a', visible: true, order: 2 }),
+      w({ id: 'b', visible: false, order: 1 }),
+      w({ id: 'c', visible: true, order: 1 }),
+    ];
     const r = visibleWidgets(widgets);
     expect(r).toHaveLength(2);
     expect(r[0].id).toBe('c');
@@ -23,14 +45,16 @@ describe('visibleWidgets', () => {
 });
 
 describe('toggleWidgetVisibility', () => {
-  it('toggles visible to false', () => expect(toggleWidgetVisibility([w({ id: 'w1', visible: true })], 'w1')[0].visible).toBe(false));
-  it('toggles false to visible', () => expect(toggleWidgetVisibility([w({ id: 'w1', visible: false })], 'w1')[0].visible).toBe(true));
+  it('toggles visible to false', () =>
+    expect(toggleWidgetVisibility([w({ id: 'w1', visible: true })], 'w1')[0].visible).toBe(false));
+  it('toggles false to visible', () =>
+    expect(toggleWidgetVisibility([w({ id: 'w1', visible: false })], 'w1')[0].visible).toBe(true));
 });
 
 describe('setAllVisible', () => {
   it('hides all', () => {
     const result = setAllVisible([w({ visible: true }), w({ id: 'w2', visible: true })], false);
-    expect(result.every(x => !x.visible)).toBe(true);
+    expect(result.every((x) => !x.visible)).toBe(true);
   });
 });
 
@@ -43,7 +67,11 @@ describe('reorderWidget', () => {
 
 describe('countByVariant', () => {
   it('counts by variant', () => {
-    const widgets = [w({ variant: 'stat', visible: true }), w({ id: 'w2', variant: 'stat', visible: true }), w({ id: 'w3', variant: 'chart', visible: false })];
+    const widgets = [
+      w({ variant: 'stat', visible: true }),
+      w({ id: 'w2', variant: 'stat', visible: true }),
+      w({ id: 'w3', variant: 'chart', visible: false }),
+    ];
     expect(countByVariant(widgets).stat).toBe(2);
   });
 });
