@@ -8,6 +8,7 @@
  */
 export function hexToRgb(hex: string): { r: number; g: number; b: number } | null {
   const clean = hex.replace(/^#/, '');
+  if (!/^[0-9a-fA-F]+$/.test(clean)) return null;
   if (clean.length === 3) {
     const [r, g, b] = clean.split('').map((c) => parseInt(c + c, 16));
     return { r, g, b };
