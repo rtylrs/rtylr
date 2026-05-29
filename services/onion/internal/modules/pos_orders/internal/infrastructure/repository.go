@@ -861,7 +861,7 @@ func (r *Repository) SplitOrder(ctx context.Context, ownerID, orderID int64, spl
 	}()
 
 	qtx := r.queries.WithTx(tx)
-	var newOrderIDs []int64
+	newOrderIDs := make([]int64, 0, len(splits))
 
 	for _, splitItemIDs := range splits {
 		orderNum, genErr := r.GenerateOrderNumber(ctx, ownerID)
