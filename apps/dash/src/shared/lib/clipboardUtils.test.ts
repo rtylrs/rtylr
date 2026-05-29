@@ -1,9 +1,5 @@
 import { describe, it, expect } from 'vitest';
-import {
-  isClipboardAvailable,
-  clipboardPreview,
-  clipboardButtonClass,
-} from './clipboardUtils';
+import { isClipboardAvailable, clipboardPreview, clipboardButtonClass } from './clipboardUtils';
 
 describe('isClipboardAvailable', () => {
   it('returns a boolean', () => {
