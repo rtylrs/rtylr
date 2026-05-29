@@ -40,7 +40,7 @@ func (s *Service) fetchCalendar(ctx context.Context, ownerID int64, from, to str
 		return nil, err
 	}
 
-	dayMap := make(map[string][]domain.CalendarAppointment)
+	dayMap := make(map[string][]domain.CalendarAppointment, len(appts))
 	for _, appt := range appts {
 		dateKey := "unknown"
 		if len(appt.StartTime) >= 10 {
@@ -49,7 +49,7 @@ func (s *Service) fetchCalendar(ctx context.Context, ownerID int64, from, to str
 		dayMap[dateKey] = append(dayMap[dateKey], appt)
 	}
 
-	var days []domain.CalendarDay
+	days := make([]domain.CalendarDay, 0, len(dayMap))
 	for date, appts := range dayMap {
 		days = append(days, domain.CalendarDay{Date: date, Appointments: appts})
 	}
