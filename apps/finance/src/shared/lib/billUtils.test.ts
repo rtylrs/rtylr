@@ -110,7 +110,7 @@ describe('getBillUrgency', () => {
     expect(getBillUrgency('2026-05-28', '2026-06-01')).toBe('medium');
   });
   it('returns high for 8-30 days', () => {
-    expect(getBillUrgency('2026-05-01', '2026-06-01')).toBe('high');
+    expect(getBillUrgency('2026-05-05', '2026-06-01')).toBe('high');
   });
   it('returns critical for over 30 days', () => {
     expect(getBillUrgency('2026-01-01', '2026-06-01')).toBe('critical');
