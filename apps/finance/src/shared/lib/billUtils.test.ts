@@ -5,6 +5,8 @@ import {
   isBillPaid,
   getBillStatusLabel,
   deriveBillStatus,
+  daysOverdue,
+  getBillUrgency,
 } from './billUtils';
 
 describe('isBillOverdue', () => {
@@ -85,5 +87,32 @@ describe('deriveBillStatus', () => {
 
   it('returns Unpaid when no due date and nothing paid', () => {
     expect(deriveBillStatus(1000, 0, null, '2026-06-01')).toBe('Unpaid');
+  });
+});
+
+describe('daysOverdue', () => {
+  it('returns 0 when not overdue', () => {
+    expect(daysOverdue('2026-12-31', '2026-06-01')).toBe(0);
+  });
+  it('returns days when overdue', () => {
+    expect(daysOverdue('2026-05-22', '2026-06-01')).toBe(10);
+  });
+  it('returns 0 when null', () => {
+    expect(daysOverdue(null, '2026-06-01')).toBe(0);
+  });
+});
+
+describe('getBillUrgency', () => {
+  it('returns low when not overdue', () => {
+    expect(getBillUrgency('2026-12-31', '2026-06-01')).toBe('low');
+  });
+  it('returns medium for 1-7 days', () => {
+    expect(getBillUrgency('2026-05-28', '2026-06-01')).toBe('medium');
+  });
+  it('returns high for 8-30 days', () => {
+    expect(getBillUrgency('2026-05-01', '2026-06-01')).toBe('high');
+  });
+  it('returns critical for over 30 days', () => {
+    expect(getBillUrgency('2026-01-01', '2026-06-01')).toBe('critical');
   });
 });
