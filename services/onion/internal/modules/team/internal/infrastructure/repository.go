@@ -71,7 +71,7 @@ func (r *Repository) ListPermissions(ctx context.Context, ownerID int64) ([]doma
 		return nil, err
 	}
 
-	var perms []domain.UserAppPermission
+	perms := make([]domain.UserAppPermission, 0, len(rows))
 
 	for _, row := range rows {
 		p := permissionFromRow(row.ID, row.OwnerID, row.UserID, row.Apps, row.Role, row.IsActive, row.CreatedAt, row.UpdatedAt)
@@ -169,7 +169,7 @@ func (r *Repository) ListStaffUsers(ctx context.Context, ownerID int64, limit, o
 		return nil, err
 	}
 
-	var users []domain.StaffUser
+	users := make([]domain.StaffUser, 0, len(rows))
 
 	for _, row := range rows {
 		var su domain.StaffUser
@@ -426,6 +426,7 @@ func (r *Repository) GetGroup(ctx context.Context, ownerID, groupID int64) (*dom
 	if row.UpdatedAt.Valid {
 		g.UpdatedAt = row.UpdatedAt.Time
 	}
+	g.ResourcePermissions = make([]domain.ResourcePermission, 0, len(perms))
 	for _, p := range perms {
 		g.ResourcePermissions = append(g.ResourcePermissions, domain.ResourcePermission{
 			ResourceKey:     p.ResourceKey,
@@ -440,7 +441,7 @@ func (r *Repository) ListGroups(ctx context.Context, ownerID int64) ([]domain.Gr
 	if err != nil {
 		return nil, err
 	}
-	var groups []domain.Group
+	groups := make([]domain.Group, 0, len(rows))
 	for _, row := range rows {
 		g := domain.Group{
 			ID:          row.ID,
@@ -519,6 +520,7 @@ func (r *Repository) GetGroupDetail(ctx context.Context, ownerID, groupID int64)
 		return nil, err
 	}
 	detail := &domain.GroupDetail{Group: *g}
+	detail.Members = make([]domain.GroupMember, 0, len(memberRows))
 	for _, m := range memberRows {
 		gm := domain.GroupMember{
 			UserID:   m.UserID,
@@ -538,7 +540,7 @@ func (r *Repository) GetUserGroups(ctx context.Context, ownerID, userID int64) (
 	if err != nil {
 		return nil, err
 	}
-	var summaries []domain.GroupSummary
+	summaries := make([]domain.GroupSummary, 0, len(rows))
 	for _, row := range rows {
 		summaries = append(summaries, domain.GroupSummary{ID: row.ID, Name: row.Name, Color: row.Color.String})
 	}
