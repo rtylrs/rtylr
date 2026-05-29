@@ -32,3 +32,20 @@ export function yoyGrowthPct(current: number, prior: number): number {
   if (prior === 0) return 0;
   return ((current - prior) / Math.abs(prior)) * 100;
 }
+
+export function ebitda(
+  net: number,
+  interest: number,
+  taxes: number,
+  dep: number,
+  amort: number
+): number {
+  return net + interest + taxes + dep + amort;
+}
+export function quickRatio(cash: number, si: number, ar: number, cl: number): number {
+  if (cl === 0) return 0;
+  return (cash + si + ar) / cl;
+}
+export function workingCapital(ca: number, cl: number): number {
+  return ca - cl;
+}
