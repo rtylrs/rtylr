@@ -44,9 +44,7 @@ export function purchaseOrderStatusVariant(
 
 /** Sort purchase orders by date, newest first. */
 export function sortOrdersByDateDesc(orders: PurchaseOrder[]): PurchaseOrder[] {
-  return [...orders].sort(
-    (a, b) => new Date(b.date).getTime() - new Date(a.date).getTime()
-  );
+  return [...orders].sort((a, b) => new Date(b.date).getTime() - new Date(a.date).getTime());
 }
 
 /** Filter orders by a given status. */
