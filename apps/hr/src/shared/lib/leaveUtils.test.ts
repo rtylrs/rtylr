@@ -6,6 +6,8 @@ import {
   remainingBalance,
   formatLeaveDuration,
   hasOverlap,
+  monthlyAccrualRate,
+  includesWeekend,
 } from './leaveUtils';
 
 describe('leaveStatusColor', () => {
@@ -117,5 +119,29 @@ describe('hasOverlap', () => {
 
   it('returns true when new range completely contains existing', () => {
     expect(hasOverlap('2026-05-28', '2026-06-10', '2026-06-01', '2026-06-05')).toBe(true);
+  });
+});
+
+describe('monthlyAccrualRate', () => {
+  it('calculates monthly accrual from annual allowance', () => {
+    expect(monthlyAccrualRate(12)).toBe(1);
+  });
+
+  it('rounds to two decimal places', () => {
+    expect(monthlyAccrualRate(15)).toBe(1.25);
+  });
+});
+
+describe('includesWeekend', () => {
+  it('returns true when range spans a Saturday', () => {
+    expect(includesWeekend('2025-01-11', '2025-01-12')).toBe(true);
+  });
+
+  it('returns false for a weekday-only range', () => {
+    expect(includesWeekend('2025-01-06', '2025-01-10')).toBe(false);
+  });
+
+  it('returns true for a range including Sunday', () => {
+    expect(includesWeekend('2025-01-12', '2025-01-13')).toBe(true);
   });
 });
