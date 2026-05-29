@@ -33,7 +33,7 @@ export function formatDays(days: number): string {
 /** Truncate a string to a maximum length with an ellipsis. */
 export function truncate(text: string, maxLength: number): string {
   if (text.length <= maxLength) return text;
-  return `${text.substring(0, maxLength - 1)}...`;
+  return `${text.substring(0, maxLength - 3)}...`;
 }
 
 /** Format a SKU for display, ensuring uppercase. */
