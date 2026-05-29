@@ -13,7 +13,7 @@ function makeMember(
   id: string,
   role: 'recruiter' | 'coordinator' | 'sourcer' | 'manager' | 'interviewer',
   activePositions: number,
-  hiredThisMonth: number,
+  hiredThisMonth: number
 ): RecruiterMember {
   return { id, name: `Member ${id}`, role, activePositions, hiredThisMonth };
 }
