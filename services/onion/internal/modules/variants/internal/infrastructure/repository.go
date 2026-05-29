@@ -44,7 +44,7 @@ func (r *Repository) ListVariants(ctx context.Context, ownerID, productID int64)
 		return nil, err
 	}
 
-	var variants []domain.Variant
+	variants := make([]domain.Variant, 0, len(rows))
 
 	for _, row := range rows {
 		variants = append(variants, variantFromRow(row))
