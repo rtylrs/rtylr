@@ -15,9 +15,7 @@ describe('isAcceptedMimeType', () => {
   it('accepts Word document MIME types', () => {
     expect(isAcceptedMimeType('application/msword')).toBe(true);
     expect(
-      isAcceptedMimeType(
-        'application/vnd.openxmlformats-officedocument.wordprocessingml.document',
-      ),
+      isAcceptedMimeType('application/vnd.openxmlformats-officedocument.wordprocessingml.document')
     ).toBe(true);
   });
 

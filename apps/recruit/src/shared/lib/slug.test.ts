@@ -51,7 +51,7 @@ describe('slugToTitle', () => {
 describe('careerUrl', () => {
   it('builds the public career URL', () => {
     expect(careerUrl('acme', 'senior-dev', 'https://app.rtylr.com')).toBe(
-      'https://app.rtylr.com/acme/careers/senior-dev',
+      'https://app.rtylr.com/acme/careers/senior-dev'
     );
   });
 
