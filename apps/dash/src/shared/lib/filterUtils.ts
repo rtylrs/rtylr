@@ -41,10 +41,7 @@ export function clearAllFilters(filters: ActiveFilters): ActiveFilters {
 }
 
 /** Merge new filter values into the current filter state. */
-export function applyFilters(
-  current: ActiveFilters,
-  updates: Partial<ActiveFilters>
-): ActiveFilters {
+export function applyFilters(current: ActiveFilters, updates: ActiveFilters): ActiveFilters {
   return { ...current, ...updates };
 }
 
