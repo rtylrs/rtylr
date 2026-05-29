@@ -38,6 +38,7 @@ func (r *Repository) List(ctx context.Context, ownerID int64, dateFrom, dateTo s
 			logger.Ctx(ctx).Error("Failed to list receipts", logger.Error(err))
 			return nil, err
 		}
+		receipts = make([]domain.Receipt, 0, len(rows))
 		for _, row := range rows {
 			receipts = append(receipts, domain.Receipt{
 				ID:            row.ID,
@@ -57,6 +58,7 @@ func (r *Repository) List(ctx context.Context, ownerID int64, dateFrom, dateTo s
 			logger.Ctx(ctx).Error("Failed to list receipts", logger.Error(err))
 			return nil, err
 		}
+		receipts = make([]domain.Receipt, 0, len(rows))
 		for _, row := range rows {
 			receipts = append(receipts, domain.Receipt{
 				ID:            row.ID,
@@ -73,6 +75,7 @@ func (r *Repository) List(ctx context.Context, ownerID int64, dateFrom, dateTo s
 			logger.Ctx(ctx).Error("Failed to list receipts", logger.Error(err))
 			return nil, err
 		}
+		receipts = make([]domain.Receipt, 0, len(rows))
 		for _, row := range rows {
 			receipts = append(receipts, domain.Receipt{
 				ID:            row.ID,
