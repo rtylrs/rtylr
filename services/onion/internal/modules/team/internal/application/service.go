@@ -480,7 +480,7 @@ func (s *Service) GetUserEffectiveResources(ctx context.Context, ownerID, userID
 
 // BulkInvite invites multiple users with the same role/apps/group in one call.
 func (s *Service) BulkInvite(ctx context.Context, ownerID, businessID int64, input domain.BulkInviteInput) ([]domain.BulkInviteResult, error) {
-	var results []domain.BulkInviteResult
+	results := make([]domain.BulkInviteResult, 0, len(input.Emails))
 	for _, email := range input.Emails {
 		email = strings.ToLower(strings.TrimSpace(email))
 		if email == "" {
