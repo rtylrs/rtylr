@@ -1,4 +1,4 @@
-// Panel + button — primary consumer entrypoints
+// Panel + button - primary consumer entrypoints
 export { default as CaretPanel } from './components/CaretPanel';
 export type { CaretPanelProps } from './components/CaretPanel';
 export { default as CaretButton } from './components/CaretButton';
@@ -27,7 +27,7 @@ export * from './components/sidebar';
 // Stores
 export * from './stores';
 
-// Types — re-export with friendlier aliases for legacy consumers.
+// Types - re-export with friendlier aliases for legacy consumers.
 export type {
   MessageRole,
   CaretMessage as CaretMessageType,

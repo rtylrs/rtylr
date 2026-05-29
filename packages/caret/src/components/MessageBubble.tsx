@@ -44,7 +44,7 @@ export const MessageBubble: React.FC<MessageBubbleProps> = ({
 
   const text = isUser ? (message.content ?? blocksToText(blocks)) : blocksToText(blocks);
 
-  // User message — right-aligned bubble (ChatGPT-style).
+  // User message - right-aligned bubble (ChatGPT-style).
   if (isUser) {
     return (
       <div
@@ -73,7 +73,7 @@ export const MessageBubble: React.FC<MessageBubbleProps> = ({
     );
   }
 
-  // Assistant message — full-width plain text, no avatar, no bubble (ChatGPT-style).
+  // Assistant message - full-width plain text, no avatar, no bubble (ChatGPT-style).
   return (
     <div style={{ margin: '14px 0' }}>
       <div

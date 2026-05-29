@@ -33,7 +33,7 @@ export async function* consumeSse(
     try {
       reader.releaseLock();
     } catch {
-      // ignore — stream may already be closed
+      // ignore - stream may already be closed
     }
   }
 }

@@ -17,7 +17,7 @@ export const CodeBlock: React.FC<CodeBlockProps> = ({ code, language }) => {
       setCopied(true);
       setTimeout(() => setCopied(false), 1500);
     } catch {
-      // Clipboard API can fail in iframes or when blurred — fail silent.
+      // Clipboard API can fail in iframes or when blurred - fail silent.
     }
   };
 

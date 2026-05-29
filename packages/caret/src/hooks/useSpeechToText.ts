@@ -78,7 +78,7 @@ export function useSpeechToText(lang = 'en-US'): UseSpeechToTextResult {
       try {
         rec.stop();
       } catch {
-        // ignore — already stopped
+        // ignore - already stopped
       }
     };
   }, [lang]);

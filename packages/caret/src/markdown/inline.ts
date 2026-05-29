@@ -20,11 +20,11 @@ export function renderInlineMarkdown(input: string): string {
   s = s.replace(/\*\*([^*]+)\*\*/g, '<strong>$1</strong>');
   s = s.replace(/__([^_]+)__/g, '<strong>$1</strong>');
 
-  // italics (* or _) — avoid eating bold markers (already replaced)
+  // italics (* or _) - avoid eating bold markers (already replaced)
   s = s.replace(/(^|[^*])\*([^*\n]+)\*([^*]|$)/g, '$1<em>$2</em>$3');
   s = s.replace(/(^|[^_])_([^_\n]+)_([^_]|$)/g, '$1<em>$2</em>$3');
 
-  // links [text](url) — only http(s) and relative paths allowed
+  // links [text](url) - only http(s) and relative paths allowed
   s = s.replace(/\[([^\]]+)\]\(((?:https?:\/\/|\/)[^\s)]+)\)/g, (_, text: string, url: string) => {
     return `<a href="${url}" target="_blank" rel="noopener noreferrer" class="caret-link">${text}</a>`;
   });

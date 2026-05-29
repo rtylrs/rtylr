@@ -54,7 +54,7 @@ export const SettingsPanel: React.FC = () => {
         >
           {Object.values(CARET_MODES).map((m) => (
             <option key={m.id} value={m.id}>
-              {m.label} — {m.description}
+              {m.label} - {m.description}
             </option>
           ))}
         </select>

@@ -3,7 +3,7 @@ import { useLayoutEffect } from 'react';
 /**
  * Make a textarea grow as the user types, capped at `maxRows`. The
  * textarea's `line-height` and vertical padding must match the constants
- * below — we don't read computed styles because flex parents can stretch
+ * below - we don't read computed styles because flex parents can stretch
  * the element to fill remaining space, making scrollHeight unreliable.
  */
 export function useAutosize(
