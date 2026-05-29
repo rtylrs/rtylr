@@ -1,74 +1,81 @@
-import { describe, it, expect, vi, beforeEach, afterEach } from 'vitest';
+import { describe, it, expect, vi, afterEach } from 'vitest';
 import { getCookie, setCookie, removeCookie, getDefaultCookieDomain } from './cookies';
 
-beforeEach(() => {
-  vi.spyOn(document, 'cookie', 'get').mockReturnValue('');
-  vi.spyOn(document, 'cookie', 'set').mockImplementation(() => {});
-});
+let cookieStore = '';
+
+function mockCookie() {
+  const proto = Object.getPrototypeOf(document);
+  Object.defineProperty(proto, 'cookie', {
+    configurable: true,
+    get() {
+      return cookieStore;
+    },
+    set(val: string) {
+      cookieStore = val;
+    },
+  });
+}
+
+mockCookie();
 
 afterEach(() => {
+  cookieStore = '';
   vi.restoreAllMocks();
 });
 
 describe('getCookie', () => {
   it('returns null when cookie does not exist', () => {
-    vi.spyOn(document, 'cookie', 'get').mockReturnValue('');
+    cookieStore = '';
     expect(getCookie('nonexistent')).toBeNull();
   });
 
   it('returns the value of an existing cookie', () => {
-    vi.spyOn(document, 'cookie', 'get').mockReturnValue('theme=dark; lang=en');
+    cookieStore = 'theme=dark; lang=en';
     expect(getCookie('theme')).toBe('dark');
   });
 
   it('returns null for empty document.cookie', () => {
-    vi.spyOn(document, 'cookie', 'get').mockReturnValue('');
+    cookieStore = '';
     expect(getCookie('anything')).toBeNull();
   });
 
   it('decodes URI-encoded cookie values', () => {
-    vi.spyOn(document, 'cookie', 'get').mockReturnValue('name=hello%20world');
+    cookieStore = 'name=hello%20world';
     expect(getCookie('name')).toBe('hello world');
   });
 });
 
 describe('setCookie', () => {
   it('sets a basic cookie without options', () => {
-    const spy = vi.spyOn(document, 'cookie', 'set');
     setCookie('token', 'abc123');
-    expect(spy).toHaveBeenCalled();
+    expect(cookieStore).toContain('token=abc123');
   });
 
   it('includes Expires when days is provided', () => {
-    const spy = vi.spyOn(document, 'cookie', 'set');
     setCookie('token', 'abc123', { days: 7 });
-    expect(spy.mock.calls[0][0]).toContain('Expires=');
+    expect(cookieStore).toContain('Expires=');
   });
 
   it('includes Domain when provided', () => {
-    const spy = vi.spyOn(document, 'cookie', 'set');
     setCookie('token', 'abc123', { domain: '.rtylr.com' });
-    expect(spy.mock.calls[0][0]).toContain('Domain=.rtylr.com');
+    expect(cookieStore).toContain('Domain=.rtylr.com');
   });
 
   it('includes SameSite', () => {
-    const spy = vi.spyOn(document, 'cookie', 'set');
     setCookie('x', 'y', { sameSite: 'strict' });
-    expect(spy.mock.calls[0][0]).toContain('SameSite=strict');
+    expect(cookieStore).toContain('SameSite=strict');
   });
 });
 
 describe('removeCookie', () => {
   it('sets cookie with expired date to remove it', () => {
-    const spy = vi.spyOn(document, 'cookie', 'set');
     removeCookie('token');
-    expect(spy.mock.calls[0][0]).toContain('Expires=Thu, 01 Jan 1970');
+    expect(cookieStore).toContain('Expires=Thu, 01 Jan 1970');
   });
 
   it('includes Domain when provided', () => {
-    const spy = vi.spyOn(document, 'cookie', 'set');
     removeCookie('token', { domain: '.rtylr.com' });
-    expect(spy.mock.calls[0][0]).toContain('Domain=.rtylr.com');
+    expect(cookieStore).toContain('Domain=.rtylr.com');
   });
 });
 
