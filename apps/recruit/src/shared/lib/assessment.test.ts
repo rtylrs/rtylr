@@ -12,7 +12,7 @@ import type { Assessment } from './assessment';
 function makeAssessment(
   status: 'pending' | 'in_progress' | 'completed' | 'expired',
   score?: number,
-  maxScore = 100,
+  maxScore = 100
 ): Assessment {
   return {
     id: 'a1',
