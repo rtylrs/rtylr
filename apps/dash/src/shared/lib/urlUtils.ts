@@ -5,12 +5,10 @@
 
 /** Joins path segments, handling leading/trailing slashes correctly. */
 export function joinPath(...segments: string[]): string {
-  return (
-    segments
-      .map((s) => s.replace(/^\/+|\/+$/g, ''))
-      .filter(Boolean)
-      .join('/')
-  );
+  return segments
+    .map((s) => s.replace(/^\/+|\/+$/g, ''))
+    .filter(Boolean)
+    .join('/');
 }
 
 /** Returns the last segment of a URL path. */

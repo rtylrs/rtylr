@@ -21,7 +21,8 @@ describe('joinPath', () => {
 });
 
 describe('lastPathSegment', () => {
-  it('returns last segment', () => expect(lastPathSegment('/app/settings/profile')).toBe('profile'));
+  it('returns last segment', () =>
+    expect(lastPathSegment('/app/settings/profile')).toBe('profile'));
   it('handles trailing slash', () => expect(lastPathSegment('/app/settings/')).toBe('settings'));
 });
 
@@ -32,7 +33,8 @@ describe('stripQueryAndHash', () => {
 });
 
 describe('extractQueryString', () => {
-  it('returns query string without ?', () => expect(extractQueryString('/page?a=1&b=2')).toBe('a=1&b=2'));
+  it('returns query string without ?', () =>
+    expect(extractQueryString('/page?a=1&b=2')).toBe('a=1&b=2'));
   it('returns empty for no query', () => expect(extractQueryString('/page')).toBe(''));
   it('strips hash from query', () => expect(extractQueryString('/page?q=1#anchor')).toBe('q=1'));
 });
