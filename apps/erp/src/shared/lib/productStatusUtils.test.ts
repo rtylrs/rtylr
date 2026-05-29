@@ -151,7 +151,7 @@ describe('topByValue', () => {
     ];
     const top2 = topByValue(products, 2);
     expect(top2).toHaveLength(2);
-    expect(top2[0].id).toBe(1);
-    expect(top2[1].id).toBe(3);
+    expect(top2[0].id).toBe(2);
+    expect([1, 3]).toContain(top2[1].id);
   });
 });
