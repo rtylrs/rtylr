@@ -3,7 +3,7 @@ package application
 import (
 	"context"
 	"database/sql"
-	"fmt"
+	"strconv"
 	"time"
 
 	"github.com/voxire/onion/internal/modules/booking_appointments/internal/domain"
@@ -20,7 +20,7 @@ func NewService(_ context.Context, db *sql.DB) *Service {
 }
 
 func (s *Service) List(ctx context.Context, ownerID int64) ([]domain.Appointment, error) {
-	cacheKey := fmt.Sprintf("booking_appointments:%d", ownerID)
+	cacheKey := "booking_appointments:" + strconv.FormatInt(ownerID, 10)
 	return cacher.Of[[]domain.Appointment]().GetOrComputeSingle(ctx, cacheKey, func(ctx context.Context) ([]domain.Appointment, error) {
 		return s.repo.List(ctx, ownerID)
 	}, cacher.WithExpiry(ctx, cacheTTL))
@@ -56,5 +56,5 @@ func (s *Service) Delete(ctx context.Context, ownerID, id int64) error {
 }
 
 func (s *Service) invalidateCache(ctx context.Context, ownerID int64) {
-	cacher.Of[[]domain.Appointment]().Invalidate(ctx, []string{fmt.Sprintf("booking_appointments:%d", ownerID)})
+	cacher.Of[[]domain.Appointment]().Invalidate(ctx, []string{"booking_appointments:" + strconv.FormatInt(ownerID, 10)})
 }
