@@ -62,3 +62,25 @@ export function isCampaignChannel(value: string): value is CampaignChannel {
 export function isActiveCampaign(campaign: Campaign): boolean {
   return campaign.status === 'active';
 }
+
+export const CAMPAIGN_STATUS_LABELS: Record<CampaignStatus, string> = {
+  draft: 'Draft',
+  scheduled: 'Scheduled',
+  active: 'Active',
+  paused: 'Paused',
+  completed: 'Completed',
+};
+
+export const CAMPAIGN_CHANNEL_LABELS: Record<CampaignChannel, string> = {
+  email: 'Email',
+  sms: 'SMS',
+  push: 'Push Notification',
+};
+
+export function campaignStatusLabel(status: CampaignStatus): string {
+  return CAMPAIGN_STATUS_LABELS[status];
+}
+
+export function campaignChannelLabel(channel: CampaignChannel): string {
+  return CAMPAIGN_CHANNEL_LABELS[channel];
+}
