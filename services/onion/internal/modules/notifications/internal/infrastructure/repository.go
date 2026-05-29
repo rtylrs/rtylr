@@ -26,7 +26,7 @@ func (r *Repository) List(ctx context.Context, userID int64) ([]domain.Notificat
 		return nil, err
 	}
 
-	var notifications []domain.Notification
+	notifications := make([]domain.Notification, 0, len(rows))
 	for _, row := range rows {
 		var n domain.Notification
 		n.ID = row.ID
