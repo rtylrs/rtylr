@@ -65,7 +65,7 @@ func (s *Service) ListForBusiness(ctx context.Context, businessID int64) ([]doma
 			if err != nil {
 				return nil, err
 			}
-			enabledMap := make(map[string]domain.BusinessAddon)
+			enabledMap := make(map[string]domain.BusinessAddon, len(enabled))
 			for _, ba := range enabled {
 				enabledMap[ba.AddonID] = ba
 			}
