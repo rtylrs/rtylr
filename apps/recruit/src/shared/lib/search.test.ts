@@ -47,7 +47,7 @@ function makeSubmission(overrides: Partial<Submission> = {}): Submission {
 
 describe('searchCareers', () => {
   it('filters by title', () => {
-    const careers = [makeCareer({ title: 'Software Engineer' }), makeCareer({ title: 'Designer' })];
+    const careers = [makeCareer({ title: 'Software Engineer' }), makeCareer({ title: 'Designer', department: 'Design' })];
     expect(searchCareers(careers, 'engineer')).toHaveLength(1);
   });
 
@@ -65,7 +65,7 @@ describe('searchCareers', () => {
   });
 
   it('is case-insensitive', () => {
-    const careers = [makeCareer({ title: 'Designer' })];
+    const careers = [makeCareer({ title: 'Designer', department: 'Design' })];
     expect(searchCareers(careers, 'DESIGNER')).toHaveLength(1);
   });
 });
@@ -74,7 +74,7 @@ describe('searchSubmissions', () => {
   it('filters by candidate name', () => {
     const subs = [
       makeSubmission({ candidateName: 'Alice' }),
-      makeSubmission({ candidateName: 'Bob' }),
+      makeSubmission({ candidateName: 'Bob', email: 'bob@example.com' }),
     ];
     expect(searchSubmissions(subs, 'alice')).toHaveLength(1);
   });
