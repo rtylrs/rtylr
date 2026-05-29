@@ -38,11 +38,7 @@ export function sortByEstimateDesc(tasks: Task[]): Task[] {
 }
 
 /** Returns tasks within the given estimate range (inclusive). */
-export function tasksWithEstimateRange(
-  tasks: Task[],
-  minHours: number,
-  maxHours: number,
-): Task[] {
+export function tasksWithEstimateRange(tasks: Task[], minHours: number, maxHours: number): Task[] {
   return tasks.filter((t) => {
     const h = estimateHours(t);
     return h >= minHours && h <= maxHours;

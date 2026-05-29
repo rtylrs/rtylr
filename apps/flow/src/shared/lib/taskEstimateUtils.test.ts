@@ -99,11 +99,7 @@ describe('sortByEstimateDesc', () => {
 
 describe('tasksWithEstimateRange', () => {
   it('returns tasks within range', () => {
-    const tasks = [
-      makeTask({ estimate: 1 }),
-      makeTask({ estimate: 3 }),
-      makeTask({ estimate: 8 }),
-    ];
+    const tasks = [makeTask({ estimate: 1 }), makeTask({ estimate: 3 }), makeTask({ estimate: 8 })];
     expect(tasksWithEstimateRange(tasks, 2, 5).length).toBe(1);
   });
 });
