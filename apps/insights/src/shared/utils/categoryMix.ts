@@ -20,7 +20,9 @@ export function topCategories(categories: CategorySales[], n: number): CategoryS
  * categoryShare returns the percentage of total revenue for each category.
  * Returns the input array with a computed pct field (overwrites existing pct).
  */
-export function categoryShare(categories: CategorySales[]): (CategorySales & { computedPct: number })[] {
+export function categoryShare(
+  categories: CategorySales[]
+): (CategorySales & { computedPct: number })[] {
   const total = totalCategorySales(categories);
   if (total === 0) return categories.map((c) => ({ ...c, computedPct: 0 }));
   return categories.map((c) => ({
