@@ -14,18 +14,14 @@ export function tasksDueWithin(tasks: Task[], today: string, days: number): Task
       t.dueDate >= today &&
       t.dueDate <= cutoff &&
       t.status !== 'done' &&
-      t.status !== 'cancelled',
+      t.status !== 'cancelled'
   );
 }
 
 /** Returns tasks overdue (past due, not done or cancelled). */
 export function overdueTaskList(tasks: Task[], today: string): Task[] {
   return tasks.filter(
-    (t) =>
-      t.dueDate &&
-      t.dueDate < today &&
-      t.status !== 'done' &&
-      t.status !== 'cancelled',
+    (t) => t.dueDate && t.dueDate < today && t.status !== 'done' && t.status !== 'cancelled'
   );
 }
 

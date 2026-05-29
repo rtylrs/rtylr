@@ -81,10 +81,7 @@ describe('tasksNoDueDate', () => {
 describe('tasksDueThisWeek', () => {
   it('returns tasks in the current week', () => {
     // 2026-06-15 is Monday, so this week is 2026-06-15 to 2026-06-21
-    const tasks = [
-      makeTask({ dueDate: '2026-06-17' }),
-      makeTask({ dueDate: '2026-06-22' }),
-    ];
+    const tasks = [makeTask({ dueDate: '2026-06-17' }), makeTask({ dueDate: '2026-06-22' })];
     expect(tasksDueThisWeek(tasks, TODAY).length).toBe(1);
   });
 });
