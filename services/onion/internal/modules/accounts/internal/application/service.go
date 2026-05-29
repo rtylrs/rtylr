@@ -100,7 +100,7 @@ func (s *Service) buildChartOfAccounts(ctx context.Context, ownerID int64) ([]*d
 		}
 	}
 
-	roots := make([]*domain.AccountTreeNode, 0)
+	roots := make([]*domain.AccountTreeNode, 0, len(accounts))
 	for _, a := range accounts {
 		node := nodes[a.ID]
 		if a.ParentID == 0 {
