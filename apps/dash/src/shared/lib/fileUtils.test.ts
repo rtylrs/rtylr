@@ -11,8 +11,10 @@ import {
 
 describe('fileCategoryFromMime', () => {
   it('identifies image MIME types', () => expect(fileCategoryFromMime('image/png')).toBe('image'));
-  it('identifies document MIME types', () => expect(fileCategoryFromMime('application/pdf')).toBe('document'));
-  it('returns other for unknown MIME', () => expect(fileCategoryFromMime('application/octet-stream')).toBe('other'));
+  it('identifies document MIME types', () =>
+    expect(fileCategoryFromMime('application/pdf')).toBe('document'));
+  it('returns other for unknown MIME', () =>
+    expect(fileCategoryFromMime('application/octet-stream')).toBe('other'));
 });
 
 describe('fileCategoryLabel', () => {
@@ -37,9 +39,12 @@ describe('fileExtension', () => {
 });
 
 describe('isAllowedExtension', () => {
-  it('returns true for allowed extension', () => expect(isAllowedExtension('photo.png', ['png', 'jpg'])).toBe(true));
-  it('returns false for disallowed extension', () => expect(isAllowedExtension('script.exe', ['png', 'jpg'])).toBe(false));
-  it('handles dot prefix in allowed list', () => expect(isAllowedExtension('doc.pdf', ['.pdf'])).toBe(true));
+  it('returns true for allowed extension', () =>
+    expect(isAllowedExtension('photo.png', ['png', 'jpg'])).toBe(true));
+  it('returns false for disallowed extension', () =>
+    expect(isAllowedExtension('script.exe', ['png', 'jpg'])).toBe(false));
+  it('handles dot prefix in allowed list', () =>
+    expect(isAllowedExtension('doc.pdf', ['.pdf'])).toBe(true));
 });
 
 describe('isWithinSizeLimit', () => {
@@ -50,6 +55,7 @@ describe('isWithinSizeLimit', () => {
 
 describe('sanitizeFilename', () => {
   it('replaces unsafe chars', () => expect(sanitizeFilename('my<file>.txt')).toBe('my_file_.txt'));
-  it('replaces spaces with underscores', () => expect(sanitizeFilename('my file.txt')).toBe('my_file.txt'));
+  it('replaces spaces with underscores', () =>
+    expect(sanitizeFilename('my file.txt')).toBe('my_file.txt'));
   it('collapses multiple underscores', () => expect(sanitizeFilename('a__b.txt')).toBe('a_b.txt'));
 });

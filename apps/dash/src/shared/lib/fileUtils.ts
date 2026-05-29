@@ -3,7 +3,14 @@
  * All functions are pure with no side-effects.
  */
 
-export type FileCategory = 'image' | 'document' | 'spreadsheet' | 'video' | 'audio' | 'archive' | 'other';
+export type FileCategory =
+  | 'image'
+  | 'document'
+  | 'spreadsheet'
+  | 'video'
+  | 'audio'
+  | 'archive'
+  | 'other';
 
 const MIME_CATEGORIES: Record<string, FileCategory> = {
   'image/jpeg': 'image',
