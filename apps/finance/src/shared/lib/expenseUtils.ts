@@ -69,3 +69,25 @@ export function getTopCategories(
     .sort((a, b) => b.total - a.total)
     .slice(0, n);
 }
+
+/**
+ * Returns the percentage change between current and prior period spend.
+ * Returns 0 if prior is 0.
+ */
+export function getExpenseGrowthPct(current: number, prior: number): number {
+  if (prior === 0) return 0;
+  return Math.round(((current - prior) / prior) * 10000) / 100;
+}
+
+/**
+ * Sorts an array of expense-like objects by amount.
+ * Direction defaults to descending (highest first).
+ */
+export function sortExpensesByAmount<T extends { amount: number }>(
+  expenses: T[],
+  direction: 'asc' | 'desc' = 'desc'
+): T[] {
+  return [...expenses].sort((a, b) =>
+    direction === 'desc' ? b.amount - a.amount : a.amount - b.amount
+  );
+}
