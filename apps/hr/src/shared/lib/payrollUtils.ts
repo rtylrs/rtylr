@@ -112,3 +112,25 @@ export function annualToPerPeriod(
   const divisors = { weekly: 52, biweekly: 26, monthly: 12 };
   return annualSalary / divisors[period];
 }
+
+/**
+ * Calculates employer social security contribution up to a wage cap.
+ */
+export function employerSocialSecurity(grossPay: number, wageCap: number, rate: number): number {
+  if (rate < 0 || rate > 1) return 0;
+  return Math.round(Math.min(grossPay, wageCap) * rate * 100) / 100;
+}
+
+/**
+ * Calculates total employer cost including an overhead fraction.
+ */
+export function totalEmployerCost(grossPay: number, overhead: number): number {
+  return Math.round(grossPay * (1 + Math.max(0, overhead)) * 100) / 100;
+}
+
+/**
+ * Returns true when payroll period start is before end.
+ */
+export function isValidPayrollPeriod(startIso: string, endIso: string): boolean {
+  return new Date(startIso) < new Date(endIso);
+}
