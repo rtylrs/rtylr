@@ -5,7 +5,6 @@ import (
 	"database/sql"
 	"encoding/json"
 	"errors"
-	"fmt"
 	"strconv"
 	"time"
 
@@ -305,7 +304,7 @@ func nullDecimal(v float64) sql.NullString {
 	if v == 0 {
 		return sql.NullString{}
 	}
-	return sql.NullString{String: fmt.Sprintf("%g", v), Valid: true}
+	return sql.NullString{String: strconv.FormatFloat(v, 'g', -1, 64), Valid: true}
 }
 
 func parseDate(s string) time.Time {
