@@ -10,17 +10,33 @@ export type ApplicationStatus =
   | 'withdrawn';
 
 const STATUS_ORDER: ApplicationStatus[] = [
-  'new', 'reviewing', 'interview', 'offer', 'hired', 'rejected', 'withdrawn',
+  'new',
+  'reviewing',
+  'interview',
+  'offer',
+  'hired',
+  'rejected',
+  'withdrawn',
 ];
 
 const STATUS_COLORS: Record<ApplicationStatus, string> = {
-  new: 'blue', reviewing: 'yellow', interview: 'purple',
-  offer: 'orange', hired: 'green', rejected: 'red', withdrawn: 'gray',
+  new: 'blue',
+  reviewing: 'yellow',
+  interview: 'purple',
+  offer: 'orange',
+  hired: 'green',
+  rejected: 'red',
+  withdrawn: 'gray',
 };
 
 const STATUS_LABELS: Record<ApplicationStatus, string> = {
-  new: 'New', reviewing: 'Reviewing', interview: 'Interview',
-  offer: 'Offer Made', hired: 'Hired', rejected: 'Rejected', withdrawn: 'Withdrawn',
+  new: 'New',
+  reviewing: 'Reviewing',
+  interview: 'Interview',
+  offer: 'Offer Made',
+  hired: 'Hired',
+  rejected: 'Rejected',
+  withdrawn: 'Withdrawn',
 };
 
 /**
