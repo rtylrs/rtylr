@@ -130,7 +130,7 @@ func (r *Repository) ListUsers(ctx context.Context, limit, offset int, search st
 	}
 	defer rows.Close()
 
-	var users []UserRow
+	users := make([]UserRow, 0, limit)
 	for rows.Next() {
 		var u UserRow
 		if err := rows.Scan(&u.ID, &u.Email, &u.FullName, &u.BusinessID,
@@ -221,7 +221,7 @@ func (r *Repository) ListBusinesses(ctx context.Context, limit, offset int, sear
 	}
 	defer rows.Close()
 
-	var businesses []BusinessRow
+	businesses := make([]BusinessRow, 0, limit)
 	for rows.Next() {
 		var b BusinessRow
 		if err := rows.Scan(&b.ID, &b.Name, &b.OwnerID, &b.CreatedAt); err != nil {
@@ -279,7 +279,7 @@ func (r *Repository) ListSubscriptions(ctx context.Context, limit, offset int, s
 	}
 	defer rows.Close()
 
-	var subs []SubscriptionRow
+	subs := make([]SubscriptionRow, 0, limit)
 	for rows.Next() {
 		var s SubscriptionRow
 		if err := rows.Scan(&s.ID, &s.OwnerID, &s.PlanID, &s.PlanName, &s.Status, &s.SeatCount,
@@ -399,7 +399,7 @@ func (r *Repository) ListGrants(ctx context.Context, limit, offset int) ([]Grant
 	}
 	defer rows.Close()
 
-	var grants []GrantRow
+	grants := make([]GrantRow, 0, limit)
 	for rows.Next() {
 		var g GrantRow
 		if err := rows.Scan(&g.ID, &g.UserID, &g.PlanID, &g.PlanName, &g.GrantedBy, &g.GranterName,
