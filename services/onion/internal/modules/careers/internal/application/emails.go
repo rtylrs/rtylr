@@ -232,15 +232,15 @@ func escape(s string) string {
 	for i := 0; i < len(s); i++ {
 		switch s[i] {
 		case '<':
-			out = append(out, []byte("&lt;")...)
+			out = append(out, "&lt;"...)
 		case '>':
-			out = append(out, []byte("&gt;")...)
+			out = append(out, "&gt;"...)
 		case '&':
-			out = append(out, []byte("&amp;")...)
+			out = append(out, "&amp;"...)
 		case '"':
-			out = append(out, []byte("&quot;")...)
+			out = append(out, "&quot;"...)
 		case '\'':
-			out = append(out, []byte("&#39;")...)
+			out = append(out, "&#39;"...)
 		default:
 			out = append(out, s[i])
 		}
