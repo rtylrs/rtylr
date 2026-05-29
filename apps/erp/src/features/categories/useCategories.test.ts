@@ -2,7 +2,12 @@ import { describe, it, expect, vi, beforeEach } from 'vitest';
 import { renderHook, waitFor, act } from '@testing-library/react';
 import { QueryClient, QueryClientProvider } from '@tanstack/react-query';
 import React from 'react';
-import { useCategories, useCreateCategory, useUpdateCategory, useDeleteCategory } from './useCategories';
+import {
+  useCategories,
+  useCreateCategory,
+  useUpdateCategory,
+  useDeleteCategory,
+} from './useCategories';
 
 const mockErpApi = {
   listCategories: vi.fn(),
@@ -61,7 +66,13 @@ describe('useCreateCategory', () => {
   beforeEach(() => vi.clearAllMocks());
 
   it('calls createCategory with data', async () => {
-    mockErpApi.createCategory.mockResolvedValue({ id: 3, name: 'Tablets', parentId: null, productCount: 0, sortOrder: 3 });
+    mockErpApi.createCategory.mockResolvedValue({
+      id: 3,
+      name: 'Tablets',
+      parentId: null,
+      productCount: 0,
+      sortOrder: 3,
+    });
     const { result } = renderHook(() => useCreateCategory(), { wrapper: createWrapper() });
     await act(async () => {
       await result.current.mutateAsync({ name: 'Tablets' });
