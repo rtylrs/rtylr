@@ -58,10 +58,10 @@ describe('activeFilterCount', () => {
 describe('applyFilters', () => {
   it('filters rows by active filters (case-insensitive)', () => {
     const rows = [
-      { name: 'Alice', status: 'active' },
-      { name: 'Bob', status: 'inactive' },
+      { name: 'Alice', status: 'open' },
+      { name: 'Bob', status: 'closed' },
     ];
-    expect(applyFilters(rows, { status: 'active' })).toHaveLength(1);
+    expect(applyFilters(rows, { status: 'open' })).toHaveLength(1);
   });
 
   it('returns all rows when no active filters', () => {

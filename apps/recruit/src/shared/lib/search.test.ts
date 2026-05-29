@@ -47,7 +47,10 @@ function makeSubmission(overrides: Partial<Submission> = {}): Submission {
 
 describe('searchCareers', () => {
   it('filters by title', () => {
-    const careers = [makeCareer({ title: 'Software Engineer' }), makeCareer({ title: 'Designer', department: 'Design' })];
+    const careers = [
+      makeCareer({ title: 'Software Engineer' }),
+      makeCareer({ title: 'Designer', department: 'Design' }),
+    ];
     expect(searchCareers(careers, 'engineer')).toHaveLength(1);
   });
 
