@@ -55,7 +55,7 @@ export function reportFilename(
   name: string,
   period: ReportPeriod,
   dateIso: string,
-  format: ReportFormat,
+  format: ReportFormat
 ): string {
   const safeName = name.toLowerCase().replace(/\s+/g, '_');
   return `${safeName}_${period}_${dateIso}.${format}`;
