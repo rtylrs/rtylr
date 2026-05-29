@@ -78,11 +78,7 @@ describe('goalsAchieved', () => {
 
 describe('goalsAtRisk', () => {
   it('returns at_risk and off_track goals', () => {
-    const goals = [
-      makeGoal('A', 100, 80),
-      makeGoal('B', 100, 55),
-      makeGoal('C', 100, 20),
-    ];
+    const goals = [makeGoal('A', 100, 80), makeGoal('B', 100, 55), makeGoal('C', 100, 20)];
     expect(goalsAtRisk(goals)).toHaveLength(2);
   });
 });
