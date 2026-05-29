@@ -102,14 +102,21 @@ func (r *Repository) ReorderSections(ctx context.Context, ownerID int64, ordered
 		}
 	}()
 
+	stmt, err := tx.PrepareContext(ctx,
+		`UPDATE careers_sections SET position = ? WHERE id = ? AND owner_id = ?`)
+	if err != nil {
+		_ = tx.Rollback()
+		return err
+	}
+
 	for idx, id := range orderedIDs {
-		if _, err := tx.ExecContext(ctx,
-			`UPDATE careers_sections SET position = ? WHERE id = ? AND owner_id = ?`,
-			int32(idx), id, ownerID); err != nil {
+		if _, err := stmt.ExecContext(ctx, int32(idx), id, ownerID); err != nil {
+			_ = stmt.Close()
 			_ = tx.Rollback()
 			return err
 		}
 	}
+	_ = stmt.Close()
 	return tx.Commit()
 }
 
