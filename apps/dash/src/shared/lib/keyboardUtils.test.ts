@@ -1,10 +1,5 @@
 import { describe, it, expect } from 'vitest';
-import {
-  formatKeyCombo,
-  isNavigationKey,
-  isActionKey,
-  isDismissKey,
-} from './keyboardUtils';
+import { formatKeyCombo, isNavigationKey, isActionKey, isDismissKey } from './keyboardUtils';
 
 describe('formatKeyCombo', () => {
   it('formats a key with no modifiers', () => {

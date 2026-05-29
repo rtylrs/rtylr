@@ -14,11 +14,16 @@ export interface KeyCombo {
 export function formatKeyCombo(combo: KeyCombo): string {
   const mods = (combo.modifiers ?? []).map((m) => {
     switch (m) {
-      case 'ctrl': return 'Ctrl';
-      case 'alt': return 'Alt';
-      case 'shift': return 'Shift';
-      case 'meta': return 'Cmd';
-      default: return m;
+      case 'ctrl':
+        return 'Ctrl';
+      case 'alt':
+        return 'Alt';
+      case 'shift':
+        return 'Shift';
+      case 'meta':
+        return 'Cmd';
+      default:
+        return m;
     }
   });
   return [...mods, combo.key.toUpperCase()].join('+');
@@ -38,8 +43,14 @@ export function matchesCombo(event: KeyboardEvent, combo: KeyCombo): boolean {
 /** Return true when the key is a navigation key (arrows, home, end, etc.). */
 export function isNavigationKey(key: string): boolean {
   return [
-    'ArrowUp', 'ArrowDown', 'ArrowLeft', 'ArrowRight',
-    'Home', 'End', 'PageUp', 'PageDown',
+    'ArrowUp',
+    'ArrowDown',
+    'ArrowLeft',
+    'ArrowRight',
+    'Home',
+    'End',
+    'PageUp',
+    'PageDown',
   ].includes(key);
 }
 
