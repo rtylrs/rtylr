@@ -97,7 +97,7 @@ func (r *Repository) getTransferItems(ctx context.Context, transferID int64) ([]
 		return nil, err
 	}
 
-	var items []domain.StockTransferItem
+	items := make([]domain.StockTransferItem, 0, len(rows))
 
 	for _, row := range rows {
 		var item domain.StockTransferItem
