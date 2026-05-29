@@ -2,6 +2,7 @@ import React from 'react';
 import AppLayout from '../../components/Layout/AppLayout';
 import MainLayout from '../../layouts/Main/MainLayout';
 import HelmetContainer from '../../components/HelmetContainer';
+import { webPageSchema } from '../../lib/structured-data';
 import styles from './legal.module.scss';
 
 // ── Table of contents anchors ────────────────────────────────────────────
@@ -32,6 +33,11 @@ const TermsPage = (): JSX.Element => {
           title="Terms of Service | rtylr"
           description="The terms that govern your use of rtylr, operated by Voxire."
           canonical="https://rtylr.com/legal/terms/"
+          structuredData={webPageSchema({
+            name: 'Terms of Service',
+            path: '/legal/terms/',
+            description: 'The terms that govern your use of rtylr, operated by Voxire.',
+          })}
         />
 
         <main className={styles.page}>

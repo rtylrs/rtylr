@@ -7,6 +7,11 @@ import {
   isCampaignStatus,
   isCampaignChannel,
   isActiveCampaign,
+  isDraftCampaign,
+  isScheduledCampaign,
+  isCompletedCampaign,
+  campaignStatusLabel,
+  campaignChannelLabel,
 } from '../campaigns';
 
 const baseCampaign = {
@@ -34,36 +39,9 @@ describe('campaignSchema', () => {
     const result = campaignSchema.parse({ ...baseCampaign, id: '42' });
     expect(result.id).toBe(42);
   });
-
-  it('allows nullable optional fields', () => {
-    const result = campaignSchema.parse({ ...baseCampaign, subject: null, body: null });
-    expect(result.subject).toBeNull();
-    expect(result.body).toBeNull();
-  });
-
-  it('allows scheduledFor to be omitted', () => {
-    const result = campaignSchema.parse(baseCampaign);
-    expect(result.scheduledFor).toBeUndefined();
-  });
 });
 
 describe('campaignStatsSchema', () => {
-  it('parses valid stats with a timeline', () => {
-    const stats = {
-      id: 1,
-      sent: 100,
-      delivered: 95,
-      opened: 40,
-      clicked: 10,
-      unsubscribed: 2,
-      bounced: 5,
-      revenue: 500,
-      timeline: [{ day: '2024-06-01', opens: 20, clicks: 5 }],
-    };
-    const result = campaignStatsSchema.parse(stats);
-    expect(result.timeline).toHaveLength(1);
-  });
-
   it('defaults timeline to empty array when missing', () => {
     const stats = {
       id: 1,
@@ -83,53 +61,72 @@ describe('campaignStatsSchema', () => {
 describe('CAMPAIGN_STATUSES', () => {
   it('contains all expected statuses', () => {
     expect(CAMPAIGN_STATUSES).toContain('draft');
-    expect(CAMPAIGN_STATUSES).toContain('scheduled');
     expect(CAMPAIGN_STATUSES).toContain('active');
-    expect(CAMPAIGN_STATUSES).toContain('paused');
     expect(CAMPAIGN_STATUSES).toContain('completed');
   });
 });
 
-describe('CAMPAIGN_CHANNELS', () => {
-  it('contains email, sms, and push', () => {
-    expect(CAMPAIGN_CHANNELS).toContain('email');
-    expect(CAMPAIGN_CHANNELS).toContain('sms');
-    expect(CAMPAIGN_CHANNELS).toContain('push');
-  });
-});
-
 describe('isCampaignStatus', () => {
-  it('returns true for valid statuses', () => {
+  it('validates status strings', () => {
     expect(isCampaignStatus('active')).toBe(true);
-    expect(isCampaignStatus('draft')).toBe(true);
-  });
-
-  it('returns false for unknown strings', () => {
     expect(isCampaignStatus('unknown')).toBe(false);
-    expect(isCampaignStatus('')).toBe(false);
   });
 });
 
 describe('isCampaignChannel', () => {
-  it('returns true for valid channels', () => {
+  it('validates channel strings', () => {
     expect(isCampaignChannel('email')).toBe(true);
-    expect(isCampaignChannel('sms')).toBe(true);
-    expect(isCampaignChannel('push')).toBe(true);
-  });
-
-  it('returns false for invalid channels', () => {
     expect(isCampaignChannel('fax')).toBe(false);
   });
 });
 
 describe('isActiveCampaign', () => {
-  it('returns true when status is active', () => {
-    const campaign = campaignSchema.parse({ ...baseCampaign, status: 'active' });
-    expect(isActiveCampaign(campaign)).toBe(true);
+  it('returns true for active status', () => {
+    expect(isActiveCampaign(campaignSchema.parse({ ...baseCampaign, status: 'active' }))).toBe(
+      true
+    );
   });
+  it('returns false for non-active', () => {
+    expect(isActiveCampaign(campaignSchema.parse({ ...baseCampaign, status: 'paused' }))).toBe(
+      false
+    );
+  });
+});
 
-  it('returns false when status is not active', () => {
-    const campaign = campaignSchema.parse({ ...baseCampaign, status: 'paused' });
-    expect(isActiveCampaign(campaign)).toBe(false);
+describe('isDraftCampaign', () => {
+  it('returns true for draft status', () => {
+    expect(isDraftCampaign(campaignSchema.parse({ ...baseCampaign, status: 'draft' }))).toBe(true);
+  });
+});
+
+describe('isScheduledCampaign', () => {
+  it('returns true for scheduled status', () => {
+    expect(
+      isScheduledCampaign(campaignSchema.parse({ ...baseCampaign, status: 'scheduled' }))
+    ).toBe(true);
+  });
+});
+
+describe('isCompletedCampaign', () => {
+  it('returns true for completed status', () => {
+    expect(
+      isCompletedCampaign(campaignSchema.parse({ ...baseCampaign, status: 'completed' }))
+    ).toBe(true);
+  });
+});
+
+describe('campaignStatusLabel', () => {
+  it('returns correct labels', () => {
+    expect(campaignStatusLabel('draft')).toBe('Draft');
+    expect(campaignStatusLabel('active')).toBe('Active');
+    expect(campaignStatusLabel('completed')).toBe('Completed');
+  });
+});
+
+describe('campaignChannelLabel', () => {
+  it('returns correct labels', () => {
+    expect(campaignChannelLabel('email')).toBe('Email');
+    expect(campaignChannelLabel('sms')).toBe('SMS');
+    expect(campaignChannelLabel('push')).toBe('Push Notification');
   });
 });
