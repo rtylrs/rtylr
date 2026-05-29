@@ -50,3 +50,24 @@ export type LoyaltyTransaction = z.infer<typeof loyaltyTransactionSchema>;
 export type LoyaltyMember = z.infer<typeof loyaltyMemberSchema>;
 export type LoyaltyReward = z.infer<typeof loyaltyRewardSchema>;
 export type LoyaltyTier = z.infer<typeof loyaltyTierSchema>;
+
+// -- Domain constants ---------------------------------------------------------
+
+export const LOYALTY_TRANSACTION_TYPES = ['earn', 'redeem', 'upgrade'] as const;
+export type LoyaltyTransactionType = (typeof LOYALTY_TRANSACTION_TYPES)[number];
+
+// -- Helpers ------------------------------------------------------------------
+
+export function isEarnTransaction(tx: LoyaltyTransaction): boolean {
+  return tx.type === 'earn';
+}
+
+export function isRedeemTransaction(tx: LoyaltyTransaction): boolean {
+  return tx.type === 'redeem';
+}
+
+export function getTransactionIcon(type: LoyaltyTransaction['type']): string {
+  if (type === 'earn') return 'plus';
+  if (type === 'redeem') return 'minus';
+  return 'arrow-up';
+}

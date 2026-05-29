@@ -40,3 +40,25 @@ export const campaignStatsSchema = z.object({
 
 export type Campaign = z.infer<typeof campaignSchema>;
 export type CampaignStats = z.infer<typeof campaignStatsSchema>;
+
+// -- Domain constants ---------------------------------------------------------
+
+export const CAMPAIGN_STATUSES = ['draft', 'scheduled', 'active', 'paused', 'completed'] as const;
+export type CampaignStatus = (typeof CAMPAIGN_STATUSES)[number];
+
+export const CAMPAIGN_CHANNELS = ['email', 'sms', 'push'] as const;
+export type CampaignChannel = (typeof CAMPAIGN_CHANNELS)[number];
+
+// -- Type guards --------------------------------------------------------------
+
+export function isCampaignStatus(value: string): value is CampaignStatus {
+  return (CAMPAIGN_STATUSES as readonly string[]).includes(value);
+}
+
+export function isCampaignChannel(value: string): value is CampaignChannel {
+  return (CAMPAIGN_CHANNELS as readonly string[]).includes(value);
+}
+
+export function isActiveCampaign(campaign: Campaign): boolean {
+  return campaign.status === 'active';
+}

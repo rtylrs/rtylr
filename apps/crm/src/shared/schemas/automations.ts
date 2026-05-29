@@ -21,3 +21,27 @@ export const automationSchema = z.object({
 });
 
 export type Automation = z.infer<typeof automationSchema>;
+
+// -- Domain constants ---------------------------------------------------------
+
+export const AUTOMATION_TRIGGERS = [
+  'new_customer',
+  'birthday',
+  'visit',
+  'points_threshold',
+  'inactivity',
+] as const;
+export type AutomationTrigger = (typeof AUTOMATION_TRIGGERS)[number];
+
+export const AUTOMATION_STATUSES = ['active', 'paused', 'draft'] as const;
+export type AutomationStatus = (typeof AUTOMATION_STATUSES)[number];
+
+// -- Type guards --------------------------------------------------------------
+
+export function isAutomationActive(automation: Automation): boolean {
+  return automation.status === 'active';
+}
+
+export function isAutomationDraft(automation: Automation): boolean {
+  return automation.status === 'draft';
+}

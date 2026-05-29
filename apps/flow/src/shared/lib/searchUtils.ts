@@ -15,9 +15,7 @@ export function searchTasks(tasks: Task[], query: string): Task[] {
   if (!query.trim()) return tasks;
   return tasks.filter(
     (t) =>
-      contains(t.title, query) ||
-      contains(t.identifier, query) ||
-      contains(t.projectName, query),
+      contains(t.title, query) || contains(t.identifier, query) || contains(t.projectName, query)
   );
 }
 
@@ -39,7 +37,7 @@ export function taskMatchesTokens(task: Task, tokens: string[]): boolean {
     (token) =>
       contains(task.title, token) ||
       contains(task.identifier, token) ||
-      contains(task.projectName, token),
+      contains(task.projectName, token)
   );
 }
 
