@@ -34,3 +34,23 @@ export function isValidSegmentColor(color: string): boolean {
 export function isTrendingUp(segment: Segment): boolean {
   return segment.trendUp === true;
 }
+
+export const SEGMENT_SIZES = ['small', 'medium', 'large', 'xlarge'] as const;
+export type SegmentSize = (typeof SEGMENT_SIZES)[number];
+
+export function getSegmentSize(memberCount: number): SegmentSize {
+  if (memberCount < 100) return 'small';
+  if (memberCount < 1000) return 'medium';
+  if (memberCount < 10000) return 'large';
+  return 'xlarge';
+}
+
+export function segmentSizeLabel(size: SegmentSize): string {
+  const labels: Record<SegmentSize, string> = {
+    small: 'Small (<100)',
+    medium: 'Medium (100-1K)',
+    large: 'Large (1K-10K)',
+    xlarge: 'Extra Large (10K+)',
+  };
+  return labels[size];
+}
