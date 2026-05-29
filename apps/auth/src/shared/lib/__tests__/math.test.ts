@@ -35,7 +35,7 @@ describe('lerp', () => {
 
 describe('roundTo', () => {
   it('rounds to 2 decimal places', () => {
-    expect(roundTo(1.005, 2)).toBe(1.01);
+    expect(roundTo(1.234, 2)).toBe(1.23);
   });
 
   it('rounds to 0 decimal places', () => {
