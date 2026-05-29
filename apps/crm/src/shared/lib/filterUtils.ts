@@ -44,3 +44,24 @@ export function paginateItems<T>(items: T[], page: number, pageSize: number): T[
   const start = (page - 1) * pageSize;
   return items.slice(start, start + pageSize);
 }
+
+export function totalPages(totalItems: number, pageSize: number): number {
+  if (pageSize <= 0) return 0;
+  return Math.ceil(totalItems / pageSize);
+}
+
+export function filterByDateRange<T>(
+  items: T[],
+  getDate: (item: T) => string,
+  from: string,
+  to: string
+): T[] {
+  return items.filter((item) => {
+    const d = getDate(item);
+    return d >= from && d <= to;
+  });
+}
+
+export function filterNonNull<T>(items: (T | null | undefined)[]): T[] {
+  return items.filter((item): item is T => item != null);
+}
