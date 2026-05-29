@@ -324,7 +324,7 @@ func initialsFromName(name string) string {
 	if name == "" {
 		return ""
 	}
-	var initials []rune
+	initials := make([]rune, 0, 2)
 	prev := ' '
 	for _, r := range name {
 		if (prev == ' ' || prev == '\t') && r != ' ' && r != '\t' {
