@@ -13,7 +13,7 @@ function makeReq(
   status: 'draft' | 'open' | 'on_hold' | 'filled' | 'cancelled',
   priority: 'low' | 'medium' | 'high' | 'urgent' = 'medium',
   dept = 'Engineering',
-  filledAt?: string,
+  filledAt?: string
 ): JobRequisition {
   return {
     id: 'r1',
