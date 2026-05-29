@@ -8,29 +8,57 @@
 
 .pricingCard {
   position: relative;
-  background: rgba(255, 255, 255, 0.025);
+  background: linear-gradient(
+    180deg,
+    rgba(255, 255, 255, 0.045) 0%,
+    rgba(255, 255, 255, 0.015) 100%
+  );
   border: 1px solid rgba(255, 255, 255, 0.08);
-  border-radius: 6px;
+  border-radius: 12px;
   padding: 40px 32px;
   display: flex;
   flex-direction: column;
+  box-shadow:
+    0 1px 0 rgba(255, 255, 255, 0.05) inset,
+    var(--elev-2);
   transition:
     background 0.3s ease,
     border-color 0.3s ease,
-    box-shadow 0.3s ease;
+    transform 0.35s var(--ease-out-soft),
+    box-shadow 0.35s var(--ease-out-soft);
 
   &:hover {
-    background: rgba(255, 255, 255, 0.04);
-    border-color: rgba(255, 255, 255, 0.15);
+    background: linear-gradient(
+      180deg,
+      rgba(255, 255, 255, 0.07) 0%,
+      rgba(255, 255, 255, 0.025) 100%
+    );
+    border-color: rgba(255, 255, 255, 0.18);
+    transform: translateY(-6px);
+    box-shadow:
+      0 1px 0 rgba(255, 255, 255, 0.08) inset,
+      var(--elev-3);
   }
 
   &.featured {
-    background: rgba(232, 230, 225, 0.06);
+    background: linear-gradient(
+      180deg,
+      rgba(232, 230, 225, 0.1) 0%,
+      rgba(232, 230, 225, 0.03) 100%
+    );
     border-color: rgba(232, 230, 225, 0.4);
+    box-shadow:
+      0 1px 0 rgba(255, 255, 255, 0.08) inset,
+      var(--elev-2),
+      var(--glow-cream);
 
     &:hover {
-      border-color: rgba(232, 230, 225, 0.65);
-      box-shadow: 0 0 40px rgba(232, 230, 225, 0.12);
+      border-color: rgba(232, 230, 225, 0.7);
+      transform: translateY(-6px) scale(1.015);
+      box-shadow:
+        0 1px 0 rgba(255, 255, 255, 0.12) inset,
+        var(--elev-3),
+        var(--glow-cream-strong);
     }
   }
 }
@@ -129,7 +157,9 @@
 }
 
 .ctaButton {
-  background: transparent;
+  position: relative;
+  overflow: hidden;
+  background: var(--btn-glass-bg);
   color: white;
   border: 1px solid rgba(255, 255, 255, 0.18);
   padding: 14px 24px;
@@ -137,24 +167,65 @@
   font-size: 0.9rem;
   font-weight: 600;
   cursor: pointer;
-  transition: all 0.2s ease;
   width: 100%;
   letter-spacing: -0.01em;
+  box-shadow: var(--btn-glass-shadow);
+  transition:
+    background 0.2s ease,
+    border-color 0.2s ease,
+    transform 0.22s var(--ease-out-soft),
+    box-shadow 0.22s var(--ease-out-soft);
 
   &:hover {
-    background: rgba(255, 255, 255, 0.07);
-    border-color: rgba(255, 255, 255, 0.32);
+    background: var(--btn-glass-bg-hover);
+    border-color: rgba(255, 255, 255, 0.34);
+    transform: translateY(-2px);
+    box-shadow: var(--btn-glass-shadow-hover);
+  }
+
+  &:active {
+    transform: translateY(0);
   }
 
   &.ctaFeatured {
-    background: #e8e6e1;
-    border-color: #e8e6e1;
+    background: var(--btn-cream-bg);
+    border-color: transparent;
     color: #0a0a0a;
+    box-shadow: var(--btn-cream-shadow);
+
+    // sheen sweep
+    &::after {
+      content: '';
+      position: absolute;
+      top: 0;
+      left: -120%;
+      width: 80%;
+      height: 100%;
+      background: linear-gradient(
+        100deg,
+        transparent 0%,
+        rgba(255, 255, 255, 0.6) 50%,
+        transparent 100%
+      );
+      transform: skewX(-18deg);
+      transition: left 0.6s var(--ease-out-soft);
+      pointer-events: none;
+    }
 
     &:hover {
-      background: #ffffff;
-      border-color: #ffffff;
-      transform: translateY(-1px);
+      background: var(--btn-cream-bg-hover);
+      border-color: transparent;
+      transform: translateY(-2px);
+      box-shadow: var(--btn-cream-shadow-hover);
+
+      &::after {
+        left: 130%;
+      }
+    }
+
+    &:active {
+      transform: translateY(0);
+      box-shadow: var(--btn-cream-shadow);
     }
   }
 }
