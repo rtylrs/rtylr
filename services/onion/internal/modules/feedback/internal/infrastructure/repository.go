@@ -96,7 +96,7 @@ func (r *Repository) List(ctx context.Context, ownerID int64, filters domain.Lis
 		}
 	}()
 
-	items := make([]domain.Feedback, 0)
+	items := make([]domain.Feedback, 0, pageSize)
 
 	for rows.Next() {
 		var (
