@@ -52,10 +52,7 @@ describe('visibleSections', () => {
   });
 
   it('sorts by position ascending', () => {
-    const sections = [
-      makeSection({ id: 1, position: 3 }),
-      makeSection({ id: 2, position: 1 }),
-    ];
+    const sections = [makeSection({ id: 1, position: 3 }), makeSection({ id: 2, position: 1 })];
     const result = visibleSections(sections);
     expect(result[0].id).toBe(2);
   });

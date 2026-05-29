@@ -14,10 +14,7 @@ export interface SortState {
  * String comparison is locale-aware; numbers use numeric subtraction.
  * Returns a new array and does not mutate the input.
  */
-export function sortRows<T extends Record<string, unknown>>(
-  rows: T[],
-  sort: SortState
-): T[] {
+export function sortRows<T extends Record<string, unknown>>(rows: T[], sort: SortState): T[] {
   return [...rows].sort((a, b) => {
     const av = a[sort.key];
     const bv = b[sort.key];
