@@ -1,5 +1,14 @@
 import { describe, it, expect } from 'vitest';
-import { buildChildMap, rootNodes, childrenOf, descendants, nodeDepth, ancestorIds, isAncestor, type TreeNode } from './treeUtils';
+import {
+  buildChildMap,
+  rootNodes,
+  childrenOf,
+  descendants,
+  nodeDepth,
+  ancestorIds,
+  isAncestor,
+  type TreeNode,
+} from './treeUtils';
 
 const nodes: TreeNode<string>[] = [
   { id: 'root', parentId: null, data: 'Root' },
@@ -27,12 +36,22 @@ describe('rootNodes', () => {
 });
 
 describe('childrenOf', () => {
-  it('returns direct children', () => expect(childrenOf(nodes, 'a').map(n => n.id).sort()).toEqual(['a1', 'a2']));
+  it('returns direct children', () =>
+    expect(
+      childrenOf(nodes, 'a')
+        .map((n) => n.id)
+        .sort()
+    ).toEqual(['a1', 'a2']));
   it('empty for leaf', () => expect(childrenOf(nodes, 'a1x')).toHaveLength(0));
 });
 
 describe('descendants', () => {
-  it('returns all descendants', () => expect(descendants(nodes, 'a').map(n => n.id).sort()).toEqual(['a1', 'a1x', 'a2']));
+  it('returns all descendants', () =>
+    expect(
+      descendants(nodes, 'a')
+        .map((n) => n.id)
+        .sort()
+    ).toEqual(['a1', 'a1x', 'a2']));
   it('empty for leaf', () => expect(descendants(nodes, 'b')).toHaveLength(0));
 });
 
