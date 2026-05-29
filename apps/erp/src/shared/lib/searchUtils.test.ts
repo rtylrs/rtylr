@@ -1,5 +1,11 @@
 import { describe, it, expect } from 'vitest';
-import { matchesSearch, filterBySearch, paginate, uniqueStrings, uniqueValues } from './searchUtils';
+import {
+  matchesSearch,
+  filterBySearch,
+  paginate,
+  uniqueStrings,
+  uniqueValues,
+} from './searchUtils';
 
 describe('matchesSearch', () => {
   it('returns true when haystack contains needle (case-insensitive)', () => {
