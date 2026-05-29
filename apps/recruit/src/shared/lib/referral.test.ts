@@ -11,7 +11,7 @@ import type { Referral } from './referral';
 function makeReferral(
   status: 'pending' | 'interviewing' | 'hired' | 'rejected',
   referrerId = 'r1',
-  bonus?: number,
+  bonus?: number
 ): Referral {
   return {
     id: `ref-${Math.random()}`,
