@@ -3,7 +3,7 @@ package application
 import (
 	"context"
 	"database/sql"
-	"fmt"
+	"strconv"
 	"time"
 
 	"github.com/voxire/onion/internal/modules/activity/internal/domain"
@@ -30,7 +30,7 @@ func NewService(_ context.Context, db *sql.DB) *Service {
 }
 
 func (s *Service) ListActivity(ctx context.Context, ownerID int64, limit int) ([]domain.ActivityLog, error) {
-	cacheKey := fmt.Sprintf("activity:%d:%d", ownerID, limit)
+	cacheKey := "activity:" + strconv.FormatInt(ownerID, 10) + ":" + strconv.Itoa(limit)
 
 	return cacher.Of[[]domain.ActivityLog]().GetOrComputeSingle(ctx, cacheKey, func(ctx context.Context) ([]domain.ActivityLog, error) {
 		return s.repo.ListActivity(ctx, ownerID, limit)
