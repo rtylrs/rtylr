@@ -13,7 +13,7 @@ export function searchCareers(careers: RecruitCareer[], query: string): RecruitC
     (c) =>
       c.title.toLowerCase().includes(q) ||
       c.department.toLowerCase().includes(q) ||
-      c.location.toLowerCase().includes(q),
+      c.location.toLowerCase().includes(q)
   );
 }
 
@@ -25,8 +25,7 @@ export function searchSubmissions(submissions: Submission[], query: string): Sub
   if (!query.trim()) return submissions;
   const q = query.toLowerCase();
   return submissions.filter(
-    (s) =>
-      s.candidateName.toLowerCase().includes(q) || s.email.toLowerCase().includes(q),
+    (s) => s.candidateName.toLowerCase().includes(q) || s.email.toLowerCase().includes(q)
   );
 }
 
