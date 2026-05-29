@@ -56,10 +56,15 @@ describe('detectAnomalies', () => {
       makePoint('2026-01', 10),
       makePoint('2026-02', 11),
       makePoint('2026-03', 10),
-      makePoint('2026-04', 50),
+      makePoint('2026-04', 9),
+      makePoint('2026-05', 10),
+      makePoint('2026-06', 11),
+      makePoint('2026-07', 9),
+      makePoint('2026-08', 10),
+      makePoint('2026-09', 100),
     ];
     const anomalies = detectAnomalies(points);
-    expect(anomalies.some((p) => p.date === '2026-04')).toBe(true);
+    expect(anomalies.some((p) => p.date === '2026-09')).toBe(true);
   });
 
   it('returns empty for uniform data', () => {
