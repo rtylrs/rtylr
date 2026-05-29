@@ -41,7 +41,7 @@ export function memberWithMostTasks(tasks: Task[], members: Member[]): Member | 
   const counts = taskCountsPerMember(tasks);
   return members.reduce(
     (max, m) => ((counts.get(m.id) ?? 0) > (counts.get(max.id) ?? 0) ? m : max),
-    members[0],
+    members[0]
   );
 }
 

@@ -74,10 +74,7 @@ describe('uniqueActors', () => {
 
 describe('activityForActor', () => {
   it('returns entries for the actor', () => {
-    const activity = [
-      makeEntry({ actor: 'Alice' }),
-      makeEntry({ id: 'e2', actor: 'Bob' }),
-    ];
+    const activity = [makeEntry({ actor: 'Alice' }), makeEntry({ id: 'e2', actor: 'Bob' })];
     expect(activityForActor(activity, 'Alice').length).toBe(1);
   });
 });

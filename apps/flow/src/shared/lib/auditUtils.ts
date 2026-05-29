@@ -7,7 +7,11 @@ export function latestActivityEntry(activity: ActivityEntry[]): ActivityEntry | 
 }
 
 /** Returns all activity entries within the last N days. */
-export function recentActivity(activity: ActivityEntry[], days: number, now?: Date): ActivityEntry[] {
+export function recentActivity(
+  activity: ActivityEntry[],
+  days: number,
+  now?: Date
+): ActivityEntry[] {
   const cutoff = new Date(now ?? new Date());
   cutoff.setDate(cutoff.getDate() - days);
   const cutoffStr = cutoff.toISOString().slice(0, 10);
@@ -16,7 +20,7 @@ export function recentActivity(activity: ActivityEntry[], days: number, now?: Da
 
 /** Returns the count of activity entries by type. */
 export function activityCountByType(
-  activity: ActivityEntry[],
+  activity: ActivityEntry[]
 ): Partial<Record<ActivityEntry['type'], number>> {
   const counts: Partial<Record<ActivityEntry['type'], number>> = {};
   for (const entry of activity) {
