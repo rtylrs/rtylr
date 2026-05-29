@@ -182,7 +182,7 @@ func (r *Repository) GetValuation(ctx context.Context, ownerID int64) ([]domain.
 		return nil, err
 	}
 
-	var items []domain.ValuationItem
+	items := make([]domain.ValuationItem, 0, len(rows))
 
 	for _, row := range rows {
 		var item domain.ValuationItem
