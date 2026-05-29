@@ -1,5 +1,14 @@
 import { describe, it, expect } from 'vitest';
-import { maskEnd, maskStart, maskMiddle, maskEmail, maskPhone, maskCard, maskApiKey, isMasked } from './maskUtils';
+import {
+  maskEnd,
+  maskStart,
+  maskMiddle,
+  maskEmail,
+  maskPhone,
+  maskCard,
+  maskApiKey,
+  isMasked,
+} from './maskUtils';
 
 describe('maskEnd', () => {
   it('masks all but last 4 chars', () => expect(maskEnd('abcdefgh', 4)).toBe('****efgh'));
@@ -16,7 +25,8 @@ describe('maskMiddle', () => {
 });
 
 describe('maskEmail', () => {
-  it('masks local part', () => expect(maskEmail('john.doe@example.com')).toBe('j******e@example.com'));
+  it('masks local part', () =>
+    expect(maskEmail('john.doe@example.com')).toBe('j******e@example.com'));
   it('handles short local part', () => expect(maskEmail('ab@example.com')).toBe('a*@example.com'));
   it('returns unchanged if no at sign', () => expect(maskEmail('notanemail')).toBe('notanemail'));
 });
@@ -26,11 +36,13 @@ describe('maskPhone', () => {
 });
 
 describe('maskCard', () => {
-  it('shows only last 4 digits', () => expect(maskCard('4111111111111111')).toBe('**** **** **** 1111'));
+  it('shows only last 4 digits', () =>
+    expect(maskCard('4111111111111111')).toBe('**** **** **** 1111'));
 });
 
 describe('maskApiKey', () => {
-  it('shows first and last 4', () => expect(maskApiKey('sk-abcdefghijklmnop')).toBe('sk-a***********mnop'));
+  it('shows first and last 4', () =>
+    expect(maskApiKey('sk-abcdefghijklmnop')).toBe('sk-a***********mnop'));
   it('fully masks short keys', () => expect(maskApiKey('short')).toBe('*****'));
 });
 
