@@ -27,7 +27,7 @@ func (r *Repository) List(ctx context.Context, ownerID int64) ([]domain.Integrat
 		return nil, err
 	}
 
-	var integrations []domain.Integration
+	integrations := make([]domain.Integration, 0, len(rows))
 	for _, row := range rows {
 		var i domain.Integration
 		i.ID = row.ID
