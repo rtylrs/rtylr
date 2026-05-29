@@ -67,3 +67,26 @@ export function resolveExpiryDate(quote: {
 }): string | null {
   return quote.expiryDate ?? quote.expiresAt ?? null;
 }
+
+/**
+ * Returns the conversion rate (accepted / total) as a percentage.
+ * Returns 0 if total is 0.
+ */
+export function quoteConversionRate(total: number, accepted: number): number {
+  if (total <= 0) return 0;
+  return Math.round((accepted / total) * 10000) / 100;
+}
+
+/**
+ * Returns a CSS color token for a quote status badge.
+ */
+export function getQuoteStatusColor(status: QuoteStatus): string {
+  const colors: Record<QuoteStatus, string> = {
+    Draft: 'gray',
+    Sent: 'blue',
+    Accepted: 'green',
+    Rejected: 'red',
+    Expired: 'orange',
+  };
+  return colors[status] ?? 'gray';
+}
