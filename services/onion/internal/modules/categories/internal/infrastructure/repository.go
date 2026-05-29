@@ -31,7 +31,7 @@ func (r *Repository) ListCategories(ctx context.Context, ownerID int64) ([]domai
 		return nil, err
 	}
 
-	var categories []domain.Category
+	categories := make([]domain.Category, 0, len(rows))
 
 	for _, row := range rows {
 		var c domain.Category
