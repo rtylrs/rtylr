@@ -64,7 +64,7 @@ func (r *Repository) GetDaySummary(ctx context.Context, ownerID int64, date stri
 			logger.Ctx(ctx).Error("Failed to get payment breakdown", logger.Error(err))
 			return summary, err
 		}
-		summary.PaymentBreakdown = make(map[string]float64)
+		summary.PaymentBreakdown = make(map[string]float64, len(breakdown))
 		for _, b := range breakdown {
 			summary.PaymentBreakdown[string(b.PaymentMethod.PosOrdersPaymentMethod)] = interfaceToFloat(b.MethodTotal)
 		}
@@ -90,7 +90,7 @@ func (r *Repository) GetDaySummary(ctx context.Context, ownerID int64, date stri
 			logger.Ctx(ctx).Error("Failed to get payment breakdown", logger.Error(err))
 			return summary, err
 		}
-		summary.PaymentBreakdown = make(map[string]float64)
+		summary.PaymentBreakdown = make(map[string]float64, len(breakdown))
 		for _, b := range breakdown {
 			summary.PaymentBreakdown[string(b.PaymentMethod.PosOrdersPaymentMethod)] = interfaceToFloat(b.MethodTotal)
 		}
