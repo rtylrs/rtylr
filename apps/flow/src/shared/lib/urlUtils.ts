@@ -41,7 +41,7 @@ export function workspaceSettingsPath(workspaceId: string): string {
 /** Appends query params to a URL path string. */
 export function withQueryParams(
   path: string,
-  params: Record<string, string | number | boolean | undefined>,
+  params: Record<string, string | number | boolean | undefined>
 ): string {
   const query = Object.entries(params)
     .filter(([, v]) => v !== undefined)
