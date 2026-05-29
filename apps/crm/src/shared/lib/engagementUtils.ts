@@ -46,3 +46,22 @@ export function engagementScore(
   else tier = 'lost';
   return { recency, frequency, monetary, total, tier };
 }
+
+export const TIER_LABELS: Record<EngagementScore['tier'], string> = {
+  champions: 'Champions',
+  loyal: 'Loyal Customers',
+  'at-risk': 'At Risk',
+  lost: 'Lost',
+};
+
+export function tierLabel(tier: EngagementScore['tier']): string {
+  return TIER_LABELS[tier];
+}
+
+export function isHighValue(score: EngagementScore): boolean {
+  return score.tier === 'champions' || score.tier === 'loyal';
+}
+
+export function needsWinback(score: EngagementScore): boolean {
+  return score.tier === 'at-risk' || score.tier === 'lost';
+}
