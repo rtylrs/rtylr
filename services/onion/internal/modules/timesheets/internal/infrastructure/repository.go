@@ -36,7 +36,8 @@ func (r *Repository) GetTimesheets(ctx context.Context, ownerID int64, weekStart
 		JOIN hr_staff st ON st.id = s.staff_id AND st.owner_id = s.owner_id
 		WHERE s.owner_id = ? AND s.status = 'completed'`
 
-	args := []interface{}{ownerID}
+	args := make([]interface{}, 0, 2)
+	args = append(args, ownerID)
 
 	if weekStart != "" {
 		query += ` AND DATE(s.date - INTERVAL WEEKDAY(s.date) DAY) = ?`
