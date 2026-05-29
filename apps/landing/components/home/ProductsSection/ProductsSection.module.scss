@@ -1,12 +1,30 @@
 .productsSection {
   padding: 120px 0 100px;
   background: var(--app-background);
+  position: relative;
+  overflow: hidden;
+
+  // Soft cream glow high-center to lift the section off the flat black.
+  &::before {
+    content: '';
+    position: absolute;
+    top: -10%;
+    left: 50%;
+    transform: translateX(-50%);
+    width: 900px;
+    height: 520px;
+    background: radial-gradient(ellipse at center, rgba(232, 230, 225, 0.06) 0%, transparent 70%);
+    pointer-events: none;
+    z-index: 0;
+  }
 }
 
 .container {
   max-width: 1400px;
   margin: 0 auto;
   padding: 0 50px;
+  position: relative;
+  z-index: 1;
 }
 
 // ── Section header ────────────────────────────────────────────────────────────
@@ -69,6 +87,7 @@
   transition: background 0.2s ease;
   overflow: hidden;
 
+  // Glowing top accent bar that lights up on hover
   &::before {
     content: '';
     position: absolute;
@@ -76,9 +95,27 @@
     left: 0;
     right: 0;
     height: 2px;
-    background: linear-gradient(90deg, #e8e6e1, #e8e6e1);
+    background: linear-gradient(
+      90deg,
+      transparent 0%,
+      rgba(232, 230, 225, 0.9) 50%,
+      transparent 100%
+    );
+    box-shadow: 0 0 14px rgba(232, 230, 225, 0.5);
     opacity: 0;
-    transition: opacity 0.25s ease;
+    transition: opacity 0.3s ease;
+    z-index: 1;
+  }
+
+  // Radial inner glow on hover, gives the flat cell some depth
+  &::after {
+    content: '';
+    position: absolute;
+    inset: 0;
+    background: radial-gradient(120% 80% at 50% 0%, rgba(232, 230, 225, 0.07) 0%, transparent 60%);
+    opacity: 0;
+    transition: opacity 0.3s ease;
+    pointer-events: none;
   }
 
   &:hover {
@@ -88,14 +125,23 @@
       opacity: 1;
     }
 
+    &::after {
+      opacity: 1;
+    }
+
     .cardArrow {
       opacity: 1;
       transform: translateX(2px);
     }
 
     .iconWrap {
-      background: rgba(232, 230, 225, 0.15);
-      border-color: rgba(232, 230, 225, 0.35);
+      background: rgba(232, 230, 225, 0.16);
+      border-color: rgba(232, 230, 225, 0.4);
+      transform: translateY(-3px) scale(1.05);
+      box-shadow:
+        0 1px 0 rgba(255, 255, 255, 0.15) inset,
+        0 0 20px -2px rgba(232, 230, 225, 0.3),
+        0 8px 18px -6px rgba(0, 0, 0, 0.55);
     }
   }
 }
@@ -110,8 +156,17 @@
   align-items: center;
   justify-content: center;
   color: #e8e6e1;
-  transition: all 0.2s ease;
+  box-shadow:
+    0 1px 0 rgba(255, 255, 255, 0.06) inset,
+    0 4px 10px -4px rgba(0, 0, 0, 0.5);
+  transition:
+    background 0.25s ease,
+    border-color 0.25s ease,
+    transform 0.3s var(--ease-out-soft),
+    box-shadow 0.3s var(--ease-out-soft);
   flex-shrink: 0;
+  position: relative;
+  z-index: 1;
 }
 
 .cardLabel {
