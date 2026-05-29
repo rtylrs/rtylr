@@ -26,7 +26,7 @@ export function commentCount(comments: Comment[], taskId: string): number {
 
 /** Returns true when the comment's mentions array includes the userId. */
 export function commentMentions(comment: Comment, userId: string): boolean {
-  return comment.mentions.includes(userId);
+  return (comment.mentions ?? []).includes(userId);
 }
 
 /** Returns comments that mention the given userId. */
