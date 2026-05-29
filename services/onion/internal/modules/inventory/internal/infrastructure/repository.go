@@ -96,7 +96,7 @@ func (r *Repository) GetInventoryReport(ctx context.Context, ownerID int64) ([]d
 		return nil, err
 	}
 
-	var report []domain.InventoryReportItem
+	report := make([]domain.InventoryReportItem, 0, len(rows))
 
 	for _, row := range rows {
 		var item domain.InventoryReportItem
