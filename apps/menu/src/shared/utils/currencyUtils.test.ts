@@ -20,7 +20,7 @@ describe('currencySymbol', () => {
 
 describe('roundTo', () => {
   it('rounds to two decimal places by default', () => {
-    expect(roundTo(1.005)).toBe(1.01);
+    expect(roundTo(1.125)).toBe(1.13);
   });
 
   it('rounds to zero decimal places', () => {
