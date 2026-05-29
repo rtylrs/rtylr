@@ -3,6 +3,7 @@ import AppLayout from '../../components/Layout/AppLayout';
 import MainLayout from '../../layouts/Main/MainLayout';
 import HelmetContainer from '../../components/HelmetContainer';
 import styles from './legal.module.scss';
+import { webPageSchema } from '../../lib/structured-data';
 
 const SECTIONS = [
   { id: 'overview', label: 'Overview' },
@@ -27,6 +28,11 @@ const PrivacyPage = (): JSX.Element => {
           title="Privacy Policy | rtylr"
           description="How rtylr and Voxire handle your personal data, under GDPR, CCPA, and equivalent laws."
           canonical="https://rtylr.com/legal/privacy-policy/"
+          structuredData={webPageSchema({
+            name: 'Privacy Policy',
+            path: '/legal/privacy-policy/',
+            description: 'How rtylr and Voxire handle your personal data.',
+          })}
         />
 
         <main className={styles.page}>

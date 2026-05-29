@@ -5,6 +5,7 @@ import HelmetContainer from '../../components/HelmetContainer';
 import { Input, Select, Button } from '@voxire/components';
 import countries from 'i18n-iso-countries';
 import enLocale from 'i18n-iso-countries/langs/en.json';
+import { webPageSchema } from '../../lib/structured-data';
 import styles from './demo.module.scss';
 
 // Register English locale for country names
@@ -124,6 +125,12 @@ const DemoPage = (): JSX.Element => {
           title="Book a demo | rtylr"
           description="See rtylr running against real data. A live 30-minute walkthrough with someone who actually built it."
           canonical="https://rtylr.com/demo/"
+          structuredData={webPageSchema({
+            name: 'Book a Demo',
+            path: '/demo/',
+            description:
+              'See rtylr running against real data. A live 30-minute walkthrough with someone who actually built it.',
+          })}
         />
         <div className={styles.demoPage}>
           <div className={styles.container}>

@@ -3,6 +3,7 @@ import AppLayout from '../../components/Layout/AppLayout';
 import MainLayout from '../../layouts/Main/MainLayout';
 import HelmetContainer from '../../components/HelmetContainer';
 import styles from './legal.module.scss';
+import { webPageSchema } from '../../lib/structured-data';
 
 const SECTIONS = [
   { id: 'program', label: 'Security Program' },
@@ -26,6 +27,12 @@ const SecurityPage = (): JSX.Element => {
           title="Security | rtylr"
           description="How rtylr protects your data, encryption, infrastructure, access controls, and incident response."
           canonical="https://rtylr.com/legal/security/"
+          structuredData={webPageSchema({
+            name: 'Security',
+            path: '/legal/security/',
+            description:
+              'How rtylr protects your data, encryption, infrastructure, and incident response.',
+          })}
         />
 
         <main className={styles.page}>
