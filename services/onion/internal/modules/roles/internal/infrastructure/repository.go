@@ -27,7 +27,7 @@ func (r *Repository) List(ctx context.Context, ownerID int64) ([]domain.Role, er
 		return nil, err
 	}
 
-	var roles []domain.Role
+	roles := make([]domain.Role, 0, len(rows))
 	for _, row := range rows {
 		var role domain.Role
 		role.ID = row.ID
