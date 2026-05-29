@@ -13,11 +13,7 @@ function makeFeedback(rating: 1 | 2 | 3 | 4 | 5, recommend: boolean): InterviewF
   return { interviewerId: 'i1', rating, recommend, notes: '' };
 }
 
-const feedbacks = [
-  makeFeedback(5, true),
-  makeFeedback(4, true),
-  makeFeedback(2, false),
-];
+const feedbacks = [makeFeedback(5, true), makeFeedback(4, true), makeFeedback(2, false)];
 
 describe('avgRating', () => {
   it('calculates average rating', () => {
