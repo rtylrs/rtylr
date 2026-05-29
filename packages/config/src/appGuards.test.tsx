@@ -43,7 +43,7 @@ describe('AppFlagGuard', () => {
   });
 
   test('renders fallback when prod default for the flag is false', () => {
-    // Find a flag whose prod default is `false` — most app flags are
+    // Find a flag whose prod default is `false` - most app flags are
     // off until launch gate flips them.
     const disabledFlag = (
       Object.keys(FLAG_PROD_DEFAULTS) as Array<keyof typeof FLAG_PROD_DEFAULTS>

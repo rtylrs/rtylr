@@ -3,7 +3,7 @@ export const ASSETS = {
     dark: 'https://cdn.voxire.dev/web_content/rtylr/logo-dark.webp',
     light: 'https://cdn.voxire.dev/web_content/rtylr/logo-light.webp',
   },
-  /** Per-app logos — will be populated when individual logos are designed.
+  /** Per-app logos - will be populated when individual logos are designed.
    *  Falls back to the main rtylr logo for now. */
   appLogos: {
     hub: { dark: '', light: '' },

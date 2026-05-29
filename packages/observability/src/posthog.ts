@@ -5,7 +5,7 @@ import posthog from 'posthog-js';
  *
  * Gated on consent: this is only called by `@voxire/consent` after
  * the user has accepted cookies. Never call `initPostHog` directly
- * from an app's main.tsx — route through the consent package.
+ * from an app's main.tsx - route through the consent package.
  */
 interface InitPostHogOptions {
   app: string;
@@ -13,7 +13,7 @@ interface InitPostHogOptions {
 
 let initialised = false;
 
-// See sentry.ts — local accessor avoids needing vite/client types
+// See sentry.ts - local accessor avoids needing vite/client types
 // downstream.
 const viteEnv = (import.meta as { env?: Record<string, string | undefined> }).env ?? {};
 
@@ -23,7 +23,7 @@ export function initPostHog(opts: InitPostHogOptions): void {
   if (!key) return;
 
   posthog.init(key, {
-    // US region — confirmed region for this project. Changing
+    // US region - confirmed region for this project. Changing
     // this means re-migrating every existing event, so it's nailed
     // here rather than read from env.
     api_host: 'https://us.i.posthog.com',
@@ -32,7 +32,7 @@ export function initPostHog(opts: InitPostHogOptions): void {
     // sees `opt_out_persistence_by_default: true`, it won't write
     // its persistence cookie until we explicitly opt in.
     opt_out_persistence_by_default: false,
-    // Autocapture captures clicks / page views automatically —
+    // Autocapture captures clicks / page views automatically -
     // good default for a first-week learning loop. Turn off later
     // once we have explicit tracking per feature.
     autocapture: true,
@@ -43,7 +43,7 @@ export function initPostHog(opts: InitPostHogOptions): void {
     loaded: (ph) => {
       ph.register({ app: opts.app });
     },
-    // Disable session recording by default — it's the single most
+    // Disable session recording by default - it's the single most
     // expensive and PII-dense surface. Turn it on per cohort via
     // PostHog cloud if we need it.
     disable_session_recording: true,

@@ -4,7 +4,7 @@ import { useClickOutside } from './useClickOutside';
 import { createRef } from 'react';
 
 describe('useClickOutside', () => {
-  // Vitest 4 tightened Mock typing — generic now defaults to
+  // Vitest 4 tightened Mock typing - generic now defaults to
   // `Procedure | Constructable`, which doesn't match the single
   // `(event: ...) => void` signature `useClickOutside` expects.
   // Pin the signature explicitly to keep this assignable.

@@ -10,12 +10,12 @@ import { FLAG_KEYS, FLAG_PROD_DEFAULTS, FLAG_ENV_OVERRIDES, type FlagKey } from 
  *   2. VITE_APP_*_ENABLED env var from the build
  *   3. Hard-coded prod default.
  *
- * PostHog may not have loaded yet when the first render runs — in
+ * PostHog may not have loaded yet when the first render runs - in
  * that case we fall through to env/default and re-check once PostHog
  * fires its `onFeatureFlags` callback.
  */
 
-// Local env accessor — keeps consumers' tsconfigs free of a
+// Local env accessor - keeps consumers' tsconfigs free of a
 // `vite/client` dependency for what is just an optional lookup.
 const viteEnv = (import.meta as { env?: Record<string, string | undefined> }).env ?? {};
 
@@ -36,7 +36,7 @@ function readPostHog(flag: FlagKey): boolean | null {
     const value = posthog.isFeatureEnabled?.(flag);
     if (typeof value === 'boolean') return value;
   } catch {
-    // posthog not initialised yet — consent probably wasn't granted.
+    // posthog not initialised yet - consent probably wasn't granted.
   }
   return null;
 }
@@ -50,7 +50,7 @@ export function resolveFlag(flag: FlagKey): boolean {
 }
 
 /**
- * React hook — re-renders when PostHog reports new flag values. Use
+ * React hook - re-renders when PostHog reports new flag values. Use
  * this inside components. For route-level gating prefer
  * `<AppFlagGuard>` below, which handles the fallback UI.
  */
@@ -66,7 +66,7 @@ export function useFeatureFlag(flag: FlagKey): boolean {
     try {
       unsub = posthog.onFeatureFlags?.(() => setEnabled(resolveFlag(flag)));
     } catch {
-      // PostHog not initialised — fall through, env/default already
+      // PostHog not initialised - fall through, env/default already
       // applied.
     }
     return () => {
@@ -113,7 +113,7 @@ const DEFAULT_FALLBACK: React.ReactNode = (
 
 /**
  * Gate a whole app (or a whole route subtree) behind a flag. Wrap
- * the app's top-level routes in this — typical usage in `App.tsx`:
+ * the app's top-level routes in this - typical usage in `App.tsx`:
  *
  * ```tsx
  * import { AppFlagGuard, FLAG_KEYS } from '@voxire/config';

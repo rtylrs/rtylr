@@ -68,7 +68,7 @@ export const useUserStore = create<UserStore>()(
         userId: state.userId,
         addons: state.addons,
         visits: state.visits,
-        // token is intentionally excluded — stored in cookie only
+        // token is intentionally excluded - stored in cookie only
       }),
     }
   )

@@ -10,9 +10,9 @@
  *     until the sub-feature is launch-ready.
  *
  * Flags resolve in this order:
- *   1. PostHog (live decision — feature rollouts, cohort toggles)
+ *   1. PostHog (live decision - feature rollouts, cohort toggles)
  *   2. `VITE_APP_*_ENABLED` env var (build-time fallback, read from
- *      import.meta.env — per .env.example at repo root)
+ *      import.meta.env - per .env.example at repo root)
  *   3. Hard-coded default listed below.
  *
  * See `appGuards.tsx` for the React components that consume these.
@@ -31,7 +31,7 @@ export const FLAG_KEYS = {
   /**
    * Flow's UI-only stub routes (Timeline, CalendarView, Roadmap,
    * Insights, Team, ProjectOverview/Timeline/Dashboard). Off in prod
-   * until these screens render real data — see vault flow.md P0 #4.
+   * until these screens render real data - see vault flow.md P0 #4.
    */
   APP_FLOW_PREVIEW_ROUTES: 'app.flow.previewRoutes',
 } as const;
@@ -39,7 +39,7 @@ export const FLAG_KEYS = {
 export type FlagKey = (typeof FLAG_KEYS)[keyof typeof FLAG_KEYS];
 
 /**
- * Prod defaults — what the flag evaluates to when PostHog is
+ * Prod defaults - what the flag evaluates to when PostHog is
  * unreachable AND the env var is unset. Everything off until proven
  * otherwise. Landing, dash, auth, hr, flow are already shipped and
  * don't have flags; they always render.
@@ -60,7 +60,7 @@ export const FLAG_PROD_DEFAULTS: Record<FlagKey, boolean> = {
 /**
  * Map a flag key to the `VITE_APP_*_ENABLED` env var the plan's
  * `.env.example` documents. Anything unmapped (sub-flags) isn't
- * env-overridable — only PostHog + the prod default apply.
+ * env-overridable - only PostHog + the prod default apply.
  */
 export const FLAG_ENV_OVERRIDES: Partial<Record<FlagKey, string>> = {
   [FLAG_KEYS.APP_RECRUIT]: 'VITE_APP_RECRUIT_ENABLED',

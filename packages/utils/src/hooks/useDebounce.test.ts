@@ -48,7 +48,7 @@ describe('useDebounce', () => {
     rerender({ value: 'abc' });
     act(() => vi.advanceTimersByTime(100));
 
-    // Only 100ms since last change — should still be empty
+    // Only 100ms since last change - should still be empty
     expect(result.current).toBe('');
 
     // Wait full 300ms

@@ -2,11 +2,11 @@ import { initSentry, enableSentryReplays } from './sentry';
 import { initPostHog } from './posthog';
 
 /**
- * bootObservability — one call, done. Every app's main.tsx imports
+ * bootObservability - one call, done. Every app's main.tsx imports
  * this and hands it an app identifier.
  *
  * What it does:
- *   - Initialises Sentry eagerly (error capture is safe pre-consent —
+ *   - Initialises Sentry eagerly (error capture is safe pre-consent -
  *     no session data, no replays, just a stack trace + app tag).
  *   - Checks the cookie banner's decision via @voxire/consent.
  *     - Already granted: init PostHog + enable Sentry replays.
@@ -14,7 +14,7 @@ import { initPostHog } from './posthog';
  *       `rtylr-consent-change` on the window when the user accepts;
  *       we listen once and initialise then.
  *
- * This keeps every app's main.tsx one line longer — callers don't
+ * This keeps every app's main.tsx one line longer - callers don't
  * need to know about consent internals, PostHog, Sentry replays, or
  * the event name.
  */
@@ -26,7 +26,7 @@ interface BootOptions {
 
 // Mirrors what @voxire/consent writes into the cookie. Importing the
 // type from the consent package would create a dependency cycle
-// (consent already imports from observability), so it's duplicated —
+// (consent already imports from observability), so it's duplicated -
 // small cost for a cleaner dep graph.
 const CONSENT_COOKIE = 'rtylr-consent';
 const CONSENT_EVENT = 'rtylr-consent-change';

@@ -11,7 +11,7 @@ let managerReady = false;
 /**
  * Registers all <a> elements inside a container with ForesightJS so their
  * target modules are prefetched when the user's cursor trajectory predicts
- * intent — before the click lands.
+ * intent - before the click lands.
  *
  * @param containerRef Ref to the element containing the nav links (e.g. sidebar)
  * @param prefetchMap  path → prefetch function pairs (dynamic imports / router.prefetch)
@@ -50,7 +50,7 @@ export function useForesightLinks(
         });
       })
       .catch(() => {});
-    // Run once — nav links don't change after mount
+    // Run once - nav links don't change after mount
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
 }

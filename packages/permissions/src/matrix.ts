@@ -7,7 +7,7 @@ import type { Resource } from './capabilities';
 
 type PermissionMatrix = Record<PlatformRole, Resource[]>;
 
-/** Direct permissions per role (NOT inherited — use `getPermissions` for resolved set) */
+/** Direct permissions per role (NOT inherited - use `getPermissions` for resolved set) */
 const DIRECT_PERMISSIONS: PermissionMatrix = {
   viewer: ['hub:dashboard', 'insights:dashboard'],
 
@@ -103,7 +103,7 @@ const DIRECT_PERMISSIONS: PermissionMatrix = {
 
   owner: [
     'hr:payroll:run',
-    // Owner inherits everything — this list is for owner-only actions
+    // Owner inherits everything - this list is for owner-only actions
   ],
 };
 

@@ -4,7 +4,7 @@
  * The server at `/flow/ws` accepts a single connection per tab and
  * multiplexes events across topics (`user:<id>`, `project:<id>`, etc.).
  * Events are lightweight invalidation hints: `{ topic, type, entity_id,
- * actor_id }`. The canonical entity data is still fetched via REST — the
+ * actor_id }`. The canonical entity data is still fetched via REST - the
  * websocket only tells the client *that* something changed so it knows
  * when to refetch.
  *
@@ -112,7 +112,7 @@ export class RealtimeClient {
 
     const token = this.getToken();
     if (!token) {
-      // No auth yet; retry shortly — the user is probably still loading.
+      // No auth yet; retry shortly - the user is probably still loading.
       this.scheduleReconnect();
       return;
     }
@@ -174,7 +174,7 @@ export class RealtimeClient {
     if (this.closed || this.reconnectTimer) return;
     const attempt = this.reconnectAttempts++;
     const backoff = Math.min(MAX_BACKOFF_MS, MIN_BACKOFF_MS * Math.pow(2, attempt));
-    // Full jitter — helps when many clients bounce at once.
+    // Full jitter - helps when many clients bounce at once.
     const delay = Math.floor(Math.random() * backoff);
     this.reconnectTimer = setTimeout(() => {
       this.reconnectTimer = null;

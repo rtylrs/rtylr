@@ -9,7 +9,7 @@ export type PlatformRole =
   | 'staff'
   | 'viewer';
 
-/** Role hierarchy — higher index = more power */
+/** Role hierarchy - higher index = more power */
 export const ROLE_HIERARCHY: PlatformRole[] = [
   'viewer',
   'staff',

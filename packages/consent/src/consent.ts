@@ -6,7 +6,7 @@
  * show"). Keyed on the root domain (`.rtylr.com`) so a user who
  * accepts on landing doesn't see the banner again on flow.
  *
- * Consent is irrevocable here for simplicity — you can change it by
+ * Consent is irrevocable here for simplicity - you can change it by
  * clearing cookies. A settings-page revoke flow is a fast-follow.
  */
 
@@ -20,7 +20,7 @@ function consentCookieDomain(): string {
   // host actually is `rtylr.com` or a subdomain of it. On localhost,
   // on Cloudflare Pages preview URLs (`*.pages.dev`), or on any
   // other host, the browser silently rejects the Set-Cookie header
-  // when the Domain attribute doesn't match — which is exactly how
+  // when the Domain attribute doesn't match - which is exactly how
   // "Accept button does nothing" manifested in preview envs.
   //
   // Fix: set the shared domain ONLY for rtylr.com hosts; let the
@@ -54,7 +54,7 @@ export function writeConsent(state: Exclude<ConsentState, 'undecided'>): void {
     'SameSite=Lax',
   ];
   if (domain) parts.push(`Domain=${domain}`);
-  // Secure only when served over https — localhost dev stays plain.
+  // Secure only when served over https - localhost dev stays plain.
   if (typeof window !== 'undefined' && window.location.protocol === 'https:') {
     parts.push('Secure');
   }
@@ -73,7 +73,7 @@ export function writeConsent(state: Exclude<ConsentState, 'undecided'>): void {
  * Writes a same-shape Set-Cookie with Max-Age=0 + matching Domain so
  * the browser actually deletes the cookie set by writeConsent. A
  * plain `document.cookie = 'rtylr-consent=; ...'` without the Domain
- * attr would leave the parent-domain cookie alive on rtylr.com — same
+ * attr would leave the parent-domain cookie alive on rtylr.com - same
  * shape of bug as the auth-cookie logout regression (commit c81034fc).
  */
 export function clearConsent(): void {
