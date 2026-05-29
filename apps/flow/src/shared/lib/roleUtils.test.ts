@@ -98,20 +98,14 @@ describe('rolePriority', () => {
 
 describe('sortMembersByRole', () => {
   it('sorts owners first', () => {
-    const members = [
-      makeMember({ role: 'viewer' }),
-      makeMember({ id: 'm2', role: 'owner' }),
-    ];
+    const members = [makeMember({ role: 'viewer' }), makeMember({ id: 'm2', role: 'owner' })];
     expect(sortMembersByRole(members)[0].role).toBe('owner');
   });
 });
 
 describe('membersByRole', () => {
   it('filters by role', () => {
-    const members = [
-      makeMember({ role: 'owner' }),
-      makeMember({ id: 'm2', role: 'member' }),
-    ];
+    const members = [makeMember({ role: 'owner' }), makeMember({ id: 'm2', role: 'member' })];
     expect(membersByRole(members, 'owner').length).toBe(1);
   });
 });
