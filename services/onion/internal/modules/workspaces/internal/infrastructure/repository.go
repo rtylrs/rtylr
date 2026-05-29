@@ -73,7 +73,7 @@ func (r *Repository) GetWorkspacesByOwner(ctx context.Context, ownerID int64) ([
 		return nil, err
 	}
 
-	var workspaces []domain.Workspace
+	workspaces := make([]domain.Workspace, 0, len(rows))
 	for _, row := range rows {
 		workspaces = append(workspaces, domain.Workspace{
 			ID:          row.ID,
@@ -499,7 +499,7 @@ func (r *Repository) GetCommentsByTask(ctx context.Context, taskID int64) ([]dom
 		return nil, err
 	}
 
-	var comments []domain.TaskComment
+	comments := make([]domain.TaskComment, 0, len(rows))
 	for _, row := range rows {
 		comments = append(comments, domain.TaskComment{
 			ID:        row.ID,
@@ -567,7 +567,7 @@ func (r *Repository) GetActivityByTask(ctx context.Context, taskID int64, limit 
 		return nil, err
 	}
 
-	var activities []domain.TaskActivity
+	activities := make([]domain.TaskActivity, 0, len(rows))
 	for _, row := range rows {
 		activities = append(activities, domain.TaskActivity{
 			ID:        row.ID,
@@ -609,7 +609,7 @@ func (r *Repository) GetAttachmentsByTask(ctx context.Context, taskID int64) ([]
 		return nil, err
 	}
 
-	var attachments []domain.TaskAttachment
+	attachments := make([]domain.TaskAttachment, 0, len(rows))
 	for _, row := range rows {
 		attachments = append(attachments, domain.TaskAttachment{
 			ID:         row.ID,
@@ -663,7 +663,7 @@ func (r *Repository) GetTimeLogsByTask(ctx context.Context, taskID int64) ([]dom
 		return nil, err
 	}
 
-	var logs []domain.TimeLog
+	logs := make([]domain.TimeLog, 0, len(rows))
 	for _, row := range rows {
 		logs = append(logs, domain.TimeLog{
 			ID:              row.ID,
@@ -708,7 +708,7 @@ func (r *Repository) GetLabelsByWorkspace(ctx context.Context, workspaceID int64
 		return nil, err
 	}
 
-	var labels []domain.Label
+	labels := make([]domain.Label, 0, len(rows))
 	for _, row := range rows {
 		labels = append(labels, domain.Label{
 			ID:          row.ID,
@@ -963,7 +963,7 @@ func initialsOf(name string) string {
 	if name == "" {
 		return ""
 	}
-	var out []rune
+	out := make([]rune, 0, 2)
 	prev := ' '
 	for _, r := range name {
 		if (prev == ' ' || prev == '\t') && r != ' ' && r != '\t' {
