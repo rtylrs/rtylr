@@ -39,7 +39,7 @@ func (r *Repository) ListSuppliers(ctx context.Context, ownerID int64, limit, of
 	}
 	defer rows.Close()
 
-	var suppliers []domain.Supplier
+	suppliers := make([]domain.Supplier, 0, limit+1)
 	for rows.Next() {
 		var s domain.Supplier
 		var email, phone, address, city, country, taxID, paymentTerms, notes sql.NullString
