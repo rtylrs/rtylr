@@ -112,6 +112,12 @@ const PartnersPage = (): JSX.Element => {
             description:
               'Build with rtylr. Implementation partners, technology partners, solution partners, and hardware partners.',
           })}
+          structuredData={webPageSchema({
+            name: 'Partner Program',
+            path: '/partners/',
+            description:
+              'Build with rtylr. Implementation partners, technology partners, solution partners, and hardware partners.',
+          })}
         />
 
         <div className={styles.page}>
