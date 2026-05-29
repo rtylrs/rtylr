@@ -141,7 +141,7 @@ func (r *Repository) ListExpiringDocuments(ctx context.Context, ownerID int64, d
 	}
 	defer rows.Close()
 
-	records := make([]domain.EmployeeDocumentRecord, 0)
+	records := make([]domain.EmployeeDocumentRecord, 0, limit)
 	for rows.Next() {
 		var rec domain.EmployeeDocumentRecord
 		var fileURL sql.NullString
