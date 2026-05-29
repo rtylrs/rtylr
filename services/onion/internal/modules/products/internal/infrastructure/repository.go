@@ -57,7 +57,7 @@ func (r *Repository) ListProducts(ctx context.Context, ownerID int64, search str
 
 	defer rows.Close()
 
-	var products []domain.Product
+	products := make([]domain.Product, 0, limit+1)
 
 	for rows.Next() {
 		var p domain.Product
