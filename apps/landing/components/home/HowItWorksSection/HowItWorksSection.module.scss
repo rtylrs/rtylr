@@ -51,6 +51,7 @@
 }
 
 .step {
+  position: relative;
   display: flex;
   flex-direction: column;
   gap: 16px;
@@ -58,12 +59,40 @@
   border-right: 1px solid #232220;
   transition: background 0.25s ease;
 
+  // Top accent bar that lights on hover
+  &::before {
+    content: '';
+    position: absolute;
+    top: 0;
+    left: 0;
+    right: 0;
+    height: 2px;
+    background: linear-gradient(
+      90deg,
+      transparent 0%,
+      rgba(232, 230, 225, 0.8) 50%,
+      transparent 100%
+    );
+    box-shadow: 0 0 12px rgba(232, 230, 225, 0.45);
+    opacity: 0;
+    transition: opacity 0.3s ease;
+  }
+
   &:last-child {
     border-right: none;
   }
 
   &:hover {
-    background: rgba(255, 255, 255, 0.015);
+    background: rgba(255, 255, 255, 0.02);
+
+    &::before {
+      opacity: 1;
+    }
+
+    .stepNumber {
+      color: #e8e6e1;
+      border-color: rgba(232, 230, 225, 0.3);
+    }
   }
 }
 
@@ -75,6 +104,9 @@
   font-variant-numeric: tabular-nums;
   padding-bottom: 14px;
   border-bottom: 1px solid rgba(255, 255, 255, 0.08);
+  transition:
+    color 0.25s ease,
+    border-color 0.25s ease;
 }
 
 .stepTitle {
