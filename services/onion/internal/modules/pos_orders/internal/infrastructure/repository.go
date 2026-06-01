@@ -454,10 +454,16 @@ func (r *Repository) CreateOrder(ctx context.Context, ownerID, staffID int64, or
 
 	qtx := r.queries.WithTx(tx)
 
+	// Compute per-item discount and totals once; reuse them in the insert loop
+	// below instead of recomputing the same arithmetic a second time.
 	var subtotal float64
-	for _, item := range input.Items {
+	discAmts := make([]float64, len(input.Items))
+	itemTotals := make([]float64, len(input.Items))
+	for i, item := range input.Items {
 		discAmt := item.UnitPrice * item.Quantity * item.DiscountPct / 100
 		itemTotal := (item.UnitPrice*item.Quantity - discAmt) * (1 + item.TaxRate/100)
+		discAmts[i] = discAmt
+		itemTotals[i] = itemTotal
 		subtotal += itemTotal
 	}
 
@@ -489,10 +495,7 @@ func (r *Repository) CreateOrder(ctx context.Context, ownerID, staffID int64, or
 		return 0, err
 	}
 
-	for _, item := range input.Items {
-		discAmt := item.UnitPrice * item.Quantity * item.DiscountPct / 100
-		itemTotal := (item.UnitPrice*item.Quantity - discAmt) * (1 + item.TaxRate/100)
-
+	for i, item := range input.Items {
 		_, err = qtx.CreateOrderItem(ctx, sqlc.CreateOrderItemParams{
 			OrderID:        orderID,
 			MenuItemID:     nullInt64(item.MenuItemID),
@@ -501,9 +504,9 @@ func (r *Repository) CreateOrder(ctx context.Context, ownerID, staffID int64, or
 			Quantity:       floatToDecimal3(item.Quantity),
 			UnitPrice:      floatToDecimal(item.UnitPrice),
 			DiscountPct:    sql.NullString{String: floatToDecimal(item.DiscountPct), Valid: true},
-			DiscountAmount: sql.NullString{String: floatToDecimal(discAmt), Valid: true},
+			DiscountAmount: sql.NullString{String: floatToDecimal(discAmts[i]), Valid: true},
 			TaxRate:        sql.NullString{String: floatToDecimal(item.TaxRate), Valid: true},
-			Total:          floatToDecimal(itemTotal),
+			Total:          floatToDecimal(itemTotals[i]),
 			Notes:          nullString(item.Notes),
 		})
 		if err != nil {
