@@ -5,6 +5,7 @@ import (
 	"database/sql"
 	"errors"
 	"fmt"
+	"strconv"
 	"time"
 
 	"github.com/voxire/onion/internal/modules/pos_orders/internal/domain"
@@ -17,6 +18,12 @@ import (
 )
 
 const ordersCacheTTL = 30 * time.Second
+
+// ownerTopic builds the wsbus topic for an owner without the reflection and
+// format-parsing overhead of fmt.Sprintf; it runs on every order mutation.
+func ownerTopic(ownerID int64) string {
+	return "owner:" + strconv.FormatInt(ownerID, 10)
+}
 
 func invalidateOrderScope(ctx context.Context, ownerID int64) {
 	if cache := cacher.GetRedisCache(); cache != nil {
@@ -94,7 +101,7 @@ func (s *Service) UpdateTableStatus(ctx context.Context, ownerID, tableID int64,
 	}
 
 	wsbus.Publish(wsbus.Event{
-		Topic:    fmt.Sprintf("owner:%d", ownerID),
+		Topic:    ownerTopic(ownerID),
 		Type:     "pos:table:status",
 		EntityID: tableID,
 	})
@@ -207,7 +214,7 @@ func (s *Service) CreateOrder(ctx context.Context, ownerID, staffID int64, input
 	invalidateOrderScope(ctx, ownerID)
 
 	wsbus.Publish(wsbus.Event{
-		Topic:    fmt.Sprintf("owner:%d", ownerID),
+		Topic:    ownerTopic(ownerID),
 		Type:     "pos:order:created",
 		EntityID: orderID,
 	})
@@ -229,7 +236,7 @@ func (s *Service) UpdateOrderItemStatus(ctx context.Context, ownerID, orderID, i
 	}
 
 	wsbus.Publish(wsbus.Event{
-		Topic:    fmt.Sprintf("owner:%d", ownerID),
+		Topic:    ownerTopic(ownerID),
 		Type:     "pos:kds:item:updated",
 		EntityID: itemID,
 	})
@@ -247,7 +254,7 @@ func (s *Service) ProcessPayment(ctx context.Context, ownerID int64, input domai
 	}
 
 	wsbus.Publish(wsbus.Event{
-		Topic:    fmt.Sprintf("owner:%d", ownerID),
+		Topic:    ownerTopic(ownerID),
 		Type:     "pos:order:paid",
 		EntityID: input.OrderID,
 	})
@@ -327,7 +334,7 @@ func (s *Service) VoidOrder(ctx context.Context, ownerID, orderID int64, reason 
 	}
 
 	wsbus.Publish(wsbus.Event{
-		Topic:    fmt.Sprintf("owner:%d", ownerID),
+		Topic:    ownerTopic(ownerID),
 		Type:     "pos:order:voided",
 		EntityID: orderID,
 	})
@@ -367,7 +374,7 @@ func (s *Service) SendToKitchen(ctx context.Context, ownerID, orderID int64) err
 	}
 	invalidateOrderScope(ctx, ownerID)
 	wsbus.Publish(wsbus.Event{
-		Topic:    fmt.Sprintf("owner:%d", ownerID),
+		Topic:    ownerTopic(ownerID),
 		Type:     "pos:order:preparing",
 		EntityID: orderID,
 	})
