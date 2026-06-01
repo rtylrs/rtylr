@@ -28,6 +28,7 @@ type repository interface {
 	ListPayrollRecords(ctx context.Context, ownerID int64, periodLabel string) ([]domain.PayrollRecord, error)
 	GetCompletedShiftsForPeriod(ctx context.Context, ownerID int64, start, end time.Time) ([]domain.ShiftSummary, error)
 	GetStaffPayRates(ctx context.Context, ownerID, staffID int64) (domain.StaffPayRates, error)
+	GetStaffPayRatesByIDs(ctx context.Context, ownerID int64, staffIDs []int64) (map[int64]domain.StaffPayRates, error)
 	CreatePayrollRecord(ctx context.Context, ownerID, staffID int64, periodStart, periodEnd time.Time, periodLabel string, regularHours, overtimeHours, basePay, overtimePay, netPay float64) (int64, error)
 	MarkPayrollPaid(ctx context.Context, ownerID, payrollID int64) error
 }
@@ -68,10 +69,21 @@ func (s *Service) RunPayroll(ctx context.Context, ownerID int64, input domain.Pa
 
 	createdCount := 0
 
+	// Batch-load pay rates for all staff in the period in one query instead of
+	// issuing GetStaffPayRates per summary (N+1).
+	staffIDs := make([]int64, 0, len(summaries))
 	for _, summary := range summaries {
-		rates, rateErr := s.repo.GetStaffPayRates(ctx, ownerID, summary.StaffID)
-		if rateErr != nil {
-			logger.Ctx(ctx).Error("Failed to get staff pay rates for payroll", logger.Error(rateErr), logger.Any("staffId", summary.StaffID))
+		staffIDs = append(staffIDs, summary.StaffID)
+	}
+	ratesByStaff, err := s.repo.GetStaffPayRatesByIDs(ctx, ownerID, staffIDs)
+	if err != nil {
+		return 0, err
+	}
+
+	for _, summary := range summaries {
+		rates, ok := ratesByStaff[summary.StaffID]
+		if !ok {
+			logger.Ctx(ctx).Error("Failed to get staff pay rates for payroll", logger.Any("staffId", summary.StaffID))
 			continue
 		}
 

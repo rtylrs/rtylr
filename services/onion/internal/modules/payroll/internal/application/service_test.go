@@ -36,6 +36,19 @@ func (m *mockRepo) GetStaffPayRates(_ context.Context, _, _ int64) (domain.Staff
 	return m.rates, m.ratesErr
 }
 
+func (m *mockRepo) GetStaffPayRatesByIDs(_ context.Context, _ int64, staffIDs []int64) (map[int64]domain.StaffPayRates, error) {
+	out := make(map[int64]domain.StaffPayRates, len(staffIDs))
+	// Mirror the "no rate row -> skip this staff" behaviour: when the test
+	// injects a rates error, return no mappings so every staff is skipped.
+	if m.ratesErr != nil {
+		return out, nil
+	}
+	for _, id := range staffIDs {
+		out[id] = m.rates
+	}
+	return out, nil
+}
+
 func (m *mockRepo) CreatePayrollRecord(_ context.Context, _, _ int64, _, _ time.Time, _ string, regular, overtime, base, ot, net float64) (int64, error) {
 	m.createGot.regular = regular
 	m.createGot.overtime = overtime

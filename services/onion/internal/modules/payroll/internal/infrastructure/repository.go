@@ -6,6 +6,7 @@ import (
 	"errors"
 	"fmt"
 	"strconv"
+	"strings"
 	"time"
 
 	"github.com/voxire/onion/internal/modules/payroll/internal/domain"
@@ -169,4 +170,57 @@ func (r *Repository) GetStaffPayRates(ctx context.Context, ownerID, staffID int6
 	}
 
 	return rates, nil
+}
+
+// GetStaffPayRatesByIDs loads pay rates for the given staff IDs in a single
+// WHERE id IN (...) query, returning a map keyed by staff ID. This replaces a
+// per-staff GetStaffPayRates call (N+1).
+func (r *Repository) GetStaffPayRatesByIDs(ctx context.Context, ownerID int64, staffIDs []int64) (map[int64]domain.StaffPayRates, error) {
+	out := make(map[int64]domain.StaffPayRates, len(staffIDs))
+	if len(staffIDs) == 0 {
+		return out, nil
+	}
+
+	var sb strings.Builder
+	sb.WriteString("SELECT id, salary, hourly_rate, overtime_rate FROM hr_staff WHERE owner_id = ? AND id IN (")
+	args := make([]any, 0, len(staffIDs)+1)
+	args = append(args, ownerID)
+	for i, id := range staffIDs {
+		if i > 0 {
+			sb.WriteByte(',')
+		}
+		sb.WriteByte('?')
+		args = append(args, id)
+	}
+	sb.WriteByte(')')
+
+	rows, err := r.pool.QueryContext(ctx, sb.String(), args...)
+	if err != nil {
+		logger.Ctx(ctx).Error("Failed to batch-load staff pay rates", logger.Error(err))
+		return nil, err
+	}
+	defer rows.Close()
+
+	for rows.Next() {
+		var (
+			id                               int64
+			salary, hourlyRate, overtimeRate sql.NullString
+		)
+		if scanErr := rows.Scan(&id, &salary, &hourlyRate, &overtimeRate); scanErr != nil {
+			return nil, scanErr
+		}
+		var rates domain.StaffPayRates
+		if salary.Valid {
+			rates.Salary, _ = strconv.ParseFloat(salary.String, 64)
+		}
+		if hourlyRate.Valid {
+			rates.HourlyRate, _ = strconv.ParseFloat(hourlyRate.String, 64)
+		}
+		if overtimeRate.Valid {
+			rates.OvertimeRate, _ = strconv.ParseFloat(overtimeRate.String, 64)
+		}
+		out[id] = rates
+	}
+
+	return out, rows.Err()
 }
