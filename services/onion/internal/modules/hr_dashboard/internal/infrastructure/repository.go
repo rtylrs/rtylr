@@ -4,6 +4,7 @@ import (
 	"context"
 	"database/sql"
 	"encoding/json"
+	"strings"
 
 	"github.com/voxire/onion/internal/modules/hr_dashboard/internal/domain"
 )
@@ -74,18 +75,24 @@ func (r *Repository) UpsertWidgets(ctx context.Context, ownerID int64, widgets [
 		return err
 	}
 
-	for _, w := range widgets {
-		configJSON, err := json.Marshal(json.RawMessage(w.Config))
-		if err != nil {
-			_ = tx.Rollback()
-			return err
+	if len(widgets) > 0 {
+		// Batch every widget into a single multi-row INSERT instead of issuing
+		// one round-trip per widget.
+		placeholders := make([]string, 0, len(widgets))
+		args := make([]interface{}, 0, len(widgets)*8)
+		for _, w := range widgets {
+			configJSON, err := json.Marshal(json.RawMessage(w.Config))
+			if err != nil {
+				_ = tx.Rollback()
+				return err
+			}
+			placeholders = append(placeholders, "(?, ?, ?, ?, ?, ?, ?, ?)")
+			args = append(args, ownerID, w.RoleID, w.WidgetType, w.PositionX, w.PositionY, w.Width, w.Height, configJSON)
 		}
 
-		_, err = tx.ExecContext(ctx,
-			`INSERT INTO hr_dashboard_widgets (owner_id, role_id, widget_type, position_x, position_y, width, height, config)
-			 VALUES (?, ?, ?, ?, ?, ?, ?, ?)`,
-			ownerID, w.RoleID, w.WidgetType, w.PositionX, w.PositionY, w.Width, w.Height, configJSON)
-		if err != nil {
+		query := `INSERT INTO hr_dashboard_widgets (owner_id, role_id, widget_type, position_x, position_y, width, height, config) VALUES ` +
+			strings.Join(placeholders, ", ")
+		if _, err = tx.ExecContext(ctx, query, args...); err != nil {
 			_ = tx.Rollback()
 			return err
 		}
