@@ -3,13 +3,28 @@ package handlers
 import (
 	"context"
 	"net/http"
+	"time"
 
 	"github.com/voxire/onion/internal/modules/addons/internal/application"
 	"github.com/voxire/onion/internal/modules/addons/internal/domain"
 	authPkg "github.com/voxire/onion/internal/platform/auth"
+	"github.com/voxire/onion/internal/platform/cache/cacher"
+	cacheKeys "github.com/voxire/onion/internal/platform/cache/keys"
 	errorModels "github.com/voxire/onion/internal/platform/errors"
 	hubv1 "github.com/voxire/voxie/gen/go/hub/v1"
 )
+
+// addonsCacheScope namespaces the per-business addons list cache. The
+// business_addons enable state is written only within this module
+// (Enable/Disable), so a short TTL plus invalidation on those mutations
+// keeps reads consistent.
+const addonsCacheScope = "addons"
+
+func invalidateAddonsCache(ctx context.Context, businessID int64) {
+	if cache := cacher.GetRedisCache(); cache != nil {
+		cache.DeleteByPattern(ctx, cacheKeys.ScopedPrefix(addonsCacheScope, businessID))
+	}
+}
 
 // ─── List addons for the current business ───────────────────────────────────
 
@@ -30,13 +45,33 @@ func (h *ListAddonsHandler) Serve(ctx context.Context, _ *ListAddonsRequest) (Li
 		return ListAddonsResponse{}, errorModels.PermissionDeniedServerError()
 	}
 
-	addons, err := h.Service.ListForBusiness(ctx, authUser.BusinessID)
-	if err != nil {
+	res, cacheErr := cacher.Of[ListAddonsResponse]().GetOrComputeSingle(
+		ctx,
+		cacheKeys.Scoped(addonsCacheScope, authUser.BusinessID, "list"),
+		func(ctx context.Context) (ListAddonsResponse, error) {
+			return h.computeList(ctx, authUser.BusinessID)
+		},
+		cacher.WithExpiry(ctx, 3*time.Minute),
+	)
+	if cacheErr == nil {
+		return res, nil
+	}
+
+	res, computeErr := h.computeList(ctx, authUser.BusinessID)
+	if computeErr != nil {
 		return ListAddonsResponse{}, &errorModels.ServerError{
 			HTTPCode: http.StatusInternalServerError,
 			Code:     http.StatusInternalServerError,
 			Message:  "Failed to list addons",
 		}
+	}
+	return res, nil
+}
+
+func (h *ListAddonsHandler) computeList(ctx context.Context, businessID int64) (ListAddonsResponse, error) {
+	addons, err := h.Service.ListForBusiness(ctx, businessID)
+	if err != nil {
+		return ListAddonsResponse{}, err
 	}
 
 	payloads := make([]*hubv1.Addon, 0, len(addons))
@@ -103,6 +138,8 @@ func (h *EnableAddonHandler) Serve(ctx context.Context, req *EnableAddonRequest)
 		}
 	}
 
+	invalidateAddonsCache(ctx, authUser.BusinessID)
+
 	return EnableAddonResponse{Message: "Addon enabled"}, nil
 }
 
@@ -140,6 +177,8 @@ func (h *DisableAddonHandler) Serve(ctx context.Context, req *DisableAddonReques
 			Message:  "Failed to disable addon",
 		}
 	}
+
+	invalidateAddonsCache(ctx, authUser.BusinessID)
 
 	return DisableAddonResponse{Message: "Addon disabled"}, nil
 }
