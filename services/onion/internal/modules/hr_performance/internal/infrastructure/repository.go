@@ -7,6 +7,7 @@ import (
 	"errors"
 	"fmt"
 	"strconv"
+	"strings"
 	"time"
 
 	"github.com/voxire/onion/internal/modules/hr_performance/internal/domain"
@@ -189,15 +190,20 @@ func (r *Repository) OpenReviewCycle(ctx context.Context, ownerID, id int64) err
 		return err
 	}
 
-	for _, eid := range employeeIDs {
-		err = qtx.CreatePerformanceReview(ctx, sqlc.CreatePerformanceReviewParams{
-			OwnerID:            ownerID,
-			EmployeeID:         eid,
-			ReviewCycleID:      id,
-			ReviewerEmployeeID: eid,
-			ReviewType:         "self",
-		})
-		if err != nil {
+	// Insert all self-reviews in one multi-row INSERT instead of a statement
+	// per employee, removing N-1 round-trips inside the transaction.
+	if len(employeeIDs) > 0 {
+		var sb strings.Builder
+		sb.WriteString("INSERT INTO hr_performance_reviews (owner_id, employee_id, review_cycle_id, reviewer_employee_id, review_type, status) VALUES ")
+		args := make([]any, 0, len(employeeIDs)*5)
+		for i, eid := range employeeIDs {
+			if i > 0 {
+				sb.WriteByte(',')
+			}
+			sb.WriteString("(?, ?, ?, ?, 'self', 'draft')")
+			args = append(args, ownerID, eid, id, eid)
+		}
+		if _, err = tx.ExecContext(ctx, sb.String(), args...); err != nil {
 			_ = tx.Rollback()
 			return err
 		}
