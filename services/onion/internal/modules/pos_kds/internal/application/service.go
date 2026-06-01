@@ -3,7 +3,7 @@ package application
 import (
 	"context"
 	"database/sql"
-	"fmt"
+	"strconv"
 	"strings"
 	"time"
 
@@ -79,7 +79,7 @@ func (s *Service) UpdateItemStatus(ctx context.Context, input domain.UpdateItemS
 	}
 	invalidateKDSScope(ctx, input.OwnerID)
 	wsbus.Publish(wsbus.Event{
-		Topic:    fmt.Sprintf("owner:%d", input.OwnerID),
+		Topic:    "owner:" + strconv.FormatInt(input.OwnerID, 10),
 		Type:     "pos:kds:item:updated",
 		EntityID: input.ItemID,
 	})
@@ -92,7 +92,7 @@ func (s *Service) UpdateItemStatusByItemID(ctx context.Context, ownerID, itemID 
 	}
 	invalidateKDSScope(ctx, ownerID)
 	wsbus.Publish(wsbus.Event{
-		Topic:    fmt.Sprintf("owner:%d", ownerID),
+		Topic:    "owner:" + strconv.FormatInt(ownerID, 10),
 		Type:     "pos:kds:item:updated",
 		EntityID: itemID,
 	})
