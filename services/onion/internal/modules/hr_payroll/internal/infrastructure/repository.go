@@ -328,6 +328,35 @@ func (r *Repository) ListDistinctOwnerIDs(ctx context.Context) ([]int64, error) 
 	return r.queries.ListDistinctPayrollOwnerIDs(ctx)
 }
 
+// ListAllPayrollConfigs returns every payroll config in one query. It exists so
+// the period-open notification job can load all owners' configs at once instead
+// of listing owner IDs and then fetching each config individually (N+1).
+func (r *Repository) ListAllPayrollConfigs(ctx context.Context) ([]domain.PayrollConfigRecord, error) {
+	const q = `SELECT id, owner_id, period_type, pay_day_of_month, overtime_enabled, created_at, updated_at
+		FROM hr_payroll_config`
+
+	rows, err := r.pool.QueryContext(ctx, q)
+	if err != nil {
+		logger.Ctx(ctx).Error("failed to list all payroll configs", logger.Error(err))
+		return nil, err
+	}
+	defer rows.Close()
+
+	var configs []domain.PayrollConfigRecord
+	for rows.Next() {
+		var cfg domain.PayrollConfigRecord
+		if scanErr := rows.Scan(
+			&cfg.ID, &cfg.OwnerID, &cfg.PeriodType, &cfg.PayDayOfMonth,
+			&cfg.OvertimeEnabled, &cfg.CreatedAt, &cfg.UpdatedAt,
+		); scanErr != nil {
+			return nil, scanErr
+		}
+		configs = append(configs, cfg)
+	}
+
+	return configs, rows.Err()
+}
+
 // --- Row Mappers ---
 
 func payrollConfigFromRow(row sqlc.HrPayrollConfig) domain.PayrollConfigRecord {

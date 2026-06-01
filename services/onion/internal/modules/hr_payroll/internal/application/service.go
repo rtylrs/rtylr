@@ -371,39 +371,37 @@ func (s *Service) GetPayrollRun(ctx context.Context, ownerID, runID int64) (*dom
 }
 
 func (s *Service) NotifyPayrollPeriodOpen(ctx context.Context) error {
-	ownerIDs, err := s.repo.ListDistinctOwnerIDs(ctx)
+	// Load every owner's payroll config in one query instead of listing owner
+	// IDs and then fetching each config individually (N+1).
+	configs, err := s.repo.ListAllPayrollConfigs(ctx)
 	if err != nil {
-		logger.Ctx(ctx).Error("payroll period notification: failed to list owner IDs", logger.Error(err))
+		logger.Ctx(ctx).Error("payroll period notification: failed to list payroll configs", logger.Error(err))
 		return err
 	}
 
-	for _, ownerID := range ownerIDs {
-		cfg, cfgErr := s.repo.GetPayrollConfig(ctx, ownerID)
-		if cfgErr != nil || cfg == nil {
+	today := int32(time.Now().Day())
+	for _, cfg := range configs {
+		if today != cfg.PayDayOfMonth {
 			continue
 		}
-
-		now := time.Now()
-		if int32(now.Day()) == cfg.PayDayOfMonth {
-			if dispErr := s.notifier.Dispatch(ctx, domain.NotificationEvent{
-				OwnerID: ownerID,
-				Type:    "payroll.period_open",
-				Subject: "Payroll period is open",
-				Payload: map[string]any{
-					"period_type": cfg.PeriodType,
-					"pay_day":     cfg.PayDayOfMonth,
-				},
-			}); dispErr != nil {
-				logger.Ctx(ctx).Warn("payroll period notification dispatch failed",
-					logger.Any("owner_id", ownerID),
-					logger.Error(dispErr),
-				)
-			}
-			logger.Ctx(ctx).Info("payroll period open notification sent",
-				logger.Any("owner_id", ownerID),
-				logger.Any("period_type", cfg.PeriodType),
+		if dispErr := s.notifier.Dispatch(ctx, domain.NotificationEvent{
+			OwnerID: cfg.OwnerID,
+			Type:    "payroll.period_open",
+			Subject: "Payroll period is open",
+			Payload: map[string]any{
+				"period_type": cfg.PeriodType,
+				"pay_day":     cfg.PayDayOfMonth,
+			},
+		}); dispErr != nil {
+			logger.Ctx(ctx).Warn("payroll period notification dispatch failed",
+				logger.Any("owner_id", cfg.OwnerID),
+				logger.Error(dispErr),
 			)
 		}
+		logger.Ctx(ctx).Info("payroll period open notification sent",
+			logger.Any("owner_id", cfg.OwnerID),
+			logger.Any("period_type", cfg.PeriodType),
+		)
 	}
 
 	return nil
