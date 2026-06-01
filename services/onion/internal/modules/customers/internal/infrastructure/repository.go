@@ -740,6 +740,7 @@ func (r *Repository) GetDashboardStats(ctx context.Context, ownerID int64) (doma
 		return domain.DashboardStats{}, err
 	}
 
+	stats.TopCustomers = make([]domain.TopCustomer, 0, len(topRows))
 	for _, row := range topRows {
 		spent, _ := strconv.ParseFloat(row.TotalSpent.String, 64)
 		stats.TopCustomers = append(stats.TopCustomers, domain.TopCustomer{
@@ -751,10 +752,6 @@ func (r *Repository) GetDashboardStats(ctx context.Context, ownerID int64) (doma
 			LoyaltyPoints: int(row.LoyaltyPoints.Int32),
 			LoyaltyTier:   string(row.LoyaltyTier.CrmCustomersLoyaltyTier),
 		})
-	}
-
-	if stats.TopCustomers == nil {
-		stats.TopCustomers = []domain.TopCustomer{}
 	}
 
 	return stats, nil
