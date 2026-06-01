@@ -4,7 +4,6 @@ import (
 	"context"
 	"database/sql"
 	"errors"
-	"fmt"
 	"strconv"
 
 	"github.com/voxire/onion/internal/modules/products/internal/domain"
@@ -47,7 +46,7 @@ func (r *Repository) ListProducts(ctx context.Context, ownerID int64, search str
 		args = append(args, categoryID)
 	}
 
-	query += fmt.Sprintf(` ORDER BY name ASC LIMIT %d OFFSET %d`, limit+1, offset)
+	query += ` ORDER BY name ASC LIMIT ` + strconv.Itoa(limit+1) + ` OFFSET ` + strconv.Itoa(offset)
 
 	rows, err := r.pool.QueryContext(ctx, query, args...)
 	if err != nil {
