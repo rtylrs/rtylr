@@ -9,8 +9,22 @@ import (
 	"github.com/voxire/onion/internal/modules/booking_appointments/internal/application"
 	"github.com/voxire/onion/internal/modules/booking_appointments/internal/domain"
 	authPkg "github.com/voxire/onion/internal/platform/auth"
+	"github.com/voxire/onion/internal/platform/cache/cacher"
+	cacheKeys "github.com/voxire/onion/internal/platform/cache/keys"
 	errorModels "github.com/voxire/onion/internal/platform/errors"
 )
+
+// appointmentsCacheScope namespaces the per-owner appointment list caches.
+// booking_appointments is written only within this module
+// (Create/Update/Delete), so a short TTL plus invalidation on those
+// mutations keeps both the full list and today views consistent.
+const appointmentsCacheScope = "booking_appointments"
+
+func invalidateAppointmentsCache(ctx context.Context, ownerID int64) {
+	if cache := cacher.GetRedisCache(); cache != nil {
+		cache.DeleteByPattern(ctx, cacheKeys.ScopedPrefix(appointmentsCacheScope, ownerID))
+	}
+}
 
 func ListRoutes() []string   { return []string{"/book/appointments"} }
 func TodayRoutes() []string  { return []string{"/book/appointments/today"} }
@@ -31,6 +45,22 @@ func (h *ListHandler) Serve(ctx context.Context, _ *ListRequest) (ListResponse, 
 	if !ok {
 		return ListResponse{}, &errorModels.ServerError{Code: http.StatusUnauthorized, HTTPCode: http.StatusUnauthorized, Message: "unauthorized"}
 	}
+	res, cacheErr := cacher.Of[ListResponse]().GetOrComputeSingle(
+		ctx,
+		cacheKeys.Scoped(appointmentsCacheScope, authUser.UserID, "list"),
+		func(ctx context.Context) (ListResponse, error) {
+			items, err := h.Service.List(ctx, authUser.UserID)
+			if err != nil {
+				return ListResponse{}, err
+			}
+			return ListResponse{Appointments: items}, nil
+		},
+		cacher.WithExpiry(ctx, 3*time.Minute),
+	)
+	if cacheErr == nil {
+		return res, nil
+	}
+
 	items, err := h.Service.List(ctx, authUser.UserID)
 	if err != nil {
 		return ListResponse{}, &errorModels.ServerError{Code: http.StatusInternalServerError, HTTPCode: http.StatusInternalServerError, Message: "Failed to list appointments"}
@@ -51,6 +81,25 @@ func (h *TodayHandler) Serve(ctx context.Context, _ *TodayRequest) (TodayRespons
 	if !ok {
 		return TodayResponse{}, &errorModels.ServerError{Code: http.StatusUnauthorized, HTTPCode: http.StatusUnauthorized, Message: "unauthorized"}
 	}
+	// Date-stamp the cache detail so a cache written yesterday can never be
+	// served today, independent of the TTL.
+	todayKey := "today:" + time.Now().Format("2006-01-02")
+	res, cacheErr := cacher.Of[TodayResponse]().GetOrComputeSingle(
+		ctx,
+		cacheKeys.Scoped(appointmentsCacheScope, authUser.UserID, todayKey),
+		func(ctx context.Context) (TodayResponse, error) {
+			items, err := h.Service.ListToday(ctx, authUser.UserID)
+			if err != nil {
+				return TodayResponse{}, err
+			}
+			return TodayResponse{Appointments: items}, nil
+		},
+		cacher.WithExpiry(ctx, 3*time.Minute),
+	)
+	if cacheErr == nil {
+		return res, nil
+	}
+
 	items, err := h.Service.ListToday(ctx, authUser.UserID)
 	if err != nil {
 		return TodayResponse{}, &errorModels.ServerError{Code: http.StatusInternalServerError, HTTPCode: http.StatusInternalServerError, Message: "Failed to list today appointments"}
@@ -114,6 +163,7 @@ func (h *CreateHandler) Serve(ctx context.Context, req *CreateRequest) (CreateRe
 	if err != nil {
 		return CreateResponse{}, &errorModels.ServerError{Code: http.StatusInternalServerError, HTTPCode: http.StatusInternalServerError, Message: "Failed to create appointment"}
 	}
+	invalidateAppointmentsCache(ctx, authUser.UserID)
 	return CreateResponse{ID: id, Message: "Appointment created"}, nil
 }
 
@@ -169,6 +219,7 @@ func (h *UpdateHandler) Serve(ctx context.Context, req *UpdateRequest) (UpdateRe
 	}); err != nil {
 		return UpdateResponse{}, &errorModels.ServerError{Code: http.StatusInternalServerError, HTTPCode: http.StatusInternalServerError, Message: "Failed to update appointment"}
 	}
+	invalidateAppointmentsCache(ctx, authUser.UserID)
 	return UpdateResponse{Message: "Appointment updated"}, nil
 }
 
@@ -198,5 +249,6 @@ func (h *DeleteHandler) Serve(ctx context.Context, req *DeleteRequest) (DeleteRe
 	if err := h.Service.Delete(ctx, authUser.UserID, req.ID); err != nil {
 		return DeleteResponse{}, &errorModels.ServerError{Code: http.StatusInternalServerError, HTTPCode: http.StatusInternalServerError, Message: "Failed to delete appointment"}
 	}
+	invalidateAppointmentsCache(ctx, authUser.UserID)
 	return DeleteResponse{Message: "Appointment deleted"}, nil
 }
