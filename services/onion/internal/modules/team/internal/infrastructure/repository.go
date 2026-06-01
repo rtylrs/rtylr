@@ -191,15 +191,71 @@ func (r *Repository) ListStaffUsers(ctx context.Context, ownerID int64, limit, o
 		users = append(users, su)
 	}
 
+	userIDs := make([]int64, len(users))
 	for i := range users {
-		groups, err := r.GetUserGroups(ctx, ownerID, users[i].ID)
-		if err != nil || groups == nil {
-			groups = []domain.GroupSummary{}
+		userIDs[i] = users[i].ID
+		users[i].Groups = []domain.GroupSummary{}
+	}
+
+	groupsByUser, err := r.groupsForUsers(ctx, ownerID, userIDs)
+	if err == nil {
+		for i := range users {
+			if groups := groupsByUser[users[i].ID]; groups != nil {
+				users[i].Groups = groups
+			}
 		}
-		users[i].Groups = groups
 	}
 
 	return users, nil
+}
+
+// groupsForUsers batches group lookups for many users into a single query,
+// mapping the result back per user ID in memory (avoids an N+1 over users).
+func (r *Repository) groupsForUsers(ctx context.Context, ownerID int64, userIDs []int64) (map[int64][]domain.GroupSummary, error) {
+	result := make(map[int64][]domain.GroupSummary, len(userIDs))
+	if len(userIDs) == 0 {
+		return result, nil
+	}
+
+	placeholders := make([]byte, 0, len(userIDs)*2)
+	args := make([]any, 0, len(userIDs)+1)
+	for i, id := range userIDs {
+		if i > 0 {
+			placeholders = append(placeholders, ',')
+		}
+		placeholders = append(placeholders, '?')
+		args = append(args, id)
+	}
+	args = append(args, ownerID)
+
+	query := "SELECT m.user_id, g.id, g.name, g.color " +
+		"FROM user_group_members m " +
+		"JOIN user_groups g ON g.id = m.group_id " +
+		"WHERE m.user_id IN (" + string(placeholders) + ") AND m.owner_id = ? " +
+		"ORDER BY g.name"
+
+	rows, err := r.pool.QueryContext(ctx, query, args...)
+	if err != nil {
+		logger.Ctx(ctx).Error("Failed to batch list user groups", logger.Error(err))
+		return nil, err
+	}
+	defer rows.Close()
+
+	for rows.Next() {
+		var userID int64
+		var color sql.NullString
+		var summary domain.GroupSummary
+		if err := rows.Scan(&userID, &summary.ID, &summary.Name, &color); err != nil {
+			return nil, err
+		}
+		summary.Color = color.String
+		result[userID] = append(result[userID], summary)
+	}
+	if err := rows.Err(); err != nil {
+		return nil, err
+	}
+
+	return result, nil
 }
 
 func (r *Repository) GetStaffUserByID(ctx context.Context, ownerID, businessID, userID int64) (*domain.StaffUser, error) {
