@@ -76,7 +76,7 @@ func (r *Repository) ListInvoices(ctx context.Context, ownerID int64, status, se
 	}
 	defer rows.Close()
 
-	var invoices []domain.Invoice
+	invoices := make([]domain.Invoice, 0, limit)
 
 	for rows.Next() {
 		var inv domain.Invoice
@@ -425,7 +425,7 @@ func (r *Repository) ListExpenses(ctx context.Context, ownerID, categoryID int64
 	}
 	defer rows.Close()
 
-	var expenses []domain.Expense
+	expenses := make([]domain.Expense, 0, limit)
 
 	for rows.Next() {
 		var e domain.Expense
