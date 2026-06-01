@@ -5,6 +5,7 @@ import (
 	"database/sql"
 	"errors"
 	"strconv"
+	"strings"
 	"time"
 
 	"github.com/voxire/onion/internal/modules/journal/internal/domain"
@@ -38,8 +39,9 @@ func (r *Repository) List(ctx context.Context, ownerID int64, limit, offset int3
 	}
 
 	entries := make([]domain.JournalEntry, 0, len(rows))
+	entryIDs := make([]int64, 0, len(rows))
 	for _, row := range rows {
-		entry := domain.JournalEntry{
+		entries = append(entries, domain.JournalEntry{
 			ID:          row.ID,
 			OwnerID:     row.OwnerID,
 			Date:        row.Date,
@@ -47,18 +49,68 @@ func (r *Repository) List(ctx context.Context, ownerID int64, limit, offset int3
 			Status:      row.Status,
 			PostedAt:    nullTime(row.PostedAt),
 			CreatedAt:   nullTime(row.CreatedAt),
-		}
+		})
+		entryIDs = append(entryIDs, row.ID)
+	}
 
-		lines, err := r.GetLines(ctx, entry.ID)
-		if err != nil {
-			return nil, err
-		}
-		entry.Lines = lines
-
-		entries = append(entries, entry)
+	// Batch-load all lines for the listed entries in a single query, then
+	// attach them in memory. This replaces a per-entry GetLines call (N+1).
+	linesByEntry, err := r.getLinesForEntries(ctx, entryIDs)
+	if err != nil {
+		return nil, err
+	}
+	for i := range entries {
+		entries[i].Lines = linesByEntry[entries[i].ID]
 	}
 
 	return entries, nil
+}
+
+// getLinesForEntries loads all journal lines for the given entry IDs in one
+// query and groups them by entry ID. An entry with no lines maps to nil.
+func (r *Repository) getLinesForEntries(ctx context.Context, entryIDs []int64) (map[int64][]domain.JournalLine, error) {
+	out := make(map[int64][]domain.JournalLine, len(entryIDs))
+	if len(entryIDs) == 0 {
+		return out, nil
+	}
+
+	var sb strings.Builder
+	sb.WriteString("SELECT id, entry_id, account_id, debit, credit FROM finance_journal_lines WHERE entry_id IN (")
+	args := make([]any, len(entryIDs))
+	for i, id := range entryIDs {
+		if i > 0 {
+			sb.WriteByte(',')
+		}
+		sb.WriteByte('?')
+		args[i] = id
+	}
+	sb.WriteByte(')')
+
+	dbRows, err := r.pool.QueryContext(ctx, sb.String(), args...)
+	if err != nil {
+		logger.Ctx(ctx).Error("Failed to batch-load journal lines", logger.Error(err))
+		return nil, err
+	}
+	defer dbRows.Close()
+
+	for dbRows.Next() {
+		var (
+			id, entryID, accountID int64
+			debit, credit          sql.NullString
+		)
+		if scanErr := dbRows.Scan(&id, &entryID, &accountID, &debit, &credit); scanErr != nil {
+			return nil, scanErr
+		}
+		out[entryID] = append(out[entryID], domain.JournalLine{
+			ID:        id,
+			EntryID:   entryID,
+			AccountID: accountID,
+			Debit:     parseFloatNull(debit),
+			Credit:    parseFloatNull(credit),
+		})
+	}
+
+	return out, dbRows.Err()
 }
 
 func (r *Repository) Get(ctx context.Context, ownerID, id int64) (domain.JournalEntry, error) {
