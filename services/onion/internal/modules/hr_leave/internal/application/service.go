@@ -319,6 +319,20 @@ func (s *Service) accrueForOwner(ctx context.Context, ownerID int64, year, month
 		return err
 	}
 
+	// The accrual balances do not depend on the leave type, so fetch them once
+	// and group by leave type ID instead of re-querying per leave type.
+	balances, balErr := s.repo.ListBalancesForAccrual(ctx, ownerID, year, month)
+	if balErr != nil {
+		logger.Ctx(ctx).Error("leave accrual: failed to list balances",
+			logger.Any("owner_id", ownerID), logger.Error(balErr))
+		return balErr
+	}
+
+	balancesByType := make(map[int64][]domain.LeaveBalanceRecord, len(balances))
+	for _, bal := range balances {
+		balancesByType[bal.LeaveTypeID] = append(balancesByType[bal.LeaveTypeID], bal)
+	}
+
 	for _, lt := range leaveTypes {
 		if lt.AccrualRule == "" || lt.AccrualRule == "none" || lt.AccrualAmount <= 0 {
 			continue
@@ -328,17 +342,7 @@ func (s *Service) accrueForOwner(ctx context.Context, ownerID int64, year, month
 			continue
 		}
 
-		balances, balErr := s.repo.ListBalancesForAccrual(ctx, ownerID, year, month)
-		if balErr != nil {
-			logger.Ctx(ctx).Error("leave accrual: failed to list balances",
-				logger.Any("owner_id", ownerID), logger.Any("leave_type_id", lt.ID), logger.Error(balErr))
-			continue
-		}
-
-		for _, bal := range balances {
-			if bal.LeaveTypeID != lt.ID {
-				continue
-			}
+		for _, bal := range balancesByType[lt.ID] {
 			addErr := s.repo.AddToEntitledDays(ctx, ownerID, bal.EmployeeID, lt.ID, year, lt.AccrualAmount, month)
 			if addErr != nil {
 				logger.Ctx(ctx).Error("leave accrual: failed to add entitled days",
