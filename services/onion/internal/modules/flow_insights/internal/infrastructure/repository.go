@@ -4,6 +4,7 @@ import (
 	"context"
 	"database/sql"
 	"errors"
+	"strings"
 
 	"github.com/voxire/onion/internal/modules/flow_insights/internal/domain"
 	"github.com/voxire/onion/internal/platform/logger"
@@ -203,15 +204,24 @@ func (r *Repository) GetRoadmap(ctx context.Context, ownerID int64) (domain.Road
 		return result, err
 	}
 
-	// Fetch milestones per project
-	for i := range result.Projects {
-		ms, err := r.getMilestonesByProject(ctx, result.Projects[i].ID)
-		if err != nil {
-			logger.Ctx(ctx).Error("GetRoadmap: milestones query failed",
-				logger.Error(err), logger.Any("project_id", result.Projects[i].ID))
-			continue
+	// Fetch milestones for every project in a single batched query, then map
+	// them back by project ID, instead of issuing one query per project.
+	if len(result.Projects) > 0 {
+		projectIDs := make([]int64, len(result.Projects))
+		for i := range result.Projects {
+			projectIDs[i] = result.Projects[i].ID
 		}
-		result.Projects[i].Milestones = ms
+
+		byProject, err := r.getMilestonesByProjectIDs(ctx, projectIDs)
+		if err != nil {
+			logger.Ctx(ctx).Error("GetRoadmap: milestones query failed", logger.Error(err))
+		} else {
+			for i := range result.Projects {
+				if ms := byProject[result.Projects[i].ID]; ms != nil {
+					result.Projects[i].Milestones = ms
+				}
+			}
+		}
 	}
 
 	if result.Projects == nil {
@@ -221,9 +231,23 @@ func (r *Repository) GetRoadmap(ctx context.Context, ownerID int64) (domain.Road
 	return result, nil
 }
 
-func (r *Repository) getMilestonesByProject(ctx context.Context, projectID int64) ([]domain.RoadmapMilestone, error) {
+// getMilestonesByProjectIDs fetches milestones for several projects at once and
+// returns them grouped by project ID.
+func (r *Repository) getMilestonesByProjectIDs(ctx context.Context, projectIDs []int64) (map[int64][]domain.RoadmapMilestone, error) {
+	if len(projectIDs) == 0 {
+		return map[int64][]domain.RoadmapMilestone{}, nil
+	}
+
+	placeholders := make([]string, len(projectIDs))
+	args := make([]interface{}, len(projectIDs))
+	for i, id := range projectIDs {
+		placeholders[i] = "?"
+		args[i] = id
+	}
+
 	rows, err := r.pool.QueryContext(ctx, `
 		SELECT
+			fm.project_id,
 			fm.id,
 			fm.name,
 			COALESCE(DATE_FORMAT(fm.target_date, '%Y-%m-%d'), '') AS due_date,
@@ -231,27 +255,25 @@ func (r *Repository) getMilestonesByProject(ctx context.Context, projectID int64
 			COUNT(CASE WHEN ft.status = 'done' THEN 1 END) AS done_count
 		FROM flow_milestones fm
 		LEFT JOIN flow_tasks ft ON ft.project_id = fm.project_id AND ft.parent_task_id IS NULL
-		WHERE fm.project_id = ?
-		GROUP BY fm.id, fm.name, fm.target_date
+		WHERE fm.project_id IN (`+strings.Join(placeholders, ", ")+`)
+		GROUP BY fm.project_id, fm.id, fm.name, fm.target_date
 		ORDER BY fm.target_date ASC
-	`, projectID)
+	`, args...)
 	if err != nil {
 		return nil, err
 	}
 	defer rows.Close()
 
-	var milestones []domain.RoadmapMilestone
+	byProject := make(map[int64][]domain.RoadmapMilestone, len(projectIDs))
 	for rows.Next() {
+		var projectID int64
 		var m domain.RoadmapMilestone
-		if err := rows.Scan(&m.ID, &m.Name, &m.DueDate, &m.TaskCount, &m.DoneCount); err != nil {
+		if err := rows.Scan(&projectID, &m.ID, &m.Name, &m.DueDate, &m.TaskCount, &m.DoneCount); err != nil {
 			continue
 		}
-		milestones = append(milestones, m)
+		byProject[projectID] = append(byProject[projectID], m)
 	}
 
-	if milestones == nil {
-		milestones = []domain.RoadmapMilestone{}
-	}
-
-	return milestones, rows.Err()
+	return byProject, rows.Err()
 }
+
