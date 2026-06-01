@@ -146,6 +146,8 @@ func (h *CreateSectionHandler) Serve(ctx context.Context, req *CreateSectionRequ
 	// Refetch list and return the newly-added row (tail of ordered
 	// list when position wasn't supplied). Keeps the client in sync
 	// without the client having to refetch.
+	invalidatePublicCareersCache(ctx, authUser.UserID)
+
 	sections, _ := h.CareersService.ListSections(ctx, authUser.UserID, false)
 	if len(sections) == 0 {
 		return CreateSectionResponse{Section: nil}, nil
@@ -216,6 +218,7 @@ func (h *UpdateSectionHandler) Serve(ctx context.Context, req *UpdateSectionRequ
 			Message: "Failed to update section",
 		}
 	}
+	invalidatePublicCareersCache(ctx, authUser.UserID)
 	return UpdateSectionResponse{Message: "Section saved"}, nil
 }
 
@@ -260,6 +263,7 @@ func (h *DeleteSectionHandler) Serve(ctx context.Context, req *DeleteSectionRequ
 			Message: "Failed to delete section",
 		}
 	}
+	invalidatePublicCareersCache(ctx, authUser.UserID)
 	return DeleteSectionResponse{Message: "Section deleted"}, nil
 }
 
@@ -297,5 +301,6 @@ func (h *ReorderSectionsHandler) Serve(ctx context.Context, req *ReorderSections
 			Message: "Failed to reorder sections",
 		}
 	}
+	invalidatePublicCareersCache(ctx, authUser.UserID)
 	return ReorderSectionsResponse{Message: "Order saved"}, nil
 }

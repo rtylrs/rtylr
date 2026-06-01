@@ -212,5 +212,6 @@ func (h *PutCustomizationHandler) Serve(ctx context.Context, req *PutCustomizati
 			Message: "Failed to save customization",
 		}
 	}
+	invalidatePublicCareersCache(ctx, authUser.UserID)
 	return PutCustomizationResponse{Message: "Customization saved"}, nil
 }

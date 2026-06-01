@@ -4,11 +4,31 @@ import (
 	"context"
 	"errors"
 	"net/http"
+	"time"
 
 	"github.com/voxire/onion/internal/modules/careers/internal/application"
 	"github.com/voxire/onion/internal/modules/careers/internal/domain"
+	"github.com/voxire/onion/internal/platform/cache/cacher"
+	cacheKeys "github.com/voxire/onion/internal/platform/cache/keys"
 	errorModels "github.com/voxire/onion/internal/platform/errors"
 )
+
+// publicCareersCacheScope namespaces the per-owner public careers page
+// cache. The careers, careers_customizations and careers_sections tables
+// are written only within this module, so a short TTL plus invalidation
+// on every careers/customization/section mutation keeps the anonymous
+// public page consistent. The cache is keyed by owner_id (resolved from
+// the slug), so write handlers — which know the owner_id — can wipe it.
+const publicCareersCacheScope = "careers_public"
+
+// invalidatePublicCareersCache wipes the cached public careers page for an
+// owner. Call from every careers/customization/section create/update/delete
+// so the public site reflects changes within the TTL window at worst.
+func invalidatePublicCareersCache(ctx context.Context, ownerID int64) {
+	if cache := cacher.GetRedisCache(); cache != nil {
+		cache.DeleteByPattern(ctx, cacheKeys.ScopedPrefix(publicCareersCacheScope, ownerID))
+	}
+}
 
 // The "public" handlers power the candidate-facing site at
 // recruit.rtylr.com. They are declared anonymous in the module's
@@ -109,12 +129,32 @@ func (h *ListPublicCareersHandler) Serve(ctx context.Context, req *ListPublicCar
 		}
 	}
 
-	careers, err := h.CareersService.ListRecruitCareers(ctx, custom.OwnerID, true)
-	if err != nil {
+	res, cacheErr := cacher.Of[ListPublicCareersResponse]().GetOrComputeSingle(
+		ctx,
+		cacheKeys.Scoped(publicCareersCacheScope, custom.OwnerID, "list"),
+		func(ctx context.Context) (ListPublicCareersResponse, error) {
+			return h.computePublicCareers(ctx, custom)
+		},
+		cacher.WithExpiry(ctx, 3*time.Minute),
+	)
+	if cacheErr == nil {
+		return res, nil
+	}
+
+	res, computeErr := h.computePublicCareers(ctx, custom)
+	if computeErr != nil {
 		return ListPublicCareersResponse{}, &errorModels.ServerError{
 			Code:    http.StatusInternalServerError,
 			Message: "Failed to load careers",
 		}
+	}
+	return res, nil
+}
+
+func (h *ListPublicCareersHandler) computePublicCareers(ctx context.Context, custom domain.Customization) (ListPublicCareersResponse, error) {
+	careers, err := h.CareersService.ListRecruitCareers(ctx, custom.OwnerID, true)
+	if err != nil {
+		return ListPublicCareersResponse{}, err
 	}
 
 	payloads := make([]*RecruitCareerPayload, 0, len(careers))

@@ -184,6 +184,7 @@ func (h *CreateRecruitCareerHandler) Serve(ctx context.Context, req *CreateRecru
 		// next list cycle.
 		created = domain.RecruitCareer{ID: id, OwnerID: authUser.UserID, Slug: input.Slug, Title: input.Title}
 	}
+	invalidatePublicCareersCache(ctx, authUser.UserID)
 	return CreateRecruitCareerResponse{Career: toRecruitCareerPayload(created)}, nil
 }
 
@@ -256,6 +257,7 @@ func (h *UpdateRecruitCareerHandler) Serve(ctx context.Context, req *UpdateRecru
 			Message: "Failed to update career",
 		}
 	}
+	invalidatePublicCareersCache(ctx, authUser.UserID)
 	return UpdateRecruitCareerResponse{Message: "Career updated"}, nil
 }
 
@@ -300,5 +302,6 @@ func (h *DeleteRecruitCareerHandler) Serve(ctx context.Context, req *DeleteRecru
 			Message: "Failed to archive career",
 		}
 	}
+	invalidatePublicCareersCache(ctx, authUser.UserID)
 	return DeleteRecruitCareerResponse{Message: "Career archived"}, nil
 }
