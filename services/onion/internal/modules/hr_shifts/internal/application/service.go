@@ -4,6 +4,7 @@ import (
 	"context"
 	"database/sql"
 	"fmt"
+	"strconv"
 	"time"
 
 	"github.com/voxire/onion/internal/modules/hr_shifts/internal/domain"
@@ -104,7 +105,7 @@ func (s *Service) GetRoster(ctx context.Context, ownerID int64, params domain.Ro
 	var conflicts []domain.ConflictInfo
 	seen := make(map[string]bool)
 	for _, a := range assignments {
-		key := fmt.Sprintf("%s-%d", a.Date, a.EmployeeID)
+		key := a.Date + "-" + strconv.FormatInt(a.EmployeeID, 10)
 
 		if s.leaveConflictChecker != nil {
 			hasLeave, leaveErr := s.leaveConflictChecker.HasApprovedLeave(ctx, ownerID, a.EmployeeID, a.Date)
