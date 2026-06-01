@@ -6,6 +6,7 @@ import (
 	"errors"
 	"fmt"
 	"strconv"
+	"strings"
 	"time"
 
 	"github.com/voxire/onion/internal/modules/invoices/internal/domain"
@@ -151,23 +152,37 @@ func (r *Repository) CreateInvoice(ctx context.Context, ownerID int64, inv domai
 }
 
 func (r *Repository) CreateInvoiceItems(ctx context.Context, invoiceID int64, items []domain.InvoiceItem) error {
-	for _, item := range items {
-		err := r.queries.CreateInvoiceItem(ctx, sqlc.CreateInvoiceItemParams{
-			InvoiceID:   invoiceID,
-			Description: item.Description,
-			Quantity:    fmtFloat(item.Quantity),
-			Unit:        sqlNullString(item.Unit),
-			UnitPrice:   fmtFloat(item.UnitPrice),
-			TaxRate:     sqlNullString(fmtFloat(item.TaxRate)),
-			DiscountPct: sqlNullString(fmtFloat(item.DiscountPct)),
-			Total:       fmtFloat(item.Total),
-			SortOrder:   sql.NullInt32{Int32: int32(item.SortOrder), Valid: true},
-		})
-		if err != nil {
-			logger.Ctx(ctx).Error("Failed to create invoice item", logger.Error(err))
+	if len(items) == 0 {
+		return nil
+	}
 
-			return err
+	// Insert all line items in a single multi-row INSERT instead of one
+	// statement per item, removing the per-item round-trip (N+1 writes).
+	const cols = 9
+	var sb strings.Builder
+	sb.WriteString("INSERT INTO finance_invoice_items (invoice_id, description, quantity, unit, unit_price, tax_rate, discount_pct, total, sort_order) VALUES ")
+	args := make([]any, 0, len(items)*cols)
+	for i, item := range items {
+		if i > 0 {
+			sb.WriteByte(',')
 		}
+		sb.WriteString("(?,?,?,?,?,?,?,?,?)")
+		args = append(args,
+			invoiceID,
+			item.Description,
+			fmtFloat(item.Quantity),
+			sqlNullString(item.Unit),
+			fmtFloat(item.UnitPrice),
+			sqlNullString(fmtFloat(item.TaxRate)),
+			sqlNullString(fmtFloat(item.DiscountPct)),
+			fmtFloat(item.Total),
+			sql.NullInt32{Int32: int32(item.SortOrder), Valid: true},
+		)
+	}
+
+	if _, err := r.pool.ExecContext(ctx, sb.String(), args...); err != nil {
+		logger.Ctx(ctx).Error("Failed to create invoice items", logger.Error(err))
+		return err
 	}
 
 	return nil
