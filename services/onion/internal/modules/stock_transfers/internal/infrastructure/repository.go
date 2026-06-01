@@ -78,42 +78,68 @@ func (r *Repository) ListStockTransfers(ctx context.Context, ownerID int64, limi
 		transfers = transfers[:limit]
 	}
 
+	itemsByTransfer, err := r.getTransferItemsBatch(ctx, transfers)
+	if err != nil {
+		return nil, false, err
+	}
 	for i := range transfers {
-		items, err := r.getTransferItems(ctx, transfers[i].ID)
-		if err != nil {
-			return nil, false, err
-		}
-		transfers[i].Items = items
+		transfers[i].Items = itemsByTransfer[transfers[i].ID]
 	}
 
 	return transfers, hasMore, nil
 }
 
-func (r *Repository) getTransferItems(ctx context.Context, transferID int64) ([]domain.StockTransferItem, error) {
-	rows, err := r.queries.GetTransferItems(ctx, transferID)
-	if err != nil {
-		logger.Ctx(ctx).Error("Failed to get transfer items", logger.Error(err))
+// getTransferItemsBatch loads all items for the given transfers in a single
+// query (WHERE transfer_id IN (...)) and groups them by transfer ID, replacing
+// the previous per-transfer N+1 query pattern.
+func (r *Repository) getTransferItemsBatch(ctx context.Context, transfers []domain.StockTransfer) (map[int64][]domain.StockTransferItem, error) {
+	if len(transfers) == 0 {
+		return nil, nil
+	}
 
+	placeholders := make([]byte, 0, len(transfers)*2)
+	args := make([]any, 0, len(transfers))
+	for i := range transfers {
+		if i > 0 {
+			placeholders = append(placeholders, ',', '?')
+		} else {
+			placeholders = append(placeholders, '?')
+		}
+		args = append(args, transfers[i].ID)
+	}
+
+	q := `SELECT id, transfer_id, product_id, quantity, created_at
+		FROM erp_stock_transfer_items
+		WHERE transfer_id IN (` + string(placeholders) + `)
+		ORDER BY id ASC`
+
+	rows, err := r.pool.QueryContext(ctx, q, args...)
+	if err != nil {
+		logger.Ctx(ctx).Error("Failed to batch get transfer items", logger.Error(err))
+		return nil, err
+	}
+	defer rows.Close()
+
+	result := make(map[int64][]domain.StockTransferItem, len(transfers))
+	for rows.Next() {
+		var item domain.StockTransferItem
+		var quantity string
+		var createdAt sql.NullTime
+		if err := rows.Scan(&item.ID, &item.TransferID, &item.ProductID, &quantity, &createdAt); err != nil {
+			logger.Ctx(ctx).Error("Failed to scan transfer item row", logger.Error(err))
+			return nil, err
+		}
+		item.Quantity, _ = strconv.ParseFloat(quantity, 64)
+		if createdAt.Valid {
+			item.CreatedAt = createdAt.Time
+		}
+		result[item.TransferID] = append(result[item.TransferID], item)
+	}
+	if err := rows.Err(); err != nil {
 		return nil, err
 	}
 
-	items := make([]domain.StockTransferItem, 0, len(rows))
-
-	for _, row := range rows {
-		var item domain.StockTransferItem
-		item.ID = row.ID
-		item.TransferID = row.TransferID
-		item.ProductID = row.ProductID
-		item.Quantity, _ = strconv.ParseFloat(row.Quantity, 64)
-
-		if row.CreatedAt.Valid {
-			item.CreatedAt = row.CreatedAt.Time
-		}
-
-		items = append(items, item)
-	}
-
-	return items, nil
+	return result, nil
 }
 
 func (r *Repository) CreateStockTransfer(ctx context.Context, ownerID int64, input domain.StockTransferInput) (int64, error) {

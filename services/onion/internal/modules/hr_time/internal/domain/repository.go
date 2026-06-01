@@ -24,6 +24,7 @@ type Repository interface {
 	ListUnsubmittedEmployees(ctx context.Context, ownerID int64, periodStart, periodEnd string) ([]int64, error)
 
 	GetTimeEntryBySourceAndTask(ctx context.Context, ownerID, employeeID int64, source string, taskID int64) (*TimeEntryRecord, error)
+	GetExistingTaskIDsBySource(ctx context.Context, ownerID, employeeID int64, source string, taskIDs []int64) (map[int64]struct{}, error)
 	ListApprovedBillableEntries(ctx context.Context, ownerID int64) ([]TimeEntryRecord, error)
 	MarkEntryExported(ctx context.Context, ownerID, entryID, billableInvoiceID int64) error
 }

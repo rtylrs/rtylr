@@ -497,6 +497,12 @@ func (r *Repository) ListGroups(ctx context.Context, ownerID int64) ([]domain.Gr
 	if err != nil {
 		return nil, err
 	}
+	groupIDs := make([]int64, len(rows))
+	for i, row := range rows {
+		groupIDs[i] = row.ID
+	}
+	permsByGroup := r.resourcePermissionsForGroups(ctx, groupIDs)
+
 	groups := make([]domain.Group, 0, len(rows))
 	for _, row := range rows {
 		g := domain.Group{
@@ -513,16 +519,55 @@ func (r *Repository) ListGroups(ctx context.Context, ownerID int64) ([]domain.Gr
 		if row.UpdatedAt.Valid {
 			g.UpdatedAt = row.UpdatedAt.Time
 		}
-		perms, _ := r.queries.ListGroupResourcePermissions(ctx, row.ID)
-		for _, p := range perms {
-			g.ResourcePermissions = append(g.ResourcePermissions, domain.ResourcePermission{
-				ResourceKey:     p.ResourceKey,
-				PermissionLevel: domain.PermissionLevel(p.PermissionLevel),
-			})
-		}
+		g.ResourcePermissions = permsByGroup[row.ID]
 		groups = append(groups, g)
 	}
 	return groups, nil
+}
+
+// resourcePermissionsForGroups batches resource-permission lookups for many
+// groups into one query, mapping the result per group ID in memory (avoids an
+// N+1 over the group list). On error it returns an empty map so callers degrade
+// to groups without resource permissions, matching the previous best-effort
+// per-group behaviour.
+func (r *Repository) resourcePermissionsForGroups(ctx context.Context, groupIDs []int64) map[int64][]domain.ResourcePermission {
+	result := make(map[int64][]domain.ResourcePermission, len(groupIDs))
+	if len(groupIDs) == 0 {
+		return result
+	}
+
+	placeholders := make([]byte, 0, len(groupIDs)*2)
+	args := make([]any, 0, len(groupIDs))
+	for i, id := range groupIDs {
+		if i > 0 {
+			placeholders = append(placeholders, ',')
+		}
+		placeholders = append(placeholders, '?')
+		args = append(args, id)
+	}
+
+	query := "SELECT group_id, resource_key, permission_level " +
+		"FROM user_group_resource_permissions WHERE group_id IN (" + string(placeholders) + ")"
+
+	rows, err := r.pool.QueryContext(ctx, query, args...)
+	if err != nil {
+		logger.Ctx(ctx).Error("Failed to batch list group resource permissions", logger.Error(err))
+		return result
+	}
+	defer rows.Close()
+
+	for rows.Next() {
+		var groupID int64
+		var p domain.ResourcePermission
+		var level string
+		if err := rows.Scan(&groupID, &p.ResourceKey, &level); err != nil {
+			logger.Ctx(ctx).Error("Failed to scan group resource permission", logger.Error(err))
+			return result
+		}
+		p.PermissionLevel = domain.PermissionLevel(level)
+		result[groupID] = append(result[groupID], p)
+	}
+	return result
 }
 
 func (r *Repository) UpdateGroup(ctx context.Context, ownerID, groupID int64, input domain.UpdateGroupInput) error {

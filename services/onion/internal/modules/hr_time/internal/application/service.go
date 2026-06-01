@@ -248,13 +248,20 @@ func (s *Service) ImportFlowTasks(ctx context.Context, ownerID, employeeID int64
 		return nil, err
 	}
 
+	// Batch the per-task existence check into one query instead of issuing
+	// GetTimeEntryBySourceAndTask once per task (N+1).
+	taskIDs := make([]int64, 0, len(tasks))
+	for _, task := range tasks {
+		taskIDs = append(taskIDs, task.TaskID)
+	}
+	existingTaskIDs, err := s.repo.GetExistingTaskIDsBySource(ctx, ownerID, employeeID, "flow_import", taskIDs)
+	if err != nil {
+		return nil, err
+	}
+
 	var imported []domain.TimeEntryRecord
 	for _, task := range tasks {
-		existing, err := s.repo.GetTimeEntryBySourceAndTask(ctx, ownerID, employeeID, "flow_import", task.TaskID)
-		if err != nil {
-			return nil, err
-		}
-		if existing != nil {
+		if _, ok := existingTaskIDs[task.TaskID]; ok {
 			continue
 		}
 

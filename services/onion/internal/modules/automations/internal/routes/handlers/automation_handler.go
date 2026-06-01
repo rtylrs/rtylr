@@ -6,14 +6,28 @@ import (
 	"errors"
 	"net/http"
 	"strconv"
+	"time"
 
 	"github.com/go-chi/chi/v5"
 
 	"github.com/voxire/onion/internal/modules/automations/internal/application"
 	"github.com/voxire/onion/internal/modules/automations/internal/domain"
 	authPkg "github.com/voxire/onion/internal/platform/auth"
+	"github.com/voxire/onion/internal/platform/cache/cacher"
+	cacheKeys "github.com/voxire/onion/internal/platform/cache/keys"
 	errorModels "github.com/voxire/onion/internal/platform/errors"
 )
+
+// automationsCacheScope namespaces the per-owner automations list cache.
+// crm_automations is written only within this module, so a short TTL plus
+// invalidation on every create/update/delete keeps reads consistent.
+const automationsCacheScope = "automations"
+
+func invalidateAutomationsCache(ctx context.Context, ownerID int64) {
+	if cache := cacher.GetRedisCache(); cache != nil {
+		cache.DeleteByPattern(ctx, cacheKeys.ScopedPrefix(automationsCacheScope, ownerID))
+	}
+}
 
 func AutomationListRoutes() []string {
 	return []string{"/crm/automations"}
@@ -85,12 +99,32 @@ func (h *ListAutomationsHandler) Serve(ctx context.Context, _ *ListAutomationsRe
 		return ListAutomationsResponse{}, errorModels.PermissionDeniedServerError()
 	}
 
-	items, err := h.Service.List(ctx, device.User.UserID)
-	if err != nil {
+	res, cacheErr := cacher.Of[ListAutomationsResponse]().GetOrComputeSingle(
+		ctx,
+		cacheKeys.Scoped(automationsCacheScope, device.User.UserID, "list"),
+		func(ctx context.Context) (ListAutomationsResponse, error) {
+			return h.computeList(ctx, device.User.UserID)
+		},
+		cacher.WithExpiry(ctx, 3*time.Minute),
+	)
+	if cacheErr == nil {
+		return res, nil
+	}
+
+	res, computeErr := h.computeList(ctx, device.User.UserID)
+	if computeErr != nil {
 		return ListAutomationsResponse{}, &errorModels.ServerError{
 			Code:    http.StatusInternalServerError,
 			Message: "Failed to list automations",
 		}
+	}
+	return res, nil
+}
+
+func (h *ListAutomationsHandler) computeList(ctx context.Context, ownerID int64) (ListAutomationsResponse, error) {
+	items, err := h.Service.List(ctx, ownerID)
+	if err != nil {
+		return ListAutomationsResponse{}, err
 	}
 
 	payloads := make([]AutomationPayload, len(items))
@@ -168,6 +202,8 @@ func (h *CreateAutomationHandler) Serve(ctx context.Context, req *CreateAutomati
 			Message: "Failed to create automation",
 		}
 	}
+
+	invalidateAutomationsCache(ctx, device.User.UserID)
 
 	return CreateAutomationResponse{AutomationID: id, Message: "Automation created successfully"}, nil
 }
@@ -248,6 +284,8 @@ func (h *UpdateAutomationHandler) Serve(ctx context.Context, req *UpdateAutomati
 		}
 	}
 
+	invalidateAutomationsCache(ctx, device.User.UserID)
+
 	return UpdateAutomationResponse{Message: "Automation updated successfully"}, nil
 }
 
@@ -291,6 +329,8 @@ func (h *DeleteAutomationHandler) Serve(ctx context.Context, _ *DeleteAutomation
 			Message: "Failed to delete automation",
 		}
 	}
+
+	invalidateAutomationsCache(ctx, device.User.UserID)
 
 	return DeleteAutomationResponse{Message: "Automation deleted successfully"}, nil
 }

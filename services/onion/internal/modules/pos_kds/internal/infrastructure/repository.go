@@ -4,6 +4,7 @@ import (
 	"context"
 	"database/sql"
 	"strconv"
+	"strings"
 
 	"github.com/voxire/onion/internal/modules/pos_kds/internal/domain"
 	"github.com/voxire/onion/internal/modules/pos_kds/internal/infrastructure/persistence/sqlc"
@@ -30,6 +31,18 @@ func (r *Repository) ListActiveOrders(ctx context.Context, ownerID int64) ([]dom
 		return nil, err
 	}
 
+	orderIDs := make([]int64, 0, len(rows))
+	for _, row := range rows {
+		orderIDs = append(orderIDs, row.ID)
+	}
+
+	// Batch-fetch all items for the active orders in a single query and group
+	// them in memory, avoiding one GetKDSOrderItems round-trip per order (N+1).
+	itemsByOrder, err := r.getItemsForOrders(ctx, orderIDs)
+	if err != nil {
+		return nil, err
+	}
+
 	orders := make([]domain.KDSOrder, 0, len(rows))
 	for _, row := range rows {
 		o := domain.KDSOrder{
@@ -42,36 +55,62 @@ func (r *Repository) ListActiveOrders(ctx context.Context, ownerID int64) ([]dom
 			KitchenNotes: row.KitchenNotes.String,
 			CreatedAt:    row.CreatedAt.Time,
 		}
-
-		items, itemErr := r.getOrderItems(ctx, o.ID)
-		if itemErr != nil {
-			return nil, itemErr
-		}
-		o.Items = items
+		o.Items = itemsByOrder[o.ID]
 		orders = append(orders, o)
 	}
 	return orders, nil
 }
 
-func (r *Repository) getOrderItems(ctx context.Context, orderID int64) ([]domain.KDSItem, error) {
-	rows, err := r.queries.GetKDSOrderItems(ctx, orderID)
-	if err != nil {
-		return nil, err
+// getItemsForOrders fetches order items for many orders in one query, returning
+// them grouped by order id. Mirrors the column set of GetKDSOrderItems.
+func (r *Repository) getItemsForOrders(ctx context.Context, orderIDs []int64) (map[int64][]domain.KDSItem, error) {
+	itemsByOrder := make(map[int64][]domain.KDSItem, len(orderIDs))
+	if len(orderIDs) == 0 {
+		return itemsByOrder, nil
 	}
 
-	items := make([]domain.KDSItem, 0, len(rows))
-	for _, row := range rows {
-		items = append(items, domain.KDSItem{
-			ID:       row.ID,
-			OrderID:  row.OrderID,
-			Name:     row.Name,
-			Quantity: decimalToFloat(row.Quantity),
-			Notes:    row.Notes.String,
-			Status:   string(row.Status.PosOrderItemsStatus),
+	placeholders := make([]string, len(orderIDs))
+	args := make([]interface{}, len(orderIDs))
+	for i, id := range orderIDs {
+		placeholders[i] = "?"
+		args[i] = id
+	}
+
+	query := "SELECT id, order_id, name, quantity, notes, status FROM pos_order_items WHERE order_id IN (" +
+		strings.Join(placeholders, ",") + ") ORDER BY id"
+
+	rows, err := r.pool.QueryContext(ctx, query, args...)
+	if err != nil {
+		logger.Ctx(ctx).Error("Failed to batch fetch KDS order items", logger.Error(err))
+		return nil, err
+	}
+	defer rows.Close()
+
+	for rows.Next() {
+		var (
+			id       int64
+			orderID  int64
+			name     string
+			quantity string
+			notes    sql.NullString
+			status   sqlc.NullPosOrderItemsStatus
+		)
+		if scanErr := rows.Scan(&id, &orderID, &name, &quantity, &notes, &status); scanErr != nil {
+			logger.Ctx(ctx).Error("Failed to scan KDS order item", logger.Error(scanErr))
+			return nil, scanErr
+		}
+		itemsByOrder[orderID] = append(itemsByOrder[orderID], domain.KDSItem{
+			ID:       id,
+			OrderID:  orderID,
+			Name:     name,
+			Quantity: decimalToFloat(quantity),
+			Notes:    notes.String,
+			Status:   string(status.PosOrderItemsStatus),
 		})
 	}
-	return items, nil
+	return itemsByOrder, rows.Err()
 }
+
 
 func (r *Repository) UpdateItemStatus(ctx context.Context, input domain.UpdateItemStatusInput) error {
 	err := r.queries.UpdateKDSItemStatus(ctx, sqlc.UpdateKDSItemStatusParams{

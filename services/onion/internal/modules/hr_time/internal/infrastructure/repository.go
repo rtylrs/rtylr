@@ -4,6 +4,7 @@ import (
 	"context"
 	"database/sql"
 	"errors"
+	"strings"
 	"time"
 
 	"github.com/voxire/onion/internal/modules/hr_time/internal/domain"
@@ -381,6 +382,50 @@ func (r *Repository) GetTimeEntryBySourceAndTask(ctx context.Context, ownerID, e
 	}
 	entry := timeEntryFromRow(row)
 	return &entry, nil
+}
+
+// GetExistingTaskIDsBySource returns the set of task IDs (from the given
+// candidate list) that already have a time entry for the owner/employee/source
+// combination. This batches what would otherwise be a per-task existence check
+// into a single WHERE task_id IN (...) query.
+func (r *Repository) GetExistingTaskIDsBySource(ctx context.Context, ownerID, employeeID int64, source string, taskIDs []int64) (map[int64]struct{}, error) {
+	existing := make(map[int64]struct{}, len(taskIDs))
+	if len(taskIDs) == 0 {
+		return existing, nil
+	}
+
+	var sb strings.Builder
+	sb.WriteString("SELECT task_id FROM hr_time_entries WHERE owner_id = ? AND employee_id = ? AND source = ? AND task_id IN (")
+	args := make([]any, 0, len(taskIDs)+3)
+	args = append(args, ownerID, employeeID, source)
+	for i, id := range taskIDs {
+		if i > 0 {
+			sb.WriteByte(',')
+		}
+		sb.WriteByte('?')
+		args = append(args, id)
+	}
+	sb.WriteByte(')')
+
+	rows, err := r.pool.QueryContext(ctx, sb.String(), args...)
+	if err != nil {
+		logger.Ctx(ctx).Error("failed to batch-check existing task entries",
+			logger.Any("owner_id", ownerID), logger.Error(err))
+		return nil, err
+	}
+	defer rows.Close()
+
+	for rows.Next() {
+		var taskID sql.NullInt64
+		if scanErr := rows.Scan(&taskID); scanErr != nil {
+			return nil, scanErr
+		}
+		if taskID.Valid {
+			existing[taskID.Int64] = struct{}{}
+		}
+	}
+
+	return existing, rows.Err()
 }
 
 func (r *Repository) ListApprovedBillableEntries(ctx context.Context, ownerID int64) ([]domain.TimeEntryRecord, error) {
