@@ -85,44 +85,73 @@ func (r *Repository) ListStockTakes(ctx context.Context, ownerID int64, limit, o
 		stockTakes = stockTakes[:limit]
 	}
 
+	itemsByStockTake, err := r.getStockTakeItemsBatch(ctx, stockTakes)
+	if err != nil {
+		return nil, false, err
+	}
 	for i := range stockTakes {
-		items, err := r.getStockTakeItems(ctx, stockTakes[i].ID)
-		if err != nil {
-			return nil, false, err
-		}
-		stockTakes[i].Items = items
+		stockTakes[i].Items = itemsByStockTake[stockTakes[i].ID]
 	}
 
 	return stockTakes, hasMore, nil
 }
 
-func (r *Repository) getStockTakeItems(ctx context.Context, stockTakeID int64) ([]domain.StockTakeItem, error) {
-	rows, err := r.queries.GetStockTakeItems(ctx, stockTakeID)
-	if err != nil {
-		logger.Ctx(ctx).Error("Failed to get stock take items", logger.Error(err))
+// getStockTakeItemsBatch loads all items for the given stock takes in a single
+// query (WHERE stock_take_id IN (...)) and groups them by stock take ID,
+// replacing the previous per-stock-take N+1 query pattern.
+func (r *Repository) getStockTakeItemsBatch(ctx context.Context, stockTakes []domain.StockTake) (map[int64][]domain.StockTakeItem, error) {
+	if len(stockTakes) == 0 {
+		return nil, nil
+	}
 
+	placeholders := make([]byte, 0, len(stockTakes)*2)
+	args := make([]any, 0, len(stockTakes))
+	for i := range stockTakes {
+		if i > 0 {
+			placeholders = append(placeholders, ',', '?')
+		} else {
+			placeholders = append(placeholders, '?')
+		}
+		args = append(args, stockTakes[i].ID)
+	}
+
+	q := `SELECT id, stock_take_id, product_id, expected_qty, counted_qty, variance, created_at
+		FROM erp_stock_take_items
+		WHERE stock_take_id IN (` + string(placeholders) + `)
+		ORDER BY id ASC`
+
+	rows, err := r.pool.QueryContext(ctx, q, args...)
+	if err != nil {
+		logger.Ctx(ctx).Error("Failed to batch get stock take items", logger.Error(err))
+		return nil, err
+	}
+	defer rows.Close()
+
+	result := make(map[int64][]domain.StockTakeItem, len(stockTakes))
+	for rows.Next() {
+		var item domain.StockTakeItem
+		var expectedQty, countedQty, variance string
+		var createdAt sql.NullTime
+		if err := rows.Scan(
+			&item.ID, &item.StockTakeID, &item.ProductID,
+			&expectedQty, &countedQty, &variance, &createdAt,
+		); err != nil {
+			logger.Ctx(ctx).Error("Failed to scan stock take item row", logger.Error(err))
+			return nil, err
+		}
+		item.ExpectedQty, _ = strconv.ParseFloat(expectedQty, 64)
+		item.CountedQty, _ = strconv.ParseFloat(countedQty, 64)
+		item.Variance, _ = strconv.ParseFloat(variance, 64)
+		if createdAt.Valid {
+			item.CreatedAt = createdAt.Time.Format("2006-01-02T15:04:05Z07:00")
+		}
+		result[item.StockTakeID] = append(result[item.StockTakeID], item)
+	}
+	if err := rows.Err(); err != nil {
 		return nil, err
 	}
 
-	items := make([]domain.StockTakeItem, 0, len(rows))
-
-	for _, row := range rows {
-		var item domain.StockTakeItem
-		item.ID = row.ID
-		item.StockTakeID = row.StockTakeID
-		item.ProductID = row.ProductID
-		item.ExpectedQty, _ = strconv.ParseFloat(row.ExpectedQty, 64)
-		item.CountedQty, _ = strconv.ParseFloat(row.CountedQty, 64)
-		item.Variance, _ = strconv.ParseFloat(row.Variance, 64)
-
-		if row.CreatedAt.Valid {
-			item.CreatedAt = row.CreatedAt.Time.Format("2006-01-02T15:04:05Z07:00")
-		}
-
-		items = append(items, item)
-	}
-
-	return items, nil
+	return result, nil
 }
 
 func (r *Repository) CreateStockTake(ctx context.Context, ownerID int64, input domain.StockTakeInput) (int64, error) {
