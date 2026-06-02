@@ -439,7 +439,7 @@ func TestListMessages_AfterCreate_ContainsMessage(t *testing.T) {
 		t.Fatalf("CreateMessage: %v", err)
 	}
 
-	messages, err := repo.ListMessages(ctx, ticketID)
+	messages, err := repo.ListMessages(ctx, supportTicketsBusinessID, ticketID)
 	if err != nil {
 		t.Fatalf("ListMessages: %v", err)
 	}
@@ -460,7 +460,7 @@ func TestListMessages_EmptyTicket_ReturnsEmpty(t *testing.T) {
 	repo := infrastructure.NewRepository(db)
 	ctx := context.Background()
 
-	messages, err := repo.ListMessages(ctx, 9999999)
+	messages, err := repo.ListMessages(ctx, supportTicketsBusinessID, 9999999)
 	if err != nil {
 		t.Fatalf("ListMessages non-existent ticket: %v", err)
 	}

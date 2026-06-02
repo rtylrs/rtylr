@@ -27,9 +27,11 @@ UPDATE support_tickets SET subject = ?, status = ?, priority = ?, assigned_to = 
 WHERE business_id = ? AND id = ?;
 
 -- name: ListMessages :many
-SELECT id, ticket_id, sender_type, sender_name, body, is_internal, created_at
-FROM support_messages WHERE ticket_id = ?
-ORDER BY created_at ASC;
+SELECT m.id, m.ticket_id, m.sender_type, m.sender_name, m.body, m.is_internal, m.created_at
+FROM support_messages m
+JOIN support_tickets t ON t.id = m.ticket_id
+WHERE m.ticket_id = ? AND t.business_id = ?
+ORDER BY m.created_at ASC;
 
 -- name: CreateMessage :execresult
 INSERT INTO support_messages (ticket_id, sender_type, sender_name, body, is_internal)

@@ -137,8 +137,8 @@ func (r *Repository) Update(ctx context.Context, input domain.TicketUpdateInput)
 	return nil
 }
 
-func (r *Repository) ListMessages(ctx context.Context, ticketID int64) ([]domain.Message, error) {
-	rows, err := r.queries.ListMessages(ctx, ticketID)
+func (r *Repository) ListMessages(ctx context.Context, businessID, ticketID int64) ([]domain.Message, error) {
+	rows, err := r.queries.ListMessages(ctx, sqlc.ListMessagesParams{TicketID: ticketID, BusinessID: businessID})
 	if err != nil {
 		logger.Ctx(ctx).Error("Failed to list support messages", logger.Error(err))
 		return nil, err

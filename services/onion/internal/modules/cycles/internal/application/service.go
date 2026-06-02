@@ -19,6 +19,7 @@ const (
 
 type repository interface {
 	List(ctx context.Context, ownerID int64, workspaceID *int64) ([]domain.Cycle, error)
+	WorkspaceBelongsToOwner(ctx context.Context, ownerID, workspaceID int64) (bool, error)
 	Create(ctx context.Context, input domain.CycleInput) (int64, error)
 	Update(ctx context.Context, input domain.CycleUpdateInput) error
 }
@@ -52,6 +53,15 @@ func (s *Service) List(ctx context.Context, ownerID int64, workspaceID *int64) (
 }
 
 func (s *Service) Create(ctx context.Context, input domain.CycleInput) (int64, error) {
+	// A cycle must live in a workspace the caller owns. Without this check a user
+	// could attach a cycle to another tenant's workspace (cross-tenant write).
+	owns, err := s.repo.WorkspaceBelongsToOwner(ctx, input.OwnerID, input.WorkspaceID)
+	if err != nil {
+		return 0, err
+	}
+	if !owns {
+		return 0, domain.ErrWorkspaceNotFound
+	}
 	id, err := s.repo.Create(ctx, input)
 	if err != nil {
 		return 0, err

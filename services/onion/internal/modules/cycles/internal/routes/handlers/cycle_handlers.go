@@ -150,6 +150,9 @@ func (h *CreateCycleHandler) Serve(ctx context.Context, req *CreateCycleRequest)
 	}
 	id, err := h.Service.Create(ctx, input)
 	if err != nil {
+		if errors.Is(err, domain.ErrWorkspaceNotFound) {
+			return CreateCycleResponse{}, &errorModels.ServerError{Code: http.StatusNotFound, Message: "Workspace not found"}
+		}
 		return CreateCycleResponse{}, &errorModels.ServerError{Code: http.StatusInternalServerError, Message: "Failed to create cycle"}
 	}
 	return CreateCycleResponse{CycleID: id, Message: "Cycle created successfully"}, nil

@@ -34,7 +34,7 @@ type repository interface {
 	DeleteInvoiceItems(ctx context.Context, invoiceID int64) error
 	UpdateInvoice(ctx context.Context, ownerID int64, inv domain.Invoice) error
 	UpdateInvoiceStatus(ctx context.Context, ownerID, invoiceID int64, status string) error
-	UpdateInvoicePaymentTotals(ctx context.Context, invoiceID int64, amountPaid, amountDue float64, status string, paidDate *time.Time) error
+	UpdateInvoicePaymentTotals(ctx context.Context, ownerID, invoiceID int64, amountPaid, amountDue float64, status string, paidDate *time.Time) error
 	DeleteInvoice(ctx context.Context, ownerID, invoiceID int64) error
 	CountInvoiceSequence(ctx context.Context, ownerID int64, year int) (int64, error)
 	CreatePayment(ctx context.Context, ownerID int64, p domain.Payment) (int64, error)
@@ -461,7 +461,7 @@ func (s *Service) RecordPayment(ctx context.Context, ownerID int64, input domain
 		newStatus = inv.Status
 	}
 
-	if err := s.repo.UpdateInvoicePaymentTotals(ctx, input.InvoiceID, newAmountPaid, newAmountDue, newStatus, paidDate); err != nil {
+	if err := s.repo.UpdateInvoicePaymentTotals(ctx, ownerID, input.InvoiceID, newAmountPaid, newAmountDue, newStatus, paidDate); err != nil {
 		return nil, err
 	}
 

@@ -79,7 +79,7 @@ func (h *GetTicketHandler) Serve(ctx context.Context, req *GetTicketRequest) (Ge
 	if err != nil {
 		return GetTicketResponse{}, &errorModels.ServerError{Code: http.StatusInternalServerError, Message: "Failed to get support ticket"}
 	}
-	msgs, err := h.Service.ListMessages(ctx, req.ID)
+	msgs, err := h.Service.ListMessages(ctx, device.User.BusinessID, req.ID)
 	if err != nil {
 		return GetTicketResponse{}, &errorModels.ServerError{Code: http.StatusInternalServerError, Message: "Failed to list ticket messages"}
 	}

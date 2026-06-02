@@ -77,13 +77,15 @@ func (s *Service) Update(ctx context.Context, input domain.TicketUpdateInput) er
 	return nil
 }
 
-// Messages are scoped by ticketID, not businessID, so they use a separate
-// global key family that's wiped on every message create.
-func (s *Service) ListMessages(ctx context.Context, ticketID int64) ([]domain.Message, error) {
+// Messages are read through the parent ticket's business scope: the query joins
+// support_tickets and filters by business_id, so a caller can never read another
+// tenant's ticket messages. The cache key family is keyed by ticketID and wiped
+// on every message create.
+func (s *Service) ListMessages(ctx context.Context, businessID, ticketID int64) ([]domain.Message, error) {
 	key := cacheKeys.Scoped("support_ticket_messages", ticketID, "list")
 	return cacher.Of[[]domain.Message]().GetOrComputeSingle(ctx, key,
 		func(ctx context.Context) ([]domain.Message, error) {
-			return s.repo.ListMessages(ctx, ticketID)
+			return s.repo.ListMessages(ctx, businessID, ticketID)
 		},
 		cacher.WithExpiry(ctx, supportTicketsTTL),
 	)

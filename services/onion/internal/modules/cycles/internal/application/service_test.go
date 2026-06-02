@@ -13,10 +13,16 @@ type mockRepo struct {
 	createID  int64
 	createErr error
 	updErr    error
+	wsOwned   bool
+	wsErr     error
 }
 
 func (m *mockRepo) List(_ context.Context, _ int64, _ *int64) ([]domain.Cycle, error) {
 	return m.list, nil
+}
+
+func (m *mockRepo) WorkspaceBelongsToOwner(_ context.Context, _, _ int64) (bool, error) {
+	return m.wsOwned, m.wsErr
 }
 
 func (m *mockRepo) Create(_ context.Context, _ domain.CycleInput) (int64, error) {
@@ -37,9 +43,16 @@ func TestList_Delegates(t *testing.T) {
 
 func TestCreate_PropagatesError(t *testing.T) {
 	want := errors.New("boom")
-	s := &Service{repo: &mockRepo{createErr: want}}
+	s := &Service{repo: &mockRepo{createErr: want, wsOwned: true}}
 	if _, err := s.Create(context.Background(), domain.CycleInput{}); !errors.Is(err, want) {
 		t.Errorf("expected sentinel, got %v", err)
+	}
+}
+
+func TestCreate_RejectsForeignWorkspace(t *testing.T) {
+	s := &Service{repo: &mockRepo{wsOwned: false}}
+	if _, err := s.Create(context.Background(), domain.CycleInput{OwnerID: 1, WorkspaceID: 99}); !errors.Is(err, domain.ErrWorkspaceNotFound) {
+		t.Errorf("expected ErrWorkspaceNotFound, got %v", err)
 	}
 }
 

@@ -50,7 +50,7 @@ func (m *mockRepo) UpdateInvoice(_ context.Context, _ int64, _ domain.Invoice) e
 	return m.err
 }
 func (m *mockRepo) UpdateInvoiceStatus(_ context.Context, _, _ int64, _ string) error { return m.err }
-func (m *mockRepo) UpdateInvoicePaymentTotals(_ context.Context, _ int64, _, _ float64, _ string, _ *time.Time) error {
+func (m *mockRepo) UpdateInvoicePaymentTotals(_ context.Context, _, _ int64, _, _ float64, _ string, _ *time.Time) error {
 	return m.err
 }
 func (m *mockRepo) DeleteInvoice(_ context.Context, _, _ int64) error { return m.err }

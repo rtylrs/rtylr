@@ -43,10 +43,10 @@ WHERE id = ? AND owner_id = ?;
 UPDATE finance_invoices SET status = ? WHERE id = ? AND owner_id = ?;
 
 -- name: UpdateInvoicePaymentTotalsWithPaidDate :exec
-UPDATE finance_invoices SET amount_paid = ?, amount_due = ?, status = ?, paid_date = ? WHERE id = ?;
+UPDATE finance_invoices SET amount_paid = ?, amount_due = ?, status = ?, paid_date = ? WHERE id = ? AND owner_id = ?;
 
 -- name: UpdateInvoicePaymentTotals :exec
-UPDATE finance_invoices SET amount_paid = ?, amount_due = ?, status = ? WHERE id = ?;
+UPDATE finance_invoices SET amount_paid = ?, amount_due = ?, status = ? WHERE id = ? AND owner_id = ?;
 
 -- name: DeleteInvoice :exec
 DELETE FROM finance_invoices WHERE id = ? AND owner_id = ? AND status = 'draft';

@@ -6,6 +6,9 @@ FROM flow_cycles WHERE owner_id = ? ORDER BY start_date ASC, created_at ASC;
 SELECT id, owner_id, workspace_id, name, start_date, end_date, status, created_at, updated_at
 FROM flow_cycles WHERE owner_id = ? AND workspace_id = ? ORDER BY start_date ASC, created_at ASC;
 
+-- name: CountWorkspaceForOwner :one
+SELECT COUNT(*) FROM flow_workspaces WHERE id = ? AND owner_id = ?;
+
 -- name: CreateCycle :execresult
 INSERT INTO flow_cycles (owner_id, workspace_id, name, start_date, end_date)
 VALUES (?, ?, ?, ?, ?);

@@ -7,6 +7,10 @@ import (
 
 var ErrCycleNotFound = errors.New("cycle not found")
 
+// ErrWorkspaceNotFound is returned when a cycle operation references a workspace
+// that does not exist or does not belong to the caller (cross-tenant guard).
+var ErrWorkspaceNotFound = errors.New("workspace not found")
+
 type Cycle struct {
 	ID          int64
 	OwnerID     int64

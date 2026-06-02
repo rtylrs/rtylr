@@ -266,7 +266,7 @@ func (r *Repository) UpdateInvoiceStatus(ctx context.Context, ownerID, invoiceID
 	return err
 }
 
-func (r *Repository) UpdateInvoicePaymentTotals(ctx context.Context, invoiceID int64, amountPaid, amountDue float64, status string, paidDate *time.Time) error {
+func (r *Repository) UpdateInvoicePaymentTotals(ctx context.Context, ownerID, invoiceID int64, amountPaid, amountDue float64, status string, paidDate *time.Time) error {
 	if paidDate != nil {
 		err := r.queries.UpdateInvoicePaymentTotalsWithPaidDate(ctx, sqlc.UpdateInvoicePaymentTotalsWithPaidDateParams{
 			AmountPaid: sqlNullString(fmtFloat(amountPaid)),
@@ -274,6 +274,7 @@ func (r *Repository) UpdateInvoicePaymentTotals(ctx context.Context, invoiceID i
 			Status:     sqlc.NullFinanceInvoicesStatus{FinanceInvoicesStatus: sqlc.FinanceInvoicesStatus(status), Valid: status != ""},
 			PaidDate:   sql.NullTime{Time: *paidDate, Valid: true},
 			ID:         invoiceID,
+			OwnerID:    ownerID,
 		})
 		if err != nil {
 			logger.Ctx(ctx).Error("Failed to update invoice payment totals", logger.Error(err))
@@ -287,6 +288,7 @@ func (r *Repository) UpdateInvoicePaymentTotals(ctx context.Context, invoiceID i
 		AmountDue:  sqlNullString(fmtFloat(amountDue)),
 		Status:     sqlc.NullFinanceInvoicesStatus{FinanceInvoicesStatus: sqlc.FinanceInvoicesStatus(status), Valid: status != ""},
 		ID:         invoiceID,
+		OwnerID:    ownerID,
 	})
 	if err != nil {
 		logger.Ctx(ctx).Error("Failed to update invoice payment totals", logger.Error(err))

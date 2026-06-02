@@ -62,6 +62,18 @@ func (r *Repository) List(ctx context.Context, ownerID int64, workspaceID *int64
 	return cycles, nil
 }
 
+func (r *Repository) WorkspaceBelongsToOwner(ctx context.Context, ownerID, workspaceID int64) (bool, error) {
+	count, err := r.queries.CountWorkspaceForOwner(ctx, sqlc.CountWorkspaceForOwnerParams{
+		ID:      workspaceID,
+		OwnerID: ownerID,
+	})
+	if err != nil {
+		logger.Ctx(ctx).Error("Failed to verify workspace ownership", logger.Error(err))
+		return false, err
+	}
+	return count > 0, nil
+}
+
 func (r *Repository) Create(ctx context.Context, input domain.CycleInput) (int64, error) {
 	result, err := r.queries.CreateCycle(ctx, sqlc.CreateCycleParams{
 		OwnerID:     input.OwnerID,
