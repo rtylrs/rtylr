@@ -297,16 +297,16 @@ const TaskDetail: React.FC = () => {
   const milestone = milestones.find((m) => m.id === task.milestoneId);
 
   // Time logs from API (preferred) or store fallback
-  const apiLogs = timeLogsData?.logs ?? [];
+  const apiLogs = timeLogsData?.timeLogs ?? [];
   const storeLogs = storeTimelogs.filter((tl) => tl.taskId === task.id);
   const hasApiLogs = apiLogs.length > 0 || timeLogsData !== undefined;
   const totalMinutes = hasApiLogs
     ? apiLogs.reduce((s, l) => s + l.durationMinutes, 0)
     : storeLogs.reduce((s, t) => s + t.minutes, 0);
 
-  const estimatedHours = timeLogsData?.estimated_hours ?? task.estimate ?? null;
+  const estimatedHours = task.estimatedHours ?? task.estimate ?? null;
   const actualHours =
-    timeLogsData?.actual_hours ??
+    task.actualHours ??
     (totalMinutes > 0 ? Math.round((totalMinutes / 60) * 10) / 10 : null);
 
   const priorities: Task['priority'][] = ['urgent', 'high', 'medium', 'low', 'no_priority'];

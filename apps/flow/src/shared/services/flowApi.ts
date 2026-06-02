@@ -66,6 +66,8 @@ export interface ApiTask {
   subtaskCount: number;
   projectName: string;
   estimate?: number;
+  estimatedHours?: number | null;
+  actualHours?: number | null;
   identifier?: string;
   createdAt?: string;
   updatedAt?: string;
@@ -245,9 +247,6 @@ export interface ApiTaskDetail {
   subtasks: ApiSubtask[];
   comments: ApiTaskComment[];
   activity: ApiTaskActivity[];
-  labels?: ApiLabel[];
-  estimated_hours?: number | null;
-  actual_hours?: number | null;
 }
 
 // -- API ------------------------------------------------------------------
@@ -448,10 +447,7 @@ export const flowApi = {
   // -- Time Logs ----------------------------------------------------------
 
   getTimeLogs: (taskId: string) =>
-    safe.get<{ logs: ApiTimeLog[]; estimated_hours: number | null; actual_hours: number | null }>(
-      '/flow/tasks/time',
-      { params: { task_id: taskId } }
-    ),
+    safe.get<{ timeLogs: ApiTimeLog[] }>('/flow/tasks/time', { params: { task_id: taskId } }),
 
   logTime: (data: { task_id: number; duration_minutes: number; description?: string }) =>
     safe.post<ApiTimeLog>('/flow/tasks/time', data),

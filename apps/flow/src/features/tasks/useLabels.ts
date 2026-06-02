@@ -54,9 +54,8 @@ export function useSetTaskLabels() {
     mutationFn: (data: { task_id: number; label_ids: number[] }) =>
       unwrap(flowApi.setTaskLabels(data)),
     onSuccess: (_data, variables) => {
-      qc.invalidateQueries({ queryKey: ['task-detail', String(variables.task_id)] });
+      qc.invalidateQueries({ queryKey: ['task', String(variables.task_id)] });
       qc.invalidateQueries({ queryKey: ['tasks'] });
-      qc.invalidateQueries({ queryKey: ['task'] });
     },
     onError: () => toast.error('Failed to set task labels'),
   });

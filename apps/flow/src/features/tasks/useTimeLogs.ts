@@ -8,9 +8,7 @@ import type { ApiTimeLog } from '../../shared/services/flowApi';
 const t = (key: string): string => i18next.t(key) as string;
 
 export interface TimeLogsData {
-  logs: ApiTimeLog[];
-  estimated_hours: number | null;
-  actual_hours: number | null;
+  timeLogs: ApiTimeLog[];
 }
 
 export function useTimeLogs(taskId: string) {
@@ -29,8 +27,8 @@ export function useLogTime() {
     onSuccess: (_data, variables) => {
       const tid = String(variables.task_id);
       qc.invalidateQueries({ queryKey: ['time-logs', tid] });
-      qc.invalidateQueries({ queryKey: ['task-detail', tid] });
-      qc.invalidateQueries({ queryKey: ['task'] });
+      qc.invalidateQueries({ queryKey: ['task', tid] });
+      qc.invalidateQueries({ queryKey: ['tasks'] });
       toast.success(t('toasts.time.logged'));
     },
     onError: () => toast.error(t('toasts.time.logFailed')),
@@ -43,8 +41,8 @@ export function useDeleteTimeLog() {
     mutationFn: ({ id }: { id: number; taskId: string }) => unwrap(flowApi.deleteTimeLog(id)),
     onSuccess: (_data, variables) => {
       qc.invalidateQueries({ queryKey: ['time-logs', variables.taskId] });
-      qc.invalidateQueries({ queryKey: ['task-detail', variables.taskId] });
-      qc.invalidateQueries({ queryKey: ['task'] });
+      qc.invalidateQueries({ queryKey: ['task', variables.taskId] });
+      qc.invalidateQueries({ queryKey: ['tasks'] });
       toast.success(t('toasts.time.deleted'));
     },
     onError: () => toast.error(t('toasts.time.deleteFailed')),
