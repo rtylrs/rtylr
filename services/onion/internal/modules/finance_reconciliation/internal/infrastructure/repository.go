@@ -4,6 +4,7 @@ import (
 	"context"
 	"database/sql"
 	"errors"
+	"math"
 	"strconv"
 	"time"
 
@@ -99,7 +100,7 @@ func (r *Repository) ListUnmatchedInvoices(ctx context.Context, ownerID int64) (
 			ID:               id,
 			InvoiceNumber:    invoiceNumber,
 			ClientName:       clientName,
-			AmountMinorUnits: decimalStrToMinorUnits(totalStr),
+			AmountMinorUnits: decimalStrToMinorUnits(ctx, totalStr),
 			Currency:         nullStr(currency),
 			IssueDate:        issueDate,
 			DueDate:          dueDate,
@@ -161,7 +162,7 @@ func (r *Repository) ListUnmatchedExpenses(ctx context.Context, ownerID int64) (
 			ID:               id,
 			InvoiceNumber:    description,
 			ClientName:       vendor,
-			AmountMinorUnits: decimalStrToMinorUnits(amountStr),
+			AmountMinorUnits: decimalStrToMinorUnits(ctx, amountStr),
 			Currency:         nullStr(currency),
 			IssueDate:        expenseDate,
 			DueDate:          expenseDate,
@@ -267,20 +268,25 @@ func nullStr(s sql.NullString) string {
 }
 
 // decimalStrToMinorUnits converts a DECIMAL column (e.g. "12.34") into
-// integer minor units (1234). Falls back to 0 on parse failure; the higher
-// layer still gets the rest of the row so a single bad amount does not
+// integer minor units (1234). Uses round-to-nearest (round-half-away-from-zero)
+// via math.Round so the rounding mode is explicit and symmetric for positive
+// and negative amounts. Falls back to 0 on parse failure (logged at Warn); the
+// higher layer still gets the rest of the row so a single bad amount does not
 // blackhole the whole list.
-func decimalStrToMinorUnits(s sql.NullString) int64 {
+//
+// NOTE: This uses round-to-nearest, NOT banker's rounding (round-to-even).
+// All amounts in the system must use consistent rounding for reconciliation to work.
+func decimalStrToMinorUnits(ctx context.Context, s sql.NullString) int64 {
 	if !s.Valid || s.String == "" {
 		return 0
 	}
 	f, err := strconv.ParseFloat(s.String, 64)
 	if err != nil {
+		logger.Ctx(ctx).Warn("Failed to parse decimal amount from database",
+			logger.String("value", s.String),
+			logger.Error(err),
+		)
 		return 0
 	}
-	// Round-to-nearest to avoid 0.1 + 0.2 style drift.
-	if f >= 0 {
-		return int64(f*100 + 0.5)
-	}
-	return int64(f*100 - 0.5)
+	return int64(math.Round(f * 100))
 }

@@ -2,6 +2,7 @@ package handlers
 
 import (
 	"context"
+	"errors"
 	"net/http"
 	"strings"
 
@@ -67,6 +68,9 @@ func (h *CreateHandler) Serve(ctx context.Context, req *CreateRequest) (CreateRe
 	}
 	id, err := h.Service.Create(ctx, authUser.UserID, domain.StoreCategoryInput{Name: req.Name, Slug: req.Slug, Description: req.Description, ImageURL: req.ImageURL, ParentID: req.ParentID, SortOrder: req.SortOrder})
 	if err != nil {
+		if errors.Is(err, domain.ErrParentNotFound) {
+			return CreateResponse{}, &errorModels.ServerError{Code: http.StatusBadRequest, HTTPCode: http.StatusBadRequest, Message: "Parent category not found"}
+		}
 		return CreateResponse{}, &errorModels.ServerError{Code: http.StatusInternalServerError, HTTPCode: http.StatusInternalServerError, Message: "Failed to create store category"}
 	}
 	return CreateResponse{ID: id, Message: "Store category created successfully"}, nil
@@ -102,6 +106,9 @@ func (h *UpdateHandler) Serve(ctx context.Context, req *UpdateRequest) (UpdateRe
 		return UpdateResponse{}, &errorModels.ServerError{Code: http.StatusUnauthorized, HTTPCode: http.StatusUnauthorized, Message: "unauthorized"}
 	}
 	if err := h.Service.Update(ctx, authUser.UserID, req.ID, domain.StoreCategoryInput{Name: req.Name, Slug: req.Slug, Description: req.Description, ImageURL: req.ImageURL, ParentID: req.ParentID, SortOrder: req.SortOrder}); err != nil {
+		if errors.Is(err, domain.ErrParentNotFound) {
+			return UpdateResponse{}, &errorModels.ServerError{Code: http.StatusBadRequest, HTTPCode: http.StatusBadRequest, Message: "Parent category not found"}
+		}
 		return UpdateResponse{}, &errorModels.ServerError{Code: http.StatusInternalServerError, HTTPCode: http.StatusInternalServerError, Message: "Failed to update store category"}
 	}
 	return UpdateResponse{Message: "Store category updated successfully"}, nil

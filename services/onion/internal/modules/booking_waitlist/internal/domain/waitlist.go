@@ -1,6 +1,13 @@
 package domain
 
-import "time"
+import (
+	"errors"
+	"time"
+)
+
+// ErrServiceNotFound is returned when a waitlist entry references a
+// booking service that does not exist or is not owned by the requester.
+var ErrServiceNotFound = errors.New("booking service not found")
 
 type WaitlistEntry struct {
 	ID            int64     `json:"id"`

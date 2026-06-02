@@ -33,6 +33,23 @@ func (r *Repository) List(ctx context.Context, ownerID int64) ([]domain.Reminder
 	return items, nil
 }
 
+// AppointmentExists reports whether the given appointment exists and is owned by
+// ownerID. It guards reminder creation against referencing another tenant's
+// appointment.
+//
+// cross-schema read from booking_appointments — verify the appointment belongs to the owner before creating a reminder for it
+func (r *Repository) AppointmentExists(ctx context.Context, ownerID, appointmentID int64) (bool, error) {
+	count, err := r.queries.CountAppointmentForOwner(ctx, sqlc.CountAppointmentForOwnerParams{
+		ID:      appointmentID,
+		OwnerID: ownerID,
+	})
+	if err != nil {
+		logger.Ctx(ctx).Error("Failed to verify appointment ownership", logger.Error(err))
+		return false, err
+	}
+	return count > 0, nil
+}
+
 func (r *Repository) Create(ctx context.Context, ownerID int64, input domain.ReminderInput) (int64, error) {
 	scheduledAt, err := time.Parse("2006-01-02T15:04:05Z07:00", input.ScheduledAt)
 	if err != nil && input.ScheduledAt != "" {
@@ -49,7 +66,11 @@ func (r *Repository) Create(ctx context.Context, ownerID int64, input domain.Rem
 		logger.Ctx(ctx).Error("Failed to create reminder", logger.Error(err))
 		return 0, err
 	}
-	id, _ := result.LastInsertId()
+	id, err := result.LastInsertId()
+	if err != nil {
+		logger.Ctx(ctx).Error("Failed to read reminder insert id", logger.Error(err))
+		return 0, err
+	}
 	return id, nil
 }
 

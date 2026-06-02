@@ -28,7 +28,7 @@ func (r *Repository) List(ctx context.Context, ownerID int64) ([]domain.StorePro
 	}
 	items := make([]domain.StoreProduct, 0, len(rows))
 	for _, row := range rows {
-		items = append(items, fromRow(row))
+		items = append(items, fromRow(ctx, row))
 	}
 	return items, nil
 }
@@ -84,7 +84,16 @@ func (r *Repository) Delete(ctx context.Context, ownerID, id int64) error {
 	return nil
 }
 
-func fromRow(row sqlc.StoreProduct) domain.StoreProduct {
+func parseMonetary(ctx context.Context, s string) float64 {
+	v, err := strconv.ParseFloat(s, 64)
+	if err != nil {
+		logger.Ctx(ctx).Warn("Failed to parse monetary value", logger.String("value", s), logger.Error(err))
+		return 0
+	}
+	return v
+}
+
+func fromRow(ctx context.Context, row sqlc.StoreProduct) domain.StoreProduct {
 	p := domain.StoreProduct{ID: row.ID, OwnerID: row.OwnerID, Title: row.Title}
 	if row.ProductID.Valid {
 		p.ProductID = row.ProductID.Int64
@@ -98,9 +107,9 @@ func fromRow(row sqlc.StoreProduct) domain.StoreProduct {
 	if row.Images != nil {
 		p.Images = string(row.Images)
 	}
-	p.Price, _ = strconv.ParseFloat(row.Price, 64)
+	p.Price = parseMonetary(ctx, row.Price)
 	if row.CompareAtPrice.Valid {
-		p.CompareAtPrice, _ = strconv.ParseFloat(row.CompareAtPrice.String, 64)
+		p.CompareAtPrice = parseMonetary(ctx, row.CompareAtPrice.String)
 	}
 	if row.IsPublished.Valid {
 		p.IsPublished = row.IsPublished.Bool

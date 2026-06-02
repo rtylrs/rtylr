@@ -6,7 +6,10 @@ import (
 	"time"
 )
 
-var ErrAccountNotFound = errors.New("account not found")
+var (
+	ErrAccountNotFound = errors.New("account not found")
+	ErrNegativeBalance = errors.New("account balance cannot be negative")
+)
 
 type Account struct {
 	ID        int64     `json:"id"`

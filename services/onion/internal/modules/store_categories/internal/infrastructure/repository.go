@@ -3,6 +3,7 @@ package infrastructure
 import (
 	"context"
 	"database/sql"
+	"errors"
 
 	"github.com/voxire/onion/internal/modules/store_categories/internal/domain"
 	"github.com/voxire/onion/internal/modules/store_categories/internal/infrastructure/persistence/sqlc"
@@ -30,6 +31,18 @@ func (r *Repository) List(ctx context.Context, ownerID int64) ([]domain.StoreCat
 		items = append(items, fromRow(row))
 	}
 	return items, nil
+}
+
+func (r *Repository) GetByID(ctx context.Context, ownerID, id int64) (domain.StoreCategory, error) {
+	row, err := r.queries.GetStoreCategory(ctx, sqlc.GetStoreCategoryParams{OwnerID: ownerID, ID: id})
+	if err != nil {
+		if errors.Is(err, sql.ErrNoRows) {
+			return domain.StoreCategory{}, domain.ErrParentNotFound
+		}
+		logger.Ctx(ctx).Error("Failed to get store category", logger.Error(err))
+		return domain.StoreCategory{}, err
+	}
+	return fromRow(row), nil
 }
 
 func (r *Repository) Create(ctx context.Context, ownerID int64, input domain.StoreCategoryInput) (int64, error) {

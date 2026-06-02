@@ -707,33 +707,58 @@ func (r *Repository) GetOwnerSubscriptionInfo(ctx context.Context, ownerID int64
 }
 
 // RecordSeatChange updates the billing seat_periods table after a team member is added or removed.
+// All three writes (close the active period, open a new one, update the subscription seat count)
+// run inside a single transaction so billing state can never end up partially applied.
 func (r *Repository) RecordSeatChange(ctx context.Context, ownerID int64, newCount int) error {
 	now := time.Now().UTC()
 	yesterday := now.AddDate(0, 0, -1)
 	billingMonth := time.Date(now.Year(), now.Month(), 1, 0, 0, 0, 0, time.UTC)
 
+	tx, err := r.pool.BeginTx(ctx, nil)
+	if err != nil {
+		return err
+	}
+	defer func() {
+		if p := recover(); p != nil {
+			_ = tx.Rollback()
+			panic(p)
+		}
+	}()
+
 	var subscriptionID int64
 	var pricePerSeatCents int
 	// cross-schema read from subscriptions — approved for seat period management
-	if err := r.pool.QueryRowContext(ctx,
-		`SELECT id, price_per_seat_cents FROM subscriptions WHERE owner_id = ?`, ownerID,
+	if err := tx.QueryRowContext(ctx,
+		`SELECT id, price_per_seat_cents FROM subscriptions WHERE owner_id = ? FOR UPDATE`, ownerID,
 	).Scan(&subscriptionID, &pricePerSeatCents); err != nil {
+		_ = tx.Rollback()
 		return err
 	}
 
 	// cross-schema write to seat_periods — approved for seat billing accuracy
-	_, _ = r.pool.ExecContext(ctx,
+	if _, execErr := tx.ExecContext(ctx,
 		`UPDATE seat_periods SET period_end = ? WHERE subscription_id = ? AND period_end IS NULL`,
-		yesterday, subscriptionID)
+		yesterday, subscriptionID); execErr != nil {
+		_ = tx.Rollback()
+		return execErr
+	}
 
-	_, _ = r.pool.ExecContext(ctx,
+	// cross-schema write to seat_periods — approved for seat billing accuracy
+	if _, execErr := tx.ExecContext(ctx,
 		`INSERT INTO seat_periods (subscription_id, owner_id, seat_count, price_per_seat_cents, period_start, billing_month)
 		 VALUES (?, ?, ?, ?, ?, ?)`,
-		subscriptionID, ownerID, newCount, pricePerSeatCents, now, billingMonth)
+		subscriptionID, ownerID, newCount, pricePerSeatCents, now, billingMonth); execErr != nil {
+		_ = tx.Rollback()
+		return execErr
+	}
 
-	_, _ = r.pool.ExecContext(ctx,
+	// cross-schema write to subscriptions — approved for seat billing accuracy
+	if _, execErr := tx.ExecContext(ctx,
 		`UPDATE subscriptions SET seat_count = ?, updated_at = CURRENT_TIMESTAMP WHERE owner_id = ?`,
-		newCount, ownerID)
+		newCount, ownerID); execErr != nil {
+		_ = tx.Rollback()
+		return execErr
+	}
 
-	return nil
+	return tx.Commit()
 }

@@ -222,7 +222,12 @@ func (h *InviteUserHandler) Serve(ctx context.Context, req *InviteUserRequest) (
 		}()
 		bgCtx, cancel := context.WithTimeout(context.WithoutCancel(ctx), 10*time.Second)
 		defer cancel()
-		h.Service.RecordSeatChange(bgCtx, ownerID)
+		if err := h.Service.RecordSeatChange(bgCtx, ownerID); err != nil {
+			logger.Ctx(bgCtx).Error("failed to record seat change for billing",
+				logger.Any("owner_id", ownerID),
+				logger.Error(err),
+			)
+		}
 	}()
 
 	if req.GroupID > 0 {
@@ -424,7 +429,12 @@ func (h *DeactivateUserHandler) Serve(ctx context.Context, req *DeactivateUserRe
 		}()
 		bgCtx, cancel := context.WithTimeout(context.WithoutCancel(ctx), 10*time.Second)
 		defer cancel()
-		h.Service.RecordSeatChange(bgCtx, ownerID)
+		if err := h.Service.RecordSeatChange(bgCtx, ownerID); err != nil {
+			logger.Ctx(bgCtx).Error("failed to record seat change for billing",
+				logger.Any("owner_id", ownerID),
+				logger.Error(err),
+			)
+		}
 	}()
 
 	return DeactivateUserResponse{Message: "User deactivated"}, nil
@@ -478,7 +488,12 @@ func (h *DeactivateMemberHandler) Serve(ctx context.Context, _ *DeactivateMember
 		}()
 		bgCtx, cancel := context.WithTimeout(context.WithoutCancel(ctx), 10*time.Second)
 		defer cancel()
-		h.Service.RecordSeatChange(bgCtx, ownerID)
+		if err := h.Service.RecordSeatChange(bgCtx, ownerID); err != nil {
+			logger.Ctx(bgCtx).Error("failed to record seat change for billing",
+				logger.Any("owner_id", ownerID),
+				logger.Error(err),
+			)
+		}
 	}()
 
 	return DeactivateMemberResponse{Message: "Member deactivated"}, nil

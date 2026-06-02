@@ -27,6 +27,9 @@ func (s *Service) List(ctx context.Context, ownerID int64) ([]domain.StoreCatego
 }
 
 func (s *Service) Create(ctx context.Context, ownerID int64, input domain.StoreCategoryInput) (int64, error) {
+	if err := s.verifyParent(ctx, ownerID, 0, input.ParentID); err != nil {
+		return 0, err
+	}
 	id, err := s.repo.Create(ctx, ownerID, input)
 	if err != nil {
 		return 0, err
@@ -36,10 +39,28 @@ func (s *Service) Create(ctx context.Context, ownerID int64, input domain.StoreC
 }
 
 func (s *Service) Update(ctx context.Context, ownerID, id int64, input domain.StoreCategoryInput) error {
+	if err := s.verifyParent(ctx, ownerID, id, input.ParentID); err != nil {
+		return err
+	}
 	if err := s.repo.Update(ctx, ownerID, id, input); err != nil {
 		return err
 	}
 	s.invalidateCache(ctx, ownerID)
+	return nil
+}
+
+// verifyParent ensures a non-zero parent_id references a category owned by the
+// same tenant, and that a category is not set as its own parent.
+func (s *Service) verifyParent(ctx context.Context, ownerID, selfID, parentID int64) error {
+	if parentID == 0 {
+		return nil
+	}
+	if parentID == selfID {
+		return domain.ErrParentNotFound
+	}
+	if _, err := s.repo.GetByID(ctx, ownerID, parentID); err != nil {
+		return err
+	}
 	return nil
 }
 

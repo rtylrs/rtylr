@@ -19,6 +19,7 @@ const (
 
 type repository interface {
 	List(ctx context.Context, ownerID int64, projectID *int64) ([]domain.Milestone, error)
+	GetProject(ctx context.Context, projectID int64, ownerID int64) (int64, error)
 	Create(ctx context.Context, input domain.MilestoneInput) (int64, error)
 	Update(ctx context.Context, input domain.MilestoneUpdateInput) error
 }
@@ -52,6 +53,12 @@ func (s *Service) List(ctx context.Context, ownerID int64, projectID *int64) ([]
 }
 
 func (s *Service) Create(ctx context.Context, input domain.MilestoneInput) (int64, error) {
+	// Verify the target project belongs to the authenticated owner before
+	// allowing a milestone to be attached to it. Prevents creating milestones
+	// against another tenant's projects.
+	if _, err := s.repo.GetProject(ctx, input.ProjectID, input.OwnerID); err != nil {
+		return 0, err
+	}
 	id, err := s.repo.Create(ctx, input)
 	if err != nil {
 		return 0, err

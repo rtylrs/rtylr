@@ -65,7 +65,7 @@ func TestGet_ReturnsNilWhenNotFound(t *testing.T) {
 func TestUpsert_PropagatesError(t *testing.T) {
 	want := errors.New("boom")
 	s := &Service{repo: &mockRepo{upErr: want}}
-	if err := s.Upsert(context.Background(), domain.SettingsInput{}); !errors.Is(err, want) {
+	if err := s.Upsert(context.Background(), domain.SettingsInput{BusinessID: 1, SLAHours: 24}); !errors.Is(err, want) {
 		t.Errorf("expected sentinel, got %v", err)
 	}
 }
@@ -82,11 +82,27 @@ func TestUpsert_HappyPath(t *testing.T) {
 	}
 }
 
-func TestUpsert_DefaultValues(t *testing.T) {
+func TestUpsert_RejectsZeroSLAHours(t *testing.T) {
 	s := &Service{repo: &mockRepo{}}
 	err := s.Upsert(context.Background(), domain.SettingsInput{BusinessID: 1})
-	if err != nil {
-		t.Errorf("unexpected error: %v", err)
+	if !errors.Is(err, domain.ErrInvalidSLAHours) {
+		t.Errorf("expected ErrInvalidSLAHours for zero SLA hours, got %v", err)
+	}
+}
+
+func TestUpsert_RejectsNegativeSLAHours(t *testing.T) {
+	s := &Service{repo: &mockRepo{}}
+	err := s.Upsert(context.Background(), domain.SettingsInput{BusinessID: 1, SLAHours: -5})
+	if !errors.Is(err, domain.ErrInvalidSLAHours) {
+		t.Errorf("expected ErrInvalidSLAHours for negative SLA hours, got %v", err)
+	}
+}
+
+func TestUpsert_RejectsExcessiveSLAHours(t *testing.T) {
+	s := &Service{repo: &mockRepo{}}
+	err := s.Upsert(context.Background(), domain.SettingsInput{BusinessID: 1, SLAHours: 1001})
+	if !errors.Is(err, domain.ErrInvalidSLAHours) {
+		t.Errorf("expected ErrInvalidSLAHours for excessive SLA hours, got %v", err)
 	}
 }
 
@@ -101,7 +117,7 @@ func TestGet_BusinessIDRoundTrip(t *testing.T) {
 
 func TestUpsert_ZeroBusinessID(t *testing.T) {
 	s := &Service{repo: &mockRepo{}}
-	if err := s.Upsert(context.Background(), domain.SettingsInput{BusinessID: 0}); err != nil {
+	if err := s.Upsert(context.Background(), domain.SettingsInput{BusinessID: 0, SLAHours: 24}); err != nil {
 		t.Errorf("unexpected error: %v", err)
 	}
 }
@@ -110,6 +126,7 @@ func TestUpsert_WithNotificationEmail(t *testing.T) {
 	s := &Service{repo: &mockRepo{}}
 	err := s.Upsert(context.Background(), domain.SettingsInput{
 		BusinessID:        2,
+		SLAHours:          24,
 		NotificationEmail: "alerts@co.com",
 	})
 	if err != nil {

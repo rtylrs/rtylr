@@ -2,6 +2,7 @@ package handlers
 
 import (
 	"context"
+	"errors"
 	"net/http"
 
 	"github.com/voxire/onion/internal/modules/support_settings/internal/application"
@@ -47,6 +48,24 @@ type UpdateSettingsResponse struct {
 	Message string `json:"message"`
 }
 
+func (h *UpdateSettingsHandler) Validate(_ context.Context, req *UpdateSettingsRequest) *errorModels.ServerError {
+	if req.SLAHours <= 0 {
+		return &errorModels.ServerError{
+			Code:     http.StatusBadRequest,
+			HTTPCode: http.StatusBadRequest,
+			Message:  "SLA hours must be greater than 0",
+		}
+	}
+	if req.SLAHours > 1000 {
+		return &errorModels.ServerError{
+			Code:     http.StatusBadRequest,
+			HTTPCode: http.StatusBadRequest,
+			Message:  "SLA hours must not exceed 1000",
+		}
+	}
+	return nil
+}
+
 func (h *UpdateSettingsHandler) Serve(ctx context.Context, req *UpdateSettingsRequest) (UpdateSettingsResponse, *errorModels.ServerError) {
 	device := authPkg.DeviceCtx(ctx)
 	if device.User == nil {
@@ -58,6 +77,9 @@ func (h *UpdateSettingsHandler) Serve(ctx context.Context, req *UpdateSettingsRe
 		NotificationEmail: req.NotificationEmail,
 	})
 	if err != nil {
+		if errors.Is(err, domain.ErrInvalidSLAHours) {
+			return UpdateSettingsResponse{}, &errorModels.ServerError{Code: http.StatusBadRequest, HTTPCode: http.StatusBadRequest, Message: "SLA hours must be between 1 and 1000"}
+		}
 		return UpdateSettingsResponse{}, &errorModels.ServerError{Code: http.StatusInternalServerError, Message: "Failed to update support settings"}
 	}
 	return UpdateSettingsResponse{Message: "Support settings updated"}, nil

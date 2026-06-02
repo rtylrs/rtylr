@@ -88,6 +88,9 @@ func ValidateLoyaltyConfigInput(input LoyaltyConfigInput) string {
 	if input.OwnerID <= 0 {
 		return "owner_id is required"
 	}
+	if input.MinRedemptionPoints < 0 {
+		return "min_redemption_points must not be negative"
+	}
 	return ""
 }
 

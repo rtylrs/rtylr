@@ -404,6 +404,11 @@ func (s *Service) DeleteInvoice(ctx context.Context, ownerID, invoiceID int64) e
 
 func (s *Service) RecordPayment(ctx context.Context, ownerID int64, input domain.PaymentInput) (*domain.Payment, error) {
 	defer invalidateInvoicesScope(ctx, ownerID)
+
+	if input.Amount <= 0 {
+		return nil, domain.ErrInvalidPaymentAmount
+	}
+
 	inv, err := s.repo.GetInvoiceByID(ctx, ownerID, input.InvoiceID)
 	if err != nil {
 		return nil, err

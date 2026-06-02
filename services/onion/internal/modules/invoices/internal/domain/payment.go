@@ -6,7 +6,10 @@ import (
 	"time"
 )
 
-var ErrPaymentNotFound = errors.New("payment not found")
+var (
+	ErrPaymentNotFound      = errors.New("payment not found")
+	ErrInvalidPaymentAmount = errors.New("payment amount must be greater than zero")
+)
 
 type Payment struct {
 	ID          int64     `json:"id"`

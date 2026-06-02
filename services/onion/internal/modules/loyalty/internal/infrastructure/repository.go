@@ -172,12 +172,13 @@ func (r *Repository) GetConfig(ctx context.Context, ownerID int64) (domain.Loyal
 	pv := parseLoyaltyDecimal(ctx, row.CurrencyPerPoint.String)
 
 	return domain.LoyaltyConfig{
-		ID:              row.ID,
-		OwnerID:         row.OwnerID,
-		PointsPerDollar: ppd,
-		PointsValue:     pv,
-		IsActive:        row.IsEnabled.Bool,
-		UpdatedAt:       row.UpdatedAt.Time,
+		ID:                  row.ID,
+		OwnerID:             row.OwnerID,
+		PointsPerDollar:     ppd,
+		MinRedemptionPoints: int(row.MinRedemptionPoints.Int32),
+		PointsValue:         pv,
+		IsActive:            row.IsEnabled.Bool,
+		UpdatedAt:           row.UpdatedAt.Time,
 	}, nil
 }
 
@@ -186,6 +187,7 @@ func (r *Repository) UpsertConfig(ctx context.Context, input domain.LoyaltyConfi
 		OwnerID:               input.OwnerID,
 		PointsPerCurrencyUnit: sql.NullString{String: strconv.FormatFloat(input.PointsPerDollar, 'f', 2, 64), Valid: true},
 		CurrencyPerPoint:      sql.NullString{String: strconv.FormatFloat(input.PointsValue, 'f', 4, 64), Valid: true},
+		MinRedemptionPoints:   sql.NullInt32{Int32: int32(input.MinRedemptionPoints), Valid: true},
 		IsEnabled:             sql.NullBool{Bool: input.IsActive, Valid: true},
 	})
 	if err != nil {

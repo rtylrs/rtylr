@@ -28,7 +28,7 @@ func (r *Repository) List(ctx context.Context, ownerID int64) ([]domain.Shipping
 	}
 	items := make([]domain.ShippingMethod, 0, len(rows))
 	for _, row := range rows {
-		items = append(items, fromRow(row))
+		items = append(items, fromRow(ctx, row))
 	}
 	return items, nil
 }
@@ -71,9 +71,18 @@ func (r *Repository) Delete(ctx context.Context, ownerID, id int64) error {
 	return nil
 }
 
-func fromRow(row sqlc.StoreShippingMethod) domain.ShippingMethod {
+func parseMonetary(ctx context.Context, s string) float64 {
+	v, err := strconv.ParseFloat(s, 64)
+	if err != nil {
+		logger.Ctx(ctx).Warn("Failed to parse monetary value", logger.String("value", s), logger.Error(err))
+		return 0
+	}
+	return v
+}
+
+func fromRow(ctx context.Context, row sqlc.StoreShippingMethod) domain.ShippingMethod {
 	s := domain.ShippingMethod{ID: row.ID, OwnerID: row.OwnerID, Name: row.Name}
-	s.Price, _ = strconv.ParseFloat(row.Price, 64)
+	s.Price = parseMonetary(ctx, row.Price)
 	if row.EstimatedDays.Valid {
 		s.EstimatedDays = int(row.EstimatedDays.Int32)
 	}

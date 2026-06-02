@@ -44,16 +44,48 @@ func (r *Repository) List(ctx context.Context, ownerID int64) ([]domain.Review, 
 			item.Period = row.Period.String
 		}
 		if row.Rating.Valid {
-			item.Rating, _ = strconv.ParseFloat(row.Rating.String, 64)
+			rating, err := strconv.ParseFloat(row.Rating.String, 64)
+			if err != nil {
+				logger.Ctx(ctx).Warn("invalid rating value",
+					logger.String("value", row.Rating.String),
+					logger.Error(err),
+				)
+				rating = 0
+			}
+			item.Rating = rating
 		}
 		if row.GoalsRating.Valid {
-			item.GoalsRating, _ = strconv.ParseFloat(row.GoalsRating.String, 64)
+			goalsRating, err := strconv.ParseFloat(row.GoalsRating.String, 64)
+			if err != nil {
+				logger.Ctx(ctx).Warn("invalid goals rating value",
+					logger.String("value", row.GoalsRating.String),
+					logger.Error(err),
+				)
+				goalsRating = 0
+			}
+			item.GoalsRating = goalsRating
 		}
 		if row.ValuesRating.Valid {
-			item.ValuesRating, _ = strconv.ParseFloat(row.ValuesRating.String, 64)
+			valuesRating, err := strconv.ParseFloat(row.ValuesRating.String, 64)
+			if err != nil {
+				logger.Ctx(ctx).Warn("invalid values rating value",
+					logger.String("value", row.ValuesRating.String),
+					logger.Error(err),
+				)
+				valuesRating = 0
+			}
+			item.ValuesRating = valuesRating
 		}
 		if row.SkillsRating.Valid {
-			item.SkillsRating, _ = strconv.ParseFloat(row.SkillsRating.String, 64)
+			skillsRating, err := strconv.ParseFloat(row.SkillsRating.String, 64)
+			if err != nil {
+				logger.Ctx(ctx).Warn("invalid skills rating value",
+					logger.String("value", row.SkillsRating.String),
+					logger.Error(err),
+				)
+				skillsRating = 0
+			}
+			item.SkillsRating = skillsRating
 		}
 		if row.Notes.Valid {
 			item.Notes = row.Notes.String

@@ -27,6 +27,11 @@ func (s *Service) List(ctx context.Context, ownerID int64) ([]domain.WaitlistEnt
 }
 
 func (s *Service) Create(ctx context.Context, ownerID int64, input domain.WaitlistInput) (int64, error) {
+	if input.ServiceID != 0 {
+		if err := s.repo.ServiceBelongsToOwner(ctx, ownerID, input.ServiceID); err != nil {
+			return 0, err
+		}
+	}
 	id, err := s.repo.Create(ctx, ownerID, input)
 	if err != nil {
 		return 0, err
@@ -36,6 +41,11 @@ func (s *Service) Create(ctx context.Context, ownerID int64, input domain.Waitli
 }
 
 func (s *Service) Update(ctx context.Context, ownerID, id int64, input domain.WaitlistInput) error {
+	if input.ServiceID != 0 {
+		if err := s.repo.ServiceBelongsToOwner(ctx, ownerID, input.ServiceID); err != nil {
+			return err
+		}
+	}
 	if err := s.repo.Update(ctx, ownerID, id, input); err != nil {
 		return err
 	}

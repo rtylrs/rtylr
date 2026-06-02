@@ -3,6 +3,7 @@ package infrastructure
 import (
 	"context"
 	"database/sql"
+	"errors"
 	"time"
 
 	"github.com/voxire/onion/internal/modules/booking_waitlist/internal/domain"
@@ -31,6 +32,25 @@ func (r *Repository) List(ctx context.Context, ownerID int64) ([]domain.Waitlist
 		items = append(items, fromRow(row))
 	}
 	return items, nil
+}
+
+// ServiceBelongsToOwner reports whether the given booking service exists and is
+// owned by ownerID. It returns domain.ErrServiceNotFound when no matching row is
+// found, so a caller cannot reference another tenant's service.
+func (r *Repository) ServiceBelongsToOwner(ctx context.Context, ownerID, serviceID int64) error {
+	// cross-schema read from booking_services — verify service ownership before linking a waitlist entry
+	_, err := r.queries.GetBookingServiceForOwner(ctx, sqlc.GetBookingServiceForOwnerParams{
+		ID:      serviceID,
+		OwnerID: ownerID,
+	})
+	if errors.Is(err, sql.ErrNoRows) {
+		return domain.ErrServiceNotFound
+	}
+	if err != nil {
+		logger.Ctx(ctx).Error("Failed to verify booking service ownership", logger.Error(err))
+		return err
+	}
+	return nil
 }
 
 func (r *Repository) Create(ctx context.Context, ownerID int64, input domain.WaitlistInput) (int64, error) {

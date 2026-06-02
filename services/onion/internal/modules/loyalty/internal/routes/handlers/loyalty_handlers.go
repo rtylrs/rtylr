@@ -2,6 +2,7 @@ package handlers
 
 import (
 	"context"
+	"errors"
 	"net/http"
 
 	"github.com/voxire/onion/internal/modules/loyalty/internal/application"
@@ -251,6 +252,9 @@ func (h *UpdateLoyaltyConfigHandler) Serve(ctx context.Context, req *UpdateLoyal
 		IsActive:            req.IsActive,
 	})
 	if err != nil {
+		if errors.Is(err, domain.ErrInvalidLoyaltyConfig) {
+			return UpdateLoyaltyConfigResponse{}, &errorModels.ServerError{Code: http.StatusBadRequest, Message: "Invalid loyalty config"}
+		}
 		return UpdateLoyaltyConfigResponse{}, &errorModels.ServerError{Code: http.StatusInternalServerError, Message: "Failed to update loyalty config"}
 	}
 	return UpdateLoyaltyConfigResponse{Message: "Loyalty config updated successfully"}, nil

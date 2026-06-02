@@ -1,6 +1,13 @@
 package domain
 
-import "time"
+import (
+	"errors"
+	"time"
+)
+
+// ErrInvalidSLAHours is returned when SLA hours are outside the
+// allowed range (must be greater than 0 and at most 1000).
+var ErrInvalidSLAHours = errors.New("sla hours must be between 1 and 1000")
 
 type Settings struct {
 	ID                int64     `json:"id"`

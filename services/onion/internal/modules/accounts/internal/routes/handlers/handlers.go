@@ -2,6 +2,7 @@ package handlers
 
 import (
 	"context"
+	"errors"
 	"net/http"
 	"strings"
 
@@ -85,7 +86,10 @@ func (h *CreateHandler) Serve(ctx context.Context, req *CreateRequest) (CreateRe
 	}
 	id, err := h.Service.Create(ctx, device.User.UserID, input)
 	if err != nil {
-		return CreateResponse{}, &errorModels.ServerError{Code: http.StatusInternalServerError, Message: "Failed to create account"}
+		if errors.Is(err, domain.ErrNegativeBalance) {
+			return CreateResponse{}, &errorModels.ServerError{HTTPCode: http.StatusBadRequest, Code: http.StatusBadRequest, Message: "Account balance cannot be negative"}
+		}
+		return CreateResponse{}, &errorModels.ServerError{HTTPCode: http.StatusInternalServerError, Code: http.StatusInternalServerError, Message: "Failed to create account"}
 	}
 	return CreateResponse{ID: id, Message: "Account created successfully"}, nil
 }

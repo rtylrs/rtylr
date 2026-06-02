@@ -28,7 +28,7 @@ func (r *Repository) List(ctx context.Context, ownerID int64) ([]domain.StoreOrd
 	}
 	items := make([]domain.StoreOrder, 0, len(rows))
 	for _, row := range rows {
-		items = append(items, orderFromRow(row))
+		items = append(items, orderFromRow(ctx, row))
 	}
 	return items, nil
 }
@@ -39,16 +39,16 @@ func (r *Repository) GetDetail(ctx context.Context, ownerID, orderID int64) (dom
 		logger.Ctx(ctx).Error("Failed to get store order", logger.Error(err))
 		return domain.StoreOrderDetail{}, err
 	}
-	itemRows, err := r.queries.ListStoreOrderItems(ctx, orderID)
+	itemRows, err := r.queries.ListStoreOrderItems(ctx, sqlc.ListStoreOrderItemsParams{OwnerID: ownerID, OrderID: orderID})
 	if err != nil {
 		logger.Ctx(ctx).Error("Failed to list store order items", logger.Error(err))
 		return domain.StoreOrderDetail{}, err
 	}
 	items := make([]domain.StoreOrderItem, 0, len(itemRows))
 	for _, row := range itemRows {
-		items = append(items, itemFromRow(row))
+		items = append(items, itemFromRow(ctx, row))
 	}
-	return domain.StoreOrderDetail{Order: orderFromRow(order), Items: items}, nil
+	return domain.StoreOrderDetail{Order: orderFromRow(ctx, order), Items: items}, nil
 }
 
 func (r *Repository) Create(ctx context.Context, ownerID int64, input domain.StoreOrderInput) (int64, error) {
@@ -109,7 +109,16 @@ func (r *Repository) Update(ctx context.Context, ownerID, id int64, input domain
 	return nil
 }
 
-func orderFromRow(row sqlc.StoreOrder) domain.StoreOrder {
+func parseMonetary(ctx context.Context, s string) float64 {
+	v, err := strconv.ParseFloat(s, 64)
+	if err != nil {
+		logger.Ctx(ctx).Warn("Failed to parse monetary value", logger.String("value", s), logger.Error(err))
+		return 0
+	}
+	return v
+}
+
+func orderFromRow(ctx context.Context, row sqlc.StoreOrder) domain.StoreOrder {
 	o := domain.StoreOrder{ID: row.ID, OwnerID: row.OwnerID}
 	if row.CustomerEmail.Valid {
 		o.CustomerEmail = row.CustomerEmail.String
@@ -123,10 +132,10 @@ func orderFromRow(row sqlc.StoreOrder) domain.StoreOrder {
 	if row.Status.Valid {
 		o.Status = string(row.Status.StoreOrdersStatus)
 	}
-	o.Subtotal, _ = strconv.ParseFloat(row.Subtotal, 64)
-	o.Tax, _ = strconv.ParseFloat(row.Tax, 64)
-	o.ShippingCost, _ = strconv.ParseFloat(row.ShippingCost, 64)
-	o.Total, _ = strconv.ParseFloat(row.Total, 64)
+	o.Subtotal = parseMonetary(ctx, row.Subtotal)
+	o.Tax = parseMonetary(ctx, row.Tax)
+	o.ShippingCost = parseMonetary(ctx, row.ShippingCost)
+	o.Total = parseMonetary(ctx, row.Total)
 	if row.ShippingAddress != nil {
 		o.ShippingAddress = string(row.ShippingAddress)
 	}
@@ -142,13 +151,13 @@ func orderFromRow(row sqlc.StoreOrder) domain.StoreOrder {
 	return o
 }
 
-func itemFromRow(row sqlc.StoreOrderItem) domain.StoreOrderItem {
+func itemFromRow(ctx context.Context, row sqlc.StoreOrderItem) domain.StoreOrderItem {
 	i := domain.StoreOrderItem{ID: row.ID, OrderID: row.OrderID, Name: row.Name, Quantity: int(row.Quantity)}
 	if row.ProductID.Valid {
 		i.ProductID = row.ProductID.Int64
 	}
-	i.Price, _ = strconv.ParseFloat(row.Price, 64)
-	i.Total, _ = strconv.ParseFloat(row.Total, 64)
+	i.Price = parseMonetary(ctx, row.Price)
+	i.Total = parseMonetary(ctx, row.Total)
 	if row.CreatedAt.Valid {
 		i.CreatedAt = row.CreatedAt.Time
 	}

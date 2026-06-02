@@ -86,6 +86,9 @@ func (s *Service) GetConfig(ctx context.Context, ownerID int64) (domain.LoyaltyC
 }
 
 func (s *Service) UpdateConfig(ctx context.Context, input domain.LoyaltyConfigInput) error {
+	if msg := domain.ValidateLoyaltyConfigInput(input); msg != "" {
+		return fmt.Errorf("%w: %s", domain.ErrInvalidLoyaltyConfig, msg)
+	}
 	if err := s.repo.UpsertConfig(ctx, input); err != nil {
 		return err
 	}

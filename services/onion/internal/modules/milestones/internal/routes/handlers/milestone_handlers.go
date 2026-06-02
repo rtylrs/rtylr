@@ -136,6 +136,9 @@ func (h *CreateMilestoneHandler) Serve(ctx context.Context, req *CreateMilestone
 	}
 	id, err := h.Service.Create(ctx, input)
 	if err != nil {
+		if errors.Is(err, domain.ErrProjectNotFound) {
+			return CreateMilestoneResponse{}, errorModels.PermissionDeniedServerError()
+		}
 		return CreateMilestoneResponse{}, &errorModels.ServerError{Code: http.StatusInternalServerError, Message: "Failed to create milestone"}
 	}
 	return CreateMilestoneResponse{MilestoneID: id, Message: "Milestone created successfully"}, nil

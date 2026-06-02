@@ -1,6 +1,13 @@
 package domain
 
-import "time"
+import (
+	"errors"
+	"time"
+)
+
+// ErrParentNotFound is returned when a category's parent_id does not reference
+// a category owned by the same tenant.
+var ErrParentNotFound = errors.New("parent category not found")
 
 type StoreCategory struct {
 	ID          int64     `json:"id"`

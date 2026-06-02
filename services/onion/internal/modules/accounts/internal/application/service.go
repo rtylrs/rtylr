@@ -49,6 +49,9 @@ func (s *Service) List(ctx context.Context, ownerID int64) ([]domain.Account, er
 }
 
 func (s *Service) Create(ctx context.Context, ownerID int64, input domain.AccountInput) (int64, error) {
+	if input.Balance < 0 {
+		return 0, domain.ErrNegativeBalance
+	}
 	id, err := s.repo.Create(ctx, ownerID, input)
 	if err != nil {
 		return 0, err
@@ -58,6 +61,9 @@ func (s *Service) Create(ctx context.Context, ownerID int64, input domain.Accoun
 }
 
 func (s *Service) Update(ctx context.Context, ownerID, id int64, input domain.AccountInput) error {
+	if input.Balance < 0 {
+		return domain.ErrNegativeBalance
+	}
 	if err := s.repo.Update(ctx, ownerID, id, input); err != nil {
 		return err
 	}

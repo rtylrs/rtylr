@@ -410,15 +410,15 @@ func (s *Service) GetOwnerSubscriptionInfo(ctx context.Context, ownerID int64) (
 }
 
 // RecordSeatChange updates the billing seat_periods table after a team member is added or removed.
-// It fires asynchronously so it never blocks team operations; billing inaccuracies can be corrected
-// by a future reconciliation job.
-func (s *Service) RecordSeatChange(ctx context.Context, ownerID int64) {
+// It is invoked asynchronously so it never blocks team operations, but it returns its error so the
+// caller can log billing failures instead of silently discarding them (which would corrupt billing).
+func (s *Service) RecordSeatChange(ctx context.Context, ownerID int64) error {
 	newCount, err := s.repo.CountActiveMembers(ctx, ownerID)
 	if err != nil {
-		return
+		return err
 	}
 
-	_ = s.repo.RecordSeatChange(ctx, ownerID, newCount)
+	return s.repo.RecordSeatChange(ctx, ownerID, newCount)
 }
 
 // ─── Groups ──────────────────────────────────────────────────────────────────

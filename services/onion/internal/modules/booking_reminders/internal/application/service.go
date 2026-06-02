@@ -19,6 +19,7 @@ const (
 type repository interface {
 	List(ctx context.Context, ownerID int64) ([]domain.Reminder, error)
 	Create(ctx context.Context, ownerID int64, input domain.ReminderInput) (int64, error)
+	AppointmentExists(ctx context.Context, ownerID, appointmentID int64) (bool, error)
 }
 
 type Service struct{ repo repository }
@@ -44,6 +45,15 @@ func (s *Service) List(ctx context.Context, ownerID int64) ([]domain.Reminder, e
 }
 
 func (s *Service) Create(ctx context.Context, ownerID int64, input domain.ReminderInput) (int64, error) {
+	// Only create reminders for appointments that exist and are owned by the
+	// requesting user. This prevents probing other tenants' appointment IDs.
+	exists, err := s.repo.AppointmentExists(ctx, ownerID, input.AppointmentID)
+	if err != nil {
+		return 0, err
+	}
+	if !exists {
+		return 0, domain.ErrAppointmentNotFound
+	}
 	id, err := s.repo.Create(ctx, ownerID, input)
 	if err != nil {
 		return 0, err

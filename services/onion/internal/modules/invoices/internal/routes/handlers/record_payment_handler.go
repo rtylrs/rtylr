@@ -95,6 +95,13 @@ func (h *RecordPaymentHandler) Serve(ctx context.Context, req *RecordPaymentRequ
 			}
 		}
 
+		if errors.Is(err, domain.ErrInvalidPaymentAmount) {
+			return RecordPaymentResponse{}, &errorModels.ServerError{
+				Code:    http.StatusBadRequest,
+				Message: "Amount must be greater than zero",
+			}
+		}
+
 		return RecordPaymentResponse{}, &errorModels.ServerError{
 			Code:    http.StatusInternalServerError,
 			Message: "Failed to record payment",

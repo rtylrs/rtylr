@@ -1,6 +1,13 @@
 package domain
 
-import "time"
+import (
+	"errors"
+	"time"
+)
+
+// ErrAppointmentNotFound is returned when a reminder references an appointment
+// that does not exist or is not owned by the requesting user.
+var ErrAppointmentNotFound = errors.New("appointment not found")
 
 type Reminder struct {
 	ID            int64     `json:"id"`

@@ -28,7 +28,7 @@ func (r *Repository) List(ctx context.Context, ownerID int64) ([]domain.BookingS
 	}
 	items := make([]domain.BookingService, 0, len(rows))
 	for _, row := range rows {
-		items = append(items, fromRow(row))
+		items = append(items, fromRow(ctx, row))
 	}
 	return items, nil
 }
@@ -76,12 +76,20 @@ func (r *Repository) Delete(ctx context.Context, ownerID, id int64) error {
 	return nil
 }
 
-func fromRow(row sqlc.BookingService) domain.BookingService {
+func fromRow(ctx context.Context, row sqlc.BookingService) domain.BookingService {
 	s := domain.BookingService{ID: row.ID, OwnerID: row.OwnerID, Name: row.Name, DurationMinutes: int(row.DurationMinutes)}
 	if row.Description.Valid {
 		s.Description = row.Description.String
 	}
-	s.Price, _ = strconv.ParseFloat(row.Price, 64)
+	if price, err := strconv.ParseFloat(row.Price, 64); err != nil {
+		logger.Ctx(ctx).Warn("failed to parse price from database",
+			logger.String("price_str", row.Price),
+			logger.Error(err),
+		)
+		s.Price = 0
+	} else {
+		s.Price = price
+	}
 	if row.Color.Valid {
 		s.Color = row.Color.String
 	}

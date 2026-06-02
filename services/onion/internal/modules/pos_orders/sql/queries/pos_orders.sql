@@ -131,7 +131,7 @@ SET status = 'paid', payment_status = 'paid', payment_method = ?,
 WHERE owner_id = ? AND id = ?;
 
 -- name: GetOrderForPayment :one
-SELECT total, table_id, type FROM pos_orders WHERE owner_id = ? AND id = ?;
+SELECT total, table_id, type FROM pos_orders WHERE owner_id = ? AND id = ? FOR UPDATE;
 
 -- name: CreateRefund :execresult
 INSERT INTO pos_refunds (owner_id, order_id, amount, reason, refunded_by)

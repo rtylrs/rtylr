@@ -95,6 +95,81 @@ func (r *Repository) GetByCode(ctx context.Context, ownerID int64, code string) 
 		return nil, err
 	}
 
+	return giftCardFromRow(row), nil
+}
+
+func (r *Repository) Redeem(ctx context.Context, ownerID int64, input domain.RedeemInput) (*domain.GiftCard, error) {
+	tx, err := r.pool.BeginTx(ctx, &sql.TxOptions{Isolation: sql.LevelSerializable})
+	if err != nil {
+		logger.Ctx(ctx).Error("Failed to begin redeem transaction",
+			logger.Int("owner_id", int(ownerID)), logger.String("code", input.Code), logger.Error(err))
+		return nil, err
+	}
+	defer func() {
+		if p := recover(); p != nil {
+			_ = tx.Rollback()
+			panic(p)
+		}
+	}()
+
+	qtx := r.queries.WithTx(tx)
+
+	// Lock the row for the duration of the transaction so concurrent redemptions
+	// serialise on this gift card and cannot double-spend the balance.
+	row, err := qtx.GetGiftCardByCodeForUpdate(ctx, sqlc.GetGiftCardByCodeForUpdateParams{
+		OwnerID: ownerID,
+		Code:    input.Code,
+	})
+	if err != nil {
+		_ = tx.Rollback()
+		if errors.Is(err, sql.ErrNoRows) {
+			return nil, domain.ErrGiftCardNotFound
+		}
+		logger.Ctx(ctx).Error("Failed to lock gift card for redeem",
+			logger.Int("owner_id", int(ownerID)), logger.String("code", input.Code), logger.Error(err))
+		return nil, err
+	}
+
+	gc := giftCardFromRow(row)
+
+	if !gc.IsActive {
+		_ = tx.Rollback()
+		return nil, domain.ErrGiftCardInactive
+	}
+	if gc.ExpiresAt != nil && gc.ExpiresAt.Before(time.Now()) {
+		_ = tx.Rollback()
+		return nil, domain.ErrGiftCardExpired
+	}
+	if gc.CurrentBalance < input.Amount {
+		_ = tx.Rollback()
+		return nil, domain.ErrInsufficientBalance
+	}
+
+	newBalance := gc.CurrentBalance - input.Amount
+
+	if err := qtx.UpdateGiftCardBalance(ctx, sqlc.UpdateGiftCardBalanceParams{
+		CurrentBalance: floatToDecimal(newBalance),
+		ID:             gc.ID,
+		OwnerID:        ownerID,
+	}); err != nil {
+		_ = tx.Rollback()
+		logger.Ctx(ctx).Error("Failed to redeem gift card",
+			logger.Int("owner_id", int(ownerID)), logger.String("code", input.Code), logger.Error(err))
+		return nil, err
+	}
+
+	if err := tx.Commit(); err != nil {
+		logger.Ctx(ctx).Error("Failed to commit redeem transaction",
+			logger.Int("owner_id", int(ownerID)), logger.String("code", input.Code), logger.Error(err))
+		return nil, err
+	}
+
+	gc.CurrentBalance = newBalance
+	return gc, nil
+}
+
+// giftCardFromRow maps a sqlc PosGiftCard row to the domain GiftCard.
+func giftCardFromRow(row sqlc.PosGiftCard) *domain.GiftCard {
 	gc := &domain.GiftCard{
 		ID:             row.ID,
 		OwnerID:        row.OwnerID,
@@ -111,45 +186,19 @@ func (r *Repository) GetByCode(ctx context.Context, ownerID int64, code string) 
 		t := row.ExpiresAt.Time
 		gc.ExpiresAt = &t
 	}
-	return gc, nil
-}
-
-func (r *Repository) Redeem(ctx context.Context, ownerID int64, input domain.RedeemInput) (*domain.GiftCard, error) {
-	gc, err := r.GetByCode(ctx, ownerID, input.Code)
-	if err != nil {
-		return nil, err
-	}
-	if !gc.IsActive {
-		return nil, domain.ErrGiftCardInactive
-	}
-	if gc.ExpiresAt != nil && gc.ExpiresAt.Before(time.Now()) {
-		return nil, domain.ErrGiftCardExpired
-	}
-	if gc.CurrentBalance < input.Amount {
-		return nil, domain.ErrInsufficientBalance
-	}
-
-	newBalance := gc.CurrentBalance - input.Amount
-
-	err = r.queries.UpdateGiftCardBalance(ctx, sqlc.UpdateGiftCardBalanceParams{
-		CurrentBalance: floatToDecimal(newBalance),
-		ID:             gc.ID,
-		OwnerID:        ownerID,
-	})
-	if err != nil {
-		logger.Ctx(ctx).Error("Failed to redeem gift card", logger.Error(err))
-		return nil, err
-	}
-
-	gc.CurrentBalance = newBalance
-	return gc, nil
+	return gc
 }
 
 func decimalToFloat(s string) float64 {
 	if s == "" {
 		return 0
 	}
-	f, _ := strconv.ParseFloat(s, 64)
+	f, err := strconv.ParseFloat(s, 64)
+	if err != nil {
+		logger.Global().Warn("failed to parse gift card decimal value from database",
+			logger.String("value", s), logger.Error(err))
+		return 0
+	}
 	return f
 }
 

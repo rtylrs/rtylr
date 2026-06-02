@@ -7,8 +7,11 @@ SELECT id, owner_id, customer_email, customer_name, customer_phone, status, subt
 FROM store_orders WHERE owner_id = ? AND id = ?;
 
 -- name: ListStoreOrderItems :many
-SELECT id, order_id, product_id, name, quantity, price, total, created_at
-FROM store_order_items WHERE order_id = ? ORDER BY id ASC;
+SELECT store_order_items.id, store_order_items.order_id, store_order_items.product_id, store_order_items.name, store_order_items.quantity, store_order_items.price, store_order_items.total, store_order_items.created_at
+FROM store_order_items
+INNER JOIN store_orders ON store_order_items.order_id = store_orders.id
+WHERE store_orders.owner_id = ? AND store_order_items.order_id = ?
+ORDER BY store_order_items.id ASC;
 
 -- name: CreateStoreOrder :execresult
 INSERT INTO store_orders (owner_id, customer_email, customer_name, customer_phone, status, subtotal, tax, shipping_cost, total, shipping_address, notes)

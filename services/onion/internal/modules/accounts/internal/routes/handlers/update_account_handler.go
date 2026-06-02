@@ -63,6 +63,9 @@ func (h *UpdateAccountHandler) Serve(ctx context.Context, req *UpdateAccountRequ
 	}
 
 	if err := h.Service.Update(ctx, device.User.UserID, id, input); err != nil {
+		if errors.Is(err, domain.ErrNegativeBalance) {
+			return UpdateAccountResponse{}, &errorModels.ServerError{HTTPCode: http.StatusBadRequest, Code: http.StatusBadRequest, Message: "Account balance cannot be negative"}
+		}
 		if errors.Is(err, domain.ErrAccountNotFound) {
 			return UpdateAccountResponse{}, &errorModels.ServerError{HTTPCode: http.StatusNotFound, Code: http.StatusNotFound, Message: "Account not found"}
 		}

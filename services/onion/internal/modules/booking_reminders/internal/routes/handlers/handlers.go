@@ -2,6 +2,7 @@ package handlers
 
 import (
 	"context"
+	"errors"
 	"net/http"
 	"strings"
 
@@ -93,6 +94,9 @@ func (h *CreateHandler) Serve(ctx context.Context, req *CreateRequest) (CreateRe
 	}
 	id, err := h.Service.Create(ctx, authUser.UserID, domain.ReminderInput{AppointmentID: req.AppointmentID, Type: req.Type, ScheduledAt: req.ScheduledAt})
 	if err != nil {
+		if errors.Is(err, domain.ErrAppointmentNotFound) {
+			return CreateResponse{}, &errorModels.ServerError{Code: http.StatusNotFound, HTTPCode: http.StatusNotFound, Message: "Appointment not found"}
+		}
 		return CreateResponse{}, &errorModels.ServerError{Code: http.StatusInternalServerError, HTTPCode: http.StatusInternalServerError, Message: "Failed to create reminder"}
 	}
 	return CreateResponse{ID: id, Message: "Reminder created"}, nil

@@ -16,7 +16,7 @@ func RegisterRoutes(ctx context.Context, router *chi.Mux, service *application.S
 		&handlers.GetSettingsHandler{Service: service},
 	)
 
-	http.RegisterPUT[handlers.UpdateSettingsRequest, handlers.UpdateSettingsResponse](
+	http.RegisterPUTWithValidation[handlers.UpdateSettingsRequest, handlers.UpdateSettingsResponse](
 		ctx, router, handlers.UpdateSettingsRoutes(),
 		&handlers.UpdateSettingsHandler{Service: service},
 	)

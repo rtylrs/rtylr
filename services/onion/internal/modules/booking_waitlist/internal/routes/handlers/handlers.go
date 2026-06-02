@@ -2,6 +2,7 @@ package handlers
 
 import (
 	"context"
+	"errors"
 	"net/http"
 	"strings"
 
@@ -70,6 +71,9 @@ func (h *CreateHandler) Serve(ctx context.Context, req *CreateRequest) (CreateRe
 		CustomerPhone: req.CustomerPhone, PreferredDate: req.PreferredDate, PreferredTime: req.PreferredTime,
 	})
 	if err != nil {
+		if errors.Is(err, domain.ErrServiceNotFound) {
+			return CreateResponse{}, &errorModels.ServerError{Code: http.StatusNotFound, HTTPCode: http.StatusNotFound, Message: "Booking service not found"}
+		}
 		return CreateResponse{}, &errorModels.ServerError{Code: http.StatusInternalServerError, HTTPCode: http.StatusInternalServerError, Message: "Failed to create waitlist entry"}
 	}
 	return CreateResponse{ID: id, Message: "Waitlist entry created"}, nil
@@ -109,6 +113,9 @@ func (h *UpdateHandler) Serve(ctx context.Context, req *UpdateRequest) (UpdateRe
 		ServiceID: req.ServiceID, CustomerName: req.CustomerName, CustomerEmail: req.CustomerEmail,
 		CustomerPhone: req.CustomerPhone, PreferredDate: req.PreferredDate, PreferredTime: req.PreferredTime, Status: req.Status,
 	}); err != nil {
+		if errors.Is(err, domain.ErrServiceNotFound) {
+			return UpdateResponse{}, &errorModels.ServerError{Code: http.StatusNotFound, HTTPCode: http.StatusNotFound, Message: "Booking service not found"}
+		}
 		return UpdateResponse{}, &errorModels.ServerError{Code: http.StatusInternalServerError, HTTPCode: http.StatusInternalServerError, Message: "Failed to update waitlist entry"}
 	}
 	return UpdateResponse{Message: "Waitlist entry updated"}, nil

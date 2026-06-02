@@ -3,6 +3,7 @@ package infrastructure
 import (
 	"context"
 	"database/sql"
+	"errors"
 	"time"
 
 	"github.com/voxire/onion/internal/modules/milestones/internal/domain"
@@ -58,6 +59,25 @@ func (r *Repository) List(ctx context.Context, ownerID int64, projectID *int64) 
 		milestones = append(milestones, m)
 	}
 	return milestones, nil
+}
+
+func (r *Repository) GetProject(ctx context.Context, projectID int64, ownerID int64) (int64, error) {
+	id, err := r.queries.GetProjectByIDAndOwner(ctx, sqlc.GetProjectByIDAndOwnerParams{
+		ID:      projectID,
+		OwnerID: ownerID,
+	})
+	if err != nil {
+		if errors.Is(err, sql.ErrNoRows) {
+			return 0, domain.ErrProjectNotFound
+		}
+		logger.Ctx(ctx).Error("Failed to verify project ownership",
+			logger.Any("project_id", projectID),
+			logger.Any("owner_id", ownerID),
+			logger.Error(err),
+		)
+		return 0, err
+	}
+	return id, nil
 }
 
 func (r *Repository) Create(ctx context.Context, input domain.MilestoneInput) (int64, error) {

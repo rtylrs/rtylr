@@ -48,6 +48,9 @@ func (s *Service) Get(ctx context.Context, businessID int64) (*domain.Settings, 
 }
 
 func (s *Service) Upsert(ctx context.Context, input domain.SettingsInput) error {
+	if input.SLAHours <= 0 || input.SLAHours > 1000 {
+		return domain.ErrInvalidSLAHours
+	}
 	if err := s.repo.Upsert(ctx, input); err != nil {
 		return err
 	}

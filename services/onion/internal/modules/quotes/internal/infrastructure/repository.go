@@ -214,7 +214,12 @@ VALUES (?,?,?,?,?,?,?,?,?,?,?,?,?)`
 	// parse and fan out. Unknown fields fall back to safe defaults.
 	if len(quoteRow.Items) > 0 {
 		var items []map[string]any
-		if decodeErr := json.Unmarshal(quoteRow.Items, &items); decodeErr == nil {
+		if decodeErr := json.Unmarshal(quoteRow.Items, &items); decodeErr != nil {
+			_ = tx.Rollback()
+			logger.Ctx(ctx).Error("Failed to unmarshal quote items",
+				logger.Error(decodeErr))
+			return 0, fmt.Errorf("invalid JSON in quote items: %w", decodeErr)
+		} else {
 			for i, item := range items {
 				desc := stringFromAny(item["description"])
 				if desc == "" {

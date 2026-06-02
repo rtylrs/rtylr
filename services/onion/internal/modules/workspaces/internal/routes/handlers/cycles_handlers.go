@@ -26,10 +26,10 @@ type ListCyclesResponse struct {
 
 type cyclePayload struct {
 	ID          string `json:"id"`
-	WorkspaceID string `json:"workspaceId"`
+	WorkspaceID string `json:"workspace_id"`
 	Name        string `json:"name"`
-	StartDate   string `json:"startDate"`
-	EndDate     string `json:"endDate"`
+	StartDate   string `json:"start_date"`
+	EndDate     string `json:"end_date"`
 	Status      string `json:"status"`
 	Scope       int    `json:"scope"`
 	Completed   int    `json:"completed"`
@@ -83,9 +83,9 @@ func CreateCycleRoutes() []string { return []string{"/flow/cycles"} }
 
 type CreateCycleRequest struct {
 	Name        string `json:"name"`
-	WorkspaceID string `json:"workspaceId"`
-	StartDate   string `json:"startDate"`
-	EndDate     string `json:"endDate"`
+	WorkspaceID string `json:"workspace_id"`
+	StartDate   string `json:"start_date"`
+	EndDate     string `json:"end_date"`
 }
 
 type CreateCycleResponse struct {
@@ -153,7 +153,7 @@ type UpdateCycleRequest struct {
 	ID      string `path:"id"`
 	Name    string `json:"name"`
 	Status  string `json:"status"`
-	EndDate string `json:"endDate"`
+	EndDate string `json:"end_date"`
 }
 
 type UpdateCycleResponse struct{}

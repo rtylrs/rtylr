@@ -9,6 +9,7 @@ var (
 	ErrLoyaltyConfigNotFound = errors.New("loyalty config not found")
 	ErrInsufficientPoints    = errors.New("insufficient loyalty points")
 	ErrTransactionNotFound   = errors.New("loyalty transaction not found")
+	ErrInvalidLoyaltyConfig  = errors.New("invalid loyalty config")
 )
 
 type LoyaltyTransaction struct {
