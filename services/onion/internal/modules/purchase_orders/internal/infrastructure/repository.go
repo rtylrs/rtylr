@@ -11,6 +11,7 @@ import (
 	"github.com/voxire/onion/internal/modules/purchase_orders/internal/domain"
 	"github.com/voxire/onion/internal/modules/purchase_orders/internal/infrastructure/persistence/sqlc"
 	"github.com/voxire/onion/internal/platform/logger"
+	"github.com/voxire/onion/internal/platform/stock_core"
 )
 
 type Repository struct {
@@ -306,6 +307,13 @@ func (r *Repository) ReceivePurchaseOrder(ctx context.Context, ownerID, poID, cr
 		return err
 	}
 
+	// PO receiving lands stock in the tenant's default warehouse location
+	// (per-warehouse routing via destination_location_id is a later slice).
+	locID, err := stock_core.DefaultLocationID(ctx, tx, ownerID)
+	if err != nil {
+		return err
+	}
+
 	for _, it := range items {
 		qty, perr := strconv.ParseFloat(it.QuantityOrdered, 64)
 		if perr != nil {
@@ -313,37 +321,31 @@ func (r *Repository) ReceivePurchaseOrder(ctx context.Context, ownerID, poID, cr
 			return err
 		}
 
-		stockStr, serr := qtx.GetProductStockForUpdate(ctx, sqlc.GetProductStockForUpdateParams{
-			OwnerID: ownerID,
-			ID:      it.ProductID,
-		})
-		if serr != nil {
-			err = serr
-			return err
-		}
-
-		current, perr := strconv.ParseFloat(stockStr, 64)
-		if perr != nil {
-			err = perr
-			return err
-		}
-
-		next := current + qty
-		if err = qtx.UpdateProductStock(ctx, sqlc.UpdateProductStockParams{
-			StockQuantity: strconv.FormatFloat(next, 'f', -1, 64),
+		before, after, merr := stock_core.ApplyMovementTx(ctx, tx, stock_core.Movement{
 			OwnerID:       ownerID,
-			ID:            it.ProductID,
-		}); err != nil {
+			LocationID:    locID,
+			ProductID:     it.ProductID,
+			EntryType:     stock_core.EntryPurchase,
+			Change:        qty,
+			ReferenceID:   &poID,
+			ReferenceType: "purchase_order",
+			Channel:       "erp",
+			Note:          fmt.Sprintf("received from purchase order %d", poID),
+			CreatedBy:     &createdBy,
+		})
+		if merr != nil {
+			err = merr
 			return err
 		}
 
+		// Legacy ledger row (read-compat).
 		if _, err = qtx.InsertInventoryTransactionWithRef(ctx, sqlc.InsertInventoryTransactionWithRefParams{
 			OwnerID:        ownerID,
 			ProductID:      it.ProductID,
 			Type:           sqlc.ErpInventoryTransactionsType(domain.InventoryTypePurchase),
 			QuantityChange: strconv.FormatFloat(qty, 'f', -1, 64),
-			QuantityBefore: strconv.FormatFloat(current, 'f', -1, 64),
-			QuantityAfter:  strconv.FormatFloat(next, 'f', -1, 64),
+			QuantityBefore: strconv.FormatFloat(before, 'f', -1, 64),
+			QuantityAfter:  strconv.FormatFloat(after, 'f', -1, 64),
 			ReferenceID:    nullInt64(poID),
 			ReferenceType:  nullString("purchase_order"),
 			CreatedBy:      nullInt64(createdBy),

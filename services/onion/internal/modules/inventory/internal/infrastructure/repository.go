@@ -3,11 +3,13 @@ package infrastructure
 import (
 	"context"
 	"database/sql"
+	"errors"
 	"strconv"
 
 	"github.com/voxire/onion/internal/modules/inventory/internal/domain"
 	"github.com/voxire/onion/internal/modules/inventory/internal/infrastructure/persistence/sqlc"
 	"github.com/voxire/onion/internal/platform/logger"
+	"github.com/voxire/onion/internal/platform/stock_core"
 )
 
 type Repository struct {
@@ -40,62 +42,48 @@ func (r *Repository) AdjustInventory(ctx context.Context, ownerID, productID int
 
 	qtx := r.queries.WithTx(tx)
 
-	stockQtyStr, err := qtx.GetProductStockForUpdate(ctx, sqlc.GetProductStockForUpdateParams{
-		OwnerID: ownerID,
-		ID:      productID,
-	})
+	// Route the stock change through the shared stock_core primitive so it lands
+	// in stock_levels + stock_ledger and keeps erp_products.stock_quantity (the
+	// legacy scalar) synced as the owner-wide total. ERP adjustments target the
+	// tenant's default warehouse location.
+	locID, err := stock_core.DefaultLocationID(ctx, tx, ownerID)
 	if err != nil {
-		logger.Ctx(ctx).Error("Failed to get current stock quantity", logger.Error(err))
+		logger.Ctx(ctx).Error("Failed to resolve default location", logger.Error(err))
 
 		return err
 	}
 
-	currentQty, parseErr := strconv.ParseFloat(stockQtyStr, 64)
-	if parseErr != nil {
-		err = parseErr
-		logger.Ctx(ctx).Error("Failed to parse stock quantity from database",
-			logger.String("value", stockQtyStr),
-			logger.Any("owner_id", ownerID),
-			logger.Any("product_id", productID),
-			logger.Error(parseErr),
-		)
-
-		return err
-	}
-
-	newQty := currentQty + change
-	// Reject any adjustment that would drive stock negative — negative on-hand
-	// stock is data corruption, not a valid state.
-	if newQty < 0 {
+	before, after, err := stock_core.ApplyMovementTx(ctx, tx, stock_core.Movement{
+		OwnerID:    ownerID,
+		LocationID: locID,
+		ProductID:  productID,
+		EntryType:  stock_core.EntryType(txType),
+		Change:     change,
+		Channel:    "erp",
+		Note:       notes,
+		CreatedBy:  &ownerID,
+	})
+	if errors.Is(err, stock_core.ErrInsufficientStock) {
 		err = domain.ErrInsufficientStock
 		logger.Ctx(ctx).Warn("Rejected inventory adjustment that would go negative",
-			logger.Any("owner_id", ownerID),
-			logger.Any("product_id", productID),
-			logger.String("current", strconv.FormatFloat(currentQty, 'f', -1, 64)),
-			logger.String("change", strconv.FormatFloat(change, 'f', -1, 64)),
-		)
+			logger.Any("owner_id", ownerID), logger.Any("product_id", productID))
 
 		return err
 	}
-
-	err = qtx.UpdateProductStock(ctx, sqlc.UpdateProductStockParams{
-		StockQuantity: strconv.FormatFloat(newQty, 'f', -1, 64),
-		OwnerID:       ownerID,
-		ID:            productID,
-	})
 	if err != nil {
-		logger.Ctx(ctx).Error("Failed to update stock quantity", logger.Error(err))
+		logger.Ctx(ctx).Error("Failed to apply inventory movement", logger.Error(err))
 
 		return err
 	}
 
+	// Legacy ledger row for read-compatibility, mirroring the movement.
 	_, err = qtx.InsertInventoryTransaction(ctx, sqlc.InsertInventoryTransactionParams{
 		OwnerID:        ownerID,
 		ProductID:      productID,
 		Type:           sqlc.ErpInventoryTransactionsType(txType),
 		QuantityChange: strconv.FormatFloat(change, 'f', -1, 64),
-		QuantityBefore: strconv.FormatFloat(currentQty, 'f', -1, 64),
-		QuantityAfter:  strconv.FormatFloat(newQty, 'f', -1, 64),
+		QuantityBefore: strconv.FormatFloat(before, 'f', -1, 64),
+		QuantityAfter:  strconv.FormatFloat(after, 'f', -1, 64),
 		Notes:          nullString(notes),
 	})
 	if err != nil {

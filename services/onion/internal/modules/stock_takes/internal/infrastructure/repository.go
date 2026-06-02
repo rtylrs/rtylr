@@ -10,6 +10,7 @@ import (
 	"github.com/voxire/onion/internal/modules/stock_takes/internal/domain"
 	"github.com/voxire/onion/internal/modules/stock_takes/internal/infrastructure/persistence/sqlc"
 	"github.com/voxire/onion/internal/platform/logger"
+	"github.com/voxire/onion/internal/platform/stock_core"
 )
 
 type Repository struct {
@@ -314,7 +315,7 @@ func (r *Repository) UpdateStockTake(ctx context.Context, ownerID int64, input d
 	// On the draft/in_progress -> completed transition, reconcile on-hand stock
 	// to the counted quantities and ledger the variance.
 	if input.Status == domain.StockTakeStatusCompleted && !alreadyCompleted {
-		if err = r.reconcileStockTake(ctx, qtx, ownerID, input.ID); err != nil {
+		if err = r.reconcileStockTake(ctx, tx, qtx, ownerID, input.ID); err != nil {
 			logger.Ctx(ctx).Error("Failed to reconcile stock take", logger.Error(err))
 			return err
 		}
@@ -332,8 +333,15 @@ func (r *Repository) UpdateStockTake(ctx context.Context, ownerID int64, input d
 // reconcileStockTake sets each counted product's on-hand stock to the physical
 // count recorded on the stock take and writes an 'adjustment' inventory
 // transaction for the variance. Runs inside the caller's transaction.
-func (r *Repository) reconcileStockTake(ctx context.Context, qtx *sqlc.Queries, ownerID, stockTakeID int64) error {
+func (r *Repository) reconcileStockTake(ctx context.Context, tx *sql.Tx, qtx *sqlc.Queries, ownerID, stockTakeID int64) error {
 	items, err := qtx.GetStockTakeItems(ctx, stockTakeID)
+	if err != nil {
+		return err
+	}
+
+	// Stock takes reconcile the tenant's default warehouse location (per-warehouse
+	// takes via erp_stock_takes.warehouse_id are a later slice).
+	locID, err := stock_core.DefaultLocationID(ctx, tx, ownerID)
 	if err != nil {
 		return err
 	}
@@ -347,41 +355,33 @@ func (r *Repository) reconcileStockTake(ctx context.Context, qtx *sqlc.Queries, 
 			continue // a physical count can't be negative; skip bad rows
 		}
 
-		stockStr, serr := qtx.GetProductStockForUpdate(ctx, sqlc.GetProductStockForUpdateParams{
-			OwnerID: ownerID,
-			ID:      it.ProductID,
-		})
-		if errors.Is(serr, sql.ErrNoRows) {
-			continue // product gone / not owned; skip rather than fail the whole take
-		}
+		// Set the location's on-hand to the physical count; stock_core ledgers
+		// the 'count' entry and syncs the scalar cache.
+		before, delta, serr := stock_core.SetLevelTx(ctx, tx, stock_core.Movement{
+			OwnerID:       ownerID,
+			LocationID:    locID,
+			ProductID:     it.ProductID,
+			EntryType:     stock_core.EntryCount,
+			ReferenceID:   &stockTakeID,
+			ReferenceType: "stock_take",
+			Channel:       "erp",
+			CreatedBy:     &ownerID,
+			Note:          fmt.Sprintf("stock take %d reconciliation", stockTakeID),
+		}, counted)
 		if serr != nil {
 			return serr
 		}
-
-		current, perr := strconv.ParseFloat(stockStr, 64)
-		if perr != nil {
-			return perr
-		}
-
-		delta := counted - current
 		if delta == 0 {
-			continue
+			continue // counted matched on-hand; no legacy variance row needed
 		}
 
-		if err = qtx.UpdateProductStock(ctx, sqlc.UpdateProductStockParams{
-			StockQuantity: strconv.FormatFloat(counted, 'f', -1, 64),
-			OwnerID:       ownerID,
-			ID:            it.ProductID,
-		}); err != nil {
-			return err
-		}
-
+		// Legacy ledger row (read-compat).
 		if _, err = qtx.InsertInventoryTransactionWithRef(ctx, sqlc.InsertInventoryTransactionWithRefParams{
 			OwnerID:        ownerID,
 			ProductID:      it.ProductID,
 			Type:           sqlc.ErpInventoryTransactionsType("adjustment"),
 			QuantityChange: strconv.FormatFloat(delta, 'f', -1, 64),
-			QuantityBefore: strconv.FormatFloat(current, 'f', -1, 64),
+			QuantityBefore: strconv.FormatFloat(before, 'f', -1, 64),
 			QuantityAfter:  strconv.FormatFloat(counted, 'f', -1, 64),
 			ReferenceID:    sql.NullInt64{Int64: stockTakeID, Valid: true},
 			ReferenceType:  sql.NullString{String: "stock_take", Valid: true},
