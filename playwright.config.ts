@@ -49,18 +49,6 @@ export default defineConfig({
 
   webServer: [
     {
-      command: 'pnpm --filter @rtylr/landing dev',
-      // Use url (not port) so Playwright makes a real HTTP GET - this
-      // triggers Vite's dep pre-bundling before tests start, preventing
-      // mid-test page reloads caused by first-request dep optimisation.
-      url: 'http://localhost:4200',
-      reuseExistingServer: !process.env.CI,
-      // Next.js cold boot with Tailwind compile can reach 30s on first run.
-      timeout: 120_000,
-      stdout: 'pipe',
-      stderr: 'pipe',
-    },
-    {
       command: 'pnpm --filter @rtylr/recruit dev',
       url: 'http://localhost:5184',
       reuseExistingServer: !process.env.CI,

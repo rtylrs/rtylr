@@ -107,7 +107,6 @@ jobs:
     runs-on: blacksmith-2vcpu-ubuntu-2404
     if: (github.event_name == 'push' || github.event_name == 'workflow_dispatch') && github.ref == 'refs/heads/main'
     outputs:
-      landing: ${{ github.event_name == 'workflow_dispatch' || steps.filter.outputs.landing }}
       auth: ${{ github.event_name == 'workflow_dispatch' || steps.filter.outputs.auth }}
       dash: ${{ github.event_name == 'workflow_dispatch' || steps.filter.outputs.dash }}
       erp: ${{ github.event_name == 'workflow_dispatch' || steps.filter.outputs.erp }}
@@ -128,9 +127,6 @@ jobs:
         id: filter
         with:
           filters: |
-            landing:
-              - 'apps/landing/**'
-              - 'packages/**'
             auth:
               - 'apps/auth/**'
               - 'packages/**'
@@ -169,16 +165,6 @@ jobs:
   # Each job is a thin call into voxire/pipelines. All app-identical
   # build + upload logic lives there; here we only declare the per-app
   # knobs (pnpm filter, dist dir, Cloudflare project name).
-
-  deploy-landing:
-    needs: [check, e2e, changes]
-    if: needs.changes.outputs.landing == 'true'
-    uses: voxire/pipelines/.github/workflows/deploy-pages.yml@main
-    with:
-      app_filter: '@rtylr/landing'
-      dist_dir: dist/landing
-      project_name: rtylr-landing
-    secrets: inherit
 
   deploy-auth:
     needs: [check, e2e, changes]
