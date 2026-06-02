@@ -195,32 +195,54 @@ func (r *Repository) Create(ctx context.Context, ownerID int64, input domain.Jou
 		return 0, err
 	}
 
-	res, err := r.queries.CreateJournalEntry(ctx, sqlc.CreateJournalEntryParams{
+	// A journal entry and its lines are a single double-entry record: persisting
+	// the header but only some lines would leave an unbalanced, corrupt entry.
+	// Write them all-or-nothing in one transaction.
+	tx, err := r.pool.BeginTx(ctx, nil)
+	if err != nil {
+		return 0, err
+	}
+	defer func() {
+		if p := recover(); p != nil {
+			_ = tx.Rollback()
+			panic(p)
+		}
+	}()
+	qtx := r.queries.WithTx(tx)
+
+	res, err := qtx.CreateJournalEntry(ctx, sqlc.CreateJournalEntryParams{
 		OwnerID:     ownerID,
 		Date:        entryDate,
 		Description: nullableString(input.Description),
 	})
 	if err != nil {
+		_ = tx.Rollback()
 		logger.Ctx(ctx).Error("Failed to create journal entry", logger.Error(err))
 		return 0, err
 	}
 
 	entryID, err := res.LastInsertId()
 	if err != nil {
+		_ = tx.Rollback()
 		return 0, err
 	}
 
 	for _, line := range input.Lines {
-		err := r.queries.CreateJournalLine(ctx, sqlc.CreateJournalLineParams{
+		if err := qtx.CreateJournalLine(ctx, sqlc.CreateJournalLineParams{
 			EntryID:   entryID,
 			AccountID: line.AccountID,
 			Debit:     nullableString(fmtFloat(line.Debit)),
 			Credit:    nullableString(fmtFloat(line.Credit)),
-		})
-		if err != nil {
+		}); err != nil {
+			_ = tx.Rollback()
 			logger.Ctx(ctx).Error("Failed to create journal line", logger.Error(err))
 			return 0, err
 		}
+	}
+
+	if err := tx.Commit(); err != nil {
+		logger.Ctx(ctx).Error("Failed to commit journal entry", logger.Error(err))
+		return 0, err
 	}
 
 	return entryID, nil

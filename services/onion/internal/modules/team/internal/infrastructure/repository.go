@@ -468,7 +468,11 @@ func (r *Repository) GetGroup(ctx context.Context, ownerID, groupID int64) (*dom
 	if err != nil {
 		return nil, err
 	}
-	perms, _ := r.queries.ListGroupResourcePermissions(ctx, groupID)
+	perms, err := r.queries.ListGroupResourcePermissions(ctx, groupID)
+	if err != nil {
+		logger.Ctx(ctx).Error("Failed to list group resource permissions", logger.Error(err))
+		return nil, err
+	}
 	g := &domain.Group{
 		ID:          row.ID,
 		OwnerID:     row.OwnerID,

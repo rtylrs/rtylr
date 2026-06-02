@@ -141,6 +141,21 @@ func (r *Repository) CreateRedeemTransaction(ctx context.Context, input domain.R
 	return err
 }
 
+// parseLoyaltyDecimal parses a DECIMAL column stored as a string. A corrupt or
+// empty value logs at Warn and yields 0 rather than being silently discarded.
+func parseLoyaltyDecimal(ctx context.Context, s string) float64 {
+	if s == "" {
+		return 0
+	}
+	f, err := strconv.ParseFloat(s, 64)
+	if err != nil {
+		logger.Ctx(ctx).Warn("failed to parse loyalty config decimal",
+			logger.String("value", s), logger.Error(err))
+		return 0
+	}
+	return f
+}
+
 func (r *Repository) GetConfig(ctx context.Context, ownerID int64) (domain.LoyaltyConfig, error) {
 	row, err := r.queries.GetConfig(ctx, ownerID)
 	if err != nil {
@@ -153,8 +168,8 @@ func (r *Repository) GetConfig(ctx context.Context, ownerID int64) (domain.Loyal
 		return domain.LoyaltyConfig{}, err
 	}
 
-	ppd, _ := strconv.ParseFloat(row.PointsPerCurrencyUnit.String, 64)
-	pv, _ := strconv.ParseFloat(row.CurrencyPerPoint.String, 64)
+	ppd := parseLoyaltyDecimal(ctx, row.PointsPerCurrencyUnit.String)
+	pv := parseLoyaltyDecimal(ctx, row.CurrencyPerPoint.String)
 
 	return domain.LoyaltyConfig{
 		ID:              row.ID,
