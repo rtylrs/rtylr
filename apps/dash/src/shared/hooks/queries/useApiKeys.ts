@@ -24,7 +24,7 @@ export const useCreateApiKey = () => {
   return useMutation({
     mutationFn: async (payload: { name: string; scopes: string[] }) => {
       const res = await unwrap(safe.post('/api-keys', payload));
-      return res as { key: string; meta: ApiKey };
+      return res as { id: number; key: string; message: string };
     },
     onSuccess: () => {
       toast.success('API key created');
@@ -38,7 +38,8 @@ export const useRevokeApiKey = () => {
   const qc = useQueryClient();
   return useMutation({
     mutationFn: async (id: string) => {
-      await unwrap(safe.delete(`/api-keys/${id}`));
+      // Backend revoke reads { id } from the body on DELETE /api-keys.
+      await unwrap(safe.delete('/api-keys', { data: { id: Number(id) } }));
       return id;
     },
     onSuccess: () => {

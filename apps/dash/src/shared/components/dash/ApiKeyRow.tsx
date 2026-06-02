@@ -17,7 +17,7 @@ function formatDate(iso: string): string {
 }
 
 export const ApiKeyRow: React.FC<ApiKeyRowProps> = ({ apiKey, onRevoke }) => {
-  const preview = `${apiKey.prefix}_••••${apiKey.lastFour}`;
+  const preview = `${apiKey.keyPrefix}••••••••`;
 
   const copy = () => {
     navigator.clipboard.writeText(preview);

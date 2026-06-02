@@ -28,9 +28,27 @@ import {
 } from '../../shared/hooks/queries/useApiKeys';
 
 const SCOPE_OPTIONS = [
-  { key: 'read', label: 'Read', description: 'Read access to all resources' },
-  { key: 'write', label: 'Write', description: 'Create and update resources' },
-  { key: 'admin', label: 'Admin', description: 'Full workspace access' },
+  {
+    key: 'upload',
+    label: 'Upload (CDN)',
+    description: 'Upload and serve media via the CDN (cdn.voxire.com)',
+  },
+  { key: 'flow:read', label: 'Flow · Read', description: 'Read workspaces, projects, and tasks' },
+  { key: 'flow:write', label: 'Flow · Write', description: 'Create and update projects and tasks' },
+  { key: 'crm:read', label: 'CRM · Read', description: 'Read customers, campaigns, and loyalty' },
+  { key: 'crm:write', label: 'CRM · Write', description: 'Create and update CRM records' },
+  {
+    key: 'finance:read',
+    label: 'Finance · Read',
+    description: 'Read invoices, expenses, and reports',
+  },
+  { key: 'finance:write', label: 'Finance · Write', description: 'Create invoices and expenses' },
+  { key: 'erp:read', label: 'ERP · Read', description: 'Read inventory, products, and suppliers' },
+  {
+    key: 'erp:write',
+    label: 'ERP · Write',
+    description: 'Create and update inventory and products',
+  },
 ];
 
 const ApiKeys: React.FC = () => {
@@ -40,7 +58,7 @@ const ApiKeys: React.FC = () => {
 
   const [createOpen, setCreateOpen] = useState(false);
   const [name, setName] = useState('');
-  const [scopes, setScopes] = useState<string[]>(['read']);
+  const [scopes, setScopes] = useState<string[]>(['upload']);
   const [showKey, setShowKey] = useState<string | null>(null);
   const [toRevoke, setToRevoke] = useState<ApiKey | null>(null);
 
@@ -53,7 +71,7 @@ const ApiKeys: React.FC = () => {
       const result = await create.mutateAsync({ name, scopes });
       setShowKey(result.key);
       setName('');
-      setScopes(['read']);
+      setScopes(['upload']);
       setCreateOpen(false);
     } catch {
       // onError in hook handles toast
