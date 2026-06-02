@@ -15,9 +15,6 @@ permissions:
 env:
   AWS_REGION: eu-west-1
   ECR_REGISTRY: 101533649486.dkr.ecr.eu-west-1.amazonaws.com
-  ECR_REPOSITORY: voxire/onion
-  ECS_CLUSTER: voxire-prod
-  ECS_SERVICE: api
 
 jobs:
   version:
@@ -58,9 +55,30 @@ jobs:
           echo "Version: $NEW_VERSION"
 
   build-push-deploy:
-    name: Build, Push, Deploy
+    name: Build, Push, Deploy (${{ matrix.name }})
     needs: version
     runs-on: blacksmith-2vcpu-ubuntu-2404
+    strategy:
+      # One runmode per matrix entry. fail-fast off so a flaky build of one
+      # image doesn't cancel the others mid-push.
+      fail-fast: false
+      matrix:
+        include:
+          - name: api
+            dockerfile: Dockerfile
+            repository: voxire/onion
+            cluster: voxire-prod
+            service: api
+          - name: worker
+            dockerfile: Dockerfile.worker
+            repository: voxire/onion-worker
+            cluster: voxire-fargate
+            service: worker
+          - name: upload
+            dockerfile: Dockerfile.upload
+            repository: voxire/onion-upload
+            cluster: voxire-fargate
+            service: upload
     steps:
       - uses: actions/checkout@v6
         with:
@@ -82,9 +100,13 @@ jobs:
       - name: Build and push Docker image
         run: |
           VERSION=${{ needs.version.outputs.new_version }}
-          IMAGE_URI=$ECR_REGISTRY/$ECR_REPOSITORY
+          IMAGE_URI=$ECR_REGISTRY/${{ matrix.repository }}
 
           docker build \
+            -f ${{ matrix.dockerfile }} \
+            --build-arg VERSION=$VERSION \
+            --build-arg COMMIT=${GITHUB_SHA::7} \
+            --build-arg BUILD_TIME=$(date -u +%Y-%m-%dT%H:%M:%SZ) \
             -t $IMAGE_URI:$VERSION \
             -t $IMAGE_URI:latest \
             .
@@ -97,10 +119,9 @@ jobs:
       - name: Deploy to ECS
         run: |
           aws ecs update-service \
-            --cluster $ECS_CLUSTER \
-            --service $ECS_SERVICE \
+            --cluster ${{ matrix.cluster }} \
+            --service ${{ matrix.service }} \
             --force-new-deployment \
             --region $AWS_REGION \
             --query 'service.deployments[0].{status:status,desiredCount:desiredCount}' \
             --output table
-

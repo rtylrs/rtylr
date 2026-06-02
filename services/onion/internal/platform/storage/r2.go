@@ -229,6 +229,39 @@ func (c *Client) Upload(ctx context.Context, key, contentType string, body io.Re
 	return err
 }
 
+// Download streams an object out of S3. The caller owns the returned
+// reader and must Close it. Size is the object's Content-Length, or 0
+// when S3 doesn't report one. Used by the CDN runmode to serve original
+// files and cached image transformations.
+func (c *Client) Download(ctx context.Context, key string) (io.ReadCloser, int64, error) {
+	out, err := c.s3.GetObject(ctx, &s3.GetObjectInput{
+		Bucket: aws.String(c.bucket),
+		Key:    aws.String(key),
+	})
+	if err != nil {
+		return nil, 0, fmt.Errorf("downloading object key=%s: %w", key, err)
+	}
+	var size int64
+	if out.ContentLength != nil {
+		size = *out.ContentLength
+	}
+	return out.Body, size, nil
+}
+
+// Exists reports whether an object is present. A HeadObject error is
+// treated as "not present" rather than surfaced — callers use this as a
+// cheap cache probe, not an authoritative health check.
+func (c *Client) Exists(ctx context.Context, key string) (bool, error) {
+	_, err := c.s3.HeadObject(ctx, &s3.HeadObjectInput{
+		Bucket: aws.String(c.bucket),
+		Key:    aws.String(key),
+	})
+	if err != nil {
+		return false, nil
+	}
+	return true, nil
+}
+
 // Bucket exposes the configured bucket name for callers that need to
 // log or report it. Not used for signing (the client already holds it).
 func (c *Client) Bucket() string {

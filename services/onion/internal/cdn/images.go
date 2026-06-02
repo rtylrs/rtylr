@@ -1,0 +1,165 @@
+package cdn
+
+import (
+	"context"
+	"database/sql"
+	"errors"
+	"fmt"
+	"io"
+	"net/http"
+	"os"
+	"os/exec"
+	"strconv"
+
+	"github.com/go-chi/chi/v5"
+
+	"github.com/voxire/onion/internal/platform/logger"
+)
+
+// transform returns a transformed image, generating it via the media-engine on
+// a cache miss and persisting the result to S3 + cdn_transformations. fileID is
+// the BIGINT key; fileUUID is the public id used for cache keys and storage paths.
+func (c *CDN) transform(ctx context.Context, fileID int64, fileUUID, originalStorageKey string, p Params) (io.ReadCloser, int64, string, error) {
+	p.Defaults()
+	if err := p.Validate(); err != nil {
+		return nil, 0, "", fmt.Errorf("invalid params: %w", err)
+	}
+
+	key := p.CacheKey(fileUUID)
+	mimeType := mimeForFormat(p.Format)
+
+	// Cache hit — stream the already-transformed asset straight from S3.
+	cached, err := c.transformationByCacheKey(ctx, key)
+	if err == nil {
+		reader, size, dlErr := c.storage.Download(ctx, cached.StorageKey)
+		if dlErr != nil {
+			return nil, 0, "", fmt.Errorf("downloading cached transformation: %w", dlErr)
+		}
+		return reader, size, mimeType, nil
+	}
+	if !errors.Is(err, sql.ErrNoRows) {
+		return nil, 0, "", fmt.Errorf("checking transformation cache: %w", err)
+	}
+
+	// Cache miss — pull the original to a temp file, run the media-engine,
+	// upload the result, record it, then stream it back.
+	tmpIn, tmpOut, cleanup, err := c.stageOriginal(ctx, originalStorageKey)
+	if err != nil {
+		return nil, 0, "", err
+	}
+	defer cleanup()
+
+	cmd := exec.CommandContext(ctx, c.mediaEngine, p.CLIArgs(tmpIn, tmpOut)...)
+	if out, runErr := cmd.CombinedOutput(); runErr != nil {
+		return nil, 0, "", fmt.Errorf("media-engine failed: %w\noutput: %s", runErr, out)
+	}
+
+	resultFile, err := os.Open(tmpOut)
+	if err != nil {
+		return nil, 0, "", fmt.Errorf("opening media-engine result: %w", err)
+	}
+	defer func() { _ = resultFile.Close() }()
+
+	transformedKey := p.StorageKey(fileUUID, key)
+	if err := c.storage.Upload(ctx, transformedKey, mimeType, resultFile); err != nil {
+		return nil, 0, "", fmt.Errorf("uploading transformation: %w", err)
+	}
+	if err := c.insertTransformation(ctx, fileID, key, transformedKey, p); err != nil {
+		return nil, 0, "", err
+	}
+
+	// Re-download so the streamed size/headers match exactly what S3 stored.
+	reader, size, err := c.storage.Download(ctx, transformedKey)
+	if err != nil {
+		return nil, 0, "", fmt.Errorf("streaming transformation: %w", err)
+	}
+	return reader, size, mimeType, nil
+}
+
+// stageOriginal downloads the original object to a temp input file and creates
+// an empty temp output file for the media-engine. The returned cleanup removes
+// both. Caller must call cleanup once done with the output file.
+func (c *CDN) stageOriginal(ctx context.Context, originalStorageKey string) (inPath, outPath string, cleanup func(), err error) {
+	origReader, _, err := c.storage.Download(ctx, originalStorageKey)
+	if err != nil {
+		return "", "", func() {}, fmt.Errorf("downloading original: %w", err)
+	}
+	defer func() { _ = origReader.Close() }()
+
+	tmpIn, err := os.CreateTemp("", "cdn-input-*")
+	if err != nil {
+		return "", "", func() {}, fmt.Errorf("creating temp input: %w", err)
+	}
+	if _, err := io.Copy(tmpIn, origReader); err != nil {
+		_ = tmpIn.Close()
+		_ = os.Remove(tmpIn.Name())
+		return "", "", func() {}, fmt.Errorf("writing temp input: %w", err)
+	}
+	_ = tmpIn.Close()
+
+	tmpOut, err := os.CreateTemp("", "cdn-output-*")
+	if err != nil {
+		_ = os.Remove(tmpIn.Name())
+		return "", "", func() {}, fmt.Errorf("creating temp output: %w", err)
+	}
+	_ = tmpOut.Close()
+
+	cleanup = func() {
+		_ = os.Remove(tmpIn.Name())
+		_ = os.Remove(tmpOut.Name())
+	}
+	return tmpIn.Name(), tmpOut.Name(), cleanup, nil
+}
+
+// serveTransformed handles GET /images/{id}?w=&h=&fit=&format=&q=
+func (c *CDN) serveTransformed(w http.ResponseWriter, r *http.Request) {
+	fileUUID := chi.URLParam(r, "id")
+	if fileUUID == "" {
+		http.Error(w, "missing image id", http.StatusBadRequest)
+		return
+	}
+
+	p := Params{
+		Width:   queryInt(r, "w"),
+		Height:  queryInt(r, "h"),
+		Fit:     r.URL.Query().Get("fit"),
+		Format:  r.URL.Query().Get("format"),
+		Quality: queryInt(r, "q"),
+	}
+
+	meta, err := c.fileByUUID(r.Context(), fileUUID)
+	if err != nil {
+		http.Error(w, "file not found", http.StatusNotFound)
+		return
+	}
+
+	reader, size, mimeType, err := c.transform(r.Context(), meta.ID, meta.FileUUID, meta.StorageKey, p)
+	if err != nil {
+		logger.Ctx(r.Context()).Error("cdn: transform failed",
+			logger.String("file_uuid", fileUUID), logger.Error(err))
+		http.Error(w, err.Error(), http.StatusInternalServerError)
+		return
+	}
+	defer func() { _ = reader.Close() }()
+
+	w.Header().Set("Content-Type", mimeType)
+	w.Header().Set("Cache-Control", "public, max-age=31536000, immutable")
+	if size > 0 {
+		w.Header().Set("Content-Length", fmt.Sprintf("%d", size))
+	}
+	if _, err := io.Copy(w, reader); err != nil {
+		logger.Ctx(r.Context()).Warn("cdn: failed to stream transformation", logger.Error(err))
+	}
+}
+
+func queryInt(r *http.Request, key string) int {
+	v := r.URL.Query().Get(key)
+	if v == "" {
+		return 0
+	}
+	n, err := strconv.Atoi(v)
+	if err != nil {
+		return 0
+	}
+	return n
+}

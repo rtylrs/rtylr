@@ -88,6 +88,12 @@ type AppConfig struct {
 	FlociRegion   string
 	FlociBucket   string
 
+	// CDN runmode (cmd/upload) — media/CDN service settings.
+	CDNBaseURL         string // public base for generated file URLs
+	CDNMaxUploadBytes  int64  // hard ceiling on a single upload
+	CDNMediaEnginePath string // path to the C++ media-engine binary
+	CDNAPIKey          string // bearer key for write endpoints; empty disables auth
+
 	// Internal Auth
 	InternalToken string
 
@@ -220,6 +226,12 @@ func LoadAndValidate() (*AppConfig, error) {
 		FlociRegion:   os.Getenv("FLOCI_REGION"),
 		FlociBucket:   os.Getenv("FLOCI_BUCKET"),
 
+		// CDN runmode (cmd/upload)
+		CDNBaseURL:         envOrDefault("CDN_BASE_URL", "https://cdn.voxire.dev"),
+		CDNMaxUploadBytes:  int64(envIntOrDefault("CDN_MAX_UPLOAD_MB", 100)) * 1024 * 1024,
+		CDNMediaEnginePath: envOrDefault("MEDIA_ENGINE_PATH", "./media-engine/build/media-engine"),
+		CDNAPIKey:          os.Getenv("CDN_API_KEY"),
+
 		// Internal Auth
 		InternalToken: os.Getenv("INTERNAL_TOKEN"),
 
@@ -252,6 +264,28 @@ func LoadAndValidate() (*AppConfig, error) {
 
 	GlobalConfig = cfg
 	return cfg, nil
+}
+
+// envOrDefault returns the env var value, or fallback when it's unset/empty.
+func envOrDefault(key, fallback string) string {
+	if v := os.Getenv(key); v != "" {
+		return v
+	}
+	return fallback
+}
+
+// envIntOrDefault parses an int env var, returning fallback when unset or
+// unparseable.
+func envIntOrDefault(key string, fallback int) int {
+	v := os.Getenv(key)
+	if v == "" {
+		return fallback
+	}
+	n, err := strconv.Atoi(v)
+	if err != nil {
+		return fallback
+	}
+	return n
 }
 
 func GetOpenAIAPIKey() string {

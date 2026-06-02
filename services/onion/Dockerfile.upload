@@ -1,0 +1,53 @@
+# Dockerfile for the `upload` runmode (cmd/upload) — the CDN service.
+# Three stages: build the C++ media-engine, build the Go binary, then a
+# slim debian runtime carrying libvips + ffmpeg so the media-engine runs.
+
+# ── Stage 1: media-engine (C++ / libvips) ──────────────────────────────────
+FROM debian:bookworm-slim AS media-engine
+RUN apt-get update && apt-get install -y --no-install-recommends \
+    cmake build-essential pkg-config \
+    libvips-dev libvips-cpp-dev \
+    ffmpeg libavcodec-dev libavformat-dev libavutil-dev libswscale-dev \
+    && rm -rf /var/lib/apt/lists/*
+WORKDIR /build
+COPY media-engine/CMakeLists.txt .
+COPY media-engine/src/     src/
+COPY media-engine/include/ include/
+RUN cmake -B build -DCMAKE_BUILD_TYPE=Release && \
+    cmake --build build --parallel "$(nproc)"
+
+# ── Stage 2: Go binary ──────────────────────────────────────────────────────
+FROM golang:1.26-alpine AS go-builder
+WORKDIR /app
+RUN apk add --no-cache ca-certificates
+# Layer cache: deps only re-download when go.mod/go.sum change. voxie is a
+# local `replace` target, so its module file must be present for resolution.
+COPY go.mod go.sum ./
+COPY voxie/go.mod voxie/go.sum* ./voxie/
+RUN go mod download
+COPY cmd ./cmd
+COPY internal ./internal
+COPY voxie ./voxie
+ARG VERSION=dev
+ARG COMMIT=unknown
+ARG BUILD_TIME=unknown
+RUN CGO_ENABLED=0 GOOS=linux go build \
+    -ldflags="-s -w \
+      -X 'github.com/voxire/onion/internal/platform/server/http.Version=${VERSION}' \
+      -X 'github.com/voxire/onion/internal/platform/server/http.Commit=${COMMIT}' \
+      -X 'github.com/voxire/onion/internal/platform/server/http.BuildTime=${BUILD_TIME}'" \
+    -o /app/upload ./cmd/upload
+
+# ── Stage 3: runtime ─────────────────────────────────────────────────────────
+FROM debian:bookworm-slim
+RUN apt-get update && apt-get install -y --no-install-recommends \
+    ca-certificates tzdata libvips libvips-cpp ffmpeg \
+    && rm -rf /var/lib/apt/lists/*
+WORKDIR /app
+COPY --from=go-builder   /app/upload                  /app/upload
+COPY --from=media-engine /build/build/media-engine    /usr/local/bin/media-engine
+# Point the Go binary at the media-engine installed on PATH.
+ENV MEDIA_ENGINE_PATH=/usr/local/bin/media-engine
+ENV PORT=8080
+EXPOSE 8080
+CMD ["/app/upload"]
