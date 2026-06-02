@@ -80,7 +80,7 @@ export const MenuBar: React.FC = () => {
 
       <div style={{ marginLeft: 'auto', display: 'flex', alignItems: 'center', gap: 8 }}>
         <a
-          href={`${APP_URLS.auth}/login`}
+          href={APP_URLS.auth}
           target="_blank"
           rel="noopener noreferrer"
           style={{
