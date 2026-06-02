@@ -8,6 +8,7 @@ import { I18nextProvider } from 'react-i18next';
 import { CookiesProvider } from 'react-cookie';
 
 import i18next from '../services/i18next';
+import { initFeatureVariant } from '../lib/featureVariant';
 
 // Import global styles
 import '@voxire/components/styles';
@@ -35,6 +36,12 @@ function MyApp({ Component, pageProps }: AppProps) {
   // that only exists in the browser.
   useEffect(() => {
     bootObservability({ app: 'landing' });
+  }, []);
+
+  // Resolve the landing A/B variant and write the rtylr_variant cookie so the
+  // Cloudflare worker can route returning visitors. Fails safe to variant 'a'.
+  useEffect(() => {
+    void initFeatureVariant();
   }, []);
 
   return (
