@@ -9,6 +9,7 @@ import (
 var (
 	ErrPurchaseOrderNotFound        = errors.New("purchase order not found")
 	ErrPurchaseOrderAlreadyApproved = errors.New("purchase order already approved")
+	ErrPurchaseOrderAlreadyReceived = errors.New("purchase order already received")
 )
 
 type PurchaseOrderStatus string

@@ -9,7 +9,6 @@ import (
 	"github.com/voxire/onion/internal/modules/purchase_orders/internal/domain"
 	"github.com/voxire/onion/internal/modules/purchase_orders/internal/infrastructure"
 	"github.com/voxire/onion/internal/platform/cache/cacher"
-	"github.com/voxire/onion/internal/platform/logger"
 )
 
 const poCacheTTL = 5 * time.Minute
@@ -88,35 +87,19 @@ func (s *Service) ApprovePurchaseOrder(ctx context.Context, ownerID, poID int64)
 }
 
 func (s *Service) UpdatePurchaseOrderStatus(ctx context.Context, ownerID, id int64, status string) error {
-	err := s.repo.UpdatePurchaseOrderStatus(ctx, ownerID, id, status)
-	if err != nil {
-		return err
+	// Receiving is special: it must verify ownership, increment stock for every
+	// line item, and ledger the movement — all atomically and idempotently.
+	// ReceivePurchaseOrder owns that whole transaction.
+	if status == string(domain.POStatusReceived) {
+		if err := s.repo.ReceivePurchaseOrder(ctx, ownerID, id, ownerID); err != nil {
+			return err
+		}
+		s.invalidateCache(ctx, ownerID)
+		return nil
 	}
 
-	if status == string(domain.POStatusReceived) {
-		items, itemErr := s.repo.GetPurchaseOrderItems(ctx, id)
-		if itemErr != nil {
-			logger.Ctx(ctx).Error("Failed to get purchase order items for inventory update", logger.Error(itemErr))
-			return itemErr
-		}
-
-		for _, item := range items {
-			adjustErr := s.repo.AdjustInventory(
-				ctx,
-				ownerID,
-				item.ProductID,
-				item.QuantityOrdered,
-				domain.InventoryTypePurchase,
-				fmt.Sprintf("auto-received from purchase order %d", id),
-			)
-			if adjustErr != nil {
-				logger.Ctx(ctx).Error("Failed to adjust inventory for received PO item",
-					logger.Error(adjustErr),
-					logger.Any("product_id", item.ProductID),
-				)
-				return adjustErr
-			}
-		}
+	if err := s.repo.UpdatePurchaseOrderStatus(ctx, ownerID, id, status); err != nil {
+		return err
 	}
 
 	s.invalidateCache(ctx, ownerID)

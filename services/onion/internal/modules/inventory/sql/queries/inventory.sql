@@ -12,7 +12,7 @@ VALUES (?, ?, ?, ?, ?, ?, ?);
 -- name: GetInventoryReport :many
 SELECT id, name, sku, unit, stock_quantity, low_stock_threshold,
        reorder_quantity, cost_price, sale_price,
-       (stock_quantity * cost_price) AS stock_value,
+       CAST(stock_quantity * cost_price AS DECIMAL(18,4)) AS stock_value,
        (stock_quantity <= low_stock_threshold) AS is_low_stock
 FROM erp_products
 WHERE owner_id = ? AND track_inventory = TRUE AND is_active = TRUE
@@ -21,7 +21,7 @@ ORDER BY name ASC;
 -- name: GetLowStockProducts :many
 SELECT id, name, sku, unit, stock_quantity, low_stock_threshold,
        reorder_quantity, cost_price, sale_price,
-       (stock_quantity * cost_price) AS stock_value,
+       CAST(stock_quantity * cost_price AS DECIMAL(18,4)) AS stock_value,
        1 AS is_low_stock
 FROM erp_products
 WHERE owner_id = ? AND track_inventory = TRUE AND is_active = TRUE

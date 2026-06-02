@@ -50,8 +50,33 @@ func (r *Repository) AdjustInventory(ctx context.Context, ownerID, productID int
 		return err
 	}
 
-	currentQty, _ := strconv.ParseFloat(stockQtyStr, 64)
+	currentQty, parseErr := strconv.ParseFloat(stockQtyStr, 64)
+	if parseErr != nil {
+		err = parseErr
+		logger.Ctx(ctx).Error("Failed to parse stock quantity from database",
+			logger.String("value", stockQtyStr),
+			logger.Any("owner_id", ownerID),
+			logger.Any("product_id", productID),
+			logger.Error(parseErr),
+		)
+
+		return err
+	}
+
 	newQty := currentQty + change
+	// Reject any adjustment that would drive stock negative — negative on-hand
+	// stock is data corruption, not a valid state.
+	if newQty < 0 {
+		err = domain.ErrInsufficientStock
+		logger.Ctx(ctx).Warn("Rejected inventory adjustment that would go negative",
+			logger.Any("owner_id", ownerID),
+			logger.Any("product_id", productID),
+			logger.String("current", strconv.FormatFloat(currentQty, 'f', -1, 64)),
+			logger.String("change", strconv.FormatFloat(change, 'f', -1, 64)),
+		)
+
+		return err
+	}
 
 	err = qtx.UpdateProductStock(ctx, sqlc.UpdateProductStockParams{
 		StockQuantity: strconv.FormatFloat(newQty, 'f', -1, 64),
@@ -114,7 +139,7 @@ func (r *Repository) GetInventoryReport(ctx context.Context, ownerID int64) ([]d
 		item.StockQuantity, _ = strconv.ParseFloat(row.StockQuantity, 64)
 		item.CostPrice, _ = strconv.ParseFloat(row.CostPrice, 64)
 		item.SalePrice, _ = strconv.ParseFloat(row.SalePrice, 64)
-		item.StockValue = float64(row.StockValue)
+		item.StockValue, _ = strconv.ParseFloat(row.StockValue, 64)
 		item.IsLowStock = row.IsLowStock
 
 		if row.LowStockThreshold.Valid {
@@ -157,7 +182,7 @@ func (r *Repository) GetLowStockProducts(ctx context.Context, ownerID int64) ([]
 		item.StockQuantity, _ = strconv.ParseFloat(row.StockQuantity, 64)
 		item.CostPrice, _ = strconv.ParseFloat(row.CostPrice, 64)
 		item.SalePrice, _ = strconv.ParseFloat(row.SalePrice, 64)
-		item.StockValue = float64(row.StockValue)
+		item.StockValue, _ = strconv.ParseFloat(row.StockValue, 64)
 		item.IsLowStock = row.IsLowStock != 0
 
 		if row.LowStockThreshold.Valid {

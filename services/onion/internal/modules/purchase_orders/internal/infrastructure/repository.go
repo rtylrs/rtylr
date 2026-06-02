@@ -4,6 +4,7 @@ import (
 	"context"
 	"database/sql"
 	"errors"
+	"fmt"
 	"strconv"
 	"time"
 
@@ -261,9 +262,17 @@ func (r *Repository) UpdatePurchaseOrderStatus(ctx context.Context, ownerID, id 
 	return nil
 }
 
-func (r *Repository) AdjustInventory(ctx context.Context, ownerID, productID int64, change float64, txType domain.InventoryTransactionType, notes string) error {
+// ReceivePurchaseOrder atomically receives a purchase order: it verifies the PO
+// belongs to the caller and isn't already received (row-locked), then for every
+// line item increments the product's on-hand stock (row-locked) and writes a
+// ledgered inventory transaction referencing this PO, marks the items received,
+// and flips the PO to 'received'. The whole thing is one transaction, so a
+// failure on any item rolls back every stock change — and the
+// already-received guard makes a repeated call a safe no-op (no double-add).
+func (r *Repository) ReceivePurchaseOrder(ctx context.Context, ownerID, poID, createdBy int64) error {
 	tx, err := r.pool.BeginTx(ctx, nil)
 	if err != nil {
+		logger.Ctx(ctx).Error("Failed to begin receive transaction", logger.Error(err))
 		return err
 	}
 
@@ -275,36 +284,84 @@ func (r *Repository) AdjustInventory(ctx context.Context, ownerID, productID int
 
 	qtx := r.queries.WithTx(tx)
 
-	stockQtyStr, err := qtx.GetProductStockForUpdate(ctx, sqlc.GetProductStockForUpdateParams{
+	// Lock the PO row and confirm ownership + current status.
+	status, err := qtx.GetPurchaseOrderForUpdate(ctx, sqlc.GetPurchaseOrderForUpdateParams{
 		OwnerID: ownerID,
-		ID:      productID,
+		ID:      poID,
 	})
+	if errors.Is(err, sql.ErrNoRows) {
+		err = domain.ErrPurchaseOrderNotFound
+		return err
+	}
+	if err != nil {
+		return err
+	}
+	if status.Valid && status.ErpPurchaseOrdersStatus == sqlc.ErpPurchaseOrdersStatus(domain.POStatusReceived) {
+		err = domain.ErrPurchaseOrderAlreadyReceived
+		return err
+	}
+
+	items, err := qtx.GetPurchaseOrderItems(ctx, poID)
 	if err != nil {
 		return err
 	}
 
-	currentQty, _ := strconv.ParseFloat(stockQtyStr, 64)
-	newQty := currentQty + change
+	for _, it := range items {
+		qty, perr := strconv.ParseFloat(it.QuantityOrdered, 64)
+		if perr != nil {
+			err = perr
+			return err
+		}
 
-	err = qtx.UpdateProductStock(ctx, sqlc.UpdateProductStockParams{
-		StockQuantity: strconv.FormatFloat(newQty, 'f', -1, 64),
-		OwnerID:       ownerID,
-		ID:            productID,
-	})
-	if err != nil {
+		stockStr, serr := qtx.GetProductStockForUpdate(ctx, sqlc.GetProductStockForUpdateParams{
+			OwnerID: ownerID,
+			ID:      it.ProductID,
+		})
+		if serr != nil {
+			err = serr
+			return err
+		}
+
+		current, perr := strconv.ParseFloat(stockStr, 64)
+		if perr != nil {
+			err = perr
+			return err
+		}
+
+		next := current + qty
+		if err = qtx.UpdateProductStock(ctx, sqlc.UpdateProductStockParams{
+			StockQuantity: strconv.FormatFloat(next, 'f', -1, 64),
+			OwnerID:       ownerID,
+			ID:            it.ProductID,
+		}); err != nil {
+			return err
+		}
+
+		if _, err = qtx.InsertInventoryTransactionWithRef(ctx, sqlc.InsertInventoryTransactionWithRefParams{
+			OwnerID:        ownerID,
+			ProductID:      it.ProductID,
+			Type:           sqlc.ErpInventoryTransactionsType(domain.InventoryTypePurchase),
+			QuantityChange: strconv.FormatFloat(qty, 'f', -1, 64),
+			QuantityBefore: strconv.FormatFloat(current, 'f', -1, 64),
+			QuantityAfter:  strconv.FormatFloat(next, 'f', -1, 64),
+			ReferenceID:    nullInt64(poID),
+			ReferenceType:  nullString("purchase_order"),
+			CreatedBy:      nullInt64(createdBy),
+			Notes:          nullString(fmt.Sprintf("received from purchase order %d", poID)),
+		}); err != nil {
+			return err
+		}
+	}
+
+	if err = qtx.MarkPurchaseOrderItemsReceived(ctx, poID); err != nil {
 		return err
 	}
 
-	_, err = qtx.InsertInventoryTransaction(ctx, sqlc.InsertInventoryTransactionParams{
-		OwnerID:        ownerID,
-		ProductID:      productID,
-		Type:           sqlc.ErpInventoryTransactionsType(txType),
-		QuantityChange: strconv.FormatFloat(change, 'f', -1, 64),
-		QuantityBefore: strconv.FormatFloat(currentQty, 'f', -1, 64),
-		QuantityAfter:  strconv.FormatFloat(newQty, 'f', -1, 64),
-		Notes:          nullString(notes),
-	})
-	if err != nil {
+	if err = qtx.UpdatePurchaseOrderStatusReceived(ctx, sqlc.UpdatePurchaseOrderStatusReceivedParams{
+		Status:  sqlc.NullErpPurchaseOrdersStatus{ErpPurchaseOrdersStatus: sqlc.ErpPurchaseOrdersStatus(domain.POStatusReceived), Valid: true},
+		OwnerID: ownerID,
+		ID:      poID,
+	}); err != nil {
 		return err
 	}
 

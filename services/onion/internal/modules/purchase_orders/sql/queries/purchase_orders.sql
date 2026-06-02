@@ -42,6 +42,19 @@ SELECT status FROM erp_purchase_orders WHERE owner_id = ? AND id = ?;
 -- name: ApprovePurchaseOrder :exec
 UPDATE erp_purchase_orders SET status = 'approved' WHERE owner_id = ? AND id = ?;
 
+-- name: GetPurchaseOrderForUpdate :one
+SELECT status FROM erp_purchase_orders WHERE owner_id = ? AND id = ? FOR UPDATE;
+
+-- name: MarkPurchaseOrderItemsReceived :exec
+UPDATE erp_purchase_order_items SET quantity_received = quantity_ordered
+WHERE purchase_order_id = ?;
+
+-- name: InsertInventoryTransactionWithRef :execresult
+INSERT INTO erp_inventory_transactions
+(owner_id, product_id, type, quantity_change, quantity_before, quantity_after,
+ reference_id, reference_type, created_by, notes)
+VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?);
+
 -- name: GetProductStockForUpdate :one
 SELECT stock_quantity FROM erp_products WHERE owner_id = ? AND id = ? FOR UPDATE;
 

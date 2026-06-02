@@ -4,7 +4,12 @@ import (
 	"errors"
 )
 
-var ErrInventoryTransactionFailed = errors.New("inventory transaction failed")
+var (
+	ErrInventoryTransactionFailed = errors.New("inventory transaction failed")
+	// ErrInsufficientStock is returned when an adjustment would drive stock
+	// below zero. Negative stock is treated as data corruption, not a valid state.
+	ErrInsufficientStock = errors.New("insufficient stock: adjustment would result in negative quantity")
+)
 
 type InventoryTransactionType string
 

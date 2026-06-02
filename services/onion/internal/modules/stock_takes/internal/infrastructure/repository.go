@@ -3,6 +3,8 @@ package infrastructure
 import (
 	"context"
 	"database/sql"
+	"errors"
+	"fmt"
 	"strconv"
 
 	"github.com/voxire/onion/internal/modules/stock_takes/internal/domain"
@@ -227,6 +229,28 @@ func (r *Repository) UpdateStockTake(ctx context.Context, ownerID int64, input d
 
 	qtx := r.queries.WithTx(tx)
 
+	// When completing a stock take we reconcile on-hand stock to the counted
+	// quantities (and ledger the variance). Lock the row first and capture the
+	// prior status so a repeated "complete" is a no-op rather than re-applying
+	// (and double-ledgering) the same counts.
+	alreadyCompleted := false
+	if input.Status == domain.StockTakeStatusCompleted {
+		var prior sqlc.NullErpStockTakesStatus
+		prior, err = qtx.GetStockTakeStatusForUpdate(ctx, sqlc.GetStockTakeStatusForUpdateParams{
+			OwnerID: ownerID,
+			ID:      input.ID,
+		})
+		if errors.Is(err, sql.ErrNoRows) {
+			err = domain.ErrStockTakeNotFound
+			return err
+		}
+		if err != nil {
+			logger.Ctx(ctx).Error("Failed to lock stock take for completion", logger.Error(err))
+			return err
+		}
+		alreadyCompleted = prior.Valid && prior.ErpStockTakesStatus == sqlc.ErpStockTakesStatus(domain.StockTakeStatusCompleted)
+	}
+
 	statusVal := sqlc.NullErpStockTakesStatus{
 		ErpStockTakesStatus: sqlc.ErpStockTakesStatus(input.Status),
 		Valid:               true,
@@ -287,10 +311,85 @@ func (r *Repository) UpdateStockTake(ctx context.Context, ownerID int64, input d
 		}
 	}
 
+	// On the draft/in_progress -> completed transition, reconcile on-hand stock
+	// to the counted quantities and ledger the variance.
+	if input.Status == domain.StockTakeStatusCompleted && !alreadyCompleted {
+		if err = r.reconcileStockTake(ctx, qtx, ownerID, input.ID); err != nil {
+			logger.Ctx(ctx).Error("Failed to reconcile stock take", logger.Error(err))
+			return err
+		}
+	}
+
 	if err = tx.Commit(); err != nil {
 		logger.Ctx(ctx).Error("Failed to commit stock take update", logger.Error(err))
 
 		return err
+	}
+
+	return nil
+}
+
+// reconcileStockTake sets each counted product's on-hand stock to the physical
+// count recorded on the stock take and writes an 'adjustment' inventory
+// transaction for the variance. Runs inside the caller's transaction.
+func (r *Repository) reconcileStockTake(ctx context.Context, qtx *sqlc.Queries, ownerID, stockTakeID int64) error {
+	items, err := qtx.GetStockTakeItems(ctx, stockTakeID)
+	if err != nil {
+		return err
+	}
+
+	for _, it := range items {
+		counted, perr := strconv.ParseFloat(it.CountedQty, 64)
+		if perr != nil {
+			return perr
+		}
+		if counted < 0 {
+			continue // a physical count can't be negative; skip bad rows
+		}
+
+		stockStr, serr := qtx.GetProductStockForUpdate(ctx, sqlc.GetProductStockForUpdateParams{
+			OwnerID: ownerID,
+			ID:      it.ProductID,
+		})
+		if errors.Is(serr, sql.ErrNoRows) {
+			continue // product gone / not owned; skip rather than fail the whole take
+		}
+		if serr != nil {
+			return serr
+		}
+
+		current, perr := strconv.ParseFloat(stockStr, 64)
+		if perr != nil {
+			return perr
+		}
+
+		delta := counted - current
+		if delta == 0 {
+			continue
+		}
+
+		if err = qtx.UpdateProductStock(ctx, sqlc.UpdateProductStockParams{
+			StockQuantity: strconv.FormatFloat(counted, 'f', -1, 64),
+			OwnerID:       ownerID,
+			ID:            it.ProductID,
+		}); err != nil {
+			return err
+		}
+
+		if _, err = qtx.InsertInventoryTransactionWithRef(ctx, sqlc.InsertInventoryTransactionWithRefParams{
+			OwnerID:        ownerID,
+			ProductID:      it.ProductID,
+			Type:           sqlc.ErpInventoryTransactionsType("adjustment"),
+			QuantityChange: strconv.FormatFloat(delta, 'f', -1, 64),
+			QuantityBefore: strconv.FormatFloat(current, 'f', -1, 64),
+			QuantityAfter:  strconv.FormatFloat(counted, 'f', -1, 64),
+			ReferenceID:    sql.NullInt64{Int64: stockTakeID, Valid: true},
+			ReferenceType:  sql.NullString{String: "stock_take", Valid: true},
+			CreatedBy:      sql.NullInt64{Int64: ownerID, Valid: true},
+			Notes:          sql.NullString{String: fmt.Sprintf("stock take %d reconciliation", stockTakeID), Valid: true},
+		}); err != nil {
+			return err
+		}
 	}
 
 	return nil

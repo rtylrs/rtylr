@@ -35,3 +35,18 @@ WHERE owner_id = ? AND id = ?;
 
 -- name: DeleteStockTakeItems :exec
 DELETE FROM erp_stock_take_items WHERE stock_take_id = ?;
+
+-- name: GetStockTakeStatusForUpdate :one
+SELECT status FROM erp_stock_takes WHERE owner_id = ? AND id = ? FOR UPDATE;
+
+-- name: GetProductStockForUpdate :one
+SELECT stock_quantity FROM erp_products WHERE owner_id = ? AND id = ? FOR UPDATE;
+
+-- name: UpdateProductStock :exec
+UPDATE erp_products SET stock_quantity = ? WHERE owner_id = ? AND id = ?;
+
+-- name: InsertInventoryTransactionWithRef :execresult
+INSERT INTO erp_inventory_transactions
+(owner_id, product_id, type, quantity_change, quantity_before, quantity_after,
+ reference_id, reference_type, created_by, notes)
+VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?);
