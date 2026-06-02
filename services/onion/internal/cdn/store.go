@@ -83,6 +83,28 @@ func (c *CDN) transformationByCacheKey(ctx context.Context, cacheKey string) (*T
 	return t, nil
 }
 
+// uploadKeyOwnerByHash returns the owner of an active, unexpired API key whose
+// SHA-256 hash matches and whose scopes include "upload". ok is false when no
+// such key exists. Used by the write-endpoint auth middleware so any user can
+// authorize uploads with a personal `upload`-scoped key (managed in Dash), not
+// just the shared CDN_API_KEY. Reads the hub_api_keys table directly — the CDN
+// runmode doesn't load the api_keys module.
+func (c *CDN) uploadKeyOwnerByHash(ctx context.Context, keyHash string) (ownerID int64, ok bool) {
+	err := c.db.QueryRowContext(ctx,
+		`SELECT owner_id FROM hub_api_keys
+		 WHERE key_hash = ?
+		   AND is_active = TRUE
+		   AND (expires_at IS NULL OR expires_at > NOW())
+		   AND JSON_CONTAINS(scopes, JSON_QUOTE('upload'))
+		 LIMIT 1`,
+		keyHash,
+	).Scan(&ownerID)
+	if err != nil {
+		return 0, false
+	}
+	return ownerID, true
+}
+
 func (c *CDN) insertTransformation(ctx context.Context, fileID int64, cacheKey, storageKey string, p Params) error {
 	// INSERT IGNORE: two concurrent requests for the same uncached
 	// transformation both generate it; the second insert is a harmless no-op.
