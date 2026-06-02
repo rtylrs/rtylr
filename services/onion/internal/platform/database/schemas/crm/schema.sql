@@ -42,6 +42,7 @@ CREATE TABLE IF NOT EXISTS crm_loyalty_config (
     is_enabled BOOLEAN DEFAULT TRUE,
     points_per_currency_unit DECIMAL(5,2) DEFAULT 1.0,
     currency_per_point DECIMAL(8,4) DEFAULT 0.01,
+    min_redemption_points INT DEFAULT 0,
     bronze_min INT DEFAULT 0,
     silver_min INT DEFAULT 500,
     gold_min INT DEFAULT 1500,

@@ -9,7 +9,8 @@ CREATE TABLE IF NOT EXISTS finance_accounts (
     balance DECIMAL(15,2) DEFAULT 0,
     is_active BOOLEAN DEFAULT TRUE,
     created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
-    INDEX idx_finance_accounts_parent (parent_id)
+    INDEX idx_finance_accounts_parent (parent_id),
+    CONSTRAINT chk_finance_accounts_balance_non_negative CHECK (balance >= 0)
 );
 
 CREATE TABLE IF NOT EXISTS finance_invoices (
