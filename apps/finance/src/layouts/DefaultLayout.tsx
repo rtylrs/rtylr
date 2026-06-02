@@ -1,11 +1,12 @@
 import React, { useEffect, useRef, useState } from 'react';
+import { Avatar } from '@voxire/ui';
 import { signOut, useUserStore } from '@voxire/auth';
 import { CaretPanel, CaretButton, useCaretStore } from '@voxire/caret';
 import TrialBanner from '../shared/components/TrialBanner';
 import { useForesightLinks } from '@voxire/utils';
 import { useNavigate, Link, Outlet, useRouterState } from '@tanstack/react-router';
 import { motion, AnimatePresence } from 'motion/react';
-import { APP_URLS } from '@voxire/config';
+import { APP_URLS, getAvatarUrl } from '@voxire/config';
 import {
   LayoutDashboard,
   FileText,
@@ -13,9 +14,11 @@ import {
   TrendingUp,
   Calculator,
   Bell,
+  ChevronRight,
   Sun,
   Moon,
   Monitor,
+  LogOut,
   ArrowLeft,
   Search as SearchIcon,
   Repeat,
@@ -190,9 +193,12 @@ const DefaultLayout: React.FC = () => {
     () => (localStorage.getItem('finance-theme') as Theme) || 'dark'
   );
   const [searchOpen, setSearchOpen] = useState(false);
+  const [showUserMenu, setShowUserMenu] = useState(false);
   const sidebarRef = useRef<HTMLElement | null>(null);
   const financeUser = useUserStore((s) => s.user);
   const userId = Number(financeUser?.id) || 0;
+  const userEmail = financeUser?.email || financeUser?.emailAddress || null;
+  const userName = financeUser?.name || financeUser?.firstName || userEmail || 'User';
   const { isOpen: caretOpen } = useCaretStore();
 
   useForesightLinks(sidebarRef, {
@@ -352,75 +358,139 @@ const DefaultLayout: React.FC = () => {
             ))}
           </nav>
 
-          <div style={{ padding: 8, borderTop: '1px solid var(--hub-border)' }}>
-            <p
-              style={{
-                fontSize: 10,
-                fontWeight: 600,
-                textTransform: 'uppercase',
-                letterSpacing: '0.08em',
-                color: 'var(--hub-text-dim)',
-                margin: '0 0 6px 4px',
+          <div className="p-2" style={{ borderTop: '1px solid var(--hub-border)' }}>
+            <Link
+              to="/settings"
+              className="flex items-center gap-2 px-3 py-1.5 rounded-lg text-xs mb-1"
+              style={{ color: 'var(--hub-text-muted)', textDecoration: 'none' }}
+              onMouseEnter={(e) => {
+                (e.currentTarget as HTMLElement).style.background = 'var(--hub-hover)';
+              }}
+              onMouseLeave={(e) => {
+                (e.currentTarget as HTMLElement).style.background = 'transparent';
               }}
             >
-              Appearance
-            </p>
-            <div style={{ display: 'flex', gap: 4 }}>
-              {[
-                { value: 'light' as Theme, icon: Sun, label: 'Light' },
-                { value: 'dark' as Theme, icon: Moon, label: 'Dark' },
-                { value: 'system' as Theme, icon: Monitor, label: 'System' },
-              ].map(({ value, icon: Icon, label }) => (
-                <button
-                  key={value}
-                  onClick={() => handleTheme(value)}
+              <SettingsIcon size={12} /> Settings
+            </Link>
+            <CaretButton className="w-full justify-start mb-1" />
+            <div className="relative">
+              <button
+                onClick={() => setShowUserMenu((v) => !v)}
+                className="flex items-center gap-2.5 w-full px-3 py-2 rounded-lg transition-colors duration-150"
+                style={{ background: 'transparent' }}
+                onMouseEnter={(e) => {
+                  (e.currentTarget as HTMLElement).style.background = 'var(--hub-hover)';
+                }}
+                onMouseLeave={(e) => {
+                  (e.currentTarget as HTMLElement).style.background = 'transparent';
+                }}
+              >
+                <Avatar
+                  src={getAvatarUrl(userEmail || userName)}
+                  alt={userName}
+                  size="sm"
+                  className="h-6 w-6"
                   style={{
-                    flex: 1,
-                    display: 'flex',
-                    flexDirection: 'column',
-                    alignItems: 'center',
-                    gap: 4,
-                    padding: '6px 4px',
-                    borderRadius: 8,
-                    fontSize: 10,
-                    fontWeight: 500,
-                    cursor: 'pointer',
-                    border:
-                      theme === value
-                        ? `1px solid color-mix(in srgb, ${ACCENT} 25%, transparent)`
-                        : '1px solid transparent',
                     background:
-                      theme === value
-                        ? 'color-mix(in srgb, var(--finance-accent, #10b981) 12%, transparent)'
-                        : 'var(--hub-hover)',
-                    color: theme === value ? ACCENT : 'var(--hub-text-muted)',
+                      'color-mix(in srgb, var(--finance-accent, #10b981) 15%, transparent)',
                   }}
-                >
-                  <Icon size={13} />
-                  {label}
-                </button>
-              ))}
+                />
+                <div className="flex flex-col items-start min-w-0 flex-1">
+                  <span
+                    className="text-xs font-medium truncate w-full text-left"
+                    style={{ color: 'var(--hub-text)' }}
+                  >
+                    {userName}
+                  </span>
+                  {userEmail && (
+                    <span
+                      className="text-[10px] truncate w-full text-left"
+                      style={{ color: 'var(--hub-text-muted)' }}
+                    >
+                      {userEmail}
+                    </span>
+                  )}
+                </div>
+                <ChevronRight
+                  size={12}
+                  className="shrink-0"
+                  style={{ color: 'var(--hub-text-dim)' }}
+                />
+              </button>
+
+              <AnimatePresence>
+                {showUserMenu && (
+                  <motion.div
+                    initial={{ opacity: 0, y: 4 }}
+                    animate={{ opacity: 1, y: 0 }}
+                    exit={{ opacity: 0, y: 4 }}
+                    transition={{ duration: 0.12 }}
+                    className="absolute bottom-full left-0 right-0 mb-1 rounded-xl p-2 z-50"
+                    style={{
+                      background: 'var(--hub-card)',
+                      border: '1px solid var(--hub-border)',
+                      boxShadow: 'var(--hub-shadow)',
+                    }}
+                  >
+                    <p
+                      className="px-2 py-1 text-[10px] font-semibold uppercase tracking-wider"
+                      style={{ color: 'var(--hub-text-dim)' }}
+                    >
+                      Appearance
+                    </p>
+                    <div className="flex gap-1 mb-2">
+                      {(
+                        [
+                          { value: 'light' as Theme, icon: Sun, label: 'Light' },
+                          { value: 'dark' as Theme, icon: Moon, label: 'Dark' },
+                          { value: 'system' as Theme, icon: Monitor, label: 'System' },
+                        ] as const
+                      ).map(({ value, icon: Icon, label }) => (
+                        <button
+                          key={value}
+                          onClick={() => handleTheme(value)}
+                          className="flex-1 flex flex-col items-center gap-1 py-2 rounded-lg text-[10px] font-medium transition-colors"
+                          style={{
+                            background:
+                              theme === value
+                                ? 'color-mix(in srgb, var(--finance-accent, #10b981) 12%, transparent)'
+                                : 'var(--hub-hover)',
+                            color: theme === value ? ACCENT : 'var(--hub-text-muted)',
+                            border:
+                              theme === value
+                                ? `1px solid color-mix(in srgb, ${ACCENT} 25%, transparent)`
+                                : '1px solid transparent',
+                          }}
+                        >
+                          <Icon size={13} />
+                          {label}
+                        </button>
+                      ))}
+                    </div>
+                    <div
+                      className="my-1"
+                      style={{ height: '1px', background: 'var(--hub-border)' }}
+                    />
+                    <button
+                      type="button"
+                      onClick={() => signOut('finance')}
+                      className="flex items-center gap-2 w-full px-2 py-2 rounded-lg text-sm transition-colors"
+                      style={{ color: 'var(--hr-error, #ef4444)' }}
+                      onMouseEnter={(e) => {
+                        (e.currentTarget as HTMLElement).style.background =
+                          'color-mix(in srgb, var(--hr-error, #ef4444) 8%, transparent)';
+                      }}
+                      onMouseLeave={(e) => {
+                        (e.currentTarget as HTMLElement).style.background = 'transparent';
+                      }}
+                    >
+                      <LogOut size={14} />
+                      Sign out
+                    </button>
+                  </motion.div>
+                )}
+              </AnimatePresence>
             </div>
-            <button
-              type="button"
-              onClick={() => signOut('finance')}
-              style={{
-                display: 'flex',
-                alignItems: 'center',
-                gap: 8,
-                width: '100%',
-                marginTop: 8,
-                padding: '8px 12px',
-                borderRadius: 8,
-                background: 'transparent',
-                border: 'none',
-                color: 'var(--hr-error, #ef4444)',
-                fontSize: 13,
-                cursor: 'pointer',
-              }}
-            >
-              Sign out
-            </button>
           </div>
         </aside>
 

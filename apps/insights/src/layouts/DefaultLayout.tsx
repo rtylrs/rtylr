@@ -250,6 +250,20 @@ const DefaultLayout: React.FC = () => {
           </nav>
 
           <div className="p-2" style={{ borderTop: '1px solid var(--hub-border)' }}>
+            <Link
+              to="/settings"
+              className="flex items-center gap-2 px-3 py-1.5 rounded-lg text-xs mb-1"
+              style={{ color: 'var(--hub-text-muted)', textDecoration: 'none' }}
+              onMouseEnter={(e) => {
+                (e.currentTarget as HTMLElement).style.background = 'var(--hub-hover)';
+              }}
+              onMouseLeave={(e) => {
+                (e.currentTarget as HTMLElement).style.background = 'transparent';
+              }}
+            >
+              <SettingsIcon size={12} /> Settings
+            </Link>
+            <CaretButton className="w-full justify-start mb-1" />
             <div className="relative">
               <button
                 onClick={() => setShowUserMenu((v) => !v)}

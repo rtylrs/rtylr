@@ -404,6 +404,7 @@ const DefaultLayout: React.FC = () => {
             >
               <SettingsIcon size={12} /> Settings
             </Link>
+            <CaretButton className="w-full justify-start mb-1" />
             <div className="relative">
               <button
                 onClick={() => setShowUserMenu((v) => !v)}

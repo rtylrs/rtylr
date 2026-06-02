@@ -1,9 +1,9 @@
 import React, { useEffect, useRef, useState } from 'react';
-import { cn } from '@voxire/ui';
+import { cn, Avatar } from '@voxire/ui';
 import TrialBanner from '../shared/components/TrialBanner';
 import { useLocation, useNavigate, Link, Outlet } from '@tanstack/react-router';
 import { motion, AnimatePresence } from 'motion/react';
-import { APP_URLS } from '@voxire/config';
+import { APP_URLS, getAvatarUrl } from '@voxire/config';
 import { signOut, useUserStore } from '@voxire/auth';
 import { CaretPanel, CaretButton, useCaretStore } from '@voxire/caret';
 import { useQuery } from '@tanstack/react-query';
@@ -189,6 +189,8 @@ const DefaultLayout: React.FC = () => {
   const sidebarRef = useRef<HTMLElement | null>(null);
   const crmUser = useUserStore((s) => s.user);
   const userId = Number(crmUser?.id) || 0;
+  const userEmail = crmUser?.email || crmUser?.emailAddress || null;
+  const userName = crmUser?.name || crmUser?.firstName || userEmail || 'User';
   const { isOpen: caretOpen } = useCaretStore();
   const salesPipelineEnabled = useAddonEnabled('sales_pipeline');
 
@@ -373,12 +375,35 @@ const DefaultLayout: React.FC = () => {
               position: 'relative',
             }}
           >
+            <Link
+              to="/settings"
+              style={{
+                display: 'flex',
+                alignItems: 'center',
+                gap: '8px',
+                padding: '6px 12px',
+                borderRadius: '8px',
+                fontSize: '12px',
+                color: 'var(--hub-text-muted)',
+                textDecoration: 'none',
+                marginBottom: '4px',
+              }}
+              onMouseEnter={(e) => {
+                (e.currentTarget as HTMLElement).style.background = 'var(--hub-hover)';
+              }}
+              onMouseLeave={(e) => {
+                (e.currentTarget as HTMLElement).style.background = 'transparent';
+              }}
+            >
+              <SettingsIcon size={12} /> Settings
+            </Link>
+            <CaretButton className="w-full justify-start mb-1" />
             <button
               onClick={() => setUserMenuOpen((v) => !v)}
               style={{
                 display: 'flex',
                 alignItems: 'center',
-                gap: '8px',
+                gap: '10px',
                 width: '100%',
                 padding: '8px 10px',
                 borderRadius: '8px',
@@ -394,23 +419,13 @@ const DefaultLayout: React.FC = () => {
                 (e.currentTarget as HTMLElement).style.background = 'transparent';
               }}
             >
-              <div
-                style={{
-                  width: '26px',
-                  height: '26px',
-                  borderRadius: '6px',
-                  background: 'rgba(59,130,246,0.15)',
-                  color: ACCENT,
-                  display: 'flex',
-                  alignItems: 'center',
-                  justifyContent: 'center',
-                  fontSize: '11px',
-                  fontWeight: 700,
-                  flexShrink: 0,
-                }}
-              >
-                U
-              </div>
+              <Avatar
+                src={getAvatarUrl(userEmail || userName)}
+                alt={userName}
+                size="sm"
+                className="h-6 w-6"
+                style={{ background: 'rgba(59,130,246,0.15)' }}
+              />
               <div style={{ flex: 1, minWidth: 0, textAlign: 'left' }}>
                 <div
                   style={{
@@ -422,8 +437,21 @@ const DefaultLayout: React.FC = () => {
                     textOverflow: 'ellipsis',
                   }}
                 >
-                  My Account
+                  {userName}
                 </div>
+                {userEmail && (
+                  <div
+                    style={{
+                      fontSize: '10px',
+                      color: 'var(--hub-text-muted)',
+                      whiteSpace: 'nowrap',
+                      overflow: 'hidden',
+                      textOverflow: 'ellipsis',
+                    }}
+                  >
+                    {userEmail}
+                  </div>
+                )}
               </div>
               <ChevronRight size={12} style={{ color: 'var(--hub-text-dim)', flexShrink: 0 }} />
             </button>
