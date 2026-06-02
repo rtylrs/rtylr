@@ -5,6 +5,7 @@ import (
 	"database/sql"
 	"errors"
 	"fmt"
+	"sort"
 	"strconv"
 	"time"
 
@@ -306,6 +307,10 @@ func (r *Repository) ReceivePurchaseOrder(ctx context.Context, ownerID, poID, cr
 	if err != nil {
 		return err
 	}
+
+	// Lock product rows in ascending product order to avoid deadlocks with other
+	// concurrent multi-item stock operations.
+	sort.Slice(items, func(i, j int) bool { return items[i].ProductID < items[j].ProductID })
 
 	// PO receiving lands stock in the tenant's default warehouse location
 	// (per-warehouse routing via destination_location_id is a later slice).

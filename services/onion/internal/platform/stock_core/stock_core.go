@@ -276,12 +276,16 @@ func applyKnown(ctx context.Context, tx DBTX, m Movement, before, after float64)
 		return 0, 0, fmt.Errorf("stock_core: insert ledger: %w", err)
 	}
 
-	// Keep the legacy scalar in sync as the owner-wide total across locations.
+	// Keep the legacy scalar synced by applying the SAME delta, NOT by recomputing
+	// SUM(on_hand). An incremental add takes a write lock on the erp_products row,
+	// which serializes concurrent same-product movements, and adds to the latest
+	// committed value — so it's immune to REPEATABLE-READ snapshot staleness (a
+	// SUM subquery could read a stale snapshot and clobber a concurrent write).
+	// The scalar therefore stays == SUM(on_hand) by construction.
 	if _, err := tx.ExecContext(ctx,
-		`UPDATE erp_products
-		 SET stock_quantity = (SELECT COALESCE(SUM(on_hand), 0) FROM stock_levels WHERE owner_id = ? AND product_id = ?)
+		`UPDATE erp_products SET stock_quantity = stock_quantity + ?
 		 WHERE owner_id = ? AND id = ?`,
-		m.OwnerID, m.ProductID, m.OwnerID, m.ProductID); err != nil {
+		fmtQty(after-before), m.OwnerID, m.ProductID); err != nil {
 		return 0, 0, fmt.Errorf("stock_core: sync scalar cache: %w", err)
 	}
 
