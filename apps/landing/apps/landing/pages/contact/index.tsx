@@ -211,8 +211,14 @@ const ContactPage = (): JSX.Element => {
                           value={form.name}
                           onChange={handleChange}
                           autoComplete="name"
+                          aria-invalid={!!errors.name}
+                          aria-describedby={errors.name ? 'contact-name-error' : undefined}
                         />
-                        {errors.name && <span className={styles.errorMsg}>{errors.name}</span>}
+                        {errors.name && (
+                          <span id="contact-name-error" className={styles.errorMsg}>
+                            {errors.name}
+                          </span>
+                        )}
                       </div>
 
                       <div className={cn(styles.field, errors.email && styles.fieldError)}>
@@ -228,8 +234,14 @@ const ContactPage = (): JSX.Element => {
                           value={form.email}
                           onChange={handleChange}
                           autoComplete="email"
+                          aria-invalid={!!errors.email}
+                          aria-describedby={errors.email ? 'contact-email-error' : undefined}
                         />
-                        {errors.email && <span className={styles.errorMsg}>{errors.email}</span>}
+                        {errors.email && (
+                          <span id="contact-email-error" className={styles.errorMsg}>
+                            {errors.email}
+                          </span>
+                        )}
                       </div>
                     </div>
 
@@ -261,8 +273,14 @@ const ContactPage = (): JSX.Element => {
                         rows={5}
                         value={form.message}
                         onChange={handleChange}
+                        aria-invalid={!!errors.message}
+                        aria-describedby={errors.message ? 'contact-message-error' : undefined}
                       />
-                      {errors.message && <span className={styles.errorMsg}>{errors.message}</span>}
+                      {errors.message && (
+                        <span id="contact-message-error" className={styles.errorMsg}>
+                          {errors.message}
+                        </span>
+                      )}
                     </div>
 
                     <button type="submit" className={styles.submitBtn}>

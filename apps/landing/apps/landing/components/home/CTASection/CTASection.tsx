@@ -79,7 +79,6 @@ const CTASection: React.FC = (): React.JSX.Element => {
             src="/images/home/hero-banner-top-bar-bg.webp"
             alt=""
             className={styles.rightImg}
-            aria-hidden="true"
           />
         </motion.div>
       </div>

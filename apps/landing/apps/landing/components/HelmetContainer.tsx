@@ -39,12 +39,7 @@ const DEFAULT_OG_LOCALE = 'en_US';
 const DEFAULT_OG_TYPE = 'website';
 const DEFAULT_TWITTER_CARD = 'summary_large_image';
 
-function buildOgImageUrl(title: string, description: string): string {
-  const params = new URLSearchParams();
-  params.set('title', title);
-  if (description) params.set('description', description);
-  return `${OG_BASE}/api/og?${params.toString()}`;
-}
+const DEFAULT_OG_IMAGE = `${OG_BASE}/og-default.png`;
 
 function HelmetContainer({
   title = 'rtylr · Your entire business, one platform.',
@@ -66,8 +61,7 @@ function HelmetContainer({
   canonical = '',
   structuredData,
 }: HelmetContainerProps) {
-  // Use the dynamic /api/og route unless the caller passes an explicit image.
-  const effectiveImage = image || buildOgImageUrl(title, ogDescription || description);
+  const effectiveImage = image || DEFAULT_OG_IMAGE;
   const effectiveOgType = ogType || DEFAULT_OG_TYPE;
   const effectiveOgLocale = ogLocale || DEFAULT_OG_LOCALE;
   const effectiveOgSiteName = ogSiteName || DEFAULT_OG_SITE_NAME;
@@ -80,7 +74,6 @@ function HelmetContainer({
 
   return (
     <Head>
-      <meta charSet="utf-8" />
       <title>{title}</title>
       {favicon && <link rel="icon" href={favicon} type="image/x-icon" />}
       <meta name="description" content={description} />

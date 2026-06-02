@@ -1,15 +1,5 @@
 import React, { useState, useEffect } from 'react';
 import { useRouter } from 'next/router';
-import {
-  Chart as ChartJS,
-  LineElement,
-  PointElement,
-  LinearScale,
-  Title,
-  Tooltip,
-  Legend,
-  CategoryScale,
-} from 'chart.js';
 
 import i18next from '../../services/i18next';
 import HelmetContainer from '../HelmetContainer';
@@ -19,8 +9,6 @@ import CustomScrollbar from '../CustomScrollbar/CustomScrollbar';
 // Import Zustand stores and React Query hooks
 import { useUserStore } from '../../stores/userStore';
 import { useUserInfo } from '../../hooks/api/useUserApi';
-
-ChartJS.register(LineElement, PointElement, LinearScale, Title, Tooltip, Legend, CategoryScale);
 
 interface AppLayoutProps {
   children: React.ReactNode;

@@ -4,13 +4,11 @@ import { Button } from '@voxire/components';
 import styles from './Cookies.module.scss';
 
 const Cookies: React.FC = () => {
-  const [showPopup, setShowPopup] = useState(true);
+  const [showPopup, setShowPopup] = useState(false);
 
   useEffect(() => {
     const acceptedCookies = localStorage.getItem('acceptedCookies');
-    if (acceptedCookies === 'true') {
-      setShowPopup(false);
-    }
+    setShowPopup(acceptedCookies !== 'true');
   }, []);
 
   const handleAccept = () => {

@@ -28,6 +28,7 @@ export const MenuBarMenu: React.FC<MenuBarMenuProps> = ({ label, items }) => {
     <div ref={ref} style={{ position: 'relative' }}>
       <button
         onClick={() => setOpen((v) => !v)}
+        aria-expanded={open}
         style={{
           background: open ? 'rgba(255,255,255,0.1)' : 'transparent',
           border: 'none',

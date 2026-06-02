@@ -8,22 +8,22 @@ const useCases = [
   {
     title: 'Food & Beverage',
     description: 'Restaurants, cafes, and bars',
-    href: '/solutions/food-beverage',
+    href: '/pos',
   },
   {
     title: 'Retail & Omnichannel',
     description: 'Stores with online and in-person sales',
-    href: '/solutions/retail',
+    href: '/pos',
   },
   {
     title: 'Services & Appointments',
     description: 'Salons, spas, and service businesses',
-    href: '/solutions/services',
+    href: '/crm',
   },
   {
     title: 'Grocery & Convenience',
     description: 'Supermarkets and convenience stores',
-    href: '/solutions/grocery',
+    href: '/pos',
   },
 ];
 

@@ -27,8 +27,7 @@ const SEO_PROPS = {
   title: 'rtylr · Your entire business, one platform.',
   description:
     'POS, ERP, HR, CRM, Finance & Flow. The all-in-one business OS built for modern teams of every size. Powered by AI.',
-  image: 'https://rtylr.com/images/home/hero-banner-top-bar-bg.webp',
-  url: 'https://rtylr.com',
+  url: 'https://rtylr.com/',
   ogType: 'website' as const,
   ogLocale: 'en_US',
   ogSiteName: 'Rtylr',

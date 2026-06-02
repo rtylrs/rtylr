@@ -45,7 +45,7 @@ export default function DoomWindow(): React.JSX.Element {
         <a
           href={DOOM_URL}
           target="_blank"
-          rel="noreferrer"
+          rel="noopener noreferrer"
           style={{
             display: 'inline-block',
             padding: '10px 28px',

@@ -11,7 +11,8 @@ const testimonials = [
     author: 'Layla Ahmed',
     role: 'Owner, Byblos Kitchen',
     company: 'Restaurant · 3 branches',
-    image: 'https://placehold.co/80x80/d6b88e/1a1612?text=LA',
+    initials: 'LA',
+    avatarColor: '#d6b88e',
   },
   {
     quote:
@@ -19,7 +20,8 @@ const testimonials = [
     author: 'Karim Mansour',
     role: 'General Manager, The Terrace',
     company: 'Restaurant',
-    image: 'https://placehold.co/80x80/c9a48a/1a1612?text=KM',
+    initials: 'KM',
+    avatarColor: '#c9a48a',
   },
   {
     quote:
@@ -27,7 +29,8 @@ const testimonials = [
     author: 'Tarek Zein',
     role: 'Owner, Mountain Café',
     company: 'Restaurant',
-    image: 'https://placehold.co/80x80/b89a8a/1a1612?text=TZ',
+    initials: 'TZ',
+    avatarColor: '#b89a8a',
   },
   {
     quote:
@@ -35,7 +38,8 @@ const testimonials = [
     author: 'Sara Halabi',
     role: 'Operations Manager, Urban Chain',
     company: 'Retail · 5 branches',
-    image: 'https://placehold.co/80x80/a89680/1a1612?text=SH',
+    initials: 'SH',
+    avatarColor: '#a89680',
   },
   {
     quote:
@@ -43,7 +47,8 @@ const testimonials = [
     author: 'Nadine Farhat',
     role: 'Founder, Fresh Market',
     company: 'Grocery · 4 branches',
-    image: 'https://placehold.co/80x80/d6b88e/1a1612?text=NF',
+    initials: 'NF',
+    avatarColor: '#d6b88e',
   },
   {
     quote:
@@ -51,7 +56,8 @@ const testimonials = [
     author: 'Jad Maalof',
     role: 'Manager, Tech Store Pro',
     company: 'Retail',
-    image: 'https://placehold.co/80x80/c9a48a/1a1612?text=JM',
+    initials: 'JM',
+    avatarColor: '#c9a48a',
   },
 ];
 
@@ -83,11 +89,13 @@ const TestimonialsSection: React.FC = () => {
                 <div key={index} className={styles.testimonialCard}>
                   <p className={styles.quote}>&ldquo;{testimonial.quote}&rdquo;</p>
                   <div className={styles.authorInfo}>
-                    <img
-                      src={testimonial.image}
-                      alt={testimonial.author}
+                    <div
                       className={styles.authorImage}
-                    />
+                      style={{ background: testimonial.avatarColor }}
+                      aria-hidden="true"
+                    >
+                      {testimonial.initials}
+                    </div>
                     <div className={styles.authorDetails}>
                       <div className={styles.authorName}>{testimonial.author}</div>
                       <div className={styles.authorRole}>{testimonial.role}</div>
@@ -103,11 +111,13 @@ const TestimonialsSection: React.FC = () => {
                 <div key={index} className={styles.testimonialCard}>
                   <p className={styles.quote}>&ldquo;{testimonial.quote}&rdquo;</p>
                   <div className={styles.authorInfo}>
-                    <img
-                      src={testimonial.image}
-                      alt={testimonial.author}
+                    <div
                       className={styles.authorImage}
-                    />
+                      style={{ background: testimonial.avatarColor }}
+                      aria-hidden="true"
+                    >
+                      {testimonial.initials}
+                    </div>
                     <div className={styles.authorDetails}>
                       <div className={styles.authorName}>{testimonial.author}</div>
                       <div className={styles.authorRole}>{testimonial.role}</div>

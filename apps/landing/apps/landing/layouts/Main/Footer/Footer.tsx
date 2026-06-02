@@ -89,13 +89,13 @@ const Footer: React.FC = () => {
           </div>
 
           <div className={styles['footer-nav']}>
-            {footerSections.map((section, index) => (
-              <div key={index} className={styles['footer-section']}>
+            {footerSections.map((section) => (
+              <div key={section.title} className={styles['footer-section']}>
                 <h3 className={styles['footer-section-title']}>{section.title}</h3>
                 <nav aria-label={`${section.title} navigation`}>
                   <ul className={styles['footer-links']}>
-                    {section.links.map((link, linkIndex) => (
-                      <li key={linkIndex}>
+                    {section.links.map((link) => (
+                      <li key={link.to}>
                         {link.external ? (
                           <a
                             href={link.to}

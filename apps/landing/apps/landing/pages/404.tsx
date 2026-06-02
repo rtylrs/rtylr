@@ -40,6 +40,7 @@ const NotFoundPage = (): JSX.Element => {
         <HelmetContainer
           title="Page not found · rtylr"
           description="The page you're looking for doesn't exist. Here's where you can go next."
+          robots="noindex, follow"
         />
 
         <main className={styles.page}>

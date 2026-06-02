@@ -1,10 +1,12 @@
 import React from 'react';
+import { useRouter } from 'next/router';
 import { APP_URLS } from '@voxire/config';
 import { AppMenu } from './AppMenu';
 import { MenuBarMenu } from './MenuBarMenu';
 import { useDesktopStore, WindowType } from '../../stores/useDesktopStore';
 
 export const MenuBar: React.FC = () => {
+  const router = useRouter();
   const addWindow = useDesktopStore((s) => s.addWindow);
 
   const productsItems = [
@@ -74,7 +76,7 @@ export const MenuBar: React.FC = () => {
           ]}
         />
         <MenuBarMenu label="Docs" items={docsItems} />
-        <MenuBarMenu label="Blog" items={[{ label: 'Blog', onClick: () => {} }]} />
+        <MenuBarMenu label="Blog" items={[{ label: 'Blog', onClick: () => router.push('/blog') }]} />
         <MenuBarMenu label="More" items={moreItems} />
       </div>
 

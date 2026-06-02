@@ -145,6 +145,7 @@ const FeaturesSection: React.FC = (): React.JSX.Element => {
           {FEATURES.map((f, i) => (
             <button
               key={f.id}
+              id={`tab-${f.id}`}
               type="button"
               role="tab"
               aria-selected={i === activeIndex}

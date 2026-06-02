@@ -102,7 +102,7 @@ export default function StatusWindow(): React.JSX.Element {
         <a
           href="https://status.rtylr.com"
           target="_blank"
-          rel="noreferrer"
+          rel="noopener noreferrer"
           style={{
             fontSize: 12,
             color: 'rgba(255,255,255,0.5)',

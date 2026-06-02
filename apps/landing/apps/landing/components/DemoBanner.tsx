@@ -16,7 +16,7 @@ function DemoBanner() {
         }}
         href="https://voxire.com"
         target="_blank"
-        rel="noreferrer"
+        rel="noopener noreferrer"
       >
         Packages
       </a>
