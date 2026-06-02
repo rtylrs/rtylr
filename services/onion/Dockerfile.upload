@@ -41,7 +41,7 @@ RUN CGO_ENABLED=0 GOOS=linux go build \
 # ── Stage 3: runtime ─────────────────────────────────────────────────────────
 FROM debian:bookworm-slim
 RUN apt-get update && apt-get install -y --no-install-recommends \
-    ca-certificates tzdata libvips libvips-cpp ffmpeg \
+    ca-certificates tzdata libvips42 ffmpeg \
     && rm -rf /var/lib/apt/lists/*
 WORKDIR /app
 COPY --from=go-builder   /app/upload                  /app/upload
