@@ -44,10 +44,14 @@ export function pickAvatarStyle(seed?: string | null): AvatarStyle {
 
 export function getAvatarUrl(seed?: string | null, style?: AvatarStyle): string {
   const raw = (seed || 'user').trim().toLowerCase();
-  // The seed is usually a user's email/name — never send that PII to the
-  // third-party avatar service. Hash it first: dicebear only ever sees an
-  // opaque, non-reversible token. Deterministic, so a user's avatar is stable.
-  // (The style is still derived from `raw` so it doesn't shift for existing users.)
+  // The seed is usually a user's email/name. Hashing it keeps the raw PII
+  // *string* out of the third-party avatar URL (so an email isn't sitting in
+  // dicebear's request logs / the Referer header). This is obfuscation, not
+  // anonymization: hashSeed is a fast non-keyed hash and a low-entropy email
+  // is still brute-forceable, so the result is best treated as a stable derived
+  // identifier. The proper fix is a random per-user avatar seed persisted
+  // server-side at signup (uncorrelated with email) — tracked as a follow-up.
+  // The avatar style stays derived from `raw` so it doesn't shift for existing users.
   const key = hashSeed(raw).toString(36);
   const chosen = style || pickAvatarStyle(raw);
   return `https://api.dicebear.com/9.x/${chosen}/svg?seed=${encodeURIComponent(key)}`;
