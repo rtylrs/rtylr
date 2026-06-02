@@ -12,7 +12,7 @@ import (
 	"github.com/voxire/onion/internal/platform/logger"
 )
 
-// isLongLivedRequest matches WS / SSE / Upgrade so the 15s timeout doesn't fire.
+// isLongLivedRequest matches WS / SSE / Upgrade so the 30s timeout doesn't fire.
 func isLongLivedRequest(r *http.Request) bool {
 	if strings.EqualFold(r.Header.Get("Upgrade"), "websocket") {
 		return true
@@ -31,7 +31,7 @@ const (
 	// When this deadline fires, all in-flight QueryContext / ExecContext
 	// calls on the request context are cancelled, so no goroutine hangs
 	// past this point waiting for MySQL.
-	RequestTimeout = 15 * time.Second
+	RequestTimeout = 30 * time.Second
 
 	// SlowQueryThreshold is the soft warn threshold. Requests that
 	// complete (or time out) after this duration are logged with
@@ -39,7 +39,7 @@ const (
 	SlowQueryThreshold = 5 * time.Second
 )
 
-// RequestTimeoutMiddleware enforces a 15s hard deadline and warns on >5s.
+// RequestTimeoutMiddleware enforces a 30s hard deadline and warns on >5s.
 // Skips long-lived (WS/SSE/Upgrade) requests.
 func RequestTimeoutMiddleware(next http.Handler) http.Handler {
 	return http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
