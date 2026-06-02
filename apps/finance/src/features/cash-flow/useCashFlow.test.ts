@@ -31,24 +31,24 @@ describe('useCashFlow', () => {
     vi.clearAllMocks();
   });
 
-  it('fetches cash flow data on mount', async () => {
+  it('fetches the cash flow series on mount', async () => {
     (safe.get as ReturnType<typeof vi.fn>).mockResolvedValue({
-      points: [
-        { month: 'Jan', inflow: 5000, outflow: 3000 },
-        { month: 'Feb', inflow: 6000, outflow: 4000 },
+      series: [
+        { date: '2026-01-01', inflowMinorUnits: 500000, outflowMinorUnits: 300000 },
+        { date: '2026-02-01', inflowMinorUnits: 600000, outflowMinorUnits: 400000 },
       ],
     });
     const { result } = renderHook(() => useCashFlow(), { wrapper: createWrapper() });
     await waitFor(() => expect(result.current.isSuccess).toBe(true));
     expect(safe.get).toHaveBeenCalledWith(
-      '/finance/reports/cash-flow',
+      '/insights/financial/cash-flow',
       expect.objectContaining({ params: expect.objectContaining({ from: expect.any(String) }) })
     );
     expect(result.current.data).toHaveLength(2);
   });
 
   it('returns empty array when no data', async () => {
-    (safe.get as ReturnType<typeof vi.fn>).mockResolvedValue({ points: [] });
+    (safe.get as ReturnType<typeof vi.fn>).mockResolvedValue({ series: [] });
     const { result } = renderHook(() => useCashFlow(), { wrapper: createWrapper() });
     await waitFor(() => expect(result.current.isSuccess).toBe(true));
     expect(result.current.data).toEqual([]);
@@ -60,12 +60,13 @@ describe('useCashFlow', () => {
     expect(result.current.isLoading).toBe(true);
   });
 
-  it('parses inflow and outflow from data points', async () => {
+  it('maps minor units to major-unit inflow/outflow points', async () => {
     (safe.get as ReturnType<typeof vi.fn>).mockResolvedValue({
-      points: [{ month: 'Mar', inflow: 8000, outflow: 5000 }],
+      series: [{ date: '2026-03-01', inflowMinorUnits: 800000, outflowMinorUnits: 500000 }],
     });
     const { result } = renderHook(() => useCashFlow(), { wrapper: createWrapper() });
     await waitFor(() => expect(result.current.isSuccess).toBe(true));
+    expect(result.current.data?.[0]?.month).toBe('2026-03-01');
     expect(result.current.data?.[0]?.inflow).toBe(8000);
     expect(result.current.data?.[0]?.outflow).toBe(5000);
   });

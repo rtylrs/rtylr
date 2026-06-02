@@ -78,8 +78,11 @@ describe('cashFlowSchema', () => {
   });
 
   it('accepts the "periods" array alias', () => {
-    const result = cashFlowSchema.parse({ periods: [{ month: 'Jan', value: 1000 }] });
+    const result = cashFlowSchema.parse({
+      periods: [{ date: '2024-01-01', inflowMinorUnits: 1000, outflowMinorUnits: 500 }],
+    });
     expect(Array.isArray(result.periods)).toBe(true);
+    expect(result.periods?.[0]?.inflowMinorUnits).toBe(1000);
   });
 
   it('accepts an empty object', () => {

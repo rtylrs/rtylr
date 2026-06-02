@@ -21,15 +21,27 @@ const barDataPointSchema = z.object({
   expenses: z.number().default(0),
 });
 
+/**
+ * Mirrors the DEPLOYED onion finance DashboardResponse
+ * (invoices module, dashboard_handler.go): total_receivable, overdue_amount,
+ * total_expenses_mtd, net_profit_mtd -> camelCased by the @voxire/api interceptor.
+ *
+ * The richer fields (revenue/profit changes, recent transactions, overdue list,
+ * bar series) are not yet returned by the backend; they remain optional with
+ * safe defaults so the dashboard degrades gracefully until the backend is
+ * extended. See the backend followup to populate them server-side.
+ */
 export const dashboardStatsSchema = z.object({
-  totalRevenueMTD: z.number().default(0),
-  totalExpensesMTD: z.number().default(0),
-  netProfit: z.number().default(0),
-  outstandingInvoicesTotal: z.number().default(0),
+  totalReceivable: z.number().default(0),
+  overdueAmount: z.number().default(0),
+  totalExpensesMtd: z.number().default(0),
+  netProfitMtd: z.number().default(0),
+
+  // Optional / not yet sent by the backend.
   outstandingInvoicesCount: z.number().default(0),
-  totalRevenueMTDChange: z.string().default('0%'),
-  totalExpensesMTDChange: z.string().default('0%'),
-  netProfitChange: z.string().default('0%'),
+  totalRevenueMtdChange: z.string().default('+0%'),
+  totalExpensesMtdChange: z.string().default('+0%'),
+  netProfitChange: z.string().default('+0%'),
   recentTransactions: z.array(transactionSchema).default([]),
   overdueInvoices: z.array(overdueInvoiceSchema).default([]),
   barData: z.array(barDataPointSchema).default([]),

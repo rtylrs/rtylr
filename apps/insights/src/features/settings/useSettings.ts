@@ -36,7 +36,7 @@ export function useScheduledReports() {
     queryKey: ['insights', 'scheduled-reports'],
     queryFn: async () => {
       const res = await unwrap(insightsService.getScheduledReports());
-      const raw = (res as Record<string, unknown>)?.reports ?? res;
+      const raw = (res as Record<string, unknown>)?.scheduledReports;
       return z.array(scheduledReportSchema).parse(Array.isArray(raw) ? raw : []);
     },
   });

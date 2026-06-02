@@ -44,7 +44,7 @@ describe('useInsightsSettings', () => {
   });
 
   it('fetches settings on mount', async () => {
-    const data = { currency: 'USD', timezone: 'UTC', emailReports: true };
+    const data = { defaultCurrency: 'USD', fiscalYearStart: '01-01', timezone: 'UTC' };
     (insightsService.getInsightsSettings as any).mockResolvedValue(data);
     const { result } = renderHook(() => useInsightsSettings(), {
       wrapper: createWrapper(),
@@ -68,14 +68,14 @@ describe('useUpdateInsightsSettings', () => {
   });
 
   it('calls updateInsightsSettings with provided data', async () => {
-    (insightsService.updateInsightsSettings as any).mockResolvedValue({ currency: 'EUR' });
+    (insightsService.updateInsightsSettings as any).mockResolvedValue({ defaultCurrency: 'EUR' });
     const { result } = renderHook(() => useUpdateInsightsSettings(), {
       wrapper: createWrapper(),
     });
     await act(async () => {
-      await result.current.mutateAsync({ currency: 'EUR' });
+      await result.current.mutateAsync({ defaultCurrency: 'EUR' });
     });
-    expect(insightsService.updateInsightsSettings).toHaveBeenCalledWith({ currency: 'EUR' });
+    expect(insightsService.updateInsightsSettings).toHaveBeenCalledWith({ defaultCurrency: 'EUR' });
   });
 });
 
@@ -85,13 +85,16 @@ describe('useScheduledReports', () => {
   });
 
   it('fetches scheduled reports', async () => {
-    const reports = [{ id: '1', name: 'Weekly Sales', frequency: 'weekly', enabled: true }];
-    (insightsService.getScheduledReports as any).mockResolvedValue(reports);
+    const response = {
+      scheduledReports: [{ id: '1', name: 'Weekly Sales', frequency: 'weekly', enabled: true }],
+    };
+    (insightsService.getScheduledReports as any).mockResolvedValue(response);
     const { result } = renderHook(() => useScheduledReports(), {
       wrapper: createWrapper(),
     });
     await waitFor(() => expect(result.current.isSuccess).toBe(true));
     expect(Array.isArray(result.current.data)).toBe(true);
+    expect(result.current.data).toHaveLength(1);
   });
 });
 

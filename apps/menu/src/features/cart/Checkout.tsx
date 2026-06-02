@@ -12,7 +12,7 @@ interface OrderItem {
 }
 
 interface PlaceOrderRequest {
-  business_id: number;
+  owner_id: number;
   customer_name: string;
   customer_email: string;
   customer_phone: string;
@@ -23,7 +23,6 @@ interface PlaceOrderRequest {
 interface PlaceOrderResponse {
   order_id: number;
   order_number: string;
-  estimated_minutes: number;
 }
 
 const Checkout = (): React.JSX.Element => {
@@ -68,7 +67,7 @@ const Checkout = (): React.JSX.Element => {
     setSubmitting(true);
 
     const body: PlaceOrderRequest = {
-      business_id: businessId,
+      owner_id: businessId,
       customer_name: name.trim(),
       customer_email: email.trim(),
       customer_phone: phone.trim(),

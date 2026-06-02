@@ -3,22 +3,35 @@ import { customerSchema, timelineEntrySchema } from '../customers';
 
 const baseCustomer = {
   id: 1,
-  name: 'Jane Doe',
+  firstName: 'Jane',
+  lastName: 'Doe',
   email: 'jane@example.com',
   phone: '+1 555-0100',
   totalSpent: 1250.0,
-  visits: 18,
+  visitCount: 18,
   loyaltyPoints: 850,
-  lastVisit: '2024-05-15',
-  initials: 'JD',
+  lastVisitAt: '2024-05-15',
+  loyaltyTier: 'Gold',
 };
 
 describe('customerSchema', () => {
-  it('parses a minimal valid customer', () => {
+  it('parses a customer from the backend wire shape', () => {
     const result = customerSchema.parse(baseCustomer);
     expect(result.id).toBe(1);
-    expect(result.name).toBe('Jane Doe');
+    expect(result.firstName).toBe('Jane');
+    expect(result.lastName).toBe('Doe');
     expect(result.loyaltyPoints).toBe(850);
+    expect(result.visitCount).toBe(18);
+    expect(result.lastVisitAt).toBe('2024-05-15');
+    expect(result.loyaltyTier).toBe('Gold');
+  });
+
+  it('derives display name, initials, visits and lastVisit', () => {
+    const result = customerSchema.parse(baseCustomer);
+    expect(result.name).toBe('Jane Doe');
+    expect(result.initials).toBe('JD');
+    expect(result.visits).toBe(18);
+    expect(result.lastVisit).toBe('2024-05-15');
   });
 
   it('coerces string id to number', () => {
@@ -31,26 +44,18 @@ describe('customerSchema', () => {
     expect(result.tags).toEqual(['vip', 'regular']);
   });
 
-  it('accepts optional consent object', () => {
-    const result = customerSchema.parse({
-      ...baseCustomer,
-      consent: { email: true, sms: false, marketing: true },
-    });
-    expect(result.consent?.email).toBe(true);
-    expect(result.consent?.sms).toBe(false);
-  });
-
   it('allows null referredBy', () => {
     const result = customerSchema.parse({ ...baseCustomer, referredBy: null });
     expect(result.referredBy).toBeNull();
   });
 
-  it('accepts optional birthday and notes', () => {
+  it('accepts optional dateOfBirth and notes', () => {
     const result = customerSchema.parse({
       ...baseCustomer,
-      birthday: '1990-06-15',
+      dateOfBirth: '1990-06-15',
       notes: 'Prefers oat milk',
     });
+    expect(result.dateOfBirth).toBe('1990-06-15');
     expect(result.birthday).toBe('1990-06-15');
     expect(result.notes).toBe('Prefers oat milk');
   });

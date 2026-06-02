@@ -8,20 +8,21 @@ import {
   hasTag,
   customerLabel,
 } from './customerUtils';
-import type { Customer } from '../schemas/customers';
+import { customerSchema, type Customer } from '../schemas/customers';
 
-const makeCustomer = (overrides: Partial<Customer> = {}): Customer => ({
-  id: 1,
-  name: 'Jane Doe',
-  email: 'jane@example.com',
-  phone: '+1 555-0100',
-  totalSpent: 500,
-  visits: 10,
-  loyaltyPoints: 200,
-  lastVisit: '2024-01-01',
-  initials: 'JD',
-  ...overrides,
-});
+const makeCustomer = (overrides: Record<string, unknown> = {}): Customer =>
+  customerSchema.parse({
+    id: 1,
+    firstName: 'Jane',
+    lastName: 'Doe',
+    email: 'jane@example.com',
+    phone: '+1 555-0100',
+    totalSpent: 500,
+    visitCount: 10,
+    loyaltyPoints: 200,
+    lastVisitAt: '2024-01-01',
+    ...overrides,
+  });
 
 describe('hasEmailConsent', () => {
   it('returns true when email consent is true', () => {
@@ -55,13 +56,13 @@ describe('daysSinceLastVisit', () => {
   it('returns 0 for a visit today', () => {
     const today = new Date();
     const dateStr = today.toISOString().split('T')[0];
-    const c = makeCustomer({ lastVisit: dateStr });
+    const c = makeCustomer({ lastVisitAt: dateStr });
     expect(daysSinceLastVisit(c, today)).toBe(0);
   });
 
   it('returns the correct number of days', () => {
     const now = new Date('2024-05-10');
-    const c = makeCustomer({ lastVisit: '2024-04-30' });
+    const c = makeCustomer({ lastVisitAt: '2024-04-30' });
     expect(daysSinceLastVisit(c, now)).toBe(10);
   });
 });
@@ -69,13 +70,13 @@ describe('daysSinceLastVisit', () => {
 describe('isAtRisk', () => {
   it('returns true when days since last visit >= atRiskDays', () => {
     const now = new Date('2024-05-10');
-    const c = makeCustomer({ lastVisit: '2024-04-10' });
+    const c = makeCustomer({ lastVisitAt: '2024-04-10' });
     expect(isAtRisk(c, 30, now)).toBe(true);
   });
 
   it('returns false when days since last visit < atRiskDays', () => {
     const now = new Date('2024-05-10');
-    const c = makeCustomer({ lastVisit: '2024-04-25' });
+    const c = makeCustomer({ lastVisitAt: '2024-04-25' });
     expect(isAtRisk(c, 30, now)).toBe(false);
   });
 });
@@ -105,7 +106,7 @@ describe('hasTag', () => {
 
 describe('customerLabel', () => {
   it('formats name and email together', () => {
-    const c = makeCustomer({ name: 'Jane Doe', email: 'jane@example.com' });
+    const c = makeCustomer({ firstName: 'Jane', lastName: 'Doe', email: 'jane@example.com' });
     expect(customerLabel(c)).toBe('Jane Doe <jane@example.com>');
   });
 });

@@ -38,7 +38,7 @@ describe('useCustomerAnalytics', () => {
   });
 
   it('fetches customer analytics on mount', async () => {
-    const data = { totalCustomers: 300, newCustomers: 25, returningCustomers: 275 };
+    const data = { total: 300, newThisMonth: 25, active: 275, churned: 12 };
     (insightsService.getCustomerAnalytics as any).mockResolvedValue(data);
     const { result } = renderHook(() => useCustomerAnalytics(), {
       wrapper: createWrapper(),

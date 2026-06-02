@@ -84,10 +84,10 @@ export interface ApiTask {
 
 export interface ApiLabel {
   id: number;
-  workspace_id: number;
+  workspaceId: number;
   name: string;
   color: string;
-  created_at: string;
+  createdAt: string;
 }
 
 export interface ApiMilestone {
@@ -195,12 +195,12 @@ export interface ApiProjectMember {
 
 export interface ApiTaskActivity {
   id: number;
-  task_id: number;
-  user_id: number;
+  taskId: number;
+  userId: number;
   action: string;
-  old_value: string;
-  new_value: string;
-  created_at: string;
+  oldValue: string;
+  newValue: string;
+  createdAt: string;
 }
 
 export interface ApiTaskComment {
@@ -232,12 +232,12 @@ export interface ApiAttachment {
 
 export interface ApiTimeLog {
   id: number;
-  task_id: number;
-  user_id: number;
-  duration_minutes: number;
+  taskId: number;
+  userId: number;
+  durationMinutes: number;
   description: string;
-  logged_at: string;
-  created_at: string;
+  loggedAt: string;
+  createdAt: string;
 }
 
 export interface ApiTaskDetail {
@@ -391,8 +391,12 @@ export const flowApi = {
 
   getTaskDetail: (id: string) => safe.get<ApiTaskDetail>('/flow/tasks/detail', { params: { id } }),
 
+  // Backend: project_id is optional. When omitted, the handler resolves the
+  // caller's auto-provisioned "Inbox" project in the target workspace
+  // (task_handlers.go CreateTaskHandler.Serve). This powers quick-create from
+  // My Tasks / the command bar where no project is selected.
   createTask: (data: {
-    projectId: string;
+    projectId?: string;
     workspaceId: string;
     title: string;
     status?: ApiTask['status'];
@@ -414,7 +418,7 @@ export const flowApi = {
     safe.put<{ message: string }>('/flow/tasks/status', { id: Number(id), status }),
 
   addComment: (data: { taskId: string; content: string }) =>
-    safe.post<{ comment: unknown }>('/flow/tasks/comment', data),
+    safe.post<{ comment: ApiTaskComment }>('/flow/tasks/comment', data),
 
   // Backend: DELETE /flow/tasks/comment with id in body.
   deleteComment: (id: string) =>

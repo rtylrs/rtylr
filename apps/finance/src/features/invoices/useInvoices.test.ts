@@ -72,9 +72,9 @@ describe('useInvoiceDetail', () => {
       status: 'Sent' as const,
     };
     (safe.get as ReturnType<typeof vi.fn>).mockResolvedValue(inv);
-    const { result } = renderHook(() => useInvoiceDetail('inv-5'), { wrapper: createWrapper() });
+    const { result } = renderHook(() => useInvoiceDetail('5'), { wrapper: createWrapper() });
     await waitFor(() => expect(result.current.isSuccess).toBe(true));
-    expect(safe.get).toHaveBeenCalledWith('/finance/invoices/inv-5');
+    expect(safe.get).toHaveBeenCalledWith('/finance/invoices/detail', { params: { id: 5 } });
   });
 
   it('does not fetch when id is undefined', () => {
@@ -102,11 +102,11 @@ describe('useUpdateInvoice', () => {
     vi.clearAllMocks();
   });
 
-  it('calls PUT /finance/invoices/:id', async () => {
-    (safe.put as ReturnType<typeof vi.fn>).mockResolvedValue({ id: 'inv-1' });
+  it('calls PUT /finance/invoices with id in body', async () => {
+    (safe.put as ReturnType<typeof vi.fn>).mockResolvedValue({ id: 1 });
     const { result } = renderHook(() => useUpdateInvoice(), { wrapper: createWrapper() });
-    await act(() => result.current.mutateAsync({ id: 'inv-1', data: { amount: 600 } as any }));
-    expect(safe.put).toHaveBeenCalledWith('/finance/invoices/inv-1', { amount: 600 });
+    await act(() => result.current.mutateAsync({ id: '1', data: { amount: 600 } as any }));
+    expect(safe.put).toHaveBeenCalledWith('/finance/invoices', { id: 1, amount: 600 });
   });
 });
 
@@ -115,11 +115,11 @@ describe('useDeleteInvoice', () => {
     vi.clearAllMocks();
   });
 
-  it('calls DELETE /finance/invoices/:id', async () => {
+  it('calls DELETE /finance/invoices with id in body', async () => {
     (safe.delete as ReturnType<typeof vi.fn>).mockResolvedValue(undefined);
     const { result } = renderHook(() => useDeleteInvoice(), { wrapper: createWrapper() });
-    await act(() => result.current.mutateAsync('inv-3'));
-    expect(safe.delete).toHaveBeenCalledWith('/finance/invoices/inv-3');
+    await act(() => result.current.mutateAsync('3'));
+    expect(safe.delete).toHaveBeenCalledWith('/finance/invoices', { data: { id: 3 } });
   });
 });
 
@@ -128,11 +128,11 @@ describe('useUpdateInvoiceStatus', () => {
     vi.clearAllMocks();
   });
 
-  it('calls PUT /finance/invoices/:id/status', async () => {
+  it('calls PUT /finance/invoices/status with id in body', async () => {
     (safe.put as ReturnType<typeof vi.fn>).mockResolvedValue(undefined);
     const { result } = renderHook(() => useUpdateInvoiceStatus(), { wrapper: createWrapper() });
-    await act(() => result.current.mutateAsync({ id: 'inv-1', status: 'Paid' as any }));
-    expect(safe.put).toHaveBeenCalledWith('/finance/invoices/inv-1/status', { status: 'Paid' });
+    await act(() => result.current.mutateAsync({ id: '1', status: 'Paid' as any }));
+    expect(safe.put).toHaveBeenCalledWith('/finance/invoices/status', { id: 1, status: 'Paid' });
   });
 });
 

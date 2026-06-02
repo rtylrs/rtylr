@@ -1,14 +1,10 @@
 import { z } from 'zod';
 
 export const operationsSummarySchema = z.object({
-  headcount: z.number().optional(),
-  totalStaff: z.number().optional(),
   activeStaff: z.number().optional(),
-  avgHoursWorked: z.number().optional(),
-  avgUtilization: z.number().optional(),
-  shiftCoverage: z.number().optional(),
+  shiftsThisWeek: z.number().optional(),
   pendingTimeOff: z.number().optional(),
-  openRoles: z.number().optional(),
+  openLeaveRequests: z.number().optional(),
 });
 
 export const staffUtilizationSchema = z.object({

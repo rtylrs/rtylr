@@ -1,8 +1,8 @@
 import { safe } from '../lib/api';
 
 export interface InsightsSettingsPayload {
-  defaultPeriod?: string;
-  currency?: string;
+  defaultCurrency?: string;
+  fiscalYearStart?: string;
   timezone?: string;
   [key: string]: unknown;
 }

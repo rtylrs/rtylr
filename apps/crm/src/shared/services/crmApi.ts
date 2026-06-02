@@ -401,7 +401,7 @@ export const crmApi = {
   getSegmentById: (id: number) => safe.get<Segment>('/crm/segments/detail', { params: { id } }),
 
   getSegmentCustomers: (id: number) =>
-    safe.get<Customer[]>('/crm/segments/customers', { params: { id } }),
+    safe.get<Customer[]>('/crm/segments/customers', { params: { segment_id: id } }),
 
   createSegment: (data: Partial<Segment>) => safe.post<Segment>('/crm/segments', data),
 
@@ -416,7 +416,7 @@ export const crmApi = {
   getCampaignById: (id: number) => safe.get<Campaign>('/crm/campaigns/detail', { params: { id } }),
 
   getCampaignStats: (id: number) =>
-    safe.get<CampaignStats>('/crm/campaigns/stats', { params: { id } }),
+    safe.get<CampaignStats>('/crm/campaigns/stats', { params: { campaign_id: id } }),
 
   createCampaign: (data: Partial<Campaign>) => safe.post<Campaign>('/crm/campaigns', data),
 

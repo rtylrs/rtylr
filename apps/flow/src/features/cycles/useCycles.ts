@@ -4,17 +4,16 @@ import { toast } from 'sonner';
 import { flowApi } from '../../shared/services/flowApi';
 import type { ApiCycle } from '../../shared/services/flowApi';
 import { useFlowStore } from '../../shared/stores/flowStore';
+import { unwrapListResponse } from '../../shared/lib/unwrapListResponse';
 
-export function useCycles(workspaceId?: string) {
+export function useCycles(workspaceId?: string): ReturnType<typeof useQuery<ApiCycle[]>> {
   const { activeWorkspaceId } = useFlowStore();
   const wsId = workspaceId ?? activeWorkspaceId;
   return useQuery<ApiCycle[]>({
     queryKey: ['cycles', wsId],
     queryFn: async () => {
       const res = await unwrap(flowApi.getCycles(wsId));
-      if (Array.isArray(res)) return res;
-      const wrapped = res as { cycles?: ApiCycle[] };
-      return wrapped.cycles ?? [];
+      return unwrapListResponse<ApiCycle>(res, 'cycles');
     },
   });
 }

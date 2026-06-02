@@ -16,13 +16,13 @@ const NewExpense: React.FC = () => {
   const [receipt, setReceipt] = useState<string | null>(null);
   const [description, setDescription] = useState('');
   const [amount, setAmount] = useState(0);
-  const [category, setCategory] = useState('');
+  const [categoryId, setCategoryId] = useState<number | undefined>(undefined);
   const [date, setDate] = useState(new Date().toISOString().slice(0, 10));
   const [notes, setNotes] = useState('');
   const createExpense = useCreateExpense();
 
   const handleSave = (): void => {
-    if (!description.trim() || !category) {
+    if (!description.trim() || categoryId === undefined) {
       toast.error('Description and category are required');
       return;
     }
@@ -31,7 +31,14 @@ const NewExpense: React.FC = () => {
       return;
     }
     createExpense.mutate(
-      { description, amount, category, date, receipt: !!receipt },
+      {
+        description,
+        amount,
+        categoryId,
+        expenseDate: date,
+        receiptUrl: receipt ?? undefined,
+        notes,
+      },
       {
         onSuccess: () => {
           toast.success('Expense submitted');
@@ -86,13 +93,15 @@ const NewExpense: React.FC = () => {
           <div>
             <label style={labelStyle}>Category</label>
             <select
-              value={category}
-              onChange={(e) => setCategory(e.target.value)}
+              value={categoryId ?? ''}
+              onChange={(e) =>
+                setCategoryId(e.target.value === '' ? undefined : Number(e.target.value))
+              }
               style={{ ...inputStyle, marginTop: 6 }}
             >
               <option value="">Select category</option>
               {categories.map((c) => (
-                <option key={c.id} value={c.name}>
+                <option key={c.id} value={c.id}>
                   {c.name}
                 </option>
               ))}

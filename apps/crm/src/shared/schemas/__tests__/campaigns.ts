@@ -1,12 +1,13 @@
 import { describe, it, expect } from 'vitest';
 import {
+  campaignSchema,
   isCampaignStatus,
-  isCampaignChannel,
+  isCampaignType,
   isActiveCampaign,
   campaignStatusLabel,
-  campaignChannelLabel,
+  campaignTypeLabel,
   CAMPAIGN_STATUS_LABELS,
-  CAMPAIGN_CHANNEL_LABELS,
+  CAMPAIGN_TYPE_LABELS,
 } from '../campaigns';
 
 describe('isCampaignStatus', () => {
@@ -21,48 +22,40 @@ describe('isCampaignStatus', () => {
   });
 });
 
-describe('isCampaignChannel', () => {
-  it('returns true for valid channels', () => {
-    expect(isCampaignChannel('email')).toBe(true);
-    expect(isCampaignChannel('sms')).toBe(true);
-    expect(isCampaignChannel('push')).toBe(true);
+describe('isCampaignType', () => {
+  it('returns true for valid types', () => {
+    expect(isCampaignType('email')).toBe(true);
+    expect(isCampaignType('sms')).toBe(true);
+    expect(isCampaignType('push')).toBe(true);
   });
-  it('returns false for invalid channels', () => {
-    expect(isCampaignChannel('whatsapp')).toBe(false);
+  it('returns false for invalid types', () => {
+    expect(isCampaignType('whatsapp')).toBe(false);
   });
 });
 
 describe('isActiveCampaign', () => {
   it('returns true for active campaign', () => {
-    const campaign = {
+    const campaign = campaignSchema.parse({
       id: 1,
       name: 'Test',
-      description: '',
-      channel: 'email',
+      type: 'email',
       status: 'active',
-      audience: 0,
-      sent: 0,
-      openRate: '0',
-      clickRate: '0',
-      revenue: '0',
+      sentCount: 0,
+      openCount: 0,
       updatedAt: '',
-    };
+    });
     expect(isActiveCampaign(campaign)).toBe(true);
   });
   it('returns false for draft campaign', () => {
-    const campaign = {
+    const campaign = campaignSchema.parse({
       id: 1,
       name: 'Test',
-      description: '',
-      channel: 'email',
+      type: 'email',
       status: 'draft',
-      audience: 0,
-      sent: 0,
-      openRate: '0',
-      clickRate: '0',
-      revenue: '0',
+      sentCount: 0,
+      openCount: 0,
       updatedAt: '',
-    };
+    });
     expect(isActiveCampaign(campaign)).toBe(false);
   });
 });
@@ -78,13 +71,13 @@ describe('campaignStatusLabel', () => {
   });
 });
 
-describe('campaignChannelLabel', () => {
+describe('campaignTypeLabel', () => {
   it('returns correct labels', () => {
-    expect(campaignChannelLabel('email')).toBe('Email');
-    expect(campaignChannelLabel('sms')).toBe('SMS');
-    expect(campaignChannelLabel('push')).toBe('Push Notification');
+    expect(campaignTypeLabel('email')).toBe('Email');
+    expect(campaignTypeLabel('sms')).toBe('SMS');
+    expect(campaignTypeLabel('push')).toBe('Push Notification');
   });
-  it('covers all channels in CAMPAIGN_CHANNEL_LABELS', () => {
-    expect(Object.keys(CAMPAIGN_CHANNEL_LABELS)).toHaveLength(3);
+  it('covers all types in CAMPAIGN_TYPE_LABELS', () => {
+    expect(Object.keys(CAMPAIGN_TYPE_LABELS)).toHaveLength(3);
   });
 });

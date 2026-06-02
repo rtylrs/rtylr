@@ -1,13 +1,11 @@
-import React, { useState } from 'react';
+import React, { useMemo, useState } from 'react';
 import { useNavigate } from '@tanstack/react-router';
 import { motion } from 'motion/react';
 import { Plus, Paperclip, Check } from 'lucide-react';
 import { Expense } from '../../shared/services/financeApi';
-import { useExpenses } from './useExpenses';
+import { useExpenses, useExpenseCategories } from './useExpenses';
 
 const ACCENT = '#10b981';
-
-type Category = string;
 
 const categoryColors: Record<string, string> = {
   'Food & Bev': '#f59e0b',
@@ -22,6 +20,8 @@ function getCategoryColor(cat: string): string {
   return categoryColors[cat] ?? '#6b7280';
 }
 
+type CategoryNameLookup = (categoryId?: number | null) => string;
+
 const fmt = (n: number) =>
   n.toLocaleString('en-US', { style: 'currency', currency: 'USD', minimumFractionDigits: 0 });
 
@@ -33,9 +33,13 @@ const cardStyle: React.CSSProperties = {
 };
 
 // ── CSS "pie" breakdown (horizontal stacked bar) ──────────────
-const CategoryBar: React.FC<{ expenses: Expense[] }> = ({ expenses }) => {
+const CategoryBar: React.FC<{ expenses: Expense[]; categoryName: CategoryNameLookup }> = ({
+  expenses,
+  categoryName,
+}) => {
   const categoryTotals = expenses.reduce<Record<string, number>>((acc, exp) => {
-    acc[exp.category] = (acc[exp.category] || 0) + exp.amount;
+    const name = categoryName(exp.categoryId);
+    acc[name] = (acc[name] || 0) + exp.amount;
     return acc;
   }, {});
   const grandTotal = Object.values(categoryTotals).reduce((s, v) => s + v, 0);
@@ -111,9 +115,16 @@ const Expenses: React.FC = () => {
   const navigate = useNavigate();
   const [page, setPage] = useState(1);
   const { data, isLoading: loading } = useExpenses({ page });
+  const { data: categories = [] } = useExpenseCategories();
   const expenses: Expense[] = data?.expenses ?? [];
   const hasMore = data?.hasMore ?? false;
   void loading;
+
+  const categoryName: CategoryNameLookup = useMemo(() => {
+    const byId = new Map<number, string>(categories.map((c) => [c.id, c.name]));
+    return (categoryId) =>
+      categoryId != null ? (byId.get(categoryId) ?? 'Uncategorized') : 'Uncategorized';
+  }, [categories]);
 
   const grandTotal = expenses.reduce((s, e) => s + e.amount, 0);
 
@@ -161,7 +172,7 @@ const Expenses: React.FC = () => {
         <h3 style={{ margin: '0 0 16px', fontSize: 14, fontWeight: 600, color: 'var(--hub-text)' }}>
           Breakdown by Category
         </h3>
-        <CategoryBar expenses={expenses} />
+        <CategoryBar expenses={expenses} categoryName={categoryName} />
       </div>
 
       {/* Expenses table */}
@@ -205,28 +216,33 @@ const Expenses: React.FC = () => {
                 onMouseLeave={(e) => (e.currentTarget.style.background = 'transparent')}
               >
                 <td style={{ padding: '11px 16px', fontSize: 12, color: 'var(--hub-text-muted)' }}>
-                  {exp.date}
+                  {exp.expenseDate}
                 </td>
                 <td style={{ padding: '11px 16px', fontSize: 13, color: 'var(--hub-text)' }}>
                   <div>{exp.description}</div>
                   <div style={{ fontSize: 11, color: 'var(--hub-text-dim)' }}>{exp.id}</div>
                 </td>
                 <td style={{ padding: '11px 16px' }}>
-                  <span
-                    style={{
-                      display: 'inline-flex',
-                      alignItems: 'center',
-                      gap: 5,
-                      padding: '3px 10px',
-                      borderRadius: 20,
-                      fontSize: 11,
-                      fontWeight: 600,
-                      background: `${getCategoryColor(exp.category)}18`,
-                      color: getCategoryColor(exp.category),
-                    }}
-                  >
-                    {exp.category}
-                  </span>
+                  {(() => {
+                    const name = categoryName(exp.categoryId);
+                    return (
+                      <span
+                        style={{
+                          display: 'inline-flex',
+                          alignItems: 'center',
+                          gap: 5,
+                          padding: '3px 10px',
+                          borderRadius: 20,
+                          fontSize: 11,
+                          fontWeight: 600,
+                          background: `${getCategoryColor(name)}18`,
+                          color: getCategoryColor(name),
+                        }}
+                      >
+                        {name}
+                      </span>
+                    );
+                  })()}
                 </td>
                 <td
                   style={{
@@ -240,7 +256,7 @@ const Expenses: React.FC = () => {
                   -{fmt(exp.amount)}
                 </td>
                 <td style={{ padding: '11px 16px' }}>
-                  {exp.receipt ? (
+                  {exp.receiptUrl ? (
                     <span
                       style={{
                         display: 'inline-flex',

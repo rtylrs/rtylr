@@ -40,7 +40,7 @@ describe('useProductPerformance', () => {
   });
 
   it('fetches product performance on mount', async () => {
-    const data = { totalProducts: 120, avgRevenue: 250 };
+    const data = { totalSkus: 120, activeSkus: 110, outOfStock: 4, avgMarginPct: 32 };
     (insightsService.getProductPerformance as any).mockResolvedValue(data);
     const { result } = renderHook(() => useProductPerformance(), {
       wrapper: createWrapper(),
@@ -64,7 +64,7 @@ describe('useBestSellers', () => {
   });
 
   it('fetches best sellers list', async () => {
-    const data = [{ id: '1', name: 'Widget A', revenue: 10000, rank: 1 }];
+    const data = { products: [{ id: '1', name: 'Widget A', revenue: 10000, rank: 1 }] };
     (insightsService.getBestSellers as any).mockResolvedValue(data);
     const { result } = renderHook(() => useBestSellers(5), {
       wrapper: createWrapper(),
@@ -91,12 +91,13 @@ describe('useSlowMovers', () => {
   });
 
   it('fetches slow movers list', async () => {
-    const data = [{ id: '2', name: 'Widget C', revenue: 50, rank: 99 }];
+    const data = { products: [{ id: '2', name: 'Widget C', revenue: 50, rank: 99 }] };
     (insightsService.getSlowMovers as any).mockResolvedValue(data);
     const { result } = renderHook(() => useSlowMovers(10), {
       wrapper: createWrapper(),
     });
     await waitFor(() => expect(result.current.isSuccess).toBe(true));
+    expect(result.current.data).toHaveLength(1);
     expect(insightsService.getSlowMovers).toHaveBeenCalledWith({ limit: 10 });
   });
 });
@@ -123,7 +124,9 @@ describe('useCategoryBreakdown', () => {
   });
 
   it('fetches category breakdown list', async () => {
-    const data = [{ category: 'Food', revenue: 30000, pct: 0.6 }];
+    const data = [
+      { categoryId: 1, categoryName: 'Food', unitsSold: 600, revenueMinorUnits: 30000 },
+    ];
     (insightsService.getCategoryBreakdown as any).mockResolvedValue(data);
     const { result } = renderHook(() => useCategoryBreakdown(), {
       wrapper: createWrapper(),

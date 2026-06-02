@@ -11,18 +11,23 @@ export function useRecurringInvoices() {
     queryKey: ['recurring-invoices'],
     queryFn: async () => {
       const res = await unwrap(safe.get<unknown>('/finance/recurring-invoices'));
-      return z.array(recurringInvoiceSchema).parse(unwrapList(res, 'recurring_invoices', 'items'));
+      // Backend ListResponse key is `recurring_invoices` -> camelCased to `recurringInvoices`.
+      return z.array(recurringInvoiceSchema).parse(unwrapList(res, 'recurringInvoices'));
     },
   });
 }
 
+/**
+ * Matches the deployed onion CreateRequest (recurring_invoices handlers.go):
+ * { template_invoice_id, frequency, next_invoice_date, end_date, is_active }.
+ * Written camelCase here; @voxire/api converts to snake_case on the wire.
+ */
 interface CreateRecurringPayload {
-  client: string;
-  amount: number;
-  currency: string;
-  cadence: string;
-  startDate: string;
-  description?: string;
+  templateInvoiceId: number;
+  frequency: string;
+  nextInvoiceDate: string;
+  endDate?: string;
+  isActive?: boolean;
 }
 
 export function useCreateRecurringInvoice() {
@@ -37,11 +42,17 @@ export function useCreateRecurringInvoice() {
   });
 }
 
+/**
+ * The backend exposes pause/resume as dedicated POST endpoints with the id in
+ * the path: POST /finance/recurring-invoices/{id}/pause | /resume.
+ */
 export function useSetRecurringStatus() {
   const qc = useQueryClient();
   return useMutation({
-    mutationFn: ({ id, status }: { id: string; status: 'active' | 'paused' }): Promise<void> =>
-      unwrap(safe.put<void>(`/finance/recurring-invoices/${id}`, { status } as unknown as object)),
+    mutationFn: ({ id, status }: { id: number; status: 'active' | 'paused' }): Promise<void> => {
+      const action = status === 'paused' ? 'pause' : 'resume';
+      return unwrap(safe.post<void>(`/finance/recurring-invoices/${id}/${action}`, {}));
+    },
     onSuccess: () => qc.invalidateQueries({ queryKey: ['recurring-invoices'] }),
     onError: () => toast.error('Failed to update recurring invoice status'),
   });

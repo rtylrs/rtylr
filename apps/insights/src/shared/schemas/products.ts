@@ -1,9 +1,10 @@
 import { z } from 'zod';
 
 export const productPerformanceSchema = z.object({
-  totalProducts: z.number().optional(),
-  avgRevenue: z.number().optional(),
-  topCategory: z.string().optional().nullable(),
+  totalSkus: z.number().optional(),
+  activeSkus: z.number().optional(),
+  outOfStock: z.number().optional(),
+  avgMarginPct: z.number().optional(),
 });
 
 export const productRankingSchema = z.object({
@@ -25,10 +26,10 @@ export const marginAnalysisSchema = z.object({
 });
 
 export const categoryBreakdownSchema = z.object({
-  category: z.string().optional(),
-  revenue: z.number().optional(),
-  pct: z.number().optional(),
-  units: z.number().optional(),
+  categoryId: z.union([z.string(), z.number()]).transform(String).optional(),
+  categoryName: z.string().optional(),
+  unitsSold: z.number().optional(),
+  revenueMinorUnits: z.number().optional(),
   data: z.array(z.unknown()).optional(),
 });
 

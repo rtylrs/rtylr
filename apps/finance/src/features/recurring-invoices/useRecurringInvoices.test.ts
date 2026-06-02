@@ -35,7 +35,15 @@ describe('useRecurringInvoices', () => {
 
   it('fetches recurring invoices on mount', async () => {
     (safe.get as ReturnType<typeof vi.fn>).mockResolvedValue({
-      recurring_invoices: [{ id: '1', client: 'Alpha', amount: 200, cadence: 'monthly' }],
+      recurringInvoices: [
+        {
+          id: 1,
+          templateInvoiceId: 42,
+          frequency: 'monthly',
+          nextInvoiceDate: '2026-07-01',
+          isActive: true,
+        },
+      ],
     });
     const { result } = renderHook(() => useRecurringInvoices(), { wrapper: createWrapper() });
     await waitFor(() => expect(result.current.isSuccess).toBe(true));
@@ -50,19 +58,20 @@ describe('useRecurringInvoices', () => {
   });
 
   it('returns empty array when list is empty', async () => {
-    (safe.get as ReturnType<typeof vi.fn>).mockResolvedValue({ recurring_invoices: [] });
+    (safe.get as ReturnType<typeof vi.fn>).mockResolvedValue({ recurringInvoices: [] });
     const { result } = renderHook(() => useRecurringInvoices(), { wrapper: createWrapper() });
     await waitFor(() => expect(result.current.isSuccess).toBe(true));
     expect(result.current.data).toEqual([]);
   });
 
-  it('coerces numeric id to string', async () => {
+  it('parses the backend payload shape', async () => {
     (safe.get as ReturnType<typeof vi.fn>).mockResolvedValue({
-      recurring_invoices: [{ id: 7, client: 'Beta' }],
+      recurringInvoices: [{ id: 7, templateInvoiceId: 9, frequency: 'weekly', isActive: false }],
     });
     const { result } = renderHook(() => useRecurringInvoices(), { wrapper: createWrapper() });
     await waitFor(() => expect(result.current.isSuccess).toBe(true));
-    expect(result.current.data?.[0]?.id).toBe('7');
+    expect(result.current.data?.[0]?.id).toBe(7);
+    expect(result.current.data?.[0]?.isActive).toBe(false);
   });
 });
 
@@ -72,16 +81,15 @@ describe('useCreateRecurringInvoice', () => {
   });
 
   it('calls POST /finance/recurring-invoices', async () => {
-    (safe.get as ReturnType<typeof vi.fn>).mockResolvedValue({ recurring_invoices: [] });
-    (safe.post as ReturnType<typeof vi.fn>).mockResolvedValue({ id: 'ri-new' });
+    (safe.get as ReturnType<typeof vi.fn>).mockResolvedValue({ recurringInvoices: [] });
+    (safe.post as ReturnType<typeof vi.fn>).mockResolvedValue({ id: 5 });
     const { result } = renderHook(() => useCreateRecurringInvoice(), { wrapper: createWrapper() });
     await act(() =>
       result.current.mutateAsync({
-        client: 'Corp Y',
-        amount: 500,
-        currency: 'USD',
-        cadence: 'monthly',
-        startDate: '2026-07-01',
+        templateInvoiceId: 42,
+        frequency: 'monthly',
+        nextInvoiceDate: '2026-07-01',
+        isActive: true,
       })
     );
     expect(safe.post).toHaveBeenCalledWith('/finance/recurring-invoices', expect.any(Object));

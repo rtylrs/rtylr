@@ -166,28 +166,32 @@ const BarChart: React.FC<{ barData: BarDataPoint[] }> = ({ barData }) => {
 const Dashboard: React.FC = () => {
   const { data: dashData, isLoading: loading } = useFinanceDashboard();
 
+  const expensesMtd = dashData?.totalExpensesMtd ?? 0;
+  const netProfitMtd = dashData?.netProfitMtd ?? 0;
+  // The backend does not send revenue directly; derive it from the identity
+  // revenue = net profit + expenses for the month-to-date figure.
+  const revenueMtd = netProfitMtd + expensesMtd;
+
   const statsItems: StatCardProps[] = [
     {
       label: 'Total Revenue (MTD)',
-      value: loading ? '…' : fmt(dashData?.totalRevenueMTD ?? 0),
-      change: dashData?.totalRevenueMTDChange ?? '+0%',
+      value: loading ? '…' : fmt(revenueMtd),
+      change: dashData?.totalRevenueMtdChange ?? '+0%',
       up: true,
       icon: DollarSign,
       color: '#10b981',
     },
     {
       label: 'Total Expenses (MTD)',
-      value: loading ? '…' : fmt(dashData?.totalExpensesMTD ?? 0),
-      change: dashData?.totalExpensesMTDChange ?? '+0%',
+      value: loading ? '…' : fmt(expensesMtd),
+      change: dashData?.totalExpensesMtdChange ?? '+0%',
       up: false,
       icon: TrendingDown,
       color: '#ef4444',
     },
     {
-      label: 'Net Profit',
-      value: loading
-        ? '…'
-        : fmt((dashData?.totalRevenueMTD ?? 0) - (dashData?.totalExpensesMTD ?? 0)),
+      label: 'Net Profit (MTD)',
+      value: loading ? '…' : fmt(netProfitMtd),
       change: dashData?.netProfitChange ?? '+0%',
       up: true,
       icon: TrendingUp,
@@ -195,10 +199,10 @@ const Dashboard: React.FC = () => {
     },
     {
       label: 'Outstanding Invoices',
-      value: loading ? '…' : fmt(dashData?.outstandingInvoicesTotal ?? 0),
+      value: loading ? '…' : fmt(dashData?.totalReceivable ?? 0),
       change: dashData?.outstandingInvoicesCount
         ? `${dashData.outstandingInvoicesCount} invoices`
-        : '0 invoices',
+        : `${fmt(dashData?.overdueAmount ?? 0)} overdue`,
       up: null,
       icon: FileText,
       color: '#f59e0b',

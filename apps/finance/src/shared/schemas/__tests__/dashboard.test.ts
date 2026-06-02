@@ -4,10 +4,10 @@ import { dashboardStatsSchema } from '../dashboard';
 describe('dashboardStatsSchema', () => {
   it('defaults all numeric fields to zero', () => {
     const result = dashboardStatsSchema.parse({});
-    expect(result.totalRevenueMTD).toBe(0);
-    expect(result.totalExpensesMTD).toBe(0);
-    expect(result.netProfit).toBe(0);
-    expect(result.outstandingInvoicesTotal).toBe(0);
+    expect(result.totalReceivable).toBe(0);
+    expect(result.overdueAmount).toBe(0);
+    expect(result.totalExpensesMtd).toBe(0);
+    expect(result.netProfitMtd).toBe(0);
     expect(result.outstandingInvoicesCount).toBe(0);
   });
 
@@ -43,18 +43,15 @@ describe('dashboardStatsSchema', () => {
     expect(result.barData[0]?.revenue).toBe(3000);
   });
 
-  it('accepts full valid payload', () => {
+  it('accepts the deployed backend payload', () => {
     const result = dashboardStatsSchema.parse({
-      totalRevenueMTD: 50000,
-      totalExpensesMTD: 20000,
-      netProfit: 30000,
-      outstandingInvoicesTotal: 5000,
-      outstandingInvoicesCount: 3,
-      totalRevenueMTDChange: '+10%',
-      totalExpensesMTDChange: '-5%',
-      netProfitChange: '+15%',
+      totalReceivable: 5000,
+      overdueAmount: 1200,
+      totalExpensesMtd: 20000,
+      netProfitMtd: 30000,
     });
-    expect(result.netProfit).toBe(30000);
-    expect(result.totalRevenueMTDChange).toBe('+10%');
+    expect(result.netProfitMtd).toBe(30000);
+    expect(result.totalReceivable).toBe(5000);
+    expect(result.overdueAmount).toBe(1200);
   });
 });

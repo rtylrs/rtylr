@@ -8,7 +8,7 @@ describe('revenueDataSchema', () => {
       total: 50000,
       change: 5000,
       changePct: 11.1,
-      data: [{ date: '2026-01-01', value: 1000 }],
+      data: [{ date: '2026-01-01', amountMinorUnits: 1000 }],
     };
     const result = revenueDataSchema.parse(data);
     expect(result.period).toBe('monthly');
@@ -23,7 +23,7 @@ describe('revenueDataSchema', () => {
 
   it('accepts the "series" alias for the data array', () => {
     const result = revenueDataSchema.parse({
-      series: [{ date: '2026-01-01', value: 200 }],
+      series: [{ date: '2026-01-01', amountMinorUnits: 200 }],
     });
     expect(result.series).toHaveLength(1);
   });
@@ -31,10 +31,10 @@ describe('revenueDataSchema', () => {
 
 describe('revenueByAppSchema', () => {
   it('parses a revenue-by-app entry', () => {
-    const data = { app: 'pos', revenue: 30000, change: 2000, pct: 0.6 };
+    const data = { app: 'pos', amountMinorUnits: 30000, pct: 0.6 };
     const result = revenueByAppSchema.parse(data);
     expect(result.app).toBe('pos');
-    expect(result.revenue).toBe(30000);
+    expect(result.amountMinorUnits).toBe(30000);
   });
 
   it('accepts an empty object (all fields optional)', () => {

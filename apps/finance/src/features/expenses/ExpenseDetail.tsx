@@ -7,10 +7,11 @@ import MoneyDisplay from '../../shared/components/MoneyDisplay';
 import { SkeletonRow } from '../../shared/components/Skeleton';
 import ReceiptUpload from '../../shared/components/ReceiptUpload';
 import { useExpenseById } from './useExpenseById';
+import { useExpenseCategories } from './useExpenses';
 import { useApproveExpense, useRejectExpense } from '../../shared/hooks/queries/useExpenses';
 import { cardStyle, ghostBtn, primaryBtn } from '../../shared/lib/tokens';
 
-const approvalStyle: Record<string, React.CSSProperties> = {
+const statusStyle: Record<string, React.CSSProperties> = {
   pending: {
     background: 'color-mix(in srgb, var(--finance-warning, #f59e0b) 12%, transparent)',
     color: 'var(--finance-warning, #f59e0b)',
@@ -28,9 +29,15 @@ const approvalStyle: Record<string, React.CSSProperties> = {
 const ExpenseDetail: React.FC = () => {
   const { id } = useParams({ strict: false });
   const { data: expense, isLoading } = useExpenseById(id);
+  const { data: categories = [] } = useExpenseCategories();
   const approveMut = useApproveExpense();
   const rejectMut = useRejectExpense();
   const [receipt, setReceipt] = React.useState<string | null>(null);
+
+  const categoryName = React.useMemo(() => {
+    if (expense?.categoryId == null) return 'Uncategorized';
+    return categories.find((c) => c.id === expense.categoryId)?.name ?? 'Uncategorized';
+  }, [categories, expense]);
 
   React.useEffect(() => {
     if (expense?.receiptUrl) setReceipt(expense.receiptUrl);
@@ -67,10 +74,10 @@ const ExpenseDetail: React.FC = () => {
                 padding: '3px 10px',
                 borderRadius: 20,
                 textTransform: 'capitalize',
-                ...approvalStyle[expense.approval],
+                ...(statusStyle[expense.status] ?? statusStyle.pending),
               }}
             >
-              {expense.approval}
+              {expense.status}
             </span>
             <MoneyDisplay amount={expense.amount} />
           </span>
@@ -103,13 +110,13 @@ const ExpenseDetail: React.FC = () => {
       <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: 20 }}>
         <div style={{ ...cardStyle, padding: 20 }}>
           <div style={{ display: 'flex', flexDirection: 'column', gap: 10 }}>
-            <Field label="Date" value={expense.date} />
+            <Field label="Date" value={expense.expenseDate} />
             <Field label="Description" value={expense.description} />
-            <Field label="Category" value={expense.category} />
+            <Field label="Category" value={categoryName} />
             <Field label="Amount">
               <MoneyDisplay amount={expense.amount} />
             </Field>
-            <Field label="Submitter" value={expense.submitter} />
+            <Field label="Vendor" value={expense.vendor ?? undefined} />
             <div
               style={{
                 marginTop: 10,

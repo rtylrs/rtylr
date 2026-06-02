@@ -4,40 +4,16 @@ import { insightsKpisSchema, insightsDashboardSummarySchema } from './dashboard'
 describe('insightsKpisSchema', () => {
   it('parses a full KPIs object', () => {
     const data = {
-      totalRevenue: 500000,
-      ordersThisMonth: 1200,
-      customerCount: 800,
+      revenue: 500000,
+      orderCount: 1200,
       staffCount: 30,
-      avgOrderValue: 42,
-      revenueToday: 8000,
-      revenueTrendPct: 5.2,
-      headcount: 30,
-      lowStockItems: 3,
+      customerCount: 800,
+      lowStockCount: 3,
+      activeApps: 5,
     };
     const result = insightsKpisSchema.parse(data);
-    expect(result.totalRevenue).toBe(500000);
-    expect(result.lowStockItems).toBe(3);
-  });
-
-  it('accepts topProduct as null', () => {
-    const result = insightsKpisSchema.parse({ topProduct: null });
-    expect(result.topProduct).toBeNull();
-  });
-
-  it('accepts topProduct with name and revenue', () => {
-    const result = insightsKpisSchema.parse({
-      topProduct: { name: 'Espresso', revenue: 12000 },
-    });
-    expect(result.topProduct?.name).toBe('Espresso');
-  });
-
-  it('accepts revenueSeries and ordersSeries as number arrays', () => {
-    const result = insightsKpisSchema.parse({
-      revenueSeries: [100, 200, 300],
-      ordersSeries: [10, 20, 30],
-    });
-    expect(result.revenueSeries).toHaveLength(3);
-    expect(result.ordersSeries).toHaveLength(3);
+    expect(result.revenue).toBe(500000);
+    expect(result.lowStockCount).toBe(3);
   });
 
   it('accepts an empty object (all fields optional)', () => {
@@ -46,24 +22,16 @@ describe('insightsKpisSchema', () => {
 });
 
 describe('insightsDashboardSummarySchema', () => {
-  it('parses a full dashboard summary', () => {
+  it('parses a full dashboard summary of metric cards', () => {
     const data = {
-      totalRevenue: 200000,
-      ordersThisMonth: 500,
-      customerCount: 300,
-      staffCount: 20,
-      avgOrderValue: 40,
-      revenueChange: 0.12,
-      newCustomers: 25,
+      revenue: { value: 200000, deltaPct: 0.12 },
+      customers: { value: 300, deltaPct: 0.05 },
+      orders: { value: 500, deltaPct: -0.02 },
+      margin: { value: 35.4, deltaPct: 1.1 },
     };
     const result = insightsDashboardSummarySchema.parse(data);
-    expect(result.totalRevenue).toBe(200000);
-    expect(result.newCustomers).toBe(25);
-  });
-
-  it('accepts topProduct as null', () => {
-    const result = insightsDashboardSummarySchema.parse({ topProduct: null });
-    expect(result.topProduct).toBeNull();
+    expect(result.revenue?.value).toBe(200000);
+    expect(result.margin?.deltaPct).toBe(1.1);
   });
 
   it('accepts an empty object', () => {

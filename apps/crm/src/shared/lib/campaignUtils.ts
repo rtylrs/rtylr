@@ -9,36 +9,36 @@ export function filterCampaignsByStatus(campaigns: Campaign[], status: string): 
   return campaigns.filter((c) => c.status === status);
 }
 
-/** Filter campaigns by channel. */
-export function filterCampaignsByChannel(campaigns: Campaign[], channel: string): Campaign[] {
-  return campaigns.filter((c) => c.channel === channel);
-}
-
-/** Sum total audience across all campaigns. */
-export function totalAudience(campaigns: Campaign[]): number {
-  return campaigns.reduce((sum, c) => sum + c.audience, 0);
+/** Filter campaigns by type (email / sms / push). */
+export function filterCampaignsByType(campaigns: Campaign[], type: string): Campaign[] {
+  return campaigns.filter((c) => c.type === type);
 }
 
 /** Sum total sent messages across all campaigns. */
 export function totalSent(campaigns: Campaign[]): number {
-  return campaigns.reduce((sum, c) => sum + c.sent, 0);
+  return campaigns.reduce((sum, c) => sum + c.sentCount, 0);
 }
 
-/** Return the delivery rate (sent / audience) for a campaign. */
-export function deliveryRate(campaign: Campaign): number {
-  if (campaign.audience === 0) return 0;
-  return campaign.sent / campaign.audience;
+/** Sum total opened messages across all campaigns. */
+export function totalOpened(campaigns: Campaign[]): number {
+  return campaigns.reduce((sum, c) => sum + c.openCount, 0);
+}
+
+/** Return the open rate (opened / sent) for a campaign. */
+export function openRate(campaign: Campaign): number {
+  if (campaign.sentCount === 0) return 0;
+  return campaign.openCount / campaign.sentCount;
 }
 
 /** Sort campaigns by updatedAt descending (newest first). Does not mutate. */
 export function sortByRecency(campaigns: Campaign[]): Campaign[] {
   return [...campaigns].sort(
-    (a, b) => new Date(b.updatedAt).getTime() - new Date(a.updatedAt).getTime()
+    (a, b) => new Date(b.updatedAt ?? 0).getTime() - new Date(a.updatedAt ?? 0).getTime()
   );
 }
 
 /** Return true if a campaign is scheduled for a future date. */
 export function isScheduledInFuture(campaign: Campaign): boolean {
-  if (!campaign.scheduledFor) return false;
-  return new Date(campaign.scheduledFor).getTime() > Date.now();
+  if (!campaign.scheduledAt) return false;
+  return new Date(campaign.scheduledAt).getTime() > Date.now();
 }

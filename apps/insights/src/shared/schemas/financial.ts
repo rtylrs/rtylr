@@ -31,13 +31,19 @@ export const invoiceAgingSchema = z.object({
   buckets: z.array(z.unknown()).optional(),
 });
 
+const cashFlowPointSchema = z.object({
+  date: z.string().optional(),
+  inflowMinorUnits: z.number().optional(),
+  outflowMinorUnits: z.number().optional(),
+});
+
 export const cashFlowSchema = z.object({
   period: z.string().optional(),
   inflow: z.number().optional(),
   outflow: z.number().optional(),
   net: z.number().optional(),
-  data: z.array(z.unknown()).optional(),
-  periods: z.array(z.unknown()).optional(),
+  data: z.array(cashFlowPointSchema).optional(),
+  periods: z.array(cashFlowPointSchema).optional(),
 });
 
 export type ProfitLoss = z.infer<typeof profitLossSchema>;

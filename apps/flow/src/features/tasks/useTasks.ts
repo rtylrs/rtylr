@@ -50,7 +50,9 @@ export function useCreateTask() {
   const qc = useQueryClient();
   return useMutation({
     mutationFn: (data: {
-      projectId: string;
+      // projectId is optional: the backend resolves the caller's auto-created
+      // Inbox project when it is omitted (quick-create from My Tasks).
+      projectId?: string;
       workspaceId: string;
       title: string;
       status?: ApiTask['status'];

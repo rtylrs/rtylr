@@ -65,13 +65,13 @@ describe('useRevenueByApp', () => {
   });
 
   it('fetches revenue by app', async () => {
-    const data = [{ app: 'pos', revenue: 3000 }];
+    const data = { byApp: [{ app: 'pos', amountMinorUnits: 3000, pct: 0.6 }] };
     (insightsService.getRevenueByApp as any).mockResolvedValue(data);
     const { result } = renderHook(() => useRevenueByApp('weekly'), {
       wrapper: createWrapper(),
     });
     await waitFor(() => expect(result.current.isSuccess).toBe(true));
-    expect(result.current.data).toEqual(data);
+    expect(result.current.data).toEqual(data.byApp);
     expect(insightsService.getRevenueByApp).toHaveBeenCalledWith({ period: 'weekly' });
   });
 });

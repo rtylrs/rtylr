@@ -18,6 +18,10 @@ import {
   useUpdateCampaignStatus,
   useDeleteCampaign,
 } from '../../shared/hooks/queries/useCampaigns';
+import {
+  calculateOpenRate,
+  type Campaign as CampaignPayload,
+} from '../../shared/schemas/campaigns';
 import { ConfirmModal } from '../../shared/components/ui';
 
 const ACCENT = '#3b82f6';
@@ -37,6 +41,37 @@ interface Campaign {
   clickRate: string;
   revenue: string;
   updatedAt: string;
+}
+
+const TYPE_TO_CHANNEL: Record<string, Channel> = {
+  email: 'Email',
+  sms: 'SMS',
+  push: 'Push',
+};
+
+const STATUS_TO_DISPLAY: Record<string, CampaignStatus> = {
+  draft: 'Draft',
+  active: 'Active',
+  paused: 'Paused',
+  completed: 'Completed',
+  scheduled: 'Draft',
+};
+
+/** Projects a backend campaign payload onto the local display shape. */
+function toDisplayCampaign(c: CampaignPayload): Campaign {
+  return {
+    id: c.id,
+    name: c.name,
+    description: c.subject ?? '',
+    channel: TYPE_TO_CHANNEL[c.type] ?? 'Email',
+    status: STATUS_TO_DISPLAY[c.status] ?? 'Draft',
+    audience: c.sentCount,
+    sent: c.sentCount,
+    openRate: `${Math.round(calculateOpenRate(c))}%`,
+    clickRate: '-',
+    revenue: '-',
+    updatedAt: c.updatedAt ?? '',
+  };
 }
 
 const statusColor: Record<CampaignStatus, { bg: string; text: string; dot: string }> = {
@@ -333,7 +368,7 @@ const Campaigns: React.FC = () => {
   const { data: fetchedCampaigns } = useListCampaigns();
   const updateStatus = useUpdateCampaignStatus();
   const removeCampaign = useDeleteCampaign();
-  const campaigns: Campaign[] = (fetchedCampaigns as Campaign[]) ?? [];
+  const campaigns: Campaign[] = (fetchedCampaigns ?? []).map(toDisplayCampaign);
   const [statusFilter, setStatusFilter] = useState<'All' | CampaignStatus>('All');
   const [confirmDeleteId, setConfirmDeleteId] = useState<number | null>(null);
 
@@ -341,7 +376,7 @@ const Campaigns: React.FC = () => {
 
   const handleLaunch = (id: number): void => {
     updateStatus.mutate(
-      { id, status: 'Active' },
+      { id, status: 'active' },
       {
         onSuccess: () => toast.success('Campaign launched'),
         onError: () => toast.error('Failed to launch campaign'),
@@ -351,7 +386,7 @@ const Campaigns: React.FC = () => {
 
   const handlePause = (id: number): void => {
     updateStatus.mutate(
-      { id, status: 'Paused' },
+      { id, status: 'paused' },
       {
         onSuccess: () => toast.success('Campaign paused'),
         onError: () => toast.error('Failed to pause campaign'),

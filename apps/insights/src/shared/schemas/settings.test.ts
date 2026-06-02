@@ -4,38 +4,18 @@ import { insightsSettingsSchema, scheduledReportSchema } from './settings';
 describe('insightsSettingsSchema', () => {
   it('parses a full settings object', () => {
     const data = {
-      id: 'set-1',
-      defaultPeriod: 'monthly',
-      defaultDateRange: 'last_30_days',
-      currency: 'USD',
+      defaultCurrency: 'USD',
+      fiscalYearStart: '01-01',
       timezone: 'America/New_York',
-      emailReports: true,
-      emailRecipients: ['admin@example.com'],
-      reportFrequency: 'weekly',
     };
     const result = insightsSettingsSchema.parse(data);
-    expect(result.currency).toBe('USD');
-    expect(result.emailReports).toBe(true);
-    expect(result.emailRecipients).toHaveLength(1);
-  });
-
-  it('coerces numeric id to string', () => {
-    const result = insightsSettingsSchema.parse({ id: 42 });
-    expect(result.id).toBe('42');
-  });
-
-  it('accepts a null reportFrequency', () => {
-    const result = insightsSettingsSchema.parse({ reportFrequency: null });
-    expect(result.reportFrequency).toBeNull();
+    expect(result.defaultCurrency).toBe('USD');
+    expect(result.fiscalYearStart).toBe('01-01');
+    expect(result.timezone).toBe('America/New_York');
   });
 
   it('accepts an empty object (all fields optional)', () => {
     expect(() => insightsSettingsSchema.parse({})).not.toThrow();
-  });
-
-  it('accepts an empty emailRecipients array', () => {
-    const result = insightsSettingsSchema.parse({ emailRecipients: [] });
-    expect(result.emailRecipients).toEqual([]);
   });
 });
 

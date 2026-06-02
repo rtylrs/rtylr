@@ -22,10 +22,14 @@ export interface PublicBusiness {
 
 export interface PublicMenuItem {
   id: number;
+  ownerId: number;
+  categoryId: number;
   name: string;
   sku: string;
   salePrice: number;
   isActive: boolean;
+  createdAt: string;
+  updatedAt: string;
 }
 
 interface BusinessApiResponse {
@@ -39,10 +43,14 @@ interface BusinessApiResponse {
 interface MenuApiResponse {
   items: {
     id: number;
+    owner_id: number;
+    category_id: number;
     name: string;
     sku: string;
     sale_price: number;
     is_active: boolean;
+    created_at: string;
+    updated_at: string;
   }[];
 }
 
@@ -68,10 +76,14 @@ async function fetchPublicMenu(
   const res = await api.get<MenuApiResponse>('/pos/public/menu', { params });
   return (res.data.items ?? []).map((i) => ({
     id: i.id,
+    ownerId: i.owner_id,
+    categoryId: i.category_id,
     name: i.name,
     sku: i.sku,
     salePrice: i.sale_price,
     isActive: i.is_active,
+    createdAt: i.created_at,
+    updatedAt: i.updated_at,
   }));
 }
 

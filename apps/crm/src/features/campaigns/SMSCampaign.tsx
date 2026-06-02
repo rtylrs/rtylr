@@ -26,12 +26,10 @@ const SMSCampaign: React.FC = () => {
     create.mutate(
       {
         name,
-        description: body.slice(0, 50),
-        channel: 'SMS',
-        status: send ? 'Active' : 'Draft',
-        audience: segments.find((s) => s.id === segmentId)?.customerCount || 0,
+        type: 'sms',
+        status: send ? 'active' : 'draft',
         body,
-        segmentId,
+        audienceSegmentId: segmentId,
       },
       {
         onSuccess: () => {

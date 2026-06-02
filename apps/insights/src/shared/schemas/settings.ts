@@ -1,14 +1,9 @@
 import { z } from 'zod';
 
 export const insightsSettingsSchema = z.object({
-  id: z.union([z.string(), z.number()]).transform(String).optional(),
-  defaultPeriod: z.string().optional(),
-  defaultDateRange: z.string().optional(),
-  currency: z.string().optional(),
+  defaultCurrency: z.string().optional(),
+  fiscalYearStart: z.string().optional(),
   timezone: z.string().optional(),
-  emailReports: z.boolean().optional(),
-  emailRecipients: z.array(z.string()).optional(),
-  reportFrequency: z.string().optional().nullable(),
 });
 
 export const scheduledReportSchema = z.object({

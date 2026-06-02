@@ -5,14 +5,13 @@ export const revenueDataSchema = z.object({
   total: z.number().optional(),
   change: z.number().optional(),
   changePct: z.number().optional(),
-  data: z.array(z.object({ date: z.string(), value: z.number() })).optional(),
-  series: z.array(z.object({ date: z.string(), value: z.number() })).optional(),
+  data: z.array(z.object({ date: z.string(), amountMinorUnits: z.number() })).optional(),
+  series: z.array(z.object({ date: z.string(), amountMinorUnits: z.number() })).optional(),
 });
 
 export const revenueByAppSchema = z.object({
   app: z.string().optional(),
-  revenue: z.number().optional(),
-  change: z.number().optional(),
+  amountMinorUnits: z.number().optional(),
   pct: z.number().optional(),
   data: z.array(z.unknown()).optional(),
 });

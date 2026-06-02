@@ -138,7 +138,7 @@ describe('insightsService', () => {
   });
 
   it('updateInsightsSettings calls PUT /insights/settings', () => {
-    const data = { defaultPeriod: 'monthly' };
+    const data = { defaultCurrency: 'USD' };
     insightsService.updateInsightsSettings(data);
     expect(safe.put).toHaveBeenCalledWith('/insights/settings', data);
   });

@@ -10,13 +10,15 @@ import type { CreateJournalEntryRequest } from '@voxire/contracts/finance/v1/jou
 // ── Types ────────────────────────────────────────────────────────
 
 export interface DashboardStats {
-  totalRevenueMTD: number;
-  totalExpensesMTD: number;
-  netProfit: number;
-  outstandingInvoicesTotal: number;
+  // Returned by the deployed backend DashboardResponse.
+  totalReceivable: number;
+  overdueAmount: number;
+  totalExpensesMtd: number;
+  netProfitMtd: number;
+  // Not yet returned by the backend; safe defaults applied by the schema.
   outstandingInvoicesCount: number;
-  totalRevenueMTDChange: string;
-  totalExpensesMTDChange: string;
+  totalRevenueMtdChange: string;
+  totalExpensesMtdChange: string;
   netProfitChange: string;
   recentTransactions: Transaction[];
   overdueInvoices: OverdueInvoice[];
@@ -64,11 +66,18 @@ export interface Invoice {
 
 export interface Expense {
   id: string;
-  date: string;
+  ownerId?: number | null;
+  categoryId?: number | null;
   description: string;
-  category: string;
   amount: number;
-  receipt: boolean;
+  currency?: string | null;
+  vendor?: string | null;
+  receiptUrl?: string | null;
+  expenseDate: string;
+  status: string;
+  notes?: string | null;
+  createdAt?: string | null;
+  updatedAt?: string | null;
 }
 
 export interface ExpenseCategory {

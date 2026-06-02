@@ -2,7 +2,7 @@ import { unwrap } from '@voxire/api';
 import { z } from 'zod';
 import { useQuery } from '@tanstack/react-query';
 import { safe } from '../../shared/lib/api';
-import { cashFlowPointSchema } from '../../shared/schemas/cashFlow';
+import { cashFlowSeriesPointSchema } from '../../shared/schemas/cashFlow';
 import type { CashFlowPoint } from '../../shared/components/CashFlowChart';
 import { unwrapList } from '../../shared/lib/unwrapList';
 
@@ -13,12 +13,17 @@ export function useCashFlow() {
   return useQuery({
     queryKey: ['cash-flow', { from, to }],
     queryFn: async (): Promise<CashFlowPoint[]> => {
+      // Backend cash-flow time series lives at /insights/financial/cash-flow and
+      // returns { series: [{ date, inflowMinorUnits, outflowMinorUnits }] }.
       const res = await unwrap(
-        safe.get<unknown>('/finance/reports/cash-flow', { params: { from, to } })
+        safe.get<unknown>('/insights/financial/cash-flow', { params: { from, to } })
       );
-      return z
-        .array(cashFlowPointSchema)
-        .parse(unwrapList(res, 'points', 'cash_flow')) as CashFlowPoint[];
+      const series = z.array(cashFlowSeriesPointSchema).parse(unwrapList(res, 'series'));
+      return series.map((p) => ({
+        month: p.date,
+        inflow: p.inflowMinorUnits / 100,
+        outflow: p.outflowMinorUnits / 100,
+      }));
     },
   });
 }

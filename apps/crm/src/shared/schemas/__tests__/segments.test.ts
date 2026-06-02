@@ -35,6 +35,25 @@ describe('segmentSchema', () => {
     const result = segmentSchema.parse({ ...baseSegment, icon: 'star' });
     expect(result.icon).toBe('star');
   });
+
+  it('parses a backend wire payload and defaults presentation fields', () => {
+    const result = segmentSchema.parse({
+      id: 7,
+      ownerId: 1,
+      name: 'New Segment',
+      description: 'From the API',
+      filters: { tier: 'gold' },
+      customerCount: 42,
+      createdAt: '2024-06-01T00:00:00Z',
+      updatedAt: '2024-06-02T00:00:00Z',
+    });
+    expect(result.id).toBe(7);
+    expect(result.filters).toEqual({ tier: 'gold' });
+    expect(result.customerCount).toBe(42);
+    expect(result.color).toBe('#3b82f6');
+    expect(result.rules).toEqual([]);
+    expect(result.trendUp).toBe(false);
+  });
 });
 
 describe('SEGMENT_COLORS', () => {

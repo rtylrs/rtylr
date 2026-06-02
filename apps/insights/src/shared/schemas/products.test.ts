@@ -8,15 +8,10 @@ import {
 
 describe('productPerformanceSchema', () => {
   it('parses a product performance summary', () => {
-    const data = { totalProducts: 80, avgRevenue: 350, topCategory: 'Beverages' };
+    const data = { totalSkus: 80, activeSkus: 70, outOfStock: 5, avgMarginPct: 35 };
     const result = productPerformanceSchema.parse(data);
-    expect(result.totalProducts).toBe(80);
-    expect(result.topCategory).toBe('Beverages');
-  });
-
-  it('accepts a null topCategory', () => {
-    const result = productPerformanceSchema.parse({ topCategory: null });
-    expect(result.topCategory).toBeNull();
+    expect(result.totalSkus).toBe(80);
+    expect(result.avgMarginPct).toBe(35);
   });
 
   it('accepts an empty object (all fields optional)', () => {
@@ -66,10 +61,11 @@ describe('marginAnalysisSchema', () => {
 
 describe('categoryBreakdownSchema', () => {
   it('parses a category breakdown entry', () => {
-    const data = { category: 'Food', revenue: 40000, pct: 0.5, units: 2000 };
+    const data = { categoryId: 3, categoryName: 'Food', unitsSold: 2000, revenueMinorUnits: 40000 };
     const result = categoryBreakdownSchema.parse(data);
-    expect(result.category).toBe('Food');
-    expect(result.units).toBe(2000);
+    expect(result.categoryName).toBe('Food');
+    expect(result.unitsSold).toBe(2000);
+    expect(result.categoryId).toBe('3');
   });
 
   it('accepts the "data" array field', () => {

@@ -24,7 +24,7 @@ export function useBestSellers(limit?: number) {
     queryKey: ['insights', 'best-sellers', limit],
     queryFn: async () => {
       const res = await unwrap(insightsService.getBestSellers({ limit }));
-      const raw = (res as Record<string, unknown>)?.products ?? res;
+      const raw = (res as Record<string, unknown>)?.products;
       return z.array(productRankingSchema).parse(Array.isArray(raw) ? raw : []);
     },
   });
@@ -35,7 +35,7 @@ export function useSlowMovers(limit?: number) {
     queryKey: ['insights', 'slow-movers', limit],
     queryFn: async () => {
       const res = await unwrap(insightsService.getSlowMovers({ limit }));
-      const raw = (res as Record<string, unknown>)?.products ?? res;
+      const raw = (res as Record<string, unknown>)?.products;
       return z.array(productRankingSchema).parse(Array.isArray(raw) ? raw : []);
     },
   });

@@ -34,8 +34,12 @@ export const useGetSegment = (id: number | undefined): UseQueryResult<Segment> =
   useQuery<Segment>({
     queryKey: ['crm-segment', id],
     queryFn: async (): Promise<Segment> => {
+      // The live segment-detail route is GET /crm/segments/detail?id= (the
+      // segments module does not register a GET /crm/segments/{id}). It wraps
+      // the segment in a `{ segment, customers }` envelope.
       const res = await unwrap(safe.get<unknown>('/crm/segments/detail', { params: { id } }));
-      return segmentSchema.parse(res);
+      const envelope = (res ?? {}) as { segment?: unknown };
+      return segmentSchema.parse(envelope.segment ?? res);
     },
     enabled: !!id,
   });
@@ -44,7 +48,13 @@ export const useSegmentCustomers = (id: number | undefined): UseQueryResult<Cust
   useQuery<Customer[]>({
     queryKey: ['crm-segment', id, 'customers'],
     queryFn: async (): Promise<Customer[]> => {
-      const res = await unwrap(safe.get<unknown>('/crm/segments/customers', { params: { id } }));
+      // The segment-customers handler reads the `segment_id` query parameter.
+      // Query params are sent verbatim (the api interceptor only converts the
+      // request body camelCase → snake_case), so the snake_case key must be
+      // passed literally here.
+      const res = await unwrap(
+        safe.get<unknown>('/crm/segments/customers', { params: { segment_id: id } })
+      );
       return z.array(customerSchema).parse(unwrapList(res, 'customers'));
     },
     enabled: !!id,
@@ -55,7 +65,21 @@ export const useCreateSegment = (): UseMutationResult<Segment, unknown, Partial<
   const { t } = useTranslation();
   return useMutation<Segment, unknown, Partial<Segment>>({
     mutationFn: async (data: Partial<Segment>): Promise<Segment> => {
-      const res = await unwrap(safe.post<Segment>('/crm/segments', data));
+      // The segments module's CreateSegmentRequest expects a `filters` JSON
+      // object; `rules` is a client-only display projection. Build the request
+      // body from only the fields the backend persists and send both `filters`
+      // and `rules` so the criteria survive regardless of which handler is
+      // wired (the segments module reads `filters`, the older customers-module
+      // handler reads `rules`). Presentation-only fields (color/icon/trend) are
+      // intentionally omitted.
+      const rules = data.rules ?? [];
+      const body = {
+        name: data.name,
+        description: data.description,
+        filters: data.filters ?? { rules },
+        rules,
+      };
+      const res = await unwrap(safe.post<Segment>('/crm/segments', body));
       return res as Segment;
     },
     onSuccess: (): void => {

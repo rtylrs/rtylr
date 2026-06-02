@@ -23,7 +23,7 @@ export function useRevenueByApp(period?: string) {
     queryKey: ['insights', 'revenue-by-app', period],
     queryFn: async () => {
       const res = await unwrap(insightsService.getRevenueByApp({ period }));
-      const raw = (res as Record<string, unknown>)?.apps ?? res;
+      const raw = (res as Record<string, unknown>)?.byApp;
       return z.array(revenueByAppSchema).parse(Array.isArray(raw) ? raw : []);
     },
   });

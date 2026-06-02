@@ -9,15 +9,14 @@ import {
 describe('customerAnalyticsSchema', () => {
   it('parses a full customer analytics object', () => {
     const data = {
-      totalCustomers: 500,
-      newCustomers: 30,
-      returningCustomers: 470,
-      churnRate: 0.05,
-      avgLifetimeValue: 1200,
+      total: 500,
+      newThisMonth: 30,
+      active: 470,
+      churned: 25,
     };
     const result = customerAnalyticsSchema.parse(data);
-    expect(result.totalCustomers).toBe(500);
-    expect(result.churnRate).toBe(0.05);
+    expect(result.total).toBe(500);
+    expect(result.churned).toBe(25);
   });
 
   it('accepts an empty object (all fields optional)', () => {

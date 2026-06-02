@@ -35,13 +35,11 @@ const EmailCampaign: React.FC = () => {
     create.mutate(
       {
         name,
-        description: subject,
-        channel: 'Email',
-        status: send ? 'Active' : 'Draft',
-        audience: segments.find((s) => s.id === segmentId)?.customerCount || 0,
+        type: 'email',
+        status: send ? 'active' : 'draft',
         subject,
         body,
-        segmentId,
+        audienceSegmentId: segmentId,
       },
       {
         onSuccess: () => {

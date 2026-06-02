@@ -1,11 +1,10 @@
 import { z } from 'zod';
 
 export const customerAnalyticsSchema = z.object({
-  totalCustomers: z.number().optional(),
-  newCustomers: z.number().optional(),
-  returningCustomers: z.number().optional(),
-  churnRate: z.number().optional(),
-  avgLifetimeValue: z.number().optional(),
+  total: z.number().optional(),
+  newThisMonth: z.number().optional(),
+  active: z.number().optional(),
+  churned: z.number().optional(),
 });
 
 export const topCustomerSchema = z.object({

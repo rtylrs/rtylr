@@ -34,23 +34,19 @@ describe('useFinanceDashboard', () => {
   });
 
   it('fetches finance dashboard data', async () => {
+    // Mirrors the deployed DashboardResponse (snake_case keys camelCased by
+    // the @voxire/api interceptor before the schema runs).
     const data = {
-      totalRevenueMTD: 50000,
-      totalExpensesMTD: 20000,
-      netProfit: 30000,
-      outstandingInvoicesTotal: 5000,
-      outstandingInvoicesCount: 3,
-      totalRevenueMTDChange: '+10%',
-      totalExpensesMTDChange: '-5%',
-      netProfitChange: '+15%',
-      recentTransactions: [],
-      overdueInvoices: [],
-      barData: [],
+      totalReceivable: 5000,
+      overdueAmount: 1200,
+      totalExpensesMtd: 20000,
+      netProfitMtd: 30000,
     };
     (safe.get as ReturnType<typeof vi.fn>).mockResolvedValue(data);
     const { result } = renderHook(() => useFinanceDashboard(), { wrapper: createWrapper() });
     await waitFor(() => expect(result.current.isSuccess).toBe(true));
     expect(safe.get).toHaveBeenCalledWith('/finance/dashboard');
+    expect(result.current.data?.netProfitMtd).toBe(30000);
   });
 
   it('starts in loading state', () => {

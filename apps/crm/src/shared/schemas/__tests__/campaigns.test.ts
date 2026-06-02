@@ -2,29 +2,29 @@ import { describe, it, expect } from 'vitest';
 import {
   campaignSchema,
   campaignStatsSchema,
+  calculateOpenRate,
   CAMPAIGN_STATUSES,
-  CAMPAIGN_CHANNELS,
+  CAMPAIGN_TYPES,
   isCampaignStatus,
-  isCampaignChannel,
+  isCampaignType,
   isActiveCampaign,
   isDraftCampaign,
   isScheduledCampaign,
   isCompletedCampaign,
   campaignStatusLabel,
-  campaignChannelLabel,
+  campaignTypeLabel,
 } from '../campaigns';
 
 const baseCampaign = {
   id: 1,
   name: 'Summer Sale',
-  description: 'Seasonal promotion',
-  channel: 'email',
+  type: 'email',
   status: 'active',
-  audience: 500,
-  sent: 480,
-  openRate: '42%',
-  clickRate: '12%',
-  revenue: '$1,200',
+  audienceSegmentId: 3,
+  subject: 'Big summer savings',
+  body: 'Shop now',
+  sentCount: 480,
+  openCount: 200,
   updatedAt: '2024-06-01',
 };
 
@@ -33,11 +33,26 @@ describe('campaignSchema', () => {
     const result = campaignSchema.parse(baseCampaign);
     expect(result.id).toBe(1);
     expect(result.name).toBe('Summer Sale');
+    expect(result.type).toBe('email');
+    expect(result.sentCount).toBe(480);
+    expect(result.openCount).toBe(200);
   });
 
   it('coerces a string id to number', () => {
     const result = campaignSchema.parse({ ...baseCampaign, id: '42' });
     expect(result.id).toBe(42);
+  });
+});
+
+describe('calculateOpenRate', () => {
+  it('derives the open rate as a percentage', () => {
+    const result = campaignSchema.parse({ ...baseCampaign, sentCount: 400, openCount: 100 });
+    expect(calculateOpenRate(result)).toBe(25);
+  });
+
+  it('returns 0 when nothing was sent', () => {
+    const result = campaignSchema.parse({ ...baseCampaign, sentCount: 0, openCount: 0 });
+    expect(calculateOpenRate(result)).toBe(0);
   });
 });
 
@@ -73,10 +88,18 @@ describe('isCampaignStatus', () => {
   });
 });
 
-describe('isCampaignChannel', () => {
-  it('validates channel strings', () => {
-    expect(isCampaignChannel('email')).toBe(true);
-    expect(isCampaignChannel('fax')).toBe(false);
+describe('CAMPAIGN_TYPES', () => {
+  it('contains the supported campaign types', () => {
+    expect(CAMPAIGN_TYPES).toContain('email');
+    expect(CAMPAIGN_TYPES).toContain('sms');
+    expect(CAMPAIGN_TYPES).toContain('push');
+  });
+});
+
+describe('isCampaignType', () => {
+  it('validates type strings', () => {
+    expect(isCampaignType('email')).toBe(true);
+    expect(isCampaignType('fax')).toBe(false);
   });
 });
 
@@ -123,10 +146,10 @@ describe('campaignStatusLabel', () => {
   });
 });
 
-describe('campaignChannelLabel', () => {
+describe('campaignTypeLabel', () => {
   it('returns correct labels', () => {
-    expect(campaignChannelLabel('email')).toBe('Email');
-    expect(campaignChannelLabel('sms')).toBe('SMS');
-    expect(campaignChannelLabel('push')).toBe('Push Notification');
+    expect(campaignTypeLabel('email')).toBe('Email');
+    expect(campaignTypeLabel('sms')).toBe('SMS');
+    expect(campaignTypeLabel('push')).toBe('Push Notification');
   });
 });

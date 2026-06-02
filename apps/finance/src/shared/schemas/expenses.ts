@@ -1,16 +1,25 @@
 import { z } from 'zod';
 
+/**
+ * Mirrors the deployed onion expenses `Expense` payload (proto finance/v1
+ * Expense): id, ownerId, categoryId?, amount, currency, description, vendor,
+ * receiptUrl, expenseDate, status, createdAt, updatedAt. Keys are camelCase
+ * because the @voxire/api interceptor converts the snake_case wire shape.
+ */
 export const expenseSchema = z.object({
   id: z.union([z.string(), z.number()]).transform(String),
-  date: z.string().default(''),
+  ownerId: z.number().optional().nullable(),
+  categoryId: z.number().optional().nullable(),
   description: z.string().default(''),
-  category: z.string().default(''),
   amount: z.number().default(0),
-  receipt: z.boolean().default(false),
-  receiptUrl: z.string().optional(),
-  approval: z.string().default('pending'),
-  submitter: z.string().optional(),
-  notes: z.string().optional(),
+  currency: z.string().optional().nullable(),
+  vendor: z.string().optional().nullable(),
+  receiptUrl: z.string().optional().nullable(),
+  expenseDate: z.string().default(''),
+  status: z.string().default('pending'),
+  notes: z.string().optional().nullable(),
+  createdAt: z.string().optional().nullable(),
+  updatedAt: z.string().optional().nullable(),
 });
 
 export const expenseCategorySchema = z.object({

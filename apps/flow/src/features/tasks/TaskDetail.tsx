@@ -108,8 +108,8 @@ function parseDurationInput(raw: string): number | null {
 
 function describeActivity(a: ApiTaskActivity): React.ReactNode {
   const action = a.action;
-  const oldVal = humanizeValue(action, a.old_value);
-  const newVal = humanizeValue(action, a.new_value);
+  const oldVal = humanizeValue(action, a.oldValue);
+  const newVal = humanizeValue(action, a.newValue);
 
   if (action === 'status_changed' || action === 'status_change') {
     return (
@@ -147,7 +147,7 @@ function describeActivity(a: ApiTaskActivity): React.ReactNode {
     .replace(/_/g, ' ')
     .replace(/\bchanged\b/, 'changed')
     .trim();
-  if (a.new_value) {
+  if (a.newValue) {
     return (
       <>
         {label} → <strong>{newVal}</strong>
@@ -301,7 +301,7 @@ const TaskDetail: React.FC = () => {
   const storeLogs = storeTimelogs.filter((tl) => tl.taskId === task.id);
   const hasApiLogs = apiLogs.length > 0 || timeLogsData !== undefined;
   const totalMinutes = hasApiLogs
-    ? apiLogs.reduce((s, l) => s + l.duration_minutes, 0)
+    ? apiLogs.reduce((s, l) => s + l.durationMinutes, 0)
     : storeLogs.reduce((s, t) => s + t.minutes, 0);
 
   const estimatedHours = timeLogsData?.estimated_hours ?? task.estimate ?? null;
@@ -653,7 +653,7 @@ const TaskDetail: React.FC = () => {
                         className="text-[11px] font-semibold"
                         style={{ color: 'var(--accent)' }}
                       >
-                        {formatDuration(log.duration_minutes)}
+                        {formatDuration(log.durationMinutes)}
                       </span>
                       {log.description && (
                         <p
@@ -664,10 +664,10 @@ const TaskDetail: React.FC = () => {
                         </p>
                       )}
                       <p className="text-[10px]" style={{ color: 'var(--flow-text-dim)' }}>
-                        {formatRelative(log.logged_at || log.created_at)}
+                        {formatRelative(log.loggedAt || log.createdAt)}
                       </p>
                     </div>
-                    {(user == null || String(log.user_id) === user.id) && (
+                    {(user == null || String(log.userId) === user.id) && (
                       <button
                         type="button"
                         onClick={() => deleteTimeLogMut.mutate({ id: log.id, taskId: task.id })}
@@ -1074,7 +1074,7 @@ const ActivitySection: React.FC<{ entries: ApiTaskActivity[] }> = ({ entries }) 
             <div className="flex-1 text-[11px]" style={{ color: 'var(--flow-text-muted)' }}>
               {describeActivity(a)}
               <span className="ml-2" style={{ color: 'var(--flow-text-dim)' }}>
-                {formatRelative(a.created_at)}
+                {formatRelative(a.createdAt)}
               </span>
             </div>
           </div>

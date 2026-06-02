@@ -11,17 +11,14 @@ import {
 describe('operationsSummarySchema', () => {
   it('parses a full operations summary', () => {
     const data = {
-      headcount: 50,
-      totalStaff: 50,
       activeStaff: 45,
-      avgHoursWorked: 38,
-      avgUtilization: 0.9,
+      shiftsThisWeek: 120,
       pendingTimeOff: 3,
-      openRoles: 2,
+      openLeaveRequests: 2,
     };
     const result = operationsSummarySchema.parse(data);
-    expect(result.headcount).toBe(50);
-    expect(result.openRoles).toBe(2);
+    expect(result.activeStaff).toBe(45);
+    expect(result.openLeaveRequests).toBe(2);
   });
 
   it('accepts an empty object (all fields optional)', () => {

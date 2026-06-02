@@ -90,7 +90,7 @@ const CampaignDetail: React.FC = () => {
               {campaign.name}
             </h2>
             <p style={{ fontSize: '12px', color: 'var(--hub-text-muted)', margin: '2px 0 0' }}>
-              {campaign.description}
+              {campaign.subject ?? ''}
             </p>
           </div>
           <span
