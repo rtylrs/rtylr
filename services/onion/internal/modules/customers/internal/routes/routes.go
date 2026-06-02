@@ -119,35 +119,6 @@ func RegisterRoutes(ctx context.Context, router *chi.Mux, crmService *applicatio
 		&handlers.DeleteSegmentHandler{CRMService: crmService},
 	)
 
-	// Campaigns
-	http.RegisterGET[handlers.ListCampaignsRequest, handlers.ListCampaignsResponse](
-		ctx,
-		router,
-		handlers.CampaignListRoutes(),
-		&handlers.ListCampaignsHandler{CRMService: crmService},
-	)
-
-	http.RegisterPOSTWithValidation[handlers.CreateCampaignRequest, handlers.CreateCampaignResponse](
-		ctx,
-		router,
-		handlers.CampaignCreateRoutes(),
-		&handlers.CreateCampaignHandler{CRMService: crmService},
-	)
-
-	http.RegisterPUTWithValidation[handlers.UpdateCampaignRequest, handlers.UpdateCampaignResponse](
-		ctx,
-		router,
-		handlers.CampaignUpdateRoutes(),
-		&handlers.UpdateCampaignHandler{CRMService: crmService},
-	)
-
-	http.RegisterPUTWithValidation[handlers.UpdateCampaignStatusRequest, handlers.UpdateCampaignStatusResponse](
-		ctx,
-		router,
-		handlers.CampaignStatusRoutes(),
-		&handlers.UpdateCampaignStatusHandler{CRMService: crmService},
-	)
-
 	// Dashboard
 	http.RegisterGET[handlers.DashboardRequest, handlers.DashboardResponse](
 		ctx,
