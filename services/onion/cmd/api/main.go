@@ -45,6 +45,7 @@ import (
 	"github.com/voxire/onion/internal/modules/documents"
 	"github.com/voxire/onion/internal/modules/echo"
 	"github.com/voxire/onion/internal/modules/expenses"
+	"github.com/voxire/onion/internal/modules/featuresupport"
 	"github.com/voxire/onion/internal/modules/feedback"
 	financebankfeeds "github.com/voxire/onion/internal/modules/finance_bank_feeds"
 	financereconciliation "github.com/voxire/onion/internal/modules/finance_reconciliation"
@@ -328,6 +329,7 @@ type apiModules struct {
 	BookingServices       *bookingservices.Module
 	BookingWaitlist       *bookingwaitlist.Module
 	Brands                *brands.Module
+	FeatureSupport        *featuresupport.Module
 	Business              *business.Module
 	Campaigns             *campaigns.Module
 	Careers               *careers.Module
@@ -474,6 +476,7 @@ func initializeModules(ctx context.Context) *apiModules {
 		CRMSales:              crmsales.NewModule(ctx, dbclient.Pool()),
 		Customers:             customers.NewModule(ctx, dbclient.Pool()),
 		Cycles:                cycles.NewModule(ctx, dbclient.Pool()),
+		FeatureSupport:        featuresupport.NewModule(ctx, dbclient.Pool()),
 		Departments:           departments.NewModule(ctx, dbclient.Pool()),
 		Documents:             documents.NewModule(ctx, dbclient.Pool()),
 		CacheOps:              cacheops.NewModule(),
