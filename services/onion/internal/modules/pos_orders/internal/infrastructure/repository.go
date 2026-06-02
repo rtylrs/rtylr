@@ -5,12 +5,14 @@ import (
 	"database/sql"
 	"errors"
 	"fmt"
+	"sort"
 	"strconv"
 	"time"
 
 	"github.com/voxire/onion/internal/modules/pos_orders/internal/domain"
 	"github.com/voxire/onion/internal/modules/pos_orders/internal/infrastructure/persistence/sqlc"
 	"github.com/voxire/onion/internal/platform/logger"
+	"github.com/voxire/onion/internal/platform/stock_core"
 )
 
 type Repository struct {
@@ -645,9 +647,107 @@ func (r *Repository) ProcessPayment(ctx context.Context, ownerID, orderID int64,
 		}
 	}
 
+	// Decrement on-hand stock for inventory-tracked line items so the sale is
+	// reflected in the shared stock (the same stock ERP reads). Atomic with the
+	// payment; idempotent so a re-fired payment can't double-deduct.
+	if err = r.deductSoldStock(ctx, tx, ownerID, orderID); err != nil {
+		logger.Ctx(ctx).Error("Failed to deduct stock for paid order", logger.Error(err), logger.Any("order_id", orderID))
+		return err
+	}
+
 	if err = tx.Commit(); err != nil {
 		logger.Ctx(ctx).Error("Failed to commit payment transaction", logger.Error(err))
 		return err
+	}
+
+	return nil
+}
+
+// deductSoldStock decrements stock_levels (and the synced scalar) for every
+// inventory-tracked line item of a paid order, through the shared stock_core
+// primitive at the order's POS branch location. It is idempotent on the
+// (pos_order, sale) ledger key, so re-firing a payment is a no-op. Oversell is
+// permitted (POS should not block a sale on a lagging count) — this should
+// become a per-tenant policy flag.
+func (r *Repository) deductSoldStock(ctx context.Context, tx *sql.Tx, ownerID, orderID int64) error {
+	var already int
+	idErr := tx.QueryRowContext(ctx,
+		`SELECT 1 FROM stock_ledger
+		 WHERE owner_id = ? AND reference_type = 'pos_order' AND reference_id = ? AND entry_type = 'sale' LIMIT 1`,
+		ownerID, orderID).Scan(&already)
+	if idErr == nil {
+		return nil // already deducted for this order
+	}
+	if !errors.Is(idErr, sql.ErrNoRows) {
+		return idErr
+	}
+
+	var locationID int64
+	if err := tx.QueryRowContext(ctx,
+		`SELECT COALESCE(location_id, 0) FROM pos_orders WHERE owner_id = ? AND id = ?`,
+		ownerID, orderID).Scan(&locationID); err != nil {
+		return err
+	}
+
+	stockLoc, err := stock_core.POSBranchLocationID(ctx, tx, ownerID, locationID)
+	if err != nil {
+		return err
+	}
+
+	rows, err := tx.QueryContext(ctx,
+		`SELECT oi.menu_item_id, oi.quantity
+		 FROM pos_order_items oi
+		 JOIN erp_products p ON p.id = oi.menu_item_id AND p.owner_id = ?
+		 WHERE oi.order_id = ? AND oi.menu_item_id IS NOT NULL AND p.track_inventory = TRUE`,
+		ownerID, orderID)
+	if err != nil {
+		return err
+	}
+
+	type line struct {
+		productID int64
+		qty       float64
+	}
+	var lines []line
+	for rows.Next() {
+		var pid int64
+		var qStr string
+		if scanErr := rows.Scan(&pid, &qStr); scanErr != nil {
+			_ = rows.Close()
+			return scanErr
+		}
+		q, perr := strconv.ParseFloat(qStr, 64)
+		if perr != nil {
+			_ = rows.Close()
+			return perr
+		}
+		lines = append(lines, line{productID: pid, qty: q})
+	}
+	if rerr := rows.Err(); rerr != nil {
+		_ = rows.Close()
+		return rerr
+	}
+	_ = rows.Close()
+
+	// Lock product rows in ascending order to avoid deadlocks across concurrent orders.
+	sort.Slice(lines, func(i, j int) bool { return lines[i].productID < lines[j].productID })
+
+	for _, l := range lines {
+		oid := orderID
+		if _, _, err := stock_core.ApplyMovementTx(ctx, tx, stock_core.Movement{
+			OwnerID:       ownerID,
+			LocationID:    stockLoc,
+			ProductID:     l.productID,
+			EntryType:     stock_core.EntrySale,
+			Change:        -l.qty,
+			ReferenceID:   &oid,
+			ReferenceType: "pos_order",
+			Channel:       "pos",
+			Note:          "pos sale",
+			AllowNegative: true,
+		}); err != nil {
+			return err
+		}
 	}
 
 	return nil

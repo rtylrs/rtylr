@@ -3,11 +3,14 @@ package infrastructure
 import (
 	"context"
 	"database/sql"
+	"errors"
+	"sort"
 	"strconv"
 
 	"github.com/voxire/onion/internal/modules/stock_transfers/internal/domain"
 	"github.com/voxire/onion/internal/modules/stock_transfers/internal/infrastructure/persistence/sqlc"
 	"github.com/voxire/onion/internal/platform/logger"
+	"github.com/voxire/onion/internal/platform/stock_core"
 )
 
 type Repository struct {
@@ -198,21 +201,121 @@ func (r *Repository) CreateStockTransfer(ctx context.Context, ownerID int64, inp
 }
 
 func (r *Repository) UpdateStockTransferStatus(ctx context.Context, ownerID, id int64, status domain.StockTransferStatus) error {
-	err := r.queries.UpdateStockTransferStatus(ctx, sqlc.UpdateStockTransferStatusParams{
-		Status: sqlc.NullErpStockTransfersStatus{
-			ErpStockTransfersStatus: sqlc.ErpStockTransfersStatus(status),
-			Valid:                   true,
-		},
-		OwnerID: ownerID,
-		ID:      id,
-	})
-	if err != nil {
-		logger.Ctx(ctx).Error("Failed to update stock transfer status", logger.Error(err))
+	// Only 'received' moves stock; other transitions are a plain status update.
+	if status != domain.StockTransferStatusReceived {
+		if err := r.queries.UpdateStockTransferStatus(ctx, sqlc.UpdateStockTransferStatusParams{
+			Status:  sqlc.NullErpStockTransfersStatus{ErpStockTransfersStatus: sqlc.ErpStockTransfersStatus(status), Valid: true},
+			OwnerID: ownerID,
+			ID:      id,
+		}); err != nil {
+			logger.Ctx(ctx).Error("Failed to update stock transfer status", logger.Error(err))
+			return err
+		}
+		return nil
+	}
 
+	return r.receiveTransfer(ctx, ownerID, id)
+}
+
+// receiveTransfer atomically moves each line item's quantity from the source
+// warehouse location to the destination location (transfer_out + transfer_in,
+// paired by transfer_group), then marks the transfer received. Owner-verified
+// and row-locked; idempotent on the (stock_transfer, transfer_out) ledger key.
+func (r *Repository) receiveTransfer(ctx context.Context, ownerID, id int64) (err error) {
+	tx, err := r.pool.BeginTx(ctx, nil)
+	if err != nil {
+		return err
+	}
+	defer func() {
+		if err != nil {
+			_ = tx.Rollback()
+		}
+	}()
+
+	qtx := r.queries.WithTx(tx)
+
+	var fromWH, toWH int64
+	var curStatus string
+	err = tx.QueryRowContext(ctx,
+		`SELECT from_warehouse_id, to_warehouse_id, status FROM erp_stock_transfers
+		 WHERE owner_id = ? AND id = ? FOR UPDATE`, ownerID, id).Scan(&fromWH, &toWH, &curStatus)
+	if errors.Is(err, sql.ErrNoRows) {
+		err = domain.ErrStockTransferNotFound
+		return err
+	}
+	if err != nil {
+		return err
+	}
+	if curStatus == string(domain.StockTransferStatusReceived) {
+		err = nil
+		return nil // idempotent: already received
+	}
+
+	items, err := qtx.GetTransferItems(ctx, id)
+	if err != nil {
 		return err
 	}
 
-	return nil
+	fromLoc, err := stock_core.WarehouseLocationID(ctx, tx, ownerID, fromWH)
+	if err != nil {
+		return err
+	}
+	toLoc, err := stock_core.WarehouseLocationID(ctx, tx, ownerID, toWH)
+	if err != nil {
+		return err
+	}
+
+	type line struct {
+		productID int64
+		qty       float64
+	}
+	lines := make([]line, 0, len(items))
+	for _, it := range items {
+		q, perr := strconv.ParseFloat(it.Quantity, 64)
+		if perr != nil {
+			err = perr
+			return err
+		}
+		lines = append(lines, line{productID: it.ProductID, qty: q})
+	}
+	sort.Slice(lines, func(i, j int) bool { return lines[i].productID < lines[j].productID })
+
+	group := id
+	for _, l := range lines {
+		out := stock_core.Movement{
+			OwnerID: ownerID, LocationID: fromLoc, ProductID: l.productID,
+			EntryType: stock_core.EntryTransferOut, Change: -l.qty,
+			ReferenceID: &id, ReferenceType: "stock_transfer", TransferGroup: &group,
+			Channel: "erp", Note: "stock transfer",
+		}
+		in := stock_core.Movement{
+			OwnerID: ownerID, LocationID: toLoc, ProductID: l.productID,
+			EntryType: stock_core.EntryTransferIn, Change: l.qty,
+			ReferenceID: &id, ReferenceType: "stock_transfer", TransferGroup: &group,
+			Channel: "erp", Note: "stock transfer", AllowNegative: true,
+		}
+		// Acquire location row locks in ascending location_id order to avoid deadlocks.
+		first, second := out, in
+		if toLoc < fromLoc {
+			first, second = in, out
+		}
+		if _, _, err = stock_core.ApplyMovementTx(ctx, tx, first); err != nil {
+			return err
+		}
+		if _, _, err = stock_core.ApplyMovementTx(ctx, tx, second); err != nil {
+			return err
+		}
+	}
+
+	if err = qtx.UpdateStockTransferStatus(ctx, sqlc.UpdateStockTransferStatusParams{
+		Status:  sqlc.NullErpStockTransfersStatus{ErpStockTransfersStatus: sqlc.ErpStockTransfersStatus(domain.StockTransferStatusReceived), Valid: true},
+		OwnerID: ownerID,
+		ID:      id,
+	}); err != nil {
+		return err
+	}
+
+	return tx.Commit()
 }
 
 func nullString(s string) sql.NullString {

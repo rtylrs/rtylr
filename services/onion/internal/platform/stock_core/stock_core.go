@@ -110,6 +110,107 @@ func DefaultLocationID(ctx context.Context, tx DBTX, ownerID int64) (int64, erro
 	return id, nil
 }
 
+// POSBranchLocationID resolves (creating on first use) the stock_locations row
+// for a POS branch (pos_locations.id), scoped to ownerID. It is the
+// tenant-isolation boundary for POS stock: if the pos_location belongs to a
+// different owner it FAILS CLOSED (returns an error) rather than attributing
+// stock to the wrong tenant. A zero/unknown posLocationID falls back to the
+// tenant's default warehouse.
+func POSBranchLocationID(ctx context.Context, tx DBTX, ownerID, posLocationID int64) (int64, error) {
+	if posLocationID == 0 {
+		return DefaultLocationID(ctx, tx, ownerID)
+	}
+
+	var locOwner int64
+	err := tx.QueryRowContext(ctx, `SELECT owner_id FROM pos_locations WHERE id = ?`, posLocationID).Scan(&locOwner)
+	if errors.Is(err, sql.ErrNoRows) {
+		// Unknown location — don't guess a branch; use the default warehouse.
+		return DefaultLocationID(ctx, tx, ownerID)
+	}
+	if err != nil {
+		return 0, fmt.Errorf("stock_core: read pos_location owner: %w", err)
+	}
+	if locOwner != ownerID {
+		return 0, fmt.Errorf("stock_core: pos_location %d belongs to owner %d, not %d (refusing to attribute stock)", posLocationID, locOwner, ownerID)
+	}
+
+	var id int64
+	err = tx.QueryRowContext(ctx,
+		`SELECT id FROM stock_locations
+		 WHERE owner_id = ? AND source_table = 'pos_locations' AND source_id = ? LIMIT 1`,
+		ownerID, posLocationID).Scan(&id)
+	if err == nil {
+		return id, nil
+	}
+	if !errors.Is(err, sql.ErrNoRows) {
+		return 0, fmt.Errorf("stock_core: lookup pos branch location: %w", err)
+	}
+
+	if _, err = tx.ExecContext(ctx,
+		`INSERT INTO stock_locations (owner_id, business_id, kind, source_table, source_id, name, is_default, is_active)
+		 VALUES (?, 0, 'pos_branch', 'pos_locations', ?, 'POS Branch', FALSE, TRUE)
+		 ON DUPLICATE KEY UPDATE source_id = VALUES(source_id)`,
+		ownerID, posLocationID); err != nil {
+		return 0, fmt.Errorf("stock_core: create pos branch location: %w", err)
+	}
+	if err = tx.QueryRowContext(ctx,
+		`SELECT id FROM stock_locations
+		 WHERE owner_id = ? AND source_table = 'pos_locations' AND source_id = ? LIMIT 1`,
+		ownerID, posLocationID).Scan(&id); err != nil {
+		return 0, fmt.Errorf("stock_core: re-read pos branch location: %w", err)
+	}
+	return id, nil
+}
+
+// WarehouseLocationID resolves (creating on first use) the stock_locations row
+// for an erp_warehouse, scoped to ownerID, with the same fail-closed owner
+// guard as POSBranchLocationID. A zero/unknown warehouseID falls back to the
+// tenant's default warehouse.
+func WarehouseLocationID(ctx context.Context, tx DBTX, ownerID, warehouseID int64) (int64, error) {
+	if warehouseID == 0 {
+		return DefaultLocationID(ctx, tx, ownerID)
+	}
+
+	var whOwner int64
+	err := tx.QueryRowContext(ctx, `SELECT owner_id FROM erp_warehouses WHERE id = ?`, warehouseID).Scan(&whOwner)
+	if errors.Is(err, sql.ErrNoRows) {
+		return DefaultLocationID(ctx, tx, ownerID)
+	}
+	if err != nil {
+		return 0, fmt.Errorf("stock_core: read warehouse owner: %w", err)
+	}
+	if whOwner != ownerID {
+		return 0, fmt.Errorf("stock_core: warehouse %d belongs to owner %d, not %d (refusing to attribute stock)", warehouseID, whOwner, ownerID)
+	}
+
+	var id int64
+	err = tx.QueryRowContext(ctx,
+		`SELECT id FROM stock_locations
+		 WHERE owner_id = ? AND source_table = 'erp_warehouses' AND source_id = ? LIMIT 1`,
+		ownerID, warehouseID).Scan(&id)
+	if err == nil {
+		return id, nil
+	}
+	if !errors.Is(err, sql.ErrNoRows) {
+		return 0, fmt.Errorf("stock_core: lookup warehouse location: %w", err)
+	}
+
+	if _, err = tx.ExecContext(ctx,
+		`INSERT INTO stock_locations (owner_id, business_id, kind, source_table, source_id, name, is_default, is_active)
+		 SELECT ?, 0, 'warehouse', 'erp_warehouses', id, name, FALSE, is_active FROM erp_warehouses WHERE id = ?
+		 ON DUPLICATE KEY UPDATE source_id = VALUES(source_id)`,
+		ownerID, warehouseID); err != nil {
+		return 0, fmt.Errorf("stock_core: create warehouse location: %w", err)
+	}
+	if err = tx.QueryRowContext(ctx,
+		`SELECT id FROM stock_locations
+		 WHERE owner_id = ? AND source_table = 'erp_warehouses' AND source_id = ? LIMIT 1`,
+		ownerID, warehouseID).Scan(&id); err != nil {
+		return 0, fmt.Errorf("stock_core: re-read warehouse location: %w", err)
+	}
+	return id, nil
+}
+
 // ApplyMovementTx applies one movement inside the caller's transaction: it
 // row-locks (and creates if absent) the (owner, location, product) stock_levels
 // row, adjusts on_hand by Change, rejects a negative result unless
