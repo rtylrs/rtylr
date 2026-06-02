@@ -1,8 +1,10 @@
 import React, { useEffect, useRef, useState } from 'react';
 import { Avatar } from '@voxire/ui';
 import { signOut, useUserStore } from '@voxire/auth';
+import { unwrap } from '@voxire/api';
 import { CaretPanel, CaretButton, useCaretStore } from '@voxire/caret';
 import TrialBanner from '../shared/components/TrialBanner';
+import { safe } from '../shared/lib/api';
 import { useForesightLinks } from '@voxire/utils';
 import { useNavigate, Link, Outlet, useRouterState } from '@tanstack/react-router';
 import { motion, AnimatePresence } from 'motion/react';
@@ -196,10 +198,23 @@ const DefaultLayout: React.FC = () => {
   const [showUserMenu, setShowUserMenu] = useState(false);
   const sidebarRef = useRef<HTMLElement | null>(null);
   const financeUser = useUserStore((s) => s.user);
+  const setAuthUser = useUserStore((s) => s.setUser);
   const userId = Number(financeUser?.id) || 0;
   const userEmail = financeUser?.email || financeUser?.emailAddress || null;
   const userName = financeUser?.name || financeUser?.firstName || userEmail || 'User';
   const { isOpen: caretOpen } = useCaretStore();
+
+  useEffect(() => {
+    if (financeUser?.name || financeUser?.email) return;
+    unwrap(safe.get<{ user: { id: number; name: string; email: string } | null }>('/account'))
+      .then((res) => {
+        if (res?.user) {
+          setAuthUser({ id: String(res.user.id), name: res.user.name, email: res.user.email });
+        }
+      })
+      .catch(() => undefined);
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [financeUser]);
 
   useForesightLinks(sidebarRef, {
     '/': () => import('../features/dashboard/Dashboard'),

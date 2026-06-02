@@ -188,6 +188,18 @@ const DefaultLayout: React.FC = () => {
   const [theme, setThemeState] = useState<Theme>(getStoredTheme);
   const sidebarRef = useRef<HTMLElement | null>(null);
   const crmUser = useUserStore((s) => s.user);
+  const setAuthUser = useUserStore((s) => s.setUser);
+  useEffect(() => {
+    if (crmUser?.name || crmUser?.email) return;
+    unwrap(safe.get<{ user: { id: number; name: string; email: string } | null }>('/account'))
+      .then((res) => {
+        if (res?.user) {
+          setAuthUser({ id: String(res.user.id), name: res.user.name, email: res.user.email });
+        }
+      })
+      .catch(() => undefined);
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [crmUser]);
   const userId = Number(crmUser?.id) || 0;
   const userEmail = crmUser?.email || crmUser?.emailAddress || null;
   const userName = crmUser?.name || crmUser?.firstName || userEmail || 'User';

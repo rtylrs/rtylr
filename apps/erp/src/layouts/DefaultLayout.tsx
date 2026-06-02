@@ -6,6 +6,8 @@ import { Link, useNavigate, useRouterState, Outlet } from '@tanstack/react-route
 import { motion, AnimatePresence } from 'motion/react';
 import { APP_URLS, getAvatarUrl } from '@voxire/config';
 import { signOut, useUserStore } from '@voxire/auth';
+import { unwrap } from '@voxire/api';
+import { safe } from '../shared/lib/api';
 import { CaretPanel, CaretButton, useCaretStore } from '@voxire/caret';
 import {
   LayoutDashboard,
@@ -215,6 +217,18 @@ const DefaultLayout: React.FC = () => {
   });
 
   const erpUser = useUserStore((s) => s.user);
+  const setAuthUser = useUserStore((s) => s.setUser);
+  useEffect(() => {
+    if (erpUser?.name || erpUser?.email) return;
+    unwrap(safe.get<{ user: { id: number; name: string; email: string } | null }>('/account'))
+      .then((res) => {
+        if (res?.user) {
+          setAuthUser({ id: String(res.user.id), name: res.user.name, email: res.user.email });
+        }
+      })
+      .catch(() => undefined);
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [erpUser]);
   const userId = Number(erpUser?.id) || 0;
   const { isOpen: caretOpen } = useCaretStore();
   const pageTitle = getPageTitle(pathname);
@@ -227,16 +241,8 @@ const DefaultLayout: React.FC = () => {
     setSidebarOpen(false);
   }, [pathname]);
 
-  const rawUser = (() => {
-    try {
-      return JSON.parse(localStorage.getItem('rtylr:voxire:user') || 'null');
-    } catch {
-      return null;
-    }
-  })();
-
-  const userEmail = rawUser?.email || rawUser?.emailAddress || null;
-  const userName = rawUser?.name || rawUser?.firstName || userEmail || 'User';
+  const userEmail = erpUser?.email || erpUser?.emailAddress || null;
+  const userName = erpUser?.name || erpUser?.firstName || userEmail || 'User';
 
   const handleSetTheme = (t: Theme) => {
     setThemeState(t);

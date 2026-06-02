@@ -5,6 +5,7 @@ import { useTranslation } from 'react-i18next';
 import { APP_URLS, getAvatarUrl } from '@voxire/config';
 import { Avatar } from '@voxire/ui';
 import { signOut, useUserStore } from '@voxire/auth';
+import { unwrap } from '@voxire/api';
 import { CaretButton, CaretPanel, useCaretStore } from '@voxire/caret';
 import {
   LayoutDashboard,
@@ -50,6 +51,7 @@ import {
 } from 'lucide-react';
 import type { HRCompanyConfigPayload } from '@voxire/contracts/hr/v1/setup';
 import { useForesightLinks } from '@voxire/utils';
+import { safe } from '../shared/lib/api';
 import { useHRConfigStore } from '../shared/stores/hrConfigStore';
 import CommandPalette from '../shared/components/CommandPalette';
 import GlobalShortcuts from '../shared/components/GlobalShortcuts';
@@ -482,6 +484,18 @@ const DefaultLayout: React.FC<DefaultLayoutProps> = ({ children }) => {
   const pathname = useRouterState({ select: (s) => s.location.pathname });
   const [theme, setTheme] = useTheme();
   const hrUser = useUserStore((s) => s.user);
+  const setAuthUser = useUserStore((s) => s.setUser);
+  useEffect(() => {
+    if (hrUser?.name || hrUser?.email) return;
+    unwrap(safe.get<{ user: { id: number; name: string; email: string } | null }>('/account'))
+      .then((res) => {
+        if (res?.user) {
+          setAuthUser({ id: String(res.user.id), name: res.user.name, email: res.user.email });
+        }
+      })
+      .catch(() => undefined);
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [hrUser]);
   const userId = Number(hrUser?.id) || 0;
   const { isOpen: caretOpen } = useCaretStore();
   const isMobile = useMediaQuery('(max-width: 960px)');
