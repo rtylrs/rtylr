@@ -43,7 +43,12 @@ export function pickAvatarStyle(seed?: string | null): AvatarStyle {
 }
 
 export function getAvatarUrl(seed?: string | null, style?: AvatarStyle): string {
-  const key = seed || 'user';
-  const chosen = style || pickAvatarStyle(key);
+  const raw = (seed || 'user').trim().toLowerCase();
+  // The seed is usually a user's email/name — never send that PII to the
+  // third-party avatar service. Hash it first: dicebear only ever sees an
+  // opaque, non-reversible token. Deterministic, so a user's avatar is stable.
+  // (The style is still derived from `raw` so it doesn't shift for existing users.)
+  const key = hashSeed(raw).toString(36);
+  const chosen = style || pickAvatarStyle(raw);
   return `https://api.dicebear.com/9.x/${chosen}/svg?seed=${encodeURIComponent(key)}`;
 }
