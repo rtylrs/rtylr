@@ -1,10 +1,10 @@
 import { z } from 'zod';
 
 export const operationsSummarySchema = z.object({
-  activeStaff: z.number().optional(),
-  shiftsThisWeek: z.number().optional(),
-  pendingTimeOff: z.number().optional(),
-  openLeaveRequests: z.number().optional(),
+  activeStaff: z.number(),
+  shiftsThisWeek: z.number(),
+  pendingTimeOff: z.number(),
+  openLeaveRequests: z.number(),
 });
 
 export const staffUtilizationSchema = z.object({

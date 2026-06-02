@@ -36,7 +36,7 @@ describe('useReportTemplates', () => {
   });
 
   it('fetches report templates on mount', async () => {
-    const templates = [{ id: '1', name: 'Sales Summary' }];
+    const templates = [{ id: '1', name: 'Sales Summary', description: 'Sales overview' }];
     (insightsService.getReportTemplates as any).mockResolvedValue(templates);
     const { result } = renderHook(() => useReportTemplates(), {
       wrapper: createWrapper(),
@@ -46,7 +46,9 @@ describe('useReportTemplates', () => {
   });
 
   it('unwraps the "templates" key when present', async () => {
-    const data = { templates: [{ id: 1, name: 'Revenue Report' }] };
+    const data = {
+      templates: [{ id: 'revenue-monthly', name: 'Revenue Report', description: 'Monthly revenue' }],
+    };
     (insightsService.getReportTemplates as any).mockResolvedValue(data);
     const { result } = renderHook(() => useReportTemplates(), {
       wrapper: createWrapper(),

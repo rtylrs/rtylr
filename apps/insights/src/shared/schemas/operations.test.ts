@@ -21,8 +21,9 @@ describe('operationsSummarySchema', () => {
     expect(result.openLeaveRequests).toBe(2);
   });
 
-  it('accepts an empty object (all fields optional)', () => {
-    expect(() => operationsSummarySchema.parse({})).not.toThrow();
+  it('rejects an object missing required fields', () => {
+    expect(() => operationsSummarySchema.parse({})).toThrow();
+    expect(() => operationsSummarySchema.parse({ activeStaff: 1 })).toThrow();
   });
 });
 

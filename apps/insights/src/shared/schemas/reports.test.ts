@@ -2,61 +2,45 @@ import { describe, it, expect } from 'vitest';
 import { reportTemplateSchema } from './reports';
 
 describe('reportTemplateSchema', () => {
-  it('parses a full report template', () => {
+  it('parses a report template matching the backend contract', () => {
     const data = {
-      id: 'rpt-001',
+      id: 'revenue-monthly',
       name: 'Monthly Revenue',
-      description: 'Revenue breakdown by month',
-      category: 'Revenue',
-      params: [
-        { key: 'start_date', label: 'Start Date', type: 'date', required: true },
-        { key: 'end_date', label: 'End Date', type: 'date', required: true },
-      ],
+      description: 'Month-by-month paid revenue over the last 12 months.',
     };
     const result = reportTemplateSchema.parse(data);
-    expect(result.id).toBe('rpt-001');
+    expect(result.id).toBe('revenue-monthly');
     expect(result.name).toBe('Monthly Revenue');
-    expect(result.params).toHaveLength(2);
-    expect(result.params?.[0].required).toBe(true);
+    expect(result.description).toBe('Month-by-month paid revenue over the last 12 months.');
   });
 
-  it('coerces numeric id to string', () => {
-    const result = reportTemplateSchema.parse({ id: 7, name: 'Daily Orders' });
-    expect(result.id).toBe('7');
+  it('rejects a missing description (backend always sends it)', () => {
+    expect(() => reportTemplateSchema.parse({ id: '1', name: 'Sales' })).toThrow();
   });
 
-  it('accepts a null description', () => {
-    const result = reportTemplateSchema.parse({ id: '1', name: 'Sales', description: null });
-    expect(result.description).toBeNull();
+  it('rejects a null description', () => {
+    expect(() =>
+      reportTemplateSchema.parse({ id: '1', name: 'Sales', description: null })
+    ).toThrow();
   });
 
-  it('accepts a null category', () => {
-    const result = reportTemplateSchema.parse({ id: '1', name: 'Sales', category: null });
-    expect(result.category).toBeNull();
+  it('rejects a missing id', () => {
+    expect(() => reportTemplateSchema.parse({ name: 'Sales', description: 'x' })).toThrow();
   });
 
-  it('accepts an empty params array', () => {
-    const result = reportTemplateSchema.parse({ id: '1', name: 'Empty', params: [] });
-    expect(result.params).toEqual([]);
+  it('rejects a missing name', () => {
+    expect(() => reportTemplateSchema.parse({ id: '1', description: 'x' })).toThrow();
   });
 
-  it('accepts a data array of unknown shape', () => {
+  it('ignores fields the backend does not send', () => {
     const result = reportTemplateSchema.parse({
       id: '1',
-      name: 'Data Report',
+      name: 'Sales',
+      description: 'desc',
+      category: 'Revenue',
+      params: [{ key: 'q', label: 'Query' }],
       data: [{ date: '2026-01', value: 100 }],
     });
-    expect(Array.isArray(result.data)).toBe(true);
-    expect(result.data).toHaveLength(1);
-  });
-
-  it('accepts params with optional type and required fields missing', () => {
-    const result = reportTemplateSchema.parse({
-      id: '1',
-      name: 'Simple',
-      params: [{ key: 'q', label: 'Query' }],
-    });
-    expect(result.params?.[0].type).toBeUndefined();
-    expect(result.params?.[0].required).toBeUndefined();
+    expect(result).toEqual({ id: '1', name: 'Sales', description: 'desc' });
   });
 });

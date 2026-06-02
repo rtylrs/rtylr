@@ -16,8 +16,9 @@ describe('insightsKpisSchema', () => {
     expect(result.lowStockCount).toBe(3);
   });
 
-  it('accepts an empty object (all fields optional)', () => {
-    expect(() => insightsKpisSchema.parse({})).not.toThrow();
+  it('rejects an object missing required KPI fields', () => {
+    expect(() => insightsKpisSchema.parse({})).toThrow();
+    expect(() => insightsKpisSchema.parse({ revenue: 1, orderCount: 2 })).toThrow();
   });
 });
 
@@ -30,11 +31,26 @@ describe('insightsDashboardSummarySchema', () => {
       margin: { value: 35.4, deltaPct: 1.1 },
     };
     const result = insightsDashboardSummarySchema.parse(data);
-    expect(result.revenue?.value).toBe(200000);
-    expect(result.margin?.deltaPct).toBe(1.1);
+    expect(result.revenue.value).toBe(200000);
+    expect(result.margin.deltaPct).toBe(1.1);
   });
 
-  it('accepts an empty object', () => {
-    expect(() => insightsDashboardSummarySchema.parse({})).not.toThrow();
+  it('rejects a summary missing one of the four cards', () => {
+    const data = {
+      revenue: { value: 200000, deltaPct: 0.12 },
+      customers: { value: 300, deltaPct: 0.05 },
+      orders: { value: 500, deltaPct: -0.02 },
+    };
+    expect(() => insightsDashboardSummarySchema.parse(data)).toThrow();
+  });
+
+  it('rejects a card missing deltaPct', () => {
+    const data = {
+      revenue: { value: 200000 },
+      customers: { value: 300, deltaPct: 0.05 },
+      orders: { value: 500, deltaPct: -0.02 },
+      margin: { value: 35.4, deltaPct: 1.1 },
+    };
+    expect(() => insightsDashboardSummarySchema.parse(data)).toThrow();
   });
 });

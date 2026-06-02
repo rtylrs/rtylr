@@ -42,7 +42,7 @@ describe('useOperationsSummary', () => {
   });
 
   it('fetches operations summary on mount', async () => {
-    const data = { headcount: 42, activeStaff: 38, avgUtilization: 0.85 };
+    const data = { activeStaff: 38, shiftsThisWeek: 12, pendingTimeOff: 3, openLeaveRequests: 2 };
     (insightsService.getOperationsSummary as any).mockResolvedValue(data);
     const { result } = renderHook(() => useOperationsSummary(), {
       wrapper: createWrapper(),
