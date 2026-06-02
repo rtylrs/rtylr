@@ -72,12 +72,12 @@ jobs:
           - name: worker
             dockerfile: Dockerfile.worker
             repository: voxire/onion-worker
-            cluster: voxire-fargate
+            cluster: voxire-prod
             service: worker
           - name: upload
             dockerfile: Dockerfile.upload
             repository: voxire/onion-upload
-            cluster: voxire-fargate
+            cluster: voxire-prod
             service: upload
     steps:
       - uses: actions/checkout@v6
