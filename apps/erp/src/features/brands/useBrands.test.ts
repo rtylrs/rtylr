@@ -59,7 +59,10 @@ describe('useCreateBrand', () => {
   beforeEach(() => vi.clearAllMocks());
 
   it('calls createBrand with data', async () => {
-    mockErpApi.createBrand.mockResolvedValue({ id: 3, name: 'NewBrand', productCount: 0 });
+    mockErpApi.createBrand.mockResolvedValue({
+      brand_id: 3,
+      message: 'Brand created successfully',
+    });
     const { result } = renderHook(() => useCreateBrand(), { wrapper: createWrapper() });
     await act(async () => {
       await result.current.mutateAsync({ name: 'NewBrand' });

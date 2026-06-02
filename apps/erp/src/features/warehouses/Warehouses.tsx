@@ -31,7 +31,8 @@ const Warehouses: React.FC = () => {
   const [confirmDeleteId, setConfirmDeleteId] = useState<number | null>(null);
   const [newName, setNewName] = useState('');
   const [newAddress, setNewAddress] = useState('');
-  const [newManager, setNewManager] = useState('');
+  const [newManagerName, setNewManagerName] = useState('');
+  const [newCapacity, setNewCapacity] = useState('');
 
   const handleCreate = async (): Promise<void> => {
     if (!newName.trim()) {
@@ -42,13 +43,15 @@ const Warehouses: React.FC = () => {
       await createMut.mutateAsync({
         name: newName.trim(),
         address: newAddress.trim(),
-        manager: newManager.trim(),
+        managerName: newManagerName.trim(),
+        capacity: newCapacity.trim() ? Number(newCapacity) : 0,
       });
       toast.success('Warehouse created');
       setShowCreate(false);
       setNewName('');
       setNewAddress('');
-      setNewManager('');
+      setNewManagerName('');
+      setNewCapacity('');
     } catch {
       toast.error('Failed to create warehouse');
     }
@@ -88,7 +91,7 @@ const Warehouses: React.FC = () => {
       ) : (
         <div className="grid grid-cols-1 lg:grid-cols-2 gap-4">
           {warehouses.map((w) => {
-            const pct = Math.round((w.used / w.capacity) * 100);
+            const location = [w.city, w.country].filter(Boolean).join(', ');
             return (
               <div
                 key={w.id}
@@ -103,7 +106,7 @@ const Warehouses: React.FC = () => {
                     >
                       <WarehouseIcon size={16} style={{ color: AMBER }} />
                     </div>
-                    <div>
+                    <div className="flex items-center gap-1.5">
                       <p className="text-sm font-semibold" style={{ color: 'var(--hub-text)' }}>
                         {w.name}
                       </p>
@@ -113,6 +116,14 @@ const Warehouses: React.FC = () => {
                           style={{ background: 'rgba(16,185,129,0.1)', color: '#10b981' }}
                         >
                           Default
+                        </span>
+                      )}
+                      {!w.isActive && (
+                        <span
+                          className="text-[10px] font-medium px-1.5 py-0.5 rounded"
+                          style={{ background: 'rgba(248,113,113,0.1)', color: '#f87171' }}
+                        >
+                          Inactive
                         </span>
                       )}
                     </div>
@@ -132,39 +143,32 @@ const Warehouses: React.FC = () => {
                     <Trash2 size={13} />
                   </button>
                 </div>
-                <div className="space-y-1.5 mb-4">
-                  <div
-                    className="flex items-center gap-2 text-xs"
-                    style={{ color: 'var(--hub-text-muted)' }}
-                  >
-                    <MapPin size={11} /> {w.address}
-                  </div>
-                  <div
-                    className="flex items-center gap-2 text-xs"
-                    style={{ color: 'var(--hub-text-muted)' }}
-                  >
-                    <User size={11} /> Managed by {w.manager}
-                  </div>
-                </div>
-                <div>
-                  <div className="flex justify-between text-xs mb-1">
-                    <span style={{ color: 'var(--hub-text-muted)' }}>Capacity</span>
-                    <span style={{ color: 'var(--hub-text)' }}>
-                      {formatNumber(w.used)} / {formatNumber(w.capacity)}
-                    </span>
-                  </div>
-                  <div
-                    className="h-2 rounded-full overflow-hidden"
-                    style={{ background: 'var(--hub-hover)' }}
-                  >
+                <div className="space-y-1.5">
+                  {(w.address || location) && (
                     <div
-                      className="h-full rounded-full"
-                      style={{
-                        width: `${pct}%`,
-                        background: pct > 85 ? '#f87171' : pct > 65 ? AMBER : '#10b981',
-                      }}
-                    />
-                  </div>
+                      className="flex items-center gap-2 text-xs"
+                      style={{ color: 'var(--hub-text-muted)' }}
+                    >
+                      <MapPin size={11} /> {[w.address, location].filter(Boolean).join(' — ')}
+                    </div>
+                  )}
+                  {w.managerName && (
+                    <div
+                      className="flex items-center gap-2 text-xs"
+                      style={{ color: 'var(--hub-text-muted)' }}
+                    >
+                      <User size={11} /> Managed by {w.managerName}
+                    </div>
+                  )}
+                  {w.capacity > 0 && (
+                    <div
+                      className="flex items-center justify-between text-xs"
+                      style={{ color: 'var(--hub-text-muted)' }}
+                    >
+                      <span>Capacity</span>
+                      <span style={{ color: 'var(--hub-text)' }}>{formatNumber(w.capacity)}</span>
+                    </div>
+                  )}
                 </div>
               </div>
             );
@@ -220,9 +224,17 @@ const Warehouses: React.FC = () => {
               style={inputStyle}
             />
             <input
-              value={newManager}
-              onChange={(e) => setNewManager(e.target.value)}
+              value={newManagerName}
+              onChange={(e) => setNewManagerName(e.target.value)}
               placeholder="Manager name (optional)"
+              style={inputStyle}
+            />
+            <input
+              value={newCapacity}
+              onChange={(e) => setNewCapacity(e.target.value)}
+              placeholder="Capacity (optional)"
+              type="number"
+              min={0}
               style={inputStyle}
             />
             <div className="flex gap-2 justify-end">

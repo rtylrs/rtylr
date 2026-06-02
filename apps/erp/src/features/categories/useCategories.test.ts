@@ -34,8 +34,20 @@ function createWrapper() {
 }
 
 const sampleCategories = [
-  { id: 1, name: 'Electronics', parentId: null, productCount: 50, sortOrder: 1 },
-  { id: 2, name: 'Phones', parentId: 1, productCount: 30, sortOrder: 2 },
+  {
+    id: 1,
+    name: 'Electronics',
+    description: 'Devices',
+    createdAt: '2024-01-01T00:00:00Z',
+    updatedAt: '2024-01-02T00:00:00Z',
+  },
+  {
+    id: 2,
+    name: 'Phones',
+    description: '',
+    createdAt: '2024-01-03T00:00:00Z',
+    updatedAt: '2024-01-04T00:00:00Z',
+  },
 ];
 
 describe('useCategories', () => {
@@ -67,11 +79,8 @@ describe('useCreateCategory', () => {
 
   it('calls createCategory with data', async () => {
     mockErpApi.createCategory.mockResolvedValue({
-      id: 3,
-      name: 'Tablets',
-      parentId: null,
-      productCount: 0,
-      sortOrder: 3,
+      category_id: 3,
+      message: 'Category created successfully',
     });
     const { result } = renderHook(() => useCreateCategory(), { wrapper: createWrapper() });
     await act(async () => {

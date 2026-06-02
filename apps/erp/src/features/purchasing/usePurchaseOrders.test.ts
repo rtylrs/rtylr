@@ -35,16 +35,40 @@ function createWrapper() {
     React.createElement(QueryClientProvider, { client }, children);
 }
 
+// Backend (erp.v1.PurchaseOrder) shape, camelCased by @voxire/api.
 const sampleOrders = [
   {
     id: 1,
     supplierId: 10,
-    supplierName: 'Acme',
-    status: 'Draft',
-    totalCost: 500,
-    itemCount: 3,
-    createdAt: '2024-01-01T00:00:00Z',
+    poNumber: 'PO-001',
+    status: 'draft',
+    subtotal: 450,
+    taxAmount: 50,
+    total: 500,
     expectedDelivery: '2024-01-10',
+    notes: '',
+    createdAt: '2024-01-01T00:00:00Z',
+    updatedAt: '2024-01-01T00:00:00Z',
+    items: [
+      {
+        id: 1,
+        purchaseOrderId: 1,
+        productId: 5,
+        quantityOrdered: 2,
+        quantityReceived: 0,
+        unitCost: 100,
+        totalCost: 200,
+      },
+      {
+        id: 2,
+        purchaseOrderId: 1,
+        productId: 6,
+        quantityOrdered: 1,
+        quantityReceived: 0,
+        unitCost: 250,
+        totalCost: 250,
+      },
+    ],
   },
 ];
 
@@ -52,21 +76,39 @@ describe('usePurchaseOrders', () => {
   beforeEach(() => vi.clearAllMocks());
 
   it('fetches purchase orders list', async () => {
-    mockErpApi.listPurchaseOrders.mockResolvedValue({ orders: sampleOrders, has_more: false });
+    mockErpApi.listPurchaseOrders.mockResolvedValue({
+      purchaseOrders: sampleOrders,
+      hasMore: false,
+    });
     const { result } = renderHook(() => usePurchaseOrders(), { wrapper: createWrapper() });
     await waitFor(() => expect(result.current.isSuccess).toBe(true));
     expect(result.current.data?.orders).toHaveLength(1);
   });
 
+  it('adapts the backend shape onto the UI shape', async () => {
+    mockErpApi.listPurchaseOrders.mockResolvedValue({
+      purchaseOrders: sampleOrders,
+      hasMore: false,
+    });
+    const { result } = renderHook(() => usePurchaseOrders(), { wrapper: createWrapper() });
+    await waitFor(() => expect(result.current.isSuccess).toBe(true));
+    const order = result.current.data?.orders[0];
+    expect(order?.items).toBe(2);
+    expect(order?.supplier).toBe('Supplier #10');
+    expect(order?.expectedDate).toBe('2024-01-10');
+    expect(order?.total).toBe('500');
+    expect(order?.status).toBe('Draft');
+  });
+
   it('uses default pagination params', async () => {
-    mockErpApi.listPurchaseOrders.mockResolvedValue({ orders: [], has_more: false });
+    mockErpApi.listPurchaseOrders.mockResolvedValue({ purchaseOrders: [], hasMore: false });
     const { result } = renderHook(() => usePurchaseOrders(), { wrapper: createWrapper() });
     await waitFor(() => expect(result.current.isSuccess).toBe(true));
     expect(mockErpApi.listPurchaseOrders).toHaveBeenCalledWith({ page: 1, page_size: 50 });
   });
 
   it('passes custom pagination params', async () => {
-    mockErpApi.listPurchaseOrders.mockResolvedValue({ orders: [], has_more: false });
+    mockErpApi.listPurchaseOrders.mockResolvedValue({ purchaseOrders: [], hasMore: false });
     const { result } = renderHook(() => usePurchaseOrders({ page: 2, pageSize: 25 }), {
       wrapper: createWrapper(),
     });
@@ -99,15 +141,15 @@ describe('useCreatePurchaseOrder', () => {
 describe('useUpdatePurchaseOrderStatus', () => {
   beforeEach(() => vi.clearAllMocks());
 
-  it('calls updatePurchaseOrderStatus with id and status', async () => {
-    mockErpApi.updatePurchaseOrderStatus.mockResolvedValue({ id: 1, status: 'Sent' });
+  it('calls updatePurchaseOrderStatus with id and lowercase status', async () => {
+    mockErpApi.updatePurchaseOrderStatus.mockResolvedValue({ id: 1, status: 'sent' });
     const { result } = renderHook(() => useUpdatePurchaseOrderStatus(), {
       wrapper: createWrapper(),
     });
     await act(async () => {
-      await result.current.mutateAsync({ id: 1, status: 'Sent' });
+      await result.current.mutateAsync({ id: 1, status: 'sent' });
     });
-    expect(mockErpApi.updatePurchaseOrderStatus).toHaveBeenCalledWith(1, 'Sent');
+    expect(mockErpApi.updatePurchaseOrderStatus).toHaveBeenCalledWith(1, 'sent');
   });
 });
 

@@ -21,7 +21,7 @@ const QuickStockAdjust: React.FC<QuickStockAdjustProps> = ({
     const next = Math.max(0, stock + delta);
     setStock(next);
     adjust.mutate(
-      { productId, delta },
+      { productId, change: delta, type: 'adjustment' },
       {
         onSuccess: () => {
           toast.success(`Stock adjusted by ${delta > 0 ? '+' : ''}${delta}`);

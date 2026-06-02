@@ -1,7 +1,13 @@
 import React, { useState } from 'react';
 import { motion } from 'motion/react';
-import { Plus, ClipboardList } from 'lucide-react';
-import { useStockTakes, useCreateStockTake } from './useStockTakes';
+import { Plus, ClipboardList, CheckCircle2 } from 'lucide-react';
+import { useStockTakes, useCreateStockTake, useUpdateStockTake } from './useStockTakes';
+import {
+  stockTakeStatusLabel,
+  stockTakeProgress,
+  stockTakeVariance,
+  type CreateStockTakeItemInput,
+} from './stockTakeSchema';
 import { useWarehouses } from '../warehouses/useWarehouses';
 import PageHeader from '../../shared/components/PageHeader';
 import { SkeletonRow } from '../../shared/components/Skeleton';
@@ -28,26 +34,40 @@ const StockTakes: React.FC = () => {
   const stockTakes = stockTakeResult?.stockTakes ?? [];
   const { data: warehouses = [] } = useWarehouses();
   const createMut = useCreateStockTake();
+  const updateMut = useUpdateStockTake();
   const [showCreate, setShowCreate] = useState(false);
-  const [newName, setNewName] = useState('');
   const [newWarehouseId, setNewWarehouseId] = useState<number>(0);
+  const [newNotes, setNewNotes] = useState('');
+
+  const warehouseName = (id: number): string =>
+    warehouses.find((w) => w.id === id)?.name ?? `Warehouse #${id}`;
 
   const handleCreate = async (): Promise<void> => {
-    if (!newName.trim()) {
-      toast.error('Stock take name is required');
+    if (!newWarehouseId) {
+      toast.error('Warehouse is required');
       return;
     }
     try {
       await createMut.mutateAsync({
-        name: newName.trim(),
-        warehouseId: newWarehouseId || undefined,
-        status: 'Draft',
+        warehouseId: newWarehouseId,
+        notes: newNotes.trim(),
+        items: [],
       });
       toast.success('Stock take created');
       setShowCreate(false);
-      setNewName('');
+      setNewWarehouseId(0);
+      setNewNotes('');
     } catch {
       toast.error('Failed to create stock take');
+    }
+  };
+
+  const handleComplete = async (id: number, items: CreateStockTakeItemInput[]): Promise<void> => {
+    try {
+      await updateMut.mutateAsync({ id, status: 'completed', items });
+      toast.success('Stock take completed');
+    } catch {
+      toast.error('Failed to complete stock take');
     }
   };
 
@@ -82,11 +102,12 @@ const StockTakes: React.FC = () => {
           />
         ) : (
           stockTakes.map((st) => {
-            const pct = st.totalItems > 0 ? Math.round((st.itemsCounted / st.totalItems) * 100) : 0;
+            const progress = stockTakeProgress(st.items);
+            const variance = stockTakeVariance(st.items);
             const statusColor =
-              st.status === 'Completed'
+              st.status === 'completed'
                 ? '#10b981'
-                : st.status === 'In Progress'
+                : st.status === 'in_progress'
                   ? AMBER
                   : 'var(--hub-text-dim)';
             return (
@@ -105,32 +126,54 @@ const StockTakes: React.FC = () => {
                     </div>
                     <div>
                       <p className="text-sm font-semibold" style={{ color: 'var(--hub-text)' }}>
-                        {st.name}
+                        {warehouseName(st.warehouseId)}
                       </p>
                       <p className="text-[11px]" style={{ color: 'var(--hub-text-dim)' }}>
-                        {st.warehouseName} / Created {formatDate(st.createdAt)}
+                        #{st.id} / Created {formatDate(st.createdAt)}
                       </p>
                     </div>
                   </div>
-                  <span
-                    className="text-[10px] font-medium px-2 py-0.5 rounded-full"
-                    style={{ background: `${statusColor}20`, color: statusColor }}
-                  >
-                    {st.status}
-                  </span>
+                  <div className="flex items-center gap-2">
+                    {st.status !== 'completed' && (
+                      <button
+                        aria-label="Complete stock take"
+                        onClick={() =>
+                          handleComplete(
+                            st.id,
+                            st.items.map((item) => ({
+                              productId: item.productId,
+                              expectedQty: item.expectedQty,
+                              countedQty: item.countedQty,
+                            }))
+                          )
+                        }
+                        disabled={updateMut.isPending}
+                        className="flex items-center gap-1 text-[10px] font-medium px-2 py-1 rounded-lg disabled:opacity-40"
+                        style={{ background: 'rgba(16,185,129,0.12)', color: '#10b981' }}
+                      >
+                        <CheckCircle2 size={12} /> Complete
+                      </button>
+                    )}
+                    <span
+                      className="text-[10px] font-medium px-2 py-0.5 rounded-full"
+                      style={{ background: `${statusColor}20`, color: statusColor }}
+                    >
+                      {stockTakeStatusLabel(st.status)}
+                    </span>
+                  </div>
                 </div>
                 <div className="flex items-center gap-4 text-xs">
                   <div className="flex-1">
                     <div className="flex justify-between mb-1">
                       <span style={{ color: 'var(--hub-text-muted)' }}>
-                        Progress: {st.itemsCounted} / {st.totalItems}
+                        Progress: {progress.counted} / {progress.total}
                       </span>
-                      <span style={{ color: 'var(--hub-text)' }}>{pct}%</span>
+                      <span style={{ color: 'var(--hub-text)' }}>{progress.pct}%</span>
                     </div>
                     <div className="h-1.5 rounded-full" style={{ background: 'var(--hub-hover)' }}>
                       <div
                         className="h-full rounded-full"
-                        style={{ width: `${pct}%`, background: AMBER }}
+                        style={{ width: `${progress.pct}%`, background: AMBER }}
                       />
                     </div>
                   </div>
@@ -140,9 +183,9 @@ const StockTakes: React.FC = () => {
                     </p>
                     <p
                       className="text-sm font-bold"
-                      style={{ color: st.variance > 0 ? '#f87171' : '#10b981' }}
+                      style={{ color: variance !== 0 ? '#f87171' : '#10b981' }}
                     >
-                      {st.variance > 0 ? `${st.variance} items` : 'None'}
+                      {variance !== 0 ? `${variance} items` : 'None'}
                     </p>
                   </div>
                 </div>
@@ -167,26 +210,24 @@ const StockTakes: React.FC = () => {
             <h3 className="text-sm font-bold" style={{ color: 'var(--hub-text)' }}>
               New Stock Take
             </h3>
+            <select
+              value={newWarehouseId}
+              onChange={(e) => setNewWarehouseId(Number(e.target.value))}
+              style={inputStyle}
+            >
+              <option value={0}>Select warehouse…</option>
+              {warehouses.map((w) => (
+                <option key={w.id} value={w.id}>
+                  {w.name}
+                </option>
+              ))}
+            </select>
             <input
-              value={newName}
-              onChange={(e) => setNewName(e.target.value)}
-              placeholder="Name (e.g. Q2 Count)"
+              value={newNotes}
+              onChange={(e) => setNewNotes(e.target.value)}
+              placeholder="Notes (optional)"
               style={inputStyle}
             />
-            {warehouses.length > 0 && (
-              <select
-                value={newWarehouseId}
-                onChange={(e) => setNewWarehouseId(Number(e.target.value))}
-                style={inputStyle}
-              >
-                <option value={0}>All warehouses</option>
-                {warehouses.map((w) => (
-                  <option key={w.id} value={w.id}>
-                    {w.name}
-                  </option>
-                ))}
-              </select>
-            )}
             <div className="flex gap-2 justify-end">
               <button
                 onClick={() => setShowCreate(false)}
@@ -197,7 +238,7 @@ const StockTakes: React.FC = () => {
               </button>
               <button
                 onClick={handleCreate}
-                disabled={createMut.isPending || !newName.trim()}
+                disabled={createMut.isPending || !newWarehouseId}
                 className="px-3 py-2 rounded-lg text-xs font-semibold disabled:opacity-40"
                 style={{ background: AMBER, color: '#000' }}
               >

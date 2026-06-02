@@ -1,21 +1,13 @@
 import React, { useState } from 'react';
 import { motion } from 'motion/react';
-import { Plus, Tags } from 'lucide-react';
+import { Plus, Tags, Star } from 'lucide-react';
 import { usePriceLists, useCreatePriceList } from './usePriceLists';
 import PageHeader from '../../shared/components/PageHeader';
 import { Skeleton } from '../../shared/components/Skeleton';
 import EmptyState from '../../shared/components/EmptyState';
 import { toast } from 'sonner';
-import { PriceList } from '../../shared/services/erpApi';
 
 const AMBER = '#f59e0b';
-
-const tierConfig: Record<string, { color: string; bg: string }> = {
-  Retail: { color: '#10b981', bg: 'rgba(16,185,129,0.12)' },
-  Wholesale: { color: AMBER, bg: 'rgba(245,158,11,0.12)' },
-  VIP: { color: '#a78bfa', bg: 'rgba(167,139,250,0.12)' },
-  Custom: { color: '#60a5fa', bg: 'rgba(96,165,250,0.12)' },
-};
 
 const inputStyle: React.CSSProperties = {
   padding: '8px 12px',
@@ -29,40 +21,30 @@ const inputStyle: React.CSSProperties = {
   boxSizing: 'border-box',
 };
 
-const TIERS: PriceList['tier'][] = ['Retail', 'Wholesale', 'VIP', 'Custom'];
-
 const PriceLists: React.FC = () => {
   const { data: lists = [], isLoading } = usePriceLists();
   const createMut = useCreatePriceList();
   const [showCreate, setShowCreate] = useState(false);
   const [newName, setNewName] = useState('');
-  const [newDescription, setNewDescription] = useState('');
-  const [newTier, setNewTier] = useState<PriceList['tier']>('Retail');
-  const [newMultiplier, setNewMultiplier] = useState('1.0');
+  const [newCurrency, setNewCurrency] = useState('USD');
+  const [newIsDefault, setNewIsDefault] = useState(false);
 
   const handleCreate = async (): Promise<void> => {
     if (!newName.trim()) {
       toast.error('Price list name is required');
       return;
     }
-    const multiplier = parseFloat(newMultiplier);
-    if (isNaN(multiplier) || multiplier <= 0) {
-      toast.error('Multiplier must be a positive number');
-      return;
-    }
     try {
       await createMut.mutateAsync({
         name: newName.trim(),
-        description: newDescription.trim(),
-        tier: newTier,
-        multiplier,
+        currency: newCurrency.trim(),
+        isDefault: newIsDefault,
       });
       toast.success('Price list created');
       setShowCreate(false);
       setNewName('');
-      setNewDescription('');
-      setNewTier('Retail');
-      setNewMultiplier('1.0');
+      setNewCurrency('USD');
+      setNewIsDefault(false);
     } catch {
       toast.error('Failed to create price list');
     }
@@ -76,7 +58,7 @@ const PriceLists: React.FC = () => {
     >
       <PageHeader
         title="Price Lists"
-        description="Customer-tier pricing strategies"
+        description="Currency-based pricing strategies"
         actions={
           <button
             onClick={() => setShowCreate(true)}
@@ -102,55 +84,45 @@ const PriceLists: React.FC = () => {
         />
       ) : (
         <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-          {lists.map((l) => {
-            const cfg = tierConfig[l.tier] ?? tierConfig.Custom;
-            return (
-              <div
-                key={l.id}
-                className="rounded-xl p-5"
-                style={{ background: 'var(--hub-card)', border: '1px solid var(--hub-border)' }}
-              >
-                <div className="flex items-start justify-between mb-3">
-                  <div className="flex items-center gap-3">
-                    <div
-                      className="h-10 w-10 rounded-lg flex items-center justify-center"
-                      style={{ background: cfg.bg }}
-                    >
-                      <Tags size={16} style={{ color: cfg.color }} />
-                    </div>
-                    <div>
-                      <p className="text-sm font-semibold" style={{ color: 'var(--hub-text)' }}>
-                        {l.name}
-                      </p>
+          {lists.map((l) => (
+            <div
+              key={l.id}
+              className="rounded-xl p-5"
+              style={{ background: 'var(--hub-card)', border: '1px solid var(--hub-border)' }}
+            >
+              <div className="flex items-start justify-between mb-3">
+                <div className="flex items-center gap-3">
+                  <div
+                    className="h-10 w-10 rounded-lg flex items-center justify-center"
+                    style={{ background: 'rgba(245,158,11,0.12)' }}
+                  >
+                    <Tags size={16} style={{ color: AMBER }} />
+                  </div>
+                  <div>
+                    <p className="text-sm font-semibold" style={{ color: 'var(--hub-text)' }}>
+                      {l.name}
+                    </p>
+                    {l.currency && (
                       <span
                         className="text-[10px] font-medium px-1.5 py-0.5 rounded"
-                        style={{ background: cfg.bg, color: cfg.color }}
+                        style={{ background: 'rgba(245,158,11,0.12)', color: AMBER }}
                       >
-                        {l.tier}
+                        {l.currency}
                       </span>
-                    </div>
+                    )}
                   </div>
-                  <span className="text-xl font-bold" style={{ color: cfg.color }}>
-                    {Math.round(l.multiplier * 100)}%
-                  </span>
                 </div>
-                <p className="text-xs mb-3" style={{ color: 'var(--hub-text-muted)' }}>
-                  {l.description}
-                </p>
-                <div
-                  className="flex items-center justify-between pt-3"
-                  style={{ borderTop: '1px solid var(--hub-border)' }}
-                >
-                  <span className="text-xs" style={{ color: 'var(--hub-text-dim)' }}>
-                    Active products
+                {l.isDefault && (
+                  <span
+                    className="flex items-center gap-1 text-[10px] font-semibold px-2 py-0.5 rounded-full"
+                    style={{ background: 'rgba(16,185,129,0.12)', color: '#10b981' }}
+                  >
+                    <Star size={10} /> Default
                   </span>
-                  <span className="text-sm font-semibold" style={{ color: 'var(--hub-text)' }}>
-                    {l.activeCount}
-                  </span>
-                </div>
+                )}
               </div>
-            );
-          })}
+            </div>
+          ))}
         </div>
       )}
 
@@ -176,31 +148,22 @@ const PriceLists: React.FC = () => {
               style={inputStyle}
             />
             <input
-              value={newDescription}
-              onChange={(e) => setNewDescription(e.target.value)}
-              placeholder="Description (optional)"
+              value={newCurrency}
+              onChange={(e) => setNewCurrency(e.target.value)}
+              placeholder="Currency (e.g. USD)"
               style={inputStyle}
             />
-            <select
-              value={newTier}
-              onChange={(e) => setNewTier(e.target.value as PriceList['tier'])}
-              style={inputStyle}
+            <label
+              className="flex items-center gap-2 text-xs"
+              style={{ color: 'var(--hub-text-muted)' }}
             >
-              {TIERS.map((t) => (
-                <option key={t} value={t}>
-                  {t}
-                </option>
-              ))}
-            </select>
-            <input
-              type="number"
-              min="0"
-              step="0.01"
-              value={newMultiplier}
-              onChange={(e) => setNewMultiplier(e.target.value)}
-              placeholder="Multiplier (e.g. 0.9 = 90%)"
-              style={inputStyle}
-            />
+              <input
+                type="checkbox"
+                checked={newIsDefault}
+                onChange={(e) => setNewIsDefault(e.target.checked)}
+              />
+              Set as default price list
+            </label>
             <div className="flex gap-2 justify-end">
               <button
                 onClick={() => setShowCreate(false)}

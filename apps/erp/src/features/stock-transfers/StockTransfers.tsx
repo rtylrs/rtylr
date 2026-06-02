@@ -2,45 +2,69 @@ import React, { useState } from 'react';
 import { motion } from 'motion/react';
 import { Plus, ArrowRight } from 'lucide-react';
 import { useStockTransfers, useCreateStockTransfer } from './useStockTransfers';
+import { stockTransferStatusLabel, type StockTransferStatus } from './stockTransferSchema';
+import { useWarehouses } from '../warehouses/useWarehouses';
 import PageHeader from '../../shared/components/PageHeader';
 import EmptyState from '../../shared/components/EmptyState';
 import { SkeletonRow } from '../../shared/components/Skeleton';
 import { formatDate } from '../../shared/lib/format';
-import { StockTransfer } from '../../shared/services/erpApi';
 import { toast } from 'sonner';
 
 const AMBER = '#f59e0b';
 
-function statusConfig(status: StockTransfer['status']) {
-  if (status === 'Received') return { color: '#10b981', bg: 'rgba(16,185,129,0.12)' };
-  if (status === 'In Transit') return { color: AMBER, bg: 'rgba(245,158,11,0.12)' };
-  if (status === 'Cancelled') return { color: '#f87171', bg: 'rgba(248,113,113,0.12)' };
+const inputStyle: React.CSSProperties = {
+  padding: '8px 12px',
+  borderRadius: '8px',
+  border: '1px solid var(--hub-border)',
+  background: 'var(--hub-input-bg)',
+  color: 'var(--hub-text)',
+  fontSize: '13px',
+  outline: 'none',
+  width: '100%',
+  boxSizing: 'border-box',
+};
+
+function statusConfig(status: StockTransferStatus): { color: string; bg: string } {
+  if (status === 'received') return { color: '#10b981', bg: 'rgba(16,185,129,0.12)' };
+  if (status === 'in_transit') return { color: AMBER, bg: 'rgba(245,158,11,0.12)' };
+  if (status === 'cancelled') return { color: '#f87171', bg: 'rgba(248,113,113,0.12)' };
   return { color: 'var(--hub-text-dim)', bg: 'var(--hub-hover)' };
 }
 
 const StockTransfers: React.FC = () => {
   const { data: transferResult, isLoading } = useStockTransfers();
   const transfers = transferResult?.transfers ?? [];
+  const { data: warehouses = [] } = useWarehouses();
   const createMut = useCreateStockTransfer();
   const [showCreate, setShowCreate] = useState(false);
-  const [fromName, setFromName] = useState('');
-  const [toName, setToName] = useState('');
+  const [fromWarehouseId, setFromWarehouseId] = useState<number>(0);
+  const [toWarehouseId, setToWarehouseId] = useState<number>(0);
+  const [notes, setNotes] = useState('');
+
+  const warehouseName = (id: number): string =>
+    warehouses.find((w) => w.id === id)?.name ?? `Warehouse #${id}`;
 
   const handleCreate = async (): Promise<void> => {
-    if (!fromName.trim() || !toName.trim()) {
-      toast.error('Source and destination locations are required');
+    if (!fromWarehouseId || !toWarehouseId) {
+      toast.error('Source and destination warehouses are required');
+      return;
+    }
+    if (fromWarehouseId === toWarehouseId) {
+      toast.error('Source and destination must differ');
       return;
     }
     try {
       await createMut.mutateAsync({
-        fromName: fromName.trim(),
-        toName: toName.trim(),
-        status: 'Draft',
+        fromWarehouseId,
+        toWarehouseId,
+        notes: notes.trim(),
+        items: [],
       });
       toast.success('Transfer draft created');
       setShowCreate(false);
-      setFromName('');
-      setToName('');
+      setFromWarehouseId(0);
+      setToWarehouseId(0);
+      setNotes('');
     } catch {
       toast.error('Failed to create transfer');
     }
@@ -107,17 +131,17 @@ const StockTransfers: React.FC = () => {
                     className="text-xs font-medium truncate pr-2"
                     style={{ color: 'var(--hub-text)' }}
                   >
-                    {t.fromName}
+                    {warehouseName(t.fromWarehouseId)}
                   </span>
                   <ArrowRight size={12} style={{ color: 'var(--hub-text-dim)' }} />
                   <span
                     className="text-xs font-medium truncate pr-2"
                     style={{ color: 'var(--hub-text)' }}
                   >
-                    {t.toName}
+                    {warehouseName(t.toWarehouseId)}
                   </span>
                   <span className="text-xs" style={{ color: 'var(--hub-text)' }}>
-                    {t.items}
+                    {t.items.length}
                   </span>
                   <span className="text-xs" style={{ color: 'var(--hub-text-muted)' }}>
                     {formatDate(t.createdAt)}
@@ -127,7 +151,7 @@ const StockTransfers: React.FC = () => {
                       className="text-[10px] font-medium px-2 py-0.5 rounded-full"
                       style={{ background: sc.bg, color: sc.color }}
                     >
-                      {t.status}
+                      {stockTransferStatusLabel(t.status)}
                     </span>
                   </span>
                 </div>
@@ -151,27 +175,35 @@ const StockTransfers: React.FC = () => {
             <h3 className="text-sm font-bold" style={{ color: 'var(--hub-text)' }}>
               New Stock Transfer
             </h3>
+            <select
+              value={fromWarehouseId}
+              onChange={(e) => setFromWarehouseId(Number(e.target.value))}
+              style={inputStyle}
+            >
+              <option value={0}>From warehouse…</option>
+              {warehouses.map((w) => (
+                <option key={w.id} value={w.id}>
+                  {w.name}
+                </option>
+              ))}
+            </select>
+            <select
+              value={toWarehouseId}
+              onChange={(e) => setToWarehouseId(Number(e.target.value))}
+              style={inputStyle}
+            >
+              <option value={0}>To warehouse…</option>
+              {warehouses.map((w) => (
+                <option key={w.id} value={w.id}>
+                  {w.name}
+                </option>
+              ))}
+            </select>
             <input
-              value={fromName}
-              onChange={(e) => setFromName(e.target.value)}
-              placeholder="From warehouse"
-              className="w-full px-3 py-2 rounded-lg text-sm outline-none"
-              style={{
-                background: 'var(--hub-input-bg)',
-                border: '1px solid var(--hub-border)',
-                color: 'var(--hub-text)',
-              }}
-            />
-            <input
-              value={toName}
-              onChange={(e) => setToName(e.target.value)}
-              placeholder="To warehouse"
-              className="w-full px-3 py-2 rounded-lg text-sm outline-none"
-              style={{
-                background: 'var(--hub-input-bg)',
-                border: '1px solid var(--hub-border)',
-                color: 'var(--hub-text)',
-              }}
+              value={notes}
+              onChange={(e) => setNotes(e.target.value)}
+              placeholder="Notes (optional)"
+              style={inputStyle}
             />
             <div className="flex gap-2 justify-end">
               <button
@@ -183,7 +215,7 @@ const StockTransfers: React.FC = () => {
               </button>
               <button
                 onClick={handleCreate}
-                disabled={createMut.isPending}
+                disabled={createMut.isPending || !fromWarehouseId || !toWarehouseId}
                 className="px-3 py-2 rounded-lg text-xs font-semibold disabled:opacity-40"
                 style={{ background: AMBER, color: '#000' }}
               >

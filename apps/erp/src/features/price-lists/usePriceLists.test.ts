@@ -28,18 +28,18 @@ const samplePriceLists = [
   {
     id: 1,
     name: 'Retail',
-    description: 'Standard retail',
-    tier: 'Retail' as const,
-    multiplier: 1.0,
-    activeCount: 100,
+    currency: 'USD',
+    isDefault: true,
+    createdAt: '2024-01-01T00:00:00Z',
+    updatedAt: '2024-01-02T00:00:00Z',
   },
   {
     id: 2,
     name: 'Wholesale',
-    description: 'Wholesale pricing',
-    tier: 'Wholesale' as const,
-    multiplier: 0.8,
-    activeCount: 50,
+    currency: 'EUR',
+    isDefault: false,
+    createdAt: '2024-01-03T00:00:00Z',
+    updatedAt: '2024-01-04T00:00:00Z',
   },
 ];
 
@@ -80,23 +80,18 @@ describe('useCreatePriceList', () => {
   beforeEach(() => vi.clearAllMocks());
 
   it('calls createPriceList with data', async () => {
-    const newList = {
-      id: 3,
-      name: 'VIP',
-      description: '',
-      tier: 'VIP' as const,
-      multiplier: 0.7,
-      activeCount: 0,
-    };
-    mockErpApi.createPriceList.mockResolvedValue(newList);
+    mockErpApi.createPriceList.mockResolvedValue({
+      price_list_id: 3,
+      message: 'Price list created successfully',
+    });
     const { result } = renderHook(() => useCreatePriceList(), { wrapper: createWrapper() });
     await act(async () => {
-      await result.current.mutateAsync({ name: 'VIP', tier: 'VIP', multiplier: 0.7 });
+      await result.current.mutateAsync({ name: 'VIP', currency: 'USD', isDefault: false });
     });
     expect(mockErpApi.createPriceList).toHaveBeenCalledWith({
       name: 'VIP',
-      tier: 'VIP',
-      multiplier: 0.7,
+      currency: 'USD',
+      isDefault: false,
     });
   });
 });

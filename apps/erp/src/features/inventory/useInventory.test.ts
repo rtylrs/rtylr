@@ -7,7 +7,10 @@ import { useInventoryReport, useLowStock, useAdjustInventory } from './useInvent
 const mockErpApi = {
   getInventoryReport: vi.fn(),
   getLowStock: vi.fn(),
-  adjustInventory: vi.fn(),
+};
+
+const mockSafe = {
+  post: vi.fn(),
 };
 
 vi.mock('@voxire/api', () => ({
@@ -18,7 +21,12 @@ vi.mock('../../shared/services/erpApi', () => ({
   erpApi: {
     getInventoryReport: (...args: unknown[]) => mockErpApi.getInventoryReport(...args),
     getLowStock: (...args: unknown[]) => mockErpApi.getLowStock(...args),
-    adjustInventory: (...args: unknown[]) => mockErpApi.adjustInventory(...args),
+  },
+}));
+
+vi.mock('../../shared/lib/api', () => ({
+  safe: {
+    post: (...args: unknown[]) => mockSafe.post(...args),
   },
 }));
 
@@ -34,10 +42,37 @@ describe('useInventoryReport', () => {
   beforeEach(() => vi.clearAllMocks());
 
   it('fetches inventory report', async () => {
-    const report = [
-      { productId: 1, name: 'Widget A', sku: 'WA-001', currentStock: 100, value: 500 },
-      { productId: 2, name: 'Widget B', sku: 'WB-001', currentStock: 3, value: 30 },
-    ];
+    const report = {
+      items: [
+        {
+          productId: 1,
+          productName: 'Widget A',
+          sku: 'WA-001',
+          unit: 'pcs',
+          stockQuantity: 100,
+          lowStockThreshold: 10,
+          reorderQuantity: 50,
+          costPrice: 5,
+          salePrice: 8,
+          stockValue: 500,
+          isLowStock: false,
+        },
+        {
+          productId: 2,
+          productName: 'Widget B',
+          sku: 'WB-001',
+          unit: 'pcs',
+          stockQuantity: 3,
+          lowStockThreshold: 10,
+          reorderQuantity: 50,
+          costPrice: 10,
+          salePrice: 15,
+          stockValue: 30,
+          isLowStock: true,
+        },
+      ],
+      totalValue: 530,
+    };
     mockErpApi.getInventoryReport.mockResolvedValue(report);
 
     const { result } = renderHook(() => useInventoryReport(), { wrapper: createWrapper() });
@@ -69,7 +104,24 @@ describe('useLowStock', () => {
   beforeEach(() => vi.clearAllMocks());
 
   it('fetches low stock items', async () => {
-    const items = [{ name: 'Widget B', sku: 'WB-001', stock: 3, minStock: 10 }];
+    const items = {
+      items: [
+        {
+          productId: 2,
+          productName: 'Widget B',
+          sku: 'WB-001',
+          unit: 'pcs',
+          stockQuantity: 3,
+          lowStockThreshold: 10,
+          reorderQuantity: 50,
+          costPrice: 10,
+          salePrice: 15,
+          stockValue: 30,
+          isLowStock: true,
+        },
+      ],
+      count: 1,
+    };
     mockErpApi.getLowStock.mockResolvedValue(items);
 
     const { result } = renderHook(() => useLowStock(), { wrapper: createWrapper() });
@@ -89,26 +141,35 @@ describe('useLowStock', () => {
 describe('useAdjustInventory', () => {
   beforeEach(() => vi.clearAllMocks());
 
-  it('calls adjustInventory with data', async () => {
-    mockErpApi.adjustInventory.mockResolvedValue({ success: true });
+  it('posts the backend adjust body to /erp/inventory/adjust', async () => {
+    mockSafe.post.mockResolvedValue({ message: 'Inventory adjusted successfully' });
 
     const { result } = renderHook(() => useAdjustInventory(), { wrapper: createWrapper() });
 
-    const adjustData = { productId: 1, adjustment: 10, reason: 'Restock' };
     await act(async () => {
-      await result.current.mutateAsync(adjustData);
+      await result.current.mutateAsync({
+        productId: 1,
+        change: 10,
+        type: 'purchase',
+        notes: 'Restock',
+      });
     });
 
-    expect(mockErpApi.adjustInventory).toHaveBeenCalledWith(adjustData);
+    expect(mockSafe.post).toHaveBeenCalledWith('/erp/inventory/adjust', {
+      productId: 1,
+      change: 10,
+      type: 'purchase',
+      notes: 'Restock',
+    });
   });
 
   it('handles mutation error', async () => {
-    mockErpApi.adjustInventory.mockRejectedValue(new Error('fail'));
+    mockSafe.post.mockRejectedValue(new Error('fail'));
 
     const { result } = renderHook(() => useAdjustInventory(), { wrapper: createWrapper() });
 
     await act(async () => {
-      result.current.mutate({ productId: 1, adjustment: -5 });
+      result.current.mutate({ productId: 1, change: -5, type: 'waste' });
     });
 
     await waitFor(() => {

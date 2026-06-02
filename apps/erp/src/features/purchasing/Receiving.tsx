@@ -52,7 +52,8 @@ const Receiving: React.FC = () => {
         : `Receipt completed with ${variance} unit variance`
     );
     if (selectedId !== null) {
-      updateStatus.mutate({ id: selectedId, status: 'Received' });
+      // Backend expects the lowercase status enum (draft|sent|approved|partial|received|cancelled).
+      updateStatus.mutate({ id: selectedId, status: 'received' });
     }
     setSelectedId(null);
   };

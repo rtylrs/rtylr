@@ -73,7 +73,15 @@ const Dashboard: React.FC = () => {
 
   const isLoading = lowStockLoading || ordersLoading || productsLoading || suppliersLoading;
 
-  const lowStockItems: LowStockItem[] = lowStockData ?? [];
+  // useLowStock returns the backend inventory-report shape; map it to the
+  // LowStockItem display shape this widget renders.
+  const lowStockItems: LowStockItem[] = (lowStockData ?? []).map((i) => ({
+    name: i.productName,
+    sku: i.sku,
+    stock: i.stockQuantity,
+    minStock: i.lowStockThreshold,
+    unit: i.unit,
+  }));
   const ordersForList: PurchaseOrder[] = ordersResult?.orders ?? [];
   const recentOrders = ordersForList.slice(0, 3);
 

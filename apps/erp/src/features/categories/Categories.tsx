@@ -145,12 +145,6 @@ const Categories: React.FC = () => {
                   </>
                 )}
               </div>
-              <span
-                className="text-xs px-2 py-0.5 rounded-full"
-                style={{ background: 'var(--hub-hover)', color: 'var(--hub-text-muted)' }}
-              >
-                {cat.productCount} products
-              </span>
               {editingId === cat.id ? (
                 <>
                   <button

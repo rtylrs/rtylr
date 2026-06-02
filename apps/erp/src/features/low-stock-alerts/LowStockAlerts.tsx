@@ -59,10 +59,10 @@ const LowStockAlerts: React.FC = () => {
           style={{ background: 'var(--hub-card)', border: '1px solid var(--hub-border)' }}
         >
           {items.map((item, i) => {
-            const critical = item.stock <= 5;
+            const critical = item.stockQuantity <= 5;
             return (
               <div
-                key={item.sku}
+                key={item.productId}
                 className="flex items-center gap-3 px-4 py-3"
                 style={{
                   borderBottom: i < items.length - 1 ? '1px solid var(--hub-border)' : 'none',
@@ -78,7 +78,7 @@ const LowStockAlerts: React.FC = () => {
                 </div>
                 <div className="flex-1 min-w-0">
                   <p className="text-sm font-medium" style={{ color: 'var(--hub-text)' }}>
-                    {item.name}
+                    {item.productName}
                   </p>
                   <p className="text-[11px] font-mono" style={{ color: 'var(--hub-text-dim)' }}>
                     {item.sku}
@@ -86,14 +86,14 @@ const LowStockAlerts: React.FC = () => {
                 </div>
                 <div className="text-right pr-3">
                   <p className="text-sm font-bold" style={{ color: critical ? '#f87171' : AMBER }}>
-                    {item.stock} {item.unit}
+                    {item.stockQuantity} {item.unit}
                   </p>
                   <p className="text-[10px]" style={{ color: 'var(--hub-text-dim)' }}>
-                    Min: {item.minStock}
+                    Min: {item.lowStockThreshold}
                   </p>
                 </div>
                 <button
-                  onClick={() => handleReorder(item.name)}
+                  onClick={() => handleReorder(item.productName)}
                   className="flex items-center gap-1.5 px-3 py-1.5 rounded-lg text-xs font-semibold"
                   style={{ background: 'rgba(245,158,11,0.15)', color: AMBER }}
                 >

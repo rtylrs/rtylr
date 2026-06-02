@@ -136,7 +136,7 @@ const Products: React.FC = () => {
         >
           <SlidersHorizontal size={12} />
           Filters
-          {(filters.category || filters.brand || filters.status) && (
+          {(filters.categoryId !== undefined || filters.brand || filters.status) && (
             <span className="h-1.5 w-1.5 rounded-full" style={{ background: AMBER }} />
           )}
         </button>
@@ -305,8 +305,13 @@ const Products: React.FC = () => {
             Category
           </label>
           <select
-            value={filters.category || ''}
-            onChange={(e) => setFilters({ ...filters, category: e.target.value || undefined })}
+            value={filters.categoryId !== undefined ? String(filters.categoryId) : ''}
+            onChange={(e) =>
+              setFilters({
+                ...filters,
+                categoryId: e.target.value ? Number(e.target.value) : undefined,
+              })
+            }
             className="w-full px-2 py-1.5 rounded-lg text-sm outline-none"
             style={{
               background: 'var(--hub-input-bg)',
@@ -316,7 +321,7 @@ const Products: React.FC = () => {
           >
             <option value="">All categories</option>
             {categories.map((c) => (
-              <option key={c.id} value={c.name}>
+              <option key={c.id} value={String(c.id)}>
                 {c.name}
               </option>
             ))}

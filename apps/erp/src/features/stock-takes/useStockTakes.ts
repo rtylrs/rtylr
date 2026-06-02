@@ -2,9 +2,14 @@ import { unwrap } from '@voxire/api';
 import { z } from 'zod';
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
 import { toast } from 'sonner';
-import { erpApi, StockTake } from '../../shared/services/erpApi';
-import { stockTakeSchema } from '../../shared/schemas/stockTakes';
+import { safe } from '../../shared/lib/api';
 import { unwrapList } from '../../shared/lib/unwrapList';
+import {
+  stockTakeSchema,
+  StockTake,
+  CreateStockTakeInput,
+  UpdateStockTakeInput,
+} from './stockTakeSchema';
 
 export interface StockTakeListResult {
   stockTakes: StockTake[];
@@ -24,11 +29,13 @@ export function useStockTakes(params: UseStockTakesParams = {}) {
   return useQuery<StockTakeListResult>({
     queryKey: ['stock-takes', { page, pageSize }],
     queryFn: async () => {
-      const res = await unwrap(erpApi.listStockTakes({ page, page_size: pageSize }));
+      const res = await unwrap(
+        safe.get<unknown>('/erp/stock-takes', { params: { page, page_size: pageSize } })
+      );
       const stockTakes = z
         .array(stockTakeSchema)
-        .parse(unwrapList(res, 'stock_takes', 'stockTakes')) as StockTake[];
-      const hasMore = (res as unknown as Record<string, unknown>)?.has_more === true;
+        .parse(unwrapList(res, 'stockTakes', 'stock_takes'));
+      const hasMore = (res as Record<string, unknown>)?.hasMore === true;
       return { stockTakes, hasMore, page, pageSize };
     },
   });
@@ -37,8 +44,18 @@ export function useStockTakes(params: UseStockTakesParams = {}) {
 export function useCreateStockTake() {
   const qc = useQueryClient();
   return useMutation({
-    mutationFn: (data: Partial<StockTake>) => unwrap(erpApi.createStockTake(data)),
+    mutationFn: (data: CreateStockTakeInput) =>
+      unwrap(safe.post<unknown>('/erp/stock-takes', data)),
     onSuccess: () => qc.invalidateQueries({ queryKey: ['stock-takes'] }),
     onError: () => toast.error('Failed to create stock take'),
+  });
+}
+
+export function useUpdateStockTake() {
+  const qc = useQueryClient();
+  return useMutation({
+    mutationFn: (data: UpdateStockTakeInput) => unwrap(safe.put<unknown>('/erp/stock-takes', data)),
+    onSuccess: () => qc.invalidateQueries({ queryKey: ['stock-takes'] }),
+    onError: () => toast.error('Failed to update stock take'),
   });
 }

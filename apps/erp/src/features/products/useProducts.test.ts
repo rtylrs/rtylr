@@ -40,42 +40,39 @@ function createWrapper() {
     React.createElement(QueryClientProvider, { client }, children);
 }
 
+// Backend (erp/v1 Product) shape: categoryId/stockQuantity/lowStockThreshold,
+// camelCase as delivered by @voxire/api after snake_case -> camelCase conversion.
+// No category string, no `stock`/`lowStock`/`status` — those are derived in the hook.
 const sampleProducts = [
   {
     id: 1,
     name: 'Widget A',
     sku: 'WA-001',
-    category: 'Electronics',
-    stock: 100,
-    lowStock: 10,
+    categoryId: 1,
+    stockQuantity: 100,
+    lowStockThreshold: 10,
     costPrice: 5,
     salePrice: 15,
-    status: 'In Stock' as const,
-    brand: 'BrandA',
   },
   {
     id: 2,
     name: 'Widget B',
     sku: 'WB-001',
-    category: 'Hardware',
-    stock: 3,
-    lowStock: 10,
+    categoryId: 2,
+    stockQuantity: 3,
+    lowStockThreshold: 10,
     costPrice: 10,
     salePrice: 30,
-    status: 'Low Stock' as const,
-    brand: 'BrandB',
   },
   {
     id: 3,
     name: 'Gadget C',
     sku: 'GC-001',
-    category: 'Electronics',
-    stock: 50,
-    lowStock: 5,
+    categoryId: 1,
+    stockQuantity: 50,
+    lowStockThreshold: 5,
     costPrice: 8,
     salePrice: 25,
-    status: 'In Stock' as const,
-    brand: 'BrandA',
   },
 ];
 
@@ -102,39 +99,28 @@ describe('useProducts', () => {
     expect(result.current.data?.products).toHaveLength(2);
   });
 
-  it('applies client-side category filter', async () => {
+  it('applies client-side categoryId filter', async () => {
     mockErpApi.listProducts.mockResolvedValue(sampleProducts);
 
-    const { result } = renderHook(() => useProducts({ category: 'Electronics' }), {
+    const { result } = renderHook(() => useProducts({ categoryId: 1 }), {
       wrapper: createWrapper(),
     });
     await waitFor(() => expect(result.current.isSuccess).toBe(true));
 
     expect(result.current.data?.products).toHaveLength(2);
-    expect(result.current.data?.products.every((p) => p.category === 'Electronics')).toBe(true);
   });
 
-  it('applies client-side brand filter', async () => {
+  it('applies client-side status filter computed from stock', async () => {
     mockErpApi.listProducts.mockResolvedValue(sampleProducts);
 
-    const { result } = renderHook(() => useProducts({ brand: 'BrandB' }), {
-      wrapper: createWrapper(),
-    });
-    await waitFor(() => expect(result.current.isSuccess).toBe(true));
-
-    expect(result.current.data?.products).toHaveLength(1);
-    expect(result.current.data?.products[0].name).toBe('Widget B');
-  });
-
-  it('applies client-side status filter', async () => {
-    mockErpApi.listProducts.mockResolvedValue(sampleProducts);
-
+    // Widget B has stockQuantity 3 <= lowStockThreshold 10 -> "Low Stock".
     const { result } = renderHook(() => useProducts({ status: 'Low Stock' }), {
       wrapper: createWrapper(),
     });
     await waitFor(() => expect(result.current.isSuccess).toBe(true));
 
     expect(result.current.data?.products).toHaveLength(1);
+    expect(result.current.data?.products[0].name).toBe('Widget B');
   });
 
   it('sorts by name ascending', async () => {

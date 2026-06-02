@@ -26,26 +26,38 @@ function createWrapper() {
     React.createElement(QueryClientProvider, { client }, children);
 }
 
+// Backend (erp.v1.Supplier) shape, camelCased by @voxire/api: isActive boolean,
+// no contactName / productCount / categories / status.
 const sampleSuppliers = [
   {
     id: 1,
     name: 'Acme',
-    contactName: 'Alice',
     email: 'alice@acme.com',
     phone: '555',
-    productCount: 10,
-    categories: ['Tools'],
-    status: 'Active' as const,
+    address: '',
+    city: '',
+    country: '',
+    taxId: '',
+    paymentTerms: '',
+    notes: '',
+    isActive: true,
+    createdAt: '2024-01-01T00:00:00Z',
+    updatedAt: '2024-01-01T00:00:00Z',
   },
   {
     id: 2,
     name: 'Beta',
-    contactName: 'Bob',
     email: 'bob@beta.com',
     phone: '666',
-    productCount: 5,
-    categories: ['Electronics'],
-    status: 'Inactive' as const,
+    address: '',
+    city: '',
+    country: '',
+    taxId: '',
+    paymentTerms: '',
+    notes: '',
+    isActive: false,
+    createdAt: '2024-01-01T00:00:00Z',
+    updatedAt: '2024-01-01T00:00:00Z',
   },
 ];
 
@@ -59,6 +71,14 @@ describe('useSuppliers', () => {
     expect(result.current.data?.suppliers).toHaveLength(2);
   });
 
+  it('maps isActive onto the display-cased status', async () => {
+    mockErpApi.listSuppliers.mockResolvedValue(sampleSuppliers);
+    const { result } = renderHook(() => useSuppliers(), { wrapper: createWrapper() });
+    await waitFor(() => expect(result.current.isSuccess).toBe(true));
+    expect(result.current.data?.suppliers[0].status).toBe('Active');
+    expect(result.current.data?.suppliers[1].status).toBe('Inactive');
+  });
+
   it('returns hasMore false when API does not signal more', async () => {
     mockErpApi.listSuppliers.mockResolvedValue(sampleSuppliers);
     const { result } = renderHook(() => useSuppliers(), { wrapper: createWrapper() });
@@ -67,7 +87,7 @@ describe('useSuppliers', () => {
   });
 
   it('returns hasMore true when API signals more', async () => {
-    const response = { suppliers: sampleSuppliers, has_more: true };
+    const response = { suppliers: sampleSuppliers, hasMore: true };
     mockErpApi.listSuppliers.mockResolvedValue(response);
     const { result } = renderHook(() => useSuppliers(), { wrapper: createWrapper() });
     await waitFor(() => expect(result.current.isSuccess).toBe(true));
