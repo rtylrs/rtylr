@@ -6,7 +6,7 @@
 FROM debian:bookworm-slim AS media-engine
 RUN apt-get update && apt-get install -y --no-install-recommends \
     cmake build-essential pkg-config \
-    libvips-dev libvips-cpp-dev \
+    libvips-dev \
     ffmpeg libavcodec-dev libavformat-dev libavutil-dev libswscale-dev \
     && rm -rf /var/lib/apt/lists/*
 WORKDIR /build
