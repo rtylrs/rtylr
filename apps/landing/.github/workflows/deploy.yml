@@ -1,7 +1,13 @@
 name: Deploy
 
+# Deploy only after CI (typecheck + build + e2e) has passed on main.
+# `workflow_run` fires when the CI workflow finishes; we gate on its
+# conclusion so a red build never reaches Cloudflare. `workflow_dispatch`
+# stays available for manual re-deploys.
 on:
-  push:
+  workflow_run:
+    workflows: [CI]
+    types: [completed]
     branches: [main]
   workflow_dispatch:
 
@@ -9,6 +15,8 @@ jobs:
   deploy:
     name: Deploy rtylr-landing
     runs-on: ubuntu-latest
+    # Manual runs always deploy; automatic runs only when CI succeeded.
+    if: ${{ github.event_name == 'workflow_dispatch' || github.event.workflow_run.conclusion == 'success' }}
     steps:
       - uses: actions/checkout@v4
         with:

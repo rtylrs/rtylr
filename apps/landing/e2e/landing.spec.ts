@@ -6,7 +6,7 @@ import { test, expect } from './fixtures';
  * the page - which has happened before and burned this spec.
  */
 
-const LANDING_URL = process.env.LANDING_URL ?? 'http://localhost:4200';
+const LANDING_URL = process.env.LANDING_URL ?? 'http://127.0.0.1:4200';
 
 test.describe('Landing page', () => {
   test('homepage loads with h1 hero', async ({ page }) => {
