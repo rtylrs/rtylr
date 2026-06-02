@@ -351,7 +351,7 @@ const DefaultLayout: React.FC = () => {
             className="flex items-center justify-between gap-2.5 px-4 py-4"
             style={{ borderBottom: '1px solid var(--hub-border)' }}
           >
-            <img src="/logo.png" alt="rtylr" className="h-6 w-auto" />
+            <img src="/logo.png?v=2" alt="rtylr" className="h-6 w-auto" />
             <button
               onClick={() => setSidebarOpen(false)}
               className="h-7 w-7 rounded-lg flex md:hidden items-center justify-center"
