@@ -4,7 +4,8 @@ import { motion, AnimatePresence } from 'motion/react';
 import { useTranslation } from 'react-i18next';
 import { APP_URLS, getAvatarUrl } from '@voxire/config';
 import { Avatar } from '@voxire/ui';
-import { signOut } from '@voxire/auth';
+import { signOut, useUserStore } from '@voxire/auth';
+import { CaretButton, CaretPanel, useCaretStore } from '@voxire/caret';
 import {
   LayoutDashboard,
   Users,
@@ -294,13 +295,7 @@ function UserMenu({ theme, setTheme }: { theme: Theme; setTheme: (t: Theme) => v
   const { t } = useTranslation();
   const [open, setOpen] = useState(false);
 
-  const rawUser = (() => {
-    try {
-      return JSON.parse(localStorage.getItem('rtylr:voxire:user') || 'null');
-    } catch {
-      return null;
-    }
-  })();
+  const rawUser = useUserStore((s) => s.user);
   const userEmail = rawUser?.email || rawUser?.emailAddress || null;
   const userName = rawUser?.name || rawUser?.firstName || userEmail || 'User';
 
@@ -486,6 +481,9 @@ const DefaultLayout: React.FC<DefaultLayoutProps> = ({ children }) => {
   const { t } = useTranslation();
   const pathname = useRouterState({ select: (s) => s.location.pathname });
   const [theme, setTheme] = useTheme();
+  const hrUser = useUserStore((s) => s.user);
+  const userId = Number(hrUser?.id) || 0;
+  const { isOpen: caretOpen } = useCaretStore();
   const isMobile = useMediaQuery('(max-width: 960px)');
   const [mobileNavOpen, setMobileNavOpen] = useState(false);
   const [collapsedSections, setCollapsedSections] = useState<Record<string, boolean>>({});
@@ -719,7 +717,39 @@ const DefaultLayout: React.FC<DefaultLayoutProps> = ({ children }) => {
         </nav>
 
         {/* Footer */}
-        <div style={{ padding: '8px', borderTop: '1px solid var(--hr-border)' }}>
+        <div
+          style={{
+            padding: '8px',
+            borderTop: '1px solid var(--hr-border)',
+            display: 'flex',
+            flexDirection: 'column',
+            gap: '4px',
+          }}
+        >
+          <Link
+            to="/settings"
+            style={{
+              display: 'flex',
+              alignItems: 'center',
+              gap: '8px',
+              padding: '6px 12px',
+              borderRadius: '8px',
+              fontSize: '12px',
+              color: 'var(--hr-text-muted)',
+              textDecoration: 'none',
+              transition: 'background 0.15s',
+            }}
+            onMouseEnter={(e: React.MouseEvent<HTMLAnchorElement>) =>
+              ((e.currentTarget as HTMLAnchorElement).style.background = 'var(--hr-hover)')
+            }
+            onMouseLeave={(e: React.MouseEvent<HTMLAnchorElement>) =>
+              ((e.currentTarget as HTMLAnchorElement).style.background = 'transparent')
+            }
+          >
+            <Settings size={14} />
+            {t('nav.settings')}
+          </Link>
+          <CaretButton className="w-full justify-start" />
           <UserMenu theme={theme} setTheme={setTheme} />
         </div>
       </aside>
@@ -866,6 +896,24 @@ const DefaultLayout: React.FC<DefaultLayoutProps> = ({ children }) => {
             {children}
           </motion.main>
         </AnimatePresence>
+      </div>
+
+      {/* Caret AI - inline column, pushes content left (matches other apps) */}
+      <div
+        style={{
+          width: caretOpen ? '360px' : '0px',
+          flexShrink: 0,
+          overflow: 'hidden',
+          transition: 'width 0.25s cubic-bezier(0.4, 0, 0.2, 1)',
+        }}
+      >
+        <CaretPanel
+          variant="inline"
+          appId="hr"
+          userId={userId}
+          apiBaseUrl={import.meta.env.VITE_API_URL ?? 'https://api.voxire.com/'}
+          systemContext="User is in the HR app (staff, shifts, payroll, attendance, leave)"
+        />
       </div>
     </div>
   );
