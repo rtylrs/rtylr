@@ -1,0 +1,4 @@
+@use 'sass:meta';
+
+//Fonts and common styles
+@include meta.load-css('./scss/common.scss');

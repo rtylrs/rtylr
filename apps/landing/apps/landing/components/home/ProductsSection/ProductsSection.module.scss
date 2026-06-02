@@ -1,0 +1,285 @@
+.productsSection {
+  padding: 120px 0 100px;
+  background: var(--app-background);
+  position: relative;
+  overflow: hidden;
+
+  // Soft cream glow high-center to lift the section off the flat black.
+  &::before {
+    content: '';
+    position: absolute;
+    top: -10%;
+    left: 50%;
+    transform: translateX(-50%);
+    width: 900px;
+    height: 520px;
+    background: radial-gradient(ellipse at center, rgba(232, 230, 225, 0.06) 0%, transparent 70%);
+    pointer-events: none;
+    z-index: 0;
+  }
+}
+
+.container {
+  max-width: 1400px;
+  margin: 0 auto;
+  padding: 0 50px;
+  position: relative;
+  z-index: 1;
+}
+
+// ── Section header ────────────────────────────────────────────────────────────
+
+.header {
+  text-align: center;
+  margin-bottom: 72px;
+}
+
+.badge {
+  display: inline-flex;
+  align-items: center;
+  background: rgba(232, 230, 225, 0.1);
+  border: 1px solid rgba(232, 230, 225, 0.25);
+  color: #e8e6e1;
+  padding: 5px 16px;
+  border-radius: 100px;
+  font-size: 0.75rem;
+  font-weight: 600;
+  letter-spacing: 0.8px;
+  text-transform: uppercase;
+  margin-bottom: 20px;
+}
+
+.sectionTitle {
+  font-size: 3.2rem;
+  font-weight: 700;
+  color: white;
+  margin: 0 0 20px;
+  line-height: 1.1;
+  letter-spacing: -0.03em;
+}
+
+.sectionSubtitle {
+  font-size: 1.05rem;
+  color: rgba(255, 255, 255, 0.48);
+  max-width: 480px;
+  margin: 0 auto;
+  line-height: 1.7;
+}
+
+// ── Product grid ──────────────────────────────────────────────────────────────
+
+.grid {
+  display: grid;
+  grid-template-columns: repeat(4, 1fr);
+  gap: 1px;
+  background: #232220;
+  border: 1px solid #232220;
+}
+
+.card {
+  background: var(--app-background);
+  padding: 36px 32px;
+  display: flex;
+  flex-direction: column;
+  gap: 16px;
+  position: relative;
+  cursor: pointer;
+  transition: background 0.2s ease;
+  overflow: hidden;
+
+  // Glowing top accent bar that lights up on hover
+  &::before {
+    content: '';
+    position: absolute;
+    top: 0;
+    left: 0;
+    right: 0;
+    height: 2px;
+    background: linear-gradient(
+      90deg,
+      transparent 0%,
+      rgba(232, 230, 225, 0.9) 50%,
+      transparent 100%
+    );
+    box-shadow: 0 0 14px rgba(232, 230, 225, 0.5);
+    opacity: 0;
+    transition: opacity 0.3s ease;
+    z-index: 1;
+  }
+
+  // Radial inner glow on hover, gives the flat cell some depth
+  &::after {
+    content: '';
+    position: absolute;
+    inset: 0;
+    background: radial-gradient(120% 80% at 50% 0%, rgba(232, 230, 225, 0.07) 0%, transparent 60%);
+    opacity: 0;
+    transition: opacity 0.3s ease;
+    pointer-events: none;
+  }
+
+  &:hover {
+    background: rgba(232, 230, 225, 0.04);
+
+    &::before {
+      opacity: 1;
+    }
+
+    &::after {
+      opacity: 1;
+    }
+
+    .cardArrow {
+      opacity: 1;
+      transform: translateX(2px);
+    }
+
+    .iconWrap {
+      background: rgba(232, 230, 225, 0.16);
+      border-color: rgba(232, 230, 225, 0.4);
+      transform: translateY(-3px) scale(1.05);
+      box-shadow:
+        0 1px 0 rgba(255, 255, 255, 0.15) inset,
+        0 0 20px -2px rgba(232, 230, 225, 0.3),
+        0 8px 18px -6px rgba(0, 0, 0, 0.55);
+    }
+  }
+}
+
+.iconWrap {
+  width: 44px;
+  height: 44px;
+  border-radius: 10px;
+  background: rgba(232, 230, 225, 0.08);
+  border: 1px solid rgba(232, 230, 225, 0.2);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  color: #e8e6e1;
+  box-shadow:
+    0 1px 0 rgba(255, 255, 255, 0.06) inset,
+    0 4px 10px -4px rgba(0, 0, 0, 0.5);
+  transition:
+    background 0.25s ease,
+    border-color 0.25s ease,
+    transform 0.3s var(--ease-out-soft),
+    box-shadow 0.3s var(--ease-out-soft);
+  flex-shrink: 0;
+  position: relative;
+  z-index: 1;
+}
+
+.cardLabel {
+  font-size: 0.65rem;
+  font-weight: 700;
+  letter-spacing: 1.2px;
+  text-transform: uppercase;
+  color: #e8e6e1;
+  margin: 0;
+}
+
+.cardTitle {
+  font-size: 1.05rem;
+  font-weight: 600;
+  color: white;
+  margin: 0;
+  letter-spacing: -0.01em;
+  line-height: 1.3;
+}
+
+.cardDescription {
+  font-size: 0.875rem;
+  color: rgba(255, 255, 255, 0.5);
+  line-height: 1.6;
+  margin: 0;
+  flex: 1;
+}
+
+.cardArrow {
+  font-size: 0.8rem;
+  color: rgba(255, 255, 255, 0.35);
+  opacity: 0;
+  transition: all 0.2s ease;
+  display: flex;
+  align-items: center;
+  gap: 4px;
+  margin-top: 4px;
+}
+
+// Last row, 3 cards, centered
+.card:nth-child(5),
+.card:nth-child(6),
+.card:nth-child(7) {
+  // handled by grid spanning for centering
+}
+
+// ── Bottom row alignment ──────────────────────────────────────────────────────
+
+.gridBottom {
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  gap: 1px;
+  background: #232220;
+  border: 1px solid #232220;
+  border-top: none;
+}
+
+// ── Responsive ────────────────────────────────────────────────────────────────
+
+@media (max-width: 1200px) {
+  .sectionTitle {
+    font-size: 2.8rem;
+  }
+
+  .grid,
+  .gridBottom {
+    grid-template-columns: repeat(3, 1fr);
+  }
+
+  .gridBottom {
+    // 3 cols for last row when main is 3 cols too
+    grid-template-columns: repeat(3, 1fr);
+  }
+}
+
+@media (max-width: 1024px) {
+  .productsSection {
+    padding: 80px 0;
+  }
+
+  .container {
+    padding: 0 30px;
+  }
+
+  .grid,
+  .gridBottom {
+    grid-template-columns: repeat(2, 1fr);
+  }
+}
+
+@media (max-width: 768px) {
+  .productsSection {
+    padding: 60px 0;
+  }
+
+  .container {
+    padding: 0 20px;
+  }
+
+  .sectionTitle {
+    font-size: 2.2rem;
+  }
+
+  .grid,
+  .gridBottom {
+    grid-template-columns: 1fr;
+  }
+
+  .card {
+    padding: 28px 24px;
+  }
+
+  .header {
+    margin-bottom: 48px;
+  }
+}

@@ -1,0 +1,210 @@
+import React, { useState, useEffect, useRef } from 'react';
+import { motion, AnimatePresence } from 'motion/react';
+
+interface MenuItem {
+  id: string;
+  name: string;
+  price: number;
+  emoji: string;
+}
+
+interface CartItem extends MenuItem {
+  qty: number;
+}
+
+const MENU: MenuItem[] = [
+  { id: 'esp', name: 'Espresso', price: 3.5, emoji: '☕' },
+  { id: 'lat', name: 'Latte', price: 5.0, emoji: '🥛' },
+  { id: 'cap', name: 'Cappuccino', price: 5.0, emoji: '☕' },
+  { id: 'cro', name: 'Croissant', price: 3.5, emoji: '🥐' },
+  { id: 'oj', name: 'Orange Juice', price: 4.5, emoji: '🍊' },
+  { id: 'avo', name: 'Avo Toast', price: 12.0, emoji: '🥑' },
+  { id: 'sal', name: 'Greek Salad', price: 14.0, emoji: '🥗' },
+  { id: 'cake', name: 'Cheesecake', price: 7.5, emoji: '🍰' },
+];
+
+const SEQ = ['esp', 'cro', 'lat', 'esp', 'avo'];
+
+export const POSDemo = ({ isActive }: { isActive: boolean }): React.JSX.Element => {
+  const [cart, setCart] = useState<CartItem[]>([]);
+  const [flash, setFlash] = useState<string | null>(null);
+  const seqRef = useRef(0);
+
+  const addItem = (id: string): void => {
+    const item = MENU.find((m) => m.id === id);
+    if (!item) return;
+    setCart((prev) => {
+      const ex = prev.find((c) => c.id === id);
+      if (ex) return prev.map((c) => (c.id === id ? { ...c, qty: c.qty + 1 } : c));
+      return [...prev, { ...item, qty: 1 }];
+    });
+    setFlash(id);
+    setTimeout(() => setFlash(null), 280);
+  };
+
+  useEffect(() => {
+    if (!isActive) return;
+    const t = setInterval(() => {
+      addItem(SEQ[seqRef.current % SEQ.length]);
+      seqRef.current += 1;
+    }, 2000);
+    return () => clearInterval(t);
+  }, [isActive]);
+
+  const total = cart.reduce((s, c) => s + c.price * c.qty, 0);
+
+  return (
+    <div
+      style={{
+        position: 'absolute',
+        inset: 0,
+        display: 'flex',
+        background: 'var(--app-background)',
+        fontFamily: 'inherit',
+        fontSize: 13,
+        overflow: 'hidden',
+      }}
+    >
+      {/* Menu grid */}
+      <div
+        style={{
+          flex: 1,
+          borderRight: '1px solid rgba(255,255,255,0.07)',
+          padding: '20px 16px',
+          overflow: 'hidden',
+        }}
+      >
+        <div
+          style={{
+            fontSize: 10,
+            fontWeight: 600,
+            letterSpacing: '0.12em',
+            color: 'rgba(255,255,255,0.35)',
+            textTransform: 'uppercase',
+            marginBottom: 14,
+          }}
+        >
+          Menu · Dine-in
+        </div>
+        <div style={{ display: 'grid', gridTemplateColumns: 'repeat(2, 1fr)', gap: 8 }}>
+          {MENU.map((item) => (
+            <button
+              key={item.id}
+              onClick={() => addItem(item.id)}
+              style={{
+                background: flash === item.id ? 'rgba(232,230,225,0.12)' : 'rgba(255,255,255,0.03)',
+                border: `1px solid ${flash === item.id ? 'rgba(232,230,225,0.3)' : 'rgba(255,255,255,0.07)'}`,
+                borderRadius: 8,
+                padding: '10px 12px',
+                cursor: 'pointer',
+                textAlign: 'left',
+                transition: 'background 0.15s ease, border-color 0.15s ease',
+                color: '#e8e6e1',
+              }}
+            >
+              <div style={{ marginBottom: 3, fontSize: 16 }}>{item.emoji}</div>
+              <div style={{ fontWeight: 500, fontSize: 12, marginBottom: 2 }}>{item.name}</div>
+              <div style={{ fontSize: 11, color: 'rgba(255,255,255,0.45)' }}>
+                ${item.price.toFixed(2)}
+              </div>
+            </button>
+          ))}
+        </div>
+      </div>
+
+      {/* Cart */}
+      <div
+        style={{
+          width: 185,
+          padding: '20px 14px',
+          display: 'flex',
+          flexDirection: 'column',
+          background: 'var(--app-background)',
+        }}
+      >
+        <div
+          style={{
+            fontSize: 10,
+            fontWeight: 600,
+            letterSpacing: '0.12em',
+            color: 'rgba(255,255,255,0.35)',
+            textTransform: 'uppercase',
+            marginBottom: 14,
+          }}
+        >
+          Order · Table 4
+        </div>
+
+        <div
+          style={{
+            flex: 1,
+            display: 'flex',
+            flexDirection: 'column',
+            gap: 8,
+            overflowY: 'hidden',
+          }}
+        >
+          {cart.length === 0 ? (
+            <div style={{ color: 'rgba(255,255,255,0.2)', fontSize: 12 }}>Add items…</div>
+          ) : (
+            <AnimatePresence>
+              {cart.map((item) => (
+                <motion.div
+                  key={item.id}
+                  initial={{ opacity: 0, x: 10 }}
+                  animate={{ opacity: 1, x: 0 }}
+                  style={{
+                    display: 'flex',
+                    justifyContent: 'space-between',
+                    alignItems: 'center',
+                    fontSize: 12,
+                  }}
+                >
+                  <span style={{ color: 'rgba(255,255,255,0.7)' }}>
+                    {item.qty}× {item.name}
+                  </span>
+                  <span style={{ color: '#e8e6e1', fontWeight: 600 }}>
+                    ${(item.price * item.qty).toFixed(2)}
+                  </span>
+                </motion.div>
+              ))}
+            </AnimatePresence>
+          )}
+        </div>
+
+        <div
+          style={{ borderTop: '1px solid rgba(255,255,255,0.07)', paddingTop: 14, marginTop: 12 }}
+        >
+          <div
+            style={{
+              display: 'flex',
+              justifyContent: 'space-between',
+              alignItems: 'center',
+              marginBottom: 14,
+            }}
+          >
+            <span style={{ color: 'rgba(255,255,255,0.45)', fontSize: 12 }}>Total</span>
+            <span style={{ color: '#e8e6e1', fontWeight: 700, fontSize: 16 }}>
+              ${total.toFixed(2)}
+            </span>
+          </div>
+          <div
+            style={{
+              background: cart.length ? '#e8e6e1' : 'rgba(255,255,255,0.06)',
+              color: cart.length ? '#0a0a0a' : 'rgba(255,255,255,0.25)',
+              borderRadius: 8,
+              padding: '11px',
+              textAlign: 'center',
+              fontWeight: 700,
+              fontSize: 13,
+              transition: 'all 0.25s ease',
+              cursor: cart.length ? 'pointer' : 'default',
+            }}
+          >
+            {cart.length ? `Charge $${total.toFixed(2)}` : 'Charge'}
+          </div>
+        </div>
+      </div>
+    </div>
+  );
+};

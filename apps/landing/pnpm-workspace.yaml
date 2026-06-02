@@ -1,0 +1,14 @@
+packages:
+  - 'apps/*'
+  - 'packages/config'
+  - 'packages/components'
+  - 'packages/consent'
+  - 'packages/observability'
+  - 'packages/utils'
+  - 'packages/types'
+
+onlyBuiltDependencies:
+  - '@parcel/watcher'
+  - '@swc/core'
+  - esbuild
+  - protobufjs
