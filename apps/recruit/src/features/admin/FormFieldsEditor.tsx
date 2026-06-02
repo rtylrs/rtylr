@@ -76,7 +76,7 @@ const FormFieldsEditor: React.FC<Props> = ({ careerId }) => {
   const { data, isLoading } = useAdminFormFields(careerId);
   const create = useCreateFormField();
   const update = useUpdateFormField();
-  const del = useDeleteFormField(careerId);
+  const del = useDeleteFormField();
 
   const fields = data?.fields ?? [];
 
@@ -116,10 +116,13 @@ const FormFieldsEditor: React.FC<Props> = ({ careerId }) => {
                 })
               }
               onDelete={() =>
-                del.mutate(f.id, {
-                  onSuccess: () => toast.success('Question removed'),
-                  onError: () => toast.error("Couldn't delete"),
-                })
+                del.mutate(
+                  { id: f.id, careerId },
+                  {
+                    onSuccess: () => toast.success('Question removed'),
+                    onError: () => toast.error("Couldn't delete"),
+                  }
+                )
               }
             />
           ))}

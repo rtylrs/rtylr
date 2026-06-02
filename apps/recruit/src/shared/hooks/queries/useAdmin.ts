@@ -276,13 +276,13 @@ export function useUpdateFormField() {
   });
 }
 
-export function useDeleteFormField(careerId: number) {
+export function useDeleteFormField() {
   const qc = useQueryClient();
   return useMutation({
-    mutationFn: (id: number) =>
-      unwrap(safe.delete<{ message: string }>('/recruit/form-fields', { data: { id } })),
-    onSuccess: () =>
-      qc.invalidateQueries({ queryKey: ['recruit', 'admin', 'form-fields', careerId] }),
+    mutationFn: (payload: { id: number; careerId: number }) =>
+      unwrap(safe.delete<{ message: string }>('/recruit/form-fields', { data: { id: payload.id } })),
+    onSuccess: (_, vars) =>
+      qc.invalidateQueries({ queryKey: ['recruit', 'admin', 'form-fields', vars.careerId] }),
     onError: () => toast.error('Failed to delete form field'),
   });
 }
