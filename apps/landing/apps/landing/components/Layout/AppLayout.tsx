@@ -2,7 +2,6 @@ import React, { useState, useEffect } from 'react';
 import { useRouter } from 'next/router';
 
 import i18next from '../../services/i18next';
-import HelmetContainer from '../HelmetContainer';
 import { getCookie } from '../../lib/cookies';
 import CustomScrollbar from '../CustomScrollbar/CustomScrollbar';
 
@@ -40,8 +39,6 @@ const AppLayout: React.FC<AppLayoutProps> = ({ children }) => {
 
   return (
     <React.Fragment>
-      <HelmetContainer title={'rtylr - The OS for your business'} favicon={'/favicon.ico'} />
-
       {/* Toolbar and Cookies components temporarily commented out */}
       {/* {(role && role === 'admin') ||
       (typeof window !== 'undefined' && window.location.hostname === 'localhost') ? (
