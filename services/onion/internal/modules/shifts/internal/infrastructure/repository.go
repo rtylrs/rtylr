@@ -68,9 +68,9 @@ func (r *Repository) ListShifts(ctx context.Context, ownerID, staffID int64, dat
 func (r *Repository) CreateShift(ctx context.Context, input domain.ShiftInput) (int64, error) {
 	result, err := r.queries.CreateShift(ctx, sqlc.CreateShiftParams{
 		OwnerID:              input.OwnerID,
-		StaffID:              input.StaffID,
+		StaffID:              sql.NullInt64{Int64: input.StaffID, Valid: true},
 		DepartmentID:         sql.NullInt64{Int64: input.DepartmentID, Valid: input.DepartmentID != 0},
-		Date:                 parseDate(input.Date),
+		Date:                 sql.NullTime{Time: parseDate(input.Date), Valid: true},
 		StartTime:            parseTime(input.StartTime),
 		EndTime:              parseTime(input.EndTime),
 		BreakDurationMinutes: sql.NullInt32{Int32: int32(input.BreakDurationMinutes), Valid: input.BreakDurationMinutes != 0},
@@ -86,7 +86,7 @@ func (r *Repository) CreateShift(ctx context.Context, input domain.ShiftInput) (
 func (r *Repository) UpdateShift(ctx context.Context, ownerID int64, input domain.ShiftUpdateInput) error {
 	err := r.queries.UpdateShift(ctx, sqlc.UpdateShiftParams{
 		DepartmentID:         sql.NullInt64{Int64: input.DepartmentID, Valid: input.DepartmentID != 0},
-		Date:                 parseDate(input.Date),
+		Date:                 sql.NullTime{Time: parseDate(input.Date), Valid: true},
 		StartTime:            parseTime(input.StartTime),
 		EndTime:              parseTime(input.EndTime),
 		BreakDurationMinutes: sql.NullInt32{Int32: int32(input.BreakDurationMinutes), Valid: input.BreakDurationMinutes != 0},

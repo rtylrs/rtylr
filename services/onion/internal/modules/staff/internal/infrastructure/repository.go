@@ -248,7 +248,7 @@ func (r *Repository) DeleteStaff(ctx context.Context, ownerID, staffID int64) er
 func (r *Repository) ClockIn(ctx context.Context, ownerID, staffID int64) error {
 	err := r.queries.ClockIn(ctx, sqlc.ClockInParams{
 		OwnerID: ownerID,
-		StaffID: staffID,
+		StaffID: sql.NullInt64{Int64: staffID, Valid: true},
 	})
 	if err != nil {
 		logger.Ctx(ctx).Error("Failed to clock in", logger.Error(err))
@@ -260,7 +260,7 @@ func (r *Repository) ClockIn(ctx context.Context, ownerID, staffID int64) error 
 func (r *Repository) ClockOut(ctx context.Context, ownerID, staffID int64) error {
 	err := r.queries.ClockOut(ctx, sqlc.ClockOutParams{
 		OwnerID: ownerID,
-		StaffID: staffID,
+		StaffID: sql.NullInt64{Int64: staffID, Valid: true},
 	})
 	if err != nil {
 		logger.Ctx(ctx).Error("Failed to clock out", logger.Error(err))

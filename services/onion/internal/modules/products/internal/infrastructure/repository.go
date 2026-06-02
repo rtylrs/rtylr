@@ -260,7 +260,7 @@ func (r *Repository) CountProducts(ctx context.Context, ownerID int64, categoryI
 	return count, nil
 }
 
-func productFromRow(row sqlc.ErpProduct) domain.Product {
+func productFromRow(row sqlc.GetProductRow) domain.Product {
 	var p domain.Product
 	p.ID = row.ID
 	p.OwnerID = row.OwnerID
