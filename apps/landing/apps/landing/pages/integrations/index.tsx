@@ -217,7 +217,7 @@ const IntegrationsPage = (): JSX.Element => {
     <AppLayout>
       <MainLayout>
         <HelmetContainer
-          title="Integrations · Payments, Accounting & 100+ App Connections | rtylr"
+          title="Integrations · Payments, Accounting & 100+ Apps | rtylr"
           description="Every service rtylr connects to, payments, accounting, delivery, comms, hardware, and productivity."
           canonical="https://rtylr.com/integrations/"
           structuredData={webPageSchema({

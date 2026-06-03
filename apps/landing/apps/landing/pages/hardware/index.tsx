@@ -108,7 +108,7 @@ const HardwarePage = (): JSX.Element => {
     <AppLayout>
       <MainLayout>
         <HelmetContainer
-          title="Hardware · Certified POS Terminals, Printers & Peripherals | rtylr"
+          title="POS Hardware · Terminals, Printers & Scanners | rtylr"
           description="Tested and certified hardware ecosystem designed for rtylr POS. Every device is optimized out of the box."
           canonical="https://rtylr.com/hardware/"
           structuredData={webPageSchema({
