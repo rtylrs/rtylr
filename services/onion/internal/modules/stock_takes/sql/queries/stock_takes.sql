@@ -4,6 +4,13 @@ FROM erp_stock_takes
 WHERE owner_id = ?
 ORDER BY created_at DESC;
 
+-- name: ListStockTakesPaged :many
+SELECT id, owner_id, warehouse_id, status, notes, started_at, completed_at, created_at
+FROM erp_stock_takes
+WHERE owner_id = ?
+ORDER BY created_at DESC, id DESC
+LIMIT ? OFFSET ?;
+
 -- name: GetStockTakeItems :many
 SELECT id, stock_take_id, product_id, expected_qty, counted_qty, variance, created_at
 FROM erp_stock_take_items
