@@ -96,12 +96,23 @@ func (c *CDN) upload(w http.ResponseWriter, r *http.Request) {
 
 	w.Header().Set("Content-Type", "application/json")
 	w.WriteHeader(http.StatusCreated)
-	if err := json.NewEncoder(w).Encode(map[string]string{
-		"id":  uploaded.FileUUID,
-		"url": c.fileURL(uploaded.FileUUID),
+	if err := json.NewEncoder(w).Encode(uploadResponse{
+		ID:   uploaded.FileUUID,
+		URL:  c.fileURL(uploaded.FileUUID),
+		MIME: uploaded.MIMEType,
+		Size: uploaded.Size,
 	}); err != nil {
 		logger.Ctx(r.Context()).Warn("cdn: failed to encode upload response", logger.Error(err))
 	}
+}
+
+// uploadResponse is the JSON body returned by a successful POST /upload. MIME
+// is the type detected from the bytes (not necessarily what the client sent).
+type uploadResponse struct {
+	ID   string `json:"id"`
+	URL  string `json:"url"`
+	MIME string `json:"mime"`
+	Size int64  `json:"size"`
 }
 
 // serveFile handles GET /files/{id} — streams the original bytes back with an
