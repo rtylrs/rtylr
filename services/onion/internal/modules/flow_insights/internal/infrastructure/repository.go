@@ -4,7 +4,8 @@ import (
 	"context"
 	"database/sql"
 	"errors"
-	"strings"
+
+	sq "github.com/Masterminds/squirrel"
 
 	"github.com/voxire/onion/internal/modules/flow_insights/internal/domain"
 	"github.com/voxire/onion/internal/platform/logger"
@@ -30,13 +31,21 @@ func (r *Repository) GetInsightsStats(ctx context.Context, ownerID int64) (domai
 	stats.TasksByPriority = make(map[string]int64)
 
 	// Total, completed, overdue
-	err := r.pool.QueryRowContext(ctx, `
-		SELECT
-			COUNT(*) AS total_tasks,
-			COUNT(CASE WHEN status = 'done' THEN 1 END) AS completed_tasks,
-			COUNT(CASE WHEN status NOT IN ('done','cancelled') AND due_date < CURDATE() THEN 1 END) AS overdue_count
-		FROM flow_tasks WHERE owner_id = ?
-	`, ownerID).Scan(&stats.TotalTasks, &stats.CompletedTasks, &stats.OverdueCount)
+	totalQuery, totalArgs, err := sq.
+		Select(
+			"COUNT(*) AS total_tasks",
+			"COUNT(CASE WHEN status = 'done' THEN 1 END) AS completed_tasks",
+			"COUNT(CASE WHEN status NOT IN ('done','cancelled') AND due_date < CURDATE() THEN 1 END) AS overdue_count",
+		).
+		From("flow_tasks").
+		Where(sq.Eq{"owner_id": ownerID}).
+		PlaceholderFormat(sq.Question).
+		ToSql()
+	if err != nil {
+		logger.Ctx(ctx).Error("GetInsightsStats: build total query failed", logger.Error(err))
+		return stats, err
+	}
+	err = r.pool.QueryRowContext(ctx, totalQuery, totalArgs...).Scan(&stats.TotalTasks, &stats.CompletedTasks, &stats.OverdueCount)
 	if err != nil && !errors.Is(err, sql.ErrNoRows) {
 		logger.Ctx(ctx).Error("GetInsightsStats: total query failed", logger.Error(err))
 		return stats, err
@@ -47,73 +56,113 @@ func (r *Repository) GetInsightsStats(ctx context.Context, ownerID int64) (domai
 	}
 
 	// Avg completion days
-	err = r.pool.QueryRowContext(ctx, `
-		SELECT COALESCE(AVG(DATEDIFF(completed_at, created_at)), 0) AS avg_days
-		FROM flow_tasks WHERE owner_id = ? AND status = 'done' AND completed_at IS NOT NULL
-	`, ownerID).Scan(&stats.AvgCompletionDays)
-	if err != nil && !errors.Is(err, sql.ErrNoRows) {
-		logger.Ctx(ctx).Error("GetInsightsStats: avg completion failed", logger.Error(err))
+	avgQuery, avgArgs, err := sq.
+		Select("COALESCE(AVG(DATEDIFF(completed_at, created_at)), 0) AS avg_days").
+		From("flow_tasks").
+		Where(sq.Eq{"owner_id": ownerID, "status": "done"}).
+		Where(sq.Expr("completed_at IS NOT NULL")).
+		PlaceholderFormat(sq.Question).
+		ToSql()
+	if err != nil {
+		logger.Ctx(ctx).Error("GetInsightsStats: build avg completion query failed", logger.Error(err))
+	} else {
+		err = r.pool.QueryRowContext(ctx, avgQuery, avgArgs...).Scan(&stats.AvgCompletionDays)
+		if err != nil && !errors.Is(err, sql.ErrNoRows) {
+			logger.Ctx(ctx).Error("GetInsightsStats: avg completion failed", logger.Error(err))
+		}
 	}
 
 	// Velocity this week
-	err = r.pool.QueryRowContext(ctx, `
-		SELECT COUNT(*) FROM flow_tasks
-		WHERE owner_id = ? AND status = 'done'
-		  AND completed_at >= DATE_SUB(CURDATE(), INTERVAL WEEKDAY(CURDATE()) DAY)
-		  AND completed_at < DATE_ADD(DATE_SUB(CURDATE(), INTERVAL WEEKDAY(CURDATE()) DAY), INTERVAL 7 DAY)
-	`, ownerID).Scan(&stats.VelocityThisWeek)
-	if err != nil && !errors.Is(err, sql.ErrNoRows) {
-		logger.Ctx(ctx).Error("GetInsightsStats: velocity this week failed", logger.Error(err))
+	velThisQuery, velThisArgs, err := sq.
+		Select("COUNT(*)").
+		From("flow_tasks").
+		Where(sq.Eq{"owner_id": ownerID, "status": "done"}).
+		Where(sq.Expr("completed_at >= DATE_SUB(CURDATE(), INTERVAL WEEKDAY(CURDATE()) DAY)")).
+		Where(sq.Expr("completed_at < DATE_ADD(DATE_SUB(CURDATE(), INTERVAL WEEKDAY(CURDATE()) DAY), INTERVAL 7 DAY)")).
+		PlaceholderFormat(sq.Question).
+		ToSql()
+	if err != nil {
+		logger.Ctx(ctx).Error("GetInsightsStats: build velocity this week query failed", logger.Error(err))
+	} else {
+		err = r.pool.QueryRowContext(ctx, velThisQuery, velThisArgs...).Scan(&stats.VelocityThisWeek)
+		if err != nil && !errors.Is(err, sql.ErrNoRows) {
+			logger.Ctx(ctx).Error("GetInsightsStats: velocity this week failed", logger.Error(err))
+		}
 	}
 
 	// Velocity last week
-	err = r.pool.QueryRowContext(ctx, `
-		SELECT COUNT(*) FROM flow_tasks
-		WHERE owner_id = ? AND status = 'done'
-		  AND completed_at >= DATE_SUB(DATE_SUB(CURDATE(), INTERVAL WEEKDAY(CURDATE()) DAY), INTERVAL 7 DAY)
-		  AND completed_at < DATE_SUB(CURDATE(), INTERVAL WEEKDAY(CURDATE()) DAY)
-	`, ownerID).Scan(&stats.VelocityLastWeek)
-	if err != nil && !errors.Is(err, sql.ErrNoRows) {
-		logger.Ctx(ctx).Error("GetInsightsStats: velocity last week failed", logger.Error(err))
+	velLastQuery, velLastArgs, err := sq.
+		Select("COUNT(*)").
+		From("flow_tasks").
+		Where(sq.Eq{"owner_id": ownerID, "status": "done"}).
+		Where(sq.Expr("completed_at >= DATE_SUB(DATE_SUB(CURDATE(), INTERVAL WEEKDAY(CURDATE()) DAY), INTERVAL 7 DAY)")).
+		Where(sq.Expr("completed_at < DATE_SUB(CURDATE(), INTERVAL WEEKDAY(CURDATE()) DAY)")).
+		PlaceholderFormat(sq.Question).
+		ToSql()
+	if err != nil {
+		logger.Ctx(ctx).Error("GetInsightsStats: build velocity last week query failed", logger.Error(err))
+	} else {
+		err = r.pool.QueryRowContext(ctx, velLastQuery, velLastArgs...).Scan(&stats.VelocityLastWeek)
+		if err != nil && !errors.Is(err, sql.ErrNoRows) {
+			logger.Ctx(ctx).Error("GetInsightsStats: velocity last week failed", logger.Error(err))
+		}
 	}
 
 	// Tasks by status
-	statusRows, err := r.pool.QueryContext(ctx, `
-		SELECT status, COUNT(*) AS cnt FROM flow_tasks WHERE owner_id = ? GROUP BY status
-	`, ownerID)
+	statusQuery, statusArgs, err := sq.
+		Select("status", "COUNT(*) AS cnt").
+		From("flow_tasks").
+		Where(sq.Eq{"owner_id": ownerID}).
+		GroupBy("status").
+		PlaceholderFormat(sq.Question).
+		ToSql()
 	if err != nil {
-		logger.Ctx(ctx).Error("GetInsightsStats: tasks by status failed", logger.Error(err))
+		logger.Ctx(ctx).Error("GetInsightsStats: build tasks by status query failed", logger.Error(err))
 	} else {
-		defer statusRows.Close()
-		for statusRows.Next() {
-			var s string
-			var c int64
-			if err := statusRows.Scan(&s, &c); err == nil {
-				stats.TasksByStatus[s] = c
+		statusRows, err := r.pool.QueryContext(ctx, statusQuery, statusArgs...)
+		if err != nil {
+			logger.Ctx(ctx).Error("GetInsightsStats: tasks by status failed", logger.Error(err))
+		} else {
+			defer statusRows.Close()
+			for statusRows.Next() {
+				var s string
+				var c int64
+				if err := statusRows.Scan(&s, &c); err == nil {
+					stats.TasksByStatus[s] = c
+				}
 			}
-		}
-		if err := statusRows.Err(); err != nil {
-			logger.Ctx(ctx).Error("GetInsightsStats: tasks by status rows failed", logger.Error(err))
+			if err := statusRows.Err(); err != nil {
+				logger.Ctx(ctx).Error("GetInsightsStats: tasks by status rows failed", logger.Error(err))
+			}
 		}
 	}
 
 	// Tasks by priority
-	priorityRows, err := r.pool.QueryContext(ctx, `
-		SELECT priority, COUNT(*) AS cnt FROM flow_tasks WHERE owner_id = ? GROUP BY priority
-	`, ownerID)
+	priorityQuery, priorityArgs, err := sq.
+		Select("priority", "COUNT(*) AS cnt").
+		From("flow_tasks").
+		Where(sq.Eq{"owner_id": ownerID}).
+		GroupBy("priority").
+		PlaceholderFormat(sq.Question).
+		ToSql()
 	if err != nil {
-		logger.Ctx(ctx).Error("GetInsightsStats: tasks by priority failed", logger.Error(err))
+		logger.Ctx(ctx).Error("GetInsightsStats: build tasks by priority query failed", logger.Error(err))
 	} else {
-		defer priorityRows.Close()
-		for priorityRows.Next() {
-			var s string
-			var c int64
-			if err := priorityRows.Scan(&s, &c); err == nil {
-				stats.TasksByPriority[s] = c
+		priorityRows, err := r.pool.QueryContext(ctx, priorityQuery, priorityArgs...)
+		if err != nil {
+			logger.Ctx(ctx).Error("GetInsightsStats: tasks by priority failed", logger.Error(err))
+		} else {
+			defer priorityRows.Close()
+			for priorityRows.Next() {
+				var s string
+				var c int64
+				if err := priorityRows.Scan(&s, &c); err == nil {
+					stats.TasksByPriority[s] = c
+				}
 			}
-		}
-		if err := priorityRows.Err(); err != nil {
-			logger.Ctx(ctx).Error("GetInsightsStats: tasks by priority rows failed", logger.Error(err))
+			if err := priorityRows.Err(); err != nil {
+				logger.Ctx(ctx).Error("GetInsightsStats: tasks by priority rows failed", logger.Error(err))
+			}
 		}
 	}
 
@@ -125,19 +174,29 @@ func (r *Repository) GetInsightsStats(ctx context.Context, ownerID int64) (domai
 // ─────────────────────────────────────────────
 
 func (r *Repository) GetTeamWorkload(ctx context.Context, ownerID int64) (domain.TeamWorkloadResult, error) {
-	rows, err := r.pool.QueryContext(ctx, `
-		SELECT
-			ft.assignee_id AS user_id,
-			COALESCE(u.full_name, CONCAT('User ', ft.assignee_id)) AS name,
-			COUNT(*) AS total_tasks,
-			COUNT(CASE WHEN ft.status = 'done' THEN 1 END) AS completed_tasks,
-			COUNT(CASE WHEN ft.status = 'in_progress' THEN 1 END) AS in_progress_tasks,
-			COUNT(CASE WHEN ft.status NOT IN ('done','cancelled') AND ft.due_date < CURDATE() THEN 1 END) AS overdue_tasks
-		FROM flow_tasks ft
-		LEFT JOIN users u ON ft.assignee_id = u.id
-		WHERE ft.owner_id = ? AND ft.assignee_id IS NOT NULL
-		GROUP BY ft.assignee_id, u.full_name
-	`, ownerID)
+	// cross-schema read from users — joins flow_tasks assignees to user display names
+	query, args, err := sq.
+		Select(
+			"ft.assignee_id AS user_id",
+			"COALESCE(u.full_name, CONCAT('User ', ft.assignee_id)) AS name",
+			"COUNT(*) AS total_tasks",
+			"COUNT(CASE WHEN ft.status = 'done' THEN 1 END) AS completed_tasks",
+			"COUNT(CASE WHEN ft.status = 'in_progress' THEN 1 END) AS in_progress_tasks",
+			"COUNT(CASE WHEN ft.status NOT IN ('done','cancelled') AND ft.due_date < CURDATE() THEN 1 END) AS overdue_tasks",
+		).
+		From("flow_tasks ft").
+		LeftJoin("users u ON ft.assignee_id = u.id").
+		Where(sq.Eq{"ft.owner_id": ownerID}).
+		Where(sq.Expr("ft.assignee_id IS NOT NULL")).
+		GroupBy("ft.assignee_id", "u.full_name").
+		PlaceholderFormat(sq.Question).
+		ToSql()
+	if err != nil {
+		logger.Ctx(ctx).Error("GetTeamWorkload build query failed", logger.Error(err))
+		return domain.TeamWorkloadResult{}, err
+	}
+
+	rows, err := r.pool.QueryContext(ctx, query, args...)
 	if err != nil {
 		logger.Ctx(ctx).Error("GetTeamWorkload failed", logger.Error(err))
 		return domain.TeamWorkloadResult{}, err
@@ -166,20 +225,29 @@ func (r *Repository) GetTeamWorkload(ctx context.Context, ownerID int64) (domain
 // ─────────────────────────────────────────────
 
 func (r *Repository) GetRoadmap(ctx context.Context, ownerID int64) (domain.RoadmapResult, error) {
-	projRows, err := r.pool.QueryContext(ctx, `
-		SELECT
-			fp.id,
-			fp.name,
-			COALESCE(DATE_FORMAT(fp.start_date, '%Y-%m-%d'), '') AS start_date,
-			COALESCE(DATE_FORMAT(fp.due_date, '%Y-%m-%d'), '') AS due_date,
-			COUNT(ft.id) AS total_tasks,
-			COUNT(CASE WHEN ft.status = 'done' THEN 1 END) AS done_tasks
-		FROM flow_projects fp
-		LEFT JOIN flow_tasks ft ON ft.project_id = fp.id AND ft.parent_task_id IS NULL
-		WHERE fp.owner_id = ? AND fp.status != 'archived'
-		GROUP BY fp.id, fp.name, fp.start_date, fp.due_date
-		ORDER BY fp.created_at ASC
-	`, ownerID)
+	projQuery, projArgs, err := sq.
+		Select(
+			"fp.id",
+			"fp.name",
+			"COALESCE(DATE_FORMAT(fp.start_date, '%Y-%m-%d'), '') AS start_date",
+			"COALESCE(DATE_FORMAT(fp.due_date, '%Y-%m-%d'), '') AS due_date",
+			"COUNT(ft.id) AS total_tasks",
+			"COUNT(CASE WHEN ft.status = 'done' THEN 1 END) AS done_tasks",
+		).
+		From("flow_projects fp").
+		LeftJoin("flow_tasks ft ON ft.project_id = fp.id AND ft.parent_task_id IS NULL").
+		Where(sq.Eq{"fp.owner_id": ownerID}).
+		Where(sq.NotEq{"fp.status": "archived"}).
+		GroupBy("fp.id", "fp.name", "fp.start_date", "fp.due_date").
+		OrderBy("fp.created_at ASC").
+		PlaceholderFormat(sq.Question).
+		ToSql()
+	if err != nil {
+		logger.Ctx(ctx).Error("GetRoadmap: build projects query failed", logger.Error(err))
+		return domain.RoadmapResult{}, err
+	}
+
+	projRows, err := r.pool.QueryContext(ctx, projQuery, projArgs...)
 	if err != nil {
 		logger.Ctx(ctx).Error("GetRoadmap: projects query failed", logger.Error(err))
 		return domain.RoadmapResult{}, err
@@ -238,27 +306,27 @@ func (r *Repository) getMilestonesByProjectIDs(ctx context.Context, projectIDs [
 		return map[int64][]domain.RoadmapMilestone{}, nil
 	}
 
-	placeholders := make([]string, len(projectIDs))
-	args := make([]interface{}, len(projectIDs))
-	for i, id := range projectIDs {
-		placeholders[i] = "?"
-		args[i] = id
+	query, args, err := sq.
+		Select(
+			"fm.project_id",
+			"fm.id",
+			"fm.name",
+			"COALESCE(DATE_FORMAT(fm.target_date, '%Y-%m-%d'), '') AS due_date",
+			"COUNT(ft.id) AS task_count",
+			"COUNT(CASE WHEN ft.status = 'done' THEN 1 END) AS done_count",
+		).
+		From("flow_milestones fm").
+		LeftJoin("flow_tasks ft ON ft.project_id = fm.project_id AND ft.parent_task_id IS NULL").
+		Where(sq.Eq{"fm.project_id": projectIDs}).
+		GroupBy("fm.project_id", "fm.id", "fm.name", "fm.target_date").
+		OrderBy("fm.target_date ASC").
+		PlaceholderFormat(sq.Question).
+		ToSql()
+	if err != nil {
+		return nil, err
 	}
 
-	rows, err := r.pool.QueryContext(ctx, `
-		SELECT
-			fm.project_id,
-			fm.id,
-			fm.name,
-			COALESCE(DATE_FORMAT(fm.target_date, '%Y-%m-%d'), '') AS due_date,
-			COUNT(ft.id) AS task_count,
-			COUNT(CASE WHEN ft.status = 'done' THEN 1 END) AS done_count
-		FROM flow_milestones fm
-		LEFT JOIN flow_tasks ft ON ft.project_id = fm.project_id AND ft.parent_task_id IS NULL
-		WHERE fm.project_id IN (`+strings.Join(placeholders, ", ")+`)
-		GROUP BY fm.project_id, fm.id, fm.name, fm.target_date
-		ORDER BY fm.target_date ASC
-	`, args...)
+	rows, err := r.pool.QueryContext(ctx, query, args...)
 	if err != nil {
 		return nil, err
 	}
@@ -276,4 +344,3 @@ func (r *Repository) getMilestonesByProjectIDs(ctx context.Context, projectIDs [
 
 	return byProject, rows.Err()
 }
-
