@@ -150,7 +150,7 @@ func (c *CDN) serveTransformed(w http.ResponseWriter, r *http.Request) {
 	if err != nil {
 		logger.Ctx(r.Context()).Error("cdn: transform failed",
 			logger.String("file_uuid", fileUUID), logger.Error(err))
-		http.Error(w, err.Error(), http.StatusInternalServerError)
+		http.Error(w, "image transformation failed", http.StatusInternalServerError)
 		return
 	}
 	defer func() { _ = reader.Close() }()
