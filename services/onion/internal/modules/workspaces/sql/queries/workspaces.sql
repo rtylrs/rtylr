@@ -137,3 +137,6 @@ SELECT
     COUNT(CASE WHEN status = 'done' AND completed_at >= ? AND completed_at < ? THEN 1 END) AS completed_this_week,
     COUNT(CASE WHEN status NOT IN ('done','cancelled') AND due_date < NOW() THEN 1 END) AS overdue_tasks
 FROM flow_tasks WHERE workspace_id = ? AND owner_id = ?;
+
+-- name: CountProjectColumns :one
+SELECT COUNT(*) FROM flow_project_columns WHERE project_id = ?;

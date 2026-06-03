@@ -1310,6 +1310,17 @@ func (r *Repository) MoveTaskToColumn(ctx context.Context, taskID, columnID int6
 }
 
 func (r *Repository) SeedDefaultColumns(ctx context.Context, projectID, workspaceID, createdBy int64) error {
+	// Idempotent: never seed a project that already has columns. Two create
+	// paths call this and (until deployed) there's no unique constraint behind
+	// it, so without this guard a re-run produces duplicate columns.
+	existing, err := r.queries.CountProjectColumns(ctx, projectID)
+	if err != nil {
+		return err
+	}
+	if existing > 0 {
+		return nil
+	}
+
 	defaults := []struct {
 		name      string
 		color     string
