@@ -7,6 +7,8 @@ import (
 	"errors"
 	"time"
 
+	sq "github.com/Masterminds/squirrel"
+
 	"github.com/voxire/onion/internal/modules/team/internal/domain"
 	"github.com/voxire/onion/internal/modules/team/internal/infrastructure/persistence/sqlc"
 	"github.com/voxire/onion/internal/platform/logger"
@@ -217,22 +219,19 @@ func (r *Repository) groupsForUsers(ctx context.Context, ownerID int64, userIDs 
 		return result, nil
 	}
 
-	placeholders := make([]byte, 0, len(userIDs)*2)
-	args := make([]any, 0, len(userIDs)+1)
-	for i, id := range userIDs {
-		if i > 0 {
-			placeholders = append(placeholders, ',')
-		}
-		placeholders = append(placeholders, '?')
-		args = append(args, id)
+	query, args, err := sq.
+		Select("m.user_id", "g.id", "g.name", "g.color").
+		From("user_group_members m").
+		Join("user_groups g ON g.id = m.group_id").
+		Where(sq.Eq{"m.user_id": userIDs}).
+		Where(sq.Eq{"m.owner_id": ownerID}).
+		OrderBy("g.name").
+		PlaceholderFormat(sq.Question).
+		ToSql()
+	if err != nil {
+		logger.Ctx(ctx).Error("Failed to build batch list user groups query", logger.Error(err))
+		return nil, err
 	}
-	args = append(args, ownerID)
-
-	query := "SELECT m.user_id, g.id, g.name, g.color " +
-		"FROM user_group_members m " +
-		"JOIN user_groups g ON g.id = m.group_id " +
-		"WHERE m.user_id IN (" + string(placeholders) + ") AND m.owner_id = ? " +
-		"ORDER BY g.name"
 
 	rows, err := r.pool.QueryContext(ctx, query, args...)
 	if err != nil {
@@ -374,8 +373,7 @@ func (r *Repository) CreateAccessRequest(ctx context.Context, businessID, userID
 // two queries (and add an owner_id filter) before that migration ships.
 
 func (r *Repository) IsOnboarded(ctx context.Context, userID int64) bool {
-	var onboarded bool
-	err := r.pool.QueryRowContext(ctx, "SELECT COALESCE(onboarded, FALSE) FROM users WHERE id = ?", userID).Scan(&onboarded)
+	onboarded, err := r.queries.IsOnboarded(ctx, userID)
 	if err != nil {
 		// A missing row (sql.ErrNoRows) legitimately means "not onboarded"; any
 		// other error indicates a DB problem and must not be swallowed silently.
@@ -389,8 +387,7 @@ func (r *Repository) IsOnboarded(ctx context.Context, userID int64) bool {
 }
 
 func (r *Repository) MarkOnboarded(ctx context.Context, userID int64) error {
-	_, err := r.pool.ExecContext(ctx, "UPDATE users SET onboarded = TRUE WHERE id = ?", userID)
-	return err
+	return r.queries.MarkOnboarded(ctx, userID)
 }
 
 // ─── helpers ─────────────────────────────────────────────────────────────────
@@ -427,15 +424,12 @@ func permissionFromRow(id, ownerID, userID int64, apps json.RawMessage, role sql
 
 // CountActiveMembers returns the number of active non-owner team members for an owner.
 func (r *Repository) CountActiveMembers(ctx context.Context, ownerID int64) (int, error) {
-	var count int
-	err := r.pool.QueryRowContext(ctx,
-		`SELECT COUNT(*) FROM user_app_permissions WHERE owner_id = ? AND is_active = 1`,
-		ownerID).Scan(&count)
+	count, err := r.queries.CountActiveMembers(ctx, ownerID)
 	if err != nil {
 		return 0, err
 	}
 
-	return count, nil
+	return int(count), nil
 }
 
 // ─── Groups ──────────────────────────────────────────────────────────────────
@@ -553,18 +547,16 @@ func (r *Repository) resourcePermissionsForGroups(ctx context.Context, groupIDs 
 		return result
 	}
 
-	placeholders := make([]byte, 0, len(groupIDs)*2)
-	args := make([]any, 0, len(groupIDs))
-	for i, id := range groupIDs {
-		if i > 0 {
-			placeholders = append(placeholders, ',')
-		}
-		placeholders = append(placeholders, '?')
-		args = append(args, id)
+	query, args, err := sq.
+		Select("group_id", "resource_key", "permission_level").
+		From("user_group_resource_permissions").
+		Where(sq.Eq{"group_id": groupIDs}).
+		PlaceholderFormat(sq.Question).
+		ToSql()
+	if err != nil {
+		logger.Ctx(ctx).Error("Failed to build batch list group resource permissions query", logger.Error(err))
+		return result
 	}
-
-	query := "SELECT group_id, resource_key, permission_level " +
-		"FROM user_group_resource_permissions WHERE group_id IN (" + string(placeholders) + ")"
 
 	rows, err := r.pool.QueryContext(ctx, query, args...)
 	if err != nil {
@@ -694,9 +686,18 @@ func (r *Repository) GetUserEffectiveResources(ctx context.Context, ownerID, use
 func (r *Repository) GetOwnerApps(ctx context.Context, ownerID int64) ([]string, error) {
 	var appsJSON string
 	// cross-schema read from subscriptions + plans — approved for owner app resolution
-	err := r.pool.QueryRowContext(ctx,
-		`SELECT p.apps FROM subscriptions s JOIN plans p ON p.id = s.plan_id WHERE s.owner_id = ?`,
-		ownerID).Scan(&appsJSON)
+	query, args, err := sq.
+		Select("p.apps").
+		From("subscriptions s").
+		Join("plans p ON p.id = s.plan_id").
+		Where(sq.Eq{"s.owner_id": ownerID}).
+		PlaceholderFormat(sq.Question).
+		ToSql()
+	if err != nil {
+		return nil, err
+	}
+
+	err = r.pool.QueryRowContext(ctx, query, args...).Scan(&appsJSON)
 	if err != nil {
 		return nil, err
 	}
@@ -713,9 +714,18 @@ func (r *Repository) GetOwnerApps(ctx context.Context, ownerID int64) ([]string,
 func (r *Repository) GetOwnerSubscriptionInfo(ctx context.Context, ownerID int64) (string, string, error) {
 	var planSlug, status string
 	// cross-schema read from subscriptions + plans — approved for owner subscription info
-	err := r.pool.QueryRowContext(ctx,
-		`SELECT p.slug, s.status FROM subscriptions s JOIN plans p ON p.id = s.plan_id WHERE s.owner_id = ?`,
-		ownerID).Scan(&planSlug, &status)
+	query, args, err := sq.
+		Select("p.slug", "s.status").
+		From("subscriptions s").
+		Join("plans p ON p.id = s.plan_id").
+		Where(sq.Eq{"s.owner_id": ownerID}).
+		PlaceholderFormat(sq.Question).
+		ToSql()
+	if err != nil {
+		return "", "", err
+	}
+
+	err = r.pool.QueryRowContext(ctx, query, args...).Scan(&planSlug, &status)
 	return planSlug, status, err
 }
 
@@ -741,34 +751,69 @@ func (r *Repository) RecordSeatChange(ctx context.Context, ownerID int64, newCou
 	var subscriptionID int64
 	var pricePerSeatCents int
 	// cross-schema read from subscriptions — approved for seat period management
-	if err := tx.QueryRowContext(ctx,
-		`SELECT id, price_per_seat_cents FROM subscriptions WHERE owner_id = ? FOR UPDATE`, ownerID,
-	).Scan(&subscriptionID, &pricePerSeatCents); err != nil {
+	selectQuery, selectArgs, err := sq.
+		Select("id", "price_per_seat_cents").
+		From("subscriptions").
+		Where(sq.Eq{"owner_id": ownerID}).
+		Suffix("FOR UPDATE").
+		PlaceholderFormat(sq.Question).
+		ToSql()
+	if err != nil {
+		_ = tx.Rollback()
+		return err
+	}
+	if err := tx.QueryRowContext(ctx, selectQuery, selectArgs...).
+		Scan(&subscriptionID, &pricePerSeatCents); err != nil {
 		_ = tx.Rollback()
 		return err
 	}
 
 	// cross-schema write to seat_periods — approved for seat billing accuracy
-	if _, execErr := tx.ExecContext(ctx,
-		`UPDATE seat_periods SET period_end = ? WHERE subscription_id = ? AND period_end IS NULL`,
-		yesterday, subscriptionID); execErr != nil {
+	closeQuery, closeArgs, err := sq.
+		Update("seat_periods").
+		Set("period_end", yesterday).
+		Where(sq.Eq{"subscription_id": subscriptionID}).
+		Where(sq.Eq{"period_end": nil}).
+		PlaceholderFormat(sq.Question).
+		ToSql()
+	if err != nil {
+		_ = tx.Rollback()
+		return err
+	}
+	if _, execErr := tx.ExecContext(ctx, closeQuery, closeArgs...); execErr != nil {
 		_ = tx.Rollback()
 		return execErr
 	}
 
 	// cross-schema write to seat_periods — approved for seat billing accuracy
-	if _, execErr := tx.ExecContext(ctx,
-		`INSERT INTO seat_periods (subscription_id, owner_id, seat_count, price_per_seat_cents, period_start, billing_month)
-		 VALUES (?, ?, ?, ?, ?, ?)`,
-		subscriptionID, ownerID, newCount, pricePerSeatCents, now, billingMonth); execErr != nil {
+	insertQuery, insertArgs, err := sq.
+		Insert("seat_periods").
+		Columns("subscription_id", "owner_id", "seat_count", "price_per_seat_cents", "period_start", "billing_month").
+		Values(subscriptionID, ownerID, newCount, pricePerSeatCents, now, billingMonth).
+		PlaceholderFormat(sq.Question).
+		ToSql()
+	if err != nil {
+		_ = tx.Rollback()
+		return err
+	}
+	if _, execErr := tx.ExecContext(ctx, insertQuery, insertArgs...); execErr != nil {
 		_ = tx.Rollback()
 		return execErr
 	}
 
 	// cross-schema write to subscriptions — approved for seat billing accuracy
-	if _, execErr := tx.ExecContext(ctx,
-		`UPDATE subscriptions SET seat_count = ?, updated_at = CURRENT_TIMESTAMP WHERE owner_id = ?`,
-		newCount, ownerID); execErr != nil {
+	updateQuery, updateArgs, err := sq.
+		Update("subscriptions").
+		Set("seat_count", newCount).
+		Set("updated_at", sq.Expr("CURRENT_TIMESTAMP")).
+		Where(sq.Eq{"owner_id": ownerID}).
+		PlaceholderFormat(sq.Question).
+		ToSql()
+	if err != nil {
+		_ = tx.Rollback()
+		return err
+	}
+	if _, execErr := tx.ExecContext(ctx, updateQuery, updateArgs...); execErr != nil {
 		_ = tx.Rollback()
 		return execErr
 	}
