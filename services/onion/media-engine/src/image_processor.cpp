@@ -101,6 +101,7 @@ void ImageProcessor::saveImage(vips::VImage img, const ImageOptions& opts) {
             vips::VImage::option()
                 ->set("Q", opts.quality)
                 ->set("lossless", false)
+                ->set("strip", true)
         );
     } else if (fmt == "jpeg" || fmt == "jpg") {
         img.jpegsave(opts.outputPath.c_str(),
@@ -120,6 +121,7 @@ void ImageProcessor::saveImage(vips::VImage img, const ImageOptions& opts) {
                 ->set("Q", opts.quality)
                 ->set("compression", VIPS_FOREIGN_HEIF_COMPRESSION_AV1)
                 ->set("lossless", false)
+                ->set("strip", true)
         );
     } else {
         throw ProcessingError("unsupported output format: " + fmt);
