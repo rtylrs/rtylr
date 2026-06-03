@@ -24,7 +24,10 @@ Args parseArgs(int argc, char* argv[]) {
 
     for (int i = 2; i < argc; ++i) {
         std::string token = argv[i];
-        if (token.rfind("--", 0) == 0 && i + 1 < argc) {
+        if (token.rfind("--", 0) == 0) {
+            if (i + 1 >= argc) {
+                throw std::runtime_error("flag " + token + " requires a value");
+            }
             args.flags[token.substr(2)] = argv[++i];
         }
     }
@@ -34,7 +37,11 @@ Args parseArgs(int argc, char* argv[]) {
 int getInt(const Args& args, const std::string& key, int fallback = 0) {
     auto it = args.flags.find(key);
     if (it == args.flags.end()) return fallback;
-    return std::stoi(it->second);
+    try {
+        return std::stoi(it->second);
+    } catch (const std::exception&) {
+        throw std::runtime_error("invalid integer for --" + key + ": " + it->second);
+    }
 }
 
 std::string getStr(const Args& args, const std::string& key, const std::string& fallback = "") {
