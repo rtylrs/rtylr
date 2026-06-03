@@ -21,3 +21,41 @@ INSERT INTO finance_reconciliation_matches (
 -- name: GetBankFeedForOwner :one
 SELECT id FROM finance_bank_feeds
 WHERE id = ? AND owner_id = ?;
+
+-- name: ListUnmatchedInvoices :many
+SELECT i.id, i.invoice_number, i.client_name, i.total, i.currency, i.issue_date, i.due_date
+FROM finance_invoices i
+WHERE i.owner_id = ?
+  AND i.status IN ('draft','sent','viewed','partial','overdue')
+  AND NOT EXISTS (
+      SELECT 1 FROM finance_reconciliation_matches m
+      WHERE m.owner_id = i.owner_id
+        AND m.target_type = 'invoice'
+        AND m.target_id = i.id
+  )
+ORDER BY i.due_date ASC, i.id ASC
+LIMIT 200;
+
+-- name: ListUnmatchedExpenses :many
+SELECT e.id, e.description, COALESCE(e.vendor, '') AS vendor, e.amount, e.currency, e.expense_date
+FROM finance_expenses e
+WHERE e.owner_id = ?
+  AND NOT EXISTS (
+      SELECT 1 FROM finance_reconciliation_matches m
+      WHERE m.owner_id = e.owner_id
+        AND m.target_type = 'expense'
+        AND m.target_id = e.id
+  )
+ORDER BY e.expense_date ASC, e.id ASC
+LIMIT 200;
+
+-- name: CountMatches :one
+SELECT COUNT(*)
+FROM finance_reconciliation_matches
+WHERE owner_id = ?;
+
+-- name: CountMatchesByTargetType :many
+SELECT target_type, COUNT(*) AS cnt
+FROM finance_reconciliation_matches
+WHERE owner_id = ?
+GROUP BY target_type;
