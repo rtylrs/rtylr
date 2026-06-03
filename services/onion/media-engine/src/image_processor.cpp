@@ -24,6 +24,10 @@ void ImageProcessor::process(const ImageOptions& opts) {
         vips::VImage::option()->set("access", VIPS_ACCESS_SEQUENTIAL)
     );
 
+    // Honour the EXIF orientation tag before resizing so output from phone
+    // cameras isn't rotated or mirrored.
+    img = img.autorot();
+
     img = resizeImage(img, opts.width, opts.height, opts.fit);
     saveImage(img, opts);
 }
