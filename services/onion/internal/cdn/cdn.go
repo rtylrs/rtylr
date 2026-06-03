@@ -29,6 +29,11 @@ type CDN struct {
 	apiKey      string
 }
 
+// immutableCacheControl is sent on every served asset. Originals are keyed by
+// UUID and transformations by a content hash, so a given URL's bytes never
+// change — clients and edge caches may keep them forever.
+const immutableCacheControl = "public, max-age=31536000, immutable"
+
 // New constructs a CDN. baseURL is the public prefix for generated file URLs,
 // maxUpload the per-request byte ceiling, mediaEngine the path to the C++
 // media-engine binary, and apiKey the bearer token guarding write endpoints
