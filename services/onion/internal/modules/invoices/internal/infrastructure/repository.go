@@ -6,8 +6,9 @@ import (
 	"errors"
 	"fmt"
 	"strconv"
-	"strings"
 	"time"
+
+	"github.com/Masterminds/squirrel"
 
 	"github.com/voxire/onion/internal/modules/invoices/internal/domain"
 	"github.com/voxire/onion/internal/modules/invoices/internal/infrastructure/persistence/sqlc"
@@ -33,42 +34,39 @@ func NewRepository(db *sql.DB) *Repository {
 // ---------------------------------------------------------------------------
 
 func (r *Repository) ListInvoices(ctx context.Context, ownerID int64, status, search, dateFrom, dateTo string, limit, offset int) ([]domain.Invoice, error) {
-	// Dynamic filters require raw SQL since sqlc cannot handle optional WHERE clauses.
-	query := `
-		SELECT id, owner_id, invoice_number, client_name, client_email, client_address, client_tax_id,
-		       status, issue_date, due_date, paid_date, currency, subtotal, discount_type,
-		       discount_value, discount_amount, tax_rate, tax_amount, total, amount_paid, amount_due,
-		       notes, terms, created_at, updated_at
-		FROM finance_invoices
-		WHERE owner_id = ?`
-
-	args := []interface{}{ownerID}
+	// Dynamic filters: built with squirrel since sqlc cannot handle optional WHERE clauses.
+	qb := squirrel.Select(
+		"id", "owner_id", "invoice_number", "client_name", "client_email", "client_address", "client_tax_id",
+		"status", "issue_date", "due_date", "paid_date", "currency", "subtotal", "discount_type",
+		"discount_value", "discount_amount", "tax_rate", "tax_amount", "total", "amount_paid", "amount_due",
+		"notes", "terms", "created_at", "updated_at",
+	).
+		From("finance_invoices").
+		Where(squirrel.Eq{"owner_id": ownerID})
 
 	if status != "" {
-		query += " AND status = ?"
-		args = append(args, status)
+		qb = qb.Where(squirrel.Eq{"status": status})
 	}
 
 	if search != "" {
-		query += " AND (client_name LIKE ? OR invoice_number LIKE ?)"
 		like := "%" + search + "%"
-		args = append(args, like, like)
+		qb = qb.Where(squirrel.Or{
+			squirrel.Like{"client_name": like},
+			squirrel.Like{"invoice_number": like},
+		})
 	}
 
 	if dateFrom != "" {
-		query += " AND issue_date >= ?"
-		args = append(args, dateFrom)
+		qb = qb.Where(squirrel.GtOrEq{"issue_date": dateFrom})
 	}
 
 	if dateTo != "" {
-		query += " AND issue_date <= ?"
-		args = append(args, dateTo)
+		qb = qb.Where(squirrel.LtOrEq{"issue_date": dateTo})
 	}
 
-	query += " ORDER BY created_at DESC LIMIT ? OFFSET ?"
-	args = append(args, limit, offset)
+	qb = qb.OrderBy("created_at DESC").Limit(uint64(limit)).Offset(uint64(offset))
 
-	rows, err := r.pool.QueryContext(ctx, query, args...)
+	rows, err := qb.PlaceholderFormat(squirrel.Question).RunWith(r.pool).QueryContext(ctx)
 	if err != nil {
 		logger.Ctx(ctx).Error("Failed to list invoices", logger.Error(err))
 
@@ -158,16 +156,11 @@ func (r *Repository) CreateInvoiceItems(ctx context.Context, invoiceID int64, it
 
 	// Insert all line items in a single multi-row INSERT instead of one
 	// statement per item, removing the per-item round-trip (N+1 writes).
-	const cols = 9
-	var sb strings.Builder
-	sb.WriteString("INSERT INTO finance_invoice_items (invoice_id, description, quantity, unit, unit_price, tax_rate, discount_pct, total, sort_order) VALUES ")
-	args := make([]any, 0, len(items)*cols)
-	for i, item := range items {
-		if i > 0 {
-			sb.WriteByte(',')
-		}
-		sb.WriteString("(?,?,?,?,?,?,?,?,?)")
-		args = append(args,
+	// Built with squirrel since the value count is dynamic (one row per item).
+	ib := squirrel.Insert("finance_invoice_items").
+		Columns("invoice_id", "description", "quantity", "unit", "unit_price", "tax_rate", "discount_pct", "total", "sort_order")
+	for _, item := range items {
+		ib = ib.Values(
 			invoiceID,
 			item.Description,
 			fmtFloat(item.Quantity),
@@ -180,7 +173,7 @@ func (r *Repository) CreateInvoiceItems(ctx context.Context, invoiceID int64, it
 		)
 	}
 
-	if _, err := r.pool.ExecContext(ctx, sb.String(), args...); err != nil {
+	if _, err := ib.PlaceholderFormat(squirrel.Question).RunWith(r.pool).ExecContext(ctx); err != nil {
 		logger.Ctx(ctx).Error("Failed to create invoice items", logger.Error(err))
 		return err
 	}
@@ -386,40 +379,37 @@ func (r *Repository) GetPaymentsByInvoice(ctx context.Context, invoiceID int64) 
 // ---------------------------------------------------------------------------
 
 func (r *Repository) ListExpenses(ctx context.Context, ownerID, categoryID int64, search, dateFrom, dateTo string, limit, offset int) ([]domain.Expense, error) {
-	// Dynamic filters require raw SQL.
-	query := `
-		SELECT id, owner_id, category_id, description, amount, currency, expense_date, vendor,
-		       payment_method, receipt_url, is_tax_deductible, tax_amount, notes, created_at, updated_at
-		FROM finance_expenses
-		WHERE owner_id = ?`
-
-	args := []interface{}{ownerID}
+	// Dynamic filters: built with squirrel since sqlc cannot handle optional WHERE clauses.
+	qb := squirrel.Select(
+		"id", "owner_id", "category_id", "description", "amount", "currency", "expense_date", "vendor",
+		"payment_method", "receipt_url", "is_tax_deductible", "tax_amount", "notes", "created_at", "updated_at",
+	).
+		From("finance_expenses").
+		Where(squirrel.Eq{"owner_id": ownerID})
 
 	if categoryID > 0 {
-		query += " AND category_id = ?"
-		args = append(args, categoryID)
+		qb = qb.Where(squirrel.Eq{"category_id": categoryID})
 	}
 
 	if search != "" {
-		query += " AND (description LIKE ? OR vendor LIKE ?)"
 		like := "%" + search + "%"
-		args = append(args, like, like)
+		qb = qb.Where(squirrel.Or{
+			squirrel.Like{"description": like},
+			squirrel.Like{"vendor": like},
+		})
 	}
 
 	if dateFrom != "" {
-		query += " AND expense_date >= ?"
-		args = append(args, dateFrom)
+		qb = qb.Where(squirrel.GtOrEq{"expense_date": dateFrom})
 	}
 
 	if dateTo != "" {
-		query += " AND expense_date <= ?"
-		args = append(args, dateTo)
+		qb = qb.Where(squirrel.LtOrEq{"expense_date": dateTo})
 	}
 
-	query += " ORDER BY expense_date DESC LIMIT ? OFFSET ?"
-	args = append(args, limit, offset)
+	qb = qb.OrderBy("expense_date DESC").Limit(uint64(limit)).Offset(uint64(offset))
 
-	rows, err := r.pool.QueryContext(ctx, query, args...)
+	rows, err := qb.PlaceholderFormat(squirrel.Question).RunWith(r.pool).QueryContext(ctx)
 	if err != nil {
 		logger.Ctx(ctx).Error("Failed to list expenses", logger.Error(err))
 
@@ -744,31 +734,19 @@ func (r *Repository) SumTaxOwed(ctx context.Context, ownerID int64, dateFrom, da
 // status bucket. The returned map uses status strings as keys (e.g. "draft",
 // "paid"). An empty map is returned when the owner has no invoices.
 func (r *Repository) CountInvoicesByStatus(ctx context.Context, ownerID int64) (map[string]int64, error) {
-	const q = `
-		SELECT status, COUNT(*) AS cnt
-		FROM finance_invoices
-		WHERE owner_id = ?
-		GROUP BY status`
-
-	rows, err := r.pool.QueryContext(ctx, q, ownerID)
+	rows, err := r.queries.CountInvoicesByStatus(ctx, ownerID)
 	if err != nil {
 		logger.Ctx(ctx).Error("Failed to count invoices by status", logger.Error(err))
 
 		return nil, err
 	}
-	defer rows.Close()
 
-	counts := make(map[string]int64)
-	for rows.Next() {
-		var status string
-		var cnt int64
-		if scanErr := rows.Scan(&status, &cnt); scanErr != nil {
-			return nil, scanErr
-		}
-		counts[status] = cnt
+	counts := make(map[string]int64, len(rows))
+	for _, row := range rows {
+		counts[string(row.Status.FinanceInvoicesStatus)] = row.Cnt
 	}
 
-	return counts, rows.Err()
+	return counts, nil
 }
 
 // GetOverdueInvoices returns all unpaid invoices whose due_date is before
@@ -779,37 +757,29 @@ func (r *Repository) GetOverdueInvoices(ctx context.Context, ownerID int64, befo
 		beforeDate = time.Now().Format("2006-01-02")
 	}
 
-	const q = `
-		SELECT id, owner_id, invoice_number, client_name, client_email, client_address, client_tax_id,
-		       status, issue_date, due_date, paid_date, currency, subtotal, discount_type,
-		       discount_value, discount_amount, tax_rate, tax_amount, total, amount_paid, amount_due,
-		       notes, terms, created_at, updated_at
-		FROM finance_invoices
-		WHERE owner_id = ?
-		  AND status NOT IN ('paid', 'void', 'draft')
-		  AND due_date < ?
-		ORDER BY due_date ASC`
+	before, err := time.Parse("2006-01-02", beforeDate)
+	if err != nil {
+		logger.Ctx(ctx).Error("Failed to parse beforeDate for overdue invoices", logger.Error(err))
 
-	rows, err := r.pool.QueryContext(ctx, q, ownerID, beforeDate)
+		return nil, err
+	}
+
+	rows, err := r.queries.ListOverdueInvoices(ctx, sqlc.ListOverdueInvoicesParams{
+		OwnerID: ownerID,
+		DueDate: before,
+	})
 	if err != nil {
 		logger.Ctx(ctx).Error("Failed to list overdue invoices", logger.Error(err))
 
 		return nil, err
 	}
-	defer rows.Close()
 
-	var invoices []domain.Invoice
-	for rows.Next() {
-		var inv domain.Invoice
-		if scanErr := inv.FromRow(rows); scanErr != nil {
-			logger.Ctx(ctx).Error("Failed to scan overdue invoice row", logger.Error(scanErr))
-
-			return nil, scanErr
-		}
-		invoices = append(invoices, inv)
+	invoices := make([]domain.Invoice, 0, len(rows))
+	for _, row := range rows {
+		invoices = append(invoices, invoiceFromSqlc(row))
 	}
 
-	return invoices, rows.Err()
+	return invoices, nil
 }
 
 // ---------------------------------------------------------------------------

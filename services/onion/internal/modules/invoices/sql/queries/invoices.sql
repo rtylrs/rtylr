@@ -54,6 +54,23 @@ DELETE FROM finance_invoices WHERE id = ? AND owner_id = ? AND status = 'draft';
 -- name: CountInvoiceSequence :one
 SELECT COUNT(*) FROM finance_invoices WHERE owner_id = ? AND YEAR(created_at) = ?;
 
+-- name: CountInvoicesByStatus :many
+SELECT status, COUNT(*) AS cnt
+FROM finance_invoices
+WHERE owner_id = ?
+GROUP BY status;
+
+-- name: ListOverdueInvoices :many
+SELECT id, owner_id, invoice_number, client_name, client_email, client_address, client_tax_id,
+       status, issue_date, due_date, paid_date, currency, subtotal, discount_type,
+       discount_value, discount_amount, tax_rate, tax_amount, total, amount_paid, amount_due,
+       notes, terms, created_at, updated_at
+FROM finance_invoices
+WHERE owner_id = ?
+  AND status NOT IN ('paid', 'void', 'draft')
+  AND due_date < ?
+ORDER BY due_date ASC;
+
 -- name: GetInvoiceItems :many
 SELECT id, invoice_id, description, quantity, unit, unit_price, tax_rate, discount_pct, total, sort_order
 FROM finance_invoice_items
