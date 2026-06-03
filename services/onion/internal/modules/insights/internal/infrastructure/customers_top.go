@@ -3,6 +3,8 @@ package infrastructure
 import (
 	"context"
 
+	sq "github.com/Masterminds/squirrel"
+
 	"github.com/voxire/onion/internal/platform/logger"
 )
 
@@ -30,23 +32,28 @@ func (r *Repository) GetTopCustomers(ctx context.Context, ownerID int64, limit i
 		limit = 100
 	}
 	// cross-schema read from crm_customers + pos_orders — lifetime spend ranking for the top-customers widget
-	const q = `
-		SELECT c.id,
-		       COALESCE(c.first_name, ''),
-		       COALESCE(c.last_name, ''),
-		       COALESCE(c.email, ''),
-		       COALESCE(SUM(o.total), 0) AS spend,
-		       COUNT(o.id)               AS orders
-		FROM crm_customers c
-		LEFT JOIN pos_orders o ON o.customer_id = c.id
-		                       AND o.owner_id = c.owner_id
-		                       AND o.payment_status = 'paid'
-		WHERE c.owner_id = ?
-		GROUP BY c.id, c.first_name, c.last_name, c.email
-		ORDER BY spend DESC
-		LIMIT ?
-	`
-	rows, err := r.pool.QueryContext(ctx, q, ownerID, limit)
+	q, args, err := sq.
+		Select(
+			"c.id",
+			"COALESCE(c.first_name, '')",
+			"COALESCE(c.last_name, '')",
+			"COALESCE(c.email, '')",
+			"COALESCE(SUM(o.total), 0) AS spend",
+			"COUNT(o.id) AS orders",
+		).
+		From("crm_customers c").
+		LeftJoin("pos_orders o ON o.customer_id = c.id AND o.owner_id = c.owner_id AND o.payment_status = 'paid'").
+		Where(sq.Eq{"c.owner_id": ownerID}).
+		GroupBy("c.id", "c.first_name", "c.last_name", "c.email").
+		OrderBy("spend DESC").
+		Limit(uint64(limit)).
+		PlaceholderFormat(sq.Question).
+		ToSql()
+	if err != nil {
+		logger.Ctx(ctx).Error("insights: build top customers query failed", logger.Error(err))
+		return nil, err
+	}
+	rows, err := r.pool.QueryContext(ctx, q, args...)
 	if err != nil {
 		logger.Ctx(ctx).Error("insights: top customers query failed", logger.Error(err))
 		return nil, err

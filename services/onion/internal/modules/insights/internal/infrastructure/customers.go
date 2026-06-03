@@ -4,6 +4,8 @@ import (
 	"context"
 	"time"
 
+	sq "github.com/Masterminds/squirrel"
+
 	"github.com/voxire/onion/internal/platform/logger"
 )
 
@@ -33,44 +35,70 @@ func (r *Repository) GetCustomerKPIs(ctx context.Context, ownerID int64) (Custom
 	out := CustomerKPIs{}
 
 	// cross-schema read from crm_customers — total customer count for the customers KPI card
-	if err := r.pool.QueryRowContext(ctx,
-		`SELECT COUNT(*) FROM crm_customers WHERE owner_id = ?`,
-		ownerID,
-	).Scan(&out.Total); err != nil {
+	totalSQL, totalArgs, err := sq.
+		Select("COUNT(*)").
+		From("crm_customers").
+		Where(sq.Eq{"owner_id": ownerID}).
+		PlaceholderFormat(sq.Question).
+		ToSql()
+	if err != nil {
+		logger.Ctx(ctx).Error("insights: build customers total query failed", logger.Error(err))
+		return CustomerKPIs{}, err
+	}
+	if err := r.pool.QueryRowContext(ctx, totalSQL, totalArgs...).Scan(&out.Total); err != nil {
 		logger.Ctx(ctx).Error("insights: customers total failed", logger.Error(err))
 		return CustomerKPIs{}, err
 	}
 
 	// cross-schema read from crm_customers — new-this-month for the customers KPI card
-	if err := r.pool.QueryRowContext(ctx,
-		`SELECT COUNT(*) FROM crm_customers WHERE owner_id = ? AND created_at >= ?`,
-		ownerID, monthStart,
-	).Scan(&out.NewThisMonth); err != nil {
+	newSQL, newArgs, err := sq.
+		Select("COUNT(*)").
+		From("crm_customers").
+		Where(sq.Eq{"owner_id": ownerID}).
+		Where(sq.GtOrEq{"created_at": monthStart}).
+		PlaceholderFormat(sq.Question).
+		ToSql()
+	if err != nil {
+		logger.Ctx(ctx).Error("insights: build customers new query failed", logger.Error(err))
+		return CustomerKPIs{}, err
+	}
+	if err := r.pool.QueryRowContext(ctx, newSQL, newArgs...).Scan(&out.NewThisMonth); err != nil {
 		logger.Ctx(ctx).Error("insights: customers new failed", logger.Error(err))
 		return CustomerKPIs{}, err
 	}
 
 	// cross-schema read from crm_customers + pos_orders — active (ordered in last 30d)
-	if err := r.pool.QueryRowContext(ctx,
-		`SELECT COUNT(DISTINCT c.id)
-		 FROM crm_customers c
-		 JOIN pos_orders o ON o.customer_id = c.id AND o.owner_id = c.owner_id
-		 WHERE c.owner_id = ? AND o.created_at >= ?`,
-		ownerID, cutoffActive,
-	).Scan(&out.Active); err != nil {
+	activeSQL, activeArgs, err := sq.
+		Select("COUNT(DISTINCT c.id)").
+		From("crm_customers c").
+		Join("pos_orders o ON o.customer_id = c.id AND o.owner_id = c.owner_id").
+		Where(sq.Eq{"c.owner_id": ownerID}).
+		Where(sq.GtOrEq{"o.created_at": cutoffActive}).
+		PlaceholderFormat(sq.Question).
+		ToSql()
+	if err != nil {
+		logger.Ctx(ctx).Error("insights: build customers active query failed", logger.Error(err))
+		return CustomerKPIs{}, err
+	}
+	if err := r.pool.QueryRowContext(ctx, activeSQL, activeArgs...).Scan(&out.Active); err != nil {
 		logger.Ctx(ctx).Error("insights: customers active failed", logger.Error(err))
 		return CustomerKPIs{}, err
 	}
 
 	// cross-schema read from crm_customers + pos_orders — churned (had orders, none in 90d+)
-	const churnQ = `
-		SELECT COUNT(*)
-		FROM crm_customers c
-		WHERE c.owner_id = ?
-		  AND EXISTS (SELECT 1 FROM pos_orders o WHERE o.owner_id = c.owner_id AND o.customer_id = c.id)
-		  AND NOT EXISTS (SELECT 1 FROM pos_orders o2 WHERE o2.owner_id = c.owner_id AND o2.customer_id = c.id AND o2.created_at >= ?)
-	`
-	if err := r.pool.QueryRowContext(ctx, churnQ, ownerID, cutoffChurn).Scan(&out.Churned); err != nil {
+	churnSQL, churnArgs, err := sq.
+		Select("COUNT(*)").
+		From("crm_customers c").
+		Where(sq.Eq{"c.owner_id": ownerID}).
+		Where(sq.Expr("EXISTS (SELECT 1 FROM pos_orders o WHERE o.owner_id = c.owner_id AND o.customer_id = c.id)")).
+		Where(sq.Expr("NOT EXISTS (SELECT 1 FROM pos_orders o2 WHERE o2.owner_id = c.owner_id AND o2.customer_id = c.id AND o2.created_at >= ?)", cutoffChurn)).
+		PlaceholderFormat(sq.Question).
+		ToSql()
+	if err != nil {
+		logger.Ctx(ctx).Error("insights: build customers churned query failed", logger.Error(err))
+		return CustomerKPIs{}, err
+	}
+	if err := r.pool.QueryRowContext(ctx, churnSQL, churnArgs...).Scan(&out.Churned); err != nil {
 		logger.Ctx(ctx).Error("insights: customers churned failed", logger.Error(err))
 		return CustomerKPIs{}, err
 	}

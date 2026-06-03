@@ -4,6 +4,8 @@ import (
 	"context"
 	"time"
 
+	sq "github.com/Masterminds/squirrel"
+
 	"github.com/voxire/onion/internal/platform/logger"
 )
 
@@ -46,27 +48,37 @@ func (r *Repository) GetCashFlowSeries(ctx context.Context, ownerID int64, from,
 
 func (r *Repository) dailyPaidInvoices(ctx context.Context, ownerID int64, from, to time.Time) (map[string]int64, error) {
 	// cross-schema read from finance_invoices — daily inflow for cash-flow chart
-	const q = `
-		SELECT DATE(COALESCE(paid_date, issue_date)) AS day, COALESCE(SUM(total), 0)
-		FROM finance_invoices
-		WHERE owner_id = ?
-		  AND status = 'paid'
-		  AND COALESCE(paid_date, issue_date) BETWEEN ? AND ?
-		GROUP BY day
-	`
-	return r.scanDailySums(ctx, q, ownerID, from.Format("2006-01-02"), to.Format("2006-01-02"))
+	q, args, err := sq.
+		Select("DATE(COALESCE(paid_date, issue_date)) AS day", "COALESCE(SUM(total), 0)").
+		From("finance_invoices").
+		Where(sq.Eq{"owner_id": ownerID}).
+		Where(sq.Eq{"status": "paid"}).
+		Where(sq.Expr("COALESCE(paid_date, issue_date) BETWEEN ? AND ?", from.Format("2006-01-02"), to.Format("2006-01-02"))).
+		GroupBy("day").
+		PlaceholderFormat(sq.Question).
+		ToSql()
+	if err != nil {
+		logger.Ctx(ctx).Error("insights: build daily paid invoices query failed", logger.Error(err))
+		return nil, err
+	}
+	return r.scanDailySums(ctx, q, args...)
 }
 
 func (r *Repository) dailyExpenses(ctx context.Context, ownerID int64, from, to time.Time) (map[string]int64, error) {
 	// cross-schema read from finance_expenses — daily outflow for cash-flow chart
-	const q = `
-		SELECT DATE(expense_date) AS day, COALESCE(SUM(amount), 0)
-		FROM finance_expenses
-		WHERE owner_id = ?
-		  AND expense_date BETWEEN ? AND ?
-		GROUP BY day
-	`
-	return r.scanDailySums(ctx, q, ownerID, from.Format("2006-01-02"), to.Format("2006-01-02"))
+	q, args, err := sq.
+		Select("DATE(expense_date) AS day", "COALESCE(SUM(amount), 0)").
+		From("finance_expenses").
+		Where(sq.Eq{"owner_id": ownerID}).
+		Where(sq.Expr("expense_date BETWEEN ? AND ?", from.Format("2006-01-02"), to.Format("2006-01-02"))).
+		GroupBy("day").
+		PlaceholderFormat(sq.Question).
+		ToSql()
+	if err != nil {
+		logger.Ctx(ctx).Error("insights: build daily expenses query failed", logger.Error(err))
+		return nil, err
+	}
+	return r.scanDailySums(ctx, q, args...)
 }
 
 func (r *Repository) scanDailySums(ctx context.Context, q string, args ...interface{}) (map[string]int64, error) {
