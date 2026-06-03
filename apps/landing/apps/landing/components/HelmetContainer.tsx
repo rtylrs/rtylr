@@ -84,6 +84,8 @@ function HelmetContainer({
 
       <meta property="og:title" content={title} />
       <meta property="og:image" content={effectiveImage} />
+      <meta property="og:image:width" content="1200" />
+      <meta property="og:image:height" content="630" />
       {effectiveCanonical && <meta property="og:url" content={effectiveCanonical} />}
       <meta property="og:type" content={effectiveOgType} />
       <meta property="og:locale" content={effectiveOgLocale} />

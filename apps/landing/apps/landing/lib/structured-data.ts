@@ -244,11 +244,6 @@ export function webSiteSchema(): Record<string, unknown> {
     url: BASE,
     description: 'Your entire business, one platform.',
     publisher: { '@type': 'Organization', name: 'rtylr', url: BASE },
-    potentialAction: {
-      '@type': 'SearchAction',
-      target: { '@type': 'EntryPoint', urlTemplate: `${BASE}/search?q={search_term_string}` },
-      'query-input': 'required name=search_term_string',
-    },
   };
 }
 
