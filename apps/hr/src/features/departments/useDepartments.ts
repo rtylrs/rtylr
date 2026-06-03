@@ -9,7 +9,7 @@ export function useDepartments() {
     queryKey: ['departments'],
     queryFn: async () => {
       const res = await unwrap(hrApi.listDepartments());
-      const raw = res ?? [];
+      const raw = Array.isArray(res) ? res : ((res as Record<string, unknown>)?.departments ?? []);
       return z.array(departmentSchema).parse(Array.isArray(raw) ? raw : []);
     },
   });
