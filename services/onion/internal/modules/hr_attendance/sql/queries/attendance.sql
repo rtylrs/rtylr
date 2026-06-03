@@ -31,6 +31,19 @@ LIMIT ? OFFSET ?;
 SELECT COUNT(*) AS total FROM hr_attendance_records
 WHERE owner_id = ? AND employee_id = ? AND date >= ? AND date <= ?;
 
+-- name: CountAllAttendance :one
+SELECT COUNT(*) AS total FROM hr_attendance_records
+WHERE owner_id = ? AND date >= ? AND date <= ?;
+
+-- name: ListAllAttendance :many
+SELECT id, owner_id, employee_id, location_id, date, clock_in_at, clock_out_at,
+       duration_minutes, clock_in_method, clock_in_lat, clock_in_lng,
+       is_late, late_minutes, status, created_at, updated_at
+FROM hr_attendance_records
+WHERE owner_id = ? AND date >= ? AND date <= ?
+ORDER BY date DESC, clock_in_at DESC
+LIMIT ? OFFSET ?;
+
 -- name: GetDailyAttendance :many
 SELECT id, owner_id, employee_id, location_id, date, clock_in_at, clock_out_at,
        duration_minutes, clock_in_method, clock_in_lat, clock_in_lng,
