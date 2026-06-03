@@ -1,6 +1,12 @@
 package domain
 
-import "time"
+import (
+	"errors"
+	"time"
+)
+
+// ErrInvalidPrice is returned when a price or compare-at price is negative.
+var ErrInvalidPrice = errors.New("invalid price: monetary values cannot be negative")
 
 type StoreProduct struct {
 	ID             int64     `json:"id"`

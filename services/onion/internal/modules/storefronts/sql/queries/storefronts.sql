@@ -12,3 +12,7 @@ VALUES (?, ?, ?, ?, ?, ?);
 UPDATE store_sites
 SET name = ?, domain = ?, logo_url = ?, theme_id = ?, is_published = ?
 WHERE owner_id = ? AND id = ?;
+
+-- name: CountThemeForOwner :one
+SELECT COUNT(*) FROM store_themes
+WHERE id = ? AND owner_id = ?;

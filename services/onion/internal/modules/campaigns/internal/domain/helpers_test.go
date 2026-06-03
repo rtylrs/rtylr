@@ -67,22 +67,22 @@ func TestHasAudience_WithoutSegment(t *testing.T) {
 }
 
 func TestValidateCampaignInput_EmptyName(t *testing.T) {
-	msg := ValidateCampaignInput(CampaignInput{Name: "", Type: "email"})
-	if msg == "" {
+	err := ValidateCampaignInput(CampaignInput{Name: "", Type: "email"})
+	if err == nil {
 		t.Error("expected validation error for empty name")
 	}
 }
 
 func TestValidateCampaignInput_EmptyType(t *testing.T) {
-	msg := ValidateCampaignInput(CampaignInput{Name: "Summer", Type: ""})
-	if msg == "" {
+	err := ValidateCampaignInput(CampaignInput{Name: "Summer", Type: ""})
+	if err == nil {
 		t.Error("expected validation error for empty type")
 	}
 }
 
 func TestValidateCampaignInput_Valid(t *testing.T) {
-	msg := ValidateCampaignInput(CampaignInput{Name: "Summer Sale", Type: "email"})
-	if msg != "" {
-		t.Errorf("expected no validation error, got %q", msg)
+	err := ValidateCampaignInput(CampaignInput{Name: "Summer Sale", Type: "email"})
+	if err != nil {
+		t.Errorf("expected no validation error, got %v", err)
 	}
 }

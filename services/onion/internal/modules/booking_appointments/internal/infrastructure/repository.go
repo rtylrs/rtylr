@@ -80,7 +80,11 @@ func (r *Repository) Create(ctx context.Context, ownerID int64, input domain.App
 		logger.Ctx(ctx).Error("Failed to create appointment", logger.Error(err))
 		return 0, err
 	}
-	id, _ := result.LastInsertId()
+	id, err := result.LastInsertId()
+	if err != nil {
+		logger.Ctx(ctx).Error("Failed to retrieve last insert ID for appointment", logger.Error(err))
+		return 0, err
+	}
 	return id, nil
 }
 

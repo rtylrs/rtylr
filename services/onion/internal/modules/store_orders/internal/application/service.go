@@ -31,6 +31,9 @@ func (s *Service) GetDetail(ctx context.Context, ownerID, orderID int64) (domain
 }
 
 func (s *Service) Create(ctx context.Context, ownerID int64, input domain.StoreOrderInput) (int64, error) {
+	if err := validateOrder(input); err != nil {
+		return 0, err
+	}
 	id, err := s.repo.Create(ctx, ownerID, input)
 	if err != nil {
 		return 0, err
@@ -40,10 +43,25 @@ func (s *Service) Create(ctx context.Context, ownerID int64, input domain.StoreO
 }
 
 func (s *Service) Update(ctx context.Context, ownerID, id int64, input domain.StoreOrderInput) error {
+	if err := validateOrder(input); err != nil {
+		return err
+	}
 	if err := s.repo.Update(ctx, ownerID, id, input); err != nil {
 		return err
 	}
 	s.invalidateCache(ctx, ownerID)
+	return nil
+}
+
+func validateOrder(input domain.StoreOrderInput) error {
+	if input.Subtotal < 0 || input.Tax < 0 || input.ShippingCost < 0 || input.Total < 0 {
+		return domain.ErrInvalidAmount
+	}
+	for _, item := range input.Items {
+		if item.Price < 0 || item.Total < 0 {
+			return domain.ErrInvalidAmount
+		}
+	}
 	return nil
 }
 

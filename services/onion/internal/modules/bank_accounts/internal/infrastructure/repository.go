@@ -152,6 +152,13 @@ func parseFloatNull(s sql.NullString) float64 {
 	if !s.Valid {
 		return 0
 	}
-	v, _ := strconv.ParseFloat(s.String, 64)
+	v, err := strconv.ParseFloat(s.String, 64)
+	if err != nil {
+		logger.Global().Warn("failed to parse bank account balance from database",
+			logger.String("value", s.String),
+			logger.Error(err),
+		)
+		return 0
+	}
 	return v
 }

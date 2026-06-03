@@ -68,7 +68,14 @@ func (r *Repository) Create(ctx context.Context, ownerID int64, input domain.Wai
 		logger.Ctx(ctx).Error("Failed to create waitlist entry", logger.Error(err))
 		return 0, err
 	}
-	id, _ := result.LastInsertId()
+	id, err := result.LastInsertId()
+	if err != nil {
+		logger.Ctx(ctx).Error("Failed to retrieve last insert ID for waitlist entry",
+			logger.Any("owner_id", ownerID),
+			logger.Error(err),
+		)
+		return 0, err
+	}
 	return id, nil
 }
 
@@ -126,6 +133,10 @@ func parseNullDate(s string) sql.NullTime {
 	}
 	t, err := time.Parse("2006-01-02", s)
 	if err != nil {
+		logger.Global().Warn("failed to parse waitlist preferred date value",
+			logger.String("value", s),
+			logger.Error(err),
+		)
 		return sql.NullTime{}
 	}
 	return sql.NullTime{Time: t, Valid: true}
@@ -137,6 +148,10 @@ func parseNullTime(s string) sql.NullTime {
 	}
 	t, err := time.Parse("15:04:05", s)
 	if err != nil {
+		logger.Global().Warn("failed to parse waitlist preferred time value",
+			logger.String("value", s),
+			logger.Error(err),
+		)
 		return sql.NullTime{}
 	}
 	return sql.NullTime{Time: t, Valid: true}

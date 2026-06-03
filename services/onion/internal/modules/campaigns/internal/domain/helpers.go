@@ -54,29 +54,3 @@ func (c *Campaign) HasBody() bool {
 func (c *Campaign) HasSubject() bool {
 	return c.Subject != ""
 }
-
-// ValidateCampaignInput returns an error string if the input is invalid.
-// Returns empty string if valid.
-func ValidateCampaignInput(input CampaignInput) string {
-	if input.Name == "" {
-		return "campaign name is required"
-	}
-	if input.Type == "" {
-		return "campaign type is required"
-	}
-	return ""
-}
-
-// ValidateCampaignUpdateInput checks required fields for updating a campaign.
-func ValidateCampaignUpdateInput(input CampaignUpdateInput) string {
-	if input.ID <= 0 {
-		return "campaign id is required"
-	}
-	if input.OwnerID <= 0 {
-		return "owner_id is required"
-	}
-	if input.Name == "" {
-		return "campaign name is required"
-	}
-	return ""
-}

@@ -1,6 +1,13 @@
 package domain
 
-import "time"
+import (
+	"errors"
+	"time"
+)
+
+// ErrThemeNotFound is returned when a storefront references a theme that does
+// not exist or belongs to a different owner.
+var ErrThemeNotFound = errors.New("theme not found for this owner")
 
 type Storefront struct {
 	ID          int64     `json:"id"`

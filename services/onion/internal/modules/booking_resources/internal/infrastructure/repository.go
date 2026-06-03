@@ -43,7 +43,11 @@ func (r *Repository) Create(ctx context.Context, ownerID int64, input domain.Res
 		logger.Ctx(ctx).Error("Failed to create resource", logger.Error(err))
 		return 0, err
 	}
-	id, _ := result.LastInsertId()
+	id, err := result.LastInsertId()
+	if err != nil {
+		logger.Ctx(ctx).Error("Failed to retrieve last insert ID for resource", logger.Error(err))
+		return 0, err
+	}
 	return id, nil
 }
 

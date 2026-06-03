@@ -52,8 +52,13 @@ func (r *Repository) AppointmentExists(ctx context.Context, ownerID, appointment
 
 func (r *Repository) Create(ctx context.Context, ownerID int64, input domain.ReminderInput) (int64, error) {
 	scheduledAt, err := time.Parse("2006-01-02T15:04:05Z07:00", input.ScheduledAt)
-	if err != nil && input.ScheduledAt != "" {
-		logger.Ctx(ctx).Error("Failed to parse scheduled_at", logger.Error(err))
+	if err != nil {
+		// The handler validates scheduled_at is non-empty, so a parse failure
+		// here indicates corrupt input rather than an optional empty value.
+		logger.Ctx(ctx).Error("Failed to parse scheduled_at",
+			logger.String("scheduled_at", input.ScheduledAt),
+			logger.Error(err),
+		)
 		return 0, err
 	}
 	result, err := r.queries.CreateReminder(ctx, sqlc.CreateReminderParams{

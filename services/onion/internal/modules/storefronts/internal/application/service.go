@@ -29,6 +29,9 @@ func (s *Service) List(ctx context.Context, ownerID int64) ([]domain.Storefront,
 }
 
 func (s *Service) Create(ctx context.Context, ownerID int64, input domain.StorefrontInput) (int64, error) {
+	if err := s.verifyThemeOwnership(ctx, ownerID, input.ThemeID); err != nil {
+		return 0, err
+	}
 	id, err := s.repo.Create(ctx, ownerID, input)
 	if err != nil {
 		return 0, err
@@ -38,11 +41,30 @@ func (s *Service) Create(ctx context.Context, ownerID int64, input domain.Storef
 }
 
 func (s *Service) Update(ctx context.Context, ownerID, id int64, input domain.StorefrontInput) error {
+	if err := s.verifyThemeOwnership(ctx, ownerID, input.ThemeID); err != nil {
+		return err
+	}
 	err := s.repo.Update(ctx, ownerID, id, input)
 	if err != nil {
 		return err
 	}
 	s.invalidateCache(ctx, ownerID)
+	return nil
+}
+
+// verifyThemeOwnership ensures a referenced theme belongs to the same owner.
+// A zero themeID means no theme is linked, which is allowed.
+func (s *Service) verifyThemeOwnership(ctx context.Context, ownerID, themeID int64) error {
+	if themeID == 0 {
+		return nil
+	}
+	ok, err := s.repo.ThemeBelongsToOwner(ctx, ownerID, themeID)
+	if err != nil {
+		return err
+	}
+	if !ok {
+		return domain.ErrThemeNotFound
+	}
 	return nil
 }
 

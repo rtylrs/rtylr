@@ -29,6 +29,9 @@ func (s *Service) List(ctx context.Context, ownerID int64) ([]domain.StoreProduc
 }
 
 func (s *Service) Create(ctx context.Context, ownerID int64, input domain.StoreProductInput) (int64, error) {
+	if err := validateProduct(input); err != nil {
+		return 0, err
+	}
 	id, err := s.repo.Create(ctx, ownerID, input)
 	if err != nil {
 		return 0, err
@@ -38,10 +41,20 @@ func (s *Service) Create(ctx context.Context, ownerID int64, input domain.StoreP
 }
 
 func (s *Service) Update(ctx context.Context, ownerID, id int64, input domain.StoreProductInput) error {
+	if err := validateProduct(input); err != nil {
+		return err
+	}
 	if err := s.repo.Update(ctx, ownerID, id, input); err != nil {
 		return err
 	}
 	s.invalidateCache(ctx, ownerID)
+	return nil
+}
+
+func validateProduct(input domain.StoreProductInput) error {
+	if input.Price < 0 || input.CompareAtPrice < 0 {
+		return domain.ErrInvalidPrice
+	}
 	return nil
 }
 

@@ -61,15 +61,15 @@ func TestOpenRate_OverTotalSent(t *testing.T) {
 }
 
 func TestValidateCampaignInput_SMSType_Valid(t *testing.T) {
-	msg := ValidateCampaignInput(CampaignInput{Name: "SMS blast", Type: TypeSMS})
-	if msg != "" {
-		t.Errorf("expected no error for SMS type, got %q", msg)
+	err := ValidateCampaignInput(CampaignInput{Name: "SMS blast", Type: TypeSMS})
+	if err != nil {
+		t.Errorf("expected no error for SMS type, got %v", err)
 	}
 }
 
 func TestValidateCampaignInput_PushType_Valid(t *testing.T) {
-	msg := ValidateCampaignInput(CampaignInput{Name: "Push alert", Type: TypePush})
-	if msg != "" {
-		t.Errorf("expected no error for push type, got %q", msg)
+	err := ValidateCampaignInput(CampaignInput{Name: "Push alert", Type: TypePush})
+	if err != nil {
+		t.Errorf("expected no error for push type, got %v", err)
 	}
 }

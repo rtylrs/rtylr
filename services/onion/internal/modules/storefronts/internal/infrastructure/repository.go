@@ -19,6 +19,17 @@ func NewRepository(db *sql.DB) *Repository {
 	return &Repository{queries: sqlc.New(pool), pool: pool}
 }
 
+// ThemeBelongsToOwner reports whether the given theme exists and is owned by ownerID.
+func (r *Repository) ThemeBelongsToOwner(ctx context.Context, ownerID, themeID int64) (bool, error) {
+	// cross-schema read from store_themes — verify theme ownership before linking a storefront
+	count, err := r.queries.CountThemeForOwner(ctx, sqlc.CountThemeForOwnerParams{ID: themeID, OwnerID: ownerID})
+	if err != nil {
+		logger.Ctx(ctx).Error("Failed to verify theme ownership", logger.Error(err))
+		return false, err
+	}
+	return count > 0, nil
+}
+
 func (r *Repository) List(ctx context.Context, ownerID int64) ([]domain.Storefront, error) {
 	rows, err := r.queries.ListStorefronts(ctx, ownerID)
 	if err != nil {

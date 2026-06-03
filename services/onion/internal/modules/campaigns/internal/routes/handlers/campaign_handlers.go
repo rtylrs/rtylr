@@ -142,6 +142,9 @@ func (h *CreateCampaignHandler) Validate(_ context.Context, req *CreateCampaignR
 	if req.Name == "" {
 		return &errorModels.ServerError{Code: http.StatusBadRequest, Message: "Name is required"}
 	}
+	if req.Type == "" {
+		return &errorModels.ServerError{Code: http.StatusBadRequest, Message: "Type is required"}
+	}
 	return nil
 }
 
@@ -159,10 +162,11 @@ func (h *CreateCampaignHandler) Serve(ctx context.Context, req *CreateCampaignRe
 		Body:              req.Body,
 	}
 	if req.ScheduledAt != nil {
-		t, err := time.Parse("2006-01-02T15:04:05Z", *req.ScheduledAt)
-		if err == nil {
-			input.ScheduledAt = &t
+		t, parseErr := time.Parse("2006-01-02T15:04:05Z", *req.ScheduledAt)
+		if parseErr != nil {
+			return CreateCampaignResponse{}, &errorModels.ServerError{Code: http.StatusBadRequest, Message: "Invalid scheduled_at format"}
 		}
+		input.ScheduledAt = &t
 	}
 	id, err := h.Service.Create(ctx, input)
 	if err != nil {
@@ -194,6 +198,9 @@ func (h *UpdateCampaignHandler) Validate(_ context.Context, req *UpdateCampaignR
 	if req.Name == "" {
 		return &errorModels.ServerError{Code: http.StatusBadRequest, Message: "Name is required"}
 	}
+	if req.Type == "" {
+		return &errorModels.ServerError{Code: http.StatusBadRequest, Message: "Type is required"}
+	}
 	return nil
 }
 
@@ -218,9 +225,10 @@ func (h *UpdateCampaignHandler) Serve(ctx context.Context, req *UpdateCampaignRe
 	}
 	if req.ScheduledAt != nil {
 		t, parseErr := time.Parse("2006-01-02T15:04:05Z", *req.ScheduledAt)
-		if parseErr == nil {
-			input.ScheduledAt = &t
+		if parseErr != nil {
+			return UpdateCampaignResponse{}, &errorModels.ServerError{Code: http.StatusBadRequest, Message: "Invalid scheduled_at format"}
 		}
+		input.ScheduledAt = &t
 	}
 	if updateErr := h.Service.Update(ctx, input); updateErr != nil {
 		return UpdateCampaignResponse{}, &errorModels.ServerError{Code: http.StatusInternalServerError, Message: "Failed to update campaign"}

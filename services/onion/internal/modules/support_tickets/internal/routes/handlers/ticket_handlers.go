@@ -9,6 +9,7 @@ import (
 	"github.com/voxire/onion/internal/modules/support_tickets/internal/domain"
 	authPkg "github.com/voxire/onion/internal/platform/auth"
 	errorModels "github.com/voxire/onion/internal/platform/errors"
+	"github.com/voxire/onion/internal/platform/logger"
 )
 
 // -- LIST --------------------------------------------------------------------
@@ -140,12 +141,22 @@ func (h *CreateTicketHandler) Serve(ctx context.Context, req *CreateTicketReques
 		if senderName == "" {
 			senderName = req.CustomerName
 		}
-		_, _ = h.Service.CreateMessage(ctx, domain.MessageInput{
+		if _, msgErr := h.Service.CreateMessage(ctx, domain.MessageInput{
 			TicketID:   ticketID,
 			SenderType: "customer",
 			SenderName: senderName,
 			Body:       req.Body,
-		})
+		}); msgErr != nil {
+			// The ticket was created successfully; the initial message is a
+			// non-critical attachment. Log the failure with the ticket and
+			// business context instead of silently discarding it, and still
+			// return success for the ticket itself.
+			logger.Ctx(ctx).Warn("Failed to create initial support ticket message",
+				logger.Any("ticket_id", ticketID),
+				logger.Any("business_id", device.User.BusinessID),
+				logger.Error(msgErr),
+			)
+		}
 	}
 	return CreateTicketResponse{TicketID: ticketID, Message: "Support ticket created"}, nil
 }

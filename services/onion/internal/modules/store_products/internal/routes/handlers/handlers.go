@@ -60,6 +60,12 @@ func (h *CreateHandler) Validate(_ context.Context, req *CreateRequest) *errorMo
 	if strings.TrimSpace(req.Title) == "" {
 		return &errorModels.ServerError{Code: http.StatusBadRequest, HTTPCode: http.StatusBadRequest, Message: "Title is required"}
 	}
+	if req.Price < 0 {
+		return &errorModels.ServerError{Code: http.StatusBadRequest, HTTPCode: http.StatusBadRequest, Message: "Price cannot be negative"}
+	}
+	if req.CompareAtPrice < 0 {
+		return &errorModels.ServerError{Code: http.StatusBadRequest, HTTPCode: http.StatusBadRequest, Message: "Compare-at price cannot be negative"}
+	}
 	return nil
 }
 
@@ -74,7 +80,7 @@ func (h *CreateHandler) Serve(ctx context.Context, req *CreateRequest) (CreateRe
 		IsPublished: req.IsPublished, SortOrder: req.SortOrder,
 	})
 	if err != nil {
-		return CreateResponse{}, &errorModels.ServerError{Code: http.StatusInternalServerError, HTTPCode: http.StatusInternalServerError, Message: "Failed to create store product"}
+		return CreateResponse{}, errorModels.FromError(err, "Failed to create store product")
 	}
 	return CreateResponse{ID: id, Message: "Store product created successfully"}, nil
 }
@@ -103,6 +109,12 @@ func (h *UpdateHandler) Validate(_ context.Context, req *UpdateRequest) *errorMo
 	if req.ID == 0 {
 		return &errorModels.ServerError{Code: http.StatusBadRequest, HTTPCode: http.StatusBadRequest, Message: "ID is required"}
 	}
+	if req.Price < 0 {
+		return &errorModels.ServerError{Code: http.StatusBadRequest, HTTPCode: http.StatusBadRequest, Message: "Price cannot be negative"}
+	}
+	if req.CompareAtPrice < 0 {
+		return &errorModels.ServerError{Code: http.StatusBadRequest, HTTPCode: http.StatusBadRequest, Message: "Compare-at price cannot be negative"}
+	}
 	return nil
 }
 
@@ -116,7 +128,7 @@ func (h *UpdateHandler) Serve(ctx context.Context, req *UpdateRequest) (UpdateRe
 		Images: req.Images, Price: req.Price, CompareAtPrice: req.CompareAtPrice,
 		IsPublished: req.IsPublished, SortOrder: req.SortOrder,
 	}); err != nil {
-		return UpdateResponse{}, &errorModels.ServerError{Code: http.StatusInternalServerError, HTTPCode: http.StatusInternalServerError, Message: "Failed to update store product"}
+		return UpdateResponse{}, errorModels.FromError(err, "Failed to update store product")
 	}
 	return UpdateResponse{Message: "Store product updated successfully"}, nil
 }

@@ -365,11 +365,24 @@ func (r *Repository) CreateAccessRequest(ctx context.Context, businessID, userID
 }
 
 // ─── Onboarding ─────────────────────────────────────────────────────────────
+//
+// The `users` table (schemas/shared/users.sql) is a GLOBAL identity table keyed
+// by `id` — it has no `owner_id` column (tenant association lives in the nullable
+// `business_id`). Onboarding state belongs to the user identity, not to a tenant,
+// so these queries intentionally key on `id` only and do NOT filter by owner_id.
+// If `users` is ever re-scoped to a tenant during a schema refactor, revisit these
+// two queries (and add an owner_id filter) before that migration ships.
 
 func (r *Repository) IsOnboarded(ctx context.Context, userID int64) bool {
 	var onboarded bool
 	err := r.pool.QueryRowContext(ctx, "SELECT COALESCE(onboarded, FALSE) FROM users WHERE id = ?", userID).Scan(&onboarded)
 	if err != nil {
+		// A missing row (sql.ErrNoRows) legitimately means "not onboarded"; any
+		// other error indicates a DB problem and must not be swallowed silently.
+		if !errors.Is(err, sql.ErrNoRows) {
+			logger.Ctx(ctx).Warn("Failed to read onboarding state, defaulting to not onboarded",
+				logger.Any("user_id", userID), logger.Error(err))
+		}
 		return false
 	}
 	return onboarded

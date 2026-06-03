@@ -61,6 +61,9 @@ func (s *Service) GetByID(ctx context.Context, ownerID, id int64) (domain.Campai
 }
 
 func (s *Service) Create(ctx context.Context, input domain.CampaignInput) (int64, error) {
+	if err := domain.ValidateCampaignInput(input); err != nil {
+		return 0, err
+	}
 	id, err := s.repo.Create(ctx, input)
 	if err != nil {
 		return 0, err
@@ -70,6 +73,9 @@ func (s *Service) Create(ctx context.Context, input domain.CampaignInput) (int64
 }
 
 func (s *Service) Update(ctx context.Context, input domain.CampaignUpdateInput) error {
+	if err := domain.ValidateCampaignUpdateInput(input); err != nil {
+		return err
+	}
 	if err := s.repo.Update(ctx, input); err != nil {
 		return err
 	}

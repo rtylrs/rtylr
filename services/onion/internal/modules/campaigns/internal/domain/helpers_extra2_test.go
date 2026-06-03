@@ -45,29 +45,29 @@ func TestHasSubject_WhenEmpty(t *testing.T) {
 }
 
 func TestValidateCampaignUpdateInput_Valid(t *testing.T) {
-	msg := ValidateCampaignUpdateInput(CampaignUpdateInput{ID: 1, OwnerID: 2, Name: "Summer"})
-	if msg != "" {
-		t.Errorf("expected no error, got %q", msg)
+	err := ValidateCampaignUpdateInput(CampaignUpdateInput{ID: 1, OwnerID: 2, Name: "Summer"})
+	if err != nil {
+		t.Errorf("expected no error, got %v", err)
 	}
 }
 
 func TestValidateCampaignUpdateInput_ZeroID(t *testing.T) {
-	msg := ValidateCampaignUpdateInput(CampaignUpdateInput{ID: 0, OwnerID: 2, Name: "Summer"})
-	if msg == "" {
+	err := ValidateCampaignUpdateInput(CampaignUpdateInput{ID: 0, OwnerID: 2, Name: "Summer"})
+	if err == nil {
 		t.Error("expected error for zero id")
 	}
 }
 
 func TestValidateCampaignUpdateInput_ZeroOwner(t *testing.T) {
-	msg := ValidateCampaignUpdateInput(CampaignUpdateInput{ID: 1, OwnerID: 0, Name: "Summer"})
-	if msg == "" {
+	err := ValidateCampaignUpdateInput(CampaignUpdateInput{ID: 1, OwnerID: 0, Name: "Summer"})
+	if err == nil {
 		t.Error("expected error for zero owner_id")
 	}
 }
 
 func TestValidateCampaignUpdateInput_EmptyName(t *testing.T) {
-	msg := ValidateCampaignUpdateInput(CampaignUpdateInput{ID: 1, OwnerID: 2, Name: ""})
-	if msg == "" {
+	err := ValidateCampaignUpdateInput(CampaignUpdateInput{ID: 1, OwnerID: 2, Name: ""})
+	if err == nil {
 		t.Error("expected error for empty name")
 	}
 }

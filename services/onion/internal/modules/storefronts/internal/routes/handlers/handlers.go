@@ -96,7 +96,7 @@ func (h *CreateHandler) Serve(ctx context.Context, req *CreateRequest) (CreateRe
 		Name: req.Name, Domain: req.Domain, LogoURL: req.LogoURL, ThemeID: req.ThemeID, IsPublished: req.IsPublished,
 	})
 	if err != nil {
-		return CreateResponse{}, &errorModels.ServerError{Code: http.StatusInternalServerError, HTTPCode: http.StatusInternalServerError, Message: "Failed to create site"}
+		return CreateResponse{}, errorModels.FromError(err, "Failed to create site")
 	}
 	return CreateResponse{ID: id, Message: "Site created successfully"}, nil
 }
@@ -139,7 +139,7 @@ func (h *UpdateHandler) Serve(ctx context.Context, req *UpdateRequest) (UpdateRe
 	if err := h.Service.Update(ctx, authUser.UserID, req.ID, domain.StorefrontInput{
 		Name: req.Name, Domain: req.Domain, LogoURL: req.LogoURL, ThemeID: req.ThemeID, IsPublished: req.IsPublished,
 	}); err != nil {
-		return UpdateResponse{}, &errorModels.ServerError{Code: http.StatusInternalServerError, HTTPCode: http.StatusInternalServerError, Message: "Failed to update site"}
+		return UpdateResponse{}, errorModels.FromError(err, "Failed to update site")
 	}
 	return UpdateResponse{Message: "Site updated successfully"}, nil
 }

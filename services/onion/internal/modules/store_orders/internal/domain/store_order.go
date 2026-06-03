@@ -1,6 +1,12 @@
 package domain
 
-import "time"
+import (
+	"errors"
+	"time"
+)
+
+// ErrInvalidAmount is returned when an order monetary field is negative.
+var ErrInvalidAmount = errors.New("invalid amount: monetary values cannot be negative")
 
 type StoreOrder struct {
 	ID              int64     `json:"id"`

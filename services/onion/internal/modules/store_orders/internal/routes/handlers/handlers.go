@@ -92,6 +92,14 @@ func (h *CreateHandler) Validate(_ context.Context, req *CreateRequest) *errorMo
 	if req.CustomerEmail == "" && req.CustomerName == "" {
 		return &errorModels.ServerError{Code: http.StatusBadRequest, HTTPCode: http.StatusBadRequest, Message: "Customer info is required"}
 	}
+	if req.Subtotal < 0 || req.Tax < 0 || req.ShippingCost < 0 || req.Total < 0 {
+		return &errorModels.ServerError{Code: http.StatusBadRequest, HTTPCode: http.StatusBadRequest, Message: "Monetary amounts cannot be negative"}
+	}
+	for _, item := range req.Items {
+		if item.Price < 0 || item.Total < 0 {
+			return &errorModels.ServerError{Code: http.StatusBadRequest, HTTPCode: http.StatusBadRequest, Message: "Item amounts cannot be negative"}
+		}
+	}
 	return nil
 }
 
@@ -106,7 +114,7 @@ func (h *CreateHandler) Serve(ctx context.Context, req *CreateRequest) (CreateRe
 		Total: req.Total, ShippingAddress: req.ShippingAddress, Notes: req.Notes, Items: req.Items,
 	})
 	if err != nil {
-		return CreateResponse{}, &errorModels.ServerError{Code: http.StatusInternalServerError, HTTPCode: http.StatusInternalServerError, Message: "Failed to create order"}
+		return CreateResponse{}, errorModels.FromError(err, "Failed to create order")
 	}
 	return CreateResponse{ID: id, Message: "Order created successfully"}, nil
 }
@@ -136,6 +144,9 @@ func (h *UpdateHandler) Validate(_ context.Context, req *UpdateRequest) *errorMo
 	if req.ID == 0 {
 		return &errorModels.ServerError{Code: http.StatusBadRequest, HTTPCode: http.StatusBadRequest, Message: "ID is required"}
 	}
+	if req.Subtotal < 0 || req.Tax < 0 || req.ShippingCost < 0 || req.Total < 0 {
+		return &errorModels.ServerError{Code: http.StatusBadRequest, HTTPCode: http.StatusBadRequest, Message: "Monetary amounts cannot be negative"}
+	}
 	return nil
 }
 
@@ -149,7 +160,7 @@ func (h *UpdateHandler) Serve(ctx context.Context, req *UpdateRequest) (UpdateRe
 		Status: req.Status, Subtotal: req.Subtotal, Tax: req.Tax, ShippingCost: req.ShippingCost,
 		Total: req.Total, ShippingAddress: req.ShippingAddress, Notes: req.Notes,
 	}); err != nil {
-		return UpdateResponse{}, &errorModels.ServerError{Code: http.StatusInternalServerError, HTTPCode: http.StatusInternalServerError, Message: "Failed to update order"}
+		return UpdateResponse{}, errorModels.FromError(err, "Failed to update order")
 	}
 	return UpdateResponse{Message: "Order updated successfully"}, nil
 }

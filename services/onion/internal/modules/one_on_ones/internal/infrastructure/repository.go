@@ -72,7 +72,7 @@ func (r *Repository) Create(ctx context.Context, ownerID int64, input domain.One
 		OwnerID:     ownerID,
 		ManagerID:   input.ManagerID,
 		StaffID:     input.StaffID,
-		ScheduledAt: parseTime(input.ScheduledAt),
+		ScheduledAt: parseTime(ctx, input.ScheduledAt),
 		Notes:       sql.NullString{String: input.Notes, Valid: input.Notes != ""},
 		ActionItems: actionItems,
 		Status:      sqlc.NullHrOneOnOnesStatus{HrOneOnOnesStatus: sqlc.HrOneOnOnesStatus(status), Valid: true},
@@ -84,7 +84,12 @@ func (r *Repository) Create(ctx context.Context, ownerID int64, input domain.One
 	return res.LastInsertId()
 }
 
-func parseTime(s string) time.Time {
+// parseTime tries each accepted layout and returns the first successful
+// parse. When every layout fails it logs at Warn and returns the zero time —
+// the handler validates scheduled_at before this is reached, so a failure here
+// signals corruption upstream rather than ordinary user input. Logging makes
+// that corruption visible instead of silently storing 0001-01-01.
+func parseTime(ctx context.Context, s string) time.Time {
 	for _, layout := range []string{
 		time.RFC3339,
 		"2006-01-02 15:04:05",
@@ -95,5 +100,8 @@ func parseTime(s string) time.Time {
 			return parsed
 		}
 	}
+	logger.Ctx(ctx).Warn("failed to parse scheduled_at, defaulting to zero time",
+		logger.String("value", s),
+	)
 	return time.Time{}
 }
