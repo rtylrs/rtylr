@@ -141,11 +141,16 @@ func (h *CreateHandler) Validate(_ context.Context, req *CreateRequest) *errorMo
 	if req.StartTime == "" || req.EndTime == "" {
 		return &errorModels.ServerError{Code: http.StatusBadRequest, HTTPCode: http.StatusBadRequest, Message: "Start and end time are required"}
 	}
-	if _, err := time.Parse("2006-01-02T15:04:05Z07:00", req.StartTime); err != nil {
+	start, err := time.Parse("2006-01-02T15:04:05Z07:00", req.StartTime)
+	if err != nil {
 		return &errorModels.ServerError{Code: http.StatusBadRequest, HTTPCode: http.StatusBadRequest, Message: "start_time must be in RFC3339 format"}
 	}
-	if _, err := time.Parse("2006-01-02T15:04:05Z07:00", req.EndTime); err != nil {
+	end, err := time.Parse("2006-01-02T15:04:05Z07:00", req.EndTime)
+	if err != nil {
 		return &errorModels.ServerError{Code: http.StatusBadRequest, HTTPCode: http.StatusBadRequest, Message: "end_time must be in RFC3339 format"}
+	}
+	if !start.Before(end) {
+		return &errorModels.ServerError{Code: http.StatusBadRequest, HTTPCode: http.StatusBadRequest, Message: "start_time must be before end_time"}
 	}
 	return nil
 }
@@ -194,15 +199,23 @@ func (h *UpdateHandler) Validate(_ context.Context, req *UpdateRequest) *errorMo
 	}
 	req.StartTime = strings.TrimSpace(req.StartTime)
 	req.EndTime = strings.TrimSpace(req.EndTime)
+	var start, end time.Time
 	if req.StartTime != "" {
-		if _, err := time.Parse("2006-01-02T15:04:05Z07:00", req.StartTime); err != nil {
+		parsed, err := time.Parse("2006-01-02T15:04:05Z07:00", req.StartTime)
+		if err != nil {
 			return &errorModels.ServerError{Code: http.StatusBadRequest, HTTPCode: http.StatusBadRequest, Message: "start_time must be in RFC3339 format"}
 		}
+		start = parsed
 	}
 	if req.EndTime != "" {
-		if _, err := time.Parse("2006-01-02T15:04:05Z07:00", req.EndTime); err != nil {
+		parsed, err := time.Parse("2006-01-02T15:04:05Z07:00", req.EndTime)
+		if err != nil {
 			return &errorModels.ServerError{Code: http.StatusBadRequest, HTTPCode: http.StatusBadRequest, Message: "end_time must be in RFC3339 format"}
 		}
+		end = parsed
+	}
+	if req.StartTime != "" && req.EndTime != "" && !start.Before(end) {
+		return &errorModels.ServerError{Code: http.StatusBadRequest, HTTPCode: http.StatusBadRequest, Message: "start_time must be before end_time"}
 	}
 	return nil
 }

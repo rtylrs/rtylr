@@ -172,6 +172,9 @@ func (h *CashAdjustHandler) Serve(ctx context.Context, req *CashAdjustRequest) (
 	if req.SessionID == 0 || req.BranchID == 0 {
 		return CashAdjustResponse{}, &errorModels.ServerError{Code: http.StatusBadRequest, Message: "sessionId and branchId are required"}
 	}
+	if req.Amount == 0 {
+		return CashAdjustResponse{}, &errorModels.ServerError{Code: http.StatusBadRequest, Message: "amount must be non-zero for adjustments"}
+	}
 	if req.Reason == nil || strings.TrimSpace(*req.Reason) == "" {
 		return CashAdjustResponse{}, &errorModels.ServerError{Code: http.StatusBadRequest, Message: "reason is required for adjustments"}
 	}
