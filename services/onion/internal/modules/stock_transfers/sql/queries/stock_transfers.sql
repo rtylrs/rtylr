@@ -4,6 +4,19 @@ FROM erp_stock_transfers
 WHERE owner_id = ?
 ORDER BY created_at DESC;
 
+-- name: ListStockTransfersPaged :many
+SELECT id, owner_id, from_warehouse_id, to_warehouse_id, status, notes, created_at, updated_at
+FROM erp_stock_transfers
+WHERE owner_id = ?
+ORDER BY created_at DESC
+LIMIT ? OFFSET ?;
+
+-- name: GetStockTransferForUpdate :one
+SELECT from_warehouse_id, to_warehouse_id, status
+FROM erp_stock_transfers
+WHERE owner_id = ? AND id = ?
+FOR UPDATE;
+
 -- name: GetTransferItems :many
 SELECT id, transfer_id, product_id, quantity, created_at
 FROM erp_stock_transfer_items

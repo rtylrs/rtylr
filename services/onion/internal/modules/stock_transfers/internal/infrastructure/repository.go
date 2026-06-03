@@ -7,6 +7,8 @@ import (
 	"sort"
 	"strconv"
 
+	"github.com/Masterminds/squirrel"
+
 	"github.com/voxire/onion/internal/modules/stock_transfers/internal/domain"
 	"github.com/voxire/onion/internal/modules/stock_transfers/internal/infrastructure/persistence/sqlc"
 	"github.com/voxire/onion/internal/platform/logger"
@@ -28,52 +30,39 @@ func NewRepository(db *sql.DB) *Repository {
 }
 
 func (r *Repository) ListStockTransfers(ctx context.Context, ownerID int64, limit, offset int) ([]domain.StockTransfer, bool, error) {
-	const q = `
-		SELECT id, owner_id, from_warehouse_id, to_warehouse_id, status, notes, created_at, updated_at
-		FROM erp_stock_transfers
-		WHERE owner_id = ?
-		ORDER BY created_at DESC
-		LIMIT ? OFFSET ?`
-
-	rows, err := r.pool.QueryContext(ctx, q, ownerID, limit+1, offset)
+	rows, err := r.queries.ListStockTransfersPaged(ctx, sqlc.ListStockTransfersPagedParams{
+		OwnerID: ownerID,
+		Limit:   int32(limit + 1),
+		Offset:  int32(offset),
+	})
 	if err != nil {
 		logger.Ctx(ctx).Error("Failed to list stock transfers", logger.Error(err))
 		return nil, false, err
 	}
-	defer rows.Close()
 
 	transfers := make([]domain.StockTransfer, 0, limit+1)
-	for rows.Next() {
-		var t domain.StockTransfer
-		var status, notes sql.NullString
-		var createdAt, updatedAt sql.NullTime
-
-		if err := rows.Scan(
-			&t.ID, &t.OwnerID, &t.FromWarehouseID, &t.ToWarehouseID,
-			&status, &notes, &createdAt, &updatedAt,
-		); err != nil {
-			logger.Ctx(ctx).Error("Failed to scan stock transfer row", logger.Error(err))
-			return nil, false, err
+	for _, row := range rows {
+		t := domain.StockTransfer{
+			ID:              row.ID,
+			OwnerID:         row.OwnerID,
+			FromWarehouseID: row.FromWarehouseID,
+			ToWarehouseID:   row.ToWarehouseID,
 		}
 
-		if status.Valid {
-			t.Status = domain.StockTransferStatus(status.String)
+		if row.Status.Valid {
+			t.Status = domain.StockTransferStatus(row.Status.ErpStockTransfersStatus)
 		}
-		if notes.Valid {
-			t.Notes = notes.String
+		if row.Notes.Valid {
+			t.Notes = row.Notes.String
 		}
-		if createdAt.Valid {
-			t.CreatedAt = createdAt.Time
+		if row.CreatedAt.Valid {
+			t.CreatedAt = row.CreatedAt.Time
 		}
-		if updatedAt.Valid {
-			t.UpdatedAt = updatedAt.Time
+		if row.UpdatedAt.Valid {
+			t.UpdatedAt = row.UpdatedAt.Time
 		}
 
 		transfers = append(transfers, t)
-	}
-
-	if err := rows.Err(); err != nil {
-		return nil, false, err
 	}
 
 	hasMore := len(transfers) > limit
@@ -100,23 +89,24 @@ func (r *Repository) getTransferItemsBatch(ctx context.Context, transfers []doma
 		return nil, nil
 	}
 
-	placeholders := make([]byte, 0, len(transfers)*2)
-	args := make([]any, 0, len(transfers))
+	ids := make([]int64, 0, len(transfers))
 	for i := range transfers {
-		if i > 0 {
-			placeholders = append(placeholders, ',', '?')
-		} else {
-			placeholders = append(placeholders, '?')
-		}
-		args = append(args, transfers[i].ID)
+		ids = append(ids, transfers[i].ID)
 	}
 
-	q := `SELECT id, transfer_id, product_id, quantity, created_at
-		FROM erp_stock_transfer_items
-		WHERE transfer_id IN (` + string(placeholders) + `)
-		ORDER BY id ASC`
+	sqlStr, args, err := squirrel.
+		Select("id", "transfer_id", "product_id", "quantity", "created_at").
+		From("erp_stock_transfer_items").
+		Where(squirrel.Eq{"transfer_id": ids}).
+		OrderBy("id ASC").
+		PlaceholderFormat(squirrel.Question).
+		ToSql()
+	if err != nil {
+		logger.Ctx(ctx).Error("Failed to build batch get transfer items query", logger.Error(err))
+		return nil, err
+	}
 
-	rows, err := r.pool.QueryContext(ctx, q, args...)
+	rows, err := r.pool.QueryContext(ctx, sqlStr, args...)
 	if err != nil {
 		logger.Ctx(ctx).Error("Failed to batch get transfer items", logger.Error(err))
 		return nil, err
@@ -234,11 +224,10 @@ func (r *Repository) receiveTransfer(ctx context.Context, ownerID, id int64) (er
 
 	qtx := r.queries.WithTx(tx)
 
-	var fromWH, toWH int64
-	var curStatus string
-	err = tx.QueryRowContext(ctx,
-		`SELECT from_warehouse_id, to_warehouse_id, status FROM erp_stock_transfers
-		 WHERE owner_id = ? AND id = ? FOR UPDATE`, ownerID, id).Scan(&fromWH, &toWH, &curStatus)
+	row, err := qtx.GetStockTransferForUpdate(ctx, sqlc.GetStockTransferForUpdateParams{
+		OwnerID: ownerID,
+		ID:      id,
+	})
 	if errors.Is(err, sql.ErrNoRows) {
 		err = domain.ErrStockTransferNotFound
 		return err
@@ -246,6 +235,9 @@ func (r *Repository) receiveTransfer(ctx context.Context, ownerID, id int64) (er
 	if err != nil {
 		return err
 	}
+	fromWH := row.FromWarehouseID
+	toWH := row.ToWarehouseID
+	curStatus := string(row.Status.ErpStockTransfersStatus)
 	if curStatus == string(domain.StockTransferStatusReceived) {
 		err = nil
 		return nil // idempotent: already received
