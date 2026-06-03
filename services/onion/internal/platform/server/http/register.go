@@ -47,6 +47,27 @@ func RegisterGETWithValidation[Req, Res any](ctx context.Context, router *chi.Mu
 	}
 }
 
+// RegisterGETWithValidationAndMiddleware is the GET counterpart to
+// RegisterPOSTWithValidationAndMiddleware: a validated GET endpoint with
+// per-route middleware (e.g. a tighter rate limit on an anonymous lookup like
+// /get-email-exists). Middlewares run in order around the handler — index 0 is
+// outermost.
+func RegisterGETWithValidationAndMiddleware[Req, Res any](
+	ctx context.Context,
+	router *chi.Mux,
+	paths []string,
+	handler HandlerFunc[Req, Res],
+	middlewares ...MiddlewareFunc,
+) {
+	for _, path := range paths {
+		var final http.Handler = wrapHandler(ctx, handler, true)
+		for i := len(middlewares) - 1; i >= 0; i-- {
+			final = middlewares[i](final)
+		}
+		router.Method(http.MethodGet, path, final)
+	}
+}
+
 func RegisterPOST[Req, Res any](ctx context.Context, router *chi.Mux, paths []string, handler HandlerFunc[Req, Res]) {
 	for _, path := range paths {
 		router.Post(path, wrapHandler(ctx, handler, false))
