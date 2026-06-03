@@ -75,10 +75,14 @@ func mimeTypeToFormat(mime string) string {
 		return "gif"
 	case "image/avif":
 		return "avif"
+	case "image/tiff":
+		return "tiff"
 	case "video/mp4":
 		return "mp4"
 	case "video/webm":
 		return "webm"
+	case "video/quicktime":
+		return "mov"
 	default:
 		return "bin"
 	}

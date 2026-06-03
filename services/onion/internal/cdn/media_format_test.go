@@ -42,9 +42,11 @@ func TestMimeTypeToFormat(t *testing.T) {
 		"image/png":  "png",
 		"image/webp": "webp",
 		"image/gif":  "gif",
-		"image/avif": "avif",
-		"video/mp4":  "mp4",
-		"video/webm": "webm",
+		"image/avif":      "avif",
+		"image/tiff":      "tiff",
+		"video/mp4":       "mp4",
+		"video/webm":      "webm",
+		"video/quicktime": "mov",
 	}
 	for in, want := range cases {
 		if got := mimeTypeToFormat(in); got != want {
