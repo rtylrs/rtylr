@@ -5,6 +5,8 @@ import (
 	"database/sql"
 	"fmt"
 	"time"
+
+	sq "github.com/Masterminds/squirrel"
 )
 
 type UserRow struct {
@@ -88,12 +90,26 @@ func NewRepository(db *sql.DB) *Repository {
 	return &Repository{pool: db}
 }
 
+var userColumns = []string{
+	"id", "email", "full_name", "business_id", "is_console_admin",
+	"is_banned", "ban_reason", "banned_at", "created_at", "password_hash",
+}
+
 // ── Auth ──────────────────────────────────────────────────────────────────────
 
 func (r *Repository) GetUserByEmail(ctx context.Context, email string) (*UserRow, error) {
-	row := r.pool.QueryRowContext(ctx,
-		`SELECT id, email, full_name, business_id, is_console_admin, is_banned, ban_reason, banned_at, created_at, password_hash
-		 FROM users WHERE email = ? LIMIT 1`, email)
+	query, args, err := sq.
+		Select(userColumns...).
+		From("users").
+		Where(sq.Eq{"email": email}).
+		Limit(1).
+		PlaceholderFormat(sq.Question).
+		ToSql()
+	if err != nil {
+		return nil, err
+	}
+
+	row := r.pool.QueryRowContext(ctx, query, args...)
 
 	var u UserRow
 	if err := row.Scan(&u.ID, &u.Email, &u.FullName, &u.BusinessID,
@@ -106,25 +122,44 @@ func (r *Repository) GetUserByEmail(ctx context.Context, email string) (*UserRow
 // ── Users CRUD ────────────────────────────────────────────────────────────────
 
 func (r *Repository) ListUsers(ctx context.Context, limit, offset int, search string) ([]UserRow, int64, error) {
-	base := `FROM users WHERE 1=1`
-	args := []interface{}{}
-
+	conds := sq.And{}
 	if search != "" {
-		base += ` AND (email LIKE ? OR full_name LIKE ?)`
 		like := "%" + search + "%"
-		args = append(args, like, like)
+		conds = append(conds, sq.Or{
+			sq.Like{"email": like},
+			sq.Like{"full_name": like},
+		})
 	}
 
-	var total int64
-	if err := r.pool.QueryRowContext(ctx, "SELECT COUNT(*) "+base, args...).Scan(&total); err != nil {
+	countSQL, countArgs, err := sq.
+		Select("COUNT(*)").
+		From("users").
+		Where(conds).
+		PlaceholderFormat(sq.Question).
+		ToSql()
+	if err != nil {
 		return nil, 0, err
 	}
 
-	query := `SELECT id, email, full_name, business_id, is_console_admin, is_banned, ban_reason, banned_at, created_at, password_hash ` +
-		base + ` ORDER BY created_at DESC LIMIT ? OFFSET ?`
-	args = append(args, limit, offset)
+	var total int64
+	if err := r.pool.QueryRowContext(ctx, countSQL, countArgs...).Scan(&total); err != nil {
+		return nil, 0, err
+	}
 
-	rows, err := r.pool.QueryContext(ctx, query, args...)
+	listSQL, listArgs, err := sq.
+		Select(userColumns...).
+		From("users").
+		Where(conds).
+		OrderBy("created_at DESC").
+		Limit(uint64(limit)).
+		Offset(uint64(offset)).
+		PlaceholderFormat(sq.Question).
+		ToSql()
+	if err != nil {
+		return nil, 0, err
+	}
+
+	rows, err := r.pool.QueryContext(ctx, listSQL, listArgs...)
 	if err != nil {
 		return nil, 0, err
 	}
@@ -143,9 +178,18 @@ func (r *Repository) ListUsers(ctx context.Context, limit, offset int, search st
 }
 
 func (r *Repository) GetUserByID(ctx context.Context, id int64) (*UserRow, error) {
-	row := r.pool.QueryRowContext(ctx,
-		`SELECT id, email, full_name, business_id, is_console_admin, is_banned, ban_reason, banned_at, created_at, password_hash
-		 FROM users WHERE id = ? LIMIT 1`, id)
+	query, args, err := sq.
+		Select(userColumns...).
+		From("users").
+		Where(sq.Eq{"id": id}).
+		Limit(1).
+		PlaceholderFormat(sq.Question).
+		ToSql()
+	if err != nil {
+		return nil, err
+	}
+
+	row := r.pool.QueryRowContext(ctx, query, args...)
 
 	var u UserRow
 	if err := row.Scan(&u.ID, &u.Email, &u.FullName, &u.BusinessID,
@@ -156,9 +200,17 @@ func (r *Repository) GetUserByID(ctx context.Context, id int64) (*UserRow, error
 }
 
 func (r *Repository) CreateUser(ctx context.Context, email, passwordHash, fullName string, isConsoleAdmin bool) (int64, error) {
-	res, err := r.pool.ExecContext(ctx,
-		`INSERT INTO users (email, password_hash, full_name, is_console_admin) VALUES (?, ?, ?, ?)`,
-		email, passwordHash, fullName, isConsoleAdmin)
+	query, args, err := sq.
+		Insert("users").
+		Columns("email", "password_hash", "full_name", "is_console_admin").
+		Values(email, passwordHash, fullName, isConsoleAdmin).
+		PlaceholderFormat(sq.Question).
+		ToSql()
+	if err != nil {
+		return 0, err
+	}
+
+	res, err := r.pool.ExecContext(ctx, query, args...)
 	if err != nil {
 		return 0, err
 	}
@@ -166,56 +218,122 @@ func (r *Repository) CreateUser(ctx context.Context, email, passwordHash, fullNa
 }
 
 func (r *Repository) UpdateUser(ctx context.Context, id int64, fullName, email string) error {
-	_, err := r.pool.ExecContext(ctx,
-		`UPDATE users SET full_name = ?, email = ?, updated_at = NOW() WHERE id = ?`,
-		fullName, email, id)
+	query, args, err := sq.
+		Update("users").
+		Set("full_name", fullName).
+		Set("email", email).
+		Set("updated_at", sq.Expr("NOW()")).
+		Where(sq.Eq{"id": id}).
+		PlaceholderFormat(sq.Question).
+		ToSql()
+	if err != nil {
+		return err
+	}
+
+	_, err = r.pool.ExecContext(ctx, query, args...)
 	return err
 }
 
 func (r *Repository) DeleteUser(ctx context.Context, id int64) error {
-	_, err := r.pool.ExecContext(ctx, `DELETE FROM users WHERE id = ?`, id)
+	query, args, err := sq.
+		Delete("users").
+		Where(sq.Eq{"id": id}).
+		PlaceholderFormat(sq.Question).
+		ToSql()
+	if err != nil {
+		return err
+	}
+
+	_, err = r.pool.ExecContext(ctx, query, args...)
 	return err
 }
 
 func (r *Repository) BanUser(ctx context.Context, id int64, reason string) error {
-	_, err := r.pool.ExecContext(ctx,
-		`UPDATE users SET is_banned = TRUE, ban_reason = ?, banned_at = NOW() WHERE id = ?`,
-		reason, id)
+	query, args, err := sq.
+		Update("users").
+		Set("is_banned", true).
+		Set("ban_reason", reason).
+		Set("banned_at", sq.Expr("NOW()")).
+		Where(sq.Eq{"id": id}).
+		PlaceholderFormat(sq.Question).
+		ToSql()
+	if err != nil {
+		return err
+	}
+
+	_, err = r.pool.ExecContext(ctx, query, args...)
 	return err
 }
 
 func (r *Repository) UnbanUser(ctx context.Context, id int64) error {
-	_, err := r.pool.ExecContext(ctx,
-		`UPDATE users SET is_banned = FALSE, ban_reason = NULL, banned_at = NULL WHERE id = ?`, id)
+	query, args, err := sq.
+		Update("users").
+		Set("is_banned", false).
+		Set("ban_reason", nil).
+		Set("banned_at", nil).
+		Where(sq.Eq{"id": id}).
+		PlaceholderFormat(sq.Question).
+		ToSql()
+	if err != nil {
+		return err
+	}
+
+	_, err = r.pool.ExecContext(ctx, query, args...)
 	return err
 }
 
 func (r *Repository) SetConsoleAdmin(ctx context.Context, id int64, isAdmin bool) error {
-	_, err := r.pool.ExecContext(ctx,
-		`UPDATE users SET is_console_admin = ? WHERE id = ?`, isAdmin, id)
+	query, args, err := sq.
+		Update("users").
+		Set("is_console_admin", isAdmin).
+		Where(sq.Eq{"id": id}).
+		PlaceholderFormat(sq.Question).
+		ToSql()
+	if err != nil {
+		return err
+	}
+
+	_, err = r.pool.ExecContext(ctx, query, args...)
 	return err
 }
 
 // ── Businesses CRUD ───────────────────────────────────────────────────────────
 
 func (r *Repository) ListBusinesses(ctx context.Context, limit, offset int, search string) ([]BusinessRow, int64, error) {
-	base := `FROM businesses WHERE 1=1`
-	args := []interface{}{}
-
+	conds := sq.And{}
 	if search != "" {
-		base += ` AND name LIKE ?`
-		args = append(args, "%"+search+"%")
+		conds = append(conds, sq.Like{"name": "%" + search + "%"})
 	}
 
-	var total int64
-	if err := r.pool.QueryRowContext(ctx, "SELECT COUNT(*) "+base, args...).Scan(&total); err != nil {
+	countSQL, countArgs, err := sq.
+		Select("COUNT(*)").
+		From("businesses").
+		Where(conds).
+		PlaceholderFormat(sq.Question).
+		ToSql()
+	if err != nil {
 		return nil, 0, err
 	}
 
-	query := `SELECT id, name, owner_id, created_at ` + base + ` ORDER BY created_at DESC LIMIT ? OFFSET ?`
-	args = append(args, limit, offset)
+	var total int64
+	if err := r.pool.QueryRowContext(ctx, countSQL, countArgs...).Scan(&total); err != nil {
+		return nil, 0, err
+	}
 
-	rows, err := r.pool.QueryContext(ctx, query, args...)
+	listSQL, listArgs, err := sq.
+		Select("id", "name", "owner_id", "created_at").
+		From("businesses").
+		Where(conds).
+		OrderBy("created_at DESC").
+		Limit(uint64(limit)).
+		Offset(uint64(offset)).
+		PlaceholderFormat(sq.Question).
+		ToSql()
+	if err != nil {
+		return nil, 0, err
+	}
+
+	rows, err := r.pool.QueryContext(ctx, listSQL, listArgs...)
 	if err != nil {
 		return nil, 0, err
 	}
@@ -233,8 +351,18 @@ func (r *Repository) ListBusinesses(ctx context.Context, limit, offset int, sear
 }
 
 func (r *Repository) GetBusinessByID(ctx context.Context, id int64) (*BusinessRow, error) {
-	row := r.pool.QueryRowContext(ctx,
-		`SELECT id, name, owner_id, created_at FROM businesses WHERE id = ? LIMIT 1`, id)
+	query, args, err := sq.
+		Select("id", "name", "owner_id", "created_at").
+		From("businesses").
+		Where(sq.Eq{"id": id}).
+		Limit(1).
+		PlaceholderFormat(sq.Question).
+		ToSql()
+	if err != nil {
+		return nil, err
+	}
+
+	row := r.pool.QueryRowContext(ctx, query, args...)
 	var b BusinessRow
 	if err := row.Scan(&b.ID, &b.Name, &b.OwnerID, &b.CreatedAt); err != nil {
 		return nil, err
@@ -243,37 +371,76 @@ func (r *Repository) GetBusinessByID(ctx context.Context, id int64) (*BusinessRo
 }
 
 func (r *Repository) UpdateBusiness(ctx context.Context, id int64, name string) error {
-	_, err := r.pool.ExecContext(ctx, `UPDATE businesses SET name = ? WHERE id = ?`, name, id)
+	query, args, err := sq.
+		Update("businesses").
+		Set("name", name).
+		Where(sq.Eq{"id": id}).
+		PlaceholderFormat(sq.Question).
+		ToSql()
+	if err != nil {
+		return err
+	}
+
+	_, err = r.pool.ExecContext(ctx, query, args...)
 	return err
 }
 
 func (r *Repository) DeleteBusiness(ctx context.Context, id int64) error {
-	_, err := r.pool.ExecContext(ctx, `DELETE FROM businesses WHERE id = ?`, id)
+	query, args, err := sq.
+		Delete("businesses").
+		Where(sq.Eq{"id": id}).
+		PlaceholderFormat(sq.Question).
+		ToSql()
+	if err != nil {
+		return err
+	}
+
+	_, err = r.pool.ExecContext(ctx, query, args...)
 	return err
 }
 
 // ── Subscriptions CRUD ────────────────────────────────────────────────────────
 
 func (r *Repository) ListSubscriptions(ctx context.Context, limit, offset int, status string) ([]SubscriptionRow, int64, error) {
-	base := `FROM subscriptions s JOIN plans p ON p.id = s.plan_id LEFT JOIN users u ON u.id = s.owner_id WHERE 1=1`
-	args := []interface{}{}
-
+	conds := sq.And{}
 	if status != "" {
-		base += ` AND s.status = ?`
-		args = append(args, status)
+		conds = append(conds, sq.Eq{"s.status": status})
 	}
 
-	var total int64
-	if err := r.pool.QueryRowContext(ctx, "SELECT COUNT(*) "+base, args...).Scan(&total); err != nil {
+	countSQL, countArgs, err := sq.
+		Select("COUNT(*)").
+		From("subscriptions s").
+		Join("plans p ON p.id = s.plan_id").
+		LeftJoin("users u ON u.id = s.owner_id").
+		Where(conds).
+		PlaceholderFormat(sq.Question).
+		ToSql()
+	if err != nil {
 		return nil, 0, err
 	}
 
-	query := `SELECT s.id, s.owner_id, s.plan_id, p.name, s.status, s.seat_count,
-		s.trial_ends_at, s.current_period_ends_at, s.created_at, u.email ` +
-		base + ` ORDER BY s.created_at DESC LIMIT ? OFFSET ?`
-	args = append(args, limit, offset)
+	var total int64
+	if err := r.pool.QueryRowContext(ctx, countSQL, countArgs...).Scan(&total); err != nil {
+		return nil, 0, err
+	}
 
-	rows, err := r.pool.QueryContext(ctx, query, args...)
+	listSQL, listArgs, err := sq.
+		Select("s.id", "s.owner_id", "s.plan_id", "p.name", "s.status", "s.seat_count",
+			"s.trial_ends_at", "s.current_period_ends_at", "s.created_at", "u.email").
+		From("subscriptions s").
+		Join("plans p ON p.id = s.plan_id").
+		LeftJoin("users u ON u.id = s.owner_id").
+		Where(conds).
+		OrderBy("s.created_at DESC").
+		Limit(uint64(limit)).
+		Offset(uint64(offset)).
+		PlaceholderFormat(sq.Question).
+		ToSql()
+	if err != nil {
+		return nil, 0, err
+	}
+
+	rows, err := r.pool.QueryContext(ctx, listSQL, listArgs...)
 	if err != nil {
 		return nil, 0, err
 	}
@@ -292,11 +459,21 @@ func (r *Repository) ListSubscriptions(ctx context.Context, limit, offset int, s
 }
 
 func (r *Repository) GetSubscriptionByID(ctx context.Context, id int64) (*SubscriptionRow, error) {
-	row := r.pool.QueryRowContext(ctx,
-		`SELECT s.id, s.owner_id, s.plan_id, p.name, s.status, s.seat_count,
-		 s.trial_ends_at, s.current_period_ends_at, s.created_at, u.email
-		 FROM subscriptions s JOIN plans p ON p.id = s.plan_id LEFT JOIN users u ON u.id = s.owner_id
-		 WHERE s.id = ? LIMIT 1`, id)
+	query, args, err := sq.
+		Select("s.id", "s.owner_id", "s.plan_id", "p.name", "s.status", "s.seat_count",
+			"s.trial_ends_at", "s.current_period_ends_at", "s.created_at", "u.email").
+		From("subscriptions s").
+		Join("plans p ON p.id = s.plan_id").
+		LeftJoin("users u ON u.id = s.owner_id").
+		Where(sq.Eq{"s.id": id}).
+		Limit(1).
+		PlaceholderFormat(sq.Question).
+		ToSql()
+	if err != nil {
+		return nil, err
+	}
+
+	row := r.pool.QueryRowContext(ctx, query, args...)
 	var s SubscriptionRow
 	if err := row.Scan(&s.ID, &s.OwnerID, &s.PlanID, &s.PlanName, &s.Status, &s.SeatCount,
 		&s.TrialEndsAt, &s.CurrentPeriodEndsAt, &s.CreatedAt, &s.OwnerEmail); err != nil {
@@ -306,11 +483,21 @@ func (r *Repository) GetSubscriptionByID(ctx context.Context, id int64) (*Subscr
 }
 
 func (r *Repository) GetSubscriptionByOwner(ctx context.Context, ownerID int64) (*SubscriptionRow, error) {
-	row := r.pool.QueryRowContext(ctx,
-		`SELECT s.id, s.owner_id, s.plan_id, p.name, s.status, s.seat_count,
-		 s.trial_ends_at, s.current_period_ends_at, s.created_at, u.email
-		 FROM subscriptions s JOIN plans p ON p.id = s.plan_id LEFT JOIN users u ON u.id = s.owner_id
-		 WHERE s.owner_id = ? LIMIT 1`, ownerID)
+	query, args, err := sq.
+		Select("s.id", "s.owner_id", "s.plan_id", "p.name", "s.status", "s.seat_count",
+			"s.trial_ends_at", "s.current_period_ends_at", "s.created_at", "u.email").
+		From("subscriptions s").
+		Join("plans p ON p.id = s.plan_id").
+		LeftJoin("users u ON u.id = s.owner_id").
+		Where(sq.Eq{"s.owner_id": ownerID}).
+		Limit(1).
+		PlaceholderFormat(sq.Question).
+		ToSql()
+	if err != nil {
+		return nil, err
+	}
+
+	row := r.pool.QueryRowContext(ctx, query, args...)
 	var s SubscriptionRow
 	if err := row.Scan(&s.ID, &s.OwnerID, &s.PlanID, &s.PlanName, &s.Status, &s.SeatCount,
 		&s.TrialEndsAt, &s.CurrentPeriodEndsAt, &s.CreatedAt, &s.OwnerEmail); err != nil {
@@ -324,35 +511,70 @@ func (r *Repository) UpsertSubscription(ctx context.Context, ownerID, planID int
 	if expiresAt != nil {
 		expiresSQL = *expiresAt
 	}
-	_, err := r.pool.ExecContext(ctx,
-		`INSERT INTO subscriptions (owner_id, plan_id, status, seat_count, current_period_ends_at)
-		 VALUES (?, ?, ?, ?, ?)
-		 ON DUPLICATE KEY UPDATE plan_id = VALUES(plan_id), status = VALUES(status),
+	query, args, err := sq.
+		Insert("subscriptions").
+		Columns("owner_id", "plan_id", "status", "seat_count", "current_period_ends_at").
+		Values(ownerID, planID, status, seatCount, expiresSQL).
+		Suffix(`ON DUPLICATE KEY UPDATE plan_id = VALUES(plan_id), status = VALUES(status),
 		   seat_count = VALUES(seat_count), current_period_ends_at = VALUES(current_period_ends_at),
-		   updated_at = NOW()`,
-		ownerID, planID, status, seatCount, expiresSQL)
+		   updated_at = NOW()`).
+		PlaceholderFormat(sq.Question).
+		ToSql()
+	if err != nil {
+		return err
+	}
+
+	_, err = r.pool.ExecContext(ctx, query, args...)
 	return err
 }
 
 func (r *Repository) UpdateSubscription(ctx context.Context, id, planID int64, status string, seatCount int) error {
-	_, err := r.pool.ExecContext(ctx,
-		`UPDATE subscriptions SET plan_id = ?, status = ?, seat_count = ?, updated_at = NOW() WHERE id = ?`,
-		planID, status, seatCount, id)
+	query, args, err := sq.
+		Update("subscriptions").
+		Set("plan_id", planID).
+		Set("status", status).
+		Set("seat_count", seatCount).
+		Set("updated_at", sq.Expr("NOW()")).
+		Where(sq.Eq{"id": id}).
+		PlaceholderFormat(sq.Question).
+		ToSql()
+	if err != nil {
+		return err
+	}
+
+	_, err = r.pool.ExecContext(ctx, query, args...)
 	return err
 }
 
 func (r *Repository) DeleteSubscription(ctx context.Context, id int64) error {
-	_, err := r.pool.ExecContext(ctx, `DELETE FROM subscriptions WHERE id = ?`, id)
+	query, args, err := sq.
+		Delete("subscriptions").
+		Where(sq.Eq{"id": id}).
+		PlaceholderFormat(sq.Question).
+		ToSql()
+	if err != nil {
+		return err
+	}
+
+	_, err = r.pool.ExecContext(ctx, query, args...)
 	return err
 }
 
 // ── Plans CRUD ────────────────────────────────────────────────────────────────
 
 func (r *Repository) ListPlans(ctx context.Context) ([]PlanRow, error) {
-	rows, err := r.pool.QueryContext(ctx,
-		`SELECT id, name, slug, price_per_seat_cents, annual_price_per_seat_cents, trial_days,
-		 max_seats, max_locations, is_active, is_solo, is_featured, tier_order, tagline, created_at
-		 FROM plans ORDER BY tier_order ASC`)
+	query, args, err := sq.
+		Select("id", "name", "slug", "price_per_seat_cents", "annual_price_per_seat_cents", "trial_days",
+			"max_seats", "max_locations", "is_active", "is_solo", "is_featured", "tier_order", "tagline", "created_at").
+		From("plans").
+		OrderBy("tier_order ASC").
+		PlaceholderFormat(sq.Question).
+		ToSql()
+	if err != nil {
+		return nil, err
+	}
+
+	rows, err := r.pool.QueryContext(ctx, query, args...)
 	if err != nil {
 		return nil, err
 	}
@@ -372,28 +594,57 @@ func (r *Repository) ListPlans(ctx context.Context) ([]PlanRow, error) {
 }
 
 func (r *Repository) UpdatePlan(ctx context.Context, id int64, name string, pricePerSeatCents, annualPricePerSeatCents int, isActive bool) error {
-	_, err := r.pool.ExecContext(ctx,
-		`UPDATE plans SET name = ?, price_per_seat_cents = ?, annual_price_per_seat_cents = ?, is_active = ? WHERE id = ?`,
-		name, pricePerSeatCents, annualPricePerSeatCents, isActive, id)
+	query, args, err := sq.
+		Update("plans").
+		Set("name", name).
+		Set("price_per_seat_cents", pricePerSeatCents).
+		Set("annual_price_per_seat_cents", annualPricePerSeatCents).
+		Set("is_active", isActive).
+		Where(sq.Eq{"id": id}).
+		PlaceholderFormat(sq.Question).
+		ToSql()
+	if err != nil {
+		return err
+	}
+
+	_, err = r.pool.ExecContext(ctx, query, args...)
 	return err
 }
 
 // ── Manual Access Grants CRUD ─────────────────────────────────────────────────
 
 func (r *Repository) ListGrants(ctx context.Context, limit, offset int) ([]GrantRow, int64, error) {
-	var total int64
-	if err := r.pool.QueryRowContext(ctx, `SELECT COUNT(*) FROM manual_access_grants`).Scan(&total); err != nil {
+	countSQL, countArgs, err := sq.
+		Select("COUNT(*)").
+		From("manual_access_grants").
+		PlaceholderFormat(sq.Question).
+		ToSql()
+	if err != nil {
 		return nil, 0, err
 	}
 
-	rows, err := r.pool.QueryContext(ctx,
-		`SELECT g.id, g.user_id, g.plan_id, p.name, g.granted_by, adm.full_name,
-		 g.note, g.expires_at, g.revoked_at, g.created_at, u.email
-		 FROM manual_access_grants g
-		 JOIN plans p ON p.id = g.plan_id
-		 LEFT JOIN users u ON u.id = g.user_id
-		 LEFT JOIN users adm ON adm.id = g.granted_by
-		 ORDER BY g.created_at DESC LIMIT ? OFFSET ?`, limit, offset)
+	var total int64
+	if err := r.pool.QueryRowContext(ctx, countSQL, countArgs...).Scan(&total); err != nil {
+		return nil, 0, err
+	}
+
+	listSQL, listArgs, err := sq.
+		Select("g.id", "g.user_id", "g.plan_id", "p.name", "g.granted_by", "adm.full_name",
+			"g.note", "g.expires_at", "g.revoked_at", "g.created_at", "u.email").
+		From("manual_access_grants g").
+		Join("plans p ON p.id = g.plan_id").
+		LeftJoin("users u ON u.id = g.user_id").
+		LeftJoin("users adm ON adm.id = g.granted_by").
+		OrderBy("g.created_at DESC").
+		Limit(uint64(limit)).
+		Offset(uint64(offset)).
+		PlaceholderFormat(sq.Question).
+		ToSql()
+	if err != nil {
+		return nil, 0, err
+	}
+
+	rows, err := r.pool.QueryContext(ctx, listSQL, listArgs...)
 	if err != nil {
 		return nil, 0, err
 	}
@@ -416,9 +667,17 @@ func (r *Repository) CreateGrant(ctx context.Context, userID, planID, grantedBy 
 	if expiresAt != nil {
 		expiresSQL = *expiresAt
 	}
-	res, err := r.pool.ExecContext(ctx,
-		`INSERT INTO manual_access_grants (user_id, plan_id, granted_by, note, expires_at) VALUES (?, ?, ?, ?, ?)`,
-		userID, planID, grantedBy, note, expiresSQL)
+	query, args, err := sq.
+		Insert("manual_access_grants").
+		Columns("user_id", "plan_id", "granted_by", "note", "expires_at").
+		Values(userID, planID, grantedBy, note, expiresSQL).
+		PlaceholderFormat(sq.Question).
+		ToSql()
+	if err != nil {
+		return 0, err
+	}
+
+	res, err := r.pool.ExecContext(ctx, query, args...)
 	if err != nil {
 		return 0, err
 	}
@@ -426,30 +685,56 @@ func (r *Repository) CreateGrant(ctx context.Context, userID, planID, grantedBy 
 }
 
 func (r *Repository) RevokeGrant(ctx context.Context, id int64) error {
-	_, err := r.pool.ExecContext(ctx,
-		`UPDATE manual_access_grants SET revoked_at = NOW() WHERE id = ?`, id)
+	query, args, err := sq.
+		Update("manual_access_grants").
+		Set("revoked_at", sq.Expr("NOW()")).
+		Where(sq.Eq{"id": id}).
+		PlaceholderFormat(sq.Question).
+		ToSql()
+	if err != nil {
+		return err
+	}
+
+	_, err = r.pool.ExecContext(ctx, query, args...)
 	return err
 }
 
 func (r *Repository) DeleteGrant(ctx context.Context, id int64) error {
-	_, err := r.pool.ExecContext(ctx, `DELETE FROM manual_access_grants WHERE id = ?`, id)
+	query, args, err := sq.
+		Delete("manual_access_grants").
+		Where(sq.Eq{"id": id}).
+		PlaceholderFormat(sq.Question).
+		ToSql()
+	if err != nil {
+		return err
+	}
+
+	_, err = r.pool.ExecContext(ctx, query, args...)
 	return err
 }
 
 // ── Stats ─────────────────────────────────────────────────────────────────────
 
 func (r *Repository) GetStats(ctx context.Context) (*StatsRow, error) {
-	var s StatsRow
-	err := r.pool.QueryRowContext(ctx, `
-		SELECT
-			(SELECT COUNT(*) FROM users) as total_users,
-			(SELECT COUNT(*) FROM users WHERE is_banned = TRUE) as banned_users,
-			(SELECT COUNT(*) FROM businesses) as total_businesses,
-			(SELECT COUNT(*) FROM subscriptions WHERE status = 'active') as active_subs,
-			(SELECT COUNT(*) FROM subscriptions WHERE status = 'trial') as trial_subs,
-			(SELECT COUNT(*) FROM manual_access_grants WHERE revoked_at IS NULL) as manual_grants
-	`).Scan(&s.TotalUsers, &s.BannedUsers, &s.TotalBusinesses, &s.ActiveSubs, &s.TrialSubs, &s.ManualGrants)
+	query, args, err := sq.
+		Select(
+			"(SELECT COUNT(*) FROM users) AS total_users",
+			"(SELECT COUNT(*) FROM users WHERE is_banned = TRUE) AS banned_users",
+			"(SELECT COUNT(*) FROM businesses) AS total_businesses",
+			"(SELECT COUNT(*) FROM subscriptions WHERE status = 'active') AS active_subs",
+			"(SELECT COUNT(*) FROM subscriptions WHERE status = 'trial') AS trial_subs",
+			"(SELECT COUNT(*) FROM manual_access_grants WHERE revoked_at IS NULL) AS manual_grants",
+		).
+		PlaceholderFormat(sq.Question).
+		ToSql()
 	if err != nil {
+		return nil, fmt.Errorf("stats query: %w", err)
+	}
+
+	var s StatsRow
+	if err := r.pool.QueryRowContext(ctx, query, args...).Scan(
+		&s.TotalUsers, &s.BannedUsers, &s.TotalBusinesses, &s.ActiveSubs, &s.TrialSubs, &s.ManualGrants,
+	); err != nil {
 		return nil, fmt.Errorf("stats query: %w", err)
 	}
 	return &s, nil
