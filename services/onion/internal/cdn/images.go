@@ -156,6 +156,15 @@ func (c *CDN) serveTransformed(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
+	// The cache key fully determines the transformed bytes, so it is the ETag.
+	// Short-circuit conditional requests before doing any transform/S3 work.
+	etag := quoteETag(p.CacheKey(meta.FileUUID))
+	w.Header().Set("ETag", etag)
+	if etagMatches(r.Header.Get("If-None-Match"), etag) {
+		w.WriteHeader(http.StatusNotModified)
+		return
+	}
+
 	reader, size, mimeType, err := c.transform(r.Context(), meta.ID, meta.FileUUID, meta.StorageKey, p)
 	if err != nil {
 		logger.Ctx(r.Context()).Error("cdn: transform failed",

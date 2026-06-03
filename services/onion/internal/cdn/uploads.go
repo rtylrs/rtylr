@@ -125,6 +125,15 @@ func (c *CDN) serveFile(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
+	// The UUID namespace is immutable, so the UUID itself is a perfect ETag.
+	// Answer conditional requests before fetching anything from storage.
+	etag := quoteETag(meta.FileUUID)
+	w.Header().Set("ETag", etag)
+	if etagMatches(r.Header.Get("If-None-Match"), etag) {
+		w.WriteHeader(http.StatusNotModified)
+		return
+	}
+
 	reader, size, err := c.storage.Download(r.Context(), meta.StorageKey)
 	if err != nil {
 		logger.Ctx(r.Context()).Error("cdn: failed to download original",
