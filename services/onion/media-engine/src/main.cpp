@@ -4,12 +4,25 @@
 #include "transform/params.hpp"
 #include "encode.hpp"
 #include "analyze.hpp"
+#include "ops/blurhash.hpp"
+#include "ops/average_color.hpp"
+#include "ops/phash.hpp"
+#include "video/probe.hpp"
+#include "video/thumbnail.hpp"
+#include "video/poster.hpp"
+#include "video/transcode.hpp"
+#include "video/hls.hpp"
+#include "video/gif.hpp"
+#include "video/trim.hpp"
+#include "video/scale.hpp"
+#include "video/mute.hpp"
 #include <vips/vips8>
 #include <iostream>
 #include <string>
 #include <vector>
 #include <unordered_map>
 #include <stdexcept>
+#include <cstdio>
 
 // MEDIA_ENGINE_VERSION is injected by CMake; fall back to "dev" for ad-hoc builds.
 #ifndef MEDIA_ENGINE_VERSION
@@ -162,6 +175,83 @@ static void cmdInfo(const Args& args) {
 }
 
 // ---------------------------------------------------------------------------
+// Subcommand: analyze — emit a metric for the input
+//   media-engine analyze --input x.jpg --metric blurhash|average-color|phash
+// ---------------------------------------------------------------------------
+
+static void cmdAnalyze(const Args& args) {
+    const std::string in = getStr(args, "input");
+    if (in.empty()) {
+        throw std::runtime_error("--input is required");
+    }
+    const std::string metric = getStr(args, "metric", "info");
+    vips::VImage img = vips::VImage::new_from_file(
+        in.c_str(), vips::VImage::option()->set("access", VIPS_ACCESS_SEQUENTIAL));
+
+    if (metric == "info") {
+        std::cout << voxire::infoToJSON(voxire::probeInfo(img)) << "\n";
+    } else if (metric == "blurhash") {
+        const int xc = getInt(args, "x", 4);
+        const int yc = getInt(args, "y", 3);
+        std::cout << voxire::ops::blurHash(img, xc, yc) << "\n";
+    } else if (metric == "average-color") {
+        const voxire::Color c = voxire::ops::averageColor(img);
+        std::printf("#%02x%02x%02x\n", c.r, c.g, c.b);
+    } else if (metric == "phash") {
+        std::printf("%016llx\n",
+            static_cast<unsigned long long>(voxire::ops::averageHash(img)));
+    } else {
+        throw std::runtime_error("unknown metric: " + metric);
+    }
+}
+
+// ---------------------------------------------------------------------------
+// Subcommand: video — dispatch the FFmpeg-backed operations
+//   media-engine video --op <probe|thumbnail|poster|transcode|hls|gif|trim|
+//                            scale|mute> --input <path> [--output <path>] ...
+// ---------------------------------------------------------------------------
+
+static void cmdVideo(const Args& args) {
+    const std::string op = getStr(args, "op");
+    const std::string in = getStr(args, "input");
+    const std::string out = getStr(args, "output");
+    if (op.empty() || in.empty()) {
+        throw std::runtime_error("video requires --op and --input");
+    }
+    namespace v = voxire::video;
+    const int w = getInt(args, "width", 0);
+    const int h = getInt(args, "height", 0);
+
+    if (op == "probe") {
+        std::cout << v::probe(in) << "\n";
+        return;
+    }
+    if (out.empty()) {
+        throw std::runtime_error("video --op " + op + " requires --output");
+    }
+    if (op == "thumbnail") {
+        v::extractThumbnail(in, out, getInt(args, "time", 1), w, h);
+    } else if (op == "poster") {
+        v::extractPoster(in, out, w, h);
+    } else if (op == "transcode") {
+        v::transcode(in, out, v::parseVideoCodec(getStr(args, "codec", "h264")),
+                     getInt(args, "crf", 23), w, h);
+    } else if (op == "hls") {
+        v::packageHLS(in, out, getInt(args, "segment", 6));
+    } else if (op == "gif") {
+        v::makeGifPreview(in, out, getInt(args, "fps", 12), w > 0 ? w : 480);
+    } else if (op == "trim") {
+        v::trim(in, out, getInt(args, "start", 0), getInt(args, "duration", 5));
+    } else if (op == "scale") {
+        v::scaleVideo(in, out, w, h);
+    } else if (op == "mute") {
+        v::muteVideo(in, out);
+    } else {
+        throw std::runtime_error("unknown video op: " + op);
+    }
+}
+
+// ---------------------------------------------------------------------------
 // Entry point
 // ---------------------------------------------------------------------------
 
@@ -175,6 +265,9 @@ static void printUsage(std::ostream& os) {
        << "  transform  --input <path> --output <path> --chain <cloudinary-chain>\n"
        << "             [--format <auto|webp|jpeg|png|avif|gif|tiff>] [--quality N]\n"
        << "  info       --input <path>   (print image metadata as JSON)\n"
+       << "  analyze    --input <path> --metric <info|blurhash|average-color|phash>\n"
+       << "  video      --op <probe|thumbnail|poster|transcode|hls|gif|trim|scale|mute>\n"
+       << "             --input <path> [--output <path>] [op-specific flags]\n"
        << "  thumbnail  --input <path> --output <path> --time N --width N --height N\n"
        << "  help       show this message\n"
        << "  version    print the version and exit\n";
@@ -211,6 +304,10 @@ int main(int argc, char* argv[]) {
             cmdTransform(args);
         } else if (args.subcommand == "info") {
             cmdInfo(args);
+        } else if (args.subcommand == "analyze") {
+            cmdAnalyze(args);
+        } else if (args.subcommand == "video") {
+            cmdVideo(args);
         } else if (args.subcommand == "thumbnail") {
             cmdThumbnail(args);
         } else {
