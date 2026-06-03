@@ -47,7 +47,12 @@ vips::VImage ImageProcessor::resizeImage(vips::VImage img, int targetW, int targ
             size  = VIPS_SIZE_BOTH;
             break;
         case FitMode::Contain:
+            // Fit within the box, scaling up small images to fill it.
+            scale = std::min(scaleW, scaleH);
+            size  = VIPS_SIZE_BOTH;
+            break;
         case FitMode::Inside:
+            // Fit within the box but never enlarge beyond the source.
             scale = std::min(scaleW, scaleH);
             size  = VIPS_SIZE_DOWN;
             break;
