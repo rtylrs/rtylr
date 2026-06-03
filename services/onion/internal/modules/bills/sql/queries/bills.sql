@@ -21,3 +21,9 @@ VALUES (?, ?, ?, ?, ?, ?, ?);
 UPDATE finance_bills
 SET supplier_id = ?, amount = ?, currency = ?, due_date = ?, status = ?, description = ?
 WHERE id = ? AND owner_id = ?;
+
+-- name: CountBillsByStatus :many
+SELECT status, COUNT(*) AS cnt
+FROM finance_bills
+WHERE owner_id = ?
+GROUP BY status;

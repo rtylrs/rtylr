@@ -7,6 +7,8 @@ import (
 	"strconv"
 	"time"
 
+	sq "github.com/Masterminds/squirrel"
+
 	"github.com/voxire/onion/internal/modules/bills/internal/domain"
 	"github.com/voxire/onion/internal/modules/bills/internal/infrastructure/persistence/sqlc"
 	"github.com/voxire/onion/internal/platform/logger"
@@ -129,13 +131,18 @@ func (r *Repository) Update(ctx context.Context, ownerID, id int64, input domain
 // SumByStatus returns the total bill amount for a given status and owner.
 // It returns 0 when the owner has no bills with that status.
 func (r *Repository) SumByStatus(ctx context.Context, ownerID int64, status string) (float64, error) {
-	const q = `
-		SELECT COALESCE(SUM(CAST(amount AS REAL)), 0)
-		FROM finance_bills
-		WHERE owner_id = ? AND status = ?`
+	query, args, err := sq.Select("COALESCE(SUM(CAST(amount AS REAL)), 0)").
+		From("finance_bills").
+		Where(sq.Eq{"owner_id": ownerID, "status": status}).
+		PlaceholderFormat(sq.Question).
+		ToSql()
+	if err != nil {
+		logger.Ctx(ctx).Error("Failed to build sum bills query", logger.Error(err))
+		return 0, err
+	}
 
 	var result float64
-	if err := r.pool.QueryRowContext(ctx, q, ownerID, status).Scan(&result); err != nil {
+	if err := r.pool.QueryRowContext(ctx, query, args...).Scan(&result); err != nil {
 		logger.Ctx(ctx).Error("Failed to sum bills by status", logger.Error(err))
 		return 0, err
 	}
@@ -145,30 +152,18 @@ func (r *Repository) SumByStatus(ctx context.Context, ownerID int64, status stri
 
 // CountByStatus returns the number of bills in each status for the owner.
 func (r *Repository) CountByStatus(ctx context.Context, ownerID int64) (map[string]int64, error) {
-	const q = `
-		SELECT status, COUNT(*) AS cnt
-		FROM finance_bills
-		WHERE owner_id = ?
-		GROUP BY status`
-
-	rows, err := r.pool.QueryContext(ctx, q, ownerID)
+	rows, err := r.queries.CountBillsByStatus(ctx, ownerID)
 	if err != nil {
 		logger.Ctx(ctx).Error("Failed to count bills by status", logger.Error(err))
 		return nil, err
 	}
-	defer rows.Close()
 
 	counts := make(map[string]int64)
-	for rows.Next() {
-		var s string
-		var cnt int64
-		if scanErr := rows.Scan(&s, &cnt); scanErr != nil {
-			return nil, scanErr
-		}
-		counts[s] = cnt
+	for _, row := range rows {
+		counts[string(row.Status.FinanceBillsStatus)] = row.Cnt
 	}
 
-	return counts, rows.Err()
+	return counts, nil
 }
 
 // ---------------------------------------------------------------------------
