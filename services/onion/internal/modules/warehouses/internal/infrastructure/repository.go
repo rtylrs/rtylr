@@ -150,11 +150,9 @@ func (r *Repository) CountWarehouses(ctx context.Context, ownerID int64, activeO
 	var err error
 
 	if activeOnly {
-		const q = `SELECT COUNT(*) FROM erp_warehouses WHERE owner_id = ? AND is_active = 1`
-		err = r.pool.QueryRowContext(ctx, q, ownerID).Scan(&count)
+		count, err = r.queries.CountActiveWarehouses(ctx, ownerID)
 	} else {
-		const q = `SELECT COUNT(*) FROM erp_warehouses WHERE owner_id = ?`
-		err = r.pool.QueryRowContext(ctx, q, ownerID).Scan(&count)
+		count, err = r.queries.CountWarehouses(ctx, ownerID)
 	}
 
 	if err != nil {
@@ -168,27 +166,10 @@ func (r *Repository) CountWarehouses(ctx context.Context, ownerID int64, activeO
 // GetWarehouseByID fetches a single warehouse by primary key for the given owner.
 // Returns ErrWarehouseNotFound when no matching row exists.
 func (r *Repository) GetWarehouseByID(ctx context.Context, ownerID, id int64) (domain.Warehouse, error) {
-	const q = `
-		SELECT id, owner_id, name, address, city, country,
-		       manager_name, capacity, is_default, is_active,
-		       created_at, updated_at
-		FROM erp_warehouses
-		WHERE owner_id = ? AND id = ?
-		LIMIT 1`
-
-	row := r.pool.QueryRowContext(ctx, q, ownerID, id)
-
-	var w domain.Warehouse
-	var address, city, country, managerName sql.NullString
-	var capacity sql.NullInt64
-	var isDefault, isActive sql.NullBool
-	var createdAt, updatedAt sql.NullTime
-
-	err := row.Scan(
-		&w.ID, &w.OwnerID, &w.Name,
-		&address, &city, &country, &managerName, &capacity,
-		&isDefault, &isActive, &createdAt, &updatedAt,
-	)
+	row, err := r.queries.GetWarehouseByID(ctx, sqlc.GetWarehouseByIDParams{
+		OwnerID: ownerID,
+		ID:      id,
+	})
 	if err != nil {
 		if err == sql.ErrNoRows {
 			return domain.Warehouse{}, domain.ErrWarehouseNotFound
@@ -197,32 +178,37 @@ func (r *Repository) GetWarehouseByID(ctx context.Context, ownerID, id int64) (d
 		return domain.Warehouse{}, err
 	}
 
-	if address.Valid {
-		w.Address = address.String
+	var w domain.Warehouse
+	w.ID = row.ID
+	w.OwnerID = row.OwnerID
+	w.Name = row.Name
+
+	if row.Address.Valid {
+		w.Address = row.Address.String
 	}
-	if city.Valid {
-		w.City = city.String
+	if row.City.Valid {
+		w.City = row.City.String
 	}
-	if country.Valid {
-		w.Country = country.String
+	if row.Country.Valid {
+		w.Country = row.Country.String
 	}
-	if managerName.Valid {
-		w.ManagerName = managerName.String
+	if row.ManagerName.Valid {
+		w.ManagerName = row.ManagerName.String
 	}
-	if capacity.Valid {
-		w.Capacity = capacity.Int64
+	if row.Capacity.Valid {
+		w.Capacity = row.Capacity.Int64
 	}
-	if isDefault.Valid {
-		w.IsDefault = isDefault.Bool
+	if row.IsDefault.Valid {
+		w.IsDefault = row.IsDefault.Bool
 	}
-	if isActive.Valid {
-		w.IsActive = isActive.Bool
+	if row.IsActive.Valid {
+		w.IsActive = row.IsActive.Bool
 	}
-	if createdAt.Valid {
-		w.CreatedAt = createdAt.Time
+	if row.CreatedAt.Valid {
+		w.CreatedAt = row.CreatedAt.Time
 	}
-	if updatedAt.Valid {
-		w.UpdatedAt = updatedAt.Time
+	if row.UpdatedAt.Valid {
+		w.UpdatedAt = row.UpdatedAt.Time
 	}
 
 	return w, nil
