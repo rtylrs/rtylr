@@ -153,14 +153,18 @@ export const WIDGET_CATALOG: WidgetConfig[] = [
   },
 ];
 
+// Every row fills all four columns so the default layout has no dead space:
+//   row 0 — four KPI cards (1 col each)
+//   row 2 — Recent activity (3 cols) + Quick actions sidebar (1 col)
+//   row 6 — Team overview (full width)
 export const DEFAULT_LAYOUT = [
   { i: 'kpi-revenue', x: 0, y: 0, w: 1, h: 2 },
   { i: 'kpi-orders', x: 1, y: 0, w: 1, h: 2 },
   { i: 'kpi-team', x: 2, y: 0, w: 1, h: 2 },
   { i: 'kpi-invoices', x: 3, y: 0, w: 1, h: 2 },
-  { i: 'activity', x: 0, y: 2, w: 2, h: 4 },
-  { i: 'quick-actions', x: 2, y: 2, w: 1, h: 4 },
-  { i: 'team', x: 0, y: 6, w: 2, h: 3 },
+  { i: 'activity', x: 0, y: 2, w: 3, h: 4 },
+  { i: 'quick-actions', x: 3, y: 2, w: 1, h: 4 },
+  { i: 'team', x: 0, y: 6, w: 4, h: 3 },
 ];
 
 const STORAGE_KEY = 'rtylr-dashboard-layout';
