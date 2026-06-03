@@ -218,14 +218,19 @@ export type ContractPlan = 'free' | 'pro' | 'scale';
 
 export interface Lead {
   id: number;
-  company: string;
-  industry: string;
-  size: string;
-  source: string;
+  // API returns company_name → companyName; older records may use company
+  company?: string;
+  companyName?: string;
+  industry?: string;
+  size?: string;
+  source?: string;
   stage: LeadStage;
-  mrrPotential: number;
-  assignedRep: string;
-  notes: string;
+  // API returns deal_value → dealValue; mrrPotential kept for backwards compat
+  mrrPotential?: number;
+  dealValue?: number;
+  // API returns assigned_rep → assignedRep (may be null)
+  assignedRep?: string | null;
+  notes?: string;
   createdAt: string;
   updatedAt: string;
 }

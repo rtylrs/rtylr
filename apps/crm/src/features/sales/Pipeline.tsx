@@ -83,7 +83,7 @@ const LeadCard: React.FC<LeadCardProps> = ({ lead, onClick }) => (
             whiteSpace: 'nowrap',
           }}
         >
-          {lead.company || (lead as unknown as Record<string, string>)['companyName']}
+          {lead.companyName ?? lead.company ?? '—'}
         </p>
         <p style={{ fontSize: '11px', color: 'var(--hub-text-muted)', margin: '2px 0 0' }}>
           {lead.industry}
@@ -128,7 +128,7 @@ const LeadCard: React.FC<LeadCardProps> = ({ lead, onClick }) => (
         {lead.source}
       </span>
       <span style={{ fontSize: '12px', fontWeight: 600, color: 'var(--hub-text)' }}>
-        ${lead.mrrPotential.toLocaleString()}/mo
+        ${(lead.mrrPotential ?? lead.dealValue ?? 0).toLocaleString()}/mo
       </span>
     </div>
   </motion.div>
@@ -162,7 +162,7 @@ const Pipeline: React.FC = () => {
         const stageLeads = byStage[key] ?? [];
         result[key] = {
           count: stageLeads.length,
-          mrr: stageLeads.reduce((s, l) => s + l.mrrPotential, 0),
+          mrr: stageLeads.reduce((s, l) => s + (l.mrrPotential ?? l.dealValue ?? 0), 0),
         };
       }
     });

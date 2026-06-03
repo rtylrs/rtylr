@@ -508,12 +508,12 @@ const LeadDetail: React.FC = () => {
               <Edit2 size={13} style={{ color: 'var(--hub-text-dim)' }} />
             </div>
             <div style={{ display: 'flex', flexDirection: 'column', gap: '10px' }}>
-              <InfoRow label="Company" value={lead.company} />
-              <InfoRow label="Industry" value={lead.industry} />
-              <InfoRow label="Size" value={lead.size} />
-              <InfoRow label="Source" value={lead.source} />
-              <InfoRow label="MRR Potential" value={`$${lead.mrrPotential.toLocaleString()}/mo`} />
-              <InfoRow label="Assigned Rep" value={lead.assignedRep} />
+              <InfoRow label="Company" value={lead.companyName ?? lead.company ?? '—'} />
+              <InfoRow label="Industry" value={lead.industry ?? '—'} />
+              <InfoRow label="Size" value={lead.size ?? '—'} />
+              <InfoRow label="Source" value={lead.source ?? '—'} />
+              <InfoRow label="MRR Potential" value={`$${(lead.mrrPotential ?? lead.dealValue ?? 0).toLocaleString()}/mo`} />
+              <InfoRow label="Assigned Rep" value={lead.assignedRep ?? '—'} />
               <div>
                 <p
                   style={{

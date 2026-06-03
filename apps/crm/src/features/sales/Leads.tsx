@@ -79,7 +79,7 @@ const Leads: React.FC = () => {
   const sources = Array.from(new Set(leads.map((l) => l.source).filter(Boolean)));
 
   const filtered = leads.filter((l) => {
-    const matchSearch = l.company.toLowerCase().includes(search.toLowerCase());
+    const matchSearch = (l.companyName ?? l.company ?? '').toLowerCase().includes(search.toLowerCase());
     const matchStage = stageFilter === 'all' || l.stage === stageFilter;
     const matchSource = sourceFilter === 'all' || l.source === sourceFilter;
     return matchSearch && matchStage && matchSource;
@@ -284,7 +284,7 @@ const Leads: React.FC = () => {
                           margin: 0,
                         }}
                       >
-                        {lead.company}
+                        {lead.companyName ?? lead.company ?? '—'}
                       </p>
                     </td>
                     <td
@@ -321,7 +321,7 @@ const Leads: React.FC = () => {
                         color: 'var(--hub-text)',
                       }}
                     >
-                      ${lead.mrrPotential.toLocaleString()}
+                      ${(lead.mrrPotential ?? lead.dealValue ?? 0).toLocaleString()}
                     </td>
                     <td style={{ padding: '12px 16px' }} onClick={(e) => e.stopPropagation()}>
                       <div style={{ display: 'flex', gap: '6px' }}>
