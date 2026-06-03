@@ -5,6 +5,7 @@ import (
 	"database/sql"
 	"time"
 
+	sq "github.com/Masterminds/squirrel"
 	"github.com/voxire/onion/internal/modules/booking_calendar/internal/domain"
 	"github.com/voxire/onion/internal/platform/logger"
 )
@@ -20,10 +21,20 @@ func NewRepository(db *sql.DB) *Repository {
 }
 
 func (r *Repository) FetchAppointments(ctx context.Context, ownerID int64, from, to string) ([]domain.CalendarAppointment, error) {
-	query := `SELECT id, service_id, customer_name, start_time, end_time, status
-		FROM booking_appointments WHERE owner_id = ? AND start_time >= ? AND start_time < ? ORDER BY start_time ASC`
+	query, args, err := sq.Select("id", "service_id", "customer_name", "start_time", "end_time", "status").
+		From("booking_appointments").
+		Where(sq.Eq{"owner_id": ownerID}).
+		Where(sq.GtOrEq{"start_time": from}).
+		Where(sq.Lt{"start_time": to}).
+		OrderBy("start_time ASC").
+		PlaceholderFormat(sq.Question).
+		ToSql()
+	if err != nil {
+		logger.Ctx(ctx).Error("Failed to build fetch appointments query", logger.Error(err))
+		return nil, err
+	}
 
-	rows, err := r.pool.QueryContext(ctx, query, ownerID, from, to)
+	rows, err := r.pool.QueryContext(ctx, query, args...)
 	if err != nil {
 		logger.Ctx(ctx).Error("Failed to fetch appointments", logger.Error(err))
 		return nil, err
