@@ -83,6 +83,11 @@ static void cmdResize(const Args& args) {
         throw std::runtime_error("--input and --output are required");
     }
 
+    const std::string& f = opts.format;
+    if (f != "webp" && f != "jpeg" && f != "jpg" && f != "png" && f != "avif") {
+        throw std::runtime_error("unsupported output format: " + f);
+    }
+
     voxire::ImageProcessor processor;
     processor.process(opts);
 }
