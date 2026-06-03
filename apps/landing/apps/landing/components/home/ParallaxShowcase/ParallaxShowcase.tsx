@@ -20,7 +20,13 @@ const ParallaxShowcase: React.FC = (): React.JSX.Element => {
     <section ref={sectionRef} className={styles.section}>
       {/* Parallax image fills the section */}
       <motion.div className={styles.imgWrap} style={{ y: imgY }} aria-hidden="true">
-        <img src="/images/home/hero-banner-top-bar-bg.webp" alt="" className={styles.img} />
+        <img
+          src="/images/home/hero-banner-top-bar-bg.webp"
+          alt=""
+          className={styles.img}
+          loading="lazy"
+          decoding="async"
+        />
         <div className={styles.imgOverlay} />
       </motion.div>
 

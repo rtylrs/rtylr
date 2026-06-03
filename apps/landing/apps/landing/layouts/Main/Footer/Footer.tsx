@@ -85,7 +85,13 @@ const Footer: React.FC = () => {
       <div className={styles['footer-container']}>
         <div className={styles['footer-top']}>
           <div className={styles['footer-logo-section']}>
-            <img src={ASSETS.logos.light} alt="Rtylr Logo" className={styles['footer-logo']} />
+            <img
+              src={ASSETS.logos.light}
+              alt="Rtylr Logo"
+              className={styles['footer-logo']}
+              loading="lazy"
+              decoding="async"
+            />
           </div>
 
           <div className={styles['footer-nav']}>

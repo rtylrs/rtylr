@@ -79,6 +79,8 @@ const CTASection: React.FC = (): React.JSX.Element => {
             src="/images/home/hero-banner-top-bar-bg.webp"
             alt=""
             className={styles.rightImg}
+            loading="lazy"
+            decoding="async"
           />
         </motion.div>
       </div>
