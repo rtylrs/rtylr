@@ -2,7 +2,9 @@ package cdn
 
 import (
 	"context"
+	"database/sql"
 	"encoding/json"
+	"errors"
 	"fmt"
 	"io"
 	"net/http"
@@ -89,7 +91,13 @@ func (c *CDN) serveFile(w http.ResponseWriter, r *http.Request) {
 
 	meta, err := c.fileByUUID(r.Context(), id)
 	if err != nil {
-		http.Error(w, "file not found", http.StatusNotFound)
+		if errors.Is(err, sql.ErrNoRows) {
+			http.Error(w, "file not found", http.StatusNotFound)
+			return
+		}
+		logger.Ctx(r.Context()).Error("cdn: file lookup failed",
+			logger.String("file_uuid", id), logger.Error(err))
+		http.Error(w, "internal error", http.StatusInternalServerError)
 		return
 	}
 

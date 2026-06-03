@@ -136,7 +136,13 @@ func (c *CDN) serveTransformed(w http.ResponseWriter, r *http.Request) {
 
 	meta, err := c.fileByUUID(r.Context(), fileUUID)
 	if err != nil {
-		http.Error(w, "file not found", http.StatusNotFound)
+		if errors.Is(err, sql.ErrNoRows) {
+			http.Error(w, "file not found", http.StatusNotFound)
+			return
+		}
+		logger.Ctx(r.Context()).Error("cdn: file lookup failed",
+			logger.String("file_uuid", fileUUID), logger.Error(err))
+		http.Error(w, "internal error", http.StatusInternalServerError)
 		return
 	}
 
