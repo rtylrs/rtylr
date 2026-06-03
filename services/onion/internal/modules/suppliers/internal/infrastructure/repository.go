@@ -24,77 +24,19 @@ func NewRepository(db *sql.DB) *Repository {
 }
 
 func (r *Repository) ListSuppliers(ctx context.Context, ownerID int64, limit, offset int) ([]domain.Supplier, bool, error) {
-	const q = `
-		SELECT id, owner_id, name, email, phone, address, city, country,
-		       tax_id, payment_terms, notes, is_active, created_at, updated_at
-		FROM erp_suppliers
-		WHERE owner_id = ?
-		ORDER BY name ASC
-		LIMIT ? OFFSET ?`
-
-	rows, err := r.pool.QueryContext(ctx, q, ownerID, limit+1, offset)
+	rows, err := r.queries.ListSuppliersPaginated(ctx, sqlc.ListSuppliersPaginatedParams{
+		OwnerID: ownerID,
+		Limit:   int32(limit + 1),
+		Offset:  int32(offset),
+	})
 	if err != nil {
 		logger.Ctx(ctx).Error("Failed to list suppliers", logger.Error(err))
 		return nil, false, err
 	}
-	defer rows.Close()
 
 	suppliers := make([]domain.Supplier, 0, limit+1)
-	for rows.Next() {
-		var s domain.Supplier
-		var email, phone, address, city, country, taxID, paymentTerms, notes sql.NullString
-		var isActive sql.NullBool
-		var createdAt, updatedAt sql.NullTime
-
-		if err := rows.Scan(
-			&s.ID, &s.OwnerID, &s.Name,
-			&email, &phone, &address, &city, &country,
-			&taxID, &paymentTerms, &notes, &isActive,
-			&createdAt, &updatedAt,
-		); err != nil {
-			logger.Ctx(ctx).Error("Failed to scan supplier row", logger.Error(err))
-			return nil, false, err
-		}
-
-		if email.Valid {
-			s.Email = email.String
-		}
-		if phone.Valid {
-			s.Phone = phone.String
-		}
-		if address.Valid {
-			s.Address = address.String
-		}
-		if city.Valid {
-			s.City = city.String
-		}
-		if country.Valid {
-			s.Country = country.String
-		}
-		if taxID.Valid {
-			s.TaxID = taxID.String
-		}
-		if paymentTerms.Valid {
-			s.PaymentTerms = paymentTerms.String
-		}
-		if notes.Valid {
-			s.Notes = notes.String
-		}
-		if isActive.Valid {
-			s.IsActive = isActive.Bool
-		}
-		if createdAt.Valid {
-			s.CreatedAt = createdAt.Time
-		}
-		if updatedAt.Valid {
-			s.UpdatedAt = updatedAt.Time
-		}
-
-		suppliers = append(suppliers, s)
-	}
-
-	if err := rows.Err(); err != nil {
-		return nil, false, err
+	for _, row := range rows {
+		suppliers = append(suppliers, supplierFromRow(row))
 	}
 
 	hasMore := len(suppliers) > limit
@@ -175,11 +117,9 @@ func (r *Repository) CountSuppliers(ctx context.Context, ownerID int64, activeOn
 	var err error
 
 	if activeOnly {
-		const q = `SELECT COUNT(*) FROM erp_suppliers WHERE owner_id = ? AND is_active = 1`
-		err = r.pool.QueryRowContext(ctx, q, ownerID).Scan(&count)
+		count, err = r.queries.CountActiveSuppliers(ctx, ownerID)
 	} else {
-		const q = `SELECT COUNT(*) FROM erp_suppliers WHERE owner_id = ?`
-		err = r.pool.QueryRowContext(ctx, q, ownerID).Scan(&count)
+		count, err = r.queries.CountSuppliers(ctx, ownerID)
 	}
 
 	if err != nil {
@@ -193,26 +133,10 @@ func (r *Repository) CountSuppliers(ctx context.Context, ownerID int64, activeOn
 // GetSupplierByID fetches a single supplier by its primary key for the given owner.
 // Returns ErrSupplierNotFound when no matching row exists.
 func (r *Repository) GetSupplierByID(ctx context.Context, ownerID, id int64) (domain.Supplier, error) {
-	const q = `
-		SELECT id, owner_id, name, email, phone, address, city, country,
-		       tax_id, payment_terms, notes, is_active, created_at, updated_at
-		FROM erp_suppliers
-		WHERE owner_id = ? AND id = ?
-		LIMIT 1`
-
-	row := r.pool.QueryRowContext(ctx, q, ownerID, id)
-
-	var s domain.Supplier
-	var email, phone, address, city, country, taxID, paymentTerms, notes sql.NullString
-	var isActive sql.NullBool
-	var createdAt, updatedAt sql.NullTime
-
-	err := row.Scan(
-		&s.ID, &s.OwnerID, &s.Name,
-		&email, &phone, &address, &city, &country,
-		&taxID, &paymentTerms, &notes, &isActive,
-		&createdAt, &updatedAt,
-	)
+	row, err := r.queries.GetSupplierByID(ctx, sqlc.GetSupplierByIDParams{
+		OwnerID: ownerID,
+		ID:      id,
+	})
 	if err != nil {
 		if err == sql.ErrNoRows {
 			return domain.Supplier{}, domain.ErrSupplierNotFound
@@ -221,41 +145,53 @@ func (r *Repository) GetSupplierByID(ctx context.Context, ownerID, id int64) (do
 		return domain.Supplier{}, err
 	}
 
-	if email.Valid {
-		s.Email = email.String
-	}
-	if phone.Valid {
-		s.Phone = phone.String
-	}
-	if address.Valid {
-		s.Address = address.String
-	}
-	if city.Valid {
-		s.City = city.String
-	}
-	if country.Valid {
-		s.Country = country.String
-	}
-	if taxID.Valid {
-		s.TaxID = taxID.String
-	}
-	if paymentTerms.Valid {
-		s.PaymentTerms = paymentTerms.String
-	}
-	if notes.Valid {
-		s.Notes = notes.String
-	}
-	if isActive.Valid {
-		s.IsActive = isActive.Bool
-	}
-	if createdAt.Valid {
-		s.CreatedAt = createdAt.Time
-	}
-	if updatedAt.Valid {
-		s.UpdatedAt = updatedAt.Time
+	return supplierFromRow(row), nil
+}
+
+// supplierFromRow maps a sqlc-generated erp_suppliers row to the domain model,
+// collapsing nullable columns to their zero value when NULL.
+func supplierFromRow(row sqlc.ErpSupplier) domain.Supplier {
+	s := domain.Supplier{
+		ID:      row.ID,
+		OwnerID: row.OwnerID,
+		Name:    row.Name,
 	}
 
-	return s, nil
+	if row.Email.Valid {
+		s.Email = row.Email.String
+	}
+	if row.Phone.Valid {
+		s.Phone = row.Phone.String
+	}
+	if row.Address.Valid {
+		s.Address = row.Address.String
+	}
+	if row.City.Valid {
+		s.City = row.City.String
+	}
+	if row.Country.Valid {
+		s.Country = row.Country.String
+	}
+	if row.TaxID.Valid {
+		s.TaxID = row.TaxID.String
+	}
+	if row.PaymentTerms.Valid {
+		s.PaymentTerms = row.PaymentTerms.String
+	}
+	if row.Notes.Valid {
+		s.Notes = row.Notes.String
+	}
+	if row.IsActive.Valid {
+		s.IsActive = row.IsActive.Bool
+	}
+	if row.CreatedAt.Valid {
+		s.CreatedAt = row.CreatedAt.Time
+	}
+	if row.UpdatedAt.Valid {
+		s.UpdatedAt = row.UpdatedAt.Time
+	}
+
+	return s
 }
 
 func nullString(s string) sql.NullString {
