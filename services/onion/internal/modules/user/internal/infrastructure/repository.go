@@ -10,7 +10,31 @@ import (
 	"github.com/voxire/onion/internal/modules/user/internal/domain"
 	"github.com/voxire/onion/internal/modules/user/internal/infrastructure/persistence/sqlc"
 	"github.com/voxire/onion/internal/platform/logger"
+	"github.com/voxire/onion/internal/platform/utils/convert"
 )
+
+// userFromRow maps the explicit columns selected by GetUserByEmail/GetUserByID
+// into a domain.User. Both queries select the same column set, so they share
+// this mapper.
+func userFromRow(id int64, email, passwordHash string, fullName, signupIP, deviceInfo sql.NullString, createdAt, updatedAt sql.NullTime) *domain.User {
+	u := &domain.User{
+		ID:               id,
+		Email:            email,
+		PasswordHash:     passwordHash,
+		FullName:         convert.ToString(fullName),
+		SignupDeviceInfo: convert.ToString(deviceInfo),
+	}
+	if signupIP.Valid {
+		u.SignupIPAddress = signupIP.String
+	}
+	if createdAt.Valid {
+		u.CreatedAt = createdAt.Time
+	}
+	if updatedAt.Valid {
+		u.UpdatedAt = updatedAt.Time
+	}
+	return u
+}
 
 type Repository struct {
 	queries *sqlc.Queries
@@ -56,10 +80,11 @@ func (r *Repository) GetUserByEmail(ctx context.Context, email string) (*domain.
 		return nil, err
 	}
 
-	var user domain.User
-	user.FromRows(row)
-
-	return &user, nil
+	return userFromRow(
+		row.ID, row.Email, row.PasswordHash,
+		row.FullName, row.SignupIpAddress, row.SignupDeviceInfo,
+		row.CreatedAt, row.UpdatedAt,
+	), nil
 }
 
 func (r *Repository) GetUserByID(ctx context.Context, id int64) (*domain.User, error) {
@@ -70,10 +95,11 @@ func (r *Repository) GetUserByID(ctx context.Context, id int64) (*domain.User, e
 		return nil, err
 	}
 
-	var user domain.User
-	user.FromRows(row)
-
-	return &user, nil
+	return userFromRow(
+		row.ID, row.Email, row.PasswordHash,
+		row.FullName, row.SignupIpAddress, row.SignupDeviceInfo,
+		row.CreatedAt, row.UpdatedAt,
+	), nil
 }
 
 func (r *Repository) UpdateUser(ctx context.Context, user *domain.User) error {
