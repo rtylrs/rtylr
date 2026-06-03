@@ -28,3 +28,19 @@ ORDER BY id ASC;
 -- name: CreateJournalLine :exec
 INSERT INTO finance_journal_lines (entry_id, account_id, debit, credit)
 VALUES (?, ?, ?, ?);
+
+-- name: CountJournalEntriesByStatus :many
+SELECT status, COUNT(*) AS cnt
+FROM finance_journal_entries
+WHERE owner_id = ?
+GROUP BY status;
+
+-- name: SumJournalLinesByAccount :one
+SELECT
+    COALESCE(SUM(CAST(l.debit AS REAL)), 0) AS total_debit,
+    COALESCE(SUM(CAST(l.credit AS REAL)), 0) AS total_credit
+FROM finance_journal_lines l
+JOIN finance_journal_entries e ON e.id = l.entry_id
+WHERE e.owner_id = ?
+  AND l.account_id = ?
+  AND e.status = 'posted';
