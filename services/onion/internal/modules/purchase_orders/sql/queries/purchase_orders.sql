@@ -14,6 +14,12 @@ WHERE owner_id = ? AND status = ?
 ORDER BY created_at DESC
 LIMIT ? OFFSET ?;
 
+-- name: GetPurchaseOrderByID :one
+SELECT id, owner_id, supplier_id, po_number, status, subtotal, tax_amount, total,
+       expected_delivery, received_at, notes, created_by, created_at, updated_at
+FROM erp_purchase_orders
+WHERE id = ? AND owner_id = ?;
+
 -- name: GetPurchaseOrderItems :many
 SELECT id, purchase_order_id, product_id, quantity_ordered, quantity_received, unit_cost, total_cost
 FROM erp_purchase_order_items
