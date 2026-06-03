@@ -19,7 +19,7 @@ env:
 jobs:
   version:
     name: Compute Version
-    runs-on: blacksmith-2vcpu-ubuntu-2404
+    runs-on: ubuntu-latest
     outputs:
       new_version: ${{ steps.bump.outputs.new_version }}
     steps:
@@ -57,7 +57,7 @@ jobs:
   build-push-deploy:
     name: Build, Push, Deploy (${{ matrix.name }})
     needs: version
-    runs-on: blacksmith-2vcpu-ubuntu-2404
+    runs-on: ubuntu-latest
     strategy:
       # One runmode per matrix entry. fail-fast off so a flaky build of one
       # image doesn't cancel the others mid-push.
