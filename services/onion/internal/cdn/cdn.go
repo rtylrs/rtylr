@@ -12,6 +12,8 @@ package cdn
 
 import (
 	"database/sql"
+	"fmt"
+	"os"
 	"runtime"
 
 	"github.com/go-chi/chi/v5"
@@ -58,6 +60,24 @@ func New(db *sql.DB, store *storage.Client, baseURL string, maxUpload int64, med
 		apiKey:      apiKey,
 		engineSem:   make(chan struct{}, concurrency),
 	}
+}
+
+// CheckMediaEngine verifies the configured media-engine binary exists and is
+// executable. Image transformation (/images) depends on it; uploads and
+// original delivery do not, so callers should treat a failure as a warning
+// rather than fatal. Returns nil when the engine is usable.
+func (c *CDN) CheckMediaEngine() error {
+	if c.mediaEngine == "" {
+		return fmt.Errorf("media-engine path is not configured")
+	}
+	info, err := os.Stat(c.mediaEngine)
+	if err != nil {
+		return fmt.Errorf("media-engine not found at %q: %w", c.mediaEngine, err)
+	}
+	if info.IsDir() || info.Mode().Perm()&0o111 == 0 {
+		return fmt.Errorf("media-engine at %q is not an executable file", c.mediaEngine)
+	}
+	return nil
 }
 
 // RegisterRoutes mounts the CDN endpoints. Read endpoints are public; the

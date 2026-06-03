@@ -96,6 +96,12 @@ func main() {
 		cfg.CDNAPIKey,
 	)
 
+	// Surface a misconfigured media-engine at boot rather than on the first
+	// /images request. Non-fatal: uploads and original delivery still work.
+	if err := service.CheckMediaEngine(); err != nil {
+		logger.Ctx(ctx).Warn("media-engine unavailable; image transformations will fail", logger.Error(err))
+	}
+
 	port := os.Getenv("PORT")
 	if port == "" {
 		port = "8080"
