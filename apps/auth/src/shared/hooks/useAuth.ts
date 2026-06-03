@@ -82,6 +82,9 @@ export const useRegisterRestaurant = () => {
   });
 };
 
+export const checkEmailExists = (email: string): Promise<{ exists: boolean }> =>
+  unwrap(safe.get<{ exists: boolean }>('/get-email-exists', { params: { email } }));
+
 export const useGoogleAuth = () => {
   const { login, setLoading, setError } = useUserStore();
 

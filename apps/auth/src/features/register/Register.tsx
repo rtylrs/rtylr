@@ -2,14 +2,15 @@ import React, { useEffect, useMemo, useState } from 'react';
 import { useNavigate } from '@tanstack/react-router';
 import { useQuery } from '@tanstack/react-query';
 import { AlertCircle, ArrowLeft, Check, Loader2 } from 'lucide-react';
-import { FaGoogle } from 'react-icons/fa';
+import { FaGoogle, FaGithub, FaMicrosoft, FaApple } from 'react-icons/fa';
 import { APP_URLS } from '@voxire/config';
 
 import { unwrap } from '@voxire/api';
 import { safe } from '../../shared/lib/api';
 import notify from '../../shared/lib/notify/notify';
 import { useUserStore } from '../../shared/stores/userStore';
-import { useRegisterRestaurant } from '../../shared/hooks/useAuth';
+import { useRegisterRestaurant, checkEmailExists } from '../../shared/hooks/useAuth';
+import { startSocialLogin, type SocialProvider } from '../../shared/lib/social';
 import { Button } from '@voxire/components';
 import AuthShell from '../../shared/components/AuthShell';
 import PasswordStrengthMeter, {
@@ -173,8 +174,21 @@ const Register: React.FC = (): React.JSX.Element => {
   const [confirmPassword, setConfirmPassword] = useState('');
   const [showPassword, setShowPassword] = useState(false);
   const [showConfirm, setShowConfirm] = useState(false);
+  const [emailTaken, setEmailTaken] = useState(false);
   const emailError = getEmailError(email);
   const matchError = getPasswordMatchError(password, confirmPassword);
+
+  // Check email availability once the field is filled and well-formed, so the
+  // user sees "email already exists" before submitting.
+  const checkEmailAvailable = async (): Promise<void> => {
+    if (getEmailError(email)) return;
+    try {
+      const { exists } = await checkEmailExists(email);
+      setEmailTaken(exists);
+    } catch {
+      setEmailTaken(false); // never block signup on a lookup failure
+    }
+  };
   const pwScore = scorePassword(password);
   const { isAuthenticated, loading, error, role, clearError } = useUserStore();
   const registerMutation = useRegisterRestaurant();
@@ -233,15 +247,11 @@ const Register: React.FC = (): React.JSX.Element => {
     );
   };
 
-  const handleGoogle = async (): Promise<void> => {
+  const handleSocial = async (provider: SocialProvider): Promise<void> => {
     try {
-      const res = await fetch('/auth/google/authorize');
-      if (!res.ok) throw new Error('Google sign-up is currently unavailable');
-      const { url } = (await res.json()) as { url: string };
-      if (redirectParam) localStorage.setItem('google_auth_redirect', redirectParam);
-      window.location.href = url;
-    } catch (err) {
-      notify.error((err as Error).message);
+      await startSocialLogin(provider, redirectParam);
+    } catch {
+      notify.error('Social sign-in is currently unavailable');
     }
   };
 
@@ -456,11 +466,18 @@ const Register: React.FC = (): React.JSX.Element => {
             placeholder="you@company.com"
             autoComplete="email"
             value={email}
-            onChange={(e) => setEmail(e.target.value)}
+            onChange={(e) => {
+              setEmail(e.target.value);
+              if (emailTaken) setEmailTaken(false);
+            }}
+            onBlur={() => void checkEmailAvailable()}
             required
             className="w-full h-10 rounded-lg border border-[#e5e5e5] bg-white px-3 text-sm text-[#111] placeholder:text-[#999] outline-none transition-colors focus:border-[#4583C4] focus:ring-2 focus:ring-[#4583C4]/20"
           />
           {emailError && <p className="text-xs text-red-500">{emailError}</p>}
+          {!emailError && emailTaken && (
+            <p className="text-xs text-red-500">An account with this email already exists.</p>
+          )}
         </div>
 
         {/* Password */}
@@ -540,6 +557,7 @@ const Register: React.FC = (): React.JSX.Element => {
           disabled={
             !email ||
             !!emailError ||
+            emailTaken ||
             pwScore < 2 ||
             !!matchError ||
             (!isSoloPlan && !businessName.trim())
@@ -548,13 +566,57 @@ const Register: React.FC = (): React.JSX.Element => {
           Create account
         </Button>
 
-        {/* Google sign up */}
-        <Button type="button" variant="outline" fullWidth height={40} onClick={handleGoogle}>
-          <span className="inline-flex items-center gap-2">
-            <FaGoogle className="text-[#444]" />
-            Sign up with Google
-          </span>
-        </Button>
+        {/* Social sign up */}
+        <div className="grid grid-cols-2 gap-2">
+          <Button
+            type="button"
+            variant="outline"
+            fullWidth
+            height={40}
+            onClick={() => handleSocial('google')}
+          >
+            <span className="inline-flex items-center gap-2">
+              <FaGoogle className="text-[#444]" />
+              Google
+            </span>
+          </Button>
+          <Button
+            type="button"
+            variant="outline"
+            fullWidth
+            height={40}
+            onClick={() => handleSocial('github')}
+          >
+            <span className="inline-flex items-center gap-2">
+              <FaGithub className="text-[#444]" />
+              GitHub
+            </span>
+          </Button>
+          <Button
+            type="button"
+            variant="outline"
+            fullWidth
+            height={40}
+            onClick={() => handleSocial('microsoft')}
+          >
+            <span className="inline-flex items-center gap-2">
+              <FaMicrosoft className="text-[#444]" />
+              Microsoft
+            </span>
+          </Button>
+          <Button
+            type="button"
+            variant="outline"
+            fullWidth
+            height={40}
+            onClick={() => handleSocial('apple')}
+          >
+            <span className="inline-flex items-center gap-2">
+              <FaApple className="text-[#444]" />
+              Apple
+            </span>
+          </Button>
+        </div>
       </form>
     </AuthShell>
   );

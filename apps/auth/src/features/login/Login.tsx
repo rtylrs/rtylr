@@ -2,11 +2,12 @@ import React, { useState, useEffect, useMemo } from 'react';
 import { useNavigate } from '@tanstack/react-router';
 import { useTranslation } from 'react-i18next';
 import { AlertCircle } from 'lucide-react';
-import { FaGoogle } from 'react-icons/fa';
+import { FaGoogle, FaGithub, FaMicrosoft, FaApple } from 'react-icons/fa';
 import { APP_URLS, APP_CONFIG } from '@voxire/config';
 
 import { useUserStore } from '../../shared/stores/userStore';
 import { useLogin } from '../../shared/hooks/useAuth';
+import { startSocialLogin, type SocialProvider } from '../../shared/lib/social';
 import notify from '../../shared/lib/notify/notify';
 import { unwrap } from '@voxire/api';
 import { safe } from '../../shared/lib/api';
@@ -82,15 +83,11 @@ const Login: React.FC = (): React.JSX.Element => {
     loginMutation.mutate({ email, password }, { onSuccess: () => void redirectTo() });
   };
 
-  const handleGoogle = async (): Promise<void> => {
+  const handleSocial = async (provider: SocialProvider): Promise<void> => {
     try {
-      const res = await fetch('/auth/google/authorize');
-      if (!res.ok) throw new Error('Google login is currently unavailable');
-      const { url } = (await res.json()) as { url: string };
-      if (redirectParam) localStorage.setItem('google_auth_redirect', redirectParam);
-      window.location.href = url;
-    } catch (err) {
-      notify.error((err as Error).message);
+      await startSocialLogin(provider, redirectParam);
+    } catch {
+      notify.error(t('auth.common.socialUnavailable'));
     }
   };
 
@@ -105,10 +102,6 @@ const Login: React.FC = (): React.JSX.Element => {
     }
   }, [isAuthenticated]);
 
-  // Generic error message regardless of cause - never leak whether the
-  // email exists in our system. The audit (auth.md P1 #5) flagged the
-  // earlier "User not found" vs "Wrong password" split as a user-
-  // enumeration vector.
   const errorMessage = error ? t('auth.login.genericError') : null;
 
   const title = t('auth.login.title');
@@ -217,13 +210,57 @@ const Login: React.FC = (): React.JSX.Element => {
           {t('auth.login.submit')}
         </Button>
 
-        {/* Google sign in */}
-        <Button type="button" variant="outline" fullWidth height={40} onClick={handleGoogle}>
-          <span className="inline-flex items-center gap-2">
-            <FaGoogle className="text-[#444]" />
-            {t('auth.common.continueWithGoogle')}
-          </span>
-        </Button>
+        {/* Social sign in */}
+        <div className="grid grid-cols-2 gap-2">
+          <Button
+            type="button"
+            variant="outline"
+            fullWidth
+            height={40}
+            onClick={() => handleSocial('google')}
+          >
+            <span className="inline-flex items-center gap-2">
+              <FaGoogle className="text-[#444]" />
+              {t('auth.common.google')}
+            </span>
+          </Button>
+          <Button
+            type="button"
+            variant="outline"
+            fullWidth
+            height={40}
+            onClick={() => handleSocial('github')}
+          >
+            <span className="inline-flex items-center gap-2">
+              <FaGithub className="text-[#444]" />
+              {t('auth.common.github')}
+            </span>
+          </Button>
+          <Button
+            type="button"
+            variant="outline"
+            fullWidth
+            height={40}
+            onClick={() => handleSocial('microsoft')}
+          >
+            <span className="inline-flex items-center gap-2">
+              <FaMicrosoft className="text-[#444]" />
+              {t('auth.common.microsoft')}
+            </span>
+          </Button>
+          <Button
+            type="button"
+            variant="outline"
+            fullWidth
+            height={40}
+            onClick={() => handleSocial('apple')}
+          >
+            <span className="inline-flex items-center gap-2">
+              <FaApple className="text-[#444]" />
+              {t('auth.common.apple')}
+            </span>
+          </Button>
+        </div>
       </form>
     </AuthShell>
   );
