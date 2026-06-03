@@ -16,8 +16,11 @@ struct Size {
     long area() const { return static_cast<long>(width) * static_cast<long>(height); }
 };
 
-// Rect is an axis-aligned rectangle: an (x,y) top-left origin plus a Size.
-struct Rect {
+// Box is an axis-aligned rectangle: an (x,y) top-left origin plus a Size.
+// (Named Box rather than Rect because libvips defines a `#define Rect VipsRect`
+// compatibility macro that textually clobbers the token in any file that
+// includes <vips/vips8>.)
+struct Box {
     int x = 0;
     int y = 0;
     int width  = 0;
