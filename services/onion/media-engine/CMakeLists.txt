@@ -53,6 +53,11 @@ target_compile_options(media-engine PRIVATE
     -Wpedantic
 )
 
+# Surface the project version to the binary (used by the `version` subcommand).
+target_compile_definitions(media-engine PRIVATE
+    MEDIA_ENGINE_VERSION="${PROJECT_VERSION}"
+)
+
 if(FFMPEG_FOUND)
     target_compile_definitions(media-engine PRIVATE VOXIRE_FFMPEG_AVAILABLE)
     target_include_directories(media-engine PRIVATE ${FFMPEG_INCLUDE_DIRS})
