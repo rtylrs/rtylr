@@ -233,3 +233,6 @@ VALUES (?, ?, 'online', 'pending', ?, ?, ?, ?, 'unpaid', ?, ?);
 
 -- name: GetPublicOrderStatus :one
 SELECT id, order_number, status FROM pos_orders WHERE id = ? LIMIT 1;
+
+-- name: GetPublicOrderNumberStatus :one
+SELECT order_number, status FROM pos_orders WHERE id = ? LIMIT 1;

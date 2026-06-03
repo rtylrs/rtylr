@@ -9,6 +9,8 @@ import (
 	"strconv"
 	"time"
 
+	sq "github.com/Masterminds/squirrel"
+
 	"github.com/voxire/onion/internal/modules/pos_orders/internal/domain"
 	"github.com/voxire/onion/internal/modules/pos_orders/internal/infrastructure/persistence/sqlc"
 	"github.com/voxire/onion/internal/platform/logger"
@@ -175,36 +177,39 @@ func (r *Repository) GetCurrentOpenSession(ctx context.Context, ownerID, staffID
 }
 
 func (r *Repository) ListSessions(ctx context.Context, ownerID, locationID int64, dateFrom, dateTo string) ([]domain.Session, error) {
-	// ListOrdersByOwner returns all sessions; we filter in-memory for optional params
-	// as sqlc doesn't support dynamic WHERE clauses.
-	// For this complex query, we keep using raw SQL.
-	query := `
-		SELECT id, owner_id, COALESCE(location_id,0), staff_id, status,
-		       opening_cash, COALESCE(closing_cash,0), COALESCE(expected_cash,0),
-		       COALESCE(cash_difference,0), total_sales, total_orders,
-		       total_cash_sales, total_card_sales, total_online_sales, total_refunds,
-		       opened_at, closed_at, COALESCE(notes,'')
-		FROM pos_sessions
-		WHERE owner_id = ?`
-
-	args := []interface{}{ownerID}
+	// Dynamic WHERE clause for optional filters (location/date range).
+	builder := sq.
+		Select(
+			"id", "owner_id", "COALESCE(location_id,0)", "staff_id", "status",
+			"opening_cash", "COALESCE(closing_cash,0)", "COALESCE(expected_cash,0)",
+			"COALESCE(cash_difference,0)", "total_sales", "total_orders",
+			"total_cash_sales", "total_card_sales", "total_online_sales", "total_refunds",
+			"opened_at", "closed_at", "COALESCE(notes,'')",
+		).
+		From("pos_sessions").
+		Where(sq.Eq{"owner_id": ownerID})
 
 	if locationID > 0 {
-		query += ` AND location_id = ?`
-		args = append(args, locationID)
+		builder = builder.Where(sq.Eq{"location_id": locationID})
 	}
 
 	if dateFrom != "" {
-		query += ` AND opened_at >= ?`
-		args = append(args, dateFrom)
+		builder = builder.Where(sq.GtOrEq{"opened_at": dateFrom})
 	}
 
 	if dateTo != "" {
-		query += ` AND opened_at <= ?`
-		args = append(args, dateTo)
+		builder = builder.Where(sq.LtOrEq{"opened_at": dateTo})
 	}
 
-	query += ` ORDER BY opened_at DESC LIMIT 500`
+	query, args, err := builder.
+		OrderBy("opened_at DESC").
+		Limit(500).
+		PlaceholderFormat(sq.Question).
+		ToSql()
+	if err != nil {
+		logger.Ctx(ctx).Error("Failed to build list pos sessions query", logger.Error(err))
+		return nil, err
+	}
 
 	rows, err := r.pool.QueryContext(ctx, query, args...)
 	if err != nil {
@@ -331,39 +336,43 @@ func (r *Repository) UpdateSessionRefundTotals(ctx context.Context, sessionID in
 // ─── Orders ──────────────────────────────────────────────────────────────────
 
 func (r *Repository) ListOrders(ctx context.Context, ownerID, sessionID int64, status, dateFrom, dateTo string) ([]domain.Order, error) {
-	// Dynamic WHERE clause: use raw SQL for optional filters
-	query := `
-		SELECT id, owner_id, COALESCE(session_id,0), COALESCE(table_id,0), COALESCE(location_id,0),
-		       order_number, type, status, COALESCE(customer_id,0), COALESCE(customer_name,''),
-		       COALESCE(staff_id,0), subtotal, discount_amount, tax_amount, total,
-		       COALESCE(payment_method,''), COALESCE(payment_status,''), COALESCE(amount_paid,0), COALESCE(change_due,0),
-		       COALESCE(notes,''), COALESCE(kitchen_notes,''), created_at, updated_at, paid_at
-		FROM pos_orders
-		WHERE owner_id = ?`
-
-	args := []interface{}{ownerID}
+	// Dynamic WHERE clause for optional filters (session/status/date range).
+	builder := sq.
+		Select(
+			"id", "owner_id", "COALESCE(session_id,0)", "COALESCE(table_id,0)", "COALESCE(location_id,0)",
+			"order_number", "type", "status", "COALESCE(customer_id,0)", "COALESCE(customer_name,'')",
+			"COALESCE(staff_id,0)", "subtotal", "discount_amount", "tax_amount", "total",
+			"COALESCE(payment_method,'')", "COALESCE(payment_status,'')", "COALESCE(amount_paid,0)", "COALESCE(change_due,0)",
+			"COALESCE(notes,'')", "COALESCE(kitchen_notes,'')", "created_at", "updated_at", "paid_at",
+		).
+		From("pos_orders").
+		Where(sq.Eq{"owner_id": ownerID})
 
 	if sessionID > 0 {
-		query += ` AND session_id = ?`
-		args = append(args, sessionID)
+		builder = builder.Where(sq.Eq{"session_id": sessionID})
 	}
 
 	if status != "" {
-		query += ` AND status = ?`
-		args = append(args, status)
+		builder = builder.Where(sq.Eq{"status": status})
 	}
 
 	if dateFrom != "" {
-		query += ` AND created_at >= ?`
-		args = append(args, dateFrom)
+		builder = builder.Where(sq.GtOrEq{"created_at": dateFrom})
 	}
 
 	if dateTo != "" {
-		query += ` AND created_at <= ?`
-		args = append(args, dateTo)
+		builder = builder.Where(sq.LtOrEq{"created_at": dateTo})
 	}
 
-	query += ` ORDER BY created_at DESC LIMIT 500`
+	query, args, err := builder.
+		OrderBy("created_at DESC").
+		Limit(500).
+		PlaceholderFormat(sq.Question).
+		ToSql()
+	if err != nil {
+		logger.Ctx(ctx).Error("Failed to build list pos orders query", logger.Error(err))
+		return nil, err
+	}
 
 	rows, err := r.pool.QueryContext(ctx, query, args...)
 	if err != nil {
@@ -670,11 +679,23 @@ func (r *Repository) ProcessPayment(ctx context.Context, ownerID, orderID int64,
 // permitted (POS should not block a sale on a lagging count) — this should
 // become a per-tenant policy flag.
 func (r *Repository) deductSoldStock(ctx context.Context, tx *sql.Tx, ownerID, orderID int64) error {
+	// cross-schema read from stock_core — idempotency guard on the shared stock ledger
+	idempotencyQuery, idempotencyArgs, err := sq.
+		Select("1").
+		From("stock_ledger").
+		Where(sq.Eq{"owner_id": ownerID}).
+		Where(sq.Eq{"reference_type": "pos_order"}).
+		Where(sq.Eq{"reference_id": orderID}).
+		Where(sq.Eq{"entry_type": "sale"}).
+		Limit(1).
+		PlaceholderFormat(sq.Question).
+		ToSql()
+	if err != nil {
+		return err
+	}
+
 	var already int
-	idErr := tx.QueryRowContext(ctx,
-		`SELECT 1 FROM stock_ledger
-		 WHERE owner_id = ? AND reference_type = 'pos_order' AND reference_id = ? AND entry_type = 'sale' LIMIT 1`,
-		ownerID, orderID).Scan(&already)
+	idErr := tx.QueryRowContext(ctx, idempotencyQuery, idempotencyArgs...).Scan(&already)
 	if idErr == nil {
 		return nil // already deducted for this order
 	}
@@ -682,10 +703,19 @@ func (r *Repository) deductSoldStock(ctx context.Context, tx *sql.Tx, ownerID, o
 		return idErr
 	}
 
+	locQuery, locArgs, err := sq.
+		Select("COALESCE(location_id, 0)").
+		From("pos_orders").
+		Where(sq.Eq{"owner_id": ownerID}).
+		Where(sq.Eq{"id": orderID}).
+		PlaceholderFormat(sq.Question).
+		ToSql()
+	if err != nil {
+		return err
+	}
+
 	var locationID int64
-	if err := tx.QueryRowContext(ctx,
-		`SELECT COALESCE(location_id, 0) FROM pos_orders WHERE owner_id = ? AND id = ?`,
-		ownerID, orderID).Scan(&locationID); err != nil {
+	if err := tx.QueryRowContext(ctx, locQuery, locArgs...).Scan(&locationID); err != nil {
 		return err
 	}
 
@@ -694,12 +724,21 @@ func (r *Repository) deductSoldStock(ctx context.Context, tx *sql.Tx, ownerID, o
 		return err
 	}
 
-	rows, err := tx.QueryContext(ctx,
-		`SELECT oi.menu_item_id, oi.quantity
-		 FROM pos_order_items oi
-		 JOIN erp_products p ON p.id = oi.menu_item_id AND p.owner_id = ?
-		 WHERE oi.order_id = ? AND oi.menu_item_id IS NOT NULL AND p.track_inventory = TRUE`,
-		ownerID, orderID)
+	// cross-schema read from erp — join POS line items against ERP products to find inventory-tracked SKUs
+	linesQuery, linesArgs, err := sq.
+		Select("oi.menu_item_id", "oi.quantity").
+		From("pos_order_items oi").
+		Join("erp_products p ON p.id = oi.menu_item_id AND p.owner_id = ?", ownerID).
+		Where("oi.order_id = ?", orderID).
+		Where("oi.menu_item_id IS NOT NULL").
+		Where(sq.Eq{"p.track_inventory": true}).
+		PlaceholderFormat(sq.Question).
+		ToSql()
+	if err != nil {
+		return err
+	}
+
+	rows, err := tx.QueryContext(ctx, linesQuery, linesArgs...)
 	if err != nil {
 		return err
 	}
@@ -816,11 +855,20 @@ func (r *Repository) VoidOrderItem(ctx context.Context, ownerID, orderID, itemID
 		}
 	}()
 
+	selectQuery, selectArgs, buildErr := sq.
+		Select("status").
+		From("pos_order_items").
+		Where(sq.Eq{"id": itemID}).
+		Where(sq.Eq{"order_id": orderID}).
+		PlaceholderFormat(sq.Question).
+		ToSql()
+	if buildErr != nil {
+		_ = tx.Rollback()
+		return buildErr
+	}
+
 	var itemStatus string
-	if scanErr := tx.QueryRowContext(ctx,
-		"SELECT status FROM pos_order_items WHERE id=? AND order_id=?",
-		itemID, orderID,
-	).Scan(&itemStatus); scanErr != nil {
+	if scanErr := tx.QueryRowContext(ctx, selectQuery, selectArgs...).Scan(&itemStatus); scanErr != nil {
 		_ = tx.Rollback()
 		if errors.Is(scanErr, sql.ErrNoRows) {
 			return domain.ErrOrderNotFound
@@ -829,22 +877,41 @@ func (r *Repository) VoidOrderItem(ctx context.Context, ownerID, orderID, itemID
 		return scanErr
 	}
 
-	if _, execErr := tx.ExecContext(ctx,
-		"UPDATE pos_order_items SET status='cancelled' WHERE id=? AND order_id=?",
-		itemID, orderID,
-	); execErr != nil {
+	cancelQuery, cancelArgs, buildErr := sq.
+		Update("pos_order_items").
+		Set("status", "cancelled").
+		Where(sq.Eq{"id": itemID}).
+		Where(sq.Eq{"order_id": orderID}).
+		PlaceholderFormat(sq.Question).
+		ToSql()
+	if buildErr != nil {
+		_ = tx.Rollback()
+		return buildErr
+	}
+
+	if _, execErr := tx.ExecContext(ctx, cancelQuery, cancelArgs...); execErr != nil {
 		_ = tx.Rollback()
 		logger.Ctx(ctx).Error("Failed to cancel order item", logger.Error(execErr))
 		return execErr
 	}
 
-	if _, execErr := tx.ExecContext(ctx,
-		`UPDATE pos_orders
-		 SET subtotal = (SELECT COALESCE(SUM(total),0) FROM pos_order_items WHERE order_id=? AND status != 'cancelled'),
-		     total    = subtotal + tax_amount - discount_amount
-		 WHERE id=? AND owner_id=?`,
-		orderID, orderID, ownerID,
-	); execErr != nil {
+	recalcQuery, recalcArgs, buildErr := sq.
+		Update("pos_orders").
+		Set("subtotal", sq.Expr(
+			"(SELECT COALESCE(SUM(total),0) FROM pos_order_items WHERE order_id=? AND status != 'cancelled')",
+			orderID,
+		)).
+		Set("total", sq.Expr("subtotal + tax_amount - discount_amount")).
+		Where(sq.Eq{"id": orderID}).
+		Where(sq.Eq{"owner_id": ownerID}).
+		PlaceholderFormat(sq.Question).
+		ToSql()
+	if buildErr != nil {
+		_ = tx.Rollback()
+		return buildErr
+	}
+
+	if _, execErr := tx.ExecContext(ctx, recalcQuery, recalcArgs...); execErr != nil {
 		_ = tx.Rollback()
 		logger.Ctx(ctx).Error("Failed to recalculate order total after item void", logger.Error(execErr))
 		return execErr
@@ -873,29 +940,56 @@ func (r *Repository) TransferTable(ctx context.Context, ownerID, orderID, oldTab
 	}()
 
 	if oldTableID > 0 {
-		if _, execErr := tx.ExecContext(ctx,
-			"UPDATE pos_tables SET status='available' WHERE id=? AND owner_id=?",
-			oldTableID, ownerID,
-		); execErr != nil {
+		freeQuery, freeArgs, buildErr := sq.
+			Update("pos_tables").
+			Set("status", "available").
+			Where(sq.Eq{"id": oldTableID}).
+			Where(sq.Eq{"owner_id": ownerID}).
+			PlaceholderFormat(sq.Question).
+			ToSql()
+		if buildErr != nil {
+			_ = tx.Rollback()
+			return buildErr
+		}
+
+		if _, execErr := tx.ExecContext(ctx, freeQuery, freeArgs...); execErr != nil {
 			_ = tx.Rollback()
 			logger.Ctx(ctx).Error("Failed to free old table during transfer", logger.Error(execErr))
 			return execErr
 		}
 	}
 
-	if _, execErr := tx.ExecContext(ctx,
-		"UPDATE pos_orders SET table_id=? WHERE id=? AND owner_id=?",
-		newTableID, orderID, ownerID,
-	); execErr != nil {
+	moveQuery, moveArgs, buildErr := sq.
+		Update("pos_orders").
+		Set("table_id", newTableID).
+		Where(sq.Eq{"id": orderID}).
+		Where(sq.Eq{"owner_id": ownerID}).
+		PlaceholderFormat(sq.Question).
+		ToSql()
+	if buildErr != nil {
+		_ = tx.Rollback()
+		return buildErr
+	}
+
+	if _, execErr := tx.ExecContext(ctx, moveQuery, moveArgs...); execErr != nil {
 		_ = tx.Rollback()
 		logger.Ctx(ctx).Error("Failed to update order table_id during transfer", logger.Error(execErr))
 		return execErr
 	}
 
-	if _, execErr := tx.ExecContext(ctx,
-		"UPDATE pos_tables SET status='occupied' WHERE id=? AND owner_id=?",
-		newTableID, ownerID,
-	); execErr != nil {
+	occupyQuery, occupyArgs, buildErr := sq.
+		Update("pos_tables").
+		Set("status", "occupied").
+		Where(sq.Eq{"id": newTableID}).
+		Where(sq.Eq{"owner_id": ownerID}).
+		PlaceholderFormat(sq.Question).
+		ToSql()
+	if buildErr != nil {
+		_ = tx.Rollback()
+		return buildErr
+	}
+
+	if _, execErr := tx.ExecContext(ctx, occupyQuery, occupyArgs...); execErr != nil {
 		_ = tx.Rollback()
 		logger.Ctx(ctx).Error("Failed to mark new table occupied during transfer", logger.Error(execErr))
 		return execErr
@@ -1301,12 +1395,24 @@ func (r *Repository) CreatePublicOrder(ctx context.Context, ownerID int64, order
 		subtotal += item.UnitPrice * item.Quantity
 	}
 
-	res, err := tx.ExecContext(ctx,
-		`INSERT INTO pos_orders
-		 (owner_id, order_number, type, status, customer_name, customer_phone, subtotal, total, payment_status, notes, created_at, updated_at)
-		 VALUES (?, ?, 'online', 'pending', ?, ?, ?, ?, 'unpaid', ?, NOW(), NOW())`,
-		ownerID, orderNumber, nullableString(customerName), nullableString(customerPhone), floatToDecimal(subtotal), floatToDecimal(subtotal), nullableString(notes),
-	)
+	orderQuery, orderArgs, err := sq.
+		Insert("pos_orders").
+		Columns(
+			"owner_id", "order_number", "type", "status", "customer_name", "customer_phone",
+			"subtotal", "total", "payment_status", "notes", "created_at", "updated_at",
+		).
+		Values(
+			ownerID, orderNumber, "online", "pending", nullableString(customerName), nullableString(customerPhone),
+			floatToDecimal(subtotal), floatToDecimal(subtotal), "unpaid", nullableString(notes), sq.Expr("NOW()"), sq.Expr("NOW()"),
+		).
+		PlaceholderFormat(sq.Question).
+		ToSql()
+	if err != nil {
+		logger.Ctx(ctx).Error("Failed to build public order insert", logger.Error(err))
+		return 0, err
+	}
+
+	res, err := tx.ExecContext(ctx, orderQuery, orderArgs...)
 	if err != nil {
 		logger.Ctx(ctx).Error("Failed to insert public order", logger.Error(err))
 		return 0, err
@@ -1319,13 +1425,25 @@ func (r *Repository) CreatePublicOrder(ctx context.Context, ownerID int64, order
 
 	for _, item := range items {
 		itemTotal := item.UnitPrice * item.Quantity
-		_, err = tx.ExecContext(ctx,
-			`INSERT INTO pos_order_items
-			 (order_id, menu_item_id, name, quantity, unit_price, total, notes, status, created_at)
-			 VALUES (?, ?, ?, ?, ?, ?, ?, 'pending', NOW())`,
-			orderID, nullableInt64(item.MenuItemID), item.Name, floatToDecimal3(item.Quantity),
-			floatToDecimal(item.UnitPrice), floatToDecimal(itemTotal), nullableString(item.Notes),
-		)
+		var itemQuery string
+		var itemArgs []interface{}
+		itemQuery, itemArgs, err = sq.
+			Insert("pos_order_items").
+			Columns(
+				"order_id", "menu_item_id", "name", "quantity", "unit_price", "total", "notes", "status", "created_at",
+			).
+			Values(
+				orderID, nullableInt64(item.MenuItemID), item.Name, floatToDecimal3(item.Quantity),
+				floatToDecimal(item.UnitPrice), floatToDecimal(itemTotal), nullableString(item.Notes), "pending", sq.Expr("NOW()"),
+			).
+			PlaceholderFormat(sq.Question).
+			ToSql()
+		if err != nil {
+			logger.Ctx(ctx).Error("Failed to build public order item insert", logger.Error(err))
+			return 0, err
+		}
+
+		_, err = tx.ExecContext(ctx, itemQuery, itemArgs...)
 		if err != nil {
 			logger.Ctx(ctx).Error("Failed to insert public order item", logger.Error(err))
 			return 0, err
@@ -1339,12 +1457,11 @@ func (r *Repository) CreatePublicOrder(ctx context.Context, ownerID int64, order
 }
 
 func (r *Repository) GetPublicOrderStatus(ctx context.Context, orderID int64) (orderNumber, status string, err error) {
-	row := r.pool.QueryRowContext(ctx,
-		`SELECT order_number, status FROM pos_orders WHERE id = ? LIMIT 1`,
-		orderID,
-	)
-	err = row.Scan(&orderNumber, &status)
-	return orderNumber, status, err
+	row, err := r.queries.GetPublicOrderNumberStatus(ctx, orderID)
+	if err != nil {
+		return "", "", err
+	}
+	return row.OrderNumber, string(row.Status.PosOrdersStatus), nil
 }
 
 func nullableString(s string) interface{} {
