@@ -270,3 +270,35 @@ export function webPageSchema(opts: {
     ],
   };
 }
+
+export function blogPostingSchema(opts: {
+  title: string;
+  slug: string;
+  description: string;
+  datePublished: string;
+  dateModified?: string;
+}): Record<string, unknown> {
+  const url = `${BASE}/blog/${opts.slug}/`;
+  return {
+    '@context': 'https://schema.org',
+    '@graph': [
+      {
+        '@type': 'BlogPosting',
+        headline: opts.title,
+        description: opts.description,
+        url,
+        mainEntityOfPage: { '@type': 'WebPage', '@id': url },
+        datePublished: opts.datePublished,
+        dateModified: opts.dateModified ?? opts.datePublished,
+        author: ORG,
+        publisher: ORG,
+        image: `${BASE}/og-default.png`,
+      },
+      breadcrumbList([
+        { label: 'rtylr', path: '/' },
+        { label: 'Blog', path: '/blog/' },
+        { label: opts.title, path: `/blog/${opts.slug}/` },
+      ]),
+    ],
+  };
+}

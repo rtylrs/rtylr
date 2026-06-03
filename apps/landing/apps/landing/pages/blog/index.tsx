@@ -1,26 +1,30 @@
 import React from 'react';
+import Link from 'next/link';
 import { motion } from 'motion/react';
-import { PenLine } from 'lucide-react';
+import { Clock } from 'lucide-react';
 import AppLayout from '../../components/Layout/AppLayout';
 import MainLayout from '../../layouts/Main/MainLayout';
 import HelmetContainer from '../../components/HelmetContainer';
 import { blurFadeIn, staggerBlur } from '../../lib/animations';
 import { webPageSchema } from '../../lib/structured-data';
+import { getAllPosts } from '../../lib/blog/posts';
 import styles from './blog.module.scss';
 
 const BlogPage = (): JSX.Element => {
+  const posts = getAllPosts();
+  const [featured, ...rest] = posts;
+
   return (
     <AppLayout>
       <MainLayout>
         <HelmetContainer
-          title="Blog | rtylr"
-          description="Product, engineering, and playbooks from the rtylr team."
+          title="Blog · POS, inventory & operations playbooks | rtylr"
+          description="Operator playbooks on POS, inventory, payroll, and running an all-in-one business platform — concrete tactics for restaurants, retail, and grocery."
           canonical="https://rtylr.com/blog/"
-          robots="noindex, follow"
           structuredData={webPageSchema({
             name: 'Blog',
             path: '/blog/',
-            description: 'Product, engineering, and playbooks from the rtylr team.',
+            description: 'Operator playbooks on POS, inventory, payroll, and all-in-one business software.',
           })}
         />
 
@@ -36,17 +40,63 @@ const BlogPage = (): JSX.Element => {
                 BLOG
               </motion.span>
               <motion.h1 className={styles.heroTitle} variants={blurFadeIn}>
-                Coming soon.
+                Playbooks for running the whole business.
               </motion.h1>
               <motion.p className={styles.heroSubtitle} variants={blurFadeIn}>
-                Engineering deep-dives, operator playbooks, customer stories, and the occasional
-                opinion on how SMB software should work. Check back soon.
+                Concrete, operator-tested writing on POS, inventory, payroll, and what changes when
+                they share one platform. No fluff, just what works on a Saturday night.
               </motion.p>
-              <motion.div className={styles.comingSoonIcon} variants={blurFadeIn}>
-                <PenLine size={40} strokeWidth={1.5} />
-              </motion.div>
             </motion.div>
           </section>
+
+          {featured && (
+            <section className={styles.featuredSection}>
+              <Link href={`/blog/${featured.slug}`} className={styles.featured}>
+                <div className={styles.featuredLeft}>
+                  <span className={styles.featuredBadge}>{featured.category.toUpperCase()}</span>
+                  <h2 className={styles.featuredTitle}>{featured.title}</h2>
+                  <p className={styles.featuredExcerpt}>{featured.excerpt}</p>
+                  <div className={styles.featuredMeta}>
+                    <time dateTime={featured.date}>{featured.dateDisplay}</time>
+                    <span className={styles.postDot}>·</span>
+                    <span className={styles.postReadTime}>
+                      <Clock size={13} /> {featured.readingMinutes} min read
+                    </span>
+                  </div>
+                </div>
+                <div className={styles.featuredRight}>
+                  <div className={styles.featuredArtwork}>
+                    <div className={styles.artworkBar} style={{ width: '90%' }} />
+                    <div className={styles.artworkBar} style={{ width: '70%' }} />
+                    <div className={styles.artworkBar} style={{ width: '80%' }} />
+                  </div>
+                </div>
+              </Link>
+            </section>
+          )}
+
+          {rest.length > 0 && (
+            <section className={styles.gridSection}>
+              <div className={styles.grid}>
+                {rest.map((post) => (
+                  <Link key={post.slug} href={`/blog/${post.slug}`} className={styles.postCard}>
+                    <div className={styles.postMetaTop}>
+                      <span className={styles.postCategory}>{post.category}</span>
+                    </div>
+                    <h3 className={styles.postTitle}>{post.title}</h3>
+                    <p className={styles.postExcerpt}>{post.excerpt}</p>
+                    <div className={styles.postMetaBottom}>
+                      <time dateTime={post.date}>{post.dateDisplay}</time>
+                      <span className={styles.postDot}>·</span>
+                      <span className={styles.postReadTime}>
+                        <Clock size={12} /> {post.readingMinutes} min
+                      </span>
+                    </div>
+                  </Link>
+                ))}
+              </div>
+            </section>
+          )}
         </div>
       </MainLayout>
     </AppLayout>
