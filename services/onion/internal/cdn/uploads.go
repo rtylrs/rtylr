@@ -54,9 +54,19 @@ func (c *CDN) uploadFile(ctx context.Context, filename, mimeType string, size in
 	return c.fileByID(ctx, id)
 }
 
+// maxInMemoryUpload bounds how much of a multipart upload is buffered in RAM;
+// anything larger spills to a temp file. The total request size is capped
+// separately by http.MaxBytesReader.
+const maxInMemoryUpload = 16 << 20 // 16 MiB
+
 // upload handles POST /upload — a multipart form with a single "file" field.
 func (c *CDN) upload(w http.ResponseWriter, r *http.Request) {
-	if err := r.ParseMultipartForm(c.maxUpload); err != nil {
+	// Cap the whole request body so a client can't exhaust disk/memory by
+	// streaming past maxUpload — ParseMultipartForm alone only bounds the
+	// in-memory portion and spills the rest to temp files.
+	r.Body = http.MaxBytesReader(w, r.Body, c.maxUpload)
+
+	if err := r.ParseMultipartForm(maxInMemoryUpload); err != nil {
 		http.Error(w, "request too large", http.StatusRequestEntityTooLarge)
 		return
 	}
@@ -67,6 +77,11 @@ func (c *CDN) upload(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 	defer func() { _ = file.Close() }()
+
+	if header.Size <= 0 {
+		http.Error(w, "empty file", http.StatusBadRequest)
+		return
+	}
 
 	mimeType := header.Header.Get("Content-Type")
 	if mimeType == "" {
