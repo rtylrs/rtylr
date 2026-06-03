@@ -4,6 +4,8 @@ import (
 	"context"
 	"database/sql"
 
+	sq "github.com/Masterminds/squirrel"
+
 	"github.com/voxire/onion/internal/modules/websitelead/internal/domain"
 	"github.com/voxire/onion/internal/platform/logger"
 )
@@ -38,12 +40,19 @@ func autoMigrate(ctx context.Context, db *sql.DB) {
 }
 
 func (r *Repository) Create(ctx context.Context, input domain.LeadInput) (int64, error) {
-	result, err := r.db.ExecContext(ctx,
-		`INSERT INTO voxire_website_leads (name, email, phone, company, service, project, budget, source)
-		 VALUES (?, ?, ?, ?, ?, ?, ?, ?)`,
-		input.Name, input.Email, input.Phone, input.Company, input.Service,
-		input.Project, input.Budget, input.Source,
-	)
+	query, args, err := sq.
+		Insert("voxire_website_leads").
+		Columns("name", "email", "phone", "company", "service", "project", "budget", "source").
+		Values(input.Name, input.Email, input.Phone, input.Company, input.Service,
+			input.Project, input.Budget, input.Source).
+		PlaceholderFormat(sq.Question).
+		ToSql()
+	if err != nil {
+		logger.Ctx(ctx).Error("Failed to build insert website lead query", logger.Error(err))
+		return 0, err
+	}
+
+	result, err := r.db.ExecContext(ctx, query, args...)
 	if err != nil {
 		logger.Ctx(ctx).Error("Failed to insert website lead", logger.Error(err))
 		return 0, err
