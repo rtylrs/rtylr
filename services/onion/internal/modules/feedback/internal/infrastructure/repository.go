@@ -3,7 +3,8 @@ package infrastructure
 import (
 	"context"
 	"database/sql"
-	"strings"
+
+	"github.com/Masterminds/squirrel"
 
 	"github.com/voxire/onion/internal/modules/feedback/internal/domain"
 	"github.com/voxire/onion/internal/modules/feedback/internal/infrastructure/persistence/sqlc"
@@ -35,38 +36,41 @@ func (r *Repository) List(ctx context.Context, ownerID int64, filters domain.Lis
 
 	offset := (page - 1) * pageSize
 
-	var whereClauses []string
-	var args []interface{}
-
-	whereClauses = append(whereClauses, "owner_id = ?")
-	args = append(args, ownerID)
+	whereConds := squirrel.And{squirrel.Eq{"owner_id": ownerID}}
 
 	if filters.Type != "" {
-		whereClauses = append(whereClauses, "type = ?")
-		args = append(args, filters.Type)
+		whereConds = append(whereConds, squirrel.Eq{"type": filters.Type})
 	}
 
 	if filters.Source != "" {
-		whereClauses = append(whereClauses, "source = ?")
-		args = append(args, filters.Source)
+		whereConds = append(whereConds, squirrel.Eq{"source": filters.Source})
 	}
 
 	if filters.MinScoreSet {
-		whereClauses = append(whereClauses, "score >= ?")
-		args = append(args, filters.MinScore)
+		whereConds = append(whereConds, squirrel.GtOrEq{"score": filters.MinScore})
 	}
 
 	if filters.MaxScoreSet {
-		whereClauses = append(whereClauses, "score <= ?")
-		args = append(args, filters.MaxScore)
+		whereConds = append(whereConds, squirrel.LtOrEq{"score": filters.MaxScore})
 	}
 
-	whereSQL := strings.Join(whereClauses, " AND ")
+	countQuery, countArgs, err := squirrel.Select("COUNT(*)").
+		From("crm_feedback").
+		Where(whereConds).
+		PlaceholderFormat(squirrel.Question).
+		ToSql()
+	if err != nil {
+		logger.Ctx(ctx).Error("Failed to build count feedback query",
+			logger.Error(err),
+			logger.Any("owner_id", ownerID),
+		)
+
+		return nil, 0, err
+	}
 
 	var total int64
 
-	if err := r.pool.QueryRowContext(ctx,
-		"SELECT COUNT(*) FROM crm_feedback WHERE "+whereSQL, args...).Scan(&total); err != nil {
+	if err := r.pool.QueryRowContext(ctx, countQuery, countArgs...).Scan(&total); err != nil {
 		logger.Ctx(ctx).Error("Failed to count feedback",
 			logger.Error(err),
 			logger.Any("owner_id", ownerID),
@@ -75,13 +79,26 @@ func (r *Repository) List(ctx context.Context, ownerID int64, filters domain.Lis
 		return nil, 0, err
 	}
 
-	listArgs := append([]interface{}{}, args...)
-	listArgs = append(listArgs, pageSize, offset)
+	listQuery, listArgs, err := squirrel.Select(
+		"id", "owner_id", "customer_id", "type", "score", "comment", "source", "created_at",
+	).
+		From("crm_feedback").
+		Where(whereConds).
+		OrderBy("created_at DESC").
+		Limit(uint64(pageSize)).
+		Offset(uint64(offset)).
+		PlaceholderFormat(squirrel.Question).
+		ToSql()
+	if err != nil {
+		logger.Ctx(ctx).Error("Failed to build list feedback query",
+			logger.Error(err),
+			logger.Any("owner_id", ownerID),
+		)
 
-	rows, err := r.pool.QueryContext(ctx,
-		"SELECT id, owner_id, customer_id, type, score, comment, source, created_at "+
-			"FROM crm_feedback WHERE "+whereSQL+
-			" ORDER BY created_at DESC LIMIT ? OFFSET ?", listArgs...)
+		return nil, 0, err
+	}
+
+	rows, err := r.pool.QueryContext(ctx, listQuery, listArgs...)
 	if err != nil {
 		logger.Ctx(ctx).Error("Failed to list feedback",
 			logger.Error(err),
