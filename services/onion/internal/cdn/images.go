@@ -84,6 +84,13 @@ func (c *CDN) transform(ctx context.Context, fileID int64, fileUUID, originalSto
 		return nil, 0, "", err
 	}
 
+	logger.Ctx(ctx).Info("cdn: generated transformation",
+		logger.String("file_uuid", fileUUID),
+		logger.String("format", p.Format),
+		logger.Any("width", p.Width),
+		logger.Any("height", p.Height),
+	)
+
 	// Re-download so the streamed size/headers match exactly what S3 stored.
 	reader, size, err := c.storage.Download(ctx, transformedKey)
 	if err != nil {
