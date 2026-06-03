@@ -6,6 +6,7 @@ import (
 	"errors"
 	"time"
 
+	sq "github.com/Masterminds/squirrel"
 	"github.com/voxire/onion/internal/modules/hr_time/internal/domain"
 	"github.com/voxire/onion/internal/platform/logger"
 )
@@ -28,11 +29,20 @@ func (a *FlowAdapter) GetCompletedTasksForEmployee(ctx context.Context, ownerID,
 		return nil, err
 	}
 
+	// cross-schema read from hr_core module — resolve employee user_id for flow task lookup
+	userIDSQL, userIDArgs, err := sq.Select("user_id").
+		From("hr_employees").
+		Where(sq.Eq{"id": employeeID, "owner_id": ownerID}).
+		PlaceholderFormat(sq.Question).
+		ToSql()
+	if err != nil {
+		logger.Ctx(ctx).Error("flow adapter: failed to build employee user_id query",
+			logger.Any("owner_id", ownerID), logger.Any("employee_id", employeeID), logger.Error(err))
+		return nil, err
+	}
+
 	var userID sql.NullInt64
-	err = a.pool.QueryRowContext(ctx,
-		"SELECT user_id FROM hr_employees WHERE id = ? AND owner_id = ?",
-		employeeID, ownerID,
-	).Scan(&userID)
+	err = a.pool.QueryRowContext(ctx, userIDSQL, userIDArgs...).Scan(&userID)
 	if err != nil {
 		if errors.Is(err, sql.ErrNoRows) {
 			return nil, nil
@@ -46,16 +56,27 @@ func (a *FlowAdapter) GetCompletedTasksForEmployee(ctx context.Context, ownerID,
 	}
 
 	// cross-schema read from flow module — completed tasks and logged time for employee import
-	rows, err := a.pool.QueryContext(ctx, `
-		SELECT t.id, t.title,
-		       COALESCE(SUM(tl.duration_minutes), 0) AS total_minutes,
-		       t.completed_at
-		FROM flow_tasks t
-		LEFT JOIN flow_time_logs tl ON tl.task_id = t.id
-		WHERE t.assignee_id = ? AND t.owner_id = ? AND t.status = 'done'
-		      AND t.completed_at >= ? AND t.completed_at <= ?
-		GROUP BY t.id, t.title, t.completed_at
-	`, userID.Int64, ownerID, ps, pe)
+	tasksSQL, tasksArgs, err := sq.Select(
+		"t.id",
+		"t.title",
+		"COALESCE(SUM(tl.duration_minutes), 0) AS total_minutes",
+		"t.completed_at",
+	).
+		From("flow_tasks t").
+		LeftJoin("flow_time_logs tl ON tl.task_id = t.id").
+		Where(sq.Eq{"t.assignee_id": userID.Int64, "t.owner_id": ownerID, "t.status": "done"}).
+		Where(sq.GtOrEq{"t.completed_at": ps}).
+		Where(sq.LtOrEq{"t.completed_at": pe}).
+		GroupBy("t.id", "t.title", "t.completed_at").
+		PlaceholderFormat(sq.Question).
+		ToSql()
+	if err != nil {
+		logger.Ctx(ctx).Error("flow adapter: failed to build completed tasks query",
+			logger.Any("owner_id", ownerID), logger.Any("user_id", userID.Int64), logger.Error(err))
+		return nil, err
+	}
+
+	rows, err := a.pool.QueryContext(ctx, tasksSQL, tasksArgs...)
 	if err != nil {
 		logger.Ctx(ctx).Error("flow adapter: failed to query completed tasks",
 			logger.Any("owner_id", ownerID), logger.Any("user_id", userID.Int64), logger.Error(err))

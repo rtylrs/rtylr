@@ -4,9 +4,9 @@ import (
 	"context"
 	"database/sql"
 	"errors"
-	"strings"
 	"time"
 
+	sq "github.com/Masterminds/squirrel"
 	"github.com/voxire/onion/internal/modules/hr_time/internal/domain"
 	"github.com/voxire/onion/internal/modules/hr_time/internal/infrastructure/persistence/sqlc"
 	"github.com/voxire/onion/internal/platform/logger"
@@ -394,20 +394,23 @@ func (r *Repository) GetExistingTaskIDsBySource(ctx context.Context, ownerID, em
 		return existing, nil
 	}
 
-	var sb strings.Builder
-	sb.WriteString("SELECT task_id FROM hr_time_entries WHERE owner_id = ? AND employee_id = ? AND source = ? AND task_id IN (")
-	args := make([]any, 0, len(taskIDs)+3)
-	args = append(args, ownerID, employeeID, source)
-	for i, id := range taskIDs {
-		if i > 0 {
-			sb.WriteByte(',')
-		}
-		sb.WriteByte('?')
-		args = append(args, id)
+	sqlStr, args, err := sq.Select("task_id").
+		From("hr_time_entries").
+		Where(sq.Eq{
+			"owner_id":    ownerID,
+			"employee_id": employeeID,
+			"source":      source,
+			"task_id":     taskIDs,
+		}).
+		PlaceholderFormat(sq.Question).
+		ToSql()
+	if err != nil {
+		logger.Ctx(ctx).Error("failed to build existing task entries query",
+			logger.Any("owner_id", ownerID), logger.Error(err))
+		return nil, err
 	}
-	sb.WriteByte(')')
 
-	rows, err := r.pool.QueryContext(ctx, sb.String(), args...)
+	rows, err := r.pool.QueryContext(ctx, sqlStr, args...)
 	if err != nil {
 		logger.Ctx(ctx).Error("failed to batch-check existing task entries",
 			logger.Any("owner_id", ownerID), logger.Error(err))
