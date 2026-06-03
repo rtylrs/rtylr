@@ -23,11 +23,20 @@ func (c *CDN) fileURL(fileUUID string) string {
 // uploadFile validates, stores the bytes in S3, and records the metadata row.
 // It returns the persisted File (CreatedAt populated from the DB).
 func (c *CDN) uploadFile(ctx context.Context, filename, mimeType string, size int64, body io.Reader) (*File, error) {
-	if !isAllowedMIMEType(mimeType) {
-		return nil, fmt.Errorf("unsupported MIME type: %s", mimeType)
-	}
 	if size > c.maxUpload {
 		return nil, fmt.Errorf("file exceeds maximum upload size of %d bytes", c.maxUpload)
+	}
+
+	// Sniff the real content type from the bytes rather than trusting the
+	// client's Content-Type, so an HTML/JS payload can't be stored under an
+	// image/* type and later served as active content.
+	sniffed, body, err := sniffMIME(body)
+	if err != nil {
+		return nil, fmt.Errorf("reading upload: %w", err)
+	}
+	mimeType, err = reconcileMIME(mimeType, sniffed)
+	if err != nil {
+		return nil, err
 	}
 
 	fileUUID := uuid.NewString()
