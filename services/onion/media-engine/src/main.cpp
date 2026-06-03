@@ -17,6 +17,8 @@
 #include "video/trim.hpp"
 #include "video/scale.hpp"
 #include "video/mute.hpp"
+#include "video/fps.hpp"
+#include "video/audio.hpp"
 #include <vips/vips8>
 #include <iostream>
 #include <string>
@@ -257,6 +259,10 @@ static void cmdVideo(const Args& args) {
         v::scaleVideo(in, out, w, h);
     } else if (op == "mute") {
         v::muteVideo(in, out);
+    } else if (op == "fps") {
+        v::changeFps(in, out, getInt(args, "fps", 30));
+    } else if (op == "audio") {
+        v::extractAudio(in, out);
     } else {
         throw std::runtime_error("unknown video op: " + op);
     }
@@ -278,7 +284,8 @@ static void printUsage(std::ostream& os) {
        << "             [--format <auto|webp|jpeg|png|avif|gif|tiff>] [--quality N]\n"
        << "  info       --input <path>   (print image metadata as JSON)\n"
        << "  analyze    --input <path> --metric <info|blurhash|average-color|phash>\n"
-       << "  video      --op <probe|thumbnail|poster|transcode|hls|gif|trim|scale|mute>\n"
+       << "  video      --op <probe|thumbnail|poster|transcode|hls|gif|trim|scale|\n"
+       << "                    mute|fps|audio>\n"
        << "             --input <path> [--output <path>] [op-specific flags]\n"
        << "  thumbnail  --input <path> --output <path> --time N --width N --height N\n"
        << "  help       show this message\n"
