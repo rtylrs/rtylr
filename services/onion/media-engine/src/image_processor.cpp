@@ -81,8 +81,6 @@ vips::VImage ImageProcessor::resizeImage(vips::VImage img, int targetW, int targ
 void ImageProcessor::saveImage(vips::VImage img, const ImageOptions& opts) {
     const std::string& fmt = opts.format;
 
-    auto saveOpts = vips::VImage::option()->set("Q", opts.quality);
-
     if (fmt == "webp") {
         img.webpsave(opts.outputPath.c_str(),
             vips::VImage::option()
