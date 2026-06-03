@@ -94,10 +94,10 @@ func TestUpsertReward_ReturnsZeroOnError(t *testing.T) {
 	}
 }
 
-func TestUpdateConfig_ZeroOwner_NoError(t *testing.T) {
+func TestUpdateConfig_ZeroOwner_Rejected(t *testing.T) {
 	s := &Service{repo: &mockRepo{}}
 	err := s.UpdateConfig(context.Background(), domain.LoyaltyConfigInput{OwnerID: 0})
-	if err != nil {
-		t.Errorf("unexpected error: %v", err)
+	if err == nil {
+		t.Error("expected validation error for zero owner_id")
 	}
 }

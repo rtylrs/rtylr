@@ -44,7 +44,7 @@ func TestGetByID_PropagatesNotFound(t *testing.T) {
 
 func TestCreate_ReturnsID(t *testing.T) {
 	s := &Service{repo: &mockRepo{createID: 55}}
-	id, err := s.Create(context.Background(), domain.CampaignInput{OwnerID: 1, Name: "Welcome"})
+	id, err := s.Create(context.Background(), domain.CampaignInput{OwnerID: 1, Name: "Welcome", Type: domain.TypeEmail})
 	if err != nil {
 		t.Fatalf("unexpected error: %v", err)
 	}
@@ -63,7 +63,8 @@ func TestUpdate_HappyPath(t *testing.T) {
 func TestUpdate_PropagatesError(t *testing.T) {
 	want := errors.New("update fail")
 	s := &Service{repo: &mockRepo{updErr: want}}
-	if err := s.Update(context.Background(), domain.CampaignUpdateInput{}); !errors.Is(err, want) {
+	upd := domain.CampaignUpdateInput{ID: 1, OwnerID: 2, Name: "Promo"}
+	if err := s.Update(context.Background(), upd); !errors.Is(err, want) {
 		t.Errorf("expected sentinel, got %v", err)
 	}
 }

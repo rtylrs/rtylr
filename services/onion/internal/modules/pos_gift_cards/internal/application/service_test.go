@@ -44,7 +44,8 @@ func TestList_Delegates(t *testing.T) {
 func TestCreate_PropagatesError(t *testing.T) {
 	want := errors.New("boom")
 	s := &Service{repo: &mockRepo{createErr: want}}
-	if _, err := s.Create(context.Background(), 1, domain.GiftCardInput{}); !errors.Is(err, want) {
+	input := domain.GiftCardInput{Code: "GC-1", InitialAmount: 50}
+	if _, err := s.Create(context.Background(), 1, input); !errors.Is(err, want) {
 		t.Errorf("expected sentinel, got %v", err)
 	}
 }
@@ -60,7 +61,8 @@ func TestGetByCode_PropagatesError(t *testing.T) {
 func TestRedeem_PropagatesError(t *testing.T) {
 	want := errors.New("invalid")
 	s := &Service{repo: &mockRepo{redErr: want}}
-	if _, err := s.Redeem(context.Background(), 1, domain.RedeemInput{}); !errors.Is(err, want) {
+	input := domain.RedeemInput{Code: "GC-1", Amount: 10}
+	if _, err := s.Redeem(context.Background(), 1, input); !errors.Is(err, want) {
 		t.Errorf("expected sentinel, got %v", err)
 	}
 }

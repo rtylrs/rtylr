@@ -61,14 +61,16 @@ func TestGetByID_Delegates(t *testing.T) {
 func TestCreate_PropagatesError(t *testing.T) {
 	want := errors.New("boom")
 	s := &Service{repo: &mockRepo{createErr: want}}
-	if _, err := s.Create(context.Background(), domain.CampaignInput{}); !errors.Is(err, want) {
+	input := domain.CampaignInput{Name: "Promo", Type: domain.TypeEmail}
+	if _, err := s.Create(context.Background(), input); !errors.Is(err, want) {
 		t.Errorf("expected sentinel, got %v", err)
 	}
 }
 
 func TestUpdateAndStatus_HappyPath(t *testing.T) {
 	s := &Service{repo: &mockRepo{}}
-	if err := s.Update(context.Background(), domain.CampaignUpdateInput{}); err != nil {
+	upd := domain.CampaignUpdateInput{ID: 5, OwnerID: 1, Name: "Promo"}
+	if err := s.Update(context.Background(), upd); err != nil {
 		t.Errorf("unexpected: %v", err)
 	}
 	if err := s.UpdateStatus(context.Background(), 1, 5, "active"); err != nil {
