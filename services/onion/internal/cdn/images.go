@@ -126,6 +126,13 @@ func (c *CDN) serveTransformed(w http.ResponseWriter, r *http.Request) {
 		Format:  r.URL.Query().Get("format"),
 		Quality: queryInt(r, "q"),
 	}
+	// Validate the request before touching the DB so malformed query params
+	// fail fast with a 400 instead of a 500 from deep in transform().
+	p.Defaults()
+	if err := p.Validate(); err != nil {
+		http.Error(w, err.Error(), http.StatusBadRequest)
+		return
+	}
 
 	meta, err := c.fileByUUID(r.Context(), fileUUID)
 	if err != nil {
