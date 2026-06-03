@@ -1,5 +1,9 @@
 #include "image_processor.hpp"
 #include "video_processor.hpp"
+#include "transform/apply.hpp"
+#include "transform/params.hpp"
+#include "encode.hpp"
+#include "analyze.hpp"
 #include <vips/vips8>
 #include <iostream>
 #include <string>
@@ -109,6 +113,55 @@ static void cmdThumbnail(const Args& args) {
 }
 
 // ---------------------------------------------------------------------------
+// Subcommand: transform
+//
+// Applies a Cloudinary-style transformation chain, e.g.
+//   media-engine transform --input in.jpg --output out.webp \
+//     --chain "w_400,h_400,c_fill,g_auto/e_blur:300" --format auto
+// ---------------------------------------------------------------------------
+
+static void cmdTransform(const Args& args) {
+    const std::string in = getStr(args, "input");
+    const std::string out = getStr(args, "output");
+    const std::string chain = getStr(args, "chain");
+    if (in.empty() || out.empty()) {
+        throw std::runtime_error("--input and --output are required");
+    }
+
+    vips::VImage img = vips::VImage::new_from_file(
+        in.c_str(), vips::VImage::option()->set("access", VIPS_ACCESS_SEQUENTIAL));
+    img = img.autorot();
+    img = voxire::transform::applyChain(img, chain);
+
+    voxire::EncodeOptions enc;
+    // Honor f_/q_ embedded in the chain, then let explicit flags override.
+    for (const auto& step : voxire::transform::splitSteps(chain)) {
+        auto p = voxire::transform::parseParams(step);
+        if (p.count("f")) enc.format = voxire::parseOutputFormat(p["f"]);
+        if (p.count("q")) enc.quality = std::stoi(p["q"]);
+    }
+    const std::string fmtFlag = getStr(args, "format");
+    if (!fmtFlag.empty()) enc.format = voxire::parseOutputFormat(fmtFlag);
+    const int qFlag = getInt(args, "quality", 0);
+    if (qFlag > 0) enc.quality = qFlag;
+
+    voxire::encodeToFile(img, out, enc);
+}
+
+// ---------------------------------------------------------------------------
+// Subcommand: info — print image metadata as JSON
+// ---------------------------------------------------------------------------
+
+static void cmdInfo(const Args& args) {
+    const std::string in = getStr(args, "input");
+    if (in.empty()) {
+        throw std::runtime_error("--input is required");
+    }
+    vips::VImage img = vips::VImage::new_from_file(in.c_str());
+    std::cout << voxire::infoToJSON(voxire::probeInfo(img)) << "\n";
+}
+
+// ---------------------------------------------------------------------------
 // Entry point
 // ---------------------------------------------------------------------------
 
@@ -119,6 +172,9 @@ static void printUsage(std::ostream& os) {
        << "  resize     --input <path> --output <path> --width N --height N\n"
        << "             --format <webp|jpeg|png|avif> --quality N\n"
        << "             --fit <cover|contain|fill|inside|outside>\n"
+       << "  transform  --input <path> --output <path> --chain <cloudinary-chain>\n"
+       << "             [--format <auto|webp|jpeg|png|avif|gif|tiff>] [--quality N]\n"
+       << "  info       --input <path>   (print image metadata as JSON)\n"
        << "  thumbnail  --input <path> --output <path> --time N --width N --height N\n"
        << "  help       show this message\n"
        << "  version    print the version and exit\n";
@@ -151,6 +207,10 @@ int main(int argc, char* argv[]) {
 
         if (args.subcommand == "resize") {
             cmdResize(args);
+        } else if (args.subcommand == "transform") {
+            cmdTransform(args);
+        } else if (args.subcommand == "info") {
+            cmdInfo(args);
         } else if (args.subcommand == "thumbnail") {
             cmdThumbnail(args);
         } else {

@@ -29,11 +29,9 @@ pkg_check_modules(FFMPEG QUIET
 
 # ── Sources ───────────────────────────────────────────────────────────────────
 
-set(SOURCES
-    src/main.cpp
-    src/image_processor.cpp
-    src/video_processor.cpp
-)
+# Glob every translation unit under src/ (top level plus ops/ and video/) so new
+# operations are picked up automatically. CONFIGURE_DEPENDS re-globs on build.
+file(GLOB_RECURSE SOURCES CONFIGURE_DEPENDS "${CMAKE_CURRENT_SOURCE_DIR}/src/*.cpp")
 
 add_executable(media-engine ${SOURCES})
 
