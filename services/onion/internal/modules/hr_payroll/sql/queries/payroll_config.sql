@@ -3,6 +3,10 @@ SELECT id, owner_id, period_type, pay_day_of_month, overtime_enabled, created_at
 FROM hr_payroll_config
 WHERE owner_id = ?;
 
+-- name: ListAllPayrollConfigs :many
+SELECT id, owner_id, period_type, pay_day_of_month, overtime_enabled, created_at, updated_at
+FROM hr_payroll_config;
+
 -- name: UpsertPayrollConfig :execresult
 INSERT INTO hr_payroll_config (owner_id, period_type, pay_day_of_month, overtime_enabled)
 VALUES (?, ?, ?, ?)
