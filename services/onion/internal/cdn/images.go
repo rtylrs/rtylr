@@ -10,11 +10,16 @@ import (
 	"os"
 	"os/exec"
 	"strconv"
+	"time"
 
 	"github.com/go-chi/chi/v5"
 
 	"github.com/voxire/onion/internal/platform/logger"
 )
+
+// engineTimeout caps how long a single media-engine invocation may run before
+// it is killed, so a malformed or pathological input can't pin a worker.
+const engineTimeout = 60 * time.Second
 
 // transform returns a transformed image, generating it via the media-engine on
 // a cache miss and persisting the result to S3 + cdn_transformations. fileID is
@@ -58,7 +63,9 @@ func (c *CDN) transform(ctx context.Context, fileID int64, fileUUID, originalSto
 		return nil, 0, "", ctx.Err()
 	}
 
-	cmd := exec.CommandContext(ctx, c.mediaEngine, p.CLIArgs(tmpIn, tmpOut)...)
+	execCtx, cancel := context.WithTimeout(ctx, engineTimeout)
+	defer cancel()
+	cmd := exec.CommandContext(execCtx, c.mediaEngine, p.CLIArgs(tmpIn, tmpOut)...)
 	if out, runErr := cmd.CombinedOutput(); runErr != nil {
 		return nil, 0, "", fmt.Errorf("media-engine failed: %w\noutput: %s", runErr, out)
 	}
