@@ -5,6 +5,7 @@ import (
 	"database/sql"
 	"errors"
 
+	sq "github.com/Masterminds/squirrel"
 	"github.com/voxire/onion/internal/modules/careers/internal/domain"
 )
 
@@ -14,12 +15,15 @@ import (
 // infrastructure package for anything else.
 var ErrSectionNotFound = errors.New("section not found")
 
-const sectionSelectColumns = `
-    id, owner_id, kind,
-    COALESCE(title,''), COALESCE(body,''),
-    COALESCE(media_url,''), COALESCE(items_json,'') AS items_json,
-    position, enabled,
-    created_at, updated_at`
+// sectionSelectColumns is the column projection shared by every
+// section read so the order stays locked with scanSection.
+var sectionSelectColumns = []string{
+	"id", "owner_id", "kind",
+	"COALESCE(title,'')", "COALESCE(body,'')",
+	"COALESCE(media_url,'')", "COALESCE(items_json,'') AS items_json",
+	"position", "enabled",
+	"created_at", "updated_at",
+}
 
 func scanSection(row interface{ Scan(...interface{}) error }) (domain.Section, error) {
 	var s domain.Section
@@ -34,13 +38,22 @@ func scanSection(row interface{ Scan(...interface{}) error }) (domain.Section, e
 }
 
 func (r *Repository) ListSections(ctx context.Context, ownerID int64, enabledOnly bool) ([]domain.Section, error) {
-	q := `SELECT ` + sectionSelectColumns + ` FROM careers_sections WHERE owner_id = ?`
+	b := sq.
+		Select(sectionSelectColumns...).
+		From("careers_sections").
+		Where(sq.Eq{"owner_id": ownerID})
 	if enabledOnly {
-		q += ` AND enabled = true`
+		b = b.Where(sq.Eq{"enabled": true})
 	}
-	q += ` ORDER BY position ASC, id ASC`
+	q, args, err := b.
+		OrderBy("position ASC", "id ASC").
+		PlaceholderFormat(sq.Question).
+		ToSql()
+	if err != nil {
+		return nil, err
+	}
 
-	rows, err := r.pool.QueryContext(ctx, q, ownerID)
+	rows, err := r.pool.QueryContext(ctx, q, args...)
 	if err != nil {
 		return nil, err
 	}
@@ -58,14 +71,19 @@ func (r *Repository) ListSections(ctx context.Context, ownerID int64, enabledOnl
 }
 
 func (r *Repository) CreateSection(ctx context.Context, in domain.SectionInput) (int64, error) {
-	q := `INSERT INTO careers_sections
-	        (owner_id, kind, title, body, media_url, items_json, position, enabled)
-	      VALUES (?, ?, ?, ?, ?, ?, ?, ?)`
-	res, err := r.pool.ExecContext(ctx, q,
-		in.OwnerID, in.Kind,
-		nullStr(in.Title), nullStr(in.Body),
-		nullStr(in.MediaURL), nullStr(in.ItemsJSON),
-		in.Position, in.Enabled)
+	q, args, err := sq.
+		Insert("careers_sections").
+		Columns("owner_id", "kind", "title", "body", "media_url", "items_json", "position", "enabled").
+		Values(in.OwnerID, in.Kind,
+			nullStr(in.Title), nullStr(in.Body),
+			nullStr(in.MediaURL), nullStr(in.ItemsJSON),
+			in.Position, in.Enabled).
+		PlaceholderFormat(sq.Question).
+		ToSql()
+	if err != nil {
+		return 0, err
+	}
+	res, err := r.pool.ExecContext(ctx, q, args...)
 	if err != nil {
 		return 0, err
 	}
@@ -73,16 +91,23 @@ func (r *Repository) CreateSection(ctx context.Context, in domain.SectionInput) 
 }
 
 func (r *Repository) UpdateSection(ctx context.Context, in domain.SectionInput) error {
-	q := `UPDATE careers_sections SET
-	        kind = ?, title = ?, body = ?, media_url = ?, items_json = ?,
-	        position = ?, enabled = ?
-	      WHERE id = ? AND owner_id = ?`
-	_, err := r.pool.ExecContext(ctx, q,
-		in.Kind,
-		nullStr(in.Title), nullStr(in.Body),
-		nullStr(in.MediaURL), nullStr(in.ItemsJSON),
-		in.Position, in.Enabled,
-		in.ID, in.OwnerID)
+	q, args, err := sq.
+		Update("careers_sections").
+		Set("kind", in.Kind).
+		Set("title", nullStr(in.Title)).
+		Set("body", nullStr(in.Body)).
+		Set("media_url", nullStr(in.MediaURL)).
+		Set("items_json", nullStr(in.ItemsJSON)).
+		Set("position", in.Position).
+		Set("enabled", in.Enabled).
+		Where(sq.Eq{"id": in.ID}).
+		Where(sq.Eq{"owner_id": in.OwnerID}).
+		PlaceholderFormat(sq.Question).
+		ToSql()
+	if err != nil {
+		return err
+	}
+	_, err = r.pool.ExecContext(ctx, q, args...)
 	return err
 }
 
@@ -102,28 +127,37 @@ func (r *Repository) ReorderSections(ctx context.Context, ownerID int64, ordered
 		}
 	}()
 
-	stmt, err := tx.PrepareContext(ctx,
-		`UPDATE careers_sections SET position = ? WHERE id = ? AND owner_id = ?`)
-	if err != nil {
-		_ = tx.Rollback()
-		return err
-	}
-
 	for idx, id := range orderedIDs {
-		if _, err := stmt.ExecContext(ctx, int32(idx), id, ownerID); err != nil {
-			_ = stmt.Close()
+		q, args, buildErr := sq.
+			Update("careers_sections").
+			Set("position", int32(idx)).
+			Where(sq.Eq{"id": id}).
+			Where(sq.Eq{"owner_id": ownerID}).
+			PlaceholderFormat(sq.Question).
+			ToSql()
+		if buildErr != nil {
 			_ = tx.Rollback()
-			return err
+			return buildErr
+		}
+		if _, execErr := tx.ExecContext(ctx, q, args...); execErr != nil {
+			_ = tx.Rollback()
+			return execErr
 		}
 	}
-	_ = stmt.Close()
 	return tx.Commit()
 }
 
 func (r *Repository) DeleteSection(ctx context.Context, ownerID, sectionID int64) error {
-	res, err := r.pool.ExecContext(ctx,
-		`DELETE FROM careers_sections WHERE id = ? AND owner_id = ?`,
-		sectionID, ownerID)
+	q, args, err := sq.
+		Delete("careers_sections").
+		Where(sq.Eq{"id": sectionID}).
+		Where(sq.Eq{"owner_id": ownerID}).
+		PlaceholderFormat(sq.Question).
+		ToSql()
+	if err != nil {
+		return err
+	}
+	res, err := r.pool.ExecContext(ctx, q, args...)
 	if err != nil {
 		return err
 	}
@@ -141,8 +175,18 @@ func (r *Repository) DeleteSection(ctx context.Context, ownerID, sectionID int64
 // cleanly on cross-tenant access rather than silently no-op via the
 // owner_id filter in UPDATE/DELETE.
 func (r *Repository) GetSection(ctx context.Context, ownerID, sectionID int64) (domain.Section, error) {
-	q := `SELECT ` + sectionSelectColumns + ` FROM careers_sections WHERE id = ? AND owner_id = ? LIMIT 1`
-	row := r.pool.QueryRowContext(ctx, q, sectionID, ownerID)
+	q, args, err := sq.
+		Select(sectionSelectColumns...).
+		From("careers_sections").
+		Where(sq.Eq{"id": sectionID}).
+		Where(sq.Eq{"owner_id": ownerID}).
+		Limit(1).
+		PlaceholderFormat(sq.Question).
+		ToSql()
+	if err != nil {
+		return domain.Section{}, err
+	}
+	row := r.pool.QueryRowContext(ctx, q, args...)
 	s, err := scanSection(row)
 	if err != nil {
 		if errors.Is(err, sql.ErrNoRows) {
