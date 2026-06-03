@@ -3,6 +3,7 @@ package infrastructure
 import (
 	"context"
 	"database/sql"
+	"fmt"
 	"strconv"
 	"time"
 
@@ -63,29 +64,19 @@ func (r *Repository) Create(ctx context.Context, ownerID int64, input domain.Ban
 
 // TotalBalance returns the sum of all account balances for the owner.
 func (r *Repository) TotalBalance(ctx context.Context, ownerID int64) (float64, error) {
-	const q = `
-		SELECT COALESCE(SUM(CAST(balance AS REAL)), 0)
-		FROM finance_bank_accounts
-		WHERE owner_id = ?`
-
-	var total float64
-	if err := r.pool.QueryRowContext(ctx, q, ownerID).Scan(&total); err != nil {
+	result, err := r.queries.SumBankAccountBalances(ctx, ownerID)
+	if err != nil {
 		logger.Ctx(ctx).Error("Failed to sum bank account balances", logger.Error(err))
 		return 0, err
 	}
 
-	return total, nil
+	return toFloat64(result), nil
 }
 
 // CountConnected returns the number of bank accounts with is_connected = TRUE.
 func (r *Repository) CountConnected(ctx context.Context, ownerID int64) (int64, error) {
-	const q = `
-		SELECT COUNT(*)
-		FROM finance_bank_accounts
-		WHERE owner_id = ? AND is_connected = TRUE`
-
-	var cnt int64
-	if err := r.pool.QueryRowContext(ctx, q, ownerID).Scan(&cnt); err != nil {
+	cnt, err := r.queries.CountConnectedBankAccounts(ctx, ownerID)
+	if err != nil {
 		logger.Ctx(ctx).Error("Failed to count connected bank accounts", logger.Error(err))
 		return 0, err
 	}
@@ -156,6 +147,44 @@ func parseFloatNull(s sql.NullString) float64 {
 	if err != nil {
 		logger.Global().Warn("failed to parse bank account balance from database",
 			logger.String("value", s.String),
+			logger.Error(err),
+		)
+		return 0
+	}
+	return v
+}
+
+// toFloat64 converts the value returned by a COALESCE(SUM(...), 0) aggregate
+// (sqlc emits interface{} for DECIMAL aggregates) into a float64, handling the
+// driver representations MySQL may return for a DECIMAL column.
+func toFloat64(v interface{}) float64 {
+	if v == nil {
+		return 0
+	}
+	switch val := v.(type) {
+	case float64:
+		return val
+	case float32:
+		return float64(val)
+	case int64:
+		return float64(val)
+	case []byte:
+		return parseFloatStr(string(val))
+	case string:
+		return parseFloatStr(val)
+	default:
+		return parseFloatStr(fmt.Sprintf("%v", val))
+	}
+}
+
+func parseFloatStr(s string) float64 {
+	if s == "" {
+		return 0
+	}
+	v, err := strconv.ParseFloat(s, 64)
+	if err != nil {
+		logger.Global().Warn("failed to parse bank account balance sum from database",
+			logger.String("value", s),
 			logger.Error(err),
 		)
 		return 0

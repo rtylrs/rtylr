@@ -7,3 +7,13 @@ ORDER BY name ASC;
 -- name: CreateBankAccount :execresult
 INSERT INTO finance_bank_accounts (owner_id, name, institution, account_type, balance, currency, is_connected)
 VALUES (?, ?, ?, ?, ?, ?, ?);
+
+-- name: SumBankAccountBalances :one
+SELECT COALESCE(SUM(balance), 0)
+FROM finance_bank_accounts
+WHERE owner_id = ?;
+
+-- name: CountConnectedBankAccounts :one
+SELECT COUNT(*)
+FROM finance_bank_accounts
+WHERE owner_id = ? AND is_connected = TRUE;
