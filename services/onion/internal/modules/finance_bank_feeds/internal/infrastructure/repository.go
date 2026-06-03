@@ -3,6 +3,8 @@ package infrastructure
 import (
 	"context"
 	"database/sql"
+	"fmt"
+	"strconv"
 	"time"
 
 	"github.com/voxire/onion/internal/modules/finance_bank_feeds/internal/domain"
@@ -69,32 +71,23 @@ func (r *Repository) List(ctx context.Context, ownerID int64, limit, offset int3
 // all feed transactions belonging to a specific bank account. Positive values
 // indicate net credits; negative values indicate net debits.
 func (r *Repository) SumAmountByAccountID(ctx context.Context, ownerID, bankAccountID int64) (int64, error) {
-	const q = `
-		SELECT COALESCE(SUM(amount_minor_units), 0)
-		FROM finance_bank_feed_transactions
-		WHERE owner_id = ? AND bank_account_id = ?`
-
-	var sum int64
-	if err := r.pool.QueryRowContext(ctx, q, ownerID, bankAccountID).Scan(&sum); err != nil {
+	result, err := r.queries.SumBankFeedAmountByAccount(ctx, sqlc.SumBankFeedAmountByAccountParams{
+		OwnerID:       ownerID,
+		BankAccountID: bankAccountID,
+	})
+	if err != nil {
 		logger.Ctx(ctx).Error("Failed to sum bank feed amounts by account", logger.Error(err))
 		return 0, err
 	}
 
-	return sum, nil
+	return toInt64(result), nil
 }
 
 // CountUnmatched returns the number of transactions that have neither a
 // matched_expense_id nor a matched_invoice_id.
 func (r *Repository) CountUnmatched(ctx context.Context, ownerID int64) (int64, error) {
-	const q = `
-		SELECT COUNT(*)
-		FROM finance_bank_feed_transactions
-		WHERE owner_id = ?
-		  AND matched_expense_id IS NULL
-		  AND matched_invoice_id IS NULL`
-
-	var cnt int64
-	if err := r.pool.QueryRowContext(ctx, q, ownerID).Scan(&cnt); err != nil {
+	cnt, err := r.queries.CountUnmatchedBankFeedTransactions(ctx, ownerID)
+	if err != nil {
 		logger.Ctx(ctx).Error("Failed to count unmatched bank feed transactions", logger.Error(err))
 		return 0, err
 	}
@@ -126,4 +119,49 @@ func nullTime(t sql.NullTime) time.Time {
 		return t.Time
 	}
 	return time.Time{}
+}
+
+// toInt64 normalizes the result of COALESCE(SUM(...), 0). MySQL returns the
+// sum of a BIGINT column as DECIMAL, which the driver may surface as int64,
+// []byte, or string depending on configuration.
+func toInt64(v interface{}) int64 {
+	if v == nil {
+		return 0
+	}
+	switch val := v.(type) {
+	case int64:
+		return val
+	case int32:
+		return int64(val)
+	case float64:
+		return int64(val)
+	case float32:
+		return int64(val)
+	case []byte:
+		return parseInt64Str(string(val))
+	case string:
+		return parseInt64Str(val)
+	default:
+		return parseInt64Str(fmt.Sprintf("%v", val))
+	}
+}
+
+func parseInt64Str(s string) int64 {
+	if s == "" {
+		return 0
+	}
+	v, err := strconv.ParseInt(s, 10, 64)
+	if err != nil {
+		// A DECIMAL sum may carry a fractional/scientific suffix; fall back
+		// to float parsing before giving up so the magnitude is preserved.
+		if f, ferr := strconv.ParseFloat(s, 64); ferr == nil {
+			return int64(f)
+		}
+		logger.Global().Warn("failed to parse bank feed amount sum from database",
+			logger.String("value", s),
+			logger.Error(err),
+		)
+		return 0
+	}
+	return v
 }

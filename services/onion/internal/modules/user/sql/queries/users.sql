@@ -31,3 +31,26 @@ DELETE FROM users WHERE id = ?;
 
 -- name: RecordLoginHistory :exec
 INSERT INTO login_history (user_id, email, method, ip_address, success) VALUES (?, ?, ?, ?, ?);
+
+-- name: GetUserBusinessID :one
+SELECT business_id FROM users WHERE id = ?;
+
+-- name: SetUserBusinessID :exec
+UPDATE users SET business_id = ? WHERE id = ?;
+
+-- name: GetBusinessOwnerID :one
+SELECT owner_id FROM businesses WHERE id = ?;
+
+-- name: GetUserAppRole :one
+SELECT role FROM user_app_permissions WHERE business_id = ? AND user_id = ?;
+
+-- name: CreateBusiness :execresult
+INSERT INTO businesses (name, owner_id) VALUES (?, ?);
+
+-- name: GetActivePlanIDBySlug :one
+SELECT id FROM plans WHERE slug = ? AND is_active = TRUE;
+
+-- name: UpsertTrialSubscription :exec
+INSERT INTO subscriptions (owner_id, plan_id, status, trial_ends_at)
+VALUES (?, ?, 'trial', ?)
+ON DUPLICATE KEY UPDATE plan_id = VALUES(plan_id), updated_at = CURRENT_TIMESTAMP;

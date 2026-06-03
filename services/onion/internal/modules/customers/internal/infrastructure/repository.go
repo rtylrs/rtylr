@@ -5,11 +5,10 @@ import (
 	"database/sql"
 	"encoding/json"
 	"errors"
-	"fmt"
 	"strconv"
-	"strings"
 	"time"
 
+	sq "github.com/Masterminds/squirrel"
 	"github.com/voxire/onion/internal/modules/customers/internal/domain"
 	"github.com/voxire/onion/internal/modules/customers/internal/infrastructure/persistence/sqlc"
 	"github.com/voxire/onion/internal/platform/logger"
@@ -75,57 +74,66 @@ func (r *Repository) ListCustomers(ctx context.Context, filter domain.CustomerLi
 }
 
 func (r *Repository) listCustomersFiltered(ctx context.Context, filter domain.CustomerListFilter, offset int) ([]domain.Customer, int, error) {
-	var (
-		whereClauses []string
-		args         []interface{}
-	)
-
-	whereClauses = append(whereClauses, "owner_id = ?")
-	args = append(args, filter.OwnerID)
+	conds := sq.And{sq.Eq{"owner_id": filter.OwnerID}}
 
 	if filter.Search != "" {
-		whereClauses = append(whereClauses, "(first_name LIKE ? OR last_name LIKE ? OR email LIKE ? OR phone LIKE ?)")
 		like := "%" + filter.Search + "%"
-		args = append(args, like, like, like, like)
+		conds = append(conds, sq.Expr(
+			"(first_name LIKE ? OR last_name LIKE ? OR email LIKE ? OR phone LIKE ?)",
+			like, like, like, like,
+		))
 	}
 
 	if filter.Tier != "" {
-		whereClauses = append(whereClauses, "loyalty_tier = ?")
-		args = append(args, filter.Tier)
+		conds = append(conds, sq.Eq{"loyalty_tier": filter.Tier})
 	}
 
 	if filter.Tag != "" {
-		whereClauses = append(whereClauses, "JSON_CONTAINS(tags, ?)")
 		tagJSON, err := json.Marshal(filter.Tag)
 		if err != nil {
 			return nil, 0, err
 		}
-		args = append(args, string(tagJSON))
+		conds = append(conds, sq.Expr("JSON_CONTAINS(tags, ?)", string(tagJSON)))
 	}
 
-	where := strings.Join(whereClauses, " AND ")
+	countSQL, countArgs, err := sq.Select("COUNT(*)").
+		From("crm_customers").
+		Where(conds).
+		PlaceholderFormat(sq.Question).
+		ToSql()
+	if err != nil {
+		logger.Ctx(ctx).Error("Failed to build customer count query", logger.Error(err))
 
-	countQuery := "SELECT COUNT(*) FROM crm_customers WHERE " + where
+		return nil, 0, err
+	}
+
 	var total int
 
-	if err := r.pool.QueryRowContext(ctx, countQuery, args...).Scan(&total); err != nil {
+	if err := r.pool.QueryRowContext(ctx, countSQL, countArgs...).Scan(&total); err != nil {
 		logger.Ctx(ctx).Error("Failed to count customers", logger.Error(err))
 
 		return nil, 0, err
 	}
 
-	query := fmt.Sprintf(`
-		SELECT id, owner_id, first_name, last_name, email, phone, date_of_birth, gender,
-		       address, city, country, loyalty_points, total_spent, visit_count, last_visit_at,
-		       loyalty_tier, tags, notes, is_active, created_at, updated_at
-		FROM crm_customers
-		WHERE %s
-		ORDER BY created_at DESC
-		LIMIT ? OFFSET ?`, where)
+	listSQL, listArgs, err := sq.Select(
+		"id", "owner_id", "first_name", "last_name", "email", "phone", "date_of_birth", "gender",
+		"address", "city", "country", "loyalty_points", "total_spent", "visit_count", "last_visit_at",
+		"loyalty_tier", "tags", "notes", "is_active", "created_at", "updated_at",
+	).
+		From("crm_customers").
+		Where(conds).
+		OrderBy("created_at DESC").
+		Limit(uint64(filter.PageSize)).
+		Offset(uint64(offset)).
+		PlaceholderFormat(sq.Question).
+		ToSql()
+	if err != nil {
+		logger.Ctx(ctx).Error("Failed to build customer list query", logger.Error(err))
 
-	args = append(args, filter.PageSize, offset)
+		return nil, 0, err
+	}
 
-	rows, err := r.pool.QueryContext(ctx, query, args...)
+	rows, err := r.pool.QueryContext(ctx, listSQL, listArgs...)
 	if err != nil {
 		logger.Ctx(ctx).Error("Failed to list customers", logger.Error(err))
 
@@ -560,26 +568,23 @@ func (r *Repository) ListCampaigns(ctx context.Context, ownerID int64, status st
 }
 
 func (r *Repository) listCampaignsFiltered(ctx context.Context, ownerID int64, status string) ([]domain.Campaign, error) {
-	var (
-		whereClauses []string
-		args         []interface{}
-	)
+	listSQL, listArgs, err := sq.Select(
+		"id", "owner_id", "name", "description", "channel", "status", "segment_id", "subject",
+		"content", "scheduled_at", "sent_at", "audience_count", "sent_count", "delivered_count",
+		"opened_count", "clicked_count", "created_at", "updated_at",
+	).
+		From("crm_campaigns").
+		Where(sq.Eq{"owner_id": ownerID, "status": status}).
+		OrderBy("created_at DESC").
+		PlaceholderFormat(sq.Question).
+		ToSql()
+	if err != nil {
+		logger.Ctx(ctx).Error("Failed to build campaign list query", logger.Error(err))
 
-	whereClauses = append(whereClauses, "owner_id = ?")
-	args = append(args, ownerID)
+		return nil, err
+	}
 
-	whereClauses = append(whereClauses, "status = ?")
-	args = append(args, status)
-
-	where := strings.Join(whereClauses, " AND ")
-
-	rows, err := r.pool.QueryContext(ctx,
-		fmt.Sprintf(`SELECT id, owner_id, name, description, channel, status, segment_id, subject,
-		        content, scheduled_at, sent_at, audience_count, sent_count, delivered_count,
-		        opened_count, clicked_count, created_at, updated_at
-		 FROM crm_campaigns WHERE %s ORDER BY created_at DESC`, where),
-		args...,
-	)
+	rows, err := r.pool.QueryContext(ctx, listSQL, listArgs...)
 	if err != nil {
 		logger.Ctx(ctx).Error("Failed to list campaigns", logger.Error(err))
 

@@ -127,11 +127,12 @@ func (r *Repository) CountVariants(ctx context.Context, ownerID, productID int64
 	)
 
 	if productID > 0 {
-		const q = `SELECT COUNT(*) FROM erp_product_variants WHERE owner_id = ? AND product_id = ?`
-		err = r.pool.QueryRowContext(ctx, q, ownerID, productID).Scan(&count)
+		count, err = r.queries.CountVariantsByProduct(ctx, sqlc.CountVariantsByProductParams{
+			OwnerID:   ownerID,
+			ProductID: productID,
+		})
 	} else {
-		const q = `SELECT COUNT(*) FROM erp_product_variants WHERE owner_id = ?`
-		err = r.pool.QueryRowContext(ctx, q, ownerID).Scan(&count)
+		count, err = r.queries.CountVariantsByOwner(ctx, ownerID)
 	}
 
 	if err != nil {

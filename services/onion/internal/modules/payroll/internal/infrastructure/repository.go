@@ -6,8 +6,9 @@ import (
 	"errors"
 	"fmt"
 	"strconv"
-	"strings"
 	"time"
+
+	sq "github.com/Masterminds/squirrel"
 
 	"github.com/voxire/onion/internal/modules/payroll/internal/domain"
 	"github.com/voxire/onion/internal/modules/payroll/internal/infrastructure/persistence/sqlc"
@@ -29,22 +30,25 @@ func NewRepository(db *sql.DB) *Repository {
 }
 
 func (r *Repository) ListPayrollRecords(ctx context.Context, ownerID int64, periodLabel string) ([]domain.PayrollRecord, error) {
-	// Dynamic WHERE clause - keep on pool
-	query := `
-		SELECT id, owner_id, staff_id, period_start, period_end, period_label,
-		       regular_hours, overtime_hours, base_pay, overtime_pay, bonuses,
-		       deductions, tax_withheld, net_pay, status, paid_at, notes, created_at
-		FROM hr_payroll_records
-		WHERE owner_id = ?`
-
-	args := []interface{}{ownerID}
+	// Dynamic WHERE clause - built with squirrel
+	builder := sq.
+		Select("id", "owner_id", "staff_id", "period_start", "period_end", "period_label",
+			"regular_hours", "overtime_hours", "base_pay", "overtime_pay", "bonuses",
+			"deductions", "tax_withheld", "net_pay", "status", "paid_at", "notes", "created_at").
+		From("hr_payroll_records").
+		Where(sq.Eq{"owner_id": ownerID})
 
 	if periodLabel != "" {
-		query += ` AND period_label = ?`
-		args = append(args, periodLabel)
+		builder = builder.Where(sq.Eq{"period_label": periodLabel})
 	}
 
-	query += ` ORDER BY period_start DESC, staff_id ASC`
+	builder = builder.OrderBy("period_start DESC", "staff_id ASC")
+
+	query, args, err := builder.PlaceholderFormat(sq.Question).ToSql()
+	if err != nil {
+		logger.Ctx(ctx).Error("Failed to build payroll records query", logger.Error(err))
+		return nil, err
+	}
 
 	rows, err := r.pool.QueryContext(ctx, query, args...)
 	if err != nil {
@@ -111,41 +115,62 @@ func (r *Repository) MarkPayrollPaid(ctx context.Context, ownerID, payrollID int
 
 // GetCompletedShiftsForPeriod retrieves completed shifts for payroll calculation.
 func (r *Repository) GetCompletedShiftsForPeriod(ctx context.Context, ownerID int64, periodStart, periodEnd time.Time) ([]domain.ShiftSummary, error) {
-	// Aggregation query - keep on pool
-	query := `
-		SELECT staff_id, SUM(hours_worked) AS total_hours, SUM(overtime_hours) AS total_overtime
-		FROM hr_shifts
-		WHERE owner_id = ? AND status = 'completed'
-		  AND date >= ? AND date <= ?
-		GROUP BY staff_id`
-
-	rows, err := r.pool.QueryContext(ctx, query, ownerID,
-		periodStart.Format("2006-01-02"),
-		periodEnd.Format("2006-01-02"),
-	)
+	rows, err := r.queries.GetCompletedShiftsForPeriod(ctx, sqlc.GetCompletedShiftsForPeriodParams{
+		OwnerID: ownerID,
+		Date:    sql.NullTime{Time: periodStart, Valid: true},
+		Date_2:  sql.NullTime{Time: periodEnd, Valid: true},
+	})
 	if err != nil {
 		logger.Ctx(ctx).Error("Failed to get completed shifts for period", logger.Error(err))
 		return nil, err
 	}
-	defer rows.Close()
 
-	var summaries []domain.ShiftSummary
-	for rows.Next() {
+	summaries := make([]domain.ShiftSummary, 0, len(rows))
+	for _, row := range rows {
 		var s domain.ShiftSummary
-		var totalHours, totalOvertime sql.NullFloat64
-		if err := rows.Scan(&s.StaffID, &totalHours, &totalOvertime); err != nil {
-			return nil, err
+		if row.StaffID.Valid {
+			s.StaffID = row.StaffID.Int64
 		}
-		if totalHours.Valid {
-			s.TotalHours = totalHours.Float64
-		}
-		if totalOvertime.Valid {
-			s.TotalOvertimeHours = totalOvertime.Float64
-		}
+		s.TotalHours = interfaceToFloat64(row.TotalHours)
+		s.TotalOvertimeHours = interfaceToFloat64(row.TotalOvertime)
 		summaries = append(summaries, s)
 	}
 
-	return summaries, rows.Err()
+	return summaries, nil
+}
+
+// interfaceToFloat64 converts a SUM/AVG aggregate column (which sqlc types as
+// interface{}) into a float64, handling the []byte/string forms MySQL returns
+// for DECIMAL aggregates.
+func interfaceToFloat64(v interface{}) float64 {
+	switch val := v.(type) {
+	case float64:
+		return val
+	case int64:
+		return float64(val)
+	case []byte:
+		f, err := strconv.ParseFloat(string(val), 64)
+		if err != nil {
+			logger.Global().Warn("failed to parse float value from database",
+				logger.String("value", string(val)),
+				logger.Error(err),
+			)
+			return 0
+		}
+		return f
+	case string:
+		f, err := strconv.ParseFloat(val, 64)
+		if err != nil {
+			logger.Global().Warn("failed to parse float value from database",
+				logger.String("value", val),
+				logger.Error(err),
+			)
+			return 0
+		}
+		return f
+	default:
+		return 0
+	}
 }
 
 // GetStaffPayRates returns salary/hourly rate for a staff member for payroll calculation.
@@ -181,20 +206,19 @@ func (r *Repository) GetStaffPayRatesByIDs(ctx context.Context, ownerID int64, s
 		return out, nil
 	}
 
-	var sb strings.Builder
-	sb.WriteString("SELECT id, salary, hourly_rate, overtime_rate FROM hr_staff WHERE owner_id = ? AND id IN (")
-	args := make([]any, 0, len(staffIDs)+1)
-	args = append(args, ownerID)
-	for i, id := range staffIDs {
-		if i > 0 {
-			sb.WriteByte(',')
-		}
-		sb.WriteByte('?')
-		args = append(args, id)
+	query, args, err := sq.
+		Select("id", "salary", "hourly_rate", "overtime_rate").
+		From("hr_staff").
+		Where(sq.Eq{"owner_id": ownerID}).
+		Where(sq.Eq{"id": staffIDs}).
+		PlaceholderFormat(sq.Question).
+		ToSql()
+	if err != nil {
+		logger.Ctx(ctx).Error("Failed to build staff pay rates query", logger.Error(err))
+		return nil, err
 	}
-	sb.WriteByte(')')
 
-	rows, err := r.pool.QueryContext(ctx, sb.String(), args...)
+	rows, err := r.pool.QueryContext(ctx, query, args...)
 	if err != nil {
 		logger.Ctx(ctx).Error("Failed to batch-load staff pay rates", logger.Error(err))
 		return nil, err

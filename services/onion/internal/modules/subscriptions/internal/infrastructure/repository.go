@@ -7,6 +7,8 @@ import (
 	"errors"
 	"time"
 
+	sq "github.com/Masterminds/squirrel"
+
 	"github.com/voxire/onion/internal/modules/subscriptions/internal/domain"
 )
 
@@ -22,13 +24,15 @@ func NewRepository(db *sql.DB) *Repository {
 
 // planSelectCols is the canonical column list for reading a plan row.
 // Kept in one place so the three GetPlan* variants stay in sync when columns change.
-const planSelectCols = `id, name, slug, apps, price_per_seat_cents,
-		COALESCE(annual_price_per_seat_cents, 0), trial_days,
-		COALESCE(paddle_price_id, ''), COALESCE(tagline, ''),
-		max_seats, max_locations,
-		COALESCE(ai_credits_per_month, 0), COALESCE(features, JSON_ARRAY()),
-		COALESCE(tier_order, 100), COALESCE(is_solo, FALSE), COALESCE(is_featured, FALSE),
-		is_active, created_at`
+var planSelectCols = []string{
+	"id", "name", "slug", "apps", "price_per_seat_cents",
+	"COALESCE(annual_price_per_seat_cents, 0)", "trial_days",
+	"COALESCE(paddle_price_id, '')", "COALESCE(tagline, '')",
+	"max_seats", "max_locations",
+	"COALESCE(ai_credits_per_month, 0)", "COALESCE(features, JSON_ARRAY())",
+	"COALESCE(tier_order, 100)", "COALESCE(is_solo, FALSE)", "COALESCE(is_featured, FALSE)",
+	"is_active", "created_at",
+}
 
 // scanPlan hydrates a Plan from a row matching planSelectCols.
 // Reused by all three GetPlan* entrypoints.
@@ -69,10 +73,18 @@ func scanPlan(scanner interface {
 }
 
 func (r *Repository) ListPlans(ctx context.Context) ([]domain.Plan, error) {
-	rows, err := r.db.QueryContext(ctx,
-		`SELECT `+planSelectCols+`
-		 FROM plans WHERE is_active = TRUE
-		 ORDER BY is_solo ASC, tier_order ASC, id ASC`)
+	query, args, err := sq.
+		Select(planSelectCols...).
+		From("plans").
+		Where(sq.Eq{"is_active": true}).
+		OrderBy("is_solo ASC", "tier_order ASC", "id ASC").
+		PlaceholderFormat(sq.Question).
+		ToSql()
+	if err != nil {
+		return nil, err
+	}
+
+	rows, err := r.db.QueryContext(ctx, query, args...)
 	if err != nil {
 		return nil, err
 	}
@@ -91,9 +103,17 @@ func (r *Repository) ListPlans(ctx context.Context) ([]domain.Plan, error) {
 }
 
 func (r *Repository) GetPlanBySlug(ctx context.Context, slug string) (*domain.Plan, error) {
-	row := r.db.QueryRowContext(ctx,
-		`SELECT `+planSelectCols+` FROM plans WHERE slug = ? AND is_active = TRUE`,
-		slug)
+	query, args, err := sq.
+		Select(planSelectCols...).
+		From("plans").
+		Where(sq.Eq{"slug": slug, "is_active": true}).
+		PlaceholderFormat(sq.Question).
+		ToSql()
+	if err != nil {
+		return nil, err
+	}
+
+	row := r.db.QueryRowContext(ctx, query, args...)
 	p, err := scanPlan(row)
 	if err != nil {
 		if errors.Is(err, sql.ErrNoRows) {
@@ -105,9 +125,17 @@ func (r *Repository) GetPlanBySlug(ctx context.Context, slug string) (*domain.Pl
 }
 
 func (r *Repository) GetPlanByID(ctx context.Context, id int64) (*domain.Plan, error) {
-	row := r.db.QueryRowContext(ctx,
-		`SELECT `+planSelectCols+` FROM plans WHERE id = ?`,
-		id)
+	query, args, err := sq.
+		Select(planSelectCols...).
+		From("plans").
+		Where(sq.Eq{"id": id}).
+		PlaceholderFormat(sq.Question).
+		ToSql()
+	if err != nil {
+		return nil, err
+	}
+
+	row := r.db.QueryRowContext(ctx, query, args...)
 	p, err := scanPlan(row)
 	if err != nil {
 		if errors.Is(err, sql.ErrNoRows) {
@@ -126,14 +154,22 @@ func (r *Repository) GetSubscription(ctx context.Context, ownerID int64) (*domai
 	var trialEndsAt, periodEndsAt, nextBillingDate sql.NullTime
 	var paddleSubID, paddleCustID sql.NullString
 
-	err := r.db.QueryRowContext(ctx,
-		`SELECT s.id, s.owner_id, s.plan_id, p.name, p.slug, p.apps, p.price_per_seat_cents,
-		        s.status, s.seat_count, s.trial_ends_at, s.next_billing_date,
-		        s.current_period_ends_at, s.paddle_subscription_id, s.paddle_customer_id, s.created_at
-		 FROM subscriptions s
-		 JOIN plans p ON p.id = s.plan_id
-		 WHERE s.owner_id = ?`,
-		ownerID).Scan(
+	query, args, err := sq.
+		Select(
+			"s.id", "s.owner_id", "s.plan_id", "p.name", "p.slug", "p.apps", "p.price_per_seat_cents",
+			"s.status", "s.seat_count", "s.trial_ends_at", "s.next_billing_date",
+			"s.current_period_ends_at", "s.paddle_subscription_id", "s.paddle_customer_id", "s.created_at",
+		).
+		From("subscriptions s").
+		Join("plans p ON p.id = s.plan_id").
+		Where(sq.Eq{"s.owner_id": ownerID}).
+		PlaceholderFormat(sq.Question).
+		ToSql()
+	if err != nil {
+		return nil, err
+	}
+
+	err = r.db.QueryRowContext(ctx, query, args...).Scan(
 		&sub.ID, &sub.OwnerID, &sub.PlanID, &sub.PlanName, &sub.PlanSlug, &appsJSON, &sub.PricePerSeatCents,
 		&sub.Status, &sub.SeatCount, &trialEndsAt, &nextBillingDate,
 		&periodEndsAt, &paddleSubID, &paddleCustID, &sub.CreatedAt)
@@ -175,21 +211,35 @@ func (r *Repository) UpsertSubscription(ctx context.Context, ownerID, planID int
 	now := time.Now().UTC()
 	nextBilling := time.Date(now.Year(), now.Month()+1, 1, 0, 0, 0, 0, time.UTC)
 
-	_, err := r.db.ExecContext(ctx,
-		`INSERT INTO subscriptions (owner_id, plan_id, status, seat_count, trial_ends_at, next_billing_date)
-		 VALUES (?, ?, 'trial', 1, ?, ?)
-		 ON DUPLICATE KEY UPDATE
-		   plan_id = VALUES(plan_id),
-		   updated_at = CURRENT_TIMESTAMP`,
-		ownerID, planID, trialEnd, nextBilling)
+	query, args, err := sq.
+		Insert("subscriptions").
+		Columns("owner_id", "plan_id", "status", "seat_count", "trial_ends_at", "next_billing_date").
+		Values(ownerID, planID, "trial", 1, trialEnd, nextBilling).
+		Suffix("ON DUPLICATE KEY UPDATE plan_id = VALUES(plan_id), updated_at = CURRENT_TIMESTAMP").
+		PlaceholderFormat(sq.Question).
+		ToSql()
+	if err != nil {
+		return err
+	}
+
+	_, err = r.db.ExecContext(ctx, query, args...)
 	return err
 }
 
 func (r *Repository) GetOwnerApps(ctx context.Context, ownerID int64) ([]string, error) {
 	var appsJSON string
-	err := r.db.QueryRowContext(ctx,
-		`SELECT p.apps FROM subscriptions s JOIN plans p ON p.id = s.plan_id WHERE s.owner_id = ?`,
-		ownerID).Scan(&appsJSON)
+	query, args, err := sq.
+		Select("p.apps").
+		From("subscriptions s").
+		Join("plans p ON p.id = s.plan_id").
+		Where(sq.Eq{"s.owner_id": ownerID}).
+		PlaceholderFormat(sq.Question).
+		ToSql()
+	if err != nil {
+		return nil, err
+	}
+
+	err = r.db.QueryRowContext(ctx, query, args...).Scan(&appsJSON)
 	if err != nil {
 		if errors.Is(err, sql.ErrNoRows) {
 			return nil, domain.ErrSubscriptionNotFound
@@ -205,9 +255,18 @@ func (r *Repository) GetOwnerApps(ctx context.Context, ownerID int64) ([]string,
 }
 
 func (r *Repository) UpdateSeatCount(ctx context.Context, ownerID int64, seatCount int) error {
-	_, err := r.db.ExecContext(ctx,
-		`UPDATE subscriptions SET seat_count = ?, updated_at = CURRENT_TIMESTAMP WHERE owner_id = ?`,
-		seatCount, ownerID)
+	query, args, err := sq.
+		Update("subscriptions").
+		Set("seat_count", seatCount).
+		Set("updated_at", sq.Expr("CURRENT_TIMESTAMP")).
+		Where(sq.Eq{"owner_id": ownerID}).
+		PlaceholderFormat(sq.Question).
+		ToSql()
+	if err != nil {
+		return err
+	}
+
+	_, err = r.db.ExecContext(ctx, query, args...)
 	return err
 }
 
@@ -217,13 +276,22 @@ func (r *Repository) GetActivePeriod(ctx context.Context, subscriptionID int64) 
 	var sp domain.SeatPeriod
 	var periodEnd sql.NullTime
 
-	err := r.db.QueryRowContext(ctx,
-		`SELECT id, subscription_id, owner_id, seat_count, price_per_seat_cents,
-		        period_start, period_end, billing_month
-		 FROM seat_periods
-		 WHERE subscription_id = ? AND period_end IS NULL
-		 ORDER BY period_start DESC LIMIT 1`,
-		subscriptionID).Scan(
+	query, args, err := sq.
+		Select(
+			"id", "subscription_id", "owner_id", "seat_count", "price_per_seat_cents",
+			"period_start", "period_end", "billing_month",
+		).
+		From("seat_periods").
+		Where(sq.Eq{"subscription_id": subscriptionID, "period_end": nil}).
+		OrderBy("period_start DESC").
+		Limit(1).
+		PlaceholderFormat(sq.Question).
+		ToSql()
+	if err != nil {
+		return nil, err
+	}
+
+	err = r.db.QueryRowContext(ctx, query, args...).Scan(
 		&sp.ID, &sp.SubscriptionID, &sp.OwnerID, &sp.SeatCount, &sp.PricePerSeatCents,
 		&sp.PeriodStart, &periodEnd, &sp.BillingMonth)
 	if err != nil {
@@ -240,29 +308,52 @@ func (r *Repository) GetActivePeriod(ctx context.Context, subscriptionID int64) 
 }
 
 func (r *Repository) CloseActivePeriod(ctx context.Context, subscriptionID int64, periodEnd time.Time) error {
-	_, err := r.db.ExecContext(ctx,
-		`UPDATE seat_periods SET period_end = ? WHERE subscription_id = ? AND period_end IS NULL`,
-		periodEnd, subscriptionID)
+	query, args, err := sq.
+		Update("seat_periods").
+		Set("period_end", periodEnd).
+		Where(sq.Eq{"subscription_id": subscriptionID, "period_end": nil}).
+		PlaceholderFormat(sq.Question).
+		ToSql()
+	if err != nil {
+		return err
+	}
+
+	_, err = r.db.ExecContext(ctx, query, args...)
 	return err
 }
 
 func (r *Repository) OpenPeriod(ctx context.Context, subscriptionID, ownerID int64, seatCount, pricePerSeatCents int, periodStart, billingMonth time.Time) error {
-	_, err := r.db.ExecContext(ctx,
-		`INSERT INTO seat_periods (subscription_id, owner_id, seat_count, price_per_seat_cents, period_start, billing_month)
-		 VALUES (?, ?, ?, ?, ?, ?)`,
-		subscriptionID, ownerID, seatCount, pricePerSeatCents, periodStart.Format("2006-01-02"), billingMonth.Format("2006-01-02"))
+	query, args, err := sq.
+		Insert("seat_periods").
+		Columns("subscription_id", "owner_id", "seat_count", "price_per_seat_cents", "period_start", "billing_month").
+		Values(subscriptionID, ownerID, seatCount, pricePerSeatCents, periodStart.Format("2006-01-02"), billingMonth.Format("2006-01-02")).
+		PlaceholderFormat(sq.Question).
+		ToSql()
+	if err != nil {
+		return err
+	}
+
+	_, err = r.db.ExecContext(ctx, query, args...)
 	return err
 }
 
 func (r *Repository) GetPeriodsForMonth(ctx context.Context, ownerID int64, month time.Time) ([]domain.SeatPeriod, error) {
 	billingMonth := time.Date(month.Year(), month.Month(), 1, 0, 0, 0, 0, time.UTC)
-	rows, err := r.db.QueryContext(ctx,
-		`SELECT id, subscription_id, owner_id, seat_count, price_per_seat_cents,
-		        period_start, period_end, billing_month
-		 FROM seat_periods
-		 WHERE owner_id = ? AND billing_month = ?
-		 ORDER BY period_start ASC`,
-		ownerID, billingMonth.Format("2006-01-02"))
+	query, args, err := sq.
+		Select(
+			"id", "subscription_id", "owner_id", "seat_count", "price_per_seat_cents",
+			"period_start", "period_end", "billing_month",
+		).
+		From("seat_periods").
+		Where(sq.Eq{"owner_id": ownerID, "billing_month": billingMonth.Format("2006-01-02")}).
+		OrderBy("period_start ASC").
+		PlaceholderFormat(sq.Question).
+		ToSql()
+	if err != nil {
+		return nil, err
+	}
+
+	rows, err := r.db.QueryContext(ctx, query, args...)
 	if err != nil {
 		return nil, err
 	}
@@ -290,13 +381,21 @@ func (r *Repository) GetBillingHistory(ctx context.Context, ownerID int64, limit
 	now := time.Now().UTC()
 	currentMonth := time.Date(now.Year(), now.Month(), 1, 0, 0, 0, 0, time.UTC)
 
-	rows, err := r.db.QueryContext(ctx,
-		`SELECT billing_month, seat_count, price_per_seat_cents, period_start, period_end
-		 FROM seat_periods
-		 WHERE owner_id = ? AND billing_month < ?
-		 ORDER BY billing_month DESC, period_start ASC
-		 LIMIT ?`,
-		ownerID, currentMonth.Format("2006-01-02"), limit*20) // fetch enough rows for limit months
+	// fetch enough rows for limit months
+	query, args, err := sq.
+		Select("billing_month", "seat_count", "price_per_seat_cents", "period_start", "period_end").
+		From("seat_periods").
+		Where(sq.Eq{"owner_id": ownerID}).
+		Where(sq.Lt{"billing_month": currentMonth.Format("2006-01-02")}).
+		OrderBy("billing_month DESC", "period_start ASC").
+		Limit(uint64(limit * 20)).
+		PlaceholderFormat(sq.Question).
+		ToSql()
+	if err != nil {
+		return nil, err
+	}
+
+	rows, err := r.db.QueryContext(ctx, query, args...)
 	if err != nil {
 		return nil, err
 	}
@@ -389,20 +488,38 @@ func computeLineItem(seatCount, pricePerSeatCents int, start time.Time, end *tim
 // UpdatePaddleSubscription writes the Paddle subscription ID, customer ID, and status
 // to the subscriptions row for the given owner.
 func (r *Repository) UpdatePaddleSubscription(ctx context.Context, ownerID int64, paddleSubID, paddleCustID, status string) error {
-	_, err := r.db.ExecContext(ctx,
-		`UPDATE subscriptions
-		 SET paddle_subscription_id = ?, paddle_customer_id = ?, status = ?, updated_at = CURRENT_TIMESTAMP
-		 WHERE owner_id = ?`,
-		paddleSubID, paddleCustID, status, ownerID)
+	query, args, err := sq.
+		Update("subscriptions").
+		Set("paddle_subscription_id", paddleSubID).
+		Set("paddle_customer_id", paddleCustID).
+		Set("status", status).
+		Set("updated_at", sq.Expr("CURRENT_TIMESTAMP")).
+		Where(sq.Eq{"owner_id": ownerID}).
+		PlaceholderFormat(sq.Question).
+		ToSql()
+	if err != nil {
+		return err
+	}
+
+	_, err = r.db.ExecContext(ctx, query, args...)
 	return err
 }
 
 // GetOwnerIDByPaddleSubscription returns the owner_id for a given Paddle subscription ID.
 func (r *Repository) GetOwnerIDByPaddleSubscription(ctx context.Context, paddleSubID string) (int64, error) {
 	var ownerID int64
-	err := r.db.QueryRowContext(ctx,
-		`SELECT owner_id FROM subscriptions WHERE paddle_subscription_id = ? LIMIT 1`,
-		paddleSubID).Scan(&ownerID)
+	query, args, err := sq.
+		Select("owner_id").
+		From("subscriptions").
+		Where(sq.Eq{"paddle_subscription_id": paddleSubID}).
+		Limit(1).
+		PlaceholderFormat(sq.Question).
+		ToSql()
+	if err != nil {
+		return 0, err
+	}
+
+	err = r.db.QueryRowContext(ctx, query, args...).Scan(&ownerID)
 	if err != nil {
 		return 0, err
 	}

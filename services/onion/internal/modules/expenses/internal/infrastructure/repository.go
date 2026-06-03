@@ -8,6 +8,7 @@ import (
 	"strconv"
 	"time"
 
+	sq "github.com/Masterminds/squirrel"
 	"github.com/voxire/onion/internal/modules/expenses/internal/domain"
 	"github.com/voxire/onion/internal/modules/expenses/internal/infrastructure/persistence/sqlc"
 	"github.com/voxire/onion/internal/platform/logger"
@@ -119,10 +120,11 @@ func (r *Repository) Delete(ctx context.Context, ownerID, id int64) error {
 }
 
 func (r *Repository) UpdateStatus(ctx context.Context, ownerID, id int64, status string) error {
-	result, err := r.pool.ExecContext(ctx,
-		`UPDATE finance_expenses SET status = ? WHERE id = ? AND owner_id = ?`,
-		status, id, ownerID,
-	)
+	result, err := r.queries.UpdateExpenseStatus(ctx, sqlc.UpdateExpenseStatusParams{
+		Status:  sql.NullString{String: status, Valid: true},
+		ID:      id,
+		OwnerID: ownerID,
+	})
 	if err != nil {
 		logger.Ctx(ctx).Error("Failed to update expense status", logger.Error(err))
 		return err
@@ -160,15 +162,20 @@ func (r *Repository) ListCategories(ctx context.Context, ownerID int64) ([]domai
 // SumByOwner returns the total expense amount for the given owner, regardless
 // of category or date.
 func (r *Repository) SumByOwner(ctx context.Context, ownerID int64) (float64, error) {
-	const q = `
-		SELECT COALESCE(SUM(CAST(amount AS REAL)), 0)
-		FROM finance_expenses
-		WHERE owner_id = ?`
+	sqlStr, args, err := sq.Select("COALESCE(SUM(CAST(amount AS REAL)), 0)").
+		From("finance_expenses").
+		Where(sq.Eq{"owner_id": ownerID}).
+		PlaceholderFormat(sq.Question).
+		ToSql()
+	if err != nil {
+		logger.Ctx(ctx).Error("Failed to build sum expenses query", logger.Error(err))
+		return 0, err
+	}
 
 	var total float64
-	if err := r.pool.QueryRowContext(ctx, q, ownerID).Scan(&total); err != nil {
-		logger.Ctx(ctx).Error("Failed to sum expenses", logger.Error(err))
-		return 0, err
+	if scanErr := r.pool.QueryRowContext(ctx, sqlStr, args...).Scan(&total); scanErr != nil {
+		logger.Ctx(ctx).Error("Failed to sum expenses", logger.Error(scanErr))
+		return 0, scanErr
 	}
 
 	return total, nil
@@ -177,13 +184,21 @@ func (r *Repository) SumByOwner(ctx context.Context, ownerID int64) (float64, er
 // CountByCategory returns the number of expenses in each category for the owner.
 // The map key is the category_id (as a string) or "uncategorised" for null values.
 func (r *Repository) CountByCategory(ctx context.Context, ownerID int64) (map[string]int64, error) {
-	const q = `
-		SELECT COALESCE(CAST(category_id AS TEXT), 'uncategorised'), COUNT(*) AS cnt
-		FROM finance_expenses
-		WHERE owner_id = ?
-		GROUP BY category_id`
+	sqlStr, args, err := sq.Select(
+		"COALESCE(CAST(category_id AS TEXT), 'uncategorised')",
+		"COUNT(*) AS cnt",
+	).
+		From("finance_expenses").
+		Where(sq.Eq{"owner_id": ownerID}).
+		GroupBy("category_id").
+		PlaceholderFormat(sq.Question).
+		ToSql()
+	if err != nil {
+		logger.Ctx(ctx).Error("Failed to build count expenses by category query", logger.Error(err))
+		return nil, err
+	}
 
-	rows, err := r.pool.QueryContext(ctx, q, ownerID)
+	rows, err := r.pool.QueryContext(ctx, sqlStr, args...)
 	if err != nil {
 		logger.Ctx(ctx).Error("Failed to count expenses by category", logger.Error(err))
 		return nil, err

@@ -7,6 +7,7 @@ import (
 	"math"
 	"time"
 
+	sq "github.com/Masterminds/squirrel"
 	"github.com/voxire/onion/internal/modules/hr_attendance/internal/domain"
 	"github.com/voxire/onion/internal/modules/hr_attendance/internal/infrastructure/persistence/sqlc"
 	"github.com/voxire/onion/internal/platform/logger"
@@ -140,45 +141,29 @@ func (r *Repository) ListAttendance(ctx context.Context, ownerID int64, params d
 }
 
 func (r *Repository) listAllAttendance(ctx context.Context, ownerID int64, dateFrom, dateTo time.Time, limit, offset int32) ([]domain.AttendanceRecordRecord, int64, error) {
-	var total int64
-	err := r.pool.QueryRowContext(ctx,
-		`SELECT COUNT(*) FROM hr_attendance_records WHERE owner_id = ? AND date >= ? AND date <= ?`,
-		ownerID, dateFrom, dateTo,
-	).Scan(&total)
+	total, err := r.queries.CountAllAttendance(ctx, sqlc.CountAllAttendanceParams{
+		OwnerID: ownerID,
+		Date:    dateFrom,
+		Date_2:  dateTo,
+	})
 	if err != nil {
 		return nil, 0, err
 	}
 
-	rows, err := r.pool.QueryContext(ctx,
-		`SELECT id, owner_id, employee_id, location_id, date, clock_in_at, clock_out_at,
-		        duration_minutes, clock_in_method, clock_in_lat, clock_in_lng,
-		        is_late, late_minutes, status, created_at, updated_at
-		 FROM hr_attendance_records
-		 WHERE owner_id = ? AND date >= ? AND date <= ?
-		 ORDER BY date DESC, clock_in_at DESC
-		 LIMIT ? OFFSET ?`,
-		ownerID, dateFrom, dateTo, limit, offset,
-	)
+	rows, err := r.queries.ListAllAttendance(ctx, sqlc.ListAllAttendanceParams{
+		OwnerID: ownerID,
+		Date:    dateFrom,
+		Date_2:  dateTo,
+		Limit:   limit,
+		Offset:  offset,
+	})
 	if err != nil {
 		return nil, 0, err
 	}
-	defer rows.Close()
 
-	records := make([]domain.AttendanceRecordRecord, 0, limit)
-	for rows.Next() {
-		var row sqlc.HrAttendanceRecord
-		if err := rows.Scan(
-			&row.ID, &row.OwnerID, &row.EmployeeID, &row.LocationID,
-			&row.Date, &row.ClockInAt, &row.ClockOutAt,
-			&row.DurationMinutes, &row.ClockInMethod, &row.ClockInLat, &row.ClockInLng,
-			&row.IsLate, &row.LateMinutes, &row.Status, &row.CreatedAt, &row.UpdatedAt,
-		); err != nil {
-			return nil, 0, err
-		}
+	records := make([]domain.AttendanceRecordRecord, 0, len(rows))
+	for _, row := range rows {
 		records = append(records, attendanceFromRow(row))
-	}
-	if err := rows.Err(); err != nil {
-		return nil, 0, err
 	}
 	return records, total, nil
 }
@@ -232,11 +217,19 @@ func (r *Repository) GetAttendanceConfig(ctx context.Context, ownerID int64) (*d
 // --- Employee PIN ---
 
 func (r *Repository) GetEmployeePINHash(ctx context.Context, ownerID, employeeID int64) (string, error) {
+	// cross-schema read from hr_core — employee PIN hash for attendance clock-in verification
+	queryStr, args, err := sq.Select("clock_in_pin_hash").
+		From("hr_employees").
+		Where(sq.Eq{"id": employeeID, "owner_id": ownerID}).
+		PlaceholderFormat(sq.Question).
+		ToSql()
+	if err != nil {
+		logger.Ctx(ctx).Error("failed to build employee PIN hash query", logger.Any("owner_id", ownerID), logger.Any("employee_id", employeeID), logger.Error(err))
+		return "", err
+	}
+
 	var hash sql.NullString
-	err := r.pool.QueryRowContext(ctx,
-		"SELECT clock_in_pin_hash FROM hr_employees WHERE id = ? AND owner_id = ?",
-		employeeID, ownerID,
-	).Scan(&hash)
+	err = r.pool.QueryRowContext(ctx, queryStr, args...).Scan(&hash)
 	if err != nil {
 		if errors.Is(err, sql.ErrNoRows) {
 			return "", domain.ErrAttendanceNotFound
@@ -251,10 +244,19 @@ func (r *Repository) GetEmployeePINHash(ctx context.Context, ownerID, employeeID
 }
 
 func (r *Repository) SetEmployeePINHash(ctx context.Context, ownerID, employeeID int64, hash string) error {
-	result, err := r.pool.ExecContext(ctx,
-		"UPDATE hr_employees SET clock_in_pin_hash = ?, updated_at = NOW() WHERE id = ? AND owner_id = ?",
-		hash, employeeID, ownerID,
-	)
+	// cross-schema write to hr_core — set employee PIN hash for attendance clock-in
+	queryStr, args, err := sq.Update("hr_employees").
+		Set("clock_in_pin_hash", hash).
+		Set("updated_at", sq.Expr("NOW()")).
+		Where(sq.Eq{"id": employeeID, "owner_id": ownerID}).
+		PlaceholderFormat(sq.Question).
+		ToSql()
+	if err != nil {
+		logger.Ctx(ctx).Error("failed to build set employee PIN hash query", logger.Any("owner_id", ownerID), logger.Any("employee_id", employeeID), logger.Error(err))
+		return err
+	}
+
+	result, err := r.pool.ExecContext(ctx, queryStr, args...)
 	if err != nil {
 		logger.Ctx(ctx).Error("failed to set employee PIN hash", logger.Any("owner_id", ownerID), logger.Any("employee_id", employeeID), logger.Error(err))
 		return err
@@ -272,11 +274,19 @@ func (r *Repository) SetEmployeePINHash(ctx context.Context, ownerID, employeeID
 // --- Location Coordinates ---
 
 func (r *Repository) GetLocationCoordinates(ctx context.Context, ownerID, locationID int64) (*domain.LocationCoordinates, error) {
+	// cross-schema read from hr_core — location coordinates for geofence attendance validation
+	queryStr, args, err := sq.Select("latitude", "longitude").
+		From("hr_locations").
+		Where(sq.Eq{"id": locationID, "owner_id": ownerID}).
+		PlaceholderFormat(sq.Question).
+		ToSql()
+	if err != nil {
+		logger.Ctx(ctx).Error("failed to build location coordinates query", logger.Any("owner_id", ownerID), logger.Any("location_id", locationID), logger.Error(err))
+		return nil, err
+	}
+
 	var lat, lng sql.NullFloat64
-	err := r.pool.QueryRowContext(ctx,
-		"SELECT latitude, longitude FROM hr_locations WHERE id = ? AND owner_id = ?",
-		locationID, ownerID,
-	).Scan(&lat, &lng)
+	err = r.pool.QueryRowContext(ctx, queryStr, args...).Scan(&lat, &lng)
 	if err != nil {
 		if errors.Is(err, sql.ErrNoRows) {
 			return nil, nil

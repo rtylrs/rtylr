@@ -8,6 +8,8 @@ import (
 	"strconv"
 	"time"
 
+	sq "github.com/Masterminds/squirrel"
+
 	"github.com/voxire/onion/internal/modules/staff/internal/domain"
 	"github.com/voxire/onion/internal/modules/staff/internal/infrastructure/persistence/sqlc"
 	"github.com/voxire/onion/internal/platform/logger"
@@ -90,35 +92,41 @@ func staffFromRow(row sqlc.HrStaff) domain.Staff {
 
 func (r *Repository) ListStaff(ctx context.Context, ownerID int64, search, departmentID, status string) ([]domain.Staff, error) {
 	// cross-schema read from hr_departments — to include department name in staff list response
-	query := `
-		SELECT s.id, s.owner_id, s.user_id, s.department_id,
-		       COALESCE(d.name, '') AS department_name,
-		       s.first_name, s.last_name, s.email, s.phone,
-		       s.role, s.employment_type, s.status, s.salary, s.hourly_rate, s.overtime_rate,
-		       s.start_date, s.end_date, s.address, s.emergency_contact_name, s.emergency_contact_phone,
-		       s.apps, s.notes, s.created_at, s.updated_at
-		FROM hr_staff s
-		LEFT JOIN hr_departments d ON d.id = s.department_id AND d.owner_id = s.owner_id
-		WHERE s.owner_id = ?`
-
-	args := make([]interface{}, 0, 7)
-	args = append(args, ownerID)
+	// Dynamic WHERE clause - built with squirrel
+	builder := sq.
+		Select("s.id", "s.owner_id", "s.user_id", "s.department_id",
+			"COALESCE(d.name, '') AS department_name",
+			"s.first_name", "s.last_name", "s.email", "s.phone",
+			"s.role", "s.employment_type", "s.status", "s.salary", "s.hourly_rate", "s.overtime_rate",
+			"s.start_date", "s.end_date", "s.address", "s.emergency_contact_name", "s.emergency_contact_phone",
+			"s.apps", "s.notes", "s.created_at", "s.updated_at").
+		From("hr_staff s").
+		LeftJoin("hr_departments d ON d.id = s.department_id AND d.owner_id = s.owner_id").
+		Where(sq.Eq{"s.owner_id": ownerID})
 
 	if search != "" {
-		query += ` AND (s.first_name LIKE ? OR s.last_name LIKE ? OR s.email LIKE ? OR s.role LIKE ?)`
 		like := "%" + search + "%"
-		args = append(args, like, like, like, like)
+		builder = builder.Where(sq.Or{
+			sq.Like{"s.first_name": like},
+			sq.Like{"s.last_name": like},
+			sq.Like{"s.email": like},
+			sq.Like{"s.role": like},
+		})
 	}
 	if departmentID != "" {
-		query += ` AND s.department_id = ?`
-		args = append(args, departmentID)
+		builder = builder.Where(sq.Eq{"s.department_id": departmentID})
 	}
 	if status != "" {
-		query += ` AND s.status = ?`
-		args = append(args, status)
+		builder = builder.Where(sq.Eq{"s.status": status})
 	}
 
-	query += ` ORDER BY s.last_name ASC, s.first_name ASC`
+	builder = builder.OrderBy("s.last_name ASC", "s.first_name ASC")
+
+	query, args, err := builder.PlaceholderFormat(sq.Question).ToSql()
+	if err != nil {
+		logger.Ctx(ctx).Error("Failed to build list staff query", logger.Error(err))
+		return nil, err
+	}
 
 	rows, err := r.pool.QueryContext(ctx, query, args...)
 	if err != nil {

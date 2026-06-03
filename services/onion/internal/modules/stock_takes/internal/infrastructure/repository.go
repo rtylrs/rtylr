@@ -7,6 +7,8 @@ import (
 	"fmt"
 	"strconv"
 
+	"github.com/Masterminds/squirrel"
+
 	"github.com/voxire/onion/internal/modules/stock_takes/internal/domain"
 	"github.com/voxire/onion/internal/modules/stock_takes/internal/infrastructure/persistence/sqlc"
 	"github.com/voxire/onion/internal/platform/logger"
@@ -28,59 +30,43 @@ func NewRepository(db *sql.DB) *Repository {
 }
 
 func (r *Repository) ListStockTakes(ctx context.Context, ownerID int64, limit, offset int) ([]domain.StockTake, bool, error) {
-	const q = `
-		SELECT id, owner_id, warehouse_id, status, notes, started_at, completed_at, created_at
-		FROM erp_stock_takes
-		WHERE owner_id = ?
-		ORDER BY created_at DESC, id DESC
-		LIMIT ? OFFSET ?`
-
-	rows, err := r.pool.QueryContext(ctx, q, ownerID, limit+1, offset)
+	rows, err := r.queries.ListStockTakesPaged(ctx, sqlc.ListStockTakesPagedParams{
+		OwnerID: ownerID,
+		Limit:   int32(limit + 1),
+		Offset:  int32(offset),
+	})
 	if err != nil {
 		logger.Ctx(ctx).Error("Failed to list stock takes", logger.Error(err))
 		return nil, false, err
 	}
-	defer rows.Close()
 
 	stockTakes := make([]domain.StockTake, 0, limit+1)
-	for rows.Next() {
-		var s domain.StockTake
-		var warehouseID sql.NullInt64
-		var status, notes sql.NullString
-		var startedAt, completedAt, createdAt sql.NullTime
-
-		if err := rows.Scan(
-			&s.ID, &s.OwnerID, &warehouseID, &status, &notes,
-			&startedAt, &completedAt, &createdAt,
-		); err != nil {
-			logger.Ctx(ctx).Error("Failed to scan stock take row", logger.Error(err))
-			return nil, false, err
+	for _, row := range rows {
+		s := domain.StockTake{
+			ID:      row.ID,
+			OwnerID: row.OwnerID,
 		}
 
-		if warehouseID.Valid {
-			s.WarehouseID = warehouseID.Int64
+		if row.WarehouseID.Valid {
+			s.WarehouseID = row.WarehouseID.Int64
 		}
-		if status.Valid {
-			s.Status = domain.StockTakeStatus(status.String)
+		if row.Status.Valid {
+			s.Status = domain.StockTakeStatus(row.Status.ErpStockTakesStatus)
 		}
-		if notes.Valid {
-			s.Notes = notes.String
+		if row.Notes.Valid {
+			s.Notes = row.Notes.String
 		}
-		if startedAt.Valid {
-			s.StartedAt = startedAt.Time.Format("2006-01-02T15:04:05Z07:00")
+		if row.StartedAt.Valid {
+			s.StartedAt = row.StartedAt.Time.Format("2006-01-02T15:04:05Z07:00")
 		}
-		if completedAt.Valid {
-			s.CompletedAt = completedAt.Time.Format("2006-01-02T15:04:05Z07:00")
+		if row.CompletedAt.Valid {
+			s.CompletedAt = row.CompletedAt.Time.Format("2006-01-02T15:04:05Z07:00")
 		}
-		if createdAt.Valid {
-			s.CreatedAt = createdAt.Time
+		if row.CreatedAt.Valid {
+			s.CreatedAt = row.CreatedAt.Time
 		}
 
 		stockTakes = append(stockTakes, s)
-	}
-
-	if err := rows.Err(); err != nil {
-		return nil, false, err
 	}
 
 	hasMore := len(stockTakes) > limit
@@ -107,21 +93,22 @@ func (r *Repository) getStockTakeItemsBatch(ctx context.Context, stockTakes []do
 		return nil, nil
 	}
 
-	placeholders := make([]byte, 0, len(stockTakes)*2)
-	args := make([]any, 0, len(stockTakes))
+	ids := make([]int64, 0, len(stockTakes))
 	for i := range stockTakes {
-		if i > 0 {
-			placeholders = append(placeholders, ',', '?')
-		} else {
-			placeholders = append(placeholders, '?')
-		}
-		args = append(args, stockTakes[i].ID)
+		ids = append(ids, stockTakes[i].ID)
 	}
 
-	q := `SELECT id, stock_take_id, product_id, expected_qty, counted_qty, variance, created_at
-		FROM erp_stock_take_items
-		WHERE stock_take_id IN (` + string(placeholders) + `)
-		ORDER BY id ASC`
+	q, args, err := squirrel.
+		Select("id", "stock_take_id", "product_id", "expected_qty", "counted_qty", "variance", "created_at").
+		From("erp_stock_take_items").
+		Where(squirrel.Eq{"stock_take_id": ids}).
+		OrderBy("id ASC").
+		PlaceholderFormat(squirrel.Question).
+		ToSql()
+	if err != nil {
+		logger.Ctx(ctx).Error("Failed to build stock take items query", logger.Error(err))
+		return nil, err
+	}
 
 	rows, err := r.pool.QueryContext(ctx, q, args...)
 	if err != nil {

@@ -17,3 +17,16 @@ WHERE owner_id = ? AND id = ?;
 
 -- name: DeleteWarehouse :exec
 DELETE FROM erp_warehouses WHERE owner_id = ? AND id = ?;
+
+-- name: CountWarehouses :one
+SELECT COUNT(*) FROM erp_warehouses WHERE owner_id = ?;
+
+-- name: CountActiveWarehouses :one
+SELECT COUNT(*) FROM erp_warehouses WHERE owner_id = ? AND is_active = 1;
+
+-- name: GetWarehouseByID :one
+SELECT id, owner_id, name, address, city, country, manager_name,
+       capacity, is_default, is_active, created_at, updated_at
+FROM erp_warehouses
+WHERE owner_id = ? AND id = ?
+LIMIT 1;

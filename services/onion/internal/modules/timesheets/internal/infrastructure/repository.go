@@ -4,6 +4,8 @@ import (
 	"context"
 	"database/sql"
 
+	sq "github.com/Masterminds/squirrel"
+
 	"github.com/voxire/onion/internal/modules/timesheets/internal/domain"
 	"github.com/voxire/onion/internal/modules/timesheets/internal/infrastructure/persistence/sqlc"
 	"github.com/voxire/onion/internal/platform/logger"
@@ -24,27 +26,34 @@ func NewRepository(db *sql.DB) *Repository {
 }
 
 func (r *Repository) GetTimesheets(ctx context.Context, ownerID int64, weekStart string) ([]domain.TimesheetEntry, error) {
-	// Dynamic WHERE clause and complex aggregation - keep on pool
-	query := `
-		SELECT s.staff_id,
-		       CONCAT(st.first_name, ' ', st.last_name) AS staff_name,
-		       DATE(s.date - INTERVAL WEEKDAY(s.date) DAY) AS week_start,
-		       COALESCE(SUM(s.hours_worked), 0) AS total_hours,
-		       COALESCE(SUM(s.hours_worked) - SUM(s.overtime_hours), 0) AS regular_hours,
-		       COALESCE(SUM(s.overtime_hours), 0) AS overtime_hours
-		FROM hr_shifts s
-		JOIN hr_staff st ON st.id = s.staff_id AND st.owner_id = s.owner_id
-		WHERE s.owner_id = ? AND s.status = 'completed'`
-
-	args := make([]interface{}, 0, 2)
-	args = append(args, ownerID)
+	// Dynamic WHERE clause and complex aggregation - built with squirrel
+	builder := sq.
+		Select(
+			"s.staff_id",
+			"CONCAT(st.first_name, ' ', st.last_name) AS staff_name",
+			"DATE(s.date - INTERVAL WEEKDAY(s.date) DAY) AS week_start",
+			"COALESCE(SUM(s.hours_worked), 0) AS total_hours",
+			"COALESCE(SUM(s.hours_worked) - SUM(s.overtime_hours), 0) AS regular_hours",
+			"COALESCE(SUM(s.overtime_hours), 0) AS overtime_hours",
+		).
+		From("hr_shifts s").
+		Join("hr_staff st ON st.id = s.staff_id AND st.owner_id = s.owner_id").
+		Where(sq.Eq{"s.owner_id": ownerID}).
+		Where(sq.Eq{"s.status": "completed"})
 
 	if weekStart != "" {
-		query += ` AND DATE(s.date - INTERVAL WEEKDAY(s.date) DAY) = ?`
-		args = append(args, weekStart)
+		builder = builder.Where(sq.Expr("DATE(s.date - INTERVAL WEEKDAY(s.date) DAY) = ?", weekStart))
 	}
 
-	query += ` GROUP BY s.staff_id, staff_name, week_start ORDER BY week_start DESC, staff_name ASC`
+	builder = builder.
+		GroupBy("s.staff_id", "staff_name", "week_start").
+		OrderBy("week_start DESC", "staff_name ASC")
+
+	query, args, err := builder.PlaceholderFormat(sq.Question).ToSql()
+	if err != nil {
+		logger.Ctx(ctx).Error("Failed to build timesheets query", logger.Error(err))
+		return nil, err
+	}
 
 	rows, err := r.pool.QueryContext(ctx, query, args...)
 	if err != nil {

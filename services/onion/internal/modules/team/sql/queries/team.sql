@@ -77,3 +77,12 @@ SELECT name, owner_id FROM businesses WHERE id = ?;
 INSERT INTO access_requests (business_id, user_id, app)
 VALUES (?, ?, ?)
 ON DUPLICATE KEY UPDATE status = 'pending', created_at = NOW();
+
+-- name: IsOnboarded :one
+SELECT COALESCE(onboarded, FALSE) FROM users WHERE id = ?;
+
+-- name: MarkOnboarded :exec
+UPDATE users SET onboarded = TRUE WHERE id = ?;
+
+-- name: CountActiveMembers :one
+SELECT COUNT(*) FROM user_app_permissions WHERE owner_id = ? AND is_active = 1;

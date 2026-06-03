@@ -27,3 +27,9 @@ WHERE owner_id = ? AND id = ?;
 
 -- name: DeleteVariant :exec
 DELETE FROM erp_product_variants WHERE owner_id = ? AND id = ?;
+
+-- name: CountVariantsByOwner :one
+SELECT COUNT(*) FROM erp_product_variants WHERE owner_id = ?;
+
+-- name: CountVariantsByProduct :one
+SELECT COUNT(*) FROM erp_product_variants WHERE owner_id = ? AND product_id = ?;

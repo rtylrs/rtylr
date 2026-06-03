@@ -26,3 +26,9 @@ INSERT INTO careers (
 ) VALUES (
     ?, ?, ?, ?, ?, ?, ?, ?
 );
+
+-- name: SaveCareerApplication :execresult
+INSERT INTO voxire_career_applications
+    (job_id, name, email, phone, work_history, education, experience_summary, cover_letter, cv_key)
+VALUES
+    (?, ?, ?, ?, ?, ?, ?, ?, ?);

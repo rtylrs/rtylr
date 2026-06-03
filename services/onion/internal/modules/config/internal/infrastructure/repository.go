@@ -55,11 +55,10 @@ func (r *Repository) GetConfig(ctx context.Context, ownerID string) (domain.Conf
 	// businesses maps to the same numeric user id used by configs, so
 	// we can resolve it cheaply with a single targeted query without
 	// reaching into the business module.
-	var slug sql.NullString
-	if err := r.pool.QueryRowContext(ctx,
-		`SELECT slug FROM businesses WHERE owner_id = ? LIMIT 1`, ownerIDInt,
-	).Scan(&slug); err != nil && !errors.Is(err, sql.ErrNoRows) {
-		logger.Ctx(ctx).Warn("Failed to load business slug for config", logger.Error(err))
+	// cross-schema read from businesses — resolve config's business slug
+	slug, slugErr := r.queries.GetBusinessSlugByOwnerID(ctx, int64(ownerIDInt))
+	if slugErr != nil && !errors.Is(slugErr, sql.ErrNoRows) {
+		logger.Ctx(ctx).Warn("Failed to load business slug for config", logger.Error(slugErr))
 	} else if slug.Valid {
 		config.BusinessSlug = slug.String
 	}
@@ -134,42 +133,24 @@ func (r *Repository) UpdateConfig(ctx context.Context, input domain.ConfigInput)
 		return marshalErr
 	}
 
-	_, execErr := r.pool.ExecContext(ctx, `
-		UPDATE config SET
-			site_name = ?,
-			logo_url = ?,
-			favicon_url = ?,
-			meta_tags = ?,
-			contact_email = ?,
-			contact_number = ?,
-			instagram = ?,
-			maintenance_mode = ?,
-			maintenance_notice = ?,
-			addons_enabled = ?,
-			enable_reviews = ?,
-			enable_wishlist = ?,
-			enable_newsletter_signup = ?,
-			about_content = ?,
-			footer_sub_text = ?
-		WHERE owner_id = ?
-	`,
-		sql.NullString{String: input.SiteName, Valid: input.SiteName != ""},
-		sql.NullString{String: input.LogoUrl, Valid: input.LogoUrl != ""},
-		sql.NullString{String: input.FaviconUrl, Valid: input.FaviconUrl != ""},
-		metaTagsJSON,
-		input.ContactEmail,
-		input.ContactNumber,
-		sql.NullString{String: input.Instagram, Valid: input.Instagram != ""},
-		input.MaintenanceMode,
-		sql.NullString{String: input.MaintenanceNotice, Valid: input.MaintenanceNotice != ""},
-		input.AddonsEnabled,
-		input.EnableReviews,
-		input.EnableWishlist,
-		input.EnableNewsletterSignup,
-		input.AboutContent,
-		sql.NullString{String: input.FooterSubText, Valid: input.FooterSubText != ""},
-		ownerIDInt,
-	)
+	execErr := r.queries.UpdateConfig(ctx, sqlc.UpdateConfigParams{
+		SiteName:               sql.NullString{String: input.SiteName, Valid: input.SiteName != ""},
+		LogoUrl:                sql.NullString{String: input.LogoUrl, Valid: input.LogoUrl != ""},
+		FaviconUrl:             sql.NullString{String: input.FaviconUrl, Valid: input.FaviconUrl != ""},
+		MetaTags:               metaTagsJSON,
+		ContactEmail:           input.ContactEmail,
+		ContactNumber:          input.ContactNumber,
+		Instagram:              sql.NullString{String: input.Instagram, Valid: input.Instagram != ""},
+		MaintenanceMode:        sql.NullBool{Bool: input.MaintenanceMode, Valid: true},
+		MaintenanceNotice:      sql.NullString{String: input.MaintenanceNotice, Valid: input.MaintenanceNotice != ""},
+		AddonsEnabled:          sql.NullBool{Bool: input.AddonsEnabled, Valid: true},
+		EnableReviews:          sql.NullBool{Bool: input.EnableReviews, Valid: true},
+		EnableWishlist:         sql.NullBool{Bool: input.EnableWishlist, Valid: true},
+		EnableNewsletterSignup: sql.NullBool{Bool: input.EnableNewsletterSignup, Valid: true},
+		AboutContent:           input.AboutContent,
+		FooterSubText:          sql.NullString{String: input.FooterSubText, Valid: input.FooterSubText != ""},
+		OwnerID:                int32(ownerIDInt),
+	})
 	if execErr != nil {
 		logger.Ctx(ctx).Error("Failed to update config", logger.Error(execErr))
 		return execErr

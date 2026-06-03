@@ -4,6 +4,8 @@ import (
 	"context"
 	"database/sql"
 
+	sq "github.com/Masterminds/squirrel"
+
 	"github.com/voxire/onion/internal/modules/voxhire/internal/domain"
 	"github.com/voxire/onion/internal/platform/logger"
 )
@@ -76,22 +78,30 @@ func autoMigrate(ctx context.Context, db *sql.DB) {
 
 // CreateCompanyLead inserts a hiring inquiry and returns its ID.
 func (r *Repository) CreateCompanyLead(ctx context.Context, input domain.CompanyLeadInput) (int64, error) {
-	result, err := r.db.ExecContext(ctx,
-		`INSERT INTO voxhire_company_leads
-		 (company_name, contact_name, contact_title, work_email, phone, role, headcount, timeline, service, message, agency_opt_in)
-		 VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)`,
-		input.CompanyName,
-		input.ContactName,
-		input.ContactTitle,
-		input.WorkEmail,
-		input.Phone,
-		input.Role,
-		input.Headcount,
-		input.Timeline,
-		input.Service,
-		input.Message,
-		input.AgencyOptIn,
-	)
+	query, args, err := sq.
+		Insert("voxhire_company_leads").
+		Columns("company_name", "contact_name", "contact_title", "work_email", "phone", "role", "headcount", "timeline", "service", "message", "agency_opt_in").
+		Values(
+			input.CompanyName,
+			input.ContactName,
+			input.ContactTitle,
+			input.WorkEmail,
+			input.Phone,
+			input.Role,
+			input.Headcount,
+			input.Timeline,
+			input.Service,
+			input.Message,
+			input.AgencyOptIn,
+		).
+		PlaceholderFormat(sq.Question).
+		ToSql()
+	if err != nil {
+		logger.Ctx(ctx).Error("Failed to build insert voxhire company lead query", logger.Error(err))
+		return 0, err
+	}
+
+	result, err := r.db.ExecContext(ctx, query, args...)
 	if err != nil {
 		logger.Ctx(ctx).Error("Failed to insert voxhire company lead", logger.Error(err))
 		return 0, err
@@ -101,25 +111,33 @@ func (r *Repository) CreateCompanyLead(ctx context.Context, input domain.Company
 
 // CreateTalentApplication inserts a talent application and returns its ID.
 func (r *Repository) CreateTalentApplication(ctx context.Context, input domain.TalentApplicationInput) (int64, error) {
-	result, err := r.db.ExecContext(ctx,
-		`INSERT INTO voxhire_talent_applications
-		 (full_name, email, phone, country_of_residence, nationality, track, years_experience, notice_period, open_to, linkedin_url, portfolio_url, pitch, consent, cv_key)
-		 VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)`,
-		input.FullName,
-		input.Email,
-		input.Phone,
-		input.CountryOfResidence,
-		input.Nationality,
-		input.Track,
-		input.YearsExperience,
-		input.NoticePeriod,
-		input.OpenTo,
-		input.LinkedinURL,
-		input.PortfolioURL,
-		input.Pitch,
-		input.Consent,
-		input.CVKey,
-	)
+	query, args, err := sq.
+		Insert("voxhire_talent_applications").
+		Columns("full_name", "email", "phone", "country_of_residence", "nationality", "track", "years_experience", "notice_period", "open_to", "linkedin_url", "portfolio_url", "pitch", "consent", "cv_key").
+		Values(
+			input.FullName,
+			input.Email,
+			input.Phone,
+			input.CountryOfResidence,
+			input.Nationality,
+			input.Track,
+			input.YearsExperience,
+			input.NoticePeriod,
+			input.OpenTo,
+			input.LinkedinURL,
+			input.PortfolioURL,
+			input.Pitch,
+			input.Consent,
+			input.CVKey,
+		).
+		PlaceholderFormat(sq.Question).
+		ToSql()
+	if err != nil {
+		logger.Ctx(ctx).Error("Failed to build insert voxhire talent application query", logger.Error(err))
+		return 0, err
+	}
+
+	result, err := r.db.ExecContext(ctx, query, args...)
 	if err != nil {
 		logger.Ctx(ctx).Error("Failed to insert voxhire talent application", logger.Error(err))
 		return 0, err

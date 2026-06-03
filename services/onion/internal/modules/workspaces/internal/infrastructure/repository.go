@@ -8,6 +8,7 @@ import (
 	"strconv"
 	"time"
 
+	sq "github.com/Masterminds/squirrel"
 	"github.com/voxire/onion/internal/modules/workspaces/internal/domain"
 	"github.com/voxire/onion/internal/modules/workspaces/internal/infrastructure/persistence/sqlc"
 	"github.com/voxire/onion/internal/platform/logger"
@@ -184,21 +185,28 @@ func (r *Repository) GetProjectsByWorkspace(ctx context.Context, workspaceID, ow
 	// Enriched projection: task_count, completed_count, and member_count
 	// are computed via correlated subqueries so the list view doesn't
 	// need separate fetches per project.
-	q := `
-		SELECT
-			p.id, p.workspace_id, p.owner_id, p.name,
-			COALESCE(p.description, ''), COALESCE(p.icon, ''), COALESCE(p.color, ''),
-			COALESCE(p.status, 'active'),
-			p.start_date, p.due_date,
-			p.created_by, p.created_at, p.updated_at,
-			COALESCE((SELECT COUNT(*) FROM flow_tasks t WHERE t.project_id = p.id), 0) AS task_count,
-			COALESCE((SELECT COUNT(*) FROM flow_tasks t WHERE t.project_id = p.id AND t.status = 'done'), 0) AS completed_count,
-			COALESCE((SELECT COUNT(*) FROM flow_project_members pm WHERE pm.project_id = p.id), 0) AS member_count
-		FROM flow_projects p
-		WHERE p.workspace_id = ? AND p.owner_id = ?
-		ORDER BY p.created_at DESC`
+	q, args, err := sq.
+		Select(
+			"p.id", "p.workspace_id", "p.owner_id", "p.name",
+			"COALESCE(p.description, '')", "COALESCE(p.icon, '')", "COALESCE(p.color, '')",
+			"COALESCE(p.status, 'active')",
+			"p.start_date", "p.due_date",
+			"p.created_by", "p.created_at", "p.updated_at",
+			"COALESCE((SELECT COUNT(*) FROM flow_tasks t WHERE t.project_id = p.id), 0) AS task_count",
+			"COALESCE((SELECT COUNT(*) FROM flow_tasks t WHERE t.project_id = p.id AND t.status = 'done'), 0) AS completed_count",
+			"COALESCE((SELECT COUNT(*) FROM flow_project_members pm WHERE pm.project_id = p.id), 0) AS member_count",
+		).
+		From("flow_projects p").
+		Where(sq.Eq{"p.workspace_id": workspaceID, "p.owner_id": ownerID}).
+		OrderBy("p.created_at DESC").
+		PlaceholderFormat(sq.Question).
+		ToSql()
+	if err != nil {
+		logger.Ctx(ctx).Error("GetProjectsByWorkspace build failed", logger.Error(err))
+		return nil, err
+	}
 
-	rows, err := r.pool.QueryContext(ctx, q, workspaceID, ownerID)
+	rows, err := r.pool.QueryContext(ctx, q, args...)
 	if err != nil {
 		logger.Ctx(ctx).Error("GetProjectsByWorkspace failed", logger.Error(err))
 		return nil, err
@@ -315,51 +323,47 @@ func (r *Repository) CreateTask(ctx context.Context, input domain.TaskInput) (in
 }
 
 func (r *Repository) GetTasksByProject(ctx context.Context, filter domain.ListTasksFilter) ([]domain.Task, error) {
-	where := "WHERE t.project_id = ? AND t.parent_task_id IS NULL"
-	args := []interface{}{filter.ProjectID}
+	builder := enrichedTaskSelect().
+		Where(sq.Eq{"t.project_id": filter.ProjectID}).
+		Where("t.parent_task_id IS NULL")
 
 	if filter.Status != "" {
-		where += " AND t.status = ?"
-		args = append(args, filter.Status)
+		builder = builder.Where(sq.Eq{"t.status": filter.Status})
 	}
 	if filter.AssigneeID != nil {
-		where += " AND t.assignee_id = ?"
-		args = append(args, *filter.AssigneeID)
+		builder = builder.Where(sq.Eq{"t.assignee_id": *filter.AssigneeID})
 	}
 	if filter.Priority != "" {
-		where += " AND t.priority = ?"
-		args = append(args, filter.Priority)
+		builder = builder.Where(sq.Eq{"t.priority": filter.Priority})
 	}
 
-	where += " ORDER BY t.sort_order ASC, t.created_at ASC"
+	builder = builder.OrderBy("t.sort_order ASC", "t.created_at ASC")
 
-	return r.listEnrichedTasks(ctx, where, args...)
+	return r.listEnrichedTasks(ctx, builder)
 }
 
 func (r *Repository) GetTasksByWorkspace(ctx context.Context, filter domain.ListTasksFilter) ([]domain.Task, error) {
-	where := "WHERE t.workspace_id = ? AND t.parent_task_id IS NULL"
-	args := []interface{}{filter.WorkspaceID}
+	builder := enrichedTaskSelect().
+		Where(sq.Eq{"t.workspace_id": filter.WorkspaceID}).
+		Where("t.parent_task_id IS NULL")
 
 	if filter.Status != "" {
-		where += " AND t.status = ?"
-		args = append(args, filter.Status)
+		builder = builder.Where(sq.Eq{"t.status": filter.Status})
 	}
 	if filter.AssigneeID != nil {
-		where += " AND t.assignee_id = ?"
-		args = append(args, *filter.AssigneeID)
+		builder = builder.Where(sq.Eq{"t.assignee_id": *filter.AssigneeID})
 	}
 	if filter.Priority != "" {
-		where += " AND t.priority = ?"
-		args = append(args, filter.Priority)
+		builder = builder.Where(sq.Eq{"t.priority": filter.Priority})
 	}
 
-	where += " ORDER BY t.created_at DESC LIMIT 500"
+	builder = builder.OrderBy("t.created_at DESC").Limit(500)
 
-	return r.listEnrichedTasks(ctx, where, args...)
+	return r.listEnrichedTasks(ctx, builder)
 }
 
 func (r *Repository) GetTaskByID(ctx context.Context, taskID int64) (domain.Task, error) {
-	tasks, err := r.listEnrichedTasks(ctx, "WHERE t.id = ?", taskID)
+	tasks, err := r.listEnrichedTasks(ctx, enrichedTaskSelect().Where(sq.Eq{"t.id": taskID}))
 	if err != nil {
 		return domain.Task{}, err
 	}
@@ -371,21 +375,24 @@ func (r *Repository) GetTaskByID(ctx context.Context, taskID int64) (domain.Task
 
 func (r *Repository) GetSubtasks(ctx context.Context, parentTaskID int64) ([]domain.Task, error) {
 	return r.listEnrichedTasks(ctx,
-		"WHERE t.parent_task_id = ? ORDER BY t.sort_order ASC, t.created_at ASC",
-		parentTaskID,
+		enrichedTaskSelect().
+			Where(sq.Eq{"t.parent_task_id": parentTaskID}).
+			OrderBy("t.sort_order ASC", "t.created_at ASC"),
 	)
 }
 
 func (r *Repository) GetMyTasks(ctx context.Context, userID int64) ([]domain.Task, error) {
 	return r.listEnrichedTasks(ctx,
-		`WHERE t.assignee_id = ? AND t.parent_task_id IS NULL
-		 AND t.status NOT IN ('done','cancelled')
-		 ORDER BY
-		   CASE WHEN t.due_date IS NULL THEN 1 ELSE 0 END,
-		   t.due_date ASC,
-		   t.created_at DESC
-		 LIMIT 500`,
-		userID,
+		enrichedTaskSelect().
+			Where(sq.Eq{"t.assignee_id": userID}).
+			Where("t.parent_task_id IS NULL").
+			Where("t.status NOT IN ('done','cancelled')").
+			OrderBy(
+				"CASE WHEN t.due_date IS NULL THEN 1 ELSE 0 END",
+				"t.due_date ASC",
+				"t.created_at DESC",
+			).
+			Limit(500),
 	)
 }
 
@@ -408,38 +415,37 @@ func (r *Repository) UpdateTask(ctx context.Context, input domain.UpdateTaskInpu
 		labelsParam = labelsJSON
 	}
 
-	// Raw query so partial updates (e.g. title-only) don't overwrite status/priority/completed_at.
+	// Partial updates (e.g. title-only) must not overwrite status/priority/completed_at.
 	// COALESCE(?, col) preserves the existing value when the param is NULL.
 	// The completed_at CASE only fires when a non-NULL status is explicitly supplied.
-	_, err = r.pool.ExecContext(ctx, `
-		UPDATE flow_tasks
-		SET title       = ?,
-		    description = COALESCE(?, description),
-		    status      = COALESCE(?, status),
-		    priority    = COALESCE(?, priority),
-		    assignee_id = ?,
-		    due_date    = ?,
-		    start_date  = ?,
-		    labels      = COALESCE(?, labels),
-		    completed_at = CASE
+	q, args, err := sq.
+		Update("flow_tasks").
+		Set("title", input.Title).
+		Set("description", sq.Expr("COALESCE(?, description)", sql.NullString{String: input.Description, Valid: input.Description != ""})).
+		Set("status", sq.Expr("COALESCE(?, status)", statusParam)).
+		Set("priority", sq.Expr("COALESCE(?, priority)", priorityParam)).
+		Set("assignee_id", nullInt64Ptr(input.AssigneeID)).
+		Set("due_date", nullTimePtrToSql(input.DueDate)).
+		Set("start_date", nullTimePtrToSql(input.StartDate)).
+		Set("labels", sq.Expr("COALESCE(?, labels)", labelsParam)).
+		Set("completed_at", sq.Expr(
+			`CASE
 		        WHEN ? IS NOT NULL AND ? = 'done'  AND completed_at IS NULL THEN NOW()
 		        WHEN ? IS NOT NULL AND ? != 'done' THEN NULL
 		        ELSE completed_at
-		    END
-		WHERE id = ? AND owner_id = ?`,
-		input.Title,
-		sql.NullString{String: input.Description, Valid: input.Description != ""},
-		statusParam,
-		priorityParam,
-		nullInt64Ptr(input.AssigneeID),
-		nullTimePtrToSql(input.DueDate),
-		nullTimePtrToSql(input.StartDate),
-		labelsParam,
-		statusParam, statusParam, // CASE WHEN ? IS NOT NULL AND ? = 'done'
-		statusParam, statusParam, // CASE WHEN ? IS NOT NULL AND ? != 'done'
-		input.ID,
-		input.OwnerID,
-	)
+		    END`,
+			statusParam, statusParam, // CASE WHEN ? IS NOT NULL AND ? = 'done'
+			statusParam, statusParam, // CASE WHEN ? IS NOT NULL AND ? != 'done'
+		)).
+		Where(sq.Eq{"id": input.ID, "owner_id": input.OwnerID}).
+		PlaceholderFormat(sq.Question).
+		ToSql()
+	if err != nil {
+		logger.Ctx(ctx).Error("UpdateTask build failed", logger.Error(err))
+		return err
+	}
+
+	_, err = r.pool.ExecContext(ctx, q, args...)
 	if err != nil {
 		logger.Ctx(ctx).Error("UpdateTask failed", logger.Error(err))
 		return err
@@ -529,9 +535,17 @@ func (r *Repository) DeleteComment(ctx context.Context, commentID, userID int64)
 // comment handlers to route realtime events to the correct task topic
 // before the row disappears.
 func (r *Repository) GetCommentTaskID(ctx context.Context, commentID int64) (int64, error) {
-	var taskID int64
-	err := r.pool.QueryRowContext(ctx, "SELECT task_id FROM flow_comments WHERE id = ?", commentID).Scan(&taskID)
+	q, args, err := sq.
+		Select("task_id").
+		From("flow_comments").
+		Where(sq.Eq{"id": commentID}).
+		PlaceholderFormat(sq.Question).
+		ToSql()
 	if err != nil {
+		return 0, err
+	}
+	var taskID int64
+	if err := r.pool.QueryRowContext(ctx, q, args...).Scan(&taskID); err != nil {
 		return 0, err
 	}
 	return taskID, nil
@@ -721,21 +735,34 @@ func (r *Repository) GetLabelsByWorkspace(ctx context.Context, workspaceID int64
 }
 
 func (r *Repository) UpdateLabel(ctx context.Context, id int64, input domain.LabelInput) error {
-	_, err := r.pool.ExecContext(ctx,
-		`UPDATE flow_labels SET name = ?, color = ? WHERE id = ?`,
-		input.Name, input.Color, id,
-	)
+	q, args, err := sq.
+		Update("flow_labels").
+		Set("name", input.Name).
+		Set("color", input.Color).
+		Where(sq.Eq{"id": id}).
+		PlaceholderFormat(sq.Question).
+		ToSql()
 	if err != nil {
+		logger.Ctx(ctx).Error("UpdateLabel build failed", logger.Error(err))
+		return err
+	}
+	if _, err = r.pool.ExecContext(ctx, q, args...); err != nil {
 		logger.Ctx(ctx).Error("UpdateLabel failed", logger.Error(err))
 	}
 	return err
 }
 
 func (r *Repository) DeleteLabel(ctx context.Context, id int64) error {
-	_, err := r.pool.ExecContext(ctx,
-		`DELETE FROM flow_labels WHERE id = ?`, id,
-	)
+	q, args, err := sq.
+		Delete("flow_labels").
+		Where(sq.Eq{"id": id}).
+		PlaceholderFormat(sq.Question).
+		ToSql()
 	if err != nil {
+		logger.Ctx(ctx).Error("DeleteLabel build failed", logger.Error(err))
+		return err
+	}
+	if _, err = r.pool.ExecContext(ctx, q, args...); err != nil {
 		logger.Ctx(ctx).Error("DeleteLabel failed", logger.Error(err))
 	}
 	return err
@@ -746,10 +773,17 @@ func (r *Repository) SetTaskLabels(ctx context.Context, taskID int64, labelIDs [
 	if err != nil {
 		return err
 	}
-	_, err = r.pool.ExecContext(ctx,
-		`UPDATE flow_tasks SET labels = ? WHERE id = ?`, b, taskID,
-	)
+	q, args, err := sq.
+		Update("flow_tasks").
+		Set("labels", b).
+		Where(sq.Eq{"id": taskID}).
+		PlaceholderFormat(sq.Question).
+		ToSql()
 	if err != nil {
+		logger.Ctx(ctx).Error("SetTaskLabels build failed", logger.Error(err))
+		return err
+	}
+	if _, err = r.pool.ExecContext(ctx, q, args...); err != nil {
 		logger.Ctx(ctx).Error("SetTaskLabels failed", logger.Error(err))
 	}
 	return err
@@ -760,32 +794,51 @@ func (r *Repository) SetTaskLabels(ctx context.Context, taskID int64, labelIDs [
 // ─────────────────────────────────────────────
 
 func (r *Repository) GetTimeLogTaskID(ctx context.Context, id int64) (int64, error) {
+	q, args, err := sq.
+		Select("task_id").
+		From("flow_time_logs").
+		Where(sq.Eq{"id": id}).
+		PlaceholderFormat(sq.Question).
+		ToSql()
+	if err != nil {
+		return 0, err
+	}
 	var taskID int64
-	err := r.pool.QueryRowContext(ctx,
-		`SELECT task_id FROM flow_time_logs WHERE id = ?`, id,
-	).Scan(&taskID)
+	err = r.pool.QueryRowContext(ctx, q, args...).Scan(&taskID)
 	return taskID, err
 }
 
 func (r *Repository) DeleteTimeLog(ctx context.Context, id, userID int64) error {
-	_, err := r.pool.ExecContext(ctx,
-		`DELETE FROM flow_time_logs WHERE id = ? AND user_id = ?`, id, userID,
-	)
+	q, args, err := sq.
+		Delete("flow_time_logs").
+		Where(sq.Eq{"id": id, "user_id": userID}).
+		PlaceholderFormat(sq.Question).
+		ToSql()
 	if err != nil {
+		logger.Ctx(ctx).Error("DeleteTimeLog build failed", logger.Error(err))
+		return err
+	}
+	if _, err = r.pool.ExecContext(ctx, q, args...); err != nil {
 		logger.Ctx(ctx).Error("DeleteTimeLog failed", logger.Error(err))
 	}
 	return err
 }
 
 func (r *Repository) RecalcActualHours(ctx context.Context, taskID int64) error {
-	_, err := r.pool.ExecContext(ctx,
-		`UPDATE flow_tasks
-		 SET actual_hours = (SELECT COALESCE(SUM(duration_minutes), 0) / 60.0
-		                     FROM flow_time_logs WHERE task_id = ?)
-		 WHERE id = ?`,
-		taskID, taskID,
-	)
+	q, args, err := sq.
+		Update("flow_tasks").
+		Set("actual_hours", sq.Expr(
+			`(SELECT COALESCE(SUM(duration_minutes), 0) / 60.0 FROM flow_time_logs WHERE task_id = ?)`,
+			taskID,
+		)).
+		Where(sq.Eq{"id": taskID}).
+		PlaceholderFormat(sq.Question).
+		ToSql()
 	if err != nil {
+		logger.Ctx(ctx).Error("RecalcActualHours build failed", logger.Error(err))
+		return err
+	}
+	if _, err = r.pool.ExecContext(ctx, q, args...); err != nil {
 		logger.Ctx(ctx).Error("RecalcActualHours failed", logger.Error(err))
 	}
 	return err
@@ -850,30 +903,39 @@ func marshalLabels(labels []int64) (json.RawMessage, error) {
 // (project name/color, assignee name, subtask count) so the UI never has
 // to do an N+1 lookup.
 //
-// Keep this const, scanEnrichedTask, and the SELECT + JOIN in
-// listEnrichedTasks in sync.
-const enrichedTaskColumns = `
-	t.id, t.project_id, t.workspace_id, t.owner_id, t.parent_task_id, t.section_id,
-	t.title, t.description, COALESCE(t.status, 'todo') AS status, COALESCE(t.priority, 'none') AS priority,
-	t.assignee_id, t.reporter_id, t.due_date, t.start_date, t.completed_at,
-	t.estimated_hours, t.actual_hours, t.sort_order, t.labels,
-	t.created_at, t.updated_at,
-	COALESCE(p.name, '')  AS project_name,
-	COALESCE(p.color, '') AS project_color,
-	COALESCE(u.full_name, '') AS assignee_name,
-	COALESCE((SELECT COUNT(*) FROM flow_tasks st WHERE st.parent_task_id = t.id), 0) AS subtask_count`
+// Keep this list, scanEnrichedTask, and the JOINs in
+// enrichedTaskSelect in sync.
+var enrichedTaskColumns = []string{
+	"t.id", "t.project_id", "t.workspace_id", "t.owner_id", "t.parent_task_id", "t.section_id",
+	"t.title", "t.description", "COALESCE(t.status, 'todo') AS status", "COALESCE(t.priority, 'none') AS priority",
+	"t.assignee_id", "t.reporter_id", "t.due_date", "t.start_date", "t.completed_at",
+	"t.estimated_hours", "t.actual_hours", "t.sort_order", "t.labels",
+	"t.created_at", "t.updated_at",
+	"COALESCE(p.name, '')  AS project_name",
+	"COALESCE(p.color, '') AS project_color",
+	"COALESCE(u.full_name, '') AS assignee_name",
+	"COALESCE((SELECT COUNT(*) FROM flow_tasks st WHERE st.parent_task_id = t.id), 0) AS subtask_count",
+}
 
-const enrichedTaskJoin = `
-	FROM flow_tasks t
-	LEFT JOIN flow_projects p ON p.id = t.project_id
-	LEFT JOIN users u         ON u.id = t.assignee_id`
+// enrichedTaskSelect returns a squirrel builder with the enriched task
+// SELECT + JOINs preconfigured. Callers add WHERE/ORDER/LIMIT clauses.
+// All tenant-scope filtering is the caller's responsibility.
+func enrichedTaskSelect() sq.SelectBuilder {
+	return sq.
+		Select(enrichedTaskColumns...).
+		From("flow_tasks t").
+		LeftJoin("flow_projects p ON p.id = t.project_id").
+		LeftJoin("users u ON u.id = t.assignee_id").
+		PlaceholderFormat(sq.Question)
+}
 
-// listEnrichedTasks runs an enriched task query. `whereAndRest` is
-// everything after the JOIN clause (e.g. `WHERE t.project_id = ? ORDER BY ...`).
-// All tenant-scope filtering lives in whereAndRest — owner scoping is the
-// caller's responsibility.
-func (r *Repository) listEnrichedTasks(ctx context.Context, whereAndRest string, args ...interface{}) ([]domain.Task, error) {
-	q := "SELECT " + enrichedTaskColumns + enrichedTaskJoin + " " + whereAndRest
+// listEnrichedTasks runs an enriched task query built by the caller.
+func (r *Repository) listEnrichedTasks(ctx context.Context, builder sq.SelectBuilder) ([]domain.Task, error) {
+	q, args, err := builder.ToSql()
+	if err != nil {
+		logger.Ctx(ctx).Error("listEnrichedTasks build failed", logger.Error(err))
+		return nil, err
+	}
 	rows, err := r.pool.QueryContext(ctx, q, args...)
 	if err != nil {
 		logger.Ctx(ctx).Error("listEnrichedTasks failed", logger.Error(err))
@@ -1046,15 +1108,23 @@ func scanTasksRaw(ctx context.Context, rows *sql.Rows) ([]domain.Task, error) {
 // ─────────────────────────────────────────────
 
 func (r *Repository) ListWorkspaceMembers(ctx context.Context, workspaceID int64) ([]domain.WorkspaceMember, error) {
-	q := `
-		SELECT wm.id, wm.workspace_id, wm.user_id, wm.role, wm.invited_by, wm.joined_at,
-		       COALESCE(u.full_name, '') AS name, COALESCE(u.email, '') AS email
-		FROM flow_workspace_members wm
-		LEFT JOIN users u ON u.id = wm.user_id
-		WHERE wm.workspace_id = ?
-		ORDER BY wm.joined_at ASC`
+	q, args, err := sq.
+		Select(
+			"wm.id", "wm.workspace_id", "wm.user_id", "wm.role", "wm.invited_by", "wm.joined_at",
+			"COALESCE(u.full_name, '') AS name", "COALESCE(u.email, '') AS email",
+		).
+		From("flow_workspace_members wm").
+		LeftJoin("users u ON u.id = wm.user_id").
+		Where(sq.Eq{"wm.workspace_id": workspaceID}).
+		OrderBy("wm.joined_at ASC").
+		PlaceholderFormat(sq.Question).
+		ToSql()
+	if err != nil {
+		logger.Ctx(ctx).Error("ListWorkspaceMembers build failed", logger.Error(err))
+		return nil, err
+	}
 
-	rows, err := r.pool.QueryContext(ctx, q, workspaceID)
+	rows, err := r.pool.QueryContext(ctx, q, args...)
 	if err != nil {
 		logger.Ctx(ctx).Error("ListWorkspaceMembers failed", logger.Error(err))
 		return nil, err
@@ -1077,11 +1147,17 @@ func (r *Repository) ListWorkspaceMembers(ctx context.Context, workspaceID int64
 }
 
 func (r *Repository) UpdateWorkspaceMemberRole(ctx context.Context, input domain.UpdateWorkspaceMemberRoleInput) error {
-	_, err := r.pool.ExecContext(ctx,
-		`UPDATE flow_workspace_members SET role = ? WHERE workspace_id = ? AND user_id = ?`,
-		input.Role, input.WorkspaceID, input.UserID,
-	)
+	q, args, err := sq.
+		Update("flow_workspace_members").
+		Set("role", input.Role).
+		Where(sq.Eq{"workspace_id": input.WorkspaceID, "user_id": input.UserID}).
+		PlaceholderFormat(sq.Question).
+		ToSql()
 	if err != nil {
+		logger.Ctx(ctx).Error("UpdateWorkspaceMemberRole build failed", logger.Error(err))
+		return err
+	}
+	if _, err = r.pool.ExecContext(ctx, q, args...); err != nil {
 		logger.Ctx(ctx).Error("UpdateWorkspaceMemberRole failed", logger.Error(err))
 	}
 	return err
@@ -1089,31 +1165,62 @@ func (r *Repository) UpdateWorkspaceMemberRole(ctx context.Context, input domain
 
 func (r *Repository) CreatePersonalWorkspace(ctx context.Context, userID int64) (int64, error) {
 	// Idempotent: do nothing if personal workspace already exists for this user
+	existingQ, existingArgs, err := sq.
+		Select("id").
+		From("flow_workspaces").
+		Where(sq.Eq{"owner_id": userID}).
+		Where("is_personal = TRUE").
+		Limit(1).
+		PlaceholderFormat(sq.Question).
+		ToSql()
+	if err != nil {
+		logger.Ctx(ctx).Error("CreatePersonalWorkspace build failed", logger.Error(err))
+		return 0, err
+	}
 	var existing int64
-	_ = r.pool.QueryRowContext(ctx,
-		`SELECT id FROM flow_workspaces WHERE owner_id = ? AND is_personal = TRUE LIMIT 1`, userID,
-	).Scan(&existing)
+	if scanErr := r.pool.QueryRowContext(ctx, existingQ, existingArgs...).Scan(&existing); scanErr != nil && !errors.Is(scanErr, sql.ErrNoRows) {
+		logger.Ctx(ctx).Warn("CreatePersonalWorkspace lookup failed", logger.Error(scanErr))
+	}
 	if existing > 0 {
 		return existing, nil
 	}
 
-	res, err := r.pool.ExecContext(ctx,
-		`INSERT INTO flow_workspaces (owner_id, name, icon, color, is_default, is_personal, created_by)
-		 VALUES (?, 'Personal', '🏠', '#64C5B9', TRUE, TRUE, ?)`,
-		userID, userID,
-	)
+	insertQ, insertArgs, err := sq.
+		Insert("flow_workspaces").
+		Columns("owner_id", "name", "icon", "color", "is_default", "is_personal", "created_by").
+		Values(userID, "Personal", "🏠", "#64C5B9", true, true, userID).
+		PlaceholderFormat(sq.Question).
+		ToSql()
+	if err != nil {
+		logger.Ctx(ctx).Error("CreatePersonalWorkspace insert build failed", logger.Error(err))
+		return 0, err
+	}
+	res, err := r.pool.ExecContext(ctx, insertQ, insertArgs...)
 	if err != nil {
 		logger.Ctx(ctx).Error("CreatePersonalWorkspace failed", logger.Error(err))
 		return 0, err
 	}
-	id, _ := res.LastInsertId()
+	id, err := res.LastInsertId()
+	if err != nil {
+		logger.Ctx(ctx).Error("CreatePersonalWorkspace last insert id failed", logger.Error(err))
+		return 0, err
+	}
 
 	// Add creator as manager
-	_, _ = r.pool.ExecContext(ctx,
-		`INSERT INTO flow_workspace_members (workspace_id, user_id, role) VALUES (?, ?, 'manager')
-		 ON DUPLICATE KEY UPDATE role = VALUES(role)`,
-		id, userID,
-	)
+	memberQ, memberArgs, err := sq.
+		Insert("flow_workspace_members").
+		Columns("workspace_id", "user_id", "role").
+		Values(id, userID, "manager").
+		Suffix("ON DUPLICATE KEY UPDATE role = VALUES(role)").
+		PlaceholderFormat(sq.Question).
+		ToSql()
+	if err != nil {
+		logger.Ctx(ctx).Warn("CreatePersonalWorkspace member build failed", logger.Error(err))
+		return id, nil
+	}
+	if _, memberErr := r.pool.ExecContext(ctx, memberQ, memberArgs...); memberErr != nil {
+		logger.Ctx(ctx).Warn("CreatePersonalWorkspace add member failed", logger.Error(memberErr))
+	}
 	return id, nil
 }
 
@@ -1122,15 +1229,23 @@ func (r *Repository) CreatePersonalWorkspace(ctx context.Context, userID int64) 
 // ─────────────────────────────────────────────
 
 func (r *Repository) ListProjectMembers(ctx context.Context, projectID int64) ([]domain.ProjectMember, error) {
-	q := `
-		SELECT pm.id, pm.project_id, pm.user_id, pm.role, pm.added_by, pm.joined_at,
-		       COALESCE(u.full_name, '') AS name, COALESCE(u.email, '') AS email
-		FROM flow_project_members pm
-		LEFT JOIN users u ON u.id = pm.user_id
-		WHERE pm.project_id = ?
-		ORDER BY pm.joined_at ASC`
+	q, args, err := sq.
+		Select(
+			"pm.id", "pm.project_id", "pm.user_id", "pm.role", "pm.added_by", "pm.joined_at",
+			"COALESCE(u.full_name, '') AS name", "COALESCE(u.email, '') AS email",
+		).
+		From("flow_project_members pm").
+		LeftJoin("users u ON u.id = pm.user_id").
+		Where(sq.Eq{"pm.project_id": projectID}).
+		OrderBy("pm.joined_at ASC").
+		PlaceholderFormat(sq.Question).
+		ToSql()
+	if err != nil {
+		logger.Ctx(ctx).Error("ListProjectMembers build failed", logger.Error(err))
+		return nil, err
+	}
 
-	rows, err := r.pool.QueryContext(ctx, q, projectID)
+	rows, err := r.pool.QueryContext(ctx, q, args...)
 	if err != nil {
 		logger.Ctx(ctx).Error("ListProjectMembers failed", logger.Error(err))
 		return nil, err
@@ -1157,69 +1272,102 @@ func (r *Repository) AddProjectMember(ctx context.Context, input domain.AddProje
 	if role == "" {
 		role = "member"
 	}
-	_, err := r.pool.ExecContext(ctx,
-		`INSERT INTO flow_project_members (project_id, user_id, role, added_by)
-		 VALUES (?, ?, ?, ?)
-		 ON DUPLICATE KEY UPDATE role = VALUES(role), added_by = VALUES(added_by)`,
-		input.ProjectID, input.UserID, role, input.AddedBy,
-	)
+	q, args, err := sq.
+		Insert("flow_project_members").
+		Columns("project_id", "user_id", "role", "added_by").
+		Values(input.ProjectID, input.UserID, role, input.AddedBy).
+		Suffix("ON DUPLICATE KEY UPDATE role = VALUES(role), added_by = VALUES(added_by)").
+		PlaceholderFormat(sq.Question).
+		ToSql()
 	if err != nil {
+		logger.Ctx(ctx).Error("AddProjectMember build failed", logger.Error(err))
+		return err
+	}
+	if _, err = r.pool.ExecContext(ctx, q, args...); err != nil {
 		logger.Ctx(ctx).Error("AddProjectMember failed", logger.Error(err))
 	}
 	return err
 }
 
 func (r *Repository) RemoveProjectMember(ctx context.Context, input domain.RemoveProjectMemberInput) error {
-	_, err := r.pool.ExecContext(ctx,
-		`DELETE FROM flow_project_members WHERE project_id = ? AND user_id = ?`,
-		input.ProjectID, input.UserID,
-	)
+	q, args, err := sq.
+		Delete("flow_project_members").
+		Where(sq.Eq{"project_id": input.ProjectID, "user_id": input.UserID}).
+		PlaceholderFormat(sq.Question).
+		ToSql()
 	if err != nil {
+		logger.Ctx(ctx).Error("RemoveProjectMember build failed", logger.Error(err))
+		return err
+	}
+	if _, err = r.pool.ExecContext(ctx, q, args...); err != nil {
 		logger.Ctx(ctx).Error("RemoveProjectMember failed", logger.Error(err))
 	}
 	return err
 }
 
 func (r *Repository) UpdateProjectMemberRole(ctx context.Context, input domain.UpdateProjectMemberRoleInput) error {
-	_, err := r.pool.ExecContext(ctx,
-		`UPDATE flow_project_members SET role = ? WHERE project_id = ? AND user_id = ?`,
-		input.Role, input.ProjectID, input.UserID,
-	)
+	q, args, err := sq.
+		Update("flow_project_members").
+		Set("role", input.Role).
+		Where(sq.Eq{"project_id": input.ProjectID, "user_id": input.UserID}).
+		PlaceholderFormat(sq.Question).
+		ToSql()
 	if err != nil {
+		logger.Ctx(ctx).Error("UpdateProjectMemberRole build failed", logger.Error(err))
+		return err
+	}
+	if _, err = r.pool.ExecContext(ctx, q, args...); err != nil {
 		logger.Ctx(ctx).Error("UpdateProjectMemberRole failed", logger.Error(err))
 	}
 	return err
 }
 
 func (r *Repository) TransferProjectOwnership(ctx context.Context, input domain.TransferProjectOwnershipInput) error {
-	_, err := r.pool.ExecContext(ctx,
-		`UPDATE flow_projects SET owner_id = ? WHERE id = ? AND owner_id = ?`,
-		input.NewOwnerID, input.ProjectID, input.CallerID,
-	)
+	q, args, err := sq.
+		Update("flow_projects").
+		Set("owner_id", input.NewOwnerID).
+		Where(sq.Eq{"id": input.ProjectID, "owner_id": input.CallerID}).
+		PlaceholderFormat(sq.Question).
+		ToSql()
 	if err != nil {
+		logger.Ctx(ctx).Error("TransferProjectOwnership build failed", logger.Error(err))
+		return err
+	}
+	if _, err = r.pool.ExecContext(ctx, q, args...); err != nil {
 		logger.Ctx(ctx).Error("TransferProjectOwnership failed", logger.Error(err))
 	}
 	return err
 }
 
 func (r *Repository) MoveProject(ctx context.Context, input domain.MoveProjectInput) error {
-	_, err := r.pool.ExecContext(ctx,
-		`UPDATE flow_projects SET workspace_id = ? WHERE id = ? AND owner_id = ?`,
-		input.WorkspaceID, input.ProjectID, input.CallerID,
-	)
+	q, args, err := sq.
+		Update("flow_projects").
+		Set("workspace_id", input.WorkspaceID).
+		Where(sq.Eq{"id": input.ProjectID, "owner_id": input.CallerID}).
+		PlaceholderFormat(sq.Question).
+		ToSql()
 	if err != nil {
+		logger.Ctx(ctx).Error("MoveProject build failed", logger.Error(err))
+		return err
+	}
+	if _, err = r.pool.ExecContext(ctx, q, args...); err != nil {
 		logger.Ctx(ctx).Error("MoveProject failed", logger.Error(err))
 	}
 	return err
 }
 
 func (r *Repository) GetUserWorkspaceRole(ctx context.Context, workspaceID, userID int64) (string, error) {
-	var role string
-	err := r.pool.QueryRowContext(ctx,
-		`SELECT role FROM flow_workspace_members WHERE workspace_id = ? AND user_id = ?`,
-		workspaceID, userID,
-	).Scan(&role)
+	q, args, err := sq.
+		Select("role").
+		From("flow_workspace_members").
+		Where(sq.Eq{"workspace_id": workspaceID, "user_id": userID}).
+		PlaceholderFormat(sq.Question).
+		ToSql()
 	if err != nil {
+		return "", err
+	}
+	var role string
+	if err := r.pool.QueryRowContext(ctx, q, args...).Scan(&role); err != nil {
 		return "", err
 	}
 	return role, nil
@@ -1228,11 +1376,19 @@ func (r *Repository) GetUserWorkspaceRole(ctx context.Context, workspaceID, user
 // ─── Project Columns ─────────────────────────────────────────────────────────
 
 func (r *Repository) GetColumnsByProject(ctx context.Context, projectID int64) ([]domain.ProjectColumn, error) {
-	rows, err := r.pool.QueryContext(ctx,
-		`SELECT id, project_id, workspace_id, name, color, sort_order, created_by, created_at, updated_at
-		 FROM flow_project_columns WHERE project_id = ? ORDER BY sort_order ASC`,
-		projectID,
-	)
+	q, args, err := sq.
+		Select("id", "project_id", "workspace_id", "name", "color", "sort_order", "created_by", "created_at", "updated_at").
+		From("flow_project_columns").
+		Where(sq.Eq{"project_id": projectID}).
+		OrderBy("sort_order ASC").
+		PlaceholderFormat(sq.Question).
+		ToSql()
+	if err != nil {
+		logger.Ctx(ctx).Error("GetColumnsByProject build failed", logger.Error(err))
+		return nil, err
+	}
+
+	rows, err := r.pool.QueryContext(ctx, q, args...)
 	if err != nil {
 		logger.Ctx(ctx).Error("GetColumnsByProject failed", logger.Error(err))
 		return nil, err
@@ -1252,11 +1408,17 @@ func (r *Repository) GetColumnsByProject(ctx context.Context, projectID int64) (
 }
 
 func (r *Repository) CreateColumn(ctx context.Context, input domain.ProjectColumnInput) (int64, error) {
-	res, err := r.pool.ExecContext(ctx,
-		`INSERT INTO flow_project_columns (project_id, workspace_id, name, color, sort_order, created_by)
-		 VALUES (?, ?, ?, ?, ?, ?)`,
-		input.ProjectID, input.WorkspaceID, input.Name, input.Color, input.SortOrder, input.CreatedBy,
-	)
+	q, args, err := sq.
+		Insert("flow_project_columns").
+		Columns("project_id", "workspace_id", "name", "color", "sort_order", "created_by").
+		Values(input.ProjectID, input.WorkspaceID, input.Name, input.Color, input.SortOrder, input.CreatedBy).
+		PlaceholderFormat(sq.Question).
+		ToSql()
+	if err != nil {
+		logger.Ctx(ctx).Error("CreateColumn build failed", logger.Error(err))
+		return 0, err
+	}
+	res, err := r.pool.ExecContext(ctx, q, args...)
 	if err != nil {
 		logger.Ctx(ctx).Error("CreateColumn failed", logger.Error(err))
 		return 0, err
@@ -1265,12 +1427,20 @@ func (r *Repository) CreateColumn(ctx context.Context, input domain.ProjectColum
 }
 
 func (r *Repository) UpdateColumn(ctx context.Context, input domain.UpdateProjectColumnInput) error {
-	_, err := r.pool.ExecContext(ctx,
-		`UPDATE flow_project_columns SET name = ?, color = ?, sort_order = ?, updated_at = NOW()
-		 WHERE id = ?`,
-		input.Name, input.Color, input.SortOrder, input.ID,
-	)
+	q, args, err := sq.
+		Update("flow_project_columns").
+		Set("name", input.Name).
+		Set("color", input.Color).
+		Set("sort_order", input.SortOrder).
+		Set("updated_at", sq.Expr("NOW()")).
+		Where(sq.Eq{"id": input.ID}).
+		PlaceholderFormat(sq.Question).
+		ToSql()
 	if err != nil {
+		logger.Ctx(ctx).Error("UpdateColumn build failed", logger.Error(err))
+		return err
+	}
+	if _, err = r.pool.ExecContext(ctx, q, args...); err != nil {
 		logger.Ctx(ctx).Error("UpdateColumn failed", logger.Error(err))
 	}
 	return err
@@ -1278,15 +1448,30 @@ func (r *Repository) UpdateColumn(ctx context.Context, input domain.UpdateProjec
 
 func (r *Repository) DeleteColumn(ctx context.Context, id int64) error {
 	// Null out section_id for tasks in this column before deleting
-	if _, err := r.pool.ExecContext(ctx,
-		`UPDATE flow_tasks SET section_id = NULL WHERE section_id = ?`, id,
-	); err != nil {
+	clearQ, clearArgs, err := sq.
+		Update("flow_tasks").
+		Set("section_id", nil).
+		Where(sq.Eq{"section_id": id}).
+		PlaceholderFormat(sq.Question).
+		ToSql()
+	if err != nil {
+		logger.Ctx(ctx).Error("DeleteColumn clear build failed", logger.Error(err))
 		return err
 	}
-	_, err := r.pool.ExecContext(ctx,
-		`DELETE FROM flow_project_columns WHERE id = ?`, id,
-	)
+	if _, err := r.pool.ExecContext(ctx, clearQ, clearArgs...); err != nil {
+		return err
+	}
+
+	delQ, delArgs, err := sq.
+		Delete("flow_project_columns").
+		Where(sq.Eq{"id": id}).
+		PlaceholderFormat(sq.Question).
+		ToSql()
 	if err != nil {
+		logger.Ctx(ctx).Error("DeleteColumn build failed", logger.Error(err))
+		return err
+	}
+	if _, err = r.pool.ExecContext(ctx, delQ, delArgs...); err != nil {
 		logger.Ctx(ctx).Error("DeleteColumn failed", logger.Error(err))
 	}
 	return err
@@ -1299,11 +1484,18 @@ func (r *Repository) MoveTaskToColumn(ctx context.Context, taskID, columnID int6
 	} else {
 		sectionVal = columnID
 	}
-	_, err := r.pool.ExecContext(ctx,
-		`UPDATE flow_tasks SET section_id = ?, updated_at = NOW() WHERE id = ?`,
-		sectionVal, taskID,
-	)
+	q, args, err := sq.
+		Update("flow_tasks").
+		Set("section_id", sectionVal).
+		Set("updated_at", sq.Expr("NOW()")).
+		Where(sq.Eq{"id": taskID}).
+		PlaceholderFormat(sq.Question).
+		ToSql()
 	if err != nil {
+		logger.Ctx(ctx).Error("MoveTaskToColumn build failed", logger.Error(err))
+		return err
+	}
+	if _, err = r.pool.ExecContext(ctx, q, args...); err != nil {
 		logger.Ctx(ctx).Error("MoveTaskToColumn failed", logger.Error(err))
 	}
 	return err

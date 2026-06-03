@@ -6,6 +6,8 @@ import (
 	"errors"
 	"time"
 
+	sq "github.com/Masterminds/squirrel"
+
 	"github.com/voxire/onion/internal/modules/hr_setup/internal/domain"
 )
 
@@ -20,10 +22,16 @@ func NewRepository(db *sql.DB) *Repository {
 }
 
 func (r *Repository) GetSetupSteps(ctx context.Context, ownerID int64) ([]*domain.SetupStep, error) {
-	rows, err := r.pool.QueryContext(ctx,
-		"SELECT id, owner_id, step_key, completed_at FROM hr_setup_steps WHERE owner_id = ?",
-		ownerID,
-	)
+	listSQL, args, err := sq.Select("id", "owner_id", "step_key", "completed_at").
+		From("hr_setup_steps").
+		Where(sq.Eq{"owner_id": ownerID}).
+		PlaceholderFormat(sq.Question).
+		ToSql()
+	if err != nil {
+		return nil, err
+	}
+
+	rows, err := r.pool.QueryContext(ctx, listSQL, args...)
 	if err != nil {
 		return nil, err
 	}
@@ -45,24 +53,35 @@ func (r *Repository) GetSetupSteps(ctx context.Context, ownerID int64) ([]*domai
 }
 
 func (r *Repository) UpsertSetupStep(ctx context.Context, ownerID int64, stepKey string, completedAt time.Time) error {
-	_, err := r.pool.ExecContext(ctx,
-		`INSERT INTO hr_setup_steps (owner_id, step_key, completed_at)
-		 VALUES (?, ?, ?)
-		 ON DUPLICATE KEY UPDATE completed_at = VALUES(completed_at)`,
-		ownerID, stepKey, completedAt,
-	)
+	upsertSQL, args, err := sq.Insert("hr_setup_steps").
+		Columns("owner_id", "step_key", "completed_at").
+		Values(ownerID, stepKey, completedAt).
+		Suffix("ON DUPLICATE KEY UPDATE completed_at = VALUES(completed_at)").
+		PlaceholderFormat(sq.Question).
+		ToSql()
+	if err != nil {
+		return err
+	}
+
+	_, err = r.pool.ExecContext(ctx, upsertSQL, args...)
 
 	return err
 }
 
 func (r *Repository) GetHRConfig(ctx context.Context, ownerID int64) (*domain.HRConfig, error) {
-	row := r.pool.QueryRowContext(ctx,
-		"SELECT id, owner_id, setup_completed_at, created_at, updated_at FROM hr_configs WHERE owner_id = ?",
-		ownerID,
-	)
+	selectSQL, args, err := sq.Select("id", "owner_id", "setup_completed_at", "created_at", "updated_at").
+		From("hr_configs").
+		Where(sq.Eq{"owner_id": ownerID}).
+		PlaceholderFormat(sq.Question).
+		ToSql()
+	if err != nil {
+		return nil, err
+	}
+
+	row := r.pool.QueryRowContext(ctx, selectSQL, args...)
 
 	var cfg domain.HRConfig
-	err := row.Scan(&cfg.ID, &cfg.OwnerID, &cfg.SetupCompletedAt, &cfg.CreatedAt, &cfg.UpdatedAt)
+	err = row.Scan(&cfg.ID, &cfg.OwnerID, &cfg.SetupCompletedAt, &cfg.CreatedAt, &cfg.UpdatedAt)
 	if err != nil {
 		if errors.Is(err, sql.ErrNoRows) {
 			return nil, domain.ErrConfigNotFound
@@ -74,12 +93,17 @@ func (r *Repository) GetHRConfig(ctx context.Context, ownerID int64) (*domain.HR
 }
 
 func (r *Repository) UpsertHRConfig(ctx context.Context, ownerID int64, completedAt *time.Time) (*domain.HRConfig, error) {
-	_, err := r.pool.ExecContext(ctx,
-		`INSERT INTO hr_configs (owner_id, setup_completed_at)
-		 VALUES (?, ?)
-		 ON DUPLICATE KEY UPDATE setup_completed_at = VALUES(setup_completed_at), updated_at = NOW()`,
-		ownerID, completedAt,
-	)
+	upsertSQL, args, err := sq.Insert("hr_configs").
+		Columns("owner_id", "setup_completed_at").
+		Values(ownerID, completedAt).
+		Suffix("ON DUPLICATE KEY UPDATE setup_completed_at = VALUES(setup_completed_at), updated_at = NOW()").
+		PlaceholderFormat(sq.Question).
+		ToSql()
+	if err != nil {
+		return nil, err
+	}
+
+	_, err = r.pool.ExecContext(ctx, upsertSQL, args...)
 	if err != nil {
 		return nil, err
 	}

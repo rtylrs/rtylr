@@ -5,6 +5,8 @@ import (
 	"database/sql"
 	"errors"
 
+	sq "github.com/Masterminds/squirrel"
+
 	"github.com/voxire/onion/internal/modules/crm_sales/internal/domain"
 	"github.com/voxire/onion/internal/platform/logger"
 )
@@ -22,15 +24,20 @@ func NewRepository(db *sql.DB) *Repository {
 // ---------------------------------------------------------------------------
 
 func (r *Repository) ListLeads(ctx context.Context, ownerID int64) ([]domain.Lead, error) {
-	rows, err := r.db.QueryContext(ctx,
-		`SELECT id, owner_id, company_name, COALESCE(industry,''), COALESCE(size,''),
-		        source, stage, assigned_to, mrr_potential, COALESCE(notes,''),
-		        created_at, updated_at
-		 FROM crm_leads
-		 WHERE owner_id = ?
-		 ORDER BY created_at DESC`,
-		ownerID,
-	)
+	query, args, err := sq.
+		Select("id", "owner_id", "company_name", "COALESCE(industry,'')", "COALESCE(size,'')",
+			"source", "stage", "assigned_to", "mrr_potential", "COALESCE(notes,'')",
+			"created_at", "updated_at").
+		From("crm_leads").
+		Where(sq.Eq{"owner_id": ownerID}).
+		OrderBy("created_at DESC").
+		PlaceholderFormat(sq.Question).
+		ToSql()
+	if err != nil {
+		return nil, err
+	}
+
+	rows, err := r.db.QueryContext(ctx, query, args...)
 	if err != nil {
 		return nil, err
 	}
@@ -55,14 +62,19 @@ func (r *Repository) ListLeads(ctx context.Context, ownerID int64) ([]domain.Lea
 }
 
 func (r *Repository) GetLead(ctx context.Context, id, ownerID int64) (domain.Lead, error) {
-	row := r.db.QueryRowContext(ctx,
-		`SELECT id, owner_id, company_name, COALESCE(industry,''), COALESCE(size,''),
-		        source, stage, assigned_to, mrr_potential, COALESCE(notes,''),
-		        created_at, updated_at
-		 FROM crm_leads
-		 WHERE id = ? AND owner_id = ?`,
-		id, ownerID,
-	)
+	query, args, err := sq.
+		Select("id", "owner_id", "company_name", "COALESCE(industry,'')", "COALESCE(size,'')",
+			"source", "stage", "assigned_to", "mrr_potential", "COALESCE(notes,'')",
+			"created_at", "updated_at").
+		From("crm_leads").
+		Where(sq.Eq{"id": id, "owner_id": ownerID}).
+		PlaceholderFormat(sq.Question).
+		ToSql()
+	if err != nil {
+		return domain.Lead{}, err
+	}
+
+	row := r.db.QueryRowContext(ctx, query, args...)
 	l, err := scanLeadRow(row)
 	if err != nil {
 		if errors.Is(err, sql.ErrNoRows) {
@@ -83,13 +95,19 @@ func (r *Repository) CreateLead(ctx context.Context, ownerID int64, req domain.C
 		stage = domain.LeadStageCold
 	}
 
-	result, err := r.db.ExecContext(ctx,
-		`INSERT INTO crm_leads (owner_id, company_name, industry, size, source, stage, assigned_to, mrr_potential, notes)
-		 VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?)`,
-		ownerID, req.CompanyName, nullableString(req.Industry), nullableString(req.Size),
-		source, string(stage), nullableInt64(req.AssignedTo), nullableFloat64(req.MRRPotential),
-		nullableString(req.Notes),
-	)
+	query, args, err := sq.
+		Insert("crm_leads").
+		Columns("owner_id", "company_name", "industry", "size", "source", "stage", "assigned_to", "mrr_potential", "notes").
+		Values(ownerID, req.CompanyName, nullableString(req.Industry), nullableString(req.Size),
+			source, string(stage), nullableInt64(req.AssignedTo), nullableFloat64(req.MRRPotential),
+			nullableString(req.Notes)).
+		PlaceholderFormat(sq.Question).
+		ToSql()
+	if err != nil {
+		return domain.Lead{}, err
+	}
+
+	result, err := r.db.ExecContext(ctx, query, args...)
 	if err != nil {
 		return domain.Lead{}, err
 	}
@@ -101,16 +119,24 @@ func (r *Repository) CreateLead(ctx context.Context, ownerID int64, req domain.C
 }
 
 func (r *Repository) UpdateLead(ctx context.Context, id, ownerID int64, req domain.UpdateLeadRequest) (domain.Lead, error) {
-	_, err := r.db.ExecContext(ctx,
-		`UPDATE crm_leads
-		 SET company_name = ?, industry = ?, size = ?, source = ?, stage = ?,
-		     assigned_to = ?, mrr_potential = ?, notes = ?
-		 WHERE id = ? AND owner_id = ?`,
-		req.CompanyName, nullableString(req.Industry), nullableString(req.Size),
-		req.Source, string(req.Stage), nullableInt64(req.AssignedTo),
-		nullableFloat64(req.MRRPotential), nullableString(req.Notes),
-		id, ownerID,
-	)
+	query, args, err := sq.
+		Update("crm_leads").
+		Set("company_name", req.CompanyName).
+		Set("industry", nullableString(req.Industry)).
+		Set("size", nullableString(req.Size)).
+		Set("source", req.Source).
+		Set("stage", string(req.Stage)).
+		Set("assigned_to", nullableInt64(req.AssignedTo)).
+		Set("mrr_potential", nullableFloat64(req.MRRPotential)).
+		Set("notes", nullableString(req.Notes)).
+		Where(sq.Eq{"id": id, "owner_id": ownerID}).
+		PlaceholderFormat(sq.Question).
+		ToSql()
+	if err != nil {
+		return domain.Lead{}, err
+	}
+
+	_, err = r.db.ExecContext(ctx, query, args...)
 	if err != nil {
 		return domain.Lead{}, err
 	}
@@ -118,10 +144,16 @@ func (r *Repository) UpdateLead(ctx context.Context, id, ownerID int64, req doma
 }
 
 func (r *Repository) DeleteLead(ctx context.Context, id, ownerID int64) error {
-	result, err := r.db.ExecContext(ctx,
-		`DELETE FROM crm_leads WHERE id = ? AND owner_id = ?`,
-		id, ownerID,
-	)
+	query, args, err := sq.
+		Delete("crm_leads").
+		Where(sq.Eq{"id": id, "owner_id": ownerID}).
+		PlaceholderFormat(sq.Question).
+		ToSql()
+	if err != nil {
+		return err
+	}
+
+	result, err := r.db.ExecContext(ctx, query, args...)
 	if err != nil {
 		return err
 	}
@@ -136,13 +168,18 @@ func (r *Repository) DeleteLead(ctx context.Context, id, ownerID int64) error {
 }
 
 func (r *Repository) GetPipeline(ctx context.Context, ownerID int64) ([]domain.PipelineSummary, error) {
-	rows, err := r.db.QueryContext(ctx,
-		`SELECT stage, COUNT(*) as cnt, COALESCE(SUM(mrr_potential), 0) as total_mrr
-		 FROM crm_leads
-		 WHERE owner_id = ?
-		 GROUP BY stage`,
-		ownerID,
-	)
+	query, args, err := sq.
+		Select("stage", "COUNT(*) as cnt", "COALESCE(SUM(mrr_potential), 0) as total_mrr").
+		From("crm_leads").
+		Where(sq.Eq{"owner_id": ownerID}).
+		GroupBy("stage").
+		PlaceholderFormat(sq.Question).
+		ToSql()
+	if err != nil {
+		return nil, err
+	}
+
+	rows, err := r.db.QueryContext(ctx, query, args...)
 	if err != nil {
 		return nil, err
 	}
@@ -171,17 +208,21 @@ func (r *Repository) GetPipeline(ctx context.Context, ownerID int64) ([]domain.P
 // ---------------------------------------------------------------------------
 
 func (r *Repository) ListContacts(ctx context.Context, ownerID int64, leadID *int64) ([]domain.Contact, error) {
-	query := `SELECT id, owner_id, lead_id, name, COALESCE(role,''), COALESCE(email,''),
-	                 COALESCE(phone,''), COALESCE(linkedin,''), is_primary, COALESCE(notes,''),
-	                 created_at, updated_at
-	          FROM crm_contacts
-	          WHERE owner_id = ?`
-	args := []interface{}{ownerID}
+	builder := sq.
+		Select("id", "owner_id", "lead_id", "name", "COALESCE(role,'')", "COALESCE(email,'')",
+			"COALESCE(phone,'')", "COALESCE(linkedin,'')", "is_primary", "COALESCE(notes,'')",
+			"created_at", "updated_at").
+		From("crm_contacts").
+		Where(sq.Eq{"owner_id": ownerID})
 	if leadID != nil {
-		query += " AND lead_id = ?"
-		args = append(args, *leadID)
+		builder = builder.Where(sq.Eq{"lead_id": *leadID})
 	}
-	query += " ORDER BY created_at DESC"
+	builder = builder.OrderBy("created_at DESC")
+
+	query, args, err := builder.PlaceholderFormat(sq.Question).ToSql()
+	if err != nil {
+		return nil, err
+	}
 
 	rows, err := r.db.QueryContext(ctx, query, args...)
 	if err != nil {
@@ -208,14 +249,19 @@ func (r *Repository) ListContacts(ctx context.Context, ownerID int64, leadID *in
 }
 
 func (r *Repository) GetContact(ctx context.Context, id, ownerID int64) (domain.Contact, error) {
-	row := r.db.QueryRowContext(ctx,
-		`SELECT id, owner_id, lead_id, name, COALESCE(role,''), COALESCE(email,''),
-		        COALESCE(phone,''), COALESCE(linkedin,''), is_primary, COALESCE(notes,''),
-		        created_at, updated_at
-		 FROM crm_contacts
-		 WHERE id = ? AND owner_id = ?`,
-		id, ownerID,
-	)
+	query, args, err := sq.
+		Select("id", "owner_id", "lead_id", "name", "COALESCE(role,'')", "COALESCE(email,'')",
+			"COALESCE(phone,'')", "COALESCE(linkedin,'')", "is_primary", "COALESCE(notes,'')",
+			"created_at", "updated_at").
+		From("crm_contacts").
+		Where(sq.Eq{"id": id, "owner_id": ownerID}).
+		PlaceholderFormat(sq.Question).
+		ToSql()
+	if err != nil {
+		return domain.Contact{}, err
+	}
+
+	row := r.db.QueryRowContext(ctx, query, args...)
 	c, err := scanContactRow(row)
 	if err != nil {
 		if errors.Is(err, sql.ErrNoRows) {
@@ -227,12 +273,18 @@ func (r *Repository) GetContact(ctx context.Context, id, ownerID int64) (domain.
 }
 
 func (r *Repository) CreateContact(ctx context.Context, ownerID int64, req domain.CreateContactRequest) (domain.Contact, error) {
-	result, err := r.db.ExecContext(ctx,
-		`INSERT INTO crm_contacts (owner_id, lead_id, name, role, email, phone, linkedin, is_primary, notes)
-		 VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?)`,
-		ownerID, req.LeadID, req.Name, nullableString(req.Role), nullableString(req.Email),
-		nullableString(req.Phone), nullableString(req.LinkedIn), req.IsPrimary, nullableString(req.Notes),
-	)
+	query, args, err := sq.
+		Insert("crm_contacts").
+		Columns("owner_id", "lead_id", "name", "role", "email", "phone", "linkedin", "is_primary", "notes").
+		Values(ownerID, req.LeadID, req.Name, nullableString(req.Role), nullableString(req.Email),
+			nullableString(req.Phone), nullableString(req.LinkedIn), req.IsPrimary, nullableString(req.Notes)).
+		PlaceholderFormat(sq.Question).
+		ToSql()
+	if err != nil {
+		return domain.Contact{}, err
+	}
+
+	result, err := r.db.ExecContext(ctx, query, args...)
 	if err != nil {
 		return domain.Contact{}, err
 	}
@@ -244,14 +296,23 @@ func (r *Repository) CreateContact(ctx context.Context, ownerID int64, req domai
 }
 
 func (r *Repository) UpdateContact(ctx context.Context, id, ownerID int64, req domain.UpdateContactRequest) (domain.Contact, error) {
-	_, err := r.db.ExecContext(ctx,
-		`UPDATE crm_contacts
-		 SET name = ?, role = ?, email = ?, phone = ?, linkedin = ?, is_primary = ?, notes = ?
-		 WHERE id = ? AND owner_id = ?`,
-		req.Name, nullableString(req.Role), nullableString(req.Email), nullableString(req.Phone),
-		nullableString(req.LinkedIn), req.IsPrimary, nullableString(req.Notes),
-		id, ownerID,
-	)
+	query, args, err := sq.
+		Update("crm_contacts").
+		Set("name", req.Name).
+		Set("role", nullableString(req.Role)).
+		Set("email", nullableString(req.Email)).
+		Set("phone", nullableString(req.Phone)).
+		Set("linkedin", nullableString(req.LinkedIn)).
+		Set("is_primary", req.IsPrimary).
+		Set("notes", nullableString(req.Notes)).
+		Where(sq.Eq{"id": id, "owner_id": ownerID}).
+		PlaceholderFormat(sq.Question).
+		ToSql()
+	if err != nil {
+		return domain.Contact{}, err
+	}
+
+	_, err = r.db.ExecContext(ctx, query, args...)
 	if err != nil {
 		return domain.Contact{}, err
 	}
@@ -259,10 +320,16 @@ func (r *Repository) UpdateContact(ctx context.Context, id, ownerID int64, req d
 }
 
 func (r *Repository) DeleteContact(ctx context.Context, id, ownerID int64) error {
-	result, err := r.db.ExecContext(ctx,
-		`DELETE FROM crm_contacts WHERE id = ? AND owner_id = ?`,
-		id, ownerID,
-	)
+	query, args, err := sq.
+		Delete("crm_contacts").
+		Where(sq.Eq{"id": id, "owner_id": ownerID}).
+		PlaceholderFormat(sq.Question).
+		ToSql()
+	if err != nil {
+		return err
+	}
+
+	result, err := r.db.ExecContext(ctx, query, args...)
 	if err != nil {
 		return err
 	}
@@ -281,14 +348,19 @@ func (r *Repository) DeleteContact(ctx context.Context, id, ownerID int64) error
 // ---------------------------------------------------------------------------
 
 func (r *Repository) ListTouchpoints(ctx context.Context, ownerID, leadID int64) ([]domain.Touchpoint, error) {
-	rows, err := r.db.QueryContext(ctx,
-		`SELECT id, owner_id, lead_id, contact_id, type, outcome,
-		        COALESCE(notes,''), next_follow_up, created_by, created_at
-		 FROM crm_touchpoints
-		 WHERE owner_id = ? AND lead_id = ?
-		 ORDER BY created_at DESC`,
-		ownerID, leadID,
-	)
+	query, args, err := sq.
+		Select("id", "owner_id", "lead_id", "contact_id", "type", "outcome",
+			"COALESCE(notes,'')", "next_follow_up", "created_by", "created_at").
+		From("crm_touchpoints").
+		Where(sq.Eq{"owner_id": ownerID, "lead_id": leadID}).
+		OrderBy("created_at DESC").
+		PlaceholderFormat(sq.Question).
+		ToSql()
+	if err != nil {
+		return nil, err
+	}
+
+	rows, err := r.db.QueryContext(ctx, query, args...)
 	if err != nil {
 		return nil, err
 	}
@@ -313,13 +385,18 @@ func (r *Repository) ListTouchpoints(ctx context.Context, ownerID, leadID int64)
 }
 
 func (r *Repository) GetTouchpoint(ctx context.Context, id, ownerID int64) (domain.Touchpoint, error) {
-	row := r.db.QueryRowContext(ctx,
-		`SELECT id, owner_id, lead_id, contact_id, type, outcome,
-		        COALESCE(notes,''), next_follow_up, created_by, created_at
-		 FROM crm_touchpoints
-		 WHERE id = ? AND owner_id = ?`,
-		id, ownerID,
-	)
+	query, args, err := sq.
+		Select("id", "owner_id", "lead_id", "contact_id", "type", "outcome",
+			"COALESCE(notes,'')", "next_follow_up", "created_by", "created_at").
+		From("crm_touchpoints").
+		Where(sq.Eq{"id": id, "owner_id": ownerID}).
+		PlaceholderFormat(sq.Question).
+		ToSql()
+	if err != nil {
+		return domain.Touchpoint{}, err
+	}
+
+	row := r.db.QueryRowContext(ctx, query, args...)
 	tp, err := scanTouchpointRow(row)
 	if err != nil {
 		if errors.Is(err, sql.ErrNoRows) {
@@ -340,12 +417,18 @@ func (r *Repository) CreateTouchpoint(ctx context.Context, ownerID, createdBy in
 		outcome = "other"
 	}
 
-	result, err := r.db.ExecContext(ctx,
-		`INSERT INTO crm_touchpoints (owner_id, lead_id, contact_id, type, outcome, notes, next_follow_up, created_by)
-		 VALUES (?, ?, ?, ?, ?, ?, ?, ?)`,
-		ownerID, req.LeadID, nullableInt64(req.ContactID), tp, outcome,
-		nullableString(req.Notes), nullableStringPtr(req.NextFollowUp), createdBy,
-	)
+	query, args, err := sq.
+		Insert("crm_touchpoints").
+		Columns("owner_id", "lead_id", "contact_id", "type", "outcome", "notes", "next_follow_up", "created_by").
+		Values(ownerID, req.LeadID, nullableInt64(req.ContactID), tp, outcome,
+			nullableString(req.Notes), nullableStringPtr(req.NextFollowUp), createdBy).
+		PlaceholderFormat(sq.Question).
+		ToSql()
+	if err != nil {
+		return domain.Touchpoint{}, err
+	}
+
+	result, err := r.db.ExecContext(ctx, query, args...)
 	if err != nil {
 		return domain.Touchpoint{}, err
 	}
@@ -357,10 +440,16 @@ func (r *Repository) CreateTouchpoint(ctx context.Context, ownerID, createdBy in
 }
 
 func (r *Repository) DeleteTouchpoint(ctx context.Context, id, ownerID int64) error {
-	result, err := r.db.ExecContext(ctx,
-		`DELETE FROM crm_touchpoints WHERE id = ? AND owner_id = ?`,
-		id, ownerID,
-	)
+	query, args, err := sq.
+		Delete("crm_touchpoints").
+		Where(sq.Eq{"id": id, "owner_id": ownerID}).
+		PlaceholderFormat(sq.Question).
+		ToSql()
+	if err != nil {
+		return err
+	}
+
+	result, err := r.db.ExecContext(ctx, query, args...)
 	if err != nil {
 		return err
 	}
@@ -379,15 +468,20 @@ func (r *Repository) DeleteTouchpoint(ctx context.Context, id, ownerID int64) er
 // ---------------------------------------------------------------------------
 
 func (r *Repository) ListContracts(ctx context.Context, ownerID int64) ([]domain.Contract, error) {
-	rows, err := r.db.QueryContext(ctx,
-		`SELECT id, owner_id, lead_id, plan, mrr, seats,
-		        signed_at, COALESCE(signed_by_name,''), closed_by, COALESCE(notes,''),
-		        created_at, updated_at
-		 FROM crm_contracts
-		 WHERE owner_id = ?
-		 ORDER BY created_at DESC`,
-		ownerID,
-	)
+	query, args, err := sq.
+		Select("id", "owner_id", "lead_id", "plan", "mrr", "seats",
+			"signed_at", "COALESCE(signed_by_name,'')", "closed_by", "COALESCE(notes,'')",
+			"created_at", "updated_at").
+		From("crm_contracts").
+		Where(sq.Eq{"owner_id": ownerID}).
+		OrderBy("created_at DESC").
+		PlaceholderFormat(sq.Question).
+		ToSql()
+	if err != nil {
+		return nil, err
+	}
+
+	rows, err := r.db.QueryContext(ctx, query, args...)
 	if err != nil {
 		return nil, err
 	}
@@ -412,14 +506,19 @@ func (r *Repository) ListContracts(ctx context.Context, ownerID int64) ([]domain
 }
 
 func (r *Repository) GetContract(ctx context.Context, id, ownerID int64) (domain.Contract, error) {
-	row := r.db.QueryRowContext(ctx,
-		`SELECT id, owner_id, lead_id, plan, mrr, seats,
-		        signed_at, COALESCE(signed_by_name,''), closed_by, COALESCE(notes,''),
-		        created_at, updated_at
-		 FROM crm_contracts
-		 WHERE id = ? AND owner_id = ?`,
-		id, ownerID,
-	)
+	query, args, err := sq.
+		Select("id", "owner_id", "lead_id", "plan", "mrr", "seats",
+			"signed_at", "COALESCE(signed_by_name,'')", "closed_by", "COALESCE(notes,'')",
+			"created_at", "updated_at").
+		From("crm_contracts").
+		Where(sq.Eq{"id": id, "owner_id": ownerID}).
+		PlaceholderFormat(sq.Question).
+		ToSql()
+	if err != nil {
+		return domain.Contract{}, err
+	}
+
+	row := r.db.QueryRowContext(ctx, query, args...)
 	c, err := scanContractRow(row)
 	if err != nil {
 		if errors.Is(err, sql.ErrNoRows) {
@@ -440,12 +539,18 @@ func (r *Repository) CreateContract(ctx context.Context, ownerID int64, req doma
 		seats = 1
 	}
 
-	result, err := r.db.ExecContext(ctx,
-		`INSERT INTO crm_contracts (owner_id, lead_id, plan, mrr, seats, signed_at, signed_by_name, closed_by, notes)
-		 VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?)`,
-		ownerID, req.LeadID, plan, req.MRR, seats, nullableStringPtr(req.SignedAt),
-		nullableString(req.SignedByName), nullableInt64(req.ClosedBy), nullableString(req.Notes),
-	)
+	query, args, err := sq.
+		Insert("crm_contracts").
+		Columns("owner_id", "lead_id", "plan", "mrr", "seats", "signed_at", "signed_by_name", "closed_by", "notes").
+		Values(ownerID, req.LeadID, plan, req.MRR, seats, nullableStringPtr(req.SignedAt),
+			nullableString(req.SignedByName), nullableInt64(req.ClosedBy), nullableString(req.Notes)).
+		PlaceholderFormat(sq.Question).
+		ToSql()
+	if err != nil {
+		return domain.Contract{}, err
+	}
+
+	result, err := r.db.ExecContext(ctx, query, args...)
 	if err != nil {
 		return domain.Contract{}, err
 	}
@@ -461,14 +566,23 @@ func (r *Repository) UpdateContract(ctx context.Context, id, ownerID int64, req 
 	if seats == 0 {
 		seats = 1
 	}
-	_, err := r.db.ExecContext(ctx,
-		`UPDATE crm_contracts
-		 SET plan = ?, mrr = ?, seats = ?, signed_at = ?, signed_by_name = ?, closed_by = ?, notes = ?
-		 WHERE id = ? AND owner_id = ?`,
-		req.Plan, req.MRR, seats, nullableStringPtr(req.SignedAt),
-		nullableString(req.SignedByName), nullableInt64(req.ClosedBy), nullableString(req.Notes),
-		id, ownerID,
-	)
+	query, args, err := sq.
+		Update("crm_contracts").
+		Set("plan", req.Plan).
+		Set("mrr", req.MRR).
+		Set("seats", seats).
+		Set("signed_at", nullableStringPtr(req.SignedAt)).
+		Set("signed_by_name", nullableString(req.SignedByName)).
+		Set("closed_by", nullableInt64(req.ClosedBy)).
+		Set("notes", nullableString(req.Notes)).
+		Where(sq.Eq{"id": id, "owner_id": ownerID}).
+		PlaceholderFormat(sq.Question).
+		ToSql()
+	if err != nil {
+		return domain.Contract{}, err
+	}
+
+	_, err = r.db.ExecContext(ctx, query, args...)
 	if err != nil {
 		return domain.Contract{}, err
 	}

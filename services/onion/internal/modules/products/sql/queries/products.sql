@@ -21,3 +21,28 @@ WHERE owner_id = ? AND id = ?;
 
 -- name: DeleteProduct :exec
 DELETE FROM erp_products WHERE owner_id = ? AND id = ?;
+
+-- name: GetProductByBarcode :one
+SELECT id, owner_id, category_id, supplier_id, name, sku, barcode, description,
+       unit, cost_price, sale_price, stock_quantity, low_stock_threshold,
+       reorder_quantity, is_active, track_inventory, created_at, updated_at
+FROM erp_products
+WHERE owner_id = ? AND barcode = ?
+LIMIT 1;
+
+-- name: CountActiveProducts :one
+SELECT COUNT(*) FROM erp_products WHERE owner_id = ? AND is_active = TRUE;
+
+-- name: CountLowStockProducts :one
+SELECT COUNT(*) FROM erp_products
+WHERE owner_id = ? AND is_active = TRUE
+  AND track_inventory = TRUE
+  AND low_stock_threshold IS NOT NULL
+  AND stock_quantity <= low_stock_threshold;
+
+-- name: CountPendingPurchaseOrders :one
+SELECT COUNT(*) FROM erp_purchase_orders
+WHERE owner_id = ? AND status IN ('draft','sent','partial');
+
+-- name: CountActiveSuppliers :one
+SELECT COUNT(*) FROM erp_suppliers WHERE owner_id = ? AND is_active = TRUE;

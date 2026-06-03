@@ -5,6 +5,7 @@ import (
 	"database/sql"
 	"time"
 
+	sq "github.com/Masterminds/squirrel"
 	"github.com/voxire/onion/internal/platform/logger"
 )
 
@@ -20,9 +21,18 @@ func NewRepository(db *sql.DB) *Repository {
 
 func (r *Repository) GetTodayCount(ctx context.Context, ownerID int64, start, end time.Time) (int, error) {
 	var count int
-	err := r.pool.QueryRowContext(ctx,
-		"SELECT COUNT(*) FROM booking_appointments WHERE owner_id = ? AND start_time >= ? AND start_time < ?",
-		ownerID, start, end).Scan(&count)
+	query, args, err := sq.Select("COUNT(*)").
+		From("booking_appointments").
+		Where(sq.Eq{"owner_id": ownerID}).
+		Where(sq.GtOrEq{"start_time": start}).
+		Where(sq.Lt{"start_time": end}).
+		PlaceholderFormat(sq.Question).
+		ToSql()
+	if err != nil {
+		logger.Ctx(ctx).Error("Failed to build today count query", logger.Error(err))
+		return 0, err
+	}
+	err = r.pool.QueryRowContext(ctx, query, args...).Scan(&count)
 	if err != nil {
 		logger.Ctx(ctx).Error("Failed to get today count in repo", logger.Error(err))
 		return 0, err
@@ -32,9 +42,18 @@ func (r *Repository) GetTodayCount(ctx context.Context, ownerID int64, start, en
 
 func (r *Repository) GetUpcomingCount(ctx context.Context, ownerID int64, start time.Time) (int, error) {
 	var count int
-	err := r.pool.QueryRowContext(ctx,
-		"SELECT COUNT(*) FROM booking_appointments WHERE owner_id = ? AND start_time >= ? AND status IN ('pending','confirmed')",
-		ownerID, start).Scan(&count)
+	query, args, err := sq.Select("COUNT(*)").
+		From("booking_appointments").
+		Where(sq.Eq{"owner_id": ownerID}).
+		Where(sq.GtOrEq{"start_time": start}).
+		Where(sq.Eq{"status": []string{"pending", "confirmed"}}).
+		PlaceholderFormat(sq.Question).
+		ToSql()
+	if err != nil {
+		logger.Ctx(ctx).Error("Failed to build upcoming count query", logger.Error(err))
+		return 0, err
+	}
+	err = r.pool.QueryRowContext(ctx, query, args...).Scan(&count)
 	if err != nil {
 		logger.Ctx(ctx).Error("Failed to get upcoming count in repo", logger.Error(err))
 		return 0, err
@@ -43,17 +62,34 @@ func (r *Repository) GetUpcomingCount(ctx context.Context, ownerID int64, start 
 }
 
 func (r *Repository) GetMonthCounts(ctx context.Context, ownerID int64, start time.Time) (total, cancelled int, err error) {
-	err = r.pool.QueryRowContext(ctx,
-		"SELECT COUNT(*) FROM booking_appointments WHERE owner_id = ? AND start_time >= ?",
-		ownerID, start).Scan(&total)
+	totalSQL, totalArgs, err := sq.Select("COUNT(*)").
+		From("booking_appointments").
+		Where(sq.Eq{"owner_id": ownerID}).
+		Where(sq.GtOrEq{"start_time": start}).
+		PlaceholderFormat(sq.Question).
+		ToSql()
+	if err != nil {
+		logger.Ctx(ctx).Error("Failed to build total month count query", logger.Error(err))
+		return 0, 0, err
+	}
+	err = r.pool.QueryRowContext(ctx, totalSQL, totalArgs...).Scan(&total)
 	if err != nil {
 		logger.Ctx(ctx).Error("Failed to get total month count in repo", logger.Error(err))
 		return 0, 0, err
 	}
 
-	err = r.pool.QueryRowContext(ctx,
-		"SELECT COUNT(*) FROM booking_appointments WHERE owner_id = ? AND start_time >= ? AND status = 'cancelled'",
-		ownerID, start).Scan(&cancelled)
+	cancelledSQL, cancelledArgs, err := sq.Select("COUNT(*)").
+		From("booking_appointments").
+		Where(sq.Eq{"owner_id": ownerID}).
+		Where(sq.GtOrEq{"start_time": start}).
+		Where(sq.Eq{"status": "cancelled"}).
+		PlaceholderFormat(sq.Question).
+		ToSql()
+	if err != nil {
+		logger.Ctx(ctx).Error("Failed to build cancelled month count query", logger.Error(err))
+		return 0, 0, err
+	}
+	err = r.pool.QueryRowContext(ctx, cancelledSQL, cancelledArgs...).Scan(&cancelled)
 	if err != nil {
 		logger.Ctx(ctx).Error("Failed to get cancelled month count in repo", logger.Error(err))
 		return 0, 0, err
@@ -64,11 +100,19 @@ func (r *Repository) GetMonthCounts(ctx context.Context, ownerID int64, start ti
 
 func (r *Repository) GetMonthRevenue(ctx context.Context, ownerID int64, start time.Time) (float64, error) {
 	var revenue sql.NullFloat64
-	err := r.pool.QueryRowContext(ctx,
-		`SELECT COALESCE(SUM(bs.price), 0) FROM booking_appointments ba
-		 JOIN booking_services bs ON ba.service_id = bs.id
-		 WHERE ba.owner_id = ? AND ba.start_time >= ? AND ba.status IN ('completed','confirmed')`,
-		ownerID, start).Scan(&revenue)
+	query, args, err := sq.Select("COALESCE(SUM(bs.price), 0)").
+		From("booking_appointments ba").
+		Join("booking_services bs ON ba.service_id = bs.id").
+		Where(sq.Eq{"ba.owner_id": ownerID}).
+		Where(sq.GtOrEq{"ba.start_time": start}).
+		Where(sq.Eq{"ba.status": []string{"completed", "confirmed"}}).
+		PlaceholderFormat(sq.Question).
+		ToSql()
+	if err != nil {
+		logger.Ctx(ctx).Error("Failed to build revenue query", logger.Error(err))
+		return 0, err
+	}
+	err = r.pool.QueryRowContext(ctx, query, args...).Scan(&revenue)
 	if err != nil {
 		logger.Ctx(ctx).Error("Failed to get revenue in repo", logger.Error(err))
 		return 0, err

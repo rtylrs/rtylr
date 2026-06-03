@@ -6,7 +6,6 @@ import (
 	"errors"
 	"math"
 	"strconv"
-	"time"
 
 	"github.com/voxire/onion/internal/modules/finance_reconciliation/internal/domain"
 	"github.com/voxire/onion/internal/modules/finance_reconciliation/internal/infrastructure/persistence/sqlc"
@@ -54,21 +53,7 @@ func (r *Repository) ListUnmatchedBankFeeds(ctx context.Context, ownerID int64) 
 // failure modes without meaningful isolation.
 func (r *Repository) ListUnmatchedInvoices(ctx context.Context, ownerID int64) ([]domain.UnmatchedInvoice, error) {
 	// cross-schema read from finance_invoices — reconciliation needs the outstanding invoice side of the match (owned by the invoices module).
-	const q = `
-		SELECT i.id, i.invoice_number, i.client_name, i.total, i.currency, i.issue_date, i.due_date
-		FROM finance_invoices i
-		WHERE i.owner_id = ?
-		  AND i.status IN ('draft','sent','viewed','partial','overdue')
-		  AND NOT EXISTS (
-		      SELECT 1 FROM finance_reconciliation_matches m
-		      WHERE m.owner_id = i.owner_id
-		        AND m.target_type = 'invoice'
-		        AND m.target_id = i.id
-		  )
-		ORDER BY i.due_date ASC, i.id ASC
-		LIMIT 200
-	`
-	rows, err := r.pool.QueryContext(ctx, q, ownerID)
+	rows, err := r.queries.ListUnmatchedInvoices(ctx, ownerID)
 	if err != nil {
 		logger.Ctx(ctx).Error("Failed to list unmatched invoices",
 			logger.Error(err),
@@ -76,38 +61,18 @@ func (r *Repository) ListUnmatchedInvoices(ctx context.Context, ownerID int64) (
 		)
 		return nil, err
 	}
-	defer func() {
-		if closeErr := rows.Close(); closeErr != nil {
-			logger.Ctx(ctx).Warn("Failed to close unmatched invoices rows", logger.Error(closeErr))
-		}
-	}()
 
-	items := make([]domain.UnmatchedInvoice, 0)
-	for rows.Next() {
-		var (
-			id            int64
-			invoiceNumber string
-			clientName    string
-			totalStr      sql.NullString
-			currency      sql.NullString
-			issueDate     time.Time
-			dueDate       time.Time
-		)
-		if scanErr := rows.Scan(&id, &invoiceNumber, &clientName, &totalStr, &currency, &issueDate, &dueDate); scanErr != nil {
-			return nil, scanErr
-		}
+	items := make([]domain.UnmatchedInvoice, 0, len(rows))
+	for _, row := range rows {
 		items = append(items, domain.UnmatchedInvoice{
-			ID:               id,
-			InvoiceNumber:    invoiceNumber,
-			ClientName:       clientName,
-			AmountMinorUnits: decimalStrToMinorUnits(ctx, totalStr),
-			Currency:         nullStr(currency),
-			IssueDate:        issueDate,
-			DueDate:          dueDate,
+			ID:               row.ID,
+			InvoiceNumber:    row.InvoiceNumber,
+			ClientName:       row.ClientName,
+			AmountMinorUnits: decimalStrToMinorUnits(ctx, row.Total),
+			Currency:         nullStr(row.Currency),
+			IssueDate:        row.IssueDate,
+			DueDate:          row.DueDate,
 		})
-	}
-	if rowsErr := rows.Err(); rowsErr != nil {
-		return nil, rowsErr
 	}
 	return items, nil
 }
@@ -118,20 +83,7 @@ func (r *Repository) ListUnmatchedInvoices(ctx context.Context, ownerID int64) (
 // suggestions.
 func (r *Repository) ListUnmatchedExpenses(ctx context.Context, ownerID int64) ([]domain.UnmatchedInvoice, error) {
 	// cross-schema read from finance_expenses — reconciliation needs the outstanding expense side of the match (owned by the expenses module).
-	const q = `
-		SELECT e.id, e.description, COALESCE(e.vendor, ''), e.amount, e.currency, e.expense_date
-		FROM finance_expenses e
-		WHERE e.owner_id = ?
-		  AND NOT EXISTS (
-		      SELECT 1 FROM finance_reconciliation_matches m
-		      WHERE m.owner_id = e.owner_id
-		        AND m.target_type = 'expense'
-		        AND m.target_id = e.id
-		  )
-		ORDER BY e.expense_date ASC, e.id ASC
-		LIMIT 200
-	`
-	rows, err := r.pool.QueryContext(ctx, q, ownerID)
+	rows, err := r.queries.ListUnmatchedExpenses(ctx, ownerID)
 	if err != nil {
 		logger.Ctx(ctx).Error("Failed to list unmatched expenses",
 			logger.Error(err),
@@ -139,37 +91,18 @@ func (r *Repository) ListUnmatchedExpenses(ctx context.Context, ownerID int64) (
 		)
 		return nil, err
 	}
-	defer func() {
-		if closeErr := rows.Close(); closeErr != nil {
-			logger.Ctx(ctx).Warn("Failed to close unmatched expenses rows", logger.Error(closeErr))
-		}
-	}()
 
-	items := make([]domain.UnmatchedInvoice, 0)
-	for rows.Next() {
-		var (
-			id          int64
-			description string
-			vendor      string
-			amountStr   sql.NullString
-			currency    sql.NullString
-			expenseDate time.Time
-		)
-		if scanErr := rows.Scan(&id, &description, &vendor, &amountStr, &currency, &expenseDate); scanErr != nil {
-			return nil, scanErr
-		}
+	items := make([]domain.UnmatchedInvoice, 0, len(rows))
+	for _, row := range rows {
 		items = append(items, domain.UnmatchedInvoice{
-			ID:               id,
-			InvoiceNumber:    description,
-			ClientName:       vendor,
-			AmountMinorUnits: decimalStrToMinorUnits(ctx, amountStr),
-			Currency:         nullStr(currency),
-			IssueDate:        expenseDate,
-			DueDate:          expenseDate,
+			ID:               row.ID,
+			InvoiceNumber:    row.Description,
+			ClientName:       row.Vendor,
+			AmountMinorUnits: decimalStrToMinorUnits(ctx, sql.NullString{String: row.Amount, Valid: true}),
+			Currency:         nullStr(row.Currency),
+			IssueDate:        row.ExpenseDate,
+			DueDate:          row.ExpenseDate,
 		})
-	}
-	if rowsErr := rows.Err(); rowsErr != nil {
-		return nil, rowsErr
 	}
 	return items, nil
 }
@@ -213,13 +146,8 @@ func (r *Repository) CreateMatch(ctx context.Context, ownerID int64, input domai
 // CountMatches returns the total number of reconciliation matches created for
 // the owner, regardless of target type.
 func (r *Repository) CountMatches(ctx context.Context, ownerID int64) (int64, error) {
-	const q = `
-		SELECT COUNT(*)
-		FROM finance_reconciliation_matches
-		WHERE owner_id = ?`
-
-	var cnt int64
-	if err := r.pool.QueryRowContext(ctx, q, ownerID).Scan(&cnt); err != nil {
+	cnt, err := r.queries.CountMatches(ctx, ownerID)
+	if err != nil {
 		logger.Ctx(ctx).Error("Failed to count reconciliation matches", logger.Error(err))
 		return 0, err
 	}
@@ -230,30 +158,18 @@ func (r *Repository) CountMatches(ctx context.Context, ownerID int64) (int64, er
 // CountMatchesByTargetType returns the number of matches for each target
 // type ("invoice", "expense") for the given owner.
 func (r *Repository) CountMatchesByTargetType(ctx context.Context, ownerID int64) (map[string]int64, error) {
-	const q = `
-		SELECT target_type, COUNT(*) AS cnt
-		FROM finance_reconciliation_matches
-		WHERE owner_id = ?
-		GROUP BY target_type`
-
-	rows, err := r.pool.QueryContext(ctx, q, ownerID)
+	rows, err := r.queries.CountMatchesByTargetType(ctx, ownerID)
 	if err != nil {
 		logger.Ctx(ctx).Error("Failed to count matches by target type", logger.Error(err))
 		return nil, err
 	}
-	defer rows.Close()
 
 	counts := make(map[string]int64)
-	for rows.Next() {
-		var ttype string
-		var cnt int64
-		if scanErr := rows.Scan(&ttype, &cnt); scanErr != nil {
-			return nil, scanErr
-		}
-		counts[ttype] = cnt
+	for _, row := range rows {
+		counts[row.TargetType] = row.Cnt
 	}
 
-	return counts, rows.Err()
+	return counts, nil
 }
 
 // ---------------------------------------------------------------------------

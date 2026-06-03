@@ -4,6 +4,8 @@ import (
 	"context"
 	"time"
 
+	sq "github.com/Masterminds/squirrel"
+
 	"github.com/voxire/onion/internal/platform/logger"
 )
 
@@ -29,21 +31,32 @@ func (r *Repository) GetChurnRates(ctx context.Context, ownerID int64) ([]ChurnR
 	for _, days := range churnWindows {
 		cutoff := now.AddDate(0, 0, -int(days))
 		// cross-schema read from crm_customers + pos_orders — rolling churn window for customer health panel
-		const q = `
-			SELECT
-			  SUM(CASE WHEN last_order_at IS NULL OR last_order_at < ? THEN 1 ELSE 0 END) AS churned,
-			  SUM(CASE WHEN last_order_at IS NOT NULL AND last_order_at >= ? THEN 1 ELSE 0 END) AS active
-			FROM (
-			  SELECT c.id, MAX(o.created_at) AS last_order_at
-			  FROM crm_customers c
-			  LEFT JOIN pos_orders o ON o.customer_id = c.id AND o.owner_id = c.owner_id
-			  WHERE c.owner_id = ?
-			  GROUP BY c.id
-			  HAVING MAX(o.created_at) IS NOT NULL
-			) AS t
-		`
+		//
+		// The aggregation wraps a per-customer last-order subquery in FROM.
+		// The subquery carries its own bound argument (owner_id), so we use
+		// FromSelect to let squirrel thread the args in clause order: the two
+		// CASE-expression cutoffs (SELECT clause) first, then the subquery's
+		// owner_id (FROM clause).
+		inner := sq.
+			Select("c.id", "MAX(o.created_at) AS last_order_at").
+			From("crm_customers c").
+			LeftJoin("pos_orders o ON o.customer_id = c.id AND o.owner_id = c.owner_id").
+			Where(sq.Eq{"c.owner_id": ownerID}).
+			GroupBy("c.id").
+			Having("MAX(o.created_at) IS NOT NULL")
+		q, args, err := sq.
+			Select().
+			Column(sq.Expr("SUM(CASE WHEN last_order_at IS NULL OR last_order_at < ? THEN 1 ELSE 0 END) AS churned", cutoff)).
+			Column(sq.Expr("SUM(CASE WHEN last_order_at IS NOT NULL AND last_order_at >= ? THEN 1 ELSE 0 END) AS active", cutoff)).
+			FromSelect(inner, "t").
+			PlaceholderFormat(sq.Question).
+			ToSql()
+		if err != nil {
+			logger.Ctx(ctx).Error("insights: build churn query failed", logger.Error(err))
+			return nil, err
+		}
 		var churned, active int64
-		if err := r.pool.QueryRowContext(ctx, q, cutoff, cutoff, ownerID).Scan(&nullableInt64{&churned}, &nullableInt64{&active}); err != nil {
+		if err := r.pool.QueryRowContext(ctx, q, args...).Scan(&nullableInt64{&churned}, &nullableInt64{&active}); err != nil {
 			logger.Ctx(ctx).Error("insights: churn query failed", logger.Error(err))
 			return nil, err
 		}

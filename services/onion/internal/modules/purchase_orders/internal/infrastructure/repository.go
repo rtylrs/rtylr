@@ -62,15 +62,10 @@ func (r *Repository) ListPurchaseOrders(ctx context.Context, ownerID int64, stat
 }
 
 func (r *Repository) GetByID(ctx context.Context, ownerID, id int64) (domain.PurchaseOrder, error) {
-	const q = `SELECT id, owner_id, supplier_id, po_number, status, subtotal, tax_amount, total,
-	             expected_delivery, received_at, notes, created_by, created_at, updated_at
-	           FROM erp_purchase_orders WHERE id = ? AND owner_id = ?`
-	var row sqlc.ErpPurchaseOrder
-	err := r.pool.QueryRowContext(ctx, q, id, ownerID).Scan(
-		&row.ID, &row.OwnerID, &row.SupplierID, &row.PoNumber, &row.Status,
-		&row.Subtotal, &row.TaxAmount, &row.Total, &row.ExpectedDelivery,
-		&row.ReceivedAt, &row.Notes, &row.CreatedBy, &row.CreatedAt, &row.UpdatedAt,
-	)
+	row, err := r.queries.GetPurchaseOrderByID(ctx, sqlc.GetPurchaseOrderByIDParams{
+		ID:      id,
+		OwnerID: ownerID,
+	})
 	if errors.Is(err, sql.ErrNoRows) {
 		return domain.PurchaseOrder{}, domain.ErrPurchaseOrderNotFound
 	}

@@ -6,6 +6,8 @@ import (
 	"errors"
 	"strconv"
 
+	"github.com/Masterminds/squirrel"
+
 	"github.com/voxire/onion/internal/modules/products/internal/domain"
 	"github.com/voxire/onion/internal/modules/products/internal/infrastructure/persistence/sqlc"
 	"github.com/voxire/onion/internal/platform/logger"
@@ -26,27 +28,34 @@ func NewRepository(db *sql.DB) *Repository {
 }
 
 func (r *Repository) ListProducts(ctx context.Context, ownerID int64, search string, categoryID, limit, offset int) ([]domain.Product, bool, error) {
-	query := `
-		SELECT id, owner_id, category_id, supplier_id, name, sku, barcode, description,
-		       unit, cost_price, sale_price, stock_quantity, low_stock_threshold,
-		       reorder_quantity, is_active, track_inventory, created_at, updated_at
-		FROM erp_products
-		WHERE owner_id = ?`
-
-	args := []interface{}{ownerID}
+	qb := squirrel.Select(
+		"id", "owner_id", "category_id", "supplier_id", "name", "sku", "barcode", "description",
+		"unit", "cost_price", "sale_price", "stock_quantity", "low_stock_threshold",
+		"reorder_quantity", "is_active", "track_inventory", "created_at", "updated_at",
+	).
+		From("erp_products").
+		Where(squirrel.Eq{"owner_id": ownerID})
 
 	if search != "" {
-		query += ` AND (name LIKE ? OR sku LIKE ? OR barcode LIKE ?)`
 		like := "%" + search + "%"
-		args = append(args, like, like, like)
+		qb = qb.Where(squirrel.Or{
+			squirrel.Like{"name": like},
+			squirrel.Like{"sku": like},
+			squirrel.Like{"barcode": like},
+		})
 	}
 
 	if categoryID > 0 {
-		query += ` AND category_id = ?`
-		args = append(args, categoryID)
+		qb = qb.Where(squirrel.Eq{"category_id": categoryID})
 	}
 
-	query += ` ORDER BY name ASC LIMIT ` + strconv.Itoa(limit+1) + ` OFFSET ` + strconv.Itoa(offset)
+	qb = qb.OrderBy("name ASC").Limit(uint64(limit + 1)).Offset(uint64(offset))
+
+	query, args, err := qb.PlaceholderFormat(squirrel.Question).ToSql()
+	if err != nil {
+		logger.Ctx(ctx).Error("Failed to build list products query", logger.Error(err))
+		return nil, false, err
+	}
 
 	rows, err := r.pool.QueryContext(ctx, query, args...)
 	if err != nil {
@@ -103,29 +112,12 @@ func (r *Repository) GetProduct(ctx context.Context, ownerID, id int64) (domain.
 // repo level we trust the input and just match exactly. Owner-scoped
 // so a barcode collision across tenants won't leak data.
 func (r *Repository) GetProductByBarcode(ctx context.Context, ownerID int64, barcode string) (domain.Product, error) {
-	// Dynamic query rather than sqlc: the SELECT shape matches
-	// ListProducts exactly, so reusing productFromRow keeps parity
-	// with GetProduct's output.
-	const q = `
-		SELECT id, owner_id, category_id, supplier_id, name, sku, barcode, description,
-		       unit, cost_price, sale_price, stock_quantity, low_stock_threshold,
-		       reorder_quantity, is_active, track_inventory, created_at, updated_at
-		FROM erp_products
-		WHERE owner_id = ? AND barcode = ?
-		LIMIT 1`
-
-	row := r.pool.QueryRowContext(ctx, q, ownerID, barcode)
-
-	var p domain.Product
-	var categoryID, supplierID sql.NullInt64
-	var barcodeCol, description, unit sql.NullString
-	var costPrice, salePrice, lowStockThreshold, reorderQuantity sql.NullFloat64
-
-	err := row.Scan(
-		&p.ID, &p.OwnerID, &categoryID, &supplierID, &p.Name, &p.SKU, &barcodeCol, &description,
-		&unit, &costPrice, &salePrice, &p.StockQuantity, &lowStockThreshold,
-		&reorderQuantity, &p.IsActive, &p.TrackInventory, &p.CreatedAt, &p.UpdatedAt,
-	)
+	row, err := r.queries.GetProductByBarcode(ctx, sqlc.GetProductByBarcodeParams{
+		OwnerID: ownerID,
+		// Match the exact string (including empty) to preserve the
+		// original `barcode = ?` semantics; never coerce to NULL.
+		Barcode: sql.NullString{String: barcode, Valid: true},
+	})
 	if err != nil {
 		if errors.Is(err, sql.ErrNoRows) {
 			return domain.Product{}, domain.ErrProductNotFound
@@ -134,34 +126,7 @@ func (r *Repository) GetProductByBarcode(ctx context.Context, ownerID int64, bar
 		return domain.Product{}, err
 	}
 
-	if categoryID.Valid {
-		p.CategoryID = categoryID.Int64
-	}
-	if supplierID.Valid {
-		p.SupplierID = supplierID.Int64
-	}
-	if barcodeCol.Valid {
-		p.Barcode = barcodeCol.String
-	}
-	if description.Valid {
-		p.Description = description.String
-	}
-	if unit.Valid {
-		p.Unit = unit.String
-	}
-	if costPrice.Valid {
-		p.CostPrice = costPrice.Float64
-	}
-	if salePrice.Valid {
-		p.SalePrice = salePrice.Float64
-	}
-	if lowStockThreshold.Valid {
-		p.LowStockThreshold = lowStockThreshold.Float64
-	}
-	if reorderQuantity.Valid {
-		p.ReorderQuantity = reorderQuantity.Float64
-	}
-	return p, nil
+	return productFromBarcodeRow(row), nil
 }
 
 func (r *Repository) CreateProduct(ctx context.Context, ownerID int64, input domain.ProductInput) (int64, error) {
@@ -239,20 +204,22 @@ func (r *Repository) DeleteProduct(ctx context.Context, ownerID, id int64) error
 // CountProducts returns the total number of products for the given owner,
 // optionally filtered by category. Pass categoryID=0 to count all categories.
 func (r *Repository) CountProducts(ctx context.Context, ownerID int64, categoryID int) (int64, error) {
-	var (
-		count int64
-		err   error
-	)
+	qb := squirrel.Select("COUNT(*)").
+		From("erp_products").
+		Where(squirrel.Eq{"owner_id": ownerID})
 
 	if categoryID > 0 {
-		const q = `SELECT COUNT(*) FROM erp_products WHERE owner_id = ? AND category_id = ?`
-		err = r.pool.QueryRowContext(ctx, q, ownerID, categoryID).Scan(&count)
-	} else {
-		const q = `SELECT COUNT(*) FROM erp_products WHERE owner_id = ?`
-		err = r.pool.QueryRowContext(ctx, q, ownerID).Scan(&count)
+		qb = qb.Where(squirrel.Eq{"category_id": categoryID})
 	}
 
+	query, args, err := qb.PlaceholderFormat(squirrel.Question).ToSql()
 	if err != nil {
+		logger.Ctx(ctx).Error("Failed to build count products query", logger.Error(err))
+		return 0, err
+	}
+
+	var count int64
+	if err := r.pool.QueryRowContext(ctx, query, args...).Scan(&count); err != nil {
 		logger.Ctx(ctx).Error("Failed to count products", logger.Error(err))
 		return 0, err
 	}
@@ -261,6 +228,67 @@ func (r *Repository) CountProducts(ctx context.Context, ownerID int64, categoryI
 }
 
 func productFromRow(row sqlc.GetProductRow) domain.Product {
+	var p domain.Product
+	p.ID = row.ID
+	p.OwnerID = row.OwnerID
+	p.Name = row.Name
+
+	if row.CategoryID.Valid {
+		p.CategoryID = row.CategoryID.Int64
+	}
+
+	if row.SupplierID.Valid {
+		p.SupplierID = row.SupplierID.Int64
+	}
+
+	if row.Sku.Valid {
+		p.SKU = row.Sku.String
+	}
+
+	if row.Barcode.Valid {
+		p.Barcode = row.Barcode.String
+	}
+
+	if row.Description.Valid {
+		p.Description = row.Description.String
+	}
+
+	if row.Unit.Valid {
+		p.Unit = row.Unit.String
+	}
+
+	p.CostPrice, _ = strconv.ParseFloat(row.CostPrice, 64)
+	p.SalePrice, _ = strconv.ParseFloat(row.SalePrice, 64)
+	p.StockQuantity, _ = strconv.ParseFloat(row.StockQuantity, 64)
+
+	if row.LowStockThreshold.Valid {
+		p.LowStockThreshold, _ = strconv.ParseFloat(row.LowStockThreshold.String, 64)
+	}
+
+	if row.ReorderQuantity.Valid {
+		p.ReorderQuantity, _ = strconv.ParseFloat(row.ReorderQuantity.String, 64)
+	}
+
+	if row.IsActive.Valid {
+		p.IsActive = row.IsActive.Bool
+	}
+
+	if row.TrackInventory.Valid {
+		p.TrackInventory = row.TrackInventory.Bool
+	}
+
+	if row.CreatedAt.Valid {
+		p.CreatedAt = row.CreatedAt.Time
+	}
+
+	if row.UpdatedAt.Valid {
+		p.UpdatedAt = row.UpdatedAt.Time
+	}
+
+	return p
+}
+
+func productFromBarcodeRow(row sqlc.GetProductByBarcodeRow) domain.Product {
 	var p domain.Product
 	p.ID = row.ID
 	p.OwnerID = row.OwnerID

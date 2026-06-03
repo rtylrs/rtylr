@@ -5,6 +5,7 @@ import (
 	"database/sql"
 	"time"
 
+	sq "github.com/Masterminds/squirrel"
 	"github.com/voxire/onion/internal/modules/shifts/internal/domain"
 	"github.com/voxire/onion/internal/modules/shifts/internal/infrastructure/persistence/sqlc"
 	"github.com/voxire/onion/internal/platform/logger"
@@ -25,26 +26,30 @@ func NewRepository(db *sql.DB) *Repository {
 }
 
 func (r *Repository) ListShifts(ctx context.Context, ownerID, staffID int64, date string) ([]domain.Shift, error) {
-	// Dynamic WHERE clauses - keep on pool
-	query := `
-		SELECT id, owner_id, staff_id, department_id, date, start_time, end_time,
-		       break_duration_minutes, status, clock_in_at, clock_out_at,
-		       hours_worked, overtime_hours, notes, created_at, updated_at
-		FROM hr_shifts WHERE owner_id = ? AND staff_id IS NOT NULL`
-
-	args := make([]interface{}, 0, 3)
-	args = append(args, ownerID)
+	// Dynamic WHERE clauses - built with squirrel
+	builder := sq.Select(
+		"id", "owner_id", "staff_id", "department_id", "date", "start_time", "end_time",
+		"break_duration_minutes", "status", "clock_in_at", "clock_out_at",
+		"hours_worked", "overtime_hours", "notes", "created_at", "updated_at",
+	).
+		From("hr_shifts").
+		Where(sq.Eq{"owner_id": ownerID}).
+		Where(sq.Expr("staff_id IS NOT NULL"))
 
 	if staffID != 0 {
-		query += ` AND staff_id = ?`
-		args = append(args, staffID)
+		builder = builder.Where(sq.Eq{"staff_id": staffID})
 	}
 	if date != "" {
-		query += ` AND date = ?`
-		args = append(args, date)
+		builder = builder.Where(sq.Eq{"date": date})
 	}
 
-	query += ` ORDER BY date DESC, start_time ASC`
+	builder = builder.OrderBy("date DESC", "start_time ASC")
+
+	query, args, err := builder.PlaceholderFormat(sq.Question).ToSql()
+	if err != nil {
+		logger.Ctx(ctx).Error("Failed to build list shifts query", logger.Error(err))
+		return nil, err
+	}
 
 	rows, err := r.pool.QueryContext(ctx, query, args...)
 	if err != nil {

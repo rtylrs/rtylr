@@ -4,6 +4,8 @@ import (
 	"context"
 	"database/sql"
 
+	"github.com/Masterminds/squirrel"
+
 	"github.com/voxire/onion/internal/modules/products/internal/domain"
 	"github.com/voxire/onion/internal/platform/logger"
 )
@@ -13,63 +15,45 @@ import (
 // because MySQL optimises simple COUNT(*) scans extremely well.
 func (r *Repository) GetDashboard(ctx context.Context, ownerID int64) (domain.DashboardStats, error) {
 	var stats domain.DashboardStats
-	db := r.pool
 
 	// Total active products.
-	if err := db.QueryRowContext(ctx,
-		`SELECT COUNT(*) FROM erp_products WHERE owner_id = ? AND is_active = TRUE`,
-		ownerID,
-	).Scan(&stats.TotalProducts); err != nil {
+	totalProducts, err := r.queries.CountActiveProducts(ctx, ownerID)
+	if err != nil {
 		logger.Ctx(ctx).Error("Failed to count products", logger.Error(err))
 		return domain.DashboardStats{}, err
 	}
+	stats.TotalProducts = int(totalProducts)
 
 	// Low stock: products at or below their low_stock_threshold.
-	if err := db.QueryRowContext(ctx,
-		`SELECT COUNT(*) FROM erp_products
-		 WHERE owner_id = ? AND is_active = TRUE
-		   AND track_inventory = TRUE
-		   AND low_stock_threshold IS NOT NULL
-		   AND stock_quantity <= low_stock_threshold`,
-		ownerID,
-	).Scan(&stats.LowStockCount); err != nil {
+	lowStock, err := r.queries.CountLowStockProducts(ctx, ownerID)
+	if err != nil {
 		logger.Ctx(ctx).Error("Failed to count low stock", logger.Error(err))
 		return domain.DashboardStats{}, err
 	}
+	stats.LowStockCount = int(lowStock)
 
 	// Pending purchase orders (draft or sent, not yet received).
-	if err := db.QueryRowContext(ctx,
-		`SELECT COUNT(*) FROM erp_purchase_orders
-		 WHERE owner_id = ? AND status IN ('draft','sent','partial')`,
-		ownerID,
-	).Scan(&stats.PendingOrders); err != nil {
+	pendingOrders, err := r.queries.CountPendingPurchaseOrders(ctx, ownerID)
+	if err != nil {
 		logger.Ctx(ctx).Error("Failed to count pending POs", logger.Error(err))
 		return domain.DashboardStats{}, err
 	}
+	stats.PendingOrders = int(pendingOrders)
 
 	// Active suppliers.
-	if err := db.QueryRowContext(ctx,
-		`SELECT COUNT(*) FROM erp_suppliers WHERE owner_id = ? AND is_active = TRUE`,
-		ownerID,
-	).Scan(&stats.TotalSuppliers); err != nil {
+	totalSuppliers, err := r.queries.CountActiveSuppliers(ctx, ownerID)
+	if err != nil {
 		logger.Ctx(ctx).Error("Failed to count suppliers", logger.Error(err))
 		return domain.DashboardStats{}, err
 	}
+	stats.TotalSuppliers = int(totalSuppliers)
 
 	// Inventory value = sum(stock_quantity * cost_price) for tracked products.
-	var invValue sql.NullFloat64
-	if err := db.QueryRowContext(ctx,
-		`SELECT COALESCE(SUM(stock_quantity * cost_price), 0)
-		 FROM erp_products
-		 WHERE owner_id = ? AND is_active = TRUE AND track_inventory = TRUE`,
-		ownerID,
-	).Scan(&invValue); err != nil {
-		logger.Ctx(ctx).Error("Failed to sum inventory value", logger.Error(err))
+	invValue, err := r.inventoryValue(ctx, ownerID)
+	if err != nil {
 		return domain.DashboardStats{}, err
 	}
-	if invValue.Valid {
-		stats.InventoryValue = invValue.Float64
-	}
+	stats.InventoryValue = invValue
 
 	// Low stock items (top 5) for the dashboard sidebar card.
 	items, err := r.topLowStockItems(ctx, ownerID, 5)
@@ -95,17 +79,55 @@ func (r *Repository) GetDashboard(ctx context.Context, ownerID int64) (domain.Da
 	return stats, nil
 }
 
+// inventoryValue sums stock_quantity * cost_price for tracked, active
+// products. Built with squirrel because the COALESCE(SUM(...)) projection
+// scans into sql.NullFloat64 — a shape sqlc would not reproduce cleanly.
+func (r *Repository) inventoryValue(ctx context.Context, ownerID int64) (float64, error) {
+	query, args, err := squirrel.
+		Select("COALESCE(SUM(stock_quantity * cost_price), 0)").
+		From("erp_products").
+		Where(squirrel.Eq{"owner_id": ownerID, "is_active": true, "track_inventory": true}).
+		PlaceholderFormat(squirrel.Question).
+		ToSql()
+	if err != nil {
+		logger.Ctx(ctx).Error("Failed to build inventory value query", logger.Error(err))
+		return 0, err
+	}
+
+	var invValue sql.NullFloat64
+	if err := r.pool.QueryRowContext(ctx, query, args...).Scan(&invValue); err != nil {
+		logger.Ctx(ctx).Error("Failed to sum inventory value", logger.Error(err))
+		return 0, err
+	}
+
+	if invValue.Valid {
+		return invValue.Float64, nil
+	}
+
+	return 0, nil
+}
+
 func (r *Repository) topLowStockItems(ctx context.Context, ownerID int64, limit int) ([]domain.LowStockItem, error) {
-	rows, err := r.pool.QueryContext(ctx, `
-		SELECT p.id, p.name, COALESCE(p.sku, ''),
-		       p.stock_quantity, COALESCE(p.low_stock_threshold, 0),
-		       ''
-		FROM erp_products p
-		WHERE p.owner_id = ? AND p.is_active = TRUE AND p.track_inventory = TRUE
-		  AND p.low_stock_threshold IS NOT NULL
-		  AND p.stock_quantity <= p.low_stock_threshold
-		ORDER BY (p.stock_quantity - p.low_stock_threshold) ASC, p.stock_quantity ASC
-		LIMIT ?`, ownerID, limit)
+	query, args, err := squirrel.
+		Select(
+			"p.id", "p.name", "COALESCE(p.sku, '')",
+			"p.stock_quantity", "COALESCE(p.low_stock_threshold, 0)",
+			"''",
+		).
+		From("erp_products p").
+		Where(squirrel.Eq{"p.owner_id": ownerID, "p.is_active": true, "p.track_inventory": true}).
+		Where("p.low_stock_threshold IS NOT NULL").
+		Where("p.stock_quantity <= p.low_stock_threshold").
+		OrderBy("(p.stock_quantity - p.low_stock_threshold) ASC", "p.stock_quantity ASC").
+		Limit(uint64(limit)).
+		PlaceholderFormat(squirrel.Question).
+		ToSql()
+	if err != nil {
+		logger.Ctx(ctx).Error("Failed to build low stock items query", logger.Error(err))
+		return nil, err
+	}
+
+	rows, err := r.pool.QueryContext(ctx, query, args...)
 	if err != nil {
 		logger.Ctx(ctx).Error("Failed to list low stock items", logger.Error(err))
 		return nil, err
@@ -130,14 +152,24 @@ func (r *Repository) topLowStockItems(ctx context.Context, ownerID int64, limit 
 
 func (r *Repository) recentPurchaseOrders(ctx context.Context, ownerID int64, limit int) ([]domain.RecentPO, error) {
 	// cross-schema read from erp_suppliers — join for display name
-	rows, err := r.pool.QueryContext(ctx, `
-		SELECT po.id, po.po_number, COALESCE(s.name, 'Unknown'),
-		       po.status, po.total, po.created_at
-		FROM erp_purchase_orders po
-		LEFT JOIN erp_suppliers s ON s.id = po.supplier_id
-		WHERE po.owner_id = ?
-		ORDER BY po.created_at DESC
-		LIMIT ?`, ownerID, limit)
+	query, args, err := squirrel.
+		Select(
+			"po.id", "po.po_number", "COALESCE(s.name, 'Unknown')",
+			"po.status", "po.total", "po.created_at",
+		).
+		From("erp_purchase_orders po").
+		LeftJoin("erp_suppliers s ON s.id = po.supplier_id").
+		Where(squirrel.Eq{"po.owner_id": ownerID}).
+		OrderBy("po.created_at DESC").
+		Limit(uint64(limit)).
+		PlaceholderFormat(squirrel.Question).
+		ToSql()
+	if err != nil {
+		logger.Ctx(ctx).Error("Failed to build recent POs query", logger.Error(err))
+		return nil, err
+	}
+
+	rows, err := r.pool.QueryContext(ctx, query, args...)
 	if err != nil {
 		logger.Ctx(ctx).Error("Failed to list recent POs", logger.Error(err))
 		return nil, err
@@ -166,15 +198,25 @@ func (r *Repository) recentPurchaseOrders(ctx context.Context, ownerID int64, li
 
 func (r *Repository) topCategories(ctx context.Context, ownerID int64, limit int) ([]domain.TopCategory, error) {
 	// cross-schema read from erp_categories — join for display name
-	rows, err := r.pool.QueryContext(ctx, `
-		SELECT COALESCE(c.name, 'Uncategorized') AS name,
-		       COUNT(p.id) AS product_count
-		FROM erp_products p
-		LEFT JOIN erp_categories c ON c.id = p.category_id
-		WHERE p.owner_id = ? AND p.is_active = TRUE
-		GROUP BY c.id, c.name
-		ORDER BY product_count DESC
-		LIMIT ?`, ownerID, limit)
+	query, args, err := squirrel.
+		Select(
+			"COALESCE(c.name, 'Uncategorized') AS name",
+			"COUNT(p.id) AS product_count",
+		).
+		From("erp_products p").
+		LeftJoin("erp_categories c ON c.id = p.category_id").
+		Where(squirrel.Eq{"p.owner_id": ownerID, "p.is_active": true}).
+		GroupBy("c.id", "c.name").
+		OrderBy("product_count DESC").
+		Limit(uint64(limit)).
+		PlaceholderFormat(squirrel.Question).
+		ToSql()
+	if err != nil {
+		logger.Ctx(ctx).Error("Failed to build top categories query", logger.Error(err))
+		return nil, err
+	}
+
+	rows, err := r.pool.QueryContext(ctx, query, args...)
 	if err != nil {
 		logger.Ctx(ctx).Error("Failed to list top categories", logger.Error(err))
 		return nil, err
@@ -201,17 +243,27 @@ func (r *Repository) topCategories(ctx context.Context, ownerID int64, limit int
 // sales-history integration the suggested qty is just the recorded
 // reorder_quantity; confidence is "low" to flag this to the UI.
 func (r *Repository) ListReorderSuggestions(ctx context.Context, ownerID int64) ([]domain.ReorderSuggestion, error) {
-	rows, err := r.pool.QueryContext(ctx, `
-		SELECT id, name, COALESCE(sku, ''),
-		       stock_quantity,
-		       COALESCE(low_stock_threshold, 0),
-		       COALESCE(reorder_quantity, 0)
-		FROM erp_products
-		WHERE owner_id = ? AND is_active = TRUE AND track_inventory = TRUE
-		  AND low_stock_threshold IS NOT NULL
-		  AND stock_quantity <= low_stock_threshold
-		ORDER BY (stock_quantity - low_stock_threshold) ASC
-		LIMIT 100`, ownerID)
+	query, args, err := squirrel.
+		Select(
+			"id", "name", "COALESCE(sku, '')",
+			"stock_quantity",
+			"COALESCE(low_stock_threshold, 0)",
+			"COALESCE(reorder_quantity, 0)",
+		).
+		From("erp_products").
+		Where(squirrel.Eq{"owner_id": ownerID, "is_active": true, "track_inventory": true}).
+		Where("low_stock_threshold IS NOT NULL").
+		Where("stock_quantity <= low_stock_threshold").
+		OrderBy("(stock_quantity - low_stock_threshold) ASC").
+		Limit(100).
+		PlaceholderFormat(squirrel.Question).
+		ToSql()
+	if err != nil {
+		logger.Ctx(ctx).Error("Failed to build reorder suggestions query", logger.Error(err))
+		return nil, err
+	}
+
+	rows, err := r.pool.QueryContext(ctx, query, args...)
 	if err != nil {
 		logger.Ctx(ctx).Error("Failed to list reorder suggestions", logger.Error(err))
 		return nil, err

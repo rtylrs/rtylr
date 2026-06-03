@@ -4,6 +4,8 @@ import (
 	"context"
 	"time"
 
+	sq "github.com/Masterminds/squirrel"
+
 	"github.com/voxire/onion/internal/modules/insights/internal/domain"
 	"github.com/voxire/onion/internal/platform/logger"
 )
@@ -91,17 +93,21 @@ func marginPct(revenueMinor, expenseMinor int64) float64 {
 
 func (r *Repository) sumPaidInvoicesMinorUnits(ctx context.Context, ownerID int64, from, to time.Time) (int64, error) {
 	// cross-schema read from finance_invoices — paid invoice revenue powers the dashboard revenue card
-	const q = `
-		SELECT COALESCE(SUM(total), 0)
-		FROM finance_invoices
-		WHERE owner_id = ?
-		  AND status = 'paid'
-		  AND COALESCE(paid_date, issue_date) >= ?
-		  AND COALESCE(paid_date, issue_date) <= ?
-	`
-	row := r.pool.QueryRowContext(ctx, q, ownerID, from.Format("2006-01-02"), to.Format("2006-01-02"))
+	q, args, err := sq.
+		Select("COALESCE(SUM(total), 0)").
+		From("finance_invoices").
+		Where(sq.Eq{"owner_id": ownerID}).
+		Where(sq.Eq{"status": "paid"}).
+		Where(sq.GtOrEq{"COALESCE(paid_date, issue_date)": from.Format("2006-01-02")}).
+		Where(sq.LtOrEq{"COALESCE(paid_date, issue_date)": to.Format("2006-01-02")}).
+		PlaceholderFormat(sq.Question).
+		ToSql()
+	if err != nil {
+		logger.Ctx(ctx).Error("insights: build sum paid invoices query failed", logger.Error(err))
+		return 0, err
+	}
 	var total interface{}
-	if err := row.Scan(&total); err != nil {
+	if err := r.pool.QueryRowContext(ctx, q, args...).Scan(&total); err != nil {
 		logger.Ctx(ctx).Error("insights: sum paid invoices failed", logger.Error(err))
 		return 0, err
 	}
@@ -110,15 +116,20 @@ func (r *Repository) sumPaidInvoicesMinorUnits(ctx context.Context, ownerID int6
 
 func (r *Repository) countPosOrders(ctx context.Context, ownerID int64, from, to time.Time) (int64, error) {
 	// cross-schema read from pos_orders — order volume powers the dashboard orders card
-	const q = `
-		SELECT COUNT(*)
-		FROM pos_orders
-		WHERE owner_id = ?
-		  AND created_at >= ?
-		  AND created_at <= ?
-	`
+	q, args, err := sq.
+		Select("COUNT(*)").
+		From("pos_orders").
+		Where(sq.Eq{"owner_id": ownerID}).
+		Where(sq.GtOrEq{"created_at": from}).
+		Where(sq.LtOrEq{"created_at": to}).
+		PlaceholderFormat(sq.Question).
+		ToSql()
+	if err != nil {
+		logger.Ctx(ctx).Error("insights: build count pos orders query failed", logger.Error(err))
+		return 0, err
+	}
 	var n int64
-	if err := r.pool.QueryRowContext(ctx, q, ownerID, from, to).Scan(&n); err != nil {
+	if err := r.pool.QueryRowContext(ctx, q, args...).Scan(&n); err != nil {
 		logger.Ctx(ctx).Error("insights: count pos orders failed", logger.Error(err))
 		return 0, err
 	}
@@ -127,15 +138,20 @@ func (r *Repository) countPosOrders(ctx context.Context, ownerID int64, from, to
 
 func (r *Repository) countCrmCustomersCreated(ctx context.Context, ownerID int64, from, to time.Time) (int64, error) {
 	// cross-schema read from crm_customers — new customer signups for the dashboard customers card
-	const q = `
-		SELECT COUNT(*)
-		FROM crm_customers
-		WHERE owner_id = ?
-		  AND created_at >= ?
-		  AND created_at <= ?
-	`
+	q, args, err := sq.
+		Select("COUNT(*)").
+		From("crm_customers").
+		Where(sq.Eq{"owner_id": ownerID}).
+		Where(sq.GtOrEq{"created_at": from}).
+		Where(sq.LtOrEq{"created_at": to}).
+		PlaceholderFormat(sq.Question).
+		ToSql()
+	if err != nil {
+		logger.Ctx(ctx).Error("insights: build count crm customers query failed", logger.Error(err))
+		return 0, err
+	}
 	var n int64
-	if err := r.pool.QueryRowContext(ctx, q, ownerID, from, to).Scan(&n); err != nil {
+	if err := r.pool.QueryRowContext(ctx, q, args...).Scan(&n); err != nil {
 		logger.Ctx(ctx).Error("insights: count crm customers failed", logger.Error(err))
 		return 0, err
 	}
@@ -144,15 +160,20 @@ func (r *Repository) countCrmCustomersCreated(ctx context.Context, ownerID int64
 
 func (r *Repository) sumExpensesMinorUnits(ctx context.Context, ownerID int64, from, to time.Time) (int64, error) {
 	// cross-schema read from finance_expenses — expense totals feed the margin card
-	const q = `
-		SELECT COALESCE(SUM(amount), 0)
-		FROM finance_expenses
-		WHERE owner_id = ?
-		  AND expense_date >= ?
-		  AND expense_date <= ?
-	`
+	q, args, err := sq.
+		Select("COALESCE(SUM(amount), 0)").
+		From("finance_expenses").
+		Where(sq.Eq{"owner_id": ownerID}).
+		Where(sq.GtOrEq{"expense_date": from.Format("2006-01-02")}).
+		Where(sq.LtOrEq{"expense_date": to.Format("2006-01-02")}).
+		PlaceholderFormat(sq.Question).
+		ToSql()
+	if err != nil {
+		logger.Ctx(ctx).Error("insights: build sum expenses query failed", logger.Error(err))
+		return 0, err
+	}
 	var total interface{}
-	if err := r.pool.QueryRowContext(ctx, q, ownerID, from.Format("2006-01-02"), to.Format("2006-01-02")).Scan(&total); err != nil {
+	if err := r.pool.QueryRowContext(ctx, q, args...).Scan(&total); err != nil {
 		logger.Ctx(ctx).Error("insights: sum expenses failed", logger.Error(err))
 		return 0, err
 	}

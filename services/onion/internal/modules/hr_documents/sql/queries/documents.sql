@@ -22,3 +22,15 @@ WHERE owner_id = ? AND employee_id = ?;
 -- name: DeleteDocument :exec
 DELETE FROM hr_employee_documents
 WHERE owner_id = ? AND id = ?;
+
+-- name: CountExpiringDocuments :one
+SELECT COUNT(*) AS total
+FROM hr_employee_documents
+WHERE owner_id = ? AND expiry_date IS NOT NULL AND expiry_date <= ?;
+
+-- name: ListExpiringDocuments :many
+SELECT id, owner_id, employee_id, document_type, title, storage_mode, file_url, external_url, expiry_date, uploaded_by, created_at, updated_at
+FROM hr_employee_documents
+WHERE owner_id = ? AND expiry_date IS NOT NULL AND expiry_date <= ?
+ORDER BY expiry_date ASC
+LIMIT ? OFFSET ?;

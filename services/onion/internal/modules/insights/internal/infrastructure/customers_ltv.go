@@ -3,6 +3,8 @@ package infrastructure
 import (
 	"context"
 
+	sq "github.com/Masterminds/squirrel"
+
 	"github.com/voxire/onion/internal/platform/logger"
 )
 
@@ -36,16 +38,19 @@ var ltvBuckets = []struct {
 // fall into the 0-100 bucket.
 func (r *Repository) GetLTVDistribution(ctx context.Context, ownerID int64) ([]LTVBucketRow, error) {
 	// cross-schema read from crm_customers + pos_orders — lifetime spend histogram for LTV widget
-	const q = `
-		SELECT c.id, COALESCE(SUM(o.total), 0) AS spend
-		FROM crm_customers c
-		LEFT JOIN pos_orders o ON o.customer_id = c.id
-		                       AND o.owner_id = c.owner_id
-		                       AND o.payment_status = 'paid'
-		WHERE c.owner_id = ?
-		GROUP BY c.id
-	`
-	rows, err := r.pool.QueryContext(ctx, q, ownerID)
+	q, args, err := sq.
+		Select("c.id", "COALESCE(SUM(o.total), 0) AS spend").
+		From("crm_customers c").
+		LeftJoin("pos_orders o ON o.customer_id = c.id AND o.owner_id = c.owner_id AND o.payment_status = 'paid'").
+		Where(sq.Eq{"c.owner_id": ownerID}).
+		GroupBy("c.id").
+		PlaceholderFormat(sq.Question).
+		ToSql()
+	if err != nil {
+		logger.Ctx(ctx).Error("insights: build ltv query failed", logger.Error(err))
+		return nil, err
+	}
+	rows, err := r.pool.QueryContext(ctx, q, args...)
 	if err != nil {
 		logger.Ctx(ctx).Error("insights: ltv query failed", logger.Error(err))
 		return nil, err

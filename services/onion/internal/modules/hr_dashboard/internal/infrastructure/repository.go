@@ -4,7 +4,8 @@ import (
 	"context"
 	"database/sql"
 	"encoding/json"
-	"strings"
+
+	sq "github.com/Masterminds/squirrel"
 
 	"github.com/voxire/onion/internal/modules/hr_dashboard/internal/domain"
 )
@@ -20,12 +21,22 @@ func NewRepository(db *sql.DB) *Repository {
 }
 
 func (r *Repository) GetWidgets(ctx context.Context, ownerID int64) ([]*domain.DashboardWidget, error) {
-	rows, err := r.db.QueryContext(ctx,
-		`SELECT id, owner_id, role_id, widget_type, position_x, position_y, width, height, config, created_at, updated_at
-		 FROM hr_dashboard_widgets
-		 WHERE owner_id = ?
-		 ORDER BY position_y ASC, position_x ASC`,
-		ownerID)
+	query, args, err := sq.
+		Select(
+			"id", "owner_id", "role_id", "widget_type",
+			"position_x", "position_y", "width", "height",
+			"config", "created_at", "updated_at",
+		).
+		From("hr_dashboard_widgets").
+		Where(sq.Eq{"owner_id": ownerID}).
+		OrderBy("position_y ASC", "position_x ASC").
+		PlaceholderFormat(sq.Question).
+		ToSql()
+	if err != nil {
+		return nil, err
+	}
+
+	rows, err := r.db.QueryContext(ctx, query, args...)
 	if err != nil {
 		return nil, err
 	}
@@ -69,7 +80,17 @@ func (r *Repository) UpsertWidgets(ctx context.Context, ownerID int64, widgets [
 		}
 	}()
 
-	_, err = tx.ExecContext(ctx, `DELETE FROM hr_dashboard_widgets WHERE owner_id = ?`, ownerID)
+	deleteQuery, deleteArgs, err := sq.
+		Delete("hr_dashboard_widgets").
+		Where(sq.Eq{"owner_id": ownerID}).
+		PlaceholderFormat(sq.Question).
+		ToSql()
+	if err != nil {
+		_ = tx.Rollback()
+		return err
+	}
+
+	_, err = tx.ExecContext(ctx, deleteQuery, deleteArgs...)
 	if err != nil {
 		_ = tx.Rollback()
 		return err
@@ -78,20 +99,23 @@ func (r *Repository) UpsertWidgets(ctx context.Context, ownerID int64, widgets [
 	if len(widgets) > 0 {
 		// Batch every widget into a single multi-row INSERT instead of issuing
 		// one round-trip per widget.
-		placeholders := make([]string, 0, len(widgets))
-		args := make([]interface{}, 0, len(widgets)*8)
+		insert := sq.
+			Insert("hr_dashboard_widgets").
+			Columns("owner_id", "role_id", "widget_type", "position_x", "position_y", "width", "height", "config")
 		for _, w := range widgets {
 			configJSON, err := json.Marshal(json.RawMessage(w.Config))
 			if err != nil {
 				_ = tx.Rollback()
 				return err
 			}
-			placeholders = append(placeholders, "(?, ?, ?, ?, ?, ?, ?, ?)")
-			args = append(args, ownerID, w.RoleID, w.WidgetType, w.PositionX, w.PositionY, w.Width, w.Height, configJSON)
+			insert = insert.Values(ownerID, w.RoleID, w.WidgetType, w.PositionX, w.PositionY, w.Width, w.Height, configJSON)
 		}
 
-		query := `INSERT INTO hr_dashboard_widgets (owner_id, role_id, widget_type, position_x, position_y, width, height, config) VALUES ` +
-			strings.Join(placeholders, ", ")
+		query, args, err := insert.PlaceholderFormat(sq.Question).ToSql()
+		if err != nil {
+			_ = tx.Rollback()
+			return err
+		}
 		if _, err = tx.ExecContext(ctx, query, args...); err != nil {
 			_ = tx.Rollback()
 			return err

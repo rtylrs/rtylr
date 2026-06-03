@@ -10,3 +10,10 @@ WHERE id = ? AND owner_id = ? AND status != 'paid';
 
 -- name: GetStaffPayRates :one
 SELECT salary, hourly_rate, overtime_rate FROM hr_staff WHERE id = ? AND owner_id = ?;
+
+-- name: GetCompletedShiftsForPeriod :many
+SELECT staff_id, SUM(hours_worked) AS total_hours, SUM(overtime_hours) AS total_overtime
+FROM hr_shifts
+WHERE owner_id = ? AND status = 'completed'
+  AND date >= ? AND date <= ?
+GROUP BY staff_id;

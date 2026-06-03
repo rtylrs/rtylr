@@ -8,3 +8,15 @@ LIMIT ? OFFSET ?;
 
 -- name: CountBankFeedTransactions :one
 SELECT COUNT(*) FROM finance_bank_feeds WHERE owner_id = ?;
+
+-- name: SumBankFeedAmountByAccount :one
+SELECT COALESCE(SUM(amount_minor_units), 0)
+FROM finance_bank_feeds
+WHERE owner_id = ? AND bank_account_id = ?;
+
+-- name: CountUnmatchedBankFeedTransactions :one
+SELECT COUNT(*)
+FROM finance_bank_feeds
+WHERE owner_id = ?
+  AND matched_expense_id IS NULL
+  AND matched_invoice_id IS NULL;

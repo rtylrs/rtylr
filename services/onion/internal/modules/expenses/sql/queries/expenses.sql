@@ -20,6 +20,9 @@ WHERE id = ? AND owner_id = ?;
 -- name: DeleteExpense :execresult
 DELETE FROM finance_expenses WHERE id = ? AND owner_id = ?;
 
+-- name: UpdateExpenseStatus :execresult
+UPDATE finance_expenses SET status = ? WHERE id = ? AND owner_id = ?;
+
 -- name: ListExpenseCategories :many
 SELECT id, owner_id, name, color, created_at
 FROM finance_expense_categories
