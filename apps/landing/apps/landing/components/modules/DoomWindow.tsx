@@ -1,41 +1,72 @@
-import React from 'react';
+import React, { useEffect, useRef } from 'react';
 
-const DOOM_URL = 'https://archive.org/embed/doom-1993';
+declare global {
+  interface Window {
+    Dos?: (el: HTMLElement, options: Record<string, unknown>) => { stop?: () => void } | undefined;
+  }
+}
+
+const JSDOS_JS = '/jsdos/js-dos.js';
+const JSDOS_CSS = '/jsdos/js-dos.css';
+
+function loadJsDos(): Promise<void> {
+  return new Promise((resolve, reject) => {
+    if (typeof window === 'undefined') {
+      resolve();
+      return;
+    }
+    if (!document.querySelector(`link[href="${JSDOS_CSS}"]`)) {
+      const link = document.createElement('link');
+      link.rel = 'stylesheet';
+      link.href = JSDOS_CSS;
+      document.head.appendChild(link);
+    }
+    if (window.Dos) {
+      resolve();
+      return;
+    }
+    const existing = document.querySelector(`script[src="${JSDOS_JS}"]`) as HTMLScriptElement | null;
+    if (existing) {
+      existing.addEventListener('load', () => resolve());
+      existing.addEventListener('error', () => reject(new Error('js-dos failed to load')));
+      return;
+    }
+    const script = document.createElement('script');
+    script.src = JSDOS_JS;
+    script.onload = () => resolve();
+    script.onerror = () => reject(new Error('js-dos failed to load'));
+    document.head.appendChild(script);
+  });
+}
 
 export default function DoomWindow(): React.JSX.Element {
-  return (
-    <div
-      style={{
-        height: '100%',
-        background: '#000',
-        display: 'flex',
-        flexDirection: 'column',
-      }}
-    >
-      <iframe
-        src={DOOM_URL}
-        title="DOOM (1993)"
-        style={{ flex: 1, width: '100%', border: 'none', display: 'block', background: '#000' }}
-        allow="autoplay; fullscreen; gamepad; keyboard-map"
-        allowFullScreen
-      />
-      <div
-        style={{
-          flexShrink: 0,
-          background: '#0a0a0a',
-          borderTop: '1px solid rgba(255,255,255,0.08)',
-          color: 'rgba(255,255,255,0.4)',
-          fontFamily: 'monospace',
-          fontSize: 10,
-          letterSpacing: 1,
-          textAlign: 'center',
-          padding: '8px 12px',
-          userSelect: 'none',
-        }}
-      >
-        CLICK THE SCREEN TO START &nbsp;·&nbsp; ARROWS / WASD MOVE &nbsp;·&nbsp; CTRL SHOOT
-        &nbsp;·&nbsp; SPACE USE
-      </div>
-    </div>
-  );
+  const ref = useRef<HTMLDivElement>(null);
+
+  useEffect(() => {
+    let ci: { stop?: () => void } | undefined;
+    let cancelled = false;
+
+    loadJsDos()
+      .then(() => {
+        if (cancelled || !ref.current || !window.Dos) return;
+        ci = window.Dos(ref.current, {
+          url: '/doom/doom.jsdos',
+          pathPrefix: '/jsdos/emulators/',
+          noCloud: true,
+          autoStart: true,
+        });
+      })
+      .catch(() => {});
+
+    return () => {
+      cancelled = true;
+      try {
+        ci?.stop?.();
+      } catch {
+        /* noop */
+      }
+    };
+  }, []);
+
+  return <div ref={ref} style={{ height: '100%', width: '100%', background: '#000' }} />;
 }
