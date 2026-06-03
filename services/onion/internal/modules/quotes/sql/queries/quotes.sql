@@ -30,3 +30,21 @@ WHERE id = ? AND owner_id = ?;
 UPDATE finance_quotes
 SET status = ?
 WHERE id = ? AND owner_id = ?;
+
+-- name: CountQuotesByStatus :many
+SELECT status, COUNT(*) AS cnt
+FROM finance_quotes
+WHERE owner_id = ?
+GROUP BY status;
+
+-- name: InsertInvoiceFromQuote :execresult
+INSERT INTO finance_invoices
+(owner_id, invoice_number, client_name, client_email, status,
+ issue_date, due_date, subtotal, tax_amount, discount_amount, total,
+ amount_due, notes)
+VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?);
+
+-- name: InsertInvoiceItemFromQuote :exec
+INSERT INTO finance_invoice_items
+(invoice_id, description, quantity, unit, unit_price, tax_rate, discount_pct, total, sort_order)
+VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?);

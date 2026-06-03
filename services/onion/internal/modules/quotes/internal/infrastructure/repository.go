@@ -176,27 +176,21 @@ func (r *Repository) ConvertToInvoice(ctx context.Context, ownerID, quoteID int6
 
 	// cross-schema write from quotes to finance_invoices — materialise quote
 	// header row. Column list matches finance_invoices schema.
-	const insertInvoiceSQL = `INSERT INTO finance_invoices
-  (owner_id, invoice_number, client_name, client_email, status,
-   issue_date, due_date, subtotal, tax_amount, discount_amount, total,
-   amount_due, notes)
-VALUES (?,?,?,?,?,?,?,?,?,?,?,?,?)`
-
-	res, err := tx.ExecContext(ctx, insertInvoiceSQL,
-		ownerID,
-		invoiceNumber,
-		quoteRow.CustomerName,
-		nullableStringInput(customerEmail),
-		"draft",
-		issueDate,
-		dueDate,
-		nullStrValue(quoteRow.Subtotal),
-		nullStrValue(quoteRow.Tax),
-		nullStrValue(quoteRow.Discount),
-		nullStrValue(quoteRow.Total),
-		nullStrValue(quoteRow.Total),
-		nullableStringInput(notes),
-	)
+	res, err := qtx.InsertInvoiceFromQuote(ctx, sqlc.InsertInvoiceFromQuoteParams{
+		OwnerID:        ownerID,
+		InvoiceNumber:  invoiceNumber,
+		ClientName:     quoteRow.CustomerName,
+		ClientEmail:    nullableStringInput(customerEmail),
+		Status:         sqlc.NullFinanceInvoicesStatus{FinanceInvoicesStatus: sqlc.FinanceInvoicesStatusDraft, Valid: true},
+		IssueDate:      issueDate,
+		DueDate:        dueDate,
+		Subtotal:       nullStrValue(quoteRow.Subtotal),
+		TaxAmount:      nullStrValue(quoteRow.Tax),
+		DiscountAmount: nullStrValue(quoteRow.Discount),
+		Total:          nullStrValue(quoteRow.Total),
+		AmountDue:      nullStrValue(quoteRow.Total),
+		Notes:          nullableStringInput(notes),
+	})
 	if err != nil {
 		_ = tx.Rollback()
 		logger.Ctx(ctx).Error("Failed to create invoice from quote", logger.Error(err))
@@ -238,20 +232,17 @@ VALUES (?,?,?,?,?,?,?,?,?,?,?,?,?)`
 					total = qty * unitPrice
 				}
 				// cross-schema write from quotes to finance_invoice_items
-				const insertItemSQL = `INSERT INTO finance_invoice_items
-  (invoice_id, description, quantity, unit, unit_price, tax_rate, discount_pct, total, sort_order)
-VALUES (?,?,?,?,?,?,?,?,?)`
-				if _, itemErr := tx.ExecContext(ctx, insertItemSQL,
-					invoiceID,
-					desc,
-					fmtFloat(qty),
-					"unit",
-					fmtFloat(unitPrice),
-					fmtFloat(0),
-					fmtFloat(0),
-					fmtFloat(total),
-					i,
-				); itemErr != nil {
+				if itemErr := qtx.InsertInvoiceItemFromQuote(ctx, sqlc.InsertInvoiceItemFromQuoteParams{
+					InvoiceID:   invoiceID,
+					Description: desc,
+					Quantity:    fmtFloat(qty),
+					Unit:        nullableStringInput("unit"),
+					UnitPrice:   fmtFloat(unitPrice),
+					TaxRate:     nullableStringInput(fmtFloat(0)),
+					DiscountPct: nullableStringInput(fmtFloat(0)),
+					Total:       fmtFloat(total),
+					SortOrder:   sql.NullInt32{Int32: int32(i), Valid: true},
+				}); itemErr != nil {
 					_ = tx.Rollback()
 					logger.Ctx(ctx).Error("Failed to insert invoice item from quote", logger.Error(itemErr))
 					return 0, itemErr
@@ -279,30 +270,18 @@ VALUES (?,?,?,?,?,?,?,?,?)`
 
 // CountByStatus returns the number of quotes in each status for the owner.
 func (r *Repository) CountByStatus(ctx context.Context, ownerID int64) (map[string]int64, error) {
-	const q = `
-		SELECT status, COUNT(*) AS cnt
-		FROM finance_quotes
-		WHERE owner_id = ?
-		GROUP BY status`
-
-	rows, err := r.pool.QueryContext(ctx, q, ownerID)
+	rows, err := r.queries.CountQuotesByStatus(ctx, ownerID)
 	if err != nil {
 		logger.Ctx(ctx).Error("Failed to count quotes by status", logger.Error(err))
 		return nil, err
 	}
-	defer rows.Close()
 
 	counts := make(map[string]int64)
-	for rows.Next() {
-		var s string
-		var cnt int64
-		if scanErr := rows.Scan(&s, &cnt); scanErr != nil {
-			return nil, scanErr
-		}
-		counts[s] = cnt
+	for _, row := range rows {
+		counts[string(row.Status.FinanceQuotesStatus)] = row.Cnt
 	}
 
-	return counts, rows.Err()
+	return counts, nil
 }
 
 func nullableStringInput(s string) sql.NullString {
