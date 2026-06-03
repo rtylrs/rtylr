@@ -5,6 +5,7 @@ import (
 	"database/sql"
 	"errors"
 
+	sq "github.com/Masterminds/squirrel"
 	"github.com/voxire/onion/internal/modules/kpis/internal/domain"
 	"github.com/voxire/onion/internal/platform/logger"
 )
@@ -23,43 +24,87 @@ func (r *Repository) GetKPIs(ctx context.Context, ownerID int64) (domain.KPISumm
 	var kpi domain.KPISummary
 
 	// Staff count
-	err := r.pool.QueryRowContext(ctx,
-		`SELECT COUNT(*) FROM hr_staff WHERE owner_id = ? AND status = 'active'`, ownerID,
-	).Scan(&kpi.StaffCount)
-	if err != nil && !errors.Is(err, sql.ErrNoRows) {
-		logger.Ctx(ctx).Error("Failed to get staff count", logger.Error(err))
+	// cross-schema read from hr_staff — active staff headcount for the KPI summary
+	staffSQL, staffArgs, err := sq.Select("COUNT(*)").
+		From("hr_staff").
+		Where(sq.Eq{"owner_id": ownerID, "status": "active"}).
+		PlaceholderFormat(sq.Question).
+		ToSql()
+	if err != nil {
+		logger.Ctx(ctx).Error("Failed to build staff count query", logger.Error(err))
+	} else {
+		err = r.pool.QueryRowContext(ctx, staffSQL, staffArgs...).Scan(&kpi.StaffCount)
+		if err != nil && !errors.Is(err, sql.ErrNoRows) {
+			logger.Ctx(ctx).Error("Failed to get staff count", logger.Error(err))
+		}
 	}
 
 	// Customer count
-	err = r.pool.QueryRowContext(ctx,
-		`SELECT COUNT(*) FROM crm_customers WHERE owner_id = ?`, ownerID,
-	).Scan(&kpi.CustomerCount)
-	if err != nil && !errors.Is(err, sql.ErrNoRows) {
-		logger.Ctx(ctx).Error("Failed to get customer count", logger.Error(err))
+	// cross-schema read from crm_customers — total customers for the KPI summary
+	customerSQL, customerArgs, err := sq.Select("COUNT(*)").
+		From("crm_customers").
+		Where(sq.Eq{"owner_id": ownerID}).
+		PlaceholderFormat(sq.Question).
+		ToSql()
+	if err != nil {
+		logger.Ctx(ctx).Error("Failed to build customer count query", logger.Error(err))
+	} else {
+		err = r.pool.QueryRowContext(ctx, customerSQL, customerArgs...).Scan(&kpi.CustomerCount)
+		if err != nil && !errors.Is(err, sql.ErrNoRows) {
+			logger.Ctx(ctx).Error("Failed to get customer count", logger.Error(err))
+		}
 	}
 
 	// Low stock count
-	err = r.pool.QueryRowContext(ctx,
-		`SELECT COUNT(*) FROM erp_products WHERE owner_id = ? AND stock_quantity <= low_stock_threshold AND stock_quantity > 0`, ownerID,
-	).Scan(&kpi.LowStockCount)
-	if err != nil && !errors.Is(err, sql.ErrNoRows) {
-		logger.Ctx(ctx).Error("Failed to get low stock count", logger.Error(err))
+	// cross-schema read from erp_products — products at or below their low-stock threshold
+	lowStockSQL, lowStockArgs, err := sq.Select("COUNT(*)").
+		From("erp_products").
+		Where(sq.Eq{"owner_id": ownerID}).
+		Where(sq.Expr("stock_quantity <= low_stock_threshold")).
+		Where(sq.Gt{"stock_quantity": 0}).
+		PlaceholderFormat(sq.Question).
+		ToSql()
+	if err != nil {
+		logger.Ctx(ctx).Error("Failed to build low stock count query", logger.Error(err))
+	} else {
+		err = r.pool.QueryRowContext(ctx, lowStockSQL, lowStockArgs...).Scan(&kpi.LowStockCount)
+		if err != nil && !errors.Is(err, sql.ErrNoRows) {
+			logger.Ctx(ctx).Error("Failed to get low stock count", logger.Error(err))
+		}
 	}
 
 	// Order count (today)
-	err = r.pool.QueryRowContext(ctx,
-		`SELECT COUNT(*) FROM pos_orders WHERE owner_id = ? AND DATE(created_at) = CURDATE()`, ownerID,
-	).Scan(&kpi.OrderCount)
-	if err != nil && !errors.Is(err, sql.ErrNoRows) {
-		logger.Ctx(ctx).Error("Failed to get order count", logger.Error(err))
+	// cross-schema read from pos_orders — orders created today for the KPI summary
+	orderSQL, orderArgs, err := sq.Select("COUNT(*)").
+		From("pos_orders").
+		Where(sq.Eq{"owner_id": ownerID}).
+		Where(sq.Expr("DATE(created_at) = CURDATE()")).
+		PlaceholderFormat(sq.Question).
+		ToSql()
+	if err != nil {
+		logger.Ctx(ctx).Error("Failed to build order count query", logger.Error(err))
+	} else {
+		err = r.pool.QueryRowContext(ctx, orderSQL, orderArgs...).Scan(&kpi.OrderCount)
+		if err != nil && !errors.Is(err, sql.ErrNoRows) {
+			logger.Ctx(ctx).Error("Failed to get order count", logger.Error(err))
+		}
 	}
 
 	// Revenue (today)
-	err = r.pool.QueryRowContext(ctx,
-		`SELECT COALESCE(SUM(total), 0) FROM pos_orders WHERE owner_id = ? AND DATE(created_at) = CURDATE()`, ownerID,
-	).Scan(&kpi.Revenue)
-	if err != nil && !errors.Is(err, sql.ErrNoRows) {
-		logger.Ctx(ctx).Error("Failed to get revenue", logger.Error(err))
+	// cross-schema read from pos_orders — total revenue from orders created today
+	revenueSQL, revenueArgs, err := sq.Select("COALESCE(SUM(total), 0)").
+		From("pos_orders").
+		Where(sq.Eq{"owner_id": ownerID}).
+		Where(sq.Expr("DATE(created_at) = CURDATE()")).
+		PlaceholderFormat(sq.Question).
+		ToSql()
+	if err != nil {
+		logger.Ctx(ctx).Error("Failed to build revenue query", logger.Error(err))
+	} else {
+		err = r.pool.QueryRowContext(ctx, revenueSQL, revenueArgs...).Scan(&kpi.Revenue)
+		if err != nil && !errors.Is(err, sql.ErrNoRows) {
+			logger.Ctx(ctx).Error("Failed to get revenue", logger.Error(err))
+		}
 	}
 
 	return kpi, nil
