@@ -7,6 +7,11 @@
 #include <unordered_map>
 #include <stdexcept>
 
+// MEDIA_ENGINE_VERSION is injected by CMake; fall back to "dev" for ad-hoc builds.
+#ifndef MEDIA_ENGINE_VERSION
+#define MEDIA_ENGINE_VERSION "dev"
+#endif
+
 // ---------------------------------------------------------------------------
 // Minimal CLI argument parser
 // ---------------------------------------------------------------------------
@@ -102,14 +107,33 @@ static void cmdThumbnail(const Args& args) {
 // Entry point
 // ---------------------------------------------------------------------------
 
+static void printUsage(std::ostream& os) {
+    os << "media-engine " << MEDIA_ENGINE_VERSION << "\n"
+       << "Usage: media-engine <subcommand> [options]\n"
+       << "Subcommands:\n"
+       << "  resize     --input <path> --output <path> --width N --height N\n"
+       << "             --format <webp|jpeg|png|avif> --quality N\n"
+       << "             --fit <cover|contain|fill|inside|outside>\n"
+       << "  thumbnail  --input <path> --output <path> --time N --width N --height N\n"
+       << "  help       show this message\n"
+       << "  version    print the version and exit\n";
+}
+
 int main(int argc, char* argv[]) {
     if (argc < 2) {
-        std::cerr << "Usage: media-engine <subcommand> [options]\n"
-                  << "Subcommands:\n"
-                  << "  resize     --input <path> --output <path> --width N --height N\n"
-                  << "             --format <webp|jpeg|png|avif> --quality N --fit <cover|contain|fill>\n"
-                  << "  thumbnail  --input <path> --output <path> --time N --width N --height N\n";
+        printUsage(std::cerr);
         return 1;
+    }
+
+    // Handle help/version before initialising libvips — they need nothing else.
+    std::string sub = argv[1];
+    if (sub == "help" || sub == "--help" || sub == "-h") {
+        printUsage(std::cout);
+        return 0;
+    }
+    if (sub == "version" || sub == "--version" || sub == "-v") {
+        std::cout << "media-engine " << MEDIA_ENGINE_VERSION << "\n";
+        return 0;
     }
 
     if (VIPS_INIT(argv[0])) {
@@ -125,7 +149,8 @@ int main(int argc, char* argv[]) {
         } else if (args.subcommand == "thumbnail") {
             cmdThumbnail(args);
         } else {
-            std::cerr << "Unknown subcommand: " << args.subcommand << "\n";
+            std::cerr << "Unknown subcommand: " << args.subcommand << "\n\n";
+            printUsage(std::cerr);
             exitCode = 1;
         }
     } catch (const std::exception& e) {
