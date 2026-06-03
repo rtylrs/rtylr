@@ -17,7 +17,7 @@ module.exports = {
   siteUrl: 'https://rtylr.com',
   generateRobotsTxt: false, // we maintain robots.txt by hand - it has AI-bot allowances
   outDir: '../../dist/landing', // matches next.config.js output directory
-  exclude: ['/404', '/homepage-legacy*'],
+  exclude: ['/404', '/blog', '/homepage-legacy*'],
   // Trailing slashes match next.config's trailingSlash: true so the
   // URLs in the sitemap match the served URLs 1:1.
   trailingSlash: true,

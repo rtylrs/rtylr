@@ -109,7 +109,7 @@ const PricingPage = (): React.JSX.Element => {
       <MainLayout>
         <HelmetContainer
           title="Pricing | rtylr"
-          description="Simple, transparent pricing for every team. Free to start. No credit card required."
+          description="Simple, transparent per-seat pricing for the all-in-one rtylr business platform — POS, ERP, HR, CRM, Finance & Flow. Free to start, no credit card required."
           canonical="https://rtylr.com/pricing/"
           structuredData={pricingPageSchema({
             tiers: [

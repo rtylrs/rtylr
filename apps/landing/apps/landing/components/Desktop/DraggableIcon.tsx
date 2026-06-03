@@ -29,7 +29,15 @@ export const DraggableIcon: React.FC<DraggableIconProps> = ({ def }) => {
 
   return (
     <div
+      role="button"
+      tabIndex={0}
       onClick={handleClick}
+      onKeyDown={(e) => {
+        if (e.key === 'Enter' || e.key === ' ') {
+          e.preventDefault();
+          handleClick();
+        }
+      }}
       onMouseDown={() => setActive(true)}
       onMouseUp={() => setActive(false)}
       onMouseLeave={() => setActive(false)}

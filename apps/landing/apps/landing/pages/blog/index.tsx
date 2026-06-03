@@ -16,6 +16,7 @@ const BlogPage = (): JSX.Element => {
           title="Blog | rtylr"
           description="Product, engineering, and playbooks from the rtylr team."
           canonical="https://rtylr.com/blog/"
+          robots="noindex, follow"
           structuredData={webPageSchema({
             name: 'Blog',
             path: '/blog/',

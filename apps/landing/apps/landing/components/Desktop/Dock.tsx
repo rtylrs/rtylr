@@ -107,7 +107,16 @@ const DockIcon: React.FC<DockIconProps> = ({ item, isOpen }) => {
         cursor: 'pointer',
         position: 'relative',
       }}
+      role="button"
+      tabIndex={0}
+      aria-label={item.label}
       onClick={handleClick}
+      onKeyDown={(e) => {
+        if (e.key === 'Enter' || e.key === ' ') {
+          e.preventDefault();
+          handleClick();
+        }
+      }}
       title={item.label}
     >
       {/* App icon square */}

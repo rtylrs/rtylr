@@ -58,20 +58,6 @@ export default function Document() {
         {/* Fonts */}
         <link
           rel="preload"
-          href="/fonts/ggsans-Normal.ttf"
-          as="font"
-          type="font/ttf"
-          crossOrigin=""
-        />
-        <link
-          rel="preload"
-          href="/fonts/ggsans-Bold.ttf"
-          as="font"
-          type="font/ttf"
-          crossOrigin=""
-        />
-        <link
-          rel="preload"
           href="/fonts/PlusJakartaSans.ttf"
           as="font"
           type="font/ttf"
@@ -80,13 +66,6 @@ export default function Document() {
         <link
           rel="preload"
           href="/fonts/Inter-Regular.ttf"
-          as="font"
-          type="font/ttf"
-          crossOrigin=""
-        />
-        <link
-          rel="preload"
-          href="/fonts/PlusJakartaSans-ExtraBold.ttf"
           as="font"
           type="font/ttf"
           crossOrigin=""

@@ -23,7 +23,16 @@ export const OsModeBar: React.FC = () => {
         backdropFilter: 'blur(12px)',
         cursor: 'pointer',
       }}
+      role="button"
+      tabIndex={0}
+      aria-label="Switch to OS mode"
       onClick={() => setExperience('os')}
+      onKeyDown={(e) => {
+        if (e.key === 'Enter' || e.key === ' ') {
+          e.preventDefault();
+          setExperience('os');
+        }
+      }}
       onMouseEnter={(e) =>
         ((e.currentTarget as HTMLDivElement).style.background = 'rgba(40,40,44,0.97)')
       }

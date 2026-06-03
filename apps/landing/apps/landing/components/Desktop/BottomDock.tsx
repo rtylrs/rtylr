@@ -182,6 +182,15 @@ const DockItem: React.FC<DockItemProps> = ({ title, icon: Icon, onRestore, onClo
       {/* App icon */}
       <div
         onClick={onRestore}
+        onKeyDown={(e) => {
+          if (e.key === 'Enter' || e.key === ' ') {
+            e.preventDefault();
+            onRestore();
+          }
+        }}
+        role="button"
+        tabIndex={0}
+        aria-label={title}
         style={{
           width: 44,
           height: 44,

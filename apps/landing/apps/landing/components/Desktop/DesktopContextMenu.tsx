@@ -24,9 +24,18 @@ export const DesktopContextMenu: React.FC<DesktopContextMenuProps> = ({ x, y, on
 
   const item = (label: string, action: () => void) => (
     <div
+      role="menuitem"
+      tabIndex={0}
       onClick={() => {
         action();
         onClose();
+      }}
+      onKeyDown={(e) => {
+        if (e.key === 'Enter' || e.key === ' ') {
+          e.preventDefault();
+          action();
+          onClose();
+        }
       }}
       style={{
         padding: '7px 14px',
@@ -50,6 +59,7 @@ export const DesktopContextMenu: React.FC<DesktopContextMenuProps> = ({ x, y, on
   return (
     <div
       ref={menuRef}
+      role="menu"
       style={{
         position: 'fixed',
         top: y,

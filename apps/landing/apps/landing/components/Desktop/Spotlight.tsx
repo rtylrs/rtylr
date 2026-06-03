@@ -182,7 +182,16 @@ export const Spotlight: React.FC = () => {
             {filtered.map((item, i) => (
               <div
                 key={`${item.type}-${item.url ?? ''}-${i}`}
+                role="option"
+                tabIndex={0}
+                aria-selected={i === selected}
                 onClick={() => open(item)}
+                onKeyDown={(e) => {
+                  if (e.key === 'Enter' || e.key === ' ') {
+                    e.preventDefault();
+                    open(item);
+                  }
+                }}
                 onMouseEnter={() => setSelected(i)}
                 style={{
                   display: 'flex',
