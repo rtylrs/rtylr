@@ -56,15 +56,15 @@ vips::VImage ImageProcessor::resizeImage(vips::VImage img, int targetW, int targ
             size  = VIPS_SIZE_UP;
             break;
         case FitMode::Fill:
-            // Stretch to exact dimensions — thumbnail then resize
-            img = img.thumbnail_image(
+            // Stretch to the exact target dimensions, distorting the aspect
+            // ratio. VIPS_SIZE_FORCE drives width and height independently; the
+            // previous centre-crop produced cover behaviour, not a fill.
+            return img.thumbnail_image(
                 targetW,
                 vips::VImage::option()
                     ->set("height", targetH)
-                    ->set("crop", VIPS_INTERESTING_CENTRE)
-                    ->set("size", VIPS_SIZE_BOTH)
+                    ->set("size", VIPS_SIZE_FORCE)
             );
-            return img;
     }
 
     img = img.thumbnail_image(
