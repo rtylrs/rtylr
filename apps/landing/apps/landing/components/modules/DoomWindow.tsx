@@ -8,76 +8,33 @@ export default function DoomWindow(): React.JSX.Element {
       style={{
         height: '100%',
         background: '#000',
-        color: '#fff',
-        fontFamily: 'monospace',
         display: 'flex',
         flexDirection: 'column',
-        alignItems: 'center',
-        justifyContent: 'center',
-        gap: 24,
-        userSelect: 'none',
       }}
     >
-      <pre
-        style={{
-          color: '#b91c1c',
-          fontSize: 10,
-          lineHeight: 1.2,
-          letterSpacing: 1,
-          textAlign: 'center',
-          margin: 0,
-        }}
-      >
-        {[
-          ' ####   #####   #####  ##   ##',
-          ' ## ##  ##  ##  ## ##  ### ###',
-          ' ##  ## #####   ##  ## ## # ##',
-          ' ## ##  ##  ##  ## ##  ##   ##',
-          ' ####   ##  ##  #####  ##   ##',
-        ].join('\n')}
-      </pre>
-
-      <div style={{ color: 'rgba(255,255,255,0.35)', fontSize: 11, letterSpacing: 2 }}>
-        ID SOFTWARE 1993
-      </div>
-
-      <div style={{ display: 'flex', flexDirection: 'column', alignItems: 'center', gap: 10 }}>
-        <a
-          href={DOOM_URL}
-          target="_blank"
-          rel="noopener noreferrer"
-          style={{
-            display: 'inline-block',
-            padding: '10px 28px',
-            background: '#b91c1c',
-            color: '#fff',
-            fontFamily: 'monospace',
-            fontSize: 13,
-            fontWeight: 700,
-            letterSpacing: 2,
-            textDecoration: 'none',
-            borderRadius: 4,
-          }}
-        >
-          PLAY DOOM
-        </a>
-        <span style={{ color: 'rgba(255,255,255,0.2)', fontSize: 10 }}>
-          Opens in a new tab (Internet Archive)
-        </span>
-      </div>
-
+      <iframe
+        src={DOOM_URL}
+        title="DOOM (1993)"
+        style={{ flex: 1, width: '100%', border: 'none', display: 'block', background: '#000' }}
+        allow="autoplay; fullscreen; gamepad; keyboard-map"
+        allowFullScreen
+      />
       <div
         style={{
-          borderTop: '1px solid rgba(255,255,255,0.07)',
-          paddingTop: 20,
-          color: 'rgba(255,255,255,0.25)',
+          flexShrink: 0,
+          background: '#0a0a0a',
+          borderTop: '1px solid rgba(255,255,255,0.08)',
+          color: 'rgba(255,255,255,0.4)',
+          fontFamily: 'monospace',
           fontSize: 10,
           letterSpacing: 1,
           textAlign: 'center',
-          lineHeight: 2,
+          padding: '8px 12px',
+          userSelect: 'none',
         }}
       >
-        WASD / ARROW KEYS TO MOVE &nbsp; CTRL TO SHOOT &nbsp; SPACE TO USE
+        CLICK THE SCREEN TO START &nbsp;·&nbsp; ARROWS / WASD MOVE &nbsp;·&nbsp; CTRL SHOOT
+        &nbsp;·&nbsp; SPACE USE
       </div>
     </div>
   );
