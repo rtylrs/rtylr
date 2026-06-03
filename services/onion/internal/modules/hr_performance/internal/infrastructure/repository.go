@@ -7,9 +7,9 @@ import (
 	"errors"
 	"fmt"
 	"strconv"
-	"strings"
 	"time"
 
+	sq "github.com/Masterminds/squirrel"
 	"github.com/voxire/onion/internal/modules/hr_performance/internal/domain"
 	"github.com/voxire/onion/internal/modules/hr_performance/internal/infrastructure/persistence/sqlc"
 	"github.com/voxire/onion/internal/platform/logger"
@@ -165,7 +165,17 @@ func (r *Repository) OpenReviewCycle(ctx context.Context, ownerID, id int64) err
 	}
 
 	// cross-schema read from hr_core — active employee list for review cycle initialisation
-	rows, err := tx.QueryContext(ctx, "SELECT id FROM hr_employees WHERE owner_id = ? AND status = 'active'", ownerID)
+	selectStr, selectArgs, err := sq.Select("id").
+		From("hr_employees").
+		Where(sq.Eq{"owner_id": ownerID, "status": "active"}).
+		PlaceholderFormat(sq.Question).
+		ToSql()
+	if err != nil {
+		_ = tx.Rollback()
+		return err
+	}
+
+	rows, err := tx.QueryContext(ctx, selectStr, selectArgs...)
 	if err != nil {
 		_ = tx.Rollback()
 		return err
@@ -192,18 +202,21 @@ func (r *Repository) OpenReviewCycle(ctx context.Context, ownerID, id int64) err
 
 	// Insert all self-reviews in one multi-row INSERT instead of a statement
 	// per employee, removing N-1 round-trips inside the transaction.
+	// Built with squirrel since the value count is dynamic (one row per employee).
 	if len(employeeIDs) > 0 {
-		var sb strings.Builder
-		sb.WriteString("INSERT INTO hr_performance_reviews (owner_id, employee_id, review_cycle_id, reviewer_employee_id, review_type, status) VALUES ")
-		args := make([]any, 0, len(employeeIDs)*5)
-		for i, eid := range employeeIDs {
-			if i > 0 {
-				sb.WriteByte(',')
-			}
-			sb.WriteString("(?, ?, ?, ?, 'self', 'draft')")
-			args = append(args, ownerID, eid, id, eid)
+		ib := sq.Insert("hr_performance_reviews").
+			Columns("owner_id", "employee_id", "review_cycle_id", "reviewer_employee_id", "review_type", "status")
+		for _, eid := range employeeIDs {
+			ib = ib.Values(ownerID, eid, id, eid, "self", "draft")
 		}
-		if _, err = tx.ExecContext(ctx, sb.String(), args...); err != nil {
+
+		insertStr, insertArgs, buildErr := ib.PlaceholderFormat(sq.Question).ToSql()
+		if buildErr != nil {
+			_ = tx.Rollback()
+			return buildErr
+		}
+
+		if _, err = tx.ExecContext(ctx, insertStr, insertArgs...); err != nil {
 			_ = tx.Rollback()
 			return err
 		}
@@ -402,7 +415,17 @@ func (r *Repository) ListGoals(ctx context.Context, ownerID, employeeID, cycleID
 // ===== Employees (cross-schema read) =====
 
 func (r *Repository) ListActiveEmployeeIDs(ctx context.Context, ownerID int64) ([]int64, error) {
-	rows, err := r.pool.QueryContext(ctx, "SELECT id FROM hr_employees WHERE owner_id = ? AND status = 'active'", ownerID)
+	// cross-schema read from hr_core — active employee IDs for performance review initialisation
+	queryStr, args, err := sq.Select("id").
+		From("hr_employees").
+		Where(sq.Eq{"owner_id": ownerID, "status": "active"}).
+		PlaceholderFormat(sq.Question).
+		ToSql()
+	if err != nil {
+		return nil, err
+	}
+
+	rows, err := r.pool.QueryContext(ctx, queryStr, args...)
 	if err != nil {
 		return nil, err
 	}
