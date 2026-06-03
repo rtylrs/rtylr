@@ -67,7 +67,12 @@ func (c *CDN) upload(w http.ResponseWriter, r *http.Request) {
 	r.Body = http.MaxBytesReader(w, r.Body, c.maxUpload)
 
 	if err := r.ParseMultipartForm(maxInMemoryUpload); err != nil {
-		http.Error(w, "request too large", http.StatusRequestEntityTooLarge)
+		var maxErr *http.MaxBytesError
+		if errors.As(err, &maxErr) {
+			http.Error(w, "request too large", http.StatusRequestEntityTooLarge)
+		} else {
+			http.Error(w, "invalid multipart form", http.StatusBadRequest)
+		}
 		return
 	}
 
