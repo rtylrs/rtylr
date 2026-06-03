@@ -10,6 +10,6 @@ VALUES (?, ?, ?, ?, TRUE);
 UPDATE pos_terminals SET branch_id = ?, name = ?, device_id = ?, is_active = ?
 WHERE id = ? AND business_id = ?;
 
--- name: UpdateTerminalHeartbeat :exec
+-- name: UpdateTerminalHeartbeat :execresult
 UPDATE pos_terminals SET last_seen_at = NOW()
 WHERE id = ? AND business_id = ?;

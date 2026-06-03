@@ -83,10 +83,10 @@ func (r *Repository) Update(ctx context.Context, input domain.TerminalUpdateInpu
 }
 
 func (r *Repository) Heartbeat(ctx context.Context, terminalID, businessID int64) error {
-	result, err := r.pool.ExecContext(ctx,
-		`UPDATE pos_terminals SET last_seen_at = NOW() WHERE id = ? AND business_id = ?`,
-		terminalID, businessID,
-	)
+	result, err := r.queries.UpdateTerminalHeartbeat(ctx, sqlc.UpdateTerminalHeartbeatParams{
+		ID:         terminalID,
+		BusinessID: businessID,
+	})
 	if err != nil {
 		logger.Ctx(ctx).Error("Failed to update terminal heartbeat", logger.Error(err))
 		return err
