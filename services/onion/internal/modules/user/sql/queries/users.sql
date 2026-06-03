@@ -16,6 +16,9 @@ FROM users WHERE id = ?;
 SELECT id, email, password_hash, full_name, signup_ip_address, signup_device_info, created_at, updated_at
 FROM users WHERE email = ?;
 
+-- name: EmailExists :one
+SELECT EXISTS(SELECT 1 FROM users WHERE email = ?);
+
 -- name: UpdateUserProfile :exec
 UPDATE users
 SET full_name = ?, updated_at = CURRENT_TIMESTAMP

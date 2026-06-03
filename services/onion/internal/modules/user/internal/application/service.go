@@ -294,6 +294,17 @@ func (s *Service) GetUserByEmail(ctx context.Context, email string) (*domain.Use
 	return s.repo.GetUserByEmail(ctx, email)
 }
 
+// EmailExists reports whether an account with the given email already exists.
+// The email is normalized (trimmed + lowercased) to match how accounts are
+// stored, so the check is case-insensitive.
+func (s *Service) EmailExists(ctx context.Context, email string) (bool, error) {
+	normalized := strings.ToLower(strings.TrimSpace(email))
+	if normalized == "" {
+		return false, nil
+	}
+	return s.repo.EmailExists(ctx, normalized)
+}
+
 func (s *Service) GetUserByID(ctx context.Context, id int64) (*domain.User, error) {
 	return cacher.Of[*domain.User]().GetOrComputeSingle(ctx,
 		cacheKeys.Scoped("user", id, "profile"),

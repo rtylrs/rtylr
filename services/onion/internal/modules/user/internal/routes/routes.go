@@ -60,6 +60,17 @@ func RegisterRoutes(ctx context.Context, router *chi.Mux, userService *applicati
 		&handlers.GoogleAuthorizeHandler{UserService: userService},
 	)
 
+	// GET /get-email-exists?email= -- anonymous email-existence check that
+	// drives inline register/login validation. Returns only {exists: bool};
+	// rate-limited per IP since it is a user-enumeration surface.
+	http.RegisterGETWithValidationAndMiddleware[handlers.EmailExistsRequest, handlers.EmailExistsResponse](
+		ctx,
+		router,
+		handlers.EmailExistsRoutes(),
+		&handlers.EmailExistsHandler{UserService: userService},
+		http.PerRouteRateLimit(20, time.Minute),
+	)
+
 	http.RegisterGET[handlers.GetProfileRequest, handlers.GetProfileResponse](
 		ctx,
 		router,

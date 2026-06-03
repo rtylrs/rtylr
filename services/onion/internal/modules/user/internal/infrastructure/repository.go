@@ -85,6 +85,17 @@ func (r *Repository) GetUserByEmail(ctx context.Context, email string) (*domain.
 	), nil
 }
 
+// EmailExists reports whether a user row with the given email exists. The
+// email is matched as stored (callers normalize case before calling).
+func (r *Repository) EmailExists(ctx context.Context, email string) (bool, error) {
+	exists, err := r.queries.EmailExists(ctx, email)
+	if err != nil {
+		logger.Ctx(ctx).Error("Failed to check email existence", logger.Error(err))
+		return false, err
+	}
+	return exists, nil
+}
+
 func (r *Repository) GetUserByID(ctx context.Context, id int64) (*domain.User, error) {
 	row, err := r.queries.GetUserByID(ctx, id)
 	if err != nil {

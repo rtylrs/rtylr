@@ -99,5 +99,6 @@ func (m *Module) GetAnonymousRoutes() []string {
 		handlers.RegisterRoutes(),
 		handlers.GoogleAuthRoutes(),
 		handlers.GoogleAuthorizeRoutes(),
+		handlers.EmailExistsRoutes(),
 	)
 }
