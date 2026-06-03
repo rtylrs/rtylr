@@ -12,6 +12,12 @@ void ImageProcessor::process(const ImageOptions& opts) {
     if (opts.width == 0 && opts.height == 0) {
         throw ProcessingError("at least one of width or height must be non-zero");
     }
+    if (opts.width < 0 || opts.height < 0) {
+        throw ProcessingError("width and height must not be negative");
+    }
+    if (opts.quality < 1 || opts.quality > 100) {
+        throw ProcessingError("quality must be between 1 and 100");
+    }
 
     vips::VImage img = vips::VImage::new_from_file(
         opts.inputPath.c_str(),
