@@ -5,6 +5,8 @@ import (
 	"database/sql"
 	"errors"
 
+	sq "github.com/Masterminds/squirrel"
+
 	"github.com/voxire/onion/internal/modules/security/internal/domain"
 	"github.com/voxire/onion/internal/platform/logger"
 )
@@ -23,9 +25,19 @@ func (r *Repository) GetSecuritySettings(ctx context.Context, userID int64) (dom
 	// Check if 2FA is enabled for the user
 	var twoFAEnabled bool
 
-	err := r.pool.QueryRowContext(ctx,
-		`SELECT COALESCE(two_factor_enabled, FALSE) FROM users WHERE id = ?`, userID,
-	).Scan(&twoFAEnabled)
+	// cross-schema read from users — 2FA flag is owned by the user/auth module
+	query, args, err := sq.
+		Select("COALESCE(two_factor_enabled, FALSE)").
+		From("users").
+		Where(sq.Eq{"id": userID}).
+		PlaceholderFormat(sq.Question).
+		ToSql()
+	if err != nil {
+		logger.Ctx(ctx).Error("Failed to build security settings query", logger.Error(err))
+		return domain.SecuritySettings{}, err
+	}
+
+	err = r.pool.QueryRowContext(ctx, query, args...).Scan(&twoFAEnabled)
 	if err != nil {
 		if errors.Is(err, sql.ErrNoRows) {
 			return domain.SecuritySettings{
@@ -44,8 +56,19 @@ func (r *Repository) GetSecuritySettings(ctx context.Context, userID int64) (dom
 }
 
 func (r *Repository) SetTwoFactor(ctx context.Context, userID int64, enabled bool) error {
-	// two_factor_enabled column may not exist yet - silently fail
-	_, err := r.pool.ExecContext(ctx, `UPDATE users SET two_factor_enabled = ? WHERE id = ?`, enabled, userID)
+	// cross-schema write to users — two_factor_enabled column may not exist yet, silently fail
+	query, args, err := sq.
+		Update("users").
+		Set("two_factor_enabled", enabled).
+		Where(sq.Eq{"id": userID}).
+		PlaceholderFormat(sq.Question).
+		ToSql()
+	if err != nil {
+		logger.Ctx(ctx).Warn("Failed to build set 2FA query", logger.Error(err))
+		return nil
+	}
+
+	_, err = r.pool.ExecContext(ctx, query, args...)
 	if err != nil {
 		logger.Ctx(ctx).Warn("Failed to set 2FA (column may not exist)", logger.Error(err))
 	}
@@ -53,9 +76,20 @@ func (r *Repository) SetTwoFactor(ctx context.Context, userID int64, enabled boo
 }
 
 func (r *Repository) GetLoginHistory(ctx context.Context, userID int64) ([]domain.LoginEntry, error) {
-	rows, err := r.pool.QueryContext(ctx,
-		`SELECT email, method, COALESCE(ip_address,''), COALESCE(user_agent,''), success, created_at
-		 FROM login_history WHERE user_id = ? ORDER BY created_at DESC LIMIT 20`, userID)
+	query, args, err := sq.
+		Select("email", "method", "COALESCE(ip_address,'')", "COALESCE(user_agent,'')", "success", "created_at").
+		From("login_history").
+		Where(sq.Eq{"user_id": userID}).
+		OrderBy("created_at DESC").
+		Limit(20).
+		PlaceholderFormat(sq.Question).
+		ToSql()
+	if err != nil {
+		logger.Ctx(ctx).Error("Failed to build login history query", logger.Error(err))
+		return nil, err
+	}
+
+	rows, err := r.pool.QueryContext(ctx, query, args...)
 	if err != nil {
 		logger.Ctx(ctx).Error("Failed to get login history", logger.Error(err))
 		return nil, err
@@ -77,8 +111,20 @@ func (r *Repository) GetLoginHistory(ctx context.Context, userID int64) ([]domai
 }
 
 func (r *Repository) InvalidateAllSessions(ctx context.Context, userID int64) error {
-	_, err := r.pool.ExecContext(ctx,
-		`UPDATE user_sessions SET revoked_at = NOW() WHERE user_id = ? AND revoked_at IS NULL`, userID)
+	// cross-schema write to user_sessions — sessions are owned by the auth module
+	query, args, err := sq.
+		Update("user_sessions").
+		Set("revoked_at", sq.Expr("NOW()")).
+		Where(sq.Eq{"user_id": userID}).
+		Where(sq.Eq{"revoked_at": nil}).
+		PlaceholderFormat(sq.Question).
+		ToSql()
+	if err != nil {
+		logger.Ctx(ctx).Error("Failed to build invalidate sessions query", logger.Error(err))
+		return err
+	}
+
+	_, err = r.pool.ExecContext(ctx, query, args...)
 	if err != nil {
 		logger.Ctx(ctx).Error("Failed to invalidate sessions", logger.Error(err))
 	}
@@ -86,9 +132,18 @@ func (r *Repository) InvalidateAllSessions(ctx context.Context, userID int64) er
 }
 
 func (r *Repository) RecordLogin(ctx context.Context, userID int64, email, method, ip, userAgent string, success bool) error {
-	_, err := r.pool.ExecContext(ctx,
-		`INSERT INTO login_history (user_id, email, method, ip_address, user_agent, success) VALUES (?, ?, ?, ?, ?, ?)`,
-		userID, email, method, ip, userAgent, success)
+	query, args, err := sq.
+		Insert("login_history").
+		Columns("user_id", "email", "method", "ip_address", "user_agent", "success").
+		Values(userID, email, method, ip, userAgent, success).
+		PlaceholderFormat(sq.Question).
+		ToSql()
+	if err != nil {
+		logger.Ctx(ctx).Error("Failed to build record login query", logger.Error(err))
+		return err
+	}
+
+	_, err = r.pool.ExecContext(ctx, query, args...)
 	if err != nil {
 		logger.Ctx(ctx).Error("Failed to record login", logger.Error(err))
 	}
