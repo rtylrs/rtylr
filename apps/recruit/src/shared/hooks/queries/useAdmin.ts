@@ -280,7 +280,9 @@ export function useDeleteFormField() {
   const qc = useQueryClient();
   return useMutation({
     mutationFn: (payload: { id: number; careerId: number }) =>
-      unwrap(safe.delete<{ message: string }>('/recruit/form-fields', { data: { id: payload.id } })),
+      unwrap(
+        safe.delete<{ message: string }>('/recruit/form-fields', { data: { id: payload.id } })
+      ),
     onSuccess: (_, vars) =>
       qc.invalidateQueries({ queryKey: ['recruit', 'admin', 'form-fields', vars.careerId] }),
     onError: () => toast.error('Failed to delete form field'),

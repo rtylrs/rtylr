@@ -47,7 +47,9 @@ describe('useReportTemplates', () => {
 
   it('unwraps the "templates" key when present', async () => {
     const data = {
-      templates: [{ id: 'revenue-monthly', name: 'Revenue Report', description: 'Monthly revenue' }],
+      templates: [
+        { id: 'revenue-monthly', name: 'Revenue Report', description: 'Monthly revenue' },
+      ],
     };
     (insightsService.getReportTemplates as any).mockResolvedValue(data);
     const { result } = renderHook(() => useReportTemplates(), {

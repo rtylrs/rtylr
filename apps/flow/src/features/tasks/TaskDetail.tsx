@@ -306,8 +306,7 @@ const TaskDetail: React.FC = () => {
 
   const estimatedHours = task.estimatedHours ?? task.estimate ?? null;
   const actualHours =
-    task.actualHours ??
-    (totalMinutes > 0 ? Math.round((totalMinutes / 60) * 10) / 10 : null);
+    task.actualHours ?? (totalMinutes > 0 ? Math.round((totalMinutes / 60) * 10) / 10 : null);
 
   const priorities: Task['priority'][] = ['urgent', 'high', 'medium', 'low', 'no_priority'];
   const statuses: Task['status'][] = [
