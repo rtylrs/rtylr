@@ -140,6 +140,9 @@ func (c *CDN) serveFile(w http.ResponseWriter, r *http.Request) {
 	// Answer conditional requests before fetching anything from storage.
 	etag := quoteETag(meta.FileUUID)
 	w.Header().Set("ETag", etag)
+	if !meta.CreatedAt.IsZero() {
+		w.Header().Set("Last-Modified", meta.CreatedAt.UTC().Format(http.TimeFormat))
+	}
 	if etagMatches(r.Header.Get("If-None-Match"), etag) {
 		w.WriteHeader(http.StatusNotModified)
 		return
