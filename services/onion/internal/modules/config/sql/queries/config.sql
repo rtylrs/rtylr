@@ -55,6 +55,9 @@ INSERT INTO config (
     enable_newsletter_signup,
     about_content,
     footer_sub_text
-) VALUES (  
+) VALUES (
     ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?
 );
+
+-- name: GetBusinessSlugByOwnerID :one
+SELECT slug FROM businesses WHERE owner_id = ? LIMIT 1;
