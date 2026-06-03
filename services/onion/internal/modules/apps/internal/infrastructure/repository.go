@@ -6,6 +6,8 @@ import (
 	"encoding/json"
 	"errors"
 
+	sq "github.com/Masterminds/squirrel"
+
 	"github.com/voxire/onion/internal/platform/logger"
 )
 
@@ -21,10 +23,23 @@ func NewRepository(db *sql.DB) *Repository {
 
 // GetEnabledAddons returns addon IDs that are enabled for the given business.
 func (r *Repository) GetEnabledAddons(ctx context.Context, businessID int64) map[string]bool {
-	rows, err := r.pool.QueryContext(ctx,
-		"SELECT addon_id FROM business_addons WHERE business_id = ? AND is_enabled = 1",
-		businessID,
-	)
+	// cross-schema read from business_addons — addon enablement is owned by another module
+	query, args, err := sq.
+		Select("addon_id").
+		From("business_addons").
+		Where(sq.Eq{"business_id": businessID}).
+		Where(sq.Eq{"is_enabled": 1}).
+		PlaceholderFormat(sq.Question).
+		ToSql()
+	if err != nil {
+		logger.Ctx(ctx).Error("failed to build enabled addons query",
+			logger.Any("business_id", businessID),
+			logger.Error(err),
+		)
+		return map[string]bool{}
+	}
+
+	rows, err := r.pool.QueryContext(ctx, query, args...)
 	if err != nil {
 		logger.Ctx(ctx).Error("failed to query enabled addons",
 			logger.Any("business_id", businessID),
@@ -63,10 +78,24 @@ func (r *Repository) GetEnabledAddons(ctx context.Context, businessID int64) map
 // could match another tenant's row and leak app permissions across tenants.
 func (r *Repository) GetUserAllowedApps(ctx context.Context, businessID, userID int64) []string {
 	var appsJSON []byte
-	err := r.pool.QueryRowContext(ctx,
-		"SELECT apps FROM user_app_permissions WHERE business_id = ? AND user_id = ?",
-		businessID, userID,
-	).Scan(&appsJSON)
+	// cross-schema read from user_app_permissions — app permissions are owned by another module
+	query, args, err := sq.
+		Select("apps").
+		From("user_app_permissions").
+		Where(sq.Eq{"business_id": businessID}).
+		Where(sq.Eq{"user_id": userID}).
+		PlaceholderFormat(sq.Question).
+		ToSql()
+	if err != nil {
+		logger.Ctx(ctx).Error("failed to build user allowed apps query",
+			logger.Any("business_id", businessID),
+			logger.Any("user_id", userID),
+			logger.Error(err),
+		)
+		return []string{}
+	}
+
+	err = r.pool.QueryRowContext(ctx, query, args...).Scan(&appsJSON)
 	if err != nil {
 		if errors.Is(err, sql.ErrNoRows) {
 			return []string{}
