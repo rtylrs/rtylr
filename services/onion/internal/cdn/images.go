@@ -49,6 +49,15 @@ func (c *CDN) transform(ctx context.Context, fileID int64, fileUUID, originalSto
 	}
 	defer cleanup()
 
+	// Bound concurrent media-engine processes; block until a slot frees up or
+	// the request is cancelled.
+	select {
+	case c.engineSem <- struct{}{}:
+		defer func() { <-c.engineSem }()
+	case <-ctx.Done():
+		return nil, 0, "", ctx.Err()
+	}
+
 	cmd := exec.CommandContext(ctx, c.mediaEngine, p.CLIArgs(tmpIn, tmpOut)...)
 	if out, runErr := cmd.CombinedOutput(); runErr != nil {
 		return nil, 0, "", fmt.Errorf("media-engine failed: %w\noutput: %s", runErr, out)

@@ -12,6 +12,7 @@ package cdn
 
 import (
 	"database/sql"
+	"runtime"
 
 	"github.com/go-chi/chi/v5"
 
@@ -27,6 +28,11 @@ type CDN struct {
 	maxUpload   int64
 	mediaEngine string
 	apiKey      string
+
+	// engineSem bounds how many media-engine subprocesses run at once. Each
+	// invocation is CPU- and memory-heavy (libvips decode + encode), so a flood
+	// of cache-miss requests must not fork an unbounded number of them.
+	engineSem chan struct{}
 }
 
 // immutableCacheControl is sent on every served asset. Originals are keyed by
@@ -39,6 +45,10 @@ const immutableCacheControl = "public, max-age=31536000, immutable"
 // media-engine binary, and apiKey the bearer token guarding write endpoints
 // (empty disables write auth — local dev only).
 func New(db *sql.DB, store *storage.Client, baseURL string, maxUpload int64, mediaEngine, apiKey string) *CDN {
+	concurrency := runtime.NumCPU()
+	if concurrency < 1 {
+		concurrency = 1
+	}
 	return &CDN{
 		db:          db,
 		storage:     store,
@@ -46,6 +56,7 @@ func New(db *sql.DB, store *storage.Client, baseURL string, maxUpload int64, med
 		maxUpload:   maxUpload,
 		mediaEngine: mediaEngine,
 		apiKey:      apiKey,
+		engineSem:   make(chan struct{}, concurrency),
 	}
 }
 
