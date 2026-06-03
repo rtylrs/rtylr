@@ -87,6 +87,13 @@ func (s *Service) UpdateCustomer(ctx context.Context, input domain.CustomerUpdat
 	if err := s.repo.UpdateCustomer(ctx, input); err != nil {
 		return err
 	}
+	if input.LoyaltyTier != "" {
+		// Preserve existing points — only update tier label
+		existing, err := s.repo.GetCustomerByID(ctx, input.OwnerID, input.ID)
+		if err == nil {
+			_ = s.repo.UpdateCustomerLoyalty(ctx, input.ID, existing.LoyaltyPoints, input.LoyaltyTier)
+		}
+	}
 	invalidateCustomerScope(ctx, input.OwnerID)
 	return nil
 }

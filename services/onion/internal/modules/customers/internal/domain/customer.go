@@ -66,6 +66,7 @@ type CustomerUpdateInput struct {
 	Address     string
 	City        string
 	Country     string
+	LoyaltyTier string
 	Tags        []string
 	Notes       string
 	IsActive    *bool

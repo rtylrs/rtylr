@@ -31,6 +31,7 @@ type UpdateCustomerRequest struct {
 	Address     string   `json:"address"`
 	City        string   `json:"city"`
 	Country     string   `json:"country"`
+	LoyaltyTier string   `json:"loyalty_tier"`
 	Tags        []string `json:"tags"`
 	Notes       string   `json:"notes"`
 	IsActive    *bool    `json:"is_active"`
@@ -65,19 +66,20 @@ func (h *UpdateCustomerHandler) Serve(ctx context.Context, req *UpdateCustomerRe
 	}
 
 	input := domain.CustomerUpdateInput{
-		ID:        req.ID,
-		OwnerID:   device.User.UserID,
-		FirstName: req.FirstName,
-		LastName:  req.LastName,
-		Email:     req.Email,
-		Phone:     req.Phone,
-		Gender:    req.Gender,
-		Address:   req.Address,
-		City:      req.City,
-		Country:   req.Country,
-		Tags:      req.Tags,
-		Notes:     req.Notes,
-		IsActive:  req.IsActive,
+		ID:          req.ID,
+		OwnerID:     device.User.UserID,
+		FirstName:   req.FirstName,
+		LastName:    req.LastName,
+		Email:       req.Email,
+		Phone:       req.Phone,
+		Gender:      req.Gender,
+		Address:     req.Address,
+		City:        req.City,
+		Country:     req.Country,
+		LoyaltyTier: req.LoyaltyTier,
+		Tags:        req.Tags,
+		Notes:       req.Notes,
+		IsActive:    req.IsActive,
 	}
 
 	if req.DateOfBirth != "" {
