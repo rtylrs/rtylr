@@ -38,13 +38,11 @@ func userFromRow(id int64, email, passwordHash string, fullName, signupIP, devic
 
 type Repository struct {
 	queries *sqlc.Queries
-	pool    *sql.DB
 }
 
 func NewRepository(db *sql.DB) *Repository {
 	return &Repository{
 		queries: sqlc.New(db),
-		pool:    db,
 	}
 }
 
@@ -147,8 +145,7 @@ func (r *Repository) DeleteUser(ctx context.Context, id int64) error {
 
 // GetUserBusinessID returns the business_id for a user. Returns 0 if not set.
 func (r *Repository) GetUserBusinessID(ctx context.Context, userID int64) (int64, error) {
-	var businessID sql.NullInt64
-	err := r.pool.QueryRowContext(ctx, "SELECT business_id FROM users WHERE id = ?", userID).Scan(&businessID)
+	businessID, err := r.queries.GetUserBusinessID(ctx, userID)
 	if err != nil {
 		return 0, err
 	}
@@ -161,30 +158,28 @@ func (r *Repository) GetUserBusinessID(ctx context.Context, userID int64) (int64
 // GetUserRole returns the role for a user within their business.
 func (r *Repository) GetUserRole(ctx context.Context, businessID, userID int64) (string, error) {
 	// Check if user is the business owner
-	var ownerID int64
-	err := r.pool.QueryRowContext(ctx, "SELECT owner_id FROM businesses WHERE id = ?", businessID).Scan(&ownerID)
+	ownerID, err := r.queries.GetBusinessOwnerID(ctx, businessID)
 	if err == nil && ownerID == userID {
 		return "owner", nil
 	}
 
 	// Otherwise check permissions table
-	var role string
-	err = r.pool.QueryRowContext(ctx,
-		"SELECT role FROM user_app_permissions WHERE business_id = ? AND user_id = ?",
-		businessID, userID,
-	).Scan(&role)
+	role, err := r.queries.GetUserAppRole(ctx, sqlc.GetUserAppRoleParams{
+		BusinessID: sql.NullInt64{Int64: businessID, Valid: true},
+		UserID:     userID,
+	})
 	if err != nil {
 		return "staff", nil // default
 	}
-	return role, nil
+	return string(role.UserAppPermissionsRole), nil
 }
 
 // CreateBusiness creates a new business and returns its ID.
 func (r *Repository) CreateBusiness(ctx context.Context, name string, ownerID int64) (int64, error) {
-	res, err := r.pool.ExecContext(ctx,
-		"INSERT INTO businesses (name, owner_id) VALUES (?, ?)",
-		name, ownerID,
-	)
+	res, err := r.queries.CreateBusiness(ctx, sqlc.CreateBusinessParams{
+		Name:    name,
+		OwnerID: ownerID,
+	})
 	if err != nil {
 		logger.Ctx(ctx).Error("Failed to create business", logger.Error(err))
 		return 0, err
@@ -194,8 +189,10 @@ func (r *Repository) CreateBusiness(ctx context.Context, name string, ownerID in
 
 // SetUserBusinessID sets the business_id for a user.
 func (r *Repository) SetUserBusinessID(ctx context.Context, userID, businessID int64) error {
-	_, err := r.pool.ExecContext(ctx, "UPDATE users SET business_id = ? WHERE id = ?", businessID, userID)
-	return err
+	return r.queries.SetUserBusinessID(ctx, sqlc.SetUserBusinessIDParams{
+		BusinessID: sql.NullInt64{Int64: businessID, Valid: true},
+		ID:         userID,
+	})
 }
 
 // RecordLogin writes a login history entry via sqlc.
@@ -211,11 +208,8 @@ func (r *Repository) RecordLogin(ctx context.Context, userID int64, email, metho
 
 // AssignSubscription looks up the plan by slug and creates a trial subscription for the owner.
 func (r *Repository) AssignSubscription(ctx context.Context, ownerID int64, planSlug string) error {
-	var planID int64
 	// cross-schema read from plans — approved for subscription assignment on registration
-	err := r.pool.QueryRowContext(ctx,
-		`SELECT id FROM plans WHERE slug = ? AND is_active = TRUE`,
-		planSlug).Scan(&planID)
+	planID, err := r.queries.GetActivePlanIDBySlug(ctx, planSlug)
 	if err != nil {
 		if errors.Is(err, sql.ErrNoRows) {
 			return fmt.Errorf("plan not found: %s", planSlug)
@@ -226,11 +220,9 @@ func (r *Repository) AssignSubscription(ctx context.Context, ownerID int64, plan
 
 	trialEnd := time.Now().AddDate(0, 0, 14)
 	// cross-schema write to subscriptions — approved for trial creation on registration
-	_, execErr := r.pool.ExecContext(ctx,
-		`INSERT INTO subscriptions (owner_id, plan_id, status, trial_ends_at)
-		 VALUES (?, ?, 'trial', ?)
-		 ON DUPLICATE KEY UPDATE plan_id = VALUES(plan_id), updated_at = CURRENT_TIMESTAMP`,
-		ownerID, planID, trialEnd)
-
-	return execErr
+	return r.queries.UpsertTrialSubscription(ctx, sqlc.UpsertTrialSubscriptionParams{
+		OwnerID:     ownerID,
+		PlanID:      planID,
+		TrialEndsAt: sql.NullTime{Time: trialEnd, Valid: true},
+	})
 }
