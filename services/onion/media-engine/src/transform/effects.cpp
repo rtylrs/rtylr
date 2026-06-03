@@ -14,6 +14,7 @@
 #include "ops/posterize.hpp"
 #include "ops/threshold.hpp"
 #include "ops/median.hpp"
+#include "ops/vignette.hpp"
 
 namespace voxire {
 namespace transform {
@@ -65,6 +66,10 @@ vips::VImage applyEffect(vips::VImage img, const std::string& name,
         int size = static_cast<int>(numOr(value, 5.0));
         if (size % 2 == 0) size += 1; // median needs an odd window
         return ops::median(img, size < 3 ? 3 : size);
+    }
+    if (name == "vignette") {
+        // value is 0..100 strength.
+        return ops::vignette(img, clampDouble(numOr(value, 30.0) / 100.0, 0.0, 1.0));
     }
     throw ProcessingError("unknown effect: " + name);
 }
