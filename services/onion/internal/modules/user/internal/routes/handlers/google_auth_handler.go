@@ -22,10 +22,14 @@ func GoogleAuthRoutes() []string {
 	}
 }
 
-// GoogleAuthorizeRoutes returns the route for the authorization URL endpoint.
+// GoogleAuthorizeRoutes returns the routes for the authorization URL endpoint.
+// /auth/social/authorize?provider=<google|github|microsoft|apple> is the
+// general form; /auth/google/authorize is kept for back-compat (defaults to
+// Google).
 func GoogleAuthorizeRoutes() []string {
 	return []string{
 		"/auth/google/authorize",
+		"/auth/social/authorize",
 	}
 }
 
@@ -117,30 +121,36 @@ func (h *GoogleAuthHandler) Serve(ctx context.Context, req *GoogleAuthRequest) (
 	}, nil
 }
 
-// GoogleAuthorizeHandler handles GET /auth/google/authorize.
-// It returns the WorkOS Google OAuth consent URL the frontend should redirect to.
+// GoogleAuthorizeHandler handles GET /auth/social/authorize (and the legacy
+// /auth/google/authorize). It returns the WorkOS-hosted consent URL for the
+// requested provider; the frontend redirects the user there.
 type GoogleAuthorizeHandler struct {
 	UserService *application.Service
 }
 
-type GoogleAuthorizeRequest struct{}
+// GoogleAuthorizeRequest reads the optional provider from the `?provider=`
+// query param (google, github, microsoft, apple). Empty defaults to Google.
+type GoogleAuthorizeRequest struct {
+	Provider string `json:"provider"`
+}
 
 type GoogleAuthorizeResponse struct {
 	URL string `json:"url"`
 }
 
-func (h *GoogleAuthorizeHandler) Serve(_ context.Context, _ *GoogleAuthorizeRequest) (GoogleAuthorizeResponse, *errorModels.ServerError) {
-	url, err := h.UserService.GoogleAuthorizationURL()
+func (h *GoogleAuthorizeHandler) Serve(_ context.Context, req *GoogleAuthorizeRequest) (GoogleAuthorizeResponse, *errorModels.ServerError) {
+	url, err := h.UserService.SocialAuthorizationURL(req.Provider)
 	if err != nil {
 		if errors.Is(err, application.ErrGoogleOAuthNotConfigured) {
 			return GoogleAuthorizeResponse{}, &errorModels.ServerError{
 				Code:    http.StatusServiceUnavailable,
-				Message: "Google login is not configured on this server",
+				Message: "Social login is not configured on this server",
 			}
 		}
+		// Unknown provider (or other validation) is a client error.
 		return GoogleAuthorizeResponse{}, &errorModels.ServerError{
-			Code:    http.StatusInternalServerError,
-			Message: "Failed to generate Google authorization URL",
+			Code:    http.StatusBadRequest,
+			Message: "Failed to generate authorization URL: " + err.Error(),
 		}
 	}
 	return GoogleAuthorizeResponse{URL: url}, nil

@@ -125,11 +125,19 @@ func (s *Service) GoogleAuth(
 	return &GoogleAuthResult{UserID: userID, Token: token, IsNew: true}, nil
 }
 
-// GoogleAuthorizationURL returns the WorkOS-hosted Google OAuth consent URL
-// the frontend should redirect the user to.
-func (s *Service) GoogleAuthorizationURL() (string, error) {
+// SocialAuthorizationURL returns the WorkOS-hosted consent URL for a social
+// provider (google, github, microsoft, apple). The frontend redirects the user
+// there; the provider returns to the callback with a code that GoogleAuth
+// exchanges (the exchange is provider-agnostic).
+func (s *Service) SocialAuthorizationURL(provider string) (string, error) {
 	if s.workOSProvider == nil || s.workOSProvider.clientID == "" {
 		return "", ErrGoogleOAuthNotConfigured
 	}
-	return s.workOSProvider.GetAuthorizationURL()
+	return s.workOSProvider.GetAuthorizationURL(provider)
+}
+
+// GoogleAuthorizationURL is the Google-specific shorthand, kept for callers
+// that predate multi-provider support.
+func (s *Service) GoogleAuthorizationURL() (string, error) {
+	return s.SocialAuthorizationURL("google")
 }
