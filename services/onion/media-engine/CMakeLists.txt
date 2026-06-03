@@ -65,6 +65,22 @@ else()
     message(STATUS "FFmpeg not found — video processing will be scaffolded only")
 endif()
 
+# ── Tests ───────────────────────────────────────────────────────────────────
+
+# Unit tests for the pure (vips-free) primitives. Each tests/*_test.cpp builds
+# into its own executable and registers with CTest; run with `ctest`.
+option(MEDIA_ENGINE_TESTS "Build the media-engine unit tests" ON)
+if(MEDIA_ENGINE_TESTS)
+    enable_testing()
+    file(GLOB TEST_SOURCES CONFIGURE_DEPENDS "${CMAKE_CURRENT_SOURCE_DIR}/tests/*_test.cpp")
+    foreach(test_src ${TEST_SOURCES})
+        get_filename_component(test_name ${test_src} NAME_WE)
+        add_executable(${test_name} ${test_src})
+        target_include_directories(${test_name} PRIVATE include tests)
+        add_test(NAME ${test_name} COMMAND ${test_name})
+    endforeach()
+endif()
+
 # ── Install ───────────────────────────────────────────────────────────────────
 
 install(TARGETS media-engine DESTINATION bin)
