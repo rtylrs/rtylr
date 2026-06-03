@@ -41,6 +41,7 @@ func TestParamsValidate(t *testing.T) {
 		{"bad format", Params{Width: 10, Quality: 85, Format: "bmp", Fit: "cover"}, true},
 		{"bad fit", Params{Width: 10, Quality: 85, Format: "webp", Fit: "squish"}, true},
 		{"uppercase format ok", Params{Width: 10, Quality: 85, Format: "WEBP", Fit: "COVER"}, false},
+		{"area too large", Params{Width: 8000, Height: 8000, Quality: 85, Format: "webp", Fit: "cover"}, true},
 	}
 	for _, tc := range cases {
 		t.Run(tc.name, func(t *testing.T) {

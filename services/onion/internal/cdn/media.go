@@ -122,6 +122,9 @@ func (p *Params) Defaults() {
 	}
 }
 
+// maxPixelArea bounds the output width*height to limit per-request memory.
+const maxPixelArea int64 = 24_000_000
+
 // Validate returns an error if parameters are out of acceptable range.
 func (p *Params) Validate() error {
 	if p.Width < 0 || p.Width > 8000 {
@@ -132,6 +135,12 @@ func (p *Params) Validate() error {
 	}
 	if p.Width == 0 && p.Height == 0 {
 		return fmt.Errorf("at least one of width or height must be specified")
+	}
+	// Cap the output area independently of the per-dimension limits: 8000x8000
+	// is within bounds but would allocate ~256 MB of pixels. 24 MP comfortably
+	// covers any real display while bounding memory.
+	if p.Width > 0 && p.Height > 0 && int64(p.Width)*int64(p.Height) > maxPixelArea {
+		return fmt.Errorf("requested dimensions exceed the %d pixel limit", maxPixelArea)
 	}
 	if p.Quality < 1 || p.Quality > 100 {
 		return fmt.Errorf("quality must be between 1 and 100")
