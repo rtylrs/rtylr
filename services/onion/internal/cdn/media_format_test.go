@@ -19,6 +19,21 @@ func TestExtensionForFormat(t *testing.T) {
 	}
 }
 
+func TestExtensionForFormat_DefaultBranch(t *testing.T) {
+	// Formats without an explicit case fall through to "." + format. tiff and
+	// mov reach here (they have no dedicated case) and must still be sensible.
+	cases := map[string]string{
+		"tiff":    ".tiff",
+		"mov":     ".mov",
+		"unknown": ".unknown",
+	}
+	for in, want := range cases {
+		if got := extensionForFormat(in); got != want {
+			t.Errorf("extensionForFormat(%q) = %q, want %q", in, got, want)
+		}
+	}
+}
+
 func TestMimeForFormat(t *testing.T) {
 	cases := map[string]string{
 		"jpeg":    "image/jpeg",
