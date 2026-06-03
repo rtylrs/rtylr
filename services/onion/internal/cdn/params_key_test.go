@@ -43,7 +43,9 @@ func TestParamsStorageKey(t *testing.T) {
 }
 
 func TestParamsCLIArgs(t *testing.T) {
-	p := Params{Width: 256, Height: 128, Fit: "cover", Format: "WEBP", Quality: 80}
+	// Both format and fit must reach the engine lowercased — the C++
+	// parseFitMode only matches lowercase, so "COVER" would otherwise crash it.
+	p := Params{Width: 256, Height: 128, Fit: "COVER", Format: "WEBP", Quality: 80}
 	args := strings.Join(p.CLIArgs("/in.jpg", "/out.webp"), " ")
 	for _, want := range []string{
 		"resize", "--input /in.jpg", "--output /out.webp",

@@ -198,7 +198,7 @@ func (p *Params) CLIArgs(inputPath, outputPath string) []string {
 		"--output", outputPath,
 		"--format", strings.ToLower(p.Format),
 		"--quality", strconv.Itoa(p.Quality),
-		"--fit", p.Fit,
+		"--fit", strings.ToLower(p.Fit),
 	}
 	if p.Width > 0 {
 		args = append(args, "--width", strconv.Itoa(p.Width))
