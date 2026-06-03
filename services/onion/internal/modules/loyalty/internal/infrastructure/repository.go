@@ -6,6 +6,7 @@ import (
 	"errors"
 	"strconv"
 
+	sq "github.com/Masterminds/squirrel"
 	"github.com/voxire/onion/internal/modules/loyalty/internal/domain"
 	"github.com/voxire/onion/internal/modules/loyalty/internal/infrastructure/persistence/sqlc"
 	"github.com/voxire/onion/internal/platform/logger"
@@ -207,20 +208,31 @@ func (r *Repository) ListMembers(ctx context.Context, ownerID int64, limit, offs
 	if offset < 0 {
 		offset = 0
 	}
+
 	// cross-schema read from crm_customers — loyalty members projection
-	rows, err := r.pool.QueryContext(ctx, `
-		SELECT id, owner_id,
-		       CONCAT_WS(' ', first_name, COALESCE(last_name, '')) AS name,
-		       COALESCE(loyalty_points, 0),
-		       COALESCE(loyalty_tier, 'bronze'),
-		       COALESCE(visit_count, 0),
-		       created_at,
-		       COALESCE(last_visit_at, created_at) AS last_active_at
-		FROM crm_customers
-		WHERE owner_id = ? AND is_active = TRUE
-		  AND (loyalty_points > 0 OR visit_count > 0)
-		ORDER BY loyalty_points DESC, visit_count DESC
-		LIMIT ? OFFSET ?`, ownerID, limit, offset)
+	listSQL, args, err := sq.Select(
+		"id", "owner_id",
+		"CONCAT_WS(' ', first_name, COALESCE(last_name, '')) AS name",
+		"COALESCE(loyalty_points, 0)",
+		"COALESCE(loyalty_tier, 'bronze')",
+		"COALESCE(visit_count, 0)",
+		"created_at",
+		"COALESCE(last_visit_at, created_at) AS last_active_at",
+	).
+		From("crm_customers").
+		Where(sq.Eq{"owner_id": ownerID, "is_active": true}).
+		Where(sq.Or{sq.Gt{"loyalty_points": 0}, sq.Gt{"visit_count": 0}}).
+		OrderBy("loyalty_points DESC", "visit_count DESC").
+		Limit(uint64(limit)).
+		Offset(uint64(offset)).
+		PlaceholderFormat(sq.Question).
+		ToSql()
+	if err != nil {
+		logger.Ctx(ctx).Error("Failed to build loyalty members query", logger.Error(err))
+		return nil, err
+	}
+
+	rows, err := r.pool.QueryContext(ctx, listSQL, args...)
 	if err != nil {
 		logger.Ctx(ctx).Error("Failed to list loyalty members", logger.Error(err))
 		return nil, err
@@ -255,16 +267,32 @@ func (r *Repository) ListMembers(ctx context.Context, ownerID int64, limit, offs
 
 // ListRewards returns the catalog of rewards for an owner.
 func (r *Repository) ListRewards(ctx context.Context, ownerID int64, activeOnly bool) ([]domain.LoyaltyReward, error) {
-	q := `SELECT id, owner_id, name, COALESCE(description, ''), COALESCE(category, 'general'),
-	             points_cost, stock, COALESCE(icon, ''), COALESCE(active, TRUE), created_at, updated_at
-	      FROM crm_loyalty_rewards WHERE owner_id = ?`
-	args := []interface{}{ownerID}
-	if activeOnly {
-		q += " AND active = TRUE"
-	}
-	q += " ORDER BY points_cost ASC, id ASC"
+	builder := sq.Select(
+		"id", "owner_id", "name",
+		"COALESCE(description, '')",
+		"COALESCE(category, 'general')",
+		"points_cost", "stock",
+		"COALESCE(icon, '')",
+		"COALESCE(active, TRUE)",
+		"created_at", "updated_at",
+	).
+		From("crm_loyalty_rewards").
+		Where(sq.Eq{"owner_id": ownerID})
 
-	rows, err := r.pool.QueryContext(ctx, q, args...)
+	if activeOnly {
+		builder = builder.Where(sq.Eq{"active": true})
+	}
+
+	listSQL, args, err := builder.
+		OrderBy("points_cost ASC", "id ASC").
+		PlaceholderFormat(sq.Question).
+		ToSql()
+	if err != nil {
+		logger.Ctx(ctx).Error("Failed to build loyalty rewards query", logger.Error(err))
+		return nil, err
+	}
+
+	rows, err := r.pool.QueryContext(ctx, listSQL, args...)
 	if err != nil {
 		logger.Ctx(ctx).Error("Failed to list loyalty rewards", logger.Error(err))
 		return nil, err
@@ -305,15 +333,21 @@ func (r *Repository) ListRewards(ctx context.Context, ownerID int64, activeOnly 
 
 // UpsertReward creates or updates a reward. ID=0 → insert; ID>0 → update.
 func (r *Repository) UpsertReward(ctx context.Context, rw domain.LoyaltyReward) (int64, error) {
-	var stock sql.NullInt64
+	var stock sql.NullInt32
 	if rw.Stock != nil {
-		stock = sql.NullInt64{Int64: int64(*rw.Stock), Valid: true}
+		stock = sql.NullInt32{Int32: int32(*rw.Stock), Valid: true}
 	}
 	if rw.ID == 0 {
-		res, err := r.pool.ExecContext(ctx, `
-			INSERT INTO crm_loyalty_rewards (owner_id, name, description, category, points_cost, stock, icon, active)
-			VALUES (?, ?, ?, ?, ?, ?, ?, ?)`,
-			rw.OwnerID, rw.Name, rw.Description, rw.Category, rw.PointsCost, stock, rw.Icon, rw.Active)
+		res, err := r.queries.CreateReward(ctx, sqlc.CreateRewardParams{
+			OwnerID:     rw.OwnerID,
+			Name:        rw.Name,
+			Description: sql.NullString{String: rw.Description, Valid: true},
+			Category:    sql.NullString{String: rw.Category, Valid: true},
+			PointsCost:  int32(rw.PointsCost),
+			Stock:       stock,
+			Icon:        sql.NullString{String: rw.Icon, Valid: true},
+			Active:      sql.NullBool{Bool: rw.Active, Valid: true},
+		})
 		if err != nil {
 			logger.Ctx(ctx).Error("Failed to insert loyalty reward", logger.Error(err))
 			return 0, err
@@ -324,11 +358,17 @@ func (r *Repository) UpsertReward(ctx context.Context, rw domain.LoyaltyReward) 
 		}
 		return id, nil
 	}
-	_, err := r.pool.ExecContext(ctx, `
-		UPDATE crm_loyalty_rewards
-		SET name = ?, description = ?, category = ?, points_cost = ?, stock = ?, icon = ?, active = ?
-		WHERE id = ? AND owner_id = ?`,
-		rw.Name, rw.Description, rw.Category, rw.PointsCost, stock, rw.Icon, rw.Active, rw.ID, rw.OwnerID)
+	err := r.queries.UpdateReward(ctx, sqlc.UpdateRewardParams{
+		Name:        rw.Name,
+		Description: sql.NullString{String: rw.Description, Valid: true},
+		Category:    sql.NullString{String: rw.Category, Valid: true},
+		PointsCost:  int32(rw.PointsCost),
+		Stock:       stock,
+		Icon:        sql.NullString{String: rw.Icon, Valid: true},
+		Active:      sql.NullBool{Bool: rw.Active, Valid: true},
+		ID:          rw.ID,
+		OwnerID:     rw.OwnerID,
+	})
 	if err != nil {
 		logger.Ctx(ctx).Error("Failed to update loyalty reward", logger.Error(err))
 		return 0, err

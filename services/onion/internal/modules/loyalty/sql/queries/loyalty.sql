@@ -34,3 +34,12 @@ ON DUPLICATE KEY UPDATE
   currency_per_point = VALUES(currency_per_point),
   min_redemption_points = VALUES(min_redemption_points),
   is_enabled = VALUES(is_enabled);
+
+-- name: CreateReward :execresult
+INSERT INTO crm_loyalty_rewards (owner_id, name, description, category, points_cost, stock, icon, active)
+VALUES (?, ?, ?, ?, ?, ?, ?, ?);
+
+-- name: UpdateReward :exec
+UPDATE crm_loyalty_rewards
+SET name = ?, description = ?, category = ?, points_cost = ?, stock = ?, icon = ?, active = ?
+WHERE id = ? AND owner_id = ?;
