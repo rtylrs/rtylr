@@ -2,6 +2,7 @@
 #include "video_processor.hpp"
 #include "transform/apply.hpp"
 #include "transform/params.hpp"
+#include "transform/presets.hpp"
 #include "encode.hpp"
 #include "analyze.hpp"
 #include "ops/blurhash.hpp"
@@ -136,9 +137,19 @@ static void cmdThumbnail(const Args& args) {
 static void cmdTransform(const Args& args) {
     const std::string in = getStr(args, "input");
     const std::string out = getStr(args, "output");
-    const std::string chain = getStr(args, "chain");
+    std::string chain = getStr(args, "chain");
     if (in.empty() || out.empty()) {
         throw std::runtime_error("--input and --output are required");
+    }
+    // A named preset expands to a chain; an explicit --chain is appended after
+    // it so callers can layer extra directives on top.
+    const std::string preset = getStr(args, "preset");
+    if (!preset.empty()) {
+        const std::string base = voxire::transform::presetChain(preset);
+        if (base.empty()) {
+            throw std::runtime_error("unknown preset: " + preset);
+        }
+        chain = chain.empty() ? base : base + "/" + chain;
     }
 
     vips::VImage img = vips::VImage::new_from_file(
@@ -263,6 +274,7 @@ static void printUsage(std::ostream& os) {
        << "             --format <webp|jpeg|png|avif> --quality N\n"
        << "             --fit <cover|contain|fill|inside|outside>\n"
        << "  transform  --input <path> --output <path> --chain <cloudinary-chain>\n"
+       << "             [--preset <thumb|avatar|card|hero|og|blur>]\n"
        << "             [--format <auto|webp|jpeg|png|avif|gif|tiff>] [--quality N]\n"
        << "  info       --input <path>   (print image metadata as JSON)\n"
        << "  analyze    --input <path> --metric <info|blurhash|average-color|phash>\n"
