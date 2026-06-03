@@ -10,13 +10,17 @@ import (
 	_ "github.com/go-sql-driver/mysql" // registers the mysql driver with database/sql
 )
 
-// OpenDB returns a *sql.DB connected to the test MySQL instance.
-// It calls t.Skip when DB_HOST is not set (local dev without a DB),
-// and t.Fatal when the connection fails in CI.
+// OpenDB returns a *sql.DB connected to a MySQL instance for integration tests.
+// Database integration tests are opt-in: when DB_HOST is not set (CI and local
+// dev without a database) the test is skipped. Set DB_HOST to run them against
+// a real MySQL. When DB_HOST is set, a connection failure is fatal.
 func OpenDB(t *testing.T) *sql.DB {
 	t.Helper()
 
-	host := envOr("DB_HOST", "127.0.0.1")
+	host := os.Getenv("DB_HOST")
+	if host == "" {
+		t.Skip("DB_HOST not set; skipping database integration test")
+	}
 
 	port := envOr("DB_PORT", "3306")
 	user := envOr("DB_USER", "onion")
