@@ -4,6 +4,7 @@ import (
 	"context"
 	"errors"
 	"net/http"
+	"strings"
 
 	"github.com/voxire/onion/internal/modules/staff/internal/application"
 	"github.com/voxire/onion/internal/modules/staff/internal/domain"
@@ -26,8 +27,47 @@ type ListStaffRequest struct {
 	Status       string `json:"status"`
 }
 
-type ListStaffResponse struct {
-	Staff []*hrv1.Staff `json:"staff"`
+// StaffCardPayload is the frontend-facing shape expected by the HR Staff page.
+// It uses a flat structure with name, department string, and human-readable enums.
+type StaffCardPayload struct {
+	ID             int64  `json:"id"`
+	Name           string `json:"name"`
+	Role           string `json:"role"`
+	Department     string `json:"department"`
+	Email          string `json:"email"`
+	EmploymentType string `json:"employment_type"`
+	Status         string `json:"status"`
+}
+
+// ListStaffResponse is a plain JSON array so the frontend can parse it directly.
+type ListStaffResponse []StaffCardPayload
+
+func toStaffCardPayload(s domain.Staff) StaffCardPayload {
+	name := strings.TrimSpace(s.FirstName + " " + s.LastName)
+
+	empType := "Full-time"
+	switch s.EmploymentType {
+	case "part_time":
+		empType = "Part-time"
+	case "contractor":
+		empType = "Contractor"
+	}
+
+	statusLabel := "Active"
+	switch s.Status {
+	case "inactive", "terminated":
+		statusLabel = "Inactive"
+	}
+
+	return StaffCardPayload{
+		ID:             s.ID,
+		Name:           name,
+		Role:           s.Role,
+		Department:     s.DepartmentName,
+		Email:          s.Email,
+		EmploymentType: empType,
+		Status:         statusLabel,
+	}
 }
 
 func newStaffPayload(s domain.Staff) *hrv1.Staff {
@@ -57,12 +97,12 @@ func (h *ListStaffHandler) Serve(ctx context.Context, req *ListStaffRequest) (Li
 		return ListStaffResponse{}, &errorModels.ServerError{Code: http.StatusInternalServerError, Message: "Failed to list staff"}
 	}
 
-	payloads := make([]*hrv1.Staff, 0, len(staffList))
+	payloads := make(ListStaffResponse, 0, len(staffList))
 	for _, s := range staffList {
-		payloads = append(payloads, newStaffPayload(s))
+		payloads = append(payloads, toStaffCardPayload(s))
 	}
 
-	return ListStaffResponse{Staff: payloads}, nil
+	return payloads, nil
 }
 
 // ─── Create Staff ─────────────────────────────────────────────────────────────

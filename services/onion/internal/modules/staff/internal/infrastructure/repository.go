@@ -89,33 +89,36 @@ func staffFromRow(row sqlc.HrStaff) domain.Staff {
 }
 
 func (r *Repository) ListStaff(ctx context.Context, ownerID int64, search, departmentID, status string) ([]domain.Staff, error) {
-	// Dynamic WHERE clauses - keep on pool
+	// cross-schema read from hr_departments — to include department name in staff list response
 	query := `
-		SELECT id, owner_id, user_id, department_id, first_name, last_name, email, phone,
-		       role, employment_type, status, salary, hourly_rate, overtime_rate,
-		       start_date, end_date, address, emergency_contact_name, emergency_contact_phone,
-		       apps, notes, created_at, updated_at
-		FROM hr_staff
-		WHERE owner_id = ?`
+		SELECT s.id, s.owner_id, s.user_id, s.department_id,
+		       COALESCE(d.name, '') AS department_name,
+		       s.first_name, s.last_name, s.email, s.phone,
+		       s.role, s.employment_type, s.status, s.salary, s.hourly_rate, s.overtime_rate,
+		       s.start_date, s.end_date, s.address, s.emergency_contact_name, s.emergency_contact_phone,
+		       s.apps, s.notes, s.created_at, s.updated_at
+		FROM hr_staff s
+		LEFT JOIN hr_departments d ON d.id = s.department_id AND d.owner_id = s.owner_id
+		WHERE s.owner_id = ?`
 
 	args := make([]interface{}, 0, 7)
 	args = append(args, ownerID)
 
 	if search != "" {
-		query += ` AND (first_name LIKE ? OR last_name LIKE ? OR email LIKE ? OR role LIKE ?)`
+		query += ` AND (s.first_name LIKE ? OR s.last_name LIKE ? OR s.email LIKE ? OR s.role LIKE ?)`
 		like := "%" + search + "%"
 		args = append(args, like, like, like, like)
 	}
 	if departmentID != "" {
-		query += ` AND department_id = ?`
+		query += ` AND s.department_id = ?`
 		args = append(args, departmentID)
 	}
 	if status != "" {
-		query += ` AND status = ?`
+		query += ` AND s.status = ?`
 		args = append(args, status)
 	}
 
-	query += ` ORDER BY last_name ASC, first_name ASC`
+	query += ` ORDER BY s.last_name ASC, s.first_name ASC`
 
 	rows, err := r.pool.QueryContext(ctx, query, args...)
 	if err != nil {
@@ -127,8 +130,90 @@ func (r *Repository) ListStaff(ctx context.Context, ownerID int64, search, depar
 	staff := make([]domain.Staff, 0)
 	for rows.Next() {
 		var s domain.Staff
-		if err := s.FromRow(rows); err != nil {
+		var (
+			userID                sql.NullInt64
+			departmentID_         sql.NullInt64
+			departmentName        sql.NullString
+			phone                 sql.NullString
+			employmentType        sql.NullString
+			statusVal             sql.NullString
+			salary                sql.NullString
+			hourlyRate            sql.NullString
+			overtimeRate          sql.NullString
+			endDate               sql.NullTime
+			address               sql.NullString
+			emergencyContactName  sql.NullString
+			emergencyContactPhone sql.NullString
+			apps                  []byte
+			notes                 sql.NullString
+			createdAt             sql.NullTime
+			updatedAt             sql.NullTime
+		)
+		if err := rows.Scan(
+			&s.ID, &s.OwnerID, &userID, &departmentID_, &departmentName,
+			&s.FirstName, &s.LastName, &s.Email, &phone,
+			&s.Role, &employmentType, &statusVal, &salary, &hourlyRate, &overtimeRate,
+			&s.StartDate, &endDate, &address, &emergencyContactName, &emergencyContactPhone,
+			&apps, &notes, &createdAt, &updatedAt,
+		); err != nil {
 			return nil, err
+		}
+		if userID.Valid {
+			s.UserID = userID.Int64
+		}
+		if departmentID_.Valid {
+			s.DepartmentID = departmentID_.Int64
+		}
+		if departmentName.Valid {
+			s.DepartmentName = departmentName.String
+		}
+		if phone.Valid {
+			s.Phone = phone.String
+		}
+		if employmentType.Valid {
+			s.EmploymentType = employmentType.String
+		}
+		if statusVal.Valid {
+			s.Status = statusVal.String
+		}
+		if salary.Valid {
+			if v, err2 := strconv.ParseFloat(salary.String, 64); err2 == nil {
+				s.Salary = v
+			}
+		}
+		if hourlyRate.Valid {
+			if v, err2 := strconv.ParseFloat(hourlyRate.String, 64); err2 == nil {
+				s.HourlyRate = v
+			}
+		}
+		if overtimeRate.Valid {
+			if v, err2 := strconv.ParseFloat(overtimeRate.String, 64); err2 == nil {
+				s.OvertimeRate = v
+			}
+		}
+		if endDate.Valid {
+			s.EndDate = endDate.Time
+		}
+		if address.Valid {
+			s.Address = address.String
+		}
+		if emergencyContactName.Valid {
+			s.EmergencyContactName = emergencyContactName.String
+		}
+		if emergencyContactPhone.Valid {
+			s.EmergencyContactPhone = emergencyContactPhone.String
+		}
+		if apps != nil {
+			s.Apps = string(apps)
+		}
+		if notes.Valid {
+			s.Notes = notes.String
+		}
+		if createdAt.Valid {
+			s.CreatedAt = createdAt.Time
+		}
+		if updatedAt.Valid {
+			s.UpdatedAt = updatedAt.Time
 		}
 		staff = append(staff, s)
 	}

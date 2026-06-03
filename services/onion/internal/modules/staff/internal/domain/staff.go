@@ -13,6 +13,7 @@ type Staff struct {
 	OwnerID               int64     `json:"owner_id"`
 	UserID                int64     `json:"user_id"`
 	DepartmentID          int64     `json:"department_id"`
+	DepartmentName        string    `json:"department_name"`
 	FirstName             string    `json:"first_name"`
 	LastName              string    `json:"last_name"`
 	Email                 string    `json:"email"`
