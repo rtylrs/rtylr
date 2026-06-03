@@ -119,11 +119,21 @@ func (c *CDN) serveTransformed(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
+	// An explicit ?format= wins; otherwise negotiate from the Accept header so
+	// modern clients get AVIF/WebP. The response varies on Accept accordingly.
+	format := r.URL.Query().Get("format")
+	if format == "" {
+		if negotiated := negotiateFormat(r.Header.Get("Accept")); negotiated != "" {
+			format = negotiated
+			w.Header().Set("Vary", "Accept")
+		}
+	}
+
 	p := Params{
 		Width:   queryInt(r, "w"),
 		Height:  queryInt(r, "h"),
 		Fit:     r.URL.Query().Get("fit"),
-		Format:  r.URL.Query().Get("format"),
+		Format:  format,
 		Quality: queryInt(r, "q"),
 	}
 	// Validate the request before touching the DB so malformed query params

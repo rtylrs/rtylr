@@ -61,6 +61,23 @@ func mimeForFormat(format string) string {
 	}
 }
 
+// negotiateFormat picks an output format from a request Accept header,
+// preferring the most modern codec the client advertises (AVIF, then WebP).
+// It returns "" when the header offers nothing better, leaving the caller's
+// default in place. An explicit ?format= query param should take precedence
+// over this.
+func negotiateFormat(accept string) string {
+	a := strings.ToLower(accept)
+	switch {
+	case strings.Contains(a, "image/avif"):
+		return "avif"
+	case strings.Contains(a, "image/webp"):
+		return "webp"
+	default:
+		return ""
+	}
+}
+
 // mimeTypeToFormat maps an upload MIME type to the short format name used when
 // building the original object's storage key.
 func mimeTypeToFormat(mime string) string {
