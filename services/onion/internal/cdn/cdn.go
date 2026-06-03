@@ -57,6 +57,11 @@ func (c *CDN) RegisterRoutes(r chi.Router) {
 	r.Get("/images/{id}", c.serveTransformed)
 	r.Get("/videos/info", c.videoInfo)
 
+	// HEAD reuses the GET handlers — net/http discards the body for HEAD, so
+	// callers get Content-Type/ETag/Cache-Control without transferring bytes.
+	r.Head("/files/{id}", c.serveFile)
+	r.Head("/images/{id}", c.serveTransformed)
+
 	r.Group(func(gr chi.Router) {
 		gr.Use(c.apiKeyAuth)
 		gr.Post("/upload", c.upload)
