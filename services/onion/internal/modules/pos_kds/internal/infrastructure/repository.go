@@ -4,8 +4,8 @@ import (
 	"context"
 	"database/sql"
 	"strconv"
-	"strings"
 
+	sq "github.com/Masterminds/squirrel"
 	"github.com/voxire/onion/internal/modules/pos_kds/internal/domain"
 	"github.com/voxire/onion/internal/modules/pos_kds/internal/infrastructure/persistence/sqlc"
 	"github.com/voxire/onion/internal/platform/logger"
@@ -69,15 +69,16 @@ func (r *Repository) getItemsForOrders(ctx context.Context, orderIDs []int64) (m
 		return itemsByOrder, nil
 	}
 
-	placeholders := make([]string, len(orderIDs))
-	args := make([]interface{}, len(orderIDs))
-	for i, id := range orderIDs {
-		placeholders[i] = "?"
-		args[i] = id
+	query, args, err := sq.Select("id", "order_id", "name", "quantity", "notes", "status").
+		From("pos_order_items").
+		Where(sq.Eq{"order_id": orderIDs}).
+		OrderBy("id").
+		PlaceholderFormat(sq.Question).
+		ToSql()
+	if err != nil {
+		logger.Ctx(ctx).Error("Failed to build KDS order items query", logger.Error(err))
+		return nil, err
 	}
-
-	query := "SELECT id, order_id, name, quantity, notes, status FROM pos_order_items WHERE order_id IN (" +
-		strings.Join(placeholders, ",") + ") ORDER BY id"
 
 	rows, err := r.pool.QueryContext(ctx, query, args...)
 	if err != nil {
