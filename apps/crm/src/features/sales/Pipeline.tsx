@@ -27,7 +27,8 @@ const STAGE_COLORS: Record<LeadStage, string> = {
   lost: 'var(--crm-sales-lost, #ef4444)',
 };
 
-function initials(name: string): string {
+function initials(name: string | null | undefined): string {
+  if (!name) return '?';
   return name
     .split(' ')
     .slice(0, 2)
@@ -82,7 +83,7 @@ const LeadCard: React.FC<LeadCardProps> = ({ lead, onClick }) => (
             whiteSpace: 'nowrap',
           }}
         >
-          {lead.company}
+          {lead.company || (lead as unknown as Record<string, string>)['companyName']}
         </p>
         <p style={{ fontSize: '11px', color: 'var(--hub-text-muted)', margin: '2px 0 0' }}>
           {lead.industry}
