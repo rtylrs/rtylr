@@ -1,7 +1,11 @@
 export const ASSETS = {
+  // Served from each app's own origin (public/logo.png) rather than an external
+  // CDN — the previous cdn.voxire.dev host no longer resolves. The asset is a
+  // single near-white mark; consumers tint it per background (see the auth
+  // Logo component).
   logos: {
-    dark: 'https://cdn.voxire.dev/web_content/rtylr/logo-dark.webp',
-    light: 'https://cdn.voxire.dev/web_content/rtylr/logo-light.webp',
+    dark: '/logo.png',
+    light: '/logo.png',
   },
   /** Per-app logos - will be populated when individual logos are designed.
    *  Falls back to the main rtylr logo for now. */
