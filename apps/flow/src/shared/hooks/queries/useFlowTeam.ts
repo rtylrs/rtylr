@@ -13,6 +13,7 @@ import { safe } from '../../lib/api';
 export interface FlowTeamMember {
   id: string;
   name: string;
+  fullName?: string;
   email: string;
   role: string;
   apps: string[];
@@ -24,6 +25,12 @@ interface ListMembersResponse {
   users?: FlowTeamMember[];
   members?: FlowTeamMember[];
 }
+
+type RawFlowTeamMember = Omit<FlowTeamMember, 'id' | 'name'> & {
+  id: string | number;
+  name?: string | null;
+  fullName?: string | null;
+};
 
 interface GrantPayload {
   userId: string;
@@ -40,16 +47,27 @@ interface GrantPayload {
 // filters (current members vs. grant candidates) are applied in the UI
 // against each member's `.apps` array - there is no separate Flow-only
 // endpoint, so the same query backs both lists.
+export function normalizeFlowTeamMember(member: RawFlowTeamMember): FlowTeamMember {
+  const fullName = member.fullName?.trim() ?? '';
+  const name = member.name?.trim() ?? '';
+  const email = member.email?.trim() ?? '';
+
+  return {
+    ...member,
+    id: String(member.id),
+    name: fullName || name || email,
+    fullName: fullName || undefined,
+    email,
+  };
+}
+
 export const useFlowTeam = (): ReturnType<typeof useQuery<FlowTeamMember[]>> =>
   useQuery<FlowTeamMember[]>({
     queryKey: ['flow-team'],
     queryFn: async (): Promise<FlowTeamMember[]> => {
       const res = await unwrap(safe.get<ListMembersResponse>('/team/members'));
-      const raw: FlowTeamMember[] = res?.users ?? res?.members ?? [];
-      return raw.map((m) => ({
-        ...m,
-        name: (m.name as string) || (m.email as string),
-      }));
+      const raw: RawFlowTeamMember[] = res?.users ?? res?.members ?? [];
+      return raw.map(normalizeFlowTeamMember);
     },
     staleTime: 30_000,
   });

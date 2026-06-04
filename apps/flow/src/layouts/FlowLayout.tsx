@@ -333,7 +333,8 @@ const FlowLayout: React.FC<FlowLayoutProps> = ({ children }) => {
     if (userId) t.push(`user:${userId}`);
     return t;
   }, [currentWorkspaceId, userId]);
-  useRealtime(realtimeTopics, handleRealtime);
+  const shouldUseRealtime = !location.pathname.startsWith('/settings');
+  useRealtime(shouldUseRealtime ? realtimeTopics : [], handleRealtime);
 
   const sidebarRef = useRef<HTMLDivElement | null>(null);
   useForesightLinks(sidebarRef, {
