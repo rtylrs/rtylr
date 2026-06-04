@@ -203,3 +203,22 @@ CREATE TABLE IF NOT EXISTS pos_member_locations (
     UNIQUE KEY unique_member_location (user_id, location_id),
     INDEX idx_member_loc_business (business_id)
 );
+
+-- POS-local customer directory (loyalty/store-credit/visit tracking).
+CREATE TABLE IF NOT EXISTS pos_customers (
+    id BIGINT NOT NULL AUTO_INCREMENT PRIMARY KEY,
+    business_id BIGINT NOT NULL,
+    name VARCHAR(255) NOT NULL,
+    email VARCHAR(255) DEFAULT NULL,
+    phone VARCHAR(50) DEFAULT NULL,
+    notes TEXT,
+    loyalty_points INT DEFAULT 0,
+    store_credit DECIMAL(10,2) DEFAULT 0.00,
+    visit_count INT DEFAULT 0,
+    total_spent DECIMAL(10,2) DEFAULT 0.00,
+    last_visit_at TIMESTAMP NULL DEFAULT NULL,
+    created_at TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP,
+    updated_at TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
+    INDEX idx_pos_customers_business (business_id),
+    INDEX idx_pos_customers_phone (phone)
+);

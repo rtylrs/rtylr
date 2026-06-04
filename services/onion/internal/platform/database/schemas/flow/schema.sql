@@ -179,3 +179,60 @@ CREATE TABLE IF NOT EXISTS flow_project_columns (
     updated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
     INDEX idx_flow_columns_project (project_id)
 );
+
+-- Flow association + per-user tables (restored into the canonical schema after
+-- the stale flow_migration_v*.sql files were removed; IF NOT EXISTS so applying
+-- against the existing production tables is a no-op).
+CREATE TABLE IF NOT EXISTS flow_businesses (
+    id BIGINT NOT NULL AUTO_INCREMENT PRIMARY KEY,
+    owner_id BIGINT NOT NULL,
+    name VARCHAR(255) NOT NULL,
+    color VARCHAR(20) DEFAULT '#64C5B9',
+    icon VARCHAR(50) DEFAULT NULL,
+    created_at TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP,
+    updated_at TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
+    INDEX idx_flow_businesses_owner (owner_id)
+);
+
+CREATE TABLE IF NOT EXISTS flow_cycle_tasks (
+    cycle_id BIGINT NOT NULL,
+    task_id BIGINT NOT NULL,
+    added_at TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP,
+    PRIMARY KEY (cycle_id, task_id)
+);
+
+CREATE TABLE IF NOT EXISTS flow_milestone_tasks (
+    milestone_id BIGINT NOT NULL,
+    task_id BIGINT NOT NULL,
+    PRIMARY KEY (milestone_id, task_id)
+);
+
+CREATE TABLE IF NOT EXISTS flow_notifications (
+    id BIGINT NOT NULL AUTO_INCREMENT PRIMARY KEY,
+    user_id BIGINT NOT NULL,
+    workspace_id BIGINT DEFAULT NULL,
+    type ENUM('assigned','mention','comment','status_change','due_soon') NOT NULL,
+    title VARCHAR(500) NOT NULL,
+    description TEXT,
+    task_id BIGINT DEFAULT NULL,
+    task_title VARCHAR(500) DEFAULT NULL,
+    actor_id BIGINT DEFAULT NULL,
+    actor_initials VARCHAR(10) DEFAULT NULL,
+    project VARCHAR(255) DEFAULT NULL,
+    project_color VARCHAR(20) DEFAULT NULL,
+    is_read BOOLEAN DEFAULT FALSE,
+    created_at TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP,
+    INDEX idx_flow_notifications_user (user_id),
+    INDEX idx_flow_notifications_user_read (user_id, is_read)
+);
+
+CREATE TABLE IF NOT EXISTS flow_user_settings (
+    user_id BIGINT NOT NULL PRIMARY KEY,
+    task_assigned BOOLEAN DEFAULT TRUE,
+    task_comments BOOLEAN DEFAULT TRUE,
+    mentions BOOLEAN DEFAULT TRUE,
+    status_changes BOOLEAN DEFAULT FALSE,
+    weekly_digest BOOLEAN DEFAULT TRUE,
+    email_notifications BOOLEAN DEFAULT FALSE,
+    updated_at TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP
+);

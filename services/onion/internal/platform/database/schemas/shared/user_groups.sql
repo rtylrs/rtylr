@@ -28,3 +28,12 @@ CREATE TABLE IF NOT EXISTS user_group_members (
     INDEX idx_ugm_user (user_id, owner_id),
     INDEX idx_ugm_group (group_id)
 );
+
+-- Per-group app permissions (group-level analogue of user_app_permissions).
+CREATE TABLE IF NOT EXISTS user_group_app_permissions (
+    group_id BIGINT NOT NULL,
+    app_id VARCHAR(32) NOT NULL,
+    permission_level ENUM('use','edit','own') NOT NULL DEFAULT 'use',
+    PRIMARY KEY (group_id, app_id),
+    INDEX idx_ugap_group (group_id)
+);
