@@ -1,0 +1,25 @@
+syntax = "proto3";
+
+package hr.location.v1;
+
+import "hr/location/v1/types.proto";
+
+option go_package = "github.com/voxire/voxie/gen/go/hr/location/v1";
+
+// ── Create ─────────────────────────────────────────────────────────
+
+message CreateLocationRequest {
+  // Human-readable name of the location.
+  string name = 1;
+  // Full street address of the location.
+  string address = 2;
+  // IANA timezone identifier; absent to use tenant default.
+  optional string timezone = 3;
+  // Optional URL-safe slug; auto-generated from name if absent.
+  optional string slug = 4;
+}
+
+message CreateLocationResponse {
+  // The newly created location.
+  LocationPayload location = 1;
+}

@@ -1,0 +1,27 @@
+syntax = "proto3";
+
+package hr.leave.v1;
+
+import "hr/leave/v1/types.proto";
+
+option go_package = "github.com/voxire/voxie/gen/go/hr/leave/v1";
+
+// ── List Leave Balances ───────────────────────────────────────────
+
+message ListLeaveBalancesRequest {
+  // Filter by employee; absent to include all employees.
+  optional int64 employee_id = 1;
+  // Filter by year; absent to return current year.
+  optional int32 year = 2;
+}
+
+message ListLeaveBalancesResponse {
+  // Leave balances matching the filters.
+  repeated LeaveBalancePayload balances = 1;
+  // Total number of matching balances across all pages.
+  int64 total = 2;
+  // Page size used for this request.
+  int32 limit = 3;
+  // Offset used for this request.
+  int32 offset = 4;
+}

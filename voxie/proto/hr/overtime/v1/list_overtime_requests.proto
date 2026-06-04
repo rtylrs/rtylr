@@ -1,0 +1,27 @@
+syntax = "proto3";
+
+package hr.overtime.v1;
+
+import "hr/overtime/v1/types.proto";
+
+option go_package = "github.com/voxire/voxie/gen/go/hr/overtime/v1";
+
+// ── List Overtime Requests ────────────────────────────────────────
+
+message ListOvertimeRequestsRequest {
+  // Filter by employee; absent to include all employees.
+  optional int64 employee_id = 1;
+  // Filter by status; absent to include all statuses.
+  optional string status = 2;
+}
+
+message ListOvertimeRequestsResponse {
+  // Page of overtime requests matching the filters.
+  repeated OvertimeRequestPayload requests = 1;
+  // Total number of matching overtime requests across all pages.
+  int64 total = 2;
+  // Page size used for this request.
+  int32 limit = 3;
+  // Offset used for this request.
+  int32 offset = 4;
+}

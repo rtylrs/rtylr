@@ -1,0 +1,19 @@
+syntax = "proto3";
+
+package pos.cash.v1;
+
+import "pos/cash/v1/types.proto";
+
+option go_package = "github.com/voxire/voxie/gen/go/pos/cash/v1";
+
+// ── List ──────────────────────────────────────────────────────────
+
+message ListCashMovementsRequest {
+  // session_id is the session id value for this contract.
+  int64 session_id = 1;
+}
+
+message ListCashMovementsResponse {
+  // movements is the movements value for this contract.
+  repeated CashMovement movements = 1;
+}

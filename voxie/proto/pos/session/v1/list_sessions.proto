@@ -1,0 +1,16 @@
+syntax = "proto3";
+
+package pos.session.v1;
+
+import "pos/session/v1/types.proto";
+
+option go_package = "github.com/voxire/voxie/gen/go/pos/session/v1";
+
+// ── List ──────────────────────────────────────────────────────────
+
+message ListSessionsRequest {}
+
+message ListSessionsResponse {
+  // sessions is the sessions value for this contract.
+  repeated Session sessions = 1;
+}

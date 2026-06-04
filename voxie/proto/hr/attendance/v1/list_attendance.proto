@@ -1,0 +1,27 @@
+syntax = "proto3";
+
+package hr.attendance.v1;
+
+import "hr/attendance/v1/types.proto";
+
+option go_package = "github.com/voxire/voxie/gen/go/hr/attendance/v1";
+
+// ── List Attendance ───────────────────────────────────────────────
+
+message ListAttendanceRequest {
+  // Filter by employee; absent to include all employees.
+  optional int64 employee_id = 1;
+  // Filter by date; absent to include all dates.
+  optional string date = 2;
+}
+
+message ListAttendanceResponse {
+  // Attendance records matching the filters.
+  repeated AttendanceRecordPayload records = 1;
+  // Total number of matching attendance records across all pages.
+  int64 total = 2;
+  // Page size used for this request.
+  int32 limit = 3;
+  // Offset used for this request.
+  int32 offset = 4;
+}

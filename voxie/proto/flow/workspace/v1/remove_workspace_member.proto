@@ -1,0 +1,17 @@
+syntax = "proto3";
+
+package flow.workspace.v1;
+
+option go_package = "github.com/voxire/voxie/gen/go/flow/workspace/v1";
+
+message RemoveWorkspaceMemberRequest {
+  // workspace_id is the workspace id value for this contract.
+  int64 workspace_id = 1;
+  // user_id identifies the user associated with this request.
+  int64 user_id = 2;
+}
+
+message RemoveWorkspaceMemberResponse {
+  // message is a human-readable result message.
+  string message = 1;
+}

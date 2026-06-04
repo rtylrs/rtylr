@@ -1,0 +1,23 @@
+syntax = "proto3";
+
+package finance.invoices.v1;
+
+import "finance/invoices/v1/types.proto";
+
+option go_package = "github.com/voxire/voxie/gen/go/finance/invoices/v1";
+
+message ListInvoicesRequest {
+  // status is the current lifecycle state.
+  string status = 1;
+  // search is the search value for this contract.
+  string search = 2;
+  // date_from is the date from value for this contract.
+  string date_from = 3;
+  // date_to is the date to value for this contract.
+  string date_to = 4;
+}
+
+message ListInvoicesResponse {
+  // invoices is the invoices value for this contract.
+  repeated InvoiceSummary invoices = 1;
+}

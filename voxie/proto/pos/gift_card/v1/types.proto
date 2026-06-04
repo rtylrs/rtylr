@@ -1,0 +1,30 @@
+syntax = "proto3";
+
+package pos.gift_card.v1;
+
+option go_package = "github.com/voxire/voxie/gen/go/pos/gift_card/v1";
+
+// ── GiftCard ──────────────────────────────────────────────────────
+
+message GiftCard {
+  // id is the unique identifier for the resource.
+  int64 id = 1;
+  // owner_id identifies the tenant that owns the resource.
+  int64 owner_id = 2;
+  // code is the code value for this contract.
+  string code = 3;
+  // initial_amount is the initial amount value for this contract.
+  double initial_amount = 4;
+  // current_balance is the current balance value for this contract.
+  double current_balance = 5;
+  // customer_name is the customer name value for this contract.
+  string customer_name = 6;
+  // customer_email is the customer email value for this contract.
+  string customer_email = 7;
+  // is_active is the is active value for this contract.
+  bool is_active = 8;
+  // expires_at is the expires at value for this contract.
+  string expires_at = 9;
+  // created_at is when the record was created.
+  string created_at = 10;
+}

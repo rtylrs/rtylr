@@ -1,0 +1,17 @@
+syntax = "proto3";
+
+package erp.purchase_order.v1;
+
+import "erp/purchase_order/v1/types.proto";
+
+option go_package = "github.com/voxire/voxie/gen/go/erp/purchase_order/v1";
+
+message ListPurchaseOrdersRequest {
+  // status is the current lifecycle state.
+  string status = 1;
+}
+
+message ListPurchaseOrdersResponse {
+  // purchase_orders is the purchase orders value for this contract.
+  repeated PurchaseOrder purchase_orders = 1;
+}

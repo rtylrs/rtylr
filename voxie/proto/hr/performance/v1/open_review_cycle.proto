@@ -1,0 +1,19 @@
+syntax = "proto3";
+
+package hr.performance.v1;
+
+import "hr/performance/v1/types.proto";
+
+option go_package = "github.com/voxire/voxie/gen/go/hr/performance/v1";
+
+// ── Open Review Cycle ────────────────────────────────────────────────
+
+message OpenReviewCycleRequest {
+  // ID of the review cycle to open for submissions.
+  int64 cycle_id = 1;
+}
+
+message OpenReviewCycleResponse {
+  // The review cycle after transitioning to open status.
+  ReviewCyclePayload cycle = 1;
+}

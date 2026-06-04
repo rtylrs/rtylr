@@ -1,0 +1,19 @@
+syntax = "proto3";
+
+package hr.employee.v1;
+
+option go_package = "github.com/voxire/voxie/gen/go/hr/employee/v1";
+
+// ── Accept Invite ──────────────────────────────────────────────────
+
+message AcceptInviteRequest {
+  // Sensitive: do not log this field. The invite token received by the employee.
+  string token = 1;
+  // Sensitive: do not log this field. Password chosen by the employee.
+  string password = 2;
+}
+
+message AcceptInviteResponse {
+  // Whether the invite was accepted successfully.
+  bool success = 1;
+}

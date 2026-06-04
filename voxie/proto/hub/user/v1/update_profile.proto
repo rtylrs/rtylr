@@ -1,0 +1,19 @@
+syntax = "proto3";
+
+package hub.user.v1;
+
+import "hub/user/v1/get_me.proto";
+
+option go_package = "github.com/voxire/voxie/gen/go/hub/user/v1";
+
+message UpdateProfileRequest {
+  // name is the name value for this contract.
+  string name = 1;
+  // email is the email address used for lookup or contact.
+  string email = 2;
+}
+
+message UpdateProfileResponse {
+  // user is the user value for this contract.
+  GetMeResponse user = 1;
+}

@@ -1,0 +1,17 @@
+syntax = "proto3";
+
+package hr.employees.payroll.runs.v1;
+
+option go_package = "github.com/voxire/voxie/gen/go/hr/employees/payroll/runs/v1";
+
+// ── Export Payroll ───────────────────────────────────────────────────
+
+message ExportPayrollRequest {
+  // ID of the payroll run to export.
+  int64 run_id = 1;
+}
+
+message ExportPayrollResponse {
+  // Unique identifier for the generated export batch.
+  string batch_id = 1;
+}

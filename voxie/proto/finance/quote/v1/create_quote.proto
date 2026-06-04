@@ -1,0 +1,25 @@
+syntax = "proto3";
+
+package finance.quote.v1;
+
+import "finance/quote/v1/types.proto";
+
+option go_package = "github.com/voxire/voxie/gen/go/finance/quote/v1";
+
+message CreateQuoteRequest {
+  // customer_id is the customer id value for this contract.
+  int64 customer_id = 1;
+  // lines is the lines value for this contract.
+  repeated QuoteLine lines = 2;
+  // valid_until is the valid until value for this contract.
+  string valid_until = 3;
+  // discount is the discount value for this contract.
+  double discount = 4;
+  // notes is the notes value for this contract.
+  string notes = 5;
+}
+
+message CreateQuoteResponse {
+  // quote is the quote value for this contract.
+  Quote quote = 1;
+}

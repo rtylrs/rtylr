@@ -1,0 +1,17 @@
+syntax = "proto3";
+
+package pos.kds.v1;
+
+option go_package = "github.com/voxire/voxie/gen/go/pos/kds/v1";
+
+// ── Update Item Status ────────────────────────────────────────────
+
+message UpdateKDSItemStatusRequest {
+  // status is the current lifecycle state.
+  string status = 1;
+}
+
+message UpdateKDSItemStatusResponse {
+  // message is a human-readable result message.
+  string message = 1;
+}

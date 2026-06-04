@@ -1,0 +1,23 @@
+syntax = "proto3";
+
+package pos.loyalty.v1;
+
+option go_package = "github.com/voxire/voxie/gen/go/pos/loyalty/v1";
+
+// ── Earn Points ───────────────────────────────────────────────────
+
+message EarnPointsRequest {
+  // customer_id is the customer id value for this contract.
+  int64 customer_id = 1;
+  // order_id is the order id value for this contract.
+  int64 order_id = 2;
+  // points is the points value for this contract.
+  int32 points = 3;
+}
+
+message EarnPointsResponse {
+  // transaction_id is the transaction id value for this contract.
+  int64 transaction_id = 1;
+  // message is a human-readable result message.
+  string message = 2;
+}

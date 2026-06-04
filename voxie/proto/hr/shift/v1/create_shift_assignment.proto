@@ -1,0 +1,23 @@
+syntax = "proto3";
+
+package hr.shift.v1;
+
+import "hr/shift/v1/types.proto";
+
+option go_package = "github.com/voxire/voxie/gen/go/hr/shift/v1";
+
+// ── Create Shift Assignment ───────────────────────────────────────
+
+message CreateShiftAssignmentRequest {
+  // Employee to assign.
+  int64 employee_id = 1;
+  // Shift template to assign.
+  int64 shift_id = 2;
+  // Date of the assignment (ISO-8601 date).
+  string date = 3;
+}
+
+message CreateShiftAssignmentResponse {
+  // The newly created assignment.
+  ShiftAssignmentPayload assignment = 1;
+}

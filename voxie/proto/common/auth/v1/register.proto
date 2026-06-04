@@ -1,0 +1,29 @@
+syntax = "proto3";
+
+package common.auth.v1;
+
+option go_package = "github.com/voxire/voxie/gen/go/common/auth/v1";
+
+message RegisterRequest {
+  // email is the email address used for lookup or contact.
+  string email = 1;
+  // password is the user-provided secret for authentication.
+  string password = 2;
+  // name is the name value for this contract.
+  string name = 3;
+  // business_name is the business name value for this contract.
+  string business_name = 4;
+}
+
+message RegisterResponse {
+  // token is the opaque token used to complete the operation.
+  string token = 1;
+  // message is a human-readable result message.
+  string message = 2;
+  // user_id identifies the user associated with this request.
+  int64 user_id = 3;
+  // email is the email address used for lookup or contact.
+  string email = 4;
+  // name is the name value for this contract.
+  string name = 5;
+}

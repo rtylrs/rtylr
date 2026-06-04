@@ -1,0 +1,17 @@
+syntax = "proto3";
+
+package flow.task.v1;
+
+import "flow/task/v1/types.proto";
+
+option go_package = "github.com/voxire/voxie/gen/go/flow/task/v1";
+
+message GetTaskActivityRequest {
+  // task_id is the task id value for this contract.
+  int64 task_id = 1;
+}
+
+message GetTaskActivityResponse {
+  // activity is the activity value for this contract.
+  repeated TaskActivity activity = 1;
+}

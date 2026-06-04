@@ -1,0 +1,27 @@
+syntax = "proto3";
+
+package hr.equipment.v1;
+
+import "hr/equipment/v1/types.proto";
+
+option go_package = "github.com/voxire/voxie/gen/go/hr/equipment/v1";
+
+// ── Create Equipment Request ─────────────────────────────────────
+
+message CreateEquipmentRequestRequest {
+  // Employee who needs the equipment.
+  int64 employee_id = 1;
+  // Category of equipment being requested.
+  string equipment_type = 2;
+  // Free-text description of the specific equipment needed.
+  string description = 3;
+  // Priority level (low | medium | high).
+  string urgency = 4;
+  // Date by which the equipment is needed (ISO-8601 date); absent if no deadline.
+  optional string needed_by_date = 5;
+}
+
+message CreateEquipmentRequestResponse {
+  // The newly created equipment request.
+  EquipmentRequestPayload request = 1;
+}

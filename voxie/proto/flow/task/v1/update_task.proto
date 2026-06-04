@@ -1,0 +1,31 @@
+syntax = "proto3";
+
+package flow.task.v1;
+
+option go_package = "github.com/voxire/voxie/gen/go/flow/task/v1";
+
+message UpdateTaskRequest {
+  // id is the unique identifier for the resource.
+  int64 id = 1;
+  // title is the title value for this contract.
+  string title = 2;
+  // description is the description value for this contract.
+  string description = 3;
+  // status is the current lifecycle state.
+  string status = 4;
+  // priority is the priority value for this contract.
+  string priority = 5;
+  // assignee_id is the assignee id value for this contract.
+  optional int64 assignee_id = 6;
+  // due_date is the due date value for this contract.
+  string due_date = 7;
+  // start_date is the start date value for this contract.
+  string start_date = 8;
+  // labels is the labels value for this contract.
+  repeated int64 labels = 9;
+}
+
+message UpdateTaskResponse {
+  // message is a human-readable result message.
+  string message = 1;
+}

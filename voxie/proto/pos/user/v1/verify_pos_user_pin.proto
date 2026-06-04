@@ -1,0 +1,19 @@
+syntax = "proto3";
+
+package pos.user.v1;
+
+import "pos/user/v1/types.proto";
+
+option go_package = "github.com/voxire/voxie/gen/go/pos/user/v1";
+
+// ── Verify PIN ────────────────────────────────────────────────────
+
+message VerifyPOSUserPINRequest {
+  // pin is the pin value for this contract.
+  string pin = 1;
+}
+
+message VerifyPOSUserPINResponse {
+  // user is the user value for this contract.
+  POSUser user = 1;
+}

@@ -1,0 +1,23 @@
+syntax = "proto3";
+
+package pos.orders.splits.v1;
+
+import "pos/orders/v1/types.proto";
+
+option go_package = "github.com/voxire/voxie/gen/go/pos/orders/splits/v1";
+
+// ── Split Order ───────────────────────────────────────────────────
+
+message SplitOrderRequest {
+  // order_id is the order id value for this contract.
+  int64 order_id = 1;
+  // splits is the splits value for this contract.
+  repeated .pos.orders.v1.SplitGroup splits = 2;
+}
+
+message SplitOrderResponse {
+  // order_ids is the order ids value for this contract.
+  repeated int64 order_ids = 1;
+  // message is a human-readable result message.
+  string message = 2;
+}

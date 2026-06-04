@@ -1,0 +1,17 @@
+syntax = "proto3";
+
+package finance.journal.v1;
+
+import "finance/journal/v1/types.proto";
+
+option go_package = "github.com/voxire/voxie/gen/go/finance/journal/v1";
+
+message GetJournalEntryRequest {
+  // id is the unique identifier for the resource.
+  int64 id = 1;
+}
+
+message GetJournalEntryResponse {
+  // entry is the entry value for this contract.
+  JournalEntry entry = 1;
+}

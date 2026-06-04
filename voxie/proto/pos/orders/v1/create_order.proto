@@ -1,0 +1,39 @@
+syntax = "proto3";
+
+package pos.orders.v1;
+
+import "pos/orders/v1/types.proto";
+
+option go_package = "github.com/voxire/voxie/gen/go/pos/orders/v1";
+
+message CreateOrderRequest {
+  // session_id is the session id value for this contract.
+  int64 session_id = 1;
+  // table_id is the table id value for this contract.
+  int64 table_id = 2;
+  // location_id is the location id value for this contract.
+  int64 location_id = 3;
+  // type is the type value for this contract.
+  string type = 4;
+  // customer_id is the customer id value for this contract.
+  int64 customer_id = 5;
+  // customer_name is the customer name value for this contract.
+  string customer_name = 6;
+  // payment_method is the payment method value for this contract.
+  string payment_method = 7;
+  // notes is the notes value for this contract.
+  string notes = 8;
+  // kitchen_notes is the kitchen notes value for this contract.
+  string kitchen_notes = 9;
+  // items is the items value for this contract.
+  repeated CreateOrderItemInput items = 10;
+}
+
+message CreateOrderResponse {
+  // order_id is the order id value for this contract.
+  int64 order_id = 1;
+  // order_number is the order number value for this contract.
+  string order_number = 2;
+  // message is a human-readable result message.
+  string message = 3;
+}

@@ -1,0 +1,24 @@
+syntax = "proto3";
+
+package finance.quote.v1;
+
+import "common/pagination/v1/pagination.proto";
+import "finance/quote/v1/types.proto";
+
+option go_package = "github.com/voxire/voxie/gen/go/finance/quote/v1";
+
+message ListQuotesRequest {
+  // pagination is the pagination value for this contract.
+  common.pagination.v1.PaginationRequest pagination = 1;
+  // status is the current lifecycle state.
+  string status = 2;
+  // customer_id is the customer id value for this contract.
+  int64 customer_id = 3;
+}
+
+message ListQuotesResponse {
+  // quotes is the quotes value for this contract.
+  repeated Quote quotes = 1;
+  // pagination is the pagination value for this contract.
+  common.pagination.v1.PaginationResponse pagination = 2;
+}

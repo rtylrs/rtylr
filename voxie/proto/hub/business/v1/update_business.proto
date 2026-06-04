@@ -1,0 +1,35 @@
+syntax = "proto3";
+
+package hub.business.v1;
+
+import "hub/business/v1/types.proto";
+
+option go_package = "github.com/voxire/voxie/gen/go/hub/business/v1";
+
+message UpdateBusinessRequest {
+  // business_id is the business id value for this contract.
+  int64 business_id = 1;
+  // name is the name value for this contract.
+  string name = 2;
+  // type is the type value for this contract.
+  string type = 3;
+  // address is the address value for this contract.
+  string address = 4;
+  // phone is the phone value for this contract.
+  string phone = 5;
+  // email is the email address used for lookup or contact.
+  string email = 6;
+  // website is the website value for this contract.
+  string website = 7;
+  // timezone is the timezone value for this contract.
+  string timezone = 8;
+  // currency is the currency value for this contract.
+  string currency = 9;
+  // slug is the slug value for this contract.
+  optional string slug = 10;
+}
+
+message UpdateBusinessResponse {
+  // business is the business value for this contract.
+  Business business = 1;
+}

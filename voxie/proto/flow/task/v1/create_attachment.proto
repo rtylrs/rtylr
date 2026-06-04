@@ -1,0 +1,21 @@
+syntax = "proto3";
+
+package flow.task.v1;
+
+option go_package = "github.com/voxire/voxie/gen/go/flow/task/v1";
+
+message CreateAttachmentRequest {
+  // name is the name value for this contract.
+  string name = 1;
+  // url is the url value for this contract.
+  string url = 2;
+  // size is the size value for this contract.
+  int64 size = 3;
+}
+
+message CreateAttachmentResponse {
+  // attachment_id is the attachment id value for this contract.
+  int64 attachment_id = 1;
+  // message is a human-readable result message.
+  string message = 2;
+}

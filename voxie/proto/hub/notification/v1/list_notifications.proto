@@ -1,0 +1,14 @@
+syntax = "proto3";
+
+package hub.notification.v1;
+
+import "hub/notification/v1/types.proto";
+
+option go_package = "github.com/voxire/voxie/gen/go/hub/notification/v1";
+
+message ListNotificationsRequest {}
+
+message ListNotificationsResponse {
+  // notifications is the notifications value for this contract.
+  repeated Notification notifications = 1;
+}

@@ -1,0 +1,29 @@
+syntax = "proto3";
+
+package hr.location.v1;
+
+import "hr/location/v1/types.proto";
+
+option go_package = "github.com/voxire/voxie/gen/go/hr/location/v1";
+
+// ── Update ─────────────────────────────────────────────────────────
+
+message UpdateLocationRequest {
+  // ID of the location to update.
+  int64 id = 1;
+  // New name; absent to keep current.
+  optional string name = 2;
+  // New address; absent to keep current.
+  optional string address = 3;
+  // New timezone; absent to keep current.
+  optional string timezone = 4;
+  // New active status; absent to keep current.
+  optional bool is_active = 5;
+  // New slug; absent to keep current.
+  optional string slug = 6;
+}
+
+message UpdateLocationResponse {
+  // The updated location.
+  LocationPayload location = 1;
+}

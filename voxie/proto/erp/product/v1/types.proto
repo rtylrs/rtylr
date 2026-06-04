@@ -1,0 +1,46 @@
+syntax = "proto3";
+
+package erp.product.v1;
+
+option go_package = "github.com/voxire/voxie/gen/go/erp/product/v1";
+
+// ── Products ────────────────────────────────────────────────────────
+
+message Product {
+  // id is the unique identifier for the resource.
+  int64 id = 1;
+  // owner_id identifies the tenant that owns the resource.
+  int64 owner_id = 2;
+  // category_id is the category id value for this contract.
+  int64 category_id = 3;
+  // supplier_id is the supplier id value for this contract.
+  int64 supplier_id = 4;
+  // name is the name value for this contract.
+  string name = 5;
+  // sku is the sku value for this contract.
+  string sku = 6;
+  // barcode is the barcode value for this contract.
+  string barcode = 7;
+  // description is the description value for this contract.
+  string description = 8;
+  // unit is the unit value for this contract.
+  string unit = 9;
+  // cost_price is the cost price value for this contract.
+  double cost_price = 10;
+  // sale_price is the sale price value for this contract.
+  double sale_price = 11;
+  // stock_quantity is the stock quantity value for this contract.
+  double stock_quantity = 12;
+  // low_stock_threshold is the low stock threshold value for this contract.
+  double low_stock_threshold = 13;
+  // reorder_quantity is the reorder quantity value for this contract.
+  double reorder_quantity = 14;
+  // is_active is the is active value for this contract.
+  bool is_active = 15;
+  // track_inventory is the track inventory value for this contract.
+  bool track_inventory = 16;
+  // created_at is when the record was created.
+  string created_at = 17;
+  // updated_at is when the record was last updated.
+  string updated_at = 18;
+}

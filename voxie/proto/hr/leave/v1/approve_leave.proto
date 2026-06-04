@@ -1,0 +1,21 @@
+syntax = "proto3";
+
+package hr.leave.v1;
+
+option go_package = "github.com/voxire/voxie/gen/go/hr/leave/v1";
+
+// ── Approve Leave Request ─────────────────────────────────────────
+
+message ApproveLeaveRequest {
+  // ID of the leave request being reviewed.
+  int64 leave_request_id = 1;
+  // True to approve, false to reject.
+  bool approved = 2;
+  // Reason for rejection; absent if approving.
+  optional string rejection_reason = 3;
+}
+
+message ApproveLeaveResponse {
+  // Whether the approval action was processed.
+  bool success = 1;
+}

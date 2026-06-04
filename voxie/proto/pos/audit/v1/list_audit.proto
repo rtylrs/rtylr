@@ -1,0 +1,27 @@
+syntax = "proto3";
+
+package pos.audit.v1;
+
+import "pos/audit/v1/types.proto";
+
+option go_package = "github.com/voxire/voxie/gen/go/pos/audit/v1";
+
+// ── List ──────────────────────────────────────────────────────────
+
+message ListAuditRequest {
+  // action is the action value for this contract.
+  string action = 1;
+  // entity_type is the entity type value for this contract.
+  string entity_type = 2;
+  // employee_id is the employee id value for this contract.
+  int64 employee_id = 3;
+  // start_date is the start date value for this contract.
+  string start_date = 4;
+  // end_date is the end date value for this contract.
+  string end_date = 5;
+}
+
+message ListAuditResponse {
+  // logs is the logs value for this contract.
+  repeated AuditLog logs = 1;
+}

@@ -1,0 +1,19 @@
+syntax = "proto3";
+
+package hr.employees.payroll.runs.v1;
+
+import "hr/employees/payroll/runs/v1/types.proto";
+
+option go_package = "github.com/voxire/voxie/gen/go/hr/employees/payroll/runs/v1";
+
+// ── Approve Payroll Run ──────────────────────────────────────────────
+
+message ApprovePayrollRunRequest {
+  // ID of the payroll run to approve.
+  int64 run_id = 1;
+}
+
+message ApprovePayrollRunResponse {
+  // The approved payroll run.
+  PayrollRunPayload run = 1;
+}

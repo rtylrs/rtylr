@@ -1,0 +1,19 @@
+syntax = "proto3";
+
+package hr.attendance.v1;
+
+import "hr/attendance/v1/types.proto";
+
+option go_package = "github.com/voxire/voxie/gen/go/hr/attendance/v1";
+
+// ── Clock Out ─────────────────────────────────────────────────────
+
+message AttendanceClockOutRequest {
+  // ID of the attendance record to close.
+  int64 attendance_record_id = 1;
+}
+
+message AttendanceClockOutResponse {
+  // The updated attendance record with clock-out data.
+  AttendanceRecordPayload record = 1;
+}

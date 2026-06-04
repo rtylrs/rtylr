@@ -1,0 +1,17 @@
+syntax = "proto3";
+
+package finance.quote.v1;
+
+import "finance/quote/v1/types.proto";
+
+option go_package = "github.com/voxire/voxie/gen/go/finance/quote/v1";
+
+message GetQuoteRequest {
+  // id is the unique identifier for the resource.
+  int64 id = 1;
+}
+
+message GetQuoteResponse {
+  // quote is the quote value for this contract.
+  Quote quote = 1;
+}

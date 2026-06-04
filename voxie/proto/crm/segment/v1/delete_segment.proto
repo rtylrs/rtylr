@@ -1,0 +1,15 @@
+syntax = "proto3";
+
+package crm.segment.v1;
+
+option go_package = "github.com/voxire/voxie/gen/go/crm/segment/v1";
+
+message DeleteSegmentRequest {
+  // id is the unique identifier for the resource.
+  int64 id = 1;
+}
+
+message DeleteSegmentResponse {
+  // message is a human-readable result message.
+  string message = 1;
+}

@@ -1,0 +1,23 @@
+syntax = "proto3";
+
+package pos.terminal.v1;
+
+option go_package = "github.com/voxire/voxie/gen/go/pos/terminal/v1";
+
+// ── Update ────────────────────────────────────────────────────────
+
+message UpdateTerminalRequest {
+  // branch_id is the branch id value for this contract.
+  int64 branch_id = 1;
+  // name is the name value for this contract.
+  string name = 2;
+  // device_id is the device id value for this contract.
+  string device_id = 3;
+  // is_active is the is active value for this contract.
+  bool is_active = 4;
+}
+
+message UpdateTerminalResponse {
+  // message is a human-readable result message.
+  string message = 1;
+}

@@ -1,0 +1,17 @@
+syntax = "proto3";
+
+package erp.purchase_order.v1;
+
+option go_package = "github.com/voxire/voxie/gen/go/erp/purchase_order/v1";
+
+message UpdatePurchaseOrderStatusRequest {
+  // id is the unique identifier for the resource.
+  int64 id = 1;
+  // status is the current lifecycle state.
+  string status = 2;
+}
+
+message UpdatePurchaseOrderStatusResponse {
+  // message is a human-readable result message.
+  string message = 1;
+}

@@ -1,0 +1,12 @@
+syntax = "proto3";
+
+package finance.expenses.v1;
+
+option go_package = "github.com/voxire/voxie/gen/go/finance/expenses/v1";
+
+message DeleteExpenseRequest {}
+
+message DeleteExpenseResponse {
+  // message is a human-readable result message.
+  string message = 1;
+}
