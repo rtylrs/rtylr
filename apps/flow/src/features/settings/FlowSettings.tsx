@@ -5,7 +5,6 @@ import {
   Palette,
   Keyboard,
   Sparkles,
-  Info,
   Tag,
   Trash2,
   Users,
@@ -36,7 +35,6 @@ import {
   formatPeriodRange,
   computeSeatProration,
 } from '../../shared/hooks/queries/useFlowSubscription';
-import appConfig from '../../app.json';
 import { useThemeStore } from '../../shared/stores/themeStore';
 import { cn } from '../../shared/lib/utils';
 import { useLifePreferences } from '../../shared/lib/lifePreferences';
@@ -69,7 +67,6 @@ function buildSections(
     { id: 'labels', label: t('common.settings.labels'), icon: Tag },
     { id: 'life', label: t('common.settings.life'), icon: Sparkles },
     { id: 'shortcuts', label: t('common.settings.shortcuts'), icon: Keyboard },
-    { id: 'about', label: t('common.settings.about'), icon: Info },
   ];
   if (canManageWorkspaces) {
     sections.unshift({ id: 'workspaces', label: 'Workspaces', icon: LayoutDashboard });
@@ -564,34 +561,6 @@ const ShortcutsSection: React.FC = () => {
     </div>
   );
 };
-
-const AboutSection: React.FC = () => (
-  <div className="space-y-6">
-    <div>
-      <h2 className="text-[15px] font-semibold mb-1" style={{ color: 'var(--flow-text)' }}>
-        About
-      </h2>
-      <p className="text-[12px]" style={{ color: 'var(--flow-text-muted)' }}>
-        Application information.
-      </p>
-    </div>
-    <div className="rounded-xl divide-y" style={{ border: '1px solid var(--flow-border)' }}>
-      {[
-        { label: 'Application', value: appConfig.name },
-        { label: 'Version', value: `v${appConfig.version}` },
-      ].map(({ label, value }) => (
-        <div key={label} className="flex items-center justify-between px-4 py-3">
-          <span className="text-[13px]" style={{ color: 'var(--flow-text-muted)' }}>
-            {label}
-          </span>
-          <span className="text-[13px] font-medium font-mono" style={{ color: 'var(--flow-text)' }}>
-            {value}
-          </span>
-        </div>
-      ))}
-    </div>
-  </div>
-);
 
 const LABEL_COLORS = [
   '#ef4444',
@@ -1203,7 +1172,6 @@ const SECTION_CONTENT: Record<string, React.FC> = {
   labels: LabelsSection,
   life: LifeRhythmSection,
   shortcuts: ShortcutsSection,
-  about: AboutSection,
 };
 
 const PlaceholderSection: React.FC<{ id: string }> = ({ id }) => {
