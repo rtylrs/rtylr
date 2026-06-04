@@ -125,3 +125,31 @@ jobs:
             --region $AWS_REGION \
             --query 'service.deployments[0].{status:status,desiredCount:desiredCount}' \
             --output table
+
+  # Cut the git tag + GitHub release once, after all images have deployed.
+  # Separate from the build matrix so it runs a single time (the old release
+  # step lived inside the matrix and ran 3x). Idempotent: re-runs that hit an
+  # existing tag are a no-op rather than a failure.
+  release:
+    name: Create GitHub Release
+    needs: [version, build-push-deploy]
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v6
+        with:
+          fetch-depth: 0
+          token: ${{ secrets.PAT_TOKEN }}
+
+      - name: Create release + tag
+        env:
+          GH_TOKEN: ${{ secrets.PAT_TOKEN }}
+          VERSION: ${{ needs.version.outputs.new_version }}
+        run: |
+          if gh release view "$VERSION" >/dev/null 2>&1; then
+            echo "Release $VERSION already exists — skipping."
+            exit 0
+          fi
+          gh release create "$VERSION" \
+            --title "Release $VERSION" \
+            --target "$GITHUB_SHA" \
+            --generate-notes
