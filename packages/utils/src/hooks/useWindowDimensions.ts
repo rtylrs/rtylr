@@ -15,7 +15,7 @@ function throttle<T extends (...args: any[]) => any>(func: T, limit: number): T 
   let inThrottle: boolean;
   return ((...args: any[]) => {
     if (!inThrottle) {
-      func.apply(null, args);
+      func(...args);
       inThrottle = true;
       setTimeout(() => (inThrottle = false), limit);
     }
