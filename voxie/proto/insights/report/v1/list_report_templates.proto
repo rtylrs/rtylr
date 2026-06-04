@@ -1,0 +1,22 @@
+syntax = "proto3";
+
+package insights.report.v1;
+
+import "common/pagination/v1/pagination.proto";
+import "insights/report/v1/types.proto";
+
+option go_package = "github.com/voxire/voxie/gen/go/insights/report/v1";
+
+message ListReportTemplatesRequest {
+  // pagination is the pagination value for this contract.
+  common.pagination.v1.PaginationRequest pagination = 1;
+  // type is the type value for this contract.
+  string type = 2;
+}
+
+message ListReportTemplatesResponse {
+  // templates is the templates value for this contract.
+  repeated ReportTemplate templates = 1;
+  // pagination is the pagination value for this contract.
+  common.pagination.v1.PaginationResponse pagination = 2;
+}

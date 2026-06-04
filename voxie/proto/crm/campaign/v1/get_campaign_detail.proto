@@ -1,0 +1,19 @@
+syntax = "proto3";
+
+package crm.campaign.v1;
+
+import "crm/campaign/v1/types.proto";
+
+option go_package = "github.com/voxire/voxie/gen/go/crm/campaign/v1";
+
+message GetCampaignDetailRequest {
+  // id is the unique identifier for the resource.
+  int64 id = 1;
+}
+
+message GetCampaignDetailResponse {
+  // campaign is the campaign value for this contract.
+  Campaign campaign = 1;
+  // stats is the stats value for this contract.
+  CampaignStats stats = 2;
+}

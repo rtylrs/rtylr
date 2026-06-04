@@ -1,0 +1,19 @@
+syntax = "proto3";
+
+package hub.business.v1;
+
+import "hub/business/v1/types.proto";
+
+option go_package = "github.com/voxire/voxie/gen/go/hub/business/v1";
+
+message LookupBusinessBySlugRequest {
+  // slug is the slug value for this contract.
+  string slug = 1;
+}
+
+message LookupBusinessBySlugResponse {
+  // business is the business value for this contract.
+  PublicBusinessSummary business = 1;
+  // locations is the locations value for this contract.
+  repeated PublicLocation locations = 2;
+}

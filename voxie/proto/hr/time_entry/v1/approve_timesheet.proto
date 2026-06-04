@@ -1,0 +1,21 @@
+syntax = "proto3";
+
+package hr.time_entry.v1;
+
+option go_package = "github.com/voxire/voxie/gen/go/hr/time_entry/v1";
+
+// ── Approve Timesheet ─────────────────────────────────────────────
+
+message ApproveTimesheetRequest {
+  // ID of the timesheet being reviewed.
+  int64 timesheet_id = 1;
+  // True to approve, false to reject.
+  bool approved = 2;
+  // Reason for rejection; absent if approving.
+  optional string rejection_reason = 3;
+}
+
+message ApproveTimesheetResponse {
+  // Whether the approval action was processed.
+  bool success = 1;
+}

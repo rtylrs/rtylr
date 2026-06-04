@@ -1,0 +1,19 @@
+syntax = "proto3";
+
+package hr.report.v1;
+
+import "hr/report/v1/types.proto";
+
+option go_package = "github.com/voxire/voxie/gen/go/hr/report/v1";
+
+// ── Generate Report ─────────────────────────────────────────────────
+
+message GenerateReportRequest {
+  // Parameters describing the report to generate.
+  ReportRequestPayload request = 1;
+}
+
+message GenerateReportResponse {
+  // The generated report.
+  ReportPayload report = 1;
+}

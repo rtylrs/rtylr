@@ -1,0 +1,15 @@
+syntax = "proto3";
+
+package hub.developer.v1;
+
+option go_package = "github.com/voxire/voxie/gen/go/hub/developer/v1";
+
+message RevokeApiKeyRequest {
+  // id is the unique identifier for the resource.
+  int64 id = 1;
+}
+
+message RevokeApiKeyResponse {
+  // message is a human-readable result message.
+  string message = 1;
+}

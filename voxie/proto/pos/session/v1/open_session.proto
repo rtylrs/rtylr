@@ -1,0 +1,23 @@
+syntax = "proto3";
+
+package pos.session.v1;
+
+option go_package = "github.com/voxire/voxie/gen/go/pos/session/v1";
+
+// ── Open ──────────────────────────────────────────────────────────
+
+message OpenSessionRequest {
+  // location_id is the location id value for this contract.
+  int64 location_id = 1;
+  // staff_id is the staff id value for this contract.
+  int64 staff_id = 2;
+  // opening_float is the opening float value for this contract.
+  double opening_float = 3;
+}
+
+message OpenSessionResponse {
+  // session_id is the session id value for this contract.
+  int64 session_id = 1;
+  // message is a human-readable result message.
+  string message = 2;
+}

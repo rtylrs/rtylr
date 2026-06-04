@@ -1,0 +1,23 @@
+syntax = "proto3";
+
+package hr.role.v1;
+
+import "hr/role/v1/types.proto";
+
+option go_package = "github.com/voxire/voxie/gen/go/hr/role/v1";
+
+// ── Update ─────────────────────────────────────────────────────────
+
+message UpdateRoleRequest {
+  // ID of the role to update.
+  int64 id = 1;
+  // New name; absent to keep current.
+  optional string name = 2;
+  // New permission set; if provided, replaces all existing permissions.
+  repeated PermissionPayload permissions = 3;
+}
+
+message UpdateRoleResponse {
+  // The updated role.
+  RolePayload role = 1;
+}

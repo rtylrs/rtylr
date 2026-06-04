@@ -1,0 +1,17 @@
+syntax = "proto3";
+
+package hub.business.v1;
+
+import "hub/business/v1/types.proto";
+
+option go_package = "github.com/voxire/voxie/gen/go/hub/business/v1";
+
+message GetBusinessRequest {
+  // business_id is the business id value for this contract.
+  int64 business_id = 1;
+}
+
+message GetBusinessResponse {
+  // business is the business value for this contract.
+  Business business = 1;
+}

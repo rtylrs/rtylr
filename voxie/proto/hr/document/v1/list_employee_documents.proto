@@ -1,0 +1,27 @@
+syntax = "proto3";
+
+package hr.document.v1;
+
+import "hr/document/v1/types.proto";
+
+option go_package = "github.com/voxire/voxie/gen/go/hr/document/v1";
+
+// ── List Employee Documents ──────────────────────────────────────
+
+message ListEmployeeDocumentsRequest {
+  // Filter by employee; absent to include all employees.
+  optional int64 employee_id = 1;
+  // Filter by document type; absent to include all types.
+  optional string document_type = 2;
+}
+
+message ListEmployeeDocumentsResponse {
+  // Page of documents matching the filters.
+  repeated EmployeeDocumentPayload documents = 1;
+  // Total number of matching documents across all pages.
+  int64 total = 2;
+  // Page size used for this request.
+  int32 limit = 3;
+  // Offset used for this request.
+  int32 offset = 4;
+}

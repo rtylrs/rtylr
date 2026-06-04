@@ -1,0 +1,19 @@
+syntax = "proto3";
+
+package hr.setup.v1;
+
+import "hr/setup/v1/types.proto";
+
+option go_package = "github.com/voxire/voxie/gen/go/hr/setup/v1";
+
+// ── Complete Setup Step ────────────────────────────────────────────
+
+message CompleteSetupStepRequest {
+  // The step to mark as completed (must match a valid step_key).
+  string step_key = 1;
+}
+
+message CompleteSetupStepResponse {
+  // The step after being marked complete.
+  SetupWizardStepPayload step = 1;
+}

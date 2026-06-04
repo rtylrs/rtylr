@@ -1,0 +1,33 @@
+syntax = "proto3";
+
+package hr.employee.v1;
+
+import "hr/employee/v1/types.proto";
+
+option go_package = "github.com/voxire/voxie/gen/go/hr/employee/v1";
+
+// ── List ───────────────────────────────────────────────────────────
+
+message ListEmployeesRequest {
+  // Filter by department; absent to include all departments.
+  optional int64 department_id = 1;
+  // Filter by location; absent to include all locations.
+  optional int64 location_id = 2;
+  // Filter by employment status; absent to include all statuses.
+  optional string status = 3;
+  // Maximum number of records to return.
+  int32 limit = 4;
+  // Number of records to skip for pagination.
+  int32 offset = 5;
+}
+
+message ListEmployeesResponse {
+  // Page of employee records matching the filters.
+  repeated EmployeePayload employees = 1;
+  // Total number of employees matching the filters.
+  int64 total = 2;
+  // Limit that was applied.
+  int32 limit = 3;
+  // Offset that was applied.
+  int32 offset = 4;
+}

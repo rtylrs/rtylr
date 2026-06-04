@@ -1,0 +1,23 @@
+syntax = "proto3";
+
+package hr.overtime.v1;
+
+option go_package = "github.com/voxire/voxie/gen/go/hr/overtime/v1";
+
+// ── Approve Overtime Request ──────────────────────────────────────
+
+message ApproveOvertimeRequest {
+  // ID of the overtime request being reviewed.
+  int64 overtime_request_id = 1;
+  // True to approve, false to reject.
+  bool approved = 2;
+  // Pay multiplier to apply (e.g. 1.5); absent to use the default rate.
+  optional double multiplier_applied = 3;
+  // Reason for rejection; absent if approving.
+  optional string rejection_reason = 4;
+}
+
+message ApproveOvertimeResponse {
+  // Whether the approval action was processed.
+  bool success = 1;
+}

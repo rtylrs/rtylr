@@ -1,0 +1,17 @@
+syntax = "proto3";
+
+package flow.project.v1;
+
+import "flow/project/v1/types.proto";
+
+option go_package = "github.com/voxire/voxie/gen/go/flow/project/v1";
+
+message ListProjectsRequest {
+  // workspace_id is the workspace id value for this contract.
+  int64 workspace_id = 1;
+}
+
+message ListProjectsResponse {
+  // projects is the projects value for this contract.
+  repeated Project projects = 1;
+}

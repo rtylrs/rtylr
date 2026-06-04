@@ -1,0 +1,29 @@
+syntax = "proto3";
+
+package hr.document.v1;
+
+import "hr/document/v1/types.proto";
+
+option go_package = "github.com/voxire/voxie/gen/go/hr/document/v1";
+
+// ── Upload Document ──────────────────────────────────────────────
+
+message UploadDocumentRequest {
+  // Employee this document is associated with.
+  int64 employee_id = 1;
+  // Category of document (e.g. "id_card", "contract", "certificate", "visa").
+  string document_type = 2;
+  // Human-readable name for the document.
+  string name = 3;
+  // How the document is stored (stored | linked).
+  string storage_mode = 4;
+  // URL to access the document file.
+  string file_url = 5;
+  // Date the document expires (ISO-8601 date); absent if no expiry.
+  optional string expiry_date = 6;
+}
+
+message UploadDocumentResponse {
+  // The newly created document record.
+  EmployeeDocumentPayload document = 1;
+}

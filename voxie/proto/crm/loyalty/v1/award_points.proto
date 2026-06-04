@@ -1,0 +1,25 @@
+syntax = "proto3";
+
+package crm.loyalty.v1;
+
+option go_package = "github.com/voxire/voxie/gen/go/crm/loyalty/v1";
+
+// ── Award / Redeem ─────────────────────────────────────────────────
+
+message AwardPointsRequest {
+  // customer_id is the customer id value for this contract.
+  int64 customer_id = 1;
+  // points is the points value for this contract.
+  int64 points = 2;
+  // description is the description value for this contract.
+  string description = 3;
+  // reference_id is the reference id value for this contract.
+  optional int64 reference_id = 4;
+  // reference_type is the reference type value for this contract.
+  string reference_type = 5;
+}
+
+message AwardPointsResponse {
+  // message is a human-readable result message.
+  string message = 1;
+}

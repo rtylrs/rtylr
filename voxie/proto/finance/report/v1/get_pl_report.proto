@@ -1,0 +1,33 @@
+syntax = "proto3";
+
+package finance.report.v1;
+
+option go_package = "github.com/voxire/voxie/gen/go/finance/report/v1";
+
+// ── Financial Reports ───────────────────────────────────────────────
+
+// -- P&L Report --
+
+message GetPLReportRequest {
+  // period is the period value for this contract.
+  string period = 1;
+  // date is the date value for this contract.
+  string date = 2;
+}
+
+message GetPLReportResponse {
+  // period is the period value for this contract.
+  string period = 1;
+  // revenue is the revenue value for this contract.
+  double revenue = 2;
+  // cogs is the cogs value for this contract.
+  double cogs = 3;
+  // gross_profit is the gross profit value for this contract.
+  double gross_profit = 4;
+  // operating_expenses is the operating expenses value for this contract.
+  double operating_expenses = 5;
+  // net_profit is the net profit value for this contract.
+  double net_profit = 6;
+  // margin_pct is the margin pct value for this contract.
+  double margin_pct = 7;
+}

@@ -1,0 +1,34 @@
+syntax = "proto3";
+
+package hr.overtime.v1;
+
+option go_package = "github.com/voxire/voxie/gen/go/hr/overtime/v1";
+
+// ── Overtime Request ──────────────────────────────────────────────
+
+message OvertimeRequestPayload {
+  // Unique identifier for the overtime request.
+  int64 id = 1;
+  // Tenant owner this request belongs to.
+  int64 owner_id = 2;
+  // Employee requesting overtime.
+  int64 employee_id = 3;
+  // Date the overtime is planned for (ISO-8601 date).
+  string date = 4;
+  // Number of extra minutes planned beyond the regular shift.
+  int32 planned_extra_minutes = 5;
+  // Justification for the overtime work.
+  string reason = 6;
+  // Workflow status (pending | approved | rejected | cancelled).
+  string status = 7;
+  // Current step in a multi-level approval chain.
+  int32 current_approval_level = 8;
+  // Employee ID of the approver; absent if not yet approved.
+  optional int64 approved_by = 9;
+  // Pay multiplier applied to the overtime hours (e.g. 1.5); absent if not yet calculated.
+  optional double multiplier_applied = 10;
+  // Unix timestamp when this record was created.
+  int64 created_at = 11;
+  // Unix timestamp when this record was last updated.
+  int64 updated_at = 12;
+}

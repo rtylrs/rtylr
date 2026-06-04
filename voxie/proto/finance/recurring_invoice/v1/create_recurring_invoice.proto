@@ -1,0 +1,25 @@
+syntax = "proto3";
+
+package finance.recurring_invoice.v1;
+
+import "finance/recurring_invoice/v1/types.proto";
+
+option go_package = "github.com/voxire/voxie/gen/go/finance/recurring_invoice/v1";
+
+message CreateRecurringInvoiceRequest {
+  // customer_id is the customer id value for this contract.
+  int64 customer_id = 1;
+  // frequency is the frequency value for this contract.
+  string frequency = 2;
+  // lines is the lines value for this contract.
+  repeated RecurringInvoiceLine lines = 3;
+  // start_date is the start date value for this contract.
+  string start_date = 4;
+  // notes is the notes value for this contract.
+  string notes = 5;
+}
+
+message CreateRecurringInvoiceResponse {
+  // invoice is the invoice value for this contract.
+  RecurringInvoice invoice = 1;
+}

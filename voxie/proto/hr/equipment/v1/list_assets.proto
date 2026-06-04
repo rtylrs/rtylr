@@ -1,0 +1,27 @@
+syntax = "proto3";
+
+package hr.equipment.v1;
+
+import "hr/equipment/v1/types.proto";
+
+option go_package = "github.com/voxire/voxie/gen/go/hr/equipment/v1";
+
+// ── List Assets ──────────────────────────────────────────────────
+
+message ListAssetsRequest {
+  // Filter by employee; absent to include all employees.
+  optional int64 employee_id = 1;
+  // Filter by condition; absent to include all conditions.
+  optional string condition = 2;
+}
+
+message ListAssetsResponse {
+  // Page of assets matching the filters.
+  repeated AssetPayload assets = 1;
+  // Total number of matching assets across all pages.
+  int64 total = 2;
+  // Page size used for this request.
+  int32 limit = 3;
+  // Offset used for this request.
+  int32 offset = 4;
+}

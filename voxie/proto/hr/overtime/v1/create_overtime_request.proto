@@ -1,0 +1,25 @@
+syntax = "proto3";
+
+package hr.overtime.v1;
+
+import "hr/overtime/v1/types.proto";
+
+option go_package = "github.com/voxire/voxie/gen/go/hr/overtime/v1";
+
+// ── Create Overtime Request ───────────────────────────────────────
+
+message CreateOvertimeRequestRequest {
+  // Employee requesting overtime.
+  int64 employee_id = 1;
+  // Date the overtime is planned for (ISO-8601 date).
+  string date = 2;
+  // Number of extra minutes planned beyond the regular shift.
+  int32 planned_extra_minutes = 3;
+  // Justification for the overtime work.
+  string reason = 4;
+}
+
+message CreateOvertimeRequestResponse {
+  // The newly created overtime request.
+  OvertimeRequestPayload request = 1;
+}

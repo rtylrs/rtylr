@@ -1,0 +1,21 @@
+syntax = "proto3";
+
+package hr.role.v1;
+
+import "hr/role/v1/types.proto";
+
+option go_package = "github.com/voxire/voxie/gen/go/hr/role/v1";
+
+// ── Create ─────────────────────────────────────────────────────────
+
+message CreateRoleRequest {
+  // Display name of the new role.
+  string name = 1;
+  // Permissions to attach to the new role.
+  repeated PermissionPayload permissions = 2;
+}
+
+message CreateRoleResponse {
+  // The newly created role.
+  RolePayload role = 1;
+}

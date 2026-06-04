@@ -1,0 +1,25 @@
+syntax = "proto3";
+
+package hr.onboarding.v1;
+
+import "hr/onboarding/v1/types.proto";
+
+option go_package = "github.com/voxire/voxie/gen/go/hr/onboarding/v1";
+
+// ── List Employee Checklists ─────────────────────────────────────
+
+message ListEmployeeChecklistsRequest {
+  // Filter by employee; absent to include all employees.
+  optional int64 employee_id = 1;
+}
+
+message ListEmployeeChecklistsResponse {
+  // Page of employee checklists matching the filters.
+  repeated EmployeeChecklistPayload checklists = 1;
+  // Total number of matching checklists across all pages.
+  int64 total = 2;
+  // Page size used for this request.
+  int32 limit = 3;
+  // Offset used for this request.
+  int32 offset = 4;
+}

@@ -1,0 +1,25 @@
+syntax = "proto3";
+
+package pos.modifier.v1;
+
+option go_package = "github.com/voxire/voxie/gen/go/pos/modifier/v1";
+
+// ── Create ────────────────────────────────────────────────────────
+
+message CreateModifierRequest {
+  // name is the name value for this contract.
+  string name = 1;
+  // price_delta is the price delta value for this contract.
+  double price_delta = 2;
+  // group_name is the group name value for this contract.
+  string group_name = 3;
+  // is_required is the is required value for this contract.
+  bool is_required = 4;
+}
+
+message CreateModifierResponse {
+  // modifier_id is the modifier id value for this contract.
+  int64 modifier_id = 1;
+  // message is a human-readable result message.
+  string message = 2;
+}

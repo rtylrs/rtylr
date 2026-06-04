@@ -1,0 +1,17 @@
+syntax = "proto3";
+
+package hub.activity.v1;
+
+import "hub/activity/v1/types.proto";
+
+option go_package = "github.com/voxire/voxie/gen/go/hub/activity/v1";
+
+message ListActivityRequest {
+  // limit is the maximum number of records to return.
+  int32 limit = 1;
+}
+
+message ListActivityResponse {
+  // activities is the activities value for this contract.
+  repeated ActivityEntry activities = 1;
+}

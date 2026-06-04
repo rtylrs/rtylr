@@ -1,0 +1,19 @@
+syntax = "proto3";
+
+package common.auth.v1;
+
+option go_package = "github.com/voxire/voxie/gen/go/common/auth/v1";
+
+message GoogleAuthRequest {
+  // id_token is the id token value for this contract.
+  string id_token = 1;
+  // business_name is the business name value for this contract.
+  string business_name = 2;
+}
+
+message GoogleAuthResponse {
+  // token is the opaque token used to complete the operation.
+  string token = 1;
+  // is_new is the is new value for this contract.
+  bool is_new = 2;
+}

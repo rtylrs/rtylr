@@ -1,0 +1,23 @@
+syntax = "proto3";
+
+package finance.report.v1;
+
+option go_package = "github.com/voxire/voxie/gen/go/finance/report/v1";
+
+// -- Tax Report --
+
+message GetTaxReportRequest {
+  // period is the period value for this contract.
+  string period = 1;
+  // date is the date value for this contract.
+  string date = 2;
+}
+
+message GetTaxReportResponse {
+  // period is the period value for this contract.
+  string period = 1;
+  // tax_collected is the tax collected value for this contract.
+  double tax_collected = 2;
+  // tax_owed is the tax owed value for this contract.
+  double tax_owed = 3;
+}

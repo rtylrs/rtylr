@@ -1,0 +1,25 @@
+syntax = "proto3";
+
+package hr.department.v1;
+
+import "hr/department/v1/types.proto";
+
+option go_package = "github.com/voxire/voxie/gen/go/hr/department/v1";
+
+// ── Create ─────────────────────────────────────────────────────────
+
+message CreateDepartmentRequest {
+  // Location this department operates from.
+  int64 location_id = 1;
+  // Parent department for org-chart hierarchy; absent if top-level.
+  optional int64 parent_department_id = 2;
+  // Display name of the department.
+  string name = 3;
+  // Default work schedule for employees in this department; absent if none.
+  optional int64 default_work_schedule_id = 4;
+}
+
+message CreateDepartmentResponse {
+  // The newly created department.
+  DepartmentPayload department = 1;
+}

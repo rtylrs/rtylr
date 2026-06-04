@@ -1,0 +1,24 @@
+syntax = "proto3";
+
+package finance.journal.v1;
+
+import "common/pagination/v1/pagination.proto";
+import "finance/journal/v1/types.proto";
+
+option go_package = "github.com/voxire/voxie/gen/go/finance/journal/v1";
+
+message ListJournalEntriesRequest {
+  // pagination is the pagination value for this contract.
+  common.pagination.v1.PaginationRequest pagination = 1;
+  // from_date is the from date value for this contract.
+  string from_date = 2;
+  // to_date is the to date value for this contract.
+  string to_date = 3;
+}
+
+message ListJournalEntriesResponse {
+  // entries is the entries value for this contract.
+  repeated JournalEntry entries = 1;
+  // pagination is the pagination value for this contract.
+  common.pagination.v1.PaginationResponse pagination = 2;
+}

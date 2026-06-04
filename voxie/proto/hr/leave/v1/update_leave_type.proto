@@ -1,0 +1,35 @@
+syntax = "proto3";
+
+package hr.leave.v1;
+
+import "hr/leave/v1/types.proto";
+
+option go_package = "github.com/voxire/voxie/gen/go/hr/leave/v1";
+
+// ── Update Leave Type ─────────────────────────────────────────────
+
+message UpdateLeaveTypeRequest {
+  // ID of the leave type to update.
+  int64 id = 1;
+  // Updated name; absent to keep current value.
+  optional string name = 2;
+  // Updated paid status; absent to keep current value.
+  optional bool is_paid = 3;
+  // Updated approval requirement; absent to keep current value.
+  optional bool requires_approval = 4;
+  // Updated accrual rule; absent to keep current value.
+  optional string accrual_rule = 5;
+  // Updated max carryover days; absent to keep current value.
+  optional int32 max_carryover_days = 6;
+  // Updated min notice days; absent to keep current value.
+  optional int32 min_notice_days = 7;
+  // Updated documentation threshold; absent to keep current value.
+  optional int32 requires_documentation_after_days = 8;
+  // Updated active status; absent to keep current value.
+  optional bool is_active = 9;
+}
+
+message UpdateLeaveTypeResponse {
+  // The updated leave type.
+  LeaveTypePayload leave_type = 1;
+}

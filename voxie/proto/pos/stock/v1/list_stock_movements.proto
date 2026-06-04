@@ -1,0 +1,21 @@
+syntax = "proto3";
+
+package pos.stock.v1;
+
+import "pos/stock/v1/types.proto";
+
+option go_package = "github.com/voxire/voxie/gen/go/pos/stock/v1";
+
+// ── List Movements ────────────────────────────────────────────────
+
+message ListStockMovementsRequest {
+  // branch_id is the branch id value for this contract.
+  int64 branch_id = 1;
+  // product_id is the product id value for this contract.
+  int64 product_id = 2;
+}
+
+message ListStockMovementsResponse {
+  // movements is the movements value for this contract.
+  repeated StockMovement movements = 1;
+}

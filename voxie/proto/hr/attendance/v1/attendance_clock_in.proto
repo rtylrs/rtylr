@@ -1,0 +1,29 @@
+syntax = "proto3";
+
+package hr.attendance.v1;
+
+import "hr/attendance/v1/types.proto";
+
+option go_package = "github.com/voxire/voxie/gen/go/hr/attendance/v1";
+
+// ── Clock In ──────────────────────────────────────────────────────
+
+message AttendanceClockInRequest {
+  // Method used to clock in (app | qr | gps | pin | facial).
+  string method = 1;
+  // Work location where the employee is clocking in.
+  int64 location_id = 2;
+  // Latitude at clock-in; absent if location not available.
+  optional double lat = 3;
+  // Longitude at clock-in; absent if location not available.
+  optional double lng = 4;
+  // QR token scanned at a terminal; absent if not using QR method.
+  optional string qr_token = 5;
+  // PIN entered by the employee; absent if not using PIN method. Sensitive: do not log this field.
+  optional string pin = 6;
+}
+
+message AttendanceClockInResponse {
+  // The created attendance record.
+  AttendanceRecordPayload record = 1;
+}

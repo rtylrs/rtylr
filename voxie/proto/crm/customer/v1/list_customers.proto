@@ -1,0 +1,31 @@
+syntax = "proto3";
+
+package crm.customer.v1;
+
+import "pos/customer/v1/types.proto";
+
+option go_package = "github.com/voxire/voxie/gen/go/crm/customer/v1";
+
+message ListCustomersRequest {
+  // search is the search value for this contract.
+  string search = 1;
+  // tier is the tier value for this contract.
+  string tier = 2;
+  // tag is the tag value for this contract.
+  string tag = 3;
+  // page is the current result page.
+  int64 page = 4;
+  // page_size is the number of records requested per page.
+  int64 page_size = 5;
+}
+
+message ListCustomersResponse {
+  // customers is the customers value for this contract.
+  repeated .pos.customer.v1.Customer customers = 1;
+  // total is the total number of matching records.
+  int64 total = 2;
+  // page is the current result page.
+  int64 page = 3;
+  // page_size is the number of records requested per page.
+  int64 page_size = 4;
+}

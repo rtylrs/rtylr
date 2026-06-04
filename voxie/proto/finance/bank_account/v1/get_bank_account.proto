@@ -1,0 +1,17 @@
+syntax = "proto3";
+
+package finance.bank_account.v1;
+
+import "finance/bank_account/v1/types.proto";
+
+option go_package = "github.com/voxire/voxie/gen/go/finance/bank_account/v1";
+
+message GetBankAccountRequest {
+  // id is the unique identifier for the resource.
+  int64 id = 1;
+}
+
+message GetBankAccountResponse {
+  // account is the account value for this contract.
+  BankAccount account = 1;
+}

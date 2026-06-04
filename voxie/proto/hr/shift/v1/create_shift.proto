@@ -1,0 +1,27 @@
+syntax = "proto3";
+
+package hr.shift.v1;
+
+import "hr/shift/v1/types.proto";
+
+option go_package = "github.com/voxire/voxie/gen/go/hr/shift/v1";
+
+// ── Create Shift ──────────────────────────────────────────────────
+
+message CreateShiftRequest {
+  // Location where this shift takes place.
+  int64 location_id = 1;
+  // Human-readable shift name.
+  string name = 2;
+  // Shift start time (HH:MM 24-hour format).
+  string start_time = 3;
+  // Shift end time (HH:MM 24-hour format).
+  string end_time = 4;
+  // Hex colour code for roster display.
+  string color = 5;
+}
+
+message CreateShiftResponse {
+  // The newly created shift.
+  ShiftPayload shift = 1;
+}

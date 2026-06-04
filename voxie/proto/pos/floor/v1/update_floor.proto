@@ -1,0 +1,19 @@
+syntax = "proto3";
+
+package pos.floor.v1;
+
+option go_package = "github.com/voxire/voxie/gen/go/pos/floor/v1";
+
+// ── Update ────────────────────────────────────────────────────────
+
+message UpdateFloorRequest {
+  // name is the name value for this contract.
+  string name = 1;
+  // sort_order is the sort order value for this contract.
+  int32 sort_order = 2;
+}
+
+message UpdateFloorResponse {
+  // message is a human-readable result message.
+  string message = 1;
+}

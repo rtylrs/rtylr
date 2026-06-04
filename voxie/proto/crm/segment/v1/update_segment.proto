@@ -1,0 +1,21 @@
+syntax = "proto3";
+
+package crm.segment.v1;
+
+option go_package = "github.com/voxire/voxie/gen/go/crm/segment/v1";
+
+message UpdateSegmentRequest {
+  // id is the unique identifier for the resource.
+  int64 id = 1;
+  // name is the name value for this contract.
+  string name = 2;
+  // description is the description value for this contract.
+  string description = 3;
+  // rules is the rules value for this contract.
+  string rules = 4;
+}
+
+message UpdateSegmentResponse {
+  // message is a human-readable result message.
+  string message = 1;
+}

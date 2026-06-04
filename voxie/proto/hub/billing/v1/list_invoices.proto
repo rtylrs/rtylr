@@ -1,0 +1,14 @@
+syntax = "proto3";
+
+package hub.billing.v1;
+
+import "hub/billing/v1/types.proto";
+
+option go_package = "github.com/voxire/voxie/gen/go/hub/billing/v1";
+
+message ListInvoicesRequest {}
+
+message ListInvoicesResponse {
+  // invoices is the invoices value for this contract.
+  repeated Invoice invoices = 1;
+}

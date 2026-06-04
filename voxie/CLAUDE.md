@@ -79,19 +79,20 @@ This repo has no runtime dependencies and should stay that way. `buf`, `protoc-g
 ```
 voxie/
 ├── proto/                      Source of truth — edit these files
-│   ├── auth/v1/
-│   │   └── auth.proto
-│   ├── common/v1/
-│   │   ├── error.proto
-│   │   └── pagination.proto
-│   ├── crm/v1/
-│   ├── erp/v1/
-│   ├── finance/v1/
-│   ├── flow/v1/
-│   ├── hr/v1/
-│   ├── hub/v1/
-│   ├── insights/v1/
-│   └── pos/v1/
+│   ├── common/                  Shared cross-app contracts
+│   │   ├── auth/v1/
+│   │   │   ├── login.proto
+│   │   │   └── register.proto
+│   │   ├── errors/v1/
+│   │   └── pagination/v1/
+│   ├── crm/{capability}/v1/
+│   ├── erp/{capability}/v1/
+│   ├── finance/{capability}/v1/
+│   ├── flow/{capability}/v1/
+│   ├── hr/{capability}/v1/
+│   ├── hub/{capability}/{subdomain}/v1/
+│   ├── insights/{capability}/v1/
+│   └── pos/{capability}/{subdomain}/v1/
 ├── gen/                        Generated — do not edit directly
 │   ├── go/                     Go structs (`.pb.go`)
 │   └── ts/                     TypeScript interfaces (`.ts`)
@@ -103,13 +104,16 @@ voxie/
 
 ### Proto Conventions
 
-- **Package naming:** `{domain}.v1` — e.g., `package hub.v1;`
-- **Go option:** `option go_package = "github.com/voxire/voxie/gen/go/{domain}/v1;{domain}v1";`
+- **Package naming:** mirror the proto path below `proto/`, using dots. For example, `proto/hub/team/members/v1/list_members.proto` uses `package hub.team.members.v1;`.
+- **Go option:** mirror the generated path. For example, `option go_package = "github.com/voxire/voxie/gen/go/hub/team/members/v1";`.
 - **Field naming:** `snake_case` in proto. Generated Go uses camelCase struct fields with `json:"snake_case"` tags.
 - **Message naming:** PascalCase. e.g., `StaffUserPayload`, `ListTeamRequest`, `InviteUserResponse`.
 - **Version suffix:** always `v1` in the package path.
 - **Payload vs Request/Response:** Use `Payload` for reusable data types, `Request`/`Response` for operation-specific envelopes.
 - **All new fields must have a comment.**
+- **Endpoint files:** each endpoint request/response pair gets its own proto file named after the operation, such as `login.proto`, `list_members.proto`, or `process_payment.proto`.
+- **Reusable types:** payload-only messages live in a local `types.proto` beside the capability that owns them.
+- **Shared contracts:** cross-app contracts live under `proto/common/{domain}/v1/`, not under an app root.
 
 ### Generation Config (`buf.gen.yaml`)
 
@@ -134,21 +138,23 @@ plugins:
 
 ### How Consumers Import These Types
 
+Import paths include the capability path:
+
 **Go backend (`onion`):**
 
 ```go
-import hubv1 "github.com/voxire/voxie/gen/go/hub/v1"
+import membersv1 "github.com/voxire/voxie/gen/go/hub/team/members/v1"
 
 return handlers.ListUsersResponse{
-    Users: []*hubv1.StaffUserPayload{ ... },
+    Users: []*membersv1.StaffUserPayload{ ... },
 }, nil
 ```
 
 **TypeScript frontend (`rtylr`):**
 
 ```ts
-import type { StaffUserPayload } from '@voxire/contracts/hub/v1/team';
-import type { ProductPayload }   from '@voxire/contracts/erp/v1/products';
+import type { StaffUserPayload } from '@voxire/contracts/hub/team/members/v1/types';
+import type { LoginRequest } from '@voxire/contracts/common/auth/v1/login';
 ```
 
 ### Deprecating and Removing Fields
@@ -222,7 +228,7 @@ Create `proto/{domain}/v2/` only for genuinely breaking changes that cannot be h
 **Do not add export paths to `packages/contracts/package.json` in `rtylr` unless the corresponding `.proto` file exists in `voxie/proto/`.** Stub exports cause TypeScript build failures downstream.
 
 Order of operations when adding a new `.proto` file:
-1. Create the `.proto` file in `proto/{domain}/v1/`.
+1. Create the `.proto` file in `proto/common/{domain}/v1/` for shared contracts or `proto/{app}/{capability}/{subdomain}/v1/` for app-owned contracts.
 2. Run `make generate`.
 3. Commit both together.
 4. Add the export path to `packages/contracts/package.json` in `rtylr`.
@@ -234,17 +240,17 @@ Order of operations when adding a new `.proto` file:
 
 | Domain | Proto package | Covers |
 |---|---|---|
-| `auth` | `auth.v1` | Login, register, token, password reset |
-| `common` | `common.v1` | Error envelope, pagination |
-| `hub` | `hub.v1` | Team, billing, config, design, analytics, permissions, API keys, webhooks, notifications, security |
-| `erp` | `erp.v1` | Products, inventory, suppliers, purchase orders |
-| `hr` | `hr.v1` | Staff, departments, shifts, payroll, time off |
-| `crm` | `crm.v1` | Customers, loyalty, campaigns, segments |
-| `finance` | `finance.v1` | Invoices, expenses, quotes, bills, bank accounts, journal, reports |
-| `flow` | `flow.v1` | Workspaces, projects, tasks, labels |
-| `pos` | `pos.v1` | Orders, tables, sessions, terminals, floors, KDS, combos, modifiers, gift cards, loyalty, receipts |
-| `insights` | `insights.v1` | Analytics deep-dive |
-| `support` | `support.v1` | Helpdesk tickets, inbox, knowledge base |
+| Domain | Package examples | Covers |
+|---|---|---|
+| `common` | `common.auth.v1`, `common.errors.v1`, `common.pagination.v1` | Shared auth, error envelope, pagination |
+| `hub` | `hub.team.members.v1`, `hub.business.v1` | Team, billing, config, permissions, API keys, webhooks, notifications, security |
+| `erp` | `erp.product.v1`, `erp.inventory.v1` | Products, inventory, suppliers, purchase orders |
+| `hr` | `hr.staff.v1`, `hr.employees.payroll.runs.v1` | Staff, departments, shifts, payroll, time off |
+| `crm` | `crm.customer.v1`, `crm.loyalty.v1` | Customers, loyalty, campaigns, segments |
+| `finance` | `finance.invoices.v1`, `finance.expenses.v1` | Invoices, expenses, quotes, bills, bank accounts, journal, reports |
+| `flow` | `flow.workspace.v1`, `flow.task.v1` | Workspaces, projects, tasks, labels |
+| `pos` | `pos.orders.v1`, `pos.orders.payments.v1` | Orders, tables, sessions, terminals, floors, KDS, combos, modifiers, gift cards, loyalty, receipts |
+| `insights` | `insights.dashboard.v1`, `insights.product.v1` | Analytics deep-dive |
 
 ---
 
@@ -257,7 +263,7 @@ Order of operations when adding a new `.proto` file:
 5. **Never rename an existing field** without creating a v2 package.
 6. **Commit generated code alongside proto changes** — always in the same commit.
 7. **Run `buf lint` before committing.** `buf breaking` must pass against main.
-8. **New proto files follow** `proto/{domain}/v1/{concern}.proto`. One concern per file.
+8. **New proto files follow** `proto/common/{domain}/v1/{endpoint}.proto` or `proto/{app}/{capability}/{subdomain}/v1/{endpoint}.proto`. One endpoint per file.
 9. **Never add `packages/contracts/package.json` export paths without a corresponding `.proto` source file.**
 
 ---
@@ -311,11 +317,11 @@ buf generate
 
 ### Add a new proto file
 
-1. Create `proto/{domain}/v1/{concern}.proto`.
+1. Create `proto/common/{domain}/v1/{endpoint}.proto` for shared contracts or `proto/{app}/{capability}/{subdomain}/v1/{endpoint}.proto` for app-owned contracts.
 2. Run `make generate`.
 3. Commit both the `.proto` file and all changed `gen/` files.
 4. In `rtylr`: `cd voxie && git pull && cd ..` → add export to `packages/contracts/package.json` → `pnpm contracts:sync`.
-5. In `onion`: `cd voxie && git pull && cd ..` → import from `gen/go/{domain}/v1`.
+5. In `onion`: `cd voxie && git pull && cd ..` → import from the generated capability path under `gen/go/`.
 
 ### Submodule update workflow
 

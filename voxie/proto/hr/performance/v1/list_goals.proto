@@ -1,0 +1,27 @@
+syntax = "proto3";
+
+package hr.performance.v1;
+
+import "hr/performance/v1/types.proto";
+
+option go_package = "github.com/voxire/voxie/gen/go/hr/performance/v1";
+
+// ── List Goals ───────────────────────────────────────────────────────
+
+message ListGoalsRequest {
+  // Filter by employee; absent to include all employees.
+  optional int64 employee_id = 1;
+  // Filter by review cycle; absent to include all cycles.
+  optional int64 review_cycle_id = 2;
+}
+
+message ListGoalsResponse {
+  // Page of review goals matching the filters.
+  repeated ReviewGoalPayload goals = 1;
+  // Total number of matching goals across all pages.
+  int64 total = 2;
+  // Page size used for this request.
+  int32 limit = 3;
+  // Offset used for this request.
+  int32 offset = 4;
+}

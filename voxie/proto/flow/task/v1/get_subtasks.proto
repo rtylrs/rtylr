@@ -1,0 +1,17 @@
+syntax = "proto3";
+
+package flow.task.v1;
+
+import "flow/task/v1/types.proto";
+
+option go_package = "github.com/voxire/voxie/gen/go/flow/task/v1";
+
+message GetSubtasksRequest {
+  // task_id is the task id value for this contract.
+  int64 task_id = 1;
+}
+
+message GetSubtasksResponse {
+  // subtasks is the subtasks value for this contract.
+  repeated TaskPayloadCompact subtasks = 1;
+}

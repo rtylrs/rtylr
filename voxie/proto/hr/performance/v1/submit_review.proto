@@ -1,0 +1,23 @@
+syntax = "proto3";
+
+package hr.performance.v1;
+
+import "hr/performance/v1/types.proto";
+
+option go_package = "github.com/voxire/voxie/gen/go/hr/performance/v1";
+
+// ── Submit Review ────────────────────────────────────────────────────
+
+message SubmitReviewRequest {
+  // ID of the performance review being submitted.
+  int64 review_id = 1;
+  // Overall rating assigned by the reviewer.
+  string overall_rating = 2;
+  // Free-form written feedback from the reviewer.
+  string narrative = 3;
+}
+
+message SubmitReviewResponse {
+  // The submitted performance review.
+  PerformanceReviewPayload review = 1;
+}

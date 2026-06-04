@@ -1,0 +1,15 @@
+syntax = "proto3";
+
+package flow.project.v1;
+
+option go_package = "github.com/voxire/voxie/gen/go/flow/project/v1";
+
+message DeleteProjectRequest {
+  // id is the unique identifier for the resource.
+  int64 id = 1;
+}
+
+message DeleteProjectResponse {
+  // message is a human-readable result message.
+  string message = 1;
+}

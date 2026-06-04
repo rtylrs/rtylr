@@ -1,0 +1,19 @@
+syntax = "proto3";
+
+package flow.task.v1;
+
+option go_package = "github.com/voxire/voxie/gen/go/flow/task/v1";
+
+message CreateTimeLogRequest {
+  // duration_minutes is the duration minutes value for this contract.
+  int64 duration_minutes = 1;
+  // description is the description value for this contract.
+  string description = 2;
+}
+
+message CreateTimeLogResponse {
+  // time_log_id is the time log id value for this contract.
+  int64 time_log_id = 1;
+  // message is a human-readable result message.
+  string message = 2;
+}

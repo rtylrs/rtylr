@@ -1,0 +1,25 @@
+syntax = "proto3";
+
+package insights.customer.v1;
+
+import "common/pagination/v1/pagination.proto";
+import "insights/customer/v1/types.proto";
+
+option go_package = "github.com/voxire/voxie/gen/go/insights/customer/v1";
+
+message GetTopCustomersRequest {
+  // pagination is the pagination value for this contract.
+  common.pagination.v1.PaginationRequest pagination = 1;
+  // period is the period value for this contract.
+  string period = 2;
+  // sort_by is the sort by value for this contract.
+  // total_spent, order_count
+  string sort_by = 3;
+}
+
+message GetTopCustomersResponse {
+  // customers is the customers value for this contract.
+  repeated TopCustomerEntry customers = 1;
+  // pagination is the pagination value for this contract.
+  common.pagination.v1.PaginationResponse pagination = 2;
+}
