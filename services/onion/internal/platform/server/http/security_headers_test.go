@@ -16,12 +16,14 @@ func TestSecurityHeadersMiddleware_SetsExpectedHeaders(t *testing.T) {
 	handler.ServeHTTP(rec, req)
 
 	expectedExact := map[string]string{
-		"X-Content-Type-Options":    "nosniff",
-		"X-Frame-Options":           "DENY",
-		"X-XSS-Protection":          "1; mode=block",
-		"Strict-Transport-Security": "max-age=31536000; includeSubDomains; preload",
-		"Referrer-Policy":           "strict-origin-when-cross-origin",
-		"Permissions-Policy":        "geolocation=(), microphone=(), camera=()",
+		"X-Content-Type-Options":            "nosniff",
+		"X-Frame-Options":                   "DENY",
+		"X-XSS-Protection":                  "0",
+		"Strict-Transport-Security":         "max-age=31536000; includeSubDomains; preload",
+		"Referrer-Policy":                   "strict-origin-when-cross-origin",
+		"X-Permitted-Cross-Domain-Policies": "none",
+		"Cross-Origin-Opener-Policy":        "same-origin-allow-popups",
+		"Cross-Origin-Resource-Policy":      "cross-origin",
 	}
 	for k, want := range expectedExact {
 		if got := rec.Header().Get(k); got != want {
@@ -29,12 +31,20 @@ func TestSecurityHeadersMiddleware_SetsExpectedHeaders(t *testing.T) {
 		}
 	}
 
-	// CSP must include the frame-ancestors lockdown.
+	// Permissions-Policy must lock down the sensitive features.
+	pp := rec.Header().Get("Permissions-Policy")
+	for _, feature := range []string{"camera=()", "microphone=()", "geolocation=()", "payment=()"} {
+		if !contains(pp, feature) {
+			t.Errorf("Permissions-Policy missing %q: %s", feature, pp)
+		}
+	}
+
+	// CSP must include the frame-ancestors and object-src lockdowns.
 	csp := rec.Header().Get("Content-Security-Policy")
 	if csp == "" {
 		t.Fatal("CSP missing")
 	}
-	for _, must := range []string{"default-src", "frame-ancestors 'none'"} {
+	for _, must := range []string{"default-src", "frame-ancestors 'none'", "object-src 'none'", "base-uri 'self'"} {
 		if !contains(csp, must) {
 			t.Errorf("CSP missing %q: %s", must, csp)
 		}
