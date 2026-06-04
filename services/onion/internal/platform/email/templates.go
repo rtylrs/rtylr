@@ -1,12 +1,18 @@
 package email
 
+import (
+	"io/fs"
+	"sort"
+	"strings"
+)
+
 // Template identifies an email template by its path under the email-templates
-// submodule's templates/ directory, without the .html extension. These constants
-// are the single source of truth for template names — pass one to SendTemplate or
-// EnqueueTemplate rather than hardcoding the path string anywhere else.
-//
-// Adding a template: drop the .html in the submodule under templates/<domain>/,
-// add a const here, add it to AllTemplates, and add a case to render_test.go.
+// submodule's templates/ directory, without the .html extension (e.g.
+// "welcome/welcome"). Templates are discovered from the embedded FS at runtime —
+// dropping an .html under templates/<domain>/ registers it automatically, no
+// const needed. The consts below are only the templates wired into Go code (they
+// have typed data structs); everything else is reachable via Available/Exists and
+// the generic SendTemplate/EnqueueTemplate with a data map.
 type Template string
 
 const (
@@ -22,14 +28,45 @@ const (
 	TemplateAccessRequest Template = "team/access_request"
 )
 
-// AllTemplates lists every registered template. render_test.go iterates it, so a
-// new const that isn't added here (or whose file is missing) fails the build.
-var AllTemplates = []Template{
+// wiredTemplates are the templates referenced from Go code — each has a typed
+// data struct and a render_test case. render_test.go iterates this, so a new
+// const here without a test case fails the build. (The full library is far
+// larger; see Available.)
+var wiredTemplates = []Template{
 	TemplateWelcome,
 	TemplateInvitation,
 	TemplatePasswordReset,
 	TemplateInvoice,
 	TemplateAccessRequest,
+}
+
+// fsTemplateRoot is where body templates live in the embedded FS: the submodule
+// is mounted at templates/ and keeps its own templates/<domain>/ subdir.
+const fsTemplateRoot = "templates/templates"
+
+// Exists reports whether tmpl resolves to an embedded template file.
+func Exists(tmpl Template) bool {
+	if tmpl == "" || strings.Contains(string(tmpl), "..") {
+		return false
+	}
+	_, err := fs.Stat(templateFS, fsTemplateRoot+"/"+string(tmpl)+".html")
+	return err == nil
+}
+
+// Available returns every embedded template (domain/name), sorted. Derived from
+// the embedded FS, so it always reflects what's actually shippable.
+func Available() []Template {
+	var out []Template
+	_ = fs.WalkDir(templateFS, fsTemplateRoot, func(path string, d fs.DirEntry, err error) error {
+		if err != nil || d.IsDir() || !strings.HasSuffix(path, ".html") {
+			return nil
+		}
+		name := strings.TrimSuffix(strings.TrimPrefix(path, fsTemplateRoot+"/"), ".html")
+		out = append(out, Template(name))
+		return nil
+	})
+	sort.Slice(out, func(i, j int) bool { return out[i] < out[j] })
+	return out
 }
 
 // The data shapes each template expects. Every template's base layout reads

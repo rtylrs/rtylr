@@ -554,7 +554,12 @@ There is **one** sending API, both in `internal/platform/email/`:
 from `WithFrom(...)`/`WithReplyTo(...)`. Never hardcode a template path string at a
 call site; pass the const.
 
-To add a template (e.g. `auth/email_verification`):
+Templates are **discovered from the embedded FS at runtime** (`email.Available()` /
+`email.Exists()`), so just adding the `.html` registers it — no const required.
+You only add a Go const + typed data struct when a template is sent from Go code
+(those are the `wiredTemplates`, kept in lockstep with `render_test.go`).
+
+To add a library template (sent via the generic API / `/test/email` with a data map):
 
 1. **In the email-templates repo:** add `templates/<domain>/<name>.html` with one
    `{{define "body"}}...{{end}}` block, reusing `base.html`'s classes (`.btn`,
@@ -563,16 +568,14 @@ To add a template (e.g. `auth/email_verification`):
    deeper nesting won't match the embed glob.
 2. **Bump the submodule pointer in onion:**
    `git -C internal/platform/email/templates fetch origin && git -C internal/platform/email/templates checkout origin/main`, then `git add internal/platform/email/templates`.
-3. **In `templates.go`:** add a `Template` const (e.g. `TemplateEmailVerification
-   = "auth/email_verification"`), add it to `AllTemplates`, and add a data struct
-   whose fields match the template's `{{.Placeholders}}` — always include `Subject`
-   (the base layout reads it).
-4. **Add a case to `render_test.go`** (`renderCases`) with representative data;
-   `TestAllTemplatesCovered` fails the build if a const has no case.
-5. **At the call site**, call `SendTemplate`/`EnqueueTemplate` with the new const
-   and struct. Run `go test ./internal/platform/email/`, then commit
-   `templates.go` + the call site + the submodule pointer (+ test) together — the
-   template isn't live until the pointer moves.
+
+That's it — it's now sendable via `SendTemplate("<domain>/<name>", dataMap)`.
+
+To additionally **wire it into Go code** (typed call sites): add a `Template` const
++ a data struct in `templates.go`, add the const to `wiredTemplates`, add a
+`renderCases` entry in `render_test.go` (`TestWiredTemplatesCovered`/`...Exist`
+enforce both), then call `SendTemplate`/`EnqueueTemplate` with the const+struct.
+The template isn't live until the submodule pointer moves.
 
 The renderer parses `base.html` + the named template on every call. At high send
 volume, parse once at startup into a cache keyed by `Template` instead of

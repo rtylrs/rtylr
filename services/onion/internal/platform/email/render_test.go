@@ -59,12 +59,37 @@ func TestRender(t *testing.T) {
 	}
 }
 
-// TestAllTemplatesCovered fails if a Template in AllTemplates has no render case,
-// keeping the registry and its tests in lockstep.
-func TestAllTemplatesCovered(t *testing.T) {
-	for _, tmpl := range AllTemplates {
+// TestWiredTemplatesCovered fails if a Go-wired Template has no render case,
+// keeping the typed templates and their tests in lockstep.
+func TestWiredTemplatesCovered(t *testing.T) {
+	for _, tmpl := range wiredTemplates {
 		if _, ok := renderCases[tmpl]; !ok {
-			t.Errorf("template %q is in AllTemplates but has no case in renderCases", tmpl)
+			t.Errorf("template %q is wired but has no case in renderCases", tmpl)
 		}
+	}
+}
+
+// TestWiredTemplatesExist ensures every wired template actually resolves in the
+// embedded FS (catches a renamed/missing file behind a const).
+func TestWiredTemplatesExist(t *testing.T) {
+	for _, tmpl := range wiredTemplates {
+		if !Exists(tmpl) {
+			t.Errorf("wired template %q has no file in the embedded FS", tmpl)
+		}
+	}
+}
+
+// TestAvailableFromFS confirms the embedded library is discovered (catches a
+// broken embed glob or submodule that didn't get checked out).
+func TestAvailableFromFS(t *testing.T) {
+	all := Available()
+	if len(all) < 100 {
+		t.Fatalf("expected the embedded template library, got only %d", len(all))
+	}
+	if !Exists("ecommerce/back_in_stock") {
+		t.Error("expected a non-wired library template to be discoverable")
+	}
+	if Exists("does/not_exist") || Exists("../etc/passwd") {
+		t.Error("Exists must reject missing/traversal paths")
 	}
 }

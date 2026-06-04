@@ -5,20 +5,20 @@
 // SECURITY: this is effectively an open email relay (e.g. it can send a genuine
 // rtylr password-reset email with a caller-supplied link — a phishing vector).
 // It is intentionally ungated for testing — DELETE this module once the queue is
-// verified. It only accepts templates in email.AllTemplates and is covered by the
-// global rate limiter.
+// verified. It only accepts templates that exist in the embedded FS and is
+// covered by the global rate limiter.
 package emailtest
 
 import (
 	"context"
 	"database/sql"
 	"net/http"
-	"strings"
 
 	"github.com/go-chi/chi/v5"
 
 	"github.com/voxire/onion/internal/platform/email"
 	"github.com/voxire/onion/internal/platform/errors"
+	"github.com/voxire/onion/internal/platform/logger"
 	serverHttp "github.com/voxire/onion/internal/platform/server/http"
 )
 
@@ -32,15 +32,35 @@ func NewModule(_ context.Context, db *sql.DB) *Module {
 
 func (m *Module) RegisterRoutes(ctx context.Context, router *chi.Mux, _ ...interface{}) {
 	serverHttp.RegisterPOST[TestEmailRequest, TestEmailResponse](
-		ctx, router, TestEmailRoutes(), &TestEmailHandler{DB: m.db},
+		ctx, router, sendRoutes(), &TestEmailHandler{DB: m.db},
+	)
+	serverHttp.RegisterGET[ListTemplatesRequest, ListTemplatesResponse](
+		ctx, router, listRoutes(), &ListTemplatesHandler{},
 	)
 }
 
 func (m *Module) GetAnonymousRoutes() []string {
-	return TestEmailRoutes()
+	return append(sendRoutes(), listRoutes()...)
 }
 
-func TestEmailRoutes() []string { return []string{"/test/email"} }
+func sendRoutes() []string { return []string{"/test/email"} }
+func listRoutes() []string { return []string{"/test/email/templates"} }
+
+// ── GET /test/email/templates ── lists every sendable template ──────────────
+
+type ListTemplatesRequest struct{}
+
+type ListTemplatesResponse struct {
+	Count     int      `json:"count"`
+	Templates []string `json:"templates"`
+}
+
+type ListTemplatesHandler struct{}
+
+func (h *ListTemplatesHandler) Serve(_ context.Context, _ *ListTemplatesRequest) (ListTemplatesResponse, *errors.ServerError) {
+	names := templateNames()
+	return ListTemplatesResponse{Count: len(names), Templates: names}, nil
+}
 
 // TestEmailRequest is the JSON body. `data` is optional — missing template fields
 // just render empty, so a bare {"template","to"} is enough to test delivery.
@@ -61,12 +81,12 @@ type TestEmailHandler struct{ DB *sql.DB }
 
 func (h *TestEmailHandler) Serve(ctx context.Context, req *TestEmailRequest) (TestEmailResponse, *errors.ServerError) {
 	if req.To == "" || req.Template == "" {
-		return TestEmailResponse{}, badRequest("both 'to' and 'template' are required. known templates: " + strings.Join(templateNames(), ", "))
+		return TestEmailResponse{}, badRequest("'to' and 'template' are required; GET /test/email/templates lists valid templates")
 	}
 
 	tmpl := email.Template(req.Template)
-	if !isKnownTemplate(tmpl) {
-		return TestEmailResponse{}, badRequest("unknown template " + req.Template + ". known templates: " + strings.Join(templateNames(), ", "))
+	if !email.Exists(tmpl) {
+		return TestEmailResponse{}, badRequest("unknown template " + req.Template + "; GET /test/email/templates lists valid templates")
 	}
 
 	if h.DB == nil {
@@ -90,10 +110,12 @@ func (h *TestEmailHandler) Serve(ctx context.Context, req *TestEmailRequest) (Te
 	}
 
 	if err := email.EnqueueTemplate(ctx, h.DB, email.PriorityNormal, req.To, subject, tmpl, data); err != nil {
+		logger.Ctx(ctx).Error("test email enqueue failed",
+			logger.String("template", req.Template), logger.Error(err))
 		return TestEmailResponse{}, &errors.ServerError{
 			HTTPCode: http.StatusInternalServerError,
 			Code:     http.StatusInternalServerError,
-			Message:  "failed to enqueue: " + err.Error(),
+			Message:  "failed to enqueue test email",
 		}
 	}
 
@@ -104,18 +126,10 @@ func badRequest(msg string) *errors.ServerError {
 	return &errors.ServerError{HTTPCode: http.StatusBadRequest, Code: http.StatusBadRequest, Message: msg}
 }
 
-func isKnownTemplate(t email.Template) bool {
-	for _, k := range email.AllTemplates {
-		if k == t {
-			return true
-		}
-	}
-	return false
-}
-
 func templateNames() []string {
-	out := make([]string, 0, len(email.AllTemplates))
-	for _, t := range email.AllTemplates {
+	all := email.Available()
+	out := make([]string, 0, len(all))
+	for _, t := range all {
 		out = append(out, string(t))
 	}
 	return out
