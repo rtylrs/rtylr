@@ -11,6 +11,7 @@ import (
 	"github.com/resend/resend-go/v2"
 
 	"github.com/voxire/onion/internal/platform/config"
+	sqlc "github.com/voxire/onion/internal/platform/email/internal/infrastructure/persistence/sqlc"
 	"github.com/voxire/onion/internal/platform/logger"
 )
 
@@ -150,10 +151,12 @@ type enqueueParams struct {
 }
 
 func enqueue(ctx context.Context, db *sql.DB, p enqueueParams) error {
-	_, err := db.ExecContext(ctx, `
-		INSERT INTO email_jobs (priority, to_email, subject, html, from_email, reply_to)
-		VALUES (?, ?, ?, ?, ?, ?)`,
-		p.priority, p.to, p.subject, p.html, p.from, p.replyTo,
-	)
-	return err
+	return sqlc.New(db).EnqueueEmail(ctx, sqlc.EnqueueEmailParams{
+		Priority:  int8(p.priority),
+		ToEmail:   p.to,
+		Subject:   p.subject,
+		Html:      p.html,
+		FromEmail: sql.NullString{String: p.from, Valid: p.from != ""},
+		ReplyTo:   sql.NullString{String: p.replyTo, Valid: p.replyTo != ""},
+	})
 }

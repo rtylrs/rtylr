@@ -11,9 +11,9 @@ NC='\033[0m' # No Color
 
 echo -e "${BLUE}🔧 Generating sqlc files for all modules...${NC}"
 
-# Find all sqlc.yaml files in modules and generate code
+# Find all sqlc.yaml files in modules and platform packages and generate code
 module_count=0
-for config_file in $(find internal/modules -name "sqlc.yaml" -type f); do
+for config_file in $(find internal/modules internal/platform -name "sqlc.yaml" -type f); do
     config_dir=$(dirname "$config_file")
     module_name=$(basename "$(dirname "$(dirname "$config_dir")")")
     
