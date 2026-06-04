@@ -124,6 +124,29 @@ type Params struct {
 	Fit     string
 	Format  string
 	Quality int
+	// Chain, when set, is a Cloudinary-style transformation chain (e.g.
+	// "w_400,c_fill,g_auto/e_blur:300") applied via the media-engine's transform
+	// subcommand instead of a plain resize. Width/Height/Fit are ignored.
+	Chain string
+}
+
+// parseChainParams extracts the output format (f_) and quality (q_) directives
+// from a transformation chain so the CDN can set the right Content-Type and
+// storage extension. The last occurrence wins.
+func parseChainParams(chain string) (format string, quality int) {
+	for _, step := range strings.Split(chain, "/") {
+		for _, tok := range strings.Split(step, ",") {
+			switch {
+			case strings.HasPrefix(tok, "f_"):
+				format = tok[2:]
+			case strings.HasPrefix(tok, "q_"):
+				if q, err := strconv.Atoi(tok[2:]); err == nil {
+					quality = q
+				}
+			}
+		}
+	}
+	return format, quality
 }
 
 // Defaults fills zero-value fields with sensible production defaults.
@@ -142,8 +165,29 @@ func (p *Params) Defaults() {
 // maxPixelArea bounds the output width*height to limit per-request memory.
 const maxPixelArea int64 = 24_000_000
 
+// allowedOutputFormat reports whether fmt is an encoder the CDN serves.
+func allowedOutputFormat(format string) bool {
+	switch strings.ToLower(format) {
+	case "webp", "jpeg", "jpg", "png", "avif":
+		return true
+	default:
+		return false
+	}
+}
+
 // Validate returns an error if parameters are out of acceptable range.
 func (p *Params) Validate() error {
+	// Chain mode: geometry/effects live in the chain string; only the output
+	// format and quality are validated here (the engine validates the rest).
+	if p.Chain != "" {
+		if p.Quality < 1 || p.Quality > 100 {
+			return fmt.Errorf("quality must be between 1 and 100")
+		}
+		if !allowedOutputFormat(p.Format) {
+			return fmt.Errorf("unsupported format: %s", p.Format)
+		}
+		return nil
+	}
 	if p.Width < 0 || p.Width > 8000 {
 		return fmt.Errorf("width must be between 0 and 8000")
 	}
@@ -182,6 +226,7 @@ func (p *Params) CacheKey(fileUUID string) string {
 		p.Fit,
 		strings.ToLower(p.Format),
 		strconv.Itoa(p.Quality),
+		p.Chain,
 	)
 }
 
@@ -192,6 +237,18 @@ func (p *Params) StorageKey(fileUUID, key string) string {
 
 // CLIArgs returns the command-line arguments for invoking the media-engine.
 func (p *Params) CLIArgs(inputPath, outputPath string) []string {
+	if p.Chain != "" {
+		// transform subcommand applies the full chain; --format/--quality pin
+		// the output so it matches the Content-Type/extension the CDN serves.
+		return []string{
+			"transform",
+			"--input", inputPath,
+			"--output", outputPath,
+			"--chain", p.Chain,
+			"--format", strings.ToLower(p.Format),
+			"--quality", strconv.Itoa(p.Quality),
+		}
+	}
 	args := []string{
 		"resize",
 		"--input", inputPath,

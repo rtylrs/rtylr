@@ -134,7 +134,8 @@ func (c *CDN) stageOriginal(ctx context.Context, originalStorageKey string) (inP
 	return tmpIn.Name(), tmpOut.Name(), cleanup, nil
 }
 
-// serveTransformed handles GET /images/{id}?w=&h=&fit=&format=&q=
+// serveTransformed handles GET /images/{id}?w=&h=&fit=&format=&q=&t=
+// where t= is an optional Cloudinary-style transformation chain.
 func (c *CDN) serveTransformed(w http.ResponseWriter, r *http.Request) {
 	fileUUID := chi.URLParam(r, "id")
 	if fileUUID == "" {
@@ -159,6 +160,23 @@ func (c *CDN) serveTransformed(w http.ResponseWriter, r *http.Request) {
 		Format:  format,
 		Quality: queryInt(r, "q"),
 	}
+
+	// ?t= carries a Cloudinary-style transformation chain (e.g.
+	// "w_400,c_fill,g_auto/e_blur:300"). When present it drives the transform,
+	// and any f_/q_ inside it sets the output format/quality the CDN serves.
+	if chain := r.URL.Query().Get("t"); chain != "" {
+		p.Chain = chain
+		chainFmt, chainQ := parseChainParams(chain)
+		if chainFmt != "" && chainFmt != "auto" {
+			p.Format = chainFmt
+		} else if p.Format == "" || p.Format == "auto" {
+			p.Format = "webp"
+		}
+		if chainQ > 0 {
+			p.Quality = chainQ
+		}
+	}
+
 	// Validate the request before touching the DB so malformed query params
 	// fail fast with a 400 instead of a 500 from deep in transform().
 	p.Defaults()
