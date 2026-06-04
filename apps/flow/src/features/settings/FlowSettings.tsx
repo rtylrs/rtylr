@@ -479,24 +479,6 @@ const AppearanceSection: React.FC = () => {
           ))}
         </div>
       </div>
-
-      <div>
-        <label
-          className="block text-[12px] font-medium mb-1.5"
-          style={{ color: 'var(--flow-text-muted)' }}
-        >
-          Accent color
-        </label>
-        <div className="flex items-center gap-2">
-          <span className="h-8 w-8 rounded-full" style={{ background: 'var(--accent)' }} />
-          <span className="text-[13px] font-mono" style={{ color: 'var(--flow-text)' }}>
-            {'var(--accent)'}
-          </span>
-          <span className="text-[11px]" style={{ color: 'var(--flow-text-dim)' }}>
-            (Flow teal, from Voxire logo)
-          </span>
-        </div>
-      </div>
     </div>
   );
 };
