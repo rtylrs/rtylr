@@ -1,7 +1,10 @@
 import { unwrap } from '@voxire/api';
 import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query';
 import type { ListEmployeeDocumentsResponse } from '@voxire/contracts/hr/document/v1/list_employee_documents';
-import type { UploadDocumentRequest, UploadDocumentResponse } from '@voxire/contracts/hr/document/v1/upload_document';
+import type {
+  UploadDocumentRequest,
+  UploadDocumentResponse,
+} from '@voxire/contracts/hr/document/v1/upload_document';
 import { safe } from '../../lib/api';
 import { toast } from 'sonner';
 import { useTranslation } from 'react-i18next';

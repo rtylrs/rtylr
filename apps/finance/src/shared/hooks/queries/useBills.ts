@@ -3,7 +3,10 @@ import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query';
 import { toast } from 'sonner';
 import { useTranslation } from 'react-i18next';
 import type { ListBillsResponse } from '@voxire/contracts/finance/bill/v1/list_bills';
-import type { CreateBillRequest, CreateBillResponse } from '@voxire/contracts/finance/bill/v1/create_bill';
+import type {
+  CreateBillRequest,
+  CreateBillResponse,
+} from '@voxire/contracts/finance/bill/v1/create_bill';
 import { safe } from '../../lib/api';
 
 interface ListBillsParams {

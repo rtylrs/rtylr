@@ -3,7 +3,10 @@ import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query';
 import { toast } from 'sonner';
 import { useTranslation } from 'react-i18next';
 import type { ListAccountsResponse } from '@voxire/contracts/finance/account/v1/list_accounts';
-import type { CreateAccountRequest, CreateAccountResponse } from '@voxire/contracts/finance/account/v1/create_account';
+import type {
+  CreateAccountRequest,
+  CreateAccountResponse,
+} from '@voxire/contracts/finance/account/v1/create_account';
 import { safe } from '../../lib/api';
 
 interface ListAccountsParams {

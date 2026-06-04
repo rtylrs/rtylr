@@ -1,6 +1,9 @@
 import React, { useState } from 'react';
 import { useTranslation } from 'react-i18next';
-import type { ReviewGoalPayload, PerformanceReviewPayload } from '@voxire/contracts/hr/performance/v1/types';
+import type {
+  ReviewGoalPayload,
+  PerformanceReviewPayload,
+} from '@voxire/contracts/hr/performance/v1/types';
 import {
   useListReviews,
   useListGoals,

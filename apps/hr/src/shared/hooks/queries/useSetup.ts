@@ -1,6 +1,9 @@
 import { unwrap } from '@voxire/api';
 import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query';
-import type { GetSetupStatusResponse, HRCompanyConfigPayload } from '@voxire/contracts/hr/setup/v1/types';
+import type {
+  GetSetupStatusResponse,
+  HRCompanyConfigPayload,
+} from '@voxire/contracts/hr/setup/v1/types';
 import { safe } from '../../lib/api';
 import { useHRConfigStore } from '../../stores/hrConfigStore';
 import { toast } from 'sonner';
