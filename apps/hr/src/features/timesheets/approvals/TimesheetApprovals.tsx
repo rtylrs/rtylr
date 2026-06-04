@@ -7,7 +7,7 @@ import {
   useListTimesheets,
   useApproveTimesheet,
 } from '../../../shared/hooks/queries/useTimesheets';
-import type { TimesheetPayload } from '@voxire/contracts/hr/v1/time_entries';
+import type { TimesheetPayload } from '@voxire/contracts/hr/time_entry/v1/types';
 import {
   SectionHeader,
   Card,

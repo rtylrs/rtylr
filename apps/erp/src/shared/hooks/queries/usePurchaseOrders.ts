@@ -1,13 +1,9 @@
 import { unwrap } from '@voxire/api';
 import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query';
-import type {
-  PurchaseOrder,
-  ListPurchaseOrdersResponse,
-  CreatePurchaseOrderRequest,
-  CreatePurchaseOrderResponse,
-  UpdatePurchaseOrderStatusRequest,
-  UpdatePurchaseOrderStatusResponse,
-} from '@voxire/contracts/erp/v1/purchase_orders';
+import type { PurchaseOrder } from '@voxire/contracts/erp/purchase_order/v1/types';
+import type { ListPurchaseOrdersResponse } from '@voxire/contracts/erp/purchase_order/v1/list_purchase_orders';
+import type { CreatePurchaseOrderRequest, CreatePurchaseOrderResponse } from '@voxire/contracts/erp/purchase_order/v1/create_purchase_order';
+import type { UpdatePurchaseOrderStatusRequest, UpdatePurchaseOrderStatusResponse } from '@voxire/contracts/erp/purchase_order/v1/update_purchase_order_status';
 import type { UseQueryResult, UseMutationResult } from '@tanstack/react-query';
 import { safe } from '../../lib/api';
 import { toast } from 'sonner';

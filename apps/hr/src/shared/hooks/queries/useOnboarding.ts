@@ -1,13 +1,9 @@
 import { unwrap } from '@voxire/api';
 import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query';
-import type {
-  ListChecklistTemplatesResponse,
-  CreateChecklistTemplateRequest,
-  CreateChecklistTemplateResponse,
-  ListEmployeeChecklistsResponse,
-  CompleteChecklistItemRequest,
-  CompleteChecklistItemResponse,
-} from '@voxire/contracts/hr/v1/onboarding';
+import type { ListChecklistTemplatesResponse } from '@voxire/contracts/hr/onboarding/v1/list_checklist_templates';
+import type { CreateChecklistTemplateRequest, CreateChecklistTemplateResponse } from '@voxire/contracts/hr/onboarding/v1/create_checklist_template';
+import type { ListEmployeeChecklistsResponse } from '@voxire/contracts/hr/onboarding/v1/list_employee_checklists';
+import type { CompleteChecklistItemRequest, CompleteChecklistItemResponse } from '@voxire/contracts/hr/onboarding/v1/complete_checklist_item';
 import { safe } from '../../lib/api';
 import { toast } from 'sonner';
 import { useTranslation } from 'react-i18next';

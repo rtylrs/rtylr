@@ -1,6 +1,6 @@
 import { unwrap } from '@voxire/api';
 import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query';
-import type { StaffUserPayload } from '@voxire/contracts/hub/v1/team';
+import type { StaffUserPayload } from '@voxire/contracts/hub/team/members/v1/types';
 import { z } from 'zod';
 import api, { safe } from '../../lib/api';
 import { teamMemberSchema } from '../../schemas/team';

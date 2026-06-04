@@ -1,12 +1,8 @@
 import { unwrap } from '@voxire/api';
 import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query';
-import type {
-  ListTimeEntriesRequest,
-  ListTimeEntriesResponse,
-  CreateTimeEntryRequest,
-  CreateTimeEntryResponse,
-  TimeEntryPayload,
-} from '@voxire/contracts/hr/v1/time_entries';
+import type { ListTimeEntriesRequest, ListTimeEntriesResponse } from '@voxire/contracts/hr/time_entry/v1/list_time_entries';
+import type { CreateTimeEntryRequest, CreateTimeEntryResponse } from '@voxire/contracts/hr/time_entry/v1/create_time_entry';
+import type { TimeEntryPayload } from '@voxire/contracts/hr/time_entry/v1/types';
 import { safe } from '../../lib/api';
 import { toast } from 'sonner';
 import { useTranslation } from 'react-i18next';

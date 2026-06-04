@@ -1,14 +1,9 @@
 import { unwrap } from '@voxire/api';
 import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query';
-import type {
-  ListTimesheetsRequest,
-  ListTimesheetsResponse,
-  TimesheetPayload,
-  SubmitTimesheetRequest,
-  SubmitTimesheetResponse,
-  ApproveTimesheetRequest,
-  ApproveTimesheetResponse,
-} from '@voxire/contracts/hr/v1/time_entries';
+import type { ListTimesheetsRequest, ListTimesheetsResponse } from '@voxire/contracts/hr/time_entry/v1/list_timesheets';
+import type { TimesheetPayload } from '@voxire/contracts/hr/time_entry/v1/types';
+import type { SubmitTimesheetRequest, SubmitTimesheetResponse } from '@voxire/contracts/hr/time_entry/v1/submit_timesheet';
+import type { ApproveTimesheetRequest, ApproveTimesheetResponse } from '@voxire/contracts/hr/time_entry/v1/approve_timesheet';
 import { safe } from '../../lib/api';
 import { toast } from 'sonner';
 import { useTranslation } from 'react-i18next';

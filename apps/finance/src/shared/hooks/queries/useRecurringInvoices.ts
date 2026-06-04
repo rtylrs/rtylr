@@ -2,11 +2,8 @@ import { unwrap } from '@voxire/api';
 import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query';
 import { toast } from 'sonner';
 import { useTranslation } from 'react-i18next';
-import type {
-  ListRecurringInvoicesResponse,
-  CreateRecurringInvoiceRequest,
-  CreateRecurringInvoiceResponse,
-} from '@voxire/contracts/finance/v1/recurring_invoices';
+import type { ListRecurringInvoicesResponse } from '@voxire/contracts/finance/recurring_invoice/v1/list_recurring_invoices';
+import type { CreateRecurringInvoiceRequest, CreateRecurringInvoiceResponse } from '@voxire/contracts/finance/recurring_invoice/v1/create_recurring_invoice';
 import { safe } from '../../lib/api';
 
 interface ListRecurringInvoicesParams {

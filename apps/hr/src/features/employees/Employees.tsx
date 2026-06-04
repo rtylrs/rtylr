@@ -4,7 +4,7 @@ import { useTranslation } from 'react-i18next';
 import { useVirtualizer } from '@tanstack/react-virtual';
 import { Plus, Search } from 'lucide-react';
 import { useListEmployees } from '../../shared/hooks/queries/useEmployees';
-import type { EmployeePayload } from '@voxire/contracts/hr/v1/employees';
+import type { EmployeePayload } from '@voxire/contracts/hr/employee/v1/types';
 
 const PAGE_SIZE = 50;
 

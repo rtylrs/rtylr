@@ -1,14 +1,10 @@
 import { unwrap } from '@voxire/api';
 import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query';
-import type {
-  Product,
-  ListProductsResponse,
-  CreateProductRequest,
-  CreateProductResponse,
-  UpdateProductRequest,
-  UpdateProductResponse,
-  DeleteProductResponse,
-} from '@voxire/contracts/erp/v1/products';
+import type { Product } from '@voxire/contracts/erp/product/v1/types';
+import type { ListProductsResponse } from '@voxire/contracts/erp/product/v1/list_products';
+import type { CreateProductRequest, CreateProductResponse } from '@voxire/contracts/erp/product/v1/create_product';
+import type { UpdateProductRequest, UpdateProductResponse } from '@voxire/contracts/erp/product/v1/update_product';
+import type { DeleteProductResponse } from '@voxire/contracts/erp/product/v1/delete_product';
 import type { UseQueryResult, UseMutationResult } from '@tanstack/react-query';
 import { safe } from '../../lib/api';
 import { toast } from 'sonner';

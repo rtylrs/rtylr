@@ -1,5 +1,5 @@
 import { safe } from '../lib/api';
-import type { CreatePurchaseOrderRequest } from '@voxire/contracts/erp/v1/purchase_orders';
+import type { CreatePurchaseOrderRequest } from '@voxire/contracts/erp/purchase_order/v1/create_purchase_order';
 
 // ─── Types ───────────────────────────────────────────────────────────────────
 

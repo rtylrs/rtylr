@@ -2,7 +2,7 @@ import { unwrap } from '@voxire/api';
 import { z } from 'zod';
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
 import { toast } from 'sonner';
-import type { CreatePurchaseOrderRequest } from '@voxire/contracts/erp/v1/purchase_orders';
+import type { CreatePurchaseOrderRequest } from '@voxire/contracts/erp/purchase_order/v1/create_purchase_order';
 import { erpApi, PurchaseOrder } from '../../shared/services/erpApi';
 import { unwrapList } from '../../shared/lib/unwrapList';
 

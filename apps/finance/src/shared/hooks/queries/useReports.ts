@@ -1,6 +1,6 @@
 import { unwrap } from '@voxire/api';
 import { useQuery } from '@tanstack/react-query';
-import type { GetPLReportResponse } from '@voxire/contracts/finance/v1/reports';
+import type { GetPLReportResponse } from '@voxire/contracts/finance/report/v1/get_pl_report';
 import { safe } from '../../lib/api';
 
 interface ReportRange {

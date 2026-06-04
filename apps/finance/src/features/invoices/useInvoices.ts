@@ -2,7 +2,7 @@ import { unwrap } from '@voxire/api';
 import { z } from 'zod';
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
 import { toast } from 'sonner';
-import type { RecordPaymentResponse } from '@voxire/contracts/finance/v1/invoices';
+import type { RecordPaymentResponse } from '@voxire/contracts/finance/invoices/payments/v1/record_payment';
 import { safe } from '../../shared/lib/api';
 import type { Invoice } from '../../shared/services/financeApi';
 import { invoiceSchema } from '../../shared/schemas/invoices';
