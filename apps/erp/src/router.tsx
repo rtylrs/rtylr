@@ -33,6 +33,13 @@ function wrap(component: React.ReactNode) {
   return () => <Suspense fallback={<FullScreenLoader />}>{component}</Suspense>;
 }
 
+function CatchAllRedirect(): null {
+  React.useEffect(() => {
+    window.location.replace('/');
+  }, []);
+  return null;
+}
+
 const rootRoute = createRootRoute({
   component: () => (
     <ErrorBoundary>
@@ -179,12 +186,7 @@ const settingsRoute = createRoute({
 const catchAllRoute = createRoute({
   getParentRoute: () => layoutRoute,
   path: '*',
-  component: () => {
-    React.useEffect(() => {
-      window.location.replace('/');
-    }, []);
-    return null;
-  },
+  component: CatchAllRedirect,
 });
 
 const routeTree = rootRoute.addChildren([

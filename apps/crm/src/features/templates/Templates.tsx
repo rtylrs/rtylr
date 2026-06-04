@@ -45,7 +45,7 @@ const Templates: React.FC = () => {
     }
   };
 
-  const useTemplate = (t: (typeof templates)[number]) => {
+  const applyTemplate = (t: (typeof templates)[number]) => {
     if (t.channel === 'email') {
       navigate({
         to: `/campaigns/email?name=${encodeURIComponent(t.name)}&subject=${encodeURIComponent(
@@ -212,7 +212,7 @@ const Templates: React.FC = () => {
                   <Button
                     variant="primary"
                     style={{ flex: 1, justifyContent: 'center', padding: '6px' }}
-                    onClick={() => useTemplate(t)}
+                    onClick={() => applyTemplate(t)}
                   >
                     Use
                   </Button>

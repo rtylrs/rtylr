@@ -10,6 +10,8 @@
     "test:coverage": "vitest run --coverage",
     "test:e2e": "playwright test",
     "typecheck": "turbo typecheck",
+    "lint": "eslint apps packages",
+    "lint:fix": "eslint apps packages --fix",
     "format": "prettier --write .",
     "format:check": "prettier --check .",
     "contracts:sync": "bash packages/contracts/scripts/sync.sh",

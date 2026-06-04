@@ -75,6 +75,6 @@ describe('topRatedFeedback', () => {
   });
 
   it('returns empty when none qualify', () => {
-    expect(topRatedFeedback(feedbacks, 5 as 5)).toHaveLength(1);
+    expect(topRatedFeedback(feedbacks, 5 as const)).toHaveLength(1);
   });
 });

@@ -54,7 +54,7 @@ export function pageNumbers(
   const pages: (number | 'ellipsis')[] = [];
   const half = Math.floor(maxVisible / 2);
   let start = Math.max(1, currentPage - half);
-  let end = Math.min(total, start + maxVisible - 1);
+  const end = Math.min(total, start + maxVisible - 1);
   if (end - start < maxVisible - 1) start = Math.max(1, end - maxVisible + 1);
   if (start > 1) {
     pages.push(1);

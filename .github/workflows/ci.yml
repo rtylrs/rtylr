@@ -43,7 +43,7 @@ jobs:
         run: pnpm turbo typecheck
 
       - name: Lint
-        run: pnpm turbo lint
+        run: pnpm lint
 
       # Unit tests run across every workspace via the root vitest
       # config. Gating here means a broken mapper or schema builder
