@@ -79,9 +79,9 @@ const Menu: React.FC = () => {
 
   const getMenu = useAsync({
     fn: menuApi.getMenu,
-    onSuccess: () => {
+    onSuccess: (response) => {
       setRetryCount(0);
-      const { details } = getMenu.result;
+      const { details } = response;
       const theme: ThemeConfig = details.theme ?? {};
 
       const cats = transformCategories(details.menu?.items ?? []);
@@ -114,14 +114,15 @@ const Menu: React.FC = () => {
     },
     callOnMount: false,
   });
+  const { main: loadMenu } = getMenu;
 
   useEffect(() => {
     setStatus('loading');
-    getMenu.main({ id });
-  }, [id]);
+    loadMenu({ id });
+  }, [id, loadMenu]);
 
   // AI chat handler, wired to backend when ready
-  const handleAiMessage = async (message: string, history: ChatMessage[]): Promise<string> => {
+  const handleAiMessage = async (message: string, _history: ChatMessage[]): Promise<string> => {
     // Placeholder until AI backend endpoint is created
     return `Thanks for your question about "${message}". Our team will have AI-powered menu assistance available soon!`;
   };
@@ -139,7 +140,7 @@ const Menu: React.FC = () => {
           className="px-4 py-2 text-sm bg-gray-900 text-white rounded-lg hover:opacity-90 transition-opacity"
           onClick={() => {
             setStatus('loading');
-            getMenu.main({ id });
+            loadMenu({ id });
           }}
         >
           Retry

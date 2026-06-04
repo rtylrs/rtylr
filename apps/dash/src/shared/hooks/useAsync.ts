@@ -1,18 +1,18 @@
-import { useCallback, useEffect, useState } from 'react';
+import { useCallback, useEffect, useMemo, useState } from 'react';
 import { debounce } from 'lodash';
 
 type AsyncFunction<T> = (data: unknown) => Promise<T>;
-type CallbackFunction = () => void;
+type SuccessCallbackFunction<T> = (result: T) => void;
+type ErrorCallbackFunction = (message: string, error: unknown) => void;
 type ErrorMessageFunction = (error: unknown) => string;
 
 interface UseAsyncParams<T> {
   fn: AsyncFunction<T>;
-  onSuccess?: CallbackFunction;
-  onError?: CallbackFunction;
+  onSuccess?: SuccessCallbackFunction<T>;
+  onError?: ErrorCallbackFunction;
   callOnMount?: boolean;
   callOnMountData?: unknown;
   debounceTime?: number;
-  dependencies?: unknown[];
 }
 
 interface UseAsyncReturn<T> {
@@ -36,7 +36,6 @@ export default function useAsync<T>({
   callOnMount = false,
   callOnMountData = null,
   debounceTime = 0,
-  dependencies = [],
 }: UseAsyncParams<T>): UseAsyncReturn<T> {
   const [error, setError] = useState<string | null>(null);
   const [success, setSuccess] = useState<boolean>(false);
@@ -44,49 +43,41 @@ export default function useAsync<T>({
   const [loading, setLoading] = useState<boolean>(false);
   const [requestData, setRequestData] = useState<unknown>(null);
 
-  const debouncedMain = useCallback(
-    debounce(async (data) => {
+  const execute = useCallback(
+    async (data: unknown) => {
       try {
+        setError(null);
+        setSuccess(false);
         setLoading(true);
         setRequestData(data);
         const res = await fn(data);
         setResult(res);
         setSuccess(true);
+        onSuccess(res);
       } catch (error) {
-        setError(errorMessage(error));
+        const message = errorMessage(error);
+        setError(message);
+        onError(message, error);
       } finally {
         setLoading(false);
       }
-    }, debounceTime),
-    [fn, debounceTime]
+    },
+    [fn, onError, onSuccess]
   );
 
-  function reset() {
-    setError(null);
-    setSuccess(false);
-    setResult(null);
-    setLoading(false);
-  }
+  const debouncedMain = useMemo(() => debounce(execute, debounceTime), [debounceTime, execute]);
 
   useEffect(() => {
     if (callOnMount) {
       debouncedMain(callOnMountData);
     }
-  }, [...dependencies]);
+  }, [callOnMount, callOnMountData, debouncedMain]);
 
   useEffect(() => {
-    if (success) {
-      onSuccess();
-    }
-
-    if (error) {
-      onError();
-    }
-
     return () => {
-      reset();
+      debouncedMain.cancel();
     };
-  }, [success, error]);
+  }, [debouncedMain]);
 
   return { main: debouncedMain, error, success, loading, result, requestData };
 }

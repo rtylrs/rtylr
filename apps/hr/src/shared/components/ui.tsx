@@ -221,7 +221,7 @@ export const Label: React.FC<React.LabelHTMLAttributes<HTMLLabelElement>> = ({
       color: 'var(--hr-text-muted)',
       textTransform: 'uppercase',
       letterSpacing: '0.05em',
-      marginBottom: 6,
+      marginBottom: 8,
       ...style,
     }}
     {...rest}

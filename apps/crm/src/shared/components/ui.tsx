@@ -92,7 +92,7 @@ export const Input: React.FC<React.InputHTMLAttributes<HTMLInputElement> & { lab
   style,
   ...props
 }) => (
-  <label style={{ display: 'flex', flexDirection: 'column', gap: '4px', width: '100%' }}>
+  <label style={{ display: 'flex', flexDirection: 'column', gap: '6px', width: '100%' }}>
     {label && (
       <span
         style={{
@@ -127,7 +127,7 @@ export const Input: React.FC<React.InputHTMLAttributes<HTMLInputElement> & { lab
 export const Textarea: React.FC<
   React.TextareaHTMLAttributes<HTMLTextAreaElement> & { label?: string }
 > = ({ label, style, ...props }) => (
-  <label style={{ display: 'flex', flexDirection: 'column', gap: '4px', width: '100%' }}>
+  <label style={{ display: 'flex', flexDirection: 'column', gap: '6px', width: '100%' }}>
     {label && (
       <span
         style={{
@@ -164,7 +164,7 @@ export const Textarea: React.FC<
 export const Select: React.FC<
   React.SelectHTMLAttributes<HTMLSelectElement> & { label?: string }
 > = ({ label, style, children, ...props }) => (
-  <label style={{ display: 'flex', flexDirection: 'column', gap: '4px', width: '100%' }}>
+  <label style={{ display: 'flex', flexDirection: 'column', gap: '6px', width: '100%' }}>
     {label && (
       <span
         style={{

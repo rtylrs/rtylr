@@ -135,6 +135,7 @@ const General: React.FC = () => {
                 />
                 <Button
                   type="button"
+                  className="shrink-0 whitespace-nowrap"
                   disabled={!slug || setSlug.isPending}
                   onClick={() => setSlug.mutate(slug)}
                 >

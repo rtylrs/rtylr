@@ -19,7 +19,7 @@ const ROUTE_LABELS: Record<string, string> = {
   audit: 'Audit',
   security: 'Security',
   settings: 'Settings',
-  subscription: 'Subscription',
+  subscription: 'Billing',
   menus: 'Menus',
   menu: 'Menu',
   orders: 'Orders',

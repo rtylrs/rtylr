@@ -32,6 +32,16 @@ describe('configStore', () => {
     expect(getState().websiteData).toEqual(data);
   });
 
+  it('setWebsiteData preserves an existing slug when the next payload omits it', () => {
+    getState().setWebsiteData({ slug: 'voxire', title: 'Old title' });
+    getState().setWebsiteData({ title: 'New title' });
+
+    expect(getState().websiteData).toEqual({
+      slug: 'voxire',
+      title: 'New title',
+    });
+  });
+
   it('setAboutContent updates aboutContent', () => {
     const content = { text: 'About us' };
     getState().setAboutContent(content);

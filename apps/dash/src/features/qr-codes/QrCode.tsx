@@ -44,6 +44,7 @@ function QrCode() {
 
   useEffect(() => {
     if (qrOptions.logoImage) {
+      setIsLogoLoaded(false);
       const img = new Image();
       img.src = (user?.logo as string) ?? '';
       img.onload = () => setIsLogoLoaded(true);
@@ -54,7 +55,7 @@ function QrCode() {
     } else {
       setIsLogoLoaded(true);
     }
-  }, [qrOptions.logoImage]);
+  }, [qrOptions.logoImage, user?.logo]);
 
   return (
     <div className="space-y-6">

@@ -21,7 +21,7 @@ function AppInit(): null {
   const fetchConfigData = useConfigStore((s) => s.fetchConfigData);
   useEffect(() => {
     fetchConfigData();
-  }, []);
+  }, [fetchConfigData]);
   return null;
 }
 

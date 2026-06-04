@@ -105,6 +105,7 @@ const routeLabels: Record<string, string> = {
   '/settings/domain': 'Custom Domain',
   '/settings/email': 'Email Settings',
   '/settings/billing': 'Billing',
+  '/settings/subscription': 'Billing',
   '/settings/addons': 'Addons',
 };
 

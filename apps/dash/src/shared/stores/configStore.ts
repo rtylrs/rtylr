@@ -41,10 +41,19 @@ const initialState: ConfigState = {
 
 export const useConfigStore = create<ConfigState & ConfigActions>()(
   persist(
-    (set, get) => ({
+    (set) => ({
       ...initialState,
 
-      setWebsiteData: (websiteData) => set({ websiteData }),
+      setWebsiteData: (websiteData) =>
+        set((state) => {
+          const current = state.websiteData ?? {};
+          const nextSlug =
+            (websiteData.slug as string | undefined) ?? (current.slug as string | undefined);
+
+          return {
+            websiteData: nextSlug ? { ...websiteData, slug: nextSlug } : websiteData,
+          };
+        }),
 
       setAboutContent: (aboutContent) => set({ aboutContent }),
 

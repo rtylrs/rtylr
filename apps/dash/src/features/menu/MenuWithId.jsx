@@ -11,9 +11,9 @@ function MenuWithId() {
   const { id } = useParams({ strict: false });
   const getMenu = useAsync({
     fn: menuApi.getMenuWithMenuId,
-    onSuccess: () => {
-      setCategories(getMenu.result.details.menu.items);
-      setRestaurant(getMenu.result.details.business);
+    onSuccess: (response) => {
+      setCategories(response.details.menu.items);
+      setRestaurant(response.details.business);
       setStatus('succeeded');
     },
     onError: () => {
@@ -21,11 +21,12 @@ function MenuWithId() {
     },
     callOnMount: false,
   });
+  const { main: loadMenu } = getMenu;
 
   useEffect(() => {
     setStatus('loading');
-    getMenu.main({ id });
-  }, []);
+    loadMenu({ id });
+  }, [id, loadMenu]);
 
   const renderMenuItem = (item) => (
     <div

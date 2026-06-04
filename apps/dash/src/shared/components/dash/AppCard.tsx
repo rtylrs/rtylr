@@ -101,7 +101,7 @@ export const AppCard: React.FC<AppCardProps> = ({ app, onLaunch }) => {
   if (isLocked) {
     return (
       <motion.a
-        href="/settings/subscription"
+        href="/settings/billing"
         className="group rounded-xl p-5 flex flex-col gap-4 no-underline transition-all"
         style={cardStyle}
         whileHover={{ scale: 1.01 }}

@@ -1,9 +1,9 @@
-import React, { useState, useEffect, useMemo } from 'react';
+import React, { useState, useEffect, useMemo, useCallback } from 'react';
 import { useNavigate } from '@tanstack/react-router';
 import { useTranslation } from 'react-i18next';
 import { AlertCircle } from 'lucide-react';
 import { FaGoogle, FaGithub, FaMicrosoft, FaApple } from 'react-icons/fa';
-import { APP_URLS, APP_CONFIG } from '@voxire/config';
+import { APP_URLS } from '@voxire/config';
 
 import { useUserStore } from '../../shared/stores/userStore';
 import { useLogin } from '../../shared/hooks/useAuth';
@@ -17,21 +17,6 @@ import AuthShell from '../../shared/components/AuthShell';
 import { getEmailError } from '../../shared/lib/validation';
 
 type KnownAppId = keyof typeof APP_URLS;
-
-function getRedirectUrl(redirectParam: string | null): string {
-  if (redirectParam && redirectParam in APP_URLS) {
-    return APP_URLS[redirectParam as KnownAppId] as string;
-  }
-  return APP_URLS.dash as string;
-}
-
-function getAppDisplayName(redirectParam: string | null): string | null {
-  if (!redirectParam) return null;
-  if (redirectParam in APP_CONFIG) {
-    return APP_CONFIG[redirectParam as keyof typeof APP_CONFIG].name;
-  }
-  return null;
-}
 
 const Login: React.FC = (): React.JSX.Element => {
   const navigate = useNavigate();
@@ -49,9 +34,7 @@ const Login: React.FC = (): React.JSX.Element => {
     return params.get('redirect');
   }, []);
 
-  const appName = getAppDisplayName(redirectParam);
-
-  const redirectTo = async (): Promise<void> => {
+  const redirectTo = useCallback(async (): Promise<void> => {
     // Explicit redirect param, honor it directly
     if (redirectParam && redirectParam in APP_URLS) {
       window.location.href = APP_URLS[redirectParam as KnownAppId] as string;
@@ -77,7 +60,7 @@ const Login: React.FC = (): React.JSX.Element => {
     } catch {
       window.location.href = APP_URLS.dash as string;
     }
-  };
+  }, [redirectParam]);
 
   const handleSubmit = (): void => {
     loginMutation.mutate({ email, password }, { onSuccess: () => void redirectTo() });
@@ -100,7 +83,7 @@ const Login: React.FC = (): React.JSX.Element => {
     if (isAuthenticated && tokenCookie) {
       void redirectTo();
     }
-  }, [isAuthenticated]);
+  }, [isAuthenticated, redirectTo]);
 
   const errorMessage = error ? t('auth.login.genericError') : null;
 

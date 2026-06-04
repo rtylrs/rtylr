@@ -33,7 +33,6 @@ const Domain = React.lazy(() => import('./features/settings/Settings/components/
 const Email = React.lazy(() => import('./features/settings/Settings/components/Email/Email'));
 const Billing = React.lazy(() => import('./features/billing/Billing.tsx'));
 const Addons = React.lazy(() => import('./features/addons/Addons.tsx'));
-const Subscription = React.lazy(() => import('./features/subscription/Subscription'));
 
 const Team = React.lazy(() => import('./features/team/Team'));
 const InviteUser = React.lazy(() => import('./features/team/InviteUser'));
@@ -335,11 +334,7 @@ const settingsEmailRoute = createRoute({
 const settingsSubscriptionRoute = createRoute({
   getParentRoute: () => settingsRoute,
   path: '/subscription',
-  component: () => (
-    <Suspense fallback={fallback}>
-      <Subscription />
-    </Suspense>
-  ),
+  component: () => <Navigate to="/settings/billing" replace />,
 });
 
 const settingsBillingRoute = createRoute({

@@ -2,14 +2,18 @@ import { unwrap } from '@voxire/api';
 import { useMutation, useQueryClient } from '@tanstack/react-query';
 import { safe } from '../../lib/api';
 import { toast } from 'sonner';
+import { useConfigStore } from '../../stores/configStore';
 
 export const useSetBusinessSlug = () => {
   const queryClient = useQueryClient();
+  const setWebsiteData = useConfigStore((s) => s.setWebsiteData);
   return useMutation({
     mutationFn: async (slug: string) => {
-      return unwrap(safe.put('/business/me/slug', { slug }));
+      return unwrap<{ slug: string }>(safe.put('/business/me/slug', { slug }));
     },
-    onSuccess: () => {
+    onSuccess: ({ slug }) => {
+      const currentWebsiteData = useConfigStore.getState().websiteData ?? {};
+      setWebsiteData({ ...currentWebsiteData, slug });
       queryClient.invalidateQueries({ queryKey: ['business'] });
       queryClient.invalidateQueries({ queryKey: ['user'] });
       toast.success('Slug updated');
