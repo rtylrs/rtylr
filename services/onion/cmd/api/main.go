@@ -40,7 +40,6 @@ import (
 	crmsales "github.com/voxire/onion/internal/modules/crm_sales"
 	crmsettings "github.com/voxire/onion/internal/modules/crm_settings"
 	"github.com/voxire/onion/internal/modules/customers"
-	"github.com/voxire/onion/internal/modules/cycles"
 	"github.com/voxire/onion/internal/modules/departments"
 	"github.com/voxire/onion/internal/modules/documents"
 	"github.com/voxire/onion/internal/modules/echo"
@@ -73,7 +72,6 @@ import (
 	"github.com/voxire/onion/internal/modules/kpis"
 	"github.com/voxire/onion/internal/modules/loyalty"
 	"github.com/voxire/onion/internal/modules/memory"
-	"github.com/voxire/onion/internal/modules/milestones"
 	"github.com/voxire/onion/internal/modules/notifications"
 	"github.com/voxire/onion/internal/modules/oauth"
 	oneonones "github.com/voxire/onion/internal/modules/one_on_ones"
@@ -136,7 +134,6 @@ import (
 	"github.com/voxire/onion/internal/modules/training"
 	"github.com/voxire/onion/internal/modules/user"
 	"github.com/voxire/onion/internal/modules/variants"
-	"github.com/voxire/onion/internal/modules/views"
 	"github.com/voxire/onion/internal/modules/voxhire"
 	"github.com/voxire/onion/internal/modules/warehouses"
 	"github.com/voxire/onion/internal/modules/webhooks"
@@ -339,7 +336,6 @@ type apiModules struct {
 	CRMSettings           *crmsettings.Module
 	CRMSales              *crmsales.Module
 	Customers             *customers.Module
-	Cycles                *cycles.Module
 	Departments           *departments.Module
 	Documents             *documents.Module
 	CacheOps              *cacheops.Module
@@ -372,7 +368,6 @@ type apiModules struct {
 	KPIs                  *kpis.Module
 	Loyalty               *loyalty.Module
 	Memory                *memory.Module
-	Milestones            *milestones.Module
 	Notifications         *notifications.Module
 	OAuth                 *oauth.Module
 	OneOnOnes             *oneonones.Module
@@ -434,7 +429,6 @@ type apiModules struct {
 	Training              *training.Module
 	User                  *user.Module
 	Variants              *variants.Module
-	Views                 *views.Module
 	Voxhire               *voxhire.Module
 	Warehouses            *warehouses.Module
 	Webhooks              *webhooks.Module
@@ -475,7 +469,6 @@ func initializeModules(ctx context.Context) *apiModules {
 		CRMSettings:           crmsettings.NewModule(ctx, dbclient.Pool()),
 		CRMSales:              crmsales.NewModule(ctx, dbclient.Pool()),
 		Customers:             customers.NewModule(ctx, dbclient.Pool()),
-		Cycles:                cycles.NewModule(ctx, dbclient.Pool()),
 		FeatureSupport:        featuresupport.NewModule(ctx, dbclient.Pool()),
 		Departments:           departments.NewModule(ctx, dbclient.Pool()),
 		Documents:             documents.NewModule(ctx, dbclient.Pool()),
@@ -509,7 +502,6 @@ func initializeModules(ctx context.Context) *apiModules {
 		KPIs:                  kpis.NewModule(ctx, dbclient.Pool()),
 		Loyalty:               loyalty.NewModule(ctx, dbclient.Pool()),
 		Memory:                memoryModule,
-		Milestones:            milestones.NewModule(ctx, dbclient.Pool()),
 		Notifications:         notifications.NewModule(ctx, dbclient.Pool()),
 		OAuth:                 oauth.NewModule(ctx, dbclient.Pool(), platformConfig.GlobalConfig.AuthAppURL),
 		OneOnOnes:             oneonones.NewModule(ctx, dbclient.Pool()),
@@ -578,7 +570,6 @@ func initializeModules(ctx context.Context) *apiModules {
 			return m
 		}(),
 		Variants:    variants.NewModule(ctx, dbclient.Pool()),
-		Views:       views.NewModule(ctx, dbclient.Pool()),
 		Voxhire:     voxhire.NewModule(ctx, dbclient.Pool()),
 		Warehouses:  warehouses.NewModule(ctx, dbclient.Pool()),
 		Webhooks:    webhooks.NewModule(ctx, dbclient.Pool()),
