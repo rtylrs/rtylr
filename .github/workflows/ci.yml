@@ -7,6 +7,12 @@ on:
     branches: [main]
   workflow_dispatch:
 
+# Cancel superseded runs on PRs/branches so a new push doesn't wait behind a
+# stale one. Never cancel main (its runs deploy — let them finish).
+concurrency:
+  group: ci-${{ github.ref }}
+  cancel-in-progress: ${{ github.ref != 'refs/heads/main' }}
+
 jobs:
   # ── Quality gates ──────────────────────────────────────────────────
   # These stay in the calling repo - they reference this repo's scripts
@@ -36,11 +42,21 @@ jobs:
       - name: Install dependencies
         run: pnpm install --frozen-lockfile
 
+      # Persist Turbo's task cache across runs so unchanged packages skip
+      # typecheck/build entirely. Keyed per-commit, falling back to the latest.
+      - name: Turbo cache
+        uses: actions/cache@v4
+        with:
+          path: .turbo
+          key: ${{ runner.os }}-turbo-${{ github.sha }}
+          restore-keys: |
+            ${{ runner.os }}-turbo-
+
       - name: Format check
         run: pnpm format:check
 
       - name: Typecheck
-        run: pnpm turbo typecheck
+        run: pnpm turbo typecheck --cache-dir=.turbo
 
       - name: Lint
         run: pnpm lint
@@ -52,17 +68,16 @@ jobs:
         run: pnpm test
 
       - name: Build
-        run: pnpm turbo build
+        run: pnpm turbo build --cache-dir=.turbo
 
   # ── End-to-end (Playwright) ────────────────────────────────────────
   # Real browser, real Vite dev servers, API stubbed per-test via
-  # page.route(). Lives in its own job so Vitest failures don't waste
-  # Playwright's boot time. Hard-gated now that specs are green - if
-  # a test goes flaky, tighten the selector rather than re-enabling
-  # continue-on-error.
+  # page.route(). Runs in parallel with `check` (it doesn't need the build) to
+  # cut wall-clock; the deploy jobs still gate on both. Hard-gated now that
+  # specs are green - if a test goes flaky, tighten the selector rather than
+  # re-enabling continue-on-error.
   e2e:
     name: Playwright E2E
-    needs: check
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v4
@@ -78,8 +93,22 @@ jobs:
       - name: Install dependencies
         run: pnpm install --frozen-lockfile
 
-      - name: Install Playwright browsers
+      # Cache the downloaded browsers; only re-download when the lockfile
+      # (hence the Playwright version) changes. OS deps are cheap to reapply.
+      - name: Cache Playwright browsers
+        id: pw-cache
+        uses: actions/cache@v4
+        with:
+          path: ~/.cache/ms-playwright
+          key: ${{ runner.os }}-playwright-${{ hashFiles('pnpm-lock.yaml') }}
+
+      - name: Install Playwright (browsers + OS deps)
+        if: steps.pw-cache.outputs.cache-hit != 'true'
         run: pnpm exec playwright install --with-deps chromium
+
+      - name: Install Playwright OS deps (cached browsers)
+        if: steps.pw-cache.outputs.cache-hit == 'true'
+        run: pnpm exec playwright install-deps chromium
 
       - name: Run Playwright specs
         run: pnpm test:e2e
