@@ -18,7 +18,8 @@ var renderCases = map[Template]struct {
 }{
 	TemplateWelcome: {
 		data: WelcomeData{Subject: "Welcome", Name: "Sam"},
-		want: []string{"Hey Sam", "welcome to rtylr"},
+		// "https://hub.rtylr.com" verifies the {{appURL "hub"}} func resolved.
+		want: []string{"Hey Sam", "welcome to rtylr", "https://hub.rtylr.com"},
 	},
 	TemplateInvitation: {
 		data: InvitationData{Subject: "Invite", InviterName: "Alex", BusinessName: "Acme", InviteLink: "https://x.test/i"},

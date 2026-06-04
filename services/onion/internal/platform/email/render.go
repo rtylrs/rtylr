@@ -5,7 +5,39 @@ import (
 	"embed"
 	"fmt"
 	"html/template"
+
+	"github.com/voxire/onion/internal/platform/config"
 )
+
+// templateFuncs exposes the rtylr app base URLs to templates as {{appURL "hub"}},
+// so links live in the templates without hardcoding "https://<app>.rtylr.com".
+// Unknown names fall back to the landing site.
+var templateFuncs = template.FuncMap{
+	"appURL": func(name string) string {
+		switch name {
+		case "auth":
+			return config.AuthAppURL
+		case "hub":
+			return config.HubAppURL
+		case "erp":
+			return config.ERPAppURL
+		case "hr":
+			return config.HRAppURL
+		case "crm":
+			return config.CRMAppURL
+		case "finance":
+			return config.FinanceAppURL
+		case "flow":
+			return config.FlowAppURL
+		case "menu":
+			return config.MenuAppURL
+		case "insights":
+			return config.InsightsAppURL
+		default:
+			return config.LandingURL
+		}
+	},
+}
 
 // The email-templates submodule is mounted at templates/; inside it, base.html
 // sits at the root and the body templates live under its own templates/<domain>/
@@ -20,7 +52,7 @@ var templateFS embed.FS
 // submodule's templates/ dir without the .html extension. The base layout is
 // always applied; the named template must define a "body" block.
 func Render(tmpl Template, data any) (string, error) {
-	t, err := template.New("base").ParseFS(templateFS,
+	t, err := template.New("base").Funcs(templateFuncs).ParseFS(templateFS,
 		"templates/base.html",
 		fmt.Sprintf("templates/templates/%s.html", tmpl),
 	)
