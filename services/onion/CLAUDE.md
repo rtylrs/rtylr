@@ -534,6 +534,50 @@ Cache writes are never fatal. **Invalidate cache** on every mutation:
 cache.Delete(ctx, fmt.Sprintf("config:%d:settings", ownerID))
 ```
 
+### Email Templates
+
+HTML email templates live in the **voxire/email-templates** submodule, mounted at
+`internal/platform/email/templates`. `base.html` is the shared layout (repo
+root); every body template lives under `templates/<domain>/<name>.html` and
+defines a single `{{define "body"}}...{{end}}` block. `render.go` embeds them via
+`//go:embed templates/base.html` + `templates/templates/*/*.html` (outer
+`templates/` = the mount, inner = the repo's own folder), so a new file in any
+domain folder is picked up automatically — **no `render.go` change needed**.
+
+There is **one** sending API, both in `internal/platform/email/`:
+
+- `SendTemplate(ctx, to, subject, tmpl, data, opts...)` — render + send now via Resend.
+- `EnqueueTemplate(ctx, db, priority, to, subject, tmpl, data, opts...)` — render + enqueue on `email_jobs` (`PriorityCritical/High/Normal`) for the worker.
+
+`tmpl` is a `Template` constant and `data` its matching struct, both declared in
+`templates.go` — that file is the single registry. Optional `From`/`Reply-To` come
+from `WithFrom(...)`/`WithReplyTo(...)`. Never hardcode a template path string at a
+call site; pass the const.
+
+To add a template (e.g. `auth/email_verification`):
+
+1. **In the email-templates repo:** add `templates/<domain>/<name>.html` with one
+   `{{define "body"}}...{{end}}` block, reusing `base.html`'s classes (`.btn`,
+   `.muted`, `h1`, `p`). Make a new domain folder if the domain is new. Commit +
+   push to its `main`. Keep it **one level deep** — `templates/<domain>/<file>.html`;
+   deeper nesting won't match the embed glob.
+2. **Bump the submodule pointer in onion:**
+   `git -C internal/platform/email/templates fetch origin && git -C internal/platform/email/templates checkout origin/main`, then `git add internal/platform/email/templates`.
+3. **In `templates.go`:** add a `Template` const (e.g. `TemplateEmailVerification
+   = "auth/email_verification"`), add it to `AllTemplates`, and add a data struct
+   whose fields match the template's `{{.Placeholders}}` — always include `Subject`
+   (the base layout reads it).
+4. **Add a case to `render_test.go`** (`renderCases`) with representative data;
+   `TestAllTemplatesCovered` fails the build if a const has no case.
+5. **At the call site**, call `SendTemplate`/`EnqueueTemplate` with the new const
+   and struct. Run `go test ./internal/platform/email/`, then commit
+   `templates.go` + the call site + the submodule pointer (+ test) together — the
+   template isn't live until the pointer moves.
+
+The renderer parses `base.html` + the named template on every call. At high send
+volume, parse once at startup into a cache keyed by `Template` instead of
+per-call — the embed FS makes this a local change to `render.go`.
+
 ### Database Pattern
 
 - Connection: singleton MySQL pool via `dbclient.Pool()` — initialized in `main.go`.

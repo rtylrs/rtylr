@@ -14,6 +14,8 @@ import (
 	"github.com/voxire/onion/internal/modules/team/internal/infrastructure"
 	"github.com/voxire/onion/internal/platform/cache/cacher"
 	cacheKeys "github.com/voxire/onion/internal/platform/cache/keys"
+	"github.com/voxire/onion/internal/platform/config"
+	emailPkg "github.com/voxire/onion/internal/platform/email"
 	"github.com/voxire/onion/internal/platform/utils/passwordutils"
 )
 
@@ -36,12 +38,50 @@ func invalidateBusinessTeamScope(ctx context.Context, businessID int64) {
 
 type Service struct {
 	repo *infrastructure.Repository
+	db   *sql.DB
 }
 
 func NewService(_ context.Context, db *sql.DB) *Service {
 	return &Service{
 		repo: infrastructure.NewRepository(db),
+		db:   db,
 	}
+}
+
+// EnqueueInviteEmail queues a team invitation email for the background worker to
+// deliver. Best-effort: returns an error to log, never blocks the invite flow.
+func (s *Service) EnqueueInviteEmail(ctx context.Context, toEmail, inviteLink string) error {
+	if s.db == nil {
+		return nil
+	}
+	subject := "Your team invited you to rtylr on rtylr"
+	return emailPkg.EnqueueTemplate(ctx, s.db, emailPkg.PriorityHigh, toEmail, subject, emailPkg.TemplateInvitation, emailPkg.InvitationData{
+		Subject:      subject,
+		InviterName:  "Your team",
+		BusinessName: "rtylr",
+		InviteLink:   inviteLink,
+	})
+}
+
+// EnqueueAccessRequestEmail queues an app-access-request notification to the
+// business owner. Best-effort: returns an error to log, never blocks the request.
+func (s *Service) EnqueueAccessRequestEmail(ctx context.Context, businessID int64, requesterName, requesterEmail, app string) error {
+	if s.db == nil {
+		return nil
+	}
+	ownerEmail := s.GetBusinessOwnerEmail(ctx, businessID)
+	if ownerEmail == "" {
+		return nil
+	}
+	appUpper := strings.ToUpper(app)
+	subject := requesterName + " requested access to " + appUpper
+	return emailPkg.EnqueueTemplate(ctx, s.db, emailPkg.PriorityNormal, ownerEmail, subject, emailPkg.TemplateAccessRequest, emailPkg.AccessRequestData{
+		Subject:        subject,
+		RequesterName:  requesterName,
+		RequesterEmail: requesterEmail,
+		App:            appUpper,
+		TeamLink:       config.HubAppURL + "/team",
+	})
 }
 
 func (s *Service) ListStaffUsers(ctx context.Context, ownerID, page, pageSize int64) ([]domain.StaffUser, bool, error) {

@@ -35,6 +35,11 @@ type AppConfig struct {
 	AuthAppURL          string
 	GoogleOAuthClientID string
 
+	// EmailTestEndpointEnabled gates the public POST /test/email queue-test
+	// endpoint. Off unless EMAIL_TEST_ENDPOINT_ENABLED=true — it is an
+	// unauthenticated email relay and must never be on by default.
+	EmailTestEndpointEnabled bool
+
 	// WorkOS
 	WorkOSAPIKey      string
 	WorkOSClientID    string
@@ -198,6 +203,8 @@ func LoadAndValidate() (*AppConfig, error) {
 		RedisEnabled:           strings.ToLower(os.Getenv("REDIS_ENABLED")) == "true",
 		InMemoryCacheMaxSizeMb: inMemoryCacheMaxSizeMb,
 
+		EmailTestEndpointEnabled: strings.ToLower(strings.TrimSpace(os.Getenv("EMAIL_TEST_ENDPOINT_ENABLED"))) == "true",
+
 		// Paddle
 		PaddleAPIKey:        os.Getenv("PADDLE_API_KEY"),
 		PaddleWebhookSecret: os.Getenv("PADDLE_WEBHOOK_SECRET"),
@@ -245,7 +252,7 @@ func LoadAndValidate() (*AppConfig, error) {
 	}
 
 	if cfg.AuthAppURL == "" {
-		cfg.AuthAppURL = "https://auth.rtylr.com"
+		cfg.AuthAppURL = AuthAppURL
 	}
 
 	var missing []string

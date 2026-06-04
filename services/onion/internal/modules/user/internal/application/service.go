@@ -134,7 +134,15 @@ func (s *Service) Register(ctx context.Context, data RegisterUserData) (int64, e
 	}
 
 	if s.db != nil {
-		if qErr := email.EnqueueWelcome(ctx, s.db, normalizedEmail, normalizedFullName); qErr != nil {
+		greeting := normalizedFullName
+		if greeting == "" {
+			greeting = "there"
+		}
+		if qErr := email.EnqueueTemplate(ctx, s.db, email.PriorityNormal, normalizedEmail, "Welcome to rtylr", email.TemplateWelcome,
+			email.WelcomeData{Subject: "Welcome to rtylr", Name: greeting},
+			email.WithFrom("Mohamad at rtylr <mohamad@voxire.com>"),
+			email.WithReplyTo("mohamad@voxire.com"),
+		); qErr != nil {
 			logger.Ctx(ctx).Warn("failed to enqueue welcome email", logger.Error(qErr))
 		}
 	}

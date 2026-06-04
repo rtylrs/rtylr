@@ -43,6 +43,7 @@ import (
 	"github.com/voxire/onion/internal/modules/departments"
 	"github.com/voxire/onion/internal/modules/documents"
 	"github.com/voxire/onion/internal/modules/echo"
+	"github.com/voxire/onion/internal/modules/emailtest"
 	"github.com/voxire/onion/internal/modules/expenses"
 	"github.com/voxire/onion/internal/modules/featuresupport"
 	"github.com/voxire/onion/internal/modules/feedback"
@@ -340,6 +341,7 @@ type apiModules struct {
 	Documents             *documents.Module
 	CacheOps              *cacheops.Module
 	Echo                  *echo.Module
+	EmailTest             *emailtest.Module
 	Expenses              *expenses.Module
 	Feedback              *feedback.Module
 	FinanceBankFeeds      *financebankfeeds.Module
@@ -474,6 +476,7 @@ func initializeModules(ctx context.Context) *apiModules {
 		Documents:             documents.NewModule(ctx, dbclient.Pool()),
 		CacheOps:              cacheops.NewModule(),
 		Echo:                  echo.NewModule(ctx, memoryModule),
+		EmailTest:             emailtest.NewModule(ctx, dbclient.Pool()),
 		Expenses:              expenses.NewModule(ctx, dbclient.Pool()),
 		Feedback:              feedback.NewModule(ctx, dbclient.Pool()),
 		FinanceBankFeeds:      financebankfeeds.NewModule(ctx, dbclient.Pool()),

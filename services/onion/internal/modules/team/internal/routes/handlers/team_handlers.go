@@ -5,7 +5,6 @@ import (
 	"errors"
 	"net/http"
 	"strconv"
-	"strings"
 	"time"
 
 	"github.com/go-chi/chi/v5"
@@ -13,7 +12,7 @@ import (
 	"github.com/voxire/onion/internal/modules/team/internal/application"
 	"github.com/voxire/onion/internal/modules/team/internal/domain"
 	authPkg "github.com/voxire/onion/internal/platform/auth"
-	emailPkg "github.com/voxire/onion/internal/platform/email"
+	"github.com/voxire/onion/internal/platform/config"
 	errorModels "github.com/voxire/onion/internal/platform/errors"
 	"github.com/voxire/onion/internal/platform/logger"
 	hubteaminvitationsv1 "github.com/voxire/voxie/gen/go/hub/team/invitations/v1"
@@ -235,20 +234,13 @@ func (h *InviteUserHandler) Serve(ctx context.Context, req *InviteUserRequest) (
 		_ = h.Service.AddGroupMembers(ctx, ownerID, req.GroupID, ownerID, []int64{userID})
 	}
 
-	// Only send invite email if no password was set manually
+	// Only send invite email if no password was set manually. Enqueue is a fast
+	// insert handled by the background worker, so no goroutine is needed.
 	if req.Password == "" && token != "" {
-		go func() {
-			defer func() {
-				if r := recover(); r != nil {
-					logger.Global().Error("goroutine panicked", logger.Any("panic", r))
-				}
-			}()
-			taskCtx, cancel := context.WithTimeout(context.WithoutCancel(ctx), 10*time.Second)
-			defer cancel()
-
-			inviteLink := "https://auth.rtylr.com/invite/" + token
-			emailPkg.SendInvitation(taskCtx, req.Email, "Your team", "rtylr", inviteLink)
-		}()
+		inviteLink := config.AuthAppURL + "/invite/" + token
+		if emailErr := h.Service.EnqueueInviteEmail(ctx, req.Email, inviteLink); emailErr != nil {
+			logger.Ctx(ctx).Warn("failed to enqueue invite email", logger.Error(emailErr))
+		}
 		return InviteUserResponse{UserId: userID, Message: "Invitation sent"}, nil
 	}
 
@@ -615,40 +607,14 @@ func (h *RequestAccessHandler) Serve(ctx context.Context, req *RequestAccessRequ
 		}
 	}
 
-	// Get requesting user's name for the email
+	// Notify the business owner. Enqueue is a fast insert; the worker delivers.
 	requesterEmail, requesterName, _ := h.Service.GetUserInfo(ctx, device.User.UserID)
 	if requesterName == "" {
 		requesterName = requesterEmail
 	}
-
-	// Send email to business owner (non-blocking)
-	go func() {
-		defer func() {
-			if r := recover(); r != nil {
-				logger.Global().Error("goroutine panicked", logger.Any("panic", r))
-			}
-		}()
-		taskCtx, cancel := context.WithTimeout(context.WithoutCancel(ctx), 10*time.Second)
-		defer cancel()
-
-		ownerEmail := h.Service.GetBusinessOwnerEmail(taskCtx, device.User.BusinessID)
-		if ownerEmail != "" {
-			appUpper := strings.ToUpper(req.App)
-			emailPkg.Send(taskCtx, emailPkg.SendParams{
-				To:      []string{ownerEmail},
-				Subject: requesterName + " requested access to " + appUpper,
-				HTML: `<div style="font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',Roboto,sans-serif;max-width:480px;margin:0 auto;padding:40px 20px;">
-					<h2 style="font-size:20px;font-weight:600;color:#111;margin:0 0 8px 0;">Access request</h2>
-					<p style="font-size:14px;color:#666;line-height:1.6;margin:0 0 24px 0;">
-						<strong>` + requesterName + `</strong> (` + requesterEmail + `) is requesting access to <strong>` + appUpper + `</strong>.
-					</p>
-					<a href="https://hub.rtylr.com/team" style="display:inline-block;background:#4583C4;color:#fff;padding:12px 24px;border-radius:8px;text-decoration:none;font-size:14px;font-weight:600;">
-						Go to Team
-					</a>
-				</div>`,
-			})
-		}
-	}()
+	if emailErr := h.Service.EnqueueAccessRequestEmail(ctx, device.User.BusinessID, requesterName, requesterEmail, req.App); emailErr != nil {
+		logger.Ctx(ctx).Warn("failed to enqueue access request email", logger.Error(emailErr))
+	}
 
 	return RequestAccessResponse{Message: "Access requested"}, nil
 }

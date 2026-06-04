@@ -12,6 +12,7 @@ import (
 	"github.com/voxire/onion/internal/platform/cache/cacher"
 	"github.com/voxire/onion/internal/platform/config"
 	"github.com/voxire/onion/internal/platform/email"
+	"github.com/voxire/onion/internal/platform/logger"
 	"github.com/voxire/onion/internal/platform/utils/passwordutils"
 )
 
@@ -54,7 +55,14 @@ func (s *Service) RequestPasswordReset(ctx context.Context, emailAddr string) er
 		authAppURL = config.GlobalConfig.AuthAppURL
 	}
 	resetLink := fmt.Sprintf("%s/password-reset/confirm?token=%s", authAppURL, token)
-	_, _ = email.SendPasswordReset(ctx, emailAddr, resetLink)
+	if s.db != nil {
+		if emailErr := email.EnqueueTemplate(ctx, s.db, email.PriorityCritical, emailAddr, "Reset your rtylr password", email.TemplatePasswordReset, email.PasswordResetData{
+			Subject:   "Reset your rtylr password",
+			ResetLink: resetLink,
+		}); emailErr != nil {
+			logger.Ctx(ctx).Warn("failed to enqueue password reset email", logger.Error(emailErr))
+		}
+	}
 	return nil
 }
 

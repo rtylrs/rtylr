@@ -4,3 +4,6 @@
 [submodule "internal/platform/database/schemas"]
 	path = internal/platform/database/schemas
 	url = https://github.com/voxire/schemas.git
+[submodule "internal/platform/email/templates"]
+	path = internal/platform/email/templates
+	url = https://github.com/voxire/email-templates.git

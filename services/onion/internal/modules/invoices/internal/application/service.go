@@ -58,11 +58,13 @@ type repository interface {
 
 type Service struct {
 	repo repository
+	db   *sql.DB
 }
 
 func NewService(_ context.Context, db *sql.DB) *Service {
 	return &Service{
 		repo: infrastructure.NewRepository(db),
+		db:   db,
 	}
 }
 
@@ -367,26 +369,16 @@ func (s *Service) SendInvoice(ctx context.Context, ownerID, invoiceID int64) err
 		return err
 	}
 
-	if inv.ClientEmail != "" && emailPkg.IsEnabled() {
+	if inv.ClientEmail != "" && s.db != nil {
 		subject := fmt.Sprintf("Invoice %s from rtylr", inv.InvoiceNumber)
-		html := fmt.Sprintf(
-			"<p>Dear %s,</p><p>Please find attached invoice <strong>%s</strong> for <strong>%.2f %s</strong> due on %s.</p>",
-			inv.ClientName, inv.InvoiceNumber, inv.Total, inv.Currency, inv.DueDate.Format("2006-01-02"),
-		)
-		text := fmt.Sprintf(
-			"Invoice %s\nAmount: %.2f %s\nDue: %s\n",
-			inv.InvoiceNumber, inv.Total, inv.Currency, inv.DueDate.Format("2006-01-02"),
-		)
-
-		if _, sendErr := emailPkg.Send(ctx, emailPkg.SendParams{
-			To:      []string{inv.ClientEmail},
-			Subject: subject,
-			HTML:    html,
-			Text:    text,
-		}); sendErr != nil {
-			logger.Ctx(ctx).Warn("failed to email invoice",
-				logger.Error(sendErr),
-			)
+		if enqErr := emailPkg.EnqueueTemplate(ctx, s.db, emailPkg.PriorityHigh, inv.ClientEmail, subject, emailPkg.TemplateInvoice, emailPkg.InvoiceData{
+			Subject:       subject,
+			CustomerName:  inv.ClientName,
+			InvoiceNumber: inv.InvoiceNumber,
+			Amount:        fmt.Sprintf("%.2f %s", inv.Total, inv.Currency),
+			DueDate:       inv.DueDate.Format("2006-01-02"),
+		}); enqErr != nil {
+			logger.Ctx(ctx).Warn("failed to enqueue invoice email", logger.Error(enqErr))
 		}
 	}
 
