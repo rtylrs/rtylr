@@ -73,6 +73,14 @@ type AppConfig struct {
 	AxiomToken   string
 	AxiomDataset string
 
+	// Slack logging — routes error/request/suspicious logs to Slack channels.
+	SlackLoggingEnabled     bool
+	SlackBotToken           string
+	SlackAlertsChannel      string
+	SlackRequestLogsChannel string
+	SlackSuspiciousChannel  string
+	SlackDashboardChannel   string
+
 	// Sentry
 	SentryDSN string
 
@@ -210,6 +218,13 @@ func LoadAndValidate() (*AppConfig, error) {
 		// Axiom logging
 		AxiomToken:   os.Getenv("AXIOM_TOKEN"),
 		AxiomDataset: os.Getenv("AXIOM_DATASET"),
+
+		SlackLoggingEnabled:     strings.ToLower(strings.TrimSpace(os.Getenv("SLACK_LOGGING_ENABLED"))) == "true",
+		SlackBotToken:           os.Getenv("SLACK_BOT_TOKEN"),
+		SlackAlertsChannel:      os.Getenv("SLACK_ALERTS_CHANNEL_ID"),
+		SlackRequestLogsChannel: os.Getenv("SLACK_REQUEST_LOGS_CHANNEL"),
+		SlackSuspiciousChannel:  os.Getenv("SLACK_SUSPICIOUS_REQUESTS_CHANNEL"),
+		SlackDashboardChannel:   os.Getenv("SLACK_DASHBOARD_CHANNEL_ID"),
 
 		// Sentry
 		SentryDSN: os.Getenv("SENTRY_DSN"),

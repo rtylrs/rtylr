@@ -9,6 +9,7 @@ import (
 	"time"
 
 	"github.com/voxire/onion/internal/platform/logger"
+	"github.com/voxire/onion/internal/platform/slack"
 )
 
 type blockedRequest struct {
@@ -111,6 +112,7 @@ func (b *securityBatcher) flush() {
 			logger.String("user_agents", formatMap(userAgents)),
 			logger.String("summary", message),
 		)
+		slack.Post(slack.Suspicious, message)
 
 		delete(b.requests, ip)
 	}

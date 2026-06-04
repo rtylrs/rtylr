@@ -5,12 +5,14 @@ import (
 	"encoding/json"
 	"log/slog"
 	"os"
+	"strings"
 	"sync"
 	"time"
 
 	axiomSlog "github.com/axiomhq/axiom-go/adapters/slog"
 
 	"github.com/voxire/onion/internal/platform/config"
+	"github.com/voxire/onion/internal/platform/slack"
 )
 
 type ctxKey struct{}
@@ -31,7 +33,14 @@ var globalAxiomHandler *axiomSlog.Handler
 // AXIOM_DATASET are set, warn+error records are shipped to Axiom in addition
 // to JSON stdout. Call after loading environment variables.
 func SetupLogger() {
+	// Start the Slack notifier first so the slack handler below has somewhere to
+	// send (no-op unless SLACK_LOGGING_ENABLED + a bot token are set).
+	slack.Init()
+
 	stdoutHandler := slog.NewJSONHandler(os.Stdout, &slog.HandlerOptions{})
+
+	// Error-level records are mirrored to the Slack alerts channel (batched).
+	handlers := []slog.Handler{stdoutHandler, slackErrorHandler{}}
 
 	var token, dataset string
 	if config.GlobalConfig != nil {
@@ -42,23 +51,44 @@ func SetupLogger() {
 		dataset = os.Getenv("AXIOM_DATASET")
 	}
 
-	if token == "" || dataset == "" {
-		slog.SetDefault(slog.New(stdoutHandler))
-		return
+	if token != "" && dataset != "" {
+		if h, err := axiomSlog.New(axiomSlog.SetLevel(slog.LevelWarn)); err == nil {
+			globalAxiomHandler = h
+			handlers = append(handlers, &dedupHandler{inner: h, window: 30 * time.Second})
+		}
 	}
 
-	h, err := axiomSlog.New(axiomSlog.SetLevel(slog.LevelWarn))
-	if err != nil {
-		slog.SetDefault(slog.New(stdoutHandler))
-		return
-	}
-
-	globalAxiomHandler = h
-	slog.SetDefault(slog.New(&multiHandler{handlers: []slog.Handler{
-		stdoutHandler,
-		&dedupHandler{inner: h, window: 30 * time.Second},
-	}}))
+	slog.SetDefault(slog.New(&multiHandler{handlers: handlers}))
 }
+
+// slackErrorHandler forwards error-level records to the Slack alerts channel. It
+// is a no-op when Slack logging is disabled.
+type slackErrorHandler struct{}
+
+func (slackErrorHandler) Enabled(_ context.Context, level slog.Level) bool {
+	return level >= slog.LevelError
+}
+
+func (slackErrorHandler) Handle(_ context.Context, r slog.Record) error {
+	if !slack.Enabled() {
+		return nil
+	}
+	var b strings.Builder
+	b.WriteString("🔴 ")
+	b.WriteString(r.Message)
+	r.Attrs(func(a slog.Attr) bool {
+		b.WriteString("\n• ")
+		b.WriteString(a.Key)
+		b.WriteString(": ")
+		b.WriteString(a.Value.String())
+		return true
+	})
+	slack.Post(slack.Alerts, b.String())
+	return nil
+}
+
+func (h slackErrorHandler) WithAttrs(_ []slog.Attr) slog.Handler { return h }
+func (h slackErrorHandler) WithGroup(_ string) slog.Handler      { return h }
 
 // Flush drains any buffered Axiom events. Call on shutdown.
 func Flush() {

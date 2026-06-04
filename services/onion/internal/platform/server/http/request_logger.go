@@ -16,6 +16,7 @@ import (
 	"github.com/go-chi/chi/v5"
 
 	"github.com/voxire/onion/internal/platform/logger"
+	"github.com/voxire/onion/internal/platform/slack"
 )
 
 func RequestLoggerMiddleware(ctx context.Context) func(next http.Handler) http.Handler {
@@ -65,6 +66,13 @@ func RequestLoggerMiddleware(ctx context.Context) func(next http.Handler) http.H
 			next.ServeHTTP(responseWriter, r)
 
 			duration := time.Since(start)
+
+			// Every request → the Slack request-logs channel (batched). Malicious
+			// requests are blocked upstream by SecurityMiddleware and never reach here.
+			if slack.Enabled() {
+				slack.Post(slack.Requests, fmt.Sprintf("`%d` %s %s · %s · %s",
+					responseWriter.statusCode, r.Method, r.URL.Path, getRemoteIP(r), duration.Round(time.Millisecond)))
+			}
 
 			go func() {
 				if responseWriter.statusCode < 400 {
