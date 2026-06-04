@@ -5,8 +5,11 @@
 // source: insights/product/v1/get_slow_movers.proto
 
 /* eslint-disable */
-import type { PaginationRequest, PaginationResponse } from "../../../common/pagination/v1/pagination";
-import type { SlowMover } from "./types";
+import type {
+  PaginationRequest,
+  PaginationResponse,
+} from '../../../common/pagination/v1/pagination';
+import type { SlowMover } from './types';
 
 export interface GetSlowMoversRequest {
   /** pagination is the pagination value for this contract. */

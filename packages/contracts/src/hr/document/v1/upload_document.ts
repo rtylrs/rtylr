@@ -5,7 +5,7 @@
 // source: hr/document/v1/upload_document.proto
 
 /* eslint-disable */
-import type { EmployeeDocumentPayload } from "./types";
+import type { EmployeeDocumentPayload } from './types';
 
 export interface UploadDocumentRequest {
   /** Employee this document is associated with. */

@@ -20,9 +20,7 @@ export interface Segment {
   /** customer_count is the customer count value for this contract. */
   customerCount: number;
   /** last_calculated_at is the last calculated at value for this contract. */
-  lastCalculatedAt?:
-    | string
-    | undefined;
+  lastCalculatedAt?: string | undefined;
   /** created_at is when the record was created. */
   createdAt: string;
   /** updated_at is when the record was last updated. */

@@ -39,9 +39,7 @@ export interface ChecklistTemplatePayload {
   /** Event that triggers this checklist (onboarding | offboarding). */
   triggerType: string;
   /** Role this template applies to; absent if it applies to all roles. */
-  roleId?:
-    | number
-    | undefined;
+  roleId?: number | undefined;
   /** Items included in this template. */
   items: ChecklistItemPayload[];
   /** Unix timestamp when this record was created. */
@@ -66,13 +64,9 @@ export interface EmployeeChecklistItemPayload {
   /** Completion status (incomplete | in_progress | complete). */
   status: string;
   /** Unix timestamp when the item was completed; absent if not yet complete. */
-  completedAt?:
-    | number
-    | undefined;
+  completedAt?: number | undefined;
   /** URL of the uploaded attachment; absent if none provided. */
-  attachmentUrl?:
-    | string
-    | undefined;
+  attachmentUrl?: string | undefined;
   /** Unix timestamp when this record was created. */
   createdAt: number;
   /** Unix timestamp when this record was last updated. */

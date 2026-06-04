@@ -35,9 +35,7 @@ export interface Addon {
   /** is_enabled is the is enabled value for this contract. */
   isEnabled: boolean;
   /** enabled_at is the enabled at value for this contract. */
-  enabledAt?:
-    | string
-    | undefined;
+  enabledAt?: string | undefined;
   /** disabled_at is the disabled at value for this contract. */
   disabledAt?: string | undefined;
 }

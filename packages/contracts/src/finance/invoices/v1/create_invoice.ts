@@ -5,7 +5,7 @@
 // source: finance/invoices/v1/create_invoice.proto
 
 /* eslint-disable */
-import type { InvoiceDetail, InvoiceItem } from "./types";
+import type { InvoiceDetail, InvoiceItem } from './types';
 
 export interface CreateInvoiceRequest {
   /** client_name is the client name value for this contract. */

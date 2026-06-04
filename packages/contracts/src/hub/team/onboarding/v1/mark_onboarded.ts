@@ -6,8 +6,7 @@
 
 /* eslint-disable */
 
-export interface MarkOnboardedRequest {
-}
+export interface MarkOnboardedRequest {}
 
 export interface MarkOnboardedResponse {
   /** message is a human-readable result message. */

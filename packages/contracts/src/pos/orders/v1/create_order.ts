@@ -5,7 +5,7 @@
 // source: pos/orders/v1/create_order.proto
 
 /* eslint-disable */
-import type { CreateOrderItemInput } from "./types";
+import type { CreateOrderItemInput } from './types';
 
 export interface CreateOrderRequest {
   /** session_id is the session id value for this contract. */

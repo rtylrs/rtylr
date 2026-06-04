@@ -5,7 +5,7 @@
 // source: pos/user/v1/list_pos_users.proto
 
 /* eslint-disable */
-import type { POSUser } from "./types";
+import type { POSUser } from './types';
 
 export interface ListPOSUsersRequest {
   /** location_id is the location id value for this contract. */

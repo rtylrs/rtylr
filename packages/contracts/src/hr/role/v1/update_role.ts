@@ -5,15 +5,13 @@
 // source: hr/role/v1/update_role.proto
 
 /* eslint-disable */
-import type { PermissionPayload, RolePayload } from "./types";
+import type { PermissionPayload, RolePayload } from './types';
 
 export interface UpdateRoleRequest {
   /** ID of the role to update. */
   id: number;
   /** New name; absent to keep current. */
-  name?:
-    | string
-    | undefined;
+  name?: string | undefined;
   /** New permission set; if provided, replaces all existing permissions. */
   permissions: PermissionPayload[];
 }

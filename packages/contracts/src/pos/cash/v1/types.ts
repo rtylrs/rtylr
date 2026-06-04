@@ -14,9 +14,7 @@ export interface CashMovement {
   /** branch_id is the branch id value for this contract. */
   branchId: number;
   /** terminal_id is the terminal id value for this contract. */
-  terminalId?:
-    | number
-    | undefined;
+  terminalId?: number | undefined;
   /** session_id is the session id value for this contract. */
   sessionId: number;
   /** employee_id is the employee id value for this contract. */
@@ -26,13 +24,9 @@ export interface CashMovement {
   /** amount is the amount value for this contract. */
   amount: number;
   /** reason is the reason value for this contract. */
-  reason?:
-    | string
-    | undefined;
+  reason?: string | undefined;
   /** approved_by is the approved by value for this contract. */
-  approvedBy?:
-    | number
-    | undefined;
+  approvedBy?: number | undefined;
   /** created_at is when the record was created. */
   createdAt: string;
 }

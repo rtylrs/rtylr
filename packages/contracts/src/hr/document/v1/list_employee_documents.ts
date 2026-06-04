@@ -5,13 +5,11 @@
 // source: hr/document/v1/list_employee_documents.proto
 
 /* eslint-disable */
-import type { EmployeeDocumentPayload } from "./types";
+import type { EmployeeDocumentPayload } from './types';
 
 export interface ListEmployeeDocumentsRequest {
   /** Filter by employee; absent to include all employees. */
-  employeeId?:
-    | number
-    | undefined;
+  employeeId?: number | undefined;
   /** Filter by document type; absent to include all types. */
   documentType?: string | undefined;
 }

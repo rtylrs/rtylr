@@ -5,10 +5,9 @@
 // source: finance/report/v1/list_tax_config.proto
 
 /* eslint-disable */
-import type { TaxConfig } from "./types";
+import type { TaxConfig } from './types';
 
-export interface ListTaxConfigRequest {
-}
+export interface ListTaxConfigRequest {}
 
 export interface ListTaxConfigResponse {
   /** configs is the configs value for this contract. */

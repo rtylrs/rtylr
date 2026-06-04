@@ -5,23 +5,17 @@
 // source: hr/department/v1/update_department.proto
 
 /* eslint-disable */
-import type { DepartmentPayload } from "./types";
+import type { DepartmentPayload } from './types';
 
 export interface UpdateDepartmentRequest {
   /** ID of the department to update. */
   id: number;
   /** New location; absent to keep current. */
-  locationId?:
-    | number
-    | undefined;
+  locationId?: number | undefined;
   /** New parent department; absent to keep current. */
-  parentDepartmentId?:
-    | number
-    | undefined;
+  parentDepartmentId?: number | undefined;
   /** New name; absent to keep current. */
-  name?:
-    | string
-    | undefined;
+  name?: string | undefined;
   /** New default work schedule; absent to keep current. */
   defaultWorkScheduleId?: number | undefined;
 }

@@ -5,10 +5,9 @@
 // source: hub/security/v1/login_history.proto
 
 /* eslint-disable */
-import type { LoginEntry } from "./types";
+import type { LoginEntry } from './types';
 
-export interface LoginHistoryRequest {
-}
+export interface LoginHistoryRequest {}
 
 export interface LoginHistoryResponse {
   /** history is the history value for this contract. */

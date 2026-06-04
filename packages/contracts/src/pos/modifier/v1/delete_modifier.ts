@@ -6,8 +6,7 @@
 
 /* eslint-disable */
 
-export interface DeleteModifierRequest {
-}
+export interface DeleteModifierRequest {}
 
 export interface DeleteModifierResponse {
   /** message is a human-readable result message. */

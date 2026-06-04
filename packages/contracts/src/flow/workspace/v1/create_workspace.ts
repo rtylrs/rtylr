@@ -5,7 +5,7 @@
 // source: flow/workspace/v1/create_workspace.proto
 
 /* eslint-disable */
-import type { Workspace } from "./types";
+import type { Workspace } from './types';
 
 export interface CreateWorkspaceRequest {
   /** name is the name value for this contract. */

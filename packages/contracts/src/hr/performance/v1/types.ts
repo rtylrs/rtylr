@@ -20,13 +20,9 @@ export interface ReviewGoalPayload {
   /** Detailed description of the goal and expectations. */
   description: string;
   /** Relative importance of this goal within the cycle; absent if all goals are weighted equally. */
-  weight?:
-    | number
-    | undefined;
+  weight?: number | undefined;
   /** Measurable criteria that define goal achievement; absent if not yet specified. */
-  successCriteria?:
-    | string
-    | undefined;
+  successCriteria?: string | undefined;
   /** Goal status (active | achieved | missed). */
   status: string;
   /** Unix timestamp when this record was created. */
@@ -49,19 +45,13 @@ export interface PerformanceReviewPayload {
   /** Type of review (self | manager | peer). */
   reviewType: string;
   /** Overall rating assigned by the reviewer; absent while still in draft. */
-  overallRating?:
-    | string
-    | undefined;
+  overallRating?: string | undefined;
   /** Free-form written feedback from the reviewer; absent while still in draft. */
-  narrative?:
-    | string
-    | undefined;
+  narrative?: string | undefined;
   /** Workflow status (draft | submitted | completed | shared). */
   status: string;
   /** Unix timestamp when the review was shared with the employee; absent if not yet shared. */
-  sharedWithEmployeeAt?:
-    | number
-    | undefined;
+  sharedWithEmployeeAt?: number | undefined;
   /** Unix timestamp when this record was created. */
   createdAt: number;
   /** Unix timestamp when this record was last updated. */

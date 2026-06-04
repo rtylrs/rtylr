@@ -18,21 +18,13 @@ export interface ApprovalChainLevelPayload {
   /** Type of approver (direct_manager | dept_head | hr_admin | role | specific_person). */
   approverType: string;
   /** Role that can approve at this level; absent unless approver_type is role. */
-  approverRoleId?:
-    | number
-    | undefined;
+  approverRoleId?: number | undefined;
   /** Specific employee who approves; absent unless approver_type is specific_person. */
-  approverEmployeeId?:
-    | number
-    | undefined;
+  approverEmployeeId?: number | undefined;
   /** Minimum value that triggers this level; absent if no lower bound. */
-  thresholdMinValue?:
-    | number
-    | undefined;
+  thresholdMinValue?: number | undefined;
   /** Maximum value that triggers this level; absent if no upper bound. */
-  thresholdMaxValue?:
-    | number
-    | undefined;
+  thresholdMaxValue?: number | undefined;
   /** Days before the level times out and the timeout_action fires. */
   timeoutDays: number;
   /** What happens on timeout (escalate | auto_approve | do_nothing). */

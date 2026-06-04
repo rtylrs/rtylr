@@ -5,10 +5,9 @@
 // source: insights/dashboard/v1/get_workload.proto
 
 /* eslint-disable */
-import type { WorkloadEntry } from "./types";
+import type { WorkloadEntry } from './types';
 
-export interface GetWorkloadRequest {
-}
+export interface GetWorkloadRequest {}
 
 export interface GetWorkloadResponse {
   /** workload is the workload value for this contract. */

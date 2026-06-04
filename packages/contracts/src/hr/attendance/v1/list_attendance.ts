@@ -5,13 +5,11 @@
 // source: hr/attendance/v1/list_attendance.proto
 
 /* eslint-disable */
-import type { AttendanceRecordPayload } from "./types";
+import type { AttendanceRecordPayload } from './types';
 
 export interface ListAttendanceRequest {
   /** Filter by employee; absent to include all employees. */
-  employeeId?:
-    | number
-    | undefined;
+  employeeId?: number | undefined;
   /** Filter by date; absent to include all dates. */
   date?: string | undefined;
 }

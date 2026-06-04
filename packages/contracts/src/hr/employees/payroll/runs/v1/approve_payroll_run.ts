@@ -5,7 +5,7 @@
 // source: hr/employees/payroll/runs/v1/approve_payroll_run.proto
 
 /* eslint-disable */
-import type { PayrollRunPayload } from "./types";
+import type { PayrollRunPayload } from './types';
 
 export interface ApprovePayrollRunRequest {
   /** ID of the payroll run to approve. */

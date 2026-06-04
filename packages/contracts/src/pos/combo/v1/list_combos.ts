@@ -5,10 +5,9 @@
 // source: pos/combo/v1/list_combos.proto
 
 /* eslint-disable */
-import type { Combo } from "./types";
+import type { Combo } from './types';
 
-export interface ListCombosRequest {
-}
+export interface ListCombosRequest {}
 
 export interface ListCombosResponse {
   /** combos is the combos value for this contract. */

@@ -5,7 +5,7 @@
 // source: hub/menu/v1/types.proto
 
 /* eslint-disable */
-import type { MenuItem as MenuItem1 } from "../../../pos/menu_item/v1/types";
+import type { MenuItem as MenuItem1 } from '../../../pos/menu_item/v1/types';
 
 export interface MenuItem {
   /** id is the unique identifier for the resource. */

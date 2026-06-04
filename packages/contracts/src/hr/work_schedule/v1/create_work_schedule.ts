@@ -5,7 +5,7 @@
 // source: hr/work_schedule/v1/create_work_schedule.proto
 
 /* eslint-disable */
-import type { WorkSchedulePayload } from "./types";
+import type { WorkSchedulePayload } from './types';
 
 export interface CreateWorkScheduleRequest {
   /** Display name of the schedule. */

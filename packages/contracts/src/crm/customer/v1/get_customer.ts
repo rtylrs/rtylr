@@ -5,7 +5,7 @@
 // source: crm/customer/v1/get_customer.proto
 
 /* eslint-disable */
-import type { Customer } from "../../../pos/customer/v1/types";
+import type { Customer } from '../../../pos/customer/v1/types';
 
 export interface GetCustomerRequest {
   /** id is the unique identifier for the resource. */

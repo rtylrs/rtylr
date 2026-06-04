@@ -5,14 +5,15 @@
 // source: insights/report/v1/list_report_templates.proto
 
 /* eslint-disable */
-import type { PaginationRequest, PaginationResponse } from "../../../common/pagination/v1/pagination";
-import type { ReportTemplate } from "./types";
+import type {
+  PaginationRequest,
+  PaginationResponse,
+} from '../../../common/pagination/v1/pagination';
+import type { ReportTemplate } from './types';
 
 export interface ListReportTemplatesRequest {
   /** pagination is the pagination value for this contract. */
-  pagination:
-    | PaginationRequest
-    | undefined;
+  pagination: PaginationRequest | undefined;
   /** type is the type value for this contract. */
   type: string;
 }

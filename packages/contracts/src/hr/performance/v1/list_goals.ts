@@ -5,13 +5,11 @@
 // source: hr/performance/v1/list_goals.proto
 
 /* eslint-disable */
-import type { ReviewGoalPayload } from "./types";
+import type { ReviewGoalPayload } from './types';
 
 export interface ListGoalsRequest {
   /** Filter by employee; absent to include all employees. */
-  employeeId?:
-    | number
-    | undefined;
+  employeeId?: number | undefined;
   /** Filter by review cycle; absent to include all cycles. */
   reviewCycleId?: number | undefined;
 }

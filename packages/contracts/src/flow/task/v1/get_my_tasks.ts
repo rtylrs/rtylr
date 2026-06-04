@@ -5,10 +5,9 @@
 // source: flow/task/v1/get_my_tasks.proto
 
 /* eslint-disable */
-import type { Task } from "./types";
+import type { Task } from './types';
 
-export interface GetMyTasksRequest {
-}
+export interface GetMyTasksRequest {}
 
 export interface GetMyTasksResponse {
   /** tasks is the tasks value for this contract. */

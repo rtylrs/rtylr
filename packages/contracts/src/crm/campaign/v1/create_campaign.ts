@@ -14,9 +14,7 @@ export interface CreateCampaignRequest {
   /** channel is the channel value for this contract. */
   channel: string;
   /** segment_id is the segment id value for this contract. */
-  segmentId?:
-    | number
-    | undefined;
+  segmentId?: number | undefined;
   /** subject is the subject value for this contract. */
   subject: string;
   /** content is the content value for this contract. */

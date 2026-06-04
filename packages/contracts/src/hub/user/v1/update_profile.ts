@@ -5,7 +5,7 @@
 // source: hub/user/v1/update_profile.proto
 
 /* eslint-disable */
-import type { GetMeResponse } from "./get_me";
+import type { GetMeResponse } from './get_me';
 
 export interface UpdateProfileRequest {
   /** name is the name value for this contract. */

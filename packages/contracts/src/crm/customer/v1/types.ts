@@ -20,9 +20,7 @@ export interface Customer {
   /** phone is the phone value for this contract. */
   phone: string;
   /** date_of_birth is the date of birth value for this contract. */
-  dateOfBirth?:
-    | string
-    | undefined;
+  dateOfBirth?: string | undefined;
   /** gender is the gender value for this contract. */
   gender: string;
   /** address is the address value for this contract. */
@@ -38,9 +36,7 @@ export interface Customer {
   /** visit_count is the visit count value for this contract. */
   visitCount: number;
   /** last_visit_at is the last visit at value for this contract. */
-  lastVisitAt?:
-    | string
-    | undefined;
+  lastVisitAt?: string | undefined;
   /** loyalty_tier is the loyalty tier value for this contract. */
   loyaltyTier: string;
   /** tags is the tags value for this contract. */

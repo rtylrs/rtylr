@@ -6,8 +6,7 @@
 
 /* eslint-disable */
 
-export interface MarkAllReadRequest {
-}
+export interface MarkAllReadRequest {}
 
 export interface MarkAllReadResponse {
   /** message is a human-readable result message. */

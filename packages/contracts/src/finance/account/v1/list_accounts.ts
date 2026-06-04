@@ -5,10 +5,9 @@
 // source: finance/account/v1/list_accounts.proto
 
 /* eslint-disable */
-import type { Account } from "./types";
+import type { Account } from './types';
 
-export interface ListAccountsRequest {
-}
+export interface ListAccountsRequest {}
 
 export interface ListAccountsResponse {
   /** accounts is the accounts value for this contract. */

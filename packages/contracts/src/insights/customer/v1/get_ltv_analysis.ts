@@ -5,10 +5,9 @@
 // source: insights/customer/v1/get_ltv_analysis.proto
 
 /* eslint-disable */
-import type { LTVAnalysis } from "./types";
+import type { LTVAnalysis } from './types';
 
-export interface GetLTVAnalysisRequest {
-}
+export interface GetLTVAnalysisRequest {}
 
 export interface GetLTVAnalysisResponse {
   /** analysis is the analysis value for this contract. */

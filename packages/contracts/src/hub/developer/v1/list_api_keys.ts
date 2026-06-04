@@ -5,10 +5,9 @@
 // source: hub/developer/v1/list_api_keys.proto
 
 /* eslint-disable */
-import type { ApiKey } from "./types";
+import type { ApiKey } from './types';
 
-export interface ListApiKeysRequest {
-}
+export interface ListApiKeysRequest {}
 
 export interface ListApiKeysResponse {
   /** keys is the keys value for this contract. */

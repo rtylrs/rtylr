@@ -5,7 +5,7 @@
 // source: crm/campaign/v1/get_campaign_stats.proto
 
 /* eslint-disable */
-import type { CampaignStats } from "./types";
+import type { CampaignStats } from './types';
 
 export interface GetCampaignStatsRequest {
   /** campaign_id is the campaign id value for this contract. */

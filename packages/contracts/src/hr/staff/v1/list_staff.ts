@@ -5,7 +5,7 @@
 // source: hr/staff/v1/list_staff.proto
 
 /* eslint-disable */
-import type { Staff } from "./types";
+import type { Staff } from './types';
 
 export interface ListStaffRequest {
   /** search is the search value for this contract. */

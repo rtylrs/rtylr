@@ -14,17 +14,11 @@ export interface ReportRequestPayload {
   /** End of the reporting period (ISO-8601 date). */
   dateTo: string;
   /** Filter by location; absent to include all locations. */
-  locationId?:
-    | number
-    | undefined;
+  locationId?: number | undefined;
   /** Filter by department; absent to include all departments. */
-  departmentId?:
-    | number
-    | undefined;
+  departmentId?: number | undefined;
   /** Filter by employee; absent to include all employees. */
-  employeeId?:
-    | number
-    | undefined;
+  employeeId?: number | undefined;
   /** Output format (json | csv | pdf). */
   format: string;
 }

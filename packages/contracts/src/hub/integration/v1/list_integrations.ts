@@ -5,10 +5,9 @@
 // source: hub/integration/v1/list_integrations.proto
 
 /* eslint-disable */
-import type { Integration } from "./types";
+import type { Integration } from './types';
 
-export interface ListIntegrationsRequest {
-}
+export interface ListIntegrationsRequest {}
 
 export interface ListIntegrationsResponse {
   /** integrations is the integrations value for this contract. */

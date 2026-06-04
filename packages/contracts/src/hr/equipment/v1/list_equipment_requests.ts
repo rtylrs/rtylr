@@ -5,13 +5,11 @@
 // source: hr/equipment/v1/list_equipment_requests.proto
 
 /* eslint-disable */
-import type { EquipmentRequestPayload } from "./types";
+import type { EquipmentRequestPayload } from './types';
 
 export interface ListEquipmentRequestsRequest {
   /** Filter by employee; absent to include all employees. */
-  employeeId?:
-    | number
-    | undefined;
+  employeeId?: number | undefined;
   /** Filter by status; absent to include all statuses. */
   status?: string | undefined;
 }

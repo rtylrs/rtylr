@@ -5,10 +5,9 @@
 // source: finance/expenses/v1/list_expenses.proto
 
 /* eslint-disable */
-import type { Expense } from "./types";
+import type { Expense } from './types';
 
-export interface ListExpensesRequest {
-}
+export interface ListExpensesRequest {}
 
 export interface ListExpensesResponse {
   /** expenses is the expenses value for this contract. */

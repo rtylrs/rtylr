@@ -12,9 +12,7 @@ export interface ApproveOvertimeRequest {
   /** True to approve, false to reject. */
   approved: boolean;
   /** Pay multiplier to apply (e.g. 1.5); absent to use the default rate. */
-  multiplierApplied?:
-    | number
-    | undefined;
+  multiplierApplied?: number | undefined;
   /** Reason for rejection; absent if approving. */
   rejectionReason?: string | undefined;
 }
