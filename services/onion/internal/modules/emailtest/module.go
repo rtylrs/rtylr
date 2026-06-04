@@ -1,13 +1,12 @@
-// Package emailtest exposes an unauthenticated endpoint that enqueues any
+// Package emailtest exposes a PUBLIC, unauthenticated endpoint that enqueues any
 // registered email template to an arbitrary address, to verify the email queue
 // end-to-end (POST -> email_jobs -> worker -> Resend) by curl.
 //
 // SECURITY: this is effectively an open email relay (e.g. it can send a genuine
-// rtylr password-reset email with a caller-supplied link — a phishing vector), so
-// it is OFF by default and only registers when EMAIL_TEST_ENDPOINT_ENABLED=true.
-// Enable it transiently to test, then unset the flag (or delete this module). It
-// only accepts templates in email.AllTemplates and is covered by the global rate
-// limiter.
+// rtylr password-reset email with a caller-supplied link — a phishing vector).
+// It is intentionally ungated for testing — DELETE this module once the queue is
+// verified. It only accepts templates in email.AllTemplates and is covered by the
+// global rate limiter.
 package emailtest
 
 import (
@@ -18,18 +17,10 @@ import (
 
 	"github.com/go-chi/chi/v5"
 
-	"github.com/voxire/onion/internal/platform/config"
 	"github.com/voxire/onion/internal/platform/email"
 	"github.com/voxire/onion/internal/platform/errors"
 	serverHttp "github.com/voxire/onion/internal/platform/server/http"
 )
-
-// enabled reports whether the test endpoint is switched on. It is off unless
-// EMAIL_TEST_ENDPOINT_ENABLED=true, so the unauthenticated relay never exists in
-// a normal (incl. production) deployment.
-func enabled() bool {
-	return config.GlobalConfig != nil && config.GlobalConfig.EmailTestEndpointEnabled
-}
 
 type Module struct {
 	db *sql.DB
@@ -40,18 +31,12 @@ func NewModule(_ context.Context, db *sql.DB) *Module {
 }
 
 func (m *Module) RegisterRoutes(ctx context.Context, router *chi.Mux, _ ...interface{}) {
-	if !enabled() {
-		return
-	}
 	serverHttp.RegisterPOST[TestEmailRequest, TestEmailResponse](
 		ctx, router, TestEmailRoutes(), &TestEmailHandler{DB: m.db},
 	)
 }
 
 func (m *Module) GetAnonymousRoutes() []string {
-	if !enabled() {
-		return []string{}
-	}
 	return TestEmailRoutes()
 }
 
