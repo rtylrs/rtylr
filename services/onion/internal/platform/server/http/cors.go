@@ -61,6 +61,12 @@ func corsMiddleware() func(http.Handler) http.Handler {
 				}
 			}
 
+			// The allowed origin is reflected per-request, so the response
+			// varies by Origin. Without this, a shared cache could serve one
+			// origin's Access-Control-Allow-Origin to another. Add (not Set) so
+			// it composes with any Vary a handler sets (e.g. the CDN's Accept).
+			w.Header().Add("Vary", "Origin")
+
 			if allowed {
 				w.Header().Set("Access-Control-Allow-Origin", origin)
 			}
