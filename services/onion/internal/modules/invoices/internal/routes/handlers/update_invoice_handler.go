@@ -11,7 +11,7 @@ import (
 	"github.com/voxire/onion/internal/modules/invoices/internal/domain"
 	authPkg "github.com/voxire/onion/internal/platform/auth"
 	errorModels "github.com/voxire/onion/internal/platform/errors"
-	finv1 "github.com/voxire/voxie/gen/go/finance/v1"
+	financeinvoicesv1 "github.com/voxire/voxie/gen/go/finance/invoices/v1"
 )
 
 func UpdateInvoiceRoutes() []string {
@@ -40,7 +40,7 @@ type UpdateInvoiceRequest struct {
 }
 
 type UpdateInvoiceResponse struct {
-	Invoice *finv1.InvoiceDetail `json:"invoice"`
+	Invoice *financeinvoicesv1.InvoiceDetail `json:"invoice"`
 }
 
 func (h *UpdateInvoiceHandler) Validate(_ context.Context, req *UpdateInvoiceRequest) *errorModels.ServerError {

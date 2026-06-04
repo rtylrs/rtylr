@@ -9,7 +9,7 @@ import (
 	authPkg "github.com/voxire/onion/internal/platform/auth"
 	errorModels "github.com/voxire/onion/internal/platform/errors"
 	"github.com/voxire/onion/internal/platform/logger"
-	hrv1 "github.com/voxire/voxie/gen/go/hr/v1"
+	hrperformancev1 "github.com/voxire/voxie/gen/go/hr/performance/v1"
 )
 
 func ListCyclesRoutes() []string { return []string{"/hr/performance/cycles"} }
@@ -22,10 +22,10 @@ type ListCyclesRequest struct {
 }
 
 type ListCyclesResponse struct {
-	Cycles []*hrv1.ReviewCyclePayload `json:"cycles"`
-	Total  int64                      `json:"total"`
-	Limit  int32                      `json:"limit"`
-	Offset int32                      `json:"offset"`
+	Cycles []*hrperformancev1.ReviewCyclePayload `json:"cycles"`
+	Total  int64                                 `json:"total"`
+	Limit  int32                                 `json:"limit"`
+	Offset int32                                 `json:"offset"`
 }
 
 func (h *ListCyclesHandler) Serve(ctx context.Context, req *ListCyclesRequest) (ListCyclesResponse, *errorModels.ServerError) {
@@ -43,7 +43,7 @@ func (h *ListCyclesHandler) Serve(ctx context.Context, req *ListCyclesRequest) (
 		return ListCyclesResponse{}, &errorModels.ServerError{HTTPCode: http.StatusInternalServerError, Code: http.StatusInternalServerError, Message: "Failed to list review cycles"}
 	}
 
-	payloads := make([]*hrv1.ReviewCyclePayload, 0, len(cycles))
+	payloads := make([]*hrperformancev1.ReviewCyclePayload, 0, len(cycles))
 	for _, c := range cycles {
 		payloads = append(payloads, cycleToProto(c))
 	}

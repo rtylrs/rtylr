@@ -7,7 +7,7 @@ import (
 	"github.com/voxire/onion/internal/modules/activity/internal/application"
 	authPkg "github.com/voxire/onion/internal/platform/auth"
 	errorModels "github.com/voxire/onion/internal/platform/errors"
-	hubv1 "github.com/voxire/voxie/gen/go/hub/v1"
+	hubactivityv1 "github.com/voxire/voxie/gen/go/hub/activity/v1"
 )
 
 // --- List Activity -----------------------------------------------------------
@@ -25,7 +25,7 @@ type ListActivityRequest struct {
 }
 
 type ListActivityResponse struct {
-	Activities []*hubv1.ActivityEntry `json:"activities"`
+	Activities []*hubactivityv1.ActivityEntry `json:"activities"`
 }
 
 func (h *ListActivityHandler) Serve(ctx context.Context, req *ListActivityRequest) (ListActivityResponse, *errorModels.ServerError) {
@@ -47,9 +47,9 @@ func (h *ListActivityHandler) Serve(ctx context.Context, req *ListActivityReques
 		}
 	}
 
-	payloads := make([]*hubv1.ActivityEntry, 0, len(activities))
+	payloads := make([]*hubactivityv1.ActivityEntry, 0, len(activities))
 	for _, a := range activities {
-		payloads = append(payloads, &hubv1.ActivityEntry{
+		payloads = append(payloads, &hubactivityv1.ActivityEntry{
 			Id:          a.ID,
 			OwnerId:     a.OwnerID,
 			App:         a.App,

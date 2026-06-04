@@ -9,7 +9,7 @@ import (
 	"github.com/voxire/onion/internal/modules/hr_attendance/internal/domain"
 	errorModels "github.com/voxire/onion/internal/platform/errors"
 	"github.com/voxire/onion/internal/platform/logger"
-	hrv1 "github.com/voxire/voxie/gen/go/hr/v1"
+	hrattendancev1 "github.com/voxire/voxie/gen/go/hr/attendance/v1"
 )
 
 func ClockInRoutes() []string { return []string{"/hr/attendance/clock-in"} }
@@ -28,7 +28,7 @@ type ClockInRequest struct {
 }
 
 type ClockInResponse struct {
-	Record *hrv1.AttendanceRecordPayload `json:"record"`
+	Record *hrattendancev1.AttendanceRecordPayload `json:"record"`
 }
 
 func (h *ClockInHandler) Validate(ctx context.Context, req *ClockInRequest) *errorModels.ServerError {

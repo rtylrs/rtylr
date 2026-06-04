@@ -11,13 +11,13 @@ import (
 	"github.com/voxire/onion/internal/modules/products/internal/domain"
 	authPkg "github.com/voxire/onion/internal/platform/auth"
 	"github.com/voxire/onion/internal/platform/logger"
-	erpv1 "github.com/voxire/voxie/gen/go/erp/v1"
+	erpproductv1 "github.com/voxire/voxie/gen/go/erp/product/v1"
 )
 
 // BarcodeLookupResponse mirrors GetProductResponse — one product,
 // nullable while the FE shows the lookup pending state.
 type BarcodeLookupResponse struct {
-	Product *erpv1.Product `json:"product"`
+	Product *erpproductv1.Product `json:"product"`
 }
 
 // BarcodeLookupHandlerFunc handles `GET /erp/products/barcode/{code}`.

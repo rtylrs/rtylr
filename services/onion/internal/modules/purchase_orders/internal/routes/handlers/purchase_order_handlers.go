@@ -14,7 +14,7 @@ import (
 	"github.com/voxire/onion/internal/modules/purchase_orders/internal/domain"
 	authPkg "github.com/voxire/onion/internal/platform/auth"
 	errorModels "github.com/voxire/onion/internal/platform/errors"
-	erpv1 "github.com/voxire/voxie/gen/go/erp/v1"
+	erppurchaseorderv1 "github.com/voxire/voxie/gen/go/erp/purchase_order/v1"
 )
 
 // ─── List Purchase Orders ─────────────────────────────────────────────────────
@@ -34,14 +34,14 @@ type ListPurchaseOrdersRequest struct {
 }
 
 type ListPurchaseOrdersResponse struct {
-	PurchaseOrders []*erpv1.PurchaseOrder `json:"purchase_orders"`
-	Page           int64                  `json:"page"`
-	PageSize       int64                  `json:"page_size"`
-	HasMore        bool                   `json:"has_more"`
+	PurchaseOrders []*erppurchaseorderv1.PurchaseOrder `json:"purchase_orders"`
+	Page           int64                               `json:"page"`
+	PageSize       int64                               `json:"page_size"`
+	HasMore        bool                                `json:"has_more"`
 }
 
-func newPurchaseOrderPayload(po domain.PurchaseOrder) *erpv1.PurchaseOrder {
-	payload := &erpv1.PurchaseOrder{
+func newPurchaseOrderPayload(po domain.PurchaseOrder) *erppurchaseorderv1.PurchaseOrder {
+	payload := &erppurchaseorderv1.PurchaseOrder{
 		Id:         po.ID,
 		OwnerId:    po.OwnerID,
 		SupplierId: po.SupplierID,
@@ -54,7 +54,7 @@ func newPurchaseOrderPayload(po domain.PurchaseOrder) *erpv1.PurchaseOrder {
 		CreatedBy:  po.CreatedBy,
 		CreatedAt:  po.CreatedAt.Format("2006-01-02T15:04:05Z07:00"),
 		UpdatedAt:  po.UpdatedAt.Format("2006-01-02T15:04:05Z07:00"),
-		Items:      make([]*erpv1.PurchaseOrderItem, 0, len(po.Items)),
+		Items:      make([]*erppurchaseorderv1.PurchaseOrderItem, 0, len(po.Items)),
 	}
 
 	if po.ExpectedDelivery != nil {
@@ -68,7 +68,7 @@ func newPurchaseOrderPayload(po domain.PurchaseOrder) *erpv1.PurchaseOrder {
 	}
 
 	for _, item := range po.Items {
-		payload.Items = append(payload.Items, &erpv1.PurchaseOrderItem{
+		payload.Items = append(payload.Items, &erppurchaseorderv1.PurchaseOrderItem{
 			Id:               item.ID,
 			PurchaseOrderId:  item.PurchaseOrderID,
 			ProductId:        item.ProductID,
@@ -101,7 +101,7 @@ func (h *ListPurchaseOrdersHandler) Serve(ctx context.Context, req *ListPurchase
 		}
 	}
 
-	payloads := make([]*erpv1.PurchaseOrder, 0, len(orders))
+	payloads := make([]*erppurchaseorderv1.PurchaseOrder, 0, len(orders))
 	for _, po := range orders {
 		payloads = append(payloads, newPurchaseOrderPayload(po))
 	}
@@ -327,7 +327,7 @@ type GetPurchaseOrderHandler struct {
 type GetPurchaseOrderRequest struct{}
 
 type GetPurchaseOrderResponse struct {
-	PurchaseOrder *erpv1.PurchaseOrder `json:"purchase_order"`
+	PurchaseOrder *erppurchaseorderv1.PurchaseOrder `json:"purchase_order"`
 }
 
 func (h *GetPurchaseOrderHandler) Serve(ctx context.Context, _ *GetPurchaseOrderRequest) (GetPurchaseOrderResponse, *errorModels.ServerError) {

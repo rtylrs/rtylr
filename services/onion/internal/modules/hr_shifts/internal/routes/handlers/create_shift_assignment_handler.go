@@ -11,7 +11,7 @@ import (
 	authPkg "github.com/voxire/onion/internal/platform/auth"
 	errorModels "github.com/voxire/onion/internal/platform/errors"
 	"github.com/voxire/onion/internal/platform/logger"
-	hrv1 "github.com/voxire/voxie/gen/go/hr/v1"
+	hrshiftv1 "github.com/voxire/voxie/gen/go/hr/shift/v1"
 )
 
 func CreateShiftAssignmentRoutes() []string { return []string{"/hr/shifts/roster/assignments"} }
@@ -25,7 +25,7 @@ type CreateShiftAssignmentRequest struct {
 }
 
 type CreateShiftAssignmentResponse struct {
-	Assignment *hrv1.ShiftAssignmentPayload `json:"assignment"`
+	Assignment *hrshiftv1.ShiftAssignmentPayload `json:"assignment"`
 }
 
 func (h *CreateShiftAssignmentHandler) Validate(_ context.Context, req *CreateShiftAssignmentRequest) *errorModels.ServerError {

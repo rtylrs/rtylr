@@ -8,7 +8,7 @@ import (
 	authPkg "github.com/voxire/onion/internal/platform/auth"
 	errorModels "github.com/voxire/onion/internal/platform/errors"
 	"github.com/voxire/onion/internal/platform/logger"
-	hrv1 "github.com/voxire/voxie/gen/go/hr/v1"
+	hrleavev1 "github.com/voxire/voxie/gen/go/hr/leave/v1"
 )
 
 func GetLeaveBalancesRoutes() []string { return []string{"/hr/leave/balances"} }
@@ -21,7 +21,7 @@ type GetLeaveBalancesRequest struct {
 }
 
 type GetLeaveBalancesResponse struct {
-	Balances []*hrv1.LeaveBalancePayload `json:"balances"`
+	Balances []*hrleavev1.LeaveBalancePayload `json:"balances"`
 }
 
 func (h *GetLeaveBalancesHandler) Serve(ctx context.Context, req *GetLeaveBalancesRequest) (GetLeaveBalancesResponse, *errorModels.ServerError) {
@@ -36,7 +36,7 @@ func (h *GetLeaveBalancesHandler) Serve(ctx context.Context, req *GetLeaveBalanc
 		return GetLeaveBalancesResponse{}, &errorModels.ServerError{HTTPCode: http.StatusInternalServerError, Code: http.StatusInternalServerError, Message: "Failed to get leave balances"}
 	}
 
-	payloads := make([]*hrv1.LeaveBalancePayload, 0, len(balances))
+	payloads := make([]*hrleavev1.LeaveBalancePayload, 0, len(balances))
 	for _, b := range balances {
 		payloads = append(payloads, leaveBalanceToProto(b))
 	}

@@ -9,7 +9,7 @@ import (
 	"github.com/voxire/onion/internal/modules/time_off/internal/domain"
 	authPkg "github.com/voxire/onion/internal/platform/auth"
 	errorModels "github.com/voxire/onion/internal/platform/errors"
-	hrv1 "github.com/voxire/voxie/gen/go/hr/v1"
+	hrtimeoffv1 "github.com/voxire/voxie/gen/go/hr/time_off/v1"
 )
 
 func isValidTimeOffDate(s string) bool {
@@ -22,8 +22,8 @@ func ListTimeOffRoutes() []string    { return []string{"/hr/time-off"} }
 func SubmitTimeOffRoutes() []string  { return []string{"/hr/time-off"} }
 func ApproveTimeOffRoutes() []string { return []string{"/hr/time-off/approve"} }
 
-func newTimeOffPayload(t domain.TimeOffRequest) *hrv1.TimeOffRequest {
-	return &hrv1.TimeOffRequest{
+func newTimeOffPayload(t domain.TimeOffRequest) *hrtimeoffv1.TimeOffRequest {
+	return &hrtimeoffv1.TimeOffRequest{
 		Id: t.ID, OwnerId: t.OwnerID, StaffId: t.StaffID, Type: t.Type,
 		StartDate: t.StartDate.Format("2006-01-02"), EndDate: t.EndDate.Format("2006-01-02"),
 		DaysCount: t.DaysCount, Status: t.Status, Reason: t.Reason,
@@ -41,7 +41,7 @@ type (
 	ListTimeOffHandler  struct{ Service *application.Service }
 	ListTimeOffRequest  struct{}
 	ListTimeOffResponse struct {
-		Requests []*hrv1.TimeOffRequest `json:"requests"`
+		Requests []*hrtimeoffv1.TimeOffRequest `json:"requests"`
 	}
 )
 
@@ -54,7 +54,7 @@ func (h *ListTimeOffHandler) Serve(ctx context.Context, _ *ListTimeOffRequest) (
 	if err != nil {
 		return ListTimeOffResponse{}, &errorModels.ServerError{Code: http.StatusInternalServerError, Message: "Failed to list time off requests"}
 	}
-	payloads := make([]*hrv1.TimeOffRequest, 0, len(requests))
+	payloads := make([]*hrtimeoffv1.TimeOffRequest, 0, len(requests))
 	for _, t := range requests {
 		payloads = append(payloads, newTimeOffPayload(t))
 	}

@@ -10,7 +10,7 @@ import (
 	"github.com/voxire/onion/internal/modules/suppliers/internal/domain"
 	authPkg "github.com/voxire/onion/internal/platform/auth"
 	errorModels "github.com/voxire/onion/internal/platform/errors"
-	erpv1 "github.com/voxire/voxie/gen/go/erp/v1"
+	erpsupplierv1 "github.com/voxire/voxie/gen/go/erp/supplier/v1"
 )
 
 // ─── List Suppliers ───────────────────────────────────────────────────────────
@@ -29,14 +29,14 @@ type ListSuppliersRequest struct {
 }
 
 type ListSuppliersResponse struct {
-	Suppliers []*erpv1.Supplier `json:"suppliers"`
-	HasMore   bool              `json:"has_more"`
-	Page      int64             `json:"page"`
-	PageSize  int64             `json:"page_size"`
+	Suppliers []*erpsupplierv1.Supplier `json:"suppliers"`
+	HasMore   bool                      `json:"has_more"`
+	Page      int64                     `json:"page"`
+	PageSize  int64                     `json:"page_size"`
 }
 
-func newSupplierPayload(s domain.Supplier) *erpv1.Supplier {
-	return &erpv1.Supplier{
+func newSupplierPayload(s domain.Supplier) *erpsupplierv1.Supplier {
+	return &erpsupplierv1.Supplier{
 		Id:           s.ID,
 		OwnerId:      s.OwnerID,
 		Name:         s.Name,
@@ -73,7 +73,7 @@ func (h *ListSuppliersHandler) Serve(ctx context.Context, req *ListSuppliersRequ
 		}
 	}
 
-	payloads := make([]*erpv1.Supplier, 0, len(suppliers))
+	payloads := make([]*erpsupplierv1.Supplier, 0, len(suppliers))
 	for _, s := range suppliers {
 		payloads = append(payloads, newSupplierPayload(s))
 	}

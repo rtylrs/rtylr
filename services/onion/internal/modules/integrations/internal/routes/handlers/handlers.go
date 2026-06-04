@@ -9,7 +9,7 @@ import (
 	"github.com/voxire/onion/internal/modules/integrations/internal/application"
 	authPkg "github.com/voxire/onion/internal/platform/auth"
 	errorModels "github.com/voxire/onion/internal/platform/errors"
-	hubv1 "github.com/voxire/voxie/gen/go/hub/v1"
+	hubintegrationv1 "github.com/voxire/voxie/gen/go/hub/integration/v1"
 )
 
 func IntegrationRoutes() []string { return []string{"/integrations"} }
@@ -22,7 +22,7 @@ type (
 )
 
 type ListResponse struct {
-	Integrations []*hubv1.Integration `json:"integrations"`
+	Integrations []*hubintegrationv1.Integration `json:"integrations"`
 }
 
 func (h *ListHandler) Serve(ctx context.Context, _ *ListRequest) (ListResponse, *errorModels.ServerError) {
@@ -40,9 +40,9 @@ func (h *ListHandler) Serve(ctx context.Context, _ *ListRequest) (ListResponse, 
 		}
 	}
 
-	payloads := make([]*hubv1.Integration, 0, len(integrations))
+	payloads := make([]*hubintegrationv1.Integration, 0, len(integrations))
 	for _, i := range integrations {
-		ig := &hubv1.Integration{
+		ig := &hubintegrationv1.Integration{
 			Id:        i.ID,
 			Provider:  i.Provider,
 			Status:    string(i.Status),

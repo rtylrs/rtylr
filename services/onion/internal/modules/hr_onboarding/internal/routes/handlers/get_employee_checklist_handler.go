@@ -13,7 +13,7 @@ import (
 	authPkg "github.com/voxire/onion/internal/platform/auth"
 	errorModels "github.com/voxire/onion/internal/platform/errors"
 	"github.com/voxire/onion/internal/platform/logger"
-	hrv1 "github.com/voxire/voxie/gen/go/hr/v1"
+	hronboardingv1 "github.com/voxire/voxie/gen/go/hr/onboarding/v1"
 )
 
 func GetEmployeeChecklistRoutes() []string { return []string{"/hr/onboarding/checklists/{id}"} }
@@ -25,7 +25,7 @@ type GetEmployeeChecklistRequest struct {
 }
 
 type GetEmployeeChecklistResponse struct {
-	Checklist *hrv1.EmployeeChecklistPayload `json:"checklist"`
+	Checklist *hronboardingv1.EmployeeChecklistPayload `json:"checklist"`
 }
 
 func (h *GetEmployeeChecklistHandler) Serve(ctx context.Context, req *GetEmployeeChecklistRequest) (GetEmployeeChecklistResponse, *errorModels.ServerError) {

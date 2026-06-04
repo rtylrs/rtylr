@@ -8,7 +8,7 @@ import (
 	"github.com/voxire/onion/internal/modules/workspaces/internal/domain"
 	authPkg "github.com/voxire/onion/internal/platform/auth"
 	errorModels "github.com/voxire/onion/internal/platform/errors"
-	flowv1 "github.com/voxire/voxie/gen/go/flow/v1"
+	flowlabelv1 "github.com/voxire/voxie/gen/go/flow/label/v1"
 )
 
 // ─────────────────────────────────────────────
@@ -25,8 +25,8 @@ func SetTaskLabelsRoutes() []string { return []string{"/flow/tasks/labels"} }
 // Shared payload types
 // ─────────────────────────────────────────────
 
-func toLabelPayload(l domain.Label) *flowv1.Label {
-	return &flowv1.Label{
+func toLabelPayload(l domain.Label) *flowlabelv1.Label {
+	return &flowlabelv1.Label{
 		Id:          l.ID,
 		WorkspaceId: l.WorkspaceID,
 		Name:        l.Name,
@@ -48,7 +48,7 @@ type ListLabelsRequest struct {
 }
 
 type ListLabelsResponse struct {
-	Labels []*flowv1.Label `json:"labels"`
+	Labels []*flowlabelv1.Label `json:"labels"`
 }
 
 func (h *ListLabelsHandler) Validate(_ context.Context, _ *ListLabelsRequest) *errorModels.ServerError {
@@ -86,7 +86,7 @@ func (h *ListLabelsHandler) Serve(ctx context.Context, req *ListLabelsRequest) (
 		}
 	}
 
-	payloads := make([]*flowv1.Label, 0, len(labels))
+	payloads := make([]*flowlabelv1.Label, 0, len(labels))
 	for _, l := range labels {
 		payloads = append(payloads, toLabelPayload(l))
 	}
@@ -109,7 +109,7 @@ type CreateLabelRequest struct {
 }
 
 type CreateLabelResponse struct {
-	Label *flowv1.Label `json:"label"`
+	Label *flowlabelv1.Label `json:"label"`
 }
 
 func (h *CreateLabelHandler) Validate(_ context.Context, req *CreateLabelRequest) *errorModels.ServerError {

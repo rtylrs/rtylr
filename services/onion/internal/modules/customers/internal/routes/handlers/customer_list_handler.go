@@ -8,7 +8,7 @@ import (
 	"github.com/voxire/onion/internal/modules/customers/internal/domain"
 	authPkg "github.com/voxire/onion/internal/platform/auth"
 	errorModels "github.com/voxire/onion/internal/platform/errors"
-	crmv1 "github.com/voxire/voxie/gen/go/crm/v1"
+	crmcustomerv1 "github.com/voxire/voxie/gen/go/crm/customer/v1"
 )
 
 func CustomerListRoutes() []string {
@@ -28,14 +28,14 @@ type ListCustomersRequest struct {
 }
 
 type ListCustomersResponse struct {
-	Customers []*crmv1.Customer `json:"customers"`
-	Total     int               `json:"total"`
-	Page      int               `json:"page"`
-	PageSize  int               `json:"page_size"`
+	Customers []*crmcustomerv1.Customer `json:"customers"`
+	Total     int                       `json:"total"`
+	Page      int                       `json:"page"`
+	PageSize  int                       `json:"page_size"`
 }
 
-func newCustomerPayload(c domain.Customer) *crmv1.Customer {
-	p := &crmv1.Customer{
+func newCustomerPayload(c domain.Customer) *crmcustomerv1.Customer {
+	p := &crmcustomerv1.Customer{
 		Id:            c.ID,
 		OwnerId:       c.OwnerID,
 		FirstName:     c.FirstName,
@@ -99,7 +99,7 @@ func (h *ListCustomersHandler) Serve(ctx context.Context, req *ListCustomersRequ
 		}
 	}
 
-	payloads := make([]*crmv1.Customer, len(result.Customers))
+	payloads := make([]*crmcustomerv1.Customer, len(result.Customers))
 	for i, c := range result.Customers {
 		payloads[i] = newCustomerPayload(c)
 	}

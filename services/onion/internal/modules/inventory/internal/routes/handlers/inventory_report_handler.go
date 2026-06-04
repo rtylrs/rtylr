@@ -8,7 +8,7 @@ import (
 	"github.com/voxire/onion/internal/modules/inventory/internal/domain"
 	authPkg "github.com/voxire/onion/internal/platform/auth"
 	errorModels "github.com/voxire/onion/internal/platform/errors"
-	erpv1 "github.com/voxire/voxie/gen/go/erp/v1"
+	erpinventoryv1 "github.com/voxire/voxie/gen/go/erp/inventory/v1"
 )
 
 func InventoryReportRoutes() []string {
@@ -22,12 +22,12 @@ type InventoryReportHandler struct {
 type InventoryReportRequest struct{}
 
 type InventoryReportResponse struct {
-	Items      []*erpv1.InventoryReportItem `json:"items"`
-	TotalValue float64                      `json:"total_value"`
+	Items      []*erpinventoryv1.InventoryReportItem `json:"items"`
+	TotalValue float64                               `json:"total_value"`
 }
 
-func newInventoryReportItemPayload(item domain.InventoryReportItem) *erpv1.InventoryReportItem {
-	return &erpv1.InventoryReportItem{
+func newInventoryReportItemPayload(item domain.InventoryReportItem) *erpinventoryv1.InventoryReportItem {
+	return &erpinventoryv1.InventoryReportItem{
 		ProductId:         item.ProductID,
 		ProductName:       item.ProductName,
 		Sku:               item.SKU,
@@ -61,7 +61,7 @@ func (h *InventoryReportHandler) Serve(ctx context.Context, _ *InventoryReportRe
 		}
 	}
 
-	payloads := make([]*erpv1.InventoryReportItem, 0, len(items))
+	payloads := make([]*erpinventoryv1.InventoryReportItem, 0, len(items))
 	var totalValue float64
 
 	for _, item := range items {

@@ -11,7 +11,7 @@ import (
 	authPkg "github.com/voxire/onion/internal/platform/auth"
 	errorModels "github.com/voxire/onion/internal/platform/errors"
 	"github.com/voxire/onion/internal/platform/logger"
-	hrv1 "github.com/voxire/voxie/gen/go/hr/v1"
+	hrperformancev1 "github.com/voxire/voxie/gen/go/hr/performance/v1"
 )
 
 func CreateCycleRoutes() []string { return []string{"/hr/performance/cycles"} }
@@ -26,7 +26,7 @@ type CreateCycleRequest struct {
 }
 
 type CreateCycleResponse struct {
-	Cycle *hrv1.ReviewCyclePayload `json:"cycle"`
+	Cycle *hrperformancev1.ReviewCyclePayload `json:"cycle"`
 }
 
 func (h *CreateCycleHandler) Validate(_ context.Context, req *CreateCycleRequest) *errorModels.ServerError {

@@ -9,7 +9,7 @@ import (
 	authPkg "github.com/voxire/onion/internal/platform/auth"
 	errorModels "github.com/voxire/onion/internal/platform/errors"
 	"github.com/voxire/onion/internal/platform/logger"
-	hrv1 "github.com/voxire/voxie/gen/go/hr/v1"
+	hrperformancev1 "github.com/voxire/voxie/gen/go/hr/performance/v1"
 )
 
 func ListGoalsRoutes() []string { return []string{"/hr/performance/goals"} }
@@ -24,10 +24,10 @@ type ListGoalsRequest struct {
 }
 
 type ListGoalsResponse struct {
-	Goals  []*hrv1.ReviewGoalPayload `json:"goals"`
-	Total  int64                     `json:"total"`
-	Limit  int32                     `json:"limit"`
-	Offset int32                     `json:"offset"`
+	Goals  []*hrperformancev1.ReviewGoalPayload `json:"goals"`
+	Total  int64                                `json:"total"`
+	Limit  int32                                `json:"limit"`
+	Offset int32                                `json:"offset"`
 }
 
 func (h *ListGoalsHandler) Serve(ctx context.Context, req *ListGoalsRequest) (ListGoalsResponse, *errorModels.ServerError) {
@@ -47,7 +47,7 @@ func (h *ListGoalsHandler) Serve(ctx context.Context, req *ListGoalsRequest) (Li
 		return ListGoalsResponse{}, &errorModels.ServerError{HTTPCode: http.StatusInternalServerError, Code: http.StatusInternalServerError, Message: "Failed to list goals"}
 	}
 
-	payloads := make([]*hrv1.ReviewGoalPayload, 0, len(goals))
+	payloads := make([]*hrperformancev1.ReviewGoalPayload, 0, len(goals))
 	for _, g := range goals {
 		payloads = append(payloads, goalToProto(g))
 	}

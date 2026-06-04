@@ -7,7 +7,7 @@ import (
 	"github.com/voxire/onion/internal/modules/inventory/internal/application"
 	authPkg "github.com/voxire/onion/internal/platform/auth"
 	errorModels "github.com/voxire/onion/internal/platform/errors"
-	erpv1 "github.com/voxire/voxie/gen/go/erp/v1"
+	erpinventoryv1 "github.com/voxire/voxie/gen/go/erp/inventory/v1"
 )
 
 func LowStockRoutes() []string {
@@ -21,8 +21,8 @@ type LowStockHandler struct {
 type LowStockRequest struct{}
 
 type LowStockResponse struct {
-	Items []*erpv1.InventoryReportItem `json:"items"`
-	Count int                          `json:"count"`
+	Items []*erpinventoryv1.InventoryReportItem `json:"items"`
+	Count int                                   `json:"count"`
 }
 
 func (h *LowStockHandler) Serve(ctx context.Context, _ *LowStockRequest) (LowStockResponse, *errorModels.ServerError) {
@@ -44,7 +44,7 @@ func (h *LowStockHandler) Serve(ctx context.Context, _ *LowStockRequest) (LowSto
 		}
 	}
 
-	payloads := make([]*erpv1.InventoryReportItem, 0, len(items))
+	payloads := make([]*erpinventoryv1.InventoryReportItem, 0, len(items))
 	for _, item := range items {
 		payloads = append(payloads, newInventoryReportItemPayload(item))
 	}

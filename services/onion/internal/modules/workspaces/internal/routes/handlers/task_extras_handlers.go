@@ -12,7 +12,7 @@ import (
 	"github.com/voxire/onion/internal/modules/workspaces/internal/domain"
 	authPkg "github.com/voxire/onion/internal/platform/auth"
 	errorModels "github.com/voxire/onion/internal/platform/errors"
-	flowv1 "github.com/voxire/voxie/gen/go/flow/v1"
+	flowtaskv1 "github.com/voxire/voxie/gen/go/flow/task/v1"
 )
 
 // --- Task Activity ---
@@ -26,7 +26,7 @@ type (
 )
 
 type GetTaskActivityResponse struct {
-	Activity []*flowv1.TaskActivity `json:"activity"`
+	Activity []*flowtaskv1.TaskActivity `json:"activity"`
 }
 
 func (h *GetTaskActivityHandler) Serve(ctx context.Context, _ *GetTaskActivityRequest) (GetTaskActivityResponse, *errorModels.ServerError) {
@@ -43,7 +43,7 @@ func (h *GetTaskActivityHandler) Serve(ctx context.Context, _ *GetTaskActivityRe
 	if err != nil {
 		return GetTaskActivityResponse{}, &errorModels.ServerError{Code: http.StatusInternalServerError, Message: "Failed to get task activity"}
 	}
-	payloads := make([]*flowv1.TaskActivity, len(activities))
+	payloads := make([]*flowtaskv1.TaskActivity, len(activities))
 	for i, a := range activities {
 		payloads[i] = toActivityPayload(a)
 	}
@@ -75,7 +75,7 @@ func (h *GetTaskActivityByQPHandler) Serve(ctx context.Context, req *GetTaskActi
 	if err != nil {
 		return GetTaskActivityByQPResponse{}, &errorModels.ServerError{Code: http.StatusInternalServerError, Message: "Failed to get task activity"}
 	}
-	payloads := make([]*flowv1.TaskActivity, len(activities))
+	payloads := make([]*flowtaskv1.TaskActivity, len(activities))
 	for i, a := range activities {
 		payloads[i] = toActivityPayload(a)
 	}

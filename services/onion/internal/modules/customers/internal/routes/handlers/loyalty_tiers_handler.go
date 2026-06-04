@@ -13,7 +13,7 @@ import (
 	"github.com/voxire/onion/internal/modules/customers/internal/domain"
 	authPkg "github.com/voxire/onion/internal/platform/auth"
 	errorModels "github.com/voxire/onion/internal/platform/errors"
-	crmv1 "github.com/voxire/voxie/gen/go/crm/v1"
+	crmloyaltyv1 "github.com/voxire/voxie/gen/go/crm/loyalty/v1"
 )
 
 func LoyaltyTiersListRoutes() []string {
@@ -32,8 +32,8 @@ func LoyaltyTiersDeleteRoutes() []string {
 	return []string{"/crm/loyalty/tiers/{id}"}
 }
 
-func newLoyaltyTierPayload(t domain.LoyaltyTier) *crmv1.LoyaltyTier {
-	return &crmv1.LoyaltyTier{
+func newLoyaltyTierPayload(t domain.LoyaltyTier) *crmloyaltyv1.LoyaltyTier {
+	return &crmloyaltyv1.LoyaltyTier{
 		Id:          t.ID,
 		OwnerId:     t.OwnerID,
 		Name:        t.Name,
@@ -55,7 +55,7 @@ type ListLoyaltyTiersHandler struct {
 type ListLoyaltyTiersRequest struct{}
 
 type ListLoyaltyTiersResponse struct {
-	Tiers []*crmv1.LoyaltyTier `json:"tiers"`
+	Tiers []*crmloyaltyv1.LoyaltyTier `json:"tiers"`
 }
 
 func (h *ListLoyaltyTiersHandler) Serve(ctx context.Context, _ *ListLoyaltyTiersRequest) (ListLoyaltyTiersResponse, *errorModels.ServerError) {
@@ -72,7 +72,7 @@ func (h *ListLoyaltyTiersHandler) Serve(ctx context.Context, _ *ListLoyaltyTiers
 		}
 	}
 
-	payloads := make([]*crmv1.LoyaltyTier, len(tiers))
+	payloads := make([]*crmloyaltyv1.LoyaltyTier, len(tiers))
 	for i, t := range tiers {
 		payloads[i] = newLoyaltyTierPayload(t)
 	}

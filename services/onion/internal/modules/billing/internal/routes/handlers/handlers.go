@@ -7,7 +7,7 @@ import (
 	"github.com/voxire/onion/internal/modules/billing/internal/application"
 	authPkg "github.com/voxire/onion/internal/platform/auth"
 	errorModels "github.com/voxire/onion/internal/platform/errors"
-	hubv1 "github.com/voxire/voxie/gen/go/hub/v1"
+	hubbillingv1 "github.com/voxire/voxie/gen/go/hub/billing/v1"
 )
 
 func SummaryRoutes() []string  { return []string{"/billing/summary"} }
@@ -21,7 +21,7 @@ type (
 )
 
 type SummaryResponse struct {
-	Summary *hubv1.BillingSummary `json:"summary"`
+	Summary *hubbillingv1.BillingSummary `json:"summary"`
 }
 
 func (h *SummaryHandler) Serve(ctx context.Context, _ *SummaryRequest) (SummaryResponse, *errorModels.ServerError) {
@@ -39,7 +39,7 @@ func (h *SummaryHandler) Serve(ctx context.Context, _ *SummaryRequest) (SummaryR
 		}
 	}
 
-	bs := &hubv1.BillingSummary{
+	bs := &hubbillingv1.BillingSummary{
 		Plan:         summary.Plan,
 		Status:       summary.Status,
 		CurrentUsage: summary.CurrentUsage,
@@ -60,7 +60,7 @@ type (
 )
 
 type InvoicesResponse struct {
-	Invoices []*hubv1.Invoice `json:"invoices"`
+	Invoices []*hubbillingv1.Invoice `json:"invoices"`
 }
 
 func (h *InvoicesHandler) Serve(ctx context.Context, _ *InvoicesRequest) (InvoicesResponse, *errorModels.ServerError) {
@@ -78,9 +78,9 @@ func (h *InvoicesHandler) Serve(ctx context.Context, _ *InvoicesRequest) (Invoic
 		}
 	}
 
-	payloads := make([]*hubv1.Invoice, 0, len(invoices))
+	payloads := make([]*hubbillingv1.Invoice, 0, len(invoices))
 	for _, inv := range invoices {
-		iv := &hubv1.Invoice{
+		iv := &hubbillingv1.Invoice{
 			Id:       inv.ID,
 			Amount:   inv.Amount,
 			Currency: inv.Currency,

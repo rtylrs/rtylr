@@ -10,7 +10,7 @@ import (
 	"github.com/voxire/onion/internal/modules/customers/internal/domain"
 	authPkg "github.com/voxire/onion/internal/platform/auth"
 	errorModels "github.com/voxire/onion/internal/platform/errors"
-	crmv1 "github.com/voxire/voxie/gen/go/crm/v1"
+	crmsegmentv1 "github.com/voxire/voxie/gen/go/crm/segment/v1"
 )
 
 func SegmentListRoutes() []string {
@@ -29,8 +29,8 @@ func SegmentDeleteRoutes() []string {
 	return []string{"/crm/segments"}
 }
 
-func newSegmentPayload(seg domain.Segment) *crmv1.Segment {
-	p := &crmv1.Segment{
+func newSegmentPayload(seg domain.Segment) *crmsegmentv1.Segment {
+	p := &crmsegmentv1.Segment{
 		Id:            seg.ID,
 		OwnerId:       seg.OwnerID,
 		Name:          seg.Name,
@@ -58,7 +58,7 @@ type ListSegmentsHandler struct {
 type ListSegmentsRequest struct{}
 
 type ListSegmentsResponse struct {
-	Segments []*crmv1.Segment `json:"segments"`
+	Segments []*crmsegmentv1.Segment `json:"segments"`
 }
 
 func (h *ListSegmentsHandler) Serve(ctx context.Context, _ *ListSegmentsRequest) (ListSegmentsResponse, *errorModels.ServerError) {
@@ -75,7 +75,7 @@ func (h *ListSegmentsHandler) Serve(ctx context.Context, _ *ListSegmentsRequest)
 		}
 	}
 
-	payloads := make([]*crmv1.Segment, len(segments))
+	payloads := make([]*crmsegmentv1.Segment, len(segments))
 	for i, seg := range segments {
 		payloads[i] = newSegmentPayload(seg)
 	}

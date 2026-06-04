@@ -14,7 +14,7 @@ import (
 	authPkg "github.com/voxire/onion/internal/platform/auth"
 	errorModels "github.com/voxire/onion/internal/platform/errors"
 	"github.com/voxire/onion/internal/platform/logger"
-	erpv1 "github.com/voxire/voxie/gen/go/erp/v1"
+	erpproductv1 "github.com/voxire/voxie/gen/go/erp/product/v1"
 )
 
 // GetProductHandlerFunc handles `GET /erp/products/{id}` — the
@@ -24,7 +24,7 @@ import (
 // careers module uses the same pattern.
 
 type GetProductResponse struct {
-	Product *erpv1.Product `json:"product"`
+	Product *erpproductv1.Product `json:"product"`
 }
 
 func GetProductHandlerFunc(svc *application.Service) http.HandlerFunc {

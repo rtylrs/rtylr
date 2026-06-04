@@ -11,7 +11,7 @@ import (
 	authPkg "github.com/voxire/onion/internal/platform/auth"
 	errorModels "github.com/voxire/onion/internal/platform/errors"
 	"github.com/voxire/onion/internal/platform/logger"
-	hrv1 "github.com/voxire/voxie/gen/go/hr/v1"
+	hronboardingv1 "github.com/voxire/voxie/gen/go/hr/onboarding/v1"
 )
 
 func TriggerChecklistRoutes() []string { return []string{"/hr/onboarding/checklists/trigger"} }
@@ -25,7 +25,7 @@ type TriggerChecklistRequest struct {
 }
 
 type TriggerChecklistResponse struct {
-	Checklist *hrv1.EmployeeChecklistPayload `json:"checklist"`
+	Checklist *hronboardingv1.EmployeeChecklistPayload `json:"checklist"`
 }
 
 func (h *TriggerChecklistHandler) Validate(_ context.Context, req *TriggerChecklistRequest) *errorModels.ServerError {

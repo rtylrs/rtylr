@@ -9,7 +9,7 @@ import (
 	"github.com/voxire/onion/internal/modules/departments/internal/domain"
 	authPkg "github.com/voxire/onion/internal/platform/auth"
 	errorModels "github.com/voxire/onion/internal/platform/errors"
-	hrv1 "github.com/voxire/voxie/gen/go/hr/v1"
+	hrdepartmentv1 "github.com/voxire/voxie/gen/go/hr/department/v1"
 )
 
 func ListDepartmentsRoutes() []string  { return []string{"/hr/departments"} }
@@ -17,8 +17,8 @@ func CreateDepartmentRoutes() []string { return []string{"/hr/departments"} }
 func UpdateDepartmentRoutes() []string { return []string{"/hr/departments"} }
 func DeleteDepartmentRoutes() []string { return []string{"/hr/departments"} }
 
-func newDepartmentPayload(d domain.Department) *hrv1.DepartmentPayload {
-	return &hrv1.DepartmentPayload{
+func newDepartmentPayload(d domain.Department) *hrdepartmentv1.DepartmentPayload {
+	return &hrdepartmentv1.DepartmentPayload{
 		Id:        d.ID,
 		OwnerId:   d.OwnerID,
 		Name:      d.Name,
@@ -31,7 +31,7 @@ type (
 	ListDepartmentsHandler  struct{ Service *application.Service }
 	ListDepartmentsRequest  struct{}
 	ListDepartmentsResponse struct {
-		Departments []*hrv1.DepartmentPayload `json:"departments"`
+		Departments []*hrdepartmentv1.DepartmentPayload `json:"departments"`
 	}
 )
 
@@ -44,7 +44,7 @@ func (h *ListDepartmentsHandler) Serve(ctx context.Context, _ *ListDepartmentsRe
 	if err != nil {
 		return ListDepartmentsResponse{}, &errorModels.ServerError{Code: http.StatusInternalServerError, Message: "Failed to list departments"}
 	}
-	payloads := make([]*hrv1.DepartmentPayload, 0, len(departments))
+	payloads := make([]*hrdepartmentv1.DepartmentPayload, 0, len(departments))
 	for _, d := range departments {
 		payloads = append(payloads, newDepartmentPayload(d))
 	}

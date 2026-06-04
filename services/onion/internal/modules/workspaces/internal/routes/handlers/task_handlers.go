@@ -11,14 +11,14 @@ import (
 	authPkg "github.com/voxire/onion/internal/platform/auth"
 	errorModels "github.com/voxire/onion/internal/platform/errors"
 	"github.com/voxire/onion/internal/platform/wsbus"
-	flowv1 "github.com/voxire/voxie/gen/go/flow/v1"
+	flowtaskv1 "github.com/voxire/voxie/gen/go/flow/task/v1"
 )
 
 // publishTaskEvent fans out a task-level invalidation hint to every
 // client subscribed to the owning project. The payload is intentionally
 // minimal — the client refetches the canonical entity via REST, keeping
 // the wire format for realtime and HTTP in sync.
-func publishTaskEvent(eventType string, t *flowv1.Task, actorID int64) {
+func publishTaskEvent(eventType string, t *flowtaskv1.Task, actorID int64) {
 	if t == nil {
 		return
 	}
@@ -87,13 +87,13 @@ func SearchTasksRoutes() []string      { return []string{"/flow/tasks/search"} }
 // Shared payload types
 // ─────────────────────────────────────────────
 
-func toTaskPayload(t domain.Task) *flowv1.Task {
+func toTaskPayload(t domain.Task) *flowtaskv1.Task {
 	labels := t.Labels
 	if labels == nil {
 		labels = []int64{}
 	}
 
-	task := &flowv1.Task{
+	task := &flowtaskv1.Task{
 		Id:             t.ID,
 		ProjectId:      t.ProjectID,
 		WorkspaceId:    t.WorkspaceID,
@@ -137,8 +137,8 @@ func toTaskPayload(t domain.Task) *flowv1.Task {
 	return task
 }
 
-func toCommentPayload(c domain.TaskComment) *flowv1.TaskComment {
-	return &flowv1.TaskComment{
+func toCommentPayload(c domain.TaskComment) *flowtaskv1.TaskComment {
+	return &flowtaskv1.TaskComment{
 		Id:        c.ID,
 		TaskId:    c.TaskID,
 		UserId:    c.UserID,
@@ -149,8 +149,8 @@ func toCommentPayload(c domain.TaskComment) *flowv1.TaskComment {
 	}
 }
 
-func toActivityPayload(a domain.TaskActivity) *flowv1.TaskActivity {
-	return &flowv1.TaskActivity{
+func toActivityPayload(a domain.TaskActivity) *flowtaskv1.TaskActivity {
+	return &flowtaskv1.TaskActivity{
 		Id:        a.ID,
 		TaskId:    a.TaskID,
 		UserId:    a.UserID,
@@ -178,7 +178,7 @@ type ListTasksRequest struct {
 }
 
 type ListTasksResponse struct {
-	Tasks []*flowv1.Task `json:"tasks"`
+	Tasks []*flowtaskv1.Task `json:"tasks"`
 }
 
 func (h *ListTasksHandler) Validate(_ context.Context, req *ListTasksRequest) *errorModels.ServerError {
@@ -223,7 +223,7 @@ func (h *ListTasksHandler) Serve(ctx context.Context, req *ListTasksRequest) (Li
 		}
 	}
 
-	payloads := make([]*flowv1.Task, 0, len(tasks))
+	payloads := make([]*flowtaskv1.Task, 0, len(tasks))
 	for _, t := range tasks {
 		payloads = append(payloads, toTaskPayload(t))
 	}
@@ -254,7 +254,7 @@ type CreateTaskRequest struct {
 }
 
 type CreateTaskResponse struct {
-	Task *flowv1.Task `json:"task"`
+	Task *flowtaskv1.Task `json:"task"`
 }
 
 func (h *CreateTaskHandler) Validate(_ context.Context, req *CreateTaskRequest) *errorModels.ServerError {
@@ -345,10 +345,10 @@ type GetTaskDetailRequest struct {
 }
 
 type GetTaskDetailResponse struct {
-	Task     *flowv1.Task           `json:"task"`
-	Subtasks []*flowv1.Task         `json:"subtasks"`
-	Comments []*flowv1.TaskComment  `json:"comments"`
-	Activity []*flowv1.TaskActivity `json:"activity"`
+	Task     *flowtaskv1.Task           `json:"task"`
+	Subtasks []*flowtaskv1.Task         `json:"subtasks"`
+	Comments []*flowtaskv1.TaskComment  `json:"comments"`
+	Activity []*flowtaskv1.TaskActivity `json:"activity"`
 }
 
 func (h *GetTaskDetailHandler) Validate(_ context.Context, req *GetTaskDetailRequest) *errorModels.ServerError {
@@ -373,17 +373,17 @@ func (h *GetTaskDetailHandler) Serve(ctx context.Context, req *GetTaskDetailRequ
 		}
 	}
 
-	subtasks := make([]*flowv1.Task, 0, len(detail.Subtasks))
+	subtasks := make([]*flowtaskv1.Task, 0, len(detail.Subtasks))
 	for _, t := range detail.Subtasks {
 		subtasks = append(subtasks, toTaskPayload(t))
 	}
 
-	comments := make([]*flowv1.TaskComment, 0, len(detail.Comments))
+	comments := make([]*flowtaskv1.TaskComment, 0, len(detail.Comments))
 	for _, c := range detail.Comments {
 		comments = append(comments, toCommentPayload(c))
 	}
 
-	activity := make([]*flowv1.TaskActivity, 0, len(detail.Activity))
+	activity := make([]*flowtaskv1.TaskActivity, 0, len(detail.Activity))
 	for _, a := range detail.Activity {
 		activity = append(activity, toActivityPayload(a))
 	}
@@ -587,7 +587,7 @@ type GetMyTasksHandler struct {
 type GetMyTasksRequest struct{}
 
 type GetMyTasksResponse struct {
-	Tasks []*flowv1.Task `json:"tasks"`
+	Tasks []*flowtaskv1.Task `json:"tasks"`
 }
 
 func (h *GetMyTasksHandler) Serve(ctx context.Context, _ *GetMyTasksRequest) (GetMyTasksResponse, *errorModels.ServerError) {
@@ -604,7 +604,7 @@ func (h *GetMyTasksHandler) Serve(ctx context.Context, _ *GetMyTasksRequest) (Ge
 		}
 	}
 
-	payloads := make([]*flowv1.Task, 0, len(tasks))
+	payloads := make([]*flowtaskv1.Task, 0, len(tasks))
 	for _, t := range tasks {
 		payloads = append(payloads, toTaskPayload(t))
 	}
@@ -626,7 +626,7 @@ type AddCommentRequest struct {
 }
 
 type AddCommentResponse struct {
-	Comment *flowv1.TaskComment `json:"comment"`
+	Comment *flowtaskv1.TaskComment `json:"comment"`
 }
 
 func (h *AddCommentHandler) Validate(_ context.Context, req *AddCommentRequest) *errorModels.ServerError {
@@ -721,7 +721,7 @@ type SearchTasksRequest struct {
 }
 
 type SearchTasksResponse struct {
-	Tasks []*flowv1.Task `json:"tasks"`
+	Tasks []*flowtaskv1.Task `json:"tasks"`
 }
 
 func (h *SearchTasksHandler) Validate(_ context.Context, req *SearchTasksRequest) *errorModels.ServerError {
@@ -753,7 +753,7 @@ func (h *SearchTasksHandler) Serve(ctx context.Context, req *SearchTasksRequest)
 		}
 	}
 
-	payloads := make([]*flowv1.Task, 0, len(tasks))
+	payloads := make([]*flowtaskv1.Task, 0, len(tasks))
 	for _, t := range tasks {
 		payloads = append(payloads, toTaskPayload(t))
 	}

@@ -8,7 +8,7 @@ import (
 	"github.com/voxire/onion/internal/modules/customers/internal/domain"
 	authPkg "github.com/voxire/onion/internal/platform/auth"
 	errorModels "github.com/voxire/onion/internal/platform/errors"
-	crmv1 "github.com/voxire/voxie/gen/go/crm/v1"
+	crmloyaltyv1 "github.com/voxire/voxie/gen/go/crm/loyalty/v1"
 )
 
 func LoyaltyTransactionsRoutes() []string {
@@ -26,14 +26,14 @@ type ListLoyaltyTransactionsRequest struct {
 }
 
 type ListLoyaltyTransactionsResponse struct {
-	Transactions []*crmv1.LoyaltyTransaction `json:"transactions"`
-	Total        int                         `json:"total"`
-	Page         int                         `json:"page"`
-	PageSize     int                         `json:"page_size"`
+	Transactions []*crmloyaltyv1.LoyaltyTransaction `json:"transactions"`
+	Total        int                                `json:"total"`
+	Page         int                                `json:"page"`
+	PageSize     int                                `json:"page_size"`
 }
 
-func newLoyaltyTransactionPayload(tx domain.LoyaltyTransaction) *crmv1.LoyaltyTransaction {
-	return &crmv1.LoyaltyTransaction{
+func newLoyaltyTransactionPayload(tx domain.LoyaltyTransaction) *crmloyaltyv1.LoyaltyTransaction {
+	return &crmloyaltyv1.LoyaltyTransaction{
 		Id:            tx.ID,
 		OwnerId:       tx.OwnerID,
 		CustomerId:    tx.CustomerID,
@@ -81,7 +81,7 @@ func (h *ListLoyaltyTransactionsHandler) Serve(ctx context.Context, req *ListLoy
 		}
 	}
 
-	payloads := make([]*crmv1.LoyaltyTransaction, len(txs))
+	payloads := make([]*crmloyaltyv1.LoyaltyTransaction, len(txs))
 	for i, tx := range txs {
 		payloads[i] = newLoyaltyTransactionPayload(tx)
 	}

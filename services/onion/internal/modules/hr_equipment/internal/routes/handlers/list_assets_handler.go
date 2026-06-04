@@ -9,7 +9,7 @@ import (
 	authPkg "github.com/voxire/onion/internal/platform/auth"
 	errorModels "github.com/voxire/onion/internal/platform/errors"
 	"github.com/voxire/onion/internal/platform/logger"
-	hrv1 "github.com/voxire/voxie/gen/go/hr/v1"
+	hrequipmentv1 "github.com/voxire/voxie/gen/go/hr/equipment/v1"
 )
 
 func ListAssetsRoutes() []string { return []string{"/hr/equipment/assets"} }
@@ -22,7 +22,7 @@ type ListAssetsRequest struct {
 }
 
 type ListAssetsResponse struct {
-	Assets []*hrv1.AssetPayload `json:"assets"`
+	Assets []*hrequipmentv1.AssetPayload `json:"assets"`
 }
 
 func (h *ListAssetsHandler) Serve(ctx context.Context, req *ListAssetsRequest) (ListAssetsResponse, *errorModels.ServerError) {
@@ -45,7 +45,7 @@ func (h *ListAssetsHandler) Serve(ctx context.Context, req *ListAssetsRequest) (
 		return ListAssetsResponse{}, &errorModels.ServerError{HTTPCode: http.StatusInternalServerError, Code: http.StatusInternalServerError, Message: "Failed to list assets"}
 	}
 
-	payloads := make([]*hrv1.AssetPayload, 0, len(assets))
+	payloads := make([]*hrequipmentv1.AssetPayload, 0, len(assets))
 	for _, a := range assets {
 		payloads = append(payloads, assetToProto(a))
 	}

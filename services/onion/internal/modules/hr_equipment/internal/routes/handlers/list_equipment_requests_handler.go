@@ -9,7 +9,7 @@ import (
 	authPkg "github.com/voxire/onion/internal/platform/auth"
 	errorModels "github.com/voxire/onion/internal/platform/errors"
 	"github.com/voxire/onion/internal/platform/logger"
-	hrv1 "github.com/voxire/voxie/gen/go/hr/v1"
+	hrequipmentv1 "github.com/voxire/voxie/gen/go/hr/equipment/v1"
 )
 
 func ListEquipmentRequestsRoutes() []string { return []string{"/hr/equipment/requests"} }
@@ -24,10 +24,10 @@ type ListEquipmentRequestsRequest struct {
 }
 
 type ListEquipmentRequestsResponse struct {
-	Requests []*hrv1.EquipmentRequestPayload `json:"requests"`
-	Total    int64                           `json:"total"`
-	Limit    int32                           `json:"limit"`
-	Offset   int32                           `json:"offset"`
+	Requests []*hrequipmentv1.EquipmentRequestPayload `json:"requests"`
+	Total    int64                                    `json:"total"`
+	Limit    int32                                    `json:"limit"`
+	Offset   int32                                    `json:"offset"`
 }
 
 func (h *ListEquipmentRequestsHandler) Serve(ctx context.Context, req *ListEquipmentRequestsRequest) (ListEquipmentRequestsResponse, *errorModels.ServerError) {
@@ -47,7 +47,7 @@ func (h *ListEquipmentRequestsHandler) Serve(ctx context.Context, req *ListEquip
 		return ListEquipmentRequestsResponse{}, &errorModels.ServerError{HTTPCode: http.StatusInternalServerError, Code: http.StatusInternalServerError, Message: "Failed to list equipment requests"}
 	}
 
-	payloads := make([]*hrv1.EquipmentRequestPayload, 0, len(requests))
+	payloads := make([]*hrequipmentv1.EquipmentRequestPayload, 0, len(requests))
 	for _, r := range requests {
 		payloads = append(payloads, equipmentRequestToProto(r))
 	}

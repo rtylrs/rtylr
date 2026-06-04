@@ -8,11 +8,11 @@ import (
 	"github.com/voxire/onion/internal/modules/pos_member_locations/internal/infrastructure"
 	authPkg "github.com/voxire/onion/internal/platform/auth"
 	errorModels "github.com/voxire/onion/internal/platform/errors"
-	posv1 "github.com/voxire/voxie/gen/go/pos/v1"
+	posaccessv1 "github.com/voxire/voxie/gen/go/pos/access/v1"
 )
 
-func toProtoMyLocation(l infrastructure.MyLocation) *posv1.MyLocation {
-	return &posv1.MyLocation{
+func toProtoMyLocation(l infrastructure.MyLocation) *posaccessv1.MyLocation {
+	return &posaccessv1.MyLocation{
 		LocationId: l.LocationID,
 		Name:       l.Name,
 		Address:    l.Address,
@@ -26,7 +26,7 @@ type (
 	GetMyLocationsHandler  struct{ Service *application.Service }
 	GetMyLocationsRequest  struct{}
 	GetMyLocationsResponse struct {
-		Locations []*posv1.MyLocation `json:"locations"`
+		Locations []*posaccessv1.MyLocation `json:"locations"`
 	}
 )
 
@@ -39,7 +39,7 @@ func (h *GetMyLocationsHandler) Serve(ctx context.Context, _ *GetMyLocationsRequ
 	if err != nil {
 		return GetMyLocationsResponse{}, &errorModels.ServerError{Code: http.StatusInternalServerError, Message: err.Error()}
 	}
-	out := make([]*posv1.MyLocation, 0, len(locs))
+	out := make([]*posaccessv1.MyLocation, 0, len(locs))
 	for _, l := range locs {
 		out = append(out, toProtoMyLocation(l))
 	}

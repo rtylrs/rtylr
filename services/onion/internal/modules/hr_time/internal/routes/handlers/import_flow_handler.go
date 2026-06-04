@@ -9,7 +9,7 @@ import (
 	authPkg "github.com/voxire/onion/internal/platform/auth"
 	errorModels "github.com/voxire/onion/internal/platform/errors"
 	"github.com/voxire/onion/internal/platform/logger"
-	hrv1 "github.com/voxire/voxie/gen/go/hr/v1"
+	hrtimeentryv1 "github.com/voxire/voxie/gen/go/hr/time_entry/v1"
 )
 
 func ImportFlowRoutes() []string { return []string{"/hr/time-entries/import-flow"} }
@@ -23,8 +23,8 @@ type ImportFlowRequest struct {
 }
 
 type ImportFlowResponse struct {
-	Imported []*hrv1.TimeEntryPayload `json:"imported"`
-	Count    int32                    `json:"count"`
+	Imported []*hrtimeentryv1.TimeEntryPayload `json:"imported"`
+	Count    int32                             `json:"count"`
 }
 
 func (h *ImportFlowHandler) Validate(_ context.Context, req *ImportFlowRequest) *errorModels.ServerError {
@@ -59,7 +59,7 @@ func (h *ImportFlowHandler) Serve(ctx context.Context, req *ImportFlowRequest) (
 		return ImportFlowResponse{}, &errorModels.ServerError{HTTPCode: http.StatusInternalServerError, Code: http.StatusInternalServerError, Message: "Failed to import flow tasks"}
 	}
 
-	payloads := make([]*hrv1.TimeEntryPayload, 0, len(entries))
+	payloads := make([]*hrtimeentryv1.TimeEntryPayload, 0, len(entries))
 	for _, e := range entries {
 		payloads = append(payloads, timeEntryToProto(e))
 	}

@@ -8,7 +8,7 @@ import (
 	authPkg "github.com/voxire/onion/internal/platform/auth"
 	errorModels "github.com/voxire/onion/internal/platform/errors"
 	"github.com/voxire/onion/internal/platform/logger"
-	hrv1 "github.com/voxire/voxie/gen/go/hr/v1"
+	hrdocumentv1 "github.com/voxire/voxie/gen/go/hr/document/v1"
 )
 
 func ListExpiringDocumentsRoutes() []string { return []string{"/hr/documents/expiring"} }
@@ -38,7 +38,7 @@ func (h *ListExpiringDocumentsHandler) Serve(ctx context.Context, req *ListExpir
 		return ListDocumentsResponse{}, &errorModels.ServerError{HTTPCode: http.StatusInternalServerError, Code: http.StatusInternalServerError, Message: "Failed to list expiring documents"}
 	}
 
-	payloads := make([]*hrv1.EmployeeDocumentPayload, 0, len(docs))
+	payloads := make([]*hrdocumentv1.EmployeeDocumentPayload, 0, len(docs))
 	for _, d := range docs {
 		payloads = append(payloads, documentToProto(d))
 	}

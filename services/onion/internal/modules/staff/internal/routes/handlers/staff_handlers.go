@@ -10,7 +10,8 @@ import (
 	"github.com/voxire/onion/internal/modules/staff/internal/domain"
 	authPkg "github.com/voxire/onion/internal/platform/auth"
 	errorModels "github.com/voxire/onion/internal/platform/errors"
-	hrv1 "github.com/voxire/voxie/gen/go/hr/v1"
+	hrdashboardv1 "github.com/voxire/voxie/gen/go/hr/dashboard/v1"
+	hrstaffv1 "github.com/voxire/voxie/gen/go/hr/staff/v1"
 )
 
 // ─── List Staff ───────────────────────────────────────────────────────────────
@@ -70,8 +71,8 @@ func toStaffCardPayload(s domain.Staff) StaffCardPayload {
 	}
 }
 
-func newStaffPayload(s domain.Staff) *hrv1.Staff {
-	return &hrv1.Staff{
+func newStaffPayload(s domain.Staff) *hrstaffv1.Staff {
+	return &hrstaffv1.Staff{
 		Id: s.ID, OwnerId: s.OwnerID, UserId: s.UserID, DepartmentId: s.DepartmentID,
 		FirstName: s.FirstName, LastName: s.LastName, Email: s.Email, Phone: s.Phone,
 		Role: s.Role, EmploymentType: s.EmploymentType, Status: s.Status,
@@ -293,7 +294,7 @@ type GetStaffRequest struct {
 }
 
 type GetStaffResponse struct {
-	Staff *hrv1.Staff `json:"staff"`
+	Staff *hrstaffv1.Staff `json:"staff"`
 }
 
 func (h *GetStaffHandler) Validate(_ context.Context, req *GetStaffRequest) *errorModels.ServerError {
@@ -403,7 +404,7 @@ type DashboardHandler struct {
 type DashboardRequest struct{}
 
 type DashboardResponse struct {
-	Stats *hrv1.DashboardStats `json:"stats"`
+	Stats *hrdashboardv1.DashboardStats `json:"stats"`
 }
 
 func (h *DashboardHandler) Serve(ctx context.Context, _ *DashboardRequest) (DashboardResponse, *errorModels.ServerError) {
@@ -417,7 +418,7 @@ func (h *DashboardHandler) Serve(ctx context.Context, _ *DashboardRequest) (Dash
 		return DashboardResponse{}, &errorModels.ServerError{Code: http.StatusInternalServerError, Message: "Failed to get dashboard stats"}
 	}
 
-	return DashboardResponse{Stats: &hrv1.DashboardStats{
+	return DashboardResponse{Stats: &hrdashboardv1.DashboardStats{
 		TotalStaff: int64(stats.TotalStaff), OnShiftToday: int64(stats.OnShiftToday),
 		PendingTimeOff: int64(stats.PendingTimeOff), PayrollDraft: int64(stats.PayrollDraft),
 	}}, nil

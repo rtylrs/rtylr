@@ -10,7 +10,7 @@ import (
 	authPkg "github.com/voxire/onion/internal/platform/auth"
 	errorModels "github.com/voxire/onion/internal/platform/errors"
 	"github.com/voxire/onion/internal/platform/wsbus"
-	flowv1 "github.com/voxire/voxie/gen/go/flow/v1"
+	flowworkspacev1 "github.com/voxire/voxie/gen/go/flow/workspace/v1"
 )
 
 // publishWorkspaceMemberEvent fans member add/remove events to the
@@ -44,8 +44,8 @@ func RemoveWorkspaceMemberRoutes() []string { return []string{"/flow/workspaces/
 // Shared payload types
 // ─────────────────────────────────────────────
 
-func toWorkspacePayload(w domain.Workspace) *flowv1.Workspace {
-	return &flowv1.Workspace{
+func toWorkspacePayload(w domain.Workspace) *flowworkspacev1.Workspace {
+	return &flowworkspacev1.Workspace{
 		Id:          w.ID,
 		OwnerId:     w.OwnerID,
 		Name:        w.Name,
@@ -70,7 +70,7 @@ type ListWorkspacesHandler struct {
 type ListWorkspacesRequest struct{}
 
 type ListWorkspacesResponse struct {
-	Workspaces []*flowv1.Workspace `json:"workspaces"`
+	Workspaces []*flowworkspacev1.Workspace `json:"workspaces"`
 }
 
 func (h *ListWorkspacesHandler) Serve(ctx context.Context, _ *ListWorkspacesRequest) (ListWorkspacesResponse, *errorModels.ServerError) {
@@ -87,7 +87,7 @@ func (h *ListWorkspacesHandler) Serve(ctx context.Context, _ *ListWorkspacesRequ
 		}
 	}
 
-	payloads := make([]*flowv1.Workspace, 0, len(workspaces))
+	payloads := make([]*flowworkspacev1.Workspace, 0, len(workspaces))
 	for _, w := range workspaces {
 		payloads = append(payloads, toWorkspacePayload(w))
 	}
@@ -111,7 +111,7 @@ type CreateWorkspaceRequest struct {
 }
 
 type CreateWorkspaceResponse struct {
-	Workspace *flowv1.Workspace `json:"workspace"`
+	Workspace *flowworkspacev1.Workspace `json:"workspace"`
 }
 
 func (h *CreateWorkspaceHandler) Validate(_ context.Context, req *CreateWorkspaceRequest) *errorModels.ServerError {

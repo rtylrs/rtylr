@@ -9,7 +9,7 @@ import (
 	authPkg "github.com/voxire/onion/internal/platform/auth"
 	errorModels "github.com/voxire/onion/internal/platform/errors"
 	"github.com/voxire/onion/internal/platform/logger"
-	hrv1 "github.com/voxire/voxie/gen/go/hr/v1"
+	hronboardingv1 "github.com/voxire/voxie/gen/go/hr/onboarding/v1"
 )
 
 func ListEmployeeChecklistsRoutes() []string { return []string{"/hr/onboarding/checklists"} }
@@ -23,10 +23,10 @@ type ListEmployeeChecklistsRequest struct {
 }
 
 type ListEmployeeChecklistsResponse struct {
-	Checklists []*hrv1.EmployeeChecklistPayload `json:"checklists"`
-	Total      int64                            `json:"total"`
-	Limit      int32                            `json:"limit"`
-	Offset     int32                            `json:"offset"`
+	Checklists []*hronboardingv1.EmployeeChecklistPayload `json:"checklists"`
+	Total      int64                                      `json:"total"`
+	Limit      int32                                      `json:"limit"`
+	Offset     int32                                      `json:"offset"`
 }
 
 func (h *ListEmployeeChecklistsHandler) Serve(ctx context.Context, req *ListEmployeeChecklistsRequest) (ListEmployeeChecklistsResponse, *errorModels.ServerError) {
@@ -48,7 +48,7 @@ func (h *ListEmployeeChecklistsHandler) Serve(ctx context.Context, req *ListEmpl
 		return ListEmployeeChecklistsResponse{}, &errorModels.ServerError{HTTPCode: http.StatusInternalServerError, Code: http.StatusInternalServerError, Message: "Failed to list checklists"}
 	}
 
-	payloads := make([]*hrv1.EmployeeChecklistPayload, 0, len(checklists))
+	payloads := make([]*hronboardingv1.EmployeeChecklistPayload, 0, len(checklists))
 	for _, c := range checklists {
 		payloads = append(payloads, employeeChecklistToProto(c))
 	}

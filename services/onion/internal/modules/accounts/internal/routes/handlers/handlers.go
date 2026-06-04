@@ -10,11 +10,11 @@ import (
 	"github.com/voxire/onion/internal/modules/accounts/internal/domain"
 	authPkg "github.com/voxire/onion/internal/platform/auth"
 	errorModels "github.com/voxire/onion/internal/platform/errors"
-	finv1 "github.com/voxire/voxie/gen/go/finance/v1"
+	financeaccountv1 "github.com/voxire/voxie/gen/go/finance/account/v1"
 )
 
-func newPayload(a domain.Account) *finv1.Account {
-	return &finv1.Account{
+func newPayload(a domain.Account) *financeaccountv1.Account {
+	return &financeaccountv1.Account{
 		Id: a.ID, OwnerId: a.OwnerID, Name: a.Name, Type: a.Type,
 		Currency: a.Currency, Balance: a.Balance, IsActive: a.IsActive,
 		CreatedAt: a.CreatedAt.Format("2006-01-02T15:04:05Z"),
@@ -27,7 +27,7 @@ type (
 	ListHandler  struct{ Service *application.Service }
 	ListRequest  struct{}
 	ListResponse struct {
-		Accounts []*finv1.Account `json:"accounts"`
+		Accounts []*financeaccountv1.Account `json:"accounts"`
 	}
 )
 
@@ -40,7 +40,7 @@ func (h *ListHandler) Serve(ctx context.Context, _ *ListRequest) (ListResponse, 
 	if err != nil {
 		return ListResponse{}, &errorModels.ServerError{Code: http.StatusInternalServerError, Message: "Failed to list accounts"}
 	}
-	payloads := make([]*finv1.Account, 0, len(items))
+	payloads := make([]*financeaccountv1.Account, 0, len(items))
 	for _, item := range items {
 		payloads = append(payloads, newPayload(item))
 	}

@@ -7,7 +7,7 @@ import (
 	"github.com/voxire/onion/internal/modules/kpis/internal/application"
 	authPkg "github.com/voxire/onion/internal/platform/auth"
 	errorModels "github.com/voxire/onion/internal/platform/errors"
-	hubv1 "github.com/voxire/voxie/gen/go/hub/v1"
+	hubdashboardv1 "github.com/voxire/voxie/gen/go/hub/dashboard/v1"
 )
 
 func KPIRoutes() []string { return []string{"/hub/kpis"} }
@@ -17,7 +17,7 @@ type (
 	KPIRequest struct{}
 )
 
-type KPIResponse = hubv1.GetKPIsResponse
+type KPIResponse = hubdashboardv1.GetKPIsResponse
 
 func (h *KPIHandler) Serve(ctx context.Context, _ *KPIRequest) (KPIResponse, *errorModels.ServerError) {
 	device := authPkg.DeviceCtx(ctx)

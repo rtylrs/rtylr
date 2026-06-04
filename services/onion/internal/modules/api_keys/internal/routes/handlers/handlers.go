@@ -8,7 +8,7 @@ import (
 	"github.com/voxire/onion/internal/modules/api_keys/internal/application"
 	authPkg "github.com/voxire/onion/internal/platform/auth"
 	errorModels "github.com/voxire/onion/internal/platform/errors"
-	hubv1 "github.com/voxire/voxie/gen/go/hub/v1"
+	hubdeveloperv1 "github.com/voxire/voxie/gen/go/hub/developer/v1"
 )
 
 // -- List API Keys --
@@ -20,7 +20,7 @@ type ListHandler struct{ Service *application.Service }
 type ListRequest struct{}
 
 type ListResponse struct {
-	Keys []*hubv1.ApiKey `json:"keys"`
+	Keys []*hubdeveloperv1.ApiKey `json:"keys"`
 }
 
 func (h *ListHandler) Serve(ctx context.Context, _ *ListRequest) (ListResponse, *errorModels.ServerError) {
@@ -38,13 +38,13 @@ func (h *ListHandler) Serve(ctx context.Context, _ *ListRequest) (ListResponse, 
 		}
 	}
 
-	payloads := make([]*hubv1.ApiKey, 0, len(keys))
+	payloads := make([]*hubdeveloperv1.ApiKey, 0, len(keys))
 	for _, k := range keys {
 		scopes := k.Scopes
 		if scopes == nil {
 			scopes = []string{}
 		}
-		ak := &hubv1.ApiKey{
+		ak := &hubdeveloperv1.ApiKey{
 			Id:        k.ID,
 			Name:      k.Name,
 			KeyPrefix: k.KeyPrefix,

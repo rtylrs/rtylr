@@ -9,7 +9,7 @@ import (
 	authPkg "github.com/voxire/onion/internal/platform/auth"
 	errorModels "github.com/voxire/onion/internal/platform/errors"
 	"github.com/voxire/onion/internal/platform/logger"
-	hrv1 "github.com/voxire/voxie/gen/go/hr/v1"
+	hrovertimev1 "github.com/voxire/voxie/gen/go/hr/overtime/v1"
 )
 
 func ListOvertimeRequestsRoutes() []string { return []string{"/hr/overtime/requests"} }
@@ -22,10 +22,10 @@ type ListOvertimeRequestsRequest struct {
 }
 
 type ListOvertimeRequestsResponse struct {
-	Requests []*hrv1.OvertimeRequestPayload `json:"requests"`
-	Total    int64                          `json:"total"`
-	Limit    int32                          `json:"limit"`
-	Offset   int32                          `json:"offset"`
+	Requests []*hrovertimev1.OvertimeRequestPayload `json:"requests"`
+	Total    int64                                  `json:"total"`
+	Limit    int32                                  `json:"limit"`
+	Offset   int32                                  `json:"offset"`
 }
 
 func (h *ListOvertimeRequestsHandler) Serve(ctx context.Context, req *ListOvertimeRequestsRequest) (ListOvertimeRequestsResponse, *errorModels.ServerError) {
@@ -42,7 +42,7 @@ func (h *ListOvertimeRequestsHandler) Serve(ctx context.Context, req *ListOverti
 		return ListOvertimeRequestsResponse{}, &errorModels.ServerError{HTTPCode: http.StatusInternalServerError, Code: http.StatusInternalServerError, Message: "Failed to list overtime requests"}
 	}
 
-	payloads := make([]*hrv1.OvertimeRequestPayload, 0, len(requests))
+	payloads := make([]*hrovertimev1.OvertimeRequestPayload, 0, len(requests))
 	for _, r := range requests {
 		payloads = append(payloads, overtimeRequestToProto(r))
 	}

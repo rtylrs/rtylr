@@ -9,7 +9,7 @@ import (
 	"github.com/voxire/onion/internal/modules/pos_cash_movements/internal/domain"
 	authPkg "github.com/voxire/onion/internal/platform/auth"
 	errorModels "github.com/voxire/onion/internal/platform/errors"
-	posv1 "github.com/voxire/voxie/gen/go/pos/v1"
+	poscashv1 "github.com/voxire/voxie/gen/go/pos/cash/v1"
 )
 
 // ─── List Cash Movements ─────────────────────────────────────────────────────
@@ -24,7 +24,7 @@ type (
 )
 
 type ListCashMovementsResponse struct {
-	Movements []*posv1.CashMovement `json:"movements"`
+	Movements []*poscashv1.CashMovement `json:"movements"`
 }
 
 func (h *ListCashMovementsHandler) Serve(ctx context.Context, req *ListCashMovementsRequest) (ListCashMovementsResponse, *errorModels.ServerError) {
@@ -39,9 +39,9 @@ func (h *ListCashMovementsHandler) Serve(ctx context.Context, req *ListCashMovem
 	if err != nil {
 		return ListCashMovementsResponse{}, &errorModels.ServerError{Code: http.StatusInternalServerError, Message: "Failed to list cash movements"}
 	}
-	payloads := make([]*posv1.CashMovement, len(movements))
+	payloads := make([]*poscashv1.CashMovement, len(movements))
 	for i, m := range movements {
-		payloads[i] = &posv1.CashMovement{
+		payloads[i] = &poscashv1.CashMovement{
 			Id:         m.ID,
 			BusinessId: m.BusinessID,
 			BranchId:   m.BranchID,

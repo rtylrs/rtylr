@@ -9,7 +9,7 @@ import (
 
 	"github.com/voxire/onion/internal/modules/user/internal/application"
 	errorModels "github.com/voxire/onion/internal/platform/errors"
-	authv1 "github.com/voxire/voxie/gen/go/auth/v1"
+	commonauthv1 "github.com/voxire/voxie/gen/go/common/auth/v1"
 )
 
 // GoogleAuthRoutes is the single endpoint the frontend calls
@@ -47,7 +47,7 @@ type GoogleAuthRequest struct {
 	BusinessName string `json:"business_name"`
 }
 
-type GoogleAuthResponse = authv1.LoginResponse
+type GoogleAuthResponse = commonauthv1.LoginResponse
 
 func (h *GoogleAuthHandler) Validate(_ context.Context, req *GoogleAuthRequest) *errorModels.ServerError {
 	if strings.TrimSpace(req.Code) == "" {

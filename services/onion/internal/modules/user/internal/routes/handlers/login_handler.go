@@ -10,7 +10,7 @@ import (
 	authPkg "github.com/voxire/onion/internal/platform/auth"
 	errorModels "github.com/voxire/onion/internal/platform/errors"
 	"github.com/voxire/onion/internal/platform/logger"
-	authv1 "github.com/voxire/voxie/gen/go/auth/v1"
+	commonauthv1 "github.com/voxire/voxie/gen/go/common/auth/v1"
 )
 
 func LoginRoutes() []string {
@@ -32,7 +32,7 @@ type LoginRequest struct {
 	Password string `json:"password"`
 }
 
-type LoginResponse = authv1.LoginResponse
+type LoginResponse = commonauthv1.LoginResponse
 
 func (h *LoginHandler) Validate(_ context.Context, req *LoginRequest) *errorModels.ServerError {
 	if req.Email == "" || req.Password == "" {

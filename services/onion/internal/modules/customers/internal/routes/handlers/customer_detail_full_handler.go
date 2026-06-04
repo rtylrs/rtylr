@@ -10,7 +10,8 @@ import (
 	"github.com/voxire/onion/internal/modules/customers/internal/domain"
 	authPkg "github.com/voxire/onion/internal/platform/auth"
 	errorModels "github.com/voxire/onion/internal/platform/errors"
-	crmv1 "github.com/voxire/voxie/gen/go/crm/v1"
+	crmcustomerv1 "github.com/voxire/voxie/gen/go/crm/customer/v1"
+	crmloyaltyv1 "github.com/voxire/voxie/gen/go/crm/loyalty/v1"
 )
 
 func CustomerDetailFullRoutes() []string {
@@ -26,9 +27,9 @@ type GetCustomerDetailFullRequest struct {
 }
 
 type GetCustomerDetailFullResponse struct {
-	Customer            *crmv1.Customer             `json:"customer"`
-	LoyaltyTransactions []*crmv1.LoyaltyTransaction `json:"loyalty_transactions"`
-	RecentVisits        []TimelineEntryPayload      `json:"recent_visits"`
+	Customer            *crmcustomerv1.Customer            `json:"customer"`
+	LoyaltyTransactions []*crmloyaltyv1.LoyaltyTransaction `json:"loyalty_transactions"`
+	RecentVisits        []TimelineEntryPayload             `json:"recent_visits"`
 }
 
 func (h *GetCustomerDetailFullHandler) Validate(_ context.Context, req *GetCustomerDetailFullRequest) *errorModels.ServerError {
@@ -63,7 +64,7 @@ func (h *GetCustomerDetailFullHandler) Serve(ctx context.Context, req *GetCustom
 		}
 	}
 
-	txPayloads := make([]*crmv1.LoyaltyTransaction, len(detail.LoyaltyTransactions))
+	txPayloads := make([]*crmloyaltyv1.LoyaltyTransaction, len(detail.LoyaltyTransactions))
 	for i, tx := range detail.LoyaltyTransactions {
 		txPayloads[i] = newLoyaltyTransactionPayload(tx)
 	}

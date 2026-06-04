@@ -9,11 +9,11 @@ import (
 	"github.com/voxire/onion/internal/modules/pos_menu/internal/domain"
 	authPkg "github.com/voxire/onion/internal/platform/auth"
 	errorModels "github.com/voxire/onion/internal/platform/errors"
-	posv1 "github.com/voxire/voxie/gen/go/pos/v1"
+	posmenuitemv1 "github.com/voxire/voxie/gen/go/pos/menu_item/v1"
 )
 
-func toProtoMenuItem(item domain.MenuItem) *posv1.MenuItem {
-	return &posv1.MenuItem{
+func toProtoMenuItem(item domain.MenuItem) *posmenuitemv1.MenuItem {
+	return &posmenuitemv1.MenuItem{
 		Id:         item.ID,
 		OwnerId:    item.OwnerID,
 		CategoryId: item.CategoryID,
@@ -34,7 +34,7 @@ type (
 	ListMenuItemsHandler  struct{ Service *application.Service }
 	ListMenuItemsRequest  struct{}
 	ListMenuItemsResponse struct {
-		Items []*posv1.MenuItem `json:"items"`
+		Items []*posmenuitemv1.MenuItem `json:"items"`
 	}
 )
 
@@ -47,7 +47,7 @@ func (h *ListMenuItemsHandler) Serve(ctx context.Context, _ *ListMenuItemsReques
 	if err != nil {
 		return ListMenuItemsResponse{}, &errorModels.ServerError{Code: http.StatusInternalServerError, Message: "Failed to list menu items"}
 	}
-	payloads := make([]*posv1.MenuItem, len(items))
+	payloads := make([]*posmenuitemv1.MenuItem, len(items))
 	for i, item := range items {
 		payloads[i] = toProtoMenuItem(item)
 	}

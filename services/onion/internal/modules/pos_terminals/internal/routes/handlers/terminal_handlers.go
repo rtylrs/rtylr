@@ -12,11 +12,11 @@ import (
 	"github.com/voxire/onion/internal/modules/pos_terminals/internal/domain"
 	authPkg "github.com/voxire/onion/internal/platform/auth"
 	errorModels "github.com/voxire/onion/internal/platform/errors"
-	posv1 "github.com/voxire/voxie/gen/go/pos/v1"
+	posterminalv1 "github.com/voxire/voxie/gen/go/pos/terminal/v1"
 )
 
-func toProtoTerminal(t domain.Terminal) *posv1.Terminal {
-	p := &posv1.Terminal{
+func toProtoTerminal(t domain.Terminal) *posterminalv1.Terminal {
+	p := &posterminalv1.Terminal{
 		Id:         t.ID,
 		BusinessId: t.BusinessID,
 		BranchId:   t.BranchID,
@@ -40,7 +40,7 @@ type (
 	ListTerminalsHandler  struct{ Service *application.Service }
 	ListTerminalsRequest  struct{}
 	ListTerminalsResponse struct {
-		Terminals []*posv1.Terminal `json:"terminals"`
+		Terminals []*posterminalv1.Terminal `json:"terminals"`
 	}
 )
 
@@ -53,7 +53,7 @@ func (h *ListTerminalsHandler) Serve(ctx context.Context, _ *ListTerminalsReques
 	if err != nil {
 		return ListTerminalsResponse{}, &errorModels.ServerError{Code: http.StatusInternalServerError, Message: "Failed to list terminals"}
 	}
-	payloads := make([]*posv1.Terminal, len(terminals))
+	payloads := make([]*posterminalv1.Terminal, len(terminals))
 	for i, t := range terminals {
 		payloads[i] = toProtoTerminal(t)
 	}

@@ -10,7 +10,7 @@ import (
 	authPkg "github.com/voxire/onion/internal/platform/auth"
 	errorModels "github.com/voxire/onion/internal/platform/errors"
 	"github.com/voxire/onion/internal/platform/logger"
-	hrv1 "github.com/voxire/voxie/gen/go/hr/v1"
+	hrperformancev1 "github.com/voxire/voxie/gen/go/hr/performance/v1"
 )
 
 func CreateGoalRoutes() []string { return []string{"/hr/performance/goals"} }
@@ -27,7 +27,7 @@ type CreateGoalRequest struct {
 }
 
 type CreateGoalResponse struct {
-	Goal *hrv1.ReviewGoalPayload `json:"goal"`
+	Goal *hrperformancev1.ReviewGoalPayload `json:"goal"`
 }
 
 func (h *CreateGoalHandler) Validate(_ context.Context, req *CreateGoalRequest) *errorModels.ServerError {

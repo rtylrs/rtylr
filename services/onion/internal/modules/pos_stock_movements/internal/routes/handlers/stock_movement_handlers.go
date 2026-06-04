@@ -8,7 +8,7 @@ import (
 	"github.com/voxire/onion/internal/modules/pos_stock_movements/internal/domain"
 	authPkg "github.com/voxire/onion/internal/platform/auth"
 	errorModels "github.com/voxire/onion/internal/platform/errors"
-	posv1 "github.com/voxire/voxie/gen/go/pos/v1"
+	posstockv1 "github.com/voxire/voxie/gen/go/pos/stock/v1"
 )
 
 // ─── List Movements ──────────────────────────────────────────────────────────
@@ -24,7 +24,7 @@ type (
 )
 
 type ListMovementsResponse struct {
-	Movements []*posv1.StockMovement `json:"movements"`
+	Movements []*posstockv1.StockMovement `json:"movements"`
 }
 
 func (h *ListMovementsHandler) Serve(ctx context.Context, req *ListMovementsRequest) (ListMovementsResponse, *errorModels.ServerError) {
@@ -39,9 +39,9 @@ func (h *ListMovementsHandler) Serve(ctx context.Context, req *ListMovementsRequ
 	if err != nil {
 		return ListMovementsResponse{}, &errorModels.ServerError{Code: http.StatusInternalServerError, Message: "Failed to list stock movements"}
 	}
-	payloads := make([]*posv1.StockMovement, len(movements))
+	payloads := make([]*posstockv1.StockMovement, len(movements))
 	for i, m := range movements {
-		payloads[i] = &posv1.StockMovement{
+		payloads[i] = &posstockv1.StockMovement{
 			Id:            m.ID,
 			BusinessId:    m.BusinessID,
 			BranchId:      m.BranchID,
@@ -226,11 +226,11 @@ type (
 )
 
 type ListInventoryResponse struct {
-	Inventory []*posv1.BranchInventory `json:"inventory"`
+	Inventory []*posstockv1.BranchInventory `json:"inventory"`
 }
 
-func toProtoBranchInventory(item domain.BranchInventory) *posv1.BranchInventory {
-	p := &posv1.BranchInventory{
+func toProtoBranchInventory(item domain.BranchInventory) *posstockv1.BranchInventory {
+	p := &posstockv1.BranchInventory{
 		Id:         item.ID,
 		BusinessId: item.BusinessID,
 		BranchId:   item.BranchID,
@@ -259,7 +259,7 @@ func (h *ListInventoryHandler) Serve(ctx context.Context, req *ListInventoryRequ
 	if err != nil {
 		return ListInventoryResponse{}, &errorModels.ServerError{Code: http.StatusInternalServerError, Message: "Failed to list inventory"}
 	}
-	payloads := make([]*posv1.BranchInventory, len(items))
+	payloads := make([]*posstockv1.BranchInventory, len(items))
 	for i, item := range items {
 		payloads[i] = toProtoBranchInventory(item)
 	}
@@ -278,7 +278,7 @@ type (
 )
 
 type LowStockResponse struct {
-	Items []*posv1.BranchInventory `json:"items"`
+	Items []*posstockv1.BranchInventory `json:"items"`
 }
 
 func (h *LowStockHandler) Serve(ctx context.Context, req *LowStockRequest) (LowStockResponse, *errorModels.ServerError) {
@@ -293,7 +293,7 @@ func (h *LowStockHandler) Serve(ctx context.Context, req *LowStockRequest) (LowS
 	if err != nil {
 		return LowStockResponse{}, &errorModels.ServerError{Code: http.StatusInternalServerError, Message: "Failed to list low stock items"}
 	}
-	payloads := make([]*posv1.BranchInventory, len(items))
+	payloads := make([]*posstockv1.BranchInventory, len(items))
 	for i, item := range items {
 		payloads[i] = toProtoBranchInventory(item)
 	}

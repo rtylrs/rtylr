@@ -8,7 +8,7 @@ import (
 	"github.com/voxire/onion/internal/modules/security/internal/domain"
 	authPkg "github.com/voxire/onion/internal/platform/auth"
 	errorModels "github.com/voxire/onion/internal/platform/errors"
-	hubv1 "github.com/voxire/voxie/gen/go/hub/v1"
+	hubsecurityv1 "github.com/voxire/voxie/gen/go/hub/security/v1"
 )
 
 func SecurityRoutes() []string     { return []string{"/security"} }
@@ -24,7 +24,7 @@ type (
 )
 
 type GetSettingsResponse struct {
-	State *hubv1.SecurityState `json:"state"`
+	State *hubsecurityv1.SecurityState `json:"state"`
 }
 
 func (h *GetSettingsHandler) Serve(ctx context.Context, _ *GetSettingsRequest) (GetSettingsResponse, *errorModels.ServerError) {
@@ -42,9 +42,9 @@ func (h *GetSettingsHandler) Serve(ctx context.Context, _ *GetSettingsRequest) (
 		}
 	}
 
-	sessions := make([]*hubv1.ActiveSession, 0, len(settings.ActiveSessions))
+	sessions := make([]*hubsecurityv1.ActiveSession, 0, len(settings.ActiveSessions))
 	for _, s := range settings.ActiveSessions {
-		sessions = append(sessions, &hubv1.ActiveSession{
+		sessions = append(sessions, &hubsecurityv1.ActiveSession{
 			Id:        s.ID,
 			Ip:        s.IP,
 			UserAgent: s.UserAgent,
@@ -54,7 +54,7 @@ func (h *GetSettingsHandler) Serve(ctx context.Context, _ *GetSettingsRequest) (
 	}
 
 	return GetSettingsResponse{
-		State: &hubv1.SecurityState{
+		State: &hubsecurityv1.SecurityState{
 			TwoFactorEnabled: settings.TwoFactorEnabled,
 			ActiveSessions:   sessions,
 		},
@@ -105,7 +105,7 @@ type (
 )
 
 type LoginHistoryResponse struct {
-	History []*hubv1.LoginEntry `json:"history"`
+	History []*hubsecurityv1.LoginEntry `json:"history"`
 }
 
 func (h *LoginHistoryHandler) Serve(ctx context.Context, _ *LoginHistoryRequest) (LoginHistoryResponse, *errorModels.ServerError) {
@@ -123,9 +123,9 @@ func (h *LoginHistoryHandler) Serve(ctx context.Context, _ *LoginHistoryRequest)
 		}
 	}
 
-	payloads := make([]*hubv1.LoginEntry, 0, len(entries))
+	payloads := make([]*hubsecurityv1.LoginEntry, 0, len(entries))
 	for _, e := range entries {
-		payloads = append(payloads, &hubv1.LoginEntry{
+		payloads = append(payloads, &hubsecurityv1.LoginEntry{
 			Email:     e.Email,
 			Method:    e.Method,
 			Ip:        e.IP,

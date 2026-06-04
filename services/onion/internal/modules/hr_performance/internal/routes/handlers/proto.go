@@ -2,11 +2,11 @@ package handlers
 
 import (
 	"github.com/voxire/onion/internal/modules/hr_performance/internal/domain"
-	hrv1 "github.com/voxire/voxie/gen/go/hr/v1"
+	hrperformancev1 "github.com/voxire/voxie/gen/go/hr/performance/v1"
 )
 
-func cycleToProto(c domain.ReviewCycleRecord) *hrv1.ReviewCyclePayload {
-	return &hrv1.ReviewCyclePayload{
+func cycleToProto(c domain.ReviewCycleRecord) *hrperformancev1.ReviewCyclePayload {
+	return &hrperformancev1.ReviewCyclePayload{
 		Id:          c.ID,
 		OwnerId:     c.OwnerID,
 		Name:        c.Name,
@@ -19,7 +19,7 @@ func cycleToProto(c domain.ReviewCycleRecord) *hrv1.ReviewCyclePayload {
 	}
 }
 
-func reviewToProto(r domain.PerformanceReviewRecord) *hrv1.PerformanceReviewPayload {
+func reviewToProto(r domain.PerformanceReviewRecord) *hrperformancev1.PerformanceReviewPayload {
 	var rating *string
 	if r.OverallRating != "" {
 		rating = &r.OverallRating
@@ -33,7 +33,7 @@ func reviewToProto(r domain.PerformanceReviewRecord) *hrv1.PerformanceReviewPayl
 		v := r.SharedWithEmployeeAt.Unix()
 		sharedAt = &v
 	}
-	return &hrv1.PerformanceReviewPayload{
+	return &hrperformancev1.PerformanceReviewPayload{
 		Id:                   r.ID,
 		OwnerId:              r.OwnerID,
 		EmployeeId:           r.EmployeeID,
@@ -49,7 +49,7 @@ func reviewToProto(r domain.PerformanceReviewRecord) *hrv1.PerformanceReviewPayl
 	}
 }
 
-func goalToProto(g domain.ReviewGoalRecord) *hrv1.ReviewGoalPayload {
+func goalToProto(g domain.ReviewGoalRecord) *hrperformancev1.ReviewGoalPayload {
 	var weight *float64
 	if g.Weight != 0 {
 		weight = &g.Weight
@@ -58,7 +58,7 @@ func goalToProto(g domain.ReviewGoalRecord) *hrv1.ReviewGoalPayload {
 	if g.SuccessCriteria != "" {
 		criteria = &g.SuccessCriteria
 	}
-	return &hrv1.ReviewGoalPayload{
+	return &hrperformancev1.ReviewGoalPayload{
 		Id:              g.ID,
 		OwnerId:         g.OwnerID,
 		EmployeeId:      g.EmployeeID,

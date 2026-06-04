@@ -10,7 +10,7 @@ import (
 	authPkg "github.com/voxire/onion/internal/platform/auth"
 	errorModels "github.com/voxire/onion/internal/platform/errors"
 	"github.com/voxire/onion/internal/platform/logger"
-	hrv1 "github.com/voxire/voxie/gen/go/hr/v1"
+	hrleavev1 "github.com/voxire/voxie/gen/go/hr/leave/v1"
 )
 
 func ListLeaveTypesRoutes() []string { return []string{"/hr/leave/types"} }
@@ -23,10 +23,10 @@ type ListLeaveTypesRequest struct {
 }
 
 type ListLeaveTypesResponse struct {
-	Types  []*hrv1.LeaveTypePayload `json:"types"`
-	Total  int64                    `json:"total"`
-	Limit  int32                    `json:"limit"`
-	Offset int32                    `json:"offset"`
+	Types  []*hrleavev1.LeaveTypePayload `json:"types"`
+	Total  int64                         `json:"total"`
+	Limit  int32                         `json:"limit"`
+	Offset int32                         `json:"offset"`
 }
 
 func (h *ListLeaveTypesHandler) Serve(ctx context.Context, req *ListLeaveTypesRequest) (ListLeaveTypesResponse, *errorModels.ServerError) {
@@ -40,13 +40,13 @@ func (h *ListLeaveTypesHandler) Serve(ctx context.Context, req *ListLeaveTypesRe
 	})
 	if err != nil {
 		if errors.Is(err, domain.ErrLeaveNotConfigured) {
-			return ListLeaveTypesResponse{Types: []*hrv1.LeaveTypePayload{}, Total: 0, Limit: req.Limit, Offset: req.Offset}, nil
+			return ListLeaveTypesResponse{Types: []*hrleavev1.LeaveTypePayload{}, Total: 0, Limit: req.Limit, Offset: req.Offset}, nil
 		}
 		logger.Ctx(ctx).Error("failed to list leave types", logger.Any("owner_id", device.User.UserID), logger.Error(err))
 		return ListLeaveTypesResponse{}, &errorModels.ServerError{HTTPCode: http.StatusInternalServerError, Code: http.StatusInternalServerError, Message: "Failed to list leave types"}
 	}
 
-	payloads := make([]*hrv1.LeaveTypePayload, 0, len(types))
+	payloads := make([]*hrleavev1.LeaveTypePayload, 0, len(types))
 	for _, t := range types {
 		payloads = append(payloads, leaveTypeToProto(t))
 	}

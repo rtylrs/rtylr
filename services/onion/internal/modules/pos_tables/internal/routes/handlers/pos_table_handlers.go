@@ -13,11 +13,11 @@ import (
 	"github.com/voxire/onion/internal/modules/pos_tables/internal/domain"
 	authPkg "github.com/voxire/onion/internal/platform/auth"
 	errorModels "github.com/voxire/onion/internal/platform/errors"
-	posv1 "github.com/voxire/voxie/gen/go/pos/v1"
+	postablev1 "github.com/voxire/voxie/gen/go/pos/table/v1"
 )
 
-func toProtoTable(t domain.Table) *posv1.Table {
-	p := &posv1.Table{
+func toProtoTable(t domain.Table) *postablev1.Table {
+	p := &postablev1.Table{
 		Id:         t.ID,
 		OwnerId:    t.OwnerID,
 		LocationId: t.LocationID,
@@ -38,7 +38,7 @@ type (
 	ListTablesHandler  struct{ Service *application.Service }
 	ListTablesRequest  struct{}
 	ListTablesResponse struct {
-		Tables []*posv1.Table `json:"tables"`
+		Tables []*postablev1.Table `json:"tables"`
 	}
 )
 
@@ -51,7 +51,7 @@ func (h *ListTablesHandler) Serve(ctx context.Context, _ *ListTablesRequest) (Li
 	if err != nil {
 		return ListTablesResponse{}, &errorModels.ServerError{Code: http.StatusInternalServerError, Message: "Failed to list tables"}
 	}
-	payloads := make([]*posv1.Table, len(tables))
+	payloads := make([]*postablev1.Table, len(tables))
 	for i, t := range tables {
 		payloads[i] = toProtoTable(t)
 	}

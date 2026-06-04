@@ -8,7 +8,7 @@ import (
 	authPkg "github.com/voxire/onion/internal/platform/auth"
 	errorModels "github.com/voxire/onion/internal/platform/errors"
 	"github.com/voxire/onion/internal/platform/logger"
-	hrv1 "github.com/voxire/voxie/gen/go/hr/v1"
+	hrdocumentv1 "github.com/voxire/voxie/gen/go/hr/document/v1"
 )
 
 func ListDocumentsRoutes() []string { return []string{"/hr/documents"} }
@@ -22,10 +22,10 @@ type ListDocumentsRequest struct {
 }
 
 type ListDocumentsResponse struct {
-	Documents []*hrv1.EmployeeDocumentPayload `json:"documents"`
-	Total     int64                           `json:"total"`
-	Limit     int32                           `json:"limit"`
-	Offset    int32                           `json:"offset"`
+	Documents []*hrdocumentv1.EmployeeDocumentPayload `json:"documents"`
+	Total     int64                                   `json:"total"`
+	Limit     int32                                   `json:"limit"`
+	Offset    int32                                   `json:"offset"`
 }
 
 func (h *ListDocumentsHandler) Serve(ctx context.Context, req *ListDocumentsRequest) (ListDocumentsResponse, *errorModels.ServerError) {
@@ -44,7 +44,7 @@ func (h *ListDocumentsHandler) Serve(ctx context.Context, req *ListDocumentsRequ
 		return ListDocumentsResponse{}, &errorModels.ServerError{HTTPCode: http.StatusInternalServerError, Code: http.StatusInternalServerError, Message: "Failed to list documents"}
 	}
 
-	payloads := make([]*hrv1.EmployeeDocumentPayload, 0, len(docs))
+	payloads := make([]*hrdocumentv1.EmployeeDocumentPayload, 0, len(docs))
 	for _, d := range docs {
 		payloads = append(payloads, documentToProto(d))
 	}

@@ -10,7 +10,7 @@ import (
 	"github.com/voxire/onion/internal/modules/notifications/internal/application"
 	authPkg "github.com/voxire/onion/internal/platform/auth"
 	errorModels "github.com/voxire/onion/internal/platform/errors"
-	hubv1 "github.com/voxire/voxie/gen/go/hub/v1"
+	hubnotificationv1 "github.com/voxire/voxie/gen/go/hub/notification/v1"
 )
 
 func NotificationRoutes() []string { return []string{"/notifications"} }
@@ -24,7 +24,7 @@ type (
 )
 
 type ListResponse struct {
-	Notifications []*hubv1.Notification `json:"notifications"`
+	Notifications []*hubnotificationv1.Notification `json:"notifications"`
 }
 
 func (h *ListHandler) Serve(ctx context.Context, _ *ListRequest) (ListResponse, *errorModels.ServerError) {
@@ -42,9 +42,9 @@ func (h *ListHandler) Serve(ctx context.Context, _ *ListRequest) (ListResponse, 
 		}
 	}
 
-	payloads := make([]*hubv1.Notification, 0, len(notifications))
+	payloads := make([]*hubnotificationv1.Notification, 0, len(notifications))
 	for _, n := range notifications {
-		payloads = append(payloads, &hubv1.Notification{
+		payloads = append(payloads, &hubnotificationv1.Notification{
 			Id:        n.ID,
 			Title:     n.Title,
 			Body:      n.Body,

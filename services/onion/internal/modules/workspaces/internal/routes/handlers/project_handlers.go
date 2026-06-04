@@ -11,7 +11,7 @@ import (
 	authPkg "github.com/voxire/onion/internal/platform/auth"
 	errorModels "github.com/voxire/onion/internal/platform/errors"
 	"github.com/voxire/onion/internal/platform/wsbus"
-	flowv1 "github.com/voxire/voxie/gen/go/flow/v1"
+	flowprojectv1 "github.com/voxire/voxie/gen/go/flow/project/v1"
 )
 
 // publishProjectEvent fans a project-level change out to every client
@@ -43,8 +43,8 @@ func DeleteProjectRoutes() []string { return []string{"/flow/projects"} }
 // Shared payload types
 // ─────────────────────────────────────────────
 
-func toProjectPayload(p domain.Project) *flowv1.Project {
-	proj := &flowv1.Project{
+func toProjectPayload(p domain.Project) *flowprojectv1.Project {
+	proj := &flowprojectv1.Project{
 		Id:             p.ID,
 		WorkspaceId:    p.WorkspaceID,
 		OwnerId:        p.OwnerID,
@@ -84,7 +84,7 @@ type ListProjectsRequest struct {
 }
 
 type ListProjectsResponse struct {
-	Projects []*flowv1.Project `json:"projects"`
+	Projects []*flowprojectv1.Project `json:"projects"`
 }
 
 func (h *ListProjectsHandler) Validate(_ context.Context, req *ListProjectsRequest) *errorModels.ServerError {
@@ -117,7 +117,7 @@ func (h *ListProjectsHandler) Serve(ctx context.Context, req *ListProjectsReques
 		}
 	}
 
-	payloads := make([]*flowv1.Project, 0, len(projects))
+	payloads := make([]*flowprojectv1.Project, 0, len(projects))
 	for _, p := range projects {
 		payloads = append(payloads, toProjectPayload(p))
 	}
@@ -145,7 +145,7 @@ type CreateProjectRequest struct {
 }
 
 type CreateProjectResponse struct {
-	Project *flowv1.Project `json:"project"`
+	Project *flowprojectv1.Project `json:"project"`
 }
 
 func (h *CreateProjectHandler) Validate(_ context.Context, req *CreateProjectRequest) *errorModels.ServerError {

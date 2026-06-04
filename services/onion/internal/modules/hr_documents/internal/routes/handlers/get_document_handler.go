@@ -13,7 +13,7 @@ import (
 	authPkg "github.com/voxire/onion/internal/platform/auth"
 	errorModels "github.com/voxire/onion/internal/platform/errors"
 	"github.com/voxire/onion/internal/platform/logger"
-	hrv1 "github.com/voxire/voxie/gen/go/hr/v1"
+	hrdocumentv1 "github.com/voxire/voxie/gen/go/hr/document/v1"
 )
 
 func GetDocumentRoutes() []string { return []string{"/hr/documents/{id}"} }
@@ -23,7 +23,7 @@ type GetDocumentHandler struct{ Service *application.Service }
 type GetDocumentRequest struct{}
 
 type GetDocumentResponse struct {
-	Document *hrv1.EmployeeDocumentPayload `json:"document"`
+	Document *hrdocumentv1.EmployeeDocumentPayload `json:"document"`
 }
 
 func (h *GetDocumentHandler) Serve(ctx context.Context, _ *GetDocumentRequest) (GetDocumentResponse, *errorModels.ServerError) {

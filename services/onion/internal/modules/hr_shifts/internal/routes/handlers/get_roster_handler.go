@@ -9,7 +9,7 @@ import (
 	authPkg "github.com/voxire/onion/internal/platform/auth"
 	errorModels "github.com/voxire/onion/internal/platform/errors"
 	"github.com/voxire/onion/internal/platform/logger"
-	hrv1 "github.com/voxire/voxie/gen/go/hr/v1"
+	hrshiftv1 "github.com/voxire/voxie/gen/go/hr/shift/v1"
 )
 
 func GetRosterRoutes() []string { return []string{"/hr/shifts/roster"} }
@@ -22,8 +22,8 @@ type GetRosterRequest struct {
 }
 
 type GetRosterResponse struct {
-	Assignments []*hrv1.ShiftAssignmentPayload `json:"assignments"`
-	Conflicts   []domain.ConflictInfo          `json:"conflicts"`
+	Assignments []*hrshiftv1.ShiftAssignmentPayload `json:"assignments"`
+	Conflicts   []domain.ConflictInfo               `json:"conflicts"`
 }
 
 func (h *GetRosterHandler) Serve(ctx context.Context, req *GetRosterRequest) (GetRosterResponse, *errorModels.ServerError) {
@@ -41,7 +41,7 @@ func (h *GetRosterHandler) Serve(ctx context.Context, req *GetRosterRequest) (Ge
 		return GetRosterResponse{}, &errorModels.ServerError{HTTPCode: http.StatusInternalServerError, Code: http.StatusInternalServerError, Message: "Failed to get roster"}
 	}
 
-	payloads := make([]*hrv1.ShiftAssignmentPayload, 0, len(assignments))
+	payloads := make([]*hrshiftv1.ShiftAssignmentPayload, 0, len(assignments))
 	for _, a := range assignments {
 		payloads = append(payloads, assignmentToProto(a))
 	}

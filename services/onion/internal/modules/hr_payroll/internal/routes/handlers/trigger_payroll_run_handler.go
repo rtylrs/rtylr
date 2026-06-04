@@ -11,7 +11,7 @@ import (
 	authPkg "github.com/voxire/onion/internal/platform/auth"
 	errorModels "github.com/voxire/onion/internal/platform/errors"
 	"github.com/voxire/onion/internal/platform/logger"
-	hrv1 "github.com/voxire/voxie/gen/go/hr/v1"
+	hremployeespayrollrunsv1 "github.com/voxire/voxie/gen/go/hr/employees/payroll/runs/v1"
 )
 
 func TriggerPayrollRunRoutes() []string { return []string{"/hr/payroll/runs/trigger"} }
@@ -24,8 +24,8 @@ type TriggerPayrollRunRequest struct {
 }
 
 type TriggerPayrollRunResponse struct {
-	Run     *hrv1.PayrollRunPayload     `json:"run"`
-	Entries []*hrv1.PayrollEntryPayload `json:"entries"`
+	Run     *hremployeespayrollrunsv1.PayrollRunPayload     `json:"run"`
+	Entries []*hremployeespayrollrunsv1.PayrollEntryPayload `json:"entries"`
 }
 
 func (h *TriggerPayrollRunHandler) Validate(_ context.Context, req *TriggerPayrollRunRequest) *errorModels.ServerError {
@@ -63,7 +63,7 @@ func (h *TriggerPayrollRunHandler) Serve(ctx context.Context, req *TriggerPayrol
 	}
 
 	runPayload := payrollRunToProto(*run)
-	entryPayloads := make([]*hrv1.PayrollEntryPayload, 0, len(entries))
+	entryPayloads := make([]*hremployeespayrollrunsv1.PayrollEntryPayload, 0, len(entries))
 	for _, e := range entries {
 		entryPayloads = append(entryPayloads, payrollEntryToProto(e))
 	}

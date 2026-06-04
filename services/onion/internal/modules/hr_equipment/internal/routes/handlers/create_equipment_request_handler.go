@@ -10,7 +10,7 @@ import (
 	authPkg "github.com/voxire/onion/internal/platform/auth"
 	errorModels "github.com/voxire/onion/internal/platform/errors"
 	"github.com/voxire/onion/internal/platform/logger"
-	hrv1 "github.com/voxire/voxie/gen/go/hr/v1"
+	hrequipmentv1 "github.com/voxire/voxie/gen/go/hr/equipment/v1"
 )
 
 func CreateEquipmentRequestRoutes() []string { return []string{"/hr/equipment/requests"} }
@@ -26,7 +26,7 @@ type CreateEquipmentRequestRequest struct {
 }
 
 type CreateEquipmentRequestResponse struct {
-	Request *hrv1.EquipmentRequestPayload `json:"request"`
+	Request *hrequipmentv1.EquipmentRequestPayload `json:"request"`
 }
 
 func (h *CreateEquipmentRequestHandler) Validate(_ context.Context, req *CreateEquipmentRequestRequest) *errorModels.ServerError {

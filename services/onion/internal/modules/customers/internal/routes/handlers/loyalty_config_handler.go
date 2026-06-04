@@ -8,7 +8,7 @@ import (
 	"github.com/voxire/onion/internal/modules/customers/internal/domain"
 	authPkg "github.com/voxire/onion/internal/platform/auth"
 	errorModels "github.com/voxire/onion/internal/platform/errors"
-	crmv1 "github.com/voxire/voxie/gen/go/crm/v1"
+	crmloyaltyv1 "github.com/voxire/voxie/gen/go/crm/loyalty/v1"
 )
 
 func LoyaltyConfigGetRoutes() []string {
@@ -28,11 +28,11 @@ type GetLoyaltyConfigHandler struct {
 type GetLoyaltyConfigRequest struct{}
 
 type GetLoyaltyConfigResponse struct {
-	Config *crmv1.LoyaltyConfig `json:"config"`
+	Config *crmloyaltyv1.LoyaltyConfig `json:"config"`
 }
 
-func newLoyaltyConfigPayload(cfg domain.LoyaltyConfig) *crmv1.LoyaltyConfig {
-	return &crmv1.LoyaltyConfig{
+func newLoyaltyConfigPayload(cfg domain.LoyaltyConfig) *crmloyaltyv1.LoyaltyConfig {
+	return &crmloyaltyv1.LoyaltyConfig{
 		Id:                    cfg.ID,
 		OwnerId:               cfg.OwnerID,
 		IsEnabled:             cfg.IsEnabled,

@@ -11,11 +11,11 @@ import (
 	"github.com/voxire/onion/internal/modules/pos_audit/internal/domain"
 	authPkg "github.com/voxire/onion/internal/platform/auth"
 	errorModels "github.com/voxire/onion/internal/platform/errors"
-	posv1 "github.com/voxire/voxie/gen/go/pos/v1"
+	posauditv1 "github.com/voxire/voxie/gen/go/pos/audit/v1"
 )
 
-func toProtoAuditLog(l domain.AuditLog) *posv1.AuditLog {
-	p := &posv1.AuditLog{
+func toProtoAuditLog(l domain.AuditLog) *posauditv1.AuditLog {
+	p := &posauditv1.AuditLog{
 		Id:         l.ID,
 		BusinessId: l.BusinessID,
 		BranchId:   l.BranchID,
@@ -50,7 +50,7 @@ type (
 )
 
 type ListAuditResponse struct {
-	Logs []*posv1.AuditLog `json:"logs"`
+	Logs []*posauditv1.AuditLog `json:"logs"`
 }
 
 func (h *ListAuditHandler) Validate(_ context.Context, req *ListAuditRequest) *errorModels.ServerError {
@@ -93,7 +93,7 @@ func (h *ListAuditHandler) Serve(ctx context.Context, req *ListAuditRequest) (Li
 	if err != nil {
 		return ListAuditResponse{}, &errorModels.ServerError{Code: http.StatusInternalServerError, Message: "Failed to list audit logs"}
 	}
-	payloads := make([]*posv1.AuditLog, len(logs))
+	payloads := make([]*posauditv1.AuditLog, len(logs))
 	for i, l := range logs {
 		payloads[i] = toProtoAuditLog(l)
 	}

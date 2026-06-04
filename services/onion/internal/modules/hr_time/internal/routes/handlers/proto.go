@@ -2,10 +2,10 @@ package handlers
 
 import (
 	"github.com/voxire/onion/internal/modules/hr_time/internal/domain"
-	hrv1 "github.com/voxire/voxie/gen/go/hr/v1"
+	hrtimeentryv1 "github.com/voxire/voxie/gen/go/hr/time_entry/v1"
 )
 
-func timeEntryToProto(e domain.TimeEntryRecord) *hrv1.TimeEntryPayload {
+func timeEntryToProto(e domain.TimeEntryRecord) *hrtimeentryv1.TimeEntryPayload {
 	var projectID, taskID, categoryID, approvedBy *int64
 	var startTime, endTime, rejectionReason *string
 
@@ -31,7 +31,7 @@ func timeEntryToProto(e domain.TimeEntryRecord) *hrv1.TimeEntryPayload {
 		rejectionReason = &e.RejectionReason
 	}
 
-	return &hrv1.TimeEntryPayload{
+	return &hrtimeentryv1.TimeEntryPayload{
 		Id:              e.ID,
 		OwnerId:         e.OwnerID,
 		EmployeeId:      e.EmployeeID,
@@ -53,14 +53,14 @@ func timeEntryToProto(e domain.TimeEntryRecord) *hrv1.TimeEntryPayload {
 	}
 }
 
-func timesheetToProto(ts domain.TimesheetRecord) *hrv1.TimesheetPayload {
+func timesheetToProto(ts domain.TimesheetRecord) *hrtimeentryv1.TimesheetPayload {
 	var submittedAt *int64
 	if !ts.SubmittedAt.IsZero() {
 		unix := ts.SubmittedAt.Unix()
 		submittedAt = &unix
 	}
 
-	return &hrv1.TimesheetPayload{
+	return &hrtimeentryv1.TimesheetPayload{
 		Id:                   ts.ID,
 		OwnerId:              ts.OwnerID,
 		EmployeeId:           ts.EmployeeID,

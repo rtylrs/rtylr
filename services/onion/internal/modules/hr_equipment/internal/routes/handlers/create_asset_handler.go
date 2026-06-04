@@ -10,7 +10,7 @@ import (
 	authPkg "github.com/voxire/onion/internal/platform/auth"
 	errorModels "github.com/voxire/onion/internal/platform/errors"
 	"github.com/voxire/onion/internal/platform/logger"
-	hrv1 "github.com/voxire/voxie/gen/go/hr/v1"
+	hrequipmentv1 "github.com/voxire/voxie/gen/go/hr/equipment/v1"
 )
 
 func CreateAssetRoutes() []string { return []string{"/hr/equipment/assets"} }
@@ -28,7 +28,7 @@ type CreateAssetRequest struct {
 }
 
 type CreateAssetResponse struct {
-	Asset *hrv1.AssetPayload `json:"asset"`
+	Asset *hrequipmentv1.AssetPayload `json:"asset"`
 }
 
 func (h *CreateAssetHandler) Validate(_ context.Context, req *CreateAssetRequest) *errorModels.ServerError {

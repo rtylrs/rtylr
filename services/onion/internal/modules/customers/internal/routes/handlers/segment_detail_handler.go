@@ -9,7 +9,8 @@ import (
 	"github.com/voxire/onion/internal/modules/customers/internal/domain"
 	authPkg "github.com/voxire/onion/internal/platform/auth"
 	errorModels "github.com/voxire/onion/internal/platform/errors"
-	crmv1 "github.com/voxire/voxie/gen/go/crm/v1"
+	crmcustomerv1 "github.com/voxire/voxie/gen/go/crm/customer/v1"
+	crmsegmentv1 "github.com/voxire/voxie/gen/go/crm/segment/v1"
 )
 
 func SegmentDetailRoutes() []string {
@@ -31,8 +32,8 @@ type GetSegmentDetailRequest struct {
 }
 
 type GetSegmentDetailResponse struct {
-	Segment   *crmv1.Segment    `json:"segment"`
-	Customers []*crmv1.Customer `json:"customers"`
+	Segment   *crmsegmentv1.Segment     `json:"segment"`
+	Customers []*crmcustomerv1.Customer `json:"customers"`
 }
 
 func (h *GetSegmentDetailHandler) Validate(_ context.Context, req *GetSegmentDetailRequest) *errorModels.ServerError {
@@ -67,7 +68,7 @@ func (h *GetSegmentDetailHandler) Serve(ctx context.Context, req *GetSegmentDeta
 		}
 	}
 
-	custPayloads := make([]*crmv1.Customer, len(detail.Customers))
+	custPayloads := make([]*crmcustomerv1.Customer, len(detail.Customers))
 	for i, c := range detail.Customers {
 		custPayloads[i] = newCustomerPayload(c)
 	}
@@ -91,10 +92,10 @@ type GetSegmentCustomersRequest struct {
 }
 
 type GetSegmentCustomersResponse struct {
-	Customers []*crmv1.Customer `json:"customers"`
-	Total     int               `json:"total"`
-	Page      int               `json:"page"`
-	PageSize  int               `json:"page_size"`
+	Customers []*crmcustomerv1.Customer `json:"customers"`
+	Total     int                       `json:"total"`
+	Page      int                       `json:"page"`
+	PageSize  int                       `json:"page_size"`
 }
 
 func (h *GetSegmentCustomersHandler) Validate(_ context.Context, req *GetSegmentCustomersRequest) *errorModels.ServerError {
@@ -137,7 +138,7 @@ func (h *GetSegmentCustomersHandler) Serve(ctx context.Context, req *GetSegmentC
 		}
 	}
 
-	payloads := make([]*crmv1.Customer, len(customers))
+	payloads := make([]*crmcustomerv1.Customer, len(customers))
 	for i, c := range customers {
 		payloads[i] = newCustomerPayload(c)
 	}

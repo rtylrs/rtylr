@@ -10,7 +10,7 @@ import (
 	authPkg "github.com/voxire/onion/internal/platform/auth"
 	errorModels "github.com/voxire/onion/internal/platform/errors"
 	"github.com/voxire/onion/internal/platform/logger"
-	hrv1 "github.com/voxire/voxie/gen/go/hr/v1"
+	hrattendancev1 "github.com/voxire/voxie/gen/go/hr/attendance/v1"
 )
 
 func ClockOutRoutes() []string { return []string{"/hr/attendance/clock-out"} }
@@ -22,7 +22,7 @@ type ClockOutRequest struct {
 }
 
 type ClockOutResponse struct {
-	Record *hrv1.AttendanceRecordPayload `json:"record"`
+	Record *hrattendancev1.AttendanceRecordPayload `json:"record"`
 }
 
 func (h *ClockOutHandler) Validate(_ context.Context, req *ClockOutRequest) *errorModels.ServerError {

@@ -2,10 +2,10 @@ package handlers
 
 import (
 	"github.com/voxire/onion/internal/modules/hr_equipment/internal/domain"
-	hrv1 "github.com/voxire/voxie/gen/go/hr/v1"
+	hrequipmentv1 "github.com/voxire/voxie/gen/go/hr/equipment/v1"
 )
 
-func equipmentRequestToProto(r domain.EquipmentRequestRecord) *hrv1.EquipmentRequestPayload {
+func equipmentRequestToProto(r domain.EquipmentRequestRecord) *hrequipmentv1.EquipmentRequestPayload {
 	var neededByDate *string
 	if r.NeededByDate != "" {
 		neededByDate = &r.NeededByDate
@@ -16,7 +16,7 @@ func equipmentRequestToProto(r domain.EquipmentRequestRecord) *hrv1.EquipmentReq
 		approvedBy = &r.ApprovedBy
 	}
 
-	return &hrv1.EquipmentRequestPayload{
+	return &hrequipmentv1.EquipmentRequestPayload{
 		Id:                   r.ID,
 		OwnerId:              r.OwnerID,
 		EmployeeId:           r.EmployeeID,
@@ -32,7 +32,7 @@ func equipmentRequestToProto(r domain.EquipmentRequestRecord) *hrv1.EquipmentReq
 	}
 }
 
-func assetToProto(a domain.AssetRecord) *hrv1.AssetPayload {
+func assetToProto(a domain.AssetRecord) *hrequipmentv1.AssetPayload {
 	var serialNumber *string
 	if a.SerialNumber != "" {
 		serialNumber = &a.SerialNumber
@@ -40,7 +40,7 @@ func assetToProto(a domain.AssetRecord) *hrv1.AssetPayload {
 
 	var returnedDate *string
 
-	return &hrv1.AssetPayload{
+	return &hrequipmentv1.AssetPayload{
 		Id:           a.ID,
 		OwnerId:      a.OwnerID,
 		EmployeeId:   a.AssignedTo,

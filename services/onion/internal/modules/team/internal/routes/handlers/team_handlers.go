@@ -16,7 +16,8 @@ import (
 	emailPkg "github.com/voxire/onion/internal/platform/email"
 	errorModels "github.com/voxire/onion/internal/platform/errors"
 	"github.com/voxire/onion/internal/platform/logger"
-	hubv1 "github.com/voxire/voxie/gen/go/hub/v1"
+	hubteaminvitationsv1 "github.com/voxire/voxie/gen/go/hub/team/invitations/v1"
+	hubteammembersv1 "github.com/voxire/voxie/gen/go/hub/team/members/v1"
 )
 
 // ─── List Staff Users ─────────────────────────────────────────────────────────
@@ -31,7 +32,7 @@ type ListUsersRequest struct {
 }
 
 type StaffUserWithGroupsPayload struct {
-	*hubv1.StaffUserPayload
+	*hubteammembersv1.StaffUserPayload
 	Groups []GroupSummaryPayload `json:"groups"`
 }
 
@@ -42,13 +43,13 @@ type ListUsersResponse struct {
 	HasMore  bool                         `json:"has_more"`
 }
 
-func newProtoStaffUser(u domain.StaffUser) *hubv1.StaffUserPayload {
+func newProtoStaffUser(u domain.StaffUser) *hubteammembersv1.StaffUserPayload {
 	apps := u.Apps
 	if apps == nil {
 		apps = []string{}
 	}
 
-	return &hubv1.StaffUserPayload{
+	return &hubteammembersv1.StaffUserPayload{
 		Id:        u.ID,
 		Email:     u.Email,
 		FullName:  u.FullName,
@@ -166,7 +167,7 @@ type InviteUserRequest struct {
 	GroupID  int64    `json:"group_id"`
 }
 
-type InviteUserResponse = hubv1.InviteUserResponse
+type InviteUserResponse = hubteaminvitationsv1.InviteUserResponse
 
 func (h *InviteUserHandler) Validate(_ context.Context, req *InviteUserRequest) *errorModels.ServerError {
 	if req.Email == "" {

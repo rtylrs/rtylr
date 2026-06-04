@@ -2,10 +2,10 @@ package handlers
 
 import (
 	"github.com/voxire/onion/internal/modules/hr_documents/internal/domain"
-	hrv1 "github.com/voxire/voxie/gen/go/hr/v1"
+	hrdocumentv1 "github.com/voxire/voxie/gen/go/hr/document/v1"
 )
 
-func documentToProto(d domain.EmployeeDocumentRecord) *hrv1.EmployeeDocumentPayload {
+func documentToProto(d domain.EmployeeDocumentRecord) *hrdocumentv1.EmployeeDocumentPayload {
 	var expiryDate *string
 	if d.ExpiryDate != nil {
 		s := d.ExpiryDate.Format("2006-01-02")
@@ -17,7 +17,7 @@ func documentToProto(d domain.EmployeeDocumentRecord) *hrv1.EmployeeDocumentPayl
 		fileURL = d.ExternalURL
 	}
 
-	return &hrv1.EmployeeDocumentPayload{
+	return &hrdocumentv1.EmployeeDocumentPayload{
 		Id:           d.ID,
 		OwnerId:      d.OwnerID,
 		EmployeeId:   d.EmployeeID,

@@ -6,7 +6,7 @@ import (
 
 	"github.com/voxire/onion/internal/modules/pos_menu/internal/application"
 	errorModels "github.com/voxire/onion/internal/platform/errors"
-	posv1 "github.com/voxire/voxie/gen/go/pos/v1"
+	posmenuitemv1 "github.com/voxire/voxie/gen/go/pos/menu_item/v1"
 )
 
 // Public read path for the customer-facing menu app. This endpoint
@@ -43,7 +43,7 @@ type PublicListMenuItemsRequest struct {
 }
 
 type PublicListMenuItemsResponse struct {
-	Items []*posv1.MenuItem `json:"items"`
+	Items []*posmenuitemv1.MenuItem `json:"items"`
 }
 
 func (h *PublicListMenuItemsHandler) Validate(_ context.Context, req *PublicListMenuItemsRequest) *errorModels.ServerError {
@@ -70,7 +70,7 @@ func (h *PublicListMenuItemsHandler) Serve(ctx context.Context, req *PublicListM
 		}
 	}
 
-	payloads := make([]*posv1.MenuItem, len(items))
+	payloads := make([]*posmenuitemv1.MenuItem, len(items))
 	for i, item := range items {
 		payloads[i] = toProtoMenuItem(item)
 	}

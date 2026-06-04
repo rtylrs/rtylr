@@ -12,11 +12,11 @@ import (
 	"github.com/voxire/onion/internal/modules/pos_floors/internal/domain"
 	authPkg "github.com/voxire/onion/internal/platform/auth"
 	errorModels "github.com/voxire/onion/internal/platform/errors"
-	posv1 "github.com/voxire/voxie/gen/go/pos/v1"
+	posfloorv1 "github.com/voxire/voxie/gen/go/pos/floor/v1"
 )
 
-func toProtoFloor(f domain.Floor) *posv1.Floor {
-	return &posv1.Floor{
+func toProtoFloor(f domain.Floor) *posfloorv1.Floor {
+	return &posfloorv1.Floor{
 		Id:         f.ID,
 		BusinessId: f.BusinessID,
 		BranchId:   f.BranchID,
@@ -39,7 +39,7 @@ type (
 )
 
 type ListFloorsResponse struct {
-	Floors []*posv1.Floor `json:"floors"`
+	Floors []*posfloorv1.Floor `json:"floors"`
 }
 
 func (h *ListFloorsHandler) Serve(ctx context.Context, req *ListFloorsRequest) (ListFloorsResponse, *errorModels.ServerError) {
@@ -54,7 +54,7 @@ func (h *ListFloorsHandler) Serve(ctx context.Context, req *ListFloorsRequest) (
 	if err != nil {
 		return ListFloorsResponse{}, &errorModels.ServerError{Code: http.StatusInternalServerError, Message: "Failed to list floors"}
 	}
-	payloads := make([]*posv1.Floor, len(floors))
+	payloads := make([]*posfloorv1.Floor, len(floors))
 	for i, f := range floors {
 		payloads[i] = toProtoFloor(f)
 	}

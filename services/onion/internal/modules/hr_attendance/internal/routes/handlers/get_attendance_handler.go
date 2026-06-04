@@ -9,7 +9,7 @@ import (
 	authPkg "github.com/voxire/onion/internal/platform/auth"
 	errorModels "github.com/voxire/onion/internal/platform/errors"
 	"github.com/voxire/onion/internal/platform/logger"
-	hrv1 "github.com/voxire/voxie/gen/go/hr/v1"
+	hrattendancev1 "github.com/voxire/voxie/gen/go/hr/attendance/v1"
 )
 
 func GetAttendanceRoutes() []string { return []string{"/hr/attendance"} }
@@ -25,10 +25,10 @@ type GetAttendanceRequest struct {
 }
 
 type GetAttendanceResponse struct {
-	Records []*hrv1.AttendanceRecordPayload `json:"records"`
-	Total   int64                           `json:"total"`
-	Limit   int32                           `json:"limit"`
-	Offset  int32                           `json:"offset"`
+	Records []*hrattendancev1.AttendanceRecordPayload `json:"records"`
+	Total   int64                                     `json:"total"`
+	Limit   int32                                     `json:"limit"`
+	Offset  int32                                     `json:"offset"`
 }
 
 func (h *GetAttendanceHandler) Serve(ctx context.Context, req *GetAttendanceRequest) (GetAttendanceResponse, *errorModels.ServerError) {
@@ -48,7 +48,7 @@ func (h *GetAttendanceHandler) Serve(ctx context.Context, req *GetAttendanceRequ
 		return GetAttendanceResponse{}, &errorModels.ServerError{HTTPCode: http.StatusInternalServerError, Code: http.StatusInternalServerError, Message: "Failed to get attendance"}
 	}
 
-	payloads := make([]*hrv1.AttendanceRecordPayload, 0, len(records))
+	payloads := make([]*hrattendancev1.AttendanceRecordPayload, 0, len(records))
 	for _, r := range records {
 		payloads = append(payloads, attendanceToProto(r))
 	}

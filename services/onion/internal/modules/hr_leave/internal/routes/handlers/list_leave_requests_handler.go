@@ -9,7 +9,7 @@ import (
 	authPkg "github.com/voxire/onion/internal/platform/auth"
 	errorModels "github.com/voxire/onion/internal/platform/errors"
 	"github.com/voxire/onion/internal/platform/logger"
-	hrv1 "github.com/voxire/voxie/gen/go/hr/v1"
+	hrleavev1 "github.com/voxire/voxie/gen/go/hr/leave/v1"
 )
 
 func ListLeaveRequestsRoutes() []string { return []string{"/hr/leave/requests"} }
@@ -22,10 +22,10 @@ type ListLeaveRequestsRequest struct {
 }
 
 type ListLeaveRequestsResponse struct {
-	Requests []*hrv1.LeaveRequestPayload `json:"requests"`
-	Total    int64                       `json:"total"`
-	Limit    int32                       `json:"limit"`
-	Offset   int32                       `json:"offset"`
+	Requests []*hrleavev1.LeaveRequestPayload `json:"requests"`
+	Total    int64                            `json:"total"`
+	Limit    int32                            `json:"limit"`
+	Offset   int32                            `json:"offset"`
 }
 
 func (h *ListLeaveRequestsHandler) Serve(ctx context.Context, req *ListLeaveRequestsRequest) (ListLeaveRequestsResponse, *errorModels.ServerError) {
@@ -42,7 +42,7 @@ func (h *ListLeaveRequestsHandler) Serve(ctx context.Context, req *ListLeaveRequ
 		return ListLeaveRequestsResponse{}, &errorModels.ServerError{HTTPCode: http.StatusInternalServerError, Code: http.StatusInternalServerError, Message: "Failed to list leave requests"}
 	}
 
-	payloads := make([]*hrv1.LeaveRequestPayload, 0, len(requests))
+	payloads := make([]*hrleavev1.LeaveRequestPayload, 0, len(requests))
 	for _, r := range requests {
 		payloads = append(payloads, leaveRequestToProto(r))
 	}

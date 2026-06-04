@@ -11,15 +11,15 @@ import (
 	authPkg "github.com/voxire/onion/internal/platform/auth"
 	errorModels "github.com/voxire/onion/internal/platform/errors"
 	"github.com/voxire/onion/internal/platform/logger"
-	posv1 "github.com/voxire/voxie/gen/go/pos/v1"
+	posuserv1 "github.com/voxire/voxie/gen/go/pos/user/v1"
 )
 
 // toProtoPOSUser intentionally does NOT carry the PIN or any hash of it
 // into the proto payload. Every caller of this function sits behind an
 // authenticated, owner-scoped handler and gets only the operational
 // attributes needed to drive the POS UI.
-func toProtoPOSUser(u domain.POSUser) *posv1.POSUser {
-	return &posv1.POSUser{
+func toProtoPOSUser(u domain.POSUser) *posuserv1.POSUser {
+	return &posuserv1.POSUser{
 		Id:               u.ID,
 		BusinessId:       u.OwnerID,
 		LocationId:       u.LocationID,
@@ -45,7 +45,7 @@ type ListPOSUsersRequest struct {
 }
 
 type ListPOSUsersResponse struct {
-	Users []*posv1.POSUser `json:"users"`
+	Users []*posuserv1.POSUser `json:"users"`
 }
 
 func (h *ListPOSUsersHandler) Serve(ctx context.Context, req *ListPOSUsersRequest) (ListPOSUsersResponse, *errorModels.ServerError) {
@@ -74,7 +74,7 @@ func (h *ListPOSUsersHandler) Serve(ctx context.Context, req *ListPOSUsersReques
 		}
 	}
 
-	out := make([]*posv1.POSUser, 0, len(users))
+	out := make([]*posuserv1.POSUser, 0, len(users))
 	for _, u := range users {
 		out = append(out, toProtoPOSUser(u))
 	}

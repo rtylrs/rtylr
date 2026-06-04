@@ -9,7 +9,7 @@ import (
 	"github.com/voxire/onion/internal/modules/products/internal/domain"
 	authPkg "github.com/voxire/onion/internal/platform/auth"
 	errorModels "github.com/voxire/onion/internal/platform/errors"
-	erpv1 "github.com/voxire/voxie/gen/go/erp/v1"
+	erpproductv1 "github.com/voxire/voxie/gen/go/erp/product/v1"
 )
 
 // ─── List Products ────────────────────────────────────────────────────────────
@@ -30,14 +30,14 @@ type ListProductsRequest struct {
 }
 
 type ListProductsResponse struct {
-	Products []*erpv1.Product `json:"products"`
-	HasMore  bool             `json:"has_more"`
-	Page     int64            `json:"page"`
-	PageSize int64            `json:"page_size"`
+	Products []*erpproductv1.Product `json:"products"`
+	HasMore  bool                    `json:"has_more"`
+	Page     int64                   `json:"page"`
+	PageSize int64                   `json:"page_size"`
 }
 
-func newProductPayload(p domain.Product) *erpv1.Product {
-	return &erpv1.Product{
+func newProductPayload(p domain.Product) *erpproductv1.Product {
+	return &erpproductv1.Product{
 		Id:                p.ID,
 		OwnerId:           p.OwnerID,
 		CategoryId:        p.CategoryID,
@@ -78,7 +78,7 @@ func (h *ListProductsHandler) Serve(ctx context.Context, req *ListProductsReques
 		}
 	}
 
-	payloads := make([]*erpv1.Product, 0, len(products))
+	payloads := make([]*erpproductv1.Product, 0, len(products))
 	for _, p := range products {
 		payloads = append(payloads, newProductPayload(p))
 	}

@@ -10,7 +10,8 @@ import (
 	"github.com/voxire/onion/internal/modules/customers/internal/domain"
 	authPkg "github.com/voxire/onion/internal/platform/auth"
 	errorModels "github.com/voxire/onion/internal/platform/errors"
-	crmv1 "github.com/voxire/voxie/gen/go/crm/v1"
+	crmcustomerv1 "github.com/voxire/voxie/gen/go/crm/customer/v1"
+	crmloyaltyv1 "github.com/voxire/voxie/gen/go/crm/loyalty/v1"
 )
 
 func CustomerExportRoutes() []string {
@@ -26,9 +27,9 @@ type ExportCustomerRequest struct {
 }
 
 type ExportCustomerResponse struct {
-	Customer     *crmv1.Customer             `json:"customer"`
-	Transactions []*crmv1.LoyaltyTransaction `json:"transactions"`
-	Timeline     []TimelineEntryPayload      `json:"timeline"`
+	Customer     *crmcustomerv1.Customer            `json:"customer"`
+	Transactions []*crmloyaltyv1.LoyaltyTransaction `json:"transactions"`
+	Timeline     []TimelineEntryPayload             `json:"timeline"`
 }
 
 func (h *ExportCustomerHandler) Validate(_ context.Context, req *ExportCustomerRequest) *errorModels.ServerError {
@@ -63,7 +64,7 @@ func (h *ExportCustomerHandler) Serve(ctx context.Context, req *ExportCustomerRe
 		}
 	}
 
-	txPayloads := make([]*crmv1.LoyaltyTransaction, len(export.Transactions))
+	txPayloads := make([]*crmloyaltyv1.LoyaltyTransaction, len(export.Transactions))
 	for i, tx := range export.Transactions {
 		txPayloads[i] = newLoyaltyTransactionPayload(tx)
 	}

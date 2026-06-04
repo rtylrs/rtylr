@@ -13,7 +13,7 @@ import (
 	authPkg "github.com/voxire/onion/internal/platform/auth"
 	errorModels "github.com/voxire/onion/internal/platform/errors"
 	"github.com/voxire/onion/internal/platform/logger"
-	hrv1 "github.com/voxire/voxie/gen/go/hr/v1"
+	hrtimeentryv1 "github.com/voxire/voxie/gen/go/hr/time_entry/v1"
 )
 
 func SubmitTimesheetRoutes() []string { return []string{"/hr/timesheets/{id}/submit"} }
@@ -23,7 +23,7 @@ type SubmitTimesheetHandler struct{ Service *application.Service }
 type SubmitTimesheetRequest struct{}
 
 type SubmitTimesheetResponse struct {
-	Timesheet *hrv1.TimesheetPayload `json:"timesheet"`
+	Timesheet *hrtimeentryv1.TimesheetPayload `json:"timesheet"`
 }
 
 func (h *SubmitTimesheetHandler) Validate(_ context.Context, _ *SubmitTimesheetRequest) *errorModels.ServerError {

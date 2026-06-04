@@ -11,7 +11,7 @@ import (
 	"github.com/voxire/onion/internal/platform/cache/cacher"
 	cacheKeys "github.com/voxire/onion/internal/platform/cache/keys"
 	errorModels "github.com/voxire/onion/internal/platform/errors"
-	hubv1 "github.com/voxire/voxie/gen/go/hub/v1"
+	hubappv1 "github.com/voxire/voxie/gen/go/hub/app/v1"
 )
 
 // addonsCacheScope namespaces the per-business addons list cache. The
@@ -36,7 +36,7 @@ type (
 )
 
 type ListAddonsResponse struct {
-	Addons []*hubv1.Addon `json:"addons"`
+	Addons []*hubappv1.Addon `json:"addons"`
 }
 
 func (h *ListAddonsHandler) Serve(ctx context.Context, _ *ListAddonsRequest) (ListAddonsResponse, *errorModels.ServerError) {
@@ -74,7 +74,7 @@ func (h *ListAddonsHandler) computeList(ctx context.Context, businessID int64) (
 		return ListAddonsResponse{}, err
 	}
 
-	payloads := make([]*hubv1.Addon, 0, len(addons))
+	payloads := make([]*hubappv1.Addon, 0, len(addons))
 	for _, a := range addons {
 		payloads = append(payloads, toProtoAddon(a))
 	}
@@ -82,8 +82,8 @@ func (h *ListAddonsHandler) computeList(ctx context.Context, businessID int64) (
 	return ListAddonsResponse{Addons: payloads}, nil
 }
 
-func toProtoAddon(a domain.BusinessAddon) *hubv1.Addon {
-	p := &hubv1.Addon{
+func toProtoAddon(a domain.BusinessAddon) *hubappv1.Addon {
+	p := &hubappv1.Addon{
 		Id:          a.AddonID,
 		Name:        a.Name,
 		Description: a.Description,

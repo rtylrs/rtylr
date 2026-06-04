@@ -9,7 +9,7 @@ import (
 	"github.com/voxire/onion/internal/modules/customers/internal/domain"
 	authPkg "github.com/voxire/onion/internal/platform/auth"
 	errorModels "github.com/voxire/onion/internal/platform/errors"
-	crmv1 "github.com/voxire/voxie/gen/go/crm/v1"
+	crmcustomerv1 "github.com/voxire/voxie/gen/go/crm/customer/v1"
 )
 
 func CustomerDetailRoutes() []string {
@@ -25,7 +25,7 @@ type GetCustomerRequest struct {
 }
 
 type GetCustomerResponse struct {
-	Customer *crmv1.Customer `json:"customer"`
+	Customer *crmcustomerv1.Customer `json:"customer"`
 }
 
 func (h *GetCustomerHandler) Validate(_ context.Context, req *GetCustomerRequest) *errorModels.ServerError {

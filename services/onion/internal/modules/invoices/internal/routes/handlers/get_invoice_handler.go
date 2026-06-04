@@ -9,7 +9,7 @@ import (
 	"github.com/voxire/onion/internal/modules/invoices/internal/domain"
 	authPkg "github.com/voxire/onion/internal/platform/auth"
 	errorModels "github.com/voxire/onion/internal/platform/errors"
-	finv1 "github.com/voxire/voxie/gen/go/finance/v1"
+	financeinvoicesv1 "github.com/voxire/voxie/gen/go/finance/invoices/v1"
 )
 
 func GetInvoiceRoutes() []string {
@@ -25,8 +25,8 @@ type GetInvoiceRequest struct {
 }
 
 type GetInvoiceResponse struct {
-	Invoice  *finv1.InvoiceDetail `json:"invoice"`
-	Payments []*finv1.Payment     `json:"payments"`
+	Invoice  *financeinvoicesv1.InvoiceDetail `json:"invoice"`
+	Payments []*financeinvoicesv1.Payment     `json:"payments"`
 }
 
 func (h *GetInvoiceHandler) Validate(_ context.Context, req *GetInvoiceRequest) *errorModels.ServerError {
@@ -58,9 +58,9 @@ func (h *GetInvoiceHandler) Serve(ctx context.Context, req *GetInvoiceRequest) (
 		}
 	}
 
-	payments := make([]*finv1.Payment, 0, len(inv.Payments))
+	payments := make([]*financeinvoicesv1.Payment, 0, len(inv.Payments))
 	for _, p := range inv.Payments {
-		payments = append(payments, &finv1.Payment{
+		payments = append(payments, &financeinvoicesv1.Payment{
 			Id:          p.ID,
 			Amount:      p.Amount,
 			Currency:    p.Currency,

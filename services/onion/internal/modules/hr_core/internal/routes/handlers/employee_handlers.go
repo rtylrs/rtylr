@@ -15,11 +15,11 @@ import (
 	authPkg "github.com/voxire/onion/internal/platform/auth"
 	errorModels "github.com/voxire/onion/internal/platform/errors"
 	"github.com/voxire/onion/internal/platform/logger"
-	hrv1 "github.com/voxire/voxie/gen/go/hr/v1"
+	hrstaffv1 "github.com/voxire/voxie/gen/go/hr/staff/v1"
 )
 
-func employeeToProto(e domain.EmployeeRecord) *hrv1.Staff {
-	return &hrv1.Staff{
+func employeeToProto(e domain.EmployeeRecord) *hrstaffv1.Staff {
+	return &hrstaffv1.Staff{
 		Id:                    e.ID,
 		OwnerId:               e.OwnerID,
 		UserId:                e.UserID,
@@ -56,10 +56,10 @@ type ListEmployeesRequest struct {
 }
 
 type ListEmployeesResponse struct {
-	Employees []*hrv1.Staff `json:"employees"`
-	Total     int64         `json:"total"`
-	Limit     int32         `json:"limit"`
-	Offset    int32         `json:"offset"`
+	Employees []*hrstaffv1.Staff `json:"employees"`
+	Total     int64              `json:"total"`
+	Limit     int32              `json:"limit"`
+	Offset    int32              `json:"offset"`
 }
 
 func (h *ListEmployeesHandler) Serve(ctx context.Context, req *ListEmployeesRequest) (ListEmployeesResponse, *errorModels.ServerError) {
@@ -74,7 +74,7 @@ func (h *ListEmployeesHandler) Serve(ctx context.Context, req *ListEmployeesRequ
 		return ListEmployeesResponse{}, &errorModels.ServerError{HTTPCode: http.StatusInternalServerError, Code: http.StatusInternalServerError, Message: "Failed to list employees"}
 	}
 
-	payloads := make([]*hrv1.Staff, 0, len(employees))
+	payloads := make([]*hrstaffv1.Staff, 0, len(employees))
 	for _, e := range employees {
 		payloads = append(payloads, employeeToProto(e))
 	}
@@ -91,7 +91,7 @@ type GetEmployeeHandler struct{ Service *application.Service }
 type GetEmployeeRequest struct{}
 
 type GetEmployeeResponse struct {
-	Employee *hrv1.Staff `json:"employee"`
+	Employee *hrstaffv1.Staff `json:"employee"`
 }
 
 func (h *GetEmployeeHandler) Serve(ctx context.Context, _ *GetEmployeeRequest) (GetEmployeeResponse, *errorModels.ServerError) {
@@ -141,7 +141,7 @@ type CreateEmployeeRequest struct {
 }
 
 type CreateEmployeeResponse struct {
-	Employee *hrv1.Staff `json:"employee"`
+	Employee *hrstaffv1.Staff `json:"employee"`
 }
 
 func (h *CreateEmployeeHandler) Validate(_ context.Context, req *CreateEmployeeRequest) *errorModels.ServerError {
@@ -225,7 +225,7 @@ type UpdateEmployeeRequest struct {
 }
 
 type UpdateEmployeeResponse struct {
-	Employee *hrv1.Staff `json:"employee"`
+	Employee *hrstaffv1.Staff `json:"employee"`
 }
 
 func (h *UpdateEmployeeHandler) Validate(_ context.Context, req *UpdateEmployeeRequest) *errorModels.ServerError {

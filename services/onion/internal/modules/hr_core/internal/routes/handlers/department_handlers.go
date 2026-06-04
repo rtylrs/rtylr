@@ -13,11 +13,11 @@ import (
 	authPkg "github.com/voxire/onion/internal/platform/auth"
 	errorModels "github.com/voxire/onion/internal/platform/errors"
 	"github.com/voxire/onion/internal/platform/logger"
-	hrv1 "github.com/voxire/voxie/gen/go/hr/v1"
+	hrdepartmentv1 "github.com/voxire/voxie/gen/go/hr/department/v1"
 )
 
-func deptToProto(d domain.DepartmentRecord) *hrv1.DepartmentPayload {
-	return &hrv1.DepartmentPayload{
+func deptToProto(d domain.DepartmentRecord) *hrdepartmentv1.DepartmentPayload {
+	return &hrdepartmentv1.DepartmentPayload{
 		Id:                    d.ID,
 		OwnerId:               d.OwnerID,
 		LocationId:            d.LocationID,
@@ -41,7 +41,7 @@ type (
 )
 
 type ListHRCoreDepartmentsResponse struct {
-	Departments []*hrv1.DepartmentPayload `json:"departments"`
+	Departments []*hrdepartmentv1.DepartmentPayload `json:"departments"`
 }
 
 func (h *ListHRCoreDepartmentsHandler) Serve(ctx context.Context, req *ListHRCoreDepartmentsRequest) (ListHRCoreDepartmentsResponse, *errorModels.ServerError) {
@@ -56,7 +56,7 @@ func (h *ListHRCoreDepartmentsHandler) Serve(ctx context.Context, req *ListHRCor
 		return ListHRCoreDepartmentsResponse{}, &errorModels.ServerError{HTTPCode: http.StatusInternalServerError, Code: http.StatusInternalServerError, Message: "Failed to list departments"}
 	}
 
-	payloads := make([]*hrv1.DepartmentPayload, 0, len(departments))
+	payloads := make([]*hrdepartmentv1.DepartmentPayload, 0, len(departments))
 	for _, d := range departments {
 		payloads = append(payloads, deptToProto(d))
 	}
@@ -78,7 +78,7 @@ type (
 )
 
 type CreateHRCoreDepartmentResponse struct {
-	Department *hrv1.DepartmentPayload `json:"department"`
+	Department *hrdepartmentv1.DepartmentPayload `json:"department"`
 }
 
 func (h *CreateHRCoreDepartmentHandler) Validate(_ context.Context, req *CreateHRCoreDepartmentRequest) *errorModels.ServerError {
@@ -119,7 +119,7 @@ type (
 )
 
 type UpdateHRCoreDepartmentResponse struct {
-	Department *hrv1.DepartmentPayload `json:"department"`
+	Department *hrdepartmentv1.DepartmentPayload `json:"department"`
 }
 
 func (h *UpdateHRCoreDepartmentHandler) Validate(_ context.Context, req *UpdateHRCoreDepartmentRequest) *errorModels.ServerError {

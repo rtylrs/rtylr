@@ -9,7 +9,7 @@ import (
 	"github.com/voxire/onion/internal/modules/pos_loyalty/internal/domain"
 	authPkg "github.com/voxire/onion/internal/platform/auth"
 	errorModels "github.com/voxire/onion/internal/platform/errors"
-	posv1 "github.com/voxire/voxie/gen/go/pos/v1"
+	posloyaltyv1 "github.com/voxire/voxie/gen/go/pos/loyalty/v1"
 )
 
 // ─── Get Config ──────────────────────────────────────────────────────────────
@@ -20,7 +20,7 @@ type (
 	GetConfigHandler  struct{ Service *application.Service }
 	GetConfigRequest  struct{}
 	GetConfigResponse struct {
-		Config *posv1.LoyaltyConfig `json:"config"`
+		Config *posloyaltyv1.LoyaltyConfig `json:"config"`
 	}
 )
 
@@ -36,7 +36,7 @@ func (h *GetConfigHandler) Serve(ctx context.Context, _ *GetConfigRequest) (GetC
 		}
 		return GetConfigResponse{}, &errorModels.ServerError{Code: http.StatusInternalServerError, Message: "Failed to get loyalty config"}
 	}
-	return GetConfigResponse{Config: &posv1.LoyaltyConfig{
+	return GetConfigResponse{Config: &posloyaltyv1.LoyaltyConfig{
 		Id:              cfg.ID,
 		BusinessId:      cfg.BusinessID,
 		IsEnabled:       cfg.IsEnabled,
@@ -107,7 +107,7 @@ type (
 )
 
 type ListTransactionsResponse struct {
-	Transactions []*posv1.LoyaltyTransaction `json:"transactions"`
+	Transactions []*posloyaltyv1.LoyaltyTransaction `json:"transactions"`
 }
 
 func (h *ListTransactionsHandler) Serve(ctx context.Context, req *ListTransactionsRequest) (ListTransactionsResponse, *errorModels.ServerError) {
@@ -122,9 +122,9 @@ func (h *ListTransactionsHandler) Serve(ctx context.Context, req *ListTransactio
 	if err != nil {
 		return ListTransactionsResponse{}, &errorModels.ServerError{Code: http.StatusInternalServerError, Message: "Failed to list transactions"}
 	}
-	payloads := make([]*posv1.LoyaltyTransaction, len(txns))
+	payloads := make([]*posloyaltyv1.LoyaltyTransaction, len(txns))
 	for i, t := range txns {
-		p := &posv1.LoyaltyTransaction{
+		p := &posloyaltyv1.LoyaltyTransaction{
 			Id:           t.ID,
 			BusinessId:   t.BusinessID,
 			CustomerId:   t.CustomerID,

@@ -7,7 +7,7 @@ import (
 	"github.com/voxire/onion/internal/modules/apps/internal/domain"
 	authPkg "github.com/voxire/onion/internal/platform/auth"
 	errorModels "github.com/voxire/onion/internal/platform/errors"
-	hubv1 "github.com/voxire/voxie/gen/go/hub/v1"
+	hubappv1 "github.com/voxire/voxie/gen/go/hub/app/v1"
 )
 
 func AppRoutes() []string { return []string{"/apps"} }
@@ -18,7 +18,7 @@ type (
 )
 
 type ListAppsResponse struct {
-	Apps []*hubv1.App `json:"apps"`
+	Apps []*hubappv1.App `json:"apps"`
 }
 
 func (h *ListAppsHandler) Serve(ctx context.Context, _ *ListAppsRequest) (ListAppsResponse, *errorModels.ServerError) {
@@ -29,15 +29,15 @@ func (h *ListAppsHandler) Serve(ctx context.Context, _ *ListAppsRequest) (ListAp
 	}
 
 	apps := h.Service.GetVisibleApps(ctx, businessID, userID, role)
-	payloads := make([]*hubv1.App, 0, len(apps))
+	payloads := make([]*hubappv1.App, 0, len(apps))
 	for _, a := range apps {
 		payloads = append(payloads, toProtoApp(a))
 	}
 	return ListAppsResponse{Apps: payloads}, nil
 }
 
-func toProtoApp(a domain.App) *hubv1.App {
-	return &hubv1.App{
+func toProtoApp(a domain.App) *hubappv1.App {
+	return &hubappv1.App{
 		Id:          a.ID,
 		Name:        a.Name,
 		Description: a.Description,

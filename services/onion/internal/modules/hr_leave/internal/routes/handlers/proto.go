@@ -2,10 +2,10 @@ package handlers
 
 import (
 	"github.com/voxire/onion/internal/modules/hr_leave/internal/domain"
-	hrv1 "github.com/voxire/voxie/gen/go/hr/v1"
+	hrleavev1 "github.com/voxire/voxie/gen/go/hr/leave/v1"
 )
 
-func leaveTypeToProto(lt domain.LeaveTypeRecord) *hrv1.LeaveTypePayload {
+func leaveTypeToProto(lt domain.LeaveTypeRecord) *hrleavev1.LeaveTypePayload {
 	var accrualRule *string
 	var requiresDocAfterDays *int32
 
@@ -16,7 +16,7 @@ func leaveTypeToProto(lt domain.LeaveTypeRecord) *hrv1.LeaveTypePayload {
 		requiresDocAfterDays = &lt.RequiresDocumentationAfterDays
 	}
 
-	return &hrv1.LeaveTypePayload{
+	return &hrleavev1.LeaveTypePayload{
 		Id:                             lt.ID,
 		OwnerId:                        lt.OwnerID,
 		Name:                           lt.Name,
@@ -32,7 +32,7 @@ func leaveTypeToProto(lt domain.LeaveTypeRecord) *hrv1.LeaveTypePayload {
 	}
 }
 
-func leaveRequestToProto(r domain.LeaveRequestRecord) *hrv1.LeaveRequestPayload {
+func leaveRequestToProto(r domain.LeaveRequestRecord) *hrleavev1.LeaveRequestPayload {
 	var notes, rejectionReason *string
 	if r.Notes != "" {
 		notes = &r.Notes
@@ -41,7 +41,7 @@ func leaveRequestToProto(r domain.LeaveRequestRecord) *hrv1.LeaveRequestPayload 
 		rejectionReason = &r.RejectionReason
 	}
 
-	return &hrv1.LeaveRequestPayload{
+	return &hrleavev1.LeaveRequestPayload{
 		Id:                   r.ID,
 		OwnerId:              r.OwnerID,
 		EmployeeId:           r.EmployeeID,
@@ -58,10 +58,10 @@ func leaveRequestToProto(r domain.LeaveRequestRecord) *hrv1.LeaveRequestPayload 
 	}
 }
 
-func leaveBalanceToProto(b domain.LeaveBalanceRecord) *hrv1.LeaveBalancePayload {
+func leaveBalanceToProto(b domain.LeaveBalanceRecord) *hrleavev1.LeaveBalancePayload {
 	remaining := b.EntitledDays - b.UsedDays - b.PendingDays
 
-	return &hrv1.LeaveBalancePayload{
+	return &hrleavev1.LeaveBalancePayload{
 		Id:            b.ID,
 		OwnerId:       b.OwnerID,
 		EmployeeId:    b.EmployeeID,

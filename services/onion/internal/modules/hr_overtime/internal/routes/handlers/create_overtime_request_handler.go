@@ -10,7 +10,7 @@ import (
 	authPkg "github.com/voxire/onion/internal/platform/auth"
 	errorModels "github.com/voxire/onion/internal/platform/errors"
 	"github.com/voxire/onion/internal/platform/logger"
-	hrv1 "github.com/voxire/voxie/gen/go/hr/v1"
+	hrovertimev1 "github.com/voxire/voxie/gen/go/hr/overtime/v1"
 )
 
 func CreateOvertimeRequestRoutes() []string { return []string{"/hr/overtime/requests"} }
@@ -25,7 +25,7 @@ type CreateOvertimeRequestRequest struct {
 }
 
 type CreateOvertimeRequestResponse struct {
-	Request *hrv1.OvertimeRequestPayload `json:"request"`
+	Request *hrovertimev1.OvertimeRequestPayload `json:"request"`
 }
 
 func (h *CreateOvertimeRequestHandler) Validate(_ context.Context, req *CreateOvertimeRequestRequest) *errorModels.ServerError {

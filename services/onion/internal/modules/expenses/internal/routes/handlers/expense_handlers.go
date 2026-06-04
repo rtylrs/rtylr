@@ -13,11 +13,11 @@ import (
 	"github.com/voxire/onion/internal/modules/expenses/internal/domain"
 	authPkg "github.com/voxire/onion/internal/platform/auth"
 	errorModels "github.com/voxire/onion/internal/platform/errors"
-	finv1 "github.com/voxire/voxie/gen/go/finance/v1"
+	financeexpensesv1 "github.com/voxire/voxie/gen/go/finance/expenses/v1"
 )
 
-func newExpensePayload(e domain.Expense) *finv1.Expense {
-	return &finv1.Expense{
+func newExpensePayload(e domain.Expense) *financeexpensesv1.Expense {
+	return &financeexpensesv1.Expense{
 		Id:          e.ID,
 		OwnerId:     e.OwnerID,
 		CategoryId:  e.CategoryID,
@@ -41,7 +41,7 @@ type (
 	ListExpensesHandler  struct{ Service *application.Service }
 	ListExpensesRequest  struct{}
 	ListExpensesResponse struct {
-		Expenses []*finv1.Expense `json:"expenses"`
+		Expenses []*financeexpensesv1.Expense `json:"expenses"`
 	}
 )
 
@@ -54,7 +54,7 @@ func (h *ListExpensesHandler) Serve(ctx context.Context, _ *ListExpensesRequest)
 	if err != nil {
 		return ListExpensesResponse{}, &errorModels.ServerError{Code: http.StatusInternalServerError, Message: "Failed to list expenses"}
 	}
-	payloads := make([]*finv1.Expense, len(expenses))
+	payloads := make([]*financeexpensesv1.Expense, len(expenses))
 	for i, e := range expenses {
 		payloads[i] = newExpensePayload(e)
 	}
@@ -69,7 +69,7 @@ type (
 	GetExpenseHandler  struct{ Service *application.Service }
 	GetExpenseRequest  struct{}
 	GetExpenseResponse struct {
-		Expense *finv1.Expense `json:"expense"`
+		Expense *financeexpensesv1.Expense `json:"expense"`
 	}
 )
 
@@ -316,7 +316,7 @@ type (
 	ListCategoriesHandler  struct{ Service *application.Service }
 	ListCategoriesRequest  struct{}
 	ListCategoriesResponse struct {
-		Categories []*finv1.ExpenseCategory `json:"categories"`
+		Categories []*financeexpensesv1.ExpenseCategory `json:"categories"`
 	}
 )
 
@@ -329,9 +329,9 @@ func (h *ListCategoriesHandler) Serve(ctx context.Context, _ *ListCategoriesRequ
 	if err != nil {
 		return ListCategoriesResponse{}, &errorModels.ServerError{Code: http.StatusInternalServerError, Message: "Failed to list expense categories"}
 	}
-	payloads := make([]*finv1.ExpenseCategory, len(cats))
+	payloads := make([]*financeexpensesv1.ExpenseCategory, len(cats))
 	for i, c := range cats {
-		payloads[i] = &finv1.ExpenseCategory{
+		payloads[i] = &financeexpensesv1.ExpenseCategory{
 			Id:        c.ID,
 			OwnerId:   c.OwnerID,
 			Name:      c.Name,

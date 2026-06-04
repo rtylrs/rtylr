@@ -2,21 +2,21 @@ package handlers
 
 import (
 	"github.com/voxire/onion/internal/modules/hr_onboarding/internal/domain"
-	hrv1 "github.com/voxire/voxie/gen/go/hr/v1"
+	hronboardingv1 "github.com/voxire/voxie/gen/go/hr/onboarding/v1"
 )
 
-func templateToProto(t domain.ChecklistTemplateRecord) *hrv1.ChecklistTemplatePayload {
+func templateToProto(t domain.ChecklistTemplateRecord) *hronboardingv1.ChecklistTemplatePayload {
 	var roleID *int64
 	if t.RoleID != 0 {
 		roleID = &t.RoleID
 	}
 
-	items := make([]*hrv1.ChecklistItemPayload, 0, len(t.Items))
+	items := make([]*hronboardingv1.ChecklistItemPayload, 0, len(t.Items))
 	for _, item := range t.Items {
 		items = append(items, checklistItemToProto(item))
 	}
 
-	return &hrv1.ChecklistTemplatePayload{
+	return &hronboardingv1.ChecklistTemplatePayload{
 		Id:          t.ID,
 		OwnerId:     t.OwnerID,
 		Name:        t.Name,
@@ -28,8 +28,8 @@ func templateToProto(t domain.ChecklistTemplateRecord) *hrv1.ChecklistTemplatePa
 	}
 }
 
-func checklistItemToProto(i domain.ChecklistItemRecord) *hrv1.ChecklistItemPayload {
-	return &hrv1.ChecklistItemPayload{
+func checklistItemToProto(i domain.ChecklistItemRecord) *hronboardingv1.ChecklistItemPayload {
+	return &hronboardingv1.ChecklistItemPayload{
 		Id:                 i.ID,
 		OwnerId:            i.OwnerID,
 		TemplateId:         i.TemplateID,
@@ -43,13 +43,13 @@ func checklistItemToProto(i domain.ChecklistItemRecord) *hrv1.ChecklistItemPaylo
 	}
 }
 
-func employeeChecklistToProto(c domain.EmployeeChecklistRecord) *hrv1.EmployeeChecklistPayload {
-	items := make([]*hrv1.EmployeeChecklistItemPayload, 0, len(c.Items))
+func employeeChecklistToProto(c domain.EmployeeChecklistRecord) *hronboardingv1.EmployeeChecklistPayload {
+	items := make([]*hronboardingv1.EmployeeChecklistItemPayload, 0, len(c.Items))
 	for _, item := range c.Items {
 		items = append(items, employeeChecklistItemToProto(item))
 	}
 
-	return &hrv1.EmployeeChecklistPayload{
+	return &hronboardingv1.EmployeeChecklistPayload{
 		Id:          c.ID,
 		OwnerId:     c.OwnerID,
 		EmployeeId:  c.EmployeeID,
@@ -61,7 +61,7 @@ func employeeChecklistToProto(c domain.EmployeeChecklistRecord) *hrv1.EmployeeCh
 	}
 }
 
-func employeeChecklistItemToProto(i domain.EmployeeChecklistItemRecord) *hrv1.EmployeeChecklistItemPayload {
+func employeeChecklistItemToProto(i domain.EmployeeChecklistItemRecord) *hronboardingv1.EmployeeChecklistItemPayload {
 	var completedAt *int64
 	if !i.CompletedAt.IsZero() {
 		v := i.CompletedAt.Unix()
@@ -73,7 +73,7 @@ func employeeChecklistItemToProto(i domain.EmployeeChecklistItemRecord) *hrv1.Em
 		attachmentURL = &i.AttachmentURL
 	}
 
-	return &hrv1.EmployeeChecklistItemPayload{
+	return &hronboardingv1.EmployeeChecklistItemPayload{
 		Id:                   i.ID,
 		OwnerId:              i.OwnerID,
 		EmployeeChecklistId:  i.EmployeeChecklistID,

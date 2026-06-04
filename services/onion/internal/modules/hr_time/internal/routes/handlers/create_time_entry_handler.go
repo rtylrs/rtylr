@@ -11,7 +11,7 @@ import (
 	authPkg "github.com/voxire/onion/internal/platform/auth"
 	errorModels "github.com/voxire/onion/internal/platform/errors"
 	"github.com/voxire/onion/internal/platform/logger"
-	hrv1 "github.com/voxire/voxie/gen/go/hr/v1"
+	hrtimeentryv1 "github.com/voxire/voxie/gen/go/hr/time_entry/v1"
 )
 
 func CreateTimeEntryRoutes() []string { return []string{"/hr/time-entries"} }
@@ -33,7 +33,7 @@ type CreateTimeEntryRequest struct {
 }
 
 type CreateTimeEntryResponse struct {
-	Entry *hrv1.TimeEntryPayload `json:"entry"`
+	Entry *hrtimeentryv1.TimeEntryPayload `json:"entry"`
 }
 
 func (h *CreateTimeEntryHandler) Validate(_ context.Context, req *CreateTimeEntryRequest) *errorModels.ServerError {

@@ -10,7 +10,7 @@ import (
 	"github.com/voxire/onion/internal/modules/invoices/internal/domain"
 	authPkg "github.com/voxire/onion/internal/platform/auth"
 	errorModels "github.com/voxire/onion/internal/platform/errors"
-	finv1 "github.com/voxire/voxie/gen/go/finance/v1"
+	financeinvoicesv1 "github.com/voxire/voxie/gen/go/finance/invoices/v1"
 )
 
 func RecordPaymentRoutes() []string {
@@ -32,8 +32,8 @@ type RecordPaymentRequest struct {
 }
 
 type RecordPaymentResponse struct {
-	Payment *finv1.RecordPaymentResponsePayload `json:"payment"`
-	Message string                              `json:"message"`
+	Payment *financeinvoicesv1.RecordPaymentResponsePayload `json:"payment"`
+	Message string                                          `json:"message"`
 }
 
 func (h *RecordPaymentHandler) Validate(_ context.Context, req *RecordPaymentRequest) *errorModels.ServerError {
@@ -109,7 +109,7 @@ func (h *RecordPaymentHandler) Serve(ctx context.Context, req *RecordPaymentRequ
 	}
 
 	return RecordPaymentResponse{
-		Payment: &finv1.RecordPaymentResponsePayload{
+		Payment: &financeinvoicesv1.RecordPaymentResponsePayload{
 			Id:          p.ID,
 			InvoiceId:   p.InvoiceID,
 			Amount:      p.Amount,

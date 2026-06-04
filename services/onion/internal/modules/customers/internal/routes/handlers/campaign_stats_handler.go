@@ -9,7 +9,7 @@ import (
 	"github.com/voxire/onion/internal/modules/customers/internal/domain"
 	authPkg "github.com/voxire/onion/internal/platform/auth"
 	errorModels "github.com/voxire/onion/internal/platform/errors"
-	crmv1 "github.com/voxire/voxie/gen/go/crm/v1"
+	crmcampaignv1 "github.com/voxire/voxie/gen/go/crm/campaign/v1"
 )
 
 func CampaignStatsRoutes() []string {
@@ -30,8 +30,8 @@ type GetCampaignStatsRequest struct {
 	CampaignID int64 `json:"campaign_id"`
 }
 
-func newCampaignStatsPayload(s domain.CampaignStats) *crmv1.CampaignStats {
-	return &crmv1.CampaignStats{
+func newCampaignStatsPayload(s domain.CampaignStats) *crmcampaignv1.CampaignStats {
+	return &crmcampaignv1.CampaignStats{
 		CampaignId:     s.CampaignID,
 		AudienceCount:  int64(s.AudienceCount),
 		SentCount:      int64(s.SentCount),
@@ -44,7 +44,7 @@ func newCampaignStatsPayload(s domain.CampaignStats) *crmv1.CampaignStats {
 }
 
 type GetCampaignStatsResponse struct {
-	Stats *crmv1.CampaignStats `json:"stats"`
+	Stats *crmcampaignv1.CampaignStats `json:"stats"`
 }
 
 func (h *GetCampaignStatsHandler) Validate(_ context.Context, req *GetCampaignStatsRequest) *errorModels.ServerError {
@@ -95,8 +95,8 @@ type GetCampaignDetailRequest struct {
 }
 
 type GetCampaignDetailResponse struct {
-	Campaign *crmv1.Campaign      `json:"campaign"`
-	Stats    *crmv1.CampaignStats `json:"stats"`
+	Campaign *crmcampaignv1.Campaign      `json:"campaign"`
+	Stats    *crmcampaignv1.CampaignStats `json:"stats"`
 }
 
 func (h *GetCampaignDetailHandler) Validate(_ context.Context, req *GetCampaignDetailRequest) *errorModels.ServerError {

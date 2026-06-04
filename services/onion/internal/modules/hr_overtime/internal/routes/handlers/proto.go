@@ -2,10 +2,10 @@ package handlers
 
 import (
 	"github.com/voxire/onion/internal/modules/hr_overtime/internal/domain"
-	hrv1 "github.com/voxire/voxie/gen/go/hr/v1"
+	hrovertimev1 "github.com/voxire/voxie/gen/go/hr/overtime/v1"
 )
 
-func overtimeRequestToProto(r domain.OvertimeRequestRecord) *hrv1.OvertimeRequestPayload {
+func overtimeRequestToProto(r domain.OvertimeRequestRecord) *hrovertimev1.OvertimeRequestPayload {
 	var approvedBy *int64
 	var multiplierApplied *float64
 
@@ -16,7 +16,7 @@ func overtimeRequestToProto(r domain.OvertimeRequestRecord) *hrv1.OvertimeReques
 		multiplierApplied = &r.MultiplierApplied
 	}
 
-	return &hrv1.OvertimeRequestPayload{
+	return &hrovertimev1.OvertimeRequestPayload{
 		Id:                   r.ID,
 		OwnerId:              r.OwnerID,
 		EmployeeId:           r.EmployeeID,

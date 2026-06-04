@@ -10,7 +10,7 @@ import (
 	"github.com/voxire/onion/internal/modules/invoices/internal/domain"
 	authPkg "github.com/voxire/onion/internal/platform/auth"
 	errorModels "github.com/voxire/onion/internal/platform/errors"
-	finv1 "github.com/voxire/voxie/gen/go/finance/v1"
+	financeinvoicesv1 "github.com/voxire/voxie/gen/go/finance/invoices/v1"
 )
 
 func CreateInvoiceRoutes() []string {
@@ -49,13 +49,13 @@ type CreateInvoiceRequest struct {
 }
 
 type CreateInvoiceResponse struct {
-	Invoice *finv1.InvoiceDetail `json:"invoice"`
+	Invoice *financeinvoicesv1.InvoiceDetail `json:"invoice"`
 }
 
-func newInvoiceDetailPayload(inv *domain.Invoice) *finv1.InvoiceDetail {
-	items := make([]*finv1.InvoiceItem, 0, len(inv.Items))
+func newInvoiceDetailPayload(inv *domain.Invoice) *financeinvoicesv1.InvoiceDetail {
+	items := make([]*financeinvoicesv1.InvoiceItem, 0, len(inv.Items))
 	for _, item := range inv.Items {
-		items = append(items, &finv1.InvoiceItem{
+		items = append(items, &financeinvoicesv1.InvoiceItem{
 			Description: item.Description,
 			Quantity:    item.Quantity,
 			Unit:        item.Unit,
@@ -72,7 +72,7 @@ func newInvoiceDetailPayload(inv *domain.Invoice) *finv1.InvoiceDetail {
 		paidDate = inv.PaidDate.Format("2006-01-02")
 	}
 
-	return &finv1.InvoiceDetail{
+	return &financeinvoicesv1.InvoiceDetail{
 		Id:             inv.ID,
 		OwnerId:        inv.OwnerID,
 		InvoiceNumber:  inv.InvoiceNumber,

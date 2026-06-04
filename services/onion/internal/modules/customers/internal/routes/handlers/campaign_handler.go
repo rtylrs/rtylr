@@ -10,7 +10,7 @@ import (
 	"github.com/voxire/onion/internal/modules/customers/internal/domain"
 	authPkg "github.com/voxire/onion/internal/platform/auth"
 	errorModels "github.com/voxire/onion/internal/platform/errors"
-	crmv1 "github.com/voxire/voxie/gen/go/crm/v1"
+	crmcampaignv1 "github.com/voxire/voxie/gen/go/crm/campaign/v1"
 )
 
 func CampaignListRoutes() []string {
@@ -29,8 +29,8 @@ func CampaignStatusRoutes() []string {
 	return []string{"/crm/campaigns/status"}
 }
 
-func newCampaignPayload(c domain.Campaign) *crmv1.Campaign {
-	p := &crmv1.Campaign{
+func newCampaignPayload(c domain.Campaign) *crmcampaignv1.Campaign {
+	p := &crmcampaignv1.Campaign{
 		Id:             c.ID,
 		OwnerId:        c.OwnerID,
 		Name:           c.Name,
@@ -73,7 +73,7 @@ type ListCampaignsRequest struct {
 }
 
 type ListCampaignsResponse struct {
-	Campaigns []*crmv1.Campaign `json:"campaigns"`
+	Campaigns []*crmcampaignv1.Campaign `json:"campaigns"`
 }
 
 func (h *ListCampaignsHandler) Serve(ctx context.Context, req *ListCampaignsRequest) (ListCampaignsResponse, *errorModels.ServerError) {
@@ -90,7 +90,7 @@ func (h *ListCampaignsHandler) Serve(ctx context.Context, req *ListCampaignsRequ
 		}
 	}
 
-	payloads := make([]*crmv1.Campaign, len(campaigns))
+	payloads := make([]*crmcampaignv1.Campaign, len(campaigns))
 	for i, c := range campaigns {
 		payloads[i] = newCampaignPayload(c)
 	}

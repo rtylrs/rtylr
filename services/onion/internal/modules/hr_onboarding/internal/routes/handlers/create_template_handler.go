@@ -10,7 +10,7 @@ import (
 	authPkg "github.com/voxire/onion/internal/platform/auth"
 	errorModels "github.com/voxire/onion/internal/platform/errors"
 	"github.com/voxire/onion/internal/platform/logger"
-	hrv1 "github.com/voxire/voxie/gen/go/hr/v1"
+	hronboardingv1 "github.com/voxire/voxie/gen/go/hr/onboarding/v1"
 )
 
 func CreateTemplateRoutes() []string { return []string{"/hr/onboarding/templates"} }
@@ -24,7 +24,7 @@ type CreateTemplateRequest struct {
 }
 
 type CreateTemplateResponse struct {
-	Template *hrv1.ChecklistTemplatePayload `json:"template"`
+	Template *hronboardingv1.ChecklistTemplatePayload `json:"template"`
 }
 
 func (h *CreateTemplateHandler) Validate(_ context.Context, req *CreateTemplateRequest) *errorModels.ServerError {

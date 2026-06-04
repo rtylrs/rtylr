@@ -12,7 +12,7 @@ import (
 	authPkg "github.com/voxire/onion/internal/platform/auth"
 	errorModels "github.com/voxire/onion/internal/platform/errors"
 	"github.com/voxire/onion/internal/platform/logger"
-	hrv1 "github.com/voxire/voxie/gen/go/hr/v1"
+	hrattendancev1 "github.com/voxire/voxie/gen/go/hr/attendance/v1"
 )
 
 func GetLocationAttendanceRoutes() []string { return []string{"/hr/attendance/location/{id}/today"} }
@@ -22,7 +22,7 @@ type GetLocationAttendanceHandler struct{ Service *application.Service }
 type GetLocationAttendanceRequest struct{}
 
 type GetLocationAttendanceResponse struct {
-	Records []*hrv1.AttendanceRecordPayload `json:"records"`
+	Records []*hrattendancev1.AttendanceRecordPayload `json:"records"`
 }
 
 func (h *GetLocationAttendanceHandler) Serve(ctx context.Context, _ *GetLocationAttendanceRequest) (GetLocationAttendanceResponse, *errorModels.ServerError) {
@@ -45,7 +45,7 @@ func (h *GetLocationAttendanceHandler) Serve(ctx context.Context, _ *GetLocation
 		return GetLocationAttendanceResponse{}, &errorModels.ServerError{HTTPCode: http.StatusInternalServerError, Code: http.StatusInternalServerError, Message: "Failed to get location attendance"}
 	}
 
-	payloads := make([]*hrv1.AttendanceRecordPayload, 0, len(records))
+	payloads := make([]*hrattendancev1.AttendanceRecordPayload, 0, len(records))
 	for _, r := range records {
 		payloads = append(payloads, attendanceToProto(r))
 	}

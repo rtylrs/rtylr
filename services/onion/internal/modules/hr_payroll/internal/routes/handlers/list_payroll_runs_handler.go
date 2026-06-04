@@ -9,7 +9,7 @@ import (
 	authPkg "github.com/voxire/onion/internal/platform/auth"
 	errorModels "github.com/voxire/onion/internal/platform/errors"
 	"github.com/voxire/onion/internal/platform/logger"
-	hrv1 "github.com/voxire/voxie/gen/go/hr/v1"
+	hremployeespayrollrunsv1 "github.com/voxire/voxie/gen/go/hr/employees/payroll/runs/v1"
 )
 
 func ListPayrollRunsRoutes() []string { return []string{"/hr/payroll/runs"} }
@@ -22,10 +22,10 @@ type ListPayrollRunsRequest struct {
 }
 
 type ListPayrollRunsResponse struct {
-	Runs   []*hrv1.PayrollRunPayload `json:"runs"`
-	Total  int64                     `json:"total"`
-	Limit  int32                     `json:"limit"`
-	Offset int32                     `json:"offset"`
+	Runs   []*hremployeespayrollrunsv1.PayrollRunPayload `json:"runs"`
+	Total  int64                                         `json:"total"`
+	Limit  int32                                         `json:"limit"`
+	Offset int32                                         `json:"offset"`
 }
 
 func (h *ListPayrollRunsHandler) Serve(ctx context.Context, req *ListPayrollRunsRequest) (ListPayrollRunsResponse, *errorModels.ServerError) {
@@ -42,7 +42,7 @@ func (h *ListPayrollRunsHandler) Serve(ctx context.Context, req *ListPayrollRuns
 		return ListPayrollRunsResponse{}, &errorModels.ServerError{HTTPCode: http.StatusInternalServerError, Code: http.StatusInternalServerError, Message: "Failed to list payroll runs"}
 	}
 
-	payloads := make([]*hrv1.PayrollRunPayload, 0, len(runs))
+	payloads := make([]*hremployeespayrollrunsv1.PayrollRunPayload, 0, len(runs))
 	for _, r := range runs {
 		payloads = append(payloads, payrollRunToProto(r))
 	}

@@ -11,7 +11,7 @@ import (
 	authPkg "github.com/voxire/onion/internal/platform/auth"
 	errorModels "github.com/voxire/onion/internal/platform/errors"
 	"github.com/voxire/onion/internal/platform/logger"
-	hrv1 "github.com/voxire/voxie/gen/go/hr/v1"
+	hrdocumentv1 "github.com/voxire/voxie/gen/go/hr/document/v1"
 )
 
 func UploadDocumentRoutes() []string { return []string{"/hr/documents"} }
@@ -28,7 +28,7 @@ type UploadDocumentRequest struct {
 }
 
 type UploadDocumentResponse struct {
-	Document *hrv1.EmployeeDocumentPayload `json:"document"`
+	Document *hrdocumentv1.EmployeeDocumentPayload `json:"document"`
 }
 
 func (h *UploadDocumentHandler) Validate(_ context.Context, req *UploadDocumentRequest) *errorModels.ServerError {

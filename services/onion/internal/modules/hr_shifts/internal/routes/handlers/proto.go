@@ -2,11 +2,11 @@ package handlers
 
 import (
 	"github.com/voxire/onion/internal/modules/hr_shifts/internal/domain"
-	hrv1 "github.com/voxire/voxie/gen/go/hr/v1"
+	hrshiftv1 "github.com/voxire/voxie/gen/go/hr/shift/v1"
 )
 
-func shiftToProto(s domain.ShiftRecord) *hrv1.ShiftPayload {
-	return &hrv1.ShiftPayload{
+func shiftToProto(s domain.ShiftRecord) *hrshiftv1.ShiftPayload {
+	return &hrshiftv1.ShiftPayload{
 		Id:         s.ID,
 		OwnerId:    s.OwnerID,
 		LocationId: s.LocationID,
@@ -19,8 +19,8 @@ func shiftToProto(s domain.ShiftRecord) *hrv1.ShiftPayload {
 	}
 }
 
-func assignmentToProto(a domain.ShiftAssignmentRecord) *hrv1.ShiftAssignmentPayload {
-	return &hrv1.ShiftAssignmentPayload{
+func assignmentToProto(a domain.ShiftAssignmentRecord) *hrshiftv1.ShiftAssignmentPayload {
+	return &hrshiftv1.ShiftAssignmentPayload{
 		Id:         a.ID,
 		OwnerId:    a.OwnerID,
 		EmployeeId: a.EmployeeID,

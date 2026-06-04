@@ -9,7 +9,7 @@ import (
 	authPkg "github.com/voxire/onion/internal/platform/auth"
 	errorModels "github.com/voxire/onion/internal/platform/errors"
 	"github.com/voxire/onion/internal/platform/logger"
-	hrv1 "github.com/voxire/voxie/gen/go/hr/v1"
+	hrleavev1 "github.com/voxire/voxie/gen/go/hr/leave/v1"
 )
 
 func GetLeaveCalendarRoutes() []string { return []string{"/hr/leave/calendar"} }
@@ -23,7 +23,7 @@ type GetLeaveCalendarRequest struct {
 }
 
 type GetLeaveCalendarResponse struct {
-	Requests []*hrv1.LeaveRequestPayload `json:"requests"`
+	Requests []*hrleavev1.LeaveRequestPayload `json:"requests"`
 }
 
 func (h *GetLeaveCalendarHandler) Serve(ctx context.Context, req *GetLeaveCalendarRequest) (GetLeaveCalendarResponse, *errorModels.ServerError) {
@@ -42,7 +42,7 @@ func (h *GetLeaveCalendarHandler) Serve(ctx context.Context, req *GetLeaveCalend
 		return GetLeaveCalendarResponse{}, &errorModels.ServerError{HTTPCode: http.StatusInternalServerError, Code: http.StatusInternalServerError, Message: "Failed to get leave calendar"}
 	}
 
-	payloads := make([]*hrv1.LeaveRequestPayload, 0, len(requests))
+	payloads := make([]*hrleavev1.LeaveRequestPayload, 0, len(requests))
 	for _, r := range requests {
 		payloads = append(payloads, leaveRequestToProto(r))
 	}

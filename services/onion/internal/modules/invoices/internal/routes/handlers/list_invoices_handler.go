@@ -8,7 +8,7 @@ import (
 	"github.com/voxire/onion/internal/modules/invoices/internal/domain"
 	authPkg "github.com/voxire/onion/internal/platform/auth"
 	errorModels "github.com/voxire/onion/internal/platform/errors"
-	finv1 "github.com/voxire/voxie/gen/go/finance/v1"
+	financeinvoicesv1 "github.com/voxire/voxie/gen/go/finance/invoices/v1"
 )
 
 func ListInvoicesRoutes() []string {
@@ -29,19 +29,19 @@ type ListInvoicesRequest struct {
 }
 
 type ListInvoicesResponse struct {
-	Invoices []*finv1.InvoiceSummary `json:"invoices"`
-	Page     int64                   `json:"page"`
-	PageSize int64                   `json:"page_size"`
-	HasMore  bool                    `json:"has_more"`
+	Invoices []*financeinvoicesv1.InvoiceSummary `json:"invoices"`
+	Page     int64                               `json:"page"`
+	PageSize int64                               `json:"page_size"`
+	HasMore  bool                                `json:"has_more"`
 }
 
-func newInvoiceSummary(inv domain.Invoice) *finv1.InvoiceSummary {
+func newInvoiceSummary(inv domain.Invoice) *financeinvoicesv1.InvoiceSummary {
 	paidDate := ""
 	if inv.PaidDate != nil {
 		paidDate = inv.PaidDate.Format("2006-01-02")
 	}
 
-	return &finv1.InvoiceSummary{
+	return &financeinvoicesv1.InvoiceSummary{
 		Id:            inv.ID,
 		InvoiceNumber: inv.InvoiceNumber,
 		ClientName:    inv.ClientName,
@@ -68,7 +68,7 @@ func (h *ListInvoicesHandler) Serve(ctx context.Context, req *ListInvoicesReques
 		}
 	}
 
-	summaries := make([]*finv1.InvoiceSummary, 0, len(invoices))
+	summaries := make([]*financeinvoicesv1.InvoiceSummary, 0, len(invoices))
 	for _, inv := range invoices {
 		summaries = append(summaries, newInvoiceSummary(inv))
 	}

@@ -9,7 +9,7 @@ import (
 	authPkg "github.com/voxire/onion/internal/platform/auth"
 	errorModels "github.com/voxire/onion/internal/platform/errors"
 	"github.com/voxire/onion/internal/platform/logger"
-	hrv1 "github.com/voxire/voxie/gen/go/hr/v1"
+	hrshiftv1 "github.com/voxire/voxie/gen/go/hr/shift/v1"
 )
 
 func ListShiftsRoutes() []string { return []string{"/hr/shifts"} }
@@ -22,10 +22,10 @@ type ListShiftsRequest struct {
 }
 
 type ListShiftsResponse struct {
-	Shifts []*hrv1.ShiftPayload `json:"shifts"`
-	Total  int64                `json:"total"`
-	Limit  int32                `json:"limit"`
-	Offset int32                `json:"offset"`
+	Shifts []*hrshiftv1.ShiftPayload `json:"shifts"`
+	Total  int64                     `json:"total"`
+	Limit  int32                     `json:"limit"`
+	Offset int32                     `json:"offset"`
 }
 
 func (h *ListShiftsHandler) Serve(ctx context.Context, req *ListShiftsRequest) (ListShiftsResponse, *errorModels.ServerError) {
@@ -42,7 +42,7 @@ func (h *ListShiftsHandler) Serve(ctx context.Context, req *ListShiftsRequest) (
 		return ListShiftsResponse{}, &errorModels.ServerError{HTTPCode: http.StatusInternalServerError, Code: http.StatusInternalServerError, Message: "Failed to list shifts"}
 	}
 
-	payloads := make([]*hrv1.ShiftPayload, 0, len(shifts))
+	payloads := make([]*hrshiftv1.ShiftPayload, 0, len(shifts))
 	for _, s := range shifts {
 		payloads = append(payloads, shiftToProto(s))
 	}

@@ -10,7 +10,7 @@ import (
 	authPkg "github.com/voxire/onion/internal/platform/auth"
 	errorModels "github.com/voxire/onion/internal/platform/errors"
 	"github.com/voxire/onion/internal/platform/logger"
-	hrv1 "github.com/voxire/voxie/gen/go/hr/v1"
+	hrshiftv1 "github.com/voxire/voxie/gen/go/hr/shift/v1"
 )
 
 func CreateShiftRoutes() []string { return []string{"/hr/shifts"} }
@@ -26,7 +26,7 @@ type CreateShiftRequest struct {
 }
 
 type CreateShiftResponse struct {
-	Shift *hrv1.ShiftPayload `json:"shift"`
+	Shift *hrshiftv1.ShiftPayload `json:"shift"`
 }
 
 func (h *CreateShiftHandler) Validate(_ context.Context, req *CreateShiftRequest) *errorModels.ServerError {

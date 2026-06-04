@@ -8,7 +8,7 @@ import (
 	"github.com/voxire/onion/internal/modules/customers/internal/domain"
 	authPkg "github.com/voxire/onion/internal/platform/auth"
 	errorModels "github.com/voxire/onion/internal/platform/errors"
-	crmv1 "github.com/voxire/voxie/gen/go/crm/v1"
+	crmdashboardv1 "github.com/voxire/voxie/gen/go/crm/dashboard/v1"
 )
 
 func DashboardRoutes() []string {
@@ -22,14 +22,14 @@ type DashboardHandler struct {
 type DashboardRequest struct{}
 
 type DashboardResponse struct {
-	TotalCustomers       int                  `json:"total_customers"`
-	NewThisMonth         int                  `json:"new_this_month"`
-	ActiveLoyaltyMembers int                  `json:"active_loyalty_members"`
-	TopCustomers         []*crmv1.TopCustomer `json:"top_customers"`
+	TotalCustomers       int                           `json:"total_customers"`
+	NewThisMonth         int                           `json:"new_this_month"`
+	ActiveLoyaltyMembers int                           `json:"active_loyalty_members"`
+	TopCustomers         []*crmdashboardv1.TopCustomer `json:"top_customers"`
 }
 
-func newTopCustomerPayload(tc domain.TopCustomer) *crmv1.TopCustomer {
-	return &crmv1.TopCustomer{
+func newTopCustomerPayload(tc domain.TopCustomer) *crmdashboardv1.TopCustomer {
+	return &crmdashboardv1.TopCustomer{
 		Id:            tc.ID,
 		FirstName:     tc.FirstName,
 		LastName:      tc.LastName,
@@ -54,7 +54,7 @@ func (h *DashboardHandler) Serve(ctx context.Context, _ *DashboardRequest) (Dash
 		}
 	}
 
-	topCustomers := make([]*crmv1.TopCustomer, len(stats.TopCustomers))
+	topCustomers := make([]*crmdashboardv1.TopCustomer, len(stats.TopCustomers))
 	for i, tc := range stats.TopCustomers {
 		topCustomers[i] = newTopCustomerPayload(tc)
 	}

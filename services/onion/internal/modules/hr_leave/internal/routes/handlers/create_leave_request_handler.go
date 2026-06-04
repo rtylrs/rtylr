@@ -12,7 +12,7 @@ import (
 	authPkg "github.com/voxire/onion/internal/platform/auth"
 	errorModels "github.com/voxire/onion/internal/platform/errors"
 	"github.com/voxire/onion/internal/platform/logger"
-	hrv1 "github.com/voxire/voxie/gen/go/hr/v1"
+	hrleavev1 "github.com/voxire/voxie/gen/go/hr/leave/v1"
 )
 
 func CreateLeaveRequestRoutes() []string { return []string{"/hr/leave/requests"} }
@@ -29,7 +29,7 @@ type CreateLeaveRequestRequest struct {
 }
 
 type CreateLeaveRequestResponse struct {
-	Request *hrv1.LeaveRequestPayload `json:"request"`
+	Request *hrleavev1.LeaveRequestPayload `json:"request"`
 }
 
 func (h *CreateLeaveRequestHandler) Validate(_ context.Context, req *CreateLeaveRequestRequest) *errorModels.ServerError {

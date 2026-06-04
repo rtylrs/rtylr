@@ -10,7 +10,7 @@ import (
 	authPkg "github.com/voxire/onion/internal/platform/auth"
 	errorModels "github.com/voxire/onion/internal/platform/errors"
 	"github.com/voxire/onion/internal/platform/logger"
-	authv1 "github.com/voxire/voxie/gen/go/auth/v1"
+	commonauthv1 "github.com/voxire/voxie/gen/go/common/auth/v1"
 )
 
 func RegisterRoutes() []string {
@@ -36,7 +36,7 @@ type RegisterRequest struct {
 	PlanSlug     string `json:"plan_slug"`
 }
 
-type RegisterResponse = authv1.RegisterResponse
+type RegisterResponse = commonauthv1.RegisterResponse
 
 func (h *RegisterHandler) Serve(ctx context.Context, req *RegisterRequest) (RegisterResponse, *errorModels.ServerError) {
 	var clientIP netip.Addr

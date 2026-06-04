@@ -2,10 +2,10 @@ package handlers
 
 import (
 	"github.com/voxire/onion/internal/modules/hr_attendance/internal/domain"
-	hrv1 "github.com/voxire/voxie/gen/go/hr/v1"
+	hrattendancev1 "github.com/voxire/voxie/gen/go/hr/attendance/v1"
 )
 
-func attendanceToProto(r domain.AttendanceRecordRecord) *hrv1.AttendanceRecordPayload {
+func attendanceToProto(r domain.AttendanceRecordRecord) *hrattendancev1.AttendanceRecordPayload {
 	var clockOutAt *int64
 	var durationMinutes *int32
 	var clockInLat, clockInLng *float64
@@ -24,7 +24,7 @@ func attendanceToProto(r domain.AttendanceRecordRecord) *hrv1.AttendanceRecordPa
 		clockInLng = &r.ClockInLng
 	}
 
-	return &hrv1.AttendanceRecordPayload{
+	return &hrattendancev1.AttendanceRecordPayload{
 		Id:              r.ID,
 		OwnerId:         r.OwnerID,
 		EmployeeId:      r.EmployeeID,

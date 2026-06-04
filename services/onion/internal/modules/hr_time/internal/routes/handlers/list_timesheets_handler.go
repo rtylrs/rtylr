@@ -9,7 +9,7 @@ import (
 	authPkg "github.com/voxire/onion/internal/platform/auth"
 	errorModels "github.com/voxire/onion/internal/platform/errors"
 	"github.com/voxire/onion/internal/platform/logger"
-	hrv1 "github.com/voxire/voxie/gen/go/hr/v1"
+	hrtimeentryv1 "github.com/voxire/voxie/gen/go/hr/time_entry/v1"
 )
 
 func ListTimesheetsRoutes() []string { return []string{"/hr/timesheets"} }
@@ -23,10 +23,10 @@ type ListTimesheetsRequest struct {
 }
 
 type ListTimesheetsResponse struct {
-	Timesheets []*hrv1.TimesheetPayload `json:"timesheets"`
-	Total      int64                    `json:"total"`
-	Limit      int32                    `json:"limit"`
-	Offset     int32                    `json:"offset"`
+	Timesheets []*hrtimeentryv1.TimesheetPayload `json:"timesheets"`
+	Total      int64                             `json:"total"`
+	Limit      int32                             `json:"limit"`
+	Offset     int32                             `json:"offset"`
 }
 
 func (h *ListTimesheetsHandler) Serve(ctx context.Context, req *ListTimesheetsRequest) (ListTimesheetsResponse, *errorModels.ServerError) {
@@ -45,7 +45,7 @@ func (h *ListTimesheetsHandler) Serve(ctx context.Context, req *ListTimesheetsRe
 		return ListTimesheetsResponse{}, &errorModels.ServerError{HTTPCode: http.StatusInternalServerError, Code: http.StatusInternalServerError, Message: "Failed to list timesheets"}
 	}
 
-	payloads := make([]*hrv1.TimesheetPayload, 0, len(timesheets))
+	payloads := make([]*hrtimeentryv1.TimesheetPayload, 0, len(timesheets))
 	for _, ts := range timesheets {
 		payloads = append(payloads, timesheetToProto(ts))
 	}

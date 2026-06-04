@@ -2,10 +2,10 @@ package handlers
 
 import (
 	"github.com/voxire/onion/internal/modules/hr_payroll/internal/domain"
-	hrv1 "github.com/voxire/voxie/gen/go/hr/v1"
+	hremployeespayrollrunsv1 "github.com/voxire/voxie/gen/go/hr/employees/payroll/runs/v1"
 )
 
-func payrollRunToProto(r domain.PayrollRunRecord) *hrv1.PayrollRunPayload {
+func payrollRunToProto(r domain.PayrollRunRecord) *hremployeespayrollrunsv1.PayrollRunPayload {
 	var approvedBy *int64
 	var exportedAt *int64
 
@@ -17,7 +17,7 @@ func payrollRunToProto(r domain.PayrollRunRecord) *hrv1.PayrollRunPayload {
 		exportedAt = &ts
 	}
 
-	return &hrv1.PayrollRunPayload{
+	return &hremployeespayrollrunsv1.PayrollRunPayload{
 		Id:          r.ID,
 		OwnerId:     r.OwnerID,
 		PeriodStart: r.PeriodStart,
@@ -33,8 +33,8 @@ func payrollRunToProto(r domain.PayrollRunRecord) *hrv1.PayrollRunPayload {
 	}
 }
 
-func payrollEntryToProto(e domain.PayrollEntryRecord) *hrv1.PayrollEntryPayload {
-	return &hrv1.PayrollEntryPayload{
+func payrollEntryToProto(e domain.PayrollEntryRecord) *hremployeespayrollrunsv1.PayrollEntryPayload {
+	return &hremployeespayrollrunsv1.PayrollEntryPayload{
 		Id:            e.ID,
 		OwnerId:       e.OwnerID,
 		PayrollRunId:  e.PayrollRunID,

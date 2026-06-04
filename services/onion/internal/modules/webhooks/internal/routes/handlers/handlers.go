@@ -8,7 +8,7 @@ import (
 	"github.com/voxire/onion/internal/modules/webhooks/internal/application"
 	authPkg "github.com/voxire/onion/internal/platform/auth"
 	errorModels "github.com/voxire/onion/internal/platform/errors"
-	hubv1 "github.com/voxire/voxie/gen/go/hub/v1"
+	hubdeveloperv1 "github.com/voxire/voxie/gen/go/hub/developer/v1"
 )
 
 func WebhookRoutes() []string { return []string{"/webhooks"} }
@@ -21,7 +21,7 @@ type (
 )
 
 type ListResponse struct {
-	Webhooks []*hubv1.Webhook `json:"webhooks"`
+	Webhooks []*hubdeveloperv1.Webhook `json:"webhooks"`
 }
 
 func (h *ListHandler) Serve(ctx context.Context, _ *ListRequest) (ListResponse, *errorModels.ServerError) {
@@ -39,13 +39,13 @@ func (h *ListHandler) Serve(ctx context.Context, _ *ListRequest) (ListResponse, 
 		}
 	}
 
-	payloads := make([]*hubv1.Webhook, 0, len(webhooks))
+	payloads := make([]*hubdeveloperv1.Webhook, 0, len(webhooks))
 	for _, w := range webhooks {
 		events := w.Events
 		if events == nil {
 			events = []string{}
 		}
-		wh := &hubv1.Webhook{
+		wh := &hubdeveloperv1.Webhook{
 			Id:        w.ID,
 			Url:       w.URL,
 			Events:    events,
