@@ -1,4 +1,4 @@
-import React, { useState, useEffect, useMemo } from 'react';
+import React, { useState, useEffect, useMemo, useRef } from 'react';
 import { motion } from 'motion/react';
 import {
   Bell,
@@ -583,6 +583,7 @@ const LabelsSection: React.FC = () => {
 
   const [newName, setNewName] = useState('');
   const [newColor, setNewColor] = useState(LABEL_COLORS[0]);
+  const customColorInputRef = useRef<HTMLInputElement | null>(null);
   const [pendingDeleteLabel, setPendingDeleteLabel] = useState<{
     id: number;
     name: string;
@@ -652,6 +653,30 @@ const LabelsSection: React.FC = () => {
             Color
           </p>
           <div className="flex flex-wrap gap-2">
+            <button
+              type="button"
+              onClick={() => customColorInputRef.current?.click()}
+              className="relative h-6 w-6 rounded-full transition-all overflow-hidden"
+              style={{
+                background: `linear-gradient(135deg, ${newColor} 0%, ${newColor} 45%, #ffffff 45%, #ffffff 55%, #111111 55%, #111111 100%)`,
+                outline: !LABEL_COLORS.includes(newColor) ? `2px solid ${newColor}` : 'none',
+                outlineOffset: 2,
+                boxShadow: !LABEL_COLORS.includes(newColor) ? '0 0 0 2px var(--flow-bg)' : 'none',
+                border: '1px solid var(--flow-border)',
+              }}
+              title="Choose custom color"
+              aria-label="Choose custom color"
+            >
+              <input
+                ref={customColorInputRef}
+                type="color"
+                value={newColor}
+                onChange={(e) => setNewColor(e.target.value)}
+                className="sr-only"
+                tabIndex={-1}
+                aria-hidden="true"
+              />
+            </button>
             {LABEL_COLORS.map((c) => (
               <button
                 key={c}
