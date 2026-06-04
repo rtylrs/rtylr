@@ -1,7 +1,7 @@
 import React, { useMemo, useState } from 'react';
 import { useNavigate } from '@tanstack/react-router';
 import { AlertCircle, CheckCircle2 } from 'lucide-react';
-import { ASSETS } from '@voxire/config';
+import Logo from '../../shared/components/Logo';
 import { Button } from '@voxire/components';
 import { unwrap } from '@voxire/api';
 import { safe } from '../../shared/lib/api';
@@ -46,12 +46,7 @@ const ResetPasswordConfirm: React.FC = () => {
     <div className="min-h-screen w-full flex items-center justify-center bg-white px-4">
       <div className="w-full max-w-sm">
         <div className="flex justify-center mb-8">
-          <img
-            src={ASSETS.logos.dark}
-            alt="rtylr"
-            className="h-8 w-auto select-none"
-            draggable={false}
-          />
+          <Logo variant="dark" className="h-8 w-auto select-none" />
         </div>
 
         <h2 className="text-xl font-semibold text-[#111] mb-1">Set a new password</h2>

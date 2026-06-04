@@ -1,8 +1,8 @@
 import React, { useState, useEffect, useCallback } from 'react';
 import { FaChevronDown } from 'react-icons/fa';
 import { useNavigate } from '@tanstack/react-router';
-import { ASSETS } from '@voxire/config';
 
+import Logo from '../../shared/components/Logo';
 import { selectLanguage } from '../../shared/services/i18next';
 import { getCookie } from '../../shared/lib/cookies';
 
@@ -67,7 +67,7 @@ const Header: React.FC = () => {
           if (e.key === 'Enter' || e.key === ' ') navigate({ to: '/' });
         }}
       >
-        <img src={ASSETS.logos.dark} alt="Logo" />
+        <Logo variant="dark" />
       </div>
 
       <div className="lang-dropdown-container">

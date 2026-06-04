@@ -2,7 +2,7 @@ import React, { useEffect, useState } from 'react';
 import { useNavigate, useRouterState } from '@tanstack/react-router';
 import { Mail, CheckCircle2, AlertCircle, Loader2 } from 'lucide-react';
 
-import { ASSETS } from '@voxire/config';
+import Logo from '../../shared/components/Logo';
 import { Button } from '@voxire/components';
 import { useEmailVerification, useResendVerificationEmail } from './useEmailVerification';
 import notify from '../../shared/lib/notify/notify';
@@ -53,12 +53,7 @@ const VerifyEmail: React.FC = () => {
       <div className="w-full max-w-sm text-center">
         {/* Logo */}
         <div className="flex justify-center mb-8">
-          <img
-            src={ASSETS.logos.dark}
-            alt="rtylr"
-            className="h-8 w-auto select-none"
-            draggable={false}
-          />
+          <Logo variant="dark" className="h-8 w-auto select-none" />
         </div>
 
         {status === 'loading' && (

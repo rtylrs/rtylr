@@ -4,7 +4,7 @@ import { CheckCircle2, AlertCircle, Loader2 } from 'lucide-react';
 
 import { unwrap } from '@voxire/api';
 import { safe } from '../../shared/lib/api';
-import { ASSETS } from '@voxire/config';
+import Logo from '../../shared/components/Logo';
 import { Button } from '@voxire/components';
 
 const EmailVerification = () => {
@@ -32,12 +32,7 @@ const EmailVerification = () => {
       <div className="w-full max-w-sm text-center">
         {/* Logo */}
         <div className="flex justify-center mb-8">
-          <img
-            src={ASSETS.logos.dark}
-            alt="rtylr"
-            className="h-8 w-auto select-none"
-            draggable={false}
-          />
+          <Logo variant="dark" className="h-8 w-auto select-none" />
         </div>
 
         {loading ? (

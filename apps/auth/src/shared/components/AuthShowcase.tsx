@@ -1,6 +1,6 @@
 import React from 'react';
 import { motion } from 'motion/react';
-import { ASSETS } from '@voxire/config';
+import Logo from './Logo';
 
 /**
  * Left-side branded showcase for the auth split-screen.
@@ -109,12 +109,7 @@ const AuthShowcase: React.FC = () => {
         animate={{ opacity: 1, y: 0 }}
         transition={{ duration: 0.6, ease: [0.16, 1, 0.3, 1] }}
       >
-        <img
-          src={ASSETS.logos.light}
-          alt="rtylr"
-          className="h-8 w-auto select-none"
-          draggable={false}
-        />
+        <Logo variant="light" className="h-8 w-auto select-none" />
       </motion.div>
 
       {/* Middle: hero copy */}

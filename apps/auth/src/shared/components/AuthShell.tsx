@@ -1,7 +1,7 @@
 import React from 'react';
 import { motion } from 'motion/react';
 import AuthShowcase from './AuthShowcase';
-import { ASSETS } from '@voxire/config';
+import Logo from './Logo';
 
 interface AuthShellProps {
   children: React.ReactNode;
@@ -38,12 +38,7 @@ const AuthShell: React.FC<AuthShellProps> = ({ children, title, subtitle, footer
       <main className="relative flex-1 lg:w-[40%] flex flex-col bg-white">
         {/* Mobile logo bar */}
         <div className="relative z-10 flex items-center justify-between px-6 pt-6 lg:hidden">
-          <img
-            src={ASSETS.logos.dark}
-            alt="rtylr"
-            className="h-7 w-auto select-none"
-            draggable={false}
-          />
+          <Logo variant="dark" className="h-7 w-auto select-none" />
         </div>
 
         {/* Centered form container */}
