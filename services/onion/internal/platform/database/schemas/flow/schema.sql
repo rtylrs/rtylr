@@ -122,37 +122,47 @@ CREATE TABLE IF NOT EXISTS flow_time_logs (
 
 CREATE TABLE IF NOT EXISTS flow_milestones (
     id BIGINT NOT NULL AUTO_INCREMENT PRIMARY KEY,
-    owner_id BIGINT NOT NULL,
+    owner_id BIGINT NOT NULL DEFAULT 0,
     project_id BIGINT NOT NULL,
+    workspace_id BIGINT NULL,
     name VARCHAR(255) NOT NULL,
     description TEXT,
     target_date DATE,
-    status ENUM('upcoming','active','completed','missed') DEFAULT 'upcoming',
+    due_date DATE NULL,
+    status ENUM('upcoming','active','completed','missed','planning','at_risk') DEFAULT 'upcoming',
+    completed_at TIMESTAMP NULL,
+    created_by BIGINT NULL,
     created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
     updated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP
 );
 
 CREATE TABLE IF NOT EXISTS flow_cycles (
     id BIGINT NOT NULL AUTO_INCREMENT PRIMARY KEY,
-    owner_id BIGINT NOT NULL,
+    owner_id BIGINT NOT NULL DEFAULT 0,
     workspace_id BIGINT NOT NULL,
+    project_id BIGINT NULL,
     name VARCHAR(255) NOT NULL,
+    description TEXT,
     start_date DATE,
     end_date DATE,
     status ENUM('upcoming','active','completed') DEFAULT 'upcoming',
+    created_by BIGINT NULL,
     created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
     updated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP
 );
 
 CREATE TABLE IF NOT EXISTS flow_views (
     id BIGINT NOT NULL AUTO_INCREMENT PRIMARY KEY,
-    owner_id BIGINT NOT NULL,
+    owner_id BIGINT NOT NULL DEFAULT 0,
     workspace_id BIGINT NOT NULL,
     name VARCHAR(255) NOT NULL,
+    icon VARCHAR(50) DEFAULT 'eye',
     filters JSON,
     sort_by VARCHAR(100) DEFAULT '',
+    sort_dir ENUM('asc','desc') DEFAULT 'asc',
     group_by VARCHAR(100) DEFAULT '',
     is_default BOOLEAN DEFAULT FALSE,
+    created_by BIGINT NULL,
     created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
     updated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP
 );
