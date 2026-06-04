@@ -58,9 +58,10 @@ const AiChat: React.FC<AiChatProps> = ({
       ]);
     }
     if (isOpen) {
-      setTimeout(() => inputRef.current?.focus(), 150);
+      const timeoutId = window.setTimeout(() => inputRef.current?.focus(), 150);
+      return () => window.clearTimeout(timeoutId);
     }
-  }, [isOpen]);
+  }, [defaultGreeting, isOpen, messages.length]);
 
   // Scroll to bottom on new message
   useEffect(() => {
@@ -78,12 +79,13 @@ const AiChat: React.FC<AiChatProps> = ({
       timestamp: new Date(),
     };
 
-    setMessages((prev) => [...prev, userMsg]);
+    const nextHistory = [...messages, userMsg];
+    setMessages(nextHistory);
     setInput('');
     setLoading(true);
 
     try {
-      const reply = await onSendMessage(text, messages);
+      const reply = await onSendMessage(text, nextHistory);
       setMessages((prev) => [
         ...prev,
         {

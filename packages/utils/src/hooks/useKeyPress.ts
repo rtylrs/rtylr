@@ -1,4 +1,4 @@
-import { useEffect, useState } from 'react';
+import { useEffect, useRef, useState } from 'react';
 
 export function useKeyPress(targetKey: string): boolean {
   const [keyPressed, setKeyPressed] = useState<boolean>(false);
@@ -33,10 +33,17 @@ export function useKeyPressCallback(
   callback: () => void,
   dependencies: unknown[] = []
 ): void {
+  const callbackRef = useRef(callback);
+  const dependenciesKey = JSON.stringify(dependencies);
+
+  useEffect(() => {
+    callbackRef.current = callback;
+  }, [callback, dependenciesKey]);
+
   useEffect(() => {
     const downHandler = ({ key }: KeyboardEvent) => {
       if (key === targetKey) {
-        callback();
+        callbackRef.current();
       }
     };
 
@@ -45,5 +52,5 @@ export function useKeyPressCallback(
     return () => {
       window.removeEventListener('keydown', downHandler);
     };
-  }, [targetKey, callback, ...dependencies]);
+  }, [targetKey]);
 }
