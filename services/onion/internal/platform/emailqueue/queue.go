@@ -9,6 +9,7 @@ import (
 	"github.com/google/uuid"
 
 	"github.com/voxire/onion/internal/platform/email"
+	sqlc "github.com/voxire/onion/internal/platform/emailqueue/internal/infrastructure/persistence/sqlc"
 	"github.com/voxire/onion/internal/platform/logger"
 )
 
@@ -30,18 +31,26 @@ type Job struct {
 	ReplyTo  string
 }
 
+// nullStr wraps a string as a NULL-able column value (empty → NULL).
+func nullStr(s string) sql.NullString {
+	return sql.NullString{String: s, Valid: s != ""}
+}
+
 // Enqueue inserts a job into email_jobs to be sent by the pool.
 func Enqueue(ctx context.Context, db *sql.DB, job Job) error {
 	priority := job.Priority
 	if priority <= 0 {
 		priority = PriorityNormal
 	}
-	_, err := db.ExecContext(ctx, `
-		INSERT INTO email_jobs (priority, to_email, subject, html, text_body, from_email, reply_to)
-		VALUES (?, ?, ?, ?, ?, ?, ?)`,
-		priority, job.To, job.Subject, job.HTML, job.Text, job.From, job.ReplyTo,
-	)
-	return err
+	return sqlc.New(db).EnqueueJob(ctx, sqlc.EnqueueJobParams{
+		Priority:  int8(priority),
+		ToEmail:   job.To,
+		Subject:   job.Subject,
+		Html:      job.HTML,
+		TextBody:  nullStr(job.Text),
+		FromEmail: nullStr(job.From),
+		ReplyTo:   nullStr(job.ReplyTo),
+	})
 }
 
 // Pool watches the email_jobs table and spawns up to maxWorkers goroutines
@@ -49,6 +58,7 @@ func Enqueue(ctx context.Context, db *sql.DB, job Job) error {
 // so no two goroutines process the same row.
 type Pool struct {
 	db     *sql.DB
+	q      *sqlc.Queries
 	sem    chan struct{}
 	active atomic.Int32
 }
@@ -56,6 +66,7 @@ type Pool struct {
 func NewPool(db *sql.DB) *Pool {
 	return &Pool{
 		db:  db,
+		q:   sqlc.New(db),
 		sem: make(chan struct{}, maxWorkers),
 	}
 }
@@ -87,15 +98,13 @@ func (p *Pool) Run(ctx context.Context) {
 }
 
 func (p *Pool) spawnWorkers(ctx context.Context) {
-	var pending int
-	row := p.db.QueryRowContext(ctx,
-		`SELECT COUNT(*) FROM email_jobs WHERE status = 'pending' AND job_id IS NULL AND scheduled_at <= NOW()`)
-	if err := row.Scan(&pending); err != nil || pending == 0 {
+	pending, err := p.q.CountPendingJobs(ctx)
+	if err != nil || pending == 0 {
 		return
 	}
 
 	current := int(p.active.Load())
-	want := min(pending, maxWorkers)
+	want := min(int(pending), maxWorkers)
 	toSpawn := want - current
 	if toSpawn <= 0 {
 		return
@@ -127,16 +136,9 @@ func (p *Pool) drain(ctx context.Context) {
 }
 
 func (p *Pool) processOne(ctx context.Context) bool {
-	claimID := uuid.New().String()
+	claimID := sql.NullString{String: uuid.New().String(), Valid: true}
 
-	res, err := p.db.ExecContext(ctx, `
-		UPDATE email_jobs
-		SET job_id = ?, status = 'processing'
-		WHERE status = 'pending' AND job_id IS NULL AND scheduled_at <= NOW()
-		ORDER BY priority DESC, scheduled_at ASC
-		LIMIT 1`,
-		claimID,
-	)
+	res, err := p.q.ClaimJob(ctx, claimID)
 	if err != nil {
 		return false
 	}
@@ -145,72 +147,54 @@ func (p *Pool) processOne(ctx context.Context) bool {
 		return false
 	}
 
-	var (
-		id        int64
-		toEmail   string
-		subject   string
-		htmlBody  string
-		textBody  sql.NullString
-		fromEmail sql.NullString
-		replyTo   sql.NullString
-		attempts  int
-		maxAtt    int
-	)
-
-	err = p.db.QueryRowContext(ctx, `
-		SELECT id, to_email, subject, html, text_body, from_email, reply_to, attempts, max_attempts
-		FROM email_jobs WHERE job_id = ?`, claimID,
-	).Scan(&id, &toEmail, &subject, &htmlBody, &textBody, &fromEmail, &replyTo, &attempts, &maxAtt)
+	job, err := p.q.GetClaimedJob(ctx, claimID)
 	if err != nil {
 		return false
 	}
 
 	params := email.SendParams{
-		To:      []string{toEmail},
-		Subject: subject,
-		HTML:    htmlBody,
+		To:      []string{job.ToEmail},
+		Subject: job.Subject,
+		HTML:    job.Html,
 	}
-	if textBody.Valid {
-		params.Text = textBody.String
+	if job.TextBody.Valid {
+		params.Text = job.TextBody.String
 	}
-	if fromEmail.Valid && fromEmail.String != "" {
-		params.From = fromEmail.String
+	if job.FromEmail.Valid && job.FromEmail.String != "" {
+		params.From = job.FromEmail.String
 	}
-	if replyTo.Valid && replyTo.String != "" {
-		params.ReplyTo = replyTo.String
+	if job.ReplyTo.Valid && job.ReplyTo.String != "" {
+		params.ReplyTo = job.ReplyTo.String
 	}
 
 	_, sendErr := email.Send(ctx, params)
 
 	if sendErr != nil {
-		newAttempts := attempts + 1
-		newStatus := "pending"
-		var newJobID *string // nil resets job_id to NULL so it can be retried
-		if newAttempts >= maxAtt {
-			newStatus = "failed"
+		newAttempts := int(job.Attempts) + 1
+		newStatus := sqlc.EmailJobsStatusPending // NULL job_id below makes it retryable
+		if newAttempts >= int(job.MaxAttempts) {
+			newStatus = sqlc.EmailJobsStatusFailed
 		}
-		_, _ = p.db.ExecContext(ctx, `
-			UPDATE email_jobs
-			SET status = ?, attempts = ?, last_error = ?, job_id = ?,
-			    scheduled_at = DATE_ADD(NOW(), INTERVAL ? SECOND)
-			WHERE id = ?`,
-			newStatus, newAttempts, sendErr.Error(), newJobID, retryDelay(newAttempts), id,
-		)
+		_ = p.q.RescheduleJob(ctx, sqlc.RescheduleJobParams{
+			Status:    newStatus,
+			Attempts:  uint8(newAttempts),
+			LastError: sql.NullString{String: sendErr.Error(), Valid: true},
+			JobID:     sql.NullString{}, // NULL resets job_id so it can be retried
+			DATEADD:   retryDelay(newAttempts),
+			ID:        job.ID,
+		})
 	} else {
-		_, _ = p.db.ExecContext(ctx, `
-			UPDATE email_jobs SET status = 'sent', sent_at = NOW(), attempts = ?, job_id = NULL WHERE id = ?`,
-			attempts+1, id,
-		)
+		_ = p.q.MarkJobSent(ctx, sqlc.MarkJobSentParams{
+			Attempts: uint8(int(job.Attempts) + 1),
+			ID:       job.ID,
+		})
 	}
 
 	return true
 }
 
 func (p *Pool) recoverStuck(ctx context.Context) {
-	res, err := p.db.ExecContext(ctx, `
-		UPDATE email_jobs
-		SET status = 'pending', job_id = NULL
-		WHERE status = 'processing' AND updated_at < DATE_SUB(NOW(), INTERVAL 5 MINUTE)`)
+	res, err := p.q.RecoverStuckJobs(ctx)
 	if err != nil {
 		logger.Ctx(ctx).Error("stuck job recovery failed", logger.Error(err))
 		return
