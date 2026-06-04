@@ -18,8 +18,8 @@ var renderCases = map[Template]struct {
 }{
 	TemplateWelcome: {
 		data: WelcomeData{Subject: "Welcome", Name: "Sam"},
-		// "https://hub.rtylr.com" verifies the {{appURL "hub"}} func resolved.
-		want: []string{"Hey Sam", "welcome to rtylr", "https://hub.rtylr.com"},
+		// the hub URL verifies the {{appURL "hub"}} func resolved.
+		want: []string{"Hey Sam", "welcome to rtylr", "https://dash.rtylr.com"},
 	},
 	TemplateInvitation: {
 		data: InvitationData{Subject: "Invite", InviterName: "Alex", BusinessName: "Acme", InviteLink: "https://x.test/i"},
@@ -47,7 +47,7 @@ func TestRender(t *testing.T) {
 				t.Fatalf("Render(%q) error: %v", tmpl, err)
 			}
 			// Base layout must always wrap the body.
-			if !strings.Contains(out, `class="wrapper"`) || !strings.Contains(out, "rtylr.com") {
+			if !strings.Contains(out, `class="card"`) || !strings.Contains(out, "rtylr.com") {
 				t.Errorf("Render(%q): base layout not applied; got:\n%s", tmpl, out)
 			}
 			for _, w := range tc.want {
