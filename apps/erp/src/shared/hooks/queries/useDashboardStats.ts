@@ -1,7 +1,7 @@
 import { unwrap } from '@voxire/api';
 import { useQuery } from '@tanstack/react-query';
 import type { UseQueryResult } from '@tanstack/react-query';
-import type { PurchaseOrder } from '@voxire/contracts/erp/v1/purchase_orders';
+import type { PurchaseOrder } from '@voxire/contracts/erp/purchase_order/v1/types';
 import { safe } from '../../lib/api';
 
 // No proto type yet - define locally.

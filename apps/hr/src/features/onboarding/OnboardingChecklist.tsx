@@ -5,7 +5,7 @@ import {
   useGetEmployeeChecklist,
   useCompleteChecklistItem,
 } from '../../shared/hooks/queries/useOnboarding';
-import type { EmployeeChecklistItemPayload } from '@voxire/contracts/hr/v1/onboarding';
+import type { EmployeeChecklistItemPayload } from '@voxire/contracts/hr/onboarding/v1/types';
 import {
   SectionHeader,
   Card,

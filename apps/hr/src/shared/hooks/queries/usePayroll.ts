@@ -1,13 +1,10 @@
 import { unwrap } from '@voxire/api';
 import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query';
-import type {
-  PayrollRunPayload,
-  PayrollEntryPayload,
-  TriggerPayrollRunRequest,
-  ApprovePayrollRunRequest,
-  ExportPayrollRequest,
-  ListPayrollRunsResponse,
-} from '@voxire/contracts/hr/v1/payroll';
+import type { PayrollRunPayload, PayrollEntryPayload } from '@voxire/contracts/hr/employees/payroll/runs/v1/types';
+import type { TriggerPayrollRunRequest } from '@voxire/contracts/hr/employees/payroll/runs/v1/trigger_payroll_run';
+import type { ApprovePayrollRunRequest } from '@voxire/contracts/hr/employees/payroll/runs/v1/approve_payroll_run';
+import type { ExportPayrollRequest } from '@voxire/contracts/hr/employees/payroll/runs/v1/export_payroll';
+import type { ListPayrollRunsResponse } from '@voxire/contracts/hr/employees/payroll/runs/v1/list_payroll_runs';
 import { safe } from '../../lib/api';
 import { toast } from 'sonner';
 import { useTranslation } from 'react-i18next';

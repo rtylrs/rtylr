@@ -5,7 +5,7 @@ import {
   useListEmployeeDocuments,
   useUploadDocument,
 } from '../../shared/hooks/queries/useDocuments';
-import type { EmployeeDocumentPayload } from '@voxire/contracts/hr/v1/documents';
+import type { EmployeeDocumentPayload } from '@voxire/contracts/hr/document/v1/types';
 import {
   Card,
   EmptyState,

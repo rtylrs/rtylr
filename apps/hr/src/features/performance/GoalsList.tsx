@@ -1,7 +1,7 @@
 import React, { useState } from 'react';
 import { useTranslation } from 'react-i18next';
 import { Target } from 'lucide-react';
-import type { ReviewGoalPayload } from '@voxire/contracts/hr/v1/performance';
+import type { ReviewGoalPayload } from '@voxire/contracts/hr/performance/v1/types';
 import { useListGoals, useCreateGoal } from '../../shared/hooks/queries/usePerformance';
 import { goalFormSchema } from '../../shared/schemas/performance';
 import {

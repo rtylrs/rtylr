@@ -2,16 +2,12 @@ import { unwrap } from '@voxire/api';
 import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query';
 import { toast } from 'sonner';
 import { useTranslation } from 'react-i18next';
-import type {
-  Expense,
-  ListExpensesResponse,
-  CreateExpenseRequest,
-  CreateExpenseResponse,
-  UpdateExpenseRequest,
-  UpdateExpenseResponse,
-  DeleteExpenseResponse,
-  ListExpenseCategoriesResponse,
-} from '@voxire/contracts/finance/v1/expenses';
+import type { Expense } from '@voxire/contracts/finance/expenses/v1/types';
+import type { ListExpensesResponse } from '@voxire/contracts/finance/expenses/v1/list_expenses';
+import type { CreateExpenseRequest, CreateExpenseResponse } from '@voxire/contracts/finance/expenses/v1/create_expense';
+import type { UpdateExpenseRequest, UpdateExpenseResponse } from '@voxire/contracts/finance/expenses/v1/update_expense';
+import type { DeleteExpenseResponse } from '@voxire/contracts/finance/expenses/v1/delete_expense';
+import type { ListExpenseCategoriesResponse } from '@voxire/contracts/finance/expenses/v1/list_expense_categories';
 import { safe } from '../../lib/api';
 
 interface ListExpensesParams {

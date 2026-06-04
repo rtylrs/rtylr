@@ -3,7 +3,7 @@ import { useTranslation } from 'react-i18next';
 import { useNavigate } from '@tanstack/react-router';
 import { Rocket, AlertTriangle } from 'lucide-react';
 import { useGetEmployeeChecklist } from '../../shared/hooks/queries/useOnboarding';
-import type { EmployeeChecklistPayload } from '@voxire/contracts/hr/v1/onboarding';
+import type { EmployeeChecklistPayload } from '@voxire/contracts/hr/onboarding/v1/types';
 import {
   SectionHeader,
   Card,

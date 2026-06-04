@@ -1,16 +1,11 @@
 import { unwrap } from '@voxire/api';
 import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query';
-import type {
-  LeaveTypePayload,
-  LeaveRequestPayload,
-  LeaveBalancePayload,
-  ListLeaveTypesResponse,
-  ListLeaveRequestsRequest,
-  ListLeaveRequestsResponse,
-  CreateLeaveRequestRequest,
-  ApproveLeaveRequest,
-  ListLeaveBalancesResponse,
-} from '@voxire/contracts/hr/v1/leave';
+import type { LeaveTypePayload, LeaveRequestPayload, LeaveBalancePayload } from '@voxire/contracts/hr/leave/v1/types';
+import type { ListLeaveTypesResponse } from '@voxire/contracts/hr/leave/v1/list_leave_types';
+import type { ListLeaveRequestsRequest, ListLeaveRequestsResponse } from '@voxire/contracts/hr/leave/v1/list_leave_requests';
+import type { CreateLeaveRequestRequest } from '@voxire/contracts/hr/leave/v1/create_leave_request';
+import type { ApproveLeaveRequest } from '@voxire/contracts/hr/leave/v1/approve_leave';
+import type { ListLeaveBalancesResponse } from '@voxire/contracts/hr/leave/v1/list_leave_balances';
 import { safe } from '../../lib/api';
 import { toast } from 'sonner';
 import { useTranslation } from 'react-i18next';

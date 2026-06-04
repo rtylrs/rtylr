@@ -4,7 +4,7 @@ import { LogIn, LogOut, QrCode, KeyRound, MapPin, Delete, Settings } from 'lucid
 import { toast } from 'sonner';
 import { useClockIn, useClockOut, useSetPin } from '../../shared/hooks/queries/useAttendance';
 import { useHRConfigStore } from '../../shared/stores/hrConfigStore';
-import type { AttendanceRecordPayload } from '@voxire/contracts/hr/v1/attendance';
+import type { AttendanceRecordPayload } from '@voxire/contracts/hr/attendance/v1/types';
 import { Card, Button, Pill, Modal, ACCENT } from '../../shared/components/ui';
 
 interface ClockInWidgetProps {

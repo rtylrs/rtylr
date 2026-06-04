@@ -4,7 +4,7 @@ import { useParams, useNavigate } from '@tanstack/react-router';
 import { motion } from 'motion/react';
 import { ArrowLeft, Send, AlertCircle } from 'lucide-react';
 import { useGetTimesheet, useSubmitTimesheet } from '../../shared/hooks/queries/useTimesheets';
-import type { TimeEntryPayload } from '@voxire/contracts/hr/v1/time_entries';
+import type { TimeEntryPayload } from '@voxire/contracts/hr/time_entry/v1/types';
 import {
   SectionHeader,
   Card,

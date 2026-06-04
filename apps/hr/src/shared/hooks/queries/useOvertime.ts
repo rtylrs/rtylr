@@ -1,12 +1,9 @@
 import { unwrap } from '@voxire/api';
 import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query';
-import type {
-  OvertimeRequestPayload,
-  ListOvertimeRequestsRequest,
-  ListOvertimeRequestsResponse,
-  CreateOvertimeRequestRequest,
-  ApproveOvertimeRequest,
-} from '@voxire/contracts/hr/v1/overtime';
+import type { OvertimeRequestPayload } from '@voxire/contracts/hr/overtime/v1/types';
+import type { ListOvertimeRequestsRequest, ListOvertimeRequestsResponse } from '@voxire/contracts/hr/overtime/v1/list_overtime_requests';
+import type { CreateOvertimeRequestRequest } from '@voxire/contracts/hr/overtime/v1/create_overtime_request';
+import type { ApproveOvertimeRequest } from '@voxire/contracts/hr/overtime/v1/approve_overtime';
 import { safe } from '../../lib/api';
 import { toast } from 'sonner';
 import { useTranslation } from 'react-i18next';

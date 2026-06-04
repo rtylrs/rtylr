@@ -3,7 +3,7 @@ import { useTranslation } from 'react-i18next';
 import { motion } from 'motion/react';
 import { Plus, Clock, Trash2, Pencil } from 'lucide-react';
 import { useListTimeEntries, useDeleteTimeEntry } from '../../shared/hooks/queries/useTimeEntries';
-import type { TimeEntryPayload } from '@voxire/contracts/hr/v1/time_entries';
+import type { TimeEntryPayload } from '@voxire/contracts/hr/time_entry/v1/types';
 import {
   SectionHeader,
   Card,

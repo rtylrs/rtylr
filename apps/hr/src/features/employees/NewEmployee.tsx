@@ -4,7 +4,7 @@ import { useTranslation } from 'react-i18next';
 import { ArrowLeft } from 'lucide-react';
 import { employeeSchema, type EmployeeFormData } from '../../shared/schemas/employeeSchema';
 import { useCreateEmployee } from '../../shared/hooks/queries/useEmployees';
-import type { CreateEmployeeRequest } from '@voxire/contracts/hr/v1/employees';
+import type { CreateEmployeeRequest } from '@voxire/contracts/hr/employee/v1/create_employee';
 
 interface NewEmployeeProps {
   onCancel?: () => void;

@@ -1,14 +1,9 @@
 import { unwrap } from '@voxire/api';
 import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query';
-import type {
-  ListEquipmentRequestsResponse,
-  ListEquipmentRequestsRequest,
-  CreateEquipmentRequestRequest,
-  CreateEquipmentRequestResponse,
-  ApproveEquipmentRequest,
-  ApproveEquipmentResponse,
-  ListAssetsResponse,
-} from '@voxire/contracts/hr/v1/equipment';
+import type { ListEquipmentRequestsResponse, ListEquipmentRequestsRequest } from '@voxire/contracts/hr/equipment/v1/list_equipment_requests';
+import type { CreateEquipmentRequestRequest, CreateEquipmentRequestResponse } from '@voxire/contracts/hr/equipment/v1/create_equipment_request';
+import type { ApproveEquipmentRequest, ApproveEquipmentResponse } from '@voxire/contracts/hr/equipment/v1/approve_equipment';
+import type { ListAssetsResponse } from '@voxire/contracts/hr/equipment/v1/list_assets';
 import { safe } from '../../lib/api';
 import { toast } from 'sonner';
 import { useTranslation } from 'react-i18next';

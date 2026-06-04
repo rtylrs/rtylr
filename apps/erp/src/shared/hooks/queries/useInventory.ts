@@ -1,14 +1,10 @@
 import { unwrap } from '@voxire/api';
 import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query';
-import type {
-  AdjustInventoryRequest,
-  AdjustInventoryResponse,
-  GetInventoryReportResponse,
-  GetLowStockResponse,
-  GetValuationResponse,
-  InventoryReportItem,
-  ValuationItem,
-} from '@voxire/contracts/erp/v1/inventory';
+import type { AdjustInventoryRequest, AdjustInventoryResponse } from '@voxire/contracts/erp/inventory/v1/adjust_inventory';
+import type { GetInventoryReportResponse } from '@voxire/contracts/erp/inventory/v1/get_inventory_report';
+import type { GetLowStockResponse } from '@voxire/contracts/erp/inventory/v1/get_low_stock';
+import type { GetValuationResponse } from '@voxire/contracts/erp/inventory/v1/get_valuation';
+import type { InventoryReportItem, ValuationItem } from '@voxire/contracts/erp/inventory/v1/types';
 import type { UseQueryResult, UseMutationResult } from '@tanstack/react-query';
 import { safe } from '../../lib/api';
 import { toast } from 'sonner';

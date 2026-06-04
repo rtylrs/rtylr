@@ -1,15 +1,10 @@
 import { unwrap } from '@voxire/api';
 import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query';
-import type {
-  EmployeePayload,
-  ListEmployeesResponse,
-  CreateEmployeeRequest,
-  CreateEmployeeResponse,
-  UpdateEmployeeRequest,
-  UpdateEmployeeResponse,
-  InviteEmployeeRequest,
-  InviteEmployeeResponse,
-} from '@voxire/contracts/hr/v1/employees';
+import type { EmployeePayload } from '@voxire/contracts/hr/employee/v1/types';
+import type { ListEmployeesResponse } from '@voxire/contracts/hr/employee/v1/list_employees';
+import type { CreateEmployeeRequest, CreateEmployeeResponse } from '@voxire/contracts/hr/employee/v1/create_employee';
+import type { UpdateEmployeeRequest, UpdateEmployeeResponse } from '@voxire/contracts/hr/employee/v1/update_employee';
+import type { InviteEmployeeRequest, InviteEmployeeResponse } from '@voxire/contracts/hr/employee/v1/invite_employee';
 import { safe } from '../../lib/api';
 import { toast } from 'sonner';
 import { useTranslation } from 'react-i18next';

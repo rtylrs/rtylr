@@ -5,8 +5,8 @@ import { toast } from 'sonner';
 import { safe } from '../lib/api';
 import { chartOfAccountSchema } from '../schemas/accounts';
 import { journalEntrySchema } from '../schemas/journal';
-import type { CreateAccountRequest } from '@voxire/contracts/finance/v1/accounts';
-import type { CreateJournalEntryRequest } from '@voxire/contracts/finance/v1/journal';
+import type { CreateAccountRequest } from '@voxire/contracts/finance/account/v1/create_account';
+import type { CreateJournalEntryRequest } from '@voxire/contracts/finance/journal/v1/create_journal_entry';
 import { unwrapList } from '../lib/unwrapList';
 
 export function useChartOfAccounts() {
