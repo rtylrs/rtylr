@@ -2,8 +2,14 @@ import { unwrap } from '@voxire/api';
 import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query';
 import type { Supplier } from '@voxire/contracts/erp/supplier/v1/types';
 import type { ListSuppliersResponse } from '@voxire/contracts/erp/supplier/v1/list_suppliers';
-import type { CreateSupplierRequest, CreateSupplierResponse } from '@voxire/contracts/erp/supplier/v1/create_supplier';
-import type { UpdateSupplierRequest, UpdateSupplierResponse } from '@voxire/contracts/erp/supplier/v1/update_supplier';
+import type {
+  CreateSupplierRequest,
+  CreateSupplierResponse,
+} from '@voxire/contracts/erp/supplier/v1/create_supplier';
+import type {
+  UpdateSupplierRequest,
+  UpdateSupplierResponse,
+} from '@voxire/contracts/erp/supplier/v1/update_supplier';
 import type { UseQueryResult, UseMutationResult } from '@tanstack/react-query';
 import { safe } from '../../lib/api';
 import { toast } from 'sonner';

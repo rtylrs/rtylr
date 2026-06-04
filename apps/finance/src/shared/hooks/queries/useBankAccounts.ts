@@ -3,7 +3,10 @@ import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query';
 import { toast } from 'sonner';
 import { useTranslation } from 'react-i18next';
 import type { ListBankAccountsResponse } from '@voxire/contracts/finance/bank_account/v1/list_bank_accounts';
-import type { CreateBankAccountRequest, CreateBankAccountResponse } from '@voxire/contracts/finance/bank_account/v1/create_bank_account';
+import type {
+  CreateBankAccountRequest,
+  CreateBankAccountResponse,
+} from '@voxire/contracts/finance/bank_account/v1/create_bank_account';
 import { safe } from '../../lib/api';
 
 interface ListBankAccountsParams {

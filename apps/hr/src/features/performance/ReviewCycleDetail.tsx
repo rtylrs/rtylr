@@ -4,7 +4,10 @@ import { useTranslation } from 'react-i18next';
 import { useVirtualizer } from '@tanstack/react-virtual';
 import { toast } from 'sonner';
 import { Share2 } from 'lucide-react';
-import type { PerformanceReviewPayload, ReviewGoalPayload } from '@voxire/contracts/hr/performance/v1/types';
+import type {
+  PerformanceReviewPayload,
+  ReviewGoalPayload,
+} from '@voxire/contracts/hr/performance/v1/types';
 import {
   useGetReviewCycle,
   useListReviews,

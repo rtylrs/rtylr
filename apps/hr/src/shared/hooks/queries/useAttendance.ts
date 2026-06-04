@@ -1,8 +1,17 @@
 import { unwrap } from '@voxire/api';
 import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query';
-import type { ListAttendanceRequest, ListAttendanceResponse } from '@voxire/contracts/hr/attendance/v1/list_attendance';
-import type { AttendanceClockInRequest, AttendanceClockInResponse } from '@voxire/contracts/hr/attendance/v1/attendance_clock_in';
-import type { AttendanceClockOutRequest, AttendanceClockOutResponse } from '@voxire/contracts/hr/attendance/v1/attendance_clock_out';
+import type {
+  ListAttendanceRequest,
+  ListAttendanceResponse,
+} from '@voxire/contracts/hr/attendance/v1/list_attendance';
+import type {
+  AttendanceClockInRequest,
+  AttendanceClockInResponse,
+} from '@voxire/contracts/hr/attendance/v1/attendance_clock_in';
+import type {
+  AttendanceClockOutRequest,
+  AttendanceClockOutResponse,
+} from '@voxire/contracts/hr/attendance/v1/attendance_clock_out';
 import { safe } from '../../lib/api';
 import { toast } from 'sonner';
 import { useTranslation } from 'react-i18next';
