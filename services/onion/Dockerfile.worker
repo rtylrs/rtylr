@@ -4,14 +4,20 @@
 # ── Build stage ──────────────────────────────────────────────────────────────
 FROM golang:1.26-alpine AS builder
 WORKDIR /app
-RUN apk add --no-cache ca-certificates
+RUN apk add --no-cache ca-certificates curl bash
+# sqlc: the worker imports the email package, whose generated query code is
+# produced by scripts/generate_sqlc.sh (gitignored, regenerated per build).
+RUN curl -sSL https://github.com/sqlc-dev/sqlc/releases/download/v1.29.0/sqlc_1.29.0_linux_amd64.tar.gz \
+    | tar -xz -C /usr/local/bin sqlc
 # voxie is a local `replace` target, so its module file must be present.
 COPY go.mod go.sum ./
 COPY voxie/go.mod voxie/go.sum* ./voxie/
 RUN go mod download
 COPY cmd ./cmd
 COPY internal ./internal
+COPY scripts ./scripts
 COPY voxie ./voxie
+RUN chmod +x scripts/*.sh && bash scripts/generate_sqlc.sh
 ARG VERSION=dev
 ARG COMMIT=unknown
 ARG BUILD_TIME=unknown
