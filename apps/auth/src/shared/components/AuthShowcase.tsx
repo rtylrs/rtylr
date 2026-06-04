@@ -1,6 +1,10 @@
-import React from 'react';
-import { motion } from 'motion/react';
+import React, { useRef } from 'react';
+import { motion, useMotionValue, useSpring } from 'motion/react';
 import Logo from './Logo';
+
+// Diameter of the cursor-following glow; shared by the move handler (to centre it
+// on the pointer) and the element style.
+const GLOW_SIZE = 560;
 
 /**
  * Left-side branded showcase for the auth split-screen.
@@ -10,8 +14,24 @@ import Logo from './Logo';
  * Hidden on mobile (< lg).
  */
 const AuthShowcase: React.FC = () => {
+  const containerRef = useRef<HTMLElement>(null);
+  // Start off-screen so the glow eases in from the edge on first move.
+  const glowX = useMotionValue(-GLOW_SIZE);
+  const glowY = useMotionValue(-GLOW_SIZE);
+  const x = useSpring(glowX, { stiffness: 80, damping: 22, mass: 0.6 });
+  const y = useSpring(glowY, { stiffness: 80, damping: 22, mass: 0.6 });
+
+  const handleMouseMove = (e: React.MouseEvent<HTMLElement>): void => {
+    const rect = containerRef.current?.getBoundingClientRect();
+    if (!rect) return;
+    glowX.set(e.clientX - rect.left - GLOW_SIZE / 2);
+    glowY.set(e.clientY - rect.top - GLOW_SIZE / 2);
+  };
+
   return (
     <aside
+      ref={containerRef}
+      onMouseMove={handleMouseMove}
       className="relative hidden lg:flex lg:w-[60%] flex-col justify-between overflow-hidden p-12 xl:p-16"
       aria-hidden="true"
     >
@@ -24,6 +44,19 @@ const AuthShowcase: React.FC = () => {
             'radial-gradient(ellipse 70% 50% at 85% 85%, rgba(126,68,150,0.12) 0%, transparent 55%),' +
             'radial-gradient(ellipse 60% 40% at 60% 50%, rgba(100,197,185,0.06) 0%, transparent 65%),' +
             'linear-gradient(135deg, #151515 0%, #141414 50%, #151515 100%)',
+        }}
+      />
+
+      {/* Cursor-following glow — springs toward the pointer for a soft parallax feel */}
+      <motion.div
+        className="absolute rounded-full pointer-events-none blur-[90px] mix-blend-screen"
+        style={{
+          width: GLOW_SIZE,
+          height: GLOW_SIZE,
+          x,
+          y,
+          background:
+            'radial-gradient(circle, rgba(69,131,196,0.28) 0%, rgba(126,68,150,0.16) 40%, rgba(100,197,185,0.07) 60%, transparent 72%)',
         }}
       />
 
@@ -171,11 +204,11 @@ const AuthShowcase: React.FC = () => {
                 background: 'linear-gradient(135deg, #4583C4 0%, #7E4496 100%)',
               }}
             >
-              SK
+              MH
             </div>
             <div className="text-xs">
-              <div className="text-white/90 font-medium">Sara Khalil</div>
-              <div className="text-white/50">COO, Marina Group</div>
+              <div className="text-white/90 font-medium">Mohamad Homsi</div>
+              <div className="text-white/50">Full Stack Engineer</div>
             </div>
           </figcaption>
         </div>
