@@ -512,7 +512,10 @@ const LeadDetail: React.FC = () => {
               <InfoRow label="Industry" value={lead.industry ?? '—'} />
               <InfoRow label="Size" value={lead.size ?? '—'} />
               <InfoRow label="Source" value={lead.source ?? '—'} />
-              <InfoRow label="MRR Potential" value={`$${(lead.mrrPotential ?? lead.dealValue ?? 0).toLocaleString()}/mo`} />
+              <InfoRow
+                label="MRR Potential"
+                value={`$${(lead.mrrPotential ?? lead.dealValue ?? 0).toLocaleString()}/mo`}
+              />
               <InfoRow label="Assigned Rep" value={lead.assignedRep ?? '—'} />
               <div>
                 <p

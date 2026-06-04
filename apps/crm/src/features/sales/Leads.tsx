@@ -79,7 +79,9 @@ const Leads: React.FC = () => {
   const sources = Array.from(new Set(leads.map((l) => l.source).filter(Boolean)));
 
   const filtered = leads.filter((l) => {
-    const matchSearch = (l.companyName ?? l.company ?? '').toLowerCase().includes(search.toLowerCase());
+    const matchSearch = (l.companyName ?? l.company ?? '')
+      .toLowerCase()
+      .includes(search.toLowerCase());
     const matchStage = stageFilter === 'all' || l.stage === stageFilter;
     const matchSource = sourceFilter === 'all' || l.source === sourceFilter;
     return matchSearch && matchStage && matchSource;
