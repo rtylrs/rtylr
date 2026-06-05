@@ -46,12 +46,33 @@
       "selectCategory": "Select category",
       "stock": "Stock",
       "costPrice": "Cost price",
-      "salePrice": "Sale price"
+      "salePrice": "Sale price",
+      "brand": "Brand",
+      "selectBrand": "Select brand",
+      "supplier": "Supplier",
+      "selectSupplier": "Select supplier",
+      "none": "None",
+      "barcode": "Barcode",
+      "description": "Description",
+      "unit": "Unit",
+      "lowStock": "Low-stock threshold",
+      "reorderPoint": "Reorder point",
+      "trackInventory": "Track inventory",
+      "status": "Status",
+      "statusActive": "Active",
+      "statusDraft": "Draft",
+      "margin": "Margin"
     },
     "validation": {
       "requiredFields": "Please fill required fields",
       "negativeCost": "Cost price cannot be negative",
       "negativePrice": "Sale price cannot be negative"
+    },
+    "sections": {
+      "basics": "Basics",
+      "organization": "Organization",
+      "pricing": "Pricing",
+      "inventory": "Inventory"
     }
   },
   "inventory": {

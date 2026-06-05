@@ -13,6 +13,7 @@ export interface Product {
   costPrice: number;
   salePrice: number;
   status: 'In Stock' | 'Low Stock' | 'Out of Stock';
+  categoryId?: number;
   brand?: string;
   barcode?: string;
   imageUrl?: string;
@@ -24,18 +25,24 @@ export interface Product {
   leadTimeDays?: number;
 }
 
+// Keys are camelCase and converted to the backend's snake_case by @voxire/api
+// (categoryId -> category_id, etc.), so they map 1:1 to the onion
+// CreateProductRequest. category is sent as categoryId (not a name string) so it
+// actually persists.
 export interface CreateProductInput {
   name: string;
   sku: string;
-  category: string;
-  stock: number;
-  lowStock: number;
-  costPrice: number;
-  salePrice: number;
-  brand?: string;
+  categoryId?: number;
+  supplierId?: number;
   barcode?: string;
   description?: string;
   unit?: string;
+  costPrice: number;
+  salePrice: number;
+  lowStockThreshold?: number;
+  reorderQuantity?: number;
+  isActive?: boolean;
+  trackInventory?: boolean;
 }
 
 export interface UpdateProductInput extends Partial<CreateProductInput> {

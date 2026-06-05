@@ -3,9 +3,10 @@ import { X, PackagePlus } from 'lucide-react';
 import { toast } from 'sonner';
 import { useTranslation } from 'react-i18next';
 import { useCreateProduct, useUpdateProduct } from '../../features/products/useProducts';
-import type { Product } from '../services/erpApi';
+import type { CreateProductInput, Product } from '../services/erpApi';
 import UnitSelector from './UnitSelector';
 import { useCategories } from '../../features/categories/useCategories';
+import { useSuppliers } from '../../features/suppliers/useSuppliers';
 
 interface QuickAddProductModalProps {
   open: boolean;
@@ -17,6 +18,22 @@ interface QuickAddProductModalProps {
   editing?: Product | null;
 }
 
+const inputClass = 'w-full px-3 py-2 rounded-lg text-sm outline-none';
+const inputStyle: React.CSSProperties = {
+  background: 'var(--hub-input-bg)',
+  border: '1px solid var(--hub-border)',
+  color: 'var(--hub-text)',
+};
+
+const SectionLabel: React.FC<{ children: React.ReactNode }> = ({ children }) => (
+  <div
+    className="text-[11px] font-semibold uppercase tracking-wide mt-1"
+    style={{ color: 'var(--hub-text-muted)' }}
+  >
+    {children}
+  </div>
+);
+
 const QuickAddProductModal: React.FC<QuickAddProductModalProps> = ({
   open,
   onClose,
@@ -24,14 +41,24 @@ const QuickAddProductModal: React.FC<QuickAddProductModalProps> = ({
 }): React.JSX.Element | null => {
   const { t } = useTranslation();
   const isEdit = !!editing;
-  const [name, setName] = useState(editing?.name ?? '');
-  const [sku, setSku] = useState(editing?.sku ?? '');
-  const [category, setCategory] = useState(editing?.category ?? '');
-  const [stock, setStock] = useState(editing ? String(editing.stock) : '');
-  const [costPrice, setCostPrice] = useState(editing ? String(editing.costPrice) : '');
-  const [salePrice, setSalePrice] = useState(editing ? String(editing.salePrice) : '');
-  const [unit, setUnit] = useState(editing?.unit ?? 'pcs');
+
+  const [name, setName] = useState('');
+  const [sku, setSku] = useState('');
+  const [categoryId, setCategoryId] = useState('');
+  const [supplierId, setSupplierId] = useState('');
+  const [barcode, setBarcode] = useState('');
+  const [description, setDescription] = useState('');
+  const [unit, setUnit] = useState('pcs');
+  const [costPrice, setCostPrice] = useState('');
+  const [salePrice, setSalePrice] = useState('');
+  const [lowStock, setLowStock] = useState('');
+  const [reorderPoint, setReorderPoint] = useState('');
+  const [trackInventory, setTrackInventory] = useState(true);
+  const [active, setActive] = useState(true);
+
   const { data: categories = [] } = useCategories();
+  const { data: supplierData } = useSuppliers();
+  const suppliers = supplierData?.suppliers ?? [];
   const createProduct = useCreateProduct();
   const updateProduct = useUpdateProduct();
 
@@ -40,81 +67,91 @@ const QuickAddProductModal: React.FC<QuickAddProductModalProps> = ({
     if (editing) {
       setName(editing.name);
       setSku(editing.sku);
-      setCategory(editing.category);
-      setStock(String(editing.stock));
-      setCostPrice(String(editing.costPrice));
-      setSalePrice(String(editing.salePrice));
+      setCategoryId(
+        editing.categoryId !== undefined && editing.categoryId !== null
+          ? String(editing.categoryId)
+          : ''
+      );
+      setBarcode(editing.barcode ?? '');
+      setDescription(editing.description ?? '');
       setUnit(editing.unit ?? 'pcs');
+      setCostPrice(String(editing.costPrice ?? ''));
+      setSalePrice(String(editing.salePrice ?? ''));
+      setLowStock(editing.lowStock != null ? String(editing.lowStock) : '');
+      setReorderPoint(editing.reorderPoint != null ? String(editing.reorderPoint) : '');
     }
   }, [editing]);
 
   if (!open) return null;
 
   const pending = createProduct.isPending || updateProduct.isPending;
+  const cost = parseFloat(costPrice);
+  const sale = parseFloat(salePrice);
+  const margin =
+    !isNaN(cost) && !isNaN(sale) && sale > 0 ? Math.round(((sale - cost) / sale) * 100) : null;
 
   const resetAndClose = (): void => {
     if (!isEdit) {
       setName('');
       setSku('');
-      setCategory('');
-      setStock('');
+      setCategoryId('');
+      setSupplierId('');
+      setBarcode('');
+      setDescription('');
+      setUnit('pcs');
       setCostPrice('');
       setSalePrice('');
+      setLowStock('');
+      setReorderPoint('');
+      setTrackInventory(true);
+      setActive(true);
     }
     onClose();
   };
 
   const handleSubmit = (): void => {
-    if (!name || !sku || !category) {
+    if (!name || !sku || !categoryId) {
       toast.error(t('erp.products.validation.requiredFields'));
       return;
     }
-    const parsedCost = parseFloat(costPrice);
-    const parsedSale = parseFloat(salePrice);
-    if (!isNaN(parsedCost) && parsedCost < 0) {
+    if (!isNaN(cost) && cost < 0) {
       toast.error(t('erp.products.validation.negativeCost'));
       return;
     }
-    if (!isNaN(parsedSale) && parsedSale < 0) {
+    if (!isNaN(sale) && sale < 0) {
       toast.error(t('erp.products.validation.negativePrice'));
       return;
     }
-    const payload = {
+
+    const payload: CreateProductInput = {
       name,
       sku,
-      category,
-      stock: parseInt(stock) || 0,
-      lowStock: editing?.lowStock ?? 10,
-      costPrice: isNaN(parsedCost) ? 0 : parsedCost,
-      salePrice: isNaN(parsedSale) ? 0 : parsedSale,
+      categoryId: Number(categoryId) || undefined,
+      supplierId: supplierId ? Number(supplierId) : undefined,
+      barcode: barcode || undefined,
+      description: description || undefined,
       unit,
+      costPrice: isNaN(cost) ? 0 : cost,
+      salePrice: isNaN(sale) ? 0 : sale,
+      lowStockThreshold: lowStock ? Number(lowStock) : undefined,
+      reorderQuantity: reorderPoint ? Number(reorderPoint) : undefined,
+      isActive: active,
+      trackInventory,
     };
+
+    const onSuccess = (): void => {
+      toast.success(t('erp.products.toast.created', { name }));
+      resetAndClose();
+    };
+    const onError = (): void => {
+      toast.error(t('erp.products.toast.createFailed'));
+    };
+
     if (isEdit && editing) {
-      updateProduct.mutate(
-        { id: editing.id, ...payload },
-        {
-          onSuccess: () => {
-            toast.success(t('erp.products.toast.created', { name }));
-            resetAndClose();
-          },
-          onError: () => {
-            toast.error(t('erp.products.toast.createFailed'));
-          },
-        }
-      );
+      updateProduct.mutate({ id: editing.id, ...payload }, { onSuccess, onError });
       return;
     }
-    createProduct.mutate(payload, {
-      onSuccess: () => {
-        toast.success(t('erp.products.toast.created', { name }));
-        resetAndClose();
-      },
-      onError: () => {
-        // Surface a real failure toast instead of faking success - the
-        // previous behaviour masked backend outages and lost user data.
-        toast.error(t('erp.products.toast.createFailed'));
-      },
-    });
+    createProduct.mutate(payload, { onSuccess, onError });
   };
 
   return (
@@ -129,7 +166,7 @@ const QuickAddProductModal: React.FC<QuickAddProductModalProps> = ({
     >
       <div
         onClick={(e) => e.stopPropagation()}
-        className="w-full max-w-md rounded-xl p-5"
+        className="w-full max-w-lg rounded-xl p-5 max-h-[88vh] overflow-y-auto"
         style={{ background: 'var(--hub-card)', border: '1px solid var(--hub-border)' }}
       >
         <div className="flex items-center justify-between mb-4">
@@ -144,77 +181,72 @@ const QuickAddProductModal: React.FC<QuickAddProductModalProps> = ({
             <X size={14} style={{ color: 'var(--hub-text-muted)' }} />
           </button>
         </div>
+
         <div className="space-y-3">
-          <label className="sr-only" htmlFor="qap-name">
-            {t('erp.products.fields.name')}
-          </label>
+          <SectionLabel>{t('erp.products.sections.basics')}</SectionLabel>
           <input
-            id="qap-name"
             data-testid="qap-name"
             value={name}
             onChange={(e) => setName(e.target.value)}
             placeholder={`${t('erp.products.fields.name')} *`}
-            className="w-full px-3 py-2 rounded-lg text-sm outline-none"
-            style={{
-              background: 'var(--hub-input-bg)',
-              border: '1px solid var(--hub-border)',
-              color: 'var(--hub-text)',
-            }}
+            className={inputClass}
+            style={inputStyle}
           />
-          <label className="sr-only" htmlFor="qap-sku">
-            {t('erp.products.fields.sku')}
-          </label>
           <input
-            id="qap-sku"
             data-testid="qap-sku"
             value={sku}
             onChange={(e) => setSku(e.target.value)}
             placeholder={`${t('erp.products.fields.sku')} *`}
-            className="w-full px-3 py-2 rounded-lg text-sm outline-none font-mono"
-            style={{
-              background: 'var(--hub-input-bg)',
-              border: '1px solid var(--hub-border)',
-              color: 'var(--hub-text)',
-            }}
+            className={`${inputClass} font-mono`}
+            style={inputStyle}
           />
-          <label className="sr-only" htmlFor="qap-category">
-            {t('erp.products.fields.category')}
-          </label>
           <select
-            id="qap-category"
             data-testid="qap-category"
-            value={category}
-            onChange={(e) => setCategory(e.target.value)}
-            className="w-full px-3 py-2 rounded-lg text-sm outline-none"
-            style={{
-              background: 'var(--hub-input-bg)',
-              border: '1px solid var(--hub-border)',
-              color: 'var(--hub-text)',
-            }}
+            value={categoryId}
+            onChange={(e) => setCategoryId(e.target.value)}
+            className={inputClass}
+            style={inputStyle}
           >
             <option value="">{t('erp.products.fields.selectCategory')} *</option>
             {categories.map((c) => (
-              <option key={c.id} value={c.name}>
+              <option key={c.id} value={c.id}>
                 {c.name}
               </option>
             ))}
           </select>
-          <div className="grid grid-cols-2 gap-3">
-            <input
-              aria-label={t('erp.products.fields.stock')}
-              value={stock}
-              onChange={(e) => setStock(e.target.value)}
-              placeholder={t('erp.products.fields.stock')}
-              type="number"
-              className="px-3 py-2 rounded-lg text-sm outline-none"
-              style={{
-                background: 'var(--hub-input-bg)',
-                border: '1px solid var(--hub-border)',
-                color: 'var(--hub-text)',
-              }}
-            />
-            <UnitSelector value={unit} onChange={setUnit} />
-          </div>
+          <select
+            aria-label={t('erp.products.fields.supplier')}
+            value={supplierId}
+            onChange={(e) => setSupplierId(e.target.value)}
+            className={inputClass}
+            style={inputStyle}
+          >
+            <option value="">{t('erp.products.fields.selectSupplier')}</option>
+            {suppliers.map((s) => (
+              <option key={s.id} value={s.id}>
+                {s.name}
+              </option>
+            ))}
+          </select>
+          <input
+            aria-label={t('erp.products.fields.barcode')}
+            value={barcode}
+            onChange={(e) => setBarcode(e.target.value)}
+            placeholder={t('erp.products.fields.barcode')}
+            className={`${inputClass} font-mono`}
+            style={inputStyle}
+          />
+          <textarea
+            aria-label={t('erp.products.fields.description')}
+            value={description}
+            onChange={(e) => setDescription(e.target.value)}
+            placeholder={t('erp.products.fields.description')}
+            rows={2}
+            className={`${inputClass} resize-none`}
+            style={inputStyle}
+          />
+
+          <SectionLabel>{t('erp.products.sections.pricing')}</SectionLabel>
           <div className="grid grid-cols-2 gap-3">
             <input
               aria-label={t('erp.products.fields.costPrice')}
@@ -223,12 +255,8 @@ const QuickAddProductModal: React.FC<QuickAddProductModalProps> = ({
               placeholder={t('erp.products.fields.costPrice')}
               type="number"
               step="0.01"
-              className="px-3 py-2 rounded-lg text-sm outline-none"
-              style={{
-                background: 'var(--hub-input-bg)',
-                border: '1px solid var(--hub-border)',
-                color: 'var(--hub-text)',
-              }}
+              className={inputClass}
+              style={inputStyle}
             />
             <input
               aria-label={t('erp.products.fields.salePrice')}
@@ -237,15 +265,64 @@ const QuickAddProductModal: React.FC<QuickAddProductModalProps> = ({
               placeholder={t('erp.products.fields.salePrice')}
               type="number"
               step="0.01"
-              className="px-3 py-2 rounded-lg text-sm outline-none"
-              style={{
-                background: 'var(--hub-input-bg)',
-                border: '1px solid var(--hub-border)',
-                color: 'var(--hub-text)',
-              }}
+              className={inputClass}
+              style={inputStyle}
             />
           </div>
+          {margin !== null && (
+            <div className="text-xs" style={{ color: 'var(--hub-text-muted)' }}>
+              {t('erp.products.fields.margin')}: <span style={{ color: '#22c55e' }}>{margin}%</span>
+            </div>
+          )}
+
+          <SectionLabel>{t('erp.products.sections.inventory')}</SectionLabel>
+          <div className="grid grid-cols-2 gap-3">
+            <UnitSelector value={unit} onChange={setUnit} />
+            <input
+              aria-label={t('erp.products.fields.lowStock')}
+              value={lowStock}
+              onChange={(e) => setLowStock(e.target.value)}
+              placeholder={t('erp.products.fields.lowStock')}
+              type="number"
+              className={inputClass}
+              style={inputStyle}
+            />
+          </div>
+          <input
+            aria-label={t('erp.products.fields.reorderPoint')}
+            value={reorderPoint}
+            onChange={(e) => setReorderPoint(e.target.value)}
+            placeholder={t('erp.products.fields.reorderPoint')}
+            type="number"
+            className={inputClass}
+            style={inputStyle}
+          />
+          <div className="flex items-center justify-between gap-3 pt-1">
+            <label
+              className="flex items-center gap-2 text-xs cursor-pointer"
+              style={{ color: 'var(--hub-text)' }}
+            >
+              <input
+                type="checkbox"
+                checked={trackInventory}
+                onChange={(e) => setTrackInventory(e.target.checked)}
+              />
+              {t('erp.products.fields.trackInventory')}
+            </label>
+            <label
+              className="flex items-center gap-2 text-xs cursor-pointer"
+              style={{ color: 'var(--hub-text)' }}
+            >
+              <input
+                type="checkbox"
+                checked={active}
+                onChange={(e) => setActive(e.target.checked)}
+              />
+              {t('erp.products.fields.statusActive')}
+            </label>
+          </div>
         </div>
+
         <div className="flex gap-2 justify-end mt-4">
           <button
             onClick={onClose}
@@ -259,11 +336,7 @@ const QuickAddProductModal: React.FC<QuickAddProductModalProps> = ({
             onClick={handleSubmit}
             disabled={pending}
             className="px-3 py-1.5 rounded-lg text-xs font-semibold"
-            style={{
-              background: '#f59e0b',
-              color: '#000',
-              opacity: pending ? 0.6 : 1,
-            }}
+            style={{ background: '#f59e0b', color: '#000', opacity: pending ? 0.6 : 1 }}
           >
             {pending
               ? t('erp.products.creating')
