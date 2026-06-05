@@ -18,6 +18,32 @@ interface ErrorBoundaryState {
   error: Error | null;
 }
 
+const DYNAMIC_IMPORT_RELOAD_KEY = 'rtylr:dynamic-import-reload';
+
+export function isDynamicImportError(error: unknown): boolean {
+  const message = error instanceof Error ? error.message : String(error ?? '');
+
+  return /Failed to fetch dynamically imported module|Importing a module script failed|Loading chunk \d+ failed|ChunkLoadError|error loading dynamically imported module/i.test(
+    message,
+  );
+}
+
+export function recoverFromDynamicImportError(error: unknown): boolean {
+  if (!isDynamicImportError(error) || typeof window === 'undefined') return false;
+
+  const reloadKey = `${window.location.origin}${window.location.pathname}${window.location.search}`;
+
+  try {
+    if (window.sessionStorage.getItem(DYNAMIC_IMPORT_RELOAD_KEY) === reloadKey) return false;
+    window.sessionStorage.setItem(DYNAMIC_IMPORT_RELOAD_KEY, reloadKey);
+  } catch {
+    return false;
+  }
+
+  window.location.reload();
+  return true;
+}
+
 export class ErrorBoundary extends React.Component<ErrorBoundaryProps, ErrorBoundaryState> {
   state: ErrorBoundaryState = { error: null };
 
@@ -27,6 +53,7 @@ export class ErrorBoundary extends React.Component<ErrorBoundaryProps, ErrorBoun
 
   componentDidCatch(error: Error, info: React.ErrorInfo): void {
     this.props.onError?.(error, info);
+    recoverFromDynamicImportError(error);
   }
 
   reset = (): void => {
