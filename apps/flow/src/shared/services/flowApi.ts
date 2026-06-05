@@ -383,6 +383,11 @@ export const flowApi = {
 
   getMyTasks: () => safe.get<{ tasks: ApiTask[] }>('/flow/tasks/my'),
 
+  // Get-or-create the caller's personal "My Tasks" project board and return its
+  // ids. Backs the My Tasks landing — we redirect to its project board.
+  getMyTasksProject: () =>
+    safe.get<{ projectId: number; workspaceId: number }>('/flow/my-tasks-project'),
+
   searchTasks: (q: string, workspaceId: string) =>
     safe.get<{ tasks: ApiTask[] }>('/flow/tasks/search', {
       params: { q, workspace_id: workspaceId },

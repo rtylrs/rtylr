@@ -13,6 +13,8 @@ import { AppGuard } from '@voxire/auth';
 import FlowLayout from './layouts/FlowLayout';
 import { PERSONAL_WORKSPACE_ID } from './shared/lib/personalWorkspace';
 import { safe } from './shared/lib/api';
+// Eager (not lazy): it's a redirect rendered without a Suspense boundary.
+import MyTasksRedirect from './features/tasks/MyTasksRedirect';
 
 const WorkspaceDashboard = React.lazy(
   () => import('./features/workspace-dashboard/WorkspaceDashboard')
@@ -27,7 +29,6 @@ const ProjectDashboard = React.lazy(() => import('./features/projects/ProjectDas
 const Inbox = React.lazy(() => import('./features/inbox/Inbox'));
 const FlowSettings = React.lazy(() => import('./features/settings/FlowSettings'));
 const TaskDetail = React.lazy(() => import('./features/tasks/TaskDetail'));
-const MyIssues = React.lazy(() => import('./features/tasks/MyIssues'));
 const Timeline = React.lazy(() => import('./features/timeline/Timeline'));
 const CalendarView = React.lazy(() => import('./features/calendar/Calendar'));
 const Milestones = React.lazy(() => import('./features/milestones/Milestones'));
@@ -94,12 +95,11 @@ const rootRoute = createRootRoute({
   ),
 });
 
+// Landing on Flow drops the user straight onto their personal "My Tasks" board.
 const indexRoute = createRoute({
   getParentRoute: () => rootRoute,
   path: '/',
-  component: () => (
-    <Navigate to="/w/$workspaceId" params={{ workspaceId: PERSONAL_WORKSPACE_ID }} replace />
-  ),
+  component: () => <MyTasksRedirect />,
 });
 
 const workspaceDashboardRoute = createRoute({
@@ -168,10 +168,12 @@ const taskDetailRoute = createRoute({
   component: () => withLayout(<TaskDetail />),
 });
 
+// "My Tasks" in the sidebar now opens the personal My Tasks project board
+// (via redirect) rather than the assigned-across-projects list.
 const myIssuesRoute = createRoute({
   getParentRoute: () => rootRoute,
   path: '/my-issues',
-  component: () => withLayout(<MyIssues />),
+  component: () => withLayout(<MyTasksRedirect />),
 });
 
 const todayRoute = createRoute({
