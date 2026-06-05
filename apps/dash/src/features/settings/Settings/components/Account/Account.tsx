@@ -5,6 +5,7 @@ import { unwrap } from '@voxire/api';
 import { toast } from 'sonner';
 import { safe } from '../../../../../shared/lib/api';
 import { useUserStore } from '../../../../../shared/stores/userStore';
+import { ConfirmDialog } from '../../../../../shared/components/dash';
 
 function formatTimeAgo(dateStr: string): string {
   const now = Date.now();
@@ -49,6 +50,7 @@ const Account: React.FC = () => {
   const [formData, setFormData] = useState({ name: '', email: '' });
   const [isEditing, setIsEditing] = useState(false);
   const [loginHistory, setLoginHistory] = useState<LoginHistoryItem[]>([]);
+  const [confirmInvalidateOpen, setConfirmInvalidateOpen] = useState(false);
 
   useEffect(() => {
     void unwrap(
@@ -97,6 +99,12 @@ const Account: React.FC = () => {
       setIsEditing(false);
     },
     onError: () => toast.error('Failed to save profile'),
+  });
+
+  const invalidateSessions = useMutation({
+    mutationFn: () => unwrap(safe.post('/security/invalidate-sessions')),
+    onSuccess: () => signOut('dash'),
+    onError: () => toast.error('Failed to invalidate sessions'),
   });
 
   const handleSave = (): void => {
@@ -169,20 +177,24 @@ const Account: React.FC = () => {
           <p className="text-sm text-gray-500 mb-3">
             Invalidate all sessions for your account. This will log you out everywhere.
           </p>
-          <Button
-            variant="destructive"
-            size="sm"
-            onClick={async () => {
-              try {
-                await unwrap(safe.post('/security/invalidate-sessions'));
-                signOut('dash');
-              } catch {}
-            }}
-          >
+          <Button variant="destructive" size="sm" onClick={() => setConfirmInvalidateOpen(true)}>
             Invalidate all sessions
           </Button>
         </CardContent>
       </Card>
+
+      <ConfirmDialog
+        open={confirmInvalidateOpen}
+        onOpenChange={setConfirmInvalidateOpen}
+        title="Invalidate all sessions?"
+        description="This will sign you out of Dash and revoke every active session for your account."
+        confirmLabel="Invalidate sessions"
+        destructive
+        isLoading={invalidateSessions.isPending}
+        onConfirm={async () => {
+          await invalidateSessions.mutateAsync();
+        }}
+      />
 
       {/* Login History */}
       <Card>
