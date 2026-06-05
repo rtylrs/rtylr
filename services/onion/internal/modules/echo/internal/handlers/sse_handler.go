@@ -44,9 +44,10 @@ func GenerateTextStreamRoutes() []string {
 }
 
 type GenerateTextStreamHandler struct {
-	AiService     *application.Service
-	MemoryService MemoryService
-	QuotaService  QuotaService
+	AiService      *application.Service
+	MemoryService  MemoryService
+	QuotaService   QuotaService
+	AnalystService AnalystService
 }
 
 type GenerateTextStreamRequest struct {
@@ -54,6 +55,7 @@ type GenerateTextStreamRequest struct {
 	SessionID     string `json:"sessionId"`
 	UserID        int64  `json:"userId"`
 	SystemContext string `json:"system_context"` // optional — app context injected as system message
+	Mode          string `json:"mode"`           // optional — "analyst" routes through the NL-to-SQL layer
 }
 
 type GenerateTextStreamResponse struct {
@@ -164,6 +166,15 @@ func (h *GenerateTextStreamHandler) ServeHTTP(w http.ResponseWriter, r *http.Req
 		http.Error(w, "Failed to get context", http.StatusInternalServerError)
 
 		return
+	}
+
+	// Analyst mode: turn the question into a validated, tenant-scoped query,
+	// run it on the read replica, and ground the answer in the real rows. Falls
+	// back to a normal chat answer if the data pipeline can't produce a result.
+	if ParseMode(req.Mode) == ModeAnalyst {
+		if grounding, ok := h.analystGrounding(ctx, req.Prompt, businessID, authUserID); ok {
+			enhancedPrompt = grounding + "\n\n---\n\n" + enhancedPrompt
+		}
 	}
 
 	log.Info("Starting AI text generation",

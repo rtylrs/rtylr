@@ -11,21 +11,23 @@ import (
 )
 
 type Module struct {
-	snipsService  *application.Service
-	memoryService handlers.MemoryService
-	quotaService  handlers.QuotaService
+	snipsService   *application.Service
+	memoryService  handlers.MemoryService
+	quotaService   handlers.QuotaService
+	analystService handlers.AnalystService
 }
 
-func NewModule(ctx context.Context, memoryService handlers.MemoryService, quotaService handlers.QuotaService) *Module {
+func NewModule(ctx context.Context, memoryService handlers.MemoryService, quotaService handlers.QuotaService, analystService handlers.AnalystService) *Module {
 	snipsService, err := application.NewService(ctx)
 	if err != nil {
 		snipsService = nil
 	}
 
 	return &Module{
-		snipsService:  snipsService,
-		memoryService: memoryService,
-		quotaService:  quotaService,
+		snipsService:   snipsService,
+		memoryService:  memoryService,
+		quotaService:   quotaService,
+		analystService: analystService,
 	}
 }
 
@@ -34,5 +36,5 @@ func (m *Module) GetSnipsService() *application.Service {
 }
 
 func (m *Module) RegisterRoutes(ctx context.Context, r *chi.Mux, _ ...interface{}) {
-	routes.RegisterRoutes(ctx, r, m.snipsService, m.memoryService, m.quotaService)
+	routes.RegisterRoutes(ctx, r, m.snipsService, m.memoryService, m.quotaService, m.analystService)
 }

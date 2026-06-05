@@ -34,6 +34,16 @@ func (s *Service) GenerateTextStream(ctx context.Context, prompt string) (<-chan
 	return s.aiClient.CompleteTextStream(ctx, prompt)
 }
 
+// CompleteText is the non-streaming completion used for internal steps like
+// generating a structured query spec in Analyst mode.
+func (s *Service) CompleteText(ctx context.Context, prompt string) (string, error) {
+	if s.aiClient == nil {
+		return "", ErrClientNotInitialized
+	}
+
+	return s.aiClient.CompleteText(ctx, prompt)
+}
+
 func (s *Service) IsAvailable() bool {
 	return s.aiClient != nil
 }
