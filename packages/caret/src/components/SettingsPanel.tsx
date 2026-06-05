@@ -3,7 +3,6 @@ import { caretTokens, caretRadius } from '../ui/tokens';
 import Divider from '../ui/Divider';
 import { useCaretSettingsStore } from '../stores/settingsStore';
 import { CARET_MODES, type CaretMode } from '../types/mode';
-import { CARET_MODELS, type CaretModel } from '../types/model';
 
 const sectionTitle: React.CSSProperties = {
   fontSize: 11,
@@ -55,31 +54,6 @@ export const SettingsPanel: React.FC = () => {
           {Object.values(CARET_MODES).map((m) => (
             <option key={m.id} value={m.id}>
               {m.label} - {m.description}
-            </option>
-          ))}
-        </select>
-      </div>
-
-      <Divider />
-
-      <div style={{ paddingTop: 12 }}>
-        <h3 style={sectionTitle}>Model</h3>
-        <select
-          value={s.model}
-          onChange={(e) => s.setModel(e.target.value as CaretModel)}
-          style={{
-            width: '100%',
-            background: caretTokens.surface,
-            border: `1px solid ${caretTokens.border}`,
-            color: caretTokens.text,
-            fontSize: 13,
-            padding: '8px 10px',
-            borderRadius: caretRadius.md,
-          }}
-        >
-          {Object.values(CARET_MODELS).map((m) => (
-            <option key={m.id} value={m.id}>
-              {m.label}
             </option>
           ))}
         </select>

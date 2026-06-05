@@ -1,11 +1,11 @@
 import { create } from 'zustand';
 import { persist } from 'zustand/middleware';
 import { DEFAULT_MODE, type CaretMode } from '../types/mode';
-import { DEFAULT_MODEL, type CaretModel } from '../types/model';
 
+// The model is chosen internally by the backend (DeepSeek / NVIDIA NIM) — users
+// don't pick it, so there is no model field here anymore.
 interface CaretSettingsState {
   mode: CaretMode;
-  model: CaretModel;
   voiceEnabled: boolean;
   autoApproveReadOnly: boolean;
   showThinking: boolean;
@@ -14,7 +14,6 @@ interface CaretSettingsState {
 
 interface CaretSettingsActions {
   setMode: (mode: CaretMode) => void;
-  setModel: (model: CaretModel) => void;
   setVoiceEnabled: (enabled: boolean) => void;
   setAutoApproveReadOnly: (auto: boolean) => void;
   setShowThinking: (show: boolean) => void;
@@ -25,7 +24,6 @@ export type CaretSettingsStore = CaretSettingsState & CaretSettingsActions;
 
 const initial: CaretSettingsState = {
   mode: DEFAULT_MODE,
-  model: DEFAULT_MODEL,
   voiceEnabled: true,
   autoApproveReadOnly: true,
   showThinking: true,
@@ -37,7 +35,6 @@ export const useCaretSettingsStore = create<CaretSettingsStore>()(
     (set) => ({
       ...initial,
       setMode: (mode) => set({ mode }),
-      setModel: (model) => set({ model }),
       setVoiceEnabled: (voiceEnabled) => set({ voiceEnabled }),
       setAutoApproveReadOnly: (autoApproveReadOnly) => set({ autoApproveReadOnly }),
       setShowThinking: (showThinking) => set({ showThinking }),

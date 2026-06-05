@@ -70,7 +70,6 @@ export function useCaretStream({
             user_id: userId,
             system_context: systemContext ?? '',
             mode: settings.mode,
-            model: settings.model,
           }),
         });
 
@@ -99,7 +98,7 @@ export function useCaretStream({
         abortRef.current = null;
       }
     },
-    [apiBaseUrl, userId, systemContext, settings.mode, settings.model, store]
+    [apiBaseUrl, userId, systemContext, settings.mode, store]
   );
 
   /** Translate one server event into store mutations. */

@@ -1,7 +1,6 @@
 import React, { useCallback, useEffect, useRef, useState } from 'react';
 import { caretTokens, caretRadius } from '../../ui/tokens';
 import ModePicker from './ModePicker';
-import ModelPicker from './ModelPicker';
 import MicButton from './MicButton';
 import AttachButton from './AttachButton';
 import SendButton from './SendButton';
@@ -96,7 +95,6 @@ export const Composer: React.FC<ComposerProps> = ({
         }}
       >
         <ModePicker />
-        <ModelPicker />
         <span style={{ flex: 1 }} />
         {onAttach && <AttachButton onFiles={onAttach} />}
         <MicButton
