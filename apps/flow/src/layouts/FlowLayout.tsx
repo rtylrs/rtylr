@@ -413,12 +413,17 @@ const FlowLayout: React.FC<FlowLayoutProps> = ({ children }) => {
   }, [activeWorkspace.color]);
   // Hide the auto-provisioned personal project - it's the backend's bucket for
   // the dedicated "My Tasks" page (top nav) and, like Asana, must not surface in
-  // the Projects list. Match by name + icon so user-created projects with the
-  // same name still show. "Inbox"/📥 is the legacy name (migrated to My Tasks).
+  // the Projects list. The authoritative match is the id returned by
+  // useMyTasksProject (the icon/name can vary, so the heuristic alone misses it);
+  // the name+icon checks remain as a fallback for before that query resolves.
+  // "Inbox"/📥 is the legacy name (migrated to My Tasks).
+  const myTasksProjectId =
+    myTasksProject?.projectId !== undefined ? String(myTasksProject.projectId) : undefined;
   const workspaceProjects = projects.filter(
     (p) =>
       p.workspaceId === currentWorkspaceId &&
       !p.archived &&
+      p.id !== myTasksProjectId &&
       !(p.name === 'My Tasks' && p.icon === '✅') &&
       !(p.name === 'Inbox' && p.icon === '📥')
   );
