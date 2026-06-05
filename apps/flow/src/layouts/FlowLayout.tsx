@@ -389,14 +389,15 @@ const FlowLayout: React.FC<FlowLayoutProps> = ({ children }) => {
     root.style.setProperty('--accent-border', hexToRgba(color, 0.3));
     root.style.setProperty('--accent-focus', hexToRgba(color, 0.5));
   }, [activeWorkspace.color]);
-  // Hide the auto-provisioned "Inbox" project - it's the backend's
-  // bucket for quick-captured personal tasks (My Tasks page) and isn't
-  // meant to surface in the project list. Match by name + icon so
-  // user-created projects literally named "Inbox" still show.
+  // Hide the auto-provisioned personal project - it's the backend's bucket for
+  // the dedicated "My Tasks" page (top nav) and, like Asana, must not surface in
+  // the Projects list. Match by name + icon so user-created projects with the
+  // same name still show. "Inbox"/📥 is the legacy name (migrated to My Tasks).
   const workspaceProjects = projects.filter(
     (p) =>
       p.workspaceId === currentWorkspaceId &&
       !p.archived &&
+      !(p.name === 'My Tasks' && p.icon === '✅') &&
       !(p.name === 'Inbox' && p.icon === '📥')
   );
 
