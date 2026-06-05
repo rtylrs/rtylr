@@ -25,6 +25,20 @@ type Product struct {
 	ReorderQuantity   float64   `json:"reorder_quantity"`
 	IsActive          bool      `json:"is_active"`
 	TrackInventory    bool      `json:"track_inventory"`
+	BrandID           int64     `json:"brand_id"`
+	CompareAtPrice    float64   `json:"compare_at_price"`
+	TaxRate           float64   `json:"tax_rate"`
+	Currency          string    `json:"currency"`
+	Weight            float64   `json:"weight"`
+	WeightUnit        string    `json:"weight_unit"`
+	Length            float64   `json:"length"`
+	Width             float64   `json:"width"`
+	Height            float64   `json:"height"`
+	DimensionUnit     string    `json:"dimension_unit"`
+	CountryOfOrigin   string    `json:"country_of_origin"`
+	HSCode            string    `json:"hs_code"`
+	AllowBackorder    bool      `json:"allow_backorder"`
+	LeadTimeDays      int       `json:"lead_time_days"`
 	CreatedAt         time.Time `json:"created_at"`
 	UpdatedAt         time.Time `json:"updated_at"`
 }
@@ -115,4 +129,18 @@ type ProductInput struct {
 	ReorderQuantity   float64 `json:"reorder_quantity"`
 	IsActive          bool    `json:"is_active"`
 	TrackInventory    bool    `json:"track_inventory"`
+	BrandID           int64   `json:"brand_id"`
+	CompareAtPrice    float64 `json:"compare_at_price"`
+	TaxRate           float64 `json:"tax_rate"`
+	Currency          string  `json:"currency"`
+	Weight            float64 `json:"weight"`
+	WeightUnit        string  `json:"weight_unit"`
+	Length            float64 `json:"length"`
+	Width             float64 `json:"width"`
+	Height            float64 `json:"height"`
+	DimensionUnit     string  `json:"dimension_unit"`
+	CountryOfOrigin   string  `json:"country_of_origin"`
+	HSCode            string  `json:"hs_code"`
+	AllowBackorder    bool    `json:"allow_backorder"`
+	LeadTimeDays      int     `json:"lead_time_days"`
 }

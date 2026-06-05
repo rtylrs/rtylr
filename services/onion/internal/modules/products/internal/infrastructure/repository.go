@@ -142,6 +142,20 @@ func (r *Repository) CreateProduct(ctx context.Context, ownerID int64, input dom
 		CostPrice:         strconv.FormatFloat(input.CostPrice, 'f', -1, 64),
 		SalePrice:         strconv.FormatFloat(input.SalePrice, 'f', -1, 64),
 		StockQuantity:     strconv.FormatFloat(input.StockQuantity, 'f', -1, 64),
+		BrandID:           nullInt64(input.BrandID),
+		CompareAtPrice:    strconv.FormatFloat(input.CompareAtPrice, 'f', -1, 64),
+		TaxRate:           strconv.FormatFloat(input.TaxRate, 'f', -1, 64),
+		Currency:          defaultStr(input.Currency, "USD"),
+		Weight:            strconv.FormatFloat(input.Weight, 'f', -1, 64),
+		WeightUnit:        defaultStr(input.WeightUnit, "kg"),
+		Length:            strconv.FormatFloat(input.Length, 'f', -1, 64),
+		Width:             strconv.FormatFloat(input.Width, 'f', -1, 64),
+		Height:            strconv.FormatFloat(input.Height, 'f', -1, 64),
+		DimensionUnit:     defaultStr(input.DimensionUnit, "cm"),
+		CountryOfOrigin:   nullString(input.CountryOfOrigin),
+		HsCode:            nullString(input.HSCode),
+		AllowBackorder:    input.AllowBackorder,
+		LeadTimeDays:      int32(input.LeadTimeDays),
 		LowStockThreshold: nullStringFromFloat(input.LowStockThreshold),
 		ReorderQuantity:   nullStringFromFloat(input.ReorderQuantity),
 		IsActive:          sql.NullBool{Bool: input.IsActive, Valid: true},
@@ -173,6 +187,20 @@ func (r *Repository) UpdateProduct(ctx context.Context, ownerID, id int64, input
 		CostPrice:         strconv.FormatFloat(input.CostPrice, 'f', -1, 64),
 		SalePrice:         strconv.FormatFloat(input.SalePrice, 'f', -1, 64),
 		StockQuantity:     strconv.FormatFloat(input.StockQuantity, 'f', -1, 64),
+		BrandID:           nullInt64(input.BrandID),
+		CompareAtPrice:    strconv.FormatFloat(input.CompareAtPrice, 'f', -1, 64),
+		TaxRate:           strconv.FormatFloat(input.TaxRate, 'f', -1, 64),
+		Currency:          defaultStr(input.Currency, "USD"),
+		Weight:            strconv.FormatFloat(input.Weight, 'f', -1, 64),
+		WeightUnit:        defaultStr(input.WeightUnit, "kg"),
+		Length:            strconv.FormatFloat(input.Length, 'f', -1, 64),
+		Width:             strconv.FormatFloat(input.Width, 'f', -1, 64),
+		Height:            strconv.FormatFloat(input.Height, 'f', -1, 64),
+		DimensionUnit:     defaultStr(input.DimensionUnit, "cm"),
+		CountryOfOrigin:   nullString(input.CountryOfOrigin),
+		HsCode:            nullString(input.HSCode),
+		AllowBackorder:    input.AllowBackorder,
+		LeadTimeDays:      int32(input.LeadTimeDays),
 		LowStockThreshold: nullStringFromFloat(input.LowStockThreshold),
 		ReorderQuantity:   nullStringFromFloat(input.ReorderQuantity),
 		IsActive:          sql.NullBool{Bool: input.IsActive, Valid: true},
@@ -287,6 +315,27 @@ func productFromRow(row sqlc.GetProductRow) domain.Product {
 		p.UpdatedAt = row.UpdatedAt.Time
 	}
 
+	if row.BrandID.Valid {
+		p.BrandID = row.BrandID.Int64
+	}
+	p.CompareAtPrice, _ = strconv.ParseFloat(row.CompareAtPrice, 64)
+	p.TaxRate, _ = strconv.ParseFloat(row.TaxRate, 64)
+	p.Currency = row.Currency
+	p.Weight, _ = strconv.ParseFloat(row.Weight, 64)
+	p.WeightUnit = row.WeightUnit
+	p.Length, _ = strconv.ParseFloat(row.Length, 64)
+	p.Width, _ = strconv.ParseFloat(row.Width, 64)
+	p.Height, _ = strconv.ParseFloat(row.Height, 64)
+	p.DimensionUnit = row.DimensionUnit
+	if row.CountryOfOrigin.Valid {
+		p.CountryOfOrigin = row.CountryOfOrigin.String
+	}
+	if row.HsCode.Valid {
+		p.HSCode = row.HsCode.String
+	}
+	p.AllowBackorder = row.AllowBackorder
+	p.LeadTimeDays = int(row.LeadTimeDays)
+
 	return p
 }
 
@@ -348,11 +397,41 @@ func productFromBarcodeRow(row sqlc.GetProductByBarcodeRow) domain.Product {
 		p.UpdatedAt = row.UpdatedAt.Time
 	}
 
+	if row.BrandID.Valid {
+		p.BrandID = row.BrandID.Int64
+	}
+	p.CompareAtPrice, _ = strconv.ParseFloat(row.CompareAtPrice, 64)
+	p.TaxRate, _ = strconv.ParseFloat(row.TaxRate, 64)
+	p.Currency = row.Currency
+	p.Weight, _ = strconv.ParseFloat(row.Weight, 64)
+	p.WeightUnit = row.WeightUnit
+	p.Length, _ = strconv.ParseFloat(row.Length, 64)
+	p.Width, _ = strconv.ParseFloat(row.Width, 64)
+	p.Height, _ = strconv.ParseFloat(row.Height, 64)
+	p.DimensionUnit = row.DimensionUnit
+	if row.CountryOfOrigin.Valid {
+		p.CountryOfOrigin = row.CountryOfOrigin.String
+	}
+	if row.HsCode.Valid {
+		p.HSCode = row.HsCode.String
+	}
+	p.AllowBackorder = row.AllowBackorder
+	p.LeadTimeDays = int(row.LeadTimeDays)
+
 	return p
 }
 
 func nullString(s string) sql.NullString {
 	return sql.NullString{String: s, Valid: s != ""}
+}
+
+// defaultStr returns def when s is empty — for NOT NULL columns with a sensible
+// default (currency, units) where the caller may not supply a value.
+func defaultStr(s, def string) string {
+	if s == "" {
+		return def
+	}
+	return s
 }
 
 func nullInt64(v int64) sql.NullInt64 {

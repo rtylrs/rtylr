@@ -115,6 +115,20 @@ type CreateProductRequest struct {
 	CostPrice         float64 `json:"cost_price"`
 	SalePrice         float64 `json:"sale_price"`
 	StockQuantity     float64 `json:"stock_quantity"`
+	BrandID           int64   `json:"brand_id"`
+	CompareAtPrice    float64 `json:"compare_at_price"`
+	TaxRate           float64 `json:"tax_rate"`
+	Currency          string  `json:"currency"`
+	Weight            float64 `json:"weight"`
+	WeightUnit        string  `json:"weight_unit"`
+	Length            float64 `json:"length"`
+	Width             float64 `json:"width"`
+	Height            float64 `json:"height"`
+	DimensionUnit     string  `json:"dimension_unit"`
+	CountryOfOrigin   string  `json:"country_of_origin"`
+	HSCode            string  `json:"hs_code"`
+	AllowBackorder    bool    `json:"allow_backorder"`
+	LeadTimeDays      int     `json:"lead_time_days"`
 	LowStockThreshold float64 `json:"low_stock_threshold"`
 	ReorderQuantity   float64 `json:"reorder_quantity"`
 	IsActive          bool    `json:"is_active"`
@@ -176,6 +190,20 @@ func (h *CreateProductHandler) Serve(ctx context.Context, req *CreateProductRequ
 		CostPrice:         req.CostPrice,
 		SalePrice:         req.SalePrice,
 		StockQuantity:     req.StockQuantity,
+		BrandID:           req.BrandID,
+		CompareAtPrice:    req.CompareAtPrice,
+		TaxRate:           req.TaxRate,
+		Currency:          req.Currency,
+		Weight:            req.Weight,
+		WeightUnit:        req.WeightUnit,
+		Length:            req.Length,
+		Width:             req.Width,
+		Height:            req.Height,
+		DimensionUnit:     req.DimensionUnit,
+		CountryOfOrigin:   req.CountryOfOrigin,
+		HSCode:            req.HSCode,
+		AllowBackorder:    req.AllowBackorder,
+		LeadTimeDays:      req.LeadTimeDays,
 		LowStockThreshold: req.LowStockThreshold,
 		ReorderQuantity:   req.ReorderQuantity,
 		IsActive:          req.IsActive,
@@ -219,6 +247,20 @@ type UpdateProductRequest struct {
 	CostPrice         float64 `json:"cost_price"`
 	SalePrice         float64 `json:"sale_price"`
 	StockQuantity     float64 `json:"stock_quantity"`
+	BrandID           int64   `json:"brand_id"`
+	CompareAtPrice    float64 `json:"compare_at_price"`
+	TaxRate           float64 `json:"tax_rate"`
+	Currency          string  `json:"currency"`
+	Weight            float64 `json:"weight"`
+	WeightUnit        string  `json:"weight_unit"`
+	Length            float64 `json:"length"`
+	Width             float64 `json:"width"`
+	Height            float64 `json:"height"`
+	DimensionUnit     string  `json:"dimension_unit"`
+	CountryOfOrigin   string  `json:"country_of_origin"`
+	HSCode            string  `json:"hs_code"`
+	AllowBackorder    bool    `json:"allow_backorder"`
+	LeadTimeDays      int     `json:"lead_time_days"`
 	LowStockThreshold float64 `json:"low_stock_threshold"`
 	ReorderQuantity   float64 `json:"reorder_quantity"`
 	IsActive          bool    `json:"is_active"`
@@ -287,6 +329,20 @@ func (h *UpdateProductHandler) Serve(ctx context.Context, req *UpdateProductRequ
 		CostPrice:         req.CostPrice,
 		SalePrice:         req.SalePrice,
 		StockQuantity:     req.StockQuantity,
+		BrandID:           req.BrandID,
+		CompareAtPrice:    req.CompareAtPrice,
+		TaxRate:           req.TaxRate,
+		Currency:          req.Currency,
+		Weight:            req.Weight,
+		WeightUnit:        req.WeightUnit,
+		Length:            req.Length,
+		Width:             req.Width,
+		Height:            req.Height,
+		DimensionUnit:     req.DimensionUnit,
+		CountryOfOrigin:   req.CountryOfOrigin,
+		HSCode:            req.HSCode,
+		AllowBackorder:    req.AllowBackorder,
+		LeadTimeDays:      req.LeadTimeDays,
 		LowStockThreshold: req.LowStockThreshold,
 		ReorderQuantity:   req.ReorderQuantity,
 		IsActive:          req.IsActive,
