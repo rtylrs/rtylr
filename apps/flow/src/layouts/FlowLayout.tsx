@@ -228,7 +228,7 @@ interface FlowLayoutProps {
 const FlowLayout: React.FC<FlowLayoutProps> = ({ children }) => {
   const location = useLocation();
   const navigate = useNavigate();
-  const { workspaceId, projectId } = useParams({ strict: false });
+  const { workspaceId } = useParams({ strict: false });
   const showPreviewRoutes = useFeatureFlag(FLAG_KEYS.APP_FLOW_PREVIEW_ROUTES);
 
   const { toggle: toggleSidebarSection, isCollapsed: isSidebarSectionCollapsed } =
@@ -292,11 +292,9 @@ const FlowLayout: React.FC<FlowLayoutProps> = ({ children }) => {
 
   const currentWorkspaceId = workspaceId || activeWorkspaceId || liveWorkspaces[0]?.id || '';
 
-  // "My tasks" redirects to its personal project board, so highlight the nav
-  // item whenever the board being viewed IS that project.
+  // Resolves the caller's auto-provisioned personal project so it can be hidden
+  // from the Projects list (its tasks surface in the global "My tasks" view).
   const { data: myTasksProject } = useMyTasksProject();
-  const isOnMyTasksBoard =
-    !!projectId && !!myTasksProject && String(projectId) === String(myTasksProject.projectId);
   const { data: apiProjects } = useProjects(currentWorkspaceId || undefined);
 
   // Once real workspaces load, redirect away from the "personal" sentinel to the
@@ -698,7 +696,7 @@ const FlowLayout: React.FC<FlowLayoutProps> = ({ children }) => {
                   icon={ListTodo}
                   label="My tasks"
                   badge={myIssuesCount}
-                  activeOverride={isOnMyTasksBoard}
+                  exact
                 />
                 <SidebarLink to="/today" icon={Sun} label="Today" badge={todayFocusCount} />
                 <SidebarLink

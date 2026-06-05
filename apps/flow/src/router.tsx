@@ -14,7 +14,6 @@ import FlowLayout from './layouts/FlowLayout';
 import { PERSONAL_WORKSPACE_ID } from './shared/lib/personalWorkspace';
 import { safe } from './shared/lib/api';
 // Eager (not lazy): it's a redirect rendered without a Suspense boundary.
-import MyTasksRedirect from './features/tasks/MyTasksRedirect';
 
 const WorkspaceDashboard = React.lazy(
   () => import('./features/workspace-dashboard/WorkspaceDashboard')
@@ -39,6 +38,7 @@ const Insights = React.lazy(() => import('./features/insights/Insights'));
 const Team = React.lazy(() => import('./features/team/Team'));
 const Triage = React.lazy(() => import('./features/triage/Triage'));
 const FocusToday = React.lazy(() => import('./features/focus-today/FocusToday'));
+const MyIssues = React.lazy(() => import('./features/tasks/MyIssues'));
 const Archive = React.lazy(() => import('./features/archive/Archive'));
 const WorkspaceManager = React.lazy(() => import('./features/workspace-manager/WorkspaceManager'));
 
@@ -95,11 +95,12 @@ const rootRoute = createRootRoute({
   ),
 });
 
-// Landing on Flow drops the user straight onto their personal "My Tasks" board.
+// Landing on Flow drops the user on their global "My tasks" view (every task
+// assigned to them across all workspaces and projects), not a workspace board.
 const indexRoute = createRoute({
   getParentRoute: () => rootRoute,
   path: '/',
-  component: () => <MyTasksRedirect />,
+  component: () => <Navigate to="/my-issues" replace />,
 });
 
 const workspaceDashboardRoute = createRoute({
@@ -168,12 +169,12 @@ const taskDetailRoute = createRoute({
   component: () => withLayout(<TaskDetail />),
 });
 
-// "My Tasks" in the sidebar now opens the personal My Tasks project board
-// (via redirect) rather than the assigned-across-projects list.
+// "My tasks" shows every task assigned to the user across all workspaces and
+// projects (it is not workspace-scoped) — a single cross-project board.
 const myIssuesRoute = createRoute({
   getParentRoute: () => rootRoute,
   path: '/my-issues',
-  component: () => withLayout(<MyTasksRedirect />),
+  component: () => withLayout(<MyIssues />),
 });
 
 const todayRoute = createRoute({
