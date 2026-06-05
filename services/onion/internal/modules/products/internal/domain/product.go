@@ -144,3 +144,17 @@ type ProductInput struct {
 	AllowBackorder    bool    `json:"allow_backorder"`
 	LeadTimeDays      int     `json:"lead_time_days"`
 }
+
+// ProductAttribute is a per-business custom key/value field on a product.
+type ProductAttribute struct {
+	ID       int64  `json:"id"`
+	Name     string `json:"name"`
+	Value    string `json:"value"`
+	Position int    `json:"position"`
+}
+
+// ProductAttributeInput is the create/update shape for a custom attribute.
+type ProductAttributeInput struct {
+	Name  string `json:"name"`
+	Value string `json:"value"`
+}

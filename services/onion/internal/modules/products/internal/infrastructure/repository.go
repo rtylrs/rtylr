@@ -421,6 +421,53 @@ func productFromBarcodeRow(row sqlc.GetProductByBarcodeRow) domain.Product {
 	return p
 }
 
+// ListProductAttributes returns the custom attributes for a product, ordered.
+func (r *Repository) ListProductAttributes(ctx context.Context, ownerID, productID int64) ([]domain.ProductAttribute, error) {
+	rows, err := r.queries.ListProductAttributes(ctx, sqlc.ListProductAttributesParams{
+		OwnerID:   ownerID,
+		ProductID: productID,
+	})
+	if err != nil {
+		return nil, err
+	}
+	out := make([]domain.ProductAttribute, 0, len(rows))
+	for _, row := range rows {
+		out = append(out, domain.ProductAttribute{
+			ID:       row.ID,
+			Name:     row.Name,
+			Value:    row.Value,
+			Position: int(row.Position),
+		})
+	}
+	return out, nil
+}
+
+// ReplaceProductAttributes replaces all of a product's custom attributes with
+// the given set (delete-then-insert). Blank-named entries are skipped.
+func (r *Repository) ReplaceProductAttributes(ctx context.Context, ownerID, productID int64, attrs []domain.ProductAttributeInput) error {
+	if err := r.queries.DeleteProductAttributes(ctx, sqlc.DeleteProductAttributesParams{
+		OwnerID:   ownerID,
+		ProductID: productID,
+	}); err != nil {
+		return err
+	}
+	for i, a := range attrs {
+		if a.Name == "" {
+			continue
+		}
+		if err := r.queries.InsertProductAttribute(ctx, sqlc.InsertProductAttributeParams{
+			OwnerID:   ownerID,
+			ProductID: productID,
+			Name:      a.Name,
+			Value:     a.Value,
+			Position:  int32(i),
+		}); err != nil {
+			return err
+		}
+	}
+	return nil
+}
+
 func nullString(s string) sql.NullString {
 	return sql.NullString{String: s, Valid: s != ""}
 }

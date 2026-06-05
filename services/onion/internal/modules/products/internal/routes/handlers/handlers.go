@@ -133,6 +133,8 @@ type CreateProductRequest struct {
 	ReorderQuantity   float64 `json:"reorder_quantity"`
 	IsActive          bool    `json:"is_active"`
 	TrackInventory    bool    `json:"track_inventory"`
+
+	Attributes []domain.ProductAttributeInput `json:"attributes"`
 }
 
 type CreateProductResponse struct {
@@ -219,6 +221,9 @@ func (h *CreateProductHandler) Serve(ctx context.Context, req *CreateProductRequ
 		}
 	}
 
+	// Best-effort: the product is created; attribute failure shouldn't fail it.
+	_ = h.Service.ReplaceProductAttributes(ctx, authUser.UserID, id, req.Attributes)
+
 	return CreateProductResponse{
 		ProductID: id,
 		Message:   "Product created successfully",
@@ -265,6 +270,8 @@ type UpdateProductRequest struct {
 	ReorderQuantity   float64 `json:"reorder_quantity"`
 	IsActive          bool    `json:"is_active"`
 	TrackInventory    bool    `json:"track_inventory"`
+
+	Attributes []domain.ProductAttributeInput `json:"attributes"`
 }
 
 type UpdateProductResponse struct {
@@ -356,6 +363,9 @@ func (h *UpdateProductHandler) Serve(ctx context.Context, req *UpdateProductRequ
 			Message:  "Failed to update product",
 		}
 	}
+
+	// Replace the product's custom attributes with the submitted set.
+	_ = h.Service.ReplaceProductAttributes(ctx, authUser.UserID, req.ID, req.Attributes)
 
 	return UpdateProductResponse{Message: "Product updated successfully"}, nil
 }

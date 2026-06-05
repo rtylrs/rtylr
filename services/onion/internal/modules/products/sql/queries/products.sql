@@ -55,3 +55,15 @@ WHERE owner_id = ? AND status IN ('draft','sent','partial');
 
 -- name: CountActiveSuppliers :one
 SELECT COUNT(*) FROM erp_suppliers WHERE owner_id = ? AND is_active = TRUE;
+
+-- name: ListProductAttributes :many
+SELECT id, name, value, position FROM erp_product_attributes
+WHERE owner_id = ? AND product_id = ?
+ORDER BY position ASC, id ASC;
+
+-- name: DeleteProductAttributes :exec
+DELETE FROM erp_product_attributes WHERE owner_id = ? AND product_id = ?;
+
+-- name: InsertProductAttribute :exec
+INSERT INTO erp_product_attributes (owner_id, product_id, name, value, position)
+VALUES (?, ?, ?, ?, ?);

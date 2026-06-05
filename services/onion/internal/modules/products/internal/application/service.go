@@ -83,6 +83,18 @@ func (s *Service) UpdateProduct(ctx context.Context, ownerID, id int64, input do
 	return nil
 }
 
+func (s *Service) ListProductAttributes(ctx context.Context, ownerID, productID int64) ([]domain.ProductAttribute, error) {
+	return s.repo.ListProductAttributes(ctx, ownerID, productID)
+}
+
+func (s *Service) ReplaceProductAttributes(ctx context.Context, ownerID, productID int64, attrs []domain.ProductAttributeInput) error {
+	if err := s.repo.ReplaceProductAttributes(ctx, ownerID, productID, attrs); err != nil {
+		return err
+	}
+	invalidateProductScope(ctx, ownerID)
+	return nil
+}
+
 func (s *Service) DeleteProduct(ctx context.Context, ownerID, id int64) error {
 	if err := s.repo.DeleteProduct(ctx, ownerID, id); err != nil {
 		return err
