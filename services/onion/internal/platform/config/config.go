@@ -18,6 +18,33 @@ const (
 	GeminiAPIKeyEnvVar = "GEMINI_API_KEY"
 )
 
+const (
+	// DeepSeek is the primary LLM provider. Only the API key is an env secret
+	// (set DEEPSEEK_API_KEY on AWS / in .env); the base URL and model are fixed
+	// here on purpose — the product chooses the model internally, users never do.
+	DeepSeekAPIKeyEnvVar = "DEEPSEEK_API_KEY"
+	// DeepSeekBaseURL is DeepSeek's OpenAI-compatible endpoint, so we drive it
+	// through the OpenAI SDK with this base URL.
+	DeepSeekBaseURL = "https://api.deepseek.com"
+	// DeepSeekModel is the chat model we run. deepseek-chat tracks DeepSeek's
+	// latest general chat model.
+	DeepSeekModel = "deepseek-chat"
+)
+
+const (
+	// AIRequestTimeout bounds any single LLM call so a hung provider can't pin
+	// an SSE stream open forever.
+	AIRequestTimeout = 90 * time.Second
+	// AIMaxOutputTokens caps generation length (cost + latency guardrail).
+	AIMaxOutputTokens = 2048
+	// AIMaxRetries is how many times a transient provider error is retried with
+	// exponential backoff before falling through to the next provider.
+	AIMaxRetries = 2
+	// AITokensPerCredit converts a plan's "AI credits" allowance into a real
+	// token budget. One credit = this many tokens of combined prompt+completion.
+	AITokensPerCredit = 1000
+)
+
 type AppConfig struct {
 	DatabaseURL         string
 	DBHost              string
@@ -51,6 +78,9 @@ type AppConfig struct {
 	OpenAIOrgID   string
 	OpenAIBaseURL string
 	GeminiAPIKey  string
+
+	// DeepSeek (primary provider) — only the key is configurable.
+	DeepSeekAPIKey string
 
 	// Redis & Cache
 	RedisURL               string
@@ -197,6 +227,9 @@ func LoadAndValidate() (*AppConfig, error) {
 		OpenAIOrgID:   os.Getenv("OPENAI_ORG_ID"),
 		OpenAIBaseURL: os.Getenv("OPENAI_BASE_URL"),
 		GeminiAPIKey:  os.Getenv("GEMINI_API_KEY"),
+
+		// DeepSeek
+		DeepSeekAPIKey: os.Getenv(DeepSeekAPIKeyEnvVar),
 
 		// Redis & Cache
 		RedisURL:               os.Getenv("REDIS_URL"),
@@ -347,6 +380,22 @@ func IsGeminiConfigured() bool {
 	return GetGeminiAPIKey() != ""
 }
 
+func GetDeepSeekAPIKey() string {
+	if GlobalConfig != nil {
+		return GlobalConfig.DeepSeekAPIKey
+	}
+	return os.Getenv(DeepSeekAPIKeyEnvVar)
+}
+
+// GetDeepSeekBaseURL / GetDeepSeekModel return the hardcoded values — they are
+// intentionally not env-configurable.
+func GetDeepSeekBaseURL() string { return DeepSeekBaseURL }
+func GetDeepSeekModel() string   { return DeepSeekModel }
+
+func IsDeepSeekConfigured() bool {
+	return GetDeepSeekAPIKey() != ""
+}
+
 func IsAnyAIConfigured() bool {
-	return IsOpenAIConfigured() || IsGeminiConfigured()
+	return IsDeepSeekConfigured() || IsOpenAIConfigured() || IsGeminiConfigured()
 }

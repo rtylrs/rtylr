@@ -3,9 +3,20 @@ package snips
 import (
 	"context"
 	"errors"
+	"time"
 
 	"github.com/voxire/onion/internal/platform/config"
 )
+
+// backoff returns the delay before retry attempt n (1-based): 200ms, 400ms, …,
+// capped at 2s.
+func backoff(attempt int) time.Duration {
+	d := 200 * time.Millisecond << (attempt - 1)
+	if d > 2*time.Second {
+		return 2 * time.Second
+	}
+	return d
+}
 
 var (
 	ErrNoProvidersConfigured = errors.New("no AI providers configured")
@@ -22,6 +33,10 @@ type StreamToken struct {
 	Done     bool   `json:"done"`
 	Provider string `json:"provider,omitempty"`
 	Error    string `json:"error,omitempty"`
+	// Token usage, populated on the final (Done) token when the provider reports
+	// it. Used by the quota system to meter real usage rather than estimates.
+	PromptTokens     int `json:"prompt_tokens,omitempty"`
+	CompletionTokens int `json:"completion_tokens,omitempty"`
 }
 
 func NewClient(ctx context.Context) (*Client, error) {
@@ -33,7 +48,17 @@ func NewClient(ctx context.Context) (*Client, error) {
 		providers: make([]Provider, 0),
 	}
 
-	// Register providers in priority order
+	// Register providers in priority order. DeepSeek is the primary provider;
+	// Gemini and OpenAI remain as automatic fallbacks if configured.
+	if config.IsDeepSeekConfigured() {
+		if provider, err := NewDeepSeekProvider(); err == nil {
+			client.providers = append(client.providers, provider)
+			if client.primaryProvider == nil {
+				client.primaryProvider = provider
+			}
+		}
+	}
+
 	if config.IsGeminiConfigured() {
 		if provider, err := NewGeminiProvider(ctx); err == nil {
 			client.providers = append(client.providers, provider)

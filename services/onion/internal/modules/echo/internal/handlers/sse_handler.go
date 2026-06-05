@@ -103,6 +103,11 @@ func (h *GenerateTextStreamHandler) ServeHTTP(w http.ResponseWriter, r *http.Req
 		return
 	}
 
+	// Neutralize control markers and bound length before the input is stored or
+	// folded into the prompt (prompt-injection defense).
+	req.Prompt = sanitizeUserInput(req.Prompt, maxUserPromptLen)
+	req.SystemContext = sanitizeUserInput(req.SystemContext, maxSystemContextLen)
+
 	if !h.AiService.IsAvailable() {
 		log.Warn("AI service not available")
 		http.Error(w, "AI service not available", http.StatusServiceUnavailable)

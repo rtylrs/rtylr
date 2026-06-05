@@ -4,6 +4,7 @@ import (
 	"context"
 	"errors"
 	"fmt"
+	"time"
 
 	"github.com/openai/openai-go/v2"
 	"github.com/openai/openai-go/v2/option"
@@ -13,69 +14,112 @@ import (
 )
 
 var (
-	ErrOpenAINotConfigured = errors.New("OpenAI is not configured. Please set OPENAI_API_KEY environment variable")
-	ErrOpenAINoChoices     = errors.New("no response choices received from OpenAI")
+	ErrOpenAINotConfigured   = errors.New("OpenAI is not configured. Please set OPENAI_API_KEY environment variable")
+	ErrDeepSeekNotConfigured = errors.New("DeepSeek is not configured. Please set DEEPSEEK_API_KEY environment variable")
+	ErrOpenAINoChoices       = errors.New("no response choices received from provider")
 )
 
+// OpenAIProvider speaks the OpenAI chat-completions API. DeepSeek is wire
+// compatible, so the same provider drives it by pointing at a different base URL
+// and model — the only differences are name/model/base URL, all injected here.
 type OpenAIProvider struct {
 	client    openai.Client
+	name      string
+	model     string
 	available bool
 }
 
+func newOpenAICompatProvider(name, apiKey, baseURL, model, orgID string) *OpenAIProvider {
+	opts := []option.RequestOption{option.WithAPIKey(apiKey)}
+	if orgID != "" {
+		opts = append(opts, option.WithOrganization(orgID))
+	}
+	if baseURL != "" {
+		opts = append(opts, option.WithBaseURL(baseURL))
+	}
+
+	return &OpenAIProvider{
+		client:    openai.NewClient(opts...),
+		name:      name,
+		model:     model,
+		available: true,
+	}
+}
+
+// NewOpenAIProvider builds the OpenAI fallback provider.
 func NewOpenAIProvider() (*OpenAIProvider, error) {
 	if !config.IsOpenAIConfigured() {
 		return nil, ErrOpenAINotConfigured
 	}
+	return newOpenAICompatProvider(
+		"openai",
+		config.GetOpenAIAPIKey(),
+		config.GetOpenAIBaseURL(),
+		"gpt-4o-mini",
+		config.GetOpenAIOrgID(),
+	), nil
+}
 
-	var opts []option.RequestOption
-
-	opts = append(opts, option.WithAPIKey(config.GetOpenAIAPIKey()))
-
-	if orgID := config.GetOpenAIOrgID(); orgID != "" {
-		opts = append(opts, option.WithOrganization(orgID))
+// NewDeepSeekProvider builds the primary DeepSeek provider (OpenAI-compatible).
+func NewDeepSeekProvider() (*OpenAIProvider, error) {
+	if !config.IsDeepSeekConfigured() {
+		return nil, ErrDeepSeekNotConfigured
 	}
-
-	if baseURL := config.GetOpenAIBaseURL(); baseURL != "" {
-		opts = append(opts, option.WithBaseURL(baseURL))
-	}
-
-	client := openai.NewClient(opts...)
-
-	return &OpenAIProvider{
-		client:    client,
-		available: true,
-	}, nil
+	return newOpenAICompatProvider(
+		"deepseek",
+		config.GetDeepSeekAPIKey(),
+		config.GetDeepSeekBaseURL(),
+		config.GetDeepSeekModel(),
+		"",
+	), nil
 }
 
-// Name returns the provider name.
-func (c *OpenAIProvider) Name() string {
-	return "openai"
-}
+func (c *OpenAIProvider) Name() string      { return c.name }
+func (c *OpenAIProvider) IsAvailable() bool { return c.available }
 
-// IsAvailable checks if the provider is available.
-func (c *OpenAIProvider) IsAvailable() bool {
-	return c.available
-}
-
-// CompleteText implements the Provider interface.
-func (c *OpenAIProvider) CompleteText(ctx context.Context, prompt string) (string, error) {
+func (c *OpenAIProvider) chatParams(prompt string, stream bool) openai.ChatCompletionNewParams {
 	req := openai.ChatCompletionNewParams{
-		Model: "gpt-4o-mini",
+		Model:     c.model,
+		MaxTokens: openai.Int(int64(config.AIMaxOutputTokens)),
 		Messages: []openai.ChatCompletionMessageParamUnion{
 			openai.UserMessage(prompt),
 		},
 	}
+	if stream {
+		// Ask the provider to include token usage in the final stream chunk so we
+		// can meter real usage for quotas.
+		req.StreamOptions = openai.ChatCompletionStreamOptionsParam{IncludeUsage: openai.Bool(true)}
+	}
+	return req
+}
 
-	resp, err := c.client.Chat.Completions.New(ctx, req)
-	if err != nil {
-		return "", fmt.Errorf("failed to create chat completion: %w", err)
+// CompleteText implements the Provider interface with a bounded timeout and
+// retry-with-backoff on transient failures.
+func (c *OpenAIProvider) CompleteText(ctx context.Context, prompt string) (string, error) {
+	var lastErr error
+	for attempt := 0; attempt <= config.AIMaxRetries; attempt++ {
+		if attempt > 0 {
+			select {
+			case <-ctx.Done():
+				return "", ctx.Err()
+			case <-time.After(backoff(attempt)):
+			}
+		}
+
+		callCtx, cancel := context.WithTimeout(ctx, config.AIRequestTimeout)
+		resp, err := c.client.Chat.Completions.New(callCtx, c.chatParams(prompt, false))
+		cancel()
+		if err != nil {
+			lastErr = fmt.Errorf("failed to create chat completion: %w", err)
+			continue
+		}
+		if len(resp.Choices) == 0 {
+			return "", ErrOpenAINoChoices
+		}
+		return resp.Choices[0].Message.Content, nil
 	}
 
-	if len(resp.Choices) == 0 {
-		return "", ErrOpenAINoChoices
-	}
-
-	return resp.Choices[0].Message.Content, nil
+	return "", lastErr
 }
 
 // CompleteTextStream implements the Provider interface.
@@ -84,7 +128,6 @@ func (c *OpenAIProvider) CompleteTextStream(ctx context.Context, prompt string) 
 
 	go func() {
 		defer close(tokenChan)
-
 		c.processOpenAIStream(ctx, prompt, tokenChan)
 	}()
 
@@ -92,17 +135,13 @@ func (c *OpenAIProvider) CompleteTextStream(ctx context.Context, prompt string) 
 }
 
 func (c *OpenAIProvider) processOpenAIStream(ctx context.Context, prompt string, tokenChan chan<- StreamToken) {
-	req := openai.ChatCompletionNewParams{
-		Model: "gpt-4o-mini",
-		Messages: []openai.ChatCompletionMessageParamUnion{
-			openai.UserMessage(prompt),
-		},
-	}
+	// Bound the whole stream so a hung provider can't pin the connection open.
+	ctx, cancel := context.WithTimeout(ctx, config.AIRequestTimeout)
+	defer cancel()
 
-	stream := c.client.Chat.Completions.NewStreaming(ctx, req)
+	stream := c.client.Chat.Completions.NewStreaming(ctx, c.chatParams(prompt, true))
 	if stream == nil {
 		c.sendErrorToken(tokenChan, "failed to create streaming response")
-
 		return
 	}
 
@@ -112,41 +151,32 @@ func (c *OpenAIProvider) processOpenAIStream(ctx context.Context, prompt string,
 		}
 	}()
 
+	var promptTokens, completionTokens int64
 	for stream.Next() {
 		chunk := stream.Current()
-		if !c.processChunk(ctx, chunk, tokenChan) {
-			return
+
+		// The usage-bearing chunk arrives last (after FinishReason=stop) and has
+		// no choices, so capture usage whenever present and keep reading.
+		if chunk.Usage.TotalTokens > 0 {
+			promptTokens = chunk.Usage.PromptTokens
+			completionTokens = chunk.Usage.CompletionTokens
 		}
 
-		if c.isStreamComplete(chunk) {
-			break
+		for i := range chunk.Choices {
+			if content := chunk.Choices[i].Delta.Content; content != "" {
+				if !c.sendTextToken(tokenChan, content) {
+					return
+				}
+			}
 		}
 	}
 
 	if err := stream.Err(); err != nil {
 		c.sendErrorToken(tokenChan, err.Error())
-
 		return
 	}
 
-	c.sendCompletionToken(tokenChan)
-}
-
-func (c *OpenAIProvider) processChunk(_ context.Context, chunk openai.ChatCompletionChunk, tokenChan chan<- StreamToken) bool {
-	for i := range chunk.Choices {
-		choice := &chunk.Choices[i]
-		if choice.Delta.Content != "" {
-			if !c.sendTextToken(tokenChan, choice.Delta.Content) {
-				return false
-			}
-		}
-	}
-
-	return true
-}
-
-func (c *OpenAIProvider) isStreamComplete(chunk openai.ChatCompletionChunk) bool {
-	return len(chunk.Choices) > 0 && chunk.Choices[0].FinishReason == "stop"
+	c.sendCompletionToken(tokenChan, int(promptTokens), int(completionTokens))
 }
 
 func (c *OpenAIProvider) sendTextToken(tokenChan chan<- StreamToken, content string) bool {
@@ -165,15 +195,14 @@ func (c *OpenAIProvider) sendErrorToken(tokenChan chan<- StreamToken, errorMsg s
 	}
 }
 
-func (c *OpenAIProvider) sendCompletionToken(tokenChan chan<- StreamToken) {
+func (c *OpenAIProvider) sendCompletionToken(tokenChan chan<- StreamToken, promptTokens, completionTokens int) {
 	select {
-	case tokenChan <- StreamToken{Done: true}:
+	case tokenChan <- StreamToken{Done: true, PromptTokens: promptTokens, CompletionTokens: completionTokens}:
 	default:
 	}
 }
 
 // Close implements the Provider interface.
 func (c *OpenAIProvider) Close() error {
-	// OpenAI client doesn't need explicit closing
 	return nil
 }
