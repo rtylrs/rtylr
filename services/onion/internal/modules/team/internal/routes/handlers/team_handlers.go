@@ -121,10 +121,10 @@ func (h *GetMemberByIDHandler) Serve(ctx context.Context, _ *GetMemberByIDReques
 		}
 	}
 
-	ownerID := device.User.UserID
+	actorID := device.User.UserID
 	businessID := device.User.BusinessID
 
-	member, err := h.Service.GetStaffUserByID(ctx, ownerID, businessID, memberID)
+	member, err := h.Service.GetStaffUserByID(ctx, actorID, businessID, memberID)
 	if err != nil {
 		if errors.Is(err, domain.ErrUserNotFound) {
 			return GetMemberByIDResponse{}, &errorModels.ServerError{
@@ -186,7 +186,7 @@ func (h *InviteUserHandler) Serve(ctx context.Context, req *InviteUserRequest) (
 		return InviteUserResponse{}, errorModels.PermissionDeniedServerError()
 	}
 
-	ownerID := device.User.UserID
+	actorID := device.User.UserID
 
 	apps := req.Apps
 	if apps == nil {
@@ -198,7 +198,7 @@ func (h *InviteUserHandler) Serve(ctx context.Context, req *InviteUserRequest) (
 		role = domain.RoleStaff
 	}
 
-	userID, token, err := h.Service.InviteUser(ctx, ownerID, device.User.BusinessID, domain.InviteUserInput{
+	userID, token, err := h.Service.InviteUser(ctx, actorID, device.User.BusinessID, domain.InviteUserInput{
 		Email:    req.Email,
 		FullName: req.FullName,
 		Password: req.Password,
@@ -206,11 +206,7 @@ func (h *InviteUserHandler) Serve(ctx context.Context, req *InviteUserRequest) (
 		Role:     role,
 	})
 	if err != nil {
-		return InviteUserResponse{}, &errorModels.ServerError{
-			HTTPCode: http.StatusInternalServerError,
-			Code:     http.StatusInternalServerError,
-			Message:  "Failed to invite user",
-		}
+		return InviteUserResponse{}, errorModels.FromError(err, "Failed to invite user")
 	}
 
 	// Record the seat change asynchronously so billing stays accurate.
@@ -222,6 +218,14 @@ func (h *InviteUserHandler) Serve(ctx context.Context, req *InviteUserRequest) (
 		}()
 		bgCtx, cancel := context.WithTimeout(context.WithoutCancel(ctx), 10*time.Second)
 		defer cancel()
+		ownerID, err := h.Service.BusinessOwnerID(bgCtx, actorID, device.User.BusinessID)
+		if err != nil {
+			logger.Ctx(bgCtx).Error("failed to resolve owner for billing seat change",
+				logger.Any("actor_id", actorID),
+				logger.Error(err),
+			)
+			return
+		}
 		if err := h.Service.RecordSeatChange(bgCtx, ownerID); err != nil {
 			logger.Ctx(bgCtx).Error("failed to record seat change for billing",
 				logger.Any("owner_id", ownerID),
@@ -231,6 +235,10 @@ func (h *InviteUserHandler) Serve(ctx context.Context, req *InviteUserRequest) (
 	}()
 
 	if req.GroupID > 0 {
+		ownerID, ownerErr := h.Service.BusinessOwnerID(ctx, actorID, device.User.BusinessID)
+		if ownerErr != nil {
+			return InviteUserResponse{}, errorModels.FromError(ownerErr, "Failed to invite user")
+		}
 		_ = h.Service.AddGroupMembers(ctx, ownerID, req.GroupID, ownerID, []int64{userID})
 	}
 
@@ -324,9 +332,10 @@ func UpdatePermissionsRoutes() []string { return []string{"/team/users/permissio
 type UpdatePermissionsHandler struct{ Service *application.Service }
 
 type UpdatePermissionsRequest struct {
-	UserID int64    `json:"user_id"`
-	Apps   []string `json:"apps"`
-	Role   string   `json:"role"`
+	UserID   int64     `json:"user_id"`
+	FullName *string   `json:"full_name"`
+	Apps     *[]string `json:"apps"`
+	Role     string    `json:"role"`
 }
 
 type UpdatePermissionsResponse struct {
@@ -351,23 +360,15 @@ func (h *UpdatePermissionsHandler) Serve(ctx context.Context, req *UpdatePermiss
 		return UpdatePermissionsResponse{}, errorModels.PermissionDeniedServerError()
 	}
 
-	ownerID := device.User.UserID
+	actorID := device.User.UserID
 
-	apps := req.Apps
-	if apps == nil {
-		apps = []string{}
-	}
-
-	if err := h.Service.UpdatePermissions(ctx, ownerID, device.User.BusinessID, domain.UpdatePermissionsInput{
-		UserID: req.UserID,
-		Apps:   apps,
-		Role:   domain.Role(req.Role),
+	if err := h.Service.UpdatePermissions(ctx, actorID, device.User.BusinessID, domain.UpdatePermissionsInput{
+		UserID:   req.UserID,
+		FullName: req.FullName,
+		Apps:     req.Apps,
+		Role:     domain.Role(req.Role),
 	}); err != nil {
-		return UpdatePermissionsResponse{}, &errorModels.ServerError{
-			HTTPCode: http.StatusInternalServerError,
-			Code:     http.StatusInternalServerError,
-			Message:  "Failed to update permissions",
-		}
+		return UpdatePermissionsResponse{}, errorModels.FromError(err, "Failed to update permissions")
 	}
 
 	return UpdatePermissionsResponse{Message: "Permissions updated"}, nil
@@ -403,14 +404,10 @@ func (h *DeactivateUserHandler) Serve(ctx context.Context, req *DeactivateUserRe
 		return DeactivateUserResponse{}, errorModels.PermissionDeniedServerError()
 	}
 
-	ownerID := device.User.UserID
+	actorID := device.User.UserID
 
-	if err := h.Service.DeactivateUser(ctx, ownerID, device.User.BusinessID, req.UserID); err != nil {
-		return DeactivateUserResponse{}, &errorModels.ServerError{
-			HTTPCode: http.StatusInternalServerError,
-			Code:     http.StatusInternalServerError,
-			Message:  "Failed to deactivate user",
-		}
+	if err := h.Service.DeactivateUser(ctx, actorID, device.User.BusinessID, req.UserID); err != nil {
+		return DeactivateUserResponse{}, errorModels.FromError(err, "Failed to deactivate user")
 	}
 
 	// Record the seat change asynchronously so billing stays accurate.
@@ -422,6 +419,14 @@ func (h *DeactivateUserHandler) Serve(ctx context.Context, req *DeactivateUserRe
 		}()
 		bgCtx, cancel := context.WithTimeout(context.WithoutCancel(ctx), 10*time.Second)
 		defer cancel()
+		ownerID, err := h.Service.BusinessOwnerID(bgCtx, actorID, device.User.BusinessID)
+		if err != nil {
+			logger.Ctx(bgCtx).Error("failed to resolve owner for billing seat change",
+				logger.Any("actor_id", actorID),
+				logger.Error(err),
+			)
+			return
+		}
 		if err := h.Service.RecordSeatChange(bgCtx, ownerID); err != nil {
 			logger.Ctx(bgCtx).Error("failed to record seat change for billing",
 				logger.Any("owner_id", ownerID),
@@ -462,14 +467,10 @@ func (h *DeactivateMemberHandler) Serve(ctx context.Context, _ *DeactivateMember
 		}
 	}
 
-	ownerID := device.User.UserID
+	actorID := device.User.UserID
 
-	if err := h.Service.DeactivateUser(ctx, ownerID, device.User.BusinessID, memberID); err != nil {
-		return DeactivateMemberResponse{}, &errorModels.ServerError{
-			HTTPCode: http.StatusInternalServerError,
-			Code:     http.StatusInternalServerError,
-			Message:  "Failed to deactivate member",
-		}
+	if err := h.Service.DeactivateUser(ctx, actorID, device.User.BusinessID, memberID); err != nil {
+		return DeactivateMemberResponse{}, errorModels.FromError(err, "Failed to deactivate member")
 	}
 
 	// Record the seat change asynchronously so billing stays accurate.
@@ -481,6 +482,14 @@ func (h *DeactivateMemberHandler) Serve(ctx context.Context, _ *DeactivateMember
 		}()
 		bgCtx, cancel := context.WithTimeout(context.WithoutCancel(ctx), 10*time.Second)
 		defer cancel()
+		ownerID, err := h.Service.BusinessOwnerID(bgCtx, actorID, device.User.BusinessID)
+		if err != nil {
+			logger.Ctx(bgCtx).Error("failed to resolve owner for billing seat change",
+				logger.Any("actor_id", actorID),
+				logger.Error(err),
+			)
+			return
+		}
 		if err := h.Service.RecordSeatChange(bgCtx, ownerID); err != nil {
 			logger.Ctx(bgCtx).Error("failed to record seat change for billing",
 				logger.Any("owner_id", ownerID),

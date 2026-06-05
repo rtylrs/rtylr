@@ -10,6 +10,7 @@ var (
 	ErrUserNotFound       = errors.New("user not found")
 	ErrTokenAlreadyUsed   = errors.New("invite token already used")
 	ErrTokenExpired       = errors.New("invite token expired")
+	ErrForbidden          = errors.New("permission denied")
 )
 
 // ValidApps is the set of recognized app identifiers.
@@ -43,10 +44,13 @@ type MyProfile struct {
 type Role string
 
 const (
-	RoleAdmin    Role = "admin"
-	RoleOperator Role = "operator"
-	RoleStaff    Role = "staff"
-	RoleViewer   Role = "viewer"
+	RoleOwner       Role = "owner"
+	RoleAdmin       Role = "admin"
+	RoleOperator    Role = "operator"
+	RoleBilling     Role = "billing"
+	RoleMenuManager Role = "menu_manager"
+	RoleStaff       Role = "staff"
+	RoleViewer      Role = "viewer"
 )
 
 // UserAppPermission maps a staff user to a set of app IDs and a role for a given owner.
@@ -82,9 +86,10 @@ type InviteUserInput struct {
 }
 
 type UpdatePermissionsInput struct {
-	UserID int64
-	Apps   []string
-	Role   Role
+	UserID   int64
+	FullName *string
+	Apps     *[]string
+	Role     Role
 }
 
 type PermissionLevel string

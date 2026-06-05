@@ -5,6 +5,7 @@ import (
 	"database/sql"
 	"encoding/json"
 	"errors"
+	"strings"
 	"time"
 
 	sq "github.com/Masterminds/squirrel"
@@ -155,6 +156,26 @@ func (r *Repository) CreateUser(ctx context.Context, email, passwordHash, fullNa
 	}
 
 	return res.LastInsertId()
+}
+
+func (r *Repository) UpdateUserProfile(ctx context.Context, userID int64, fullName string) error {
+	query, args, err := sq.
+		Update("users").
+		Set("full_name", strings.TrimSpace(fullName)).
+		Set("updated_at", sq.Expr("NOW()")).
+		Where(sq.Eq{"id": userID}).
+		PlaceholderFormat(sq.Question).
+		ToSql()
+	if err != nil {
+		return err
+	}
+
+	if _, err := r.pool.ExecContext(ctx, query, args...); err != nil {
+		logger.Ctx(ctx).Error("Failed to update user profile via team", logger.Error(err))
+		return err
+	}
+
+	return nil
 }
 
 // ─── Staff listing (join users + permissions) ─────────────────────────────────

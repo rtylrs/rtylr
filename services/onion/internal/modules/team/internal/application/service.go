@@ -209,7 +209,12 @@ func (s *Service) GetStaffUserByID(ctx context.Context, ownerID, businessID, use
 		return nil, domain.ErrUserNotFound
 	}
 
-	return s.repo.GetStaffUserByID(ctx, ownerID, businessID, userID)
+	resolvedOwnerID, err := s.resolveBusinessOwnerID(ctx, ownerID, businessID)
+	if err != nil {
+		return nil, err
+	}
+
+	return s.repo.GetStaffUserByID(ctx, resolvedOwnerID, businessID, userID)
 }
 
 // InviteUser creates a user account (no password) and generates an invite token.
@@ -221,6 +226,10 @@ func (s *Service) GetStaffUserByID(ctx context.Context, ownerID, businessID, use
 func (s *Service) InviteUser(ctx context.Context, ownerID, businessID int64, input domain.InviteUserInput) (int64, string, error) {
 	if input.Email == "" {
 		return 0, "", errors.New("email is required")
+	}
+	ownerID, err := s.requireTeamManager(ctx, ownerID, businessID)
+	if err != nil {
+		return 0, "", err
 	}
 
 	normalizedEmail := strings.ToLower(strings.TrimSpace(input.Email))
@@ -397,19 +406,47 @@ func (s *Service) GetBusinessInfo(ctx context.Context, businessID, userID int64)
 	return name, ownerID == userID
 }
 
-func (s *Service) UpdatePermissions(ctx context.Context, ownerID, businessID int64, input domain.UpdatePermissionsInput) error {
+func (s *Service) UpdatePermissions(ctx context.Context, actorID, businessID int64, input domain.UpdatePermissionsInput) error {
 	if input.UserID == 0 {
 		return errors.New("user id is required")
 	}
 
+	ownerID, err := s.requireTeamManager(ctx, actorID, businessID)
+	if err != nil {
+		return err
+	}
+
 	role := input.Role
+	apps := []string{}
+	if input.Apps != nil {
+		apps = *input.Apps
+	}
+	if input.Apps == nil || role == "" {
+		existing, err := s.repo.GetStaffUserByID(ctx, ownerID, businessID, input.UserID)
+		if err != nil {
+			return err
+		}
+		if input.Apps == nil {
+			apps = existing.Apps
+		}
+		if role == "" {
+			role = existing.Role
+		}
+	}
 	if role == "" {
 		role = domain.RoleStaff
 	}
+	if !isAssignableRole(role) {
+		return fmt.Errorf("invalid role: %s", role)
+	}
+	if role == domain.RoleOwner && input.UserID != ownerID {
+		return domain.ErrForbidden
+	}
 
-	apps := input.Apps
-	if apps == nil {
-		apps = []string{}
+	if input.FullName != nil {
+		if err := s.repo.UpdateUserProfile(ctx, input.UserID, *input.FullName); err != nil {
+			return err
+		}
 	}
 
 	if err := s.repo.UpsertPermission(ctx, ownerID, input.UserID, apps, role); err != nil {
@@ -423,9 +460,17 @@ func (s *Service) UpdatePermissions(ctx context.Context, ownerID, businessID int
 	return nil
 }
 
-func (s *Service) DeactivateUser(ctx context.Context, ownerID, businessID, userID int64) error {
+func (s *Service) DeactivateUser(ctx context.Context, actorID, businessID, userID int64) error {
 	if userID == 0 {
 		return errors.New("user id is required")
+	}
+
+	ownerID, err := s.requireTeamManager(ctx, actorID, businessID)
+	if err != nil {
+		return err
+	}
+	if userID == ownerID {
+		return domain.ErrForbidden
 	}
 
 	if err := s.repo.DeactivateUser(ctx, ownerID, userID); err != nil {
@@ -437,6 +482,55 @@ func (s *Service) DeactivateUser(ctx context.Context, ownerID, businessID, userI
 		invalidateBusinessTeamScope(ctx, businessID)
 	}
 	return nil
+}
+
+func (s *Service) resolveBusinessOwnerID(ctx context.Context, fallbackOwnerID, businessID int64) (int64, error) {
+	if businessID == 0 {
+		return fallbackOwnerID, nil
+	}
+
+	_, ownerID, err := s.repo.GetBusinessByID(ctx, businessID)
+	if err != nil {
+		return 0, err
+	}
+
+	return ownerID, nil
+}
+
+func (s *Service) BusinessOwnerID(ctx context.Context, fallbackOwnerID, businessID int64) (int64, error) {
+	return s.resolveBusinessOwnerID(ctx, fallbackOwnerID, businessID)
+}
+
+func (s *Service) requireTeamManager(ctx context.Context, actorID, businessID int64) (int64, error) {
+	ownerID, err := s.resolveBusinessOwnerID(ctx, actorID, businessID)
+	if err != nil {
+		return 0, err
+	}
+	if actorID == ownerID {
+		return ownerID, nil
+	}
+	if businessID == 0 {
+		return 0, domain.ErrForbidden
+	}
+
+	perm, err := s.repo.GetPermissionByBusiness(ctx, businessID, actorID)
+	if err != nil {
+		return 0, domain.ErrForbidden
+	}
+	if perm != nil && perm.IsActive && perm.Role == domain.RoleAdmin {
+		return ownerID, nil
+	}
+
+	return 0, domain.ErrForbidden
+}
+
+func isAssignableRole(role domain.Role) bool {
+	switch role {
+	case domain.RoleOwner, domain.RoleAdmin, domain.RoleOperator, domain.RoleBilling, domain.RoleMenuManager, domain.RoleStaff, domain.RoleViewer:
+		return true
+	default:
+		return false
+	}
 }
 
 // GetOwnerApps returns the list of apps the owner is subscribed to.
