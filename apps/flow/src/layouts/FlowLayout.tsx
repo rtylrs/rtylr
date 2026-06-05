@@ -49,7 +49,7 @@ import { useWorkspaces } from '../features/workspace-dashboard/useWorkspaces';
 import { useProjects, useCreateProject } from '../features/projects/useProjects';
 import { useMyTasksProject } from '../features/tasks/useMyTasksProject';
 import { PERSONAL_WORKSPACE_ID } from '../shared/lib/personalWorkspace';
-import type { Workspace } from '../shared/stores/flowStore';
+import type { Member, Workspace } from '../shared/stores/flowStore';
 import { isTaskMine } from '../shared/lib/currentUser';
 import { displayUserEmail, displayUserName } from '../shared/lib/userDisplay';
 import { useSidebarSections } from '../shared/hooks/useSidebarSections';
@@ -63,6 +63,8 @@ import { useNotifications } from '../features/inbox/useNotifications';
 import { apiProjectToProject, apiWorkspaceToWorkspace } from '../shared/lib/projectMapper';
 import { useRealtime } from '../shared/lib/realtime';
 import { useQueryClient } from '@tanstack/react-query';
+import { useFlowTeam } from '../shared/hooks/queries/useFlowTeam';
+import { initialsFromName } from '../shared/lib/memberUtils';
 import type { RealtimeEvent } from '@voxire/api';
 import { useCallback } from 'react';
 
@@ -253,6 +255,7 @@ const FlowLayout: React.FC<FlowLayoutProps> = ({ children }) => {
     setActiveWorkspace,
     setWorkspaces,
     setProjects,
+    setMembers,
     tasks,
     setCommandBarOpen,
     setQuickCreateOpen,
@@ -319,6 +322,29 @@ const FlowLayout: React.FC<FlowLayoutProps> = ({ children }) => {
       setProjects(apiProjects.map(apiProjectToProject));
     }
   }, [apiProjects, setProjects]);
+
+  // Seed the store's members from the business team so the assignee picker (and
+  // any other member-driven UI) has people to choose from — nothing else calls
+  // setMembers, so without this the store stays empty and assignment is impossible.
+  const { data: teamMembers } = useFlowTeam();
+  useEffect(() => {
+    if (!teamMembers || teamMembers.length === 0) return;
+    const mapped: Member[] = teamMembers
+      .filter((m) => m.isActive)
+      .map((m) => {
+        const role: Member['role'] =
+          m.role === 'owner' || m.role === 'admin' || m.role === 'viewer' ? m.role : 'member';
+        return {
+          id: String(m.id),
+          name: m.name,
+          email: m.email,
+          initials: initialsFromName(m.name),
+          role,
+          capacity: 40,
+        };
+      });
+    setMembers(mapped);
+  }, [teamMembers, setMembers]);
 
   // ── Realtime wiring ─────────────────────────────────────────────────
   // Subscribe the layout to the current workspace's topic AND the user's
