@@ -1,16 +1,6 @@
 import React from 'react';
-import { Link, Outlet, useNavigate, useRouterState } from '@tanstack/react-router';
-import {
-  User,
-  Building2,
-  Globe,
-  Mail,
-  CreditCard,
-  Puzzle,
-  ArrowLeft,
-  Briefcase,
-  Layers,
-} from 'lucide-react';
+import { Link, Outlet, useRouterState } from '@tanstack/react-router';
+import { User, Building2, Globe, Mail, CreditCard, Puzzle, Briefcase, Layers } from 'lucide-react';
 import { cn } from '../../../../../shared/lib/utils';
 import { useUserStore } from '../../../../../shared/stores/userStore';
 
@@ -58,7 +48,6 @@ function getNavGroups(isOwner: boolean): NavGroup[] {
 }
 
 const SettingsLayout: React.FC = () => {
-  const navigate = useNavigate();
   const pathname = useRouterState({ select: (s) => s.location.pathname });
   const { user } = useUserStore();
   const isOwner = user?.isOwner !== false;
@@ -76,13 +65,6 @@ const SettingsLayout: React.FC = () => {
           className="flex items-center gap-2 px-4 py-3.5 shrink-0"
           style={{ borderBottom: '1px solid var(--dash-border)' }}
         >
-          <button
-            onClick={() => navigate({ to: '/' })}
-            className="h-6 w-6 rounded-md flex items-center justify-center transition-colors hover:bg-[var(--dash-hover)]"
-            style={{ color: 'var(--dash-text-muted)' }}
-          >
-            <ArrowLeft size={14} />
-          </button>
           <span className="text-sm font-semibold" style={{ color: 'var(--dash-text)' }}>
             Settings
           </span>
