@@ -31,6 +31,7 @@ const General = React.lazy(() => import('./features/settings/Settings/components
 const Industry = React.lazy(() => import('./features/settings/Settings/components/BusinessType'));
 const Domain = React.lazy(() => import('./features/settings/Settings/components/Domain/Domain'));
 const Email = React.lazy(() => import('./features/settings/Settings/components/Email/Email'));
+const AiUsage = React.lazy(() => import('./features/settings/Settings/components/AiUsage'));
 const Billing = React.lazy(() => import('./features/billing/Billing.tsx'));
 const Addons = React.lazy(() => import('./features/addons/Addons.tsx'));
 
@@ -331,6 +332,16 @@ const settingsEmailRoute = createRoute({
   ),
 });
 
+const settingsAiRoute = createRoute({
+  getParentRoute: () => settingsRoute,
+  path: '/ai',
+  component: () => (
+    <Suspense fallback={fallback}>
+      <AiUsage />
+    </Suspense>
+  ),
+});
+
 const settingsSubscriptionRoute = createRoute({
   getParentRoute: () => settingsRoute,
   path: '/subscription',
@@ -413,6 +424,7 @@ const routeTree = rootRoute.addChildren([
       settingsIndustryRoute,
       settingsDomainRoute,
       settingsEmailRoute,
+      settingsAiRoute,
       settingsSubscriptionRoute,
       settingsBillingRoute,
       settingsAddonsRoute,

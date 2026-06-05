@@ -10,6 +10,7 @@ import {
   ArrowLeft,
   Briefcase,
   Layers,
+  Sparkles,
 } from 'lucide-react';
 import { cn } from '../../../../../shared/lib/utils';
 import { useUserStore } from '../../../../../shared/stores/userStore';
@@ -25,6 +26,7 @@ function getNavGroups(isOwner: boolean): NavGroup[] {
       label: 'Account',
       items: [
         { label: 'Account', path: '/settings/account', icon: User },
+        { label: 'AI Usage', path: '/settings/ai', icon: Sparkles },
         ...(isOwner
           ? [
               { label: 'General', path: '/settings/general', icon: Building2 },
