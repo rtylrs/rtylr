@@ -1,9 +1,23 @@
-import React, { useState } from 'react';
+import React, { useEffect, useState } from 'react';
 import { useNavigate, useParams } from '@tanstack/react-router';
-import { ArrowLeft, Mail, Shield, Clock, UserX, X } from 'lucide-react';
+import {
+  Mail,
+  Shield,
+  Clock,
+  UserX,
+  X,
+  Pencil,
+  Save,
+  MonitorSpeaker,
+  Package,
+  UserCheck,
+  Users,
+  CreditCard,
+  Layers,
+} from 'lucide-react';
 import { useQuery } from '@tanstack/react-query';
 import { unwrap } from '@voxire/api';
-import { Avatar } from '../../shared/components/ui';
+import { Avatar, Button, Input, Label } from '../../shared/components/ui';
 import {
   RoleBadge,
   AppBadge,
@@ -13,7 +27,11 @@ import {
   ConfirmDialog,
   EmptyState,
 } from '../../shared/components/dash';
-import { useMember, useDeactivateMember } from '../../shared/hooks/queries/useTeam';
+import {
+  useMember,
+  useDeactivateMember,
+  useUpdateMember,
+} from '../../shared/hooks/queries/useTeam';
 import { useActivity } from '../../shared/hooks/queries/useActivity';
 import {
   useMySubscription,
@@ -24,6 +42,25 @@ import { useMutation, useQueryClient } from '@tanstack/react-query';
 import { toast } from 'sonner';
 import type { GroupSummary } from '../../shared/hooks/queries/useGroups';
 import { safe } from '../../shared/lib/api';
+import { useUserStore } from '../../shared/stores/userStore';
+
+const ALL_APPS = [
+  { key: 'pos', label: 'POS', icon: MonitorSpeaker, color: '#4583C4' },
+  { key: 'erp', label: 'ERP', icon: Package, color: '#10b981' },
+  { key: 'hr', label: 'HR', icon: UserCheck, color: '#f59e0b' },
+  { key: 'crm', label: 'CRM', icon: Users, color: '#8b5cf6' },
+  { key: 'finance', label: 'Finance', icon: CreditCard, color: '#ef4444' },
+  { key: 'flow', label: 'Flow', icon: Layers, color: '#64C5B9' },
+];
+
+const ROLES = [
+  { id: 'admin', label: 'Admin' },
+  { id: 'operator', label: 'Operator' },
+  { id: 'billing', label: 'Billing' },
+  { id: 'menu_manager', label: 'Menu Manager' },
+  { id: 'staff', label: 'Staff' },
+  { id: 'viewer', label: 'Viewer' },
+];
 
 function getInitials(name?: string | null): string {
   if (!name) return '?';
@@ -41,8 +78,14 @@ const MemberDetail: React.FC = (): React.JSX.Element => {
   const { data: member, isLoading } = useMember(id);
   const { data: activity = [] } = useActivity(10);
   const deactivate = useDeactivateMember();
+  const updateMember = useUpdateMember();
+  const currentUser = useUserStore((state) => state.user);
   const { data: sub } = useMySubscription();
   const [confirmOpen, setConfirmOpen] = useState(false);
+  const [isEditing, setIsEditing] = useState(false);
+  const [nameDraft, setNameDraft] = useState('');
+  const [roleDraft, setRoleDraft] = useState('staff');
+  const [appsDraft, setAppsDraft] = useState<string[]>([]);
 
   const { data: memberGroups = [] } = useQuery<GroupSummary[]>({
     queryKey: ['user-groups', id],
@@ -65,6 +108,13 @@ const MemberDetail: React.FC = (): React.JSX.Element => {
     },
     onError: () => toast.error('Failed to remove from group'),
   });
+
+  useEffect(() => {
+    if (!member) return;
+    setNameDraft(member.fullName || member.name || '');
+    setRoleDraft(member.role || 'staff');
+    setAppsDraft(member.apps ?? []);
+  }, [member]);
 
   if (isLoading) {
     return (
@@ -91,6 +141,37 @@ const MemberDetail: React.FC = (): React.JSX.Element => {
   }
 
   const memberActivity = activity.filter((a) => a.actor === member.name);
+  const currentRole = currentUser?.role;
+  const canEditMember =
+    (currentRole === 'owner' || currentRole === 'admin' || currentUser?.isOwner === true) &&
+    member.role !== 'owner';
+
+  const toggleApp = (appKey: string): void => {
+    setAppsDraft((prev) =>
+      prev.includes(appKey) ? prev.filter((key) => key !== appKey) : [...prev, appKey]
+    );
+  };
+
+  const saveMember = async (): Promise<void> => {
+    if (!nameDraft.trim()) {
+      toast.error('Name is required');
+      return;
+    }
+    try {
+      await updateMember.mutateAsync({
+        id: member.id,
+        patch: {
+          fullName: nameDraft.trim(),
+          name: nameDraft.trim(),
+          role: roleDraft,
+          apps: appsDraft,
+        },
+      });
+      setIsEditing(false);
+    } catch {
+      // onError in hook handles toast
+    }
+  };
 
   return (
     <div className="space-y-5 max-w-4xl">
@@ -101,7 +182,7 @@ const MemberDetail: React.FC = (): React.JSX.Element => {
           className="shrink-0"
           style={{ background: 'rgba(69,131,196,0.15)', color: '#4583C4' }}
         />
-        <div>
+        <div className="min-w-0 flex-1">
           <div className="flex items-center gap-2">
             <h1 className="text-lg font-semibold" style={{ color: 'var(--dash-text)' }}>
               {member.name}
@@ -112,7 +193,93 @@ const MemberDetail: React.FC = (): React.JSX.Element => {
             {member.email}
           </p>
         </div>
+        {canEditMember && (
+          <div className="ml-auto flex items-center gap-2">
+            {isEditing ? (
+              <>
+                <Button
+                  variant="outline"
+                  onClick={() => {
+                    setIsEditing(false);
+                    setNameDraft(member.fullName || member.name || '');
+                    setRoleDraft(member.role || 'staff');
+                    setAppsDraft(member.apps ?? []);
+                  }}
+                >
+                  <X size={14} />
+                  Cancel
+                </Button>
+                <Button onClick={saveMember} disabled={updateMember.isPending}>
+                  <Save size={14} />
+                  Save
+                </Button>
+              </>
+            ) : (
+              <Button variant="outline" onClick={() => setIsEditing(true)}>
+                <Pencil size={14} />
+                Edit
+              </Button>
+            )}
+          </div>
+        )}
       </div>
+
+      {isEditing && (
+        <SettingSection title="Member details" description="Edit this member's profile and access.">
+          <div className="grid gap-4 md:grid-cols-2">
+            <div className="space-y-1.5">
+              <Label htmlFor="member-name">Name</Label>
+              <Input
+                id="member-name"
+                value={nameDraft}
+                onChange={(event) => setNameDraft(event.target.value)}
+              />
+            </div>
+            <div className="space-y-1.5">
+              <Label htmlFor="member-role">Role</Label>
+              <select
+                id="member-role"
+                value={roleDraft}
+                onChange={(event) => setRoleDraft(event.target.value)}
+                className="w-full rounded-lg px-3 py-2 text-sm"
+                style={{
+                  background: 'var(--dash-bg)',
+                  border: '1px solid var(--dash-border)',
+                  color: 'var(--dash-text)',
+                }}
+              >
+                {ROLES.map((role) => (
+                  <option key={role.id} value={role.id}>
+                    {role.label}
+                  </option>
+                ))}
+              </select>
+            </div>
+          </div>
+          <div className="grid grid-cols-2 gap-2 md:grid-cols-3">
+            {ALL_APPS.map((app) => {
+              const Icon = app.icon;
+              const selected = appsDraft.includes(app.key);
+              return (
+                <button
+                  key={app.key}
+                  type="button"
+                  onClick={() => toggleApp(app.key)}
+                  className="flex items-center gap-2 rounded-lg px-3 py-2 text-left transition-colors"
+                  style={{
+                    background: selected ? `${app.color}10` : 'var(--dash-bg)',
+                    border: `1px solid ${selected ? `${app.color}45` : 'var(--dash-border)'}`,
+                    color: selected ? app.color : 'var(--dash-text-muted)',
+                  }}
+                >
+                  <Icon size={15} style={{ color: app.color }} />
+                  <span className="text-xs font-semibold">{app.label}</span>
+                </button>
+              );
+            })}
+          </div>
+        </SettingSection>
+      )}
 
       <div className="grid grid-cols-3 gap-3">
         <div

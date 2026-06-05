@@ -97,13 +97,14 @@ export const useUpdateMember = () => {
   const qc = useQueryClient();
   return useMutation({
     mutationFn: async ({ id, patch }: { id: string; patch: Partial<TeamMember> }) => {
-      return unwrap(
-        safe.put('/team/users/permissions', {
-          userId: Number(id),
-          apps: patch.apps ?? [],
-          role: patch.role,
-        })
-      );
+      const payload: Record<string, unknown> = { userId: Number(id) };
+      if (patch.fullName !== undefined || patch.name !== undefined) {
+        payload.fullName = patch.fullName ?? patch.name ?? '';
+      }
+      if (patch.apps !== undefined) payload.apps = patch.apps;
+      if (patch.role !== undefined) payload.role = patch.role;
+
+      return unwrap(safe.put('/team/users/permissions', payload));
     },
     onSuccess: () => {
       toast.success('Member updated');

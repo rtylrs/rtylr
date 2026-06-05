@@ -12,6 +12,7 @@ import {
 
 const mockGet = vi.fn();
 const mockPost = vi.fn();
+const mockPut = vi.fn();
 const mockPatch = vi.fn();
 
 vi.mock('@voxire/api', () => ({
@@ -22,6 +23,7 @@ vi.mock('../../lib/api', () => ({
   safe: {
     get: (...args: unknown[]) => mockGet(...args),
     post: (...args: unknown[]) => mockPost(...args),
+    put: (...args: unknown[]) => mockPut(...args),
   },
   default: {
     patch: (...args: unknown[]) => mockPatch(...args),
@@ -193,5 +195,29 @@ describe('useDeactivateMember', () => {
     });
 
     expect(mockPost).toHaveBeenCalledWith('/team/members/42/deactivate');
+  });
+});
+
+describe('useUpdateMember', () => {
+  beforeEach(() => vi.clearAllMocks());
+
+  it('sends profile and permission updates', async () => {
+    mockPut.mockResolvedValue({ success: true });
+
+    const { result } = renderHook(() => useUpdateMember(), { wrapper: createWrapper() });
+
+    await act(async () => {
+      await result.current.mutateAsync({
+        id: '42',
+        patch: { fullName: 'Edited User', role: 'admin', apps: ['pos', 'finance'] },
+      });
+    });
+
+    expect(mockPut).toHaveBeenCalledWith('/team/users/permissions', {
+      userId: 42,
+      fullName: 'Edited User',
+      role: 'admin',
+      apps: ['pos', 'finance'],
+    });
   });
 });
