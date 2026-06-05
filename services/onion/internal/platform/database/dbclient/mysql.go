@@ -21,6 +21,7 @@ import (
 type MySQLClient struct {
 	mainDB    *sql.DB
 	loggingDB *sql.DB
+	replicaDB *sql.DB
 }
 
 var (
@@ -100,6 +101,21 @@ func Connect(ctx context.Context) error {
 		client.loggingDB = loggingDB
 	}
 
+	// Read replica for the AI / NL-to-SQL layer, connected with the read-only
+	// tenant-scoped user. Optional and fail-soft: if it's not configured or not
+	// reachable, AI reads fall back to the primary via ReplicaPool().
+	if replicaConfigured() {
+		replicaDB, repErr := openDB(ctx, buildReplicaDSN())
+		if repErr != nil {
+			logger.Ctx(ctx).Warn("failed to connect to read replica; AI reads will use the primary",
+				logger.Error(repErr))
+		} else {
+			client.replicaDB = replicaDB
+			logger.Ctx(ctx).Info("Connected to read replica",
+				logger.String("host", os.Getenv(envReplicaHost)))
+		}
+	}
+
 	logger.Ctx(ctx).Info("Connected to MySQL database",
 		logger.String("host", getEnvOrDefault("DB_HOST", DefaultDBHost)),
 		logger.String("port", getEnvOrDefault("DB_PORT", DefaultDBPort)),
@@ -164,6 +180,37 @@ func resolveMainDSN() string {
 	}
 
 	return buildLocalDSN()
+}
+
+// Read-replica / AI read-only connection env vars.
+const (
+	envReplicaHost = "DB_REPLICA_HOST"
+	envReplicaPort = "DB_REPLICA_PORT"
+	envAIUser      = "DB_AI_USER"
+	envAIPassword  = "DB_AI_PASSWORD"
+)
+
+// replicaConfigured reports whether a read replica + AI read-only credentials are
+// available. All three are required; otherwise AI reads fall back to the primary.
+func replicaConfigured() bool {
+	return os.Getenv(envReplicaHost) != "" && os.Getenv(envAIUser) != "" && os.Getenv(envAIPassword) != ""
+}
+
+// buildReplicaDSN builds the DSN for the AI read-only user against the replica.
+// Note: no multiStatements — the NL-to-SQL layer must only ever run a single
+// statement, so we disable stacked queries at the connection level too.
+func buildReplicaDSN() string {
+	host := os.Getenv(envReplicaHost)
+	port := getEnvOrDefault(envReplicaPort, getEnvOrDefault("DB_PORT", DefaultDBPort))
+	dbname := getEnvOrDefault("DB_NAME", DefaultDBName)
+	user := os.Getenv(envAIUser)
+	password := os.Getenv(envAIPassword)
+
+	return fmt.Sprintf(
+		"%s:%s@tcp(%s:%s)/%s?parseTime=true&loc=UTC&charset=utf8mb4&collation=utf8mb4_unicode_ci&timeout=%s&readTimeout=%s&writeTimeout=%s&interpolateParams=true",
+		user, password, host, port, dbname,
+		dsnConnectTimeout, dsnReadTimeout, dsnWriteTimeout,
+	)
 }
 
 func buildLocalDSN() string {
@@ -366,6 +413,16 @@ func Pool() *sql.DB {
 	return getClient().mainDB
 }
 
+// ReplicaPool returns the read-only replica pool used by the AI / NL-to-SQL
+// layer. Falls back to the primary when no replica is configured/reachable.
+func ReplicaPool() *sql.DB {
+	client := getClient()
+	if client.replicaDB != nil {
+		return client.replicaDB
+	}
+	return client.mainDB
+}
+
 func GetPoolByName(_ string) *sql.DB {
 	return Pool()
 }
@@ -379,6 +436,10 @@ func Close() {
 
 	if client.loggingDB != nil {
 		_ = client.loggingDB.Close()
+	}
+
+	if client.replicaDB != nil {
+		_ = client.replicaDB.Close()
 	}
 }
 
