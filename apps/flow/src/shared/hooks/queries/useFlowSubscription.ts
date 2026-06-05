@@ -16,34 +16,10 @@ export interface FlowSubscription {
   paddleSubscriptionId: string | null;
 }
 
-export interface FlowBillingLineItem {
-  periodStart: string;
-  periodEnd: string | null;
-  seatCount: number;
-  pricePerSeatCents: number;
-  amountCents: number;
-}
-
-export interface FlowBillingDetail {
-  billingMonth: string;
-  nextBillingDate: string | null;
-  lineItems: FlowBillingLineItem[];
-  totalCents: number;
-  planName: string;
-  status: 'active' | 'trial' | 'cancelled' | 'expired';
-  trialEndsAt: string | null;
-  paddleSubscriptionId: string | null;
-}
-
 // ── Helpers ───────────────────────────────────────────────────────────────────
 
 export function centsToDisplay(cents: number, currency = 'USD'): string {
   return new Intl.NumberFormat('en', { style: 'currency', currency }).format(cents / 100);
-}
-
-export function trialDaysLeft(trialEndsAt: string | null): number {
-  if (!trialEndsAt) return 0;
-  return Math.max(0, Math.ceil((new Date(trialEndsAt).getTime() - Date.now()) / 86_400_000));
 }
 
 export interface SeatProration {
@@ -74,26 +50,10 @@ export function computeSeatProration(pricePerSeatCents: number): SeatProration {
   };
 }
 
-export function formatPeriodRange(start: string, end: string | null): string {
-  const s = new Date(start);
-  const e = end ? new Date(end) : new Date();
-  const sMonth = shortMonth(s, true);
-  const eMonth = shortMonth(e, true);
-  const year = e.getUTCFullYear();
-  if (s.getUTCMonth() === e.getUTCMonth() && s.getUTCFullYear() === e.getUTCFullYear()) {
-    return `${sMonth} ${s.getUTCDate()} – ${e.getUTCDate()}, ${year}`;
-  }
-  return `${sMonth} ${s.getUTCDate()} – ${eMonth} ${e.getUTCDate()}, ${year}`;
-}
-
 // ── Hooks ─────────────────────────────────────────────────────────────────────
 
 interface SubResponse {
   subscription: FlowSubscription | null;
-}
-
-interface BillingResponse {
-  billing: FlowBillingDetail | null;
 }
 
 export const useFlowSubscription = (): ReturnType<typeof useQuery<FlowSubscription | null>> =>
@@ -102,12 +62,4 @@ export const useFlowSubscription = (): ReturnType<typeof useQuery<FlowSubscripti
     queryFn: () => unwrap(safe.get<SubResponse>('/subscriptions/my')),
     select: (d) => d.subscription,
     staleTime: 5 * 60 * 1000,
-  });
-
-export const useFlowBillingDetail = (): ReturnType<typeof useQuery<FlowBillingDetail | null>> =>
-  useQuery({
-    queryKey: ['flow-subscription', 'billing'],
-    queryFn: () => unwrap(safe.get<BillingResponse>('/subscriptions/billing')),
-    select: (d) => d.billing,
-    staleTime: 2 * 60 * 1000,
   });

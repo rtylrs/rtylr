@@ -8,13 +8,8 @@ import {
   Tag,
   Trash2,
   Users,
-  CreditCard,
   UserMinus,
   UserPlus,
-  Clock,
-  CheckCircle2,
-  XCircle,
-  AlertCircle,
   LayoutDashboard,
   Plus,
 } from 'lucide-react';
@@ -29,10 +24,7 @@ import {
 } from '../../shared/hooks/queries/useFlowTeam';
 import {
   useFlowSubscription,
-  useFlowBillingDetail,
   centsToDisplay,
-  trialDaysLeft,
-  formatPeriodRange,
   computeSeatProration,
 } from '../../shared/hooks/queries/useFlowSubscription';
 import { useThemeStore } from '../../shared/stores/themeStore';
@@ -61,7 +53,6 @@ function buildSections(
 ): SettingsSection[] {
   const sections: SettingsSection[] = [
     { id: 'team', label: t('common.settings.team'), icon: Users },
-    { id: 'billing', label: t('common.settings.billing'), icon: CreditCard },
     { id: 'notifications', label: t('common.settings.notifications'), icon: Bell },
     { id: 'appearance', label: t('common.settings.appearance'), icon: Palette },
     { id: 'labels', label: t('common.settings.labels'), icon: Tag },
@@ -976,204 +967,11 @@ const TeamSection: React.FC = () => {
   );
 };
 
-// ── Billing Section ───────────────────────────────────────────────────────────
-
-const STATUS_ICON: Record<string, React.ComponentType<{ size?: number }>> = {
-  active: CheckCircle2,
-  trial: Clock,
-  cancelled: XCircle,
-  expired: AlertCircle,
-};
-
-const STATUS_COLOR: Record<string, string> = {
-  active: 'var(--status-active, #16a34a)',
-  trial: 'var(--status-trial, #d97706)',
-  cancelled: 'var(--status-cancelled, #dc2626)',
-  expired: 'var(--status-expired, #6b7280)',
-};
-
-const BillingSection: React.FC = () => {
-  const { data: sub, isLoading: subLoading } = useFlowSubscription();
-  const { data: billing, isLoading: billingLoading } = useFlowBillingDetail();
-
-  const isLoading = subLoading || billingLoading;
-
-  if (isLoading) {
-    return (
-      <div className="space-y-4">
-        <div
-          className="h-6 w-32 rounded animate-pulse"
-          style={{ background: 'var(--flow-hover)' }}
-        />
-        <div
-          className="h-28 rounded-xl animate-pulse"
-          style={{ background: 'var(--flow-hover)' }}
-        />
-        <div
-          className="h-20 rounded-xl animate-pulse"
-          style={{ background: 'var(--flow-hover)' }}
-        />
-      </div>
-    );
-  }
-
-  const StatusIcon = sub ? (STATUS_ICON[sub.status] ?? AlertCircle) : null;
-  const statusColor = sub ? (STATUS_COLOR[sub.status] ?? STATUS_COLOR.expired) : '';
-
-  return (
-    <div className="space-y-6">
-      <div>
-        <h2 className="text-[15px] font-semibold mb-1" style={{ color: 'var(--flow-text)' }}>
-          Billing
-        </h2>
-        <p className="text-[12px]" style={{ color: 'var(--flow-text-muted)' }}>
-          Your Flow subscription and usage this month.
-        </p>
-      </div>
-
-      {!sub ? (
-        <div
-          className="rounded-xl p-6 text-center space-y-3"
-          style={{ border: '1px solid var(--flow-border)', background: 'var(--flow-card)' }}
-        >
-          <CreditCard
-            size={24}
-            className="mx-auto opacity-30"
-            style={{ color: 'var(--flow-text)' }}
-          />
-          <p className="text-[13px] font-medium" style={{ color: 'var(--flow-text)' }}>
-            No active subscription
-          </p>
-          <p className="text-[12px]" style={{ color: 'var(--flow-text-muted)' }}>
-            Contact your account owner or visit billing to activate Flow.
-          </p>
-        </div>
-      ) : (
-        <>
-          {/* Plan overview */}
-          <div
-            className="rounded-xl p-4 space-y-3"
-            style={{ border: '1px solid var(--flow-border)', background: 'var(--flow-card)' }}
-          >
-            <div className="flex items-center justify-between">
-              <p className="text-[14px] font-semibold" style={{ color: 'var(--flow-text)' }}>
-                {sub.planName}
-              </p>
-              {StatusIcon && (
-                <div
-                  className="flex items-center gap-1.5 text-[11px] font-semibold"
-                  style={{ color: statusColor }}
-                >
-                  <StatusIcon size={12} />
-                  <span className="capitalize">{sub.status}</span>
-                </div>
-              )}
-            </div>
-
-            <div className="flex items-end justify-between">
-              <div>
-                <p className="text-[22px] font-bold" style={{ color: 'var(--flow-text)' }}>
-                  {centsToDisplay(billing?.totalCents ?? sub.seatCount * sub.pricePerSeatCents)}
-                </p>
-                <p className="text-[11px]" style={{ color: 'var(--flow-text-muted)' }}>
-                  {sub.seatCount} seat{sub.seatCount !== 1 ? 's' : ''} ×{' '}
-                  {centsToDisplay(sub.pricePerSeatCents)}/seat · billed 1st of each month
-                </p>
-              </div>
-              {sub.status === 'trial' && (
-                <div
-                  className="text-[11px] font-semibold px-2.5 py-1 rounded-lg shrink-0"
-                  style={{
-                    background: 'rgba(245,158,11,0.12)',
-                    color: '#d97706',
-                  }}
-                >
-                  {trialDaysLeft(sub.trialEndsAt)}d left in trial
-                </div>
-              )}
-            </div>
-          </div>
-
-          {/* Current month line items */}
-          {billing && billing.lineItems.length > 0 && (
-            <div
-              className="rounded-xl overflow-hidden"
-              style={{ border: '1px solid var(--flow-border)' }}
-            >
-              <div
-                className="px-4 py-2.5 text-[11px] font-semibold uppercase tracking-wider"
-                style={{
-                  background: 'var(--flow-hover)',
-                  color: 'var(--flow-text-dim)',
-                  borderBottom: '1px solid var(--flow-border)',
-                }}
-              >
-                This month
-              </div>
-              {billing.lineItems.map((item, i) => (
-                <div
-                  key={i}
-                  className="px-4 py-3 flex items-center justify-between gap-4"
-                  style={{
-                    borderBottom:
-                      i < billing.lineItems.length - 1 ? '1px solid var(--flow-border)' : 'none',
-                  }}
-                >
-                  <div>
-                    <p className="text-[12px]" style={{ color: 'var(--flow-text)' }}>
-                      {item.seatCount} seat{item.seatCount !== 1 ? 's' : ''} ·{' '}
-                      {centsToDisplay(item.pricePerSeatCents)}/seat/mo
-                    </p>
-                    <p
-                      className="text-[11px] font-mono mt-0.5"
-                      style={{ color: 'var(--flow-text-dim)' }}
-                    >
-                      {formatPeriodRange(item.periodStart, item.periodEnd)}
-                      {!item.periodEnd && (
-                        <span
-                          className="ml-1.5 font-sans text-[10px] px-1.5 py-0.5 rounded-full"
-                          style={{ background: 'rgba(245,158,11,0.12)', color: '#d97706' }}
-                        >
-                          in progress
-                        </span>
-                      )}
-                    </p>
-                  </div>
-                  <p className="text-[13px] font-semibold" style={{ color: 'var(--flow-text)' }}>
-                    {centsToDisplay(item.amountCents)}
-                  </p>
-                </div>
-              ))}
-              <div
-                className="px-4 py-3 flex items-center justify-between"
-                style={{
-                  background: 'var(--flow-hover)',
-                  borderTop: '1px solid var(--flow-border)',
-                }}
-              >
-                <p className="text-[12px] font-semibold" style={{ color: 'var(--flow-text)' }}>
-                  {sub.status === 'trial'
-                    ? 'Estimated total (trial, not charged)'
-                    : 'Estimated total'}
-                </p>
-                <p className="text-[15px] font-bold" style={{ color: 'var(--flow-text)' }}>
-                  {centsToDisplay(billing.totalCents)}
-                </p>
-              </div>
-            </div>
-          )}
-        </>
-      )}
-    </div>
-  );
-};
-
 // ── Section content map ───────────────────────────────────────────────────────
 
 const SECTION_CONTENT: Record<string, React.FC> = {
   workspaces: WorkspacesSection,
   team: TeamSection,
-  billing: BillingSection,
   notifications: NotificationsSection,
   appearance: AppearanceSection,
   labels: LabelsSection,
