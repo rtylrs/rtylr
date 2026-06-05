@@ -58,7 +58,6 @@ const rawSections: NavSection[] = [
       { label: 'Addon System', href: '/docs/addons' },
       { label: 'Authentication', href: '/docs/authentication' },
       { label: 'Team Management', href: '/docs/team-management' },
-      { label: 'Billing', href: '/docs/billing' },
     ],
   },
   {

@@ -7,13 +7,8 @@ import {
   Database,
   Palette,
   Users,
-  CreditCard,
   UserPlus,
   UserMinus,
-  Clock,
-  CheckCircle2,
-  XCircle,
-  AlertCircle,
 } from 'lucide-react';
 import appConfig from '../../app.json';
 import PageHeader from '../../shared/components/PageHeader';
@@ -26,14 +21,11 @@ import {
 } from '../../shared/hooks/queries/useErpTeam';
 import {
   useErpSubscription,
-  useErpSubscriptionBilling,
   centsToDisplay,
-  trialDaysLeft,
-  formatPeriodRange,
   computeSeatProration,
 } from '../../shared/hooks/queries/useErpSubscription';
 
-type TabId = 'general' | 'team' | 'billing';
+type TabId = 'general' | 'team';
 
 interface TabDef {
   id: TabId;
@@ -44,7 +36,6 @@ interface TabDef {
 const TABS: TabDef[] = [
   { id: 'general', label: 'General', icon: SettingsIcon },
   { id: 'team', label: 'Team', icon: Users },
-  { id: 'billing', label: 'Billing', icon: CreditCard },
 ];
 
 // ── Shared primitives ─────────────────────────────────────────────────────────
@@ -458,191 +449,6 @@ const TeamTab: React.FC = () => {
   );
 };
 
-// ── Billing Tab ───────────────────────────────────────────────────────────────
-
-const STATUS_ICON: Record<string, React.ComponentType<{ size?: number }>> = {
-  active: CheckCircle2,
-  trial: Clock,
-  cancelled: XCircle,
-  expired: AlertCircle,
-};
-
-const STATUS_COLOR: Record<string, string> = {
-  active: 'var(--status-active, #16a34a)',
-  trial: 'var(--status-trial, #d97706)',
-  cancelled: 'var(--status-cancelled, #dc2626)',
-  expired: 'var(--status-expired, #6b7280)',
-};
-
-const BillingTab: React.FC = () => {
-  const { data: sub, isLoading: subLoading } = useErpSubscription();
-  const { data: billing, isLoading: billingLoading } = useErpSubscriptionBilling();
-
-  const isLoading = subLoading || billingLoading;
-
-  if (isLoading) {
-    return (
-      <div className="w-full min-w-0 space-y-4">
-        <div
-          className="h-6 w-32 rounded animate-pulse"
-          style={{ background: 'var(--hub-hover)' }}
-        />
-        <div className="h-28 rounded-xl animate-pulse" style={{ background: 'var(--hub-hover)' }} />
-        <div className="h-20 rounded-xl animate-pulse" style={{ background: 'var(--hub-hover)' }} />
-      </div>
-    );
-  }
-
-  const StatusIcon = sub ? (STATUS_ICON[sub.status] ?? AlertCircle) : null;
-  const statusColor = sub ? (STATUS_COLOR[sub.status] ?? STATUS_COLOR['expired']) : '';
-
-  return (
-    <div className="w-full min-w-0 space-y-5">
-      <div>
-        <h2 className="text-[15px] font-semibold mb-1" style={{ color: 'var(--hub-text)' }}>
-          Billing
-        </h2>
-        <p className="text-[12px]" style={{ color: 'var(--hub-text-muted)' }}>
-          Your ERP subscription and usage this month.
-        </p>
-      </div>
-
-      {!sub ? (
-        <div
-          className="rounded-xl p-6 text-center space-y-3"
-          style={{ border: '1px solid var(--hub-border)', background: 'var(--hub-card)' }}
-        >
-          <CreditCard
-            size={24}
-            className="mx-auto opacity-30"
-            style={{ color: 'var(--hub-text)' }}
-          />
-          <p className="text-[13px] font-medium" style={{ color: 'var(--hub-text)' }}>
-            No active subscription
-          </p>
-          <p className="text-[12px]" style={{ color: 'var(--hub-text-muted)' }}>
-            Contact your account owner or visit billing to activate ERP.
-          </p>
-        </div>
-      ) : (
-        <>
-          <div
-            className="rounded-xl p-4 space-y-3"
-            style={{ border: '1px solid var(--hub-border)', background: 'var(--hub-card)' }}
-          >
-            <div className="flex items-center justify-between">
-              <p className="text-[14px] font-semibold" style={{ color: 'var(--hub-text)' }}>
-                {sub.planName}
-              </p>
-              {StatusIcon && (
-                <div
-                  className="flex items-center gap-1.5 text-[11px] font-semibold"
-                  style={{ color: statusColor }}
-                >
-                  <StatusIcon size={12} />
-                  <span className="capitalize">{sub.status}</span>
-                </div>
-              )}
-            </div>
-
-            <div className="flex items-end justify-between">
-              <div>
-                <p className="text-[22px] font-bold" style={{ color: 'var(--hub-text)' }}>
-                  {centsToDisplay(billing?.totalCents ?? sub.seatCount * sub.pricePerSeatCents)}
-                </p>
-                <p className="text-[11px]" style={{ color: 'var(--hub-text-muted)' }}>
-                  {sub.seatCount} seat{sub.seatCount !== 1 ? 's' : ''} ×{' '}
-                  {centsToDisplay(sub.pricePerSeatCents)}/seat · billed 1st of each month
-                </p>
-              </div>
-              {sub.status === 'trial' && (
-                <div
-                  className="text-[11px] font-semibold px-2.5 py-1 rounded-lg shrink-0"
-                  style={{
-                    background: 'color-mix(in srgb, var(--status-trial, #d97706) 12%, transparent)',
-                    color: 'var(--status-trial, #d97706)',
-                  }}
-                >
-                  {trialDaysLeft(sub.trialEndsAt)}d left in trial
-                </div>
-              )}
-            </div>
-          </div>
-
-          {billing && billing.lineItems.length > 0 && (
-            <div
-              className="rounded-xl overflow-hidden"
-              style={{ border: '1px solid var(--hub-border)' }}
-            >
-              <div
-                className="px-4 py-2.5 text-[11px] font-semibold uppercase tracking-wider"
-                style={{
-                  background: 'var(--hub-hover)',
-                  color: 'var(--hub-text-muted)',
-                  borderBottom: '1px solid var(--hub-border)',
-                }}
-              >
-                This month
-              </div>
-              {billing.lineItems.map((item, i) => (
-                <div
-                  key={i}
-                  className="px-4 py-3 flex items-center justify-between gap-4"
-                  style={{
-                    borderBottom:
-                      i < billing.lineItems.length - 1 ? '1px solid var(--hub-border)' : 'none',
-                  }}
-                >
-                  <div>
-                    <p className="text-[12px]" style={{ color: 'var(--hub-text)' }}>
-                      {item.seatCount} seat{item.seatCount !== 1 ? 's' : ''} ·{' '}
-                      {centsToDisplay(item.pricePerSeatCents)}/seat/mo
-                    </p>
-                    <p
-                      className="text-[11px] font-mono mt-0.5"
-                      style={{ color: 'var(--hub-text-muted)' }}
-                    >
-                      {formatPeriodRange(item.periodStart, item.periodEnd)}
-                      {!item.periodEnd && (
-                        <span
-                          className="ml-1.5 font-sans text-[10px] px-1.5 py-0.5 rounded-full"
-                          style={{
-                            background:
-                              'color-mix(in srgb, var(--status-trial, #d97706) 12%, transparent)',
-                            color: 'var(--status-trial, #d97706)',
-                          }}
-                        >
-                          in progress
-                        </span>
-                      )}
-                    </p>
-                  </div>
-                  <p className="text-[13px] font-semibold" style={{ color: 'var(--hub-text)' }}>
-                    {centsToDisplay(item.amountCents)}
-                  </p>
-                </div>
-              ))}
-              <div
-                className="px-4 py-3 flex items-center justify-between"
-                style={{ background: 'var(--hub-hover)', borderTop: '1px solid var(--hub-border)' }}
-              >
-                <p className="text-[12px] font-semibold" style={{ color: 'var(--hub-text)' }}>
-                  {sub.status === 'trial'
-                    ? 'Estimated total (trial, not charged)'
-                    : 'Estimated total'}
-                </p>
-                <p className="text-[15px] font-bold" style={{ color: 'var(--hub-text)' }}>
-                  {centsToDisplay(billing.totalCents)}
-                </p>
-              </div>
-            </div>
-          )}
-        </>
-      )}
-    </div>
-  );
-};
-
 // ── Main Settings Component ───────────────────────────────────────────────────
 
 const Settings: React.FC = () => {
@@ -693,7 +499,6 @@ const Settings: React.FC = () => {
       >
         {activeTab === 'general' && <GeneralTab />}
         {activeTab === 'team' && <TeamTab />}
-        {activeTab === 'billing' && <BillingTab />}
       </motion.div>
     </div>
   );

@@ -7,13 +7,8 @@ import {
   Image as ImageIcon,
   Settings2,
   Users,
-  CreditCard,
   UserPlus,
   UserMinus,
-  Clock,
-  CheckCircle2,
-  XCircle,
-  AlertCircle,
 } from 'lucide-react';
 import appConfig from '../../app.json';
 import PageHeader from '../../shared/components/PageHeader';
@@ -34,16 +29,13 @@ import {
 } from '../../shared/hooks/queries/useFinanceTeam';
 import {
   useFinanceSubscription,
-  useFinanceSubscriptionBilling,
   centsToDisplay,
-  trialDaysLeft,
-  formatPeriodRange,
   computeSeatProration,
 } from '../../shared/hooks/queries/useFinanceSubscription';
 
 const MONTHS = ['Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun', 'Jul', 'Aug', 'Sep', 'Oct', 'Nov', 'Dec'];
 
-type TabId = 'general' | 'team' | 'billing';
+type TabId = 'general' | 'team';
 
 interface Tab {
   id: TabId;
@@ -54,7 +46,6 @@ interface Tab {
 const TABS: Tab[] = [
   { id: 'general', label: 'General', icon: Settings2 },
   { id: 'team', label: 'Team', icon: Users },
-  { id: 'billing', label: 'Billing', icon: CreditCard },
 ];
 
 // ── General Tab ───────────────────────────────────────────────────────────────
@@ -511,228 +502,6 @@ const TeamTab: React.FC = () => {
   );
 };
 
-// ── Billing Tab ───────────────────────────────────────────────────────────────
-
-const STATUS_ICON: Record<string, React.ComponentType<{ size?: number }>> = {
-  active: CheckCircle2,
-  trial: Clock,
-  cancelled: XCircle,
-  expired: AlertCircle,
-};
-
-const STATUS_COLOR: Record<string, string> = {
-  active: 'var(--status-active, #16a34a)',
-  trial: 'var(--status-trial, #d97706)',
-  cancelled: 'var(--status-cancelled, #dc2626)',
-  expired: 'var(--status-expired, #6b7280)',
-};
-
-const BillingTab: React.FC = () => {
-  const { data: sub, isLoading: subLoading } = useFinanceSubscription();
-  const { data: billing, isLoading: billingLoading } = useFinanceSubscriptionBilling();
-
-  const isLoading = subLoading || billingLoading;
-
-  if (isLoading) {
-    return (
-      <div style={{ display: 'flex', flexDirection: 'column', gap: 16, maxWidth: 600 }}>
-        {[32, 112, 80].map((h, i) => (
-          <div
-            key={i}
-            style={{
-              height: h,
-              borderRadius: 12,
-              background: 'var(--hub-hover)',
-            }}
-          />
-        ))}
-      </div>
-    );
-  }
-
-  const StatusIcon = sub ? (STATUS_ICON[sub.status] ?? AlertCircle) : null;
-  const statusColor = sub ? (STATUS_COLOR[sub.status] ?? STATUS_COLOR['expired']) : '';
-
-  return (
-    <div style={{ display: 'flex', flexDirection: 'column', gap: 20, maxWidth: 600 }}>
-      <div>
-        <div style={{ fontSize: 15, fontWeight: 600, color: 'var(--hub-text)', marginBottom: 4 }}>
-          Billing
-        </div>
-        <div style={{ fontSize: 12, color: 'var(--hub-text-muted)' }}>
-          Your Finance subscription and usage this month.
-        </div>
-      </div>
-
-      {!sub ? (
-        <div
-          style={{
-            ...cardStyle,
-            padding: '32px 24px',
-            textAlign: 'center',
-            display: 'flex',
-            flexDirection: 'column',
-            gap: 12,
-            alignItems: 'center',
-          }}
-        >
-          <CreditCard size={24} style={{ opacity: 0.3, color: 'var(--hub-text)' }} />
-          <p style={{ fontSize: 13, fontWeight: 500, color: 'var(--hub-text)', margin: 0 }}>
-            No active subscription
-          </p>
-          <p style={{ fontSize: 12, color: 'var(--hub-text-muted)', margin: 0 }}>
-            Contact your account owner or visit billing to activate Finance.
-          </p>
-        </div>
-      ) : (
-        <>
-          <div
-            style={{ ...cardStyle, padding: 16, display: 'flex', flexDirection: 'column', gap: 12 }}
-          >
-            <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between' }}>
-              <p style={{ fontSize: 14, fontWeight: 600, color: 'var(--hub-text)', margin: 0 }}>
-                {sub.planName}
-              </p>
-              {StatusIcon && (
-                <div
-                  style={{
-                    display: 'flex',
-                    alignItems: 'center',
-                    gap: 6,
-                    fontSize: 11,
-                    fontWeight: 600,
-                    color: statusColor,
-                  }}
-                >
-                  <StatusIcon size={12} />
-                  <span style={{ textTransform: 'capitalize' }}>{sub.status}</span>
-                </div>
-              )}
-            </div>
-
-            <div
-              style={{ display: 'flex', alignItems: 'flex-end', justifyContent: 'space-between' }}
-            >
-              <div>
-                <p style={{ fontSize: 22, fontWeight: 700, color: 'var(--hub-text)', margin: 0 }}>
-                  {centsToDisplay(billing?.totalCents ?? sub.seatCount * sub.pricePerSeatCents)}
-                </p>
-                <p style={{ fontSize: 11, color: 'var(--hub-text-muted)', margin: '4px 0 0' }}>
-                  {sub.seatCount} seat{sub.seatCount !== 1 ? 's' : ''} ×{' '}
-                  {centsToDisplay(sub.pricePerSeatCents)}/seat · billed 1st of each month
-                </p>
-              </div>
-              {sub.status === 'trial' && (
-                <div
-                  style={{
-                    fontSize: 11,
-                    fontWeight: 600,
-                    padding: '4px 10px',
-                    borderRadius: 8,
-                    flexShrink: 0,
-                    background: 'color-mix(in srgb, var(--status-trial, #d97706) 12%, transparent)',
-                    color: 'var(--status-trial, #d97706)',
-                  }}
-                >
-                  {trialDaysLeft(sub.trialEndsAt)}d left in trial
-                </div>
-              )}
-            </div>
-          </div>
-
-          {billing && billing.lineItems.length > 0 && (
-            <div style={{ ...cardStyle, overflow: 'hidden' }}>
-              <div
-                style={{
-                  padding: '10px 16px',
-                  fontSize: 11,
-                  fontWeight: 600,
-                  textTransform: 'uppercase',
-                  letterSpacing: '0.05em',
-                  background: 'var(--hub-hover)',
-                  color: 'var(--hub-text-muted)',
-                  borderBottom: '1px solid var(--hub-border)',
-                }}
-              >
-                This month
-              </div>
-              {billing.lineItems.map((item, i) => (
-                <div
-                  key={i}
-                  style={{
-                    padding: '12px 16px',
-                    display: 'flex',
-                    alignItems: 'center',
-                    justifyContent: 'space-between',
-                    gap: 16,
-                    borderBottom:
-                      i < billing.lineItems.length - 1 ? '1px solid var(--hub-border)' : 'none',
-                  }}
-                >
-                  <div>
-                    <p style={{ fontSize: 12, color: 'var(--hub-text)', margin: 0 }}>
-                      {item.seatCount} seat{item.seatCount !== 1 ? 's' : ''} ·{' '}
-                      {centsToDisplay(item.pricePerSeatCents)}/seat/mo
-                    </p>
-                    <p
-                      style={{
-                        fontSize: 11,
-                        fontFamily: 'monospace',
-                        color: 'var(--hub-text-muted)',
-                        margin: '2px 0 0',
-                      }}
-                    >
-                      {formatPeriodRange(item.periodStart, item.periodEnd)}
-                      {!item.periodEnd && (
-                        <span
-                          style={{
-                            marginLeft: 6,
-                            fontFamily: 'inherit',
-                            fontSize: 10,
-                            padding: '2px 6px',
-                            borderRadius: 999,
-                            background:
-                              'color-mix(in srgb, var(--status-trial, #d97706) 12%, transparent)',
-                            color: 'var(--status-trial, #d97706)',
-                          }}
-                        >
-                          in progress
-                        </span>
-                      )}
-                    </p>
-                  </div>
-                  <p style={{ fontSize: 13, fontWeight: 600, color: 'var(--hub-text)', margin: 0 }}>
-                    {centsToDisplay(item.amountCents)}
-                  </p>
-                </div>
-              ))}
-              <div
-                style={{
-                  padding: '12px 16px',
-                  display: 'flex',
-                  alignItems: 'center',
-                  justifyContent: 'space-between',
-                  background: 'var(--hub-hover)',
-                  borderTop: '1px solid var(--hub-border)',
-                }}
-              >
-                <p style={{ fontSize: 12, fontWeight: 600, color: 'var(--hub-text)', margin: 0 }}>
-                  {sub.status === 'trial'
-                    ? 'Estimated total (trial, not charged)'
-                    : 'Estimated total'}
-                </p>
-                <p style={{ fontSize: 15, fontWeight: 700, color: 'var(--hub-text)', margin: 0 }}>
-                  {centsToDisplay(billing.totalCents)}
-                </p>
-              </div>
-            </div>
-          )}
-        </>
-      )}
-    </div>
-  );
-};
-
 // ── Main Settings Component ───────────────────────────────────────────────────
 
 const Settings: React.FC = () => {
@@ -794,7 +563,6 @@ const Settings: React.FC = () => {
       >
         {activeTab === 'general' && <GeneralTab />}
         {activeTab === 'team' && <TeamTab />}
-        {activeTab === 'billing' && <BillingTab />}
       </motion.div>
     </motion.div>
   );
