@@ -42,6 +42,20 @@ CREATE TABLE IF NOT EXISTS erp_products (
     reorder_quantity DECIMAL(10,3) DEFAULT 0,
     is_active BOOLEAN DEFAULT TRUE,
     track_inventory BOOLEAN DEFAULT TRUE,
+    -- PIM extensions (migration 005_product_pim.sql)
+    compare_at_price DECIMAL(10,2) NOT NULL DEFAULT 0,
+    tax_rate DECIMAL(5,2) NOT NULL DEFAULT 0,
+    currency VARCHAR(3) NOT NULL DEFAULT 'USD',
+    weight DECIMAL(10,3) NOT NULL DEFAULT 0,
+    weight_unit VARCHAR(8) NOT NULL DEFAULT 'kg',
+    length DECIMAL(10,2) NOT NULL DEFAULT 0,
+    width DECIMAL(10,2) NOT NULL DEFAULT 0,
+    height DECIMAL(10,2) NOT NULL DEFAULT 0,
+    dimension_unit VARCHAR(8) NOT NULL DEFAULT 'cm',
+    country_of_origin VARCHAR(2) DEFAULT NULL,
+    hs_code VARCHAR(20) DEFAULT NULL,
+    allow_backorder BOOLEAN NOT NULL DEFAULT FALSE,
+    lead_time_days INT NOT NULL DEFAULT 0,
     created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
     updated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP
 );
