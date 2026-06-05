@@ -52,11 +52,11 @@
 }
 
 .rtylr-logo {
-  filter: none;
+  filter: brightness(0) invert(1);
 }
 
 :root[data-theme='light'] .rtylr-logo {
-  filter: invert(1);
+  filter: brightness(0);
 }
 
 @layer base {
