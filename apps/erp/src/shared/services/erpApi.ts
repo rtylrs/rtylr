@@ -39,6 +39,7 @@ export interface CreateProductInput {
   unit?: string;
   costPrice: number;
   salePrice: number;
+  stockQuantity?: number;
   lowStockThreshold?: number;
   reorderQuantity?: number;
   isActive?: boolean;

@@ -51,6 +51,7 @@ const QuickAddProductModal: React.FC<QuickAddProductModalProps> = ({
   const [unit, setUnit] = useState('pcs');
   const [costPrice, setCostPrice] = useState('');
   const [salePrice, setSalePrice] = useState('');
+  const [stock, setStock] = useState('');
   const [lowStock, setLowStock] = useState('');
   const [reorderPoint, setReorderPoint] = useState('');
   const [trackInventory, setTrackInventory] = useState(true);
@@ -77,6 +78,7 @@ const QuickAddProductModal: React.FC<QuickAddProductModalProps> = ({
       setUnit(editing.unit ?? 'pcs');
       setCostPrice(String(editing.costPrice ?? ''));
       setSalePrice(String(editing.salePrice ?? ''));
+      setStock(editing.stock != null ? String(editing.stock) : '');
       setLowStock(editing.lowStock != null ? String(editing.lowStock) : '');
       setReorderPoint(editing.reorderPoint != null ? String(editing.reorderPoint) : '');
     }
@@ -101,6 +103,7 @@ const QuickAddProductModal: React.FC<QuickAddProductModalProps> = ({
       setUnit('pcs');
       setCostPrice('');
       setSalePrice('');
+      setStock('');
       setLowStock('');
       setReorderPoint('');
       setTrackInventory(true);
@@ -133,6 +136,7 @@ const QuickAddProductModal: React.FC<QuickAddProductModalProps> = ({
       unit,
       costPrice: isNaN(cost) ? 0 : cost,
       salePrice: isNaN(sale) ? 0 : sale,
+      stockQuantity: stock ? Number(stock) : undefined,
       lowStockThreshold: lowStock ? Number(lowStock) : undefined,
       reorderQuantity: reorderPoint ? Number(reorderPoint) : undefined,
       isActive: active,
@@ -277,7 +281,18 @@ const QuickAddProductModal: React.FC<QuickAddProductModalProps> = ({
 
           <SectionLabel>{t('erp.products.sections.inventory')}</SectionLabel>
           <div className="grid grid-cols-2 gap-3">
+            <input
+              aria-label={t('erp.products.fields.stock')}
+              value={stock}
+              onChange={(e) => setStock(e.target.value)}
+              placeholder={t('erp.products.fields.stock')}
+              type="number"
+              className={inputClass}
+              style={inputStyle}
+            />
             <UnitSelector value={unit} onChange={setUnit} />
+          </div>
+          <div className="grid grid-cols-2 gap-3">
             <input
               aria-label={t('erp.products.fields.lowStock')}
               value={lowStock}
@@ -287,16 +302,16 @@ const QuickAddProductModal: React.FC<QuickAddProductModalProps> = ({
               className={inputClass}
               style={inputStyle}
             />
+            <input
+              aria-label={t('erp.products.fields.reorderPoint')}
+              value={reorderPoint}
+              onChange={(e) => setReorderPoint(e.target.value)}
+              placeholder={t('erp.products.fields.reorderPoint')}
+              type="number"
+              className={inputClass}
+              style={inputStyle}
+            />
           </div>
-          <input
-            aria-label={t('erp.products.fields.reorderPoint')}
-            value={reorderPoint}
-            onChange={(e) => setReorderPoint(e.target.value)}
-            placeholder={t('erp.products.fields.reorderPoint')}
-            type="number"
-            className={inputClass}
-            style={inputStyle}
-          />
           <div className="flex items-center justify-between gap-3 pt-1">
             <label
               className="flex items-center gap-2 text-xs cursor-pointer"
