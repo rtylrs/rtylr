@@ -10,7 +10,6 @@ import {
   UserPlus,
   UserMinus,
 } from 'lucide-react';
-import appConfig from '../../app.json';
 import PageHeader from '../../shared/components/PageHeader';
 import { useSettings } from '../../shared/lib/settings';
 import { CURRENCY_OPTIONS, type Currency } from '../../shared/lib/money';
@@ -220,31 +219,6 @@ const GeneralTab: React.FC = () => {
               ))}
             </select>
           </Field>
-        </Card>
-
-        <Card title="About">
-          <div style={{ display: 'flex', flexDirection: 'column', gap: 8 }}>
-            {[
-              { label: 'Application', value: appConfig.name },
-              { label: 'Version', value: `v${appConfig.version}` },
-            ].map(({ label, value }) => (
-              <div
-                key={label}
-                style={{
-                  display: 'flex',
-                  justifyContent: 'space-between',
-                  alignItems: 'center',
-                  padding: '4px 0',
-                  borderBottom: '1px solid var(--hub-border)',
-                }}
-              >
-                <span style={{ fontSize: 12, color: 'var(--hub-text-muted)' }}>{label}</span>
-                <span style={{ fontSize: 12, fontFamily: 'monospace', color: 'var(--hub-text)' }}>
-                  {value}
-                </span>
-              </div>
-            ))}
-          </div>
         </Card>
 
         <Card title="Shortcuts">

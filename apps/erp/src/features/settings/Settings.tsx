@@ -10,7 +10,6 @@ import {
   UserPlus,
   UserMinus,
 } from 'lucide-react';
-import appConfig from '../../app.json';
 import PageHeader from '../../shared/components/PageHeader';
 import { useSettings } from '../../shared/lib/settingsStore';
 import { useWarehouses } from '../warehouses/useWarehouses';
@@ -218,19 +217,6 @@ const GeneralTab: React.FC = () => {
             ))}
           </div>
         </ConfigField>
-      </Section>
-
-      <Section title="About" icon={SettingsIcon}>
-        {[
-          { label: 'Application', value: appConfig.name },
-          { label: 'Version', value: `v${appConfig.version}` },
-        ].map(({ label, value }) => (
-          <ConfigField key={label} label={label}>
-            <span className="text-xs font-mono" style={{ color: 'var(--hub-text)' }}>
-              {value}
-            </span>
-          </ConfigField>
-        ))}
       </Section>
     </motion.div>
   );

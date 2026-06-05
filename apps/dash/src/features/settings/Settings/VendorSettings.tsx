@@ -7,7 +7,6 @@ import {
   Scales as Gavel,
 } from 'phosphor-react';
 import { useNavigate } from '@tanstack/react-router';
-import appConfig from '../../../app.json';
 
 const VendorSettings = () => {
   const navigate = useNavigate();
@@ -76,17 +75,6 @@ const VendorSettings = () => {
           </div>
         </div>
       </div>
-
-      <p
-        style={{
-          marginTop: 24,
-          fontSize: 11,
-          color: 'var(--dash-text-dim)',
-          fontFamily: 'monospace',
-        }}
-      >
-        {appConfig.name} v{appConfig.version}
-      </p>
     </div>
   );
 };
