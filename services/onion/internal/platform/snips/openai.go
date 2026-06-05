@@ -143,6 +143,18 @@ func (c *OpenAIProvider) CompleteTextStream(ctx context.Context, prompt string) 
 
 	go func() {
 		defer close(tokenChan)
+		// Never let a provider/SDK panic escape this goroutine — an unrecovered
+		// goroutine panic crashes the whole API process (the HTTP recover
+		// middleware can't catch it). Surface it as a stream error instead.
+		defer func() {
+			if r := recover(); r != nil {
+				logger.Global().Error("panic in AI stream goroutine", logger.Any("panic", r))
+				select {
+				case tokenChan <- StreamToken{Error: "internal streaming error", Done: true}:
+				default:
+				}
+			}
+		}()
 		c.processOpenAIStream(ctx, prompt, tokenChan)
 	}()
 

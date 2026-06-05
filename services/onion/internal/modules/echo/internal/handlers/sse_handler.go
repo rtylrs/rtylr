@@ -217,6 +217,11 @@ func (h *GenerateTextStreamHandler) recordUsage(ctx context.Context, businessID,
 		return
 	}
 	go func() {
+		defer func() {
+			if r := recover(); r != nil {
+				logger.Ctx(ctx).Error("panic in recordUsage goroutine", logger.Any("panic", r))
+			}
+		}()
 		bg, cancel := context.WithTimeout(context.WithoutCancel(ctx), 10*time.Second)
 		defer cancel()
 		h.QuotaService.RecordUsage(bg, businessID, userID, tokens)
@@ -417,6 +422,13 @@ func (h *GenerateTextStreamHandler) processAndStreamToken(w http.ResponseWriter,
 }
 
 func (h *GenerateTextStreamHandler) storeAIResponse(ctx context.Context, sessionID string, userID int, response string) {
+	// Runs in its own goroutine — a panic here must not crash the API process.
+	defer func() {
+		if r := recover(); r != nil {
+			logger.Ctx(ctx).Error("panic in storeAIResponse goroutine", logger.Any("panic", r))
+		}
+	}()
+
 	_, err := h.MemoryService.StoreMessage(ctx, sessionID, userID, "assistant", response, len(response)/4)
 	if err != nil {
 		logger.Ctx(ctx).Error("Failed to store AI response",
@@ -430,6 +442,11 @@ func (h *GenerateTextStreamHandler) storeAIResponse(ctx context.Context, session
 	// abort before it ever starts. We still keep the parent's logger
 	// scope so trace ids survive.
 	go func() {
+		defer func() {
+			if r := recover(); r != nil {
+				logger.Global().Error("panic in summarize goroutine", logger.Any("panic", r))
+			}
+		}()
 		bg, cancel := context.WithTimeout(context.WithoutCancel(ctx), 30*time.Second)
 		defer cancel()
 
