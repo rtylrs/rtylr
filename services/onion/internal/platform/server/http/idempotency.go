@@ -2,6 +2,7 @@ package http
 
 import (
 	"bytes"
+	"context"
 	"encoding/json"
 	"fmt"
 	"net/http"
@@ -10,6 +11,7 @@ import (
 
 	authPkg "github.com/voxire/onion/internal/platform/auth"
 	"github.com/voxire/onion/internal/platform/cache/cacher"
+	"github.com/voxire/onion/internal/platform/config"
 	"github.com/voxire/onion/internal/platform/logger"
 )
 
@@ -17,6 +19,10 @@ const (
 	idempotencyHeader = "Idempotency-Key"
 	idempotencyTTL    = 30 * time.Minute
 	idempotencyMaxLen = 128
+	// idempotencyPendingStatus marks a reservation for an in-flight request in
+	// the distributed (Redis) path. A real HTTP status is always >= 100, so 0
+	// unambiguously means "owned but not yet completed".
+	idempotencyPendingStatus = 0
 )
 
 // idempotencyRecord is what we store in the cache for a completed request.
@@ -28,9 +34,15 @@ type idempotencyRecord struct {
 
 // IdempotencyMiddleware deduplicates mutating requests that carry an
 // Idempotency-Key header. On the first call the handler runs normally and
-// the response is stored in BigCache for 30 minutes. Any subsequent request
-// with the same key from the same principal within that window gets the
-// stored response without touching the DB.
+// the response is stored for 30 minutes; any subsequent request with the same
+// key from the same principal within that window gets the stored response
+// without touching the DB.
+//
+// When Redis is enabled the store is Redis (shared across all replicas), with a
+// SetNx reservation so exactly one request executes even under a horizontally
+// scaled deployment — a retry that lands on a different replica replays the
+// stored response instead of re-executing the handler. Without Redis it falls
+// back to the in-process cache (correct for a single replica).
 //
 // Scope: POST, PUT, PATCH only. GET/DELETE are idempotent by nature.
 // Key scoping: authenticated user ID when available, otherwise remote IP.
@@ -55,42 +67,108 @@ func IdempotencyMiddleware(next http.Handler) http.Handler {
 		}
 
 		cacheKey := buildIdempotencyKey(r, key)
-		lc := cacher.GetLocalCache(r.Context())
+		if config.IsRedisEnabled() {
+			serveIdempotentRedis(w, r, next, cacheKey)
+			return
+		}
+		serveIdempotentLocal(w, r, next, cacheKey)
+	})
+}
 
-		if cached := lc.Get(r.Context(), cacheKey); cached != nil {
+// serveIdempotentRedis gives correct cross-replica idempotency. SetNx atomically
+// reserves the key so exactly one request runs; concurrent or retried duplicates
+// (on any replica) either replay the completed response or get 409 while it is
+// still in flight. The reservation is released if the handler fails or panics so
+// the client can retry with a fresh attempt.
+func serveIdempotentRedis(w http.ResponseWriter, r *http.Request, next http.Handler, cacheKey string) {
+	rc := cacher.GetRedisCache()
+	pending, _ := json.Marshal(idempotencyRecord{Status: idempotencyPendingStatus})
+
+	reserved := rc.SetNx(r.Context(), cacheKey, pending, idempotencyTTL)
+	if !reserved {
+		if cached := rc.Get(r.Context(), cacheKey); cached != nil {
 			var rec idempotencyRecord
 			if err := json.Unmarshal(cached, &rec); err == nil {
-				for hk, hvs := range rec.Headers {
-					for _, hv := range hvs {
-						w.Header().Set(hk, hv)
-					}
+				if rec.Status >= 200 {
+					writeIdempotentReplay(w, rec)
+					return
 				}
-				w.Header().Set("Idempotent-Replayed", "true")
-				w.WriteHeader(rec.Status)
-				_, _ = w.Write(rec.Body)
+				// Owned by another in-flight request (possibly on another
+				// replica) — tell the client to retry shortly.
+				w.Header().Set("Content-Type", "application/json")
+				w.WriteHeader(http.StatusConflict)
+				_, _ = w.Write([]byte(`{"error":"a request with this Idempotency-Key is still being processed"}`))
 				return
 			}
-			logger.Ctx(r.Context()).Warn("failed to unmarshal idempotency record, reprocessing",
-				logger.String("key", cacheKey),
-			)
 		}
+		// Reservation vanished between SetNx and Get (TTL expiry / release):
+		// process without holding it rather than blocking the caller.
+	}
 
-		rec := &responseRecorder{ResponseWriter: w, status: http.StatusOK}
-		next.ServeHTTP(rec, r)
+	stored := false
+	if reserved {
+		// Release the reservation unless we store a success, so an error or a
+		// panic doesn't leave the key wedged for the full TTL.
+		defer func() {
+			if !stored {
+				rc.Delete(context.Background(), []string{cacheKey})
+			}
+		}()
+	}
 
-		// Only cache successful responses — errors may be transient and the
-		// client should be able to retry and get a fresh attempt.
-		if rec.status >= 200 && rec.status < 300 {
-			entry := idempotencyRecord{
-				Status:  rec.status,
-				Headers: w.Header().Clone(),
-				Body:    rec.buf.Bytes(),
-			}
-			if b, err := json.Marshal(entry); err == nil {
-				lc.Put(r.Context(), cacheKey, b, idempotencyTTL)
-			}
+	rec := &responseRecorder{ResponseWriter: w, status: http.StatusOK}
+	next.ServeHTTP(rec, r)
+
+	if rec.status >= 200 && rec.status < 300 {
+		entry := idempotencyRecord{Status: rec.status, Headers: w.Header().Clone(), Body: rec.buf.Bytes()}
+		if b, err := json.Marshal(entry); err == nil {
+			rc.Put(r.Context(), cacheKey, b, idempotencyTTL)
+			stored = true
 		}
-	})
+	}
+}
+
+// serveIdempotentLocal is the single-replica fallback used when Redis is off:
+// dedup against the in-process cache. There is no cross-replica guarantee here
+// (there is only one replica), so a simple get-or-run is sufficient.
+func serveIdempotentLocal(w http.ResponseWriter, r *http.Request, next http.Handler, cacheKey string) {
+	lc := cacher.GetLocalCache(r.Context())
+
+	if cached := lc.Get(r.Context(), cacheKey); cached != nil {
+		var rec idempotencyRecord
+		if err := json.Unmarshal(cached, &rec); err == nil {
+			writeIdempotentReplay(w, rec)
+			return
+		}
+		logger.Ctx(r.Context()).Warn("failed to unmarshal idempotency record, reprocessing",
+			logger.String("key", cacheKey),
+		)
+	}
+
+	rec := &responseRecorder{ResponseWriter: w, status: http.StatusOK}
+	next.ServeHTTP(rec, r)
+
+	// Only cache successful responses — errors may be transient and the
+	// client should be able to retry and get a fresh attempt.
+	if rec.status >= 200 && rec.status < 300 {
+		entry := idempotencyRecord{Status: rec.status, Headers: w.Header().Clone(), Body: rec.buf.Bytes()}
+		if b, err := json.Marshal(entry); err == nil {
+			lc.Put(r.Context(), cacheKey, b, idempotencyTTL)
+		}
+	}
+}
+
+// writeIdempotentReplay replays a stored response, tagging it so clients can tell
+// it came from the idempotency cache rather than a fresh execution.
+func writeIdempotentReplay(w http.ResponseWriter, rec idempotencyRecord) {
+	for hk, hvs := range rec.Headers {
+		for _, hv := range hvs {
+			w.Header().Set(hk, hv)
+		}
+	}
+	w.Header().Set("Idempotent-Replayed", "true")
+	w.WriteHeader(rec.Status)
+	_, _ = w.Write(rec.Body)
 }
 
 func buildIdempotencyKey(r *http.Request, key string) string {

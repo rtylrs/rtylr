@@ -35,7 +35,17 @@ func Default() *Hub {
 
 // Publish is the ergonomic helper for the common publish-via-default
 // pattern. Silently drops events if no hub is configured.
+//
+// When the Redis backplane is enabled (see EnableRedisBackplane) the event is
+// published to Redis instead of fanned out locally; every replica's subscriber
+// — including this one — then delivers it to its own hub, so clients connected
+// to any replica receive it exactly once. Without the backplane it fans out
+// in-process only (correct for a single replica).
 func Publish(e Event) {
+	if backplaneEnabled {
+		publishBackplane(e)
+		return
+	}
 	h := Default()
 	if h == nil {
 		return

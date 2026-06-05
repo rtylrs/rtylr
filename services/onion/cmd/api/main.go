@@ -626,6 +626,12 @@ func setupRoutes(ctx context.Context, r *chi.Mux) {
 		}
 	}))
 
+	// Fan realtime events across replicas when Redis is available; otherwise the
+	// hub stays in-process, which is correct for a single replica.
+	if platformConfig.IsRedisEnabled() {
+		wsbus.EnableRedisBackplane()
+	}
+
 	accessPolicy := http.NewRouteAccessPolicy()
 	accessPolicy.RegisterAnonymousRoutes("/health")
 	accessPolicy.RegisterAnonymousRoutes("/version")
