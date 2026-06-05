@@ -102,6 +102,11 @@ func RegisterRoutes(ctx context.Context, router *chi.Mux, flowService *applicati
 		&handlers.GetMyTasksHandler{FlowService: flowService},
 	)
 
+	http.RegisterGET[handlers.GetMyTasksProjectRequest, handlers.GetMyTasksProjectResponse](
+		ctx, router, handlers.GetMyTasksProjectRoutes(),
+		&handlers.GetMyTasksProjectHandler{FlowService: flowService},
+	)
+
 	http.RegisterGETWithValidation[handlers.SearchTasksRequest, handlers.SearchTasksResponse](
 		ctx, router, handlers.SearchTasksRoutes(),
 		&handlers.SearchTasksHandler{FlowService: flowService},

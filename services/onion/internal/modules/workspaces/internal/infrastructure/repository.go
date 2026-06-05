@@ -1604,21 +1604,31 @@ func (r *Repository) IsWorkspaceMember(ctx context.Context, userID, workspaceID 
 	return exists == 1
 }
 
-// GetInboxProject returns the id of the caller's auto-provisioned Inbox
-// project inside a workspace, or 0 if it doesn't exist yet. The inbox is
-// uniquely identified by (owner_id, workspace_id, name = 'Inbox').
-func (r *Repository) GetInboxProject(ctx context.Context, userID, workspaceID int64) int64 {
+// GetMyTasksProject returns the id and current name of the caller's
+// auto-provisioned personal project inside a workspace, or (0, "") if none
+// exists. Identified by name — "My Tasks" now, with "Inbox" recognised as the
+// legacy name so existing data is reused (the service migrates it on access).
+func (r *Repository) GetMyTasksProject(ctx context.Context, userID, workspaceID int64) (int64, string) {
 	var id int64
+	var name string
 	err := r.pool.QueryRowContext(ctx,
-		`SELECT id FROM flow_projects
-		 WHERE owner_id = ? AND workspace_id = ? AND name = 'Inbox'
-		 ORDER BY created_at ASC LIMIT 1`,
+		`SELECT id, name FROM flow_projects
+		 WHERE owner_id = ? AND workspace_id = ? AND name IN ('My Tasks', 'Inbox')
+		 ORDER BY (name = 'My Tasks') DESC, created_at ASC LIMIT 1`,
 		userID, workspaceID,
-	).Scan(&id)
+	).Scan(&id, &name)
 	if err != nil && !errors.Is(err, sql.ErrNoRows) {
-		logger.Ctx(ctx).Warn("GetInboxProject failed", logger.Error(err))
+		logger.Ctx(ctx).Warn("GetMyTasksProject failed", logger.Error(err))
 	}
-	return id
+	return id, name
+}
+
+// RenameProject updates a project's name. Used to migrate the legacy "Inbox"
+// personal project to "My Tasks" on access.
+func (r *Repository) RenameProject(ctx context.Context, projectID int64, name string) error {
+	_, err := r.pool.ExecContext(ctx,
+		`UPDATE flow_projects SET name = ? WHERE id = ?`, name, projectID)
+	return err
 }
 
 // GetProjectWorkspace returns the workspace id of the given project, or

@@ -293,14 +293,14 @@ func (h *CreateTaskHandler) Serve(ctx context.Context, req *CreateTaskRequest) (
 	// flows from My Tasks / the command bar.
 	projectID := req.ProjectID.Int64()
 	if projectID == 0 {
-		inboxID, inboxErr := h.FlowService.EnsureInboxProject(ctx, authUser.UserID, workspaceID)
-		if inboxErr != nil || inboxID == 0 {
+		myTasksID, _, ensureErr := h.FlowService.EnsureMyTasksProject(ctx, authUser.UserID, workspaceID)
+		if ensureErr != nil || myTasksID == 0 {
 			return CreateTaskResponse{}, &errorModels.ServerError{
 				Code:    http.StatusInternalServerError,
-				Message: "Failed to resolve inbox project",
+				Message: "Failed to resolve My Tasks project",
 			}
 		}
-		projectID = inboxID
+		projectID = myTasksID
 	}
 
 	input := domain.TaskInput{
@@ -610,6 +610,42 @@ func (h *GetMyTasksHandler) Serve(ctx context.Context, _ *GetMyTasksRequest) (Ge
 	}
 
 	return GetMyTasksResponse{Tasks: payloads}, nil
+}
+
+// ─────────────────────────────────────────────
+// GET /flow/my-tasks-project
+// Get-or-create the caller's personal "My Tasks" project board and return its
+// ids, so the Flow app can land the user directly on it.
+// ─────────────────────────────────────────────
+
+func GetMyTasksProjectRoutes() []string { return []string{"/flow/my-tasks-project"} }
+
+type GetMyTasksProjectRequest struct{}
+
+type GetMyTasksProjectResponse struct {
+	ProjectID   int64 `json:"project_id"`
+	WorkspaceID int64 `json:"workspace_id"`
+}
+
+type GetMyTasksProjectHandler struct {
+	FlowService *application.Service
+}
+
+func (h *GetMyTasksProjectHandler) Serve(ctx context.Context, _ *GetMyTasksProjectRequest) (GetMyTasksProjectResponse, *errorModels.ServerError) {
+	authUser, ok := authPkg.GetAuthUser(ctx)
+	if !ok {
+		return GetMyTasksProjectResponse{}, errorModels.PermissionDeniedServerError()
+	}
+
+	projectID, workspaceID, err := h.FlowService.EnsureMyTasksProject(ctx, authUser.UserID, 0)
+	if err != nil || projectID == 0 {
+		return GetMyTasksProjectResponse{}, &errorModels.ServerError{
+			Code:    http.StatusInternalServerError,
+			Message: "Failed to resolve My Tasks project",
+		}
+	}
+
+	return GetMyTasksProjectResponse{ProjectID: projectID, WorkspaceID: workspaceID}, nil
 }
 
 // ─────────────────────────────────────────────

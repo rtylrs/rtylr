@@ -758,45 +758,54 @@ func (s *Service) GetProjectWorkspace(ctx context.Context, projectID int64) int6
 	return s.repo.GetProjectWorkspace(ctx, projectID)
 }
 
-// EnsureInboxProject returns the id of the caller's "Inbox" project in
-// the given workspace, creating it (plus its default columns) on first
-// call. This backs the "quick create task" flow on My Tasks / the
-// command bar where the user hasn't picked a project.
-func (s *Service) EnsureInboxProject(
+// EnsureMyTasksProject returns the id of the caller's personal "My Tasks"
+// project (and the workspace it lives in), creating it — plus its default
+// kanban columns — on first call. This is the board the user lands on in Flow
+// and where quick-created tasks go. Idempotent: it reuses the existing project,
+// migrating the legacy "Inbox" name to "My Tasks" on access. Pass workspaceID 0
+// to use (and lazily create) the caller's personal workspace.
+func (s *Service) EnsureMyTasksProject(
 	ctx context.Context,
 	userID, workspaceID int64,
-) (int64, error) {
+) (projectID int64, resolvedWorkspaceID int64, err error) {
 	if workspaceID == 0 {
-		wsID, err := s.repo.CreatePersonalWorkspace(ctx, userID)
-		if err != nil {
-			return 0, err
+		wsID, wsErr := s.repo.CreatePersonalWorkspace(ctx, userID)
+		if wsErr != nil {
+			return 0, 0, wsErr
 		}
 		workspaceID = wsID
 	}
 
-	existingID := s.repo.GetInboxProject(ctx, userID, workspaceID)
-	if existingID != 0 {
-		return existingID, nil
+	if existingID, existingName := s.repo.GetMyTasksProject(ctx, userID, workspaceID); existingID != 0 {
+		if existingName == "Inbox" {
+			if renameErr := s.repo.RenameProject(ctx, existingID, "My Tasks"); renameErr != nil {
+				logger.Ctx(ctx).Warn("migrate Inbox->My Tasks failed", logger.Error(renameErr))
+			} else {
+				invalidateWorkspacesScope(ctx, userID)
+			}
+		}
+		return existingID, workspaceID, nil
 	}
 
 	id, err := s.repo.CreateProject(ctx, domain.ProjectInput{
 		WorkspaceID: workspaceID,
 		OwnerID:     userID,
-		Name:        "Inbox",
-		Description: "Tasks captured from My Tasks and the quick-create bar.",
-		Icon:        "📥",
+		Name:        "My Tasks",
+		Description: "Your personal task board. Quick-created tasks land here.",
+		Icon:        "✅",
 		Color:       "#64C5B9",
 		CreatedBy:   userID,
 	})
 	if err != nil {
-		return 0, err
+		return 0, 0, err
 	}
 	// Seed default kanban columns so the Board view works out of the box.
 	if seedErr := s.repo.SeedDefaultColumns(ctx, id, workspaceID, userID); seedErr != nil {
 		// Non-fatal — user can still create columns manually.
 		_ = seedErr
 	}
-	return id, nil
+	invalidateWorkspacesScope(ctx, userID)
+	return id, workspaceID, nil
 }
 
 func (s *Service) SeedDefaultColumns(ctx context.Context, projectID, workspaceID, createdBy int64) error {
