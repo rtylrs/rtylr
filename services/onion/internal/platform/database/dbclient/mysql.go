@@ -196,13 +196,38 @@ func replicaConfigured() bool {
 	return os.Getenv(envReplicaHost) != "" && os.Getenv(envAIUser) != "" && os.Getenv(envAIPassword) != ""
 }
 
+// replicaDBName resolves the database name for the replica connection. Prod sets
+// only DATABASE_URL (no DB_NAME), so when DB_NAME is absent we parse the db name
+// out of the primary DSN rather than falling back to the dev default.
+func replicaDBName() string {
+	if n := os.Getenv("DB_NAME"); n != "" {
+		return n
+	}
+	if n := dbNameFromDSN(resolveMainDSN()); n != "" {
+		return n
+	}
+	return DefaultDBName
+}
+
+// dbNameFromDSN extracts the database name from a go-sql-driver DSN
+// (user:pass@tcp(host:port)/dbname?params) or a URL DSN (scheme://.../dbname?params).
+func dbNameFromDSN(dsn string) string {
+	if i := strings.IndexByte(dsn, '?'); i >= 0 {
+		dsn = dsn[:i]
+	}
+	if i := strings.LastIndexByte(dsn, '/'); i >= 0 {
+		return dsn[i+1:]
+	}
+	return ""
+}
+
 // buildReplicaDSN builds the DSN for the AI read-only user against the replica.
 // Note: no multiStatements — the NL-to-SQL layer must only ever run a single
 // statement, so we disable stacked queries at the connection level too.
 func buildReplicaDSN() string {
 	host := os.Getenv(envReplicaHost)
 	port := getEnvOrDefault(envReplicaPort, getEnvOrDefault("DB_PORT", DefaultDBPort))
-	dbname := getEnvOrDefault("DB_NAME", DefaultDBName)
+	dbname := replicaDBName()
 	user := os.Getenv(envAIUser)
 	password := os.Getenv(envAIPassword)
 
