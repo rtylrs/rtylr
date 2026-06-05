@@ -81,5 +81,6 @@ func RegisterRoutes(ctx context.Context, router *chi.Mux, service *application.S
 	// `barcode` before `{id}` so the specific segment matches first.
 	router.Get("/erp/products/barcode/{code}", handlers.BarcodeLookupHandlerFunc(service))
 	router.Get("/erp/products/{id}", handlers.GetProductHandlerFunc(service))
+	router.Get("/erp/products/{id}/full", handlers.GetProductFullHandlerFunc(service))
 	router.Get("/erp/products/{id}/attributes", handlers.ListProductAttributesHandlerFunc(service))
 }
