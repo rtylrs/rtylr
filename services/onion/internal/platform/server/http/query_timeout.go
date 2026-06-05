@@ -23,6 +23,12 @@ func isLongLivedRequest(r *http.Request) bool {
 	if strings.Contains(r.Header.Get("Accept"), "text/event-stream") {
 		return true
 	}
+	// Match SSE endpoints by path too — browser fetch()-based SSE sends
+	// Accept: */* (not text/event-stream), so the header check alone misses it
+	// and the 30s timeout would kill the stream mid-flight (→ tunnel 502).
+	if strings.HasSuffix(r.URL.Path, "/generate-text-stream") {
+		return true
+	}
 	return false
 }
 

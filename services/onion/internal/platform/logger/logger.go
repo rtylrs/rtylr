@@ -58,7 +58,25 @@ func SetupLogger() {
 		}
 	}
 
-	slog.SetDefault(slog.New(&multiHandler{handlers: handlers}))
+	// Tag every record with which runmode emitted it (api / worker / upload),
+	// so logs are filterable per service. Set SERVICE_NAME per task definition;
+	// defaults to "onion" for local/dev.
+	serviceName := os.Getenv("SERVICE_NAME")
+	if serviceName == "" {
+		serviceName = "onion"
+	}
+
+	slog.SetDefault(slog.New(&multiHandler{handlers: handlers}).With(slog.String("service", serviceName)))
+}
+
+// ServiceName returns the configured runmode label (api/worker/upload), or
+// "onion" if unset. Used by request/security middleware so their explicit
+// "service" field matches the base attribute.
+func ServiceName() string {
+	if n := os.Getenv("SERVICE_NAME"); n != "" {
+		return n
+	}
+	return "onion"
 }
 
 // slackErrorHandler forwards error-level records to the Slack alerts channel. It

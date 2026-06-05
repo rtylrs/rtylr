@@ -20,7 +20,7 @@ import (
 )
 
 func RequestLoggerMiddleware(ctx context.Context) func(next http.Handler) http.Handler {
-	serviceName := "onion"
+	serviceName := logger.ServiceName()
 
 	rateLimiter := &RateLimiter{
 		chatLimit:   30 * time.Second,

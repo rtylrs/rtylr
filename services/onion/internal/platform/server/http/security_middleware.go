@@ -38,7 +38,7 @@ var (
 
 func getBatcher() *securityBatcher {
 	once.Do(func() {
-		serviceName := "onion"
+		serviceName := logger.ServiceName()
 
 		batcher = &securityBatcher{
 			requests:    make(map[string][]blockedRequest),

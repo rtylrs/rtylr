@@ -51,11 +51,17 @@ type GenerateTextStreamHandler struct {
 }
 
 type GenerateTextStreamRequest struct {
-	Prompt        string `json:"prompt"`
-	SessionID     string `json:"sessionId"`
-	UserID        int64  `json:"userId"`
+	Prompt string `json:"prompt"`
+	// snake_case to match the frontend payload and onion's JSON convention.
+	// camelCase aliases are accepted too so older clients keep working.
+	SessionID     string `json:"session_id"`
+	UserID        int64  `json:"user_id"`
 	SystemContext string `json:"system_context"` // optional — app context injected as system message
 	Mode          string `json:"mode"`           // optional — "analyst" routes through the NL-to-SQL layer
+
+	// Accepted aliases (older camelCase clients).
+	SessionIDAlt string `json:"sessionId"`
+	UserIDAlt    int64  `json:"userId"`
 }
 
 type GenerateTextStreamResponse struct {
@@ -142,6 +148,11 @@ func (h *GenerateTextStreamHandler) ServeHTTP(w http.ResponseWriter, r *http.Req
 	if device.User != nil {
 		businessID = device.User.BusinessID
 		authUserID = device.User.UserID
+	}
+	// Trust the authenticated identity over the client-supplied user_id for the
+	// session/memory owner too — prevents one user reading another's history.
+	if authUserID > 0 {
+		req.UserID = authUserID
 	}
 	if h.QuotaService != nil {
 		allowed, plan, allowance, used, remaining := h.QuotaService.Authorize(ctx, businessID, authUserID)
@@ -241,6 +252,14 @@ func (h *GenerateTextStreamHandler) parseAndValidateRequest(r *http.Request) (*G
 	var req GenerateTextStreamRequest
 	if err := json.NewDecoder(r.Body).Decode(&req); err != nil {
 		return nil, ErrInvalidRequestBody
+	}
+
+	// Accept camelCase aliases from older clients.
+	if req.SessionID == "" {
+		req.SessionID = req.SessionIDAlt
+	}
+	if req.UserID == 0 {
+		req.UserID = req.UserIDAlt
 	}
 
 	return &req, nil

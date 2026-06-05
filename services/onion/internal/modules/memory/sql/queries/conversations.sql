@@ -141,16 +141,16 @@ user_memories AS (
     ORDER BY confidence DESC 
     LIMIT 10
 )
-SELECT 
+SELECT
     type,
     COALESCE(role, '') AS role,
-    content,
+    COALESCE(content, '') AS content,
     created_at,
-    summary,
-    key_topics,
-    memory_type,
-    memory_key,
-    memory_value
+    COALESCE(summary, '') AS summary,
+    COALESCE(key_topics, '') AS key_topics,
+    COALESCE(memory_type, '') AS memory_type,
+    COALESCE(memory_key, '') AS memory_key,
+    COALESCE(memory_value, '') AS memory_value
 FROM (
     SELECT 
         'message' AS type,
