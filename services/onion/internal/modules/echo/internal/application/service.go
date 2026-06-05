@@ -3,9 +3,9 @@ package application
 import (
 	"context"
 	"errors"
-	"fmt"
 
 	"github.com/voxire/onion/internal/modules/echo/internal/domain"
+	"github.com/voxire/onion/internal/platform/logger"
 	"github.com/voxire/onion/internal/platform/snips"
 )
 
@@ -18,7 +18,11 @@ type Service struct {
 func NewService(ctx context.Context) (*Service, error) {
 	client, err := snips.NewClient(ctx)
 	if err != nil {
-		return nil, fmt.Errorf("failed to create AI client: %w", err)
+		// No provider configured (or init failed) is not fatal: return a usable
+		// Service with a nil client so the status/stream handlers report
+		// "unavailable" gracefully instead of nil-panicking.
+		logger.Ctx(ctx).Warn("AI client not initialized; AI features disabled", logger.Error(err))
+		return &Service{aiClient: nil}, nil
 	}
 
 	return &Service{
