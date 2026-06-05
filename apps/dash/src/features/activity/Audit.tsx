@@ -1,22 +1,27 @@
 import React, { useMemo, useState } from 'react';
-import { ScrollText, Download, Search } from 'lucide-react';
+import { ScrollText, Download, Search, ChevronLeft, ChevronRight } from 'lucide-react';
 import { Button, Input } from '../../shared/components/ui';
-import {
-  ActivityEntryRow,
-  Breadcrumbs,
-  EmptyState,
-  SkeletonList,
-} from '../../shared/components/dash';
+import { ActivityEntryRow, EmptyState, SkeletonList } from '../../shared/components/dash';
 import { useAuditLog } from '../../shared/hooks/queries/useActivity';
 import { toast } from 'sonner';
 
+const PAGE_SIZE = 50;
+
 const Audit: React.FC = () => {
-  const { data = [], isLoading } = useAuditLog(500);
+  const [page, setPage] = useState(1);
+  const { data, isLoading, isFetching } = useAuditLog({ page, pageSize: PAGE_SIZE });
   const [query, setQuery] = useState('');
   const [severity, setSeverity] = useState<'all' | 'info' | 'warning' | 'critical'>('all');
 
+  const entries = useMemo(() => data?.entries ?? [], [data]);
+  const total = data?.total ?? 0;
+  const totalPages = Math.max(1, Math.ceil(total / PAGE_SIZE));
+  const rangeStart = total === 0 ? 0 : (page - 1) * PAGE_SIZE + 1;
+  const rangeEnd = Math.min(page * PAGE_SIZE, total);
+
+  // Search + severity refine the current page; pagination is server-side.
   const filtered = useMemo(() => {
-    return data.filter((e) => {
+    return entries.filter((e) => {
       const matchesQuery =
         !query.trim() ||
         e.actor.toLowerCase().includes(query.toLowerCase()) ||
@@ -26,7 +31,7 @@ const Audit: React.FC = () => {
       const matchesSeverity = severity === 'all' || e.severity === severity;
       return matchesQuery && matchesSeverity;
     });
-  }, [data, query, severity]);
+  }, [entries, query, severity]);
 
   const exportCsv = () => {
     const rows = [
@@ -136,6 +141,33 @@ const Audit: React.FC = () => {
             ))}
           </div>
         )}
+      </div>
+
+      <div className="flex items-center justify-between">
+        <p className="text-xs" style={{ color: 'var(--dash-text-dim)' }}>
+          {total === 0 ? 'No entries' : `Showing ${rangeStart}–${rangeEnd} of ${total}`}
+        </p>
+        <div className="flex items-center gap-2">
+          <Button
+            variant="secondary"
+            disabled={page <= 1 || isFetching}
+            onClick={() => setPage((p) => Math.max(1, p - 1))}
+          >
+            <ChevronLeft size={14} />
+            Previous
+          </Button>
+          <span className="text-xs" style={{ color: 'var(--dash-text-muted)' }}>
+            Page {page} of {totalPages}
+          </span>
+          <Button
+            variant="secondary"
+            disabled={page >= totalPages || isFetching}
+            onClick={() => setPage((p) => Math.min(totalPages, p + 1))}
+          >
+            Next
+            <ChevronRight size={14} />
+          </Button>
+        </div>
       </div>
     </div>
   );
