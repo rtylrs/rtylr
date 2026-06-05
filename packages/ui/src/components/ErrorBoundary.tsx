@@ -24,7 +24,7 @@ export function isDynamicImportError(error: unknown): boolean {
   const message = error instanceof Error ? error.message : String(error ?? '');
 
   return /Failed to fetch dynamically imported module|Importing a module script failed|Loading chunk \d+ failed|ChunkLoadError|error loading dynamically imported module/i.test(
-    message,
+    message
   );
 }
 
