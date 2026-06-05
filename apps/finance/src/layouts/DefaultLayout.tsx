@@ -290,7 +290,7 @@ const DefaultLayout: React.FC = () => {
               borderBottom: '1px solid var(--hub-border)',
             }}
           >
-            <img src="/logo.png?v=2" alt="rtylr" className="h-6 w-auto" />
+            <img src="/logo.png?v=2" alt="rtylr" className="rtylr-logo h-6 w-auto" />
           </div>
 
           <div style={{ padding: '6px 8px' }}>
