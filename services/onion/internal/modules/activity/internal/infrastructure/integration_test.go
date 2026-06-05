@@ -13,7 +13,7 @@ func TestListActivity_ReturnsSliceForOwner(t *testing.T) {
 	repo := infrastructure.NewRepository(db)
 	ctx := context.Background()
 
-	items, err := repo.ListActivity(ctx, testutil.OwnerID, 50)
+	items, _, err := repo.ListActivity(ctx, testutil.OwnerID, "", 50, 0)
 	if err != nil {
 		t.Fatalf("ListActivity: %v", err)
 	}
@@ -28,7 +28,7 @@ func TestListActivity_DefaultLimitApplied(t *testing.T) {
 	ctx := context.Background()
 
 	// limit=0 should use default of 50
-	items, err := repo.ListActivity(ctx, testutil.OwnerID, 0)
+	items, _, err := repo.ListActivity(ctx, testutil.OwnerID, "", 0, 0)
 	if err != nil {
 		t.Fatalf("ListActivity(limit=0): %v", err)
 	}
@@ -42,7 +42,7 @@ func TestListActivity_NegativeLimitApplied(t *testing.T) {
 	repo := infrastructure.NewRepository(db)
 	ctx := context.Background()
 
-	items, err := repo.ListActivity(ctx, testutil.OwnerID, -1)
+	items, _, err := repo.ListActivity(ctx, testutil.OwnerID, "", -1, 0)
 	if err != nil {
 		t.Fatalf("ListActivity(limit=-1): %v", err)
 	}
@@ -57,7 +57,7 @@ func TestListActivity_MaxLimitCapped(t *testing.T) {
 	ctx := context.Background()
 
 	// limit > 200 should be capped at 200
-	items, err := repo.ListActivity(ctx, testutil.OwnerID, 9999)
+	items, _, err := repo.ListActivity(ctx, testutil.OwnerID, "", 9999, 0)
 	if err != nil {
 		t.Fatalf("ListActivity(limit=9999): %v", err)
 	}
@@ -71,7 +71,7 @@ func TestListActivity_WrongOwnerReturnsEmpty(t *testing.T) {
 	repo := infrastructure.NewRepository(db)
 	ctx := context.Background()
 
-	items, err := repo.ListActivity(ctx, 999999, 50)
+	items, _, err := repo.ListActivity(ctx, 999999, "", 50, 0)
 	if err != nil {
 		t.Fatalf("ListActivity wrong owner: %v", err)
 	}
@@ -85,7 +85,7 @@ func TestListActivity_LimitOne(t *testing.T) {
 	repo := infrastructure.NewRepository(db)
 	ctx := context.Background()
 
-	items, err := repo.ListActivity(ctx, testutil.OwnerID, 1)
+	items, _, err := repo.ListActivity(ctx, testutil.OwnerID, "", 1, 0)
 	if err != nil {
 		t.Fatalf("ListActivity(limit=1): %v", err)
 	}
@@ -99,7 +99,7 @@ func TestListActivity_ItemsHaveOwnerID(t *testing.T) {
 	repo := infrastructure.NewRepository(db)
 	ctx := context.Background()
 
-	items, err := repo.ListActivity(ctx, testutil.OwnerID, 50)
+	items, _, err := repo.ListActivity(ctx, testutil.OwnerID, "", 50, 0)
 	if err != nil {
 		t.Fatalf("ListActivity: %v", err)
 	}
@@ -115,7 +115,7 @@ func TestListActivity_ItemsHaveNonZeroID(t *testing.T) {
 	repo := infrastructure.NewRepository(db)
 	ctx := context.Background()
 
-	items, err := repo.ListActivity(ctx, testutil.OwnerID, 50)
+	items, _, err := repo.ListActivity(ctx, testutil.OwnerID, "", 50, 0)
 	if err != nil {
 		t.Fatalf("ListActivity: %v", err)
 	}
@@ -131,7 +131,7 @@ func TestListActivity_ItemsHaveAppSet(t *testing.T) {
 	repo := infrastructure.NewRepository(db)
 	ctx := context.Background()
 
-	items, err := repo.ListActivity(ctx, testutil.OwnerID, 50)
+	items, _, err := repo.ListActivity(ctx, testutil.OwnerID, "", 50, 0)
 	if err != nil {
 		t.Fatalf("ListActivity: %v", err)
 	}
@@ -147,7 +147,7 @@ func TestListActivity_ItemsHaveAction(t *testing.T) {
 	repo := infrastructure.NewRepository(db)
 	ctx := context.Background()
 
-	items, err := repo.ListActivity(ctx, testutil.OwnerID, 50)
+	items, _, err := repo.ListActivity(ctx, testutil.OwnerID, "", 50, 0)
 	if err != nil {
 		t.Fatalf("ListActivity: %v", err)
 	}
@@ -163,7 +163,7 @@ func TestListActivity_LimitTen(t *testing.T) {
 	repo := infrastructure.NewRepository(db)
 	ctx := context.Background()
 
-	items, err := repo.ListActivity(ctx, testutil.OwnerID, 10)
+	items, _, err := repo.ListActivity(ctx, testutil.OwnerID, "", 10, 0)
 	if err != nil {
 		t.Fatalf("ListActivity(limit=10): %v", err)
 	}
@@ -177,7 +177,7 @@ func TestListActivity_LimitHundred(t *testing.T) {
 	repo := infrastructure.NewRepository(db)
 	ctx := context.Background()
 
-	items, err := repo.ListActivity(ctx, testutil.OwnerID, 100)
+	items, _, err := repo.ListActivity(ctx, testutil.OwnerID, "", 100, 0)
 	if err != nil {
 		t.Fatalf("ListActivity(limit=100): %v", err)
 	}
@@ -191,7 +191,7 @@ func TestListActivity_LimitFive(t *testing.T) {
 	repo := infrastructure.NewRepository(db)
 	ctx := context.Background()
 
-	items, err := repo.ListActivity(ctx, testutil.OwnerID, 5)
+	items, _, err := repo.ListActivity(ctx, testutil.OwnerID, "", 5, 0)
 	if err != nil {
 		t.Fatalf("ListActivity(limit=5): %v", err)
 	}
@@ -205,7 +205,7 @@ func TestListActivity_LimitFifty(t *testing.T) {
 	repo := infrastructure.NewRepository(db)
 	ctx := context.Background()
 
-	items, err := repo.ListActivity(ctx, testutil.OwnerID, 50)
+	items, _, err := repo.ListActivity(ctx, testutil.OwnerID, "", 50, 0)
 	if err != nil {
 		t.Fatalf("ListActivity(limit=50): %v", err)
 	}
@@ -219,7 +219,7 @@ func TestListActivity_LimitTwoHundred(t *testing.T) {
 	repo := infrastructure.NewRepository(db)
 	ctx := context.Background()
 
-	items, err := repo.ListActivity(ctx, testutil.OwnerID, 200)
+	items, _, err := repo.ListActivity(ctx, testutil.OwnerID, "", 200, 0)
 	if err != nil {
 		t.Fatalf("ListActivity(limit=200): %v", err)
 	}
@@ -233,11 +233,11 @@ func TestListActivity_IdempotentCallsReturnSameCount(t *testing.T) {
 	repo := infrastructure.NewRepository(db)
 	ctx := context.Background()
 
-	items1, err := repo.ListActivity(ctx, testutil.OwnerID, 50)
+	items1, _, err := repo.ListActivity(ctx, testutil.OwnerID, "", 50, 0)
 	if err != nil {
 		t.Fatalf("ListActivity first: %v", err)
 	}
-	items2, err := repo.ListActivity(ctx, testutil.OwnerID, 50)
+	items2, _, err := repo.ListActivity(ctx, testutil.OwnerID, "", 50, 0)
 	if err != nil {
 		t.Fatalf("ListActivity second: %v", err)
 	}
@@ -251,7 +251,7 @@ func TestListActivity_ItemsHaveNonNegativeEntityID(t *testing.T) {
 	repo := infrastructure.NewRepository(db)
 	ctx := context.Background()
 
-	items, err := repo.ListActivity(ctx, testutil.OwnerID, 50)
+	items, _, err := repo.ListActivity(ctx, testutil.OwnerID, "", 50, 0)
 	if err != nil {
 		t.Fatalf("ListActivity: %v", err)
 	}
@@ -267,7 +267,7 @@ func TestListActivity_ItemsHaveCreatedAt(t *testing.T) {
 	repo := infrastructure.NewRepository(db)
 	ctx := context.Background()
 
-	items, err := repo.ListActivity(ctx, testutil.OwnerID, 50)
+	items, _, err := repo.ListActivity(ctx, testutil.OwnerID, "", 50, 0)
 	if err != nil {
 		t.Fatalf("ListActivity: %v", err)
 	}
@@ -283,7 +283,7 @@ func TestListActivity_AnotherUnknownOwnerEmpty(t *testing.T) {
 	repo := infrastructure.NewRepository(db)
 	ctx := context.Background()
 
-	items, err := repo.ListActivity(ctx, 7777777, 50)
+	items, _, err := repo.ListActivity(ctx, 7777777, "", 50, 0)
 	if err != nil {
 		t.Fatalf("ListActivity unknown owner: %v", err)
 	}
@@ -297,7 +297,7 @@ func TestListActivity_LimitTwenty(t *testing.T) {
 	repo := infrastructure.NewRepository(db)
 	ctx := context.Background()
 
-	items, err := repo.ListActivity(ctx, testutil.OwnerID, 20)
+	items, _, err := repo.ListActivity(ctx, testutil.OwnerID, "", 20, 0)
 	if err != nil {
 		t.Fatalf("ListActivity(limit=20): %v", err)
 	}
@@ -311,7 +311,7 @@ func TestListActivity_LimitOneLessThanFifty(t *testing.T) {
 	repo := infrastructure.NewRepository(db)
 	ctx := context.Background()
 
-	items, err := repo.ListActivity(ctx, testutil.OwnerID, 49)
+	items, _, err := repo.ListActivity(ctx, testutil.OwnerID, "", 49, 0)
 	if err != nil {
 		t.Fatalf("ListActivity(limit=49): %v", err)
 	}
@@ -326,7 +326,7 @@ func TestListActivity_ReturnedCountNotExceedsLimit(t *testing.T) {
 	ctx := context.Background()
 
 	const limit = 15
-	items, err := repo.ListActivity(ctx, testutil.OwnerID, limit)
+	items, _, err := repo.ListActivity(ctx, testutil.OwnerID, "", limit, 0)
 	if err != nil {
 		t.Fatalf("ListActivity(limit=%d): %v", limit, err)
 	}
@@ -340,7 +340,7 @@ func TestListActivity_LimitTwoReturnsTwoOrFewer(t *testing.T) {
 	repo := infrastructure.NewRepository(db)
 	ctx := context.Background()
 
-	items, err := repo.ListActivity(ctx, testutil.OwnerID, 2)
+	items, _, err := repo.ListActivity(ctx, testutil.OwnerID, "", 2, 0)
 	if err != nil {
 		t.Fatalf("ListActivity(limit=2): %v", err)
 	}

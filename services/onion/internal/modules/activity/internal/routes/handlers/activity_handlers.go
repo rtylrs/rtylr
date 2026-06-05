@@ -21,11 +21,16 @@ type ListActivityHandler struct {
 }
 
 type ListActivityRequest struct {
-	Limit int `json:"limit"`
+	Limit  int    `json:"limit"`
+	Offset int    `json:"offset"`
+	App    string `json:"app"`
 }
 
 type ListActivityResponse struct {
 	Activities []*hubactivityv1.ActivityEntry `json:"activities"`
+	Total      int64                          `json:"total"`
+	Limit      int                            `json:"limit"`
+	Offset     int                            `json:"offset"`
 }
 
 func (h *ListActivityHandler) Serve(ctx context.Context, req *ListActivityRequest) (ListActivityResponse, *errorModels.ServerError) {
@@ -38,7 +43,19 @@ func (h *ListActivityHandler) Serve(ctx context.Context, req *ListActivityReques
 		}
 	}
 
-	activities, err := h.Service.ListActivity(ctx, authUser.UserID, req.Limit)
+	limit := req.Limit
+	if limit <= 0 {
+		limit = 50
+	}
+	if limit > 200 {
+		limit = 200
+	}
+	offset := req.Offset
+	if offset < 0 {
+		offset = 0
+	}
+
+	page, err := h.Service.ListActivity(ctx, authUser.UserID, req.App, limit, offset)
 	if err != nil {
 		return ListActivityResponse{}, &errorModels.ServerError{
 			Code:     http.StatusInternalServerError,
@@ -47,8 +64,8 @@ func (h *ListActivityHandler) Serve(ctx context.Context, req *ListActivityReques
 		}
 	}
 
-	payloads := make([]*hubactivityv1.ActivityEntry, 0, len(activities))
-	for _, a := range activities {
+	payloads := make([]*hubactivityv1.ActivityEntry, 0, len(page.Entries))
+	for _, a := range page.Entries {
 		payloads = append(payloads, &hubactivityv1.ActivityEntry{
 			Id:          a.ID,
 			OwnerId:     a.OwnerID,
@@ -63,5 +80,5 @@ func (h *ListActivityHandler) Serve(ctx context.Context, req *ListActivityReques
 		})
 	}
 
-	return ListActivityResponse{Activities: payloads}, nil
+	return ListActivityResponse{Activities: payloads, Total: page.Total, Limit: limit, Offset: offset}, nil
 }

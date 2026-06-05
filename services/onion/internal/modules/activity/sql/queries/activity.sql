@@ -3,5 +3,12 @@ SELECT a.id, a.owner_id, a.app, a.entity_type, a.entity_id, a.action, a.descript
 FROM activity_log a
 LEFT JOIN users u ON u.id = a.user_id
 WHERE a.owner_id = ?
+  AND (? = '' OR a.app = ?)
 ORDER BY a.created_at DESC
-LIMIT ?;
+LIMIT ? OFFSET ?;
+
+-- name: CountActivity :one
+SELECT COUNT(*) AS total
+FROM activity_log a
+WHERE a.owner_id = ?
+  AND (? = '' OR a.app = ?);

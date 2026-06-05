@@ -3,7 +3,7 @@ package application
 import (
 	"context"
 	"database/sql"
-	"strconv"
+	"fmt"
 	"time"
 
 	"github.com/voxire/onion/internal/modules/activity/internal/domain"
@@ -14,7 +14,7 @@ import (
 const activityCacheTTL = 1 * time.Minute
 
 type repository interface {
-	ListActivity(ctx context.Context, ownerID int64, limit int) ([]domain.ActivityLog, error)
+	ListActivity(ctx context.Context, ownerID int64, app string, limit, offset int) ([]domain.ActivityLog, int64, error)
 }
 
 type Service struct {
@@ -29,10 +29,16 @@ func NewService(_ context.Context, db *sql.DB) *Service {
 	}
 }
 
-func (s *Service) ListActivity(ctx context.Context, ownerID int64, limit int) ([]domain.ActivityLog, error) {
-	cacheKey := "activity:" + strconv.FormatInt(ownerID, 10) + ":" + strconv.Itoa(limit)
+// ListActivity returns a single page of activity for the owner, optionally
+// filtered to one app (empty = all), with the total count for that filter.
+func (s *Service) ListActivity(ctx context.Context, ownerID int64, app string, limit, offset int) (domain.ActivityPage, error) {
+	cacheKey := fmt.Sprintf("activity:%d:%s:%d:%d", ownerID, app, limit, offset)
 
-	return cacher.Of[[]domain.ActivityLog]().GetOrComputeSingle(ctx, cacheKey, func(ctx context.Context) ([]domain.ActivityLog, error) {
-		return s.repo.ListActivity(ctx, ownerID, limit)
+	return cacher.Of[domain.ActivityPage]().GetOrComputeSingle(ctx, cacheKey, func(ctx context.Context) (domain.ActivityPage, error) {
+		entries, total, err := s.repo.ListActivity(ctx, ownerID, app, limit, offset)
+		if err != nil {
+			return domain.ActivityPage{}, err
+		}
+		return domain.ActivityPage{Entries: entries, Total: total}, nil
 	}, cacher.WithExpiry(ctx, activityCacheTTL))
 }

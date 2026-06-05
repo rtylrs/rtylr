@@ -18,6 +18,13 @@ type ActivityLog struct {
 	CreatedAt   time.Time `json:"created_at"`
 }
 
+// ActivityPage is a single page of activity plus the total count for the same
+// owner/app filter, so the client can render pagination controls.
+type ActivityPage struct {
+	Entries []ActivityLog
+	Total   int64
+}
+
 func (a *ActivityLog) FromRow(row *sql.Rows) error {
 	var (
 		app         sql.NullString

@@ -19,7 +19,10 @@ func NewRepository(db *sql.DB) *Repository {
 	}
 }
 
-func (r *Repository) ListActivity(ctx context.Context, ownerID int64, limit int) ([]domain.ActivityLog, error) {
+// ListActivity returns one page of activity for an owner (optionally filtered to
+// a single app — pass "" for all apps) plus the total count for that same filter,
+// so callers can paginate. limit is clamped to [1,200]; offset is floored at 0.
+func (r *Repository) ListActivity(ctx context.Context, ownerID int64, app string, limit, offset int) ([]domain.ActivityLog, int64, error) {
 	if limit <= 0 {
 		limit = 50
 	}
@@ -28,14 +31,21 @@ func (r *Repository) ListActivity(ctx context.Context, ownerID int64, limit int)
 		limit = 200
 	}
 
+	if offset < 0 {
+		offset = 0
+	}
+
 	rows, err := r.queries.ListActivity(ctx, sqlc.ListActivityParams{
 		OwnerID: ownerID,
+		Column2: app, // matches the `? = ''` short-circuit; empty app = all apps
+		App:     app,
 		Limit:   int32(limit),
+		Offset:  int32(offset),
 	})
 	if err != nil {
 		logger.Ctx(ctx).Error("Failed to list activity", logger.Error(err))
 
-		return nil, err
+		return nil, 0, err
 	}
 
 	activities := make([]domain.ActivityLog, 0, len(rows))
@@ -71,5 +81,16 @@ func (r *Repository) ListActivity(ctx context.Context, ownerID int64, limit int)
 		activities = append(activities, a)
 	}
 
-	return activities, nil
+	total, err := r.queries.CountActivity(ctx, sqlc.CountActivityParams{
+		OwnerID: ownerID,
+		Column2: app,
+		App:     app,
+	})
+	if err != nil {
+		logger.Ctx(ctx).Error("Failed to count activity", logger.Error(err))
+
+		return nil, 0, err
+	}
+
+	return activities, total, nil
 }
