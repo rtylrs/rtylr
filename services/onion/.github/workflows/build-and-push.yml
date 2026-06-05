@@ -134,6 +134,12 @@ jobs:
     name: Create GitHub Release
     needs: [version, build-push-deploy]
     runs-on: ubuntu-latest
+    # Tag creation is blocked by an org ruleset (rulesets aren't editable via API
+    # on this plan), so the release is best-effort and must never fail the deploy
+    # — the images are already built and deployed by the time this runs. To make
+    # releases actually publish, add the CI actor to the ruleset's bypass list in
+    # the org settings UI.
+    continue-on-error: true
     steps:
       - uses: actions/checkout@v6
         with:
