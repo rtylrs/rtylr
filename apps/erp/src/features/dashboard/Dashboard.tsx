@@ -129,9 +129,12 @@ const Dashboard: React.FC = () => {
       variants={containerVariants as any}
       initial="hidden"
       animate="show"
-      className="space-y-6 max-w-7xl"
+      className="w-full min-w-0 space-y-6"
     >
-      <motion.div variants={itemVariants as any} className="flex items-start justify-between">
+      <motion.div
+        variants={itemVariants as any}
+        className="flex flex-wrap items-start justify-between gap-4"
+      >
         <div>
           <h2 className="text-xl font-semibold" style={{ color: 'var(--hub-text)' }}>
             Inventory Overview
@@ -153,7 +156,7 @@ const Dashboard: React.FC = () => {
       {/* Stat cards */}
       <motion.div
         variants={containerVariants as any}
-        className="grid grid-cols-2 gap-4 lg:grid-cols-4"
+        className="grid grid-cols-1 gap-4 sm:grid-cols-2 xl:grid-cols-4"
       >
         {stats.map((stat) => {
           const Icon = stat.icon;
@@ -209,7 +212,7 @@ const Dashboard: React.FC = () => {
       {/* Extra widgets row */}
       <motion.div
         variants={containerVariants as any}
-        className="grid grid-cols-1 lg:grid-cols-3 gap-4"
+        className="grid grid-cols-1 gap-4 xl:grid-cols-[minmax(0,1.1fr)_minmax(0,1.1fr)_minmax(320px,0.9fr)]"
       >
         <motion.div
           variants={itemVariants as any}
@@ -298,7 +301,7 @@ const Dashboard: React.FC = () => {
       </motion.div>
 
       {/* Two column grid */}
-      <div className="grid grid-cols-1 gap-4 lg:grid-cols-2">
+      <div className="grid grid-cols-1 gap-4 xl:grid-cols-2">
         <motion.div
           variants={itemVariants as any}
           className="rounded-xl p-5"
