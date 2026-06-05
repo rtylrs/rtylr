@@ -16,5 +16,6 @@
   "date": "Date",
   "total": "Total",
   "quantity": "Quantity",
-  "price": "Price"
+  "price": "Price",
+  "remove": "Remove"
 }

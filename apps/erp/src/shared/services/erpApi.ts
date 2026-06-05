@@ -58,6 +58,14 @@ export interface CreateProductInput {
   hsCode?: string;
   isActive?: boolean;
   trackInventory?: boolean;
+  attributes?: { name: string; value: string }[];
+}
+
+export interface ProductAttribute {
+  id: number;
+  name: string;
+  value: string;
+  position: number;
 }
 
 export interface UpdateProductInput extends Partial<CreateProductInput> {
@@ -237,6 +245,9 @@ export const erpApi = {
     page_size?: number;
   }) => safe.get<Product[]>('/erp/products', { params }),
   getProduct: (id: number) => safe.get<Product>(`/erp/products/${id}`),
+
+  getProductAttributes: (id: number) =>
+    safe.get<{ attributes: ProductAttribute[] }>(`/erp/products/${id}/attributes`),
   createProduct: (data: CreateProductInput) => safe.post<Product>('/erp/products', data),
   updateProduct: (data: UpdateProductInput) => safe.put<Product>('/erp/products', data),
   deleteProduct: (id: number) =>

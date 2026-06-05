@@ -72,7 +72,10 @@
       "countryOfOrigin": "Country of origin",
       "hsCode": "HS code",
       "leadTime": "Lead time (days)",
-      "allowBackorder": "Allow backorder"
+      "allowBackorder": "Allow backorder",
+      "attrName": "Attribute",
+      "attrValue": "Value",
+      "addAttribute": "Add attribute"
     },
     "validation": {
       "requiredFields": "Please fill required fields",
@@ -84,7 +87,8 @@
       "organization": "Organization",
       "pricing": "Pricing",
       "inventory": "Inventory",
-      "logistics": "Logistics"
+      "logistics": "Logistics",
+      "attributes": "Custom attributes"
     }
   },
   "inventory": {

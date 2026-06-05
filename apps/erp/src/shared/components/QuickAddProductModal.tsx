@@ -1,9 +1,11 @@
 import React, { useEffect, useState } from 'react';
-import { X, PackagePlus } from 'lucide-react';
+import { X, PackagePlus, Plus } from 'lucide-react';
 import { toast } from 'sonner';
+import { useQuery } from '@tanstack/react-query';
+import { unwrap } from '@voxire/api';
 import { useTranslation } from 'react-i18next';
 import { useCreateProduct, useUpdateProduct } from '../../features/products/useProducts';
-import type { CreateProductInput, Product } from '../services/erpApi';
+import { erpApi, type CreateProductInput, type Product } from '../services/erpApi';
 import UnitSelector from './UnitSelector';
 import { useCategories } from '../../features/categories/useCategories';
 import { useSuppliers } from '../../features/suppliers/useSuppliers';
@@ -69,6 +71,19 @@ const QuickAddProductModal: React.FC<QuickAddProductModalProps> = ({
   const [hsCode, setHsCode] = useState('');
   const [leadTimeDays, setLeadTimeDays] = useState('');
   const [allowBackorder, setAllowBackorder] = useState(false);
+  const [attributes, setAttributes] = useState<{ name: string; value: string }[]>([]);
+
+  // Prefill custom attributes when editing an existing product.
+  const { data: attrData } = useQuery({
+    queryKey: ['product-attributes', editing?.id],
+    enabled: !!editing?.id,
+    queryFn: () => unwrap(erpApi.getProductAttributes(editing!.id)),
+  });
+  useEffect(() => {
+    if (attrData?.attributes) {
+      setAttributes(attrData.attributes.map((a) => ({ name: a.name, value: a.value })));
+    }
+  }, [attrData]);
 
   const { data: categories = [] } = useCategories();
   const { data: supplierData } = useSuppliers();
@@ -134,9 +149,16 @@ const QuickAddProductModal: React.FC<QuickAddProductModalProps> = ({
       setHsCode('');
       setLeadTimeDays('');
       setAllowBackorder(false);
+      setAttributes([]);
     }
     onClose();
   };
+
+  const addAttribute = (): void => setAttributes((a) => [...a, { name: '', value: '' }]);
+  const updateAttribute = (i: number, key: 'name' | 'value', val: string): void =>
+    setAttributes((a) => a.map((x, idx) => (idx === i ? { ...x, [key]: val } : x)));
+  const removeAttribute = (i: number): void =>
+    setAttributes((a) => a.filter((_, idx) => idx !== i));
 
   const handleSubmit = (): void => {
     if (!name || !sku || !categoryId) {
@@ -179,6 +201,7 @@ const QuickAddProductModal: React.FC<QuickAddProductModalProps> = ({
       hsCode: hsCode || undefined,
       leadTimeDays: leadTimeDays ? Number(leadTimeDays) : undefined,
       allowBackorder,
+      attributes: attributes.filter((a) => a.name.trim() !== ''),
     };
 
     const onSuccess = (): void => {
@@ -504,6 +527,45 @@ const QuickAddProductModal: React.FC<QuickAddProductModalProps> = ({
               {t('erp.products.fields.allowBackorder')}
             </label>
           </div>
+
+          <SectionLabel>{t('erp.products.sections.attributes')}</SectionLabel>
+          {attributes.map((a, i) => (
+            <div key={i} className="flex gap-2 items-center">
+              <input
+                aria-label={t('erp.products.fields.attrName')}
+                value={a.name}
+                onChange={(e) => updateAttribute(i, 'name', e.target.value)}
+                placeholder={t('erp.products.fields.attrName')}
+                className={inputClass}
+                style={inputStyle}
+              />
+              <input
+                aria-label={t('erp.products.fields.attrValue')}
+                value={a.value}
+                onChange={(e) => updateAttribute(i, 'value', e.target.value)}
+                placeholder={t('erp.products.fields.attrValue')}
+                className={inputClass}
+                style={inputStyle}
+              />
+              <button
+                type="button"
+                onClick={() => removeAttribute(i)}
+                aria-label={t('common.remove')}
+                className="shrink-0 rounded-lg p-1.5"
+                style={{ background: 'var(--hub-hover)' }}
+              >
+                <X size={13} style={{ color: 'var(--hub-text-muted)' }} />
+              </button>
+            </div>
+          ))}
+          <button
+            type="button"
+            onClick={addAttribute}
+            className="flex items-center gap-1.5 text-xs"
+            style={{ color: 'var(--hub-text-muted)' }}
+          >
+            <Plus size={13} /> {t('erp.products.fields.addAttribute')}
+          </button>
         </div>
 
         <div className="flex gap-2 justify-end mt-4">
