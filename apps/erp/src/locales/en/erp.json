@@ -61,7 +61,18 @@
       "status": "Status",
       "statusActive": "Active",
       "statusDraft": "Draft",
-      "margin": "Margin"
+      "margin": "Margin",
+      "compareAt": "Compare-at price",
+      "taxRate": "Tax rate %",
+      "currency": "Currency",
+      "weight": "Weight (kg)",
+      "length": "Length (cm)",
+      "width": "Width (cm)",
+      "height": "Height (cm)",
+      "countryOfOrigin": "Country of origin",
+      "hsCode": "HS code",
+      "leadTime": "Lead time (days)",
+      "allowBackorder": "Allow backorder"
     },
     "validation": {
       "requiredFields": "Please fill required fields",
@@ -72,7 +83,8 @@
       "basics": "Basics",
       "organization": "Organization",
       "pricing": "Pricing",
-      "inventory": "Inventory"
+      "inventory": "Inventory",
+      "logistics": "Logistics"
     }
   },
   "inventory": {

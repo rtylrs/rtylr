@@ -7,6 +7,7 @@ import type { CreateProductInput, Product } from '../services/erpApi';
 import UnitSelector from './UnitSelector';
 import { useCategories } from '../../features/categories/useCategories';
 import { useSuppliers } from '../../features/suppliers/useSuppliers';
+import { useBrands } from '../../features/brands/useBrands';
 
 interface QuickAddProductModalProps {
   open: boolean;
@@ -56,10 +57,23 @@ const QuickAddProductModal: React.FC<QuickAddProductModalProps> = ({
   const [reorderPoint, setReorderPoint] = useState('');
   const [trackInventory, setTrackInventory] = useState(true);
   const [active, setActive] = useState(true);
+  const [brandId, setBrandId] = useState('');
+  const [compareAtPrice, setCompareAtPrice] = useState('');
+  const [taxRate, setTaxRate] = useState('');
+  const [currency, setCurrency] = useState('USD');
+  const [weight, setWeight] = useState('');
+  const [length, setLength] = useState('');
+  const [width, setWidth] = useState('');
+  const [height, setHeight] = useState('');
+  const [countryOfOrigin, setCountryOfOrigin] = useState('');
+  const [hsCode, setHsCode] = useState('');
+  const [leadTimeDays, setLeadTimeDays] = useState('');
+  const [allowBackorder, setAllowBackorder] = useState(false);
 
   const { data: categories = [] } = useCategories();
   const { data: supplierData } = useSuppliers();
   const suppliers = supplierData?.suppliers ?? [];
+  const { data: brands = [] } = useBrands();
   const createProduct = useCreateProduct();
   const updateProduct = useUpdateProduct();
 
@@ -108,6 +122,18 @@ const QuickAddProductModal: React.FC<QuickAddProductModalProps> = ({
       setReorderPoint('');
       setTrackInventory(true);
       setActive(true);
+      setBrandId('');
+      setCompareAtPrice('');
+      setTaxRate('');
+      setCurrency('USD');
+      setWeight('');
+      setLength('');
+      setWidth('');
+      setHeight('');
+      setCountryOfOrigin('');
+      setHsCode('');
+      setLeadTimeDays('');
+      setAllowBackorder(false);
     }
     onClose();
   };
@@ -141,6 +167,18 @@ const QuickAddProductModal: React.FC<QuickAddProductModalProps> = ({
       reorderQuantity: reorderPoint ? Number(reorderPoint) : undefined,
       isActive: active,
       trackInventory,
+      brandId: brandId ? Number(brandId) : undefined,
+      compareAtPrice: compareAtPrice ? Number(compareAtPrice) : undefined,
+      taxRate: taxRate ? Number(taxRate) : undefined,
+      currency: currency || undefined,
+      weight: weight ? Number(weight) : undefined,
+      length: length ? Number(length) : undefined,
+      width: width ? Number(width) : undefined,
+      height: height ? Number(height) : undefined,
+      countryOfOrigin: countryOfOrigin || undefined,
+      hsCode: hsCode || undefined,
+      leadTimeDays: leadTimeDays ? Number(leadTimeDays) : undefined,
+      allowBackorder,
     };
 
     const onSuccess = (): void => {
@@ -232,6 +270,20 @@ const QuickAddProductModal: React.FC<QuickAddProductModalProps> = ({
               </option>
             ))}
           </select>
+          <select
+            aria-label={t('erp.products.fields.brand')}
+            value={brandId}
+            onChange={(e) => setBrandId(e.target.value)}
+            className={inputClass}
+            style={inputStyle}
+          >
+            <option value="">{t('erp.products.fields.selectBrand')}</option>
+            {brands.map((b) => (
+              <option key={b.id} value={b.id}>
+                {b.name}
+              </option>
+            ))}
+          </select>
           <input
             aria-label={t('erp.products.fields.barcode')}
             value={barcode}
@@ -278,6 +330,37 @@ const QuickAddProductModal: React.FC<QuickAddProductModalProps> = ({
               {t('erp.products.fields.margin')}: <span style={{ color: '#22c55e' }}>{margin}%</span>
             </div>
           )}
+          <div className="grid grid-cols-3 gap-3">
+            <input
+              aria-label={t('erp.products.fields.compareAt')}
+              value={compareAtPrice}
+              onChange={(e) => setCompareAtPrice(e.target.value)}
+              placeholder={t('erp.products.fields.compareAt')}
+              type="number"
+              step="0.01"
+              className={inputClass}
+              style={inputStyle}
+            />
+            <input
+              aria-label={t('erp.products.fields.taxRate')}
+              value={taxRate}
+              onChange={(e) => setTaxRate(e.target.value)}
+              placeholder={t('erp.products.fields.taxRate')}
+              type="number"
+              step="0.01"
+              className={inputClass}
+              style={inputStyle}
+            />
+            <input
+              aria-label={t('erp.products.fields.currency')}
+              value={currency}
+              onChange={(e) => setCurrency(e.target.value.toUpperCase().slice(0, 3))}
+              placeholder={t('erp.products.fields.currency')}
+              maxLength={3}
+              className={`${inputClass} uppercase`}
+              style={inputStyle}
+            />
+          </div>
 
           <SectionLabel>{t('erp.products.sections.inventory')}</SectionLabel>
           <div className="grid grid-cols-2 gap-3">
@@ -334,6 +417,91 @@ const QuickAddProductModal: React.FC<QuickAddProductModalProps> = ({
                 onChange={(e) => setActive(e.target.checked)}
               />
               {t('erp.products.fields.statusActive')}
+            </label>
+          </div>
+
+          <SectionLabel>{t('erp.products.sections.logistics')}</SectionLabel>
+          <input
+            aria-label={t('erp.products.fields.weight')}
+            value={weight}
+            onChange={(e) => setWeight(e.target.value)}
+            placeholder={t('erp.products.fields.weight')}
+            type="number"
+            step="0.001"
+            className={inputClass}
+            style={inputStyle}
+          />
+          <div className="grid grid-cols-3 gap-3">
+            <input
+              aria-label={t('erp.products.fields.length')}
+              value={length}
+              onChange={(e) => setLength(e.target.value)}
+              placeholder={t('erp.products.fields.length')}
+              type="number"
+              step="0.01"
+              className={inputClass}
+              style={inputStyle}
+            />
+            <input
+              aria-label={t('erp.products.fields.width')}
+              value={width}
+              onChange={(e) => setWidth(e.target.value)}
+              placeholder={t('erp.products.fields.width')}
+              type="number"
+              step="0.01"
+              className={inputClass}
+              style={inputStyle}
+            />
+            <input
+              aria-label={t('erp.products.fields.height')}
+              value={height}
+              onChange={(e) => setHeight(e.target.value)}
+              placeholder={t('erp.products.fields.height')}
+              type="number"
+              step="0.01"
+              className={inputClass}
+              style={inputStyle}
+            />
+          </div>
+          <div className="grid grid-cols-2 gap-3">
+            <input
+              aria-label={t('erp.products.fields.countryOfOrigin')}
+              value={countryOfOrigin}
+              onChange={(e) => setCountryOfOrigin(e.target.value.toUpperCase().slice(0, 2))}
+              placeholder={t('erp.products.fields.countryOfOrigin')}
+              maxLength={2}
+              className={`${inputClass} uppercase`}
+              style={inputStyle}
+            />
+            <input
+              aria-label={t('erp.products.fields.hsCode')}
+              value={hsCode}
+              onChange={(e) => setHsCode(e.target.value)}
+              placeholder={t('erp.products.fields.hsCode')}
+              className={`${inputClass} font-mono`}
+              style={inputStyle}
+            />
+          </div>
+          <div className="grid grid-cols-2 gap-3 items-center">
+            <input
+              aria-label={t('erp.products.fields.leadTime')}
+              value={leadTimeDays}
+              onChange={(e) => setLeadTimeDays(e.target.value)}
+              placeholder={t('erp.products.fields.leadTime')}
+              type="number"
+              className={inputClass}
+              style={inputStyle}
+            />
+            <label
+              className="flex items-center gap-2 text-xs cursor-pointer"
+              style={{ color: 'var(--hub-text)' }}
+            >
+              <input
+                type="checkbox"
+                checked={allowBackorder}
+                onChange={(e) => setAllowBackorder(e.target.checked)}
+              />
+              {t('erp.products.fields.allowBackorder')}
             </label>
           </div>
         </div>

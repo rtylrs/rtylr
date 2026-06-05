@@ -39,9 +39,23 @@ export interface CreateProductInput {
   unit?: string;
   costPrice: number;
   salePrice: number;
+  compareAtPrice?: number;
+  taxRate?: number;
+  currency?: string;
   stockQuantity?: number;
   lowStockThreshold?: number;
   reorderQuantity?: number;
+  allowBackorder?: boolean;
+  leadTimeDays?: number;
+  brandId?: number;
+  weight?: number;
+  weightUnit?: string;
+  length?: number;
+  width?: number;
+  height?: number;
+  dimensionUnit?: string;
+  countryOfOrigin?: string;
+  hsCode?: string;
   isActive?: boolean;
   trackInventory?: boolean;
 }
