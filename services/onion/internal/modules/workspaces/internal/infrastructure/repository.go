@@ -381,12 +381,27 @@ func (r *Repository) GetSubtasks(ctx context.Context, parentTaskID int64) ([]dom
 	)
 }
 
+// myTasksDoneWindowDays bounds how far back completed tasks surface in the global
+// "My tasks" board, so the Done column shows recent work without unbounded history.
+const myTasksDoneWindowDays = 14
+
 func (r *Repository) GetMyTasks(ctx context.Context, userID int64) ([]domain.Task, error) {
+	// All active work assigned to the user, plus tasks they completed within the
+	// recent window so the board's Done column isn't always empty. Cancelled tasks
+	// stay hidden. completed_at is stamped by both the status and partial-update
+	// paths when a task moves to 'done'.
+	doneCutoff := time.Now().AddDate(0, 0, -myTasksDoneWindowDays)
 	return r.listEnrichedTasks(ctx,
 		enrichedTaskSelect().
 			Where(sq.Eq{"t.assignee_id": userID}).
 			Where("t.parent_task_id IS NULL").
-			Where("t.status NOT IN ('done','cancelled')").
+			Where(sq.Or{
+				sq.Expr("t.status NOT IN ('done','cancelled')"),
+				sq.And{
+					sq.Eq{"t.status": "done"},
+					sq.GtOrEq{"t.completed_at": doneCutoff},
+				},
+			}).
 			OrderBy(
 				"CASE WHEN t.due_date IS NULL THEN 1 ELSE 0 END",
 				"t.due_date ASC",
