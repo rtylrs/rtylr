@@ -90,8 +90,7 @@
       "payrollRunDetail": "Payroll Run",
       "checklistTemplates": "Checklist Templates",
       "reviewCycleDetail": "Review Cycle"
-    },
-    "hubLink": "Dash"
+    }
   },
   "setup": {
     "title": "Set up your HR workspace",

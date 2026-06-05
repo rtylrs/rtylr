@@ -90,8 +90,7 @@
       "payrollRunDetail": "دورة الرواتب",
       "checklistTemplates": "قوالب قوائم المراجعة",
       "reviewCycleDetail": "دورة التقييم"
-    },
-    "hubLink": "Dash"
+    }
   },
   "setup": {
     "title": "إعداد مساحة عمل الموارد البشرية",

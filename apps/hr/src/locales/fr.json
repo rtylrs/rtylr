@@ -90,8 +90,7 @@
       "payrollRunDetail": "Exécution de la paie",
       "checklistTemplates": "Modèles de listes",
       "reviewCycleDetail": "Cycle d'évaluation"
-    },
-    "hubLink": "Dash"
+    }
   },
   "setup": {
     "title": "Configurez votre espace RH",
