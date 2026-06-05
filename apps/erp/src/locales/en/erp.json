@@ -89,6 +89,28 @@
       "inventory": "Inventory",
       "logistics": "Logistics",
       "attributes": "Custom attributes"
+    },
+    "variants": {
+      "title": "Variants",
+      "subtitle": "Generate individual SKUs for sizes, colors, and other options",
+      "empty": "No variants yet. Add an option below to generate them.",
+      "variant": "Variant",
+      "sku": "SKU",
+      "price": "Price",
+      "stock": "Stock",
+      "save": "Save",
+      "saved": "Variant updated",
+      "deleted": "Variant deleted",
+      "created": "{{count}} variants created",
+      "createFailed": "Failed to create variants",
+      "allExist": "All combinations already exist",
+      "optionName": "Option name (e.g. Size, Color)",
+      "addOption": "Add option",
+      "addValuePlaceholder": "Add value, press Enter",
+      "generateBtn": "Generate {{count}} new",
+      "preview": "New variants to create",
+      "createAll": "Create {{count}} variants",
+      "creating": "Creating…"
     }
   },
   "inventory": {

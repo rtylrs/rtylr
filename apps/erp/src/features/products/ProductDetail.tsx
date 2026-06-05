@@ -1,11 +1,11 @@
 import React, { useState } from 'react';
 import { useParams, Link, useNavigate } from '@tanstack/react-router';
 import { motion } from 'motion/react';
-import { ArrowLeft, Edit3, Trash2, Package, TrendingUp, Clock, Tag, Truck } from 'lucide-react';
+import { ArrowLeft, Edit3, Trash2, Package, TrendingUp, Clock, Truck } from 'lucide-react';
 import { toast } from 'sonner';
 import { useTranslation } from 'react-i18next';
 import { useDeleteProduct, useProduct } from './useProducts';
-import { useVariants } from './useVariants';
+import VariantMatrix from './components/VariantMatrix';
 import Breadcrumbs from '../../shared/components/Breadcrumbs';
 import StockBadge from '../../shared/components/StockBadge';
 import BarcodeSvg from '../../shared/components/BarcodeSvg';
@@ -58,7 +58,6 @@ const ProductDetail: React.FC = () => {
   const { id } = useParams({ strict: false });
   const productId = id ? parseInt(id) : undefined;
   const { data: product, isLoading } = useProduct(productId);
-  const { data: variants = [] } = useVariants(productId);
   const deleteProduct = useDeleteProduct();
   const [editing, setEditing] = useState(false);
   const [confirmDelete, setConfirmDelete] = useState(false);
@@ -299,45 +298,11 @@ const ProductDetail: React.FC = () => {
             )}
           </div>
 
-          {variants.length > 0 && (
-            <div
-              className="rounded-xl p-5"
-              style={{ background: 'var(--hub-card)', border: '1px solid var(--hub-border)' }}
-            >
-              <h3
-                className="text-sm font-semibold mb-3 flex items-center gap-2"
-                style={{ color: 'var(--hub-text)' }}
-              >
-                <Tag size={14} style={{ color: AMBER }} /> Variants
-              </h3>
-              <div className="space-y-2">
-                {variants.map((v) => (
-                  <div
-                    key={v.id}
-                    className="flex items-center justify-between p-2 rounded-lg"
-                    style={{ background: 'var(--hub-hover)' }}
-                  >
-                    <div>
-                      <p className="text-xs font-medium" style={{ color: 'var(--hub-text)' }}>
-                        {v.name}
-                      </p>
-                      <p className="text-[10px] font-mono" style={{ color: 'var(--hub-text-dim)' }}>
-                        {v.sku}
-                      </p>
-                    </div>
-                    <div className="flex items-center gap-4">
-                      <span className="text-xs" style={{ color: 'var(--hub-text-muted)' }}>
-                        {v.stock} in stock
-                      </span>
-                      <span className="text-sm font-semibold" style={{ color: AMBER }}>
-                        {formatCurrency(v.price)}
-                      </span>
-                    </div>
-                  </div>
-                ))}
-              </div>
-            </div>
-          )}
+          <VariantMatrix
+            productId={product.id}
+            productSku={product.sku}
+            baseSalePrice={product.salePrice}
+          />
         </div>
 
         {/* Sidebar */}

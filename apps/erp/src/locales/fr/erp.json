@@ -89,6 +89,28 @@
       "inventory": "Inventory",
       "logistics": "Logistics",
       "attributes": "Custom attributes"
+    },
+    "variants": {
+      "title": "Variantes",
+      "subtitle": "Générez des SKU individuels pour les tailles, couleurs et autres options",
+      "empty": "Aucune variante pour l'instant. Ajoutez une option ci-dessous pour les générer.",
+      "variant": "Variante",
+      "sku": "SKU",
+      "price": "Prix",
+      "stock": "Stock",
+      "save": "Enregistrer",
+      "saved": "Variante mise à jour",
+      "deleted": "Variante supprimée",
+      "created": "{{count}} variantes créées",
+      "createFailed": "Échec de la création des variantes",
+      "allExist": "Toutes les combinaisons existent déjà",
+      "optionName": "Nom de l'option (ex. Taille, Couleur)",
+      "addOption": "Ajouter une option",
+      "addValuePlaceholder": "Ajouter une valeur, appuyez sur Entrée",
+      "generateBtn": "Générer {{count}} nouvelles",
+      "preview": "Nouvelles variantes à créer",
+      "createAll": "Créer {{count}} variantes",
+      "creating": "Création…"
     }
   },
   "inventory": {

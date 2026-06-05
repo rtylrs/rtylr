@@ -364,6 +364,19 @@ export const erpApi = {
     safe.get<ProductVariant[]>('/erp/variants', { params: productId ? { productId } : undefined }),
   createVariant: (data: Partial<ProductVariant>) =>
     safe.post<ProductVariant>('/erp/variants', data),
+  // Backend stores attributes as a JSON string and uses salePrice/stockQuantity,
+  // so write inputs intentionally diverge from the ProductVariant display type.
+  updateVariant: (data: {
+    id: number;
+    productId?: number;
+    name: string;
+    sku?: string;
+    salePrice?: number;
+    stockQuantity?: number;
+    attributes?: string;
+  }) => safe.put<{ message: string }>('/erp/variants', data),
+  deleteVariant: (id: number) =>
+    safe.delete<{ message: string }>('/erp/variants', { data: { id } }),
 
   // Activity log
   listActivity: (limit = 20) => safe.get<ActivityItem[]>('/erp/activity', { params: { limit } }),

@@ -86,3 +86,42 @@ export function useCreateVariant() {
     onError: () => toast.error('Failed to create variant'),
   });
 }
+
+export interface VariantEditInput {
+  id: number;
+  productId: number;
+  name: string;
+  sku: string;
+  price: number;
+  stock: number;
+  attributes: Record<string, string>;
+}
+
+export function useUpdateVariant() {
+  const qc = useQueryClient();
+  return useMutation({
+    mutationFn: (data: VariantEditInput) =>
+      unwrap(
+        erpApi.updateVariant({
+          id: data.id,
+          productId: data.productId,
+          name: data.name,
+          sku: data.sku,
+          salePrice: data.price,
+          stockQuantity: data.stock,
+          attributes: JSON.stringify(data.attributes ?? {}),
+        })
+      ),
+    onSuccess: () => qc.invalidateQueries({ queryKey: ['variants'] }),
+    onError: () => toast.error('Failed to update variant'),
+  });
+}
+
+export function useDeleteVariant() {
+  const qc = useQueryClient();
+  return useMutation({
+    mutationFn: (id: number) => unwrap(erpApi.deleteVariant(id)),
+    onSuccess: () => qc.invalidateQueries({ queryKey: ['variants'] }),
+    onError: () => toast.error('Failed to delete variant'),
+  });
+}

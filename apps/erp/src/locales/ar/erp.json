@@ -89,6 +89,28 @@
       "inventory": "Inventory",
       "logistics": "Logistics",
       "attributes": "Custom attributes"
+    },
+    "variants": {
+      "title": "المتغيرات",
+      "subtitle": "أنشئ أرقام SKU فردية للأحجام والألوان وخيارات أخرى",
+      "empty": "لا توجد متغيرات بعد. أضف خياراً أدناه لإنشائها.",
+      "variant": "المتغير",
+      "sku": "SKU",
+      "price": "السعر",
+      "stock": "المخزون",
+      "save": "حفظ",
+      "saved": "تم تحديث المتغير",
+      "deleted": "تم حذف المتغير",
+      "created": "تم إنشاء {{count}} متغير",
+      "createFailed": "فشل إنشاء المتغيرات",
+      "allExist": "جميع التركيبات موجودة بالفعل",
+      "optionName": "اسم الخيار (مثل المقاس، اللون)",
+      "addOption": "إضافة خيار",
+      "addValuePlaceholder": "أضف قيمة، اضغط Enter",
+      "generateBtn": "إنشاء {{count}} جديد",
+      "preview": "متغيرات جديدة لإنشائها",
+      "createAll": "إنشاء {{count}} متغير",
+      "creating": "جارٍ الإنشاء…"
     }
   },
   "inventory": {
