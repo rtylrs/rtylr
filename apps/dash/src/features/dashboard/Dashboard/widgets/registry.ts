@@ -61,15 +61,6 @@ export const WIDGET_CATALOG: WidgetConfig[] = [
     minH: 3,
   },
   {
-    id: 'quick-actions',
-    label: 'Quick Actions',
-    description: 'Shortcuts to common tasks',
-    defaultW: 1,
-    defaultH: 4,
-    minW: 1,
-    minH: 2,
-  },
-  {
     id: 'team',
     label: 'Team Overview',
     description: 'Staff on shift and recent hires',
@@ -155,7 +146,7 @@ export const WIDGET_CATALOG: WidgetConfig[] = [
 
 // Every row fills all four columns so the default layout has no dead space:
 //   row 0 — four KPI cards (1 col each)
-//   row 2 — Recent activity (3 cols) + Quick actions sidebar (1 col)
+//   row 2 — Recent activity (3 cols) + Pending approvals sidebar (1 col)
 //   row 6 — Team overview (full width)
 export const DEFAULT_LAYOUT = [
   { i: 'kpi-revenue', x: 0, y: 0, w: 1, h: 2 },
@@ -163,9 +154,15 @@ export const DEFAULT_LAYOUT = [
   { i: 'kpi-team', x: 2, y: 0, w: 1, h: 2 },
   { i: 'kpi-invoices', x: 3, y: 0, w: 1, h: 2 },
   { i: 'activity', x: 0, y: 2, w: 3, h: 4 },
-  { i: 'quick-actions', x: 3, y: 2, w: 1, h: 4 },
+  { i: 'pending', x: 3, y: 2, w: 1, h: 4 },
   { i: 'team', x: 0, y: 6, w: 4, h: 3 },
 ];
+
+// Saved layouts that still reference a retired widget id are reset to default so
+// the user never sees an empty card for a widget that no longer exists.
+//   'kpis'          — old combined KPI widget, split into four kpi-* cards
+//   'quick-actions' — removed (its actions dead-linked to /apps), replaced by pending
+const RETIRED_WIDGET_IDS = ['kpis', 'quick-actions'];
 
 const STORAGE_KEY = 'rtylr-dashboard-layout';
 const WIDGETS_KEY = 'rtylr-dashboard-widgets';
@@ -175,8 +172,9 @@ export function loadLayout() {
     const raw = localStorage.getItem(STORAGE_KEY);
     if (!raw) return DEFAULT_LAYOUT;
     const parsed = JSON.parse(raw);
-    // If old layout has 'kpis' (the combined widget), reset to default
-    if (parsed.some((l: Record<string, unknown>) => l.i === 'kpis')) return DEFAULT_LAYOUT;
+    // If the saved layout references a retired widget, reset to default.
+    if (parsed.some((l: Record<string, unknown>) => RETIRED_WIDGET_IDS.includes(l.i as string)))
+      return DEFAULT_LAYOUT;
     return parsed;
   } catch {
     return DEFAULT_LAYOUT;
@@ -192,8 +190,9 @@ export function loadActiveWidgets(): string[] {
     const raw = localStorage.getItem(WIDGETS_KEY);
     if (!raw) return DEFAULT_LAYOUT.map((l) => l.i);
     const parsed = JSON.parse(raw);
-    // If old widgets has 'kpis', reset
-    if (parsed.includes('kpis')) return DEFAULT_LAYOUT.map((l) => l.i);
+    // If the saved widget set references a retired widget, reset to default.
+    if (parsed.some((id: string) => RETIRED_WIDGET_IDS.includes(id)))
+      return DEFAULT_LAYOUT.map((l) => l.i);
     return parsed;
   } catch {
     return DEFAULT_LAYOUT.map((l) => l.i);
