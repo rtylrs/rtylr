@@ -20,6 +20,17 @@ interface OpenThinking {
   startedAt: number;
 }
 
+// The API is on a different domain than the app, so the auth cookie can't ride
+// cross-site. Like @voxire/api, read the JS-readable `token` cookie and send it
+// as a Bearer header — otherwise the SSE request hits the API unauthenticated.
+function readAuthToken(): string | null {
+  if (typeof document === 'undefined') return null;
+  const match = document.cookie.match(/(?:^|;\s*)token=([^;]+)/);
+  const token = match ? decodeURIComponent(match[1]) : null;
+  if (!token || token.split('.').length !== 3) return null;
+  return token;
+}
+
 export function useCaretStream({
   userId,
   apiBaseUrl,
@@ -59,11 +70,15 @@ export function useCaretStream({
       const openThinking: Record<string, OpenThinking> = {};
 
       try {
+        const token = readAuthToken();
         const response = await fetch(url, {
           method: 'POST',
           credentials: 'include',
           signal: controller.signal,
-          headers: { 'Content-Type': 'application/json' },
+          headers: {
+            'Content-Type': 'application/json',
+            ...(token ? { Authorization: `Bearer ${token}` } : {}),
+          },
           body: JSON.stringify({
             prompt: prompt.trim(),
             session_id: store.sessionId ?? '',
