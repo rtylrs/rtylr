@@ -110,6 +110,7 @@ type ProductInput struct {
 	Unit              string  `json:"unit"`
 	CostPrice         float64 `json:"cost_price"`
 	SalePrice         float64 `json:"sale_price"`
+	StockQuantity     float64 `json:"stock_quantity"`
 	LowStockThreshold float64 `json:"low_stock_threshold"`
 	ReorderQuantity   float64 `json:"reorder_quantity"`
 	IsActive          bool    `json:"is_active"`
