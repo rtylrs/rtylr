@@ -85,6 +85,44 @@ const QuickAddProductModal: React.FC<QuickAddProductModalProps> = ({
     }
   }, [attrData]);
 
+  // Authoritative full-product fetch on edit: the list payload lacks the PIM
+  // fields, so without this an edit-save would zero compare-at/tax/weight/etc.
+  const { data: fullData } = useQuery({
+    queryKey: ['product-full', editing?.id],
+    enabled: !!editing?.id,
+    queryFn: () => unwrap(erpApi.getProductFull(editing!.id)),
+  });
+  useEffect(() => {
+    const p = fullData?.product;
+    if (!p) return;
+    setName(p.name);
+    setSku(p.sku);
+    setCategoryId(p.categoryId ? String(p.categoryId) : '');
+    setSupplierId(p.supplierId ? String(p.supplierId) : '');
+    setBrandId(p.brandId ? String(p.brandId) : '');
+    setBarcode(p.barcode ?? '');
+    setDescription(p.description ?? '');
+    setUnit(p.unit || 'pcs');
+    setCostPrice(p.costPrice ? String(p.costPrice) : '');
+    setSalePrice(p.salePrice ? String(p.salePrice) : '');
+    setStock(p.stockQuantity ? String(p.stockQuantity) : '');
+    setLowStock(p.lowStockThreshold ? String(p.lowStockThreshold) : '');
+    setReorderPoint(p.reorderQuantity ? String(p.reorderQuantity) : '');
+    setTrackInventory(p.trackInventory);
+    setActive(p.isActive);
+    setCompareAtPrice(p.compareAtPrice ? String(p.compareAtPrice) : '');
+    setTaxRate(p.taxRate ? String(p.taxRate) : '');
+    setCurrency(p.currency || 'USD');
+    setWeight(p.weight ? String(p.weight) : '');
+    setLength(p.length ? String(p.length) : '');
+    setWidth(p.width ? String(p.width) : '');
+    setHeight(p.height ? String(p.height) : '');
+    setCountryOfOrigin(p.countryOfOrigin ?? '');
+    setHsCode(p.hsCode ?? '');
+    setLeadTimeDays(p.leadTimeDays ? String(p.leadTimeDays) : '');
+    setAllowBackorder(p.allowBackorder);
+  }, [fullData]);
+
   const { data: categories = [] } = useCategories();
   const { data: supplierData } = useSuppliers();
   const suppliers = supplierData?.suppliers ?? [];

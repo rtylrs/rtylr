@@ -68,6 +68,38 @@ export interface ProductAttribute {
   position: number;
 }
 
+// Complete product as returned by GET /erp/products/{id}/full (every PIM column,
+// camelCased by @voxire/api). Used to fully prefill the edit form.
+export interface FullProduct {
+  id: number;
+  categoryId?: number;
+  supplierId?: number;
+  brandId?: number;
+  name: string;
+  sku: string;
+  barcode?: string;
+  description?: string;
+  unit?: string;
+  costPrice: number;
+  salePrice: number;
+  stockQuantity: number;
+  lowStockThreshold: number;
+  reorderQuantity: number;
+  isActive: boolean;
+  trackInventory: boolean;
+  compareAtPrice: number;
+  taxRate: number;
+  currency: string;
+  weight: number;
+  length: number;
+  width: number;
+  height: number;
+  countryOfOrigin: string;
+  hsCode: string;
+  allowBackorder: boolean;
+  leadTimeDays: number;
+}
+
 export interface UpdateProductInput extends Partial<CreateProductInput> {
   id: number;
 }
@@ -248,6 +280,8 @@ export const erpApi = {
 
   getProductAttributes: (id: number) =>
     safe.get<{ attributes: ProductAttribute[] }>(`/erp/products/${id}/attributes`),
+
+  getProductFull: (id: number) => safe.get<{ product: FullProduct }>(`/erp/products/${id}/full`),
   createProduct: (data: CreateProductInput) => safe.post<Product>('/erp/products', data),
   updateProduct: (data: UpdateProductInput) => safe.put<Product>('/erp/products', data),
   deleteProduct: (id: number) =>
