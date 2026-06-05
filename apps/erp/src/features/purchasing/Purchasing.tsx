@@ -129,7 +129,7 @@ const Purchasing: React.FC = () => {
       variants={containerVariants}
       initial="hidden"
       animate="show"
-      className="space-y-5 max-w-6xl"
+      className="w-full min-w-0 space-y-5"
     >
       <motion.div variants={itemVariants} className="flex items-center justify-between">
         <h2 className="text-xl font-semibold" style={{ color: 'var(--hub-text)' }}>

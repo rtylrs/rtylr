@@ -43,7 +43,7 @@ const Categories: React.FC = () => {
     <motion.div
       initial={{ opacity: 0, y: 8 }}
       animate={{ opacity: 1, y: 0 }}
-      className="space-y-5 max-w-4xl"
+      className="w-full min-w-0 space-y-5"
     >
       <PageHeader title="Categories" description="Organize products into hierarchical categories" />
 

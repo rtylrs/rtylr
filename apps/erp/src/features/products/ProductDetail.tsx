@@ -79,7 +79,7 @@ const ProductDetail: React.FC = () => {
 
   if (isLoading) {
     return (
-      <div className="space-y-4 max-w-5xl">
+      <div className="w-full min-w-0 space-y-4">
         <Skeleton className="h-8 w-64" />
         <Skeleton className="h-48 w-full" />
       </div>
@@ -108,7 +108,7 @@ const ProductDetail: React.FC = () => {
     <motion.div
       initial={{ opacity: 0, y: 8 }}
       animate={{ opacity: 1, y: 0 }}
-      className="space-y-5 max-w-5xl"
+      className="w-full min-w-0 space-y-5"
     >
       <Breadcrumbs items={[{ label: 'Products', to: '/products' }, { label: product.name }]} />
 

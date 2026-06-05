@@ -80,7 +80,7 @@ const Inventory: React.FC = () => {
       variants={containerVariants}
       initial="hidden"
       animate="show"
-      className="space-y-5 max-w-6xl"
+      className="w-full min-w-0 space-y-5"
     >
       {/* Header */}
       <motion.div variants={itemVariants} className="flex items-center justify-between">

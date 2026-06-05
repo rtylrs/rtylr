@@ -25,7 +25,7 @@ const Valuation: React.FC = () => {
     <motion.div
       initial={{ opacity: 0, y: 8 }}
       animate={{ opacity: 1, y: 0 }}
-      className="space-y-5 max-w-6xl"
+      className="w-full min-w-0 space-y-5"
     >
       <PageHeader title="Inventory Valuation" description="Total value of inventory on hand" />
 

@@ -115,7 +115,7 @@ const GeneralTab: React.FC = () => {
     <motion.div
       initial={{ opacity: 0, y: 8 }}
       animate={{ opacity: 1, y: 0 }}
-      className="space-y-5 max-w-3xl"
+      className="w-full min-w-0 space-y-5"
     >
       <Section title="General" icon={SettingsIcon}>
         <ConfigField label="Currency" description="Default currency for pricing and reports">
@@ -282,7 +282,7 @@ const TeamTab: React.FC = () => {
   };
 
   return (
-    <div className="space-y-5 max-w-2xl">
+    <div className="w-full min-w-0 space-y-5">
       <div>
         <h2 className="text-[15px] font-semibold mb-1" style={{ color: 'var(--hub-text)' }}>
           Team
@@ -482,7 +482,7 @@ const BillingTab: React.FC = () => {
 
   if (isLoading) {
     return (
-      <div className="space-y-4 max-w-2xl">
+      <div className="w-full min-w-0 space-y-4">
         <div
           className="h-6 w-32 rounded animate-pulse"
           style={{ background: 'var(--hub-hover)' }}
@@ -497,7 +497,7 @@ const BillingTab: React.FC = () => {
   const statusColor = sub ? (STATUS_COLOR[sub.status] ?? STATUS_COLOR['expired']) : '';
 
   return (
-    <div className="space-y-5 max-w-2xl">
+    <div className="w-full min-w-0 space-y-5">
       <div>
         <h2 className="text-[15px] font-semibold mb-1" style={{ color: 'var(--hub-text)' }}>
           Billing
