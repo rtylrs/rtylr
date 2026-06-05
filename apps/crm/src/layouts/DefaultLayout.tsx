@@ -3,7 +3,7 @@ import { cn, Avatar } from '@voxire/ui';
 import TrialBanner from '../shared/components/TrialBanner';
 import { useLocation, useNavigate, Link, Outlet } from '@tanstack/react-router';
 import { motion, AnimatePresence } from 'motion/react';
-import { APP_URLS, getAvatarUrl } from '@voxire/config';
+import { getAvatarUrl } from '@voxire/config';
 import { signOut, useUserStore } from '@voxire/auth';
 import { CaretPanel, CaretButton, useCaretStore } from '@voxire/caret';
 import { useQuery } from '@tanstack/react-query';
@@ -13,7 +13,6 @@ import {
   Gift,
   Megaphone,
   PieChart,
-  ArrowLeft,
   Bell,
   Sun,
   Moon,
@@ -298,33 +297,6 @@ const DefaultLayout: React.FC = () => {
             >
               <X size={16} />
             </button>
-          </div>
-
-          {/* Hub back link */}
-          <div style={{ padding: '10px 8px 4px' }}>
-            <a
-              href={APP_URLS.dash}
-              style={{
-                display: 'flex',
-                alignItems: 'center',
-                gap: '6px',
-                padding: '6px 10px',
-                borderRadius: '8px',
-                fontSize: '12px',
-                color: 'var(--hub-text-muted)',
-                textDecoration: 'none',
-                transition: 'background 0.15s',
-              }}
-              onMouseEnter={(e) => {
-                (e.currentTarget as HTMLElement).style.background = 'var(--hub-hover)';
-              }}
-              onMouseLeave={(e) => {
-                (e.currentTarget as HTMLElement).style.background = 'transparent';
-              }}
-            >
-              <ArrowLeft size={13} />
-              <span>Hub</span>
-            </a>
           </div>
 
           {/* Navigation */}

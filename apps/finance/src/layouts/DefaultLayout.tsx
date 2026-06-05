@@ -8,7 +8,7 @@ import { safe } from '../shared/lib/api';
 import { useForesightLinks } from '@voxire/utils';
 import { useNavigate, Link, Outlet, useRouterState } from '@tanstack/react-router';
 import { motion, AnimatePresence } from 'motion/react';
-import { APP_URLS, getAvatarUrl } from '@voxire/config';
+import { getAvatarUrl } from '@voxire/config';
 import {
   LayoutDashboard,
   FileText,
@@ -21,7 +21,6 @@ import {
   Moon,
   Monitor,
   LogOut,
-  ArrowLeft,
   Search as SearchIcon,
   Repeat,
   ClipboardList,
@@ -292,27 +291,6 @@ const DefaultLayout: React.FC = () => {
             }}
           >
             <img src="/logo.png?v=2" alt="rtylr" className="h-6 w-auto" />
-          </div>
-
-          <div style={{ padding: '10px 8px 4px' }}>
-            <a
-              href={APP_URLS.dash}
-              style={{
-                display: 'flex',
-                alignItems: 'center',
-                gap: 6,
-                padding: '6px 12px',
-                borderRadius: 8,
-                fontSize: 12,
-                color: 'var(--hub-text-muted)',
-                textDecoration: 'none',
-                background: 'var(--hub-hover)',
-                border: '1px solid var(--hub-border)',
-              }}
-            >
-              <ArrowLeft size={12} />
-              <span>Hub</span>
-            </a>
           </div>
 
           <div style={{ padding: '6px 8px' }}>

@@ -1,7 +1,6 @@
 import React from 'react';
 import { Link, Outlet, useLocation } from '@tanstack/react-router';
-import { Briefcase, Inbox, Palette, ArrowLeft, LayoutGrid } from 'lucide-react';
-import { APP_URLS } from '@voxire/config';
+import { Briefcase, Inbox, Palette, LayoutGrid } from 'lucide-react';
 import { signOut } from '@voxire/auth';
 
 /**
@@ -36,14 +35,6 @@ const AdminLayout: React.FC = (): React.JSX.Element => {
           />
         </nav>
         <div className="mx-3 mb-4 flex flex-col gap-1">
-          <a
-            href={APP_URLS.dash}
-            className="inline-flex items-center gap-2 rounded-md px-3 py-2 text-xs"
-            style={{ color: '#999' }}
-          >
-            <ArrowLeft className="h-3.5 w-3.5" />
-            Back to dashboard
-          </a>
           <button
             type="button"
             onClick={() => signOut('recruit')}

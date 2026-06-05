@@ -2,7 +2,7 @@ import React, { useEffect, useRef, useState } from 'react';
 import { useRouterState, Link } from '@tanstack/react-router';
 import { motion, AnimatePresence } from 'motion/react';
 import { useTranslation } from 'react-i18next';
-import { APP_URLS, getAvatarUrl } from '@voxire/config';
+import { getAvatarUrl } from '@voxire/config';
 import { Avatar } from '@voxire/ui';
 import { signOut, useUserStore } from '@voxire/auth';
 import { unwrap } from '@voxire/api';
@@ -14,7 +14,6 @@ import {
   DollarSign,
   Building2,
   Bell,
-  ArrowLeft,
   Sun,
   Moon,
   Monitor,
@@ -610,7 +609,7 @@ const DefaultLayout: React.FC<DefaultLayoutProps> = ({ children }) => {
           boxShadow: isMobile ? 'var(--hr-shadow)' : 'none',
         }}
       >
-        {/* Logo + Hub back link */}
+        {/* Logo */}
         <div
           style={{
             display: 'flex',
@@ -623,28 +622,6 @@ const DefaultLayout: React.FC<DefaultLayoutProps> = ({ children }) => {
           <div style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
             <img src="/logo.png?v=2" alt="rtylr" style={{ height: 24, width: 'auto' }} />
           </div>
-          <a
-            href={APP_URLS.dash}
-            style={{
-              display: 'inline-flex',
-              alignItems: 'center',
-              gap: '4px',
-              fontSize: '11px',
-              color: 'var(--hr-text-dim)',
-              textDecoration: 'none',
-              marginTop: '2px',
-              transition: 'color 0.15s',
-            }}
-            onMouseEnter={(e: React.MouseEvent<HTMLAnchorElement>) =>
-              ((e.currentTarget as HTMLAnchorElement).style.color = 'var(--hr-text-muted)')
-            }
-            onMouseLeave={(e: React.MouseEvent<HTMLAnchorElement>) =>
-              ((e.currentTarget as HTMLAnchorElement).style.color = 'var(--hr-text-dim)')
-            }
-          >
-            <ArrowLeft size={11} />
-            {t('layout.hubLink')}
-          </a>
         </div>
 
         {/* Navigation */}

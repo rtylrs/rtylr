@@ -4,7 +4,7 @@ import TrialBanner from '../shared/components/TrialBanner';
 import { useForesightLinks } from '@voxire/utils';
 import { Link, useNavigate, useRouterState, Outlet } from '@tanstack/react-router';
 import { motion, AnimatePresence } from 'motion/react';
-import { APP_URLS, getAvatarUrl } from '@voxire/config';
+import { getAvatarUrl } from '@voxire/config';
 import { signOut, useUserStore } from '@voxire/auth';
 import { unwrap } from '@voxire/api';
 import { safe } from '../shared/lib/api';
@@ -20,7 +20,6 @@ import {
   Moon,
   Monitor,
   LogOut,
-  ArrowLeft,
   Warehouse,
   Truck,
   ClipboardList,
@@ -359,23 +358,6 @@ const DefaultLayout: React.FC = () => {
             >
               <X size={16} />
             </button>
-          </div>
-
-          <div className="px-3 pt-3">
-            <a
-              href={APP_URLS.dash}
-              className="flex items-center gap-2 px-3 py-1.5 rounded-lg text-xs transition-colors duration-150 no-underline"
-              style={{ color: 'var(--hub-text-muted)' }}
-              onMouseEnter={(e) => {
-                (e.currentTarget as HTMLElement).style.background = 'var(--hub-hover)';
-              }}
-              onMouseLeave={(e) => {
-                (e.currentTarget as HTMLElement).style.background = 'transparent';
-              }}
-            >
-              <ArrowLeft size={12} />
-              <span>Hub</span>
-            </a>
           </div>
 
           <nav ref={sidebarRef} className="flex-1 overflow-y-auto py-2 px-2 space-y-3">
