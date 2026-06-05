@@ -1,9 +1,7 @@
 import React from 'react';
 import { Navigate } from '@tanstack/react-router';
-import { useQuery } from '@tanstack/react-query';
-import { unwrap } from '@voxire/api';
-import { flowApi } from '../../shared/services/flowApi';
 import { PERSONAL_WORKSPACE_ID } from '../../shared/lib/personalWorkspace';
+import { useMyTasksProject } from './useMyTasksProject';
 
 /**
  * Resolves (get-or-creates) the user's personal "My Tasks" project and redirects
@@ -11,11 +9,7 @@ import { PERSONAL_WORKSPACE_ID } from '../../shared/lib/personalWorkspace';
  * instead of a separate page. Falls back to the personal workspace on error.
  */
 const MyTasksRedirect = (): React.JSX.Element => {
-  const { data, isLoading, isError } = useQuery({
-    queryKey: ['my-tasks-project'],
-    queryFn: () => unwrap(flowApi.getMyTasksProject()),
-    staleTime: 5 * 60 * 1000,
-  });
+  const { data, isLoading, isError } = useMyTasksProject();
 
   if (isLoading) {
     return (

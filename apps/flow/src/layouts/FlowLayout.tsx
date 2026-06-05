@@ -47,6 +47,7 @@ import BulkEditBar from '../shared/components/BulkEditBar';
 import { useKeyboardShortcuts } from '../shared/hooks/useKeyboardShortcuts';
 import { useWorkspaces } from '../features/workspace-dashboard/useWorkspaces';
 import { useProjects, useCreateProject } from '../features/projects/useProjects';
+import { useMyTasksProject } from '../features/tasks/useMyTasksProject';
 import { PERSONAL_WORKSPACE_ID } from '../shared/lib/personalWorkspace';
 import type { Workspace } from '../shared/stores/flowStore';
 import { isTaskMine } from '../shared/lib/currentUser';
@@ -88,6 +89,9 @@ interface SidebarLinkProps {
   label: string;
   exact?: boolean;
   badge?: number;
+  // When set, fully controls the active state (used for items like "My tasks"
+  // that redirect to a project board, so path-matching can't detect them).
+  activeOverride?: boolean;
 }
 
 const SidebarSectionReorder: React.FC<{
@@ -162,9 +166,21 @@ const SidebarCollapsible: React.FC<{ open: boolean; children: React.ReactNode }>
   </AnimatePresence>
 );
 
-const SidebarLink: React.FC<SidebarLinkProps> = ({ to, icon: Icon, label, exact, badge }) => {
+const SidebarLink: React.FC<SidebarLinkProps> = ({
+  to,
+  icon: Icon,
+  label,
+  exact,
+  badge,
+  activeOverride,
+}) => {
   const location = useLocation();
-  const isActive = exact ? location.pathname === to : location.pathname.startsWith(to);
+  const isActive =
+    activeOverride !== undefined
+      ? activeOverride
+      : exact
+        ? location.pathname === to
+        : location.pathname.startsWith(to);
 
   return (
     <Link
@@ -210,7 +226,7 @@ interface FlowLayoutProps {
 const FlowLayout: React.FC<FlowLayoutProps> = ({ children }) => {
   const location = useLocation();
   const navigate = useNavigate();
-  const { workspaceId } = useParams({ strict: false });
+  const { workspaceId, projectId } = useParams({ strict: false });
   const showPreviewRoutes = useFeatureFlag(FLAG_KEYS.APP_FLOW_PREVIEW_ROUTES);
 
   const { toggle: toggleSidebarSection, isCollapsed: isSidebarSectionCollapsed } =
@@ -272,6 +288,12 @@ const FlowLayout: React.FC<FlowLayoutProps> = ({ children }) => {
   }, [apiWorkspaces, workspaces, workspacesLoading]);
 
   const currentWorkspaceId = workspaceId || activeWorkspaceId || liveWorkspaces[0]?.id || '';
+
+  // "My tasks" redirects to its personal project board, so highlight the nav
+  // item whenever the board being viewed IS that project.
+  const { data: myTasksProject } = useMyTasksProject();
+  const isOnMyTasksBoard =
+    !!projectId && !!myTasksProject && String(projectId) === String(myTasksProject.projectId);
   const { data: apiProjects } = useProjects(currentWorkspaceId || undefined);
 
   // Once real workspaces load, redirect away from the "personal" sentinel to the
@@ -645,6 +667,7 @@ const FlowLayout: React.FC<FlowLayoutProps> = ({ children }) => {
                   icon={ListTodo}
                   label="My tasks"
                   badge={myIssuesCount}
+                  activeOverride={isOnMyTasksBoard}
                 />
                 <SidebarLink to="/today" icon={Sun} label="Today" badge={todayFocusCount} />
                 <SidebarLink
