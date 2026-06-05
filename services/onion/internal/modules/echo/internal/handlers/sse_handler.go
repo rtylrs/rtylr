@@ -448,7 +448,14 @@ func (h *GenerateTextStreamHandler) storeAIResponse(ctx context.Context, session
 		}
 	}()
 
-	_, err := h.MemoryService.StoreMessage(ctx, sessionID, userID, "assistant", response, len(response)/4)
+	// Decouple from the request context: the SSE handler has already returned by
+	// the time this runs, so the request ctx is canceled and the DB write +
+	// cache invalidation would fail with "context canceled". Keep the logger
+	// scope (trace ids) but a fresh, time-bounded cancellation.
+	storeCtx, cancel := context.WithTimeout(context.WithoutCancel(ctx), 30*time.Second)
+	defer cancel()
+
+	_, err := h.MemoryService.StoreMessage(storeCtx, sessionID, userID, "assistant", response, len(response)/4)
 	if err != nil {
 		logger.Ctx(ctx).Error("Failed to store AI response",
 			logger.Error(err),
