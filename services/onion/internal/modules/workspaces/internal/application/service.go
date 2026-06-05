@@ -295,34 +295,36 @@ func (s *Service) UpdateTask(ctx context.Context, input domain.UpdateTaskInput, 
 		return err
 	}
 
-	if existing.Status != input.Status {
+	// This is a partial update — only log a change for a field the request
+	// actually supplied. An omitted field arrives as the zero value (empty
+	// string / nil) and means "leave unchanged", so comparing it against the
+	// existing value would otherwise log a spurious "changed to empty" entry.
+	if input.Status != "" && existing.Status != input.Status {
 		if actErr := s.repo.LogActivity(ctx, input.ID, userID, "status_changed", existing.Status, input.Status); actErr != nil {
 			logger.Ctx(ctx).Error("UpdateTask: failed to log status activity", logger.Error(actErr))
 		}
 	}
 
-	if existing.Priority != input.Priority {
+	if input.Priority != "" && existing.Priority != input.Priority {
 		if actErr := s.repo.LogActivity(ctx, input.ID, userID, "priority_changed", existing.Priority, input.Priority); actErr != nil {
 			logger.Ctx(ctx).Error("UpdateTask: failed to log priority activity", logger.Error(actErr))
 		}
 	}
 
-	existingAssignee := int64(0)
-	if existing.AssigneeID != nil {
-		existingAssignee = *existing.AssigneeID
-	}
-
-	newAssignee := int64(0)
 	if input.AssigneeID != nil {
-		newAssignee = *input.AssigneeID
-	}
+		existingAssignee := int64(0)
+		if existing.AssigneeID != nil {
+			existingAssignee = *existing.AssigneeID
+		}
+		newAssignee := *input.AssigneeID
 
-	if existingAssignee != newAssignee {
-		if actErr := s.repo.LogActivity(ctx, input.ID, userID, "assignee_changed",
-			strconv.FormatInt(existingAssignee, 10),
-			strconv.FormatInt(newAssignee, 10),
-		); actErr != nil {
-			logger.Ctx(ctx).Error("UpdateTask: failed to log assignee activity", logger.Error(actErr))
+		if existingAssignee != newAssignee {
+			if actErr := s.repo.LogActivity(ctx, input.ID, userID, "assignee_changed",
+				strconv.FormatInt(existingAssignee, 10),
+				strconv.FormatInt(newAssignee, 10),
+			); actErr != nil {
+				logger.Ctx(ctx).Error("UpdateTask: failed to log assignee activity", logger.Error(actErr))
+			}
 		}
 	}
 

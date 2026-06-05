@@ -246,7 +246,7 @@ type CreateTaskRequest struct {
 	Title          string           `json:"title"`
 	Description    string           `json:"description"`
 	Priority       string           `json:"priority"`
-	AssigneeID     *int64           `json:"assignee_id"`
+	AssigneeID     *JSONID          `json:"assignee_id"`
 	DueDate        *time.Time       `json:"due_date"`
 	StartDate      *time.Time       `json:"start_date"`
 	EstimatedHours *float64         `json:"estimated_hours"`
@@ -311,7 +311,7 @@ func (h *CreateTaskHandler) Serve(ctx context.Context, req *CreateTaskRequest) (
 		Title:          req.Title,
 		Description:    req.Description,
 		Priority:       req.Priority,
-		AssigneeID:     req.AssigneeID,
+		AssigneeID:     jsonIDPtrToInt64Ptr(req.AssigneeID),
 		ReporterID:     authUser.UserID,
 		DueDate:        req.DueDate,
 		StartDate:      req.StartDate,
@@ -410,7 +410,7 @@ type UpdateTaskRequest struct {
 	Description string     `json:"description"`
 	Status      string     `json:"status"`
 	Priority    string     `json:"priority"`
-	AssigneeID  *int64     `json:"assignee_id"`
+	AssigneeID  *JSONID    `json:"assignee_id"`
 	DueDate     *time.Time `json:"due_date"`
 	StartDate   *time.Time `json:"start_date"`
 	Labels      []int64    `json:"labels"`
@@ -425,9 +425,10 @@ func (h *UpdateTaskHandler) Validate(_ context.Context, req *UpdateTaskRequest) 
 		return &errorModels.ServerError{Code: http.StatusBadRequest, Message: "Task ID is required"}
 	}
 
-	if req.Title == "" {
-		return &errorModels.ServerError{Code: http.StatusBadRequest, Message: "Title is required"}
-	}
+	// This is a partial update (PATCH semantics over PUT): the client sends only
+	// the fields it wants to change (e.g. just priority or assignee). An omitted
+	// title means "leave unchanged", not "set empty", so we don't require it here
+	// — the repository preserves any field the request leaves blank/nil.
 
 	return nil
 }
@@ -445,7 +446,7 @@ func (h *UpdateTaskHandler) Serve(ctx context.Context, req *UpdateTaskRequest) (
 		Description: req.Description,
 		Status:      req.Status,
 		Priority:    req.Priority,
-		AssigneeID:  req.AssigneeID,
+		AssigneeID:  jsonIDPtrToInt64Ptr(req.AssigneeID),
 		DueDate:     req.DueDate,
 		StartDate:   req.StartDate,
 		Labels:      req.Labels,

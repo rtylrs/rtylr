@@ -104,3 +104,15 @@ func (j JSONID) Int64() int64 { return int64(j) }
 
 // IsZero is the canonical "was this field provided?" check.
 func (j JSONID) IsZero() bool { return int64(j) == 0 }
+
+// jsonIDPtrToInt64Ptr converts an optional, string-or-number id from a request
+// body into the *int64 the domain layer expects. nil (field omitted or null) and
+// an explicit 0 both map to nil so the caller's "leave unchanged" semantics hold;
+// the frontend sends ids as strings, which a plain *int64 field cannot decode.
+func jsonIDPtrToInt64Ptr(j *JSONID) *int64 {
+	if j == nil || int64(*j) == 0 {
+		return nil
+	}
+	v := int64(*j)
+	return &v
+}

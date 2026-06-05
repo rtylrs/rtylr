@@ -414,19 +414,37 @@ func (r *Repository) UpdateTask(ctx context.Context, input domain.UpdateTaskInpu
 	if labelsJSON != nil {
 		labelsParam = labelsJSON
 	}
+	var titleParam interface{}
+	if input.Title != "" {
+		titleParam = input.Title
+	}
+	var assigneeParam interface{}
+	if input.AssigneeID != nil {
+		assigneeParam = *input.AssigneeID
+	}
+	var dueDateParam interface{}
+	if input.DueDate != nil {
+		dueDateParam = *input.DueDate
+	}
+	var startDateParam interface{}
+	if input.StartDate != nil {
+		startDateParam = *input.StartDate
+	}
 
-	// Partial updates (e.g. title-only) must not overwrite status/priority/completed_at.
-	// COALESCE(?, col) preserves the existing value when the param is NULL.
-	// The completed_at CASE only fires when a non-NULL status is explicitly supplied.
+	// Partial updates (the client sends only the fields it changed, e.g. just
+	// priority or assignee) must not overwrite the fields it omitted. COALESCE(?, col)
+	// preserves the existing value when the param is NULL, and every nullable param
+	// above is left NULL when the request omits that field. The completed_at CASE only
+	// fires when a non-NULL status is explicitly supplied.
 	q, args, err := sq.
 		Update("flow_tasks").
-		Set("title", input.Title).
+		Set("title", sq.Expr("COALESCE(?, title)", titleParam)).
 		Set("description", sq.Expr("COALESCE(?, description)", sql.NullString{String: input.Description, Valid: input.Description != ""})).
 		Set("status", sq.Expr("COALESCE(?, status)", statusParam)).
 		Set("priority", sq.Expr("COALESCE(?, priority)", priorityParam)).
-		Set("assignee_id", nullInt64Ptr(input.AssigneeID)).
-		Set("due_date", nullTimePtrToSql(input.DueDate)).
-		Set("start_date", nullTimePtrToSql(input.StartDate)).
+		Set("assignee_id", sq.Expr("COALESCE(?, assignee_id)", assigneeParam)).
+		Set("due_date", sq.Expr("COALESCE(?, due_date)", dueDateParam)).
+		Set("start_date", sq.Expr("COALESCE(?, start_date)", startDateParam)).
 		Set("labels", sq.Expr("COALESCE(?, labels)", labelsParam)).
 		Set("completed_at", sq.Expr(
 			`CASE
