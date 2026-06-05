@@ -11,6 +11,7 @@ import (
 	"time"
 
 	"github.com/voxire/onion/internal/modules/echo/internal/application"
+	authPkg "github.com/voxire/onion/internal/platform/auth"
 	errorModels "github.com/voxire/onion/internal/platform/errors"
 	"github.com/voxire/onion/internal/platform/logger"
 	"github.com/voxire/onion/internal/platform/snips"
@@ -21,6 +22,15 @@ type MemoryService interface {
 	StoreMessage(ctx context.Context, sessionID string, userID int, role, content string, tokens int) (any, error)
 	SummarizeSession(ctx context.Context, sessionID string, userID int) error
 	BuildEnhancedPrompt(ctx context.Context, sessionID string, userID int, currentRequest string) string
+}
+
+// QuotaService gates AI requests against the tenant's monthly token allowance
+// and records consumption. Implemented by the aiquota module; kept as a local
+// interface (primitive signatures) so echo doesn't depend on its internals.
+// Authorize fails open (returns allowed) on error.
+type QuotaService interface {
+	Authorize(ctx context.Context, businessID, userID int64) (allowed bool, planSlug string, allowanceTokens, usedTokens, remainingTokens int64)
+	RecordUsage(ctx context.Context, businessID, userID int64, tokens int)
 }
 
 const caretSystemPreamble = "You are Caret, an AI business assistant for rtylr."
@@ -36,6 +46,7 @@ func GenerateTextStreamRoutes() []string {
 type GenerateTextStreamHandler struct {
 	AiService     *application.Service
 	MemoryService MemoryService
+	QuotaService  QuotaService
 }
 
 type GenerateTextStreamRequest struct {
@@ -122,6 +133,24 @@ func (h *GenerateTextStreamHandler) ServeHTTP(w http.ResponseWriter, r *http.Req
 		return
 	}
 
+	// Quota gate. Use the authenticated identity (never the client-supplied
+	// userId) so usage is metered against the real tenant.
+	device := authPkg.DeviceCtx(ctx)
+	var businessID, authUserID int64
+	if device.User != nil {
+		businessID = device.User.BusinessID
+		authUserID = device.User.UserID
+	}
+	if h.QuotaService != nil {
+		allowed, plan, allowance, used, remaining := h.QuotaService.Authorize(ctx, businessID, authUserID)
+		if !allowed {
+			log.Info("AI request blocked by quota",
+				logger.Any("owner_business_id", businessID), logger.String("plan", plan))
+			h.writeQuotaExceeded(w, plan, allowance, used, remaining)
+			return
+		}
+	}
+
 	if setupErr := h.setupSessionAndStoreMessage(ctx, req); setupErr != nil {
 		log.Error("Failed to setup session and store message", logger.Error(setupErr))
 		http.Error(w, "Failed to setup session", http.StatusInternalServerError)
@@ -151,7 +180,45 @@ func (h *GenerateTextStreamHandler) ServeHTTP(w http.ResponseWriter, r *http.Req
 		return
 	}
 
-	h.streamTokensToClient(ctx, w, tokenChan, clientGone, req)
+	h.streamTokensToClient(ctx, w, tokenChan, clientGone, req, businessID, authUserID, len(enhancedPrompt))
+}
+
+// writeQuotaExceeded reports that the tenant has spent its monthly AI allowance.
+// 402 Payment Required signals "upgrade to continue".
+func (h *GenerateTextStreamHandler) writeQuotaExceeded(w http.ResponseWriter, plan string, allowance, used, remaining int64) {
+	w.Header().Set("Content-Type", "application/json")
+	w.WriteHeader(http.StatusPaymentRequired)
+	_ = json.NewEncoder(w).Encode(map[string]any{
+		"error":            "ai_quota_exceeded",
+		"message":          "Your team's monthly AI limit has been reached. Upgrade your plan to keep using Caret.",
+		"plan":             plan,
+		"allowance_tokens": allowance,
+		"used_tokens":      used,
+		"remaining_tokens": remaining,
+	})
+}
+
+// recordUsage meters consumed tokens against the tenant's quota. It runs detached
+// from the request context (which is canceled when the SSE handler returns) but
+// time-bounded.
+func (h *GenerateTextStreamHandler) recordUsage(ctx context.Context, businessID, userID int64, tokens int) {
+	if h.QuotaService == nil || tokens <= 0 {
+		return
+	}
+	go func() {
+		bg, cancel := context.WithTimeout(context.WithoutCancel(ctx), 10*time.Second)
+		defer cancel()
+		h.QuotaService.RecordUsage(bg, businessID, userID, tokens)
+	}()
+}
+
+// estimateTokens is the fallback when a provider doesn't report usage
+// (~4 chars/token).
+func estimateTokens(chars int) int {
+	if chars <= 0 {
+		return 0
+	}
+	return chars / 4
 }
 
 func (h *GenerateTextStreamHandler) parseAndValidateRequest(r *http.Request) (*GenerateTextStreamRequest, error) {
@@ -268,7 +335,7 @@ func (h *GenerateTextStreamHandler) writeErrorResponse(w http.ResponseWriter, er
 	}
 }
 
-func (h *GenerateTextStreamHandler) streamTokensToClient(ctx context.Context, w http.ResponseWriter, tokenChan <-chan snips.StreamToken, clientGone chan bool, req *GenerateTextStreamRequest) {
+func (h *GenerateTextStreamHandler) streamTokensToClient(ctx context.Context, w http.ResponseWriter, tokenChan <-chan snips.StreamToken, clientGone chan bool, req *GenerateTextStreamRequest, businessID, userID int64, promptChars int) {
 	var fullResponse strings.Builder
 
 	for {
@@ -288,6 +355,14 @@ func (h *GenerateTextStreamHandler) streamTokensToClient(ctx context.Context, w 
 				if fullResponse.Len() > 0 {
 					go h.storeAIResponse(ctx, req.SessionID, int(req.UserID), fullResponse.String())
 				}
+
+				// Meter usage against the quota. Prefer the provider's reported
+				// token counts; fall back to a char/4 estimate when absent.
+				tokens := token.PromptTokens + token.CompletionTokens
+				if tokens == 0 {
+					tokens = estimateTokens(promptChars) + estimateTokens(fullResponse.Len())
+				}
+				h.recordUsage(ctx, businessID, userID, tokens)
 
 				return
 			}

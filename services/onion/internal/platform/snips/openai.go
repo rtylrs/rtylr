@@ -14,9 +14,10 @@ import (
 )
 
 var (
-	ErrOpenAINotConfigured   = errors.New("OpenAI is not configured. Please set OPENAI_API_KEY environment variable")
-	ErrDeepSeekNotConfigured = errors.New("DeepSeek is not configured. Please set DEEPSEEK_API_KEY environment variable")
-	ErrOpenAINoChoices       = errors.New("no response choices received from provider")
+	ErrOpenAINotConfigured    = errors.New("OpenAI is not configured. Please set OPENAI_API_KEY environment variable")
+	ErrDeepSeekNotConfigured  = errors.New("DeepSeek is not configured. Please set DEEPSEEK_API_KEY environment variable")
+	ErrNvidiaNIMNotConfigured = errors.New("NVIDIA NIM is not configured. Please set NVIDIA_NIM_API_KEY environment variable")
+	ErrOpenAINoChoices        = errors.New("no response choices received from provider")
 )
 
 // OpenAIProvider speaks the OpenAI chat-completions API. DeepSeek is wire
@@ -70,6 +71,20 @@ func NewDeepSeekProvider() (*OpenAIProvider, error) {
 		config.GetDeepSeekAPIKey(),
 		config.GetDeepSeekBaseURL(),
 		config.GetDeepSeekModel(),
+		"",
+	), nil
+}
+
+// NewNvidiaNIMProvider builds an NVIDIA NIM provider (OpenAI-compatible).
+func NewNvidiaNIMProvider() (*OpenAIProvider, error) {
+	if !config.IsNvidiaNIMConfigured() {
+		return nil, ErrNvidiaNIMNotConfigured
+	}
+	return newOpenAICompatProvider(
+		"nvidia",
+		config.GetNvidiaNIMAPIKey(),
+		config.GetNvidiaNIMBaseURL(),
+		config.GetNvidiaNIMModel(),
 		"",
 	), nil
 }

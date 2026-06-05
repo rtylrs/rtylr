@@ -16,7 +16,7 @@ import (
 // GenerateTextStreamRoutes() share the same bucket state.
 var aiStreamRateLimit = serverHttp.AIUserRateLimit(5, time.Minute)
 
-func RegisterRoutes(ctx context.Context, r *chi.Mux, snipsService *application.Service, memoryService handlers.MemoryService) {
+func RegisterRoutes(ctx context.Context, r *chi.Mux, snipsService *application.Service, memoryService handlers.MemoryService, quotaService handlers.QuotaService) {
 	serverHttp.RegisterGET[handlers.GetProviderStatusRequest, handlers.GetProviderStatusResponse](
 		ctx,
 		r,
@@ -31,6 +31,7 @@ func RegisterRoutes(ctx context.Context, r *chi.Mux, snipsService *application.S
 		streamHandler := &handlers.GenerateTextStreamHandler{
 			AiService:     snipsService,
 			MemoryService: memoryService,
+			QuotaService:  quotaService,
 		}
 		r.With(aiStreamRateLimit).Post(path, streamHandler.ServeHTTP)
 	}

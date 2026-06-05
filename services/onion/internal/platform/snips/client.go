@@ -48,44 +48,52 @@ func NewClient(ctx context.Context) (*Client, error) {
 		providers: make([]Provider, 0),
 	}
 
-	// Register providers in priority order. DeepSeek is the primary provider;
-	// Gemini and OpenAI remain as automatic fallbacks if configured.
-	if config.IsDeepSeekConfigured() {
-		if provider, err := NewDeepSeekProvider(); err == nil {
-			client.providers = append(client.providers, provider)
-			if client.primaryProvider == nil {
-				client.primaryProvider = provider
+	// Default priority: DeepSeek, then NVIDIA NIM (both OpenAI-compatible), then
+	// Gemini and OpenAI as fallbacks. AI_PRIMARY_PROVIDER can promote deepseek or
+	// nvidia to the front when both are configured. Any unconfigured provider is
+	// skipped; the first registered becomes primary (used for streaming).
+	register := func(p Provider) {
+		client.providers = append(client.providers, p)
+		if client.primaryProvider == nil {
+			client.primaryProvider = p
+		}
+	}
+
+	deepseekFirst := config.GetAIPrimaryProvider() != "nvidia"
+	addDeepSeek := func() {
+		if config.IsDeepSeekConfigured() {
+			if p, err := NewDeepSeekProvider(); err == nil {
+				register(p)
+			}
+		}
+	}
+	addNvidia := func() {
+		if config.IsNvidiaNIMConfigured() {
+			if p, err := NewNvidiaNIMProvider(); err == nil {
+				register(p)
 			}
 		}
 	}
 
+	if deepseekFirst {
+		addDeepSeek()
+		addNvidia()
+	} else {
+		addNvidia()
+		addDeepSeek()
+	}
+
 	if config.IsGeminiConfigured() {
-		if provider, err := NewGeminiProvider(ctx); err == nil {
-			client.providers = append(client.providers, provider)
-			if client.primaryProvider == nil {
-				client.primaryProvider = provider
-			}
+		if p, err := NewGeminiProvider(ctx); err == nil {
+			register(p)
 		}
 	}
 
 	if config.IsOpenAIConfigured() {
-		if provider, err := NewOpenAIProvider(); err == nil {
-			client.providers = append(client.providers, provider)
-			if client.primaryProvider == nil {
-				client.primaryProvider = provider
-			}
+		if p, err := NewOpenAIProvider(); err == nil {
+			register(p)
 		}
 	}
-
-	// Future: MindsDB provider
-	// if config.IsMindsDBConfigured() {
-	//     if provider, err := NewMindsDBProvider(ctx); err == nil {
-	//         client.providers = append(client.providers, provider)
-	//         if client.primaryProvider == nil {
-	//             client.primaryProvider = provider
-	//         }
-	//     }
-	// }
 
 	if len(client.providers) == 0 {
 		return nil, ErrNoProvidersConfigured

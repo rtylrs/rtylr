@@ -14,6 +14,7 @@ import (
 
 	"github.com/voxire/onion/internal/modules/accounts"
 	"github.com/voxire/onion/internal/modules/activity"
+	"github.com/voxire/onion/internal/modules/aiquota"
 	"github.com/voxire/onion/internal/modules/addons"
 	apikeys "github.com/voxire/onion/internal/modules/api_keys"
 	"github.com/voxire/onion/internal/modules/apps"
@@ -340,6 +341,7 @@ type apiModules struct {
 	Departments           *departments.Module
 	Documents             *documents.Module
 	CacheOps              *cacheops.Module
+	AIQuota               *aiquota.Module
 	Echo                  *echo.Module
 	EmailTest             *emailtest.Module
 	Expenses              *expenses.Module
@@ -440,6 +442,7 @@ type apiModules struct {
 
 func initializeModules(ctx context.Context) *apiModules {
 	memoryModule := memory.NewModule(ctx, dbclient.Pool())
+	aiQuotaModule := aiquota.NewModule(ctx, dbclient.Pool())
 	hrCoreModule := hrcore.NewModule(ctx, dbclient.Pool())
 
 	return &apiModules{
@@ -475,7 +478,8 @@ func initializeModules(ctx context.Context) *apiModules {
 		Departments:           departments.NewModule(ctx, dbclient.Pool()),
 		Documents:             documents.NewModule(ctx, dbclient.Pool()),
 		CacheOps:              cacheops.NewModule(),
-		Echo:                  echo.NewModule(ctx, memoryModule),
+		AIQuota:               aiQuotaModule,
+		Echo:                  echo.NewModule(ctx, memoryModule, aiQuotaModule),
 		EmailTest:             emailtest.NewModule(ctx, dbclient.Pool()),
 		Expenses:              expenses.NewModule(ctx, dbclient.Pool()),
 		Feedback:              feedback.NewModule(ctx, dbclient.Pool()),

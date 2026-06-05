@@ -32,6 +32,19 @@ const (
 )
 
 const (
+	// NVIDIA NIM is an OpenAI-compatible provider (hosted catalog or self-hosted).
+	// Only the API key is an env secret (NVIDIA_NIM_API_KEY); base URL + model are
+	// fixed here. Point NvidiaNIMBaseURL at a self-hosted NIM if/when we run one.
+	NvidiaNIMAPIKeyEnvVar = "NVIDIA_NIM_API_KEY"
+	NvidiaNIMBaseURL      = "https://integrate.api.nvidia.com/v1"
+	NvidiaNIMModel        = "meta/llama-3.3-70b-instruct"
+
+	// AIPrimaryProviderEnvVar optionally forces which configured provider is
+	// primary ("deepseek" | "nvidia"). Empty = use the default priority order.
+	AIPrimaryProviderEnvVar = "AI_PRIMARY_PROVIDER"
+)
+
+const (
 	// AIRequestTimeout bounds any single LLM call so a hung provider can't pin
 	// an SSE stream open forever.
 	AIRequestTimeout = 90 * time.Second
@@ -79,8 +92,10 @@ type AppConfig struct {
 	OpenAIBaseURL string
 	GeminiAPIKey  string
 
-	// DeepSeek (primary provider) — only the key is configurable.
-	DeepSeekAPIKey string
+	// DeepSeek + NVIDIA NIM (primary providers) — only the keys are configurable.
+	DeepSeekAPIKey    string
+	NvidiaNIMAPIKey   string
+	AIPrimaryProvider string
 
 	// Redis & Cache
 	RedisURL               string
@@ -228,8 +243,10 @@ func LoadAndValidate() (*AppConfig, error) {
 		OpenAIBaseURL: os.Getenv("OPENAI_BASE_URL"),
 		GeminiAPIKey:  os.Getenv("GEMINI_API_KEY"),
 
-		// DeepSeek
-		DeepSeekAPIKey: os.Getenv(DeepSeekAPIKeyEnvVar),
+		// DeepSeek + NVIDIA NIM
+		DeepSeekAPIKey:    os.Getenv(DeepSeekAPIKeyEnvVar),
+		NvidiaNIMAPIKey:   os.Getenv(NvidiaNIMAPIKeyEnvVar),
+		AIPrimaryProvider: os.Getenv(AIPrimaryProviderEnvVar),
 
 		// Redis & Cache
 		RedisURL:               os.Getenv("REDIS_URL"),
@@ -396,6 +413,30 @@ func IsDeepSeekConfigured() bool {
 	return GetDeepSeekAPIKey() != ""
 }
 
+func GetNvidiaNIMAPIKey() string {
+	if GlobalConfig != nil {
+		return GlobalConfig.NvidiaNIMAPIKey
+	}
+	return os.Getenv(NvidiaNIMAPIKeyEnvVar)
+}
+
+// GetNvidiaNIMBaseURL / GetNvidiaNIMModel return the hardcoded values.
+func GetNvidiaNIMBaseURL() string { return NvidiaNIMBaseURL }
+func GetNvidiaNIMModel() string   { return NvidiaNIMModel }
+
+func IsNvidiaNIMConfigured() bool {
+	return GetNvidiaNIMAPIKey() != ""
+}
+
+// GetAIPrimaryProvider returns the operator's preferred primary provider
+// ("deepseek" | "nvidia"), or "" for the default priority order.
+func GetAIPrimaryProvider() string {
+	if GlobalConfig != nil {
+		return GlobalConfig.AIPrimaryProvider
+	}
+	return os.Getenv(AIPrimaryProviderEnvVar)
+}
+
 func IsAnyAIConfigured() bool {
-	return IsDeepSeekConfigured() || IsOpenAIConfigured() || IsGeminiConfigured()
+	return IsDeepSeekConfigured() || IsNvidiaNIMConfigured() || IsOpenAIConfigured() || IsGeminiConfigured()
 }
