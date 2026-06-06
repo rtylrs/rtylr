@@ -14,25 +14,24 @@ import { TerminalIcon } from './icons/TerminalIcon';
 import { DoomIcon } from './icons/DoomIcon';
 import { StatusIcon } from './icons/StatusIcon';
 import { SnakeIcon } from './icons/SnakeIcon';
-import { WindowType } from '../../stores/useDesktopStore';
 
 const ICONS: DesktopIconDef[] = [
-  { key: 'pos', label: 'POS', svgIcon: POSIcon, windowType: 'pos', defaultPos: { x: 0, y: 0 } },
-  { key: 'erp', label: 'ERP', svgIcon: ERPIcon, windowType: 'erp', defaultPos: { x: 0, y: 0 } },
-  { key: 'crm', label: 'CRM', svgIcon: CRMIcon, windowType: 'crm', defaultPos: { x: 0, y: 0 } },
-  { key: 'hr', label: 'HR', svgIcon: HRIcon, windowType: 'hr', defaultPos: { x: 0, y: 0 } },
+  { key: 'pos', label: 'POS', svgIcon: POSIcon, href: '/pos', defaultPos: { x: 0, y: 0 } },
+  { key: 'erp', label: 'ERP', svgIcon: ERPIcon, href: '/erp', defaultPos: { x: 0, y: 0 } },
+  { key: 'crm', label: 'CRM', svgIcon: CRMIcon, href: '/crm', defaultPos: { x: 0, y: 0 } },
+  { key: 'hr', label: 'HR', svgIcon: HRIcon, href: '/hr', defaultPos: { x: 0, y: 0 } },
   {
     key: 'finance',
     label: 'Finance',
     svgIcon: FinanceIcon,
-    windowType: 'finance',
+    href: '/finance',
     defaultPos: { x: 0, y: 0 },
   },
   {
     key: 'flow',
     label: 'Flow',
     svgIcon: FlowIcon,
-    windowType: 'flow',
+    href: '/flow',
     defaultPos: { x: 0, y: 0 },
   },
   {

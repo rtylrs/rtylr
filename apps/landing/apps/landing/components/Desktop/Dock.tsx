@@ -25,22 +25,22 @@ interface DockItem {
 }
 
 const LEFT_ITEMS: DockItem[] = [
-  { key: 'pos', label: 'POS', icon: Utensils, windowType: 'pos', accent: 'rgba(232,230,225,0.08)' },
-  { key: 'erp', label: 'ERP', icon: Package, windowType: 'erp', accent: 'rgba(232,230,225,0.08)' },
-  { key: 'crm', label: 'CRM', icon: Users, windowType: 'crm', accent: 'rgba(232,230,225,0.08)' },
-  { key: 'hr', label: 'HR', icon: UserCheck, windowType: 'hr', accent: 'rgba(232,230,225,0.08)' },
+  { key: 'pos', label: 'POS', icon: Utensils, href: '/pos', accent: 'rgba(232,230,225,0.08)' },
+  { key: 'erp', label: 'ERP', icon: Package, href: '/erp', accent: 'rgba(232,230,225,0.08)' },
+  { key: 'crm', label: 'CRM', icon: Users, href: '/crm', accent: 'rgba(232,230,225,0.08)' },
+  { key: 'hr', label: 'HR', icon: UserCheck, href: '/hr', accent: 'rgba(232,230,225,0.08)' },
   {
     key: 'finance',
     label: 'Finance',
     icon: DollarSign,
-    windowType: 'finance',
+    href: '/finance',
     accent: 'rgba(232,230,225,0.08)',
   },
   {
     key: 'flow',
     label: 'Flow',
     icon: GitMerge,
-    windowType: 'flow',
+    href: '/flow',
     accent: 'rgba(232,230,225,0.08)',
   },
 ];
@@ -94,7 +94,10 @@ const DockIcon: React.FC<DockIconProps> = ({ item, isOpen }) => {
 
   const handleClick = () => {
     if (item.windowType) addWindow(item.windowType);
-    else if (item.href) window.open(item.href, '_blank', 'noopener,noreferrer');
+    else if (item.href) {
+      if (item.href.startsWith('/')) window.location.href = item.href;
+      else window.open(item.href, '_blank', 'noopener,noreferrer');
+    }
   };
 
   return (

@@ -10,12 +10,12 @@ export const MenuBar: React.FC = () => {
   const addWindow = useDesktopStore((s) => s.addWindow);
 
   const productsItems = [
-    { label: 'POS', onClick: () => addWindow('pos' as WindowType) },
-    { label: 'ERP', onClick: () => addWindow('erp' as WindowType) },
-    { label: 'CRM', onClick: () => addWindow('crm' as WindowType) },
-    { label: 'HR', onClick: () => addWindow('hr' as WindowType) },
-    { label: 'Finance', onClick: () => addWindow('finance' as WindowType) },
-    { label: 'Flow', onClick: () => addWindow('flow' as WindowType) },
+    { label: 'POS', onClick: () => router.push('/pos') },
+    { label: 'ERP', onClick: () => router.push('/erp') },
+    { label: 'CRM', onClick: () => router.push('/crm') },
+    { label: 'HR', onClick: () => router.push('/hr') },
+    { label: 'Finance', onClick: () => router.push('/finance') },
+    { label: 'Flow', onClick: () => router.push('/flow') },
   ];
 
   const docsItems = [

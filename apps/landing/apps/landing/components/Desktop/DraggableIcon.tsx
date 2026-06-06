@@ -24,7 +24,10 @@ export const DraggableIcon: React.FC<DraggableIconProps> = ({ def }) => {
   const handleClick = useCallback(() => {
     if (hasDragged.current) return;
     if (def.windowType) addWindow(def.windowType, def.windowUrl);
-    else if (def.href) window.open(def.href, '_blank', 'noopener,noreferrer');
+    else if (def.href) {
+      if (def.href.startsWith('/')) window.location.href = def.href;
+      else window.open(def.href, '_blank', 'noopener,noreferrer');
+    }
   }, [def, addWindow]);
 
   return (
