@@ -339,6 +339,18 @@ const HeaderMobile: React.FC = () => {
                   <Link href="/trust" onClick={() => handleNavigation('/trust')}>
                     Trust Center
                   </Link>
+                  <Link href="/legal/security" onClick={() => handleNavigation('/legal/security')}>
+                    Security
+                  </Link>
+                  <Link
+                    href="/legal/privacy-policy"
+                    onClick={() => handleNavigation('/legal/privacy-policy')}
+                  >
+                    Privacy Policy
+                  </Link>
+                  <Link href="/legal/terms" onClick={() => handleNavigation('/legal/terms')}>
+                    Terms of Use
+                  </Link>
                   <a
                     href="#"
                     onClick={(e) => {

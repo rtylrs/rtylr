@@ -35,6 +35,19 @@ export const MenuBar: React.FC = () => {
   ];
 
   const moreItems = [
+    { label: 'About', onClick: () => router.push('/about') },
+    { label: 'Partners', onClick: () => router.push('/partners') },
+    { label: 'Contact', onClick: () => router.push('/contact') },
+    { separator: true as const },
+    { label: 'Hardware', onClick: () => router.push('/hardware') },
+    { label: 'Integrations', onClick: () => router.push('/integrations') },
+    { label: 'Help Center', onClick: () => router.push('/support') },
+    { label: 'Trust Center', onClick: () => router.push('/trust') },
+    { label: 'Security', onClick: () => router.push('/legal/security') },
+    { separator: true as const },
+    { label: 'Privacy Policy', onClick: () => router.push('/legal/privacy-policy') },
+    { label: 'Terms of Use', onClick: () => router.push('/legal/terms') },
+    { separator: true as const },
     { label: 'Keyboard Shortcuts', onClick: () => addWindow('shortcuts' as WindowType) },
     {
       label: 'System Status',

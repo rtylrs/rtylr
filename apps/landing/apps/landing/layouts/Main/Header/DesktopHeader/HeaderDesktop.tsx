@@ -318,6 +318,24 @@ const HeaderDesktop: React.FC = () => {
                 >
                   Trust Center
                 </h6>
+                <h6
+                  onClick={() => handleNavigation('/legal/security')}
+                  onMouseEnter={() => prefetchRoute('/legal/security')}
+                >
+                  Security
+                </h6>
+                <h6
+                  onClick={() => handleNavigation('/legal/privacy-policy')}
+                  onMouseEnter={() => prefetchRoute('/legal/privacy-policy')}
+                >
+                  Privacy Policy
+                </h6>
+                <h6
+                  onClick={() => handleNavigation('/legal/terms')}
+                  onMouseEnter={() => prefetchRoute('/legal/terms')}
+                >
+                  Terms of Use
+                </h6>
                 <h6 onClick={() => handleExternalLink(APP_URLS.status)}>Status</h6>
               </div>
             )}
