@@ -188,8 +188,8 @@ const Midnight: React.FC = () => (
       rx="6"
       style={{ animation: 'mn-neon 6s ease-in-out 1s infinite' }}
     />
-    <text x="589" y="418" textAnchor="middle" fill="white" fontSize="16" fontWeight="700" fontFamily="system-ui, sans-serif">
-      THE SHOP
+    <text x="589" y="420" textAnchor="middle" fill="white" fontSize="18" fontWeight="800" fontFamily="system-ui, sans-serif" letterSpacing="1">
+      Rtylr
     </text>
     <text x="589" y="479" textAnchor="middle" fill="rgba(255,255,255,0.7)" fontSize="10" fontFamily="system-ui, sans-serif">
       OPEN 24H
