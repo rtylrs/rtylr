@@ -4,11 +4,12 @@
   align-items: center;
   justify-content: center;
   gap: 8px;
-  border: 2px solid transparent;
-  border-radius: 4px;
+  overflow: hidden;
+  border: none;
+  border-radius: 12px;
   box-sizing: border-box;
   font-family: var(
-    --secondary-font,
+    --primary-font,
     -apple-system,
     BlinkMacSystemFont,
     'Segoe UI',
@@ -20,7 +21,12 @@
   line-height: 1;
   text-decoration: none;
   cursor: pointer;
-  transition: all 0.2s cubic-bezier(0.4, 0, 0.2, 1);
+  transition:
+    background 0.22s var(--ease-out-soft, cubic-bezier(0.22, 1, 0.36, 1)),
+    border-color 0.22s ease,
+    color 0.22s ease,
+    box-shadow 0.22s var(--ease-out-soft, cubic-bezier(0.22, 1, 0.36, 1)),
+    transform 0.22s var(--ease-out-soft, cubic-bezier(0.22, 1, 0.36, 1));
   user-select: none;
   white-space: nowrap;
   outline: none;
@@ -31,7 +37,7 @@
   }
 
   &:active {
-    transform: none;
+    transform: translateY(0);
   }
 
   &.voxire-button-sm {
@@ -83,6 +89,8 @@
   }
 
   .voxire-button-content {
+    position: relative;
+    z-index: 1;
     display: flex;
     align-items: center;
     gap: 8px;
@@ -132,37 +140,29 @@
   }
 }
 
-.voxire-button-primary {
-  background-color: var(--primary-color);
-  border-color: var(--primary-color);
-  color: white;
+.voxire-button-primary,
+.voxire-button-secondary,
+.voxire-button-outline,
+.voxire-button-soft,
+.voxire-button-dark-outline {
+  background: #ffffff;
+  color: #0a0a0a;
+  border: none;
+  border-radius: 12px;
+  box-shadow: none;
+  text-shadow: none;
 
   &:hover:not(.voxire-button-disabled) {
-    background-color: #2a2a2a;
-    border-color: #2a2a2a;
+    background: #f4f4f4;
+    color: #0a0a0a;
+    transform: translateY(-1px);
+    box-shadow: none;
   }
-}
 
-.voxire-button-secondary {
-  background-color: white;
-  border-color: var(--primary-color);
-  color: var(--primary-color);
-
-  &:hover:not(.voxire-button-disabled) {
-    background-color: var(--secondary-color);
-    border-color: var(--secondary-color);
-    color: white;
-  }
-}
-
-.voxire-button-outline {
-  background-color: transparent;
-  border-color: var(--primary-color);
-  color: var(--primary-color);
-
-  &:hover:not(.voxire-button-disabled) {
-    background-color: var(--primary-color);
-    color: white;
+  &:active:not(.voxire-button-disabled) {
+    background: #eeeeee;
+    transform: translateY(0);
+    box-shadow: none;
   }
 }
 
@@ -177,42 +177,6 @@
 
   &:active:not(.voxire-button-disabled) {
     background-color: rgba(0, 0, 0, 0.1);
-  }
-}
-
-.voxire-button-soft {
-  background-color: #eaebe0;
-  border-color: #eaebe0;
-  color: #374151;
-  border-radius: 24px;
-
-  &:hover:not(.voxire-button-disabled) {
-    background-color: #ffffff;
-    border-color: #ffffff;
-    color: #1f2937;
-  }
-
-  &:active:not(.voxire-button-disabled) {
-    background-color: #f9fafb;
-    border-color: #f9fafb;
-  }
-}
-
-.voxire-button-dark-outline {
-  background-color: #20211f;
-  border-color: #423e3a;
-  color: #f9fafb;
-  border-radius: 24px;
-
-  &:hover:not(.voxire-button-disabled) {
-    background-color: #1a1b19;
-    border-color: #524d47;
-    color: #ffffff;
-  }
-
-  &:active:not(.voxire-button-disabled) {
-    background-color: #141514;
-    border-color: #625c54;
   }
 }
 
