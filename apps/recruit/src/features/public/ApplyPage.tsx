@@ -35,10 +35,6 @@ const ApplyPage: React.FC = (): React.JSX.Element => {
   const careerSlug = rawCareerSlug ?? '';
   const navigate = useNavigate();
 
-  if (!slug || !careerSlug) {
-    return <div>Invalid application link.</div>;
-  }
-
   const { data, isLoading, error } = usePublicCareer(slug, careerSlug);
   const submit = useSubmitApplication();
 
@@ -56,29 +52,22 @@ const ApplyPage: React.FC = (): React.JSX.Element => {
   const [coverLetter, setCoverLetter] = useState('');
   const [done, setDone] = useState(false);
 
-  // Answers to the per-role custom fields. Keyed by field id →
-  // string (short_text, long_text, url, single_select) or string[]
-  // (multi_select) or '1'/'' (boolean). We keep the wire shape as a
-  // string/string[] union and let the server store it opaquely.
   const [answers, setAnswers] = useState<Record<string, string | string[]>>({});
   function setAnswer(fieldId: number, value: string | string[]) {
     setAnswers((prev) => ({ ...prev, [String(fieldId)]: value }));
   }
 
-  // GDPR consent - shown only when the business has require_consent
-  // on. The checkbox is required, which means the form won't submit
-  // without it.
   const [consented, setConsented] = useState(false);
 
-  // File upload state. `resumeFile` is the picked File, `uploadedKey`
-  // is the R2 object key we got back after a successful upload - the
-  // distinction matters because we want to show "uploaded ✓" state
-  // without re-uploading the same file on every re-render.
   const [resumeFile, setResumeFile] = useState<File | null>(null);
   const [uploadedKey, setUploadedKey] = useState<string | null>(null);
   const [uploading, setUploading] = useState(false);
   const [uploadError, setUploadError] = useState<string | null>(null);
   const fileInputRef = useRef<HTMLInputElement>(null);
+
+  if (!slug || !careerSlug) {
+    return <div>Invalid application link.</div>;
+  }
 
   async function onPickFile(e: React.ChangeEvent<HTMLInputElement>) {
     const file = e.target.files?.[0];
