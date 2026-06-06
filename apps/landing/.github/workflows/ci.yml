@@ -1,46 +1,109 @@
 name: CI
 
 on:
-  pull_request:
   push:
+    branches: [main]
+  pull_request:
     branches: [main]
   workflow_dispatch:
 
+# Cancel superseded runs on PRs. Never cancel main (its runs deploy).
+concurrency:
+  group: ci-${{ github.ref }}
+  cancel-in-progress: ${{ github.ref != 'refs/heads/main' }}
+
 jobs:
+  # ── Typecheck + Build ───────────────────────────────────────────────
+  # Uploads dist/ as an artifact so the deploy job reuses it instead
+  # of rebuilding. Runs in parallel with e2e.
   verify:
-    runs-on: ubuntu-latest
+    name: Typecheck & Build
+    runs-on: blacksmith-2vcpu-ubuntu-2404
     steps:
       - uses: actions/checkout@v4
         with:
           submodules: recursive
           token: ${{ secrets.PAT_TOKEN }}
+
       - uses: pnpm/action-setup@v4
+
       - uses: actions/setup-node@v4
         with:
           node-version: 20
           cache: pnpm
+
       - run: pnpm install --frozen-lockfile
+
       - run: pnpm typecheck
+
       - run: pnpm build
 
+      - name: Upload dist artifact
+        if: github.ref == 'refs/heads/main' || github.event_name == 'workflow_dispatch'
+        uses: actions/upload-artifact@v4
+        with:
+          name: dist-${{ github.sha }}
+          path: dist/landing
+          retention-days: 1
+
+  # ── Playwright E2E ──────────────────────────────────────────────────
+  # Runs in parallel with verify — doesn't need the build output.
   e2e:
-    runs-on: ubuntu-latest
+    name: Playwright E2E
+    runs-on: blacksmith-2vcpu-ubuntu-2404
     steps:
       - uses: actions/checkout@v4
         with:
           submodules: recursive
           token: ${{ secrets.PAT_TOKEN }}
+
       - uses: pnpm/action-setup@v4
+
       - uses: actions/setup-node@v4
         with:
           node-version: 20
           cache: pnpm
+
       - run: pnpm install --frozen-lockfile
+
       - run: pnpm exec playwright install --with-deps chromium
+
       - run: pnpm test:e2e
+
       - uses: actions/upload-artifact@v4
-        if: always()
+        if: failure()
         with:
           name: playwright-report
           path: playwright-report/
           retention-days: 7
+
+  # ── Deploy ──────────────────────────────────────────────────────────
+  # Downloads the pre-built artifact from verify — no rebuild.
+  # Only runs on main pushes and manual dispatches.
+  deploy:
+    name: Deploy to Cloudflare Pages
+    needs: [verify, e2e]
+    if: (github.ref == 'refs/heads/main' && github.event_name == 'push') || github.event_name == 'workflow_dispatch'
+    runs-on: blacksmith-2vcpu-ubuntu-2404
+    steps:
+      - name: Download dist artifact
+        uses: actions/download-artifact@v4
+        with:
+          name: dist-${{ github.sha }}
+          path: dist/landing
+
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 20
+
+      - name: Ensure Cloudflare Pages project exists
+        run: npx wrangler pages project create rtylr-landing --production-branch=main || true
+        env:
+          CLOUDFLARE_API_TOKEN: ${{ secrets.CLOUDFLARE_API_TOKEN }}
+          CLOUDFLARE_ACCOUNT_ID: ${{ secrets.CLOUDFLARE_ACCOUNT_ID }}
+
+      - name: Deploy to Cloudflare Pages
+        run: npx wrangler pages deploy dist/landing --project-name=rtylr-landing --branch=main
+        env:
+          CLOUDFLARE_API_TOKEN: ${{ secrets.CLOUDFLARE_API_TOKEN }}
+          CLOUDFLARE_ACCOUNT_ID: ${{ secrets.CLOUDFLARE_ACCOUNT_ID }}
