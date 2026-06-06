@@ -9,6 +9,13 @@ on:
       - "README.md"
   workflow_dispatch:
 
+# Cancel any in-flight run for the same branch so a rapid push doesn't
+# queue three full Docker builds behind each other. Never cancel main
+# (its runs deploy — let them finish).
+concurrency:
+  group: build-${{ github.ref }}
+  cancel-in-progress: ${{ github.ref != 'refs/heads/main' }}
+
 permissions:
   contents: write
 
@@ -59,8 +66,6 @@ jobs:
     needs: version
     runs-on: ubuntu-latest
     strategy:
-      # One runmode per matrix entry. fail-fast off so a flaky build of one
-      # image doesn't cancel the others mid-push.
       fail-fast: false
       matrix:
         include:
@@ -85,6 +90,9 @@ jobs:
           submodules: recursive
           token: ${{ secrets.PAT_TOKEN }}
 
+      - name: Set up Docker Buildx
+        uses: docker/setup-buildx-action@v3
+
       - name: Configure AWS credentials
         uses: aws-actions/configure-aws-credentials@v6
         with:
@@ -102,17 +110,17 @@ jobs:
           VERSION=${{ needs.version.outputs.new_version }}
           IMAGE_URI=$ECR_REGISTRY/${{ matrix.repository }}
 
-          docker build \
+          docker buildx build \
+            --cache-from type=gha,scope=${{ matrix.name }} \
+            --cache-to   type=gha,scope=${{ matrix.name }},mode=max \
             -f ${{ matrix.dockerfile }} \
             --build-arg VERSION=$VERSION \
             --build-arg COMMIT=${GITHUB_SHA::7} \
             --build-arg BUILD_TIME=$(date -u +%Y-%m-%dT%H:%M:%SZ) \
             -t $IMAGE_URI:$VERSION \
             -t $IMAGE_URI:latest \
+            --push \
             .
-
-          docker push $IMAGE_URI:$VERSION
-          docker push $IMAGE_URI:latest
 
           echo "Pushed $IMAGE_URI:$VERSION"
 
