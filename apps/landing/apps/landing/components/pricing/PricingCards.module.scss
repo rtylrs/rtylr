@@ -157,9 +157,11 @@
 }
 
 .ctaButton {
+  appearance: none;
   background: #ffffff;
+  background-image: none;
   color: #0a0a0a;
-  border: none;
+  border: 0;
   padding: 14px 24px;
   border-radius: 12px;
   font-size: 0.9rem;
@@ -180,25 +182,6 @@
   &:active {
     background: #eeeeee;
     transform: translateY(0);
-  }
-
-  &.ctaFeatured {
-    background: #ffffff;
-    border: none;
-    color: #0a0a0a;
-    box-shadow: none;
-
-    &:hover {
-      background: #f4f4f4;
-      transform: translateY(-1px);
-      box-shadow: none;
-    }
-
-    &:active {
-      background: #eeeeee;
-      transform: translateY(0);
-      box-shadow: none;
-    }
   }
 }
 

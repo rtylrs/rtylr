@@ -47,10 +47,7 @@ const PricingCards = ({ billing = 'monthly', onCta }: PricingCardsProps): React.
               </li>
             ))}
           </ul>
-          <button
-            className={cn(styles.ctaButton, plan.featured && styles.ctaFeatured)}
-            onClick={() => onCta(plan.ctaAction)}
-          >
+          <button className={styles.ctaButton} onClick={() => onCta(plan.ctaAction)}>
             {plan.ctaText}
           </button>
         </motion.div>
