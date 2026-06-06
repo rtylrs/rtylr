@@ -13,19 +13,11 @@ const COLOR_MODES: {
 ];
 
 const WALLPAPERS: { key: Wallpaper; label: string; color: string }[] = [
-  { key: 'slate', label: 'Slate', color: 'linear-gradient(135deg, #1a1a2e 0%, #16213e 100%)' },
-  {
-    key: 'midnight',
-    label: 'Midnight',
-    color: 'linear-gradient(135deg, #0a0a0f 0%, #151520 100%)',
-  },
-  {
-    key: 'aurora',
-    label: 'Aurora',
-    color: 'linear-gradient(135deg, #0d1b2a 0%, #1a2a1a 50%, #0d1b2a 100%)',
-  },
-  { key: 'dusk', label: 'Dusk', color: 'linear-gradient(135deg, #1a0a2e 0%, #2d1b4e 100%)' },
-  { key: 'forest', label: 'Forest', color: 'linear-gradient(135deg, #0d1f0d 0%, #1a2e1a 100%)' },
+  { key: 'midnight', label: 'Night City', color: 'linear-gradient(135deg, #040a18 0%, #0e1b38 60%, #ff6b35 100%)' },
+  { key: 'aurora', label: 'Street Market', color: 'linear-gradient(135deg, #4aaee8 0%, #7cc8f0 50%, #d4c4a0 100%)' },
+  { key: 'dusk', label: 'Coastal Sunset', color: 'linear-gradient(135deg, #1a1040 0%, #e85d20 60%, #1a3860 100%)' },
+  { key: 'slate', label: 'Snowy Town', color: 'linear-gradient(135deg, #8898b8 0%, #aab8cc 50%, #e8f2ff 100%)' },
+  { key: 'forest', label: 'Forest Trail', color: 'linear-gradient(135deg, #5ab8f0 0%, #448028 50%, #4a8030 100%)' },
 ];
 
 export default function SettingsWindow(): React.JSX.Element {
