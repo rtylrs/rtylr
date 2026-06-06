@@ -8,16 +8,16 @@ import { useConsent } from './useConsent';
  * we point customers at when they want to revisit their choice.
  *
  * Renders nothing while the banner itself is showing (`undecided`) to
- * avoid a duplicate UI affordance. Otherwise renders an unstyled
- * <button> that consumers wrap in their footer's link styling - pass
- * `className` to inherit whatever footer-link class the host site uses.
+ * avoid a duplicate UI affordance. Otherwise renders an anchor that
+ * consumers wrap in their footer's link styling - pass `className` to
+ * inherit whatever footer-link class the host site uses.
  *
  * Behavior: clicking calls `clearConsent()` which deletes the cookie
  * on the same Domain it was set with, and dispatches the change event
  * so the CookieBanner remounts.
  */
 interface ManageConsentLinkProps {
-  /** Class applied to the rendered <button>. Use the same class your
+  /** Class applied to the rendered anchor. Use the same class your
    *  footer uses for its <Link>/<a> elements so styling matches. */
   className?: string;
   /** Override the visible label. Defaults to "Cookie preferences". */
@@ -32,14 +32,14 @@ export function ManageConsentLink({
   if (state === 'undecided') return null;
 
   return (
-    <button
-      type="button"
-      onClick={reopen}
+    <a
+      href="#cookie-preferences"
+      onClick={(event) => {
+        event.preventDefault();
+        reopen();
+      }}
       className={className}
       style={{
-        background: 'none',
-        border: 'none',
-        padding: 0,
         cursor: 'pointer',
         ...(className
           ? {}
@@ -52,6 +52,6 @@ export function ManageConsentLink({
       }}
     >
       {children ?? 'Cookie preferences'}
-    </button>
+    </a>
   );
 }
