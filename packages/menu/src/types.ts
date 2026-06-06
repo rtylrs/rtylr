@@ -93,11 +93,18 @@ export interface ItemDisplayConfig {
   cardRadius: CardRadius;
 }
 
+export interface ColorsConfig {
+  primary: string;
+  accent: string;
+  bg: string;
+}
+
 export interface MenuLayoutConfig {
   pages: PageConfig;
   header: HeaderConfig;
   nav: NavConfig;
   items: ItemDisplayConfig;
+  colors?: ColorsConfig;
 }
 
 export const DEFAULT_LAYOUT_CONFIG: MenuLayoutConfig = {

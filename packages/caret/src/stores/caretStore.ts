@@ -150,7 +150,7 @@ export const useCaretStore = create<CaretStore>()(
     }),
     {
       name: 'caret-session',
-      partialize: (state) => ({ sessionId: state.sessionId }),
+      partialize: (state) => ({ isOpen: state.isOpen }),
     }
   )
 );

@@ -8,6 +8,7 @@ export type {
   HeaderConfig,
   NavConfig,
   ItemDisplayConfig,
+  ColorsConfig,
   MenuLayoutConfig,
   CoverHeight,
   NavStyle,
