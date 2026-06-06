@@ -8,6 +8,7 @@ declare global {
 
 const JSDOS_JS = '/jsdos/js-dos.js';
 const JSDOS_CSS = '/jsdos/js-dos.css';
+const DOOM_BUNDLE = '/doom/doom.jsdos?v=20260606';
 
 function loadJsDos(): Promise<void> {
   return new Promise((resolve, reject) => {
@@ -45,12 +46,25 @@ export default function DoomWindow(): React.JSX.Element {
   useEffect(() => {
     let ci: { stop?: () => void } | undefined;
     let cancelled = false;
+    const handleUnhandledRejection = (event: PromiseRejectionEvent) => {
+      const reason = event.reason as { message?: unknown; name?: unknown } | undefined;
+      const name = reason && typeof reason === 'object' ? String(reason.name ?? '') : '';
+      const message = reason && typeof reason === 'object' ? String(reason.message ?? '') : '';
+      if (
+        name === 'InvalidStateError' &&
+        message.includes('lock() request')
+      ) {
+        event.preventDefault();
+      }
+    };
+
+    window.addEventListener('unhandledrejection', handleUnhandledRejection);
 
     loadJsDos()
       .then(() => {
         if (cancelled || !ref.current || !window.Dos) return;
         ci = window.Dos(ref.current, {
-          url: '/doom/doom.jsdos',
+          url: DOOM_BUNDLE,
           pathPrefix: '/jsdos/emulators/',
           noCloud: true,
           autoStart: true,
@@ -60,6 +74,7 @@ export default function DoomWindow(): React.JSX.Element {
 
     return () => {
       cancelled = true;
+      window.removeEventListener('unhandledrejection', handleUnhandledRejection);
       try {
         ci?.stop?.();
       } catch {
