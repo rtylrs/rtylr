@@ -93,6 +93,31 @@ func (r *Repository) GetPayrollRun(ctx context.Context, ownerID, runID int64) (*
 	return &run, nil
 }
 
+func (r *Repository) GetPayrollRunByPeriod(ctx context.Context, ownerID int64, periodStart, periodEnd string) (*domain.PayrollRunRecord, error) {
+	ps, err := time.Parse("2006-01-02", periodStart)
+	if err != nil {
+		return nil, err
+	}
+	pe, err := time.Parse("2006-01-02", periodEnd)
+	if err != nil {
+		return nil, err
+	}
+	row, err := r.queries.GetPayrollRunByPeriod(ctx, sqlc.GetPayrollRunByPeriodParams{
+		OwnerID:     ownerID,
+		PeriodStart: ps,
+		PeriodEnd:   pe,
+	})
+	if err != nil {
+		if errors.Is(err, sql.ErrNoRows) {
+			return nil, domain.ErrPayrollRunNotFound
+		}
+		logger.Ctx(ctx).Error("failed to get payroll run by period", logger.Any("owner_id", ownerID), logger.Error(err))
+		return nil, err
+	}
+	run := payrollRunFromRow(row)
+	return &run, nil
+}
+
 func (r *Repository) CreatePayrollRunWithEntries(ctx context.Context, ownerID int64, run domain.PayrollRunRecord, entries []domain.PayrollEntryRecord) (*domain.PayrollRunRecord, []domain.PayrollEntryRecord, error) {
 	tx, err := r.pool.BeginTx(ctx, nil)
 	if err != nil {

@@ -3,6 +3,7 @@ package application
 import (
 	"context"
 	"database/sql"
+	"errors"
 	"fmt"
 	"time"
 
@@ -115,6 +116,14 @@ func (s *Service) TriggerPayrollRun(ctx context.Context, ownerID, createdBy int6
 	}
 	if !endDate.After(startDate) {
 		return nil, nil, domain.ErrInvalidDateRange
+	}
+
+	existing, err := s.repo.GetPayrollRunByPeriod(ctx, ownerID, periodStart, periodEnd)
+	if err != nil && !errors.Is(err, domain.ErrPayrollRunNotFound) {
+		return nil, nil, err
+	}
+	if existing != nil {
+		return nil, nil, domain.ErrPayrollRunAlreadyExists
 	}
 
 	cfg, err := s.repo.GetPayrollConfig(ctx, ownerID)

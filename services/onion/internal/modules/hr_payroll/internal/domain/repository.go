@@ -10,6 +10,7 @@ type Repository interface {
 	// Payroll Runs
 	ListPayrollRuns(ctx context.Context, ownerID int64, params ListPayrollRunsParams) ([]PayrollRunRecord, int64, error)
 	GetPayrollRun(ctx context.Context, ownerID, runID int64) (*PayrollRunRecord, error)
+	GetPayrollRunByPeriod(ctx context.Context, ownerID int64, periodStart, periodEnd string) (*PayrollRunRecord, error)
 	CreatePayrollRunWithEntries(ctx context.Context, ownerID int64, run PayrollRunRecord, entries []PayrollEntryRecord) (*PayrollRunRecord, []PayrollEntryRecord, error)
 	UpdatePayrollRunStatus(ctx context.Context, ownerID, runID int64, status string) error
 	SetPayrollRunApproved(ctx context.Context, ownerID, runID, approverID int64) error
