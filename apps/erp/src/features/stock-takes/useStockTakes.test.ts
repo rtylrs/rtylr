@@ -134,7 +134,7 @@ describe('useUpdateStockTake', () => {
         items: [{ productId: 5, expectedQty: 100, countedQty: 100 }],
       });
     });
-    expect(mockSafe.put).toHaveBeenCalledWith('/erp/stock-takes', {
+    expect(mockSafe.put).toHaveBeenCalledWith('/erp/stock-takes/1', {
       id: 1,
       status: 'completed',
       items: [{ productId: 5, expectedQty: 100, countedQty: 100 }],

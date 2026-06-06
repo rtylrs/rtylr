@@ -122,7 +122,7 @@ describe('useUpdateWarehouse', () => {
     await act(async () => {
       await result.current.mutateAsync({ id: 1, name: 'Renamed', isActive: false });
     });
-    expect(mockSafe.put).toHaveBeenCalledWith('/erp/warehouses', {
+    expect(mockSafe.put).toHaveBeenCalledWith('/erp/warehouses/1', {
       id: 1,
       name: 'Renamed',
       isActive: false,
@@ -139,6 +139,6 @@ describe('useDeleteWarehouse', () => {
     await act(async () => {
       await result.current.mutateAsync(1);
     });
-    expect(mockSafe.delete).toHaveBeenCalledWith('/erp/warehouses', { data: { id: 1 } });
+    expect(mockSafe.delete).toHaveBeenCalledWith('/erp/warehouses/1');
   });
 });

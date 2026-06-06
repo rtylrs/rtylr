@@ -132,7 +132,7 @@ describe('useUpdateStockTransferStatus', () => {
     await act(async () => {
       await result.current.mutateAsync({ id: 1, status: 'in_transit' });
     });
-    expect(mockSafe.put).toHaveBeenCalledWith('/erp/stock-transfers', {
+    expect(mockSafe.put).toHaveBeenCalledWith('/erp/stock-transfers/1', {
       id: 1,
       status: 'in_transit',
     });
