@@ -67,38 +67,116 @@ body {
   background-color: white;
 }
 
-// Landing page CTA cleanup. A few product pages still use local button classes
-// instead of the shared Button component; keep them visually aligned.
-:where(a, button)[class*='primaryBtn'][class*='primaryBtn'],
-:where(a, button)[class*='ctaPrimary'][class*='ctaPrimary'],
-:where(a, button)[class*='outlineBtn'][class*='outlineBtn'],
-:where(a, button)[class*='ctaSecondary'][class*='ctaSecondary'] {
-  display: inline-flex;
-  align-items: center;
-  justify-content: center;
-  gap: 8px;
-  background: #ffffff;
-  color: #0a0a0a;
-  border: none;
-  border-radius: 12px;
-  box-shadow: none;
-  text-shadow: none;
-  letter-spacing: 0;
-  transition:
-    background 0.22s var(--ease-out-soft),
-    color 0.22s ease,
-    transform 0.22s var(--ease-out-soft);
+// Landing-wide button neutralizer. Page modules and OS-mode windows still have
+// scattered local button rules and inline styles, so this strips colored hue,
+// borders, and glow while preserving a white-primary / dark-secondary pairing.
+:where(
+    button,
+    a[class*='Btn'],
+    a[class*='btn'],
+    a[class*='Button'],
+    a[class*='button'],
+    a[class*='CTA'],
+    a[class*='cta']
+  ):not([class*='FeaturesSection_tab']) {
+  background: #ffffff !important;
+  background-image: none !important;
+  color: #0a0a0a !important;
+  border: 0 !important;
+  box-shadow: none !important;
+  text-shadow: none !important;
+  letter-spacing: 0 !important;
+}
 
-  &:hover {
-    background: #f4f4f4;
-    color: #0a0a0a;
-    transform: translateY(-1px);
-  }
+:where(
+    button,
+    a[class*='Btn'],
+    a[class*='btn'],
+    a[class*='Button'],
+    a[class*='button'],
+    a[class*='CTA'],
+    a[class*='cta']
+  ):not([class*='FeaturesSection_tab']):hover {
+  background: #f4f4f4 !important;
+  background-image: none !important;
+  color: #0a0a0a !important;
+  border: 0 !important;
+  box-shadow: none !important;
+}
 
-  &:active {
-    background: #eeeeee;
-    transform: translateY(0);
-  }
+:where(
+    button,
+    a[class*='Btn'],
+    a[class*='btn'],
+    a[class*='Button'],
+    a[class*='button'],
+    a[class*='CTA'],
+    a[class*='cta']
+  ):not([class*='FeaturesSection_tab']):active {
+  background: #eeeeee !important;
+  background-image: none !important;
+  color: #0a0a0a !important;
+  border: 0 !important;
+  box-shadow: none !important;
+}
+
+:where(
+    button[class*='outlineBtn'],
+    button[class*='ctaSecondary'],
+    button[class*='dark-outline'],
+    button[class*='darkOutline'],
+    button[class*='secondary'],
+    a[class*='outlineBtn'],
+    a[class*='ctaSecondary'],
+    a[class*='dark-outline'],
+    a[class*='darkOutline'],
+    a[class*='secondary']
+  ):not([class*='FeaturesSection_tab']) {
+  background: #242424 !important;
+  background-image: none !important;
+  color: #ffffff !important;
+  border: 0 !important;
+  box-shadow: none !important;
+  text-shadow: none !important;
+}
+
+:where(
+    button[class*='outlineBtn'],
+    button[class*='ctaSecondary'],
+    button[class*='dark-outline'],
+    button[class*='darkOutline'],
+    button[class*='secondary'],
+    a[class*='outlineBtn'],
+    a[class*='ctaSecondary'],
+    a[class*='dark-outline'],
+    a[class*='darkOutline'],
+    a[class*='secondary']
+  ):not([class*='FeaturesSection_tab']):hover {
+  background: #303030 !important;
+  background-image: none !important;
+  color: #ffffff !important;
+}
+
+:where(
+    button,
+    a[class*='Btn'],
+    a[class*='btn'],
+    a[class*='Button'],
+    a[class*='button'],
+    a[class*='CTA'],
+    a[class*='cta']
+  ):not([class*='FeaturesSection_tab'])::before,
+:where(
+    button,
+    a[class*='Btn'],
+    a[class*='btn'],
+    a[class*='Button'],
+    a[class*='button'],
+    a[class*='CTA'],
+    a[class*='cta']
+  ):not([class*='FeaturesSection_tab'])::after {
+  background-image: none !important;
+  box-shadow: none !important;
 }
 
 /* Hide default scrollbar */
