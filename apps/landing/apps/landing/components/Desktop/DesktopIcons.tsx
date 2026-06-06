@@ -54,8 +54,7 @@ const ICONS: DesktopIconDef[] = [
     key: 'blog',
     label: 'Blog',
     svgIcon: BlogIcon,
-    windowType: 'docs',
-    windowUrl: 'https://blog.rtylr.com',
+    href: '/blog',
     defaultPos: { x: 0, y: 0 },
   },
   {

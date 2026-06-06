@@ -1,4 +1,5 @@
 import React, { useState, useEffect, useRef, useCallback } from 'react';
+import { useRouter } from 'next/router';
 import { useDesktopStore, WindowType } from '../../stores/useDesktopStore';
 
 interface SpotlightItem {
@@ -17,7 +18,7 @@ const ITEMS: SpotlightItem[] = [
   { label: 'Flow', type: 'flow', kind: 'App' },
   { label: 'Pricing', type: 'pricing', kind: 'Page', url: '/pricing?embed=1' },
   { label: 'Docs', type: 'docs', kind: 'Page', url: 'https://docs.rtylr.com' },
-  { label: 'Blog', type: 'docs', kind: 'Page', url: 'https://blog.rtylr.com' },
+  { label: 'Blog', type: 'blog', kind: 'Page', url: '/blog' },
   { label: 'Status', type: 'status', kind: 'Page', url: 'https://status.rtylr.com' },
   { label: 'Settings', type: 'settings', kind: 'System' },
   { label: 'About rtylr', type: 'about', kind: 'System' },
@@ -37,6 +38,7 @@ export const Spotlight: React.FC = () => {
   const spotlightOpen = useDesktopStore((s) => s.spotlightOpen);
   const setSpotlightOpen = useDesktopStore((s) => s.setSpotlightOpen);
   const addWindow = useDesktopStore((s) => s.addWindow);
+  const router = useRouter();
 
   const [query, setQuery] = useState('');
   const [selected, setSelected] = useState(0);
@@ -60,10 +62,16 @@ export const Spotlight: React.FC = () => {
 
   const open = useCallback(
     (item: SpotlightItem) => {
+      if (item.url?.startsWith('/')) {
+        router.push(item.url);
+        setSpotlightOpen(false);
+        return;
+      }
+
       addWindow(item.type as WindowType, item.url);
       setSpotlightOpen(false);
     },
-    [addWindow, setSpotlightOpen]
+    [addWindow, router, setSpotlightOpen]
   );
 
   const handleKeyDown = useCallback(

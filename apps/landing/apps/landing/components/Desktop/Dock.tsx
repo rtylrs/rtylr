@@ -64,7 +64,7 @@ const RIGHT_ITEMS: DockItem[] = [
     key: 'blog',
     label: 'Blog',
     icon: Rss,
-    href: 'https://blog.rtylr.com',
+    href: '/blog',
     accent: 'rgba(232,230,225,0.08)',
   },
   {
