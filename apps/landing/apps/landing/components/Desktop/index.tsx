@@ -84,6 +84,7 @@ export const Desktop: React.FC = () => {
 
   return (
     <div
+      className="rtylr-desktop-shell"
       onContextMenu={handleContextMenu}
       onClick={() => setContextMenu(null)}
       style={

@@ -67,9 +67,8 @@ body {
   background-color: white;
 }
 
-// Landing-wide button neutralizer. Page modules and OS-mode windows still have
-// scattered local button rules and inline styles, so this strips colored hue,
-// borders, and glow while preserving a white-primary / dark-secondary pairing.
+// Landing-wide button neutralizer. Exclude OS-mode chrome and embedded app
+// controls so the desktop shell keeps its own local styling.
 :where(
     button,
     a[class*='Btn'],
@@ -78,7 +77,7 @@ body {
     a[class*='button'],
     a[class*='CTA'],
     a[class*='cta']
-  ):not([class*='FeaturesSection_tab']) {
+  ):not([class*='FeaturesSection_tab']):not(.rtylr-desktop-shell *) {
   background: #ffffff !important;
   background-image: none !important;
   color: #0a0a0a !important;
@@ -96,7 +95,7 @@ body {
     a[class*='button'],
     a[class*='CTA'],
     a[class*='cta']
-  ):not([class*='FeaturesSection_tab']):hover {
+  ):not([class*='FeaturesSection_tab']):not(.rtylr-desktop-shell *):hover {
   background: #f4f4f4 !important;
   background-image: none !important;
   color: #0a0a0a !important;
@@ -112,7 +111,7 @@ body {
     a[class*='button'],
     a[class*='CTA'],
     a[class*='cta']
-  ):not([class*='FeaturesSection_tab']):active {
+  ):not([class*='FeaturesSection_tab']):not(.rtylr-desktop-shell *):active {
   background: #eeeeee !important;
   background-image: none !important;
   color: #0a0a0a !important;
@@ -131,7 +130,7 @@ body {
     a[class*='dark-outline'],
     a[class*='darkOutline'],
     a[class*='secondary']
-  ):not([class*='FeaturesSection_tab']) {
+  ):not([class*='FeaturesSection_tab']):not(.rtylr-desktop-shell *) {
   background: #242424 !important;
   background-image: none !important;
   color: #ffffff !important;
@@ -151,7 +150,7 @@ body {
     a[class*='dark-outline'],
     a[class*='darkOutline'],
     a[class*='secondary']
-  ):not([class*='FeaturesSection_tab']):hover {
+  ):not([class*='FeaturesSection_tab']):not(.rtylr-desktop-shell *):hover {
   background: #303030 !important;
   background-image: none !important;
   color: #ffffff !important;
@@ -165,7 +164,7 @@ body {
     a[class*='button'],
     a[class*='CTA'],
     a[class*='cta']
-  ):not([class*='FeaturesSection_tab'])::before,
+  ):not([class*='FeaturesSection_tab']):not(.rtylr-desktop-shell *)::before,
 :where(
     button,
     a[class*='Btn'],
@@ -174,7 +173,7 @@ body {
     a[class*='button'],
     a[class*='CTA'],
     a[class*='cta']
-  ):not([class*='FeaturesSection_tab'])::after {
+  ):not([class*='FeaturesSection_tab']):not(.rtylr-desktop-shell *)::after {
   background-image: none !important;
   box-shadow: none !important;
 }
