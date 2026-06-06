@@ -1,7 +1,7 @@
 import React, { useState } from 'react';
 import { cn } from '../../../../lib/cn';
 import { motion } from 'motion/react';
-import { Sparkles, Shuffle } from 'lucide-react';
+import { ArrowRight, Sparkles, Shuffle } from 'lucide-react';
 import { APP_URLS } from '@voxire/config';
 import { navigateExternal } from '../../../../lib/navigation';
 import styles from '../HeroSection.module.scss';
@@ -111,7 +111,8 @@ const MainHero: React.FC = (): React.JSX.Element => {
           </div>
 
           <button type="submit" className={styles.aiCardSubmit}>
-            Start building
+            <span>Start building</span>
+            <ArrowRight size={15} strokeWidth={2.2} aria-hidden="true" />
           </button>
         </div>
       </motion.form>

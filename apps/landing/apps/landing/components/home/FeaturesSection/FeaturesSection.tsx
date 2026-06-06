@@ -1,6 +1,7 @@
 import React, { useCallback, useEffect, useRef, useState } from 'react';
 import { cn } from '../../../lib/cn';
 import { motion, AnimatePresence } from 'motion/react';
+import { ArrowUpRight } from 'lucide-react';
 import { Button } from '@voxire/components';
 import { useRouter } from 'next/router';
 import { blurFadeIn, blurFadeInSlow, viewportOnce } from '../../../lib/animations';
@@ -181,6 +182,7 @@ const FeaturesSection: React.FC = (): React.JSX.Element => {
                     variant="dark-outline"
                     onClick={() => router.push('/demo')}
                     className={styles.featureButton}
+                    suffix={<ArrowUpRight size={15} strokeWidth={2.1} aria-hidden="true" />}
                   >
                     {active.ctaText}
                   </Button>

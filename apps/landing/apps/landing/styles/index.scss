@@ -67,6 +67,40 @@ body {
   background-color: white;
 }
 
+// Landing page CTA cleanup. A few product pages still use local button classes
+// instead of the shared Button component; keep them visually aligned.
+:where(a, button)[class*='primaryBtn'][class*='primaryBtn'],
+:where(a, button)[class*='ctaPrimary'][class*='ctaPrimary'],
+:where(a, button)[class*='outlineBtn'][class*='outlineBtn'],
+:where(a, button)[class*='ctaSecondary'][class*='ctaSecondary'] {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 8px;
+  background: #ffffff;
+  color: #0a0a0a;
+  border: none;
+  border-radius: 12px;
+  box-shadow: none;
+  text-shadow: none;
+  letter-spacing: 0;
+  transition:
+    background 0.22s var(--ease-out-soft),
+    color 0.22s ease,
+    transform 0.22s var(--ease-out-soft);
+
+  &:hover {
+    background: #f4f4f4;
+    color: #0a0a0a;
+    transform: translateY(-1px);
+  }
+
+  &:active {
+    background: #eeeeee;
+    transform: translateY(0);
+  }
+}
+
 /* Hide default scrollbar */
 ::-webkit-scrollbar {
   width: 0;

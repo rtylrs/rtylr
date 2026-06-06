@@ -1,4 +1,5 @@
 /** @type {import('next').NextConfig} */
+const { PHASE_DEVELOPMENT_SERVER } = require('next/constants');
 
 /**
  * Landing-site Next config. Turbopack is the default bundler in
@@ -13,10 +14,12 @@
  * add the single entry to `turbopack.resolveAlias` then - don't
  * re-introduce the kitchen-sink list.
  */
-const nextConfig = {
+const createNextConfig = (phase) => ({
   reactStrictMode: true,
   output: 'export',
-  distDir: '../../dist/landing',
+  // Keep dev output app-local so server-side module resolution can find
+  // app dependencies. Production export still lands in the repo-level dist.
+  distDir: phase === PHASE_DEVELOPMENT_SERVER ? '.next' : '../../dist/landing',
   trailingSlash: true,
 
   images: {
@@ -38,6 +41,6 @@ const nextConfig = {
   env: {
     CUSTOM_KEY: process.env.CUSTOM_KEY,
   },
-};
+});
 
-module.exports = nextConfig;
+module.exports = createNextConfig;
