@@ -1,41 +1,74 @@
-import React, { useRef } from 'react';
-import { motion, useMotionValue, useSpring } from 'motion/react';
+import React, { useRef, useState, useCallback } from 'react';
+import { motion, useMotionValue, useSpring, useTransform } from 'motion/react';
 import Logo from './Logo';
 
-// Diameter of the cursor-following glow; shared by the move handler (to centre it
-// on the pointer) and the element style.
 const GLOW_SIZE = 560;
 
-/**
- * Left-side branded showcase for the auth split-screen.
- * Dark gradient background, animated floating orbs, brand message,
- * and a subtle testimonial.
- *
- * Hidden on mobile (< lg).
- */
+interface Ripple {
+  id: number;
+  x: number;
+  y: number;
+}
+
 const AuthShowcase: React.FC = () => {
   const containerRef = useRef<HTMLElement>(null);
-  // Start off-screen so the glow eases in from the edge on first move.
+  const [ripples, setRipples] = useState<Ripple[]>([]);
+
+  // Cursor glow
   const glowX = useMotionValue(-GLOW_SIZE);
   const glowY = useMotionValue(-GLOW_SIZE);
   const x = useSpring(glowX, { stiffness: 80, damping: 22, mass: 0.6 });
   const y = useSpring(glowY, { stiffness: 80, damping: 22, mass: 0.6 });
 
-  const handleMouseMove = (e: React.MouseEvent<HTMLElement>): void => {
+  // Normalised cursor offset from center (-0.5 → 0.5) for parallax
+  const mouseNX = useMotionValue(0);
+  const mouseNY = useMotionValue(0);
+  const smoothNX = useSpring(mouseNX, { stiffness: 40, damping: 20, mass: 0.8 });
+  const smoothNY = useSpring(mouseNY, { stiffness: 40, damping: 20, mass: 0.8 });
+
+  // Testimonial card tilt (max ±8deg)
+  const tiltX = useTransform(smoothNY, [-0.5, 0.5], [6, -6]);
+  const tiltY = useTransform(smoothNX, [-0.5, 0.5], [-8, 8]);
+
+  const handleMouseMove = useCallback(
+    (e: React.MouseEvent<HTMLElement>): void => {
+      const rect = containerRef.current?.getBoundingClientRect();
+      if (!rect) return;
+      glowX.set(e.clientX - rect.left - GLOW_SIZE / 2);
+      glowY.set(e.clientY - rect.top - GLOW_SIZE / 2);
+      mouseNX.set((e.clientX - rect.left) / rect.width - 0.5);
+      mouseNY.set((e.clientY - rect.top) / rect.height - 0.5);
+    },
+    [glowX, glowY, mouseNX, mouseNY]
+  );
+
+  const handleClick = useCallback((e: React.MouseEvent<HTMLElement>): void => {
     const rect = containerRef.current?.getBoundingClientRect();
     if (!rect) return;
-    glowX.set(e.clientX - rect.left - GLOW_SIZE / 2);
-    glowY.set(e.clientY - rect.top - GLOW_SIZE / 2);
-  };
+    const id = Date.now();
+    setRipples((prev) => [...prev, { id, x: e.clientX - rect.left, y: e.clientY - rect.top }]);
+    setTimeout(() => setRipples((prev) => prev.filter((r) => r.id !== id)), 900);
+  }, []);
+
+  // Parallax offsets per orb — different factors create depth layers
+  const orb1X = useTransform(smoothNX, [-0.5, 0.5], [-35, 35]);
+  const orb1Y = useTransform(smoothNY, [-0.5, 0.5], [-20, 20]);
+  const orb2X = useTransform(smoothNX, [-0.5, 0.5], [25, -25]);
+  const orb2Y = useTransform(smoothNY, [-0.5, 0.5], [18, -18]);
+  const orb3X = useTransform(smoothNX, [-0.5, 0.5], [-18, 18]);
+  const orb3Y = useTransform(smoothNY, [-0.5, 0.5], [-28, 28]);
+  const orb4X = useTransform(smoothNX, [-0.5, 0.5], [30, -30]);
+  const orb4Y = useTransform(smoothNY, [-0.5, 0.5], [22, -22]);
 
   return (
     <aside
       ref={containerRef}
       onMouseMove={handleMouseMove}
-      className="relative hidden lg:flex lg:w-[60%] flex-col justify-between overflow-hidden p-12 xl:p-16"
+      onClick={handleClick}
+      className="relative hidden lg:flex lg:w-[60%] flex-col justify-between overflow-hidden p-12 xl:p-16 cursor-crosshair"
       aria-hidden="true"
     >
-      {/* Base background: deep navy with radial brand accents */}
+      {/* Base background */}
       <div
         className="absolute inset-0"
         style={{
@@ -47,7 +80,7 @@ const AuthShowcase: React.FC = () => {
         }}
       />
 
-      {/* Cursor-following glow — springs toward the pointer for a soft parallax feel */}
+      {/* Cursor-following glow */}
       <motion.div
         className="absolute rounded-full pointer-events-none blur-[90px] mix-blend-screen"
         style={{
@@ -69,7 +102,19 @@ const AuthShowcase: React.FC = () => {
         }}
       />
 
-      {/* Floating gradient orbs */}
+      {/* Click ripples */}
+      {ripples.map((r) => (
+        <motion.div
+          key={r.id}
+          className="absolute rounded-full pointer-events-none border border-white/20"
+          style={{ left: r.x, top: r.y, translateX: '-50%', translateY: '-50%' }}
+          initial={{ width: 0, height: 0, opacity: 0.6 }}
+          animate={{ width: 320, height: 320, opacity: 0 }}
+          transition={{ duration: 0.85, ease: [0.2, 0.8, 0.4, 1] }}
+        />
+      ))}
+
+      {/* Orb 1 — blue, top-left, deep layer */}
       <motion.div
         className="absolute rounded-full blur-3xl pointer-events-none"
         style={{
@@ -77,15 +122,15 @@ const AuthShowcase: React.FC = () => {
           height: 420,
           top: '-80px',
           left: '-60px',
-          background: 'radial-gradient(circle, rgba(69,131,196,0.18) 0%, rgba(69,131,196,0) 70%)',
+          x: orb1X,
+          y: orb1Y,
+          background: 'radial-gradient(circle, rgba(69,131,196,0.22) 0%, rgba(69,131,196,0) 70%)',
         }}
-        animate={{
-          x: [0, 60, -30, 0],
-          y: [0, 40, 80, 0],
-          scale: [1, 1.12, 0.95, 1],
-        }}
+        animate={{ x: [0, 60, -30, 0], y: [0, 40, 80, 0], scale: [1, 1.12, 0.95, 1] }}
         transition={{ duration: 22, repeat: Infinity, ease: 'easeInOut' }}
       />
+
+      {/* Orb 2 — purple, bottom-right, mid layer */}
       <motion.div
         className="absolute rounded-full blur-3xl pointer-events-none"
         style={{
@@ -93,15 +138,15 @@ const AuthShowcase: React.FC = () => {
           height: 380,
           bottom: '-100px',
           right: '-40px',
-          background: 'radial-gradient(circle, rgba(126,68,150,0.15) 0%, rgba(126,68,150,0) 70%)',
+          x: orb2X,
+          y: orb2Y,
+          background: 'radial-gradient(circle, rgba(126,68,150,0.20) 0%, rgba(126,68,150,0) 70%)',
         }}
-        animate={{
-          x: [0, -50, 30, 0],
-          y: [0, -40, -20, 0],
-          scale: [1, 1.08, 1.15, 1],
-        }}
+        animate={{ x: [0, -50, 30, 0], y: [0, -40, -20, 0], scale: [1, 1.08, 1.15, 1] }}
         transition={{ duration: 26, repeat: Infinity, ease: 'easeInOut' }}
       />
+
+      {/* Orb 3 — teal, mid-right, shallow layer */}
       <motion.div
         className="absolute rounded-full blur-3xl pointer-events-none"
         style={{
@@ -109,15 +154,15 @@ const AuthShowcase: React.FC = () => {
           height: 320,
           top: '40%',
           right: '15%',
-          background: 'radial-gradient(circle, rgba(100,197,185,0.10) 0%, rgba(100,197,185,0) 70%)',
+          x: orb3X,
+          y: orb3Y,
+          background: 'radial-gradient(circle, rgba(100,197,185,0.14) 0%, rgba(100,197,185,0) 70%)',
         }}
-        animate={{
-          x: [0, 30, -40, 0],
-          y: [0, -60, 20, 0],
-          scale: [1, 0.9, 1.1, 1],
-        }}
+        animate={{ x: [0, 30, -40, 0], y: [0, -60, 20, 0], scale: [1, 0.9, 1.1, 1] }}
         transition={{ duration: 30, repeat: Infinity, ease: 'easeInOut' }}
       />
+
+      {/* Orb 4 — cyan, top-right, foreground */}
       <motion.div
         className="absolute rounded-full blur-3xl pointer-events-none"
         style={{
@@ -125,13 +170,11 @@ const AuthShowcase: React.FC = () => {
           height: 260,
           top: '15%',
           right: '25%',
-          background: 'radial-gradient(circle, rgba(111,206,235,0.08) 0%, rgba(111,206,235,0) 70%)',
+          x: orb4X,
+          y: orb4Y,
+          background: 'radial-gradient(circle, rgba(111,206,235,0.12) 0%, rgba(111,206,235,0) 70%)',
         }}
-        animate={{
-          x: [0, -40, 50, 0],
-          y: [0, 60, -30, 0],
-          scale: [1, 1.15, 0.92, 1],
-        }}
+        animate={{ x: [0, -40, 50, 0], y: [0, 60, -30, 0], scale: [1, 1.15, 0.92, 1] }}
         transition={{ duration: 24, repeat: Infinity, ease: 'easeInOut' }}
       />
 
@@ -169,7 +212,7 @@ const AuthShowcase: React.FC = () => {
           unified in a single beautiful workspace.
         </p>
 
-        {/* Product chips */}
+        {/* Product chips — glow on hover */}
         <div className="mt-8 flex flex-wrap gap-2">
           {['POS', 'ERP', 'HR', 'CRM', 'Finance', 'Flow', 'Insights'].map((p, i) => (
             <motion.span
@@ -177,7 +220,13 @@ const AuthShowcase: React.FC = () => {
               initial={{ opacity: 0, y: 8 }}
               animate={{ opacity: 1, y: 0 }}
               transition={{ duration: 0.4, delay: 0.35 + i * 0.05 }}
-              className="px-3 py-1.5 rounded-full text-xs font-medium text-white/85 border border-white/10 bg-white/[0.04] backdrop-blur-sm"
+              whileHover={{
+                scale: 1.08,
+                backgroundColor: 'rgba(69,131,196,0.18)',
+                borderColor: 'rgba(69,131,196,0.5)',
+              }}
+              className="px-3 py-1.5 rounded-full text-xs font-medium text-white/85 border border-white/10 bg-white/[0.04] backdrop-blur-sm cursor-default"
+              style={{ transition: 'box-shadow 0.2s' }}
             >
               {p}
             </motion.span>
@@ -185,12 +234,13 @@ const AuthShowcase: React.FC = () => {
         </div>
       </motion.div>
 
-      {/* Bottom: testimonial */}
+      {/* Bottom: testimonial with 3D tilt */}
       <motion.figure
         className="relative z-10 max-w-lg"
         initial={{ opacity: 0, y: 12 }}
         animate={{ opacity: 1, y: 0 }}
         transition={{ duration: 0.7, delay: 0.45, ease: [0.16, 1, 0.3, 1] }}
+        style={{ rotateX: tiltX, rotateY: tiltY, transformPerspective: 800 }}
       >
         <div className="rounded-2xl border border-white/10 bg-white/[0.03] backdrop-blur-sm p-5 xl:p-6">
           <blockquote className="text-[15px] leading-relaxed text-white/80">
@@ -200,9 +250,7 @@ const AuthShowcase: React.FC = () => {
           <figcaption className="mt-4 flex items-center gap-3">
             <div
               className="h-9 w-9 rounded-full flex items-center justify-center text-sm font-semibold text-white"
-              style={{
-                background: 'linear-gradient(135deg, #4583C4 0%, #7E4496 100%)',
-              }}
+              style={{ background: 'linear-gradient(135deg, #4583C4 0%, #7E4496 100%)' }}
             >
               MH
             </div>
