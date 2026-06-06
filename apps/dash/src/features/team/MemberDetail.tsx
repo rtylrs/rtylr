@@ -256,7 +256,7 @@ const MemberDetail: React.FC = (): React.JSX.Element => {
               </select>
             </div>
           </div>
-          <div className="grid grid-cols-2 gap-2 md:grid-cols-3">
+          <div className="mt-4 grid grid-cols-2 gap-2 md:grid-cols-3">
             {ALL_APPS.map((app) => {
               const Icon = app.icon;
               const selected = appsDraft.includes(app.key);
