@@ -82,7 +82,8 @@ export function useCreateVariant() {
       // intentionally diverges from the ProductVariant display type here.
       return unwrap(erpApi.createVariant(body as unknown as Partial<ProductVariant>));
     },
-    onSuccess: () => qc.invalidateQueries({ queryKey: ['variants'] }),
+    onSuccess: (_result, variables) =>
+      qc.invalidateQueries({ queryKey: ['variants', variables.productId] }),
     onError: () => toast.error('Failed to create variant'),
   });
 }

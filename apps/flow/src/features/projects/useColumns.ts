@@ -70,8 +70,9 @@ export function useMoveTaskToColumn() {
   return useMutation({
     mutationFn: ({ taskId, columnId }: { taskId: string; columnId: string }) =>
       unwrap(flowApi.moveTaskToColumn(taskId, columnId)),
-    onSuccess: () => {
+    onSuccess: (_data, { taskId }) => {
       qc.invalidateQueries({ queryKey: ['tasks'] });
+      qc.invalidateQueries({ queryKey: ['task', taskId] });
     },
     onError: () => toast.error('Failed to move task'),
   });

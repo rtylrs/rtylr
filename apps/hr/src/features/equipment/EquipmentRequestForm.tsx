@@ -1,6 +1,7 @@
 import React, { useState } from 'react';
 import { useTranslation } from 'react-i18next';
 import { z } from 'zod';
+import { useUserStore } from '@voxire/auth';
 import { useCreateEquipmentRequest } from '../../shared/hooks/queries/useEquipment';
 import { Modal, Input, Textarea, Select, Label, Button } from '../../shared/components/ui';
 
@@ -17,6 +18,7 @@ interface Props {
 
 const EquipmentRequestForm = ({ onClose }: Props): React.JSX.Element => {
   const { t } = useTranslation();
+  const userId = useUserStore((s) => s.userId);
   const createRequest = useCreateEquipmentRequest();
 
   const [equipmentType, setEquipmentType] = useState('');
@@ -45,7 +47,7 @@ const EquipmentRequestForm = ({ onClose }: Props): React.JSX.Element => {
 
     createRequest.mutate(
       {
-        employeeId: 0,
+        employeeId: Number(userId),
         ...result.data,
       },
       {

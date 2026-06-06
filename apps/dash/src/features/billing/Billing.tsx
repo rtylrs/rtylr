@@ -492,7 +492,7 @@ const CurrentMonthCard: React.FC = () => {
       </div>
 
       <div className="px-5">
-        {!billing || billing.lineItems.length === 0 ? (
+        {!billing || billing.lineItems?.length === 0 ? (
           <div className="py-8 text-center">
             <p className="text-sm" style={{ color: 'var(--dash-text-muted)' }}>
               No usage recorded yet this month.

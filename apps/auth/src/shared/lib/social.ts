@@ -1,5 +1,6 @@
 import { unwrap } from '@voxire/api';
 import { safe } from './api';
+import { storageSet } from './storage';
 
 export type SocialProvider = 'google' | 'github' | 'microsoft' | 'apple';
 
@@ -15,6 +16,6 @@ export async function startSocialLogin(
   const { url } = await unwrap(
     safe.get<{ url: string }>('/auth/social/authorize', { params: { provider } })
   );
-  if (redirectParam) localStorage.setItem('social_auth_redirect', redirectParam);
+  if (redirectParam) storageSet('social_auth_redirect', redirectParam);
   window.location.href = url;
 }

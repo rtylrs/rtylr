@@ -53,7 +53,10 @@ const Receiving: React.FC = () => {
     );
     if (selectedId !== null) {
       // Backend expects the lowercase status enum (draft|sent|approved|partial|received|cancelled).
-      updateStatus.mutate({ id: selectedId, status: 'received' });
+      updateStatus.mutate(
+        { id: selectedId, status: 'received' },
+        { onError: () => toast.error('Failed to update receipt status') }
+      );
     }
     setSelectedId(null);
   };

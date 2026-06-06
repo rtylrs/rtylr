@@ -27,7 +27,13 @@ const AddRewardModal: React.FC<{ onClose: () => void }> = ({ onClose }) => {
       toast.error('Reward name is required');
       return;
     }
-    upsert.mutate({ data: { ...form, active: true } }, { onSuccess: () => onClose() });
+    upsert.mutate(
+      { data: { ...form, active: true } },
+      {
+        onSuccess: () => onClose(),
+        onError: () => toast.error('Failed to save reward'),
+      }
+    );
   };
 
   const inputStyle: React.CSSProperties = {

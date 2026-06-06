@@ -36,7 +36,8 @@ function QrCode() {
       return;
     }
 
-    const canvas = await html2canvas(qrRef.current!);
+    if (!qrRef.current) return;
+    const canvas = await html2canvas(qrRef.current);
     canvas.toBlob((blob) => {
       if (blob) saveAs(blob, 'qr-code.png');
     });

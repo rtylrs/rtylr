@@ -4,6 +4,7 @@ import { unwrap } from '@voxire/api';
 import { safe } from '../../shared/lib/api';
 import { useUserStore } from '../../shared/stores/userStore';
 import { setCookie, getDefaultCookieDomain } from '../../shared/lib/cookies';
+import { storageGet, storageRemove } from '../../shared/lib/storage';
 
 type KnownAppId = keyof typeof APP_URLS;
 
@@ -35,8 +36,8 @@ const Callback: React.FC = (): React.JSX.Element => {
       return;
     }
 
-    const redirectParam = localStorage.getItem('social_auth_redirect');
-    localStorage.removeItem('social_auth_redirect');
+    const redirectParam = storageGet('social_auth_redirect');
+    storageRemove('social_auth_redirect');
 
     unwrap(safe.post<GoogleAuthResponse>('/auth/register/google', { code }))
       .then((data) => {

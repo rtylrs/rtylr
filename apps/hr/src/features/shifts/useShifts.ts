@@ -1,6 +1,7 @@
 import { unwrap } from '@voxire/api';
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
 import { z } from 'zod';
+import { toast } from 'sonner';
 import { hrApi, CreateShiftInput, UpdateShiftInput } from '../../shared/services/hrApi';
 import { shiftSchema } from '../../shared/schemas/shifts';
 
@@ -20,6 +21,7 @@ export function useCreateShift() {
   return useMutation({
     mutationFn: (data: CreateShiftInput) => unwrap(hrApi.createShift(data)),
     onSuccess: () => qc.invalidateQueries({ queryKey: ['shifts'] }),
+    onError: () => toast.error('Failed to create shift'),
   });
 }
 
@@ -28,5 +30,6 @@ export function useUpdateShift() {
   return useMutation({
     mutationFn: (data: UpdateShiftInput) => unwrap(hrApi.updateShift(data)),
     onSuccess: () => qc.invalidateQueries({ queryKey: ['shifts'] }),
+    onError: () => toast.error('Failed to update shift'),
   });
 }

@@ -36,7 +36,7 @@ const Employees = (): React.JSX.Element => {
   });
 
   const filteredEmployees = searchTerm
-    ? employees.filter((e) => e.jobTitle.toLowerCase().includes(searchTerm.toLowerCase()))
+    ? employees.filter((e) => (e.jobTitle ?? '').toLowerCase().includes(searchTerm.toLowerCase()))
     : employees;
 
   const inputStyle: React.CSSProperties = {

@@ -23,8 +23,8 @@ export function leaveStatusColor(status: LeaveStatus): string {
  * inclusive of both start and end dates.
  */
 export function workingDaysBetween(startIso: string, endIso: string): number {
-  const start = new Date(startIso);
-  const end = new Date(endIso);
+  const start = new Date(startIso + 'T00:00:00Z');
+  const end = new Date(endIso + 'T00:00:00Z');
   let count = 0;
   const current = new Date(start);
   while (current <= end) {

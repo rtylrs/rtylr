@@ -61,8 +61,13 @@ const Loyalty: React.FC = () => {
         <button
           onClick={() => {
             const next = !programEnabled;
-            setProgramEnabled(next);
-            updateConfig.mutate({ programEnabled: next });
+            updateConfig.mutate(
+              { programEnabled: next },
+              {
+                onSuccess: () => setProgramEnabled(next),
+                onError: () => setProgramEnabled(!next),
+              }
+            );
           }}
           style={{
             display: 'flex',

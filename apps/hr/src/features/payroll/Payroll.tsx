@@ -1,7 +1,6 @@
 import React, { useState } from 'react';
 import { Link } from '@tanstack/react-router';
 import { useTranslation } from 'react-i18next';
-import { toast } from 'sonner';
 import { Play, DollarSign, TrendingUp, Users, Clock, Settings } from 'lucide-react';
 import { motion } from 'motion/react';
 import { useListPayrollRuns, useTriggerPayrollRun } from '../../shared/hooks/queries/usePayroll';
@@ -81,13 +80,7 @@ const Payroll = (): React.JSX.Element => {
     const now = new Date();
     const start = new Date(now.getFullYear(), now.getMonth(), 1).toISOString().split('T')[0];
     const end = new Date(now.getFullYear(), now.getMonth() + 1, 0).toISOString().split('T')[0];
-    triggerRun.mutate(
-      { periodStart: start, periodEnd: end },
-      {
-        onSuccess: () => toast.success('Payroll run triggered'),
-        onError: () => toast.error('Failed to trigger payroll run'),
-      }
-    );
+    triggerRun.mutate({ periodStart: start, periodEnd: end });
   };
 
   return (
@@ -215,7 +208,7 @@ const Payroll = (): React.JSX.Element => {
                   </div>
                   <div style={{ fontSize: 11, color: 'var(--hr-text-muted)', marginTop: 3 }}>
                     <Users size={11} style={{ verticalAlign: 'middle', marginRight: 4 }} />
-                    {t('payroll.employeeCount', { count: run.entries.length })} ·{' '}
+                    {t('payroll.employeeCount', { count: run.entries?.length ?? 0 })} ·{' '}
                     {t('payroll.netTotal')}: {fmt(run.totalNet)}
                   </div>
                 </div>

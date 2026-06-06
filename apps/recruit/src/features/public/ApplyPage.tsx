@@ -27,11 +27,17 @@ import NotFound from './NotFound';
  * form is a utility and benefits from a single consistent shape.
  */
 const ApplyPage: React.FC = (): React.JSX.Element => {
-  const { slug = '', careerSlug = '' } = useParams({ strict: false }) as {
+  const { slug: rawSlug, careerSlug: rawCareerSlug } = useParams({ strict: false }) as {
     slug?: string;
     careerSlug?: string;
   };
+  const slug = rawSlug ?? '';
+  const careerSlug = rawCareerSlug ?? '';
   const navigate = useNavigate();
+
+  if (!slug || !careerSlug) {
+    return <div>Invalid application link.</div>;
+  }
 
   const { data, isLoading, error } = usePublicCareer(slug, careerSlug);
   const submit = useSubmitApplication();
@@ -77,6 +83,15 @@ const ApplyPage: React.FC = (): React.JSX.Element => {
   async function onPickFile(e: React.ChangeEvent<HTMLInputElement>) {
     const file = e.target.files?.[0];
     if (!file) return;
+    const allowed = [
+      'application/pdf',
+      'application/msword',
+      'application/vnd.openxmlformats-officedocument.wordprocessingml.document',
+    ];
+    if (!allowed.includes(file.type)) {
+      setUploadError('Please upload a PDF or Word document');
+      return;
+    }
     setResumeFile(file);
     setUploadedKey(null);
     setUploadError(null);

@@ -24,6 +24,7 @@ interface ConfigActions {
   setContactInfo: (info: ContactInfo) => void;
   setFaqs: (faqs: Record<string, unknown>[]) => void;
   setNews: (news: Record<string, unknown>[]) => void;
+  reset: () => void;
 }
 
 const initialState: ConfigState = {
@@ -66,6 +67,8 @@ export const useConfigStore = create<ConfigState & ConfigActions>()(
       setFaqs: (faqs) => set({ faqs }),
 
       setNews: (news) => set({ news }),
+
+      reset: () => set(initialState),
     }),
     {
       name: 'config-store',

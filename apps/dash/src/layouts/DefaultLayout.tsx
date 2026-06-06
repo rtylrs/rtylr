@@ -30,6 +30,8 @@ import {
 } from 'lucide-react';
 import { CaretPanel, CaretButton, useCaretStore, useCaretSettingsStore } from '@voxire/caret';
 import { useUserStore } from '../shared/stores/userStore';
+import { useBusinessStore } from '../shared/stores/businessStore';
+import { useConfigStore } from '../shared/stores/configStore';
 import { useThemeStore } from '../shared/stores/themeStore';
 import { useApps } from '../shared/hooks/queries/useApps';
 import { cn } from '../shared/lib/utils';
@@ -314,6 +316,8 @@ const DefaultLayout: React.FC<DefaultLayoutProps> = ({ children }) => {
   const businessName = user?.businessName || 'My Business';
 
   const handleLogout = (): void => {
+    useBusinessStore.getState().reset();
+    useConfigStore.getState().reset();
     logout();
     signOut('dash');
   };

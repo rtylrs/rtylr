@@ -20,6 +20,7 @@ interface BusinessActions {
   setBusinessType: (type: BusinessType) => void;
   setBusinessPreferences: (preferences: Record<string, unknown>) => void;
   updateBusinessPreference: (key: string, value: unknown) => void;
+  reset: () => void;
 }
 
 const initialState: BusinessState = {
@@ -43,6 +44,8 @@ export const useBusinessStore = create<BusinessState & BusinessActions>()(
             [key]: value,
           },
         })),
+
+      reset: () => set(initialState),
     }),
     {
       name: 'business-store',

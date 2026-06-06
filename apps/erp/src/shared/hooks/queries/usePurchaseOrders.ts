@@ -41,12 +41,12 @@ export const useListPurchaseOrders = (
         })
       );
       const raw = res as Record<string, unknown>;
-      const purchaseOrders = (raw.purchase_orders ?? []) as PurchaseOrder[];
+      const purchaseOrders = (raw.purchaseOrders ?? []) as PurchaseOrder[];
       return {
         purchaseOrders,
-        hasMore: Boolean(raw.has_more),
+        hasMore: Boolean(raw.hasMore),
         page: Number(raw.page ?? page),
-        pageSize: Number(raw.page_size ?? pageSize),
+        pageSize: Number(raw.pageSize ?? pageSize),
       };
     },
   });

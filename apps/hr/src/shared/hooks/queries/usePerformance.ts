@@ -92,7 +92,7 @@ export const useListReviewCycles = (params?: ListReviewCyclesParams) => {
   });
 };
 
-export const useGetReviewCycle = (id: number) => {
+export const useGetReviewCycle = (id: number | undefined) => {
   return useQuery<ReviewCyclePayload>({
     queryKey: ['review-cycle', id],
     queryFn: async (): Promise<ReviewCyclePayload> => {
@@ -101,7 +101,7 @@ export const useGetReviewCycle = (id: number) => {
       );
       return (res as { cycle: ReviewCyclePayload }).cycle;
     },
-    enabled: id > 0,
+    enabled: !!id,
   });
 };
 

@@ -160,6 +160,7 @@ export const useAddGroupMembers = (
     },
     onSuccess: () => {
       toast.success('Members added');
+      qc.invalidateQueries({ queryKey: ['groups'] });
       qc.invalidateQueries({ queryKey: ['groups', groupId] });
     },
     onError: () => toast.error('Failed to add members'),
@@ -203,6 +204,7 @@ export const useBulkInvite = (): ReturnType<
     },
     onSuccess: () => {
       qc.invalidateQueries({ queryKey: ['team'] });
+      qc.invalidateQueries({ queryKey: ['groups'] });
     },
     onError: () => toast.error('Bulk invite failed'),
   });

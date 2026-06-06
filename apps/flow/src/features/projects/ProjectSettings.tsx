@@ -70,6 +70,14 @@ const ProjectSettings: React.FC = () => {
   const [confirmDelete, setConfirmDelete] = useState(false);
   const [deleteTypedName, setDeleteTypedName] = useState('');
 
+  if (!projectId) {
+    return (
+      <div className="p-6" style={{ color: 'var(--flow-text-muted)' }}>
+        Loading…
+      </div>
+    );
+  }
+
   const otherWorkspaces = workspaces.filter((w) => w.id !== (project?.workspaceId ?? workspaceId));
 
   if (!project) {
@@ -640,7 +648,7 @@ const ProjectSettings: React.FC = () => {
                   deleteTypedName.trim() !== (project?.name ?? '') || deleteProject.isPending
                 }
                 onClick={() => {
-                  deleteProject.mutate(projectId!, {
+                  deleteProject.mutate(projectId, {
                     onSuccess: () => {
                       toast.success('Project deleted');
                       setConfirmDelete(false);

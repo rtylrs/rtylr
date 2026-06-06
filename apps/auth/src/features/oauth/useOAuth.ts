@@ -1,5 +1,6 @@
 import { useMutation } from '@tanstack/react-query';
 import { unwrap } from '@voxire/api';
+import { toast } from 'sonner';
 import { safe } from '../../shared/lib/api';
 
 interface IssueRequest {
@@ -19,4 +20,5 @@ export const useIssueAuthCode = () =>
   useMutation({
     mutationFn: (req: IssueRequest): Promise<IssueResponse> =>
       unwrap(safe.post<IssueResponse>('/oauth/authorize/issue', req)),
+    onError: () => toast.error('Authorization failed. Please try again.'),
   });

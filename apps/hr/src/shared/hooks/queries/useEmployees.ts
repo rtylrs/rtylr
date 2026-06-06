@@ -87,6 +87,7 @@ export const useUpdateEmployee = () => {
 };
 
 export const useInviteEmployee = () => {
+  const queryClient = useQueryClient();
   const { t } = useTranslation();
 
   return useMutation({
@@ -95,6 +96,7 @@ export const useInviteEmployee = () => {
       return res as InviteEmployeeResponse;
     },
     onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ['employees'] });
       toast.success(t('employees.inviteSent'));
     },
     onError: () => {

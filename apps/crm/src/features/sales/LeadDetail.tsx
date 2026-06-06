@@ -108,7 +108,10 @@ const LeadDetail: React.FC = () => {
   // Stage change
   const handleStageChange = (stage: LeadStage): void => {
     if (!leadId) return;
-    updateLead.mutate({ id: leadId, data: { stage } });
+    updateLead.mutate(
+      { id: leadId, data: { stage } },
+      { onError: () => toast.error('Failed to update stage') }
+    );
   };
 
   // Delete lead
@@ -117,6 +120,7 @@ const LeadDetail: React.FC = () => {
     if (!leadId) return;
     deleteLead.mutate(leadId, {
       onSuccess: () => navigate({ to: '/sales/leads' }),
+      onError: () => toast.error('Failed to delete lead'),
     });
   };
 
@@ -157,6 +161,7 @@ const LeadDetail: React.FC = () => {
           });
           setTpOpen(false);
         },
+        onError: () => toast.error('Failed to log touchpoint'),
       }
     );
   };
@@ -181,6 +186,7 @@ const LeadDetail: React.FC = () => {
           setContactForm({ name: '', role: '', phone: '', email: '' });
           setContactOpen(false);
         },
+        onError: () => toast.error('Failed to add contact'),
       }
     );
   };
@@ -217,6 +223,7 @@ const LeadDetail: React.FC = () => {
         onSuccess: () => {
           setContractOpen(false);
         },
+        onError: () => toast.error('Failed to save contract'),
       }
     );
   };

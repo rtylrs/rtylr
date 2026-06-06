@@ -1,6 +1,7 @@
 import { unwrap } from '@voxire/api';
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
 import { z } from 'zod';
+import { toast } from 'sonner';
 import { hrApi, CreateDepartmentInput, UpdateDepartmentInput } from '../../shared/services/hrApi';
 import { departmentSchema } from '../../shared/schemas/departments';
 
@@ -20,6 +21,7 @@ export function useCreateDepartment() {
   return useMutation({
     mutationFn: (data: CreateDepartmentInput) => unwrap(hrApi.createDepartment(data)),
     onSuccess: () => qc.invalidateQueries({ queryKey: ['departments'] }),
+    onError: () => toast.error('Failed to create department'),
   });
 }
 
@@ -28,5 +30,6 @@ export function useUpdateDepartment() {
   return useMutation({
     mutationFn: (data: UpdateDepartmentInput) => unwrap(hrApi.updateDepartment(data)),
     onSuccess: () => qc.invalidateQueries({ queryKey: ['departments'] }),
+    onError: () => toast.error('Failed to update department'),
   });
 }

@@ -105,6 +105,7 @@ const Contracts: React.FC = () => {
             notes: '',
           });
         },
+        onError: () => toast.error('Failed to create contract'),
       }
     );
   };

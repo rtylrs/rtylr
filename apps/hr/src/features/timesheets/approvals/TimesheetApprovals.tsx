@@ -146,7 +146,7 @@ const TimesheetApprovals = (): React.JSX.Element => {
                       </span>
                       <span>·</span>
                       <span>
-                        {ts.entries.length} {t('timesheets.entries')}
+                        {ts.entries?.length ?? 0} {t('timesheets.entries')}
                       </span>
                     </div>
                   </div>

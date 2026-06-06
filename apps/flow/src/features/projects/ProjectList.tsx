@@ -1,4 +1,4 @@
-import React, { useMemo, useState } from 'react';
+import React, { useMemo, useState, useEffect } from 'react';
 import { Link, useParams } from '@tanstack/react-router';
 import { motion, AnimatePresence } from 'motion/react';
 import {
@@ -41,6 +41,10 @@ interface TaskRowProps {
 const TaskRow: React.FC<TaskRowProps> = ({ task, depth = 0 }) => {
   const [checked, setChecked] = useState(task.status === 'done');
   const updateTaskStatus = useUpdateTaskStatus();
+
+  useEffect(() => {
+    setChecked(task.status === 'done');
+  }, [task.status]);
 
   const handleToggle = () => {
     const newChecked = !checked;

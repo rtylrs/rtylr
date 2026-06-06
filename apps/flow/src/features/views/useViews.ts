@@ -79,7 +79,7 @@ export function useFilteredTasks(view: SavedView | null, tasks: Task[]) {
           case 'priority':
             return (PRIORITY_ORDER[a.priority] - PRIORITY_ORDER[b.priority]) * dir;
           case 'dueDate':
-            return a.dueDate.localeCompare(b.dueDate) * dir;
+            return (a.dueDate ?? '').localeCompare(b.dueDate ?? '') * dir;
           case 'updated':
             return a.updatedAt.localeCompare(b.updatedAt) * dir;
           case 'created':

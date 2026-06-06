@@ -1,8 +1,9 @@
 import { unwrap } from '@voxire/api';
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
 import { z } from 'zod';
+import { toast } from 'sonner';
 import { hrExtras } from '../services/hrExtras';
-import { hrApi, StaffMember } from '../services/hrApi';
+import { hrApi } from '../services/hrApi';
 import { staffMemberSchema } from '../schemas/staff';
 import { timeOffEntrySchema } from '../schemas/timeOff';
 import {
@@ -53,6 +54,7 @@ export function useSubmitTimeOff() {
     mutationFn: (data: Parameters<typeof hrExtras.submitTimeOff>[0]) =>
       unwrap(hrExtras.submitTimeOff(data)),
     onSuccess: () => qc.invalidateQueries({ queryKey: ['time-off'] }),
+    onError: () => toast.error('Failed to submit time off request'),
   });
 }
 
@@ -62,6 +64,7 @@ export function useApproveTimeOff() {
     mutationFn: ({ id, approved, note }: { id: number; approved: boolean; note?: string }) =>
       unwrap(hrExtras.approveTimeOff(id, approved, note)),
     onSuccess: () => qc.invalidateQueries({ queryKey: ['time-off'] }),
+    onError: () => toast.error('Failed to update time off request'),
   });
 }
 
@@ -83,6 +86,7 @@ export function useUpsertShift() {
     mutationFn: (shift: Parameters<typeof hrExtras.upsertScheduleShift>[0]) =>
       unwrap(hrExtras.upsertScheduleShift(shift)),
     onSuccess: () => qc.invalidateQueries({ queryKey: ['schedule'] }),
+    onError: () => toast.error('Failed to save shift'),
   });
 }
 
@@ -91,6 +95,7 @@ export function useDeleteShift() {
   return useMutation({
     mutationFn: (id: number) => unwrap(hrExtras.deleteScheduleShift(id)),
     onSuccess: () => qc.invalidateQueries({ queryKey: ['schedule'] }),
+    onError: () => toast.error('Failed to delete shift'),
   });
 }
 
@@ -99,6 +104,7 @@ export function usePublishWeek() {
   return useMutation({
     mutationFn: (weekStart: string) => unwrap(hrExtras.publishWeek(weekStart)),
     onSuccess: () => qc.invalidateQueries({ queryKey: ['schedule'] }),
+    onError: () => toast.error('Failed to publish schedule'),
   });
 }
 
@@ -119,6 +125,7 @@ export function useApproveTimesheet() {
   return useMutation({
     mutationFn: (id: number) => unwrap(hrExtras.approveTimesheet(id)),
     onSuccess: () => qc.invalidateQueries({ queryKey: ['timesheets'] }),
+    onError: () => toast.error('Failed to approve timesheet'),
   });
 }
 
@@ -140,6 +147,7 @@ export function useCreateReview() {
     mutationFn: (data: Parameters<typeof hrExtras.createReview>[0]) =>
       unwrap(hrExtras.createReview(data)),
     onSuccess: () => qc.invalidateQueries({ queryKey: ['reviews'] }),
+    onError: () => toast.error('Failed to create review'),
   });
 }
 
@@ -161,6 +169,7 @@ export function useCreateOneOnOne() {
     mutationFn: (data: Parameters<typeof hrExtras.createOneOnOne>[0]) =>
       unwrap(hrExtras.createOneOnOne(data)),
     onSuccess: () => qc.invalidateQueries({ queryKey: ['one-on-ones'] }),
+    onError: () => toast.error('Failed to schedule 1:1'),
   });
 }
 
@@ -181,6 +190,7 @@ export function useToggleOnboardingTask() {
   return useMutation({
     mutationFn: (id: number) => unwrap(hrExtras.toggleOnboardingTask(id)),
     onSuccess: () => qc.invalidateQueries({ queryKey: ['onboarding'] }),
+    onError: () => toast.error('Failed to update onboarding task'),
   });
 }
 
@@ -200,6 +210,7 @@ export function useToggleOffboardingTask() {
   return useMutation({
     mutationFn: (id: number) => unwrap(hrExtras.toggleOffboardingTask(id)),
     onSuccess: () => qc.invalidateQueries({ queryKey: ['offboarding'] }),
+    onError: () => toast.error('Failed to update offboarding task'),
   });
 }
 
@@ -221,6 +232,7 @@ export function useAddDocument() {
     mutationFn: (doc: Parameters<typeof hrExtras.addDocument>[0]) =>
       unwrap(hrExtras.addDocument(doc)),
     onSuccess: () => qc.invalidateQueries({ queryKey: ['documents'] }),
+    onError: () => toast.error('Failed to upload document'),
   });
 }
 
@@ -229,6 +241,7 @@ export function useDeleteDocument() {
   return useMutation({
     mutationFn: (id: number) => unwrap(hrExtras.deleteDocument(id)),
     onSuccess: () => qc.invalidateQueries({ queryKey: ['documents'] }),
+    onError: () => toast.error('Failed to delete document'),
   });
 }
 
@@ -272,6 +285,7 @@ export function useEnrollBenefit() {
     mutationFn: (data: Parameters<typeof hrExtras.enrollBenefit>[0]) =>
       unwrap(hrExtras.enrollBenefit(data)),
     onSuccess: () => qc.invalidateQueries({ queryKey: ['benefits'] }),
+    onError: () => toast.error('Failed to enroll in benefit'),
   });
 }
 
@@ -349,6 +363,7 @@ export function useResolveSwap() {
     mutationFn: ({ id, accepted }: { id: number; accepted: boolean }) =>
       unwrap(hrExtras.resolveSwap(id, accepted)),
     onSuccess: () => qc.invalidateQueries({ queryKey: ['swaps'] }),
+    onError: () => toast.error('Failed to resolve swap request'),
   });
 }
 
@@ -358,6 +373,7 @@ export function useCreateSwap() {
     mutationFn: (data: Parameters<typeof hrExtras.createSwap>[0]) =>
       unwrap(hrExtras.createSwap(data)),
     onSuccess: () => qc.invalidateQueries({ queryKey: ['swaps'] }),
+    onError: () => toast.error('Failed to create swap request'),
   });
 }
 
@@ -385,6 +401,7 @@ export function useStartBreak() {
       type: 'Lunch' | 'Short' | 'Other';
     }) => unwrap(hrExtras.startBreak(staffId, staffName, type)),
     onSuccess: () => qc.invalidateQueries({ queryKey: ['breaks'] }),
+    onError: () => toast.error('Failed to start break'),
   });
 }
 
@@ -393,6 +410,7 @@ export function useEndBreak() {
   return useMutation({
     mutationFn: (id: number) => unwrap(hrExtras.endBreak(id)),
     onSuccess: () => qc.invalidateQueries({ queryKey: ['breaks'] }),
+    onError: () => toast.error('Failed to end break'),
   });
 }
 
@@ -423,6 +441,7 @@ export function useUpdateHrSettings() {
     mutationFn: (patch: Parameters<typeof hrExtras.updateSettings>[0]) =>
       unwrap(hrExtras.updateSettings(patch)),
     onSuccess: () => qc.invalidateQueries({ queryKey: ['settings'] }),
+    onError: () => toast.error('Failed to save settings'),
   });
 }
 

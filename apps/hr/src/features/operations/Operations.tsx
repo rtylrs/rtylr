@@ -61,7 +61,7 @@ const Operations: React.FC = () => {
     (sum, p) => sum + p.basePay + p.overtime - p.deductions,
     0
   );
-  const monthlyCost = weeklyCost * 4;
+  const monthlyCost = weeklyCost * (52 / 12);
   const weeklyHours = filteredPayroll.reduce((sum, p) => sum + p.hoursWorked, 0);
   const blendedRate = weeklyHours > 0 ? weeklyCost / weeklyHours : 0;
 

@@ -81,10 +81,7 @@ const Team: React.FC = (): React.JSX.Element => {
 
   const { data: groups = [] } = useGroups();
 
-  // We need to pick the groupId for the add-to-group action from the selected users
-  // We'll use the first selected user id to build the hook; actual mutation will be triggered manually
-  const [addGroupTarget, setAddGroupTarget] = useState<string | undefined>(undefined);
-  const addGroupMembers = useAddGroupMembers(addGroupTarget);
+  const addGroupMembers = useAddGroupMembers(selectedGroupId || undefined);
 
   const filtered = useMemo(() => {
     return members.filter((m) => {
@@ -131,7 +128,6 @@ const Team: React.FC = (): React.JSX.Element => {
 
   const handleAddToGroup = async (): Promise<void> => {
     if (!selectedGroupId) return;
-    setAddGroupTarget(selectedGroupId);
     const userIds = Array.from(selected)
       .map(Number)
       .filter((n) => !isNaN(n));

@@ -266,7 +266,7 @@ function GoalsTab({ cycleId }: { cycleId: number }): React.JSX.Element {
 const ReviewCycleDetail = (): React.JSX.Element => {
   const { t } = useTranslation();
   const { id } = useParams({ strict: false });
-  const cycleId = Number(id) || 0;
+  const cycleId = id ? Number(id) : undefined;
   const { data: cycle, isLoading } = useGetReviewCycle(cycleId);
 
   const reviewsLabel = t('performance.tabs.reviews');
@@ -298,9 +298,9 @@ const ReviewCycleDetail = (): React.JSX.Element => {
       <Tabs tabs={[reviewsLabel, goalsLabel]} active={activeTab} onChange={setActiveTab} />
 
       {activeTab === reviewsLabel ? (
-        <ReviewsTab cycleId={cycleId} />
+        <ReviewsTab cycleId={cycleId ?? 0} />
       ) : (
-        <GoalsTab cycleId={cycleId} />
+        <GoalsTab cycleId={cycleId ?? 0} />
       )}
     </div>
   );

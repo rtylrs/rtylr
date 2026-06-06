@@ -192,8 +192,9 @@ const Menu: React.FC<{}> = () => {
         );
       } else if (item.type === 'category') {
         if (item.details?.isParentCategory) {
-          const childCategories = (groupedCategories[item.itemId ?? ''] as GroupedCategory)
-            .children;
+          const group = groupedCategories[item.itemId ?? ''] as GroupedCategory | undefined;
+          if (!group) return null;
+          const childCategories = group.children;
           return renderParentCategory(item, childCategories);
         } else if (item.details?.parentCategory) {
           return null;

@@ -1,6 +1,7 @@
 import { unwrap } from '@voxire/api';
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
 import { z } from 'zod';
+import { toast } from 'sonner';
 import { hrApi, CreateStaffInput, UpdateStaffInput } from '../../shared/services/hrApi';
 import { staffMemberSchema } from '../../shared/schemas/staff';
 
@@ -20,6 +21,7 @@ export function useCreateStaff() {
   return useMutation({
     mutationFn: (data: CreateStaffInput) => unwrap(hrApi.createStaff(data)),
     onSuccess: () => qc.invalidateQueries({ queryKey: ['staff'] }),
+    onError: () => toast.error('Failed to create staff member'),
   });
 }
 
@@ -28,6 +30,7 @@ export function useUpdateStaff() {
   return useMutation({
     mutationFn: (data: UpdateStaffInput) => unwrap(hrApi.updateStaff(data)),
     onSuccess: () => qc.invalidateQueries({ queryKey: ['staff'] }),
+    onError: () => toast.error('Failed to update staff member'),
   });
 }
 
@@ -36,6 +39,7 @@ export function useDeleteStaff() {
   return useMutation({
     mutationFn: (id: number) => unwrap(hrApi.deleteStaff(id)),
     onSuccess: () => qc.invalidateQueries({ queryKey: ['staff'] }),
+    onError: () => toast.error('Failed to remove staff member'),
   });
 }
 
@@ -47,6 +51,7 @@ export function useClockIn() {
       qc.invalidateQueries({ queryKey: ['staff'] });
       qc.invalidateQueries({ queryKey: ['hr-dashboard'] });
     },
+    onError: () => toast.error('Failed to clock in'),
   });
 }
 
@@ -58,5 +63,6 @@ export function useClockOut() {
       qc.invalidateQueries({ queryKey: ['staff'] });
       qc.invalidateQueries({ queryKey: ['hr-dashboard'] });
     },
+    onError: () => toast.error('Failed to clock out'),
   });
 }
