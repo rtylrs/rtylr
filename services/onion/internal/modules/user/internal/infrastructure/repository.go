@@ -38,11 +38,13 @@ func userFromRow(id int64, email, passwordHash string, fullName, signupIP, devic
 
 type Repository struct {
 	queries *sqlc.Queries
+	db      *sql.DB
 }
 
 func NewRepository(db *sql.DB) *Repository {
 	return &Repository{
 		queries: sqlc.New(db),
+		db:      db,
 	}
 }
 
@@ -204,6 +206,20 @@ func (r *Repository) SetUserBusinessID(ctx context.Context, userID, businessID i
 		BusinessID: sql.NullInt64{Int64: businessID, Valid: true},
 		ID:         userID,
 	})
+}
+
+func (r *Repository) EnsureEmployeeForUser(ctx context.Context, ownerID, userID int64) error {
+	// cross-schema write to hr_core — every user is also an hr_employees row
+	_, err := r.db.ExecContext(ctx, `
+INSERT INTO hr_employees (owner_id, user_id, first_name, last_name, email, status)
+SELECT ?, u.id,
+       COALESCE(NULLIF(SUBSTRING_INDEX(u.full_name, ' ', 1), ''), u.email),
+       CASE WHEN LOCATE(' ', u.full_name) > 0 THEN SUBSTRING(u.full_name, LOCATE(' ', u.full_name) + 1) ELSE '' END,
+       u.email, 'active'
+FROM users u
+WHERE u.id = ?
+  AND NOT EXISTS (SELECT 1 FROM hr_employees e WHERE e.user_id = u.id)`, ownerID, userID)
+	return err
 }
 
 // RecordLogin writes a login history entry via sqlc.

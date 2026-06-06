@@ -16,6 +16,7 @@ import (
 	cacheKeys "github.com/voxire/onion/internal/platform/cache/keys"
 	"github.com/voxire/onion/internal/platform/config"
 	emailPkg "github.com/voxire/onion/internal/platform/email"
+	"github.com/voxire/onion/internal/platform/logger"
 	"github.com/voxire/onion/internal/platform/utils/passwordutils"
 )
 
@@ -270,6 +271,11 @@ func (s *Service) InviteUser(ctx context.Context, ownerID, businessID int64, inp
 
 	if err := s.repo.UpsertPermission(ctx, ownerID, userID, apps, role); err != nil {
 		return 0, "", err
+	}
+
+	if err := s.repo.EnsureEmployeeForUser(ctx, ownerID, userID); err != nil {
+		logger.Ctx(ctx).Error("failed to create employee record for invited user",
+			logger.Int("owner_id", int(ownerID)), logger.Int("user_id", int(userID)), logger.Error(err))
 	}
 
 	// New team member changes the business's team list cache + the new user's

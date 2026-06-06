@@ -182,7 +182,16 @@ func (s *Service) CreateBusinessForUser(ctx context.Context, userID int64, busin
 		return err
 	}
 
-	return s.repo.SetUserBusinessID(ctx, userID, businessID)
+	if err := s.repo.SetUserBusinessID(ctx, userID, businessID); err != nil {
+		return err
+	}
+
+	if err := s.repo.EnsureEmployeeForUser(ctx, userID, userID); err != nil {
+		logger.Ctx(ctx).Error("failed to create employee record for business owner",
+			logger.Int("owner_id", int(userID)), logger.Error(err))
+	}
+
+	return nil
 }
 
 type PlatformClaims struct {
