@@ -59,6 +59,6 @@ export function useLoadCaretChat({
       const messages = json.context?.messages ?? [];
       return messages.filter((m) => m.content).map(toCaretMessage);
     },
-    [baseUrl, userId],
+    [baseUrl, userId]
   );
 }

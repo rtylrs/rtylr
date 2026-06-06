@@ -35,8 +35,16 @@ const DEFAULT_SUGGESTIONS = [
 
 const CaretPanel: React.FC<CaretPanelProps> = ({ systemContext, userId, apiBaseUrl, variant }) => {
   useShortcuts();
-  const { isOpen, sessionId, messages, isStreaming, setToolStatus, setSessionId, setMessages, reset } =
-    useCaretStore();
+  const {
+    isOpen,
+    sessionId,
+    messages,
+    isStreaming,
+    setToolStatus,
+    setSessionId,
+    setMessages,
+    reset,
+  } = useCaretStore();
   const showThinking = useCaretSettingsStore((s) => s.showThinking);
   const panelWidth = useCaretSettingsStore((s) => s.panelWidth);
   const view = useCaretUIStore((s) => s.view);
@@ -72,7 +80,7 @@ const CaretPanel: React.FC<CaretPanelProps> = ({ systemContext, userId, apiBaseU
         setMessages([]);
       }
     },
-    [loadChat, setSessionId, setMessages, setView],
+    [loadChat, setSessionId, setMessages, setView]
   );
 
   const [introPlaying, setIntroPlaying] = useState(false);
@@ -167,12 +175,7 @@ const CaretPanel: React.FC<CaretPanelProps> = ({ systemContext, userId, apiBaseU
       )}
 
       {view === 'history' && (
-        <ChatList
-          chats={sessions}
-          activeId={sessionId}
-          onSelect={selectChat}
-          onNew={newChat}
-        />
+        <ChatList chats={sessions} activeId={sessionId} onSelect={selectChat} onNew={newChat} />
       )}
 
       {view === 'settings' && <SettingsPanel />}
