@@ -339,8 +339,6 @@ func (h *GenerateTextStreamHandler) setupSSEHeaders(w http.ResponseWriter) {
 	w.Header().Set("Content-Type", "text/event-stream")
 	w.Header().Set("Cache-Control", "no-cache")
 	w.Header().Set("Connection", "keep-alive")
-	w.Header().Set("Access-Control-Allow-Origin", "*")
-	w.Header().Set("Access-Control-Allow-Headers", "Cache-Control")
 }
 
 func (h *GenerateTextStreamHandler) monitorClientDisconnect(r *http.Request) chan bool {

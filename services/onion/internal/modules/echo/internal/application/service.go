@@ -18,10 +18,7 @@ type Service struct {
 func NewService(ctx context.Context) (*Service, error) {
 	client, err := snips.NewClient(ctx)
 	if err != nil {
-		// No provider configured (or init failed) is not fatal: return a usable
-		// Service with a nil client so the status/stream handlers report
-		// "unavailable" gracefully instead of nil-panicking.
-		logger.Ctx(ctx).Warn("AI client not initialized; AI features disabled", logger.Error(err))
+		logger.Ctx(ctx).Debug("AI client not initialized; AI features disabled", logger.Error(err))
 		return &Service{aiClient: nil}, nil
 	}
 
