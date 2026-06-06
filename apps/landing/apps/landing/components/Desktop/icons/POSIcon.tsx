@@ -8,6 +8,7 @@ export const POSIcon = ({ size = 44 }: { size?: number }) => (
     fill="none"
     xmlns="http://www.w3.org/2000/svg"
   >
+    <rect x="0" y="0" width="44" height="44" rx="10" fill="#1a2d4a" />
     {/* Monitor body */}
     <rect
       x="6"

@@ -55,10 +55,6 @@ export const DraggableIcon: React.FC<DraggableIconProps> = ({ def }) => {
         flexShrink: 0,
         pointerEvents: 'auto',
         padding: '6px 4px',
-        borderRadius: 12,
-        background: 'rgba(0,0,0,0.18)',
-        backdropFilter: 'blur(6px)',
-        WebkitBackdropFilter: 'blur(6px)',
       }}
     >
       <div
