@@ -7,6 +7,7 @@ import (
 	"github.com/voxire/onion/internal/modules/memory/internal/application"
 	"github.com/voxire/onion/internal/modules/memory/internal/domain"
 	errorModels "github.com/voxire/onion/internal/platform/errors"
+	authPkg "github.com/voxire/onion/internal/platform/auth"
 )
 
 func ChatsRoutes() []string {
@@ -54,12 +55,11 @@ type ChatHistoryHandler struct {
 }
 
 func (h *ChatHistoryHandler) Serve(ctx context.Context, req *ChatsRequest) (ChatsResponse, *errorModels.ServerError) {
-	if req.UserID <= 0 {
-		return ChatsResponse{}, &errorModels.ServerError{
-			Code:    http.StatusBadRequest,
-			Message: "User ID is required",
-		}
+	device := authPkg.DeviceCtx(ctx)
+	if device.User == nil {
+		return ChatsResponse{}, &errorModels.ServerError{Code: http.StatusUnauthorized, Message: "unauthorized"}
 	}
+	req.UserID = int(device.User.UserID)
 
 	limit := req.Limit
 	if limit <= 0 {
@@ -95,17 +95,16 @@ type ChatMessagesHandler struct {
 }
 
 func (h *ChatMessagesHandler) Serve(ctx context.Context, req *ChatMessagesRequest) (ChatMessagesResponse, *errorModels.ServerError) {
+	device := authPkg.DeviceCtx(ctx)
+	if device.User == nil {
+		return ChatMessagesResponse{}, &errorModels.ServerError{Code: http.StatusUnauthorized, Message: "unauthorized"}
+	}
+	req.UserID = int(device.User.UserID)
+
 	if req.SessionID == "" {
 		return ChatMessagesResponse{}, &errorModels.ServerError{
 			Code:    http.StatusBadRequest,
 			Message: "Session ID is required",
-		}
-	}
-
-	if req.UserID <= 0 {
-		return ChatMessagesResponse{}, &errorModels.ServerError{
-			Code:    http.StatusBadRequest,
-			Message: "User ID is required",
 		}
 	}
 

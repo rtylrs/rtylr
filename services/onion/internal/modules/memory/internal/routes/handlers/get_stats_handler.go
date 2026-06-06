@@ -6,6 +6,7 @@ import (
 
 	"github.com/voxire/onion/internal/modules/memory/internal/application"
 	errorModels "github.com/voxire/onion/internal/platform/errors"
+	authPkg "github.com/voxire/onion/internal/platform/auth"
 )
 
 func StatsRoutes() []string {
@@ -29,12 +30,11 @@ type StatsHandler struct {
 }
 
 func (h *StatsHandler) Serve(ctx context.Context, req *StatsRequest) (StatsResponse, *errorModels.ServerError) {
-	if req.UserID <= 0 {
-		return StatsResponse{}, &errorModels.ServerError{
-			Code:    http.StatusBadRequest,
-			Message: "User ID is required",
-		}
+	device := authPkg.DeviceCtx(ctx)
+	if device.User == nil {
+		return StatsResponse{}, &errorModels.ServerError{Code: http.StatusUnauthorized, Message: "unauthorized"}
 	}
+	req.UserID = int(device.User.UserID)
 
 	stats, err := h.MemoryService.GetUserStats(ctx, req.UserID)
 	if err != nil {
