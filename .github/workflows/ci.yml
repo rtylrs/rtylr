@@ -70,6 +70,16 @@ jobs:
       - name: Build
         run: pnpm turbo build --cache-dir=.turbo
 
+      - name: Upload dist artifacts
+        # Only upload on main pushes — deploy jobs only run on main and they
+        # download this artifact instead of rebuilding, saving ~3 min per app.
+        if: github.ref == 'refs/heads/main' && (github.event_name == 'push' || github.event_name == 'workflow_dispatch')
+        uses: actions/upload-artifact@v4
+        with:
+          name: dist-${{ github.sha }}
+          path: dist/
+          retention-days: 1
+
   # ── End-to-end (Playwright) ────────────────────────────────────────
   # Real browser, real Vite dev servers, API stubbed per-test via
   # page.route(). Runs in parallel with `check` (it doesn't need the build) to
@@ -203,6 +213,7 @@ jobs:
       app_filter: '@rtylr/auth'
       dist_dir: dist/auth
       project_name: rtylr-auth
+      artifact_name: dist-${{ github.sha }}
     secrets: inherit
 
   deploy-dash:
@@ -213,6 +224,7 @@ jobs:
       app_filter: dash
       dist_dir: dist/dash
       project_name: rtylr-hub
+      artifact_name: dist-${{ github.sha }}
     secrets: inherit
 
   deploy-erp:
@@ -223,6 +235,7 @@ jobs:
       app_filter: '@rtylr/erp'
       dist_dir: dist/erp
       project_name: rtylr-erp
+      artifact_name: dist-${{ github.sha }}
     secrets: inherit
 
   deploy-crm:
@@ -233,6 +246,7 @@ jobs:
       app_filter: '@rtylr/crm'
       dist_dir: dist/crm
       project_name: rtylr-crm
+      artifact_name: dist-${{ github.sha }}
     secrets: inherit
 
   deploy-hr:
@@ -243,6 +257,7 @@ jobs:
       app_filter: '@rtylr/hr'
       dist_dir: dist/hr
       project_name: rtylr-hr
+      artifact_name: dist-${{ github.sha }}
     secrets: inherit
 
   deploy-finance:
@@ -253,6 +268,7 @@ jobs:
       app_filter: '@rtylr/finance'
       dist_dir: dist/finance
       project_name: rtylr-finance
+      artifact_name: dist-${{ github.sha }}
     secrets: inherit
 
   deploy-flow:
@@ -263,6 +279,7 @@ jobs:
       app_filter: '@rtylr/flow'
       dist_dir: dist/flow
       project_name: rtylr-flow
+      artifact_name: dist-${{ github.sha }}
     secrets: inherit
 
   deploy-insights:
@@ -273,6 +290,7 @@ jobs:
       app_filter: '@rtylr/insights'
       dist_dir: dist/insights
       project_name: rtylr-insights
+      artifact_name: dist-${{ github.sha }}
     secrets: inherit
 
   deploy-menu:
@@ -283,6 +301,7 @@ jobs:
       app_filter: '@rtylr/menu'
       dist_dir: dist/menu
       project_name: rtylr-menu
+      artifact_name: dist-${{ github.sha }}
     secrets: inherit
 
   deploy-docs:
@@ -293,6 +312,7 @@ jobs:
       app_filter: '@rtylr/docs'
       dist_dir: dist/docs
       project_name: rtylr-docs
+      artifact_name: dist-${{ github.sha }}
     secrets: inherit
 
   deploy-recruit:
@@ -303,4 +323,5 @@ jobs:
       app_filter: '@rtylr/recruit'
       dist_dir: dist/recruit
       project_name: rtylr-recruit
+      artifact_name: dist-${{ github.sha }}
     secrets: inherit

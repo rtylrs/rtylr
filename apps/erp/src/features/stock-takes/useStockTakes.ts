@@ -54,8 +54,7 @@ export function useCreateStockTake() {
 export function useUpdateStockTake() {
   const qc = useQueryClient();
   return useMutation({
-    mutationFn: (data: UpdateStockTakeInput) =>
-      unwrap(safe.put<unknown>(`/erp/stock-takes/${data.id}`, data)),
+    mutationFn: (data: UpdateStockTakeInput) => unwrap(safe.put<unknown>('/erp/stock-takes', data)),
     onSuccess: () => qc.invalidateQueries({ queryKey: ['stock-takes'] }),
     onError: () => toast.error('Failed to update stock take'),
   });

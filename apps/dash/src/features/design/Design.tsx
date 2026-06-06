@@ -571,7 +571,12 @@ const Design: React.FC = () => {
     setColorPrimary(draftConfig.colors?.primary ?? '#4583C4');
     setColorAccent(draftConfig.colors?.accent ?? '#f59e0b');
     setColorBg(draftConfig.colors?.bg ?? '#ffffff');
-  }, [activePresetId]);
+  }, [
+    activePresetId,
+    draftConfig.colors?.primary,
+    draftConfig.colors?.accent,
+    draftConfig.colors?.bg,
+  ]);
 
   const activePreset = presets.find((p) => p.id === activePresetId);
 
