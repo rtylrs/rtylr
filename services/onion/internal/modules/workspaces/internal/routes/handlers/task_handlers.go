@@ -207,6 +207,10 @@ func (h *ListTasksHandler) Serve(ctx context.Context, req *ListTasksRequest) (Li
 		workspaceID = resolved
 	}
 
+	if req.ProjectID != 0 && !h.FlowService.IsProjectMember(ctx, authUser.UserID, req.ProjectID) {
+		return ListTasksResponse{}, errorModels.PermissionDeniedServerError()
+	}
+
 	filter := domain.ListTasksFilter{
 		ProjectID:   req.ProjectID,
 		WorkspaceID: workspaceID,
@@ -360,8 +364,12 @@ func (h *GetTaskDetailHandler) Validate(_ context.Context, req *GetTaskDetailReq
 }
 
 func (h *GetTaskDetailHandler) Serve(ctx context.Context, req *GetTaskDetailRequest) (GetTaskDetailResponse, *errorModels.ServerError) {
-	_, ok := authPkg.GetAuthUser(ctx)
+	authUser, ok := authPkg.GetAuthUser(ctx)
 	if !ok {
+		return GetTaskDetailResponse{}, errorModels.PermissionDeniedServerError()
+	}
+
+	if !h.FlowService.IsTaskMember(ctx, authUser.UserID, req.ID.Int64()) {
 		return GetTaskDetailResponse{}, errorModels.PermissionDeniedServerError()
 	}
 
@@ -681,6 +689,10 @@ func (h *AddCommentHandler) Validate(_ context.Context, req *AddCommentRequest) 
 func (h *AddCommentHandler) Serve(ctx context.Context, req *AddCommentRequest) (AddCommentResponse, *errorModels.ServerError) {
 	authUser, ok := authPkg.GetAuthUser(ctx)
 	if !ok {
+		return AddCommentResponse{}, errorModels.PermissionDeniedServerError()
+	}
+
+	if !h.FlowService.IsTaskMember(ctx, authUser.UserID, req.TaskID.Int64()) {
 		return AddCommentResponse{}, errorModels.PermissionDeniedServerError()
 	}
 

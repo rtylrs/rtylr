@@ -306,6 +306,10 @@ func (h *MoveProjectHandler) Serve(ctx context.Context, req *MoveProjectRequest)
 		return MoveProjectResponse{}, errorModels.PermissionDeniedServerError()
 	}
 
+	if !h.FlowService.IsWorkspaceMember(ctx, authUser.UserID, req.WorkspaceID.Int64()) {
+		return MoveProjectResponse{}, errorModels.PermissionDeniedServerError()
+	}
+
 	if err := h.FlowService.MoveProject(ctx, domain.MoveProjectInput{
 		ProjectID:   req.ProjectID.Int64(),
 		WorkspaceID: req.WorkspaceID.Int64(),
