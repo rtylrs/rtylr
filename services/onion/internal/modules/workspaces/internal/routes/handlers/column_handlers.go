@@ -2,6 +2,7 @@ package handlers
 
 import (
 	"context"
+	"errors"
 	"fmt"
 	"net/http"
 
@@ -183,11 +184,15 @@ func (h *UpdateColumnHandler) Serve(ctx context.Context, req *UpdateColumnReques
 
 	err := h.FlowService.UpdateColumn(ctx, domain.UpdateProjectColumnInput{
 		ID:        req.ID.Int64(),
+		ActorID:   authUser.UserID,
 		Name:      req.Name,
 		Color:     req.Color,
 		SortOrder: req.SortOrder,
 	})
 	if err != nil {
+		if errors.Is(err, domain.ErrUnauthorized) {
+			return UpdateColumnResponse{}, errorModels.PermissionDeniedServerError()
+		}
 		return UpdateColumnResponse{}, &errorModels.ServerError{Code: http.StatusInternalServerError, Message: "Failed to update column"}
 	}
 	publishColumnEvent(
@@ -232,7 +237,10 @@ func (h *DeleteColumnHandler) Serve(ctx context.Context, req *DeleteColumnReques
 	// event can route to the right topic.
 	projectID := h.FlowService.GetColumnProject(ctx, req.ID.Int64())
 
-	if err := h.FlowService.DeleteColumn(ctx, req.ID.Int64()); err != nil {
+	if err := h.FlowService.DeleteColumn(ctx, req.ID.Int64(), authUser.UserID); err != nil {
+		if errors.Is(err, domain.ErrUnauthorized) {
+			return DeleteColumnResponse{}, errorModels.PermissionDeniedServerError()
+		}
 		return DeleteColumnResponse{}, &errorModels.ServerError{Code: http.StatusInternalServerError, Message: "Failed to delete column"}
 	}
 	publishColumnEvent("column.deleted", projectID, req.ID.Int64(), authUser.UserID)
@@ -269,7 +277,10 @@ func (h *MoveTaskToColumnHandler) Serve(ctx context.Context, req *MoveTaskToColu
 		return MoveTaskToColumnResponse{}, errorModels.PermissionDeniedServerError()
 	}
 
-	if err := h.FlowService.MoveTaskToColumn(ctx, req.TaskID.Int64(), req.ColumnID.Int64()); err != nil {
+	if err := h.FlowService.MoveTaskToColumn(ctx, req.TaskID.Int64(), req.ColumnID.Int64(), authUser.UserID); err != nil {
+		if errors.Is(err, domain.ErrUnauthorized) {
+			return MoveTaskToColumnResponse{}, errorModels.PermissionDeniedServerError()
+		}
 		return MoveTaskToColumnResponse{}, &errorModels.ServerError{Code: http.StatusInternalServerError, Message: "Failed to move task"}
 	}
 

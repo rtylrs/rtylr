@@ -114,6 +114,6 @@ func (cfg *LoyaltyConfig) CanRedeem(points int) bool {
 }
 
 // HasReferenceID returns true when the transaction references an external entity.
-func (tx *LoyaltyTransaction) HasReferenceID() bool {
-	return tx.ReferenceID != nil
+func (t *LoyaltyTransaction) HasReferenceID() bool {
+	return t.ReferenceID != nil
 }

@@ -1,12 +1,5 @@
-// Package emailtest exposes a PUBLIC, unauthenticated endpoint that enqueues any
-// registered email template to an arbitrary address, to verify the email queue
-// end-to-end (POST -> email_jobs -> worker -> Resend) by curl.
-//
-// SECURITY: this is effectively an open email relay (e.g. it can send a genuine
-// rtylr password-reset email with a caller-supplied link — a phishing vector).
-// It is intentionally ungated for testing — DELETE this module once the queue is
-// verified. It only accepts templates that exist in the embedded FS and is
-// covered by the global rate limiter.
+// Package emailtest exposes authenticated non-production endpoints for manually
+// testing email template enqueueing end-to-end.
 package emailtest
 
 import (
@@ -16,6 +9,8 @@ import (
 
 	"github.com/go-chi/chi/v5"
 
+	authPkg "github.com/voxire/onion/internal/platform/auth"
+	"github.com/voxire/onion/internal/platform/config"
 	"github.com/voxire/onion/internal/platform/email"
 	"github.com/voxire/onion/internal/platform/errors"
 	"github.com/voxire/onion/internal/platform/logger"
@@ -40,7 +35,7 @@ func (m *Module) RegisterRoutes(ctx context.Context, router *chi.Mux, _ ...inter
 }
 
 func (m *Module) GetAnonymousRoutes() []string {
-	return append(sendRoutes(), listRoutes()...)
+	return []string{}
 }
 
 func sendRoutes() []string { return []string{"/test/email"} }
@@ -57,7 +52,10 @@ type ListTemplatesResponse struct {
 
 type ListTemplatesHandler struct{}
 
-func (h *ListTemplatesHandler) Serve(_ context.Context, _ *ListTemplatesRequest) (ListTemplatesResponse, *errors.ServerError) {
+func (h *ListTemplatesHandler) Serve(ctx context.Context, _ *ListTemplatesRequest) (ListTemplatesResponse, *errors.ServerError) {
+	if err := requireAuthenticatedNonProduction(ctx); err != nil {
+		return ListTemplatesResponse{}, err
+	}
 	names := templateNames()
 	return ListTemplatesResponse{Count: len(names), Templates: names}, nil
 }
@@ -80,6 +78,9 @@ type TestEmailResponse struct {
 type TestEmailHandler struct{ DB *sql.DB }
 
 func (h *TestEmailHandler) Serve(ctx context.Context, req *TestEmailRequest) (TestEmailResponse, *errors.ServerError) {
+	if err := requireAuthenticatedNonProduction(ctx); err != nil {
+		return TestEmailResponse{}, err
+	}
 	if req.To == "" || req.Template == "" {
 		return TestEmailResponse{}, badRequest("'to' and 'template' are required; GET /test/email/templates lists valid templates")
 	}
@@ -124,6 +125,17 @@ func (h *TestEmailHandler) Serve(ctx context.Context, req *TestEmailRequest) (Te
 
 func badRequest(msg string) *errors.ServerError {
 	return &errors.ServerError{HTTPCode: http.StatusBadRequest, Code: http.StatusBadRequest, Message: msg}
+}
+
+func requireAuthenticatedNonProduction(ctx context.Context) *errors.ServerError {
+	if config.IsProduction() {
+		return &errors.ServerError{HTTPCode: http.StatusNotFound, Code: http.StatusNotFound, Message: "Not found"}
+	}
+	device := authPkg.DeviceCtx(ctx)
+	if device.IsAnonymous || device.User == nil {
+		return errors.PermissionDeniedServerError()
+	}
+	return nil
 }
 
 func templateNames() []string {

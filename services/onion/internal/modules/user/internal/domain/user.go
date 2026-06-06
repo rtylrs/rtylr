@@ -27,4 +27,3 @@ func NewUser(email, passwordHash, fullName, signupIP, deviceInfo string) *User {
 		UpdatedAt:        time.Now(),
 	}
 }
-

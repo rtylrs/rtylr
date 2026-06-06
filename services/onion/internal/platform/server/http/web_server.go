@@ -19,7 +19,7 @@ const serverShutdownTimeoutSeconds = 20
 func Start(ctx context.Context, runMode ChiRunMode, port string) error {
 	r := chi.NewRouter()
 
-	r.Use(middleware.Logger)
+	r.Use(safeRequestLogger())
 	r.Use(middleware.Recoverer)
 	// Sentry recover runs after chi's Recoverer so we still respond
 	// with a 500, but anything that escapes the handler layer ends

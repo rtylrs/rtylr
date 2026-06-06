@@ -1377,6 +1377,52 @@ func (r *Repository) GetOrderIDByPaddleTx(ctx context.Context, txID string) (int
 
 // ─── Public Online Ordering ──────────────────────────────────────────────────
 
+func (r *Repository) IsOnlineOrderingEnabled(ctx context.Context, ownerID int64) (bool, error) {
+	var count int64
+	err := r.pool.QueryRowContext(
+		ctx,
+		"SELECT COUNT(*) FROM business_addons WHERE business_id = ? AND addon_id = 'online_ordering' AND is_enabled = TRUE",
+		ownerID,
+	).Scan(&count)
+	if err != nil {
+		return false, err
+	}
+	return count > 0, nil
+}
+
+func (r *Repository) GetPublicMenuItem(ctx context.Context, ownerID, menuItemID int64) (domain.OrderItemInput, error) {
+	query, args, err := sq.
+		Select("id", "name", "sku", "sale_price", "tax_rate").
+		From("erp_products").
+		Where(sq.Eq{"owner_id": ownerID}).
+		Where(sq.Eq{"id": menuItemID}).
+		Where(sq.Eq{"is_active": true}).
+		PlaceholderFormat(sq.Question).
+		ToSql()
+	if err != nil {
+		return domain.OrderItemInput{}, err
+	}
+
+	var item domain.OrderItemInput
+	var sku sql.NullString
+	var salePrice string
+	var taxRate sql.NullString
+	if err := r.pool.QueryRowContext(ctx, query, args...).Scan(
+		&item.MenuItemID,
+		&item.Name,
+		&sku,
+		&salePrice,
+		&taxRate,
+	); err != nil {
+		return domain.OrderItemInput{}, err
+	}
+
+	item.SKU = sku.String
+	item.UnitPrice = decimalToFloat(salePrice)
+	item.TaxRate = decimalToFloat(taxRate.String)
+	return item, nil
+}
+
 func (r *Repository) CreatePublicOrder(ctx context.Context, ownerID int64, orderNumber, customerName, customerPhone, notes string, items []domain.OrderItemInput) (int64, error) {
 	tx, err := r.pool.BeginTx(ctx, nil)
 	if err != nil {

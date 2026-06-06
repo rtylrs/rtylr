@@ -76,8 +76,7 @@ func init() {
 
 func getNewRedisClient() redis.UniversalClient {
 	const (
-		defaultMaxClusterClientConnAge   = 5 * time.Minute
-		defaultMinClusterClientIdleConns = 10
+		defaultMinClusterClientIdleConns = 2
 		defaultPoolSize                  = 25
 	)
 
@@ -88,7 +87,7 @@ func getNewRedisClient() redis.UniversalClient {
 		opt, err := redis.ParseURL(url)
 		if err == nil {
 			opt.ClientName = "onion-api"
-			opt.ConnMaxLifetime = defaultMaxClusterClientConnAge
+			opt.DisableIdentity = true
 			opt.PoolSize = defaultPoolSize
 			opt.MinIdleConns = defaultMinClusterClientIdleConns
 			return redis.NewClient(opt)
@@ -101,7 +100,7 @@ func getNewRedisClient() redis.UniversalClient {
 		Addrs:           config.GetRedisHosts(),
 		Username:        config.GetRedisUsername(),
 		Password:        config.GetRedisPassword(),
-		ConnMaxLifetime: defaultMaxClusterClientConnAge,
+		DisableIdentity: true,
 		PoolSize:        defaultPoolSize,
 		MinIdleConns:    defaultMinClusterClientIdleConns,
 	})

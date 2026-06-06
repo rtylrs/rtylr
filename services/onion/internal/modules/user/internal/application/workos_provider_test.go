@@ -8,14 +8,14 @@ func TestWorkOSProviderID(t *testing.T) {
 		want    string
 		wantErr bool
 	}{
-		{"", "GoogleOAuth", false},        // default
+		{"", "GoogleOAuth", false}, // default
 		{"google", "GoogleOAuth", false},
-		{"Google", "GoogleOAuth", false},  // case-insensitive
+		{"Google", "GoogleOAuth", false},    // case-insensitive
 		{"  github ", "GitHubOAuth", false}, // trimmed
 		{"github", "GitHubOAuth", false},
 		{"microsoft", "MicrosoftOAuth", false},
 		{"apple", "AppleOAuth", false},
-		{"facebook", "", true},  // unsupported
+		{"facebook", "", true}, // unsupported
 		{"twitter", "", true},
 	}
 	for _, tc := range cases {

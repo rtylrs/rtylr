@@ -5,8 +5,8 @@ import (
 	"net/http"
 
 	"github.com/voxire/onion/internal/modules/memory/internal/application"
-	errorModels "github.com/voxire/onion/internal/platform/errors"
 	authPkg "github.com/voxire/onion/internal/platform/auth"
+	errorModels "github.com/voxire/onion/internal/platform/errors"
 )
 
 func SummarizeRoutes() []string {

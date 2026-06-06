@@ -6,11 +6,11 @@ import (
 )
 
 var (
-	ErrEmptyItemName         = errors.New("equipment item name is required")
-	ErrNonPositiveQuantity   = errors.New("quantity must be at least 1")
+	ErrEmptyItemName          = errors.New("equipment item name is required")
+	ErrNonPositiveQuantity    = errors.New("quantity must be at least 1")
 	ErrInvalidEquipmentStatus = errors.New("invalid equipment request status")
-	ErrInvalidAssetStatus    = errors.New("invalid asset status")
-	ErrEmptyAssetName        = errors.New("asset name is required")
+	ErrInvalidAssetStatus     = errors.New("invalid asset status")
+	ErrEmptyAssetName         = errors.New("asset name is required")
 )
 
 // IsValidEquipmentStatus returns true when the status is recognised.

@@ -10,6 +10,7 @@ import (
 	"time"
 
 	sq "github.com/Masterminds/squirrel"
+
 	"github.com/voxire/onion/internal/modules/hr_performance/internal/domain"
 	"github.com/voxire/onion/internal/modules/hr_performance/internal/infrastructure/persistence/sqlc"
 	"github.com/voxire/onion/internal/platform/logger"

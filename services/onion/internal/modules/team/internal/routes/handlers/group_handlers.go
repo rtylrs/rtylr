@@ -68,12 +68,22 @@ func toGroupPayload(g domain.Group) GroupPayload {
 	}
 }
 
-func ownerIDFromCtx(ctx context.Context) (int64, bool) {
+func teamOwnerIDFromCtx(ctx context.Context, service *application.Service) (int64, bool) {
 	device := authPkg.DeviceCtx(ctx)
 	if device.User == nil {
 		return 0, false
 	}
-	return device.User.UserID, true
+	ownerID, err := service.BusinessOwnerID(ctx, device.User.UserID, device.User.BusinessID)
+	return ownerID, err == nil && ownerID != 0
+}
+
+func teamManagerFromCtx(ctx context.Context, service *application.Service) (actorID, ownerID int64, ok bool) {
+	device := authPkg.DeviceCtx(ctx)
+	if device.User == nil {
+		return 0, 0, false
+	}
+	ownerID, err := service.TeamManagerOwnerID(ctx, device.User.UserID, device.User.BusinessID)
+	return device.User.UserID, ownerID, err == nil && ownerID != 0
 }
 
 // ─── List Groups ─────────────────────────────────────────────────────────────
@@ -89,7 +99,7 @@ type (
 )
 
 func (h *ListGroupsHandler) Serve(ctx context.Context, _ *ListGroupsRequest) (ListGroupsResponse, *errorModels.ServerError) {
-	ownerID, ok := ownerIDFromCtx(ctx)
+	ownerID, ok := teamOwnerIDFromCtx(ctx, h.Service)
 	if !ok {
 		return ListGroupsResponse{}, errorModels.PermissionDeniedServerError()
 	}
@@ -128,7 +138,7 @@ func (h *CreateGroupHandler) Validate(_ context.Context, req *CreateGroupRequest
 }
 
 func (h *CreateGroupHandler) Serve(ctx context.Context, req *CreateGroupRequest) (CreateGroupResponse, *errorModels.ServerError) {
-	ownerID, ok := ownerIDFromCtx(ctx)
+	_, ownerID, ok := teamManagerFromCtx(ctx, h.Service)
 	if !ok {
 		return CreateGroupResponse{}, errorModels.PermissionDeniedServerError()
 	}
@@ -166,7 +176,7 @@ type (
 )
 
 func (h *GetGroupDetailHandler) Serve(ctx context.Context, _ *GetGroupDetailRequest) (GetGroupDetailResponse, *errorModels.ServerError) {
-	ownerID, ok := ownerIDFromCtx(ctx)
+	ownerID, ok := teamOwnerIDFromCtx(ctx, h.Service)
 	if !ok {
 		return GetGroupDetailResponse{}, errorModels.PermissionDeniedServerError()
 	}
@@ -215,7 +225,7 @@ func (h *UpdateGroupHandler) Validate(_ context.Context, req *UpdateGroupRequest
 }
 
 func (h *UpdateGroupHandler) Serve(ctx context.Context, req *UpdateGroupRequest) (UpdateGroupResponse, *errorModels.ServerError) {
-	ownerID, ok := ownerIDFromCtx(ctx)
+	_, ownerID, ok := teamManagerFromCtx(ctx, h.Service)
 	if !ok {
 		return UpdateGroupResponse{}, errorModels.PermissionDeniedServerError()
 	}
@@ -251,7 +261,7 @@ type (
 )
 
 func (h *DeleteGroupHandler) Serve(ctx context.Context, _ *DeleteGroupRequest) (DeleteGroupResponse, *errorModels.ServerError) {
-	ownerID, ok := ownerIDFromCtx(ctx)
+	_, ownerID, ok := teamManagerFromCtx(ctx, h.Service)
 	if !ok {
 		return DeleteGroupResponse{}, errorModels.PermissionDeniedServerError()
 	}
@@ -290,7 +300,7 @@ func (h *AddGroupMembersHandler) Validate(_ context.Context, req *AddGroupMember
 }
 
 func (h *AddGroupMembersHandler) Serve(ctx context.Context, req *AddGroupMembersRequest) (AddGroupMembersResponse, *errorModels.ServerError) {
-	ownerID, ok := ownerIDFromCtx(ctx)
+	actorID, ownerID, ok := teamManagerFromCtx(ctx, h.Service)
 	if !ok {
 		return AddGroupMembersResponse{}, errorModels.PermissionDeniedServerError()
 	}
@@ -299,7 +309,7 @@ func (h *AddGroupMembersHandler) Serve(ctx context.Context, req *AddGroupMembers
 	if err != nil || groupID <= 0 {
 		return AddGroupMembersResponse{}, &errorModels.ServerError{HTTPCode: http.StatusBadRequest, Code: http.StatusBadRequest, Message: "Invalid group id"}
 	}
-	if err := h.Service.AddGroupMembers(ctx, ownerID, groupID, ownerID, req.UserIDs); err != nil {
+	if err := h.Service.AddGroupMembers(ctx, ownerID, groupID, actorID, req.UserIDs); err != nil {
 		return AddGroupMembersResponse{}, &errorModels.ServerError{HTTPCode: http.StatusInternalServerError, Code: http.StatusInternalServerError, Message: "Failed to add members"}
 	}
 	return AddGroupMembersResponse{Added: len(req.UserIDs), Message: "Members added"}, nil
@@ -318,7 +328,7 @@ type (
 )
 
 func (h *RemoveGroupMemberHandler) Serve(ctx context.Context, _ *RemoveGroupMemberRequest) (RemoveGroupMemberResponse, *errorModels.ServerError) {
-	ownerID, ok := ownerIDFromCtx(ctx)
+	_, ownerID, ok := teamManagerFromCtx(ctx, h.Service)
 	if !ok {
 		return RemoveGroupMemberResponse{}, errorModels.PermissionDeniedServerError()
 	}
@@ -351,7 +361,7 @@ type (
 )
 
 func (h *GetUserGroupsHandler) Serve(ctx context.Context, _ *GetUserGroupsRequest) (GetUserGroupsResponse, *errorModels.ServerError) {
-	ownerID, ok := ownerIDFromCtx(ctx)
+	ownerID, ok := teamOwnerIDFromCtx(ctx, h.Service)
 	if !ok {
 		return GetUserGroupsResponse{}, errorModels.PermissionDeniedServerError()
 	}
@@ -404,7 +414,7 @@ func (h *BulkInviteHandler) Validate(_ context.Context, req *BulkInviteRequest) 
 }
 
 func (h *BulkInviteHandler) Serve(ctx context.Context, req *BulkInviteRequest) (BulkInviteResponse, *errorModels.ServerError) {
-	ownerID, ok := ownerIDFromCtx(ctx)
+	_, ownerID, ok := teamManagerFromCtx(ctx, h.Service)
 	if !ok {
 		return BulkInviteResponse{}, errorModels.PermissionDeniedServerError()
 	}

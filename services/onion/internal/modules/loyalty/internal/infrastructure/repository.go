@@ -7,6 +7,7 @@ import (
 	"strconv"
 
 	sq "github.com/Masterminds/squirrel"
+
 	"github.com/voxire/onion/internal/modules/loyalty/internal/domain"
 	"github.com/voxire/onion/internal/modules/loyalty/internal/infrastructure/persistence/sqlc"
 	"github.com/voxire/onion/internal/platform/logger"
@@ -374,28 +375,6 @@ func (r *Repository) UpsertReward(ctx context.Context, rw domain.LoyaltyReward) 
 		return 0, err
 	}
 	return rw.ID, nil
-}
-
-// initialsFromName returns uppercase initials from a full name, up to 2 chars.
-func initialsFromName(name string) string {
-	if name == "" {
-		return ""
-	}
-	initials := make([]rune, 0, 2)
-	prev := ' '
-	for _, r := range name {
-		if (prev == ' ' || prev == '\t') && r != ' ' && r != '\t' {
-			if r >= 'a' && r <= 'z' {
-				r -= 32
-			}
-			initials = append(initials, r)
-			if len(initials) == 2 {
-				break
-			}
-		}
-		prev = r
-	}
-	return string(initials)
 }
 
 func nullInt64Ptr(v sql.NullInt64) *int64 {

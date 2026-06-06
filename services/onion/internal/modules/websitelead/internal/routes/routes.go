@@ -2,6 +2,7 @@ package routes
 
 import (
 	"context"
+	"time"
 
 	"github.com/go-chi/chi/v5"
 
@@ -11,13 +12,16 @@ import (
 )
 
 func RegisterRoutes(ctx context.Context, router *chi.Mux, service *application.Service) {
-	http.RegisterPOSTWithValidation[handlers.SubmitRequest, handlers.SubmitResponse](
+	http.RegisterPOSTWithValidationAndMiddleware[handlers.SubmitRequest, handlers.SubmitResponse](
 		ctx, router, handlers.SubmitRoutes(), &handlers.SubmitHandler{Service: service},
+		http.PerRouteRateLimit(10, time.Minute),
 	)
-	http.RegisterPOSTWithValidation[handlers.ContactRequest, handlers.ContactResponse](
+	http.RegisterPOSTWithValidationAndMiddleware[handlers.ContactRequest, handlers.ContactResponse](
 		ctx, router, handlers.ContactRoutes(), &handlers.ContactHandler{Service: service},
+		http.PerRouteRateLimit(10, time.Minute),
 	)
-	http.RegisterPOST[handlers.AnalyticsEventRequest, handlers.AnalyticsEventResponse](
+	http.RegisterPOSTWithValidationAndMiddleware[handlers.AnalyticsEventRequest, handlers.AnalyticsEventResponse](
 		ctx, router, handlers.AnalyticsEventRoutes(), &handlers.AnalyticsEventHandler{},
+		http.PerRouteRateLimit(60, time.Minute),
 	)
 }

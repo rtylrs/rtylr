@@ -19,10 +19,6 @@ const (
 	idempotencyHeader = "Idempotency-Key"
 	idempotencyTTL    = 30 * time.Minute
 	idempotencyMaxLen = 128
-	// idempotencyPendingStatus marks a reservation for an in-flight request in
-	// the distributed (Redis) path. A real HTTP status is always >= 100, so 0
-	// unambiguously means "owned but not yet completed".
-	idempotencyPendingStatus = 0
 )
 
 // idempotencyRecord is what we store in the cache for a completed request.
@@ -82,7 +78,7 @@ func IdempotencyMiddleware(next http.Handler) http.Handler {
 // the client can retry with a fresh attempt.
 func serveIdempotentRedis(w http.ResponseWriter, r *http.Request, next http.Handler, cacheKey string) {
 	rc := cacher.GetRedisCache()
-	pending, _ := json.Marshal(idempotencyRecord{Status: idempotencyPendingStatus})
+	pending := []byte(`{"status":0}`)
 
 	reserved := rc.SetNx(r.Context(), cacheKey, pending, idempotencyTTL)
 	if !reserved {

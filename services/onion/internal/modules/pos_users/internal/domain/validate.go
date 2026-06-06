@@ -24,10 +24,7 @@ func ValidateCreatePOSUserInput(input CreatePOSUserInput) error {
 	if len(pin) < 4 {
 		return fmt.Errorf("PIN must be at least 4 digits")
 	}
-	if err := ValidatePOSUserRole(input.Role); err != nil {
-		return err
-	}
-	return nil
+	return ValidatePOSUserRole(input.Role)
 }
 
 // CanPerformRefund reports whether this user has refund permission.

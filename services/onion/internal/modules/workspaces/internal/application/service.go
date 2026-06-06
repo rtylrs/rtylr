@@ -136,6 +136,21 @@ func (s *Service) IsProjectMember(ctx context.Context, userID, projectID int64) 
 	return s.repo.IsProjectMember(ctx, userID, projectID)
 }
 
+// IsTaskMember reports whether userID can subscribe to a task realtime topic.
+func (s *Service) IsTaskMember(ctx context.Context, userID, taskID int64) bool {
+	task, err := s.repo.GetTaskByID(ctx, taskID)
+	if err != nil {
+		return false
+	}
+	if task.ProjectID != 0 {
+		return s.repo.IsProjectMember(ctx, userID, task.ProjectID)
+	}
+	if task.WorkspaceID != 0 {
+		return s.repo.IsWorkspaceMember(ctx, userID, task.WorkspaceID)
+	}
+	return task.OwnerID == userID
+}
+
 // ─────────────────────────────────────────────
 // Projects
 // ─────────────────────────────────────────────
@@ -518,16 +533,16 @@ func (s *Service) CreateLabel(ctx context.Context, input domain.LabelInput) (dom
 	}, nil
 }
 
-func (s *Service) UpdateLabel(ctx context.Context, id int64, input domain.LabelInput) error {
-	return s.repo.UpdateLabel(ctx, id, input)
+func (s *Service) UpdateLabel(ctx context.Context, id, actorID int64, input domain.LabelInput) error {
+	return s.repo.UpdateLabel(ctx, id, actorID, input)
 }
 
-func (s *Service) DeleteLabel(ctx context.Context, id int64) error {
-	return s.repo.DeleteLabel(ctx, id)
+func (s *Service) DeleteLabel(ctx context.Context, id, actorID int64) error {
+	return s.repo.DeleteLabel(ctx, id, actorID)
 }
 
-func (s *Service) SetTaskLabels(ctx context.Context, taskID int64, labelIDs []int64) error {
-	return s.repo.SetTaskLabels(ctx, taskID, labelIDs)
+func (s *Service) SetTaskLabels(ctx context.Context, taskID, actorID int64, labelIDs []int64) error {
+	return s.repo.SetTaskLabels(ctx, taskID, actorID, labelIDs)
 }
 
 // ─────────────────────────────────────────────
@@ -624,8 +639,8 @@ func (s *Service) UpdateView(ctx context.Context, input domain.UpdateViewInput) 
 	return s.repo.UpdateView(ctx, input)
 }
 
-func (s *Service) DeleteView(ctx context.Context, id int64) error {
-	return s.repo.DeleteView(ctx, id)
+func (s *Service) DeleteView(ctx context.Context, id, actorID int64) error {
+	return s.repo.DeleteView(ctx, id, actorID)
 }
 
 // ─────────────────────────────────────────────
@@ -738,12 +753,12 @@ func (s *Service) UpdateColumn(ctx context.Context, input domain.UpdateProjectCo
 	return s.repo.UpdateColumn(ctx, input)
 }
 
-func (s *Service) DeleteColumn(ctx context.Context, id int64) error {
-	return s.repo.DeleteColumn(ctx, id)
+func (s *Service) DeleteColumn(ctx context.Context, id, actorID int64) error {
+	return s.repo.DeleteColumn(ctx, id, actorID)
 }
 
-func (s *Service) MoveTaskToColumn(ctx context.Context, taskID, columnID int64) error {
-	return s.repo.MoveTaskToColumn(ctx, taskID, columnID)
+func (s *Service) MoveTaskToColumn(ctx context.Context, taskID, columnID, actorID int64) error {
+	return s.repo.MoveTaskToColumn(ctx, taskID, columnID, actorID)
 }
 
 // GetColumnProject returns the project id of the given column, or 0 if
@@ -769,7 +784,7 @@ func (s *Service) GetProjectWorkspace(ctx context.Context, projectID int64) int6
 func (s *Service) EnsureMyTasksProject(
 	ctx context.Context,
 	userID, workspaceID int64,
-) (projectID int64, resolvedWorkspaceID int64, err error) {
+) (projectID, resolvedWorkspaceID int64, err error) {
 	if workspaceID == 0 {
 		wsID, wsErr := s.repo.CreatePersonalWorkspace(ctx, userID)
 		if wsErr != nil {

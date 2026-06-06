@@ -61,6 +61,7 @@ type ProjectColumnInput struct {
 type UpdateProjectColumnInput struct {
 	ID        int64
 	OwnerID   int64
+	ActorID   int64
 	Name      string
 	Color     string
 	SortOrder int

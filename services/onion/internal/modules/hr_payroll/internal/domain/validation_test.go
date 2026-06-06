@@ -94,11 +94,11 @@ func TestValidatePayrollRun_NegativeTotalGross(t *testing.T) {
 
 func TestValidatePayrollEntry_Valid(t *testing.T) {
 	entry := domain.PayrollEntryRecord{
-		BasePay:       2000,
-		OvertimePay:   300,
-		Bonuses:       100,
-		Deductions:    200,
-		NetPay:        2200,
+		BasePay:     2000,
+		OvertimePay: 300,
+		Bonuses:     100,
+		Deductions:  200,
+		NetPay:      2200,
 	}
 	if err := domain.ValidatePayrollEntry(entry); err != nil {
 		t.Errorf("unexpected error: %v", err)

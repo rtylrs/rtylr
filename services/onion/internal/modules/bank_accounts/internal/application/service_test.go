@@ -9,15 +9,15 @@ import (
 )
 
 type mockRepo struct {
-	listResult    []domain.BankAccount
-	listErr       error
-	createID      int64
-	createErr     error
-	totalBalance  float64
-	totalBalErr   error
-	connectedCnt  int64
-	connectedErr  error
-	createGot     struct {
+	listResult   []domain.BankAccount
+	listErr      error
+	createID     int64
+	createErr    error
+	totalBalance float64
+	totalBalErr  error
+	connectedCnt int64
+	connectedErr error
+	createGot    struct {
 		ownerID int64
 		input   domain.BankAccountInput
 	}

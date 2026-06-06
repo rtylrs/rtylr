@@ -3,8 +3,8 @@ package domain
 import "errors"
 
 var (
-	ErrInvalidWidgetType     = errors.New("invalid widget type")
-	ErrInvalidWidgetPosition = errors.New("widget position values must be non-negative")
+	ErrInvalidWidgetType      = errors.New("invalid widget type")
+	ErrInvalidWidgetPosition  = errors.New("widget position values must be non-negative")
 	ErrInvalidWidgetDimension = errors.New("widget width and height must be positive")
 )
 

@@ -3,9 +3,9 @@ package domain
 import "errors"
 
 var (
-	ErrInvalidReportType  = errors.New("invalid report type")
-	ErrMissingDateRange   = errors.New("report date range is required")
-	ErrDateRangeInverted  = errors.New("report date_from must be before date_to")
+	ErrInvalidReportType = errors.New("invalid report type")
+	ErrMissingDateRange  = errors.New("report date range is required")
+	ErrDateRangeInverted = errors.New("report date_from must be before date_to")
 )
 
 // IsValidReportType returns true when the report type is recognised.

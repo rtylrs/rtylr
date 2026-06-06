@@ -7,6 +7,7 @@ import (
 	"time"
 
 	sq "github.com/Masterminds/squirrel"
+
 	"github.com/voxire/onion/internal/modules/hr_time/internal/domain"
 	"github.com/voxire/onion/internal/platform/logger"
 )

@@ -41,8 +41,14 @@ func (h *ClockInHandler) Validate(ctx context.Context, req *ClockInRequest) *err
 	if req.ClockInMethod == "" {
 		return &errorModels.ServerError{Code: http.StatusBadRequest, Message: "clock_in_method is required"}
 	}
+	if !domain.IsValidClockInMethod(req.ClockInMethod) {
+		return &errorModels.ServerError{Code: http.StatusBadRequest, Message: "invalid clock_in_method"}
+	}
+	if req.ClockInMethod != domain.ClockInMethodPin && req.ClockInMethod != domain.ClockInMethodQR {
+		return &errorModels.ServerError{HTTPCode: http.StatusForbidden, Code: http.StatusForbidden, Message: "This clock-in method requires authenticated app access"}
+	}
 
-	if req.ClockInMethod == "qr" {
+	if req.ClockInMethod == domain.ClockInMethodQR {
 		if req.QRToken == "" {
 			return &errorModels.ServerError{Code: http.StatusBadRequest, Message: "qr_token is required for QR clock-in"}
 		}
@@ -51,7 +57,7 @@ func (h *ClockInHandler) Validate(ctx context.Context, req *ClockInRequest) *err
 		}
 	}
 
-	if req.ClockInMethod == "pin" {
+	if req.ClockInMethod == domain.ClockInMethodPin {
 		if req.Pin == "" {
 			return &errorModels.ServerError{Code: http.StatusBadRequest, Message: "pin is required for PIN clock-in"}
 		}
@@ -82,6 +88,9 @@ func (h *ClockInHandler) Serve(ctx context.Context, req *ClockInRequest) (ClockI
 	if err != nil {
 		if errors.Is(err, domain.ErrAlreadyClockedIn) {
 			return ClockInResponse{}, &errorModels.ServerError{HTTPCode: http.StatusConflict, Code: http.StatusConflict, Message: "Already clocked in"}
+		}
+		if errors.Is(err, domain.ErrInvalidClockInMethod) {
+			return ClockInResponse{}, &errorModels.ServerError{HTTPCode: http.StatusBadRequest, Code: http.StatusBadRequest, Message: "Invalid clock-in method"}
 		}
 		if errors.Is(err, domain.ErrClockInMethodDisabled) {
 			return ClockInResponse{}, &errorModels.ServerError{HTTPCode: http.StatusForbidden, Code: http.StatusForbidden, Message: "This clock-in method is not enabled"}

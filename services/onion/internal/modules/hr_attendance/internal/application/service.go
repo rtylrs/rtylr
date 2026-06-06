@@ -24,6 +24,10 @@ func NewService(_ context.Context, db *sql.DB) *Service {
 }
 
 func (s *Service) ClockIn(ctx context.Context, ownerID int64, record domain.AttendanceRecordRecord) (*domain.AttendanceRecordRecord, error) {
+	if !domain.IsValidClockInMethod(record.ClockInMethod) {
+		return nil, domain.ErrInvalidClockInMethod
+	}
+
 	cfg, err := s.repo.GetAttendanceConfig(ctx, ownerID)
 	if err != nil {
 		return nil, err
@@ -153,26 +157,28 @@ func (s *Service) ValidatePIN(ctx context.Context, ownerID, employeeID int64, pi
 
 func (s *Service) validateClockInMethod(cfg *domain.AttendanceConfigRecord, method string) error {
 	switch method {
-	case "app":
+	case domain.ClockInMethodApp:
 		if !cfg.AppEnabled {
 			return domain.ErrClockInMethodDisabled
 		}
-	case "qr":
+	case domain.ClockInMethodQR:
 		if !cfg.QREnabled {
 			return domain.ErrClockInMethodDisabled
 		}
-	case "gps":
+	case domain.ClockInMethodGPS:
 		if !cfg.GPSEnabled {
 			return domain.ErrClockInMethodDisabled
 		}
-	case "pin":
+	case domain.ClockInMethodPin:
 		if !cfg.PinEnabled {
 			return domain.ErrClockInMethodDisabled
 		}
-	case "facial":
+	case domain.ClockInMethodFacial:
 		if !cfg.FacialEnabled {
 			return domain.ErrClockInMethodDisabled
 		}
+	default:
+		return domain.ErrInvalidClockInMethod
 	}
 	return nil
 }

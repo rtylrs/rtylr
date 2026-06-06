@@ -2,18 +2,28 @@ package http
 
 import (
 	"context"
+	"crypto/subtle"
 	"encoding/json"
 	"net/http"
+	"os"
 
 	"github.com/go-chi/chi/v5"
 
 	"github.com/voxire/onion/internal/platform/cache/invalidation"
+	"github.com/voxire/onion/internal/platform/config"
 	"github.com/voxire/onion/internal/platform/logger"
 )
 
 func RegisterCacheRoutes(ctx context.Context, r *chi.Mux) {
 	r.Post("/invalidate-cache", func(w http.ResponseWriter, r *http.Request) {
 		w.Header().Set("Content-Type", "application/json")
+		if !hasValidInternalToken(r) {
+			w.WriteHeader(http.StatusForbidden)
+			if err := json.NewEncoder(w).Encode(map[string]interface{}{"error": "Forbidden"}); err != nil {
+				logger.Ctx(ctx).Warn("Failed to encode forbidden response", logger.Error(err))
+			}
+			return
+		}
 
 		var req invalidation.Request
 		if err := json.NewDecoder(r.Body).Decode(&req); err != nil {
@@ -61,4 +71,19 @@ func RegisterCacheRoutes(ctx context.Context, r *chi.Mux) {
 			logger.Ctx(ctx).Warn("Failed to encode success response", logger.Error(err))
 		}
 	})
+}
+
+func hasValidInternalToken(r *http.Request) bool {
+	var expected string
+	if config.GlobalConfig != nil {
+		expected = config.GlobalConfig.InternalToken
+	} else {
+		expected = os.Getenv("INTERNAL_TOKEN")
+	}
+	if expected == "" {
+		return false
+	}
+
+	actual := r.Header.Get("Internal-Token")
+	return subtle.ConstantTimeCompare([]byte(actual), []byte(expected)) == 1
 }

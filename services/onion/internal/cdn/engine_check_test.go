@@ -30,7 +30,7 @@ func TestCheckMediaEngine(t *testing.T) {
 
 	t.Run("non-executable", func(t *testing.T) {
 		f := filepath.Join(t.TempDir(), "plain")
-		if err := os.WriteFile(f, []byte("x"), 0o644); err != nil {
+		if err := os.WriteFile(f, []byte("x"), 0o600); err != nil {
 			t.Fatal(err)
 		}
 		c := &CDN{mediaEngine: f}
@@ -41,7 +41,10 @@ func TestCheckMediaEngine(t *testing.T) {
 
 	t.Run("executable", func(t *testing.T) {
 		f := filepath.Join(t.TempDir(), "bin")
-		if err := os.WriteFile(f, []byte("#!/bin/sh\n"), 0o755); err != nil {
+		if err := os.WriteFile(f, []byte("#!/bin/sh\n"), 0o600); err != nil {
+			t.Fatal(err)
+		}
+		if err := os.Chmod(f, 0o700); err != nil {
 			t.Fatal(err)
 		}
 		c := &CDN{mediaEngine: f}

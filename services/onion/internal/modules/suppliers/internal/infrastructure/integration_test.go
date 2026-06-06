@@ -2,6 +2,7 @@ package infrastructure_test
 
 import (
 	"context"
+	"errors"
 	"testing"
 
 	"github.com/voxire/onion/internal/modules/suppliers/internal/domain"
@@ -445,7 +446,7 @@ func TestGetSupplierByID_NotFound(t *testing.T) {
 	ctx := context.Background()
 
 	_, err := repo.GetSupplierByID(ctx, testutil.OwnerID, 9999999)
-	if err != domain.ErrSupplierNotFound {
+	if !errors.Is(err, domain.ErrSupplierNotFound) {
 		t.Fatalf("expected ErrSupplierNotFound, got %v", err)
 	}
 }
@@ -457,7 +458,7 @@ func TestGetSupplierByID_WrongOwner_NotFound(t *testing.T) {
 
 	// Supplier 5101 belongs to owner 1001; a different owner should not see it.
 	_, err := repo.GetSupplierByID(ctx, 9999999, 5101)
-	if err != domain.ErrSupplierNotFound {
+	if !errors.Is(err, domain.ErrSupplierNotFound) {
 		t.Fatalf("expected ErrSupplierNotFound for wrong owner, got %v", err)
 	}
 }

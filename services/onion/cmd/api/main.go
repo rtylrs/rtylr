@@ -14,9 +14,9 @@ import (
 
 	"github.com/voxire/onion/internal/modules/accounts"
 	"github.com/voxire/onion/internal/modules/activity"
+	"github.com/voxire/onion/internal/modules/addons"
 	"github.com/voxire/onion/internal/modules/aiquery"
 	"github.com/voxire/onion/internal/modules/aiquota"
-	"github.com/voxire/onion/internal/modules/addons"
 	apikeys "github.com/voxire/onion/internal/modules/api_keys"
 	"github.com/voxire/onion/internal/modules/apps"
 	"github.com/voxire/onion/internal/modules/automations"
@@ -597,14 +597,14 @@ func setupRoutes(ctx context.Context, r *chi.Mux) {
 	// workspace/project membership checks. The rules:
 	//
 	//   user:<id>        → caller must be that user
+	//   owner:<id>       → caller must own or belong to that owner account
 	//   workspace:<id>   → caller must belong to the workspace
 	//   project:<id>     → caller must be a project or workspace member
-	//   task:<id>        → (MVP) allowed; tightening requires a task→
-	//                      project lookup on every subscribe, which we
-	//                      skip until task-detail subscriptions land
+	//   task:<id>        → caller must be able to access the task's project
 	//
 	// Unknown topic schemes are denied by default.
 	workspacesSvc := modules.Workspaces.Service()
+	teamSvc := modules.Team.Service()
 	wsbus.SetDefault(ctx, wsbus.New(func(ctx context.Context, userID int64, topic string) bool {
 		scope, id, ok := wsbus.ParseTopic(topic)
 		if !ok {
@@ -614,19 +614,13 @@ func setupRoutes(ctx context.Context, r *chi.Mux) {
 		case "user":
 			return id == userID
 		case "owner":
-			// Allow if the connected user's businessID matches. businessID is
-			// stored on AuthUser in the client context by each WS handler.
-			authUser, _ := ctx.Value(authPkg.AuthUserKey).(*authPkg.AuthUser)
-			if authUser == nil {
-				return false
-			}
-			return authUser.BusinessID == id
+			return teamSvc.CanAccessOwner(ctx, userID, id)
 		case "workspace":
 			return workspacesSvc.IsWorkspaceMember(ctx, userID, id)
 		case "project":
 			return workspacesSvc.IsProjectMember(ctx, userID, id)
 		case "task":
-			return true
+			return workspacesSvc.IsTaskMember(ctx, userID, id)
 		default:
 			return false
 		}

@@ -98,16 +98,17 @@ func (r *Repository) UpdateCycle(ctx context.Context, input domain.UpdateCycleIn
 		parts = append(parts, "end_date = ?")
 		args = append(args, input.EndDate.Format("2006-01-02"))
 	}
-	args = append(args, input.ID)
+	args = append(args, input.ID, input.ActorID, input.ActorID)
 
-	_, err := r.pool.ExecContext(ctx,
-		fmt.Sprintf("UPDATE flow_cycles SET %s WHERE id = ?", strings.Join(parts, ", ")),
+	res, err := r.pool.ExecContext(ctx,
+		fmt.Sprintf("UPDATE flow_cycles SET %s WHERE id = ? AND %s", strings.Join(parts, ", "), workspaceMemberPredicate("flow_cycles")),
 		args...,
 	)
 	if err != nil {
 		logger.Ctx(ctx).Error("UpdateCycle failed", logger.Error(err))
+		return err
 	}
-	return err
+	return requireAffected(res)
 }
 
 func nullInt64PtrFromPtr(v *int64) sql.NullInt64 {
@@ -213,16 +214,17 @@ func (r *Repository) UpdateMilestone(ctx context.Context, input domain.UpdateMil
 		parts = append(parts, "due_date = ?")
 		args = append(args, input.DueDate.Format("2006-01-02"))
 	}
-	args = append(args, input.ID)
+	args = append(args, input.ID, input.ActorID, input.ActorID)
 
-	_, err := r.pool.ExecContext(ctx,
-		fmt.Sprintf("UPDATE flow_milestones SET %s WHERE id = ?", strings.Join(parts, ", ")),
+	res, err := r.pool.ExecContext(ctx,
+		fmt.Sprintf("UPDATE flow_milestones SET %s WHERE id = ? AND %s", strings.Join(parts, ", "), workspaceMemberPredicate("flow_milestones")),
 		args...,
 	)
 	if err != nil {
 		logger.Ctx(ctx).Error("UpdateMilestone failed", logger.Error(err))
+		return err
 	}
-	return err
+	return requireAffected(res)
 }
 
 // ─────────────────────────────────────────────
@@ -293,8 +295,8 @@ func (r *Repository) UpdateView(ctx context.Context, input domain.UpdateViewInpu
 	if err != nil {
 		return err
 	}
-	_, err = r.pool.ExecContext(ctx,
-		`UPDATE flow_views SET name = ?, icon = ?, filters = ?, group_by = ?, sort_by = ?, sort_dir = ? WHERE id = ?`,
+	res, err := r.pool.ExecContext(ctx,
+		fmt.Sprintf(`UPDATE flow_views SET name = ?, icon = ?, filters = ?, group_by = ?, sort_by = ?, sort_dir = ? WHERE id = ? AND %s`, workspaceMemberPredicate("flow_views")),
 		input.Name,
 		sql.NullString{String: input.Icon, Valid: input.Icon != ""},
 		filtersJSON,
@@ -302,19 +304,41 @@ func (r *Repository) UpdateView(ctx context.Context, input domain.UpdateViewInpu
 		sql.NullString{String: input.SortBy, Valid: input.SortBy != ""},
 		sql.NullString{String: input.SortDir, Valid: input.SortDir != ""},
 		input.ID,
+		input.ActorID,
+		input.ActorID,
 	)
 	if err != nil {
 		logger.Ctx(ctx).Error("UpdateView failed", logger.Error(err))
+		return err
 	}
-	return err
+	return requireAffected(res)
 }
 
-func (r *Repository) DeleteView(ctx context.Context, id int64) error {
-	_, err := r.pool.ExecContext(ctx, `DELETE FROM flow_views WHERE id = ?`, id)
+func (r *Repository) DeleteView(ctx context.Context, id, actorID int64) error {
+	res, err := r.pool.ExecContext(ctx, fmt.Sprintf(`DELETE FROM flow_views WHERE id = ? AND %s`, workspaceMemberPredicate("flow_views")), id, actorID, actorID)
 	if err != nil {
 		logger.Ctx(ctx).Error("DeleteView failed", logger.Error(err))
+		return err
 	}
-	return err
+	return requireAffected(res)
+}
+
+func workspaceMemberPredicate(table string) string {
+	return fmt.Sprintf(`(
+		EXISTS (SELECT 1 FROM flow_workspaces w WHERE w.id = %s.workspace_id AND w.owner_id = ?)
+		OR EXISTS (SELECT 1 FROM flow_workspace_members wm WHERE wm.workspace_id = %s.workspace_id AND wm.user_id = ?)
+	)`, table, table)
+}
+
+func requireAffected(res sql.Result) error {
+	affected, err := res.RowsAffected()
+	if err != nil {
+		return err
+	}
+	if affected == 0 {
+		return domain.ErrUnauthorized
+	}
+	return nil
 }
 
 // ─────────────────────────────────────────────

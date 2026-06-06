@@ -388,6 +388,25 @@ func (r *Repository) GetBusinessByID(ctx context.Context, businessID int64) (str
 	return row.Name, row.OwnerID, nil
 }
 
+func (r *Repository) GetBusinessIDByOwnerID(ctx context.Context, ownerID int64) (int64, error) {
+	q, args, err := sq.
+		Select("id").
+		From("businesses").
+		Where(sq.Eq{"owner_id": ownerID}).
+		Limit(1).
+		PlaceholderFormat(sq.Question).
+		ToSql()
+	if err != nil {
+		return 0, err
+	}
+
+	var businessID int64
+	if err := r.pool.QueryRowContext(ctx, q, args...).Scan(&businessID); err != nil {
+		return 0, err
+	}
+	return businessID, nil
+}
+
 // ─── Access Requests ────────────────────────────────────────────────────────
 
 func (r *Repository) CreateAccessRequest(ctx context.Context, businessID, userID int64, app string) error {
@@ -610,6 +629,9 @@ func (r *Repository) resourcePermissionsForGroups(ctx context.Context, groupIDs 
 		}
 		p.PermissionLevel = domain.PermissionLevel(level)
 		result[groupID] = append(result[groupID], p)
+	}
+	if err := rows.Err(); err != nil {
+		logger.Ctx(ctx).Error("Failed to iterate group resource permissions", logger.Error(err))
 	}
 	return result
 }

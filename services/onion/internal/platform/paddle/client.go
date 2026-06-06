@@ -247,6 +247,8 @@ func CreateTransaction(ctx context.Context, ownerID int64, priceID, customerEmai
 	return txResp.Data.Checkout.URL, nil
 }
 
+const webhookSignatureTolerance = 5 * time.Minute
+
 // VerifyWebhookSignature validates the Paddle-Signature header against the raw body.
 // Returns nil on success, error if the signature is invalid.
 //
@@ -255,6 +257,9 @@ func CreateTransaction(ctx context.Context, ownerID int64, priceID, customerEmai
 func VerifyWebhookSignature(rawBody []byte, signatureHeader string) error {
 	secret := config.GetPaddleWebhookSecret()
 	if secret == "" {
+		if config.IsProduction() {
+			return errors.New("PADDLE_WEBHOOK_SECRET is required in production")
+		}
 		// No secret configured — skip verification in development.
 		return nil
 	}
@@ -271,6 +276,15 @@ func VerifyWebhookSignature(rawBody []byte, signatureHeader string) error {
 
 	if ts == "" || h1 == "" {
 		return errors.New("invalid Paddle-Signature header format")
+	}
+
+	timestamp, err := strconv.ParseInt(ts, 10, 64)
+	if err != nil {
+		return errors.New("invalid Paddle-Signature timestamp")
+	}
+	signedAt := time.Unix(timestamp, 0)
+	if delta := time.Since(signedAt); delta > webhookSignatureTolerance || delta < -webhookSignatureTolerance {
+		return errors.New("Paddle-Signature timestamp outside tolerance")
 	}
 
 	// Compute HMAC-SHA256 of "ts:rawBody"

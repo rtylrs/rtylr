@@ -4,7 +4,7 @@ import "fmt"
 
 // ChangeResult holds the result of a cash payment calculation.
 type ChangeResult struct {
-	AmountDue float64
+	AmountDue  float64
 	AmountPaid float64
 	Change     float64
 }

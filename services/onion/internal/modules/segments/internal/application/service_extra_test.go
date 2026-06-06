@@ -34,7 +34,9 @@ func TestCreate_PassesInputThrough(t *testing.T) {
 	m := &mockRepo{createID: 1}
 	s := &Service{repo: m}
 	_, _ = s.Create(context.Background(), domain.SegmentInput{OwnerID: 5, Name: "Frequent Buyers"})
-	// No panic means input was forwarded correctly
+	if m.createInput.OwnerID != 5 || m.createInput.Name != "Frequent Buyers" {
+		t.Errorf("create input = %+v", m.createInput)
+	}
 }
 
 func TestUpdate_HappyPath(t *testing.T) {

@@ -340,16 +340,13 @@ func TestCreate_ThenList_FindsNewAccount(t *testing.T) {
 	repo := infrastructure.NewRepository(db)
 	ctx := context.Background()
 
-	beforeCount := 0
-	{
-		items, err := repo.List(ctx, testutil.OwnerID)
-		if err != nil {
-			t.Fatalf("List before: %v", err)
-		}
-		beforeCount = len(items)
+	items, err := repo.List(ctx, testutil.OwnerID)
+	if err != nil {
+		t.Fatalf("List before: %v", err)
 	}
+	beforeCount := len(items)
 
-	_, err := repo.Create(ctx, testutil.OwnerID, domain.BankAccountInput{
+	_, err = repo.Create(ctx, testutil.OwnerID, domain.BankAccountInput{
 		Name:     "New Account For List Check",
 		Balance:  0,
 		Currency: "USD",
@@ -358,7 +355,7 @@ func TestCreate_ThenList_FindsNewAccount(t *testing.T) {
 		t.Fatalf("Create: %v", err)
 	}
 
-	items, err := repo.List(ctx, testutil.OwnerID)
+	items, err = repo.List(ctx, testutil.OwnerID)
 	if err != nil {
 		t.Fatalf("List after: %v", err)
 	}

@@ -6,15 +6,15 @@ import (
 )
 
 var (
-	ErrEmptyCycleName       = errors.New("review cycle name is required")
-	ErrInvalidCycleStatus   = errors.New("invalid review cycle status")
-	ErrInvalidCycleType     = errors.New("invalid review cycle type")
-	ErrInvalidReviewType    = errors.New("invalid review type")
-	ErrEmptyGoalTitle       = errors.New("goal title is required")
-	ErrNegativeGoalWeight   = errors.New("goal weight must be non-negative")
-	ErrInvalidGoalStatus    = errors.New("invalid goal status")
-	ErrInvalidRatingScale   = errors.New("invalid rating scale type")
-	ErrInvalidRatingRange   = errors.New("rating min must be less than rating max")
+	ErrEmptyCycleName     = errors.New("review cycle name is required")
+	ErrInvalidCycleStatus = errors.New("invalid review cycle status")
+	ErrInvalidCycleType   = errors.New("invalid review cycle type")
+	ErrInvalidReviewType  = errors.New("invalid review type")
+	ErrEmptyGoalTitle     = errors.New("goal title is required")
+	ErrNegativeGoalWeight = errors.New("goal weight must be non-negative")
+	ErrInvalidGoalStatus  = errors.New("invalid goal status")
+	ErrInvalidRatingScale = errors.New("invalid rating scale type")
+	ErrInvalidRatingRange = errors.New("rating min must be less than rating max")
 )
 
 // IsValidCycleStatus returns true when the status is recognised.

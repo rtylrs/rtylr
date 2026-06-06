@@ -159,7 +159,7 @@ func (h *GenerateTextStreamHandler) ServeHTTP(w http.ResponseWriter, r *http.Req
 		if !allowed {
 			log.Info("AI request blocked by quota",
 				logger.Any("owner_business_id", businessID), logger.String("plan", plan))
-			h.writeQuotaExceeded(w, plan, allowance, used, remaining)
+			h.writeQuotaExceeded(ctx, w, plan, allowance, used, remaining)
 			return
 		}
 	}
@@ -207,17 +207,28 @@ func (h *GenerateTextStreamHandler) ServeHTTP(w http.ResponseWriter, r *http.Req
 
 // writeQuotaExceeded reports that the tenant has spent its monthly AI allowance.
 // 402 Payment Required signals "upgrade to continue".
-func (h *GenerateTextStreamHandler) writeQuotaExceeded(w http.ResponseWriter, plan string, allowance, used, remaining int64) {
+type quotaExceededResponse struct {
+	Error           string `json:"error"`
+	Message         string `json:"message"`
+	Plan            string `json:"plan"`
+	AllowanceTokens int64  `json:"allowance_tokens"`
+	UsedTokens      int64  `json:"used_tokens"`
+	RemainingTokens int64  `json:"remaining_tokens"`
+}
+
+func (h *GenerateTextStreamHandler) writeQuotaExceeded(ctx context.Context, w http.ResponseWriter, plan string, allowance, used, remaining int64) {
 	w.Header().Set("Content-Type", "application/json")
 	w.WriteHeader(http.StatusPaymentRequired)
-	_ = json.NewEncoder(w).Encode(map[string]any{
-		"error":            "ai_quota_exceeded",
-		"message":          "Your team's monthly AI limit has been reached. Upgrade your plan to keep using Caret.",
-		"plan":             plan,
-		"allowance_tokens": allowance,
-		"used_tokens":      used,
-		"remaining_tokens": remaining,
-	})
+	if err := json.NewEncoder(w).Encode(quotaExceededResponse{
+		Error:           "ai_quota_exceeded",
+		Message:         "Your team's monthly AI limit has been reached. Upgrade your plan to keep using Caret.",
+		Plan:            plan,
+		AllowanceTokens: allowance,
+		UsedTokens:      used,
+		RemainingTokens: remaining,
+	}); err != nil {
+		logger.Ctx(ctx).Error("Failed to write quota exceeded response", logger.Error(err))
+	}
 }
 
 // recordUsage meters consumed tokens against the tenant's quota. It runs detached

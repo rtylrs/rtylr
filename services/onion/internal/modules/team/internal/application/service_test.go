@@ -2,6 +2,7 @@ package application
 
 import (
 	"context"
+	"errors"
 	"testing"
 
 	"github.com/voxire/onion/internal/modules/team/internal/domain"
@@ -86,6 +87,28 @@ func TestInviteUser_EmptyEmailStringFails(t *testing.T) {
 	}
 }
 
+func TestInviteUser_RejectsOwnerRole(t *testing.T) {
+	s := &Service{}
+	_, _, err := s.InviteUser(context.Background(), 1, 0, domain.InviteUserInput{
+		Email: "new-owner@example.com",
+		Role:  domain.RoleOwner,
+	})
+	if !errors.Is(err, domain.ErrForbidden) {
+		t.Fatalf("expected ErrForbidden for owner invite role, got %v", err)
+	}
+}
+
+func TestInviteUser_RejectsInvalidRole(t *testing.T) {
+	s := &Service{}
+	_, _, err := s.InviteUser(context.Background(), 1, 0, domain.InviteUserInput{
+		Email: "bad-role@example.com",
+		Role:  "super_admin",
+	})
+	if err == nil {
+		t.Fatal("expected error for invalid invite role")
+	}
+}
+
 func TestPaginateTeam_DefaultsPage(t *testing.T) {
 	limit, offset := paginateTeam(0, 10)
 	if limit != 10 || offset != 0 {
@@ -140,9 +163,9 @@ func TestInviteUser_ErrorMessage(t *testing.T) {
 
 func TestGetBusinessInfo_ZeroBusinessID(t *testing.T) {
 	s := &Service{}
-	name, isOwner := s.GetBusinessInfo(context.Background(), 0, 1)
-	if name != "" || isOwner {
-		t.Errorf("expected empty name and not owner for businessID=0: got name=%q isOwner=%v", name, isOwner)
+	name, ownerID, isOwner := s.GetBusinessInfo(context.Background(), 0, 1)
+	if name != "" || ownerID != 0 || isOwner {
+		t.Errorf("expected empty name, zero owner, and not owner for businessID=0: got name=%q ownerID=%d isOwner=%v", name, ownerID, isOwner)
 	}
 }
 

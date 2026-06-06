@@ -6,8 +6,8 @@ import (
 
 	"github.com/voxire/onion/internal/modules/memory/internal/application"
 	"github.com/voxire/onion/internal/modules/memory/internal/domain"
-	errorModels "github.com/voxire/onion/internal/platform/errors"
 	authPkg "github.com/voxire/onion/internal/platform/auth"
+	errorModels "github.com/voxire/onion/internal/platform/errors"
 )
 
 func MemoryRoutes() []string {
@@ -35,13 +35,6 @@ type MemoryHandler struct {
 }
 
 func (h *MemoryHandler) Validate(_ context.Context, req *MemoryRequest) *errorModels.ServerError {
-	if req.UserID <= 0 {
-		return &errorModels.ServerError{
-			Code:    http.StatusBadRequest,
-			Message: "User ID is required",
-		}
-	}
-
 	if req.SessionID == "" {
 		return &errorModels.ServerError{
 			Code:    http.StatusBadRequest,

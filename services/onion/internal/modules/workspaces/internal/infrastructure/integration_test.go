@@ -533,7 +533,7 @@ func TestWorkspaces_CreateLabel_ReturnsPositiveID(t *testing.T) {
 	if labelID <= 0 {
 		t.Errorf("expected positive label ID, got %d", labelID)
 	}
-	t.Cleanup(func() { _ = repo.DeleteLabel(ctx, labelID) })
+	t.Cleanup(func() { _ = repo.DeleteLabel(ctx, labelID, testutil.OwnerID) })
 }
 
 func TestWorkspaces_GetLabelsByWorkspace_ReturnsLabel(t *testing.T) {
@@ -555,7 +555,7 @@ func TestWorkspaces_GetLabelsByWorkspace_ReturnsLabel(t *testing.T) {
 	if err != nil {
 		t.Fatalf("CreateLabel: %v", err)
 	}
-	t.Cleanup(func() { _ = repo.DeleteLabel(ctx, labelID) })
+	t.Cleanup(func() { _ = repo.DeleteLabel(ctx, labelID, testutil.OwnerID) })
 
 	labels, err := repo.GetLabelsByWorkspace(ctx, wsID)
 	if err != nil {
@@ -637,7 +637,7 @@ func TestWorkspaces_CreateColumn_ReturnsPositiveID(t *testing.T) {
 	if colID <= 0 {
 		t.Errorf("expected positive column ID, got %d", colID)
 	}
-	t.Cleanup(func() { _ = repo.DeleteColumn(ctx, colID) })
+	t.Cleanup(func() { _ = repo.DeleteColumn(ctx, colID, testutil.OwnerID) })
 }
 
 func TestWorkspaces_LogActivity_NoError(t *testing.T) {

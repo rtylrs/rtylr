@@ -2,6 +2,7 @@ package handlers
 
 import (
 	"context"
+	"errors"
 	"net/http"
 
 	"github.com/voxire/onion/internal/modules/workspaces/internal/application"
@@ -184,7 +185,7 @@ func (h *UpdateLabelHandler) Validate(_ context.Context, req *UpdateLabelRequest
 }
 
 func (h *UpdateLabelHandler) Serve(ctx context.Context, req *UpdateLabelRequest) (UpdateLabelResponse, *errorModels.ServerError) {
-	_, ok := authPkg.GetAuthUser(ctx)
+	authUser, ok := authPkg.GetAuthUser(ctx)
 	if !ok {
 		return UpdateLabelResponse{}, errorModels.PermissionDeniedServerError()
 	}
@@ -194,7 +195,10 @@ func (h *UpdateLabelHandler) Serve(ctx context.Context, req *UpdateLabelRequest)
 		Color: req.Color,
 	}
 
-	if err := h.FlowService.UpdateLabel(ctx, req.ID, input); err != nil {
+	if err := h.FlowService.UpdateLabel(ctx, req.ID, authUser.UserID, input); err != nil {
+		if errors.Is(err, domain.ErrUnauthorized) {
+			return UpdateLabelResponse{}, errorModels.PermissionDeniedServerError()
+		}
 		return UpdateLabelResponse{}, &errorModels.ServerError{
 			Code:    http.StatusInternalServerError,
 			Message: "Failed to update label",
@@ -228,12 +232,15 @@ func (h *DeleteLabelHandler) Validate(_ context.Context, req *DeleteLabelRequest
 }
 
 func (h *DeleteLabelHandler) Serve(ctx context.Context, req *DeleteLabelRequest) (DeleteLabelResponse, *errorModels.ServerError) {
-	_, ok := authPkg.GetAuthUser(ctx)
+	authUser, ok := authPkg.GetAuthUser(ctx)
 	if !ok {
 		return DeleteLabelResponse{}, errorModels.PermissionDeniedServerError()
 	}
 
-	if err := h.FlowService.DeleteLabel(ctx, req.ID); err != nil {
+	if err := h.FlowService.DeleteLabel(ctx, req.ID, authUser.UserID); err != nil {
+		if errors.Is(err, domain.ErrUnauthorized) {
+			return DeleteLabelResponse{}, errorModels.PermissionDeniedServerError()
+		}
 		return DeleteLabelResponse{}, &errorModels.ServerError{
 			Code:    http.StatusInternalServerError,
 			Message: "Failed to delete label",
@@ -268,7 +275,7 @@ func (h *SetTaskLabelsHandler) Validate(_ context.Context, req *SetTaskLabelsReq
 }
 
 func (h *SetTaskLabelsHandler) Serve(ctx context.Context, req *SetTaskLabelsRequest) (SetTaskLabelsResponse, *errorModels.ServerError) {
-	_, ok := authPkg.GetAuthUser(ctx)
+	authUser, ok := authPkg.GetAuthUser(ctx)
 	if !ok {
 		return SetTaskLabelsResponse{}, errorModels.PermissionDeniedServerError()
 	}
@@ -278,7 +285,10 @@ func (h *SetTaskLabelsHandler) Serve(ctx context.Context, req *SetTaskLabelsRequ
 		labelIDs = []int64{}
 	}
 
-	if err := h.FlowService.SetTaskLabels(ctx, req.TaskID, labelIDs); err != nil {
+	if err := h.FlowService.SetTaskLabels(ctx, req.TaskID, authUser.UserID, labelIDs); err != nil {
+		if errors.Is(err, domain.ErrUnauthorized) {
+			return SetTaskLabelsResponse{}, errorModels.PermissionDeniedServerError()
+		}
 		return SetTaskLabelsResponse{}, &errorModels.ServerError{
 			Code:    http.StatusInternalServerError,
 			Message: "Failed to set task labels",

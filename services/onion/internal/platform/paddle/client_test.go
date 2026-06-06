@@ -1,0 +1,74 @@
+package paddle
+
+import (
+	"crypto/hmac"
+	"crypto/sha256"
+	"encoding/hex"
+	"strconv"
+	"testing"
+	"time"
+
+	"github.com/voxire/onion/internal/platform/config"
+)
+
+func signedWebhookHeader(secret string, body []byte, ts time.Time) string {
+	timestamp := strconv.FormatInt(ts.Unix(), 10)
+	mac := hmac.New(sha256.New, []byte(secret))
+	mac.Write([]byte(timestamp + ":"))
+	mac.Write(body)
+	return "ts=" + timestamp + ";h1=" + hex.EncodeToString(mac.Sum(nil))
+}
+
+func TestVerifyWebhookSignatureRequiresSecretInProduction(t *testing.T) {
+	old := config.GlobalConfig
+	config.GlobalConfig = nil
+	t.Cleanup(func() { config.GlobalConfig = old })
+	t.Setenv("APP_ENV", "production")
+	t.Setenv("PADDLE_WEBHOOK_SECRET", "")
+
+	if err := VerifyWebhookSignature([]byte(`{}`), ""); err == nil {
+		t.Fatal("expected missing secret to fail in production")
+	}
+}
+
+func TestVerifyWebhookSignatureAllowsMissingSecretOutsideProduction(t *testing.T) {
+	old := config.GlobalConfig
+	config.GlobalConfig = nil
+	t.Cleanup(func() { config.GlobalConfig = old })
+	t.Setenv("APP_ENV", "development")
+	t.Setenv("PADDLE_WEBHOOK_SECRET", "")
+
+	if err := VerifyWebhookSignature([]byte(`{}`), ""); err != nil {
+		t.Fatalf("expected missing dev secret to be allowed, got %v", err)
+	}
+}
+
+func TestVerifyWebhookSignatureValidatesHMAC(t *testing.T) {
+	old := config.GlobalConfig
+	config.GlobalConfig = nil
+	t.Cleanup(func() { config.GlobalConfig = old })
+	t.Setenv("APP_ENV", "production")
+	t.Setenv("PADDLE_WEBHOOK_SECRET", "whsec_test")
+
+	body := []byte(`{"event_type":"subscription.updated"}`)
+	header := signedWebhookHeader("whsec_test", body, time.Now())
+
+	if err := VerifyWebhookSignature(body, header); err != nil {
+		t.Fatalf("expected valid signature, got %v", err)
+	}
+}
+
+func TestVerifyWebhookSignatureRejectsStaleTimestamp(t *testing.T) {
+	old := config.GlobalConfig
+	config.GlobalConfig = nil
+	t.Cleanup(func() { config.GlobalConfig = old })
+	t.Setenv("APP_ENV", "production")
+	t.Setenv("PADDLE_WEBHOOK_SECRET", "whsec_test")
+
+	body := []byte(`{"event_type":"subscription.updated"}`)
+	header := signedWebhookHeader("whsec_test", body, time.Now().Add(-10*time.Minute))
+
+	if err := VerifyWebhookSignature(body, header); err == nil {
+		t.Fatal("expected stale signature timestamp to fail")
+	}
+}

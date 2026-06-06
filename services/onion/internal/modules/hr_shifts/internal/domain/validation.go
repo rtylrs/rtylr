@@ -6,11 +6,11 @@ import (
 )
 
 var (
-	ErrEmptyShiftName    = errors.New("shift name is required")
-	ErrEmptyShiftTime    = errors.New("shift start and end times are required")
-	ErrEmptyAssignDate   = errors.New("assignment date is required")
-	ErrZeroShiftID       = errors.New("shift ID must be non-zero")
-	ErrZeroEmployeeID    = errors.New("employee ID must be non-zero")
+	ErrEmptyShiftName  = errors.New("shift name is required")
+	ErrEmptyShiftTime  = errors.New("shift start and end times are required")
+	ErrEmptyAssignDate = errors.New("assignment date is required")
+	ErrZeroShiftID     = errors.New("shift ID must be non-zero")
+	ErrZeroEmployeeID  = errors.New("employee ID must be non-zero")
 )
 
 // IsValidAssignmentStatus returns true when the status is recognised.

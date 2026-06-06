@@ -3,9 +3,9 @@ package domain
 import "errors"
 
 var (
-	ErrInvalidClockInMethod   = errors.New("invalid clock-in method")
+	ErrInvalidClockInMethod    = errors.New("invalid clock-in method")
 	ErrInvalidAttendanceStatus = errors.New("invalid attendance status")
-	ErrNegativeDuration       = errors.New("duration minutes must be non-negative")
+	ErrNegativeDuration        = errors.New("duration minutes must be non-negative")
 )
 
 // IsValidClockInMethod returns true when the method is recognised.

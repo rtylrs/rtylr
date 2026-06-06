@@ -283,6 +283,9 @@ func (h *AddWorkspaceMemberHandler) Serve(ctx context.Context, req *AddWorkspace
 	if !ok {
 		return AddWorkspaceMemberResponse{}, errorModels.PermissionDeniedServerError()
 	}
+	if !h.FlowService.IsWorkspaceMember(ctx, authUser.UserID, req.WorkspaceID.Int64()) {
+		return AddWorkspaceMemberResponse{}, errorModels.PermissionDeniedServerError()
+	}
 
 	input := domain.AddWorkspaceMemberInput{
 		WorkspaceID: req.WorkspaceID.Int64(),
@@ -338,6 +341,9 @@ func (h *RemoveWorkspaceMemberHandler) Validate(_ context.Context, req *RemoveWo
 func (h *RemoveWorkspaceMemberHandler) Serve(ctx context.Context, req *RemoveWorkspaceMemberRequest) (RemoveWorkspaceMemberResponse, *errorModels.ServerError) {
 	authUser, ok := authPkg.GetAuthUser(ctx)
 	if !ok {
+		return RemoveWorkspaceMemberResponse{}, errorModels.PermissionDeniedServerError()
+	}
+	if !h.FlowService.IsWorkspaceMember(ctx, authUser.UserID, req.WorkspaceID.Int64()) {
 		return RemoveWorkspaceMemberResponse{}, errorModels.PermissionDeniedServerError()
 	}
 

@@ -19,12 +19,15 @@ type mockRepo struct {
 func (m *mockRepo) List(_ context.Context, _ int64) ([]domain.Combo, error) {
 	return m.list, nil
 }
+
 func (m *mockRepo) Create(_ context.Context, _ int64, _ domain.ComboInput) (int64, error) {
 	return m.createID, m.createErr
 }
+
 func (m *mockRepo) Update(_ context.Context, _, _ int64, _ domain.ComboInput) error {
 	return m.updateErr
 }
+
 func (m *mockRepo) Delete(_ context.Context, _, _ int64) error {
 	return m.deleteErr
 }

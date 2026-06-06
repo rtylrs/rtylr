@@ -74,4 +74,3 @@ func TestDeleteSegment_ThenNotFound(t *testing.T) {
 		t.Fatal("expected error after delete, got nil")
 	}
 }
-

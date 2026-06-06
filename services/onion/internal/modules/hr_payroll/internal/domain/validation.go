@@ -6,10 +6,10 @@ import (
 )
 
 var (
-	ErrInvalidPayrollStatus  = errors.New("invalid payroll run status")
-	ErrInvalidPeriodType     = errors.New("invalid payroll period type")
-	ErrNegativePayAmount     = errors.New("pay amounts must be non-negative")
-	ErrEmptyPeriodDates      = errors.New("period start and end dates are required")
+	ErrInvalidPayrollStatus = errors.New("invalid payroll run status")
+	ErrInvalidPeriodType    = errors.New("invalid payroll period type")
+	ErrNegativePayAmount    = errors.New("pay amounts must be non-negative")
+	ErrEmptyPeriodDates     = errors.New("period start and end dates are required")
 )
 
 // IsValidPayrollStatus returns true when the status is recognised.

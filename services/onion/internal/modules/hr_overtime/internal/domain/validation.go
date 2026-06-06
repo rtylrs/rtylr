@@ -6,10 +6,10 @@ import (
 )
 
 var (
-	ErrInvalidOvertimeStatus  = errors.New("invalid overtime request status")
-	ErrNegativeExtraMinutes   = errors.New("planned extra minutes must be positive")
-	ErrNegativeMultiplier     = errors.New("overtime multiplier must be positive")
-	ErrEmptyOvertimeDate      = errors.New("overtime date is required")
+	ErrInvalidOvertimeStatus = errors.New("invalid overtime request status")
+	ErrNegativeExtraMinutes  = errors.New("planned extra minutes must be positive")
+	ErrNegativeMultiplier    = errors.New("overtime multiplier must be positive")
+	ErrEmptyOvertimeDate     = errors.New("overtime date is required")
 )
 
 // IsValidOvertimeStatus returns true when the status is recognised.

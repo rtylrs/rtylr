@@ -6,12 +6,12 @@ import (
 )
 
 var (
-	ErrEmptyTemplateName     = errors.New("checklist template name is required")
-	ErrInvalidTriggerType    = errors.New("invalid trigger type")
-	ErrEmptyItemTitle        = errors.New("checklist item title is required")
+	ErrEmptyTemplateName      = errors.New("checklist template name is required")
+	ErrInvalidTriggerType     = errors.New("invalid trigger type")
+	ErrEmptyItemTitle         = errors.New("checklist item title is required")
 	ErrInvalidChecklistStatus = errors.New("invalid checklist status")
-	ErrInvalidItemStatus     = errors.New("invalid checklist item status")
-	ErrInvalidAssigneeRole   = errors.New("invalid assignee role")
+	ErrInvalidItemStatus      = errors.New("invalid checklist item status")
+	ErrInvalidAssigneeRole    = errors.New("invalid assignee role")
 )
 
 // IsValidTriggerType returns true when the trigger type is recognised.

@@ -2,6 +2,7 @@ package handlers
 
 import (
 	"context"
+	"errors"
 	"net/http"
 	"strconv"
 	"time"
@@ -163,20 +164,27 @@ func (r *UpdateCycleRequest) Validate() *errorModels.ServerError { return nil }
 type UpdateCycleHandler struct{ FlowService *application.Service }
 
 func (h *UpdateCycleHandler) Serve(ctx context.Context, r *UpdateCycleRequest) (UpdateCycleResponse, *errorModels.ServerError) {
-	_, ok := authPkg.GetAuthUser(ctx)
+	authUser, ok := authPkg.GetAuthUser(ctx)
 	if !ok {
 		return UpdateCycleResponse{}, errorModels.PermissionDeniedServerError()
 	}
 
-	id, _ := strconv.ParseInt(r.ID, 10, 64)
+	id, err := strconv.ParseInt(r.ID, 10, 64)
+	if err != nil || id <= 0 {
+		return UpdateCycleResponse{}, &errorModels.ServerError{Code: http.StatusBadRequest, Message: "Invalid cycle id"}
+	}
 	end, _ := time.Parse("2006-01-02", r.EndDate)
 
 	if err := h.FlowService.UpdateCycle(ctx, domain.UpdateCycleInput{
 		ID:      id,
+		ActorID: authUser.UserID,
 		Name:    r.Name,
 		Status:  r.Status,
 		EndDate: end,
 	}); err != nil {
+		if errors.Is(err, domain.ErrUnauthorized) {
+			return UpdateCycleResponse{}, errorModels.PermissionDeniedServerError()
+		}
 		return UpdateCycleResponse{}, &errorModels.ServerError{Code: http.StatusInternalServerError, Message: err.Error()}
 	}
 	return UpdateCycleResponse{}, nil

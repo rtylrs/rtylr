@@ -4,20 +4,12 @@ import (
 	"net/http"
 	"regexp"
 	"strings"
+
+	"github.com/voxire/onion/internal/platform/origins"
 )
 
 func getAllowedOrigins() []*regexp.Regexp {
-	return []*regexp.Regexp{
-		regexp.MustCompile(`^http://localhost(:\d*)?$`),
-		regexp.MustCompile(`^http://voxire\.com$`),
-		regexp.MustCompile(`^https://voxire\.com$`),
-		regexp.MustCompile(`^https?://.*\.voxire\.com$`),
-		regexp.MustCompile(`^http://voxelect\.com$`),
-		regexp.MustCompile(`^https://voxelect\.com$`),
-		regexp.MustCompile(`^https?://.*\.voxelect\.com$`),
-		regexp.MustCompile(`^https?://.*\.voxire\.tech$`),
-		regexp.MustCompile(`^https?://(.*\.)?rtylr\.com$`),
-	}
+	return origins.AllowedPatterns()
 }
 
 func allowedHeaders() []string {

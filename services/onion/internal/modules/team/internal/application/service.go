@@ -163,7 +163,7 @@ func (s *Service) computeMyProfile(ctx context.Context, userID, businessID int64
 		apps = []string{}
 	}
 
-	businessName, isOwner := s.GetBusinessInfo(ctx, businessID, userID)
+	businessName, businessOwnerID, isOwner := s.GetBusinessInfo(ctx, businessID, userID)
 
 	var planSlug, subscriptionStatus string
 	if isOwner {
@@ -182,7 +182,7 @@ func (s *Service) computeMyProfile(ctx context.Context, userID, businessID int64
 
 	effectiveResources := map[string]string{}
 	if !isOwner {
-		if resPerms, resErr := s.GetUserEffectiveResources(ctx, businessID, userID); resErr == nil {
+		if resPerms, resErr := s.GetUserEffectiveResources(ctx, businessOwnerID, userID); resErr == nil {
 			for k, v := range resPerms {
 				effectiveResources[k] = string(v)
 			}
@@ -228,6 +228,17 @@ func (s *Service) InviteUser(ctx context.Context, ownerID, businessID int64, inp
 	if input.Email == "" {
 		return 0, "", errors.New("email is required")
 	}
+	role := input.Role
+	if role == "" {
+		role = domain.RoleStaff
+	}
+	if !isAssignableRole(role) {
+		return 0, "", fmt.Errorf("invalid role: %s", role)
+	}
+	if role == domain.RoleOwner {
+		return 0, "", domain.ErrForbidden
+	}
+
 	ownerID, err := s.requireTeamManager(ctx, ownerID, businessID)
 	if err != nil {
 		return 0, "", err
@@ -257,11 +268,6 @@ func (s *Service) InviteUser(ctx context.Context, ownerID, businessID int64, inp
 		if err != nil {
 			return 0, "", err
 		}
-	}
-
-	role := input.Role
-	if role == "" {
-		role = domain.RoleStaff
 	}
 
 	apps := input.Apps
@@ -398,18 +404,18 @@ func (s *Service) MarkOnboarded(ctx context.Context, userID int64) error {
 	return nil
 }
 
-// GetBusinessInfo returns the business name and whether the user is the owner.
-func (s *Service) GetBusinessInfo(ctx context.Context, businessID, userID int64) (string, bool) {
+// GetBusinessInfo returns the business name, owner ID, and whether the user is the owner.
+func (s *Service) GetBusinessInfo(ctx context.Context, businessID, userID int64) (string, int64, bool) {
 	if businessID == 0 {
-		return "", false
+		return "", 0, false
 	}
 
 	name, ownerID, err := s.repo.GetBusinessByID(ctx, businessID)
 	if err != nil {
-		return "", false
+		return "", 0, false
 	}
 
-	return name, ownerID == userID
+	return name, ownerID, ownerID == userID
 }
 
 func (s *Service) UpdatePermissions(ctx context.Context, actorID, businessID int64, input domain.UpdatePermissionsInput) error {
@@ -507,6 +513,24 @@ func (s *Service) BusinessOwnerID(ctx context.Context, fallbackOwnerID, business
 	return s.resolveBusinessOwnerID(ctx, fallbackOwnerID, businessID)
 }
 
+func (s *Service) CanAccessOwner(ctx context.Context, userID, ownerID int64) bool {
+	if userID == 0 || ownerID == 0 {
+		return false
+	}
+	if userID == ownerID {
+		return true
+	}
+	perm, err := s.repo.GetPermission(ctx, ownerID, userID)
+	if err != nil {
+		return false
+	}
+	return perm != nil && perm.IsActive
+}
+
+func (s *Service) TeamManagerOwnerID(ctx context.Context, actorID, businessID int64) (int64, error) {
+	return s.requireTeamManager(ctx, actorID, businessID)
+}
+
 func (s *Service) requireTeamManager(ctx context.Context, actorID, businessID int64) (int64, error) {
 	ownerID, err := s.resolveBusinessOwnerID(ctx, actorID, businessID)
 	if err != nil {
@@ -589,25 +613,42 @@ func (s *Service) UpdateGroup(ctx context.Context, ownerID, groupID int64, input
 	if input.Name == "" {
 		return errors.New("name is required")
 	}
-	return s.repo.UpdateGroup(ctx, ownerID, groupID, input)
+	if err := s.repo.UpdateGroup(ctx, ownerID, groupID, input); err != nil {
+		return err
+	}
+	s.invalidateGroupMemberScopes(ctx, ownerID, groupID)
+	return nil
 }
 
 func (s *Service) DeleteGroup(ctx context.Context, ownerID, groupID int64) error {
-	return s.repo.DeleteGroup(ctx, ownerID, groupID)
+	memberIDs := s.groupMemberIDs(ctx, ownerID, groupID)
+	if err := s.repo.DeleteGroup(ctx, ownerID, groupID); err != nil {
+		return err
+	}
+	s.invalidateMemberScopes(ctx, ownerID, memberIDs)
+	return nil
 }
 
 func (s *Service) AddGroupMembers(ctx context.Context, ownerID, groupID, callerID int64, userIDs []int64) error {
 	if len(userIDs) == 0 {
 		return errors.New("no user IDs provided")
 	}
-	return s.repo.AddGroupMembers(ctx, ownerID, groupID, callerID, userIDs)
+	if err := s.repo.AddGroupMembers(ctx, ownerID, groupID, callerID, userIDs); err != nil {
+		return err
+	}
+	s.invalidateMemberScopes(ctx, ownerID, userIDs)
+	return nil
 }
 
 func (s *Service) RemoveGroupMember(ctx context.Context, ownerID, groupID, userID int64) error {
 	if _, err := s.repo.GetGroup(ctx, ownerID, groupID); err != nil {
 		return domain.ErrPermissionNotFound
 	}
-	return s.repo.RemoveGroupMember(ctx, groupID, userID)
+	if err := s.repo.RemoveGroupMember(ctx, groupID, userID); err != nil {
+		return err
+	}
+	s.invalidateMemberScopes(ctx, ownerID, []int64{userID})
+	return nil
 }
 
 func (s *Service) GetUserGroups(ctx context.Context, ownerID, userID int64) ([]domain.GroupSummary, error) {
@@ -616,6 +657,33 @@ func (s *Service) GetUserGroups(ctx context.Context, ownerID, userID int64) ([]d
 
 func (s *Service) GetUserEffectiveResources(ctx context.Context, ownerID, userID int64) (map[string]domain.PermissionLevel, error) {
 	return s.repo.GetUserEffectiveResources(ctx, ownerID, userID)
+}
+
+func (s *Service) invalidateGroupMemberScopes(ctx context.Context, ownerID, groupID int64) {
+	s.invalidateMemberScopes(ctx, ownerID, s.groupMemberIDs(ctx, ownerID, groupID))
+}
+
+func (s *Service) groupMemberIDs(ctx context.Context, ownerID, groupID int64) []int64 {
+	detail, err := s.repo.GetGroupDetail(ctx, ownerID, groupID)
+	if err != nil || detail == nil {
+		return nil
+	}
+	userIDs := make([]int64, 0, len(detail.Members))
+	for _, member := range detail.Members {
+		userIDs = append(userIDs, member.UserID)
+	}
+	return userIDs
+}
+
+func (s *Service) invalidateMemberScopes(ctx context.Context, ownerID int64, userIDs []int64) {
+	for _, userID := range userIDs {
+		if userID != 0 {
+			invalidateUserScope(ctx, userID)
+		}
+	}
+	if businessID, err := s.repo.GetBusinessIDByOwnerID(ctx, ownerID); err == nil && businessID != 0 {
+		invalidateBusinessTeamScope(ctx, businessID)
+	}
 }
 
 // BulkInvite invites multiple users with the same role/apps/group in one call.

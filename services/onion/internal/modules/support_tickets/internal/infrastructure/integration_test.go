@@ -263,7 +263,7 @@ func TestUpdateTicket_ChangesAssignee(t *testing.T) {
 		t.Fatalf("Create: %v", err)
 	}
 
-	assignee := int64(testutil.OwnerID)
+	assignee := testutil.OwnerID
 	if err := repo.Update(ctx, domain.TicketUpdateInput{
 		BusinessID: supportTicketsBusinessID,
 		ID:         id,

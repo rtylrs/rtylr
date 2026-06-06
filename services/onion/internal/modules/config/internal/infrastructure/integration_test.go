@@ -436,11 +436,11 @@ func TestUpdateConfig_MultipleFieldsRoundTrip(t *testing.T) {
 	}
 
 	input := domain.ConfigInput{
-		OwnerId:       ownerStr,
-		SiteName:      "Multi Field Test",
-		ContactEmail:  "multi@example.com",
-		FooterSubText: "Multi Footer",
-		EnableReviews: true,
+		OwnerId:        ownerStr,
+		SiteName:       "Multi Field Test",
+		ContactEmail:   "multi@example.com",
+		FooterSubText:  "Multi Footer",
+		EnableReviews:  true,
 		EnableWishlist: true,
 	}
 	if err := repo.UpdateConfig(ctx, input); err != nil {

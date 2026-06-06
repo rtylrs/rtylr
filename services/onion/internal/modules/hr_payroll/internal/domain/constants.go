@@ -10,8 +10,8 @@ const (
 
 // Payroll period type values.
 const (
-	PayrollPeriodMonthly    = "monthly"
-	PayrollPeriodBiWeekly   = "bi_weekly"
-	PayrollPeriodWeekly     = "weekly"
+	PayrollPeriodMonthly     = "monthly"
+	PayrollPeriodBiWeekly    = "bi_weekly"
+	PayrollPeriodWeekly      = "weekly"
 	PayrollPeriodSemiMonthly = "semi_monthly"
 )

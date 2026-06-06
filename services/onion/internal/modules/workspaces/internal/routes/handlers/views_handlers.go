@@ -2,6 +2,7 @@ package handlers
 
 import (
 	"context"
+	"errors"
 	"net/http"
 	"strconv"
 
@@ -159,18 +160,22 @@ func (r *UpdateViewRequest) Validate() *errorModels.ServerError { return nil }
 type UpdateViewHandler struct{ FlowService *application.Service }
 
 func (h *UpdateViewHandler) Serve(ctx context.Context, r *UpdateViewRequest) (UpdateViewResponse, *errorModels.ServerError) {
-	_, ok := authPkg.GetAuthUser(ctx)
+	authUser, ok := authPkg.GetAuthUser(ctx)
 	if !ok {
 		return UpdateViewResponse{}, errorModels.PermissionDeniedServerError()
 	}
 
-	id, _ := strconv.ParseInt(r.ID, 10, 64)
+	id, err := strconv.ParseInt(r.ID, 10, 64)
+	if err != nil || id <= 0 {
+		return UpdateViewResponse{}, &errorModels.ServerError{Code: http.StatusBadRequest, Message: "Invalid view id"}
+	}
 	if r.Filters == nil {
 		r.Filters = map[string]interface{}{}
 	}
 
 	if err := h.FlowService.UpdateView(ctx, domain.UpdateViewInput{
 		ID:      id,
+		ActorID: authUser.UserID,
 		Name:    r.Name,
 		Icon:    r.Icon,
 		Filters: r.Filters,
@@ -178,6 +183,9 @@ func (h *UpdateViewHandler) Serve(ctx context.Context, r *UpdateViewRequest) (Up
 		SortBy:  r.SortBy,
 		SortDir: r.SortDir,
 	}); err != nil {
+		if errors.Is(err, domain.ErrUnauthorized) {
+			return UpdateViewResponse{}, errorModels.PermissionDeniedServerError()
+		}
 		return UpdateViewResponse{}, &errorModels.ServerError{Code: http.StatusInternalServerError, Message: err.Error()}
 	}
 	return UpdateViewResponse{}, nil
@@ -198,13 +206,19 @@ func (r *DeleteViewRequest) Validate() *errorModels.ServerError { return nil }
 type DeleteViewHandler struct{ FlowService *application.Service }
 
 func (h *DeleteViewHandler) Serve(ctx context.Context, r *DeleteViewRequest) (DeleteViewResponse, *errorModels.ServerError) {
-	_, ok := authPkg.GetAuthUser(ctx)
+	authUser, ok := authPkg.GetAuthUser(ctx)
 	if !ok {
 		return DeleteViewResponse{}, errorModels.PermissionDeniedServerError()
 	}
 
-	id, _ := strconv.ParseInt(r.ID, 10, 64)
-	if err := h.FlowService.DeleteView(ctx, id); err != nil {
+	id, err := strconv.ParseInt(r.ID, 10, 64)
+	if err != nil || id <= 0 {
+		return DeleteViewResponse{}, &errorModels.ServerError{Code: http.StatusBadRequest, Message: "Invalid view id"}
+	}
+	if err := h.FlowService.DeleteView(ctx, id, authUser.UserID); err != nil {
+		if errors.Is(err, domain.ErrUnauthorized) {
+			return DeleteViewResponse{}, errorModels.PermissionDeniedServerError()
+		}
 		return DeleteViewResponse{}, &errorModels.ServerError{Code: http.StatusInternalServerError, Message: err.Error()}
 	}
 	return DeleteViewResponse{}, nil

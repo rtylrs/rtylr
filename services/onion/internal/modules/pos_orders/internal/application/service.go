@@ -517,6 +517,22 @@ func (s *Service) CreatePublicOrder(ctx context.Context, ownerID int64, input Pu
 	if len(input.Items) == 0 {
 		return 0, "", errors.New("order must have at least one item")
 	}
+	for i, item := range input.Items {
+		if item.MenuItemID <= 0 {
+			return 0, "", fmt.Errorf("item[%d]: menu_item_id is required", i)
+		}
+		if item.Quantity <= 0 {
+			return 0, "", fmt.Errorf("item[%d]: quantity must be positive", i)
+		}
+	}
+
+	enabled, err := s.repo.IsOnlineOrderingEnabled(ctx, ownerID)
+	if err != nil {
+		return 0, "", fmt.Errorf("check online ordering entitlement: %w", err)
+	}
+	if !enabled {
+		return 0, "", errors.New("online ordering is not enabled")
+	}
 
 	orderNumber, err := s.repo.GenerateOrderNumber(ctx, ownerID)
 	if err != nil {
@@ -524,14 +540,17 @@ func (s *Service) CreatePublicOrder(ctx context.Context, ownerID int64, input Pu
 	}
 
 	items := make([]domain.OrderItemInput, 0, len(input.Items))
-	for _, it := range input.Items {
-		items = append(items, domain.OrderItemInput{
-			MenuItemID: it.MenuItemID,
-			Name:       it.Name,
-			Quantity:   it.Quantity,
-			UnitPrice:  it.UnitPrice,
-			Notes:      it.Notes,
-		})
+	for i, it := range input.Items {
+		item, err := s.repo.GetPublicMenuItem(ctx, ownerID, it.MenuItemID)
+		if err != nil {
+			if errors.Is(err, sql.ErrNoRows) {
+				return 0, "", fmt.Errorf("item[%d]: menu item is not available", i)
+			}
+			return 0, "", fmt.Errorf("load menu item: %w", err)
+		}
+		item.Quantity = it.Quantity
+		item.Notes = it.Notes
+		items = append(items, item)
 	}
 
 	orderID, err := s.repo.CreatePublicOrder(ctx, ownerID, orderNumber, input.CustomerName, input.CustomerPhone, input.Notes, items)

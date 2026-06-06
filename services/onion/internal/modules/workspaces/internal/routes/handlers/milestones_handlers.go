@@ -2,6 +2,7 @@ package handlers
 
 import (
 	"context"
+	"errors"
 	"net/http"
 	"strconv"
 	"time"
@@ -180,21 +181,28 @@ func (r *UpdateMilestoneRequest) Validate() *errorModels.ServerError { return ni
 type UpdateMilestoneHandler struct{ FlowService *application.Service }
 
 func (h *UpdateMilestoneHandler) Serve(ctx context.Context, r *UpdateMilestoneRequest) (UpdateMilestoneResponse, *errorModels.ServerError) {
-	_, ok := authPkg.GetAuthUser(ctx)
+	authUser, ok := authPkg.GetAuthUser(ctx)
 	if !ok {
 		return UpdateMilestoneResponse{}, errorModels.PermissionDeniedServerError()
 	}
 
-	id, _ := strconv.ParseInt(r.ID, 10, 64)
+	id, err := strconv.ParseInt(r.ID, 10, 64)
+	if err != nil || id <= 0 {
+		return UpdateMilestoneResponse{}, &errorModels.ServerError{Code: http.StatusBadRequest, Message: "Invalid milestone id"}
+	}
 	dueDate, _ := time.Parse("2006-01-02", r.TargetDate)
 
 	if err := h.FlowService.UpdateMilestone(ctx, domain.UpdateMilestoneInput{
 		ID:          id,
+		ActorID:     authUser.UserID,
 		Name:        r.Name,
 		Description: r.Description,
 		Status:      r.Status,
 		DueDate:     dueDate,
 	}); err != nil {
+		if errors.Is(err, domain.ErrUnauthorized) {
+			return UpdateMilestoneResponse{}, errorModels.PermissionDeniedServerError()
+		}
 		return UpdateMilestoneResponse{}, &errorModels.ServerError{Code: http.StatusInternalServerError, Message: err.Error()}
 	}
 	return UpdateMilestoneResponse{}, nil

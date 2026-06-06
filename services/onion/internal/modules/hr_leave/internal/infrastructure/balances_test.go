@@ -57,9 +57,9 @@ func TestUpsertLeaveBalance_Persists(t *testing.T) {
 	})
 
 	err = repo.UpsertLeaveBalance(ctx, testutil.OwnerID, domain.LeaveBalanceRecord{
-		EmployeeID:  4101,
-		LeaveTypeID: lt.ID,
-		Year:        2026,
+		EmployeeID:   4101,
+		LeaveTypeID:  lt.ID,
+		Year:         2026,
 		EntitledDays: 15,
 	})
 	if err != nil {

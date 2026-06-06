@@ -6,6 +6,7 @@ import (
 	"strconv"
 
 	sq "github.com/Masterminds/squirrel"
+
 	"github.com/voxire/onion/internal/modules/pos_kds/internal/domain"
 	"github.com/voxire/onion/internal/modules/pos_kds/internal/infrastructure/persistence/sqlc"
 	"github.com/voxire/onion/internal/platform/logger"
@@ -111,7 +112,6 @@ func (r *Repository) getItemsForOrders(ctx context.Context, orderIDs []int64) (m
 	}
 	return itemsByOrder, rows.Err()
 }
-
 
 func (r *Repository) UpdateItemStatus(ctx context.Context, input domain.UpdateItemStatusInput) error {
 	err := r.queries.UpdateKDSItemStatus(ctx, sqlc.UpdateKDSItemStatusParams{

@@ -33,6 +33,7 @@ type CycleInput struct {
 
 type UpdateCycleInput struct {
 	ID      int64
+	ActorID int64
 	Name    string
 	Status  string
 	EndDate time.Time
@@ -75,6 +76,7 @@ type MilestoneInput struct {
 
 type UpdateMilestoneInput struct {
 	ID          int64
+	ActorID     int64
 	Name        string
 	Description string
 	Status      string
@@ -111,6 +113,7 @@ type ViewInput struct {
 
 type UpdateViewInput struct {
 	ID      int64
+	ActorID int64
 	Name    string
 	Icon    string
 	Filters map[string]interface{}

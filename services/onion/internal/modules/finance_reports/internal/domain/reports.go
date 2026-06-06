@@ -19,12 +19,12 @@ type CashFlow struct {
 
 // ProfitAndLoss is a simplified P&L summary for a given period.
 type ProfitAndLoss struct {
-	Period        string  `json:"period"`
-	Revenue       float64 `json:"revenue"`
-	Expenses      float64 `json:"expenses"`
-	GrossProfit   float64 `json:"gross_profit"`
-	NetProfit     float64 `json:"net_profit"`
-	ProfitMargin  float64 `json:"profit_margin"` // percentage: 0-100
+	Period       string  `json:"period"`
+	Revenue      float64 `json:"revenue"`
+	Expenses     float64 `json:"expenses"`
+	GrossProfit  float64 `json:"gross_profit"`
+	NetProfit    float64 `json:"net_profit"`
+	ProfitMargin float64 `json:"profit_margin"` // percentage: 0-100
 }
 
 // FinancialSummary bundles the most-used single-page KPIs.

@@ -9,6 +9,7 @@ import (
 	"time"
 
 	sq "github.com/Masterminds/squirrel"
+
 	"github.com/voxire/onion/internal/modules/workspaces/internal/domain"
 	"github.com/voxire/onion/internal/modules/workspaces/internal/infrastructure/persistence/sqlc"
 	"github.com/voxire/onion/internal/platform/logger"
@@ -767,41 +768,47 @@ func (r *Repository) GetLabelsByWorkspace(ctx context.Context, workspaceID int64
 	return labels, nil
 }
 
-func (r *Repository) UpdateLabel(ctx context.Context, id int64, input domain.LabelInput) error {
+func (r *Repository) UpdateLabel(ctx context.Context, id, actorID int64, input domain.LabelInput) error {
 	q, args, err := sq.
 		Update("flow_labels").
 		Set("name", input.Name).
 		Set("color", input.Color).
 		Where(sq.Eq{"id": id}).
+		Where(workspaceMemberPredicate("flow_labels"), actorID, actorID).
 		PlaceholderFormat(sq.Question).
 		ToSql()
 	if err != nil {
 		logger.Ctx(ctx).Error("UpdateLabel build failed", logger.Error(err))
 		return err
 	}
-	if _, err = r.pool.ExecContext(ctx, q, args...); err != nil {
+	res, err := r.pool.ExecContext(ctx, q, args...)
+	if err != nil {
 		logger.Ctx(ctx).Error("UpdateLabel failed", logger.Error(err))
+		return err
 	}
-	return err
+	return requireAffected(res)
 }
 
-func (r *Repository) DeleteLabel(ctx context.Context, id int64) error {
+func (r *Repository) DeleteLabel(ctx context.Context, id, actorID int64) error {
 	q, args, err := sq.
 		Delete("flow_labels").
 		Where(sq.Eq{"id": id}).
+		Where(workspaceMemberPredicate("flow_labels"), actorID, actorID).
 		PlaceholderFormat(sq.Question).
 		ToSql()
 	if err != nil {
 		logger.Ctx(ctx).Error("DeleteLabel build failed", logger.Error(err))
 		return err
 	}
-	if _, err = r.pool.ExecContext(ctx, q, args...); err != nil {
+	res, err := r.pool.ExecContext(ctx, q, args...)
+	if err != nil {
 		logger.Ctx(ctx).Error("DeleteLabel failed", logger.Error(err))
+		return err
 	}
-	return err
+	return requireAffected(res)
 }
 
-func (r *Repository) SetTaskLabels(ctx context.Context, taskID int64, labelIDs []int64) error {
+func (r *Repository) SetTaskLabels(ctx context.Context, taskID, actorID int64, labelIDs []int64) error {
 	b, err := json.Marshal(labelIDs)
 	if err != nil {
 		return err
@@ -810,16 +817,19 @@ func (r *Repository) SetTaskLabels(ctx context.Context, taskID int64, labelIDs [
 		Update("flow_tasks").
 		Set("labels", b).
 		Where(sq.Eq{"id": taskID}).
+		Where(workspaceMemberPredicate("flow_tasks"), actorID, actorID).
 		PlaceholderFormat(sq.Question).
 		ToSql()
 	if err != nil {
 		logger.Ctx(ctx).Error("SetTaskLabels build failed", logger.Error(err))
 		return err
 	}
-	if _, err = r.pool.ExecContext(ctx, q, args...); err != nil {
+	res, err := r.pool.ExecContext(ctx, q, args...)
+	if err != nil {
 		logger.Ctx(ctx).Error("SetTaskLabels failed", logger.Error(err))
+		return err
 	}
-	return err
+	return requireAffected(res)
 }
 
 // ─────────────────────────────────────────────
@@ -1467,24 +1477,28 @@ func (r *Repository) UpdateColumn(ctx context.Context, input domain.UpdateProjec
 		Set("sort_order", input.SortOrder).
 		Set("updated_at", sq.Expr("NOW()")).
 		Where(sq.Eq{"id": input.ID}).
+		Where(workspaceMemberPredicate("flow_project_columns"), input.ActorID, input.ActorID).
 		PlaceholderFormat(sq.Question).
 		ToSql()
 	if err != nil {
 		logger.Ctx(ctx).Error("UpdateColumn build failed", logger.Error(err))
 		return err
 	}
-	if _, err = r.pool.ExecContext(ctx, q, args...); err != nil {
+	res, err := r.pool.ExecContext(ctx, q, args...)
+	if err != nil {
 		logger.Ctx(ctx).Error("UpdateColumn failed", logger.Error(err))
+		return err
 	}
-	return err
+	return requireAffected(res)
 }
 
-func (r *Repository) DeleteColumn(ctx context.Context, id int64) error {
+func (r *Repository) DeleteColumn(ctx context.Context, id, actorID int64) error {
 	// Null out section_id for tasks in this column before deleting
 	clearQ, clearArgs, err := sq.
 		Update("flow_tasks").
 		Set("section_id", nil).
 		Where(sq.Eq{"section_id": id}).
+		Where(workspaceMemberPredicate("flow_tasks"), actorID, actorID).
 		PlaceholderFormat(sq.Question).
 		ToSql()
 	if err != nil {
@@ -1498,19 +1512,22 @@ func (r *Repository) DeleteColumn(ctx context.Context, id int64) error {
 	delQ, delArgs, err := sq.
 		Delete("flow_project_columns").
 		Where(sq.Eq{"id": id}).
+		Where(workspaceMemberPredicate("flow_project_columns"), actorID, actorID).
 		PlaceholderFormat(sq.Question).
 		ToSql()
 	if err != nil {
 		logger.Ctx(ctx).Error("DeleteColumn build failed", logger.Error(err))
 		return err
 	}
-	if _, err = r.pool.ExecContext(ctx, delQ, delArgs...); err != nil {
+	res, err := r.pool.ExecContext(ctx, delQ, delArgs...)
+	if err != nil {
 		logger.Ctx(ctx).Error("DeleteColumn failed", logger.Error(err))
+		return err
 	}
-	return err
+	return requireAffected(res)
 }
 
-func (r *Repository) MoveTaskToColumn(ctx context.Context, taskID, columnID int64) error {
+func (r *Repository) MoveTaskToColumn(ctx context.Context, taskID, columnID, actorID int64) error {
 	var sectionVal interface{}
 	if columnID == 0 {
 		sectionVal = nil
@@ -1522,16 +1539,20 @@ func (r *Repository) MoveTaskToColumn(ctx context.Context, taskID, columnID int6
 		Set("section_id", sectionVal).
 		Set("updated_at", sq.Expr("NOW()")).
 		Where(sq.Eq{"id": taskID}).
+		Where(workspaceMemberPredicate("flow_tasks"), actorID, actorID).
+		Where("(? = 0 OR EXISTS (SELECT 1 FROM flow_project_columns c WHERE c.id = ? AND c.workspace_id = flow_tasks.workspace_id))", columnID, columnID).
 		PlaceholderFormat(sq.Question).
 		ToSql()
 	if err != nil {
 		logger.Ctx(ctx).Error("MoveTaskToColumn build failed", logger.Error(err))
 		return err
 	}
-	if _, err = r.pool.ExecContext(ctx, q, args...); err != nil {
+	res, err := r.pool.ExecContext(ctx, q, args...)
+	if err != nil {
 		logger.Ctx(ctx).Error("MoveTaskToColumn failed", logger.Error(err))
+		return err
 	}
-	return err
+	return requireAffected(res)
 }
 
 func (r *Repository) SeedDefaultColumns(ctx context.Context, projectID, workspaceID, createdBy int64) error {

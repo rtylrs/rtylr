@@ -2,6 +2,7 @@ package infrastructure_test
 
 import (
 	"context"
+	"errors"
 	"testing"
 
 	"github.com/voxire/onion/internal/modules/warehouses/internal/domain"
@@ -401,10 +402,10 @@ func TestWarehouses_CreateWarehouse_FullAddress(t *testing.T) {
 	ctx := context.Background()
 
 	id, err := repo.CreateWarehouse(ctx, testutil.OwnerID, domain.WarehouseInput{
-		Name:    "Full Addr WH",
-		Address: "456 Industrial Blvd",
-		City:    "Metropolis",
-		Country: "US",
+		Name:     "Full Addr WH",
+		Address:  "456 Industrial Blvd",
+		City:     "Metropolis",
+		Country:  "US",
 		IsActive: true,
 	})
 	if err != nil {
@@ -527,9 +528,9 @@ func TestWarehouses_GetWarehouseByID_Created(t *testing.T) {
 	ctx := context.Background()
 
 	id, err := repo.CreateWarehouse(ctx, testutil.OwnerID, domain.WarehouseInput{
-		Name:    "GetByID Test WH",
-		City:    "TestCity",
-		Country: "US",
+		Name:     "GetByID Test WH",
+		City:     "TestCity",
+		Country:  "US",
 		IsActive: true,
 	})
 	if err != nil {
@@ -555,7 +556,7 @@ func TestWarehouses_GetWarehouseByID_NotFound(t *testing.T) {
 	ctx := context.Background()
 
 	_, err := repo.GetWarehouseByID(ctx, testutil.OwnerID, 9999999)
-	if err != domain.ErrWarehouseNotFound {
+	if !errors.Is(err, domain.ErrWarehouseNotFound) {
 		t.Fatalf("expected ErrWarehouseNotFound, got %v", err)
 	}
 }
@@ -575,7 +576,7 @@ func TestWarehouses_GetWarehouseByID_WrongOwner(t *testing.T) {
 	t.Cleanup(func() { _ = repo.DeleteWarehouse(ctx, testutil.OwnerID, id) })
 
 	_, err = repo.GetWarehouseByID(ctx, 9999999, id)
-	if err != domain.ErrWarehouseNotFound {
+	if !errors.Is(err, domain.ErrWarehouseNotFound) {
 		t.Fatalf("expected ErrWarehouseNotFound for wrong owner, got %v", err)
 	}
 }

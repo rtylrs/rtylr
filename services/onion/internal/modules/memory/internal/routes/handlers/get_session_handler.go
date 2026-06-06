@@ -6,8 +6,8 @@ import (
 
 	"github.com/voxire/onion/internal/modules/memory/internal/application"
 	"github.com/voxire/onion/internal/modules/memory/internal/domain"
-	errorModels "github.com/voxire/onion/internal/platform/errors"
 	authPkg "github.com/voxire/onion/internal/platform/auth"
+	errorModels "github.com/voxire/onion/internal/platform/errors"
 )
 
 func SessionRoutes() []string {
@@ -32,13 +32,6 @@ type SessionHandler struct {
 }
 
 func (h *SessionHandler) Validate(_ context.Context, req *SessionRequest) *errorModels.ServerError {
-	if req.UserID <= 0 {
-		return &errorModels.ServerError{
-			Code:    http.StatusBadRequest,
-			Message: "User ID is required",
-		}
-	}
-
 	if req.Title == "" {
 		return &errorModels.ServerError{
 			Code:    http.StatusBadRequest,

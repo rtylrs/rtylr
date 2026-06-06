@@ -53,8 +53,8 @@ func (h *CreatePublicOrderHandler) Validate(_ context.Context, req *CreatePublic
 		return &errorModels.ServerError{HTTPCode: http.StatusBadRequest, Code: http.StatusBadRequest, Message: "order must have at least one item"}
 	}
 	for _, item := range req.Items {
-		if item.Name == "" {
-			return &errorModels.ServerError{HTTPCode: http.StatusBadRequest, Code: http.StatusBadRequest, Message: "each item must have a name"}
+		if item.MenuItemID <= 0 {
+			return &errorModels.ServerError{HTTPCode: http.StatusBadRequest, Code: http.StatusBadRequest, Message: "each item must have a menu_item_id"}
 		}
 		if item.Quantity <= 0 {
 			return &errorModels.ServerError{HTTPCode: http.StatusBadRequest, Code: http.StatusBadRequest, Message: "item quantity must be positive"}

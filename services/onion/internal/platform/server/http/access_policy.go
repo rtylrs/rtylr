@@ -1,6 +1,9 @@
 package http
 
-import "sync"
+import (
+	"strings"
+	"sync"
+)
 
 type RouteAccessPolicy struct {
 	mu              sync.RWMutex
@@ -61,9 +64,7 @@ func (p *RouteAccessPolicy) IsAllowedAnonymously(path string) bool {
 	p.mu.RLock()
 	defer p.mu.RUnlock()
 
-	_, ok := p.anonymousRoutes[path]
-
-	return ok
+	return hasMatchingRoute(p.anonymousRoutes, path)
 }
 
 func (p *RouteAccessPolicy) IsAllowedForAgent(userAgent, path string) bool {
@@ -79,7 +80,47 @@ func (p *RouteAccessPolicy) IsAllowedForAgent(userAgent, path string) bool {
 		return false
 	}
 
-	_, ok = routes[path]
+	return hasMatchingRoute(routes, path)
+}
 
-	return ok
+func hasMatchingRoute(routes map[string]struct{}, path string) bool {
+	if _, ok := routes[path]; ok {
+		return true
+	}
+
+	for route := range routes {
+		if routePatternMatchesPath(route, path) {
+			return true
+		}
+	}
+	return false
+}
+
+func routePatternMatchesPath(route, path string) bool {
+	if !strings.Contains(route, "{") {
+		return false
+	}
+
+	routeParts := splitRoutePath(route)
+	pathParts := splitRoutePath(path)
+	if len(routeParts) != len(pathParts) {
+		return false
+	}
+
+	for i, routePart := range routeParts {
+		if strings.HasPrefix(routePart, "{") && strings.HasSuffix(routePart, "}") {
+			if pathParts[i] == "" {
+				return false
+			}
+			continue
+		}
+		if routePart != pathParts[i] {
+			return false
+		}
+	}
+	return true
+}
+
+func splitRoutePath(path string) []string {
+	return strings.Split(strings.Trim(path, "/"), "/")
 }

@@ -1,20 +1,10 @@
 package application
 
 import (
-	"context"
 	"testing"
 
 	"github.com/voxire/onion/internal/modules/hr_equipment/internal/domain"
 )
-
-// stubApprovalProvider implements domain.ApprovalChainProvider for tests.
-type stubApprovalProvider struct {
-	chain *domain.ApprovalChainInfo
-}
-
-func (s *stubApprovalProvider) GetApprovalChain(_ context.Context, _ int64, _ string) (*domain.ApprovalChainInfo, error) {
-	return s.chain, nil
-}
 
 func TestApproveEquipmentRequest_NilChain_DirectlyApproves(t *testing.T) {
 	// When the approval chain is nil, any approval goes directly to "approved".

@@ -9,8 +9,10 @@ import (
 	"github.com/voxire/onion/internal/testutil"
 )
 
-const terminalsBusinessID int64 = 1
-const terminalsBranchID int64 = 3001
+const (
+	terminalsBusinessID int64 = 1
+	terminalsBranchID   int64 = 3001
+)
 
 func TestListTerminals_RunsWithoutError(t *testing.T) {
 	db := testutil.OpenDB(t)

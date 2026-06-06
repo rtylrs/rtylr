@@ -3,6 +3,7 @@ package infrastructure
 import (
 	"context"
 	"database/sql"
+	"errors"
 
 	"github.com/voxire/onion/internal/modules/suppliers/internal/domain"
 	"github.com/voxire/onion/internal/modules/suppliers/internal/infrastructure/persistence/sqlc"
@@ -138,7 +139,7 @@ func (r *Repository) GetSupplierByID(ctx context.Context, ownerID, id int64) (do
 		ID:      id,
 	})
 	if err != nil {
-		if err == sql.ErrNoRows {
+		if errors.Is(err, sql.ErrNoRows) {
 			return domain.Supplier{}, domain.ErrSupplierNotFound
 		}
 		logger.Ctx(ctx).Error("Failed to get supplier by ID", logger.Error(err))

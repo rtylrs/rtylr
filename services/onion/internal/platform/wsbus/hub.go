@@ -31,6 +31,7 @@ import (
 	"github.com/coder/websocket"
 
 	"github.com/voxire/onion/internal/platform/logger"
+	"github.com/voxire/onion/internal/platform/origins"
 )
 
 // AuthorizeFn decides whether userID may subscribe to topic. Return true
@@ -225,7 +226,7 @@ func (h *Hub) shutdown() {
 // authorize against `userID` via the hub's AuthorizeFn.
 func (h *Hub) ServeWS(w http.ResponseWriter, r *http.Request, userID int64) {
 	conn, err := websocket.Accept(w, r, &websocket.AcceptOptions{
-		OriginPatterns: []string{"*"}, // CORS handled upstream
+		OriginPatterns: origins.AllowedPatternStrings(),
 	})
 	if err != nil {
 		logger.Ctx(r.Context()).Warn("wsbus accept failed", logger.Error(err))

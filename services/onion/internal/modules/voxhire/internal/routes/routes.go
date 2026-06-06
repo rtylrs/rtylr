@@ -26,6 +26,7 @@ func RegisterRoutes(ctx context.Context, router *chi.Mux, service *application.S
 	// this handler is wired directly to chi the same way careers/apply
 	// is. We register it once per route path returned by ApplicationsRoutes().
 	for _, path := range handlers.ApplicationsRoutes() {
-		router.Post(path, handlers.ApplicationsHandler(service))
+		router.With(serverHttp.PerRouteRateLimit(5, time.Minute)).
+			Post(path, handlers.ApplicationsHandler(service))
 	}
 }

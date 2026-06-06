@@ -4,15 +4,13 @@ import (
 	"context"
 
 	"github.com/go-chi/chi/v5"
-
-	"github.com/voxire/onion/internal/modules/cacheops/internal/routes"
 )
 
-// Module exposes the cache invalidation public API.
+// Module is kept so old wiring does not break, but /invalidate-cache is
+// registered by the platform HTTP layer where the raw Internal-Token header can
+// be checked before any cache invalidation is allowed.
 type Module struct{}
 
 func NewModule() *Module { return &Module{} }
 
-func (m *Module) RegisterRoutes(ctx context.Context, r *chi.Mux, _ ...interface{}) {
-	routes.RegisterRoutes(ctx, r)
-}
+func (m *Module) RegisterRoutes(_ context.Context, _ *chi.Mux, _ ...interface{}) {}

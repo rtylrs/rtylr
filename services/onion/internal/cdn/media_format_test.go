@@ -53,10 +53,10 @@ func TestMimeForFormat(t *testing.T) {
 
 func TestMimeTypeToFormat(t *testing.T) {
 	cases := map[string]string{
-		"image/jpeg": "jpg",
-		"image/png":  "png",
-		"image/webp": "webp",
-		"image/gif":  "gif",
+		"image/jpeg":      "jpg",
+		"image/png":       "png",
+		"image/webp":      "webp",
+		"image/gif":       "gif",
 		"image/avif":      "avif",
 		"image/tiff":      "tiff",
 		"video/mp4":       "mp4",

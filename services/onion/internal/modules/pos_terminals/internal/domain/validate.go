@@ -32,8 +32,5 @@ func ValidateTerminalUpdateInput(input TerminalUpdateInput) error {
 
 // IsOnline reports whether the terminal has recently been seen (within the last 5 minutes).
 func (t Terminal) IsOnline() bool {
-	if t.LastSeenAt == nil {
-		return false
-	}
-	return true
+	return t.LastSeenAt != nil
 }

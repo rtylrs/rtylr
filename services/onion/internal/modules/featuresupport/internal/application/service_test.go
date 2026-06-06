@@ -27,12 +27,13 @@ func (m *mockRepo) DeleteFlag(_ context.Context, _ string) error       { return 
 func (m *mockRepo) ListTargetsByOwner(_ context.Context, ownerID int64) ([]domain.Target, error) {
 	return m.targets[ownerID], nil
 }
+
 func (m *mockRepo) ListTargetsByKey(_ context.Context, _ string) ([]domain.Target, error) {
 	return nil, nil
 }
-func (m *mockRepo) UpsertTarget(_ context.Context, _ domain.Target) error          { return nil }
-func (m *mockRepo) DeleteTarget(_ context.Context, _ string, _ int64) error        { return nil }
-func (m *mockRepo) ListEnabledRules(_ context.Context) ([]domain.Rule, error)      { return m.rules, nil }
+func (m *mockRepo) UpsertTarget(_ context.Context, _ domain.Target) error     { return nil }
+func (m *mockRepo) DeleteTarget(_ context.Context, _ string, _ int64) error   { return nil }
+func (m *mockRepo) ListEnabledRules(_ context.Context) ([]domain.Rule, error) { return m.rules, nil }
 func (m *mockRepo) ListRulesByKey(_ context.Context, _ string) ([]domain.Rule, error) {
 	return m.rules, nil
 }

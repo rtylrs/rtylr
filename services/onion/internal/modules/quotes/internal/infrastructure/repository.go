@@ -213,40 +213,39 @@ func (r *Repository) ConvertToInvoice(ctx context.Context, ownerID, quoteID int6
 			logger.Ctx(ctx).Error("Failed to unmarshal quote items",
 				logger.Error(decodeErr))
 			return 0, fmt.Errorf("invalid JSON in quote items: %w", decodeErr)
-		} else {
-			for i, item := range items {
-				desc := stringFromAny(item["description"])
-				if desc == "" {
-					desc = stringFromAny(item["name"])
-				}
-				qty := floatFromAny(item["quantity"])
-				if qty == 0 {
-					qty = 1
-				}
-				unitPrice := floatFromAny(item["unit_price"])
-				if unitPrice == 0 {
-					unitPrice = floatFromAny(item["price"])
-				}
-				total := floatFromAny(item["total"])
-				if total == 0 {
-					total = qty * unitPrice
-				}
-				// cross-schema write from quotes to finance_invoice_items
-				if itemErr := qtx.InsertInvoiceItemFromQuote(ctx, sqlc.InsertInvoiceItemFromQuoteParams{
-					InvoiceID:   invoiceID,
-					Description: desc,
-					Quantity:    fmtFloat(qty),
-					Unit:        nullableStringInput("unit"),
-					UnitPrice:   fmtFloat(unitPrice),
-					TaxRate:     nullableStringInput(fmtFloat(0)),
-					DiscountPct: nullableStringInput(fmtFloat(0)),
-					Total:       fmtFloat(total),
-					SortOrder:   sql.NullInt32{Int32: int32(i), Valid: true},
-				}); itemErr != nil {
-					_ = tx.Rollback()
-					logger.Ctx(ctx).Error("Failed to insert invoice item from quote", logger.Error(itemErr))
-					return 0, itemErr
-				}
+		}
+		for i, item := range items {
+			desc := stringFromAny(item["description"])
+			if desc == "" {
+				desc = stringFromAny(item["name"])
+			}
+			qty := floatFromAny(item["quantity"])
+			if qty == 0 {
+				qty = 1
+			}
+			unitPrice := floatFromAny(item["unit_price"])
+			if unitPrice == 0 {
+				unitPrice = floatFromAny(item["price"])
+			}
+			total := floatFromAny(item["total"])
+			if total == 0 {
+				total = qty * unitPrice
+			}
+			// cross-schema write from quotes to finance_invoice_items
+			if itemErr := qtx.InsertInvoiceItemFromQuote(ctx, sqlc.InsertInvoiceItemFromQuoteParams{
+				InvoiceID:   invoiceID,
+				Description: desc,
+				Quantity:    fmtFloat(qty),
+				Unit:        nullableStringInput("unit"),
+				UnitPrice:   fmtFloat(unitPrice),
+				TaxRate:     nullableStringInput(fmtFloat(0)),
+				DiscountPct: nullableStringInput(fmtFloat(0)),
+				Total:       fmtFloat(total),
+				SortOrder:   sql.NullInt32{Int32: int32(i), Valid: true},
+			}); itemErr != nil {
+				_ = tx.Rollback()
+				logger.Ctx(ctx).Error("Failed to insert invoice item from quote", logger.Error(itemErr))
+				return 0, itemErr
 			}
 		}
 	}

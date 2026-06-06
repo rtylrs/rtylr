@@ -97,6 +97,9 @@ func (h *ListWorkspaceMembersHandler) Serve(ctx context.Context, req *ListWorksp
 	if err != nil || workspaceID == 0 {
 		return ListWorkspaceMembersResponse{}, &errorModels.ServerError{Code: http.StatusBadRequest, Message: "Invalid workspace_id"}
 	}
+	if !h.FlowService.IsWorkspaceMember(ctx, authUser.UserID, workspaceID) {
+		return ListWorkspaceMembersResponse{}, errorModels.PermissionDeniedServerError()
+	}
 
 	members, err := h.FlowService.ListWorkspaceMembers(ctx, workspaceID)
 	if err != nil {
@@ -143,7 +146,11 @@ func (h *UpdateWorkspaceMemberRoleHandler) Validate(_ context.Context, req *Upda
 }
 
 func (h *UpdateWorkspaceMemberRoleHandler) Serve(ctx context.Context, req *UpdateWorkspaceMemberRoleRequest) (UpdateWorkspaceMemberRoleResponse, *errorModels.ServerError) {
-	if _, ok := authPkg.GetAuthUser(ctx); !ok {
+	authUser, ok := authPkg.GetAuthUser(ctx)
+	if !ok {
+		return UpdateWorkspaceMemberRoleResponse{}, errorModels.PermissionDeniedServerError()
+	}
+	if !h.FlowService.IsWorkspaceMember(ctx, authUser.UserID, req.WorkspaceID.Int64()) {
 		return UpdateWorkspaceMemberRoleResponse{}, errorModels.PermissionDeniedServerError()
 	}
 
@@ -182,7 +189,11 @@ func (h *ListProjectMembersHandler) Validate(_ context.Context, req *ListProject
 }
 
 func (h *ListProjectMembersHandler) Serve(ctx context.Context, req *ListProjectMembersRequest) (ListProjectMembersResponse, *errorModels.ServerError) {
-	if _, ok := authPkg.GetAuthUser(ctx); !ok {
+	authUser, ok := authPkg.GetAuthUser(ctx)
+	if !ok {
+		return ListProjectMembersResponse{}, errorModels.PermissionDeniedServerError()
+	}
+	if !h.FlowService.IsProjectMember(ctx, authUser.UserID, req.ProjectID.Int64()) {
 		return ListProjectMembersResponse{}, errorModels.PermissionDeniedServerError()
 	}
 
@@ -232,6 +243,9 @@ func (h *AddProjectMemberHandler) Serve(ctx context.Context, req *AddProjectMemb
 	if !ok {
 		return AddProjectMemberResponse{}, errorModels.PermissionDeniedServerError()
 	}
+	if !h.FlowService.IsProjectMember(ctx, authUser.UserID, req.ProjectID.Int64()) {
+		return AddProjectMemberResponse{}, errorModels.PermissionDeniedServerError()
+	}
 
 	if err := h.FlowService.AddProjectMember(ctx, domain.AddProjectMemberInput{
 		ProjectID: req.ProjectID.Int64(),
@@ -273,7 +287,11 @@ func (h *RemoveProjectMemberHandler) Validate(_ context.Context, req *RemoveProj
 }
 
 func (h *RemoveProjectMemberHandler) Serve(ctx context.Context, req *RemoveProjectMemberRequest) (RemoveProjectMemberResponse, *errorModels.ServerError) {
-	if _, ok := authPkg.GetAuthUser(ctx); !ok {
+	authUser, ok := authPkg.GetAuthUser(ctx)
+	if !ok {
+		return RemoveProjectMemberResponse{}, errorModels.PermissionDeniedServerError()
+	}
+	if !h.FlowService.IsProjectMember(ctx, authUser.UserID, req.ProjectID.Int64()) {
 		return RemoveProjectMemberResponse{}, errorModels.PermissionDeniedServerError()
 	}
 
@@ -319,7 +337,11 @@ func (h *UpdateProjectMemberRoleHandler) Validate(_ context.Context, req *Update
 }
 
 func (h *UpdateProjectMemberRoleHandler) Serve(ctx context.Context, req *UpdateProjectMemberRoleRequest) (UpdateProjectMemberRoleResponse, *errorModels.ServerError) {
-	if _, ok := authPkg.GetAuthUser(ctx); !ok {
+	authUser, ok := authPkg.GetAuthUser(ctx)
+	if !ok {
+		return UpdateProjectMemberRoleResponse{}, errorModels.PermissionDeniedServerError()
+	}
+	if !h.FlowService.IsProjectMember(ctx, authUser.UserID, req.ProjectID.Int64()) {
 		return UpdateProjectMemberRoleResponse{}, errorModels.PermissionDeniedServerError()
 	}
 
@@ -409,6 +431,9 @@ func (h *InviteProjectMemberByEmailHandler) Validate(_ context.Context, req *Inv
 func (h *InviteProjectMemberByEmailHandler) Serve(ctx context.Context, req *InviteProjectMemberByEmailRequest) (InviteProjectMemberByEmailResponse, *errorModels.ServerError) {
 	authUser, ok := authPkg.GetAuthUser(ctx)
 	if !ok {
+		return InviteProjectMemberByEmailResponse{}, errorModels.PermissionDeniedServerError()
+	}
+	if !h.FlowService.IsProjectMember(ctx, authUser.UserID, req.ProjectID.Int64()) {
 		return InviteProjectMemberByEmailResponse{}, errorModels.PermissionDeniedServerError()
 	}
 

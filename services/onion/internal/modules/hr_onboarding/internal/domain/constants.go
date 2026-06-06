@@ -2,10 +2,10 @@ package domain
 
 // Checklist trigger types.
 const (
-	TriggerTypeHire       = "hire"
-	TriggerTypeTerminate  = "terminate"
-	TriggerTypeTransfer   = "transfer"
-	TriggerTypePromotion  = "promotion"
+	TriggerTypeHire      = "hire"
+	TriggerTypeTerminate = "terminate"
+	TriggerTypeTransfer  = "transfer"
+	TriggerTypePromotion = "promotion"
 )
 
 // Employee checklist statuses.

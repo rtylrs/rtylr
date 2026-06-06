@@ -24,6 +24,10 @@ func (m *Module) RegisterRoutes(ctx context.Context, router *chi.Mux, _ ...inter
 	routes.RegisterRoutes(ctx, router, m.service)
 }
 
+func (m *Module) Service() *application.Service {
+	return m.service
+}
+
 func (m *Module) GetAnonymousRoutes() []string {
 	return []string{
 		"/auth/invite/verify",

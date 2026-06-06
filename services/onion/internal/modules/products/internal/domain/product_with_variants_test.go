@@ -28,6 +28,9 @@ func TestProductWithVariants_ProductFields(t *testing.T) {
 	if pw.Product.Name != "Burger" {
 		t.Errorf("expected product name='Burger', got %q", pw.Product.Name)
 	}
+	if pw.VariantCount != 2 {
+		t.Errorf("expected variant count=2, got %d", pw.VariantCount)
+	}
 	if len(pw.VariantNames) != 2 {
 		t.Errorf("expected 2 variant names, got %d", len(pw.VariantNames))
 	}

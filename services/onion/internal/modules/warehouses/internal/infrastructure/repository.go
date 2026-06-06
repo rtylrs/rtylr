@@ -3,6 +3,7 @@ package infrastructure
 import (
 	"context"
 	"database/sql"
+	"errors"
 
 	"github.com/voxire/onion/internal/modules/warehouses/internal/domain"
 	"github.com/voxire/onion/internal/modules/warehouses/internal/infrastructure/persistence/sqlc"
@@ -171,7 +172,7 @@ func (r *Repository) GetWarehouseByID(ctx context.Context, ownerID, id int64) (d
 		ID:      id,
 	})
 	if err != nil {
-		if err == sql.ErrNoRows {
+		if errors.Is(err, sql.ErrNoRows) {
 			return domain.Warehouse{}, domain.ErrWarehouseNotFound
 		}
 		logger.Ctx(ctx).Error("Failed to get warehouse by ID", logger.Error(err))

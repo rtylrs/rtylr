@@ -65,6 +65,7 @@ func (c *CDN) transform(ctx context.Context, fileID int64, fileUUID, originalSto
 
 	execCtx, cancel := context.WithTimeout(ctx, engineTimeout)
 	defer cancel()
+	// #nosec G204 -- mediaEngine is a server-side configured binary path; CLI args are built from validated params and temp paths.
 	cmd := exec.CommandContext(execCtx, c.mediaEngine, p.CLIArgs(tmpIn, tmpOut)...)
 	if out, runErr := cmd.CombinedOutput(); runErr != nil {
 		return nil, 0, "", fmt.Errorf("media-engine failed: %w\noutput: %s", runErr, out)

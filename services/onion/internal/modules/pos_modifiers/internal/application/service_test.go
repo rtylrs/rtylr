@@ -19,12 +19,15 @@ type mockModifierRepo struct {
 func (m *mockModifierRepo) List(_ context.Context, _ int64) ([]domain.Modifier, error) {
 	return m.list, nil
 }
+
 func (m *mockModifierRepo) Create(_ context.Context, _ int64, _ domain.ModifierInput) (int64, error) {
 	return m.createID, m.createErr
 }
+
 func (m *mockModifierRepo) Update(_ context.Context, _, _ int64, _ domain.ModifierInput) error {
 	return m.updateErr
 }
+
 func (m *mockModifierRepo) Delete(_ context.Context, _, _ int64) error {
 	return m.deleteErr
 }

@@ -1,6 +1,9 @@
 package config
 
-import "os"
+import (
+	"os"
+	"strings"
+)
 
 const (
 	PaddleAPIKeyEnvVar        = "PADDLE_API_KEY"
@@ -39,6 +42,14 @@ func IsPaddleSandbox() bool {
 
 func IsPaddleConfigured() bool {
 	return GetPaddleAPIKey() != ""
+}
+
+func IsProduction() bool {
+	env := strings.ToLower(strings.TrimSpace(os.Getenv("APP_ENV")))
+	if GlobalConfig != nil {
+		env = strings.ToLower(strings.TrimSpace(GlobalConfig.AppEnv))
+	}
+	return env == "production" || env == "prod"
 }
 
 func GetPaddleBaseURL() string {

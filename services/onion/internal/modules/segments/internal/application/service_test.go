@@ -9,18 +9,20 @@ import (
 )
 
 type mockRepo struct {
-	list      []domain.Segment
-	createID  int64
-	createErr error
-	updErr    error
-	delErr    error
+	list        []domain.Segment
+	createID    int64
+	createInput domain.SegmentInput
+	createErr   error
+	updErr      error
+	delErr      error
 }
 
 func (m *mockRepo) List(_ context.Context, _ int64) ([]domain.Segment, error) {
 	return m.list, nil
 }
 
-func (m *mockRepo) Create(_ context.Context, _ domain.SegmentInput) (int64, error) {
+func (m *mockRepo) Create(_ context.Context, input domain.SegmentInput) (int64, error) {
+	m.createInput = input
 	return m.createID, m.createErr
 }
 
