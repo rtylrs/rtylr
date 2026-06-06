@@ -6,7 +6,7 @@
     "beforeDevCommand": "pnpm dev",
     "devUrl": "http://localhost:5178",
     "beforeBuildCommand": "pnpm build",
-    "frontendDist": "../../../dist/vbitez"
+    "frontendDist": "../dist"
   },
   "app": {
     "withGlobalTauri": true,

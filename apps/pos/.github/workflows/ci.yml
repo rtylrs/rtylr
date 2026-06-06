@@ -7,10 +7,14 @@ on:
     branches: [main]
   workflow_dispatch:
 
+concurrency:
+  group: ci-${{ github.ref }}
+  cancel-in-progress: ${{ github.ref != 'refs/heads/main' }}
+
 jobs:
   check:
     name: Test, Typecheck & Build
-    runs-on: blacksmith-4vcpu-ubuntu-2404
+    runs-on: ubuntu-latest
 
     steps:
       - name: Checkout
@@ -52,3 +56,14 @@ jobs:
 
       - name: Check native shell
         run: pnpm native:check
+
+  deploy:
+    name: Deploy to Cloudflare Pages
+    needs: check
+    if: (github.event_name == 'push' || github.event_name == 'workflow_dispatch') && github.ref == 'refs/heads/main'
+    uses: voxire/pipelines/.github/workflows/deploy-pages.yml@main
+    with:
+      app_filter: 'vbitez'
+      dist_dir: 'dist'
+      project_name: 'rtylr-pos'
+    secrets: inherit
