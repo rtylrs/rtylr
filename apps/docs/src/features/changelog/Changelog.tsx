@@ -8,6 +8,27 @@ interface ChangelogEntry {
 
 const entries: ChangelogEntry[] = [
   {
+    version: '1.6.0',
+    date: '2026-06-06',
+    changes: [
+      'Caret — your AI business assistant — is now available across Dash, ERP, HR, CRM, Finance, Flow, and Insights',
+      'Ask questions about your business in plain language; Analyst mode answers from your live data',
+      'Streaming responses with conversation history and memory',
+      'Monthly AI usage allowance per plan, with shared team pool or per-person allocation (Settings → AI Usage)',
+    ],
+  },
+  {
+    version: '1.5.0',
+    date: '2026-05-12',
+    changes: [
+      'ERP: richer products — pricing, tax, weight & dimensions, country of origin, lead time, and custom attributes',
+      'ERP: product variant matrix — generate per-SKU price and stock from size/color options',
+      'Flow: My Tasks is now a single board of everything assigned to you across all workspaces',
+      'Dash: paginated, searchable audit log',
+      'Faster, more reliable APIs backed by a dedicated read replica for analytics',
+    ],
+  },
+  {
     version: '1.4.0',
     date: '2026-04-01',
     changes: [
