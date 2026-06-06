@@ -620,7 +620,7 @@ const DefaultLayout: React.FC<DefaultLayoutProps> = ({ children }) => {
           }}
         >
           <div style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
-            <img src="/logo.png?v=2" alt="rtylr" style={{ height: 24, width: 'auto' }} />
+            <img src="/logo.png?v=2" alt="rtylr" className="rtylr-logo h-6 w-auto" />
           </div>
         </div>
 
