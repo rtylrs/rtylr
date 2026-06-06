@@ -19,7 +19,11 @@ import {
   useDeleteCustomer,
   useExportCustomers,
 } from '../../shared/hooks/queries/useCustomers';
-import { useAwardPoints, useRedeemPoints } from '../../shared/hooks/queries/useLoyalty';
+import {
+  useAwardPoints,
+  useRedeemPoints,
+  useLoyaltyConfig,
+} from '../../shared/hooks/queries/useLoyalty';
 import { Breadcrumbs, Button, Card, ConfirmModal, SkeletonList } from '../../shared/components/ui';
 import {
   CustomerAvatar,
@@ -43,6 +47,7 @@ const CustomerProfile: React.FC = () => {
   const remove = useDeleteCustomer();
   const award = useAwardPoints();
   const redeem = useRedeemPoints();
+  const { data: loyaltyConfig } = useLoyaltyConfig();
   const exportData = useExportCustomers();
   const [confirmDelete, setConfirmDelete] = useState(false);
   const [newTag, setNewTag] = useState('');
@@ -110,6 +115,10 @@ const CustomerProfile: React.FC = () => {
   };
 
   const handleAward = (points: number, reason: string) => {
+    if (!loyaltyConfig?.programEnabled) {
+      toast.error('Loyalty program is currently disabled');
+      return;
+    }
     award.mutate(
       { customerId: customer.id, points, reason },
       {
@@ -120,6 +129,10 @@ const CustomerProfile: React.FC = () => {
   };
 
   const handleDeduct = (points: number, reason: string) => {
+    if (!loyaltyConfig?.programEnabled) {
+      toast.error('Loyalty program is currently disabled');
+      return;
+    }
     redeem.mutate(
       { customerId: customer.id, points, reason },
       {
@@ -422,7 +435,9 @@ const CustomerProfile: React.FC = () => {
             </div>
           </Card>
 
-          <LoyaltyPointsInput onAward={handleAward} onDeduct={handleDeduct} />
+          {loyaltyConfig?.programEnabled && (
+            <LoyaltyPointsInput onAward={handleAward} onDeduct={handleDeduct} />
+          )}
           <ConsentBanner consent={consent} />
           <NotesPanel notes={customer.notes || ''} onSave={handleNotesSave} />
         </div>

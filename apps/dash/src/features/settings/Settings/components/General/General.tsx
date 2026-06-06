@@ -56,6 +56,16 @@ const General: React.FC = () => {
           prev.telephone,
         companyName:
           (websiteData?.siteName as string | undefined) || user.businessName || prev.companyName,
+        address: (websiteData?.address as string | undefined) || prev.address,
+        city: (websiteData?.city as string | undefined) || prev.city,
+        zipcode: (websiteData?.zipcode as string | undefined) || prev.zipcode,
+        mapsUrl: (websiteData?.mapsUrl as string | undefined) || prev.mapsUrl,
+        website: (websiteData?.website as string | undefined) || prev.website,
+        country: (websiteData?.country as string | undefined) || prev.country,
+        senderEmail:
+          (websiteData?.senderEmail as string | undefined) ||
+          contactInfo?.contactEmail ||
+          prev.senderEmail,
       }));
     }
   }, [user, websiteData, contactInfo]);

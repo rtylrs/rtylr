@@ -2,7 +2,7 @@ import React, { useRef, useCallback } from 'react';
 import { useParams, Link } from '@tanstack/react-router';
 import { useTranslation } from 'react-i18next';
 import { useVirtualizer } from '@tanstack/react-virtual';
-import { CheckCircle, Download, ArrowLeft } from 'lucide-react';
+import { CheckCircle, Download, ArrowLeft, AlertTriangle } from 'lucide-react';
 import { useGetPayrollRun, useApprovePayrollRun } from '../../shared/hooks/queries/usePayroll';
 import type { PayrollEntryPayload } from '../../shared/hooks/queries/usePayroll';
 import { ErrorBoundary } from '@voxire/ui';
@@ -238,6 +238,8 @@ const PayrollRunDetailContent = (): React.JSX.Element => {
           >
             {virtualizer.getVirtualItems().map((virtualRow) => {
               const entry: PayrollEntryPayload = entries[virtualRow.index];
+              const grossPay = entry.basePay + entry.overtimePay + entry.bonuses;
+              const deductionsExceedGross = entry.deductions > grossPay;
               return (
                 <div
                   key={entry.id}
@@ -253,11 +255,43 @@ const PayrollRunDetailContent = (): React.JSX.Element => {
                     alignItems: 'center',
                     padding: '0 20px',
                     borderBottom: '1px solid var(--hr-border)',
+                    background: deductionsExceedGross
+                      ? 'color-mix(in srgb, var(--hr-error) 6%, transparent)'
+                      : undefined,
                   }}
                 >
                   {/* Employee ID */}
-                  <span style={{ fontSize: 13, fontWeight: 600, color: 'var(--hr-text)' }}>
+                  <span
+                    style={{
+                      fontSize: 13,
+                      fontWeight: 600,
+                      color: 'var(--hr-text)',
+                      display: 'flex',
+                      alignItems: 'center',
+                      gap: 6,
+                    }}
+                  >
                     {t('payroll.table.employeeId', { id: entry.employeeId })}
+                    {deductionsExceedGross && (
+                      <span
+                        style={{
+                          display: 'inline-flex',
+                          alignItems: 'center',
+                          gap: 3,
+                          padding: '2px 6px',
+                          borderRadius: 4,
+                          background: 'color-mix(in srgb, var(--hr-error) 15%, transparent)',
+                          border: '1px solid color-mix(in srgb, var(--hr-error) 30%, transparent)',
+                          color: 'var(--hr-error)',
+                          fontSize: 10,
+                          fontWeight: 700,
+                          whiteSpace: 'nowrap',
+                        }}
+                      >
+                        <AlertTriangle size={9} />
+                        {t('payroll.table.deductionsExceedGross')}
+                      </span>
+                    )}
                   </span>
                   <span style={{ fontSize: 13, color: 'var(--hr-text)' }}>
                     {entry.hoursWorked}h

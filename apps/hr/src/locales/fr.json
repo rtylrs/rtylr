@@ -544,7 +544,9 @@
       "reasonPlaceholder": "Pourquoi demandez-vous un congé ?",
       "notes": "Notes",
       "notesPlaceholder": "Notes supplémentaires (facultatif)",
-      "submit": "Soumettre la demande"
+      "submit": "Soumettre la demande",
+      "errorPastDate": "Les dates de congé ne peuvent pas être dans le passé",
+      "errorOverlap": "Cette plage de dates chevauche une demande de congé approuvée existante"
     },
     "calendar": {
       "prevMonth": "Mois précédent",
@@ -620,7 +622,8 @@
       "overtimePay": "Heures supplémentaires",
       "deductions": "Déductions",
       "bonuses": "Primes",
-      "netPay": "Salaire net"
+      "netPay": "Salaire net",
+      "deductionsExceedGross": "Les déductions dépassent le salaire brut"
     },
     "runDetail": {
       "subtitle": "{{count}} entrées dans ce cycle",
@@ -689,6 +692,7 @@
       "choosePlaceholder": "Choisir un quart…",
       "assign": "Attribuer",
       "conflictsWarning": "Certaines attributions ont des conflits d'horaire.",
+      "cannotPublishConflicts": "Résolvez tous les conflits d'horaire avant de publier le planning.",
       "emptyTitle": "Aucune donnée de planning",
       "emptyDescription": "Ajoutez des employés à cet emplacement pour construire le planning."
     }

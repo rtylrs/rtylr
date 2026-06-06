@@ -90,21 +90,23 @@ function ExpandedDetail({ customer, onView }: { customer: Customer; onView: () =
 
 const Customers: React.FC = () => {
   const navigate = useNavigate();
-  const { data: fetchedCustomers, isLoading } = useListCustomers({ limit: 100, offset: 0 });
-  const update = useUpdateCustomer();
-  const customers = fetchedCustomers ?? [];
   const [search, setSearch] = useState('');
   const [tierFilter, setTierFilter] = useState<Tier | 'All'>('All');
   const [expandedId, setExpandedId] = useState<number | null>(null);
   const [selected, setSelected] = useState<Set<number>>(new Set());
   const [bulkTag, setBulkTag] = useState('');
 
+  const { data: fetchedCustomers, isLoading } = useListCustomers({
+    limit: 100,
+    offset: 0,
+    search: search.trim() || undefined,
+  });
+  const update = useUpdateCustomer();
+  const customers = fetchedCustomers ?? [];
+
   const filtered = customers.filter((c) => {
-    const matchSearch =
-      c.name.toLowerCase().includes(search.toLowerCase()) ||
-      c.email.toLowerCase().includes(search.toLowerCase());
     const matchTier = tierFilter === 'All' || getTier(c.loyaltyPoints) === tierFilter;
-    return matchSearch && matchTier;
+    return matchTier;
   });
 
   const allSelected = filtered.length > 0 && filtered.every((c) => selected.has(c.id));

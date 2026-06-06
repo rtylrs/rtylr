@@ -60,7 +60,10 @@ const NewInvoice: React.FC = () => {
   const canProceed = () => {
     if (step === 0) return !!client;
     if (step === 1)
-      return items.length > 0 && items.every((it) => it.description && it.unitPrice > 0);
+      return (
+        items.length > 0 &&
+        items.every((it) => it.description && it.unitPrice > 0 && (it.quantity ?? 1) > 0)
+      );
     return true;
   };
 

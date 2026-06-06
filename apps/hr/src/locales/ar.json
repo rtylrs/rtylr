@@ -544,7 +544,9 @@
       "reasonPlaceholder": "لماذا تطلب إجازة؟",
       "notes": "ملاحظات",
       "notesPlaceholder": "ملاحظات إضافية (اختياري)",
-      "submit": "تقديم الطلب"
+      "submit": "تقديم الطلب",
+      "errorPastDate": "لا يمكن أن تكون تواريخ الإجازة في الماضي",
+      "errorOverlap": "يتداخل هذا النطاق الزمني مع طلب إجازة معتمد موجود"
     },
     "calendar": {
       "prevMonth": "الشهر السابق",
@@ -620,7 +622,8 @@
       "overtimePay": "العمل الإضافي",
       "deductions": "الخصومات",
       "bonuses": "المكافآت",
-      "netPay": "صافي الراتب"
+      "netPay": "صافي الراتب",
+      "deductionsExceedGross": "الخصومات تتجاوز إجمالي الراتب"
     },
     "runDetail": {
       "subtitle": "{{count}} إدخالات في هذه الدورة",
@@ -689,6 +692,7 @@
       "choosePlaceholder": "اختر مناوبة…",
       "assign": "تعيين",
       "conflictsWarning": "بعض التعيينات بها تعارضات في الجدولة.",
+      "cannotPublishConflicts": "قم بحل جميع تعارضات الجدولة قبل نشر الجدول.",
       "emptyTitle": "لا توجد بيانات جدول",
       "emptyDescription": "أضف موظفين إلى هذا الموقع لبناء الجدول."
     }

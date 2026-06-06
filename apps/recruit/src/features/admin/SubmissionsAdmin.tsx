@@ -115,15 +115,23 @@ const SubmissionsAdmin: React.FC = (): React.JSX.Element => {
 
                 <select
                   value={s.status}
-                  onChange={(e) =>
+                  onChange={(e) => {
+                    const newStatus = e.target.value;
+                    if (
+                      s.status === 'hired' &&
+                      newStatus !== 'hired' &&
+                      !confirm(`Move ${s.candidateName} from "hired" back to "${newStatus}"?`)
+                    ) {
+                      return;
+                    }
                     update.mutate(
-                      { id: s.id, status: e.target.value },
+                      { id: s.id, status: newStatus },
                       {
                         onSuccess: () => toast.success('Status updated'),
                         onError: () => toast.error("Couldn't update"),
                       }
-                    )
-                  }
+                    );
+                  }}
                   className="rounded-md border bg-black/40 px-3 py-1.5 text-sm outline-none focus:border-white/40"
                   style={{ borderColor: '#2a2a2a' }}
                 >

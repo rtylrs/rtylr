@@ -2,11 +2,13 @@ import React, { useState, useMemo } from 'react';
 import { useNavigate } from '@tanstack/react-router';
 import { useTranslation } from 'react-i18next';
 import { z } from 'zod';
+import { toast } from 'sonner';
 import { useUserStore } from '@voxire/auth';
 import {
   useListLeaveTypes,
   useCreateLeaveRequest,
   useListLeaveBalances,
+  useListLeaveRequests,
 } from '../../shared/hooks/queries/useLeave';
 import {
   Card,
@@ -39,6 +41,7 @@ const LeaveRequestForm = (): React.JSX.Element => {
   const userId = useUserStore((s) => s.userId);
   const { data: leaveTypes, isLoading: typesLoading } = useListLeaveTypes();
   const { data: balances } = useListLeaveBalances();
+  const { data: existingRequests } = useListLeaveRequests({ employeeId: Number(userId) });
   const createRequest = useCreateLeaveRequest();
 
   const [form, setForm] = useState({
@@ -68,6 +71,22 @@ const LeaveRequestForm = (): React.JSX.Element => {
     }
     setErrors({});
     const { leaveTypeId, startDate, endDate, notes } = result.data;
+
+    const today = new Date().toISOString().split('T')[0];
+    if (startDate < today || endDate < today) {
+      toast.error(t('leave.form.errorPastDate'));
+      return;
+    }
+
+    const approvedRequests = (existingRequests ?? []).filter((r) => r.status === 'approved');
+    const hasOverlap = approvedRequests.some(
+      (r) => startDate <= r.endDate && endDate >= r.startDate
+    );
+    if (hasOverlap) {
+      toast.error(t('leave.form.errorOverlap'));
+      return;
+    }
+
     createRequest.mutate(
       {
         employeeId: Number(userId),
@@ -167,6 +186,7 @@ const LeaveRequestForm = (): React.JSX.Element => {
                 type="date"
                 value={form.startDate}
                 onChange={(e) => update('startDate', e.target.value)}
+                min={new Date().toISOString().split('T')[0]}
                 style={errors.startDate ? { borderColor: 'var(--hr-error)' } : undefined}
               />
               {errors.startDate && (
@@ -181,7 +201,7 @@ const LeaveRequestForm = (): React.JSX.Element => {
                 type="date"
                 value={form.endDate}
                 onChange={(e) => update('endDate', e.target.value)}
-                min={form.startDate || undefined}
+                min={form.startDate || new Date().toISOString().split('T')[0]}
                 style={errors.endDate ? { borderColor: 'var(--hr-error)' } : undefined}
               />
               {errors.endDate && (

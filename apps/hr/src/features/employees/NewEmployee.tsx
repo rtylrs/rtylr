@@ -2,8 +2,9 @@ import React, { useState } from 'react';
 import { useNavigate } from '@tanstack/react-router';
 import { useTranslation } from 'react-i18next';
 import { ArrowLeft } from 'lucide-react';
+import { toast } from 'sonner';
 import { employeeSchema, type EmployeeFormData } from '../../shared/schemas/employeeSchema';
-import { useCreateEmployee } from '../../shared/hooks/queries/useEmployees';
+import { useCreateEmployee, useListEmployees } from '../../shared/hooks/queries/useEmployees';
 import type { CreateEmployeeRequest } from '@voxire/contracts/hr/employee/v1/create_employee';
 
 interface NewEmployeeProps {
@@ -15,6 +16,7 @@ const NewEmployee = ({ onCancel, isWizardMode }: NewEmployeeProps): React.JSX.El
   const { t } = useTranslation();
   const navigate = useNavigate();
   const createEmployee = useCreateEmployee();
+  const { data: existingEmployees } = useListEmployees({ limit: 1000, offset: 0 });
 
   const [form, setForm] = useState<EmployeeFormData>({
     userId: 0,
@@ -44,6 +46,11 @@ const NewEmployee = ({ onCancel, isWizardMode }: NewEmployeeProps): React.JSX.El
       return;
     }
     setErrors({});
+    const userIdExists = existingEmployees?.employees?.some((e) => e.userId === result.data.userId);
+    if (userIdExists) {
+      toast.error(t('employees.form.duplicateUserId'));
+      return;
+    }
     const payload: CreateEmployeeRequest = result.data;
     createEmployee.mutate(payload, {
       onSuccess: () => {

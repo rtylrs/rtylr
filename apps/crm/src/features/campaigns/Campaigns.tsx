@@ -375,6 +375,11 @@ const Campaigns: React.FC = () => {
   const filtered = campaigns.filter((c) => statusFilter === 'All' || c.status === statusFilter);
 
   const handleLaunch = (id: number): void => {
+    const campaign = campaigns.find((c) => c.id === id);
+    if ((campaign?.audience ?? 0) <= 0) {
+      toast.error('No eligible recipients for this campaign');
+      return;
+    }
     updateStatus.mutate(
       { id, status: 'active' },
       {

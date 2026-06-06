@@ -168,6 +168,7 @@ const ApplyPage: React.FC = (): React.JSX.Element => {
         onSuccess: () => {
           setDone(true);
           toast.success('Application received');
+          window.history.replaceState(null, '', window.location.href);
         },
         onError: () => toast.error("Couldn't submit - try again"),
       }

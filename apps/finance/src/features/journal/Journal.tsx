@@ -33,6 +33,11 @@ const Journal: React.FC = () => {
       toast.error('Amount must be greater than zero');
       return;
     }
+    const today = new Date().toISOString().slice(0, 10);
+    if (date > today) {
+      toast.error('Date cannot be in the future');
+      return;
+    }
     const amt = parsedAmount;
     try {
       await createMut.mutateAsync({
@@ -228,6 +233,7 @@ const Journal: React.FC = () => {
               style={inputStyle}
               type="date"
               value={date}
+              max={new Date().toISOString().split('T')[0]}
               onChange={(e) => setDate(e.target.value)}
             />
             <input

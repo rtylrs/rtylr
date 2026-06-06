@@ -63,6 +63,15 @@ const StockTakes: React.FC = () => {
   };
 
   const handleComplete = async (id: number, items: CreateStockTakeItemInput[]): Promise<void> => {
+    const uncounted = items.filter((item) => item.expectedQty > 0 && !item.countedQty).length;
+    if (
+      uncounted > 0 &&
+      !window.confirm(
+        `You have ${uncounted} uncounted item${uncounted === 1 ? '' : 's'}. Complete anyway?`
+      )
+    ) {
+      return;
+    }
     try {
       await updateMut.mutateAsync({ id, status: 'completed', items });
       toast.success('Stock take completed');

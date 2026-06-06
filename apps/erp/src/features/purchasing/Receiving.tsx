@@ -40,11 +40,20 @@ const Receiving: React.FC = () => {
 
   const adjust = (sku: string, delta: number) => {
     setLines((prev) =>
-      prev.map((l) => (l.sku === sku ? { ...l, received: Math.max(0, l.received + delta) } : l))
+      prev.map((l) =>
+        l.sku === sku
+          ? { ...l, received: Math.min(l.expected, Math.max(0, l.received + delta)) }
+          : l
+      )
     );
   };
 
   const completeReceipt = () => {
+    const overReceived = lines.filter((l) => l.received > l.expected);
+    if (overReceived.length > 0) {
+      toast.error('Cannot receive more units than ordered');
+      return;
+    }
     const variance = lines.reduce((sum, l) => sum + (l.expected - l.received), 0);
     toast.success(
       variance === 0

@@ -544,7 +544,9 @@
       "reasonPlaceholder": "Why are you requesting leave?",
       "notes": "Notes",
       "notesPlaceholder": "Additional notes (optional)",
-      "submit": "Submit Request"
+      "submit": "Submit Request",
+      "errorPastDate": "Leave dates cannot be in the past",
+      "errorOverlap": "This date range overlaps with an existing approved leave request"
     },
     "calendar": {
       "prevMonth": "Previous month",
@@ -620,7 +622,8 @@
       "overtimePay": "Overtime Pay",
       "deductions": "Deductions",
       "bonuses": "Bonuses",
-      "netPay": "Net Pay"
+      "netPay": "Net Pay",
+      "deductionsExceedGross": "Deductions exceed gross pay"
     },
     "runDetail": {
       "subtitle": "{{count}} entries in this run",
@@ -689,6 +692,7 @@
       "choosePlaceholder": "Choose a shift…",
       "assign": "Assign",
       "conflictsWarning": "Some assignments have scheduling conflicts.",
+      "cannotPublishConflicts": "Resolve all scheduling conflicts before publishing the roster.",
       "emptyTitle": "No roster data",
       "emptyDescription": "Add employees to this location to build the roster."
     }

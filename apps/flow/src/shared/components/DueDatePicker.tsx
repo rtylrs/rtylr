@@ -73,6 +73,7 @@ export const DueDatePicker: React.FC<DueDatePickerProps> = ({ value, onChange })
             <input
               type="date"
               value={value || ''}
+              min={new Date().toISOString().split('T')[0]}
               onChange={(e) => {
                 onChange(e.target.value);
                 setOpen(false);

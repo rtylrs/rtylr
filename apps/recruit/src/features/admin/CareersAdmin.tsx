@@ -5,6 +5,7 @@ import { APP_URLS } from '@voxire/config';
 
 import {
   useAdminCareers,
+  useAdminSubmissions,
   useCreateCareer,
   useDeleteCareer,
   useUpdateCareer,
@@ -22,6 +23,7 @@ import CareerEditor from './CareerEditor';
 const CareersAdmin: React.FC = (): React.JSX.Element => {
   const { data: careersData, isLoading } = useAdminCareers();
   const { data: customData } = useAdminCustomization();
+  const { data: submissionsData } = useAdminSubmissions();
   const create = useCreateCareer();
   const update = useUpdateCareer();
   const del = useDeleteCareer();
@@ -30,6 +32,7 @@ const CareersAdmin: React.FC = (): React.JSX.Element => {
   const [creating, setCreating] = useState(false);
 
   const careers = careersData?.careers ?? [];
+  const submissions = submissionsData?.submissions ?? [];
   const slug = customData?.customization?.slug;
 
   return (
@@ -115,7 +118,18 @@ const CareersAdmin: React.FC = (): React.JSX.Element => {
                       </IconButton>
                       <IconButton
                         onClick={() => {
-                          if (confirm(`Archive "${c.title}"?`)) {
+                          const openCount =
+                            submissions.filter(
+                              (s) =>
+                                s.careerId === c.id &&
+                                s.status !== 'hired' &&
+                                s.status !== 'rejected'
+                            ).length ?? 0;
+                          const message =
+                            openCount > 0
+                              ? `Archive "${c.title}"? It has ${openCount} open application(s).`
+                              : `Archive "${c.title}"?`;
+                          if (confirm(message)) {
                             del.mutate(c.id, {
                               onSuccess: () => toast.success('Role archived'),
                               onError: () => toast.error("Couldn't archive"),

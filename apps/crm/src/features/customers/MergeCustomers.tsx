@@ -24,6 +24,10 @@ const MergeCustomers: React.FC = () => {
 
   const handleMerge = () => {
     if (!primaryId || !secondaryId) return;
+    if (primaryId === secondaryId) {
+      toast.error('Cannot merge a customer with themselves');
+      return;
+    }
     merge.mutate(
       { primaryId, secondaryId },
       {
