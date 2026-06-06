@@ -68,6 +68,7 @@ export const TitleBar: React.FC<TitleBarProps> = ({
         onMouseDown={(e) => e.stopPropagation()}
       >
         <button
+          className="rtylr-os-window-control rtylr-os-window-control-close"
           onClick={(e) => {
             e.stopPropagation();
             onClose();
@@ -89,6 +90,7 @@ export const TitleBar: React.FC<TitleBarProps> = ({
           {groupHovered && <CloseIcon />}
         </button>
         <button
+          className="rtylr-os-window-control rtylr-os-window-control-minimize"
           onClick={(e) => {
             e.stopPropagation();
             onMinimize();
@@ -110,6 +112,7 @@ export const TitleBar: React.FC<TitleBarProps> = ({
           {groupHovered && <MinimizeIcon />}
         </button>
         <button
+          className="rtylr-os-window-control rtylr-os-window-control-maximize"
           onClick={(e) => {
             e.stopPropagation();
             onMaximize?.();

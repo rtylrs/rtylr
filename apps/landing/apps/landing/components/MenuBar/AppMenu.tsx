@@ -29,7 +29,9 @@ export const AppMenu: React.FC = () => {
   return (
     <div ref={ref} style={{ position: 'relative' }}>
       <button
+        className="rtylr-os-menu-logo-trigger"
         onClick={() => setOpen((v) => !v)}
+        aria-expanded={open}
         style={{
           background: open ? 'rgba(255,255,255,0.1)' : 'transparent',
           border: 'none',
@@ -52,6 +54,7 @@ export const AppMenu: React.FC = () => {
 
       {open && (
         <div
+          className="rtylr-os-menu-dropdown"
           style={{
             position: 'absolute',
             top: 'calc(100% + 4px)',
@@ -70,11 +73,13 @@ export const AppMenu: React.FC = () => {
             'separator' in item && item.separator ? (
               <div
                 key={i}
+                className="rtylr-os-menu-separator"
                 style={{ height: 1, background: 'rgba(255,255,255,0.08)', margin: '4px 0' }}
               />
             ) : (
               <button
                 key={i}
+                className="rtylr-os-menu-item"
                 onClick={() => {
                   'action' in item && item.action();
                   setOpen(false);
