@@ -6,12 +6,21 @@ vi.stubGlobal('import', {
   meta: { env: { VITE_API_URL: 'https://api.test.com/' } },
 });
 
+function clearAllCookies(): void {
+  const names = new Set(
+    document.cookie
+      .split(';')
+      .map((c) => c.split('=')[0]?.trim())
+      .filter((n): n is string => Boolean(n))
+  );
+  names.add('token');
+  for (const name of names) {
+    document.cookie = `${name}=; Expires=Thu, 01 Jan 1970 00:00:00 GMT; Max-Age=0; path=/`;
+  }
+}
+
 beforeEach(() => {
-  // Clear all cookies between tests
-  document.cookie.split(';').forEach((c) => {
-    const name = c.trim().split('=')[0];
-    if (name) document.cookie = `${name}=; Max-Age=0; path=/`;
-  });
+  clearAllCookies();
   vi.restoreAllMocks();
 });
 
