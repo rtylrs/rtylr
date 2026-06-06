@@ -182,7 +182,7 @@ func (h *GenerateTextStreamHandler) ServeHTTP(w http.ResponseWriter, r *http.Req
 	// Analyst mode: turn the question into a validated, tenant-scoped query,
 	// run it on the read replica, and ground the answer in the real rows. Falls
 	// back to a normal chat answer if the data pipeline can't produce a result.
-	if ParseMode(req.Mode) == ModeAnalyst {
+	if ParseMode(req.Mode) != ModeSupport {
 		if grounding, ok := h.analystGrounding(ctx, req.Prompt, businessID, authUserID); ok {
 			enhancedPrompt = grounding + "\n\n---\n\n" + enhancedPrompt
 		}
@@ -339,6 +339,7 @@ func (h *GenerateTextStreamHandler) setupSSEHeaders(w http.ResponseWriter) {
 	w.Header().Set("Content-Type", "text/event-stream")
 	w.Header().Set("Cache-Control", "no-cache")
 	w.Header().Set("Connection", "keep-alive")
+	w.Header().Set("X-Accel-Buffering", "no")
 
 	if err := http.NewResponseController(w).SetWriteDeadline(time.Time{}); err != nil {
 		logger.Global().Warn("could not clear SSE write deadline", logger.Error(err))

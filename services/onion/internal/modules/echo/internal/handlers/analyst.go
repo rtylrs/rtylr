@@ -4,6 +4,7 @@ import (
 	"context"
 	"encoding/json"
 	"strings"
+	"time"
 
 	"github.com/voxire/onion/internal/platform/logger"
 )
@@ -25,15 +26,24 @@ const maxGroundingChars = 12000
 // buildSpecGenPrompt asks the model to turn a question into a strict JSON query
 // spec (no prose) against the allowlisted schema. owner_id is never mentioned —
 // it is enforced server-side.
-func buildSpecGenPrompt(schema, question string) string {
+func buildSpecGenPrompt(schema, question, today string) string {
 	var b strings.Builder
-	b.WriteString("You translate a business question into a JSON query spec for a read-only analytics API. ")
-	b.WriteString("Output ONLY a single JSON object — no prose, no markdown fences.\n\n")
-	b.WriteString("Available views and their columns:\n")
+	b.WriteString("You convert a business question into a JSON query against a read-only analytics API. ")
+	b.WriteString("Output ONLY a single JSON object, nothing else — no prose, no markdown fences.\n\n")
+	b.WriteString("Today is ")
+	b.WriteString(today)
+	b.WriteString(".\n\nViews and their columns:\n")
 	b.WriteString(schema)
 	b.WriteString("\nSpec shape:\n")
 	b.WriteString(`{"view":"<one view>","columns":["<col>"],"aggregations":[{"func":"sum|count|avg|min|max","col":"<col>","as":"<alias>"}],"where":[{"col":"<col>","op":"=|!=|<|<=|>|>=|like|in","value":<value>}],"group_by":["<col>"],"order_by":[{"col":"<col-or-alias>","dir":"asc|desc"}],"limit":<int>}`)
-	b.WriteString("\n\nRules: use exactly one view; only columns listed for that view; never reference owner_id (it is applied automatically); keep limit <= 1000.\n\n")
+	b.WriteString("\n\nRules: exactly one view; only columns listed for that view; never reference owner_id (applied automatically); limit <= 1000. For date filters use 'YYYY-MM-DD'.\n\n")
+	b.WriteString("Examples:\n")
+	b.WriteString(`Q: "revenue today" -> {"view":"ai_invoices","aggregations":[{"func":"sum","col":"total","as":"revenue"}],"where":[{"col":"issue_date","op":">=","value":"` + today + `"}]}`)
+	b.WriteString("\n")
+	b.WriteString(`Q: "how many employees" -> {"view":"ai_employees","aggregations":[{"func":"count","as":"employees"}]}`)
+	b.WriteString("\n")
+	b.WriteString(`Q: "low stock products" -> {"view":"ai_products","columns":["name","sku","stock_quantity","low_stock_threshold"],"order_by":[{"col":"stock_quantity","dir":"asc"}],"limit":20}`)
+	b.WriteString("\n\nIf the question is not answerable from these views (greetings, how-to, general chat), respond with exactly: {}\n\n")
 	b.WriteString("Question: ")
 	b.WriteString(question)
 	return b.String()
@@ -58,14 +68,15 @@ func (h *GenerateTextStreamHandler) analystGrounding(ctx context.Context, questi
 		return "", false
 	}
 
-	raw, err := h.AiService.CompleteText(ctx, buildSpecGenPrompt(h.AnalystService.SchemaPrompt(), question))
+	today := time.Now().UTC().Format("2006-01-02")
+	raw, err := h.AiService.CompleteText(ctx, buildSpecGenPrompt(h.AnalystService.SchemaPrompt(), question, today))
 	if err != nil {
 		logger.Ctx(ctx).Warn("analyst spec generation failed", logger.Error(err))
 		return "", false
 	}
 
 	specJSON := extractJSONObject(raw)
-	if specJSON == "" {
+	if specJSON == "" || specJSON == "{}" {
 		return "", false
 	}
 

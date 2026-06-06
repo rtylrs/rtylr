@@ -37,7 +37,7 @@ const (
 	// fixed here. Point NvidiaNIMBaseURL at a self-hosted NIM if/when we run one.
 	NvidiaNIMAPIKeyEnvVar = "NVIDIA_NIM_API_KEY"
 	NvidiaNIMBaseURL      = "https://integrate.api.nvidia.com/v1"
-	NvidiaNIMModel        = "meta/llama-3.3-70b-instruct"
+	NvidiaNIMModel        = "meta/llama-3.1-8b-instruct"
 
 	// AIPrimaryProviderEnvVar optionally forces which configured provider is
 	// primary ("deepseek" | "nvidia"). Empty = use the default priority order.
