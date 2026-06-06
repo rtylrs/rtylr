@@ -95,7 +95,8 @@ CREATE TABLE IF NOT EXISTS hr_employees (
     INDEX idx_hr_employees_owner (owner_id),
     INDEX idx_hr_employees_email (owner_id, email),
     INDEX idx_hr_employees_dept (owner_id, department_id),
-    INDEX idx_hr_employees_location (owner_id, location_id)
+    INDEX idx_hr_employees_location (owner_id, location_id),
+    UNIQUE KEY uniq_employee_user_id (user_id)
 );
 
 CREATE TABLE IF NOT EXISTS hr_roles (
