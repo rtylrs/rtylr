@@ -339,6 +339,10 @@ func (h *GenerateTextStreamHandler) setupSSEHeaders(w http.ResponseWriter) {
 	w.Header().Set("Content-Type", "text/event-stream")
 	w.Header().Set("Cache-Control", "no-cache")
 	w.Header().Set("Connection", "keep-alive")
+
+	if err := http.NewResponseController(w).SetWriteDeadline(time.Time{}); err != nil {
+		logger.Global().Warn("could not clear SSE write deadline", logger.Error(err))
+	}
 }
 
 func (h *GenerateTextStreamHandler) monitorClientDisconnect(r *http.Request) chan bool {
