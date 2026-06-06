@@ -21,6 +21,33 @@ export interface TeamListResult {
   pageSize: number;
 }
 
+function applyMemberPatch(member: TeamMember, patch: Partial<TeamMember>): TeamMember {
+  const fullName = patch.fullName ?? patch.name;
+  const next: TeamMember = {
+    ...member,
+    ...patch,
+  };
+
+  if (fullName !== undefined) {
+    next.fullName = fullName;
+    next.name = fullName || next.email;
+  } else {
+    next.name = next.fullName || next.name || next.email;
+  }
+
+  if (patch.isActive !== undefined) {
+    next.status = patch.isActive ? 'active' : 'inactive';
+  }
+
+  return next;
+}
+
+function isTeamListResult(value: unknown): value is TeamListResult {
+  return (
+    typeof value === 'object' && value !== null && Array.isArray((value as TeamListResult).members)
+  );
+}
+
 export const useTeam = (params: UseTeamParams = {}) => {
   const { page = 1, pageSize = 50 } = params;
   return useQuery<TeamListResult>({
@@ -106,9 +133,20 @@ export const useUpdateMember = () => {
 
       return unwrap(safe.put('/team/users/permissions', payload));
     },
-    onSuccess: () => {
+    onSuccess: (_data, { id, patch }) => {
       toast.success('Member updated');
-      qc.invalidateQueries({ queryKey: ['team'] });
+      qc.getQueriesData({ queryKey: ['team'] }).forEach(([queryKey, cached]) => {
+        if (!isTeamListResult(cached)) return;
+        qc.setQueryData<TeamListResult>(queryKey, {
+          ...cached,
+          members: cached.members.map((member) =>
+            member.id === id ? applyMemberPatch(member, patch) : member
+          ),
+        });
+      });
+      qc.setQueryData<TeamMember | undefined>(['team', id], (old) =>
+        old ? applyMemberPatch(old, patch) : old
+      );
     },
     onError: () => toast.error('Failed to update member'),
   });

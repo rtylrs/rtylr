@@ -220,4 +220,63 @@ describe('useUpdateMember', () => {
       apps: ['pos', 'finance'],
     });
   });
+
+  it('updates cached list and detail data after save', async () => {
+    mockGet
+      .mockResolvedValueOnce({
+        users: [
+          {
+            id: '42',
+            fullName: 'Old Name',
+            email: 'member@test.com',
+            role: 'staff',
+            apps: ['pos'],
+            isActive: true,
+          },
+        ],
+      })
+      .mockResolvedValueOnce({
+        user: {
+          id: '42',
+          fullName: 'Old Name',
+          email: 'member@test.com',
+          role: 'staff',
+          apps: ['pos'],
+          isActive: true,
+        },
+      });
+    mockPut.mockResolvedValue({ success: true });
+
+    const wrapper = createWrapper();
+    const team = renderHook(() => useTeam({ pageSize: 50 }), { wrapper });
+    const member = renderHook(() => useMember('42'), { wrapper });
+
+    await waitFor(() => expect(team.result.current.data?.members[0].name).toBe('Old Name'));
+    await waitFor(() => expect(member.result.current.data?.name).toBe('Old Name'));
+
+    const update = renderHook(() => useUpdateMember(), { wrapper });
+    await act(async () => {
+      await update.result.current.mutateAsync({
+        id: '42',
+        patch: { fullName: 'New Name', role: 'admin', apps: ['erp', 'flow'] },
+      });
+    });
+
+    await waitFor(() =>
+      expect(team.result.current.data?.members[0]).toMatchObject({
+        fullName: 'New Name',
+        name: 'New Name',
+        role: 'admin',
+        apps: ['erp', 'flow'],
+      })
+    );
+    await waitFor(() =>
+      expect(member.result.current.data).toMatchObject({
+        fullName: 'New Name',
+        name: 'New Name',
+        role: 'admin',
+        apps: ['erp', 'flow'],
+      })
+    );
+  });
 });
