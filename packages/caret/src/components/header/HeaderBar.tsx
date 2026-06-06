@@ -9,9 +9,10 @@ import HistoryHover from './HistoryHover';
 
 export interface HeaderBarProps {
   onNewChat?: () => void;
+  onSelectChat?: (id: string) => void;
 }
 
-export const HeaderBar: React.FC<HeaderBarProps> = ({ onNewChat }) => {
+export const HeaderBar: React.FC<HeaderBarProps> = ({ onNewChat, onSelectChat }) => {
   const close = useCaretStore((s) => s.close);
   const view = useCaretUIStore((s) => s.view);
   const setView = useCaretUIStore((s) => s.setView);
@@ -48,7 +49,7 @@ export const HeaderBar: React.FC<HeaderBarProps> = ({ onNewChat }) => {
         </IconButton>
       </Tooltip>
 
-      <HistoryHover />
+      <HistoryHover onSelectChat={onSelectChat} />
 
       <Tooltip label="Settings">
         <IconButton

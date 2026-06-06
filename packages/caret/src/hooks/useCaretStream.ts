@@ -3,6 +3,7 @@ import { useCaretStore } from '../stores/caretStore';
 import { useCaretSettingsStore } from '../stores/settingsStore';
 import { consumeSse } from '../protocol/sse';
 import type { CaretStreamEvent } from '../protocol/events';
+import { readAuthToken } from '../lib/auth';
 
 export interface UseCaretStreamParams {
   userId: number;
@@ -18,17 +19,6 @@ export interface UseCaretStreamResult {
 interface OpenThinking {
   blockId: string;
   startedAt: number;
-}
-
-// The API is on a different domain than the app, so the auth cookie can't ride
-// cross-site. Like @voxire/api, read the JS-readable `token` cookie and send it
-// as a Bearer header — otherwise the SSE request hits the API unauthenticated.
-function readAuthToken(): string | null {
-  if (typeof document === 'undefined') return null;
-  const match = document.cookie.match(/(?:^|;\s*)token=([^;]+)/);
-  const token = match ? decodeURIComponent(match[1]) : null;
-  if (!token || token.split('.').length !== 3) return null;
-  return token;
 }
 
 export function useCaretStream({

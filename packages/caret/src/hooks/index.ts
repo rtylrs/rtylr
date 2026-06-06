@@ -1,6 +1,6 @@
 export { useCaretStream } from './useCaretStream';
 export { useCaretSessions } from './useCaretSessions';
-export type { CaretSession } from './useCaretSessions';
+export { useLoadCaretChat } from './useLoadCaretChat';
 export { usePanelResize } from './usePanelResize';
 export { useScrollToBottom } from './useScrollToBottom';
 export { useShortcuts } from './useShortcuts';

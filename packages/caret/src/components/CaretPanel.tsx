@@ -4,7 +4,10 @@ import { caretTokens } from '../ui/tokens';
 import { useCaretStore } from '../stores/caretStore';
 import { useCaretSettingsStore } from '../stores/settingsStore';
 import { useCaretUIStore } from '../stores/uiStore';
+import { useChatsStore } from '../stores/chatsStore';
 import { useCaretStream } from '../hooks/useCaretStream';
+import { useCaretSessions } from '../hooks/useCaretSessions';
+import { useLoadCaretChat } from '../hooks/useLoadCaretChat';
 import { usePanelResize } from '../hooks/usePanelResize';
 import { useShortcuts } from '../hooks/useShortcuts';
 import HeaderBar from './header/HeaderBar';
@@ -32,7 +35,8 @@ const DEFAULT_SUGGESTIONS = [
 
 const CaretPanel: React.FC<CaretPanelProps> = ({ systemContext, userId, apiBaseUrl, variant }) => {
   useShortcuts();
-  const { isOpen, messages, isStreaming, setToolStatus, reset } = useCaretStore();
+  const { isOpen, sessionId, messages, isStreaming, setToolStatus, setSessionId, setMessages, reset } =
+    useCaretStore();
   const showThinking = useCaretSettingsStore((s) => s.showThinking);
   const panelWidth = useCaretSettingsStore((s) => s.panelWidth);
   const view = useCaretUIStore((s) => s.view);
@@ -43,17 +47,33 @@ const CaretPanel: React.FC<CaretPanelProps> = ({ systemContext, userId, apiBaseU
     apiBaseUrl,
     systemContext,
   });
+  const { sessions } = useCaretSessions({ userId, apiBaseUrl });
+  const loadChat = useLoadCaretChat({ userId, apiBaseUrl });
+  const setRecent = useChatsStore((s) => s.setRecent);
   const { onMouseDown } = usePanelResize();
+
+  useEffect(() => {
+    if (sessions.length > 0) setRecent(sessions);
+  }, [sessions, setRecent]);
 
   const newChat = useCallback((): void => {
     reset();
     setView('chat');
   }, [reset, setView]);
 
-  // Bounce out of history if you reopen with no messages.
-  useEffect(() => {
-    if (isOpen && view === 'history' && messages.length === 0) setView('chat');
-  }, [isOpen, view, messages.length, setView]);
+  const selectChat = useCallback(
+    async (id: string): Promise<void> => {
+      setSessionId(id);
+      setView('chat');
+      try {
+        const loaded = await loadChat(id);
+        setMessages(loaded);
+      } catch {
+        setMessages([]);
+      }
+    },
+    [loadChat, setSessionId, setMessages, setView],
+  );
 
   const [introPlaying, setIntroPlaying] = useState(false);
   useEffect(() => {
@@ -123,7 +143,7 @@ const CaretPanel: React.FC<CaretPanelProps> = ({ systemContext, userId, apiBaseU
         }}
       />
 
-      <HeaderBar onNewChat={newChat} />
+      <HeaderBar onNewChat={newChat} onSelectChat={selectChat} />
 
       {view === 'chat' && (
         <>
@@ -147,7 +167,12 @@ const CaretPanel: React.FC<CaretPanelProps> = ({ systemContext, userId, apiBaseU
       )}
 
       {view === 'history' && (
-        <ChatList chats={[]} activeId={null} onSelect={() => setView('chat')} onNew={newChat} />
+        <ChatList
+          chats={sessions}
+          activeId={sessionId}
+          onSelect={selectChat}
+          onNew={newChat}
+        />
       )}
 
       {view === 'settings' && <SettingsPanel />}

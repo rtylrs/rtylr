@@ -6,8 +6,12 @@ import Tooltip from '../../ui/Tooltip';
 import { useChatsStore } from '../../stores/chatsStore';
 import { useCaretUIStore } from '../../stores/uiStore';
 
+export interface HistoryHoverProps {
+  onSelectChat?: (id: string) => void;
+}
+
 /** History icon button that reveals a hover dropdown of recent chats. */
-export const HistoryHover: React.FC = () => {
+export const HistoryHover: React.FC<HistoryHoverProps> = ({ onSelectChat }) => {
   const recent = useChatsStore((s) => s.recent);
   const setActive = useChatsStore((s) => s.setActiveChat);
   const setView = useCaretUIStore((s) => s.setView);
@@ -79,7 +83,8 @@ export const HistoryHover: React.FC = () => {
               type="button"
               onClick={() => {
                 setActive(c.id);
-                setView('chat');
+                if (onSelectChat) onSelectChat(c.id);
+                else setView('chat');
                 setOpen(false);
               }}
               style={{

@@ -12,6 +12,7 @@ interface ChatsState {
 interface ChatsActions {
   setActiveChat: (id: string | null) => void;
   upsertRecent: (chat: CaretChatSummary) => void;
+  setRecent: (chats: CaretChatSummary[]) => void;
   removeRecent: (id: string) => void;
   clear: () => void;
 }
@@ -31,6 +32,7 @@ export const useChatsStore = create<ChatsStore>()(
           const filtered = s.recent.filter((c) => c.id !== chat.id);
           return { recent: [chat, ...filtered].slice(0, MAX_RECENT) };
         }),
+      setRecent: (chats) => set({ recent: chats.slice(0, MAX_RECENT) }),
       removeRecent: (id) => set((s) => ({ recent: s.recent.filter((c) => c.id !== id) })),
       clear: () => set({ activeChatId: null, recent: [] }),
     }),
