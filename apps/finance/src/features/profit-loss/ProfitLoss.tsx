@@ -2,7 +2,7 @@ import React, { useState } from 'react';
 import { motion } from 'motion/react';
 import { TrendingUp, TrendingDown, Download, Lock } from 'lucide-react';
 import { toast } from 'sonner';
-import { usePL } from '../../shared/hooks/useTax';
+import { usePLByPeriod } from '../../shared/hooks/useTax';
 import PaymentReminderPanel from '../../shared/components/PaymentReminderPanel';
 import ConfirmDialog from '../../shared/components/ConfirmDialog';
 import { exportProfitLossCsv } from '../../shared/lib/exports';
@@ -118,7 +118,7 @@ const PERIOD_PARAMS: Record<Period, string> = {
 const ProfitLoss: React.FC = () => {
   const [period, setPeriod] = useState<Period>('This Month');
   const [showClose, setShowClose] = useState(false);
-  const { data: plData } = usePL(PERIOD_PARAMS[period]);
+  const { data: plData } = usePLByPeriod(PERIOD_PARAMS[period]);
 
   const data: PeriodData = plData
     ? {

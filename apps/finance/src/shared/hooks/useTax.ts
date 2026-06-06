@@ -75,7 +75,8 @@ function periodToRange(period: string): { from: string; to: string } {
   };
 }
 
-export function usePL(period: string) {
+/** Use this hook in ProfitLoss.tsx. Accepts a short period token (month/last_month/quarter/year). */
+export function usePLByPeriod(period: string) {
   const { from, to } = periodToRange(period);
   return useQuery({
     queryKey: ['pl', period],

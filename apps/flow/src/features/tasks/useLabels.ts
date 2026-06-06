@@ -56,6 +56,7 @@ export function useSetTaskLabels() {
     onSuccess: (_data, variables) => {
       qc.invalidateQueries({ queryKey: ['task', String(variables.task_id)] });
       qc.invalidateQueries({ queryKey: ['tasks'] });
+      qc.invalidateQueries({ queryKey: ['my-tasks'] });
     },
     onError: () => toast.error('Failed to set task labels'),
   });

@@ -46,5 +46,8 @@ if (rootElement) {
     </HelmetProvider>
   );
 } else {
-  <div>The App Failed To Load</div>;
+  const msg = document.createElement('div');
+  msg.textContent = 'The app failed to load. Please refresh the page.';
+  msg.style.cssText = 'padding:2rem;font-family:sans-serif';
+  document.body.appendChild(msg);
 }

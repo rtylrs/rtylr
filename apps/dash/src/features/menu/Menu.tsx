@@ -4,6 +4,7 @@ import { useNavigate } from '@tanstack/react-router';
 import CreateCategoryModal from './Components/CreateCategoryModal';
 import { useMenuStore } from '../../shared/stores/menuStore';
 import { useUserStore } from '../../shared/stores/userStore';
+import { useGetMenu } from '../../shared/hooks/queries/useMenu';
 import CreateParentCategoryModal from './Components/CreateParentCategoryModal';
 
 interface StoreItemDetails {
@@ -33,20 +34,19 @@ interface GroupedCategory {
 const Menu: React.FC<{}> = () => {
   const navigate = useNavigate();
   const { userId } = useUserStore();
-  const { items, status, id: menuId, fetchMenu, deleteCategory } = useMenuStore();
+  const { items, status, id: menuId, deleteCategory } = useMenuStore();
+  useGetMenu(userId as string);
 
   const [isCreateCategoryModalOpen, setCreateCategoryModalOpen] = useState(false);
   const [isCreateParentCategoryModalOpen, setCreateParentCategoryModalOpen] = useState(false);
 
   useEffect(() => {
-    fetchMenu(userId as string, true);
-
     const url = new URL(window.location.href);
     if (!url.searchParams.has('menuId')) {
       url.searchParams.append('menuId', menuId as string);
       window.history.replaceState({}, '', url.toString());
     }
-  }, [fetchMenu, menuId, userId]);
+  }, [menuId]);
 
   const handleDeleteCategory = (categoryId: string) => {
     deleteCategory(categoryId);

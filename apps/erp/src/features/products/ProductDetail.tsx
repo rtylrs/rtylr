@@ -237,7 +237,9 @@ const ProductDetail: React.FC = () => {
                   Margin
                 </p>
                 <p className="text-lg font-bold mt-0.5" style={{ color: '#10b981' }}>
-                  {Math.round(((product.salePrice - product.costPrice) / product.salePrice) * 100)}%
+                  {product.salePrice > 0
+                    ? `${Math.round(((product.salePrice - product.costPrice) / product.salePrice) * 100)}%`
+                    : '—'}
                 </p>
               </div>
               <div>

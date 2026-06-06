@@ -35,8 +35,8 @@ const Callback: React.FC = (): React.JSX.Element => {
       return;
     }
 
-    const redirectParam = localStorage.getItem('google_auth_redirect');
-    localStorage.removeItem('google_auth_redirect');
+    const redirectParam = localStorage.getItem('social_auth_redirect');
+    localStorage.removeItem('social_auth_redirect');
 
     unwrap(safe.post<GoogleAuthResponse>('/auth/register/google', { code }))
       .then((data) => {

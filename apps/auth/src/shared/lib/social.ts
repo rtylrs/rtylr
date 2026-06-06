@@ -15,6 +15,6 @@ export async function startSocialLogin(
   const { url } = await unwrap(
     safe.get<{ url: string }>('/auth/social/authorize', { params: { provider } })
   );
-  if (redirectParam) localStorage.setItem('google_auth_redirect', redirectParam);
+  if (redirectParam) localStorage.setItem('social_auth_redirect', redirectParam);
   window.location.href = url;
 }

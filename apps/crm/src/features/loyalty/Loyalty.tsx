@@ -3,6 +3,7 @@ import {
   useLoyaltyConfig,
   useLoyaltyTransactions,
   useLoyaltyTiers,
+  useUpdateLoyaltyConfig,
 } from '../../shared/hooks/queries/useLoyalty';
 import { motion } from 'motion/react';
 import { Gift, Star, Trophy, Crown, Award, ToggleLeft, ToggleRight, Clock } from 'lucide-react';
@@ -27,6 +28,7 @@ const Loyalty: React.FC = () => {
   const { data: config } = useLoyaltyConfig();
   const { data: transactions } = useLoyaltyTransactions();
   const { data: tiersData } = useLoyaltyTiers();
+  const updateConfig = useUpdateLoyaltyConfig();
 
   const tiers: LoyaltyTier[] = tiersData ?? [];
 
@@ -57,7 +59,11 @@ const Loyalty: React.FC = () => {
           </p>
         </div>
         <button
-          onClick={() => setProgramEnabled((v) => !v)}
+          onClick={() => {
+            const next = !programEnabled;
+            setProgramEnabled(next);
+            updateConfig.mutate({ programEnabled: next });
+          }}
           style={{
             display: 'flex',
             alignItems: 'center',
@@ -215,6 +221,25 @@ const Loyalty: React.FC = () => {
               100 pts = $1.00
             </div>
           </div>
+        </div>
+        <div style={{ display: 'flex', justifyContent: 'flex-end', marginTop: '16px' }}>
+          <button
+            onClick={() => updateConfig.mutate({ pointsPerDollar, pointsExpiry })}
+            disabled={updateConfig.isPending}
+            style={{
+              padding: '8px 20px',
+              borderRadius: '8px',
+              fontSize: '13px',
+              fontWeight: 600,
+              background: ACCENT,
+              color: '#fff',
+              border: 'none',
+              cursor: updateConfig.isPending ? 'not-allowed' : 'pointer',
+              opacity: updateConfig.isPending ? 0.7 : 1,
+            }}
+          >
+            {updateConfig.isPending ? 'Saving…' : 'Save'}
+          </button>
         </div>
       </motion.div>
 

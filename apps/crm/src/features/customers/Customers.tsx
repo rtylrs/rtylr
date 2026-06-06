@@ -155,13 +155,13 @@ const Customers: React.FC = () => {
               } else {
                 toast.error(`Failed to tag ${failed} of ${ids.length} customers`);
               }
+              setBulkTag('');
+              setSelected(new Set());
             }
           },
         }
       );
     });
-    setBulkTag('');
-    setSelected(new Set());
   };
 
   const exportCsv = () => {

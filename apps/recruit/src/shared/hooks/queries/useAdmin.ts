@@ -138,7 +138,8 @@ export function useUpdateSubmissionStatus() {
   return useMutation({
     mutationFn: (body: { id: number; status: string }) =>
       unwrap(safe.put<{ message: string }>('/recruit/submissions/status', body)),
-    onSuccess: () => qc.invalidateQueries({ queryKey: ['recruit', 'admin', 'submissions'] }),
+    onSuccess: () =>
+      qc.invalidateQueries({ queryKey: ['recruit', 'admin', 'submissions'], exact: false }),
     onError: () => toast.error('Failed to update submission status'),
   });
 }
