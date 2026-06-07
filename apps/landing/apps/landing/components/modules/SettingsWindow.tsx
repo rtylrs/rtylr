@@ -1,6 +1,7 @@
 import React from 'react';
 import { Monitor, Sun, Moon } from 'lucide-react';
 import { useDesktopStore, ColorMode, Wallpaper } from '../../stores/useDesktopStore';
+import { WallpaperOverlay } from '../Desktop/WallpaperOverlay';
 
 const COLOR_MODES: {
   key: ColorMode;
@@ -12,12 +13,12 @@ const COLOR_MODES: {
   { key: 'dark', label: 'Dark', icon: Moon },
 ];
 
-const WALLPAPERS: { key: Wallpaper; label: string; color: string }[] = [
-  { key: 'midnight', label: 'Night City', color: 'linear-gradient(135deg, #040a18 0%, #0e1b38 60%, #ff6b35 100%)' },
-  { key: 'aurora', label: 'Street Market', color: 'linear-gradient(135deg, #4aaee8 0%, #7cc8f0 50%, #d4c4a0 100%)' },
-  { key: 'dusk', label: 'Coastal Sunset', color: 'linear-gradient(135deg, #1a1040 0%, #e85d20 60%, #1a3860 100%)' },
-  { key: 'slate', label: 'Snowy Town', color: 'linear-gradient(135deg, #8898b8 0%, #aab8cc 50%, #e8f2ff 100%)' },
-  { key: 'forest', label: 'Forest Trail', color: 'linear-gradient(135deg, #5ab8f0 0%, #448028 50%, #4a8030 100%)' },
+const WALLPAPERS: { key: Wallpaper; label: string }[] = [
+  { key: 'midnight', label: 'Neon City' },
+  { key: 'aurora', label: 'Aurora' },
+  { key: 'dusk', label: 'Sunset' },
+  { key: 'slate', label: 'Misty Peaks' },
+  { key: 'forest', label: 'Dawn Hills' },
 ];
 
 export default function SettingsWindow(): React.JSX.Element {
@@ -116,14 +117,19 @@ export default function SettingsWindow(): React.JSX.Element {
               title={w.label}
               style={{
                 flex: 1,
-                height: 44,
+                height: 58,
+                padding: 0,
+                position: 'relative',
+                overflow: 'hidden',
                 border: `2px solid ${wallpaper === w.key ? '#e8e6e1' : 'rgba(255,255,255,0.1)'}`,
-                borderRadius: 7,
-                background: w.color,
+                borderRadius: 8,
                 cursor: 'pointer',
-                transition: 'border-color 0.15s',
+                transition: 'border-color 0.15s, transform 0.15s',
+                transform: wallpaper === w.key ? 'scale(1)' : 'scale(0.97)',
               }}
-            />
+            >
+              <WallpaperOverlay wallpaper={w.key} />
+            </button>
           ))}
         </div>
         <div style={{ fontSize: 11, color: 'rgba(255,255,255,0.3)', marginTop: 6 }}>
