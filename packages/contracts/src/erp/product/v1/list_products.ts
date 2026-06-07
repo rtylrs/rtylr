@@ -5,7 +5,7 @@
 // source: erp/product/v1/list_products.proto
 
 /* eslint-disable */
-import type { Product } from './types';
+import type { Product } from "./types";
 
 export interface ListProductsRequest {
   /** search is the search value for this contract. */

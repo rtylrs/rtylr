@@ -5,7 +5,7 @@
 // source: insights/report/v1/get_report_template.proto
 
 /* eslint-disable */
-import type { ReportTemplate } from './types';
+import type { ReportTemplate } from "./types";
 
 export interface GetReportTemplateRequest {
   /** id is the unique identifier for the resource. */

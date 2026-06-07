@@ -5,9 +5,10 @@
 // source: insights/setting/v1/get_insights_settings.proto
 
 /* eslint-disable */
-import type { InsightsSettings } from './types';
+import type { InsightsSettings } from "./types";
 
-export interface GetInsightsSettingsRequest {}
+export interface GetInsightsSettingsRequest {
+}
 
 export interface GetInsightsSettingsResponse {
   /** settings is the settings value for this contract. */

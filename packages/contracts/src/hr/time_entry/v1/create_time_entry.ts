@@ -5,25 +5,35 @@
 // source: hr/time_entry/v1/create_time_entry.proto
 
 /* eslint-disable */
-import type { TimeEntryPayload } from './types';
+import type { TimeEntryPayload } from "./types";
 
 export interface CreateTimeEntryRequest {
   /** Employee who logged the time. */
   employeeId: number;
   /** Associated project; absent if not project-based. */
-  projectId?: number | undefined;
+  projectId?:
+    | number
+    | undefined;
   /** Associated task; absent if not task-level tracking. */
-  taskId?: number | undefined;
+  taskId?:
+    | number
+    | undefined;
   /** Time category for reporting; absent if uncategorised. */
-  categoryId?: number | undefined;
+  categoryId?:
+    | number
+    | undefined;
   /** Date the work was performed (ISO-8601 format). */
   date: string;
   /** Total duration of work in minutes. */
   durationMinutes: number;
   /** Clock-in time; absent if duration-only entry. */
-  startTime?: string | undefined;
+  startTime?:
+    | string
+    | undefined;
   /** Clock-out time; absent if duration-only entry. */
-  endTime?: string | undefined;
+  endTime?:
+    | string
+    | undefined;
   /** Free-text description of the work performed. */
   description: string;
   /** Whether this time is billable to a client. */

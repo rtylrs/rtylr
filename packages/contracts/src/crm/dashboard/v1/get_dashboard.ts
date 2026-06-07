@@ -5,9 +5,10 @@
 // source: crm/dashboard/v1/get_dashboard.proto
 
 /* eslint-disable */
-import type { TopCustomer } from './types';
+import type { TopCustomer } from "./types";
 
-export interface GetDashboardRequest {}
+export interface GetDashboardRequest {
+}
 
 export interface GetDashboardResponse {
   /** total_customers is the total customers value for this contract. */

@@ -6,7 +6,8 @@
 
 /* eslint-disable */
 
-export interface GetMeRequest {}
+export interface GetMeRequest {
+}
 
 export interface GetMeResponse {
   /** id is the unique identifier for the resource. */

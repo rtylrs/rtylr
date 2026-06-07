@@ -5,7 +5,7 @@
 // source: hr/staff/v1/get_staff.proto
 
 /* eslint-disable */
-import type { Staff } from './types';
+import type { Staff } from "./types";
 
 export interface GetStaffRequest {
   /** id is the unique identifier for the resource. */

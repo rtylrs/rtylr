@@ -5,7 +5,7 @@
 // source: hr/approval_chain/v1/upsert_approval_chain.proto
 
 /* eslint-disable */
-import type { ApprovalChainLevelPayload, ApprovalChainPayload } from './types';
+import type { ApprovalChainLevelPayload, ApprovalChainPayload } from "./types";
 
 export interface UpsertApprovalChainRequest {
   /** Chain ID for update; absent (zero) to create a new chain. */

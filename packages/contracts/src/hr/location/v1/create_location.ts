@@ -5,7 +5,7 @@
 // source: hr/location/v1/create_location.proto
 
 /* eslint-disable */
-import type { LocationPayload } from './types';
+import type { LocationPayload } from "./types";
 
 export interface CreateLocationRequest {
   /** Human-readable name of the location. */
@@ -13,7 +13,9 @@ export interface CreateLocationRequest {
   /** Full street address of the location. */
   address: string;
   /** IANA timezone identifier; absent to use tenant default. */
-  timezone?: string | undefined;
+  timezone?:
+    | string
+    | undefined;
   /** Optional URL-safe slug; auto-generated from name if absent. */
   slug?: string | undefined;
 }

@@ -5,7 +5,7 @@
 // source: hr/report/v1/generate_report.proto
 
 /* eslint-disable */
-import type { ReportPayload, ReportRequestPayload } from './types';
+import type { ReportPayload, ReportRequestPayload } from "./types";
 
 export interface GenerateReportRequest {
   /** Parameters describing the report to generate. */

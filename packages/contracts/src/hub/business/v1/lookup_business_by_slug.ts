@@ -5,7 +5,7 @@
 // source: hub/business/v1/lookup_business_by_slug.proto
 
 /* eslint-disable */
-import type { PublicBusinessSummary, PublicLocation } from './types';
+import type { PublicBusinessSummary, PublicLocation } from "./types";
 
 export interface LookupBusinessBySlugRequest {
   /** slug is the slug value for this contract. */
@@ -14,7 +14,9 @@ export interface LookupBusinessBySlugRequest {
 
 export interface LookupBusinessBySlugResponse {
   /** business is the business value for this contract. */
-  business: PublicBusinessSummary | undefined;
+  business:
+    | PublicBusinessSummary
+    | undefined;
   /** locations is the locations value for this contract. */
   locations: PublicLocation[];
 }

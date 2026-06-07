@@ -14,7 +14,9 @@ export interface AwardPointsRequest {
   /** description is the description value for this contract. */
   description: string;
   /** reference_id is the reference id value for this contract. */
-  referenceId?: number | undefined;
+  referenceId?:
+    | number
+    | undefined;
   /** reference_type is the reference type value for this contract. */
   referenceType: string;
 }

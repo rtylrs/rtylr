@@ -5,7 +5,7 @@
 // source: pos/orders/splits/v1/split_order.proto
 
 /* eslint-disable */
-import type { SplitGroup } from '../../v1/types';
+import type { SplitGroup } from "../../v1/types";
 
 export interface SplitOrderRequest {
   /** order_id is the order id value for this contract. */

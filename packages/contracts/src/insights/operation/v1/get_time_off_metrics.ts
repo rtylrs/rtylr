@@ -5,7 +5,7 @@
 // source: insights/operation/v1/get_time_off_metrics.proto
 
 /* eslint-disable */
-import type { TimeOffMetrics } from './types';
+import type { TimeOffMetrics } from "./types";
 
 export interface GetTimeOffMetricsRequest {
   /** period is the period value for this contract. */

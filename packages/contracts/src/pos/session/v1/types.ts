@@ -12,9 +12,13 @@ export interface Session {
   /** owner_id identifies the tenant that owns the resource. */
   ownerId: number;
   /** location_id is the location id value for this contract. */
-  locationId?: number | undefined;
+  locationId?:
+    | number
+    | undefined;
   /** staff_id is the staff id value for this contract. */
-  staffId?: number | undefined;
+  staffId?:
+    | number
+    | undefined;
   /** opening_float is the opening float value for this contract. */
   openingFloat: number;
   /** closing_float is the closing float value for this contract. */
@@ -26,7 +30,9 @@ export interface Session {
   /** opened_at is the opened at value for this contract. */
   openedAt: string;
   /** closed_at is the closed at value for this contract. */
-  closedAt?: string | undefined;
+  closedAt?:
+    | string
+    | undefined;
   /** created_at is when the record was created. */
   createdAt: string;
 }

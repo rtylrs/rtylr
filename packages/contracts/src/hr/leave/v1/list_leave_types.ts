@@ -5,9 +5,10 @@
 // source: hr/leave/v1/list_leave_types.proto
 
 /* eslint-disable */
-import type { LeaveTypePayload } from './types';
+import type { LeaveTypePayload } from "./types";
 
-export interface ListLeaveTypesRequest {}
+export interface ListLeaveTypesRequest {
+}
 
 export interface ListLeaveTypesResponse {
   /** All leave types configured for the tenant. */

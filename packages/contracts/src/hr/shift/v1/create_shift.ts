@@ -5,7 +5,7 @@
 // source: hr/shift/v1/create_shift.proto
 
 /* eslint-disable */
-import type { ShiftPayload } from './types';
+import type { ShiftPayload } from "./types";
 
 export interface CreateShiftRequest {
   /** Location where this shift takes place. */

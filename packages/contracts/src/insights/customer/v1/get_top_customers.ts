@@ -5,15 +5,14 @@
 // source: insights/customer/v1/get_top_customers.proto
 
 /* eslint-disable */
-import type {
-  PaginationRequest,
-  PaginationResponse,
-} from '../../../common/pagination/v1/pagination';
-import type { TopCustomerEntry } from './types';
+import type { PaginationRequest, PaginationResponse } from "../../../common/pagination/v1/pagination";
+import type { TopCustomerEntry } from "./types";
 
 export interface GetTopCustomersRequest {
   /** pagination is the pagination value for this contract. */
-  pagination: PaginationRequest | undefined;
+  pagination:
+    | PaginationRequest
+    | undefined;
   /** period is the period value for this contract. */
   period: string;
   /**

@@ -5,7 +5,7 @@
 // source: crm/campaign/v1/list_campaigns.proto
 
 /* eslint-disable */
-import type { Campaign } from './types';
+import type { Campaign } from "./types";
 
 export interface ListCampaignsRequest {
   /** status is the current lifecycle state. */

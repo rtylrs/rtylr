@@ -5,7 +5,7 @@
 // source: flow/task/v1/get_task_activity.proto
 
 /* eslint-disable */
-import type { TaskActivity } from './types';
+import type { TaskActivity } from "./types";
 
 export interface GetTaskActivityRequest {
   /** task_id is the task id value for this contract. */

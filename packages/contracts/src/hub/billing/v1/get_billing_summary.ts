@@ -5,9 +5,10 @@
 // source: hub/billing/v1/get_billing_summary.proto
 
 /* eslint-disable */
-import type { BillingSummary } from './types';
+import type { BillingSummary } from "./types";
 
-export interface GetBillingSummaryRequest {}
+export interface GetBillingSummaryRequest {
+}
 
 export interface GetBillingSummaryResponse {
   /** summary is the summary value for this contract. */

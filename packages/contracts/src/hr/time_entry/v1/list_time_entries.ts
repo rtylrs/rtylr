@@ -5,11 +5,13 @@
 // source: hr/time_entry/v1/list_time_entries.proto
 
 /* eslint-disable */
-import type { TimeEntryPayload } from './types';
+import type { TimeEntryPayload } from "./types";
 
 export interface ListTimeEntriesRequest {
   /** Filter by employee; absent to include all employees. */
-  employeeId?: number | undefined;
+  employeeId?:
+    | number
+    | undefined;
   /** Filter by date; absent to include all dates. */
   date?: string | undefined;
 }

@@ -5,7 +5,7 @@
 // source: hr/onboarding/v1/create_checklist_template.proto
 
 /* eslint-disable */
-import type { ChecklistTemplatePayload } from './types';
+import type { ChecklistTemplatePayload } from "./types";
 
 export interface CreateChecklistTemplateRequest {
   /** Human-readable name for the template. */

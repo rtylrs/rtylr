@@ -6,7 +6,8 @@
 
 /* eslint-disable */
 
-export interface DeleteExpenseRequest {}
+export interface DeleteExpenseRequest {
+}
 
 export interface DeleteExpenseResponse {
   /** message is a human-readable result message. */

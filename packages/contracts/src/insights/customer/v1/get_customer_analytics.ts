@@ -5,7 +5,7 @@
 // source: insights/customer/v1/get_customer_analytics.proto
 
 /* eslint-disable */
-import type { CustomerAnalytics } from './types';
+import type { CustomerAnalytics } from "./types";
 
 export interface GetCustomerAnalyticsRequest {
   /** period is the period value for this contract. */

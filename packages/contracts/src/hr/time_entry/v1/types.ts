@@ -14,19 +14,29 @@ export interface TimeEntryPayload {
   /** Employee who logged the time. */
   employeeId: number;
   /** Associated project; absent if not project-based. */
-  projectId?: number | undefined;
+  projectId?:
+    | number
+    | undefined;
   /** Associated task; absent if not task-level tracking. */
-  taskId?: number | undefined;
+  taskId?:
+    | number
+    | undefined;
   /** Time category for reporting; absent if uncategorised. */
-  categoryId?: number | undefined;
+  categoryId?:
+    | number
+    | undefined;
   /** Date the work was performed (ISO-8601 format, e.g. "2026-04-14"). */
   date: string;
   /** Total duration of work in minutes. */
   durationMinutes: number;
   /** Clock-in time (ISO-8601 time or datetime); absent if duration-only entry. */
-  startTime?: string | undefined;
+  startTime?:
+    | string
+    | undefined;
   /** Clock-out time (ISO-8601 time or datetime); absent if duration-only entry. */
-  endTime?: string | undefined;
+  endTime?:
+    | string
+    | undefined;
   /** Free-text description of the work performed. */
   description: string;
   /** Whether this time is billable to a client. */
@@ -34,9 +44,13 @@ export interface TimeEntryPayload {
   /** Workflow status (draft | submitted | approved | rejected). */
   status: string;
   /** Reason the entry was rejected; absent unless status is rejected. */
-  rejectionReason?: string | undefined;
+  rejectionReason?:
+    | string
+    | undefined;
   /** Employee ID of the approver; absent if not yet approved. */
-  approvedBy?: number | undefined;
+  approvedBy?:
+    | number
+    | undefined;
   /** How the entry was created (manual | timer | flow_import). */
   source: string;
   /** Unix timestamp when this record was created. */
@@ -61,7 +75,9 @@ export interface TimesheetPayload {
   /** Current step in a multi-level approval chain. */
   currentApprovalLevel: number;
   /** Unix timestamp when the timesheet was submitted; absent if still in draft. */
-  submittedAt?: number | undefined;
+  submittedAt?:
+    | number
+    | undefined;
   /** Sum of all entry durations in minutes. */
   totalMinutes: number;
   /** Individual time entries within this timesheet. */

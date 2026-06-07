@@ -5,9 +5,10 @@
 // source: pos/loyalty/v1/get_loyalty_config.proto
 
 /* eslint-disable */
-import type { LoyaltyConfig } from './types';
+import type { LoyaltyConfig } from "./types";
 
-export interface GetLoyaltyConfigRequest {}
+export interface GetLoyaltyConfigRequest {
+}
 
 export interface GetLoyaltyConfigResponse {
   /** config is the config value for this contract. */

@@ -5,13 +5,16 @@
 // source: hub/config/v1/get_config.proto
 
 /* eslint-disable */
-import type { Business } from '../../business/v1/types';
+import type { Business } from "../../business/v1/types";
 
-export interface GetConfigRequest {}
+export interface GetConfigRequest {
+}
 
 export interface GetConfigResponse {
   /** business is the business value for this contract. */
-  business: Business | undefined;
+  business:
+    | Business
+    | undefined;
   /** maintenance is the maintenance value for this contract. */
   maintenance: boolean;
 }

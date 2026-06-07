@@ -5,7 +5,7 @@
 // source: finance/quote/v1/get_quote.proto
 
 /* eslint-disable */
-import type { Quote } from './types';
+import type { Quote } from "./types";
 
 export interface GetQuoteRequest {
   /** id is the unique identifier for the resource. */

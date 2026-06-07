@@ -5,9 +5,10 @@
 // source: erp/supplier/v1/list_suppliers.proto
 
 /* eslint-disable */
-import type { Supplier } from './types';
+import type { Supplier } from "./types";
 
-export interface ListSuppliersRequest {}
+export interface ListSuppliersRequest {
+}
 
 export interface ListSuppliersResponse {
   /** suppliers is the suppliers value for this contract. */

@@ -5,9 +5,10 @@
 // source: pos/gift_card/v1/list_gift_cards.proto
 
 /* eslint-disable */
-import type { GiftCard } from './types';
+import type { GiftCard } from "./types";
 
-export interface ListGiftCardsRequest {}
+export interface ListGiftCardsRequest {
+}
 
 export interface ListGiftCardsResponse {
   /** gift_cards is the gift cards value for this contract. */

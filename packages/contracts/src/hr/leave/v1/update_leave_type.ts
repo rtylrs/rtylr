@@ -5,25 +5,39 @@
 // source: hr/leave/v1/update_leave_type.proto
 
 /* eslint-disable */
-import type { LeaveTypePayload } from './types';
+import type { LeaveTypePayload } from "./types";
 
 export interface UpdateLeaveTypeRequest {
   /** ID of the leave type to update. */
   id: number;
   /** Updated name; absent to keep current value. */
-  name?: string | undefined;
+  name?:
+    | string
+    | undefined;
   /** Updated paid status; absent to keep current value. */
-  isPaid?: boolean | undefined;
+  isPaid?:
+    | boolean
+    | undefined;
   /** Updated approval requirement; absent to keep current value. */
-  requiresApproval?: boolean | undefined;
+  requiresApproval?:
+    | boolean
+    | undefined;
   /** Updated accrual rule; absent to keep current value. */
-  accrualRule?: string | undefined;
+  accrualRule?:
+    | string
+    | undefined;
   /** Updated max carryover days; absent to keep current value. */
-  maxCarryoverDays?: number | undefined;
+  maxCarryoverDays?:
+    | number
+    | undefined;
   /** Updated min notice days; absent to keep current value. */
-  minNoticeDays?: number | undefined;
+  minNoticeDays?:
+    | number
+    | undefined;
   /** Updated documentation threshold; absent to keep current value. */
-  requiresDocumentationAfterDays?: number | undefined;
+  requiresDocumentationAfterDays?:
+    | number
+    | undefined;
   /** Updated active status; absent to keep current value. */
   isActive?: boolean | undefined;
 }

@@ -6,7 +6,8 @@
 
 /* eslint-disable */
 
-export interface DashboardRequest {}
+export interface DashboardRequest {
+}
 
 export interface DashboardResponse {
   /** total_sales is the total sales value for this contract. */

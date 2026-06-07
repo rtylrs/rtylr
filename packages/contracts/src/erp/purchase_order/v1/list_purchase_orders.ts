@@ -5,7 +5,7 @@
 // source: erp/purchase_order/v1/list_purchase_orders.proto
 
 /* eslint-disable */
-import type { PurchaseOrder } from './types';
+import type { PurchaseOrder } from "./types";
 
 export interface ListPurchaseOrdersRequest {
   /** status is the current lifecycle state. */

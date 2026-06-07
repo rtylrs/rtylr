@@ -5,7 +5,7 @@
 // source: flow/task/v1/create_task.proto
 
 /* eslint-disable */
-import type { Task } from './types';
+import type { Task } from "./types";
 
 export interface CreateTaskRequest {
   /** project_id is the project id value for this contract. */
@@ -13,7 +13,9 @@ export interface CreateTaskRequest {
   /** workspace_id is the workspace id value for this contract. */
   workspaceId: number;
   /** parent_task_id is the parent task id value for this contract. */
-  parentTaskId?: number | undefined;
+  parentTaskId?:
+    | number
+    | undefined;
   /** title is the title value for this contract. */
   title: string;
   /** description is the description value for this contract. */
@@ -21,13 +23,17 @@ export interface CreateTaskRequest {
   /** priority is the priority value for this contract. */
   priority: string;
   /** assignee_id is the assignee id value for this contract. */
-  assigneeId?: number | undefined;
+  assigneeId?:
+    | number
+    | undefined;
   /** due_date is the due date value for this contract. */
   dueDate: string;
   /** start_date is the start date value for this contract. */
   startDate: string;
   /** estimated_hours is the estimated hours value for this contract. */
-  estimatedHours?: number | undefined;
+  estimatedHours?:
+    | number
+    | undefined;
   /** labels is the labels value for this contract. */
   labels: number[];
 }

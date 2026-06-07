@@ -5,7 +5,7 @@
 // source: hr/shift/v1/list_shifts.proto
 
 /* eslint-disable */
-import type { ShiftPayload } from './types';
+import type { ShiftPayload } from "./types";
 
 export interface ListShiftsRequest {
   /** Filter by location; absent to include all locations. */

@@ -5,7 +5,7 @@
 // source: flow/task/v1/get_task_detail.proto
 
 /* eslint-disable */
-import type { Task, TaskActivity, TaskComment } from './types';
+import type { Task, TaskActivity, TaskComment } from "./types";
 
 export interface GetTaskDetailRequest {
   /** id is the unique identifier for the resource. */
@@ -14,7 +14,9 @@ export interface GetTaskDetailRequest {
 
 export interface GetTaskDetailResponse {
   /** task is the task value for this contract. */
-  task: Task | undefined;
+  task:
+    | Task
+    | undefined;
   /** subtasks is the subtasks value for this contract. */
   subtasks: Task[];
   /** comments is the comments value for this contract. */

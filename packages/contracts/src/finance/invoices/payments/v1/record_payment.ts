@@ -5,7 +5,7 @@
 // source: finance/invoices/payments/v1/record_payment.proto
 
 /* eslint-disable */
-import type { RecordPaymentResponsePayload } from '../../v1/types';
+import type { RecordPaymentResponsePayload } from "../../v1/types";
 
 export interface RecordPaymentRequest {
   /** invoice_id is the invoice id value for this contract. */
@@ -26,7 +26,9 @@ export interface RecordPaymentRequest {
 
 export interface RecordPaymentResponse {
   /** payment is the payment value for this contract. */
-  payment: RecordPaymentResponsePayload | undefined;
+  payment:
+    | RecordPaymentResponsePayload
+    | undefined;
   /** message is a human-readable result message. */
   message: string;
 }

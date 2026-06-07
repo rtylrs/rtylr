@@ -5,9 +5,10 @@
 // source: insights/dashboard/v1/get_roadmap.proto
 
 /* eslint-disable */
-import type { RoadmapProject } from './types';
+import type { RoadmapProject } from "./types";
 
-export interface GetRoadmapRequest {}
+export interface GetRoadmapRequest {
+}
 
 export interface GetRoadmapResponse {
   /** projects is the projects value for this contract. */

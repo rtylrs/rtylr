@@ -24,9 +24,13 @@ export interface OvertimeRequestPayload {
   /** Current step in a multi-level approval chain. */
   currentApprovalLevel: number;
   /** Employee ID of the approver; absent if not yet approved. */
-  approvedBy?: number | undefined;
+  approvedBy?:
+    | number
+    | undefined;
   /** Pay multiplier applied to the overtime hours (e.g. 1.5); absent if not yet calculated. */
-  multiplierApplied?: number | undefined;
+  multiplierApplied?:
+    | number
+    | undefined;
   /** Unix timestamp when this record was created. */
   createdAt: number;
   /** Unix timestamp when this record was last updated. */

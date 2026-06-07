@@ -5,7 +5,7 @@
 // source: hr/overtime/v1/create_overtime_request.proto
 
 /* eslint-disable */
-import type { OvertimeRequestPayload } from './types';
+import type { OvertimeRequestPayload } from "./types";
 
 export interface CreateOvertimeRequestRequest {
   /** Employee requesting overtime. */

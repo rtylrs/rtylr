@@ -5,7 +5,7 @@
 // source: insights/operation/v1/get_utilization.proto
 
 /* eslint-disable */
-import type { UtilizationMetrics } from './types';
+import type { UtilizationMetrics } from "./types";
 
 export interface GetUtilizationRequest {
   /** period is the period value for this contract. */

@@ -5,7 +5,7 @@
 // source: pos/customer/v1/search_customers.proto
 
 /* eslint-disable */
-import type { Customer } from './types';
+import type { Customer } from "./types";
 
 export interface SearchCustomersRequest {
   /** query is the query value for this contract. */

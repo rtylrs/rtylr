@@ -8,7 +8,9 @@
 
 export interface UpdateTableRequest {
   /** location_id is the location id value for this contract. */
-  locationId?: number | undefined;
+  locationId?:
+    | number
+    | undefined;
   /** label is the label value for this contract. */
   label: string;
   /** seats is the seats value for this contract. */

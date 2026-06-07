@@ -5,7 +5,7 @@
 // source: crm/customer/v1/list_customers.proto
 
 /* eslint-disable */
-import type { Customer } from '../../../pos/customer/v1/types';
+import type { Customer } from "../../../pos/customer/v1/types";
 
 export interface ListCustomersRequest {
   /** search is the search value for this contract. */

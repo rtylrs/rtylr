@@ -20,15 +20,23 @@ export interface AttendanceRecordPayload {
   /** Unix timestamp when the employee clocked in. */
   clockInAt: number;
   /** Unix timestamp when the employee clocked out; absent if still clocked in. */
-  clockOutAt?: number | undefined;
+  clockOutAt?:
+    | number
+    | undefined;
   /** Total worked duration in minutes; absent if still clocked in. */
-  durationMinutes?: number | undefined;
+  durationMinutes?:
+    | number
+    | undefined;
   /** Method used to clock in (app | qr | gps | pin | facial). */
   clockInMethod: string;
   /** Latitude at clock-in; absent if location not captured. */
-  clockInLat?: number | undefined;
+  clockInLat?:
+    | number
+    | undefined;
   /** Longitude at clock-in; absent if location not captured. */
-  clockInLng?: number | undefined;
+  clockInLng?:
+    | number
+    | undefined;
   /** Whether the employee clocked in after the scheduled start. */
   isLate: boolean;
   /** Number of minutes late; zero if on time. */

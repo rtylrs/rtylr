@@ -20,13 +20,21 @@ export interface StockMovement {
   /** quantity is the quantity value for this contract. */
   quantity: number;
   /** reference_id is the reference id value for this contract. */
-  referenceId?: number | undefined;
+  referenceId?:
+    | number
+    | undefined;
   /** reference_type is the reference type value for this contract. */
-  referenceType?: string | undefined;
+  referenceType?:
+    | string
+    | undefined;
   /** note is the note value for this contract. */
-  note?: string | undefined;
+  note?:
+    | string
+    | undefined;
   /** employee_id is the employee id value for this contract. */
-  employeeId?: number | undefined;
+  employeeId?:
+    | number
+    | undefined;
   /** created_at is when the record was created. */
   createdAt: string;
 }

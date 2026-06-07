@@ -5,7 +5,7 @@
 // source: crm/campaign/v1/get_campaign_detail.proto
 
 /* eslint-disable */
-import type { Campaign, CampaignStats } from './types';
+import type { Campaign, CampaignStats } from "./types";
 
 export interface GetCampaignDetailRequest {
   /** id is the unique identifier for the resource. */
@@ -14,7 +14,9 @@ export interface GetCampaignDetailRequest {
 
 export interface GetCampaignDetailResponse {
   /** campaign is the campaign value for this contract. */
-  campaign: Campaign | undefined;
+  campaign:
+    | Campaign
+    | undefined;
   /** stats is the stats value for this contract. */
   stats: CampaignStats | undefined;
 }

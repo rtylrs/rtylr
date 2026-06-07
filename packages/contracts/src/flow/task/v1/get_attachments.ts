@@ -5,7 +5,7 @@
 // source: flow/task/v1/get_attachments.proto
 
 /* eslint-disable */
-import type { Attachment } from './types';
+import type { Attachment } from "./types";
 
 export interface GetAttachmentsRequest {
   /** task_id is the task id value for this contract. */

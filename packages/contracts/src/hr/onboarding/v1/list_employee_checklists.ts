@@ -5,7 +5,7 @@
 // source: hr/onboarding/v1/list_employee_checklists.proto
 
 /* eslint-disable */
-import type { EmployeeChecklistPayload } from './types';
+import type { EmployeeChecklistPayload } from "./types";
 
 export interface ListEmployeeChecklistsRequest {
   /** Filter by employee; absent to include all employees. */

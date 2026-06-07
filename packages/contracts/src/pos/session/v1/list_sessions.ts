@@ -5,9 +5,10 @@
 // source: pos/session/v1/list_sessions.proto
 
 /* eslint-disable */
-import type { Session } from './types';
+import type { Session } from "./types";
 
-export interface ListSessionsRequest {}
+export interface ListSessionsRequest {
+}
 
 export interface ListSessionsResponse {
   /** sessions is the sessions value for this contract. */

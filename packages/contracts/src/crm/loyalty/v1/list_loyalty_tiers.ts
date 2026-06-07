@@ -5,9 +5,10 @@
 // source: crm/loyalty/v1/list_loyalty_tiers.proto
 
 /* eslint-disable */
-import type { LoyaltyTier } from './types';
+import type { LoyaltyTier } from "./types";
 
-export interface ListLoyaltyTiersRequest {}
+export interface ListLoyaltyTiersRequest {
+}
 
 export interface ListLoyaltyTiersResponse {
   /** tiers is the tiers value for this contract. */

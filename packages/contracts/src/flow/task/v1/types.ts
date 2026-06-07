@@ -16,7 +16,9 @@ export interface Task {
   /** owner_id identifies the tenant that owns the resource. */
   ownerId: number;
   /** parent_task_id is the parent task id value for this contract. */
-  parentTaskId?: number | undefined;
+  parentTaskId?:
+    | number
+    | undefined;
   /** title is the title value for this contract. */
   title: string;
   /** description is the description value for this contract. */
@@ -26,19 +28,31 @@ export interface Task {
   /** priority is the priority value for this contract. */
   priority: string;
   /** assignee_id is the assignee id value for this contract. */
-  assigneeId?: number | undefined;
+  assigneeId?:
+    | number
+    | undefined;
   /** reporter_id is the reporter id value for this contract. */
   reporterId: number;
   /** due_date is the due date value for this contract. */
-  dueDate?: string | undefined;
+  dueDate?:
+    | string
+    | undefined;
   /** start_date is the start date value for this contract. */
-  startDate?: string | undefined;
+  startDate?:
+    | string
+    | undefined;
   /** completed_at is the completed at value for this contract. */
-  completedAt?: string | undefined;
+  completedAt?:
+    | string
+    | undefined;
   /** estimated_hours is the estimated hours value for this contract. */
-  estimatedHours?: number | undefined;
+  estimatedHours?:
+    | number
+    | undefined;
   /** actual_hours is the actual hours value for this contract. */
-  actualHours?: number | undefined;
+  actualHours?:
+    | number
+    | undefined;
   /** sort_order is the sort order value for this contract. */
   sortOrder: number;
   /** labels is the labels value for this contract. */
@@ -60,9 +74,13 @@ export interface Task {
   /** Number of direct subtasks. Powers the "N subtasks" pill on task rows. */
   subtaskCount: number;
   /** Section bucket within a project (e.g. "Backlog", "Sprint 5"). 0 if unbucketed. */
-  sectionId?: number | undefined;
+  sectionId?:
+    | number
+    | undefined;
   /** Cycle (sprint) this task belongs to, if any. */
-  cycleId?: number | undefined;
+  cycleId?:
+    | number
+    | undefined;
   /** Milestone this task rolls up to, if any. */
   milestoneId?: number | undefined;
 }

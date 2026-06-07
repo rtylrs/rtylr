@@ -5,7 +5,7 @@
 // source: flow/task/v1/get_subtasks.proto
 
 /* eslint-disable */
-import type { TaskPayloadCompact } from './types';
+import type { TaskPayloadCompact } from "./types";
 
 export interface GetSubtasksRequest {
   /** task_id is the task id value for this contract. */

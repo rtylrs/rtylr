@@ -5,9 +5,10 @@
 // source: erp/inventory/v1/get_valuation.proto
 
 /* eslint-disable */
-import type { ValuationItem } from './types';
+import type { ValuationItem } from "./types";
 
-export interface GetValuationRequest {}
+export interface GetValuationRequest {
+}
 
 export interface GetValuationResponse {
   /** items is the items value for this contract. */

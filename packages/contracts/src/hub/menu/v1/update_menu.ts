@@ -5,7 +5,7 @@
 // source: hub/menu/v1/update_menu.proto
 
 /* eslint-disable */
-import type { MenuItem } from '../../../pos/menu_item/v1/types';
+import type { MenuItem } from "../../../pos/menu_item/v1/types";
 
 export interface UpdateMenuRequest {
   /** items is the items value for this contract. */

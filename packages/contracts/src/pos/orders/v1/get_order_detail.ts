@@ -5,7 +5,7 @@
 // source: pos/orders/v1/get_order_detail.proto
 
 /* eslint-disable */
-import type { Order } from './types';
+import type { Order } from "./types";
 
 export interface GetOrderDetailRequest {
   /** order_id is the order id value for this contract. */

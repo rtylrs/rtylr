@@ -5,7 +5,7 @@
 // source: pos/orders/v1/list_orders.proto
 
 /* eslint-disable */
-import type { Order } from './types';
+import type { Order } from "./types";
 
 export interface ListOrdersRequest {
   /** session_id is the session id value for this contract. */

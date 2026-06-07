@@ -5,9 +5,10 @@
 // source: erp/inventory/v1/get_low_stock.proto
 
 /* eslint-disable */
-import type { InventoryReportItem } from './types';
+import type { InventoryReportItem } from "./types";
 
-export interface GetLowStockRequest {}
+export interface GetLowStockRequest {
+}
 
 export interface GetLowStockResponse {
   /** items is the items value for this contract. */
