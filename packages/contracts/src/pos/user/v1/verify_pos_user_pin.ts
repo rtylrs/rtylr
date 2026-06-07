@@ -5,7 +5,7 @@
 // source: pos/user/v1/verify_pos_user_pin.proto
 
 /* eslint-disable */
-import type { POSUser } from "./types";
+import type { POSUser } from './types';
 
 export interface VerifyPOSUserPINRequest {
   /** pin is the pin value for this contract. */

@@ -5,7 +5,7 @@
 // source: hr/employee/v1/create_employee.proto
 
 /* eslint-disable */
-import type { EmployeePayload } from "./types";
+import type { EmployeePayload } from './types';
 
 export interface CreateEmployeeRequest {
   /** Linked user account ID. */
@@ -15,9 +15,7 @@ export interface CreateEmployeeRequest {
   /** Work location the employee reports to. */
   locationId: number;
   /** Direct manager; absent if top-level. */
-  managerId?:
-    | number
-    | undefined;
+  managerId?: number | undefined;
   /** Employment arrangement (full_time | part_time | freelancer). */
   contractType: string;
   /** Initial employment status (active | probation | inactive | terminated). */
@@ -25,27 +23,17 @@ export interface CreateEmployeeRequest {
   /** Date the employee was hired (ISO-8601 format). */
   hireDate: string;
   /** End of probation period; absent if no probation (ISO-8601 format). */
-  probationEndDate?:
-    | string
-    | undefined;
+  probationEndDate?: string | undefined;
   /** Date employment was terminated; absent if still employed (ISO-8601 format). */
-  terminationDate?:
-    | string
-    | undefined;
+  terminationDate?: string | undefined;
   /** Pay rate per hour for hourly employees; absent if salaried only. */
-  hourlyRate?:
-    | number
-    | undefined;
+  hourlyRate?: number | undefined;
   /** Monthly gross salary; absent if hourly only. */
-  monthlySalary?:
-    | number
-    | undefined;
+  monthlySalary?: number | undefined;
   /** ISO-4217 currency code for compensation (e.g. "USD"). */
   currency: string;
   /** Assigned work schedule; absent if using department default. */
-  workScheduleId?:
-    | number
-    | undefined;
+  workScheduleId?: number | undefined;
   /** How the employee account was created (hr_created | invite_link). */
   accountCreationMode: string;
   /** Employee's job title or position name. */

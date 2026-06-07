@@ -5,13 +5,11 @@
 // source: hr/equipment/v1/list_assets.proto
 
 /* eslint-disable */
-import type { AssetPayload } from "./types";
+import type { AssetPayload } from './types';
 
 export interface ListAssetsRequest {
   /** Filter by employee; absent to include all employees. */
-  employeeId?:
-    | number
-    | undefined;
+  employeeId?: number | undefined;
   /** Filter by condition; absent to include all conditions. */
   condition?: string | undefined;
 }

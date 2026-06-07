@@ -5,15 +5,13 @@
 // source: hr/department/v1/create_department.proto
 
 /* eslint-disable */
-import type { DepartmentPayload } from "./types";
+import type { DepartmentPayload } from './types';
 
 export interface CreateDepartmentRequest {
   /** Location this department operates from. */
   locationId: number;
   /** Parent department for org-chart hierarchy; absent if top-level. */
-  parentDepartmentId?:
-    | number
-    | undefined;
+  parentDepartmentId?: number | undefined;
   /** Display name of the department. */
   name: string;
   /** Default work schedule for employees in this department; absent if none. */

@@ -5,10 +5,9 @@
 // source: hub/security/v1/get_security_state.proto
 
 /* eslint-disable */
-import type { SecurityState } from "./types";
+import type { SecurityState } from './types';
 
-export interface GetSecurityStateRequest {
-}
+export interface GetSecurityStateRequest {}
 
 export interface GetSecurityStateResponse {
   /** state is the state value for this contract. */

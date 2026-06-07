@@ -5,13 +5,11 @@
 // source: hr/overtime/v1/list_overtime_requests.proto
 
 /* eslint-disable */
-import type { OvertimeRequestPayload } from "./types";
+import type { OvertimeRequestPayload } from './types';
 
 export interface ListOvertimeRequestsRequest {
   /** Filter by employee; absent to include all employees. */
-  employeeId?:
-    | number
-    | undefined;
+  employeeId?: number | undefined;
   /** Filter by status; absent to include all statuses. */
   status?: string | undefined;
 }

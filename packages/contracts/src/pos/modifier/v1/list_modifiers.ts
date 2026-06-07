@@ -5,10 +5,9 @@
 // source: pos/modifier/v1/list_modifiers.proto
 
 /* eslint-disable */
-import type { Modifier } from "./types";
+import type { Modifier } from './types';
 
-export interface ListModifiersRequest {
-}
+export interface ListModifiersRequest {}
 
 export interface ListModifiersResponse {
   /** modifiers is the modifiers value for this contract. */

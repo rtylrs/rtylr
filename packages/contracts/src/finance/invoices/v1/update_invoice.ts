@@ -5,7 +5,7 @@
 // source: finance/invoices/v1/update_invoice.proto
 
 /* eslint-disable */
-import type { InvoiceDetail, InvoiceItem } from "./types";
+import type { InvoiceDetail, InvoiceItem } from './types';
 
 export interface UpdateInvoiceRequest {
   /** id is the unique identifier for the resource. */

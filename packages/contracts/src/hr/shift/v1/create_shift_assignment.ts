@@ -5,7 +5,7 @@
 // source: hr/shift/v1/create_shift_assignment.proto
 
 /* eslint-disable */
-import type { ShiftAssignmentPayload } from "./types";
+import type { ShiftAssignmentPayload } from './types';
 
 export interface CreateShiftAssignmentRequest {
   /** Employee to assign. */

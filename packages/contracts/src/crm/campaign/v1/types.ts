@@ -20,21 +20,15 @@ export interface Campaign {
   /** status is the current lifecycle state. */
   status: string;
   /** segment_id is the segment id value for this contract. */
-  segmentId?:
-    | number
-    | undefined;
+  segmentId?: number | undefined;
   /** subject is the subject value for this contract. */
   subject: string;
   /** content is the content value for this contract. */
   content: string;
   /** scheduled_at is the scheduled at value for this contract. */
-  scheduledAt?:
-    | string
-    | undefined;
+  scheduledAt?: string | undefined;
   /** sent_at is the sent at value for this contract. */
-  sentAt?:
-    | string
-    | undefined;
+  sentAt?: string | undefined;
   /** audience_count is the audience count value for this contract. */
   audienceCount: number;
   /** sent_count is the sent count value for this contract. */

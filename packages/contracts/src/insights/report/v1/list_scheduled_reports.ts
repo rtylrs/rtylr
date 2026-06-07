@@ -5,8 +5,11 @@
 // source: insights/report/v1/list_scheduled_reports.proto
 
 /* eslint-disable */
-import type { PaginationRequest, PaginationResponse } from "../../../common/pagination/v1/pagination";
-import type { ScheduledReport } from "./types";
+import type {
+  PaginationRequest,
+  PaginationResponse,
+} from '../../../common/pagination/v1/pagination';
+import type { ScheduledReport } from './types';
 
 export interface ListScheduledReportsRequest {
   /** pagination is the pagination value for this contract. */

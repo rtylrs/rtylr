@@ -5,10 +5,9 @@
 // source: hr/dashboard/v1/get_hr_dashboard.proto
 
 /* eslint-disable */
-import type { DashboardStats } from "./types";
+import type { DashboardStats } from './types';
 
-export interface GetHRDashboardRequest {
-}
+export interface GetHRDashboardRequest {}
 
 export interface GetHRDashboardResponse {
   /** stats is the stats value for this contract. */

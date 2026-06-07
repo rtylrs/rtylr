@@ -5,10 +5,9 @@
 // source: hub/app/v1/list_addons.proto
 
 /* eslint-disable */
-import type { Addon } from "./types";
+import type { Addon } from './types';
 
-export interface ListAddonsRequest {
-}
+export interface ListAddonsRequest {}
 
 export interface ListAddonsResponse {
   /** addons is the addons value for this contract. */

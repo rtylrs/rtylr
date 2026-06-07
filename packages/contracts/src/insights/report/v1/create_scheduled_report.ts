@@ -5,7 +5,7 @@
 // source: insights/report/v1/create_scheduled_report.proto
 
 /* eslint-disable */
-import type { ScheduledReport } from "./types";
+import type { ScheduledReport } from './types';
 
 export interface CreateScheduledReportRequest {
   /** template_id is the template id value for this contract. */

@@ -5,7 +5,7 @@
 // source: finance/journal/v1/create_journal_entry.proto
 
 /* eslint-disable */
-import type { JournalEntry, JournalLine } from "./types";
+import type { JournalEntry, JournalLine } from './types';
 
 export interface CreateJournalEntryRequest {
   /** date is the date value for this contract. */

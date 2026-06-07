@@ -5,10 +5,9 @@
 // source: hub/developer/v1/list_webhooks.proto
 
 /* eslint-disable */
-import type { Webhook } from "./types";
+import type { Webhook } from './types';
 
-export interface ListWebhooksRequest {
-}
+export interface ListWebhooksRequest {}
 
 export interface ListWebhooksResponse {
   /** webhooks is the webhooks value for this contract. */

@@ -6,8 +6,7 @@
 
 /* eslint-disable */
 
-export interface GetFinanceDashboardRequest {
-}
+export interface GetFinanceDashboardRequest {}
 
 export interface GetFinanceDashboardResponse {
   /** total_receivable is the total receivable value for this contract. */

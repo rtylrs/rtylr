@@ -5,14 +5,15 @@
 // source: finance/journal/v1/list_journal_entries.proto
 
 /* eslint-disable */
-import type { PaginationRequest, PaginationResponse } from "../../../common/pagination/v1/pagination";
-import type { JournalEntry } from "./types";
+import type {
+  PaginationRequest,
+  PaginationResponse,
+} from '../../../common/pagination/v1/pagination';
+import type { JournalEntry } from './types';
 
 export interface ListJournalEntriesRequest {
   /** pagination is the pagination value for this contract. */
-  pagination:
-    | PaginationRequest
-    | undefined;
+  pagination: PaginationRequest | undefined;
   /** from_date is the from date value for this contract. */
   fromDate: string;
   /** to_date is the to date value for this contract. */

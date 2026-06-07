@@ -5,7 +5,7 @@
 // source: hr/onboarding/v1/trigger_checklist.proto
 
 /* eslint-disable */
-import type { EmployeeChecklistPayload } from "./types";
+import type { EmployeeChecklistPayload } from './types';
 
 export interface TriggerChecklistRequest {
   /** Employee to trigger the checklist for. */

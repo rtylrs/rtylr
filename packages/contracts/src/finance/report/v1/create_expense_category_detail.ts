@@ -5,7 +5,7 @@
 // source: finance/report/v1/create_expense_category_detail.proto
 
 /* eslint-disable */
-import type { ExpenseCategoryDetail } from "./types";
+import type { ExpenseCategoryDetail } from './types';
 
 export interface CreateExpenseCategoryDetailRequest {
   /** name is the name value for this contract. */

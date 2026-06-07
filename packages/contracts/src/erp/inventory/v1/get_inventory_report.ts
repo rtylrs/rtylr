@@ -5,10 +5,9 @@
 // source: erp/inventory/v1/get_inventory_report.proto
 
 /* eslint-disable */
-import type { InventoryReportItem } from "./types";
+import type { InventoryReportItem } from './types';
 
-export interface GetInventoryReportRequest {
-}
+export interface GetInventoryReportRequest {}
 
 export interface GetInventoryReportResponse {
   /** items is the items value for this contract. */

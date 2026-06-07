@@ -5,10 +5,9 @@
 // source: pos/menu_item/v1/list_menu_items.proto
 
 /* eslint-disable */
-import type { MenuItem } from "./types";
+import type { MenuItem } from './types';
 
-export interface ListMenuItemsRequest {
-}
+export interface ListMenuItemsRequest {}
 
 export interface ListMenuItemsResponse {
   /** items is the items value for this contract. */

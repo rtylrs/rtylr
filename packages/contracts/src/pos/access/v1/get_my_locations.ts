@@ -5,10 +5,9 @@
 // source: pos/access/v1/get_my_locations.proto
 
 /* eslint-disable */
-import type { MyLocation } from "./types";
+import type { MyLocation } from './types';
 
-export interface GetMyLocationsRequest {
-}
+export interface GetMyLocationsRequest {}
 
 export interface GetMyLocationsResponse {
   /** locations is the locations value for this contract. */

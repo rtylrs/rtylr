@@ -5,8 +5,8 @@
 // source: buf/validate/validate.proto
 
 /* eslint-disable */
-import type { FieldDescriptorProto_Type } from "../../google/protobuf/descriptor";
-import type { Duration } from "../../google/protobuf/duration";
+import type { FieldDescriptorProto_Type } from '../../google/protobuf/descriptor';
+import type { Duration } from '../../google/protobuf/duration';
 
 /**
  * Specifies how `FieldRules.ignore` behaves, depending on the field's value, and
@@ -136,18 +136,14 @@ export interface Rule {
    * `id` is a string that serves as a machine-readable name for this Rule.
    * It should be unique within its scope, which could be either a message or a field.
    */
-  id?:
-    | string
-    | undefined;
+  id?: string | undefined;
   /**
    * `message` is an optional field that provides a human-readable error message
    * for this Rule when the CEL expression evaluates to false. If a
    * non-empty message is provided, any strings resulting from the CEL
    * expression evaluation are ignored.
    */
-  message?:
-    | string
-    | undefined;
+  message?: string | undefined;
   /**
    * `expression` is the actual CEL expression that will be evaluated for
    * validation. This string must resolve to either a boolean or a string
@@ -375,9 +371,7 @@ export interface FieldRules {
    * values, the elements are always considered to be set. Consequently,
    * specifying `repeated.items.required` is redundant.
    */
-  required?:
-    | boolean
-    | undefined;
+  required?: boolean | undefined;
   /**
    * Ignore validation rules on the field if its value matches the specified
    * criteria. See the `Ignore` enum for details.
@@ -392,9 +386,7 @@ export interface FieldRules {
    * }
    * ```
    */
-  ignore?:
-    | Ignore
-    | undefined;
+  ignore?: Ignore | undefined;
   /** Scalar Field Types */
   float?: FloatRules | undefined;
   double?: DoubleRules | undefined;
@@ -410,15 +402,11 @@ export interface FieldRules {
   sfixed64?: SFixed64Rules | undefined;
   bool?: BoolRules | undefined;
   string?: StringRules | undefined;
-  bytes?:
-    | BytesRules
-    | undefined;
+  bytes?: BytesRules | undefined;
   /** Complex Field Types */
   enum?: EnumRules | undefined;
   repeated?: RepeatedRules | undefined;
-  map?:
-    | MapRules
-    | undefined;
+  map?: MapRules | undefined;
   /** Well-Known Field Types */
   any?: AnyRules | undefined;
   duration?: DurationRules | undefined;
@@ -466,9 +454,7 @@ export interface FloatRules {
    * }
    * ```
    */
-  const?:
-    | number
-    | undefined;
+  const?: number | undefined;
   /**
    * `lt` requires the field value to be less than the specified value (field <
    * value). If the field value is equal to or greater than the specified value,
@@ -481,9 +467,7 @@ export interface FloatRules {
    * }
    * ```
    */
-  lt?:
-    | number
-    | undefined;
+  lt?: number | undefined;
   /**
    * `lte` requires the field value to be less than or equal to the specified
    * value (field <= value). If the field value is greater than the specified
@@ -496,9 +480,7 @@ export interface FloatRules {
    * }
    * ```
    */
-  lte?:
-    | number
-    | undefined;
+  lte?: number | undefined;
   /**
    * `gt` requires the field value to be greater than the specified value
    * (exclusive). If the value of `gt` is larger than a specified `lt` or
@@ -519,9 +501,7 @@ export interface FloatRules {
    * }
    * ```
    */
-  gt?:
-    | number
-    | undefined;
+  gt?: number | undefined;
   /**
    * `gte` requires the field value to be greater than or equal to the specified
    * value (exclusive). If the value of `gte` is larger than a specified `lt`
@@ -542,9 +522,7 @@ export interface FloatRules {
    * }
    * ```
    */
-  gte?:
-    | number
-    | undefined;
+  gte?: number | undefined;
   /**
    * `in` requires the field value to be equal to one of the specified values.
    * If the field value isn't one of the specified values, an error message
@@ -575,9 +553,7 @@ export interface FloatRules {
    * `finite` requires the field value to be finite. If the field value is
    * infinite or NaN, an error message is generated.
    */
-  finite?:
-    | boolean
-    | undefined;
+  finite?: boolean | undefined;
   /**
    * `example` specifies values that the field may have. These values SHOULD
    * conform to other rules. `example` values will not impact validation
@@ -611,9 +587,7 @@ export interface DoubleRules {
    * }
    * ```
    */
-  const?:
-    | number
-    | undefined;
+  const?: number | undefined;
   /**
    * `lt` requires the field value to be less than the specified value (field <
    * value). If the field value is equal to or greater than the specified
@@ -626,9 +600,7 @@ export interface DoubleRules {
    * }
    * ```
    */
-  lt?:
-    | number
-    | undefined;
+  lt?: number | undefined;
   /**
    * `lte` requires the field value to be less than or equal to the specified value
    * (field <= value). If the field value is greater than the specified value,
@@ -641,9 +613,7 @@ export interface DoubleRules {
    * }
    * ```
    */
-  lte?:
-    | number
-    | undefined;
+  lte?: number | undefined;
   /**
    * `gt` requires the field value to be greater than the specified value
    * (exclusive). If the value of `gt` is larger than a specified `lt` or `lte`,
@@ -664,9 +634,7 @@ export interface DoubleRules {
    * }
    * ```
    */
-  gt?:
-    | number
-    | undefined;
+  gt?: number | undefined;
   /**
    * `gte` requires the field value to be greater than or equal to the specified
    * value (exclusive). If the value of `gte` is larger than a specified `lt` or
@@ -687,9 +655,7 @@ export interface DoubleRules {
    * }
    * ```
    */
-  gte?:
-    | number
-    | undefined;
+  gte?: number | undefined;
   /**
    * `in` requires the field value to be equal to one of the specified values.
    * If the field value isn't one of the specified values, an error message is
@@ -720,9 +686,7 @@ export interface DoubleRules {
    * `finite` requires the field value to be finite. If the field value is
    * infinite or NaN, an error message is generated.
    */
-  finite?:
-    | boolean
-    | undefined;
+  finite?: boolean | undefined;
   /**
    * `example` specifies values that the field may have. These values SHOULD
    * conform to other rules. `example` values will not impact validation
@@ -756,9 +720,7 @@ export interface Int32Rules {
    * }
    * ```
    */
-  const?:
-    | number
-    | undefined;
+  const?: number | undefined;
   /**
    * `lt` requires the field value to be less than the specified value (field
    * < value). If the field value is equal to or greater than the specified
@@ -771,9 +733,7 @@ export interface Int32Rules {
    * }
    * ```
    */
-  lt?:
-    | number
-    | undefined;
+  lt?: number | undefined;
   /**
    * `lte` requires the field value to be less than or equal to the specified
    * value (field <= value). If the field value is greater than the specified
@@ -786,9 +746,7 @@ export interface Int32Rules {
    * }
    * ```
    */
-  lte?:
-    | number
-    | undefined;
+  lte?: number | undefined;
   /**
    * `gt` requires the field value to be greater than the specified value
    * (exclusive). If the value of `gt` is larger than a specified `lt` or
@@ -809,9 +767,7 @@ export interface Int32Rules {
    * }
    * ```
    */
-  gt?:
-    | number
-    | undefined;
+  gt?: number | undefined;
   /**
    * `gte` requires the field value to be greater than or equal to the specified value
    * (exclusive). If the value of `gte` is larger than a specified `lt` or
@@ -832,9 +788,7 @@ export interface Int32Rules {
    * }
    * ```
    */
-  gte?:
-    | number
-    | undefined;
+  gte?: number | undefined;
   /**
    * `in` requires the field value to be equal to one of the specified values.
    * If the field value isn't one of the specified values, an error message is
@@ -894,9 +848,7 @@ export interface Int64Rules {
    * }
    * ```
    */
-  const?:
-    | number
-    | undefined;
+  const?: number | undefined;
   /**
    * `lt` requires the field value to be less than the specified value (field <
    * value). If the field value is equal to or greater than the specified value,
@@ -909,9 +861,7 @@ export interface Int64Rules {
    * }
    * ```
    */
-  lt?:
-    | number
-    | undefined;
+  lt?: number | undefined;
   /**
    * `lte` requires the field value to be less than or equal to the specified
    * value (field <= value). If the field value is greater than the specified
@@ -924,9 +874,7 @@ export interface Int64Rules {
    * }
    * ```
    */
-  lte?:
-    | number
-    | undefined;
+  lte?: number | undefined;
   /**
    * `gt` requires the field value to be greater than the specified value
    * (exclusive). If the value of `gt` is larger than a specified `lt` or
@@ -947,9 +895,7 @@ export interface Int64Rules {
    * }
    * ```
    */
-  gt?:
-    | number
-    | undefined;
+  gt?: number | undefined;
   /**
    * `gte` requires the field value to be greater than or equal to the specified
    * value (exclusive). If the value of `gte` is larger than a specified `lt`
@@ -970,9 +916,7 @@ export interface Int64Rules {
    * }
    * ```
    */
-  gte?:
-    | number
-    | undefined;
+  gte?: number | undefined;
   /**
    * `in` requires the field value to be equal to one of the specified values.
    * If the field value isn't one of the specified values, an error message is
@@ -1032,9 +976,7 @@ export interface UInt32Rules {
    * }
    * ```
    */
-  const?:
-    | number
-    | undefined;
+  const?: number | undefined;
   /**
    * `lt` requires the field value to be less than the specified value (field <
    * value). If the field value is equal to or greater than the specified value,
@@ -1047,9 +989,7 @@ export interface UInt32Rules {
    * }
    * ```
    */
-  lt?:
-    | number
-    | undefined;
+  lt?: number | undefined;
   /**
    * `lte` requires the field value to be less than or equal to the specified
    * value (field <= value). If the field value is greater than the specified
@@ -1062,9 +1002,7 @@ export interface UInt32Rules {
    * }
    * ```
    */
-  lte?:
-    | number
-    | undefined;
+  lte?: number | undefined;
   /**
    * `gt` requires the field value to be greater than the specified value
    * (exclusive). If the value of `gt` is larger than a specified `lt` or
@@ -1085,9 +1023,7 @@ export interface UInt32Rules {
    * }
    * ```
    */
-  gt?:
-    | number
-    | undefined;
+  gt?: number | undefined;
   /**
    * `gte` requires the field value to be greater than or equal to the specified
    * value (exclusive). If the value of `gte` is larger than a specified `lt`
@@ -1108,9 +1044,7 @@ export interface UInt32Rules {
    * }
    * ```
    */
-  gte?:
-    | number
-    | undefined;
+  gte?: number | undefined;
   /**
    * `in` requires the field value to be equal to one of the specified values.
    * If the field value isn't one of the specified values, an error message is
@@ -1170,9 +1104,7 @@ export interface UInt64Rules {
    * }
    * ```
    */
-  const?:
-    | number
-    | undefined;
+  const?: number | undefined;
   /**
    * `lt` requires the field value to be less than the specified value (field <
    * value). If the field value is equal to or greater than the specified value,
@@ -1185,9 +1117,7 @@ export interface UInt64Rules {
    * }
    * ```
    */
-  lt?:
-    | number
-    | undefined;
+  lt?: number | undefined;
   /**
    * `lte` requires the field value to be less than or equal to the specified
    * value (field <= value). If the field value is greater than the specified
@@ -1200,9 +1130,7 @@ export interface UInt64Rules {
    * }
    * ```
    */
-  lte?:
-    | number
-    | undefined;
+  lte?: number | undefined;
   /**
    * `gt` requires the field value to be greater than the specified value
    * (exclusive). If the value of `gt` is larger than a specified `lt` or
@@ -1223,9 +1151,7 @@ export interface UInt64Rules {
    * }
    * ```
    */
-  gt?:
-    | number
-    | undefined;
+  gt?: number | undefined;
   /**
    * `gte` requires the field value to be greater than or equal to the specified
    * value (exclusive). If the value of `gte` is larger than a specified `lt`
@@ -1246,9 +1172,7 @@ export interface UInt64Rules {
    * }
    * ```
    */
-  gte?:
-    | number
-    | undefined;
+  gte?: number | undefined;
   /**
    * `in` requires the field value to be equal to one of the specified values.
    * If the field value isn't one of the specified values, an error message is
@@ -1305,9 +1229,7 @@ export interface SInt32Rules {
    * }
    * ```
    */
-  const?:
-    | number
-    | undefined;
+  const?: number | undefined;
   /**
    * `lt` requires the field value to be less than the specified value (field
    * < value). If the field value is equal to or greater than the specified
@@ -1320,9 +1242,7 @@ export interface SInt32Rules {
    * }
    * ```
    */
-  lt?:
-    | number
-    | undefined;
+  lt?: number | undefined;
   /**
    * `lte` requires the field value to be less than or equal to the specified
    * value (field <= value). If the field value is greater than the specified
@@ -1335,9 +1255,7 @@ export interface SInt32Rules {
    * }
    * ```
    */
-  lte?:
-    | number
-    | undefined;
+  lte?: number | undefined;
   /**
    * `gt` requires the field value to be greater than the specified value
    * (exclusive). If the value of `gt` is larger than a specified `lt` or
@@ -1358,9 +1276,7 @@ export interface SInt32Rules {
    * }
    * ```
    */
-  gt?:
-    | number
-    | undefined;
+  gt?: number | undefined;
   /**
    * `gte` requires the field value to be greater than or equal to the specified
    * value (exclusive). If the value of `gte` is larger than a specified `lt`
@@ -1381,9 +1297,7 @@ export interface SInt32Rules {
    * }
    * ```
    */
-  gte?:
-    | number
-    | undefined;
+  gte?: number | undefined;
   /**
    * `in` requires the field value to be equal to one of the specified values.
    * If the field value isn't one of the specified values, an error message is
@@ -1440,9 +1354,7 @@ export interface SInt64Rules {
    * }
    * ```
    */
-  const?:
-    | number
-    | undefined;
+  const?: number | undefined;
   /**
    * `lt` requires the field value to be less than the specified value (field
    * < value). If the field value is equal to or greater than the specified
@@ -1455,9 +1367,7 @@ export interface SInt64Rules {
    * }
    * ```
    */
-  lt?:
-    | number
-    | undefined;
+  lt?: number | undefined;
   /**
    * `lte` requires the field value to be less than or equal to the specified
    * value (field <= value). If the field value is greater than the specified
@@ -1470,9 +1380,7 @@ export interface SInt64Rules {
    * }
    * ```
    */
-  lte?:
-    | number
-    | undefined;
+  lte?: number | undefined;
   /**
    * `gt` requires the field value to be greater than the specified value
    * (exclusive). If the value of `gt` is larger than a specified `lt` or
@@ -1493,9 +1401,7 @@ export interface SInt64Rules {
    * }
    * ```
    */
-  gt?:
-    | number
-    | undefined;
+  gt?: number | undefined;
   /**
    * `gte` requires the field value to be greater than or equal to the specified
    * value (exclusive). If the value of `gte` is larger than a specified `lt`
@@ -1516,9 +1422,7 @@ export interface SInt64Rules {
    * }
    * ```
    */
-  gte?:
-    | number
-    | undefined;
+  gte?: number | undefined;
   /**
    * `in` requires the field value to be equal to one of the specified values.
    * If the field value isn't one of the specified values, an error message
@@ -1575,9 +1479,7 @@ export interface Fixed32Rules {
    * }
    * ```
    */
-  const?:
-    | number
-    | undefined;
+  const?: number | undefined;
   /**
    * `lt` requires the field value to be less than the specified value (field <
    * value). If the field value is equal to or greater than the specified value,
@@ -1590,9 +1492,7 @@ export interface Fixed32Rules {
    * }
    * ```
    */
-  lt?:
-    | number
-    | undefined;
+  lt?: number | undefined;
   /**
    * `lte` requires the field value to be less than or equal to the specified
    * value (field <= value). If the field value is greater than the specified
@@ -1605,9 +1505,7 @@ export interface Fixed32Rules {
    * }
    * ```
    */
-  lte?:
-    | number
-    | undefined;
+  lte?: number | undefined;
   /**
    * `gt` requires the field value to be greater than the specified value
    * (exclusive). If the value of `gt` is larger than a specified `lt` or
@@ -1628,9 +1526,7 @@ export interface Fixed32Rules {
    * }
    * ```
    */
-  gt?:
-    | number
-    | undefined;
+  gt?: number | undefined;
   /**
    * `gte` requires the field value to be greater than or equal to the specified
    * value (exclusive). If the value of `gte` is larger than a specified `lt`
@@ -1651,9 +1547,7 @@ export interface Fixed32Rules {
    * }
    * ```
    */
-  gte?:
-    | number
-    | undefined;
+  gte?: number | undefined;
   /**
    * `in` requires the field value to be equal to one of the specified values.
    * If the field value isn't one of the specified values, an error message
@@ -1710,9 +1604,7 @@ export interface Fixed64Rules {
    * }
    * ```
    */
-  const?:
-    | number
-    | undefined;
+  const?: number | undefined;
   /**
    * `lt` requires the field value to be less than the specified value (field <
    * value). If the field value is equal to or greater than the specified value,
@@ -1725,9 +1617,7 @@ export interface Fixed64Rules {
    * }
    * ```
    */
-  lt?:
-    | number
-    | undefined;
+  lt?: number | undefined;
   /**
    * `lte` requires the field value to be less than or equal to the specified
    * value (field <= value). If the field value is greater than the specified
@@ -1740,9 +1630,7 @@ export interface Fixed64Rules {
    * }
    * ```
    */
-  lte?:
-    | number
-    | undefined;
+  lte?: number | undefined;
   /**
    * `gt` requires the field value to be greater than the specified value
    * (exclusive). If the value of `gt` is larger than a specified `lt` or
@@ -1763,9 +1651,7 @@ export interface Fixed64Rules {
    * }
    * ```
    */
-  gt?:
-    | number
-    | undefined;
+  gt?: number | undefined;
   /**
    * `gte` requires the field value to be greater than or equal to the specified
    * value (exclusive). If the value of `gte` is larger than a specified `lt`
@@ -1786,9 +1672,7 @@ export interface Fixed64Rules {
    * }
    * ```
    */
-  gte?:
-    | number
-    | undefined;
+  gte?: number | undefined;
   /**
    * `in` requires the field value to be equal to one of the specified values.
    * If the field value isn't one of the specified values, an error message is
@@ -1845,9 +1729,7 @@ export interface SFixed32Rules {
    * }
    * ```
    */
-  const?:
-    | number
-    | undefined;
+  const?: number | undefined;
   /**
    * `lt` requires the field value to be less than the specified value (field <
    * value). If the field value is equal to or greater than the specified value,
@@ -1860,9 +1742,7 @@ export interface SFixed32Rules {
    * }
    * ```
    */
-  lt?:
-    | number
-    | undefined;
+  lt?: number | undefined;
   /**
    * `lte` requires the field value to be less than or equal to the specified
    * value (field <= value). If the field value is greater than the specified
@@ -1875,9 +1755,7 @@ export interface SFixed32Rules {
    * }
    * ```
    */
-  lte?:
-    | number
-    | undefined;
+  lte?: number | undefined;
   /**
    * `gt` requires the field value to be greater than the specified value
    * (exclusive). If the value of `gt` is larger than a specified `lt` or
@@ -1898,9 +1776,7 @@ export interface SFixed32Rules {
    * }
    * ```
    */
-  gt?:
-    | number
-    | undefined;
+  gt?: number | undefined;
   /**
    * `gte` requires the field value to be greater than or equal to the specified
    * value (exclusive). If the value of `gte` is larger than a specified `lt`
@@ -1921,9 +1797,7 @@ export interface SFixed32Rules {
    * }
    * ```
    */
-  gte?:
-    | number
-    | undefined;
+  gte?: number | undefined;
   /**
    * `in` requires the field value to be equal to one of the specified values.
    * If the field value isn't one of the specified values, an error message is
@@ -1980,9 +1854,7 @@ export interface SFixed64Rules {
    * }
    * ```
    */
-  const?:
-    | number
-    | undefined;
+  const?: number | undefined;
   /**
    * `lt` requires the field value to be less than the specified value (field <
    * value). If the field value is equal to or greater than the specified value,
@@ -1995,9 +1867,7 @@ export interface SFixed64Rules {
    * }
    * ```
    */
-  lt?:
-    | number
-    | undefined;
+  lt?: number | undefined;
   /**
    * `lte` requires the field value to be less than or equal to the specified
    * value (field <= value). If the field value is greater than the specified
@@ -2010,9 +1880,7 @@ export interface SFixed64Rules {
    * }
    * ```
    */
-  lte?:
-    | number
-    | undefined;
+  lte?: number | undefined;
   /**
    * `gt` requires the field value to be greater than the specified value
    * (exclusive). If the value of `gt` is larger than a specified `lt` or
@@ -2033,9 +1901,7 @@ export interface SFixed64Rules {
    * }
    * ```
    */
-  gt?:
-    | number
-    | undefined;
+  gt?: number | undefined;
   /**
    * `gte` requires the field value to be greater than or equal to the specified
    * value (exclusive). If the value of `gte` is larger than a specified `lt`
@@ -2056,9 +1922,7 @@ export interface SFixed64Rules {
    * }
    * ```
    */
-  gte?:
-    | number
-    | undefined;
+  gte?: number | undefined;
   /**
    * `in` requires the field value to be equal to one of the specified values.
    * If the field value isn't one of the specified values, an error message is
@@ -2118,9 +1982,7 @@ export interface BoolRules {
    * }
    * ```
    */
-  const?:
-    | boolean
-    | undefined;
+  const?: boolean | undefined;
   /**
    * `example` specifies values that the field may have. These values SHOULD
    * conform to other rules. `example` values will not impact validation
@@ -2154,9 +2016,7 @@ export interface StringRules {
    * }
    * ```
    */
-  const?:
-    | string
-    | undefined;
+  const?: string | undefined;
   /**
    * `len` dictates that the field value must have the specified
    * number of characters (Unicode code points), which may differ from the number
@@ -2170,9 +2030,7 @@ export interface StringRules {
    * }
    * ```
    */
-  len?:
-    | number
-    | undefined;
+  len?: number | undefined;
   /**
    * `min_len` specifies that the field value must have at least the specified
    * number of characters (Unicode code points), which may differ from the number
@@ -2186,9 +2044,7 @@ export interface StringRules {
    * }
    * ```
    */
-  minLen?:
-    | number
-    | undefined;
+  minLen?: number | undefined;
   /**
    * `max_len` specifies that the field value must have no more than the specified
    * number of characters (Unicode code points), which may differ from the
@@ -2202,9 +2058,7 @@ export interface StringRules {
    * }
    * ```
    */
-  maxLen?:
-    | number
-    | undefined;
+  maxLen?: number | undefined;
   /**
    * `len_bytes` dictates that the field value must have the specified number of
    * bytes. If the field value does not match the specified length in bytes,
@@ -2217,9 +2071,7 @@ export interface StringRules {
    * }
    * ```
    */
-  lenBytes?:
-    | number
-    | undefined;
+  lenBytes?: number | undefined;
   /**
    * `min_bytes` specifies that the field value must have at least the specified
    * number of bytes. If the field value contains fewer bytes, an error message
@@ -2233,9 +2085,7 @@ export interface StringRules {
    *
    * ```
    */
-  minBytes?:
-    | number
-    | undefined;
+  minBytes?: number | undefined;
   /**
    * `max_bytes` specifies that the field value must have no more than the
    * specified number of bytes. If the field value contains more bytes, an
@@ -2248,9 +2098,7 @@ export interface StringRules {
    * }
    * ```
    */
-  maxBytes?:
-    | number
-    | undefined;
+  maxBytes?: number | undefined;
   /**
    * `pattern` specifies that the field value must match the specified
    * regular expression (RE2 syntax), with the expression provided without any
@@ -2264,9 +2112,7 @@ export interface StringRules {
    * }
    * ```
    */
-  pattern?:
-    | string
-    | undefined;
+  pattern?: string | undefined;
   /**
    * `prefix` specifies that the field value must have the
    * specified substring at the beginning of the string. If the field value
@@ -2280,9 +2126,7 @@ export interface StringRules {
    * }
    * ```
    */
-  prefix?:
-    | string
-    | undefined;
+  prefix?: string | undefined;
   /**
    * `suffix` specifies that the field value must have the
    * specified substring at the end of the string. If the field value doesn't
@@ -2295,9 +2139,7 @@ export interface StringRules {
    * }
    * ```
    */
-  suffix?:
-    | string
-    | undefined;
+  suffix?: string | undefined;
   /**
    * `contains` specifies that the field value must have the
    * specified substring anywhere in the string. If the field value doesn't
@@ -2310,9 +2152,7 @@ export interface StringRules {
    * }
    * ```
    */
-  contains?:
-    | string
-    | undefined;
+  contains?: string | undefined;
   /**
    * `not_contains` specifies that the field value must not have the
    * specified substring anywhere in the string. If the field value contains
@@ -2325,9 +2165,7 @@ export interface StringRules {
    * }
    * ```
    */
-  notContains?:
-    | string
-    | undefined;
+  notContains?: string | undefined;
   /**
    * `in` specifies that the field value must be equal to one of the specified
    * values. If the field value isn't one of the specified values, an error
@@ -2371,9 +2209,7 @@ export interface StringRules {
    * }
    * ```
    */
-  email?:
-    | boolean
-    | undefined;
+  email?: boolean | undefined;
   /**
    * `hostname` specifies that the field value must be a valid hostname, for
    * example "foo.example.com".
@@ -2395,9 +2231,7 @@ export interface StringRules {
    * }
    * ```
    */
-  hostname?:
-    | boolean
-    | undefined;
+  hostname?: boolean | undefined;
   /**
    * `ip` specifies that the field value must be a valid IP (v4 or v6) address.
    *
@@ -2418,9 +2252,7 @@ export interface StringRules {
    * }
    * ```
    */
-  ip?:
-    | boolean
-    | undefined;
+  ip?: boolean | undefined;
   /**
    * `ipv4` specifies that the field value must be a valid IPv4 address—for
    * example "192.168.5.21". If the field value isn't a valid IPv4 address, an
@@ -2433,9 +2265,7 @@ export interface StringRules {
    * }
    * ```
    */
-  ipv4?:
-    | boolean
-    | undefined;
+  ipv4?: boolean | undefined;
   /**
    * `ipv6` specifies that the field value must be a valid IPv6 address—for
    * example "::1", or "d7a:115c:a1e0:ab12:4843:cd96:626b:430b". If the field
@@ -2448,9 +2278,7 @@ export interface StringRules {
    * }
    * ```
    */
-  ipv6?:
-    | boolean
-    | undefined;
+  ipv6?: boolean | undefined;
   /**
    * `uri` specifies that the field value must be a valid URI, for example
    * "https://example.com/foo/bar?baz=quux#frag".
@@ -2467,9 +2295,7 @@ export interface StringRules {
    * }
    * ```
    */
-  uri?:
-    | boolean
-    | undefined;
+  uri?: boolean | undefined;
   /**
    * `uri_ref` specifies that the field value must be a valid URI Reference—either
    * a URI such as "https://example.com/foo/bar?baz=quux#frag", or a Relative
@@ -2489,9 +2315,7 @@ export interface StringRules {
    * }
    * ```
    */
-  uriRef?:
-    | boolean
-    | undefined;
+  uriRef?: boolean | undefined;
   /**
    * `address` specifies that the field value must be either a valid hostname
    * (for example, "example.com"), or a valid IP (v4 or v6) address (for example,
@@ -2505,9 +2329,7 @@ export interface StringRules {
    * }
    * ```
    */
-  address?:
-    | boolean
-    | undefined;
+  address?: boolean | undefined;
   /**
    * `uuid` specifies that the field value must be a valid UUID as defined by
    * [RFC 4122](https://datatracker.ietf.org/doc/html/rfc4122#section-4.1.2). If the
@@ -2520,9 +2342,7 @@ export interface StringRules {
    * }
    * ```
    */
-  uuid?:
-    | boolean
-    | undefined;
+  uuid?: boolean | undefined;
   /**
    * `tuuid` (trimmed UUID) specifies that the field value must be a valid UUID as
    * defined by [RFC 4122](https://datatracker.ietf.org/doc/html/rfc4122#section-4.1.2) with all dashes
@@ -2536,9 +2356,7 @@ export interface StringRules {
    * }
    * ```
    */
-  tuuid?:
-    | boolean
-    | undefined;
+  tuuid?: boolean | undefined;
   /**
    * `ip_with_prefixlen` specifies that the field value must be a valid IP
    * (v4 or v6) address with prefix length—for example, "192.168.5.21/16" or
@@ -2552,9 +2370,7 @@ export interface StringRules {
    * }
    * ```
    */
-  ipWithPrefixlen?:
-    | boolean
-    | undefined;
+  ipWithPrefixlen?: boolean | undefined;
   /**
    * `ipv4_with_prefixlen` specifies that the field value must be a valid
    * IPv4 address with prefix length—for example, "192.168.5.21/16". If the
@@ -2568,9 +2384,7 @@ export interface StringRules {
    * }
    * ```
    */
-  ipv4WithPrefixlen?:
-    | boolean
-    | undefined;
+  ipv4WithPrefixlen?: boolean | undefined;
   /**
    * `ipv6_with_prefixlen` specifies that the field value must be a valid
    * IPv6 address with prefix length—for example, "2001:0DB8:ABCD:0012::F1/64".
@@ -2584,9 +2398,7 @@ export interface StringRules {
    * }
    * ```
    */
-  ipv6WithPrefixlen?:
-    | boolean
-    | undefined;
+  ipv6WithPrefixlen?: boolean | undefined;
   /**
    * `ip_prefix` specifies that the field value must be a valid IP (v4 or v6)
    * prefix—for example, "192.168.0.0/16" or "2001:0DB8:ABCD:0012::0/64".
@@ -2605,9 +2417,7 @@ export interface StringRules {
    * }
    * ```
    */
-  ipPrefix?:
-    | boolean
-    | undefined;
+  ipPrefix?: boolean | undefined;
   /**
    * `ipv4_prefix` specifies that the field value must be a valid IPv4
    * prefix, for example "192.168.0.0/16".
@@ -2626,9 +2436,7 @@ export interface StringRules {
    * }
    * ```
    */
-  ipv4Prefix?:
-    | boolean
-    | undefined;
+  ipv4Prefix?: boolean | undefined;
   /**
    * `ipv6_prefix` specifies that the field value must be a valid IPv6 prefix—for
    * example, "2001:0DB8:ABCD:0012::0/64".
@@ -2647,9 +2455,7 @@ export interface StringRules {
    * }
    * ```
    */
-  ipv6Prefix?:
-    | boolean
-    | undefined;
+  ipv6Prefix?: boolean | undefined;
   /**
    * `host_and_port` specifies that the field value must be a valid host/port
    * pair—for example, "example.com:8080".
@@ -2662,9 +2468,7 @@ export interface StringRules {
    * The port is separated by a colon. It must be non-empty, with a decimal number
    * in the range of 0-65535, inclusive.
    */
-  hostAndPort?:
-    | boolean
-    | undefined;
+  hostAndPort?: boolean | undefined;
   /**
    * `ulid` specifies that the field value must be a valid ULID (Universally Unique
    * Lexicographically Sortable Identifier) as defined by the [ULID specification](https://github.com/ulid/spec).
@@ -2677,9 +2481,7 @@ export interface StringRules {
    * }
    * ```
    */
-  ulid?:
-    | boolean
-    | undefined;
+  ulid?: boolean | undefined;
   /**
    * `protobuf_fqn` specifies that the field value must be a valid fully-qualified
    * Protobuf name as defined by the [Protobuf Language Specification](https://protobuf.com/docs/language-spec).
@@ -2705,9 +2507,7 @@ export interface StringRules {
    * }
    * ```
    */
-  protobufFqn?:
-    | boolean
-    | undefined;
+  protobufFqn?: boolean | undefined;
   /**
    * `protobuf_dot_fqn` specifies that the field value must be a valid fully-qualified
    * Protobuf name with a leading dot, as defined by the
@@ -2735,9 +2535,7 @@ export interface StringRules {
    * }
    * ```
    */
-  protobufDotFqn?:
-    | boolean
-    | undefined;
+  protobufDotFqn?: boolean | undefined;
   /**
    * `well_known_regex` specifies a common well-known pattern
    * defined as a regex. If the field value doesn't match the well-known
@@ -2760,9 +2558,7 @@ export interface StringRules {
    * | KNOWN_REGEX_HTTP_HEADER_NAME  | 1      | HTTP header name as defined by [RFC 7230](https://datatracker.ietf.org/doc/html/rfc7230#section-3.2)  |
    * | KNOWN_REGEX_HTTP_HEADER_VALUE | 2      | HTTP header value as defined by [RFC 7230](https://datatracker.ietf.org/doc/html/rfc7230#section-3.2.4) |
    */
-  wellKnownRegex?:
-    | KnownRegex
-    | undefined;
+  wellKnownRegex?: KnownRegex | undefined;
   /**
    * This applies to regexes `HTTP_HEADER_NAME` and `HTTP_HEADER_VALUE` to
    * enable strict header validation. By default, this is true, and HTTP header
@@ -2777,9 +2573,7 @@ export interface StringRules {
    * }
    * ```
    */
-  strict?:
-    | boolean
-    | undefined;
+  strict?: boolean | undefined;
   /**
    * `example` specifies values that the field may have. These values SHOULD
    * conform to other rules. `example` values will not impact validation
@@ -2813,9 +2607,7 @@ export interface BytesRules {
    * }
    * ```
    */
-  const?:
-    | Uint8Array
-    | undefined;
+  const?: Uint8Array | undefined;
   /**
    * `len` requires the field value to have the specified length in bytes.
    * If the field value doesn't match, an error message is generated.
@@ -2827,9 +2619,7 @@ export interface BytesRules {
    * }
    * ```
    */
-  len?:
-    | number
-    | undefined;
+  len?: number | undefined;
   /**
    * `min_len` requires the field value to have at least the specified minimum
    * length in bytes.
@@ -2842,9 +2632,7 @@ export interface BytesRules {
    * }
    * ```
    */
-  minLen?:
-    | number
-    | undefined;
+  minLen?: number | undefined;
   /**
    * `max_len` requires the field value to have at most the specified maximum
    * length in bytes.
@@ -2857,9 +2645,7 @@ export interface BytesRules {
    * }
    * ```
    */
-  maxLen?:
-    | number
-    | undefined;
+  maxLen?: number | undefined;
   /**
    * `pattern` requires the field value to match the specified regular
    * expression ([RE2 syntax](https://github.com/google/re2/wiki/Syntax)).
@@ -2874,9 +2660,7 @@ export interface BytesRules {
    * }
    * ```
    */
-  pattern?:
-    | string
-    | undefined;
+  pattern?: string | undefined;
   /**
    * `prefix` requires the field value to have the specified bytes at the
    * beginning of the string.
@@ -2889,9 +2673,7 @@ export interface BytesRules {
    * }
    * ```
    */
-  prefix?:
-    | Uint8Array
-    | undefined;
+  prefix?: Uint8Array | undefined;
   /**
    * `suffix` requires the field value to have the specified bytes at the end
    * of the string.
@@ -2904,9 +2686,7 @@ export interface BytesRules {
    * }
    * ```
    */
-  suffix?:
-    | Uint8Array
-    | undefined;
+  suffix?: Uint8Array | undefined;
   /**
    * `contains` requires the field value to have the specified bytes anywhere in
    * the string.
@@ -2919,9 +2699,7 @@ export interface BytesRules {
    * }
    * ```
    */
-  contains?:
-    | Uint8Array
-    | undefined;
+  contains?: Uint8Array | undefined;
   /**
    * `in` requires the field value to be equal to one of the specified
    * values. If the field value doesn't match any of the specified values, an
@@ -2960,9 +2738,7 @@ export interface BytesRules {
    * }
    * ```
    */
-  ip?:
-    | boolean
-    | undefined;
+  ip?: boolean | undefined;
   /**
    * `ipv4` ensures that the field `value` is a valid IPv4 address in byte format.
    * If the field value doesn't meet this rule, an error message is generated.
@@ -2974,9 +2750,7 @@ export interface BytesRules {
    * }
    * ```
    */
-  ipv4?:
-    | boolean
-    | undefined;
+  ipv4?: boolean | undefined;
   /**
    * `ipv6` ensures that the field `value` is a valid IPv6 address in byte format.
    * If the field value doesn't meet this rule, an error message is generated.
@@ -2987,9 +2761,7 @@ export interface BytesRules {
    * }
    * ```
    */
-  ipv6?:
-    | boolean
-    | undefined;
+  ipv6?: boolean | undefined;
   /**
    * `uuid` ensures that the field value encodes 128-bit UUID data as defined
    * by [RFC 4122](https://datatracker.ietf.org/doc/html/rfc4122#section-4.1.2).
@@ -3003,9 +2775,7 @@ export interface BytesRules {
    * }
    * ```
    */
-  uuid?:
-    | boolean
-    | undefined;
+  uuid?: boolean | undefined;
   /**
    * `example` specifies values that the field may have. These values SHOULD
    * conform to other rules. `example` values will not impact validation
@@ -3042,9 +2812,7 @@ export interface EnumRules {
    * }
    * ```
    */
-  const?:
-    | number
-    | undefined;
+  const?: number | undefined;
   /**
    * `defined_only` requires the field value to be one of the defined values for
    * this enum, failing on any undefined value.
@@ -3062,9 +2830,7 @@ export interface EnumRules {
    * }
    * ```
    */
-  definedOnly?:
-    | boolean
-    | undefined;
+  definedOnly?: boolean | undefined;
   /**
    * `in` requires the field value to be equal to one of the
    * specified enum values. If the field value doesn't match any of the
@@ -3139,9 +2905,7 @@ export interface RepeatedRules {
    * }
    * ```
    */
-  minItems?:
-    | number
-    | undefined;
+  minItems?: number | undefined;
   /**
    * `max_items` denotes that this field must not exceed a
    * certain number of items as the upper limit. If the field contains more
@@ -3155,9 +2919,7 @@ export interface RepeatedRules {
    * }
    * ```
    */
-  maxItems?:
-    | number
-    | undefined;
+  maxItems?: number | undefined;
   /**
    * `unique` indicates that all elements in this field must
    * be unique. This rule is strictly applicable to scalar and enum
@@ -3170,9 +2932,7 @@ export interface RepeatedRules {
    * }
    * ```
    */
-  unique?:
-    | boolean
-    | undefined;
+  unique?: boolean | undefined;
   /**
    * `items` details the rules to be applied to each item
    * in the field. Even for repeated message fields, validation is executed
@@ -3209,9 +2969,7 @@ export interface MapRules {
    * }
    * ```
    */
-  minPairs?:
-    | number
-    | undefined;
+  minPairs?: number | undefined;
   /**
    * Specifies the maximum number of key-value pairs allowed. If the field has
    * more key-value pairs than specified, an error message is generated.
@@ -3223,9 +2981,7 @@ export interface MapRules {
    * }
    * ```
    */
-  maxPairs?:
-    | number
-    | undefined;
+  maxPairs?: number | undefined;
   /**
    * Specifies the rules to be applied to each key in the field.
    *
@@ -3243,9 +2999,7 @@ export interface MapRules {
    *
    * Note that the `required` rule does not apply. Map keys cannot be unset.
    */
-  keys?:
-    | FieldRules
-    | undefined;
+  keys?: FieldRules | undefined;
   /**
    * Specifies the rules to be applied to the value of each key in the
    * field. Message values will still have their validations evaluated unless
@@ -3313,9 +3067,7 @@ export interface DurationRules {
    * }
    * ```
    */
-  const?:
-    | Duration
-    | undefined;
+  const?: Duration | undefined;
   /**
    * `lt` stipulates that the field must be less than the specified value of the `google.protobuf.Duration` type,
    * exclusive. If the field's value is greater than or equal to the specified
@@ -3328,9 +3080,7 @@ export interface DurationRules {
    * }
    * ```
    */
-  lt?:
-    | Duration
-    | undefined;
+  lt?: Duration | undefined;
   /**
    * `lte` indicates that the field must be less than or equal to the specified
    * value of the `google.protobuf.Duration` type, inclusive. If the field's value is greater than the specified value,
@@ -3343,9 +3093,7 @@ export interface DurationRules {
    * }
    * ```
    */
-  lte?:
-    | Duration
-    | undefined;
+  lte?: Duration | undefined;
   /**
    * `gt` requires the duration field value to be greater than the specified
    * value (exclusive). If the value of `gt` is larger than a specified `lt`
@@ -3366,9 +3114,7 @@ export interface DurationRules {
    * }
    * ```
    */
-  gt?:
-    | Duration
-    | undefined;
+  gt?: Duration | undefined;
   /**
    * `gte` requires the duration field value to be greater than or equal to the
    * specified value (exclusive). If the value of `gte` is larger than a
@@ -3389,9 +3135,7 @@ export interface DurationRules {
    * }
    * ```
    */
-  gte?:
-    | Duration
-    | undefined;
+  gte?: Duration | undefined;
   /**
    * `in` asserts that the field must be equal to one of the specified values of the `google.protobuf.Duration` type.
    * If the field's value doesn't correspond to any of the specified values,
@@ -3452,9 +3196,7 @@ export interface FieldMaskRules {
    * }
    * ```
    */
-  const?:
-    | string[]
-    | undefined;
+  const?: string[] | undefined;
   /**
    * `in` requires the field value to only contain paths matching specified
    * values or their subpaths.
@@ -3518,9 +3260,7 @@ export interface TimestampRules {
    * }
    * ```
    */
-  const?:
-    | Date
-    | undefined;
+  const?: Date | undefined;
   /**
    * `lt` requires the timestamp field value to be less than the specified value (field < value). If the field value doesn't meet the required conditions, an error message is generated.
    *
@@ -3531,9 +3271,7 @@ export interface TimestampRules {
    * }
    * ```
    */
-  lt?:
-    | Date
-    | undefined;
+  lt?: Date | undefined;
   /**
    * `lte` requires the timestamp field value to be less than or equal to the specified value (field <= value). If the field value doesn't meet the required conditions, an error message is generated.
    *
@@ -3544,9 +3282,7 @@ export interface TimestampRules {
    * }
    * ```
    */
-  lte?:
-    | Date
-    | undefined;
+  lte?: Date | undefined;
   /**
    * `lt_now` specifies that this field, of the `google.protobuf.Timestamp` type, must be less than the current time. `lt_now` can only be used with the `within` rule.
    *
@@ -3557,9 +3293,7 @@ export interface TimestampRules {
    * }
    * ```
    */
-  ltNow?:
-    | boolean
-    | undefined;
+  ltNow?: boolean | undefined;
   /**
    * `gt` requires the timestamp field value to be greater than the specified
    * value (exclusive). If the value of `gt` is larger than a specified `lt`
@@ -3580,9 +3314,7 @@ export interface TimestampRules {
    * }
    * ```
    */
-  gt?:
-    | Date
-    | undefined;
+  gt?: Date | undefined;
   /**
    * `gte` requires the timestamp field value to be greater than or equal to the
    * specified value (exclusive). If the value of `gte` is larger than a
@@ -3603,9 +3335,7 @@ export interface TimestampRules {
    * }
    * ```
    */
-  gte?:
-    | Date
-    | undefined;
+  gte?: Date | undefined;
   /**
    * `gt_now` specifies that this field, of the `google.protobuf.Timestamp` type, must be greater than the current time. `gt_now` can only be used with the `within` rule.
    *
@@ -3616,9 +3346,7 @@ export interface TimestampRules {
    * }
    * ```
    */
-  gtNow?:
-    | boolean
-    | undefined;
+  gtNow?: boolean | undefined;
   /**
    * `within` specifies that this field, of the `google.protobuf.Timestamp` type, must be within the specified duration of the current time. If the field value isn't within the duration, an error message is generated.
    *
@@ -3629,9 +3357,7 @@ export interface TimestampRules {
    * }
    * ```
    */
-  within?:
-    | Duration
-    | undefined;
+  within?: Duration | undefined;
   /**
    * `example` specifies values that the field may have. These values SHOULD
    * conform to other rules. `example` values will not impact validation
@@ -3726,9 +3452,7 @@ export interface Violation {
    * }
    * ```
    */
-  field?:
-    | FieldPath
-    | undefined;
+  field?: FieldPath | undefined;
   /**
    * `rule` is a machine-readable path that points to the specific rule that failed validation.
    * This will be a nested field starting from the FieldRules of the field that failed validation.
@@ -3759,23 +3483,17 @@ export interface Violation {
    * }
    * ```
    */
-  rule?:
-    | FieldPath
-    | undefined;
+  rule?: FieldPath | undefined;
   /**
    * `rule_id` is the unique identifier of the `Rule` that was not fulfilled.
    * This is the same `id` that was specified in the `Rule` message, allowing easy tracing of which rule was violated.
    */
-  ruleId?:
-    | string
-    | undefined;
+  ruleId?: string | undefined;
   /**
    * `message` is a human-readable error message that describes the nature of the violation.
    * This can be the default error message from the violated `Rule`, or it can be a custom message that gives more context about the violation.
    */
-  message?:
-    | string
-    | undefined;
+  message?: string | undefined;
   /** `for_key` indicates whether the violation was caused by a map key, rather than a value. */
   forKey?: boolean | undefined;
 }
@@ -3800,16 +3518,12 @@ export interface FieldPath {
  */
 export interface FieldPathElement {
   /** `field_number` is the field number this path element refers to. */
-  fieldNumber?:
-    | number
-    | undefined;
+  fieldNumber?: number | undefined;
   /**
    * `field_name` contains the field name this path element refers to.
    * This can be used to display a human-readable path even if the field number is unknown.
    */
-  fieldName?:
-    | string
-    | undefined;
+  fieldName?: string | undefined;
   /**
    * `field_type` specifies the type of this field. When using reflection, this value is not needed.
    *
@@ -3822,40 +3536,26 @@ export interface FieldPathElement {
    * N.B.: Although groups are deprecated, the corresponding delimited encoding scheme is not, and
    * can be explicitly used in Protocol Buffers 2023 Edition.
    */
-  fieldType?:
-    | FieldDescriptorProto_Type
-    | undefined;
+  fieldType?: FieldDescriptorProto_Type | undefined;
   /**
    * `key_type` specifies the map key type of this field. This value is useful when traversing
    * unknown fields through wire data: specifically, it allows handling the differences between
    * different integer encodings.
    */
-  keyType?:
-    | FieldDescriptorProto_Type
-    | undefined;
+  keyType?: FieldDescriptorProto_Type | undefined;
   /**
    * `value_type` specifies map value type of this field. This is useful if you want to display a
    * value inside unknown fields through wire data.
    */
-  valueType?:
-    | FieldDescriptorProto_Type
-    | undefined;
+  valueType?: FieldDescriptorProto_Type | undefined;
   /** `index` specifies a 0-based index into a repeated field. */
-  index?:
-    | number
-    | undefined;
+  index?: number | undefined;
   /** `bool_key` specifies a map key of type bool. */
-  boolKey?:
-    | boolean
-    | undefined;
+  boolKey?: boolean | undefined;
   /** `int_key` specifies a map key of type int32, int64, sint32, sint64, sfixed32 or sfixed64. */
-  intKey?:
-    | number
-    | undefined;
+  intKey?: number | undefined;
   /** `uint_key` specifies a map key of type uint32, uint64, fixed32 or fixed64. */
-  uintKey?:
-    | number
-    | undefined;
+  uintKey?: number | undefined;
   /** `string_key` specifies a map key of type string. */
   stringKey?: string | undefined;
 }

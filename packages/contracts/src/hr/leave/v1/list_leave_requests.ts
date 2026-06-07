@@ -5,13 +5,11 @@
 // source: hr/leave/v1/list_leave_requests.proto
 
 /* eslint-disable */
-import type { LeaveRequestPayload } from "./types";
+import type { LeaveRequestPayload } from './types';
 
 export interface ListLeaveRequestsRequest {
   /** Filter by employee; absent to include all employees. */
-  employeeId?:
-    | number
-    | undefined;
+  employeeId?: number | undefined;
   /** Filter by status; absent to include all statuses. */
   status?: string | undefined;
 }

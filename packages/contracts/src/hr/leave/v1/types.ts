@@ -18,17 +18,13 @@ export interface LeaveTypePayload {
   /** Whether leave requests of this type require manager approval. */
   requiresApproval: boolean;
   /** Rule describing how entitlement accrues (e.g. "monthly", "yearly"); absent if entitlement is fixed. */
-  accrualRule?:
-    | string
-    | undefined;
+  accrualRule?: string | undefined;
   /** Maximum unused days that may carry over to the next year. */
   maxCarryoverDays: number;
   /** Minimum calendar days of notice required before the leave starts. */
   minNoticeDays: number;
   /** Number of consecutive days after which supporting documentation is required; absent if never required. */
-  requiresDocumentationAfterDays?:
-    | number
-    | undefined;
+  requiresDocumentationAfterDays?: number | undefined;
   /** Whether this leave type is currently available for new requests. */
   isActive: boolean;
   /** Unix timestamp when this record was created. */
@@ -53,17 +49,13 @@ export interface LeaveRequestPayload {
   /** Total number of working days requested (may be fractional for half-days). */
   totalDays: number;
   /** Additional context from the employee; absent if none provided. */
-  notes?:
-    | string
-    | undefined;
+  notes?: string | undefined;
   /** Workflow status (pending | approved | rejected | cancelled). */
   status: string;
   /** Current step in a multi-level approval chain. */
   currentApprovalLevel: number;
   /** Reason the request was rejected; absent unless status is rejected. */
-  rejectionReason?:
-    | string
-    | undefined;
+  rejectionReason?: string | undefined;
   /** Unix timestamp when this record was created. */
   createdAt: number;
   /** Unix timestamp when this record was last updated. */

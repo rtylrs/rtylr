@@ -5,7 +5,7 @@
 // source: hr/onboarding/v1/list_checklist_templates.proto
 
 /* eslint-disable */
-import type { ChecklistTemplatePayload } from "./types";
+import type { ChecklistTemplatePayload } from './types';
 
 export interface ListChecklistTemplatesRequest {
   /** Filter by trigger type; absent to include all types. */

@@ -5,10 +5,9 @@
 // source: pos/orders/holds/v1/list_held_orders.proto
 
 /* eslint-disable */
-import type { Order } from "../../v1/types";
+import type { Order } from '../../v1/types';
 
-export interface ListHeldOrdersRequest {
-}
+export interface ListHeldOrdersRequest {}
 
 export interface ListHeldOrdersResponse {
   /** orders is the orders value for this contract. */

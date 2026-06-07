@@ -5,7 +5,7 @@
 // source: pos/stock/v1/list_inventory.proto
 
 /* eslint-disable */
-import type { BranchInventory } from "./types";
+import type { BranchInventory } from './types';
 
 export interface ListInventoryRequest {
   /** branch_id is the branch id value for this contract. */

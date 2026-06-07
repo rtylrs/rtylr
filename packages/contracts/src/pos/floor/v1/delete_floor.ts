@@ -6,8 +6,7 @@
 
 /* eslint-disable */
 
-export interface DeleteFloorRequest {
-}
+export interface DeleteFloorRequest {}
 
 export interface DeleteFloorResponse {
   /** message is a human-readable result message. */

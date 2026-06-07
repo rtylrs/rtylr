@@ -5,7 +5,7 @@
 // source: pos/receipt/v1/list_receipts.proto
 
 /* eslint-disable */
-import type { Receipt } from "./types";
+import type { Receipt } from './types';
 
 export interface ListReceiptsRequest {
   /** from is the from value for this contract. */

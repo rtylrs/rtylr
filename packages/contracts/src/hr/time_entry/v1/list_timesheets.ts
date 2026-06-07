@@ -5,13 +5,11 @@
 // source: hr/time_entry/v1/list_timesheets.proto
 
 /* eslint-disable */
-import type { TimesheetPayload } from "./types";
+import type { TimesheetPayload } from './types';
 
 export interface ListTimesheetsRequest {
   /** Filter by employee; absent to include all employees. */
-  employeeId?:
-    | number
-    | undefined;
+  employeeId?: number | undefined;
   /** Filter by status; absent to include all statuses. */
   status?: string | undefined;
 }

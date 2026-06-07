@@ -6,8 +6,7 @@
 
 /* eslint-disable */
 
-export interface DeleteComboRequest {
-}
+export interface DeleteComboRequest {}
 
 export interface DeleteComboResponse {
   /** message is a human-readable result message. */

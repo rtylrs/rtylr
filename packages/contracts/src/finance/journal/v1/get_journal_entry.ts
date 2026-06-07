@@ -5,7 +5,7 @@
 // source: finance/journal/v1/get_journal_entry.proto
 
 /* eslint-disable */
-import type { JournalEntry } from "./types";
+import type { JournalEntry } from './types';
 
 export interface GetJournalEntryRequest {
   /** id is the unique identifier for the resource. */

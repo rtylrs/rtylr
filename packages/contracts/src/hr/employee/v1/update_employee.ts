@@ -5,63 +5,37 @@
 // source: hr/employee/v1/update_employee.proto
 
 /* eslint-disable */
-import type { EmployeePayload } from "./types";
+import type { EmployeePayload } from './types';
 
 export interface UpdateEmployeeRequest {
   /** ID of the employee to update. */
   id: number;
   /** New department assignment; absent to keep current. */
-  departmentId?:
-    | number
-    | undefined;
+  departmentId?: number | undefined;
   /** New work location; absent to keep current. */
-  locationId?:
-    | number
-    | undefined;
+  locationId?: number | undefined;
   /** New direct manager; absent to keep current. */
-  managerId?:
-    | number
-    | undefined;
+  managerId?: number | undefined;
   /** New employment arrangement; absent to keep current. */
-  contractType?:
-    | string
-    | undefined;
+  contractType?: string | undefined;
   /** New employment status; absent to keep current. */
-  status?:
-    | string
-    | undefined;
+  status?: string | undefined;
   /** New hire date (ISO-8601); absent to keep current. */
-  hireDate?:
-    | string
-    | undefined;
+  hireDate?: string | undefined;
   /** New probation end date (ISO-8601); absent to keep current. */
-  probationEndDate?:
-    | string
-    | undefined;
+  probationEndDate?: string | undefined;
   /** New termination date (ISO-8601); absent to keep current. */
-  terminationDate?:
-    | string
-    | undefined;
+  terminationDate?: string | undefined;
   /** New hourly rate; absent to keep current. */
-  hourlyRate?:
-    | number
-    | undefined;
+  hourlyRate?: number | undefined;
   /** New monthly salary; absent to keep current. */
-  monthlySalary?:
-    | number
-    | undefined;
+  monthlySalary?: number | undefined;
   /** New currency code; absent to keep current. */
-  currency?:
-    | string
-    | undefined;
+  currency?: string | undefined;
   /** New work schedule; absent to keep current. */
-  workScheduleId?:
-    | number
-    | undefined;
+  workScheduleId?: number | undefined;
   /** New account creation mode; absent to keep current. */
-  accountCreationMode?:
-    | string
-    | undefined;
+  accountCreationMode?: string | undefined;
   /** New job title; absent to keep current. */
   jobTitle?: string | undefined;
 }

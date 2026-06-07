@@ -5,10 +5,9 @@
 // source: hub/team/members/v1/list_members.proto
 
 /* eslint-disable */
-import type { StaffUserPayload } from "./types";
+import type { StaffUserPayload } from './types';
 
-export interface ListTeamRequest {
-}
+export interface ListTeamRequest {}
 
 export interface ListTeamResponse {
   /** users is the users value for this contract. */

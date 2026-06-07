@@ -5,14 +5,15 @@
 // source: insights/product/v1/get_product_margins.proto
 
 /* eslint-disable */
-import type { PaginationRequest, PaginationResponse } from "../../../common/pagination/v1/pagination";
-import type { ProductMargin } from "./types";
+import type {
+  PaginationRequest,
+  PaginationResponse,
+} from '../../../common/pagination/v1/pagination';
+import type { ProductMargin } from './types';
 
 export interface GetProductMarginsRequest {
   /** pagination is the pagination value for this contract. */
-  pagination:
-    | PaginationRequest
-    | undefined;
+  pagination: PaginationRequest | undefined;
   /** period is the period value for this contract. */
   period: string;
 }

@@ -5,7 +5,7 @@
 // source: insights/product/v1/get_category_performance.proto
 
 /* eslint-disable */
-import type { CategoryPerformance } from "./types";
+import type { CategoryPerformance } from './types';
 
 export interface GetCategoryPerformanceRequest {
   /** period is the period value for this contract. */

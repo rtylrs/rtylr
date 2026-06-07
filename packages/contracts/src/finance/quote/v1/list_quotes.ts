@@ -5,14 +5,15 @@
 // source: finance/quote/v1/list_quotes.proto
 
 /* eslint-disable */
-import type { PaginationRequest, PaginationResponse } from "../../../common/pagination/v1/pagination";
-import type { Quote } from "./types";
+import type {
+  PaginationRequest,
+  PaginationResponse,
+} from '../../../common/pagination/v1/pagination';
+import type { Quote } from './types';
 
 export interface ListQuotesRequest {
   /** pagination is the pagination value for this contract. */
-  pagination:
-    | PaginationRequest
-    | undefined;
+  pagination: PaginationRequest | undefined;
   /** status is the current lifecycle state. */
   status: string;
   /** customer_id is the customer id value for this contract. */

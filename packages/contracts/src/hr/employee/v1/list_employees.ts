@@ -5,21 +5,15 @@
 // source: hr/employee/v1/list_employees.proto
 
 /* eslint-disable */
-import type { EmployeePayload } from "./types";
+import type { EmployeePayload } from './types';
 
 export interface ListEmployeesRequest {
   /** Filter by department; absent to include all departments. */
-  departmentId?:
-    | number
-    | undefined;
+  departmentId?: number | undefined;
   /** Filter by location; absent to include all locations. */
-  locationId?:
-    | number
-    | undefined;
+  locationId?: number | undefined;
   /** Filter by employment status; absent to include all statuses. */
-  status?:
-    | string
-    | undefined;
+  status?: string | undefined;
   /** Maximum number of records to return. */
   limit: number;
   /** Number of records to skip for pagination. */

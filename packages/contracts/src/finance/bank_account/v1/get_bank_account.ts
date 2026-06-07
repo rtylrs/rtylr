@@ -5,7 +5,7 @@
 // source: finance/bank_account/v1/get_bank_account.proto
 
 /* eslint-disable */
-import type { BankAccount } from "./types";
+import type { BankAccount } from './types';
 
 export interface GetBankAccountRequest {
   /** id is the unique identifier for the resource. */

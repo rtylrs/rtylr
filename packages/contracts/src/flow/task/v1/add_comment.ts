@@ -5,7 +5,7 @@
 // source: flow/task/v1/add_comment.proto
 
 /* eslint-disable */
-import type { TaskComment } from "./types";
+import type { TaskComment } from './types';
 
 export interface AddCommentRequest {
   /** task_id is the task id value for this contract. */

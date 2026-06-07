@@ -5,10 +5,9 @@
 // source: hub/notification/v1/list_notifications.proto
 
 /* eslint-disable */
-import type { Notification } from "./types";
+import type { Notification } from './types';
 
-export interface ListNotificationsRequest {
-}
+export interface ListNotificationsRequest {}
 
 export interface ListNotificationsResponse {
   /** notifications is the notifications value for this contract. */

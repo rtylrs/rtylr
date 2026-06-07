@@ -5,7 +5,7 @@
 // source: pos/loyalty/v1/list_loyalty_transactions.proto
 
 /* eslint-disable */
-import type { LoyaltyTransaction } from "./types";
+import type { LoyaltyTransaction } from './types';
 
 export interface ListLoyaltyTransactionsRequest {
   /** customer_id is the customer id value for this contract. */

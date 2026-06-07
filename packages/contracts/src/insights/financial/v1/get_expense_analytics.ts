@@ -5,7 +5,7 @@
 // source: insights/financial/v1/get_expense_analytics.proto
 
 /* eslint-disable */
-import type { ExpenseAnalytics } from "./types";
+import type { ExpenseAnalytics } from './types';
 
 export interface GetExpenseAnalyticsRequest {
   /** period is the period value for this contract. */

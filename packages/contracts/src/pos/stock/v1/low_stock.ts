@@ -5,7 +5,7 @@
 // source: pos/stock/v1/low_stock.proto
 
 /* eslint-disable */
-import type { BranchInventory } from "./types";
+import type { BranchInventory } from './types';
 
 export interface LowStockRequest {
   /** branch_id is the branch id value for this contract. */
