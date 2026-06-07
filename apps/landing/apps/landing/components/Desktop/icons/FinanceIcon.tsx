@@ -8,7 +8,7 @@ export const FinanceIcon = ({ size = 44 }: { size?: number }) => (
     fill="none"
     xmlns="http://www.w3.org/2000/svg"
   >
-    <rect x="0" y="0" width="44" height="44" rx="10" fill="#0a1e0e" />
+    <rect x="0" y="0" width="44" height="44" rx="10" fill="#16a34a" />
     {/* Grid baseline */}
     <line x1="7" y1="36" x2="38" y2="36" stroke="rgba(255,255,255,0.15)" strokeWidth="0.75" />
     <line x1="7" y1="29" x2="38" y2="29" stroke="rgba(255,255,255,0.07)" strokeWidth="0.5" />

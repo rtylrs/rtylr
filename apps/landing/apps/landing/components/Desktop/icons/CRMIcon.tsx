@@ -8,7 +8,7 @@ export const CRMIcon = ({ size = 44 }: { size?: number }) => (
     fill="none"
     xmlns="http://www.w3.org/2000/svg"
   >
-    <rect x="0" y="0" width="44" height="44" rx="10" fill="#1e0d38" />
+    <rect x="0" y="0" width="44" height="44" rx="10" fill="#7c3aed" />
     {/* Connection lines */}
     <line
       x1="22"

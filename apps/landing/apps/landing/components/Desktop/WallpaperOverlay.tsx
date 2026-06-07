@@ -1,7 +1,169 @@
 import React from 'react';
 import { Wallpaper } from '../../stores/useDesktopStore';
 
-// ─── Midnight: Night City Street ─────────────────────────────────────────────
+// ─── Isometric helpers ────────────────────────────────────────────────────────
+// T=30, origin=(720, 480)
+// p(x, y, z) = [720 + (x-y)*30, 480 + (x+y)*15 - z*30]
+const px = (x: number, y: number, z: number): [number, number] => [
+  720 + (x - y) * 30,
+  480 + (x + y) * 15 - z * 30,
+];
+
+// Top face polygon (z = gz+h): corners (gx,gy)→(gx+W,gy)→(gx+W,gy+D)→(gx,gy+D)
+function topFace(gx: number, gy: number, gz: number, W: number, D: number, h: number): string {
+  const [ax, ay] = px(gx, gy, gz + h);
+  const [bx, by] = px(gx + W, gy, gz + h);
+  const [cx, cy] = px(gx + W, gy + D, gz + h);
+  const [dx, dy] = px(gx, gy + D, gz + h);
+  return `${ax},${ay} ${bx},${by} ${cx},${cy} ${dx},${dy}`;
+}
+
+// East face polygon (x = gx+W): corners at z=gz and z=gz+h, y from gy to gy+D
+function eastFace(gx: number, gy: number, gz: number, W: number, D: number, h: number): string {
+  const [ax, ay] = px(gx + W, gy, gz + h);
+  const [bx, by] = px(gx + W, gy + D, gz + h);
+  const [cx, cy] = px(gx + W, gy + D, gz);
+  const [dx, dy] = px(gx + W, gy, gz);
+  return `${ax},${ay} ${bx},${by} ${cx},${cy} ${dx},${dy}`;
+}
+
+// South face polygon (y = gy+D): corners at z=gz and z=gz+h, x from gx to gx+W
+function southFace(gx: number, gy: number, gz: number, W: number, D: number, h: number): string {
+  const [ax, ay] = px(gx, gy + D, gz + h);
+  const [bx, by] = px(gx + W, gy + D, gz + h);
+  const [cx, cy] = px(gx + W, gy + D, gz);
+  const [dx, dy] = px(gx, gy + D, gz);
+  return `${ax},${ay} ${bx},${by} ${cx},${cy} ${dx},${dy}`;
+}
+
+interface BuildingProps {
+  gx: number;
+  gy: number;
+  gz?: number;
+  W: number;
+  D: number;
+  h: number;
+  topColor: string;
+  eastColor: string;
+  southColor: string;
+  outline?: string;
+  // optional window grid
+  winRows?: number;
+  winCols?: number;
+  winColor?: string;
+  winOpacity?: number;
+}
+
+function Building({
+  gx, gy, gz = 0, W, D, h,
+  topColor, eastColor, southColor,
+  outline = '#0d111e',
+  winRows = 0, winCols = 0, winColor = '#ffe080', winOpacity = 0.6,
+}: BuildingProps) {
+  const stroke = { stroke: outline, strokeWidth: 1, strokeLinejoin: 'round' as const };
+
+  // Window parallelograms on east face
+  const eastWins: React.ReactNode[] = [];
+  if (winRows > 0 && winCols > 0) {
+    for (let row = 0; row < winRows; row++) {
+      for (let col = 0; col < winCols; col++) {
+        const yStep = D / (winCols + 1);
+        const zStep = h / (winRows + 1);
+        const wy = gy + D - yStep * (col + 1);
+        const wz = gz + zStep * (row + 1);
+        const wW = 0;
+        const wD = yStep * 0.45;
+        const wH = zStep * 0.5;
+        const [ax, ay] = px(gx + W, wy, wz + wH);
+        const [bx, by] = px(gx + W, wy + wD, wz + wH);
+        const [cx, cy] = px(gx + W, wy + wD, wz);
+        const [dx, dy] = px(gx + W, wy, wz);
+        eastWins.push(
+          <polygon key={`ew-${row}-${col}`} points={`${ax},${ay} ${bx},${by} ${cx},${cy} ${dx},${dy}`}
+            fill={winColor} opacity={winOpacity} stroke={outline} strokeWidth={0.5} strokeLinejoin="round" />
+        );
+      }
+    }
+  }
+
+  // Window parallelograms on south face
+  const southWins: React.ReactNode[] = [];
+  if (winRows > 0 && winCols > 0) {
+    for (let row = 0; row < winRows; row++) {
+      for (let col = 0; col < winCols; col++) {
+        const xStep = W / (winCols + 1);
+        const zStep = h / (winRows + 1);
+        const wx = gx + xStep * (col + 1);
+        const wz = gz + zStep * (row + 1);
+        const wW = xStep * 0.45;
+        const wH = zStep * 0.5;
+        const [ax, ay] = px(wx, gy + D, wz + wH);
+        const [bx, by] = px(wx + wW, gy + D, wz + wH);
+        const [cx, cy] = px(wx + wW, gy + D, wz);
+        const [dx, dy] = px(wx, gy + D, wz);
+        southWins.push(
+          <polygon key={`sw-${row}-${col}`} points={`${ax},${ay} ${bx},${by} ${cx},${cy} ${dx},${dy}`}
+            fill={winColor} opacity={winOpacity * 0.8} stroke={outline} strokeWidth={0.5} strokeLinejoin="round" />
+        );
+      }
+    }
+  }
+
+  return (
+    <g>
+      <polygon points={southFace(gx, gy, gz, W, D, h)} fill={southColor} {...stroke} />
+      <polygon points={eastFace(gx, gy, gz, W, D, h)} fill={eastColor} {...stroke} />
+      <polygon points={topFace(gx, gy, gz, W, D, h)} fill={topColor} {...stroke} />
+      {eastWins}
+      {southWins}
+    </g>
+  );
+}
+
+// Ground tile parallelogram
+function GroundTile({ gx, gy, W, D, fill }: { gx: number; gy: number; W: number; D: number; fill: string }) {
+  const [ax, ay] = px(gx, gy, 0);
+  const [bx, by] = px(gx + W, gy, 0);
+  const [cx, cy] = px(gx + W, gy + D, 0);
+  const [dx, dy] = px(gx, gy + D, 0);
+  return <polygon points={`${ax},${ay} ${bx},${by} ${cx},${cy} ${dx},${dy}`} fill={fill} stroke="#0d111e" strokeWidth={0.5} strokeLinejoin="round" />;
+}
+
+// Tree: trunk + 3 layered canopy tiers
+function IsoTree({ gx, gy, gz = 0, colors = ['#3aaa50', '#2a8838', '#1e6828'] }: { gx: number; gy: number; gz?: number; colors?: string[] }) {
+  return (
+    <g>
+      <Building gx={gx + 0.15} gy={gy + 0.15} gz={gz} W={0.7} D={0.7} h={1.2} topColor="#5a3010" eastColor="#4a2208" southColor="#3e1c06" />
+      {/* tier 1 - wide base */}
+      <polygon points={topFace(gx - 0.4, gy - 0.4, gz, 1.8, 1.8, 1.2 + 0.8)} fill={colors[2]} stroke="#0d111e" strokeWidth={1} strokeLinejoin="round" />
+      {/* tier 2 */}
+      <polygon points={topFace(gx - 0.2, gy - 0.2, gz, 1.4, 1.4, 1.2 + 1.5)} fill={colors[1]} stroke="#0d111e" strokeWidth={1} strokeLinejoin="round" />
+      {/* tier 3 top */}
+      <polygon points={topFace(gx, gy, gz, 1.0, 1.0, 1.2 + 2.1)} fill={colors[0]} stroke="#0d111e" strokeWidth={1} strokeLinejoin="round" />
+    </g>
+  );
+}
+
+// Simple isometric person silhouette
+function IsoPerson({ gx, gy, gz = 0, bodyColor, skinColor, hatColor }: { gx: number; gy: number; gz?: number; bodyColor: string; skinColor: string; hatColor?: string }) {
+  const [hx, hy] = px(gx, gy, gz + 1.8);
+  const [fx, fy] = px(gx, gy, gz);
+  // body
+  const bpts = topFace(gx - 0.15, gy - 0.15, gz, 0.3, 0.3, 1.4);
+  const bE = eastFace(gx - 0.15, gy - 0.15, gz, 0.3, 0.3, 1.4);
+  const bS = southFace(gx - 0.15, gy - 0.15, gz, 0.3, 0.3, 1.4);
+  return (
+    <g>
+      <polygon points={bS} fill={bodyColor} stroke="#0d111e" strokeWidth={0.7} strokeLinejoin="round" />
+      <polygon points={bE} fill={bodyColor} stroke="#0d111e" strokeWidth={0.7} strokeLinejoin="round" />
+      <polygon points={bpts} fill={bodyColor} stroke="#0d111e" strokeWidth={0.7} strokeLinejoin="round" />
+      <circle cx={hx} cy={hy - 12} r={9} fill={skinColor} stroke="#0d111e" strokeWidth={0.7} />
+      {hatColor && <ellipse cx={hx} cy={hy - 20} rx={10} ry={5} fill={hatColor} stroke="#0d111e" strokeWidth={0.7} />}
+    </g>
+  );
+}
+
+// ─── Midnight: Night City ─────────────────────────────────────────────────────
 const Midnight: React.FC = () => (
   <svg
     style={{ position: 'absolute', inset: 0, width: '100%', height: '100%' }}
@@ -11,350 +173,253 @@ const Midnight: React.FC = () => (
   >
     <defs>
       <linearGradient id="mn-sky" x1="0" y1="0" x2="0" y2="1">
-        <stop offset="0%" stopColor="#040a18" />
-        <stop offset="100%" stopColor="#0e1b38" />
+        <stop offset="0%" stopColor="#030818" />
+        <stop offset="100%" stopColor="#0a1632" />
       </linearGradient>
-      <filter id="mn-blur">
-        <feGaussianBlur stdDeviation="10" />
-      </filter>
       <filter id="mn-glow">
-        <feGaussianBlur stdDeviation="3" result="b" />
-        <feMerge>
-          <feMergeNode in="b" />
-          <feMergeNode in="SourceGraphic" />
-        </feMerge>
+        <feGaussianBlur stdDeviation="4" result="b" />
+        <feMerge><feMergeNode in="b" /><feMergeNode in="SourceGraphic" /></feMerge>
       </filter>
-      <pattern id="mn-stripe" x="0" y="0" width="18" height="100" patternUnits="userSpaceOnUse">
-        <rect width="18" height="100" fill="#e03030" />
-        <rect x="9" width="9" height="100" fill="#f5f5f5" opacity="0.88" />
-      </pattern>
+      <filter id="mn-blur">
+        <feGaussianBlur stdDeviation="12" />
+      </filter>
       <style>{`
-        @keyframes mn-twinkle { 0%,100%{opacity:1} 50%{opacity:0.1} }
-        @keyframes mn-car1 { from{transform:translateX(0)} to{transform:translateX(-280px)} }
-        @keyframes mn-car2 { from{transform:translateX(0)} to{transform:translateX(240px)} }
-        @keyframes mn-neon { 0%,88%,100%{opacity:1} 90%{opacity:0.3} 92%{opacity:1} 94%{opacity:0.5} 96%{opacity:1} }
-        @keyframes mn-walk { 0%{transform:translateX(0)} 100%{transform:translateX(45px)} }
-        @keyframes mn-walk2 { 0%{transform:translateX(0)} 100%{transform:translateX(-35px)} }
+        @keyframes mn-twinkle { 0%,100%{opacity:0.9} 50%{opacity:0.1} }
+        @keyframes mn-neon { 0%,85%,100%{opacity:1} 87%{opacity:0.2} 89%{opacity:1} 91%{opacity:0.5} 93%{opacity:1} }
+        @keyframes mn-car1 { from{transform:translateX(0)} to{transform:translateX(-420px)} }
+        @keyframes mn-car2 { from{transform:translateX(0)} to{transform:translateX(380px)} }
+        @keyframes mn-bob  { 0%,100%{transform:translateY(0)} 50%{transform:translateY(-3px)} }
       `}</style>
     </defs>
 
+    {/* Sky */}
     <rect width="1440" height="900" fill="url(#mn-sky)" />
+
+    {/* Moon */}
+    <circle cx="1260" cy="95" r="70" fill="#f8f0d8" opacity="0.12" filter="url(#mn-blur)" />
+    <circle cx="1260" cy="95" r="44" fill="#f0e8c8" stroke="#0d111e" strokeWidth="1" />
+    <circle cx="1247" cy="83" r="7" fill="#e0d4a8" opacity="0.65" />
+    <circle cx="1272" cy="106" r="4.5" fill="#e0d4a8" opacity="0.5" />
+    <circle cx="1278" cy="82" r="3" fill="#e0d4a8" opacity="0.4" />
 
     {/* Stars */}
     {(
       [
-        [55, 28, 1.2], [148, 15, 0.9], [290, 48, 1.4], [418, 22, 0.8], [542, 40, 1.1],
-        [675, 18, 1.3], [802, 52, 0.9], [938, 30, 1.2], [1072, 44, 0.8], [1198, 20, 1.3],
-        [1348, 38, 1.0], [1415, 62, 0.7], [82, 95, 0.8], [215, 82, 1.1], [362, 108, 0.9],
-        [498, 75, 1.2], [632, 100, 0.8], [768, 85, 1.3], [895, 115, 0.9], [1028, 80, 1.1],
-        [1155, 102, 0.8], [1302, 88, 1.2], [1382, 118, 0.7], [42, 152, 1.0], [188, 165, 0.8],
-        [328, 138, 1.2], [472, 172, 0.9], [612, 155, 1.1], [745, 142, 0.8], [882, 168, 1.3],
-        [1015, 148, 0.9], [1148, 162, 0.8], [1288, 145, 1.1], [1432, 162, 0.7],
-        [115, 215, 0.7], [252, 232, 1.0], [392, 202, 0.8], [528, 218, 1.1], [672, 235, 0.7],
-        [812, 208, 1.2], [948, 225, 0.8], [1088, 212, 1.0], [1228, 238, 0.7], [1365, 222, 0.9],
-      ] as [number, number, number][]
-    ).map(([cx, cy, r], i) => (
-      <circle
-        key={`mn-s${i}`}
-        cx={cx}
-        cy={cy}
-        r={r}
-        fill="white"
-        opacity={0.4 + (i % 4) * 0.12}
-        style={
-          i % 5 === 0
-            ? { animation: `mn-twinkle ${1.5 + (i % 4) * 0.7}s ease-in-out ${(i % 3) * 0.8}s infinite` }
-            : undefined
-        }
-      />
+        [58,22,1.3],[148,12,0.9],[295,48,1.5],[420,18,0.8],[550,42,1.2],
+        [682,16,1.4],[810,55,0.9],[945,28,1.2],[1075,46,0.8],[1198,19,1.1],
+        [1350,40,1.0],[88,92,0.8],[218,80,1.1],[365,108,0.9],[500,74,1.3],
+        [635,100,0.8],[775,88,1.4],[902,118,0.9],[1032,82,1.1],[1162,105,0.8],
+        [1305,90,1.2],[42,148,1.0],[188,162,0.8],[332,138,1.2],[475,172,0.9],
+        [618,155,1.1],[748,140,0.8],[885,168,1.3],[1018,148,0.9],[1152,162,0.8],
+        [1290,145,1.1],[115,215,0.7],[255,232,1.0],[395,202,0.8],[530,220,1.1],
+        [675,235,0.7],[815,208,1.2],[952,225,0.8],[1092,212,1.0],[1232,238,0.7],
+      ] as [number,number,number][]
+    ).map(([cx,cy,r],i) => (
+      <circle key={`mn-s${i}`} cx={cx} cy={cy} r={r} fill="white"
+        opacity={0.35 + (i % 4) * 0.12}
+        style={i % 5 === 0 ? { animation: `mn-twinkle ${1.4 + (i % 4) * 0.8}s ease-in-out ${(i % 3) * 0.7}s infinite` } : undefined} />
     ))}
 
-    {/* Moon */}
-    <ellipse cx="1310" cy="88" rx="75" ry="75" fill="#fffbea" opacity="0.1" filter="url(#mn-blur)" />
-    <circle cx="1310" cy="88" r="48" fill="#f4efd8" />
-    <circle cx="1296" cy="76" r="8" fill="#e6dec0" opacity="0.65" />
-    <circle cx="1320" cy="100" r="5" fill="#e6dec0" opacity="0.55" />
-    <circle cx="1330" cy="75" r="3.5" fill="#e6dec0" opacity="0.45" />
-
-    {/* Far background silhouettes */}
-    <rect x="0" y="318" width="92" height="302" fill="#0b1226" rx="2" />
-    <rect x="22" y="278" width="52" height="342" fill="#0d1430" rx="2" />
-    <rect x="72" y="348" width="78" height="272" fill="#0a1020" rx="2" />
-    <rect x="138" y="298" width="68" height="322" fill="#0c1228" rx="2" />
-    <rect x="192" y="262" width="44" height="358" fill="#0e1530" rx="2" />
-    {(
-      [
-        [12, 332], [12, 362], [12, 392], [12, 422], [12, 452], [28, 292], [28, 322], [28, 352],
-        [28, 382], [28, 412], [28, 442], [78, 362], [78, 392], [78, 422], [78, 452],
-        [143, 312], [143, 342], [143, 372], [143, 402], [143, 432], [197, 278], [197, 308],
-        [197, 338], [197, 368], [197, 398], [197, 428],
-      ] as [number, number][]
-    ).map(([wx, wy], i) => (
-      <rect key={`mn-fw${i}`} x={wx} y={wy} width={7} height={6} fill="#ffd860" opacity={0.15 + (i % 5) * 0.06} rx={1} />
-    ))}
-    <rect x="1172" y="288" width="88" height="332" fill="#0b1226" rx="2" />
-    <rect x="1238" y="258" width="62" height="362" fill="#0d1430" rx="2" />
-    <rect x="1288" y="318" width="78" height="302" fill="#0a1020" rx="2" />
-    <rect x="1352" y="298" width="88" height="322" fill="#0c1228" rx="2" />
-    {(
-      [
-        [1178, 302], [1178, 332], [1178, 362], [1178, 392], [1178, 422],
-        [1243, 272], [1243, 302], [1243, 332], [1243, 362], [1243, 392],
-        [1293, 332], [1293, 362], [1293, 392], [1293, 422],
-        [1358, 312], [1358, 342], [1358, 372], [1358, 402],
-      ] as [number, number][]
-    ).map(([wx, wy], i) => (
-      <rect key={`mn-rfw${i}`} x={wx} y={wy} width={7} height={6} fill="#ffd860" opacity={0.15 + (i % 5) * 0.06} rx={1} />
-    ))}
-
-    {/* Left apartment building */}
-    <rect x="0" y="252" width="172" height="368" fill="#131d35" rx="3" />
-    {Array.from({ length: 8 }).map((_, row) =>
-      Array.from({ length: 4 }).map((_, col) => (
-        <rect
-          key={`mn-lb1-${row}-${col}`}
-          x={14 + col * 38}
-          y={268 + row * 36}
-          width={22}
-          height={18}
-          fill={(row + col) % 3 === 0 ? '#fff8e0' : '#ffe070'}
-          opacity={0.08 + ((row + col) % 4) * 0.06}
-          rx={2}
-        />
-      ))
+    {/* Ground tiles - road + sidewalk */}
+    {Array.from({ length: 16 }).map((_, i) =>
+      Array.from({ length: 8 }).map((_, j) => {
+        const roadY = j >= 4;
+        return (
+          <GroundTile key={`mn-gt-${i}-${j}`} gx={i * 1 - 4} gy={j * 1 + 4} W={1} D={1}
+            fill={roadY ? (j === 4 || j === 7 ? '#1e2438' : '#141828') : '#1c2438'} />
+        );
+      })
     )}
-    <rect x="78" y="238" width="22" height="16" fill="#0e1628" rx="2" />
-    <ellipse cx="89" cy="238" rx="13" ry="4.5" fill="#0c1422" />
-    <line x1="76" y1="254" x2="76" y2="268" stroke="#0e1628" strokeWidth="3" />
-    <line x1="103" y1="254" x2="103" y2="268" stroke="#0e1628" strokeWidth="3" />
+    {/* Road markings */}
+    {Array.from({ length: 8 }).map((_, i) => {
+      const [ax, ay] = px(-4 + i * 2, 6.5, 0);
+      const [bx, by] = px(-4 + i * 2 + 0.8, 6.5, 0);
+      const [cx, cy] = px(-4 + i * 2 + 0.8, 7.5, 0);
+      const [dx, dy] = px(-4 + i * 2, 7.5, 0);
+      return <polygon key={`mn-rm-${i}`} points={`${ax},${ay} ${bx},${by} ${cx},${cy} ${dx},${dy}`} fill="#2a3050" stroke="none" />;
+    })}
 
-    {/* Left commercial building */}
-    <rect x="165" y="358" width="132" height="262" fill="#152238" rx="3" />
-    {Array.from({ length: 5 }).map((_, row) =>
-      Array.from({ length: 3 }).map((_, col) => (
-        <rect
-          key={`mn-lb2-${row}-${col}`}
-          x={176 + col * 40}
-          y={372 + row * 38}
-          width={24}
-          height={20}
-          fill="#ffc840"
-          opacity={0.1 + ((row + col) % 4) * 0.05}
-          rx={2}
-        />
-      ))
-    )}
-    <rect
-      x="176"
-      y="364"
-      width="112"
-      height="9"
-      fill="#0066ff"
-      opacity={0.55}
-      rx={2}
-      style={{ animation: 'mn-neon 4s ease-in-out 0.5s infinite' }}
-    />
+    {/* Buildings - back to front (painter's algorithm) */}
 
-    {/* MAIN SHOP */}
-    <rect x="455" y="385" width="268" height="235" fill="#1a2d4a" rx="4" />
-    {([[475, 398], [538, 398], [600, 398], [662, 398], [475, 438], [538, 438], [600, 438], [662, 438]] as [number, number][]).map(
-      ([wx, wy], i) => (
-        <rect key={`mn-sw${i}`} x={wx} y={wy} width={32} height={28} fill="#ffeeaa" opacity={0.3 + (i % 3) * 0.08} rx={3} />
-      )
-    )}
-    <path d="M 445 483 L 733 483 L 713 467 L 465 467 Z" fill="url(#mn-stripe)" />
-    {Array.from({ length: 15 }).map((_, i) => (
-      <ellipse key={`mn-sc${i}`} cx={452 + i * 19} cy={483} rx={7} ry={8} fill="#c01818" />
-    ))}
-    <rect x="470" y="490" width="238" height={102} fill="#1e3a5a" rx="4" />
-    {([[490, 505, '#ff6b35'], [540, 498, '#4fc3f7'], [590, 506, '#aed581'], [640, 500, '#ff8a65'], [692, 505, '#ce93d8']] as [number, number, string][]).map(
-      ([px, py, c], i) => (
-        <ellipse key={`mn-prod${i}`} cx={px} cy={py} rx={18} ry={15} fill={c} opacity={0.7} />
-      )
-    )}
-    {([[482, 527], [535, 520], [584, 528], [636, 522], [685, 527]] as [number, number][]).map(([px, py], i) => (
-      <rect key={`mn-tag${i}`} x={px} y={py} width={18} height={10} fill="white" opacity={0.5} rx={2} />
-    ))}
-    <rect x="568" y="516" width={44} height={76} fill="#0d1e32" rx="3" />
-    <rect x="572" y="520" width={16} height={32} fill="#1e3555" rx="2" opacity="0.8" />
-    <rect x="591" y="520" width={16} height={32} fill="#1e3555" rx="2" opacity="0.8" />
-    <circle cx="590" cy="558" r="3" fill="#888" />
-    <rect
-      x="485"
-      y="393"
-      width={208}
-      height={40}
-      fill="#ff6b35"
-      rx="6"
-      style={{ animation: 'mn-neon 6s ease-in-out 1s infinite' }}
-    />
-    <text x="589" y="420" textAnchor="middle" fill="white" fontSize="18" fontWeight="800" fontFamily="system-ui, sans-serif" letterSpacing="1">
-      Rtylr
-    </text>
-    <text x="589" y="479" textAnchor="middle" fill="rgba(255,255,255,0.7)" fontSize="10" fontFamily="system-ui, sans-serif">
-      OPEN 24H
-    </text>
-    <ellipse cx="589" cy="640" rx="160" ry="28" fill="#ffee80" opacity="0.05" filter="url(#mn-blur)" />
+    {/* Tall tower (6,1 h=8) */}
+    <Building gx={6} gy={1} gz={0} W={2} D={2} h={8}
+      topColor="#1a2848" eastColor="#0e1830" southColor="#0a1228"
+      winRows={6} winCols={2} winColor="#ffc840" winOpacity={0.55} />
+    {/* Neon sign on tower east */}
+    {(() => {
+      const [sx, sy] = px(8, 2, 5.5);
+      return (
+        <g style={{ animation: 'mn-neon 5s ease-in-out 0.5s infinite' }}>
+          <rect x={sx - 28} y={sy - 10} width={56} height={18} fill="#3366ff" rx="3" filter="url(#mn-glow)" />
+          <text x={sx} y={sy + 4} textAnchor="middle" fill="white" fontSize="10" fontWeight="700" fontFamily="system-ui,sans-serif">TOWER</text>
+        </g>
+      );
+    })()}
 
-    {/* Flower pots */}
-    <rect x="456" y="600" width={15} height={18} fill="#8a3a20" rx="2" />
-    <ellipse cx="463" cy="600" rx="9" ry="4" fill="#7a3018" />
-    <circle cx="463" cy="594" r="8" fill="#2a6030" />
-    <circle cx="458" cy="590" r="4" fill="#ff6644" opacity="0.85" />
-    <circle cx="468" cy="591" r="3" fill="#ff9966" opacity="0.85" />
-    <rect x="718" y="600" width={15} height={18} fill="#8a3a20" rx="2" />
-    <ellipse cx="725" cy="600" rx="9" ry="4" fill="#7a3018" />
-    <circle cx="725" cy="594" r="8" fill="#2a6030" />
-    <circle cx="720" cy="590" r="4" fill="#ffaa33" opacity="0.85" />
-    <circle cx="730" cy="591" r="3" fill="#ff6644" opacity="0.85" />
+    {/* Apartment (3,1 h=6) */}
+    <Building gx={3} gy={1} gz={0} W={2} D={2} h={6}
+      topColor="#1e2e50" eastColor="#121e38" southColor="#0e1830"
+      winRows={4} winCols={2} winColor="#ffe060" winOpacity={0.5} />
 
-    {/* Right buildings */}
-    <rect x="720" y="338" width="148" height="282" fill="#14203a" rx="3" />
-    {Array.from({ length: 6 }).map((_, row) =>
-      Array.from({ length: 3 }).map((_, col) => (
-        <rect key={`mn-rb1-${row}-${col}`} x={730 + col * 42} y={352 + row * 36} width={26} height={22} fill="#ffdc60" opacity={0.08 + ((row * col) % 4) * 0.06} rx={2} />
-      ))
-    )}
-    <rect x="855" y="268" width="128" height="352" fill="#12203a" rx="3" />
-    {Array.from({ length: 9 }).map((_, row) =>
-      Array.from({ length: 3 }).map((_, col) => (
-        <rect key={`mn-rb2-${row}-${col}`} x={864 + col * 38} y={282 + row * 32} width={24} height={20} fill="#ffc830" opacity={0.1 + ((row + col) % 5) * 0.05} rx={2} />
-      ))
-    )}
-    <rect x="982" y="308" width="7" height="278" fill="#1a2840" opacity="0.75" />
-    {[338, 368, 398, 428, 458, 488, 518, 548].map((fy, i) => (
-      <rect key={`mn-fe${i}`} x={968} y={fy} width={21} height={3} fill="#1a2840" opacity="0.75" />
-    ))}
-    <rect x="998" y="388" width="108" height="232" fill="#152030" rx="3" />
-    {Array.from({ length: 5 }).map((_, row) =>
-      Array.from({ length: 2 }).map((_, col) => (
-        <rect key={`mn-rb3-${row}-${col}`} x={1008 + col * 48} y={398 + row * 38} width={30} height={24} fill="#ffcc40" opacity={0.08 + ((row * col) % 4) * 0.06} rx={2} />
-      ))
-    )}
-    <rect x="1102" y="358" width="142" height="262" fill="#131e35" rx="3" />
-    {Array.from({ length: 6 }).map((_, row) =>
-      Array.from({ length: 3 }).map((_, col) => (
-        <rect key={`mn-rb4-${row}-${col}`} x={1112 + col * 42} y={372 + row * 35} width={28} height={20} fill="#ffaa20" opacity={0.1 + ((row + col) % 4) * 0.05} rx={2} />
-      ))
-    )}
-    <rect x="1117" y="365" width="122" height="9" fill="#22ffaa" opacity="0.45" rx={2} style={{ animation: 'mn-neon 3.5s ease-in-out 2s infinite' }} />
+    {/* Left building (-1,2 size 2x3 h=5) */}
+    <Building gx={-1} gy={2} gz={0} W={2} D={3} h={5}
+      topColor="#182240" eastColor="#0c1428" southColor="#081020"
+      winRows={4} winCols={2} winColor="#ffaa30" winOpacity={0.45} />
 
-    {/* Sidewalk & Road */}
-    <rect x="0" y="598" width="1440" height="52" fill="#1c2540" />
-    {Array.from({ length: 25 }).map((_, i) => (
-      <line key={`mn-tile${i}`} x1={i * 58} y1={598} x2={i * 58} y2={650} stroke="#181e38" strokeWidth={1} opacity={0.55} />
-    ))}
-    <rect x="0" y="650" width="1440" height="112" fill="#10141e" />
-    {Array.from({ length: 14 }).map((_, i) => (
-      <rect key={`mn-lm${i}`} x={i * 106} y={700} width={64} height={5} fill="#2a3050" rx="2" />
-    ))}
-    <rect x="0" y="762" width="1440" height="42" fill="#1c2540" />
-    {Array.from({ length: 25 }).map((_, i) => (
-      <line key={`mn-ltile${i}`} x1={i * 58} y1={762} x2={i * 58} y2={804} stroke="#181e38" strokeWidth={1} opacity={0.55} />
-    ))}
-    <rect x="0" y="804" width="1440" height="96" fill="#141a2e" />
+    {/* Rtylr shop (1,4 size 2x2 h=3) */}
+    <Building gx={1} gy={4} gz={0} W={2} D={2} h={3}
+      topColor="#1e3258" eastColor="#122040" southColor="#0c1830"
+      winRows={2} winCols={2} winColor="#ffd060" winOpacity={0.6} />
+    {/* Awning on south face */}
+    {(() => {
+      const [ax, ay] = px(1, 6, 2.2);
+      const [bx, by] = px(3, 6, 2.2);
+      const [cx, cy] = px(3, 6, 1.8);
+      const [dx, dy] = px(1, 6, 1.8);
+      return (
+        <polygon points={`${ax},${ay} ${bx},${by} ${cx},${cy} ${dx},${dy}`}
+          fill="#e05520" stroke="#0d111e" strokeWidth={1} strokeLinejoin="round" />
+      );
+    })()}
+    {/* Neon RTYLR sign on south face */}
+    {(() => {
+      const [sx, sy] = px(2, 6, 2.8);
+      return (
+        <g style={{ animation: 'mn-neon 7s ease-in-out 1s infinite' }}>
+          <rect x={sx - 32} y={sy - 12} width={64} height={22} fill="#ff6030" rx="4" filter="url(#mn-glow)" />
+          <text x={sx} y={sy + 4} textAnchor="middle" fill="white" fontSize="13" fontWeight="800" fontFamily="system-ui,sans-serif" letterSpacing="1">Rtylr</text>
+        </g>
+      );
+    })()}
+    {/* OPEN 24H sign */}
+    {(() => {
+      const [sx, sy] = px(2, 6, 1.2);
+      return (
+        <g>
+          <rect x={sx - 24} y={sy - 8} width={48} height={14} fill="#00aa66" rx="3" filter="url(#mn-glow)"
+            style={{ animation: 'mn-neon 3s ease-in-out 2s infinite' }} />
+          <text x={sx} y={sy + 3} textAnchor="middle" fill="white" fontSize="8" fontWeight="600" fontFamily="system-ui,sans-serif">OPEN 24H</text>
+        </g>
+      );
+    })()}
 
-    {/* Street Lights */}
-    {[195, 618, 1038, 1348].map((lx, i) => (
-      <g key={`mn-lamp${i}`}>
-        <ellipse cx={lx + 32} cy={672} rx={55} ry={18} fill="#ffaa30" opacity={0.1} filter="url(#mn-blur)" />
-        <rect x={lx} y={488} width={5} height={162} fill="#2a3550" rx={2} />
-        <path d={`M ${lx + 2} 488 Q ${lx + 30} 482 ${lx + 38} 468`} fill="none" stroke="#2a3550" strokeWidth={4} />
-        <rect x={lx + 25} y={462} width={24} height={11} fill="#1e2b45" rx={2} />
-        <ellipse cx={lx + 37} cy={463} rx={9} ry={5} fill="#ffe060" filter="url(#mn-glow)" />
-      </g>
-    ))}
+    {/* Small foreground building (5,5 h=3) */}
+    <Building gx={5} gy={5} gz={0} W={1} D={1} h={3}
+      topColor="#1a2848" eastColor="#10183a" southColor="#0c1230"
+      winRows={2} winCols={1} winColor="#ffcc40" winOpacity={0.5} />
 
-    {/* Cars */}
-    <g style={{ animation: 'mn-car1 20s linear infinite' }} transform="translate(820, 0)">
-      <ellipse cx="792" cy="694" rx="28" ry="8" fill="#ffffaa" opacity={0.12} filter="url(#mn-blur)" />
-      <rect x="716" y="662" width="86" height="27" fill="#c02828" rx="5" />
-      <rect x="732" y="646" width="52" height="19" fill="#aa1e1e" rx="7" />
-      <rect x="735" y="649" width="21" height="13" fill="#88c8ff" opacity={0.5} rx="2" />
-      <rect x="759" y="649" width="21" height="13" fill="#88c8ff" opacity={0.5} rx="2" />
-      <rect x="800" y="669" width="6" height="10" fill="#ffffaa" rx="1" />
-      <rect x="714" y="669" width="5" height="10" fill="#ff3322" rx="1" opacity={0.8} />
-      <circle cx="733" cy="690" r="9" fill="#1a1a1a" />
-      <circle cx="733" cy="690" r="4.5" fill="#333" />
-      <circle cx="786" cy="690" r="9" fill="#1a1a1a" />
-      <circle cx="786" cy="690" r="4.5" fill="#333" />
+    {/* Street lights */}
+    {[[-1.5, 3.5], [2.5, 3.5], [5.5, 3.5]].map(([lx, ly], i) => {
+      const [bx, by] = px(lx, ly, 0);
+      const [tx, ty] = px(lx, ly, 2.5);
+      const [hx, hy] = px(lx + 0.4, ly, 2.5);
+      const [ex, ey] = px(lx + 0.4, ly, 2.3);
+      return (
+        <g key={`mn-lamp${i}`}>
+          <line x1={bx} y1={by} x2={tx} y2={ty} stroke="#2a3858" strokeWidth={3} />
+          <line x1={tx} y1={ty} x2={hx} y2={hy} stroke="#2a3858" strokeWidth={2.5} />
+          <circle cx={hx} cy={hy} r={6} fill="#ffe050" filter="url(#mn-glow)" stroke="#0d111e" strokeWidth={0.5} />
+          <ellipse cx={hx} cy={hy + 18} rx={30} ry={8} fill="#ffee80" opacity="0.08" filter="url(#mn-blur)" />
+        </g>
+      );
+    })}
+
+    {/* Neon signs floating */}
+    {(() => {
+      const [sx, sy] = px(-0.5, 2, 3.5);
+      return (
+        <g style={{ animation: 'mn-neon 4s ease-in-out 1.5s infinite' }}>
+          <rect x={sx - 22} y={sy - 8} width={44} height={14} fill="#cc22aa" rx="3" filter="url(#mn-glow)" />
+          <text x={sx} y={sy + 3} textAnchor="middle" fill="white" fontSize="8" fontWeight="600" fontFamily="system-ui,sans-serif">NOODLES</text>
+        </g>
+      );
+    })()}
+    {(() => {
+      const [sx, sy] = px(3.5, 1, 4.5);
+      return (
+        <g style={{ animation: 'mn-neon 6s ease-in-out 3s infinite' }}>
+          <rect x={sx - 20} y={sy - 7} width={40} height={13} fill="#22aaff" rx="3" filter="url(#mn-glow)" />
+          <text x={sx} y={sy + 3} textAnchor="middle" fill="white" fontSize="7.5" fontWeight="600" fontFamily="system-ui,sans-serif">24/7 BAR</text>
+        </g>
+      );
+    })()}
+
+    {/* Cars on road */}
+    <g style={{ animation: 'mn-car1 18s linear infinite' }}>
+      {(() => {
+        const [ax, ay] = px(2, 5.2, 0.3);
+        const [bx, by] = px(3, 5.2, 0.3);
+        const [cx, cy] = px(3, 5.7, 0.3);
+        const [dx, dy] = px(2, 5.7, 0.3);
+        const [ax2, ay2] = px(2.2, 5.2, 0.55);
+        const [bx2, by2] = px(2.8, 5.2, 0.55);
+        const [cx2, cy2] = px(2.8, 5.7, 0.55);
+        const [dx2, dy2] = px(2.2, 5.7, 0.55);
+        const [fx, fy] = px(3, 5.3, 0.15);
+        const [gxx, gy2] = px(3, 5.6, 0.15);
+        return (
+          <g>
+            {/* body */}
+            <polygon points={`${ax2},${ay2} ${bx2},${by2} ${cx2},${cy2} ${dx2},${dy2}`} fill="#c82020" stroke="#0d111e" strokeWidth={1} strokeLinejoin="round" />
+            <polygon points={southFace(2, 5.2, 0, 1, 0.5, 0.3)} fill="#a01818" stroke="#0d111e" strokeWidth={1} strokeLinejoin="round" />
+            <polygon points={eastFace(2, 5.2, 0, 1, 0.5, 0.3)} fill="#b01c1c" stroke="#0d111e" strokeWidth={1} strokeLinejoin="round" />
+            <polygon points={`${ax},${ay} ${bx},${by} ${cx},${cy} ${dx},${dy}`} fill="#c82020" stroke="#0d111e" strokeWidth={1} strokeLinejoin="round" />
+            {/* headlights */}
+            <circle cx={fx} cy={fy} r={4} fill="#ffffaa" opacity={0.9} filter="url(#mn-glow)" />
+            <circle cx={gxx} cy={gy2} r={4} fill="#ffffaa" opacity={0.9} filter="url(#mn-glow)" />
+          </g>
+        );
+      })()}
     </g>
-    <g style={{ animation: 'mn-car2 24s linear 6s infinite' }} transform="translate(175, 0)">
-      <ellipse cx="212" cy="732" rx="22" ry="8" fill="#ff4422" opacity={0.1} filter="url(#mn-blur)" />
-      <rect x="218" y="708" width="86" height="27" fill="#2252a8" rx="5" />
-      <rect x="234" y="692" width="52" height="19" fill="#1a3e8e" rx="7" />
-      <rect x="237" y="695" width="21" height="13" fill="#88c8ff" opacity={0.5} rx="2" />
-      <rect x="261" y="695" width="21" height="13" fill="#88c8ff" opacity={0.5} rx="2" />
-      <rect x="302" y="715" width="6" height="10" fill="#ffffaa" rx="1" />
-      <rect x="216" y="715" width="5" height="10" fill="#ff3322" rx="1" />
-      <circle cx="235" cy="736" r="9" fill="#1a1a1a" />
-      <circle cx="235" cy="736" r="4.5" fill="#333" />
-      <circle cx="288" cy="736" r="9" fill="#1a1a1a" />
-      <circle cx="288" cy="736" r="4.5" fill="#333" />
-    </g>
-    <g transform="translate(1080, 0)">
-      <rect x="0" y="662" width="80" height="26" fill="#e8c010" rx="5" />
-      <rect x="14" y="647" width="50" height="18" fill="#d4ac0c" rx="6" />
-      <rect x="16" y="649" width="20" height="12" fill="#88c8ff" opacity={0.5} rx="2" />
-      <rect x="38" y="649" width="20" height="12" fill="#88c8ff" opacity={0.5} rx="2" />
-      <rect x="78" y="668" width="5" height="9" fill="#ffffaa" rx="1" />
-      <circle cx="16" cy="689" r="8" fill="#1a1a1a" />
-      <circle cx="16" cy="689" r="4" fill="#333" />
-      <circle cx="64" cy="689" r="8" fill="#1a1a1a" />
-      <circle cx="64" cy="689" r="4" fill="#333" />
+    <g style={{ animation: 'mn-car2 22s linear 5s infinite' }}>
+      {(() => {
+        const [sx, sy] = px(-2, 6.2, 0.3);
+        const bS = southFace(-2, 6.2, 0, 1, 0.5, 0.3);
+        const bE = eastFace(-2, 6.2, 0, 1, 0.5, 0.3);
+        const bT = topFace(-2, 6.2, 0, 1, 0.5, 0.3);
+        const bCT = topFace(-1.8, 6.2, 0.3, 0.6, 0.5, 0.25);
+        const [lx, ly] = px(-2, 6.3, 0.15);
+        const [lx2, ly2] = px(-2, 6.6, 0.15);
+        return (
+          <g>
+            <polygon points={bS} fill="#1a3a88" stroke="#0d111e" strokeWidth={1} strokeLinejoin="round" />
+            <polygon points={bE} fill="#1e4099" stroke="#0d111e" strokeWidth={1} strokeLinejoin="round" />
+            <polygon points={bT} fill="#2244aa" stroke="#0d111e" strokeWidth={1} strokeLinejoin="round" />
+            <polygon points={bCT} fill="#2860cc" stroke="#0d111e" strokeWidth={1} strokeLinejoin="round" />
+            <circle cx={lx} cy={ly} r={4} fill="#ff2200" opacity={0.9} filter="url(#mn-glow)" />
+            <circle cx={lx2} cy={ly2} r={4} fill="#ff2200" opacity={0.9} filter="url(#mn-glow)" />
+          </g>
+        );
+      })()}
     </g>
 
-    {/* People */}
-    <g style={{ animation: 'mn-walk 9s linear infinite' }} transform="translate(328, 0)">
-      <circle cx="0" cy="588" r="7" fill="#e8b888" />
-      <rect x="-5" y="595" width="10" height="13" fill="#4455aa" rx="2" />
-      <rect x="-4" y="608" width="4" height="10" fill="#2a3555" rx="1" />
-      <rect x="1" y="608" width="4" height="10" fill="#2a3555" rx="1" />
+    {/* People silhouettes on sidewalk */}
+    <g style={{ animation: 'mn-bob 2.2s ease-in-out infinite' }}>
+      <IsoPerson gx={0.5} gy={3.5} gz={0} bodyColor="#2255aa" skinColor="#d4a878" hatColor="#1a2030" />
     </g>
-    <g transform="translate(428, 0)">
-      <circle cx="0" cy="584" r="7" fill="#c89870" />
-      <rect x="-5" y="591" width="11" height="14" fill="#cc4433" rx="2" />
-      <rect x="-5" y="605" width="4" height="12" fill="#1a2235" rx="1" />
-      <rect x="2" y="605" width="4" height="12" fill="#1a2235" rx="1" />
+    <IsoPerson gx={2.5} gy={3.8} gz={0} bodyColor="#cc3322" skinColor="#c89060" />
+    <g style={{ animation: 'mn-bob 2.8s ease-in-out 0.5s infinite' }}>
+      <IsoPerson gx={4.5} gy={4.2} gz={0} bodyColor="#338844" skinColor="#e8c090" hatColor="#4a2808" />
     </g>
-    <g transform="translate(778, 0)">
-      <circle cx="0" cy="588" r="7" fill="#d4aa80" />
-      <rect x="-5" y="595" width="10" height="14" fill="#338855" rx="2" />
-      <rect x="-4" y="609" width="4" height="10" fill="#1a2235" rx="1" />
-      <rect x="1" y="609" width="4" height="10" fill="#1a2235" rx="1" />
-      <rect x="9" y="599" width="9" height="12" fill="#ffaa22" rx="2" />
-      <path d="M 10 599 Q 13 595 17 599" fill="none" stroke="#aa7010" strokeWidth="1.5" />
-    </g>
-    <g style={{ animation: 'mn-walk2 11s linear 2s infinite' }} transform="translate(1082, 0)">
-      <circle cx="0" cy="786" r="7" fill="#e0c0a0" />
-      <rect x="-5" y="793" width="10" height="14" fill="#554488" rx="2" />
-      <rect x="-4" y="807" width="4" height="10" fill="#1a1a2a" rx="1" />
-      <rect x="1" y="807" width="4" height="10" fill="#1a1a2a" rx="1" />
-    </g>
-    <g transform="translate(1258, 0)">
-      <rect x="-14" y="793" width="48" height="5" fill="#2a3550" rx="2" />
-      <rect x="-11" y="798" width="6" height="12" fill="#243040" />
-      <rect x="20" y="798" width="6" height="12" fill="#243040" />
-      <circle cx="8" cy="783" r="6" fill="#d4b090" />
-      <rect x="3" y="789" width="10" height="10" fill="#3366cc" rx="2" />
-      <rect x="3" y="796" width="15" height="4" fill="#334466" rx="1" />
-    </g>
+    <IsoPerson gx={-0.8} gy={3.2} gz={0} bodyColor="#554488" skinColor="#ddb898" />
 
-    {/* Sidewalk tree */}
-    <rect x="350" y="543" width="8" height="58" fill="#1e2d40" />
-    <circle cx="354" cy="528" r="26" fill="#1a3022" />
-    <circle cx="338" cy="538" r="18" fill="#1e3528" />
-    <circle cx="370" cy="540" r="16" fill="#1e3525" />
-    <rect x="1178" y="543" width="8" height="58" fill="#1e2d40" />
-    <circle cx="1182" cy="526" r="24" fill="#1a3022" />
-    <circle cx="1165" cy="537" r="16" fill="#1e3528" />
-
-    {/* Manhole + crosswalk */}
-    <circle cx="718" cy="706" r="13" fill="#161d32" />
-    <circle cx="718" cy="706" r="11" fill="#121828" stroke="#1a2240" strokeWidth="2" />
-    {Array.from({ length: 6 }).map((_, i) => (
-      <rect key={`mn-cw${i}`} x={1148 + i * 16} y={650} width={10} height={52} fill="#222a45" rx="1" />
-    ))}
+    {/* Flower pots at shop */}
+    <Building gx={0.8} gy={5.9} gz={0} W={0.25} D={0.25} h={0.3} topColor="#7a3010" eastColor="#5a2008" southColor="#4e1c06" />
+    <Building gx={2.9} gy={5.9} gz={0} W={0.25} D={0.25} h={0.3} topColor="#7a3010" eastColor="#5a2008" southColor="#4e1c06" />
+    {(() => {
+      const [cx, cy] = px(0.925, 5.925, 0.3);
+      const [cx2, cy2] = px(3.025, 5.925, 0.3);
+      return (
+        <>
+          <circle cx={cx} cy={cy - 4} r={10} fill="#2a6030" stroke="#0d111e" strokeWidth={0.8} />
+          <circle cx={cx - 4} cy={cy - 9} r={4} fill="#ff5530" stroke="#0d111e" strokeWidth={0.6} />
+          <circle cx={cx + 3} cy={cy - 8} r={3} fill="#ff9960" stroke="#0d111e" strokeWidth={0.6} />
+          <circle cx={cx2} cy={cy2 - 4} r={10} fill="#2a6030" stroke="#0d111e" strokeWidth={0.8} />
+          <circle cx={cx2 - 3} cy={cy2 - 9} r={4} fill="#ffaa30" stroke="#0d111e" strokeWidth={0.6} />
+          <circle cx={cx2 + 4} cy={cy2 - 7} r={3} fill="#ff5530" stroke="#0d111e" strokeWidth={0.6} />
+        </>
+      );
+    })()}
   </svg>
 );
 
@@ -368,245 +433,269 @@ const Aurora: React.FC = () => (
   >
     <defs>
       <linearGradient id="au-sky" x1="0" y1="0" x2="0" y2="1">
-        <stop offset="0%" stopColor="#4aaee8" />
-        <stop offset="65%" stopColor="#7cc8f0" />
-        <stop offset="100%" stopColor="#a8dbf5" />
+        <stop offset="0%" stopColor="#48b0e8" />
+        <stop offset="60%" stopColor="#7acaf0" />
+        <stop offset="100%" stopColor="#a8dcf5" />
       </linearGradient>
-      <filter id="au-blur">
-        <feGaussianBlur stdDeviation="8" />
+      <filter id="au-blur"><feGaussianBlur stdDeviation="10" /></filter>
+      <filter id="au-glow">
+        <feGaussianBlur stdDeviation="3" result="b" />
+        <feMerge><feMergeNode in="b" /><feMergeNode in="SourceGraphic" /></feMerge>
       </filter>
       <style>{`
-        @keyframes au-cloud1 { 0%{transform:translateX(0)} 100%{transform:translateX(-40px)} }
-        @keyframes au-cloud2 { 0%{transform:translateX(0)} 100%{transform:translateX(32px)} }
-        @keyframes au-flag { 0%,100%{transform:skewX(0deg)} 50%{transform:skewX(-6deg)} }
+        @keyframes au-cloud1 { 0%{transform:translateX(0)} 100%{transform:translateX(-50px)} }
+        @keyframes au-cloud2 { 0%{transform:translateX(0)} 100%{transform:translateX(40px)} }
+        @keyframes au-flag { 0%,100%{transform:skewX(0deg)} 50%{transform:skewX(-8deg)} }
+        @keyframes au-bob { 0%,100%{transform:translateY(0)} 50%{transform:translateY(-4px)} }
       `}</style>
     </defs>
 
     <rect width="1440" height="900" fill="url(#au-sky)" />
 
     {/* Sun */}
-    <circle cx="1338" cy="92" r="85" fill="#fff070" opacity="0.2" filter="url(#au-blur)" />
-    <circle cx="1338" cy="92" r="52" fill="#fff380" />
+    <circle cx="1330" cy="88" r="90" fill="#fff060" opacity="0.18" filter="url(#au-blur)" />
+    <circle cx="1330" cy="88" r="52" fill="#fff380" stroke="#0d111e" strokeWidth="1" />
     {Array.from({ length: 12 }).map((_, i) => {
       const a = (i * 30 * Math.PI) / 180;
-      return (
-        <line key={`au-sr${i}`} x1={1338 + Math.cos(a) * 60} y1={92 + Math.sin(a) * 60} x2={1338 + Math.cos(a) * 82} y2={92 + Math.sin(a) * 82} stroke="#ffe050" strokeWidth={i % 2 === 0 ? 3 : 2} opacity={0.7} />
-      );
+      return <line key={`au-sr${i}`} x1={1330 + Math.cos(a) * 60} y1={88 + Math.sin(a) * 60}
+        x2={1330 + Math.cos(a) * 82} y2={88 + Math.sin(a) * 82} stroke="#ffe050" strokeWidth={i % 2 === 0 ? 3 : 2} opacity={0.7} />;
     })}
 
     {/* Clouds */}
-    <g style={{ animation: 'au-cloud1 14s ease-in-out infinite alternate' }}>
-      <ellipse cx="282" cy="108" rx="78" ry="33" fill="white" opacity={0.9} />
-      <ellipse cx="340" cy="92" rx="60" ry="40" fill="white" opacity={0.85} />
-      <ellipse cx="222" cy="114" rx="54" ry="28" fill="white" opacity={0.8} />
+    <g style={{ animation: 'au-cloud1 16s ease-in-out infinite alternate' }}>
+      <ellipse cx="285" cy="112" rx="82" ry="34" fill="white" opacity={0.92} />
+      <ellipse cx="345" cy="95" rx="62" ry="42" fill="white" opacity={0.88} />
+      <ellipse cx="225" cy="118" rx="55" ry="28" fill="white" opacity={0.82} />
     </g>
-    <g style={{ animation: 'au-cloud2 18s ease-in-out 3s infinite alternate' }}>
-      <ellipse cx="798" cy="72" rx="68" ry="28" fill="white" opacity={0.8} />
-      <ellipse cx="852" cy="58" rx="52" ry="35" fill="white" opacity={0.75} />
-      <ellipse cx="752" cy="78" rx="48" ry="24" fill="white" opacity={0.7} />
+    <g style={{ animation: 'au-cloud2 20s ease-in-out 4s infinite alternate' }}>
+      <ellipse cx="805" cy="75" rx="70" ry="29" fill="white" opacity={0.8} />
+      <ellipse cx="858" cy="60" rx="54" ry="36" fill="white" opacity={0.75} />
+      <ellipse cx="755" cy="80" rx="50" ry="25" fill="white" opacity={0.7} />
     </g>
-    <g style={{ animation: 'au-cloud1 20s ease-in-out 7s infinite alternate' }}>
-      <ellipse cx="1078" cy="128" rx="62" ry="26" fill="white" opacity={0.72} />
-      <ellipse cx="1128" cy="115" rx="48" ry="30" fill="white" opacity={0.68} />
+    <g style={{ animation: 'au-cloud1 22s ease-in-out 8s infinite alternate' }}>
+      <ellipse cx="1082" cy="130" rx="65" ry="27" fill="white" opacity={0.72} />
+      <ellipse cx="1132" cy="115" rx="50" ry="32" fill="white" opacity={0.68} />
     </g>
+
+    {/* Ground tiles - cobblestone */}
+    {Array.from({ length: 14 }).map((_, i) =>
+      Array.from({ length: 8 }).map((_, j) => (
+        <GroundTile key={`au-gt-${i}-${j}`} gx={i * 1 - 4} gy={j * 1 + 1} W={1} D={1}
+          fill={(i + j) % 2 === 0 ? '#c8b888' : '#b8a878'} />
+      ))
+    )}
 
     {/* Background buildings */}
-    <rect x="0" y="308" width="118" height="322" fill="#e8d5b0" rx="3" />
-    <rect x="18" y="268" width="58" height="362" fill="#f0dcbc" rx="3" />
-    {([[28, 282], [28, 318], [28, 354], [28, 390], [88, 322], [88, 358], [88, 394]] as [number, number][]).map(([x, y], i) => (
-      <rect key={`au-bw${i}`} x={x} y={y} width={18} height={20} fill="#d4a870" opacity={0.4} rx={2} />
-    ))}
-    <rect x="1228" y="282" width="108" height="348" fill="#dcc8a0" rx="3" />
-    <rect x="1292" y="258" width="78" height="372" fill="#e8d4b0" rx="3" />
-    {([[1238, 298], [1238, 338], [1238, 378], [1298, 272], [1298, 312], [1298, 352], [1298, 392]] as [number, number][]).map(([x, y], i) => (
-      <rect key={`au-bw2${i}`} x={x} y={y} width={18} height={20} fill="#c4a460" opacity={0.5} rx={2} />
-    ))}
+    <Building gx={-3} gy={0} gz={0} W={2} D={2} h={4}
+      topColor="#e8d8a8" eastColor="#d4c090" southColor="#c4aa78"
+      winRows={3} winCols={2} winColor="#88bbff" winOpacity={0.5} />
+    <Building gx={8} gy={0} gz={0} W={2} D={2} h={5}
+      topColor="#dcc8a0" eastColor="#c8b488" southColor="#b8a070"
+      winRows={4} winCols={2} winColor="#88bbff" winOpacity={0.5} />
+    <Building gx={-3} gy={-2} gz={0} W={1} D={1} h={3}
+      topColor="#e4d4a8" eastColor="#cec090" southColor="#baa878" />
 
-    {/* Market ground */}
-    <rect x="0" y="578" width="1440" height="322" fill="#d4c4a0" />
-    {Array.from({ length: 25 }).map((_, i) => (
-      <line key={`au-gv${i}`} x1={i * 58} y1={578} x2={i * 58} y2={900} stroke="#c4b490" strokeWidth={1} opacity={0.45} />
-    ))}
-    {Array.from({ length: 6 }).map((_, i) => (
-      <line key={`au-gh${i}`} x1={0} y1={578 + i * 55} x2={1440} y2={578 + i * 55} stroke="#c4b490" strokeWidth={1} opacity={0.45} />
-    ))}
-
-    {/* Bunting */}
-    <path d="M 60 450 Q 350 420 720 448 Q 1090 420 1385 452" fill="none" stroke="#ddd" strokeWidth={1.5} opacity={0.7} />
+    {/* Bunting rope */}
+    <path d="M 80 440 Q 360 415 720 442 Q 1080 415 1370 445" fill="none" stroke="#ccc" strokeWidth={1.5} opacity={0.6} />
     {Array.from({ length: 22 }).map((_, i) => {
-      const x = 62 + i * 60;
-      const y = 450 + Math.sin(i * 0.55) * 10;
-      const colors = ['#e03030', '#ff9920', '#22aa44', '#3366cc', '#cc44aa', '#ff6622', '#ffcc00'];
+      const x = 82 + i * 58;
+      const y = 442 + Math.sin(i * 0.6) * 12;
+      const colors = ['#e02020', '#ff9910', '#22aa44', '#2255cc', '#cc44aa', '#ff6622', '#ffcc00'];
       return (
-        <polygon
-          key={`au-flag${i}`}
-          points={`${x},${y} ${x + 15},${y} ${x + 7.5},${y + 17}`}
-          fill={colors[i % colors.length]}
-          opacity={0.88}
-          style={{ animation: `au-flag ${1.5 + (i % 3) * 0.5}s ease-in-out ${i * 0.18}s infinite alternate`, transformOrigin: `${x + 7.5}px ${y}px` }}
-        />
+        <polygon key={`au-flag${i}`}
+          points={`${x},${y} ${x + 16},${y} ${x + 8},${y + 18}`}
+          fill={colors[i % colors.length]} opacity={0.9}
+          style={{ animation: `au-flag ${1.5 + (i % 3) * 0.5}s ease-in-out ${i * 0.15}s infinite alternate`, transformOrigin: `${x + 8}px ${y}px` }} />
       );
     })}
 
-    {/* Stall 1 - Red */}
-    <rect x="75" y="478" width="218" height="122" fill="#fdf8ee" rx="2" />
-    <rect x="62" y="468" width="244" height="28" fill="#e03030" rx="3" />
-    {Array.from({ length: 5 }).map((_, i) => (
-      <rect key={`au-s1s${i}`} x={62 + i * 49} y={468} width={24} height={28} fill="#c01010" opacity={0.45} rx="1" />
-    ))}
-    {Array.from({ length: 13 }).map((_, i) => (
-      <ellipse key={`au-s1f${i}`} cx={68 + i * 18} cy={496} rx={7} ry={8} fill="#c01010" />
-    ))}
-    <rect x="80" y="524" width="208" height="12" fill="#d4a060" rx="2" />
-    <rect x="80" y="536" width="5" height={62} fill="#b88040" />
-    <rect x="283" y="536" width="5" height={62} fill="#b88040" />
-    {([[95, 516, '#ff6b22'], [114, 512, '#ffcc00'], [133, 516, '#55bb22'], [152, 512, '#ff6b22'], [171, 516, '#ffcc00'], [190, 512, '#55bb22'], [209, 516, '#ff6b22'], [228, 512, '#ffcc00'], [247, 516, '#55bb22'], [266, 512, '#ff6b22']] as [number, number, string][]).map(([px, py, c], i) => (
-      <circle key={`au-s1p${i}`} cx={px} cy={py} r={9} fill={c} opacity={0.9} />
-    ))}
-    <rect x="128" y="476" width="112" height="16" fill="#c01010" rx="3" />
-    <text x="184" y="488" textAnchor="middle" fill="white" fontSize="11" fontWeight="600" fontFamily="system-ui, sans-serif">FRESH MARKET</text>
+    {/* Market stall 1 - RED: Fresh Produce */}
+    {(() => {
+      const sx = -3, sy = 3;
+      const [cx, cy] = px(sx + 1, sy + 1, 2.5);
+      return (
+        <g>
+          <Building gx={sx} gy={sy} gz={0} W={2} D={2} h={2}
+            topColor="#f0e8c0" eastColor="#dcd2a8" southColor="#c8bc90" />
+          {/* Canopy top */}
+          <polygon points={topFace(sx - 0.2, sy - 0.2, 0, 2.4, 2.4, 2.1)} fill="#e02828" stroke="#0d111e" strokeWidth={1} strokeLinejoin="round" />
+          {/* Fringe east */}
+          {Array.from({ length: 5 }).map((_, i) => {
+            const [fx, fy] = px(sx + 2.2, sy + i * 0.4, 2.1);
+            return <circle key={i} cx={fx} cy={fy} r={5} fill="#c01818" stroke="#0d111e" strokeWidth={0.5} />;
+          })}
+          {/* Fringe south */}
+          {Array.from({ length: 5 }).map((_, i) => {
+            const [fx, fy] = px(sx + i * 0.4, sy + 2.2, 2.1);
+            return <circle key={i} cx={fx} cy={fy} r={5} fill="#c01818" stroke="#0d111e" strokeWidth={0.5} />;
+          })}
+          {/* Sign */}
+          <rect x={cx - 40} y={cy - 16} width={80} height={20} fill="#a01010" rx="3" stroke="#0d111e" strokeWidth={0.8} />
+          <text x={cx} y={cy - 2} textAnchor="middle" fill="white" fontSize="10" fontWeight="700" fontFamily="system-ui,sans-serif">FRESH MARKET</text>
+          {/* Products on table */}
+          {[[-0.7, 0.3], [-0.2, 0.8], [0.3, 0.3], [0.8, 0.8]].map(([ox, oy], pi) => {
+            const [px2, py2] = px(sx + 1 + ox, sy + 1 + oy, 1.2);
+            const cols = ['#ff6020', '#ff9920', '#44cc22', '#ffdd00'];
+            return <circle key={pi} cx={px2} cy={py2} r={8} fill={cols[pi]} stroke="#0d111e" strokeWidth={0.7} />;
+          })}
+        </g>
+      );
+    })()}
 
-    {/* Stall 2 - Orange */}
-    <rect x="355" y="472" width="198" height="128" fill="#fffcf0" rx="2" />
-    <rect x="342" y="462" width="224" height="28" fill="#ff9920" rx="3" />
-    {Array.from({ length: 5 }).map((_, i) => (
-      <rect key={`au-s2s${i}`} x={342 + i * 45} y={462} width={22} height={28} fill="#ee7e0e" opacity={0.45} rx="1" />
-    ))}
-    {Array.from({ length: 12 }).map((_, i) => (
-      <ellipse key={`au-s2f${i}`} cx={348 + i * 18} cy={490} rx={7} ry={8} fill="#ee7e0e" />
-    ))}
-    <rect x="360" y="522" width="188" height="12" fill="#d4a060" rx="2" />
-    <rect x="360" y="534" width="5" height={64} fill="#b88040" />
-    <rect x="543" y="534" width="5" height={64} fill="#b88040" />
-    {Array.from({ length: 9 }).map((_, i) => (
-      <ellipse key={`au-s2h${i}`} cx={375 + i * 21} cy={512} rx={7} ry={9} fill={i % 2 === 0 ? '#ff6633' : '#ffaa22'} opacity={0.88} />
-    ))}
+    {/* Market stall 2 - ORANGE: Spices */}
+    {(() => {
+      const sx = 1, sy = 3;
+      const [cx, cy] = px(sx + 1, sy + 1, 2.5);
+      return (
+        <g>
+          <Building gx={sx} gy={sy} gz={0} W={2} D={2} h={2}
+            topColor="#f0e8c0" eastColor="#dcd2a8" southColor="#c8bc90" />
+          <polygon points={topFace(sx - 0.2, sy - 0.2, 0, 2.4, 2.4, 2.1)} fill="#ff8810" stroke="#0d111e" strokeWidth={1} strokeLinejoin="round" />
+          {Array.from({ length: 5 }).map((_, i) => {
+            const [fx, fy] = px(sx + 2.2, sy + i * 0.4, 2.1);
+            return <circle key={i} cx={fx} cy={fy} r={5} fill="#dd6608" stroke="#0d111e" strokeWidth={0.5} />;
+          })}
+          {Array.from({ length: 5 }).map((_, i) => {
+            const [fx, fy] = px(sx + i * 0.4, sy + 2.2, 2.1);
+            return <circle key={i} cx={fx} cy={fy} r={5} fill="#dd6608" stroke="#0d111e" strokeWidth={0.5} />;
+          })}
+          <rect x={cx - 36} y={cy - 16} width={72} height={20} fill="#bb5500" rx="3" stroke="#0d111e" strokeWidth={0.8} />
+          <text x={cx} y={cy - 2} textAnchor="middle" fill="white" fontSize="10" fontWeight="700" fontFamily="system-ui,sans-serif">SPICE BAZAAR</text>
+          {[[-0.6, 0.5], [0.1, 0.3], [0.7, 0.6]].map(([ox, oy], pi) => {
+            const [px2, py2] = px(sx + 1 + ox, sy + 1 + oy, 1.2);
+            const cols = ['#ffaa30', '#cc4422', '#ffdd00'];
+            return <ellipse key={pi} cx={px2} cy={py2} rx={10} ry={7} fill={cols[pi]} stroke="#0d111e" strokeWidth={0.7} />;
+          })}
+        </g>
+      );
+    })()}
 
-    {/* Stall 3 - Green hero */}
-    <rect x="615" y="458" width="238" height="142" fill="#f0f8f0" rx="2" />
-    <rect x="600" y="446" width="268" height="32" fill="#22aa44" rx="3" />
-    {Array.from({ length: 6 }).map((_, i) => (
-      <rect key={`au-s3s${i}`} x={600 + i * 45} y={446} width={22} height={32} fill="#188833" opacity={0.45} rx="1" />
-    ))}
-    {Array.from({ length: 14 }).map((_, i) => (
-      <ellipse key={`au-s3f${i}`} cx={606 + i * 18} cy={478} rx={7} ry={8} fill="#188833" />
-    ))}
-    <rect x="620" y="524" width="228" height="14" fill="#d4a060" rx="2" />
-    <rect x="620" y="538" width="5" height={62} fill="#b88040" />
-    <rect x="843" y="538" width="5" height={62} fill="#b88040" />
-    {([[636, 516, '#55cc22'], [658, 510, '#ff6622'], [680, 516, '#ffcc00'], [702, 510, '#44aaff'], [724, 516, '#55cc22'], [746, 510, '#ff6622'], [768, 516, '#ffcc00'], [790, 510, '#44aaff'], [812, 516, '#55cc22'], [834, 510, '#ff6622']] as [number, number, string][]).map(([px, py, c], i) => (
-      <circle key={`au-s3p${i}`} cx={px} cy={py} r={10} fill={c} opacity={0.9} />
-    ))}
-    <rect x="648" y="455" width="172" height="20" fill="#188833" rx="4" />
-    <text x="734" y="469" textAnchor="middle" fill="white" fontSize="12" fontWeight="700" fontFamily="system-ui, sans-serif">ORGANIC GOODS</text>
+    {/* Market stall 3 - GREEN: Organic */}
+    {(() => {
+      const sx = 5, sy = 3;
+      const [cx, cy] = px(sx + 1, sy + 1, 2.5);
+      return (
+        <g>
+          <Building gx={sx} gy={sy} gz={0} W={2} D={2} h={2}
+            topColor="#f0e8c0" eastColor="#dcd2a8" southColor="#c8bc90" />
+          <polygon points={topFace(sx - 0.2, sy - 0.2, 0, 2.4, 2.4, 2.1)} fill="#22aa44" stroke="#0d111e" strokeWidth={1} strokeLinejoin="round" />
+          {Array.from({ length: 5 }).map((_, i) => {
+            const [fx, fy] = px(sx + 2.2, sy + i * 0.4, 2.1);
+            return <circle key={i} cx={fx} cy={fy} r={5} fill="#189833" stroke="#0d111e" strokeWidth={0.5} />;
+          })}
+          {Array.from({ length: 5 }).map((_, i) => {
+            const [fx, fy] = px(sx + i * 0.4, sy + 2.2, 2.1);
+            return <circle key={i} cx={fx} cy={fy} r={5} fill="#189833" stroke="#0d111e" strokeWidth={0.5} />;
+          })}
+          <rect x={cx - 44} y={cy - 16} width={88} height={20} fill="#148828" rx="3" stroke="#0d111e" strokeWidth={0.8} />
+          <text x={cx} y={cy - 2} textAnchor="middle" fill="white" fontSize="10" fontWeight="700" fontFamily="system-ui,sans-serif">ORGANIC GOODS</text>
+          {[[-0.7, 0.4], [0, 0.7], [0.6, 0.3], [0.8, 0.9]].map(([ox, oy], pi) => {
+            const [px2, py2] = px(sx + 1 + ox, sy + 1 + oy, 1.2);
+            const cols = ['#55cc22', '#ff6622', '#ffdd00', '#44aaff'];
+            return <circle key={pi} cx={px2} cy={py2} r={9} fill={cols[pi]} stroke="#0d111e" strokeWidth={0.7} />;
+          })}
+        </g>
+      );
+    })()}
 
-    {/* Stall 4 - Blue */}
-    <rect x="924" y="472" width="208" height="128" fill="#f0f0ff" rx="2" />
-    <rect x="910" y="462" width="236" height="28" fill="#3366cc" rx="3" />
-    {Array.from({ length: 5 }).map((_, i) => (
-      <rect key={`au-s4s${i}`} x={910 + i * 47} y={462} width={23} height={28} fill="#2255bb" opacity={0.45} rx="1" />
-    ))}
-    {Array.from({ length: 12 }).map((_, i) => (
-      <ellipse key={`au-s4f${i}`} cx={916 + i * 18} cy={490} rx={7} ry={8} fill="#2255bb" />
-    ))}
-    <rect x="929" y="522" width="198" height="12" fill="#d4a060" rx="2" />
-    <rect x="929" y="534" width="5" height={64} fill="#b88040" />
-    <rect x="1122" y="534" width="5" height={64} fill="#b88040" />
-    {Array.from({ length: 8 }).map((_, i) => (
-      <rect key={`au-s4p${i}`} x={942 + i * 22} y={508} width={16} height={18} fill={i % 3 === 0 ? '#ff8844' : i % 3 === 1 ? '#44bbff' : '#ffcc33'} opacity={0.82} rx={2} />
-    ))}
-
-    {/* Stall 5 - Pink */}
-    <rect x="1194" y="476" width="200" height="124" fill="#fff0f8" rx="2" />
-    <rect x="1180" y="466" width="228" height="28" fill="#cc44aa" rx="3" />
-    {Array.from({ length: 5 }).map((_, i) => (
-      <rect key={`au-s5s${i}`} x={1180 + i * 46} y={466} width={23} height={28} fill="#bb3399" opacity={0.45} rx="1" />
-    ))}
-    {Array.from({ length: 12 }).map((_, i) => (
-      <ellipse key={`au-s5f${i}`} cx={1186 + i * 18} cy={494} rx={7} ry={8} fill="#bb3399" />
-    ))}
-    <rect x="1199" y="522" width="188" height="12" fill="#d4a060" rx="2" />
-    <rect x="1199" y="534" width="5" height={64} fill="#b88040" />
-    <rect x="1382" y="534" width="5" height={64} fill="#b88040" />
+    {/* Market stall 4 - BLUE: Crafts */}
+    {(() => {
+      const sx = 2.5, sy = 5.5;
+      const [cx, cy] = px(sx + 1, sy + 1, 2.5);
+      return (
+        <g>
+          <Building gx={sx} gy={sy} gz={0} W={2} D={2} h={2}
+            topColor="#f0e8c0" eastColor="#dcd2a8" southColor="#c8bc90" />
+          <polygon points={topFace(sx - 0.2, sy - 0.2, 0, 2.4, 2.4, 2.1)} fill="#2255cc" stroke="#0d111e" strokeWidth={1} strokeLinejoin="round" />
+          {Array.from({ length: 5 }).map((_, i) => {
+            const [fx, fy] = px(sx + 2.2, sy + i * 0.4, 2.1);
+            return <circle key={i} cx={fx} cy={fy} r={5} fill="#1844aa" stroke="#0d111e" strokeWidth={0.5} />;
+          })}
+          {Array.from({ length: 5 }).map((_, i) => {
+            const [fx, fy] = px(sx + i * 0.4, sy + 2.2, 2.1);
+            return <circle key={i} cx={fx} cy={fy} r={5} fill="#1844aa" stroke="#0d111e" strokeWidth={0.5} />;
+          })}
+          <rect x={cx - 36} y={cy - 16} width={72} height={20} fill="#1438aa" rx="3" stroke="#0d111e" strokeWidth={0.8} />
+          <text x={cx} y={cy - 2} textAnchor="middle" fill="white" fontSize="10" fontWeight="700" fontFamily="system-ui,sans-serif">ARTISAN CRAFTS</text>
+          {[[-0.5, 0.5], [0.3, 0.3], [0.7, 0.7]].map(([ox, oy], pi) => {
+            const [px2, py2] = px(sx + 1 + ox, sy + 1 + oy, 1.2);
+            const cols = ['#ff8844', '#44bbff', '#ffcc33'];
+            return <rect key={pi} x={px2 - 9} y={py2 - 7} width={18} height={14} fill={cols[pi]} stroke="#0d111e" strokeWidth={0.7} rx={2} />;
+          })}
+        </g>
+      );
+    })()}
 
     {/* Trees */}
-    <rect x="202" y="445" width="10" height="133" fill="#8a6030" />
-    <circle cx="207" cy="422" r="40" fill="#2a8828" />
-    <circle cx="190" cy="438" r="28" fill="#338833" />
-    <circle cx="225" cy="436" r="26" fill="#2a7a25" />
-    <circle cx="207" cy="402" r="24" fill="#2d9a2d" />
-    <rect x="1148" y="442" width="10" height="136" fill="#8a6030" />
-    <circle cx="1153" cy="418" r="38" fill="#258825" />
-    <circle cx="1135" cy="434" r="26" fill="#2d9230" />
-    <circle cx="1170" cy="432" r="24" fill="#228020" />
+    <IsoTree gx={-2.5} gy={2} gz={0} colors={['#44bb44', '#339933', '#226622']} />
+    <IsoTree gx={9} gy={2.5} gz={0} colors={['#3aaa50', '#2a8838', '#1e6828']} />
+    <IsoTree gx={-1} gy={7} gz={0} colors={['#55cc44', '#44aa33', '#2d7a22']} />
 
-    {/* Lamp post */}
-    <rect x="739" y="438" width="6" height="162" fill="#888070" />
-    <ellipse cx="742" cy="438" rx="14" ry="5.5" fill="#aaaa80" />
-    <circle cx="742" cy="435" r="7" fill="#ffeeaa" opacity={0.7} />
+    {/* Lamp post in square center */}
+    {(() => {
+      const [bx, by] = px(4.5, 4.5, 0);
+      const [tx, ty] = px(4.5, 4.5, 3);
+      const [hx, hy] = px(4.9, 4.5, 3);
+      return (
+        <g>
+          <line x1={bx} y1={by} x2={tx} y2={ty} stroke="#8a7050" strokeWidth={4} />
+          <line x1={tx} y1={ty} x2={hx} y2={hy} stroke="#8a7050" strokeWidth={3} />
+          <circle cx={hx} cy={hy} r={7} fill="#ffe898" filter="url(#au-glow)" stroke="#0d111e" strokeWidth={0.8} />
+        </g>
+      );
+    })()}
 
-    {/* Vendor 1 */}
-    <g transform="translate(188, 0)">
-      <circle cx="0" cy="562" r="8" fill="#d4a870" />
-      <rect x="-6" y="570" width="12" height="14" fill="#e03030" rx="2" />
-      <rect x="-4" y="572" width="8" height="11" fill="white" opacity={0.55} rx="1" />
-      <rect x="-5" y="584" width="4" height="12" fill="#333" rx="1" />
-      <rect x="2" y="584" width="4" height="12" fill="#333" rx="1" />
+    {/* Vendors and customers */}
+    <g style={{ animation: 'au-bob 2.5s ease-in-out infinite' }}>
+      <IsoPerson gx={-2} gy={3.5} gz={0} bodyColor="#e02020" skinColor="#d4a878" />
     </g>
-    {/* Customer 1 with basket */}
-    <g transform="translate(318, 0)">
-      <circle cx="0" cy="565" r="7" fill="#e8c8a0" />
-      <rect x="-5" y="572" width="10" height="14" fill="#4488ff" rx="2" />
-      <rect x="-4" y="586" width="4" height="11" fill="#225" rx="1" />
-      <rect x="1" y="586" width="4" height="11" fill="#225" rx="1" />
-      <rect x="8" y="575" width="12" height="10" fill="#c4903a" rx="2" />
-      <path d="M 9 575 Q 14 570 20 575" fill="none" stroke="#a07028" strokeWidth="1.5" />
+    <IsoPerson gx={0} gy={4.2} gz={0} bodyColor="#4488ff" skinColor="#e8c8a0" hatColor="#3a2808" />
+    <g style={{ animation: 'au-bob 3s ease-in-out 0.5s infinite' }}>
+      <IsoPerson gx={4} gy={3.5} gz={0} bodyColor="#22aa44" skinColor="#c8986a" />
     </g>
-    {/* Vendor green */}
-    <g transform="translate(728, 0)">
-      <circle cx="0" cy="558" r="8" fill="#c8986a" />
-      <rect x="-6" y="566" width="12" height="15" fill="#22aa44" rx="2" />
-      <rect x="-4" y="568" width="8" height="12" fill="white" opacity={0.5} rx="1" />
-      <rect x="-5" y="581" width="4" height="12" fill="#333" rx="1" />
-      <rect x="2" y="581" width="4" height="12" fill="#333" rx="1" />
-    </g>
-    {/* Customer 2 + child */}
-    <g transform="translate(850, 0)">
-      <circle cx="0" cy="560" r="7" fill="#e0b888" />
-      <rect x="-5" y="567" width="10" height="13" fill="#aa44cc" rx="2" />
-      <rect x="-4" y="580" width="4" height="11" fill="#224" rx="1" />
-      <rect x="1" y="580" width="4" height="11" fill="#224" rx="1" />
-    </g>
-    <g transform="translate(866, 0)">
-      <circle cx="0" cy="568" r="5" fill="#e8c8a0" />
-      <rect x="-4" y="573" width="8" height="10" fill="#ff8844" rx="2" />
-      <rect x="-3" y="583" width="3" height="8" fill="#445" rx="1" />
-      <rect x="1" y="583" width="3" height="8" fill="#445" rx="1" />
-    </g>
-    {/* Customer 3 */}
-    <g transform="translate(1058, 0)">
-      <circle cx="0" cy="562" r="7" fill="#d4a070" />
-      <rect x="-5" y="569" width="10" height="14" fill="#336699" rx="2" />
-      <rect x="-4" y="583" width="4" height="11" fill="#223" rx="1" />
-      <rect x="1" y="583" width="4" height="11" fill="#223" rx="1" />
-    </g>
-    {/* Customer 4 */}
-    <g transform="translate(1378, 0)">
-      <circle cx="0" cy="560" r="7" fill="#c89870" />
-      <rect x="-5" y="567" width="10" height="14" fill="#ff6622" rx="2" />
-      <rect x="-4" y="581" width="4" height="11" fill="#333" rx="1" />
-      <rect x="1" y="581" width="4" height="11" fill="#333" rx="1" />
-    </g>
+    <IsoPerson gx={6} gy={4.3} gz={0} bodyColor="#aa44cc" skinColor="#e0b888" />
+    <IsoPerson gx={3.5} gy={5.8} gz={0} bodyColor="#ff6622" skinColor="#d4a070" hatColor="#1a2030" />
+    {/* Child customer */}
+    {(() => {
+      const [hx, hy] = px(1.5, 5.0, 1.1);
+      const bS = southFace(1.38, 4.88, 0, 0.24, 0.24, 1);
+      const bE = eastFace(1.38, 4.88, 0, 0.24, 0.24, 1);
+      const bT = topFace(1.38, 4.88, 0, 0.24, 0.24, 1);
+      return (
+        <g>
+          <polygon points={bS} fill="#ff8844" stroke="#0d111e" strokeWidth={0.7} strokeLinejoin="round" />
+          <polygon points={bE} fill="#ff8844" stroke="#0d111e" strokeWidth={0.7} strokeLinejoin="round" />
+          <polygon points={bT} fill="#ff8844" stroke="#0d111e" strokeWidth={0.7} strokeLinejoin="round" />
+          <circle cx={hx} cy={hy - 10} r={7} fill="#e8c8a0" stroke="#0d111e" strokeWidth={0.7} />
+        </g>
+      );
+    })()}
 
-    {/* Ground details */}
-    <circle cx="308" cy="598" r="5.5" fill="#ff5520" opacity={0.82} />
-    <line x1="308" y1="592" x2="310" y2="588" stroke="#228822" strokeWidth="1.5" />
-    <rect x="548" y="584" width="17" height="19" fill="#eecc88" rx="2" />
-    <path d="M 552 584 Q 556 579 562 584" fill="none" stroke="#cc9944" strokeWidth="1.5" />
+    {/* Ground decoration: flowers */}
+    {[[-3.5, 2.5], [-3.5, 8.5], [9.5, 2.5], [9.5, 8.5]].map(([fx, fy], i) => {
+      const [cx2, cy2] = px(fx, fy, 0);
+      return (
+        <g key={`au-fl${i}`}>
+          <circle cx={cx2} cy={cy2} r={7} fill={i % 2 === 0 ? '#ffdd22' : '#ff6688'} stroke="#0d111e" strokeWidth={0.7} />
+          <circle cx={cx2} cy={cy2} r={3} fill="white" opacity={0.7} />
+        </g>
+      );
+    })}
+
+    {/* Basket */}
+    {(() => {
+      const [bx, by] = px(0.2, 4.5, 0.4);
+      return (
+        <g>
+          <ellipse cx={bx} cy={by} rx={14} ry={9} fill="#c4903a" stroke="#0d111e" strokeWidth={0.8} />
+          <path d={`M ${bx - 14} ${by} Q ${bx} ${by - 18} ${bx + 14} ${by}`} fill="none" stroke="#a07028" strokeWidth={1.5} />
+        </g>
+      );
+    })()}
   </svg>
 );
 
-// ─── Dusk: Coastal Sunset ─────────────────────────────────────────────────────
+// ─── Dusk: Coastal Harbor ────────────────────────────────────────────────────
 const Dusk: React.FC = () => (
   <svg
     style={{ position: 'absolute', inset: 0, width: '100%', height: '100%' }}
@@ -616,156 +705,244 @@ const Dusk: React.FC = () => (
   >
     <defs>
       <linearGradient id="du-sky" x1="0" y1="0" x2="0" y2="1">
-        <stop offset="0%" stopColor="#1a1040" />
-        <stop offset="30%" stopColor="#6b2d8b" />
-        <stop offset="58%" stopColor="#e85d20" />
-        <stop offset="78%" stopColor="#f5a030" />
-        <stop offset="100%" stopColor="#ffc860" />
+        <stop offset="0%" stopColor="#1a1048" />
+        <stop offset="28%" stopColor="#6a2a90" />
+        <stop offset="55%" stopColor="#e85520" />
+        <stop offset="75%" stopColor="#f59828" />
+        <stop offset="100%" stopColor="#ffc850" />
       </linearGradient>
       <linearGradient id="du-water" x1="0" y1="0" x2="0" y2="1">
-        <stop offset="0%" stopColor="#e07828" />
-        <stop offset="45%" stopColor="#b05820" />
+        <stop offset="0%" stopColor="#d07020" />
+        <stop offset="40%" stopColor="#a04e18" />
         <stop offset="100%" stopColor="#1a3860" />
       </linearGradient>
-      <filter id="du-blur">
-        <feGaussianBlur stdDeviation="10" />
+      <filter id="du-blur"><feGaussianBlur stdDeviation="12" /></filter>
+      <filter id="du-glow">
+        <feGaussianBlur stdDeviation="4" result="b" />
+        <feMerge><feMergeNode in="b" /><feMergeNode in="SourceGraphic" /></feMerge>
       </filter>
       <style>{`
-        @keyframes du-bird { 0%{transform:translate(0,0)} 50%{transform:translate(30px,-8px)} 100%{transform:translate(60px,0)} }
-        @keyframes du-sail { 0%,100%{transform:rotate(-2deg)} 50%{transform:rotate(2deg)} }
         @keyframes du-ripple { 0%,100%{opacity:0.15} 50%{opacity:0.35} }
+        @keyframes du-sail { 0%,100%{transform:rotate(-2.5deg)} 50%{transform:rotate(2.5deg)} }
+        @keyframes du-bird { 0%{transform:translate(0,0)} 50%{transform:translate(32px,-10px)} 100%{transform:translate(64px,0)} }
+        @keyframes du-bob { 0%,100%{transform:translateY(0)} 50%{transform:translateY(-3px)} }
       `}</style>
     </defs>
 
     <rect width="1440" height="900" fill="url(#du-sky)" />
 
-    {/* Sun */}
-    <ellipse cx="720" cy="490" rx="110" ry="110" fill="#ffee80" opacity="0.15" filter="url(#du-blur)" />
-    <circle cx="720" cy="490" r="62" fill="#fff380" />
-    <path d="M 660 530 Q 720 520 780 530 Q 760 560 720 570 Q 680 560 660 530 Z" fill="#ffdd60" opacity="0.3" />
+    {/* Sun on horizon */}
+    <circle cx="720" cy="488" r="120" fill="#ffe880" opacity="0.14" filter="url(#du-blur)" />
+    <circle cx="720" cy="488" r="64" fill="#fff380" stroke="#0d111e" strokeWidth="1" />
+    <path d="M 658 528 Q 720 515 782 528 Q 762 560 720 572 Q 678 560 658 528 Z" fill="#ffdd60" opacity="0.35" />
 
-    {/* Stars top */}
-    {([[80, 45], [180, 28], [310, 52], [450, 30], [580, 58], [200, 85], [380, 70], [520, 92]] as [number, number][]).map(([cx, cy], i) => (
+    {/* Stars in upper sky */}
+    {([[80,45],[182,28],[315,52],[455,30],[582,58],[200,88],[382,72],[528,95]] as [number,number][]).map(([cx,cy],i) => (
       <circle key={`du-star${i}`} cx={cx} cy={cy} r={1.2} fill="white" opacity={0.6} />
     ))}
 
     {/* Sunset clouds */}
-    <ellipse cx="220" cy="200" rx="95" ry="32" fill="#ff9060" opacity="0.5" />
-    <ellipse cx="285" cy="185" rx="75" ry="42" fill="#ff7a48" opacity="0.45" />
-    <ellipse cx="155" cy="210" rx="65" ry="26" fill="#ff9060" opacity="0.4" />
-    <ellipse cx="1050" cy="165" rx="85" ry="28" fill="#ff9060" opacity="0.48" />
-    <ellipse cx="1115" cy="150" rx="68" ry="38" fill="#e87845" opacity="0.42" />
+    <ellipse cx="222" cy="205" rx="98" ry="33" fill="#ff8855" opacity="0.5" />
+    <ellipse cx="288" cy="188" rx="78" ry="44" fill="#ff6a40" opacity="0.45" />
+    <ellipse cx="158" cy="215" rx="67" ry="27" fill="#ff8855" opacity="0.4" />
+    <ellipse cx="1055" cy="168" rx="88" ry="30" fill="#ff8855" opacity="0.48" />
+    <ellipse cx="1120" cy="152" rx="70" ry="40" fill="#e07040" opacity="0.42" />
 
     {/* Water */}
-    <rect x="0" y="528" width="1440" height="372" fill="url(#du-water)" />
-    {[548, 568, 590, 615, 645].map((wy, i) => (
+    <rect x="0" y="525" width="1440" height="375" fill="url(#du-water)" />
+    {[548,570,595,623,655].map((wy,i) => (
       <path key={`du-wv${i}`}
-        d={`M 0 ${wy} Q ${180 + i * 20} ${wy - 6} ${360} ${wy} Q ${540} ${wy + 6} 720 ${wy} Q ${900} ${wy - 6} 1080 ${wy} Q 1260 ${wy + 6} 1440 ${wy}`}
-        fill="none" stroke={`rgba(255,${140 - i * 18},30,${0.25 - i * 0.03})`} strokeWidth={1.5}
-        style={{ animation: `du-ripple ${2 + i * 0.4}s ease-in-out ${i * 0.3}s infinite` }} />
+        d={`M 0 ${wy} Q ${180+i*22} ${wy-7} ${360} ${wy} Q ${540} ${wy+7} 720 ${wy} Q ${900} ${wy-7} 1080 ${wy} Q ${1260} ${wy+7} 1440 ${wy}`}
+        fill="none" stroke={`rgba(255,${135-i*18},25,${0.25-i*0.03})`} strokeWidth={1.5}
+        style={{ animation: `du-ripple ${2+i*0.45}s ease-in-out ${i*0.3}s infinite` }} />
     ))}
-    {Array.from({ length: 8 }).map((_, i) => (
-      <ellipse key={`du-ref${i}`} cx={720} cy={540 + i * 22} rx={20 + i * 12} ry={3} fill="#ffcc40" opacity={0.15 - i * 0.015} />
-    ))}
-
-    {/* Left buildings */}
-    <rect x="0" y="350" width="145" height="182" fill="#e8ddd0" rx="4" />
-    <rect x="0" y="332" width="105" height="200" fill="#ede4d8" rx="4" />
-    <rect x="18" y="318" width="78" height="214" fill="#f0e6da" rx="4" />
-    {([[25, 330], [55, 330], [25, 362], [55, 362], [25, 394], [55, 394], [25, 426], [55, 426], [110, 362], [110, 394], [110, 426], [110, 458], [110, 490]] as [number, number][]).map(([wx, wy], i) => (
-      <rect key={`du-lw${i}`} x={wx} y={wy} width={22} height={18} fill="#ff9840" opacity={0.45} rx={2} />
-    ))}
-    <rect x="0" y="440" width="145" height="8" fill="#d4c8ba" rx="2" />
-    <rect x="40" y="462" width="28" height="38" fill="#c05828" rx="14 14 0 0" opacity={0.5} />
-
-    {/* Center buildings */}
-    <rect x="320" y="372" width="165" height="160" fill="#ede4d8" rx="4" />
-    <rect x="352" y="350" width="102" height="182" fill="#f0e6da" rx="4" />
-    {([[328, 385], [368, 385], [410, 385], [328, 420], [368, 420], [410, 420], [328, 455], [368, 455], [410, 455]] as [number, number][]).map(([wx, wy], i) => (
-      <rect key={`du-cw${i}`} x={wx} y={wy} width={26} height={22} fill="#ff9840" opacity={0.4} rx={2} />
+    {/* Sun reflection */}
+    {Array.from({ length: 8 }).map((_,i) => (
+      <ellipse key={`du-ref${i}`} cx={720} cy={542+i*24} rx={18+i*14} ry={4} fill="#ffcc40" opacity={0.18-i*0.018} />
     ))}
 
-    {/* Right buildings */}
-    <rect x="980" y="360" width="155" height="172" fill="#e8ddd0" rx="4" />
-    <rect x="1008" y="338" width="118" height="194" fill="#ede4d8" rx="4" />
-    <rect x="1120" y="374" width="145" height="158" fill="#e0d4c4" rx="4" />
-    <rect x="1258" y="352" width="182" height="180" fill="#ede4d8" rx="4" />
-    {([[988, 372], [1028, 372], [1068, 372], [988, 408], [1028, 408], [1068, 408], [988, 444], [1028, 444], [1068, 444], [1128, 386], [1168, 386], [1128, 422], [1168, 422], [1266, 365], [1310, 365], [1354, 365], [1266, 402], [1310, 402], [1354, 402]] as [number, number][]).map(([wx, wy], i) => (
-      <rect key={`du-rw${i}`} x={wx} y={wy} width={24} height={20} fill="#ff9840" opacity={0.42} rx={2} />
-    ))}
+    {/* Isometric ground/dock area */}
+    {Array.from({ length: 14 }).map((_,i) =>
+      Array.from({ length: 4 }).map((_,j) => (
+        <GroundTile key={`du-gt-${i}-${j}`} gx={i-5} gy={j+2} W={1} D={1}
+          fill={(i+j)%3===0 ? '#c8b88a' : (i+j)%3===1 ? '#b8a878' : '#ccc0a0'} />
+      ))
+    )}
 
-    {/* Dock */}
-    <rect x="580" y="520" width="285" height="20" fill="#a06840" rx="2" />
-    {Array.from({ length: 14 }).map((_, i) => (
-      <rect key={`du-plank${i}`} x={582 + i * 20} y={520} width={17} height={20} fill="#9a6038" opacity={0.6} rx="1" />
+    {/* Mediterranean buildings */}
+    {/* Building 1 left */}
+    <Building gx={-4} gy={0} gz={0} W={2} D={2} h={4}
+      topColor="#f8f0e0" eastColor="#e8dbc8" southColor="#d8c8b0"
+      winRows={3} winCols={2} winColor="#ff9838" winOpacity={0.55} />
+    <Building gx={-4} gy={-2} gz={0} W={1.5} D={1.5} h={3}
+      topColor="#f0e8d8" eastColor="#e0d4bc" southColor="#d0c0a4"
+      winRows={2} winCols={1} winColor="#ff8828" winOpacity={0.5} />
+
+    {/* Building 2 mid-left */}
+    <Building gx={0} gy={0} gz={0} W={2} D={1.5} h={3.5}
+      topColor="#f5ede0" eastColor="#e5d8c8" southColor="#d5c8b0"
+      winRows={2} winCols={2} winColor="#ff9940" winOpacity={0.5} />
+    {/* Arch window */}
+    {(() => {
+      const [ax, ay] = px(0, 1.5, 1.5);
+      return (
+        <g>
+          <rect x={ax - 12} y={ay - 18} width={24} height={30} fill="#e08830" opacity={0.55} rx="12 12 0 0" stroke="#0d111e" strokeWidth={0.8} />
+        </g>
+      );
+    })()}
+
+    {/* Building 3 right */}
+    <Building gx={6} gy={0} gz={0} W={2} D={2} h={4}
+      topColor="#f8f0e0" eastColor="#e8dbc8" southColor="#d8c8b0"
+      winRows={3} winCols={2} winColor="#ff9838" winOpacity={0.55} />
+    {/* Dome / blue roof */}
+    {(() => {
+      const [cx, cy] = px(7, 0, 4);
+      return (
+        <ellipse cx={cx} cy={cy - 15} rx={35} ry={18} fill="#5588cc" stroke="#0d111e" strokeWidth={1} />
+      );
+    })()}
+
+    {/* Building 4 far right */}
+    <Building gx={8} gy={-1} gz={0} W={1.5} D={1.5} h={5}
+      topColor="#f0e8d8" eastColor="#e0d4c0" southColor="#d0c0a8"
+      winRows={4} winCols={1} winColor="#ff9940" winOpacity={0.5} />
+    {/* Bell tower top */}
+    <Building gx={8.2} gy={-0.8} gz={5} W={1.1} D={1.1} h={1}
+      topColor="#f8f0e0" eastColor="#e8dac8" southColor="#d8c8b0" />
+
+    {/* Dock planks */}
+    {Array.from({ length: 8 }).map((_,i) => (
+      <GroundTile key={`du-dock-${i}`} gx={1+i*0.6} gy={4} W={0.55} D={1} fill={i%2===0?'#9a6028':'#8a5020'} />
     ))}
-    {[595, 645, 698, 752, 805, 855].map((px, i) => (
-      <g key={`du-post${i}`}>
-        <rect x={px - 4} y={522} width={8} height={55} fill="#8a5030" rx="2" />
-        <ellipse cx={px} cy={575} rx={6} ry={3} fill="#7a4428" />
-        {i < 5 && <path d={`M ${px + 4} 535 Q ${px + 30} 530 ${px + 57} 535`} fill="none" stroke="#c09060" strokeWidth={2} opacity={0.6} />}
-      </g>
-    ))}
-    <g transform="translate(628, 0)">
-      <circle cx="0" cy="512" r="7" fill="#e8c090" />
-      <rect x="-5" y="519" width="11" height="14" fill="#2255aa" rx="2" />
-      <rect x="-4" y="533" width="4" height="10" fill="#334" rx="1" />
-      <rect x="2" y="533" width="4" height="10" fill="#334" rx="1" />
+    {/* Dock posts */}
+    {[1.2, 2.4, 3.6, 4.8].map((dx,i) => {
+      const [bx, by] = px(dx, 5, 0);
+      const [tx, ty] = px(dx, 5, 0.8);
+      return (
+        <g key={`du-post${i}`}>
+          <line x1={bx} y1={by} x2={tx} y2={ty} stroke="#7a4820" strokeWidth={5} />
+          <ellipse cx={tx} cy={ty} rx={6} ry={3} fill="#6a3818" stroke="#0d111e" strokeWidth={0.7} />
+        </g>
+      );
+    })}
+    {/* Rope between posts */}
+    {[1.2,2.4,3.6].map((dx,i) => {
+      const [ax,ay] = px(dx, 5, 0.7);
+      const [bx,by] = px(dx+1.2, 5, 0.7);
+      return <line key={i} x1={ax} y1={ay} x2={bx} y2={by} stroke="#c09060" strokeWidth={1.5} opacity={0.7} />;
+    })}
+
+    {/* Sailboat 1 */}
+    <g style={{ animation: 'du-sail 5s ease-in-out infinite', transformOrigin: `${px(2,8,0)[0]}px ${px(2,8,0)[1]}px` }}>
+      {(() => {
+        const hull = southFace(1, 7.5, 0, 1.5, 1, 0.35);
+        const hullE = eastFace(1, 7.5, 0, 1.5, 1, 0.35);
+        const hullT = topFace(1, 7.5, 0, 1.5, 1, 0.35);
+        const [mx, my] = px(2.2, 8, 0.35);
+        const [mtx, mty] = px(2.2, 8, 3);
+        const [s1ax, s1ay] = px(2.2, 8, 3);
+        const [s1bx, s1by] = px(2.2, 9, 0.35);
+        const [s1cx, s1cy] = px(2.2, 8.5, 0.35);
+        const [s2ax, s2ay] = px(2.2, 8, 3);
+        const [s2bx, s2by] = px(1, 8, 0.35);
+        const [s2cx, s2cy] = px(1.5, 8, 0.35);
+        return (
+          <g>
+            <polygon points={hull} fill="#e8d5a8" stroke="#0d111e" strokeWidth={1} strokeLinejoin="round" />
+            <polygon points={hullE} fill="#d8c598" stroke="#0d111e" strokeWidth={1} strokeLinejoin="round" />
+            <polygon points={hullT} fill="#e8d5a8" stroke="#0d111e" strokeWidth={1} strokeLinejoin="round" />
+            <line x1={mx} y1={my} x2={mtx} y2={mty} stroke="#7a5028" strokeWidth={3} />
+            <polygon points={`${s1ax},${s1ay} ${s1bx},${s1by} ${s1cx},${s1cy}`} fill="white" opacity={0.92} stroke="#0d111e" strokeWidth={0.8} strokeLinejoin="round" />
+            <polygon points={`${s2ax},${s2ay} ${s2bx},${s2by} ${s2cx},${s2cy}`} fill="#ff6622" opacity={0.8} stroke="#0d111e" strokeWidth={0.8} strokeLinejoin="round" />
+          </g>
+        );
+      })()}
     </g>
-    <g transform="translate(808, 0)">
-      <circle cx="0" cy="511" r="7" fill="#d4a878" />
-      <rect x="-5" y="518" width="11" height="14" fill="#cc4422" rx="2" />
-      <rect x="-4" y="532" width="4" height="10" fill="#334" rx="1" />
-      <rect x="2" y="532" width="4" height="10" fill="#334" rx="1" />
-    </g>
 
-    {/* Sailboats */}
-    <g style={{ animation: 'du-sail 4s ease-in-out infinite', transformOrigin: '440px 480px' }}>
-      <path d="M 390 490 L 440 490 L 455 520 L 375 520 Z" fill="#e8d0a8" />
-      <rect x="438" y="420" width="4" height="72" fill="#8a6030" />
-      <path d="M 442 425 L 490 480 L 442 480 Z" fill="white" opacity={0.9} />
-      <path d="M 438 430 L 395 478 L 438 478 Z" fill="#ff8844" opacity={0.8} />
-    </g>
+    {/* Sailboat 2 */}
     <g>
-      <path d="M 840 500 Q 870 498 900 500 L 888 518 L 852 518 Z" fill="#d8c898" />
-      <rect x="868" y="458" width="3" height="44" fill="#7a5028" />
-      <path d="M 871 462 L 900 496 L 871 496 Z" fill="white" opacity={0.85} />
-      <path d="M 868 466 L 842 494 L 868 494 Z" fill="#4488cc" opacity={0.75} />
+      {(() => {
+        const hull = southFace(5, 8, 0, 1.2, 0.8, 0.28);
+        const hullE = eastFace(5, 8, 0, 1.2, 0.8, 0.28);
+        const hullT = topFace(5, 8, 0, 1.2, 0.8, 0.28);
+        const [mx, my] = px(5.8, 8.3, 0.28);
+        const [mtx, mty] = px(5.8, 8.3, 2.5);
+        const [s1ax, s1ay] = px(5.8, 8.3, 2.5);
+        const [s1bx, s1by] = px(5.8, 8.9, 0.28);
+        const [s1cx, s1cy] = px(5.8, 8.6, 0.28);
+        const [s2ax, s2ay] = px(5.8, 8.3, 2.5);
+        const [s2bx, s2by] = px(5, 8.3, 0.28);
+        const [s2cx, s2cy] = px(5.3, 8.3, 0.28);
+        return (
+          <g>
+            <polygon points={hull} fill="#d8c898" stroke="#0d111e" strokeWidth={1} strokeLinejoin="round" />
+            <polygon points={hullE} fill="#c8b888" stroke="#0d111e" strokeWidth={1} strokeLinejoin="round" />
+            <polygon points={hullT} fill="#d8c898" stroke="#0d111e" strokeWidth={1} strokeLinejoin="round" />
+            <line x1={mx} y1={my} x2={mtx} y2={mty} stroke="#7a5028" strokeWidth={2.5} />
+            <polygon points={`${s1ax},${s1ay} ${s1bx},${s1by} ${s1cx},${s1cy}`} fill="white" opacity={0.88} stroke="#0d111e" strokeWidth={0.8} strokeLinejoin="round" />
+            <polygon points={`${s2ax},${s2ay} ${s2bx},${s2by} ${s2cx},${s2cy}`} fill="#4488cc" opacity={0.78} stroke="#0d111e" strokeWidth={0.8} strokeLinejoin="round" />
+          </g>
+        );
+      })()}
     </g>
 
     {/* Palm trees */}
-    <g transform="translate(152, 0)">
-      <path d="M 0 528 Q -5 480 8 440 Q 15 420 5 395" fill="none" stroke="#6a4820" strokeWidth={8} strokeLinecap="round" />
-      {[[-35, 395, 20], [-10, 380, 10], [20, 388, -15], [32, 402, -30], [0, 370, 5]].map(([dx, dy, rot], i) => (
-        <ellipse key={i} cx={5 + dx} cy={dy} rx={28} ry={8} fill="#2d6820" transform={`rotate(${rot} ${5 + dx} ${dy})`} opacity={0.88} />
-      ))}
-    </g>
-    <g transform="translate(1328, 0)">
-      <path d="M 0 528 Q 5 480 -6 440 Q -12 420 -2 395" fill="none" stroke="#6a4820" strokeWidth={7} strokeLinecap="round" />
-      {[[28, 395, -20], [8, 380, -10], [-18, 388, 15], [-30, 402, 30], [-2, 372, -5]].map(([dx, dy, rot], i) => (
-        <ellipse key={i} cx={-2 + dx} cy={dy} rx={26} ry={7} fill="#2d6820" transform={`rotate(${rot} ${-2 + dx} ${dy})`} opacity={0.88} />
-      ))}
-    </g>
+    {(() => {
+      const [tx, ty] = px(-3, 3, 0);
+      const [t2x, t2y] = px(9.5, 1, 0);
+      const renderPalm = (bx: number, by: number, flip: boolean) => (
+        <g>
+          <path d={`M ${bx} ${by} Q ${bx + (flip?-8:8)} ${by - 48} ${bx + (flip?-5:5)} ${by - 95}`}
+            fill="none" stroke="#6a4820" strokeWidth={8} strokeLinecap="round" />
+          {[[-30, -90, 20], [-8, -105, 8], [22, -96, -18], [35, -80, -32], [0, -118, 5]].map(([dx, dy2, rot], i) => (
+            <ellipse key={i} cx={bx + (flip ? -dx : dx) + (flip?-5:5)} cy={by + dy2}
+              rx={26} ry={7} fill="#2d6820"
+              transform={`rotate(${flip ? -rot : rot} ${bx + (flip?-dx:dx) + (flip?-5:5)} ${by + dy2})`}
+              stroke="#0d111e" strokeWidth={0.8} opacity={0.9} />
+          ))}
+        </g>
+      );
+      return (
+        <>
+          {renderPalm(tx, ty, false)}
+          {renderPalm(t2x, t2y, true)}
+        </>
+      );
+    })()}
 
-    {/* Seagulls */}
-    {([[220, 280], [250, 265], [275, 278], [900, 295], [930, 280], [960, 292]] as [number, number][]).map(([bx, by], i) => (
-      <g key={`du-bird${i}`} style={{ animation: `du-bird ${3 + i * 0.4}s ease-in-out ${i * 0.8}s infinite` }}>
-        <path d={`M ${bx - 10} ${by} Q ${bx - 5} ${by - 5} ${bx} ${by}`} fill="none" stroke="white" strokeWidth={1.8} />
-        <path d={`M ${bx} ${by} Q ${bx + 5} ${by - 5} ${bx + 10} ${by}`} fill="none" stroke="white" strokeWidth={1.8} />
-      </g>
-    ))}
+    {/* People on dock */}
+    <g style={{ animation: 'du-bob 2s ease-in-out infinite' }}>
+      <IsoPerson gx={1.5} gy={3.5} gz={0} bodyColor="#2255aa" skinColor="#e8c090" />
+    </g>
+    <IsoPerson gx={4} gy={3.2} gz={0} bodyColor="#cc4422" skinColor="#d4a878" hatColor="#1a2038" />
 
     {/* Beach umbrellas */}
-    <line x1="100" y1="488" x2="115" y2="538" stroke="#8a5030" strokeWidth={3} />
-    <path d="M 60 490 Q 100 470 140 490 Z" fill="#ff4433" opacity={0.85} />
-    <path d="M 78 490 Q 100 478 122 490 Z" fill="white" opacity={0.7} />
-    <line x1="1300" y1="492" x2="1315" y2="540" stroke="#8a5030" strokeWidth={3} />
-    <path d="M 1260 494 Q 1300 474 1340 494 Z" fill="#3366cc" opacity={0.82} />
-    <path d="M 1278 494 Q 1300 482 1322 494 Z" fill="white" opacity={0.65} />
+    {[[-3.8, 1.5], [9.5, 2]].map(([ux, uy], i) => {
+      const [cx, cy] = px(ux, uy, 0);
+      return (
+        <g key={i}>
+          <line x1={cx} y1={cy} x2={cx + 5} y2={cy + 50} stroke="#8a5030" strokeWidth={3} />
+          <path d={`M ${cx - 32} ${cy + 2} Q ${cx} ${cy - 22} ${cx + 32} ${cy + 2} Z`}
+            fill={i === 0 ? '#e83020' : '#2244aa'} opacity={0.88} stroke="#0d111e" strokeWidth={0.8} />
+          <path d={`M ${cx - 15} ${cy + 2} Q ${cx} ${cy - 10} ${cx + 15} ${cy + 2} Z`}
+            fill="white" opacity={0.65} />
+        </g>
+      );
+    })}
+
+    {/* Seagulls */}
+    {([[225,282],[258,265],[290,278],[908,298],[940,282],[968,295]] as [number,number][]).map(([bx,by],i) => (
+      <g key={`du-bird${i}`} style={{ animation: `du-bird ${3+i*0.4}s ease-in-out ${i*0.8}s infinite` }}>
+        <path d={`M ${bx-10} ${by} Q ${bx-5} ${by-5} ${bx} ${by}`} fill="none" stroke="white" strokeWidth={1.8} />
+        <path d={`M ${bx} ${by} Q ${bx+5} ${by-5} ${bx+10} ${by}`} fill="none" stroke="white" strokeWidth={1.8} />
+      </g>
+    ))}
   </svg>
 );
 
-// ─── Slate: Snowy Town ────────────────────────────────────────────────────────
+// ─── Slate: Snowy Town ───────────────────────────────────────────────────────
 const Slate: React.FC = () => (
   <svg
     style={{ position: 'absolute', inset: 0, width: '100%', height: '100%' }}
@@ -777,224 +954,237 @@ const Slate: React.FC = () => (
       <linearGradient id="sl-sky" x1="0" y1="0" x2="0" y2="1">
         <stop offset="0%" stopColor="#8898b8" />
         <stop offset="55%" stopColor="#aab8cc" />
-        <stop offset="100%" stopColor="#c8d4e4" />
+        <stop offset="100%" stopColor="#c8d4e0" />
       </linearGradient>
-      <filter id="sl-blur">
-        <feGaussianBlur stdDeviation="8" />
+      <filter id="sl-blur"><feGaussianBlur stdDeviation="8" /></filter>
+      <filter id="sl-glow">
+        <feGaussianBlur stdDeviation="3" result="b" />
+        <feMerge><feMergeNode in="b" /><feMergeNode in="SourceGraphic" /></feMerge>
       </filter>
       <style>{`
-        @keyframes sl-snow1 { 0%{transform:translate(0,0)} 100%{transform:translate(-20px,900px)} }
-        @keyframes sl-snow2 { 0%{transform:translate(0,0)} 100%{transform:translate(25px,900px)} }
-        @keyframes sl-smoke { 0%{transform:translateY(0) scaleX(1);opacity:0.4} 100%{transform:translateY(-40px) scaleX(1.6);opacity:0} }
-        @keyframes sl-walk3 { 0%{transform:translateX(0)} 100%{transform:translateX(40px)} }
-        @keyframes sl-xmas { 0%,100%{opacity:0.8} 50%{opacity:0.4} }
+        @keyframes sl-snow1 { 0%{transform:translate(0,0)} 100%{transform:translate(-22px,900px)} }
+        @keyframes sl-snow2 { 0%{transform:translate(0,0)} 100%{transform:translate(28px,900px)} }
+        @keyframes sl-smoke { 0%{transform:translateY(0) scaleX(1);opacity:0.45} 100%{transform:translateY(-50px) scaleX(1.8);opacity:0} }
+        @keyframes sl-xmas { 0%,100%{opacity:0.9} 50%{opacity:0.3} }
+        @keyframes sl-walk { 0%{transform:translateX(0)} 100%{transform:translateX(50px)} }
       `}</style>
     </defs>
 
     <rect width="1440" height="900" fill="url(#sl-sky)" />
 
     {/* Snowflakes */}
-    {Array.from({ length: 40 }).map((_, i) => {
-      const x = (i * 97 + 30) % 1440;
-      const y = (i * 43 + 10) % 400;
-      const s = 0.8 + (i % 4) * 0.4;
+    {Array.from({ length: 44 }).map((_, i) => {
+      const x = (i * 101 + 35) % 1440;
+      const y = (i * 47 + 15) % 420;
+      const s = 0.9 + (i % 4) * 0.4;
       return (
         <g key={`sl-flake${i}`} transform={`translate(${x},${y})`}
-          style={{ animation: `${i % 2 === 0 ? 'sl-snow1' : 'sl-snow2'} ${6 + (i % 6)}s linear ${(i % 8) * 0.5}s infinite` }}>
-          <circle cx="0" cy="0" r={s} fill="white" opacity={0.7} />
-          <line x1={-s * 3} y1="0" x2={s * 3} y2="0" stroke="white" strokeWidth={s * 0.6} opacity={0.5} />
-          <line x1="0" y1={-s * 3} x2="0" y2={s * 3} stroke="white" strokeWidth={s * 0.6} opacity={0.5} />
+          style={{ animation: `${i%2===0?'sl-snow1':'sl-snow2'} ${6+(i%6)}s linear ${(i%8)*0.5}s infinite` }}>
+          <circle cx="0" cy="0" r={s} fill="white" opacity={0.75} />
+          <line x1={-s*3} y1="0" x2={s*3} y2="0" stroke="white" strokeWidth={s*0.6} opacity={0.5} />
+          <line x1="0" y1={-s*3} x2="0" y2={s*3} stroke="white" strokeWidth={s*0.6} opacity={0.5} />
         </g>
       );
     })}
 
-    {/* Snow ground */}
-    <rect x="0" y="620" width="1440" height="280" fill="#dce8f4" />
-    <path d="M 0 620 Q 240 608 480 622 Q 720 636 960 618 Q 1200 604 1440 620 L 1440 900 L 0 900 Z" fill="#e8f2ff" />
-
-    {/* Far left building */}
-    <rect x="0" y="348" width="138" height="274" fill="#6a7898" rx="3" />
-    <rect x="-4" y="340" width="146" height="14" fill="#e8f2ff" rx="3" />
-    <path d="M 0 348 L 69 325 L 138 348 Z" fill="#7a88a8" />
-    <rect x="15" y="333" width="108" height="20" fill="#e8f2ff" rx="2" opacity={0.9} />
-    {Array.from({ length: 4 }).map((_, row) =>
-      Array.from({ length: 3 }).map((_, col) => (
-        <rect key={`sl-lw-${row}-${col}`} x={12 + col * 40} y={362 + row * 44} width={26} height={22} fill="#ffe898" opacity={0.38 + (row + col) % 3 * 0.08} rx={2} />
+    {/* Ground tiles - snowy */}
+    {Array.from({ length: 14 }).map((_,i) =>
+      Array.from({ length: 6 }).map((_,j) => (
+        <GroundTile key={`sl-gt-${i}-${j}`} gx={i-4} gy={j+3} W={1} D={1}
+          fill={(i+j)%2===0 ? '#dce8f4' : '#e8f2fc'} />
       ))
     )}
-    <rect x="52" y="318" width="16" height="28" fill="#5a6888" rx="2" />
-    <rect x="48" y="314" width="24" height="8" fill="#4e5c7a" rx="1" />
-    {[0, 1, 2].map((i) => (
-      <ellipse key={`sl-sm1-${i}`} cx={60} cy={304 - i * 12} rx={5 + i * 2} ry={4 + i} fill="#c8d4e4" opacity={0.4}
-        style={{ animation: `sl-smoke ${2.5 + i * 0.5}s ease-out ${i * 0.6}s infinite` }} />
+
+    {/* Street */}
+    {Array.from({ length: 14 }).map((_,i) => (
+      <GroundTile key={`sl-rd-${i}`} gx={i-4} gy={4} W={1} D={1}
+        fill={(i)%3===0?'#2a3250':'#222a42'} />
     ))}
 
-    {/* Main left building */}
-    <rect x="125" y="290" width="188" height="332" fill="#788aaa" rx="3" />
-    <rect x="125" y="282" width="188" height="14" fill="#e8f2ff" rx="3" />
-    <path d="M 125 290 L 219 258 L 313 290 Z" fill="#8898b8" />
-    <rect x="130" y="265" width="178" height="28" fill="#e8f2ff" rx="2" opacity={0.9} />
-    {Array.from({ length: 6 }).map((_, row) =>
-      Array.from({ length: 4 }).map((_, col) => (
-        <rect key={`sl-mw-${row}-${col}`} x={135 + col * 44} y={302 + row * 40} width={28} height={24} fill="#ffe898" opacity={0.35 + (row * col) % 4 * 0.07} rx={2} />
-      ))
-    )}
-    <rect x="194" y="522" width="32" height="52" fill="#3a4a60" rx="3" />
-    <circle cx="210" cy="538" r="12" fill="none" stroke="#448833" strokeWidth={4} opacity={0.8} />
-    <circle cx="210" cy="534" r="3" fill="#cc2222" opacity={0.9} />
-    <rect x="168" y="248" width="18" height="30" fill="#6a7898" rx="2" />
-    <rect x="163" y="244" width="28" height="9" fill="#5e6e8a" rx="1" />
-    {[0, 1, 2].map((i) => (
-      <ellipse key={`sl-sm2-${i}`} cx={177} cy={234 - i * 12} rx={5 + i * 2} ry={4 + i} fill="#c8d4e4" opacity={0.38}
-        style={{ animation: `sl-smoke ${3 + i * 0.5}s ease-out ${0.8 + i * 0.4}s infinite` }} />
+    {/* Building 1 - far left small */}
+    <Building gx={-4} gy={0} gz={0} W={1.5} D={1.5} h={3}
+      topColor="#e8f2ff" eastColor="#6a7898" southColor="#5a6888"
+      winRows={2} winCols={1} winColor="#ffe898" winOpacity={0.6} />
+    {/* Snow on roof */}
+    <polygon points={topFace(-4, 0, 0, 1.5, 1.5, 3.05)} fill="#e8f2ff" stroke="#0d111e" strokeWidth={0.8} strokeLinejoin="round" />
+    {/* Chimney */}
+    <Building gx={-3.6} gy={0.2} gz={3} W={0.4} D={0.4} h={0.8} topColor="#5a6880" eastColor="#485870" southColor="#3c4c60" />
+    {[0,1,2].map(i => (
+      <ellipse key={`sl-sm1-${i}`} cx={px(-3.4,0.4,3.8+i*0.3)[0]} cy={px(-3.4,0.4,3.8+i*0.3)[1]-8} rx={5+i*2} ry={3+i}
+        fill="#c8d4e4" opacity={0.4} style={{ animation: `sl-smoke ${2.5+i*0.5}s ease-out ${i*0.6}s infinite` }} />
     ))}
 
-    {/* Center bakery */}
-    <rect x="458" y="360" width="265" height="262" fill="#7a8eae" rx="3" />
-    <rect x="454" y="352" width="273" height="14" fill="#e8f2ff" rx="3" />
-    <path d="M 458 360 L 590 330 L 723 360 Z" fill="#8898b8" />
-    <rect x="460" y="338" width="263" height="22" fill="#e8f2ff" rx="2" opacity={0.9} />
-    {([[468, 374], [540, 374], [612, 374], [682, 374], [468, 424], [540, 424], [612, 424], [682, 424]] as [number, number][]).map(([wx, wy], i) => (
-      <rect key={`sl-cw${i}`} x={wx} y={wy} width={38} height={32} fill="#ffe898" opacity={0.45} rx={3} />
+    {/* Building 2 - main left */}
+    <Building gx={-2.5} gy={0} gz={0} W={2} D={2} h={5}
+      topColor="#e8f2ff" eastColor="#788aaa" southColor="#6878a0"
+      winRows={4} winCols={2} winColor="#ffe898" winOpacity={0.5} />
+    <polygon points={topFace(-2.5, 0, 0, 2, 2, 5.05)} fill="#e8f2ff" stroke="#0d111e" strokeWidth={0.8} strokeLinejoin="round" />
+    {/* Pitched snow roof shape */}
+    {(() => {
+      const [rx, ry] = px(-1.5, 0, 5.4);
+      const [lx, ly] = px(-2.5, 0, 5.05);
+      const [ex, ey] = px(-0.5, 0, 5.05);
+      const [sx, sy] = px(-2.5, 2, 5.05);
+      const [sex, sey] = px(-0.5, 2, 5.05);
+      return <polygon points={`${lx},${ly} ${rx},${ry} ${ex},${ey} ${sex},${sey} ${rx},${ry} ${sx},${sy}`}
+        fill="#dde8f5" stroke="#0d111e" strokeWidth={0.8} strokeLinejoin="round" />;
+    })()}
+    <Building gx={-1.8} gy={0.2} gz={5} W={0.5} D={0.5} h={0.9} topColor="#5a6880" eastColor="#485870" southColor="#3c4c60" />
+    {[0,1,2,3].map(i => (
+      <ellipse key={`sl-sm2-${i}`} cx={px(-1.55,0.45,5.9+i*0.28)[0]} cy={px(-1.55,0.45,5.9+i*0.28)[1]-8} rx={5+i*2} ry={3+i}
+        fill="#c8d4e4" opacity={0.4} style={{ animation: `sl-smoke ${3+i*0.5}s ease-out ${0.8+i*0.4}s infinite` }} />
     ))}
-    <rect x="492" y="368" width="155" height="22" fill="#3a4e6a" rx="3" />
-    <rect x="492" y="368" width="155" height="7" fill="#e8f2ff" rx="3 3 0 0" opacity={0.9} />
-    <text x="569" y="385" textAnchor="middle" fill="white" fontSize="11" fontWeight="600" fontFamily="system-ui, sans-serif">BAKERY &amp; CAFÉ</text>
-    <rect x="466" y="456" width="252" height="78" fill="#3a4e6a" rx="4" />
-    {[[485, 490, '#f4c2a0'], [520, 485, '#d4a870'], [558, 490, '#e8b888'], [595, 484, '#ff9988'], [635, 490, '#d4c888'], [672, 484, '#e8a878']].map(([px, py, c], i) => (
-      <ellipse key={`sl-cake${i}`} cx={px as number} cy={py as number} rx={16} ry={12} fill={c as string} opacity={0.85} />
+
+    {/* Building 3 - bakery center */}
+    <Building gx={1} gy={1} gz={0} W={3} D={2} h={4}
+      topColor="#e8f2ff" eastColor="#7a8eae" southColor="#6a7ea0"
+      winRows={3} winCols={3} winColor="#ffe898" winOpacity={0.55} />
+    <polygon points={topFace(1, 1, 0, 3, 2, 4.05)} fill="#e8f2ff" stroke="#0d111e" strokeWidth={0.8} strokeLinejoin="round" />
+    {/* Shop sign */}
+    {(() => {
+      const [sx, sy] = px(2.5, 3, 2.5);
+      return (
+        <g>
+          <rect x={sx-48} y={sy-14} width={96} height={22} fill="#3a4e6a" rx="4" stroke="#0d111e" strokeWidth={0.8} />
+          <rect x={sx-48} y={sy-14} width={96} height={7} fill="#e8f2ff" rx="4 4 0 0" opacity={0.9} />
+          <text x={sx} y={sy+4} textAnchor="middle" fill="white" fontSize="11" fontWeight="600" fontFamily="system-ui,sans-serif">BAKERY &amp; CAFÉ</text>
+        </g>
+      );
+    })()}
+    {/* Window display - baked goods */}
+    {(() => {
+      const [wx, wy] = px(1.5, 3, 1.5);
+      const [wx2, wy2] = px(3, 3, 1.5);
+      return (
+        <g>
+          <rect x={wx-15} y={wy-10} width={30} height={22} fill="#3a4e6a" rx="2" stroke="#0d111e" strokeWidth={0.8} />
+          {[0,1,2].map(i => <circle key={i} cx={wx-8+i*8} cy={wy-2} r={5} fill={['#f4c2a0','#d4a870','#e8b888'][i]} stroke="#0d111e" strokeWidth={0.5} />)}
+          <rect x={wx2-15} y={wy2-10} width={30} height={22} fill="#3a4e6a" rx="2" stroke="#0d111e" strokeWidth={0.8} />
+          {[0,1].map(i => <ellipse key={i} cx={wx2-6+i*12} cy={wy2-2} rx={7} ry={5} fill={['#ff9988','#d4c888'][i]} stroke="#0d111e" strokeWidth={0.5} />)}
+        </g>
+      );
+    })()}
+    <Building gx={2} gy={1.2} gz={4} W={0.5} D={0.5} h={0.9} topColor="#5a6880" eastColor="#485870" southColor="#3c4c60" />
+    {[0,1,2,3].map(i => (
+      <ellipse key={`sl-sm3-${i}`} cx={px(2.25,1.45,4.9+i*0.28)[0]} cy={px(2.25,1.45,4.9+i*0.28)[1]-8} rx={6+i*2} ry={4+i}
+        fill="#c8d4e4" opacity={0.4} style={{ animation: `sl-smoke ${2+i*0.4}s ease-out ${i*0.3}s infinite` }} />
     ))}
-    <rect x="464" y="452" width="256" height="8" fill="#e8f2ff" rx="2" />
-    <rect x="560" y="484" width="40" height="76" fill="#2a3a50" rx="3" />
-    <circle cx="580" cy="524" r="3" fill="#aaa" />
-    <rect x="548" y="322" width="20" height="32" fill="#6a7898" rx="2" />
-    <rect x="543" y="318" width="30" height="9" fill="#5e6e8a" rx="1" />
-    {[0, 1, 2, 3].map((i) => (
-      <ellipse key={`sl-sm3-${i}`} cx={558} cy={308 - i * 11} rx={6 + i * 2} ry={4 + i} fill="#c8d4e4" opacity={0.4}
-        style={{ animation: `sl-smoke ${2 + i * 0.4}s ease-out ${i * 0.3}s infinite` }} />
-    ))}
-    {/* Christmas lights */}
-    {Array.from({ length: 18 }).map((_, i) => {
-      const colors = ['#ff2222', '#22ff22', '#ffff22', '#2222ff', '#ff8822'];
-      return <circle key={`sl-xmas${i}`} cx={462 + i * 14} cy={460} r={3.5} fill={colors[i % colors.length]} opacity={0.8}
-        style={{ animation: `sl-xmas ${0.8 + (i % 4) * 0.3}s ease-in-out ${i * 0.1}s infinite` }} />;
+    {/* Christmas lights on bakery */}
+    {Array.from({ length: 14 }).map((_,i) => {
+      const [lx, ly] = px(1 + i * (3/14), 3, 4.06);
+      const colors = ['#ff2222','#22ff22','#ffff22','#2222ff','#ff8822'];
+      return <circle key={`sl-xmas${i}`} cx={lx} cy={ly} r={4} fill={colors[i%colors.length]} opacity={0.85}
+        style={{ animation: `sl-xmas ${0.8+(i%4)*0.3}s ease-in-out ${i*0.1}s infinite` }}
+        filter="url(#sl-glow)" />;
     })}
-    <path d="M 462 460 Q 640 456 723 460" fill="none" stroke="#888" strokeWidth={1} opacity={0.5} />
 
-    {/* Right buildings */}
-    <rect x="755" y="332" width="165" height="290" fill="#788aaa" rx="3" />
-    <rect x="751" y="324" width="173" height="14" fill="#e8f2ff" rx="3" />
-    <path d="M 755 332 L 837 305 L 920 332 Z" fill="#8898b8" />
-    <rect x="757" y="311" width="162" height="22" fill="#e8f2ff" rx="2" opacity={0.88} />
-    {Array.from({ length: 5 }).map((_, row) =>
-      Array.from({ length: 3 }).map((_, col) => (
-        <rect key={`sl-rw1-${row}-${col}`} x={765 + col * 50} y={346 + row * 40} width={32} height={26} fill="#ffe898" opacity={0.35 + (row + col) % 4 * 0.07} rx={2} />
-      ))
-    )}
-    <rect x="1042" y="358" width="148" height="264" fill="#6a7898" rx="3" />
-    <rect x="1038" y="350" width="156" height="12" fill="#e8f2ff" rx="3" />
-    <path d="M 1042 358 L 1116 332 L 1190 358 Z" fill="#7a88a8" />
-    <rect x="1044" y="338" width="148" height="20" fill="#e8f2ff" rx="2" opacity={0.88} />
-    {Array.from({ length: 5 }).map((_, row) =>
-      Array.from({ length: 3 }).map((_, col) => (
-        <rect key={`sl-rw2-${row}-${col}`} x={1050 + col * 42} y={370 + row * 38} width={28} height={24} fill="#ffe898" opacity={0.3 + (row * col) % 4 * 0.07} rx={2} />
-      ))
-    )}
-    <rect x="1228" y="370" width="212" height="252" fill="#788aaa" rx="3" />
-    <rect x="1224" y="362" width="220" height="12" fill="#e8f2ff" rx="3" />
-    <path d="M 1228 370 L 1334 340 L 1440 370 Z" fill="#8898b8" />
-    <rect x="1230" y="347" width="210" height="23" fill="#e8f2ff" rx="2" opacity={0.88} />
-    {Array.from({ length: 5 }).map((_, row) =>
-      Array.from({ length: 4 }).map((_, col) => (
-        <rect key={`sl-rw3-${row}-${col}`} x={1237 + col * 48} y={382 + row * 38} width={30} height={24} fill="#ffe898" opacity={0.33 + (row + col) % 4 * 0.06} rx={2} />
-      ))
-    )}
-
-    {/* Street + lamps */}
-    <rect x="0" y="618" width="1440" height="8" fill="#e8f2ff" rx="2" />
-    {[240, 590, 960, 1280].map((lx, i) => (
-      <g key={`sl-lamp${i}`}>
-        <ellipse cx={lx + 30} cy={660} rx={45} ry={15} fill="#ffe898" opacity={0.2} filter="url(#sl-blur)" />
-        <rect x={lx} y={488} width={5} height={132} fill="#4a5878" rx={2} />
-        <path d={`M ${lx + 2} 488 Q ${lx + 28} 482 ${lx + 36} 470`} fill="none" stroke="#4a5878" strokeWidth={4} />
-        <rect x={lx + 23} y={464} width={22} height={10} fill="#3a4868" rx={2} />
-        <ellipse cx={lx + 34} cy={465} rx={8} ry={4.5} fill="#ffe060" opacity={0.85} />
-        <rect x={lx - 2} y={616} width={9} height={28} fill="#e8f2ff" rx="2" />
-      </g>
+    {/* Building 4 - right residential */}
+    <Building gx={5} gy={0} gz={0} W={2} D={2} h={4}
+      topColor="#e8f2ff" eastColor="#788aaa" southColor="#6878a0"
+      winRows={3} winCols={2} winColor="#ffe898" winOpacity={0.5} />
+    <polygon points={topFace(5, 0, 0, 2, 2, 4.05)} fill="#e8f2ff" stroke="#0d111e" strokeWidth={0.8} strokeLinejoin="round" />
+    <Building gx={5.8} gy={0.2} gz={4} W={0.4} D={0.4} h={0.7} topColor="#5a6880" eastColor="#485870" southColor="#3c4c60" />
+    {[0,1,2].map(i => (
+      <ellipse key={`sl-sm4-${i}`} cx={px(6,0.4,4.7+i*0.28)[0]} cy={px(6,0.4,4.7+i*0.28)[1]-8} rx={4+i*2} ry={3+i}
+        fill="#c8d4e4" opacity={0.38} style={{ animation: `sl-smoke ${3.5+i*0.5}s ease-out ${1+i*0.5}s infinite` }} />
     ))}
+
+    {/* Building 5 - far right church */}
+    <Building gx={8} gy={-1} gz={0} W={1.5} D={1.5} h={4}
+      topColor="#e8f2ff" eastColor="#6a7898" southColor="#5a6888"
+      winRows={3} winCols={1} winColor="#ffe898" winOpacity={0.55} />
+    <polygon points={topFace(8, -1, 0, 1.5, 1.5, 4.05)} fill="#e8f2ff" stroke="#0d111e" strokeWidth={0.8} strokeLinejoin="round" />
+    {/* Steeple */}
+    <Building gx={8.4} gy={-0.6} gz={4} W={0.7} D={0.7} h={2} topColor="#dce8f4" eastColor="#5a6888" southColor="#4a5878" />
+    {(() => {
+      const [tx, ty] = px(8.75, -0.25, 6.1);
+      return <line x1={tx} y1={ty} x2={tx} y2={ty - 22} stroke="#cc2222" strokeWidth={2} />;
+    })()}
+    <Building gx={8.5} gy={-0.5} gz={6} W={0.5} D={0.5} h={0.7} topColor="#cc2222" eastColor="#aa1818" southColor="#881010" />
+
+    {/* Street lamps */}
+    {[[-2, 2.8], [2.5, 2.8], [6.5, 2.8]].map(([lx, ly], i) => {
+      const [bx, by] = px(lx, ly, 0);
+      const [tx, ty] = px(lx, ly, 2.5);
+      const [hx, hy] = px(lx + 0.4, ly, 2.5);
+      return (
+        <g key={`sl-lamp${i}`}>
+          <line x1={bx} y1={by} x2={tx} y2={ty} stroke="#4a5878" strokeWidth={3} />
+          <line x1={tx} y1={ty} x2={hx} y2={hy} stroke="#4a5878" strokeWidth={2.5} />
+          <circle cx={hx} cy={hy} r={7} fill="#ffe060" filter="url(#sl-glow)" stroke="#0d111e" strokeWidth={0.6} />
+          <ellipse cx={hx} cy={hy+20} rx={35} ry={10} fill="#ffe898" opacity={0.15} filter="url(#sl-blur)" />
+          {/* Snow cap on lamp */}
+          <ellipse cx={hx} cy={hy-7} rx={9} ry={4} fill="#e8f2ff" stroke="#0d111e" strokeWidth={0.5} />
+        </g>
+      );
+    })}
 
     {/* Bare trees */}
-    <g transform="translate(398, 0)">
-      <rect x="-3" y="540" width="6" height="80" fill="#5a5a6a" />
-      {[[-20, 555], [18, 548], [-12, 572], [14, 568]].map(([dx, dy], i) => (
-        <line key={i} x1="0" y1={dy} x2={dx} y2={dy + 18} stroke="#5a5a6a" strokeWidth={2.5} opacity={0.8} />
-      ))}
-      {[[-20, 573, 14], [18, 566, 12], [-12, 590, 10], [14, 586, 10]].map(([bx, by, bw], i) => (
-        <ellipse key={i} cx={bx as number} cy={by as number} rx={bw as number / 2} ry={3} fill="#e8f2ff" opacity={0.85} />
-      ))}
-    </g>
-    <g transform="translate(1095, 0)">
-      <rect x="-3" y="545" width="6" height="75" fill="#5a5a6a" />
-      {[[-18, 558], [16, 552], [-10, 575], [12, 570]].map(([dx, dy], i) => (
-        <line key={i} x1="0" y1={dy} x2={dx} y2={dy + 16} stroke="#5a5a6a" strokeWidth={2.5} opacity={0.8} />
-      ))}
-      {[[-18, 574, 12], [16, 568, 12], [-10, 591, 9], [12, 586, 10]].map(([bx, by, bw], i) => (
-        <ellipse key={i} cx={bx as number} cy={by as number} rx={bw as number / 2} ry={3} fill="#e8f2ff" opacity={0.85} />
-      ))}
-    </g>
+    {[[-3.5, 2.2], [4.8, 2.2]].map(([tx, ty], ti) => {
+      const [bx, by] = px(tx, ty, 0);
+      return (
+        <g key={`sl-tree${ti}`}>
+          <line x1={bx} y1={by} x2={bx} y2={by-78} stroke="#5a5a6a" strokeWidth={5} />
+          {[[-22,55],[ 20,48],[-14,72],[16,68]].map(([dx,dz],i) => {
+            const [lx2, ly2] = px(tx, ty, dz/30);
+            return (
+              <g key={i}>
+                <line x1={lx2} y1={ly2} x2={lx2+dx} y2={ly2+18} stroke="#5a5a6a" strokeWidth={2.5} opacity={0.8} />
+                <ellipse cx={lx2+dx} cy={ly2+18} rx={Math.abs(dx)*0.55} ry={4} fill="#dce8f4" opacity={0.8} />
+              </g>
+            );
+          })}
+          {/* Snow on branches */}
+        </g>
+      );
+    })}
 
     {/* Snowman */}
-    <g transform="translate(890, 0)">
-      <ellipse cx="0" cy="666" rx="38" ry="10" fill="#d8eaf8" />
-      <circle cx="0" cy="638" r="28" fill="white" opacity={0.95} />
-      <circle cx="0" cy="596" r="20" fill="white" opacity={0.95} />
-      <circle cx="0" cy="570" r="13" fill="white" opacity={0.95} />
-      <circle cx="-5" cy="566" r="2.5" fill="#2a3040" />
-      <circle cx="5" cy="566" r="2.5" fill="#2a3040" />
-      <path d="M 0 570 L 8 572 L 0 574 Z" fill="#ff6622" />
-      <circle cx="0" cy="590" r={2.5} fill="#2a3040" />
-      <circle cx="0" cy="598" r={2.5} fill="#2a3040" />
-      <circle cx="0" cy="606" r={2.5} fill="#2a3040" />
-      <path d="M -18 584 Q 0 578 18 584 Q 18 590 0 586 Q -18 590 -18 584 Z" fill="#cc2222" opacity={0.9} />
-      <rect x="-12" y="550" width="24" height="18" fill="#1a2030" rx="2" />
-      <rect x="-16" y="566" width="32" height="5" fill="#1a2030" rx="1" />
-      <line x1="-28" y1="592" x2="-50" y2="575" stroke="#5a5a6a" strokeWidth={3} />
-      <line x1="-50" y1="575" x2="-58" y2="565" stroke="#5a5a6a" strokeWidth={2} />
-      <line x1="28" y1="592" x2="50" y2="575" stroke="#5a5a6a" strokeWidth={3} />
-      <line x1="50" y1="575" x2="58" y2="565" stroke="#5a5a6a" strokeWidth={2} />
-    </g>
+    {(() => {
+      const [cx, cy] = px(3.5, 6.5, 0);
+      return (
+        <g>
+          <ellipse cx={cx} cy={cy + 5} rx={40} ry={11} fill="#d8eaf8" stroke="#0d111e" strokeWidth={0.8} />
+          <circle cx={cx} cy={cy - 24} r={28} fill="white" stroke="#0d111e" strokeWidth={0.8} />
+          <circle cx={cx} cy={cy - 62} r={20} fill="white" stroke="#0d111e" strokeWidth={0.8} />
+          <circle cx={cx} cy={cy - 88} r={13} fill="white" stroke="#0d111e" strokeWidth={0.8} />
+          {/* Face */}
+          <circle cx={cx-5} cy={cy-91} r={2.5} fill="#2a3040" />
+          <circle cx={cx+5} cy={cy-91} r={2.5} fill="#2a3040" />
+          <path d={`M ${cx-2} ${cy-86} L ${cx+8} ${cy-84} L ${cx} ${cy-82} Z`} fill="#ff6622" />
+          {/* Buttons */}
+          {[0,1,2].map(i => <circle key={i} cx={cx} cy={cy-68+i*8} r={2.5} fill="#2a3040" />)}
+          {/* Scarf */}
+          <path d={`M ${cx-18} ${cy-66} Q ${cx} ${cy-60} ${cx+18} ${cy-66} Q ${cx+18} ${cy-58} ${cx} ${cy-54} Q ${cx-18} ${cy-58} ${cx-18} ${cy-66} Z`}
+            fill="#cc2222" stroke="#0d111e" strokeWidth={0.8} opacity={0.9} />
+          {/* Hat */}
+          <rect x={cx-13} y={cy-104} width={26} height={19} fill="#1a2030" rx="2" stroke="#0d111e" strokeWidth={0.8} />
+          <rect x={cx-18} y={cy-87} width={36} height={5} fill="#1a2030" rx="2" stroke="#0d111e" strokeWidth={0.8} />
+          {/* Arms */}
+          <line x1={cx-28} y1={cy-64} x2={cx-52} y2={cy-48} stroke="#5a5a6a" strokeWidth={3} />
+          <line x1={cx-52} y1={cy-48} x2={cx-60} y2={cy-38} stroke="#5a5a6a" strokeWidth={2} />
+          <line x1={cx+28} y1={cy-64} x2={cx+52} y2={cy-48} stroke="#5a5a6a" strokeWidth={3} />
+          <line x1={cx+52} y1={cy-48} x2={cx+60} y2={cy-38} stroke="#5a5a6a" strokeWidth={2} />
+        </g>
+      );
+    })()}
 
-    {/* People in coats */}
-    <g transform="translate(318, 0)">
-      <circle cx="0" cy="608" r="8" fill="#e8c8a0" />
-      <rect x="-7" y="616" width="14" height="18" fill="#2244aa" rx="3" />
-      <rect x="-8" y="623" width="16" height="5" fill="#cc2222" rx="2" />
-      <rect x="-5" y="634" width="5" height="14" fill="#1a3380" rx="1" />
-      <rect x="1" y="634" width="5" height="14" fill="#1a3380" rx="1" />
+    {/* People in winter coats */}
+    <IsoPerson gx={-1} gy={3.5} gz={0} bodyColor="#2244aa" skinColor="#e8c8a0" hatColor="#1a2030" />
+    <g style={{ animation: 'sl-walk 9s linear infinite' }}>
+      <IsoPerson gx={2} gy={3.5} gz={0} bodyColor="#556633" skinColor="#e0b890" hatColor="#aa8833" />
     </g>
-    <g style={{ animation: 'sl-walk3 9s linear infinite' }} transform="translate(748, 0)">
-      <circle cx="0" cy="606" r="8" fill="#e0b890" />
-      <rect x="-7" y="614" width="14" height="18" fill="#556633" rx="3" />
-      <rect x="-8" y="622" width="16" height="5" fill="#aa8833" rx="2" />
-      <rect x="-5" y="632" width="5" height="13" fill="#3a4422" rx="1" />
-      <rect x="1" y="632" width="5" height="13" fill="#3a4422" rx="1" />
-    </g>
-    <g transform="translate(1182, 0)">
-      <circle cx="0" cy="608" r="8" fill="#d4a878" />
-      <rect x="-7" y="616" width="14" height="18" fill="#443322" rx="3" />
-      <rect x="-8" y="622" width="16" height="5" fill="#884422" rx="2" />
-      <rect x="-5" y="634" width="5" height="13" fill="#332211" rx="1" />
-      <rect x="1" y="634" width="5" height="13" fill="#332211" rx="1" />
-    </g>
+    <IsoPerson gx={6.5} gy={3.8} gz={0} bodyColor="#443322" skinColor="#d4a878" hatColor="#884422" />
 
-    {/* Footprints */}
-    {Array.from({ length: 8 }).map((_, i) => (
-      <ellipse key={`sl-foot${i}`} cx={740 + i * 28} cy={650 + (i % 2) * 6} rx={5} ry={3} fill="#c8dcf0" opacity={0.7} />
-    ))}
+    {/* Footprints in snow */}
+    {Array.from({ length: 8 }).map((_,i) => {
+      const [fx, fy] = px(2 + i * 0.5, 4.5, 0);
+      return <ellipse key={i} cx={fx} cy={fy + (i%2)*5} rx={5} ry={3} fill="#c8dcf0" opacity={0.7} />;
+    })}
   </svg>
 );
 
-// ─── Forest: Sunny Forest Trail ────────────────────────────────────────────────
+// ─── Forest: Sunny Trail ─────────────────────────────────────────────────────
 const Forest: React.FC = () => (
   <svg
     style={{ position: 'absolute', inset: 0, width: '100%', height: '100%' }}
@@ -1004,199 +1194,260 @@ const Forest: React.FC = () => (
   >
     <defs>
       <linearGradient id="fo-sky" x1="0" y1="0" x2="0" y2="1">
-        <stop offset="0%" stopColor="#5ab8f0" />
-        <stop offset="55%" stopColor="#8dcef5" />
+        <stop offset="0%" stopColor="#58baf2" />
+        <stop offset="55%" stopColor="#8dd0f5" />
         <stop offset="100%" stopColor="#b8e4f8" />
       </linearGradient>
-      <linearGradient id="fo-path" x1="0" y1="0" x2="0" y2="1">
-        <stop offset="0%" stopColor="#c4a870" />
-        <stop offset="100%" stopColor="#a8905a" />
-      </linearGradient>
-      <filter id="fo-blur">
-        <feGaussianBlur stdDeviation="8" />
+      <filter id="fo-blur"><feGaussianBlur stdDeviation="10" /></filter>
+      <filter id="fo-glow">
+        <feGaussianBlur stdDeviation="3" result="b" />
+        <feMerge><feMergeNode in="b" /><feMergeNode in="SourceGraphic" /></feMerge>
       </filter>
       <style>{`
         @keyframes fo-sway { 0%,100%{transform:rotate(-1.5deg)} 50%{transform:rotate(1.5deg)} }
         @keyframes fo-sway2 { 0%,100%{transform:rotate(2deg)} 50%{transform:rotate(-2deg)} }
         @keyframes fo-bird { 0%{transform:translate(0,0)} 50%{transform:translate(35px,-12px)} 100%{transform:translate(70px,0)} }
-        @keyframes fo-butterfly { 0%{transform:translate(0,0)} 25%{transform:translate(8px,-5px)} 50%{transform:translate(15px,0)} 75%{transform:translate(8px,5px)} 100%{transform:translate(0,0)} }
-        @keyframes fo-light { 0%,100%{opacity:0.18} 50%{opacity:0.32} }
-        @keyframes fo-deer { 0%{transform:translateX(0)} 100%{transform:translateX(-8px)} }
+        @keyframes fo-butterfly { 0%{transform:translate(0,0)} 25%{transform:translate(8px,-5px)} 50%{transform:translate(16px,0)} 75%{transform:translate(8px,5px)} 100%{transform:translate(0,0)} }
+        @keyframes fo-light { 0%,100%{opacity:0.06} 50%{opacity:0.14} }
+        @keyframes fo-deer { 0%,100%{transform:translateX(0)} 50%{transform:translateX(-6px)} }
       `}</style>
     </defs>
 
     <rect width="1440" height="900" fill="url(#fo-sky)" />
 
     {/* Sun glow */}
-    <circle cx="720" cy="200" r="200" fill="#f0e888" opacity="0.15" filter="url(#fo-blur)" />
+    <circle cx="720" cy="200" r="210" fill="#f0e888" opacity="0.12" filter="url(#fo-blur)" />
 
-    {/* Background canopy */}
-    {([[0, 280, 130], [80, 260, 110], [180, 240, 140], [295, 255, 125], [400, 235, 150], [520, 248, 120],
-      [625, 228, 155], [748, 240, 145], [870, 232, 138], [988, 245, 125], [1100, 235, 148],
-      [1225, 248, 130], [1335, 255, 120]] as [number, number, number][]).map(([tx, ty, tw], i) => (
-        <ellipse key={`fo-bg${i}`} cx={tx + tw / 2} cy={ty} rx={tw / 2} ry={tw / 3.5}
-          fill={i % 2 === 0 ? '#2d7028' : '#347530'} opacity={0.7} />
+    {/* Background canopy silhouette */}
+    {([[0,285,140],[88,262,118],[195,242,148],[308,258,132],[415,238,158],[532,250,128],
+      [638,230,162],[758,242,152],[882,234,142],[1002,248,130],[1115,238,155],
+      [1238,250,135],[1352,258,125]] as [number,number,number][]).map(([tx,ty,tw],i) => (
+        <ellipse key={`fo-bg${i}`} cx={tx+tw/2} cy={ty} rx={tw/2} ry={tw/3.5}
+          fill={i%2===0?'#2d7028':'#347530'} opacity={0.68} />
       ))}
 
     {/* Sunbeams */}
-    {[580, 660, 740, 820, 900].map((bx, i) => (
-      <path key={`fo-beam${i}`} d={`M ${bx - 30} 180 L ${bx - 80} 620 L ${bx + 80} 620 L ${bx + 30} 180 Z`}
-        fill="#f8f060" opacity={0.06}
-        style={{ animation: `fo-light ${3 + i * 0.6}s ease-in-out ${i * 0.4}s infinite` }} />
+    {[585,665,745,825,905].map((bx,i) => (
+      <path key={`fo-beam${i}`} d={`M ${bx-32} 178 L ${bx-85} 625 L ${bx+85} 625 L ${bx+32} 178 Z`}
+        fill="#f8f060" opacity={0.07}
+        style={{ animation: `fo-light ${3+i*0.6}s ease-in-out ${i*0.4}s infinite` }} />
     ))}
 
-    {/* Ground */}
-    <rect x="0" y="580" width="1440" height="320" fill="#4a8030" />
-    <rect x="0" y="580" width="1440" height="60" fill="#558838" />
-    <rect x="0" y="640" width="1440" height="260" fill="#448028" />
+    {/* Ground tiles - grass */}
+    {Array.from({ length: 14 }).map((_,i) =>
+      Array.from({ length: 8 }).map((_,j) => {
+        const isDirt = (i >= 5 && i <= 8) && j >= 2;
+        return (
+          <GroundTile key={`fo-gt-${i}-${j}`} gx={i-4} gy={j+1} W={1} D={1}
+            fill={isDirt ? (j%2===0?'#c4a870':'#b8985a') : ((i+j)%3===0?'#4a8030':'(i+j)%3===1?#559038':'#488028')} />
+        );
+      })
+    )}
+    {/* More grass tiles */}
+    {Array.from({ length: 14 }).map((_,i) =>
+      Array.from({ length: 8 }).map((_,j) => {
+        const isDirt = (i >= 5 && i <= 8) && j >= 2;
+        if (!isDirt) return null;
+        return (
+          <GroundTile key={`fo-dirt-${i}-${j}`} gx={i-4} gy={j+1} W={1} D={1}
+            fill={j%2===0?'#c4a870':'#b8985a'} />
+        );
+      })
+    )}
 
-    {/* Trail */}
-    <path d="M 560 580 Q 590 640 620 720 Q 650 800 670 900 L 780 900 Q 800 800 790 720 Q 780 640 820 580 Z" fill="url(#fo-path)" opacity={0.85} />
-    {Array.from({ length: 6 }).map((_, i) => (
-      <ellipse key={`fo-pebble${i}`} cx={640 + (i % 3) * 18 - 12} cy={650 + i * 42} rx={5} ry={3} fill="#c4a060" opacity={0.6} transform={`rotate(${i * 22} ${640 + (i % 3) * 18 - 12} ${650 + i * 42})`} />
-    ))}
-
-    {/* Main trees - Big oaks */}
-    <g style={{ animation: 'fo-sway 7s ease-in-out infinite', transformOrigin: '155px 580px' }}>
-      <path d="M 150 575 Q 125 578 115 585" fill="none" stroke="#5a3a18" strokeWidth={5} strokeLinecap="round" />
-      <path d="M 162 578 Q 182 580 192 588" fill="none" stroke="#5a3a18" strokeWidth={4} strokeLinecap="round" />
-      <rect x="150" y="445" width="12" height="135" fill="#6a4820" rx="3" />
-      <circle cx="156" cy="400" r="68" fill="#3a8030" />
-      <circle cx="156" cy="375" r="52" fill="#448838" />
-      <circle cx="128" cy="415" r="45" fill="#3d8530" />
-      <circle cx="184" cy="412" r="42" fill="#388030" />
-      <circle cx="145" cy="358" r="36" fill="#4a9038" />
-      <circle cx="170" cy="375" r="22" fill="#58a840" opacity={0.5} />
+    {/* Main trees (6 large, stacked octagonal layers via IsoTree) */}
+    <g style={{ animation: 'fo-sway 7s ease-in-out infinite', transformOrigin: `${px(-3,2,0)[0]}px ${px(-3,2,0)[1]}px` }}>
+      <IsoTree gx={-3} gy={2} gz={0} colors={['#4ab840','#38a030','#268820']} />
     </g>
-    <g style={{ animation: 'fo-sway2 9s ease-in-out 1s infinite', transformOrigin: '285px 580px' }}>
-      <rect x="280" y="468" width="10" height="112" fill="#5a4018" rx="2" />
-      <circle cx="285" cy="430" r="58" fill="#357830" />
-      <circle cx="285" cy="408" r="45" fill="#3d8835" />
-      <circle cx="262" cy="445" r="38" fill="#308028" />
-      <circle cx="308" cy="442" r="36" fill="#357830" />
-      <circle cx="275" cy="392" r="30" fill="#3e9035" />
-      <circle cx="295" cy="395" r="18" fill="#50a840" opacity={0.5} />
+    <g style={{ animation: 'fo-sway2 9s ease-in-out 1s infinite', transformOrigin: `${px(-2,4,0)[0]}px ${px(-2,4,0)[1]}px` }}>
+      <IsoTree gx={-2} gy={4} gz={0} colors={['#42b038','#309028','#207818']} />
     </g>
-    <g style={{ animation: 'fo-sway 8s ease-in-out 2s infinite', transformOrigin: '1165px 580px' }}>
-      <path d="M 1155 580 Q 1132 582 1122 590" fill="none" stroke="#5a3a18" strokeWidth={4} strokeLinecap="round" />
-      <path d="M 1172 582 Q 1192 585 1200 590" fill="none" stroke="#5a3a18" strokeWidth={4} strokeLinecap="round" />
-      <rect x="1160" y="440" width="12" height="140" fill="#6a4820" rx="3" />
-      <circle cx="1166" cy="395" r="72" fill="#3a8030" />
-      <circle cx="1166" cy="368" r="56" fill="#448838" />
-      <circle cx="1138" cy="412" r="48" fill="#3d8530" />
-      <circle cx="1194" cy="410" r="44" fill="#388030" />
-      <circle cx="1155" cy="350" r="38" fill="#4a9038" />
-      <circle cx="1178" cy="370" r="24" fill="#58a840" opacity={0.48} />
+    <g style={{ animation: 'fo-sway 8s ease-in-out 2s infinite', transformOrigin: `${px(-3,6,0)[0]}px ${px(-3,6,0)[1]}px` }}>
+      <IsoTree gx={-3} gy={6} gz={0} colors={['#50c048','#3ea835','#2a9025']} />
     </g>
-    <g style={{ animation: 'fo-sway2 6.5s ease-in-out 3s infinite', transformOrigin: '1292px 580px' }}>
-      <rect x="1288" y="472" width="10" height="108" fill="#5a4018" rx="2" />
-      <circle cx="1293" cy="432" r="60" fill="#368030" />
-      <circle cx="1293" cy="410" r="47" fill="#3e8838" />
-      <circle cx="1270" cy="448" r="40" fill="#318030" />
-      <circle cx="1316" cy="445" r="38" fill="#368030" />
-      <circle cx="1283" cy="395" r="32" fill="#409038" />
-      <circle cx="1303" cy="400" r="20" fill="#50a840" opacity={0.48} />
+    <g style={{ animation: 'fo-sway2 6.5s ease-in-out 3s infinite', transformOrigin: `${px(7,2,0)[0]}px ${px(7,2,0)[1]}px` }}>
+      <IsoTree gx={7} gy={2} gz={0} colors={['#48b840','#369030','#247820']} />
+    </g>
+    <g style={{ animation: 'fo-sway 7.5s ease-in-out 0.5s infinite', transformOrigin: `${px(6,4,0)[0]}px ${px(6,4,0)[1]}px` }}>
+      <IsoTree gx={6} gy={4} gz={0} colors={['#44b03c','#328830','#207018']} />
+    </g>
+    <g style={{ animation: 'fo-sway2 8.5s ease-in-out 1.5s infinite', transformOrigin: `${px(7,6,0)[0]}px ${px(7,6,0)[1]}px` }}>
+      <IsoTree gx={7} gy={6} gz={0} colors={['#4cc044','#38a832','#269020']} />
     </g>
 
-    {/* Mid-ground trees */}
-    {([[390, 488, 48, '#357a28'], [480, 495, 42, '#2d7028'], [960, 490, 46, '#357a28'], [1050, 485, 52, '#2d7028']] as [number, number, number, string][]).map(([tx, ty, tr, tc], i) => (
-      <g key={`fo-mt${i}`} style={{ animation: i % 2 === 0 ? 'fo-sway 7s ease-in-out 1s infinite' : 'fo-sway2 8s ease-in-out 2s infinite', transformOrigin: `${tx}px 580px` }}>
-        <rect x={tx - 5} y={ty + 45} width={10} height={90} fill="#5a4018" rx="2" />
-        <circle cx={tx} cy={ty + 20} r={tr} fill={tc} />
-        <circle cx={tx} cy={ty} r={tr * 0.7} fill={tc} opacity={0.9} />
-        <circle cx={tx - tr * 0.5} cy={ty + 25} r={tr * 0.55} fill={tc} opacity={0.85} />
-        <circle cx={tx + tr * 0.5} cy={ty + 22} r={tr * 0.5} fill={tc} opacity={0.85} />
+    {/* Smaller mid-ground trees */}
+    {[[-1,2],[0,5],[5,2],[4,5]].map(([tx,ty],i) => (
+      <g key={`fo-sm-tree${i}`}>
+        <Building gx={tx+0.25} gy={ty+0.25} gz={0} W={0.5} D={0.5} h={0.9}
+          topColor="#4a3010" eastColor="#3a2208" southColor="#2e1806" />
+        <polygon points={topFace(tx-0.3, ty-0.3, 0, 1.6, 1.6, 1.6)} fill="#267820" stroke="#0d111e" strokeWidth={0.8} strokeLinejoin="round" />
+        <polygon points={topFace(tx-0.15, ty-0.15, 0, 1.3, 1.3, 2.2)} fill="#308828" stroke="#0d111e" strokeWidth={0.8} strokeLinejoin="round" />
+        <polygon points={topFace(tx, ty, 0, 1.0, 1.0, 2.7)} fill="#3a9830" stroke="#0d111e" strokeWidth={0.8} strokeLinejoin="round" />
       </g>
     ))}
 
-    {/* Flowers */}
-    {([[120, 598, '#ffdd22'], [142, 602, '#ff6688'], [168, 596, '#ff6688'], [192, 600, '#ffdd22'],
-      [1252, 596, '#ffdd22'], [1276, 600, '#ff6688'], [1298, 596, '#ffaa33'], [1322, 602, '#ff6688'],
-      [440, 590, '#ff6688'], [462, 594, '#ffdd22'], [484, 590, '#ff6688'],
-      [972, 590, '#ffdd22'], [996, 594, '#ff6688'], [1020, 590, '#ffaa33']] as [number, number, string][]).map(([fx, fy, fc], i) => (
-        <g key={`fo-flower${i}`}>
-          <line x1={fx} y1={fy} x2={fx} y2={fy + 12} stroke="#3a7828" strokeWidth={1.5} />
-          <circle cx={fx} cy={fy} r={5} fill={fc} opacity={0.9} />
-          <circle cx={fx} cy={fy} r={2.5} fill="white" opacity={0.7} />
+    {/* Dirt path tiles */}
+    {Array.from({ length: 8 }).map((_,j) => (
+      <g key={`fo-path-${j}`}>
+        <GroundTile gx={1} gy={j+1} W={1} D={1} fill="#c4a870" />
+        <GroundTile gx={2} gy={j+1} W={1} D={1} fill="#b8985a" />
+      </g>
+    ))}
+    {/* Path pebbles */}
+    {Array.from({ length: 8 }).map((_,i) => {
+      const [px2, py2] = px(1.3 + (i%3)*0.25, 1.5+i, 0);
+      return <ellipse key={i} cx={px2} cy={py2} rx={5} ry={3} fill="#c09858" stroke="#0d111e" strokeWidth={0.4} opacity={0.7}
+        transform={`rotate(${i*25} ${px2} ${py2})`} />;
+    })}
+
+    {/* Flower patches */}
+    {[[-3.6,1.5,'#ffdd22'],[-3.2,1.8,'#ff6688'],[-2.8,1.5,'#ff9933'],
+      [7.5,1.5,'#ffdd22'],[7.8,1.8,'#ff6688'],[8.2,1.4,'#44aaff'],
+      [-3.5,7.5,'#ff6688'],[-3,7.8,'#ffdd22'],
+      [7.4,7.5,'#ffaa33'],[7.9,7.8,'#ff6688']].map(([fx,fy,fc],i) => {
+      const [cx2, cy2] = px(fx as number, fy as number, 0);
+      return (
+        <g key={`fo-fl${i}`}>
+          <line x1={cx2} y1={cy2} x2={cx2} y2={cy2+12} stroke="#3a7828" strokeWidth={1.5} />
+          <circle cx={cx2} cy={cy2} r={5.5} fill={fc as string} stroke="#0d111e" strokeWidth={0.6} opacity={0.92} />
+          <circle cx={cx2} cy={cy2} r={2.5} fill="white" opacity={0.7} />
         </g>
-      ))}
+      );
+    })}
 
     {/* Mushrooms */}
-    {([[200, 608, '#cc3322', 14], [218, 612, '#cc3322', 10], [1230, 606, '#dd4422', 12]] as [number, number, string, number][]).map(([mx, my, mc, mr], i) => (
-      <g key={`fo-mush${i}`}>
-        <rect x={(mx as number) - 3} y={my as number} width={6} height={14} fill="#e8d8b0" rx="1" />
-        <ellipse cx={mx as number} cy={my as number} rx={mr as number} ry={(mr as number) * 0.55} fill={mc as string} />
-        {Array.from({ length: 3 }).map((_, j) => (
-          <ellipse key={j} cx={(mx as number) - (mr as number) * 0.5 + j * (mr as number) * 0.5} cy={(my as number) + 2} rx={2} ry={1.2} fill="white" opacity={0.6} />
-        ))}
-      </g>
-    ))}
+    {[[-2.8,7.5,'#cc3322',14],[-2.5,7.8,'#cc3322',10],[7.2,7.5,'#dd4422',12]].map(([mx,my,mc,mr],i) => {
+      const [cx2, cy2] = px(mx as number, my as number, 0);
+      return (
+        <g key={`fo-mush${i}`}>
+          <rect x={cx2-3} y={cy2-10} width={6} height={12} fill="#e8d8b0" rx="1" stroke="#0d111e" strokeWidth={0.5} />
+          <ellipse cx={cx2} cy={cy2-10} rx={mr as number} ry={(mr as number)*0.55} fill={mc as string} stroke="#0d111e" strokeWidth={0.6} />
+          {[0,1,2].map(j => <ellipse key={j} cx={cx2-(mr as number)*0.4+j*(mr as number)*0.4} cy={cy2-8} rx={2} ry={1.2} fill="white" opacity={0.6} />)}
+        </g>
+      );
+    })}
 
     {/* Ferns */}
-    {([[340, 590], [360, 594], [380, 590], [1068, 590], [1088, 592], [1108, 590]] as [number, number][]).map(([fx, fy], i) => (
-      <g key={`fo-fern${i}`}>
-        {[[-14, -10], [-7, -16], [0, -18], [7, -16], [14, -10]].map(([dx, dy], j) => (
-          <ellipse key={j} cx={fx + dx} cy={fy + dy} rx={6} ry={3.5} fill="#2a7020"
-            transform={`rotate(${dx * 2} ${fx + dx} ${fy + dy})`} opacity={0.85} />
-        ))}
-      </g>
-    ))}
+    {[[-2.2,2.5],[-2.5,6.5],[6.8,2.5],[6.5,6.5]].map(([fx,fy],i) => {
+      const [cx2, cy2] = px(fx, fy, 0);
+      return (
+        <g key={`fo-fern${i}`}>
+          {[[-14,-10],[-7,-16],[0,-18],[7,-16],[14,-10]].map(([dx,dy],j) => (
+            <ellipse key={j} cx={cx2+dx} cy={cy2+dy} rx={6} ry={3.5} fill="#2a7020"
+              transform={`rotate(${dx*2} ${cx2+dx} ${cy2+dy})`} opacity={0.85} stroke="#0d111e" strokeWidth={0.4} />
+          ))}
+        </g>
+      );
+    })}
 
     {/* Deer */}
-    <g style={{ animation: 'fo-deer 3s ease-in-out infinite alternate' }} transform="translate(680, 0)">
-      <ellipse cx="0" cy="560" rx="30" ry="18" fill="#8a5a30" />
-      <ellipse cx="22" cy="546" rx="10" ry="15" fill="#8a5a30" />
-      <ellipse cx="28" cy="534" rx="13" ry="10" fill="#8a5a30" />
-      <ellipse cx="35" cy="527" rx="5" ry="8" fill="#8a5a30" />
-      <ellipse cx="35" cy="527" rx="3" ry="5" fill="#c87860" />
-      <circle cx="32" cy="532" r="2.5" fill="#1a1a1a" />
-      <circle cx="33" cy="531" r="1" fill="white" opacity={0.8} />
-      <path d="M 30 524 L 35 510 L 42 502 M 35 510 L 28 504" fill="none" stroke="#6a4020" strokeWidth={2.5} strokeLinecap="round" />
-      {[[-18, 578], [-8, 578], [8, 578], [18, 578]].map(([lx, ly], i) => (
-        <line key={i} x1={lx} y1={574} x2={lx - (i < 2 ? 2 : -2)} y2={ly} stroke="#6a4020" strokeWidth={4} strokeLinecap="round" />
-      ))}
-      <ellipse cx="-28" cy="556" rx="6" ry="4" fill="white" opacity={0.9} />
+    <g style={{ animation: 'fo-deer 3s ease-in-out infinite alternate' }}>
+      {(() => {
+        const [bx, by] = px(3, 4, 0);
+        return (
+          <g>
+            {/* body */}
+            <ellipse cx={bx} cy={by-18} rx={28} ry={16} fill="#8a5a30" stroke="#0d111e" strokeWidth={0.8} />
+            {/* neck */}
+            <ellipse cx={bx+18} cy={by-28} rx={9} ry={13} fill="#8a5a30" stroke="#0d111e" strokeWidth={0.8} />
+            {/* head */}
+            <ellipse cx={bx+28} cy={by-40} rx={12} ry={9} fill="#8a5a30" stroke="#0d111e" strokeWidth={0.8} />
+            <ellipse cx={bx+34} cy={by-42} rx={4.5} ry={7} fill="#8a5a30" stroke="#0d111e" strokeWidth={0.8} />
+            <ellipse cx={bx+34} cy={by-42} rx={2.5} ry={4.5} fill="#c87860" />
+            <circle cx={bx+31} cy={by-44} r={2.2} fill="#1a1a1a" />
+            <circle cx={bx+32} cy={by-45} r={0.9} fill="white" opacity={0.8} />
+            {/* antlers */}
+            <path d={`M ${bx+28} ${by-49} L ${bx+32} ${by-65} L ${bx+40} ${by-58} M ${bx+32} ${by-65} L ${bx+26} ${by-60}`}
+              fill="none" stroke="#6a4020" strokeWidth={2.5} strokeLinecap="round" />
+            {/* legs */}
+            {[[-18,0],[-8,0],[8,0],[18,0]].map(([lx2],idx) => (
+              <line key={idx} x1={bx+lx2} y1={by-6} x2={bx+lx2+(idx<2?-2:2)} y2={by+10}
+                stroke="#6a4020" strokeWidth={3.5} strokeLinecap="round" />
+            ))}
+            {/* tail */}
+            <ellipse cx={bx-26} cy={by-22} rx={6} ry={4} fill="white" stroke="#0d111e" strokeWidth={0.6} opacity={0.9} />
+          </g>
+        );
+      })()}
     </g>
 
     {/* Birds */}
-    {([[380, 240], [415, 228], [445, 238], [900, 215], [935, 202], [962, 218]] as [number, number][]).map(([bx, by], i) => (
-      <g key={`fo-bird${i}`} style={{ animation: `fo-bird ${4 + i * 0.5}s ease-in-out ${i * 0.7}s infinite` }}>
-        <path d={`M ${bx - 10} ${by} Q ${bx - 4} ${by - 6} ${bx} ${by}`} fill="none" stroke="#2a2a3a" strokeWidth={1.8} />
-        <path d={`M ${bx} ${by} Q ${bx + 4} ${by - 6} ${bx + 10} ${by}`} fill="none" stroke="#2a2a3a" strokeWidth={1.8} />
+    {([[385,242],[418,228],[450,242],[905,218],[938,204],[966,220]] as [number,number][]).map(([bx,by],i) => (
+      <g key={`fo-bird${i}`} style={{ animation: `fo-bird ${4+i*0.5}s ease-in-out ${i*0.7}s infinite` }}>
+        <path d={`M ${bx-10} ${by} Q ${bx-4} ${by-6} ${bx} ${by}`} fill="none" stroke="#2a2a3a" strokeWidth={1.8} />
+        <path d={`M ${bx} ${by} Q ${bx+4} ${by-6} ${bx+10} ${by}`} fill="none" stroke="#2a2a3a" strokeWidth={1.8} />
       </g>
     ))}
 
     {/* Butterflies */}
-    {[[540, 520], [480, 530], [1000, 515]].map(([btx, bty], i) => (
-      <g key={`fo-bf${i}`} style={{ animation: `fo-butterfly ${2.5 + i}s ease-in-out ${i * 0.6}s infinite`, transformOrigin: `${btx}px ${bty}px` }}>
-        <ellipse cx={btx - 8} cy={bty} rx={9} ry={6} fill={i === 0 ? '#ff8844' : i === 1 ? '#ee44cc' : '#44aaff'} opacity={0.85} transform={`rotate(20 ${btx - 8} ${bty})`} />
-        <ellipse cx={btx + 8} cy={bty} rx={9} ry={6} fill={i === 0 ? '#ff8844' : i === 1 ? '#ee44cc' : '#44aaff'} opacity={0.85} transform={`rotate(-20 ${btx + 8} ${bty})`} />
-        <ellipse cx={btx - 5} cy={bty + 4} rx={5} ry={3.5} fill={i === 0 ? '#ffaa66' : i === 1 ? '#ff66dd' : '#66bbff'} opacity={0.75} transform={`rotate(30 ${btx - 5} ${bty + 4})`} />
-        <ellipse cx={btx + 5} cy={bty + 4} rx={5} ry={3.5} fill={i === 0 ? '#ffaa66' : i === 1 ? '#ff66dd' : '#66bbff'} opacity={0.75} transform={`rotate(-30 ${btx + 5} ${bty + 4})`} />
-        <line x1={btx - 3} y1={bty - 5} x2={btx - 10} y2={bty - 14} stroke="#2a2a3a" strokeWidth={1} />
-        <line x1={btx + 3} y1={bty - 5} x2={btx + 10} y2={bty - 14} stroke="#2a2a3a" strokeWidth={1} />
+    {[[540,522],[482,535],[1008,518]].map(([btx,bty],i) => (
+      <g key={`fo-bf${i}`}
+        style={{ animation: `fo-butterfly ${2.5+i}s ease-in-out ${i*0.6}s infinite`, transformOrigin: `${btx}px ${bty}px` }}>
+        <ellipse cx={btx-8} cy={bty} rx={9} ry={6} fill={i===0?'#ff8844':i===1?'#ee44cc':'#44aaff'} opacity={0.88}
+          transform={`rotate(20 ${btx-8} ${bty})`} />
+        <ellipse cx={btx+8} cy={bty} rx={9} ry={6} fill={i===0?'#ff8844':i===1?'#ee44cc':'#44aaff'} opacity={0.88}
+          transform={`rotate(-20 ${btx+8} ${bty})`} />
+        <ellipse cx={btx-5} cy={bty+4} rx={5} ry={3.5} fill={i===0?'#ffaa66':i===1?'#ff66dd':'#66bbff'} opacity={0.75}
+          transform={`rotate(30 ${btx-5} ${bty+4})`} />
+        <ellipse cx={btx+5} cy={bty+4} rx={5} ry={3.5} fill={i===0?'#ffaa66':i===1?'#ff66dd':'#66bbff'} opacity={0.75}
+          transform={`rotate(-30 ${btx+5} ${bty+4})`} />
+        <line x1={btx-3} y1={bty-5} x2={btx-10} y2={bty-14} stroke="#2a2a3a" strokeWidth={1} />
+        <line x1={btx+3} y1={bty-5} x2={btx+10} y2={bty-14} stroke="#2a2a3a" strokeWidth={1} />
       </g>
     ))}
 
-    {/* Hikers on trail */}
-    <g transform="translate(630, 0)">
-      <circle cx="0" cy="574" r="7" fill="#e0b888" />
-      <rect x="-8" y="560" width="16" height="7" fill="#aa6622" rx="2" />
-      <rect x="-5" y="556" width="10" height="7" fill="#993311" rx="2" />
-      <rect x="-6" y="581" width="12" height="14" fill="#338844" rx="2" />
-      <rect x="-5" y="595" width="4" height="12" fill="#1a2a1a" rx="1" />
-      <rect x="2" y="595" width="4" height="12" fill="#1a2a1a" rx="1" />
-      <rect x="-12" y="582" width="8" height="12" fill="#ee8833" rx="2" />
-      <line x1="10" y1="572" x2="16" y2="610" stroke="#8a6030" strokeWidth={2.5} strokeLinecap="round" />
-    </g>
-    <g transform="translate(752, 0)">
-      <circle cx="0" cy="568" r="6" fill="#d4a070" />
-      <rect x="-5" y="574" width="10" height="12" fill="#4455aa" rx="2" />
-      <rect x="-4" y="586" width="4" height="10" fill="#223" rx="1" />
-      <rect x="1" y="586" width="4" height="10" fill="#223" rx="1" />
-      <rect x="-10" y="576" width="7" height="10" fill="#cc4422" rx="2" />
-      <line x1="8" y1="566" x2="14" y2="598" stroke="#8a6030" strokeWidth={2} strokeLinecap="round" />
-    </g>
+    {/* Hikers on path */}
+    <IsoPerson gx={1.5} gy={3} gz={0} bodyColor="#338844" skinColor="#e0b888" hatColor="#aa6622" />
+    {/* Hiker 2 with backpack */}
+    {(() => {
+      const bS = southFace(1.7, 5.85, 0, 0.3, 0.3, 1.4);
+      const bE = eastFace(1.7, 5.85, 0, 0.3, 0.3, 1.4);
+      const bT = topFace(1.7, 5.85, 0, 0.3, 0.3, 1.4);
+      const [hx, hy] = px(1.85, 5.85, 1.4);
+      const [bpx, bpy] = px(1.65, 6, 1.1);
+      const [wx, wy] = px(2.1, 5.85, 0);
+      const [wx2, wy2] = px(2.1, 5.85, 1.4);
+      return (
+        <g>
+          <polygon points={bS} fill="#4455aa" stroke="#0d111e" strokeWidth={0.7} strokeLinejoin="round" />
+          <polygon points={bE} fill="#4455aa" stroke="#0d111e" strokeWidth={0.7} strokeLinejoin="round" />
+          <polygon points={bT} fill="#4455aa" stroke="#0d111e" strokeWidth={0.7} strokeLinejoin="round" />
+          <circle cx={hx} cy={hy-12} r={8} fill="#d4a070" stroke="#0d111e" strokeWidth={0.7} />
+          {/* Backpack */}
+          <rect x={bpx-8} y={bpy-18} width={14} height={20} fill="#cc4422" rx="2" stroke="#0d111e" strokeWidth={0.7} />
+          {/* Walking stick */}
+          <line x1={wx} y1={wy} x2={wx2} y2={wy2-30} stroke="#8a6030" strokeWidth={2.5} strokeLinecap="round" />
+        </g>
+      );
+    })()}
+
+    {/* Log on ground */}
+    {(() => {
+      const logS = southFace(-1.5, 7, 0, 1, 0.25, 0.25);
+      const logE = eastFace(-1.5, 7, 0, 1, 0.25, 0.25);
+      const logT = topFace(-1.5, 7, 0, 1, 0.25, 0.25);
+      return (
+        <g>
+          <polygon points={logS} fill="#7a5030" stroke="#0d111e" strokeWidth={0.8} strokeLinejoin="round" />
+          <polygon points={logE} fill="#6a4020" stroke="#0d111e" strokeWidth={0.8} strokeLinejoin="round" />
+          <polygon points={logT} fill="#8a6040" stroke="#0d111e" strokeWidth={0.8} strokeLinejoin="round" />
+        </g>
+      );
+    })()}
+
+    {/* Rock cluster */}
+    {[[-3.8,4.5,'#9a9888'],[-3.4,4.8,'#b0ae9c'],[-3.7,5.1,'#8a8878']].map(([rx,ry,rc],i) => {
+      const rockS = southFace(rx as number, ry as number, 0, 0.3, 0.25, 0.2+i*0.05);
+      const rockE = eastFace(rx as number, ry as number, 0, 0.3, 0.25, 0.2+i*0.05);
+      const rockT = topFace(rx as number, ry as number, 0, 0.3, 0.25, 0.2+i*0.05);
+      return (
+        <g key={i}>
+          <polygon points={rockS} fill={rc as string} stroke="#0d111e" strokeWidth={0.7} strokeLinejoin="round" />
+          <polygon points={rockE} fill={rc as string} stroke="#0d111e" strokeWidth={0.7} strokeLinejoin="round" />
+          <polygon points={rockT} fill={rc as string} stroke="#0d111e" strokeWidth={0.7} strokeLinejoin="round" />
+        </g>
+      );
+    })}
   </svg>
 );
 
