@@ -19,6 +19,7 @@ export const invoiceSchema = z.object({
   client: z.string().default(''),
   clientEmail: z.string().optional().nullable(),
   amount: z.number().default(0),
+  currency: z.string().optional().nullable(),
   paid: z.number().optional().nullable(),
   status: z.enum(['Draft', 'Sent', 'Paid', 'Overdue']).catch('Draft'),
   dueDate: z.string().default(''),

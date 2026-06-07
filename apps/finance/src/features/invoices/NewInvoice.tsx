@@ -3,6 +3,7 @@ import { useNavigate } from '@tanstack/react-router';
 import { motion } from 'motion/react';
 import { ChevronRight, Plus, ArrowLeft, Save } from 'lucide-react';
 import { toast } from 'sonner';
+import type { CreateInvoiceRequest } from '@voxire/contracts/finance/invoices/v1/create_invoice';
 import PageHeader from '../../shared/components/PageHeader';
 import ClientSelect, { Client } from '../../shared/components/ClientSelect';
 import LineItemRow, { LineItem } from '../../shared/components/LineItemRow';
@@ -72,8 +73,6 @@ const NewInvoice: React.FC = () => {
       toast.error('Select a client first');
       return;
     }
-    const subtotal = items.reduce((s, it) => s + it.quantity * it.unitPrice, 0);
-    const tax = items.reduce((s, it) => s + it.quantity * it.unitPrice * (it.taxRate / 100), 0);
     const mappedItems = items.map((it, idx) => ({
       description: it.description,
       quantity: it.quantity,
@@ -84,29 +83,28 @@ const NewInvoice: React.FC = () => {
       sortOrder: idx,
       total: it.quantity * it.unitPrice,
     }));
-    createInvoice.mutate(
-      {
-        number: invoiceNumber,
-        client: client.name,
-        clientEmail: client.email,
-        items: mappedItems,
-        notes,
-        discount,
-        tax,
-        subtotal,
-        amount: subtotal + tax - discount,
-        status,
-        issuedDate,
-        dueDate,
+    const payload: CreateInvoiceRequest = {
+      clientName: client.name,
+      clientEmail: client.email ?? '',
+      clientAddress: '',
+      clientTaxId: '',
+      issueDate: issuedDate,
+      dueDate,
+      currency: settings.currency,
+      discountType: discount > 0 ? 'fixed' : 'none',
+      discountValue: discount,
+      taxRate: settings.defaultTaxRate,
+      notes,
+      terms: '',
+      items: mappedItems,
+    };
+    createInvoice.mutate(payload, {
+      onSuccess: () => {
+        toast.success(`Invoice ${invoiceNumber} saved as ${status}`);
+        navigate({ to: '/invoices' });
       },
-      {
-        onSuccess: () => {
-          toast.success(`Invoice ${invoiceNumber} saved as ${status}`);
-          navigate({ to: '/invoices' });
-        },
-        onError: () => toast.error('Failed to save invoice'),
-      }
-    );
+      onError: () => toast.error('Failed to save invoice'),
+    });
   };
 
   return (

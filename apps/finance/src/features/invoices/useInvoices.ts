@@ -3,10 +3,20 @@ import { z } from 'zod';
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
 import { toast } from 'sonner';
 import type { RecordPaymentResponse } from '@voxire/contracts/finance/invoices/payments/v1/record_payment';
+import type { CreateInvoiceRequest } from '@voxire/contracts/finance/invoices/v1/create_invoice';
+import type { UpdateInvoiceRequest } from '@voxire/contracts/finance/invoices/v1/update_invoice';
+import { validateContractPayload } from '@voxire/contracts/validation/metadata';
 import { safe } from '../../shared/lib/api';
 import type { Invoice } from '../../shared/services/financeApi';
 import { invoiceSchema } from '../../shared/schemas/invoices';
 import { unwrapList } from '../../shared/lib/unwrapList';
+
+function assertContractPayload(messageName: string, payload: Record<string, unknown>): void {
+  const issues = validateContractPayload(messageName, payload);
+  if (issues.length > 0) {
+    throw new Error(issues[0].message);
+  }
+}
 
 interface UseInvoicesParams {
   page?: number;
@@ -58,10 +68,15 @@ export function useInvoiceDetail(id: string | undefined) {
 export function useCreateInvoice() {
   const qc = useQueryClient();
   return useMutation({
-    mutationFn: (data: Partial<Invoice>): Promise<Invoice> =>
-      unwrap(safe.post<Invoice>('/finance/invoices', data)),
+    mutationFn: (data: CreateInvoiceRequest): Promise<Invoice> => {
+      assertContractPayload('finance.invoices.v1.CreateInvoiceRequest', {
+        ...(data as unknown as Record<string, unknown>),
+      });
+      return unwrap(safe.post<Invoice>('/finance/invoices', data));
+    },
     onSuccess: () => qc.invalidateQueries({ queryKey: ['invoices'] }),
-    onError: () => toast.error('Failed to create invoice'),
+    onError: (error) =>
+      toast.error(error instanceof Error ? error.message : 'Failed to create invoice'),
   });
 }
 
@@ -70,8 +85,13 @@ export function useUpdateInvoice() {
   return useMutation({
     // Backend UpdateInvoiceHandler is registered at PUT /finance/invoices and
     // reads the id from the request body.
-    mutationFn: ({ id, data }: { id: string; data: Partial<Invoice> }): Promise<Invoice> =>
-      unwrap(safe.put<Invoice>('/finance/invoices', { id: Number(id), ...data })),
+    mutationFn: ({ id, data }: { id: string; data: Partial<Invoice> }): Promise<Invoice> => {
+      const payload = { id: Number(id), ...data } as UpdateInvoiceRequest;
+      assertContractPayload('finance.invoices.v1.UpdateInvoiceRequest', {
+        ...(payload as unknown as Record<string, unknown>),
+      });
+      return unwrap(safe.put<Invoice>('/finance/invoices', payload));
+    },
     onSuccess: () => qc.invalidateQueries({ queryKey: ['invoices'] }),
     onError: () => toast.error('Failed to update invoice'),
   });
@@ -94,8 +114,11 @@ export function useUpdateInvoiceStatus() {
   return useMutation({
     // Backend UpdateInvoiceStatusHandler is registered at PUT /finance/invoices/status
     // and reads { id, status } from the request body.
-    mutationFn: ({ id, status }: { id: string; status: Invoice['status'] }): Promise<void> =>
-      unwrap(safe.put<void>('/finance/invoices/status', { id: Number(id), status })),
+    mutationFn: ({ id, status }: { id: string; status: Invoice['status'] }): Promise<void> => {
+      const payload = { id: Number(id), status };
+      assertContractPayload('finance.invoices.v1.UpdateInvoiceStatusRequest', payload);
+      return unwrap(safe.put<void>('/finance/invoices/status', payload));
+    },
     onSuccess: () => qc.invalidateQueries({ queryKey: ['invoices'] }),
     onError: () => toast.error('Failed to update invoice status'),
   });
@@ -109,25 +132,35 @@ export function useRecordPayment() {
     mutationFn: ({
       id,
       amount,
+      currency,
       paymentDate,
       method,
     }: {
       id: string;
       amount: number;
+      currency: string;
       paymentDate?: string;
       method?: string;
-    }): Promise<RecordPaymentResponse> =>
-      unwrap(
-        safe.post<RecordPaymentResponse>('/finance/invoices/payment', {
-          invoiceId: Number(id),
-          amount,
-          paymentDate,
-          method,
-        })
-      ),
+    }): Promise<RecordPaymentResponse> => {
+      const payload = {
+        invoiceId: Number(id),
+        amount,
+        currency,
+        paymentDate,
+        method,
+      };
+      assertContractPayload('finance.invoices.payments.v1.RecordPaymentRequest', payload);
+      return unwrap(safe.post<RecordPaymentResponse>('/finance/invoices/payment', payload));
+    },
     onSuccess: (
       _data: RecordPaymentResponse,
-      variables: { id: string; amount: number; paymentDate?: string; method?: string }
+      variables: {
+        id: string;
+        amount: number;
+        currency: string;
+        paymentDate?: string;
+        method?: string;
+      }
     ) => {
       qc.invalidateQueries({ queryKey: ['invoices'] });
       qc.invalidateQueries({ queryKey: ['invoice', variables.id] });

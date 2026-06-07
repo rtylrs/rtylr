@@ -1,5 +1,6 @@
 import { unwrap } from '@voxire/api';
 import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query';
+import { validateContractPayload } from '@voxire/contracts/validation/metadata';
 import type { Product } from '@voxire/contracts/erp/product/v1/types';
 import type { ListProductsResponse } from '@voxire/contracts/erp/product/v1/list_products';
 import type {
@@ -15,6 +16,13 @@ import type { UseQueryResult, UseMutationResult } from '@tanstack/react-query';
 import { safe } from '../../lib/api';
 import { toast } from 'sonner';
 import { useTranslation } from 'react-i18next';
+
+function assertContractPayload(messageName: string, payload: Record<string, unknown>): void {
+  const issues = validateContractPayload(messageName, payload);
+  if (issues.length > 0) {
+    throw new Error(issues[0].message);
+  }
+}
 
 interface ListProductsParams {
   search?: string;
@@ -59,6 +67,9 @@ export const useCreateProduct = (): UseMutationResult<
 
   return useMutation({
     mutationFn: async (data: CreateProductRequest): Promise<CreateProductResponse> => {
+      assertContractPayload('erp.product.v1.CreateProductRequest', {
+        ...(data as unknown as Record<string, unknown>),
+      });
       const res = await unwrap(safe.post<CreateProductResponse>('/erp/products', data));
       return res as CreateProductResponse;
     },
@@ -82,6 +93,9 @@ export const useUpdateProduct = (): UseMutationResult<
 
   return useMutation({
     mutationFn: async (data: UpdateProductRequest): Promise<UpdateProductResponse> => {
+      assertContractPayload('erp.product.v1.UpdateProductRequest', {
+        ...(data as unknown as Record<string, unknown>),
+      });
       const res = await unwrap(safe.put<UpdateProductResponse>(`/erp/products/${data.id}`, data));
       return res as UpdateProductResponse;
     },

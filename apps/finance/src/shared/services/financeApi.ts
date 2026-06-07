@@ -51,6 +51,7 @@ export interface Invoice {
   client: string;
   clientEmail?: string;
   amount: number;
+  currency?: string | null;
   paid?: number;
   status: 'Draft' | 'Sent' | 'Paid' | 'Overdue';
   dueDate: string;

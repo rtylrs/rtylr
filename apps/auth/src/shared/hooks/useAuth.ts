@@ -1,5 +1,6 @@
 import { useMutation } from '@tanstack/react-query';
 import { unwrap, type ApiError } from '@voxire/api';
+import { validateContractPayload } from '@voxire/contracts/validation/metadata';
 import { safe } from '../lib/api';
 import { useUserStore } from '../stores/userStore';
 import { setCookie, getDefaultCookieDomain } from '../lib/cookies';
@@ -26,12 +27,23 @@ interface AuthResponse {
   role?: string;
 }
 
+function assertContractPayload(messageName: string, payload: Record<string, unknown>): void {
+  const issues = validateContractPayload(messageName, payload);
+  if (issues.length > 0) {
+    throw new Error(issues[0].message);
+  }
+}
+
 export const useLogin = () => {
   const { login, setLoading, setError } = useUserStore();
 
   return useMutation({
-    mutationFn: (payload: LoginPayload): Promise<AuthResponse> =>
-      unwrap(safe.post<AuthResponse>('/auth/login', payload)),
+    mutationFn: (payload: LoginPayload): Promise<AuthResponse> => {
+      assertContractPayload('common.auth.v1.LoginRequest', {
+        ...(payload as unknown as Record<string, unknown>),
+      });
+      return unwrap(safe.post<AuthResponse>('/auth/login', payload));
+    },
     onMutate: () => {
       setLoading(true);
       setError(null);
@@ -58,8 +70,12 @@ export const useRegisterRestaurant = () => {
   const { login, setLoading, setError } = useUserStore();
 
   return useMutation({
-    mutationFn: (payload: RegisterPayload): Promise<AuthResponse> =>
-      unwrap(safe.post<AuthResponse>('/auth/register', payload)),
+    mutationFn: (payload: RegisterPayload): Promise<AuthResponse> => {
+      assertContractPayload('common.auth.v1.RegisterRequest', {
+        ...(payload as unknown as Record<string, unknown>),
+      });
+      return unwrap(safe.post<AuthResponse>('/auth/register', payload));
+    },
     onMutate: () => {
       setLoading(true);
       setError(null);

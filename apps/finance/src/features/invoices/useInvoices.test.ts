@@ -92,8 +92,17 @@ describe('useCreateInvoice', () => {
   it('calls POST /finance/invoices', async () => {
     (safe.post as ReturnType<typeof vi.fn>).mockResolvedValue({ id: 'inv-new' });
     const { result } = renderHook(() => useCreateInvoice(), { wrapper: createWrapper() });
-    await act(() => result.current.mutateAsync({ amount: 300 } as any));
-    expect(safe.post).toHaveBeenCalledWith('/finance/invoices', { amount: 300 });
+    const invoice = {
+      clientName: 'Beta Corp',
+      clientEmail: 'billing@beta.test',
+      issueDate: '2026-05-01',
+      dueDate: '2026-06-01',
+      currency: 'USD',
+      discountType: 'none',
+      items: [{ description: 'Consulting', quantity: 1, unitPrice: 300 }],
+    };
+    await act(() => result.current.mutateAsync(invoice as any));
+    expect(safe.post).toHaveBeenCalledWith('/finance/invoices', invoice);
   });
 });
 
@@ -105,8 +114,17 @@ describe('useUpdateInvoice', () => {
   it('calls PUT /finance/invoices with id in body', async () => {
     (safe.put as ReturnType<typeof vi.fn>).mockResolvedValue({ id: 1 });
     const { result } = renderHook(() => useUpdateInvoice(), { wrapper: createWrapper() });
-    await act(() => result.current.mutateAsync({ id: '1', data: { amount: 600 } as any }));
-    expect(safe.put).toHaveBeenCalledWith('/finance/invoices', { id: 1, amount: 600 });
+    const invoice = {
+      clientName: 'Beta Corp',
+      clientEmail: 'billing@beta.test',
+      issueDate: '2026-05-01',
+      dueDate: '2026-06-01',
+      currency: 'USD',
+      discountType: 'none',
+      items: [{ description: 'Consulting', quantity: 2, unitPrice: 300 }],
+    };
+    await act(() => result.current.mutateAsync({ id: '1', data: invoice as any }));
+    expect(safe.put).toHaveBeenCalledWith('/finance/invoices', { id: 1, ...invoice });
   });
 });
 
@@ -144,12 +162,21 @@ describe('useRecordPayment', () => {
   it('calls POST /finance/invoices/payment', async () => {
     (safe.post as ReturnType<typeof vi.fn>).mockResolvedValue(undefined);
     const { result } = renderHook(() => useRecordPayment(), { wrapper: createWrapper() });
-    await act(() => result.current.mutateAsync({ id: '42', amount: 250 }));
+    await act(() =>
+      result.current.mutateAsync({
+        id: '42',
+        amount: 250,
+        currency: 'USD',
+        paymentDate: '2026-06-01',
+        method: 'card',
+      } as any)
+    );
     expect(safe.post).toHaveBeenCalledWith('/finance/invoices/payment', {
       invoiceId: 42,
       amount: 250,
-      paymentDate: undefined,
-      method: undefined,
+      currency: 'USD',
+      paymentDate: '2026-06-01',
+      method: 'card',
     });
   });
 });

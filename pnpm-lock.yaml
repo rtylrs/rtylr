@@ -330,6 +330,9 @@ importers:
       '@voxire/auth':
         specifier: workspace:*
         version: link:../../packages/auth
+      '@voxire/contracts':
+        specifier: workspace:*
+        version: link:../../packages/contracts
       '@voxire/i18n':
         specifier: workspace:*
         version: link:../../packages/i18n

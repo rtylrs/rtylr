@@ -12,6 +12,7 @@ interface RecordPaymentModalProps {
   onClose: () => void;
   invoiceId: string;
   amount: number;
+  currency?: string | null;
   onRecorded?: (amount: number) => void;
 }
 
@@ -31,6 +32,7 @@ const RecordPaymentModal: React.FC<RecordPaymentModalProps> = ({
   onClose,
   invoiceId,
   amount,
+  currency,
   onRecorded,
 }) => {
   const [value, setValue] = useState(amount);
@@ -45,7 +47,7 @@ const RecordPaymentModal: React.FC<RecordPaymentModalProps> = ({
       return;
     }
     recordPayment.mutate(
-      { id: invoiceId, amount: value, paymentDate: date, method },
+      { id: invoiceId, amount: value, currency: currency || 'USD', paymentDate: date, method },
       {
         onSuccess: () => {
           onRecorded?.(value);

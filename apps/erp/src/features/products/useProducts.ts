@@ -2,6 +2,7 @@ import { unwrap } from '@voxire/api';
 import { z } from 'zod';
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
 import { toast } from 'sonner';
+import { validateContractPayload } from '@voxire/contracts/validation/metadata';
 import {
   erpApi,
   CreateProductInput,
@@ -10,6 +11,13 @@ import {
 } from '../../shared/services/erpApi';
 import { productSchema } from '../../shared/schemas/products';
 import { unwrapList } from '../../shared/lib/unwrapList';
+
+function assertContractPayload(messageName: string, payload: Record<string, unknown>): void {
+  const issues = validateContractPayload(messageName, payload);
+  if (issues.length > 0) {
+    throw new Error(issues[0].message);
+  }
+}
 
 export interface ProductFilters {
   search?: string;
@@ -162,16 +170,27 @@ export function useProduct(id: number | undefined) {
 export function useCreateProduct() {
   const qc = useQueryClient();
   return useMutation({
-    mutationFn: (data: CreateProductInput) => unwrap(erpApi.createProduct(data)),
+    mutationFn: (data: CreateProductInput) => {
+      assertContractPayload('erp.product.v1.CreateProductRequest', {
+        ...(data as unknown as Record<string, unknown>),
+      });
+      return unwrap(erpApi.createProduct(data));
+    },
     onSuccess: () => qc.invalidateQueries({ queryKey: ['products'] }),
-    onError: () => toast.error('Failed to create product'),
+    onError: (error) =>
+      toast.error(error instanceof Error ? error.message : 'Failed to create product'),
   });
 }
 
 export function useUpdateProduct() {
   const qc = useQueryClient();
   return useMutation({
-    mutationFn: (data: UpdateProductInput) => unwrap(erpApi.updateProduct(data)),
+    mutationFn: (data: UpdateProductInput) => {
+      assertContractPayload('erp.product.v1.UpdateProductRequest', {
+        ...(data as unknown as Record<string, unknown>),
+      });
+      return unwrap(erpApi.updateProduct(data));
+    },
     onSuccess: (_res, variables) => {
       // Invalidate both the list cache and the individual product cache
       // so the detail screen sees the edited name on its next render.

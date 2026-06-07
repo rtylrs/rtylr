@@ -229,6 +229,7 @@ const InvoiceDetail: React.FC = () => {
         onClose={() => setShowPayment(false)}
         invoiceId={invoice.id}
         amount={balanceDue}
+        currency={invoice.currency}
       />
       <ConfirmDialog
         open={showVoid}
