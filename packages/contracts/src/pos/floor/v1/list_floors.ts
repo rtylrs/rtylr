@@ -5,7 +5,7 @@
 // source: pos/floor/v1/list_floors.proto
 
 /* eslint-disable */
-import type { Floor } from './types';
+import type { Floor } from "./types";
 
 export interface ListFloorsRequest {
   /** branch_id is the branch id value for this contract. */

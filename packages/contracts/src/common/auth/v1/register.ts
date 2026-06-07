@@ -13,8 +13,10 @@ export interface RegisterRequest {
   password: string;
   /** name is the name value for this contract. */
   name: string;
-  /** business_name is the business name value for this contract. */
+  /** business_name is the optional business name to create for the user. */
   businessName: string;
+  /** plan_slug selects the subscription plan to assign after registration. */
+  planSlug: string;
 }
 
 export interface RegisterResponse {

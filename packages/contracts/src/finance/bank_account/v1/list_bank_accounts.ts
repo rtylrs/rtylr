@@ -5,11 +5,8 @@
 // source: finance/bank_account/v1/list_bank_accounts.proto
 
 /* eslint-disable */
-import type {
-  PaginationRequest,
-  PaginationResponse,
-} from '../../../common/pagination/v1/pagination';
-import type { BankAccount } from './types';
+import type { PaginationRequest, PaginationResponse } from "../../../common/pagination/v1/pagination";
+import type { BankAccount } from "./types";
 
 export interface ListBankAccountsRequest {
   /** pagination is the pagination value for this contract. */

@@ -5,7 +5,7 @@
 // source: hub/developer/v1/update_webhook.proto
 
 /* eslint-disable */
-import type { Webhook } from './types';
+import type { Webhook } from "./types";
 
 export interface UpdateWebhookRequest {
   /** id is the unique identifier for the resource. */

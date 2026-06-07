@@ -14,7 +14,9 @@ export interface AuditLog {
   /** branch_id is the branch id value for this contract. */
   branchId: number;
   /** terminal_id is the terminal id value for this contract. */
-  terminalId?: number | undefined;
+  terminalId?:
+    | number
+    | undefined;
   /** employee_id is the employee id value for this contract. */
   employeeId: number;
   /** action is the action value for this contract. */
@@ -22,11 +24,17 @@ export interface AuditLog {
   /** entity_type is the entity type value for this contract. */
   entityType: string;
   /** entity_id is the entity id value for this contract. */
-  entityId?: number | undefined;
+  entityId?:
+    | number
+    | undefined;
   /** details is the details value for this contract. */
-  details?: string | undefined;
+  details?:
+    | string
+    | undefined;
   /** ip_address is the ip address value for this contract. */
-  ipAddress?: string | undefined;
+  ipAddress?:
+    | string
+    | undefined;
   /** created_at is when the record was created. */
   createdAt: string;
 }

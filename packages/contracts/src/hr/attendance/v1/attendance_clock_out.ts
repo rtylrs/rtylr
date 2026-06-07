@@ -5,7 +5,7 @@
 // source: hr/attendance/v1/attendance_clock_out.proto
 
 /* eslint-disable */
-import type { AttendanceRecordPayload } from './types';
+import type { AttendanceRecordPayload } from "./types";
 
 export interface AttendanceClockOutRequest {
   /** ID of the attendance record to close. */

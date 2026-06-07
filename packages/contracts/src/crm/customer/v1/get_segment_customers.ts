@@ -5,7 +5,7 @@
 // source: crm/customer/v1/get_segment_customers.proto
 
 /* eslint-disable */
-import type { Customer } from '../../../pos/customer/v1/types';
+import type { Customer } from "../../../pos/customer/v1/types";
 
 export interface GetSegmentCustomersRequest {
   /** segment_id is the segment id value for this contract. */

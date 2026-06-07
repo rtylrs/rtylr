@@ -5,7 +5,7 @@
 // source: hr/employees/payroll/runs/v1/trigger_payroll_run.proto
 
 /* eslint-disable */
-import type { PayrollRunPayload } from './types';
+import type { PayrollRunPayload } from "./types";
 
 export interface TriggerPayrollRunRequest {
   /** Start of the pay period to process (ISO-8601 date). */

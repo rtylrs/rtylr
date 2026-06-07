@@ -5,7 +5,7 @@
 // source: hub/business/v1/get_business.proto
 
 /* eslint-disable */
-import type { Business } from './types';
+import type { Business } from "./types";
 
 export interface GetBusinessRequest {
   /** business_id is the business id value for this contract. */

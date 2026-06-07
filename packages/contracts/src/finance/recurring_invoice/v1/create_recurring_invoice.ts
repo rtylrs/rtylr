@@ -5,7 +5,7 @@
 // source: finance/recurring_invoice/v1/create_recurring_invoice.proto
 
 /* eslint-disable */
-import type { RecurringInvoice, RecurringInvoiceLine } from './types';
+import type { RecurringInvoice, RecurringInvoiceLine } from "./types";
 
 export interface CreateRecurringInvoiceRequest {
   /** customer_id is the customer id value for this contract. */

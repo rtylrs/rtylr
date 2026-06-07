@@ -5,7 +5,7 @@
 // source: insights/revenue/v1/get_revenue_comparison.proto
 
 /* eslint-disable */
-import type { RevenueComparison } from './types';
+import type { RevenueComparison } from "./types";
 
 export interface GetRevenueComparisonRequest {
   /** period is the period value for this contract. */

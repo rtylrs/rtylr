@@ -18,7 +18,9 @@ export interface CreateSubtaskRequest {
   /** priority is the priority value for this contract. */
   priority: string;
   /** assignee_id is the assignee id value for this contract. */
-  assigneeId?: number | undefined;
+  assigneeId?:
+    | number
+    | undefined;
   /** due_date is the due date value for this contract. */
   dueDate: string;
   /** start_date is the start date value for this contract. */

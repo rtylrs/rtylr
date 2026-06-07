@@ -13,4 +13,5 @@ export interface ChangePasswordRequest {
   newPassword: string;
 }
 
-export interface ChangePasswordResponse {}
+export interface ChangePasswordResponse {
+}

@@ -5,9 +5,10 @@
 // source: flow/workspace/v1/list_workspaces.proto
 
 /* eslint-disable */
-import type { Workspace } from './types';
+import type { Workspace } from "./types";
 
-export interface ListWorkspacesRequest {}
+export interface ListWorkspacesRequest {
+}
 
 export interface ListWorkspacesResponse {
   /** workspaces is the workspaces value for this contract. */

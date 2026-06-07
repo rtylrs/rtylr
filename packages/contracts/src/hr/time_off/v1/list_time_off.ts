@@ -5,9 +5,10 @@
 // source: hr/time_off/v1/list_time_off.proto
 
 /* eslint-disable */
-import type { TimeOffRequest } from './types';
+import type { TimeOffRequest } from "./types";
 
-export interface ListTimeOffRequest {}
+export interface ListTimeOffRequest {
+}
 
 export interface ListTimeOffResponse {
   /** requests is the requests value for this contract. */

@@ -5,9 +5,10 @@
 // source: pos/terminal/v1/list_terminals.proto
 
 /* eslint-disable */
-import type { Terminal } from './types';
+import type { Terminal } from "./types";
 
-export interface ListTerminalsRequest {}
+export interface ListTerminalsRequest {
+}
 
 export interface ListTerminalsResponse {
   /** terminals is the terminals value for this contract. */

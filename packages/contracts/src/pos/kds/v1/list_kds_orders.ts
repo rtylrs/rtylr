@@ -5,9 +5,10 @@
 // source: pos/kds/v1/list_kds_orders.proto
 
 /* eslint-disable */
-import type { KDSOrder } from './types';
+import type { KDSOrder } from "./types";
 
-export interface ListKDSOrdersRequest {}
+export interface ListKDSOrdersRequest {
+}
 
 export interface ListKDSOrdersResponse {
   /** orders is the orders value for this contract. */

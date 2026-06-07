@@ -5,19 +5,27 @@
 // source: hr/location/v1/update_location.proto
 
 /* eslint-disable */
-import type { LocationPayload } from './types';
+import type { LocationPayload } from "./types";
 
 export interface UpdateLocationRequest {
   /** ID of the location to update. */
   id: number;
   /** New name; absent to keep current. */
-  name?: string | undefined;
+  name?:
+    | string
+    | undefined;
   /** New address; absent to keep current. */
-  address?: string | undefined;
+  address?:
+    | string
+    | undefined;
   /** New timezone; absent to keep current. */
-  timezone?: string | undefined;
+  timezone?:
+    | string
+    | undefined;
   /** New active status; absent to keep current. */
-  isActive?: boolean | undefined;
+  isActive?:
+    | boolean
+    | undefined;
   /** New slug; absent to keep current. */
   slug?: string | undefined;
 }

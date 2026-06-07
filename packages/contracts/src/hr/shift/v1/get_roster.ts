@@ -5,7 +5,7 @@
 // source: hr/shift/v1/get_roster.proto
 
 /* eslint-disable */
-import type { ShiftAssignmentPayload } from './types';
+import type { ShiftAssignmentPayload } from "./types";
 
 export interface GetRosterRequest {
   /** Location to fetch the roster for. */

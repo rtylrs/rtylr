@@ -5,9 +5,10 @@
 // source: insights/financial/v1/get_invoice_aging.proto
 
 /* eslint-disable */
-import type { InvoiceAging } from './types';
+import type { InvoiceAging } from "./types";
 
-export interface GetInvoiceAgingRequest {}
+export interface GetInvoiceAgingRequest {
+}
 
 export interface GetInvoiceAgingResponse {
   /** aging is the aging value for this contract. */

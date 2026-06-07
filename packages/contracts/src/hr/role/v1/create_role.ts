@@ -5,7 +5,7 @@
 // source: hr/role/v1/create_role.proto
 
 /* eslint-disable */
-import type { PermissionPayload, RolePayload } from './types';
+import type { PermissionPayload, RolePayload } from "./types";
 
 export interface CreateRoleRequest {
   /** Display name of the new role. */

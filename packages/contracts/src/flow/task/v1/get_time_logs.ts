@@ -5,7 +5,7 @@
 // source: flow/task/v1/get_time_logs.proto
 
 /* eslint-disable */
-import type { TimeLog } from './types';
+import type { TimeLog } from "./types";
 
 export interface GetTimeLogsRequest {
   /** task_id is the task id value for this contract. */

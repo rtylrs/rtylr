@@ -5,7 +5,7 @@
 // source: hr/equipment/v1/create_equipment_request.proto
 
 /* eslint-disable */
-import type { EquipmentRequestPayload } from './types';
+import type { EquipmentRequestPayload } from "./types";
 
 export interface CreateEquipmentRequestRequest {
   /** Employee who needs the equipment. */

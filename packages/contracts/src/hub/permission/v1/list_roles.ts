@@ -5,9 +5,10 @@
 // source: hub/permission/v1/list_roles.proto
 
 /* eslint-disable */
-import type { CustomRole } from './types';
+import type { CustomRole } from "./types";
 
-export interface ListRolesRequest {}
+export interface ListRolesRequest {
+}
 
 export interface ListRolesResponse {
   /** roles is the roles value for this contract. */

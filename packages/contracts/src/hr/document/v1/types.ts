@@ -22,7 +22,9 @@ export interface EmployeeDocumentPayload {
   /** URL to access the document file. */
   fileUrl: string;
   /** Date the document expires (ISO-8601 date); absent if no expiry. */
-  expiryDate?: string | undefined;
+  expiryDate?:
+    | string
+    | undefined;
   /** Employee who uploaded or linked the document. */
   uploadedBy: number;
   /** Unix timestamp when the document was uploaded. */

@@ -5,9 +5,10 @@
 // source: hr/performance/v1/list_review_cycles.proto
 
 /* eslint-disable */
-import type { ReviewCyclePayload } from './types';
+import type { ReviewCyclePayload } from "./types";
 
-export interface ListReviewCyclesRequest {}
+export interface ListReviewCyclesRequest {
+}
 
 export interface ListReviewCyclesResponse {
   /** Page of review cycles. */

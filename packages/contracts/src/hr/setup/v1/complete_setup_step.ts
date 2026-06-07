@@ -5,7 +5,7 @@
 // source: hr/setup/v1/complete_setup_step.proto
 
 /* eslint-disable */
-import type { SetupWizardStepPayload } from './types';
+import type { SetupWizardStepPayload } from "./types";
 
 export interface CompleteSetupStepRequest {
   /** The step to mark as completed (must match a valid step_key). */

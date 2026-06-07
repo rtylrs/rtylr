@@ -5,9 +5,10 @@
 // source: hub/permission/v1/get_permissions.proto
 
 /* eslint-disable */
-import type { PermissionMatrix } from './types';
+import type { PermissionMatrix } from "./types";
 
-export interface GetPermissionsRequest {}
+export interface GetPermissionsRequest {
+}
 
 export interface GetPermissionsResponse {
   /** matrix is the matrix value for this contract. */

@@ -5,7 +5,7 @@
 // source: crm/loyalty/v1/list_loyalty_transactions.proto
 
 /* eslint-disable */
-import type { LoyaltyTransaction } from '../../../pos/loyalty/v1/types';
+import type { LoyaltyTransaction } from "../../../pos/loyalty/v1/types";
 
 export interface ListLoyaltyTransactionsRequest {
   /** customer_id is the customer id value for this contract. */

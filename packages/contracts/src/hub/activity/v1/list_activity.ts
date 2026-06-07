@@ -5,7 +5,7 @@
 // source: hub/activity/v1/list_activity.proto
 
 /* eslint-disable */
-import type { ActivityEntry } from './types';
+import type { ActivityEntry } from "./types";
 
 export interface ListActivityRequest {
   /** limit is the maximum number of records to return. */

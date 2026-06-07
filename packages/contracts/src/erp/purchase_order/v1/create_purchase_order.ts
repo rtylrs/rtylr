@@ -5,7 +5,7 @@
 // source: erp/purchase_order/v1/create_purchase_order.proto
 
 /* eslint-disable */
-import type { CreatePurchaseOrderItemRequest } from './types';
+import type { CreatePurchaseOrderItemRequest } from "./types";
 
 export interface CreatePurchaseOrderRequest {
   /** supplier_id is the supplier id value for this contract. */

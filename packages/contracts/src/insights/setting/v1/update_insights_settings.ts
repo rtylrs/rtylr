@@ -5,7 +5,7 @@
 // source: insights/setting/v1/update_insights_settings.proto
 
 /* eslint-disable */
-import type { InsightsSettings } from './types';
+import type { InsightsSettings } from "./types";
 
 export interface UpdateInsightsSettingsRequest {
   /** settings is the settings value for this contract. */

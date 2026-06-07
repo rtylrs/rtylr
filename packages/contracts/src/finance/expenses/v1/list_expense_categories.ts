@@ -5,9 +5,10 @@
 // source: finance/expenses/v1/list_expense_categories.proto
 
 /* eslint-disable */
-import type { ExpenseCategory } from './types';
+import type { ExpenseCategory } from "./types";
 
-export interface ListExpenseCategoriesRequest {}
+export interface ListExpenseCategoriesRequest {
+}
 
 export interface ListExpenseCategoriesResponse {
   /** categories is the categories value for this contract. */

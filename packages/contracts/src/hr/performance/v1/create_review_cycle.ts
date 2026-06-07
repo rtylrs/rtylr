@@ -5,7 +5,7 @@
 // source: hr/performance/v1/create_review_cycle.proto
 
 /* eslint-disable */
-import type { ReviewCyclePayload } from './types';
+import type { ReviewCyclePayload } from "./types";
 
 export interface CreateReviewCycleRequest {
   /** Human-readable name for the cycle. */

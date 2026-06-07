@@ -5,7 +5,7 @@
 // source: hr/performance/v1/submit_review.proto
 
 /* eslint-disable */
-import type { PerformanceReviewPayload } from './types';
+import type { PerformanceReviewPayload } from "./types";
 
 export interface SubmitReviewRequest {
   /** ID of the performance review being submitted. */

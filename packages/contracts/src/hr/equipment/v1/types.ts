@@ -20,15 +20,21 @@ export interface EquipmentRequestPayload {
   /** Priority level (low | medium | high). */
   urgency: string;
   /** Date by which the equipment is needed (ISO-8601 date); absent if no deadline. */
-  neededByDate?: string | undefined;
+  neededByDate?:
+    | string
+    | undefined;
   /** Workflow status (pending | approved | ordered | delivered | rejected). */
   status: string;
   /** Current step in a multi-level approval chain. */
   currentApprovalLevel: number;
   /** Employee who approved the request; absent if not yet approved. */
-  approvedBy?: number | undefined;
+  approvedBy?:
+    | number
+    | undefined;
   /** Unix timestamp when the equipment was delivered; absent if not yet delivered. */
-  deliveredAt?: number | undefined;
+  deliveredAt?:
+    | number
+    | undefined;
   /** Unix timestamp when this record was created. */
   createdAt: number;
   /** Unix timestamp when this record was last updated. */
@@ -45,11 +51,15 @@ export interface AssetPayload {
   /** Human-readable name of the asset (e.g. "MacBook Pro 16-inch"). */
   name: string;
   /** Manufacturer serial number; absent if not tracked. */
-  serialNumber?: string | undefined;
+  serialNumber?:
+    | string
+    | undefined;
   /** Date the asset was assigned to the employee (ISO-8601 date). */
   assignedDate: string;
   /** Date the asset was returned; absent if still assigned (ISO-8601 date). */
-  returnedDate?: string | undefined;
+  returnedDate?:
+    | string
+    | undefined;
   /** Physical condition of the asset (new | good | fair | damaged). */
   condition: string;
   /** Unix timestamp when this record was created. */

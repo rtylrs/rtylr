@@ -5,7 +5,7 @@
 // source: insights/customer/v1/get_churn_analysis.proto
 
 /* eslint-disable */
-import type { ChurnAnalysis } from './types';
+import type { ChurnAnalysis } from "./types";
 
 export interface GetChurnAnalysisRequest {
   /** period is the period value for this contract. */

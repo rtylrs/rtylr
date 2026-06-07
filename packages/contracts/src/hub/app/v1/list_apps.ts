@@ -5,9 +5,10 @@
 // source: hub/app/v1/list_apps.proto
 
 /* eslint-disable */
-import type { App } from './types';
+import type { App } from "./types";
 
-export interface ListAppsRequest {}
+export interface ListAppsRequest {
+}
 
 export interface ListAppsResponse {
   /** apps is the apps value for this contract. */

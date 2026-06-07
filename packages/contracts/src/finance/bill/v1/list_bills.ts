@@ -5,9 +5,10 @@
 // source: finance/bill/v1/list_bills.proto
 
 /* eslint-disable */
-import type { Bill } from './types';
+import type { Bill } from "./types";
 
-export interface ListBillsRequest {}
+export interface ListBillsRequest {
+}
 
 export interface ListBillsResponse {
   /** bills is the bills value for this contract. */

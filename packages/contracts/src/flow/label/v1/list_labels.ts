@@ -5,7 +5,7 @@
 // source: flow/label/v1/list_labels.proto
 
 /* eslint-disable */
-import type { Label } from './types';
+import type { Label } from "./types";
 
 export interface ListLabelsRequest {
   /** workspace_id is the workspace id value for this contract. */

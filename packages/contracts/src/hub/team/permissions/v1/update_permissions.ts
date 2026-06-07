@@ -15,4 +15,5 @@ export interface UpdatePermissionsRequest {
   role: string;
 }
 
-export interface UpdatePermissionsResponse {}
+export interface UpdatePermissionsResponse {
+}

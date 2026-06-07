@@ -5,7 +5,7 @@
 // source: finance/bank_account/v1/create_bank_account.proto
 
 /* eslint-disable */
-import type { BankAccount } from './types';
+import type { BankAccount } from "./types";
 
 export interface CreateBankAccountRequest {
   /** name is the name value for this contract. */

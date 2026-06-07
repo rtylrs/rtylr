@@ -5,8 +5,8 @@
 // source: crm/customer/v1/get_segment_detail.proto
 
 /* eslint-disable */
-import type { Customer } from '../../../pos/customer/v1/types';
-import type { Segment } from '../../segment/v1/types';
+import type { Customer } from "../../../pos/customer/v1/types";
+import type { Segment } from "../../segment/v1/types";
 
 export interface GetSegmentDetailRequest {
   /** id is the unique identifier for the resource. */
@@ -15,7 +15,9 @@ export interface GetSegmentDetailRequest {
 
 export interface GetSegmentDetailResponse {
   /** segment is the segment value for this contract. */
-  segment: Segment | undefined;
+  segment:
+    | Segment
+    | undefined;
   /** customers is the customers value for this contract. */
   customers: Customer[];
 }

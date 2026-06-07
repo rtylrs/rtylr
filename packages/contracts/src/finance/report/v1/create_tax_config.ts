@@ -5,7 +5,7 @@
 // source: finance/report/v1/create_tax_config.proto
 
 /* eslint-disable */
-import type { TaxConfig } from './types';
+import type { TaxConfig } from "./types";
 
 export interface CreateTaxConfigRequest {
   /** name is the name value for this contract. */

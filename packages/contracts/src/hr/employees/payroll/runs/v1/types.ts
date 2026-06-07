@@ -49,9 +49,13 @@ export interface PayrollRunPayload {
   /** Employee who initiated the payroll run. */
   createdBy: number;
   /** Employee who approved the run; absent if not yet approved. */
-  approvedBy?: number | undefined;
+  approvedBy?:
+    | number
+    | undefined;
   /** Unix timestamp when the run was exported; absent if not yet exported. */
-  exportedAt?: number | undefined;
+  exportedAt?:
+    | number
+    | undefined;
   /** Sum of all entry gross pay amounts in this run. */
   totalGross: number;
   /** Sum of all entry net pay amounts in this run. */

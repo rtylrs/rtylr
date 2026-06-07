@@ -41,9 +41,13 @@ export interface PurchaseOrder {
   /** total is the total number of matching records. */
   total: number;
   /** expected_delivery is the expected delivery value for this contract. */
-  expectedDelivery?: string | undefined;
+  expectedDelivery?:
+    | string
+    | undefined;
   /** received_at is the received at value for this contract. */
-  receivedAt?: string | undefined;
+  receivedAt?:
+    | string
+    | undefined;
   /** notes is the notes value for this contract. */
   notes: string;
   /** created_by is the created by value for this contract. */

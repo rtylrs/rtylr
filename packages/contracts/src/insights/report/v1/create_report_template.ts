@@ -5,7 +5,7 @@
 // source: insights/report/v1/create_report_template.proto
 
 /* eslint-disable */
-import type { ReportTemplate } from './types';
+import type { ReportTemplate } from "./types";
 
 export interface CreateReportTemplateRequest {
   /** name is the name value for this contract. */

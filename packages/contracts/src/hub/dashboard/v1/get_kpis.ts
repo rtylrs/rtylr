@@ -6,7 +6,8 @@
 
 /* eslint-disable */
 
-export interface GetKPIsRequest {}
+export interface GetKPIsRequest {
+}
 
 export interface GetKPIsResponse {
   /** revenue is the revenue value for this contract. */

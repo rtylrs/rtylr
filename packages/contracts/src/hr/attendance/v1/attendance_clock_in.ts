@@ -5,7 +5,7 @@
 // source: hr/attendance/v1/attendance_clock_in.proto
 
 /* eslint-disable */
-import type { AttendanceRecordPayload } from './types';
+import type { AttendanceRecordPayload } from "./types";
 
 export interface AttendanceClockInRequest {
   /** Method used to clock in (app | qr | gps | pin | facial). */
@@ -13,11 +13,17 @@ export interface AttendanceClockInRequest {
   /** Work location where the employee is clocking in. */
   locationId: number;
   /** Latitude at clock-in; absent if location not available. */
-  lat?: number | undefined;
+  lat?:
+    | number
+    | undefined;
   /** Longitude at clock-in; absent if location not available. */
-  lng?: number | undefined;
+  lng?:
+    | number
+    | undefined;
   /** QR token scanned at a terminal; absent if not using QR method. */
-  qrToken?: string | undefined;
+  qrToken?:
+    | string
+    | undefined;
   /** PIN entered by the employee; absent if not using PIN method. Sensitive: do not log this field. */
   pin?: string | undefined;
 }

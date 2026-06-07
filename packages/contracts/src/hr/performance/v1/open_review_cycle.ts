@@ -5,7 +5,7 @@
 // source: hr/performance/v1/open_review_cycle.proto
 
 /* eslint-disable */
-import type { ReviewCyclePayload } from './types';
+import type { ReviewCyclePayload } from "./types";
 
 export interface OpenReviewCycleRequest {
   /** ID of the review cycle to open for submissions. */

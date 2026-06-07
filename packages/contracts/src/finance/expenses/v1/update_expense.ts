@@ -8,7 +8,9 @@
 
 export interface UpdateExpenseRequest {
   /** category_id is the category id value for this contract. */
-  categoryId?: number | undefined;
+  categoryId?:
+    | number
+    | undefined;
   /** amount is the amount value for this contract. */
   amount: number;
   /** currency is the currency value for this contract. */

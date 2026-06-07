@@ -14,11 +14,15 @@ export interface DepartmentPayload {
   /** Location this department operates from. */
   locationId: number;
   /** Parent department for org-chart hierarchy; absent if top-level. */
-  parentDepartmentId?: number | undefined;
+  parentDepartmentId?:
+    | number
+    | undefined;
   /** Display name of the department. */
   name: string;
   /** Work schedule applied to employees in this department by default; absent if none. */
-  defaultWorkScheduleId?: number | undefined;
+  defaultWorkScheduleId?:
+    | number
+    | undefined;
   /** Unix timestamp when this department was created. */
   createdAt: number;
   /** Unix timestamp when this department was last updated. */

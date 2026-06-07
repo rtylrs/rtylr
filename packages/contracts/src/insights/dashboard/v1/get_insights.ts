@@ -6,7 +6,8 @@
 
 /* eslint-disable */
 
-export interface GetInsightsRequest {}
+export interface GetInsightsRequest {
+}
 
 export interface GetInsightsResponse {
   /** total_tasks is the total tasks value for this contract. */
