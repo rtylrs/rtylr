@@ -21,6 +21,7 @@ require (
 )
 
 require (
+	buf.build/go/protovalidate v1.2.0
 	github.com/aws/aws-sdk-go-v2 v1.41.6
 	github.com/aws/aws-sdk-go-v2/config v1.32.16
 	github.com/aws/aws-sdk-go-v2/service/s3 v1.99.1
@@ -30,10 +31,14 @@ require (
 	github.com/getsentry/sentry-go v0.45.1
 	github.com/go-playground/validator/v10 v10.30.2
 	github.com/voxire/voxie v0.0.0-00010101000000-000000000000
+	github.com/workos/workos-go/v4 v4.46.1
 	golang.org/x/image v0.39.0
 )
 
 require (
+	buf.build/gen/go/bufbuild/protovalidate/protocolbuffers/go v1.36.11-20260415201107-50325440f8f2.1 // indirect
+	cel.dev/expr v0.25.1 // indirect
+	github.com/antlr4-go/antlr/v4 v4.13.1 // indirect
 	github.com/aws/aws-sdk-go-v2/aws/protocol/eventstream v1.7.9 // indirect
 	github.com/aws/aws-sdk-go-v2/credentials v1.19.15 // indirect
 	github.com/aws/aws-sdk-go-v2/feature/ec2/imds v1.18.22 // indirect
@@ -54,10 +59,11 @@ require (
 	github.com/go-playground/locales v0.14.1 // indirect
 	github.com/go-playground/universal-translator v0.18.1 // indirect
 	github.com/golang/freetype v0.0.0-20170609003504-e2365dfdc4a0 // indirect
+	github.com/google/cel-go v0.28.0 // indirect
 	github.com/google/go-querystring v1.2.0 // indirect
 	github.com/klauspost/compress v1.18.5 // indirect
 	github.com/leodido/go-urn v1.4.0 // indirect
-	github.com/workos/workos-go/v4 v4.46.1 // indirect
+	golang.org/x/exp v0.0.0-20250813145105-42675adae3e6 // indirect
 )
 
 require (
@@ -97,7 +103,7 @@ require (
 	golang.org/x/time v0.15.0 // indirect
 	google.golang.org/genproto/googleapis/api v0.0.0-20260401024825-9d38bb4040a9 // indirect
 	google.golang.org/genproto/googleapis/rpc v0.0.0-20260401024825-9d38bb4040a9 // indirect
-	google.golang.org/protobuf v1.36.11 // indirect
+	google.golang.org/protobuf v1.36.11
 )
 
 replace github.com/voxire/voxie => ./voxie

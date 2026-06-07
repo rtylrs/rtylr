@@ -7,17 +7,23 @@ import (
 	"fmt"
 	"io"
 	"net/http"
+	"reflect"
 	"strconv"
 	"strings"
 
+	"buf.build/go/protovalidate"
 	"github.com/go-chi/chi/v5"
 	"github.com/go-playground/validator/v10"
+	"google.golang.org/protobuf/proto"
 
 	"github.com/voxire/onion/internal/platform/errors"
 	"github.com/voxire/onion/internal/platform/logger"
 )
 
-var validateInstance = validator.New()
+var (
+	validateInstance = validator.New()
+	protoValidator   = protovalidate.GlobalValidator
+)
 
 type MiddlewareFunc func(next http.Handler) http.Handler
 
@@ -186,6 +192,17 @@ func wrapHandler[Req, Res any](ctx context.Context, handler HandlerFunc[Req, Res
 			return
 		}
 
+		if err := validateProtoMessages(res); err != nil {
+			logger.Ctx(reqCtx).Error("Response proto validation failed", logger.Error(err))
+			writeServerError(reqCtx, w, &errors.ServerError{
+				HTTPCode: http.StatusInternalServerError,
+				Code:     http.StatusInternalServerError,
+				Message:  "Response validation failed",
+			})
+
+			return
+		}
+
 		w.Header().Set("Content-Type", "application/json")
 		w.WriteHeader(http.StatusOK)
 
@@ -236,10 +253,91 @@ func validateRequest[Req any](ctx context.Context, handler interface{}, req *Req
 		}
 	}
 
+	if err := validateProtoMessages(req); err != nil {
+		return &errors.ServerError{
+			HTTPCode: http.StatusBadRequest,
+			Code:     http.StatusBadRequest,
+			Message:  "Proto validation failed: " + err.Error(),
+		}
+	}
+
 	// Then run custom logic validation if the handler implements ValidatorFunc
 	if v, ok := handler.(ValidatorFunc[Req]); ok {
 		if err := v.Validate(ctx, req); err != nil {
 			return err
+		}
+	}
+
+	return nil
+}
+
+func validateProtoMessages(value any) error {
+	seen := make(map[uintptr]struct{})
+	return walkProtoMessages(reflect.ValueOf(value), seen)
+}
+
+func walkProtoMessages(value reflect.Value, seen map[uintptr]struct{}) error {
+	if !value.IsValid() {
+		return nil
+	}
+
+	if value.Kind() == reflect.Interface {
+		if value.IsNil() {
+			return nil
+		}
+		return walkProtoMessages(value.Elem(), seen)
+	}
+
+	if value.Kind() == reflect.Pointer {
+		if value.IsNil() {
+			return nil
+		}
+		ptr := value.Pointer()
+		if _, ok := seen[ptr]; ok {
+			return nil
+		}
+		seen[ptr] = struct{}{}
+
+		if value.CanInterface() {
+			if msg, ok := value.Interface().(proto.Message); ok {
+				return protoValidator.Validate(msg)
+			}
+		}
+
+		return walkProtoMessages(value.Elem(), seen)
+	}
+
+	if value.CanAddr() {
+		ptr := value.Addr()
+		if ptr.CanInterface() {
+			if msg, ok := ptr.Interface().(proto.Message); ok {
+				return protoValidator.Validate(msg)
+			}
+		}
+	}
+
+	switch value.Kind() {
+	case reflect.Struct:
+		for i := 0; i < value.NumField(); i++ {
+			field := value.Field(i)
+			if !field.CanInterface() && !field.CanAddr() {
+				continue
+			}
+			if err := walkProtoMessages(field, seen); err != nil {
+				return err
+			}
+		}
+	case reflect.Slice, reflect.Array:
+		for i := 0; i < value.Len(); i++ {
+			if err := walkProtoMessages(value.Index(i), seen); err != nil {
+				return err
+			}
+		}
+	case reflect.Map:
+		for _, key := range value.MapKeys() {
+			if err := walkProtoMessages(value.MapIndex(key), seen); err != nil {
+				return err
+			}
 		}
 	}
 
