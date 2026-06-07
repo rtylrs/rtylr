@@ -9719,9 +9719,10 @@ export function validateContractPayload(messageName: string, payload: Record<str
   const oneofs = getContractOneofValidation(messageName);
   const issues: ContractValidationIssue[] = [];
   if (!fields) return issues;
+  const fieldMap = fields as Record<string, ContractFieldValidation>;
 
   for (const oneof of oneofs) {
-    const present = oneof.fields.filter((fieldName) => hasValue(payload[fieldName], fields[fieldName] ?? { repeated: false } as ContractFieldValidation));
+    const present = oneof.fields.filter((fieldName) => hasValue(payload[fieldName], fieldMap[fieldName] ?? { repeated: false } as ContractFieldValidation));
     if (oneof.required && present.length === 0) {
       issues.push({ field: oneof.fields[0] ?? "", protoName: oneof.protoFields[0] ?? "", message: `one of ${oneof.fields.join(", ")} is required` });
     }
