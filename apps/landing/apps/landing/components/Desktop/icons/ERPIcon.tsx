@@ -8,7 +8,13 @@ export const ERPIcon = ({ size = 44 }: { size?: number }) => (
     fill="none"
     xmlns="http://www.w3.org/2000/svg"
   >
-    <rect x="0" y="0" width="44" height="44" rx="10" fill="#0284c7" />
+    <defs>
+      <linearGradient id="erp-bg" x1="0" y1="0" x2="0" y2="1">
+        <stop offset="0" stopColor="#2bb8e0" />
+        <stop offset="1" stopColor="#0a82b4" />
+      </linearGradient>
+    </defs>
+    <rect x="0" y="0" width="44" height="44" rx="10" fill="url(#erp-bg)" />
     {/* Isometric cube - top face */}
     <path d="M22 7L36 14.5V22L22 29.5L8 22V14.5L22 7Z" fill="none" />
     <path

@@ -8,7 +8,13 @@ export const FlowIcon = ({ size = 44 }: { size?: number }) => (
     fill="none"
     xmlns="http://www.w3.org/2000/svg"
   >
-    <rect x="0" y="0" width="44" height="44" rx="10" fill="#4f46e5" />
+    <defs>
+      <linearGradient id="flow-bg" x1="0" y1="0" x2="0" y2="1">
+        <stop offset="0" stopColor="#8a92fb" />
+        <stop offset="1" stopColor="#4f46e5" />
+      </linearGradient>
+    </defs>
+    <rect x="0" y="0" width="44" height="44" rx="10" fill="url(#flow-bg)" />
     {/* Connector lines */}
     <path
       d="M22 12.5V20"

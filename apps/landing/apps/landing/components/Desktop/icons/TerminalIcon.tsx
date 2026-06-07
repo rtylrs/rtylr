@@ -8,28 +8,25 @@ export const TerminalIcon = ({ size = 44 }: { size?: number }) => (
     fill="none"
     xmlns="http://www.w3.org/2000/svg"
   >
-    <rect
-      x="4"
-      y="7"
-      width="36"
-      height="30"
-      rx="4"
-      fill="rgba(10,10,10,0.9)"
-      stroke="rgba(255,255,255,0.25)"
-      strokeWidth="1"
-    />
-    <rect x="4" y="7" width="36" height="8" rx="4" fill="rgba(40,40,44,0.95)" />
-    <rect x="4" y="11" width="36" height="4" fill="rgba(40,40,44,0.95)" />
-    <circle cx="10" cy="11" r="1.5" fill="#ff5f57" />
-    <circle cx="15.5" cy="11" r="1.5" fill="#febc2e" />
-    <circle cx="21" cy="11" r="1.5" fill="#28c840" />
+    <defs>
+      <linearGradient id="term-bg" x1="0" y1="0" x2="0" y2="1">
+        <stop offset="0" stopColor="#2a2a32" />
+        <stop offset="1" stopColor="#141419" />
+      </linearGradient>
+    </defs>
+    <rect x="0" y="0" width="44" height="44" rx="10" fill="url(#term-bg)" />
+    <rect x="0" y="0" width="44" height="11" rx="10" fill="rgba(255,255,255,0.07)" />
+    <rect x="0" y="7" width="44" height="4" fill="rgba(255,255,255,0.07)" />
+    <circle cx="10" cy="9" r="1.8" fill="#ff5f57" />
+    <circle cx="16" cy="9" r="1.8" fill="#febc2e" />
+    <circle cx="22" cy="9" r="1.8" fill="#28c840" />
     <path
-      d="M11 22l5 4-5 4"
+      d="M12 23l6 5-6 5"
       stroke="#22c55e"
-      strokeWidth="1.5"
+      strokeWidth="2"
       strokeLinecap="round"
       strokeLinejoin="round"
     />
-    <rect x="19" y="29" width="12" height="1.5" rx="0.75" fill="#22c55e" opacity="0.7" />
+    <rect x="22" y="31" width="12" height="2" rx="1" fill="#22c55e" opacity="0.7" />
   </svg>
 );

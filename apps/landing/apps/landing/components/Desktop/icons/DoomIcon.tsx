@@ -8,16 +8,13 @@ export const DoomIcon = ({ size = 44 }: { size?: number }) => (
     fill="none"
     xmlns="http://www.w3.org/2000/svg"
   >
-    <rect
-      x="4"
-      y="4"
-      width="36"
-      height="36"
-      rx="8"
-      fill="rgba(20,5,5,0.95)"
-      stroke="rgba(239,68,68,0.3)"
-      strokeWidth="1"
-    />
+    <defs>
+      <linearGradient id="doom-bg" x1="0" y1="0" x2="0" y2="1">
+        <stop offset="0" stopColor="#2c0e0e" />
+        <stop offset="1" stopColor="#160505" />
+      </linearGradient>
+    </defs>
+    <rect x="0" y="0" width="44" height="44" rx="10" fill="url(#doom-bg)" />
     <circle
       cx="22"
       cy="18"

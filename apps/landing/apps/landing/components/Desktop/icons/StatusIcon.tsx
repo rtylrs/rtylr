@@ -8,16 +8,13 @@ export const StatusIcon = ({ size = 44 }: { size?: number }) => (
     fill="none"
     xmlns="http://www.w3.org/2000/svg"
   >
-    <rect
-      x="4"
-      y="4"
-      width="36"
-      height="36"
-      rx="8"
-      fill="rgba(5,20,10,0.95)"
-      stroke="rgba(34,197,94,0.3)"
-      strokeWidth="1"
-    />
+    <defs>
+      <linearGradient id="status-bg" x1="0" y1="0" x2="0" y2="1">
+        <stop offset="0" stopColor="#103024" />
+        <stop offset="1" stopColor="#07160e" />
+      </linearGradient>
+    </defs>
+    <rect x="0" y="0" width="44" height="44" rx="10" fill="url(#status-bg)" />
     <path
       d="M8 24h4l3-8 4 16 3-12 3 6 3-4 4 2h4"
       stroke="#22c55e"

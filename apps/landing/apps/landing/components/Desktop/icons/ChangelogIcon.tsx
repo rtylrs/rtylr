@@ -8,7 +8,13 @@ export const ChangelogIcon = ({ size = 44 }: { size?: number }) => (
     fill="none"
     xmlns="http://www.w3.org/2000/svg"
   >
-    <rect x="0" y="0" width="44" height="44" rx="10" fill="#0891b2" />
+    <defs>
+      <linearGradient id="chg-bg" x1="0" y1="0" x2="0" y2="1">
+        <stop offset="0" stopColor="#46c8f0" />
+        <stop offset="1" stopColor="#0a91b8" />
+      </linearGradient>
+    </defs>
+    <rect x="0" y="0" width="44" height="44" rx="10" fill="url(#chg-bg)" />
     {/* Outer ring */}
     <circle
       cx="22"

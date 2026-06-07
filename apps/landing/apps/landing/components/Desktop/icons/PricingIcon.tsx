@@ -8,7 +8,13 @@ export const PricingIcon = ({ size = 44 }: { size?: number }) => (
     fill="none"
     xmlns="http://www.w3.org/2000/svg"
   >
-    <rect x="0" y="0" width="44" height="44" rx="10" fill="#ea580c" />
+    <defs>
+      <linearGradient id="pri-bg" x1="0" y1="0" x2="0" y2="1">
+        <stop offset="0" stopColor="#ffa552" />
+        <stop offset="1" stopColor="#e8590c" />
+      </linearGradient>
+    </defs>
+    <rect x="0" y="0" width="44" height="44" rx="10" fill="url(#pri-bg)" />
     {/* Tag outline */}
     <path
       d="M9 9h16l11 13-11 13H9V9Z"

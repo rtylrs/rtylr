@@ -8,16 +8,13 @@ export const SnakeIcon = ({ size = 44 }: { size?: number }) => (
     fill="none"
     xmlns="http://www.w3.org/2000/svg"
   >
-    <rect
-      x="4"
-      y="4"
-      width="36"
-      height="36"
-      rx="8"
-      fill="rgba(5,15,5,0.95)"
-      stroke="rgba(34,197,94,0.3)"
-      strokeWidth="1"
-    />
+    <defs>
+      <linearGradient id="snake-bg" x1="0" y1="0" x2="0" y2="1">
+        <stop offset="0" stopColor="#13301a" />
+        <stop offset="1" stopColor="#07160a" />
+      </linearGradient>
+    </defs>
+    <rect x="0" y="0" width="44" height="44" rx="10" fill="url(#snake-bg)" />
     <rect x="9" y="9" width="6" height="6" rx="1.5" fill="rgba(34,197,94,0.9)" />
     <rect x="15" y="9" width="6" height="6" rx="1.5" fill="rgba(34,197,94,0.7)" />
     <rect x="21" y="9" width="6" height="6" rx="1.5" fill="rgba(34,197,94,0.7)" />

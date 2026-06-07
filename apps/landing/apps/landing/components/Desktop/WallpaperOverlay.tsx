@@ -8,7 +8,7 @@ const SVG_PROPS = {
   viewBox: '0 0 1440 900',
 };
 
-// Deterministic pseudo-random so star fields are stable across renders.
+// Deterministic pseudo-random so generated detail is stable across renders.
 const rng = (seed: number): (() => number) => {
   let s = seed;
   return () => {
@@ -29,8 +29,8 @@ const StarField: React.FC<{ count: number; seed: number; maxY: number; twinkle?:
       {Array.from({ length: count }).map((_, i) => {
         const cx = r() * 1440;
         const cy = r() * maxY;
-        const rad = 0.5 + r() * 1.4;
-        const o = 0.4 + r() * 0.6;
+        const rad = 0.5 + r() * 1.5;
+        const o = 0.35 + r() * 0.6;
         const dur = 2 + r() * 4;
         const delay = r() * 5;
         return (
@@ -53,205 +53,281 @@ const StarField: React.FC<{ count: number; seed: number; maxY: number; twinkle?:
   );
 };
 
-// ─── Midnight — Neon city skyline mirrored on water ──────────────────────────
-const Midnight: React.FC = () => (
-  <svg {...SVG_PROPS}>
-    <defs>
-      <linearGradient id="mn-sky" x1="0" y1="0" x2="0" y2="1">
-        <stop offset="0%" stopColor="#070a1f" />
-        <stop offset="45%" stopColor="#141a44" />
-        <stop offset="75%" stopColor="#3a1f5c" />
-        <stop offset="100%" stopColor="#6b2f63" />
-      </linearGradient>
-      <radialGradient id="mn-moon" cx="50%" cy="50%" r="50%">
-        <stop offset="0%" stopColor="#fff7e8" />
-        <stop offset="70%" stopColor="#fce9c0" />
-        <stop offset="100%" stopColor="#fce9c0" stopOpacity="0" />
-      </radialGradient>
-      <linearGradient id="mn-water" x1="0" y1="0" x2="0" y2="1">
-        <stop offset="0%" stopColor="#6b2f63" />
-        <stop offset="40%" stopColor="#2a1a48" />
-        <stop offset="100%" stopColor="#0c0e26" />
-      </linearGradient>
-      <style>{`
-        @keyframes wp-twinkle { 0%,100%{opacity:.9} 50%{opacity:.15} }
-        @keyframes mn-shimmer { 0%,100%{opacity:.5;transform:translateX(0)} 50%{opacity:.8;transform:translateX(6px)} }
-      `}</style>
-    </defs>
+// ─── Midnight — city skyline glowing under a hazy twilight ───────────────────
+// Skyline built as continuous stepped silhouettes (one path per depth layer)
+// so it reads as a connected cityscape, not scattered boxes. Light pollution
+// glow + base haze tie it together; soft window bokeh gives it life.
+const buildSkyline = (
+  seed: number,
+  baseY: number,
+  hMin: number,
+  hMax: number,
+  wMin: number,
+  wMax: number
+): { path: string; segs: { x: number; w: number; top: number }[] } => {
+  const r = rng(seed);
+  const segs: { x: number; w: number; top: number }[] = [];
+  let x = -40;
+  while (x < 1480) {
+    const w = wMin + r() * (wMax - wMin);
+    const h = hMin + r() * (hMax - hMin);
+    segs.push({ x, w, top: baseY - h });
+    x += w;
+  }
+  let d = `M${segs[0].x} 900 L${segs[0].x} ${segs[0].top}`;
+  segs.forEach((s) => {
+    d += ` L${s.x} ${s.top} L${s.x + s.w} ${s.top}`;
+  });
+  d += ` L${x} 900 Z`;
+  return { path: d, segs };
+};
 
-    <rect width="1440" height="630" fill="url(#mn-sky)" />
-    <StarField count={90} seed={7} maxY={520} twinkle />
+const Windows: React.FC<{
+  segs: { x: number; w: number; top: number }[];
+  baseY: number;
+  seed: number;
+}> = ({ segs, baseY, seed }) => {
+  const r = rng(seed);
+  const rects: React.ReactNode[] = [];
+  segs.forEach((s, si) => {
+    if (s.w < 26) return;
+    for (let wy = s.top + 14; wy < baseY - 10; wy += 16) {
+      for (let wx = s.x + 8; wx < s.x + s.w - 12; wx += 14) {
+        if (r() > 0.55) continue;
+        rects.push(
+          <rect
+            key={`${si}-${wx}-${wy}`}
+            x={wx}
+            y={wy}
+            width={6}
+            height={8}
+            rx={1}
+            opacity={0.25 + r() * 0.6}
+          />
+        );
+      }
+    }
+  });
+  return <g fill="#ffd27a">{rects}</g>;
+};
 
-    {/* Moon */}
-    <circle cx="1140" cy="150" r="150" fill="url(#mn-moon)" opacity="0.5" />
-    <circle cx="1140" cy="150" r="64" fill="#fdf3d8" />
-    <circle cx="1118" cy="132" r="11" fill="#ecdcb6" opacity="0.6" />
-    <circle cx="1158" cy="168" r="8" fill="#ecdcb6" opacity="0.55" />
-    <circle cx="1166" cy="128" r="6" fill="#ecdcb6" opacity="0.5" />
+const Midnight: React.FC = () => {
+  const far = buildSkyline(3, 560, 80, 200, 70, 130);
+  const mid = buildSkyline(11, 610, 120, 300, 80, 150);
+  const near = buildSkyline(29, 660, 160, 380, 90, 170);
+  return (
+    <svg {...SVG_PROPS}>
+      <defs>
+        <linearGradient id="mn-sky" x1="0" y1="0" x2="0" y2="1">
+          <stop offset="0%" stopColor="#070b22" />
+          <stop offset="40%" stopColor="#141d45" />
+          <stop offset="70%" stopColor="#34315e" />
+          <stop offset="100%" stopColor="#7a4a5e" />
+        </linearGradient>
+        <radialGradient id="mn-moon" cx="50%" cy="50%" r="50%">
+          <stop offset="0%" stopColor="#fff7e8" />
+          <stop offset="65%" stopColor="#fce9c0" stopOpacity="0.55" />
+          <stop offset="100%" stopColor="#fce9c0" stopOpacity="0" />
+        </radialGradient>
+        <radialGradient id="mn-pollution" cx="50%" cy="100%" r="75%">
+          <stop offset="0%" stopColor="#ffb27a" stopOpacity="0.5" />
+          <stop offset="45%" stopColor="#b9628a" stopOpacity="0.22" />
+          <stop offset="100%" stopColor="#b9628a" stopOpacity="0" />
+        </radialGradient>
+        <filter id="mn-haze" x="-20%" y="-60%" width="140%" height="220%">
+          <feGaussianBlur stdDeviation="26" />
+        </filter>
+        <style>{`
+          @keyframes wp-twinkle { 0%,100%{opacity:.9} 50%{opacity:.12} }
+          @keyframes mn-beacon { 0%,45%,100%{opacity:1} 55%,95%{opacity:.1} }
+        `}</style>
+      </defs>
 
-    {/* Far skyline — hazy purple */}
-    <g fill="#2f2155" opacity="0.85">
-      <rect x="60" y="430" width="70" height="200" />
-      <rect x="150" y="390" width="54" height="240" />
-      <rect x="230" y="450" width="80" height="180" />
-      <rect x="340" y="410" width="48" height="220" />
-      <rect x="900" y="420" width="64" height="210" />
-      <rect x="990" y="380" width="52" height="250" />
-      <rect x="1070" y="445" width="76" height="185" />
-      <rect x="1170" y="405" width="50" height="225" />
-      <rect x="1260" y="440" width="70" height="190" />
-    </g>
+      <rect width="1440" height="900" fill="url(#mn-sky)" />
+      <StarField count={80} seed={7} maxY={460} twinkle />
 
-    {/* Mid skyline */}
-    <g fill="#1c1640">
-      <rect x="0" y="470" width="90" height="160" />
-      <rect x="120" y="430" width="66" height="200" />
-      <rect x="210" y="490" width="78" height="140" />
-      <rect x="430" y="400" width="60" height="230" />
-      <rect x="520" y="350" width="44" height="280" />
-      <rect x="600" y="440" width="84" height="190" />
-      <rect x="760" y="410" width="58" height="220" />
-      <rect x="850" y="470" width="72" height="160" />
-      <rect x="1130" y="455" width="62" height="175" />
-      <rect x="1230" y="415" width="56" height="215" />
-      <rect x="1330" y="465" width="110" height="165" />
-    </g>
+      {/* Moon */}
+      <circle cx="1130" cy="160" r="170" fill="url(#mn-moon)" />
+      <circle cx="1130" cy="160" r="62" fill="#fdf3d8" />
+      <circle cx="1110" cy="144" r="10" fill="#ecdcb6" opacity="0.55" />
+      <circle cx="1148" cy="176" r="7" fill="#ecdcb6" opacity="0.5" />
 
-    {/* Front skyline — darkest, lit windows */}
-    <g fill="#0c0a24">
-      <rect x="270" y="370" width="92" height="260" />
-      <rect x="380" y="320" width="58" height="310" />
-      <rect x="660" y="300" width="74" height="330" />
-      <rect x="700" y="270" width="20" height="40" />
-      <rect x="980" y="350" width="88" height="280" />
-      <rect x="1090" y="330" width="60" height="300" />
-    </g>
-    {/* Lit windows on front buildings */}
-    <g fill="#ffd66b">
-      {[
-        [286, 392], [320, 392], [286, 420], [320, 448], [286, 476], [320, 504], [286, 560],
-        [396, 342], [414, 342], [396, 380], [414, 418], [396, 470], [414, 520], [396, 580],
-        [676, 322], [702, 322], [676, 360], [702, 398], [676, 440], [702, 490], [676, 540], [702, 590],
-        [996, 372], [1030, 372], [996, 410], [1030, 458], [996, 510], [1030, 560],
-        [1106, 352], [1124, 352], [1106, 400], [1124, 450], [1106, 520], [1124, 580],
-      ].map(([x, y], i) => (
-        <rect
-          key={i}
-          x={x}
-          y={y}
-          width="12"
-          height="16"
-          rx="1"
-          opacity={0.5 + (i % 4) * 0.13}
-        />
-      ))}
-    </g>
+      {/* Light-pollution glow behind the skyline */}
+      <rect x="0" y="360" width="1440" height="540" fill="url(#mn-pollution)" />
 
-    {/* Water + reflection */}
-    <rect y="630" width="1440" height="270" fill="url(#mn-water)" />
-    <g fill="#0c0a24" opacity="0.4">
-      <rect x="270" y="630" width="92" height="120" />
-      <rect x="380" y="630" width="58" height="150" />
-      <rect x="660" y="630" width="74" height="170" />
-      <rect x="980" y="630" width="88" height="140" />
-      <rect x="1090" y="630" width="60" height="150" />
-    </g>
-    <circle cx="1140" cy="690" r="40" fill="#fdf3d8" opacity="0.25" />
-    {[660, 700, 740, 780].map((y, i) => (
+      {/* Far layer */}
+      <path d={far.path} fill="#2c2f58" opacity="0.7" />
+      {/* Mid layer */}
+      <path d={mid.path} fill="#1a1c42" />
+      <Windows segs={mid.segs} baseY={610} seed={101} />
+      {/* Near layer */}
+      <path d={near.path} fill="#0c0d26" />
+      <Windows segs={near.segs} baseY={660} seed={202} />
+
+      {/* Beacon lights on the two tallest near towers */}
+      {near.segs
+        .filter((s) => s.top < 380)
+        .slice(0, 3)
+        .map((s, i) => (
+          <circle
+            key={i}
+            cx={s.x + s.w / 2}
+            cy={s.top - 2}
+            r={3}
+            fill="#ff4d4d"
+            style={{ animation: `mn-beacon ${2 + i * 0.6}s ease-in-out ${i * 0.4}s infinite` }}
+          />
+        ))}
+
+      {/* Ground haze — glowing fog that bleeds the city light upward */}
       <rect
-        key={i}
-        x="200"
-        y={y}
-        width="1040"
-        height="3"
-        fill="#ffd66b"
-        opacity="0.1"
-        style={{ animation: `mn-shimmer ${3 + i}s ease-in-out ${i * 0.5}s infinite` }}
+        x="-40"
+        y="640"
+        width="1520"
+        height="120"
+        fill="#9a6a7a"
+        opacity="0.5"
+        filter="url(#mn-haze)"
       />
-    ))}
-  </svg>
-);
+      <rect
+        x="-40"
+        y="700"
+        width="1520"
+        height="160"
+        fill="#d98a6a"
+        opacity="0.35"
+        filter="url(#mn-haze)"
+      />
+    </svg>
+  );
+};
 
-// ─── Aurora — flowing northern lights over a frozen lake ─────────────────────
-const Aurora: React.FC = () => (
-  <svg {...SVG_PROPS}>
-    <defs>
-      <linearGradient id="au-sky" x1="0" y1="0" x2="0" y2="1">
-        <stop offset="0%" stopColor="#040814" />
-        <stop offset="55%" stopColor="#081428" />
-        <stop offset="100%" stopColor="#0e2236" />
-      </linearGradient>
-      <linearGradient id="au-r1" x1="0" y1="0" x2="0" y2="1">
-        <stop offset="0%" stopColor="#48ffb0" stopOpacity="0" />
-        <stop offset="40%" stopColor="#3affa0" stopOpacity="0.55" />
-        <stop offset="100%" stopColor="#0affc8" stopOpacity="0" />
-      </linearGradient>
-      <linearGradient id="au-r2" x1="0" y1="0" x2="0" y2="1">
-        <stop offset="0%" stopColor="#7a5cff" stopOpacity="0" />
-        <stop offset="45%" stopColor="#9d6bff" stopOpacity="0.5" />
-        <stop offset="100%" stopColor="#5cc8ff" stopOpacity="0" />
-      </linearGradient>
-      <linearGradient id="au-r3" x1="0" y1="0" x2="0" y2="1">
-        <stop offset="0%" stopColor="#22d9a0" stopOpacity="0" />
-        <stop offset="50%" stopColor="#3affb0" stopOpacity="0.4" />
-        <stop offset="100%" stopColor="#22d9a0" stopOpacity="0" />
-      </linearGradient>
-      <linearGradient id="au-lake" x1="0" y1="0" x2="0" y2="1">
-        <stop offset="0%" stopColor="#0e2236" />
-        <stop offset="100%" stopColor="#04101e" />
-      </linearGradient>
-      <filter id="au-blur" x="-30%" y="-30%" width="160%" height="160%">
-        <feGaussianBlur stdDeviation="22" />
-      </filter>
-      <style>{`
-        @keyframes au-drift1 { 0%,100%{transform:translateX(0) scaleY(1)} 50%{transform:translateX(-40px) scaleY(1.08)} }
-        @keyframes au-drift2 { 0%,100%{transform:translateX(0) scaleY(1)} 50%{transform:translateX(50px) scaleY(0.94)} }
-        @keyframes au-drift3 { 0%,100%{transform:translateX(0)} 50%{transform:translateX(-28px)} }
-      `}</style>
-    </defs>
+// ─── Aurora — full shimmering curtains of light over a low ridge ─────────────
+const Aurora: React.FC = () => {
+  const rays = (seed: number, yBase: number, amp: number, count: number) => {
+    const r = rng(seed);
+    return Array.from({ length: count }).map((_, i) => {
+      const x = (i / count) * 1520 - 40;
+      const w = 10 + r() * 26;
+      const top = yBase + Math.sin(i * 0.4) * amp - 30 - r() * 60;
+      const h = 240 + r() * 220;
+      const dur = 4 + r() * 5;
+      const delay = r() * 5;
+      return { x, w, top, h, dur, delay };
+    });
+  };
+  const greenRays = rays(5, 230, 70, 46);
+  const violetRays = rays(17, 330, 90, 34);
+  return (
+    <svg {...SVG_PROPS}>
+      <defs>
+        <linearGradient id="au-sky" x1="0" y1="0" x2="0" y2="1">
+          <stop offset="0%" stopColor="#03060f" />
+          <stop offset="55%" stopColor="#06121f" />
+          <stop offset="100%" stopColor="#0a2030" />
+        </linearGradient>
+        <linearGradient id="au-green" x1="0" y1="0" x2="0" y2="1">
+          <stop offset="0%" stopColor="#4dffb0" stopOpacity="0" />
+          <stop offset="35%" stopColor="#3dff9a" stopOpacity="0.75" />
+          <stop offset="70%" stopColor="#1fd9c0" stopOpacity="0.4" />
+          <stop offset="100%" stopColor="#1fd9c0" stopOpacity="0" />
+        </linearGradient>
+        <linearGradient id="au-violet" x1="0" y1="0" x2="0" y2="1">
+          <stop offset="0%" stopColor="#9d6bff" stopOpacity="0" />
+          <stop offset="45%" stopColor="#b06bff" stopOpacity="0.55" />
+          <stop offset="100%" stopColor="#ff6bd0" stopOpacity="0" />
+        </linearGradient>
+        <radialGradient id="au-bloom" cx="50%" cy="38%" r="60%">
+          <stop offset="0%" stopColor="#2dffb0" stopOpacity="0.28" />
+          <stop offset="100%" stopColor="#2dffb0" stopOpacity="0" />
+        </radialGradient>
+        <filter id="au-soft" x="-40%" y="-40%" width="180%" height="180%">
+          <feGaussianBlur stdDeviation="14" />
+        </filter>
+        <linearGradient id="au-lake" x1="0" y1="0" x2="0" y2="1">
+          <stop offset="0%" stopColor="#0a2030" />
+          <stop offset="100%" stopColor="#030b14" />
+        </linearGradient>
+        <style>{`
+          @keyframes au-ray { 0%,100%{opacity:.35;transform:scaleY(1)} 50%{opacity:.85;transform:scaleY(1.12)} }
+        `}</style>
+      </defs>
 
-    <rect width="1440" height="660" fill="url(#au-sky)" />
-    <StarField count={110} seed={21} maxY={620} twinkle />
+      <rect width="1440" height="700" fill="url(#au-sky)" />
+      <StarField count={140} seed={21} maxY={680} twinkle />
 
-    {/* Aurora ribbons */}
-    <g filter="url(#au-blur)">
+      {/* Broad green bloom filling the sky */}
+      <rect width="1440" height="700" fill="url(#au-bloom)" />
+
+      {/* Violet curtain (behind) */}
+      <g filter="url(#au-soft)">
+        {violetRays.map((r, i) => (
+          <rect
+            key={`v${i}`}
+            x={r.x}
+            y={r.top}
+            width={r.w}
+            height={r.h}
+            rx={r.w / 2}
+            fill="url(#au-violet)"
+            style={{
+              animation: `au-ray ${r.dur}s ease-in-out ${r.delay}s infinite`,
+              transformOrigin: `${r.x + r.w / 2}px ${r.top}px`,
+            }}
+          />
+        ))}
+      </g>
+      {/* Green curtain (front, brighter) */}
+      <g filter="url(#au-soft)">
+        {greenRays.map((r, i) => (
+          <rect
+            key={`g${i}`}
+            x={r.x}
+            y={r.top}
+            width={r.w}
+            height={r.h}
+            rx={r.w / 2}
+            fill="url(#au-green)"
+            style={{
+              animation: `au-ray ${r.dur}s ease-in-out ${r.delay}s infinite`,
+              transformOrigin: `${r.x + r.w / 2}px ${r.top}px`,
+            }}
+          />
+        ))}
+      </g>
+
+      {/* Low ridge so the aurora dominates */}
       <path
-        d="M-100 120 Q 300 40 700 180 T 1540 120 L1540 470 Q 1100 360 700 480 T -100 420 Z"
-        fill="url(#au-r1)"
-        style={{ animation: 'au-drift1 14s ease-in-out infinite', transformOrigin: 'center' }}
+        d="M0 700 L0 600 L160 560 L320 610 L470 540 L640 620 L820 560 L1000 630 L1180 560 L1320 610 L1440 580 L1440 700 Z"
+        fill="#04101a"
       />
-      <path
-        d="M-100 220 Q 400 120 820 260 T 1540 220 L1540 520 Q 1000 420 600 540 T -100 500 Z"
-        fill="url(#au-r2)"
-        style={{ animation: 'au-drift2 18s ease-in-out infinite', transformOrigin: 'center' }}
-      />
-      <path
-        d="M-100 70 Q 500 10 900 130 T 1540 90 L1540 320 Q 980 240 540 340 T -100 300 Z"
-        fill="url(#au-r3)"
-        style={{ animation: 'au-drift3 11s ease-in-out infinite', transformOrigin: 'center' }}
-      />
-    </g>
+      <g fill="#123040" opacity="0.7">
+        <path d="M470 540 L505 568 L435 568 Z" />
+        <path d="M1180 560 L1212 586 L1148 586 Z" />
+      </g>
 
-    {/* Mountain range silhouette */}
-    <path
-      d="M0 660 L0 540 L120 470 L240 540 L360 430 L520 560 L640 480 L780 580 L920 450 L1080 560 L1220 470 L1340 540 L1440 500 L1440 660 Z"
-      fill="#061018"
-    />
-    {/* Snow caps */}
-    <g fill="#16384a" opacity="0.8">
-      <path d="M360 430 L400 462 L320 462 Z" />
-      <path d="M920 450 L956 478 L884 478 Z" />
-      <path d="M120 470 L150 494 L90 494 Z" />
-    </g>
-
-    {/* Frozen lake reflection */}
-    <rect y="660" width="1440" height="240" fill="url(#au-lake)" />
-    <g filter="url(#au-blur)" opacity="0.4" transform="translate(0,1320) scale(1,-1)">
-      <path d="M-100 120 Q 300 40 700 180 T 1540 120 L1540 400 Q 1100 320 700 420 T -100 380 Z" fill="url(#au-r1)" />
-      <path d="M-100 70 Q 500 10 900 130 T 1540 90 L1540 300 Q 980 220 540 320 T -100 280 Z" fill="url(#au-r3)" />
-    </g>
-  </svg>
-);
+      {/* Frozen-lake reflection */}
+      <rect y="700" width="1440" height="200" fill="url(#au-lake)" />
+      <g
+        filter="url(#au-soft)"
+        opacity="0.4"
+        transform="translate(0,1400) scale(1,-1)"
+      >
+        {greenRays.slice(0, 24).map((r, i) => (
+          <rect
+            key={`gr${i}`}
+            x={r.x}
+            y={520}
+            width={r.w}
+            height={170}
+            rx={r.w / 2}
+            fill="url(#au-green)"
+          />
+        ))}
+      </g>
+    </svg>
+  );
+};
 
 // ─── Dusk — layered sunset hills with a low sun ──────────────────────────────
 const Dusk: React.FC = () => (
@@ -368,7 +444,6 @@ const Slate: React.FC = () => (
       fill="#8298b6"
       opacity="0.7"
     />
-    {/* mist band */}
     <rect
       x="-50"
       y="560"
@@ -386,7 +461,6 @@ const Slate: React.FC = () => (
       d="M0 760 L240 650 L520 780 L780 640 L1060 780 L1320 660 L1440 720 L1440 900 L0 900 Z"
       fill="#3a4d6e"
     />
-    {/* lower mist */}
     <rect
       x="-50"
       y="740"
@@ -401,92 +475,130 @@ const Slate: React.FC = () => (
   </svg>
 );
 
-// ─── Forest — rolling hills at dawn with treeline ────────────────────────────
-const Forest: React.FC = () => (
-  <svg {...SVG_PROPS}>
-    <defs>
-      <linearGradient id="fo-sky" x1="0" y1="0" x2="0" y2="1">
-        <stop offset="0%" stopColor="#fcd9a0" />
-        <stop offset="40%" stopColor="#ffeccb" />
-        <stop offset="100%" stopColor="#e6f5e8" />
-      </linearGradient>
-      <radialGradient id="fo-sun" cx="50%" cy="50%" r="50%">
-        <stop offset="0%" stopColor="#fff6d8" />
-        <stop offset="45%" stopColor="#ffe7a0" stopOpacity="0.7" />
-        <stop offset="100%" stopColor="#ffe7a0" stopOpacity="0" />
-      </radialGradient>
-      <style>{`
-        @keyframes fo-sun { 0%,100%{opacity:.85} 50%{opacity:1} }
-        @keyframes fo-cloud { 0%{transform:translateX(0)} 100%{transform:translateX(60px)} }
-        @keyframes fo-bird { 0%{transform:translate(0,0)} 50%{transform:translate(24px,-8px)} 100%{transform:translate(48px,0)} }
-      `}</style>
-    </defs>
+// ─── Forest — misty layered hills at dawn with soft treelines ────────────────
+// Hills flow as smooth curves; treelines are rounded canopy bumps (arcs), not
+// spikes; mist bands between layers add depth like the Misty Peaks scene.
+const Forest: React.FC = () => {
+  // A ridge with soft rounded tree-canopy bumps along the top.
+  const treeRidge = (seed: number, baseY: number, amp: number): string => {
+    const r = rng(seed);
+    let d = `M0 900 L0 ${baseY}`;
+    let x = 0;
+    while (x < 1460) {
+      const w = 26 + r() * 30;
+      const h = 14 + r() * amp;
+      const my = baseY - Math.sin(x * 0.004) * 28;
+      d += ` Q ${x + w / 2} ${my - h} ${x + w} ${my}`;
+      x += w;
+    }
+    d += ` L1440 900 Z`;
+    return d;
+  };
+  return (
+    <svg {...SVG_PROPS}>
+      <defs>
+        <linearGradient id="fo-sky" x1="0" y1="0" x2="0" y2="1">
+          <stop offset="0%" stopColor="#ffd29a" />
+          <stop offset="38%" stopColor="#ffe7c4" />
+          <stop offset="100%" stopColor="#e2f1e6" />
+        </linearGradient>
+        <radialGradient id="fo-sun" cx="50%" cy="50%" r="50%">
+          <stop offset="0%" stopColor="#fff7dc" />
+          <stop offset="42%" stopColor="#ffe39a" stopOpacity="0.7" />
+          <stop offset="100%" stopColor="#ffe39a" stopOpacity="0" />
+        </radialGradient>
+        <filter id="fo-mist" x="-20%" y="-60%" width="140%" height="220%">
+          <feGaussianBlur stdDeviation="18" />
+        </filter>
+        <style>{`
+          @keyframes fo-sun { 0%,100%{opacity:.85} 50%{opacity:1} }
+          @keyframes fo-cloud { 0%{transform:translateX(0)} 100%{transform:translateX(70px)} }
+          @keyframes fo-bird { 0%{transform:translate(0,0)} 50%{transform:translate(24px,-8px)} 100%{transform:translate(48px,0)} }
+          @keyframes fo-mist { 0%,100%{opacity:.55;transform:translateX(0)} 50%{opacity:.85;transform:translateX(36px)} }
+        `}</style>
+      </defs>
 
-    <rect width="1440" height="900" fill="url(#fo-sky)" />
+      <rect width="1440" height="900" fill="url(#fo-sky)" />
 
-    {/* Sun + glow */}
-    <circle
-      cx="500"
-      cy="270"
-      r="240"
-      fill="url(#fo-sun)"
-      style={{ animation: 'fo-sun 6s ease-in-out infinite' }}
-    />
-    <circle cx="500" cy="270" r="92" fill="#fff2cf" />
-
-    {/* Soft clouds */}
-    <g fill="#fff" opacity="0.55" style={{ animation: 'fo-cloud 40s linear infinite alternate' }}>
-      <ellipse cx="980" cy="180" rx="120" ry="34" />
-      <ellipse cx="1060" cy="160" rx="90" ry="40" />
-      <ellipse cx="900" cy="195" rx="80" ry="28" />
-    </g>
-    <g fill="#fff" opacity="0.4" style={{ animation: 'fo-cloud 55s linear 4s infinite alternate' }}>
-      <ellipse cx="300" cy="120" rx="100" ry="28" />
-      <ellipse cx="370" cy="108" rx="70" ry="32" />
-    </g>
-
-    {/* Birds */}
-    {[
-      [760, 230],
-      [810, 212],
-      [860, 238],
-    ].map(([x, y], i) => (
-      <path
-        key={i}
-        d={`M${x} ${y} Q ${x + 12} ${y - 10} ${x + 24} ${y} Q ${x + 36} ${y - 10} ${x + 48} ${y}`}
-        fill="none"
-        stroke="#5a7a4a"
-        strokeWidth="2.5"
-        strokeLinecap="round"
-        opacity="0.5"
-        style={{ animation: `fo-bird ${6 + i}s ease-in-out ${i * 0.7}s infinite` }}
+      {/* Sun + glow */}
+      <circle
+        cx="520"
+        cy="250"
+        r="250"
+        fill="url(#fo-sun)"
+        style={{ animation: 'fo-sun 6s ease-in-out infinite' }}
       />
-    ))}
+      <circle cx="520" cy="250" r="86" fill="#fff4cf" />
 
-    {/* Rolling hills — far (light) to near (dark), with paper-cut treelines */}
-    <path d="M0 540 Q 360 470 720 525 T 1440 510 L1440 900 L0 900 Z" fill="#bfe3a8" opacity="0.8" />
-    <path d="M0 615 Q 300 545 680 600 Q 1040 650 1440 590 L1440 900 L0 900 Z" fill="#8fcf7e" />
-    {/* treeline on hill 2 */}
-    <g fill="#6db35f">
-      {Array.from({ length: 24 }).map((_, i) => {
-        const x = i * 62 + 20;
-        const y = 600 + Math.sin(i * 0.7) * 18;
-        return <path key={i} d={`M${x} ${y} l10 -26 l10 26 Z`} />;
-      })}
-    </g>
-    <path d="M0 700 Q 380 630 760 690 T 1440 670 L1440 900 L0 900 Z" fill="#4f9a48" />
-    {/* treeline on hill 3 */}
-    <g fill="#3d7d3a">
-      {Array.from({ length: 20 }).map((_, i) => {
-        const x = i * 74 + 30;
-        const y = 686 + Math.sin(i * 0.9 + 1) * 16;
-        return <path key={i} d={`M${x} ${y} l12 -32 l12 32 Z`} />;
-      })}
-    </g>
-    <path d="M0 790 Q 320 730 720 785 T 1440 760 L1440 900 L0 900 Z" fill="#2c6630" />
-    <path d="M0 860 Q 400 820 800 855 T 1440 840 L1440 900 L0 900 Z" fill="#1a4421" />
-  </svg>
-);
+      {/* Soft clouds */}
+      <g fill="#fff" opacity="0.5" style={{ animation: 'fo-cloud 45s linear infinite alternate' }}>
+        <ellipse cx="980" cy="170" rx="120" ry="32" />
+        <ellipse cx="1064" cy="152" rx="86" ry="38" />
+        <ellipse cx="906" cy="184" rx="74" ry="26" />
+      </g>
+
+      {/* Birds */}
+      {[
+        [780, 220],
+        [832, 202],
+        [884, 228],
+      ].map(([x, y], i) => (
+        <path
+          key={i}
+          d={`M${x} ${y} Q ${x + 12} ${y - 10} ${x + 24} ${y} Q ${x + 36} ${y - 10} ${x + 48} ${y}`}
+          fill="none"
+          stroke="#7a8a5a"
+          strokeWidth="2.5"
+          strokeLinecap="round"
+          opacity="0.5"
+          style={{ animation: `fo-bird ${6 + i}s ease-in-out ${i * 0.7}s infinite` }}
+        />
+      ))}
+
+      {/* Far hills — smooth, hazy */}
+      <path d="M0 560 Q 380 500 760 548 T 1440 528 L1440 900 L0 900 Z" fill="#cfe6b4" opacity="0.85" />
+      {/* mist band */}
+      <rect
+        x="-40"
+        y="548"
+        width="1520"
+        height="56"
+        fill="#eef6e8"
+        filter="url(#fo-mist)"
+        style={{ animation: 'fo-mist 18s ease-in-out infinite' }}
+      />
+      {/* Mid hill with soft treeline */}
+      <path d={treeRidge(13, 640, 34)} fill="#86c873" />
+      {/* mist band */}
+      <rect
+        x="-40"
+        y="660"
+        width="1520"
+        height="48"
+        fill="#dbeede"
+        filter="url(#fo-mist)"
+        opacity="0.8"
+        style={{ animation: 'fo-mist 22s ease-in-out 2s infinite' }}
+      />
+      {/* Near hill with denser treeline */}
+      <path d={treeRidge(41, 740, 46)} fill="#3f8c45" />
+      {/* Foreground ridge */}
+      <path d="M0 840 Q 420 795 840 838 T 1440 822 L1440 900 L0 900 Z" fill="#1f5a2b" />
+
+      {/* A couple of soft foreground trees for character */}
+      <g fill="#173f20">
+        <rect x="196" y="788" width="10" height="60" rx="2" />
+        <circle cx="201" cy="776" r="34" />
+        <circle cx="176" cy="792" r="22" />
+        <circle cx="226" cy="790" r="20" />
+        <rect x="1204" y="800" width="9" height="52" rx="2" />
+        <circle cx="1208" cy="790" r="28" />
+        <circle cx="1188" cy="802" r="18" />
+        <circle cx="1228" cy="802" r="17" />
+      </g>
+    </svg>
+  );
+};
 
 const WALLPAPER_OVERLAYS: Record<Wallpaper, React.FC> = {
   midnight: Midnight,

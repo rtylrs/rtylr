@@ -8,7 +8,13 @@ export const HRIcon = ({ size = 44 }: { size?: number }) => (
     fill="none"
     xmlns="http://www.w3.org/2000/svg"
   >
-    <rect x="0" y="0" width="44" height="44" rx="10" fill="#0d9488" />
+    <defs>
+      <linearGradient id="hr-bg" x1="0" y1="0" x2="0" y2="1">
+        <stop offset="0" stopColor="#2dd4bf" />
+        <stop offset="1" stopColor="#0d9488" />
+      </linearGradient>
+    </defs>
+    <rect x="0" y="0" width="44" height="44" rx="10" fill="url(#hr-bg)" />
     {/* Card body */}
     <rect
       x="8"

@@ -8,7 +8,13 @@ export const BlogIcon = ({ size = 44 }: { size?: number }) => (
     fill="none"
     xmlns="http://www.w3.org/2000/svg"
   >
-    <rect x="0" y="0" width="44" height="44" rx="10" fill="#dc2626" />
+    <defs>
+      <linearGradient id="blog-bg" x1="0" y1="0" x2="0" y2="1">
+        <stop offset="0" stopColor="#fb7a7a" />
+        <stop offset="1" stopColor="#db2626" />
+      </linearGradient>
+    </defs>
+    <rect x="0" y="0" width="44" height="44" rx="10" fill="url(#blog-bg)" />
     {/* RSS wave 1 - outermost */}
     <path
       d="M8 38c0-16.569 13.431-30 30-30"
