@@ -233,17 +233,17 @@ var File_erp_product_v1_create_product_proto protoreflect.FileDescriptor
 
 const file_erp_product_v1_create_product_proto_rawDesc = "" +
 	"\n" +
-	"#erp/product/v1/create_product.proto\x12\x0eerp.product.v1\x1a\x1bbuf/validate/validate.proto\"\xa3\x04\n" +
-	"\x14CreateProductRequest\x12(\n" +
-	"\vcategory_id\x18\x01 \x01(\x03B\a\xbaH\x04\"\x02 \x00R\n" +
-	"categoryId\x12(\n" +
-	"\vsupplier_id\x18\x02 \x01(\x03B\a\xbaH\x04\"\x02 \x00R\n" +
+	"#erp/product/v1/create_product.proto\x12\x0eerp.product.v1\x1a\x1bbuf/validate/validate.proto\"\xff\x03\n" +
+	"\x14CreateProductRequest\x12\x1f\n" +
+	"\vcategory_id\x18\x01 \x01(\x03R\n" +
+	"categoryId\x12\x1f\n" +
+	"\vsupplier_id\x18\x02 \x01(\x03R\n" +
 	"supplierId\x12\x1b\n" +
 	"\x04name\x18\x03 \x01(\tB\a\xbaH\x04r\x02\x10\x01R\x04name\x12\x19\n" +
-	"\x03sku\x18\x04 \x01(\tB\a\xbaH\x04r\x02\x10\x01R\x03sku\x12!\n" +
-	"\abarcode\x18\x05 \x01(\tB\a\xbaH\x04r\x02\x10\x01R\abarcode\x12 \n" +
-	"\vdescription\x18\x06 \x01(\tR\vdescription\x12\x1b\n" +
-	"\x04unit\x18\a \x01(\tB\a\xbaH\x04r\x02\x10\x01R\x04unit\x12-\n" +
+	"\x03sku\x18\x04 \x01(\tB\a\xbaH\x04r\x02\x10\x01R\x03sku\x12\x18\n" +
+	"\abarcode\x18\x05 \x01(\tR\abarcode\x12 \n" +
+	"\vdescription\x18\x06 \x01(\tR\vdescription\x12\x12\n" +
+	"\x04unit\x18\a \x01(\tR\x04unit\x12-\n" +
 	"\n" +
 	"cost_price\x18\b \x01(\x01B\x0e\xbaH\v\x12\t)\x00\x00\x00\x00\x00\x00\x00\x00R\tcostPrice\x12-\n" +
 	"\n" +

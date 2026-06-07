@@ -1220,22 +1220,20 @@ export const contractValidationMetadata = {
   "erp.inventory.v1.GetValuationRequest": {},
   "erp.product.v1.CreateProductRequest": {
     "barcode": {
-      "minLen": 1,
       "name": "barcode",
       "optional": false,
       "protoName": "barcode",
       "repeated": false,
-      "required": true,
+      "required": false,
       "scalar": true,
       "type": "string"
     },
     "categoryId": {
-      "gt": 0,
       "name": "categoryId",
       "optional": false,
       "protoName": "category_id",
       "repeated": false,
-      "required": true,
+      "required": false,
       "scalar": true,
       "type": "int64"
     },
@@ -1318,12 +1316,11 @@ export const contractValidationMetadata = {
       "type": "string"
     },
     "supplierId": {
-      "gt": 0,
       "name": "supplierId",
       "optional": false,
       "protoName": "supplier_id",
       "repeated": false,
-      "required": true,
+      "required": false,
       "scalar": true,
       "type": "int64"
     },
@@ -1337,12 +1334,11 @@ export const contractValidationMetadata = {
       "type": "bool"
     },
     "unit": {
-      "minLen": 1,
       "name": "unit",
       "optional": false,
       "protoName": "unit",
       "repeated": false,
-      "required": true,
+      "required": false,
       "scalar": true,
       "type": "string"
     }
@@ -1399,22 +1395,20 @@ export const contractValidationMetadata = {
   },
   "erp.product.v1.UpdateProductRequest": {
     "barcode": {
-      "minLen": 1,
       "name": "barcode",
       "optional": false,
       "protoName": "barcode",
       "repeated": false,
-      "required": true,
+      "required": false,
       "scalar": true,
       "type": "string"
     },
     "categoryId": {
-      "gt": 0,
       "name": "categoryId",
       "optional": false,
       "protoName": "category_id",
       "repeated": false,
-      "required": true,
+      "required": false,
       "scalar": true,
       "type": "int64"
     },
@@ -1507,12 +1501,11 @@ export const contractValidationMetadata = {
       "type": "string"
     },
     "supplierId": {
-      "gt": 0,
       "name": "supplierId",
       "optional": false,
       "protoName": "supplier_id",
       "repeated": false,
-      "required": true,
+      "required": false,
       "scalar": true,
       "type": "int64"
     },
@@ -1526,12 +1519,11 @@ export const contractValidationMetadata = {
       "type": "bool"
     },
     "unit": {
-      "minLen": 1,
       "name": "unit",
       "optional": false,
       "protoName": "unit",
       "repeated": false,
-      "required": true,
+      "required": false,
       "scalar": true,
       "type": "string"
     }
