@@ -5,7 +5,7 @@
 // source: flow/project/v1/list_projects.proto
 
 /* eslint-disable */
-import type { Project } from "./types";
+import type { Project } from './types';
 
 export interface ListProjectsRequest {
   /** workspace_id is the workspace id value for this contract. */

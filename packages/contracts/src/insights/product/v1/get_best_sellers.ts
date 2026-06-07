@@ -5,14 +5,15 @@
 // source: insights/product/v1/get_best_sellers.proto
 
 /* eslint-disable */
-import type { PaginationRequest, PaginationResponse } from "../../../common/pagination/v1/pagination";
-import type { BestSeller } from "./types";
+import type {
+  PaginationRequest,
+  PaginationResponse,
+} from '../../../common/pagination/v1/pagination';
+import type { BestSeller } from './types';
 
 export interface GetBestSellersRequest {
   /** pagination is the pagination value for this contract. */
-  pagination:
-    | PaginationRequest
-    | undefined;
+  pagination: PaginationRequest | undefined;
   /** period is the period value for this contract. */
   period: string;
 }

@@ -5,10 +5,9 @@
 // source: hub/billing/v1/list_invoices.proto
 
 /* eslint-disable */
-import type { Invoice } from "./types";
+import type { Invoice } from './types';
 
-export interface ListInvoicesRequest {
-}
+export interface ListInvoicesRequest {}
 
 export interface ListInvoicesResponse {
   /** invoices is the invoices value for this contract. */

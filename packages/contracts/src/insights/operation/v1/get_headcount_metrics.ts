@@ -5,7 +5,7 @@
 // source: insights/operation/v1/get_headcount_metrics.proto
 
 /* eslint-disable */
-import type { HeadcountMetrics } from "./types";
+import type { HeadcountMetrics } from './types';
 
 export interface GetHeadcountMetricsRequest {
   /** period is the period value for this contract. */

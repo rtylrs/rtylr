@@ -5,7 +5,7 @@
 // source: finance/recurring_invoice/v1/get_recurring_invoice.proto
 
 /* eslint-disable */
-import type { RecurringInvoice } from "./types";
+import type { RecurringInvoice } from './types';
 
 export interface GetRecurringInvoiceRequest {
   /** id is the unique identifier for the resource. */

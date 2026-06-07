@@ -5,7 +5,7 @@
 // source: hr/leave/v1/create_leave_request.proto
 
 /* eslint-disable */
-import type { LeaveRequestPayload } from "./types";
+import type { LeaveRequestPayload } from './types';
 
 export interface CreateLeaveRequestRequest {
   /** Employee requesting leave. */

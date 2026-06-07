@@ -5,13 +5,11 @@
 // source: hr/leave/v1/list_leave_balances.proto
 
 /* eslint-disable */
-import type { LeaveBalancePayload } from "./types";
+import type { LeaveBalancePayload } from './types';
 
 export interface ListLeaveBalancesRequest {
   /** Filter by employee; absent to include all employees. */
-  employeeId?:
-    | number
-    | undefined;
+  employeeId?: number | undefined;
   /** Filter by year; absent to return current year. */
   year?: number | undefined;
 }

@@ -5,7 +5,7 @@
 // source: hr/onboarding/v1/complete_checklist_item.proto
 
 /* eslint-disable */
-import type { EmployeeChecklistItemPayload } from "./types";
+import type { EmployeeChecklistItemPayload } from './types';
 
 export interface CompleteChecklistItemRequest {
   /** ID of the employee checklist item to mark as complete. */

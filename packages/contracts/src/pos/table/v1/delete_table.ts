@@ -6,8 +6,7 @@
 
 /* eslint-disable */
 
-export interface DeleteTableRequest {
-}
+export interface DeleteTableRequest {}
 
 export interface DeleteTableResponse {
   /** message is a human-readable result message. */

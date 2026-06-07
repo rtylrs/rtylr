@@ -5,7 +5,7 @@
 // source: flow/dashboard/v1/get_flow_dashboard.proto
 
 /* eslint-disable */
-import type { Task } from "../../task/v1/types";
+import type { Task } from '../../task/v1/types';
 
 export interface GetFlowDashboardRequest {
   /** workspace_id is the workspace id value for this contract. */

@@ -5,7 +5,7 @@
 // source: finance/quote/v1/create_quote.proto
 
 /* eslint-disable */
-import type { Quote, QuoteLine } from "./types";
+import type { Quote, QuoteLine } from './types';
 
 export interface CreateQuoteRequest {
   /** customer_id is the customer id value for this contract. */

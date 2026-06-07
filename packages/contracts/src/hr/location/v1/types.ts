@@ -16,9 +16,7 @@ export interface LocationPayload {
   /** Full street address of the location. */
   address: string;
   /** IANA timezone identifier (e.g. "America/New_York"); absent if using tenant default. */
-  timezone?:
-    | string
-    | undefined;
+  timezone?: string | undefined;
   /** Whether this location is currently active and assignable. */
   isActive: boolean;
   /** Unix timestamp when this location was created. */

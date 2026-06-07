@@ -9631,14 +9631,8 @@
   "oneofs": {
     "flow.task.v1.ListTasksRequest": [
       {
-        "fields": [
-          "projectId",
-          "workspaceId"
-        ],
-        "protoFields": [
-          "project_id",
-          "workspace_id"
-        ],
+        "fields": ["projectId", "workspaceId"],
+        "protoFields": ["project_id", "workspace_id"],
         "required": true
       }
     ]

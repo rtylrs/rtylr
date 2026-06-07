@@ -5,7 +5,7 @@
 // source: insights/operation/v1/get_shift_metrics.proto
 
 /* eslint-disable */
-import type { ShiftMetrics } from "./types";
+import type { ShiftMetrics } from './types';
 
 export interface GetShiftMetricsRequest {
   /** period is the period value for this contract. */

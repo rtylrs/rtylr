@@ -16,15 +16,11 @@ export interface Terminal {
   /** name is the name value for this contract. */
   name: string;
   /** device_id is the device id value for this contract. */
-  deviceId?:
-    | string
-    | undefined;
+  deviceId?: string | undefined;
   /** is_active is the is active value for this contract. */
   isActive: boolean;
   /** last_seen_at is the last seen at value for this contract. */
-  lastSeenAt?:
-    | string
-    | undefined;
+  lastSeenAt?: string | undefined;
   /** created_at is when the record was created. */
   createdAt: string;
 }

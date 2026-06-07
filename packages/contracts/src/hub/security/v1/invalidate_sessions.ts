@@ -6,8 +6,7 @@
 
 /* eslint-disable */
 
-export interface InvalidateSessionsRequest {
-}
+export interface InvalidateSessionsRequest {}
 
 export interface InvalidateSessionsResponse {
   /** message is a human-readable result message. */

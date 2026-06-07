@@ -5,7 +5,7 @@
 // source: finance/invoices/v1/get_invoice.proto
 
 /* eslint-disable */
-import type { InvoiceDetail, Payment } from "./types";
+import type { InvoiceDetail, Payment } from './types';
 
 export interface GetInvoiceRequest {
   /** id is the unique identifier for the resource. */
@@ -14,9 +14,7 @@ export interface GetInvoiceRequest {
 
 export interface GetInvoiceResponse {
   /** invoice is the invoice value for this contract. */
-  invoice:
-    | InvoiceDetail
-    | undefined;
+  invoice: InvoiceDetail | undefined;
   /** payments is the payments value for this contract. */
   payments: Payment[];
 }

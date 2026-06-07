@@ -5,10 +5,9 @@
 // source: crm/segment/v1/list_segments.proto
 
 /* eslint-disable */
-import type { Segment } from "./types";
+import type { Segment } from './types';
 
-export interface ListSegmentsRequest {
-}
+export interface ListSegmentsRequest {}
 
 export interface ListSegmentsResponse {
   /** segments is the segments value for this contract. */

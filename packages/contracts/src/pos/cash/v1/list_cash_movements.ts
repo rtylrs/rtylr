@@ -5,7 +5,7 @@
 // source: pos/cash/v1/list_cash_movements.proto
 
 /* eslint-disable */
-import type { CashMovement } from "./types";
+import type { CashMovement } from './types';
 
 export interface ListCashMovementsRequest {
   /** session_id is the session id value for this contract. */

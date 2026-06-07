@@ -5,7 +5,7 @@
 // source: insights/revenue/v1/get_revenue_by_app.proto
 
 /* eslint-disable */
-import type { RevenueByApp } from "./types";
+import type { RevenueByApp } from './types';
 
 export interface GetRevenueByAppRequest {
   /** period is the period value for this contract. */

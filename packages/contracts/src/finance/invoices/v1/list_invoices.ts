@@ -5,7 +5,7 @@
 // source: finance/invoices/v1/list_invoices.proto
 
 /* eslint-disable */
-import type { InvoiceSummary } from "./types";
+import type { InvoiceSummary } from './types';
 
 export interface ListInvoicesRequest {
   /** status is the current lifecycle state. */

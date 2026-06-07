@@ -5,7 +5,7 @@
 // source: hub/permission/v1/create_role.proto
 
 /* eslint-disable */
-import type { CustomRole } from "./types";
+import type { CustomRole } from './types';
 
 export interface CreateRoleRequest {
   /** name is the name value for this contract. */

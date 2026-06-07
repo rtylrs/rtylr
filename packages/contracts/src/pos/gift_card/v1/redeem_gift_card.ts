@@ -5,7 +5,7 @@
 // source: pos/gift_card/v1/redeem_gift_card.proto
 
 /* eslint-disable */
-import type { GiftCard } from "./types";
+import type { GiftCard } from './types';
 
 export interface RedeemGiftCardRequest {
   /** code is the code value for this contract. */
@@ -16,9 +16,7 @@ export interface RedeemGiftCardRequest {
 
 export interface RedeemGiftCardResponse {
   /** gift_card is the gift card value for this contract. */
-  giftCard:
-    | GiftCard
-    | undefined;
+  giftCard: GiftCard | undefined;
   /** message is a human-readable result message. */
   message: string;
 }

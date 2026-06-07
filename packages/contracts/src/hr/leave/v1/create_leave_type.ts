@@ -5,7 +5,7 @@
 // source: hr/leave/v1/create_leave_type.proto
 
 /* eslint-disable */
-import type { LeaveTypePayload } from "./types";
+import type { LeaveTypePayload } from './types';
 
 export interface CreateLeaveTypeRequest {
   /** Human-readable name (e.g. "Annual Leave", "Sick Leave"). */
@@ -15,9 +15,7 @@ export interface CreateLeaveTypeRequest {
   /** Whether leave requests of this type require manager approval. */
   requiresApproval: boolean;
   /** Accrual rule; absent if entitlement is fixed. */
-  accrualRule?:
-    | string
-    | undefined;
+  accrualRule?: string | undefined;
   /** Maximum unused days that may carry over to the next year. */
   maxCarryoverDays: number;
   /** Minimum calendar days of notice required. */

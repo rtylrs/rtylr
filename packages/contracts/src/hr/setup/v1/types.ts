@@ -14,9 +14,7 @@ export interface SetupWizardStepPayload {
   /** Which setup step this represents (company_profile | work_schedule | leave_policy | org_structure | locations | roles_permissions | payroll | notifications | employees). */
   stepKey: string;
   /** Unix timestamp when this step was completed; absent if not yet completed. */
-  completedAt?:
-    | number
-    | undefined;
+  completedAt?: number | undefined;
   /** Unix timestamp when this step record was created. */
   createdAt: number;
   /** Unix timestamp when this step record was last updated. */
@@ -37,9 +35,7 @@ export interface HRCompanyConfigPayload {
   /** How gross pay is calculated (hourly | salary | both). */
   payrollGrossModel: string;
   /** Unix timestamp when the full setup wizard was completed; absent if still in progress. */
-  setupCompletedAt?:
-    | number
-    | undefined;
+  setupCompletedAt?: number | undefined;
   /** Unix timestamp when this config was created. */
   createdAt: number;
   /** Unix timestamp when this config was last updated. */
@@ -61,9 +57,7 @@ export interface GetSetupStatusResponse {
   /** All wizard steps and their completion state. */
   steps: SetupWizardStepPayload[];
   /** Current HR configuration for the tenant. */
-  config:
-    | HRCompanyConfigPayload
-    | undefined;
+  config: HRCompanyConfigPayload | undefined;
   /** Whether every setup step has been completed. */
   isComplete: boolean;
 }

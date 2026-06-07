@@ -5,7 +5,7 @@
 // source: pos/stock/v1/list_stock_movements.proto
 
 /* eslint-disable */
-import type { StockMovement } from "./types";
+import type { StockMovement } from './types';
 
 export interface ListStockMovementsRequest {
   /** branch_id is the branch id value for this contract. */

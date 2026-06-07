@@ -5,10 +5,9 @@
 // source: hr/employees/payroll/runs/v1/list_payroll_runs.proto
 
 /* eslint-disable */
-import type { PayrollRunPayload } from "./types";
+import type { PayrollRunPayload } from './types';
 
-export interface ListPayrollRunsRequest {
-}
+export interface ListPayrollRunsRequest {}
 
 export interface ListPayrollRunsResponse {
   /** Page of payroll runs. */

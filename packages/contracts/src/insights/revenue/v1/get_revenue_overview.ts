@@ -5,7 +5,7 @@
 // source: insights/revenue/v1/get_revenue_overview.proto
 
 /* eslint-disable */
-import type { RevenueOverview } from "./types";
+import type { RevenueOverview } from './types';
 
 export interface GetRevenueOverviewRequest {
   /** period is the period value for this contract. */

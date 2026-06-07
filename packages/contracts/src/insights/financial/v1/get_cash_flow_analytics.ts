@@ -5,7 +5,7 @@
 // source: insights/financial/v1/get_cash_flow_analytics.proto
 
 /* eslint-disable */
-import type { CashFlowAnalytics } from "./types";
+import type { CashFlowAnalytics } from './types';
 
 export interface GetCashFlowAnalyticsRequest {
   /** period is the period value for this contract. */

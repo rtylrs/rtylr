@@ -5,7 +5,7 @@
 // source: pos/audit/v1/list_audit.proto
 
 /* eslint-disable */
-import type { AuditLog } from "./types";
+import type { AuditLog } from './types';
 
 export interface ListAuditRequest {
   /** action is the action value for this contract. */

@@ -5,10 +5,9 @@
 // source: pos/table/v1/list_tables.proto
 
 /* eslint-disable */
-import type { Table } from "./types";
+import type { Table } from './types';
 
-export interface ListTablesRequest {
-}
+export interface ListTablesRequest {}
 
 export interface ListTablesResponse {
   /** tables is the tables value for this contract. */

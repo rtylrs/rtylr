@@ -5,7 +5,7 @@
 // source: flow/task/v1/list_tasks.proto
 
 /* eslint-disable */
-import type { Task } from "./types";
+import type { Task } from './types';
 
 export interface ListTasksRequest {
   /** project_id is the project id value for this contract. */
@@ -13,9 +13,7 @@ export interface ListTasksRequest {
   /** status is the current lifecycle state. */
   status: string;
   /** assignee_id is the assignee id value for this contract. */
-  assigneeId?:
-    | number
-    | undefined;
+  assigneeId?: number | undefined;
   /** priority is the priority value for this contract. */
   priority: string;
   /** workspace_id filters tasks by workspace when project_id is absent. */
