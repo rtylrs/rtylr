@@ -7,6 +7,7 @@
 package v1
 
 import (
+	_ "buf.build/gen/go/bufbuild/protovalidate/protocolbuffers/go/buf/validate"
 	protoreflect "google.golang.org/protobuf/reflect/protoreflect"
 	protoimpl "google.golang.org/protobuf/runtime/protoimpl"
 	reflect "reflect"
@@ -205,14 +206,14 @@ var File_pos_user_v1_update_pos_user_proto protoreflect.FileDescriptor
 
 const file_pos_user_v1_update_pos_user_proto_rawDesc = "" +
 	"\n" +
-	"!pos/user/v1/update_pos_user.proto\x12\vpos.user.v1\"\xd8\x02\n" +
-	"\x14UpdatePOSUserRequest\x12\x0e\n" +
-	"\x02id\x18\x01 \x01(\x03R\x02id\x12\x12\n" +
-	"\x04name\x18\x02 \x01(\tR\x04name\x12\x10\n" +
-	"\x03pin\x18\x03 \x01(\tR\x03pin\x12\x12\n" +
-	"\x04role\x18\x04 \x01(\tR\x04role\x12\x1b\n" +
-	"\tis_active\x18\x05 \x01(\bR\bisActive\x12\x1f\n" +
-	"\vhourly_rate\x18\x06 \x01(\x01R\n" +
+	"!pos/user/v1/update_pos_user.proto\x12\vpos.user.v1\x1a\x1bbuf/validate/validate.proto\"\x8c\x03\n" +
+	"\x14UpdatePOSUserRequest\x12\x17\n" +
+	"\x02id\x18\x01 \x01(\x03B\a\xbaH\x04\"\x02 \x00R\x02id\x12\x1b\n" +
+	"\x04name\x18\x02 \x01(\tB\a\xbaH\x04r\x02\x10\x01R\x04name\x12\x19\n" +
+	"\x03pin\x18\x03 \x01(\tB\a\xbaH\x04r\x02\x10\x01R\x03pin\x12\x1b\n" +
+	"\x04role\x18\x04 \x01(\tB\a\xbaH\x04r\x02\x10\x01R\x04role\x12\x1b\n" +
+	"\tis_active\x18\x05 \x01(\bR\bisActive\x12/\n" +
+	"\vhourly_rate\x18\x06 \x01(\x01B\x0e\xbaH\v\x12\t)\x00\x00\x00\x00\x00\x00\x00\x00R\n" +
 	"hourlyRate\x12(\n" +
 	"\x10max_discount_pct\x18\a \x01(\x01R\x0emaxDiscountPct\x12\x19\n" +
 	"\bcan_void\x18\b \x01(\bR\acanVoid\x12\x1d\n" +

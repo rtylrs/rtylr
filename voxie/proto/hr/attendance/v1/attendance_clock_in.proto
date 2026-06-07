@@ -2,6 +2,7 @@ syntax = "proto3";
 
 package hr.attendance.v1;
 
+import "buf/validate/validate.proto";
 import "hr/attendance/v1/types.proto";
 
 option go_package = "github.com/voxire/voxie/gen/go/hr/attendance/v1";
@@ -12,7 +13,7 @@ message AttendanceClockInRequest {
   // Method used to clock in (app | qr | gps | pin | facial).
   string method = 1;
   // Work location where the employee is clocking in.
-  int64 location_id = 2;
+  int64 location_id = 2 [(buf.validate.field).int64.gt = 0];
   // Latitude at clock-in; absent if location not available.
   optional double lat = 3;
   // Longitude at clock-in; absent if location not available.

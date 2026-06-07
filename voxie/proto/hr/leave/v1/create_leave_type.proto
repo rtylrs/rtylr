@@ -2,6 +2,7 @@ syntax = "proto3";
 
 package hr.leave.v1;
 
+import "buf/validate/validate.proto";
 import "hr/leave/v1/types.proto";
 
 option go_package = "github.com/voxire/voxie/gen/go/hr/leave/v1";
@@ -10,7 +11,7 @@ option go_package = "github.com/voxire/voxie/gen/go/hr/leave/v1";
 
 message CreateLeaveTypeRequest {
   // Human-readable name (e.g. "Annual Leave", "Sick Leave").
-  string name = 1;
+  string name = 1 [(buf.validate.field).string.min_len = 1];
   // Whether days taken under this type are paid.
   bool is_paid = 2;
   // Whether leave requests of this type require manager approval.

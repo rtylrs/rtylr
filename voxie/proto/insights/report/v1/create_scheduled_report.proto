@@ -2,17 +2,21 @@ syntax = "proto3";
 
 package insights.report.v1;
 
+import "buf/validate/validate.proto";
 import "insights/report/v1/types.proto";
 
 option go_package = "github.com/voxire/voxie/gen/go/insights/report/v1";
 
 message CreateScheduledReportRequest {
   // template_id is the template id value for this contract.
-  int64 template_id = 1;
+  int64 template_id = 1 [(buf.validate.field).int64.gt = 0];
   // frequency is the frequency value for this contract.
-  string frequency = 2;
+  string frequency = 2 [(buf.validate.field).string.min_len = 1];
   // recipient_email is the recipient email value for this contract.
-  string recipient_email = 3;
+  string recipient_email = 3 [(buf.validate.field).string = {
+    min_len: 1
+    email: true
+  }];
 }
 
 message CreateScheduledReportResponse {

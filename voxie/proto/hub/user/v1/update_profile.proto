@@ -2,15 +2,19 @@ syntax = "proto3";
 
 package hub.user.v1;
 
+import "buf/validate/validate.proto";
 import "hub/user/v1/get_me.proto";
 
 option go_package = "github.com/voxire/voxie/gen/go/hub/user/v1";
 
 message UpdateProfileRequest {
   // name is the name value for this contract.
-  string name = 1;
+  string name = 1 [(buf.validate.field).string.min_len = 1];
   // email is the email address used for lookup or contact.
-  string email = 2;
+  string email = 2 [(buf.validate.field).string = {
+    min_len: 1
+    email: true
+  }];
 }
 
 message UpdateProfileResponse {

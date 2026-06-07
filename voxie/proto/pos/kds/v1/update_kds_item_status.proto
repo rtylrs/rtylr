@@ -2,13 +2,15 @@ syntax = "proto3";
 
 package pos.kds.v1;
 
+import "buf/validate/validate.proto";
+
 option go_package = "github.com/voxire/voxie/gen/go/pos/kds/v1";
 
 // ── Update Item Status ────────────────────────────────────────────
 
 message UpdateKDSItemStatusRequest {
   // status is the current lifecycle state.
-  string status = 1;
+  string status = 1 [(buf.validate.field).string.min_len = 1];
 }
 
 message UpdateKDSItemStatusResponse {

@@ -7,6 +7,7 @@
 package v1
 
 import (
+	_ "buf.build/gen/go/bufbuild/protovalidate/protocolbuffers/go/buf/validate"
 	protoreflect "google.golang.org/protobuf/reflect/protoreflect"
 	protoimpl "google.golang.org/protobuf/runtime/protoimpl"
 	reflect "reflect"
@@ -115,9 +116,9 @@ var File_hub_business_v1_get_business_proto protoreflect.FileDescriptor
 
 const file_hub_business_v1_get_business_proto_rawDesc = "" +
 	"\n" +
-	"\"hub/business/v1/get_business.proto\x12\x0fhub.business.v1\x1a\x1bhub/business/v1/types.proto\"5\n" +
-	"\x12GetBusinessRequest\x12\x1f\n" +
-	"\vbusiness_id\x18\x01 \x01(\x03R\n" +
+	"\"hub/business/v1/get_business.proto\x12\x0fhub.business.v1\x1a\x1bbuf/validate/validate.proto\x1a\x1bhub/business/v1/types.proto\">\n" +
+	"\x12GetBusinessRequest\x12(\n" +
+	"\vbusiness_id\x18\x01 \x01(\x03B\a\xbaH\x04\"\x02 \x00R\n" +
 	"businessId\"L\n" +
 	"\x13GetBusinessResponse\x125\n" +
 	"\bbusiness\x18\x01 \x01(\v2\x19.hub.business.v1.BusinessR\bbusinessB0Z.github.com/voxire/voxie/gen/go/hub/business/v1b\x06proto3"

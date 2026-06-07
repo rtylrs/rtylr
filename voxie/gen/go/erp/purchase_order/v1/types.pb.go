@@ -7,6 +7,7 @@
 package v1
 
 import (
+	_ "buf.build/gen/go/bufbuild/protovalidate/protocolbuffers/go/buf/validate"
 	protoreflect "google.golang.org/protobuf/reflect/protoreflect"
 	protoimpl "google.golang.org/protobuf/runtime/protoimpl"
 	reflect "reflect"
@@ -358,7 +359,7 @@ var File_erp_purchase_order_v1_types_proto protoreflect.FileDescriptor
 
 const file_erp_purchase_order_v1_types_proto_rawDesc = "" +
 	"\n" +
-	"!erp/purchase_order/v1/types.proto\x12\x15erp.purchase_order.v1\"\x82\x02\n" +
+	"!erp/purchase_order/v1/types.proto\x12\x15erp.purchase_order.v1\x1a\x1bbuf/validate/validate.proto\"\x82\x02\n" +
 	"\x11PurchaseOrderItem\x12\x0e\n" +
 	"\x02id\x18\x01 \x01(\x03R\x02id\x12*\n" +
 	"\x11purchase_order_id\x18\x02 \x01(\x03R\x0fpurchaseOrderId\x12\x1d\n" +
@@ -393,12 +394,12 @@ const file_erp_purchase_order_v1_types_proto_rawDesc = "" +
 	"updated_at\x18\x0e \x01(\tR\tupdatedAt\x12>\n" +
 	"\x05items\x18\x0f \x03(\v2(.erp.purchase_order.v1.PurchaseOrderItemR\x05itemsB\x14\n" +
 	"\x12_expected_deliveryB\x0e\n" +
-	"\f_received_at\"\x87\x01\n" +
-	"\x1eCreatePurchaseOrderItemRequest\x12\x1d\n" +
+	"\f_received_at\"\xb0\x01\n" +
+	"\x1eCreatePurchaseOrderItemRequest\x12&\n" +
 	"\n" +
-	"product_id\x18\x01 \x01(\x03R\tproductId\x12)\n" +
-	"\x10quantity_ordered\x18\x02 \x01(\x01R\x0fquantityOrdered\x12\x1b\n" +
-	"\tunit_cost\x18\x03 \x01(\x01R\bunitCostB6Z4github.com/voxire/voxie/gen/go/erp/purchase_order/v1b\x06proto3"
+	"product_id\x18\x01 \x01(\x03B\a\xbaH\x04\"\x02 \x00R\tproductId\x129\n" +
+	"\x10quantity_ordered\x18\x02 \x01(\x01B\x0e\xbaH\v\x12\t)\x00\x00\x00\x00\x00\x00\x00\x00R\x0fquantityOrdered\x12+\n" +
+	"\tunit_cost\x18\x03 \x01(\x01B\x0e\xbaH\v\x12\t)\x00\x00\x00\x00\x00\x00\x00\x00R\bunitCostB6Z4github.com/voxire/voxie/gen/go/erp/purchase_order/v1b\x06proto3"
 
 var (
 	file_erp_purchase_order_v1_types_proto_rawDescOnce sync.Once

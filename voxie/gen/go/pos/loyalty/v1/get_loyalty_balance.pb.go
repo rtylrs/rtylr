@@ -7,6 +7,7 @@
 package v1
 
 import (
+	_ "buf.build/gen/go/bufbuild/protovalidate/protocolbuffers/go/buf/validate"
 	protoreflect "google.golang.org/protobuf/reflect/protoreflect"
 	protoimpl "google.golang.org/protobuf/runtime/protoimpl"
 	reflect "reflect"
@@ -124,9 +125,9 @@ var File_pos_loyalty_v1_get_loyalty_balance_proto protoreflect.FileDescriptor
 
 const file_pos_loyalty_v1_get_loyalty_balance_proto_rawDesc = "" +
 	"\n" +
-	"(pos/loyalty/v1/get_loyalty_balance.proto\x12\x0epos.loyalty.v1\";\n" +
-	"\x18GetLoyaltyBalanceRequest\x12\x1f\n" +
-	"\vcustomer_id\x18\x01 \x01(\x03R\n" +
+	"(pos/loyalty/v1/get_loyalty_balance.proto\x12\x0epos.loyalty.v1\x1a\x1bbuf/validate/validate.proto\"D\n" +
+	"\x18GetLoyaltyBalanceRequest\x12(\n" +
+	"\vcustomer_id\x18\x01 \x01(\x03B\a\xbaH\x04\"\x02 \x00R\n" +
 	"customerId\"V\n" +
 	"\x19GetLoyaltyBalanceResponse\x12\x1f\n" +
 	"\vcustomer_id\x18\x01 \x01(\x03R\n" +

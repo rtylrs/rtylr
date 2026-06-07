@@ -7,6 +7,7 @@
 package v1
 
 import (
+	_ "buf.build/gen/go/bufbuild/protovalidate/protocolbuffers/go/buf/validate"
 	protoreflect "google.golang.org/protobuf/reflect/protoreflect"
 	protoimpl "google.golang.org/protobuf/runtime/protoimpl"
 	reflect "reflect"
@@ -115,9 +116,9 @@ var File_hr_staff_v1_clock_out_proto protoreflect.FileDescriptor
 
 const file_hr_staff_v1_clock_out_proto_rawDesc = "" +
 	"\n" +
-	"\x1bhr/staff/v1/clock_out.proto\x12\vhr.staff.v1\",\n" +
-	"\x0fClockOutRequest\x12\x19\n" +
-	"\bstaff_id\x18\x01 \x01(\x03R\astaffId\",\n" +
+	"\x1bhr/staff/v1/clock_out.proto\x12\vhr.staff.v1\x1a\x1bbuf/validate/validate.proto\"5\n" +
+	"\x0fClockOutRequest\x12\"\n" +
+	"\bstaff_id\x18\x01 \x01(\x03B\a\xbaH\x04\"\x02 \x00R\astaffId\",\n" +
 	"\x10ClockOutResponse\x12\x18\n" +
 	"\asuccess\x18\x01 \x01(\bR\asuccessB,Z*github.com/voxire/voxie/gen/go/hr/staff/v1b\x06proto3"
 

@@ -2,13 +2,14 @@ syntax = "proto3";
 
 package crm.campaign.v1;
 
+import "buf/validate/validate.proto";
 import "crm/campaign/v1/types.proto";
 
 option go_package = "github.com/voxire/voxie/gen/go/crm/campaign/v1";
 
 message GetCampaignDetailRequest {
   // id is the unique identifier for the resource.
-  int64 id = 1;
+  int64 id = 1 [(buf.validate.field).int64.gt = 0];
 }
 
 message GetCampaignDetailResponse {

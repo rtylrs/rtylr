@@ -7,6 +7,7 @@
 package v1
 
 import (
+	_ "buf.build/gen/go/bufbuild/protovalidate/protocolbuffers/go/buf/validate"
 	protoreflect "google.golang.org/protobuf/reflect/protoreflect"
 	protoimpl "google.golang.org/protobuf/runtime/protoimpl"
 	reflect "reflect"
@@ -115,9 +116,9 @@ var File_flow_task_v1_get_time_logs_proto protoreflect.FileDescriptor
 
 const file_flow_task_v1_get_time_logs_proto_rawDesc = "" +
 	"\n" +
-	" flow/task/v1/get_time_logs.proto\x12\fflow.task.v1\x1a\x18flow/task/v1/types.proto\"-\n" +
-	"\x12GetTimeLogsRequest\x12\x17\n" +
-	"\atask_id\x18\x01 \x01(\x03R\x06taskId\"I\n" +
+	" flow/task/v1/get_time_logs.proto\x12\fflow.task.v1\x1a\x1bbuf/validate/validate.proto\x1a\x18flow/task/v1/types.proto\"6\n" +
+	"\x12GetTimeLogsRequest\x12 \n" +
+	"\atask_id\x18\x01 \x01(\x03B\a\xbaH\x04\"\x02 \x00R\x06taskId\"I\n" +
 	"\x13GetTimeLogsResponse\x122\n" +
 	"\ttime_logs\x18\x01 \x03(\v2\x15.flow.task.v1.TimeLogR\btimeLogsB-Z+github.com/voxire/voxie/gen/go/flow/task/v1b\x06proto3"
 

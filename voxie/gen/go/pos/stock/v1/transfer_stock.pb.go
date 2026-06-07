@@ -7,6 +7,7 @@
 package v1
 
 import (
+	_ "buf.build/gen/go/bufbuild/protovalidate/protocolbuffers/go/buf/validate"
 	protoreflect "google.golang.org/protobuf/reflect/protoreflect"
 	protoimpl "google.golang.org/protobuf/runtime/protoimpl"
 	reflect "reflect"
@@ -169,16 +170,16 @@ var File_pos_stock_v1_transfer_stock_proto protoreflect.FileDescriptor
 
 const file_pos_stock_v1_transfer_stock_proto_rawDesc = "" +
 	"\n" +
-	"!pos/stock/v1/transfer_stock.proto\x12\fpos.stock.v1\"\xce\x01\n" +
+	"!pos/stock/v1/transfer_stock.proto\x12\fpos.stock.v1\x1a\x1bbuf/validate/validate.proto\"\xe0\x01\n" +
 	"\x14TransferStockRequest\x12$\n" +
 	"\x0efrom_branch_id\x18\x01 \x01(\x03R\ffromBranchId\x12 \n" +
 	"\fto_branch_id\x18\x02 \x01(\x03R\n" +
-	"toBranchId\x12\x1d\n" +
+	"toBranchId\x12&\n" +
 	"\n" +
-	"product_id\x18\x03 \x01(\x03R\tproductId\x12\x1a\n" +
+	"product_id\x18\x03 \x01(\x03B\a\xbaH\x04\"\x02 \x00R\tproductId\x12\x1a\n" +
 	"\bquantity\x18\x04 \x01(\x01R\bquantity\x12\x12\n" +
-	"\x04note\x18\x05 \x01(\tR\x04note\x12\x1f\n" +
-	"\vemployee_id\x18\x06 \x01(\x03R\n" +
+	"\x04note\x18\x05 \x01(\tR\x04note\x12(\n" +
+	"\vemployee_id\x18\x06 \x01(\x03B\a\xbaH\x04\"\x02 \x00R\n" +
 	"employeeId\"R\n" +
 	"\x15TransferStockResponse\x12\x1f\n" +
 	"\vmovement_id\x18\x01 \x01(\x03R\n" +

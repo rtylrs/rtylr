@@ -7,6 +7,7 @@
 package v1
 
 import (
+	_ "buf.build/gen/go/bufbuild/protovalidate/protocolbuffers/go/buf/validate"
 	protoreflect "google.golang.org/protobuf/reflect/protoreflect"
 	protoimpl "google.golang.org/protobuf/runtime/protoimpl"
 	reflect "reflect"
@@ -142,11 +143,11 @@ var File_pos_session_v1_open_session_proto protoreflect.FileDescriptor
 
 const file_pos_session_v1_open_session_proto_rawDesc = "" +
 	"\n" +
-	"!pos/session/v1/open_session.proto\x12\x0epos.session.v1\"u\n" +
-	"\x12OpenSessionRequest\x12\x1f\n" +
-	"\vlocation_id\x18\x01 \x01(\x03R\n" +
-	"locationId\x12\x19\n" +
-	"\bstaff_id\x18\x02 \x01(\x03R\astaffId\x12#\n" +
+	"!pos/session/v1/open_session.proto\x12\x0epos.session.v1\x1a\x1bbuf/validate/validate.proto\"\x87\x01\n" +
+	"\x12OpenSessionRequest\x12(\n" +
+	"\vlocation_id\x18\x01 \x01(\x03B\a\xbaH\x04\"\x02 \x00R\n" +
+	"locationId\x12\"\n" +
+	"\bstaff_id\x18\x02 \x01(\x03B\a\xbaH\x04\"\x02 \x00R\astaffId\x12#\n" +
 	"\ropening_float\x18\x03 \x01(\x01R\fopeningFloat\"N\n" +
 	"\x13OpenSessionResponse\x12\x1d\n" +
 	"\n" +

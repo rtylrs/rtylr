@@ -7,6 +7,7 @@
 package v1
 
 import (
+	_ "buf.build/gen/go/bufbuild/protovalidate/protocolbuffers/go/buf/validate"
 	protoreflect "google.golang.org/protobuf/reflect/protoreflect"
 	protoimpl "google.golang.org/protobuf/runtime/protoimpl"
 	reflect "reflect"
@@ -115,9 +116,9 @@ var File_crm_customer_v1_delete_customer_proto protoreflect.FileDescriptor
 
 const file_crm_customer_v1_delete_customer_proto_rawDesc = "" +
 	"\n" +
-	"%crm/customer/v1/delete_customer.proto\x12\x0fcrm.customer.v1\"'\n" +
-	"\x15DeleteCustomerRequest\x12\x0e\n" +
-	"\x02id\x18\x01 \x01(\x03R\x02id\"2\n" +
+	"%crm/customer/v1/delete_customer.proto\x12\x0fcrm.customer.v1\x1a\x1bbuf/validate/validate.proto\"0\n" +
+	"\x15DeleteCustomerRequest\x12\x17\n" +
+	"\x02id\x18\x01 \x01(\x03B\a\xbaH\x04\"\x02 \x00R\x02id\"2\n" +
 	"\x16DeleteCustomerResponse\x12\x18\n" +
 	"\amessage\x18\x01 \x01(\tR\amessageB0Z.github.com/voxire/voxie/gen/go/crm/customer/v1b\x06proto3"
 

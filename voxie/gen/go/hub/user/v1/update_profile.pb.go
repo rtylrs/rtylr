@@ -7,6 +7,7 @@
 package v1
 
 import (
+	_ "buf.build/gen/go/bufbuild/protovalidate/protocolbuffers/go/buf/validate"
 	protoreflect "google.golang.org/protobuf/reflect/protoreflect"
 	protoimpl "google.golang.org/protobuf/runtime/protoimpl"
 	reflect "reflect"
@@ -124,10 +125,10 @@ var File_hub_user_v1_update_profile_proto protoreflect.FileDescriptor
 
 const file_hub_user_v1_update_profile_proto_rawDesc = "" +
 	"\n" +
-	" hub/user/v1/update_profile.proto\x12\vhub.user.v1\x1a\x18hub/user/v1/get_me.proto\"@\n" +
-	"\x14UpdateProfileRequest\x12\x12\n" +
-	"\x04name\x18\x01 \x01(\tR\x04name\x12\x14\n" +
-	"\x05email\x18\x02 \x01(\tR\x05email\"G\n" +
+	" hub/user/v1/update_profile.proto\x12\vhub.user.v1\x1a\x1bbuf/validate/validate.proto\x1a\x18hub/user/v1/get_me.proto\"T\n" +
+	"\x14UpdateProfileRequest\x12\x1b\n" +
+	"\x04name\x18\x01 \x01(\tB\a\xbaH\x04r\x02\x10\x01R\x04name\x12\x1f\n" +
+	"\x05email\x18\x02 \x01(\tB\t\xbaH\x06r\x04\x10\x01`\x01R\x05email\"G\n" +
 	"\x15UpdateProfileResponse\x12.\n" +
 	"\x04user\x18\x01 \x01(\v2\x1a.hub.user.v1.GetMeResponseR\x04userB,Z*github.com/voxire/voxie/gen/go/hub/user/v1b\x06proto3"
 

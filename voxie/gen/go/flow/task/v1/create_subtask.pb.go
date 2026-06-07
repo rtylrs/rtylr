@@ -7,6 +7,7 @@
 package v1
 
 import (
+	_ "buf.build/gen/go/bufbuild/protovalidate/protocolbuffers/go/buf/validate"
 	protoreflect "google.golang.org/protobuf/reflect/protoreflect"
 	protoimpl "google.golang.org/protobuf/runtime/protoimpl"
 	reflect "reflect"
@@ -196,19 +197,19 @@ var File_flow_task_v1_create_subtask_proto protoreflect.FileDescriptor
 
 const file_flow_task_v1_create_subtask_proto_rawDesc = "" +
 	"\n" +
-	"!flow/task/v1/create_subtask.proto\x12\fflow.task.v1\"\xde\x02\n" +
-	"\x14CreateSubtaskRequest\x12\x1d\n" +
+	"!flow/task/v1/create_subtask.proto\x12\fflow.task.v1\x1a\x1bbuf/validate/validate.proto\"\x94\x03\n" +
+	"\x14CreateSubtaskRequest\x12&\n" +
 	"\n" +
-	"project_id\x18\x01 \x01(\x03R\tprojectId\x12!\n" +
-	"\fworkspace_id\x18\x02 \x01(\x03R\vworkspaceId\x12\x14\n" +
-	"\x05title\x18\x03 \x01(\tR\x05title\x12 \n" +
-	"\vdescription\x18\x04 \x01(\tR\vdescription\x12\x1a\n" +
-	"\bpriority\x18\x05 \x01(\tR\bpriority\x12$\n" +
+	"project_id\x18\x01 \x01(\x03B\a\xbaH\x04\"\x02 \x00R\tprojectId\x12*\n" +
+	"\fworkspace_id\x18\x02 \x01(\x03B\a\xbaH\x04\"\x02 \x00R\vworkspaceId\x12\x1d\n" +
+	"\x05title\x18\x03 \x01(\tB\a\xbaH\x04r\x02\x10\x01R\x05title\x12 \n" +
+	"\vdescription\x18\x04 \x01(\tR\vdescription\x12#\n" +
+	"\bpriority\x18\x05 \x01(\tB\a\xbaH\x04r\x02\x10\x01R\bpriority\x12$\n" +
 	"\vassignee_id\x18\x06 \x01(\x03H\x00R\n" +
-	"assigneeId\x88\x01\x01\x12\x19\n" +
-	"\bdue_date\x18\a \x01(\tR\adueDate\x12\x1d\n" +
+	"assigneeId\x88\x01\x01\x12\"\n" +
+	"\bdue_date\x18\a \x01(\tB\a\xbaH\x04r\x02\x10\x01R\adueDate\x12&\n" +
 	"\n" +
-	"start_date\x18\b \x01(\tR\tstartDate\x12,\n" +
+	"start_date\x18\b \x01(\tB\a\xbaH\x04r\x02\x10\x01R\tstartDate\x12,\n" +
 	"\x0festimated_hours\x18\t \x01(\x01H\x01R\x0eestimatedHours\x88\x01\x01B\x0e\n" +
 	"\f_assignee_idB\x12\n" +
 	"\x10_estimated_hours\"J\n" +

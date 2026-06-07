@@ -7,6 +7,7 @@
 package v1
 
 import (
+	_ "buf.build/gen/go/bufbuild/protovalidate/protocolbuffers/go/buf/validate"
 	protoreflect "google.golang.org/protobuf/reflect/protoreflect"
 	protoimpl "google.golang.org/protobuf/runtime/protoimpl"
 	reflect "reflect"
@@ -160,10 +161,10 @@ var File_hr_attendance_v1_attendance_clock_in_proto protoreflect.FileDescriptor
 
 const file_hr_attendance_v1_attendance_clock_in_proto_rawDesc = "" +
 	"\n" +
-	"*hr/attendance/v1/attendance_clock_in.proto\x12\x10hr.attendance.v1\x1a\x1chr/attendance/v1/types.proto\"\xdd\x01\n" +
+	"*hr/attendance/v1/attendance_clock_in.proto\x12\x10hr.attendance.v1\x1a\x1bbuf/validate/validate.proto\x1a\x1chr/attendance/v1/types.proto\"\xe6\x01\n" +
 	"\x18AttendanceClockInRequest\x12\x16\n" +
-	"\x06method\x18\x01 \x01(\tR\x06method\x12\x1f\n" +
-	"\vlocation_id\x18\x02 \x01(\x03R\n" +
+	"\x06method\x18\x01 \x01(\tR\x06method\x12(\n" +
+	"\vlocation_id\x18\x02 \x01(\x03B\a\xbaH\x04\"\x02 \x00R\n" +
 	"locationId\x12\x15\n" +
 	"\x03lat\x18\x03 \x01(\x01H\x00R\x03lat\x88\x01\x01\x12\x15\n" +
 	"\x03lng\x18\x04 \x01(\x01H\x01R\x03lng\x88\x01\x01\x12\x1e\n" +

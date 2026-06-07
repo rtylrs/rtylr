@@ -7,6 +7,7 @@
 package v1
 
 import (
+	_ "buf.build/gen/go/bufbuild/protovalidate/protocolbuffers/go/buf/validate"
 	protoreflect "google.golang.org/protobuf/reflect/protoreflect"
 	protoimpl "google.golang.org/protobuf/runtime/protoimpl"
 	reflect "reflect"
@@ -115,9 +116,9 @@ var File_hr_employees_payroll_runs_v1_approve_payroll_run_proto protoreflect.Fil
 
 const file_hr_employees_payroll_runs_v1_approve_payroll_run_proto_rawDesc = "" +
 	"\n" +
-	"6hr/employees/payroll/runs/v1/approve_payroll_run.proto\x12\x1chr.employees.payroll.runs.v1\x1a(hr/employees/payroll/runs/v1/types.proto\"1\n" +
-	"\x18ApprovePayrollRunRequest\x12\x15\n" +
-	"\x06run_id\x18\x01 \x01(\x03R\x05runId\"^\n" +
+	"6hr/employees/payroll/runs/v1/approve_payroll_run.proto\x12\x1chr.employees.payroll.runs.v1\x1a\x1bbuf/validate/validate.proto\x1a(hr/employees/payroll/runs/v1/types.proto\":\n" +
+	"\x18ApprovePayrollRunRequest\x12\x1e\n" +
+	"\x06run_id\x18\x01 \x01(\x03B\a\xbaH\x04\"\x02 \x00R\x05runId\"^\n" +
 	"\x19ApprovePayrollRunResponse\x12A\n" +
 	"\x03run\x18\x01 \x01(\v2/.hr.employees.payroll.runs.v1.PayrollRunPayloadR\x03runB=Z;github.com/voxire/voxie/gen/go/hr/employees/payroll/runs/v1b\x06proto3"
 

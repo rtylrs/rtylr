@@ -2,15 +2,17 @@ syntax = "proto3";
 
 package finance.account.v1;
 
+import "buf/validate/validate.proto";
+
 option go_package = "github.com/voxire/voxie/gen/go/finance/account/v1";
 
 message CreateAccountRequest {
   // name is the name value for this contract.
-  string name = 1;
+  string name = 1 [(buf.validate.field).string.min_len = 1];
   // type is the type value for this contract.
-  string type = 2;
+  string type = 2 [(buf.validate.field).string.min_len = 1];
   // currency is the currency value for this contract.
-  string currency = 3;
+  string currency = 3 [(buf.validate.field).string.min_len = 1];
   // balance is the balance value for this contract.
   double balance = 4;
   // is_active is the is active value for this contract.

@@ -7,6 +7,7 @@
 package v1
 
 import (
+	_ "buf.build/gen/go/bufbuild/protovalidate/protocolbuffers/go/buf/validate"
 	protoreflect "google.golang.org/protobuf/reflect/protoreflect"
 	protoimpl "google.golang.org/protobuf/runtime/protoimpl"
 	reflect "reflect"
@@ -124,10 +125,10 @@ var File_flow_task_v1_update_task_status_proto protoreflect.FileDescriptor
 
 const file_flow_task_v1_update_task_status_proto_rawDesc = "" +
 	"\n" +
-	"%flow/task/v1/update_task_status.proto\x12\fflow.task.v1\"A\n" +
-	"\x17UpdateTaskStatusRequest\x12\x0e\n" +
-	"\x02id\x18\x01 \x01(\x03R\x02id\x12\x16\n" +
-	"\x06status\x18\x02 \x01(\tR\x06status\"4\n" +
+	"%flow/task/v1/update_task_status.proto\x12\fflow.task.v1\x1a\x1bbuf/validate/validate.proto\"S\n" +
+	"\x17UpdateTaskStatusRequest\x12\x17\n" +
+	"\x02id\x18\x01 \x01(\x03B\a\xbaH\x04\"\x02 \x00R\x02id\x12\x1f\n" +
+	"\x06status\x18\x02 \x01(\tB\a\xbaH\x04r\x02\x10\x01R\x06status\"4\n" +
 	"\x18UpdateTaskStatusResponse\x12\x18\n" +
 	"\amessage\x18\x01 \x01(\tR\amessageB-Z+github.com/voxire/voxie/gen/go/flow/task/v1b\x06proto3"
 

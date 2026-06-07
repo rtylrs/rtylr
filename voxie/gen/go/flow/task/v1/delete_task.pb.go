@@ -7,6 +7,7 @@
 package v1
 
 import (
+	_ "buf.build/gen/go/bufbuild/protovalidate/protocolbuffers/go/buf/validate"
 	protoreflect "google.golang.org/protobuf/reflect/protoreflect"
 	protoimpl "google.golang.org/protobuf/runtime/protoimpl"
 	reflect "reflect"
@@ -115,9 +116,9 @@ var File_flow_task_v1_delete_task_proto protoreflect.FileDescriptor
 
 const file_flow_task_v1_delete_task_proto_rawDesc = "" +
 	"\n" +
-	"\x1eflow/task/v1/delete_task.proto\x12\fflow.task.v1\"#\n" +
-	"\x11DeleteTaskRequest\x12\x0e\n" +
-	"\x02id\x18\x01 \x01(\x03R\x02id\".\n" +
+	"\x1eflow/task/v1/delete_task.proto\x12\fflow.task.v1\x1a\x1bbuf/validate/validate.proto\",\n" +
+	"\x11DeleteTaskRequest\x12\x17\n" +
+	"\x02id\x18\x01 \x01(\x03B\a\xbaH\x04\"\x02 \x00R\x02id\".\n" +
 	"\x12DeleteTaskResponse\x12\x18\n" +
 	"\amessage\x18\x01 \x01(\tR\amessageB-Z+github.com/voxire/voxie/gen/go/flow/task/v1b\x06proto3"
 

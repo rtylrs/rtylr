@@ -2,13 +2,15 @@ syntax = "proto3";
 
 package common.auth.v1;
 
+import "buf/validate/validate.proto";
+
 option go_package = "github.com/voxire/voxie/gen/go/common/auth/v1";
 
 message GoogleAuthRequest {
   // id_token is the id token value for this contract.
-  string id_token = 1;
+  string id_token = 1 [(buf.validate.field).string.min_len = 1];
   // business_name is the business name value for this contract.
-  string business_name = 2;
+  string business_name = 2 [(buf.validate.field).string.min_len = 1];
 }
 
 message GoogleAuthResponse {

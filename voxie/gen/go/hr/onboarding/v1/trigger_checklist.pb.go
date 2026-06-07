@@ -7,6 +7,7 @@
 package v1
 
 import (
+	_ "buf.build/gen/go/bufbuild/protovalidate/protocolbuffers/go/buf/validate"
 	protoreflect "google.golang.org/protobuf/reflect/protoreflect"
 	protoimpl "google.golang.org/protobuf/runtime/protoimpl"
 	reflect "reflect"
@@ -124,11 +125,11 @@ var File_hr_onboarding_v1_trigger_checklist_proto protoreflect.FileDescriptor
 
 const file_hr_onboarding_v1_trigger_checklist_proto_rawDesc = "" +
 	"\n" +
-	"(hr/onboarding/v1/trigger_checklist.proto\x12\x10hr.onboarding.v1\x1a\x1chr/onboarding/v1/types.proto\"]\n" +
-	"\x17TriggerChecklistRequest\x12\x1f\n" +
-	"\vemployee_id\x18\x01 \x01(\x03R\n" +
-	"employeeId\x12!\n" +
-	"\ftrigger_type\x18\x02 \x01(\tR\vtriggerType\"d\n" +
+	"(hr/onboarding/v1/trigger_checklist.proto\x12\x10hr.onboarding.v1\x1a\x1bbuf/validate/validate.proto\x1a\x1chr/onboarding/v1/types.proto\"o\n" +
+	"\x17TriggerChecklistRequest\x12(\n" +
+	"\vemployee_id\x18\x01 \x01(\x03B\a\xbaH\x04\"\x02 \x00R\n" +
+	"employeeId\x12*\n" +
+	"\ftrigger_type\x18\x02 \x01(\tB\a\xbaH\x04r\x02\x10\x01R\vtriggerType\"d\n" +
 	"\x18TriggerChecklistResponse\x12H\n" +
 	"\tchecklist\x18\x01 \x01(\v2*.hr.onboarding.v1.EmployeeChecklistPayloadR\tchecklistB1Z/github.com/voxire/voxie/gen/go/hr/onboarding/v1b\x06proto3"
 

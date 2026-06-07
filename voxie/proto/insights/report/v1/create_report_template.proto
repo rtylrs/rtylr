@@ -2,21 +2,22 @@ syntax = "proto3";
 
 package insights.report.v1;
 
+import "buf/validate/validate.proto";
 import "insights/report/v1/types.proto";
 
 option go_package = "github.com/voxire/voxie/gen/go/insights/report/v1";
 
 message CreateReportTemplateRequest {
   // name is the name value for this contract.
-  string name = 1;
+  string name = 1 [(buf.validate.field).string.min_len = 1];
   // description is the description value for this contract.
   string description = 2;
   // type is the type value for this contract.
-  string type = 3;
+  string type = 3 [(buf.validate.field).string.min_len = 1];
   // metrics is the metrics value for this contract.
   repeated string metrics = 4;
   // format is the format value for this contract.
-  string format = 5;
+  string format = 5 [(buf.validate.field).string.min_len = 1];
 }
 
 message CreateReportTemplateResponse {

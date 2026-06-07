@@ -2,6 +2,7 @@ syntax = "proto3";
 
 package hr.setup.v1;
 
+import "buf/validate/validate.proto";
 import "hr/setup/v1/types.proto";
 
 option go_package = "github.com/voxire/voxie/gen/go/hr/setup/v1";
@@ -10,7 +11,7 @@ option go_package = "github.com/voxire/voxie/gen/go/hr/setup/v1";
 
 message CompleteSetupStepRequest {
   // The step to mark as completed (must match a valid step_key).
-  string step_key = 1;
+  string step_key = 1 [(buf.validate.field).string.min_len = 1];
 }
 
 message CompleteSetupStepResponse {

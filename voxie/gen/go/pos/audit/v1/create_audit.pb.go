@@ -7,6 +7,7 @@
 package v1
 
 import (
+	_ "buf.build/gen/go/bufbuild/protovalidate/protocolbuffers/go/buf/validate"
 	protoreflect "google.golang.org/protobuf/reflect/protoreflect"
 	protoimpl "google.golang.org/protobuf/runtime/protoimpl"
 	reflect "reflect"
@@ -187,20 +188,20 @@ var File_pos_audit_v1_create_audit_proto protoreflect.FileDescriptor
 
 const file_pos_audit_v1_create_audit_proto_rawDesc = "" +
 	"\n" +
-	"\x1fpos/audit/v1/create_audit.proto\x12\fpos.audit.v1\"\x82\x02\n" +
-	"\x12CreateAuditRequest\x12\x1b\n" +
-	"\tbranch_id\x18\x01 \x01(\x03R\bbranchId\x12\x1f\n" +
-	"\vterminal_id\x18\x02 \x01(\x03R\n" +
-	"terminalId\x12\x1f\n" +
-	"\vemployee_id\x18\x03 \x01(\x03R\n" +
-	"employeeId\x12\x16\n" +
-	"\x06action\x18\x04 \x01(\tR\x06action\x12\x1f\n" +
-	"\ventity_type\x18\x05 \x01(\tR\n" +
-	"entityType\x12\x1b\n" +
-	"\tentity_id\x18\x06 \x01(\x03R\bentityId\x12\x18\n" +
-	"\adetails\x18\a \x01(\tR\adetails\x12\x1d\n" +
+	"\x1fpos/audit/v1/create_audit.proto\x12\fpos.audit.v1\x1a\x1bbuf/validate/validate.proto\"\xc1\x02\n" +
+	"\x12CreateAuditRequest\x12$\n" +
+	"\tbranch_id\x18\x01 \x01(\x03B\a\xbaH\x04\"\x02 \x00R\bbranchId\x12(\n" +
+	"\vterminal_id\x18\x02 \x01(\x03B\a\xbaH\x04\"\x02 \x00R\n" +
+	"terminalId\x12(\n" +
+	"\vemployee_id\x18\x03 \x01(\x03B\a\xbaH\x04\"\x02 \x00R\n" +
+	"employeeId\x12\x1f\n" +
+	"\x06action\x18\x04 \x01(\tB\a\xbaH\x04r\x02\x10\x01R\x06action\x12(\n" +
+	"\ventity_type\x18\x05 \x01(\tB\a\xbaH\x04r\x02\x10\x01R\n" +
+	"entityType\x12$\n" +
+	"\tentity_id\x18\x06 \x01(\x03B\a\xbaH\x04\"\x02 \x00R\bentityId\x12\x18\n" +
+	"\adetails\x18\a \x01(\tR\adetails\x12&\n" +
 	"\n" +
-	"ip_address\x18\b \x01(\tR\tipAddress\"Q\n" +
+	"ip_address\x18\b \x01(\tB\a\xbaH\x04r\x02\x10\x01R\tipAddress\"Q\n" +
 	"\x13CreateAuditResponse\x12 \n" +
 	"\faudit_log_id\x18\x01 \x01(\x03R\n" +
 	"auditLogId\x12\x18\n" +

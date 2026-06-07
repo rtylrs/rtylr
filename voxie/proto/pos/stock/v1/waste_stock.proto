@@ -2,6 +2,8 @@ syntax = "proto3";
 
 package pos.stock.v1;
 
+import "buf/validate/validate.proto";
+
 option go_package = "github.com/voxire/voxie/gen/go/pos/stock/v1";
 
 // ── Waste Stock ───────────────────────────────────────────────────
@@ -10,13 +12,13 @@ message WasteStockRequest {
   // branch_id is the branch id value for this contract.
   int64 branch_id = 1;
   // product_id is the product id value for this contract.
-  int64 product_id = 2;
+  int64 product_id = 2 [(buf.validate.field).int64.gt = 0];
   // quantity is the quantity value for this contract.
   double quantity = 3;
   // note is the note value for this contract.
   string note = 4;
   // employee_id is the employee id value for this contract.
-  int64 employee_id = 5;
+  int64 employee_id = 5 [(buf.validate.field).int64.gt = 0];
 }
 
 message WasteStockResponse {

@@ -2,6 +2,8 @@ syntax = "proto3";
 
 package pos.loyalty.v1;
 
+import "buf/validate/validate.proto";
+
 option go_package = "github.com/voxire/voxie/gen/go/pos/loyalty/v1";
 
 // ── Earn Points ───────────────────────────────────────────────────
@@ -10,7 +12,7 @@ message EarnPointsRequest {
   // customer_id is the customer id value for this contract.
   int64 customer_id = 1;
   // order_id is the order id value for this contract.
-  int64 order_id = 2;
+  int64 order_id = 2 [(buf.validate.field).int64.gt = 0];
   // points is the points value for this contract.
   int32 points = 3;
 }

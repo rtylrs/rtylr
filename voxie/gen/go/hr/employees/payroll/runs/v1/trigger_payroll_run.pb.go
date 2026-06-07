@@ -7,6 +7,7 @@
 package v1
 
 import (
+	_ "buf.build/gen/go/bufbuild/protovalidate/protocolbuffers/go/buf/validate"
 	protoreflect "google.golang.org/protobuf/reflect/protoreflect"
 	protoimpl "google.golang.org/protobuf/runtime/protoimpl"
 	reflect "reflect"
@@ -124,11 +125,11 @@ var File_hr_employees_payroll_runs_v1_trigger_payroll_run_proto protoreflect.Fil
 
 const file_hr_employees_payroll_runs_v1_trigger_payroll_run_proto_rawDesc = "" +
 	"\n" +
-	"6hr/employees/payroll/runs/v1/trigger_payroll_run.proto\x12\x1chr.employees.payroll.runs.v1\x1a(hr/employees/payroll/runs/v1/types.proto\"\\\n" +
-	"\x18TriggerPayrollRunRequest\x12!\n" +
-	"\fperiod_start\x18\x01 \x01(\tR\vperiodStart\x12\x1d\n" +
+	"6hr/employees/payroll/runs/v1/trigger_payroll_run.proto\x12\x1chr.employees.payroll.runs.v1\x1a\x1bbuf/validate/validate.proto\x1a(hr/employees/payroll/runs/v1/types.proto\"n\n" +
+	"\x18TriggerPayrollRunRequest\x12*\n" +
+	"\fperiod_start\x18\x01 \x01(\tB\a\xbaH\x04r\x02\x10\x01R\vperiodStart\x12&\n" +
 	"\n" +
-	"period_end\x18\x02 \x01(\tR\tperiodEnd\"^\n" +
+	"period_end\x18\x02 \x01(\tB\a\xbaH\x04r\x02\x10\x01R\tperiodEnd\"^\n" +
 	"\x19TriggerPayrollRunResponse\x12A\n" +
 	"\x03run\x18\x01 \x01(\v2/.hr.employees.payroll.runs.v1.PayrollRunPayloadR\x03runB=Z;github.com/voxire/voxie/gen/go/hr/employees/payroll/runs/v1b\x06proto3"
 

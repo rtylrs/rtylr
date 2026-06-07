@@ -7,6 +7,7 @@
 package v1
 
 import (
+	_ "buf.build/gen/go/bufbuild/protovalidate/protocolbuffers/go/buf/validate"
 	protoreflect "google.golang.org/protobuf/reflect/protoreflect"
 	protoimpl "google.golang.org/protobuf/runtime/protoimpl"
 	reflect "reflect"
@@ -133,10 +134,10 @@ var File_pos_gift_card_v1_redeem_gift_card_proto protoreflect.FileDescriptor
 
 const file_pos_gift_card_v1_redeem_gift_card_proto_rawDesc = "" +
 	"\n" +
-	"'pos/gift_card/v1/redeem_gift_card.proto\x12\x10pos.gift_card.v1\x1a\x1cpos/gift_card/v1/types.proto\"C\n" +
-	"\x15RedeemGiftCardRequest\x12\x12\n" +
-	"\x04code\x18\x01 \x01(\tR\x04code\x12\x16\n" +
-	"\x06amount\x18\x02 \x01(\x01R\x06amount\"k\n" +
+	"'pos/gift_card/v1/redeem_gift_card.proto\x12\x10pos.gift_card.v1\x1a\x1bbuf/validate/validate.proto\x1a\x1cpos/gift_card/v1/types.proto\"\\\n" +
+	"\x15RedeemGiftCardRequest\x12\x1b\n" +
+	"\x04code\x18\x01 \x01(\tB\a\xbaH\x04r\x02\x10\x01R\x04code\x12&\n" +
+	"\x06amount\x18\x02 \x01(\x01B\x0e\xbaH\v\x12\t)\x00\x00\x00\x00\x00\x00\x00\x00R\x06amount\"k\n" +
 	"\x16RedeemGiftCardResponse\x127\n" +
 	"\tgift_card\x18\x01 \x01(\v2\x1a.pos.gift_card.v1.GiftCardR\bgiftCard\x12\x18\n" +
 	"\amessage\x18\x02 \x01(\tR\amessageB1Z/github.com/voxire/voxie/gen/go/pos/gift_card/v1b\x06proto3"

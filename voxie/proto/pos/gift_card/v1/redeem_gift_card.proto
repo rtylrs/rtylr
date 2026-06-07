@@ -2,6 +2,7 @@ syntax = "proto3";
 
 package pos.gift_card.v1;
 
+import "buf/validate/validate.proto";
 import "pos/gift_card/v1/types.proto";
 
 option go_package = "github.com/voxire/voxie/gen/go/pos/gift_card/v1";
@@ -10,9 +11,9 @@ option go_package = "github.com/voxire/voxie/gen/go/pos/gift_card/v1";
 
 message RedeemGiftCardRequest {
   // code is the code value for this contract.
-  string code = 1;
+  string code = 1 [(buf.validate.field).string.min_len = 1];
   // amount is the amount value for this contract.
-  double amount = 2;
+  double amount = 2 [(buf.validate.field).double.gte = 0];
 }
 
 message RedeemGiftCardResponse {

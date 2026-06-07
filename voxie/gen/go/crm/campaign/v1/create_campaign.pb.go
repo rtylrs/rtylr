@@ -7,6 +7,7 @@
 package v1
 
 import (
+	_ "buf.build/gen/go/bufbuild/protovalidate/protocolbuffers/go/buf/validate"
 	protoreflect "google.golang.org/protobuf/reflect/protoreflect"
 	protoimpl "google.golang.org/protobuf/runtime/protoimpl"
 	reflect "reflect"
@@ -178,16 +179,16 @@ var File_crm_campaign_v1_create_campaign_proto protoreflect.FileDescriptor
 
 const file_crm_campaign_v1_create_campaign_proto_rawDesc = "" +
 	"\n" +
-	"%crm/campaign/v1/create_campaign.proto\x12\x0fcrm.campaign.v1\"\xf1\x01\n" +
-	"\x15CreateCampaignRequest\x12\x12\n" +
-	"\x04name\x18\x01 \x01(\tR\x04name\x12 \n" +
-	"\vdescription\x18\x02 \x01(\tR\vdescription\x12\x18\n" +
-	"\achannel\x18\x03 \x01(\tR\achannel\x12\"\n" +
+	"%crm/campaign/v1/create_campaign.proto\x12\x0fcrm.campaign.v1\x1a\x1bbuf/validate/validate.proto\"\x9e\x02\n" +
+	"\x15CreateCampaignRequest\x12\x1b\n" +
+	"\x04name\x18\x01 \x01(\tB\a\xbaH\x04r\x02\x10\x01R\x04name\x12 \n" +
+	"\vdescription\x18\x02 \x01(\tR\vdescription\x12!\n" +
+	"\achannel\x18\x03 \x01(\tB\a\xbaH\x04r\x02\x10\x01R\achannel\x12\"\n" +
 	"\n" +
-	"segment_id\x18\x04 \x01(\x03H\x00R\tsegmentId\x88\x01\x01\x12\x18\n" +
-	"\asubject\x18\x05 \x01(\tR\asubject\x12\x18\n" +
-	"\acontent\x18\x06 \x01(\tR\acontent\x12!\n" +
-	"\fscheduled_at\x18\a \x01(\tR\vscheduledAtB\r\n" +
+	"segment_id\x18\x04 \x01(\x03H\x00R\tsegmentId\x88\x01\x01\x12!\n" +
+	"\asubject\x18\x05 \x01(\tB\a\xbaH\x04r\x02\x10\x01R\asubject\x12!\n" +
+	"\acontent\x18\x06 \x01(\tB\a\xbaH\x04r\x02\x10\x01R\acontent\x12*\n" +
+	"\fscheduled_at\x18\a \x01(\tB\a\xbaH\x04r\x02\x10\x01R\vscheduledAtB\r\n" +
 	"\v_segment_id\"S\n" +
 	"\x16CreateCampaignResponse\x12\x1f\n" +
 	"\vcampaign_id\x18\x01 \x01(\x03R\n" +

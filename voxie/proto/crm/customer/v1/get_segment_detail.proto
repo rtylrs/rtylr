@@ -2,6 +2,7 @@ syntax = "proto3";
 
 package crm.customer.v1;
 
+import "buf/validate/validate.proto";
 import "crm/segment/v1/types.proto";
 import "pos/customer/v1/types.proto";
 
@@ -11,7 +12,7 @@ option go_package = "github.com/voxire/voxie/gen/go/crm/customer/v1";
 
 message GetSegmentDetailRequest {
   // id is the unique identifier for the resource.
-  int64 id = 1;
+  int64 id = 1 [(buf.validate.field).int64.gt = 0];
 }
 
 message GetSegmentDetailResponse {

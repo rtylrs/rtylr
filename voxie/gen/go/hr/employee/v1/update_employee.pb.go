@@ -7,6 +7,7 @@
 package v1
 
 import (
+	_ "buf.build/gen/go/bufbuild/protovalidate/protocolbuffers/go/buf/validate"
 	protoreflect "google.golang.org/protobuf/reflect/protoreflect"
 	protoimpl "google.golang.org/protobuf/runtime/protoimpl"
 	reflect "reflect"
@@ -241,9 +242,9 @@ var File_hr_employee_v1_update_employee_proto protoreflect.FileDescriptor
 
 const file_hr_employee_v1_update_employee_proto_rawDesc = "" +
 	"\n" +
-	"$hr/employee/v1/update_employee.proto\x12\x0ehr.employee.v1\x1a\x1ahr/employee/v1/types.proto\"\xd9\x06\n" +
-	"\x15UpdateEmployeeRequest\x12\x0e\n" +
-	"\x02id\x18\x01 \x01(\x03R\x02id\x12(\n" +
+	"$hr/employee/v1/update_employee.proto\x12\x0ehr.employee.v1\x1a\x1bbuf/validate/validate.proto\x1a\x1ahr/employee/v1/types.proto\"\xe2\x06\n" +
+	"\x15UpdateEmployeeRequest\x12\x17\n" +
+	"\x02id\x18\x01 \x01(\x03B\a\xbaH\x04\"\x02 \x00R\x02id\x12(\n" +
 	"\rdepartment_id\x18\x02 \x01(\x03H\x00R\fdepartmentId\x88\x01\x01\x12$\n" +
 	"\vlocation_id\x18\x03 \x01(\x03H\x01R\n" +
 	"locationId\x88\x01\x01\x12\"\n" +

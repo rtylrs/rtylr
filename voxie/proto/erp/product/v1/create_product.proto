@@ -2,31 +2,33 @@ syntax = "proto3";
 
 package erp.product.v1;
 
+import "buf/validate/validate.proto";
+
 option go_package = "github.com/voxire/voxie/gen/go/erp/product/v1";
 
 message CreateProductRequest {
   // category_id is the category id value for this contract.
-  int64 category_id = 1;
+  int64 category_id = 1 [(buf.validate.field).int64.gt = 0];
   // supplier_id is the supplier id value for this contract.
-  int64 supplier_id = 2;
+  int64 supplier_id = 2 [(buf.validate.field).int64.gt = 0];
   // name is the name value for this contract.
-  string name = 3;
+  string name = 3 [(buf.validate.field).string.min_len = 1];
   // sku is the sku value for this contract.
-  string sku = 4;
+  string sku = 4 [(buf.validate.field).string.min_len = 1];
   // barcode is the barcode value for this contract.
-  string barcode = 5;
+  string barcode = 5 [(buf.validate.field).string.min_len = 1];
   // description is the description value for this contract.
   string description = 6;
   // unit is the unit value for this contract.
-  string unit = 7;
+  string unit = 7 [(buf.validate.field).string.min_len = 1];
   // cost_price is the cost price value for this contract.
-  double cost_price = 8;
+  double cost_price = 8 [(buf.validate.field).double.gte = 0];
   // sale_price is the sale price value for this contract.
-  double sale_price = 9;
+  double sale_price = 9 [(buf.validate.field).double.gte = 0];
   // low_stock_threshold is the low stock threshold value for this contract.
-  double low_stock_threshold = 10;
+  double low_stock_threshold = 10 [(buf.validate.field).double.gte = 0];
   // reorder_quantity is the reorder quantity value for this contract.
-  double reorder_quantity = 11;
+  double reorder_quantity = 11 [(buf.validate.field).double.gte = 0];
   // is_active is the is active value for this contract.
   bool is_active = 12;
   // track_inventory is the track inventory value for this contract.

@@ -7,6 +7,7 @@
 package v1
 
 import (
+	_ "buf.build/gen/go/bufbuild/protovalidate/protocolbuffers/go/buf/validate"
 	protoreflect "google.golang.org/protobuf/reflect/protoreflect"
 	protoimpl "google.golang.org/protobuf/runtime/protoimpl"
 	reflect "reflect"
@@ -115,9 +116,9 @@ var File_finance_bank_account_v1_get_bank_account_proto protoreflect.FileDescrip
 
 const file_finance_bank_account_v1_get_bank_account_proto_rawDesc = "" +
 	"\n" +
-	".finance/bank_account/v1/get_bank_account.proto\x12\x17finance.bank_account.v1\x1a#finance/bank_account/v1/types.proto\"'\n" +
-	"\x15GetBankAccountRequest\x12\x0e\n" +
-	"\x02id\x18\x01 \x01(\x03R\x02id\"X\n" +
+	".finance/bank_account/v1/get_bank_account.proto\x12\x17finance.bank_account.v1\x1a\x1bbuf/validate/validate.proto\x1a#finance/bank_account/v1/types.proto\"0\n" +
+	"\x15GetBankAccountRequest\x12\x17\n" +
+	"\x02id\x18\x01 \x01(\x03B\a\xbaH\x04\"\x02 \x00R\x02id\"X\n" +
 	"\x16GetBankAccountResponse\x12>\n" +
 	"\aaccount\x18\x01 \x01(\v2$.finance.bank_account.v1.BankAccountR\aaccountB8Z6github.com/voxire/voxie/gen/go/finance/bank_account/v1b\x06proto3"
 

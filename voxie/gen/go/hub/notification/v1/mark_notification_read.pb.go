@@ -7,6 +7,7 @@
 package v1
 
 import (
+	_ "buf.build/gen/go/bufbuild/protovalidate/protocolbuffers/go/buf/validate"
 	protoreflect "google.golang.org/protobuf/reflect/protoreflect"
 	protoimpl "google.golang.org/protobuf/runtime/protoimpl"
 	reflect "reflect"
@@ -115,9 +116,9 @@ var File_hub_notification_v1_mark_notification_read_proto protoreflect.FileDescr
 
 const file_hub_notification_v1_mark_notification_read_proto_rawDesc = "" +
 	"\n" +
-	"0hub/notification/v1/mark_notification_read.proto\x12\x13hub.notification.v1\"-\n" +
-	"\x1bMarkNotificationReadRequest\x12\x0e\n" +
-	"\x02id\x18\x01 \x01(\x03R\x02id\"8\n" +
+	"0hub/notification/v1/mark_notification_read.proto\x12\x13hub.notification.v1\x1a\x1bbuf/validate/validate.proto\"6\n" +
+	"\x1bMarkNotificationReadRequest\x12\x17\n" +
+	"\x02id\x18\x01 \x01(\x03B\a\xbaH\x04\"\x02 \x00R\x02id\"8\n" +
 	"\x1cMarkNotificationReadResponse\x12\x18\n" +
 	"\amessage\x18\x01 \x01(\tR\amessageB4Z2github.com/voxire/voxie/gen/go/hub/notification/v1b\x06proto3"
 

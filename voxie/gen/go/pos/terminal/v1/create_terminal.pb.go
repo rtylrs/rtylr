@@ -7,6 +7,7 @@
 package v1
 
 import (
+	_ "buf.build/gen/go/bufbuild/protovalidate/protocolbuffers/go/buf/validate"
 	protoreflect "google.golang.org/protobuf/reflect/protoreflect"
 	protoimpl "google.golang.org/protobuf/runtime/protoimpl"
 	reflect "reflect"
@@ -142,11 +143,11 @@ var File_pos_terminal_v1_create_terminal_proto protoreflect.FileDescriptor
 
 const file_pos_terminal_v1_create_terminal_proto_rawDesc = "" +
 	"\n" +
-	"%pos/terminal/v1/create_terminal.proto\x12\x0fpos.terminal.v1\"e\n" +
-	"\x15CreateTerminalRequest\x12\x1b\n" +
-	"\tbranch_id\x18\x01 \x01(\x03R\bbranchId\x12\x12\n" +
-	"\x04name\x18\x02 \x01(\tR\x04name\x12\x1b\n" +
-	"\tdevice_id\x18\x03 \x01(\tR\bdeviceId\"S\n" +
+	"%pos/terminal/v1/create_terminal.proto\x12\x0fpos.terminal.v1\x1a\x1bbuf/validate/validate.proto\"\x80\x01\n" +
+	"\x15CreateTerminalRequest\x12$\n" +
+	"\tbranch_id\x18\x01 \x01(\x03B\a\xbaH\x04\"\x02 \x00R\bbranchId\x12\x1b\n" +
+	"\x04name\x18\x02 \x01(\tB\a\xbaH\x04r\x02\x10\x01R\x04name\x12$\n" +
+	"\tdevice_id\x18\x03 \x01(\tB\a\xbaH\x04r\x02\x10\x01R\bdeviceId\"S\n" +
 	"\x16CreateTerminalResponse\x12\x1f\n" +
 	"\vterminal_id\x18\x01 \x01(\x03R\n" +
 	"terminalId\x12\x18\n" +

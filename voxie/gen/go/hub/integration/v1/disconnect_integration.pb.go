@@ -7,6 +7,7 @@
 package v1
 
 import (
+	_ "buf.build/gen/go/bufbuild/protovalidate/protocolbuffers/go/buf/validate"
 	protoreflect "google.golang.org/protobuf/reflect/protoreflect"
 	protoimpl "google.golang.org/protobuf/runtime/protoimpl"
 	reflect "reflect"
@@ -115,9 +116,9 @@ var File_hub_integration_v1_disconnect_integration_proto protoreflect.FileDescri
 
 const file_hub_integration_v1_disconnect_integration_proto_rawDesc = "" +
 	"\n" +
-	"/hub/integration/v1/disconnect_integration.proto\x12\x12hub.integration.v1\".\n" +
-	"\x1cDisconnectIntegrationRequest\x12\x0e\n" +
-	"\x02id\x18\x01 \x01(\x03R\x02id\"9\n" +
+	"/hub/integration/v1/disconnect_integration.proto\x12\x12hub.integration.v1\x1a\x1bbuf/validate/validate.proto\"7\n" +
+	"\x1cDisconnectIntegrationRequest\x12\x17\n" +
+	"\x02id\x18\x01 \x01(\x03B\a\xbaH\x04\"\x02 \x00R\x02id\"9\n" +
 	"\x1dDisconnectIntegrationResponse\x12\x18\n" +
 	"\amessage\x18\x01 \x01(\tR\amessageB3Z1github.com/voxire/voxie/gen/go/hub/integration/v1b\x06proto3"
 

@@ -2,17 +2,18 @@ syntax = "proto3";
 
 package finance.quote.v1;
 
+import "buf/validate/validate.proto";
 import "finance/quote/v1/types.proto";
 
 option go_package = "github.com/voxire/voxie/gen/go/finance/quote/v1";
 
 message CreateQuoteRequest {
   // customer_id is the customer id value for this contract.
-  int64 customer_id = 1;
+  int64 customer_id = 1 [(buf.validate.field).int64.gt = 0];
   // lines is the lines value for this contract.
-  repeated QuoteLine lines = 2;
+  repeated QuoteLine lines = 2 [(buf.validate.field).repeated.min_items = 1];
   // valid_until is the valid until value for this contract.
-  string valid_until = 3;
+  string valid_until = 3 [(buf.validate.field).string.min_len = 1];
   // discount is the discount value for this contract.
   double discount = 4;
   // notes is the notes value for this contract.

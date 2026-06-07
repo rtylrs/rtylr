@@ -7,6 +7,7 @@
 package v1
 
 import (
+	_ "buf.build/gen/go/bufbuild/protovalidate/protocolbuffers/go/buf/validate"
 	protoreflect "google.golang.org/protobuf/reflect/protoreflect"
 	protoimpl "google.golang.org/protobuf/runtime/protoimpl"
 	reflect "reflect"
@@ -125,9 +126,9 @@ var File_hr_role_v1_create_role_proto protoreflect.FileDescriptor
 const file_hr_role_v1_create_role_proto_rawDesc = "" +
 	"\n" +
 	"\x1chr/role/v1/create_role.proto\x12\n" +
-	"hr.role.v1\x1a\x16hr/role/v1/types.proto\"h\n" +
-	"\x11CreateRoleRequest\x12\x12\n" +
-	"\x04name\x18\x01 \x01(\tR\x04name\x12?\n" +
+	"hr.role.v1\x1a\x1bbuf/validate/validate.proto\x1a\x16hr/role/v1/types.proto\"q\n" +
+	"\x11CreateRoleRequest\x12\x1b\n" +
+	"\x04name\x18\x01 \x01(\tB\a\xbaH\x04r\x02\x10\x01R\x04name\x12?\n" +
 	"\vpermissions\x18\x02 \x03(\v2\x1d.hr.role.v1.PermissionPayloadR\vpermissions\"A\n" +
 	"\x12CreateRoleResponse\x12+\n" +
 	"\x04role\x18\x01 \x01(\v2\x17.hr.role.v1.RolePayloadR\x04roleB+Z)github.com/voxire/voxie/gen/go/hr/role/v1b\x06proto3"

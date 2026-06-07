@@ -2,6 +2,8 @@ syntax = "proto3";
 
 package pos.loyalty.v1;
 
+import "buf/validate/validate.proto";
+
 option go_package = "github.com/voxire/voxie/gen/go/pos/loyalty/v1";
 
 // ── Update Config ─────────────────────────────────────────────────
@@ -12,7 +14,7 @@ message UpdateLoyaltyConfigRequest {
   // points_per_dollar is the points per dollar value for this contract.
   double points_per_dollar = 2;
   // redemption_rate is the redemption rate value for this contract.
-  double redemption_rate = 3;
+  double redemption_rate = 3 [(buf.validate.field).double.gte = 0];
   // min_redeem_points is the min redeem points value for this contract.
   int32 min_redeem_points = 4;
 }

@@ -7,6 +7,7 @@
 package v1
 
 import (
+	_ "buf.build/gen/go/bufbuild/protovalidate/protocolbuffers/go/buf/validate"
 	protoreflect "google.golang.org/protobuf/reflect/protoreflect"
 	protoimpl "google.golang.org/protobuf/runtime/protoimpl"
 	reflect "reflect"
@@ -142,9 +143,9 @@ var File_pos_orders_refunds_v1_process_refund_proto protoreflect.FileDescriptor
 
 const file_pos_orders_refunds_v1_process_refund_proto_rawDesc = "" +
 	"\n" +
-	"*pos/orders/refunds/v1/process_refund.proto\x12\x15pos.orders.refunds.v1\"a\n" +
-	"\x14ProcessRefundRequest\x12\x19\n" +
-	"\border_id\x18\x01 \x01(\x03R\aorderId\x12\x16\n" +
+	"*pos/orders/refunds/v1/process_refund.proto\x12\x15pos.orders.refunds.v1\x1a\x1bbuf/validate/validate.proto\"j\n" +
+	"\x14ProcessRefundRequest\x12\"\n" +
+	"\border_id\x18\x01 \x01(\x03B\a\xbaH\x04\"\x02 \x00R\aorderId\x12\x16\n" +
 	"\x06amount\x18\x02 \x01(\x01R\x06amount\x12\x16\n" +
 	"\x06reason\x18\x03 \x01(\tR\x06reason\"N\n" +
 	"\x15ProcessRefundResponse\x12\x1b\n" +

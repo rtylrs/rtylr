@@ -7,6 +7,7 @@
 package v1
 
 import (
+	_ "buf.build/gen/go/bufbuild/protovalidate/protocolbuffers/go/buf/validate"
 	protoreflect "google.golang.org/protobuf/reflect/protoreflect"
 	protoimpl "google.golang.org/protobuf/runtime/protoimpl"
 	reflect "reflect"
@@ -169,14 +170,14 @@ var File_pos_cash_v1_cash_adjust_proto protoreflect.FileDescriptor
 
 const file_pos_cash_v1_cash_adjust_proto_rawDesc = "" +
 	"\n" +
-	"\x1dpos/cash/v1/cash_adjust.proto\x12\vpos.cash.v1\"\xc1\x01\n" +
+	"\x1dpos/cash/v1/cash_adjust.proto\x12\vpos.cash.v1\x1a\x1bbuf/validate/validate.proto\"\xd3\x01\n" +
 	"\x11CashAdjustRequest\x12\x1b\n" +
-	"\tbranch_id\x18\x01 \x01(\x03R\bbranchId\x12\x1f\n" +
-	"\vterminal_id\x18\x02 \x01(\x03R\n" +
+	"\tbranch_id\x18\x01 \x01(\x03R\bbranchId\x12(\n" +
+	"\vterminal_id\x18\x02 \x01(\x03B\a\xbaH\x04\"\x02 \x00R\n" +
 	"terminalId\x12\x1d\n" +
 	"\n" +
-	"session_id\x18\x03 \x01(\x03R\tsessionId\x12\x1f\n" +
-	"\vemployee_id\x18\x04 \x01(\x03R\n" +
+	"session_id\x18\x03 \x01(\x03R\tsessionId\x12(\n" +
+	"\vemployee_id\x18\x04 \x01(\x03B\a\xbaH\x04\"\x02 \x00R\n" +
 	"employeeId\x12\x16\n" +
 	"\x06amount\x18\x05 \x01(\x01R\x06amount\x12\x16\n" +
 	"\x06reason\x18\x06 \x01(\tR\x06reason\"O\n" +

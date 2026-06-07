@@ -2,17 +2,22 @@ syntax = "proto3";
 
 package common.auth.v1;
 
+import "buf/validate/validate.proto";
+
 option go_package = "github.com/voxire/voxie/gen/go/common/auth/v1";
 
 message RegisterRequest {
   // email is the email address used for lookup or contact.
-  string email = 1;
+  string email = 1 [(buf.validate.field).string = {
+    min_len: 1
+    email: true
+  }];
   // password is the user-provided secret for authentication.
-  string password = 2;
+  string password = 2 [(buf.validate.field).string.min_len = 1];
   // name is the name value for this contract.
-  string name = 3;
+  string name = 3 [(buf.validate.field).string.min_len = 1];
   // business_name is the business name value for this contract.
-  string business_name = 4;
+  string business_name = 4 [(buf.validate.field).string.min_len = 1];
 }
 
 message RegisterResponse {

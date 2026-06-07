@@ -7,6 +7,7 @@
 package v1
 
 import (
+	_ "buf.build/gen/go/bufbuild/protovalidate/protocolbuffers/go/buf/validate"
 	protoreflect "google.golang.org/protobuf/reflect/protoreflect"
 	protoimpl "google.golang.org/protobuf/runtime/protoimpl"
 	reflect "reflect"
@@ -151,14 +152,14 @@ var File_crm_loyalty_v1_redeem_points_proto protoreflect.FileDescriptor
 
 const file_crm_loyalty_v1_redeem_points_proto_rawDesc = "" +
 	"\n" +
-	"\"crm/loyalty/v1/redeem_points.proto\x12\x0ecrm.loyalty.v1\"\xd0\x01\n" +
-	"\x13RedeemPointsRequest\x12\x1f\n" +
-	"\vcustomer_id\x18\x01 \x01(\x03R\n" +
+	"\"crm/loyalty/v1/redeem_points.proto\x12\x0ecrm.loyalty.v1\x1a\x1bbuf/validate/validate.proto\"\xe2\x01\n" +
+	"\x13RedeemPointsRequest\x12(\n" +
+	"\vcustomer_id\x18\x01 \x01(\x03B\a\xbaH\x04\"\x02 \x00R\n" +
 	"customerId\x12\x16\n" +
 	"\x06points\x18\x02 \x01(\x03R\x06points\x12 \n" +
 	"\vdescription\x18\x03 \x01(\tR\vdescription\x12&\n" +
-	"\freference_id\x18\x04 \x01(\x03H\x00R\vreferenceId\x88\x01\x01\x12%\n" +
-	"\x0ereference_type\x18\x05 \x01(\tR\rreferenceTypeB\x0f\n" +
+	"\freference_id\x18\x04 \x01(\x03H\x00R\vreferenceId\x88\x01\x01\x12.\n" +
+	"\x0ereference_type\x18\x05 \x01(\tB\a\xbaH\x04r\x02\x10\x01R\rreferenceTypeB\x0f\n" +
 	"\r_reference_id\"0\n" +
 	"\x14RedeemPointsResponse\x12\x18\n" +
 	"\amessage\x18\x01 \x01(\tR\amessageB/Z-github.com/voxire/voxie/gen/go/crm/loyalty/v1b\x06proto3"

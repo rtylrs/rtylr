@@ -7,6 +7,7 @@
 package v1
 
 import (
+	_ "buf.build/gen/go/bufbuild/protovalidate/protocolbuffers/go/buf/validate"
 	protoreflect "google.golang.org/protobuf/reflect/protoreflect"
 	protoimpl "google.golang.org/protobuf/runtime/protoimpl"
 	reflect "reflect"
@@ -160,10 +161,10 @@ var File_common_auth_v1_login_proto protoreflect.FileDescriptor
 
 const file_common_auth_v1_login_proto_rawDesc = "" +
 	"\n" +
-	"\x1acommon/auth/v1/login.proto\x12\x0ecommon.auth.v1\"@\n" +
-	"\fLoginRequest\x12\x14\n" +
-	"\x05email\x18\x01 \x01(\tR\x05email\x12\x1a\n" +
-	"\bpassword\x18\x02 \x01(\tR\bpassword\"\x82\x01\n" +
+	"\x1acommon/auth/v1/login.proto\x12\x0ecommon.auth.v1\x1a\x1bbuf/validate/validate.proto\"T\n" +
+	"\fLoginRequest\x12\x1f\n" +
+	"\x05email\x18\x01 \x01(\tB\t\xbaH\x06r\x04\x10\x01`\x01R\x05email\x12#\n" +
+	"\bpassword\x18\x02 \x01(\tB\a\xbaH\x04r\x02\x10\x01R\bpassword\"\x82\x01\n" +
 	"\rLoginResponse\x12\x14\n" +
 	"\x05token\x18\x01 \x01(\tR\x05token\x12\x18\n" +
 	"\amessage\x18\x02 \x01(\tR\amessage\x12\x17\n" +

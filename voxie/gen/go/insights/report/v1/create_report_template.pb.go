@@ -7,6 +7,7 @@
 package v1
 
 import (
+	_ "buf.build/gen/go/bufbuild/protovalidate/protocolbuffers/go/buf/validate"
 	protoreflect "google.golang.org/protobuf/reflect/protoreflect"
 	protoimpl "google.golang.org/protobuf/runtime/protoimpl"
 	reflect "reflect"
@@ -151,13 +152,13 @@ var File_insights_report_v1_create_report_template_proto protoreflect.FileDescri
 
 const file_insights_report_v1_create_report_template_proto_rawDesc = "" +
 	"\n" +
-	"/insights/report/v1/create_report_template.proto\x12\x12insights.report.v1\x1a\x1einsights/report/v1/types.proto\"\x99\x01\n" +
-	"\x1bCreateReportTemplateRequest\x12\x12\n" +
-	"\x04name\x18\x01 \x01(\tR\x04name\x12 \n" +
-	"\vdescription\x18\x02 \x01(\tR\vdescription\x12\x12\n" +
-	"\x04type\x18\x03 \x01(\tR\x04type\x12\x18\n" +
-	"\ametrics\x18\x04 \x03(\tR\ametrics\x12\x16\n" +
-	"\x06format\x18\x05 \x01(\tR\x06format\"^\n" +
+	"/insights/report/v1/create_report_template.proto\x12\x12insights.report.v1\x1a\x1bbuf/validate/validate.proto\x1a\x1einsights/report/v1/types.proto\"\xb4\x01\n" +
+	"\x1bCreateReportTemplateRequest\x12\x1b\n" +
+	"\x04name\x18\x01 \x01(\tB\a\xbaH\x04r\x02\x10\x01R\x04name\x12 \n" +
+	"\vdescription\x18\x02 \x01(\tR\vdescription\x12\x1b\n" +
+	"\x04type\x18\x03 \x01(\tB\a\xbaH\x04r\x02\x10\x01R\x04type\x12\x18\n" +
+	"\ametrics\x18\x04 \x03(\tR\ametrics\x12\x1f\n" +
+	"\x06format\x18\x05 \x01(\tB\a\xbaH\x04r\x02\x10\x01R\x06format\"^\n" +
 	"\x1cCreateReportTemplateResponse\x12>\n" +
 	"\btemplate\x18\x01 \x01(\v2\".insights.report.v1.ReportTemplateR\btemplateB3Z1github.com/voxire/voxie/gen/go/insights/report/v1b\x06proto3"
 

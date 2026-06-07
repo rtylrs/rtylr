@@ -2,6 +2,7 @@ syntax = "proto3";
 
 package hr.employees.payroll.runs.v1;
 
+import "buf/validate/validate.proto";
 import "hr/employees/payroll/runs/v1/types.proto";
 
 option go_package = "github.com/voxire/voxie/gen/go/hr/employees/payroll/runs/v1";
@@ -10,9 +11,9 @@ option go_package = "github.com/voxire/voxie/gen/go/hr/employees/payroll/runs/v1
 
 message TriggerPayrollRunRequest {
   // Start of the pay period to process (ISO-8601 date).
-  string period_start = 1;
+  string period_start = 1 [(buf.validate.field).string.min_len = 1];
   // End of the pay period to process (ISO-8601 date).
-  string period_end = 2;
+  string period_end = 2 [(buf.validate.field).string.min_len = 1];
 }
 
 message TriggerPayrollRunResponse {

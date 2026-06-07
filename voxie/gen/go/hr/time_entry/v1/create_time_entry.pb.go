@@ -7,6 +7,7 @@
 package v1
 
 import (
+	_ "buf.build/gen/go/bufbuild/protovalidate/protocolbuffers/go/buf/validate"
 	protoreflect "google.golang.org/protobuf/reflect/protoreflect"
 	protoimpl "google.golang.org/protobuf/runtime/protoimpl"
 	reflect "reflect"
@@ -205,16 +206,16 @@ var File_hr_time_entry_v1_create_time_entry_proto protoreflect.FileDescriptor
 
 const file_hr_time_entry_v1_create_time_entry_proto_rawDesc = "" +
 	"\n" +
-	"(hr/time_entry/v1/create_time_entry.proto\x12\x10hr.time_entry.v1\x1a\x1chr/time_entry/v1/types.proto\"\xc6\x03\n" +
-	"\x16CreateTimeEntryRequest\x12\x1f\n" +
-	"\vemployee_id\x18\x01 \x01(\x03R\n" +
+	"(hr/time_entry/v1/create_time_entry.proto\x12\x10hr.time_entry.v1\x1a\x1bbuf/validate/validate.proto\x1a\x1chr/time_entry/v1/types.proto\"\xe1\x03\n" +
+	"\x16CreateTimeEntryRequest\x12(\n" +
+	"\vemployee_id\x18\x01 \x01(\x03B\a\xbaH\x04\"\x02 \x00R\n" +
 	"employeeId\x12\"\n" +
 	"\n" +
 	"project_id\x18\x02 \x01(\x03H\x00R\tprojectId\x88\x01\x01\x12\x1c\n" +
 	"\atask_id\x18\x03 \x01(\x03H\x01R\x06taskId\x88\x01\x01\x12$\n" +
 	"\vcategory_id\x18\x04 \x01(\x03H\x02R\n" +
-	"categoryId\x88\x01\x01\x12\x12\n" +
-	"\x04date\x18\x05 \x01(\tR\x04date\x12)\n" +
+	"categoryId\x88\x01\x01\x12\x1b\n" +
+	"\x04date\x18\x05 \x01(\tB\a\xbaH\x04r\x02\x10\x01R\x04date\x12)\n" +
 	"\x10duration_minutes\x18\x06 \x01(\x05R\x0fdurationMinutes\x12\"\n" +
 	"\n" +
 	"start_time\x18\a \x01(\tH\x03R\tstartTime\x88\x01\x01\x12\x1e\n" +
@@ -222,8 +223,8 @@ const file_hr_time_entry_v1_create_time_entry_proto_rawDesc = "" +
 	"\vdescription\x18\t \x01(\tR\vdescription\x12\x1f\n" +
 	"\vis_billable\x18\n" +
 	" \x01(\bR\n" +
-	"isBillable\x12\x16\n" +
-	"\x06source\x18\v \x01(\tR\x06sourceB\r\n" +
+	"isBillable\x12\x1f\n" +
+	"\x06source\x18\v \x01(\tB\a\xbaH\x04r\x02\x10\x01R\x06sourceB\r\n" +
 	"\v_project_idB\n" +
 	"\n" +
 	"\b_task_idB\x0e\n" +

@@ -2,13 +2,14 @@ syntax = "proto3";
 
 package flow.task.v1;
 
+import "buf/validate/validate.proto";
 import "flow/task/v1/types.proto";
 
 option go_package = "github.com/voxire/voxie/gen/go/flow/task/v1";
 
 message GetTimeLogsRequest {
   // task_id is the task id value for this contract.
-  int64 task_id = 1;
+  int64 task_id = 1 [(buf.validate.field).int64.gt = 0];
 }
 
 message GetTimeLogsResponse {

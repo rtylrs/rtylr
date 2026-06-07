@@ -4,12 +4,13 @@
 generate:
 	@echo "Generating code from proto files..."
 	buf generate
+	python3 scripts/generate_validation_metadata.py
 	@echo "Done. Output in gen/go and gen/ts"
 
 # Clean generated code
 clean:
-	rm -rf gen/go gen/ts
-	mkdir -p gen/go gen/ts
+	rm -rf gen/go gen/ts gen/validation
+	mkdir -p gen/go gen/ts gen/validation
 
 # Lint proto files
 lint:

@@ -7,6 +7,7 @@
 package v1
 
 import (
+	_ "buf.build/gen/go/bufbuild/protovalidate/protocolbuffers/go/buf/validate"
 	protoreflect "google.golang.org/protobuf/reflect/protoreflect"
 	protoimpl "google.golang.org/protobuf/runtime/protoimpl"
 	reflect "reflect"
@@ -115,9 +116,9 @@ var File_pos_user_v1_deactivate_pos_user_proto protoreflect.FileDescriptor
 
 const file_pos_user_v1_deactivate_pos_user_proto_rawDesc = "" +
 	"\n" +
-	"%pos/user/v1/deactivate_pos_user.proto\x12\vpos.user.v1\"*\n" +
-	"\x18DeactivatePOSUserRequest\x12\x0e\n" +
-	"\x02id\x18\x01 \x01(\x03R\x02id\"5\n" +
+	"%pos/user/v1/deactivate_pos_user.proto\x12\vpos.user.v1\x1a\x1bbuf/validate/validate.proto\"3\n" +
+	"\x18DeactivatePOSUserRequest\x12\x17\n" +
+	"\x02id\x18\x01 \x01(\x03B\a\xbaH\x04\"\x02 \x00R\x02id\"5\n" +
 	"\x19DeactivatePOSUserResponse\x12\x18\n" +
 	"\asuccess\x18\x01 \x01(\bR\asuccessB,Z*github.com/voxire/voxie/gen/go/pos/user/v1b\x06proto3"
 

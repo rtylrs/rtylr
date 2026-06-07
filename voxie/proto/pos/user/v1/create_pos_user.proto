@@ -2,21 +2,23 @@ syntax = "proto3";
 
 package pos.user.v1;
 
+import "buf/validate/validate.proto";
+
 option go_package = "github.com/voxire/voxie/gen/go/pos/user/v1";
 
 // ── Create ────────────────────────────────────────────────────────
 
 message CreatePOSUserRequest {
   // location_id is the location id value for this contract.
-  int64 location_id = 1;
+  int64 location_id = 1 [(buf.validate.field).int64.gt = 0];
   // name is the name value for this contract.
-  string name = 2;
+  string name = 2 [(buf.validate.field).string.min_len = 1];
   // pin is the pin value for this contract.
-  string pin = 3;
+  string pin = 3 [(buf.validate.field).string.min_len = 1];
   // role is the role value for this contract.
-  string role = 4;
+  string role = 4 [(buf.validate.field).string.min_len = 1];
   // hourly_rate is the hourly rate value for this contract.
-  double hourly_rate = 5;
+  double hourly_rate = 5 [(buf.validate.field).double.gte = 0];
   // max_discount_pct is the max discount pct value for this contract.
   double max_discount_pct = 6;
   // can_void is the can void value for this contract.

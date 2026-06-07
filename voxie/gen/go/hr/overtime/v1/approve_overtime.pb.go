@@ -7,6 +7,7 @@
 package v1
 
 import (
+	_ "buf.build/gen/go/bufbuild/protovalidate/protocolbuffers/go/buf/validate"
 	protoreflect "google.golang.org/protobuf/reflect/protoreflect"
 	protoimpl "google.golang.org/protobuf/runtime/protoimpl"
 	reflect "reflect"
@@ -142,9 +143,9 @@ var File_hr_overtime_v1_approve_overtime_proto protoreflect.FileDescriptor
 
 const file_hr_overtime_v1_approve_overtime_proto_rawDesc = "" +
 	"\n" +
-	"%hr/overtime/v1/approve_overtime.proto\x12\x0ehr.overtime.v1\"\xf4\x01\n" +
-	"\x16ApproveOvertimeRequest\x12.\n" +
-	"\x13overtime_request_id\x18\x01 \x01(\x03R\x11overtimeRequestId\x12\x1a\n" +
+	"%hr/overtime/v1/approve_overtime.proto\x12\x0ehr.overtime.v1\x1a\x1bbuf/validate/validate.proto\"\xfd\x01\n" +
+	"\x16ApproveOvertimeRequest\x127\n" +
+	"\x13overtime_request_id\x18\x01 \x01(\x03B\a\xbaH\x04\"\x02 \x00R\x11overtimeRequestId\x12\x1a\n" +
 	"\bapproved\x18\x02 \x01(\bR\bapproved\x122\n" +
 	"\x12multiplier_applied\x18\x03 \x01(\x01H\x00R\x11multiplierApplied\x88\x01\x01\x12.\n" +
 	"\x10rejection_reason\x18\x04 \x01(\tH\x01R\x0frejectionReason\x88\x01\x01B\x15\n" +

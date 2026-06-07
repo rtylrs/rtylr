@@ -7,6 +7,7 @@
 package v1
 
 import (
+	_ "buf.build/gen/go/bufbuild/protovalidate/protocolbuffers/go/buf/validate"
 	protoreflect "google.golang.org/protobuf/reflect/protoreflect"
 	protoimpl "google.golang.org/protobuf/runtime/protoimpl"
 	reflect "reflect"
@@ -124,11 +125,11 @@ var File_hub_team_permissions_v1_update_permissions_proto protoreflect.FileDescr
 
 const file_hub_team_permissions_v1_update_permissions_proto_rawDesc = "" +
 	"\n" +
-	"0hub/team/permissions/v1/update_permissions.proto\x12\x17hub.team.permissions.v1\"[\n" +
-	"\x18UpdatePermissionsRequest\x12\x17\n" +
-	"\auser_id\x18\x01 \x01(\x03R\x06userId\x12\x12\n" +
-	"\x04apps\x18\x02 \x03(\tR\x04apps\x12\x12\n" +
-	"\x04role\x18\x03 \x01(\tR\x04role\"\x1b\n" +
+	"0hub/team/permissions/v1/update_permissions.proto\x12\x17hub.team.permissions.v1\x1a\x1bbuf/validate/validate.proto\"m\n" +
+	"\x18UpdatePermissionsRequest\x12 \n" +
+	"\auser_id\x18\x01 \x01(\x03B\a\xbaH\x04\"\x02 \x00R\x06userId\x12\x12\n" +
+	"\x04apps\x18\x02 \x03(\tR\x04apps\x12\x1b\n" +
+	"\x04role\x18\x03 \x01(\tB\a\xbaH\x04r\x02\x10\x01R\x04role\"\x1b\n" +
 	"\x19UpdatePermissionsResponseB8Z6github.com/voxire/voxie/gen/go/hub/team/permissions/v1b\x06proto3"
 
 var (

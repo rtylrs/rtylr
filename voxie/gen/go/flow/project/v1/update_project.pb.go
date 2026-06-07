@@ -7,6 +7,7 @@
 package v1
 
 import (
+	_ "buf.build/gen/go/bufbuild/protovalidate/protocolbuffers/go/buf/validate"
 	protoreflect "google.golang.org/protobuf/reflect/protoreflect"
 	protoimpl "google.golang.org/protobuf/runtime/protoimpl"
 	reflect "reflect"
@@ -178,17 +179,17 @@ var File_flow_project_v1_update_project_proto protoreflect.FileDescriptor
 
 const file_flow_project_v1_update_project_proto_rawDesc = "" +
 	"\n" +
-	"$flow/project/v1/update_project.proto\x12\x0fflow.project.v1\"\xd8\x01\n" +
-	"\x14UpdateProjectRequest\x12\x0e\n" +
-	"\x02id\x18\x01 \x01(\x03R\x02id\x12\x12\n" +
-	"\x04name\x18\x02 \x01(\tR\x04name\x12 \n" +
-	"\vdescription\x18\x03 \x01(\tR\vdescription\x12\x12\n" +
-	"\x04icon\x18\x04 \x01(\tR\x04icon\x12\x14\n" +
-	"\x05color\x18\x05 \x01(\tR\x05color\x12\x16\n" +
-	"\x06status\x18\x06 \x01(\tR\x06status\x12\x1d\n" +
+	"$flow/project/v1/update_project.proto\x12\x0fflow.project.v1\x1a\x1bbuf/validate/validate.proto\"\x97\x02\n" +
+	"\x14UpdateProjectRequest\x12\x17\n" +
+	"\x02id\x18\x01 \x01(\x03B\a\xbaH\x04\"\x02 \x00R\x02id\x12\x1b\n" +
+	"\x04name\x18\x02 \x01(\tB\a\xbaH\x04r\x02\x10\x01R\x04name\x12 \n" +
+	"\vdescription\x18\x03 \x01(\tR\vdescription\x12\x1b\n" +
+	"\x04icon\x18\x04 \x01(\tB\a\xbaH\x04r\x02\x10\x01R\x04icon\x12\x1d\n" +
+	"\x05color\x18\x05 \x01(\tB\a\xbaH\x04r\x02\x10\x01R\x05color\x12\x1f\n" +
+	"\x06status\x18\x06 \x01(\tB\a\xbaH\x04r\x02\x10\x01R\x06status\x12&\n" +
 	"\n" +
-	"start_date\x18\a \x01(\tR\tstartDate\x12\x19\n" +
-	"\bdue_date\x18\b \x01(\tR\adueDate\"1\n" +
+	"start_date\x18\a \x01(\tB\a\xbaH\x04r\x02\x10\x01R\tstartDate\x12\"\n" +
+	"\bdue_date\x18\b \x01(\tB\a\xbaH\x04r\x02\x10\x01R\adueDate\"1\n" +
 	"\x15UpdateProjectResponse\x12\x18\n" +
 	"\amessage\x18\x01 \x01(\tR\amessageB0Z.github.com/voxire/voxie/gen/go/flow/project/v1b\x06proto3"
 

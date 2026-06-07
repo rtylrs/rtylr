@@ -7,6 +7,7 @@
 package v1
 
 import (
+	_ "buf.build/gen/go/bufbuild/protovalidate/protocolbuffers/go/buf/validate"
 	protoreflect "google.golang.org/protobuf/reflect/protoreflect"
 	protoimpl "google.golang.org/protobuf/runtime/protoimpl"
 	reflect "reflect"
@@ -124,9 +125,9 @@ var File_crm_campaign_v1_get_campaign_detail_proto protoreflect.FileDescriptor
 
 const file_crm_campaign_v1_get_campaign_detail_proto_rawDesc = "" +
 	"\n" +
-	")crm/campaign/v1/get_campaign_detail.proto\x12\x0fcrm.campaign.v1\x1a\x1bcrm/campaign/v1/types.proto\"*\n" +
-	"\x18GetCampaignDetailRequest\x12\x0e\n" +
-	"\x02id\x18\x01 \x01(\x03R\x02id\"\x88\x01\n" +
+	")crm/campaign/v1/get_campaign_detail.proto\x12\x0fcrm.campaign.v1\x1a\x1bbuf/validate/validate.proto\x1a\x1bcrm/campaign/v1/types.proto\"3\n" +
+	"\x18GetCampaignDetailRequest\x12\x17\n" +
+	"\x02id\x18\x01 \x01(\x03B\a\xbaH\x04\"\x02 \x00R\x02id\"\x88\x01\n" +
 	"\x19GetCampaignDetailResponse\x125\n" +
 	"\bcampaign\x18\x01 \x01(\v2\x19.crm.campaign.v1.CampaignR\bcampaign\x124\n" +
 	"\x05stats\x18\x02 \x01(\v2\x1e.crm.campaign.v1.CampaignStatsR\x05statsB0Z.github.com/voxire/voxie/gen/go/crm/campaign/v1b\x06proto3"

@@ -2,6 +2,7 @@ syntax = "proto3";
 
 package hr.leave.v1;
 
+import "buf/validate/validate.proto";
 import "hr/leave/v1/types.proto";
 
 option go_package = "github.com/voxire/voxie/gen/go/hr/leave/v1";
@@ -10,13 +11,13 @@ option go_package = "github.com/voxire/voxie/gen/go/hr/leave/v1";
 
 message CreateLeaveRequestRequest {
   // Employee requesting leave.
-  int64 employee_id = 1;
+  int64 employee_id = 1 [(buf.validate.field).int64.gt = 0];
   // Leave type being requested.
-  int64 leave_type_id = 2;
+  int64 leave_type_id = 2 [(buf.validate.field).int64.gt = 0];
   // First day of leave (ISO-8601 date).
-  string start_date = 3;
+  string start_date = 3 [(buf.validate.field).string.min_len = 1];
   // Last day of leave (ISO-8601 date).
-  string end_date = 4;
+  string end_date = 4 [(buf.validate.field).string.min_len = 1];
   // Total number of working days requested.
   double total_days = 5;
   // Additional context from the employee; absent if none provided.

@@ -7,6 +7,7 @@
 package v1
 
 import (
+	_ "buf.build/gen/go/bufbuild/protovalidate/protocolbuffers/go/buf/validate"
 	protoreflect "google.golang.org/protobuf/reflect/protoreflect"
 	protoimpl "google.golang.org/protobuf/runtime/protoimpl"
 	reflect "reflect"
@@ -115,9 +116,9 @@ var File_hr_performance_v1_open_review_cycle_proto protoreflect.FileDescriptor
 
 const file_hr_performance_v1_open_review_cycle_proto_rawDesc = "" +
 	"\n" +
-	")hr/performance/v1/open_review_cycle.proto\x12\x11hr.performance.v1\x1a\x1dhr/performance/v1/types.proto\"3\n" +
-	"\x16OpenReviewCycleRequest\x12\x19\n" +
-	"\bcycle_id\x18\x01 \x01(\x03R\acycleId\"V\n" +
+	")hr/performance/v1/open_review_cycle.proto\x12\x11hr.performance.v1\x1a\x1bbuf/validate/validate.proto\x1a\x1dhr/performance/v1/types.proto\"<\n" +
+	"\x16OpenReviewCycleRequest\x12\"\n" +
+	"\bcycle_id\x18\x01 \x01(\x03B\a\xbaH\x04\"\x02 \x00R\acycleId\"V\n" +
 	"\x17OpenReviewCycleResponse\x12;\n" +
 	"\x05cycle\x18\x01 \x01(\v2%.hr.performance.v1.ReviewCyclePayloadR\x05cycleB2Z0github.com/voxire/voxie/gen/go/hr/performance/v1b\x06proto3"
 

@@ -7,6 +7,7 @@
 package v1
 
 import (
+	_ "buf.build/gen/go/bufbuild/protovalidate/protocolbuffers/go/buf/validate"
 	protoreflect "google.golang.org/protobuf/reflect/protoreflect"
 	protoimpl "google.golang.org/protobuf/runtime/protoimpl"
 	reflect "reflect"
@@ -133,10 +134,10 @@ var File_hub_permission_v1_update_permission_matrix_proto protoreflect.FileDescr
 
 const file_hub_permission_v1_update_permission_matrix_proto_rawDesc = "" +
 	"\n" +
-	"0hub/permission/v1/update_permission_matrix.proto\x12\x11hub.permission.v1\"t\n" +
-	"\x1dUpdatePermissionMatrixRequest\x12\x12\n" +
-	"\x04role\x18\x01 \x01(\tR\x04role\x12%\n" +
-	"\x0epermission_key\x18\x02 \x01(\tR\rpermissionKey\x12\x18\n" +
+	"0hub/permission/v1/update_permission_matrix.proto\x12\x11hub.permission.v1\x1a\x1bbuf/validate/validate.proto\"\x86\x01\n" +
+	"\x1dUpdatePermissionMatrixRequest\x12\x1b\n" +
+	"\x04role\x18\x01 \x01(\tB\a\xbaH\x04r\x02\x10\x01R\x04role\x12.\n" +
+	"\x0epermission_key\x18\x02 \x01(\tB\a\xbaH\x04r\x02\x10\x01R\rpermissionKey\x12\x18\n" +
 	"\aenabled\x18\x03 \x01(\bR\aenabled\":\n" +
 	"\x1eUpdatePermissionMatrixResponse\x12\x18\n" +
 	"\asuccess\x18\x01 \x01(\bR\asuccessB2Z0github.com/voxire/voxie/gen/go/hub/permission/v1b\x06proto3"

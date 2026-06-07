@@ -2,17 +2,19 @@ syntax = "proto3";
 
 package hr.time_off.v1;
 
+import "buf/validate/validate.proto";
+
 option go_package = "github.com/voxire/voxie/gen/go/hr/time_off/v1";
 
 message SubmitTimeOffRequest {
   // staff_id is the staff id value for this contract.
-  int64 staff_id = 1;
+  int64 staff_id = 1 [(buf.validate.field).int64.gt = 0];
   // type is the type value for this contract.
-  string type = 2;
+  string type = 2 [(buf.validate.field).string.min_len = 1];
   // start_date is the start date value for this contract.
-  string start_date = 3;
+  string start_date = 3 [(buf.validate.field).string.min_len = 1];
   // end_date is the end date value for this contract.
-  string end_date = 4;
+  string end_date = 4 [(buf.validate.field).string.min_len = 1];
   // days_count is the days count value for this contract.
   double days_count = 5;
   // reason is the reason value for this contract.

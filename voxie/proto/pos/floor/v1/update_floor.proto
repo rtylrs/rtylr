@@ -2,13 +2,15 @@ syntax = "proto3";
 
 package pos.floor.v1;
 
+import "buf/validate/validate.proto";
+
 option go_package = "github.com/voxire/voxie/gen/go/pos/floor/v1";
 
 // ── Update ────────────────────────────────────────────────────────
 
 message UpdateFloorRequest {
   // name is the name value for this contract.
-  string name = 1;
+  string name = 1 [(buf.validate.field).string.min_len = 1];
   // sort_order is the sort order value for this contract.
   int32 sort_order = 2;
 }

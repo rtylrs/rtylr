@@ -7,6 +7,7 @@
 package v1
 
 import (
+	_ "buf.build/gen/go/bufbuild/protovalidate/protocolbuffers/go/buf/validate"
 	protoreflect "google.golang.org/protobuf/reflect/protoreflect"
 	protoimpl "google.golang.org/protobuf/runtime/protoimpl"
 	reflect "reflect"
@@ -169,16 +170,16 @@ var File_erp_purchase_order_v1_create_purchase_order_proto protoreflect.FileDesc
 
 const file_erp_purchase_order_v1_create_purchase_order_proto_rawDesc = "" +
 	"\n" +
-	"1erp/purchase_order/v1/create_purchase_order.proto\x12\x15erp.purchase_order.v1\x1a!erp/purchase_order/v1/types.proto\"\x89\x02\n" +
-	"\x1aCreatePurchaseOrderRequest\x12\x1f\n" +
-	"\vsupplier_id\x18\x01 \x01(\x03R\n" +
-	"supplierId\x12\x1b\n" +
-	"\tpo_number\x18\x02 \x01(\tR\bpoNumber\x12\x1d\n" +
+	"1erp/purchase_order/v1/create_purchase_order.proto\x12\x15erp.purchase_order.v1\x1a\x1bbuf/validate/validate.proto\x1a!erp/purchase_order/v1/types.proto\"\xbe\x02\n" +
+	"\x1aCreatePurchaseOrderRequest\x12(\n" +
+	"\vsupplier_id\x18\x01 \x01(\x03B\a\xbaH\x04\"\x02 \x00R\n" +
+	"supplierId\x12$\n" +
+	"\tpo_number\x18\x02 \x01(\tB\a\xbaH\x04r\x02\x10\x01R\bpoNumber\x12-\n" +
 	"\n" +
-	"tax_amount\x18\x03 \x01(\x01R\ttaxAmount\x12+\n" +
-	"\x11expected_delivery\x18\x04 \x01(\tR\x10expectedDelivery\x12\x14\n" +
-	"\x05notes\x18\x05 \x01(\tR\x05notes\x12K\n" +
-	"\x05items\x18\x06 \x03(\v25.erp.purchase_order.v1.CreatePurchaseOrderItemRequestR\x05items\"c\n" +
+	"tax_amount\x18\x03 \x01(\x01B\x0e\xbaH\v\x12\t)\x00\x00\x00\x00\x00\x00\x00\x00R\ttaxAmount\x124\n" +
+	"\x11expected_delivery\x18\x04 \x01(\tB\a\xbaH\x04r\x02\x10\x01R\x10expectedDelivery\x12\x14\n" +
+	"\x05notes\x18\x05 \x01(\tR\x05notes\x12U\n" +
+	"\x05items\x18\x06 \x03(\v25.erp.purchase_order.v1.CreatePurchaseOrderItemRequestB\b\xbaH\x05\x92\x01\x02\b\x01R\x05items\"c\n" +
 	"\x1bCreatePurchaseOrderResponse\x12*\n" +
 	"\x11purchase_order_id\x18\x01 \x01(\x03R\x0fpurchaseOrderId\x12\x18\n" +
 	"\amessage\x18\x02 \x01(\tR\amessageB6Z4github.com/voxire/voxie/gen/go/erp/purchase_order/v1b\x06proto3"

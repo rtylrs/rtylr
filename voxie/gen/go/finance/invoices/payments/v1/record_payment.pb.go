@@ -7,6 +7,7 @@
 package v1
 
 import (
+	_ "buf.build/gen/go/bufbuild/protovalidate/protocolbuffers/go/buf/validate"
 	v1 "github.com/voxire/voxie/gen/go/finance/invoices/v1"
 	protoreflect "google.golang.org/protobuf/reflect/protoreflect"
 	protoimpl "google.golang.org/protobuf/runtime/protoimpl"
@@ -179,14 +180,14 @@ var File_finance_invoices_payments_v1_record_payment_proto protoreflect.FileDesc
 
 const file_finance_invoices_payments_v1_record_payment_proto_rawDesc = "" +
 	"\n" +
-	"1finance/invoices/payments/v1/record_payment.proto\x12\x1cfinance.invoices.payments.v1\x1a\x1ffinance/invoices/v1/types.proto\"\xd8\x01\n" +
-	"\x14RecordPaymentRequest\x12\x1d\n" +
+	"1finance/invoices/payments/v1/record_payment.proto\x12\x1cfinance.invoices.payments.v1\x1a\x1bbuf/validate/validate.proto\x1a\x1ffinance/invoices/v1/types.proto\"\x8c\x02\n" +
+	"\x14RecordPaymentRequest\x12&\n" +
 	"\n" +
-	"invoice_id\x18\x01 \x01(\x03R\tinvoiceId\x12\x16\n" +
-	"\x06amount\x18\x02 \x01(\x01R\x06amount\x12\x1a\n" +
-	"\bcurrency\x18\x03 \x01(\tR\bcurrency\x12!\n" +
-	"\fpayment_date\x18\x04 \x01(\tR\vpaymentDate\x12\x16\n" +
-	"\x06method\x18\x05 \x01(\tR\x06method\x12\x1c\n" +
+	"invoice_id\x18\x01 \x01(\x03B\a\xbaH\x04\"\x02 \x00R\tinvoiceId\x12&\n" +
+	"\x06amount\x18\x02 \x01(\x01B\x0e\xbaH\v\x12\t)\x00\x00\x00\x00\x00\x00\x00\x00R\x06amount\x12#\n" +
+	"\bcurrency\x18\x03 \x01(\tB\a\xbaH\x04r\x02\x10\x01R\bcurrency\x12*\n" +
+	"\fpayment_date\x18\x04 \x01(\tB\a\xbaH\x04r\x02\x10\x01R\vpaymentDate\x12\x1f\n" +
+	"\x06method\x18\x05 \x01(\tB\a\xbaH\x04r\x02\x10\x01R\x06method\x12\x1c\n" +
 	"\treference\x18\x06 \x01(\tR\treference\x12\x14\n" +
 	"\x05notes\x18\a \x01(\tR\x05notes\"~\n" +
 	"\x15RecordPaymentResponse\x12K\n" +

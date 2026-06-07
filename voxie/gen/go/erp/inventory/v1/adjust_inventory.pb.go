@@ -7,6 +7,7 @@
 package v1
 
 import (
+	_ "buf.build/gen/go/bufbuild/protovalidate/protocolbuffers/go/buf/validate"
 	protoreflect "google.golang.org/protobuf/reflect/protoreflect"
 	protoimpl "google.golang.org/protobuf/runtime/protoimpl"
 	reflect "reflect"
@@ -142,10 +143,10 @@ var File_erp_inventory_v1_adjust_inventory_proto protoreflect.FileDescriptor
 
 const file_erp_inventory_v1_adjust_inventory_proto_rawDesc = "" +
 	"\n" +
-	"'erp/inventory/v1/adjust_inventory.proto\x12\x10erp.inventory.v1\"y\n" +
-	"\x16AdjustInventoryRequest\x12\x1d\n" +
+	"'erp/inventory/v1/adjust_inventory.proto\x12\x10erp.inventory.v1\x1a\x1bbuf/validate/validate.proto\"\x82\x01\n" +
+	"\x16AdjustInventoryRequest\x12&\n" +
 	"\n" +
-	"product_id\x18\x01 \x01(\x03R\tproductId\x12\x16\n" +
+	"product_id\x18\x01 \x01(\x03B\a\xbaH\x04\"\x02 \x00R\tproductId\x12\x16\n" +
 	"\x06change\x18\x02 \x01(\x01R\x06change\x12\x12\n" +
 	"\x04type\x18\x03 \x01(\tR\x04type\x12\x14\n" +
 	"\x05notes\x18\x04 \x01(\tR\x05notes\"3\n" +

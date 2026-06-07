@@ -7,6 +7,7 @@
 package v1
 
 import (
+	_ "buf.build/gen/go/bufbuild/protovalidate/protocolbuffers/go/buf/validate"
 	protoreflect "google.golang.org/protobuf/reflect/protoreflect"
 	protoimpl "google.golang.org/protobuf/runtime/protoimpl"
 	reflect "reflect"
@@ -241,27 +242,27 @@ var File_hr_employee_v1_create_employee_proto protoreflect.FileDescriptor
 
 const file_hr_employee_v1_create_employee_proto_rawDesc = "" +
 	"\n" +
-	"$hr/employee/v1/create_employee.proto\x12\x0ehr.employee.v1\x1a\x1ahr/employee/v1/types.proto\"\xb8\x05\n" +
-	"\x15CreateEmployeeRequest\x12\x17\n" +
-	"\auser_id\x18\x01 \x01(\x03R\x06userId\x12#\n" +
-	"\rdepartment_id\x18\x02 \x01(\x03R\fdepartmentId\x12\x1f\n" +
-	"\vlocation_id\x18\x03 \x01(\x03R\n" +
+	"$hr/employee/v1/create_employee.proto\x12\x0ehr.employee.v1\x1a\x1bbuf/validate/validate.proto\x1a\x1ahr/employee/v1/types.proto\"\x89\x06\n" +
+	"\x15CreateEmployeeRequest\x12 \n" +
+	"\auser_id\x18\x01 \x01(\x03B\a\xbaH\x04\"\x02 \x00R\x06userId\x12,\n" +
+	"\rdepartment_id\x18\x02 \x01(\x03B\a\xbaH\x04\"\x02 \x00R\fdepartmentId\x12(\n" +
+	"\vlocation_id\x18\x03 \x01(\x03B\a\xbaH\x04\"\x02 \x00R\n" +
 	"locationId\x12\"\n" +
 	"\n" +
-	"manager_id\x18\x04 \x01(\x03H\x00R\tmanagerId\x88\x01\x01\x12#\n" +
-	"\rcontract_type\x18\x05 \x01(\tR\fcontractType\x12\x16\n" +
-	"\x06status\x18\x06 \x01(\tR\x06status\x12\x1b\n" +
-	"\thire_date\x18\a \x01(\tR\bhireDate\x121\n" +
+	"manager_id\x18\x04 \x01(\x03H\x00R\tmanagerId\x88\x01\x01\x12,\n" +
+	"\rcontract_type\x18\x05 \x01(\tB\a\xbaH\x04r\x02\x10\x01R\fcontractType\x12\x1f\n" +
+	"\x06status\x18\x06 \x01(\tB\a\xbaH\x04r\x02\x10\x01R\x06status\x12$\n" +
+	"\thire_date\x18\a \x01(\tB\a\xbaH\x04r\x02\x10\x01R\bhireDate\x121\n" +
 	"\x12probation_end_date\x18\b \x01(\tH\x01R\x10probationEndDate\x88\x01\x01\x12.\n" +
 	"\x10termination_date\x18\t \x01(\tH\x02R\x0fterminationDate\x88\x01\x01\x12$\n" +
 	"\vhourly_rate\x18\n" +
 	" \x01(\x01H\x03R\n" +
 	"hourlyRate\x88\x01\x01\x12*\n" +
-	"\x0emonthly_salary\x18\v \x01(\x01H\x04R\rmonthlySalary\x88\x01\x01\x12\x1a\n" +
-	"\bcurrency\x18\f \x01(\tR\bcurrency\x12-\n" +
-	"\x10work_schedule_id\x18\r \x01(\x03H\x05R\x0eworkScheduleId\x88\x01\x01\x122\n" +
-	"\x15account_creation_mode\x18\x0e \x01(\tR\x13accountCreationMode\x12\x1b\n" +
-	"\tjob_title\x18\x0f \x01(\tR\bjobTitleB\r\n" +
+	"\x0emonthly_salary\x18\v \x01(\x01H\x04R\rmonthlySalary\x88\x01\x01\x12#\n" +
+	"\bcurrency\x18\f \x01(\tB\a\xbaH\x04r\x02\x10\x01R\bcurrency\x12-\n" +
+	"\x10work_schedule_id\x18\r \x01(\x03H\x05R\x0eworkScheduleId\x88\x01\x01\x12;\n" +
+	"\x15account_creation_mode\x18\x0e \x01(\tB\a\xbaH\x04r\x02\x10\x01R\x13accountCreationMode\x12$\n" +
+	"\tjob_title\x18\x0f \x01(\tB\a\xbaH\x04r\x02\x10\x01R\bjobTitleB\r\n" +
 	"\v_manager_idB\x15\n" +
 	"\x13_probation_end_dateB\x13\n" +
 	"\x11_termination_dateB\x0e\n" +

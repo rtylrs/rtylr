@@ -7,6 +7,7 @@
 package v1
 
 import (
+	_ "buf.build/gen/go/bufbuild/protovalidate/protocolbuffers/go/buf/validate"
 	protoreflect "google.golang.org/protobuf/reflect/protoreflect"
 	protoimpl "google.golang.org/protobuf/runtime/protoimpl"
 	reflect "reflect"
@@ -124,10 +125,10 @@ var File_flow_workspace_v1_remove_workspace_member_proto protoreflect.FileDescri
 
 const file_flow_workspace_v1_remove_workspace_member_proto_rawDesc = "" +
 	"\n" +
-	"/flow/workspace/v1/remove_workspace_member.proto\x12\x11flow.workspace.v1\"Z\n" +
-	"\x1cRemoveWorkspaceMemberRequest\x12!\n" +
-	"\fworkspace_id\x18\x01 \x01(\x03R\vworkspaceId\x12\x17\n" +
-	"\auser_id\x18\x02 \x01(\x03R\x06userId\"9\n" +
+	"/flow/workspace/v1/remove_workspace_member.proto\x12\x11flow.workspace.v1\x1a\x1bbuf/validate/validate.proto\"l\n" +
+	"\x1cRemoveWorkspaceMemberRequest\x12*\n" +
+	"\fworkspace_id\x18\x01 \x01(\x03B\a\xbaH\x04\"\x02 \x00R\vworkspaceId\x12 \n" +
+	"\auser_id\x18\x02 \x01(\x03B\a\xbaH\x04\"\x02 \x00R\x06userId\"9\n" +
 	"\x1dRemoveWorkspaceMemberResponse\x12\x18\n" +
 	"\amessage\x18\x01 \x01(\tR\amessageB2Z0github.com/voxire/voxie/gen/go/flow/workspace/v1b\x06proto3"
 

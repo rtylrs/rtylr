@@ -7,6 +7,7 @@
 package v1
 
 import (
+	_ "buf.build/gen/go/bufbuild/protovalidate/protocolbuffers/go/buf/validate"
 	protoreflect "google.golang.org/protobuf/reflect/protoreflect"
 	protoimpl "google.golang.org/protobuf/runtime/protoimpl"
 	reflect "reflect"
@@ -214,15 +215,15 @@ var File_crm_customer_v1_create_customer_proto protoreflect.FileDescriptor
 
 const file_crm_customer_v1_create_customer_proto_rawDesc = "" +
 	"\n" +
-	"%crm/customer/v1/create_customer.proto\x12\x0fcrm.customer.v1\"\xad\x02\n" +
-	"\x15CreateCustomerRequest\x12\x1d\n" +
+	"%crm/customer/v1/create_customer.proto\x12\x0fcrm.customer.v1\x1a\x1bbuf/validate/validate.proto\"\xdc\x02\n" +
+	"\x15CreateCustomerRequest\x12&\n" +
 	"\n" +
-	"first_name\x18\x01 \x01(\tR\tfirstName\x12\x1b\n" +
-	"\tlast_name\x18\x02 \x01(\tR\blastName\x12\x14\n" +
-	"\x05email\x18\x03 \x01(\tR\x05email\x12\x14\n" +
-	"\x05phone\x18\x04 \x01(\tR\x05phone\x12\"\n" +
-	"\rdate_of_birth\x18\x05 \x01(\tR\vdateOfBirth\x12\x16\n" +
-	"\x06gender\x18\x06 \x01(\tR\x06gender\x12\x18\n" +
+	"first_name\x18\x01 \x01(\tB\a\xbaH\x04r\x02\x10\x01R\tfirstName\x12$\n" +
+	"\tlast_name\x18\x02 \x01(\tB\a\xbaH\x04r\x02\x10\x01R\blastName\x12\x1f\n" +
+	"\x05email\x18\x03 \x01(\tB\t\xbaH\x06r\x04\x10\x01`\x01R\x05email\x12\x14\n" +
+	"\x05phone\x18\x04 \x01(\tR\x05phone\x12+\n" +
+	"\rdate_of_birth\x18\x05 \x01(\tB\a\xbaH\x04r\x02\x10\x01R\vdateOfBirth\x12\x1f\n" +
+	"\x06gender\x18\x06 \x01(\tB\a\xbaH\x04r\x02\x10\x01R\x06gender\x12\x18\n" +
 	"\aaddress\x18\a \x01(\tR\aaddress\x12\x12\n" +
 	"\x04city\x18\b \x01(\tR\x04city\x12\x18\n" +
 	"\acountry\x18\t \x01(\tR\acountry\x12\x12\n" +

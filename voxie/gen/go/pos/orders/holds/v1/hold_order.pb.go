@@ -7,6 +7,7 @@
 package v1
 
 import (
+	_ "buf.build/gen/go/bufbuild/protovalidate/protocolbuffers/go/buf/validate"
 	protoreflect "google.golang.org/protobuf/reflect/protoreflect"
 	protoimpl "google.golang.org/protobuf/runtime/protoimpl"
 	reflect "reflect"
@@ -124,9 +125,9 @@ var File_pos_orders_holds_v1_hold_order_proto protoreflect.FileDescriptor
 
 const file_pos_orders_holds_v1_hold_order_proto_rawDesc = "" +
 	"\n" +
-	"$pos/orders/holds/v1/hold_order.proto\x12\x13pos.orders.holds.v1\"E\n" +
-	"\x10HoldOrderRequest\x12\x19\n" +
-	"\border_id\x18\x01 \x01(\x03R\aorderId\x12\x16\n" +
+	"$pos/orders/holds/v1/hold_order.proto\x12\x13pos.orders.holds.v1\x1a\x1bbuf/validate/validate.proto\"N\n" +
+	"\x10HoldOrderRequest\x12\"\n" +
+	"\border_id\x18\x01 \x01(\x03B\a\xbaH\x04\"\x02 \x00R\aorderId\x12\x16\n" +
 	"\x06reason\x18\x02 \x01(\tR\x06reason\"-\n" +
 	"\x11HoldOrderResponse\x12\x18\n" +
 	"\amessage\x18\x01 \x01(\tR\amessageB4Z2github.com/voxire/voxie/gen/go/pos/orders/holds/v1b\x06proto3"

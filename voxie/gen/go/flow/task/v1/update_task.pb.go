@@ -7,6 +7,7 @@
 package v1
 
 import (
+	_ "buf.build/gen/go/bufbuild/protovalidate/protocolbuffers/go/buf/validate"
 	protoreflect "google.golang.org/protobuf/reflect/protoreflect"
 	protoimpl "google.golang.org/protobuf/runtime/protoimpl"
 	reflect "reflect"
@@ -187,18 +188,18 @@ var File_flow_task_v1_update_task_proto protoreflect.FileDescriptor
 
 const file_flow_task_v1_update_task_proto_rawDesc = "" +
 	"\n" +
-	"\x1eflow/task/v1/update_task.proto\x12\fflow.task.v1\"\x97\x02\n" +
-	"\x11UpdateTaskRequest\x12\x0e\n" +
-	"\x02id\x18\x01 \x01(\x03R\x02id\x12\x14\n" +
-	"\x05title\x18\x02 \x01(\tR\x05title\x12 \n" +
-	"\vdescription\x18\x03 \x01(\tR\vdescription\x12\x16\n" +
-	"\x06status\x18\x04 \x01(\tR\x06status\x12\x1a\n" +
-	"\bpriority\x18\x05 \x01(\tR\bpriority\x12$\n" +
+	"\x1eflow/task/v1/update_task.proto\x12\fflow.task.v1\x1a\x1bbuf/validate/validate.proto\"\xcd\x02\n" +
+	"\x11UpdateTaskRequest\x12\x17\n" +
+	"\x02id\x18\x01 \x01(\x03B\a\xbaH\x04\"\x02 \x00R\x02id\x12\x1d\n" +
+	"\x05title\x18\x02 \x01(\tB\a\xbaH\x04r\x02\x10\x01R\x05title\x12 \n" +
+	"\vdescription\x18\x03 \x01(\tR\vdescription\x12\x1f\n" +
+	"\x06status\x18\x04 \x01(\tB\a\xbaH\x04r\x02\x10\x01R\x06status\x12#\n" +
+	"\bpriority\x18\x05 \x01(\tB\a\xbaH\x04r\x02\x10\x01R\bpriority\x12$\n" +
 	"\vassignee_id\x18\x06 \x01(\x03H\x00R\n" +
-	"assigneeId\x88\x01\x01\x12\x19\n" +
-	"\bdue_date\x18\a \x01(\tR\adueDate\x12\x1d\n" +
+	"assigneeId\x88\x01\x01\x12\"\n" +
+	"\bdue_date\x18\a \x01(\tB\a\xbaH\x04r\x02\x10\x01R\adueDate\x12&\n" +
 	"\n" +
-	"start_date\x18\b \x01(\tR\tstartDate\x12\x16\n" +
+	"start_date\x18\b \x01(\tB\a\xbaH\x04r\x02\x10\x01R\tstartDate\x12\x16\n" +
 	"\x06labels\x18\t \x03(\x03R\x06labelsB\x0e\n" +
 	"\f_assignee_id\".\n" +
 	"\x12UpdateTaskResponse\x12\x18\n" +

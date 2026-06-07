@@ -2,15 +2,17 @@ syntax = "proto3";
 
 package hr.employee.v1;
 
+import "buf/validate/validate.proto";
+
 option go_package = "github.com/voxire/voxie/gen/go/hr/employee/v1";
 
 // ── Accept Invite ──────────────────────────────────────────────────
 
 message AcceptInviteRequest {
   // Sensitive: do not log this field. The invite token received by the employee.
-  string token = 1;
+  string token = 1 [(buf.validate.field).string.min_len = 1];
   // Sensitive: do not log this field. Password chosen by the employee.
-  string password = 2;
+  string password = 2 [(buf.validate.field).string.min_len = 1];
 }
 
 message AcceptInviteResponse {

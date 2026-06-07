@@ -7,6 +7,7 @@
 package v1
 
 import (
+	_ "buf.build/gen/go/bufbuild/protovalidate/protocolbuffers/go/buf/validate"
 	protoreflect "google.golang.org/protobuf/reflect/protoreflect"
 	protoimpl "google.golang.org/protobuf/runtime/protoimpl"
 	reflect "reflect"
@@ -124,10 +125,10 @@ var File_pos_orders_v1_update_order_status_proto protoreflect.FileDescriptor
 
 const file_pos_orders_v1_update_order_status_proto_rawDesc = "" +
 	"\n" +
-	"'pos/orders/v1/update_order_status.proto\x12\rpos.orders.v1\"M\n" +
-	"\x18UpdateOrderStatusRequest\x12\x19\n" +
-	"\border_id\x18\x01 \x01(\x03R\aorderId\x12\x16\n" +
-	"\x06status\x18\x02 \x01(\tR\x06status\"5\n" +
+	"'pos/orders/v1/update_order_status.proto\x12\rpos.orders.v1\x1a\x1bbuf/validate/validate.proto\"_\n" +
+	"\x18UpdateOrderStatusRequest\x12\"\n" +
+	"\border_id\x18\x01 \x01(\x03B\a\xbaH\x04\"\x02 \x00R\aorderId\x12\x1f\n" +
+	"\x06status\x18\x02 \x01(\tB\a\xbaH\x04r\x02\x10\x01R\x06status\"5\n" +
 	"\x19UpdateOrderStatusResponse\x12\x18\n" +
 	"\amessage\x18\x01 \x01(\tR\amessageB.Z,github.com/voxire/voxie/gen/go/pos/orders/v1b\x06proto3"
 

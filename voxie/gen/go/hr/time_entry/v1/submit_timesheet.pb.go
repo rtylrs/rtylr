@@ -7,6 +7,7 @@
 package v1
 
 import (
+	_ "buf.build/gen/go/bufbuild/protovalidate/protocolbuffers/go/buf/validate"
 	protoreflect "google.golang.org/protobuf/reflect/protoreflect"
 	protoimpl "google.golang.org/protobuf/runtime/protoimpl"
 	reflect "reflect"
@@ -115,9 +116,9 @@ var File_hr_time_entry_v1_submit_timesheet_proto protoreflect.FileDescriptor
 
 const file_hr_time_entry_v1_submit_timesheet_proto_rawDesc = "" +
 	"\n" +
-	"'hr/time_entry/v1/submit_timesheet.proto\x12\x10hr.time_entry.v1\";\n" +
-	"\x16SubmitTimesheetRequest\x12!\n" +
-	"\ftimesheet_id\x18\x01 \x01(\x03R\vtimesheetId\"3\n" +
+	"'hr/time_entry/v1/submit_timesheet.proto\x12\x10hr.time_entry.v1\x1a\x1bbuf/validate/validate.proto\"D\n" +
+	"\x16SubmitTimesheetRequest\x12*\n" +
+	"\ftimesheet_id\x18\x01 \x01(\x03B\a\xbaH\x04\"\x02 \x00R\vtimesheetId\"3\n" +
 	"\x17SubmitTimesheetResponse\x12\x18\n" +
 	"\asuccess\x18\x01 \x01(\bR\asuccessB1Z/github.com/voxire/voxie/gen/go/hr/time_entry/v1b\x06proto3"
 

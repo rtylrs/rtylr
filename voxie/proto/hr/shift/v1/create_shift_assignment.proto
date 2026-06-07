@@ -2,6 +2,7 @@ syntax = "proto3";
 
 package hr.shift.v1;
 
+import "buf/validate/validate.proto";
 import "hr/shift/v1/types.proto";
 
 option go_package = "github.com/voxire/voxie/gen/go/hr/shift/v1";
@@ -10,11 +11,11 @@ option go_package = "github.com/voxire/voxie/gen/go/hr/shift/v1";
 
 message CreateShiftAssignmentRequest {
   // Employee to assign.
-  int64 employee_id = 1;
+  int64 employee_id = 1 [(buf.validate.field).int64.gt = 0];
   // Shift template to assign.
-  int64 shift_id = 2;
+  int64 shift_id = 2 [(buf.validate.field).int64.gt = 0];
   // Date of the assignment (ISO-8601 date).
-  string date = 3;
+  string date = 3 [(buf.validate.field).string.min_len = 1];
 }
 
 message CreateShiftAssignmentResponse {

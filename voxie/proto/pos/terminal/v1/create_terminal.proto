@@ -2,17 +2,19 @@ syntax = "proto3";
 
 package pos.terminal.v1;
 
+import "buf/validate/validate.proto";
+
 option go_package = "github.com/voxire/voxie/gen/go/pos/terminal/v1";
 
 // ── Create ────────────────────────────────────────────────────────
 
 message CreateTerminalRequest {
   // branch_id is the branch id value for this contract.
-  int64 branch_id = 1;
+  int64 branch_id = 1 [(buf.validate.field).int64.gt = 0];
   // name is the name value for this contract.
-  string name = 2;
+  string name = 2 [(buf.validate.field).string.min_len = 1];
   // device_id is the device id value for this contract.
-  string device_id = 3;
+  string device_id = 3 [(buf.validate.field).string.min_len = 1];
 }
 
 message CreateTerminalResponse {

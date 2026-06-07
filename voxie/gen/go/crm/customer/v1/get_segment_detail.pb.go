@@ -7,6 +7,7 @@
 package v1
 
 import (
+	_ "buf.build/gen/go/bufbuild/protovalidate/protocolbuffers/go/buf/validate"
 	v1 "github.com/voxire/voxie/gen/go/crm/segment/v1"
 	v11 "github.com/voxire/voxie/gen/go/pos/customer/v1"
 	protoreflect "google.golang.org/protobuf/reflect/protoreflect"
@@ -126,9 +127,9 @@ var File_crm_customer_v1_get_segment_detail_proto protoreflect.FileDescriptor
 
 const file_crm_customer_v1_get_segment_detail_proto_rawDesc = "" +
 	"\n" +
-	"(crm/customer/v1/get_segment_detail.proto\x12\x0fcrm.customer.v1\x1a\x1acrm/segment/v1/types.proto\x1a\x1bpos/customer/v1/types.proto\")\n" +
-	"\x17GetSegmentDetailRequest\x12\x0e\n" +
-	"\x02id\x18\x01 \x01(\x03R\x02id\"\x86\x01\n" +
+	"(crm/customer/v1/get_segment_detail.proto\x12\x0fcrm.customer.v1\x1a\x1bbuf/validate/validate.proto\x1a\x1acrm/segment/v1/types.proto\x1a\x1bpos/customer/v1/types.proto\"2\n" +
+	"\x17GetSegmentDetailRequest\x12\x17\n" +
+	"\x02id\x18\x01 \x01(\x03B\a\xbaH\x04\"\x02 \x00R\x02id\"\x86\x01\n" +
 	"\x18GetSegmentDetailResponse\x121\n" +
 	"\asegment\x18\x01 \x01(\v2\x17.crm.segment.v1.SegmentR\asegment\x127\n" +
 	"\tcustomers\x18\x02 \x03(\v2\x19.pos.customer.v1.CustomerR\tcustomersB0Z.github.com/voxire/voxie/gen/go/crm/customer/v1b\x06proto3"

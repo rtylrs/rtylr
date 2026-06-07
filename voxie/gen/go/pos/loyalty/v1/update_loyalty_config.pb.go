@@ -7,6 +7,7 @@
 package v1
 
 import (
+	_ "buf.build/gen/go/bufbuild/protovalidate/protocolbuffers/go/buf/validate"
 	protoreflect "google.golang.org/protobuf/reflect/protoreflect"
 	protoimpl "google.golang.org/protobuf/runtime/protoimpl"
 	reflect "reflect"
@@ -142,12 +143,12 @@ var File_pos_loyalty_v1_update_loyalty_config_proto protoreflect.FileDescriptor
 
 const file_pos_loyalty_v1_update_loyalty_config_proto_rawDesc = "" +
 	"\n" +
-	"*pos/loyalty/v1/update_loyalty_config.proto\x12\x0epos.loyalty.v1\"\xbc\x01\n" +
+	"*pos/loyalty/v1/update_loyalty_config.proto\x12\x0epos.loyalty.v1\x1a\x1bbuf/validate/validate.proto\"\xcc\x01\n" +
 	"\x1aUpdateLoyaltyConfigRequest\x12\x1d\n" +
 	"\n" +
 	"is_enabled\x18\x01 \x01(\bR\tisEnabled\x12*\n" +
-	"\x11points_per_dollar\x18\x02 \x01(\x01R\x0fpointsPerDollar\x12'\n" +
-	"\x0fredemption_rate\x18\x03 \x01(\x01R\x0eredemptionRate\x12*\n" +
+	"\x11points_per_dollar\x18\x02 \x01(\x01R\x0fpointsPerDollar\x127\n" +
+	"\x0fredemption_rate\x18\x03 \x01(\x01B\x0e\xbaH\v\x12\t)\x00\x00\x00\x00\x00\x00\x00\x00R\x0eredemptionRate\x12*\n" +
 	"\x11min_redeem_points\x18\x04 \x01(\x05R\x0fminRedeemPoints\"7\n" +
 	"\x1bUpdateLoyaltyConfigResponse\x12\x18\n" +
 	"\amessage\x18\x01 \x01(\tR\amessageB/Z-github.com/voxire/voxie/gen/go/pos/loyalty/v1b\x06proto3"

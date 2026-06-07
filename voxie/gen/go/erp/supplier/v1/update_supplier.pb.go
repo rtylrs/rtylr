@@ -7,6 +7,7 @@
 package v1
 
 import (
+	_ "buf.build/gen/go/bufbuild/protovalidate/protocolbuffers/go/buf/validate"
 	protoreflect "google.golang.org/protobuf/reflect/protoreflect"
 	protoimpl "google.golang.org/protobuf/runtime/protoimpl"
 	reflect "reflect"
@@ -205,11 +206,11 @@ var File_erp_supplier_v1_update_supplier_proto protoreflect.FileDescriptor
 
 const file_erp_supplier_v1_update_supplier_proto_rawDesc = "" +
 	"\n" +
-	"%erp/supplier/v1/update_supplier.proto\x12\x0ferp.supplier.v1\"\x9e\x02\n" +
-	"\x15UpdateSupplierRequest\x12\x0e\n" +
-	"\x02id\x18\x01 \x01(\x03R\x02id\x12\x12\n" +
-	"\x04name\x18\x02 \x01(\tR\x04name\x12\x14\n" +
-	"\x05email\x18\x03 \x01(\tR\x05email\x12\x14\n" +
+	"%erp/supplier/v1/update_supplier.proto\x12\x0ferp.supplier.v1\x1a\x1bbuf/validate/validate.proto\"\xbb\x02\n" +
+	"\x15UpdateSupplierRequest\x12\x17\n" +
+	"\x02id\x18\x01 \x01(\x03B\a\xbaH\x04\"\x02 \x00R\x02id\x12\x1b\n" +
+	"\x04name\x18\x02 \x01(\tB\a\xbaH\x04r\x02\x10\x01R\x04name\x12\x1f\n" +
+	"\x05email\x18\x03 \x01(\tB\t\xbaH\x06r\x04\x10\x01`\x01R\x05email\x12\x14\n" +
 	"\x05phone\x18\x04 \x01(\tR\x05phone\x12\x18\n" +
 	"\aaddress\x18\x05 \x01(\tR\aaddress\x12\x12\n" +
 	"\x04city\x18\x06 \x01(\tR\x04city\x12\x18\n" +

@@ -7,6 +7,7 @@
 package v1
 
 import (
+	_ "buf.build/gen/go/bufbuild/protovalidate/protocolbuffers/go/buf/validate"
 	protoreflect "google.golang.org/protobuf/reflect/protoreflect"
 	protoimpl "google.golang.org/protobuf/runtime/protoimpl"
 	reflect "reflect"
@@ -124,10 +125,10 @@ var File_hr_employee_v1_accept_invite_proto protoreflect.FileDescriptor
 
 const file_hr_employee_v1_accept_invite_proto_rawDesc = "" +
 	"\n" +
-	"\"hr/employee/v1/accept_invite.proto\x12\x0ehr.employee.v1\"G\n" +
-	"\x13AcceptInviteRequest\x12\x14\n" +
-	"\x05token\x18\x01 \x01(\tR\x05token\x12\x1a\n" +
-	"\bpassword\x18\x02 \x01(\tR\bpassword\"0\n" +
+	"\"hr/employee/v1/accept_invite.proto\x12\x0ehr.employee.v1\x1a\x1bbuf/validate/validate.proto\"Y\n" +
+	"\x13AcceptInviteRequest\x12\x1d\n" +
+	"\x05token\x18\x01 \x01(\tB\a\xbaH\x04r\x02\x10\x01R\x05token\x12#\n" +
+	"\bpassword\x18\x02 \x01(\tB\a\xbaH\x04r\x02\x10\x01R\bpassword\"0\n" +
 	"\x14AcceptInviteResponse\x12\x18\n" +
 	"\asuccess\x18\x01 \x01(\bR\asuccessB/Z-github.com/voxire/voxie/gen/go/hr/employee/v1b\x06proto3"
 

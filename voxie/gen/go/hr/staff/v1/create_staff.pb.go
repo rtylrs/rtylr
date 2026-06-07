@@ -7,6 +7,7 @@
 package v1
 
 import (
+	_ "buf.build/gen/go/bufbuild/protovalidate/protocolbuffers/go/buf/validate"
 	protoreflect "google.golang.org/protobuf/reflect/protoreflect"
 	protoimpl "google.golang.org/protobuf/runtime/protoimpl"
 	reflect "reflect"
@@ -277,30 +278,30 @@ var File_hr_staff_v1_create_staff_proto protoreflect.FileDescriptor
 
 const file_hr_staff_v1_create_staff_proto_rawDesc = "" +
 	"\n" +
-	"\x1ehr/staff/v1/create_staff.proto\x12\vhr.staff.v1\"\xd9\x04\n" +
-	"\x12CreateStaffRequest\x12\x17\n" +
-	"\auser_id\x18\x01 \x01(\x03R\x06userId\x12#\n" +
-	"\rdepartment_id\x18\x02 \x01(\x03R\fdepartmentId\x12\x1d\n" +
+	"\x1ehr/staff/v1/create_staff.proto\x12\vhr.staff.v1\x1a\x1bbuf/validate/validate.proto\"\x80\x06\n" +
+	"\x12CreateStaffRequest\x12 \n" +
+	"\auser_id\x18\x01 \x01(\x03B\a\xbaH\x04\"\x02 \x00R\x06userId\x12,\n" +
+	"\rdepartment_id\x18\x02 \x01(\x03B\a\xbaH\x04\"\x02 \x00R\fdepartmentId\x12&\n" +
 	"\n" +
-	"first_name\x18\x03 \x01(\tR\tfirstName\x12\x1b\n" +
-	"\tlast_name\x18\x04 \x01(\tR\blastName\x12\x14\n" +
-	"\x05email\x18\x05 \x01(\tR\x05email\x12\x14\n" +
-	"\x05phone\x18\x06 \x01(\tR\x05phone\x12\x12\n" +
-	"\x04role\x18\a \x01(\tR\x04role\x12'\n" +
-	"\x0femployment_type\x18\b \x01(\tR\x0eemploymentType\x12\x16\n" +
-	"\x06status\x18\t \x01(\tR\x06status\x12\x16\n" +
+	"first_name\x18\x03 \x01(\tB\a\xbaH\x04r\x02\x10\x01R\tfirstName\x12$\n" +
+	"\tlast_name\x18\x04 \x01(\tB\a\xbaH\x04r\x02\x10\x01R\blastName\x12\x1f\n" +
+	"\x05email\x18\x05 \x01(\tB\t\xbaH\x06r\x04\x10\x01`\x01R\x05email\x12\x14\n" +
+	"\x05phone\x18\x06 \x01(\tR\x05phone\x12\x1b\n" +
+	"\x04role\x18\a \x01(\tB\a\xbaH\x04r\x02\x10\x01R\x04role\x120\n" +
+	"\x0femployment_type\x18\b \x01(\tB\a\xbaH\x04r\x02\x10\x01R\x0eemploymentType\x12\x1f\n" +
+	"\x06status\x18\t \x01(\tB\a\xbaH\x04r\x02\x10\x01R\x06status\x12&\n" +
 	"\x06salary\x18\n" +
-	" \x01(\x01R\x06salary\x12\x1f\n" +
-	"\vhourly_rate\x18\v \x01(\x01R\n" +
-	"hourlyRate\x12#\n" +
-	"\rovertime_rate\x18\f \x01(\x01R\fovertimeRate\x12\x1d\n" +
+	" \x01(\x01B\x0e\xbaH\v\x12\t)\x00\x00\x00\x00\x00\x00\x00\x00R\x06salary\x12/\n" +
+	"\vhourly_rate\x18\v \x01(\x01B\x0e\xbaH\v\x12\t)\x00\x00\x00\x00\x00\x00\x00\x00R\n" +
+	"hourlyRate\x123\n" +
+	"\rovertime_rate\x18\f \x01(\x01B\x0e\xbaH\v\x12\t)\x00\x00\x00\x00\x00\x00\x00\x00R\fovertimeRate\x12&\n" +
 	"\n" +
-	"start_date\x18\r \x01(\tR\tstartDate\x12\x19\n" +
-	"\bend_date\x18\x0e \x01(\tR\aendDate\x12\x18\n" +
-	"\aaddress\x18\x0f \x01(\tR\aaddress\x124\n" +
-	"\x16emergency_contact_name\x18\x10 \x01(\tR\x14emergencyContactName\x126\n" +
-	"\x17emergency_contact_phone\x18\x11 \x01(\tR\x15emergencyContactPhone\x12\x12\n" +
-	"\x04apps\x18\x12 \x01(\tR\x04apps\x12\x14\n" +
+	"start_date\x18\r \x01(\tB\a\xbaH\x04r\x02\x10\x01R\tstartDate\x12\"\n" +
+	"\bend_date\x18\x0e \x01(\tB\a\xbaH\x04r\x02\x10\x01R\aendDate\x12\x18\n" +
+	"\aaddress\x18\x0f \x01(\tR\aaddress\x12=\n" +
+	"\x16emergency_contact_name\x18\x10 \x01(\tB\a\xbaH\x04r\x02\x10\x01R\x14emergencyContactName\x12?\n" +
+	"\x17emergency_contact_phone\x18\x11 \x01(\tB\a\xbaH\x04r\x02\x10\x01R\x15emergencyContactPhone\x12\x1b\n" +
+	"\x04apps\x18\x12 \x01(\tB\a\xbaH\x04r\x02\x10\x01R\x04apps\x12\x14\n" +
 	"\x05notes\x18\x13 \x01(\tR\x05notes\"%\n" +
 	"\x13CreateStaffResponse\x12\x0e\n" +
 	"\x02id\x18\x01 \x01(\x03R\x02idB,Z*github.com/voxire/voxie/gen/go/hr/staff/v1b\x06proto3"

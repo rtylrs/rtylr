@@ -7,6 +7,7 @@
 package v1
 
 import (
+	_ "buf.build/gen/go/bufbuild/protovalidate/protocolbuffers/go/buf/validate"
 	protoreflect "google.golang.org/protobuf/reflect/protoreflect"
 	protoimpl "google.golang.org/protobuf/runtime/protoimpl"
 	reflect "reflect"
@@ -142,10 +143,10 @@ var File_hub_developer_v1_update_webhook_proto protoreflect.FileDescriptor
 
 const file_hub_developer_v1_update_webhook_proto_rawDesc = "" +
 	"\n" +
-	"%hub/developer/v1/update_webhook.proto\x12\x10hub.developer.v1\x1a\x1chub/developer/v1/types.proto\"m\n" +
-	"\x14UpdateWebhookRequest\x12\x0e\n" +
-	"\x02id\x18\x01 \x01(\x03R\x02id\x12\x10\n" +
-	"\x03url\x18\x02 \x01(\tR\x03url\x12\x16\n" +
+	"%hub/developer/v1/update_webhook.proto\x12\x10hub.developer.v1\x1a\x1bbuf/validate/validate.proto\x1a\x1chub/developer/v1/types.proto\"\x7f\n" +
+	"\x14UpdateWebhookRequest\x12\x17\n" +
+	"\x02id\x18\x01 \x01(\x03B\a\xbaH\x04\"\x02 \x00R\x02id\x12\x19\n" +
+	"\x03url\x18\x02 \x01(\tB\a\xbaH\x04r\x02\x10\x01R\x03url\x12\x16\n" +
 	"\x06events\x18\x03 \x03(\tR\x06events\x12\x1b\n" +
 	"\tis_active\x18\x04 \x01(\bR\bisActive\"L\n" +
 	"\x15UpdateWebhookResponse\x123\n" +

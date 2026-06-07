@@ -2,13 +2,15 @@ syntax = "proto3";
 
 package hr.leave.v1;
 
+import "buf/validate/validate.proto";
+
 option go_package = "github.com/voxire/voxie/gen/go/hr/leave/v1";
 
 // ── Approve Leave Request ─────────────────────────────────────────
 
 message ApproveLeaveRequest {
   // ID of the leave request being reviewed.
-  int64 leave_request_id = 1;
+  int64 leave_request_id = 1 [(buf.validate.field).int64.gt = 0];
   // True to approve, false to reject.
   bool approved = 2;
   // Reason for rejection; absent if approving.

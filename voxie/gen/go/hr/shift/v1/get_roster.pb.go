@@ -7,6 +7,7 @@
 package v1
 
 import (
+	_ "buf.build/gen/go/bufbuild/protovalidate/protocolbuffers/go/buf/validate"
 	protoreflect "google.golang.org/protobuf/reflect/protoreflect"
 	protoimpl "google.golang.org/protobuf/runtime/protoimpl"
 	reflect "reflect"
@@ -133,9 +134,9 @@ var File_hr_shift_v1_get_roster_proto protoreflect.FileDescriptor
 
 const file_hr_shift_v1_get_roster_proto_rawDesc = "" +
 	"\n" +
-	"\x1chr/shift/v1/get_roster.proto\x12\vhr.shift.v1\x1a\x17hr/shift/v1/types.proto\"R\n" +
-	"\x10GetRosterRequest\x12\x1f\n" +
-	"\vlocation_id\x18\x01 \x01(\x03R\n" +
+	"\x1chr/shift/v1/get_roster.proto\x12\vhr.shift.v1\x1a\x1bbuf/validate/validate.proto\x1a\x17hr/shift/v1/types.proto\"[\n" +
+	"\x10GetRosterRequest\x12(\n" +
+	"\vlocation_id\x18\x01 \x01(\x03B\a\xbaH\x04\"\x02 \x00R\n" +
 	"locationId\x12\x1d\n" +
 	"\n" +
 	"week_start\x18\x02 \x01(\tR\tweekStart\"x\n" +

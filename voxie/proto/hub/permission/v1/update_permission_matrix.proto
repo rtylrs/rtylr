@@ -2,13 +2,15 @@ syntax = "proto3";
 
 package hub.permission.v1;
 
+import "buf/validate/validate.proto";
+
 option go_package = "github.com/voxire/voxie/gen/go/hub/permission/v1";
 
 message UpdatePermissionMatrixRequest {
   // role is the role value for this contract.
-  string role = 1;
+  string role = 1 [(buf.validate.field).string.min_len = 1];
   // permission_key is the permission key value for this contract.
-  string permission_key = 2;
+  string permission_key = 2 [(buf.validate.field).string.min_len = 1];
   // enabled is the enabled value for this contract.
   bool enabled = 3;
 }

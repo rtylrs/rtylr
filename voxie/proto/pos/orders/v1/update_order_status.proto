@@ -2,15 +2,17 @@ syntax = "proto3";
 
 package pos.orders.v1;
 
+import "buf/validate/validate.proto";
+
 option go_package = "github.com/voxire/voxie/gen/go/pos/orders/v1";
 
 // ── Update Order Status ───────────────────────────────────────────
 
 message UpdateOrderStatusRequest {
   // order_id is the order id value for this contract.
-  int64 order_id = 1;
+  int64 order_id = 1 [(buf.validate.field).int64.gt = 0];
   // status is the current lifecycle state.
-  string status = 2;
+  string status = 2 [(buf.validate.field).string.min_len = 1];
 }
 
 message UpdateOrderStatusResponse {

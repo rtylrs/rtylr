@@ -2,6 +2,7 @@ syntax = "proto3";
 
 package hr.employee.v1;
 
+import "buf/validate/validate.proto";
 import "hr/employee/v1/types.proto";
 
 option go_package = "github.com/voxire/voxie/gen/go/hr/employee/v1";
@@ -10,19 +11,19 @@ option go_package = "github.com/voxire/voxie/gen/go/hr/employee/v1";
 
 message CreateEmployeeRequest {
   // Linked user account ID.
-  int64 user_id = 1;
+  int64 user_id = 1 [(buf.validate.field).int64.gt = 0];
   // Department to assign the employee to.
-  int64 department_id = 2;
+  int64 department_id = 2 [(buf.validate.field).int64.gt = 0];
   // Work location the employee reports to.
-  int64 location_id = 3;
+  int64 location_id = 3 [(buf.validate.field).int64.gt = 0];
   // Direct manager; absent if top-level.
   optional int64 manager_id = 4;
   // Employment arrangement (full_time | part_time | freelancer).
-  string contract_type = 5;
+  string contract_type = 5 [(buf.validate.field).string.min_len = 1];
   // Initial employment status (active | probation | inactive | terminated).
-  string status = 6;
+  string status = 6 [(buf.validate.field).string.min_len = 1];
   // Date the employee was hired (ISO-8601 format).
-  string hire_date = 7;
+  string hire_date = 7 [(buf.validate.field).string.min_len = 1];
   // End of probation period; absent if no probation (ISO-8601 format).
   optional string probation_end_date = 8;
   // Date employment was terminated; absent if still employed (ISO-8601 format).
@@ -32,13 +33,13 @@ message CreateEmployeeRequest {
   // Monthly gross salary; absent if hourly only.
   optional double monthly_salary = 11;
   // ISO-4217 currency code for compensation (e.g. "USD").
-  string currency = 12;
+  string currency = 12 [(buf.validate.field).string.min_len = 1];
   // Assigned work schedule; absent if using department default.
   optional int64 work_schedule_id = 13;
   // How the employee account was created (hr_created | invite_link).
-  string account_creation_mode = 14;
+  string account_creation_mode = 14 [(buf.validate.field).string.min_len = 1];
   // Employee's job title or position name.
-  string job_title = 15;
+  string job_title = 15 [(buf.validate.field).string.min_len = 1];
 }
 
 message CreateEmployeeResponse {

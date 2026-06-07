@@ -7,6 +7,7 @@
 package v1
 
 import (
+	_ "buf.build/gen/go/bufbuild/protovalidate/protocolbuffers/go/buf/validate"
 	protoreflect "google.golang.org/protobuf/reflect/protoreflect"
 	protoimpl "google.golang.org/protobuf/runtime/protoimpl"
 	reflect "reflect"
@@ -169,15 +170,15 @@ var File_finance_bill_v1_update_bill_proto protoreflect.FileDescriptor
 
 const file_finance_bill_v1_update_bill_proto_rawDesc = "" +
 	"\n" +
-	"!finance/bill/v1/update_bill.proto\x12\x0ffinance.bill.v1\"\xcd\x01\n" +
-	"\x11UpdateBillRequest\x12\x0e\n" +
-	"\x02id\x18\x01 \x01(\x03R\x02id\x12\x1f\n" +
-	"\vsupplier_id\x18\x02 \x01(\x03R\n" +
-	"supplierId\x12\x16\n" +
-	"\x06amount\x18\x03 \x01(\x01R\x06amount\x12\x1a\n" +
-	"\bcurrency\x18\x04 \x01(\tR\bcurrency\x12\x19\n" +
-	"\bdue_date\x18\x05 \x01(\tR\adueDate\x12\x16\n" +
-	"\x06status\x18\x06 \x01(\tR\x06status\x12 \n" +
+	"!finance/bill/v1/update_bill.proto\x12\x0ffinance.bill.v1\x1a\x1bbuf/validate/validate.proto\"\x8a\x02\n" +
+	"\x11UpdateBillRequest\x12\x17\n" +
+	"\x02id\x18\x01 \x01(\x03B\a\xbaH\x04\"\x02 \x00R\x02id\x12(\n" +
+	"\vsupplier_id\x18\x02 \x01(\x03B\a\xbaH\x04\"\x02 \x00R\n" +
+	"supplierId\x12&\n" +
+	"\x06amount\x18\x03 \x01(\x01B\x0e\xbaH\v\x12\t)\x00\x00\x00\x00\x00\x00\x00\x00R\x06amount\x12#\n" +
+	"\bcurrency\x18\x04 \x01(\tB\a\xbaH\x04r\x02\x10\x01R\bcurrency\x12\"\n" +
+	"\bdue_date\x18\x05 \x01(\tB\a\xbaH\x04r\x02\x10\x01R\adueDate\x12\x1f\n" +
+	"\x06status\x18\x06 \x01(\tB\a\xbaH\x04r\x02\x10\x01R\x06status\x12 \n" +
 	"\vdescription\x18\a \x01(\tR\vdescription\".\n" +
 	"\x12UpdateBillResponse\x12\x18\n" +
 	"\amessage\x18\x01 \x01(\tR\amessageB0Z.github.com/voxire/voxie/gen/go/finance/bill/v1b\x06proto3"

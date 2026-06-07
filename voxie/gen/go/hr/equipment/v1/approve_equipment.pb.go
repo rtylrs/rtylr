@@ -7,6 +7,7 @@
 package v1
 
 import (
+	_ "buf.build/gen/go/bufbuild/protovalidate/protocolbuffers/go/buf/validate"
 	protoreflect "google.golang.org/protobuf/reflect/protoreflect"
 	protoimpl "google.golang.org/protobuf/runtime/protoimpl"
 	reflect "reflect"
@@ -124,9 +125,9 @@ var File_hr_equipment_v1_approve_equipment_proto protoreflect.FileDescriptor
 
 const file_hr_equipment_v1_approve_equipment_proto_rawDesc = "" +
 	"\n" +
-	"'hr/equipment/v1/approve_equipment.proto\x12\x0fhr.equipment.v1\"g\n" +
-	"\x17ApproveEquipmentRequest\x120\n" +
-	"\x14equipment_request_id\x18\x01 \x01(\x03R\x12equipmentRequestId\x12\x1a\n" +
+	"'hr/equipment/v1/approve_equipment.proto\x12\x0fhr.equipment.v1\x1a\x1bbuf/validate/validate.proto\"p\n" +
+	"\x17ApproveEquipmentRequest\x129\n" +
+	"\x14equipment_request_id\x18\x01 \x01(\x03B\a\xbaH\x04\"\x02 \x00R\x12equipmentRequestId\x12\x1a\n" +
 	"\bapproved\x18\x02 \x01(\bR\bapproved\"4\n" +
 	"\x18ApproveEquipmentResponse\x12\x18\n" +
 	"\asuccess\x18\x01 \x01(\bR\asuccessB0Z.github.com/voxire/voxie/gen/go/hr/equipment/v1b\x06proto3"

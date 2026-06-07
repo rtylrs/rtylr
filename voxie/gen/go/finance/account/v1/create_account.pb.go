@@ -7,6 +7,7 @@
 package v1
 
 import (
+	_ "buf.build/gen/go/bufbuild/protovalidate/protocolbuffers/go/buf/validate"
 	protoreflect "google.golang.org/protobuf/reflect/protoreflect"
 	protoimpl "google.golang.org/protobuf/runtime/protoimpl"
 	reflect "reflect"
@@ -160,11 +161,11 @@ var File_finance_account_v1_create_account_proto protoreflect.FileDescriptor
 
 const file_finance_account_v1_create_account_proto_rawDesc = "" +
 	"\n" +
-	"'finance/account/v1/create_account.proto\x12\x12finance.account.v1\"\x91\x01\n" +
-	"\x14CreateAccountRequest\x12\x12\n" +
-	"\x04name\x18\x01 \x01(\tR\x04name\x12\x12\n" +
-	"\x04type\x18\x02 \x01(\tR\x04type\x12\x1a\n" +
-	"\bcurrency\x18\x03 \x01(\tR\bcurrency\x12\x18\n" +
+	"'finance/account/v1/create_account.proto\x12\x12finance.account.v1\x1a\x1bbuf/validate/validate.proto\"\xac\x01\n" +
+	"\x14CreateAccountRequest\x12\x1b\n" +
+	"\x04name\x18\x01 \x01(\tB\a\xbaH\x04r\x02\x10\x01R\x04name\x12\x1b\n" +
+	"\x04type\x18\x02 \x01(\tB\a\xbaH\x04r\x02\x10\x01R\x04type\x12#\n" +
+	"\bcurrency\x18\x03 \x01(\tB\a\xbaH\x04r\x02\x10\x01R\bcurrency\x12\x18\n" +
 	"\abalance\x18\x04 \x01(\x01R\abalance\x12\x1b\n" +
 	"\tis_active\x18\x05 \x01(\bR\bisActive\"A\n" +
 	"\x15CreateAccountResponse\x12\x0e\n" +

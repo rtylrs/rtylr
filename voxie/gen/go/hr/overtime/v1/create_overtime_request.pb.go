@@ -7,6 +7,7 @@
 package v1
 
 import (
+	_ "buf.build/gen/go/bufbuild/protovalidate/protocolbuffers/go/buf/validate"
 	protoreflect "google.golang.org/protobuf/reflect/protoreflect"
 	protoimpl "google.golang.org/protobuf/runtime/protoimpl"
 	reflect "reflect"
@@ -142,11 +143,11 @@ var File_hr_overtime_v1_create_overtime_request_proto protoreflect.FileDescripto
 
 const file_hr_overtime_v1_create_overtime_request_proto_rawDesc = "" +
 	"\n" +
-	",hr/overtime/v1/create_overtime_request.proto\x12\x0ehr.overtime.v1\x1a\x1ahr/overtime/v1/types.proto\"\x9f\x01\n" +
-	"\x1cCreateOvertimeRequestRequest\x12\x1f\n" +
-	"\vemployee_id\x18\x01 \x01(\x03R\n" +
-	"employeeId\x12\x12\n" +
-	"\x04date\x18\x02 \x01(\tR\x04date\x122\n" +
+	",hr/overtime/v1/create_overtime_request.proto\x12\x0ehr.overtime.v1\x1a\x1bbuf/validate/validate.proto\x1a\x1ahr/overtime/v1/types.proto\"\xb1\x01\n" +
+	"\x1cCreateOvertimeRequestRequest\x12(\n" +
+	"\vemployee_id\x18\x01 \x01(\x03B\a\xbaH\x04\"\x02 \x00R\n" +
+	"employeeId\x12\x1b\n" +
+	"\x04date\x18\x02 \x01(\tB\a\xbaH\x04r\x02\x10\x01R\x04date\x122\n" +
 	"\x15planned_extra_minutes\x18\x03 \x01(\x05R\x13plannedExtraMinutes\x12\x16\n" +
 	"\x06reason\x18\x04 \x01(\tR\x06reason\"a\n" +
 	"\x1dCreateOvertimeRequestResponse\x12@\n" +

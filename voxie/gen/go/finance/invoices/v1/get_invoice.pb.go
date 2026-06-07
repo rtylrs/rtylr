@@ -7,6 +7,7 @@
 package v1
 
 import (
+	_ "buf.build/gen/go/bufbuild/protovalidate/protocolbuffers/go/buf/validate"
 	protoreflect "google.golang.org/protobuf/reflect/protoreflect"
 	protoimpl "google.golang.org/protobuf/runtime/protoimpl"
 	reflect "reflect"
@@ -124,9 +125,9 @@ var File_finance_invoices_v1_get_invoice_proto protoreflect.FileDescriptor
 
 const file_finance_invoices_v1_get_invoice_proto_rawDesc = "" +
 	"\n" +
-	"%finance/invoices/v1/get_invoice.proto\x12\x13finance.invoices.v1\x1a\x1ffinance/invoices/v1/types.proto\"#\n" +
-	"\x11GetInvoiceRequest\x12\x0e\n" +
-	"\x02id\x18\x01 \x01(\x03R\x02id\"\x8c\x01\n" +
+	"%finance/invoices/v1/get_invoice.proto\x12\x13finance.invoices.v1\x1a\x1bbuf/validate/validate.proto\x1a\x1ffinance/invoices/v1/types.proto\",\n" +
+	"\x11GetInvoiceRequest\x12\x17\n" +
+	"\x02id\x18\x01 \x01(\x03B\a\xbaH\x04\"\x02 \x00R\x02id\"\x8c\x01\n" +
 	"\x12GetInvoiceResponse\x12<\n" +
 	"\ainvoice\x18\x01 \x01(\v2\".finance.invoices.v1.InvoiceDetailR\ainvoice\x128\n" +
 	"\bpayments\x18\x02 \x03(\v2\x1c.finance.invoices.v1.PaymentR\bpaymentsB4Z2github.com/voxire/voxie/gen/go/finance/invoices/v1b\x06proto3"

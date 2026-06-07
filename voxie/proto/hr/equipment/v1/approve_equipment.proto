@@ -2,13 +2,15 @@ syntax = "proto3";
 
 package hr.equipment.v1;
 
+import "buf/validate/validate.proto";
+
 option go_package = "github.com/voxire/voxie/gen/go/hr/equipment/v1";
 
 // ── Approve Equipment Request ────────────────────────────────────
 
 message ApproveEquipmentRequest {
   // ID of the equipment request being reviewed.
-  int64 equipment_request_id = 1;
+  int64 equipment_request_id = 1 [(buf.validate.field).int64.gt = 0];
   // True to approve, false to reject.
   bool approved = 2;
 }

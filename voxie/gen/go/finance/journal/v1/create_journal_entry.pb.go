@@ -7,6 +7,7 @@
 package v1
 
 import (
+	_ "buf.build/gen/go/bufbuild/protovalidate/protocolbuffers/go/buf/validate"
 	protoreflect "google.golang.org/protobuf/reflect/protoreflect"
 	protoimpl "google.golang.org/protobuf/runtime/protoimpl"
 	reflect "reflect"
@@ -133,11 +134,11 @@ var File_finance_journal_v1_create_journal_entry_proto protoreflect.FileDescript
 
 const file_finance_journal_v1_create_journal_entry_proto_rawDesc = "" +
 	"\n" +
-	"-finance/journal/v1/create_journal_entry.proto\x12\x12finance.journal.v1\x1a\x1efinance/journal/v1/types.proto\"\x88\x01\n" +
-	"\x19CreateJournalEntryRequest\x12\x12\n" +
-	"\x04date\x18\x01 \x01(\tR\x04date\x12 \n" +
-	"\vdescription\x18\x02 \x01(\tR\vdescription\x125\n" +
-	"\x05lines\x18\x03 \x03(\v2\x1f.finance.journal.v1.JournalLineR\x05lines\"T\n" +
+	"-finance/journal/v1/create_journal_entry.proto\x12\x12finance.journal.v1\x1a\x1bbuf/validate/validate.proto\x1a\x1efinance/journal/v1/types.proto\"\x9b\x01\n" +
+	"\x19CreateJournalEntryRequest\x12\x1b\n" +
+	"\x04date\x18\x01 \x01(\tB\a\xbaH\x04r\x02\x10\x01R\x04date\x12 \n" +
+	"\vdescription\x18\x02 \x01(\tR\vdescription\x12?\n" +
+	"\x05lines\x18\x03 \x03(\v2\x1f.finance.journal.v1.JournalLineB\b\xbaH\x05\x92\x01\x02\b\x01R\x05lines\"T\n" +
 	"\x1aCreateJournalEntryResponse\x126\n" +
 	"\x05entry\x18\x01 \x01(\v2 .finance.journal.v1.JournalEntryR\x05entryB3Z1github.com/voxire/voxie/gen/go/finance/journal/v1b\x06proto3"
 

@@ -7,6 +7,7 @@
 package v1
 
 import (
+	_ "buf.build/gen/go/bufbuild/protovalidate/protocolbuffers/go/buf/validate"
 	protoreflect "google.golang.org/protobuf/reflect/protoreflect"
 	protoimpl "google.golang.org/protobuf/runtime/protoimpl"
 	reflect "reflect"
@@ -160,14 +161,14 @@ var File_hr_leave_v1_create_leave_request_proto protoreflect.FileDescriptor
 
 const file_hr_leave_v1_create_leave_request_proto_rawDesc = "" +
 	"\n" +
-	"&hr/leave/v1/create_leave_request.proto\x12\vhr.leave.v1\x1a\x17hr/leave/v1/types.proto\"\xde\x01\n" +
-	"\x19CreateLeaveRequestRequest\x12\x1f\n" +
-	"\vemployee_id\x18\x01 \x01(\x03R\n" +
-	"employeeId\x12\"\n" +
-	"\rleave_type_id\x18\x02 \x01(\x03R\vleaveTypeId\x12\x1d\n" +
+	"&hr/leave/v1/create_leave_request.proto\x12\vhr.leave.v1\x1a\x1bbuf/validate/validate.proto\x1a\x17hr/leave/v1/types.proto\"\x82\x02\n" +
+	"\x19CreateLeaveRequestRequest\x12(\n" +
+	"\vemployee_id\x18\x01 \x01(\x03B\a\xbaH\x04\"\x02 \x00R\n" +
+	"employeeId\x12+\n" +
+	"\rleave_type_id\x18\x02 \x01(\x03B\a\xbaH\x04\"\x02 \x00R\vleaveTypeId\x12&\n" +
 	"\n" +
-	"start_date\x18\x03 \x01(\tR\tstartDate\x12\x19\n" +
-	"\bend_date\x18\x04 \x01(\tR\aendDate\x12\x1d\n" +
+	"start_date\x18\x03 \x01(\tB\a\xbaH\x04r\x02\x10\x01R\tstartDate\x12\"\n" +
+	"\bend_date\x18\x04 \x01(\tB\a\xbaH\x04r\x02\x10\x01R\aendDate\x12\x1d\n" +
 	"\n" +
 	"total_days\x18\x05 \x01(\x01R\ttotalDays\x12\x19\n" +
 	"\x05notes\x18\x06 \x01(\tH\x00R\x05notes\x88\x01\x01B\b\n" +

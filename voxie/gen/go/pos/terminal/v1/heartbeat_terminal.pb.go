@@ -7,6 +7,7 @@
 package v1
 
 import (
+	_ "buf.build/gen/go/bufbuild/protovalidate/protocolbuffers/go/buf/validate"
 	protoreflect "google.golang.org/protobuf/reflect/protoreflect"
 	protoimpl "google.golang.org/protobuf/runtime/protoimpl"
 	reflect "reflect"
@@ -115,9 +116,9 @@ var File_pos_terminal_v1_heartbeat_terminal_proto protoreflect.FileDescriptor
 
 const file_pos_terminal_v1_heartbeat_terminal_proto_rawDesc = "" +
 	"\n" +
-	"(pos/terminal/v1/heartbeat_terminal.proto\x12\x0fpos.terminal.v1\";\n" +
-	"\x18HeartbeatTerminalRequest\x12\x1f\n" +
-	"\vterminal_id\x18\x01 \x01(\x03R\n" +
+	"(pos/terminal/v1/heartbeat_terminal.proto\x12\x0fpos.terminal.v1\x1a\x1bbuf/validate/validate.proto\"D\n" +
+	"\x18HeartbeatTerminalRequest\x12(\n" +
+	"\vterminal_id\x18\x01 \x01(\x03B\a\xbaH\x04\"\x02 \x00R\n" +
 	"terminalId\"5\n" +
 	"\x19HeartbeatTerminalResponse\x12\x18\n" +
 	"\amessage\x18\x01 \x01(\tR\amessageB0Z.github.com/voxire/voxie/gen/go/pos/terminal/v1b\x06proto3"

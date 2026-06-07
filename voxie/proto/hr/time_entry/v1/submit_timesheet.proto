@@ -2,13 +2,15 @@ syntax = "proto3";
 
 package hr.time_entry.v1;
 
+import "buf/validate/validate.proto";
+
 option go_package = "github.com/voxire/voxie/gen/go/hr/time_entry/v1";
 
 // ── Submit Timesheet ──────────────────────────────────────────────
 
 message SubmitTimesheetRequest {
   // ID of the timesheet to submit for approval.
-  int64 timesheet_id = 1;
+  int64 timesheet_id = 1 [(buf.validate.field).int64.gt = 0];
 }
 
 message SubmitTimesheetResponse {

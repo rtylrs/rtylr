@@ -2,6 +2,7 @@ syntax = "proto3";
 
 package hr.performance.v1;
 
+import "buf/validate/validate.proto";
 import "hr/performance/v1/types.proto";
 
 option go_package = "github.com/voxire/voxie/gen/go/hr/performance/v1";
@@ -10,13 +11,13 @@ option go_package = "github.com/voxire/voxie/gen/go/hr/performance/v1";
 
 message CreateReviewCycleRequest {
   // Human-readable name for the cycle.
-  string name = 1;
+  string name = 1 [(buf.validate.field).string.min_len = 1];
   // Cycle type (annual | mid_year | probation | adhoc).
-  string type = 2;
+  string type = 2 [(buf.validate.field).string.min_len = 1];
   // Start of the review period (ISO-8601 date).
-  string period_start = 3;
+  string period_start = 3 [(buf.validate.field).string.min_len = 1];
   // End of the review period (ISO-8601 date).
-  string period_end = 4;
+  string period_end = 4 [(buf.validate.field).string.min_len = 1];
 }
 
 message CreateReviewCycleResponse {

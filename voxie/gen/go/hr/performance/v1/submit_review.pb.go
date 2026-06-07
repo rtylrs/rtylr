@@ -7,6 +7,7 @@
 package v1
 
 import (
+	_ "buf.build/gen/go/bufbuild/protovalidate/protocolbuffers/go/buf/validate"
 	protoreflect "google.golang.org/protobuf/reflect/protoreflect"
 	protoimpl "google.golang.org/protobuf/runtime/protoimpl"
 	reflect "reflect"
@@ -133,11 +134,11 @@ var File_hr_performance_v1_submit_review_proto protoreflect.FileDescriptor
 
 const file_hr_performance_v1_submit_review_proto_rawDesc = "" +
 	"\n" +
-	"%hr/performance/v1/submit_review.proto\x12\x11hr.performance.v1\x1a\x1dhr/performance/v1/types.proto\"w\n" +
-	"\x13SubmitReviewRequest\x12\x1b\n" +
-	"\treview_id\x18\x01 \x01(\x03R\breviewId\x12%\n" +
-	"\x0eoverall_rating\x18\x02 \x01(\tR\roverallRating\x12\x1c\n" +
-	"\tnarrative\x18\x03 \x01(\tR\tnarrative\"[\n" +
+	"%hr/performance/v1/submit_review.proto\x12\x11hr.performance.v1\x1a\x1bbuf/validate/validate.proto\x1a\x1dhr/performance/v1/types.proto\"\x92\x01\n" +
+	"\x13SubmitReviewRequest\x12$\n" +
+	"\treview_id\x18\x01 \x01(\x03B\a\xbaH\x04\"\x02 \x00R\breviewId\x12.\n" +
+	"\x0eoverall_rating\x18\x02 \x01(\tB\a\xbaH\x04r\x02\x10\x01R\roverallRating\x12%\n" +
+	"\tnarrative\x18\x03 \x01(\tB\a\xbaH\x04r\x02\x10\x01R\tnarrative\"[\n" +
 	"\x14SubmitReviewResponse\x12C\n" +
 	"\x06review\x18\x01 \x01(\v2+.hr.performance.v1.PerformanceReviewPayloadR\x06reviewB2Z0github.com/voxire/voxie/gen/go/hr/performance/v1b\x06proto3"
 

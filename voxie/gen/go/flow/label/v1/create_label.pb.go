@@ -7,6 +7,7 @@
 package v1
 
 import (
+	_ "buf.build/gen/go/bufbuild/protovalidate/protocolbuffers/go/buf/validate"
 	protoreflect "google.golang.org/protobuf/reflect/protoreflect"
 	protoimpl "google.golang.org/protobuf/runtime/protoimpl"
 	reflect "reflect"
@@ -133,11 +134,11 @@ var File_flow_label_v1_create_label_proto protoreflect.FileDescriptor
 
 const file_flow_label_v1_create_label_proto_rawDesc = "" +
 	"\n" +
-	" flow/label/v1/create_label.proto\x12\rflow.label.v1\x1a\x19flow/label/v1/types.proto\"a\n" +
-	"\x12CreateLabelRequest\x12!\n" +
-	"\fworkspace_id\x18\x01 \x01(\x03R\vworkspaceId\x12\x12\n" +
-	"\x04name\x18\x02 \x01(\tR\x04name\x12\x14\n" +
-	"\x05color\x18\x03 \x01(\tR\x05color\"A\n" +
+	" flow/label/v1/create_label.proto\x12\rflow.label.v1\x1a\x1bbuf/validate/validate.proto\x1a\x19flow/label/v1/types.proto\"|\n" +
+	"\x12CreateLabelRequest\x12*\n" +
+	"\fworkspace_id\x18\x01 \x01(\x03B\a\xbaH\x04\"\x02 \x00R\vworkspaceId\x12\x1b\n" +
+	"\x04name\x18\x02 \x01(\tB\a\xbaH\x04r\x02\x10\x01R\x04name\x12\x1d\n" +
+	"\x05color\x18\x03 \x01(\tB\a\xbaH\x04r\x02\x10\x01R\x05color\"A\n" +
 	"\x13CreateLabelResponse\x12*\n" +
 	"\x05label\x18\x01 \x01(\v2\x14.flow.label.v1.LabelR\x05labelB.Z,github.com/voxire/voxie/gen/go/flow/label/v1b\x06proto3"
 

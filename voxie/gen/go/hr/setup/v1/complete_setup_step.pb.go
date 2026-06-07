@@ -7,6 +7,7 @@
 package v1
 
 import (
+	_ "buf.build/gen/go/bufbuild/protovalidate/protocolbuffers/go/buf/validate"
 	protoreflect "google.golang.org/protobuf/reflect/protoreflect"
 	protoimpl "google.golang.org/protobuf/runtime/protoimpl"
 	reflect "reflect"
@@ -115,9 +116,9 @@ var File_hr_setup_v1_complete_setup_step_proto protoreflect.FileDescriptor
 
 const file_hr_setup_v1_complete_setup_step_proto_rawDesc = "" +
 	"\n" +
-	"%hr/setup/v1/complete_setup_step.proto\x12\vhr.setup.v1\x1a\x17hr/setup/v1/types.proto\"5\n" +
-	"\x18CompleteSetupStepRequest\x12\x19\n" +
-	"\bstep_key\x18\x01 \x01(\tR\astepKey\"T\n" +
+	"%hr/setup/v1/complete_setup_step.proto\x12\vhr.setup.v1\x1a\x1bbuf/validate/validate.proto\x1a\x17hr/setup/v1/types.proto\">\n" +
+	"\x18CompleteSetupStepRequest\x12\"\n" +
+	"\bstep_key\x18\x01 \x01(\tB\a\xbaH\x04r\x02\x10\x01R\astepKey\"T\n" +
 	"\x19CompleteSetupStepResponse\x127\n" +
 	"\x04step\x18\x01 \x01(\v2#.hr.setup.v1.SetupWizardStepPayloadR\x04stepB,Z*github.com/voxire/voxie/gen/go/hr/setup/v1b\x06proto3"
 

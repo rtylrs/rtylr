@@ -7,6 +7,7 @@
 package v1
 
 import (
+	_ "buf.build/gen/go/bufbuild/protovalidate/protocolbuffers/go/buf/validate"
 	protoreflect "google.golang.org/protobuf/reflect/protoreflect"
 	protoimpl "google.golang.org/protobuf/runtime/protoimpl"
 	reflect "reflect"
@@ -115,9 +116,9 @@ var File_insights_setting_v1_update_insights_settings_proto protoreflect.FileDes
 
 const file_insights_setting_v1_update_insights_settings_proto_rawDesc = "" +
 	"\n" +
-	"2insights/setting/v1/update_insights_settings.proto\x12\x13insights.setting.v1\x1a\x1finsights/setting/v1/types.proto\"b\n" +
-	"\x1dUpdateInsightsSettingsRequest\x12A\n" +
-	"\bsettings\x18\x01 \x01(\v2%.insights.setting.v1.InsightsSettingsR\bsettings\"c\n" +
+	"2insights/setting/v1/update_insights_settings.proto\x12\x13insights.setting.v1\x1a\x1bbuf/validate/validate.proto\x1a\x1finsights/setting/v1/types.proto\"j\n" +
+	"\x1dUpdateInsightsSettingsRequest\x12I\n" +
+	"\bsettings\x18\x01 \x01(\v2%.insights.setting.v1.InsightsSettingsB\x06\xbaH\x03\xc8\x01\x01R\bsettings\"c\n" +
 	"\x1eUpdateInsightsSettingsResponse\x12A\n" +
 	"\bsettings\x18\x01 \x01(\v2%.insights.setting.v1.InsightsSettingsR\bsettingsB4Z2github.com/voxire/voxie/gen/go/insights/setting/v1b\x06proto3"
 

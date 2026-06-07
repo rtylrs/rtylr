@@ -7,6 +7,7 @@
 package v1
 
 import (
+	_ "buf.build/gen/go/bufbuild/protovalidate/protocolbuffers/go/buf/validate"
 	protoreflect "google.golang.org/protobuf/reflect/protoreflect"
 	protoimpl "google.golang.org/protobuf/runtime/protoimpl"
 	reflect "reflect"
@@ -178,15 +179,15 @@ var File_hr_work_schedule_v1_create_work_schedule_proto protoreflect.FileDescrip
 
 const file_hr_work_schedule_v1_create_work_schedule_proto_rawDesc = "" +
 	"\n" +
-	".hr/work_schedule/v1/create_work_schedule.proto\x12\x13hr.work_schedule.v1\x1a\x1fhr/work_schedule/v1/types.proto\"\xe8\x02\n" +
-	"\x19CreateWorkScheduleRequest\x12\x12\n" +
-	"\x04name\x18\x01 \x01(\tR\x04name\x12!\n" +
-	"\fworking_days\x18\x02 \x03(\tR\vworkingDays\x12\x1d\n" +
+	".hr/work_schedule/v1/create_work_schedule.proto\x12\x13hr.work_schedule.v1\x1a\x1bbuf/validate/validate.proto\x1a\x1fhr/work_schedule/v1/types.proto\"\x93\x03\n" +
+	"\x19CreateWorkScheduleRequest\x12\x1b\n" +
+	"\x04name\x18\x01 \x01(\tB\a\xbaH\x04r\x02\x10\x01R\x04name\x12!\n" +
+	"\fworking_days\x18\x02 \x03(\tR\vworkingDays\x12&\n" +
 	"\n" +
-	"start_time\x18\x03 \x01(\tR\tstartTime\x12\x19\n" +
-	"\bend_time\x18\x04 \x01(\tR\aendTime\x12#\n" +
-	"\rbreak_minutes\x18\x05 \x01(\x05R\fbreakMinutes\x129\n" +
-	"\x19contracted_hours_per_week\x18\x06 \x01(\x01R\x16contractedHoursPerWeek\x12;\n" +
+	"start_time\x18\x03 \x01(\tB\a\xbaH\x04r\x02\x10\x01R\tstartTime\x12\"\n" +
+	"\bend_time\x18\x04 \x01(\tB\a\xbaH\x04r\x02\x10\x01R\aendTime\x12#\n" +
+	"\rbreak_minutes\x18\x05 \x01(\x05R\fbreakMinutes\x12I\n" +
+	"\x19contracted_hours_per_week\x18\x06 \x01(\x01B\x0e\xbaH\v\x12\t)\x00\x00\x00\x00\x00\x00\x00\x00R\x16contractedHoursPerWeek\x12;\n" +
 	"\x1adaily_ot_threshold_minutes\x18\a \x01(\x05R\x17dailyOtThresholdMinutes\x12=\n" +
 	"\x1bweekly_ot_threshold_minutes\x18\b \x01(\x05R\x18weeklyOtThresholdMinutes\"b\n" +
 	"\x1aCreateWorkScheduleResponse\x12D\n" +
