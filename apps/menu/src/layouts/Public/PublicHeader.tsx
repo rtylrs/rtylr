@@ -24,7 +24,7 @@ const Header: React.FC = () => {
   const navigate = useNavigate();
   const { primary } = useColors();
   const { width } = useWindowDimensions();
-  const token = localStorage.getItem('token');
+  const token = getCookie('token');
 
   const isMobile = useMemo(() => width < 968, [width]);
   const isQuestionnaire = useMemo(() => pathname.includes('/auth/questionnaire'), [pathname]);
