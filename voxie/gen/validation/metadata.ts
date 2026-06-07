@@ -24,6 +24,12 @@ export type ContractFieldValidation = {
 
 export type ContractValidationMetadata = Record<string, Record<string, ContractFieldValidation>>;
 
+export type ContractValidationIssue = {
+  field: string;
+  protoName: string;
+  message: string;
+};
+
 export const contractValidationMetadata = {
   "common.auth.v1.GoogleAuthRequest": {
     "businessName": {
@@ -9636,4 +9642,80 @@ export const contractValidationMetadata = {
 
 export function getContractValidation(messageName: string) {
   return contractValidationMetadata[messageName as keyof typeof contractValidationMetadata];
+}
+
+export function getRequiredContractFields(messageName: string) {
+  const fields = getContractValidation(messageName);
+  if (!fields) return [];
+  return Object.values(fields).filter((field) => field.required);
+}
+
+function hasValue(value: unknown, field: ContractFieldValidation): boolean {
+  if (value === null || value === undefined) return false;
+  if (typeof value === "string") return value.trim().length > 0;
+  if (field.repeated) return Array.isArray(value) && value.length > 0;
+  return true;
+}
+
+function numberValue(value: unknown): number | null {
+  if (typeof value === "number") return Number.isFinite(value) ? value : null;
+  if (typeof value === "string" && value.trim()) {
+    const parsed = Number(value);
+    return Number.isFinite(parsed) ? parsed : null;
+  }
+  return null;
+}
+
+export function validateContractPayload(messageName: string, payload: Record<string, unknown>) {
+  const fields = getContractValidation(messageName);
+  const issues: ContractValidationIssue[] = [];
+  if (!fields) return issues;
+
+  for (const field of Object.values(fields)) {
+    const value = payload[field.name];
+    if (field.required && !hasValue(value, field)) {
+      issues.push({ field: field.name, protoName: field.protoName, message: `${field.name} is required` });
+      continue;
+    }
+    if (!hasValue(value, field)) continue;
+
+    if (typeof value === "string") {
+      if (field.minLen !== undefined && value.trim().length < field.minLen) {
+        issues.push({ field: field.name, protoName: field.protoName, message: `${field.name} must be at least ${field.minLen} characters` });
+      }
+      if (field.maxLen !== undefined && value.length > field.maxLen) {
+        issues.push({ field: field.name, protoName: field.protoName, message: `${field.name} must be at most ${field.maxLen} characters` });
+      }
+      if (field.email && !/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(value.trim())) {
+        issues.push({ field: field.name, protoName: field.protoName, message: `${field.name} must be a valid email` });
+      }
+    }
+
+    if (field.repeated && Array.isArray(value)) {
+      if (field.minItems !== undefined && value.length < field.minItems) {
+        issues.push({ field: field.name, protoName: field.protoName, message: `${field.name} must include at least ${field.minItems} item(s)` });
+      }
+      if (field.maxItems !== undefined && value.length > field.maxItems) {
+        issues.push({ field: field.name, protoName: field.protoName, message: `${field.name} must include at most ${field.maxItems} item(s)` });
+      }
+    }
+
+    const numeric = numberValue(value);
+    if (numeric !== null) {
+      if (field.gt !== undefined && numeric <= field.gt) {
+        issues.push({ field: field.name, protoName: field.protoName, message: `${field.name} must be greater than ${field.gt}` });
+      }
+      if (field.gte !== undefined && numeric < field.gte) {
+        issues.push({ field: field.name, protoName: field.protoName, message: `${field.name} must be at least ${field.gte}` });
+      }
+      if (field.lt !== undefined && numeric >= field.lt) {
+        issues.push({ field: field.name, protoName: field.protoName, message: `${field.name} must be less than ${field.lt}` });
+      }
+      if (field.lte !== undefined && numeric > field.lte) {
+        issues.push({ field: field.name, protoName: field.protoName, message: `${field.name} must be at most ${field.lte}` });
+      }
+    }
+  }
+
+  return issues;
 }
