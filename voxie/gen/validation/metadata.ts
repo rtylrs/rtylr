@@ -100,12 +100,11 @@ export const contractValidationMetadata = {
   },
   "common.auth.v1.RegisterRequest": {
     "businessName": {
-      "minLen": 1,
       "name": "businessName",
       "optional": false,
       "protoName": "business_name",
       "repeated": false,
-      "required": true,
+      "required": false,
       "scalar": true,
       "type": "string"
     },
@@ -137,6 +136,15 @@ export const contractValidationMetadata = {
       "protoName": "password",
       "repeated": false,
       "required": true,
+      "scalar": true,
+      "type": "string"
+    },
+    "planSlug": {
+      "name": "planSlug",
+      "optional": false,
+      "protoName": "plan_slug",
+      "repeated": false,
+      "required": false,
       "scalar": true,
       "type": "string"
     }

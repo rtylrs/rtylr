@@ -30,8 +30,10 @@ type RegisterRequest struct {
 	Password string `protobuf:"bytes,2,opt,name=password,proto3" json:"password,omitempty"`
 	// name is the name value for this contract.
 	Name string `protobuf:"bytes,3,opt,name=name,proto3" json:"name,omitempty"`
-	// business_name is the business name value for this contract.
-	BusinessName  string `protobuf:"bytes,4,opt,name=business_name,json=businessName,proto3" json:"business_name,omitempty"`
+	// business_name is the optional business name to create for the user.
+	BusinessName string `protobuf:"bytes,4,opt,name=business_name,json=businessName,proto3" json:"business_name,omitempty"`
+	// plan_slug selects the subscription plan to assign after registration.
+	PlanSlug      string `protobuf:"bytes,5,opt,name=plan_slug,json=planSlug,proto3" json:"plan_slug,omitempty"`
 	unknownFields protoimpl.UnknownFields
 	sizeCache     protoimpl.SizeCache
 }
@@ -90,6 +92,13 @@ func (x *RegisterRequest) GetName() string {
 func (x *RegisterRequest) GetBusinessName() string {
 	if x != nil {
 		return x.BusinessName
+	}
+	return ""
+}
+
+func (x *RegisterRequest) GetPlanSlug() string {
+	if x != nil {
+		return x.PlanSlug
 	}
 	return ""
 }
@@ -179,12 +188,13 @@ var File_common_auth_v1_register_proto protoreflect.FileDescriptor
 
 const file_common_auth_v1_register_proto_rawDesc = "" +
 	"\n" +
-	"\x1dcommon/auth/v1/register.proto\x12\x0ecommon.auth.v1\x1a\x1bbuf/validate/validate.proto\"\xa2\x01\n" +
+	"\x1dcommon/auth/v1/register.proto\x12\x0ecommon.auth.v1\x1a\x1bbuf/validate/validate.proto\"\xb6\x01\n" +
 	"\x0fRegisterRequest\x12\x1f\n" +
 	"\x05email\x18\x01 \x01(\tB\t\xbaH\x06r\x04\x10\x01`\x01R\x05email\x12#\n" +
 	"\bpassword\x18\x02 \x01(\tB\a\xbaH\x04r\x02\x10\x01R\bpassword\x12\x1b\n" +
-	"\x04name\x18\x03 \x01(\tB\a\xbaH\x04r\x02\x10\x01R\x04name\x12,\n" +
-	"\rbusiness_name\x18\x04 \x01(\tB\a\xbaH\x04r\x02\x10\x01R\fbusinessName\"\x85\x01\n" +
+	"\x04name\x18\x03 \x01(\tB\a\xbaH\x04r\x02\x10\x01R\x04name\x12#\n" +
+	"\rbusiness_name\x18\x04 \x01(\tR\fbusinessName\x12\x1b\n" +
+	"\tplan_slug\x18\x05 \x01(\tR\bplanSlug\"\x85\x01\n" +
 	"\x10RegisterResponse\x12\x14\n" +
 	"\x05token\x18\x01 \x01(\tR\x05token\x12\x18\n" +
 	"\amessage\x18\x02 \x01(\tR\amessage\x12\x17\n" +
