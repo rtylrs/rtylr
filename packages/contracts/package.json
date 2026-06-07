@@ -4,6 +4,8 @@
   "description": "Generated TypeScript types from voxie protobuf contracts",
   "type": "module",
   "exports": {
+    "./validation/metadata": "./src/validation/metadata.ts",
+    "./validation/metadata.json": "./src/validation/metadata.json",
     "./*": "./src/*.ts",
     "./package.json": "./package.json"
   },
