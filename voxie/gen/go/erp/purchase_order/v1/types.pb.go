@@ -394,10 +394,11 @@ const file_erp_purchase_order_v1_types_proto_rawDesc = "" +
 	"updated_at\x18\x0e \x01(\tR\tupdatedAt\x12>\n" +
 	"\x05items\x18\x0f \x03(\v2(.erp.purchase_order.v1.PurchaseOrderItemR\x05itemsB\x14\n" +
 	"\x12_expected_deliveryB\x0e\n" +
-	"\f_received_at\"\xb0\x01\n" +
-	"\x1eCreatePurchaseOrderItemRequest\x12&\n" +
+	"\f_received_at\"\xb3\x01\n" +
+	"\x1eCreatePurchaseOrderItemRequest\x12)\n" +
 	"\n" +
-	"product_id\x18\x01 \x01(\x03B\a\xbaH\x04\"\x02 \x00R\tproductId\x129\n" +
+	"product_id\x18\x01 \x01(\x03B\n" +
+	"\xbaH\a\xc8\x01\x01\"\x02 \x00R\tproductId\x129\n" +
 	"\x10quantity_ordered\x18\x02 \x01(\x01B\x0e\xbaH\v\x12\t)\x00\x00\x00\x00\x00\x00\x00\x00R\x0fquantityOrdered\x12+\n" +
 	"\tunit_cost\x18\x03 \x01(\x01B\x0e\xbaH\v\x12\t)\x00\x00\x00\x00\x00\x00\x00\x00R\bunitCostB6Z4github.com/voxire/voxie/gen/go/erp/purchase_order/v1b\x06proto3"
 

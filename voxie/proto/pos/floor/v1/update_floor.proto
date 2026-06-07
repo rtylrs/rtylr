@@ -10,7 +10,10 @@ option go_package = "github.com/voxire/voxie/gen/go/pos/floor/v1";
 
 message UpdateFloorRequest {
   // name is the name value for this contract.
-  string name = 1 [(buf.validate.field).string.min_len = 1];
+  string name = 1 [
+    (buf.validate.field).required = true,
+    (buf.validate.field).string.min_len = 1
+  ];
   // sort_order is the sort order value for this contract.
   int32 sort_order = 2;
 }

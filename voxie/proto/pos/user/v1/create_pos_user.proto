@@ -10,13 +10,25 @@ option go_package = "github.com/voxire/voxie/gen/go/pos/user/v1";
 
 message CreatePOSUserRequest {
   // location_id is the location id value for this contract.
-  int64 location_id = 1 [(buf.validate.field).int64.gt = 0];
+  int64 location_id = 1 [
+    (buf.validate.field).required = true,
+    (buf.validate.field).int64.gt = 0
+  ];
   // name is the name value for this contract.
-  string name = 2 [(buf.validate.field).string.min_len = 1];
+  string name = 2 [
+    (buf.validate.field).required = true,
+    (buf.validate.field).string.min_len = 1
+  ];
   // pin is the pin value for this contract.
-  string pin = 3 [(buf.validate.field).string.min_len = 1];
+  string pin = 3 [
+    (buf.validate.field).required = true,
+    (buf.validate.field).string.min_len = 1
+  ];
   // role is the role value for this contract.
-  string role = 4 [(buf.validate.field).string.min_len = 1];
+  string role = 4 [
+    (buf.validate.field).required = true,
+    (buf.validate.field).string.min_len = 1
+  ];
   // hourly_rate is the hourly rate value for this contract.
   double hourly_rate = 5 [(buf.validate.field).double.gte = 0];
   // max_discount_pct is the max discount pct value for this contract.

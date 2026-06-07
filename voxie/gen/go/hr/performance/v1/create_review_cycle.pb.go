@@ -143,13 +143,17 @@ var File_hr_performance_v1_create_review_cycle_proto protoreflect.FileDescriptor
 
 const file_hr_performance_v1_create_review_cycle_proto_rawDesc = "" +
 	"\n" +
-	"+hr/performance/v1/create_review_cycle.proto\x12\x11hr.performance.v1\x1a\x1bbuf/validate/validate.proto\x1a\x1dhr/performance/v1/types.proto\"\xa8\x01\n" +
-	"\x18CreateReviewCycleRequest\x12\x1b\n" +
-	"\x04name\x18\x01 \x01(\tB\a\xbaH\x04r\x02\x10\x01R\x04name\x12\x1b\n" +
-	"\x04type\x18\x02 \x01(\tB\a\xbaH\x04r\x02\x10\x01R\x04type\x12*\n" +
-	"\fperiod_start\x18\x03 \x01(\tB\a\xbaH\x04r\x02\x10\x01R\vperiodStart\x12&\n" +
+	"+hr/performance/v1/create_review_cycle.proto\x12\x11hr.performance.v1\x1a\x1bbuf/validate/validate.proto\x1a\x1dhr/performance/v1/types.proto\"\xb4\x01\n" +
+	"\x18CreateReviewCycleRequest\x12\x1e\n" +
+	"\x04name\x18\x01 \x01(\tB\n" +
+	"\xbaH\a\xc8\x01\x01r\x02\x10\x01R\x04name\x12\x1e\n" +
+	"\x04type\x18\x02 \x01(\tB\n" +
+	"\xbaH\a\xc8\x01\x01r\x02\x10\x01R\x04type\x12-\n" +
+	"\fperiod_start\x18\x03 \x01(\tB\n" +
+	"\xbaH\a\xc8\x01\x01r\x02\x10\x01R\vperiodStart\x12)\n" +
 	"\n" +
-	"period_end\x18\x04 \x01(\tB\a\xbaH\x04r\x02\x10\x01R\tperiodEnd\"X\n" +
+	"period_end\x18\x04 \x01(\tB\n" +
+	"\xbaH\a\xc8\x01\x01r\x02\x10\x01R\tperiodEnd\"X\n" +
 	"\x19CreateReviewCycleResponse\x12;\n" +
 	"\x05cycle\x18\x01 \x01(\v2%.hr.performance.v1.ReviewCyclePayloadR\x05cycleB2Z0github.com/voxire/voxie/gen/go/hr/performance/v1b\x06proto3"
 

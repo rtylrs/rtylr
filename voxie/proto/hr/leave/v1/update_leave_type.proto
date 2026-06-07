@@ -11,7 +11,10 @@ option go_package = "github.com/voxire/voxie/gen/go/hr/leave/v1";
 
 message UpdateLeaveTypeRequest {
   // ID of the leave type to update.
-  int64 id = 1 [(buf.validate.field).int64.gt = 0];
+  int64 id = 1 [
+    (buf.validate.field).required = true,
+    (buf.validate.field).int64.gt = 0
+  ];
   // Updated name; absent to keep current value.
   optional string name = 2;
   // Updated paid status; absent to keep current value.

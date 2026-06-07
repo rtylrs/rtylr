@@ -7,6 +7,7 @@
 package v1
 
 import (
+	_ "buf.build/gen/go/bufbuild/protovalidate/protocolbuffers/go/buf/validate"
 	protoreflect "google.golang.org/protobuf/reflect/protoreflect"
 	protoimpl "google.golang.org/protobuf/runtime/protoimpl"
 	reflect "reflect"
@@ -30,7 +31,9 @@ type ListTasksRequest struct {
 	// assignee_id is the assignee id value for this contract.
 	AssigneeId *int64 `protobuf:"varint,3,opt,name=assignee_id,json=assigneeId,proto3,oneof" json:"assignee_id,omitempty"`
 	// priority is the priority value for this contract.
-	Priority      string `protobuf:"bytes,4,opt,name=priority,proto3" json:"priority,omitempty"`
+	Priority string `protobuf:"bytes,4,opt,name=priority,proto3" json:"priority,omitempty"`
+	// workspace_id filters tasks by workspace when project_id is absent.
+	WorkspaceId   string `protobuf:"bytes,5,opt,name=workspace_id,json=workspaceId,proto3" json:"workspace_id,omitempty"`
 	unknownFields protoimpl.UnknownFields
 	sizeCache     protoimpl.SizeCache
 }
@@ -93,6 +96,13 @@ func (x *ListTasksRequest) GetPriority() string {
 	return ""
 }
 
+func (x *ListTasksRequest) GetWorkspaceId() string {
+	if x != nil {
+		return x.WorkspaceId
+	}
+	return ""
+}
+
 type ListTasksResponse struct {
 	state protoimpl.MessageState `protogen:"open.v1"`
 	// tasks is the tasks value for this contract.
@@ -142,14 +152,18 @@ var File_flow_task_v1_list_tasks_proto protoreflect.FileDescriptor
 
 const file_flow_task_v1_list_tasks_proto_rawDesc = "" +
 	"\n" +
-	"\x1dflow/task/v1/list_tasks.proto\x12\fflow.task.v1\x1a\x18flow/task/v1/types.proto\"\x9b\x01\n" +
+	"\x1dflow/task/v1/list_tasks.proto\x12\fflow.task.v1\x1a\x1bbuf/validate/validate.proto\x1a\x18flow/task/v1/types.proto\"\xe1\x01\n" +
 	"\x10ListTasksRequest\x12\x1d\n" +
 	"\n" +
 	"project_id\x18\x01 \x01(\x03R\tprojectId\x12\x16\n" +
 	"\x06status\x18\x02 \x01(\tR\x06status\x12$\n" +
 	"\vassignee_id\x18\x03 \x01(\x03H\x00R\n" +
 	"assigneeId\x88\x01\x01\x12\x1a\n" +
-	"\bpriority\x18\x04 \x01(\tR\bpriorityB\x0e\n" +
+	"\bpriority\x18\x04 \x01(\tR\bpriority\x12!\n" +
+	"\fworkspace_id\x18\x05 \x01(\tR\vworkspaceId:!\xbaH\x1e\"\x1c\n" +
+	"\n" +
+	"project_id\n" +
+	"\fworkspace_id\x10\x01B\x0e\n" +
 	"\f_assignee_id\"=\n" +
 	"\x11ListTasksResponse\x12(\n" +
 	"\x05tasks\x18\x01 \x03(\v2\x12.flow.task.v1.TaskR\x05tasksB-Z+github.com/voxire/voxie/gen/go/flow/task/v1b\x06proto3"

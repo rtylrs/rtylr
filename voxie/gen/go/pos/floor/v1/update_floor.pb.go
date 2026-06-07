@@ -125,9 +125,10 @@ var File_pos_floor_v1_update_floor_proto protoreflect.FileDescriptor
 
 const file_pos_floor_v1_update_floor_proto_rawDesc = "" +
 	"\n" +
-	"\x1fpos/floor/v1/update_floor.proto\x12\fpos.floor.v1\x1a\x1bbuf/validate/validate.proto\"P\n" +
-	"\x12UpdateFloorRequest\x12\x1b\n" +
-	"\x04name\x18\x01 \x01(\tB\a\xbaH\x04r\x02\x10\x01R\x04name\x12\x1d\n" +
+	"\x1fpos/floor/v1/update_floor.proto\x12\fpos.floor.v1\x1a\x1bbuf/validate/validate.proto\"S\n" +
+	"\x12UpdateFloorRequest\x12\x1e\n" +
+	"\x04name\x18\x01 \x01(\tB\n" +
+	"\xbaH\a\xc8\x01\x01r\x02\x10\x01R\x04name\x12\x1d\n" +
 	"\n" +
 	"sort_order\x18\x02 \x01(\x05R\tsortOrder\"/\n" +
 	"\x13UpdateFloorResponse\x12\x18\n" +

@@ -2,11 +2,20 @@ syntax = "proto3";
 
 package flow.task.v1;
 
+import "buf/validate/validate.proto";
 import "flow/task/v1/types.proto";
 
 option go_package = "github.com/voxire/voxie/gen/go/flow/task/v1";
 
 message ListTasksRequest {
+  option (buf.validate.message).oneof = {
+    fields: [
+      "project_id",
+      "workspace_id"
+    ]
+    required: true
+  };
+
   // project_id is the project id value for this contract.
   int64 project_id = 1;
   // status is the current lifecycle state.
@@ -15,6 +24,8 @@ message ListTasksRequest {
   optional int64 assignee_id = 3;
   // priority is the priority value for this contract.
   string priority = 4;
+  // workspace_id filters tasks by workspace when project_id is absent.
+  string workspace_id = 5;
 }
 
 message ListTasksResponse {

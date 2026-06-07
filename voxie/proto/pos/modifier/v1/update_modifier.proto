@@ -10,11 +10,17 @@ option go_package = "github.com/voxire/voxie/gen/go/pos/modifier/v1";
 
 message UpdateModifierRequest {
   // name is the name value for this contract.
-  string name = 1 [(buf.validate.field).string.min_len = 1];
+  string name = 1 [
+    (buf.validate.field).required = true,
+    (buf.validate.field).string.min_len = 1
+  ];
   // price_delta is the price delta value for this contract.
   double price_delta = 2 [(buf.validate.field).double.gte = 0];
   // group_name is the group name value for this contract.
-  string group_name = 3 [(buf.validate.field).string.min_len = 1];
+  string group_name = 3 [
+    (buf.validate.field).required = true,
+    (buf.validate.field).string.min_len = 1
+  ];
   // is_required is the is required value for this contract.
   bool is_required = 4;
 }

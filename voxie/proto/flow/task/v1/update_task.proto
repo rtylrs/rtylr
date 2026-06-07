@@ -8,21 +8,39 @@ option go_package = "github.com/voxire/voxie/gen/go/flow/task/v1";
 
 message UpdateTaskRequest {
   // id is the unique identifier for the resource.
-  int64 id = 1 [(buf.validate.field).int64.gt = 0];
+  int64 id = 1 [
+    (buf.validate.field).required = true,
+    (buf.validate.field).int64.gt = 0
+  ];
   // title is the title value for this contract.
-  string title = 2 [(buf.validate.field).string.min_len = 1];
+  string title = 2 [
+    (buf.validate.field).required = true,
+    (buf.validate.field).string.min_len = 1
+  ];
   // description is the description value for this contract.
   string description = 3;
   // status is the current lifecycle state.
-  string status = 4 [(buf.validate.field).string.min_len = 1];
+  string status = 4 [
+    (buf.validate.field).required = true,
+    (buf.validate.field).string.min_len = 1
+  ];
   // priority is the priority value for this contract.
-  string priority = 5 [(buf.validate.field).string.min_len = 1];
+  string priority = 5 [
+    (buf.validate.field).required = true,
+    (buf.validate.field).string.min_len = 1
+  ];
   // assignee_id is the assignee id value for this contract.
   optional int64 assignee_id = 6;
   // due_date is the due date value for this contract.
-  string due_date = 7 [(buf.validate.field).string.min_len = 1];
+  string due_date = 7 [
+    (buf.validate.field).required = true,
+    (buf.validate.field).string.min_len = 1
+  ];
   // start_date is the start date value for this contract.
-  string start_date = 8 [(buf.validate.field).string.min_len = 1];
+  string start_date = 8 [
+    (buf.validate.field).required = true,
+    (buf.validate.field).string.min_len = 1
+  ];
   // labels is the labels value for this contract.
   repeated int64 labels = 9;
 }

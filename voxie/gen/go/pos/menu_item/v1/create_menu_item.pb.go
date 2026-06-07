@@ -143,10 +143,12 @@ var File_pos_menu_item_v1_create_menu_item_proto protoreflect.FileDescriptor
 
 const file_pos_menu_item_v1_create_menu_item_proto_rawDesc = "" +
 	"\n" +
-	"'pos/menu_item/v1/create_menu_item.proto\x12\x10pos.menu_item.v1\x1a\x1bbuf/validate/validate.proto\"~\n" +
-	"\x15CreateMenuItemRequest\x12\x1b\n" +
-	"\x04name\x18\x01 \x01(\tB\a\xbaH\x04r\x02\x10\x01R\x04name\x12\x19\n" +
-	"\x03sku\x18\x02 \x01(\tB\a\xbaH\x04r\x02\x10\x01R\x03sku\x12-\n" +
+	"'pos/menu_item/v1/create_menu_item.proto\x12\x10pos.menu_item.v1\x1a\x1bbuf/validate/validate.proto\"\x84\x01\n" +
+	"\x15CreateMenuItemRequest\x12\x1e\n" +
+	"\x04name\x18\x01 \x01(\tB\n" +
+	"\xbaH\a\xc8\x01\x01r\x02\x10\x01R\x04name\x12\x1c\n" +
+	"\x03sku\x18\x02 \x01(\tB\n" +
+	"\xbaH\a\xc8\x01\x01r\x02\x10\x01R\x03sku\x12-\n" +
 	"\n" +
 	"sale_price\x18\x03 \x01(\x01B\x0e\xbaH\v\x12\t)\x00\x00\x00\x00\x00\x00\x00\x00R\tsalePrice\"K\n" +
 	"\x16CreateMenuItemResponse\x12\x17\n" +

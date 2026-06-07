@@ -125,10 +125,12 @@ var File_erp_purchase_order_v1_update_purchase_order_status_proto protoreflect.F
 
 const file_erp_purchase_order_v1_update_purchase_order_status_proto_rawDesc = "" +
 	"\n" +
-	"8erp/purchase_order/v1/update_purchase_order_status.proto\x12\x15erp.purchase_order.v1\x1a\x1bbuf/validate/validate.proto\"\\\n" +
-	" UpdatePurchaseOrderStatusRequest\x12\x17\n" +
-	"\x02id\x18\x01 \x01(\x03B\a\xbaH\x04\"\x02 \x00R\x02id\x12\x1f\n" +
-	"\x06status\x18\x02 \x01(\tB\a\xbaH\x04r\x02\x10\x01R\x06status\"=\n" +
+	"8erp/purchase_order/v1/update_purchase_order_status.proto\x12\x15erp.purchase_order.v1\x1a\x1bbuf/validate/validate.proto\"b\n" +
+	" UpdatePurchaseOrderStatusRequest\x12\x1a\n" +
+	"\x02id\x18\x01 \x01(\x03B\n" +
+	"\xbaH\a\xc8\x01\x01\"\x02 \x00R\x02id\x12\"\n" +
+	"\x06status\x18\x02 \x01(\tB\n" +
+	"\xbaH\a\xc8\x01\x01r\x02\x10\x01R\x06status\"=\n" +
 	"!UpdatePurchaseOrderStatusResponse\x12\x18\n" +
 	"\amessage\x18\x01 \x01(\tR\amessageB6Z4github.com/voxire/voxie/gen/go/erp/purchase_order/v1b\x06proto3"
 

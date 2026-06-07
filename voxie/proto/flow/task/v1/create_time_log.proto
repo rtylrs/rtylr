@@ -2,13 +2,23 @@ syntax = "proto3";
 
 package flow.task.v1;
 
+import "buf/validate/validate.proto";
+
 option go_package = "github.com/voxire/voxie/gen/go/flow/task/v1";
 
 message CreateTimeLogRequest {
   // duration_minutes is the duration minutes value for this contract.
-  int64 duration_minutes = 1;
+  int64 duration_minutes = 1 [
+    (buf.validate.field).required = true,
+    (buf.validate.field).int64.gt = 0
+  ];
   // description is the description value for this contract.
   string description = 2;
+  // task_id identifies the task the time log belongs to.
+  int64 task_id = 3 [
+    (buf.validate.field).required = true,
+    (buf.validate.field).int64.gt = 0
+  ];
 }
 
 message CreateTimeLogResponse {

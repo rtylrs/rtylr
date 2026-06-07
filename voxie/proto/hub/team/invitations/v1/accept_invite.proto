@@ -8,9 +8,15 @@ option go_package = "github.com/voxire/voxie/gen/go/hub/team/invitations/v1";
 
 message AcceptInviteRequest {
   // token is the opaque token used to complete the operation.
-  string token = 1 [(buf.validate.field).string.min_len = 1];
+  string token = 1 [
+    (buf.validate.field).required = true,
+    (buf.validate.field).string.min_len = 1
+  ];
   // password is the user-provided secret for authentication.
-  string password = 2 [(buf.validate.field).string.min_len = 1];
+  string password = 2 [
+    (buf.validate.field).required = true,
+    (buf.validate.field).string.min_len = 1
+  ];
 }
 
 message AcceptInviteResponse {

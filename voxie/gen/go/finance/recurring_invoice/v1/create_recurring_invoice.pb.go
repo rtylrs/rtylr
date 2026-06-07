@@ -152,14 +152,17 @@ var File_finance_recurring_invoice_v1_create_recurring_invoice_proto protoreflec
 
 const file_finance_recurring_invoice_v1_create_recurring_invoice_proto_rawDesc = "" +
 	"\n" +
-	";finance/recurring_invoice/v1/create_recurring_invoice.proto\x12\x1cfinance.recurring_invoice.v1\x1a\x1bbuf/validate/validate.proto\x1a(finance/recurring_invoice/v1/types.proto\"\x82\x02\n" +
-	"\x1dCreateRecurringInvoiceRequest\x12(\n" +
-	"\vcustomer_id\x18\x01 \x01(\x03B\a\xbaH\x04\"\x02 \x00R\n" +
-	"customerId\x12%\n" +
-	"\tfrequency\x18\x02 \x01(\tB\a\xbaH\x04r\x02\x10\x01R\tfrequency\x12R\n" +
-	"\x05lines\x18\x03 \x03(\v22.finance.recurring_invoice.v1.RecurringInvoiceLineB\b\xbaH\x05\x92\x01\x02\b\x01R\x05lines\x12&\n" +
+	";finance/recurring_invoice/v1/create_recurring_invoice.proto\x12\x1cfinance.recurring_invoice.v1\x1a\x1bbuf/validate/validate.proto\x1a(finance/recurring_invoice/v1/types.proto\"\x8b\x02\n" +
+	"\x1dCreateRecurringInvoiceRequest\x12+\n" +
+	"\vcustomer_id\x18\x01 \x01(\x03B\n" +
+	"\xbaH\a\xc8\x01\x01\"\x02 \x00R\n" +
+	"customerId\x12(\n" +
+	"\tfrequency\x18\x02 \x01(\tB\n" +
+	"\xbaH\a\xc8\x01\x01r\x02\x10\x01R\tfrequency\x12R\n" +
+	"\x05lines\x18\x03 \x03(\v22.finance.recurring_invoice.v1.RecurringInvoiceLineB\b\xbaH\x05\x92\x01\x02\b\x01R\x05lines\x12)\n" +
 	"\n" +
-	"start_date\x18\x04 \x01(\tB\a\xbaH\x04r\x02\x10\x01R\tstartDate\x12\x14\n" +
+	"start_date\x18\x04 \x01(\tB\n" +
+	"\xbaH\a\xc8\x01\x01r\x02\x10\x01R\tstartDate\x12\x14\n" +
 	"\x05notes\x18\x05 \x01(\tR\x05notes\"j\n" +
 	"\x1eCreateRecurringInvoiceResponse\x12H\n" +
 	"\ainvoice\x18\x01 \x01(\v2..finance.recurring_invoice.v1.RecurringInvoiceR\ainvoiceB=Z;github.com/voxire/voxie/gen/go/finance/recurring_invoice/v1b\x06proto3"

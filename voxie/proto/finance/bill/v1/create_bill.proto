@@ -8,15 +8,27 @@ option go_package = "github.com/voxire/voxie/gen/go/finance/bill/v1";
 
 message CreateBillRequest {
   // supplier_id is the supplier id value for this contract.
-  int64 supplier_id = 1 [(buf.validate.field).int64.gt = 0];
+  int64 supplier_id = 1 [
+    (buf.validate.field).required = true,
+    (buf.validate.field).int64.gt = 0
+  ];
   // amount is the amount value for this contract.
   double amount = 2 [(buf.validate.field).double.gte = 0];
   // currency is the currency value for this contract.
-  string currency = 3 [(buf.validate.field).string.min_len = 1];
+  string currency = 3 [
+    (buf.validate.field).required = true,
+    (buf.validate.field).string.min_len = 1
+  ];
   // due_date is the due date value for this contract.
-  string due_date = 4 [(buf.validate.field).string.min_len = 1];
+  string due_date = 4 [
+    (buf.validate.field).required = true,
+    (buf.validate.field).string.min_len = 1
+  ];
   // status is the current lifecycle state.
-  string status = 5 [(buf.validate.field).string.min_len = 1];
+  string status = 5 [
+    (buf.validate.field).required = true,
+    (buf.validate.field).string.min_len = 1
+  ];
   // description is the description value for this contract.
   string description = 6;
 }

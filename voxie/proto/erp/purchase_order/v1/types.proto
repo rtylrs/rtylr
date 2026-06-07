@@ -60,7 +60,10 @@ message PurchaseOrder {
 
 message CreatePurchaseOrderItemRequest {
   // product_id is the product id value for this contract.
-  int64 product_id = 1 [(buf.validate.field).int64.gt = 0];
+  int64 product_id = 1 [
+    (buf.validate.field).required = true,
+    (buf.validate.field).int64.gt = 0
+  ];
   // quantity_ordered is the quantity ordered value for this contract.
   double quantity_ordered = 2 [(buf.validate.field).double.gte = 0];
   // unit_cost is the unit cost value for this contract.

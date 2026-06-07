@@ -125,9 +125,10 @@ var File_flow_task_v1_add_comment_proto protoreflect.FileDescriptor
 
 const file_flow_task_v1_add_comment_proto_rawDesc = "" +
 	"\n" +
-	"\x1eflow/task/v1/add_comment.proto\x12\fflow.task.v1\x1a\x1bbuf/validate/validate.proto\x1a\x18flow/task/v1/types.proto\"O\n" +
-	"\x11AddCommentRequest\x12 \n" +
-	"\atask_id\x18\x01 \x01(\x03B\a\xbaH\x04\"\x02 \x00R\x06taskId\x12\x18\n" +
+	"\x1eflow/task/v1/add_comment.proto\x12\fflow.task.v1\x1a\x1bbuf/validate/validate.proto\x1a\x18flow/task/v1/types.proto\"R\n" +
+	"\x11AddCommentRequest\x12#\n" +
+	"\atask_id\x18\x01 \x01(\x03B\n" +
+	"\xbaH\a\xc8\x01\x01\"\x02 \x00R\x06taskId\x12\x18\n" +
 	"\acontent\x18\x02 \x01(\tR\acontent\"I\n" +
 	"\x12AddCommentResponse\x123\n" +
 	"\acomment\x18\x01 \x01(\v2\x19.flow.task.v1.TaskCommentR\acommentB-Z+github.com/voxire/voxie/gen/go/flow/task/v1b\x06proto3"

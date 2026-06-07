@@ -10,9 +10,15 @@ option go_package = "github.com/voxire/voxie/gen/go/hr/employee/v1";
 
 message InviteEmployeeRequest {
   // ID of the employee to invite.
-  int64 employee_id = 1 [(buf.validate.field).int64.gt = 0];
+  int64 employee_id = 1 [
+    (buf.validate.field).required = true,
+    (buf.validate.field).int64.gt = 0
+  ];
   // Channel to deliver the invite (email | sms).
-  string send_via = 2 [(buf.validate.field).string.min_len = 1];
+  string send_via = 2 [
+    (buf.validate.field).required = true,
+    (buf.validate.field).string.min_len = 1
+  ];
 }
 
 message InviteEmployeeResponse {

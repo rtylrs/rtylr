@@ -125,10 +125,12 @@ var File_hub_team_invitations_v1_accept_invite_proto protoreflect.FileDescriptor
 
 const file_hub_team_invitations_v1_accept_invite_proto_rawDesc = "" +
 	"\n" +
-	"+hub/team/invitations/v1/accept_invite.proto\x12\x17hub.team.invitations.v1\x1a\x1bbuf/validate/validate.proto\"Y\n" +
-	"\x13AcceptInviteRequest\x12\x1d\n" +
-	"\x05token\x18\x01 \x01(\tB\a\xbaH\x04r\x02\x10\x01R\x05token\x12#\n" +
-	"\bpassword\x18\x02 \x01(\tB\a\xbaH\x04r\x02\x10\x01R\bpassword\"0\n" +
+	"+hub/team/invitations/v1/accept_invite.proto\x12\x17hub.team.invitations.v1\x1a\x1bbuf/validate/validate.proto\"_\n" +
+	"\x13AcceptInviteRequest\x12 \n" +
+	"\x05token\x18\x01 \x01(\tB\n" +
+	"\xbaH\a\xc8\x01\x01r\x02\x10\x01R\x05token\x12&\n" +
+	"\bpassword\x18\x02 \x01(\tB\n" +
+	"\xbaH\a\xc8\x01\x01r\x02\x10\x01R\bpassword\"0\n" +
 	"\x14AcceptInviteResponse\x12\x18\n" +
 	"\amessage\x18\x01 \x01(\tR\amessageB8Z6github.com/voxire/voxie/gen/go/hub/team/invitations/v1b\x06proto3"
 

@@ -125,12 +125,14 @@ var File_hr_shift_v1_publish_roster_proto protoreflect.FileDescriptor
 
 const file_hr_shift_v1_publish_roster_proto_rawDesc = "" +
 	"\n" +
-	" hr/shift/v1/publish_roster.proto\x12\vhr.shift.v1\x1a\x1bbuf/validate/validate.proto\"h\n" +
-	"\x14PublishRosterRequest\x12(\n" +
-	"\vlocation_id\x18\x01 \x01(\x03B\a\xbaH\x04\"\x02 \x00R\n" +
-	"locationId\x12&\n" +
+	" hr/shift/v1/publish_roster.proto\x12\vhr.shift.v1\x1a\x1bbuf/validate/validate.proto\"n\n" +
+	"\x14PublishRosterRequest\x12+\n" +
+	"\vlocation_id\x18\x01 \x01(\x03B\n" +
+	"\xbaH\a\xc8\x01\x01\"\x02 \x00R\n" +
+	"locationId\x12)\n" +
 	"\n" +
-	"week_start\x18\x02 \x01(\tB\a\xbaH\x04r\x02\x10\x01R\tweekStart\"1\n" +
+	"week_start\x18\x02 \x01(\tB\n" +
+	"\xbaH\a\xc8\x01\x01r\x02\x10\x01R\tweekStart\"1\n" +
 	"\x15PublishRosterResponse\x12\x18\n" +
 	"\asuccess\x18\x01 \x01(\bR\asuccessB,Z*github.com/voxire/voxie/gen/go/hr/shift/v1b\x06proto3"
 

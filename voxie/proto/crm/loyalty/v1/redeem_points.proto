@@ -8,7 +8,10 @@ option go_package = "github.com/voxire/voxie/gen/go/crm/loyalty/v1";
 
 message RedeemPointsRequest {
   // customer_id is the customer id value for this contract.
-  int64 customer_id = 1 [(buf.validate.field).int64.gt = 0];
+  int64 customer_id = 1 [
+    (buf.validate.field).required = true,
+    (buf.validate.field).int64.gt = 0
+  ];
   // points is the points value for this contract.
   int64 points = 2;
   // description is the description value for this contract.
@@ -16,7 +19,10 @@ message RedeemPointsRequest {
   // reference_id is the reference id value for this contract.
   optional int64 reference_id = 4;
   // reference_type is the reference type value for this contract.
-  string reference_type = 5 [(buf.validate.field).string.min_len = 1];
+  string reference_type = 5 [
+    (buf.validate.field).required = true,
+    (buf.validate.field).string.min_len = 1
+  ];
 }
 
 message RedeemPointsResponse {

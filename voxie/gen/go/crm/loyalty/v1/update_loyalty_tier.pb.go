@@ -161,14 +161,17 @@ var File_crm_loyalty_v1_update_loyalty_tier_proto protoreflect.FileDescriptor
 
 const file_crm_loyalty_v1_update_loyalty_tier_proto_rawDesc = "" +
 	"\n" +
-	"(crm/loyalty/v1/update_loyalty_tier.proto\x12\x0ecrm.loyalty.v1\x1a\x1bbuf/validate/validate.proto\"\xd0\x01\n" +
-	"\x18UpdateLoyaltyTierRequest\x12\x17\n" +
-	"\x02id\x18\x01 \x01(\x03B\a\xbaH\x04\"\x02 \x00R\x02id\x12\x1b\n" +
-	"\x04name\x18\x02 \x01(\tB\a\xbaH\x04r\x02\x10\x01R\x04name\x12\x1d\n" +
+	"(crm/loyalty/v1/update_loyalty_tier.proto\x12\x0ecrm.loyalty.v1\x1a\x1bbuf/validate/validate.proto\"\xd9\x01\n" +
+	"\x18UpdateLoyaltyTierRequest\x12\x1a\n" +
+	"\x02id\x18\x01 \x01(\x03B\n" +
+	"\xbaH\a\xc8\x01\x01\"\x02 \x00R\x02id\x12\x1e\n" +
+	"\x04name\x18\x02 \x01(\tB\n" +
+	"\xbaH\a\xc8\x01\x01r\x02\x10\x01R\x04name\x12\x1d\n" +
 	"\n" +
 	"min_points\x18\x03 \x01(\x03R\tminPoints\x12!\n" +
-	"\fdiscount_pct\x18\x04 \x01(\x01R\vdiscountPct\x12\x1d\n" +
-	"\x05perks\x18\x05 \x01(\tB\a\xbaH\x04r\x02\x10\x01R\x05perks\x12\x1d\n" +
+	"\fdiscount_pct\x18\x04 \x01(\x01R\vdiscountPct\x12 \n" +
+	"\x05perks\x18\x05 \x01(\tB\n" +
+	"\xbaH\a\xc8\x01\x01r\x02\x10\x01R\x05perks\x12\x1d\n" +
 	"\n" +
 	"sort_order\x18\x06 \x01(\x03R\tsortOrder\"5\n" +
 	"\x19UpdateLoyaltyTierResponse\x12\x18\n" +

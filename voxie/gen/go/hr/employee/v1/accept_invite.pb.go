@@ -125,10 +125,12 @@ var File_hr_employee_v1_accept_invite_proto protoreflect.FileDescriptor
 
 const file_hr_employee_v1_accept_invite_proto_rawDesc = "" +
 	"\n" +
-	"\"hr/employee/v1/accept_invite.proto\x12\x0ehr.employee.v1\x1a\x1bbuf/validate/validate.proto\"Y\n" +
-	"\x13AcceptInviteRequest\x12\x1d\n" +
-	"\x05token\x18\x01 \x01(\tB\a\xbaH\x04r\x02\x10\x01R\x05token\x12#\n" +
-	"\bpassword\x18\x02 \x01(\tB\a\xbaH\x04r\x02\x10\x01R\bpassword\"0\n" +
+	"\"hr/employee/v1/accept_invite.proto\x12\x0ehr.employee.v1\x1a\x1bbuf/validate/validate.proto\"_\n" +
+	"\x13AcceptInviteRequest\x12 \n" +
+	"\x05token\x18\x01 \x01(\tB\n" +
+	"\xbaH\a\xc8\x01\x01r\x02\x10\x01R\x05token\x12&\n" +
+	"\bpassword\x18\x02 \x01(\tB\n" +
+	"\xbaH\a\xc8\x01\x01r\x02\x10\x01R\bpassword\"0\n" +
 	"\x14AcceptInviteResponse\x12\x18\n" +
 	"\asuccess\x18\x01 \x01(\bR\asuccessB/Z-github.com/voxire/voxie/gen/go/hr/employee/v1b\x06proto3"
 

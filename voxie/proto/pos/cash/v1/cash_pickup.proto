@@ -12,11 +12,17 @@ message CashPickupRequest {
   // branch_id is the branch id value for this contract.
   int64 branch_id = 1;
   // terminal_id is the terminal id value for this contract.
-  int64 terminal_id = 2 [(buf.validate.field).int64.gt = 0];
+  int64 terminal_id = 2 [
+    (buf.validate.field).required = true,
+    (buf.validate.field).int64.gt = 0
+  ];
   // session_id is the session id value for this contract.
   int64 session_id = 3;
   // employee_id is the employee id value for this contract.
-  int64 employee_id = 4 [(buf.validate.field).int64.gt = 0];
+  int64 employee_id = 4 [
+    (buf.validate.field).required = true,
+    (buf.validate.field).int64.gt = 0
+  ];
   // amount is the amount value for this contract.
   double amount = 5;
   // reason is the reason value for this contract.

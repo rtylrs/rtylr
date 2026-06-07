@@ -10,9 +10,15 @@ option go_package = "github.com/voxire/voxie/gen/go/pos/orders/v1";
 
 message UpdateOrderStatusRequest {
   // order_id is the order id value for this contract.
-  int64 order_id = 1 [(buf.validate.field).int64.gt = 0];
+  int64 order_id = 1 [
+    (buf.validate.field).required = true,
+    (buf.validate.field).int64.gt = 0
+  ];
   // status is the current lifecycle state.
-  string status = 2 [(buf.validate.field).string.min_len = 1];
+  string status = 2 [
+    (buf.validate.field).required = true,
+    (buf.validate.field).string.min_len = 1
+  ];
 }
 
 message UpdateOrderStatusResponse {

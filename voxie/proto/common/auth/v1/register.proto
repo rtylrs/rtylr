@@ -8,14 +8,23 @@ option go_package = "github.com/voxire/voxie/gen/go/common/auth/v1";
 
 message RegisterRequest {
   // email is the email address used for lookup or contact.
-  string email = 1 [(buf.validate.field).string = {
-    min_len: 1
-    email: true
-  }];
+  string email = 1 [
+    (buf.validate.field).required = true,
+    (buf.validate.field).string = {
+      min_len: 1
+      email: true
+    }
+  ];
   // password is the user-provided secret for authentication.
-  string password = 2 [(buf.validate.field).string.min_len = 1];
+  string password = 2 [
+    (buf.validate.field).required = true,
+    (buf.validate.field).string.min_len = 1
+  ];
   // name is the name value for this contract.
-  string name = 3 [(buf.validate.field).string.min_len = 1];
+  string name = 3 [
+    (buf.validate.field).required = true,
+    (buf.validate.field).string.min_len = 1
+  ];
   // business_name is the optional business name to create for the user.
   string business_name = 4;
   // plan_slug selects the subscription plan to assign after registration.

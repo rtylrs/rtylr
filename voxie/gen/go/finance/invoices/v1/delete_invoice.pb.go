@@ -116,9 +116,10 @@ var File_finance_invoices_v1_delete_invoice_proto protoreflect.FileDescriptor
 
 const file_finance_invoices_v1_delete_invoice_proto_rawDesc = "" +
 	"\n" +
-	"(finance/invoices/v1/delete_invoice.proto\x12\x13finance.invoices.v1\x1a\x1bbuf/validate/validate.proto\"/\n" +
-	"\x14DeleteInvoiceRequest\x12\x17\n" +
-	"\x02id\x18\x01 \x01(\x03B\a\xbaH\x04\"\x02 \x00R\x02id\"1\n" +
+	"(finance/invoices/v1/delete_invoice.proto\x12\x13finance.invoices.v1\x1a\x1bbuf/validate/validate.proto\"2\n" +
+	"\x14DeleteInvoiceRequest\x12\x1a\n" +
+	"\x02id\x18\x01 \x01(\x03B\n" +
+	"\xbaH\a\xc8\x01\x01\"\x02 \x00R\x02id\"1\n" +
 	"\x15DeleteInvoiceResponse\x12\x18\n" +
 	"\amessage\x18\x01 \x01(\tR\amessageB4Z2github.com/voxire/voxie/gen/go/finance/invoices/v1b\x06proto3"
 

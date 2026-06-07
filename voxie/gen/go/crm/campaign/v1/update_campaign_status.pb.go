@@ -125,10 +125,12 @@ var File_crm_campaign_v1_update_campaign_status_proto protoreflect.FileDescripto
 
 const file_crm_campaign_v1_update_campaign_status_proto_rawDesc = "" +
 	"\n" +
-	",crm/campaign/v1/update_campaign_status.proto\x12\x0fcrm.campaign.v1\x1a\x1bbuf/validate/validate.proto\"W\n" +
-	"\x1bUpdateCampaignStatusRequest\x12\x17\n" +
-	"\x02id\x18\x01 \x01(\x03B\a\xbaH\x04\"\x02 \x00R\x02id\x12\x1f\n" +
-	"\x06status\x18\x02 \x01(\tB\a\xbaH\x04r\x02\x10\x01R\x06status\"8\n" +
+	",crm/campaign/v1/update_campaign_status.proto\x12\x0fcrm.campaign.v1\x1a\x1bbuf/validate/validate.proto\"]\n" +
+	"\x1bUpdateCampaignStatusRequest\x12\x1a\n" +
+	"\x02id\x18\x01 \x01(\x03B\n" +
+	"\xbaH\a\xc8\x01\x01\"\x02 \x00R\x02id\x12\"\n" +
+	"\x06status\x18\x02 \x01(\tB\n" +
+	"\xbaH\a\xc8\x01\x01r\x02\x10\x01R\x06status\"8\n" +
 	"\x1cUpdateCampaignStatusResponse\x12\x18\n" +
 	"\amessage\x18\x01 \x01(\tR\amessageB0Z.github.com/voxire/voxie/gen/go/crm/campaign/v1b\x06proto3"
 

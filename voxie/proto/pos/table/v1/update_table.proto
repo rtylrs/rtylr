@@ -12,11 +12,17 @@ message UpdateTableRequest {
   // location_id is the location id value for this contract.
   optional int64 location_id = 1;
   // label is the label value for this contract.
-  string label = 2 [(buf.validate.field).string.min_len = 1];
+  string label = 2 [
+    (buf.validate.field).required = true,
+    (buf.validate.field).string.min_len = 1
+  ];
   // seats is the seats value for this contract.
   int32 seats = 3;
   // status is the current lifecycle state.
-  string status = 4 [(buf.validate.field).string.min_len = 1];
+  string status = 4 [
+    (buf.validate.field).required = true,
+    (buf.validate.field).string.min_len = 1
+  ];
 }
 
 message UpdateTableResponse {

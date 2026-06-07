@@ -10,7 +10,10 @@ option go_package = "github.com/voxire/voxie/gen/go/hr/time_entry/v1";
 
 message SubmitTimesheetRequest {
   // ID of the timesheet to submit for approval.
-  int64 timesheet_id = 1 [(buf.validate.field).int64.gt = 0];
+  int64 timesheet_id = 1 [
+    (buf.validate.field).required = true,
+    (buf.validate.field).int64.gt = 0
+  ];
 }
 
 message SubmitTimesheetResponse {

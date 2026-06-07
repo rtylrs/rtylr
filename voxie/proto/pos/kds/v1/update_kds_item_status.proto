@@ -10,7 +10,10 @@ option go_package = "github.com/voxire/voxie/gen/go/pos/kds/v1";
 
 message UpdateKDSItemStatusRequest {
   // status is the current lifecycle state.
-  string status = 1 [(buf.validate.field).string.min_len = 1];
+  string status = 1 [
+    (buf.validate.field).required = true,
+    (buf.validate.field).string.min_len = 1
+  ];
 }
 
 message UpdateKDSItemStatusResponse {

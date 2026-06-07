@@ -116,9 +116,10 @@ var File_flow_task_v1_get_attachments_proto protoreflect.FileDescriptor
 
 const file_flow_task_v1_get_attachments_proto_rawDesc = "" +
 	"\n" +
-	"\"flow/task/v1/get_attachments.proto\x12\fflow.task.v1\x1a\x1bbuf/validate/validate.proto\x1a\x18flow/task/v1/types.proto\"9\n" +
-	"\x15GetAttachmentsRequest\x12 \n" +
-	"\atask_id\x18\x01 \x01(\x03B\a\xbaH\x04\"\x02 \x00R\x06taskId\"T\n" +
+	"\"flow/task/v1/get_attachments.proto\x12\fflow.task.v1\x1a\x1bbuf/validate/validate.proto\x1a\x18flow/task/v1/types.proto\"<\n" +
+	"\x15GetAttachmentsRequest\x12#\n" +
+	"\atask_id\x18\x01 \x01(\x03B\n" +
+	"\xbaH\a\xc8\x01\x01\"\x02 \x00R\x06taskId\"T\n" +
 	"\x16GetAttachmentsResponse\x12:\n" +
 	"\vattachments\x18\x01 \x03(\v2\x18.flow.task.v1.AttachmentR\vattachmentsB-Z+github.com/voxire/voxie/gen/go/flow/task/v1b\x06proto3"
 

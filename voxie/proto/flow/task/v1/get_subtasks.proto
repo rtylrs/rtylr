@@ -9,7 +9,10 @@ option go_package = "github.com/voxire/voxie/gen/go/flow/task/v1";
 
 message GetSubtasksRequest {
   // task_id is the task id value for this contract.
-  int64 task_id = 1 [(buf.validate.field).int64.gt = 0];
+  int64 task_id = 1 [
+    (buf.validate.field).required = true,
+    (buf.validate.field).int64.gt = 0
+  ];
 }
 
 message GetSubtasksResponse {

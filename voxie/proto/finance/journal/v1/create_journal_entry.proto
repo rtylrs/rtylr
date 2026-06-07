@@ -9,7 +9,10 @@ option go_package = "github.com/voxire/voxie/gen/go/finance/journal/v1";
 
 message CreateJournalEntryRequest {
   // date is the date value for this contract.
-  string date = 1 [(buf.validate.field).string.min_len = 1];
+  string date = 1 [
+    (buf.validate.field).required = true,
+    (buf.validate.field).string.min_len = 1
+  ];
   // description is the description value for this contract.
   string description = 2;
   // lines is the lines value for this contract.

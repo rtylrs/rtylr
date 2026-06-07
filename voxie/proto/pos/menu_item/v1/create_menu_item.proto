@@ -10,9 +10,15 @@ option go_package = "github.com/voxire/voxie/gen/go/pos/menu_item/v1";
 
 message CreateMenuItemRequest {
   // name is the name value for this contract.
-  string name = 1 [(buf.validate.field).string.min_len = 1];
+  string name = 1 [
+    (buf.validate.field).required = true,
+    (buf.validate.field).string.min_len = 1
+  ];
   // sku is the sku value for this contract.
-  string sku = 2 [(buf.validate.field).string.min_len = 1];
+  string sku = 2 [
+    (buf.validate.field).required = true,
+    (buf.validate.field).string.min_len = 1
+  ];
   // sale_price is the sale price value for this contract.
   double sale_price = 3 [(buf.validate.field).double.gte = 0];
 }

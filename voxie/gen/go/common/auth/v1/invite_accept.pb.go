@@ -125,10 +125,12 @@ var File_common_auth_v1_invite_accept_proto protoreflect.FileDescriptor
 
 const file_common_auth_v1_invite_accept_proto_rawDesc = "" +
 	"\n" +
-	"\"common/auth/v1/invite_accept.proto\x12\x0ecommon.auth.v1\x1a\x1bbuf/validate/validate.proto\"Y\n" +
-	"\x13InviteAcceptRequest\x12\x1d\n" +
-	"\x05token\x18\x01 \x01(\tB\a\xbaH\x04r\x02\x10\x01R\x05token\x12#\n" +
-	"\bpassword\x18\x02 \x01(\tB\a\xbaH\x04r\x02\x10\x01R\bpassword\"0\n" +
+	"\"common/auth/v1/invite_accept.proto\x12\x0ecommon.auth.v1\x1a\x1bbuf/validate/validate.proto\"_\n" +
+	"\x13InviteAcceptRequest\x12 \n" +
+	"\x05token\x18\x01 \x01(\tB\n" +
+	"\xbaH\a\xc8\x01\x01r\x02\x10\x01R\x05token\x12&\n" +
+	"\bpassword\x18\x02 \x01(\tB\n" +
+	"\xbaH\a\xc8\x01\x01r\x02\x10\x01R\bpassword\"0\n" +
 	"\x14InviteAcceptResponse\x12\x18\n" +
 	"\amessage\x18\x01 \x01(\tR\amessageB/Z-github.com/voxire/voxie/gen/go/common/auth/v1b\x06proto3"
 

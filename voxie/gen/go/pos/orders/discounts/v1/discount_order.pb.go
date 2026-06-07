@@ -143,9 +143,10 @@ var File_pos_orders_discounts_v1_discount_order_proto protoreflect.FileDescripto
 
 const file_pos_orders_discounts_v1_discount_order_proto_rawDesc = "" +
 	"\n" +
-	",pos/orders/discounts/v1/discount_order.proto\x12\x17pos.orders.discounts.v1\x1a\x1bbuf/validate/validate.proto\"\x9e\x01\n" +
-	"\x14DiscountOrderRequest\x12\"\n" +
-	"\border_id\x18\x01 \x01(\x03B\a\xbaH\x04\"\x02 \x00R\aorderId\x12#\n" +
+	",pos/orders/discounts/v1/discount_order.proto\x12\x17pos.orders.discounts.v1\x1a\x1bbuf/validate/validate.proto\"\xa1\x01\n" +
+	"\x14DiscountOrderRequest\x12%\n" +
+	"\border_id\x18\x01 \x01(\x03B\n" +
+	"\xbaH\a\xc8\x01\x01\"\x02 \x00R\aorderId\x12#\n" +
 	"\rdiscount_type\x18\x02 \x01(\tR\fdiscountType\x12%\n" +
 	"\x0ediscount_value\x18\x03 \x01(\x01R\rdiscountValue\x12\x16\n" +
 	"\x06reason\x18\x04 \x01(\tR\x06reason\"1\n" +

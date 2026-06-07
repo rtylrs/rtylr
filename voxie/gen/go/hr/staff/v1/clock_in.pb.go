@@ -116,9 +116,10 @@ var File_hr_staff_v1_clock_in_proto protoreflect.FileDescriptor
 
 const file_hr_staff_v1_clock_in_proto_rawDesc = "" +
 	"\n" +
-	"\x1ahr/staff/v1/clock_in.proto\x12\vhr.staff.v1\x1a\x1bbuf/validate/validate.proto\"4\n" +
-	"\x0eClockInRequest\x12\"\n" +
-	"\bstaff_id\x18\x01 \x01(\x03B\a\xbaH\x04\"\x02 \x00R\astaffId\"+\n" +
+	"\x1ahr/staff/v1/clock_in.proto\x12\vhr.staff.v1\x1a\x1bbuf/validate/validate.proto\"7\n" +
+	"\x0eClockInRequest\x12%\n" +
+	"\bstaff_id\x18\x01 \x01(\x03B\n" +
+	"\xbaH\a\xc8\x01\x01\"\x02 \x00R\astaffId\"+\n" +
 	"\x0fClockInResponse\x12\x18\n" +
 	"\asuccess\x18\x01 \x01(\bR\asuccessB,Z*github.com/voxire/voxie/gen/go/hr/staff/v1b\x06proto3"
 

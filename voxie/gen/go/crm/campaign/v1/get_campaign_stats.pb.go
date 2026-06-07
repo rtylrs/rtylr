@@ -116,9 +116,10 @@ var File_crm_campaign_v1_get_campaign_stats_proto protoreflect.FileDescriptor
 
 const file_crm_campaign_v1_get_campaign_stats_proto_rawDesc = "" +
 	"\n" +
-	"(crm/campaign/v1/get_campaign_stats.proto\x12\x0fcrm.campaign.v1\x1a\x1bbuf/validate/validate.proto\x1a\x1bcrm/campaign/v1/types.proto\"C\n" +
-	"\x17GetCampaignStatsRequest\x12(\n" +
-	"\vcampaign_id\x18\x01 \x01(\x03B\a\xbaH\x04\"\x02 \x00R\n" +
+	"(crm/campaign/v1/get_campaign_stats.proto\x12\x0fcrm.campaign.v1\x1a\x1bbuf/validate/validate.proto\x1a\x1bcrm/campaign/v1/types.proto\"F\n" +
+	"\x17GetCampaignStatsRequest\x12+\n" +
+	"\vcampaign_id\x18\x01 \x01(\x03B\n" +
+	"\xbaH\a\xc8\x01\x01\"\x02 \x00R\n" +
 	"campaignId\"P\n" +
 	"\x18GetCampaignStatsResponse\x124\n" +
 	"\x05stats\x18\x01 \x01(\v2\x1e.crm.campaign.v1.CampaignStatsR\x05statsB0Z.github.com/voxire/voxie/gen/go/crm/campaign/v1b\x06proto3"

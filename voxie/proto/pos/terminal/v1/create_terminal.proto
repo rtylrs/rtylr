@@ -10,11 +10,20 @@ option go_package = "github.com/voxire/voxie/gen/go/pos/terminal/v1";
 
 message CreateTerminalRequest {
   // branch_id is the branch id value for this contract.
-  int64 branch_id = 1 [(buf.validate.field).int64.gt = 0];
+  int64 branch_id = 1 [
+    (buf.validate.field).required = true,
+    (buf.validate.field).int64.gt = 0
+  ];
   // name is the name value for this contract.
-  string name = 2 [(buf.validate.field).string.min_len = 1];
+  string name = 2 [
+    (buf.validate.field).required = true,
+    (buf.validate.field).string.min_len = 1
+  ];
   // device_id is the device id value for this contract.
-  string device_id = 3 [(buf.validate.field).string.min_len = 1];
+  string device_id = 3 [
+    (buf.validate.field).required = true,
+    (buf.validate.field).string.min_len = 1
+  ];
 }
 
 message CreateTerminalResponse {

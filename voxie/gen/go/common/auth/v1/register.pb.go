@@ -188,11 +188,13 @@ var File_common_auth_v1_register_proto protoreflect.FileDescriptor
 
 const file_common_auth_v1_register_proto_rawDesc = "" +
 	"\n" +
-	"\x1dcommon/auth/v1/register.proto\x12\x0ecommon.auth.v1\x1a\x1bbuf/validate/validate.proto\"\xb6\x01\n" +
-	"\x0fRegisterRequest\x12\x1f\n" +
-	"\x05email\x18\x01 \x01(\tB\t\xbaH\x06r\x04\x10\x01`\x01R\x05email\x12#\n" +
-	"\bpassword\x18\x02 \x01(\tB\a\xbaH\x04r\x02\x10\x01R\bpassword\x12\x1b\n" +
-	"\x04name\x18\x03 \x01(\tB\a\xbaH\x04r\x02\x10\x01R\x04name\x12#\n" +
+	"\x1dcommon/auth/v1/register.proto\x12\x0ecommon.auth.v1\x1a\x1bbuf/validate/validate.proto\"\xbf\x01\n" +
+	"\x0fRegisterRequest\x12\"\n" +
+	"\x05email\x18\x01 \x01(\tB\f\xbaH\t\xc8\x01\x01r\x04\x10\x01`\x01R\x05email\x12&\n" +
+	"\bpassword\x18\x02 \x01(\tB\n" +
+	"\xbaH\a\xc8\x01\x01r\x02\x10\x01R\bpassword\x12\x1e\n" +
+	"\x04name\x18\x03 \x01(\tB\n" +
+	"\xbaH\a\xc8\x01\x01r\x02\x10\x01R\x04name\x12#\n" +
 	"\rbusiness_name\x18\x04 \x01(\tR\fbusinessName\x12\x1b\n" +
 	"\tplan_slug\x18\x05 \x01(\tR\bplanSlug\"\x85\x01\n" +
 	"\x10RegisterResponse\x12\x14\n" +

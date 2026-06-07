@@ -134,11 +134,14 @@ var File_pos_orders_items_v1_update_order_item_status_proto protoreflect.FileDes
 
 const file_pos_orders_items_v1_update_order_item_status_proto_rawDesc = "" +
 	"\n" +
-	"2pos/orders/items/v1/update_order_item_status.proto\x12\x13pos.orders.items.v1\x1a\x1bbuf/validate/validate.proto\"\x85\x01\n" +
-	"\x1cUpdateOrderItemStatusRequest\x12\"\n" +
-	"\border_id\x18\x01 \x01(\x03B\a\xbaH\x04\"\x02 \x00R\aorderId\x12 \n" +
-	"\aitem_id\x18\x02 \x01(\x03B\a\xbaH\x04\"\x02 \x00R\x06itemId\x12\x1f\n" +
-	"\x06status\x18\x03 \x01(\tB\a\xbaH\x04r\x02\x10\x01R\x06status\"9\n" +
+	"2pos/orders/items/v1/update_order_item_status.proto\x12\x13pos.orders.items.v1\x1a\x1bbuf/validate/validate.proto\"\x8e\x01\n" +
+	"\x1cUpdateOrderItemStatusRequest\x12%\n" +
+	"\border_id\x18\x01 \x01(\x03B\n" +
+	"\xbaH\a\xc8\x01\x01\"\x02 \x00R\aorderId\x12#\n" +
+	"\aitem_id\x18\x02 \x01(\x03B\n" +
+	"\xbaH\a\xc8\x01\x01\"\x02 \x00R\x06itemId\x12\"\n" +
+	"\x06status\x18\x03 \x01(\tB\n" +
+	"\xbaH\a\xc8\x01\x01r\x02\x10\x01R\x06status\"9\n" +
 	"\x1dUpdateOrderItemStatusResponse\x12\x18\n" +
 	"\amessage\x18\x01 \x01(\tR\amessageB4Z2github.com/voxire/voxie/gen/go/pos/orders/items/v1b\x06proto3"
 

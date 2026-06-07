@@ -116,9 +116,10 @@ var File_hr_staff_v1_get_staff_proto protoreflect.FileDescriptor
 
 const file_hr_staff_v1_get_staff_proto_rawDesc = "" +
 	"\n" +
-	"\x1bhr/staff/v1/get_staff.proto\x12\vhr.staff.v1\x1a\x1bbuf/validate/validate.proto\x1a\x17hr/staff/v1/types.proto\"*\n" +
-	"\x0fGetStaffRequest\x12\x17\n" +
-	"\x02id\x18\x01 \x01(\x03B\a\xbaH\x04\"\x02 \x00R\x02id\"<\n" +
+	"\x1bhr/staff/v1/get_staff.proto\x12\vhr.staff.v1\x1a\x1bbuf/validate/validate.proto\x1a\x17hr/staff/v1/types.proto\"-\n" +
+	"\x0fGetStaffRequest\x12\x1a\n" +
+	"\x02id\x18\x01 \x01(\x03B\n" +
+	"\xbaH\a\xc8\x01\x01\"\x02 \x00R\x02id\"<\n" +
 	"\x10GetStaffResponse\x12(\n" +
 	"\x05staff\x18\x01 \x01(\v2\x12.hr.staff.v1.StaffR\x05staffB,Z*github.com/voxire/voxie/gen/go/hr/staff/v1b\x06proto3"
 

@@ -8,7 +8,10 @@ option go_package = "github.com/voxire/voxie/gen/go/hub/developer/v1";
 
 message CreateApiKeyRequest {
   // name is the name value for this contract.
-  string name = 1 [(buf.validate.field).string.min_len = 1];
+  string name = 1 [
+    (buf.validate.field).required = true,
+    (buf.validate.field).string.min_len = 1
+  ];
   // scopes is the scopes value for this contract.
   repeated string scopes = 2;
 }

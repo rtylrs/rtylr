@@ -11,7 +11,10 @@ option go_package = "github.com/voxire/voxie/gen/go/hr/document/v1";
 
 message UploadDocumentRequest {
   // Employee this document is associated with.
-  int64 employee_id = 1 [(buf.validate.field).int64.gt = 0];
+  int64 employee_id = 1 [
+    (buf.validate.field).required = true,
+    (buf.validate.field).int64.gt = 0
+  ];
   // Category of document (e.g. "id_card", "contract", "certificate", "visa").
   string document_type = 2;
   // Human-readable name for the document.

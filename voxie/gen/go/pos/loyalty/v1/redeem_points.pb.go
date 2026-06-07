@@ -134,9 +134,10 @@ var File_pos_loyalty_v1_redeem_points_proto protoreflect.FileDescriptor
 
 const file_pos_loyalty_v1_redeem_points_proto_rawDesc = "" +
 	"\n" +
-	"\"pos/loyalty/v1/redeem_points.proto\x12\x0epos.loyalty.v1\x1a\x1bbuf/validate/validate.proto\"W\n" +
-	"\x13RedeemPointsRequest\x12(\n" +
-	"\vcustomer_id\x18\x01 \x01(\x03B\a\xbaH\x04\"\x02 \x00R\n" +
+	"\"pos/loyalty/v1/redeem_points.proto\x12\x0epos.loyalty.v1\x1a\x1bbuf/validate/validate.proto\"Z\n" +
+	"\x13RedeemPointsRequest\x12+\n" +
+	"\vcustomer_id\x18\x01 \x01(\x03B\n" +
+	"\xbaH\a\xc8\x01\x01\"\x02 \x00R\n" +
 	"customerId\x12\x16\n" +
 	"\x06points\x18\x02 \x01(\x05R\x06points\"W\n" +
 	"\x14RedeemPointsResponse\x12%\n" +

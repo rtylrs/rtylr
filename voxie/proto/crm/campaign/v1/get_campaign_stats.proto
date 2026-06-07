@@ -9,7 +9,10 @@ option go_package = "github.com/voxire/voxie/gen/go/crm/campaign/v1";
 
 message GetCampaignStatsRequest {
   // campaign_id is the campaign id value for this contract.
-  int64 campaign_id = 1 [(buf.validate.field).int64.gt = 0];
+  int64 campaign_id = 1 [
+    (buf.validate.field).required = true,
+    (buf.validate.field).int64.gt = 0
+  ];
 }
 
 message GetCampaignStatsResponse {

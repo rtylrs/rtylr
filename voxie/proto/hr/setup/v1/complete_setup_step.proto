@@ -11,7 +11,10 @@ option go_package = "github.com/voxire/voxie/gen/go/hr/setup/v1";
 
 message CompleteSetupStepRequest {
   // The step to mark as completed (must match a valid step_key).
-  string step_key = 1 [(buf.validate.field).string.min_len = 1];
+  string step_key = 1 [
+    (buf.validate.field).required = true,
+    (buf.validate.field).string.min_len = 1
+  ];
 }
 
 message CompleteSetupStepResponse {

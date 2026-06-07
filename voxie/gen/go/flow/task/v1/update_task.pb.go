@@ -188,18 +188,24 @@ var File_flow_task_v1_update_task_proto protoreflect.FileDescriptor
 
 const file_flow_task_v1_update_task_proto_rawDesc = "" +
 	"\n" +
-	"\x1eflow/task/v1/update_task.proto\x12\fflow.task.v1\x1a\x1bbuf/validate/validate.proto\"\xcd\x02\n" +
-	"\x11UpdateTaskRequest\x12\x17\n" +
-	"\x02id\x18\x01 \x01(\x03B\a\xbaH\x04\"\x02 \x00R\x02id\x12\x1d\n" +
-	"\x05title\x18\x02 \x01(\tB\a\xbaH\x04r\x02\x10\x01R\x05title\x12 \n" +
-	"\vdescription\x18\x03 \x01(\tR\vdescription\x12\x1f\n" +
-	"\x06status\x18\x04 \x01(\tB\a\xbaH\x04r\x02\x10\x01R\x06status\x12#\n" +
-	"\bpriority\x18\x05 \x01(\tB\a\xbaH\x04r\x02\x10\x01R\bpriority\x12$\n" +
+	"\x1eflow/task/v1/update_task.proto\x12\fflow.task.v1\x1a\x1bbuf/validate/validate.proto\"\xdf\x02\n" +
+	"\x11UpdateTaskRequest\x12\x1a\n" +
+	"\x02id\x18\x01 \x01(\x03B\n" +
+	"\xbaH\a\xc8\x01\x01\"\x02 \x00R\x02id\x12 \n" +
+	"\x05title\x18\x02 \x01(\tB\n" +
+	"\xbaH\a\xc8\x01\x01r\x02\x10\x01R\x05title\x12 \n" +
+	"\vdescription\x18\x03 \x01(\tR\vdescription\x12\"\n" +
+	"\x06status\x18\x04 \x01(\tB\n" +
+	"\xbaH\a\xc8\x01\x01r\x02\x10\x01R\x06status\x12&\n" +
+	"\bpriority\x18\x05 \x01(\tB\n" +
+	"\xbaH\a\xc8\x01\x01r\x02\x10\x01R\bpriority\x12$\n" +
 	"\vassignee_id\x18\x06 \x01(\x03H\x00R\n" +
-	"assigneeId\x88\x01\x01\x12\"\n" +
-	"\bdue_date\x18\a \x01(\tB\a\xbaH\x04r\x02\x10\x01R\adueDate\x12&\n" +
+	"assigneeId\x88\x01\x01\x12%\n" +
+	"\bdue_date\x18\a \x01(\tB\n" +
+	"\xbaH\a\xc8\x01\x01r\x02\x10\x01R\adueDate\x12)\n" +
 	"\n" +
-	"start_date\x18\b \x01(\tB\a\xbaH\x04r\x02\x10\x01R\tstartDate\x12\x16\n" +
+	"start_date\x18\b \x01(\tB\n" +
+	"\xbaH\a\xc8\x01\x01r\x02\x10\x01R\tstartDate\x12\x16\n" +
 	"\x06labels\x18\t \x03(\x03R\x06labelsB\x0e\n" +
 	"\f_assignee_id\".\n" +
 	"\x12UpdateTaskResponse\x12\x18\n" +

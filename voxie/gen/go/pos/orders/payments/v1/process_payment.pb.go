@@ -134,9 +134,10 @@ var File_pos_orders_payments_v1_process_payment_proto protoreflect.FileDescripto
 
 const file_pos_orders_payments_v1_process_payment_proto_rawDesc = "" +
 	"\n" +
-	",pos/orders/payments/v1/process_payment.proto\x12\x16pos.orders.payments.v1\x1a\x1bbuf/validate/validate.proto\"\x83\x01\n" +
-	"\x15ProcessPaymentRequest\x12\"\n" +
-	"\border_id\x18\x01 \x01(\x03B\a\xbaH\x04\"\x02 \x00R\aorderId\x12%\n" +
+	",pos/orders/payments/v1/process_payment.proto\x12\x16pos.orders.payments.v1\x1a\x1bbuf/validate/validate.proto\"\x86\x01\n" +
+	"\x15ProcessPaymentRequest\x12%\n" +
+	"\border_id\x18\x01 \x01(\x03B\n" +
+	"\xbaH\a\xc8\x01\x01\"\x02 \x00R\aorderId\x12%\n" +
 	"\x0epayment_method\x18\x02 \x01(\tR\rpaymentMethod\x12\x1f\n" +
 	"\vamount_paid\x18\x03 \x01(\x01R\n" +
 	"amountPaid\"2\n" +

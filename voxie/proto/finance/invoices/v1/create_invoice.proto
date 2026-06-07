@@ -9,24 +9,42 @@ option go_package = "github.com/voxire/voxie/gen/go/finance/invoices/v1";
 
 message CreateInvoiceRequest {
   // client_name is the client name value for this contract.
-  string client_name = 1 [(buf.validate.field).string.min_len = 1];
+  string client_name = 1 [
+    (buf.validate.field).required = true,
+    (buf.validate.field).string.min_len = 1
+  ];
   // client_email is the client email value for this contract.
-  string client_email = 2 [(buf.validate.field).string = {
-    min_len: 1
-    email: true
-  }];
+  string client_email = 2 [
+    (buf.validate.field).required = true,
+    (buf.validate.field).string = {
+      min_len: 1
+      email: true
+    }
+  ];
   // client_address is the client address value for this contract.
   string client_address = 3;
   // client_tax_id is the client tax id value for this contract.
   string client_tax_id = 4;
   // issue_date is the issue date value for this contract.
-  string issue_date = 5 [(buf.validate.field).string.min_len = 1];
+  string issue_date = 5 [
+    (buf.validate.field).required = true,
+    (buf.validate.field).string.min_len = 1
+  ];
   // due_date is the due date value for this contract.
-  string due_date = 6 [(buf.validate.field).string.min_len = 1];
+  string due_date = 6 [
+    (buf.validate.field).required = true,
+    (buf.validate.field).string.min_len = 1
+  ];
   // currency is the currency value for this contract.
-  string currency = 7 [(buf.validate.field).string.min_len = 1];
+  string currency = 7 [
+    (buf.validate.field).required = true,
+    (buf.validate.field).string.min_len = 1
+  ];
   // discount_type is the discount type value for this contract.
-  string discount_type = 8 [(buf.validate.field).string.min_len = 1];
+  string discount_type = 8 [
+    (buf.validate.field).required = true,
+    (buf.validate.field).string.min_len = 1
+  ];
   // discount_value is the discount value value for this contract.
   double discount_value = 9 [(buf.validate.field).double.gte = 0];
   // tax_rate is the tax rate value for this contract.

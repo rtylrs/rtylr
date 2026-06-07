@@ -18,6 +18,8 @@ export interface ListTasksRequest {
     | undefined;
   /** priority is the priority value for this contract. */
   priority: string;
+  /** workspace_id filters tasks by workspace when project_id is absent. */
+  workspaceId: string;
 }
 
 export interface ListTasksResponse {

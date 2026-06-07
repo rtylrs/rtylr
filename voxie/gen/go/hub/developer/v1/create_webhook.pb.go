@@ -134,9 +134,10 @@ var File_hub_developer_v1_create_webhook_proto protoreflect.FileDescriptor
 
 const file_hub_developer_v1_create_webhook_proto_rawDesc = "" +
 	"\n" +
-	"%hub/developer/v1/create_webhook.proto\x12\x10hub.developer.v1\x1a\x1bbuf/validate/validate.proto\"I\n" +
-	"\x14CreateWebhookRequest\x12\x19\n" +
-	"\x03url\x18\x01 \x01(\tB\a\xbaH\x04r\x02\x10\x01R\x03url\x12\x16\n" +
+	"%hub/developer/v1/create_webhook.proto\x12\x10hub.developer.v1\x1a\x1bbuf/validate/validate.proto\"L\n" +
+	"\x14CreateWebhookRequest\x12\x1c\n" +
+	"\x03url\x18\x01 \x01(\tB\n" +
+	"\xbaH\a\xc8\x01\x01r\x02\x10\x01R\x03url\x12\x16\n" +
 	"\x06events\x18\x02 \x03(\tR\x06events\"A\n" +
 	"\x15CreateWebhookResponse\x12\x0e\n" +
 	"\x02id\x18\x01 \x01(\x03R\x02id\x12\x18\n" +

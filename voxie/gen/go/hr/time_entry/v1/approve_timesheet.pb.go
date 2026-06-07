@@ -134,9 +134,10 @@ var File_hr_time_entry_v1_approve_timesheet_proto protoreflect.FileDescriptor
 
 const file_hr_time_entry_v1_approve_timesheet_proto_rawDesc = "" +
 	"\n" +
-	"(hr/time_entry/v1/approve_timesheet.proto\x12\x10hr.time_entry.v1\x1a\x1bbuf/validate/validate.proto\"\xa6\x01\n" +
-	"\x17ApproveTimesheetRequest\x12*\n" +
-	"\ftimesheet_id\x18\x01 \x01(\x03B\a\xbaH\x04\"\x02 \x00R\vtimesheetId\x12\x1a\n" +
+	"(hr/time_entry/v1/approve_timesheet.proto\x12\x10hr.time_entry.v1\x1a\x1bbuf/validate/validate.proto\"\xa9\x01\n" +
+	"\x17ApproveTimesheetRequest\x12-\n" +
+	"\ftimesheet_id\x18\x01 \x01(\x03B\n" +
+	"\xbaH\a\xc8\x01\x01\"\x02 \x00R\vtimesheetId\x12\x1a\n" +
 	"\bapproved\x18\x02 \x01(\bR\bapproved\x12.\n" +
 	"\x10rejection_reason\x18\x03 \x01(\tH\x00R\x0frejectionReason\x88\x01\x01B\x13\n" +
 	"\x11_rejection_reason\"4\n" +

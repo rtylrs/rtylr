@@ -8,9 +8,15 @@ option go_package = "github.com/voxire/voxie/gen/go/finance/invoices/v1";
 
 message UpdateInvoiceStatusRequest {
   // id is the unique identifier for the resource.
-  int64 id = 1 [(buf.validate.field).int64.gt = 0];
+  int64 id = 1 [
+    (buf.validate.field).required = true,
+    (buf.validate.field).int64.gt = 0
+  ];
   // status is the current lifecycle state.
-  string status = 2 [(buf.validate.field).string.min_len = 1];
+  string status = 2 [
+    (buf.validate.field).required = true,
+    (buf.validate.field).string.min_len = 1
+  ];
 }
 
 message UpdateInvoiceStatusResponse {

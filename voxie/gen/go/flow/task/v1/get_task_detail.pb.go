@@ -143,9 +143,10 @@ var File_flow_task_v1_get_task_detail_proto protoreflect.FileDescriptor
 
 const file_flow_task_v1_get_task_detail_proto_rawDesc = "" +
 	"\n" +
-	"\"flow/task/v1/get_task_detail.proto\x12\fflow.task.v1\x1a\x1bbuf/validate/validate.proto\x1a\x18flow/task/v1/types.proto\"/\n" +
-	"\x14GetTaskDetailRequest\x12\x17\n" +
-	"\x02id\x18\x01 \x01(\x03B\a\xbaH\x04\"\x02 \x00R\x02id\"\xde\x01\n" +
+	"\"flow/task/v1/get_task_detail.proto\x12\fflow.task.v1\x1a\x1bbuf/validate/validate.proto\x1a\x18flow/task/v1/types.proto\"2\n" +
+	"\x14GetTaskDetailRequest\x12\x1a\n" +
+	"\x02id\x18\x01 \x01(\x03B\n" +
+	"\xbaH\a\xc8\x01\x01\"\x02 \x00R\x02id\"\xde\x01\n" +
 	"\x15GetTaskDetailResponse\x12&\n" +
 	"\x04task\x18\x01 \x01(\v2\x12.flow.task.v1.TaskR\x04task\x12.\n" +
 	"\bsubtasks\x18\x02 \x03(\v2\x12.flow.task.v1.TaskR\bsubtasks\x125\n" +

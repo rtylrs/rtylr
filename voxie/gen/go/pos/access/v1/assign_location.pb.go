@@ -152,10 +152,12 @@ var File_pos_access_v1_assign_location_proto protoreflect.FileDescriptor
 
 const file_pos_access_v1_assign_location_proto_rawDesc = "" +
 	"\n" +
-	"#pos/access/v1/assign_location.proto\x12\rpos.access.v1\x1a\x1bbuf/validate/validate.proto\"\xf0\x01\n" +
-	"\x15AssignLocationRequest\x12 \n" +
-	"\auser_id\x18\x01 \x01(\x03B\a\xbaH\x04\"\x02 \x00R\x06userId\x12(\n" +
-	"\vlocation_id\x18\x02 \x01(\x03B\a\xbaH\x04\"\x02 \x00R\n" +
+	"#pos/access/v1/assign_location.proto\x12\rpos.access.v1\x1a\x1bbuf/validate/validate.proto\"\xf6\x01\n" +
+	"\x15AssignLocationRequest\x12#\n" +
+	"\auser_id\x18\x01 \x01(\x03B\n" +
+	"\xbaH\a\xc8\x01\x01\"\x02 \x00R\x06userId\x12+\n" +
+	"\vlocation_id\x18\x02 \x01(\x03B\n" +
+	"\xbaH\a\xc8\x01\x01\"\x02 \x00R\n" +
 	"locationId\x12/\n" +
 	"\x14can_manage_pos_users\x18\x03 \x01(\bR\x11canManagePosUsers\x120\n" +
 	"\x14can_manage_terminals\x18\x04 \x01(\bR\x12canManageTerminals\x12(\n" +

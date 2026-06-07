@@ -152,13 +152,16 @@ var File_hr_equipment_v1_create_equipment_request_proto protoreflect.FileDescrip
 
 const file_hr_equipment_v1_create_equipment_request_proto_rawDesc = "" +
 	"\n" +
-	".hr/equipment/v1/create_equipment_request.proto\x12\x0fhr.equipment.v1\x1a\x1bbuf/validate/validate.proto\x1a\x1bhr/equipment/v1/types.proto\"\xfc\x01\n" +
-	"\x1dCreateEquipmentRequestRequest\x12(\n" +
-	"\vemployee_id\x18\x01 \x01(\x03B\a\xbaH\x04\"\x02 \x00R\n" +
-	"employeeId\x12.\n" +
-	"\x0eequipment_type\x18\x02 \x01(\tB\a\xbaH\x04r\x02\x10\x01R\requipmentType\x12 \n" +
-	"\vdescription\x18\x03 \x01(\tR\vdescription\x12!\n" +
-	"\aurgency\x18\x04 \x01(\tB\a\xbaH\x04r\x02\x10\x01R\aurgency\x12)\n" +
+	".hr/equipment/v1/create_equipment_request.proto\x12\x0fhr.equipment.v1\x1a\x1bbuf/validate/validate.proto\x1a\x1bhr/equipment/v1/types.proto\"\x85\x02\n" +
+	"\x1dCreateEquipmentRequestRequest\x12+\n" +
+	"\vemployee_id\x18\x01 \x01(\x03B\n" +
+	"\xbaH\a\xc8\x01\x01\"\x02 \x00R\n" +
+	"employeeId\x121\n" +
+	"\x0eequipment_type\x18\x02 \x01(\tB\n" +
+	"\xbaH\a\xc8\x01\x01r\x02\x10\x01R\requipmentType\x12 \n" +
+	"\vdescription\x18\x03 \x01(\tR\vdescription\x12$\n" +
+	"\aurgency\x18\x04 \x01(\tB\n" +
+	"\xbaH\a\xc8\x01\x01r\x02\x10\x01R\aurgency\x12)\n" +
 	"\x0eneeded_by_date\x18\x05 \x01(\tH\x00R\fneededByDate\x88\x01\x01B\x11\n" +
 	"\x0f_needed_by_date\"d\n" +
 	"\x1eCreateEquipmentRequestResponse\x12B\n" +

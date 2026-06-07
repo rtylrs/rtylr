@@ -7,6 +7,7 @@
 package v1
 
 import (
+	_ "buf.build/gen/go/bufbuild/protovalidate/protocolbuffers/go/buf/validate"
 	protoreflect "google.golang.org/protobuf/reflect/protoreflect"
 	protoimpl "google.golang.org/protobuf/runtime/protoimpl"
 	reflect "reflect"
@@ -26,7 +27,9 @@ type CreateTimeLogRequest struct {
 	// duration_minutes is the duration minutes value for this contract.
 	DurationMinutes int64 `protobuf:"varint,1,opt,name=duration_minutes,json=durationMinutes,proto3" json:"duration_minutes,omitempty"`
 	// description is the description value for this contract.
-	Description   string `protobuf:"bytes,2,opt,name=description,proto3" json:"description,omitempty"`
+	Description string `protobuf:"bytes,2,opt,name=description,proto3" json:"description,omitempty"`
+	// task_id identifies the task the time log belongs to.
+	TaskId        int64 `protobuf:"varint,3,opt,name=task_id,json=taskId,proto3" json:"task_id,omitempty"`
 	unknownFields protoimpl.UnknownFields
 	sizeCache     protoimpl.SizeCache
 }
@@ -73,6 +76,13 @@ func (x *CreateTimeLogRequest) GetDescription() string {
 		return x.Description
 	}
 	return ""
+}
+
+func (x *CreateTimeLogRequest) GetTaskId() int64 {
+	if x != nil {
+		return x.TaskId
+	}
+	return 0
 }
 
 type CreateTimeLogResponse struct {
@@ -133,10 +143,13 @@ var File_flow_task_v1_create_time_log_proto protoreflect.FileDescriptor
 
 const file_flow_task_v1_create_time_log_proto_rawDesc = "" +
 	"\n" +
-	"\"flow/task/v1/create_time_log.proto\x12\fflow.task.v1\"c\n" +
-	"\x14CreateTimeLogRequest\x12)\n" +
-	"\x10duration_minutes\x18\x01 \x01(\x03R\x0fdurationMinutes\x12 \n" +
-	"\vdescription\x18\x02 \x01(\tR\vdescription\"Q\n" +
+	"\"flow/task/v1/create_time_log.proto\x12\fflow.task.v1\x1a\x1bbuf/validate/validate.proto\"\x94\x01\n" +
+	"\x14CreateTimeLogRequest\x125\n" +
+	"\x10duration_minutes\x18\x01 \x01(\x03B\n" +
+	"\xbaH\a\xc8\x01\x01\"\x02 \x00R\x0fdurationMinutes\x12 \n" +
+	"\vdescription\x18\x02 \x01(\tR\vdescription\x12#\n" +
+	"\atask_id\x18\x03 \x01(\x03B\n" +
+	"\xbaH\a\xc8\x01\x01\"\x02 \x00R\x06taskId\"Q\n" +
 	"\x15CreateTimeLogResponse\x12\x1e\n" +
 	"\vtime_log_id\x18\x01 \x01(\x03R\ttimeLogId\x12\x18\n" +
 	"\amessage\x18\x02 \x01(\tR\amessageB-Z+github.com/voxire/voxie/gen/go/flow/task/v1b\x06proto3"

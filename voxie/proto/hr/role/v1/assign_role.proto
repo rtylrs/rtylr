@@ -10,9 +10,15 @@ option go_package = "github.com/voxire/voxie/gen/go/hr/role/v1";
 
 message AssignRoleRequest {
   // ID of the employee to assign the role to.
-  int64 employee_id = 1 [(buf.validate.field).int64.gt = 0];
+  int64 employee_id = 1 [
+    (buf.validate.field).required = true,
+    (buf.validate.field).int64.gt = 0
+  ];
   // ID of the role to assign.
-  int64 role_id = 2 [(buf.validate.field).int64.gt = 0];
+  int64 role_id = 2 [
+    (buf.validate.field).required = true,
+    (buf.validate.field).int64.gt = 0
+  ];
 }
 
 message AssignRoleResponse {

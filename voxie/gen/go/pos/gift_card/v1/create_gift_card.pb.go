@@ -161,14 +161,17 @@ var File_pos_gift_card_v1_create_gift_card_proto protoreflect.FileDescriptor
 
 const file_pos_gift_card_v1_create_gift_card_proto_rawDesc = "" +
 	"\n" +
-	"'pos/gift_card/v1/create_gift_card.proto\x12\x10pos.gift_card.v1\x1a\x1bbuf/validate/validate.proto\"\xf3\x01\n" +
-	"\x15CreateGiftCardRequest\x12\x1b\n" +
-	"\x04code\x18\x01 \x01(\tB\a\xbaH\x04r\x02\x10\x01R\x04code\x125\n" +
-	"\x0einitial_amount\x18\x02 \x01(\x01B\x0e\xbaH\v\x12\t)\x00\x00\x00\x00\x00\x00\x00\x00R\rinitialAmount\x12,\n" +
-	"\rcustomer_name\x18\x03 \x01(\tB\a\xbaH\x04r\x02\x10\x01R\fcustomerName\x120\n" +
-	"\x0ecustomer_email\x18\x04 \x01(\tB\t\xbaH\x06r\x04\x10\x01`\x01R\rcustomerEmail\x12&\n" +
+	"'pos/gift_card/v1/create_gift_card.proto\x12\x10pos.gift_card.v1\x1a\x1bbuf/validate/validate.proto\"\xff\x01\n" +
+	"\x15CreateGiftCardRequest\x12\x1e\n" +
+	"\x04code\x18\x01 \x01(\tB\n" +
+	"\xbaH\a\xc8\x01\x01r\x02\x10\x01R\x04code\x125\n" +
+	"\x0einitial_amount\x18\x02 \x01(\x01B\x0e\xbaH\v\x12\t)\x00\x00\x00\x00\x00\x00\x00\x00R\rinitialAmount\x12/\n" +
+	"\rcustomer_name\x18\x03 \x01(\tB\n" +
+	"\xbaH\a\xc8\x01\x01r\x02\x10\x01R\fcustomerName\x123\n" +
+	"\x0ecustomer_email\x18\x04 \x01(\tB\f\xbaH\t\xc8\x01\x01r\x04\x10\x01`\x01R\rcustomerEmail\x12)\n" +
 	"\n" +
-	"expires_at\x18\x05 \x01(\tB\a\xbaH\x04r\x02\x10\x01R\texpiresAt\"T\n" +
+	"expires_at\x18\x05 \x01(\tB\n" +
+	"\xbaH\a\xc8\x01\x01r\x02\x10\x01R\texpiresAt\"T\n" +
 	"\x16CreateGiftCardResponse\x12 \n" +
 	"\fgift_card_id\x18\x01 \x01(\x03R\n" +
 	"giftCardId\x12\x18\n" +

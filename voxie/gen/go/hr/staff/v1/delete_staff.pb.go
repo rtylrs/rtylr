@@ -116,9 +116,10 @@ var File_hr_staff_v1_delete_staff_proto protoreflect.FileDescriptor
 
 const file_hr_staff_v1_delete_staff_proto_rawDesc = "" +
 	"\n" +
-	"\x1ehr/staff/v1/delete_staff.proto\x12\vhr.staff.v1\x1a\x1bbuf/validate/validate.proto\"-\n" +
-	"\x12DeleteStaffRequest\x12\x17\n" +
-	"\x02id\x18\x01 \x01(\x03B\a\xbaH\x04\"\x02 \x00R\x02id\"/\n" +
+	"\x1ehr/staff/v1/delete_staff.proto\x12\vhr.staff.v1\x1a\x1bbuf/validate/validate.proto\"0\n" +
+	"\x12DeleteStaffRequest\x12\x1a\n" +
+	"\x02id\x18\x01 \x01(\x03B\n" +
+	"\xbaH\a\xc8\x01\x01\"\x02 \x00R\x02id\"/\n" +
 	"\x13DeleteStaffResponse\x12\x18\n" +
 	"\asuccess\x18\x01 \x01(\bR\asuccessB,Z*github.com/voxire/voxie/gen/go/hr/staff/v1b\x06proto3"
 

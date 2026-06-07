@@ -125,10 +125,12 @@ var File_finance_invoices_v1_update_invoice_status_proto protoreflect.FileDescri
 
 const file_finance_invoices_v1_update_invoice_status_proto_rawDesc = "" +
 	"\n" +
-	"/finance/invoices/v1/update_invoice_status.proto\x12\x13finance.invoices.v1\x1a\x1bbuf/validate/validate.proto\"V\n" +
-	"\x1aUpdateInvoiceStatusRequest\x12\x17\n" +
-	"\x02id\x18\x01 \x01(\x03B\a\xbaH\x04\"\x02 \x00R\x02id\x12\x1f\n" +
-	"\x06status\x18\x02 \x01(\tB\a\xbaH\x04r\x02\x10\x01R\x06status\"7\n" +
+	"/finance/invoices/v1/update_invoice_status.proto\x12\x13finance.invoices.v1\x1a\x1bbuf/validate/validate.proto\"\\\n" +
+	"\x1aUpdateInvoiceStatusRequest\x12\x1a\n" +
+	"\x02id\x18\x01 \x01(\x03B\n" +
+	"\xbaH\a\xc8\x01\x01\"\x02 \x00R\x02id\x12\"\n" +
+	"\x06status\x18\x02 \x01(\tB\n" +
+	"\xbaH\a\xc8\x01\x01r\x02\x10\x01R\x06status\"7\n" +
 	"\x1bUpdateInvoiceStatusResponse\x12\x18\n" +
 	"\amessage\x18\x01 \x01(\tR\amessageB4Z2github.com/voxire/voxie/gen/go/finance/invoices/v1b\x06proto3"
 

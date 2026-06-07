@@ -161,9 +161,10 @@ var File_hr_document_v1_upload_document_proto protoreflect.FileDescriptor
 
 const file_hr_document_v1_upload_document_proto_rawDesc = "" +
 	"\n" +
-	"$hr/document/v1/upload_document.proto\x12\x0ehr.document.v1\x1a\x1bbuf/validate/validate.proto\x1a\x1ahr/document/v1/types.proto\"\xee\x01\n" +
-	"\x15UploadDocumentRequest\x12(\n" +
-	"\vemployee_id\x18\x01 \x01(\x03B\a\xbaH\x04\"\x02 \x00R\n" +
+	"$hr/document/v1/upload_document.proto\x12\x0ehr.document.v1\x1a\x1bbuf/validate/validate.proto\x1a\x1ahr/document/v1/types.proto\"\xf1\x01\n" +
+	"\x15UploadDocumentRequest\x12+\n" +
+	"\vemployee_id\x18\x01 \x01(\x03B\n" +
+	"\xbaH\a\xc8\x01\x01\"\x02 \x00R\n" +
 	"employeeId\x12#\n" +
 	"\rdocument_type\x18\x02 \x01(\tR\fdocumentType\x12\x12\n" +
 	"\x04name\x18\x03 \x01(\tR\x04name\x12!\n" +

@@ -134,9 +134,10 @@ var File_hub_permission_v1_create_role_proto protoreflect.FileDescriptor
 
 const file_hub_permission_v1_create_role_proto_rawDesc = "" +
 	"\n" +
-	"#hub/permission/v1/create_role.proto\x12\x11hub.permission.v1\x1a\x1bbuf/validate/validate.proto\x1a\x1dhub/permission/v1/types.proto\"t\n" +
-	"\x11CreateRoleRequest\x12\x1b\n" +
-	"\x04name\x18\x01 \x01(\tB\a\xbaH\x04r\x02\x10\x01R\x04name\x12 \n" +
+	"#hub/permission/v1/create_role.proto\x12\x11hub.permission.v1\x1a\x1bbuf/validate/validate.proto\x1a\x1dhub/permission/v1/types.proto\"w\n" +
+	"\x11CreateRoleRequest\x12\x1e\n" +
+	"\x04name\x18\x01 \x01(\tB\n" +
+	"\xbaH\a\xc8\x01\x01r\x02\x10\x01R\x04name\x12 \n" +
 	"\vdescription\x18\x02 \x01(\tR\vdescription\x12 \n" +
 	"\vpermissions\x18\x03 \x03(\tR\vpermissions\"G\n" +
 	"\x12CreateRoleResponse\x121\n" +

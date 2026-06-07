@@ -116,9 +116,10 @@ var File_pos_orders_v1_get_order_detail_proto protoreflect.FileDescriptor
 
 const file_pos_orders_v1_get_order_detail_proto_rawDesc = "" +
 	"\n" +
-	"$pos/orders/v1/get_order_detail.proto\x12\rpos.orders.v1\x1a\x1bbuf/validate/validate.proto\x1a\x19pos/orders/v1/types.proto\";\n" +
-	"\x15GetOrderDetailRequest\x12\"\n" +
-	"\border_id\x18\x01 \x01(\x03B\a\xbaH\x04\"\x02 \x00R\aorderId\"D\n" +
+	"$pos/orders/v1/get_order_detail.proto\x12\rpos.orders.v1\x1a\x1bbuf/validate/validate.proto\x1a\x19pos/orders/v1/types.proto\">\n" +
+	"\x15GetOrderDetailRequest\x12%\n" +
+	"\border_id\x18\x01 \x01(\x03B\n" +
+	"\xbaH\a\xc8\x01\x01\"\x02 \x00R\aorderId\"D\n" +
 	"\x16GetOrderDetailResponse\x12*\n" +
 	"\x05order\x18\x01 \x01(\v2\x14.pos.orders.v1.OrderR\x05orderB.Z,github.com/voxire/voxie/gen/go/pos/orders/v1b\x06proto3"
 

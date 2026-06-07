@@ -10,7 +10,10 @@ option go_package = "github.com/voxire/voxie/gen/go/hr/overtime/v1";
 
 message ApproveOvertimeRequest {
   // ID of the overtime request being reviewed.
-  int64 overtime_request_id = 1 [(buf.validate.field).int64.gt = 0];
+  int64 overtime_request_id = 1 [
+    (buf.validate.field).required = true,
+    (buf.validate.field).int64.gt = 0
+  ];
   // True to approve, false to reject.
   bool approved = 2;
   // Pay multiplier to apply (e.g. 1.5); absent to use the default rate.

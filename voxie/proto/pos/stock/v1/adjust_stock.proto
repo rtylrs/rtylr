@@ -12,13 +12,19 @@ message AdjustStockRequest {
   // branch_id is the branch id value for this contract.
   int64 branch_id = 1;
   // product_id is the product id value for this contract.
-  int64 product_id = 2 [(buf.validate.field).int64.gt = 0];
+  int64 product_id = 2 [
+    (buf.validate.field).required = true,
+    (buf.validate.field).int64.gt = 0
+  ];
   // quantity is the quantity value for this contract.
   double quantity = 3;
   // note is the note value for this contract.
   string note = 4;
   // employee_id is the employee id value for this contract.
-  int64 employee_id = 5 [(buf.validate.field).int64.gt = 0];
+  int64 employee_id = 5 [
+    (buf.validate.field).required = true,
+    (buf.validate.field).int64.gt = 0
+  ];
 }
 
 message AdjustStockResponse {

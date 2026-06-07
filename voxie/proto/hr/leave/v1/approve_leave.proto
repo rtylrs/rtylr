@@ -10,7 +10,10 @@ option go_package = "github.com/voxire/voxie/gen/go/hr/leave/v1";
 
 message ApproveLeaveRequest {
   // ID of the leave request being reviewed.
-  int64 leave_request_id = 1 [(buf.validate.field).int64.gt = 0];
+  int64 leave_request_id = 1 [
+    (buf.validate.field).required = true,
+    (buf.validate.field).int64.gt = 0
+  ];
   // True to approve, false to reject.
   bool approved = 2;
   // Reason for rejection; absent if approving.

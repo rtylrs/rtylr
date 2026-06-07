@@ -179,17 +179,21 @@ var File_finance_expenses_v1_create_expense_proto protoreflect.FileDescriptor
 
 const file_finance_expenses_v1_create_expense_proto_rawDesc = "" +
 	"\n" +
-	"(finance/expenses/v1/create_expense.proto\x12\x13finance.expenses.v1\x1a\x1bbuf/validate/validate.proto\"\xb2\x02\n" +
+	"(finance/expenses/v1/create_expense.proto\x12\x13finance.expenses.v1\x1a\x1bbuf/validate/validate.proto\"\xbe\x02\n" +
 	"\x14CreateExpenseRequest\x12$\n" +
 	"\vcategory_id\x18\x01 \x01(\x03H\x00R\n" +
 	"categoryId\x88\x01\x01\x12&\n" +
-	"\x06amount\x18\x02 \x01(\x01B\x0e\xbaH\v\x12\t)\x00\x00\x00\x00\x00\x00\x00\x00R\x06amount\x12#\n" +
-	"\bcurrency\x18\x03 \x01(\tB\a\xbaH\x04r\x02\x10\x01R\bcurrency\x12 \n" +
-	"\vdescription\x18\x04 \x01(\tR\vdescription\x12\x1f\n" +
-	"\x06vendor\x18\x05 \x01(\tB\a\xbaH\x04r\x02\x10\x01R\x06vendor\x12(\n" +
-	"\vreceipt_url\x18\x06 \x01(\tB\a\xbaH\x04r\x02\x10\x01R\n" +
-	"receiptUrl\x12*\n" +
-	"\fexpense_date\x18\a \x01(\tB\a\xbaH\x04r\x02\x10\x01R\vexpenseDateB\x0e\n" +
+	"\x06amount\x18\x02 \x01(\x01B\x0e\xbaH\v\x12\t)\x00\x00\x00\x00\x00\x00\x00\x00R\x06amount\x12&\n" +
+	"\bcurrency\x18\x03 \x01(\tB\n" +
+	"\xbaH\a\xc8\x01\x01r\x02\x10\x01R\bcurrency\x12 \n" +
+	"\vdescription\x18\x04 \x01(\tR\vdescription\x12\"\n" +
+	"\x06vendor\x18\x05 \x01(\tB\n" +
+	"\xbaH\a\xc8\x01\x01r\x02\x10\x01R\x06vendor\x12+\n" +
+	"\vreceipt_url\x18\x06 \x01(\tB\n" +
+	"\xbaH\a\xc8\x01\x01r\x02\x10\x01R\n" +
+	"receiptUrl\x12-\n" +
+	"\fexpense_date\x18\a \x01(\tB\n" +
+	"\xbaH\a\xc8\x01\x01r\x02\x10\x01R\vexpenseDateB\x0e\n" +
 	"\f_category_id\"P\n" +
 	"\x15CreateExpenseResponse\x12\x1d\n" +
 	"\n" +

@@ -11,7 +11,10 @@ option go_package = "github.com/voxire/voxie/gen/go/hr/location/v1";
 
 message CreateLocationRequest {
   // Human-readable name of the location.
-  string name = 1 [(buf.validate.field).string.min_len = 1];
+  string name = 1 [
+    (buf.validate.field).required = true,
+    (buf.validate.field).string.min_len = 1
+  ];
   // Full street address of the location.
   string address = 2;
   // IANA timezone identifier; absent to use tenant default.

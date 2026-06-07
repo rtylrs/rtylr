@@ -162,10 +162,11 @@ var File_crm_customer_v1_get_segment_customers_proto protoreflect.FileDescriptor
 
 const file_crm_customer_v1_get_segment_customers_proto_rawDesc = "" +
 	"\n" +
-	"+crm/customer/v1/get_segment_customers.proto\x12\x0fcrm.customer.v1\x1a\x1bbuf/validate/validate.proto\x1a\x1bpos/customer/v1/types.proto\"u\n" +
-	"\x1aGetSegmentCustomersRequest\x12&\n" +
+	"+crm/customer/v1/get_segment_customers.proto\x12\x0fcrm.customer.v1\x1a\x1bbuf/validate/validate.proto\x1a\x1bpos/customer/v1/types.proto\"x\n" +
+	"\x1aGetSegmentCustomersRequest\x12)\n" +
 	"\n" +
-	"segment_id\x18\x01 \x01(\x03B\a\xbaH\x04\"\x02 \x00R\tsegmentId\x12\x12\n" +
+	"segment_id\x18\x01 \x01(\x03B\n" +
+	"\xbaH\a\xc8\x01\x01\"\x02 \x00R\tsegmentId\x12\x12\n" +
 	"\x04page\x18\x02 \x01(\x03R\x04page\x12\x1b\n" +
 	"\tpage_size\x18\x03 \x01(\x03R\bpageSize\"\x9d\x01\n" +
 	"\x1bGetSegmentCustomersResponse\x127\n" +

@@ -134,11 +134,14 @@ var File_finance_report_v1_create_expense_category_detail_proto protoreflect.Fil
 
 const file_finance_report_v1_create_expense_category_detail_proto_rawDesc = "" +
 	"\n" +
-	"6finance/report/v1/create_expense_category_detail.proto\x12\x11finance.report.v1\x1a\x1bbuf/validate/validate.proto\x1a\x1dfinance/report/v1/types.proto\"}\n" +
-	"\"CreateExpenseCategoryDetailRequest\x12\x1b\n" +
-	"\x04name\x18\x01 \x01(\tB\a\xbaH\x04r\x02\x10\x01R\x04name\x12\x1d\n" +
-	"\x05color\x18\x02 \x01(\tB\a\xbaH\x04r\x02\x10\x01R\x05color\x12\x1b\n" +
-	"\x04icon\x18\x03 \x01(\tB\a\xbaH\x04r\x02\x10\x01R\x04icon\"k\n" +
+	"6finance/report/v1/create_expense_category_detail.proto\x12\x11finance.report.v1\x1a\x1bbuf/validate/validate.proto\x1a\x1dfinance/report/v1/types.proto\"\x86\x01\n" +
+	"\"CreateExpenseCategoryDetailRequest\x12\x1e\n" +
+	"\x04name\x18\x01 \x01(\tB\n" +
+	"\xbaH\a\xc8\x01\x01r\x02\x10\x01R\x04name\x12 \n" +
+	"\x05color\x18\x02 \x01(\tB\n" +
+	"\xbaH\a\xc8\x01\x01r\x02\x10\x01R\x05color\x12\x1e\n" +
+	"\x04icon\x18\x03 \x01(\tB\n" +
+	"\xbaH\a\xc8\x01\x01r\x02\x10\x01R\x04icon\"k\n" +
 	"#CreateExpenseCategoryDetailResponse\x12D\n" +
 	"\bcategory\x18\x01 \x01(\v2(.finance.report.v1.ExpenseCategoryDetailR\bcategoryB2Z0github.com/voxire/voxie/gen/go/finance/report/v1b\x06proto3"
 

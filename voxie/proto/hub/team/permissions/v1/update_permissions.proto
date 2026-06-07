@@ -8,11 +8,17 @@ option go_package = "github.com/voxire/voxie/gen/go/hub/team/permissions/v1";
 
 message UpdatePermissionsRequest {
   // user_id identifies the user associated with this request.
-  int64 user_id = 1 [(buf.validate.field).int64.gt = 0];
+  int64 user_id = 1 [
+    (buf.validate.field).required = true,
+    (buf.validate.field).int64.gt = 0
+  ];
   // apps is the apps value for this contract.
   repeated string apps = 2;
   // role is the role value for this contract.
-  string role = 3 [(buf.validate.field).string.min_len = 1];
+  string role = 3 [
+    (buf.validate.field).required = true,
+    (buf.validate.field).string.min_len = 1
+  ];
 }
 
 message UpdatePermissionsResponse {}

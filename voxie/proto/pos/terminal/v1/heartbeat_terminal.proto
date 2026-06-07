@@ -10,7 +10,10 @@ option go_package = "github.com/voxire/voxie/gen/go/pos/terminal/v1";
 
 message HeartbeatTerminalRequest {
   // terminal_id is the terminal id value for this contract.
-  int64 terminal_id = 1 [(buf.validate.field).int64.gt = 0];
+  int64 terminal_id = 1 [
+    (buf.validate.field).required = true,
+    (buf.validate.field).int64.gt = 0
+  ];
 }
 
 message HeartbeatTerminalResponse {

@@ -143,11 +143,12 @@ var File_pos_table_v1_create_table_proto protoreflect.FileDescriptor
 
 const file_pos_table_v1_create_table_proto_rawDesc = "" +
 	"\n" +
-	"\x1fpos/table/v1/create_table.proto\x12\fpos.table.v1\x1a\x1bbuf/validate/validate.proto\"\x7f\n" +
+	"\x1fpos/table/v1/create_table.proto\x12\fpos.table.v1\x1a\x1bbuf/validate/validate.proto\"\x82\x01\n" +
 	"\x12CreateTableRequest\x12$\n" +
 	"\vlocation_id\x18\x01 \x01(\x03H\x00R\n" +
-	"locationId\x88\x01\x01\x12\x1d\n" +
-	"\x05label\x18\x02 \x01(\tB\a\xbaH\x04r\x02\x10\x01R\x05label\x12\x14\n" +
+	"locationId\x88\x01\x01\x12 \n" +
+	"\x05label\x18\x02 \x01(\tB\n" +
+	"\xbaH\a\xc8\x01\x01r\x02\x10\x01R\x05label\x12\x14\n" +
 	"\x05seats\x18\x03 \x01(\x05R\x05seatsB\x0e\n" +
 	"\f_location_id\"J\n" +
 	"\x13CreateTableResponse\x12\x19\n" +

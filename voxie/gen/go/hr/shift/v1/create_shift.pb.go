@@ -152,15 +152,20 @@ var File_hr_shift_v1_create_shift_proto protoreflect.FileDescriptor
 
 const file_hr_shift_v1_create_shift_proto_rawDesc = "" +
 	"\n" +
-	"\x1ehr/shift/v1/create_shift.proto\x12\vhr.shift.v1\x1a\x1bbuf/validate/validate.proto\x1a\x17hr/shift/v1/types.proto\"\xc6\x01\n" +
-	"\x12CreateShiftRequest\x12(\n" +
-	"\vlocation_id\x18\x01 \x01(\x03B\a\xbaH\x04\"\x02 \x00R\n" +
-	"locationId\x12\x1b\n" +
-	"\x04name\x18\x02 \x01(\tB\a\xbaH\x04r\x02\x10\x01R\x04name\x12&\n" +
+	"\x1ehr/shift/v1/create_shift.proto\x12\vhr.shift.v1\x1a\x1bbuf/validate/validate.proto\x1a\x17hr/shift/v1/types.proto\"\xd5\x01\n" +
+	"\x12CreateShiftRequest\x12+\n" +
+	"\vlocation_id\x18\x01 \x01(\x03B\n" +
+	"\xbaH\a\xc8\x01\x01\"\x02 \x00R\n" +
+	"locationId\x12\x1e\n" +
+	"\x04name\x18\x02 \x01(\tB\n" +
+	"\xbaH\a\xc8\x01\x01r\x02\x10\x01R\x04name\x12)\n" +
 	"\n" +
-	"start_time\x18\x03 \x01(\tB\a\xbaH\x04r\x02\x10\x01R\tstartTime\x12\"\n" +
-	"\bend_time\x18\x04 \x01(\tB\a\xbaH\x04r\x02\x10\x01R\aendTime\x12\x1d\n" +
-	"\x05color\x18\x05 \x01(\tB\a\xbaH\x04r\x02\x10\x01R\x05color\"F\n" +
+	"start_time\x18\x03 \x01(\tB\n" +
+	"\xbaH\a\xc8\x01\x01r\x02\x10\x01R\tstartTime\x12%\n" +
+	"\bend_time\x18\x04 \x01(\tB\n" +
+	"\xbaH\a\xc8\x01\x01r\x02\x10\x01R\aendTime\x12 \n" +
+	"\x05color\x18\x05 \x01(\tB\n" +
+	"\xbaH\a\xc8\x01\x01r\x02\x10\x01R\x05color\"F\n" +
 	"\x13CreateShiftResponse\x12/\n" +
 	"\x05shift\x18\x01 \x01(\v2\x19.hr.shift.v1.ShiftPayloadR\x05shiftB,Z*github.com/voxire/voxie/gen/go/hr/shift/v1b\x06proto3"
 

@@ -8,9 +8,15 @@ option go_package = "github.com/voxire/voxie/gen/go/flow/task/v1";
 
 message CreateAttachmentRequest {
   // name is the name value for this contract.
-  string name = 1 [(buf.validate.field).string.min_len = 1];
+  string name = 1 [
+    (buf.validate.field).required = true,
+    (buf.validate.field).string.min_len = 1
+  ];
   // url is the url value for this contract.
-  string url = 2 [(buf.validate.field).string.min_len = 1];
+  string url = 2 [
+    (buf.validate.field).required = true,
+    (buf.validate.field).string.min_len = 1
+  ];
   // size is the size value for this contract.
   int64 size = 3;
 }

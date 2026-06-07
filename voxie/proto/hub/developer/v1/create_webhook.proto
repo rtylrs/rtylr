@@ -8,7 +8,10 @@ option go_package = "github.com/voxire/voxie/gen/go/hub/developer/v1";
 
 message CreateWebhookRequest {
   // url is the url value for this contract.
-  string url = 1 [(buf.validate.field).string.min_len = 1];
+  string url = 1 [
+    (buf.validate.field).required = true,
+    (buf.validate.field).string.min_len = 1
+  ];
   // events is the events value for this contract.
   repeated string events = 2;
 }

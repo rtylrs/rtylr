@@ -10,21 +10,42 @@ option go_package = "github.com/voxire/voxie/gen/go/pos/audit/v1";
 
 message CreateAuditRequest {
   // branch_id is the branch id value for this contract.
-  int64 branch_id = 1 [(buf.validate.field).int64.gt = 0];
+  int64 branch_id = 1 [
+    (buf.validate.field).required = true,
+    (buf.validate.field).int64.gt = 0
+  ];
   // terminal_id is the terminal id value for this contract.
-  int64 terminal_id = 2 [(buf.validate.field).int64.gt = 0];
+  int64 terminal_id = 2 [
+    (buf.validate.field).required = true,
+    (buf.validate.field).int64.gt = 0
+  ];
   // employee_id is the employee id value for this contract.
-  int64 employee_id = 3 [(buf.validate.field).int64.gt = 0];
+  int64 employee_id = 3 [
+    (buf.validate.field).required = true,
+    (buf.validate.field).int64.gt = 0
+  ];
   // action is the action value for this contract.
-  string action = 4 [(buf.validate.field).string.min_len = 1];
+  string action = 4 [
+    (buf.validate.field).required = true,
+    (buf.validate.field).string.min_len = 1
+  ];
   // entity_type is the entity type value for this contract.
-  string entity_type = 5 [(buf.validate.field).string.min_len = 1];
+  string entity_type = 5 [
+    (buf.validate.field).required = true,
+    (buf.validate.field).string.min_len = 1
+  ];
   // entity_id is the entity id value for this contract.
-  int64 entity_id = 6 [(buf.validate.field).int64.gt = 0];
+  int64 entity_id = 6 [
+    (buf.validate.field).required = true,
+    (buf.validate.field).int64.gt = 0
+  ];
   // details is the details value for this contract.
   string details = 7;
   // ip_address is the ip address value for this contract.
-  string ip_address = 8 [(buf.validate.field).string.min_len = 1];
+  string ip_address = 8 [
+    (buf.validate.field).required = true,
+    (buf.validate.field).string.min_len = 1
+  ];
 }
 
 message CreateAuditResponse {

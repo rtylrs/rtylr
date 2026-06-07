@@ -11,7 +11,10 @@ option go_package = "github.com/voxire/voxie/gen/go/hr/time_entry/v1";
 
 message CreateTimeEntryRequest {
   // Employee who logged the time.
-  int64 employee_id = 1 [(buf.validate.field).int64.gt = 0];
+  int64 employee_id = 1 [
+    (buf.validate.field).required = true,
+    (buf.validate.field).int64.gt = 0
+  ];
   // Associated project; absent if not project-based.
   optional int64 project_id = 2;
   // Associated task; absent if not task-level tracking.
@@ -19,7 +22,10 @@ message CreateTimeEntryRequest {
   // Time category for reporting; absent if uncategorised.
   optional int64 category_id = 4;
   // Date the work was performed (ISO-8601 format).
-  string date = 5 [(buf.validate.field).string.min_len = 1];
+  string date = 5 [
+    (buf.validate.field).required = true,
+    (buf.validate.field).string.min_len = 1
+  ];
   // Total duration of work in minutes.
   int32 duration_minutes = 6;
   // Clock-in time; absent if duration-only entry.
@@ -31,7 +37,10 @@ message CreateTimeEntryRequest {
   // Whether this time is billable to a client.
   bool is_billable = 10;
   // How the entry was created (manual | timer | flow_import).
-  string source = 11 [(buf.validate.field).string.min_len = 1];
+  string source = 11 [
+    (buf.validate.field).required = true,
+    (buf.validate.field).string.min_len = 1
+  ];
 }
 
 message CreateTimeEntryResponse {

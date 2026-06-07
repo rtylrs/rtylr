@@ -10,7 +10,10 @@ option go_package = "github.com/voxire/voxie/gen/go/pos/orders/refunds/v1";
 
 message ProcessRefundRequest {
   // order_id is the order id value for this contract.
-  int64 order_id = 1 [(buf.validate.field).int64.gt = 0];
+  int64 order_id = 1 [
+    (buf.validate.field).required = true,
+    (buf.validate.field).int64.gt = 0
+  ];
   // amount is the amount value for this contract.
   double amount = 2;
   // reason is the reason value for this contract.

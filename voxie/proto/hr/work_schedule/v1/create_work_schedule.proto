@@ -11,13 +11,22 @@ option go_package = "github.com/voxire/voxie/gen/go/hr/work_schedule/v1";
 
 message CreateWorkScheduleRequest {
   // Display name of the schedule.
-  string name = 1 [(buf.validate.field).string.min_len = 1];
+  string name = 1 [
+    (buf.validate.field).required = true,
+    (buf.validate.field).string.min_len = 1
+  ];
   // Days of the week this schedule applies to.
   repeated string working_days = 2;
   // Shift start time in HH:MM 24-hour format.
-  string start_time = 3 [(buf.validate.field).string.min_len = 1];
+  string start_time = 3 [
+    (buf.validate.field).required = true,
+    (buf.validate.field).string.min_len = 1
+  ];
   // Shift end time in HH:MM 24-hour format.
-  string end_time = 4 [(buf.validate.field).string.min_len = 1];
+  string end_time = 4 [
+    (buf.validate.field).required = true,
+    (buf.validate.field).string.min_len = 1
+  ];
   // Duration of the daily break in minutes.
   int32 break_minutes = 5;
   // Total contracted hours per week.

@@ -11,7 +11,10 @@ option go_package = "github.com/voxire/voxie/gen/go/hr/employees/payroll/runs/v1
 
 message ApprovePayrollRunRequest {
   // ID of the payroll run to approve.
-  int64 run_id = 1 [(buf.validate.field).int64.gt = 0];
+  int64 run_id = 1 [
+    (buf.validate.field).required = true,
+    (buf.validate.field).int64.gt = 0
+  ];
 }
 
 message ApprovePayrollRunResponse {

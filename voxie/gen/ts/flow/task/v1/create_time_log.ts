@@ -11,6 +11,8 @@ export interface CreateTimeLogRequest {
   durationMinutes: number;
   /** description is the description value for this contract. */
   description: string;
+  /** task_id identifies the task the time log belongs to. */
+  taskId: number;
 }
 
 export interface CreateTimeLogResponse {

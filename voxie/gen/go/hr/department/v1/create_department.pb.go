@@ -143,12 +143,14 @@ var File_hr_department_v1_create_department_proto protoreflect.FileDescriptor
 
 const file_hr_department_v1_create_department_proto_rawDesc = "" +
 	"\n" +
-	"(hr/department/v1/create_department.proto\x12\x10hr.department.v1\x1a\x1bbuf/validate/validate.proto\x1a\x1chr/department/v1/types.proto\"\x8b\x02\n" +
-	"\x17CreateDepartmentRequest\x12(\n" +
-	"\vlocation_id\x18\x01 \x01(\x03B\a\xbaH\x04\"\x02 \x00R\n" +
+	"(hr/department/v1/create_department.proto\x12\x10hr.department.v1\x1a\x1bbuf/validate/validate.proto\x1a\x1chr/department/v1/types.proto\"\x91\x02\n" +
+	"\x17CreateDepartmentRequest\x12+\n" +
+	"\vlocation_id\x18\x01 \x01(\x03B\n" +
+	"\xbaH\a\xc8\x01\x01\"\x02 \x00R\n" +
 	"locationId\x125\n" +
-	"\x14parent_department_id\x18\x02 \x01(\x03H\x00R\x12parentDepartmentId\x88\x01\x01\x12\x1b\n" +
-	"\x04name\x18\x03 \x01(\tB\a\xbaH\x04r\x02\x10\x01R\x04name\x12<\n" +
+	"\x14parent_department_id\x18\x02 \x01(\x03H\x00R\x12parentDepartmentId\x88\x01\x01\x12\x1e\n" +
+	"\x04name\x18\x03 \x01(\tB\n" +
+	"\xbaH\a\xc8\x01\x01r\x02\x10\x01R\x04name\x12<\n" +
 	"\x18default_work_schedule_id\x18\x04 \x01(\x03H\x01R\x15defaultWorkScheduleId\x88\x01\x01B\x17\n" +
 	"\x15_parent_department_idB\x1b\n" +
 	"\x19_default_work_schedule_id\"_\n" +

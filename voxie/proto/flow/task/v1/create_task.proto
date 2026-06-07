@@ -9,23 +9,41 @@ option go_package = "github.com/voxire/voxie/gen/go/flow/task/v1";
 
 message CreateTaskRequest {
   // project_id is the project id value for this contract.
-  int64 project_id = 1 [(buf.validate.field).int64.gt = 0];
+  int64 project_id = 1 [
+    (buf.validate.field).required = true,
+    (buf.validate.field).int64.gt = 0
+  ];
   // workspace_id is the workspace id value for this contract.
-  int64 workspace_id = 2 [(buf.validate.field).int64.gt = 0];
+  int64 workspace_id = 2 [
+    (buf.validate.field).required = true,
+    (buf.validate.field).int64.gt = 0
+  ];
   // parent_task_id is the parent task id value for this contract.
   optional int64 parent_task_id = 3;
   // title is the title value for this contract.
-  string title = 4 [(buf.validate.field).string.min_len = 1];
+  string title = 4 [
+    (buf.validate.field).required = true,
+    (buf.validate.field).string.min_len = 1
+  ];
   // description is the description value for this contract.
   string description = 5;
   // priority is the priority value for this contract.
-  string priority = 6 [(buf.validate.field).string.min_len = 1];
+  string priority = 6 [
+    (buf.validate.field).required = true,
+    (buf.validate.field).string.min_len = 1
+  ];
   // assignee_id is the assignee id value for this contract.
   optional int64 assignee_id = 7;
   // due_date is the due date value for this contract.
-  string due_date = 8 [(buf.validate.field).string.min_len = 1];
+  string due_date = 8 [
+    (buf.validate.field).required = true,
+    (buf.validate.field).string.min_len = 1
+  ];
   // start_date is the start date value for this contract.
-  string start_date = 9 [(buf.validate.field).string.min_len = 1];
+  string start_date = 9 [
+    (buf.validate.field).required = true,
+    (buf.validate.field).string.min_len = 1
+  ];
   // estimated_hours is the estimated hours value for this contract.
   optional double estimated_hours = 10;
   // labels is the labels value for this contract.

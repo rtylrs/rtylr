@@ -12,15 +12,27 @@ message CreateExpenseRequest {
   // amount is the amount value for this contract.
   double amount = 2 [(buf.validate.field).double.gte = 0];
   // currency is the currency value for this contract.
-  string currency = 3 [(buf.validate.field).string.min_len = 1];
+  string currency = 3 [
+    (buf.validate.field).required = true,
+    (buf.validate.field).string.min_len = 1
+  ];
   // description is the description value for this contract.
   string description = 4;
   // vendor is the vendor value for this contract.
-  string vendor = 5 [(buf.validate.field).string.min_len = 1];
+  string vendor = 5 [
+    (buf.validate.field).required = true,
+    (buf.validate.field).string.min_len = 1
+  ];
   // receipt_url is the receipt url value for this contract.
-  string receipt_url = 6 [(buf.validate.field).string.min_len = 1];
+  string receipt_url = 6 [
+    (buf.validate.field).required = true,
+    (buf.validate.field).string.min_len = 1
+  ];
   // expense_date is the expense date value for this contract.
-  string expense_date = 7 [(buf.validate.field).string.min_len = 1];
+  string expense_date = 7 [
+    (buf.validate.field).required = true,
+    (buf.validate.field).string.min_len = 1
+  ];
 }
 
 message CreateExpenseResponse {

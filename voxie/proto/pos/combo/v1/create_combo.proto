@@ -10,13 +10,19 @@ option go_package = "github.com/voxire/voxie/gen/go/pos/combo/v1";
 
 message CreateComboRequest {
   // name is the name value for this contract.
-  string name = 1 [(buf.validate.field).string.min_len = 1];
+  string name = 1 [
+    (buf.validate.field).required = true,
+    (buf.validate.field).string.min_len = 1
+  ];
   // description is the description value for this contract.
   string description = 2;
   // price is the price value for this contract.
   double price = 3 [(buf.validate.field).double.gte = 0];
   // items is the items value for this contract.
-  string items = 4 [(buf.validate.field).string.min_len = 1];
+  string items = 4 [
+    (buf.validate.field).required = true,
+    (buf.validate.field).string.min_len = 1
+  ];
   // is_active is the is active value for this contract.
   bool is_active = 5;
 }

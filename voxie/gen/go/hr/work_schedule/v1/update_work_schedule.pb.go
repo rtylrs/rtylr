@@ -188,9 +188,10 @@ var File_hr_work_schedule_v1_update_work_schedule_proto protoreflect.FileDescrip
 
 const file_hr_work_schedule_v1_update_work_schedule_proto_rawDesc = "" +
 	"\n" +
-	".hr/work_schedule/v1/update_work_schedule.proto\x12\x13hr.work_schedule.v1\x1a\x1bbuf/validate/validate.proto\x1a\x1fhr/work_schedule/v1/types.proto\"\xb8\x04\n" +
-	"\x19UpdateWorkScheduleRequest\x12\x17\n" +
-	"\x02id\x18\x01 \x01(\x03B\a\xbaH\x04\"\x02 \x00R\x02id\x12\x17\n" +
+	".hr/work_schedule/v1/update_work_schedule.proto\x12\x13hr.work_schedule.v1\x1a\x1bbuf/validate/validate.proto\x1a\x1fhr/work_schedule/v1/types.proto\"\xbb\x04\n" +
+	"\x19UpdateWorkScheduleRequest\x12\x1a\n" +
+	"\x02id\x18\x01 \x01(\x03B\n" +
+	"\xbaH\a\xc8\x01\x01\"\x02 \x00R\x02id\x12\x17\n" +
 	"\x04name\x18\x02 \x01(\tH\x00R\x04name\x88\x01\x01\x12!\n" +
 	"\fworking_days\x18\x03 \x03(\tR\vworkingDays\x12\"\n" +
 	"\n" +

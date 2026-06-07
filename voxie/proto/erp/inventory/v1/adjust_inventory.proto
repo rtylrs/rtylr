@@ -12,7 +12,10 @@ option go_package = "github.com/voxire/voxie/gen/go/erp/inventory/v1";
 
 message AdjustInventoryRequest {
   // product_id is the product id value for this contract.
-  int64 product_id = 1 [(buf.validate.field).int64.gt = 0];
+  int64 product_id = 1 [
+    (buf.validate.field).required = true,
+    (buf.validate.field).int64.gt = 0
+  ];
   // change is the change value for this contract.
   double change = 2;
   // type is the type value for this contract.

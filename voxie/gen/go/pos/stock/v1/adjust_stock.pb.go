@@ -161,14 +161,16 @@ var File_pos_stock_v1_adjust_stock_proto protoreflect.FileDescriptor
 
 const file_pos_stock_v1_adjust_stock_proto_rawDesc = "" +
 	"\n" +
-	"\x1fpos/stock/v1/adjust_stock.proto\x12\fpos.stock.v1\x1a\x1bbuf/validate/validate.proto\"\xb3\x01\n" +
+	"\x1fpos/stock/v1/adjust_stock.proto\x12\fpos.stock.v1\x1a\x1bbuf/validate/validate.proto\"\xb9\x01\n" +
 	"\x12AdjustStockRequest\x12\x1b\n" +
-	"\tbranch_id\x18\x01 \x01(\x03R\bbranchId\x12&\n" +
+	"\tbranch_id\x18\x01 \x01(\x03R\bbranchId\x12)\n" +
 	"\n" +
-	"product_id\x18\x02 \x01(\x03B\a\xbaH\x04\"\x02 \x00R\tproductId\x12\x1a\n" +
+	"product_id\x18\x02 \x01(\x03B\n" +
+	"\xbaH\a\xc8\x01\x01\"\x02 \x00R\tproductId\x12\x1a\n" +
 	"\bquantity\x18\x03 \x01(\x01R\bquantity\x12\x12\n" +
-	"\x04note\x18\x04 \x01(\tR\x04note\x12(\n" +
-	"\vemployee_id\x18\x05 \x01(\x03B\a\xbaH\x04\"\x02 \x00R\n" +
+	"\x04note\x18\x04 \x01(\tR\x04note\x12+\n" +
+	"\vemployee_id\x18\x05 \x01(\x03B\n" +
+	"\xbaH\a\xc8\x01\x01\"\x02 \x00R\n" +
 	"employeeId\"P\n" +
 	"\x13AdjustStockResponse\x12\x1f\n" +
 	"\vmovement_id\x18\x01 \x01(\x03R\n" +

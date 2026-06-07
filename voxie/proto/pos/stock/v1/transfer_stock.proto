@@ -14,13 +14,19 @@ message TransferStockRequest {
   // to_branch_id is the to branch id value for this contract.
   int64 to_branch_id = 2;
   // product_id is the product id value for this contract.
-  int64 product_id = 3 [(buf.validate.field).int64.gt = 0];
+  int64 product_id = 3 [
+    (buf.validate.field).required = true,
+    (buf.validate.field).int64.gt = 0
+  ];
   // quantity is the quantity value for this contract.
   double quantity = 4;
   // note is the note value for this contract.
   string note = 5;
   // employee_id is the employee id value for this contract.
-  int64 employee_id = 6 [(buf.validate.field).int64.gt = 0];
+  int64 employee_id = 6 [
+    (buf.validate.field).required = true,
+    (buf.validate.field).int64.gt = 0
+  ];
 }
 
 message TransferStockResponse {

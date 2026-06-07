@@ -8,15 +8,24 @@ option go_package = "github.com/voxire/voxie/gen/go/erp/product/v1";
 
 message UpdateProductRequest {
   // id is the unique identifier for the resource.
-  int64 id = 1 [(buf.validate.field).int64.gt = 0];
+  int64 id = 1 [
+    (buf.validate.field).required = true,
+    (buf.validate.field).int64.gt = 0
+  ];
   // category_id is the category id value for this contract.
   int64 category_id = 2;
   // supplier_id is the supplier id value for this contract.
   int64 supplier_id = 3;
   // name is the name value for this contract.
-  string name = 4 [(buf.validate.field).string.min_len = 1];
+  string name = 4 [
+    (buf.validate.field).required = true,
+    (buf.validate.field).string.min_len = 1
+  ];
   // sku is the sku value for this contract.
-  string sku = 5 [(buf.validate.field).string.min_len = 1];
+  string sku = 5 [
+    (buf.validate.field).required = true,
+    (buf.validate.field).string.min_len = 1
+  ];
   // barcode is the barcode value for this contract.
   string barcode = 6;
   // description is the description value for this contract.

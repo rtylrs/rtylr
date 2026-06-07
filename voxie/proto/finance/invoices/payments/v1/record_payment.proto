@@ -9,15 +9,27 @@ option go_package = "github.com/voxire/voxie/gen/go/finance/invoices/payments/v1
 
 message RecordPaymentRequest {
   // invoice_id is the invoice id value for this contract.
-  int64 invoice_id = 1 [(buf.validate.field).int64.gt = 0];
+  int64 invoice_id = 1 [
+    (buf.validate.field).required = true,
+    (buf.validate.field).int64.gt = 0
+  ];
   // amount is the amount value for this contract.
   double amount = 2 [(buf.validate.field).double.gte = 0];
   // currency is the currency value for this contract.
-  string currency = 3 [(buf.validate.field).string.min_len = 1];
+  string currency = 3 [
+    (buf.validate.field).required = true,
+    (buf.validate.field).string.min_len = 1
+  ];
   // payment_date is the payment date value for this contract.
-  string payment_date = 4 [(buf.validate.field).string.min_len = 1];
+  string payment_date = 4 [
+    (buf.validate.field).required = true,
+    (buf.validate.field).string.min_len = 1
+  ];
   // method is the method value for this contract.
-  string method = 5 [(buf.validate.field).string.min_len = 1];
+  string method = 5 [
+    (buf.validate.field).required = true,
+    (buf.validate.field).string.min_len = 1
+  ];
   // reference is the reference value for this contract.
   string reference = 6;
   // notes is the notes value for this contract.

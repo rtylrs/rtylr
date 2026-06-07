@@ -11,7 +11,10 @@ option go_package = "github.com/voxire/voxie/gen/go/hr/department/v1";
 
 message UpdateDepartmentRequest {
   // ID of the department to update.
-  int64 id = 1 [(buf.validate.field).int64.gt = 0];
+  int64 id = 1 [
+    (buf.validate.field).required = true,
+    (buf.validate.field).int64.gt = 0
+  ];
   // New location; absent to keep current.
   optional int64 location_id = 2;
   // New parent department; absent to keep current.

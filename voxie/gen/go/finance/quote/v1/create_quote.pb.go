@@ -152,12 +152,14 @@ var File_finance_quote_v1_create_quote_proto protoreflect.FileDescriptor
 
 const file_finance_quote_v1_create_quote_proto_rawDesc = "" +
 	"\n" +
-	"#finance/quote/v1/create_quote.proto\x12\x10finance.quote.v1\x1a\x1bbuf/validate/validate.proto\x1a\x1cfinance/quote/v1/types.proto\"\xd7\x01\n" +
-	"\x12CreateQuoteRequest\x12(\n" +
-	"\vcustomer_id\x18\x01 \x01(\x03B\a\xbaH\x04\"\x02 \x00R\n" +
+	"#finance/quote/v1/create_quote.proto\x12\x10finance.quote.v1\x1a\x1bbuf/validate/validate.proto\x1a\x1cfinance/quote/v1/types.proto\"\xdd\x01\n" +
+	"\x12CreateQuoteRequest\x12+\n" +
+	"\vcustomer_id\x18\x01 \x01(\x03B\n" +
+	"\xbaH\a\xc8\x01\x01\"\x02 \x00R\n" +
 	"customerId\x12;\n" +
-	"\x05lines\x18\x02 \x03(\v2\x1b.finance.quote.v1.QuoteLineB\b\xbaH\x05\x92\x01\x02\b\x01R\x05lines\x12(\n" +
-	"\vvalid_until\x18\x03 \x01(\tB\a\xbaH\x04r\x02\x10\x01R\n" +
+	"\x05lines\x18\x02 \x03(\v2\x1b.finance.quote.v1.QuoteLineB\b\xbaH\x05\x92\x01\x02\b\x01R\x05lines\x12+\n" +
+	"\vvalid_until\x18\x03 \x01(\tB\n" +
+	"\xbaH\a\xc8\x01\x01r\x02\x10\x01R\n" +
 	"validUntil\x12\x1a\n" +
 	"\bdiscount\x18\x04 \x01(\x01R\bdiscount\x12\x14\n" +
 	"\x05notes\x18\x05 \x01(\tR\x05notes\"D\n" +

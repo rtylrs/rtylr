@@ -143,11 +143,13 @@ var File_crm_segment_v1_create_segment_proto protoreflect.FileDescriptor
 
 const file_crm_segment_v1_create_segment_proto_rawDesc = "" +
 	"\n" +
-	"#crm/segment/v1/create_segment.proto\x12\x0ecrm.segment.v1\x1a\x1bbuf/validate/validate.proto\"t\n" +
-	"\x14CreateSegmentRequest\x12\x1b\n" +
-	"\x04name\x18\x01 \x01(\tB\a\xbaH\x04r\x02\x10\x01R\x04name\x12 \n" +
-	"\vdescription\x18\x02 \x01(\tR\vdescription\x12\x1d\n" +
-	"\x05rules\x18\x03 \x01(\tB\a\xbaH\x04r\x02\x10\x01R\x05rules\"P\n" +
+	"#crm/segment/v1/create_segment.proto\x12\x0ecrm.segment.v1\x1a\x1bbuf/validate/validate.proto\"z\n" +
+	"\x14CreateSegmentRequest\x12\x1e\n" +
+	"\x04name\x18\x01 \x01(\tB\n" +
+	"\xbaH\a\xc8\x01\x01r\x02\x10\x01R\x04name\x12 \n" +
+	"\vdescription\x18\x02 \x01(\tR\vdescription\x12 \n" +
+	"\x05rules\x18\x03 \x01(\tB\n" +
+	"\xbaH\a\xc8\x01\x01r\x02\x10\x01R\x05rules\"P\n" +
 	"\x15CreateSegmentResponse\x12\x1d\n" +
 	"\n" +
 	"segment_id\x18\x01 \x01(\x03R\tsegmentId\x12\x18\n" +

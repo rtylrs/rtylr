@@ -233,19 +233,25 @@ var File_finance_invoices_v1_update_invoice_proto protoreflect.FileDescriptor
 
 const file_finance_invoices_v1_update_invoice_proto_rawDesc = "" +
 	"\n" +
-	"(finance/invoices/v1/update_invoice.proto\x12\x13finance.invoices.v1\x1a\x1bbuf/validate/validate.proto\x1a\x1ffinance/invoices/v1/types.proto\"\xc1\x04\n" +
-	"\x14UpdateInvoiceRequest\x12\x17\n" +
-	"\x02id\x18\x01 \x01(\x03B\a\xbaH\x04\"\x02 \x00R\x02id\x12(\n" +
-	"\vclient_name\x18\x02 \x01(\tB\a\xbaH\x04r\x02\x10\x01R\n" +
-	"clientName\x12,\n" +
-	"\fclient_email\x18\x03 \x01(\tB\t\xbaH\x06r\x04\x10\x01`\x01R\vclientEmail\x12%\n" +
+	"(finance/invoices/v1/update_invoice.proto\x12\x13finance.invoices.v1\x1a\x1bbuf/validate/validate.proto\x1a\x1ffinance/invoices/v1/types.proto\"\xd6\x04\n" +
+	"\x14UpdateInvoiceRequest\x12\x1a\n" +
+	"\x02id\x18\x01 \x01(\x03B\n" +
+	"\xbaH\a\xc8\x01\x01\"\x02 \x00R\x02id\x12+\n" +
+	"\vclient_name\x18\x02 \x01(\tB\n" +
+	"\xbaH\a\xc8\x01\x01r\x02\x10\x01R\n" +
+	"clientName\x12/\n" +
+	"\fclient_email\x18\x03 \x01(\tB\f\xbaH\t\xc8\x01\x01r\x04\x10\x01`\x01R\vclientEmail\x12%\n" +
 	"\x0eclient_address\x18\x04 \x01(\tR\rclientAddress\x12\"\n" +
-	"\rclient_tax_id\x18\x05 \x01(\tR\vclientTaxId\x12&\n" +
+	"\rclient_tax_id\x18\x05 \x01(\tR\vclientTaxId\x12)\n" +
 	"\n" +
-	"issue_date\x18\x06 \x01(\tB\a\xbaH\x04r\x02\x10\x01R\tissueDate\x12\"\n" +
-	"\bdue_date\x18\a \x01(\tB\a\xbaH\x04r\x02\x10\x01R\adueDate\x12#\n" +
-	"\bcurrency\x18\b \x01(\tB\a\xbaH\x04r\x02\x10\x01R\bcurrency\x12,\n" +
-	"\rdiscount_type\x18\t \x01(\tB\a\xbaH\x04r\x02\x10\x01R\fdiscountType\x125\n" +
+	"issue_date\x18\x06 \x01(\tB\n" +
+	"\xbaH\a\xc8\x01\x01r\x02\x10\x01R\tissueDate\x12%\n" +
+	"\bdue_date\x18\a \x01(\tB\n" +
+	"\xbaH\a\xc8\x01\x01r\x02\x10\x01R\adueDate\x12&\n" +
+	"\bcurrency\x18\b \x01(\tB\n" +
+	"\xbaH\a\xc8\x01\x01r\x02\x10\x01R\bcurrency\x12/\n" +
+	"\rdiscount_type\x18\t \x01(\tB\n" +
+	"\xbaH\a\xc8\x01\x01r\x02\x10\x01R\fdiscountType\x125\n" +
 	"\x0ediscount_value\x18\n" +
 	" \x01(\x01B\x0e\xbaH\v\x12\t)\x00\x00\x00\x00\x00\x00\x00\x00R\rdiscountValue\x12)\n" +
 	"\btax_rate\x18\v \x01(\x01B\x0e\xbaH\v\x12\t)\x00\x00\x00\x00\x00\x00\x00\x00R\ataxRate\x12\x14\n" +

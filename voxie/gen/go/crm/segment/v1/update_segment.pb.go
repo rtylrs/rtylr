@@ -143,12 +143,15 @@ var File_crm_segment_v1_update_segment_proto protoreflect.FileDescriptor
 
 const file_crm_segment_v1_update_segment_proto_rawDesc = "" +
 	"\n" +
-	"#crm/segment/v1/update_segment.proto\x12\x0ecrm.segment.v1\x1a\x1bbuf/validate/validate.proto\"\x8d\x01\n" +
-	"\x14UpdateSegmentRequest\x12\x17\n" +
-	"\x02id\x18\x01 \x01(\x03B\a\xbaH\x04\"\x02 \x00R\x02id\x12\x1b\n" +
-	"\x04name\x18\x02 \x01(\tB\a\xbaH\x04r\x02\x10\x01R\x04name\x12 \n" +
-	"\vdescription\x18\x03 \x01(\tR\vdescription\x12\x1d\n" +
-	"\x05rules\x18\x04 \x01(\tB\a\xbaH\x04r\x02\x10\x01R\x05rules\"1\n" +
+	"#crm/segment/v1/update_segment.proto\x12\x0ecrm.segment.v1\x1a\x1bbuf/validate/validate.proto\"\x96\x01\n" +
+	"\x14UpdateSegmentRequest\x12\x1a\n" +
+	"\x02id\x18\x01 \x01(\x03B\n" +
+	"\xbaH\a\xc8\x01\x01\"\x02 \x00R\x02id\x12\x1e\n" +
+	"\x04name\x18\x02 \x01(\tB\n" +
+	"\xbaH\a\xc8\x01\x01r\x02\x10\x01R\x04name\x12 \n" +
+	"\vdescription\x18\x03 \x01(\tR\vdescription\x12 \n" +
+	"\x05rules\x18\x04 \x01(\tB\n" +
+	"\xbaH\a\xc8\x01\x01r\x02\x10\x01R\x05rules\"1\n" +
 	"\x15UpdateSegmentResponse\x12\x18\n" +
 	"\amessage\x18\x01 \x01(\tR\amessageB/Z-github.com/voxire/voxie/gen/go/crm/segment/v1b\x06proto3"
 

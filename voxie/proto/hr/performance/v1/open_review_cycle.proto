@@ -11,7 +11,10 @@ option go_package = "github.com/voxire/voxie/gen/go/hr/performance/v1";
 
 message OpenReviewCycleRequest {
   // ID of the review cycle to open for submissions.
-  int64 cycle_id = 1 [(buf.validate.field).int64.gt = 0];
+  int64 cycle_id = 1 [
+    (buf.validate.field).required = true,
+    (buf.validate.field).int64.gt = 0
+  ];
 }
 
 message OpenReviewCycleResponse {

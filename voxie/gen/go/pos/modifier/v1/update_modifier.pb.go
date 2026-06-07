@@ -143,13 +143,15 @@ var File_pos_modifier_v1_update_modifier_proto protoreflect.FileDescriptor
 
 const file_pos_modifier_v1_update_modifier_proto_rawDesc = "" +
 	"\n" +
-	"%pos/modifier/v1/update_modifier.proto\x12\x0fpos.modifier.v1\x1a\x1bbuf/validate/validate.proto\"\xae\x01\n" +
-	"\x15UpdateModifierRequest\x12\x1b\n" +
-	"\x04name\x18\x01 \x01(\tB\a\xbaH\x04r\x02\x10\x01R\x04name\x12/\n" +
+	"%pos/modifier/v1/update_modifier.proto\x12\x0fpos.modifier.v1\x1a\x1bbuf/validate/validate.proto\"\xb4\x01\n" +
+	"\x15UpdateModifierRequest\x12\x1e\n" +
+	"\x04name\x18\x01 \x01(\tB\n" +
+	"\xbaH\a\xc8\x01\x01r\x02\x10\x01R\x04name\x12/\n" +
 	"\vprice_delta\x18\x02 \x01(\x01B\x0e\xbaH\v\x12\t)\x00\x00\x00\x00\x00\x00\x00\x00R\n" +
-	"priceDelta\x12&\n" +
+	"priceDelta\x12)\n" +
 	"\n" +
-	"group_name\x18\x03 \x01(\tB\a\xbaH\x04r\x02\x10\x01R\tgroupName\x12\x1f\n" +
+	"group_name\x18\x03 \x01(\tB\n" +
+	"\xbaH\a\xc8\x01\x01r\x02\x10\x01R\tgroupName\x12\x1f\n" +
 	"\vis_required\x18\x04 \x01(\bR\n" +
 	"isRequired\"2\n" +
 	"\x16UpdateModifierResponse\x12\x18\n" +

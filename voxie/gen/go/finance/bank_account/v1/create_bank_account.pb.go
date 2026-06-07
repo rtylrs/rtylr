@@ -170,14 +170,19 @@ var File_finance_bank_account_v1_create_bank_account_proto protoreflect.FileDesc
 
 const file_finance_bank_account_v1_create_bank_account_proto_rawDesc = "" +
 	"\n" +
-	"1finance/bank_account/v1/create_bank_account.proto\x12\x17finance.bank_account.v1\x1a\x1bbuf/validate/validate.proto\x1a#finance/bank_account/v1/types.proto\"\x8d\x02\n" +
-	"\x18CreateBankAccountRequest\x12\x1b\n" +
-	"\x04name\x18\x01 \x01(\tB\a\xbaH\x04r\x02\x10\x01R\x04name\x12$\n" +
-	"\tbank_name\x18\x02 \x01(\tB\a\xbaH\x04r\x02\x10\x01R\bbankName\x12*\n" +
-	"\faccount_type\x18\x03 \x01(\tB\a\xbaH\x04r\x02\x10\x01R\vaccountType\x12$\n" +
-	"\tlast_four\x18\x04 \x01(\tB\a\xbaH\x04r\x02\x10\x01R\blastFour\x12\x18\n" +
-	"\abalance\x18\x05 \x01(\x01R\abalance\x12#\n" +
-	"\bcurrency\x18\x06 \x01(\tB\a\xbaH\x04r\x02\x10\x01R\bcurrency\x12\x1d\n" +
+	"1finance/bank_account/v1/create_bank_account.proto\x12\x17finance.bank_account.v1\x1a\x1bbuf/validate/validate.proto\x1a#finance/bank_account/v1/types.proto\"\x9c\x02\n" +
+	"\x18CreateBankAccountRequest\x12\x1e\n" +
+	"\x04name\x18\x01 \x01(\tB\n" +
+	"\xbaH\a\xc8\x01\x01r\x02\x10\x01R\x04name\x12'\n" +
+	"\tbank_name\x18\x02 \x01(\tB\n" +
+	"\xbaH\a\xc8\x01\x01r\x02\x10\x01R\bbankName\x12-\n" +
+	"\faccount_type\x18\x03 \x01(\tB\n" +
+	"\xbaH\a\xc8\x01\x01r\x02\x10\x01R\vaccountType\x12'\n" +
+	"\tlast_four\x18\x04 \x01(\tB\n" +
+	"\xbaH\a\xc8\x01\x01r\x02\x10\x01R\blastFour\x12\x18\n" +
+	"\abalance\x18\x05 \x01(\x01R\abalance\x12&\n" +
+	"\bcurrency\x18\x06 \x01(\tB\n" +
+	"\xbaH\a\xc8\x01\x01r\x02\x10\x01R\bcurrency\x12\x1d\n" +
 	"\n" +
 	"is_primary\x18\a \x01(\bR\tisPrimary\"[\n" +
 	"\x19CreateBankAccountResponse\x12>\n" +

@@ -116,9 +116,10 @@ var File_finance_journal_v1_get_journal_entry_proto protoreflect.FileDescriptor
 
 const file_finance_journal_v1_get_journal_entry_proto_rawDesc = "" +
 	"\n" +
-	"*finance/journal/v1/get_journal_entry.proto\x12\x12finance.journal.v1\x1a\x1bbuf/validate/validate.proto\x1a\x1efinance/journal/v1/types.proto\"1\n" +
-	"\x16GetJournalEntryRequest\x12\x17\n" +
-	"\x02id\x18\x01 \x01(\x03B\a\xbaH\x04\"\x02 \x00R\x02id\"Q\n" +
+	"*finance/journal/v1/get_journal_entry.proto\x12\x12finance.journal.v1\x1a\x1bbuf/validate/validate.proto\x1a\x1efinance/journal/v1/types.proto\"4\n" +
+	"\x16GetJournalEntryRequest\x12\x1a\n" +
+	"\x02id\x18\x01 \x01(\x03B\n" +
+	"\xbaH\a\xc8\x01\x01\"\x02 \x00R\x02id\"Q\n" +
 	"\x17GetJournalEntryResponse\x126\n" +
 	"\x05entry\x18\x01 \x01(\v2 .finance.journal.v1.JournalEntryR\x05entryB3Z1github.com/voxire/voxie/gen/go/finance/journal/v1b\x06proto3"
 

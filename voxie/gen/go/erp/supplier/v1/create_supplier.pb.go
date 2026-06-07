@@ -206,10 +206,11 @@ var File_erp_supplier_v1_create_supplier_proto protoreflect.FileDescriptor
 
 const file_erp_supplier_v1_create_supplier_proto_rawDesc = "" +
 	"\n" +
-	"%erp/supplier/v1/create_supplier.proto\x12\x0ferp.supplier.v1\x1a\x1bbuf/validate/validate.proto\"\xa2\x02\n" +
-	"\x15CreateSupplierRequest\x12\x1b\n" +
-	"\x04name\x18\x01 \x01(\tB\a\xbaH\x04r\x02\x10\x01R\x04name\x12\x1f\n" +
-	"\x05email\x18\x02 \x01(\tB\t\xbaH\x06r\x04\x10\x01`\x01R\x05email\x12\x14\n" +
+	"%erp/supplier/v1/create_supplier.proto\x12\x0ferp.supplier.v1\x1a\x1bbuf/validate/validate.proto\"\xa8\x02\n" +
+	"\x15CreateSupplierRequest\x12\x1e\n" +
+	"\x04name\x18\x01 \x01(\tB\n" +
+	"\xbaH\a\xc8\x01\x01r\x02\x10\x01R\x04name\x12\"\n" +
+	"\x05email\x18\x02 \x01(\tB\f\xbaH\t\xc8\x01\x01r\x04\x10\x01`\x01R\x05email\x12\x14\n" +
 	"\x05phone\x18\x03 \x01(\tR\x05phone\x12\x18\n" +
 	"\aaddress\x18\x04 \x01(\tR\aaddress\x12\x12\n" +
 	"\x04city\x18\x05 \x01(\tR\x04city\x12\x18\n" +

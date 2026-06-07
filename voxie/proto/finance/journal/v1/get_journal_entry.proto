@@ -9,7 +9,10 @@ option go_package = "github.com/voxire/voxie/gen/go/finance/journal/v1";
 
 message GetJournalEntryRequest {
   // id is the unique identifier for the resource.
-  int64 id = 1 [(buf.validate.field).int64.gt = 0];
+  int64 id = 1 [
+    (buf.validate.field).required = true,
+    (buf.validate.field).int64.gt = 0
+  ];
 }
 
 message GetJournalEntryResponse {

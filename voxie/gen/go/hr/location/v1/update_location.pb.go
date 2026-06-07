@@ -161,9 +161,10 @@ var File_hr_location_v1_update_location_proto protoreflect.FileDescriptor
 
 const file_hr_location_v1_update_location_proto_rawDesc = "" +
 	"\n" +
-	"$hr/location/v1/update_location.proto\x12\x0ehr.location.v1\x1a\x1bbuf/validate/validate.proto\x1a\x1ahr/location/v1/types.proto\"\xfd\x01\n" +
-	"\x15UpdateLocationRequest\x12\x17\n" +
-	"\x02id\x18\x01 \x01(\x03B\a\xbaH\x04\"\x02 \x00R\x02id\x12\x17\n" +
+	"$hr/location/v1/update_location.proto\x12\x0ehr.location.v1\x1a\x1bbuf/validate/validate.proto\x1a\x1ahr/location/v1/types.proto\"\x80\x02\n" +
+	"\x15UpdateLocationRequest\x12\x1a\n" +
+	"\x02id\x18\x01 \x01(\x03B\n" +
+	"\xbaH\a\xc8\x01\x01\"\x02 \x00R\x02id\x12\x17\n" +
 	"\x04name\x18\x02 \x01(\tH\x00R\x04name\x88\x01\x01\x12\x1d\n" +
 	"\aaddress\x18\x03 \x01(\tH\x01R\aaddress\x88\x01\x01\x12\x1f\n" +
 	"\btimezone\x18\x04 \x01(\tH\x02R\btimezone\x88\x01\x01\x12 \n" +

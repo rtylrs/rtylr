@@ -8,11 +8,17 @@ option go_package = "github.com/voxire/voxie/gen/go/crm/segment/v1";
 
 message CreateSegmentRequest {
   // name is the name value for this contract.
-  string name = 1 [(buf.validate.field).string.min_len = 1];
+  string name = 1 [
+    (buf.validate.field).required = true,
+    (buf.validate.field).string.min_len = 1
+  ];
   // description is the description value for this contract.
   string description = 2;
   // rules is the rules value for this contract.
-  string rules = 3 [(buf.validate.field).string.min_len = 1];
+  string rules = 3 [
+    (buf.validate.field).required = true,
+    (buf.validate.field).string.min_len = 1
+  ];
 }
 
 message CreateSegmentResponse {

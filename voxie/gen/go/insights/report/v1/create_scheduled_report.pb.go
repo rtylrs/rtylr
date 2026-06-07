@@ -134,12 +134,14 @@ var File_insights_report_v1_create_scheduled_report_proto protoreflect.FileDescr
 
 const file_insights_report_v1_create_scheduled_report_proto_rawDesc = "" +
 	"\n" +
-	"0insights/report/v1/create_scheduled_report.proto\x12\x12insights.report.v1\x1a\x1bbuf/validate/validate.proto\x1a\x1einsights/report/v1/types.proto\"\xa3\x01\n" +
-	"\x1cCreateScheduledReportRequest\x12(\n" +
-	"\vtemplate_id\x18\x01 \x01(\x03B\a\xbaH\x04\"\x02 \x00R\n" +
-	"templateId\x12%\n" +
-	"\tfrequency\x18\x02 \x01(\tB\a\xbaH\x04r\x02\x10\x01R\tfrequency\x122\n" +
-	"\x0frecipient_email\x18\x03 \x01(\tB\t\xbaH\x06r\x04\x10\x01`\x01R\x0erecipientEmail\"\\\n" +
+	"0insights/report/v1/create_scheduled_report.proto\x12\x12insights.report.v1\x1a\x1bbuf/validate/validate.proto\x1a\x1einsights/report/v1/types.proto\"\xac\x01\n" +
+	"\x1cCreateScheduledReportRequest\x12+\n" +
+	"\vtemplate_id\x18\x01 \x01(\x03B\n" +
+	"\xbaH\a\xc8\x01\x01\"\x02 \x00R\n" +
+	"templateId\x12(\n" +
+	"\tfrequency\x18\x02 \x01(\tB\n" +
+	"\xbaH\a\xc8\x01\x01r\x02\x10\x01R\tfrequency\x125\n" +
+	"\x0frecipient_email\x18\x03 \x01(\tB\f\xbaH\t\xc8\x01\x01r\x04\x10\x01`\x01R\x0erecipientEmail\"\\\n" +
 	"\x1dCreateScheduledReportResponse\x12;\n" +
 	"\x06report\x18\x01 \x01(\v2#.insights.report.v1.ScheduledReportR\x06reportB3Z1github.com/voxire/voxie/gen/go/insights/report/v1b\x06proto3"
 

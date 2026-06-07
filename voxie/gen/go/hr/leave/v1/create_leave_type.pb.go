@@ -170,9 +170,10 @@ var File_hr_leave_v1_create_leave_type_proto protoreflect.FileDescriptor
 
 const file_hr_leave_v1_create_leave_type_proto_rawDesc = "" +
 	"\n" +
-	"#hr/leave/v1/create_leave_type.proto\x12\vhr.leave.v1\x1a\x1bbuf/validate/validate.proto\x1a\x17hr/leave/v1/types.proto\"\x80\x03\n" +
-	"\x16CreateLeaveTypeRequest\x12\x1b\n" +
-	"\x04name\x18\x01 \x01(\tB\a\xbaH\x04r\x02\x10\x01R\x04name\x12\x17\n" +
+	"#hr/leave/v1/create_leave_type.proto\x12\vhr.leave.v1\x1a\x1bbuf/validate/validate.proto\x1a\x17hr/leave/v1/types.proto\"\x83\x03\n" +
+	"\x16CreateLeaveTypeRequest\x12\x1e\n" +
+	"\x04name\x18\x01 \x01(\tB\n" +
+	"\xbaH\a\xc8\x01\x01r\x02\x10\x01R\x04name\x12\x17\n" +
 	"\ais_paid\x18\x02 \x01(\bR\x06isPaid\x12+\n" +
 	"\x11requires_approval\x18\x03 \x01(\bR\x10requiresApproval\x12&\n" +
 	"\faccrual_rule\x18\x04 \x01(\tH\x00R\vaccrualRule\x88\x01\x01\x12,\n" +

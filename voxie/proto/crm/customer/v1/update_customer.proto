@@ -8,22 +8,40 @@ option go_package = "github.com/voxire/voxie/gen/go/crm/customer/v1";
 
 message UpdateCustomerRequest {
   // id is the unique identifier for the resource.
-  int64 id = 1 [(buf.validate.field).int64.gt = 0];
+  int64 id = 1 [
+    (buf.validate.field).required = true,
+    (buf.validate.field).int64.gt = 0
+  ];
   // first_name is the first name value for this contract.
-  string first_name = 2 [(buf.validate.field).string.min_len = 1];
+  string first_name = 2 [
+    (buf.validate.field).required = true,
+    (buf.validate.field).string.min_len = 1
+  ];
   // last_name is the last name value for this contract.
-  string last_name = 3 [(buf.validate.field).string.min_len = 1];
+  string last_name = 3 [
+    (buf.validate.field).required = true,
+    (buf.validate.field).string.min_len = 1
+  ];
   // email is the email address used for lookup or contact.
-  string email = 4 [(buf.validate.field).string = {
-    min_len: 1
-    email: true
-  }];
+  string email = 4 [
+    (buf.validate.field).required = true,
+    (buf.validate.field).string = {
+      min_len: 1
+      email: true
+    }
+  ];
   // phone is the phone value for this contract.
   string phone = 5;
   // date_of_birth is the date of birth value for this contract.
-  string date_of_birth = 6 [(buf.validate.field).string.min_len = 1];
+  string date_of_birth = 6 [
+    (buf.validate.field).required = true,
+    (buf.validate.field).string.min_len = 1
+  ];
   // gender is the gender value for this contract.
-  string gender = 7 [(buf.validate.field).string.min_len = 1];
+  string gender = 7 [
+    (buf.validate.field).required = true,
+    (buf.validate.field).string.min_len = 1
+  ];
   // address is the address value for this contract.
   string address = 8;
   // city is the city value for this contract.

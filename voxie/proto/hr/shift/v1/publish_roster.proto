@@ -10,9 +10,15 @@ option go_package = "github.com/voxire/voxie/gen/go/hr/shift/v1";
 
 message PublishRosterRequest {
   // Location to publish the roster for.
-  int64 location_id = 1 [(buf.validate.field).int64.gt = 0];
+  int64 location_id = 1 [
+    (buf.validate.field).required = true,
+    (buf.validate.field).int64.gt = 0
+  ];
   // Monday of the week being published (ISO-8601 date).
-  string week_start = 2 [(buf.validate.field).string.min_len = 1];
+  string week_start = 2 [
+    (buf.validate.field).required = true,
+    (buf.validate.field).string.min_len = 1
+  ];
 }
 
 message PublishRosterResponse {

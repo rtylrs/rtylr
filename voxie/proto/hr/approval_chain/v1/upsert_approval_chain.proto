@@ -11,11 +11,20 @@ option go_package = "github.com/voxire/voxie/gen/go/hr/approval_chain/v1";
 
 message UpsertApprovalChainRequest {
   // Chain ID for update; absent (zero) to create a new chain.
-  int64 id = 1 [(buf.validate.field).int64.gt = 0];
+  int64 id = 1 [
+    (buf.validate.field).required = true,
+    (buf.validate.field).int64.gt = 0
+  ];
   // Type of request this chain governs (timesheet | leave | overtime | equipment | payroll).
-  string request_type = 2 [(buf.validate.field).string.min_len = 1];
+  string request_type = 2 [
+    (buf.validate.field).required = true,
+    (buf.validate.field).string.min_len = 1
+  ];
   // Human-readable name for the chain.
-  string name = 3 [(buf.validate.field).string.min_len = 1];
+  string name = 3 [
+    (buf.validate.field).required = true,
+    (buf.validate.field).string.min_len = 1
+  ];
   // Whether approvers can delegate their approval authority.
   bool delegation_enabled = 4;
   // Ordered levels to set on the chain; replaces all existing levels.

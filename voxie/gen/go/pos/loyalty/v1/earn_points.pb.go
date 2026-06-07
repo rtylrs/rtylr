@@ -143,11 +143,12 @@ var File_pos_loyalty_v1_earn_points_proto protoreflect.FileDescriptor
 
 const file_pos_loyalty_v1_earn_points_proto_rawDesc = "" +
 	"\n" +
-	" pos/loyalty/v1/earn_points.proto\x12\x0epos.loyalty.v1\x1a\x1bbuf/validate/validate.proto\"p\n" +
+	" pos/loyalty/v1/earn_points.proto\x12\x0epos.loyalty.v1\x1a\x1bbuf/validate/validate.proto\"s\n" +
 	"\x11EarnPointsRequest\x12\x1f\n" +
 	"\vcustomer_id\x18\x01 \x01(\x03R\n" +
-	"customerId\x12\"\n" +
-	"\border_id\x18\x02 \x01(\x03B\a\xbaH\x04\"\x02 \x00R\aorderId\x12\x16\n" +
+	"customerId\x12%\n" +
+	"\border_id\x18\x02 \x01(\x03B\n" +
+	"\xbaH\a\xc8\x01\x01\"\x02 \x00R\aorderId\x12\x16\n" +
 	"\x06points\x18\x03 \x01(\x05R\x06points\"U\n" +
 	"\x12EarnPointsResponse\x12%\n" +
 	"\x0etransaction_id\x18\x01 \x01(\x03R\rtransactionId\x12\x18\n" +

@@ -10,9 +10,15 @@ option go_package = "github.com/voxire/voxie/gen/go/hr/employee/v1";
 
 message AcceptInviteRequest {
   // Sensitive: do not log this field. The invite token received by the employee.
-  string token = 1 [(buf.validate.field).string.min_len = 1];
+  string token = 1 [
+    (buf.validate.field).required = true,
+    (buf.validate.field).string.min_len = 1
+  ];
   // Sensitive: do not log this field. Password chosen by the employee.
-  string password = 2 [(buf.validate.field).string.min_len = 1];
+  string password = 2 [
+    (buf.validate.field).required = true,
+    (buf.validate.field).string.min_len = 1
+  ];
 }
 
 message AcceptInviteResponse {

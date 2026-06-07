@@ -125,9 +125,10 @@ var File_hr_onboarding_v1_complete_checklist_item_proto protoreflect.FileDescrip
 
 const file_hr_onboarding_v1_complete_checklist_item_proto_rawDesc = "" +
 	"\n" +
-	".hr/onboarding/v1/complete_checklist_item.proto\x12\x10hr.onboarding.v1\x1a\x1bbuf/validate/validate.proto\x1a\x1chr/onboarding/v1/types.proto\"\x7f\n" +
-	"\x1cCompleteChecklistItemRequest\x12 \n" +
-	"\aitem_id\x18\x01 \x01(\x03B\a\xbaH\x04\"\x02 \x00R\x06itemId\x12*\n" +
+	".hr/onboarding/v1/complete_checklist_item.proto\x12\x10hr.onboarding.v1\x1a\x1bbuf/validate/validate.proto\x1a\x1chr/onboarding/v1/types.proto\"\x82\x01\n" +
+	"\x1cCompleteChecklistItemRequest\x12#\n" +
+	"\aitem_id\x18\x01 \x01(\x03B\n" +
+	"\xbaH\a\xc8\x01\x01\"\x02 \x00R\x06itemId\x12*\n" +
 	"\x0eattachment_url\x18\x02 \x01(\tH\x00R\rattachmentUrl\x88\x01\x01B\x11\n" +
 	"\x0f_attachment_url\"c\n" +
 	"\x1dCompleteChecklistItemResponse\x12B\n" +

@@ -170,13 +170,17 @@ var File_hr_time_off_v1_submit_time_off_proto protoreflect.FileDescriptor
 
 const file_hr_time_off_v1_submit_time_off_proto_rawDesc = "" +
 	"\n" +
-	"$hr/time_off/v1/submit_time_off.proto\x12\x0ehr.time_off.v1\x1a\x1bbuf/validate/validate.proto\"\xf0\x01\n" +
-	"\x14SubmitTimeOffRequest\x12\"\n" +
-	"\bstaff_id\x18\x01 \x01(\x03B\a\xbaH\x04\"\x02 \x00R\astaffId\x12\x1b\n" +
-	"\x04type\x18\x02 \x01(\tB\a\xbaH\x04r\x02\x10\x01R\x04type\x12&\n" +
+	"$hr/time_off/v1/submit_time_off.proto\x12\x0ehr.time_off.v1\x1a\x1bbuf/validate/validate.proto\"\xfc\x01\n" +
+	"\x14SubmitTimeOffRequest\x12%\n" +
+	"\bstaff_id\x18\x01 \x01(\x03B\n" +
+	"\xbaH\a\xc8\x01\x01\"\x02 \x00R\astaffId\x12\x1e\n" +
+	"\x04type\x18\x02 \x01(\tB\n" +
+	"\xbaH\a\xc8\x01\x01r\x02\x10\x01R\x04type\x12)\n" +
 	"\n" +
-	"start_date\x18\x03 \x01(\tB\a\xbaH\x04r\x02\x10\x01R\tstartDate\x12\"\n" +
-	"\bend_date\x18\x04 \x01(\tB\a\xbaH\x04r\x02\x10\x01R\aendDate\x12\x1d\n" +
+	"start_date\x18\x03 \x01(\tB\n" +
+	"\xbaH\a\xc8\x01\x01r\x02\x10\x01R\tstartDate\x12%\n" +
+	"\bend_date\x18\x04 \x01(\tB\n" +
+	"\xbaH\a\xc8\x01\x01r\x02\x10\x01R\aendDate\x12\x1d\n" +
 	"\n" +
 	"days_count\x18\x05 \x01(\x01R\tdaysCount\x12\x16\n" +
 	"\x06reason\x18\x06 \x01(\tR\x06reason\x12\x14\n" +

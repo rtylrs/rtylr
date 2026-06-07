@@ -11,11 +11,20 @@ option go_package = "github.com/voxire/voxie/gen/go/hr/performance/v1";
 
 message SubmitReviewRequest {
   // ID of the performance review being submitted.
-  int64 review_id = 1 [(buf.validate.field).int64.gt = 0];
+  int64 review_id = 1 [
+    (buf.validate.field).required = true,
+    (buf.validate.field).int64.gt = 0
+  ];
   // Overall rating assigned by the reviewer.
-  string overall_rating = 2 [(buf.validate.field).string.min_len = 1];
+  string overall_rating = 2 [
+    (buf.validate.field).required = true,
+    (buf.validate.field).string.min_len = 1
+  ];
   // Free-form written feedback from the reviewer.
-  string narrative = 3 [(buf.validate.field).string.min_len = 1];
+  string narrative = 3 [
+    (buf.validate.field).required = true,
+    (buf.validate.field).string.min_len = 1
+  ];
 }
 
 message SubmitReviewResponse {

@@ -10,9 +10,15 @@ option go_package = "github.com/voxire/voxie/gen/go/pos/access/v1";
 
 message AssignLocationRequest {
   // user_id identifies the user associated with this request.
-  int64 user_id = 1 [(buf.validate.field).int64.gt = 0];
+  int64 user_id = 1 [
+    (buf.validate.field).required = true,
+    (buf.validate.field).int64.gt = 0
+  ];
   // location_id is the location id value for this contract.
-  int64 location_id = 2 [(buf.validate.field).int64.gt = 0];
+  int64 location_id = 2 [
+    (buf.validate.field).required = true,
+    (buf.validate.field).int64.gt = 0
+  ];
   // can_manage_pos_users is the can manage pos users value for this contract.
   bool can_manage_pos_users = 3;
   // can_manage_terminals is the can manage terminals value for this contract.

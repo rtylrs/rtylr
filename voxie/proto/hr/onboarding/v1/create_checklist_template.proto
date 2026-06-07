@@ -11,9 +11,15 @@ option go_package = "github.com/voxire/voxie/gen/go/hr/onboarding/v1";
 
 message CreateChecklistTemplateRequest {
   // Human-readable name for the template.
-  string name = 1 [(buf.validate.field).string.min_len = 1];
+  string name = 1 [
+    (buf.validate.field).required = true,
+    (buf.validate.field).string.min_len = 1
+  ];
   // Event that triggers this checklist (onboarding | offboarding).
-  string trigger_type = 2 [(buf.validate.field).string.min_len = 1];
+  string trigger_type = 2 [
+    (buf.validate.field).required = true,
+    (buf.validate.field).string.min_len = 1
+  ];
   // Role this template applies to; absent if it applies to all roles.
   optional int64 role_id = 3;
 }

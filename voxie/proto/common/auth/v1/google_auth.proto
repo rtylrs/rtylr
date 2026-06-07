@@ -8,9 +8,15 @@ option go_package = "github.com/voxire/voxie/gen/go/common/auth/v1";
 
 message GoogleAuthRequest {
   // id_token is the id token value for this contract.
-  string id_token = 1 [(buf.validate.field).string.min_len = 1];
+  string id_token = 1 [
+    (buf.validate.field).required = true,
+    (buf.validate.field).string.min_len = 1
+  ];
   // business_name is the business name value for this contract.
-  string business_name = 2 [(buf.validate.field).string.min_len = 1];
+  string business_name = 2 [
+    (buf.validate.field).required = true,
+    (buf.validate.field).string.min_len = 1
+  ];
 }
 
 message GoogleAuthResponse {

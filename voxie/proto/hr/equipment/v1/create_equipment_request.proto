@@ -11,13 +11,22 @@ option go_package = "github.com/voxire/voxie/gen/go/hr/equipment/v1";
 
 message CreateEquipmentRequestRequest {
   // Employee who needs the equipment.
-  int64 employee_id = 1 [(buf.validate.field).int64.gt = 0];
+  int64 employee_id = 1 [
+    (buf.validate.field).required = true,
+    (buf.validate.field).int64.gt = 0
+  ];
   // Category of equipment being requested.
-  string equipment_type = 2 [(buf.validate.field).string.min_len = 1];
+  string equipment_type = 2 [
+    (buf.validate.field).required = true,
+    (buf.validate.field).string.min_len = 1
+  ];
   // Free-text description of the specific equipment needed.
   string description = 3;
   // Priority level (low | medium | high).
-  string urgency = 4 [(buf.validate.field).string.min_len = 1];
+  string urgency = 4 [
+    (buf.validate.field).required = true,
+    (buf.validate.field).string.min_len = 1
+  ];
   // Date by which the equipment is needed (ISO-8601 date); absent if no deadline.
   optional string needed_by_date = 5;
 }

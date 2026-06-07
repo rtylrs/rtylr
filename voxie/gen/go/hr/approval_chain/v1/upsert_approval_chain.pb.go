@@ -152,11 +152,14 @@ var File_hr_approval_chain_v1_upsert_approval_chain_proto protoreflect.FileDescr
 
 const file_hr_approval_chain_v1_upsert_approval_chain_proto_rawDesc = "" +
 	"\n" +
-	"0hr/approval_chain/v1/upsert_approval_chain.proto\x12\x14hr.approval_chain.v1\x1a\x1bbuf/validate/validate.proto\x1a hr/approval_chain/v1/types.proto\"\xf6\x01\n" +
-	"\x1aUpsertApprovalChainRequest\x12\x17\n" +
-	"\x02id\x18\x01 \x01(\x03B\a\xbaH\x04\"\x02 \x00R\x02id\x12*\n" +
-	"\frequest_type\x18\x02 \x01(\tB\a\xbaH\x04r\x02\x10\x01R\vrequestType\x12\x1b\n" +
-	"\x04name\x18\x03 \x01(\tB\a\xbaH\x04r\x02\x10\x01R\x04name\x12-\n" +
+	"0hr/approval_chain/v1/upsert_approval_chain.proto\x12\x14hr.approval_chain.v1\x1a\x1bbuf/validate/validate.proto\x1a hr/approval_chain/v1/types.proto\"\xff\x01\n" +
+	"\x1aUpsertApprovalChainRequest\x12\x1a\n" +
+	"\x02id\x18\x01 \x01(\x03B\n" +
+	"\xbaH\a\xc8\x01\x01\"\x02 \x00R\x02id\x12-\n" +
+	"\frequest_type\x18\x02 \x01(\tB\n" +
+	"\xbaH\a\xc8\x01\x01r\x02\x10\x01R\vrequestType\x12\x1e\n" +
+	"\x04name\x18\x03 \x01(\tB\n" +
+	"\xbaH\a\xc8\x01\x01r\x02\x10\x01R\x04name\x12-\n" +
 	"\x12delegation_enabled\x18\x04 \x01(\bR\x11delegationEnabled\x12G\n" +
 	"\x06levels\x18\x05 \x03(\v2/.hr.approval_chain.v1.ApprovalChainLevelPayloadR\x06levels\"_\n" +
 	"\x1bUpsertApprovalChainResponse\x12@\n" +

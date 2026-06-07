@@ -296,10 +296,12 @@ var File_hr_time_off_v1_types_proto protoreflect.FileDescriptor
 
 const file_hr_time_off_v1_types_proto_rawDesc = "" +
 	"\n" +
-	"\x1ahr/time_off/v1/types.proto\x12\x0ehr.time_off.v1\x1a\x1bbuf/validate/validate.proto\"\x9b\x03\n" +
-	"\x0eTimeOffRequest\x12\x17\n" +
-	"\x02id\x18\x01 \x01(\x03B\a\xbaH\x04\"\x02 \x00R\x02id\x12\"\n" +
-	"\bowner_id\x18\x02 \x01(\x03B\a\xbaH\x04\"\x02 \x00R\aownerId\x12\x19\n" +
+	"\x1ahr/time_off/v1/types.proto\x12\x0ehr.time_off.v1\x1a\x1bbuf/validate/validate.proto\"\xa1\x03\n" +
+	"\x0eTimeOffRequest\x12\x1a\n" +
+	"\x02id\x18\x01 \x01(\x03B\n" +
+	"\xbaH\a\xc8\x01\x01\"\x02 \x00R\x02id\x12%\n" +
+	"\bowner_id\x18\x02 \x01(\x03B\n" +
+	"\xbaH\a\xc8\x01\x01\"\x02 \x00R\aownerId\x12\x19\n" +
 	"\bstaff_id\x18\x03 \x01(\x03R\astaffId\x12\x12\n" +
 	"\x04type\x18\x04 \x01(\tR\x04type\x12\x1d\n" +
 	"\n" +

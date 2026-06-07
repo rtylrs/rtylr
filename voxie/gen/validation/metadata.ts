@@ -24,6 +24,14 @@ export type ContractFieldValidation = {
 
 export type ContractValidationMetadata = Record<string, Record<string, ContractFieldValidation>>;
 
+export type ContractOneofValidation = {
+  fields: readonly string[];
+  protoFields: readonly string[];
+  required: boolean;
+};
+
+export type ContractOneofValidationMetadata = Record<string, readonly ContractOneofValidation[]>;
+
 export type ContractValidationIssue = {
   field: string;
   protoName: string;
@@ -3555,11 +3563,22 @@ export const contractValidationMetadata = {
       "type": "string"
     },
     "durationMinutes": {
+      "gt": 0,
       "name": "durationMinutes",
       "optional": false,
       "protoName": "duration_minutes",
       "repeated": false,
-      "required": false,
+      "required": true,
+      "scalar": true,
+      "type": "int64"
+    },
+    "taskId": {
+      "gt": 0,
+      "name": "taskId",
+      "optional": false,
+      "protoName": "task_id",
+      "repeated": false,
+      "required": true,
       "scalar": true,
       "type": "int64"
     }
@@ -3693,6 +3712,15 @@ export const contractValidationMetadata = {
       "name": "status",
       "optional": false,
       "protoName": "status",
+      "repeated": false,
+      "required": false,
+      "scalar": true,
+      "type": "string"
+    },
+    "workspaceId": {
+      "name": "workspaceId",
+      "optional": false,
+      "protoName": "workspace_id",
       "repeated": false,
       "required": false,
       "scalar": true,
@@ -9640,8 +9668,28 @@ export const contractValidationMetadata = {
   }
 } as const satisfies ContractValidationMetadata;
 
+export const contractValidationOneofMetadata = {
+  "flow.task.v1.ListTasksRequest": [
+    {
+      "fields": [
+        "projectId",
+        "workspaceId"
+      ],
+      "protoFields": [
+        "project_id",
+        "workspace_id"
+      ],
+      "required": true
+    }
+  ]
+} as const satisfies ContractOneofValidationMetadata;
+
 export function getContractValidation(messageName: string) {
   return contractValidationMetadata[messageName as keyof typeof contractValidationMetadata];
+}
+
+export function getContractOneofValidation(messageName: string) {
+  return contractValidationOneofMetadata[messageName as keyof typeof contractValidationOneofMetadata] ?? [];
 }
 
 export function getRequiredContractFields(messageName: string) {
@@ -9668,8 +9716,19 @@ function numberValue(value: unknown): number | null {
 
 export function validateContractPayload(messageName: string, payload: Record<string, unknown>) {
   const fields = getContractValidation(messageName);
+  const oneofs = getContractOneofValidation(messageName);
   const issues: ContractValidationIssue[] = [];
   if (!fields) return issues;
+
+  for (const oneof of oneofs) {
+    const present = oneof.fields.filter((fieldName) => hasValue(payload[fieldName], fields[fieldName] ?? { repeated: false } as ContractFieldValidation));
+    if (oneof.required && present.length === 0) {
+      issues.push({ field: oneof.fields[0] ?? "", protoName: oneof.protoFields[0] ?? "", message: `one of ${oneof.fields.join(", ")} is required` });
+    }
+    if (present.length > 1) {
+      issues.push({ field: present[0] ?? "", protoName: oneof.protoFields[0] ?? "", message: `only one of ${oneof.fields.join(", ")} can be set` });
+    }
+  }
 
   for (const field of Object.values(fields)) {
     const value = payload[field.name];

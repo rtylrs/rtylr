@@ -134,10 +134,12 @@ var File_common_auth_v1_google_auth_proto protoreflect.FileDescriptor
 
 const file_common_auth_v1_google_auth_proto_rawDesc = "" +
 	"\n" +
-	" common/auth/v1/google_auth.proto\x12\x0ecommon.auth.v1\x1a\x1bbuf/validate/validate.proto\"e\n" +
-	"\x11GoogleAuthRequest\x12\"\n" +
-	"\bid_token\x18\x01 \x01(\tB\a\xbaH\x04r\x02\x10\x01R\aidToken\x12,\n" +
-	"\rbusiness_name\x18\x02 \x01(\tB\a\xbaH\x04r\x02\x10\x01R\fbusinessName\"A\n" +
+	" common/auth/v1/google_auth.proto\x12\x0ecommon.auth.v1\x1a\x1bbuf/validate/validate.proto\"k\n" +
+	"\x11GoogleAuthRequest\x12%\n" +
+	"\bid_token\x18\x01 \x01(\tB\n" +
+	"\xbaH\a\xc8\x01\x01r\x02\x10\x01R\aidToken\x12/\n" +
+	"\rbusiness_name\x18\x02 \x01(\tB\n" +
+	"\xbaH\a\xc8\x01\x01r\x02\x10\x01R\fbusinessName\"A\n" +
 	"\x12GoogleAuthResponse\x12\x14\n" +
 	"\x05token\x18\x01 \x01(\tR\x05token\x12\x15\n" +
 	"\x06is_new\x18\x02 \x01(\bR\x05isNewB/Z-github.com/voxire/voxie/gen/go/common/auth/v1b\x06proto3"

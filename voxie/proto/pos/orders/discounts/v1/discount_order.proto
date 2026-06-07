@@ -10,7 +10,10 @@ option go_package = "github.com/voxire/voxie/gen/go/pos/orders/discounts/v1";
 
 message DiscountOrderRequest {
   // order_id is the order id value for this contract.
-  int64 order_id = 1 [(buf.validate.field).int64.gt = 0];
+  int64 order_id = 1 [
+    (buf.validate.field).required = true,
+    (buf.validate.field).int64.gt = 0
+  ];
   // discount_type is the discount type value for this contract.
   string discount_type = 2;
   // discount_value is the discount value value for this contract.

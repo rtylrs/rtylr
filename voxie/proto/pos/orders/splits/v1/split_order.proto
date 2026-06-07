@@ -11,7 +11,10 @@ option go_package = "github.com/voxire/voxie/gen/go/pos/orders/splits/v1";
 
 message SplitOrderRequest {
   // order_id is the order id value for this contract.
-  int64 order_id = 1 [(buf.validate.field).int64.gt = 0];
+  int64 order_id = 1 [
+    (buf.validate.field).required = true,
+    (buf.validate.field).int64.gt = 0
+  ];
   // splits is the splits value for this contract.
   repeated .pos.orders.v1.SplitGroup splits = 2;
 }

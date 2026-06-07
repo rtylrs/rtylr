@@ -23,6 +23,10 @@ FIELD_RE = re.compile(
 )
 MESSAGE_RE = re.compile(r"^\s*message\s+([A-Za-z][A-Za-z0-9_]*)\s*\{")
 PACKAGE_RE = re.compile(r"^\s*package\s+([A-Za-z0-9_.]+)\s*;")
+MESSAGE_ONEOF_RE = re.compile(
+    r"\(buf\.validate\.message\)\.oneof\s*=\s*\{(?P<body>.*?)\}",
+    re.DOTALL,
+)
 
 
 SCALAR_TYPES = {
@@ -115,6 +119,23 @@ def is_field_required(rules: dict[str, object]) -> bool:
     return False
 
 
+def extract_message_oneof_options(line: str) -> list[dict[str, object]]:
+    oneofs: list[dict[str, object]] = []
+    for match in MESSAGE_ONEOF_RE.finditer(line):
+        body = match.group("body")
+        proto_fields = re.findall(r'"([a-z][a-z0-9_]*)"', body)
+        if not proto_fields:
+            continue
+        oneofs.append(
+            {
+                "fields": [camel(field) for field in proto_fields],
+                "protoFields": proto_fields,
+                "required": re.search(r"\brequired\s*:\s*true", body) is not None,
+            }
+        )
+    return oneofs
+
+
 def logical_proto_lines(proto: Path) -> list[str]:
     lines: list[str] = []
     pending: list[str] = []
@@ -126,7 +147,9 @@ def logical_proto_lines(proto: Path) -> list[str]:
                 lines.append("\n".join(pending))
                 pending = []
             continue
-        if re.match(r"^\s*(optional|repeated)?\s*[A-Za-z_][A-Za-z0-9_.]*\s+[a-z][a-z0-9_]*\s*=", raw_line):
+        if stripped.startswith("option ") or re.match(
+            r"^\s*(optional|repeated)?\s*[A-Za-z_][A-Za-z0-9_.]*\s+[a-z][a-z0-9_]*\s*=", raw_line
+        ):
             if stripped.endswith(";"):
                 lines.append(raw_line)
             else:
@@ -141,6 +164,7 @@ def logical_proto_lines(proto: Path) -> list[str]:
 def iter_message_fields(proto: Path) -> tuple[str, dict[str, dict[str, object]]]:
     package = read_package(proto)
     messages: dict[str, dict[str, object]] = {}
+    message_oneofs: dict[str, list[dict[str, object]]] = {}
     stack: list[tuple[str, int]] = []
 
     for raw_line in logical_proto_lines(proto):
@@ -152,10 +176,15 @@ def iter_message_fields(proto: Path) -> tuple[str, dict[str, dict[str, object]]]
             fq_name = f"{package}.{parent + '.' if parent else ''}{name}"
             stack.append((name, 1))
             messages[fq_name] = {}
+            message_oneofs[fq_name] = []
             continue
 
         if not stack:
             continue
+
+        current_message = f"{package}.{'.'.join(name for name, _ in stack)}"
+        if "(buf.validate.message).oneof" in raw_line:
+            message_oneofs[current_message].extend(extract_message_oneof_options(raw_line))
 
         field_match = FIELD_RE.match(raw_line)
         if field_match:
@@ -176,7 +205,7 @@ def iter_message_fields(proto: Path) -> tuple[str, dict[str, dict[str, object]]]
                 "scalar": is_scalar,
             }
             field.update(rules)
-            messages[f"{package}.{'.'.join(name for name, _ in stack)}"][camel(proto_name)] = field
+            messages[current_message][camel(proto_name)] = field
 
         open_count = raw_line.count("{")
         close_count = raw_line.count("}")
@@ -188,6 +217,10 @@ def iter_message_fields(proto: Path) -> tuple[str, dict[str, dict[str, object]]]
             else:
                 stack[-1] = (name, depth)
 
+    for name, oneofs in message_oneofs.items():
+        if oneofs:
+            messages.setdefault(name, {})["__oneofs"] = oneofs
+
     return package, messages
 
 
@@ -198,15 +231,21 @@ def main() -> None:
         all_messages.update(messages)
 
     request_messages = {
-        name: fields
+        name: {field_name: field for field_name, field in fields.items() if field_name != "__oneofs"}
         for name, fields in all_messages.items()
         if name.split(".")[-1].endswith("Request")
+    }
+    request_oneofs = {
+        name: fields["__oneofs"]
+        for name, fields in all_messages.items()
+        if name.split(".")[-1].endswith("Request") and "__oneofs" in fields
     }
 
     OUT_DIR.mkdir(parents=True, exist_ok=True)
     json_payload = {
         "version": 1,
         "messages": request_messages,
+        "oneofs": request_oneofs,
     }
     (OUT_DIR / "metadata.json").write_text(json.dumps(json_payload, indent=2, sort_keys=True) + "\n")
 
@@ -234,14 +273,25 @@ def main() -> None:
         "  uri?: boolean;\n"
         "};\n\n"
         "export type ContractValidationMetadata = Record<string, Record<string, ContractFieldValidation>>;\n\n"
+        "export type ContractOneofValidation = {\n"
+        "  fields: readonly string[];\n"
+        "  protoFields: readonly string[];\n"
+        "  required: boolean;\n"
+        "};\n\n"
+        "export type ContractOneofValidationMetadata = Record<string, readonly ContractOneofValidation[]>;\n\n"
         "export type ContractValidationIssue = {\n"
         "  field: string;\n"
         "  protoName: string;\n"
         "  message: string;\n"
         "};\n\n"
         f"export const contractValidationMetadata = {json.dumps(request_messages, indent=2, sort_keys=True)} as const satisfies ContractValidationMetadata;\n\n"
+        f"export const contractValidationOneofMetadata = {json.dumps(request_oneofs, indent=2, sort_keys=True)} as const satisfies ContractOneofValidationMetadata;\n\n"
         "export function getContractValidation(messageName: string) {\n"
         "  return contractValidationMetadata[messageName as keyof typeof contractValidationMetadata];\n"
+        "}\n"
+        "\n"
+        "export function getContractOneofValidation(messageName: string) {\n"
+        "  return contractValidationOneofMetadata[messageName as keyof typeof contractValidationOneofMetadata] ?? [];\n"
         "}\n"
         "\n"
         "export function getRequiredContractFields(messageName: string) {\n"
@@ -268,8 +318,19 @@ def main() -> None:
         "\n"
         "export function validateContractPayload(messageName: string, payload: Record<string, unknown>) {\n"
         "  const fields = getContractValidation(messageName);\n"
+        "  const oneofs = getContractOneofValidation(messageName);\n"
         "  const issues: ContractValidationIssue[] = [];\n"
         "  if (!fields) return issues;\n"
+        "\n"
+        "  for (const oneof of oneofs) {\n"
+        "    const present = oneof.fields.filter((fieldName) => hasValue(payload[fieldName], fields[fieldName] ?? { repeated: false } as ContractFieldValidation));\n"
+        "    if (oneof.required && present.length === 0) {\n"
+        "      issues.push({ field: oneof.fields[0] ?? \"\", protoName: oneof.protoFields[0] ?? \"\", message: `one of ${oneof.fields.join(\", \")} is required` });\n"
+        "    }\n"
+        "    if (present.length > 1) {\n"
+        "      issues.push({ field: present[0] ?? \"\", protoName: oneof.protoFields[0] ?? \"\", message: `only one of ${oneof.fields.join(\", \")} can be set` });\n"
+        "    }\n"
+        "  }\n"
         "\n"
         "  for (const field of Object.values(fields)) {\n"
         "    const value = payload[field.name];\n"

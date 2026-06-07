@@ -10,18 +10,30 @@ option go_package = "github.com/voxire/voxie/gen/go/pos/gift_card/v1";
 
 message CreateGiftCardRequest {
   // code is the code value for this contract.
-  string code = 1 [(buf.validate.field).string.min_len = 1];
+  string code = 1 [
+    (buf.validate.field).required = true,
+    (buf.validate.field).string.min_len = 1
+  ];
   // initial_amount is the initial amount value for this contract.
   double initial_amount = 2 [(buf.validate.field).double.gte = 0];
   // customer_name is the customer name value for this contract.
-  string customer_name = 3 [(buf.validate.field).string.min_len = 1];
+  string customer_name = 3 [
+    (buf.validate.field).required = true,
+    (buf.validate.field).string.min_len = 1
+  ];
   // customer_email is the customer email value for this contract.
-  string customer_email = 4 [(buf.validate.field).string = {
-    min_len: 1
-    email: true
-  }];
+  string customer_email = 4 [
+    (buf.validate.field).required = true,
+    (buf.validate.field).string = {
+      min_len: 1
+      email: true
+    }
+  ];
   // expires_at is the expires at value for this contract.
-  string expires_at = 5 [(buf.validate.field).string.min_len = 1];
+  string expires_at = 5 [
+    (buf.validate.field).required = true,
+    (buf.validate.field).string.min_len = 1
+  ];
 }
 
 message CreateGiftCardResponse {

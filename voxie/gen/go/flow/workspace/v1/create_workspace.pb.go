@@ -143,12 +143,15 @@ var File_flow_workspace_v1_create_workspace_proto protoreflect.FileDescriptor
 
 const file_flow_workspace_v1_create_workspace_proto_rawDesc = "" +
 	"\n" +
-	"(flow/workspace/v1/create_workspace.proto\x12\x11flow.workspace.v1\x1a\x1bbuf/validate/validate.proto\x1a\x1dflow/workspace/v1/types.proto\"\x93\x01\n" +
-	"\x16CreateWorkspaceRequest\x12\x1b\n" +
-	"\x04name\x18\x01 \x01(\tB\a\xbaH\x04r\x02\x10\x01R\x04name\x12 \n" +
-	"\vdescription\x18\x02 \x01(\tR\vdescription\x12\x1b\n" +
-	"\x04icon\x18\x03 \x01(\tB\a\xbaH\x04r\x02\x10\x01R\x04icon\x12\x1d\n" +
-	"\x05color\x18\x04 \x01(\tB\a\xbaH\x04r\x02\x10\x01R\x05color\"U\n" +
+	"(flow/workspace/v1/create_workspace.proto\x12\x11flow.workspace.v1\x1a\x1bbuf/validate/validate.proto\x1a\x1dflow/workspace/v1/types.proto\"\x9c\x01\n" +
+	"\x16CreateWorkspaceRequest\x12\x1e\n" +
+	"\x04name\x18\x01 \x01(\tB\n" +
+	"\xbaH\a\xc8\x01\x01r\x02\x10\x01R\x04name\x12 \n" +
+	"\vdescription\x18\x02 \x01(\tR\vdescription\x12\x1e\n" +
+	"\x04icon\x18\x03 \x01(\tB\n" +
+	"\xbaH\a\xc8\x01\x01r\x02\x10\x01R\x04icon\x12 \n" +
+	"\x05color\x18\x04 \x01(\tB\n" +
+	"\xbaH\a\xc8\x01\x01r\x02\x10\x01R\x05color\"U\n" +
 	"\x17CreateWorkspaceResponse\x12:\n" +
 	"\tworkspace\x18\x01 \x01(\v2\x1c.flow.workspace.v1.WorkspaceR\tworkspaceB2Z0github.com/voxire/voxie/gen/go/flow/workspace/v1b\x06proto3"
 

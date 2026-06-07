@@ -11,9 +11,15 @@ option go_package = "github.com/voxire/voxie/gen/go/hr/overtime/v1";
 
 message CreateOvertimeRequestRequest {
   // Employee requesting overtime.
-  int64 employee_id = 1 [(buf.validate.field).int64.gt = 0];
+  int64 employee_id = 1 [
+    (buf.validate.field).required = true,
+    (buf.validate.field).int64.gt = 0
+  ];
   // Date the overtime is planned for (ISO-8601 date).
-  string date = 2 [(buf.validate.field).string.min_len = 1];
+  string date = 2 [
+    (buf.validate.field).required = true,
+    (buf.validate.field).string.min_len = 1
+  ];
   // Number of extra minutes planned beyond the regular shift.
   int32 planned_extra_minutes = 3;
   // Justification for the overtime work.

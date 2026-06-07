@@ -11,7 +11,10 @@ option go_package = "github.com/voxire/voxie/gen/go/hr/role/v1";
 
 message CreateRoleRequest {
   // Display name of the new role.
-  string name = 1 [(buf.validate.field).string.min_len = 1];
+  string name = 1 [
+    (buf.validate.field).required = true,
+    (buf.validate.field).string.min_len = 1
+  ];
   // Permissions to attach to the new role.
   repeated PermissionPayload permissions = 2;
 }

@@ -11,15 +11,30 @@ option go_package = "github.com/voxire/voxie/gen/go/hr/shift/v1";
 
 message CreateShiftRequest {
   // Location where this shift takes place.
-  int64 location_id = 1 [(buf.validate.field).int64.gt = 0];
+  int64 location_id = 1 [
+    (buf.validate.field).required = true,
+    (buf.validate.field).int64.gt = 0
+  ];
   // Human-readable shift name.
-  string name = 2 [(buf.validate.field).string.min_len = 1];
+  string name = 2 [
+    (buf.validate.field).required = true,
+    (buf.validate.field).string.min_len = 1
+  ];
   // Shift start time (HH:MM 24-hour format).
-  string start_time = 3 [(buf.validate.field).string.min_len = 1];
+  string start_time = 3 [
+    (buf.validate.field).required = true,
+    (buf.validate.field).string.min_len = 1
+  ];
   // Shift end time (HH:MM 24-hour format).
-  string end_time = 4 [(buf.validate.field).string.min_len = 1];
+  string end_time = 4 [
+    (buf.validate.field).required = true,
+    (buf.validate.field).string.min_len = 1
+  ];
   // Hex colour code for roster display.
-  string color = 5 [(buf.validate.field).string.min_len = 1];
+  string color = 5 [
+    (buf.validate.field).required = true,
+    (buf.validate.field).string.min_len = 1
+  ];
 }
 
 message CreateShiftResponse {

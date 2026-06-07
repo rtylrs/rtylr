@@ -11,7 +11,10 @@ option go_package = "github.com/voxire/voxie/gen/go/pos/gift_card/v1";
 
 message RedeemGiftCardRequest {
   // code is the code value for this contract.
-  string code = 1 [(buf.validate.field).string.min_len = 1];
+  string code = 1 [
+    (buf.validate.field).required = true,
+    (buf.validate.field).string.min_len = 1
+  ];
   // amount is the amount value for this contract.
   double amount = 2 [(buf.validate.field).double.gte = 0];
 }

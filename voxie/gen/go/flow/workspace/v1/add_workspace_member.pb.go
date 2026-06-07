@@ -134,10 +134,12 @@ var File_flow_workspace_v1_add_workspace_member_proto protoreflect.FileDescripto
 
 const file_flow_workspace_v1_add_workspace_member_proto_rawDesc = "" +
 	"\n" +
-	",flow/workspace/v1/add_workspace_member.proto\x12\x11flow.workspace.v1\x1a\x1bbuf/validate/validate.proto\"}\n" +
-	"\x19AddWorkspaceMemberRequest\x12*\n" +
-	"\fworkspace_id\x18\x01 \x01(\x03B\a\xbaH\x04\"\x02 \x00R\vworkspaceId\x12 \n" +
-	"\auser_id\x18\x02 \x01(\x03B\a\xbaH\x04\"\x02 \x00R\x06userId\x12\x12\n" +
+	",flow/workspace/v1/add_workspace_member.proto\x12\x11flow.workspace.v1\x1a\x1bbuf/validate/validate.proto\"\x83\x01\n" +
+	"\x19AddWorkspaceMemberRequest\x12-\n" +
+	"\fworkspace_id\x18\x01 \x01(\x03B\n" +
+	"\xbaH\a\xc8\x01\x01\"\x02 \x00R\vworkspaceId\x12#\n" +
+	"\auser_id\x18\x02 \x01(\x03B\n" +
+	"\xbaH\a\xc8\x01\x01\"\x02 \x00R\x06userId\x12\x12\n" +
 	"\x04role\x18\x03 \x01(\tR\x04role\"6\n" +
 	"\x1aAddWorkspaceMemberResponse\x12\x18\n" +
 	"\amessage\x18\x01 \x01(\tR\amessageB2Z0github.com/voxire/voxie/gen/go/flow/workspace/v1b\x06proto3"

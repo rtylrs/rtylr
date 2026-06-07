@@ -11,9 +11,15 @@ option go_package = "github.com/voxire/voxie/gen/go/hr/onboarding/v1";
 
 message TriggerChecklistRequest {
   // Employee to trigger the checklist for.
-  int64 employee_id = 1 [(buf.validate.field).int64.gt = 0];
+  int64 employee_id = 1 [
+    (buf.validate.field).required = true,
+    (buf.validate.field).int64.gt = 0
+  ];
   // Event type that is triggering (onboarding | offboarding).
-  string trigger_type = 2 [(buf.validate.field).string.min_len = 1];
+  string trigger_type = 2 [
+    (buf.validate.field).required = true,
+    (buf.validate.field).string.min_len = 1
+  ];
 }
 
 message TriggerChecklistResponse {

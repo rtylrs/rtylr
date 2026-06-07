@@ -11,7 +11,10 @@ option go_package = "github.com/voxire/voxie/gen/go/hr/employee/v1";
 
 message UpdateEmployeeRequest {
   // ID of the employee to update.
-  int64 id = 1 [(buf.validate.field).int64.gt = 0];
+  int64 id = 1 [
+    (buf.validate.field).required = true,
+    (buf.validate.field).int64.gt = 0
+  ];
   // New department assignment; absent to keep current.
   optional int64 department_id = 2;
   // New work location; absent to keep current.

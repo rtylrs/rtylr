@@ -8,7 +8,10 @@ option go_package = "github.com/voxire/voxie/gen/go/hub/integration/v1";
 
 message DisconnectIntegrationRequest {
   // id is the unique identifier for the resource.
-  int64 id = 1 [(buf.validate.field).int64.gt = 0];
+  int64 id = 1 [
+    (buf.validate.field).required = true,
+    (buf.validate.field).int64.gt = 0
+  ];
 }
 
 message DisconnectIntegrationResponse {
