@@ -62,14 +62,17 @@ export const insightsService = {
 
   // Reports
   getReportTemplates: () => safe.get('/insights/reports/templates'),
-  generateReport: (templateId: string, params?: Record<string, string>) =>
-    safe.post(`/insights/reports/generate/${templateId}`, params),
-  exportReport: (templateId: string, format: 'csv' | 'pdf', params?: Record<string, string>) =>
-    safe.post(
-      `/insights/reports/export/${templateId}`,
-      { format, ...params },
-      { responseType: 'blob' }
-    ),
+  generateReport: (templateId: string, params?: Record<string, string>) => {
+    if (templateId !== 'revenue') throw new Error(`Unsupported report template: ${templateId}`);
+    return safe.post('/insights/reports/generate/revenue', params);
+  },
+  exportReport: (templateId: string, format: 'csv' | 'pdf', params?: Record<string, string>) => {
+    if (templateId !== 'revenue') throw new Error(`Unsupported report template: ${templateId}`);
+    return safe.get('/insights/reports/export/revenue', {
+      params: { format, ...params },
+      responseType: 'blob',
+    });
+  },
 
   // Settings
   getInsightsSettings: () => safe.get('/insights/settings'),

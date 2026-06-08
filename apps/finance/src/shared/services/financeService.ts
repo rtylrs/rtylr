@@ -60,14 +60,14 @@ export const financeService = {
 
   getInvoices: (params?: InvoiceFilterParams) => safe.get('/finance/invoices', { params }),
   createInvoice: (data: InvoicePayload) => safe.post('/finance/invoices', data),
-  getInvoice: (id: number) => safe.get(`/finance/invoices/${id}`),
+  getInvoice: (id: number) => safe.get('/finance/invoices/detail', { params: { id } }),
   updateInvoice: (id: number, data: Partial<InvoicePayload>) =>
-    safe.put(`/finance/invoices/${id}`, data),
-  deleteInvoice: (id: number) => safe.delete(`/finance/invoices/${id}`),
+    safe.put('/finance/invoices', { id, ...data }),
+  deleteInvoice: (id: number) => safe.delete('/finance/invoices', { data: { id } }),
   updateInvoiceStatus: (id: number, status: string) =>
-    safe.put(`/finance/invoices/${id}/status`, { status }),
+    safe.put('/finance/invoices/status', { id, status }),
   recordPayment: (id: number, data: PaymentPayload) =>
-    safe.post(`/finance/invoices/${id}/payment`, data),
+    safe.post('/finance/invoices/payment', { invoiceId: id, ...data }),
 
   getExpenses: (params?: ExpenseFilterParams) => safe.get('/finance/expenses', { params }),
   createExpense: (data: ExpensePayload) => safe.post('/finance/expenses', data),

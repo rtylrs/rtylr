@@ -33,8 +33,7 @@ export function useCreateWarehouse() {
 export function useUpdateWarehouse() {
   const qc = useQueryClient();
   return useMutation({
-    mutationFn: (data: UpdateWarehouseInput) =>
-      unwrap(safe.put<unknown>(`/erp/warehouses/${data.id}`, data)),
+    mutationFn: (data: UpdateWarehouseInput) => unwrap(safe.put<unknown>('/erp/warehouses', data)),
     onSuccess: () => qc.invalidateQueries({ queryKey: ['warehouses'] }),
     onError: () => toast.error('Failed to update warehouse'),
   });
@@ -43,7 +42,7 @@ export function useUpdateWarehouse() {
 export function useDeleteWarehouse() {
   const qc = useQueryClient();
   return useMutation({
-    mutationFn: (id: number) => unwrap(safe.delete<unknown>(`/erp/warehouses/${id}`)),
+    mutationFn: (id: number) => unwrap(safe.delete<unknown>('/erp/warehouses', { data: { id } })),
     onSuccess: () => qc.invalidateQueries({ queryKey: ['warehouses'] }),
     onError: () => toast.error('Failed to delete warehouse'),
   });

@@ -87,9 +87,9 @@ describe('hrApi', () => {
     expect(safe.post).toHaveBeenCalledWith('/hr/payroll/run', { period: '2026-03' });
   });
 
-  it('markPayrollPaid calls POST /hr/payroll/paid', () => {
+  it('markPayrollPaid calls POST /hr/payroll/mark-paid', () => {
     hrApi.markPayrollPaid(7);
-    expect(safe.post).toHaveBeenCalledWith('/hr/payroll/paid', { id: 7 });
+    expect(safe.post).toHaveBeenCalledWith('/hr/payroll/mark-paid', { id: 7 });
   });
 
   // Time Off

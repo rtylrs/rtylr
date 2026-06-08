@@ -35,25 +35,25 @@ describe('crmService', () => {
     expect(safe.post).toHaveBeenCalledWith('/crm/customers', data);
   });
 
-  it('getCustomer calls GET /crm/customers/:id', () => {
+  it('getCustomer calls GET /crm/customers/detail with id param', () => {
     crmService.getCustomer(3);
-    expect(safe.get).toHaveBeenCalledWith('/crm/customers/3');
+    expect(safe.get).toHaveBeenCalledWith('/crm/customers/detail', { params: { id: 3 } });
   });
 
-  it('updateCustomer calls PUT /crm/customers/:id', () => {
+  it('updateCustomer calls PUT /crm/customers with id', () => {
     crmService.updateCustomer(3, { name: 'Updated' });
-    expect(safe.put).toHaveBeenCalledWith('/crm/customers/3', { name: 'Updated' });
+    expect(safe.put).toHaveBeenCalledWith('/crm/customers', { id: 3, name: 'Updated' });
   });
 
-  it('deleteCustomer calls DELETE /crm/customers/:id', () => {
+  it('deleteCustomer calls DELETE /crm/customers with id', () => {
     crmService.deleteCustomer(3);
-    expect(safe.delete).toHaveBeenCalledWith('/crm/customers/3');
+    expect(safe.delete).toHaveBeenCalledWith('/crm/customers', { data: { id: 3 } });
   });
 
-  it('recordVisit calls POST /crm/customers/visit', () => {
+  it('recordVisit calls POST /crm/customers/record-visit', () => {
     const data = { customerId: 1 };
     crmService.recordVisit(data);
-    expect(safe.post).toHaveBeenCalledWith('/crm/customers/visit', data);
+    expect(safe.post).toHaveBeenCalledWith('/crm/customers/record-visit', data);
   });
 
   // Loyalty

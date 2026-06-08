@@ -451,10 +451,10 @@ export const crmApi = {
   createCampaign: (data: Partial<Campaign>) => safe.post<Campaign>('/crm/campaigns', data),
 
   updateCampaign: (id: number, data: Partial<Campaign>) =>
-    safe.put<Campaign>('/crm/campaigns', { id, ...data }),
+    safe.put<Campaign>(`/crm/campaigns/${id}`, data),
 
   updateCampaignStatus: (id: number, status: string) =>
-    safe.put('/crm/campaigns/status', { id, status }),
+    safe.put(`/crm/campaigns/${id}/status`, { status }),
 
   deleteCampaign: (id: number) => safe.delete(`/crm/campaigns/${id}`),
 
@@ -480,7 +480,7 @@ export const crmApi = {
   // Settings
   getSettings: () => safe.get<Settings>('/crm/settings'),
 
-  updateSettings: (data: Partial<Settings>) => safe.post<Settings>('/crm/settings', data),
+  updateSettings: (data: Partial<Settings>) => safe.put<Settings>('/crm/settings', data),
 
   // Sales Pipeline
   getSalesPipeline: () => safe.get<PipelineColumn[]>('/crm/sales/pipeline'),

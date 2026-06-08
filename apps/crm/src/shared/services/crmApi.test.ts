@@ -164,7 +164,7 @@ describe('crmApi', () => {
 
   it('updateCampaignStatus calls PUT /crm/campaigns/status', () => {
     crmApi.updateCampaignStatus(1, 'active');
-    expect(safe.put).toHaveBeenCalledWith('/crm/campaigns/status', { id: 1, status: 'active' });
+    expect(safe.put).toHaveBeenCalledWith('/crm/campaigns/1/status', { status: 'active' });
   });
 
   // Automations
@@ -197,9 +197,9 @@ describe('crmApi', () => {
     expect(safe.get).toHaveBeenCalledWith('/crm/settings');
   });
 
-  it('updateSettings calls POST /crm/settings', () => {
+  it('updateSettings calls PUT /crm/settings', () => {
     const data = { fromEmail: 'hi@test.com' };
     crmApi.updateSettings(data);
-    expect(safe.post).toHaveBeenCalledWith('/crm/settings', data);
+    expect(safe.put).toHaveBeenCalledWith('/crm/settings', data);
   });
 });

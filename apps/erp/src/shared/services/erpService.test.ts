@@ -87,8 +87,11 @@ describe('erpService', () => {
     expect(safe.post).toHaveBeenCalledWith('/erp/purchase-orders', data);
   });
 
-  it('updatePurchaseOrderStatus calls PUT /erp/purchase-orders/:id/status', () => {
+  it('updatePurchaseOrderStatus calls PUT /erp/purchase-orders/status with id', () => {
     erpService.updatePurchaseOrderStatus(1, 'Approved');
-    expect(safe.put).toHaveBeenCalledWith('/erp/purchase-orders/1/status', { status: 'Approved' });
+    expect(safe.put).toHaveBeenCalledWith('/erp/purchase-orders/status', {
+      id: 1,
+      status: 'Approved',
+    });
   });
 });

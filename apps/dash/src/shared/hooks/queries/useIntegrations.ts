@@ -22,7 +22,7 @@ export const useConnectIntegration = () => {
   const qc = useQueryClient();
   return useMutation({
     mutationFn: async (id: string) => {
-      await unwrap(safe.post(`/integrations/${id}/connect`));
+      await unwrap(safe.post('/integrations', { provider: id }));
       return id;
     },
     onSuccess: () => {
@@ -37,7 +37,7 @@ export const useDisconnectIntegration = () => {
   const qc = useQueryClient();
   return useMutation({
     mutationFn: async (id: string) => {
-      await unwrap(safe.post(`/integrations/${id}/disconnect`));
+      await unwrap(safe.delete('/integrations', { data: { id } }));
       return id;
     },
     onSuccess: () => {

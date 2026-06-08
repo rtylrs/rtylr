@@ -97,7 +97,7 @@ export const useGetReviewCycle = (id: number | undefined) => {
     queryKey: ['review-cycle', id],
     queryFn: async (): Promise<ReviewCyclePayload> => {
       const res = await unwrap(
-        safe.get<{ cycle: ReviewCyclePayload }>(`/hr/performance/cycles/${id}`)
+        safe.get<{ cycle: ReviewCyclePayload }>('/hr/performance/cycles', { params: { id } })
       );
       return (res as { cycle: ReviewCyclePayload }).cycle;
     },

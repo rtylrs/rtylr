@@ -99,7 +99,7 @@ export const useTriggerPayrollRun = () => {
 
   return useMutation({
     mutationFn: async (data: TriggerPayrollRunRequest): Promise<void> => {
-      await unwrap(safe.post('/hr/payroll/runs', data));
+      await unwrap(safe.post('/hr/payroll/runs/trigger', data));
     },
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ['payroll-runs'] });

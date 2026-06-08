@@ -84,7 +84,7 @@ export function useCreateExpenseCategory() {
   const qc = useQueryClient();
   return useMutation({
     mutationFn: (data: Partial<ExpenseCategory>): Promise<ExpenseCategory> =>
-      unwrap(safe.post<ExpenseCategory>('/finance/expenses/categories', data)),
+      unwrap(safe.post<ExpenseCategory>('/finance/expense-categories', data)),
     onSuccess: () => qc.invalidateQueries({ queryKey: ['expense-categories'] }),
     onError: () => toast.error('Failed to create expense category'),
   });

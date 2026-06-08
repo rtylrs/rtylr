@@ -64,11 +64,11 @@ export const crmService = {
 
   getCustomers: (params?: CustomerFilterParams) => safe.get('/crm/customers', { params }),
   createCustomer: (data: CustomerPayload) => safe.post('/crm/customers', data),
-  getCustomer: (id: number) => safe.get(`/crm/customers/${id}`),
+  getCustomer: (id: number) => safe.get('/crm/customers/detail', { params: { id } }),
   updateCustomer: (id: number, data: Partial<CustomerPayload>) =>
-    safe.put(`/crm/customers/${id}`, data),
-  deleteCustomer: (id: number) => safe.delete(`/crm/customers/${id}`),
-  recordVisit: (data: VisitPayload) => safe.post('/crm/customers/visit', data),
+    safe.put('/crm/customers', { id, ...data }),
+  deleteCustomer: (id: number) => safe.delete('/crm/customers', { data: { id } }),
+  recordVisit: (data: VisitPayload) => safe.post('/crm/customers/record-visit', data),
 
   getLoyaltyTransactions: (params?: LoyaltyFilterParams) =>
     safe.get('/crm/loyalty/transactions', { params }),

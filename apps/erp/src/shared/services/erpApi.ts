@@ -332,8 +332,7 @@ export const erpApi = {
     safe.get<Supplier[]>('/erp/suppliers', { params }),
   createSupplier: (data: CreateSupplierInput) => safe.post<Supplier>('/erp/suppliers', data),
   updateSupplier: (data: UpdateSupplierInput) => safe.put<Supplier>('/erp/suppliers', data),
-  deleteSupplier: (id: number) =>
-    safe.delete<{ success: boolean }>('/erp/suppliers', { data: { id } }),
+  deleteSupplier: (id: number) => safe.delete<{ success: boolean }>(`/erp/suppliers/${id}`),
 
   // Purchase Orders
   listPurchaseOrders: (params?: { page?: number; page_size?: number }) =>

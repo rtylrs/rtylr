@@ -108,9 +108,12 @@ function findMatchingBrace(text, openIndex) {
 }
 
 function moduleRootForFile(file) {
-  const marker = '/internal/routes/';
-  const index = toPosix(file).indexOf(marker);
-  return index === -1 ? null : toPosix(file).slice(0, index);
+  const normalized = toPosix(file);
+  for (const marker of ['/internal/routes/', '/internal/handlers/']) {
+    const index = normalized.indexOf(marker);
+    if (index !== -1) return normalized.slice(0, index);
+  }
+  return null;
 }
 
 function parseRequestStructs(handlerFiles) {
@@ -193,20 +196,28 @@ function chooseRequestStruct(structs, request, routeFile) {
 }
 
 function parseBackendRoutes() {
-  const routeFiles = walk(path.join(onionRoot, 'internal/modules'), (file) =>
-    file.endsWith('/internal/routes/routes.go')
+  const routeFiles = walk(
+    path.join(onionRoot, 'internal/modules'),
+    (file) =>
+      file.includes('/internal/routes/') &&
+      !file.includes('/internal/routes/handlers/') &&
+      file.endsWith('.go')
   );
   const handlerFiles = walk(
     path.join(onionRoot, 'internal/modules'),
-    (file) => file.includes('/internal/routes/handlers/') && file.endsWith('.go')
+    (file) =>
+      (file.includes('/internal/routes/handlers/') || file.includes('/internal/handlers/')) &&
+      file.endsWith('.go')
   );
 
   const routeFns = parseRoutesFunctionPaths(handlerFiles);
   const structs = parseRequestStructs(handlerFiles);
   const routes = [];
   const regRegex =
-    /(?:http|serverHttp)\.Register(GET|POST|PUT|PATCH|DELETE)(?:WithValidation(?:AndMiddleware)?|AndMiddleware)?\s*\[\s*handlers\.([A-Za-z0-9_]+)\s*,\s*handlers\.([A-Za-z0-9_]+)\s*\]\s*\(\s*ctx\s*,\s*router\s*,\s*handlers\.([A-Za-z0-9_]+Routes)\(\)/g;
+    /(?:http|serverHttp)\.Register(GET|POST|PUT|PATCH|DELETE)(?:WithValidation(?:AndMiddleware)?|AndMiddleware)?\s*\[\s*handlers\.([A-Za-z0-9_]+)\s*,\s*handlers\.([A-Za-z0-9_]+)\s*\]\s*\(\s*ctx\s*,\s*[^,]+,\s*handlers\.([A-Za-z0-9_]+Routes)\(\)/g;
   const rawRouteRegex = /router\.(Get|Post|Put|Patch|Delete)\s*\(\s*"([^"]+)"/g;
+  const rawRouteFnLoopRegex =
+    /for\s+_,\s*path\s*:=\s*range\s+handlers\.([A-Za-z0-9_]+Routes)\(\)\s*\{[\s\S]*?router\.(Get|Post|Put|Patch|Delete)\s*\(\s*path\b/g;
 
   for (const file of routeFiles) {
     const text = readText(file);
@@ -241,6 +252,24 @@ function parseBackendRoutes() {
         validated: false,
         raw: true,
       });
+    }
+    while ((match = rawRouteFnLoopRegex.exec(text))) {
+      const [, routeFn, methodName] = match;
+      const method = methodName.toUpperCase();
+      const moduleRoot = moduleRootForFile(file);
+      for (const routePath of routeFns.get(`${moduleRoot}:${routeFn}`) ?? []) {
+        routes.push({
+          method,
+          path: routePath,
+          normalizedPath: normalizeRoute(routePath),
+          request: null,
+          response: null,
+          routeFile: toPosix(path.relative(root, file)),
+          requestStruct: null,
+          validated: false,
+          raw: true,
+        });
+      }
     }
   }
 

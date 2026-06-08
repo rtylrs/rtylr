@@ -43,7 +43,7 @@ describe('useBalanceSheet', () => {
     const { result } = renderHook(() => useBalanceSheet(), { wrapper: createWrapper() });
     await waitFor(() => expect(result.current.isSuccess).toBe(true));
     expect(safe.get).toHaveBeenCalledWith(
-      '/finance/reports/balance-sheet',
+      '/finance/balance-sheet',
       expect.objectContaining({ params: expect.objectContaining({ as_of: expect.any(String) }) })
     );
   });

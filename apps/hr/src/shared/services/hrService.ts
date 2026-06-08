@@ -63,21 +63,21 @@ export const hrService = {
   // Staff
   getStaff: () => safe.get('/hr/staff'),
   createStaff: (data: StaffPayload) => safe.post('/hr/staff', data),
-  updateStaff: (id: number, data: Partial<StaffPayload>) => safe.put(`/hr/staff/${id}`, data),
-  deleteStaff: (id: number) => safe.delete(`/hr/staff/${id}`),
+  updateStaff: (id: number, data: Partial<StaffPayload>) => safe.put('/hr/staff', { id, ...data }),
+  deleteStaff: (id: number) => safe.delete('/hr/staff', { data: { id } }),
   getDashboard: () => safe.get('/hr/dashboard'),
 
   // Departments
   getDepartments: () => safe.get('/hr/departments'),
   createDepartment: (data: DepartmentPayload) => safe.post('/hr/departments', data),
   updateDepartment: (id: number, data: Partial<DepartmentPayload>) =>
-    safe.put(`/hr/departments/${id}`, data),
+    safe.put('/hr/departments', { id, ...data }),
 
   // Shifts
   getShifts: () => safe.get('/hr/shifts'),
   createShift: (data: ShiftPayload) => safe.post('/hr/shifts', data),
-  clockIn: (data: ClockPayload) => safe.post('/hr/shifts/clock-in', data),
-  clockOut: (data: ClockPayload) => safe.post('/hr/shifts/clock-out', data),
+  clockIn: (data: ClockPayload) => safe.post('/hr/staff/clock-in', data),
+  clockOut: (data: ClockPayload) => safe.post('/hr/staff/clock-out', data),
 
   // Time Off
   getTimeOff: () => safe.get('/hr/time-off'),

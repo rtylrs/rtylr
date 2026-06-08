@@ -35,14 +35,14 @@ describe('flowService', () => {
     expect(safe.post).toHaveBeenCalledWith('/flow/workspaces', data);
   });
 
-  it('updateWorkspace calls PUT /flow/workspaces/:id', () => {
+  it('updateWorkspace calls PUT /flow/workspaces with id', () => {
     flowService.updateWorkspace(1, { name: 'Updated' });
-    expect(safe.put).toHaveBeenCalledWith('/flow/workspaces/1', { name: 'Updated' });
+    expect(safe.put).toHaveBeenCalledWith('/flow/workspaces', { id: 1, name: 'Updated' });
   });
 
-  it('deleteWorkspace calls DELETE /flow/workspaces/:id', () => {
+  it('deleteWorkspace calls DELETE /flow/workspaces with id', () => {
     flowService.deleteWorkspace(1);
-    expect(safe.delete).toHaveBeenCalledWith('/flow/workspaces/1');
+    expect(safe.delete).toHaveBeenCalledWith('/flow/workspaces', { data: { id: 1 } });
   });
 
   // Projects
@@ -58,14 +58,14 @@ describe('flowService', () => {
     expect(safe.post).toHaveBeenCalledWith('/flow/projects', data);
   });
 
-  it('updateProject calls PUT /flow/projects/:id', () => {
+  it('updateProject calls PUT /flow/projects with id', () => {
     flowService.updateProject(2, { name: 'Updated' });
-    expect(safe.put).toHaveBeenCalledWith('/flow/projects/2', { name: 'Updated' });
+    expect(safe.put).toHaveBeenCalledWith('/flow/projects', { id: 2, name: 'Updated' });
   });
 
-  it('deleteProject calls DELETE /flow/projects/:id', () => {
+  it('deleteProject calls DELETE /flow/projects with id', () => {
     flowService.deleteProject(2);
-    expect(safe.delete).toHaveBeenCalledWith('/flow/projects/2');
+    expect(safe.delete).toHaveBeenCalledWith('/flow/projects', { data: { id: 2 } });
   });
 
   // Tasks
@@ -81,14 +81,14 @@ describe('flowService', () => {
     expect(safe.post).toHaveBeenCalledWith('/flow/tasks', data);
   });
 
-  it('updateTask calls PUT /flow/tasks/:id', () => {
+  it('updateTask calls PUT /flow/tasks with id', () => {
     flowService.updateTask(3, { title: 'Updated' });
-    expect(safe.put).toHaveBeenCalledWith('/flow/tasks/3', { title: 'Updated' });
+    expect(safe.put).toHaveBeenCalledWith('/flow/tasks', { id: 3, title: 'Updated' });
   });
 
-  it('deleteTask calls DELETE /flow/tasks/:id', () => {
+  it('deleteTask calls DELETE /flow/tasks with id', () => {
     flowService.deleteTask(3);
-    expect(safe.delete).toHaveBeenCalledWith('/flow/tasks/3');
+    expect(safe.delete).toHaveBeenCalledWith('/flow/tasks', { data: { id: 3 } });
   });
 
   // Labels

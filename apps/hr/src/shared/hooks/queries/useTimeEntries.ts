@@ -78,9 +78,7 @@ export const useImportFromFlow = () => {
 
   return useMutation({
     mutationFn: async (): Promise<FlowImportResponse> => {
-      const res = await unwrap(
-        safe.post<FlowImportResponse>('/hr/time-entries/import-from-flow', {})
-      );
+      const res = await unwrap(safe.post<FlowImportResponse>('/hr/time-entries/import-flow', {}));
       return res as FlowImportResponse;
     },
     onSuccess: (data) => {

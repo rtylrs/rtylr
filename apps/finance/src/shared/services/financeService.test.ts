@@ -36,30 +36,33 @@ describe('financeService', () => {
     expect(safe.post).toHaveBeenCalledWith('/finance/invoices', data);
   });
 
-  it('getInvoice calls GET /finance/invoices/:id', () => {
+  it('getInvoice calls GET /finance/invoices/detail with id param', () => {
     financeService.getInvoice(3);
-    expect(safe.get).toHaveBeenCalledWith('/finance/invoices/3');
+    expect(safe.get).toHaveBeenCalledWith('/finance/invoices/detail', { params: { id: 3 } });
   });
 
-  it('updateInvoice calls PUT /finance/invoices/:id', () => {
+  it('updateInvoice calls PUT /finance/invoices with id', () => {
     financeService.updateInvoice(3, { amount: 500 });
-    expect(safe.put).toHaveBeenCalledWith('/finance/invoices/3', { amount: 500 });
+    expect(safe.put).toHaveBeenCalledWith('/finance/invoices', { id: 3, amount: 500 });
   });
 
-  it('deleteInvoice calls DELETE /finance/invoices/:id', () => {
+  it('deleteInvoice calls DELETE /finance/invoices with id', () => {
     financeService.deleteInvoice(3);
-    expect(safe.delete).toHaveBeenCalledWith('/finance/invoices/3');
+    expect(safe.delete).toHaveBeenCalledWith('/finance/invoices', { data: { id: 3 } });
   });
 
-  it('updateInvoiceStatus calls PUT /finance/invoices/:id/status', () => {
+  it('updateInvoiceStatus calls PUT /finance/invoices/status with id', () => {
     financeService.updateInvoiceStatus(3, 'paid');
-    expect(safe.put).toHaveBeenCalledWith('/finance/invoices/3/status', { status: 'paid' });
+    expect(safe.put).toHaveBeenCalledWith('/finance/invoices/status', { id: 3, status: 'paid' });
   });
 
-  it('recordPayment calls POST /finance/invoices/:id/payment', () => {
+  it('recordPayment calls POST /finance/invoices/payment with invoiceId', () => {
     const data = { amount: 100 };
     financeService.recordPayment(3, data);
-    expect(safe.post).toHaveBeenCalledWith('/finance/invoices/3/payment', data);
+    expect(safe.post).toHaveBeenCalledWith('/finance/invoices/payment', {
+      invoiceId: 3,
+      amount: 100,
+    });
   });
 
   // Expenses

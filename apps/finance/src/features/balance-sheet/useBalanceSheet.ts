@@ -9,7 +9,7 @@ export function useBalanceSheet() {
     queryKey: ['balance-sheet', asOf],
     queryFn: async () => {
       const res = await unwrap(
-        safe.get<unknown>('/finance/reports/balance-sheet', { params: { as_of: asOf } })
+        safe.get<unknown>('/finance/balance-sheet', { params: { as_of: asOf } })
       );
       return balanceSheetSchema.parse(res ?? {});
     },

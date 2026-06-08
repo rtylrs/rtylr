@@ -35,7 +35,7 @@ export const useRevokeSession = () => {
   const qc = useQueryClient();
   return useMutation({
     mutationFn: async (id: string) => {
-      await unwrap(safe.delete(`/security/sessions/${id}`));
+      await unwrap(safe.post('/security/invalidate-sessions', { exceptSessionId: id }));
     },
     onSuccess: () => {
       toast.success('Session revoked');

@@ -252,8 +252,9 @@ export const hrExtras = {
   // Timesheets
   listTimesheets: () => safe.get<TimesheetRow[]>('/hr/timesheets'),
   approveTimesheet: (id: number) =>
-    safe.post<{ success: boolean }>('/hr/timesheets', { id, _action: 'approve' }),
-  upsertTimesheet: (row: TimesheetRow) => safe.post<TimesheetRow>('/hr/timesheets', row),
+    safe.post<{ success: boolean }>(`/hr/timesheets/${id}/approve`, {}),
+  upsertTimesheet: (row: TimesheetRow) =>
+    safe.post<TimesheetRow>(`/hr/timesheets/${row.id}/submit`, {}),
 
   // Reviews
   listReviews: () => safe.get<Review[]>('/hr/reviews'),
@@ -327,14 +328,14 @@ export const hrExtras = {
   // Breaks
   listBreaks: () => safe.get<BreakLog[]>('/hr/shifts', { params: { view: 'breaks' } }),
   startBreak: (staffId: number, staffName: string, type: BreakLog['type']) =>
-    safe.post<BreakLog>('/hr/shifts/clock-in', {
+    safe.post<BreakLog>('/hr/staff/clock-in', {
       staffId,
       staffName,
       type,
       _action: 'start-break',
     }),
   endBreak: (id: number) =>
-    safe.post<{ success: boolean }>('/hr/shifts/clock-out', { id, _action: 'end-break' }),
+    safe.post<{ success: boolean }>('/hr/staff/clock-out', { id, _action: 'end-break' }),
 
   // Overtime
   listOvertimeAlerts: () =>
@@ -342,6 +343,5 @@ export const hrExtras = {
 
   // Settings
   getSettings: () => safe.get<HrSettings>('/hr/dashboard', { params: { view: 'settings' } }),
-  updateSettings: (patch: Partial<HrSettings>) =>
-    safe.post<HrSettings>('/hr/dashboard', { ...patch, _action: 'update-settings' }),
+  updateSettings: (patch: Partial<HrSettings>) => safe.put<HrSettings>('/hr/config', patch),
 };

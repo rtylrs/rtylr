@@ -71,7 +71,7 @@ describe('useTriggerPayrollRun', () => {
     await act(() =>
       result.current.mutateAsync({ periodStart: '2026-04-01', periodEnd: '2026-04-30' })
     );
-    expect(safe.post).toHaveBeenCalledWith('/hr/payroll/runs', {
+    expect(safe.post).toHaveBeenCalledWith('/hr/payroll/runs/trigger', {
       periodStart: '2026-04-01',
       periodEnd: '2026-04-30',
     });

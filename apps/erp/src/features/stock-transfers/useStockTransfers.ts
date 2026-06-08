@@ -55,7 +55,7 @@ export function useUpdateStockTransferStatus() {
   const qc = useQueryClient();
   return useMutation({
     mutationFn: (data: UpdateStockTransferStatusInput) =>
-      unwrap(safe.put<unknown>(`/erp/stock-transfers/${data.id}`, data)),
+      unwrap(safe.put<unknown>('/erp/stock-transfers', data)),
     onSuccess: () => qc.invalidateQueries({ queryKey: ['stock-transfers'] }),
     onError: () => toast.error('Failed to update stock transfer'),
   });

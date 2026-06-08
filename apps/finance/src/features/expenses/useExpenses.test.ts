@@ -114,10 +114,10 @@ describe('useCreateExpenseCategory', () => {
     vi.clearAllMocks();
   });
 
-  it('calls POST /finance/expenses/categories', async () => {
+  it('calls POST /finance/expense-categories', async () => {
     (safe.post as ReturnType<typeof vi.fn>).mockResolvedValue({ id: 'cat-new' });
     const { result } = renderHook(() => useCreateExpenseCategory(), { wrapper: createWrapper() });
     await act(() => result.current.mutateAsync({ name: 'Travel' } as any));
-    expect(safe.post).toHaveBeenCalledWith('/finance/expenses/categories', { name: 'Travel' });
+    expect(safe.post).toHaveBeenCalledWith('/finance/expense-categories', { name: 'Travel' });
   });
 });

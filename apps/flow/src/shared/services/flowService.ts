@@ -52,19 +52,19 @@ export const flowService = {
   getWorkspaces: () => safe.get('/flow/workspaces'),
   createWorkspace: (data: WorkspacePayload) => safe.post('/flow/workspaces', data),
   updateWorkspace: (id: number, data: Partial<WorkspacePayload>) =>
-    safe.put(`/flow/workspaces/${id}`, data),
-  deleteWorkspace: (id: number) => safe.delete(`/flow/workspaces/${id}`),
+    safe.put('/flow/workspaces', { id, ...data }),
+  deleteWorkspace: (id: number) => safe.delete('/flow/workspaces', { data: { id } }),
 
   getProjects: (params?: ProjectFilterParams) => safe.get('/flow/projects', { params }),
   createProject: (data: ProjectPayload) => safe.post('/flow/projects', data),
   updateProject: (id: number, data: Partial<ProjectPayload>) =>
-    safe.put(`/flow/projects/${id}`, data),
-  deleteProject: (id: number) => safe.delete(`/flow/projects/${id}`),
+    safe.put('/flow/projects', { id, ...data }),
+  deleteProject: (id: number) => safe.delete('/flow/projects', { data: { id } }),
 
   getTasks: (params?: TaskFilterParams) => safe.get('/flow/tasks', { params }),
   createTask: (data: TaskPayload) => safe.post('/flow/tasks', data),
-  updateTask: (id: number, data: Partial<TaskPayload>) => safe.put(`/flow/tasks/${id}`, data),
-  deleteTask: (id: number) => safe.delete(`/flow/tasks/${id}`),
+  updateTask: (id: number, data: Partial<TaskPayload>) => safe.put('/flow/tasks', { id, ...data }),
+  deleteTask: (id: number) => safe.delete('/flow/tasks', { data: { id } }),
 
   getLabels: () => safe.get('/flow/labels'),
   createLabel: (data: LabelPayload) => safe.post('/flow/labels', data),

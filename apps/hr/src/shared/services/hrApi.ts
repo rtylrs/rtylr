@@ -134,7 +134,7 @@ export const hrApi = {
   // Payroll
   listPayroll: (params?: { period?: string }) => safe.get<PayrollRow[]>('/hr/payroll', { params }),
   runPayroll: (period: string) => safe.post<{ success: boolean }>('/hr/payroll/run', { period }),
-  markPayrollPaid: (id: number) => safe.post<{ success: boolean }>('/hr/payroll/paid', { id }),
+  markPayrollPaid: (id: number) => safe.post<{ success: boolean }>('/hr/payroll/mark-paid', { id }),
 
   // Time Off
   listTimeOff: () => safe.get<TimeOffRequest[]>('/hr/time-off'),

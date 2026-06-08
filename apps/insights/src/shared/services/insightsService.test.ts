@@ -122,13 +122,12 @@ describe('insightsService', () => {
     expect(safe.post).toHaveBeenCalledWith('/insights/reports/generate/revenue', params);
   });
 
-  it('exportReport calls POST /insights/reports/export/:templateId with format', () => {
+  it('exportReport calls GET /insights/reports/export/revenue with format', () => {
     insightsService.exportReport('revenue', 'csv', { start: '2026-01-01' });
-    expect(safe.post).toHaveBeenCalledWith(
-      '/insights/reports/export/revenue',
-      { format: 'csv', start: '2026-01-01' },
-      { responseType: 'blob' }
-    );
+    expect(safe.get).toHaveBeenCalledWith('/insights/reports/export/revenue', {
+      params: { format: 'csv', start: '2026-01-01' },
+      responseType: 'blob',
+    });
   });
 
   // Settings

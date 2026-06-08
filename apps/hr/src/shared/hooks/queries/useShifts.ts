@@ -83,7 +83,7 @@ export const useCreateShiftAssignment = () => {
 
   return useMutation({
     mutationFn: async (data: CreateShiftAssignmentPayload): Promise<void> => {
-      await unwrap(safe.post('/hr/shifts/roster/assign', data));
+      await unwrap(safe.post('/hr/shifts/roster/assignments', data));
     },
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ['roster'] });

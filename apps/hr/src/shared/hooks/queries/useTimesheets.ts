@@ -41,7 +41,9 @@ export const useGetTimesheet = (id: number | undefined) => {
   return useQuery<TimesheetPayload>({
     queryKey: ['timesheet', id],
     queryFn: async (): Promise<TimesheetPayload> => {
-      const res = await unwrap(safe.get<{ timesheet: TimesheetPayload }>(`/hr/timesheets/${id}`));
+      const res = await unwrap(
+        safe.get<{ timesheet: TimesheetPayload }>('/hr/timesheets/current', { params: { id } })
+      );
       return (res as { timesheet: TimesheetPayload }).timesheet;
     },
     enabled: !!id,
@@ -54,7 +56,9 @@ export const useSubmitTimesheet = () => {
 
   return useMutation({
     mutationFn: async (data: SubmitTimesheetRequest): Promise<SubmitTimesheetResponse> => {
-      const res = await unwrap(safe.post<SubmitTimesheetResponse>('/hr/timesheets/submit', data));
+      const res = await unwrap(
+        safe.post<SubmitTimesheetResponse>(`/hr/timesheets/${data.timesheetId}/submit`, {})
+      );
       return res as SubmitTimesheetResponse;
     },
     onSuccess: () => {
@@ -73,7 +77,9 @@ export const useApproveTimesheet = () => {
 
   return useMutation({
     mutationFn: async (data: ApproveTimesheetRequest): Promise<ApproveTimesheetResponse> => {
-      const res = await unwrap(safe.post<ApproveTimesheetResponse>('/hr/timesheets/approve', data));
+      const res = await unwrap(
+        safe.post<ApproveTimesheetResponse>(`/hr/timesheets/${data.timesheetId}/approve`, {})
+      );
       return res as ApproveTimesheetResponse;
     },
     onSuccess: (_data: ApproveTimesheetResponse, variables: ApproveTimesheetRequest) => {

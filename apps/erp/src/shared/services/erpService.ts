@@ -63,5 +63,5 @@ export const erpService = {
   getPurchaseOrders: () => safe.get('/erp/purchase-orders'),
   createPurchaseOrder: (data: PurchaseOrderPayload) => safe.post('/erp/purchase-orders', data),
   updatePurchaseOrderStatus: (id: number, status: string) =>
-    safe.put(`/erp/purchase-orders/${id}/status`, { status }),
+    safe.put('/erp/purchase-orders/status', { id, status }),
 };

@@ -23,8 +23,7 @@ export function useChartOfAccounts() {
 export function useCreateAccount() {
   const qc = useQueryClient();
   return useMutation({
-    mutationFn: (data: CreateAccountRequest) =>
-      unwrap(safe.post('/finance/chart-of-accounts', data)),
+    mutationFn: (data: CreateAccountRequest) => unwrap(safe.post('/finance/accounts', data)),
     onSuccess: () => {
       qc.invalidateQueries({ queryKey: ['chart-of-accounts'] });
       toast.success('Account created');

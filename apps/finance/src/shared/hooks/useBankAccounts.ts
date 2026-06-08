@@ -20,9 +20,7 @@ export function useBankTransactions(accountId?: string) {
     queryKey: ['bank-tx', accountId ?? 'all'],
     queryFn: async () => {
       const params = accountId ? { account_id: accountId } : undefined;
-      const res = await unwrap(
-        safe.get<unknown>('/finance/bank-accounts/transactions', { params })
-      );
+      const res = await unwrap(safe.get<unknown>('/finance/bank-feeds', { params }));
       return z.array(bankAccountSchema).parse(unwrapList(res, 'transactions'));
     },
   });

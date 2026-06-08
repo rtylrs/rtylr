@@ -30,14 +30,14 @@ describe('hrService', () => {
     expect(safe.post).toHaveBeenCalledWith('/hr/staff', data);
   });
 
-  it('updateStaff calls PUT /hr/staff/:id', () => {
+  it('updateStaff calls PUT /hr/staff with id', () => {
     hrService.updateStaff(1, { name: 'Updated' });
-    expect(safe.put).toHaveBeenCalledWith('/hr/staff/1', { name: 'Updated' });
+    expect(safe.put).toHaveBeenCalledWith('/hr/staff', { id: 1, name: 'Updated' });
   });
 
-  it('deleteStaff calls DELETE /hr/staff/:id', () => {
+  it('deleteStaff calls DELETE /hr/staff with id', () => {
     hrService.deleteStaff(1);
-    expect(safe.delete).toHaveBeenCalledWith('/hr/staff/1');
+    expect(safe.delete).toHaveBeenCalledWith('/hr/staff', { data: { id: 1 } });
   });
 
   it('getDashboard calls GET /hr/dashboard', () => {
@@ -57,9 +57,9 @@ describe('hrService', () => {
     expect(safe.post).toHaveBeenCalledWith('/hr/departments', data);
   });
 
-  it('updateDepartment calls PUT /hr/departments/:id', () => {
+  it('updateDepartment calls PUT /hr/departments with id', () => {
     hrService.updateDepartment(2, { name: 'Updated' });
-    expect(safe.put).toHaveBeenCalledWith('/hr/departments/2', { name: 'Updated' });
+    expect(safe.put).toHaveBeenCalledWith('/hr/departments', { id: 2, name: 'Updated' });
   });
 
   // Shifts
@@ -74,16 +74,16 @@ describe('hrService', () => {
     expect(safe.post).toHaveBeenCalledWith('/hr/shifts', data);
   });
 
-  it('clockIn calls POST /hr/shifts/clock-in', () => {
+  it('clockIn calls POST /hr/staff/clock-in', () => {
     const data = { staffId: 1 };
     hrService.clockIn(data);
-    expect(safe.post).toHaveBeenCalledWith('/hr/shifts/clock-in', data);
+    expect(safe.post).toHaveBeenCalledWith('/hr/staff/clock-in', data);
   });
 
-  it('clockOut calls POST /hr/shifts/clock-out', () => {
+  it('clockOut calls POST /hr/staff/clock-out', () => {
     const data = { staffId: 1 };
     hrService.clockOut(data);
-    expect(safe.post).toHaveBeenCalledWith('/hr/shifts/clock-out', data);
+    expect(safe.post).toHaveBeenCalledWith('/hr/staff/clock-out', data);
   });
 
   // Time Off

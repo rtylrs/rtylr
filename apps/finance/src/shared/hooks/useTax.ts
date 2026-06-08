@@ -81,9 +81,7 @@ export function usePLByPeriod(period: string) {
   return useQuery({
     queryKey: ['pl', period],
     queryFn: async () => {
-      const res = await unwrap(
-        safe.get<unknown>('/finance/reports/profit-loss', { params: { from, to } })
-      );
+      const res = await unwrap(safe.get<unknown>('/finance/pl', { params: { from, to } }));
       return plReportSchema.parse(res ?? {}) as PLReport;
     },
     enabled: !!period,

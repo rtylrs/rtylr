@@ -50,8 +50,10 @@ export function useSetRecurringStatus() {
   const qc = useQueryClient();
   return useMutation({
     mutationFn: ({ id, status }: { id: number; status: 'active' | 'paused' }): Promise<void> => {
-      const action = status === 'paused' ? 'pause' : 'resume';
-      return unwrap(safe.post<void>(`/finance/recurring-invoices/${id}/${action}`, {}));
+      if (status === 'paused') {
+        return unwrap(safe.post<void>(`/finance/recurring-invoices/${id}/pause`, {}));
+      }
+      return unwrap(safe.post<void>(`/finance/recurring-invoices/${id}/resume`, {}));
     },
     onSuccess: () => qc.invalidateQueries({ queryKey: ['recurring-invoices'] }),
     onError: () => toast.error('Failed to update recurring invoice status'),
