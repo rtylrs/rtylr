@@ -1,27 +1,63 @@
 #!/bin/bash
-# Sync generated TypeScript types from voxie submodule into @voxire/contracts
-# Run after `cd voxie && buf generate`
+# Generate TypeScript contracts from the local voxie submodule.
+
+set -euo pipefail
 
 SCRIPT_DIR="$(cd "$(dirname "$0")" && pwd)"
-CONTRACTS_SRC="$SCRIPT_DIR/../src"
-VOXIE_TS="$SCRIPT_DIR/../../../voxie/gen/ts"
-VOXIE_VALIDATION="$SCRIPT_DIR/../../../voxie/gen/validation"
+CONTRACTS_ROOT="$(cd "$SCRIPT_DIR/.." && pwd)"
+FRONTEND_ROOT="$(cd "$CONTRACTS_ROOT/../.." && pwd)"
+CONTRACTS_SRC="$CONTRACTS_ROOT/src"
+VOXIE_ROOT="$FRONTEND_ROOT/voxie"
+TEMPLATE_FILE="$(mktemp "${TMPDIR:-/tmp}/voxie.ts.XXXXXX.yaml")"
 
-if [ ! -d "$VOXIE_TS" ]; then
-  echo "Error: voxie/gen/ts not found. Run 'cd voxie && buf generate' first."
+cleanup() {
+  rm -f "$TEMPLATE_FILE"
+}
+trap cleanup EXIT
+
+if [ ! -d "$VOXIE_ROOT/proto" ]; then
+  echo "Error: voxie/proto not found. Run 'git submodule update --init --recursive' first."
   exit 1
 fi
 
-if [ ! -d "$VOXIE_VALIDATION" ]; then
-  echo "Error: voxie/gen/validation not found. Run 'cd voxie && make generate' first."
+if ! command -v buf >/dev/null 2>&1; then
+  echo "Error: buf is required to generate contracts."
   exit 1
 fi
 
-# Clean and copy
+export PATH="$FRONTEND_ROOT/node_modules/.bin:$CONTRACTS_ROOT/node_modules/.bin:$PATH"
+if ! command -v protoc-gen-ts_proto >/dev/null 2>&1; then
+  echo "Error: protoc-gen-ts_proto is required. Run 'pnpm install' first."
+  exit 1
+fi
+
+cat > "$TEMPLATE_FILE" <<EOF
+version: v2
+plugins:
+  - local: protoc-gen-ts_proto
+    out: $CONTRACTS_SRC
+    opt:
+      - esModuleInterop=true
+      - outputServices=false
+      - env=browser
+      - useExactTypes=false
+      - exportCommonSymbols=false
+      - onlyTypes=true
+EOF
+
+echo "Generating contracts from voxie..."
 rm -rf "$CONTRACTS_SRC"
 mkdir -p "$CONTRACTS_SRC"
-cp -r "$VOXIE_TS"/* "$CONTRACTS_SRC/"
-mkdir -p "$CONTRACTS_SRC/validation"
-cp -r "$VOXIE_VALIDATION"/* "$CONTRACTS_SRC/validation/"
+buf generate "$VOXIE_ROOT" --template "$TEMPLATE_FILE"
+python3 "$SCRIPT_DIR/generate_validation_metadata.py" \
+  --proto-root "$VOXIE_ROOT/proto" \
+  --out-dir "$CONTRACTS_SRC/validation"
 
-echo "Synced $(find "$CONTRACTS_SRC" -name '*.ts' | wc -l | tr -d ' ') TypeScript files and validation metadata from voxie"
+if command -v pnpm >/dev/null 2>&1; then
+  (
+    cd "$FRONTEND_ROOT"
+    pnpm exec prettier --write "packages/contracts/src/**/*.ts" "packages/contracts/src/validation/*.json" >/dev/null
+  )
+fi
+
+echo "Generated $(find "$CONTRACTS_SRC" -name '*.ts' | wc -l | tr -d ' ') TypeScript files and validation metadata"
