@@ -59,15 +59,6 @@ export const contractValidationMetadata = {
       scalar: true,
       type: 'string',
     },
-    idToken: {
-      name: 'idToken',
-      optional: true,
-      protoName: 'id_token',
-      repeated: false,
-      required: false,
-      scalar: true,
-      type: 'string',
-    },
   },
   'common.auth.v1.InviteAcceptRequest': {
     password: {

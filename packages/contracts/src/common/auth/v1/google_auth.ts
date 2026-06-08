@@ -7,8 +7,6 @@
 /* eslint-disable */
 
 export interface GoogleAuthRequest {
-  /** id_token is the legacy Google ID token; absent when using the OAuth code flow. */
-  idToken?: string | undefined;
   /** business_name is the optional business name to create for the user. */
   businessName?: string | undefined;
   /** code is the OAuth authorization code returned by the provider callback. */
