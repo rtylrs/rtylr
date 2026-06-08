@@ -101,11 +101,11 @@ func (h *ListMilestonesHandler) Serve(ctx context.Context, r *ListMilestonesRequ
 func CreateMilestoneRoutes() []string { return []string{"/flow/milestones"} }
 
 type CreateMilestoneRequest struct {
-	ProjectID   string `json:"projectId"`
-	WorkspaceID string `json:"workspaceId"`
+	ProjectID   string `json:"project_id"`
+	WorkspaceID string `json:"workspace_id"`
 	Name        string `json:"name"`
 	Description string `json:"description"`
-	TargetDate  string `json:"targetDate"`
+	TargetDate  string `json:"target_date"`
 }
 
 type CreateMilestoneResponse struct {
@@ -171,7 +171,7 @@ type UpdateMilestoneRequest struct {
 	Name        string `json:"name"`
 	Description string `json:"description"`
 	Status      string `json:"status"`
-	TargetDate  string `json:"targetDate"`
+	TargetDate  string `json:"target_date"`
 }
 
 type UpdateMilestoneResponse struct{}

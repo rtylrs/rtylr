@@ -76,13 +76,13 @@ func (h *ListViewsHandler) Serve(ctx context.Context, r *ListViewsRequest) (List
 func CreateViewRoutes() []string { return []string{"/flow/views"} }
 
 type CreateViewRequest struct {
-	WorkspaceID string                 `json:"workspaceId"`
+	WorkspaceID string                 `json:"workspace_id"`
 	Name        string                 `json:"name"`
 	Icon        string                 `json:"icon"`
 	Filters     map[string]interface{} `json:"filters"`
-	GroupBy     string                 `json:"groupBy"`
-	SortBy      string                 `json:"sortBy"`
-	SortDir     string                 `json:"sortDir"`
+	GroupBy     string                 `json:"group_by"`
+	SortBy      string                 `json:"sort_by"`
+	SortDir     string                 `json:"sort_dir"`
 }
 
 type CreateViewResponse struct {
@@ -148,9 +148,9 @@ type UpdateViewRequest struct {
 	Name    string                 `json:"name"`
 	Icon    string                 `json:"icon"`
 	Filters map[string]interface{} `json:"filters"`
-	GroupBy string                 `json:"groupBy"`
-	SortBy  string                 `json:"sortBy"`
-	SortDir string                 `json:"sortDir"`
+	GroupBy string                 `json:"group_by"`
+	SortBy  string                 `json:"sort_by"`
+	SortDir string                 `json:"sort_dir"`
 }
 
 type UpdateViewResponse struct{}

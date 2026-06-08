@@ -174,12 +174,12 @@ func (h *GetUserSettingsHandler) Serve(ctx context.Context, _ *GetUserSettingsRe
 func UpdateUserSettingsRoutes() []string { return []string{"/flow/settings"} }
 
 type UpdateUserSettingsRequest struct {
-	TaskAssigned       bool `json:"taskAssigned"`
-	TaskComments       bool `json:"taskComments"`
+	TaskAssigned       bool `json:"task_assigned"`
+	TaskComments       bool `json:"task_comments"`
 	Mentions           bool `json:"mentions"`
-	StatusChanges      bool `json:"statusChanges"`
-	WeeklyDigest       bool `json:"weeklyDigest"`
-	EmailNotifications bool `json:"emailNotifications"`
+	StatusChanges      bool `json:"status_changes"`
+	WeeklyDigest       bool `json:"weekly_digest"`
+	EmailNotifications bool `json:"email_notifications"`
 }
 
 type UpdateUserSettingsResponse struct{}
