@@ -51,7 +51,7 @@ const ImportCustomers: React.FC = () => {
       return o;
     });
     importMut.mutate(
-      { rows: payload, dedupe },
+      { customers: payload, dedupe },
       {
         onSuccess: () => {
           toast.success(`Imported ${payload.length} customers`);

@@ -66,7 +66,7 @@ export function useUpdateQuoteStatus() {
   const qc = useQueryClient();
   return useMutation({
     mutationFn: async ({ id, status }: { id: string; status: string }): Promise<unknown> =>
-      unwrap(safe.put(`/finance/quotes/${id}`, { status })),
+      unwrap(safe.put(`/finance/quotes/${id}/status`, { status })),
     onSuccess: () => {
       void qc.invalidateQueries({ queryKey: ['quotes'] });
     },

@@ -67,9 +67,12 @@ describe('crmApi', () => {
   });
 
   it('importCustomers calls POST /crm/customers/import', () => {
-    const rows = [{ name: 'A' }];
-    crmApi.importCustomers(rows);
-    expect(safe.post).toHaveBeenCalledWith('/crm/customers/import', { rows });
+    const customers = [{ name: 'A' }];
+    crmApi.importCustomers(customers);
+    expect(safe.post).toHaveBeenCalledWith('/crm/customers/import', {
+      customers,
+      dedupe: undefined,
+    });
   });
 
   it('mergeCustomers calls POST /crm/customers/merge', () => {

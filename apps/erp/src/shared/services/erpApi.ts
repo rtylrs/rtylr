@@ -321,7 +321,11 @@ export const erpApi = {
   // Stock takes
   listStockTakes: (params?: { page?: number; page_size?: number }) =>
     safe.get<StockTake[]>('/erp/stock-takes', { params }),
-  createStockTake: (data: Partial<StockTake>) => safe.post<StockTake>('/erp/stock-takes', data),
+  createStockTake: (data: {
+    warehouseId: number;
+    notes?: string;
+    items: Array<{ productId: number; expectedQty: number; countedQty: number }>;
+  }) => safe.post<StockTake>('/erp/stock-takes', data),
 
   // Suppliers
   listSuppliers: (params?: { page?: number; page_size?: number }) =>

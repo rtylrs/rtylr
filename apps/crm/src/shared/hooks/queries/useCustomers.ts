@@ -201,7 +201,7 @@ export const useImportCustomers = (): UseMutationResult<unknown, unknown, File> 
 };
 
 interface ImportCustomerRowsPayload {
-  rows: Record<string, string>[];
+  customers: Record<string, string>[];
   dedupe: boolean;
 }
 

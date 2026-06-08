@@ -32,7 +32,7 @@ const Reconcile: React.FC = () => {
 
   const match = async (txId: string, candidateId: string): Promise<void> => {
     try {
-      await unwrap(financeApi.matchTransaction(txId, candidateId));
+      await unwrap(financeApi.matchTransaction(txId, 'invoice', candidateId));
       setMatches((prev) => ({ ...prev, [txId]: candidateId }));
       toast.success(`Matched transaction to ${candidateId}`);
     } catch {
@@ -43,7 +43,20 @@ const Reconcile: React.FC = () => {
   const handleAutoMatch = async (): Promise<void> => {
     setAutoMatching(true);
     try {
-      await unwrap(financeApi.autoMatchTransactions());
+      const exactMatches = unmatched.flatMap((transaction) => {
+        const candidate = candidates.find(
+          (item) => Math.abs(item.amount) === Math.abs(transaction.amount ?? 0)
+        );
+        return transaction.id && candidate ? [{ transactionId: transaction.id, candidate }] : [];
+      });
+      for (const item of exactMatches) {
+        await unwrap(financeApi.matchTransaction(item.transactionId, 'invoice', item.candidate.id));
+      }
+      setMatches((prev) => {
+        const next = { ...prev };
+        for (const item of exactMatches) next[item.transactionId] = item.candidate.id;
+        return next;
+      });
       toast.success('Auto-match completed');
     } catch {
       toast.error('Auto-match failed');

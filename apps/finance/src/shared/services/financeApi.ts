@@ -1,5 +1,6 @@
 import { safe } from '../lib/api';
 import type { InvoiceItem as InvoiceLine } from '@voxire/contracts/finance/invoices/v1/types';
+import type { CreateInvoiceRequest } from '@voxire/contracts/finance/invoices/v1/create_invoice';
 import type { CreateRecurringInvoiceRequest } from '@voxire/contracts/finance/recurring_invoice/v1/create_recurring_invoice';
 import type { CreateQuoteRequest } from '@voxire/contracts/finance/quote/v1/create_quote';
 import type { CreateBillRequest } from '@voxire/contracts/finance/bill/v1/create_bill';
@@ -134,7 +135,7 @@ export const financeApi = {
   getInvoiceDetail: (id: string) =>
     safe.get<Invoice>('/finance/invoices/detail', { params: { id } }),
 
-  createInvoice: (data: Partial<Invoice>) => safe.post<Invoice>('/finance/invoices', data),
+  createInvoice: (data: CreateInvoiceRequest) => safe.post<Invoice>('/finance/invoices', data),
 
   updateInvoice: (id: string, data: Partial<Invoice>) =>
     safe.put<Invoice>('/finance/invoices', { id, ...data }),
@@ -207,12 +208,16 @@ export const financeApi = {
 
   // Reconciliation
   getReconciliation: () => safe.get('/finance/reconciliation'),
-  matchTransaction: (transactionId: string, matchId: string) =>
+  matchTransaction: (
+    bankFeedId: string | number,
+    targetType: 'invoice' | 'expense',
+    targetId: string | number
+  ) =>
     safe.post('/finance/reconciliation/match', {
-      transaction_id: transactionId,
-      match_id: matchId,
+      bankFeedId: Number(bankFeedId),
+      targetType,
+      targetId: Number(targetId),
     }),
-  autoMatchTransactions: () => safe.post('/finance/reconciliation/match', { auto: true }),
 
   // Balance Sheet
   getBalanceSheet: () => safe.get('/finance/balance-sheet'),

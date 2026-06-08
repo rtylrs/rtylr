@@ -22,6 +22,7 @@ export interface CreateStockTakeInput {
   name: string;
   warehouseId: number;
   notes?: string;
+  items: Array<{ productId: number; expectedQty: number; countedQty: number }>;
 }
 
 interface ListStockTakesResponse {

@@ -14,6 +14,7 @@
     "lint:fix": "eslint apps packages --fix",
     "format": "prettier --write .",
     "format:check": "prettier --check .",
+    "contracts:audit-requests": "node scripts/audit-request-contracts.mjs --fail-on-errors",
     "contracts:sync": "bash packages/contracts/scripts/sync.sh",
     "prepare": "husky",
     "init": "git submodule update --init --recursive"

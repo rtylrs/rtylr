@@ -369,8 +369,8 @@ export const crmApi = {
 
   recordVisit: (customerId: number) => safe.post('/crm/customers/record-visit', { customerId }),
 
-  importCustomers: (rows: Record<string, unknown>[], dedupe?: boolean) =>
-    safe.post('/crm/customers/import', { rows, dedupe }),
+  importCustomers: (customers: Record<string, unknown>[], dedupe?: boolean) =>
+    safe.post('/crm/customers/import', { customers, dedupe }),
 
   mergeCustomers: (primaryId: number, secondaryId: number) =>
     safe.post('/crm/customers/merge', { primaryId, secondaryId }),
@@ -446,7 +446,8 @@ export const crmApi = {
   // Templates
   getTemplates: () => safe.get<Template[]>('/crm/templates'),
 
-  createTemplate: (data: Partial<Template>) => safe.post<Template>('/crm/templates', data),
+  createTemplate: (data: Omit<Template, 'id' | 'updatedAt'>) =>
+    safe.post<Template>('/crm/templates', { ...data, type: data.channel }),
 
   // Feedback
   getFeedback: () => safe.get<FeedbackItem[]>('/crm/feedback'),
