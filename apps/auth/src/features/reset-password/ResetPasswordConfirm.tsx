@@ -4,6 +4,7 @@ import { AlertCircle, CheckCircle2 } from 'lucide-react';
 import Logo from '../../shared/components/Logo';
 import { Button } from '@voxire/components';
 import { unwrap } from '@voxire/api';
+import type { ResetPasswordConfirmRequest } from '@voxire/contracts/common/auth/v1/reset_password_confirm';
 import { safe } from '../../shared/lib/api';
 
 const ResetPasswordConfirm: React.FC = () => {
@@ -32,7 +33,8 @@ const ResetPasswordConfirm: React.FC = () => {
     setLoading(true);
     setError('');
     try {
-      await unwrap(safe.post('/auth/password-reset/confirm', { token, password }));
+      const request: ResetPasswordConfirmRequest = { token, password };
+      await unwrap(safe.post('/auth/password-reset/confirm', request));
       setDone(true);
     } catch (err: unknown) {
       const msg = err instanceof Error ? err.message : 'Failed to reset password.';

@@ -1,6 +1,7 @@
 import React, { useEffect, useRef } from 'react';
 import { APP_URLS, APP_CONFIG } from '@voxire/config';
 import { unwrap } from '@voxire/api';
+import type { GoogleAuthRequest } from '@voxire/contracts/common/auth/v1/google_auth';
 import { safe } from '../../shared/lib/api';
 import { useUserStore } from '../../shared/stores/userStore';
 import { setCookie, getDefaultCookieDomain } from '../../shared/lib/cookies';
@@ -39,7 +40,9 @@ const Callback: React.FC = (): React.JSX.Element => {
     const redirectParam = storageGet('social_auth_redirect');
     storageRemove('social_auth_redirect');
 
-    unwrap(safe.post<GoogleAuthResponse>('/auth/register/google', { code }))
+    const request: GoogleAuthRequest = { code };
+
+    unwrap(safe.post<GoogleAuthResponse>('/auth/register/google', request))
       .then((data) => {
         setCookie('token', data.token, {
           days: 30,

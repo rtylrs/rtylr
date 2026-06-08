@@ -3,6 +3,9 @@ import { UserCircle, Mail, KeyRound } from 'lucide-react';
 import { toast } from 'sonner';
 import { useMutation, useQueryClient } from '@tanstack/react-query';
 import { unwrap } from '@voxire/api';
+import type { ResendVerificationRequest } from '@voxire/contracts/common/auth/v1/resend_verification';
+import type { ChangePasswordRequest } from '@voxire/contracts/hub/user/v1/change_password';
+import type { UpdateProfileRequest } from '@voxire/contracts/hub/user/v1/update_profile';
 import { Button, Input, Label } from '../../shared/components/ui';
 import { Breadcrumbs, DangerZone, SettingSection } from '../../shared/components/dash';
 import { useUserStore } from '../../shared/stores/userStore';
@@ -21,7 +24,10 @@ const Account: React.FC = () => {
   }, [user?.fullName]);
 
   const updateProfile = useMutation({
-    mutationFn: () => unwrap(safe.patch('/account/profile', { name })),
+    mutationFn: () => {
+      const request: UpdateProfileRequest = { name };
+      return unwrap(safe.patch('/account/profile', request));
+    },
     onSuccess: () => {
       toast.success('Profile saved');
       qc.invalidateQueries({ queryKey: ['user'] });
@@ -30,13 +36,13 @@ const Account: React.FC = () => {
   });
 
   const changePassword = useMutation({
-    mutationFn: () =>
-      unwrap(
-        safe.post('/account/password', {
-          currentPassword,
-          newPassword,
-        })
-      ),
+    mutationFn: () => {
+      const request: ChangePasswordRequest = {
+        currentPassword,
+        newPassword,
+      };
+      return unwrap(safe.post('/account/password', request));
+    },
     onSuccess: () => {
       toast.success('Password updated');
       setCurrentPassword('');
@@ -49,7 +55,10 @@ const Account: React.FC = () => {
   const email = user?.email ?? '';
 
   const resendVerification = useMutation({
-    mutationFn: () => unwrap(safe.post('/auth/resend-verification', { email })),
+    mutationFn: () => {
+      const request: ResendVerificationRequest = { email };
+      return unwrap(safe.post('/auth/resend-verification', request));
+    },
     onSuccess: () => toast.success('Verification email sent'),
     onError: () => toast.error('Failed to send verification email'),
   });

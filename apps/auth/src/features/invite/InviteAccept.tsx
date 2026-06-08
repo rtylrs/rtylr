@@ -5,6 +5,7 @@ import { Button } from '@voxire/components';
 import { APP_URLS } from '@voxire/config';
 import AuthShell from '../../shared/components/AuthShell';
 import { unwrap } from '@voxire/api';
+import type { AcceptInviteRequest } from '@voxire/contracts/hub/team/invitations/v1/accept_invite';
 import { safe } from '../../shared/lib/api';
 import type { AppId } from '@voxire/types';
 
@@ -59,7 +60,8 @@ const InviteAccept: React.FC = () => {
     setError(null);
 
     try {
-      await unwrap(safe.post('/auth/invite/accept', { token, password }));
+      const request: AcceptInviteRequest = { token: token ?? '', password };
+      await unwrap(safe.post('/auth/invite/accept', request));
       setSuccess(true);
     } catch (err) {
       const e = err as { response?: { data?: { error?: { message?: string } } } };

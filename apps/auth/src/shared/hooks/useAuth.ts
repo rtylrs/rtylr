@@ -1,26 +1,12 @@
 import { useMutation } from '@tanstack/react-query';
 import { unwrap, type ApiError } from '@voxire/api';
+import type { GoogleAuthRequest } from '@voxire/contracts/common/auth/v1/google_auth';
+import type { LoginRequest } from '@voxire/contracts/common/auth/v1/login';
+import type { RegisterRequest } from '@voxire/contracts/common/auth/v1/register';
 import { validateContractPayload } from '@voxire/contracts/validation/metadata';
 import { safe } from '../lib/api';
 import { useUserStore } from '../stores/userStore';
 import { setCookie, getDefaultCookieDomain } from '../lib/cookies';
-
-interface LoginPayload {
-  email: string;
-  password: string;
-}
-
-interface RegisterPayload {
-  email: string;
-  password: string;
-  name: string;
-  businessName?: string;
-  planSlug?: string;
-}
-
-interface GoogleAuthPayload {
-  code: string;
-}
 
 interface AuthResponse {
   token: string;
@@ -38,7 +24,7 @@ export const useLogin = () => {
   const { login, setLoading, setError } = useUserStore();
 
   return useMutation({
-    mutationFn: (payload: LoginPayload): Promise<AuthResponse> => {
+    mutationFn: (payload: LoginRequest): Promise<AuthResponse> => {
       assertContractPayload('common.auth.v1.LoginRequest', {
         ...(payload as unknown as Record<string, unknown>),
       });
@@ -70,7 +56,7 @@ export const useRegisterRestaurant = () => {
   const { login, setLoading, setError } = useUserStore();
 
   return useMutation({
-    mutationFn: (payload: RegisterPayload): Promise<AuthResponse> => {
+    mutationFn: (payload: RegisterRequest): Promise<AuthResponse> => {
       assertContractPayload('common.auth.v1.RegisterRequest', {
         ...(payload as unknown as Record<string, unknown>),
       });
@@ -105,7 +91,7 @@ export const useGoogleAuth = () => {
   const { login, setLoading, setError } = useUserStore();
 
   return useMutation({
-    mutationFn: (payload: GoogleAuthPayload): Promise<AuthResponse> =>
+    mutationFn: (payload: GoogleAuthRequest): Promise<AuthResponse> =>
       unwrap(safe.post<AuthResponse>('/auth/register/google', payload)),
     onMutate: () => {
       setLoading(true);

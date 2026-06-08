@@ -6,6 +6,7 @@ import { AlertCircle, ArrowLeft, CheckCircle2 } from 'lucide-react';
 import Logo from '../../shared/components/Logo';
 import { Button } from '@voxire/components';
 import { unwrap } from '@voxire/api';
+import type { ResetPasswordRequest } from '@voxire/contracts/common/auth/v1/reset_password';
 import { safe } from '../../shared/lib/api';
 
 const ResetPassword: React.FC = () => {
@@ -19,7 +20,8 @@ const ResetPassword: React.FC = () => {
   const handleReset = async (): Promise<void> => {
     setLoading(true);
     try {
-      await unwrap(safe.post('/auth/password-reset/request', { email }));
+      const request: ResetPasswordRequest = { email };
+      await unwrap(safe.post('/auth/password-reset/request', request));
       setRequestSent(true);
       setMessage(t('auth.reset.successMessage'));
     } catch {

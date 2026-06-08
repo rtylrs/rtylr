@@ -83,20 +83,20 @@ const OAuthConsent: React.FC = (): React.JSX.Element => {
     setError(null);
     issueMutation.mutate(
       {
-        client_id: params.clientId,
-        redirect_uri: params.redirectUri,
+        clientId: params.clientId,
+        redirectUri: params.redirectUri,
         scope: params.scope,
         state: params.state,
-        code_challenge: params.codeChallenge,
-        code_challenge_method: params.codeChallengeMethod,
+        codeChallenge: params.codeChallenge,
+        codeChallengeMethod: params.codeChallengeMethod,
       },
       {
         onSuccess: (data) => {
-          if (!isAllowedOAuthRedirect(data.redirect_url)) {
+          if (!isAllowedOAuthRedirect(data.redirectUrl)) {
             setError('Redirect URI is not on an allowed domain.');
             return;
           }
-          window.location.href = data.redirect_url;
+          window.location.href = data.redirectUrl;
         },
         onError: () => setError('Failed to authorize. Please try again.'),
       }
