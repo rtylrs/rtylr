@@ -21,6 +21,7 @@ type repository interface {
 	List(ctx context.Context, ownerID int64, limit, offset int32) ([]domain.Quote, error)
 	Create(ctx context.Context, ownerID int64, input domain.QuoteInput) (int64, error)
 	Update(ctx context.Context, ownerID, id int64, input domain.QuoteInput) error
+	UpdateStatus(ctx context.Context, ownerID, id int64, status string) error
 	Delete(ctx context.Context, ownerID, id int64) error
 	ConvertToInvoice(ctx context.Context, ownerID, quoteID int64) (int64, error)
 }
@@ -82,6 +83,14 @@ func (s *Service) Create(ctx context.Context, ownerID int64, input domain.QuoteI
 
 func (s *Service) Update(ctx context.Context, ownerID, id int64, input domain.QuoteInput) error {
 	if err := s.repo.Update(ctx, ownerID, id, input); err != nil {
+		return err
+	}
+	invalidateQuotesScope(ctx, ownerID)
+	return nil
+}
+
+func (s *Service) UpdateStatus(ctx context.Context, ownerID, id int64, status string) error {
+	if err := s.repo.UpdateStatus(ctx, ownerID, id, status); err != nil {
 		return err
 	}
 	invalidateQuotesScope(ctx, ownerID)

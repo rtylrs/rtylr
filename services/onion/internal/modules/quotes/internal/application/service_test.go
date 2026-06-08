@@ -14,6 +14,7 @@ type mockRepo struct {
 	convertID int64
 	createErr error
 	updErr    error
+	statusErr error
 	delErr    error
 	convErr   error
 }
@@ -28,6 +29,10 @@ func (m *mockRepo) Create(_ context.Context, _ int64, _ domain.QuoteInput) (int6
 
 func (m *mockRepo) Update(_ context.Context, _, _ int64, _ domain.QuoteInput) error {
 	return m.updErr
+}
+
+func (m *mockRepo) UpdateStatus(_ context.Context, _, _ int64, _ string) error {
+	return m.statusErr
 }
 
 func (m *mockRepo) Delete(_ context.Context, _, _ int64) error {
@@ -48,12 +53,15 @@ func TestList_Delegates(t *testing.T) {
 
 func TestCreateUpdateDelete_PropagateErrors(t *testing.T) {
 	want := errors.New("boom")
-	s := &Service{repo: &mockRepo{createErr: want, updErr: want, delErr: want}}
+	s := &Service{repo: &mockRepo{createErr: want, updErr: want, statusErr: want, delErr: want}}
 	if _, err := s.Create(context.Background(), 1, domain.QuoteInput{}); !errors.Is(err, want) {
 		t.Errorf("create: %v", err)
 	}
 	if err := s.Update(context.Background(), 1, 5, domain.QuoteInput{}); !errors.Is(err, want) {
 		t.Errorf("update: %v", err)
+	}
+	if err := s.UpdateStatus(context.Background(), 1, 5, "accepted"); !errors.Is(err, want) {
+		t.Errorf("update status: %v", err)
 	}
 	if err := s.Delete(context.Background(), 1, 5); !errors.Is(err, want) {
 		t.Errorf("delete: %v", err)
@@ -111,6 +119,13 @@ func TestList_HasMoreWhenResultExceedsPageSize(t *testing.T) {
 func TestUpdate_HappyPath(t *testing.T) {
 	s := &Service{repo: &mockRepo{}}
 	if err := s.Update(context.Background(), 1, 5, domain.QuoteInput{CustomerName: "Updated"}); err != nil {
+		t.Errorf("unexpected error: %v", err)
+	}
+}
+
+func TestUpdateStatus_HappyPath(t *testing.T) {
+	s := &Service{repo: &mockRepo{}}
+	if err := s.UpdateStatus(context.Background(), 1, 5, "accepted"); err != nil {
 		t.Errorf("unexpected error: %v", err)
 	}
 }
