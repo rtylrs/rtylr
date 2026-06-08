@@ -128,12 +128,8 @@ const Leave = (): React.JSX.Element => {
                   </div>
                   {req.status === 'Pending' && (
                     <ApprovalButtons
-                      onApprove={() =>
-                        approveLeave.mutate({ leaveRequestId: req.id, approved: true })
-                      }
-                      onReject={() =>
-                        approveLeave.mutate({ leaveRequestId: req.id, approved: false })
-                      }
+                      onApprove={() => approveLeave.mutate({ requestId: req.id, approved: true })}
+                      onReject={() => approveLeave.mutate({ requestId: req.id, approved: false })}
                     />
                   )}
                 </Card>

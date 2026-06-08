@@ -76,8 +76,8 @@ export const useApproveLeave = () => {
   return useMutation({
     mutationFn: async (data: ApproveLeaveRequest): Promise<void> => {
       await unwrap(
-        safe.post(`/hr/leave/requests/${data.leaveRequestId}/approve`, {
-          requestId: data.leaveRequestId,
+        safe.post(`/hr/leave/requests/${data.requestId}/approve`, {
+          requestId: data.requestId,
           approved: data.approved,
           rejectionReason: data.rejectionReason,
         })
