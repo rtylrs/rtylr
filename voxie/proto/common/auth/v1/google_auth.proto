@@ -7,8 +7,8 @@ import "buf/validate/validate.proto";
 option go_package = "github.com/voxire/voxie/gen/go/common/auth/v1";
 
 message GoogleAuthRequest {
-  // id_token is the legacy Google ID token; absent when using the OAuth code flow.
-  optional string id_token = 1;
+  reserved 1;
+
   // business_name is the optional business name to create for the user.
   optional string business_name = 2;
   // code is the OAuth authorization code returned by the provider callback.

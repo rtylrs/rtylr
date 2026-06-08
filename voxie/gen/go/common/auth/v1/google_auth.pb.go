@@ -24,8 +24,6 @@ const (
 
 type GoogleAuthRequest struct {
 	state protoimpl.MessageState `protogen:"open.v1"`
-	// id_token is the legacy Google ID token; absent when using the OAuth code flow.
-	IdToken *string `protobuf:"bytes,1,opt,name=id_token,json=idToken,proto3,oneof" json:"id_token,omitempty"`
 	// business_name is the optional business name to create for the user.
 	BusinessName *string `protobuf:"bytes,2,opt,name=business_name,json=businessName,proto3,oneof" json:"business_name,omitempty"`
 	// code is the OAuth authorization code returned by the provider callback.
@@ -62,13 +60,6 @@ func (x *GoogleAuthRequest) ProtoReflect() protoreflect.Message {
 // Deprecated: Use GoogleAuthRequest.ProtoReflect.Descriptor instead.
 func (*GoogleAuthRequest) Descriptor() ([]byte, []int) {
 	return file_common_auth_v1_google_auth_proto_rawDescGZIP(), []int{0}
-}
-
-func (x *GoogleAuthRequest) GetIdToken() string {
-	if x != nil && x.IdToken != nil {
-		return *x.IdToken
-	}
-	return ""
 }
 
 func (x *GoogleAuthRequest) GetBusinessName() string {
@@ -143,14 +134,12 @@ var File_common_auth_v1_google_auth_proto protoreflect.FileDescriptor
 
 const file_common_auth_v1_google_auth_proto_rawDesc = "" +
 	"\n" +
-	" common/auth/v1/google_auth.proto\x12\x0ecommon.auth.v1\x1a\x1bbuf/validate/validate.proto\"\x9c\x01\n" +
-	"\x11GoogleAuthRequest\x12\x1e\n" +
-	"\bid_token\x18\x01 \x01(\tH\x00R\aidToken\x88\x01\x01\x12(\n" +
-	"\rbusiness_name\x18\x02 \x01(\tH\x01R\fbusinessName\x88\x01\x01\x12\x1e\n" +
+	" common/auth/v1/google_auth.proto\x12\x0ecommon.auth.v1\x1a\x1bbuf/validate/validate.proto\"u\n" +
+	"\x11GoogleAuthRequest\x12(\n" +
+	"\rbusiness_name\x18\x02 \x01(\tH\x00R\fbusinessName\x88\x01\x01\x12\x1e\n" +
 	"\x04code\x18\x03 \x01(\tB\n" +
-	"\xbaH\a\xc8\x01\x01r\x02\x10\x01R\x04codeB\v\n" +
-	"\t_id_tokenB\x10\n" +
-	"\x0e_business_name\"A\n" +
+	"\xbaH\a\xc8\x01\x01r\x02\x10\x01R\x04codeB\x10\n" +
+	"\x0e_business_nameJ\x04\b\x01\x10\x02\"A\n" +
 	"\x12GoogleAuthResponse\x12\x14\n" +
 	"\x05token\x18\x01 \x01(\tR\x05token\x12\x15\n" +
 	"\x06is_new\x18\x02 \x01(\bR\x05isNewB/Z-github.com/voxire/voxie/gen/go/common/auth/v1b\x06proto3"
