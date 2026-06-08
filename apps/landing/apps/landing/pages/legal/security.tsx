@@ -216,7 +216,7 @@ const SecurityPage = (): JSX.Element => {
                   <h3>Need our SOC 2 letter, SIG, or DPA?</h3>
                   <p>
                     Email <a href="mailto:security@voxire.com">security@voxire.com</a> and
-                    we&apos;ll send the current packet under NDA within one business day.
+                    we&apos;ll send the current packet under NDA within 7 business days.
                   </p>
                 </div>
               </article>

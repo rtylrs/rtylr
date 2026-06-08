@@ -205,9 +205,14 @@ const TrustPage = (): JSX.Element => {
               <h2 className={styles.sectionTitle}>Where we are.</h2>
               <p className={styles.complianceCopy}>
                 We publish our compliance status transparently, certified, aligned, or in progress.
-                For SIG, DPA, or SOC 2 under NDA, email{' '}
-                <a href="mailto:security@voxire.com">security@voxire.com</a>.
               </p>
+              <div className={styles.contactStrip}>
+                <h3>Need our SOC 2 letter, SIG, or DPA?</h3>
+                <p>
+                  Email <a href="mailto:security@voxire.com">security@voxire.com</a> and we&apos;ll
+                  send the current packet under NDA within 7 business days.
+                </p>
+              </div>
             </motion.div>
             <motion.ul className={styles.complianceList} variants={blurFadeIn}>
               {COMPLIANCE.map((item) => (

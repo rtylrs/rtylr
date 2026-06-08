@@ -321,6 +321,36 @@
   }
 }
 
+.contactStrip {
+  margin-top: 22px;
+  padding: 24px 26px;
+  background: rgba(255, 255, 255, 0.02);
+  border: 1px solid rgba(255, 255, 255, 0.08);
+  border-radius: 10px;
+
+  h3 {
+    font-size: 1rem;
+    font-weight: 600;
+    color: #e8e6e1;
+    margin: 0 0 8px;
+    letter-spacing: -0.015em;
+  }
+
+  p {
+    font-size: 0.9rem;
+    color: rgba(255, 255, 255, 0.6);
+    line-height: 1.6;
+    margin: 0;
+  }
+
+  a {
+    color: #e8e6e1;
+    text-decoration: underline;
+    text-underline-offset: 3px;
+    text-decoration-color: rgba(232, 230, 225, 0.35);
+  }
+}
+
 .complianceList {
   list-style: none;
   padding: 0;
