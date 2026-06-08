@@ -43,7 +43,7 @@ export const useErpInviteMember = (): UseMutationResult<unknown, unknown, Invite
   const qc = useQueryClient();
   return useMutation<unknown, unknown, InvitePayload>({
     mutationFn: (payload: InvitePayload): Promise<unknown> =>
-      unwrap(safe.post('/auth/invite', { ...payload, apps: ['erp'] })),
+      unwrap(safe.post('/team/invite', { ...payload, apps: ['erp'] })),
     onSuccess: (): void => {
       toast.success('Invitation sent');
       void qc.invalidateQueries({ queryKey: ['erp-team'] });
@@ -58,7 +58,7 @@ export const useErpDeactivateMember = (): UseMutationResult<unknown, unknown, st
   const qc = useQueryClient();
   return useMutation<unknown, unknown, string>({
     mutationFn: (id: string): Promise<unknown> =>
-      unwrap(safe.post(`/team/members/${id}/deactivate`, {})),
+      unwrap(safe.patch(`/team/members/${id}/deactivate`, {})),
     onSuccess: (): void => {
       toast.success('Member removed');
       void qc.invalidateQueries({ queryKey: ['erp-team'] });

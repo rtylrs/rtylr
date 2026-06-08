@@ -82,10 +82,10 @@ export const hrService = {
   // Time Off
   getTimeOff: () => safe.get('/hr/time-off'),
   submitTimeOff: (data: TimeOffPayload) => safe.post('/hr/time-off', data),
-  approveTimeOff: (data: TimeOffApprovalPayload) => safe.put('/hr/time-off/approve', data),
+  approveTimeOff: (data: TimeOffApprovalPayload) => safe.post('/hr/time-off/approve', data),
 
   // Payroll
   getPayroll: () => safe.get('/hr/payroll'),
   runPayroll: (data: PayrollPayload) => safe.post('/hr/payroll/run', data),
-  markPayrollPaid: (data: MarkPaidPayload) => safe.put('/hr/payroll/mark-paid', data),
+  markPayrollPaid: (data: MarkPaidPayload) => safe.post('/hr/payroll/mark-paid', data),
 };

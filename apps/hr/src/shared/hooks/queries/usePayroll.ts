@@ -117,7 +117,7 @@ export const useApprovePayrollRun = () => {
 
   return useMutation({
     mutationFn: async (data: ApprovePayrollRunRequest): Promise<void> => {
-      await unwrap(safe.put(`/hr/payroll/runs/${data.runId}/approve`, data));
+      await unwrap(safe.post(`/hr/payroll/runs/${data.runId}/approve`, data));
     },
     onSuccess: (_data: void, variables: ApprovePayrollRunRequest) => {
       queryClient.invalidateQueries({ queryKey: ['payroll-runs'] });

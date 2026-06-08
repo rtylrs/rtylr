@@ -8,11 +8,13 @@ vi.mock('@voxire/api', () => ({ unwrap: vi.fn((v) => v) }));
 
 const mockGet = vi.fn();
 const mockPost = vi.fn();
+const mockPatch = vi.fn();
 
 vi.mock('../../lib/api', () => ({
   safe: {
     get: (...args: unknown[]) => mockGet(...args),
     post: (...args: unknown[]) => mockPost(...args),
+    patch: (...args: unknown[]) => mockPatch(...args),
   },
 }));
 
@@ -79,7 +81,7 @@ describe('useErpInviteMember', () => {
         role: 'member',
       });
     });
-    expect(mockPost).toHaveBeenCalledWith('/auth/invite', {
+    expect(mockPost).toHaveBeenCalledWith('/team/invite', {
       email: 'new@example.com',
       fullName: 'New User',
       role: 'member',
@@ -92,12 +94,12 @@ describe('useErpDeactivateMember', () => {
   beforeEach(() => vi.clearAllMocks());
 
   it('calls deactivate endpoint with member id', async () => {
-    mockPost.mockResolvedValue({ success: true });
+    mockPatch.mockResolvedValue({ success: true });
     mockGet.mockResolvedValue({ members: [] });
     const { result } = renderHook(() => useErpDeactivateMember(), { wrapper: createWrapper() });
     await act(async () => {
       await result.current.mutateAsync('user-123');
     });
-    expect(mockPost).toHaveBeenCalledWith('/team/members/user-123/deactivate', {});
+    expect(mockPatch).toHaveBeenCalledWith('/team/members/user-123/deactivate', {});
   });
 });

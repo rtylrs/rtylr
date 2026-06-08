@@ -45,7 +45,7 @@ export const useCrmInviteMember = (): UseMutationResult<unknown, unknown, Invite
   const { t } = useTranslation();
   return useMutation<unknown, unknown, InvitePayload>({
     mutationFn: (payload: InvitePayload): Promise<unknown> =>
-      unwrap(safe.post('/auth/invite', { ...payload, apps: ['crm'] })),
+      unwrap(safe.post('/team/invite', { ...payload, apps: ['crm'] })),
     onSuccess: (): void => {
       toast.success(t('crm.team.inviteSent'));
       void qc.invalidateQueries({ queryKey: ['crm-team'] });
@@ -61,7 +61,7 @@ export const useCrmDeactivateMember = (): UseMutationResult<unknown, unknown, st
   const { t } = useTranslation();
   return useMutation<unknown, unknown, string>({
     mutationFn: (id: string): Promise<unknown> =>
-      unwrap(safe.post(`/team/members/${id}/deactivate`, {})),
+      unwrap(safe.patch(`/team/members/${id}/deactivate`, {})),
     onSuccess: (): void => {
       toast.success(t('crm.team.memberRemoved'));
       void qc.invalidateQueries({ queryKey: ['crm-team'] });

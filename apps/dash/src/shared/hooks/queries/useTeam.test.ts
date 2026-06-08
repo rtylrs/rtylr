@@ -24,8 +24,6 @@ vi.mock('../../lib/api', () => ({
     get: (...args: unknown[]) => mockGet(...args),
     post: (...args: unknown[]) => mockPost(...args),
     put: (...args: unknown[]) => mockPut(...args),
-  },
-  default: {
     patch: (...args: unknown[]) => mockPatch(...args),
   },
 }));
@@ -186,7 +184,7 @@ describe('useDeactivateMember', () => {
   beforeEach(() => vi.clearAllMocks());
 
   it('calls deactivate endpoint', async () => {
-    mockPost.mockResolvedValue({ success: true });
+    mockPatch.mockResolvedValue({ success: true });
 
     const { result } = renderHook(() => useDeactivateMember(), { wrapper: createWrapper() });
 
@@ -194,7 +192,7 @@ describe('useDeactivateMember', () => {
       await result.current.mutateAsync('42');
     });
 
-    expect(mockPost).toHaveBeenCalledWith('/team/members/42/deactivate');
+    expect(mockPatch).toHaveBeenCalledWith('/team/members/42/deactivate');
   });
 });
 

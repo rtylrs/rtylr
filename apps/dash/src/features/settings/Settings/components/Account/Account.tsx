@@ -90,7 +90,7 @@ const Account: React.FC = () => {
   const updateProfile = useMutation({
     mutationFn: () =>
       unwrap(
-        safe.post('/account/profile', {
+        safe.patch('/account/profile', {
           name: formData.name,
         })
       ),

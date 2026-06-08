@@ -17,6 +17,16 @@ import { safe } from '../../lib/api';
 import { toast } from 'sonner';
 import { useTranslation } from 'react-i18next';
 
+interface ApproveEquipmentPayload {
+  approve: boolean;
+  reason: string;
+}
+
+const toApproveEquipmentPayload = (data: ApproveEquipmentRequest): ApproveEquipmentPayload => ({
+  approve: data.approved,
+  reason: '',
+});
+
 export const useListEquipmentRequests = (params?: ListEquipmentRequestsRequest) => {
   return useQuery<ListEquipmentRequestsResponse>({
     queryKey: ['equipment-requests', params],
@@ -59,9 +69,9 @@ export const useApproveEquipment = () => {
   return useMutation({
     mutationFn: async (data: ApproveEquipmentRequest): Promise<ApproveEquipmentResponse> => {
       const res = await unwrap(
-        safe.put<ApproveEquipmentResponse>(
+        safe.post<ApproveEquipmentResponse>(
           `/hr/equipment/requests/${data.equipmentRequestId}/approve`,
-          data
+          toApproveEquipmentPayload(data)
         )
       );
       return res as ApproveEquipmentResponse;

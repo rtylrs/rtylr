@@ -47,11 +47,44 @@ interface CreateQuotePayload {
   description?: string;
 }
 
+interface BackendCreateQuotePayload {
+  customerName: string;
+  customerEmail: string;
+  status: string;
+  items: string;
+  subtotal: number;
+  tax: number;
+  discount: number;
+  total: number;
+  validUntil: string;
+  notes: string;
+}
+
+const toBackendCreateQuotePayload = (data: CreateQuotePayload): BackendCreateQuotePayload => ({
+  customerName: data.client,
+  customerEmail: '',
+  status: 'draft',
+  items: JSON.stringify([
+    {
+      description: data.description || 'Quote',
+      quantity: 1,
+      unit_price: data.amount,
+      total: data.amount,
+    },
+  ]),
+  subtotal: data.amount,
+  tax: 0,
+  discount: 0,
+  total: data.amount,
+  validUntil: data.expiresAt,
+  notes: data.description ?? '',
+});
+
 export function useCreateQuote() {
   const qc = useQueryClient();
   return useMutation({
     mutationFn: async (data: CreateQuotePayload): Promise<unknown> =>
-      unwrap(safe.post('/finance/quotes', data)),
+      unwrap(safe.post('/finance/quotes', toBackendCreateQuotePayload(data))),
     onSuccess: () => {
       void qc.invalidateQueries({ queryKey: ['quotes'] });
       toast.success('Quote created');

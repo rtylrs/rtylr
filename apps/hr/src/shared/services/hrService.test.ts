@@ -98,10 +98,10 @@ describe('hrService', () => {
     expect(safe.post).toHaveBeenCalledWith('/hr/time-off', data);
   });
 
-  it('approveTimeOff calls PUT /hr/time-off/approve', () => {
+  it('approveTimeOff calls POST /hr/time-off/approve', () => {
     const data = { id: 1, approved: true };
     hrService.approveTimeOff(data);
-    expect(safe.put).toHaveBeenCalledWith('/hr/time-off/approve', data);
+    expect(safe.post).toHaveBeenCalledWith('/hr/time-off/approve', data);
   });
 
   // Payroll
@@ -116,9 +116,9 @@ describe('hrService', () => {
     expect(safe.post).toHaveBeenCalledWith('/hr/payroll/run', data);
   });
 
-  it('markPayrollPaid calls PUT /hr/payroll/mark-paid', () => {
+  it('markPayrollPaid calls POST /hr/payroll/mark-paid', () => {
     const data = { id: 1 };
     hrService.markPayrollPaid(data);
-    expect(safe.put).toHaveBeenCalledWith('/hr/payroll/mark-paid', data);
+    expect(safe.post).toHaveBeenCalledWith('/hr/payroll/mark-paid', data);
   });
 });

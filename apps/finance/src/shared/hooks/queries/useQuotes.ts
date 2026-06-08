@@ -3,10 +3,7 @@ import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query';
 import { toast } from 'sonner';
 import { useTranslation } from 'react-i18next';
 import type { ListQuotesResponse } from '@voxire/contracts/finance/quote/v1/list_quotes';
-import type {
-  CreateQuoteRequest,
-  CreateQuoteResponse,
-} from '@voxire/contracts/finance/quote/v1/create_quote';
+import type { CreateQuoteResponse } from '@voxire/contracts/finance/quote/v1/create_quote';
 import { safe } from '../../lib/api';
 
 interface ListQuotesParams {
@@ -14,6 +11,19 @@ interface ListQuotesParams {
   offset: number;
   status?: string;
   customerId?: number;
+}
+
+export interface CreateQuotePayload {
+  customerName: string;
+  customerEmail?: string;
+  status?: string;
+  items?: string;
+  subtotal?: number;
+  tax?: number;
+  discount?: number;
+  total?: number;
+  validUntil?: string;
+  notes?: string;
 }
 
 export const useListQuotes = (params: ListQuotesParams) => {
@@ -31,7 +41,7 @@ export const useCreateQuote = () => {
   const { t } = useTranslation();
 
   return useMutation({
-    mutationFn: async (data: CreateQuoteRequest): Promise<CreateQuoteResponse> => {
+    mutationFn: async (data: CreateQuotePayload): Promise<CreateQuoteResponse> => {
       const res = await unwrap(safe.post<CreateQuoteResponse>('/finance/quotes', data));
       return res as CreateQuoteResponse;
     },

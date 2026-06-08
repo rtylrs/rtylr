@@ -43,6 +43,7 @@ function normalizeRoute(value) {
   return (
     value
       .replace(/^`|`$/g, '')
+      .replace(/[?#].*$/, '')
       .replace(/\$\{[^}]+\}/g, '{param}')
       .replace(/:[^/]+/g, '{param}')
       .replace(/\{[^}]+\}/g, '{param}')
@@ -65,13 +66,14 @@ function parseRoutesFunctionPaths(handlerFiles) {
 
   for (const file of handlerFiles) {
     const text = readText(file);
+    const moduleRoot = moduleRootForFile(file);
     let match;
     while ((match = routeFnRegex.exec(text))) {
       const openBrace = text.indexOf('{', match.index);
       const closeBrace = findMatchingBrace(text, openBrace);
       const body = text.slice(match.index, closeBrace > openBrace ? closeBrace + 1 : match.index);
       const paths = [...body.matchAll(/"([^"]+)"/g)].map((m) => m[1]);
-      routeFns.set(match[1], paths);
+      routeFns.set(`${moduleRoot}:${match[1]}`, paths);
     }
   }
   return routeFns;
@@ -105,18 +107,35 @@ function findMatchingBrace(text, openIndex) {
   return -1;
 }
 
+function moduleRootForFile(file) {
+  const marker = '/internal/routes/';
+  const index = toPosix(file).indexOf(marker);
+  return index === -1 ? null : toPosix(file).slice(0, index);
+}
+
 function parseRequestStructs(handlerFiles) {
   const structs = new Map();
-  const structRegex = /type\s+([A-Za-z0-9_]+Request)\s+struct\s*\{([\s\S]*?)\n\}/g;
   const validateRegex =
-    /func\s+\(h \*\s*([A-Za-z0-9_]+Handler)\)\s+Validate\s*\([^)]*req\s+\*([A-Za-z0-9_]+Request)\)[^{]*\{([\s\S]*?)\n\}/g;
+    /func\s+\(h \*\s*([A-Za-z0-9_]+Handler)\)\s+Validate\s*\([^)]*req\s+\*([A-Za-z0-9_]+)\)[^{]*\{/g;
 
   for (const file of handlerFiles) {
     const text = readText(file);
-    let match;
-    while ((match = structRegex.exec(text))) {
+    const lines = text.split('\n');
+    for (let index = 0; index < lines.length; index++) {
+      const declaration = lines[index].match(
+        /^\s*(?:type\s+)?([A-Z][A-Za-z0-9_]*)\s+struct\s*\{\s*$/
+      );
+      if (!declaration) continue;
+
+      const body = [];
+      index++;
+      while (index < lines.length && !/^\s*}\s*$/.test(lines[index])) {
+        body.push(lines[index]);
+        index++;
+      }
+
       const fields = {};
-      for (const line of match[2].split('\n')) {
+      for (const line of body) {
         const json = line.match(/`[^`]*json:"([^",`]+)[^"`]*"[^`]*`/);
         const field = line.trim().match(/^([A-Z][A-Za-z0-9_]*)\s+/);
         if (!json || !field || json[1] === '-') continue;
@@ -125,24 +144,30 @@ function parseRequestStructs(handlerFiles) {
       const item = {
         absFile: file,
         file: toPosix(path.relative(root, file)),
-        name: match[1],
+        name: declaration[1],
         fields,
       };
-      if (!structs.has(match[1])) structs.set(match[1], []);
-      structs.get(match[1]).push(item);
+      if (!structs.has(declaration[1])) structs.set(declaration[1], []);
+      structs.get(declaration[1]).push(item);
     }
 
+    let match;
     while ((match = validateRegex.exec(text))) {
       const reqName = match[2];
-      const body = match[3];
       const current = structs.get(reqName)?.find((item) => item.absFile === file);
       if (!current) continue;
-      for (const requiredCheck of body.matchAll(
-        /if\s+([^{]+req\.[^{]+)\{([\s\S]*?required[\s\S]*?)\n\s*\}/gi
-      )) {
+
+      const openBrace = text.indexOf('{', match.index);
+      const closeBrace = findMatchingBrace(text, openBrace);
+      if (closeBrace <= openBrace) continue;
+      const body = text.slice(openBrace + 1, closeBrace);
+      for (const requiredCheck of body.matchAll(/if\s+([^{]+req\.[^{]+)\{/g)) {
         const condition = requiredCheck[1];
-        const block = requiredCheck[2];
-        if (!/\bis required\b/i.test(block)) continue;
+        const ifOpenBrace = body.indexOf('{', requiredCheck.index);
+        const ifCloseBrace = findMatchingBrace(body, ifOpenBrace);
+        if (ifCloseBrace <= ifOpenBrace) continue;
+        const block = body.slice(ifOpenBrace + 1, ifCloseBrace);
+        if (!/\brequired\b/i.test(block)) continue;
         for (const reqField of condition.matchAll(/req\.([A-Z][A-Za-z0-9_]*)/g)) {
           for (const field of Object.values(current.fields)) {
             if (field.goName === reqField[1]) field.required = true;
@@ -158,7 +183,8 @@ function parseRequestStructs(handlerFiles) {
 function chooseRequestStruct(structs, request, routeFile) {
   const candidates = structs.get(request) ?? [];
   if (candidates.length <= 1) return candidates[0] ?? null;
-  const moduleRoot = routeFile.slice(0, routeFile.indexOf('/internal/routes/routes.go'));
+  const moduleRoot = moduleRootForFile(routeFile);
+  if (!moduleRoot) return candidates[0] ?? null;
   return (
     candidates.find((candidate) => candidate.absFile.startsWith(`${moduleRoot}/`)) ??
     candidates[0] ??
@@ -179,7 +205,7 @@ function parseBackendRoutes() {
   const structs = parseRequestStructs(handlerFiles);
   const routes = [];
   const regRegex =
-    /(?:http|serverHttp)\.Register(GET|POST|PUT|PATCH|DELETE)(?:WithValidation(?:AndMiddleware)?|AndMiddleware)?\s*\[\s*handlers\.([A-Za-z0-9_]+Request)\s*,\s*handlers\.([A-Za-z0-9_]+Response)\s*\]\s*\(\s*ctx\s*,\s*router\s*,\s*handlers\.([A-Za-z0-9_]+Routes)\(\)/g;
+    /(?:http|serverHttp)\.Register(GET|POST|PUT|PATCH|DELETE)(?:WithValidation(?:AndMiddleware)?|AndMiddleware)?\s*\[\s*handlers\.([A-Za-z0-9_]+)\s*,\s*handlers\.([A-Za-z0-9_]+)\s*\]\s*\(\s*ctx\s*,\s*router\s*,\s*handlers\.([A-Za-z0-9_]+Routes)\(\)/g;
   const rawRouteRegex = /router\.(Get|Post|Put|Patch|Delete)\s*\(\s*"([^"]+)"/g;
 
   for (const file of routeFiles) {
@@ -187,7 +213,8 @@ function parseBackendRoutes() {
     let match;
     while ((match = regRegex.exec(text))) {
       const [, method, request, response, routeFn] = match;
-      for (const routePath of routeFns.get(routeFn) ?? []) {
+      const moduleRoot = moduleRootForFile(file);
+      for (const routePath of routeFns.get(`${moduleRoot}:${routeFn}`) ?? []) {
         routes.push({
           method,
           path: routePath,
@@ -514,6 +541,21 @@ const warnings = frontend.issues.filter((issue) => issue.severity === 'warning')
 const report = {
   generatedAt: new Date().toISOString(),
   backendRoutes: backendRoutes.length,
+  backendRouteDetails: backendRoutes.map((route) => ({
+    method: route.method,
+    path: route.path,
+    request: route.request,
+    routeFile: route.routeFile,
+    requestStruct: route.requestStruct
+      ? {
+          name: route.requestStruct.name,
+          file: route.requestStruct.file,
+          fields: route.requestStruct.fields,
+        }
+      : null,
+    validated: route.validated,
+    raw: Boolean(route.raw),
+  })),
   frontendCalls: frontend.calls.length,
   errors: errors.length,
   warnings: warnings.length,

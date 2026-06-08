@@ -75,7 +75,7 @@ export const useApproveLeave = () => {
 
   return useMutation({
     mutationFn: async (data: ApproveLeaveRequest): Promise<void> => {
-      await unwrap(safe.put(`/hr/leave/requests/${data.leaveRequestId}/approve`, data));
+      await unwrap(safe.post(`/hr/leave/requests/${data.leaveRequestId}/approve`, data));
     },
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ['leave-requests'] });

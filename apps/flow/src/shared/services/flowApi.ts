@@ -551,7 +551,7 @@ export const flowApi = {
 
   // -- Account / Profile --------------------------------------------------
 
-  updateProfile: (data: { name?: string; email?: string }) => safe.post('/account/profile', data),
+  updateProfile: (data: { name?: string; email?: string }) => safe.patch('/account/profile', data),
 
   changePassword: (data: { currentPassword: string; newPassword: string }) =>
     safe.post('/account/password', data),

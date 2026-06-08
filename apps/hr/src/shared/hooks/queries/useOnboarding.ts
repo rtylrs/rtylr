@@ -73,7 +73,7 @@ export const useCompleteChecklistItem = () => {
       data: CompleteChecklistItemRequest
     ): Promise<CompleteChecklistItemResponse> => {
       const res = await unwrap(
-        safe.put<CompleteChecklistItemResponse>(
+        safe.post<CompleteChecklistItemResponse>(
           `/hr/onboarding/checklists/items/${data.itemId}/complete`,
           data
         )

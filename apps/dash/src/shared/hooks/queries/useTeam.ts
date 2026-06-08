@@ -156,7 +156,7 @@ export const useDeactivateMember = () => {
   const qc = useQueryClient();
   return useMutation({
     mutationFn: async (id: string) => {
-      await unwrap(safe.post(`/team/members/${id}/deactivate`));
+      await unwrap(safe.patch(`/team/members/${id}/deactivate`));
       return id;
     },
     onSuccess: () => {

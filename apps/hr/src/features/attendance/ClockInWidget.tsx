@@ -2,6 +2,7 @@ import React, { useState, useCallback } from 'react';
 import { useTranslation } from 'react-i18next';
 import { LogIn, LogOut, QrCode, KeyRound, MapPin, Delete, Settings } from 'lucide-react';
 import { toast } from 'sonner';
+import { useUserStore } from '@voxire/auth';
 import { useClockIn, useClockOut, useSetPin } from '../../shared/hooks/queries/useAttendance';
 import { useHRConfigStore } from '../../shared/stores/hrConfigStore';
 import type { AttendanceRecordPayload } from '@voxire/contracts/hr/attendance/v1/types';
@@ -215,6 +216,7 @@ const ClockInWidget = ({ activeRecord }: ClockInWidgetProps): React.JSX.Element 
   const clockIn = useClockIn();
   const clockOut = useClockOut();
   const setPin = useSetPin();
+  const userId = Number(useUserStore((s) => s.user?.id)) || 0;
 
   const [pinModalOpen, setPinModalOpen] = useState(false);
   const [pinMode, setPinMode] = useState<'clockIn' | 'setPin' | 'confirmPin'>('clockIn');
@@ -229,12 +231,12 @@ const ClockInWidget = ({ activeRecord }: ClockInWidgetProps): React.JSX.Element 
   const isGpsEnabled = enabledMethods.includes('gps');
 
   const handleClockIn = useCallback((): void => {
-    clockIn.mutate({ method: 'app', locationId: 0 });
-  }, [clockIn]);
+    clockIn.mutate({ ownerId: userId, employeeId: userId, method: 'app', locationId: 0 });
+  }, [clockIn, userId]);
 
   const handleClockOut = useCallback((): void => {
     if (!activeRecord) return;
-    clockOut.mutate({ attendanceRecordId: activeRecord.id });
+    clockOut.mutate({ employeeId: activeRecord.employeeId });
   }, [activeRecord, clockOut]);
 
   /* ── PIN flow ─────────────────────────────────────────────── */
@@ -256,7 +258,7 @@ const ClockInWidget = ({ activeRecord }: ClockInWidgetProps): React.JSX.Element 
     (enteredPin: string): void => {
       if (pinMode === 'clockIn') {
         clockIn.mutate(
-          { method: 'pin', pin: enteredPin, locationId: 0 },
+          { ownerId: userId, employeeId: userId, method: 'pin', pin: enteredPin, locationId: 0 },
           { onSuccess: () => setPinModalOpen(false) }
         );
       } else if (pinMode === 'setPin') {
@@ -268,12 +270,15 @@ const ClockInWidget = ({ activeRecord }: ClockInWidgetProps): React.JSX.Element 
           setPinError(t('attendance.pinModal.pinMismatch'));
           return;
         }
-        setPin.mutate(enteredPin, {
-          onSuccess: () => {
-            setPinModalOpen(false);
-            setPendingNewPin('');
-          },
-        });
+        setPin.mutate(
+          { employeeId: userId, pin: enteredPin },
+          {
+            onSuccess: () => {
+              setPinModalOpen(false);
+              setPendingNewPin('');
+            },
+          }
+        );
       }
     },
     [pinMode, pendingNewPin, clockIn, setPin, t]
@@ -293,6 +298,8 @@ const ClockInWidget = ({ activeRecord }: ClockInWidgetProps): React.JSX.Element 
       (position) => {
         setGpsLoading(false);
         clockIn.mutate({
+          ownerId: userId,
+          employeeId: userId,
           method: 'gps',
           locationId: 0,
           lat: position.coords.latitude,

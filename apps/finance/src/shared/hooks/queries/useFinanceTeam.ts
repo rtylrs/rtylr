@@ -43,7 +43,7 @@ export const useFinanceInviteMember = (): UseMutationResult<unknown, unknown, In
   const qc = useQueryClient();
   return useMutation<unknown, unknown, InvitePayload>({
     mutationFn: (payload: InvitePayload): Promise<unknown> =>
-      unwrap(safe.post('/auth/invite', { ...payload, apps: ['finance'] })),
+      unwrap(safe.post('/team/invite', { ...payload, apps: ['finance'] })),
     onSuccess: (): void => {
       toast.success('Invitation sent');
       void qc.invalidateQueries({ queryKey: ['finance-team'] });
@@ -58,7 +58,7 @@ export const useFinanceDeactivateMember = (): UseMutationResult<unknown, unknown
   const qc = useQueryClient();
   return useMutation<unknown, unknown, string>({
     mutationFn: (id: string): Promise<unknown> =>
-      unwrap(safe.post(`/team/members/${id}/deactivate`, {})),
+      unwrap(safe.patch(`/team/members/${id}/deactivate`, {})),
     onSuccess: (): void => {
       toast.success('Member removed');
       void qc.invalidateQueries({ queryKey: ['finance-team'] });

@@ -21,7 +21,7 @@ const Account: React.FC = () => {
   }, [user?.fullName]);
 
   const updateProfile = useMutation({
-    mutationFn: () => unwrap(safe.post('/account/profile', { name })),
+    mutationFn: () => unwrap(safe.patch('/account/profile', { name })),
     onSuccess: () => {
       toast.success('Profile saved');
       qc.invalidateQueries({ queryKey: ['user'] });

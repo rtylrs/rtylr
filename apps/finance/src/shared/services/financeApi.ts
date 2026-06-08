@@ -2,7 +2,6 @@ import { safe } from '../lib/api';
 import type { InvoiceItem as InvoiceLine } from '@voxire/contracts/finance/invoices/v1/types';
 import type { CreateInvoiceRequest } from '@voxire/contracts/finance/invoices/v1/create_invoice';
 import type { CreateRecurringInvoiceRequest } from '@voxire/contracts/finance/recurring_invoice/v1/create_recurring_invoice';
-import type { CreateQuoteRequest } from '@voxire/contracts/finance/quote/v1/create_quote';
 import type { CreateBillRequest } from '@voxire/contracts/finance/bill/v1/create_bill';
 import type { CreateBankAccountRequest } from '@voxire/contracts/finance/bank_account/v1/create_bank_account';
 import type { CreateAccountRequest } from '@voxire/contracts/finance/account/v1/create_account';
@@ -64,6 +63,19 @@ export interface Invoice {
   subtotal?: number;
   number?: string;
   history?: { label: string; at: string }[];
+}
+
+export interface QuotePayload {
+  customerName: string;
+  customerEmail?: string;
+  status?: string;
+  items?: string;
+  subtotal?: number;
+  tax?: number;
+  discount?: number;
+  total?: number;
+  validUntil?: string;
+  notes?: string;
 }
 
 export interface Expense {
@@ -186,9 +198,9 @@ export const financeApi = {
   // Quotes
   getQuotes: () => safe.get('/finance/quotes'),
 
-  createQuote: (data: CreateQuoteRequest) => safe.post('/finance/quotes', data),
+  createQuote: (data: QuotePayload) => safe.post('/finance/quotes', data),
 
-  updateQuote: (id: string, data: Partial<CreateQuoteRequest>) =>
+  updateQuote: (id: string, data: Partial<QuotePayload>) =>
     safe.put('/finance/quotes', { id, ...data }),
 
   deleteQuote: (id: string) => safe.delete('/finance/quotes', { data: { id } }),

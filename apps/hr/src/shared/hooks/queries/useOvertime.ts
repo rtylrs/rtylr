@@ -59,7 +59,7 @@ export const useApproveOvertime = () => {
 
   return useMutation({
     mutationFn: async (data: ApproveOvertimeRequest): Promise<void> => {
-      await unwrap(safe.put(`/hr/overtime/requests/${data.overtimeRequestId}/approve`, data));
+      await unwrap(safe.post(`/hr/overtime/requests/${data.overtimeRequestId}/approve`, data));
     },
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ['overtime-requests'] });

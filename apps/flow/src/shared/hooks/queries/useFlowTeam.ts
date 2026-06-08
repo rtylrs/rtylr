@@ -102,7 +102,7 @@ export const useFlowDeactivateMember = (): UseMutationResult<unknown, unknown, s
   const qc = useQueryClient();
   return useMutation<unknown, unknown, string>({
     mutationFn: (id: string): Promise<unknown> =>
-      unwrap(safe.post(`/team/members/${id}/deactivate`, {})),
+      unwrap(safe.patch(`/team/members/${id}/deactivate`, {})),
     onSuccess: (): void => {
       toast.success('Member removed from Flow');
       void qc.invalidateQueries({ queryKey: ['flow-team'] });
