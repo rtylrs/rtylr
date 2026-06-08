@@ -103,7 +103,12 @@ describe('erpApi', () => {
       categories: ['Parts'],
     };
     erpApi.createSupplier(data);
-    expect(safe.post).toHaveBeenCalledWith('/erp/suppliers', data);
+    expect(safe.post).toHaveBeenCalledWith('/erp/suppliers', {
+      name: 'Acme',
+      email: 'bob@acme.com',
+      phone: '555',
+      isActive: undefined,
+    });
   });
 
   // Purchase Orders
@@ -139,7 +144,11 @@ describe('erpApi', () => {
   it('adjustInventory calls POST /erp/inventory/adjust', () => {
     const data = { productId: 1, quantity: 5 };
     erpApi.adjustInventory(data);
-    expect(safe.post).toHaveBeenCalledWith('/erp/inventory/adjust', data);
+    expect(safe.post).toHaveBeenCalledWith('/erp/inventory/adjust', {
+      productId: 1,
+      change: 5,
+      type: 'adjustment',
+    });
   });
 
   it('getValuation calls GET /erp/inventory/valuation with method param', () => {

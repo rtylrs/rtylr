@@ -324,6 +324,131 @@ export const toLeadMutationPayload = (
   notes: data.notes,
 });
 
+interface CustomerMutationPayload {
+  firstName: string;
+  lastName: string;
+  email?: string;
+  phone?: string;
+  dateOfBirth?: string;
+  tags?: string[];
+  notes?: string;
+}
+
+function splitCustomerName(name?: string): { firstName: string; lastName: string } {
+  const parts = (name ?? '').trim().split(/\s+/).filter(Boolean);
+  return {
+    firstName: parts[0] ?? '',
+    lastName: parts.slice(1).join(' '),
+  };
+}
+
+function toCustomerMutationPayload(data: Partial<Customer>): CustomerMutationPayload {
+  const names = splitCustomerName(data.name);
+  return {
+    firstName: names.firstName,
+    lastName: names.lastName,
+    email: data.email,
+    phone: data.phone,
+    dateOfBirth: data.birthday,
+    tags: data.tags,
+    notes: data.notes,
+  };
+}
+
+interface ImportCustomersPayload {
+  customers: Record<string, unknown>[];
+}
+
+interface LoyaltyPointsPayload {
+  customerId: number;
+  points: number;
+  description?: string;
+}
+
+interface LoyaltyConfigPayload {
+  pointsPerDollar?: number;
+  pointsValue?: number;
+  isActive?: boolean;
+}
+
+function toLoyaltyConfigPayload(config: Partial<LoyaltyConfig>): LoyaltyConfigPayload {
+  return {
+    pointsPerDollar: config.pointsPerDollar,
+    pointsValue: config.redemptionRate,
+    isActive: config.programEnabled,
+  };
+}
+
+interface SegmentMutationPayload {
+  name?: string;
+  description?: string;
+  filters?: { rules: string[] };
+}
+
+function toSegmentMutationPayload(data: Partial<Segment>): SegmentMutationPayload {
+  return {
+    name: data.name,
+    description: data.description,
+    filters: { rules: data.rules ?? [] },
+  };
+}
+
+interface CampaignMutationPayload {
+  name?: string;
+  type?: string;
+  audienceSegmentId?: number;
+  subject?: string;
+  body?: string;
+  scheduledAt?: string;
+}
+
+function toCampaignMutationPayload(data: Partial<Campaign>): CampaignMutationPayload {
+  return {
+    name: data.name,
+    type: data.channel,
+    audienceSegmentId: data.segmentId,
+    subject: data.subject,
+    body: data.body,
+    scheduledAt: data.scheduledFor,
+  };
+}
+
+interface AutomationMutationPayload {
+  name?: string;
+  triggerType?: string;
+  triggerConfig?: Record<string, unknown>;
+  actions?: Array<{ id: string; type: string; label: string; x: number; y: number }>;
+  isActive?: boolean;
+}
+
+function toAutomationMutationPayload(data: Partial<Automation>): AutomationMutationPayload {
+  return {
+    name: data.name,
+    triggerType: data.trigger,
+    triggerConfig: {},
+    actions: data.nodes,
+    isActive: data.status === 'active',
+  };
+}
+
+interface SettingsMutationPayload {
+  defaultConsent?: boolean;
+  timezone?: string;
+  fromEmail?: string;
+  fromName?: string;
+  smsSenderId?: string;
+}
+
+function toSettingsMutationPayload(data: Partial<Settings>): SettingsMutationPayload {
+  return {
+    defaultConsent: data.defaultConsent,
+    timezone: data.timezone,
+    fromEmail: data.fromEmail,
+    fromName: data.fromName,
+    smsSenderId: data.smsSenderId,
+  };
+}
+
 export interface CreateTouchpointRequest {
   leadId: number;
   type: TouchpointType;
@@ -370,6 +495,65 @@ export interface UpdateContractRequest {
   notes?: string;
 }
 
+interface TouchpointMutationPayload {
+  leadId: number;
+  type: TouchpointType;
+  outcome: TouchpointOutcome;
+  notes: string;
+  contactId?: number | null;
+  nextFollowUp?: string | null;
+}
+
+function toTouchpointMutationPayload(data: CreateTouchpointRequest): TouchpointMutationPayload {
+  return {
+    leadId: data.leadId,
+    type: data.type,
+    outcome: data.outcome,
+    notes: data.notes,
+    contactId: data.contactId,
+    nextFollowUp: data.nextFollowUp,
+  };
+}
+
+interface ContractMutationPayload {
+  plan?: ContractPlan;
+  mrr?: number;
+  seats?: number;
+  signedAt?: string;
+  signedByName?: string;
+  closedBy?: number;
+  notes?: string;
+}
+
+interface CreateContractMutationPayload extends ContractMutationPayload {
+  leadId: number;
+}
+
+function toCreateContractPayload(data: CreateContractRequest): CreateContractMutationPayload {
+  return {
+    leadId: data.leadId,
+    plan: data.plan,
+    mrr: data.mrr,
+    seats: data.seats,
+    signedAt: data.signedAt,
+    signedByName: data.signedBy,
+    closedBy: data.closedBy ? Number(data.closedBy) : undefined,
+    notes: data.notes,
+  };
+}
+
+function toContractUpdatePayload(data: UpdateContractRequest): ContractMutationPayload {
+  return {
+    plan: data.plan,
+    mrr: data.mrr,
+    seats: data.seats,
+    signedAt: data.signedAt,
+    signedByName: data.signedBy,
+    closedBy: data.closedBy ? Number(data.closedBy) : undefined,
+    notes: data.notes,
+  };
+}
+
 // ── Service ──────────────────────────────────────────────────────
 
 export const crmApi = {
@@ -385,17 +569,18 @@ export const crmApi = {
   getCustomerTimeline: (id: number) =>
     safe.get<TimelineEntry[]>('/crm/customers/timeline', { params: { id } }),
 
-  createCustomer: (data: Partial<Customer>) => safe.post<Customer>('/crm/customers', data),
+  createCustomer: (data: Partial<Customer>) =>
+    safe.post<Customer>('/crm/customers', toCustomerMutationPayload(data)),
 
   updateCustomer: (id: number, data: Partial<Customer>) =>
-    safe.put<Customer>('/crm/customers', { id, ...data }),
+    safe.put<Customer>('/crm/customers', { id, ...toCustomerMutationPayload(data) }),
 
   deleteCustomer: (id: number) => safe.delete('/crm/customers', { data: { id } }),
 
   recordVisit: (customerId: number) => safe.post('/crm/customers/record-visit', { customerId }),
 
-  importCustomers: (customers: Record<string, unknown>[], dedupe?: boolean) =>
-    safe.post('/crm/customers/import', { customers, dedupe }),
+  importCustomers: (customers: Record<string, unknown>[], _dedupe?: boolean) =>
+    safe.post('/crm/customers/import', { customers } satisfies ImportCustomersPayload),
 
   mergeCustomers: (primaryId: number, secondaryId: number) =>
     safe.post('/crm/customers/merge', { primaryId, secondaryId }),
@@ -404,15 +589,15 @@ export const crmApi = {
 
   // Loyalty
   awardPoints: (customerId: number, points: number, reason?: string) =>
-    safe.post('/crm/loyalty/award', { customerId, points, reason }),
+    safe.post('/crm/loyalty/award', { customerId, points, description: reason }),
 
   redeemPoints: (customerId: number, points: number, reason?: string) =>
-    safe.post('/crm/loyalty/redeem', { customerId, points, reason }),
+    safe.post('/crm/loyalty/redeem', { customerId, points, description: reason }),
 
   getLoyaltyConfig: () => safe.get<LoyaltyConfig>('/crm/loyalty/config'),
 
   updateLoyaltyConfig: (config: Partial<LoyaltyConfig>) =>
-    safe.put<LoyaltyConfig>('/crm/loyalty/config', config),
+    safe.put<LoyaltyConfig>('/crm/loyalty/config', toLoyaltyConfigPayload(config)),
 
   getLoyaltyTransactions: () => safe.get<LoyaltyTransaction[]>('/crm/loyalty/transactions'),
 
@@ -433,7 +618,8 @@ export const crmApi = {
   getSegmentCustomers: (id: number) =>
     safe.get<Customer[]>('/crm/segments/customers', { params: { segment_id: id } }),
 
-  createSegment: (data: Partial<Segment>) => safe.post<Segment>('/crm/segments', data),
+  createSegment: (data: Partial<Segment>) =>
+    safe.post<Segment>('/crm/segments', toSegmentMutationPayload(data)),
 
   updateSegment: (id: number, data: Partial<Segment>) =>
     safe.put<Segment>('/crm/segments', { id, ...data }),
@@ -448,10 +634,11 @@ export const crmApi = {
   getCampaignStats: (id: number) =>
     safe.get<CampaignStats>('/crm/campaigns/stats', { params: { campaign_id: id } }),
 
-  createCampaign: (data: Partial<Campaign>) => safe.post<Campaign>('/crm/campaigns', data),
+  createCampaign: (data: Partial<Campaign>) =>
+    safe.post<Campaign>('/crm/campaigns', toCampaignMutationPayload(data)),
 
   updateCampaign: (id: number, data: Partial<Campaign>) =>
-    safe.put<Campaign>(`/crm/campaigns/${id}`, data),
+    safe.put<Campaign>(`/crm/campaigns/${id}`, toCampaignMutationPayload(data)),
 
   updateCampaignStatus: (id: number, status: string) =>
     safe.put(`/crm/campaigns/${id}/status`, { status }),
@@ -461,10 +648,11 @@ export const crmApi = {
   // Automations
   getAutomations: () => safe.get<Automation[]>('/crm/automations'),
 
-  createAutomation: (data: Partial<Automation>) => safe.post<Automation>('/crm/automations', data),
+  createAutomation: (data: Partial<Automation>) =>
+    safe.post<Automation>('/crm/automations', toAutomationMutationPayload(data)),
 
   updateAutomation: (id: number, data: Partial<Automation>) =>
-    safe.put<Automation>(`/crm/automations/${id}`, data),
+    safe.put<Automation>(`/crm/automations/${id}`, toAutomationMutationPayload(data)),
 
   deleteAutomation: (id: number) => safe.delete(`/crm/automations/${id}`),
 
@@ -480,7 +668,8 @@ export const crmApi = {
   // Settings
   getSettings: () => safe.get<Settings>('/crm/settings'),
 
-  updateSettings: (data: Partial<Settings>) => safe.put<Settings>('/crm/settings', data),
+  updateSettings: (data: Partial<Settings>) =>
+    safe.put<Settings>('/crm/settings', toSettingsMutationPayload(data)),
 
   // Sales Pipeline
   getSalesPipeline: () => safe.get<PipelineColumn[]>('/crm/sales/pipeline'),
@@ -494,7 +683,7 @@ export const crmApi = {
   getLeadTouchpoints: (leadId: number) =>
     safe.get<Touchpoint[]>(`/crm/sales/leads/${leadId}/touchpoints`),
   createTouchpoint: (data: CreateTouchpointRequest) =>
-    safe.post<Touchpoint>('/crm/sales/touchpoints', data),
+    safe.post<Touchpoint>('/crm/sales/touchpoints', toTouchpointMutationPayload(data)),
   deleteTouchpoint: (id: number) => safe.delete(`/crm/sales/touchpoints/${id}`),
   getContacts: (leadId?: number) =>
     safe.get<SalesContact[]>('/crm/sales/contacts', {
@@ -508,7 +697,7 @@ export const crmApi = {
   getContracts: () => safe.get<Contract[]>('/crm/sales/contracts'),
   getContract: (id: number) => safe.get<Contract>(`/crm/sales/contracts/${id}`),
   createContract: (data: CreateContractRequest) =>
-    safe.post<Contract>('/crm/sales/contracts', data),
+    safe.post<Contract>('/crm/sales/contracts', toCreateContractPayload(data)),
   updateContract: (id: number, data: UpdateContractRequest) =>
-    safe.put<Contract>(`/crm/sales/contracts/${id}`, data),
+    safe.put<Contract>(`/crm/sales/contracts/${id}`, toContractUpdatePayload(data)),
 };

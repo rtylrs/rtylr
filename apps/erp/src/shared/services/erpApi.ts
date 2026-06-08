@@ -266,6 +266,156 @@ export interface ActivityItem {
   timestamp: string;
 }
 
+interface CategoryMutationPayload {
+  name?: string;
+  description?: string;
+}
+
+function toCategoryMutationPayload(data: Partial<Category>): CategoryMutationPayload {
+  return {
+    name: data.name,
+    description: data.description,
+  };
+}
+
+interface BrandMutationPayload {
+  name?: string;
+  logoUrl?: string;
+  description?: string;
+}
+
+function toBrandMutationPayload(data: Partial<Brand>): BrandMutationPayload {
+  return {
+    name: data.name,
+    logoUrl: data.logoUrl,
+    description: data.description,
+  };
+}
+
+interface WarehouseMutationPayload {
+  name?: string;
+  address?: string;
+  managerName?: string;
+  isDefault?: boolean;
+}
+
+interface UpdateWarehousePayload extends WarehouseMutationPayload {
+  id: number;
+}
+
+function toWarehouseMutationPayload(
+  data: Partial<Warehouse> & { managerName?: string }
+): WarehouseMutationPayload {
+  return {
+    name: data.name,
+    address: data.address,
+    managerName: data.managerName ?? data.manager,
+    isDefault: data.isDefault,
+  };
+}
+
+function toUpdateWarehousePayload(data: {
+  id: number;
+  name: string;
+  address?: string;
+  manager?: string;
+}): UpdateWarehousePayload {
+  return {
+    id: data.id,
+    ...toWarehouseMutationPayload(data),
+  };
+}
+
+interface StockTransferMutationPayload {
+  fromWarehouseId?: number;
+  toWarehouseId?: number;
+  notes?: string;
+  items?: Array<{ productId: number; quantity: number }>;
+}
+
+function toStockTransferMutationPayload(
+  data: Partial<StockTransfer> & {
+    notes?: string;
+    transferItems?: Array<{ productId: number; quantity: number }>;
+  }
+): StockTransferMutationPayload {
+  return {
+    fromWarehouseId: data.fromWarehouseId,
+    toWarehouseId: data.toWarehouseId,
+    notes: data.notes,
+    items: data.transferItems,
+  };
+}
+
+interface SupplierMutationPayload {
+  name?: string;
+  email?: string;
+  phone?: string;
+  isActive?: boolean;
+}
+
+function toSupplierMutationPayload(
+  data: CreateSupplierInput | UpdateSupplierInput
+): SupplierMutationPayload {
+  return {
+    name: data.name,
+    email: data.email,
+    phone: data.phone,
+    isActive: 'status' in data ? data.status !== 'Inactive' : undefined,
+  };
+}
+
+interface UpdateSupplierPayload extends SupplierMutationPayload {
+  id: number;
+}
+
+function toUpdateSupplierPayload(data: UpdateSupplierInput): UpdateSupplierPayload {
+  return {
+    id: data.id,
+    ...toSupplierMutationPayload(data),
+  };
+}
+
+interface InventoryAdjustmentPayload {
+  productId: number;
+  change: number;
+  type: 'adjustment';
+}
+
+interface PriceListMutationPayload {
+  name?: string;
+  currency?: string;
+  isDefault?: boolean;
+}
+
+function toPriceListMutationPayload(data: Partial<PriceList>): PriceListMutationPayload {
+  return {
+    name: data.name,
+    currency: 'USD',
+    isDefault: false,
+  };
+}
+
+interface VariantMutationPayload {
+  productId?: number;
+  name?: string;
+  sku?: string;
+  salePrice?: number;
+  stockQuantity?: number;
+  attributes?: string;
+}
+
+function toVariantMutationPayload(data: Partial<ProductVariant>): VariantMutationPayload {
+  return {
+    productId: data.productId,
+    name: data.name,
+    sku: data.sku,
+    salePrice: data.price,
+    stockQuantity: data.stock,
+    attributes: data.attributes ? JSON.stringify(data.attributes) : undefined,
+  };
+}
+
 // ─── API ─────────────────────────────────────────────────────────────────────
 
 export const erpApi = {
@@ -291,7 +441,8 @@ export const erpApi = {
 
   // Categories
   listCategories: () => safe.get<Category[]>('/erp/categories'),
-  createCategory: (data: Partial<Category>) => safe.post<Category>('/erp/categories', data),
+  createCategory: (data: Partial<Category>) =>
+    safe.post<Category>('/erp/categories', toCategoryMutationPayload(data)),
   deleteCategory: (id: number) =>
     safe.delete<{ success: boolean }>('/erp/categories', { data: { id } }),
   updateCategory: (data: { id: number; name: string; description?: string }) =>
@@ -299,24 +450,26 @@ export const erpApi = {
 
   // Brands
   listBrands: () => safe.get<Brand[]>('/erp/brands'),
-  createBrand: (data: Partial<Brand>) => safe.post<Brand>('/erp/brands', data),
+  createBrand: (data: Partial<Brand>) =>
+    safe.post<Brand>('/erp/brands', toBrandMutationPayload(data)),
   deleteBrand: (id: number) => safe.delete<{ success: boolean }>('/erp/brands', { data: { id } }),
   updateBrand: (data: { id: number; name: string; description?: string }) =>
     safe.put<Brand>('/erp/brands', data),
 
   // Warehouses
   listWarehouses: () => safe.get<Warehouse[]>('/erp/warehouses'),
-  createWarehouse: (data: Partial<Warehouse>) => safe.post<Warehouse>('/erp/warehouses', data),
+  createWarehouse: (data: Partial<Warehouse>) =>
+    safe.post<Warehouse>('/erp/warehouses', toWarehouseMutationPayload(data)),
   deleteWarehouse: (id: number) =>
     safe.delete<{ success: boolean }>('/erp/warehouses', { data: { id } }),
   updateWarehouse: (data: { id: number; name: string; address?: string; manager?: string }) =>
-    safe.put<Warehouse>('/erp/warehouses', data),
+    safe.put<Warehouse>('/erp/warehouses', toUpdateWarehousePayload(data)),
 
   // Stock transfers
   listStockTransfers: (params?: { page?: number; page_size?: number }) =>
     safe.get<StockTransfer[]>('/erp/stock-transfers', { params }),
   createStockTransfer: (data: Partial<StockTransfer>) =>
-    safe.post<StockTransfer>('/erp/stock-transfers', data),
+    safe.post<StockTransfer>('/erp/stock-transfers', toStockTransferMutationPayload(data)),
 
   // Stock takes
   listStockTakes: (params?: { page?: number; page_size?: number }) =>
@@ -330,8 +483,10 @@ export const erpApi = {
   // Suppliers
   listSuppliers: (params?: { page?: number; page_size?: number }) =>
     safe.get<Supplier[]>('/erp/suppliers', { params }),
-  createSupplier: (data: CreateSupplierInput) => safe.post<Supplier>('/erp/suppliers', data),
-  updateSupplier: (data: UpdateSupplierInput) => safe.put<Supplier>('/erp/suppliers', data),
+  createSupplier: (data: CreateSupplierInput) =>
+    safe.post<Supplier>('/erp/suppliers', toSupplierMutationPayload(data)),
+  updateSupplier: (data: UpdateSupplierInput) =>
+    safe.put<Supplier>('/erp/suppliers', toUpdateSupplierPayload(data)),
   deleteSupplier: (id: number) => safe.delete<{ success: boolean }>(`/erp/suppliers/${id}`),
 
   // Purchase Orders
@@ -347,8 +502,12 @@ export const erpApi = {
   // Inventory
   getInventoryReport: () => safe.get<InventoryReportItem[]>('/erp/inventory/report'),
   getLowStock: () => safe.get<LowStockItem[]>('/erp/inventory/low-stock'),
-  adjustInventory: (data: { productId: number; delta: number }) =>
-    safe.post<{ success: boolean }>('/erp/inventory/adjust', data),
+  adjustInventory: (data: { productId: number; delta?: number; quantity?: number }) =>
+    safe.post<{ success: boolean }>('/erp/inventory/adjust', {
+      productId: data.productId,
+      change: data.delta ?? data.quantity ?? 0,
+      type: 'adjustment',
+    } satisfies InventoryAdjustmentPayload),
   getValuation: (method: 'FIFO' | 'LIFO' | 'WAC' = 'WAC') =>
     safe.get<any>('/erp/inventory/valuation', { params: { method } }),
 
@@ -360,13 +519,14 @@ export const erpApi = {
 
   // Price lists
   listPriceLists: () => safe.get<PriceList[]>('/erp/price-lists'),
-  createPriceList: (data: Partial<PriceList>) => safe.post<PriceList>('/erp/price-lists', data),
+  createPriceList: (data: Partial<PriceList>) =>
+    safe.post<PriceList>('/erp/price-lists', toPriceListMutationPayload(data)),
 
   // Variants
   listVariants: (productId?: number) =>
     safe.get<ProductVariant[]>('/erp/variants', { params: productId ? { productId } : undefined }),
   createVariant: (data: Partial<ProductVariant>) =>
-    safe.post<ProductVariant>('/erp/variants', data),
+    safe.post<ProductVariant>('/erp/variants', toVariantMutationPayload(data)),
   // Backend stores attributes as a JSON string and uses salePrice/stockQuantity,
   // so write inputs intentionally diverge from the ProductVariant display type.
   updateVariant: (data: {

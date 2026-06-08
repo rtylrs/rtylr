@@ -48,12 +48,29 @@ describe('crmApi', () => {
   it('createCustomer calls POST /crm/customers', () => {
     const data = { name: 'Jane', email: 'jane@test.com' };
     crmApi.createCustomer(data);
-    expect(safe.post).toHaveBeenCalledWith('/crm/customers', data);
+    expect(safe.post).toHaveBeenCalledWith('/crm/customers', {
+      firstName: 'Jane',
+      lastName: '',
+      email: 'jane@test.com',
+      phone: undefined,
+      dateOfBirth: undefined,
+      tags: undefined,
+      notes: undefined,
+    });
   });
 
   it('updateCustomer calls PUT /crm/customers with id', () => {
     crmApi.updateCustomer(3, { name: 'Updated' });
-    expect(safe.put).toHaveBeenCalledWith('/crm/customers', { id: 3, name: 'Updated' });
+    expect(safe.put).toHaveBeenCalledWith('/crm/customers', {
+      id: 3,
+      firstName: 'Updated',
+      lastName: '',
+      email: undefined,
+      phone: undefined,
+      dateOfBirth: undefined,
+      tags: undefined,
+      notes: undefined,
+    });
   });
 
   it('deleteCustomer calls DELETE /crm/customers with id', () => {
@@ -71,7 +88,6 @@ describe('crmApi', () => {
     crmApi.importCustomers(customers);
     expect(safe.post).toHaveBeenCalledWith('/crm/customers/import', {
       customers,
-      dedupe: undefined,
     });
   });
 
@@ -94,7 +110,7 @@ describe('crmApi', () => {
     expect(safe.post).toHaveBeenCalledWith('/crm/loyalty/award', {
       customerId: 1,
       points: 100,
-      reason: 'birthday',
+      description: 'birthday',
     });
   });
 
@@ -142,7 +158,11 @@ describe('crmApi', () => {
   it('createSegment calls POST /crm/segments', () => {
     const data = { name: 'VIPs' };
     crmApi.createSegment(data);
-    expect(safe.post).toHaveBeenCalledWith('/crm/segments', data);
+    expect(safe.post).toHaveBeenCalledWith('/crm/segments', {
+      name: 'VIPs',
+      description: undefined,
+      filters: { rules: [] },
+    });
   });
 
   it('deleteSegment calls DELETE /crm/segments with id', () => {
@@ -176,7 +196,13 @@ describe('crmApi', () => {
   it('createAutomation calls POST /crm/automations', () => {
     const data = { name: 'Welcome flow' };
     crmApi.createAutomation(data);
-    expect(safe.post).toHaveBeenCalledWith('/crm/automations', data);
+    expect(safe.post).toHaveBeenCalledWith('/crm/automations', {
+      name: 'Welcome flow',
+      triggerType: undefined,
+      triggerConfig: {},
+      actions: undefined,
+      isActive: false,
+    });
   });
 
   // Templates
