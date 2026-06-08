@@ -13,14 +13,8 @@ message UpdateProfileRequest {
     (buf.validate.field).required = true,
     (buf.validate.field).string.min_len = 1
   ];
-  // email is the email address used for lookup or contact.
-  string email = 2 [
-    (buf.validate.field).required = true,
-    (buf.validate.field).string = {
-      min_len: 1
-      email: true
-    }
-  ];
+  // email is reserved for future profile email changes.
+  optional string email = 2 [(buf.validate.field).string.email = true];
 }
 
 message UpdateProfileResponse {

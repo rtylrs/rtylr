@@ -1,0 +1,35 @@
+syntax = "proto3";
+
+package common.oauth.v1;
+
+import "buf/validate/validate.proto";
+
+option go_package = "github.com/voxire/voxie/gen/go/common/oauth/v1";
+
+// IssueRequest creates an OAuth authorization redirect for the signed-in user.
+message IssueRequest {
+  // client_id identifies the OAuth client requesting authorization.
+  string client_id = 1 [
+    (buf.validate.field).required = true,
+    (buf.validate.field).string.min_len = 1
+  ];
+  // redirect_uri is the callback URI that receives the authorization code.
+  string redirect_uri = 2 [
+    (buf.validate.field).required = true,
+    (buf.validate.field).string.uri = true
+  ];
+  // scope contains the requested OAuth scopes.
+  string scope = 3;
+  // state is echoed back to the redirect URI.
+  string state = 4;
+  // code_challenge is the PKCE challenge for the authorization code.
+  string code_challenge = 5;
+  // code_challenge_method is the PKCE challenge method.
+  string code_challenge_method = 6;
+}
+
+// IssueResponse returns the authorization redirect URL.
+message IssueResponse {
+  // redirect_url is the URL the browser should navigate to.
+  string redirect_url = 1;
+}

@@ -7,6 +7,7 @@
 package v1
 
 import (
+	_ "buf.build/gen/go/bufbuild/protovalidate/protocolbuffers/go/buf/validate"
 	protoreflect "google.golang.org/protobuf/reflect/protoreflect"
 	protoimpl "google.golang.org/protobuf/runtime/protoimpl"
 	reflect "reflect"
@@ -115,9 +116,9 @@ var File_common_auth_v1_reset_password_proto protoreflect.FileDescriptor
 
 const file_common_auth_v1_reset_password_proto_rawDesc = "" +
 	"\n" +
-	"#common/auth/v1/reset_password.proto\x12\x0ecommon.auth.v1\",\n" +
-	"\x14ResetPasswordRequest\x12\x14\n" +
-	"\x05email\x18\x01 \x01(\tR\x05email\"1\n" +
+	"#common/auth/v1/reset_password.proto\x12\x0ecommon.auth.v1\x1a\x1bbuf/validate/validate.proto\":\n" +
+	"\x14ResetPasswordRequest\x12\"\n" +
+	"\x05email\x18\x01 \x01(\tB\f\xbaH\t\xc8\x01\x01r\x04\x10\x01`\x01R\x05email\"1\n" +
 	"\x15ResetPasswordResponse\x12\x18\n" +
 	"\amessage\x18\x01 \x01(\tR\amessageB/Z-github.com/voxire/voxie/gen/go/common/auth/v1b\x06proto3"
 

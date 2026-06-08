@@ -10,8 +10,8 @@ import type { GetMeResponse } from "./get_me";
 export interface UpdateProfileRequest {
   /** name is the name value for this contract. */
   name: string;
-  /** email is the email address used for lookup or contact. */
-  email: string;
+  /** email is reserved for future profile email changes. */
+  email?: string | undefined;
 }
 
 export interface UpdateProfileResponse {

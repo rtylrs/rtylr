@@ -78,7 +78,7 @@
     "common.auth.v1.RegisterRequest": {
       "businessName": {
         "name": "businessName",
-        "optional": false,
+        "optional": true,
         "protoName": "business_name",
         "repeated": false,
         "required": false,
@@ -118,7 +118,7 @@
       },
       "planSlug": {
         "name": "planSlug",
-        "optional": false,
+        "optional": true,
         "protoName": "plan_slug",
         "repeated": false,
         "required": false,
@@ -126,11 +126,118 @@
         "type": "string"
       }
     },
-    "common.auth.v1.ResetPasswordRequest": {
+    "common.auth.v1.ResendVerificationRequest": {
       "email": {
+        "email": true,
+        "minLen": 1,
         "name": "email",
         "optional": false,
         "protoName": "email",
+        "repeated": false,
+        "required": true,
+        "scalar": true,
+        "type": "string"
+      }
+    },
+    "common.auth.v1.ResetPasswordConfirmRequest": {
+      "password": {
+        "minLen": 1,
+        "name": "password",
+        "optional": false,
+        "protoName": "password",
+        "repeated": false,
+        "required": true,
+        "scalar": true,
+        "type": "string"
+      },
+      "token": {
+        "minLen": 1,
+        "name": "token",
+        "optional": false,
+        "protoName": "token",
+        "repeated": false,
+        "required": true,
+        "scalar": true,
+        "type": "string"
+      }
+    },
+    "common.auth.v1.ResetPasswordRequest": {
+      "email": {
+        "email": true,
+        "minLen": 1,
+        "name": "email",
+        "optional": false,
+        "protoName": "email",
+        "repeated": false,
+        "required": true,
+        "scalar": true,
+        "type": "string"
+      }
+    },
+    "common.auth.v1.VerifyEmailRequest": {
+      "token": {
+        "minLen": 1,
+        "name": "token",
+        "optional": false,
+        "protoName": "token",
+        "repeated": false,
+        "required": true,
+        "scalar": true,
+        "type": "string"
+      }
+    },
+    "common.oauth.v1.IssueRequest": {
+      "clientId": {
+        "minLen": 1,
+        "name": "clientId",
+        "optional": false,
+        "protoName": "client_id",
+        "repeated": false,
+        "required": true,
+        "scalar": true,
+        "type": "string"
+      },
+      "codeChallenge": {
+        "name": "codeChallenge",
+        "optional": false,
+        "protoName": "code_challenge",
+        "repeated": false,
+        "required": false,
+        "scalar": true,
+        "type": "string"
+      },
+      "codeChallengeMethod": {
+        "name": "codeChallengeMethod",
+        "optional": false,
+        "protoName": "code_challenge_method",
+        "repeated": false,
+        "required": false,
+        "scalar": true,
+        "type": "string"
+      },
+      "redirectUri": {
+        "name": "redirectUri",
+        "optional": false,
+        "protoName": "redirect_uri",
+        "repeated": false,
+        "required": true,
+        "scalar": true,
+        "type": "string",
+        "uri": true
+      },
+      "scope": {
+        "name": "scope",
+        "optional": false,
+        "protoName": "scope",
+        "repeated": false,
+        "required": false,
+        "scalar": true,
+        "type": "string"
+      },
+      "state": {
+        "name": "state",
+        "optional": false,
+        "protoName": "state",
         "repeated": false,
         "required": false,
         "scalar": true,
@@ -7309,12 +7416,11 @@
     "hub.user.v1.UpdateProfileRequest": {
       "email": {
         "email": true,
-        "minLen": 1,
         "name": "email",
-        "optional": false,
+        "optional": true,
         "protoName": "email",
         "repeated": false,
-        "required": true,
+        "required": false,
         "scalar": true,
         "type": "string"
       },
