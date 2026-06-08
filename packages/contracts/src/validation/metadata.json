@@ -2,22 +2,30 @@
   "messages": {
     "common.auth.v1.GoogleAuthRequest": {
       "businessName": {
-        "minLen": 1,
         "name": "businessName",
-        "optional": false,
+        "optional": true,
         "protoName": "business_name",
+        "repeated": false,
+        "required": false,
+        "scalar": true,
+        "type": "string"
+      },
+      "code": {
+        "minLen": 1,
+        "name": "code",
+        "optional": false,
+        "protoName": "code",
         "repeated": false,
         "required": true,
         "scalar": true,
         "type": "string"
       },
       "idToken": {
-        "minLen": 1,
         "name": "idToken",
-        "optional": false,
+        "optional": true,
         "protoName": "id_token",
         "repeated": false,
-        "required": true,
+        "required": false,
         "scalar": true,
         "type": "string"
       }
@@ -4177,11 +4185,12 @@
         "type": "int64"
       },
       "name": {
+        "minLen": 1,
         "name": "name",
-        "optional": true,
+        "optional": false,
         "protoName": "name",
         "repeated": false,
-        "required": false,
+        "required": true,
         "scalar": true,
         "type": "string"
       },
@@ -4295,51 +4304,49 @@
       }
     },
     "hr.employee.v1.CreateEmployeeRequest": {
-      "accountCreationMode": {
-        "minLen": 1,
-        "name": "accountCreationMode",
+      "address": {
+        "name": "address",
         "optional": false,
-        "protoName": "account_creation_mode",
+        "protoName": "address",
         "repeated": false,
-        "required": true,
-        "scalar": true,
-        "type": "string"
-      },
-      "contractType": {
-        "minLen": 1,
-        "name": "contractType",
-        "optional": false,
-        "protoName": "contract_type",
-        "repeated": false,
-        "required": true,
-        "scalar": true,
-        "type": "string"
-      },
-      "currency": {
-        "minLen": 1,
-        "name": "currency",
-        "optional": false,
-        "protoName": "currency",
-        "repeated": false,
-        "required": true,
+        "required": false,
         "scalar": true,
         "type": "string"
       },
       "departmentId": {
-        "gt": 0,
         "name": "departmentId",
         "optional": false,
         "protoName": "department_id",
         "repeated": false,
-        "required": true,
+        "required": false,
         "scalar": true,
         "type": "int64"
       },
-      "hireDate": {
+      "email": {
+        "email": true,
         "minLen": 1,
-        "name": "hireDate",
+        "name": "email",
         "optional": false,
-        "protoName": "hire_date",
+        "protoName": "email",
+        "repeated": false,
+        "required": true,
+        "scalar": true,
+        "type": "string"
+      },
+      "employmentType": {
+        "name": "employmentType",
+        "optional": false,
+        "protoName": "employment_type",
+        "repeated": false,
+        "required": false,
+        "scalar": true,
+        "type": "string"
+      },
+      "firstName": {
+        "minLen": 1,
+        "name": "firstName",
+        "optional": false,
+        "protoName": "first_name",
         "repeated": false,
         "required": true,
         "scalar": true,
@@ -4347,92 +4354,71 @@
       },
       "hourlyRate": {
         "name": "hourlyRate",
-        "optional": true,
+        "optional": false,
         "protoName": "hourly_rate",
         "repeated": false,
         "required": false,
         "scalar": true,
         "type": "double"
       },
-      "jobTitle": {
+      "lastName": {
         "minLen": 1,
-        "name": "jobTitle",
+        "name": "lastName",
         "optional": false,
-        "protoName": "job_title",
+        "protoName": "last_name",
         "repeated": false,
         "required": true,
         "scalar": true,
         "type": "string"
       },
       "locationId": {
-        "gt": 0,
         "name": "locationId",
         "optional": false,
         "protoName": "location_id",
-        "repeated": false,
-        "required": true,
-        "scalar": true,
-        "type": "int64"
-      },
-      "managerId": {
-        "name": "managerId",
-        "optional": true,
-        "protoName": "manager_id",
         "repeated": false,
         "required": false,
         "scalar": true,
         "type": "int64"
       },
-      "monthlySalary": {
-        "name": "monthlySalary",
-        "optional": true,
-        "protoName": "monthly_salary",
+      "overtimeRate": {
+        "name": "overtimeRate",
+        "optional": false,
+        "protoName": "overtime_rate",
         "repeated": false,
         "required": false,
         "scalar": true,
         "type": "double"
       },
-      "probationEndDate": {
-        "name": "probationEndDate",
-        "optional": true,
-        "protoName": "probation_end_date",
+      "phone": {
+        "name": "phone",
+        "optional": false,
+        "protoName": "phone",
         "repeated": false,
         "required": false,
         "scalar": true,
         "type": "string"
       },
-      "status": {
-        "minLen": 1,
-        "name": "status",
+      "salary": {
+        "name": "salary",
         "optional": false,
-        "protoName": "status",
+        "protoName": "salary",
         "repeated": false,
-        "required": true,
+        "required": false,
         "scalar": true,
-        "type": "string"
+        "type": "double"
       },
-      "terminationDate": {
-        "name": "terminationDate",
-        "optional": true,
-        "protoName": "termination_date",
+      "startDate": {
+        "name": "startDate",
+        "optional": false,
+        "protoName": "start_date",
         "repeated": false,
         "required": false,
         "scalar": true,
         "type": "string"
-      },
-      "userId": {
-        "gt": 0,
-        "name": "userId",
-        "optional": false,
-        "protoName": "user_id",
-        "repeated": false,
-        "required": true,
-        "scalar": true,
-        "type": "int64"
       },
       "workScheduleId": {
         "name": "workScheduleId",
-        "optional": true,
+        "optional": false,
         "protoName": "work_schedule_id",
         "repeated": false,
         "required": false,
@@ -4510,28 +4496,10 @@
       }
     },
     "hr.employee.v1.UpdateEmployeeRequest": {
-      "accountCreationMode": {
-        "name": "accountCreationMode",
-        "optional": true,
-        "protoName": "account_creation_mode",
-        "repeated": false,
-        "required": false,
-        "scalar": true,
-        "type": "string"
-      },
-      "contractType": {
-        "name": "contractType",
-        "optional": true,
-        "protoName": "contract_type",
-        "repeated": false,
-        "required": false,
-        "scalar": true,
-        "type": "string"
-      },
-      "currency": {
-        "name": "currency",
-        "optional": true,
-        "protoName": "currency",
+      "address": {
+        "name": "address",
+        "optional": false,
+        "protoName": "address",
         "repeated": false,
         "required": false,
         "scalar": true,
@@ -4539,25 +4507,71 @@
       },
       "departmentId": {
         "name": "departmentId",
-        "optional": true,
+        "optional": false,
         "protoName": "department_id",
         "repeated": false,
         "required": false,
         "scalar": true,
         "type": "int64"
       },
-      "hireDate": {
-        "name": "hireDate",
-        "optional": true,
-        "protoName": "hire_date",
+      "email": {
+        "name": "email",
+        "optional": false,
+        "protoName": "email",
         "repeated": false,
         "required": false,
         "scalar": true,
         "type": "string"
       },
+      "emergencyContactName": {
+        "name": "emergencyContactName",
+        "optional": false,
+        "protoName": "emergency_contact_name",
+        "repeated": false,
+        "required": false,
+        "scalar": true,
+        "type": "string"
+      },
+      "emergencyContactPhone": {
+        "name": "emergencyContactPhone",
+        "optional": false,
+        "protoName": "emergency_contact_phone",
+        "repeated": false,
+        "required": false,
+        "scalar": true,
+        "type": "string"
+      },
+      "employmentType": {
+        "name": "employmentType",
+        "optional": false,
+        "protoName": "employment_type",
+        "repeated": false,
+        "required": false,
+        "scalar": true,
+        "type": "string"
+      },
+      "endDate": {
+        "name": "endDate",
+        "optional": false,
+        "protoName": "end_date",
+        "repeated": false,
+        "required": false,
+        "scalar": true,
+        "type": "string"
+      },
+      "firstName": {
+        "minLen": 1,
+        "name": "firstName",
+        "optional": false,
+        "protoName": "first_name",
+        "repeated": false,
+        "required": true,
+        "scalar": true,
+        "type": "string"
+      },
       "hourlyRate": {
         "name": "hourlyRate",
-        "optional": true,
+        "optional": false,
         "protoName": "hourly_rate",
         "repeated": false,
         "required": false,
@@ -4574,46 +4588,65 @@
         "scalar": true,
         "type": "int64"
       },
-      "jobTitle": {
-        "name": "jobTitle",
-        "optional": true,
-        "protoName": "job_title",
+      "lastName": {
+        "minLen": 1,
+        "name": "lastName",
+        "optional": false,
+        "protoName": "last_name",
         "repeated": false,
-        "required": false,
+        "required": true,
         "scalar": true,
         "type": "string"
       },
       "locationId": {
         "name": "locationId",
-        "optional": true,
+        "optional": false,
         "protoName": "location_id",
         "repeated": false,
         "required": false,
         "scalar": true,
         "type": "int64"
       },
-      "managerId": {
-        "name": "managerId",
-        "optional": true,
-        "protoName": "manager_id",
+      "notes": {
+        "name": "notes",
+        "optional": false,
+        "protoName": "notes",
         "repeated": false,
         "required": false,
         "scalar": true,
-        "type": "int64"
+        "type": "string"
       },
-      "monthlySalary": {
-        "name": "monthlySalary",
-        "optional": true,
-        "protoName": "monthly_salary",
+      "overtimeRate": {
+        "name": "overtimeRate",
+        "optional": false,
+        "protoName": "overtime_rate",
         "repeated": false,
         "required": false,
         "scalar": true,
         "type": "double"
       },
-      "probationEndDate": {
-        "name": "probationEndDate",
-        "optional": true,
-        "protoName": "probation_end_date",
+      "phone": {
+        "name": "phone",
+        "optional": false,
+        "protoName": "phone",
+        "repeated": false,
+        "required": false,
+        "scalar": true,
+        "type": "string"
+      },
+      "salary": {
+        "name": "salary",
+        "optional": false,
+        "protoName": "salary",
+        "repeated": false,
+        "required": false,
+        "scalar": true,
+        "type": "double"
+      },
+      "startDate": {
+        "name": "startDate",
+        "optional": false,
+        "protoName": "start_date",
         "repeated": false,
         "required": false,
         "scalar": true,
@@ -4621,17 +4654,8 @@
       },
       "status": {
         "name": "status",
-        "optional": true,
+        "optional": false,
         "protoName": "status",
-        "repeated": false,
-        "required": false,
-        "scalar": true,
-        "type": "string"
-      },
-      "terminationDate": {
-        "name": "terminationDate",
-        "optional": true,
-        "protoName": "termination_date",
         "repeated": false,
         "required": false,
         "scalar": true,
@@ -4639,7 +4663,7 @@
       },
       "workScheduleId": {
         "name": "workScheduleId",
-        "optional": true,
+        "optional": false,
         "protoName": "work_schedule_id",
         "repeated": false,
         "required": false,
@@ -4814,16 +4838,6 @@
         "scalar": true,
         "type": "bool"
       },
-      "leaveRequestId": {
-        "gt": 0,
-        "name": "leaveRequestId",
-        "optional": false,
-        "protoName": "leave_request_id",
-        "repeated": false,
-        "required": true,
-        "scalar": true,
-        "type": "int64"
-      },
       "rejectionReason": {
         "name": "rejectionReason",
         "optional": true,
@@ -4832,6 +4846,16 @@
         "required": false,
         "scalar": true,
         "type": "string"
+      },
+      "requestId": {
+        "gt": 0,
+        "name": "requestId",
+        "optional": false,
+        "protoName": "request_id",
+        "repeated": false,
+        "required": true,
+        "scalar": true,
+        "type": "int64"
       }
     },
     "hr.leave.v1.CreateLeaveRequestRequest": {
@@ -7261,20 +7285,22 @@
     },
     "hub.user.v1.ChangePasswordRequest": {
       "currentPassword": {
+        "minLen": 1,
         "name": "currentPassword",
         "optional": false,
         "protoName": "current_password",
         "repeated": false,
-        "required": false,
+        "required": true,
         "scalar": true,
         "type": "string"
       },
       "newPassword": {
+        "minLen": 1,
         "name": "newPassword",
         "optional": false,
         "protoName": "new_password",
         "repeated": false,
-        "required": false,
+        "required": true,
         "scalar": true,
         "type": "string"
       }

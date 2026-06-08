@@ -5,42 +5,50 @@
 // source: hr/employee/v1/update_employee.proto
 
 /* eslint-disable */
-import type { EmployeePayload } from './types';
+import type { Staff } from '../../staff/v1/types';
 
 export interface UpdateEmployeeRequest {
-  /** ID of the employee to update. */
+  /** id is the employee ID from the route. */
   id: number;
-  /** New department assignment; absent to keep current. */
-  departmentId?: number | undefined;
-  /** New work location; absent to keep current. */
-  locationId?: number | undefined;
-  /** New direct manager; absent to keep current. */
-  managerId?: number | undefined;
-  /** New employment arrangement; absent to keep current. */
-  contractType?: string | undefined;
-  /** New employment status; absent to keep current. */
-  status?: string | undefined;
-  /** New hire date (ISO-8601); absent to keep current. */
-  hireDate?: string | undefined;
-  /** New probation end date (ISO-8601); absent to keep current. */
-  probationEndDate?: string | undefined;
-  /** New termination date (ISO-8601); absent to keep current. */
-  terminationDate?: string | undefined;
-  /** New hourly rate; absent to keep current. */
-  hourlyRate?: number | undefined;
-  /** New monthly salary; absent to keep current. */
-  monthlySalary?: number | undefined;
-  /** New currency code; absent to keep current. */
-  currency?: string | undefined;
-  /** New work schedule; absent to keep current. */
-  workScheduleId?: number | undefined;
-  /** New account creation mode; absent to keep current. */
-  accountCreationMode?: string | undefined;
-  /** New job title; absent to keep current. */
-  jobTitle?: string | undefined;
+  /** department_id is the department assignment; zero leaves it unset. */
+  departmentId: number;
+  /** location_id is the work location assignment; zero leaves it unset. */
+  locationId: number;
+  /** work_schedule_id is the work schedule assignment; zero leaves it unset. */
+  workScheduleId: number;
+  /** first_name is the employee's given name. */
+  firstName: string;
+  /** last_name is the employee's family name. */
+  lastName: string;
+  /** email is the employee email address. */
+  email: string;
+  /** phone is the employee phone number. */
+  phone: string;
+  /** employment_type is the employment type label. */
+  employmentType: string;
+  /** status is the employment status. */
+  status: string;
+  /** salary is the monthly or salaried compensation amount. */
+  salary: number;
+  /** hourly_rate is the employee hourly pay rate. */
+  hourlyRate: number;
+  /** overtime_rate is the employee overtime pay rate. */
+  overtimeRate: number;
+  /** start_date is the start date in YYYY-MM-DD format. */
+  startDate: string;
+  /** end_date is the end date in YYYY-MM-DD format. */
+  endDate: string;
+  /** address is the employee address. */
+  address: string;
+  /** emergency_contact_name is the emergency contact name. */
+  emergencyContactName: string;
+  /** emergency_contact_phone is the emergency contact phone. */
+  emergencyContactPhone: string;
+  /** notes are internal employee notes. */
+  notes: string;
 }
 
 export interface UpdateEmployeeResponse {
   /** The updated employee record. */
-  employee: EmployeePayload | undefined;
+  employee: Staff | undefined;
 }
