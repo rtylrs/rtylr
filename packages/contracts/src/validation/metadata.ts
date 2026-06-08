@@ -6938,11 +6938,12 @@ export const contractValidationMetadata = {
   },
   'hub.business.v1.LookupBusinessBySlugRequest': {
     slug: {
+      minLen: 1,
       name: 'slug',
       optional: false,
       protoName: 'slug',
       repeated: false,
-      required: false,
+      required: true,
       scalar: true,
       type: 'string',
     },

@@ -8,7 +8,7 @@
 import type { PublicBusinessSummary, PublicLocation } from './types';
 
 export interface LookupBusinessBySlugRequest {
-  /** slug is the slug value for this contract. */
+  /** slug is the public business slug to resolve. */
   slug: string;
 }
 
