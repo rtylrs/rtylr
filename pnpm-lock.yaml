@@ -369,6 +369,9 @@ importers:
       '@voxire/config':
         specifier: workspace:*
         version: link:../../packages/config
+      '@voxire/contracts':
+        specifier: workspace:*
+        version: link:../../packages/contracts
       '@voxire/i18n':
         specifier: workspace:*
         version: link:../../packages/i18n

@@ -354,8 +354,31 @@ function requestContractFromType(type, contracts) {
   return null;
 }
 
+function fieldInfoFromType(type, contracts) {
+  const contract = requestContractFromType(type, contracts);
+  const keys = type
+    .getProperties()
+    .map((prop) => prop.name)
+    .filter((name) => !name.startsWith('__'));
+
+  return {
+    keys: keys.length ? keys : null,
+    snakeKeys: keys.length ? keys.map(camelToSnake) : null,
+    hasSpread: Boolean(type.getStringIndexType() || type.getNumberIndexType()),
+    contract,
+  };
+}
+
 function fieldInfoFromExpression(checker, expression, contracts) {
   if (!expression) return { keys: null, snakeKeys: null, hasSpread: false, contract: null };
+
+  if (ts.isAsExpression(expression) || ts.isTypeAssertionExpression(expression)) {
+    return fieldInfoFromType(checker.getTypeFromTypeNode(expression.type), contracts);
+  }
+
+  if (ts.isSatisfiesExpression?.(expression)) {
+    return fieldInfoFromType(checker.getTypeFromTypeNode(expression.type), contracts);
+  }
 
   const type = checker.getTypeAtLocation(expression);
   if (type.symbol?.name === 'FormData' || type.aliasSymbol?.name === 'FormData') {
@@ -372,18 +395,7 @@ function fieldInfoFromExpression(checker, expression, contracts) {
     };
   }
 
-  const contract = requestContractFromType(type, contracts);
-  const keys = type
-    .getProperties()
-    .map((prop) => prop.name)
-    .filter((name) => !name.startsWith('__'));
-
-  return {
-    keys: keys.length ? keys : null,
-    snakeKeys: keys.length ? keys.map(camelToSnake) : null,
-    hasSpread: Boolean(type.getStringIndexType() || type.getNumberIndexType()),
-    contract,
-  };
+  return fieldInfoFromType(type, contracts);
 }
 
 function analyzeFrontendCalls(backendRoutes, contracts) {

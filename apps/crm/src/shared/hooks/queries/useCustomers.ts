@@ -1,4 +1,6 @@
 import { unwrap } from '@voxire/api';
+import type { CreateCustomerRequest } from '@voxire/contracts/crm/customer/v1/create_customer';
+import type { UpdateCustomerRequest } from '@voxire/contracts/crm/customer/v1/update_customer';
 import {
   useMutation,
   useQuery,
@@ -90,7 +92,8 @@ export const useCreateCustomer = (): UseMutationResult<Customer, unknown, Custom
   const { t } = useTranslation();
   return useMutation<Customer, unknown, CustomerInput>({
     mutationFn: async (data: CustomerInput): Promise<Customer> => {
-      const res = await unwrap(safe.post<Customer>('/crm/customers', data));
+      const request: CreateCustomerRequest = data as CreateCustomerRequest;
+      const res = await unwrap(safe.post<Customer>('/crm/customers', request));
       return res as Customer;
     },
     onSuccess: (): void => {
@@ -112,9 +115,11 @@ export const useUpdateCustomer = (): UseMutationResult<
   const { t } = useTranslation();
   return useMutation<Customer, unknown, UpdateCustomerPayload>({
     mutationFn: async (payload: UpdateCustomerPayload): Promise<Customer> => {
-      const res = await unwrap(
-        safe.put<Customer>('/crm/customers', { id: payload.id, ...payload.data })
-      );
+      const request: UpdateCustomerRequest = {
+        id: payload.id,
+        ...payload.data,
+      } as UpdateCustomerRequest;
+      const res = await unwrap(safe.put<Customer>('/crm/customers', request));
       return res as Customer;
     },
     onSuccess: (_data: Customer, variables: UpdateCustomerPayload): void => {

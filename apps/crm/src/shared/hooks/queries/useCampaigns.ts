@@ -1,4 +1,7 @@
 import { unwrap } from '@voxire/api';
+import type { CreateCampaignRequest } from '@voxire/contracts/crm/campaign/v1/create_campaign';
+import type { UpdateCampaignRequest } from '@voxire/contracts/crm/campaign/v1/update_campaign';
+import type { UpdateCampaignStatusRequest } from '@voxire/contracts/crm/campaign/v1/update_campaign_status';
 import {
   useMutation,
   useQuery,
@@ -66,7 +69,9 @@ export const useCreateCampaign = (): UseMutationResult<Campaign, unknown, Partia
   const { t } = useTranslation();
   return useMutation<Campaign, unknown, Partial<Campaign>>({
     mutationFn: async (data: Partial<Campaign>): Promise<Campaign> => {
-      const res = await unwrap(safe.post<Campaign>('/crm/campaigns', data));
+      const res = await unwrap(
+        safe.post<Campaign>('/crm/campaigns', data as CreateCampaignRequest)
+      );
       return res as Campaign;
     },
     onSuccess: (): void => {
@@ -88,7 +93,12 @@ export const useUpdateCampaign = (): UseMutationResult<
   const { t } = useTranslation();
   return useMutation<Campaign, unknown, UpdateCampaignPayload>({
     mutationFn: async (payload: UpdateCampaignPayload): Promise<Campaign> => {
-      const res = await unwrap(safe.put<Campaign>(`/crm/campaigns/${payload.id}`, payload.data));
+      const res = await unwrap(
+        safe.put<Campaign>(`/crm/campaigns/${payload.id}`, {
+          id: payload.id,
+          ...payload.data,
+        } as UpdateCampaignRequest)
+      );
       return res as Campaign;
     },
     onSuccess: (_data: Campaign, variables: UpdateCampaignPayload): void => {
@@ -125,8 +135,14 @@ export const useUpdateCampaignStatus = (): UseMutationResult<
   const qc = useQueryClient();
   const { t } = useTranslation();
   return useMutation<unknown, unknown, CampaignStatusPayload>({
-    mutationFn: (payload: CampaignStatusPayload): Promise<unknown> =>
-      unwrap(safe.put(`/crm/campaigns/${payload.id}/status`, { status: payload.status })),
+    mutationFn: (payload: CampaignStatusPayload): Promise<unknown> => {
+      return unwrap(
+        safe.put(`/crm/campaigns/${payload.id}/status`, {
+          id: payload.id,
+          status: payload.status,
+        } as UpdateCampaignStatusRequest)
+      );
+    },
     onSuccess: (_data: unknown, variables: CampaignStatusPayload): void => {
       void qc.invalidateQueries({ queryKey: ['crm-campaigns'] });
       void qc.invalidateQueries({ queryKey: ['crm-campaign', variables.id] });
