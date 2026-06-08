@@ -1,13 +1,19 @@
 import { unwrap } from '@voxire/api';
 import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query';
 import type { ListEmployeeDocumentsResponse } from '@voxire/contracts/hr/document/v1/list_employee_documents';
-import type {
-  UploadDocumentRequest,
-  UploadDocumentResponse,
-} from '@voxire/contracts/hr/document/v1/upload_document';
+import type { UploadDocumentResponse } from '@voxire/contracts/hr/document/v1/upload_document';
 import { safe } from '../../lib/api';
 import { toast } from 'sonner';
 import { useTranslation } from 'react-i18next';
+
+export interface UploadDocumentPayload {
+  employeeId: number;
+  documentType: string;
+  title: string;
+  storageMode: string;
+  fileUrl: string;
+  externalUrl?: string;
+}
 
 export const useListEmployeeDocuments = (employeeId?: number) => {
   return useQuery<ListEmployeeDocumentsResponse>({
@@ -29,11 +35,11 @@ export const useUploadDocument = () => {
   const { t } = useTranslation();
 
   return useMutation({
-    mutationFn: async (data: UploadDocumentRequest): Promise<UploadDocumentResponse> => {
+    mutationFn: async (data: UploadDocumentPayload): Promise<UploadDocumentResponse> => {
       const res = await unwrap(safe.post<UploadDocumentResponse>('/hr/documents', data));
       return res as UploadDocumentResponse;
     },
-    onSuccess: (_data: UploadDocumentResponse, variables: UploadDocumentRequest) => {
+    onSuccess: (_data: UploadDocumentResponse, variables: UploadDocumentPayload) => {
       queryClient.invalidateQueries({ queryKey: ['employee-documents', variables.employeeId] });
       queryClient.invalidateQueries({ queryKey: ['employee-documents'] });
       toast.success(t('documents.uploaded'));

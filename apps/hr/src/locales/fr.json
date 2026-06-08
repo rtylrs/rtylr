@@ -230,6 +230,9 @@
     },
     "form": {
       "title": "Nouvel employé",
+      "firstName": "Prénom",
+      "lastName": "Nom",
+      "email": "E-mail",
       "userId": "ID utilisateur",
       "departmentId": "Département",
       "locationId": "Emplacement",

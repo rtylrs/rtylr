@@ -2,18 +2,13 @@ import { unwrap } from '@voxire/api';
 import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query';
 import type { EmployeePayload } from '@voxire/contracts/hr/employee/v1/types';
 import type { ListEmployeesResponse } from '@voxire/contracts/hr/employee/v1/list_employees';
-import type {
-  CreateEmployeeRequest,
-  CreateEmployeeResponse,
-} from '@voxire/contracts/hr/employee/v1/create_employee';
-import type {
-  UpdateEmployeeRequest,
-  UpdateEmployeeResponse,
-} from '@voxire/contracts/hr/employee/v1/update_employee';
+import type { CreateEmployeeResponse } from '@voxire/contracts/hr/employee/v1/create_employee';
+import type { UpdateEmployeeResponse } from '@voxire/contracts/hr/employee/v1/update_employee';
 import type {
   InviteEmployeeRequest,
   InviteEmployeeResponse,
 } from '@voxire/contracts/hr/employee/v1/invite_employee';
+import type { EmployeeFormData } from '../../schemas/employeeSchema';
 import { safe } from '../../lib/api';
 import { toast } from 'sonner';
 import { useTranslation } from 'react-i18next';
@@ -25,6 +20,38 @@ interface ListEmployeesParams {
   locationId?: number;
   status?: string;
 }
+
+export interface CreateEmployeePayload {
+  departmentId: number;
+  locationId: number;
+  workScheduleId?: number;
+  firstName: string;
+  lastName: string;
+  email: string;
+  employmentType: string;
+  salary?: number;
+  hourlyRate?: number;
+  startDate: string;
+}
+
+export interface UpdateEmployeePayload extends Partial<CreateEmployeePayload> {
+  id: number;
+  status?: string;
+  endDate?: string;
+}
+
+export const toCreateEmployeePayload = (data: EmployeeFormData): CreateEmployeePayload => ({
+  departmentId: data.departmentId,
+  locationId: data.locationId,
+  workScheduleId: data.workScheduleId,
+  firstName: data.firstName,
+  lastName: data.lastName,
+  email: data.email,
+  employmentType: data.contractType,
+  salary: data.monthlySalary,
+  hourlyRate: data.hourlyRate,
+  startDate: data.hireDate,
+});
 
 export const useListEmployees = (params: ListEmployeesParams) => {
   return useQuery<ListEmployeesResponse>({
@@ -52,7 +79,7 @@ export const useCreateEmployee = () => {
   const { t } = useTranslation();
 
   return useMutation({
-    mutationFn: async (data: CreateEmployeeRequest): Promise<CreateEmployeeResponse> => {
+    mutationFn: async (data: CreateEmployeePayload): Promise<CreateEmployeeResponse> => {
       const res = await unwrap(safe.post<CreateEmployeeResponse>('/hr/employees', data));
       return res as CreateEmployeeResponse;
     },
@@ -71,11 +98,11 @@ export const useUpdateEmployee = () => {
   const { t } = useTranslation();
 
   return useMutation({
-    mutationFn: async (data: UpdateEmployeeRequest): Promise<UpdateEmployeeResponse> => {
+    mutationFn: async (data: UpdateEmployeePayload): Promise<UpdateEmployeeResponse> => {
       const res = await unwrap(safe.put<UpdateEmployeeResponse>(`/hr/employees/${data.id}`, data));
       return res as UpdateEmployeeResponse;
     },
-    onSuccess: (_data: UpdateEmployeeResponse, variables: UpdateEmployeeRequest) => {
+    onSuccess: (_data: UpdateEmployeeResponse, variables: UpdateEmployeePayload) => {
       queryClient.invalidateQueries({ queryKey: ['employees'] });
       queryClient.invalidateQueries({ queryKey: ['employee', variables.id] });
       toast.success(t('employees.updated'));

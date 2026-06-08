@@ -230,6 +230,9 @@
     },
     "form": {
       "title": "موظف جديد",
+      "firstName": "الاسم الأول",
+      "lastName": "اسم العائلة",
+      "email": "البريد الإلكتروني",
       "userId": "معرف المستخدم",
       "departmentId": "القسم",
       "locationId": "الموقع",

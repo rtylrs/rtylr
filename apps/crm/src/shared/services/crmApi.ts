@@ -279,6 +279,7 @@ export interface Contract {
 
 export interface CreateLeadRequest {
   company: string;
+  companyName?: string;
   industry: string;
   size: string;
   source: string;
@@ -290,6 +291,7 @@ export interface CreateLeadRequest {
 
 export interface UpdateLeadRequest {
   company?: string;
+  companyName?: string;
   industry?: string;
   size?: string;
   source?: string;
@@ -298,6 +300,29 @@ export interface UpdateLeadRequest {
   assignedRep?: string;
   notes?: string;
 }
+
+interface LeadMutationPayload {
+  companyName: string;
+  industry?: string;
+  size?: string;
+  source?: string;
+  stage?: LeadStage;
+  assignedTo?: number;
+  mrrPotential?: number;
+  notes?: string;
+}
+
+export const toLeadMutationPayload = (
+  data: CreateLeadRequest | UpdateLeadRequest
+): LeadMutationPayload => ({
+  companyName: data.companyName ?? data.company ?? '',
+  industry: data.industry,
+  size: data.size,
+  source: data.source,
+  stage: data.stage,
+  mrrPotential: data.mrrPotential,
+  notes: data.notes,
+});
 
 export interface CreateTouchpointRequest {
   leadId: number;
@@ -461,9 +486,10 @@ export const crmApi = {
   getSalesPipeline: () => safe.get<PipelineColumn[]>('/crm/sales/pipeline'),
   getLeads: () => safe.get<Lead[]>('/crm/sales/leads'),
   getLead: (id: number) => safe.get<Lead>(`/crm/sales/leads/${id}`),
-  createLead: (data: CreateLeadRequest) => safe.post<Lead>('/crm/sales/leads', data),
+  createLead: (data: CreateLeadRequest) =>
+    safe.post<Lead>('/crm/sales/leads', toLeadMutationPayload(data)),
   updateLead: (id: number, data: UpdateLeadRequest) =>
-    safe.put<Lead>(`/crm/sales/leads/${id}`, data),
+    safe.put<Lead>(`/crm/sales/leads/${id}`, toLeadMutationPayload(data)),
   deleteLead: (id: number) => safe.delete(`/crm/sales/leads/${id}`),
   getLeadTouchpoints: (leadId: number) =>
     safe.get<Touchpoint[]>(`/crm/sales/leads/${leadId}/touchpoints`),

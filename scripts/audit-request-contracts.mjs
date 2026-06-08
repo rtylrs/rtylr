@@ -179,7 +179,8 @@ function parseBackendRoutes() {
   const structs = parseRequestStructs(handlerFiles);
   const routes = [];
   const regRegex =
-    /http\.Register(GET|POST|PUT|PATCH|DELETE)(?:WithValidation(?:AndMiddleware)?|AndMiddleware)?\s*\[\s*handlers\.([A-Za-z0-9_]+Request)\s*,\s*handlers\.([A-Za-z0-9_]+Response)\s*\]\s*\(\s*ctx\s*,\s*router\s*,\s*handlers\.([A-Za-z0-9_]+Routes)\(\)/g;
+    /(?:http|serverHttp)\.Register(GET|POST|PUT|PATCH|DELETE)(?:WithValidation(?:AndMiddleware)?|AndMiddleware)?\s*\[\s*handlers\.([A-Za-z0-9_]+Request)\s*,\s*handlers\.([A-Za-z0-9_]+Response)\s*\]\s*\(\s*ctx\s*,\s*router\s*,\s*handlers\.([A-Za-z0-9_]+Routes)\(\)/g;
+  const rawRouteRegex = /router\.(Get|Post|Put|Patch|Delete)\s*\(\s*"([^"]+)"/g;
 
   for (const file of routeFiles) {
     const text = readText(file);
@@ -198,6 +199,21 @@ function parseBackendRoutes() {
           validated: match[0].includes('WithValidation'),
         });
       }
+    }
+    while ((match = rawRouteRegex.exec(text))) {
+      const [, methodName, routePath] = match;
+      const method = methodName.toUpperCase();
+      routes.push({
+        method,
+        path: routePath,
+        normalizedPath: normalizeRoute(routePath),
+        request: null,
+        response: null,
+        routeFile: toPosix(path.relative(root, file)),
+        requestStruct: null,
+        validated: false,
+        raw: true,
+      });
     }
   }
 

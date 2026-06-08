@@ -9,6 +9,7 @@ import {
 import { toast } from 'sonner';
 import { safe } from '../../lib/api';
 import { unwrapList } from '../../lib/unwrapList';
+import { toLeadMutationPayload } from '../../services/crmApi';
 import type {
   PipelineColumn,
   Lead,
@@ -74,7 +75,7 @@ export const useCreateLead = (): UseMutationResult<Lead, unknown, CreateLeadRequ
   const qc = useQueryClient();
   return useMutation<Lead, unknown, CreateLeadRequest>({
     mutationFn: async (data: CreateLeadRequest): Promise<Lead> => {
-      const res = await unwrap(safe.post<Lead>('/crm/sales/leads', data));
+      const res = await unwrap(safe.post<Lead>('/crm/sales/leads', toLeadMutationPayload(data)));
       return res as Lead;
     },
     onSuccess: (): void => {
@@ -97,7 +98,9 @@ export const useUpdateLead = (): UseMutationResult<Lead, unknown, UpdateLeadPayl
   const qc = useQueryClient();
   return useMutation<Lead, unknown, UpdateLeadPayload>({
     mutationFn: async (payload: UpdateLeadPayload): Promise<Lead> => {
-      const res = await unwrap(safe.put<Lead>(`/crm/sales/leads/${payload.id}`, payload.data));
+      const res = await unwrap(
+        safe.put<Lead>(`/crm/sales/leads/${payload.id}`, toLeadMutationPayload(payload.data))
+      );
       return res as Lead;
     },
     onSuccess: (_data: Lead, variables: UpdateLeadPayload): void => {

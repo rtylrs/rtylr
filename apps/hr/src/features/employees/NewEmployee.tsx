@@ -4,8 +4,11 @@ import { useTranslation } from 'react-i18next';
 import { ArrowLeft } from 'lucide-react';
 import { toast } from 'sonner';
 import { employeeSchema, type EmployeeFormData } from '../../shared/schemas/employeeSchema';
-import { useCreateEmployee, useListEmployees } from '../../shared/hooks/queries/useEmployees';
-import type { CreateEmployeeRequest } from '@voxire/contracts/hr/employee/v1/create_employee';
+import {
+  toCreateEmployeePayload,
+  useCreateEmployee,
+  useListEmployees,
+} from '../../shared/hooks/queries/useEmployees';
 
 interface NewEmployeeProps {
   onCancel?: () => void;
@@ -22,6 +25,9 @@ const NewEmployee = ({ onCancel, isWizardMode }: NewEmployeeProps): React.JSX.El
     userId: 0,
     departmentId: 0,
     locationId: 0,
+    firstName: '',
+    lastName: '',
+    email: '',
     contractType: 'full_time',
     status: 'active',
     hireDate: new Date().toISOString().slice(0, 10),
@@ -51,7 +57,7 @@ const NewEmployee = ({ onCancel, isWizardMode }: NewEmployeeProps): React.JSX.El
       toast.error(t('employees.form.duplicateUserId'));
       return;
     }
-    const payload: CreateEmployeeRequest = result.data;
+    const payload = toCreateEmployeePayload(result.data);
     createEmployee.mutate(payload, {
       onSuccess: () => {
         if (isWizardMode && onCancel) {
@@ -127,6 +133,9 @@ const NewEmployee = ({ onCancel, isWizardMode }: NewEmployeeProps): React.JSX.El
         style={{ background: 'var(--hr-card)', border: '1px solid var(--hr-border)' }}
       >
         <div className="grid grid-cols-1 gap-4 sm:grid-cols-2">
+          {field(t('employees.form.firstName'), 'firstName')}
+          {field(t('employees.form.lastName'), 'lastName')}
+          {field(t('employees.form.email'), 'email')}
           {field(t('employees.form.jobTitle'), 'jobTitle')}
           {field(t('employees.form.userId'), 'userId', 'number')}
           {field(t('employees.form.departmentId'), 'departmentId', 'number')}

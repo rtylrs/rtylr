@@ -281,9 +281,14 @@ export const hrExtras = {
   // Documents
   listDocuments: () => safe.get<DocumentItem[]>('/hr/documents'),
   addDocument: (doc: Omit<DocumentItem, 'id' | 'uploadedAt'>) =>
-    safe.post<DocumentItem>('/hr/documents', doc),
-  deleteDocument: (id: number) =>
-    safe.post<{ success: boolean }>('/hr/documents', { id, _action: 'delete' }),
+    safe.post<DocumentItem>('/hr/documents', {
+      employeeId: doc.staffId,
+      documentType: doc.type,
+      title: doc.name,
+      storageMode: doc.url ? 'linked' : 'stored',
+      fileUrl: doc.url ?? doc.name,
+    }),
+  deleteDocument: (id: number) => safe.delete<{ success: boolean }>(`/hr/documents/${id}`),
   expiringDocuments: (daysAhead = 30) =>
     safe.get<DocumentItem[]>('/hr/documents/expiring', { params: { days: daysAhead } }),
 
