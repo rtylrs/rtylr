@@ -7,7 +7,7 @@
 /* eslint-disable */
 
 export interface DisableAddonRequest {
-  /** addon_id is the addon id value for this contract. */
+  /** addon_id identifies the addon to disable. */
   addonId: string;
 }
 

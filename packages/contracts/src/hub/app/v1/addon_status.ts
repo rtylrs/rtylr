@@ -7,7 +7,7 @@
 /* eslint-disable */
 
 export interface AddonStatusRequest {
-  /** addon_id is the addon id value for this contract. */
+  /** addon_id identifies the addon whose status is requested. */
   addonId: string;
 }
 

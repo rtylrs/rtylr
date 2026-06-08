@@ -6847,33 +6847,36 @@
     },
     "hub.app.v1.AddonStatusRequest": {
       "addonId": {
+        "minLen": 1,
         "name": "addonId",
         "optional": false,
         "protoName": "addon_id",
         "repeated": false,
-        "required": false,
+        "required": true,
         "scalar": true,
         "type": "string"
       }
     },
     "hub.app.v1.DisableAddonRequest": {
       "addonId": {
+        "minLen": 1,
         "name": "addonId",
         "optional": false,
         "protoName": "addon_id",
         "repeated": false,
-        "required": false,
+        "required": true,
         "scalar": true,
         "type": "string"
       }
     },
     "hub.app.v1.EnableAddonRequest": {
       "addonId": {
+        "minLen": 1,
         "name": "addonId",
         "optional": false,
         "protoName": "addon_id",
         "repeated": false,
-        "required": false,
+        "required": true,
         "scalar": true,
         "type": "string"
       }
