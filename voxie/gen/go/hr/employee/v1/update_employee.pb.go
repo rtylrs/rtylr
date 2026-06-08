@@ -8,6 +8,7 @@ package v1
 
 import (
 	_ "buf.build/gen/go/bufbuild/protovalidate/protocolbuffers/go/buf/validate"
+	v1 "github.com/voxire/voxie/gen/go/hr/staff/v1"
 	protoreflect "google.golang.org/protobuf/reflect/protoreflect"
 	protoimpl "google.golang.org/protobuf/runtime/protoimpl"
 	reflect "reflect"
@@ -24,36 +25,44 @@ const (
 
 type UpdateEmployeeRequest struct {
 	state protoimpl.MessageState `protogen:"open.v1"`
-	// ID of the employee to update.
+	// id is the employee ID from the route.
 	Id int64 `protobuf:"varint,1,opt,name=id,proto3" json:"id,omitempty"`
-	// New department assignment; absent to keep current.
-	DepartmentId *int64 `protobuf:"varint,2,opt,name=department_id,json=departmentId,proto3,oneof" json:"department_id,omitempty"`
-	// New work location; absent to keep current.
-	LocationId *int64 `protobuf:"varint,3,opt,name=location_id,json=locationId,proto3,oneof" json:"location_id,omitempty"`
-	// New direct manager; absent to keep current.
-	ManagerId *int64 `protobuf:"varint,4,opt,name=manager_id,json=managerId,proto3,oneof" json:"manager_id,omitempty"`
-	// New employment arrangement; absent to keep current.
-	ContractType *string `protobuf:"bytes,5,opt,name=contract_type,json=contractType,proto3,oneof" json:"contract_type,omitempty"`
-	// New employment status; absent to keep current.
-	Status *string `protobuf:"bytes,6,opt,name=status,proto3,oneof" json:"status,omitempty"`
-	// New hire date (ISO-8601); absent to keep current.
-	HireDate *string `protobuf:"bytes,7,opt,name=hire_date,json=hireDate,proto3,oneof" json:"hire_date,omitempty"`
-	// New probation end date (ISO-8601); absent to keep current.
-	ProbationEndDate *string `protobuf:"bytes,8,opt,name=probation_end_date,json=probationEndDate,proto3,oneof" json:"probation_end_date,omitempty"`
-	// New termination date (ISO-8601); absent to keep current.
-	TerminationDate *string `protobuf:"bytes,9,opt,name=termination_date,json=terminationDate,proto3,oneof" json:"termination_date,omitempty"`
-	// New hourly rate; absent to keep current.
-	HourlyRate *float64 `protobuf:"fixed64,10,opt,name=hourly_rate,json=hourlyRate,proto3,oneof" json:"hourly_rate,omitempty"`
-	// New monthly salary; absent to keep current.
-	MonthlySalary *float64 `protobuf:"fixed64,11,opt,name=monthly_salary,json=monthlySalary,proto3,oneof" json:"monthly_salary,omitempty"`
-	// New currency code; absent to keep current.
-	Currency *string `protobuf:"bytes,12,opt,name=currency,proto3,oneof" json:"currency,omitempty"`
-	// New work schedule; absent to keep current.
-	WorkScheduleId *int64 `protobuf:"varint,13,opt,name=work_schedule_id,json=workScheduleId,proto3,oneof" json:"work_schedule_id,omitempty"`
-	// New account creation mode; absent to keep current.
-	AccountCreationMode *string `protobuf:"bytes,14,opt,name=account_creation_mode,json=accountCreationMode,proto3,oneof" json:"account_creation_mode,omitempty"`
-	// New job title; absent to keep current.
-	JobTitle      *string `protobuf:"bytes,15,opt,name=job_title,json=jobTitle,proto3,oneof" json:"job_title,omitempty"`
+	// department_id is the department assignment; zero leaves it unset.
+	DepartmentId int64 `protobuf:"varint,2,opt,name=department_id,json=departmentId,proto3" json:"department_id,omitempty"`
+	// location_id is the work location assignment; zero leaves it unset.
+	LocationId int64 `protobuf:"varint,3,opt,name=location_id,json=locationId,proto3" json:"location_id,omitempty"`
+	// work_schedule_id is the work schedule assignment; zero leaves it unset.
+	WorkScheduleId int64 `protobuf:"varint,4,opt,name=work_schedule_id,json=workScheduleId,proto3" json:"work_schedule_id,omitempty"`
+	// first_name is the employee's given name.
+	FirstName string `protobuf:"bytes,5,opt,name=first_name,json=firstName,proto3" json:"first_name,omitempty"`
+	// last_name is the employee's family name.
+	LastName string `protobuf:"bytes,6,opt,name=last_name,json=lastName,proto3" json:"last_name,omitempty"`
+	// email is the employee email address.
+	Email string `protobuf:"bytes,7,opt,name=email,proto3" json:"email,omitempty"`
+	// phone is the employee phone number.
+	Phone string `protobuf:"bytes,8,opt,name=phone,proto3" json:"phone,omitempty"`
+	// employment_type is the employment type label.
+	EmploymentType string `protobuf:"bytes,9,opt,name=employment_type,json=employmentType,proto3" json:"employment_type,omitempty"`
+	// status is the employment status.
+	Status string `protobuf:"bytes,10,opt,name=status,proto3" json:"status,omitempty"`
+	// salary is the monthly or salaried compensation amount.
+	Salary float64 `protobuf:"fixed64,11,opt,name=salary,proto3" json:"salary,omitempty"`
+	// hourly_rate is the employee hourly pay rate.
+	HourlyRate float64 `protobuf:"fixed64,12,opt,name=hourly_rate,json=hourlyRate,proto3" json:"hourly_rate,omitempty"`
+	// overtime_rate is the employee overtime pay rate.
+	OvertimeRate float64 `protobuf:"fixed64,13,opt,name=overtime_rate,json=overtimeRate,proto3" json:"overtime_rate,omitempty"`
+	// start_date is the start date in YYYY-MM-DD format.
+	StartDate string `protobuf:"bytes,14,opt,name=start_date,json=startDate,proto3" json:"start_date,omitempty"`
+	// end_date is the end date in YYYY-MM-DD format.
+	EndDate string `protobuf:"bytes,15,opt,name=end_date,json=endDate,proto3" json:"end_date,omitempty"`
+	// address is the employee address.
+	Address string `protobuf:"bytes,16,opt,name=address,proto3" json:"address,omitempty"`
+	// emergency_contact_name is the emergency contact name.
+	EmergencyContactName string `protobuf:"bytes,17,opt,name=emergency_contact_name,json=emergencyContactName,proto3" json:"emergency_contact_name,omitempty"`
+	// emergency_contact_phone is the emergency contact phone.
+	EmergencyContactPhone string `protobuf:"bytes,18,opt,name=emergency_contact_phone,json=emergencyContactPhone,proto3" json:"emergency_contact_phone,omitempty"`
+	// notes are internal employee notes.
+	Notes         string `protobuf:"bytes,19,opt,name=notes,proto3" json:"notes,omitempty"`
 	unknownFields protoimpl.UnknownFields
 	sizeCache     protoimpl.SizeCache
 }
@@ -96,99 +105,127 @@ func (x *UpdateEmployeeRequest) GetId() int64 {
 }
 
 func (x *UpdateEmployeeRequest) GetDepartmentId() int64 {
-	if x != nil && x.DepartmentId != nil {
-		return *x.DepartmentId
+	if x != nil {
+		return x.DepartmentId
 	}
 	return 0
 }
 
 func (x *UpdateEmployeeRequest) GetLocationId() int64 {
-	if x != nil && x.LocationId != nil {
-		return *x.LocationId
+	if x != nil {
+		return x.LocationId
 	}
 	return 0
 }
 
-func (x *UpdateEmployeeRequest) GetManagerId() int64 {
-	if x != nil && x.ManagerId != nil {
-		return *x.ManagerId
+func (x *UpdateEmployeeRequest) GetWorkScheduleId() int64 {
+	if x != nil {
+		return x.WorkScheduleId
 	}
 	return 0
 }
 
-func (x *UpdateEmployeeRequest) GetContractType() string {
-	if x != nil && x.ContractType != nil {
-		return *x.ContractType
+func (x *UpdateEmployeeRequest) GetFirstName() string {
+	if x != nil {
+		return x.FirstName
+	}
+	return ""
+}
+
+func (x *UpdateEmployeeRequest) GetLastName() string {
+	if x != nil {
+		return x.LastName
+	}
+	return ""
+}
+
+func (x *UpdateEmployeeRequest) GetEmail() string {
+	if x != nil {
+		return x.Email
+	}
+	return ""
+}
+
+func (x *UpdateEmployeeRequest) GetPhone() string {
+	if x != nil {
+		return x.Phone
+	}
+	return ""
+}
+
+func (x *UpdateEmployeeRequest) GetEmploymentType() string {
+	if x != nil {
+		return x.EmploymentType
 	}
 	return ""
 }
 
 func (x *UpdateEmployeeRequest) GetStatus() string {
-	if x != nil && x.Status != nil {
-		return *x.Status
+	if x != nil {
+		return x.Status
 	}
 	return ""
 }
 
-func (x *UpdateEmployeeRequest) GetHireDate() string {
-	if x != nil && x.HireDate != nil {
-		return *x.HireDate
+func (x *UpdateEmployeeRequest) GetSalary() float64 {
+	if x != nil {
+		return x.Salary
 	}
-	return ""
-}
-
-func (x *UpdateEmployeeRequest) GetProbationEndDate() string {
-	if x != nil && x.ProbationEndDate != nil {
-		return *x.ProbationEndDate
-	}
-	return ""
-}
-
-func (x *UpdateEmployeeRequest) GetTerminationDate() string {
-	if x != nil && x.TerminationDate != nil {
-		return *x.TerminationDate
-	}
-	return ""
+	return 0
 }
 
 func (x *UpdateEmployeeRequest) GetHourlyRate() float64 {
-	if x != nil && x.HourlyRate != nil {
-		return *x.HourlyRate
+	if x != nil {
+		return x.HourlyRate
 	}
 	return 0
 }
 
-func (x *UpdateEmployeeRequest) GetMonthlySalary() float64 {
-	if x != nil && x.MonthlySalary != nil {
-		return *x.MonthlySalary
+func (x *UpdateEmployeeRequest) GetOvertimeRate() float64 {
+	if x != nil {
+		return x.OvertimeRate
 	}
 	return 0
 }
 
-func (x *UpdateEmployeeRequest) GetCurrency() string {
-	if x != nil && x.Currency != nil {
-		return *x.Currency
+func (x *UpdateEmployeeRequest) GetStartDate() string {
+	if x != nil {
+		return x.StartDate
 	}
 	return ""
 }
 
-func (x *UpdateEmployeeRequest) GetWorkScheduleId() int64 {
-	if x != nil && x.WorkScheduleId != nil {
-		return *x.WorkScheduleId
-	}
-	return 0
-}
-
-func (x *UpdateEmployeeRequest) GetAccountCreationMode() string {
-	if x != nil && x.AccountCreationMode != nil {
-		return *x.AccountCreationMode
+func (x *UpdateEmployeeRequest) GetEndDate() string {
+	if x != nil {
+		return x.EndDate
 	}
 	return ""
 }
 
-func (x *UpdateEmployeeRequest) GetJobTitle() string {
-	if x != nil && x.JobTitle != nil {
-		return *x.JobTitle
+func (x *UpdateEmployeeRequest) GetAddress() string {
+	if x != nil {
+		return x.Address
+	}
+	return ""
+}
+
+func (x *UpdateEmployeeRequest) GetEmergencyContactName() string {
+	if x != nil {
+		return x.EmergencyContactName
+	}
+	return ""
+}
+
+func (x *UpdateEmployeeRequest) GetEmergencyContactPhone() string {
+	if x != nil {
+		return x.EmergencyContactPhone
+	}
+	return ""
+}
+
+func (x *UpdateEmployeeRequest) GetNotes() string {
+	if x != nil {
+		return x.Notes
 	}
 	return ""
 }
@@ -196,7 +233,7 @@ func (x *UpdateEmployeeRequest) GetJobTitle() string {
 type UpdateEmployeeResponse struct {
 	state protoimpl.MessageState `protogen:"open.v1"`
 	// The updated employee record.
-	Employee      *EmployeePayload `protobuf:"bytes,1,opt,name=employee,proto3" json:"employee,omitempty"`
+	Employee      *v1.Staff `protobuf:"bytes,1,opt,name=employee,proto3" json:"employee,omitempty"`
 	unknownFields protoimpl.UnknownFields
 	sizeCache     protoimpl.SizeCache
 }
@@ -231,7 +268,7 @@ func (*UpdateEmployeeResponse) Descriptor() ([]byte, []int) {
 	return file_hr_employee_v1_update_employee_proto_rawDescGZIP(), []int{1}
 }
 
-func (x *UpdateEmployeeResponse) GetEmployee() *EmployeePayload {
+func (x *UpdateEmployeeResponse) GetEmployee() *v1.Staff {
 	if x != nil {
 		return x.Employee
 	}
@@ -242,47 +279,37 @@ var File_hr_employee_v1_update_employee_proto protoreflect.FileDescriptor
 
 const file_hr_employee_v1_update_employee_proto_rawDesc = "" +
 	"\n" +
-	"$hr/employee/v1/update_employee.proto\x12\x0ehr.employee.v1\x1a\x1bbuf/validate/validate.proto\x1a\x1ahr/employee/v1/types.proto\"\xe5\x06\n" +
+	"$hr/employee/v1/update_employee.proto\x12\x0ehr.employee.v1\x1a\x1bbuf/validate/validate.proto\x1a\x17hr/staff/v1/types.proto\"\x9a\x05\n" +
 	"\x15UpdateEmployeeRequest\x12\x1a\n" +
 	"\x02id\x18\x01 \x01(\x03B\n" +
-	"\xbaH\a\xc8\x01\x01\"\x02 \x00R\x02id\x12(\n" +
-	"\rdepartment_id\x18\x02 \x01(\x03H\x00R\fdepartmentId\x88\x01\x01\x12$\n" +
-	"\vlocation_id\x18\x03 \x01(\x03H\x01R\n" +
-	"locationId\x88\x01\x01\x12\"\n" +
+	"\xbaH\a\xc8\x01\x01\"\x02 \x00R\x02id\x12#\n" +
+	"\rdepartment_id\x18\x02 \x01(\x03R\fdepartmentId\x12\x1f\n" +
+	"\vlocation_id\x18\x03 \x01(\x03R\n" +
+	"locationId\x12(\n" +
+	"\x10work_schedule_id\x18\x04 \x01(\x03R\x0eworkScheduleId\x12)\n" +
 	"\n" +
-	"manager_id\x18\x04 \x01(\x03H\x02R\tmanagerId\x88\x01\x01\x12(\n" +
-	"\rcontract_type\x18\x05 \x01(\tH\x03R\fcontractType\x88\x01\x01\x12\x1b\n" +
-	"\x06status\x18\x06 \x01(\tH\x04R\x06status\x88\x01\x01\x12 \n" +
-	"\thire_date\x18\a \x01(\tH\x05R\bhireDate\x88\x01\x01\x121\n" +
-	"\x12probation_end_date\x18\b \x01(\tH\x06R\x10probationEndDate\x88\x01\x01\x12.\n" +
-	"\x10termination_date\x18\t \x01(\tH\aR\x0fterminationDate\x88\x01\x01\x12$\n" +
-	"\vhourly_rate\x18\n" +
-	" \x01(\x01H\bR\n" +
-	"hourlyRate\x88\x01\x01\x12*\n" +
-	"\x0emonthly_salary\x18\v \x01(\x01H\tR\rmonthlySalary\x88\x01\x01\x12\x1f\n" +
-	"\bcurrency\x18\f \x01(\tH\n" +
-	"R\bcurrency\x88\x01\x01\x12-\n" +
-	"\x10work_schedule_id\x18\r \x01(\x03H\vR\x0eworkScheduleId\x88\x01\x01\x127\n" +
-	"\x15account_creation_mode\x18\x0e \x01(\tH\fR\x13accountCreationMode\x88\x01\x01\x12 \n" +
-	"\tjob_title\x18\x0f \x01(\tH\rR\bjobTitle\x88\x01\x01B\x10\n" +
-	"\x0e_department_idB\x0e\n" +
-	"\f_location_idB\r\n" +
-	"\v_manager_idB\x10\n" +
-	"\x0e_contract_typeB\t\n" +
-	"\a_statusB\f\n" +
+	"first_name\x18\x05 \x01(\tB\n" +
+	"\xbaH\a\xc8\x01\x01r\x02\x10\x01R\tfirstName\x12'\n" +
+	"\tlast_name\x18\x06 \x01(\tB\n" +
+	"\xbaH\a\xc8\x01\x01r\x02\x10\x01R\blastName\x12\x14\n" +
+	"\x05email\x18\a \x01(\tR\x05email\x12\x14\n" +
+	"\x05phone\x18\b \x01(\tR\x05phone\x12'\n" +
+	"\x0femployment_type\x18\t \x01(\tR\x0eemploymentType\x12\x16\n" +
+	"\x06status\x18\n" +
+	" \x01(\tR\x06status\x12\x16\n" +
+	"\x06salary\x18\v \x01(\x01R\x06salary\x12\x1f\n" +
+	"\vhourly_rate\x18\f \x01(\x01R\n" +
+	"hourlyRate\x12#\n" +
+	"\rovertime_rate\x18\r \x01(\x01R\fovertimeRate\x12\x1d\n" +
 	"\n" +
-	"_hire_dateB\x15\n" +
-	"\x13_probation_end_dateB\x13\n" +
-	"\x11_termination_dateB\x0e\n" +
-	"\f_hourly_rateB\x11\n" +
-	"\x0f_monthly_salaryB\v\n" +
-	"\t_currencyB\x13\n" +
-	"\x11_work_schedule_idB\x18\n" +
-	"\x16_account_creation_modeB\f\n" +
-	"\n" +
-	"_job_title\"U\n" +
-	"\x16UpdateEmployeeResponse\x12;\n" +
-	"\bemployee\x18\x01 \x01(\v2\x1f.hr.employee.v1.EmployeePayloadR\bemployeeB/Z-github.com/voxire/voxie/gen/go/hr/employee/v1b\x06proto3"
+	"start_date\x18\x0e \x01(\tR\tstartDate\x12\x19\n" +
+	"\bend_date\x18\x0f \x01(\tR\aendDate\x12\x18\n" +
+	"\aaddress\x18\x10 \x01(\tR\aaddress\x124\n" +
+	"\x16emergency_contact_name\x18\x11 \x01(\tR\x14emergencyContactName\x126\n" +
+	"\x17emergency_contact_phone\x18\x12 \x01(\tR\x15emergencyContactPhone\x12\x14\n" +
+	"\x05notes\x18\x13 \x01(\tR\x05notes\"H\n" +
+	"\x16UpdateEmployeeResponse\x12.\n" +
+	"\bemployee\x18\x01 \x01(\v2\x12.hr.staff.v1.StaffR\bemployeeB/Z-github.com/voxire/voxie/gen/go/hr/employee/v1b\x06proto3"
 
 var (
 	file_hr_employee_v1_update_employee_proto_rawDescOnce sync.Once
@@ -300,10 +327,10 @@ var file_hr_employee_v1_update_employee_proto_msgTypes = make([]protoimpl.Messag
 var file_hr_employee_v1_update_employee_proto_goTypes = []any{
 	(*UpdateEmployeeRequest)(nil),  // 0: hr.employee.v1.UpdateEmployeeRequest
 	(*UpdateEmployeeResponse)(nil), // 1: hr.employee.v1.UpdateEmployeeResponse
-	(*EmployeePayload)(nil),        // 2: hr.employee.v1.EmployeePayload
+	(*v1.Staff)(nil),               // 2: hr.staff.v1.Staff
 }
 var file_hr_employee_v1_update_employee_proto_depIdxs = []int32{
-	2, // 0: hr.employee.v1.UpdateEmployeeResponse.employee:type_name -> hr.employee.v1.EmployeePayload
+	2, // 0: hr.employee.v1.UpdateEmployeeResponse.employee:type_name -> hr.staff.v1.Staff
 	1, // [1:1] is the sub-list for method output_type
 	1, // [1:1] is the sub-list for method input_type
 	1, // [1:1] is the sub-list for extension type_name
@@ -316,8 +343,6 @@ func file_hr_employee_v1_update_employee_proto_init() {
 	if File_hr_employee_v1_update_employee_proto != nil {
 		return
 	}
-	file_hr_employee_v1_types_proto_init()
-	file_hr_employee_v1_update_employee_proto_msgTypes[0].OneofWrappers = []any{}
 	type x struct{}
 	out := protoimpl.TypeBuilder{
 		File: protoimpl.DescBuilder{

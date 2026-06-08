@@ -5,54 +5,38 @@
 // source: hr/employee/v1/create_employee.proto
 
 /* eslint-disable */
-import type { EmployeePayload } from "./types";
+import type { Staff } from "../../staff/v1/types";
 
 export interface CreateEmployeeRequest {
-  /** Linked user account ID. */
-  userId: number;
-  /** Department to assign the employee to. */
+  /** department_id is the department assignment; zero leaves it unset. */
   departmentId: number;
-  /** Work location the employee reports to. */
+  /** location_id is the work location assignment; zero leaves it unset. */
   locationId: number;
-  /** Direct manager; absent if top-level. */
-  managerId?:
-    | number
-    | undefined;
-  /** Employment arrangement (full_time | part_time | freelancer). */
-  contractType: string;
-  /** Initial employment status (active | probation | inactive | terminated). */
-  status: string;
-  /** Date the employee was hired (ISO-8601 format). */
-  hireDate: string;
-  /** End of probation period; absent if no probation (ISO-8601 format). */
-  probationEndDate?:
-    | string
-    | undefined;
-  /** Date employment was terminated; absent if still employed (ISO-8601 format). */
-  terminationDate?:
-    | string
-    | undefined;
-  /** Pay rate per hour for hourly employees; absent if salaried only. */
-  hourlyRate?:
-    | number
-    | undefined;
-  /** Monthly gross salary; absent if hourly only. */
-  monthlySalary?:
-    | number
-    | undefined;
-  /** ISO-4217 currency code for compensation (e.g. "USD"). */
-  currency: string;
-  /** Assigned work schedule; absent if using department default. */
-  workScheduleId?:
-    | number
-    | undefined;
-  /** How the employee account was created (hr_created | invite_link). */
-  accountCreationMode: string;
-  /** Employee's job title or position name. */
-  jobTitle: string;
+  /** work_schedule_id is the work schedule assignment; zero leaves it unset. */
+  workScheduleId: number;
+  /** first_name is the employee's given name. */
+  firstName: string;
+  /** last_name is the employee's family name. */
+  lastName: string;
+  /** email is the employee email address. */
+  email: string;
+  /** phone is the employee phone number. */
+  phone: string;
+  /** employment_type is the employment type label. */
+  employmentType: string;
+  /** salary is the monthly or salaried compensation amount. */
+  salary: number;
+  /** hourly_rate is the employee hourly pay rate. */
+  hourlyRate: number;
+  /** overtime_rate is the employee overtime pay rate. */
+  overtimeRate: number;
+  /** start_date is the start date in YYYY-MM-DD format. */
+  startDate: string;
+  /** address is the employee address. */
+  address: string;
 }
 
 export interface CreateEmployeeResponse {
   /** The newly created employee record. */
-  employee: EmployeePayload | undefined;
+  employee: Staff | undefined;
 }

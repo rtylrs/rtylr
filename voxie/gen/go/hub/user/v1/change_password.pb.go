@@ -7,6 +7,7 @@
 package v1
 
 import (
+	_ "buf.build/gen/go/bufbuild/protovalidate/protocolbuffers/go/buf/validate"
 	protoreflect "google.golang.org/protobuf/reflect/protoreflect"
 	protoimpl "google.golang.org/protobuf/runtime/protoimpl"
 	reflect "reflect"
@@ -115,10 +116,12 @@ var File_hub_user_v1_change_password_proto protoreflect.FileDescriptor
 
 const file_hub_user_v1_change_password_proto_rawDesc = "" +
 	"\n" +
-	"!hub/user/v1/change_password.proto\x12\vhub.user.v1\"e\n" +
-	"\x15ChangePasswordRequest\x12)\n" +
-	"\x10current_password\x18\x01 \x01(\tR\x0fcurrentPassword\x12!\n" +
-	"\fnew_password\x18\x02 \x01(\tR\vnewPassword\"\x18\n" +
+	"!hub/user/v1/change_password.proto\x12\vhub.user.v1\x1a\x1bbuf/validate/validate.proto\"}\n" +
+	"\x15ChangePasswordRequest\x125\n" +
+	"\x10current_password\x18\x01 \x01(\tB\n" +
+	"\xbaH\a\xc8\x01\x01r\x02\x10\x01R\x0fcurrentPassword\x12-\n" +
+	"\fnew_password\x18\x02 \x01(\tB\n" +
+	"\xbaH\a\xc8\x01\x01r\x02\x10\x01R\vnewPassword\"\x18\n" +
 	"\x16ChangePasswordResponseB,Z*github.com/voxire/voxie/gen/go/hub/user/v1b\x06proto3"
 
 var (

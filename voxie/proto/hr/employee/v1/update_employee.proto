@@ -3,49 +3,63 @@ syntax = "proto3";
 package hr.employee.v1;
 
 import "buf/validate/validate.proto";
-import "hr/employee/v1/types.proto";
+import "hr/staff/v1/types.proto";
 
 option go_package = "github.com/voxire/voxie/gen/go/hr/employee/v1";
 
 // ── Update ─────────────────────────────────────────────────────────
 
 message UpdateEmployeeRequest {
-  // ID of the employee to update.
+  // id is the employee ID from the route.
   int64 id = 1 [
     (buf.validate.field).required = true,
     (buf.validate.field).int64.gt = 0
   ];
-  // New department assignment; absent to keep current.
-  optional int64 department_id = 2;
-  // New work location; absent to keep current.
-  optional int64 location_id = 3;
-  // New direct manager; absent to keep current.
-  optional int64 manager_id = 4;
-  // New employment arrangement; absent to keep current.
-  optional string contract_type = 5;
-  // New employment status; absent to keep current.
-  optional string status = 6;
-  // New hire date (ISO-8601); absent to keep current.
-  optional string hire_date = 7;
-  // New probation end date (ISO-8601); absent to keep current.
-  optional string probation_end_date = 8;
-  // New termination date (ISO-8601); absent to keep current.
-  optional string termination_date = 9;
-  // New hourly rate; absent to keep current.
-  optional double hourly_rate = 10;
-  // New monthly salary; absent to keep current.
-  optional double monthly_salary = 11;
-  // New currency code; absent to keep current.
-  optional string currency = 12;
-  // New work schedule; absent to keep current.
-  optional int64 work_schedule_id = 13;
-  // New account creation mode; absent to keep current.
-  optional string account_creation_mode = 14;
-  // New job title; absent to keep current.
-  optional string job_title = 15;
+  // department_id is the department assignment; zero leaves it unset.
+  int64 department_id = 2;
+  // location_id is the work location assignment; zero leaves it unset.
+  int64 location_id = 3;
+  // work_schedule_id is the work schedule assignment; zero leaves it unset.
+  int64 work_schedule_id = 4;
+  // first_name is the employee's given name.
+  string first_name = 5 [
+    (buf.validate.field).required = true,
+    (buf.validate.field).string.min_len = 1
+  ];
+  // last_name is the employee's family name.
+  string last_name = 6 [
+    (buf.validate.field).required = true,
+    (buf.validate.field).string.min_len = 1
+  ];
+  // email is the employee email address.
+  string email = 7;
+  // phone is the employee phone number.
+  string phone = 8;
+  // employment_type is the employment type label.
+  string employment_type = 9;
+  // status is the employment status.
+  string status = 10;
+  // salary is the monthly or salaried compensation amount.
+  double salary = 11;
+  // hourly_rate is the employee hourly pay rate.
+  double hourly_rate = 12;
+  // overtime_rate is the employee overtime pay rate.
+  double overtime_rate = 13;
+  // start_date is the start date in YYYY-MM-DD format.
+  string start_date = 14;
+  // end_date is the end date in YYYY-MM-DD format.
+  string end_date = 15;
+  // address is the employee address.
+  string address = 16;
+  // emergency_contact_name is the emergency contact name.
+  string emergency_contact_name = 17;
+  // emergency_contact_phone is the emergency contact phone.
+  string emergency_contact_phone = 18;
+  // notes are internal employee notes.
+  string notes = 19;
 }
 
 message UpdateEmployeeResponse {
   // The updated employee record.
-  EmployeePayload employee = 1;
+  hr.staff.v1.Staff employee = 1;
 }

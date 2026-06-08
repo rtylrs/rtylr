@@ -30,8 +30,8 @@ type UpdateDepartmentRequest struct {
 	LocationId *int64 `protobuf:"varint,2,opt,name=location_id,json=locationId,proto3,oneof" json:"location_id,omitempty"`
 	// New parent department; absent to keep current.
 	ParentDepartmentId *int64 `protobuf:"varint,3,opt,name=parent_department_id,json=parentDepartmentId,proto3,oneof" json:"parent_department_id,omitempty"`
-	// New name; absent to keep current.
-	Name *string `protobuf:"bytes,4,opt,name=name,proto3,oneof" json:"name,omitempty"`
+	// name is the updated department name.
+	Name string `protobuf:"bytes,4,opt,name=name,proto3" json:"name,omitempty"`
 	// New default work schedule; absent to keep current.
 	DefaultWorkScheduleId *int64 `protobuf:"varint,5,opt,name=default_work_schedule_id,json=defaultWorkScheduleId,proto3,oneof" json:"default_work_schedule_id,omitempty"`
 	unknownFields         protoimpl.UnknownFields
@@ -90,8 +90,8 @@ func (x *UpdateDepartmentRequest) GetParentDepartmentId() int64 {
 }
 
 func (x *UpdateDepartmentRequest) GetName() string {
-	if x != nil && x.Name != nil {
-		return *x.Name
+	if x != nil {
+		return x.Name
 	}
 	return ""
 }
@@ -152,18 +152,18 @@ var File_hr_department_v1_update_department_proto protoreflect.FileDescriptor
 
 const file_hr_department_v1_update_department_proto_rawDesc = "" +
 	"\n" +
-	"(hr/department/v1/update_department.proto\x12\x10hr.department.v1\x1a\x1bbuf/validate/validate.proto\x1a\x1chr/department/v1/types.proto\"\xb8\x02\n" +
+	"(hr/department/v1/update_department.proto\x12\x10hr.department.v1\x1a\x1bbuf/validate/validate.proto\x1a\x1chr/department/v1/types.proto\"\xb6\x02\n" +
 	"\x17UpdateDepartmentRequest\x12\x1a\n" +
 	"\x02id\x18\x01 \x01(\x03B\n" +
 	"\xbaH\a\xc8\x01\x01\"\x02 \x00R\x02id\x12$\n" +
 	"\vlocation_id\x18\x02 \x01(\x03H\x00R\n" +
 	"locationId\x88\x01\x01\x125\n" +
-	"\x14parent_department_id\x18\x03 \x01(\x03H\x01R\x12parentDepartmentId\x88\x01\x01\x12\x17\n" +
-	"\x04name\x18\x04 \x01(\tH\x02R\x04name\x88\x01\x01\x12<\n" +
-	"\x18default_work_schedule_id\x18\x05 \x01(\x03H\x03R\x15defaultWorkScheduleId\x88\x01\x01B\x0e\n" +
+	"\x14parent_department_id\x18\x03 \x01(\x03H\x01R\x12parentDepartmentId\x88\x01\x01\x12\x1e\n" +
+	"\x04name\x18\x04 \x01(\tB\n" +
+	"\xbaH\a\xc8\x01\x01r\x02\x10\x01R\x04name\x12<\n" +
+	"\x18default_work_schedule_id\x18\x05 \x01(\x03H\x02R\x15defaultWorkScheduleId\x88\x01\x01B\x0e\n" +
 	"\f_location_idB\x17\n" +
-	"\x15_parent_department_idB\a\n" +
-	"\x05_nameB\x1b\n" +
+	"\x15_parent_department_idB\x1b\n" +
 	"\x19_default_work_schedule_id\"_\n" +
 	"\x18UpdateDepartmentResponse\x12C\n" +
 	"\n" +

@@ -24,8 +24,8 @@ const (
 
 type ApproveLeaveRequest struct {
 	state protoimpl.MessageState `protogen:"open.v1"`
-	// ID of the leave request being reviewed.
-	LeaveRequestId int64 `protobuf:"varint,1,opt,name=leave_request_id,json=leaveRequestId,proto3" json:"leave_request_id,omitempty"`
+	// request_id is the leave request being reviewed.
+	RequestId int64 `protobuf:"varint,1,opt,name=request_id,json=requestId,proto3" json:"request_id,omitempty"`
 	// True to approve, false to reject.
 	Approved bool `protobuf:"varint,2,opt,name=approved,proto3" json:"approved,omitempty"`
 	// Reason for rejection; absent if approving.
@@ -64,9 +64,9 @@ func (*ApproveLeaveRequest) Descriptor() ([]byte, []int) {
 	return file_hr_leave_v1_approve_leave_proto_rawDescGZIP(), []int{0}
 }
 
-func (x *ApproveLeaveRequest) GetLeaveRequestId() int64 {
+func (x *ApproveLeaveRequest) GetRequestId() int64 {
 	if x != nil {
-		return x.LeaveRequestId
+		return x.RequestId
 	}
 	return 0
 }
@@ -134,10 +134,11 @@ var File_hr_leave_v1_approve_leave_proto protoreflect.FileDescriptor
 
 const file_hr_leave_v1_approve_leave_proto_rawDesc = "" +
 	"\n" +
-	"\x1fhr/leave/v1/approve_leave.proto\x12\vhr.leave.v1\x1a\x1bbuf/validate/validate.proto\"\xac\x01\n" +
-	"\x13ApproveLeaveRequest\x124\n" +
-	"\x10leave_request_id\x18\x01 \x01(\x03B\n" +
-	"\xbaH\a\xc8\x01\x01\"\x02 \x00R\x0eleaveRequestId\x12\x1a\n" +
+	"\x1fhr/leave/v1/approve_leave.proto\x12\vhr.leave.v1\x1a\x1bbuf/validate/validate.proto\"\xa1\x01\n" +
+	"\x13ApproveLeaveRequest\x12)\n" +
+	"\n" +
+	"request_id\x18\x01 \x01(\x03B\n" +
+	"\xbaH\a\xc8\x01\x01\"\x02 \x00R\trequestId\x12\x1a\n" +
 	"\bapproved\x18\x02 \x01(\bR\bapproved\x12.\n" +
 	"\x10rejection_reason\x18\x03 \x01(\tH\x00R\x0frejectionReason\x88\x01\x01B\x13\n" +
 	"\x11_rejection_reason\"0\n" +

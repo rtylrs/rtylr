@@ -3,73 +3,54 @@ syntax = "proto3";
 package hr.employee.v1;
 
 import "buf/validate/validate.proto";
-import "hr/employee/v1/types.proto";
+import "hr/staff/v1/types.proto";
 
 option go_package = "github.com/voxire/voxie/gen/go/hr/employee/v1";
 
 // ── Create ─────────────────────────────────────────────────────────
 
 message CreateEmployeeRequest {
-  // Linked user account ID.
-  int64 user_id = 1 [
-    (buf.validate.field).required = true,
-    (buf.validate.field).int64.gt = 0
-  ];
-  // Department to assign the employee to.
-  int64 department_id = 2 [
-    (buf.validate.field).required = true,
-    (buf.validate.field).int64.gt = 0
-  ];
-  // Work location the employee reports to.
-  int64 location_id = 3 [
-    (buf.validate.field).required = true,
-    (buf.validate.field).int64.gt = 0
-  ];
-  // Direct manager; absent if top-level.
-  optional int64 manager_id = 4;
-  // Employment arrangement (full_time | part_time | freelancer).
-  string contract_type = 5 [
+  // department_id is the department assignment; zero leaves it unset.
+  int64 department_id = 1;
+  // location_id is the work location assignment; zero leaves it unset.
+  int64 location_id = 2;
+  // work_schedule_id is the work schedule assignment; zero leaves it unset.
+  int64 work_schedule_id = 3;
+  // first_name is the employee's given name.
+  string first_name = 4 [
     (buf.validate.field).required = true,
     (buf.validate.field).string.min_len = 1
   ];
-  // Initial employment status (active | probation | inactive | terminated).
-  string status = 6 [
+  // last_name is the employee's family name.
+  string last_name = 5 [
     (buf.validate.field).required = true,
     (buf.validate.field).string.min_len = 1
   ];
-  // Date the employee was hired (ISO-8601 format).
-  string hire_date = 7 [
+  // email is the employee email address.
+  string email = 6 [
     (buf.validate.field).required = true,
-    (buf.validate.field).string.min_len = 1
+    (buf.validate.field).string = {
+      min_len: 1
+      email: true
+    }
   ];
-  // End of probation period; absent if no probation (ISO-8601 format).
-  optional string probation_end_date = 8;
-  // Date employment was terminated; absent if still employed (ISO-8601 format).
-  optional string termination_date = 9;
-  // Pay rate per hour for hourly employees; absent if salaried only.
-  optional double hourly_rate = 10;
-  // Monthly gross salary; absent if hourly only.
-  optional double monthly_salary = 11;
-  // ISO-4217 currency code for compensation (e.g. "USD").
-  string currency = 12 [
-    (buf.validate.field).required = true,
-    (buf.validate.field).string.min_len = 1
-  ];
-  // Assigned work schedule; absent if using department default.
-  optional int64 work_schedule_id = 13;
-  // How the employee account was created (hr_created | invite_link).
-  string account_creation_mode = 14 [
-    (buf.validate.field).required = true,
-    (buf.validate.field).string.min_len = 1
-  ];
-  // Employee's job title or position name.
-  string job_title = 15 [
-    (buf.validate.field).required = true,
-    (buf.validate.field).string.min_len = 1
-  ];
+  // phone is the employee phone number.
+  string phone = 7;
+  // employment_type is the employment type label.
+  string employment_type = 8;
+  // salary is the monthly or salaried compensation amount.
+  double salary = 9;
+  // hourly_rate is the employee hourly pay rate.
+  double hourly_rate = 10;
+  // overtime_rate is the employee overtime pay rate.
+  double overtime_rate = 11;
+  // start_date is the start date in YYYY-MM-DD format.
+  string start_date = 12;
+  // address is the employee address.
+  string address = 13;
 }
 
 message CreateEmployeeResponse {
   // The newly created employee record.
-  EmployeePayload employee = 1;
+  hr.staff.v1.Staff employee = 1;
 }

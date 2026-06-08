@@ -18,10 +18,8 @@ export interface UpdateDepartmentRequest {
   parentDepartmentId?:
     | number
     | undefined;
-  /** New name; absent to keep current. */
-  name?:
-    | string
-    | undefined;
+  /** name is the updated department name. */
+  name: string;
   /** New default work schedule; absent to keep current. */
   defaultWorkScheduleId?: number | undefined;
 }

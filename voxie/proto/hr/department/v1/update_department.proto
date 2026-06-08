@@ -19,8 +19,11 @@ message UpdateDepartmentRequest {
   optional int64 location_id = 2;
   // New parent department; absent to keep current.
   optional int64 parent_department_id = 3;
-  // New name; absent to keep current.
-  optional string name = 4;
+  // name is the updated department name.
+  string name = 4 [
+    (buf.validate.field).required = true,
+    (buf.validate.field).string.min_len = 1
+  ];
   // New default work schedule; absent to keep current.
   optional int64 default_work_schedule_id = 5;
 }

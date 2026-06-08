@@ -7,8 +7,8 @@
 /* eslint-disable */
 
 export interface ApproveLeaveRequest {
-  /** ID of the leave request being reviewed. */
-  leaveRequestId: number;
+  /** request_id is the leave request being reviewed. */
+  requestId: number;
   /** True to approve, false to reject. */
   approved: boolean;
   /** Reason for rejection; absent if approving. */
