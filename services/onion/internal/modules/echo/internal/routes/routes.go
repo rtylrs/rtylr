@@ -24,6 +24,13 @@ func RegisterRoutes(ctx context.Context, r *chi.Mux, snipsService *application.S
 		&handlers.ProviderStatusHandler{SnipsService: snipsService},
 	)
 
+	serverHttp.RegisterPOST[handlers.ListToolsRequest, handlers.ListToolsResponse](
+		ctx,
+		r,
+		handlers.ListToolsRoutes(),
+		&handlers.ListToolsHandler{},
+	)
+
 	// SSE endpoints are registered manually — they stream tokens rather than
 	// following the standard request/response pattern used by RegisterPOST.
 	// A per-user rate limit (5 req/min) is applied to control AI generation cost.

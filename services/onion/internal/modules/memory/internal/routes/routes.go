@@ -53,17 +53,38 @@ func RegisterRoutes(ctx context.Context, r *chi.Mux, memoryService *application.
 		&handlers.SummarizeHandler{MemoryService: memoryService},
 	)
 
-	http.RegisterPOST[handlers.ChatsRequest, handlers.ChatsResponse](
+	http.RegisterGET[handlers.ChatsRequest, handlers.ChatsResponse](
 		ctx,
 		r,
 		handlers.ChatsRoutes(),
 		&handlers.ChatHistoryHandler{MemoryService: memoryService},
 	)
 
-	http.RegisterPOST[handlers.ChatMessagesRequest, handlers.ChatMessagesResponse](
+	http.RegisterGET[handlers.ChatMessagesRequest, handlers.ChatMessagesResponse](
 		ctx,
 		r,
 		handlers.ChatMessagesRoutes(),
 		&handlers.ChatMessagesHandler{MemoryService: memoryService},
+	)
+
+	http.RegisterDELETE[handlers.DeleteChatRequest, handlers.DeleteChatResponse](
+		ctx,
+		r,
+		handlers.DeleteChatRoutes(),
+		&handlers.DeleteChatHandler{Service: memoryService},
+	)
+
+	http.RegisterPUTWithValidation[handlers.RenameChatRequest, handlers.RenameChatResponse](
+		ctx,
+		r,
+		handlers.RenameChatRoutes(),
+		&handlers.RenameChatHandler{Service: memoryService},
+	)
+
+	http.RegisterPUT[handlers.PinChatRequest, handlers.PinChatResponse](
+		ctx,
+		r,
+		handlers.PinChatRoutes(),
+		&handlers.PinChatHandler{Service: memoryService},
 	)
 }
