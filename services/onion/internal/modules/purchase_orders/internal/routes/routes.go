@@ -40,7 +40,7 @@ func RegisterRoutes(ctx context.Context, router *chi.Mux, service *application.S
 	)
 
 	// POST /erp/purchase-orders/{id}/approve — path-param approval action.
-	http.RegisterPOST[handlers.ApprovePurchaseOrderRequest, handlers.ApprovePurchaseOrderResponse](
+	http.RegisterPOSTWithValidation[handlers.ApprovePurchaseOrderRequest, handlers.ApprovePurchaseOrderResponse](
 		ctx,
 		router,
 		handlers.ApprovePurchaseOrderRoutes(),

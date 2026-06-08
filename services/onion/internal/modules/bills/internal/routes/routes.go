@@ -26,7 +26,7 @@ func RegisterRoutes(ctx context.Context, router *chi.Mux, service *application.S
 	http.RegisterPUTWithValidation[handlers.UpdateBillByIDRequest, handlers.UpdateBillByIDResponse](
 		ctx, router, handlers.UpdateBillByIDRoutes(), &handlers.UpdateBillByIDHandler{Service: service},
 	)
-	http.RegisterDELETE[handlers.DeleteBillRequest, handlers.DeleteBillResponse](
+	http.RegisterDELETEWithValidation[handlers.DeleteBillRequest, handlers.DeleteBillResponse](
 		ctx, router, handlers.DeleteBillRoutes(), &handlers.DeleteBillHandler{Service: service},
 	)
 }

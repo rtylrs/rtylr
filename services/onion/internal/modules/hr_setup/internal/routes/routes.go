@@ -14,13 +14,13 @@ func RegisterRoutes(ctx context.Context, router *chi.Mux, service *application.S
 	serverHttp.RegisterGET[handlers.GetSetupStatusRequest, handlers.GetSetupStatusResponse](
 		ctx, router, handlers.GetSetupStatusRoutes(), &handlers.GetSetupStatusHandler{Service: service},
 	)
-	serverHttp.RegisterPOST[handlers.CompleteSetupStepRequest, handlers.CompleteSetupStepResponse](
+	serverHttp.RegisterPOSTWithValidation[handlers.CompleteSetupStepRequest, handlers.CompleteSetupStepResponse](
 		ctx, router, handlers.CompleteSetupStepRoutes(), &handlers.CompleteSetupStepHandler{Service: service},
 	)
 	serverHttp.RegisterGET[handlers.GetHRConfigRequest, handlers.GetHRConfigResponse](
 		ctx, router, handlers.GetHRConfigRoutes(), &handlers.GetHRConfigHandler{Service: service},
 	)
-	serverHttp.RegisterPUT[handlers.UpsertHRConfigRequest, handlers.UpsertHRConfigResponse](
+	serverHttp.RegisterPUTWithValidation[handlers.UpsertHRConfigRequest, handlers.UpsertHRConfigResponse](
 		ctx, router, handlers.UpsertHRConfigRoutes(), &handlers.UpsertHRConfigHandler{Service: service},
 	)
 }

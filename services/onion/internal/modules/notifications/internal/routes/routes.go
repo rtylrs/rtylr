@@ -28,12 +28,12 @@ func RegisterRoutes(ctx context.Context, router *chi.Mux, service *application.S
 	)
 
 	// PUT kept for backwards compatibility; POST /read-all is what the frontend calls.
-	serverHttp.RegisterPUT[handlers.MarkAllReadRequest, handlers.MarkAllReadResponse](
+	serverHttp.RegisterPUTWithValidation[handlers.MarkAllReadRequest, handlers.MarkAllReadResponse](
 		ctx, router, handlers.ReadAllRoutes(),
 		&handlers.MarkAllReadHandler{Service: service},
 	)
 
-	serverHttp.RegisterPOST[handlers.MarkAllReadRequest, handlers.MarkAllReadResponse](
+	serverHttp.RegisterPOSTWithValidation[handlers.MarkAllReadRequest, handlers.MarkAllReadResponse](
 		ctx, router, handlers.ReadAllRoutes(),
 		&handlers.MarkAllReadHandler{Service: service},
 	)

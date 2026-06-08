@@ -63,7 +63,7 @@ func RegisterRoutes(ctx context.Context, router *chi.Mux, service *application.S
 	)
 
 	// PATCH /team/members/{id}/deactivate — convenience path-param deactivation for per-app UIs
-	serverHttp.RegisterPATCH[handlers.DeactivateMemberRequest, handlers.DeactivateMemberResponse](
+	serverHttp.RegisterPATCHWithValidation[handlers.DeactivateMemberRequest, handlers.DeactivateMemberResponse](
 		ctx, router, handlers.DeactivateMemberRoutes(),
 		&handlers.DeactivateMemberHandler{Service: service},
 	)
@@ -85,7 +85,7 @@ func RegisterRoutes(ctx context.Context, router *chi.Mux, service *application.S
 		ctx, router, handlers.GetGroupDetailRoutes(),
 		&handlers.UpdateGroupHandler{Service: service},
 	)
-	serverHttp.RegisterDELETE[handlers.DeleteGroupRequest, handlers.DeleteGroupResponse](
+	serverHttp.RegisterDELETEWithValidation[handlers.DeleteGroupRequest, handlers.DeleteGroupResponse](
 		ctx, router, handlers.GetGroupDetailRoutes(),
 		&handlers.DeleteGroupHandler{Service: service},
 	)
@@ -93,7 +93,7 @@ func RegisterRoutes(ctx context.Context, router *chi.Mux, service *application.S
 		ctx, router, handlers.AddGroupMembersRoutes(),
 		&handlers.AddGroupMembersHandler{Service: service},
 	)
-	serverHttp.RegisterDELETE[handlers.RemoveGroupMemberRequest, handlers.RemoveGroupMemberResponse](
+	serverHttp.RegisterDELETEWithValidation[handlers.RemoveGroupMemberRequest, handlers.RemoveGroupMemberResponse](
 		ctx, router, handlers.RemoveGroupMemberRoutes(),
 		&handlers.RemoveGroupMemberHandler{Service: service},
 	)

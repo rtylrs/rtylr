@@ -16,7 +16,7 @@ func RegisterRoutes(ctx context.Context, router *chi.Mux, svc *application.Servi
 		&handlers.GetConfigHandler{Service: svc},
 	)
 
-	http.RegisterPUT[handlers.UpdateConfigRequest, handlers.UpdateConfigResponse](
+	http.RegisterPUTWithValidation[handlers.UpdateConfigRequest, handlers.UpdateConfigResponse](
 		ctx, router, handlers.UpdateConfigRoutes(),
 		&handlers.UpdateConfigHandler{Service: svc},
 	)
@@ -26,12 +26,12 @@ func RegisterRoutes(ctx context.Context, router *chi.Mux, svc *application.Servi
 		&handlers.ListTransactionsHandler{Service: svc},
 	)
 
-	http.RegisterPOST[handlers.EarnPointsRequest, handlers.EarnPointsResponse](
+	http.RegisterPOSTWithValidation[handlers.EarnPointsRequest, handlers.EarnPointsResponse](
 		ctx, router, handlers.EarnPointsRoutes(),
 		&handlers.EarnPointsHandler{Service: svc},
 	)
 
-	http.RegisterPOST[handlers.RedeemPointsRequest, handlers.RedeemPointsResponse](
+	http.RegisterPOSTWithValidation[handlers.RedeemPointsRequest, handlers.RedeemPointsResponse](
 		ctx, router, handlers.RedeemPointsRoutes(),
 		&handlers.RedeemPointsHandler{Service: svc},
 	)

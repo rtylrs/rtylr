@@ -12,10 +12,10 @@ import (
 
 func RegisterRoutes(ctx context.Context, router *chi.Mux, service *application.Service) {
 	// Reads.
-	serverHttp.RegisterPOST[handlers.GetFeaturesRequest, handlers.FeaturesResponse](
+	serverHttp.RegisterPOSTWithValidation[handlers.GetFeaturesRequest, handlers.FeaturesResponse](
 		ctx, router, handlers.GetFeaturesRoutes(), &handlers.GetFeaturesHandler{Service: service},
 	)
-	serverHttp.RegisterPOST[handlers.GetMyFeaturesRequest, handlers.FeaturesResponse](
+	serverHttp.RegisterPOSTWithValidation[handlers.GetMyFeaturesRequest, handlers.FeaturesResponse](
 		ctx, router, handlers.GetMyFeaturesRoutes(), &handlers.GetMyFeaturesHandler{Service: service},
 	)
 

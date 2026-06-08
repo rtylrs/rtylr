@@ -177,7 +177,7 @@ func RegisterRoutes(ctx context.Context, router *chi.Mux, flowService *applicati
 		&handlers.CreateTimeLogHandler{FlowService: flowService},
 	)
 
-	http.RegisterDELETE[handlers.DeleteTimeLogRequest, handlers.DeleteTimeLogResponse](
+	http.RegisterDELETEWithValidation[handlers.DeleteTimeLogRequest, handlers.DeleteTimeLogResponse](
 		ctx, router, handlers.DeleteTimeLogRoutes(),
 		&handlers.DeleteTimeLogHandler{FlowService: flowService},
 	)

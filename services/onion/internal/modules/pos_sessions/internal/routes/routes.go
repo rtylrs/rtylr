@@ -21,12 +21,12 @@ func RegisterRoutes(ctx context.Context, router *chi.Mux, svc *application.Servi
 		&handlers.GetSessionHandler{Service: svc},
 	)
 
-	http.RegisterPOST[handlers.OpenSessionRequest, handlers.OpenSessionResponse](
+	http.RegisterPOSTWithValidation[handlers.OpenSessionRequest, handlers.OpenSessionResponse](
 		ctx, router, handlers.SessionOpenRoutes(),
 		&handlers.OpenSessionHandler{Service: svc},
 	)
 
-	http.RegisterPOST[handlers.CloseSessionRequest, handlers.CloseSessionResponse](
+	http.RegisterPOSTWithValidation[handlers.CloseSessionRequest, handlers.CloseSessionResponse](
 		ctx, router, handlers.SessionCloseRoutes(),
 		&handlers.CloseSessionHandler{Service: svc},
 	)

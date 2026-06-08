@@ -25,7 +25,7 @@ func RegisterRoutes(ctx context.Context, router *chi.Mux, configService *applica
 		&handlers.CreateConfigHandler{ConfigService: configService},
 	)
 
-	http.RegisterPUT[handlers.UpdateConfigRequest, handlers.UpdateConfigResponse](
+	http.RegisterPUTWithValidation[handlers.UpdateConfigRequest, handlers.UpdateConfigResponse](
 		ctx,
 		router,
 		handlers.UpdateConfigRoutes(),

@@ -26,7 +26,7 @@ func RegisterRoutes(ctx context.Context, router *chi.Mux, svc *application.Servi
 		&handlers.UpdateModifierHandler{Service: svc},
 	)
 
-	http.RegisterDELETE[handlers.DeleteModifierRequest, handlers.DeleteModifierResponse](
+	http.RegisterDELETEWithValidation[handlers.DeleteModifierRequest, handlers.DeleteModifierResponse](
 		ctx, router, handlers.DeleteModifierRoutes(),
 		&handlers.DeleteModifierHandler{Service: svc},
 	)

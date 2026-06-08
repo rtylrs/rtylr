@@ -26,7 +26,7 @@ func RegisterRoutes(ctx context.Context, router *chi.Mux, service *application.S
 	serverHttp.RegisterPOSTWithValidation[handlers.CreateCycleRequest, handlers.CreateCycleResponse](
 		ctx, router, handlers.CreateCycleRoutes(), &handlers.CreateCycleHandler{Service: service},
 	)
-	serverHttp.RegisterPOST[handlers.OpenCycleRequest, handlers.OpenCycleResponse](
+	serverHttp.RegisterPOSTWithValidation[handlers.OpenCycleRequest, handlers.OpenCycleResponse](
 		ctx, router, handlers.OpenCycleRoutes(), &handlers.OpenCycleHandler{Service: service},
 	)
 
@@ -48,7 +48,7 @@ func RegisterRoutes(ctx context.Context, router *chi.Mux, service *application.S
 	serverHttp.RegisterPOSTWithValidation[handlers.SubmitReviewRequest, handlers.SubmitReviewResponse](
 		ctx, router, handlers.SubmitReviewRoutes(), &handlers.SubmitReviewHandler{Service: service},
 	)
-	serverHttp.RegisterPOST[handlers.ShareReviewRequest, handlers.ShareReviewResponse](
+	serverHttp.RegisterPOSTWithValidation[handlers.ShareReviewRequest, handlers.ShareReviewResponse](
 		ctx, router, handlers.ShareReviewRoutes(), &handlers.ShareReviewHandler{Service: service},
 	)
 }

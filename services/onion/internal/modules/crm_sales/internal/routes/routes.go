@@ -29,7 +29,7 @@ func RegisterRoutes(ctx context.Context, router *chi.Mux, service *application.S
 	serverHttp.RegisterPUTWithValidation[handlers.UpdateLeadRequest, handlers.UpdateLeadResponse](
 		ctx, router, handlers.UpdateLeadRoutes(), &handlers.UpdateLeadHandler{Service: service},
 	)
-	serverHttp.RegisterDELETE[handlers.DeleteLeadRequest, handlers.DeleteLeadResponse](
+	serverHttp.RegisterDELETEWithValidation[handlers.DeleteLeadRequest, handlers.DeleteLeadResponse](
 		ctx, router, handlers.DeleteLeadRoutes(), &handlers.DeleteLeadHandler{Service: service},
 	)
 
@@ -40,7 +40,7 @@ func RegisterRoutes(ctx context.Context, router *chi.Mux, service *application.S
 	serverHttp.RegisterPOSTWithValidation[handlers.CreateTouchpointRequest, handlers.CreateTouchpointResponse](
 		ctx, router, handlers.CreateTouchpointRoutes(), &handlers.CreateTouchpointHandler{Service: service},
 	)
-	serverHttp.RegisterDELETE[handlers.DeleteTouchpointRequest, handlers.DeleteTouchpointResponse](
+	serverHttp.RegisterDELETEWithValidation[handlers.DeleteTouchpointRequest, handlers.DeleteTouchpointResponse](
 		ctx, router, handlers.DeleteTouchpointRoutes(), &handlers.DeleteTouchpointHandler{Service: service},
 	)
 
@@ -54,7 +54,7 @@ func RegisterRoutes(ctx context.Context, router *chi.Mux, service *application.S
 	serverHttp.RegisterPUTWithValidation[handlers.UpdateContactRequest, handlers.UpdateContactResponse](
 		ctx, router, handlers.UpdateContactRoutes(), &handlers.UpdateContactHandler{Service: service},
 	)
-	serverHttp.RegisterDELETE[handlers.DeleteContactRequest, handlers.DeleteContactResponse](
+	serverHttp.RegisterDELETEWithValidation[handlers.DeleteContactRequest, handlers.DeleteContactResponse](
 		ctx, router, handlers.DeleteContactRoutes(), &handlers.DeleteContactHandler{Service: service},
 	)
 

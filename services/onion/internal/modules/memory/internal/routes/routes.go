@@ -11,42 +11,42 @@ import (
 )
 
 func RegisterRoutes(ctx context.Context, r *chi.Mux, memoryService *application.Service) {
-	http.RegisterPOST[handlers.SessionRequest, handlers.SessionResponse](
+	http.RegisterPOSTWithValidation[handlers.SessionRequest, handlers.SessionResponse](
 		ctx,
 		r,
 		handlers.SessionRoutes(),
 		&handlers.SessionHandler{MemoryService: memoryService},
 	)
 
-	http.RegisterPOST[handlers.MemoryRequest, handlers.MemoryResponse](
+	http.RegisterPOSTWithValidation[handlers.MemoryRequest, handlers.MemoryResponse](
 		ctx,
 		r,
 		handlers.MemoryRoutes(),
 		&handlers.MemoryHandler{MemoryService: memoryService},
 	)
 
-	http.RegisterPOST[handlers.ContextRequest, handlers.ContextResponse](
+	http.RegisterPOSTWithValidation[handlers.ContextRequest, handlers.ContextResponse](
 		ctx,
 		r,
 		handlers.ContextRoutes(),
 		&handlers.ContextHandler{MemoryService: memoryService},
 	)
 
-	http.RegisterPOST[handlers.SearchRequest, handlers.SearchResponse](
+	http.RegisterPOSTWithValidation[handlers.SearchRequest, handlers.SearchResponse](
 		ctx,
 		r,
 		handlers.SearchRoutes(),
 		&handlers.SearchHandler{MemoryService: memoryService},
 	)
 
-	http.RegisterPOST[handlers.StatsRequest, handlers.StatsResponse](
+	http.RegisterPOSTWithValidation[handlers.StatsRequest, handlers.StatsResponse](
 		ctx,
 		r,
 		handlers.StatsRoutes(),
 		&handlers.StatsHandler{MemoryService: memoryService},
 	)
 
-	http.RegisterPOST[handlers.SummarizeRequest, handlers.SummarizeResponse](
+	http.RegisterPOSTWithValidation[handlers.SummarizeRequest, handlers.SummarizeResponse](
 		ctx,
 		r,
 		handlers.SummarizeRoutes(),
@@ -67,7 +67,7 @@ func RegisterRoutes(ctx context.Context, r *chi.Mux, memoryService *application.
 		&handlers.ChatMessagesHandler{MemoryService: memoryService},
 	)
 
-	http.RegisterDELETE[handlers.DeleteChatRequest, handlers.DeleteChatResponse](
+	http.RegisterDELETEWithValidation[handlers.DeleteChatRequest, handlers.DeleteChatResponse](
 		ctx,
 		r,
 		handlers.DeleteChatRoutes(),
@@ -81,7 +81,7 @@ func RegisterRoutes(ctx context.Context, r *chi.Mux, memoryService *application.
 		&handlers.RenameChatHandler{Service: memoryService},
 	)
 
-	http.RegisterPUT[handlers.PinChatRequest, handlers.PinChatResponse](
+	http.RegisterPUTWithValidation[handlers.PinChatRequest, handlers.PinChatResponse](
 		ctx,
 		r,
 		handlers.PinChatRoutes(),

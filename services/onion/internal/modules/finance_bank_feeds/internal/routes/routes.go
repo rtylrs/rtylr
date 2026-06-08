@@ -14,7 +14,7 @@ func RegisterRoutes(ctx context.Context, router *chi.Mux, service *application.S
 	http.RegisterGET[handlers.ListRequest, handlers.ListResponse](
 		ctx, router, handlers.ListRoutes(), &handlers.ListHandler{Service: service},
 	)
-	http.RegisterPOST[handlers.SyncRequest, handlers.SyncResponse](
+	http.RegisterPOSTWithValidation[handlers.SyncRequest, handlers.SyncResponse](
 		ctx, router, handlers.SyncRoutes(), &handlers.SyncHandler{Service: service},
 	)
 }

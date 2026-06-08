@@ -15,7 +15,7 @@ func RegisterRoutes(ctx context.Context, router *chi.Mux, service *application.S
 	serverHttp.RegisterGET[handlers.GetSetupStatusRequest, handlers.GetSetupStatusResponse](
 		ctx, router, handlers.GetSetupStatusRoutes(), &handlers.GetSetupStatusHandler{Service: service},
 	)
-	serverHttp.RegisterPOST[handlers.CompleteSetupStepRequest, handlers.CompleteSetupStepResponse](
+	serverHttp.RegisterPOSTWithValidation[handlers.CompleteSetupStepRequest, handlers.CompleteSetupStepResponse](
 		ctx, router, handlers.CompleteSetupStepRoutes(), &handlers.CompleteSetupStepHandler{Service: service},
 	)
 
@@ -40,7 +40,7 @@ func RegisterRoutes(ctx context.Context, router *chi.Mux, service *application.S
 	serverHttp.RegisterPUTWithValidation[handlers.UpdateEmployeeRequest, handlers.UpdateEmployeeResponse](
 		ctx, router, handlers.UpdateEmployeeRoutes(), &handlers.UpdateEmployeeHandler{Service: service},
 	)
-	serverHttp.RegisterDELETE[handlers.DeleteEmployeeRequest, handlers.DeleteEmployeeResponse](
+	serverHttp.RegisterDELETEWithValidation[handlers.DeleteEmployeeRequest, handlers.DeleteEmployeeResponse](
 		ctx, router, handlers.DeleteEmployeeRoutes(), &handlers.DeleteEmployeeHandler{Service: service},
 	)
 

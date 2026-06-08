@@ -32,7 +32,7 @@ func RegisterRoutes(ctx context.Context, router *chi.Mux, service *application.S
 	serverHttp.RegisterPOSTWithValidation[handlers.ApprovePayrollRunRequest, handlers.ApprovePayrollRunResponse](
 		ctx, router, handlers.ApprovePayrollRunRoutes(), &handlers.ApprovePayrollRunHandler{Service: service},
 	)
-	serverHttp.RegisterPOST[handlers.ExportPayrollRequest, handlers.ExportPayrollResponse](
+	serverHttp.RegisterPOSTWithValidation[handlers.ExportPayrollRequest, handlers.ExportPayrollResponse](
 		ctx, router, handlers.ExportPayrollRoutes(), &handlers.ExportPayrollHandler{Service: service},
 	)
 }

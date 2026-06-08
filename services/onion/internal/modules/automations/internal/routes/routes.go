@@ -32,7 +32,7 @@ func RegisterRoutes(ctx context.Context, router *chi.Mux, service *application.S
 		&handlers.UpdateAutomationHandler{Service: service},
 	)
 
-	http.RegisterDELETE[handlers.DeleteAutomationRequest, handlers.DeleteAutomationResponse](
+	http.RegisterDELETEWithValidation[handlers.DeleteAutomationRequest, handlers.DeleteAutomationResponse](
 		ctx,
 		router,
 		handlers.AutomationDeleteRoutes(),

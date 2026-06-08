@@ -26,7 +26,7 @@ func RegisterRoutes(ctx context.Context, router *chi.Mux, svc *application.Servi
 		&handlers.UpdateComboHandler{Service: svc},
 	)
 
-	http.RegisterDELETE[handlers.DeleteComboRequest, handlers.DeleteComboResponse](
+	http.RegisterDELETEWithValidation[handlers.DeleteComboRequest, handlers.DeleteComboResponse](
 		ctx, router, handlers.DeleteComboRoutes(),
 		&handlers.DeleteComboHandler{Service: svc},
 	)

@@ -23,7 +23,7 @@ func RegisterRoutes(ctx context.Context, router *chi.Mux, service *application.S
 	serverHttp.RegisterGET[handlers.GetDocumentRequest, handlers.GetDocumentResponse](
 		ctx, router, handlers.GetDocumentRoutes(), &handlers.GetDocumentHandler{Service: service},
 	)
-	serverHttp.RegisterDELETE[handlers.DeleteDocumentRequest, handlers.DeleteDocumentResponse](
+	serverHttp.RegisterDELETEWithValidation[handlers.DeleteDocumentRequest, handlers.DeleteDocumentResponse](
 		ctx, router, handlers.DeleteDocumentRoutes(), &handlers.DeleteDocumentHandler{Service: service},
 	)
 }

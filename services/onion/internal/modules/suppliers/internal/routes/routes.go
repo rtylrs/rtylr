@@ -41,7 +41,7 @@ func RegisterRoutes(ctx context.Context, router *chi.Mux, service *application.S
 	)
 
 	// DELETE /erp/suppliers/{id} — new REST path variant.
-	http.RegisterDELETE[handlers.DeleteSupplierByIDRequest, handlers.DeleteSupplierByIDResponse](
+	http.RegisterDELETEWithValidation[handlers.DeleteSupplierByIDRequest, handlers.DeleteSupplierByIDResponse](
 		ctx,
 		router,
 		handlers.DeleteSupplierByIDRoutes(),

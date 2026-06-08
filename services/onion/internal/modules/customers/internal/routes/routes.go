@@ -83,7 +83,7 @@ func RegisterRoutes(ctx context.Context, router *chi.Mux, crmService *applicatio
 		&handlers.GetLoyaltyConfigHandler{CRMService: crmService},
 	)
 
-	http.RegisterPUT[handlers.UpdateLoyaltyConfigRequest, handlers.UpdateLoyaltyConfigResponse](
+	http.RegisterPUTWithValidation[handlers.UpdateLoyaltyConfigRequest, handlers.UpdateLoyaltyConfigResponse](
 		ctx,
 		router,
 		handlers.LoyaltyConfigUpdateRoutes(),
@@ -189,7 +189,7 @@ func RegisterRoutes(ctx context.Context, router *chi.Mux, crmService *applicatio
 		&handlers.UpdateLoyaltyTierHandler{CRMService: crmService},
 	)
 
-	http.RegisterDELETE[handlers.DeleteLoyaltyTierRequest, handlers.DeleteLoyaltyTierResponse](
+	http.RegisterDELETEWithValidation[handlers.DeleteLoyaltyTierRequest, handlers.DeleteLoyaltyTierResponse](
 		ctx,
 		router,
 		handlers.LoyaltyTiersDeleteRoutes(),

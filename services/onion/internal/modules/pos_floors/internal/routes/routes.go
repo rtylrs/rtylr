@@ -26,7 +26,7 @@ func RegisterRoutes(ctx context.Context, router *chi.Mux, svc *application.Servi
 		&handlers.UpdateFloorHandler{Service: svc},
 	)
 
-	http.RegisterDELETE[handlers.DeleteFloorRequest, handlers.DeleteFloorResponse](
+	http.RegisterDELETEWithValidation[handlers.DeleteFloorRequest, handlers.DeleteFloorResponse](
 		ctx, router, handlers.FloorDeleteRoutes(),
 		&handlers.DeleteFloorHandler{Service: svc},
 	)

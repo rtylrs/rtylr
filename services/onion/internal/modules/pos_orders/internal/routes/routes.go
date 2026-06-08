@@ -153,7 +153,7 @@ func RegisterRoutes(ctx context.Context, router *chi.Mux, service *application.S
 	)
 
 	// Paddle billing
-	serverHttp.RegisterPOST[handlers.PayOrderRequest, handlers.PayOrderResponse](
+	serverHttp.RegisterPOSTWithValidation[handlers.PayOrderRequest, handlers.PayOrderResponse](
 		ctx, router, handlers.PayOrderRoutes(),
 		&handlers.PayOrderHandler{Service: service},
 	)

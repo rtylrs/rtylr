@@ -26,7 +26,7 @@ func NewModule(_ context.Context, db *sql.DB) *Module {
 }
 
 func (m *Module) RegisterRoutes(ctx context.Context, router *chi.Mux, _ ...interface{}) {
-	serverHttp.RegisterPOST[TestEmailRequest, TestEmailResponse](
+	serverHttp.RegisterPOSTWithValidation[TestEmailRequest, TestEmailResponse](
 		ctx, router, sendRoutes(), &TestEmailHandler{DB: m.db},
 	)
 	serverHttp.RegisterGET[ListTemplatesRequest, ListTemplatesResponse](

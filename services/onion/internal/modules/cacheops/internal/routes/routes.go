@@ -10,7 +10,7 @@ import (
 )
 
 func RegisterRoutes(ctx context.Context, r *chi.Mux) {
-	serverHttp.RegisterPOST[handlers.InvalidateRequest, handlers.InvalidateResponse](
+	serverHttp.RegisterPOSTWithValidation[handlers.InvalidateRequest, handlers.InvalidateResponse](
 		ctx,
 		r,
 		handlers.InvalidateRoutes(),

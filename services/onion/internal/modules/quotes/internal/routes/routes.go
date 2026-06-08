@@ -29,10 +29,10 @@ func RegisterRoutes(ctx context.Context, router *chi.Mux, service *application.S
 	http.RegisterPUTWithValidation[handlers.UpdateQuoteStatusRequest, handlers.UpdateQuoteStatusResponse](
 		ctx, router, handlers.UpdateQuoteStatusRoutes(), &handlers.UpdateQuoteStatusHandler{Service: service},
 	)
-	http.RegisterDELETE[handlers.DeleteQuoteByIDRequest, handlers.DeleteQuoteByIDResponse](
+	http.RegisterDELETEWithValidation[handlers.DeleteQuoteByIDRequest, handlers.DeleteQuoteByIDResponse](
 		ctx, router, handlers.DeleteQuoteByIDRoutes(), &handlers.DeleteQuoteByIDHandler{Service: service},
 	)
-	http.RegisterPOST[handlers.ConvertQuoteRequest, handlers.ConvertQuoteResponse](
+	http.RegisterPOSTWithValidation[handlers.ConvertQuoteRequest, handlers.ConvertQuoteResponse](
 		ctx, router, handlers.ConvertQuoteRoutes(), &handlers.ConvertQuoteHandler{Service: service},
 	)
 }

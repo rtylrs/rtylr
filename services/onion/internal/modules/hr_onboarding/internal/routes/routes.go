@@ -32,7 +32,7 @@ func RegisterRoutes(ctx context.Context, router *chi.Mux, service *application.S
 	serverHttp.RegisterGET[handlers.GetEmployeeChecklistRequest, handlers.GetEmployeeChecklistResponse](
 		ctx, router, handlers.GetEmployeeChecklistRoutes(), &handlers.GetEmployeeChecklistHandler{Service: service},
 	)
-	serverHttp.RegisterPOST[handlers.CompleteChecklistItemRequest, handlers.CompleteChecklistItemResponse](
+	serverHttp.RegisterPOSTWithValidation[handlers.CompleteChecklistItemRequest, handlers.CompleteChecklistItemResponse](
 		ctx, router, handlers.CompleteChecklistItemRoutes(), &handlers.CompleteChecklistItemHandler{Service: service},
 	)
 }

@@ -48,7 +48,7 @@ func RegisterRoutes(ctx context.Context, router *chi.Mux, service *application.S
 	)
 
 	// DELETE /erp/products/{id} — REST path variant; coexists with the body-ID route above.
-	http.RegisterDELETE[handlers.DeleteProductByIDRequest, handlers.DeleteProductByIDResponse](
+	http.RegisterDELETEWithValidation[handlers.DeleteProductByIDRequest, handlers.DeleteProductByIDResponse](
 		ctx,
 		router,
 		handlers.DeleteProductByIDRoutes(),

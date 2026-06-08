@@ -16,17 +16,17 @@ func RegisterRoutes(ctx context.Context, router *chi.Mux, svc *application.Servi
 		&handlers.ListCashMovementsHandler{Service: svc},
 	)
 
-	http.RegisterPOST[handlers.CashDropRequest, handlers.CashDropResponse](
+	http.RegisterPOSTWithValidation[handlers.CashDropRequest, handlers.CashDropResponse](
 		ctx, router, handlers.CashDropRoutes(),
 		&handlers.CashDropHandler{Service: svc},
 	)
 
-	http.RegisterPOST[handlers.CashPickupRequest, handlers.CashPickupResponse](
+	http.RegisterPOSTWithValidation[handlers.CashPickupRequest, handlers.CashPickupResponse](
 		ctx, router, handlers.CashPickupRoutes(),
 		&handlers.CashPickupHandler{Service: svc},
 	)
 
-	http.RegisterPOST[handlers.CashAdjustRequest, handlers.CashAdjustResponse](
+	http.RegisterPOSTWithValidation[handlers.CashAdjustRequest, handlers.CashAdjustResponse](
 		ctx, router, handlers.CashAdjustRoutes(),
 		&handlers.CashAdjustHandler{Service: svc},
 	)

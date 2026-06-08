@@ -24,7 +24,7 @@ func RegisterRoutes(ctx context.Context, r *chi.Mux, snipsService *application.S
 		&handlers.ProviderStatusHandler{SnipsService: snipsService},
 	)
 
-	serverHttp.RegisterPOST[handlers.ListToolsRequest, handlers.ListToolsResponse](
+	serverHttp.RegisterPOSTWithValidation[handlers.ListToolsRequest, handlers.ListToolsResponse](
 		ctx,
 		r,
 		handlers.ListToolsRoutes(),

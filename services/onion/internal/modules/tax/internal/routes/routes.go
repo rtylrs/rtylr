@@ -16,7 +16,7 @@ func RegisterRoutes(ctx context.Context, router *chi.Mux, svc *application.Servi
 		&handlers.GetTaxConfigHandler{Service: svc},
 	)
 
-	http.RegisterPUT[handlers.UpdateTaxConfigRequest, handlers.UpdateTaxConfigResponse](
+	http.RegisterPUTWithValidation[handlers.UpdateTaxConfigRequest, handlers.UpdateTaxConfigResponse](
 		ctx, router, handlers.TaxConfigUpdateRoutes(),
 		&handlers.UpdateTaxConfigHandler{Service: svc},
 	)

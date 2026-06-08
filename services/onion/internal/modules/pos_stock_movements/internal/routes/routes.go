@@ -16,22 +16,22 @@ func RegisterRoutes(ctx context.Context, router *chi.Mux, svc *application.Servi
 		&handlers.ListMovementsHandler{Service: svc},
 	)
 
-	http.RegisterPOST[handlers.ReceiveStockRequest, handlers.ReceiveStockResponse](
+	http.RegisterPOSTWithValidation[handlers.ReceiveStockRequest, handlers.ReceiveStockResponse](
 		ctx, router, handlers.ReceiveStockRoutes(),
 		&handlers.ReceiveStockHandler{Service: svc},
 	)
 
-	http.RegisterPOST[handlers.AdjustStockRequest, handlers.AdjustStockResponse](
+	http.RegisterPOSTWithValidation[handlers.AdjustStockRequest, handlers.AdjustStockResponse](
 		ctx, router, handlers.AdjustStockRoutes(),
 		&handlers.AdjustStockHandler{Service: svc},
 	)
 
-	http.RegisterPOST[handlers.WasteStockRequest, handlers.WasteStockResponse](
+	http.RegisterPOSTWithValidation[handlers.WasteStockRequest, handlers.WasteStockResponse](
 		ctx, router, handlers.WasteStockRoutes(),
 		&handlers.WasteStockHandler{Service: svc},
 	)
 
-	http.RegisterPOST[handlers.TransferStockRequest, handlers.TransferStockResponse](
+	http.RegisterPOSTWithValidation[handlers.TransferStockRequest, handlers.TransferStockResponse](
 		ctx, router, handlers.TransferStockRoutes(),
 		&handlers.TransferStockHandler{Service: svc},
 	)

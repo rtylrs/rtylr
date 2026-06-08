@@ -29,7 +29,7 @@ func RegisterRoutes(ctx context.Context, router *chi.Mux, service *application.S
 	serverHttp.RegisterPOSTWithValidation[handlers.AssignAssetRequest, handlers.AssignAssetResponse](
 		ctx, router, handlers.AssignAssetRoutes(), &handlers.AssignAssetHandler{Service: service},
 	)
-	serverHttp.RegisterPOST[handlers.UnassignAssetRequest, handlers.UnassignAssetResponse](
+	serverHttp.RegisterPOSTWithValidation[handlers.UnassignAssetRequest, handlers.UnassignAssetResponse](
 		ctx, router, handlers.UnassignAssetRoutes(), &handlers.UnassignAssetHandler{Service: service},
 	)
 }

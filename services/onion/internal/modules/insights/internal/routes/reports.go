@@ -15,7 +15,7 @@ func registerReportsRoutes(ctx context.Context, router *chi.Mux, svc *applicatio
 		ctx, router, handlers.GetReportTemplatesRoutes(),
 		&handlers.GetReportTemplatesHandler{Service: svc},
 	)
-	serverHttp.RegisterPOST[handlers.GenerateRevenueReportRequest, handlers.GenerateRevenueReportResponse](
+	serverHttp.RegisterPOSTWithValidation[handlers.GenerateRevenueReportRequest, handlers.GenerateRevenueReportResponse](
 		ctx, router, handlers.GenerateRevenueReportRoutes(),
 		&handlers.GenerateRevenueReportHandler{Service: svc},
 	)
