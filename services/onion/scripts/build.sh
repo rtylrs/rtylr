@@ -9,6 +9,9 @@ done
 # Check sql case
 ./scripts/check_sql_case.sh
 
+# Generate Go contracts from the local Voxie submodule.
+./scripts/generate_contracts.sh
+
 # Generate SQL code for each module (includes SQL case checking)
 ./scripts/generate_sqlc.sh
 
