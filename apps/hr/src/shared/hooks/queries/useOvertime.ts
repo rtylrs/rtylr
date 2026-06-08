@@ -59,7 +59,13 @@ export const useApproveOvertime = () => {
 
   return useMutation({
     mutationFn: async (data: ApproveOvertimeRequest): Promise<void> => {
-      await unwrap(safe.post(`/hr/overtime/requests/${data.overtimeRequestId}/approve`, data));
+      await unwrap(
+        safe.post(`/hr/overtime/requests/${data.overtimeRequestId}/approve`, {
+          requestId: data.overtimeRequestId,
+          approved: data.approved,
+          multiplierApplied: data.multiplierApplied,
+        })
+      );
     },
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ['overtime-requests'] });
@@ -87,7 +93,13 @@ export const useUpdateOvertimeConfig = () => {
 
   return useMutation({
     mutationFn: async (data: UpdateOvertimeConfigData): Promise<void> => {
-      await unwrap(safe.put('/hr/overtime/config', data));
+      await unwrap(
+        safe.put('/hr/overtime/config', {
+          dailyThresholdMinutes: data.dailyOtThresholdMinutes,
+          defaultMultiplier: data.defaultMultiplier,
+          autoDetectEnabled: true,
+        })
+      );
     },
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ['overtime-config'] });

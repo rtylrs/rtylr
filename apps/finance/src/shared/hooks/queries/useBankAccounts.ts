@@ -32,8 +32,23 @@ export const useCreateBankAccount = () => {
 
   return useMutation({
     mutationFn: async (data: CreateBankAccountRequest): Promise<CreateBankAccountResponse> => {
+      const source = data as CreateBankAccountRequest & {
+        institution?: string;
+        bankName?: string;
+        accountType?: string;
+        balance?: number;
+        currency?: string;
+        isConnected?: boolean;
+      };
       const res = await unwrap(
-        safe.post<CreateBankAccountResponse>('/finance/bank-accounts', data)
+        safe.post<CreateBankAccountResponse>('/finance/bank-accounts', {
+          name: source.name,
+          institution: source.institution ?? source.bankName,
+          accountType: source.accountType,
+          balance: source.balance ?? 0,
+          currency: source.currency ?? 'USD',
+          isConnected: source.isConnected ?? false,
+        })
       );
       return res as CreateBankAccountResponse;
     },

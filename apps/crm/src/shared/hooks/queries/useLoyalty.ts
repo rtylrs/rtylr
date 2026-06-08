@@ -161,7 +161,13 @@ export const useAwardPoints = (): UseMutationResult<unknown, unknown, AwardRedee
   const { t } = useTranslation();
   return useMutation<unknown, unknown, AwardRedeemPayload>({
     mutationFn: (payload: AwardRedeemPayload): Promise<unknown> =>
-      unwrap(safe.post('/crm/loyalty/award', payload)),
+      unwrap(
+        safe.post('/crm/loyalty/award', {
+          customerId: payload.customerId,
+          points: payload.points,
+          description: payload.reason,
+        })
+      ),
     onSuccess: (_data: unknown, variables: AwardRedeemPayload): void => {
       void qc.invalidateQueries({ queryKey: ['crm-loyalty-transactions'] });
       void qc.invalidateQueries({ queryKey: ['crm-customers'] });
@@ -179,7 +185,13 @@ export const useRedeemPoints = (): UseMutationResult<unknown, unknown, AwardRede
   const { t } = useTranslation();
   return useMutation<unknown, unknown, AwardRedeemPayload>({
     mutationFn: (payload: AwardRedeemPayload): Promise<unknown> =>
-      unwrap(safe.post('/crm/loyalty/redeem', payload)),
+      unwrap(
+        safe.post('/crm/loyalty/redeem', {
+          customerId: payload.customerId,
+          points: payload.points,
+          description: payload.reason,
+        })
+      ),
     onSuccess: (_data: unknown, variables: AwardRedeemPayload): void => {
       void qc.invalidateQueries({ queryKey: ['crm-loyalty-transactions'] });
       void qc.invalidateQueries({ queryKey: ['crm-customers'] });

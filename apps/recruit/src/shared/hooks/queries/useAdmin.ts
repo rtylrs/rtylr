@@ -42,8 +42,10 @@ interface CreateCareerResponse {
 export function useCreateCareer() {
   const qc = useQueryClient();
   return useMutation({
-    mutationFn: (body: CareerBody) =>
-      unwrap(safe.post<CreateCareerResponse>('/recruit/careers', body)),
+    mutationFn: (body: CareerBody) => {
+      const { id: _id, ...payload } = body;
+      return unwrap(safe.post<CreateCareerResponse>('/recruit/careers', payload));
+    },
     onSuccess: () => qc.invalidateQueries({ queryKey: ['recruit', 'admin', 'careers'] }),
     onError: () => toast.error('Failed to create career'),
   });
@@ -188,8 +190,10 @@ export interface SectionBody {
 export function useCreateSection() {
   const qc = useQueryClient();
   return useMutation({
-    mutationFn: (body: SectionBody) =>
-      unwrap(safe.post<{ section: Section }>('/recruit/sections', body)),
+    mutationFn: (body: SectionBody) => {
+      const { id: _id, ...payload } = body;
+      return unwrap(safe.post<{ section: Section }>('/recruit/sections', payload));
+    },
     onSuccess: () => qc.invalidateQueries({ queryKey: ['recruit', 'admin', 'sections'] }),
     onError: () => toast.error('Failed to create section'),
   });
@@ -258,8 +262,10 @@ export interface FormFieldBody {
 export function useCreateFormField() {
   const qc = useQueryClient();
   return useMutation({
-    mutationFn: (body: FormFieldBody) =>
-      unwrap(safe.post<{ field: FormField }>('/recruit/form-fields', body)),
+    mutationFn: (body: FormFieldBody) => {
+      const { id: _id, ...payload } = body;
+      return unwrap(safe.post<{ field: FormField }>('/recruit/form-fields', payload));
+    },
     onSuccess: (_, vars) =>
       qc.invalidateQueries({ queryKey: ['recruit', 'admin', 'form-fields', vars.careerId] }),
     onError: () => toast.error('Failed to create form field'),

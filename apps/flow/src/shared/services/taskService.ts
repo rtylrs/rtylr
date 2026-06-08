@@ -30,7 +30,15 @@ export const taskService = {
     priority?: ApiTask['priority'];
     assigneeId?: string;
     dueDate?: string;
-  }) => safe.post<ApiTask>('/flow/tasks', data),
+  }) =>
+    safe.post<ApiTask>('/flow/tasks', {
+      projectId: data.projectId,
+      workspaceId: data.workspaceId,
+      title: data.title,
+      priority: data.priority,
+      assigneeId: data.assigneeId,
+      dueDate: data.dueDate,
+    }),
 
   update: (id: string, data: Partial<ApiTask>) =>
     safe.put<ApiTask>('/flow/tasks', { id: parseInt(id), ...data }),

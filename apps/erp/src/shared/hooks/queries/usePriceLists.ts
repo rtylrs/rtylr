@@ -47,7 +47,13 @@ export const useCreatePriceList = (): UseMutationResult<PriceList, Error, Create
 
   return useMutation({
     mutationFn: async (data: CreatePriceListInput): Promise<PriceList> => {
-      const res = await unwrap(safe.post<PriceList>('/erp/price-lists', data));
+      const res = await unwrap(
+        safe.post<PriceList>('/erp/price-lists', {
+          name: data.name,
+          currency: 'USD',
+          isDefault: false,
+        })
+      );
       return res as PriceList;
     },
     onSuccess: (): void => {

@@ -58,7 +58,8 @@ export const useUpdateSupplier = (): UseMutationResult<
 
   return useMutation({
     mutationFn: async (data: UpdateSupplierRequest): Promise<UpdateSupplierResponse> => {
-      const res = await unwrap(safe.put<UpdateSupplierResponse>(`/erp/suppliers/${data.id}`, data));
+      const { id, ...body } = data;
+      const res = await unwrap(safe.put<UpdateSupplierResponse>(`/erp/suppliers/${id}`, body));
       return res as UpdateSupplierResponse;
     },
     onSuccess: (_res: UpdateSupplierResponse, variables: UpdateSupplierRequest): void => {

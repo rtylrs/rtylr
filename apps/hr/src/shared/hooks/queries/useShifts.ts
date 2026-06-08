@@ -55,7 +55,12 @@ export const useCreateShift = () => {
 
   return useMutation({
     mutationFn: async (data: CreateShiftRequest): Promise<void> => {
-      await unwrap(safe.post('/hr/shifts', data));
+      await unwrap(
+        safe.post('/hr/shifts', {
+          startTime: data.startTime,
+          endTime: data.endTime,
+        })
+      );
     },
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ['shifts'] });
@@ -83,7 +88,13 @@ export const useCreateShiftAssignment = () => {
 
   return useMutation({
     mutationFn: async (data: CreateShiftAssignmentPayload): Promise<void> => {
-      await unwrap(safe.post('/hr/shifts/roster/assignments', data));
+      await unwrap(
+        safe.post('/hr/shifts/roster/assignments', {
+          employeeId: data.staffId,
+          shiftId: data.shiftId,
+          date: data.date,
+        })
+      );
     },
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ['roster'] });

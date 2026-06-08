@@ -65,19 +65,11 @@ export const useCreateSegment = (): UseMutationResult<Segment, unknown, Partial<
   const { t } = useTranslation();
   return useMutation<Segment, unknown, Partial<Segment>>({
     mutationFn: async (data: Partial<Segment>): Promise<Segment> => {
-      // The segments module's CreateSegmentRequest expects a `filters` JSON
-      // object; `rules` is a client-only display projection. Build the request
-      // body from only the fields the backend persists and send both `filters`
-      // and `rules` so the criteria survive regardless of which handler is
-      // wired (the segments module reads `filters`, the older customers-module
-      // handler reads `rules`). Presentation-only fields (color/icon/trend) are
-      // intentionally omitted.
       const rules = data.rules ?? [];
       const body = {
         name: data.name,
         description: data.description,
         filters: data.filters ?? { rules },
-        rules,
       };
       const res = await unwrap(safe.post<Segment>('/crm/segments', body));
       return res as Segment;

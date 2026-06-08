@@ -47,8 +47,23 @@ export const useCreateEquipmentRequest = () => {
     mutationFn: async (
       data: CreateEquipmentRequestRequest
     ): Promise<CreateEquipmentRequestResponse> => {
+      const source = data as CreateEquipmentRequestRequest & {
+        equipmentType?: string;
+        description?: string;
+        urgency?: string;
+        itemName?: string;
+        quantity?: number;
+        reason?: string;
+        neededByDate?: string;
+      };
       const res = await unwrap(
-        safe.post<CreateEquipmentRequestResponse>('/hr/equipment/requests', data)
+        safe.post<CreateEquipmentRequestResponse>('/hr/equipment/requests', {
+          employeeId: data.employeeId,
+          itemName: source.itemName ?? source.equipmentType,
+          quantity: source.quantity ?? 1,
+          reason: source.reason ?? source.description ?? source.urgency,
+          neededByDate: source.neededByDate,
+        })
       );
       return res as CreateEquipmentRequestResponse;
     },

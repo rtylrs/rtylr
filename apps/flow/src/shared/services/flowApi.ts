@@ -173,6 +173,90 @@ export interface ApiRoadmap {
   taskCount?: number;
 }
 
+const toTaskCreatePayload = (data: {
+  projectId?: string;
+  workspaceId: string;
+  title: string;
+  priority?: ApiTask['priority'];
+  assigneeId?: string;
+  dueDate?: string;
+}) => ({
+  projectId: data.projectId,
+  workspaceId: data.workspaceId,
+  title: data.title,
+  priority: data.priority,
+  assigneeId: data.assigneeId,
+  dueDate: data.dueDate,
+});
+
+const toMilestoneCreatePayload = (data: Partial<ApiMilestone>) => ({
+  projectId: data.projectId,
+  workspaceId:
+    'workspaceId' in data
+      ? (data as Partial<ApiMilestone> & { workspaceId?: string }).workspaceId
+      : undefined,
+  name: data.name,
+  description: data.description,
+  targetDate: data.targetDate,
+});
+
+const toMilestoneUpdatePayload = (data: Partial<ApiMilestone>) => ({
+  name: data.name,
+  description: data.description,
+  status: data.status,
+  targetDate: data.targetDate,
+});
+
+const toCycleCreatePayload = (data: Partial<ApiCycle>) => ({
+  name: data.name,
+  workspaceId: data.workspaceId,
+  startDate: data.startDate,
+  endDate: data.endDate,
+});
+
+const toCycleUpdatePayload = (data: Partial<ApiCycle>) => ({
+  name: data.name,
+  status: data.status,
+  endDate: data.endDate,
+});
+
+const toViewPayload = (data: Partial<ApiView> & { workspaceId?: string }) => ({
+  workspaceId: data.workspaceId,
+  name: data.name,
+  icon: data.icon,
+  filters: data.filters,
+  groupBy: data.groupBy,
+  sortBy: data.sortBy,
+  sortDir: data.sortDir,
+});
+
+const toViewUpdatePayload = (data: Partial<ApiView>) => ({
+  name: data.name,
+  icon: data.icon,
+  filters: data.filters,
+  groupBy: data.groupBy,
+  sortBy: data.sortBy,
+  sortDir: data.sortDir,
+});
+
+const toUserSettingsPayload = (data: ApiUserSettings) => {
+  const source = data as ApiUserSettings & {
+    task_assigned?: boolean;
+    task_comments?: boolean;
+    status_changes?: boolean;
+    weekly_digest?: boolean;
+    email_notifications?: boolean;
+  };
+  return {
+    taskAssigned: data.taskAssigned ?? source.task_assigned,
+    taskComments: data.taskComments ?? source.task_comments,
+    mentions: data.mentions,
+    statusChanges: data.statusChanges ?? source.status_changes,
+    weeklyDigest: data.weeklyDigest ?? source.weekly_digest,
+    emailNotifications: data.emailNotifications ?? source.email_notifications,
+  };
+};
+
 export interface ApiWorkspaceMember {
   id: string;
   workspaceId: string;
@@ -407,7 +491,7 @@ export const flowApi = {
     priority?: ApiTask['priority'];
     assigneeId?: string;
     dueDate?: string;
-  }) => safe.post<{ task: ApiTask }>('/flow/tasks', data),
+  }) => safe.post<{ task: ApiTask }>('/flow/tasks', toTaskCreatePayload(data)),
 
   // Backend: PUT /flow/tasks with id in body.
   updateTask: (id: string, data: Partial<ApiTask>) =>
@@ -486,10 +570,10 @@ export const flowApi = {
     }),
 
   createMilestone: (data: Partial<ApiMilestone>) =>
-    safe.post<{ milestone: ApiMilestone }>('/flow/milestones', data),
+    safe.post<{ milestone: ApiMilestone }>('/flow/milestones', toMilestoneCreatePayload(data)),
 
   updateMilestone: (id: string, data: Partial<ApiMilestone>) =>
-    safe.put<{ message: string }>(`/flow/milestones/${id}`, data),
+    safe.put<{ message: string }>(`/flow/milestones/${id}`, toMilestoneUpdatePayload(data)),
 
   // -- Cycles -------------------------------------------------------------
 
@@ -498,19 +582,21 @@ export const flowApi = {
       params: workspaceId ? { workspace_id: workspaceId } : undefined,
     }),
 
-  createCycle: (data: Partial<ApiCycle>) => safe.post<{ cycle: ApiCycle }>('/flow/cycles', data),
+  createCycle: (data: Partial<ApiCycle>) =>
+    safe.post<{ cycle: ApiCycle }>('/flow/cycles', toCycleCreatePayload(data)),
 
   updateCycle: (id: string, data: Partial<ApiCycle>) =>
-    safe.put<{ message: string }>(`/flow/cycles/${id}`, data),
+    safe.put<{ message: string }>(`/flow/cycles/${id}`, toCycleUpdatePayload(data)),
 
   // -- Views --------------------------------------------------------------
 
   getViews: () => safe.get<{ views: ApiView[] }>('/flow/views'),
 
-  createView: (data: Partial<ApiView>) => safe.post<{ view: ApiView }>('/flow/views', data),
+  createView: (data: Partial<ApiView>) =>
+    safe.post<{ view: ApiView }>('/flow/views', toViewPayload(data)),
 
   updateView: (id: string, data: Partial<ApiView>) =>
-    safe.put<{ message: string }>(`/flow/views/${id}`, data),
+    safe.put<{ message: string }>(`/flow/views/${id}`, toViewUpdatePayload(data)),
 
   deleteView: (id: string) => safe.delete(`/flow/views/${id}`),
 
@@ -547,7 +633,8 @@ export const flowApi = {
 
   getUserSettings: () => safe.get<ApiUserSettings>('/flow/settings'),
 
-  updateUserSettings: (data: ApiUserSettings) => safe.put('/flow/settings', data),
+  updateUserSettings: (data: ApiUserSettings) =>
+    safe.put('/flow/settings', toUserSettingsPayload(data)),
 
   // -- Account / Profile --------------------------------------------------
 

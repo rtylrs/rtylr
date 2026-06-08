@@ -56,7 +56,12 @@ export const useUpsertPayrollConfig = () => {
 
   return useMutation({
     mutationFn: async (data: UpsertPayrollConfigRequest): Promise<PayrollConfigData> => {
-      const res = await unwrap(safe.put<{ config: PayrollConfigData }>('/hr/payroll/config', data));
+      const res = await unwrap(
+        safe.put<{ config: PayrollConfigData }>('/hr/payroll/config', {
+          periodType: data.period,
+          overtimeEnabled: data.overtimeEnabled,
+        })
+      );
       return (res as { config: PayrollConfigData }).config;
     },
     onSuccess: () => {

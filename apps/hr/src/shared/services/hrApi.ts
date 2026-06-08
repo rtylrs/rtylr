@@ -106,15 +106,62 @@ export interface HRDashboardStats {
   };
 }
 
+const splitName = (name?: string) => {
+  const [firstName = '', ...rest] = (name ?? '').trim().split(/\s+/).filter(Boolean);
+  return { firstName, lastName: rest.join(' ') || firstName };
+};
+
+const toStaffPayload = (data: Partial<CreateStaffInput> & { id?: number }) => {
+  const { firstName, lastName } = splitName(data.name);
+  return {
+    firstName,
+    lastName,
+    email: data.email,
+    role: data.role,
+    employmentType: data.employmentType,
+  };
+};
+
+const toStaffUpdatePayload = (data: UpdateStaffInput) => ({
+  id: data.id,
+  ...toStaffPayload(data),
+});
+
+const toDepartmentCreatePayload = (data: CreateDepartmentInput) => ({
+  name: data.name,
+  description: data.description,
+});
+
+const toDepartmentUpdatePayload = (data: UpdateDepartmentInput) => ({
+  id: data.id,
+  name: data.name,
+  description: data.description,
+});
+
+const toShiftCreatePayload = (data: CreateShiftInput) => ({
+  staffId: data.staffId,
+  date: data.day,
+  startTime: data.start,
+  endTime: data.end,
+});
+
+const toShiftUpdatePayload = (data: UpdateShiftInput) => ({
+  id: data.id,
+  date: data.day,
+  startTime: data.start,
+  endTime: data.end,
+});
+
 // ─── API ─────────────────────────────────────────────────────────────────────
 
 export const hrApi = {
   // Staff
   listStaff: () => safe.get<StaffMember[]>('/hr/staff'),
-  createStaff: (data: CreateStaffInput) => safe.post<StaffMember>('/hr/staff', data),
-  updateStaff: (data: UpdateStaffInput) => safe.post<StaffMember>('/hr/staff', data),
-  deleteStaff: (id: number) =>
-    safe.post<{ success: boolean }>('/hr/staff', { id, _action: 'delete' }),
+  createStaff: (data: CreateStaffInput) =>
+    safe.post<StaffMember>('/hr/staff', toStaffPayload(data)),
+  updateStaff: (data: UpdateStaffInput) =>
+    safe.put<StaffMember>('/hr/staff', toStaffUpdatePayload(data)),
+  deleteStaff: (id: number) => safe.delete<{ success: boolean }>('/hr/staff', { data: { id } }),
   clockIn: (staffId: number) =>
     safe.post<{ success: boolean; time: string }>('/hr/staff/clock-in', { staffId }),
   clockOut: (staffId: number) =>
@@ -122,18 +169,27 @@ export const hrApi = {
 
   // Departments
   listDepartments: () => safe.get<Department[]>('/hr/departments'),
-  createDepartment: (data: CreateDepartmentInput) => safe.post<Department>('/hr/departments', data),
-  updateDepartment: (data: UpdateDepartmentInput) => safe.post<Department>('/hr/departments', data),
+  createDepartment: (data: CreateDepartmentInput) =>
+    safe.post<Department>('/hr/departments', toDepartmentCreatePayload(data)),
+  updateDepartment: (data: UpdateDepartmentInput) =>
+    safe.put<Department>('/hr/departments', toDepartmentUpdatePayload(data)),
 
   // Shifts
   listShifts: (params?: { day?: string; staffId?: number }) =>
     safe.get<Shift[]>('/hr/shifts', { params }),
-  createShift: (data: CreateShiftInput) => safe.post<Shift>('/hr/shifts', data),
-  updateShift: (data: UpdateShiftInput) => safe.post<Shift>('/hr/shifts', data),
+  createShift: (data: CreateShiftInput) =>
+    safe.post<Shift>('/hr/shifts', toShiftCreatePayload(data)),
+  updateShift: (data: UpdateShiftInput) =>
+    safe.put<Shift>('/hr/shifts', toShiftUpdatePayload(data)),
 
   // Payroll
   listPayroll: (params?: { period?: string }) => safe.get<PayrollRow[]>('/hr/payroll', { params }),
-  runPayroll: (period: string) => safe.post<{ success: boolean }>('/hr/payroll/run', { period }),
+  runPayroll: (period: string) =>
+    safe.post<{ success: boolean }>('/hr/payroll/run', {
+      periodStart: period,
+      periodEnd: period,
+      periodLabel: period,
+    }),
   markPayrollPaid: (id: number) => safe.post<{ success: boolean }>('/hr/payroll/mark-paid', { id }),
 
   // Time Off
@@ -141,7 +197,10 @@ export const hrApi = {
   submitTimeOff: (data: { staffId: number; startDate: string; endDate: string; reason: string }) =>
     safe.post<TimeOffRequest>('/hr/time-off', data),
   approveTimeOff: (id: number, approved: boolean) =>
-    safe.post<{ success: boolean }>('/hr/time-off/approve', { id, approved }),
+    safe.post<{ success: boolean }>('/hr/time-off/approve', {
+      id,
+      status: approved ? 'approved' : 'rejected',
+    }),
 
   // Dashboard
   getDashboard: () => safe.get<HRDashboardStats>('/hr/dashboard'),

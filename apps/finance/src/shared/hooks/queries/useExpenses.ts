@@ -86,9 +86,8 @@ export const useUpdateExpense = () => {
 
   return useMutation({
     mutationFn: async (data: UpdateExpenseVariables): Promise<UpdateExpenseResponse> => {
-      const res = await unwrap(
-        safe.put<UpdateExpenseResponse>(`/finance/expenses/${data.id}`, data)
-      );
+      const { id, ...body } = data;
+      const res = await unwrap(safe.put<UpdateExpenseResponse>(`/finance/expenses/${id}`, body));
       return res as UpdateExpenseResponse;
     },
     onSuccess: (_data: UpdateExpenseResponse, variables: UpdateExpenseVariables) => {

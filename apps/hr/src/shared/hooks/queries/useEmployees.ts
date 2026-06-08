@@ -99,7 +99,8 @@ export const useUpdateEmployee = () => {
 
   return useMutation({
     mutationFn: async (data: UpdateEmployeePayload): Promise<UpdateEmployeeResponse> => {
-      const res = await unwrap(safe.put<UpdateEmployeeResponse>(`/hr/employees/${data.id}`, data));
+      const { id, ...body } = data;
+      const res = await unwrap(safe.put<UpdateEmployeeResponse>(`/hr/employees/${id}`, body));
       return res as UpdateEmployeeResponse;
     },
     onSuccess: (_data: UpdateEmployeeResponse, variables: UpdateEmployeePayload) => {
@@ -119,7 +120,26 @@ export const useInviteEmployee = () => {
 
   return useMutation({
     mutationFn: async (data: InviteEmployeeRequest): Promise<InviteEmployeeResponse> => {
-      const res = await unwrap(safe.post<InviteEmployeeResponse>('/hr/employees/invite', data));
+      const source = data as InviteEmployeeRequest & {
+        firstName?: string;
+        lastName?: string;
+        email?: string;
+        phone?: string;
+        employmentType?: string;
+        departmentId?: number;
+        locationId?: number;
+      };
+      const res = await unwrap(
+        safe.post<InviteEmployeeResponse>('/hr/employees/invite', {
+          firstName: source.firstName,
+          lastName: source.lastName,
+          email: source.email,
+          phone: source.phone,
+          employmentType: source.employmentType,
+          departmentId: source.departmentId,
+          locationId: source.locationId,
+        })
+      );
       return res as InviteEmployeeResponse;
     },
     onSuccess: () => {

@@ -93,10 +93,11 @@ export const useUpdateProduct = (): UseMutationResult<
 
   return useMutation({
     mutationFn: async (data: UpdateProductRequest): Promise<UpdateProductResponse> => {
+      const { id, ...body } = data as UpdateProductRequest & { id: number };
       assertContractPayload('erp.product.v1.UpdateProductRequest', {
-        ...(data as unknown as Record<string, unknown>),
+        ...(body as unknown as Record<string, unknown>),
       });
-      const res = await unwrap(safe.put<UpdateProductResponse>(`/erp/products/${data.id}`, data));
+      const res = await unwrap(safe.put<UpdateProductResponse>(`/erp/products/${id}`, body));
       return res as UpdateProductResponse;
     },
     onSuccess: (_res: UpdateProductResponse, variables: UpdateProductRequest): void => {

@@ -45,7 +45,13 @@ export const useCreateStockTake = (): UseMutationResult<StockTake, Error, Create
 
   return useMutation({
     mutationFn: async (data: CreateStockTakeInput): Promise<StockTake> => {
-      const res = await unwrap(safe.post<StockTake>('/erp/stock-takes', data));
+      const res = await unwrap(
+        safe.post<StockTake>('/erp/stock-takes', {
+          warehouseId: data.warehouseId,
+          notes: data.notes,
+          items: data.items,
+        })
+      );
       return res as StockTake;
     },
     onSuccess: (): void => {

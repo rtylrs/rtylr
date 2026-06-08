@@ -64,7 +64,7 @@ describe('financeApi', () => {
   it('recordPayment calls POST /finance/invoices/payment', () => {
     financeApi.recordPayment('INV-001', 500);
     expect(safe.post).toHaveBeenCalledWith('/finance/invoices/payment', {
-      id: 'INV-001',
+      invoiceId: 1,
       amount: 500,
     });
   });
@@ -121,9 +121,15 @@ describe('financeApi', () => {
   });
 
   it('createRecurringInvoice calls POST /finance/recurring-invoices', () => {
-    const data = { client: 'Acme' };
+    const data = { templateInvoiceId: 4, frequency: 'monthly', nextInvoiceDate: '2026-04-01' };
     financeApi.createRecurringInvoice(data);
-    expect(safe.post).toHaveBeenCalledWith('/finance/recurring-invoices', data);
+    expect(safe.post).toHaveBeenCalledWith('/finance/recurring-invoices', {
+      templateInvoiceId: 4,
+      frequency: 'monthly',
+      nextInvoiceDate: '2026-04-01',
+      endDate: undefined,
+      isActive: true,
+    });
   });
 
   // Quotes

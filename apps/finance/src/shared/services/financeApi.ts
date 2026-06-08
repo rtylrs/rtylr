@@ -135,6 +135,79 @@ export interface TaxReport {
   configs: TaxConfig[];
 }
 
+type ExpenseMutationPayload = Pick<
+  Expense,
+  'categoryId' | 'amount' | 'currency' | 'description' | 'vendor' | 'receiptUrl' | 'expenseDate'
+>;
+
+const toExpenseMutationPayload = (data: Partial<Expense>): Partial<ExpenseMutationPayload> => ({
+  categoryId: data.categoryId,
+  amount: data.amount,
+  currency: data.currency ?? undefined,
+  description: data.description,
+  vendor: data.vendor ?? undefined,
+  receiptUrl: data.receiptUrl ?? undefined,
+  expenseDate: data.expenseDate,
+});
+
+const toExpenseCategoryMutationPayload = (data: Partial<ExpenseCategory>) => ({
+  name: data.name,
+  color: data.color,
+  icon: 'icon' in data ? (data as Partial<ExpenseCategory> & { icon?: string }).icon : undefined,
+});
+
+const toTaxConfigPayload = (data: TaxConfig) => ({
+  name: data.name,
+  rate: data.rate,
+  type: 'type' in data ? (data as TaxConfig & { type?: string }).type : undefined,
+  isDefault:
+    'isDefault' in data ? (data as TaxConfig & { isDefault?: boolean }).isDefault : undefined,
+});
+
+const toRecurringInvoicePayload = (data: CreateRecurringInvoiceRequest) => {
+  const source = data as CreateRecurringInvoiceRequest & {
+    templateInvoiceId?: number;
+    customerId?: number;
+    startDate?: string;
+    nextInvoiceDate?: string;
+    endDate?: string;
+    isActive?: boolean;
+  };
+  return {
+    templateInvoiceId: source.templateInvoiceId ?? source.customerId,
+    frequency: source.frequency,
+    nextInvoiceDate: source.nextInvoiceDate ?? source.startDate,
+    endDate: source.endDate,
+    isActive: source.isActive ?? true,
+  };
+};
+
+const toBankAccountPayload = (data: CreateBankAccountRequest) => {
+  const source = data as CreateBankAccountRequest & {
+    institution?: string;
+    bankName?: string;
+    accountType?: string;
+    balance?: number;
+    currency?: string;
+    isConnected?: boolean;
+  };
+  return {
+    name: source.name,
+    institution: source.institution ?? source.bankName,
+    accountType: source.accountType,
+    balance: source.balance ?? 0,
+    currency: source.currency ?? 'USD',
+    isConnected: source.isConnected ?? false,
+  };
+};
+
+const toNumericId = (id: string): number => {
+  const direct = Number(id);
+  if (Number.isFinite(direct)) return direct;
+  const digits = id.match(/\d+/g)?.join('');
+  return digits ? Number(digits) : 0;
+};
+
 // ── Service ──────────────────────────────────────────────────────
 
 export const financeApi = {
@@ -158,12 +231,13 @@ export const financeApi = {
     safe.put('/finance/invoices/status', { id, status }),
 
   recordPayment: (id: string, amount: number) =>
-    safe.post('/finance/invoices/payment', { id, amount }),
+    safe.post('/finance/invoices/payment', { invoiceId: toNumericId(id), amount }),
 
   // Expenses
   getExpenses: () => safe.get<Expense[]>('/finance/expenses'),
 
-  createExpense: (data: Partial<Expense>) => safe.post<Expense>('/finance/expenses', data),
+  createExpense: (data: Partial<Expense>) =>
+    safe.post<Expense>('/finance/expenses', toExpenseMutationPayload(data)),
 
   updateExpense: (id: string, data: Partial<Expense>) =>
     safe.put<Expense>('/finance/expenses', { id, ...data }),
@@ -174,7 +248,10 @@ export const financeApi = {
   getExpenseCategories: () => safe.get<ExpenseCategory[]>('/finance/expense-categories'),
 
   createExpenseCategory: (data: Partial<ExpenseCategory>) =>
-    safe.post<ExpenseCategory>('/finance/expense-categories', data),
+    safe.post<ExpenseCategory>(
+      '/finance/expense-categories',
+      toExpenseCategoryMutationPayload(data)
+    ),
 
   // P&L
   getPL: (period: string) => safe.get<PLReport>('/finance/pl', { params: { period } }),
@@ -182,7 +259,8 @@ export const financeApi = {
   // Tax
   getTaxConfig: () => safe.get<TaxConfig[]>('/finance/tax/config'),
 
-  createTaxConfig: (data: TaxConfig) => safe.post<TaxConfig>('/finance/tax/config', data),
+  createTaxConfig: (data: TaxConfig) =>
+    safe.post<TaxConfig>('/finance/tax/config', toTaxConfigPayload(data)),
 
   getTaxReport: () => safe.get<TaxReport>('/finance/tax/report'),
 
@@ -190,7 +268,7 @@ export const financeApi = {
   getRecurringInvoices: () => safe.get('/finance/recurring-invoices'),
 
   createRecurringInvoice: (data: CreateRecurringInvoiceRequest) =>
-    safe.post('/finance/recurring-invoices', data),
+    safe.post('/finance/recurring-invoices', toRecurringInvoicePayload(data)),
 
   updateRecurringInvoice: (id: string, data: Partial<CreateRecurringInvoiceRequest>) =>
     safe.put('/finance/recurring-invoices', { id, ...data }),
@@ -216,7 +294,8 @@ export const financeApi = {
   // Bank Accounts
   getBankAccounts: () => safe.get('/finance/bank-accounts'),
 
-  createBankAccount: (data: CreateBankAccountRequest) => safe.post('/finance/bank-accounts', data),
+  createBankAccount: (data: CreateBankAccountRequest) =>
+    safe.post('/finance/bank-accounts', toBankAccountPayload(data)),
 
   // Reconciliation
   getReconciliation: () => safe.get('/finance/reconciliation'),

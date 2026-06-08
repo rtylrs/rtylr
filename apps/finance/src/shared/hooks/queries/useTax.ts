@@ -31,7 +31,20 @@ export const useUpdateTaxConfig = () => {
 
   return useMutation({
     mutationFn: async (data: CreateTaxConfigRequest): Promise<CreateTaxConfigResponse> => {
-      const res = await unwrap(safe.put<CreateTaxConfigResponse>('/finance/tax', data));
+      const source = data as CreateTaxConfigRequest & {
+        taxName?: string;
+        taxRate?: number;
+        isInclusive?: boolean;
+        isActive?: boolean;
+      };
+      const res = await unwrap(
+        safe.put<CreateTaxConfigResponse>('/finance/tax', {
+          taxName: source.taxName ?? data.name,
+          taxRate: source.taxRate ?? data.rate,
+          isInclusive: source.isInclusive ?? false,
+          isActive: source.isActive ?? true,
+        })
+      );
       return res as CreateTaxConfigResponse;
     },
     onSuccess: () => {

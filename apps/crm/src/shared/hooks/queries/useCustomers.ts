@@ -214,7 +214,7 @@ export const useImportCustomerRows = (): UseMutationResult<
   const { t } = useTranslation();
   return useMutation<unknown, unknown, ImportCustomerRowsPayload>({
     mutationFn: (payload: ImportCustomerRowsPayload): Promise<unknown> =>
-      unwrap(safe.post('/crm/customers/import', payload)),
+      unwrap(safe.post('/crm/customers/import', { customers: payload.customers })),
     onSuccess: (): void => {
       void qc.invalidateQueries({ queryKey: ['crm-customers'] });
       toast.success(t('crm.customers.imported'));

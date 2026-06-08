@@ -44,7 +44,14 @@ export const useCreateWarehouse = (): UseMutationResult<Warehouse, Error, Create
 
   return useMutation({
     mutationFn: async (data: CreateWarehouseInput): Promise<Warehouse> => {
-      const res = await unwrap(safe.post<Warehouse>('/erp/warehouses', data));
+      const res = await unwrap(
+        safe.post<Warehouse>('/erp/warehouses', {
+          name: data.name,
+          address: data.address,
+          managerName: data.manager,
+          isDefault: data.isDefault,
+        })
+      );
       return res as Warehouse;
     },
     onSuccess: (): void => {

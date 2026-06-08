@@ -51,8 +51,9 @@ export const useUpdateTimeEntry = () => {
     mutationFn: async (
       data: Partial<CreateTimeEntryRequest> & { id: number }
     ): Promise<TimeEntryPayload> => {
+      const { id, ...body } = data;
       const res = await unwrap(
-        safe.put<{ entry: TimeEntryPayload }>(`/hr/time-entries/${data.id}`, data)
+        safe.put<{ entry: TimeEntryPayload }>(`/hr/time-entries/${id}`, body)
       );
       return (res as { entry: TimeEntryPayload }).entry;
     },

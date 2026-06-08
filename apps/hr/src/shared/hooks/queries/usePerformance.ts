@@ -111,8 +111,19 @@ export const useCreateReviewCycle = () => {
 
   return useMutation({
     mutationFn: async (data: CreateReviewCycleRequest): Promise<ReviewCyclePayload | undefined> => {
+      const source = data as CreateReviewCycleRequest & {
+        type?: string;
+        cycleType?: string;
+        periodStart?: string;
+        periodEnd?: string;
+      };
       const res = await unwrap(
-        safe.post<CreateReviewCycleResponse>('/hr/performance/cycles', data)
+        safe.post<CreateReviewCycleResponse>('/hr/performance/cycles', {
+          name: data.name,
+          cycleType: source.cycleType ?? source.type,
+          periodStart: source.periodStart,
+          periodEnd: source.periodEnd,
+        })
       );
       return (res as CreateReviewCycleResponse).cycle;
     },
@@ -133,7 +144,9 @@ export const useOpenReviewCycle = () => {
   return useMutation({
     mutationFn: async (data: OpenReviewCycleRequest): Promise<ReviewCyclePayload | undefined> => {
       const res = await unwrap(
-        safe.post<OpenReviewCycleResponse>(`/hr/performance/cycles/${data.cycleId}/open`, data)
+        safe.post<OpenReviewCycleResponse>(`/hr/performance/cycles/${data.cycleId}/open`, {
+          id: data.cycleId,
+        })
       );
       return (res as OpenReviewCycleResponse).cycle;
     },
@@ -183,8 +196,16 @@ export const useUpdateGoal = () => {
 
   return useMutation({
     mutationFn: async (data: UpdateGoalRequest): Promise<ReviewGoalPayload> => {
+      const source = data as UpdateGoalRequest & { successCriteria?: string };
       const res = await unwrap(
-        safe.put<UpdateGoalResponse>(`/hr/performance/goals/${data.goalId}`, data)
+        safe.put<UpdateGoalResponse>(`/hr/performance/goals/${data.goalId}`, {
+          id: data.goalId,
+          title: data.title,
+          description: data.description,
+          weight: data.weight,
+          successCriteria: source.successCriteria,
+          status: data.status,
+        })
       );
       return (res as UpdateGoalResponse).goal;
     },
@@ -218,8 +239,17 @@ export const useSubmitReview = () => {
     mutationFn: async (
       data: SubmitReviewRequest
     ): Promise<PerformanceReviewPayload | undefined> => {
+      const source = data as SubmitReviewRequest & {
+        rating?: string;
+        narrative?: string;
+        overallRating?: number;
+      };
       const res = await unwrap(
-        safe.post<SubmitReviewResponse>(`/hr/performance/reviews/${data.reviewId}/submit`, data)
+        safe.post<SubmitReviewResponse>(`/hr/performance/reviews/${data.reviewId}/submit`, {
+          id: data.reviewId,
+          rating: source.rating ?? String(source.overallRating ?? ''),
+          narrative: source.narrative,
+        })
       );
       return (res as SubmitReviewResponse).review;
     },
@@ -240,7 +270,9 @@ export const useShareReview = () => {
   return useMutation({
     mutationFn: async (data: ShareReviewRequest): Promise<PerformanceReviewPayload> => {
       const res = await unwrap(
-        safe.post<ShareReviewResponse>(`/hr/performance/reviews/${data.reviewId}/share`, data)
+        safe.post<ShareReviewResponse>(`/hr/performance/reviews/${data.reviewId}/share`, {
+          id: data.reviewId,
+        })
       );
       return (res as ShareReviewResponse).review;
     },

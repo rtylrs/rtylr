@@ -33,12 +33,18 @@ describe('hrApi', () => {
       employmentType: 'Full-time' as const,
     };
     hrApi.createStaff(data);
-    expect(safe.post).toHaveBeenCalledWith('/hr/staff', data);
+    expect(safe.post).toHaveBeenCalledWith('/hr/staff', {
+      firstName: 'Alice',
+      lastName: 'Alice',
+      email: 'a@test.com',
+      role: 'Dev',
+      employmentType: 'Full-time',
+    });
   });
 
-  it('deleteStaff calls POST /hr/staff with delete action', () => {
+  it('deleteStaff calls DELETE /hr/staff', () => {
     hrApi.deleteStaff(5);
-    expect(safe.post).toHaveBeenCalledWith('/hr/staff', { id: 5, _action: 'delete' });
+    expect(safe.delete).toHaveBeenCalledWith('/hr/staff', { data: { id: 5 } });
   });
 
   it('clockIn calls POST /hr/staff/clock-in', () => {
@@ -60,7 +66,10 @@ describe('hrApi', () => {
   it('createDepartment calls POST /hr/departments', () => {
     const data = { name: 'Eng', description: 'Engineering', head: 'Bob' };
     hrApi.createDepartment(data);
-    expect(safe.post).toHaveBeenCalledWith('/hr/departments', data);
+    expect(safe.post).toHaveBeenCalledWith('/hr/departments', {
+      name: 'Eng',
+      description: 'Engineering',
+    });
   });
 
   // Shifts
@@ -73,7 +82,12 @@ describe('hrApi', () => {
   it('createShift calls POST /hr/shifts', () => {
     const data = { staffId: 1, start: '09:00', end: '17:00', day: 'Monday' };
     hrApi.createShift(data);
-    expect(safe.post).toHaveBeenCalledWith('/hr/shifts', data);
+    expect(safe.post).toHaveBeenCalledWith('/hr/shifts', {
+      staffId: 1,
+      date: 'Monday',
+      startTime: '09:00',
+      endTime: '17:00',
+    });
   });
 
   // Payroll
@@ -84,7 +98,11 @@ describe('hrApi', () => {
 
   it('runPayroll calls POST /hr/payroll/run', () => {
     hrApi.runPayroll('2026-03');
-    expect(safe.post).toHaveBeenCalledWith('/hr/payroll/run', { period: '2026-03' });
+    expect(safe.post).toHaveBeenCalledWith('/hr/payroll/run', {
+      periodStart: '2026-03',
+      periodEnd: '2026-03',
+      periodLabel: '2026-03',
+    });
   });
 
   it('markPayrollPaid calls POST /hr/payroll/mark-paid', () => {
@@ -106,7 +124,10 @@ describe('hrApi', () => {
 
   it('approveTimeOff calls POST /hr/time-off/approve', () => {
     hrApi.approveTimeOff(2, true);
-    expect(safe.post).toHaveBeenCalledWith('/hr/time-off/approve', { id: 2, approved: true });
+    expect(safe.post).toHaveBeenCalledWith('/hr/time-off/approve', {
+      id: 2,
+      status: 'approved',
+    });
   });
 
   // Dashboard

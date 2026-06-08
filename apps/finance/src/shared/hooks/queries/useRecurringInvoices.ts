@@ -35,8 +35,22 @@ export const useCreateRecurringInvoice = () => {
     mutationFn: async (
       data: CreateRecurringInvoiceRequest
     ): Promise<CreateRecurringInvoiceResponse> => {
+      const source = data as CreateRecurringInvoiceRequest & {
+        templateInvoiceId?: number;
+        customerId?: number;
+        startDate?: string;
+        nextInvoiceDate?: string;
+        endDate?: string;
+        isActive?: boolean;
+      };
       const res = await unwrap(
-        safe.post<CreateRecurringInvoiceResponse>('/finance/recurring-invoices', data)
+        safe.post<CreateRecurringInvoiceResponse>('/finance/recurring-invoices', {
+          templateInvoiceId: source.templateInvoiceId ?? source.customerId,
+          frequency: source.frequency,
+          nextInvoiceDate: source.nextInvoiceDate ?? source.startDate,
+          endDate: source.endDate,
+          isActive: source.isActive ?? true,
+        })
       );
       return res as CreateRecurringInvoiceResponse;
     },

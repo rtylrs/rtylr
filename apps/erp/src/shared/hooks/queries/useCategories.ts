@@ -42,7 +42,12 @@ export const useCreateCategory = (): UseMutationResult<Category, Error, CreateCa
 
   return useMutation({
     mutationFn: async (data: CreateCategoryInput): Promise<Category> => {
-      const res = await unwrap(safe.post<Category>('/erp/categories', data));
+      const res = await unwrap(
+        safe.post<Category>('/erp/categories', {
+          name: data.name,
+          description: data.description,
+        })
+      );
       return res as Category;
     },
     onSuccess: (): void => {
