@@ -1,69 +1,45 @@
 # voxie
 
-Protocol Buffer contracts for the rtylr platform. Single source of truth for API request/response types, shared between frontend (TypeScript) and backend (Go).
+Protocol Buffer contracts for the rtylr platform. Voxie is the source of truth for API request and response shapes shared by the TypeScript frontend and Go backend.
 
 ## Structure
 
-```
+```text
 voxie/
   proto/
-    common/          # Shared types (pagination, errors, timestamps)
-    auth/            # Authentication contracts
-    hub/             # Hub (dashboard, team, billing, developer, etc.)
-    pos/             # POS terminal contracts
-    erp/             # Inventory & supply chain
-    hr/              # Human resources
+    common/          # Shared cross-app contracts
     crm/             # Customer relations
-    finance/         # Invoicing & accounting
+    erp/             # Inventory and supply chain
+    finance/         # Invoicing and accounting
     flow/            # Project management
+    hr/              # Human resources
+    hub/             # Dashboard, team, billing, developer, etc.
     insights/        # Analytics
-  gen/
-    go/              # Generated Go types
-    ts/              # Generated TypeScript types
+    pos/             # POS contracts
 ```
+
+Generated code is intentionally not committed here. Consumers generate their own language output from the checked-out submodule:
+
+- `rtylr`: `pnpm contracts:sync` generates TypeScript into `packages/contracts/src`.
+- `onion`: `make contracts` generates Go into the local `voxie/gen/go` checkout before Go builds/tests.
 
 ## Usage
 
-### Generate code
-
 ```bash
-make generate
+make lint
+make format
 ```
 
-### As a git submodule
+## Adding New Contracts
 
-**Frontend (rtylr):**
-```bash
-git submodule add git@github.com:voxire/voxie.git voxie
-```
-
-**Backend (onion):**
-```bash
-git submodule add git@github.com:voxire/voxie.git voxie
-```
-
-Then import generated types:
-
-**TypeScript:**
-```typescript
-import { LoginRequest, LoginResponse } from '../voxie/gen/ts/auth/auth';
-import { ListTeamResponse, TeamMember } from '../voxie/gen/ts/hub/user';
-```
-
-**Go:**
-```go
-import hub "github.com/voxire/voxie/gen/go/hub"
-```
-
-## Adding new contracts
-
-1. Create or edit `.proto` files in `proto/{module}/`
-2. Run `make generate`
-3. Commit both `.proto` and `gen/` files
-4. Pull submodule updates in frontend + backend repos
+1. Create or edit `.proto` files under `proto/{app-or-common}/{domain}/v1/`.
+2. Keep each endpoint in its own `.proto` file.
+3. Put shared cross-app contracts under `proto/common/`.
+4. Add comments for new messages and fields.
+5. Run `make lint`.
+6. Update the Voxie submodule in consumer repos and run their generation commands.
 
 ## Tools
 
-- [buf](https://buf.build/) for linting, generation, and breaking change detection
-- [ts-proto](https://github.com/stephenh/ts-proto) for TypeScript output
-- [protoc-gen-go](https://pkg.go.dev/google.golang.org/protobuf/cmd/protoc-gen-go) for Go output
+- [buf](https://buf.build/) for linting, formatting, and breaking change detection.
+- Consumer repos own language-specific code generation.

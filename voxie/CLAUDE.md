@@ -15,9 +15,9 @@
 - Feature branches are the **default**. Prefix: `feat/`, `fix/`, `chore/`, `refactor/`
 - **Direct push to `main`** is acceptable ONLY for: trivial fixes to `.proto` comments or formatting. Structural or type-breaking changes always go through a branch.
 - **No `.md` files** in commits except `CLAUDE.md` itself.
-- **Atomic commits** — one logical unit per commit. A new proto field + its generated code = one commit.
+- **Atomic commits** — one logical unit per commit. A new proto field and its comments belong together.
 - Commit message format: short imperative, no conventional prefix. `add staff user payload proto` not `feat: add staff user payload proto`.
-- **ALWAYS commit both the `.proto` source AND the generated `gen/` files together in one commit.** The generated code is committed — consumers should not need `buf` or `protoc` installed.
+- **Do not commit generated language output.** Voxie owns `.proto` sources only; consumers generate TypeScript/Go locally.
 - After committing to `voxie`, update the submodule ref in both `rtylr` and `onion` repos.
 
 ### Definition of Done
@@ -27,7 +27,7 @@ A proto change is only complete when ALL of the following are true:
 - `buf lint` passes with zero errors
 - `buf breaking` passes against the last tagged version (no breaking changes unless intentional and documented)
 - All new fields have a comment describing their purpose
-- Generated `gen/go/` and `gen/ts/` files are committed alongside the `.proto` file
+- Generated code is refreshed in `rtylr` and `onion`
 - Submodule refs updated in both `onion` and `rtylr`
 - `@voxire/contracts/package.json` exports updated in `rtylr` if a new `.proto` file was added
 - If a new domain or structural pattern was introduced, it is documented in `rtylr/docs/`
@@ -39,9 +39,8 @@ Run through this before merging any proto change:
 - [ ] `buf lint` passes with zero output
 - [ ] `buf breaking --against '.git#branch=main'` passes (or breaking change is intentional and a v2 package was created)
 - [ ] All new fields have inline comments
-- [ ] `gen/go/` and `gen/ts/` files were regenerated with `make generate` and committed
-- [ ] Submodule ref updated in `onion` (`cd voxie && git pull && cd .. && git add voxie`)
-- [ ] Submodule ref updated in `rtylr` (`cd voxie && git pull && cd .. && git add voxie && pnpm contracts:sync`)
+- [ ] Submodule ref updated in `onion` and `make contracts` passes there
+- [ ] Submodule ref updated in `rtylr` and `pnpm contracts:sync` passes there
 - [ ] New export paths added to `packages/contracts/package.json` in `rtylr` (if new `.proto` file added)
 - [ ] `rtylr/docs/` updated if the change affects the API contract
 
@@ -60,15 +59,15 @@ If you create a new proto convention (a new naming pattern, a new use of `oneof`
 | Component | Technology | Version | Notes |
 |---|---|---|---|
 | Schema language | Protocol Buffers 3 | proto3 | All `.proto` files use `syntax = "proto3"` |
-| Build tool | buf | v2 | Linting, generation, breaking-change detection |
-| Go codegen | protoc-gen-go | latest | Generates `.pb.go` files |
-| TypeScript codegen | ts-proto | latest | Generates TypeScript interfaces (types only, no runtime) |
-| Go module | `github.com/voxire/voxie` | — | Imported in `onion` via `replace` directive |
-| TS package | `@voxire/contracts` | — | Re-exports from `voxie/gen/ts/` via `packages/contracts/` in `rtylr` |
+| Build tool | buf | v2 | Linting, formatting, breaking-change detection |
+| Go codegen | protoc-gen-go | latest | Owned by `onion` |
+| TypeScript codegen | ts-proto | latest | Owned by `rtylr/packages/contracts` |
+| Go module | `github.com/voxire/voxie` | — | Imported in `onion` via `replace` after local generation |
+| TS package | `@voxire/contracts` | — | Generated from `rtylr/voxie/proto` into `packages/contracts/src` |
 
 ### Adding Dependencies
 
-This repo has no runtime dependencies and should stay that way. `buf`, `protoc-gen-go`, and `protoc-gen-ts_proto` are codegen tools only. Do not add Go runtime dependencies to `go.mod`. If you think you need a runtime dependency here, it belongs in `onion` instead.
+This repo has no runtime dependencies and should stay that way. `buf`, `protoc-gen-go`, and `protoc-gen-ts_proto` are consumer-side codegen tools. Do not add Go runtime dependencies to `go.mod`. If you think you need a runtime dependency here, it belongs in `onion` instead.
 
 ---
 
@@ -93,13 +92,9 @@ voxie/
 │   ├── hub/{capability}/{subdomain}/v1/
 │   ├── insights/{capability}/v1/
 │   └── pos/{capability}/{subdomain}/v1/
-├── gen/                        Generated — do not edit directly
-│   ├── go/                     Go structs (`.pb.go`)
-│   └── ts/                     TypeScript interfaces (`.ts`)
-├── buf.gen.yaml
 ├── buf.yaml
 ├── go.mod
-└── Makefile                    `make generate`
+└── Makefile                    lint/format helpers
 ```
 
 ### Proto Conventions
@@ -115,26 +110,12 @@ voxie/
 - **Reusable types:** payload-only messages live in a local `types.proto` beside the capability that owns them.
 - **Shared contracts:** cross-app contracts live under `proto/common/{domain}/v1/`, not under an app root.
 
-### Generation Config (`buf.gen.yaml`)
+### Generation Ownership
 
-```yaml
-version: v2
-plugins:
-  - local: protoc-gen-go
-    out: gen/go
-    opt:
-      - paths=source_relative
+Voxie does not commit generated files. Consumer repos own their generated output:
 
-  - local: protoc-gen-ts_proto
-    out: gen/ts
-    opt:
-      - esModuleInterop=true
-      - outputServices=false
-      - env=browser
-      - useExactTypes=false
-      - exportCommonSymbols=false
-      - onlyTypes=true   # TypeScript types only — zero runtime code
-```
+- `rtylr`: `pnpm contracts:sync` generates TypeScript into `packages/contracts/src`.
+- `onion`: `make contracts` generates Go into the local `voxie/gen/go` checkout before build/test.
 
 ### How Consumers Import These Types
 
@@ -169,8 +150,7 @@ import type { LoginRequest } from '@voxire/contracts/common/auth/v1/login';
      reserved "old_field";
    }
    ```
-3. Keep the field in `gen/` until all consumers have been updated.
-4. Coordinate removal across `onion` (stop writing) and `rtylr` (stop reading) before dropping the `reserved` block.
+3. Coordinate removal across `onion` (stop writing) and `rtylr` (stop reading) before dropping the `reserved` block.
 
 ### Enum Evolution Rules
 
@@ -229,10 +209,11 @@ Create `proto/{domain}/v2/` only for genuinely breaking changes that cannot be h
 
 Order of operations when adding a new `.proto` file:
 1. Create the `.proto` file in `proto/common/{domain}/v1/` for shared contracts or `proto/{app}/{capability}/{subdomain}/v1/` for app-owned contracts.
-2. Run `make generate`.
-3. Commit both together.
-4. Add the export path to `packages/contracts/package.json` in `rtylr`.
+2. Run `make lint`.
+3. Commit the `.proto` source.
+4. Add the export path to `packages/contracts/package.json` in `rtylr` if needed.
 5. Run `pnpm contracts:sync` in `rtylr`.
+6. Run `make contracts` in `onion`.
 
 ---
 
@@ -256,12 +237,12 @@ Order of operations when adding a new `.proto` file:
 
 ## 6. CODE QUALITY RULES — NON-NEGOTIABLE
 
-1. **Never edit files in `gen/`** directly. They will be overwritten on the next `make generate`.
+1. **Never commit generated files in `gen/`.** Consumers regenerate language output.
 2. **All new message fields must have a comment** describing their purpose.
 3. **Field names are snake_case** in proto — no exceptions.
 4. **Never remove or renumber existing fields** without a deprecation plan. Use `reserved` instead.
 5. **Never rename an existing field** without creating a v2 package.
-6. **Commit generated code alongside proto changes** — always in the same commit.
+6. **Refresh generated code in consumers** after proto changes.
 7. **Run `buf lint` before committing.** `buf breaking` must pass against main.
 8. **New proto files follow** `proto/common/{domain}/v1/{endpoint}.proto` or `proto/{app}/{capability}/{subdomain}/v1/{endpoint}.proto`. One endpoint per file.
 9. **Never add `packages/contracts/package.json` export paths without a corresponding `.proto` source file.**
@@ -304,24 +285,26 @@ Order of operations when adding a new `.proto` file:
 | Tool | Version | Install |
 |---|---|---|
 | buf | v2 | https://buf.build/docs/installation |
-| protoc-gen-go | latest | `go install google.golang.org/protobuf/cmd/protoc-gen-go@latest` |
-| protoc-gen-ts_proto | latest | `npm install -g ts-proto` |
+| protoc-gen-go | latest | Install in `onion` when running `make contracts` |
+| protoc-gen-ts_proto | latest | Installed by `rtylr` package dependencies |
 
-### Generate all code
+### Generate Consumer Code
 
 ```bash
-make generate
-# or directly:
-buf generate
+# In rtylr/
+pnpm contracts:sync
+
+# In onion/
+make contracts
 ```
 
 ### Add a new proto file
 
 1. Create `proto/common/{domain}/v1/{endpoint}.proto` for shared contracts or `proto/{app}/{capability}/{subdomain}/v1/{endpoint}.proto` for app-owned contracts.
-2. Run `make generate`.
-3. Commit both the `.proto` file and all changed `gen/` files.
-4. In `rtylr`: `cd voxie && git pull && cd ..` → add export to `packages/contracts/package.json` → `pnpm contracts:sync`.
-5. In `onion`: `cd voxie && git pull && cd ..` → import from the generated capability path under `gen/go/`.
+2. Run `make lint`.
+3. Commit the `.proto` file.
+4. In `rtylr`: `cd voxie && git pull && cd ..` → add export to `packages/contracts/package.json` if needed → `pnpm contracts:sync`.
+5. In `onion`: `cd voxie && git pull && cd ..` → `make contracts` → import from the generated capability path under `gen/go/`.
 
 ### Submodule update workflow
 
