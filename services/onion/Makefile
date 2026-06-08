@@ -1,4 +1,4 @@
-.PHONY: onion setup build build-all build-media-engine generate lint test run run-api run-upload dev sql-check sql-case-check local-env-up local-env-down local-env-logs local-env-mindsdb-init
+.PHONY: onion setup build build-all build-media-engine contracts generate lint test run run-api run-upload dev sql-check sql-case-check local-env-up local-env-down local-env-logs local-env-mindsdb-init
 
 onion: sql-check test build
 	@echo "✅ Onion project is ready!"
@@ -8,6 +8,9 @@ setup:
 
 build:
 	./scripts/build.sh
+
+contracts:
+	./scripts/generate_contracts.sh
 
 # Build all service binaries
 build-all:
