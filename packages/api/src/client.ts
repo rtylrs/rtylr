@@ -97,6 +97,9 @@ export function createApiClient(appId: string): AxiosInstance {
       if (config.data && typeof config.data === 'object' && !(config.data instanceof FormData)) {
         config.data = convertKeysToSnake(config.data);
       }
+      if (config.params && typeof config.params === 'object') {
+        config.params = convertKeysToSnake(config.params);
+      }
       return config;
     },
     (error) => Promise.reject(error)

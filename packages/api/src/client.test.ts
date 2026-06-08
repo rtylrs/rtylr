@@ -69,6 +69,34 @@ describe('createApiClient', () => {
     expect(result.headers['Authorization']).toBeUndefined();
   });
 
+  it('request interceptor converts body and query params to backend JSON names', () => {
+    const client = createApiClient('hub');
+
+    const config = {
+      headers: {} as Record<string, string>,
+      data: {
+        clientName: 'Voxire',
+        lineItems: [{ unitPrice: 12 }],
+      },
+      params: {
+        projectId: 'flow-1',
+        dateFrom: '2026-06-01',
+      },
+    };
+
+    const interceptors = (client.interceptors.request as any).handlers;
+    const result = interceptors[0].fulfilled(config);
+
+    expect(result.data).toEqual({
+      client_name: 'Voxire',
+      line_items: [{ unit_price: 12 }],
+    });
+    expect(result.params).toEqual({
+      project_id: 'flow-1',
+      date_from: '2026-06-01',
+    });
+  });
+
   it('response interceptor handles 401 by redirecting to auth', async () => {
     document.cookie = 'token=eyJhbGciOiJub25lIn0.eyJ1c2VyX2lkIjoiMSJ9.fake_sig';
     const client = createApiClient('hub');
