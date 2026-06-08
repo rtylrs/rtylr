@@ -1,9 +1,8 @@
 import { unwrap } from '@voxire/api';
-import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query';
+import { useQuery } from '@tanstack/react-query';
 import { z } from 'zod';
 import { safe } from '../../lib/api';
 import { permissionMatrixSchema, customRoleSchema } from '../../schemas/permissions';
-import { toast } from 'sonner';
 
 export type { PermissionDef, PermissionMatrix, CustomRole } from '../../schemas/permissions';
 export type Role = 'owner' | 'admin' | 'manager' | 'staff' | 'viewer' | string;
@@ -16,34 +15,6 @@ export const usePermissions = () => {
     queryFn: async () => {
       const res = await unwrap(safe.get('/permissions'));
       return permissionMatrixSchema.parse(res);
-    },
-  });
-};
-
-export const useUpdatePermission = () => {
-  const qc = useQueryClient();
-  return useMutation({
-    mutationFn: async (payload: { role: Role; permission: string; value: boolean }) => {
-      await unwrap(safe.post('/permissions', payload));
-      return payload;
-    },
-    onMutate: async ({ role, permission, value }) => {
-      await qc.cancelQueries({ queryKey: ['permissions'] });
-      const prev = qc.getQueryData<PermissionMatrix>(['permissions']);
-      if (prev) {
-        qc.setQueryData<PermissionMatrix>(['permissions'], {
-          ...prev,
-          values: {
-            ...prev.values,
-            [role]: { ...(prev.values[role] ?? {}), [permission]: value },
-          },
-        });
-      }
-      return { prev };
-    },
-    onError: (_e, _v, ctx) => {
-      if (ctx?.prev) qc.setQueryData(['permissions'], ctx.prev);
-      toast.error('Failed to update permission');
     },
   });
 };

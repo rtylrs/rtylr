@@ -1,11 +1,9 @@
 import { Spinner } from '@voxire/components';
-import { useEffect, useState } from 'react';
+import { useEffect } from 'react';
 import { useNavigate } from '@tanstack/react-router';
-import CreateCategoryModal from './Components/CreateCategoryModal';
 import { useMenuStore } from '../../shared/stores/menuStore';
 import { useUserStore } from '../../shared/stores/userStore';
 import { useGetMenu } from '../../shared/hooks/queries/useMenu';
-import CreateParentCategoryModal from './Components/CreateParentCategoryModal';
 
 interface StoreItemDetails {
   name?: string;
@@ -17,6 +15,8 @@ interface StoreItemDetails {
   icon?: string;
   menuItems?: StoreItem[];
   banner?: { title?: string; bannerImage?: string };
+  sku?: string;
+  isActive?: boolean;
 }
 
 interface StoreItem {
@@ -34,11 +34,8 @@ interface GroupedCategory {
 const Menu: React.FC<{}> = () => {
   const navigate = useNavigate();
   const { userId } = useUserStore();
-  const { items, status, id: menuId, deleteCategory } = useMenuStore();
+  const { items, status, id: menuId } = useMenuStore();
   useGetMenu(userId as string);
-
-  const [isCreateCategoryModalOpen, setCreateCategoryModalOpen] = useState(false);
-  const [isCreateParentCategoryModalOpen, setCreateParentCategoryModalOpen] = useState(false);
 
   useEffect(() => {
     const url = new URL(window.location.href);
@@ -47,10 +44,6 @@ const Menu: React.FC<{}> = () => {
       window.history.replaceState({}, '', url.toString());
     }
   }, [menuId]);
-
-  const handleDeleteCategory = (categoryId: string) => {
-    deleteCategory(categoryId);
-  };
 
   const renderItems = (items: StoreItem[]) => {
     return items.map((item) => (
@@ -82,6 +75,32 @@ const Menu: React.FC<{}> = () => {
     ));
   };
 
+  const renderFlatItem = (item: StoreItem) => (
+    <div
+      key={item._id}
+      className="flex items-center justify-between p-4 border border-black/10 rounded-xl bg-white"
+    >
+      <div className="min-w-0">
+        <p className="text-sm font-semibold text-primary truncate">{item.details?.name}</p>
+        {item.details?.sku && <p className="text-xs text-muted mt-1">SKU {item.details.sku}</p>}
+      </div>
+      <div className="flex items-center gap-3">
+        <span className="text-sm font-semibold text-primary">
+          ${Number(item.details?.price ?? 0).toFixed(2)}
+        </span>
+        <span
+          className="px-2 py-1 rounded-full text-[11px] font-semibold"
+          style={{
+            color: item.details?.isActive === false ? '#8a6a00' : '#047857',
+            background: item.details?.isActive === false ? '#fef3c7' : '#d1fae5',
+          }}
+        >
+          {item.details?.isActive === false ? 'Inactive' : 'Active'}
+        </span>
+      </div>
+    </div>
+  );
+
   const renderCategory = (category: StoreItem) => {
     return (
       <div key={category._id} className="border border-black/10 rounded-xl p-4 bg-white mb-3">
@@ -107,7 +126,7 @@ const Menu: React.FC<{}> = () => {
             </button>
             <button
               className="px-3 py-1.5 text-sm text-red-500 border border-red-200 rounded-lg hover:bg-red-50 transition-colors"
-              onClick={() => handleDeleteCategory(category.itemId ?? '')}
+              disabled
             >
               Delete
             </button>
@@ -135,7 +154,7 @@ const Menu: React.FC<{}> = () => {
           <div className="flex gap-2">
             <button
               className="px-3 py-1.5 text-sm text-red-500 border border-red-200 rounded-lg hover:bg-red-50 transition-colors"
-              onClick={() => handleDeleteCategory(parentCategory.itemId ?? '')}
+              disabled
             >
               Delete
             </button>
@@ -177,7 +196,7 @@ const Menu: React.FC<{}> = () => {
               <div>
                 <button
                   className="px-3 py-1.5 text-sm text-red-500 border border-red-200 rounded-lg hover:bg-red-50 transition-colors"
-                  onClick={() => setCreateCategoryModalOpen(true)}
+                  disabled
                 >
                   Delete
                 </button>
@@ -202,6 +221,9 @@ const Menu: React.FC<{}> = () => {
           return renderCategory(item);
         }
       }
+      if (item.type === 'item') {
+        return renderFlatItem(item);
+      }
       return null;
     });
   };
@@ -218,38 +240,14 @@ const Menu: React.FC<{}> = () => {
     <div className="space-y-6">
       <div className="flex items-center justify-between">
         <h1 className="text-2xl font-bold text-primary">Menu</h1>
-        <div className="flex gap-2">
-          <button
-            onClick={() => setCreateParentCategoryModalOpen(true)}
-            className="px-4 py-2 text-sm font-medium bg-white border border-black/10 rounded-lg hover:bg-black/5 transition-colors"
-          >
-            Create Group
-          </button>
-          <button
-            onClick={() => setCreateCategoryModalOpen(true)}
-            className="px-4 py-2 text-sm font-medium bg-white border border-black/10 rounded-lg hover:bg-black/5 transition-colors"
-          >
-            Create Category
-          </button>
-          <button
-            onClick={() => navigate({ to: '/create-banner' })}
-            className="px-4 py-2 text-sm font-medium bg-accent text-white rounded-lg hover:opacity-90 transition-opacity"
-          >
-            Create Banner
-          </button>
-        </div>
       </div>
-      <div>{renderSections(items as StoreItem[])}</div>
-      <CreateCategoryModal
-        isOpen={isCreateCategoryModalOpen}
-        onClose={() => setCreateCategoryModalOpen(false)}
-        addOrEdit="add"
-      />
-      <CreateParentCategoryModal
-        isOpen={isCreateParentCategoryModalOpen}
-        onClose={() => setCreateParentCategoryModalOpen(false)}
-        addOrEdit="add"
-      />
+      {items.length > 0 ? (
+        <div className="space-y-2">{renderSections(items as StoreItem[])}</div>
+      ) : (
+        <div className="rounded-xl border border-black/10 bg-white p-8 text-center text-sm text-muted">
+          No POS menu items yet.
+        </div>
+      )}
     </div>
   );
 };

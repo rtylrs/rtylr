@@ -1,13 +1,8 @@
 import React, { useState } from 'react';
-import { toast } from 'sonner';
 import { useNavigate } from '@tanstack/react-router';
-import { Plus, UtensilsCrossed, Search, MoreHorizontal, CheckCircle } from 'lucide-react';
+import { UtensilsCrossed, Search, MoreHorizontal } from 'lucide-react';
 import { useUserStore } from '../../shared/stores/userStore';
-import {
-  useGetAllMenus,
-  useCreateMenu,
-  useSetActiveMenu,
-} from '../../shared/hooks/queries/useMenu';
+import { useGetAllMenus } from '../../shared/hooks/queries/useMenu';
 import {
   Card,
   CardContent,
@@ -17,15 +12,6 @@ import {
   Badge,
   Button,
   Input,
-  Dialog,
-  DialogTrigger,
-  DialogContent,
-  DialogHeader,
-  DialogTitle,
-  DialogDescription,
-  DialogFooter,
-  DialogClose,
-  Label,
   DropdownMenu,
   DropdownMenuTrigger,
   DropdownMenuContent,
@@ -46,34 +32,12 @@ const Menus: React.FC = () => {
   const navigate = useNavigate();
   const { userId } = useUserStore();
   const [searchTerm, setSearchTerm] = useState('');
-  const [newMenuName, setNewMenuName] = useState('');
 
   const { data: allMenus = [], isLoading } = useGetAllMenus(userId);
-  const createMenu = useCreateMenu();
-  const setActiveMenu = useSetActiveMenu();
 
   const filteredMenus = (allMenus as MenuEntry[]).filter((menu) =>
     (menu.menuName || menu.name || '').toLowerCase().includes(searchTerm.toLowerCase())
   );
-
-  const handleCreate = () => {
-    if (!newMenuName.trim()) {
-      toast.error('Menu name is required');
-      return;
-    }
-    if (!userId) return;
-    createMenu.mutate(
-      { restaurantId: userId, menuName: newMenuName },
-      {
-        onSuccess: () => setNewMenuName(''),
-      }
-    );
-  };
-
-  const handleSetActive = (menuId: string) => {
-    if (!userId) return;
-    setActiveMenu.mutate({ restaurantId: userId, menuId });
-  };
 
   return (
     <div className="space-y-6">
@@ -83,40 +47,6 @@ const Menus: React.FC = () => {
           <h1 className="text-xl font-bold text-primary">Menus</h1>
           <p className="text-sm text-gray-400 mt-0.5">Manage your restaurant menus</p>
         </div>
-        <Dialog>
-          <DialogTrigger>
-            <Button size="sm">
-              <Plus size={14} />
-              New Menu
-            </Button>
-          </DialogTrigger>
-          <DialogContent>
-            <DialogHeader>
-              <DialogTitle>Create New Menu</DialogTitle>
-              <DialogDescription>Give your menu a name to get started.</DialogDescription>
-            </DialogHeader>
-            <div className="p-6 pt-2 pb-4 space-y-3">
-              <Label htmlFor="menuName">Menu Name</Label>
-              <Input
-                id="menuName"
-                placeholder="e.g. Lunch Menu, Drinks, Specials..."
-                value={newMenuName}
-                onChange={(e) => setNewMenuName(e.target.value)}
-                onKeyDown={(e) => {
-                  if (e.key === 'Enter') handleCreate();
-                }}
-              />
-            </div>
-            <DialogFooter>
-              <DialogClose>
-                <Button variant="outline">Cancel</Button>
-              </DialogClose>
-              <Button onClick={handleCreate} disabled={!newMenuName.trim() || createMenu.isPending}>
-                {createMenu.isPending ? 'Creating...' : 'Create Menu'}
-              </Button>
-            </DialogFooter>
-          </DialogContent>
-        </Dialog>
       </div>
 
       {/* Search */}
@@ -180,12 +110,6 @@ const Menus: React.FC = () => {
                           <DropdownMenuItem onClick={() => navigate({ to: `/menu/${menu._id}` })}>
                             View Menu
                           </DropdownMenuItem>
-                          {!isActive && (
-                            <DropdownMenuItem onClick={() => handleSetActive(menu._id)}>
-                              <CheckCircle size={14} />
-                              Set as Active
-                            </DropdownMenuItem>
-                          )}
                         </DropdownMenuContent>
                       </DropdownMenu>
                     </div>
@@ -217,38 +141,7 @@ const Menus: React.FC = () => {
             <UtensilsCrossed size={28} className="text-gray-300" />
           </div>
           <h3 className="text-sm font-semibold text-primary">No menus yet</h3>
-          <p className="text-sm text-gray-400 mt-1 mb-4">Create your first menu to get started</p>
-          <Dialog>
-            <DialogTrigger>
-              <Button size="sm">
-                <Plus size={14} />
-                Create your first menu
-              </Button>
-            </DialogTrigger>
-            <DialogContent>
-              <DialogHeader>
-                <DialogTitle>Create New Menu</DialogTitle>
-                <DialogDescription>Give your menu a name to get started.</DialogDescription>
-              </DialogHeader>
-              <div className="p-6 pt-2 pb-4 space-y-3">
-                <Label htmlFor="menuName2">Menu Name</Label>
-                <Input
-                  id="menuName2"
-                  placeholder="e.g. Lunch Menu, Drinks..."
-                  value={newMenuName}
-                  onChange={(e) => setNewMenuName(e.target.value)}
-                />
-              </div>
-              <DialogFooter>
-                <DialogClose>
-                  <Button variant="outline">Cancel</Button>
-                </DialogClose>
-                <Button onClick={handleCreate} disabled={!newMenuName.trim()}>
-                  Create Menu
-                </Button>
-              </DialogFooter>
-            </DialogContent>
-          </Dialog>
+          <p className="text-sm text-gray-400 mt-1">No POS menu items have been created yet.</p>
         </div>
       )}
     </div>

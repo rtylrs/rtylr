@@ -3,7 +3,16 @@ import { persist } from 'zustand/middleware';
 
 interface MenuItem {
   _id: string;
+  itemId?: string;
   name: string;
+  type?: 'item';
+  details?: {
+    name: string;
+    description?: string;
+    price?: number;
+    sku?: string;
+    isActive?: boolean;
+  };
   [key: string]: unknown;
 }
 
@@ -23,12 +32,15 @@ interface Banner {
 
 interface Menu {
   _id: string;
-  items: (Category | Banner)[];
+  name?: string;
+  itemCount?: number;
+  isActive?: boolean;
+  items: (Category | Banner | MenuItem)[];
 }
 
 interface MenuState {
   id: string | null;
-  items: (Category | Banner)[];
+  items: (Category | Banner | MenuItem)[];
   allMenus: Menu[];
   activeMenuId: string | null;
   status: 'idle' | 'loading' | 'success' | 'error';
@@ -36,7 +48,7 @@ interface MenuState {
 
 interface MenuActions {
   setId: (id: string | null) => void;
-  setItems: (items: (Category | Banner)[]) => void;
+  setItems: (items: (Category | Banner | MenuItem)[]) => void;
   setAllMenus: (menus: Menu[]) => void;
   setActiveMenuId: (id: string | null) => void;
   fetchMenu: (userId: string, force?: boolean) => Promise<void>;
@@ -46,7 +58,7 @@ interface MenuActions {
   addBanner: (banner: Banner) => void;
 }
 
-function isCategory(item: Category | Banner): item is Category {
+function isCategory(item: Category | Banner | MenuItem): item is Category {
   return (item as Category).type === 'category';
 }
 

@@ -1,16 +1,10 @@
 import React from 'react';
 import { Shield } from 'lucide-react';
-import {
-  Breadcrumbs,
-  PermissionCheckbox,
-  RoleBadge,
-  SkeletonList,
-} from '../../shared/components/dash';
-import { usePermissions, useUpdatePermission } from '../../shared/hooks/queries/usePermissions';
+import { PermissionCheckbox, RoleBadge, SkeletonList } from '../../shared/components/dash';
+import { usePermissions } from '../../shared/hooks/queries/usePermissions';
 
 const Permissions: React.FC = () => {
   const { data, isLoading } = usePermissions();
-  const update = useUpdatePermission();
 
   if (isLoading || !data) {
     return (
@@ -109,11 +103,7 @@ const Permissions: React.FC = () => {
                   const isOwner = role === 'owner';
                   return (
                     <div key={role} className="flex justify-center">
-                      <PermissionCheckbox
-                        checked={isOwner ? true : value}
-                        disabled={isOwner}
-                        onChange={(v) => update.mutate({ role, permission: p.key, value: v })}
-                      />
+                      <PermissionCheckbox checked={isOwner ? true : value} disabled />
                     </div>
                   );
                 })}
