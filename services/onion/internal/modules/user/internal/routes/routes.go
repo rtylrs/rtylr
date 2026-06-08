@@ -112,4 +112,24 @@ func RegisterRoutes(ctx context.Context, router *chi.Mux, userService *applicati
 		handlers.PasswordResetConfirmRoutes(),
 		&handlers.PasswordResetConfirmHandler{UserService: userService},
 	)
+	http.RegisterGET[handlers.VerifyEmailRequest, handlers.VerifyEmailResponse](
+		ctx,
+		router,
+		handlers.VerifyEmailTokenRoutes(),
+		&handlers.VerifyEmailHandler{},
+	)
+	http.RegisterPOSTWithValidationAndMiddleware[handlers.VerifyEmailRequest, handlers.VerifyEmailResponse](
+		ctx,
+		router,
+		handlers.VerifyEmailBodyRoutes(),
+		&handlers.VerifyEmailHandler{},
+		http.PerRouteRateLimit(10, time.Minute),
+	)
+	http.RegisterPOSTWithValidationAndMiddleware[handlers.ResendVerificationRequest, handlers.ResendVerificationResponse](
+		ctx,
+		router,
+		handlers.ResendVerificationRoutes(),
+		&handlers.ResendVerificationHandler{},
+		http.PerRouteRateLimit(3, time.Minute),
+	)
 }
