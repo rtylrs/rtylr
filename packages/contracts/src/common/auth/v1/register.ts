@@ -14,9 +14,9 @@ export interface RegisterRequest {
   /** name is the name value for this contract. */
   name: string;
   /** business_name is the optional business name to create for the user. */
-  businessName: string;
-  /** plan_slug selects the subscription plan to assign after registration. */
-  planSlug: string;
+  businessName?: string | undefined;
+  /** plan_slug optionally selects the subscription plan to assign after registration. */
+  planSlug?: string | undefined;
 }
 
 export interface RegisterResponse {
