@@ -1,16 +1,8 @@
-.PHONY: generate clean lint
-
-# Generate Go + TypeScript code from proto files
-generate:
-	@echo "Generating code from proto files..."
-	buf generate
-	python3 scripts/generate_validation_metadata.py
-	@echo "Done. Output in gen/go and gen/ts"
+.PHONY: clean lint format breaking
 
 # Clean generated code
 clean:
-	rm -rf gen/go gen/ts gen/validation
-	mkdir -p gen/go gen/ts gen/validation
+	rm -rf gen
 
 # Lint proto files
 lint:
