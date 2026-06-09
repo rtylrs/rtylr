@@ -289,6 +289,13 @@ func (s *Service) ProcessRefund(ctx context.Context, ownerID, refundedBy int64, 
 		return 0, errors.New("refund amount must be positive")
 	}
 
+	// Confirm the order is this owner's before refunding — GetOrderSessionID and
+	// UpdateSessionRefundTotals below act on the order/session by id with no
+	// owner scope, so without this a refund could bump another tenant's session.
+	if _, err := s.repo.GetOrder(ctx, ownerID, input.OrderID); err != nil {
+		return 0, err
+	}
+
 	refundID, err := s.repo.CreateRefund(ctx, ownerID, input.OrderID, refundedBy, input.Amount, input.Reason)
 	if err != nil {
 		return 0, err
