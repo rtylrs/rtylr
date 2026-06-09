@@ -239,7 +239,13 @@ func (h *InviteUserHandler) Serve(ctx context.Context, req *InviteUserRequest) (
 		if ownerErr != nil {
 			return InviteUserResponse{}, errorModels.FromError(ownerErr, "Failed to invite user")
 		}
-		_ = h.Service.AddGroupMembers(ctx, ownerID, req.GroupID, ownerID, []int64{userID})
+		if grpErr := h.Service.AddGroupMembers(ctx, ownerID, req.GroupID, ownerID, []int64{userID}); grpErr != nil {
+			logger.Ctx(ctx).Warn("failed to add invited user to group",
+				logger.Int("group_id", int(req.GroupID)),
+				logger.Int("user_id", int(userID)),
+				logger.Error(grpErr),
+			)
+		}
 	}
 
 	// Only send invite email if no password was set manually. Enqueue is a fast

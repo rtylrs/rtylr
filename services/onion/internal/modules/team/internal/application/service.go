@@ -633,6 +633,11 @@ func (s *Service) AddGroupMembers(ctx context.Context, ownerID, groupID, callerI
 	if len(userIDs) == 0 {
 		return errors.New("no user IDs provided")
 	}
+	// Verify the group belongs to this owner before adding members — otherwise
+	// a caller could target a group id owned by another business.
+	if _, err := s.repo.GetGroup(ctx, ownerID, groupID); err != nil {
+		return err
+	}
 	if err := s.repo.AddGroupMembers(ctx, ownerID, groupID, callerID, userIDs); err != nil {
 		return err
 	}
