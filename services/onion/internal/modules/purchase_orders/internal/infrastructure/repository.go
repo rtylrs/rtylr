@@ -96,12 +96,12 @@ func (r *Repository) GetPurchaseOrderItems(ctx context.Context, purchaseOrderID 
 		item.ID = row.ID
 		item.PurchaseOrderID = row.PurchaseOrderID
 		item.ProductID = row.ProductID
-		item.QuantityOrdered, _ = strconv.ParseFloat(row.QuantityOrdered, 64)
-		item.UnitCost, _ = strconv.ParseFloat(row.UnitCost, 64)
-		item.TotalCost, _ = strconv.ParseFloat(row.TotalCost, 64)
+		item.QuantityOrdered = parseDecimal(row.QuantityOrdered)
+		item.UnitCost = parseDecimal(row.UnitCost)
+		item.TotalCost = parseDecimal(row.TotalCost)
 
 		if row.QuantityReceived.Valid {
-			item.QuantityReceived, _ = strconv.ParseFloat(row.QuantityReceived.String, 64)
+			item.QuantityReceived = parseDecimal(row.QuantityReceived.String)
 		}
 
 		items = append(items, item)
@@ -382,15 +382,15 @@ func purchaseOrderFromRow(row sqlc.ErpPurchaseOrder) domain.PurchaseOrder {
 	}
 
 	if row.Subtotal.Valid {
-		po.Subtotal, _ = strconv.ParseFloat(row.Subtotal.String, 64)
+		po.Subtotal = parseDecimal(row.Subtotal.String)
 	}
 
 	if row.TaxAmount.Valid {
-		po.TaxAmount, _ = strconv.ParseFloat(row.TaxAmount.String, 64)
+		po.TaxAmount = parseDecimal(row.TaxAmount.String)
 	}
 
 	if row.Total.Valid {
-		po.Total, _ = strconv.ParseFloat(row.Total.String, 64)
+		po.Total = parseDecimal(row.Total.String)
 	}
 
 	if row.ExpectedDelivery.Valid {
@@ -426,4 +426,19 @@ func nullString(s string) sql.NullString {
 
 func nullInt64(v int64) sql.NullInt64 {
 	return sql.NullInt64{Int64: v, Valid: v != 0}
+}
+
+// parseDecimal converts a DB decimal string to float64, logging (rather than
+// silently swallowing) corrupt values so bad money/quantity data surfaces.
+func parseDecimal(s string) float64 {
+	if s == "" {
+		return 0
+	}
+	f, err := strconv.ParseFloat(s, 64)
+	if err != nil {
+		logger.Global().Warn("failed to parse purchase-order decimal from database",
+			logger.String("value", s), logger.Error(err))
+		return 0
+	}
+	return f
 }
