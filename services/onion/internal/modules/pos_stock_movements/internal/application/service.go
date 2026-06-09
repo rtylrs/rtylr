@@ -3,6 +3,7 @@ package application
 import (
 	"context"
 	"database/sql"
+	"errors"
 	"fmt"
 	"time"
 
@@ -83,6 +84,16 @@ func (s *Service) RecordWaste(ctx context.Context, input domain.WasteStockInput)
 func (s *Service) TransferStock(ctx context.Context, input domain.TransferStockInput) (int64, error) {
 	if err := domain.ValidateTransferStockInput(input); err != nil {
 		return 0, err
+	}
+	// Reject transfers larger than what the source branch holds — otherwise
+	// transfer_out drives the source inventory negative. A missing inventory
+	// row means zero stock, so that fails the check too.
+	src, err := s.repo.GetInventoryItem(ctx, input.BusinessID, input.FromBranchID, input.ProductID)
+	if err != nil && !errors.Is(err, domain.ErrInventoryNotFound) {
+		return 0, err
+	}
+	if src.Quantity < input.Quantity {
+		return 0, domain.ErrInsufficientStock
 	}
 	if _, err := s.repo.CreateMovement(ctx, input.BusinessID, input.FromBranchID, input.ProductID, "transfer_out", -input.Quantity, nil, nil, input.Note, input.EmployeeID); err != nil {
 		return 0, err
