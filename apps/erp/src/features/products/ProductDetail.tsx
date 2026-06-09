@@ -27,12 +27,18 @@ const MiniLineChart: React.FC<{ data: number[]; color: string; height?: number }
   color,
   height = 60,
 }) => {
+  // Guard the degenerate cases: empty data makes Math.max/min return
+  // ±Infinity, and a single point makes (data.length - 1) a zero divisor → NaN.
+  if (data.length === 0) {
+    return <svg width="100%" height={height} viewBox="0 0 100 100" preserveAspectRatio="none" />;
+  }
   const max = Math.max(...data);
   const min = Math.min(...data);
   const range = max - min || 1;
+  const denom = data.length > 1 ? data.length - 1 : 1;
   const points = data
     .map((v, i) => {
-      const x = (i / (data.length - 1)) * 100;
+      const x = (i / denom) * 100;
       const y = 100 - ((v - min) / range) * 100;
       return `${x},${y}`;
     })
