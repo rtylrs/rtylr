@@ -1,0 +1,12 @@
+syntax = "proto3";
+
+package finance.recurring_invoice.v1;
+
+option go_package = "github.com/voxire/voxie/gen/go/finance/recurring_invoice/v1";
+
+message ResumeRecurringInvoiceRequest {}
+
+message ResumeRecurringInvoiceResponse {
+  // message is the backend confirmation message.
+  string message = 1;
+}
