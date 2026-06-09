@@ -158,6 +158,13 @@ func (s *Service) SummarizeSession(ctx context.Context, sessionID string, userID
 		return ErrAIClientNotAvailable
 	}
 
+	// Verify the session belongs to this user before reading its messages —
+	// GetSessionMessages is keyed by session id alone, so without this guard a
+	// user could summarize (and surface) another user's conversation.
+	if _, err := s.repository.GetChatSession(ctx, sessionID, userID); err != nil {
+		return err
+	}
+
 	messages, err := s.repository.GetSessionMessages(ctx, sessionID)
 	if err != nil {
 		return fmt.Errorf("failed to get session messages: %w", err)
