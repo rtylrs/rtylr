@@ -120,11 +120,23 @@ func parseFloatNull(s sql.NullString) float64 {
 	if !s.Valid {
 		return 0
 	}
-	v, _ := strconv.ParseFloat(s.String, 64)
-	return v
+	return parseTaxDecimal(s.String)
 }
 
-func toFloat64FromInterface(v interface{}) float64 {
+func parseTaxDecimal(s string) float64 {
+	if s == "" {
+		return 0
+	}
+	f, err := strconv.ParseFloat(s, 64)
+	if err != nil {
+		logger.Global().Warn("failed to parse tax decimal from database",
+			logger.String("value", s), logger.Error(err))
+		return 0
+	}
+	return f
+}
+
+func toFloat64FromInterface(v any) float64 {
 	if v == nil {
 		return 0
 	}
@@ -136,13 +148,10 @@ func toFloat64FromInterface(v interface{}) float64 {
 	case int64:
 		return float64(val)
 	case []byte:
-		f, _ := strconv.ParseFloat(string(val), 64)
-		return f
+		return parseTaxDecimal(string(val))
 	case string:
-		f, _ := strconv.ParseFloat(val, 64)
-		return f
+		return parseTaxDecimal(val)
 	default:
-		f, _ := strconv.ParseFloat(fmt.Sprintf("%v", val), 64)
-		return f
+		return parseTaxDecimal(fmt.Sprintf("%v", val))
 	}
 }

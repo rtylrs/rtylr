@@ -396,12 +396,12 @@ func (r *Repository) GetLoyaltyConfig(ctx context.Context, ownerID int64) (domai
 		return domain.LoyaltyConfig{}, err
 	}
 
-	ppcu, _ := strconv.ParseFloat(row.PointsPerCurrencyUnit.String, 64)
-	cpp, _ := strconv.ParseFloat(row.CurrencyPerPoint.String, 64)
-	bdp, _ := strconv.ParseFloat(row.BronzeDiscountPct.String, 64)
-	sdp, _ := strconv.ParseFloat(row.SilverDiscountPct.String, 64)
-	gdp, _ := strconv.ParseFloat(row.GoldDiscountPct.String, 64)
-	pdp, _ := strconv.ParseFloat(row.PlatinumDiscountPct.String, 64)
+	ppcu := parseDecimal(row.PointsPerCurrencyUnit.String)
+	cpp := parseDecimal(row.CurrencyPerPoint.String)
+	bdp := parseDecimal(row.BronzeDiscountPct.String)
+	sdp := parseDecimal(row.SilverDiscountPct.String)
+	gdp := parseDecimal(row.GoldDiscountPct.String)
+	pdp := parseDecimal(row.PlatinumDiscountPct.String)
 
 	return domain.LoyaltyConfig{
 		ID:                    row.ID,
@@ -748,7 +748,7 @@ func (r *Repository) GetDashboardStats(ctx context.Context, ownerID int64) (doma
 
 	stats.TopCustomers = make([]domain.TopCustomer, 0, len(topRows))
 	for _, row := range topRows {
-		spent, _ := strconv.ParseFloat(row.TotalSpent.String, 64)
+		spent := parseDecimal(row.TotalSpent.String)
 		stats.TopCustomers = append(stats.TopCustomers, domain.TopCustomer{
 			ID:            row.ID,
 			FirstName:     row.FirstName,
@@ -964,7 +964,7 @@ func (r *Repository) ListLoyaltyTiers(ctx context.Context, ownerID int64) ([]dom
 	tiers := make([]domain.LoyaltyTier, 0, len(rows))
 
 	for _, row := range rows {
-		dp, _ := strconv.ParseFloat(row.DiscountPct.String, 64)
+		dp := parseDecimal(row.DiscountPct.String)
 
 		t := domain.LoyaltyTier{
 			ID:          row.ID,
@@ -1184,7 +1184,7 @@ func customerFromRow(row sqlc.CrmCustomer) domain.Customer {
 		UpdatedAt:     row.UpdatedAt.Time,
 	}
 
-	spent, _ := strconv.ParseFloat(row.TotalSpent.String, 64)
+	spent := parseDecimal(row.TotalSpent.String)
 	c.TotalSpent = spent
 
 	if row.DateOfBirth.Valid {
@@ -1402,4 +1402,19 @@ func toInt(v interface{}) (int, bool) {
 	}
 
 	return 0, false
+}
+
+// parseDecimal converts a DB decimal string to float64, logging corrupt
+// values instead of silently coercing them to 0.
+func parseDecimal(s string) float64 {
+	if s == "" {
+		return 0
+	}
+	f, err := strconv.ParseFloat(s, 64)
+	if err != nil {
+		logger.Global().Warn("failed to parse customer decimal from database",
+			logger.String("value", s), logger.Error(err))
+		return 0
+	}
+	return f
 }
