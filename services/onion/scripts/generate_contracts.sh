@@ -4,10 +4,11 @@ set -euo pipefail
 ROOT="$(cd "$(dirname "$0")/.." && pwd)"
 VOXIE_ROOT="$ROOT/voxie"
 OUT_DIR="$VOXIE_ROOT/gen/go"
-TEMPLATE_FILE="$(mktemp "${TMPDIR:-/tmp}/voxie.go.XXXXXX.yaml")"
+TEMPLATE_DIR="$(mktemp -d "${TMPDIR:-/tmp}/voxie.go.XXXXXX")"
+TEMPLATE_FILE="$TEMPLATE_DIR/buf.gen.yaml"
 
 cleanup() {
-  rm -f "$TEMPLATE_FILE"
+  rm -rf "$TEMPLATE_DIR"
 }
 trap cleanup EXIT
 
