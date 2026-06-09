@@ -99,21 +99,30 @@ func (r *Repository) GetDaySummary(ctx context.Context, ownerID int64, date stri
 	return summary, nil
 }
 
-func interfaceToFloat(v interface{}) float64 {
+func interfaceToFloat(v any) float64 {
 	if v == nil {
 		return 0
 	}
-	switch val := v.(type) {
-	case []byte:
-		f, _ := strconv.ParseFloat(string(val), 64)
-		return f
-	case string:
-		f, _ := strconv.ParseFloat(val, 64)
-		return f
-	case float64:
-		return val
-	default:
-		f, _ := strconv.ParseFloat(fmt.Sprintf("%v", val), 64)
+	if f, ok := v.(float64); ok {
 		return f
 	}
+	var str string
+	switch val := v.(type) {
+	case []byte:
+		str = string(val)
+	case string:
+		str = val
+	default:
+		str = fmt.Sprintf("%v", val)
+	}
+	if str == "" {
+		return 0
+	}
+	f, err := strconv.ParseFloat(str, 64)
+	if err != nil {
+		logger.Global().Warn("failed to parse day-summary decimal from database",
+			logger.String("value", str), logger.Error(err))
+		return 0
+	}
+	return f
 }

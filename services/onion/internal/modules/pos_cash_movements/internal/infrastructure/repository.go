@@ -92,21 +92,26 @@ func (r *Repository) Create(ctx context.Context, input domain.CreateCashMovement
 	return result.LastInsertId()
 }
 
-func decimalToFloat(s interface{}) float64 {
+func decimalToFloat(s any) float64 {
+	var str string
 	switch v := s.(type) {
 	case string:
-		if v == "" {
-			return 0
-		}
-		f, _ := strconv.ParseFloat(v, 64)
-		return f
+		str = v
 	case []byte:
-		f, _ := strconv.ParseFloat(string(v), 64)
-		return f
+		str = string(v)
 	default:
-		f, _ := strconv.ParseFloat(fmt.Sprintf("%v", s), 64)
-		return f
+		str = fmt.Sprintf("%v", s)
 	}
+	if str == "" {
+		return 0
+	}
+	f, err := strconv.ParseFloat(str, 64)
+	if err != nil {
+		logger.Global().Warn("failed to parse cash-movement decimal from database",
+			logger.String("value", str), logger.Error(err))
+		return 0
+	}
+	return f
 }
 
 func floatToDecimal(f float64) string {
