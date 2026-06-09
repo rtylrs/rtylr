@@ -16,9 +16,9 @@ message ListEmployeeChecklistsRequest {
     (buf.validate.field).int64.gt = 0
   ];
   // limit is the maximum number of checklists to return.
-  int32 limit = 2;
+  optional int32 limit = 2;
   // offset is the number of checklists to skip before returning results.
-  int32 offset = 3;
+  optional int32 offset = 3;
 }
 
 message ListEmployeeChecklistsResponse {
