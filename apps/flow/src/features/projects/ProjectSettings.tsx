@@ -1,4 +1,4 @@
-import React, { useRef, useState } from 'react';
+import React, { useRef, useState, useEffect } from 'react';
 import { useParams, useNavigate } from '@tanstack/react-router';
 import { toast } from 'sonner';
 import { useTranslation } from 'react-i18next';
@@ -44,6 +44,16 @@ const ProjectSettings: React.FC = () => {
   const [name, setName] = useState(project?.name || '');
   const [description, setDescription] = useState(project?.description || '');
   const [tab, setTab] = useState<'general' | 'members' | 'integrations' | 'danger'>('general');
+
+  // Projects load async into the store and the same component instance is
+  // reused when switching projects, so sync the form when the project changes.
+  useEffect(() => {
+    if (project) {
+      setName(project.name);
+      setDescription(project.description || '');
+    }
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [project?.id]);
 
   const updateProject = useUpdateProject();
   const deleteProject = useDeleteProject();
