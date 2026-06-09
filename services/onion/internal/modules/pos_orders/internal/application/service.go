@@ -231,6 +231,12 @@ func (s *Service) UpdateOrderStatus(ctx context.Context, ownerID, orderID int64,
 }
 
 func (s *Service) UpdateOrderItemStatus(ctx context.Context, ownerID, orderID, itemID int64, status domain.ItemStatus) error {
+	// The underlying item-status query isn't owner-scoped, so verify the order
+	// belongs to this owner first — otherwise a caller could flip KDS item
+	// status on another tenant's order.
+	if _, err := s.repo.GetOrder(ctx, ownerID, orderID); err != nil {
+		return err
+	}
 	if err := s.repo.UpdateOrderItemStatus(ctx, orderID, itemID, status); err != nil {
 		return err
 	}
@@ -382,6 +388,12 @@ func (s *Service) SendToKitchen(ctx context.Context, ownerID, orderID int64) err
 }
 
 func (s *Service) VoidOrderItem(ctx context.Context, ownerID, orderID, itemID int64) error {
+	// Verify the order belongs to this owner before touching its items — the
+	// item-level cancel isn't owner-scoped, so without this a caller could void
+	// an item on another tenant's order. Mirrors TransferTable's guard.
+	if _, err := s.repo.GetOrder(ctx, ownerID, orderID); err != nil {
+		return err
+	}
 	if err := s.repo.VoidOrderItem(ctx, ownerID, orderID, itemID); err != nil {
 		return err
 	}
