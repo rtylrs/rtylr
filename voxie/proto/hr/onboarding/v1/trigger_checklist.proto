@@ -15,10 +15,18 @@ message TriggerChecklistRequest {
     (buf.validate.field).required = true,
     (buf.validate.field).int64.gt = 0
   ];
-  // Event type that is triggering (onboarding | offboarding).
-  string trigger_type = 2 [
+  // template_id identifies the checklist template to trigger.
+  int64 template_id = 2 [
     (buf.validate.field).required = true,
-    (buf.validate.field).string.min_len = 1
+    (buf.validate.field).int64.gt = 0
+  ];
+  // trigger_date is the date the checklist starts, formatted as YYYY-MM-DD.
+  string trigger_date = 3 [
+    (buf.validate.field).required = true,
+    (buf.validate.field).string = {
+      min_len: 1
+      pattern: "^[0-9]{4}-[0-9]{2}-[0-9]{2}$"
+    }
   ];
 }
 
