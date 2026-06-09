@@ -18,6 +18,7 @@ const QuickStockAdjust: React.FC<QuickStockAdjustProps> = ({
   const adjust = useAdjustInventory();
 
   const bump = (delta: number) => {
+    const prev = stock;
     const next = Math.max(0, stock + delta);
     setStock(next);
     adjust.mutate(
@@ -28,6 +29,8 @@ const QuickStockAdjust: React.FC<QuickStockAdjustProps> = ({
           onChange?.(next);
         },
         onError: () => {
+          // Roll back the optimistic update so the UI matches the backend.
+          setStock(prev);
           toast.error('Failed to adjust stock');
         },
       }
