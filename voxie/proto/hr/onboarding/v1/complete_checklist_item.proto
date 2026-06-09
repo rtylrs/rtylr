@@ -2,24 +2,13 @@ syntax = "proto3";
 
 package hr.onboarding.v1;
 
-import "buf/validate/validate.proto";
-import "hr/onboarding/v1/types.proto";
-
 option go_package = "github.com/voxire/voxie/gen/go/hr/onboarding/v1";
 
 // ── Complete Checklist Item ──────────────────────────────────────
 
-message CompleteChecklistItemRequest {
-  // ID of the employee checklist item to mark as complete.
-  int64 item_id = 1 [
-    (buf.validate.field).required = true,
-    (buf.validate.field).int64.gt = 0
-  ];
-  // URL of the uploaded attachment; absent if not required.
-  optional string attachment_url = 2;
-}
+message CompleteChecklistItemRequest {}
 
 message CompleteChecklistItemResponse {
-  // The updated employee checklist item.
-  EmployeeChecklistItemPayload item = 1;
+  // success indicates the checklist item was marked complete.
+  bool success = 1;
 }
