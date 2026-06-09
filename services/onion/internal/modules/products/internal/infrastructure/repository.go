@@ -287,16 +287,16 @@ func productFromRow(row sqlc.GetProductRow) domain.Product {
 		p.Unit = row.Unit.String
 	}
 
-	p.CostPrice, _ = strconv.ParseFloat(row.CostPrice, 64)
-	p.SalePrice, _ = strconv.ParseFloat(row.SalePrice, 64)
-	p.StockQuantity, _ = strconv.ParseFloat(row.StockQuantity, 64)
+	p.CostPrice = parseDecimal(row.CostPrice)
+	p.SalePrice = parseDecimal(row.SalePrice)
+	p.StockQuantity = parseDecimal(row.StockQuantity)
 
 	if row.LowStockThreshold.Valid {
-		p.LowStockThreshold, _ = strconv.ParseFloat(row.LowStockThreshold.String, 64)
+		p.LowStockThreshold = parseDecimal(row.LowStockThreshold.String)
 	}
 
 	if row.ReorderQuantity.Valid {
-		p.ReorderQuantity, _ = strconv.ParseFloat(row.ReorderQuantity.String, 64)
+		p.ReorderQuantity = parseDecimal(row.ReorderQuantity.String)
 	}
 
 	if row.IsActive.Valid {
@@ -318,14 +318,14 @@ func productFromRow(row sqlc.GetProductRow) domain.Product {
 	if row.BrandID.Valid {
 		p.BrandID = row.BrandID.Int64
 	}
-	p.CompareAtPrice, _ = strconv.ParseFloat(row.CompareAtPrice, 64)
-	p.TaxRate, _ = strconv.ParseFloat(row.TaxRate, 64)
+	p.CompareAtPrice = parseDecimal(row.CompareAtPrice)
+	p.TaxRate = parseDecimal(row.TaxRate)
 	p.Currency = row.Currency
-	p.Weight, _ = strconv.ParseFloat(row.Weight, 64)
+	p.Weight = parseDecimal(row.Weight)
 	p.WeightUnit = row.WeightUnit
-	p.Length, _ = strconv.ParseFloat(row.Length, 64)
-	p.Width, _ = strconv.ParseFloat(row.Width, 64)
-	p.Height, _ = strconv.ParseFloat(row.Height, 64)
+	p.Length = parseDecimal(row.Length)
+	p.Width = parseDecimal(row.Width)
+	p.Height = parseDecimal(row.Height)
 	p.DimensionUnit = row.DimensionUnit
 	if row.CountryOfOrigin.Valid {
 		p.CountryOfOrigin = row.CountryOfOrigin.String
@@ -369,16 +369,16 @@ func productFromBarcodeRow(row sqlc.GetProductByBarcodeRow) domain.Product {
 		p.Unit = row.Unit.String
 	}
 
-	p.CostPrice, _ = strconv.ParseFloat(row.CostPrice, 64)
-	p.SalePrice, _ = strconv.ParseFloat(row.SalePrice, 64)
-	p.StockQuantity, _ = strconv.ParseFloat(row.StockQuantity, 64)
+	p.CostPrice = parseDecimal(row.CostPrice)
+	p.SalePrice = parseDecimal(row.SalePrice)
+	p.StockQuantity = parseDecimal(row.StockQuantity)
 
 	if row.LowStockThreshold.Valid {
-		p.LowStockThreshold, _ = strconv.ParseFloat(row.LowStockThreshold.String, 64)
+		p.LowStockThreshold = parseDecimal(row.LowStockThreshold.String)
 	}
 
 	if row.ReorderQuantity.Valid {
-		p.ReorderQuantity, _ = strconv.ParseFloat(row.ReorderQuantity.String, 64)
+		p.ReorderQuantity = parseDecimal(row.ReorderQuantity.String)
 	}
 
 	if row.IsActive.Valid {
@@ -400,14 +400,14 @@ func productFromBarcodeRow(row sqlc.GetProductByBarcodeRow) domain.Product {
 	if row.BrandID.Valid {
 		p.BrandID = row.BrandID.Int64
 	}
-	p.CompareAtPrice, _ = strconv.ParseFloat(row.CompareAtPrice, 64)
-	p.TaxRate, _ = strconv.ParseFloat(row.TaxRate, 64)
+	p.CompareAtPrice = parseDecimal(row.CompareAtPrice)
+	p.TaxRate = parseDecimal(row.TaxRate)
 	p.Currency = row.Currency
-	p.Weight, _ = strconv.ParseFloat(row.Weight, 64)
+	p.Weight = parseDecimal(row.Weight)
 	p.WeightUnit = row.WeightUnit
-	p.Length, _ = strconv.ParseFloat(row.Length, 64)
-	p.Width, _ = strconv.ParseFloat(row.Width, 64)
-	p.Height, _ = strconv.ParseFloat(row.Height, 64)
+	p.Length = parseDecimal(row.Length)
+	p.Width = parseDecimal(row.Width)
+	p.Height = parseDecimal(row.Height)
 	p.DimensionUnit = row.DimensionUnit
 	if row.CountryOfOrigin.Valid {
 		p.CountryOfOrigin = row.CountryOfOrigin.String
@@ -488,4 +488,19 @@ func nullInt64(v int64) sql.NullInt64 {
 func nullStringFromFloat(v float64) sql.NullString {
 	s := strconv.FormatFloat(v, 'f', -1, 64)
 	return sql.NullString{String: s, Valid: true}
+}
+
+// parseDecimal converts a DB decimal string to float64, logging corrupt
+// values instead of silently coercing them to 0.
+func parseDecimal(s string) float64 {
+	if s == "" {
+		return 0
+	}
+	f, err := strconv.ParseFloat(s, 64)
+	if err != nil {
+		logger.Global().Warn("failed to parse product decimal from database",
+			logger.String("value", s), logger.Error(err))
+		return 0
+	}
+	return f
 }

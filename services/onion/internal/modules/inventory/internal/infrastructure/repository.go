@@ -124,18 +124,18 @@ func (r *Repository) GetInventoryReport(ctx context.Context, ownerID int64) ([]d
 			item.Unit = row.Unit.String
 		}
 
-		item.StockQuantity, _ = strconv.ParseFloat(row.StockQuantity, 64)
-		item.CostPrice, _ = strconv.ParseFloat(row.CostPrice, 64)
-		item.SalePrice, _ = strconv.ParseFloat(row.SalePrice, 64)
-		item.StockValue, _ = strconv.ParseFloat(row.StockValue, 64)
+		item.StockQuantity = parseDecimal(row.StockQuantity)
+		item.CostPrice = parseDecimal(row.CostPrice)
+		item.SalePrice = parseDecimal(row.SalePrice)
+		item.StockValue = parseDecimal(row.StockValue)
 		item.IsLowStock = row.IsLowStock
 
 		if row.LowStockThreshold.Valid {
-			item.LowStockThreshold, _ = strconv.ParseFloat(row.LowStockThreshold.String, 64)
+			item.LowStockThreshold = parseDecimal(row.LowStockThreshold.String)
 		}
 
 		if row.ReorderQuantity.Valid {
-			item.ReorderQuantity, _ = strconv.ParseFloat(row.ReorderQuantity.String, 64)
+			item.ReorderQuantity = parseDecimal(row.ReorderQuantity.String)
 		}
 
 		report = append(report, item)
@@ -167,18 +167,18 @@ func (r *Repository) GetLowStockProducts(ctx context.Context, ownerID int64) ([]
 			item.Unit = row.Unit.String
 		}
 
-		item.StockQuantity, _ = strconv.ParseFloat(row.StockQuantity, 64)
-		item.CostPrice, _ = strconv.ParseFloat(row.CostPrice, 64)
-		item.SalePrice, _ = strconv.ParseFloat(row.SalePrice, 64)
-		item.StockValue, _ = strconv.ParseFloat(row.StockValue, 64)
+		item.StockQuantity = parseDecimal(row.StockQuantity)
+		item.CostPrice = parseDecimal(row.CostPrice)
+		item.SalePrice = parseDecimal(row.SalePrice)
+		item.StockValue = parseDecimal(row.StockValue)
 		item.IsLowStock = row.IsLowStock != 0
 
 		if row.LowStockThreshold.Valid {
-			item.LowStockThreshold, _ = strconv.ParseFloat(row.LowStockThreshold.String, 64)
+			item.LowStockThreshold = parseDecimal(row.LowStockThreshold.String)
 		}
 
 		if row.ReorderQuantity.Valid {
-			item.ReorderQuantity, _ = strconv.ParseFloat(row.ReorderQuantity.String, 64)
+			item.ReorderQuantity = parseDecimal(row.ReorderQuantity.String)
 		}
 
 		report = append(report, item)
@@ -208,7 +208,7 @@ func (r *Repository) GetValuation(ctx context.Context, ownerID int64) ([]domain.
 			case float64:
 				item.TotalValue = v
 			case []byte:
-				item.TotalValue, _ = strconv.ParseFloat(string(v), 64)
+				item.TotalValue = parseDecimal(string(v))
 			}
 		}
 
@@ -217,7 +217,7 @@ func (r *Repository) GetValuation(ctx context.Context, ownerID int64) ([]domain.
 			case float64:
 				item.TotalCost = v
 			case []byte:
-				item.TotalCost, _ = strconv.ParseFloat(string(v), 64)
+				item.TotalCost = parseDecimal(string(v))
 			}
 		}
 
@@ -229,4 +229,19 @@ func (r *Repository) GetValuation(ctx context.Context, ownerID int64) ([]domain.
 
 func nullString(s string) sql.NullString {
 	return sql.NullString{String: s, Valid: s != ""}
+}
+
+// parseDecimal converts a DB decimal string to float64, logging corrupt
+// values instead of silently coercing them to 0.
+func parseDecimal(s string) float64 {
+	if s == "" {
+		return 0
+	}
+	f, err := strconv.ParseFloat(s, 64)
+	if err != nil {
+		logger.Global().Warn("failed to parse inventory decimal from database",
+			logger.String("value", s), logger.Error(err))
+		return 0
+	}
+	return f
 }
