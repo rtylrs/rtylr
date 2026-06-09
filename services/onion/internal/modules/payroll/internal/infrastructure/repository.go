@@ -185,13 +185,13 @@ func (r *Repository) GetStaffPayRates(ctx context.Context, ownerID, staffID int6
 
 	var rates domain.StaffPayRates
 	if row.Salary.Valid {
-		rates.Salary, _ = strconv.ParseFloat(row.Salary.String, 64)
+		rates.Salary = parseDecimal(row.Salary.String)
 	}
 	if row.HourlyRate.Valid {
-		rates.HourlyRate, _ = strconv.ParseFloat(row.HourlyRate.String, 64)
+		rates.HourlyRate = parseDecimal(row.HourlyRate.String)
 	}
 	if row.OvertimeRate.Valid {
-		rates.OvertimeRate, _ = strconv.ParseFloat(row.OvertimeRate.String, 64)
+		rates.OvertimeRate = parseDecimal(row.OvertimeRate.String)
 	}
 
 	return rates, nil
@@ -235,16 +235,31 @@ func (r *Repository) GetStaffPayRatesByIDs(ctx context.Context, ownerID int64, s
 		}
 		var rates domain.StaffPayRates
 		if salary.Valid {
-			rates.Salary, _ = strconv.ParseFloat(salary.String, 64)
+			rates.Salary = parseDecimal(salary.String)
 		}
 		if hourlyRate.Valid {
-			rates.HourlyRate, _ = strconv.ParseFloat(hourlyRate.String, 64)
+			rates.HourlyRate = parseDecimal(hourlyRate.String)
 		}
 		if overtimeRate.Valid {
-			rates.OvertimeRate, _ = strconv.ParseFloat(overtimeRate.String, 64)
+			rates.OvertimeRate = parseDecimal(overtimeRate.String)
 		}
 		out[id] = rates
 	}
 
 	return out, rows.Err()
+}
+
+// parseDecimal converts a DB decimal string to float64, logging corrupt
+// values instead of silently coercing pay figures to 0.
+func parseDecimal(s string) float64 {
+	if s == "" {
+		return 0
+	}
+	f, err := strconv.ParseFloat(s, 64)
+	if err != nil {
+		logger.Global().Warn("failed to parse payroll decimal from database",
+			logger.String("value", s), logger.Error(err))
+		return 0
+	}
+	return f
 }
