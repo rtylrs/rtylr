@@ -6,13 +6,18 @@ import type {
   CreateChecklistTemplateResponse,
 } from '@voxire/contracts/hr/onboarding/v1/create_checklist_template';
 import type { ListEmployeeChecklistsResponse } from '@voxire/contracts/hr/onboarding/v1/list_employee_checklists';
-import type {
-  CompleteChecklistItemRequest,
-  CompleteChecklistItemResponse,
-} from '@voxire/contracts/hr/onboarding/v1/complete_checklist_item';
+import type { CompleteChecklistItemResponse } from '@voxire/contracts/hr/onboarding/v1/complete_checklist_item';
 import { safe } from '../../lib/api';
 import { toast } from 'sonner';
 import { useTranslation } from 'react-i18next';
+
+// The generated CompleteChecklistItemRequest body is intentionally empty —
+// the item id travels in the URL path, not the body. attachmentUrl is an
+// optional body field. Model the call inputs locally.
+interface CompleteChecklistItemInput {
+  itemId: number;
+  attachmentUrl?: string;
+}
 
 export const useListChecklistTemplates = () => {
   return useQuery<ListChecklistTemplatesResponse>({
@@ -70,7 +75,7 @@ export const useCompleteChecklistItem = () => {
 
   return useMutation({
     mutationFn: async (
-      data: CompleteChecklistItemRequest
+      data: CompleteChecklistItemInput
     ): Promise<CompleteChecklistItemResponse> => {
       const res = await unwrap(
         safe.post<CompleteChecklistItemResponse>(
