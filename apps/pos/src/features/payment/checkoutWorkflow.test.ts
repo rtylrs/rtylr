@@ -155,7 +155,7 @@ describe('buildCashTender', () => {
   it('calculates cash tender change for valid received amount', () => {
     expect(buildCashTender('25.50', 21.6)).toEqual({
       received: 25.5,
-      change: 3.8999999999999986,
+      change: 3.9,
       canCharge: true,
     });
   });

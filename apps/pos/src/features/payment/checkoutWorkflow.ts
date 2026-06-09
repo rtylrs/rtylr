@@ -1,6 +1,7 @@
 import type { CartItem } from '../../shared/stores/cartStore';
 import type { Order } from '../../shared/types/pos';
 import type { PaymentPayload } from '../../shared/services/posService';
+import { roundCents } from '../../shared/utils/orderCalc';
 
 export type CheckoutPaymentMethod = 'card' | 'cash' | 'qr';
 
@@ -40,7 +41,7 @@ export function buildCashTender(amountInput: string, totalDue: number): CashTend
 
   return {
     received: normalizedReceived,
-    change: canCharge ? normalizedReceived - normalizedTotalDue : null,
+    change: canCharge ? roundCents(normalizedReceived - normalizedTotalDue) : null,
     canCharge,
   };
 }
