@@ -6948,6 +6948,18 @@ export const contractValidationMetadata = {
       type: 'string',
     },
   },
+  'hub.business.v1.SetSlugRequest': {
+    slug: {
+      minLen: 1,
+      name: 'slug',
+      optional: false,
+      protoName: 'slug',
+      repeated: false,
+      required: true,
+      scalar: true,
+      type: 'string',
+    },
+  },
   'hub.business.v1.UpdateBusinessRequest': {
     address: {
       name: 'address',
