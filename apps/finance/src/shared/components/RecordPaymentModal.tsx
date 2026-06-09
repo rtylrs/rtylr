@@ -47,7 +47,14 @@ const RecordPaymentModal: React.FC<RecordPaymentModalProps> = ({
       return;
     }
     recordPayment.mutate(
-      { id: invoiceId, amount: value, currency: currency || 'USD', paymentDate: date, method },
+      {
+        id: invoiceId,
+        amount: value,
+        currency: currency || 'USD',
+        paymentDate: date,
+        method,
+        reference,
+      },
       {
         onSuccess: () => {
           onRecorded?.(value);

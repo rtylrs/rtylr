@@ -135,12 +135,14 @@ export function useRecordPayment() {
       currency,
       paymentDate,
       method,
+      reference,
     }: {
       id: string;
       amount: number;
       currency: string;
       paymentDate?: string;
       method?: string;
+      reference?: string;
     }): Promise<RecordPaymentResponse> => {
       const payload = {
         invoiceId: Number(id),
@@ -148,6 +150,7 @@ export function useRecordPayment() {
         currency,
         paymentDate,
         method,
+        reference,
       };
       assertContractPayload('finance.invoices.payments.v1.RecordPaymentRequest', payload);
       return unwrap(safe.post<RecordPaymentResponse>('/finance/invoices/payment', payload));
@@ -160,6 +163,7 @@ export function useRecordPayment() {
         currency: string;
         paymentDate?: string;
         method?: string;
+        reference?: string;
       }
     ) => {
       qc.invalidateQueries({ queryKey: ['invoices'] });
