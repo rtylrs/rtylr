@@ -5,22 +5,11 @@
 // source: finance/recurring_invoice/v1/list_recurring_invoices.proto
 
 /* eslint-disable */
-import type {
-  PaginationRequest,
-  PaginationResponse,
-} from '../../../common/pagination/v1/pagination';
 import type { RecurringInvoice } from './types';
 
-export interface ListRecurringInvoicesRequest {
-  /** pagination is the pagination value for this contract. */
-  pagination: PaginationRequest | undefined;
-  /** active_only is the active only value for this contract. */
-  activeOnly: boolean;
-}
+export interface ListRecurringInvoicesRequest {}
 
 export interface ListRecurringInvoicesResponse {
-  /** invoices is the invoices value for this contract. */
-  invoices: RecurringInvoice[];
-  /** pagination is the pagination value for this contract. */
-  pagination: PaginationResponse | undefined;
+  /** recurring_invoices is the full set of recurring invoices for the owner. */
+  recurringInvoices: RecurringInvoice[];
 }

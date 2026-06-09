@@ -5,22 +5,23 @@
 // source: finance/recurring_invoice/v1/create_recurring_invoice.proto
 
 /* eslint-disable */
-import type { RecurringInvoice, RecurringInvoiceLine } from './types';
 
 export interface CreateRecurringInvoiceRequest {
-  /** customer_id is the customer id value for this contract. */
-  customerId: number;
-  /** frequency is the frequency value for this contract. */
+  /** template_invoice_id is the invoice used as the recurring invoice template. */
+  templateInvoiceId: number;
+  /** frequency is how often the recurring invoice should be generated. */
   frequency: string;
-  /** lines is the lines value for this contract. */
-  lines: RecurringInvoiceLine[];
-  /** start_date is the start date value for this contract. */
-  startDate: string;
-  /** notes is the notes value for this contract. */
-  notes: string;
+  /** next_invoice_date is the next generation date, formatted as YYYY-MM-DD. */
+  nextInvoiceDate: string;
+  /** end_date is when recurring generation should stop; absent when open-ended. */
+  endDate?: string | undefined;
+  /** is_active indicates whether the recurring invoice should start active. */
+  isActive?: boolean | undefined;
 }
 
 export interface CreateRecurringInvoiceResponse {
-  /** invoice is the invoice value for this contract. */
-  invoice: RecurringInvoice | undefined;
+  /** id is the recurring invoice that was created. */
+  id: number;
+  /** message is the backend confirmation message. */
+  message: string;
 }

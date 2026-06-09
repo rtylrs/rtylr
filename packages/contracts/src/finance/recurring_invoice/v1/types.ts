@@ -9,44 +9,18 @@
 export interface RecurringInvoice {
   /** id is the unique identifier for the resource. */
   id: number;
-  /** customer_id is the customer id value for this contract. */
-  customerId: number;
-  /** customer_name is the customer name value for this contract. */
-  customerName: string;
-  /**
-   * frequency is the frequency value for this contract.
-   * weekly, monthly, quarterly, yearly
-   */
+  /** owner_id is the business owner for this recurring invoice. */
+  ownerId: number;
+  /** template_invoice_id is the invoice used as the recurring invoice template. */
+  templateInvoiceId: number;
+  /** frequency is how often the recurring invoice should be generated. */
   frequency: string;
-  /** lines is the lines value for this contract. */
-  lines: RecurringInvoiceLine[];
-  /** subtotal is the subtotal value for this contract. */
-  subtotal: number;
-  /** tax is the tax value for this contract. */
-  tax: number;
-  /** total is the total number of matching records. */
-  total: number;
-  /** next_date is the next date value for this contract. */
-  nextDate: string;
-  /** last_generated_at is the last generated at value for this contract. */
-  lastGeneratedAt: string;
+  /** next_invoice_date is the next generation date. */
+  nextInvoiceDate: string;
+  /** end_date is when recurring generation should stop; absent when open-ended. */
+  endDate?: string | undefined;
   /** is_active is the is active value for this contract. */
   isActive: boolean;
-  /** notes is the notes value for this contract. */
-  notes: string;
   /** created_at is when the record was created. */
   createdAt: string;
-}
-
-export interface RecurringInvoiceLine {
-  /** description is the description value for this contract. */
-  description: string;
-  /** quantity is the quantity value for this contract. */
-  quantity: number;
-  /** unit_price is the unit price value for this contract. */
-  unitPrice: number;
-  /** tax_rate is the tax rate value for this contract. */
-  taxRate: number;
-  /** total is the total number of matching records. */
-  total: number;
 }
