@@ -28,16 +28,19 @@ const Employees = (): React.JSX.Element => {
 
   const parentRef = useRef<HTMLDivElement>(null);
 
+  const filteredEmployees = searchTerm
+    ? employees.filter((e) => (e.jobTitle ?? '').toLowerCase().includes(searchTerm.toLowerCase()))
+    : employees;
+
+  // Count must track the filtered list, otherwise searching leaves the
+  // virtualizer generating indices past filteredEmployees.length and the
+  // row lookup returns undefined.
   const virtualizer = useVirtualizer({
-    count: employees.length,
+    count: filteredEmployees.length,
     getScrollElement: () => parentRef.current,
     estimateSize: () => 56,
     overscan: 10,
   });
-
-  const filteredEmployees = searchTerm
-    ? employees.filter((e) => (e.jobTitle ?? '').toLowerCase().includes(searchTerm.toLowerCase()))
-    : employees;
 
   const inputStyle: React.CSSProperties = {
     padding: '8px 12px',
@@ -138,7 +141,8 @@ const Employees = (): React.JSX.Element => {
                 }}
               >
                 {virtualizer.getVirtualItems().map((virtualRow) => {
-                  const emp: EmployeePayload = filteredEmployees[virtualRow.index];
+                  const emp: EmployeePayload | undefined = filteredEmployees[virtualRow.index];
+                  if (!emp) return null;
                   return (
                     <div
                       key={virtualRow.key}
