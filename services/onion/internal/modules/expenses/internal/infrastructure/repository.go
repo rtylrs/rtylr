@@ -297,7 +297,15 @@ func fmtFloat(f float64) string {
 }
 
 func parseFloat(s string) float64 {
-	v, _ := strconv.ParseFloat(s, 64)
+	if s == "" {
+		return 0
+	}
+	v, err := strconv.ParseFloat(s, 64)
+	if err != nil {
+		logger.Global().Warn("failed to parse expense decimal from database",
+			logger.String("value", s), logger.Error(err))
+		return 0
+	}
 	return v
 }
 

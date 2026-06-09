@@ -65,7 +65,12 @@ func decimalToFloat(s string) float64 {
 	if s == "" {
 		return 0
 	}
-	f, _ := strconv.ParseFloat(s, 64)
+	f, err := strconv.ParseFloat(s, 64)
+	if err != nil {
+		logger.Global().Warn("failed to parse menu decimal from database",
+			logger.String("value", s), logger.Error(err))
+		return 0
+	}
 	return f
 }
 
