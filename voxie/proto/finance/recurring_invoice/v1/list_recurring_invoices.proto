@@ -2,21 +2,13 @@ syntax = "proto3";
 
 package finance.recurring_invoice.v1;
 
-import "common/pagination/v1/pagination.proto";
 import "finance/recurring_invoice/v1/types.proto";
 
 option go_package = "github.com/voxire/voxie/gen/go/finance/recurring_invoice/v1";
 
-message ListRecurringInvoicesRequest {
-  // pagination is the pagination value for this contract.
-  common.pagination.v1.PaginationRequest pagination = 1;
-  // active_only is the active only value for this contract.
-  bool active_only = 2;
-}
+message ListRecurringInvoicesRequest {}
 
 message ListRecurringInvoicesResponse {
-  // invoices is the invoices value for this contract.
-  repeated RecurringInvoice invoices = 1;
-  // pagination is the pagination value for this contract.
-  common.pagination.v1.PaginationResponse pagination = 2;
+  // recurring_invoices is the full set of recurring invoices for the owner.
+  repeated RecurringInvoice recurring_invoices = 1;
 }

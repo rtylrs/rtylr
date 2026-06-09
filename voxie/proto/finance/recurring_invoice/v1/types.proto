@@ -9,42 +9,18 @@ option go_package = "github.com/voxire/voxie/gen/go/finance/recurring_invoice/v1
 message RecurringInvoice {
   // id is the unique identifier for the resource.
   int64 id = 1;
-  // customer_id is the customer id value for this contract.
-  int64 customer_id = 2;
-  // customer_name is the customer name value for this contract.
-  string customer_name = 3;
-  // frequency is the frequency value for this contract.
-  // weekly, monthly, quarterly, yearly
+  // owner_id is the business owner for this recurring invoice.
+  int64 owner_id = 2;
+  // template_invoice_id is the invoice used as the recurring invoice template.
+  int64 template_invoice_id = 3;
+  // frequency is how often the recurring invoice should be generated.
   string frequency = 4;
-  // lines is the lines value for this contract.
-  repeated RecurringInvoiceLine lines = 5;
-  // subtotal is the subtotal value for this contract.
-  double subtotal = 6;
-  // tax is the tax value for this contract.
-  double tax = 7;
-  // total is the total number of matching records.
-  double total = 8;
-  // next_date is the next date value for this contract.
-  string next_date = 9;
-  // last_generated_at is the last generated at value for this contract.
-  string last_generated_at = 10;
+  // next_invoice_date is the next generation date.
+  string next_invoice_date = 5;
+  // end_date is when recurring generation should stop; absent when open-ended.
+  optional string end_date = 6;
   // is_active is the is active value for this contract.
-  bool is_active = 11;
-  // notes is the notes value for this contract.
-  string notes = 12;
+  bool is_active = 7;
   // created_at is when the record was created.
-  string created_at = 13;
-}
-
-message RecurringInvoiceLine {
-  // description is the description value for this contract.
-  string description = 1;
-  // quantity is the quantity value for this contract.
-  int32 quantity = 2;
-  // unit_price is the unit price value for this contract.
-  double unit_price = 3;
-  // tax_rate is the tax rate value for this contract.
-  double tax_rate = 4;
-  // total is the total number of matching records.
-  double total = 5;
+  string created_at = 8;
 }
