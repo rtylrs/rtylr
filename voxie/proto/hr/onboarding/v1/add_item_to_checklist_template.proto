@@ -1,0 +1,31 @@
+syntax = "proto3";
+
+package hr.onboarding.v1;
+
+import "buf/validate/validate.proto";
+import "hr/onboarding/v1/types.proto";
+
+option go_package = "github.com/voxire/voxie/gen/go/hr/onboarding/v1";
+
+// ── Add Item To Checklist Template ───────────────────────────────
+
+message AddItemToChecklistTemplateRequest {
+  // title is the checklist item title.
+  string title = 1 [
+    (buf.validate.field).required = true,
+    (buf.validate.field).string.min_len = 1
+  ];
+  // description is the optional supporting text for the checklist item.
+  optional string description = 2;
+  // assignee_role is the role responsible for completing this item.
+  optional string assignee_role = 3;
+  // due_offset_days is the number of days after trigger date by which this item is due.
+  int32 due_offset_days = 4;
+  // requires_attachment indicates whether completion needs an uploaded attachment.
+  bool requires_attachment = 5;
+}
+
+message AddItemToChecklistTemplateResponse {
+  // item is the checklist template item that was created.
+  ChecklistItemPayload item = 1;
+}
