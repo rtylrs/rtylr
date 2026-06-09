@@ -10,8 +10,10 @@ import type { EmployeeChecklistPayload } from './types';
 export interface TriggerChecklistRequest {
   /** Employee to trigger the checklist for. */
   employeeId: number;
-  /** Event type that is triggering (onboarding | offboarding). */
-  triggerType: string;
+  /** template_id identifies the checklist template to trigger. */
+  templateId: number;
+  /** trigger_date is the date the checklist starts, formatted as YYYY-MM-DD. */
+  triggerDate: string;
 }
 
 export interface TriggerChecklistResponse {
