@@ -10,8 +10,8 @@ import type { ChecklistTemplatePayload } from './types';
 export interface CreateChecklistTemplateRequest {
   /** Human-readable name for the template. */
   name: string;
-  /** Event that triggers this checklist (onboarding | offboarding). */
-  triggerType: string;
+  /** trigger_type is the event that triggers this checklist (onboarding | offboarding). */
+  triggerType?: string | undefined;
   /** Role this template applies to; absent if it applies to all roles. */
   roleId?: number | undefined;
 }

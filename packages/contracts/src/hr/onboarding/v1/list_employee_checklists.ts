@@ -8,8 +8,12 @@
 import type { EmployeeChecklistPayload } from './types';
 
 export interface ListEmployeeChecklistsRequest {
-  /** Filter by employee; absent to include all employees. */
-  employeeId?: number | undefined;
+  /** employee_id is the employee whose checklists should be listed. */
+  employeeId: number;
+  /** limit is the maximum number of checklists to return. */
+  limit?: number | undefined;
+  /** offset is the number of checklists to skip before returning results. */
+  offset?: number | undefined;
 }
 
 export interface ListEmployeeChecklistsResponse {

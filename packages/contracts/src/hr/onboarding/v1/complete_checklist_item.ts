@@ -5,16 +5,10 @@
 // source: hr/onboarding/v1/complete_checklist_item.proto
 
 /* eslint-disable */
-import type { EmployeeChecklistItemPayload } from './types';
 
-export interface CompleteChecklistItemRequest {
-  /** ID of the employee checklist item to mark as complete. */
-  itemId: number;
-  /** URL of the uploaded attachment; absent if not required. */
-  attachmentUrl?: string | undefined;
-}
+export interface CompleteChecklistItemRequest {}
 
 export interface CompleteChecklistItemResponse {
-  /** The updated employee checklist item. */
-  item: EmployeeChecklistItemPayload | undefined;
+  /** success indicates the checklist item was marked complete. */
+  success: boolean;
 }
