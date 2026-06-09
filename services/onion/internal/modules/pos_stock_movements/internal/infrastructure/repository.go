@@ -226,20 +226,27 @@ func (r *Repository) GetInventoryItem(ctx context.Context, businessID, branchID,
 	return item, nil
 }
 
-func decimalToFloat(s interface{}) float64 {
+func decimalToFloat(s any) float64 {
+	var str string
 	switch v := s.(type) {
 	case string:
-		if v == "" {
-			return 0
-		}
-		f, _ := strconv.ParseFloat(v, 64)
-		return f
+		str = v
 	case []byte:
-		f, _ := strconv.ParseFloat(string(v), 64)
-		return f
+		str = string(v)
 	default:
 		return 0
 	}
+	if str == "" {
+		return 0
+	}
+	f, err := strconv.ParseFloat(str, 64)
+	if err != nil {
+		// Don't silently coerce corrupt decimal data to 0 — surface it.
+		logger.Global().Warn("failed to parse decimal from database",
+			logger.String("value", str), logger.Error(err))
+		return 0
+	}
+	return f
 }
 
 func floatToDecimal(f float64) string {
