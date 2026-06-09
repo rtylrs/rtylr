@@ -135,7 +135,12 @@ func decimalToFloat(s string) float64 {
 	if s == "" {
 		return 0
 	}
-	f, _ := strconv.ParseFloat(s, 64)
+	f, err := strconv.ParseFloat(s, 64)
+	if err != nil {
+		logger.Global().Warn("failed to parse loyalty decimal from database",
+			logger.String("value", s), logger.Error(err))
+		return 0
+	}
 	return f
 }
 
@@ -143,23 +148,30 @@ func floatToDecimal(f float64) string {
 	return fmt.Sprintf("%.2f", f)
 }
 
-func interfaceToInt(v interface{}) int64 {
+func interfaceToInt(v any) int64 {
 	if v == nil {
 		return 0
 	}
 	switch val := v.(type) {
-	case []byte:
-		n, _ := strconv.ParseInt(string(val), 10, 64)
-		return n
-	case string:
-		n, _ := strconv.ParseInt(val, 10, 64)
-		return n
 	case int64:
 		return val
 	case float64:
 		return int64(val)
-	default:
-		n, _ := strconv.ParseInt(fmt.Sprintf("%v", v), 10, 64)
-		return n
 	}
+	var str string
+	switch val := v.(type) {
+	case []byte:
+		str = string(val)
+	case string:
+		str = val
+	default:
+		str = fmt.Sprintf("%v", v)
+	}
+	n, err := strconv.ParseInt(str, 10, 64)
+	if err != nil {
+		logger.Global().Warn("failed to parse loyalty int from database",
+			logger.String("value", str), logger.Error(err))
+		return 0
+	}
+	return n
 }
