@@ -63,9 +63,12 @@ func (h *RegisterHandler) Serve(ctx context.Context, req *RegisterRequest) (Regi
 	}
 
 	if bizErr := h.UserService.CreateBusinessForUser(ctx, userId, businessName); bizErr != nil {
-		// Non-fatal: user is created but business creation failed
-		// Log it but don't block registration
-		_ = bizErr
+		// Non-fatal: the user is created even if business bootstrap fails, but
+		// surface the error rather than silently discarding it.
+		logger.Ctx(ctx).Warn("failed to create business for new user",
+			logger.String("business_name", businessName),
+			logger.Error(bizErr),
+		)
 	}
 
 	// Assign subscription plan after registration
