@@ -54,13 +54,13 @@ func staffFromRow(row sqlc.HrStaff) domain.Staff {
 		s.Status = string(row.Status.HrStaffStatus)
 	}
 	if row.Salary.Valid {
-		s.Salary, _ = strconv.ParseFloat(row.Salary.String, 64)
+		s.Salary = parseDecimal(row.Salary.String)
 	}
 	if row.HourlyRate.Valid {
-		s.HourlyRate, _ = strconv.ParseFloat(row.HourlyRate.String, 64)
+		s.HourlyRate = parseDecimal(row.HourlyRate.String)
 	}
 	if row.OvertimeRate.Valid {
-		s.OvertimeRate, _ = strconv.ParseFloat(row.OvertimeRate.String, 64)
+		s.OvertimeRate = parseDecimal(row.OvertimeRate.String)
 	}
 	s.StartDate = row.StartDate
 	if row.EndDate.Valid {
@@ -416,4 +416,19 @@ func parseNullDate(s string) sql.NullTime {
 		return sql.NullTime{Time: t, Valid: true}
 	}
 	return sql.NullTime{}
+}
+
+// parseDecimal converts a DB decimal string to float64, logging corrupt
+// values instead of silently coercing them to 0.
+func parseDecimal(s string) float64 {
+	if s == "" {
+		return 0
+	}
+	f, err := strconv.ParseFloat(s, 64)
+	if err != nil {
+		logger.Global().Warn("failed to parse staff decimal from database",
+			logger.String("value", s), logger.Error(err))
+		return 0
+	}
+	return f
 }

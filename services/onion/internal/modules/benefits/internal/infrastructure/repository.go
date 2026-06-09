@@ -44,10 +44,10 @@ func (r *Repository) List(ctx context.Context, ownerID int64) ([]domain.BenefitP
 			item.Provider = row.Provider.String
 		}
 		if row.CostEmployer.Valid {
-			item.CostEmployer, _ = strconv.ParseFloat(row.CostEmployer.String, 64)
+			item.CostEmployer = parseDecimal(row.CostEmployer.String)
 		}
 		if row.CostEmployee.Valid {
-			item.CostEmployee, _ = strconv.ParseFloat(row.CostEmployee.String, 64)
+			item.CostEmployee = parseDecimal(row.CostEmployee.String)
 		}
 		if row.IsActive.Valid {
 			item.IsActive = row.IsActive.Bool
@@ -80,4 +80,19 @@ func (r *Repository) Create(ctx context.Context, ownerID int64, input domain.Ben
 		return 0, err
 	}
 	return res.LastInsertId()
+}
+
+// parseDecimal converts a DB decimal string to float64, logging corrupt
+// values instead of silently coercing them to 0.
+func parseDecimal(s string) float64 {
+	if s == "" {
+		return 0
+	}
+	f, err := strconv.ParseFloat(s, 64)
+	if err != nil {
+		logger.Global().Warn("failed to parse benefit decimal from database",
+			logger.String("value", s), logger.Error(err))
+		return 0
+	}
+	return f
 }

@@ -196,7 +196,12 @@ func overtimeConfigFromRow(row sqlc.HrOvertimeConfig) domain.OvertimeConfigRecor
 }
 
 func parseFloat(s string) float64 {
-	f, _ := strconv.ParseFloat(s, 64)
+	f, err := strconv.ParseFloat(s, 64)
+	if err != nil {
+		logger.Global().Warn("failed to parse overtime decimal from database",
+			logger.String("value", s), logger.Error(err))
+		return 0
+	}
 	return f
 }
 

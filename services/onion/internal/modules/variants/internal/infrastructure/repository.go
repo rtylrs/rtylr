@@ -158,9 +158,9 @@ func variantFromRow(row sqlc.ErpProductVariant) domain.Variant {
 		v.Barcode = row.Barcode.String
 	}
 
-	v.CostPrice, _ = strconv.ParseFloat(row.CostPrice, 64)
-	v.SalePrice, _ = strconv.ParseFloat(row.SalePrice, 64)
-	v.StockQuantity, _ = strconv.ParseFloat(row.StockQuantity, 64)
+	v.CostPrice = parseDecimal(row.CostPrice)
+	v.SalePrice = parseDecimal(row.SalePrice)
+	v.StockQuantity = parseDecimal(row.StockQuantity)
 
 	if row.Attributes != nil {
 		v.Attributes = string(row.Attributes)
@@ -191,4 +191,19 @@ func nullJSON(s string) json.RawMessage {
 	}
 
 	return json.RawMessage(s)
+}
+
+// parseDecimal converts a DB decimal string to float64, logging corrupt
+// values instead of silently coercing them to 0.
+func parseDecimal(s string) float64 {
+	if s == "" {
+		return 0
+	}
+	f, err := strconv.ParseFloat(s, 64)
+	if err != nil {
+		logger.Global().Warn("failed to parse product decimal from database",
+			logger.String("value", s), logger.Error(err))
+		return 0
+	}
+	return f
 }

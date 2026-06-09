@@ -129,9 +129,9 @@ func (r *Repository) getStockTakeItemsBatch(ctx context.Context, stockTakes []do
 			logger.Ctx(ctx).Error("Failed to scan stock take item row", logger.Error(err))
 			return nil, err
 		}
-		item.ExpectedQty, _ = strconv.ParseFloat(expectedQty, 64)
-		item.CountedQty, _ = strconv.ParseFloat(countedQty, 64)
-		item.Variance, _ = strconv.ParseFloat(variance, 64)
+		item.ExpectedQty = parseDecimal(expectedQty)
+		item.CountedQty = parseDecimal(countedQty)
+		item.Variance = parseDecimal(variance)
 		if createdAt.Valid {
 			item.CreatedAt = createdAt.Time.Format("2006-01-02T15:04:05Z07:00")
 		}
@@ -388,4 +388,19 @@ func nullString(s string) sql.NullString {
 
 func nullInt64(v int64) sql.NullInt64 {
 	return sql.NullInt64{Int64: v, Valid: v != 0}
+}
+
+// parseDecimal converts a DB decimal string to float64, logging corrupt
+// values instead of silently coercing them to 0.
+func parseDecimal(s string) float64 {
+	if s == "" {
+		return 0
+	}
+	f, err := strconv.ParseFloat(s, 64)
+	if err != nil {
+		logger.Global().Warn("failed to parse stock-take decimal from database",
+			logger.String("value", s), logger.Error(err))
+		return 0
+	}
+	return f
 }

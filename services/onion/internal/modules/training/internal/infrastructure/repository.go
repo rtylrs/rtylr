@@ -41,7 +41,7 @@ func (r *Repository) List(ctx context.Context, ownerID int64) ([]domain.Training
 			item.Description = row.Description.String
 		}
 		if row.DurationHours.Valid {
-			item.DurationHours, _ = strconv.ParseFloat(row.DurationHours.String, 64)
+			item.DurationHours = parseDecimal(row.DurationHours.String)
 		}
 		if row.IsRequired.Valid {
 			item.IsRequired = row.IsRequired.Bool
@@ -67,4 +67,19 @@ func (r *Repository) Create(ctx context.Context, ownerID int64, input domain.Tra
 		return 0, err
 	}
 	return res.LastInsertId()
+}
+
+// parseDecimal converts a DB decimal string to float64, logging corrupt
+// values instead of silently coercing them to 0.
+func parseDecimal(s string) float64 {
+	if s == "" {
+		return 0
+	}
+	f, err := strconv.ParseFloat(s, 64)
+	if err != nil {
+		logger.Global().Warn("failed to parse training decimal from database",
+			logger.String("value", s), logger.Error(err))
+		return 0
+	}
+	return f
 }

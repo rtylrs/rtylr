@@ -122,7 +122,7 @@ func (r *Repository) getTransferItemsBatch(ctx context.Context, transfers []doma
 			logger.Ctx(ctx).Error("Failed to scan transfer item row", logger.Error(err))
 			return nil, err
 		}
-		item.Quantity, _ = strconv.ParseFloat(quantity, 64)
+		item.Quantity = parseDecimal(quantity)
 		if createdAt.Valid {
 			item.CreatedAt = createdAt.Time
 		}
@@ -312,4 +312,19 @@ func (r *Repository) receiveTransfer(ctx context.Context, ownerID, id int64) (er
 
 func nullString(s string) sql.NullString {
 	return sql.NullString{String: s, Valid: s != ""}
+}
+
+// parseDecimal converts a DB decimal string to float64, logging corrupt
+// values instead of silently coercing them to 0.
+func parseDecimal(s string) float64 {
+	if s == "" {
+		return 0
+	}
+	f, err := strconv.ParseFloat(s, 64)
+	if err != nil {
+		logger.Global().Warn("failed to parse stock-transfer decimal from database",
+			logger.String("value", s), logger.Error(err))
+		return 0
+	}
+	return f
 }
