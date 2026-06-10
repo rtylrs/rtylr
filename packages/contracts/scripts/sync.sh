@@ -8,10 +8,11 @@ CONTRACTS_ROOT="$(cd "$SCRIPT_DIR/.." && pwd)"
 FRONTEND_ROOT="$(cd "$CONTRACTS_ROOT/../.." && pwd)"
 CONTRACTS_SRC="$CONTRACTS_ROOT/src"
 VOXIE_ROOT="$FRONTEND_ROOT/voxie"
-TEMPLATE_FILE="$(mktemp "${TMPDIR:-/tmp}/voxie.ts.XXXXXX.yaml")"
+TEMPLATE_DIR="$(mktemp -d "${TMPDIR:-/tmp}/voxie.ts.XXXXXX")"
+TEMPLATE_FILE="$TEMPLATE_DIR/buf.gen.yaml"
 
 cleanup() {
-  rm -f "$TEMPLATE_FILE"
+  rm -rf "$TEMPLATE_DIR"
 }
 trap cleanup EXIT
 
