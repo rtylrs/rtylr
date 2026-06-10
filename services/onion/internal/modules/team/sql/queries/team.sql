@@ -21,9 +21,13 @@ WHERE owner_id = ?
 ORDER BY created_at DESC;
 
 -- name: UpsertPermission :exec
-INSERT INTO user_app_permissions (owner_id, user_id, apps, role)
-VALUES (?, ?, ?, ?)
-ON DUPLICATE KEY UPDATE apps = VALUES(apps), role = VALUES(role), updated_at = NOW();
+INSERT INTO user_app_permissions (business_id, owner_id, user_id, apps, role)
+VALUES (?, ?, ?, ?, ?)
+ON DUPLICATE KEY UPDATE
+    business_id = VALUES(business_id),
+    apps = VALUES(apps),
+    role = VALUES(role),
+    updated_at = NOW();
 
 -- name: DeactivateUser :exec
 UPDATE user_app_permissions

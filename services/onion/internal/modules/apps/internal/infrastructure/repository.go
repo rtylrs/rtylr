@@ -82,7 +82,13 @@ func (r *Repository) GetUserAllowedApps(ctx context.Context, businessID, userID 
 	query, args, err := sq.
 		Select("apps").
 		From("user_app_permissions").
-		Where(sq.Eq{"business_id": businessID}).
+		Where(sq.Or{
+			sq.Eq{"business_id": businessID},
+			sq.And{
+				sq.Eq{"business_id": nil},
+				sq.Expr("owner_id = (SELECT owner_id FROM businesses WHERE id = ? LIMIT 1)", businessID),
+			},
+		}).
 		Where(sq.Eq{"user_id": userID}).
 		PlaceholderFormat(sq.Question).
 		ToSql()

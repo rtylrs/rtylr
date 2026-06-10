@@ -84,17 +84,18 @@ func (r *Repository) ListPermissions(ctx context.Context, ownerID int64) ([]doma
 	return perms, nil
 }
 
-func (r *Repository) UpsertPermission(ctx context.Context, ownerID, userID int64, apps []string, role domain.Role) error {
+func (r *Repository) UpsertPermission(ctx context.Context, businessID, ownerID, userID int64, apps []string, role domain.Role) error {
 	appsJSON, err := json.Marshal(apps)
 	if err != nil {
 		return err
 	}
 
 	err = r.queries.UpsertPermission(ctx, sqlc.UpsertPermissionParams{
-		OwnerID: ownerID,
-		UserID:  userID,
-		Apps:    appsJSON,
-		Role:    sqlc.NullUserAppPermissionsRole{UserAppPermissionsRole: sqlc.UserAppPermissionsRole(role), Valid: true},
+		BusinessID: sql.NullInt64{Int64: businessID, Valid: businessID > 0},
+		OwnerID:    ownerID,
+		UserID:     userID,
+		Apps:       appsJSON,
+		Role:       sqlc.NullUserAppPermissionsRole{UserAppPermissionsRole: sqlc.UserAppPermissionsRole(role), Valid: true},
 	})
 	if err != nil {
 		logger.Ctx(ctx).Error("Failed to upsert user app permission", logger.Error(err))

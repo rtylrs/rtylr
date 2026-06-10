@@ -276,7 +276,7 @@ func (s *Service) InviteUser(ctx context.Context, ownerID, businessID int64, inp
 		apps = []string{}
 	}
 
-	if err := s.repo.UpsertPermission(ctx, ownerID, userID, apps, role); err != nil {
+	if err := s.repo.UpsertPermission(ctx, businessID, ownerID, userID, apps, role); err != nil {
 		return 0, "", err
 	}
 
@@ -463,7 +463,7 @@ func (s *Service) UpdatePermissions(ctx context.Context, actorID, businessID int
 		}
 	}
 
-	if err := s.repo.UpsertPermission(ctx, ownerID, input.UserID, apps, role); err != nil {
+	if err := s.repo.UpsertPermission(ctx, businessID, ownerID, input.UserID, apps, role); err != nil {
 		return err
 	}
 

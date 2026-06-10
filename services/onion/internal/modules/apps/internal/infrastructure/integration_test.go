@@ -132,6 +132,59 @@ func TestGetUserAllowedApps_StaffUser(t *testing.T) {
 	}
 }
 
+func TestGetUserAllowedApps_FallsBackForLegacyNullBusinessID(t *testing.T) {
+	db := testutil.OpenDB(t)
+	repo := infrastructure.NewRepository(db)
+	ctx := context.Background()
+
+	ownerID := int64(880001)
+	res, err := db.ExecContext(ctx,
+		"INSERT INTO businesses (name, owner_id) VALUES (?, ?)",
+		"Legacy App Permissions", ownerID,
+	)
+	if err != nil {
+		t.Fatalf("insert business: %v", err)
+	}
+	businessID, err := res.LastInsertId()
+	if err != nil {
+		t.Fatalf("business id: %v", err)
+	}
+	t.Cleanup(func() {
+		_, _ = db.ExecContext(context.Background(), "DELETE FROM businesses WHERE id = ?", businessID)
+	})
+
+	res, err = db.ExecContext(ctx,
+		"INSERT INTO users (email, password_hash, full_name) VALUES (?, ?, ?)",
+		"legacy-apps-member@example.com", "", "Legacy Apps Member",
+	)
+	if err != nil {
+		t.Fatalf("insert user: %v", err)
+	}
+	userID, err := res.LastInsertId()
+	if err != nil {
+		t.Fatalf("user id: %v", err)
+	}
+	t.Cleanup(func() {
+		_, _ = db.ExecContext(context.Background(), "DELETE FROM users WHERE id = ?", userID)
+	})
+
+	_, err = db.ExecContext(ctx,
+		"INSERT INTO user_app_permissions (business_id, owner_id, user_id, apps, role) VALUES (NULL, ?, ?, ?, ?)",
+		ownerID, userID, `["pos","finance"]`, "staff",
+	)
+	if err != nil {
+		t.Fatalf("insert legacy permission: %v", err)
+	}
+	t.Cleanup(func() {
+		_, _ = db.ExecContext(context.Background(), "DELETE FROM user_app_permissions WHERE owner_id = ? AND user_id = ?", ownerID, userID)
+	})
+
+	apps := repo.GetUserAllowedApps(ctx, businessID, userID)
+	if len(apps) != 2 || apps[0] != "pos" || apps[1] != "finance" {
+		t.Fatalf("expected legacy apps [pos finance], got %#v", apps)
+	}
+}
+
 func TestGetEnabledAddons_ZeroBusinessID(t *testing.T) {
 	db := testutil.OpenDB(t)
 	repo := infrastructure.NewRepository(db)

@@ -69,7 +69,7 @@ func UserPermissions(userID int64) string {
 }
 
 func UserApps(userID int64) string {
-	return fmt.Sprintf("%suser:%d:apps", Namespace, userID)
+	return fmt.Sprintf("%suser:%d:apps:v2", Namespace, userID)
 }
 
 func UserPrefix(userID int64) string {

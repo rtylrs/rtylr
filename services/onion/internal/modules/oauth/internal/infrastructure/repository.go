@@ -227,7 +227,7 @@ func (r *Repository) GetUserBusinessIDAndRole(ctx context.Context, userID int64)
 	query, args, err := sq.
 		Select("u.business_id", "COALESCE(uap.role, '')").
 		From("users u").
-		LeftJoin("user_app_permissions uap ON uap.user_id = u.id").
+		LeftJoin("user_app_permissions uap ON uap.user_id = u.id AND uap.business_id = u.business_id").
 		Where(sq.Eq{"u.id": userID}).
 		Limit(1).
 		PlaceholderFormat(sq.Question).
