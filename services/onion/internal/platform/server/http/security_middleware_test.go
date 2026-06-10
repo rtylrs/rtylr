@@ -14,6 +14,9 @@ func TestIsMaliciousPath(t *testing.T) {
 		// Sub-segments of legitimate API paths must NOT match.
 		{"/hr/setup/status", false},
 		{"/api/admin-panel", false},
+		{"/console", false},
+		{"/console/stats", false},
+		{"/console/resources", false},
 
 		// First-segment matches against the pattern list ARE blocked.
 		{"/admin/settings", true},

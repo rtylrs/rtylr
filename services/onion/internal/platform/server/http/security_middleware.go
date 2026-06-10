@@ -413,6 +413,10 @@ var suspiciousParams = []string{
 	"onunload",
 }
 
+var maliciousPathAllowedPrefixes = []string{
+	"/console",
+}
+
 func SecurityMiddleware() MiddlewareFunc {
 	batcher := getBatcher()
 
@@ -480,6 +484,13 @@ func SecurityMiddleware() MiddlewareFunc {
 
 func isMaliciousPath(path string) bool {
 	pathLower := strings.ToLower(path)
+	for _, prefix := range maliciousPathAllowedPrefixes {
+		prefixLower := strings.ToLower(prefix)
+		if pathLower == prefixLower || strings.HasPrefix(pathLower, prefixLower+"/") {
+			return false
+		}
+	}
+
 	// Split into segments so that /hr/setup/status does not match the /setup pattern.
 	// A pattern like "/setup" should only block a request whose path IS "/setup" or
 	// starts with "/setup/" — not one where "setup" appears as a sub-segment of a
