@@ -225,9 +225,13 @@ func (r *Repository) GetUserBusinessIDAndRole(ctx context.Context, userID int64)
 	var role string
 
 	query, args, err := sq.
-		Select("u.business_id", "COALESCE(uap.role, '')").
+		Select(
+			"u.business_id",
+			"CASE WHEN b.owner_id = u.id THEN 'owner' ELSE COALESCE(uap.role, 'staff') END",
+		).
 		From("users u").
-		LeftJoin("user_app_permissions uap ON uap.user_id = u.id AND uap.business_id = u.business_id").
+		LeftJoin("businesses b ON b.id = u.business_id").
+		LeftJoin("user_app_permissions uap ON uap.user_id = u.id AND (uap.business_id = u.business_id OR (uap.business_id IS NULL AND uap.owner_id = b.owner_id))").
 		Where(sq.Eq{"u.id": userID}).
 		Limit(1).
 		PlaceholderFormat(sq.Question).

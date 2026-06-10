@@ -217,6 +217,110 @@ func TestGetUserBusinessIDAndRole_UnknownUserReturnsZeroValues(t *testing.T) {
 	_ = role
 }
 
+func TestGetUserBusinessIDAndRole_OwnerRole(t *testing.T) {
+	db := testutil.OpenDB(t)
+	repo := infrastructure.NewRepository(db)
+	ctx := context.Background()
+
+	res, err := db.ExecContext(ctx,
+		"INSERT INTO users (email, password_hash, full_name) VALUES (?, ?, ?)",
+		"oauth-owner@example.com", "", "OAuth Owner",
+	)
+	if err != nil {
+		t.Fatalf("insert owner: %v", err)
+	}
+	ownerID, err := res.LastInsertId()
+	if err != nil {
+		t.Fatalf("owner id: %v", err)
+	}
+	t.Cleanup(func() {
+		_, _ = db.ExecContext(context.Background(), "DELETE FROM users WHERE id = ?", ownerID)
+	})
+
+	res, err = db.ExecContext(ctx,
+		"INSERT INTO businesses (name, owner_id) VALUES (?, ?)",
+		"OAuth Owner Business", ownerID,
+	)
+	if err != nil {
+		t.Fatalf("insert business: %v", err)
+	}
+	businessID, err := res.LastInsertId()
+	if err != nil {
+		t.Fatalf("business id: %v", err)
+	}
+	t.Cleanup(func() {
+		_, _ = db.ExecContext(context.Background(), "DELETE FROM businesses WHERE id = ?", businessID)
+	})
+
+	if _, err := db.ExecContext(ctx, "UPDATE users SET business_id = ? WHERE id = ?", businessID, ownerID); err != nil {
+		t.Fatalf("set owner business: %v", err)
+	}
+
+	gotBusinessID, role, err := repo.GetUserBusinessIDAndRole(ctx, ownerID)
+	if err != nil {
+		t.Fatalf("GetUserBusinessIDAndRole: %v", err)
+	}
+	if gotBusinessID != businessID || role != "owner" {
+		t.Fatalf("expected business=%d role=owner, got business=%d role=%q", businessID, gotBusinessID, role)
+	}
+}
+
+func TestGetUserBusinessIDAndRole_LegacyPermissionRole(t *testing.T) {
+	db := testutil.OpenDB(t)
+	repo := infrastructure.NewRepository(db)
+	ctx := context.Background()
+
+	ownerID := int64(880002)
+	res, err := db.ExecContext(ctx,
+		"INSERT INTO businesses (name, owner_id) VALUES (?, ?)",
+		"OAuth Legacy Permission Business", ownerID,
+	)
+	if err != nil {
+		t.Fatalf("insert business: %v", err)
+	}
+	businessID, err := res.LastInsertId()
+	if err != nil {
+		t.Fatalf("business id: %v", err)
+	}
+	t.Cleanup(func() {
+		_, _ = db.ExecContext(context.Background(), "DELETE FROM businesses WHERE id = ?", businessID)
+	})
+
+	res, err = db.ExecContext(ctx,
+		"INSERT INTO users (business_id, email, password_hash, full_name) VALUES (?, ?, ?, ?)",
+		businessID, "oauth-legacy-member@example.com", "", "OAuth Legacy Member",
+	)
+	if err != nil {
+		t.Fatalf("insert user: %v", err)
+	}
+	userID, err := res.LastInsertId()
+	if err != nil {
+		t.Fatalf("user id: %v", err)
+	}
+	t.Cleanup(func() {
+		_, _ = db.ExecContext(context.Background(), "DELETE FROM users WHERE id = ?", userID)
+	})
+
+	_, err = db.ExecContext(ctx,
+		"INSERT INTO user_app_permissions (business_id, owner_id, user_id, apps, role) VALUES (NULL, ?, ?, ?, ?)",
+		ownerID, userID, `["pos"]`, "admin",
+	)
+	if err != nil {
+		t.Fatalf("insert legacy permission: %v", err)
+	}
+	t.Cleanup(func() {
+		_, _ = db.ExecContext(context.Background(), "DELETE FROM user_app_permissions WHERE owner_id = ? AND user_id = ?", ownerID, userID)
+	})
+
+	gotBusinessID, role, err := repo.GetUserBusinessIDAndRole(ctx, userID)
+	if err != nil {
+		t.Fatalf("GetUserBusinessIDAndRole: %v", err)
+	}
+	if gotBusinessID != businessID || role != "admin" {
+		t.Fatalf("expected business=%d role=admin, got business=%d role=%q", businessID, gotBusinessID, role)
+	}
+}
+
 func TestRevokeToken_NonExistentTokenIsNoOp(t *testing.T) {
 	db := testutil.OpenDB(t)
 	repo := infrastructure.NewRepository(db)
