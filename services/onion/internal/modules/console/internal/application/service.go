@@ -3,16 +3,12 @@ package application
 import (
 	"context"
 	"database/sql"
-	"errors"
 	"fmt"
 	"time"
-
-	"github.com/golang-jwt/jwt/v5"
 
 	"github.com/voxire/onion/internal/modules/console/internal/infrastructure"
 	"github.com/voxire/onion/internal/platform/cache/cacher"
 	"github.com/voxire/onion/internal/platform/logger"
-	"github.com/voxire/onion/internal/platform/utils/jwtutils"
 	"github.com/voxire/onion/internal/platform/utils/passwordutils"
 )
 
@@ -30,81 +26,12 @@ func invalidateConsoleScope(ctx context.Context) {
 	}
 }
 
-// consoleClaims is the JWT claims payload for console admin sessions.
-type consoleClaims struct {
-	UserID int64  `json:"user_id"`
-	Role   string `json:"role"`
-	jwt.RegisteredClaims
-}
-
-func (c *consoleClaims) SetIssuer(issuer string) {
-	c.Issuer = issuer
-}
-
-func (c *consoleClaims) SetExpiration(exp time.Time) {
-	if !exp.IsZero() {
-		c.ExpiresAt = jwt.NewNumericDate(exp)
-	}
-}
-
-var (
-	ErrInvalidCredentials = errors.New("invalid email or password")
-	ErrNotConsoleAdmin    = errors.New("account does not have console access")
-	ErrUserBanned         = errors.New("account is banned")
-)
-
 type Service struct {
 	repo *infrastructure.Repository
-	JWT  *jwtutils.JWTHelper
 }
 
 func NewService(_ context.Context, db *sql.DB) *Service {
 	return &Service{repo: infrastructure.NewRepository(db)}
-}
-
-func (s *Service) Initialize(ctx context.Context, jwtSecret string, jwtDuration time.Duration) {
-	s.JWT = jwtutils.NewJWTHelperWithDuration(jwtSecret, "console-panel", jwtDuration)
-	_ = ctx
-}
-
-// ── Auth ──────────────────────────────────────────────────────────────────────
-
-type LoginResult struct {
-	Token  string
-	UserID int64
-	Email  string
-	Name   string
-}
-
-func (s *Service) Login(ctx context.Context, email, password string) (*LoginResult, error) {
-	user, err := s.repo.GetUserByEmail(ctx, email)
-	if err != nil {
-		return nil, ErrInvalidCredentials
-	}
-
-	if !passwordutils.CheckPasswordHash(password, user.PasswordHash) {
-		return nil, ErrInvalidCredentials
-	}
-
-	if !user.IsConsoleAdmin {
-		return nil, ErrNotConsoleAdmin
-	}
-
-	if user.IsBanned {
-		return nil, ErrUserBanned
-	}
-
-	token, err := s.JWT.CreateJWT(&consoleClaims{UserID: user.ID, Role: "console_admin"})
-	if err != nil {
-		return nil, err
-	}
-
-	name := ""
-	if user.FullName.Valid {
-		name = user.FullName.String
-	}
-
-	return &LoginResult{Token: token, UserID: user.ID, Email: user.Email, Name: name}, nil
 }
 
 // ── Users ─────────────────────────────────────────────────────────────────────

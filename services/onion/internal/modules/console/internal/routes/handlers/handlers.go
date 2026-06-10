@@ -2,7 +2,6 @@ package handlers
 
 import (
 	"context"
-	"errors"
 	"net/http"
 	"time"
 
@@ -22,47 +21,6 @@ func requireConsoleAdmin(ctx context.Context) *errorModels.ServerError {
 		return &errorModels.ServerError{Code: http.StatusForbidden, Message: "Console admin access required"}
 	}
 	return nil
-}
-
-// ── Auth ──────────────────────────────────────────────────────────────────────
-
-type LoginRequest struct {
-	Email    string `json:"email"`
-	Password string `json:"password"`
-}
-
-type LoginResponse struct {
-	Token   string `json:"token"`
-	UserID  int64  `json:"user_id"`
-	Email   string `json:"email"`
-	Name    string `json:"name"`
-	Message string `json:"message"`
-}
-
-type LoginHandler struct{ Service *application.Service }
-
-func (h *LoginHandler) Validate(_ context.Context, req *LoginRequest) *errorModels.ServerError {
-	if req.Email == "" || req.Password == "" {
-		return &errorModels.ServerError{Code: http.StatusBadRequest, Message: "Email and password are required"}
-	}
-	return nil
-}
-
-func (h *LoginHandler) Serve(ctx context.Context, req *LoginRequest) (LoginResponse, *errorModels.ServerError) {
-	result, err := h.Service.Login(ctx, req.Email, req.Password)
-	if err != nil {
-		if errors.Is(err, application.ErrInvalidCredentials) {
-			return LoginResponse{}, &errorModels.ServerError{Code: http.StatusUnauthorized, Message: "Invalid email or password"}
-		}
-		if errors.Is(err, application.ErrNotConsoleAdmin) {
-			return LoginResponse{}, &errorModels.ServerError{Code: http.StatusForbidden, Message: "Account does not have console access"}
-		}
-		if errors.Is(err, application.ErrUserBanned) {
-			return LoginResponse{}, &errorModels.ServerError{Code: http.StatusForbidden, Message: "Account is banned"}
-		}
-		return LoginResponse{}, &errorModels.ServerError{Code: http.StatusInternalServerError, Message: "Login failed"}
-	}
-	return LoginResponse{Token: result.Token, UserID: result.UserID, Email: result.Email, Name: result.Name, Message: "Login successful"}, nil
 }
 
 // ── Stats ─────────────────────────────────────────────────────────────────────

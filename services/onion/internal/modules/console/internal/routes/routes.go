@@ -17,12 +17,6 @@ import (
 )
 
 func RegisterRoutes(ctx context.Context, router *chi.Mux, service *application.Service) {
-	// Auth (anonymous)
-	serverHttp.RegisterPOSTWithValidation[handlers.LoginRequest, handlers.LoginResponse](
-		ctx, router, []string{"/console/auth/login"},
-		&handlers.LoginHandler{Service: service},
-	)
-
 	// Stats
 	serverHttp.RegisterGET[handlers.StatsRequest, handlers.StatsResponse](
 		ctx, router, []string{"/console/stats"},
