@@ -8,6 +8,23 @@
  * auto content scanner in monorepo setups. */
 @source '../../../packages/**/*.{ts,tsx}';
 
+/* Brand/semantic color tokens ported from @voxire/tailwind-config. Without
+ * these, the shared @voxire/ui Button (bg-primary, ring-ring, bg-destructive,
+ * …) resolves to nothing and renders unstyled/black. */
+@theme {
+  --color-primary: #040428;
+  --color-primary-foreground: #ffffff;
+  --color-secondary: #4485c4;
+  --color-secondary-foreground: #ffffff;
+  --color-accent: #03aed2;
+  --color-accent-foreground: #ffffff;
+  --color-destructive: #dc2626;
+  --color-destructive-foreground: #ffffff;
+  --color-success: #059669;
+  --color-warning: #d97706;
+  --color-ring: #03aed2;
+}
+
 @layer base {
   *,
   *::before,
