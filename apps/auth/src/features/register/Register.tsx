@@ -571,6 +571,7 @@ const Register: React.FC = (): React.JSX.Element => {
           <Button
             type="button"
             variant="outline"
+            className="auth-provider-button"
             fullWidth
             height={40}
             onClick={() => handleSocial('google')}
@@ -583,6 +584,7 @@ const Register: React.FC = (): React.JSX.Element => {
           <Button
             type="button"
             variant="outline"
+            className="auth-provider-button"
             fullWidth
             height={40}
             onClick={() => handleSocial('github')}
@@ -595,6 +597,7 @@ const Register: React.FC = (): React.JSX.Element => {
           <Button
             type="button"
             variant="outline"
+            className="auth-provider-button"
             fullWidth
             height={40}
             onClick={() => handleSocial('microsoft')}
@@ -607,6 +610,7 @@ const Register: React.FC = (): React.JSX.Element => {
           <Button
             type="button"
             variant="outline"
+            className="auth-provider-button"
             fullWidth
             height={40}
             onClick={() => handleSocial('apple')}

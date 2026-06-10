@@ -51,3 +51,37 @@
     -moz-osx-font-smoothing: grayscale;
   }
 }
+
+@layer components {
+  .auth-provider-button.voxire-button {
+    border: 1px solid var(--auth-border) !important;
+    background: var(--auth-card) !important;
+    color: var(--auth-text) !important;
+    box-shadow: 0 1px 2px rgb(17 17 17 / 0.04) !important;
+  }
+
+  .auth-provider-button.voxire-button:hover:not(.voxire-button-disabled) {
+    border-color: #d1d5db !important;
+    background: #f9fafb !important;
+    color: var(--auth-text) !important;
+    box-shadow: 0 6px 16px rgb(17 17 17 / 0.08) !important;
+  }
+
+  .auth-provider-button.voxire-button:active:not(.voxire-button-disabled) {
+    background: #f3f4f6 !important;
+    box-shadow: 0 1px 2px rgb(17 17 17 / 0.04) !important;
+  }
+
+  @media (prefers-color-scheme: dark) {
+    .auth-provider-button.voxire-button:hover:not(.voxire-button-disabled) {
+      border-color: #3f3f46 !important;
+      background: #18181b !important;
+      box-shadow: 0 6px 16px rgb(0 0 0 / 0.28) !important;
+    }
+
+    .auth-provider-button.voxire-button:active:not(.voxire-button-disabled) {
+      background: #27272a !important;
+      box-shadow: 0 1px 2px rgb(0 0 0 / 0.24) !important;
+    }
+  }
+}
