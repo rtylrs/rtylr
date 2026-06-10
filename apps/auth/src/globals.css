@@ -73,6 +73,13 @@
   }
 
   @media (prefers-color-scheme: dark) {
+    .auth-provider-button {
+      /* Elevate above the near-black page and use a clearly visible border so
+         the buttons don't read as flat black blobs in dark mode. */
+      background: #1d1d1d !important;
+      border-color: #3a3a3a !important;
+    }
+
     .auth-provider-button:hover:not(.voxire-button-disabled) {
       border-color: #3f3f46 !important;
       background: #18181b !important;
