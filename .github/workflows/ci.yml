@@ -42,6 +42,12 @@ jobs:
       - name: Install dependencies
         run: pnpm install --frozen-lockfile
 
+      - name: Generate contracts
+        run: pnpm contracts:sync
+
+      - name: Audit request contracts
+        run: pnpm contracts:audit-requests
+
       # Persist Turbo's task cache across runs so unchanged packages skip
       # typecheck/build entirely. Keyed per-commit, falling back to the latest.
       - name: Turbo cache

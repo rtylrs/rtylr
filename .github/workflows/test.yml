@@ -28,5 +28,8 @@ jobs:
       - name: Install dependencies
         run: pnpm install --frozen-lockfile
 
+      - name: Generate contracts
+        run: pnpm contracts:sync
+
       - name: Unit tests
         run: pnpm test
