@@ -59,8 +59,20 @@ func RegisterRoutes(ctx context.Context, r *chi.Mux, memoryService *application.
 		handlers.ChatsRoutes(),
 		&handlers.ChatHistoryHandler{MemoryService: memoryService},
 	)
+	http.RegisterPOST[handlers.ChatsRequest, handlers.ChatsResponse](
+		ctx,
+		r,
+		handlers.ChatsRoutes(),
+		&handlers.ChatHistoryHandler{MemoryService: memoryService},
+	)
 
 	http.RegisterGET[handlers.ChatMessagesRequest, handlers.ChatMessagesResponse](
+		ctx,
+		r,
+		handlers.ChatMessagesRoutes(),
+		&handlers.ChatMessagesHandler{MemoryService: memoryService},
+	)
+	http.RegisterPOST[handlers.ChatMessagesRequest, handlers.ChatMessagesResponse](
 		ctx,
 		r,
 		handlers.ChatMessagesRoutes(),
