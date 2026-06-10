@@ -26,10 +26,6 @@ const AuthShowcase: React.FC = () => {
   const smoothNX = useSpring(mouseNX, { stiffness: 40, damping: 20, mass: 0.8 });
   const smoothNY = useSpring(mouseNY, { stiffness: 40, damping: 20, mass: 0.8 });
 
-  // Testimonial card tilt (max ±8deg)
-  const tiltX = useTransform(smoothNY, [-0.5, 0.5], [6, -6]);
-  const tiltY = useTransform(smoothNX, [-0.5, 0.5], [-8, 8]);
-
   const handleMouseMove = useCallback(
     (e: React.MouseEvent<HTMLElement>): void => {
       const rect = containerRef.current?.getBoundingClientRect();
@@ -234,13 +230,12 @@ const AuthShowcase: React.FC = () => {
         </div>
       </motion.div>
 
-      {/* Bottom: testimonial with 3D tilt */}
+      {/* Bottom: testimonial */}
       <motion.figure
         className="relative z-10 max-w-lg"
         initial={{ opacity: 0, y: 12 }}
         animate={{ opacity: 1, y: 0 }}
         transition={{ duration: 0.7, delay: 0.45, ease: [0.16, 1, 0.3, 1] }}
-        style={{ rotateX: tiltX, rotateY: tiltY, transformPerspective: 800 }}
       >
         <div className="rounded-2xl border border-white/10 bg-white/[0.03] backdrop-blur-sm p-5 xl:p-6">
           <blockquote className="text-[15px] leading-relaxed text-white/80">
