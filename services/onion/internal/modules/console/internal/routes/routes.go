@@ -17,6 +17,15 @@ import (
 )
 
 func RegisterRoutes(ctx context.Context, router *chi.Mux, service *application.Service) {
+	// Generic admin resources
+	router.Get("/console/resources", rawListResources(ctx, service))
+	router.Get("/console/resources/{table}", rawDescribeResource(ctx, service))
+	router.Get("/console/resources/{table}/rows", rawListResourceRows(ctx, service))
+	router.Post("/console/resources/{table}/rows", rawCreateResourceRow(ctx, service))
+	router.Get("/console/resources/{table}/rows/{id}", rawGetResourceRow(ctx, service))
+	router.Put("/console/resources/{table}/rows/{id}", rawUpdateResourceRow(ctx, service))
+	router.Delete("/console/resources/{table}/rows/{id}", rawDeleteResourceRow(ctx, service))
+
 	// Stats
 	serverHttp.RegisterGET[handlers.StatsRequest, handlers.StatsResponse](
 		ctx, router, []string{"/console/stats"},
@@ -111,6 +120,18 @@ func getIDParam(r *http.Request, param string) (int64, bool) {
 	return id, err == nil && id > 0
 }
 
+func getPositiveQueryInt(r *http.Request, name string, fallback int) int {
+	raw := r.URL.Query().Get(name)
+	if raw == "" {
+		return fallback
+	}
+	value, err := strconv.Atoi(raw)
+	if err != nil || value < 0 {
+		return fallback
+	}
+	return value
+}
+
 func checkAdmin(r *http.Request) (*authPkg.AuthUser, bool) {
 	user, ok := authPkg.GetAuthUser(r.Context())
 	if !ok || user.Role != "console_admin" {
@@ -120,6 +141,135 @@ func checkAdmin(r *http.Request) (*authPkg.AuthUser, bool) {
 }
 
 // ── raw handlers ──────────────────────────────────────────────────────────────
+
+func rawListResources(_ context.Context, svc *application.Service) http.HandlerFunc {
+	return func(w http.ResponseWriter, r *http.Request) {
+		if _, ok := checkAdmin(r); !ok {
+			writeError(w, http.StatusForbidden, "Console admin access required")
+			return
+		}
+		result, err := svc.ListResources(r.Context())
+		if err != nil {
+			writeError(w, http.StatusInternalServerError, "Failed to list resources")
+			return
+		}
+		writeJSON(w, http.StatusOK, result)
+	}
+}
+
+func rawDescribeResource(_ context.Context, svc *application.Service) http.HandlerFunc {
+	return func(w http.ResponseWriter, r *http.Request) {
+		if _, ok := checkAdmin(r); !ok {
+			writeError(w, http.StatusForbidden, "Console admin access required")
+			return
+		}
+		table := chi.URLParam(r, "table")
+		result, err := svc.DescribeResource(r.Context(), table)
+		if err != nil {
+			writeError(w, http.StatusNotFound, "Resource not found")
+			return
+		}
+		writeJSON(w, http.StatusOK, result)
+	}
+}
+
+func rawListResourceRows(_ context.Context, svc *application.Service) http.HandlerFunc {
+	return func(w http.ResponseWriter, r *http.Request) {
+		if _, ok := checkAdmin(r); !ok {
+			writeError(w, http.StatusForbidden, "Console admin access required")
+			return
+		}
+		table := chi.URLParam(r, "table")
+		limit := getPositiveQueryInt(r, "limit", 50)
+		offset := getPositiveQueryInt(r, "offset", 0)
+		result, err := svc.ListResourceRows(r.Context(), table, limit, offset)
+		if err != nil {
+			writeError(w, http.StatusNotFound, "Resource not found")
+			return
+		}
+		writeJSON(w, http.StatusOK, result)
+	}
+}
+
+func rawGetResourceRow(_ context.Context, svc *application.Service) http.HandlerFunc {
+	return func(w http.ResponseWriter, r *http.Request) {
+		if _, ok := checkAdmin(r); !ok {
+			writeError(w, http.StatusForbidden, "Console admin access required")
+			return
+		}
+		result, err := svc.GetResourceRow(r.Context(), chi.URLParam(r, "table"), chi.URLParam(r, "id"))
+		if err != nil {
+			writeError(w, http.StatusNotFound, "Resource row not found")
+			return
+		}
+		writeJSON(w, http.StatusOK, result)
+	}
+}
+
+func rawCreateResourceRow(_ context.Context, svc *application.Service) http.HandlerFunc {
+	return func(w http.ResponseWriter, r *http.Request) {
+		if _, ok := checkAdmin(r); !ok {
+			writeError(w, http.StatusForbidden, "Console admin access required")
+			return
+		}
+		var req struct {
+			Values map[string]any `json:"values"`
+		}
+		if err := json.NewDecoder(r.Body).Decode(&req); err != nil {
+			writeError(w, http.StatusBadRequest, "Invalid body")
+			return
+		}
+		if req.Values == nil {
+			writeError(w, http.StatusBadRequest, "values are required")
+			return
+		}
+		id, err := svc.CreateResourceRow(r.Context(), chi.URLParam(r, "table"), req.Values)
+		if err != nil {
+			writeError(w, http.StatusBadRequest, err.Error())
+			return
+		}
+		writeJSON(w, http.StatusCreated, map[string]any{"id": id, "message": "Resource row created"})
+	}
+}
+
+func rawUpdateResourceRow(_ context.Context, svc *application.Service) http.HandlerFunc {
+	return func(w http.ResponseWriter, r *http.Request) {
+		if _, ok := checkAdmin(r); !ok {
+			writeError(w, http.StatusForbidden, "Console admin access required")
+			return
+		}
+		var req struct {
+			Values map[string]any `json:"values"`
+		}
+		if err := json.NewDecoder(r.Body).Decode(&req); err != nil {
+			writeError(w, http.StatusBadRequest, "Invalid body")
+			return
+		}
+		if req.Values == nil {
+			writeError(w, http.StatusBadRequest, "values are required")
+			return
+		}
+		if err := svc.UpdateResourceRow(r.Context(), chi.URLParam(r, "table"), chi.URLParam(r, "id"), req.Values); err != nil {
+			writeError(w, http.StatusBadRequest, err.Error())
+			return
+		}
+		writeJSON(w, http.StatusOK, map[string]string{"message": "Resource row updated"})
+	}
+}
+
+func rawDeleteResourceRow(_ context.Context, svc *application.Service) http.HandlerFunc {
+	return func(w http.ResponseWriter, r *http.Request) {
+		if _, ok := checkAdmin(r); !ok {
+			writeError(w, http.StatusForbidden, "Console admin access required")
+			return
+		}
+		if err := svc.DeleteResourceRow(r.Context(), chi.URLParam(r, "table"), chi.URLParam(r, "id")); err != nil {
+			writeError(w, http.StatusBadRequest, err.Error())
+			return
+		}
+		writeJSON(w, http.StatusOK, map[string]string{"message": "Resource row deleted"})
+	}
+}
 
 func rawGetUser(_ context.Context, svc *application.Service) http.HandlerFunc {
 	return func(w http.ResponseWriter, r *http.Request) {
