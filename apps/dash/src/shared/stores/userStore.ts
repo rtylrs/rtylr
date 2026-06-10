@@ -17,6 +17,8 @@ export interface StoredUser {
   businessId?: number;
   businessName?: string;
   isOwner?: boolean;
+  isConsoleAdmin?: boolean;
+  is_console_admin?: boolean;
   apps?: string[];
   onboarded?: boolean;
   planSlug?: string;

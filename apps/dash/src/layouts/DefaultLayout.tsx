@@ -314,6 +314,7 @@ const DefaultLayout: React.FC<DefaultLayoutProps> = ({ children }) => {
   const userEmail = user?.email || null;
   const userName = user?.fullName || 'User';
   const businessName = user?.businessName || 'My Business';
+  const isConsoleAdmin = user?.isConsoleAdmin === true || user?.is_console_admin === true;
 
   const handleLogout = (): void => {
     useBusinessStore.getState().reset();
@@ -459,6 +460,19 @@ const DefaultLayout: React.FC<DefaultLayoutProps> = ({ children }) => {
                   </div>
                 </div>
                 <DropdownMenuSeparator />
+                {isConsoleAdmin && (
+                  <>
+                    <DropdownMenuItem
+                      onClick={() => {
+                        window.location.href = APP_URLS.console;
+                      }}
+                    >
+                      <ExternalLink size={14} />
+                      Open console
+                    </DropdownMenuItem>
+                    <DropdownMenuSeparator />
+                  </>
+                )}
                 <DropdownMenuItem destructive onClick={handleLogout}>
                   <LogOut size={14} />
                   Sign out
