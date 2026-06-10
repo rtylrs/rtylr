@@ -25,9 +25,15 @@ message CreateSupplierRequest {
   // address is the address value for this contract.
   string address = 4;
   // city is the city value for this contract.
-  string city = 5;
+  string city = 5 [
+    (buf.validate.field).required = true,
+    (buf.validate.field).string.min_len = 1
+  ];
   // country is the country value for this contract.
-  string country = 6;
+  string country = 6 [
+    (buf.validate.field).required = true,
+    (buf.validate.field).string.min_len = 1
+  ];
   // tax_id is the tax id value for this contract.
   string tax_id = 7;
   // payment_terms is the payment terms value for this contract.

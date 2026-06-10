@@ -15,11 +15,20 @@ message DiscountOrderRequest {
     (buf.validate.field).int64.gt = 0
   ];
   // discount_type is the discount type value for this contract.
-  string discount_type = 2;
+  string discount_type = 2 [
+    (buf.validate.field).required = true,
+    (buf.validate.field).string.min_len = 1
+  ];
   // discount_value is the discount value value for this contract.
-  double discount_value = 3;
+  double discount_value = 3 [
+    (buf.validate.field).required = true,
+    (buf.validate.field).double.gte = 0
+  ];
   // reason is the reason value for this contract.
-  string reason = 4;
+  string reason = 4 [
+    (buf.validate.field).required = true,
+    (buf.validate.field).string.min_len = 1
+  ];
 }
 
 message DiscountOrderResponse {

@@ -26,7 +26,7 @@ message InviteUserRequest {
     (buf.validate.field).string.min_len = 1
   ];
   // apps is the apps value for this contract.
-  repeated string apps = 4;
+  repeated string apps = 4 [(buf.validate.field).repeated.min_items = 1];
   // password is the user-provided secret for authentication.
   string password = 5 [
     (buf.validate.field).required = true,

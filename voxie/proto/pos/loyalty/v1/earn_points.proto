@@ -10,14 +10,20 @@ option go_package = "github.com/voxire/voxie/gen/go/pos/loyalty/v1";
 
 message EarnPointsRequest {
   // customer_id is the customer id value for this contract.
-  int64 customer_id = 1;
+  int64 customer_id = 1 [
+    (buf.validate.field).required = true,
+    (buf.validate.field).int64.gt = 0
+  ];
   // order_id is the order id value for this contract.
   int64 order_id = 2 [
     (buf.validate.field).required = true,
     (buf.validate.field).int64.gt = 0
   ];
   // points is the points value for this contract.
-  int32 points = 3;
+  int32 points = 3 [
+    (buf.validate.field).required = true,
+    (buf.validate.field).int32.gt = 0
+  ];
 }
 
 message EarnPointsResponse {

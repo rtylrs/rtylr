@@ -21,7 +21,10 @@ message CreateEquipmentRequestRequest {
     (buf.validate.field).string.min_len = 1
   ];
   // Free-text description of the specific equipment needed.
-  string description = 3;
+  string description = 3 [
+    (buf.validate.field).required = true,
+    (buf.validate.field).string.min_len = 1
+  ];
   // Priority level (low | medium | high).
   string urgency = 4 [
     (buf.validate.field).required = true,

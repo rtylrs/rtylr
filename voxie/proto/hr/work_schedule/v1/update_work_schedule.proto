@@ -18,7 +18,7 @@ message UpdateWorkScheduleRequest {
   // New name; absent to keep current.
   optional string name = 2;
   // New working days; if provided, replaces all existing days.
-  repeated string working_days = 3;
+  repeated string working_days = 3 [(buf.validate.field).repeated.min_items = 1];
   // New start time; absent to keep current.
   optional string start_time = 4;
   // New end time; absent to keep current.

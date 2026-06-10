@@ -15,7 +15,10 @@ message RedeemPointsRequest {
     (buf.validate.field).int64.gt = 0
   ];
   // points is the points value for this contract.
-  int32 points = 2;
+  int32 points = 2 [
+    (buf.validate.field).required = true,
+    (buf.validate.field).int32.gt = 0
+  ];
 }
 
 message RedeemPointsResponse {

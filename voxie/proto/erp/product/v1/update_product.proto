@@ -13,9 +13,15 @@ message UpdateProductRequest {
     (buf.validate.field).int64.gt = 0
   ];
   // category_id is the category id value for this contract.
-  int64 category_id = 2;
+  int64 category_id = 2 [
+    (buf.validate.field).required = true,
+    (buf.validate.field).int64.gt = 0
+  ];
   // supplier_id is the supplier id value for this contract.
-  int64 supplier_id = 3;
+  int64 supplier_id = 3 [
+    (buf.validate.field).required = true,
+    (buf.validate.field).int64.gt = 0
+  ];
   // name is the name value for this contract.
   string name = 4 [
     (buf.validate.field).required = true,
@@ -27,11 +33,20 @@ message UpdateProductRequest {
     (buf.validate.field).string.min_len = 1
   ];
   // barcode is the barcode value for this contract.
-  string barcode = 6;
+  string barcode = 6 [
+    (buf.validate.field).required = true,
+    (buf.validate.field).string.min_len = 1
+  ];
   // description is the description value for this contract.
-  string description = 7;
+  string description = 7 [
+    (buf.validate.field).required = true,
+    (buf.validate.field).string.min_len = 1
+  ];
   // unit is the unit value for this contract.
-  string unit = 8;
+  string unit = 8 [
+    (buf.validate.field).required = true,
+    (buf.validate.field).string.min_len = 1
+  ];
   // cost_price is the cost price value for this contract.
   double cost_price = 9 [(buf.validate.field).double.gte = 0];
   // sale_price is the sale price value for this contract.

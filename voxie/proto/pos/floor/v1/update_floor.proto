@@ -15,7 +15,10 @@ message UpdateFloorRequest {
     (buf.validate.field).string.min_len = 1
   ];
   // sort_order is the sort order value for this contract.
-  int32 sort_order = 2;
+  int32 sort_order = 2 [
+    (buf.validate.field).required = true,
+    (buf.validate.field).int32.gt = 0
+  ];
 }
 
 message UpdateFloorResponse {

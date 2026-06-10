@@ -28,7 +28,7 @@ message UpsertApprovalChainRequest {
   // Whether approvers can delegate their approval authority.
   bool delegation_enabled = 4;
   // Ordered levels to set on the chain; replaces all existing levels.
-  repeated ApprovalChainLevelPayload levels = 5;
+  repeated ApprovalChainLevelPayload levels = 5 [(buf.validate.field).repeated.min_items = 1];
 }
 
 message UpsertApprovalChainResponse {

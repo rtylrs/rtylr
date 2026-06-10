@@ -17,9 +17,15 @@ message AdjustInventoryRequest {
     (buf.validate.field).int64.gt = 0
   ];
   // change is the change value for this contract.
-  double change = 2;
+  double change = 2 [
+    (buf.validate.field).required = true,
+    (buf.validate.field).double.gt = 0
+  ];
   // type is the type value for this contract.
-  string type = 3;
+  string type = 3 [
+    (buf.validate.field).required = true,
+    (buf.validate.field).string.min_len = 1
+  ];
   // notes is the notes value for this contract.
   string notes = 4;
 }

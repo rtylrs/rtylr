@@ -11,7 +11,10 @@ option go_package = "github.com/voxire/voxie/gen/go/hr/attendance/v1";
 
 message AttendanceClockInRequest {
   // Method used to clock in (app | qr | gps | pin | facial).
-  string method = 1;
+  string method = 1 [
+    (buf.validate.field).required = true,
+    (buf.validate.field).string.min_len = 1
+  ];
   // Work location where the employee is clocking in.
   int64 location_id = 2 [
     (buf.validate.field).required = true,

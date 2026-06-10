@@ -19,7 +19,7 @@ message UpdateWebhookRequest {
     (buf.validate.field).string.min_len = 1
   ];
   // events is the events value for this contract.
-  repeated string events = 3;
+  repeated string events = 3 [(buf.validate.field).repeated.min_items = 1];
   // is_active is the is active value for this contract.
   bool is_active = 4;
 }

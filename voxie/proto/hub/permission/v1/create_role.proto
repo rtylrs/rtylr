@@ -14,9 +14,12 @@ message CreateRoleRequest {
     (buf.validate.field).string.min_len = 1
   ];
   // description is the description value for this contract.
-  string description = 2;
+  string description = 2 [
+    (buf.validate.field).required = true,
+    (buf.validate.field).string.min_len = 1
+  ];
   // permissions is the permissions value for this contract.
-  repeated string permissions = 3;
+  repeated string permissions = 3 [(buf.validate.field).repeated.min_items = 1];
 }
 
 message CreateRoleResponse {

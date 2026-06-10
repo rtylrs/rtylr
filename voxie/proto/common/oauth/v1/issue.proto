@@ -19,13 +19,25 @@ message IssueRequest {
     (buf.validate.field).string.uri = true
   ];
   // scope contains the requested OAuth scopes.
-  string scope = 3;
+  string scope = 3 [
+    (buf.validate.field).required = true,
+    (buf.validate.field).string.min_len = 1
+  ];
   // state is echoed back to the redirect URI.
-  string state = 4;
+  string state = 4 [
+    (buf.validate.field).required = true,
+    (buf.validate.field).string.min_len = 1
+  ];
   // code_challenge is the PKCE challenge for the authorization code.
-  string code_challenge = 5;
+  string code_challenge = 5 [
+    (buf.validate.field).required = true,
+    (buf.validate.field).string.min_len = 1
+  ];
   // code_challenge_method is the PKCE challenge method.
-  string code_challenge_method = 6;
+  string code_challenge_method = 6 [
+    (buf.validate.field).required = true,
+    (buf.validate.field).string.min_len = 1
+  ];
 }
 
 // IssueResponse returns the authorization redirect URL.

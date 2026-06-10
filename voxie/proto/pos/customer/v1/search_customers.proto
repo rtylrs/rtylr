@@ -2,6 +2,7 @@ syntax = "proto3";
 
 package pos.customer.v1;
 
+import "buf/validate/validate.proto";
 import "pos/customer/v1/types.proto";
 
 option go_package = "github.com/voxire/voxie/gen/go/pos/customer/v1";
@@ -10,7 +11,10 @@ option go_package = "github.com/voxire/voxie/gen/go/pos/customer/v1";
 
 message SearchCustomersRequest {
   // query is the query value for this contract.
-  string query = 1;
+  string query = 1 [
+    (buf.validate.field).required = true,
+    (buf.validate.field).string.min_len = 1
+  ];
 }
 
 message SearchCustomersResponse {

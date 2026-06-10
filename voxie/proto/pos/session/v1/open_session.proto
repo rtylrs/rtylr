@@ -20,7 +20,10 @@ message OpenSessionRequest {
     (buf.validate.field).int64.gt = 0
   ];
   // opening_float is the opening float value for this contract.
-  double opening_float = 3;
+  double opening_float = 3 [
+    (buf.validate.field).required = true,
+    (buf.validate.field).double.gte = 0
+  ];
 }
 
 message OpenSessionResponse {

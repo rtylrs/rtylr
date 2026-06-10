@@ -16,13 +16,25 @@ message UploadDocumentRequest {
     (buf.validate.field).int64.gt = 0
   ];
   // Category of document (e.g. "id_card", "contract", "certificate", "visa").
-  string document_type = 2;
+  string document_type = 2 [
+    (buf.validate.field).required = true,
+    (buf.validate.field).string.min_len = 1
+  ];
   // Human-readable name for the document.
-  string name = 3;
+  string name = 3 [
+    (buf.validate.field).required = true,
+    (buf.validate.field).string.min_len = 1
+  ];
   // How the document is stored (stored | linked).
-  string storage_mode = 4;
+  string storage_mode = 4 [
+    (buf.validate.field).required = true,
+    (buf.validate.field).string.min_len = 1
+  ];
   // URL to access the document file.
-  string file_url = 5;
+  string file_url = 5 [
+    (buf.validate.field).required = true,
+    (buf.validate.field).string.min_len = 1
+  ];
   // Date the document expires (ISO-8601 date); absent if no expiry.
   optional string expiry_date = 6;
 }

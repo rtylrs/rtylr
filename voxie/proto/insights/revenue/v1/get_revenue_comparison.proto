@@ -2,6 +2,7 @@ syntax = "proto3";
 
 package insights.revenue.v1;
 
+import "buf/validate/validate.proto";
 import "insights/revenue/v1/types.proto";
 
 option go_package = "github.com/voxire/voxie/gen/go/insights/revenue/v1";
@@ -11,7 +12,10 @@ message GetRevenueComparisonRequest {
   string period = 1;
   // compare_to is the compare to value for this contract.
   // previous_period, same_period_last_year
-  string compare_to = 2;
+  string compare_to = 2 [
+    (buf.validate.field).required = true,
+    (buf.validate.field).string.min_len = 1
+  ];
 }
 
 message GetRevenueComparisonResponse {

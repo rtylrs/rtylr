@@ -15,9 +15,15 @@ message ProcessRefundRequest {
     (buf.validate.field).int64.gt = 0
   ];
   // amount is the amount value for this contract.
-  double amount = 2;
+  double amount = 2 [
+    (buf.validate.field).required = true,
+    (buf.validate.field).double.gt = 0
+  ];
   // reason is the reason value for this contract.
-  string reason = 3;
+  string reason = 3 [
+    (buf.validate.field).required = true,
+    (buf.validate.field).string.min_len = 1
+  ];
 }
 
 message ProcessRefundResponse {

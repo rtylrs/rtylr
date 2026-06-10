@@ -15,7 +15,10 @@ message CreateComboRequest {
     (buf.validate.field).string.min_len = 1
   ];
   // description is the description value for this contract.
-  string description = 2;
+  string description = 2 [
+    (buf.validate.field).required = true,
+    (buf.validate.field).string.min_len = 1
+  ];
   // price is the price value for this contract.
   double price = 3 [(buf.validate.field).double.gte = 0];
   // items is the items value for this contract.

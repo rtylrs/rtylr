@@ -28,9 +28,15 @@ message SubmitTimeOffRequest {
     (buf.validate.field).string.min_len = 1
   ];
   // days_count is the days count value for this contract.
-  double days_count = 5;
+  double days_count = 5 [
+    (buf.validate.field).required = true,
+    (buf.validate.field).double.gt = 0
+  ];
   // reason is the reason value for this contract.
-  string reason = 6;
+  string reason = 6 [
+    (buf.validate.field).required = true,
+    (buf.validate.field).string.min_len = 1
+  ];
   // notes is the notes value for this contract.
   string notes = 7;
 }

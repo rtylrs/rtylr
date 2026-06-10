@@ -40,11 +40,17 @@ message CreateCustomerRequest {
   // address is the address value for this contract.
   string address = 7;
   // city is the city value for this contract.
-  string city = 8;
+  string city = 8 [
+    (buf.validate.field).required = true,
+    (buf.validate.field).string.min_len = 1
+  ];
   // country is the country value for this contract.
-  string country = 9;
+  string country = 9 [
+    (buf.validate.field).required = true,
+    (buf.validate.field).string.min_len = 1
+  ];
   // tags is the tags value for this contract.
-  repeated string tags = 10;
+  repeated string tags = 10 [(buf.validate.field).repeated.min_items = 1];
   // notes is the notes value for this contract.
   string notes = 11;
 }

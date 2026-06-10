@@ -14,14 +14,17 @@ message CreateReportTemplateRequest {
     (buf.validate.field).string.min_len = 1
   ];
   // description is the description value for this contract.
-  string description = 2;
+  string description = 2 [
+    (buf.validate.field).required = true,
+    (buf.validate.field).string.min_len = 1
+  ];
   // type is the type value for this contract.
   string type = 3 [
     (buf.validate.field).required = true,
     (buf.validate.field).string.min_len = 1
   ];
   // metrics is the metrics value for this contract.
-  repeated string metrics = 4;
+  repeated string metrics = 4 [(buf.validate.field).repeated.min_items = 1];
   // format is the format value for this contract.
   string format = 5 [
     (buf.validate.field).required = true,

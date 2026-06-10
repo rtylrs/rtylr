@@ -15,9 +15,15 @@ message ProcessPaymentRequest {
     (buf.validate.field).int64.gt = 0
   ];
   // payment_method is the payment method value for this contract.
-  string payment_method = 2;
+  string payment_method = 2 [
+    (buf.validate.field).required = true,
+    (buf.validate.field).string.min_len = 1
+  ];
   // amount_paid is the amount paid value for this contract.
-  double amount_paid = 3;
+  double amount_paid = 3 [
+    (buf.validate.field).required = true,
+    (buf.validate.field).double.gt = 0
+  ];
 }
 
 message ProcessPaymentResponse {

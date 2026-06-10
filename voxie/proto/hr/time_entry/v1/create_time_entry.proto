@@ -27,13 +27,19 @@ message CreateTimeEntryRequest {
     (buf.validate.field).string.min_len = 1
   ];
   // Total duration of work in minutes.
-  int32 duration_minutes = 6;
+  int32 duration_minutes = 6 [
+    (buf.validate.field).required = true,
+    (buf.validate.field).int32.gt = 0
+  ];
   // Clock-in time; absent if duration-only entry.
   optional string start_time = 7;
   // Clock-out time; absent if duration-only entry.
   optional string end_time = 8;
   // Free-text description of the work performed.
-  string description = 9;
+  string description = 9 [
+    (buf.validate.field).required = true,
+    (buf.validate.field).string.min_len = 1
+  ];
   // Whether this time is billable to a client.
   bool is_billable = 10;
   // How the entry was created (manual | timer | flow_import).

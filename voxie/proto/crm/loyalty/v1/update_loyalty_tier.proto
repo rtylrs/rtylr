@@ -18,16 +18,25 @@ message UpdateLoyaltyTierRequest {
     (buf.validate.field).string.min_len = 1
   ];
   // min_points is the min points value for this contract.
-  int64 min_points = 3;
+  int64 min_points = 3 [
+    (buf.validate.field).required = true,
+    (buf.validate.field).int64.gt = 0
+  ];
   // discount_pct is the discount pct value for this contract.
-  double discount_pct = 4;
+  double discount_pct = 4 [
+    (buf.validate.field).required = true,
+    (buf.validate.field).double.gt = 0
+  ];
   // perks is the perks value for this contract.
   string perks = 5 [
     (buf.validate.field).required = true,
     (buf.validate.field).string.min_len = 1
   ];
   // sort_order is the sort order value for this contract.
-  int64 sort_order = 6;
+  int64 sort_order = 6 [
+    (buf.validate.field).required = true,
+    (buf.validate.field).int64.gt = 0
+  ];
 }
 
 message UpdateLoyaltyTierResponse {

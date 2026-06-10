@@ -35,7 +35,10 @@ message UpdateBillRequest {
     (buf.validate.field).string.min_len = 1
   ];
   // description is the description value for this contract.
-  string description = 7;
+  string description = 7 [
+    (buf.validate.field).required = true,
+    (buf.validate.field).string.min_len = 1
+  ];
 }
 
 message UpdateBillResponse {

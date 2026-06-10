@@ -23,7 +23,10 @@ message CreateSubtaskRequest {
     (buf.validate.field).string.min_len = 1
   ];
   // description is the description value for this contract.
-  string description = 4;
+  string description = 4 [
+    (buf.validate.field).required = true,
+    (buf.validate.field).string.min_len = 1
+  ];
   // priority is the priority value for this contract.
   string priority = 5 [
     (buf.validate.field).required = true,

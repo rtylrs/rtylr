@@ -14,9 +14,15 @@ message GetSegmentCustomersRequest {
     (buf.validate.field).int64.gt = 0
   ];
   // page is the current result page.
-  int64 page = 2;
+  int64 page = 2 [
+    (buf.validate.field).required = true,
+    (buf.validate.field).int64.gt = 0
+  ];
   // page_size is the number of records requested per page.
-  int64 page_size = 3;
+  int64 page_size = 3 [
+    (buf.validate.field).required = true,
+    (buf.validate.field).int64.gt = 0
+  ];
 }
 
 message GetSegmentCustomersResponse {

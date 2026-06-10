@@ -2,6 +2,7 @@ syntax = "proto3";
 
 package pos.audit.v1;
 
+import "buf/validate/validate.proto";
 import "pos/audit/v1/types.proto";
 
 option go_package = "github.com/voxire/voxie/gen/go/pos/audit/v1";
@@ -16,9 +17,15 @@ message ListAuditRequest {
   // employee_id is the employee id value for this contract.
   int64 employee_id = 3;
   // start_date is the start date value for this contract.
-  string start_date = 4;
+  string start_date = 4 [
+    (buf.validate.field).required = true,
+    (buf.validate.field).string.min_len = 1
+  ];
   // end_date is the end date value for this contract.
-  string end_date = 5;
+  string end_date = 5 [
+    (buf.validate.field).required = true,
+    (buf.validate.field).string.min_len = 1
+  ];
 }
 
 message ListAuditResponse {

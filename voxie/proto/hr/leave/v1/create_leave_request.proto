@@ -31,7 +31,10 @@ message CreateLeaveRequestRequest {
     (buf.validate.field).string.min_len = 1
   ];
   // Total number of working days requested.
-  double total_days = 5;
+  double total_days = 5 [
+    (buf.validate.field).required = true,
+    (buf.validate.field).double.gt = 0
+  ];
   // Additional context from the employee; absent if none provided.
   optional string notes = 6;
 }

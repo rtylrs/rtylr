@@ -2,6 +2,7 @@ syntax = "proto3";
 
 package pos.orders.v1;
 
+import "buf/validate/validate.proto";
 import "pos/orders/v1/types.proto";
 
 option go_package = "github.com/voxire/voxie/gen/go/pos/orders/v1";
@@ -10,7 +11,10 @@ option go_package = "github.com/voxire/voxie/gen/go/pos/orders/v1";
 
 message ListOrdersRequest {
   // session_id is the session id value for this contract.
-  int64 session_id = 1;
+  int64 session_id = 1 [
+    (buf.validate.field).required = true,
+    (buf.validate.field).int64.gt = 0
+  ];
   // status is the current lifecycle state.
   string status = 2;
   // date_from is the date from value for this contract.

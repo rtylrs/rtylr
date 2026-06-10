@@ -45,11 +45,17 @@ message UpdateCustomerRequest {
   // address is the address value for this contract.
   string address = 8;
   // city is the city value for this contract.
-  string city = 9;
+  string city = 9 [
+    (buf.validate.field).required = true,
+    (buf.validate.field).string.min_len = 1
+  ];
   // country is the country value for this contract.
-  string country = 10;
+  string country = 10 [
+    (buf.validate.field).required = true,
+    (buf.validate.field).string.min_len = 1
+  ];
   // tags is the tags value for this contract.
-  repeated string tags = 11;
+  repeated string tags = 11 [(buf.validate.field).repeated.min_items = 1];
   // notes is the notes value for this contract.
   string notes = 12;
   // is_active is the is active value for this contract.

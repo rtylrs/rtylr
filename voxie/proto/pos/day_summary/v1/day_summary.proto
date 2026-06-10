@@ -2,13 +2,18 @@ syntax = "proto3";
 
 package pos.day_summary.v1;
 
+import "buf/validate/validate.proto";
+
 option go_package = "github.com/voxire/voxie/gen/go/pos/day_summary/v1";
 
 // ── DaySummary ────────────────────────────────────────────────────
 
 message DaySummaryRequest {
   // date is the date value for this contract.
-  string date = 1;
+  string date = 1 [
+    (buf.validate.field).required = true,
+    (buf.validate.field).string.min_len = 1
+  ];
 }
 
 message DaySummaryResponse {

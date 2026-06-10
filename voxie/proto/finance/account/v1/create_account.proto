@@ -23,7 +23,10 @@ message CreateAccountRequest {
     (buf.validate.field).string.min_len = 1
   ];
   // balance is the balance value for this contract.
-  double balance = 4;
+  double balance = 4 [
+    (buf.validate.field).required = true,
+    (buf.validate.field).double.gte = 0
+  ];
   // is_active is the is active value for this contract.
   bool is_active = 5;
 }

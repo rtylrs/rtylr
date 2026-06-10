@@ -10,16 +10,25 @@ option go_package = "github.com/voxire/voxie/gen/go/pos/stock/v1";
 
 message WasteStockRequest {
   // branch_id is the branch id value for this contract.
-  int64 branch_id = 1;
+  int64 branch_id = 1 [
+    (buf.validate.field).required = true,
+    (buf.validate.field).int64.gt = 0
+  ];
   // product_id is the product id value for this contract.
   int64 product_id = 2 [
     (buf.validate.field).required = true,
     (buf.validate.field).int64.gt = 0
   ];
   // quantity is the quantity value for this contract.
-  double quantity = 3;
+  double quantity = 3 [
+    (buf.validate.field).required = true,
+    (buf.validate.field).double.gt = 0
+  ];
   // note is the note value for this contract.
-  string note = 4;
+  string note = 4 [
+    (buf.validate.field).required = true,
+    (buf.validate.field).string.min_len = 1
+  ];
   // employee_id is the employee id value for this contract.
   int64 employee_id = 5 [
     (buf.validate.field).required = true,

@@ -2,13 +2,18 @@ syntax = "proto3";
 
 package pos.manager.v1;
 
+import "buf/validate/validate.proto";
+
 option go_package = "github.com/voxire/voxie/gen/go/pos/manager/v1";
 
 // ── Manager ───────────────────────────────────────────────────────
 
 message VerifyPINRequest {
   // pin is the pin value for this contract.
-  string pin = 1;
+  string pin = 1 [
+    (buf.validate.field).required = true,
+    (buf.validate.field).string.min_len = 1
+  ];
 }
 
 message VerifyPINResponse {

@@ -2,6 +2,7 @@ syntax = "proto3";
 
 package pos.cash.v1;
 
+import "buf/validate/validate.proto";
 import "pos/cash/v1/types.proto";
 
 option go_package = "github.com/voxire/voxie/gen/go/pos/cash/v1";
@@ -10,7 +11,10 @@ option go_package = "github.com/voxire/voxie/gen/go/pos/cash/v1";
 
 message ListCashMovementsRequest {
   // session_id is the session id value for this contract.
-  int64 session_id = 1;
+  int64 session_id = 1 [
+    (buf.validate.field).required = true,
+    (buf.validate.field).int64.gt = 0
+  ];
 }
 
 message ListCashMovementsResponse {

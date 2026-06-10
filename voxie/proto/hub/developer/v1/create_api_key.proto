@@ -13,7 +13,7 @@ message CreateApiKeyRequest {
     (buf.validate.field).string.min_len = 1
   ];
   // scopes is the scopes value for this contract.
-  repeated string scopes = 2;
+  repeated string scopes = 2 [(buf.validate.field).repeated.min_items = 1];
 }
 
 message CreateApiKeyResponse {

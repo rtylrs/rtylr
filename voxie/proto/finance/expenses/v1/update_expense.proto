@@ -17,7 +17,10 @@ message UpdateExpenseRequest {
     (buf.validate.field).string.min_len = 1
   ];
   // description is the description value for this contract.
-  string description = 4;
+  string description = 4 [
+    (buf.validate.field).required = true,
+    (buf.validate.field).string.min_len = 1
+  ];
   // vendor is the vendor value for this contract.
   string vendor = 5 [
     (buf.validate.field).required = true,

@@ -17,7 +17,10 @@ message CreateTableRequest {
     (buf.validate.field).string.min_len = 1
   ];
   // seats is the seats value for this contract.
-  int32 seats = 3;
+  int32 seats = 3 [
+    (buf.validate.field).required = true,
+    (buf.validate.field).int32.gt = 0
+  ];
 }
 
 message CreateTableResponse {

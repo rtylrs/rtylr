@@ -16,7 +16,7 @@ message SplitOrderRequest {
     (buf.validate.field).int64.gt = 0
   ];
   // splits is the splits value for this contract.
-  repeated .pos.orders.v1.SplitGroup splits = 2;
+  repeated .pos.orders.v1.SplitGroup splits = 2 [(buf.validate.field).repeated.min_items = 1];
 }
 
 message SplitOrderResponse {

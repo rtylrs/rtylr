@@ -26,7 +26,10 @@ message CreateTaskRequest {
     (buf.validate.field).string.min_len = 1
   ];
   // description is the description value for this contract.
-  string description = 5;
+  string description = 5 [
+    (buf.validate.field).required = true,
+    (buf.validate.field).string.min_len = 1
+  ];
   // priority is the priority value for this contract.
   string priority = 6 [
     (buf.validate.field).required = true,
@@ -47,7 +50,7 @@ message CreateTaskRequest {
   // estimated_hours is the estimated hours value for this contract.
   optional double estimated_hours = 10;
   // labels is the labels value for this contract.
-  repeated int64 labels = 11;
+  repeated int64 labels = 11 [(buf.validate.field).repeated.min_items = 1];
 }
 
 message CreateTaskResponse {

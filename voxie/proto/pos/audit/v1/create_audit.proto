@@ -40,7 +40,10 @@ message CreateAuditRequest {
     (buf.validate.field).int64.gt = 0
   ];
   // details is the details value for this contract.
-  string details = 7;
+  string details = 7 [
+    (buf.validate.field).required = true,
+    (buf.validate.field).string.min_len = 1
+  ];
   // ip_address is the ip address value for this contract.
   string ip_address = 8 [
     (buf.validate.field).required = true,

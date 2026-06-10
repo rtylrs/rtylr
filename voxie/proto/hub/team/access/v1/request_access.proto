@@ -2,11 +2,16 @@ syntax = "proto3";
 
 package hub.team.access.v1;
 
+import "buf/validate/validate.proto";
+
 option go_package = "github.com/voxire/voxie/gen/go/hub/team/access/v1";
 
 message RequestAccessRequest {
   // app is the app value for this contract.
-  string app = 1;
+  string app = 1 [
+    (buf.validate.field).required = true,
+    (buf.validate.field).string.min_len = 1
+  ];
 }
 
 message RequestAccessResponse {

@@ -30,9 +30,15 @@ message UpdateSupplierRequest {
   // address is the address value for this contract.
   string address = 5;
   // city is the city value for this contract.
-  string city = 6;
+  string city = 6 [
+    (buf.validate.field).required = true,
+    (buf.validate.field).string.min_len = 1
+  ];
   // country is the country value for this contract.
-  string country = 7;
+  string country = 7 [
+    (buf.validate.field).required = true,
+    (buf.validate.field).string.min_len = 1
+  ];
   // tax_id is the tax id value for this contract.
   string tax_id = 8;
   // payment_terms is the payment terms value for this contract.

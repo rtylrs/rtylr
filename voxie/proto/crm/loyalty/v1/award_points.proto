@@ -15,9 +15,15 @@ message AwardPointsRequest {
     (buf.validate.field).int64.gt = 0
   ];
   // points is the points value for this contract.
-  int64 points = 2;
+  int64 points = 2 [
+    (buf.validate.field).required = true,
+    (buf.validate.field).int64.gt = 0
+  ];
   // description is the description value for this contract.
-  string description = 3;
+  string description = 3 [
+    (buf.validate.field).required = true,
+    (buf.validate.field).string.min_len = 1
+  ];
   // reference_id is the reference id value for this contract.
   optional int64 reference_id = 4;
   // reference_type is the reference type value for this contract.

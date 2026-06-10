@@ -21,9 +21,15 @@ message CreateOvertimeRequestRequest {
     (buf.validate.field).string.min_len = 1
   ];
   // Number of extra minutes planned beyond the regular shift.
-  int32 planned_extra_minutes = 3;
+  int32 planned_extra_minutes = 3 [
+    (buf.validate.field).required = true,
+    (buf.validate.field).int32.gt = 0
+  ];
   // Justification for the overtime work.
-  string reason = 4;
+  string reason = 4 [
+    (buf.validate.field).required = true,
+    (buf.validate.field).string.min_len = 1
+  ];
 }
 
 message CreateOvertimeRequestResponse {

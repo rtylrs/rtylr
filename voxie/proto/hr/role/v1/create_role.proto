@@ -16,7 +16,7 @@ message CreateRoleRequest {
     (buf.validate.field).string.min_len = 1
   ];
   // Permissions to attach to the new role.
-  repeated PermissionPayload permissions = 2;
+  repeated PermissionPayload permissions = 2 [(buf.validate.field).repeated.min_items = 1];
 }
 
 message CreateRoleResponse {

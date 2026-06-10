@@ -18,7 +18,7 @@ message UpdateRoleRequest {
   // New name; absent to keep current.
   optional string name = 2;
   // New permission set; if provided, replaces all existing permissions.
-  repeated PermissionPayload permissions = 3;
+  repeated PermissionPayload permissions = 3 [(buf.validate.field).repeated.min_items = 1];
 }
 
 message UpdateRoleResponse {

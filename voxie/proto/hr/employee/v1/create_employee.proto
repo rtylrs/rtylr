@@ -37,15 +37,21 @@ message CreateEmployeeRequest {
   // phone is the employee phone number.
   string phone = 7;
   // employment_type is the employment type label.
-  string employment_type = 8;
+  string employment_type = 8 [
+    (buf.validate.field).required = true,
+    (buf.validate.field).string.min_len = 1
+  ];
   // salary is the monthly or salaried compensation amount.
-  double salary = 9;
+  double salary = 9 [(buf.validate.field).double.gte = 0];
   // hourly_rate is the employee hourly pay rate.
-  double hourly_rate = 10;
+  double hourly_rate = 10 [(buf.validate.field).double.gte = 0];
   // overtime_rate is the employee overtime pay rate.
-  double overtime_rate = 11;
+  double overtime_rate = 11 [(buf.validate.field).double.gte = 0];
   // start_date is the start date in YYYY-MM-DD format.
-  string start_date = 12;
+  string start_date = 12 [
+    (buf.validate.field).required = true,
+    (buf.validate.field).string.min_len = 1
+  ];
   // address is the employee address.
   string address = 13;
 }

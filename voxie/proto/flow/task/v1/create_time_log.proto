@@ -13,7 +13,10 @@ message CreateTimeLogRequest {
     (buf.validate.field).int64.gt = 0
   ];
   // description is the description value for this contract.
-  string description = 2;
+  string description = 2 [
+    (buf.validate.field).required = true,
+    (buf.validate.field).string.min_len = 1
+  ];
   // task_id identifies the task the time log belongs to.
   int64 task_id = 3 [
     (buf.validate.field).required = true,

@@ -14,7 +14,10 @@ message CreateWorkspaceRequest {
     (buf.validate.field).string.min_len = 1
   ];
   // description is the description value for this contract.
-  string description = 2;
+  string description = 2 [
+    (buf.validate.field).required = true,
+    (buf.validate.field).string.min_len = 1
+  ];
   // icon is the icon value for this contract.
   string icon = 3 [
     (buf.validate.field).required = true,

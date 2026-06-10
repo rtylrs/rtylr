@@ -31,7 +31,10 @@ message RecordPaymentRequest {
     (buf.validate.field).string.min_len = 1
   ];
   // reference is the reference value for this contract.
-  string reference = 6;
+  string reference = 6 [
+    (buf.validate.field).required = true,
+    (buf.validate.field).string.min_len = 1
+  ];
   // notes is the notes value for this contract.
   string notes = 7;
 }

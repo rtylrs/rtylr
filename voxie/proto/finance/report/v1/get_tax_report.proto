@@ -2,6 +2,8 @@ syntax = "proto3";
 
 package finance.report.v1;
 
+import "buf/validate/validate.proto";
+
 option go_package = "github.com/voxire/voxie/gen/go/finance/report/v1";
 
 // -- Tax Report --
@@ -10,7 +12,10 @@ message GetTaxReportRequest {
   // period is the period value for this contract.
   string period = 1;
   // date is the date value for this contract.
-  string date = 2;
+  string date = 2 [
+    (buf.validate.field).required = true,
+    (buf.validate.field).string.min_len = 1
+  ];
 }
 
 message GetTaxReportResponse {

@@ -21,7 +21,10 @@ message CreateQuoteRequest {
     (buf.validate.field).string.min_len = 1
   ];
   // discount is the discount value for this contract.
-  double discount = 4;
+  double discount = 4 [
+    (buf.validate.field).required = true,
+    (buf.validate.field).double.gte = 0
+  ];
   // notes is the notes value for this contract.
   string notes = 5;
 }

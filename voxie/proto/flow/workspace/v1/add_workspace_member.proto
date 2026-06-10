@@ -18,7 +18,10 @@ message AddWorkspaceMemberRequest {
     (buf.validate.field).int64.gt = 0
   ];
   // role is the role value for this contract.
-  string role = 3;
+  string role = 3 [
+    (buf.validate.field).required = true,
+    (buf.validate.field).string.min_len = 1
+  ];
 }
 
 message AddWorkspaceMemberResponse {

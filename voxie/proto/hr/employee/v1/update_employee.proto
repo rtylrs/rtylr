@@ -32,29 +32,50 @@ message UpdateEmployeeRequest {
     (buf.validate.field).string.min_len = 1
   ];
   // email is the employee email address.
-  string email = 7;
+  string email = 7 [
+    (buf.validate.field).required = true,
+    (buf.validate.field).string.min_len = 1
+  ];
   // phone is the employee phone number.
   string phone = 8;
   // employment_type is the employment type label.
-  string employment_type = 9;
+  string employment_type = 9 [
+    (buf.validate.field).required = true,
+    (buf.validate.field).string.min_len = 1
+  ];
   // status is the employment status.
-  string status = 10;
+  string status = 10 [
+    (buf.validate.field).required = true,
+    (buf.validate.field).string.min_len = 1
+  ];
   // salary is the monthly or salaried compensation amount.
-  double salary = 11;
+  double salary = 11 [(buf.validate.field).double.gte = 0];
   // hourly_rate is the employee hourly pay rate.
-  double hourly_rate = 12;
+  double hourly_rate = 12 [(buf.validate.field).double.gte = 0];
   // overtime_rate is the employee overtime pay rate.
-  double overtime_rate = 13;
+  double overtime_rate = 13 [(buf.validate.field).double.gte = 0];
   // start_date is the start date in YYYY-MM-DD format.
-  string start_date = 14;
+  string start_date = 14 [
+    (buf.validate.field).required = true,
+    (buf.validate.field).string.min_len = 1
+  ];
   // end_date is the end date in YYYY-MM-DD format.
-  string end_date = 15;
+  string end_date = 15 [
+    (buf.validate.field).required = true,
+    (buf.validate.field).string.min_len = 1
+  ];
   // address is the employee address.
   string address = 16;
   // emergency_contact_name is the emergency contact name.
-  string emergency_contact_name = 17;
+  string emergency_contact_name = 17 [
+    (buf.validate.field).required = true,
+    (buf.validate.field).string.min_len = 1
+  ];
   // emergency_contact_phone is the emergency contact phone.
-  string emergency_contact_phone = 18;
+  string emergency_contact_phone = 18 [
+    (buf.validate.field).required = true,
+    (buf.validate.field).string.min_len = 1
+  ];
   // notes are internal employee notes.
   string notes = 19;
 }

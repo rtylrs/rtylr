@@ -2,11 +2,16 @@ syntax = "proto3";
 
 package hub.integration.v1;
 
+import "buf/validate/validate.proto";
+
 option go_package = "github.com/voxire/voxie/gen/go/hub/integration/v1";
 
 message ConnectIntegrationRequest {
   // provider is the provider value for this contract.
-  string provider = 1;
+  string provider = 1 [
+    (buf.validate.field).required = true,
+    (buf.validate.field).string.min_len = 1
+  ];
   // config is the config value for this contract.
   bytes config = 2;
 }

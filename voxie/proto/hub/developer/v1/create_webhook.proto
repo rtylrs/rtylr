@@ -13,7 +13,7 @@ message CreateWebhookRequest {
     (buf.validate.field).string.min_len = 1
   ];
   // events is the events value for this contract.
-  repeated string events = 2;
+  repeated string events = 2 [(buf.validate.field).repeated.min_items = 1];
 }
 
 message CreateWebhookResponse {

@@ -18,7 +18,10 @@ message CreateAttachmentRequest {
     (buf.validate.field).string.min_len = 1
   ];
   // size is the size value for this contract.
-  int64 size = 3;
+  int64 size = 3 [
+    (buf.validate.field).required = true,
+    (buf.validate.field).int64.gt = 0
+  ];
 }
 
 message CreateAttachmentResponse {

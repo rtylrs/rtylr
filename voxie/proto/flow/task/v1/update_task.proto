@@ -18,7 +18,10 @@ message UpdateTaskRequest {
     (buf.validate.field).string.min_len = 1
   ];
   // description is the description value for this contract.
-  string description = 3;
+  string description = 3 [
+    (buf.validate.field).required = true,
+    (buf.validate.field).string.min_len = 1
+  ];
   // status is the current lifecycle state.
   string status = 4 [
     (buf.validate.field).required = true,
@@ -42,7 +45,7 @@ message UpdateTaskRequest {
     (buf.validate.field).string.min_len = 1
   ];
   // labels is the labels value for this contract.
-  repeated int64 labels = 9;
+  repeated int64 labels = 9 [(buf.validate.field).repeated.min_items = 1];
 }
 
 message UpdateTaskResponse {

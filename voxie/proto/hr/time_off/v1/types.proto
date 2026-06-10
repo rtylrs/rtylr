@@ -20,19 +20,40 @@ message TimeOffRequest {
     (buf.validate.field).int64.gt = 0
   ];
   // staff_id is the staff id value for this contract.
-  int64 staff_id = 3;
+  int64 staff_id = 3 [
+    (buf.validate.field).required = true,
+    (buf.validate.field).int64.gt = 0
+  ];
   // type is the type value for this contract.
-  string type = 4;
+  string type = 4 [
+    (buf.validate.field).required = true,
+    (buf.validate.field).string.min_len = 1
+  ];
   // start_date is the start date value for this contract.
-  string start_date = 5;
+  string start_date = 5 [
+    (buf.validate.field).required = true,
+    (buf.validate.field).string.min_len = 1
+  ];
   // end_date is the end date value for this contract.
-  string end_date = 6;
+  string end_date = 6 [
+    (buf.validate.field).required = true,
+    (buf.validate.field).string.min_len = 1
+  ];
   // days_count is the days count value for this contract.
-  double days_count = 7;
+  double days_count = 7 [
+    (buf.validate.field).required = true,
+    (buf.validate.field).double.gt = 0
+  ];
   // status is the current lifecycle state.
-  string status = 8;
+  string status = 8 [
+    (buf.validate.field).required = true,
+    (buf.validate.field).string.min_len = 1
+  ];
   // reason is the reason value for this contract.
-  string reason = 9;
+  string reason = 9 [
+    (buf.validate.field).required = true,
+    (buf.validate.field).string.min_len = 1
+  ];
   // approved_by is the approved by value for this contract.
   int64 approved_by = 10;
   // approved_at is the approved at value for this contract.

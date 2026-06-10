@@ -14,7 +14,10 @@ message AddCommentRequest {
     (buf.validate.field).int64.gt = 0
   ];
   // content is the content value for this contract.
-  string content = 2;
+  string content = 2 [
+    (buf.validate.field).required = true,
+    (buf.validate.field).string.min_len = 1
+  ];
 }
 
 message AddCommentResponse {

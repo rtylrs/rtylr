@@ -29,7 +29,10 @@ message CreateBankAccountRequest {
     (buf.validate.field).string.min_len = 1
   ];
   // balance is the balance value for this contract.
-  double balance = 5;
+  double balance = 5 [
+    (buf.validate.field).required = true,
+    (buf.validate.field).double.gte = 0
+  ];
   // currency is the currency value for this contract.
   string currency = 6 [
     (buf.validate.field).required = true,

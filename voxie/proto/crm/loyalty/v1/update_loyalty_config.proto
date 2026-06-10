@@ -2,33 +2,68 @@ syntax = "proto3";
 
 package crm.loyalty.v1;
 
+import "buf/validate/validate.proto";
+
 option go_package = "github.com/voxire/voxie/gen/go/crm/loyalty/v1";
 
 message UpdateLoyaltyConfigRequest {
   // is_enabled is the is enabled value for this contract.
   bool is_enabled = 1;
   // points_per_currency_unit is the points per currency unit value for this contract.
-  double points_per_currency_unit = 2;
+  double points_per_currency_unit = 2 [
+    (buf.validate.field).required = true,
+    (buf.validate.field).double.gt = 0
+  ];
   // currency_per_point is the currency per point value for this contract.
-  double currency_per_point = 3;
+  double currency_per_point = 3 [
+    (buf.validate.field).required = true,
+    (buf.validate.field).double.gt = 0
+  ];
   // bronze_min is the bronze min value for this contract.
-  int64 bronze_min = 4;
+  int64 bronze_min = 4 [
+    (buf.validate.field).required = true,
+    (buf.validate.field).int64.gt = 0
+  ];
   // silver_min is the silver min value for this contract.
-  int64 silver_min = 5;
+  int64 silver_min = 5 [
+    (buf.validate.field).required = true,
+    (buf.validate.field).int64.gt = 0
+  ];
   // gold_min is the gold min value for this contract.
-  int64 gold_min = 6;
+  int64 gold_min = 6 [
+    (buf.validate.field).required = true,
+    (buf.validate.field).int64.gt = 0
+  ];
   // platinum_min is the platinum min value for this contract.
-  int64 platinum_min = 7;
+  int64 platinum_min = 7 [
+    (buf.validate.field).required = true,
+    (buf.validate.field).int64.gt = 0
+  ];
   // bronze_discount_pct is the bronze discount pct value for this contract.
-  double bronze_discount_pct = 8;
+  double bronze_discount_pct = 8 [
+    (buf.validate.field).required = true,
+    (buf.validate.field).double.gt = 0
+  ];
   // silver_discount_pct is the silver discount pct value for this contract.
-  double silver_discount_pct = 9;
+  double silver_discount_pct = 9 [
+    (buf.validate.field).required = true,
+    (buf.validate.field).double.gt = 0
+  ];
   // gold_discount_pct is the gold discount pct value for this contract.
-  double gold_discount_pct = 10;
+  double gold_discount_pct = 10 [
+    (buf.validate.field).required = true,
+    (buf.validate.field).double.gt = 0
+  ];
   // platinum_discount_pct is the platinum discount pct value for this contract.
-  double platinum_discount_pct = 11;
+  double platinum_discount_pct = 11 [
+    (buf.validate.field).required = true,
+    (buf.validate.field).double.gt = 0
+  ];
   // points_expiry_days is the points expiry days value for this contract.
-  int64 points_expiry_days = 12;
+  int64 points_expiry_days = 12 [
+    (buf.validate.field).required = true,
+    (buf.validate.field).int64.gt = 0
+  ];
 }
 
 message UpdateLoyaltyConfigResponse {

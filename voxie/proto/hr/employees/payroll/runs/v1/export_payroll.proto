@@ -2,13 +2,18 @@ syntax = "proto3";
 
 package hr.employees.payroll.runs.v1;
 
+import "buf/validate/validate.proto";
+
 option go_package = "github.com/voxire/voxie/gen/go/hr/employees/payroll/runs/v1";
 
 // ── Export Payroll ───────────────────────────────────────────────────
 
 message ExportPayrollRequest {
   // ID of the payroll run to export.
-  int64 run_id = 1;
+  int64 run_id = 1 [
+    (buf.validate.field).required = true,
+    (buf.validate.field).int64.gt = 0
+  ];
 }
 
 message ExportPayrollResponse {

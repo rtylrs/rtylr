@@ -22,9 +22,15 @@ message CreateLeaveTypeRequest {
   // Accrual rule; absent if entitlement is fixed.
   optional string accrual_rule = 4;
   // Maximum unused days that may carry over to the next year.
-  int32 max_carryover_days = 5;
+  int32 max_carryover_days = 5 [
+    (buf.validate.field).required = true,
+    (buf.validate.field).int32.gt = 0
+  ];
   // Minimum calendar days of notice required.
-  int32 min_notice_days = 6;
+  int32 min_notice_days = 6 [
+    (buf.validate.field).required = true,
+    (buf.validate.field).int32.gt = 0
+  ];
   // Consecutive days after which documentation is required; absent if never.
   optional int32 requires_documentation_after_days = 7;
 }

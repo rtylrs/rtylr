@@ -8,9 +8,15 @@ option go_package = "github.com/voxire/voxie/gen/go/erp/product/v1";
 
 message CreateProductRequest {
   // category_id is the category id value for this contract.
-  int64 category_id = 1;
+  int64 category_id = 1 [
+    (buf.validate.field).required = true,
+    (buf.validate.field).int64.gt = 0
+  ];
   // supplier_id is the supplier id value for this contract.
-  int64 supplier_id = 2;
+  int64 supplier_id = 2 [
+    (buf.validate.field).required = true,
+    (buf.validate.field).int64.gt = 0
+  ];
   // name is the name value for this contract.
   string name = 3 [
     (buf.validate.field).required = true,
@@ -22,11 +28,20 @@ message CreateProductRequest {
     (buf.validate.field).string.min_len = 1
   ];
   // barcode is the barcode value for this contract.
-  string barcode = 5;
+  string barcode = 5 [
+    (buf.validate.field).required = true,
+    (buf.validate.field).string.min_len = 1
+  ];
   // description is the description value for this contract.
-  string description = 6;
+  string description = 6 [
+    (buf.validate.field).required = true,
+    (buf.validate.field).string.min_len = 1
+  ];
   // unit is the unit value for this contract.
-  string unit = 7;
+  string unit = 7 [
+    (buf.validate.field).required = true,
+    (buf.validate.field).string.min_len = 1
+  ];
   // cost_price is the cost price value for this contract.
   double cost_price = 8 [(buf.validate.field).double.gte = 0];
   // sale_price is the sale price value for this contract.

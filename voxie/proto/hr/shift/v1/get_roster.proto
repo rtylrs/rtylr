@@ -16,7 +16,10 @@ message GetRosterRequest {
     (buf.validate.field).int64.gt = 0
   ];
   // Monday of the week to retrieve (ISO-8601 date).
-  string week_start = 2;
+  string week_start = 2 [
+    (buf.validate.field).required = true,
+    (buf.validate.field).string.min_len = 1
+  ];
 }
 
 message GetRosterResponse {

@@ -2,6 +2,8 @@ syntax = "proto3";
 
 package hr.dashboard.v1;
 
+import "buf/validate/validate.proto";
+
 option go_package = "github.com/voxire/voxie/gen/go/hr/dashboard/v1";
 
 // ── HR Dashboard ────────────────────────────────────────────────────
@@ -66,5 +68,5 @@ message GetDashboardResponse {
 
 message UpdateWidgetLayoutRequest {
   // Updated widget positions and sizes.
-  repeated DashboardWidgetPayload widgets = 1;
+  repeated DashboardWidgetPayload widgets = 1 [(buf.validate.field).repeated.min_items = 1];
 }
