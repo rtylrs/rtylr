@@ -35,6 +35,7 @@ type MyProfile struct {
 	BusinessID         int64             `json:"business_id"`
 	BusinessName       string            `json:"business_name"`
 	IsOwner            bool              `json:"is_owner"`
+	IsConsoleAdmin     bool              `json:"is_console_admin"`
 	Onboarded          bool              `json:"onboarded"`
 	PlanSlug           string            `json:"plan_slug"`
 	SubscriptionStatus string            `json:"subscription_status"`

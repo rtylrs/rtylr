@@ -155,7 +155,7 @@ func (s *Service) GetMyProfile(ctx context.Context, userID, businessID int64) (d
 }
 
 func (s *Service) computeMyProfile(ctx context.Context, userID, businessID int64) (domain.MyProfile, error) {
-	email, fullName, apps, role, err := s.GetMeByBusiness(ctx, businessID, userID)
+	email, fullName, isConsoleAdmin, apps, role, err := s.GetMeByBusiness(ctx, businessID, userID)
 	if err != nil {
 		return domain.MyProfile{}, err
 	}
@@ -198,6 +198,7 @@ func (s *Service) computeMyProfile(ctx context.Context, userID, businessID int64
 		BusinessID:         businessID,
 		BusinessName:       businessName,
 		IsOwner:            isOwner,
+		IsConsoleAdmin:     isConsoleAdmin,
 		Onboarded:          s.IsOnboarded(ctx, userID),
 		PlanSlug:           planSlug,
 		SubscriptionStatus: subscriptionStatus,
@@ -313,7 +314,7 @@ func (s *Service) VerifyInviteToken(ctx context.Context, token string) (int64, s
 		return 0, "", "", nil, err
 	}
 
-	email, fullName, err := s.repo.GetUserByID(ctx, userID)
+	email, fullName, _, err := s.repo.GetUserByID(ctx, userID)
 	if err != nil {
 		return 0, "", "", nil, err
 	}
@@ -351,22 +352,22 @@ func (s *Service) AcceptInvite(ctx context.Context, token, password string) (int
 }
 
 // GetMeByBusiness returns user info with permissions looked up by business_id.
-func (s *Service) GetMeByBusiness(ctx context.Context, businessID, userID int64) (string, string, []string, domain.Role, error) {
-	email, fullName, err := s.repo.GetUserByID(ctx, userID)
+func (s *Service) GetMeByBusiness(ctx context.Context, businessID, userID int64) (string, string, bool, []string, domain.Role, error) {
+	email, fullName, isConsoleAdmin, err := s.repo.GetUserByID(ctx, userID)
 	if err != nil {
-		return "", "", nil, "", err
+		return "", "", false, nil, "", err
 	}
 
 	perm, err := s.repo.GetPermissionByBusiness(ctx, businessID, userID)
 	if err != nil {
-		return email, fullName, []string{}, "", nil
+		return email, fullName, isConsoleAdmin, []string{}, "", nil
 	}
 
 	if perm == nil {
-		return email, fullName, []string{}, "", nil
+		return email, fullName, isConsoleAdmin, []string{}, "", nil
 	}
 
-	return email, fullName, perm.Apps, perm.Role, nil
+	return email, fullName, isConsoleAdmin, perm.Apps, perm.Role, nil
 }
 
 // RequestAccess stores a pending access request from a staff user.
@@ -380,7 +381,7 @@ func (s *Service) GetBusinessOwnerEmail(ctx context.Context, businessID int64) s
 	if err != nil {
 		return ""
 	}
-	email, _, err := s.repo.GetUserByID(ctx, ownerID)
+	email, _, _, err := s.repo.GetUserByID(ctx, ownerID)
 	if err != nil {
 		return ""
 	}
@@ -389,7 +390,8 @@ func (s *Service) GetBusinessOwnerEmail(ctx context.Context, businessID int64) s
 
 // GetUserInfo returns email and full name for a user.
 func (s *Service) GetUserInfo(ctx context.Context, userID int64) (string, string, error) {
-	return s.repo.GetUserByID(ctx, userID)
+	email, fullName, _, err := s.repo.GetUserByID(ctx, userID)
+	return email, fullName, err
 }
 
 func (s *Service) IsOnboarded(ctx context.Context, userID int64) bool {
@@ -731,7 +733,7 @@ func (s *Service) BulkInvite(ctx context.Context, ownerID, businessID int64, inp
 }
 
 func (s *Service) GetMe(ctx context.Context, ownerID, userID int64) (string, string, []string, domain.Role, error) {
-	email, fullName, err := s.repo.GetUserByID(ctx, userID)
+	email, fullName, _, err := s.repo.GetUserByID(ctx, userID)
 	if err != nil {
 		return "", "", nil, "", err
 	}

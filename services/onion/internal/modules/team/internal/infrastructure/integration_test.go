@@ -48,7 +48,7 @@ func TestTeam_GetPermissionByUserID_NoError(t *testing.T) {
 func TestTeam_GetUserByID_Owner(t *testing.T) {
 	db := testutil.OpenDB(t)
 	repo := infrastructure.NewRepository(db)
-	email, fullName, err := repo.GetUserByID(context.Background(), testutil.OwnerID)
+	email, fullName, _, err := repo.GetUserByID(context.Background(), testutil.OwnerID)
 	if err != nil {
 		t.Fatalf("GetUserByID: %v", err)
 	}
@@ -61,7 +61,7 @@ func TestTeam_GetUserByID_Owner(t *testing.T) {
 func TestTeam_GetUserByID_Unknown_Error(t *testing.T) {
 	db := testutil.OpenDB(t)
 	repo := infrastructure.NewRepository(db)
-	_, _, err := repo.GetUserByID(context.Background(), 9999999)
+	_, _, _, err := repo.GetUserByID(context.Background(), 9999999)
 	if err == nil {
 		t.Fatal("expected error for unknown user ID")
 	}

@@ -130,17 +130,17 @@ func (r *Repository) GetUserByEmail(ctx context.Context, email string) (int64, s
 	return row.ID, row.Email, row.FullName, nil
 }
 
-func (r *Repository) GetUserByID(ctx context.Context, id int64) (string, string, error) {
+func (r *Repository) GetUserByID(ctx context.Context, id int64) (string, string, bool, error) {
 	row, err := r.queries.GetUserByID(ctx, id)
 	if err != nil {
 		if errors.Is(err, sql.ErrNoRows) {
-			return "", "", domain.ErrUserNotFound
+			return "", "", false, domain.ErrUserNotFound
 		}
 
-		return "", "", err
+		return "", "", false, err
 	}
 
-	return row.Email, row.FullName, nil
+	return row.Email, row.FullName, row.IsConsoleAdmin, nil
 }
 
 func (r *Repository) CreateUser(ctx context.Context, email, passwordHash, fullName string) (int64, error) {

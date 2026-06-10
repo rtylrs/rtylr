@@ -34,7 +34,7 @@ WHERE owner_id = ? AND user_id = ?;
 SELECT id, email, COALESCE(full_name,'') AS full_name FROM users WHERE email = ? LIMIT 1;
 
 -- name: GetUserByID :one
-SELECT email, COALESCE(full_name,'') AS full_name FROM users WHERE id = ?;
+SELECT email, COALESCE(full_name,'') AS full_name, is_console_admin FROM users WHERE id = ?;
 
 -- name: CreateUser :execresult
 INSERT INTO users (email, password_hash, full_name) VALUES (?, ?, ?);
