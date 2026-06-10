@@ -9,7 +9,7 @@ function isLocalDevHost(hostname: string): boolean {
 
 const IS_LOCAL = typeof window !== 'undefined' && isLocalDevHost(window.location.hostname);
 
-export const APP_URLS: Record<AppId, string> & { api: string; status: string } = {
+export const APP_URLS: Record<AppId, string> & { api: string; status: string; console: string } = {
   dash: IS_LOCAL ? 'http://localhost:5175' : 'https://dash.rtylr.com',
   auth: IS_LOCAL ? 'http://localhost:5176' : 'https://auth.rtylr.com',
   menu: IS_LOCAL ? 'http://localhost:5177' : 'https://menu.rtylr.com',
@@ -24,6 +24,7 @@ export const APP_URLS: Record<AppId, string> & { api: string; status: string } =
   landing: IS_LOCAL ? 'http://localhost:4200' : 'https://rtylr.com',
   api: 'https://api.voxire.com',
   status: 'https://status.rtylr.com',
+  console: 'https://console.voxire.com',
 };
 
 export const APP_CONFIG: Record<
