@@ -201,11 +201,15 @@ type PlatformClaims struct {
 }
 
 func (s *Service) GenerateToken(ctx context.Context, userID int64) (string, error) {
-	_ = ctx
-
-	return s.JWT.CreateJWT(&AccessTokenClaims{
+	claims := &AccessTokenClaims{
 		UserID: userID,
-	})
+	}
+
+	if user, err := s.GetUserByID(ctx, userID); err == nil && user.IsConsoleAdmin {
+		claims.Role = "console_admin"
+	}
+
+	return s.JWT.CreateJWT(claims)
 }
 
 func (s *Service) GenerateTokenWithPlatform(ctx context.Context, userID int64, pc *PlatformClaims) (string, error) {
@@ -219,6 +223,10 @@ func (s *Service) GenerateTokenWithPlatform(ctx context.Context, userID int64, p
 		claims.BusinessID = businessID
 		role, _ := s.repo.GetUserRole(ctx, businessID, userID)
 		claims.Role = role
+	}
+
+	if user, err := s.GetUserByID(ctx, userID); err == nil && user.IsConsoleAdmin {
+		claims.Role = "console_admin"
 	}
 
 	if pc != nil {

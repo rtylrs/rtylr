@@ -9,11 +9,11 @@ INSERT INTO users (
 -- the application reads, so adding a column to the users schema can never break
 -- these queries against a database that has not been migrated yet.
 -- name: GetUserByID :one
-SELECT id, email, password_hash, full_name, signup_ip_address, signup_device_info, created_at, updated_at
+SELECT id, email, password_hash, full_name, signup_ip_address, signup_device_info, created_at, updated_at, is_console_admin
 FROM users WHERE id = ?;
 
 -- name: GetUserByEmail :one
-SELECT id, email, password_hash, full_name, signup_ip_address, signup_device_info, created_at, updated_at
+SELECT id, email, password_hash, full_name, signup_ip_address, signup_device_info, created_at, updated_at, is_console_admin
 FROM users WHERE email = ?;
 
 -- name: EmailExists :one

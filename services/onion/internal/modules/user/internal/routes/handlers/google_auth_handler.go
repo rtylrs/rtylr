@@ -113,11 +113,12 @@ func (h *GoogleAuthHandler) Serve(ctx context.Context, req *GoogleAuthRequest) (
 	}
 
 	return GoogleAuthResponse{
-		Token:   result.Token,
-		Message: "Google authentication successful",
-		UserId:  result.UserID,
-		Email:   user.Email,
-		Name:    user.FullName,
+		Token:          result.Token,
+		Message:        "Google authentication successful",
+		UserId:         result.UserID,
+		Email:          user.Email,
+		Name:           user.FullName,
+		IsConsoleAdmin: user.IsConsoleAdmin,
 	}, nil
 }
 

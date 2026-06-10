@@ -116,10 +116,11 @@ func (h *LoginHandler) Serve(ctx context.Context, req *LoginRequest) (LoginRespo
 	}()
 
 	return LoginResponse{
-		Token:   token,
-		Message: "Login successful",
-		UserId:  userId,
-		Email:   user.Email,
-		Name:    user.FullName,
+		Token:          token,
+		Message:        "Login successful",
+		UserId:         userId,
+		Email:          user.Email,
+		Name:           user.FullName,
+		IsConsoleAdmin: user.IsConsoleAdmin,
 	}, nil
 }
