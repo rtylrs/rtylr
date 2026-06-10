@@ -46,6 +46,10 @@ const RecordPaymentModal: React.FC<RecordPaymentModalProps> = ({
       toast.error('Amount must be greater than zero');
       return;
     }
+    if (!date || !reference.trim()) {
+      toast.error('Payment date and reference are required');
+      return;
+    }
     recordPayment.mutate(
       {
         id: invoiceId,
@@ -53,7 +57,7 @@ const RecordPaymentModal: React.FC<RecordPaymentModalProps> = ({
         currency: currency || 'USD',
         paymentDate: date,
         method,
-        reference,
+        reference: reference.trim(),
       },
       {
         onSuccess: () => {
@@ -115,7 +119,7 @@ const RecordPaymentModal: React.FC<RecordPaymentModalProps> = ({
           <input
             value={reference}
             onChange={(e) => setReference(e.target.value)}
-            placeholder="Optional txn ID"
+            placeholder="Transaction ID or receipt number"
             style={inputStyle}
           />
         </div>

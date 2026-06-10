@@ -169,6 +169,7 @@ describe('useRecordPayment', () => {
         currency: 'USD',
         paymentDate: '2026-06-01',
         method: 'card',
+        reference: 'TXN-42',
       } as any)
     );
     expect(safe.post).toHaveBeenCalledWith('/finance/invoices/payment', {
@@ -177,6 +178,7 @@ describe('useRecordPayment', () => {
       currency: 'USD',
       paymentDate: '2026-06-01',
       method: 'card',
+      reference: 'TXN-42',
     });
   });
 });

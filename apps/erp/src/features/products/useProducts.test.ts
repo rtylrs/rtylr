@@ -186,7 +186,11 @@ describe('useCreateProduct', () => {
       await result.current.mutateAsync({
         name: 'New Product',
         sku: 'NP-001',
-        category: 'Test',
+        categoryId: 1,
+        supplierId: 1,
+        barcode: 'NP-001-BAR',
+        description: 'New product for testing',
+        unit: 'pcs',
         stock: 10,
         lowStock: 2,
         costPrice: 5,

@@ -140,9 +140,9 @@ export function useRecordPayment() {
       id: string;
       amount: number;
       currency: string;
-      paymentDate?: string;
+      paymentDate: string;
       method?: string;
-      reference?: string;
+      reference: string;
     }): Promise<RecordPaymentResponse> => {
       const payload = {
         invoiceId: Number(id),
@@ -161,9 +161,9 @@ export function useRecordPayment() {
         id: string;
         amount: number;
         currency: string;
-        paymentDate?: string;
+        paymentDate: string;
         method?: string;
-        reference?: string;
+        reference: string;
       }
     ) => {
       qc.invalidateQueries({ queryKey: ['invoices'] });

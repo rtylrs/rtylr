@@ -199,7 +199,7 @@ const QuickAddProductModal: React.FC<QuickAddProductModalProps> = ({
     setAttributes((a) => a.filter((_, idx) => idx !== i));
 
   const handleSubmit = (): void => {
-    if (!name || !sku || !categoryId) {
+    if (!name || !sku || !categoryId || !supplierId || !barcode || !description || !unit) {
       toast.error(t('erp.products.validation.requiredFields'));
       return;
     }
@@ -215,10 +215,10 @@ const QuickAddProductModal: React.FC<QuickAddProductModalProps> = ({
     const payload: CreateProductInput = {
       name,
       sku,
-      categoryId: Number(categoryId) || undefined,
-      supplierId: supplierId ? Number(supplierId) : undefined,
-      barcode: barcode || undefined,
-      description: description || undefined,
+      categoryId: Number(categoryId),
+      supplierId: Number(supplierId),
+      barcode,
+      description,
       unit,
       costPrice: isNaN(cost) ? 0 : cost,
       salePrice: isNaN(sale) ? 0 : sale,

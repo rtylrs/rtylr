@@ -32,11 +32,11 @@ export interface Product {
 export interface CreateProductInput {
   name: string;
   sku: string;
-  categoryId?: number;
-  supplierId?: number;
-  barcode?: string;
-  description?: string;
-  unit?: string;
+  categoryId: number;
+  supplierId: number;
+  barcode: string;
+  description: string;
+  unit: string;
   costPrice: number;
   salePrice: number;
   compareAtPrice?: number;
