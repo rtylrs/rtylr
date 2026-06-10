@@ -35,4 +35,6 @@ message LoginResponse {
   string email = 4;
   // name is the name value for this contract.
   string name = 5;
+  // is_console_admin indicates the user can access the internal console.
+  bool is_console_admin = 6;
 }
