@@ -1,36 +1,12 @@
 import React from 'react';
+import { IconBase } from './IconBase';
 
-export const DocsIcon = ({ size = 44 }: { size?: number }) => {
-  const uid = React.useId().replace(/[^a-zA-Z0-9_-]/g, '');
-  return (
-    <svg
-      width={size}
-      height={size}
-      viewBox="0 0 44 44"
-      fill="none"
-      xmlns="http://www.w3.org/2000/svg"
-    >
-      <defs>
-        <linearGradient id={`docs-bg-${uid}`} x1="0" y1="0" x2="0" y2="1">
-          <stop offset="0" stopColor="#6aa8fc" />
-          <stop offset="1" stopColor="#2f6fe0" />
-        </linearGradient>
-      </defs>
-      <rect x="0" y="0" width="44" height="44" rx="10" fill={`url(#docs-bg-${uid})`} />
-      {/* Shadow page behind */}
-      <rect x="14" y="10" width="21" height="27" rx="2.5" fill="rgba(255,255,255,0.07)" />
-      {/* Spine */}
-      <rect x="9" y="7" width="5.5" height="30" rx="1.5" fill="rgba(255,255,255,0.22)" />
-      {/* Main page */}
-      <rect x="13" y="7" width="22" height="30" rx="2.5" fill="rgba(255,255,255,0.92)" />
-      {/* Page lines */}
-      <rect x="17" y="13" width="14" height="2" rx="1" fill="rgba(15,25,50,0.55)" />
-      <rect x="17" y="18" width="11" height="1.5" rx="0.75" fill="rgba(15,25,50,0.3)" />
-      <rect x="17" y="22" width="14" height="1.5" rx="0.75" fill="rgba(15,25,50,0.3)" />
-      <rect x="17" y="26" width="9" height="1.5" rx="0.75" fill="rgba(15,25,50,0.3)" />
-      <rect x="17" y="30" width="12" height="1.5" rx="0.75" fill="rgba(15,25,50,0.2)" />
-      {/* Bookmark ribbon */}
-      <path d="M29 7v11l-3-2.5-3 2.5V7h6Z" fill="rgba(90,160,255,0.9)" />
-    </svg>
-  );
-};
+export const DocsIcon = ({ size = 44 }: { size?: number }) => (
+  <IconBase size={size} from="#46b8f5" to="#0369a1">
+    <path d="M15 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V7Z" />
+    <path d="M14 2v4a2 2 0 0 0 2 2h4" />
+    <path d="M10 9H8" />
+    <path d="M16 13H8" />
+    <path d="M16 17H8" />
+  </IconBase>
+);

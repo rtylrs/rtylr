@@ -1,31 +1,8 @@
 import React from 'react';
+import { IconBase } from './IconBase';
 
-export const StatusIcon = ({ size = 44 }: { size?: number }) => {
-  const uid = React.useId().replace(/[^a-zA-Z0-9_-]/g, '');
-  return (
-    <svg
-      width={size}
-      height={size}
-      viewBox="0 0 44 44"
-      fill="none"
-      xmlns="http://www.w3.org/2000/svg"
-    >
-      <defs>
-        <linearGradient id={`status-bg-${uid}`} x1="0" y1="0" x2="0" y2="1">
-          <stop offset="0" stopColor="#103024" />
-          <stop offset="1" stopColor="#07160e" />
-        </linearGradient>
-      </defs>
-      <rect x="0" y="0" width="44" height="44" rx="10" fill={`url(#status-bg-${uid})`} />
-      <path
-        d="M8 24h4l3-8 4 16 3-12 3 6 3-4 4 2h4"
-        stroke="#22c55e"
-        strokeWidth="1.5"
-        strokeLinecap="round"
-        strokeLinejoin="round"
-      />
-      <circle cx="22" cy="34" r="2" fill="rgba(34,197,94,0.9)" />
-      <circle cx="22" cy="34" r="4" stroke="rgba(34,197,94,0.3)" strokeWidth="1" />
-    </svg>
-  );
-};
+export const StatusIcon = ({ size = 44 }: { size?: number }) => (
+  <IconBase size={size} from="#0c4a35" to="#022c22" stroke="#34d399">
+    <path d="M22 12h-2.48a2 2 0 0 0-1.93 1.46l-2.35 8.36a.25.25 0 0 1-.48 0L9.24 2.18a.25.25 0 0 0-.48 0l-2.35 8.36A2 2 0 0 1 4.49 12H2" />
+  </IconBase>
+);
