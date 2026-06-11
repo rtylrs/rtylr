@@ -11,6 +11,12 @@ import (
 	"github.com/voxire/onion/internal/platform/config"
 )
 
+func TestPaddleHTTPClientHasTimeout(t *testing.T) {
+	if paddleHTTPClient.Timeout != paddleRequestTimeout {
+		t.Fatalf("expected Paddle HTTP timeout %s, got %s", paddleRequestTimeout, paddleHTTPClient.Timeout)
+	}
+}
+
 func signedWebhookHeader(secret string, body []byte, ts time.Time) string {
 	timestamp := strconv.FormatInt(ts.Unix(), 10)
 	mac := hmac.New(sha256.New, []byte(secret))

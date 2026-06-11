@@ -102,6 +102,10 @@ type POSPaymentResult struct {
 	CheckoutURL   string
 }
 
+const paddleRequestTimeout = 15 * time.Second
+
+var paddleHTTPClient = &http.Client{Timeout: paddleRequestTimeout}
+
 // CreatePOSTransaction creates a one-off Paddle transaction for a POS order.
 // Uses the idempotency key so retries with the same key resolve to the same
 // transaction on Paddle's side.
@@ -150,7 +154,7 @@ func CreatePOSTransaction(ctx context.Context, req POSPaymentRequest) (POSPaymen
 		httpReq.Header.Set("Paddle-Idempotency-Key", req.IdempotencyKey)
 	}
 
-	resp, err := http.DefaultClient.Do(httpReq)
+	resp, err := paddleHTTPClient.Do(httpReq)
 	if err != nil {
 		return POSPaymentResult{}, err
 	}
@@ -215,7 +219,7 @@ func CreateTransaction(ctx context.Context, ownerID int64, priceID, customerEmai
 	req.Header.Set("Content-Type", "application/json")
 	req.Header.Set("Authorization", "Bearer "+config.GetPaddleAPIKey())
 
-	resp, err := http.DefaultClient.Do(req)
+	resp, err := paddleHTTPClient.Do(req)
 	if err != nil {
 		return "", err
 	}
