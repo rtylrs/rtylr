@@ -1,6 +1,6 @@
 import React, { useCallback } from 'react';
 import { Rnd } from 'react-rnd';
-import { motion, AnimatePresence } from 'motion/react';
+import { motion } from 'motion/react';
 import { TitleBar } from './TitleBar';
 import { WindowContent } from './WindowContent';
 import { useDesktopStore, WindowState } from '../../stores/useDesktopStore';
@@ -10,24 +10,21 @@ interface AppWindowProps {
   animationsEnabled: boolean;
 }
 
-export const AppWindow: React.FC<AppWindowProps> = ({ window: win, animationsEnabled }) => {
-  const closeWindow = useDesktopStore((s) => s.closeWindow);
-  const bringToFront = useDesktopStore((s) => s.bringToFront);
-  const minimizeWindow = useDesktopStore((s) => s.minimizeWindow);
-  const updateWindowPosition = useDesktopStore((s) => s.updateWindowPosition);
-  const updateWindowSize = useDesktopStore((s) => s.updateWindowSize);
-  const [dragging, setDragging] = React.useState(false);
+export const AppWindow: React.FC<AppWindowProps> = React.memo(
+  ({ window: win, animationsEnabled }) => {
+    const closeWindow = useDesktopStore((s) => s.closeWindow);
+    const bringToFront = useDesktopStore((s) => s.bringToFront);
+    const minimizeWindow = useDesktopStore((s) => s.minimizeWindow);
+    const updateWindowPosition = useDesktopStore((s) => s.updateWindowPosition);
+    const updateWindowSize = useDesktopStore((s) => s.updateWindowSize);
+    const [dragging, setDragging] = React.useState(false);
 
-  const handleClose = useCallback(() => closeWindow(win.id), [win.id, closeWindow]);
-  const handleMinimize = useCallback(() => minimizeWindow(win.id), [win.id, minimizeWindow]);
-  const handleFocus = useCallback(() => bringToFront(win.id), [win.id, bringToFront]);
+    const handleClose = useCallback(() => closeWindow(win.id), [win.id, closeWindow]);
+    const handleMinimize = useCallback(() => minimizeWindow(win.id), [win.id, minimizeWindow]);
+    const handleFocus = useCallback(() => bringToFront(win.id), [win.id, bringToFront]);
 
-  if (win.minimized) return null;
-
-  return (
-    <AnimatePresence>
+    return (
       <motion.div
-        key={win.id}
         initial={animationsEnabled ? { scale: 0.85, opacity: 0 } : false}
         animate={{ scale: 1, opacity: 1 }}
         exit={animationsEnabled ? { scale: 0.9, opacity: 0 } : undefined}
@@ -100,6 +97,8 @@ export const AppWindow: React.FC<AppWindowProps> = ({ window: win, animationsEna
           </div>
         </Rnd>
       </motion.div>
-    </AnimatePresence>
-  );
-};
+    );
+  }
+);
+
+AppWindow.displayName = 'AppWindow';

@@ -1,5 +1,6 @@
 import React, { useEffect, useState, useCallback } from 'react';
 import dynamic from 'next/dynamic';
+import { AnimatePresence } from 'motion/react';
 import { useDesktopStore, Wallpaper, ColorMode } from '../../stores/useDesktopStore';
 import { MenuBar } from '../MenuBar';
 import { DesktopIcons } from './DesktopIcons';
@@ -116,9 +117,13 @@ export const Desktop: React.FC = () => {
         <DesktopIcons />
 
         {/* Open windows */}
-        {windows.map((win) => (
-          <AppWindow key={win.id} window={win} animationsEnabled={animationsEnabled} />
-        ))}
+        <AnimatePresence>
+          {windows
+            .filter((win) => !win.minimized)
+            .map((win) => (
+              <AppWindow key={win.id} window={win} animationsEnabled={animationsEnabled} />
+            ))}
+        </AnimatePresence>
 
         <BottomDock />
       </div>
