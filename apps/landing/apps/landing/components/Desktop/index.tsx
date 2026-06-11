@@ -98,7 +98,7 @@ export const Desktop: React.FC = () => {
         } as React.CSSProperties
       }
     >
-      <WallpaperOverlay wallpaper={wallpaper} />
+      <WallpaperOverlay wallpaper={wallpaper} animated={animationsEnabled} />
       <MenuBar />
 
       {/* Desktop area - below menu bar */}

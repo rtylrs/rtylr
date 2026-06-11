@@ -14,7 +14,10 @@ const SVG_PROPS = {
   viewBox: '0 0 1440 900',
 };
 
+// Keyframes are only defined when animation is allowed; the inline
+// animation declarations on scene elements become no-ops without them.
 const KEYFRAMES = `
+@media (prefers-reduced-motion: no-preference) {
 @keyframes wp-twinkle { 0%,100%{opacity:.9} 50%{opacity:.12} }
 @keyframes mn-beacon { 0%,45%,100%{opacity:1} 55%,95%{opacity:.1} }
 @keyframes au-ray { 0%,100%{opacity:.35;transform:scaleY(1)} 50%{opacity:.85;transform:scaleY(1.12)} }
@@ -25,6 +28,7 @@ const KEYFRAMES = `
 @keyframes fo-cloud { 0%{transform:translateX(0)} 100%{transform:translateX(70px)} }
 @keyframes fo-bird { 0%{transform:translate(0,0)} 50%{transform:translate(24px,-8px)} 100%{transform:translate(48px,0)} }
 @keyframes fo-mist { 0%,100%{opacity:.55;transform:translateX(0)} 50%{opacity:.85;transform:translateX(36px)} }
+}
 `;
 
 // Static CSS approximations of each scene, used for cheap previews (e.g. the
@@ -625,14 +629,17 @@ const WALLPAPER_OVERLAYS: Record<Wallpaper, React.FC<SceneProps>> = {
   forest: Forest,
 };
 
-export const WallpaperOverlay: React.FC<{ wallpaper: Wallpaper }> = ({ wallpaper }) => {
-  const uid = React.useId().replace(/[^a-zA-Z0-9_-]/g, '');
-  const id = React.useCallback((name: string) => `${name}-${uid}`, [uid]);
-  const Overlay = WALLPAPER_OVERLAYS[wallpaper];
-  return (
-    <>
-      <style>{KEYFRAMES}</style>
-      <Overlay id={id} />
-    </>
-  );
-};
+export const WallpaperOverlay: React.FC<{ wallpaper: Wallpaper; animated?: boolean }> =
+  React.memo(({ wallpaper, animated = true }) => {
+    const uid = React.useId().replace(/[^a-zA-Z0-9_-]/g, '');
+    const id = React.useCallback((name: string) => `${name}-${uid}`, [uid]);
+    const Overlay = WALLPAPER_OVERLAYS[wallpaper];
+    return (
+      <>
+        {animated && <style>{KEYFRAMES}</style>}
+        <Overlay id={id} />
+      </>
+    );
+  });
+
+WallpaperOverlay.displayName = 'WallpaperOverlay';
