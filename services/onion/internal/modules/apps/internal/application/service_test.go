@@ -2,14 +2,18 @@ package application
 
 import (
 	"context"
+	"errors"
 	"testing"
 )
 
 type mockRepo struct {
-	enabled       map[string]bool
-	allowed       []string
-	gotEnabledBiz int64
-	gotAllowed    struct{ biz, uid int64 }
+	enabled        map[string]bool
+	allowed        []string
+	businessID     int64
+	businessErr    error
+	gotEnabledBiz  int64
+	gotBusinessUID int64
+	gotAllowed     struct{ biz, uid int64 }
 }
 
 func (m *mockRepo) GetEnabledAddons(_ context.Context, businessID int64) map[string]bool {
@@ -21,6 +25,14 @@ func (m *mockRepo) GetUserAllowedApps(_ context.Context, biz, uid int64) []strin
 	m.gotAllowed.biz = biz
 	m.gotAllowed.uid = uid
 	return m.allowed
+}
+
+func (m *mockRepo) GetUserBusinessID(_ context.Context, uid int64) (int64, error) {
+	m.gotBusinessUID = uid
+	if m.businessErr != nil {
+		return 0, m.businessErr
+	}
+	return m.businessID, nil
 }
 
 func TestListApps_NonEmpty(t *testing.T) {
@@ -119,6 +131,56 @@ func TestGetVisibleApps_RegularUserSeesNoAppsIfNotAllowed(t *testing.T) {
 	visible := s.GetVisibleApps(context.Background(), 1, 5, "staff")
 	if len(visible) != 0 {
 		t.Errorf("expected no apps for staff with no permissions, got %d", len(visible))
+	}
+}
+
+func TestGetVisibleAppsForUser_ResolvesMissingBusinessID(t *testing.T) {
+	m := &mockRepo{
+		enabled:    map[string]bool{},
+		allowed:    []string{"pos", "finance"},
+		businessID: 7,
+	}
+	s := &Service{repo: m}
+
+	visible, err := s.GetVisibleAppsForUser(context.Background(), 0, 5, "staff")
+	if err != nil {
+		t.Fatalf("GetVisibleAppsForUser returned error: %v", err)
+	}
+	if m.gotBusinessUID != 5 {
+		t.Fatalf("expected business lookup for user 5, got %d", m.gotBusinessUID)
+	}
+	if m.gotAllowed.biz != 7 || m.gotAllowed.uid != 5 {
+		t.Fatalf("expected allowed apps lookup for business 7/user 5, got %+v", m.gotAllowed)
+	}
+	if len(visible) != 2 {
+		t.Fatalf("expected 2 visible apps, got %d", len(visible))
+	}
+}
+
+func TestGetVisibleAppsForUser_AnonymousDoesNotResolveBusinessID(t *testing.T) {
+	m := &mockRepo{enabled: map[string]bool{}}
+	s := &Service{repo: m}
+
+	visible, err := s.GetVisibleAppsForUser(context.Background(), 0, 0, "")
+	if err != nil {
+		t.Fatalf("GetVisibleAppsForUser returned error: %v", err)
+	}
+	if m.gotBusinessUID != 0 {
+		t.Fatalf("anonymous calls should not look up user business, got %d", m.gotBusinessUID)
+	}
+	if len(visible) == 0 {
+		t.Fatal("expected anonymous visible apps")
+	}
+}
+
+func TestGetVisibleAppsForUser_PropagatesBusinessLookupError(t *testing.T) {
+	wantErr := errors.New("business lookup failed")
+	m := &mockRepo{businessErr: wantErr}
+	s := &Service{repo: m}
+
+	_, err := s.GetVisibleAppsForUser(context.Background(), 0, 5, "staff")
+	if !errors.Is(err, wantErr) {
+		t.Fatalf("expected %v, got %v", wantErr, err)
 	}
 }
 

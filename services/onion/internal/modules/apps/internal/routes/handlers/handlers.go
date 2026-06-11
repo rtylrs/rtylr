@@ -28,7 +28,11 @@ func (h *ListAppsHandler) Serve(ctx context.Context, _ *ListAppsRequest) (ListAp
 		businessID, userID, role = u.BusinessID, u.UserID, u.Role
 	}
 
-	apps := h.Service.GetVisibleApps(ctx, businessID, userID, role)
+	apps, err := h.Service.GetVisibleAppsForUser(ctx, businessID, userID, role)
+	if err != nil {
+		return ListAppsResponse{}, errorModels.FromError(err, "Failed to load apps")
+	}
+
 	payloads := make([]*hubappv1.App, 0, len(apps))
 	for _, a := range apps {
 		payloads = append(payloads, toProtoApp(a))

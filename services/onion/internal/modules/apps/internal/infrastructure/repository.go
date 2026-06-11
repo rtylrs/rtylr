@@ -21,6 +21,18 @@ func NewRepository(db *sql.DB) *Repository {
 	}
 }
 
+func (r *Repository) GetUserBusinessID(ctx context.Context, userID int64) (int64, error) {
+	var businessID sql.NullInt64
+	err := r.pool.QueryRowContext(ctx, "SELECT business_id FROM users WHERE id = ?", userID).Scan(&businessID)
+	if err != nil {
+		return 0, err
+	}
+	if !businessID.Valid {
+		return 0, nil
+	}
+	return businessID.Int64, nil
+}
+
 // GetEnabledAddons returns addon IDs that are enabled for the given business.
 func (r *Repository) GetEnabledAddons(ctx context.Context, businessID int64) map[string]bool {
 	// cross-schema read from business_addons — addon enablement is owned by another module

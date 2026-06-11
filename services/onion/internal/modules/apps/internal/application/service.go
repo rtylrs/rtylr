@@ -11,6 +11,7 @@ import (
 type repository interface {
 	GetEnabledAddons(ctx context.Context, businessID int64) map[string]bool
 	GetUserAllowedApps(ctx context.Context, businessID, userID int64) []string
+	GetUserBusinessID(ctx context.Context, userID int64) (int64, error)
 }
 
 type Service struct {
@@ -33,6 +34,25 @@ func (s *Service) GetEnabledAddons(ctx context.Context, businessID int64) map[st
 
 func (s *Service) GetUserAllowedApps(ctx context.Context, businessID, userID int64) []string {
 	return s.repo.GetUserAllowedApps(ctx, businessID, userID)
+}
+
+func (s *Service) GetVisibleAppsForUser(ctx context.Context, businessID, userID int64, role string) ([]domain.App, error) {
+	if userID == 0 {
+		return s.GetVisibleApps(ctx, businessID, userID, role), nil
+	}
+
+	resolvedBusinessID, err := s.resolveBusinessID(ctx, businessID, userID)
+	if err != nil {
+		return nil, err
+	}
+	return s.GetVisibleApps(ctx, resolvedBusinessID, userID, role), nil
+}
+
+func (s *Service) resolveBusinessID(ctx context.Context, businessID, userID int64) (int64, error) {
+	if businessID > 0 {
+		return businessID, nil
+	}
+	return s.repo.GetUserBusinessID(ctx, userID)
 }
 
 // GetVisibleApps returns the app catalogue projected for a specific user:
