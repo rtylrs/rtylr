@@ -3,8 +3,10 @@ package httprequest
 import (
 	"context"
 	"encoding/json"
+	"errors"
 	"net/http"
 	"net/http/httptest"
+	"strings"
 	"testing"
 )
 
@@ -94,5 +96,46 @@ func TestPostBodyIsForwarded(t *testing.T) {
 	}
 	if string(got) != `{"a":1}` {
 		t.Errorf("expected body forwarded, got %q", got)
+	}
+}
+
+func TestReadResponseBodyRejectsOversizedBody(t *testing.T) {
+	resp, err := readResponseBody(strings.NewReader("abcdef"), 5)
+	if !errors.Is(err, ErrResponseTooLarge) {
+		t.Fatalf("expected ErrResponseTooLarge, got %v", err)
+	}
+	if string(resp) != "abcde" {
+		t.Fatalf("expected capped body prefix, got %q", resp)
+	}
+}
+
+func TestGetReturnsErrorWhenResponseExceedsLimit(t *testing.T) {
+	srv := httptest.NewServer(http.HandlerFunc(func(w http.ResponseWriter, _ *http.Request) {
+		_, _ = w.Write([]byte("abcdef"))
+	}))
+	defer srv.Close()
+
+	resp, err := Get(context.Background(), srv.URL, WithMaxResponseBytes(5))
+	if !errors.Is(err, ErrResponseTooLarge) {
+		t.Fatalf("expected ErrResponseTooLarge, got %v", err)
+	}
+	if string(resp.Body) != "abcde" {
+		t.Fatalf("expected capped response body, got %q", resp.Body)
+	}
+}
+
+func TestWithMaxResponseBytesAllowsLargerBody(t *testing.T) {
+	const body = "abcdef"
+	srv := httptest.NewServer(http.HandlerFunc(func(w http.ResponseWriter, _ *http.Request) {
+		_, _ = w.Write([]byte(body))
+	}))
+	defer srv.Close()
+
+	resp, err := Get(context.Background(), srv.URL, WithMaxResponseBytes(int64(len(body))))
+	if err != nil {
+		t.Fatalf("unexpected: %v", err)
+	}
+	if string(resp.Body) != body {
+		t.Fatalf("expected full body, got %q", resp.Body)
 	}
 }

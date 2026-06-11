@@ -19,7 +19,10 @@ const (
 	DefaultUserAgent = "Onion-HTTP-Client/1.0"
 )
 
-var ErrUnmarshal = errors.New("failed to unmarshal results")
+var (
+	ErrResponseTooLarge = errors.New("response body too large")
+	ErrUnmarshal        = errors.New("failed to unmarshal results")
+)
 
 type (
 	Headers      map[string]string
@@ -136,7 +139,7 @@ func execRequest(ctx context.Context, urlPath, method string, payload []byte, op
 	response := HTTPResponse{}
 	response.StatusCode = resp.StatusCode
 	response.Headers = resp.Header
-	bodyBytes, err := io.ReadAll(resp.Body)
+	bodyBytes, err := readResponseBody(resp.Body, configs.maxBodyBytes)
 	response.Body = bodyBytes
 
 	if err != nil {
@@ -163,6 +166,22 @@ func execRequest(ctx context.Context, urlPath, method string, payload []byte, op
 	}
 
 	return response, nil
+}
+
+func readResponseBody(body io.Reader, maxBodyBytes int64) ([]byte, error) {
+	if maxBodyBytes <= 0 {
+		return io.ReadAll(body)
+	}
+
+	bodyBytes, err := io.ReadAll(io.LimitReader(body, maxBodyBytes+1))
+	if err != nil {
+		return bodyBytes, err
+	}
+	if int64(len(bodyBytes)) > maxBodyBytes {
+		return bodyBytes[:maxBodyBytes], ErrResponseTooLarge
+	}
+
+	return bodyBytes, nil
 }
 
 func (resp HTTPResponse) WasRedirected() (wasRedirected bool, finalURL string) {

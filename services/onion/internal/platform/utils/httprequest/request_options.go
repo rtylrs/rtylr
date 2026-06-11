@@ -27,6 +27,7 @@ type requestConfiguration struct {
 	headers       Headers
 	contentType   string
 	timeout       time.Duration
+	maxBodyBytes  int64
 	unmarshalFunc unmarshalFunction
 	targetStruct  any
 	Certificate   *tls.Certificate
@@ -88,12 +89,24 @@ func WithTimeout(duration time.Duration) RequestOptions {
 	}
 }
 
+func WithMaxResponseBytes(maxBytes int64) RequestOptions {
+	return func(c *requestConfiguration) {
+		if maxBytes > 0 {
+			c.maxBodyBytes = maxBytes
+		}
+	}
+}
+
 func getDefaultConfig() requestConfiguration {
-	const defaultTimeout = 5 * time.Second
+	const (
+		defaultTimeout          = 5 * time.Second
+		defaultMaxResponseBytes = 8 << 20
+	)
 
 	return requestConfiguration{
 		unmarshalFunc: jsonUnmarshal,
 		timeout:       defaultTimeout,
+		maxBodyBytes:  defaultMaxResponseBytes,
 	}
 }
 
