@@ -1,7 +1,7 @@
 import React from 'react';
 import { Monitor, Sun, Moon } from 'lucide-react';
 import { useDesktopStore, ColorMode, Wallpaper } from '../../stores/useDesktopStore';
-import { WallpaperOverlay } from '../Desktop/WallpaperOverlay';
+import { WALLPAPER_PREVIEWS } from '../Desktop/WallpaperOverlay';
 
 const COLOR_MODES: {
   key: ColorMode;
@@ -128,7 +128,9 @@ export default function SettingsWindow(): React.JSX.Element {
                 transform: wallpaper === w.key ? 'scale(1)' : 'scale(0.97)',
               }}
             >
-              <WallpaperOverlay wallpaper={w.key} />
+              <div
+                style={{ position: 'absolute', inset: 0, background: WALLPAPER_PREVIEWS[w.key] }}
+              />
             </button>
           ))}
         </div>

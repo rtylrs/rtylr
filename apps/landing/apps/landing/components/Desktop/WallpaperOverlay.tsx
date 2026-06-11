@@ -2,11 +2,46 @@ import React from 'react';
 import { Wallpaper } from '../../stores/useDesktopStore';
 
 const SVG_PROPS = {
-  style: { position: 'absolute' as const, inset: 0, width: '100%', height: '100%' },
+  style: {
+    position: 'absolute' as const,
+    inset: 0,
+    width: '100%',
+    height: '100%',
+    pointerEvents: 'none' as const,
+  },
   xmlns: 'http://www.w3.org/2000/svg',
   preserveAspectRatio: 'xMidYMid slice',
   viewBox: '0 0 1440 900',
 };
+
+const KEYFRAMES = `
+@keyframes wp-twinkle { 0%,100%{opacity:.9} 50%{opacity:.12} }
+@keyframes mn-beacon { 0%,45%,100%{opacity:1} 55%,95%{opacity:.1} }
+@keyframes au-ray { 0%,100%{opacity:.35;transform:scaleY(1)} 50%{opacity:.85;transform:scaleY(1.12)} }
+@keyframes du-glow { 0%,100%{opacity:.85;transform:scale(1)} 50%{opacity:1;transform:scale(1.04)} }
+@keyframes du-bird { 0%{transform:translate(0,0)} 50%{transform:translate(20px,-10px)} 100%{transform:translate(40px,0)} }
+@keyframes sl-mist { 0%,100%{opacity:.5;transform:translateX(0)} 50%{opacity:.8;transform:translateX(40px)} }
+@keyframes fo-sun { 0%,100%{opacity:.85} 50%{opacity:1} }
+@keyframes fo-cloud { 0%{transform:translateX(0)} 100%{transform:translateX(70px)} }
+@keyframes fo-bird { 0%{transform:translate(0,0)} 50%{transform:translate(24px,-8px)} 100%{transform:translate(48px,0)} }
+@keyframes fo-mist { 0%,100%{opacity:.55;transform:translateX(0)} 50%{opacity:.85;transform:translateX(36px)} }
+`;
+
+// Static CSS approximations of each scene, used for cheap previews (e.g. the
+// Settings thumbnails) instead of mounting the full SVG five times over.
+export const WALLPAPER_PREVIEWS: Record<Wallpaper, string> = {
+  midnight:
+    'linear-gradient(180deg, #070b22 0%, #141d45 36%, #34315e 58%, #7a4a5e 72%, #1a1c42 76%, #0c0d26 100%)',
+  aurora:
+    'linear-gradient(180deg, rgba(61,255,154,0) 18%, rgba(61,255,154,0.4) 42%, rgba(176,107,255,0.25) 58%, rgba(31,217,192,0) 72%), linear-gradient(180deg, #03060f 0%, #06121f 55%, #0a2030 76%, #04101a 78%, #030b14 100%)',
+  dusk: 'linear-gradient(180deg, #2b1a5e 0%, #6e2f7a 30%, #c5447a 52%, #f47c4a 68%, #6a2952 78%, #1f0c22 100%)',
+  slate:
+    'linear-gradient(180deg, #c3d2e6 0%, #dde7f2 40%, #8298b6 62%, #5a7193 75%, #3a4d6e 88%, #1f2d49 100%)',
+  forest:
+    'linear-gradient(180deg, #ffd29a 0%, #ffe7c4 32%, #e2f1e6 50%, #cfe6b4 62%, #86c873 76%, #3f8c45 88%, #1f5a2b 100%)',
+};
+
+type SceneProps = { id: (name: string) => string };
 
 // Deterministic pseudo-random so generated detail is stable across renders.
 const rng = (seed: number): (() => number) => {
@@ -111,49 +146,45 @@ const Windows: React.FC<{
   return <g fill="#ffd27a">{rects}</g>;
 };
 
-const Midnight: React.FC = () => {
+const Midnight: React.FC<SceneProps> = ({ id }) => {
   const far = buildSkyline(3, 560, 80, 200, 70, 130);
   const mid = buildSkyline(11, 610, 120, 300, 80, 150);
   const near = buildSkyline(29, 660, 160, 380, 90, 170);
   return (
     <svg {...SVG_PROPS}>
       <defs>
-        <linearGradient id="mn-sky" x1="0" y1="0" x2="0" y2="1">
+        <linearGradient id={id('mn-sky')} x1="0" y1="0" x2="0" y2="1">
           <stop offset="0%" stopColor="#070b22" />
           <stop offset="40%" stopColor="#141d45" />
           <stop offset="70%" stopColor="#34315e" />
           <stop offset="100%" stopColor="#7a4a5e" />
         </linearGradient>
-        <radialGradient id="mn-moon" cx="50%" cy="50%" r="50%">
+        <radialGradient id={id('mn-moon')} cx="50%" cy="50%" r="50%">
           <stop offset="0%" stopColor="#fff7e8" />
           <stop offset="65%" stopColor="#fce9c0" stopOpacity="0.55" />
           <stop offset="100%" stopColor="#fce9c0" stopOpacity="0" />
         </radialGradient>
-        <radialGradient id="mn-pollution" cx="50%" cy="100%" r="75%">
+        <radialGradient id={id('mn-pollution')} cx="50%" cy="100%" r="75%">
           <stop offset="0%" stopColor="#ffb27a" stopOpacity="0.5" />
           <stop offset="45%" stopColor="#b9628a" stopOpacity="0.22" />
           <stop offset="100%" stopColor="#b9628a" stopOpacity="0" />
         </radialGradient>
-        <filter id="mn-haze" x="-20%" y="-60%" width="140%" height="220%">
+        <filter id={id('mn-haze')} x="-20%" y="-60%" width="140%" height="220%">
           <feGaussianBlur stdDeviation="26" />
         </filter>
-        <style>{`
-          @keyframes wp-twinkle { 0%,100%{opacity:.9} 50%{opacity:.12} }
-          @keyframes mn-beacon { 0%,45%,100%{opacity:1} 55%,95%{opacity:.1} }
-        `}</style>
       </defs>
 
-      <rect width="1440" height="900" fill="url(#mn-sky)" />
+      <rect width="1440" height="900" fill={`url(#${id('mn-sky')})`} />
       <StarField count={80} seed={7} maxY={460} twinkle />
 
       {/* Moon */}
-      <circle cx="1130" cy="160" r="170" fill="url(#mn-moon)" />
+      <circle cx="1130" cy="160" r="170" fill={`url(#${id('mn-moon')})`} />
       <circle cx="1130" cy="160" r="62" fill="#fdf3d8" />
       <circle cx="1110" cy="144" r="10" fill="#ecdcb6" opacity="0.55" />
       <circle cx="1148" cy="176" r="7" fill="#ecdcb6" opacity="0.5" />
 
       {/* Light-pollution glow behind the skyline */}
-      <rect x="0" y="360" width="1440" height="540" fill="url(#mn-pollution)" />
+      <rect x="0" y="360" width="1440" height="540" fill={`url(#${id('mn-pollution')})`} />
 
       {/* Far layer */}
       <path d={far.path} fill="#2c2f58" opacity="0.7" />
@@ -187,7 +218,7 @@ const Midnight: React.FC = () => {
         height="120"
         fill="#9a6a7a"
         opacity="0.5"
-        filter="url(#mn-haze)"
+        filter={`url(#${id('mn-haze')})`}
       />
       <rect
         x="-40"
@@ -196,14 +227,14 @@ const Midnight: React.FC = () => {
         height="160"
         fill="#d98a6a"
         opacity="0.35"
-        filter="url(#mn-haze)"
+        filter={`url(#${id('mn-haze')})`}
       />
     </svg>
   );
 };
 
 // ─── Aurora — full shimmering curtains of light over a low ridge ─────────────
-const Aurora: React.FC = () => {
+const Aurora: React.FC<SceneProps> = ({ id }) => {
   const rays = (seed: number, yBase: number, amp: number, count: number) => {
     const r = rng(seed);
     return Array.from({ length: count }).map((_, i) => {
@@ -221,46 +252,43 @@ const Aurora: React.FC = () => {
   return (
     <svg {...SVG_PROPS}>
       <defs>
-        <linearGradient id="au-sky" x1="0" y1="0" x2="0" y2="1">
+        <linearGradient id={id('au-sky')} x1="0" y1="0" x2="0" y2="1">
           <stop offset="0%" stopColor="#03060f" />
           <stop offset="55%" stopColor="#06121f" />
           <stop offset="100%" stopColor="#0a2030" />
         </linearGradient>
-        <linearGradient id="au-green" x1="0" y1="0" x2="0" y2="1">
+        <linearGradient id={id('au-green')} x1="0" y1="0" x2="0" y2="1">
           <stop offset="0%" stopColor="#4dffb0" stopOpacity="0" />
           <stop offset="35%" stopColor="#3dff9a" stopOpacity="0.75" />
           <stop offset="70%" stopColor="#1fd9c0" stopOpacity="0.4" />
           <stop offset="100%" stopColor="#1fd9c0" stopOpacity="0" />
         </linearGradient>
-        <linearGradient id="au-violet" x1="0" y1="0" x2="0" y2="1">
+        <linearGradient id={id('au-violet')} x1="0" y1="0" x2="0" y2="1">
           <stop offset="0%" stopColor="#9d6bff" stopOpacity="0" />
           <stop offset="45%" stopColor="#b06bff" stopOpacity="0.55" />
           <stop offset="100%" stopColor="#ff6bd0" stopOpacity="0" />
         </linearGradient>
-        <radialGradient id="au-bloom" cx="50%" cy="38%" r="60%">
+        <radialGradient id={id('au-bloom')} cx="50%" cy="38%" r="60%">
           <stop offset="0%" stopColor="#2dffb0" stopOpacity="0.28" />
           <stop offset="100%" stopColor="#2dffb0" stopOpacity="0" />
         </radialGradient>
-        <filter id="au-soft" x="-40%" y="-40%" width="180%" height="180%">
+        <filter id={id('au-soft')} x="-40%" y="-40%" width="180%" height="180%">
           <feGaussianBlur stdDeviation="14" />
         </filter>
-        <linearGradient id="au-lake" x1="0" y1="0" x2="0" y2="1">
+        <linearGradient id={id('au-lake')} x1="0" y1="0" x2="0" y2="1">
           <stop offset="0%" stopColor="#0a2030" />
           <stop offset="100%" stopColor="#030b14" />
         </linearGradient>
-        <style>{`
-          @keyframes au-ray { 0%,100%{opacity:.35;transform:scaleY(1)} 50%{opacity:.85;transform:scaleY(1.12)} }
-        `}</style>
       </defs>
 
-      <rect width="1440" height="700" fill="url(#au-sky)" />
+      <rect width="1440" height="700" fill={`url(#${id('au-sky')})`} />
       <StarField count={140} seed={21} maxY={680} twinkle />
 
       {/* Broad green bloom filling the sky */}
-      <rect width="1440" height="700" fill="url(#au-bloom)" />
+      <rect width="1440" height="700" fill={`url(#${id('au-bloom')})`} />
 
       {/* Violet curtain (behind) */}
-      <g filter="url(#au-soft)">
+      <g filter={`url(#${id('au-soft')})`}>
         {violetRays.map((r, i) => (
           <rect
             key={`v${i}`}
@@ -269,7 +297,7 @@ const Aurora: React.FC = () => {
             width={r.w}
             height={r.h}
             rx={r.w / 2}
-            fill="url(#au-violet)"
+            fill={`url(#${id('au-violet')})`}
             style={{
               animation: `au-ray ${r.dur}s ease-in-out ${r.delay}s infinite`,
               transformOrigin: `${r.x + r.w / 2}px ${r.top}px`,
@@ -278,7 +306,7 @@ const Aurora: React.FC = () => {
         ))}
       </g>
       {/* Green curtain (front, brighter) */}
-      <g filter="url(#au-soft)">
+      <g filter={`url(#${id('au-soft')})`}>
         {greenRays.map((r, i) => (
           <rect
             key={`g${i}`}
@@ -287,7 +315,7 @@ const Aurora: React.FC = () => {
             width={r.w}
             height={r.h}
             rx={r.w / 2}
-            fill="url(#au-green)"
+            fill={`url(#${id('au-green')})`}
             style={{
               animation: `au-ray ${r.dur}s ease-in-out ${r.delay}s infinite`,
               transformOrigin: `${r.x + r.w / 2}px ${r.top}px`,
@@ -307,12 +335,8 @@ const Aurora: React.FC = () => {
       </g>
 
       {/* Frozen-lake reflection */}
-      <rect y="700" width="1440" height="200" fill="url(#au-lake)" />
-      <g
-        filter="url(#au-soft)"
-        opacity="0.4"
-        transform="translate(0,1400) scale(1,-1)"
-      >
+      <rect y="700" width="1440" height="200" fill={`url(#${id('au-lake')})`} />
+      <g filter={`url(#${id('au-soft')})`} opacity="0.4" transform="translate(0,1400) scale(1,-1)">
         {greenRays.slice(0, 24).map((r, i) => (
           <rect
             key={`gr${i}`}
@@ -321,7 +345,7 @@ const Aurora: React.FC = () => {
             width={r.w}
             height={170}
             rx={r.w / 2}
-            fill="url(#au-green)"
+            fill={`url(#${id('au-green')})`}
           />
         ))}
       </g>
@@ -330,42 +354,38 @@ const Aurora: React.FC = () => {
 };
 
 // ─── Dusk — layered sunset hills with a low sun ──────────────────────────────
-const Dusk: React.FC = () => (
+const Dusk: React.FC<SceneProps> = ({ id }) => (
   <svg {...SVG_PROPS}>
     <defs>
-      <linearGradient id="du-sky" x1="0" y1="0" x2="0" y2="1">
+      <linearGradient id={id('du-sky')} x1="0" y1="0" x2="0" y2="1">
         <stop offset="0%" stopColor="#2b1a5e" />
         <stop offset="32%" stopColor="#6e2f7a" />
         <stop offset="58%" stopColor="#c5447a" />
         <stop offset="78%" stopColor="#f47c4a" />
         <stop offset="100%" stopColor="#ffc15e" />
       </linearGradient>
-      <radialGradient id="du-sunglow" cx="50%" cy="50%" r="50%">
+      <radialGradient id={id('du-sunglow')} cx="50%" cy="50%" r="50%">
         <stop offset="0%" stopColor="#fff4c4" />
         <stop offset="35%" stopColor="#ffd06a" stopOpacity="0.7" />
         <stop offset="100%" stopColor="#ff9a4a" stopOpacity="0" />
       </radialGradient>
-      <linearGradient id="du-sun" x1="0" y1="0" x2="0" y2="1">
+      <linearGradient id={id('du-sun')} x1="0" y1="0" x2="0" y2="1">
         <stop offset="0%" stopColor="#fff2c0" />
         <stop offset="100%" stopColor="#ffcf66" />
       </linearGradient>
-      <style>{`
-        @keyframes du-glow { 0%,100%{opacity:.85;transform:scale(1)} 50%{opacity:1;transform:scale(1.04)} }
-        @keyframes du-bird { 0%{transform:translate(0,0)} 50%{transform:translate(20px,-10px)} 100%{transform:translate(40px,0)} }
-      `}</style>
     </defs>
 
-    <rect width="1440" height="900" fill="url(#du-sky)" />
+    <rect width="1440" height="900" fill={`url(#${id('du-sky')})`} />
 
     {/* Sun */}
     <circle
       cx="720"
       cy="430"
       r="280"
-      fill="url(#du-sunglow)"
+      fill={`url(#${id('du-sunglow')})`}
       style={{ animation: 'du-glow 7s ease-in-out infinite', transformOrigin: '720px 430px' }}
     />
-    <circle cx="720" cy="430" r="115" fill="url(#du-sun)" />
+    <circle cx="720" cy="430" r="115" fill={`url(#${id('du-sun')})`} />
 
     {/* Birds */}
     {[
@@ -406,31 +426,28 @@ const Dusk: React.FC = () => (
 );
 
 // ─── Slate — minimalist misty mountain ranges ────────────────────────────────
-const Slate: React.FC = () => (
+const Slate: React.FC<SceneProps> = ({ id }) => (
   <svg {...SVG_PROPS}>
     <defs>
-      <linearGradient id="sl-sky" x1="0" y1="0" x2="0" y2="1">
+      <linearGradient id={id('sl-sky')} x1="0" y1="0" x2="0" y2="1">
         <stop offset="0%" stopColor="#c3d2e6" />
         <stop offset="60%" stopColor="#dde7f2" />
         <stop offset="100%" stopColor="#eef3f8" />
       </linearGradient>
-      <radialGradient id="sl-sun" cx="50%" cy="50%" r="50%">
+      <radialGradient id={id('sl-sun')} cx="50%" cy="50%" r="50%">
         <stop offset="0%" stopColor="#fff" stopOpacity="0.95" />
         <stop offset="60%" stopColor="#f4f8fc" stopOpacity="0.5" />
         <stop offset="100%" stopColor="#f4f8fc" stopOpacity="0" />
       </radialGradient>
-      <filter id="sl-mist" x="-20%" y="-50%" width="140%" height="200%">
+      <filter id={id('sl-mist')} x="-20%" y="-50%" width="140%" height="200%">
         <feGaussianBlur stdDeviation="16" />
       </filter>
-      <style>{`
-        @keyframes sl-mist { 0%,100%{opacity:.5;transform:translateX(0)} 50%{opacity:.8;transform:translateX(40px)} }
-      `}</style>
     </defs>
 
-    <rect width="1440" height="900" fill="url(#sl-sky)" />
+    <rect width="1440" height="900" fill={`url(#${id('sl-sky')})`} />
 
     {/* Soft sun */}
-    <circle cx="1020" cy="240" r="190" fill="url(#sl-sun)" />
+    <circle cx="1020" cy="240" r="190" fill={`url(#${id('sl-sun')})`} />
     <circle cx="1020" cy="240" r="68" fill="#fbfdff" opacity="0.9" />
 
     {/* Mountain ranges — atmospheric perspective (light/far → dark/near) */}
@@ -450,7 +467,7 @@ const Slate: React.FC = () => (
       width="1540"
       height="60"
       fill="#eef3f8"
-      filter="url(#sl-mist)"
+      filter={`url(#${id('sl-mist')})`}
       style={{ animation: 'sl-mist 16s ease-in-out infinite' }}
     />
     <path
@@ -467,7 +484,7 @@ const Slate: React.FC = () => (
       width="1540"
       height="50"
       fill="#dde7f2"
-      filter="url(#sl-mist)"
+      filter={`url(#${id('sl-mist')})`}
       opacity="0.8"
       style={{ animation: 'sl-mist 20s ease-in-out 2s infinite' }}
     />
@@ -478,7 +495,7 @@ const Slate: React.FC = () => (
 // ─── Forest — misty layered hills at dawn with soft treelines ────────────────
 // Hills flow as smooth curves; treelines are rounded canopy bumps (arcs), not
 // spikes; mist bands between layers add depth like the Misty Peaks scene.
-const Forest: React.FC = () => {
+const Forest: React.FC<SceneProps> = ({ id }) => {
   // A ridge with soft rounded tree-canopy bumps along the top.
   const treeRidge = (seed: number, baseY: number, amp: number): string => {
     const r = rng(seed);
@@ -497,35 +514,29 @@ const Forest: React.FC = () => {
   return (
     <svg {...SVG_PROPS}>
       <defs>
-        <linearGradient id="fo-sky" x1="0" y1="0" x2="0" y2="1">
+        <linearGradient id={id('fo-sky')} x1="0" y1="0" x2="0" y2="1">
           <stop offset="0%" stopColor="#ffd29a" />
           <stop offset="38%" stopColor="#ffe7c4" />
           <stop offset="100%" stopColor="#e2f1e6" />
         </linearGradient>
-        <radialGradient id="fo-sun" cx="50%" cy="50%" r="50%">
+        <radialGradient id={id('fo-sun')} cx="50%" cy="50%" r="50%">
           <stop offset="0%" stopColor="#fff7dc" />
           <stop offset="42%" stopColor="#ffe39a" stopOpacity="0.7" />
           <stop offset="100%" stopColor="#ffe39a" stopOpacity="0" />
         </radialGradient>
-        <filter id="fo-mist" x="-20%" y="-60%" width="140%" height="220%">
+        <filter id={id('fo-mist')} x="-20%" y="-60%" width="140%" height="220%">
           <feGaussianBlur stdDeviation="18" />
         </filter>
-        <style>{`
-          @keyframes fo-sun { 0%,100%{opacity:.85} 50%{opacity:1} }
-          @keyframes fo-cloud { 0%{transform:translateX(0)} 100%{transform:translateX(70px)} }
-          @keyframes fo-bird { 0%{transform:translate(0,0)} 50%{transform:translate(24px,-8px)} 100%{transform:translate(48px,0)} }
-          @keyframes fo-mist { 0%,100%{opacity:.55;transform:translateX(0)} 50%{opacity:.85;transform:translateX(36px)} }
-        `}</style>
       </defs>
 
-      <rect width="1440" height="900" fill="url(#fo-sky)" />
+      <rect width="1440" height="900" fill={`url(#${id('fo-sky')})`} />
 
       {/* Sun + glow */}
       <circle
         cx="520"
         cy="250"
         r="250"
-        fill="url(#fo-sun)"
+        fill={`url(#${id('fo-sun')})`}
         style={{ animation: 'fo-sun 6s ease-in-out infinite' }}
       />
       <circle cx="520" cy="250" r="86" fill="#fff4cf" />
@@ -564,7 +575,7 @@ const Forest: React.FC = () => {
         width="1520"
         height="56"
         fill="#eef6e8"
-        filter="url(#fo-mist)"
+        filter={`url(#${id('fo-mist')})`}
         style={{ animation: 'fo-mist 18s ease-in-out infinite' }}
       />
       {/* Mid hill with soft treeline */}
@@ -576,7 +587,7 @@ const Forest: React.FC = () => {
         width="1520"
         height="48"
         fill="#dbeede"
-        filter="url(#fo-mist)"
+        filter={`url(#${id('fo-mist')})`}
         opacity="0.8"
         style={{ animation: 'fo-mist 22s ease-in-out 2s infinite' }}
       />
@@ -600,7 +611,7 @@ const Forest: React.FC = () => {
   );
 };
 
-const WALLPAPER_OVERLAYS: Record<Wallpaper, React.FC> = {
+const WALLPAPER_OVERLAYS: Record<Wallpaper, React.FC<SceneProps>> = {
   midnight: Midnight,
   aurora: Aurora,
   dusk: Dusk,
@@ -609,6 +620,13 @@ const WALLPAPER_OVERLAYS: Record<Wallpaper, React.FC> = {
 };
 
 export const WallpaperOverlay: React.FC<{ wallpaper: Wallpaper }> = ({ wallpaper }) => {
+  const uid = React.useId().replace(/[^a-zA-Z0-9_-]/g, '');
+  const id = React.useCallback((name: string) => `${name}-${uid}`, [uid]);
   const Overlay = WALLPAPER_OVERLAYS[wallpaper];
-  return <Overlay />;
+  return (
+    <>
+      <style>{KEYFRAMES}</style>
+      <Overlay id={id} />
+    </>
+  );
 };
