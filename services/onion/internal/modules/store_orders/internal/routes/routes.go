@@ -12,7 +12,7 @@ import (
 
 func RegisterRoutes(ctx context.Context, router *chi.Mux, service *application.Service) {
 	http.RegisterGET[handlers.ListRequest, handlers.ListResponse](ctx, router, handlers.ListRoutes(), &handlers.ListHandler{Service: service})
-	http.RegisterGET[handlers.DetailRequest, handlers.DetailResponse](ctx, router, handlers.DetailRoutes(), &handlers.DetailHandler{Service: service})
+	http.RegisterGETWithValidation[handlers.DetailRequest, handlers.DetailResponse](ctx, router, handlers.DetailRoutes(), &handlers.DetailHandler{Service: service})
 	http.RegisterPOSTWithValidation[handlers.CreateRequest, handlers.CreateResponse](ctx, router, handlers.CreateRoutes(), &handlers.CreateHandler{Service: service})
 	http.RegisterPUTWithValidation[handlers.UpdateRequest, handlers.UpdateResponse](ctx, router, handlers.UpdateRoutes(), &handlers.UpdateHandler{Service: service})
 }

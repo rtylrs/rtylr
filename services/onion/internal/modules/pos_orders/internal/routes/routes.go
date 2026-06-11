@@ -53,13 +53,13 @@ func RegisterRoutes(ctx context.Context, router *chi.Mux, service *application.S
 		&handlers.CloseSessionHandler{Service: service},
 	)
 
-	serverHttp.RegisterGET[handlers.ListSessionsRequest, handlers.ListSessionsResponse](
+	serverHttp.RegisterGETWithValidation[handlers.ListSessionsRequest, handlers.ListSessionsResponse](
 		ctx, router, handlers.ListSessionsRoutes(),
 		&handlers.ListSessionsHandler{Service: service},
 	)
 
 	// Orders
-	serverHttp.RegisterGET[handlers.ListOrdersRequest, handlers.ListOrdersResponse](
+	serverHttp.RegisterGETWithValidation[handlers.ListOrdersRequest, handlers.ListOrdersResponse](
 		ctx, router, handlers.ListOrdersRoutes(),
 		&handlers.ListOrdersHandler{Service: service},
 	)

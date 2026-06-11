@@ -11,7 +11,7 @@ import (
 )
 
 func RegisterRoutes(ctx context.Context, router *chi.Mux, svc *application.Service) {
-	http.RegisterGET[handlers.ListReceiptsRequest, handlers.ListReceiptsResponse](
+	http.RegisterGETWithValidation[handlers.ListReceiptsRequest, handlers.ListReceiptsResponse](
 		ctx, router, handlers.ListReceiptsRoutes(),
 		&handlers.ListReceiptsHandler{Service: svc},
 	)

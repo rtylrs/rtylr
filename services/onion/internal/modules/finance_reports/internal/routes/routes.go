@@ -14,7 +14,7 @@ func RegisterRoutes(ctx context.Context, router *chi.Mux, service *application.S
 	http.RegisterGET[handlers.BalanceSheetRequest, handlers.BalanceSheetResponse](
 		ctx, router, handlers.BalanceSheetRoutes(), &handlers.BalanceSheetHandler{Service: service},
 	)
-	http.RegisterGET[handlers.CashFlowRequest, handlers.CashFlowResponse](
+	http.RegisterGETWithValidation[handlers.CashFlowRequest, handlers.CashFlowResponse](
 		ctx, router, handlers.CashFlowRoutes(), &handlers.CashFlowHandler{Service: service},
 	)
 }

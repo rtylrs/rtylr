@@ -11,7 +11,7 @@ import (
 )
 
 func RegisterRoutes(ctx context.Context, router *chi.Mux, svc *application.Service) {
-	http.RegisterGET[handlers.DaySummaryRequest, handlers.DaySummaryResponse](
+	http.RegisterGETWithValidation[handlers.DaySummaryRequest, handlers.DaySummaryResponse](
 		ctx, router, handlers.DaySummaryRoutes(),
 		&handlers.DaySummaryHandler{Service: svc},
 	)
