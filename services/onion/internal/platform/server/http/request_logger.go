@@ -7,6 +7,7 @@ import (
 	"encoding/json"
 	"fmt"
 	"io"
+	"mime"
 	"net"
 	"net/http"
 	"strings"
@@ -18,6 +19,8 @@ import (
 	"github.com/voxire/onion/internal/platform/logger"
 	"github.com/voxire/onion/internal/platform/slack"
 )
+
+const maxLoggedRequestBodyBytes = 64 << 10
 
 func RequestLoggerMiddleware(ctx context.Context) func(next http.Handler) http.Handler {
 	serviceName := logger.ServiceName()
@@ -42,12 +45,8 @@ func RequestLoggerMiddleware(ctx context.Context) func(next http.Handler) http.H
 
 			var bodyContent string
 
-			if r.Body != nil && r.Header.Get("Content-Type") == "application/json" {
-				bodyBytes, err := io.ReadAll(r.Body)
-				if err == nil {
-					bodyContent = string(bodyBytes)
-					r.Body = io.NopCloser(bytes.NewBuffer(bodyBytes))
-				}
+			if r.Body != nil && isJSONContentType(r.Header.Get("Content-Type")) {
+				bodyContent = captureRequestBodyPreview(r)
 			}
 
 			sanitizedBody := sanitizeJSON(bodyContent)
@@ -100,6 +99,42 @@ func RequestLoggerMiddleware(ctx context.Context) func(next http.Handler) http.H
 			}()
 		})
 	}
+}
+
+type replayReadCloser struct {
+	io.Reader
+	closer io.Closer
+}
+
+func (r *replayReadCloser) Close() error {
+	return r.closer.Close()
+}
+
+func isJSONContentType(contentType string) bool {
+	mediaType, _, err := mime.ParseMediaType(contentType)
+	if err != nil {
+		return strings.Contains(strings.ToLower(contentType), "application/json")
+	}
+	mediaType = strings.ToLower(mediaType)
+	return mediaType == "application/json" || strings.HasSuffix(mediaType, "+json")
+}
+
+func captureRequestBodyPreview(r *http.Request) string {
+	originalBody := r.Body
+	bodyBytes, err := io.ReadAll(io.LimitReader(originalBody, maxLoggedRequestBodyBytes+1))
+	if len(bodyBytes) > 0 {
+		r.Body = &replayReadCloser{
+			Reader: io.MultiReader(bytes.NewReader(bodyBytes), originalBody),
+			closer: originalBody,
+		}
+	}
+	if err != nil {
+		return ""
+	}
+	if len(bodyBytes) > maxLoggedRequestBodyBytes {
+		return string(bodyBytes[:maxLoggedRequestBodyBytes])
+	}
+	return string(bodyBytes)
 }
 
 type ResponseWriter struct {
@@ -234,7 +269,17 @@ func generateRequestKey(r *http.Request, statusCode int) string {
 	return key.String()
 }
 
-var sensitiveFields = []string{"password", "token", "authorization"}
+var sensitiveFieldParts = []string{
+	"password",
+	"token",
+	"authorization",
+	"secret",
+	"api_key",
+	"apikey",
+	"private_key",
+	"credential",
+	"cookie",
+}
 
 func sanitizeMap(data map[string][]string) map[string][]string {
 	sanitized := make(map[string][]string, len(data))
@@ -288,13 +333,13 @@ func sanitizeInterface(v interface{}) {
 
 func isSensitiveField(key string) bool {
 	key = strings.ToLower(key)
-	for _, f := range sensitiveFields {
-		if key == f {
+	for _, f := range sensitiveFieldParts {
+		if strings.Contains(key, f) {
 			return true
 		}
 	}
 
-	return false
+	return key == "session_id" || strings.HasSuffix(key, "_session_id")
 }
 
 func logRequest(ctx context.Context, r *http.Request, statusCode int, duration time.Duration, bodyContent string, headers, query map[string][]string, serviceName string, count int) {
