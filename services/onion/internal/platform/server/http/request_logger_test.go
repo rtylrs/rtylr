@@ -8,6 +8,7 @@ import (
 	"net/http/httptest"
 	"strings"
 	"testing"
+	"time"
 )
 
 func TestRequestLoggerPreservesJSONBodyWithCharset(t *testing.T) {
@@ -85,4 +86,32 @@ func TestSanitizeJSONRedactsSensitiveFieldVariants(t *testing.T) {
 	if profile["name"] != "Voxire" {
 		t.Fatalf("sanitizeJSON removed non-sensitive value: %s", got)
 	}
+}
+
+func TestDuplicateDetectorCleanupLoopRemovesStaleEntries(t *testing.T) {
+	detector := newDuplicateDetector(time.Millisecond)
+	detector.requests["stale"] = &DuplicateInfo{
+		firstSeen:    time.Now().Add(-time.Hour),
+		lastSeen:     time.Now().Add(-time.Hour),
+		lastReported: time.Now().Add(-time.Hour),
+		count:        1,
+	}
+
+	ctx, cancel := context.WithCancel(context.Background())
+	defer cancel()
+
+	detector.startCleanup(ctx, time.Millisecond)
+
+	deadline := time.Now().Add(250 * time.Millisecond)
+	for time.Now().Before(deadline) {
+		detector.mu.RLock()
+		_, exists := detector.requests["stale"]
+		detector.mu.RUnlock()
+		if !exists {
+			return
+		}
+		time.Sleep(time.Millisecond)
+	}
+
+	t.Fatal("stale duplicate detector entry was not cleaned up")
 }

@@ -20,7 +20,10 @@ import (
 	"github.com/voxire/onion/internal/platform/slack"
 )
 
-const maxLoggedRequestBodyBytes = 64 << 10
+const (
+	maxLoggedRequestBodyBytes        = 64 << 10
+	duplicateDetectorCleanupInterval = time.Minute
+)
 
 func RequestLoggerMiddleware(ctx context.Context) func(next http.Handler) http.Handler {
 	serviceName := logger.ServiceName()
@@ -33,11 +36,8 @@ func RequestLoggerMiddleware(ctx context.Context) func(next http.Handler) http.H
 		mu:          &sync.RWMutex{},
 	}
 
-	duplicateDetector := &DuplicateDetector{
-		requests: make(map[string]*DuplicateInfo),
-		mu:       &sync.RWMutex{},
-		ttl:      15 * time.Minute,
-	}
+	duplicateDetector := newDuplicateDetector(15 * time.Minute)
+	duplicateDetector.startCleanup(ctx, duplicateDetectorCleanupInterval)
 
 	return func(next http.Handler) http.Handler {
 		return http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
@@ -205,6 +205,14 @@ type DuplicateDetector struct {
 	ttl      time.Duration
 }
 
+func newDuplicateDetector(ttl time.Duration) *DuplicateDetector {
+	return &DuplicateDetector{
+		requests: make(map[string]*DuplicateInfo),
+		mu:       &sync.RWMutex{},
+		ttl:      ttl,
+	}
+}
+
 func (dd *DuplicateDetector) ShouldReport(requestKey string) (shouldReport bool, count int) {
 	dd.mu.Lock()
 	defer dd.mu.Unlock()
@@ -232,6 +240,26 @@ func (dd *DuplicateDetector) ShouldReport(requestKey string) (shouldReport bool,
 	}
 
 	return true, 1
+}
+
+func (dd *DuplicateDetector) startCleanup(ctx context.Context, interval time.Duration) {
+	if ctx == nil || ctx.Done() == nil || interval <= 0 {
+		return
+	}
+
+	go func() {
+		ticker := time.NewTicker(interval)
+		defer ticker.Stop()
+
+		for {
+			select {
+			case <-ticker.C:
+				dd.Cleanup()
+			case <-ctx.Done():
+				return
+			}
+		}
+	}()
 }
 
 func (dd *DuplicateDetector) Cleanup() {
