@@ -7,7 +7,6 @@ import (
 	"github.com/go-chi/chi/v5"
 
 	"github.com/voxire/onion/internal/modules/memory/internal/application"
-	authPkg "github.com/voxire/onion/internal/platform/auth"
 	errorModels "github.com/voxire/onion/internal/platform/errors"
 )
 
@@ -43,8 +42,7 @@ func (h *RenameChatHandler) Validate(_ context.Context, req *RenameChatRequest) 
 }
 
 func (h *RenameChatHandler) Serve(ctx context.Context, _ *RenameChatRequest) (RenameChatResponse, *errorModels.ServerError) {
-	device := authPkg.DeviceCtx(ctx)
-	if device.User == nil {
+	if _, ok := authenticatedUser(ctx); !ok {
 		return RenameChatResponse{}, errorModels.PermissionDeniedServerError()
 	}
 	sessionID := chi.URLParamFromCtx(ctx, "sessionID")

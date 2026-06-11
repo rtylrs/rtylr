@@ -5,7 +5,6 @@ import (
 	"net/http"
 
 	"github.com/voxire/onion/internal/modules/memory/internal/application"
-	authPkg "github.com/voxire/onion/internal/platform/auth"
 	errorModels "github.com/voxire/onion/internal/platform/errors"
 )
 
@@ -30,11 +29,11 @@ type StatsHandler struct {
 }
 
 func (h *StatsHandler) Serve(ctx context.Context, req *StatsRequest) (StatsResponse, *errorModels.ServerError) {
-	device := authPkg.DeviceCtx(ctx)
-	if device.User == nil {
+	user, ok := authenticatedUser(ctx)
+	if !ok {
 		return StatsResponse{}, &errorModels.ServerError{Code: http.StatusUnauthorized, Message: "unauthorized"}
 	}
-	req.UserID = int(device.User.UserID)
+	req.UserID = int(user.UserID)
 
 	stats, err := h.MemoryService.GetUserStats(ctx, req.UserID)
 	if err != nil {

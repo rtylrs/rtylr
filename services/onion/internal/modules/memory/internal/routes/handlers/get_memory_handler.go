@@ -6,7 +6,6 @@ import (
 
 	"github.com/voxire/onion/internal/modules/memory/internal/application"
 	"github.com/voxire/onion/internal/modules/memory/internal/domain"
-	authPkg "github.com/voxire/onion/internal/platform/auth"
 	errorModels "github.com/voxire/onion/internal/platform/errors"
 )
 
@@ -60,11 +59,11 @@ func (h *MemoryHandler) Validate(_ context.Context, req *MemoryRequest) *errorMo
 }
 
 func (h *MemoryHandler) Serve(ctx context.Context, req *MemoryRequest) (MemoryResponse, *errorModels.ServerError) {
-	device := authPkg.DeviceCtx(ctx)
-	if device.User == nil {
+	user, ok := authenticatedUser(ctx)
+	if !ok {
 		return MemoryResponse{}, &errorModels.ServerError{Code: http.StatusUnauthorized, Message: "unauthorized"}
 	}
-	req.UserID = int(device.User.UserID)
+	req.UserID = int(user.UserID)
 
 	_, err := h.MemoryService.StoreMessage(ctx, req.SessionID, req.UserID, req.Role, req.Content, req.TokensUsed)
 	if err != nil {

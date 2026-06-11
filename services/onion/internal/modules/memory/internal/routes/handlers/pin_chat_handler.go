@@ -7,7 +7,6 @@ import (
 	"github.com/go-chi/chi/v5"
 
 	"github.com/voxire/onion/internal/modules/memory/internal/application"
-	authPkg "github.com/voxire/onion/internal/platform/auth"
 	errorModels "github.com/voxire/onion/internal/platform/errors"
 )
 
@@ -24,8 +23,7 @@ type PinChatResponse struct {
 }
 
 func (h *PinChatHandler) Serve(ctx context.Context, req *PinChatRequest) (PinChatResponse, *errorModels.ServerError) {
-	device := authPkg.DeviceCtx(ctx)
-	if device.User == nil {
+	if _, ok := authenticatedUser(ctx); !ok {
 		return PinChatResponse{}, errorModels.PermissionDeniedServerError()
 	}
 	sessionID := chi.URLParamFromCtx(ctx, "sessionID")

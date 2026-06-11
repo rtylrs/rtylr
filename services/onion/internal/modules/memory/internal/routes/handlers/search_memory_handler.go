@@ -5,7 +5,6 @@ import (
 	"net/http"
 
 	"github.com/voxire/onion/internal/modules/memory/internal/application"
-	authPkg "github.com/voxire/onion/internal/platform/auth"
 	errorModels "github.com/voxire/onion/internal/platform/errors"
 )
 
@@ -31,11 +30,11 @@ type SearchHandler struct {
 }
 
 func (h *SearchHandler) Serve(ctx context.Context, req *SearchRequest) (SearchResponse, *errorModels.ServerError) {
-	device := authPkg.DeviceCtx(ctx)
-	if device.User == nil {
+	user, ok := authenticatedUser(ctx)
+	if !ok {
 		return SearchResponse{}, &errorModels.ServerError{Code: http.StatusUnauthorized, Message: "unauthorized"}
 	}
-	req.UserID = int(device.User.UserID)
+	req.UserID = int(user.UserID)
 
 	if req.Query == "" {
 		return SearchResponse{}, &errorModels.ServerError{

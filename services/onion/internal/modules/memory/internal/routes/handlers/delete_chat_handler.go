@@ -7,7 +7,6 @@ import (
 	"github.com/go-chi/chi/v5"
 
 	"github.com/voxire/onion/internal/modules/memory/internal/application"
-	authPkg "github.com/voxire/onion/internal/platform/auth"
 	errorModels "github.com/voxire/onion/internal/platform/errors"
 )
 
@@ -25,8 +24,7 @@ type DeleteChatResponse struct {
 // hook lands in a follow-up commit — for now we acknowledge the request so
 // the dash UI can wire up its delete flow against a stable contract.
 func (h *DeleteChatHandler) Serve(ctx context.Context, _ *DeleteChatRequest) (DeleteChatResponse, *errorModels.ServerError) {
-	device := authPkg.DeviceCtx(ctx)
-	if device.User == nil {
+	if _, ok := authenticatedUser(ctx); !ok {
 		return DeleteChatResponse{}, errorModels.PermissionDeniedServerError()
 	}
 	sessionID := chi.URLParamFromCtx(ctx, "sessionID")
