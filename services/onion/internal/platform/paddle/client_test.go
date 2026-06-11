@@ -5,6 +5,7 @@ import (
 	"crypto/sha256"
 	"encoding/hex"
 	"strconv"
+	"strings"
 	"testing"
 	"time"
 
@@ -14,6 +15,23 @@ import (
 func TestPaddleHTTPClientHasTimeout(t *testing.T) {
 	if paddleHTTPClient.Timeout != paddleRequestTimeout {
 		t.Fatalf("expected Paddle HTTP timeout %s, got %s", paddleRequestTimeout, paddleHTTPClient.Timeout)
+	}
+}
+
+func TestReadPaddleResponseBody(t *testing.T) {
+	body, err := readPaddleResponseBody(strings.NewReader(`{"ok":true}`))
+	if err != nil {
+		t.Fatalf("readPaddleResponseBody: %v", err)
+	}
+	if string(body) != `{"ok":true}` {
+		t.Fatalf("unexpected body: %s", string(body))
+	}
+}
+
+func TestReadPaddleResponseBodyRejectsOversizedBody(t *testing.T) {
+	_, err := readPaddleResponseBody(strings.NewReader(strings.Repeat("x", maxPaddleResponseBodyBytes+1)))
+	if err == nil {
+		t.Fatal("expected oversized body to fail")
 	}
 }
 

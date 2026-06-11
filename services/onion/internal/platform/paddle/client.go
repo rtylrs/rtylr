@@ -102,7 +102,10 @@ type POSPaymentResult struct {
 	CheckoutURL   string
 }
 
-const paddleRequestTimeout = 15 * time.Second
+const (
+	paddleRequestTimeout       = 15 * time.Second
+	maxPaddleResponseBodyBytes = 1 << 20
+)
 
 var paddleHTTPClient = &http.Client{Timeout: paddleRequestTimeout}
 
@@ -160,7 +163,7 @@ func CreatePOSTransaction(ctx context.Context, req POSPaymentRequest) (POSPaymen
 	}
 	defer func() { _ = resp.Body.Close() }()
 
-	respBody, err := io.ReadAll(resp.Body)
+	respBody, err := readPaddleResponseBody(resp.Body)
 	if err != nil {
 		return POSPaymentResult{}, err
 	}
@@ -225,7 +228,7 @@ func CreateTransaction(ctx context.Context, ownerID int64, priceID, customerEmai
 	}
 	defer func() { _ = resp.Body.Close() }()
 
-	respBody, err := io.ReadAll(resp.Body)
+	respBody, err := readPaddleResponseBody(resp.Body)
 	if err != nil {
 		return "", err
 	}
@@ -249,6 +252,17 @@ func CreateTransaction(ctx context.Context, ownerID int64, priceID, customerEmai
 	}
 
 	return txResp.Data.Checkout.URL, nil
+}
+
+func readPaddleResponseBody(body io.Reader) ([]byte, error) {
+	respBody, err := io.ReadAll(io.LimitReader(body, maxPaddleResponseBodyBytes+1))
+	if err != nil {
+		return nil, err
+	}
+	if len(respBody) > maxPaddleResponseBodyBytes {
+		return nil, errors.New("paddle response body too large")
+	}
+	return respBody, nil
 }
 
 const webhookSignatureTolerance = 5 * time.Minute
