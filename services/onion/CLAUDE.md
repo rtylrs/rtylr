@@ -3,7 +3,7 @@
 ## 1. PROJECT IDENTITY
 
 - **Product:** RTYLR — commerce operating system
-- **Repo role:** The single Go API server (`onion`) that powers every frontend app. One process, one port, all modules.
+- **Repo role:** The single Go API server (`onion`) that powers every frontend app. One process, one port, all modules. The repo also builds two secondary binaries: `cmd/worker` (background jobs / email queue worker) and `cmd/upload` (CDN runmode — `cdn.voxire.dev`, uploads + image transforms via `internal/cdn` and `media-engine/`).
 - **Go module:** `github.com/voxire/onion`
 - **Production API base:** `https://api.voxire.dev/`
 - **Server port:** `9999`
@@ -65,7 +65,7 @@ If you create a new convention (a new middleware, a new cross-cutting utility, a
 | Component | Technology | Version | Notes |
 |---|---|---|---|
 | Language | Go | 1.26 | `go 1.26` in `go.mod` |
-| HTTP router | go-chi/chi | v5.2.2 | Middleware-based, context-driven |
+| HTTP router | go-chi/chi | v5.2.5 | Middleware-based, context-driven |
 | Database | MySQL | 8.0 | Production credentials live in deployment env vars only — never in this repo |
 | DB driver | go-sql-driver/mysql | v1.9.3 | |
 | Query builder | Masterminds/squirrel | v1.5.4 | Used in some modules |
@@ -75,14 +75,21 @@ If you create a new convention (a new middleware, a new cross-cutting utility, a
 | Auth | golang-jwt/jwt | v5.2.2 | HS256 JWT |
 | Password hashing | golang.org/x/crypto | — | bcrypt |
 | ID generation | google/uuid | v1.6.0 | |
-| Email | resend/resend-go | v2.28.0 | |
+| Email | resend/resend-go | v2.28.0 | Templates live in the `email-templates` submodule |
 | AI (OpenAI) | openai/openai-go | v2.0.2 | Echo module |
 | AI (Gemini) | google/generative-ai-go | v0.20.1 | Echo module |
-| XML | beevik/etree | v1.5.1 | |
-| Env loading | joho/godotenv | v1.5.1 | Loads `.env` at startup |
+| XML | beevik/etree | v1.6.0 | |
 | Concurrency cache | puzpuzpuz/xsync | v3.5.1 | Lock-free concurrent map |
 | Proto contracts | github.com/voxire/voxie | submodule at `./voxie` | Generated Go types |
+| Request validation | buf.build/go/protovalidate | v1.2.0 | Enforces protovalidate rules from voxie contracts |
 | Scheduler | codnect.io/chrono | v1.1.3 | Background task scheduling |
+| Object storage | aws-sdk-go-v2 (S3) | v1.99.x | Cloudflare R2 — uploads, CDN assets (`platform/storage`) |
+| Error tracking | getsentry/sentry-go | v0.45.1 | `platform/observability` |
+| Log shipping | axiomhq/axiom-go | v0.32.0 | Structured log export |
+| WebSockets | coder/websocket | v1.8.14 | Realtime bus (`platform/wsbus`) |
+| SSO | workos/workos-go | v4.46.1 | Enterprise SSO / oauth module |
+| Input validation | go-playground/validator | v10.30.2 | Struct-tag validation |
+| Image processing | fogleman/gg + golang.org/x/image | — | CDN image transforms (`internal/cdn`, `media-engine/`) |
 
 ### Adding Dependencies
 
@@ -99,9 +106,14 @@ If a new dependency is genuinely needed, add it via `go get` and ensure `go.sum`
 ```
 onion/
 ├── cmd/
-│   └── api/
-│       └── main.go           Entry point — initializes all modules, wires routes, starts server
+│   ├── api/
+│   │   └── main.go           Entry point — initializes all modules, wires routes, starts server
+│   ├── worker/
+│   │   └── main.go           Background worker — drains the email queue and other async jobs
+│   └── upload/
+│       └── main.go           CDN runmode (cdn.voxire.dev) — uploads, image transforms, asset delivery
 ├── internal/
+│   ├── cdn/                  Media/CDN logic used by cmd/upload (auth, etag, disposition, transforms)
 │   ├── modules/              Domain modules — one directory per bounded context
 │   │   └── <module>/
 │   │       ├── module.go     Module struct, NewModule(), RegisterRoutes(), GetAnonymousRoutes()
@@ -120,29 +132,43 @@ onion/
 │   └── platform/             Cross-cutting infrastructure (no business logic)
 │       ├── auth/             JWT validation, AuthUser context, device context
 │       ├── cache/            Redis + bigcache abstraction, cache invalidation
-│       ├── config/           os.Getenv wrappers for env var access
+│       ├── config/           Env var access wrappers
 │       ├── database/
 │       │   ├── dbclient/     MySQL connection pool (singleton)
-│       │   └── schemas/      All SQL schema files organised by domain
-│       ├── email/            Email sending (Resend)
+│       │   └── schemas/      Git submodule (voxire/schemas) — all SQL schema files by domain
+│       ├── email/            Email sending (Resend); templates/ is a git submodule (voxire/email-templates)
+│       ├── emailqueue/       email_jobs queue — drained by cmd/worker
 │       ├── errors/           ServerError type, error constructors
 │       ├── logger/           Structured logger (wraps zap or similar)
-│       ├── models/           Shared value types (none currently)
+│       ├── models/           Shared value types
+│       ├── observability/    Sentry init / error tracking
+│       ├── origins/          Allowed-origin handling
+│       ├── paddle/           Paddle billing integration
 │       ├── server/
 │       │   ├── http/         Chi wrappers: RegisterGET/POST/PUT/DELETE, middleware, auth, CORS
 │       │   └── grpc/         gRPC server (secondary, not primary API)
+│       ├── sheets/           Google Sheets integration
+│       ├── slack/            Slack notifications
 │       ├── snips/            Code snippet utilities
 │       ├── status/           /status health check endpoint
-│       └── utils/            Cross-cutting utilities (jwtutils, passwordutils, etc.)
-├── scripts/                  Shell scripts: migrate.sh, reset-db.sh, build.sh, lint.sh, test.sh
+│       ├── stock_core/       Shared stock logic used by ERP + POS modules
+│       ├── storage/          S3/R2 object storage client
+│       ├── utils/            Cross-cutting utilities (jwtutils, passwordutils, etc.)
+│       └── wsbus/            WebSocket realtime bus
+├── media-engine/             Native image/video transform engine used by the CDN runmode
+├── local-env/                Local development environment (docker compose etc. — see make local-env-up)
+├── scripts/                  migrate.sh, reset-db.sh, generate_sqlc.sh, generate_contracts.sh, goose.sh, check_schema_drift.py, ...
 ├── docs/                     backend.md, database.md — authoritative architecture references
 ├── voxie/                    Git submodule — proto contracts + generated Go types
 ├── app.yaml                  App Engine / deployment config (see note below)
-├── Dockerfile
+├── cloudbuild.yaml           Cloud Build pipeline
+├── Dockerfile                API image; Dockerfile.worker and Dockerfile.upload build the other binaries
 ├── Makefile
 ├── go.mod
 └── go.sum
 ```
+
+> **Submodules:** there are three — `voxie` (proto contracts), `internal/platform/database/schemas` (voxire/schemas), and `internal/platform/email/templates` (voxire/email-templates). All use absolute HTTPS URLs. Run `git submodule update --init --recursive` after every pull.
 
 > **Note on `app.yaml`:** This file contains deployment configuration for Google Cloud App Engine (or a compatible platform). It defines the runtime, scaling settings, and environment variable references used in production. Do not edit it without understanding the production deployment implications. It is not used for local development.
 
@@ -308,7 +334,7 @@ Follow this checklist exactly when creating a new module:
 
 ### Module registration cross-reference
 
-The `cmd/api/main.go` file already registers 80+ modules. Don't grep for "TODO" — instead, copy the pattern from an existing module that's similar to yours (POS module if you're adding a transactional flow; HR module if you're adding employee-scoped data; Hub module if you're adding a settings/admin surface). The shape is always the same: import → field on `apiModules` → init in `initializeModules` → register routes → optional scheduler hook.
+The `cmd/api/main.go` file already registers 130+ modules. Don't grep for "TODO" — instead, copy the pattern from an existing module that's similar to yours (POS module if you're adding a transactional flow; HR module if you're adding employee-scoped data; Hub module if you're adding a settings/admin surface). The shape is always the same: import → field on `apiModules` → init in `initializeModules` → register routes → optional scheduler hook.
 
 ### Auth in Handlers: DeviceCtx vs GetAuthUser
 
@@ -713,7 +739,7 @@ All relative to `https://api.voxire.dev`. Auth required unless noted.
 - **Production connection details (host, database name, user, password):** stored as deployment environment variables only. Never commit or paste them into this repository or any documentation. Operators retrieve them from the deployment platform (Render / Cloud Run / 1Password) directly.
 - **Multi-tenancy model:** `owner_id BIGINT NOT NULL` on every tenant-scoped table. Every query must filter by `owner_id`.
 - **Primary keys:** `BIGINT NOT NULL AUTO_INCREMENT` throughout.
-- **Schema files:** `internal/platform/database/schemas/` — apply in order: `shared → rtylr → voxire → erp → hr → crm → finance → flow → pos → hub`.
+- **Schema files:** `internal/platform/database/schemas/` — a **git submodule** (voxire/schemas), organised by domain directory (`shared`, `rtylr`, `voxire`, `erp`, the `hr_*` family, `crm`, `finance`, `flow`, `pos`, `hub`, `insights`, `store`, `book`, `support`, `oauth`, `ai`, `cdn`, `recruit`, ...). The submodule's own `migrate.sh` defines the apply order.
 
 ### Migration commands
 
@@ -919,7 +945,7 @@ func (s *Service) GetDashboardConfig(ctx context.Context, ownerID int64) (*domai
 | Some modules may use `squirrel` directly instead of sqlc — inconsistent query approach | Various `infrastructure/` files | Medium |
 | `echo` module depends on `memory` module directly (passed via `NewModule`) — only cross-module dependency | `cmd/api/main.go` | Low |
 | gRPC server exists (`platform/server/grpc`) but no modules currently register gRPC services | `internal/platform/server/grpc/` | Info |
-| No automated testing infrastructure visible (no `_test.go` files found beyond `platform/`) | Various modules | High |
+| Test coverage is uneven — `internal/cdn`, `platform/email`, and parts of `platform/` have `_test.go` files, but most business modules have none | Various modules | High |
 
 ---
 
@@ -959,8 +985,8 @@ Migrations use `IF NOT EXISTS` and are additive-only — there is no automatic r
 
 ### Monitoring
 
-- **Current state:** No monitoring tooling is configured. Axiom (structured logging) and PostHog (product analytics) are planned.
-- **Until monitoring is live:** rely on the Render logs dashboard and `curl https://api.voxire.dev/status` for health checks.
+- **Current state:** Sentry is wired in via `platform/observability` (crash/error tracking) and the Axiom client (`axiomhq/axiom-go`) handles structured log export. PostHog (product analytics) is still planned.
+- **Also:** the Render logs dashboard and `curl https://api.voxire.dev/status` remain useful for health checks.
 - **Escalation:** Contact Abed El-Fattah Amouneh — info@voxire.com / +961 3 940 708.
 
 ---
@@ -979,12 +1005,11 @@ Migrations use `IF NOT EXISTS` and are additive-only — there is no automatic r
 
 ### First-time local setup (one-time only)
 
-The `voxie` git submodule uses a relative URL (`../voxie`) that requires GitHub credentials to clone automatically. Since you already have the `voxie` repo locally, copy it instead:
+All three submodules (`voxie`, `internal/platform/database/schemas`, `internal/platform/email/templates`) use absolute HTTPS URLs:
 
 ```bash
 cd ~/Development/onion
-rm -rf voxie
-cp -rp ~/Development/voxie voxie
+git submodule update --init --recursive
 ```
 
 The sqlc-generated code is gitignored and must be generated locally. Install sqlc and generate:
@@ -992,7 +1017,7 @@ The sqlc-generated code is gitignored and must be generated locally. Install sql
 ```bash
 go install github.com/sqlc-dev/sqlc/cmd/sqlc@v1.29.0
 export PATH="$PATH:$(go env GOPATH)/bin"
-./scripts/generate_sqlc.sh   # generates all 98 modules (~10 seconds)
+./scripts/generate_sqlc.sh   # regenerates every module (130+)
 ```
 
 > **Note:** If `generate_sqlc.sh` fails on a module that includes a `migration_vN.sql` file in its schema directory, change that schema entry in the module's `sqlc.yaml` to reference `schema.sql` directly (e.g. `schemas/flow/schema.sql` instead of `schemas/flow/`). The `migration_*.sql` files use MySQL procedural syntax that sqlc cannot parse.
@@ -1053,7 +1078,15 @@ R2_BUCKET_NAME=
 ### Useful make targets
 
 ```bash
-make build     # build binary
-make test      # run tests
-make lint      # run linters
+make build         # build the API binary
+make build-all     # build api + worker + upload
+make contracts     # regenerate Go types from the voxie submodule
+make generate      # regenerate sqlc code
+make test          # run tests
+make lint          # run linters
+make sql-check     # check SQL casing conventions
+make dev           # air live-reload on port 9999
+make run-api       # run the API directly
+make run-upload    # run the CDN/upload binary
+make local-env-up  # start the local docker environment
 ```
