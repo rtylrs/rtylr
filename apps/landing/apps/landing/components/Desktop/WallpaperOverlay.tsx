@@ -47,6 +47,32 @@ export const WALLPAPER_PREVIEWS: Record<Wallpaper, string> = {
 
 type SceneProps = { id: (name: string) => string };
 
+// Shared finishing layer: a soft radial vignette for depth plus a faint
+// monochrome grain that breaks up gradient banding on 8-bit displays.
+const Atmosphere: React.FC<SceneProps & { vignette?: number; grain?: number }> = ({
+  id,
+  vignette = 0.24,
+  grain = 0.045,
+}) => (
+  <>
+    <defs>
+      <filter id={id('wp-grain')} x="0" y="0" width="100%" height="100%">
+        <feTurbulence type="fractalNoise" baseFrequency="0.8" numOctaves="2" stitchTiles="stitch" />
+        <feColorMatrix
+          type="matrix"
+          values="0 0 0 0 0  0 0 0 0 0  0 0 0 0 0  0.5 0.5 0.5 0 0"
+        />
+      </filter>
+      <radialGradient id={id('wp-vig')} cx="50%" cy="44%" r="80%">
+        <stop offset="55%" stopColor="#000" stopOpacity="0" />
+        <stop offset="100%" stopColor="#000" stopOpacity="1" />
+      </radialGradient>
+    </defs>
+    <rect width="1440" height="900" fill={`url(#${id('wp-vig')})`} opacity={vignette} />
+    <rect width="1440" height="900" filter={`url(#${id('wp-grain')})`} opacity={grain} />
+  </>
+);
+
 // Deterministic pseudo-random so generated detail is stable across renders.
 const rng = (seed: number): (() => number) => {
   let s = seed;
@@ -233,6 +259,8 @@ const Midnight: React.FC<SceneProps> = ({ id }) => {
         opacity="0.35"
         filter={`url(#${id('mn-haze')})`}
       />
+
+      <Atmosphere id={id} vignette={0.26} />
     </svg>
   );
 };
@@ -355,6 +383,8 @@ const Aurora: React.FC<SceneProps> = ({ id }) => {
           />
         ))}
       </g>
+
+      <Atmosphere id={id} vignette={0.3} />
     </svg>
   );
 };
@@ -432,6 +462,8 @@ const Dusk: React.FC<SceneProps> = ({ id }) => (
       <circle cx="1140" cy="690" r="20" />
       <circle cx="1184" cy="690" r="18" />
     </g>
+
+    <Atmosphere id={id} vignette={0.2} />
   </svg>
 );
 
@@ -499,6 +531,8 @@ const Slate: React.FC<SceneProps> = ({ id }) => (
       style={{ animation: 'sl-mist 20s ease-in-out 2s infinite' }}
     />
     <path d="M0 840 L360 770 L760 850 L1120 760 L1440 820 L1440 900 L0 900 Z" fill="#1f2d49" />
+
+    <Atmosphere id={id} vignette={0.12} grain={0.035} />
   </svg>
 );
 
@@ -617,6 +651,8 @@ const Forest: React.FC<SceneProps> = ({ id }) => {
         <circle cx="1188" cy="802" r="18" />
         <circle cx="1228" cy="802" r="17" />
       </g>
+
+      <Atmosphere id={id} vignette={0.12} grain={0.035} />
     </svg>
   );
 };
