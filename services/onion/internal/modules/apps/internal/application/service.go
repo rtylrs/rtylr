@@ -3,15 +3,10 @@ package application
 import (
 	"context"
 	"database/sql"
-	"time"
 
 	"github.com/voxire/onion/internal/modules/apps/internal/domain"
 	"github.com/voxire/onion/internal/modules/apps/internal/infrastructure"
-	"github.com/voxire/onion/internal/platform/cache/cacher"
-	cacheKeys "github.com/voxire/onion/internal/platform/cache/keys"
 )
-
-const appsCacheTTL = 5 * time.Minute
 
 type repository interface {
 	GetEnabledAddons(ctx context.Context, businessID int64) map[string]bool
@@ -42,27 +37,11 @@ func (s *Service) GetUserAllowedApps(ctx context.Context, businessID, userID int
 
 // GetVisibleApps returns the app catalogue projected for a specific user:
 // addon-gated apps are toggled on only when the business has the addon enabled
-// and (for non-owners/admins) the user has explicit access. Result is cached
-// per-user; team/permission/addon changes invalidate `cache:user:{id}:*`.
+// and (for non-owners/admins) the user has explicit access.
 //
 // Pass an empty role and userID==0 for anonymous callers — only ungated core
 // apps are returned in that case.
 func (s *Service) GetVisibleApps(ctx context.Context, businessID, userID int64, role string) []domain.App {
-	if userID == 0 {
-		return s.computeVisibleApps(ctx, 0, 0, "")
-	}
-	apps, _ := cacher.Of[[]domain.App]().GetOrComputeSingle(
-		ctx,
-		cacheKeys.UserApps(userID),
-		func(ctx context.Context) ([]domain.App, error) {
-			return s.computeVisibleApps(ctx, businessID, userID, role), nil
-		},
-		cacher.WithExpiry(ctx, appsCacheTTL),
-	)
-	return apps
-}
-
-func (s *Service) computeVisibleApps(ctx context.Context, businessID, userID int64, role string) []domain.App {
 	all := s.ListApps()
 
 	if userID == 0 {
@@ -83,7 +62,7 @@ func (s *Service) computeVisibleApps(ctx context.Context, businessID, userID int
 		return a
 	}
 
-	if role == "owner" || role == "admin" {
+	if hasFullCatalogAccess(role) {
 		out := make([]domain.App, 0, len(all))
 		for _, a := range all {
 			out = append(out, project(a))
@@ -104,4 +83,13 @@ func (s *Service) computeVisibleApps(ctx context.Context, businessID, userID int
 		}
 	}
 	return out
+}
+
+func hasFullCatalogAccess(role string) bool {
+	switch role {
+	case "owner", "admin", "console_admin":
+		return true
+	default:
+		return false
+	}
 }

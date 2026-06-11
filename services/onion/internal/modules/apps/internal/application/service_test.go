@@ -84,6 +84,15 @@ func TestGetVisibleApps_AdminSeesAll(t *testing.T) {
 	}
 }
 
+func TestGetVisibleApps_ConsoleAdminSeesAll(t *testing.T) {
+	s := &Service{repo: &mockRepo{enabled: map[string]bool{}}}
+	all := s.ListApps()
+	visible := s.GetVisibleApps(context.Background(), 1, 2, "console_admin")
+	if len(visible) != len(all) {
+		t.Errorf("console admin should see all %d apps, got %d", len(all), len(visible))
+	}
+}
+
 func TestGetVisibleApps_RegularUserSeesOnlyAllowed(t *testing.T) {
 	m := &mockRepo{
 		enabled: map[string]bool{},
