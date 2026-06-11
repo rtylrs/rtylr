@@ -70,4 +70,19 @@ func TestValidateToken_HydratesMissingBusinessScope(t *testing.T) {
 	if claims.Platform != "rtylr" || claims.PlatformUserID != 42 || claims.PlanID != 9 {
 		t.Fatalf("platform claims were not preserved: %+v", claims)
 	}
+
+	refreshedToken, err := service.RefreshToken(ctx, userID)
+	if err != nil {
+		t.Fatalf("RefreshToken: %v", err)
+	}
+	refreshedClaims := &AccessTokenClaims{}
+	if err := service.JWT.ValidateToken(ctx, refreshedToken, refreshedClaims); err != nil {
+		t.Fatalf("raw refreshed token ValidateToken: %v", err)
+	}
+	if refreshedClaims.BusinessID != businessID {
+		t.Fatalf("expected refreshed token business %d, got %d", businessID, refreshedClaims.BusinessID)
+	}
+	if refreshedClaims.Role != "owner" {
+		t.Fatalf("expected refreshed token owner role, got %q", refreshedClaims.Role)
+	}
 }

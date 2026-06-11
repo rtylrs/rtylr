@@ -261,11 +261,7 @@ func (s *Service) ValidateToken(ctx context.Context, tokenString string) (*Acces
 }
 
 func (s *Service) RefreshToken(ctx context.Context, userID int64) (string, error) {
-	_ = ctx
-
-	return s.JWT.RefreshToken(&AccessTokenClaims{
-		UserID: userID,
-	})
+	return s.JWT.RefreshToken(s.buildAccessTokenClaims(ctx, userID))
 }
 
 func (s *Service) UpdateProfile(ctx context.Context, userID int64, name string) (*domain.User, error) {
