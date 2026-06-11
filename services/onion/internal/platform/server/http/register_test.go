@@ -4,6 +4,7 @@ import (
 	"context"
 	"net/http"
 	"net/http/httptest"
+	"strings"
 	"testing"
 
 	"github.com/go-chi/chi/v5"
@@ -106,5 +107,90 @@ func TestRegisterGETWithValidationParsesQuery(t *testing.T) {
 	}
 	if !handler.called || handler.seenID != 7 {
 		t.Fatalf("handler saw id %d, called=%v; want id 7", handler.seenID, handler.called)
+	}
+}
+
+type jsonBodyRequest struct {
+	Name string `json:"name"`
+}
+
+type jsonBodyResponse struct {
+	Name string `json:"name"`
+}
+
+type jsonBodyHandler struct {
+	called bool
+	seen   string
+}
+
+func (h *jsonBodyHandler) Serve(_ context.Context, req *jsonBodyRequest) (jsonBodyResponse, *platformErrors.ServerError) {
+	h.called = true
+	h.seen = req.Name
+	return jsonBodyResponse{Name: req.Name}, nil
+}
+
+func TestRegisterPOSTRejectsTrailingJSON(t *testing.T) {
+	router := chi.NewRouter()
+	handler := &jsonBodyHandler{}
+	RegisterPOST[jsonBodyRequest, jsonBodyResponse](
+		context.Background(),
+		router,
+		[]string{"/json"},
+		handler,
+	)
+
+	req := httptest.NewRequest(http.MethodPost, "/json", strings.NewReader(`{"name":"one"}{"name":"two"}`))
+	rec := httptest.NewRecorder()
+	router.ServeHTTP(rec, req)
+
+	if rec.Code != http.StatusBadRequest {
+		t.Fatalf("expected 400, got %d: %s", rec.Code, rec.Body.String())
+	}
+	if handler.called {
+		t.Fatal("handler should not run after trailing JSON")
+	}
+}
+
+func TestRegisterPOSTAcceptsWhitespaceAfterJSON(t *testing.T) {
+	router := chi.NewRouter()
+	handler := &jsonBodyHandler{}
+	RegisterPOST[jsonBodyRequest, jsonBodyResponse](
+		context.Background(),
+		router,
+		[]string{"/json"},
+		handler,
+	)
+
+	req := httptest.NewRequest(http.MethodPost, "/json", strings.NewReader("{\"name\":\"one\"}\n\t "))
+	rec := httptest.NewRecorder()
+	router.ServeHTTP(rec, req)
+
+	if rec.Code != http.StatusOK {
+		t.Fatalf("expected 200, got %d: %s", rec.Code, rec.Body.String())
+	}
+	if !handler.called || handler.seen != "one" {
+		t.Fatalf("handler saw name %q, called=%v; want one", handler.seen, handler.called)
+	}
+}
+
+func TestRegisterDELETERejectsTrailingJSONBody(t *testing.T) {
+	router := chi.NewRouter()
+	handler := &jsonBodyHandler{}
+	RegisterDELETE[jsonBodyRequest, jsonBodyResponse](
+		context.Background(),
+		router,
+		[]string{"/json"},
+		handler,
+	)
+
+	req := httptest.NewRequest(http.MethodDelete, "/json", strings.NewReader(`{"name":"one"}{"name":"two"}`))
+	rec := httptest.NewRecorder()
+	router.ServeHTTP(rec, req)
+
+	if rec.Code != http.StatusBadRequest {
+		t.Fatalf("expected 400, got %d: %s", rec.Code, rec.Body.String())
+	}
+	if handler.called {
+		t.Fatal("handler should not run after trailing JSON")
 	}
 }

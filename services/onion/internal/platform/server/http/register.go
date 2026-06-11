@@ -149,10 +149,7 @@ func wrapHandler[Req, Res any](ctx context.Context, handler HandlerFunc[Req, Res
 
 		switch r.Method {
 		case "POST", "PUT", "PATCH":
-			r.Body = http.MaxBytesReader(w, r.Body, 4<<20) // 4 MiB
-			if err := json.NewDecoder(r.Body).Decode(&req); err != nil && err != io.EOF {
-				writeBadRequest(ctx, w)
-
+			if !decodeJSONRequestBody(ctx, w, r, &req) {
 				return
 			}
 		case "DELETE":
@@ -162,10 +159,7 @@ func wrapHandler[Req, Res any](ctx context.Context, handler HandlerFunc[Req, Res
 			// present so handlers don't have to special-case the FE
 			// shape; fall back to query params otherwise.
 			if r.Body != nil && r.ContentLength != 0 {
-				r.Body = http.MaxBytesReader(w, r.Body, 4<<20) // 4 MiB
-				if err := json.NewDecoder(r.Body).Decode(&req); err != nil && err != io.EOF {
-					writeBadRequest(ctx, w)
-
+				if !decodeJSONRequestBody(ctx, w, r, &req) {
 					return
 				}
 			} else {
@@ -210,6 +204,29 @@ func wrapHandler[Req, Res any](ctx context.Context, handler HandlerFunc[Req, Res
 			logger.Ctx(ctx).Error("Failed to encode response", logger.Error(err))
 		}
 	}
+}
+
+func decodeJSONRequestBody(ctx context.Context, w http.ResponseWriter, r *http.Request, dst interface{}) bool {
+	r.Body = http.MaxBytesReader(w, r.Body, 4<<20) // 4 MiB
+
+	decoder := json.NewDecoder(r.Body)
+	if err := decoder.Decode(dst); err != nil {
+		if err == io.EOF {
+			return true
+		}
+		writeBadRequest(ctx, w)
+
+		return false
+	}
+
+	var extra interface{}
+	if err := decoder.Decode(&extra); err != io.EOF {
+		writeBadRequest(ctx, w)
+
+		return false
+	}
+
+	return true
 }
 
 func writeBadRequest(ctx context.Context, w http.ResponseWriter) {
