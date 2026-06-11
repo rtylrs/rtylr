@@ -3,7 +3,36 @@ package handlers
 import (
 	"context"
 	"testing"
+	"time"
 )
+
+func TestRunAsyncUserHookIgnoresParentCancellation(t *testing.T) {
+	parent, cancelParent := context.WithCancel(context.Background())
+	cancelParent()
+
+	done := make(chan error, 1)
+	runAsyncUserHook(parent, 42, func(ctx context.Context, userID int64) {
+		if userID != 42 {
+			done <- context.Canceled
+			return
+		}
+		select {
+		case <-ctx.Done():
+			done <- ctx.Err()
+		default:
+			done <- nil
+		}
+	})
+
+	select {
+	case err := <-done:
+		if err != nil {
+			t.Fatalf("expected hook context to survive parent cancellation, got %v", err)
+		}
+	case <-time.After(time.Second):
+		t.Fatal("timed out waiting for async hook")
+	}
+}
 
 func TestLoginHandler_Validate_RequiresEmail(t *testing.T) {
 	h := &LoginHandler{}

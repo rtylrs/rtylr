@@ -98,10 +98,10 @@ func (h *GoogleAuthHandler) Serve(ctx context.Context, req *GoogleAuthRequest) (
 	// idempotent (personal-workspace creation) and should never block
 	// the user's first response.
 	if result.IsNew && h.OnUserCreated != nil {
-		go h.OnUserCreated(context.WithoutCancel(ctx), result.UserID)
+		runAsyncUserHook(ctx, result.UserID, h.OnUserCreated)
 	}
 	if !result.IsNew && h.OnUserLogin != nil {
-		go h.OnUserLogin(context.WithoutCancel(ctx), result.UserID)
+		runAsyncUserHook(ctx, result.UserID, h.OnUserLogin)
 	}
 
 	user, uErr := h.UserService.GetUserByID(ctx, result.UserID)
