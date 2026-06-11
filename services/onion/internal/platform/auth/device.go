@@ -35,6 +35,14 @@ func (d *Device) Ctx(ctx context.Context) context.Context {
 func DeviceCtx(ctx context.Context) Device {
 	device, ok := ctx.Value(deviceCtxKey{}).(Device)
 	if !ok {
+		if authUser, authOK := GetAuthUser(ctx); authOK && authUser != nil {
+			return Device{
+				User:        authUser,
+				Language:    "en",
+				IsAnonymous: false,
+				IP:          authUser.IP,
+			}
+		}
 		return GetAnonymousDevice()
 	}
 

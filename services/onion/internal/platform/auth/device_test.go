@@ -68,6 +68,25 @@ func TestDeviceCtx_FallsBackToAnonymous(t *testing.T) {
 	}
 }
 
+func TestDeviceCtx_FallsBackToAuthUser(t *testing.T) {
+	user := &AuthUser{UserID: 7, BusinessID: 3, IP: "4.5.6.7"}
+	ctx := context.WithValue(context.Background(), AuthUserKey, user)
+
+	d := DeviceCtx(ctx)
+	if d.IsAnonymous {
+		t.Fatal("auth-only context should return an authenticated device")
+	}
+	if d.User == nil || d.User.UserID != 7 || d.User.BusinessID != 3 {
+		t.Fatalf("expected auth user to be copied into device, got %+v", d.User)
+	}
+	if d.IP != "4.5.6.7" {
+		t.Fatalf("expected IP from auth user, got %q", d.IP)
+	}
+	if d.Language != "en" {
+		t.Fatalf("expected default language en, got %q", d.Language)
+	}
+}
+
 func TestDeviceCtxRoundTrip(t *testing.T) {
 	d := Device{
 		Language:               "fr",
