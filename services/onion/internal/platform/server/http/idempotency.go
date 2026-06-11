@@ -16,9 +16,10 @@ import (
 )
 
 const (
-	idempotencyHeader = "Idempotency-Key"
-	idempotencyTTL    = 30 * time.Minute
-	idempotencyMaxLen = 128
+	idempotencyHeader            = "Idempotency-Key"
+	idempotencyTTL               = 30 * time.Minute
+	idempotencyMaxLen            = 128
+	idempotencyCacheWriteTimeout = 2 * time.Second
 )
 
 // idempotencyRecord is what we store in the cache for a completed request.
@@ -107,7 +108,9 @@ func serveIdempotentRedis(w http.ResponseWriter, r *http.Request, next http.Hand
 		// panic doesn't leave the key wedged for the full TTL.
 		defer func() {
 			if !stored {
-				rc.Delete(context.Background(), []string{cacheKey})
+				cacheCtx, cancel := idempotencyCacheContext(r.Context())
+				defer cancel()
+				rc.Delete(cacheCtx, []string{cacheKey})
 			}
 		}()
 	}
@@ -118,7 +121,9 @@ func serveIdempotentRedis(w http.ResponseWriter, r *http.Request, next http.Hand
 	if rec.status >= 200 && rec.status < 300 {
 		entry := idempotencyRecord{Status: rec.status, Headers: w.Header().Clone(), Body: rec.buf.Bytes()}
 		if b, err := json.Marshal(entry); err == nil {
-			rc.Put(r.Context(), cacheKey, b, idempotencyTTL)
+			cacheCtx, cancel := idempotencyCacheContext(r.Context())
+			defer cancel()
+			rc.Put(cacheCtx, cacheKey, b, idempotencyTTL)
 			stored = true
 		}
 	}
@@ -149,9 +154,15 @@ func serveIdempotentLocal(w http.ResponseWriter, r *http.Request, next http.Hand
 	if rec.status >= 200 && rec.status < 300 {
 		entry := idempotencyRecord{Status: rec.status, Headers: w.Header().Clone(), Body: rec.buf.Bytes()}
 		if b, err := json.Marshal(entry); err == nil {
-			lc.Put(r.Context(), cacheKey, b, idempotencyTTL)
+			cacheCtx, cancel := idempotencyCacheContext(r.Context())
+			defer cancel()
+			lc.Put(cacheCtx, cacheKey, b, idempotencyTTL)
 		}
 	}
+}
+
+func idempotencyCacheContext(ctx context.Context) (context.Context, context.CancelFunc) {
+	return context.WithTimeout(context.WithoutCancel(ctx), idempotencyCacheWriteTimeout)
 }
 
 // writeIdempotentReplay replays a stored response, tagging it so clients can tell
