@@ -123,19 +123,7 @@ func (c *Client) CompleteTextStream(ctx context.Context, prompt string) (<-chan 
 	if c.primaryProvider != nil && c.primaryProvider.IsAvailable() {
 		tokenChan, err := c.primaryProvider.CompleteTextStream(ctx, prompt)
 		if err == nil {
-			// Create enhanced channel with provider name
-			enhancedChan := make(chan StreamToken, 100)
-
-			go func() {
-				defer close(enhancedChan)
-
-				for token := range tokenChan {
-					token.Provider = c.primaryProvider.Name()
-					enhancedChan <- token
-				}
-			}()
-
-			return enhancedChan, nil
+			return enhanceStreamWithProvider(ctx, c.primaryProvider.Name(), tokenChan), nil
 		}
 	}
 
@@ -144,24 +132,40 @@ func (c *Client) CompleteTextStream(ctx context.Context, prompt string) (<-chan 
 		if provider.IsAvailable() {
 			tokenChan, err := provider.CompleteTextStream(ctx, prompt)
 			if err == nil {
-				// Create enhanced channel with provider name
-				enhancedChan := make(chan StreamToken, 100)
-
-				go func() {
-					defer close(enhancedChan)
-
-					for token := range tokenChan {
-						token.Provider = provider.Name()
-						enhancedChan <- token
-					}
-				}()
-
-				return enhancedChan, nil
+				return enhanceStreamWithProvider(ctx, provider.Name(), tokenChan), nil
 			}
 		}
 	}
 
 	return nil, ErrAllProvidersFailed
+}
+
+func enhanceStreamWithProvider(ctx context.Context, providerName string, tokenChan <-chan StreamToken) <-chan StreamToken {
+	enhancedChan := make(chan StreamToken, 100)
+
+	go func() {
+		defer close(enhancedChan)
+
+		for {
+			select {
+			case <-ctx.Done():
+				return
+			case token, ok := <-tokenChan:
+				if !ok {
+					return
+				}
+
+				token.Provider = providerName
+				select {
+				case enhancedChan <- token:
+				case <-ctx.Done():
+					return
+				}
+			}
+		}
+	}()
+
+	return enhancedChan
 }
 
 func (c *Client) GetProviderStatus() map[string]bool {
