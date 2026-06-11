@@ -1,4 +1,4 @@
-import React, { useRef, useState, useCallback } from 'react';
+import React, { useState, useCallback } from 'react';
 import { useDesktopStore, WindowType } from '../../stores/useDesktopStore';
 
 export interface DesktopIconDef {
@@ -8,21 +8,18 @@ export interface DesktopIconDef {
   windowType?: WindowType;
   windowUrl?: string;
   href?: string;
-  defaultPos: { x: number; y: number };
 }
 
-interface DraggableIconProps {
+interface DesktopIconProps {
   def: DesktopIconDef;
 }
 
-export const DraggableIcon: React.FC<DraggableIconProps> = ({ def }) => {
+export const DesktopIcon: React.FC<DesktopIconProps> = ({ def }) => {
   const addWindow = useDesktopStore((s) => s.addWindow);
-  const hasDragged = useRef(false);
   const [active, setActive] = useState(false);
   const SvgIcon = def.svgIcon;
 
   const handleClick = useCallback(() => {
-    if (hasDragged.current) return;
     if (def.windowType) addWindow(def.windowType, def.windowUrl);
     else if (def.href) {
       if (def.href.startsWith('/')) window.location.href = def.href;

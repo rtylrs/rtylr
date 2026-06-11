@@ -1,5 +1,5 @@
 import React from 'react';
-import { DraggableIcon, DesktopIconDef } from './DraggableIcon';
+import { DesktopIcon, DesktopIconDef } from './DesktopIcon';
 import { POSIcon } from './icons/POSIcon';
 import { ERPIcon } from './icons/ERPIcon';
 import { CRMIcon } from './icons/CRMIcon';
@@ -16,23 +16,21 @@ import { StatusIcon } from './icons/StatusIcon';
 import { SnakeIcon } from './icons/SnakeIcon';
 
 const ICONS: DesktopIconDef[] = [
-  { key: 'pos', label: 'POS', svgIcon: POSIcon, href: '/pos', defaultPos: { x: 0, y: 0 } },
-  { key: 'erp', label: 'ERP', svgIcon: ERPIcon, href: '/erp', defaultPos: { x: 0, y: 0 } },
-  { key: 'crm', label: 'CRM', svgIcon: CRMIcon, href: '/crm', defaultPos: { x: 0, y: 0 } },
-  { key: 'hr', label: 'HR', svgIcon: HRIcon, href: '/hr', defaultPos: { x: 0, y: 0 } },
+  { key: 'pos', label: 'POS', svgIcon: POSIcon, href: '/pos' },
+  { key: 'erp', label: 'ERP', svgIcon: ERPIcon, href: '/erp' },
+  { key: 'crm', label: 'CRM', svgIcon: CRMIcon, href: '/crm' },
+  { key: 'hr', label: 'HR', svgIcon: HRIcon, href: '/hr' },
   {
     key: 'finance',
     label: 'Finance',
     svgIcon: FinanceIcon,
     href: '/finance',
-    defaultPos: { x: 0, y: 0 },
   },
   {
     key: 'flow',
     label: 'Flow',
     svgIcon: FlowIcon,
     href: '/flow',
-    defaultPos: { x: 0, y: 0 },
   },
   {
     key: 'pricing',
@@ -40,7 +38,6 @@ const ICONS: DesktopIconDef[] = [
     svgIcon: PricingIcon,
     windowType: 'pricing',
     windowUrl: '/pricing?embed=1',
-    defaultPos: { x: 0, y: 0 },
   },
   {
     key: 'docs',
@@ -48,14 +45,12 @@ const ICONS: DesktopIconDef[] = [
     svgIcon: DocsIcon,
     windowType: 'docs',
     windowUrl: 'https://docs.rtylr.com',
-    defaultPos: { x: 0, y: 0 },
   },
   {
     key: 'blog',
     label: 'Blog',
     svgIcon: BlogIcon,
     href: '/blog',
-    defaultPos: { x: 0, y: 0 },
   },
   {
     key: 'changelog',
@@ -63,35 +58,30 @@ const ICONS: DesktopIconDef[] = [
     svgIcon: ChangelogIcon,
     windowType: 'docs',
     windowUrl: 'https://docs.rtylr.com/changelog',
-    defaultPos: { x: 0, y: 0 },
   },
   {
     key: 'terminal',
     label: 'Terminal',
     svgIcon: TerminalIcon,
     windowType: 'terminal',
-    defaultPos: { x: 0, y: 0 },
   },
   {
     key: 'snake',
     label: 'Snake',
     svgIcon: SnakeIcon,
     windowType: 'snake',
-    defaultPos: { x: 0, y: 0 },
   },
   {
     key: 'doom',
     label: 'Doom',
     svgIcon: DoomIcon,
     windowType: 'doom',
-    defaultPos: { x: 0, y: 0 },
   },
   {
     key: 'status',
     label: 'Status',
     svgIcon: StatusIcon,
     windowType: 'status',
-    defaultPos: { x: 0, y: 0 },
   },
 ];
 
@@ -113,7 +103,7 @@ export const DesktopIcons: React.FC = () => (
     }}
   >
     {ICONS.map((def) => (
-      <DraggableIcon key={def.key} def={def} />
+      <DesktopIcon key={def.key} def={def} />
     ))}
   </div>
 );

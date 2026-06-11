@@ -38,7 +38,6 @@ export interface WindowState {
 interface DesktopState {
   windows: WindowState[];
   globalZ: number;
-  iconPositions: Record<string, { x: number; y: number }>;
   experience: Experience;
   colorMode: ColorMode;
   wallpaper: Wallpaper;
@@ -58,7 +57,6 @@ interface DesktopState {
   setColorMode: (mode: ColorMode) => void;
   setWallpaper: (wallpaper: Wallpaper) => void;
   setAnimationsEnabled: (enabled: boolean) => void;
-  setIconPosition: (key: string, pos: { x: number; y: number }) => void;
 }
 
 const WINDOW_DEFAULTS: Record<WindowType, { title: string; width: number; height: number }> = {
@@ -87,7 +85,6 @@ export const useDesktopStore = create<DesktopState>()(
     (set, get) => ({
       windows: [],
       globalZ: 600,
-      iconPositions: {},
       experience: 'os',
       colorMode: 'system',
       wallpaper: 'slate',
@@ -185,23 +182,16 @@ export const useDesktopStore = create<DesktopState>()(
       setWallpaper: (wallpaper) => set({ wallpaper }),
       setAnimationsEnabled: (animationsEnabled) => set({ animationsEnabled }),
       setSpotlightOpen: (spotlightOpen) => set({ spotlightOpen }),
-      setIconPosition: (key, pos) =>
-        set((s) => ({ iconPositions: { ...s.iconPositions, [key]: pos } })),
     }),
     {
       name: 'rtylr-desktop',
       version: 2,
       storage: createJSONStorage(() => localStorage),
-      migrate: (persisted) => ({
-        ...(persisted as object),
-        iconPositions: {},
-      }),
       partialize: (s) => ({
         experience: s.experience,
         colorMode: s.colorMode,
         wallpaper: s.wallpaper,
         animationsEnabled: s.animationsEnabled,
-        iconPositions: s.iconPositions,
       }),
     }
   )
