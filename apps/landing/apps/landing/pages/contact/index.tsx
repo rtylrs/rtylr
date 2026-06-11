@@ -179,9 +179,11 @@ const ContactPage = (): JSX.Element => {
                 {submitted ? (
                   <div className={styles.successState}>
                     <CheckCircle size={48} strokeWidth={1.5} className={styles.successIcon} />
-                    <h3 className={styles.successTitle}>Message sent!</h3>
+                    <h3 className={styles.successTitle}>One more step.</h3>
                     <p className={styles.successBody}>
-                      Thanks for reaching out. We'll get back to you within 24 hours.
+                      We opened a pre-filled draft in your email app — hit send to get it to us and
+                      we'll reply within 24 hours. If nothing opened, email us directly at{' '}
+                      <a href="mailto:info@voxire.com">info@voxire.com</a>.
                     </p>
                     <button
                       className={styles.successReset}

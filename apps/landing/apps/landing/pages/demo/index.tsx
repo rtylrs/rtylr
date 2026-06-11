@@ -140,11 +140,15 @@ const DemoPage = (): JSX.Element => {
                 // Keeps the page branded and tells the user the exact
                 // next step so they're not left wondering.
                 <>
-                  <h1 className={styles.title}>Request received.</h1>
+                  <h1 className={styles.title}>One more step.</h1>
                   <p className={styles.subtitle}>
-                    Someone from the rtylr team will reach out within one business day to schedule
-                    the walkthrough. Check your inbox (and spam, occasionally) for an email from{' '}
-                    <strong>demo@voxire.com</strong>.
+                    We opened a pre-filled draft in your email app — hit send and someone from the
+                    rtylr team will reach out within one business day to schedule the walkthrough.
+                    If nothing opened, email us directly at{' '}
+                    <strong>
+                      <a href="mailto:sales@rtylr.com">sales@rtylr.com</a>
+                    </strong>
+                    .
                   </p>
                 </>
               ) : (
