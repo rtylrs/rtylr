@@ -60,6 +60,7 @@ If you create a new proto convention (a new naming pattern, a new use of `oneof`
 |---|---|---|---|
 | Schema language | Protocol Buffers 3 | proto3 | All `.proto` files use `syntax = "proto3"` |
 | Build tool | buf | v2 | Linting, formatting, breaking-change detection |
+| Validation | bufbuild/protovalidate | via `buf.yaml` deps | Field validation rules on request messages; `onion` enforces them with `buf.build/go/protovalidate` |
 | Go codegen | protoc-gen-go | latest | Owned by `onion` |
 | TypeScript codegen | ts-proto | latest | Owned by `rtylr/packages/contracts` |
 | Go module | `github.com/voxire/voxie` | — | Imported in `onion` via `replace` after local generation |
@@ -79,9 +80,8 @@ This repo has no runtime dependencies and should stay that way. `buf`, `protoc-g
 voxie/
 ├── proto/                      Source of truth — edit these files
 │   ├── common/                  Shared cross-app contracts
-│   │   ├── auth/v1/
-│   │   │   ├── login.proto
-│   │   │   └── register.proto
+│   │   ├── auth/v1/             login, register, verify_email, reset_password, google_auth, invite_accept, ...
+│   │   ├── oauth/v1/            OAuth token issuing
 │   │   ├── errors/v1/
 │   │   └── pagination/v1/
 │   ├── crm/{capability}/v1/
@@ -92,9 +92,10 @@ voxie/
 │   ├── hub/{capability}/{subdomain}/v1/
 │   ├── insights/{capability}/v1/
 │   └── pos/{capability}/{subdomain}/v1/
-├── buf.yaml
+├── buf.yaml                    buf v2 config — module path proto/, dep: bufbuild/protovalidate
+├── buf.lock                    locked buf dependencies
 ├── go.mod
-└── Makefile                    lint/format helpers
+└── Makefile                    clean / lint / format / breaking targets
 ```
 
 ### Proto Conventions
@@ -219,11 +220,9 @@ Order of operations when adding a new `.proto` file:
 
 ## 5. CONTRACT DOMAINS
 
-| Domain | Proto package | Covers |
-|---|---|---|
 | Domain | Package examples | Covers |
 |---|---|---|
-| `common` | `common.auth.v1`, `common.errors.v1`, `common.pagination.v1` | Shared auth, error envelope, pagination |
+| `common` | `common.auth.v1`, `common.oauth.v1`, `common.errors.v1`, `common.pagination.v1` | Shared auth (login, register, verify email, reset password, Google auth, invite accept), OAuth token issuing, error envelope, pagination |
 | `hub` | `hub.team.members.v1`, `hub.business.v1` | Team, billing, config, permissions, API keys, webhooks, notifications, security |
 | `erp` | `erp.product.v1`, `erp.inventory.v1` | Products, inventory, suppliers, purchase orders |
 | `hr` | `hr.staff.v1`, `hr.employees.payroll.runs.v1` | Staff, departments, shifts, payroll, time off |
@@ -262,8 +261,7 @@ Order of operations when adding a new `.proto` file:
 
 | Issue | Location | Priority |
 |---|---|---|
-| `@voxire/contracts/package.json` exports include `book/v1/*` and `store/v1/*` paths with no corresponding proto files | `packages/contracts/package.json` (in rtylr) | Medium |
-| `buf.yaml` module config not documented — linting rules are opaque | `buf.yaml` | Low |
+| `@voxire/contracts/package.json` exports include `book/v1/*`, `store/v1/*`, and legacy `auth/v1/auth` paths with no corresponding proto files | `packages/contracts/package.json` (in rtylr) | Medium |
 | No CI workflow to enforce `buf breaking` checks on PRs | — | High |
 | Go module is declared as `v0.0.0` — no semantic versioning enforced | `go.mod` | Low |
 
