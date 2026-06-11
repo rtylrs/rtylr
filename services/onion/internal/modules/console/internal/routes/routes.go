@@ -3,6 +3,7 @@ package routes
 import (
 	"context"
 	"encoding/json"
+	"io"
 	"net/http"
 	"strconv"
 
@@ -15,6 +16,8 @@ import (
 	"github.com/voxire/onion/internal/platform/logger"
 	serverHttp "github.com/voxire/onion/internal/platform/server/http"
 )
+
+const consoleJSONBodyLimit = 4 << 20
 
 func RegisterRoutes(ctx context.Context, router *chi.Mux, service *application.Service) {
 	// Generic admin resources
@@ -112,6 +115,30 @@ func writeError(w http.ResponseWriter, status int, msg string) {
 	}); err != nil {
 		logger.Global().Error("Failed to encode error response", logger.Error(err))
 	}
+}
+
+func decodeJSONBody(w http.ResponseWriter, r *http.Request, dst any) bool {
+	r.Body = http.MaxBytesReader(w, r.Body, consoleJSONBodyLimit)
+	decoder := json.NewDecoder(r.Body)
+	if err := decoder.Decode(dst); err != nil {
+		writeError(w, http.StatusBadRequest, "Invalid body")
+		return false
+	}
+
+	var extra struct{}
+	if err := decoder.Decode(&extra); err != io.EOF {
+		writeError(w, http.StatusBadRequest, "Invalid body")
+		return false
+	}
+
+	return true
+}
+
+func decodeOptionalJSONBody(w http.ResponseWriter, r *http.Request, dst any) bool {
+	if r.Body == nil || r.Body == http.NoBody || r.ContentLength == 0 {
+		return true
+	}
+	return decodeJSONBody(w, r, dst)
 }
 
 func getIDParam(r *http.Request, param string) (int64, bool) {
@@ -215,8 +242,7 @@ func rawCreateResourceRow(_ context.Context, svc *application.Service) http.Hand
 		var req struct {
 			Values map[string]any `json:"values"`
 		}
-		if err := json.NewDecoder(r.Body).Decode(&req); err != nil {
-			writeError(w, http.StatusBadRequest, "Invalid body")
+		if !decodeJSONBody(w, r, &req) {
 			return
 		}
 		if req.Values == nil {
@@ -241,8 +267,7 @@ func rawUpdateResourceRow(_ context.Context, svc *application.Service) http.Hand
 		var req struct {
 			Values map[string]any `json:"values"`
 		}
-		if err := json.NewDecoder(r.Body).Decode(&req); err != nil {
-			writeError(w, http.StatusBadRequest, "Invalid body")
+		if !decodeJSONBody(w, r, &req) {
 			return
 		}
 		if req.Values == nil {
@@ -306,8 +331,7 @@ func rawUpdateUser(_ context.Context, svc *application.Service) http.HandlerFunc
 			FullName string `json:"full_name"`
 			Email    string `json:"email"`
 		}
-		if err := json.NewDecoder(r.Body).Decode(&req); err != nil {
-			writeError(w, http.StatusBadRequest, "Invalid body")
+		if !decodeJSONBody(w, r, &req) {
 			return
 		}
 		if err := svc.UpdateUser(r.Context(), id, req.FullName, req.Email); err != nil {
@@ -351,7 +375,9 @@ func rawBanUser(_ context.Context, svc *application.Service) http.HandlerFunc {
 		var req struct {
 			Reason string `json:"reason"`
 		}
-		_ = json.NewDecoder(r.Body).Decode(&req)
+		if !decodeOptionalJSONBody(w, r, &req) {
+			return
+		}
 		if err := svc.BanUser(r.Context(), id, req.Reason); err != nil {
 			writeError(w, http.StatusInternalServerError, "Failed to ban user")
 			return
@@ -393,7 +419,9 @@ func rawSetConsoleAdmin(_ context.Context, svc *application.Service) http.Handle
 		var req struct {
 			IsConsoleAdmin bool `json:"is_console_admin"`
 		}
-		_ = json.NewDecoder(r.Body).Decode(&req)
+		if !decodeJSONBody(w, r, &req) {
+			return
+		}
 		if err := svc.SetConsoleAdmin(r.Context(), id, req.IsConsoleAdmin); err != nil {
 			writeError(w, http.StatusInternalServerError, "Failed to update admin status")
 			return
@@ -456,8 +484,7 @@ func rawUpdateBusiness(_ context.Context, svc *application.Service) http.Handler
 		var req struct {
 			Name string `json:"name"`
 		}
-		if err := json.NewDecoder(r.Body).Decode(&req); err != nil {
-			writeError(w, http.StatusBadRequest, "Invalid body")
+		if !decodeJSONBody(w, r, &req) {
 			return
 		}
 		if err := svc.UpdateBusiness(r.Context(), id, req.Name); err != nil {
@@ -523,8 +550,7 @@ func rawUpdateSubscription(_ context.Context, svc *application.Service) http.Han
 			Status    string `json:"status"`
 			SeatCount int    `json:"seat_count"`
 		}
-		if err := json.NewDecoder(r.Body).Decode(&req); err != nil {
-			writeError(w, http.StatusBadRequest, "Invalid body")
+		if !decodeJSONBody(w, r, &req) {
 			return
 		}
 		if err := svc.UpdateSubscription(r.Context(), id, req.PlanID, req.Status, req.SeatCount); err != nil {
@@ -571,8 +597,7 @@ func rawUpdatePlan(_ context.Context, svc *application.Service) http.HandlerFunc
 			AnnualPricePerSeatCents int    `json:"annual_price_per_seat_cents"`
 			IsActive                bool   `json:"is_active"`
 		}
-		if err := json.NewDecoder(r.Body).Decode(&req); err != nil {
-			writeError(w, http.StatusBadRequest, "Invalid body")
+		if !decodeJSONBody(w, r, &req) {
 			return
 		}
 		if err := svc.UpdatePlan(r.Context(), id, req.Name, req.PricePerSeatCents, req.AnnualPricePerSeatCents, req.IsActive); err != nil {
