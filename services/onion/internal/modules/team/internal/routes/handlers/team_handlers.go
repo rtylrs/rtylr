@@ -5,7 +5,6 @@ import (
 	"errors"
 	"net/http"
 	"strconv"
-	"time"
 
 	"github.com/go-chi/chi/v5"
 
@@ -209,30 +208,7 @@ func (h *InviteUserHandler) Serve(ctx context.Context, req *InviteUserRequest) (
 		return InviteUserResponse{}, errorModels.FromError(err, "Failed to invite user")
 	}
 
-	// Record the seat change asynchronously so billing stays accurate.
-	go func() {
-		defer func() {
-			if r := recover(); r != nil {
-				logger.Global().Error("goroutine panicked", logger.Any("panic", r))
-			}
-		}()
-		bgCtx, cancel := context.WithTimeout(context.WithoutCancel(ctx), 10*time.Second)
-		defer cancel()
-		ownerID, err := h.Service.BusinessOwnerID(bgCtx, actorID, device.User.BusinessID)
-		if err != nil {
-			logger.Ctx(bgCtx).Error("failed to resolve owner for billing seat change",
-				logger.Any("actor_id", actorID),
-				logger.Error(err),
-			)
-			return
-		}
-		if err := h.Service.RecordSeatChange(bgCtx, ownerID); err != nil {
-			logger.Ctx(bgCtx).Error("failed to record seat change for billing",
-				logger.Any("owner_id", ownerID),
-				logger.Error(err),
-			)
-		}
-	}()
+	recordSeatChangeAsync(ctx, h.Service, actorID, device.User.BusinessID)
 
 	if req.GroupID > 0 {
 		ownerID, ownerErr := h.Service.BusinessOwnerID(ctx, actorID, device.User.BusinessID)
@@ -416,30 +392,7 @@ func (h *DeactivateUserHandler) Serve(ctx context.Context, req *DeactivateUserRe
 		return DeactivateUserResponse{}, errorModels.FromError(err, "Failed to deactivate user")
 	}
 
-	// Record the seat change asynchronously so billing stays accurate.
-	go func() {
-		defer func() {
-			if r := recover(); r != nil {
-				logger.Global().Error("goroutine panicked", logger.Any("panic", r))
-			}
-		}()
-		bgCtx, cancel := context.WithTimeout(context.WithoutCancel(ctx), 10*time.Second)
-		defer cancel()
-		ownerID, err := h.Service.BusinessOwnerID(bgCtx, actorID, device.User.BusinessID)
-		if err != nil {
-			logger.Ctx(bgCtx).Error("failed to resolve owner for billing seat change",
-				logger.Any("actor_id", actorID),
-				logger.Error(err),
-			)
-			return
-		}
-		if err := h.Service.RecordSeatChange(bgCtx, ownerID); err != nil {
-			logger.Ctx(bgCtx).Error("failed to record seat change for billing",
-				logger.Any("owner_id", ownerID),
-				logger.Error(err),
-			)
-		}
-	}()
+	recordSeatChangeAsync(ctx, h.Service, actorID, device.User.BusinessID)
 
 	return DeactivateUserResponse{Message: "User deactivated"}, nil
 }
@@ -479,30 +432,7 @@ func (h *DeactivateMemberHandler) Serve(ctx context.Context, _ *DeactivateMember
 		return DeactivateMemberResponse{}, errorModels.FromError(err, "Failed to deactivate member")
 	}
 
-	// Record the seat change asynchronously so billing stays accurate.
-	go func() {
-		defer func() {
-			if r := recover(); r != nil {
-				logger.Global().Error("goroutine panicked", logger.Any("panic", r))
-			}
-		}()
-		bgCtx, cancel := context.WithTimeout(context.WithoutCancel(ctx), 10*time.Second)
-		defer cancel()
-		ownerID, err := h.Service.BusinessOwnerID(bgCtx, actorID, device.User.BusinessID)
-		if err != nil {
-			logger.Ctx(bgCtx).Error("failed to resolve owner for billing seat change",
-				logger.Any("actor_id", actorID),
-				logger.Error(err),
-			)
-			return
-		}
-		if err := h.Service.RecordSeatChange(bgCtx, ownerID); err != nil {
-			logger.Ctx(bgCtx).Error("failed to record seat change for billing",
-				logger.Any("owner_id", ownerID),
-				logger.Error(err),
-			)
-		}
-	}()
+	recordSeatChangeAsync(ctx, h.Service, actorID, device.User.BusinessID)
 
 	return DeactivateMemberResponse{Message: "Member deactivated"}, nil
 }
