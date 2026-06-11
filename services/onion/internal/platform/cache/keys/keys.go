@@ -64,6 +64,10 @@ func UserMe(userID int64) string {
 	return fmt.Sprintf("%suser:%d:me", Namespace, userID)
 }
 
+func UserMeForBusiness(userID, businessID int64) string {
+	return fmt.Sprintf("%suser:%d:business:%d:me", Namespace, userID, businessID)
+}
+
 func UserPermissions(userID int64) string {
 	return fmt.Sprintf("%suser:%d:permissions", Namespace, userID)
 }

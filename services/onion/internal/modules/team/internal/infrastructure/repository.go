@@ -144,6 +144,20 @@ func (r *Repository) GetUserByID(ctx context.Context, id int64) (string, string,
 	return row.Email, row.FullName, row.IsConsoleAdmin, nil
 }
 
+func (r *Repository) GetUserBusinessID(ctx context.Context, id int64) (int64, error) {
+	var businessID sql.NullInt64
+	if err := r.pool.QueryRowContext(ctx, "SELECT business_id FROM users WHERE id = ?", id).Scan(&businessID); err != nil {
+		if errors.Is(err, sql.ErrNoRows) {
+			return 0, domain.ErrUserNotFound
+		}
+		return 0, err
+	}
+	if !businessID.Valid {
+		return 0, nil
+	}
+	return businessID.Int64, nil
+}
+
 func (r *Repository) CreateUser(ctx context.Context, email, passwordHash, fullName string) (int64, error) {
 	res, err := r.queries.CreateUser(ctx, sqlc.CreateUserParams{
 		Email:        email,

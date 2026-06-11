@@ -144,14 +144,31 @@ func paginateTeam(page, pageSize int64) (int, int) {
 // subscription + effective resources). Cached per-user; any team or
 // subscription mutation under the user invalidates `cache:user:{id}:*`.
 func (s *Service) GetMyProfile(ctx context.Context, userID, businessID int64) (domain.MyProfile, error) {
+	resolvedBusinessID, err := s.resolveProfileBusinessID(ctx, userID, businessID)
+	if err != nil {
+		return domain.MyProfile{}, err
+	}
+
 	return cacher.Of[domain.MyProfile]().GetOrComputeSingle(
 		ctx,
-		cacheKeys.UserMe(userID),
+		cacheKeys.UserMeForBusiness(userID, resolvedBusinessID),
 		func(ctx context.Context) (domain.MyProfile, error) {
-			return s.computeMyProfile(ctx, userID, businessID)
+			return s.computeMyProfile(ctx, userID, resolvedBusinessID)
 		},
 		cacher.WithExpiry(ctx, meCacheTTL),
 	)
+}
+
+func (s *Service) resolveProfileBusinessID(ctx context.Context, userID, businessID int64) (int64, error) {
+	if businessID > 0 {
+		return businessID, nil
+	}
+
+	resolvedBusinessID, err := s.repo.GetUserBusinessID(ctx, userID)
+	if err != nil {
+		return 0, err
+	}
+	return resolvedBusinessID, nil
 }
 
 func (s *Service) computeMyProfile(ctx context.Context, userID, businessID int64) (domain.MyProfile, error) {
