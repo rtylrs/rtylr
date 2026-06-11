@@ -26,7 +26,7 @@ func RegisterCacheRoutes(ctx context.Context, r *chi.Mux) {
 		}
 
 		var req invalidation.Request
-		if err := json.NewDecoder(r.Body).Decode(&req); err != nil {
+		if err := DecodeJSONRequestBody(w, r, &req); err != nil {
 			w.WriteHeader(http.StatusBadRequest)
 
 			response := map[string]interface{}{

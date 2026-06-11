@@ -15,6 +15,7 @@ import (
 	authPkg "github.com/voxire/onion/internal/platform/auth"
 	errorModels "github.com/voxire/onion/internal/platform/errors"
 	"github.com/voxire/onion/internal/platform/logger"
+	serverHttp "github.com/voxire/onion/internal/platform/server/http"
 )
 
 func GenerateReportRoutes() []string { return []string{"/hr/reports/generate"} }
@@ -46,7 +47,7 @@ func (h *GenerateReportHandler) ServeHTTP(w http.ResponseWriter, r *http.Request
 	}
 
 	var req GenerateReportRequest
-	if err := json.NewDecoder(r.Body).Decode(&req); err != nil {
+	if err := serverHttp.DecodeJSONRequestBody(w, r, &req); err != nil {
 		writeError(w, &errorModels.ServerError{
 			HTTPCode: http.StatusBadRequest,
 			Code:     http.StatusBadRequest,

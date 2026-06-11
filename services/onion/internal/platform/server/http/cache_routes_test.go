@@ -45,6 +45,23 @@ func TestInvalidateCacheAcceptsInternalToken(t *testing.T) {
 	}
 }
 
+func TestInvalidateCacheRejectsTrailingJSON(t *testing.T) {
+	withInternalToken(t, "secret")
+
+	router := chi.NewRouter()
+	RegisterCacheRoutes(context.Background(), router)
+
+	req := httptest.NewRequest(http.MethodPost, "/invalidate-cache", strings.NewReader(`{"type":"all"}{"type":"ids"}`))
+	req.Header.Set("Internal-Token", "secret")
+	rec := httptest.NewRecorder()
+
+	router.ServeHTTP(rec, req)
+
+	if rec.Code != http.StatusBadRequest {
+		t.Fatalf("expected bad request for trailing JSON, got %d: %s", rec.Code, rec.Body.String())
+	}
+}
+
 func withInternalToken(t *testing.T, token string) {
 	t.Helper()
 	old := config.GlobalConfig

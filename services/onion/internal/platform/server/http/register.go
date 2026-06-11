@@ -21,8 +21,9 @@ import (
 )
 
 var (
-	validateInstance = validator.New()
-	protoValidator   = protovalidate.GlobalValidator
+	validateInstance          = validator.New()
+	protoValidator            = protovalidate.GlobalValidator
+	errMultipleJSONBodyValues = stdErrors.New("request body must contain a single JSON value")
 )
 
 type MiddlewareFunc func(next http.Handler) http.Handler
@@ -207,26 +208,37 @@ func wrapHandler[Req, Res any](ctx context.Context, handler HandlerFunc[Req, Res
 }
 
 func decodeJSONRequestBody(ctx context.Context, w http.ResponseWriter, r *http.Request, dst interface{}) bool {
-	r.Body = http.MaxBytesReader(w, r.Body, 4<<20) // 4 MiB
-
-	decoder := json.NewDecoder(r.Body)
-	if err := decoder.Decode(dst); err != nil {
-		if err == io.EOF {
-			return true
-		}
-		writeBadRequest(ctx, w)
-
-		return false
-	}
-
-	var extra interface{}
-	if err := decoder.Decode(&extra); err != io.EOF {
+	if err := DecodeJSONRequestBody(w, r, dst); err != nil {
 		writeBadRequest(ctx, w)
 
 		return false
 	}
 
 	return true
+}
+
+// DecodeJSONRequestBody reads at most one JSON value from the request body.
+// Empty bodies are accepted so legacy no-payload endpoints keep working.
+func DecodeJSONRequestBody(w http.ResponseWriter, r *http.Request, dst interface{}) error {
+	r.Body = http.MaxBytesReader(w, r.Body, 4<<20) // 4 MiB
+
+	decoder := json.NewDecoder(r.Body)
+	if err := decoder.Decode(dst); err != nil {
+		if err == io.EOF {
+			return nil
+		}
+		return err
+	}
+
+	var extra interface{}
+	if err := decoder.Decode(&extra); err != io.EOF {
+		if err == nil {
+			return errMultipleJSONBodyValues
+		}
+		return err
+	}
+
+	return nil
 }
 
 func writeBadRequest(ctx context.Context, w http.ResponseWriter) {

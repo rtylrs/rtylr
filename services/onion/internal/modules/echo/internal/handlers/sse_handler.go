@@ -14,6 +14,7 @@ import (
 	authPkg "github.com/voxire/onion/internal/platform/auth"
 	errorModels "github.com/voxire/onion/internal/platform/errors"
 	"github.com/voxire/onion/internal/platform/logger"
+	serverHttp "github.com/voxire/onion/internal/platform/server/http"
 	"github.com/voxire/onion/internal/platform/snips"
 )
 
@@ -107,7 +108,7 @@ func (h *GenerateTextStreamHandler) ServeHTTP(w http.ResponseWriter, r *http.Req
 		logger.String("user_agent", r.UserAgent()),
 		logger.String("remote_addr", r.RemoteAddr))
 
-	req, err := h.parseAndValidateRequest(r)
+	req, err := h.parseAndValidateRequest(w, r)
 	if err != nil {
 		log.Error("Failed to parse request", logger.Error(err))
 		http.Error(w, "Invalid request format", http.StatusBadRequest)
@@ -259,9 +260,9 @@ func estimateTokens(chars int) int {
 	return chars / 4
 }
 
-func (h *GenerateTextStreamHandler) parseAndValidateRequest(r *http.Request) (*GenerateTextStreamRequest, error) {
+func (h *GenerateTextStreamHandler) parseAndValidateRequest(w http.ResponseWriter, r *http.Request) (*GenerateTextStreamRequest, error) {
 	var req GenerateTextStreamRequest
-	if err := json.NewDecoder(r.Body).Decode(&req); err != nil {
+	if err := serverHttp.DecodeJSONRequestBody(w, r, &req); err != nil {
 		return nil, ErrInvalidRequestBody
 	}
 
