@@ -41,7 +41,7 @@ export function buildCanonicalUrl(path: string): string {
  * Returns the full absolute URL for an OG image path.
  */
 export function buildOgImageUrl(imagePath?: string): string {
-  if (!imagePath) return `${BASE_URL}/og/default.png`;
+  if (!imagePath) return `${BASE_URL}/og-default.png`;
   if (imagePath.startsWith('http')) return imagePath;
   const normalized = imagePath.startsWith('/') ? imagePath : `/${imagePath}`;
   return `${BASE_URL}${normalized}`;

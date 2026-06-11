@@ -207,10 +207,11 @@ const TrustPage = (): JSX.Element => {
                 We publish our compliance status transparently, certified, aligned, or in progress.
               </p>
               <div className={styles.contactStrip}>
-                <h3>Need our SOC 2 letter, SIG, or DPA?</h3>
+                <h3>Need our security packet, SIG, or DPA?</h3>
                 <p>
                   Email <a href="mailto:security@voxire.com">security@voxire.com</a> and we&apos;ll
-                  send the current packet under NDA within 7 business days.
+                  send the current packet under NDA within 7 business days, including the latest
+                  status of our SOC 2 Type II audit.
                 </p>
               </div>
             </motion.div>
