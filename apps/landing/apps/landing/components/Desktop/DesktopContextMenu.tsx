@@ -1,4 +1,4 @@
-import React, { useEffect, useRef } from 'react';
+import React, { useEffect, useLayoutEffect, useRef, useState } from 'react';
 import { useDesktopStore } from '../../stores/useDesktopStore';
 
 interface DesktopContextMenuProps {
@@ -11,6 +11,17 @@ export const DesktopContextMenu: React.FC<DesktopContextMenuProps> = ({ x, y, on
   const addWindow = useDesktopStore((s) => s.addWindow);
   const closeAllWindows = useDesktopStore((s) => s.closeAllWindows);
   const menuRef = useRef<HTMLDivElement>(null);
+  const [pos, setPos] = useState({ x, y });
+
+  useLayoutEffect(() => {
+    const el = menuRef.current;
+    if (!el) return;
+    const rect = el.getBoundingClientRect();
+    setPos({
+      x: Math.max(8, Math.min(x, window.innerWidth - rect.width - 8)),
+      y: Math.max(8, Math.min(y, window.innerHeight - rect.height - 8)),
+    });
+  }, [x, y]);
 
   useEffect(() => {
     const handler = (e: MouseEvent) => {
@@ -18,8 +29,15 @@ export const DesktopContextMenu: React.FC<DesktopContextMenuProps> = ({ x, y, on
         onClose();
       }
     };
+    const keyHandler = (e: KeyboardEvent) => {
+      if (e.key === 'Escape') onClose();
+    };
     window.addEventListener('mousedown', handler);
-    return () => window.removeEventListener('mousedown', handler);
+    window.addEventListener('keydown', keyHandler);
+    return () => {
+      window.removeEventListener('mousedown', handler);
+      window.removeEventListener('keydown', keyHandler);
+    };
   }, [onClose]);
 
   const item = (label: string, action: () => void) => (
@@ -62,8 +80,8 @@ export const DesktopContextMenu: React.FC<DesktopContextMenuProps> = ({ x, y, on
       role="menu"
       style={{
         position: 'fixed',
-        top: y,
-        left: x,
+        top: pos.y,
+        left: pos.x,
         zIndex: 8900,
         background: 'rgba(18,18,22,0.96)',
         backdropFilter: 'blur(16px)',

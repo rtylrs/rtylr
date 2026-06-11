@@ -118,12 +118,16 @@ export const useDesktopStore = create<DesktopState>()(
         const vw = typeof window !== 'undefined' ? window.innerWidth : 1280;
         const vh = typeof window !== 'undefined' ? window.innerHeight : 800;
         const menuBarH = 36;
+        const width = Math.min(defaults.width, vw - 16);
+        const height = Math.min(defaults.height, vh - menuBarH - 16);
         const x =
-          type === 'landing' ? Math.max(0, Math.floor((vw - defaults.width) / 2)) : 80 + offset;
+          type === 'landing'
+            ? Math.max(0, Math.floor((vw - width) / 2))
+            : Math.max(0, Math.min(80 + offset, vw - width - 8));
         const y =
           type === 'landing'
-            ? Math.max(0, Math.floor((vh - menuBarH - defaults.height) / 2))
-            : 40 + offset;
+            ? Math.max(0, Math.floor((vh - menuBarH - height) / 2))
+            : Math.max(0, Math.min(40 + offset, vh - menuBarH - height - 8));
 
         set((s) => ({
           globalZ: z,
@@ -136,8 +140,8 @@ export const useDesktopStore = create<DesktopState>()(
               url,
               x,
               y,
-              width: defaults.width,
-              height: defaults.height,
+              width,
+              height,
               zIndex: z,
               minimized: false,
             },
