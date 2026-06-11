@@ -4,7 +4,6 @@ import (
 	"context"
 	"errors"
 	"net/http"
-	"time"
 
 	"github.com/voxire/onion/internal/modules/user/internal/application"
 	authPkg "github.com/voxire/onion/internal/platform/auth"
@@ -97,23 +96,8 @@ func (h *LoginHandler) Serve(ctx context.Context, req *LoginRequest) (LoginRespo
 		}
 	}
 
-	// Record login + run idempotent post-login hooks (non-blocking).
-	go func() {
-		defer func() {
-			if r := recover(); r != nil {
-				logger.Global().Error("goroutine panicked", logger.Any("panic", r))
-			}
-		}()
-		taskCtx, cancel := context.WithTimeout(context.WithoutCancel(ctx), 10*time.Second)
-		defer cancel()
-
-		ip := authPkg.DeviceCtx(ctx).IP
-		_ = h.UserService.RecordLogin(taskCtx, userId, req.Email, "email", ip, true)
-
-		if h.OnUserLogin != nil {
-			h.OnUserLogin(taskCtx, userId)
-		}
-	}()
+	ip := authPkg.DeviceCtx(ctx).IP
+	runAsyncLoginTasks(ctx, h.UserService, userId, req.Email, ip, h.OnUserLogin)
 
 	return LoginResponse{
 		Token:          token,
