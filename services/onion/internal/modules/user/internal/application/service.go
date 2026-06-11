@@ -220,19 +220,31 @@ func (s *Service) buildAccessTokenClaims(ctx context.Context, userID int64) *Acc
 	claims := &AccessTokenClaims{
 		UserID: userID,
 	}
-
-	businessID, _ := s.repo.GetUserBusinessID(ctx, userID)
-	if businessID > 0 {
-		claims.BusinessID = businessID
-		role, _ := s.repo.GetUserRole(ctx, businessID, userID)
-		claims.Role = role
-	}
-
-	if user, err := s.GetUserByID(ctx, userID); err == nil && user.IsConsoleAdmin {
-		claims.Role = "console_admin"
-	}
+	s.hydrateAccessTokenClaims(ctx, claims)
 
 	return claims
+}
+
+func (s *Service) hydrateAccessTokenClaims(ctx context.Context, claims *AccessTokenClaims) {
+	if claims == nil || claims.UserID <= 0 {
+		return
+	}
+
+	if claims.BusinessID <= 0 {
+		if businessID, err := s.repo.GetUserBusinessID(ctx, claims.UserID); err == nil && businessID > 0 {
+			claims.BusinessID = businessID
+		}
+	}
+
+	if claims.BusinessID > 0 && claims.Role == "" {
+		if role, err := s.repo.GetUserRole(ctx, claims.BusinessID, claims.UserID); err == nil {
+			claims.Role = role
+		}
+	}
+
+	if user, err := s.GetUserByID(ctx, claims.UserID); err == nil && user.IsConsoleAdmin {
+		claims.Role = "console_admin"
+	}
 }
 
 func (s *Service) ValidateToken(ctx context.Context, tokenString string) (*AccessTokenClaims, error) {
@@ -242,6 +254,8 @@ func (s *Service) ValidateToken(ctx context.Context, tokenString string) (*Acces
 	if err != nil {
 		return nil, err
 	}
+
+	s.hydrateAccessTokenClaims(ctx, claims)
 
 	return claims, nil
 }
