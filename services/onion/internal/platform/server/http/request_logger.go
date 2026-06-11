@@ -153,6 +153,12 @@ func (rw *ResponseWriter) Write(b []byte) (int, error) {
 
 func (rw *ResponseWriter) Unwrap() http.ResponseWriter { return rw.ResponseWriter }
 
+func (rw *ResponseWriter) Flush() {
+	if f, ok := rw.ResponseWriter.(http.Flusher); ok {
+		f.Flush()
+	}
+}
+
 // Hijack delegates to the underlying ResponseWriter so WebSocket upgrades work.
 func (rw *ResponseWriter) Hijack() (net.Conn, *bufio.ReadWriter, error) {
 	h, ok := rw.ResponseWriter.(http.Hijacker)

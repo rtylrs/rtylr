@@ -115,3 +115,18 @@ func TestDuplicateDetectorCleanupLoopRemovesStaleEntries(t *testing.T) {
 
 	t.Fatal("stale duplicate detector entry was not cleaned up")
 }
+
+func TestResponseWriterPreservesFlusher(t *testing.T) {
+	rec := httptest.NewRecorder()
+	rw := &ResponseWriter{ResponseWriter: rec}
+
+	flusher, ok := any(rw).(http.Flusher)
+	if !ok {
+		t.Fatal("ResponseWriter should preserve http.Flusher")
+	}
+
+	flusher.Flush()
+	if !rec.Flushed {
+		t.Fatal("Flush was not forwarded to the wrapped response writer")
+	}
+}
