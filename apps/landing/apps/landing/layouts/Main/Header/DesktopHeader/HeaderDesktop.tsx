@@ -2,7 +2,6 @@ import React, { useState, useEffect, useCallback, useMemo } from 'react';
 import { cn } from '../../../../lib/cn';
 import { HiChevronDown } from 'react-icons/hi';
 import Link from 'next/link';
-import { useRouter } from 'next/router';
 
 import { Button } from '@voxire/components';
 import { APP_URLS, ASSETS } from '@voxire/config';
@@ -16,6 +15,44 @@ interface LinkWithColorProps extends React.AnchorHTMLAttributes<HTMLAnchorElemen
   to: string;
 }
 
+const FEATURE_LINKS = [
+  { href: '/pos', title: 'POS', desc: 'Payments, tables, orders, and receipts in one register.' },
+  { href: '/erp', title: 'ERP', desc: 'Inventory, suppliers, and purchasing that stay in sync.' },
+  { href: '/hr', title: 'HR', desc: 'Staff, schedules, time off, and payroll in one place.' },
+  { href: '/crm', title: 'CRM', desc: 'Customer profiles, loyalty, segments, and campaigns.' },
+  {
+    href: '/finance',
+    title: 'Finance',
+    desc: 'Invoices, expenses, tax, and a real P&L in seconds.',
+  },
+  {
+    href: '/flow',
+    title: 'Flow',
+    desc: 'Projects, tasks, and team workspaces for every department.',
+  },
+];
+
+const RESOURCE_LINKS = [
+  { href: '/hardware', label: 'Hardware' },
+  { href: '/integrations', label: 'Integrations' },
+  { href: '/blog', label: 'Blog' },
+  { href: 'https://docs.rtylr.com/changelog', label: 'Changelog', external: true },
+  { href: 'https://docs.rtylr.com', label: 'Documentation', external: true },
+  { href: '/support', label: 'Help Center' },
+  { href: '/trust', label: 'Trust Center' },
+  { href: '/legal/security', label: 'Security' },
+  { href: '/legal/privacy-policy', label: 'Privacy Policy' },
+  { href: '/legal/terms', label: 'Terms of Use' },
+  { href: APP_URLS.status, label: 'Status', external: true },
+];
+
+const COMPANY_LINKS = [
+  { href: '/about', label: 'About' },
+  { href: '/partners', label: 'Partners' },
+  { href: 'https://voxire.com/careers', label: 'Careers', external: true },
+  { href: '/contact', label: 'Contact' },
+];
+
 const HeaderDesktop: React.FC = () => {
   const [scrolled, setScrolled] = useState(false);
   const [featuresDropdown, setFeaturesDropdown] = useState(false);
@@ -23,8 +60,6 @@ const HeaderDesktop: React.FC = () => {
   const [resourcesDropdown, setResourcesDropdown] = useState(false);
   const [languageDropdown, setLanguageDropdown] = useState(false);
   const [language, setLanguage] = useState<string>('en');
-
-  const router = useRouter();
 
   useEffect(() => {
     let ticking = false;
@@ -75,9 +110,20 @@ const HeaderDesktop: React.FC = () => {
       }
     };
 
+    const handleEscape = (event: KeyboardEvent) => {
+      if (event.key === 'Escape') {
+        setFeaturesDropdown(false);
+        setSolutionsDropdown(false);
+        setResourcesDropdown(false);
+        setLanguageDropdown(false);
+      }
+    };
+
     document.addEventListener('mousedown', handleClickOutside);
+    document.addEventListener('keydown', handleEscape);
     return () => {
       document.removeEventListener('mousedown', handleClickOutside);
+      document.removeEventListener('keydown', handleEscape);
     };
   }, [featuresDropdown, solutionsDropdown, resourcesDropdown, languageDropdown]);
 
@@ -113,34 +159,14 @@ const HeaderDesktop: React.FC = () => {
     navigateExternal(`${APP_URLS.auth}/register`);
   }, []);
 
-  const handleLogoClick = useCallback(() => {
-    router.push('/');
-  }, [router]);
-
   const handleLoginClick = useCallback(() => {
     navigateExternal(APP_URLS.auth);
   }, []);
 
-  const handleNavigation = useCallback(
-    (path: string) => {
-      setFeaturesDropdown(false);
-      setSolutionsDropdown(false);
-      setResourcesDropdown(false);
-      router.push(path);
-    },
-    [router]
-  );
-
-  const prefetchRoute = useCallback(
-    (path: string) => {
-      router.prefetch(path).catch(() => {});
-    },
-    [router]
-  );
-
-  const handleExternalLink = useCallback((url: string) => {
+  const closeDropdowns = useCallback(() => {
+    setFeaturesDropdown(false);
+    setSolutionsDropdown(false);
     setResourcesDropdown(false);
-    window.open(url, '_blank', 'noopener,noreferrer');
   }, []);
 
   const LinkWithColor: React.FC<LinkWithColorProps> = useMemo(() => {
@@ -187,13 +213,19 @@ const HeaderDesktop: React.FC = () => {
   return (
     <header className={headerClasses}>
       <div className={styles['header-left']}>
-        <div className={styles['logo-container']} onClick={handleLogoClick}>
-          <img src={ASSETS.logos.light} alt="Logo" />
-        </div>
+        <Link href="/" className={styles['logo-container']} aria-label="rtylr home">
+          <img src={ASSETS.logos.light} alt="rtylr" />
+        </Link>
 
         <nav className={styles['nav-links']}>
           <div className={cn(styles['nav-item'], 'features-dropdown-container')}>
-            <p className={styles['nav-link']} onClick={toggleFeaturesDropdown}>
+            <button
+              type="button"
+              className={styles['nav-link']}
+              onClick={toggleFeaturesDropdown}
+              aria-expanded={featuresDropdown}
+              aria-haspopup="true"
+            >
               Features
               <HiChevronDown
                 className={styles['dropdown-icon']}
@@ -201,69 +233,20 @@ const HeaderDesktop: React.FC = () => {
                   transform: featuresDropdown ? 'rotate(180deg)' : 'rotate(0deg)',
                 }}
               />
-            </p>
+            </button>
             {featuresDropdown && (
               <div className={styles['header-dropdown-wide']}>
-                <div
-                  className={styles['dropdown-item']}
-                  onClick={() => handleNavigation('/pos')}
-                  onMouseEnter={() => prefetchRoute('/pos')}
-                >
-                  <div className={styles['dropdown-item-title']}>POS</div>
-                  <div className={styles['dropdown-item-desc']}>
-                    Payments, tables, orders, and receipts in one register.
-                  </div>
-                </div>
-                <div
-                  className={styles['dropdown-item']}
-                  onClick={() => handleNavigation('/erp')}
-                  onMouseEnter={() => prefetchRoute('/erp')}
-                >
-                  <div className={styles['dropdown-item-title']}>ERP</div>
-                  <div className={styles['dropdown-item-desc']}>
-                    Inventory, suppliers, and purchasing that stay in sync.
-                  </div>
-                </div>
-                <div
-                  className={styles['dropdown-item']}
-                  onClick={() => handleNavigation('/hr')}
-                  onMouseEnter={() => prefetchRoute('/hr')}
-                >
-                  <div className={styles['dropdown-item-title']}>HR</div>
-                  <div className={styles['dropdown-item-desc']}>
-                    Staff, schedules, time off, and payroll in one place.
-                  </div>
-                </div>
-                <div
-                  className={styles['dropdown-item']}
-                  onClick={() => handleNavigation('/crm')}
-                  onMouseEnter={() => prefetchRoute('/crm')}
-                >
-                  <div className={styles['dropdown-item-title']}>CRM</div>
-                  <div className={styles['dropdown-item-desc']}>
-                    Customer profiles, loyalty, segments, and campaigns.
-                  </div>
-                </div>
-                <div
-                  className={styles['dropdown-item']}
-                  onClick={() => handleNavigation('/finance')}
-                  onMouseEnter={() => prefetchRoute('/finance')}
-                >
-                  <div className={styles['dropdown-item-title']}>Finance</div>
-                  <div className={styles['dropdown-item-desc']}>
-                    Invoices, expenses, tax, and a real P&L in seconds.
-                  </div>
-                </div>
-                <div
-                  className={styles['dropdown-item']}
-                  onClick={() => handleNavigation('/flow')}
-                  onMouseEnter={() => prefetchRoute('/flow')}
-                >
-                  <div className={styles['dropdown-item-title']}>Flow</div>
-                  <div className={styles['dropdown-item-desc']}>
-                    Projects, tasks, and team workspaces for every department.
-                  </div>
-                </div>
+                {FEATURE_LINKS.map((item) => (
+                  <Link
+                    key={item.href}
+                    href={item.href}
+                    className={styles['dropdown-item']}
+                    onClick={closeDropdowns}
+                  >
+                    <div className={styles['dropdown-item-title']}>{item.title}</div>
+                    <div className={styles['dropdown-item-desc']}>{item.desc}</div>
+                  </Link>
+                ))}
               </div>
             )}
           </div>
@@ -273,7 +256,13 @@ const HeaderDesktop: React.FC = () => {
           </LinkWithColor>
 
           <div className={cn(styles['nav-item'], 'resources-dropdown-container')}>
-            <p className={styles['nav-link']} onClick={toggleResourcesDropdown}>
+            <button
+              type="button"
+              className={styles['nav-link']}
+              onClick={toggleResourcesDropdown}
+              aria-expanded={resourcesDropdown}
+              aria-haspopup="true"
+            >
               Resources
               <HiChevronDown
                 className={styles['dropdown-icon']}
@@ -281,68 +270,44 @@ const HeaderDesktop: React.FC = () => {
                   transform: resourcesDropdown ? 'rotate(180deg)' : 'rotate(0deg)',
                 }}
               />
-            </p>
+            </button>
             {resourcesDropdown && (
               <div className={styles['header-dropdown']}>
-                <h6
-                  onClick={() => handleNavigation('/hardware')}
-                  onMouseEnter={() => prefetchRoute('/hardware')}
-                >
-                  Hardware
-                </h6>
-                <h6
-                  onClick={() => handleNavigation('/integrations')}
-                  onMouseEnter={() => prefetchRoute('/integrations')}
-                >
-                  Integrations
-                </h6>
-                <h6
-                  onClick={() => handleNavigation('/blog')}
-                  onMouseEnter={() => prefetchRoute('/blog')}
-                >
-                  Blog
-                </h6>
-                <h6 onClick={() => handleExternalLink('https://docs.rtylr.com/changelog')}>
-                  Changelog
-                </h6>
-                <h6 onClick={() => handleExternalLink('https://docs.rtylr.com')}>Documentation</h6>
-                <h6
-                  onClick={() => handleNavigation('/support')}
-                  onMouseEnter={() => prefetchRoute('/support')}
-                >
-                  Help Center
-                </h6>
-                <h6
-                  onClick={() => handleNavigation('/trust')}
-                  onMouseEnter={() => prefetchRoute('/trust')}
-                >
-                  Trust Center
-                </h6>
-                <h6
-                  onClick={() => handleNavigation('/legal/security')}
-                  onMouseEnter={() => prefetchRoute('/legal/security')}
-                >
-                  Security
-                </h6>
-                <h6
-                  onClick={() => handleNavigation('/legal/privacy-policy')}
-                  onMouseEnter={() => prefetchRoute('/legal/privacy-policy')}
-                >
-                  Privacy Policy
-                </h6>
-                <h6
-                  onClick={() => handleNavigation('/legal/terms')}
-                  onMouseEnter={() => prefetchRoute('/legal/terms')}
-                >
-                  Terms of Use
-                </h6>
-                <h6 onClick={() => handleExternalLink(APP_URLS.status)}>Status</h6>
+                {RESOURCE_LINKS.map((item) =>
+                  item.external ? (
+                    <a
+                      key={item.label}
+                      href={item.href}
+                      className={styles['dropdown-link']}
+                      target="_blank"
+                      rel="noopener noreferrer"
+                      onClick={closeDropdowns}
+                    >
+                      {item.label}
+                    </a>
+                  ) : (
+                    <Link
+                      key={item.label}
+                      href={item.href}
+                      className={styles['dropdown-link']}
+                      onClick={closeDropdowns}
+                    >
+                      {item.label}
+                    </Link>
+                  )
+                )}
               </div>
             )}
           </div>
 
           <div className={cn(styles['nav-item'], 'solutions-dropdown-container')}>
-            <p className={styles['nav-link']} onClick={toggleSolutionsDropdown}>
+            <button
+              type="button"
+              className={styles['nav-link']}
+              onClick={toggleSolutionsDropdown}
+              aria-expanded={solutionsDropdown}
+              aria-haspopup="true"
+            >
               Company
               <HiChevronDown
                 className={styles['dropdown-icon']}
@@ -350,28 +315,32 @@ const HeaderDesktop: React.FC = () => {
                   transform: solutionsDropdown ? 'rotate(180deg)' : 'rotate(0deg)',
                 }}
               />
-            </p>
+            </button>
             {solutionsDropdown && (
               <div className={styles['header-dropdown']}>
-                <h6
-                  onClick={() => handleNavigation('/about')}
-                  onMouseEnter={() => prefetchRoute('/about')}
-                >
-                  About
-                </h6>
-                <h6
-                  onClick={() => handleNavigation('/partners')}
-                  onMouseEnter={() => prefetchRoute('/partners')}
-                >
-                  Partners
-                </h6>
-                <h6 onClick={() => handleExternalLink('https://voxire.com/careers')}>Careers</h6>
-                <h6
-                  onClick={() => handleNavigation('/contact')}
-                  onMouseEnter={() => prefetchRoute('/contact')}
-                >
-                  Contact
-                </h6>
+                {COMPANY_LINKS.map((item) =>
+                  item.external ? (
+                    <a
+                      key={item.label}
+                      href={item.href}
+                      className={styles['dropdown-link']}
+                      target="_blank"
+                      rel="noopener noreferrer"
+                      onClick={closeDropdowns}
+                    >
+                      {item.label}
+                    </a>
+                  ) : (
+                    <Link
+                      key={item.label}
+                      href={item.href}
+                      className={styles['dropdown-link']}
+                      onClick={closeDropdowns}
+                    >
+                      {item.label}
+                    </Link>
+                  )
+                )}
               </div>
             )}
           </div>

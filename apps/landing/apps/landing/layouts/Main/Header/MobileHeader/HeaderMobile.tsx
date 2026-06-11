@@ -1,6 +1,5 @@
 import React, { useState, useEffect, useCallback } from 'react';
 import Link from 'next/link';
-import { useRouter } from 'next/router';
 import { HiMenu, HiX, HiChevronDown, HiChevronRight } from 'react-icons/hi';
 import { Button } from '@voxire/components';
 import { APP_URLS, ASSETS } from '@voxire/config';
@@ -16,8 +15,6 @@ const HeaderMobile: React.FC = () => {
   const [solutionsDropdown, setSolutionsDropdown] = useState(false);
   const [resourcesDropdown, setResourcesDropdown] = useState(false);
   const [language, setLanguage] = useState<string>('en');
-
-  const router = useRouter();
 
   useEffect(() => {
     let ticking = false;
@@ -59,6 +56,15 @@ const HeaderMobile: React.FC = () => {
     };
   }, [isMenuOpen]);
 
+  useEffect(() => {
+    if (!isMenuOpen) return;
+    const handleEscape = (e: KeyboardEvent) => {
+      if (e.key === 'Escape') setIsMenuOpen(false);
+    };
+    document.addEventListener('keydown', handleEscape);
+    return () => document.removeEventListener('keydown', handleEscape);
+  }, [isMenuOpen]);
+
   const toggleMenu = useCallback(() => {
     setIsMenuOpen((prev) => !prev);
   }, []);
@@ -96,27 +102,12 @@ const HeaderMobile: React.FC = () => {
     setIsMenuOpen(false);
   }, []);
 
-  const handleNavigation = useCallback(
-    (path: string) => {
-      setFeaturesDropdown(false);
-      setSolutionsDropdown(false);
-      setResourcesDropdown(false);
-      setIsMenuOpen(false);
-      router.push(path);
-    },
-    [router]
-  );
-
-  const handleExternalLink = useCallback((url: string) => {
+  const closeMenu = useCallback(() => {
+    setFeaturesDropdown(false);
+    setSolutionsDropdown(false);
     setResourcesDropdown(false);
     setIsMenuOpen(false);
-    window.open(url, '_blank', 'noopener,noreferrer');
   }, []);
-
-  const handleLogoClick = useCallback(() => {
-    setIsMenuOpen(false);
-    router.push('/');
-  }, [router]);
 
   const headerClasses = `${styles.header} ${styles['mobile-header']} ${
     !scrolled ? styles['initial-position'] : styles.scrolled
@@ -126,9 +117,14 @@ const HeaderMobile: React.FC = () => {
     <>
       <header className={headerClasses}>
         <div className={styles['mobile-header-content']}>
-          <div className={styles['logo-container']} onClick={handleLogoClick}>
-            <img src={ASSETS.logos.light} alt="Logo" />
-          </div>
+          <Link
+            href="/"
+            className={styles['logo-container']}
+            aria-label="rtylr home"
+            onClick={closeMenu}
+          >
+            <img src={ASSETS.logos.light} alt="rtylr" />
+          </Link>
 
           <div className={styles['mobile-header-actions']}>
             <Button
@@ -152,11 +148,21 @@ const HeaderMobile: React.FC = () => {
       </header>
 
       {isMenuOpen && (
-        <div className={styles['mobile-menu-overlay']}>
+        <div
+          className={styles['mobile-menu-overlay']}
+          role="dialog"
+          aria-modal="true"
+          aria-label="Navigation menu"
+        >
           <div className={styles['mobile-menu-header']}>
-            <div className={styles['mobile-menu-logo']} onClick={handleLogoClick}>
-              <img src={ASSETS.logos.light} alt="Logo" />
-            </div>
+            <Link
+              href="/"
+              className={styles['mobile-menu-logo']}
+              aria-label="rtylr home"
+              onClick={closeMenu}
+            >
+              <img src={ASSETS.logos.light} alt="rtylr" />
+            </Link>
             <button
               className={styles['mobile-menu-close']}
               onClick={toggleMenu}
@@ -168,7 +174,11 @@ const HeaderMobile: React.FC = () => {
 
           <div className={styles['mobile-menu-content']}>
             <div className={styles['mobile-nav-item']}>
-              <p onClick={toggleFeaturesDropdown}>
+              <button
+                type="button"
+                onClick={toggleFeaturesDropdown}
+                aria-expanded={featuresDropdown}
+              >
                 Features
                 {featuresDropdown ? (
                   <HiChevronDown
@@ -179,44 +189,28 @@ const HeaderMobile: React.FC = () => {
                 ) : (
                   <HiChevronRight />
                 )}
-              </p>
+              </button>
               {featuresDropdown && (
                 <div className={styles['mobile-dropdown']}>
-                  <Link
-                    href="/pos"
-                    onClick={() => handleNavigation('/pos')}
-                    className={styles['mobile-feature-link']}
-                  >
+                  <Link href="/pos" onClick={closeMenu} className={styles['mobile-feature-link']}>
                     <span className={styles['mobile-feature-title']}>POS</span>
                     <span className={styles['mobile-feature-desc']}>
                       Payments, tables, orders, and receipts in one register.
                     </span>
                   </Link>
-                  <Link
-                    href="/erp"
-                    onClick={() => handleNavigation('/erp')}
-                    className={styles['mobile-feature-link']}
-                  >
+                  <Link href="/erp" onClick={closeMenu} className={styles['mobile-feature-link']}>
                     <span className={styles['mobile-feature-title']}>ERP</span>
                     <span className={styles['mobile-feature-desc']}>
                       Inventory, suppliers, and purchasing that stay in sync.
                     </span>
                   </Link>
-                  <Link
-                    href="/hr"
-                    onClick={() => handleNavigation('/hr')}
-                    className={styles['mobile-feature-link']}
-                  >
+                  <Link href="/hr" onClick={closeMenu} className={styles['mobile-feature-link']}>
                     <span className={styles['mobile-feature-title']}>HR</span>
                     <span className={styles['mobile-feature-desc']}>
                       Staff, schedules, time off, and payroll in one place.
                     </span>
                   </Link>
-                  <Link
-                    href="/crm"
-                    onClick={() => handleNavigation('/crm')}
-                    className={styles['mobile-feature-link']}
-                  >
+                  <Link href="/crm" onClick={closeMenu} className={styles['mobile-feature-link']}>
                     <span className={styles['mobile-feature-title']}>CRM</span>
                     <span className={styles['mobile-feature-desc']}>
                       Customer profiles, loyalty, segments, and campaigns.
@@ -224,7 +218,7 @@ const HeaderMobile: React.FC = () => {
                   </Link>
                   <Link
                     href="/finance"
-                    onClick={() => handleNavigation('/finance')}
+                    onClick={closeMenu}
                     className={styles['mobile-feature-link']}
                   >
                     <span className={styles['mobile-feature-title']}>Finance</span>
@@ -232,11 +226,7 @@ const HeaderMobile: React.FC = () => {
                       Invoices, expenses, tax, and a real P&L in seconds.
                     </span>
                   </Link>
-                  <Link
-                    href="/flow"
-                    onClick={() => handleNavigation('/flow')}
-                    className={styles['mobile-feature-link']}
-                  >
+                  <Link href="/flow" onClick={closeMenu} className={styles['mobile-feature-link']}>
                     <span className={styles['mobile-feature-title']}>Flow</span>
                     <span className={styles['mobile-feature-desc']}>
                       Projects, tasks, and team workspaces for every department.
@@ -247,7 +237,11 @@ const HeaderMobile: React.FC = () => {
             </div>
 
             <div className={styles['mobile-nav-item']}>
-              <p onClick={toggleSolutionsDropdown}>
+              <button
+                type="button"
+                onClick={toggleSolutionsDropdown}
+                aria-expanded={solutionsDropdown}
+              >
                 Company
                 {solutionsDropdown ? (
                   <HiChevronDown
@@ -258,41 +252,40 @@ const HeaderMobile: React.FC = () => {
                 ) : (
                   <HiChevronRight />
                 )}
-              </p>
+              </button>
               {solutionsDropdown && (
                 <div className={styles['mobile-dropdown']}>
-                  <Link href="/about" onClick={() => handleNavigation('/about')}>
+                  <Link href="/about" onClick={closeMenu}>
                     About
                   </Link>
-                  <Link href="/partners" onClick={() => handleNavigation('/partners')}>
+                  <Link href="/partners" onClick={closeMenu}>
                     Partners
                   </Link>
                   <a
-                    href="#"
-                    onClick={(e) => {
-                      e.preventDefault();
-                      handleExternalLink('https://voxire.com/careers');
-                    }}
+                    href="https://voxire.com/careers"
+                    target="_blank"
+                    rel="noopener noreferrer"
+                    onClick={closeMenu}
                   >
                     Careers
                   </a>
-                  <Link href="/contact" onClick={() => handleNavigation('/contact')}>
+                  <Link href="/contact" onClick={closeMenu}>
                     Contact
                   </Link>
                 </div>
               )}
             </div>
 
-            <Link
-              href="/pricing"
-              onClick={() => handleNavigation('/pricing')}
-              className={styles['mobile-nav-link']}
-            >
+            <Link href="/pricing" onClick={closeMenu} className={styles['mobile-nav-link']}>
               Pricing <HiChevronRight />
             </Link>
 
             <div className={styles['mobile-nav-item']}>
-              <p onClick={toggleResourcesDropdown}>
+              <button
+                type="button"
+                onClick={toggleResourcesDropdown}
+                aria-expanded={resourcesDropdown}
+              >
                 Resources
                 {resourcesDropdown ? (
                   <HiChevronDown
@@ -303,60 +296,54 @@ const HeaderMobile: React.FC = () => {
                 ) : (
                   <HiChevronRight />
                 )}
-              </p>
+              </button>
               {resourcesDropdown && (
                 <div className={styles['mobile-dropdown']}>
-                  <Link href="/hardware" onClick={() => handleNavigation('/hardware')}>
+                  <Link href="/hardware" onClick={closeMenu}>
                     Hardware
                   </Link>
-                  <Link href="/integrations" onClick={() => handleNavigation('/integrations')}>
+                  <Link href="/integrations" onClick={closeMenu}>
                     Integrations
                   </Link>
-                  <Link href="/blog" onClick={() => handleNavigation('/blog')}>
+                  <Link href="/blog" onClick={closeMenu}>
                     Blog
                   </Link>
                   <a
                     href="https://docs.rtylr.com/changelog"
-                    onClick={(e) => {
-                      e.preventDefault();
-                      handleExternalLink('https://docs.rtylr.com/changelog');
-                    }}
+                    target="_blank"
+                    rel="noopener noreferrer"
+                    onClick={closeMenu}
                   >
                     Changelog
                   </a>
                   <a
-                    href="#"
-                    onClick={(e) => {
-                      e.preventDefault();
-                      handleExternalLink('https://docs.rtylr.com');
-                    }}
+                    href="https://docs.rtylr.com"
+                    target="_blank"
+                    rel="noopener noreferrer"
+                    onClick={closeMenu}
                   >
                     Documentation
                   </a>
-                  <Link href="/support" onClick={() => handleNavigation('/support')}>
+                  <Link href="/support" onClick={closeMenu}>
                     Help Center
                   </Link>
-                  <Link href="/trust" onClick={() => handleNavigation('/trust')}>
+                  <Link href="/trust" onClick={closeMenu}>
                     Trust Center
                   </Link>
-                  <Link href="/legal/security" onClick={() => handleNavigation('/legal/security')}>
+                  <Link href="/legal/security" onClick={closeMenu}>
                     Security
                   </Link>
-                  <Link
-                    href="/legal/privacy-policy"
-                    onClick={() => handleNavigation('/legal/privacy-policy')}
-                  >
+                  <Link href="/legal/privacy-policy" onClick={closeMenu}>
                     Privacy Policy
                   </Link>
-                  <Link href="/legal/terms" onClick={() => handleNavigation('/legal/terms')}>
+                  <Link href="/legal/terms" onClick={closeMenu}>
                     Terms of Use
                   </Link>
                   <a
-                    href="#"
-                    onClick={(e) => {
-                      e.preventDefault();
-                      handleExternalLink(APP_URLS.status);
-                    }}
+                    href={APP_URLS.status}
+                    target="_blank"
+                    rel="noopener noreferrer"
+                    onClick={closeMenu}
                   >
                     Status
                   </a>
@@ -364,11 +351,7 @@ const HeaderMobile: React.FC = () => {
               )}
             </div>
 
-            <Link
-              href="/contact"
-              onClick={() => handleNavigation('/contact')}
-              className={styles['mobile-nav-link']}
-            >
+            <Link href="/contact" onClick={closeMenu} className={styles['mobile-nav-link']}>
               Contact <HiChevronRight />
             </Link>
           </div>

@@ -36,6 +36,8 @@
 
 .logo-container {
   cursor: pointer;
+  display: inline-flex;
+  align-items: center;
   transition: transform 0.2s ease;
 
   img {
@@ -170,10 +172,16 @@
   position: relative;
   width: 100%;
 
-  > p {
+  > p,
+  > button {
     display: flex;
     justify-content: space-between;
     align-items: center;
+    width: 100%;
+    background: none;
+    border: none;
+    font-family: inherit;
+    text-align: left;
     color: white;
     font-size: 18px;
     font-weight: 600;

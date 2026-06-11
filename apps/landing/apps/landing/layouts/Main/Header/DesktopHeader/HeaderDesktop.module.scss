@@ -44,6 +44,8 @@
 
 .logo-container {
   cursor: pointer;
+  display: inline-flex;
+  align-items: center;
   transition: transform 0.2s ease;
 
   &:hover {
@@ -73,7 +75,11 @@
   text-decoration: none;
   font-weight: 500;
   font-size: 14px;
+  font-family: inherit;
+  background: none;
+  border: none;
   margin: 0;
+  padding: 0;
   cursor: pointer;
   transition: all 0.2s ease;
   white-space: nowrap;
@@ -140,26 +146,28 @@
   width: max-content;
   z-index: 1001;
 
-  h6 {
-    display: block;
-    margin-bottom: 0;
+}
+
+.dropdown-link {
+  display: block;
+  margin-bottom: 0;
+  color: #ffffff;
+  font-size: 15px;
+  font-weight: 500;
+  text-decoration: none;
+  cursor: pointer;
+  transition: all 0.2s ease;
+  padding: 12px 16px;
+  border-radius: 0;
+  position: relative;
+
+  &:hover {
+    background-color: rgba(255, 255, 255, 0.1);
     color: #ffffff;
-    font-size: 15px;
-    font-weight: 500;
-    cursor: pointer;
-    transition: all 0.2s ease;
-    padding: 12px 16px;
-    border-radius: 0;
-    position: relative;
+  }
 
-    &:hover {
-      background-color: rgba(255, 255, 255, 0.1);
-      color: #ffffff;
-    }
-
-    &:last-child {
-      margin-bottom: 0;
-    }
+  &:last-child {
+    margin-bottom: 0;
   }
 }
 
@@ -187,6 +195,7 @@
   flex-direction: column;
   gap: 4px;
   cursor: pointer;
+  text-decoration: none;
   padding: 14px 16px;
   transition: background-color 0.2s ease;
 
