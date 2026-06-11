@@ -57,26 +57,51 @@ func (r RedisPubSub[C]) Publish(channel string, message C) {
 }
 
 func (r RedisPubSub[C]) Subscribe(channel string) {
+	r.SubscribeContext(context.Background(), channel)
+}
+
+func (r RedisPubSub[C]) SubscribeContext(ctx context.Context, channel string) {
 	if r.redisCacheCluster == nil {
 		return
 	}
 
-	ctx := context.Background()
 	subscriber := r.redisCacheCluster.Subscribe(ctx, channel)
+	defer func() {
+		if err := subscriber.Close(); err != nil {
+			logger.Ctx(ctx).Warn("Unable to close redis pub sub",
+				logger.Error(err),
+				logger.String("channel", channel),
+			)
+		}
+	}()
 
 	const redisReadPeriod = 3 * time.Second
 
 	for {
 		message, err := subscriber.ReceiveMessage(ctx)
 		if err != nil {
+			if ctx.Err() != nil {
+				return
+			}
+
 			logger.Ctx(ctx).Warn("Unable to receive message from redis pub sub",
 				logger.Error(err),
 				logger.String("channel", channel),
 			)
-			// backoff from redis to avoid spamming it
-			time.Sleep(redisReadPeriod)
 
-			continue
+			timer := time.NewTimer(redisReadPeriod)
+			select {
+			case <-ctx.Done():
+				if !timer.Stop() {
+					select {
+					case <-timer.C:
+					default:
+					}
+				}
+				return
+			case <-timer.C:
+				continue
+			}
 		}
 
 		consumer := *new(C)
