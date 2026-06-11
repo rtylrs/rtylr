@@ -2,6 +2,7 @@ package handlers
 
 import (
 	"encoding/json"
+	"errors"
 	"io"
 	"net/http"
 
@@ -9,6 +10,8 @@ import (
 	"github.com/voxire/onion/internal/platform/logger"
 	paddlePkg "github.com/voxire/onion/internal/platform/paddle"
 )
+
+const maxPaddleWebhookBodyBytes = 1 << 20 // 1 MiB
 
 // PaddlePOSWebhookHTTPHandler returns a raw http.HandlerFunc for Paddle webhook
 // events targeting POS orders. It bypasses the typed handler pipeline so the
@@ -18,8 +21,14 @@ func PaddlePOSWebhookHTTPHandler(service *application.Service) http.HandlerFunc 
 	return func(w http.ResponseWriter, r *http.Request) {
 		ctx := r.Context()
 
+		r.Body = http.MaxBytesReader(w, r.Body, maxPaddleWebhookBodyBytes)
 		rawBody, err := io.ReadAll(r.Body)
 		if err != nil {
+			var maxErr *http.MaxBytesError
+			if errors.As(err, &maxErr) {
+				http.Error(w, `{"error":"request body too large"}`, http.StatusRequestEntityTooLarge)
+				return
+			}
 			http.Error(w, `{"error":"failed to read request body"}`, http.StatusBadRequest)
 			return
 		}
