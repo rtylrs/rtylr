@@ -78,41 +78,62 @@ Run `pnpm --filter <app> build` and inspect the Vite output chunk sizes after ad
 ```
 rtylr/
 ├── apps/
-│   ├── hub/          Port 5175 - Command center (menu, orders, analytics, settings, team)
-│   ├── auth/         Port 5176 - Cross-app SSO login/register
+│   ├── dash/         Port 5175 - Command center (menu, orders, analytics, billing, settings, team)
+│   ├── auth/         Port 5176 - Cross-app SSO login/register/oauth consent
 │   ├── menu/         Port 5177 - Customer-facing digital menu (public, no auth)
-│   ├── vbitez/       POS - Tauri desktop app (not a web app; built as native binary)
 │   ├── erp/          Port 5179 - Inventory & purchasing
 │   ├── hr/           Port 5180 - Staff, shifts, payroll
-│   ├── crm/          Port 5181 - Customers, loyalty, campaigns
+│   ├── crm/          Port 5181 - Customers, loyalty, campaigns, sales
 │   ├── finance/      Port 5182 - Invoices, expenses, P&L
 │   ├── flow/         Port 5183 - Projects & tasks
-│   ├── docs/         Internal docs viewer app
-│   ├── insights/     Analytics deep-dive app
-│   └── landing/      Port 4200 - Marketing site (Next.js 15 SSG)
-├── packages/
-│   ├── api/          @voxire/api      - Axios client, safeFetch, ResultAsync
-│   ├── auth/         @voxire/auth     - ProtectedRoute, RoleGuard, useUserStore, cookie helpers
+│   ├── recruit/      Port 5184 - Careers portal (public apply pages + admin)
+│   ├── insights/     Port 5187 - Analytics deep-dive
+│   └── docs/         Internal docs viewer app
+├── packages/         GIT SUBMODULE (voxire/packages) - all shared workspace packages
+│   ├── api/          @voxire/api      - Axios client, safeFetch, ResultAsync, realtime
+│   ├── auth/         @voxire/auth     - AppGuard, ProtectedRoute, RoleGuard, useUserStore, cookies, signOut
+│   ├── caret/        @voxire/caret    - AI assistant (Caret) shared features
+│   ├── components/   @voxire/components - Higher-level shared components (FullScreenLoader, etc.)
+│   ├── config/       @voxire/config   - APP_URLS, APP_CONFIG, AppFlagGuard, industries, themes
+│   ├── consent/      @voxire/consent  - Cookie/consent management
+│   ├── contracts/    @voxire/contracts - Generated TypeScript types from voxie protos
+│   ├── i18n/         @voxire/i18n     - Shared i18next setup
+│   ├── observability/ @voxire/observability - Client-side error/log reporting
+│   ├── permissions/  @voxire/permissions - RBAC helpers
 │   ├── types/        @voxire/types    - Shared TypeScript interfaces (no runtime)
-│   ├── config/       @voxire/config   - APP_URLS, APP_CONFIG (ports, domains, allowed roles)
-│   ├── ui/           @voxire/ui       - Shared low-level components
-│   ├── components/   @voxire/components - Higher-level shared components
-│   ├── assets/       @voxire/assets   - Shared static assets
-│   ├── menu/         @voxire/menu     - Shared menu display components
-│   ├── tailwind-config/ @voxire/tailwind-config - Shared Tailwind preset
-│   ├── utils/        @voxire/utils    - Shared utility functions
-│   └── contracts/    @voxire/contracts - Re-exported voxie generated TypeScript types
-├── voxie/            Git submodule - proto contracts + generated TS/Go types
+│   ├── ui/           @voxire/ui       - Shared low-level components (incl. ErrorBoundary)
+│   ├── assets/, menu/, tailwind-config/, utils/   - as named
+├── voxie/            Git submodule - proto contracts
 ├── docs/             Architecture docs + ADRs (authoritative)
-├── e2e/              Playwright e2e tests
+├── e2e/              Playwright e2e tests (one spec per app area)
 ├── test/             Shared test utilities
+├── scripts/          audit-request-contracts.mjs - audits request shapes against voxie contracts
+├── eslint.config.mjs Flat ESLint config (root)
 ├── pnpm-workspace.yaml
 ├── turbo.json
 ├── tsconfig.base.json
 └── package.json      Root - shared devDependencies and scripts
 ```
 
-### App Structure (Vite apps - all except landing)
+> **Removed apps:** `landing` (marketing site) now lives in its own repo. `hub` was renamed to `dash`. `vbitez` (POS desktop) is not part of this monorepo. Empty `apps/hub`, `apps/vbitez`, or `apps/landing` folders on disk are untracked leftovers - safe to delete.
+>
+> **Submodules:** both `voxie/` (contracts) and `packages/` (voxire/packages) are git submodules. Run `git submodule update --init --recursive` after every pull, then `pnpm install`.
+
+### Tech Stack
+
+| Component    | Technology                          | Version                                         |
+| ------------ | ----------------------------------- | ----------------------------------------------- |
+| Runtime / PM | Node 20+ / pnpm                     | 10.33.0 (`packageManager` in root package.json) |
+| Framework    | React                               | 19                                              |
+| Routing      | @tanstack/react-router              | v1 (react-router has been fully removed)        |
+| Server state | @tanstack/react-query               | v5                                              |
+| UI state     | Zustand                             | v5                                              |
+| Build        | Vite + Turborepo                    | Vite 8                                          |
+| Language     | TypeScript                          | 6.x                                             |
+| Lint         | ESLint flat config                  | `eslint.config.mjs` at root                     |
+| Tests        | Vitest (unit) + Playwright (`e2e/`) | —                                               |
+
+### App Structure (Vite apps)
 
 Each Vite app follows this internal structure:
 
@@ -134,13 +155,14 @@ apps/<name>/src/
 │   ├── lib/
 │   │   └── api.ts    App-specific `safeFetch` instance
 │   └── utils/        App-local utilities
-├── routes/
-│   └── AppRoutes.tsx Route definitions (RouteObject[])
-├── layouts/          Layout wrappers (AppLayout, NoSidebarLayout, etc.)
-├── locales/          i18n JSON files (en.json, ar.json, fr.json)
-├── App.tsx           Root component - routes, ChartJS init, i18n setup
-└── main.tsx          Entry point - React root, QueryClient, BrowserRouter
+├── router.tsx        TanStack Router route tree (createRootRoute/createRoute/createRouter)
+├── layouts/          Layout wrappers (DefaultLayout, etc.)
+├── locales/          Namespaced i18n JSON: locales/{en,ar,fr}/<namespace>.json (hr still uses flat en.json/ar.json/fr.json)
+├── App.tsx           Mostly legacy - routing moved to router.tsx
+└── main.tsx          Entry point - React root, QueryClient, RouterProvider
 ```
+
+> Some apps still carry a legacy `routes/AppRoutes.tsx` file - `src/router.tsx` is the live route tree everywhere. Don't add routes to `AppRoutes.tsx`.
 
 ### Naming Conventions
 
@@ -152,7 +174,7 @@ apps/<name>/src/
 | Service files   | camelCase, `Service` suffix | `teamService.ts`                             |
 | Schema files    | camelCase, `schema` suffix  | `inviteSchema.ts`                            |
 | Type-only files | camelCase                   | `types.ts`                                   |
-| Route arrays    | PascalCase                  | `AppRoutes.tsx`                              |
+| Route tree      | `router.tsx` (per app)      | `apps/erp/src/router.tsx`                    |
 | Feature dirs    | camelCase                   | `features/qr-codes/`                         |
 | Query hooks     | `use` + noun + verb or noun | `useGetConfig`, `useTeam`, `useUpdateConfig` |
 
@@ -190,34 +212,60 @@ Don't duplicate a component that already exists in a shared package. Read the sh
 **All route-level components must be lazy-loaded.** This keeps the initial bundle small and only loads code when the user navigates to that route.
 
 ```tsx
-// ✅ correct - lazy load every route component
-const Team = React.lazy(() => import('../features/team/Team'));
-const TeamMember = React.lazy(() => import('../features/team/TeamMember'));
+// ✅ correct - lazy load every route component (in router.tsx)
+const Team = React.lazy(() => import('./features/team/Team'));
+const TeamMember = React.lazy(() => import('./features/team/TeamMember'));
 
-// Wrap the router in a Suspense boundary with a fallback
-<Suspense fallback={<PageLoader />}>
-  <Routes>
-    <Route path="/team" element={<Team />} />
-    <Route path="/team/:id" element={<TeamMember />} />
-  </Routes>
-</Suspense>;
+// wrap() puts each lazy component behind a Suspense fallback
+function wrap(component: React.ReactNode) {
+  return () => <Suspense fallback={<FullScreenLoader />}>{component}</Suspense>;
+}
+
+const teamRoute = createRoute({
+  getParentRoute: () => layoutRoute,
+  path: '/team',
+  component: wrap(<Team />),
+});
 
 // ❌ wrong - eager import bloats the initial bundle
-import Team from '../features/team/Team';
+import Team from './features/team/Team';
 ```
 
-Never eagerly import a page-level component. Layout components (`AppLayout`, etc.) are the exception - they are always needed and can be eagerly imported.
+Never eagerly import a page-level component. Layout components (`DefaultLayout`, etc.) are the exception - they are always needed and can be eagerly imported.
+
+### Routing Pattern - TanStack Router
+
+Every app defines its route tree in `src/router.tsx` using `@tanstack/react-router` (`createRootRoute`, `createRoute`, `createRouter`) and mounts it with `<RouterProvider router={router} />` in `main.tsx`. The root route composes the guards:
+
+```tsx
+const rootRoute = createRootRoute({
+  component: () => (
+    <ErrorBoundary>
+      <AppGuard
+        appId="erp"
+        fetchUser={(): Promise<Record<string, unknown>> =>
+          unwrap(safe.get<Record<string, unknown>>('/user/me'))
+        }
+      >
+        <Outlet />
+      </AppGuard>
+    </ErrorBoundary>
+  ),
+});
+```
+
+`AppGuard` (from `@voxire/auth`) replaces the old per-app `ProtectedRoute` wiring: it checks the cookie, loads the user, and enforces `allowedRoles` from `APP_CONFIG`. Feature-flagged apps additionally wrap with `AppFlagGuard` from `@voxire/config`. Unknown paths render a `CatchAllRedirect` that sends the user back to `/`.
 
 ### Error Boundary Placement
 
-Every top-level route group must be wrapped in an `<ErrorBoundary>`. This prevents a crash in one feature from taking down the entire app.
+Every top-level route group must be wrapped in an `<ErrorBoundary>` (exported from `@voxire/ui`). This prevents a crash in one feature from taking down the entire app.
 
 ```tsx
-// Wrap the route tree - one boundary per app at minimum
-<ErrorBoundary fallback={<AppErrorFallback />}>
-  <Suspense fallback={<PageLoader />}>
-    <AppRoutes />
-  </Suspense>
+// Wrap the route tree - one boundary per app at minimum (in the root route component)
+<ErrorBoundary>
+  <AppGuard appId="hr" fetchUser={...}>
+    <Outlet />
+  </AppGuard>
 </ErrorBoundary>
 ```
 
@@ -241,7 +289,7 @@ Add a second, tighter boundary around any feature that loads third-party integra
 </ErrorBoundary>
 ```
 
-`@voxire/ui` does not currently export an `ErrorBoundary` component. Create one in `shared/components/ErrorBoundary.tsx` for now, and open a task to promote it to `@voxire/ui` so all apps share the same implementation.
+`ErrorBoundary` is exported from `@voxire/ui` - import it from there. Do not create per-app copies.
 
 ### State Management Pattern
 
@@ -309,7 +357,7 @@ TanStack Query hook (useX.ts)
 ```ts
 // src/shared/lib/api.ts
 import { createApiClient, safeFetch } from '@voxire/api';
-export const api = createApiClient('hub'); // swap appId per app
+export const api = createApiClient('dash'); // swap appId per app
 export const safe = safeFetch(api);
 ```
 
@@ -350,68 +398,48 @@ return <button>{t('team.inviteUser')}</button>;
 return <button>Invite User</button>;
 ```
 
-When adding a new string:
+Locale files are namespaced per app: `locales/{en,ar,fr}/<namespace>.json` (e.g. `locales/en/erp.json`, `locales/en/common.json`). The HR app still uses the legacy flat `locales/en.json` format. When adding a new string:
 
-1. Add the key to `locales/en.json` first.
-2. Add a placeholder to `locales/ar.json` and `locales/fr.json` (mark with `// TODO: translate` comment in the JSON if needed).
+1. Add the key to the relevant `locales/en/<namespace>.json` first.
+2. Add the same key to the matching `ar/` and `fr/` namespace files.
 3. Use the key in JSX via `t('...')`.
 
 Never ship a new UI element without a translation key, even in early development.
 
 ### Authentication Pattern
 
-- `ProtectedRoute` from `@voxire/auth` wraps each app's entry. Reads the `token` cookie synchronously - no network call.
-- `RoleGuard` from `@voxire/auth` gates UI elements by role.
-- `useUserStore` from `@voxire/auth` is the single source of truth for user identity.
+- `AppGuard` from `@voxire/auth` wraps each app's root route (see Routing Pattern above): checks the cookie, fetches `/user/me`, and enforces the app's `allowedRoles` from `APP_CONFIG`.
+- `ProtectedRoute` and `RoleGuard` from `@voxire/auth` remain available for finer-grained gating of routes and UI elements.
+- `useUserStore` from `@voxire/auth` is the single source of truth for user identity; `signOut` from the same package handles logout.
 - **Never read the token from a store or prop.** Always read it via the cookie mechanism in `@voxire/api` or `@voxire/auth`.
 
-### BusinessRoute (Hub)
+### BusinessRoute (Dash)
 
-Hub wraps its entire route tree in a `<BusinessRoute>` component (see `apps/hub/src/App.tsx`). This component:
+Dash wraps its route tree in a `<BusinessRoute>` component (`apps/dash/src/shared/utils/BusinessRoute.tsx`, used in `router.tsx`). This component:
 
-- Ensures the business config (`/get-configs`) is loaded and stored in `configStore` before rendering any hub route.
+- Ensures the business config (`/get-configs`) is loaded and stored in `configStore` before rendering any dash route.
 - Applies the business's theme CSS variables to the document root.
 - Redirects to the onboarding flow if the business has not completed setup.
 
-**Do not remove or bypass `BusinessRoute`.** If you add new hub routes, they must be inside it.
+**Do not remove or bypass `BusinessRoute`.** If you add new dash routes, they must be inside it.
 
 ### Contracts / Types Pattern
 
 - Prefer types from `@voxire/contracts` over hand-written interfaces when a proto definition exists.
-- Import path: `import type { StaffUserPayload } from '@voxire/contracts/hub/v1/team'`
+- Import paths mirror the voxie proto layout (`{app}/{capability}/v1/{operation}` plus a `types` module per capability):
+  `import type { StaffUserPayload } from '@voxire/contracts/hub/team/members/v1/types'`
+  `import type { ClockInRequest } from '@voxire/contracts/hr/attendance/v1/attendance_clock_in'`
 - `@voxire/types` contains non-proto types (legacy and shared domain types).
 - Never copy-paste type shapes from contracts. Import them.
-
-### Landing App - SSG Limitations
-
-`apps/landing/` uses Next.js 15 with `output: 'export'`. This means:
-
-- **No server-side rendering.** No `getServerSideProps`. No API routes (`pages/api/`).
-- **No Next.js Middleware.** No `middleware.ts`.
-- **No automatic image optimization** via `<Image>` with external URLs - use static imports or CDN URLs only.
-- All pages are pre-rendered at build time as static HTML. Data fetching must happen client-side or at build time via `getStaticProps`.
-
-Do not add server-dependent Next.js features to the landing app. It is a static site.
+- Run `pnpm contracts:audit-requests` to verify request shapes used in apps still match the contracts.
 
 ---
 
 ## 5. ROUTES / ENDPOINTS
 
-### Landing (`apps/landing/`, Next.js 15, port 4200)
+> The marketing site (landing) lives in its own repository - it is no longer part of this monorepo.
 
-| Route       | File                       |
-| ----------- | -------------------------- |
-| `/`         | `pages/index.tsx`          |
-| `/about`    | `pages/about/index.tsx`    |
-| `/contact`  | `pages/contact/index.tsx`  |
-| `/demo`     | `pages/demo/index.tsx`     |
-| `/hardware` | `pages/hardware/index.tsx` |
-| `/pricing`  | `pages/pricing/index.tsx`  |
-| `/404`      | `pages/404.tsx`            |
-
-> `pages/homepage-legacy/` is a legacy version - do not add new code there.
-
-### Hub (`apps/hub/`, port 5175)
+### Dash (`apps/dash/`, port 5175)
 
 | Route                    | Screen                |
 | ------------------------ | --------------------- |
@@ -452,14 +480,19 @@ Do not add server-dependent Next.js features to the landing app. It is a static 
 
 ### Other Apps
 
-| App            | Key Routes                                                                    |
-| -------------- | ----------------------------------------------------------------------------- |
-| Auth (5176)    | `/` (login), `/register`, `/password-reset`, `/email-verification`            |
-| ERP (5179)     | `/`, `/inventory`, `/purchasing`, `/suppliers`                                |
-| HR (5180)      | `/`, `/staff`, `/shifts`, `/payroll`, `/departments`                          |
-| CRM (5181)     | `/`, `/customers`, `/loyalty`, `/campaigns`, `/segments`                      |
-| Finance (5182) | `/`, `/invoices`, `/expenses`, `/pl`, `/tax`                                  |
-| Flow (5183)    | `/`, `/w/:workspaceId`, `/w/:workspaceId/p/:projectId`, `/inbox`, `/settings` |
+| App             | Key Routes                                                                                                                                                                                     |
+| --------------- | ---------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| Auth (5176)     | `/` (login), `/register`, `/reset-password`, `/email-verification`, `/oauth` (consent), `/callback`, `/invite`                                                                                 |
+| Menu (5177)     | public digital menu + cart                                                                                                                                                                     |
+| ERP (5179)      | `/`, `/inventory`, `/purchasing`, `/suppliers`, `/products`, `/warehouses`, `/stock-transfers`, `/stock-takes`, `/price-lists`, `/variants`, `/barcodes`, `/expiry`, `/valuation`, `/settings` |
+| HR (5180)       | `/`, `/staff`, `/employees`, `/shifts`, `/payroll`, `/departments`, `/leave`, `/attendance`, `/timesheets`, `/performance`, `/onboarding`, `/setup-wizard`                                     |
+| CRM (5181)      | `/`, `/customers`, `/loyalty`, `/campaigns`, `/segments`, `/sales` (leads, contracts), `/templates`, `/automations`                                                                            |
+| Finance (5182)  | `/`, `/invoices`, `/expenses`, `/bills`, `/quotes`, `/journal`, `/reconcile`, `/profit-loss`, `/balance-sheet`, `/cash-flow`, `/tax`                                                           |
+| Flow (5183)     | `/`, `/w/:workspaceId`, `/w/:workspaceId/p/:projectId`, `/inbox`, `/triage`, `/roadmap`, `/settings`                                                                                           |
+| Recruit (5184)  | public apply pages + `/admin` (careers, submissions, form fields)                                                                                                                              |
+| Insights (5187) | `/`, `/revenue`, `/customers`, `/products`, `/financial`, `/operations`, `/reports`, `/settings`                                                                                               |
+
+Each app's `src/router.tsx` is the definitive route list.
 
 ---
 
@@ -467,12 +500,14 @@ Do not add server-dependent Next.js features to the landing app. It is a static 
 
 ### Tailwind Configuration
 
-All apps extend `@voxire/tailwind-config` (shared preset). Hub overrides `primary` and `admin` color tokens to use CSS custom properties:
+All apps extend `@voxire/tailwind-config` (shared preset). Dash overrides `primary` and `admin` color tokens to use CSS custom properties:
 
 ```ts
 primary: { DEFAULT: 'var(--hub-text)', foreground: 'var(--hub-text)' }
 admin: { DEFAULT: '#262626', bg: 'var(--hub-bg)', border: 'var(--hub-border)' }
 ```
+
+> The `--hub-*` CSS variable names are legacy (pre-rename); `globals.css` also defines newer `--dash-*` tokens. Don't introduce new `--hub-*` variables.
 
 CSS variables are set at runtime based on the business's chosen theme (loaded from the `themes` table).
 
@@ -498,7 +533,7 @@ Do not ship a new screen or component without verifying it is navigable by keybo
 ### Component Library
 
 - `@voxire/ui` for low-level primitives (Button, Modal, Card, Input, etc.)
-- `@radix-ui/react-dialog` for dialogs in Hub
+- `@radix-ui/react-dialog` for dialogs in Dash
 - `lucide-react` and `phosphor-react` for icons
 - Skeleton loaders via `react-loading-skeleton`
 
@@ -570,7 +605,7 @@ toast.success(t('notifications.requestSent'));
 
 ### Company config drives the UI
 
-Every RTYLR app has a config guard component (e.g. `BusinessRoute` in Hub, `HRConfigRoute` in the HR app) that:
+Every RTYLR app has a config guard component (e.g. `BusinessRoute` in Dash, the HR config store/guard in the HR app) that:
 
 1. Loads the company's configuration before rendering any feature screens.
 2. Stores the config in a Zustand store with `persist` so it survives page refresh.
@@ -644,16 +679,15 @@ Never commit secrets. Never expose sensitive data to the browser. Follow these r
 
 ## 10. KNOWN ISSUES
 
-| Issue                                                                                                    | File / Location                           | Priority |
-| -------------------------------------------------------------------------------------------------------- | ----------------------------------------- | -------- |
-| `tsconfig.base.json` lacks `strict: true` at root level - individual app tsconfigs must set it           | `tsconfig.base.json`                      | High     |
-| `console.error` / `console.log` calls exist in query hooks (e.g., `useGetConfig`)                        | `apps/hub/src/shared/hooks/queries/`      | Medium   |
-| Hub's `AppRoutes.tsx` has a `.jsx` import (`MenuWithId.jsx`) - mixed extensions                          | `apps/hub/src/routes/AppRoutes.tsx`       | Low      |
-| Legacy `pages/homepage-legacy/` directory in landing - dead code not removed                             | `apps/landing/pages/homepage-legacy/`     | Low      |
-| Menu app uses Redux (legacy, not Zustand) - inconsistent with all other apps                             | `apps/menu/`                              | Medium   |
-| `useUserStore` in Hub has `[key: string]: unknown` index signature on `StoredUser` - weakens type safety | `apps/hub/src/shared/stores/userStore.ts` | Medium   |
-| `vbitez` (POS desktop app) is on same port 5178 as POS web entry in some configs                         | Cloudflare config docs                    | Low      |
-| No `.env.example` visible in repo root - environment setup requires reading docs                         | Root                                      | Medium   |
+| Issue                                                                                                                                                          | File / Location                                                          | Priority |
+| -------------------------------------------------------------------------------------------------------------------------------------------------------------- | ------------------------------------------------------------------------ | -------- |
+| `tsconfig.base.json` lacks `strict: true` at root level - individual app tsconfigs must set it                                                                 | `tsconfig.base.json`                                                     | High     |
+| `useUserStore` in Dash has `[key: string]: unknown` index signature on `StoredUser`; `@voxire/auth` `User` type has `[key: string]: any` - weakens type safety | `apps/dash/src/shared/stores/userStore.ts`, `packages/auth/src/types.ts` | Medium   |
+| Legacy `routes/AppRoutes.tsx` files still exist in some apps alongside the live `router.tsx`; `MenuWithId.jsx` is a mixed-extension import in dash             | `apps/dash/src/routes/`, `apps/dash/src/features/menu/`                  | Low      |
+| HR app still uses flat locale files (`locales/en.json`) instead of the namespaced `locales/en/*.json` layout                                                   | `apps/hr/src/locales/`                                                   | Low      |
+| Empty untracked `apps/hub/`, `apps/vbitez/`, `apps/landing/` leftover folders may exist on local checkouts                                                     | `apps/`                                                                  | Low      |
+| `@voxire/contracts/package.json` exports `book/v1/*`, `store/v1/*`, and `auth/v1/auth` paths with no proto sources in voxie                                    | `packages/contracts/package.json`                                        | Medium   |
+| No `.env.example` visible in repo root - environment setup requires reading docs                                                                               | Root                                                                     | Medium   |
 
 ---
 
@@ -662,12 +696,12 @@ Never commit secrets. Never expose sensitive data to the browser. Follow these r
 Run these steps at the start of every new session before touching any file:
 
 1. `git pull origin main` (or the relevant branch)
-2. `git submodule update --init --recursive` (keeps voxie contracts in sync)
+2. `git submodule update --init --recursive` (keeps the voxie contracts AND the packages/ submodule in sync)
 3. `git checkout -b feat/<task-name>` to create a feature branch
 4. `pnpm install` if `pnpm-lock.yaml` changed since last session
 5. Check `docs/` for any new files added since last session
 6. Re-read the relevant sections of this CLAUDE.md
-7. Confirm the dev server starts: `pnpm --filter hub dev` (or the relevant app)
+7. Confirm the dev server starts: `pnpm --filter dash dev` (or the relevant app)
 
 ---
 
@@ -688,7 +722,7 @@ Run these steps at the start of every new session before touching any file:
 
 ### Monitoring
 
-- **Error tracking:** Axiom + PostHog are planned but not yet configured. Until they are live, check Cloudflare Pages deployment logs and the browser console for client-side errors.
+- **Error tracking:** `@voxire/observability` wires up Sentry (error tracking) and PostHog (product analytics) on the client — see `packages/observability/src/boot.ts`. Cloudflare Pages deployment logs and the browser console remain useful for debugging.
 - **Escalation:** Contact Abed El-Fattah Amouneh directly - info@voxire.com / +961 3 940 708.
 
 ---
@@ -718,7 +752,7 @@ pnpm dev
 ### Run a single app
 
 ```bash
-pnpm --filter hub dev          # Hub on :5175
+pnpm --filter dash dev         # Dash on :5175
 pnpm --filter @rtylr/auth dev  # Auth on :5176
 pnpm --filter @rtylr/erp dev   # ERP on :5179
 ```
@@ -742,9 +776,9 @@ pnpm test          # Vitest unit tests
 pnpm test:e2e      # Playwright e2e tests
 ```
 
-### Submodule (voxie contracts)
+### Submodules (voxie contracts + packages)
 
-The `voxie/` directory is a git submodule. After cloning:
+Both `voxie/` (proto contracts) and `packages/` (voxire/packages — all shared workspace packages) are git submodules. After cloning or pulling:
 
 ```bash
 git submodule update --init --recursive
@@ -753,7 +787,8 @@ git submodule update --init --recursive
 To sync contracts after a voxie update:
 
 ```bash
-pnpm contracts:sync   # runs packages/contracts/scripts/sync.sh
+pnpm contracts:sync             # runs packages/contracts/scripts/sync.sh
+pnpm contracts:audit-requests   # audits app request shapes against the contracts
 ```
 
 ### Cloudflare Pages deployment
@@ -761,7 +796,7 @@ pnpm contracts:sync   # runs packages/contracts/scripts/sync.sh
 Each app is its own Cloudflare Pages project. Root directory: empty (monorepo root). Build command pattern:
 
 ```
-pnpm install --frozen-lockfile && pnpm --filter hub run build
+pnpm install --frozen-lockfile && pnpm --filter dash run build
 ```
 
-Output directory: `apps/hub/dist` (or `apps/landing/.next` for landing).
+Output directory: `apps/dash/dist`.
