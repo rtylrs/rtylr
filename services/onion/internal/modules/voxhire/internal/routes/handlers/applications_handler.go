@@ -2,6 +2,7 @@ package handlers
 
 import (
 	"encoding/json"
+	"errors"
 	"fmt"
 	"net/http"
 	"strings"
@@ -15,6 +16,12 @@ import (
 	"github.com/voxire/onion/internal/platform/storage"
 )
 
+const (
+	maxResumeUploadBytes                 = 5 << 20 // 5 MiB
+	maxApplicationMultipartOverheadBytes = 512 << 10
+	maxApplicationMultipartBytes         = maxResumeUploadBytes + maxApplicationMultipartOverheadBytes
+)
+
 func ApplicationsRoutes() []string { return []string{"/voxhire/applications"} }
 
 // ApplicationsHandler accepts talent-pool applications from the
@@ -24,8 +31,13 @@ func ApplicationsRoutes() []string { return []string{"/voxhire/applications"} }
 // candidate isn't blocked.
 func ApplicationsHandler(svc *application.Service) http.HandlerFunc {
 	return func(w http.ResponseWriter, r *http.Request) {
-		const maxUpload = 5 << 20 // 5 MB
-		if err := r.ParseMultipartForm(maxUpload); err != nil {
+		r.Body = http.MaxBytesReader(w, r.Body, maxApplicationMultipartBytes)
+		if err := r.ParseMultipartForm(maxResumeUploadBytes); err != nil {
+			var maxErr *http.MaxBytesError
+			if errors.As(err, &maxErr) {
+				writeApplyError(w, http.StatusRequestEntityTooLarge, "Upload is too large")
+				return
+			}
 			writeApplyError(w, http.StatusBadRequest, "Invalid multipart form")
 			return
 		}
@@ -70,6 +82,10 @@ func ApplicationsHandler(svc *application.Service) http.HandlerFunc {
 		file, header, fileErr := r.FormFile("cv")
 		if fileErr == nil {
 			defer file.Close()
+			if header.Size > maxResumeUploadBytes {
+				writeApplyError(w, http.StatusRequestEntityTooLarge, "CV must be 5 MB or smaller")
+				return
+			}
 
 			contentType := header.Header.Get("Content-Type")
 			if contentType == "" {

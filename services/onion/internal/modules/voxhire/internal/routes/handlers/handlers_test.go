@@ -1,7 +1,11 @@
 package handlers
 
 import (
+	"bytes"
 	"context"
+	"mime/multipart"
+	"net/http"
+	"net/http/httptest"
 	"testing"
 )
 
@@ -91,4 +95,60 @@ func TestContactHandler_Validate_WithOptionalFields(t *testing.T) {
 	if err := h.Validate(context.Background(), req); err != nil {
 		t.Errorf("unexpected error with optional fields: %v", err)
 	}
+}
+
+func TestApplicationsHandlerRejectsOversizedMultipartBody(t *testing.T) {
+	body, contentType := newVoxhireMultipartBody(t, maxApplicationMultipartBytes+1)
+	req := httptest.NewRequest(http.MethodPost, "/voxhire/applications", body)
+	req.Header.Set("Content-Type", contentType)
+	rec := httptest.NewRecorder()
+
+	ApplicationsHandler(nil).ServeHTTP(rec, req)
+
+	if rec.Code != http.StatusRequestEntityTooLarge {
+		t.Fatalf("status = %d, want %d", rec.Code, http.StatusRequestEntityTooLarge)
+	}
+}
+
+func TestApplicationsHandlerRejectsOversizedCV(t *testing.T) {
+	body, contentType := newVoxhireMultipartBody(t, maxResumeUploadBytes+1)
+	req := httptest.NewRequest(http.MethodPost, "/voxhire/applications", body)
+	req.Header.Set("Content-Type", contentType)
+	rec := httptest.NewRecorder()
+
+	ApplicationsHandler(nil).ServeHTTP(rec, req)
+
+	if rec.Code != http.StatusRequestEntityTooLarge {
+		t.Fatalf("status = %d, want %d", rec.Code, http.StatusRequestEntityTooLarge)
+	}
+}
+
+func newVoxhireMultipartBody(t *testing.T, cvSize int) (*bytes.Buffer, string) {
+	t.Helper()
+
+	body := &bytes.Buffer{}
+	writer := multipart.NewWriter(body)
+
+	for key, value := range map[string]string{
+		"fullName": "Ada Lovelace",
+		"email":    "ada@example.com",
+		"consent":  "true",
+	} {
+		if err := writer.WriteField(key, value); err != nil {
+			t.Fatalf("WriteField(%s): %v", key, err)
+		}
+	}
+
+	part, err := writer.CreateFormFile("cv", "resume.pdf")
+	if err != nil {
+		t.Fatalf("CreateFormFile: %v", err)
+	}
+	if _, err := part.Write(bytes.Repeat([]byte("x"), cvSize)); err != nil {
+		t.Fatalf("write cv: %v", err)
+	}
+	if err := writer.Close(); err != nil {
+		t.Fatalf("Close: %v", err)
+	}
+
+	return body, writer.FormDataContentType()
 }
