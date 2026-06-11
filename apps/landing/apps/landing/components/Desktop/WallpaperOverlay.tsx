@@ -282,7 +282,7 @@ const Aurora: React.FC<SceneProps> = ({ id }) => {
       </defs>
 
       <rect width="1440" height="700" fill={`url(#${id('au-sky')})`} />
-      <StarField count={140} seed={21} maxY={680} twinkle />
+      <StarField count={140} seed={21} maxY={520} twinkle />
 
       {/* Broad green bloom filling the sky */}
       <rect width="1440" height="700" fill={`url(#${id('au-bloom')})`} />
@@ -300,7 +300,8 @@ const Aurora: React.FC<SceneProps> = ({ id }) => {
             fill={`url(#${id('au-violet')})`}
             style={{
               animation: `au-ray ${r.dur}s ease-in-out ${r.delay}s infinite`,
-              transformOrigin: `${r.x + r.w / 2}px ${r.top}px`,
+              transformBox: 'fill-box',
+              transformOrigin: 'center top',
             }}
           />
         ))}
@@ -318,7 +319,8 @@ const Aurora: React.FC<SceneProps> = ({ id }) => {
             fill={`url(#${id('au-green')})`}
             style={{
               animation: `au-ray ${r.dur}s ease-in-out ${r.delay}s infinite`,
-              transformOrigin: `${r.x + r.w / 2}px ${r.top}px`,
+              transformBox: 'fill-box',
+              transformOrigin: 'center top',
             }}
           />
         ))}
@@ -383,7 +385,11 @@ const Dusk: React.FC<SceneProps> = ({ id }) => (
       cy="430"
       r="280"
       fill={`url(#${id('du-sunglow')})`}
-      style={{ animation: 'du-glow 7s ease-in-out infinite', transformOrigin: '720px 430px' }}
+      style={{
+        animation: 'du-glow 7s ease-in-out infinite',
+        transformBox: 'fill-box',
+        transformOrigin: 'center',
+      }}
     />
     <circle cx="720" cy="430" r="115" fill={`url(#${id('du-sun')})`} />
 
@@ -501,8 +507,8 @@ const Forest: React.FC<SceneProps> = ({ id }) => {
     const r = rng(seed);
     let d = `M0 900 L0 ${baseY}`;
     let x = 0;
-    while (x < 1460) {
-      const w = 26 + r() * 30;
+    while (x < 1440) {
+      const w = Math.min(26 + r() * 30, 1440 - x);
       const h = 14 + r() * amp;
       const my = baseY - Math.sin(x * 0.004) * 28;
       d += ` Q ${x + w / 2} ${my - h} ${x + w} ${my}`;
