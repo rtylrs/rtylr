@@ -2,6 +2,7 @@ package infrastructure_test
 
 import (
 	"context"
+	"fmt"
 	"testing"
 
 	"github.com/voxire/onion/internal/modules/console/internal/infrastructure"
@@ -166,6 +167,47 @@ func TestListPlans_ReturnsPlans(t *testing.T) {
 	}
 	// Plans may be empty in test DB but call must succeed.
 	_ = plans
+}
+
+func TestResourceCRUD_HidesSensitiveUserColumns(t *testing.T) {
+	db := testutil.OpenDB(t)
+	repo := infrastructure.NewRepository(db)
+	ctx := context.Background()
+
+	columns, _, err := repo.DescribeResourceTable(ctx, "users")
+	if err != nil {
+		t.Fatalf("DescribeResourceTable users: %v", err)
+	}
+	assertNoResourceColumn(t, columns, "password_hash")
+
+	rows, err := repo.ListResourceRows(ctx, "users", 10, 0)
+	if err != nil {
+		t.Fatalf("ListResourceRows users: %v", err)
+	}
+	assertNoResourceColumn(t, rows.Columns, "password_hash")
+	for _, row := range rows.Rows {
+		if _, ok := row["password_hash"]; ok {
+			t.Fatal("generic resource rows exposed password_hash")
+		}
+	}
+
+	row, rowColumns, _, err := repo.GetResourceRow(ctx, "users", fmt.Sprint(testutil.OwnerID))
+	if err != nil {
+		t.Fatalf("GetResourceRow users: %v", err)
+	}
+	assertNoResourceColumn(t, rowColumns, "password_hash")
+	if _, ok := row["password_hash"]; ok {
+		t.Fatal("generic resource row exposed password_hash")
+	}
+}
+
+func assertNoResourceColumn(t *testing.T, columns []infrastructure.ResourceColumnRow, name string) {
+	t.Helper()
+	for _, column := range columns {
+		if column.Name == name {
+			t.Fatalf("generic resource metadata exposed %s", name)
+		}
+	}
 }
 
 func TestGetUserByEmail_OwnerEmailWorks(t *testing.T) {

@@ -120,7 +120,37 @@ func quoteIdentifier(name string) string {
 
 func isWritableColumn(c ResourceColumnRow) bool {
 	extra := strings.ToLower(c.Extra)
-	return !c.IsPrimary && !strings.Contains(extra, "auto_increment") && !strings.Contains(extra, "generated")
+	return !c.IsPrimary && !isSensitiveResourceColumn(c.Name) && !strings.Contains(extra, "auto_increment") && !strings.Contains(extra, "generated")
+}
+
+func isSensitiveResourceColumn(name string) bool {
+	column := strings.ToLower(name)
+	sensitiveParts := []string{
+		"password",
+		"secret",
+		"token",
+		"api_key",
+		"apikey",
+		"private_key",
+		"credential",
+		"cookie",
+	}
+	for _, part := range sensitiveParts {
+		if strings.Contains(column, part) {
+			return true
+		}
+	}
+	return column == "session_id" || strings.HasSuffix(column, "_session_id")
+}
+
+func visibleResourceColumns(columns []ResourceColumnRow) []ResourceColumnRow {
+	visible := make([]ResourceColumnRow, 0, len(columns))
+	for _, col := range columns {
+		if !isSensitiveResourceColumn(col.Name) {
+			visible = append(visible, col)
+		}
+	}
+	return visible
 }
 
 func normalizeResourceValue(value any) (any, error) {
@@ -202,8 +232,16 @@ func (r *Repository) DescribeResourceTable(ctx context.Context, table string) ([
 	if err := rows.Err(); err != nil {
 		return nil, "", err
 	}
+	columns = visibleResourceColumns(columns)
 	if len(columns) == 0 {
 		return nil, "", sql.ErrNoRows
+	}
+	primaryKey = ""
+	for _, col := range columns {
+		if col.IsPrimary {
+			primaryKey = col.Name
+			break
+		}
 	}
 	return columns, primaryKey, nil
 }
