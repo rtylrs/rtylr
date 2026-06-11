@@ -190,16 +190,24 @@ func buildIdempotencyKey(r *http.Request, key string) string {
 // runs. It forwards all writes to the underlying ResponseWriter immediately.
 type responseRecorder struct {
 	http.ResponseWriter
-	status int
-	buf    bytes.Buffer
+	status      int
+	wroteHeader bool
+	buf         bytes.Buffer
 }
 
 func (rr *responseRecorder) WriteHeader(code int) {
+	if rr.wroteHeader {
+		return
+	}
+	rr.wroteHeader = true
 	rr.status = code
 	rr.ResponseWriter.WriteHeader(code)
 }
 
 func (rr *responseRecorder) Write(b []byte) (int, error) {
+	if !rr.wroteHeader {
+		rr.wroteHeader = true
+	}
 	rr.buf.Write(b)
 	return rr.ResponseWriter.Write(b)
 }
