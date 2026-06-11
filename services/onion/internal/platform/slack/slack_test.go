@@ -1,6 +1,7 @@
 package slack
 
 import (
+	"errors"
 	"strings"
 	"testing"
 )
@@ -39,5 +40,32 @@ func TestChunkTruncatesOversizedLine(t *testing.T) {
 	}
 	if !strings.HasSuffix(got[0], "...") {
 		t.Error("expected truncation marker")
+	}
+}
+
+func TestDecodePostMessageResultSuccess(t *testing.T) {
+	got, err := decodePostMessageResult(strings.NewReader(`{"ok":true}`))
+	if err != nil {
+		t.Fatalf("unexpected error: %v", err)
+	}
+	if !got.OK {
+		t.Fatal("expected ok result")
+	}
+}
+
+func TestDecodePostMessageResultLogicalError(t *testing.T) {
+	got, err := decodePostMessageResult(strings.NewReader(`{"ok":false,"error":"channel_not_found"}`))
+	if err != nil {
+		t.Fatalf("unexpected error: %v", err)
+	}
+	if got.OK || got.Error != "channel_not_found" {
+		t.Fatalf("expected Slack logical error, got %+v", got)
+	}
+}
+
+func TestDecodePostMessageResultRejectsOversizedBody(t *testing.T) {
+	_, err := decodePostMessageResult(strings.NewReader(strings.Repeat("x", maxSlackResponseBodyBytes+1)))
+	if !errors.Is(err, errSlackResponseTooLarge) {
+		t.Fatalf("expected errSlackResponseTooLarge, got %v", err)
 	}
 }

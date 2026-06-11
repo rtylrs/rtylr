@@ -15,7 +15,9 @@ import (
 	"bytes"
 	"context"
 	"encoding/json"
+	"errors"
 	"fmt"
+	"io"
 	"net/http"
 	"os"
 	"sync"
@@ -27,9 +29,12 @@ import (
 const (
 	flushInterval = 10 * time.Second
 	// Slack's per-message text limit is ~40k chars; leave headroom.
-	maxMessageChars = 38000
-	separator       = "\n──────────\n"
+	maxMessageChars           = 38000
+	maxSlackResponseBodyBytes = 64 << 10
+	separator                 = "\n──────────\n"
 )
+
+var errSlackResponseTooLarge = errors.New("slack response body too large")
 
 // Channel identifies a logical destination, mapped to a Slack channel ID at init.
 type Channel int
@@ -48,6 +53,11 @@ type notifier struct {
 
 	mu   sync.Mutex
 	bufs map[Channel][]string
+}
+
+type postMessageResult struct {
+	OK    bool   `json:"ok"`
+	Error string `json:"error"`
 }
 
 var (
@@ -174,12 +184,29 @@ func (n *notifier) post(channelID, text string) {
 	}
 	defer func() { _ = resp.Body.Close() }()
 
-	// Slack returns 200 with {"ok":false,"error":"..."} on logical failures.
-	var result struct {
-		OK    bool   `json:"ok"`
-		Error string `json:"error"`
+	result, jsonErr := decodePostMessageResult(resp.Body)
+	if jsonErr != nil {
+		fmt.Fprintf(os.Stderr, "slack: response decode failed: %v\n", jsonErr)
+		return
 	}
-	if jsonErr := json.NewDecoder(resp.Body).Decode(&result); jsonErr == nil && !result.OK {
+	// Slack returns 200 with {"ok":false,"error":"..."} on logical failures.
+	if !result.OK {
 		fmt.Fprintf(os.Stderr, "slack: chat.postMessage error: %s\n", result.Error)
 	}
+}
+
+func decodePostMessageResult(body io.Reader) (postMessageResult, error) {
+	bodyBytes, err := io.ReadAll(io.LimitReader(body, maxSlackResponseBodyBytes+1))
+	if err != nil {
+		return postMessageResult{}, err
+	}
+	if len(bodyBytes) > maxSlackResponseBodyBytes {
+		return postMessageResult{}, errSlackResponseTooLarge
+	}
+
+	var result postMessageResult
+	if err := json.Unmarshal(bodyBytes, &result); err != nil {
+		return postMessageResult{}, err
+	}
+	return result, nil
 }
