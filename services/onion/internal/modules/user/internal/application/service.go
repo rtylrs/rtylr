@@ -201,23 +201,26 @@ type PlatformClaims struct {
 }
 
 func (s *Service) GenerateToken(ctx context.Context, userID int64) (string, error) {
-	claims := &AccessTokenClaims{
-		UserID: userID,
-	}
+	return s.JWT.CreateJWT(s.buildAccessTokenClaims(ctx, userID))
+}
 
-	if user, err := s.GetUserByID(ctx, userID); err == nil && user.IsConsoleAdmin {
-		claims.Role = "console_admin"
+func (s *Service) GenerateTokenWithPlatform(ctx context.Context, userID int64, pc *PlatformClaims) (string, error) {
+	claims := s.buildAccessTokenClaims(ctx, userID)
+
+	if pc != nil {
+		claims.Platform = pc.Platform
+		claims.PlatformUserID = pc.PlatformUserID
+		claims.PlanID = pc.PlanID
 	}
 
 	return s.JWT.CreateJWT(claims)
 }
 
-func (s *Service) GenerateTokenWithPlatform(ctx context.Context, userID int64, pc *PlatformClaims) (string, error) {
+func (s *Service) buildAccessTokenClaims(ctx context.Context, userID int64) *AccessTokenClaims {
 	claims := &AccessTokenClaims{
 		UserID: userID,
 	}
 
-	// Look up business_id and role
 	businessID, _ := s.repo.GetUserBusinessID(ctx, userID)
 	if businessID > 0 {
 		claims.BusinessID = businessID
@@ -229,13 +232,7 @@ func (s *Service) GenerateTokenWithPlatform(ctx context.Context, userID int64, p
 		claims.Role = "console_admin"
 	}
 
-	if pc != nil {
-		claims.Platform = pc.Platform
-		claims.PlatformUserID = pc.PlatformUserID
-		claims.PlanID = pc.PlanID
-	}
-
-	return s.JWT.CreateJWT(claims)
+	return claims
 }
 
 func (s *Service) ValidateToken(ctx context.Context, tokenString string) (*AccessTokenClaims, error) {
