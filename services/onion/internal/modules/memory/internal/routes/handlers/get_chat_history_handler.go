@@ -2,6 +2,7 @@ package handlers
 
 import (
 	"context"
+	"encoding/json"
 	"net/http"
 	"strconv"
 	"time"
@@ -163,9 +164,25 @@ func toChatSummaries(sessions []domain.ChatSession) []ChatSummary {
 			Title:     title,
 			Summary:   session.Summary,
 			UpdatedAt: session.UpdatedAt,
+			Pinned:    sessionMetadataBool(session.Metadata, "pinned"),
+			Archived:  sessionMetadataBool(session.Metadata, "archived"),
 		})
 	}
 	return chats
+}
+
+func sessionMetadataBool(raw string, key string) bool {
+	if raw == "" || raw == "null" {
+		return false
+	}
+
+	var metadata map[string]interface{}
+	if err := json.Unmarshal([]byte(raw), &metadata); err != nil {
+		return false
+	}
+
+	value, ok := metadata[key].(bool)
+	return ok && value
 }
 
 func toMessages(messages []domain.ConversationMessage) []Message {

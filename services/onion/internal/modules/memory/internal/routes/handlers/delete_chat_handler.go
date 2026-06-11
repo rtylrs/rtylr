@@ -2,6 +2,7 @@ package handlers
 
 import (
 	"context"
+	"errors"
 	"net/http"
 
 	"github.com/go-chi/chi/v5"
@@ -20,11 +21,11 @@ type DeleteChatResponse struct {
 	Deleted bool `json:"deleted"`
 }
 
-// Serve removes a chat session for the authenticated user. The repository
-// hook lands in a follow-up commit — for now we acknowledge the request so
-// the dash UI can wire up its delete flow against a stable contract.
+// Serve removes a chat session and its stored conversation rows for the
+// authenticated user.
 func (h *DeleteChatHandler) Serve(ctx context.Context, _ *DeleteChatRequest) (DeleteChatResponse, *errorModels.ServerError) {
-	if _, ok := authenticatedUser(ctx); !ok {
+	user, ok := authenticatedUser(ctx)
+	if !ok {
 		return DeleteChatResponse{}, errorModels.PermissionDeniedServerError()
 	}
 	sessionID := chi.URLParamFromCtx(ctx, "sessionID")
@@ -35,6 +36,19 @@ func (h *DeleteChatHandler) Serve(ctx context.Context, _ *DeleteChatRequest) (De
 			Message:  "Missing sessionID",
 		}
 	}
-	_ = h.Service // service hook lands with the repository update
+	if err := h.Service.DeleteSession(ctx, sessionID, int(user.UserID)); err != nil {
+		if errors.Is(err, application.ErrChatSessionNotFound) {
+			return DeleteChatResponse{}, &errorModels.ServerError{
+				HTTPCode: http.StatusNotFound,
+				Code:     http.StatusNotFound,
+				Message:  "Chat session not found",
+			}
+		}
+		return DeleteChatResponse{}, &errorModels.ServerError{
+			HTTPCode: http.StatusInternalServerError,
+			Code:     http.StatusInternalServerError,
+			Message:  "Failed to delete chat session",
+		}
+	}
 	return DeleteChatResponse{Deleted: true}, nil
 }

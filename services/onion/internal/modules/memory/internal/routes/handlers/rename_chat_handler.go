@@ -2,6 +2,7 @@ package handlers
 
 import (
 	"context"
+	"errors"
 	"net/http"
 
 	"github.com/go-chi/chi/v5"
@@ -41,8 +42,9 @@ func (h *RenameChatHandler) Validate(_ context.Context, req *RenameChatRequest) 
 	return nil
 }
 
-func (h *RenameChatHandler) Serve(ctx context.Context, _ *RenameChatRequest) (RenameChatResponse, *errorModels.ServerError) {
-	if _, ok := authenticatedUser(ctx); !ok {
+func (h *RenameChatHandler) Serve(ctx context.Context, req *RenameChatRequest) (RenameChatResponse, *errorModels.ServerError) {
+	user, ok := authenticatedUser(ctx)
+	if !ok {
 		return RenameChatResponse{}, errorModels.PermissionDeniedServerError()
 	}
 	sessionID := chi.URLParamFromCtx(ctx, "sessionID")
@@ -53,6 +55,19 @@ func (h *RenameChatHandler) Serve(ctx context.Context, _ *RenameChatRequest) (Re
 			Message:  "Missing sessionID",
 		}
 	}
-	_ = h.Service
+	if _, err := h.Service.RenameSession(ctx, sessionID, int(user.UserID), req.Title); err != nil {
+		if errors.Is(err, application.ErrChatSessionNotFound) {
+			return RenameChatResponse{}, &errorModels.ServerError{
+				HTTPCode: http.StatusNotFound,
+				Code:     http.StatusNotFound,
+				Message:  "Chat session not found",
+			}
+		}
+		return RenameChatResponse{}, &errorModels.ServerError{
+			HTTPCode: http.StatusInternalServerError,
+			Code:     http.StatusInternalServerError,
+			Message:  "Failed to rename chat session",
+		}
+	}
 	return RenameChatResponse{Updated: true}, nil
 }

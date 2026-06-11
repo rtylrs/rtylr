@@ -78,6 +78,10 @@ func (r *Repository) GetChatSession(ctx context.Context, sessionID string, userI
 }
 
 func (r *Repository) UpdateChatSession(ctx context.Context, sessionID string, userID int, title, summary, metadata string) (*domain.ChatSession, error) {
+	if metadata == "" {
+		metadata = "{}"
+	}
+
 	arg := sqlc.UpdateChatSessionParams{
 		Title:     sql.NullString{String: title, Valid: title != ""},
 		Summary:   sql.NullString{String: summary, Valid: summary != ""},
@@ -94,6 +98,56 @@ func (r *Repository) UpdateChatSession(ctx context.Context, sessionID string, us
 	}
 
 	return r.GetChatSession(ctx, sessionID, userID)
+}
+
+func (r *Repository) DeleteChatSession(ctx context.Context, sessionID string, userID int) error {
+	if _, err := r.GetChatSession(ctx, sessionID, userID); err != nil {
+		return err
+	}
+
+	tx, err := r.pool.BeginTx(ctx, nil)
+	if err != nil {
+		return fmt.Errorf("failed to begin delete chat session transaction: %w", err)
+	}
+	defer func() {
+		_ = tx.Rollback()
+	}()
+
+	if _, err := tx.ExecContext(ctx, `
+		DELETE FROM conversation_messages
+		WHERE session_id = ? AND user_id = ?
+	`, sessionID, userID); err != nil {
+		return fmt.Errorf("failed to delete chat messages: %w", err)
+	}
+
+	if _, err := tx.ExecContext(ctx, `
+		DELETE FROM conversation_summaries
+		WHERE session_id = ? AND user_id = ?
+	`, sessionID, userID); err != nil {
+		return fmt.Errorf("failed to delete chat summaries: %w", err)
+	}
+
+	result, err := tx.ExecContext(ctx, `
+		DELETE FROM chat_sessions
+		WHERE session_id = ? AND user_id = ?
+	`, sessionID, userID)
+	if err != nil {
+		return fmt.Errorf("failed to delete chat session: %w", err)
+	}
+
+	rows, err := result.RowsAffected()
+	if err != nil {
+		return fmt.Errorf("failed to inspect deleted chat session rows: %w", err)
+	}
+	if rows == 0 {
+		return ErrChatSessionNotFound
+	}
+
+	if err := tx.Commit(); err != nil {
+		return fmt.Errorf("failed to commit delete chat session transaction: %w", err)
+	}
+
+	return nil
 }
 
 func (r *Repository) CreateMessage(ctx context.Context, message *domain.ConversationMessage) (*domain.ConversationMessage, error) {

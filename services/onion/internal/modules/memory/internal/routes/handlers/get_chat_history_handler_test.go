@@ -14,10 +14,12 @@ func TestToChatSummariesMapsDashShape(t *testing.T) {
 			SessionID: "session-1",
 			Title:     "Launch notes",
 			Summary:   "Discussed launch work.",
+			Metadata:  `{"pinned":true}`,
 			UpdatedAt: updated,
 		},
 		{
 			SessionID: "session-2",
+			Metadata:  `{"archived":true}`,
 			UpdatedAt: updated.Add(time.Minute),
 		},
 	}
@@ -31,6 +33,12 @@ func TestToChatSummariesMapsDashShape(t *testing.T) {
 	}
 	if chats[1].Title != "Untitled chat" {
 		t.Fatalf("empty titles should fall back, got %q", chats[1].Title)
+	}
+	if !chats[0].Pinned {
+		t.Fatal("pinned metadata should map to chat summary")
+	}
+	if !chats[1].Archived {
+		t.Fatal("archived metadata should map to chat summary")
 	}
 }
 

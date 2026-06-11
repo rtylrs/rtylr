@@ -3,6 +3,7 @@ package application
 import (
 	"context"
 	"database/sql"
+	"encoding/json"
 	"errors"
 	"fmt"
 	"strings"
@@ -19,6 +20,8 @@ import (
 )
 
 const memoryTTL = 30 * time.Second
+
+var ErrChatSessionNotFound = infrastructure.ErrChatSessionNotFound
 
 func invalidateMemoryScope(ctx context.Context, userID int) {
 	if cache := cacher.GetRedisCache(); cache != nil {
@@ -290,6 +293,36 @@ func (s *Service) SearchMemories(ctx context.Context, userID int, query string) 
 	return s.repository.SearchUserMemory(ctx, userID, query)
 }
 
+func (s *Service) RenameSession(ctx context.Context, sessionID string, userID int, title string) (*domain.ChatSession, error) {
+	session, err := s.repository.GetChatSession(ctx, sessionID, userID)
+	if err != nil {
+		return nil, err
+	}
+
+	defer invalidateMemoryScope(ctx, userID)
+	return s.repository.UpdateChatSession(ctx, sessionID, userID, title, session.Summary, session.Metadata)
+}
+
+func (s *Service) SetSessionPinned(ctx context.Context, sessionID string, userID int, pinned bool) (*domain.ChatSession, error) {
+	session, err := s.repository.GetChatSession(ctx, sessionID, userID)
+	if err != nil {
+		return nil, err
+	}
+
+	metadata, err := setSessionMetadataFlag(session.Metadata, "pinned", pinned)
+	if err != nil {
+		return nil, err
+	}
+
+	defer invalidateMemoryScope(ctx, userID)
+	return s.repository.UpdateChatSession(ctx, sessionID, userID, session.Title, session.Summary, metadata)
+}
+
+func (s *Service) DeleteSession(ctx context.Context, sessionID string, userID int) error {
+	defer invalidateMemoryScope(ctx, userID)
+	return s.repository.DeleteChatSession(ctx, sessionID, userID)
+}
+
 func (s *Service) GetUserStats(ctx context.Context, userID int) (*domain.UserStats, error) {
 	return cacher.Of[*domain.UserStats]().GetOrComputeSingle(ctx,
 		cacheKeys.Scoped("user", int64(userID), "memory_stats"),
@@ -315,6 +348,24 @@ func (s *Service) Close() error {
 	}
 
 	return nil
+}
+
+func setSessionMetadataFlag(raw string, key string, value bool) (string, error) {
+	metadata := map[string]interface{}{}
+	if strings.TrimSpace(raw) != "" && strings.TrimSpace(raw) != "null" {
+		if err := json.Unmarshal([]byte(raw), &metadata); err != nil {
+			return "", fmt.Errorf("failed to parse session metadata: %w", err)
+		}
+	}
+
+	metadata[key] = value
+
+	encoded, err := json.Marshal(metadata)
+	if err != nil {
+		return "", fmt.Errorf("failed to encode session metadata: %w", err)
+	}
+
+	return string(encoded), nil
 }
 
 type SummaryData struct {

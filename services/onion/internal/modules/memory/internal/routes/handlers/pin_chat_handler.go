@@ -2,6 +2,7 @@ package handlers
 
 import (
 	"context"
+	"errors"
 	"net/http"
 
 	"github.com/go-chi/chi/v5"
@@ -23,7 +24,8 @@ type PinChatResponse struct {
 }
 
 func (h *PinChatHandler) Serve(ctx context.Context, req *PinChatRequest) (PinChatResponse, *errorModels.ServerError) {
-	if _, ok := authenticatedUser(ctx); !ok {
+	user, ok := authenticatedUser(ctx)
+	if !ok {
 		return PinChatResponse{}, errorModels.PermissionDeniedServerError()
 	}
 	sessionID := chi.URLParamFromCtx(ctx, "sessionID")
@@ -34,6 +36,19 @@ func (h *PinChatHandler) Serve(ctx context.Context, req *PinChatRequest) (PinCha
 			Message:  "Missing sessionID",
 		}
 	}
-	_ = h.Service
+	if _, err := h.Service.SetSessionPinned(ctx, sessionID, int(user.UserID), req.Pinned); err != nil {
+		if errors.Is(err, application.ErrChatSessionNotFound) {
+			return PinChatResponse{}, &errorModels.ServerError{
+				HTTPCode: http.StatusNotFound,
+				Code:     http.StatusNotFound,
+				Message:  "Chat session not found",
+			}
+		}
+		return PinChatResponse{}, &errorModels.ServerError{
+			HTTPCode: http.StatusInternalServerError,
+			Code:     http.StatusInternalServerError,
+			Message:  "Failed to update chat session",
+		}
+	}
 	return PinChatResponse{Pinned: req.Pinned}, nil
 }
