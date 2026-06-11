@@ -85,7 +85,7 @@ func (h *RegisterHandler) Serve(ctx context.Context, req *RegisterRequest) (Regi
 
 	// Create personal workspace for the new user (non-fatal)
 	if h.OnUserCreated != nil {
-		h.OnUserCreated(ctx, userId)
+		runAsyncUserHook(ctx, userId, h.OnUserCreated)
 	}
 
 	var platformClaims *application.PlatformClaims
