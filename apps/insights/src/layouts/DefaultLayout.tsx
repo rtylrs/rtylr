@@ -17,7 +17,6 @@ import {
   DollarSign,
   FileText,
   Settings as SettingsIcon,
-  Bell,
   ChevronRight,
   Sun,
   Moon,
@@ -393,18 +392,6 @@ const DefaultLayout: React.FC = () => {
                   }}
                 >
                   {theme === 'dark' ? <Sun size={14} /> : <Moon size={14} />}
-                </button>
-                <button
-                  className="h-7 w-7 rounded-lg flex items-center justify-center transition-colors duration-150"
-                  style={{ color: 'var(--hub-text-muted)' }}
-                  onMouseEnter={(e) => {
-                    (e.currentTarget as HTMLElement).style.background = 'var(--hub-hover)';
-                  }}
-                  onMouseLeave={(e) => {
-                    (e.currentTarget as HTMLElement).style.background = 'transparent';
-                  }}
-                >
-                  <Bell size={14} />
                 </button>
                 <CaretButton />
               </div>

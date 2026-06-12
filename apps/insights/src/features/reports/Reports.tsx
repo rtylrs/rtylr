@@ -50,6 +50,9 @@ const Reports: React.FC = (): React.JSX.Element => {
         <div className="flex items-center gap-2">
           <a
             href={csvExportUrl}
+            download
+            target="_blank"
+            rel="noreferrer"
             className="flex items-center gap-1 px-3 py-1.5 rounded-md text-xs font-medium"
             style={{ background: 'var(--hub-active)', color: 'var(--hub-text)' }}
             aria-label={t('insights.reports.exportRevenue')}
