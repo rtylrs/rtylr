@@ -422,6 +422,7 @@ type UpdateTaskRequest struct {
 	DueDate     *time.Time `json:"due_date"`
 	StartDate   *time.Time `json:"start_date"`
 	Labels      []int64    `json:"labels"`
+	Archived    *bool      `json:"archived"`
 }
 
 type UpdateTaskResponse struct {
@@ -458,6 +459,7 @@ func (h *UpdateTaskHandler) Serve(ctx context.Context, req *UpdateTaskRequest) (
 		DueDate:     req.DueDate,
 		StartDate:   req.StartDate,
 		Labels:      req.Labels,
+		Archived:    req.Archived,
 	}
 
 	if err := h.FlowService.UpdateTask(ctx, input, authUser.UserID); err != nil {

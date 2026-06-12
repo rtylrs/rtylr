@@ -446,6 +446,10 @@ func (r *Repository) UpdateTask(ctx context.Context, input domain.UpdateTaskInpu
 	if input.StartDate != nil {
 		startDateParam = *input.StartDate
 	}
+	var archivedParam interface{}
+	if input.Archived != nil {
+		archivedParam = *input.Archived
+	}
 
 	// Partial updates (the client sends only the fields it changed, e.g. just
 	// priority or assignee) must not overwrite the fields it omitted. COALESCE(?, col)
@@ -462,6 +466,7 @@ func (r *Repository) UpdateTask(ctx context.Context, input domain.UpdateTaskInpu
 		Set("due_date", sq.Expr("COALESCE(?, due_date)", dueDateParam)).
 		Set("start_date", sq.Expr("COALESCE(?, start_date)", startDateParam)).
 		Set("labels", sq.Expr("COALESCE(?, labels)", labelsParam)).
+		Set("archived", sq.Expr("COALESCE(?, archived)", archivedParam)).
 		Set("completed_at", sq.Expr(
 			`CASE
 		        WHEN ? IS NOT NULL AND ? = 'done'  AND completed_at IS NULL THEN NOW()

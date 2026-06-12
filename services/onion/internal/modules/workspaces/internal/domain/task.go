@@ -123,6 +123,7 @@ type UpdateTaskInput struct {
 	DueDate     *time.Time
 	StartDate   *time.Time
 	Labels      []int64
+	Archived    *bool
 }
 
 type UpdateTaskStatusInput struct {
