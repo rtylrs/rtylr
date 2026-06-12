@@ -4,9 +4,12 @@ import { unwrap } from '@voxire/api';
 import { toast } from 'sonner';
 import { posService } from '../../shared/services/api/posService';
 import {
+  extractCreatedLocationId,
   extractCreatedTerminalId,
+  extractLocationsList,
   filterTerminalsForLocation,
   mapBranchLocations,
+  mergeLocationOptions,
   type LocationOption,
   type TerminalOption,
 } from './locationSelection';
@@ -15,49 +18,57 @@ interface Props {
   onComplete: (locationId: number, terminalId: number) => void;
 }
 
+type Step = 'location' | 'create' | 'terminal';
+
 const LocationSelect: React.FC<Props> = ({ onComplete }) => {
-  const [step, setStep] = useState<'location' | 'terminal'>('location');
+  const [step, setStep] = useState<Step>('location');
   const [locations, setLocations] = useState<LocationOption[]>([]);
   const [terminals, setTerminals] = useState<TerminalOption[]>([]);
   const [selectedLocation, setSelectedLocation] = useState<LocationOption | null>(null);
   const [loading, setLoading] = useState(true);
   const [creatingTerminal, setCreatingTerminal] = useState(false);
+  const [creatingLocation, setCreatingLocation] = useState(false);
   const [newTerminalName, setNewTerminalName] = useState('');
+  const [newLocationName, setNewLocationName] = useState('');
+  const [newLocationAddress, setNewLocationAddress] = useState('');
+  const [newLocationPhone, setNewLocationPhone] = useState('');
   const [locationError, setLocationError] = useState<string | null>(null);
   const [terminalError, setTerminalError] = useState<string | null>(null);
 
-  // Load locations
+  // Load both assigned (staff) and owned (business owner) locations.
+  // Owners typically have no member-location assignments, so the assigned
+  // list alone is not enough - merge both sources.
   useEffect(() => {
     (async () => {
-      try {
-        const data = await unwrap(posService.getMyLocations());
-        const locs = mapBranchLocations(
-          ((data as Record<string, unknown>)?.locations as unknown[]) ?? []
-        );
-        setLocations(locs);
-        setLocationError(null);
-        // Auto-select if only one location
-        if (locs.length === 1) {
-          handleLocationSelect(locs[0]);
+      const [assigned, owned] = await Promise.allSettled([
+        unwrap(posService.getMyLocations()),
+        unwrap(posService.getBranches()),
+      ]);
+
+      const lists: LocationOption[][] = [];
+      for (const result of [assigned, owned]) {
+        if (result.status === 'fulfilled') {
+          lists.push(mapBranchLocations(extractLocationsList(result.value)));
         }
-      } catch {
-        // Owner/admin sees all locations
-        try {
-          const data = await unwrap(posService.getBranches());
-          const rawBranches = Array.isArray(data)
-            ? data
-            : ((data as Record<string, unknown>)?.locations ?? []);
-          const mapped = mapBranchLocations(rawBranches as unknown[]);
-          setLocations(mapped);
-          setLocationError(null);
-          if (mapped.length === 1) handleLocationSelect(mapped[0]);
-        } catch {
-          setLocations([]);
-          setLocationError('Unable to load locations. Check your connection and try again.');
-        }
-      } finally {
-        setLoading(false);
       }
+
+      if (lists.length === 0) {
+        setLocations([]);
+        setLocationError('Unable to load locations. Check your connection and try again.');
+        setLoading(false);
+        return;
+      }
+
+      const merged = mergeLocationOptions(...lists);
+      setLocations(merged);
+      setLocationError(null);
+
+      if (merged.length === 1) {
+        await handleLocationSelect(merged[0]);
+      } else if (merged.length === 0) {
+        setStep('create');
+      }
+      setLoading(false);
     })();
   }, []);
 
@@ -72,11 +83,41 @@ const LocationSelect: React.FC<Props> = ({ onComplete }) => {
         (data as Record<string, unknown>)?.terminals ?? (Array.isArray(data) ? data : []);
       const filtered = filterTerminalsForLocation(rawTerminals as unknown[], loc.locationId);
       setTerminals(filtered);
+      if (filtered.length === 0) {
+        setNewTerminalName((prev) => prev || 'Register 1');
+      }
     } catch {
       setTerminals([]);
       setTerminalError('Unable to load terminals. You can retry or register a new terminal.');
     }
     setLoading(false);
+  };
+
+  const handleCreateLocation = async () => {
+    if (!newLocationName.trim()) return;
+    setCreatingLocation(true);
+    try {
+      const data = await unwrap(
+        posService.createBranch({
+          name: newLocationName.trim(),
+          address: newLocationAddress.trim(),
+          phone: newLocationPhone.trim(),
+          is_active: true,
+        })
+      );
+      const loc: LocationOption = {
+        locationId: extractCreatedLocationId(data),
+        name: newLocationName.trim(),
+        address: newLocationAddress.trim(),
+        phone: newLocationPhone.trim(),
+      };
+      setLocations((prev) => mergeLocationOptions(prev, [loc]));
+      await handleLocationSelect(loc);
+    } catch (error) {
+      toast.error(error instanceof Error ? error.message : 'Failed to create location');
+    } finally {
+      setCreatingLocation(false);
+    }
   };
 
   const handleTerminalSelect = (terminal: TerminalOption) => {
@@ -103,6 +144,17 @@ const LocationSelect: React.FC<Props> = ({ onComplete }) => {
     }
   };
 
+  const isFirstLocation = locations.length === 0;
+
+  const subtitle =
+    step === 'location'
+      ? 'Select your location'
+      : step === 'create'
+        ? isFirstLocation
+          ? "Welcome! Let's set up your first location"
+          : 'Add a new location'
+        : `Select terminal at ${selectedLocation?.name}`;
+
   if (loading) {
     return (
       <div className="min-h-screen flex items-center justify-center bg-pos-bg">
@@ -117,28 +169,15 @@ const LocationSelect: React.FC<Props> = ({ onComplete }) => {
         {/* Header */}
         <div className="text-center mb-8">
           <h1 className="text-2xl font-bold text-pos-text">rtylr POS</h1>
-          <p className="text-sm text-pos-muted mt-1">
-            {step === 'location'
-              ? 'Select your location'
-              : `Select terminal at ${selectedLocation?.name}`}
-          </p>
+          <p className="text-sm text-pos-muted mt-1">{subtitle}</p>
         </div>
 
         {step === 'location' && (
           <div className="grid gap-3">
-            {locations.length === 0 && (
+            {locationError && (
               <div className="text-center py-12">
                 <MapPin className="w-10 h-10 mx-auto text-pos-muted mb-3" />
-                {locationError ? (
-                  <p className="text-sm text-destructive">{locationError}</p>
-                ) : (
-                  <>
-                    <p className="text-sm text-pos-muted">No locations assigned to your account.</p>
-                    <p className="text-xs text-pos-muted mt-1">
-                      Ask your business owner to assign you to a location.
-                    </p>
-                  </>
-                )}
+                <p className="text-sm text-destructive">{locationError}</p>
               </div>
             )}
             {locations.map((loc) => (
@@ -158,6 +197,75 @@ const LocationSelect: React.FC<Props> = ({ onComplete }) => {
                 </div>
               </button>
             ))}
+            {!locationError && (
+              <button
+                onClick={() => setStep('create')}
+                className="w-full flex items-center justify-center gap-2 p-4 rounded-xl border border-dashed border-pos-border text-pos-muted hover:text-pos-text hover:border-blue-500/50 transition-colors text-sm"
+              >
+                <Plus className="w-4 h-4" />
+                Add location
+              </button>
+            )}
+          </div>
+        )}
+
+        {step === 'create' && (
+          <div className="space-y-4">
+            {locations.length > 0 && (
+              <button
+                onClick={() => setStep('location')}
+                className="text-xs text-pos-muted hover:text-pos-text transition-colors"
+              >
+                &larr; Back to locations
+              </button>
+            )}
+
+            <div className="p-5 rounded-xl bg-pos-card border border-pos-border space-y-3">
+              {isFirstLocation && (
+                <p className="text-xs text-pos-muted">
+                  Create the location this register runs at. You can add terminals, menu items
+                  and staff right after.
+                </p>
+              )}
+              <input
+                type="text"
+                value={newLocationName}
+                onChange={(e) => setNewLocationName(e.target.value)}
+                placeholder="Location name (e.g. Downtown Cafe)"
+                className="w-full h-11 px-3 rounded-lg text-sm bg-pos-bg border border-pos-border text-pos-text placeholder:text-pos-muted outline-none focus:border-blue-500/50"
+              />
+              <input
+                type="text"
+                value={newLocationAddress}
+                onChange={(e) => setNewLocationAddress(e.target.value)}
+                placeholder="Address (optional)"
+                className="w-full h-11 px-3 rounded-lg text-sm bg-pos-bg border border-pos-border text-pos-text placeholder:text-pos-muted outline-none focus:border-blue-500/50"
+              />
+              <input
+                type="text"
+                value={newLocationPhone}
+                onChange={(e) => setNewLocationPhone(e.target.value)}
+                placeholder="Phone (optional)"
+                className="w-full h-11 px-3 rounded-lg text-sm bg-pos-bg border border-pos-border text-pos-text placeholder:text-pos-muted outline-none focus:border-blue-500/50"
+              />
+              <button
+                onClick={handleCreateLocation}
+                disabled={!newLocationName.trim() || creatingLocation}
+                className="w-full h-11 rounded-lg text-sm font-semibold bg-blue-500 text-white disabled:opacity-50 flex items-center justify-center"
+              >
+                {creatingLocation ? (
+                  <Loader2 className="w-4 h-4 animate-spin" />
+                ) : (
+                  'Create location'
+                )}
+              </button>
+            </div>
+
+            {isFirstLocation && (
+              <p className="text-center text-xs text-pos-muted">
+                Staff member? Ask your business owner to assign you to a location instead.
+              </p>
+            )}
           </div>
         )}
 
@@ -202,7 +310,9 @@ const LocationSelect: React.FC<Props> = ({ onComplete }) => {
               <div className="p-5 rounded-xl bg-pos-card border border-dashed border-pos-border">
                 <div className="flex items-center gap-3 mb-3">
                   <Plus className="w-4 h-4 text-pos-muted" />
-                  <p className="text-sm font-medium text-pos-text">Register new terminal</p>
+                  <p className="text-sm font-medium text-pos-text">
+                    {terminals.length === 0 ? 'Register this terminal' : 'Register new terminal'}
+                  </p>
                 </div>
                 <div className="flex gap-2">
                   <input

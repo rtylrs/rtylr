@@ -8,6 +8,7 @@ const mockPosService = vi.hoisted(() => ({
   getBranches: vi.fn(),
   getTerminals: vi.fn(),
   createTerminal: vi.fn(),
+  createBranch: vi.fn(),
 }));
 
 const mockToast = vi.hoisted(() => ({
@@ -28,6 +29,7 @@ vi.mock('../../shared/services/api/posService', () => ({
     getBranches: (...args: unknown[]) => mockPosService.getBranches(...args),
     getTerminals: (...args: unknown[]) => mockPosService.getTerminals(...args),
     createTerminal: (...args: unknown[]) => mockPosService.createTerminal(...args),
+    createBranch: (...args: unknown[]) => mockPosService.createBranch(...args),
   },
 }));
 
@@ -40,7 +42,7 @@ describe('LocationSelect', () => {
     cleanup();
   });
 
-  it('shows a load error when assigned and fallback locations both fail', async () => {
+  it('shows a load error when assigned and owned locations both fail', async () => {
     mockPosService.getMyLocations.mockRejectedValue(new Error('assigned failed'));
     mockPosService.getBranches.mockRejectedValue(new Error('branches failed'));
 
@@ -51,6 +53,113 @@ describe('LocationSelect', () => {
     ).toBeTruthy();
   });
 
+  it('shows owned locations when the assigned list is empty', async () => {
+    mockPosService.getMyLocations.mockResolvedValue({ locations: [] });
+    mockPosService.getBranches.mockResolvedValue({
+      locations: [
+        { id: 3, name: 'HQ' },
+        { id: 4, name: 'Annex' },
+      ],
+    });
+
+    render(<LocationSelect onComplete={vi.fn()} />);
+
+    expect(await screen.findByText('HQ')).toBeTruthy();
+    expect(screen.getByText('Annex')).toBeTruthy();
+  });
+
+  it('merges assigned and owned locations without duplicates', async () => {
+    mockPosService.getMyLocations.mockResolvedValue({
+      locations: [{ id: 1, name: 'Main' }],
+    });
+    mockPosService.getBranches.mockResolvedValue({
+      locations: [
+        { id: 1, name: 'Main' },
+        { id: 2, name: 'Uptown' },
+      ],
+    });
+
+    render(<LocationSelect onComplete={vi.fn()} />);
+
+    expect(await screen.findByText('Uptown')).toBeTruthy();
+    expect(screen.getAllByText('Main')).toHaveLength(1);
+  });
+
+  it('shows the first-location setup form when no locations exist anywhere', async () => {
+    mockPosService.getMyLocations.mockResolvedValue({ locations: [] });
+    mockPosService.getBranches.mockResolvedValue({ locations: [] });
+
+    render(<LocationSelect onComplete={vi.fn()} />);
+
+    expect(
+      await screen.findByPlaceholderText('Location name (e.g. Downtown Cafe)'),
+    ).toBeTruthy();
+    expect(screen.getByText("Welcome! Let's set up your first location")).toBeTruthy();
+  });
+
+  it('creates the first location and advances to terminal registration', async () => {
+    mockPosService.getMyLocations.mockResolvedValue({ locations: [] });
+    mockPosService.getBranches.mockResolvedValue({ locations: [] });
+    mockPosService.createBranch.mockResolvedValue({ location_id: 7, message: 'ok' });
+    mockPosService.getTerminals.mockResolvedValue({ terminals: [] });
+
+    render(<LocationSelect onComplete={vi.fn()} />);
+
+    fireEvent.change(await screen.findByPlaceholderText('Location name (e.g. Downtown Cafe)'), {
+      target: { value: 'Downtown Cafe' },
+    });
+    fireEvent.click(screen.getByText('Create location'));
+
+    expect(await screen.findByText('Register this terminal')).toBeTruthy();
+    expect(mockPosService.createBranch).toHaveBeenCalledWith({
+      name: 'Downtown Cafe',
+      address: '',
+      phone: '',
+      is_active: true,
+    });
+    // Terminal name pre-filled for first-run flow
+    const terminalInput = screen.getByPlaceholderText(
+      'Terminal name (e.g. Register 1)',
+    ) as HTMLInputElement;
+    expect(terminalInput.value).toBe('Register 1');
+  });
+
+  it('reports a failed location create without leaving the form', async () => {
+    mockPosService.getMyLocations.mockResolvedValue({ locations: [] });
+    mockPosService.getBranches.mockResolvedValue({ locations: [] });
+    mockPosService.createBranch.mockRejectedValue(new Error('Failed to create location'));
+
+    render(<LocationSelect onComplete={vi.fn()} />);
+
+    fireEvent.change(await screen.findByPlaceholderText('Location name (e.g. Downtown Cafe)'), {
+      target: { value: 'Downtown Cafe' },
+    });
+    fireEvent.click(screen.getByText('Create location'));
+
+    await waitFor(() =>
+      expect(mockToast.error).toHaveBeenCalledWith('Failed to create location'),
+    );
+    expect(screen.getByPlaceholderText('Location name (e.g. Downtown Cafe)')).toBeTruthy();
+  });
+
+  it('offers an Add location button alongside existing locations', async () => {
+    mockPosService.getMyLocations.mockResolvedValue({
+      locations: [
+        { id: 1, name: 'Main' },
+        { id: 2, name: 'Uptown' },
+      ],
+    });
+    mockPosService.getBranches.mockResolvedValue({ locations: [] });
+
+    render(<LocationSelect onComplete={vi.fn()} />);
+
+    fireEvent.click(await screen.findByText('Add location'));
+
+    expect(screen.getByText('Add a new location')).toBeTruthy();
+    fireEvent.click(screen.getByText('← Back to locations'));
+    expect(screen.getByText('Main')).toBeTruthy();
+  });
+
   it('shows a terminal load error when terminals cannot be loaded for a location', async () => {
     mockPosService.getMyLocations.mockResolvedValue({
       locations: [
@@ -58,6 +167,7 @@ describe('LocationSelect', () => {
         { id: 2, name: 'Uptown' },
       ],
     });
+    mockPosService.getBranches.mockResolvedValue({ locations: [] });
     mockPosService.getTerminals.mockRejectedValue(new Error('terminals failed'));
 
     render(<LocationSelect onComplete={vi.fn()} />);
@@ -77,15 +187,15 @@ describe('LocationSelect', () => {
         { id: 2, name: 'Uptown' },
       ],
     });
+    mockPosService.getBranches.mockResolvedValue({ locations: [] });
     mockPosService.getTerminals.mockResolvedValue({ terminals: [] });
     mockPosService.createTerminal.mockResolvedValue({ id: 'draft' });
 
     render(<LocationSelect onComplete={onComplete} />);
 
     fireEvent.click(await screen.findByText('Main'));
-    fireEvent.change(await screen.findByPlaceholderText('Terminal name (e.g. Register 1)'), {
-      target: { value: 'Register 1' },
-    });
+    const input = await screen.findByPlaceholderText('Terminal name (e.g. Register 1)');
+    fireEvent.change(input, { target: { value: 'Register 1' } });
     fireEvent.click(screen.getByText('Add'));
 
     await waitFor(() =>
