@@ -70,6 +70,7 @@
 }
 
 .tab {
+  position: relative;
   flex-shrink: 0;
   background: transparent;
   color: rgba(255, 255, 255, 0.62);
@@ -94,17 +95,29 @@
   }
 }
 
-.tabActive {
+// The cream background lives on a shared-layout pill that glides between
+// tabs; the button itself only switches text color.
+.tabPill {
+  position: absolute;
+  inset: -1px;
   background: var(--btn-cream-bg);
+  border-radius: 999px;
+  box-shadow: var(--btn-cream-shadow);
+}
+
+.tabLabel {
+  position: relative;
+  z-index: 1;
+}
+
+.tabActive {
   color: #0a0a0a;
   border-color: transparent;
-  box-shadow: var(--btn-cream-shadow);
 
   &:hover {
-    background: var(--btn-cream-bg-hover);
     color: #0a0a0a;
     border-color: transparent;
-    box-shadow: var(--btn-cream-shadow-hover);
+    background: transparent;
   }
 }
 
@@ -244,9 +257,19 @@
 }
 
 .progressDotActive {
-  background: #e8e6e1;
+  position: relative;
+  overflow: hidden;
+  background: rgba(255, 255, 255, 0.25);
   width: 20px;
   border-radius: 999px;
+}
+
+.progressFill {
+  position: absolute;
+  inset: 0;
+  background: #e8e6e1;
+  border-radius: 999px;
+  transform-origin: left;
 }
 
 // Responsive

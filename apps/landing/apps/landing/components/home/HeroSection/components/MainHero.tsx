@@ -4,6 +4,8 @@ import { motion } from 'motion/react';
 import { ArrowRight, Sparkles, Shuffle } from 'lucide-react';
 import { APP_URLS } from '@voxire/config';
 import { navigateExternal } from '../../../../lib/navigation';
+import { SplitWords } from '../../../motion/SplitWords';
+import { SPRING_SNAPPY } from '../../../../lib/animations';
 import styles from '../HeroSection.module.scss';
 
 const MainHero: React.FC = (): React.JSX.Element => {
@@ -55,17 +57,13 @@ const MainHero: React.FC = (): React.JSX.Element => {
         </span>
       </motion.a>
 
-      {/* Headline */}
-      <motion.h1
+      {/* Headline - per-word masked rise */}
+      <SplitWords
+        as="h1"
         className={styles.heroTitle}
-        initial={{ opacity: 0, y: 28, filter: 'blur(10px)' }}
-        animate={{ opacity: 1, y: 0, filter: 'blur(0px)' }}
-        transition={{ delay: 0.18, duration: 1.0, ease: [0.16, 1, 0.3, 1] }}
-      >
-        Run your entire business.
-        <br />
-        From a single platform.
-      </motion.h1>
+        text={'Run your entire business.\nFrom a single platform.'}
+        delay={0.18}
+      />
 
       {/* AI prompt card, Retool AppGen clone */}
       <motion.form
@@ -110,10 +108,16 @@ const MainHero: React.FC = (): React.JSX.Element => {
             </button>
           </div>
 
-          <button type="submit" className={styles.aiCardSubmit}>
+          <motion.button
+            type="submit"
+            className={styles.aiCardSubmit}
+            whileHover={{ scale: 1.03 }}
+            whileTap={{ scale: 0.97 }}
+            transition={SPRING_SNAPPY}
+          >
             <span>Start building</span>
             <ArrowRight size={15} strokeWidth={2.2} aria-hidden="true" />
-          </button>
+          </motion.button>
         </div>
       </motion.form>
 

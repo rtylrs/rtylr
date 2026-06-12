@@ -1,6 +1,7 @@
-import React from 'react';
-import { motion } from 'motion/react';
+import React, { useRef } from 'react';
+import { motion, useScroll, useSpring } from 'motion/react';
 import { blurFadeIn, blurFadeInSlow, staggerBlur, viewportOnce } from '../../../lib/animations';
+import { SplitWords } from '../../motion/SplitWords';
 import styles from './HowItWorksSection.module.scss';
 
 const STEPS = [
@@ -30,6 +31,16 @@ const STEPS = [
 ];
 
 const HowItWorksSection: React.FC = (): React.JSX.Element => {
+  const gridRef = useRef<HTMLDivElement>(null);
+
+  // The accent line draws across the top of the grid as it scrolls
+  // through the viewport, pacing the reader through the four steps.
+  const { scrollYProgress } = useScroll({
+    target: gridRef,
+    offset: ['start 0.85', 'end 0.45'],
+  });
+  const lineProgress = useSpring(scrollYProgress, { stiffness: 140, damping: 30, mass: 0.5 });
+
   return (
     <section className={styles.howItWorksSection}>
       <div className={styles.container}>
@@ -41,20 +52,27 @@ const HowItWorksSection: React.FC = (): React.JSX.Element => {
           variants={blurFadeInSlow}
         >
           <span className={styles.eyebrow}>HOW IT WORKS</span>
-          <h2 className={styles.sectionTitle}>
-            From sign-up to live
-            <br />
-            in four steps.
-          </h2>
+          <SplitWords
+            as="h2"
+            className={styles.sectionTitle}
+            text={'From sign-up to live\nin four steps.'}
+            trigger="view"
+          />
         </motion.div>
 
         <motion.div
+          ref={gridRef}
           className={styles.grid}
           initial="hidden"
           whileInView="visible"
           viewport={viewportOnce}
           variants={staggerBlur}
         >
+          <motion.span
+            className={styles.gridProgress}
+            style={{ scaleX: lineProgress }}
+            aria-hidden="true"
+          />
           {STEPS.map((step) => (
             <motion.div key={step.number} className={styles.step} variants={blurFadeIn}>
               <div className={styles.stepNumber}>{step.number}</div>

@@ -4,7 +4,7 @@ import { motion, AnimatePresence } from 'motion/react';
 import { ArrowUpRight } from 'lucide-react';
 import { Button } from '@voxire/components';
 import { useRouter } from 'next/router';
-import { blurFadeIn, blurFadeInSlow, viewportOnce } from '../../../lib/animations';
+import { blurFadeIn, blurFadeInSlow, viewportOnce, SPRING_SMOOTH } from '../../../lib/animations';
 import { POSDemo } from './demos/POSDemo';
 import { ERPDemo } from './demos/ERPDemo';
 import { HRDemo } from './demos/HRDemo';
@@ -154,7 +154,14 @@ const FeaturesSection: React.FC = (): React.JSX.Element => {
               onClick={() => selectFeature(i)}
               className={cn(styles.tab, i === activeIndex && styles.tabActive)}
             >
-              {f.category}
+              {i === activeIndex && (
+                <motion.span
+                  layoutId="featureTabPill"
+                  className={styles.tabPill}
+                  transition={SPRING_SMOOTH}
+                />
+              )}
+              <span className={styles.tabLabel}>{f.category}</span>
             </button>
           ))}
         </motion.div>
@@ -169,10 +176,10 @@ const FeaturesSection: React.FC = (): React.JSX.Element => {
             <AnimatePresence mode="wait">
               <motion.div
                 key={active.id}
-                initial={{ opacity: 0, y: 12 }}
-                animate={{ opacity: 1, y: 0 }}
-                exit={{ opacity: 0, y: -8 }}
-                transition={{ duration: 0.32, ease: [0.16, 1, 0.3, 1] }}
+                initial={{ opacity: 0, y: 14, filter: 'blur(6px)' }}
+                animate={{ opacity: 1, y: 0, filter: 'blur(0px)' }}
+                exit={{ opacity: 0, y: -10, filter: 'blur(4px)' }}
+                transition={{ duration: 0.4, ease: [0.16, 1, 0.3, 1] }}
               >
                 <span className={styles.featureCategory}>{active.category}</span>
                 <h3 className={styles.featureTitle}>{active.title}</h3>
@@ -209,7 +216,17 @@ const FeaturesSection: React.FC = (): React.JSX.Element => {
                 <span
                   key={f.id}
                   className={cn(styles.progressDot, i === activeIndex && styles.progressDotActive)}
-                />
+                >
+                  {i === activeIndex && (
+                    <motion.span
+                      key={`fill-${activeIndex}`}
+                      className={styles.progressFill}
+                      initial={{ scaleX: 0 }}
+                      animate={{ scaleX: 1 }}
+                      transition={{ duration: AUTO_ADVANCE_MS / 1000, ease: 'linear' }}
+                    />
+                  )}
+                </span>
               ))}
             </div>
           </div>
