@@ -1,5 +1,5 @@
 import React, { useRef } from 'react';
-import { motion, useScroll, useSpring, useTransform } from 'motion/react';
+import { motion, useScroll, useTransform } from 'motion/react';
 import styles from './ParallaxShowcase.module.scss';
 
 // Pinned scroll scene: the image starts as a rounded inset card, expands
@@ -12,26 +12,22 @@ const ParallaxShowcase: React.FC = (): React.JSX.Element => {
     target: sectionRef,
     offset: ['start start', 'end end'],
   });
-  const smooth = useSpring(scrollYProgress, { stiffness: 120, damping: 30, mass: 0.5 });
 
-  // Phase 1 (0 - 0.55): the frame grows from inset card to full bleed
-  // while the photo inside settles out of a zoomed crop.
-  const frameScale = useTransform(smooth, [0, 0.55], [0.62, 1]);
-  const frameRadius = useTransform(smooth, [0, 0.55], ['28px', '0px']);
-  const imgScale = useTransform(smooth, [0, 1], [1.3, 1]);
+  // Direct scrub (no spring) so the scene tracks the wheel 1:1 - springs
+  // on pinned scrubs read as lag. Border radius stays CONSTANT (paint
+  // happens once); the final 1.045 scale pushes the rounded corners just
+  // past the viewport edge, so only cheap composited transforms animate.
+  const frameScale = useTransform(scrollYProgress, [0, 0.55], [0.62, 1.045]);
+  const imgScale = useTransform(scrollYProgress, [0, 1], [1.25, 1]);
 
   // Phase 2 (0.5 - 0.8): the message scrubs in over the settled image.
-  const contentOpacity = useTransform(smooth, [0.5, 0.8], [0, 1]);
-  const contentY = useTransform(smooth, [0.5, 0.8], [48, 0]);
+  const contentOpacity = useTransform(scrollYProgress, [0.5, 0.8], [0, 1]);
+  const contentY = useTransform(scrollYProgress, [0.5, 0.8], [48, 0]);
 
   return (
     <section ref={sectionRef} className={styles.section}>
       <div className={styles.sticky}>
-        <motion.div
-          className={styles.frame}
-          style={{ scale: frameScale, borderRadius: frameRadius }}
-          aria-hidden="true"
-        >
+        <motion.div className={styles.frame} style={{ scale: frameScale }} aria-hidden="true">
           <motion.img
             src="/images/home/hero-banner-top-bar-bg.webp"
             alt=""

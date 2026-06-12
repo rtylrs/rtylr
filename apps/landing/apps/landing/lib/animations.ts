@@ -115,12 +115,11 @@ export const staggerContainerSlow: Variants = {
 
 // Blur + fade, more cinematic than plain fadeInUp
 export const blurFadeIn: Variants = {
-  hidden: { opacity: 0, y: 28, filter: 'blur(10px)' },
+  hidden: { opacity: 0, y: 24 },
   visible: {
     opacity: 1,
     y: 0,
-    filter: 'blur(0px)',
-    transition: { duration: 0.75, ease: EASE_OUT_EXPO },
+    transition: { duration: 0.7, ease: EASE_OUT_EXPO },
   },
 };
 
