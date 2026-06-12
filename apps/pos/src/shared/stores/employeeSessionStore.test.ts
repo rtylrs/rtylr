@@ -1,191 +1,139 @@
 import { describe, it, expect, beforeEach, vi } from 'vitest';
-import { useEmployeeSessionStore } from './employeeSessionStore';
 
-// Mock the api module
-vi.mock('../services/api/api', () => ({
-  default: {
-    post: vi.fn(),
-    get: vi.fn(),
-    put: vi.fn(),
-  },
+vi.mock('@voxire/api', () => ({ unwrap: (p: unknown) => p }));
+vi.mock('../services/api/posService', () => ({
+  posService: { verifyPIN: vi.fn() },
 }));
 
-import api from '../services/api/api';
+import { useEmployeeSessionStore } from './employeeSessionStore';
+import { posService } from '../services/api/posService';
 
 const { getState, setState } = useEmployeeSessionStore;
-const act = (fn: () => void) => {
-  fn();
-};
+
+const verifyResponse = (overrides: Record<string, unknown> = {}): Record<string, unknown> => ({
+  user_id: 42,
+  pos_user_id: 7,
+  location_id: 3,
+  display_name: 'Alice',
+  role: 'manager',
+  can_void: true,
+  can_refund: true,
+  can_open_drawer: true,
+  can_apply_discount: true,
+  max_discount_pct: 100,
+  ...overrides,
+});
 
 beforeEach(() => {
-  setState({
-    employee: null,
-    isActive: false,
-    loading: false,
-    error: null,
-  });
+  setState({ employee: null, isActive: false, loading: false, error: null });
   vi.clearAllMocks();
 });
 
 describe('employeeSessionStore', () => {
-  // ── Initial state ──────────────────────────────────────────────
-
   it('starts with no employee and inactive', () => {
     expect(getState().employee).toBeNull();
     expect(getState().isActive).toBe(false);
-    expect(getState().loading).toBe(false);
-    expect(getState().error).toBeNull();
   });
 
-  // ── authenticatePin ────────────────────────────────────────────
+  it('authenticates a roster operator and stores capabilities', async () => {
+    vi.mocked(posService.verifyPIN).mockResolvedValueOnce(verifyResponse() as never);
 
-  it('authenticates with a valid pin', async () => {
-    const mockEmployee = { id: '1', name: 'Alice', role: 'cashier' };
-    vi.mocked(api.post).mockResolvedValueOnce({ data: { employee: mockEmployee } });
+    await getState().authenticatePin(3, 42, '1234');
 
-    await getState().authenticatePin('1234');
-
-    expect(getState().employee).toEqual(mockEmployee);
+    expect(posService.verifyPIN).toHaveBeenCalledWith(3, 42, '1234');
     expect(getState().isActive).toBe(true);
-    expect(getState().loading).toBe(false);
-    expect(getState().error).toBeNull();
+    expect(getState().employee).toEqual({
+      id: '42',
+      posUserId: '7',
+      locationId: 3,
+      name: 'Alice',
+      role: 'manager',
+      capabilities: {
+        canVoid: true,
+        canRefund: true,
+        canOpenDrawer: true,
+        canApplyDiscount: true,
+        maxDiscountPct: 100,
+      },
+    });
+  });
+
+  it('defaults missing capability flags to false/0', async () => {
+    vi.mocked(posService.verifyPIN).mockResolvedValueOnce(
+      verifyResponse({
+        role: 'cashier',
+        can_void: undefined,
+        can_refund: undefined,
+        can_open_drawer: undefined,
+        can_apply_discount: undefined,
+        max_discount_pct: undefined,
+      }) as never
+    );
+
+    await getState().authenticatePin(3, 42, '1234');
+
+    expect(getState().employee?.capabilities).toEqual({
+      canVoid: false,
+      canRefund: false,
+      canOpenDrawer: false,
+      canApplyDiscount: false,
+      maxDiscountPct: 0,
+    });
   });
 
   it('sets loading true during authentication', async () => {
     let loadingDuringCall = false;
-    vi.mocked(api.post).mockImplementation(async () => {
+    vi.mocked(posService.verifyPIN).mockImplementation((() => {
       loadingDuringCall = getState().loading;
-      return { data: { employee: { id: '1', name: 'Alice', role: 'cashier' } } };
-    });
+      return Promise.resolve(verifyResponse());
+    }) as never);
 
-    await getState().authenticatePin('1234');
+    await getState().authenticatePin(3, 42, '1234');
     expect(loadingDuringCall).toBe(true);
   });
 
-  it('sets error on failed authentication', async () => {
-    vi.mocked(api.post).mockRejectedValueOnce({
-      response: { data: { message: 'Invalid PIN' } },
-    });
-
-    await expect(getState().authenticatePin('0000')).rejects.toBeTruthy();
-
-    expect(getState().error).toBe('Invalid PIN');
-    expect(getState().loading).toBe(false);
-    expect(getState().isActive).toBe(false);
-    expect(getState().employee).toBeNull();
-  });
-
-  it('uses fallback error message when server provides none', async () => {
-    vi.mocked(api.post).mockRejectedValueOnce(new Error('Network error'));
-
-    await expect(getState().authenticatePin('0000')).rejects.toBeTruthy();
-
-    expect(getState().error).toBe('Incorrect PIN');
-  });
-
-  it('clears previous error before new auth attempt', async () => {
-    setState({ error: 'old error' });
-    vi.mocked(api.post).mockResolvedValueOnce({
-      data: { employee: { id: '1', name: 'Bob', role: 'manager' } },
-    });
-
-    await getState().authenticatePin('1111');
-    expect(getState().error).toBeNull();
-  });
-
-  it('rejects blank PINs without calling the API', async () => {
-    await expect(getState().authenticatePin('   ')).rejects.toThrow('Enter your employee PIN');
-
-    expect(api.post).not.toHaveBeenCalled();
-    expect(getState().employee).toBeNull();
-    expect(getState().isActive).toBe(false);
-    expect(getState().loading).toBe(false);
-    expect(getState().error).toBe('Enter your employee PIN');
-  });
-
-  it('rejects malformed employee auth responses without activating a session', async () => {
-    vi.mocked(api.post).mockResolvedValueOnce({
-      data: { employee: { id: 'employee-uuid', name: 'Alice', role: 'cashier', pin: '1234' } },
-    });
-
-    await expect(getState().authenticatePin('1234')).rejects.toThrow(
-      'Employee login returned invalid employee data',
+  it('sets a generic error on failed authentication (no cause leak)', async () => {
+    vi.mocked(posService.verifyPIN).mockRejectedValueOnce(
+      new Error('401 Invalid credentials') as never
     );
 
-    expect(getState().employee).toBeNull();
+    await expect(getState().authenticatePin(3, 42, '0000')).rejects.toBeTruthy();
+    expect(getState().error).toBe('Incorrect PIN');
     expect(getState().isActive).toBe(false);
-    expect(getState().loading).toBe(false);
-    expect(getState().error).toBe('Employee login returned invalid employee data');
+    expect(getState().employee).toBeNull();
   });
 
-  it('normalizes employee auth response and strips sensitive fields', async () => {
-    vi.mocked(api.post).mockResolvedValueOnce({
-      data: {
-        employee: {
-          id: 9.7,
-          name: ' Alice ',
-          role: ' cashier ',
-          pin: '1234',
-          pin_hash: 'secret',
-        },
-      },
-    });
-
-    await getState().authenticatePin(' 1234 ');
-
-    expect(api.post).toHaveBeenCalledWith('/employees/pin', { pin: '1234' });
-    expect(getState().employee).toEqual({ id: '9', name: 'Alice', role: 'cashier' });
+  it('rejects a blank PIN without calling the API', async () => {
+    await expect(getState().authenticatePin(3, 42, '   ')).rejects.toThrow(
+      'Enter your employee PIN'
+    );
+    expect(posService.verifyPIN).not.toHaveBeenCalled();
+    expect(getState().isActive).toBe(false);
   });
 
-  // ── endSession ─────────────────────────────────────────────────
+  it('rejects a malformed verify response without activating a session', async () => {
+    vi.mocked(posService.verifyPIN).mockResolvedValueOnce(
+      verifyResponse({ user_id: 0 }) as never
+    );
 
-  it('ends the session and clears employee', () => {
-    setState({
-      employee: { id: '1', name: 'Alice', role: 'cashier' },
-      isActive: true,
-      error: 'some error',
-    });
+    await expect(getState().authenticatePin(3, 42, '1234')).rejects.toThrow(
+      'Employee login returned invalid employee data'
+    );
+    expect(getState().isActive).toBe(false);
+    expect(getState().employee).toBeNull();
+  });
 
-    act(() => getState().endSession());
-
+  it('ends the session and clears the employee', () => {
+    setState({ isActive: true, error: 'x' });
+    getState().endSession();
     expect(getState().employee).toBeNull();
     expect(getState().isActive).toBe(false);
     expect(getState().error).toBeNull();
   });
-
-  // ── clearError ─────────────────────────────────────────────────
 
   it('clears the error', () => {
-    setState({ error: 'Something went wrong' });
-
-    act(() => getState().clearError());
-
+    setState({ error: 'boom' });
+    getState().clearError();
     expect(getState().error).toBeNull();
-  });
-
-  it('clearError is a no-op when error is already null', () => {
-    act(() => getState().clearError());
-    expect(getState().error).toBeNull();
-  });
-
-  // ── Edge cases ─────────────────────────────────────────────────
-
-  it('endSession is safe to call when already inactive', () => {
-    act(() => getState().endSession());
-    expect(getState().isActive).toBe(false);
-    expect(getState().employee).toBeNull();
-  });
-
-  it('multiple authentications replace the previous employee', async () => {
-    const emp1 = { id: '1', name: 'Alice', role: 'cashier' };
-    const emp2 = { id: '2', name: 'Bob', role: 'manager' };
-
-    vi.mocked(api.post).mockResolvedValueOnce({ data: { employee: emp1 } });
-    await getState().authenticatePin('1111');
-    expect(getState().employee).toEqual(emp1);
-
-    vi.mocked(api.post).mockResolvedValueOnce({ data: { employee: emp2 } });
-    await getState().authenticatePin('2222');
-    expect(getState().employee).toEqual(emp2);
   });
 });

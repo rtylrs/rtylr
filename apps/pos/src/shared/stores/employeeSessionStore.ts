@@ -1,11 +1,24 @@
 import { create } from 'zustand';
 import { persist } from 'zustand/middleware';
-import api from '../services/api/api';
+import { unwrap } from '@voxire/api';
+import { posService } from '../services/api/posService';
+
+export interface EmployeeCapabilities {
+  canVoid: boolean;
+  canRefund: boolean;
+  canOpenDrawer: boolean;
+  canApplyDiscount: boolean;
+  maxDiscountPct: number;
+}
 
 export interface Employee {
+  /** Team users.id — the unified identity behind the PIN. */
   id: string;
+  posUserId: string;
+  locationId: number;
   name: string;
   role: string;
+  capabilities: EmployeeCapabilities;
 }
 
 interface EmployeeSessionState {
@@ -16,7 +29,7 @@ interface EmployeeSessionState {
 }
 
 interface EmployeeSessionActions {
-  authenticatePin: (pin: string) => Promise<void>;
+  authenticatePin: (locationId: number, userId: number, pin: string) => Promise<void>;
   endSession: () => void;
   clearError: () => void;
 }
@@ -24,7 +37,7 @@ interface EmployeeSessionActions {
 const INVALID_EMPLOYEE_ERROR = 'Employee login returned invalid employee data';
 const BLANK_PIN_ERROR = 'Enter your employee PIN';
 
-function positiveEmployeeId(value: unknown): string | null {
+function positiveId(value: unknown): string | null {
   const numeric = typeof value === 'string' ? Number(value.trim()) : Number(value);
   if (!Number.isFinite(numeric) || numeric <= 0) return null;
   return String(Math.floor(numeric));
@@ -36,20 +49,43 @@ function trimmedText(value: unknown): string | null {
   return trimmed || null;
 }
 
-function normalizeEmployee(raw: unknown): Employee {
+function asBool(value: unknown): boolean {
+  return value === true;
+}
+
+function asNumber(value: unknown): number {
+  const n = Number(value);
+  return Number.isFinite(n) ? n : 0;
+}
+
+// Backend VerifyPINResponse (camelCased by @voxire/api): user_id, pos_user_id,
+// location_id, role, display_name + capability flags. The PIN is never echoed,
+// so nothing sensitive lands in this persisted store.
+function normalizeVerifyResponse(raw: unknown): Employee {
   if (!raw || typeof raw !== 'object') {
     throw new Error(INVALID_EMPLOYEE_ERROR);
   }
-
-  const record = raw as Record<string, unknown>;
-  const id = positiveEmployeeId(record.id);
-  const name = trimmedText(record.name);
-  const role = trimmedText(record.role) ?? 'cashier';
+  const r = raw as Record<string, unknown>;
+  const id = positiveId(r.userId ?? r.user_id);
+  const name = trimmedText(r.displayName ?? r.display_name ?? r.name);
+  const role = trimmedText(r.role) ?? 'cashier';
   if (!id || !name) {
     throw new Error(INVALID_EMPLOYEE_ERROR);
   }
-
-  return { id, name, role };
+  return {
+    id,
+    posUserId: positiveId(r.posUserId ?? r.pos_user_id) ?? '0',
+    locationId: asNumber(r.locationId ?? r.location_id),
+    name,
+    role,
+    capabilities: {
+      canVoid: asBool(r.canVoid ?? r.can_void),
+      canRefund: asBool(r.canRefund ?? r.can_refund),
+      canOpenDrawer: asBool(r.canOpenDrawer ?? r.can_open_drawer),
+      canApplyDiscount: asBool(r.canApplyDiscount ?? r.can_apply_discount),
+      maxDiscountPct: asNumber(r.maxDiscountPct ?? r.max_discount_pct),
+    },
+  };
 }
 
 export const useEmployeeSessionStore = create<EmployeeSessionState & EmployeeSessionActions>()(
@@ -60,7 +96,7 @@ export const useEmployeeSessionStore = create<EmployeeSessionState & EmployeeSes
       loading: false,
       error: null,
 
-      authenticatePin: async (pin: string) => {
+      authenticatePin: async (locationId: number, userId: number, pin: string) => {
         const normalizedPin = pin.trim();
         if (!normalizedPin) {
           set({ loading: false, error: BLANK_PIN_ERROR });
@@ -69,37 +105,15 @@ export const useEmployeeSessionStore = create<EmployeeSessionState & EmployeeSes
 
         set({ loading: true, error: null });
         try {
-          const response = await api.post('/employees/pin', { pin: normalizedPin });
-          // Strip any PIN-shaped field the backend returns before
-          // putting the employee in a persisted store. Earlier shape
-          // included `pin?: string` which would land in localStorage -
-          // a security gap (audit P0 #7).
-          const raw = response.data.employee as Record<string, unknown> & {
-            pin?: unknown;
-            pin_hash?: unknown;
-          };
-          const { pin: _stripPin, pin_hash: _stripHash, ...safeEmployee } = raw;
-          void _stripPin;
-          void _stripHash;
-          const employee = normalizeEmployee(safeEmployee);
-          set({
-            employee,
-            isActive: true,
-            loading: false,
-            error: null,
-          });
+          const data = await unwrap(posService.verifyPIN(locationId, userId, normalizedPin));
+          const employee = normalizeVerifyResponse(data);
+          set({ employee, isActive: true, loading: false, error: null });
         } catch (err) {
-          const e = err as { response?: { data?: { message?: string } } };
           const message =
             err instanceof Error && err.message === INVALID_EMPLOYEE_ERROR
               ? err.message
-              : e.response?.data?.message || 'Incorrect PIN';
-          set({
-            loading: false,
-            employee: null,
-            isActive: false,
-            error: message,
-          });
+              : 'Incorrect PIN';
+          set({ loading: false, employee: null, isActive: false, error: message });
           throw err;
         }
       },

@@ -293,9 +293,30 @@ describe('posService', () => {
     expect(safe.patch).toHaveBeenCalledWith('/pos/users/deactivate', { id: 5 });
   });
 
-  it('verifyPIN calls POST /pos/users/verify-pin', () => {
-    posService.verifyPIN('9999');
-    expect(safe.post).toHaveBeenCalledWith('/pos/users/verify-pin', { pin: '9999' });
+  it('verifyPIN calls POST /pos/users/verify-pin with location + operator', () => {
+    posService.verifyPIN(3, 42, '9999');
+    expect(safe.post).toHaveBeenCalledWith('/pos/users/verify-pin', {
+      location_id: 3,
+      user_id: 42,
+      pin: '9999',
+    });
+  });
+
+  it('setPIN calls POST /pos/users/set-pin', () => {
+    posService.setPIN({ userId: 42, locationId: 3, name: 'Alice', pin: '1234' });
+    expect(safe.post).toHaveBeenCalledWith('/pos/users/set-pin', {
+      user_id: 42,
+      location_id: 3,
+      name: 'Alice',
+      pin: '1234',
+    });
+  });
+
+  it('getLocationRoster calls GET /pos/access/location-roster', () => {
+    posService.getLocationRoster(3);
+    expect(safe.get).toHaveBeenCalledWith('/pos/access/location-roster', {
+      params: { location_id: 3 },
+    });
   });
 
   // Location Access

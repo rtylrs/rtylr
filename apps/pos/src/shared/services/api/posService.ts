@@ -162,10 +162,18 @@ export interface StockPayload {
   employee_id?: number | null;
 }
 
+/** Matches the backend CreatePOSUserRequest contract (snake_case). */
 export interface POSUserPayload {
   name: string;
   pin: string;
-  locationId?: number;
+  location_id: number;
+  role?: string;
+  hourly_rate?: number;
+  max_discount_pct?: number;
+  can_void?: boolean;
+  can_refund?: boolean;
+  can_open_drawer?: boolean;
+  can_apply_discount?: boolean;
   [key: string]: unknown;
 }
 
@@ -342,10 +350,24 @@ export const posService = {
   updatePOSUser: (data: Partial<POSUserPayload> & { id: number }) =>
     safe.patch('/pos/users/update', data),
   deactivatePOSUser: (id: number) => safe.patch('/pos/users/deactivate', { id }),
-  verifyPIN: (pin: string) => safe.post('/pos/users/verify-pin', { pin }),
+  // Verify a roster operator's PIN at a location. Returns the linked team
+  // user id + role-derived capability flags.
+  verifyPIN: (locationId: number, userId: number, pin: string) =>
+    safe.post('/pos/users/verify-pin', { location_id: locationId, user_id: userId, pin }),
+  // First-time PIN onboarding for a rostered operator (self or manager-provisioned).
+  setPIN: (data: { userId: number; locationId: number; name: string; pin: string }) =>
+    safe.post('/pos/users/set-pin', {
+      user_id: data.userId,
+      location_id: data.locationId,
+      name: data.name,
+      pin: data.pin,
+    }),
 
   // ── Member Location Access ────────────────────────────────────
   getMyLocations: () => safe.get('/pos/access/my-locations'),
+  // The sign-in roster for a location: assigned members + has_pin + role.
+  getLocationRoster: (locationId: number) =>
+    safe.get('/pos/access/location-roster', { params: { location_id: locationId } }),
   assignMemberToLocation: (data: MemberLocationPayload) => safe.post('/pos/access/assign', data),
   removeMemberFromLocation: (id: number) => safe.post('/pos/access/remove', { id }),
 };

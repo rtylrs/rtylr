@@ -1,8 +1,12 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useCallback } from 'react';
+import { unwrap } from '@voxire/api';
+import { toast } from 'sonner';
+import { Loader2, ChevronLeft, ShieldCheck } from 'lucide-react';
 import { useEmployeeSessionStore } from '../../shared/stores/employeeSessionStore';
 import { useThemeStore } from '../../shared/stores/themeStore';
-
-const PIN_LENGTH = 4;
+import { useTerminalContextStore } from '../../shared/stores/terminalContextStore';
+import { posService } from '../../shared/services/api/posService';
+import { mapRoster, isCompletePin, PIN_LENGTH, type RosterMember } from './rosterWorkflow';
 
 const KEYS = [
   ['1', '2', '3'],
@@ -11,69 +15,239 @@ const KEYS = [
   ['', '0', '⌫'],
 ];
 
+type Step = 'roster' | 'enter' | 'setup';
+
 const PinLogin: React.FC = () => {
+  const locationId = useTerminalContextStore((s) => s.locationId);
   const { authenticatePin, loading, error, clearError } = useEmployeeSessionStore();
   const theme = useThemeStore((s) => s.theme);
+
+  const [roster, setRoster] = useState<RosterMember[]>([]);
+  const [rosterLoading, setRosterLoading] = useState(true);
+  const [rosterError, setRosterError] = useState<string | null>(null);
+  const [step, setStep] = useState<Step>('roster');
+  const [member, setMember] = useState<RosterMember | null>(null);
   const [pin, setPin] = useState('');
+  const [confirmPin, setConfirmPin] = useState('');
+  const [settingPin, setSettingPin] = useState(false);
   const [shake, setShake] = useState(false);
 
-  // Auto-submit when PIN is full
-  useEffect(() => {
-    if (pin.length === PIN_LENGTH) {
-      handleSubmit(pin);
+  const loadRoster = useCallback(async () => {
+    if (!locationId) return;
+    setRosterLoading(true);
+    setRosterError(null);
+    try {
+      const data = await unwrap(posService.getLocationRoster(locationId));
+      setRoster(mapRoster(data));
+    } catch {
+      setRosterError('Unable to load the staff list. Check your connection and try again.');
+    } finally {
+      setRosterLoading(false);
     }
-  }, [pin]);
+  }, [locationId]);
 
-  // Keyboard support
   useEffect(() => {
-    const onKey = (e: KeyboardEvent) => {
+    void loadRoster();
+  }, [loadRoster]);
+
+  const resetToRoster = (): void => {
+    setStep('roster');
+    setMember(null);
+    setPin('');
+    setConfirmPin('');
+    clearError();
+  };
+
+  const pickMember = (m: RosterMember): void => {
+    clearError();
+    setMember(m);
+    setPin('');
+    setConfirmPin('');
+    setStep(m.hasPin ? 'enter' : 'setup');
+  };
+
+  const submitEnter = useCallback(
+    async (value: string) => {
+      if (!member || !locationId) return;
+      try {
+        await authenticatePin(locationId, member.userId, value);
+        // success → AppShell sees isActive and renders the POS
+      } catch {
+        setShake(true);
+        setPin('');
+        setTimeout(() => setShake(false), 500);
+      }
+    },
+    [authenticatePin, locationId, member]
+  );
+
+  const submitSetup = useCallback(async () => {
+    if (!member || !locationId) return;
+    if (pin !== confirmPin) {
+      setShake(true);
+      setConfirmPin('');
+      setTimeout(() => setShake(false), 500);
+      toast.error('PINs do not match');
+      return;
+    }
+    setSettingPin(true);
+    try {
+      await unwrap(
+        posService.setPIN({ userId: member.userId, locationId, name: member.name, pin })
+      );
+      // Immediately sign in with the PIN just set.
+      await authenticatePin(locationId, member.userId, pin);
+    } catch (err) {
+      const msg = err instanceof Error ? err.message : 'Could not set PIN';
+      toast.error(msg);
+      setPin('');
+      setConfirmPin('');
+      setStep('setup');
+    } finally {
+      setSettingPin(false);
+    }
+  }, [authenticatePin, confirmPin, locationId, member, pin]);
+
+  // Auto-submit when a PIN field fills.
+  useEffect(() => {
+    if (step === 'enter' && isCompletePin(pin)) void submitEnter(pin);
+  }, [pin, step, submitEnter]);
+
+  useEffect(() => {
+    if (step === 'setup' && isCompletePin(pin) && isCompletePin(confirmPin)) void submitSetup();
+  }, [pin, confirmPin, step, submitSetup]);
+
+  // The active field for the keypad: PIN first, then confirm during setup.
+  const activeValue = step === 'setup' && isCompletePin(pin) ? confirmPin : pin;
+  const setActive = (updater: (prev: string) => string): void => {
+    if (step === 'setup' && isCompletePin(pin)) setConfirmPin(updater);
+    else setPin(updater);
+  };
+
+  const pushDigit = useCallback(
+    (d: string) => {
+      clearError();
+      setActive((p) => (p.length < PIN_LENGTH ? p + d : p));
+    },
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+    [clearError, step, pin]
+  );
+
+  const deleteDigit = useCallback(() => {
+    clearError();
+    setActive((p) => p.slice(0, -1));
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [clearError, step, pin]);
+
+  useEffect(() => {
+    if (step === 'roster') return;
+    const onKey = (e: KeyboardEvent): void => {
       if (e.key >= '0' && e.key <= '9') pushDigit(e.key);
       if (e.key === 'Backspace') deleteDigit();
+      if (e.key === 'Escape') resetToRoster();
     };
     window.addEventListener('keydown', onKey);
     return () => window.removeEventListener('keydown', onKey);
-  }, [pin]);
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [step, pushDigit, deleteDigit]);
 
-  const pushDigit = (d: string) => {
-    clearError();
-    setPin((p) => (p.length < PIN_LENGTH ? p + d : p));
-  };
-
-  const deleteDigit = () => {
-    clearError();
-    setPin((p) => p.slice(0, -1));
-  };
-
-  const handleSubmit = async (value: string) => {
-    try {
-      await authenticatePin(value);
-    } catch {
-      setShake(true);
-      setPin('');
-      setTimeout(() => setShake(false), 500);
-    }
-  };
-
-  const handleKey = (key: string) => {
+  const handleKey = (key: string): void => {
     if (key === '⌫') deleteDigit();
     else if (key !== '') pushDigit(key);
   };
 
+  const logo =
+    theme === 'dark'
+      ? 'https://cdn.voxire.dev/web_content/rtylr/logo-dark.webp'
+      : 'https://cdn.voxire.dev/web_content/rtylr/logo-light.webp';
+
+  // ── Roster step ────────────────────────────────────────────────
+  if (step === 'roster') {
+    return (
+      <div className="min-h-screen flex items-center justify-center bg-pos-bg p-6">
+        <div className="w-full max-w-md">
+          <div className="flex flex-col items-center gap-1 text-center mb-8">
+            <img src={logo} alt="rtylr" className="h-8 w-auto" />
+            <h1 className="text-lg font-bold text-pos-text mt-2">Who's working?</h1>
+            <p className="text-xs text-pos-muted">Tap your name to sign in</p>
+          </div>
+
+          {rosterLoading ? (
+            <div className="flex justify-center py-12">
+              <Loader2 className="w-7 h-7 animate-spin text-pos-muted" />
+            </div>
+          ) : rosterError ? (
+            <div className="text-center py-10">
+              <p className="text-sm text-destructive mb-3">{rosterError}</p>
+              <button
+                onClick={() => void loadRoster()}
+                className="text-xs text-pos-muted hover:text-pos-text underline"
+              >
+                Retry
+              </button>
+            </div>
+          ) : roster.length === 0 ? (
+            <div className="text-center py-10">
+              <p className="text-sm text-pos-muted">No staff assigned to this location yet.</p>
+              <p className="text-xs text-pos-muted mt-1">
+                Ask your manager to assign you to this location in the dashboard.
+              </p>
+            </div>
+          ) : (
+            <div className="grid grid-cols-2 gap-3">
+              {roster.map((m) => (
+                <button
+                  key={m.userId}
+                  onClick={() => pickMember(m)}
+                  className="flex flex-col items-center gap-2 p-5 rounded-2xl bg-pos-card border border-pos-border hover:border-blue-500/50 transition-colors"
+                >
+                  <div className="w-14 h-14 rounded-full bg-blue-500/10 flex items-center justify-center text-lg font-bold text-blue-400">
+                    {m.name.charAt(0).toUpperCase()}
+                  </div>
+                  <span className="text-sm font-semibold text-pos-text text-center leading-tight">
+                    {m.name}
+                  </span>
+                  <span className="text-[10px] text-pos-muted capitalize flex items-center gap-1">
+                    {m.isManager && <ShieldCheck className="w-3 h-3 text-emerald-500" />}
+                    {m.hasPin ? m.posRole || 'staff' : 'Set up PIN'}
+                  </span>
+                </button>
+              ))}
+            </div>
+          )}
+        </div>
+      </div>
+    );
+  }
+
+  // ── PIN entry / setup step ─────────────────────────────────────
+  const isSetup = step === 'setup';
+  const confirming = isSetup && isCompletePin(pin);
+  const title = isSetup
+    ? confirming
+      ? 'Confirm your PIN'
+      : 'Create your PIN'
+    : `Hi ${member?.name?.split(' ')[0] ?? ''}`;
+  const subtitle = isSetup
+    ? confirming
+      ? 'Re-enter to confirm'
+      : `Pick a ${PIN_LENGTH}-digit PIN for this location`
+    : 'Enter your PIN';
+  const busy = loading || settingPin;
+
   return (
     <div className="min-h-screen flex items-center justify-center bg-pos-bg">
       <div className="w-full max-w-xs bg-pos-card border border-pos-border rounded-2xl p-8 flex flex-col items-center gap-6">
+        <button
+          onClick={resetToRoster}
+          className="self-start flex items-center gap-1 text-xs text-pos-muted hover:text-pos-text transition-colors"
+        >
+          <ChevronLeft className="w-3.5 h-3.5" /> Back
+        </button>
+
         <div className="flex flex-col items-center gap-1 text-center">
-          <img
-            src={
-              theme === 'dark'
-                ? 'https://cdn.voxire.dev/web_content/rtylr/logo-dark.webp'
-                : 'https://cdn.voxire.dev/web_content/rtylr/logo-light.webp'
-            }
-            alt="rtylr"
-            className="h-8 w-auto"
-          />
-          <h1 className="text-lg font-bold text-pos-text">Vbitez POS</h1>
-          <p className="text-xs text-pos-muted">Enter your employee PIN</p>
+          <h1 className="text-lg font-bold text-pos-text">{title}</h1>
+          <p className="text-xs text-pos-muted">{subtitle}</p>
         </div>
 
         {/* PIN dots */}
@@ -84,7 +258,7 @@ const PinLogin: React.FC = () => {
               className={`w-3 h-3 rounded-full border-2 transition-colors ${
                 error
                   ? 'border-destructive bg-destructive/30'
-                  : i < pin.length
+                  : i < activeValue.length
                     ? 'border-pos-text bg-pos-text'
                     : 'border-pos-muted bg-transparent'
               }`}
@@ -94,7 +268,6 @@ const PinLogin: React.FC = () => {
 
         {error && <p className="text-xs text-destructive text-center">{error}</p>}
 
-        {/* Numpad */}
         <div className="flex flex-col gap-2 w-full">
           {KEYS.map((row, ri) => (
             <div key={ri} className="flex gap-2 justify-center">
@@ -109,7 +282,7 @@ const PinLogin: React.FC = () => {
                         : 'bg-white/8 text-pos-text hover:bg-white/14 active:scale-95'
                   }`}
                   onClick={() => handleKey(key)}
-                  disabled={loading || key === ''}
+                  disabled={busy || key === ''}
                   aria-label={key === '⌫' ? 'Delete' : key}
                 >
                   {key}
@@ -119,7 +292,7 @@ const PinLogin: React.FC = () => {
           ))}
         </div>
 
-        {loading && <p className="text-xs text-pos-muted">Verifying…</p>}
+        {busy && <p className="text-xs text-pos-muted">Please wait…</p>}
       </div>
     </div>
   );
