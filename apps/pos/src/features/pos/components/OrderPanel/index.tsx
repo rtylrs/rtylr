@@ -6,11 +6,11 @@ import { unwrap } from '@voxire/api';
 import { useCartStore } from '../../../../shared/stores/cartStore';
 import { useHeldOrdersStore } from '../../../../shared/stores/heldOrdersStore';
 import { useSettingsStore } from '../../../../shared/stores/settingsStore';
-import { useEmployeeSessionStore } from '../../../../shared/stores/employeeSessionStore';
+import { useTerminalContextStore } from '../../../../shared/stores/terminalContextStore';
 import ConfirmModal from '../../../../shared/components/ConfirmModal';
 import QuickNoteModal from '../../../../shared/components/QuickNoteModal';
 import OfflineBadge from '../../../../shared/components/OfflineBadge';
-import { posService } from '../../../../shared/services/posService';
+import { posService } from '../../../../shared/services/api/posService';
 import { formatCurrency } from '../../../../shared/utils/format';
 import { buildKitchenOrderPayload, extractCreatedOrderId } from './kitchenWorkflow';
 
@@ -32,7 +32,9 @@ const OrderPanel: React.FC<OrderPanelProps> = ({ tableNumber }) => {
   } = useCartStore();
   const hold = useHeldOrdersStore((s) => s.hold);
   const taxRate = useSettingsStore((s) => s.taxRate);
-  const employee = useEmployeeSessionStore((s) => s.employee);
+  const locationId = useTerminalContextStore((s) => s.locationId);
+  const customerId = useCartStore((s) => s.customerId);
+  const customerName = useCartStore((s) => s.customerName);
 
   const subtotal = total();
   const tax = subtotal * taxRate;
@@ -71,10 +73,9 @@ const OrderPanel: React.FC<OrderPanelProps> = ({ tableNumber }) => {
           posService.createOrder(
             buildKitchenOrderPayload({
               items,
-              subtotal,
-              tax,
-              total: grandTotal,
-              employeeId: employee?.id,
+              locationId,
+              customerId,
+              customerName,
             })
           )
         );

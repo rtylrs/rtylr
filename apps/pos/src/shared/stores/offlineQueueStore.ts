@@ -1,6 +1,7 @@
 import { create } from 'zustand';
 import { persist } from 'zustand/middleware';
-import type { OfflineQueuedOrder, Order } from '../types/pos';
+import type { OfflineQueuedOrder } from '../types/pos';
+import type { CreateOrderPayload } from '../services/api/posService';
 
 interface OfflineQueueState {
   queue: OfflineQueuedOrder[];
@@ -8,7 +9,7 @@ interface OfflineQueueState {
 }
 
 interface OfflineQueueActions {
-  enqueue: (order: Order) => OfflineQueuedOrder;
+  enqueue: (order: CreateOrderPayload) => OfflineQueuedOrder;
   setOnline: (online: boolean) => void;
   retry: (id: string) => void;
   markSynced: (id: string) => void;

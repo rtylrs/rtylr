@@ -6,12 +6,13 @@ import { unwrap } from '@voxire/api';
 import POSLayout from '../../layouts/POSLayout';
 import { useCartStore } from '../../shared/stores/cartStore';
 import { useSettingsStore } from '../../shared/stores/settingsStore';
-import { useEmployeeSessionStore } from '../../shared/stores/employeeSessionStore';
-import { posService } from '../../shared/services/posService';
+import { posService } from '../../shared/services/api/posService';
 import { useOfflineQueueStore } from '../../shared/stores/offlineQueueStore';
+import { useTerminalContextStore } from '../../shared/stores/terminalContextStore';
 import {
   buildCashTender,
   buildCheckoutOrder,
+  buildCreateOrderPayload,
   processCheckout,
   type CheckoutPaymentMethod,
 } from './checkoutWorkflow';
@@ -29,11 +30,14 @@ const fmt = (n: number): string =>
 
 const Payment: React.FC = () => {
   const navigate = useNavigate();
-  const { items, total, clearCart, newOrder, customerId } = useCartStore();
+  const { items, total, clearCart, newOrder, customerId, customerName } = useCartStore();
+  const locationId = useTerminalContextStore((s) => s.locationId);
+  // Stable local reference for the QR panel - regenerating it per render
+  // would change the QR code under the customer's camera.
+  const [localOrderRef] = useState(() => `local-${Date.now().toString(36)}`);
   const taxRate = useSettingsStore((s) => s.taxRate);
   const printer = useSettingsStore((s) => s.printer);
   const business = useSettingsStore((s) => s.business);
-  const employee = useEmployeeSessionStore((s) => s.employee);
   const enqueueOffline = useOfflineQueueStore((s) => s.enqueue);
   const addReceipt = useReceiptsStore((s) => s.add);
   const recordCashSale = useCashDrawerStore((s) => s.recordCashSale);
@@ -53,18 +57,27 @@ const Payment: React.FC = () => {
     setProcessing(true);
     try {
       const order = buildCheckoutOrder({
-        id: `local-${Date.now()}`,
+        id: localOrderRef,
         items,
         subtotal,
         tax,
         total: grandTotal,
         tip,
-        employeeId: employee?.id,
+        customerId,
         createdAt: new Date().toISOString(),
+      });
+
+      const payload = buildCreateOrderPayload({
+        items,
+        method,
+        locationId,
+        customerId,
+        customerName,
       });
 
       const result = await processCheckout({
         order,
+        payload,
         method,
         createOrder: async (payload) => unwrap(posService.createOrder(payload)),
         chargeOrder: async (orderId, payload) => {
@@ -265,7 +278,7 @@ const Payment: React.FC = () => {
 
           {method === 'qr' && (
             <QrPayPanel
-              orderId={`local-${Date.now().toString(36)}`}
+              orderId={localOrderRef}
               amount={grandTotal}
               onConfirmed={() => setQrConfirmed(true)}
             />

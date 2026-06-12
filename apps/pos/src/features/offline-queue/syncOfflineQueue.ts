@@ -1,8 +1,9 @@
-import type { OfflineQueuedOrder, Order } from '../../shared/types/pos';
+import type { OfflineQueuedOrder } from '../../shared/types/pos';
+import type { CreateOrderPayload } from '../../shared/services/api/posService';
 
 interface SyncQueuedOrdersParams {
   entries: OfflineQueuedOrder[];
-  syncOrder: (order: Order) => Promise<void>;
+  syncOrder: (order: CreateOrderPayload) => Promise<void>;
   retry: (id: string) => void;
   markSynced: (id: string) => void;
   markFailed: (id: string, err: string) => void;

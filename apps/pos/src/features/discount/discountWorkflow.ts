@@ -1,4 +1,4 @@
-import type { DiscountPayload } from '../../shared/services/posService';
+import type { DiscountPayload } from '../../shared/services/api/posService';
 
 export type DiscountMode = 'percent' | 'flat';
 
@@ -40,8 +40,8 @@ export function buildDiscountRequest({
   return {
     orderId: normalizedOrderId,
     payload: {
-      mode,
-      value: discountValue(mode, valueInput),
+      discount_type: mode,
+      discount_value: discountValue(mode, valueInput),
     },
   };
 }

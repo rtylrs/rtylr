@@ -63,7 +63,7 @@ const OfflineQueueScreen: React.FC = () => {
               >
                 <div>
                   <div className="text-sm font-semibold text-pos-text">
-                    Order {q.order.number ?? q.order.id}
+                    Order · {q.order.items.length} item{q.order.items.length === 1 ? '' : 's'}
                   </div>
                   <div className="text-xs text-pos-muted">
                     Queued {formatDate(q.queuedAt)} · Retries {q.retries} · {q.status}
@@ -74,7 +74,9 @@ const OfflineQueueScreen: React.FC = () => {
                 </div>
                 <div className="flex items-center gap-3">
                   <div className="text-sm font-bold text-pos-text">
-                    {formatCurrency(q.order.total ?? 0)}
+                    {formatCurrency(
+                      q.order.items.reduce((sum, it) => sum + it.unit_price * it.quantity, 0)
+                    )}
                   </div>
                   <button
                     onClick={() => retry(q.id)}

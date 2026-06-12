@@ -1,6 +1,9 @@
 import type { CartItem } from '../../shared/stores/cartStore';
 import type { Order } from '../../shared/types/pos';
-import type { PaymentPayload } from '../../shared/services/posService';
+import type {
+  CreateOrderPayload,
+  PaymentPayload,
+} from '../../shared/services/api/posService';
 import { roundCents } from '../../shared/utils/orderCalc';
 
 export type CheckoutPaymentMethod = 'card' | 'cash' | 'qr';
@@ -18,20 +21,38 @@ interface BuildCheckoutOrderParams {
   tax: number;
   total: number;
   tip?: number;
-  employeeId?: string | number | null;
+  customerId?: string | number | null;
   createdAt: string;
+}
+
+interface BuildCreateOrderPayloadParams {
+  items: CartItem[];
+  method: CheckoutPaymentMethod;
+  locationId?: number | null;
+  tableId?: number | null;
+  sessionId?: number | null;
+  customerId?: string | number | null;
+  customerName?: string | null;
+  notes?: string;
 }
 
 interface ProcessCheckoutParams {
   order: Order;
+  payload: CreateOrderPayload;
   method: CheckoutPaymentMethod;
-  createOrder: (order: Order) => Promise<{ id?: number; order_id?: number }>;
+  createOrder: (payload: CreateOrderPayload) => Promise<{ id?: number; order_id?: number }>;
   chargeOrder: (orderId: number, payload: PaymentPayload) => Promise<void>;
-  enqueueOffline: (order: Order) => void;
+  enqueueOffline: (payload: CreateOrderPayload) => void;
   recordCashSale: (amount: number, orderId: string) => void;
 }
 
 type ProcessCheckoutResult = { status: 'online'; orderId: number } | { status: 'queued' };
+
+function positiveInteger(value: unknown): number | undefined {
+  const numeric = typeof value === 'string' ? Number(value.trim()) : Number(value);
+  if (!Number.isInteger(numeric) || numeric <= 0) return undefined;
+  return numeric;
+}
 
 export function buildCashTender(amountInput: string, totalDue: number): CashTender {
   const received = Number(amountInput);
@@ -46,6 +67,7 @@ export function buildCashTender(amountInput: string, totalDue: number): CashTend
   };
 }
 
+// Local Order object used for receipts and the receipt history screen.
 export function buildCheckoutOrder({
   id,
   items,
@@ -53,7 +75,7 @@ export function buildCheckoutOrder({
   tax,
   total,
   tip = 0,
-  employeeId,
+  customerId,
   createdAt,
 }: BuildCheckoutOrderParams): Order {
   return {
@@ -73,12 +95,45 @@ export function buildCheckoutOrder({
     total,
     createdAt,
     paidAt: createdAt,
-    customerId: String(employeeId ?? ''),
+    customerId: String(customerId ?? ''),
+  };
+}
+
+// API payload matching the backend CreateOrderRequest contract. The backend
+// computes totals from items, so unit_price/tax_rate must be per-line.
+export function buildCreateOrderPayload({
+  items,
+  method,
+  locationId,
+  tableId,
+  sessionId,
+  customerId,
+  customerName,
+  notes,
+}: BuildCreateOrderPayloadParams): CreateOrderPayload {
+  return {
+    location_id: positiveInteger(locationId),
+    table_id: positiveInteger(tableId),
+    session_id: positiveInteger(sessionId),
+    customer_id: positiveInteger(customerId),
+    customer_name: customerName ?? undefined,
+    payment_method: method,
+    notes,
+    items: items.map((item) => ({
+      menu_item_id: item.productId,
+      name: item.name,
+      quantity: item.quantity,
+      unit_price: item.unitPrice,
+      discount_pct: item.discountPct ?? 0,
+      tax_rate: item.taxRate ?? 0,
+      notes: item.notes ?? '',
+    })),
   };
 }
 
 export async function processCheckout({
   order,
+  payload,
   method,
   createOrder,
   chargeOrder,
@@ -86,7 +141,7 @@ export async function processCheckout({
   recordCashSale,
 }: ProcessCheckoutParams): Promise<ProcessCheckoutResult> {
   try {
-    const createRes = await createOrder(order);
+    const createRes = await createOrder(payload);
     const orderId = createRes.id ?? createRes.order_id;
     if (!orderId || orderId <= 0) {
       throw new Error('Order was not accepted by the server.');
@@ -104,7 +159,7 @@ export async function processCheckout({
     return { status: 'online', orderId };
   } catch {
     if (method === 'cash') {
-      enqueueOffline(order);
+      enqueueOffline(payload);
       recordCashSale(order.total, order.id);
       return { status: 'queued' };
     }

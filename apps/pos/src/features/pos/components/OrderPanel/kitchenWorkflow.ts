@@ -1,21 +1,15 @@
-import type { OrderPayload } from '../../../../shared/services/posService';
+import type { CreateOrderPayload } from '../../../../shared/services/api/posService';
 import type { CartItem } from '../../../../shared/stores/cartStore';
 
 export const KITCHEN_ORDER_ID_ERROR = 'Order must sync before it can be sent to kitchen.';
 
 interface BuildKitchenOrderPayloadInput {
   items: CartItem[];
-  subtotal: number;
-  tax: number;
-  total: number;
-  employeeId?: number | string;
-  now?: () => string;
-  localId?: () => string;
-}
-
-function nonNegativeNumber(value: number): number {
-  if (!Number.isFinite(value) || value < 0) return 0;
-  return value;
+  locationId?: number | null;
+  tableId?: number | null;
+  customerId?: string | number | null;
+  customerName?: string | null;
+  kitchenNotes?: string;
 }
 
 function positiveInteger(value: unknown): number | undefined {
@@ -24,24 +18,24 @@ function positiveInteger(value: unknown): number | undefined {
   return numeric;
 }
 
-export function buildKitchenOrderPayload(input: BuildKitchenOrderPayloadInput): OrderPayload {
+// Builds a backend CreateOrderRequest-shaped payload. The backend computes
+// totals from the per-line unit_price/tax_rate, so no totals are sent.
+export function buildKitchenOrderPayload(input: BuildKitchenOrderPayloadInput): CreateOrderPayload {
   return {
-    id: input.localId?.() ?? `local-${Date.now()}`,
-    status: 'open',
+    location_id: positiveInteger(input.locationId),
+    table_id: positiveInteger(input.tableId),
+    customer_id: positiveInteger(input.customerId),
+    customer_name: input.customerName ?? undefined,
+    kitchen_notes: input.kitchenNotes,
     items: input.items.map((item) => ({
-      id: item.id,
+      menu_item_id: item.productId,
       name: item.name,
-      price: nonNegativeNumber(item.price),
       quantity: positiveInteger(item.quantity) ?? 1,
+      unit_price: Number.isFinite(item.unitPrice) && item.unitPrice >= 0 ? item.unitPrice : 0,
+      discount_pct: item.discountPct ?? 0,
+      tax_rate: item.taxRate ?? 0,
       notes: item.notes ?? '',
     })),
-    subtotal: nonNegativeNumber(input.subtotal),
-    tax: nonNegativeNumber(input.tax),
-    tip: 0,
-    discount: 0,
-    total: nonNegativeNumber(input.total),
-    createdAt: input.now?.() ?? new Date().toISOString(),
-    customerId: String(input.employeeId ?? ''),
   };
 }
 

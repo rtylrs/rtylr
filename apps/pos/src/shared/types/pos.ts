@@ -127,7 +127,8 @@ export interface DaySummary {
 
 export interface OfflineQueuedOrder {
   id: string;
-  order: Order;
+  /** Backend-shaped CreateOrderPayload, replayed verbatim on reconnect. */
+  order: import('../services/api/posService').CreateOrderPayload;
   queuedAt: string;
   retries: number;
   lastError?: string;
