@@ -19,10 +19,11 @@ func CreateCycleRoutes() []string { return []string{"/hr/performance/cycles"} }
 type CreateCycleHandler struct{ Service *application.Service }
 
 type CreateCycleRequest struct {
-	Name        string `json:"name"`
-	CycleType   string `json:"cycle_type"`
-	PeriodStart string `json:"period_start"`
-	PeriodEnd   string `json:"period_end"`
+	Name        string   `json:"name"`
+	CycleType   string   `json:"cycle_type"`
+	PeriodStart string   `json:"period_start"`
+	PeriodEnd   string   `json:"period_end"`
+	ReviewTypes []string `json:"review_types"`
 }
 
 type CreateCycleResponse struct {

@@ -29,6 +29,9 @@ func RegisterRoutes(ctx context.Context, router *chi.Mux, service *application.S
 	serverHttp.RegisterGET[handlers.GetTimesheetRequest, handlers.GetTimesheetResponse](
 		ctx, router, handlers.GetTimesheetRoutes(), &handlers.GetTimesheetHandler{Service: service},
 	)
+	serverHttp.RegisterGET[handlers.GetTimesheetByIDRequest, handlers.GetTimesheetByIDResponse](
+		ctx, router, handlers.GetTimesheetByIDRoutes(), &handlers.GetTimesheetByIDHandler{Service: service},
+	)
 	serverHttp.RegisterGET[handlers.ListTimesheetsRequest, handlers.ListTimesheetsResponse](
 		ctx, router, handlers.ListTimesheetsRoutes(), &handlers.ListTimesheetsHandler{Service: service},
 	)
@@ -37,6 +40,9 @@ func RegisterRoutes(ctx context.Context, router *chi.Mux, service *application.S
 	)
 	serverHttp.RegisterPOSTWithValidation[handlers.ApproveTimesheetRequest, handlers.ApproveTimesheetResponse](
 		ctx, router, handlers.ApproveTimesheetRoutes(), &handlers.ApproveTimesheetHandler{Service: service},
+	)
+	serverHttp.RegisterPOSTWithValidation[handlers.RejectTimesheetRequest, handlers.RejectTimesheetResponse](
+		ctx, router, handlers.RejectTimesheetRoutes(), &handlers.RejectTimesheetHandler{Service: service},
 	)
 
 	// Flow import & billable export

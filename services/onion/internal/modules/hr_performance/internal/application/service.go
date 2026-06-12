@@ -85,6 +85,16 @@ func (s *Service) CreateReviewCycle(ctx context.Context, ownerID int64, params d
 	return rec, err
 }
 
+func (s *Service) GetReviewCycle(ctx context.Context, ownerID, cycleID int64) (*domain.ReviewCycleRecord, error) {
+	key := cacheKeys.Scoped(hrPerformanceScope, ownerID, fmt.Sprintf("cycle=%d", cycleID))
+	return cacher.Of[*domain.ReviewCycleRecord]().GetOrComputeSingle(ctx, key,
+		func(ctx context.Context) (*domain.ReviewCycleRecord, error) {
+			return s.repo.GetReviewCycle(ctx, ownerID, cycleID)
+		},
+		cacher.WithExpiry(ctx, hrPerformanceTTL),
+	)
+}
+
 func (s *Service) OpenReviewCycle(ctx context.Context, ownerID, cycleID int64) error {
 	cycle, err := s.repo.GetReviewCycle(ctx, ownerID, cycleID)
 	if err != nil {

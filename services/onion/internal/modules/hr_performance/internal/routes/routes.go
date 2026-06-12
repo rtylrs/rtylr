@@ -23,6 +23,9 @@ func RegisterRoutes(ctx context.Context, router *chi.Mux, service *application.S
 	serverHttp.RegisterGET[handlers.ListCyclesRequest, handlers.ListCyclesResponse](
 		ctx, router, handlers.ListCyclesRoutes(), &handlers.ListCyclesHandler{Service: service},
 	)
+	serverHttp.RegisterGET[handlers.GetCycleRequest, handlers.GetCycleResponse](
+		ctx, router, handlers.GetCycleRoutes(), &handlers.GetCycleHandler{Service: service},
+	)
 	serverHttp.RegisterPOSTWithValidation[handlers.CreateCycleRequest, handlers.CreateCycleResponse](
 		ctx, router, handlers.CreateCycleRoutes(), &handlers.CreateCycleHandler{Service: service},
 	)
