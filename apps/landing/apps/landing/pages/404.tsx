@@ -9,6 +9,7 @@ import MainLayout from '../layouts/Main/MainLayout';
 import HelmetContainer from '../components/HelmetContainer';
 import { navigateExternal } from '../lib/navigation';
 import { blurFadeIn, staggerBlur } from '../lib/animations';
+import { SplitWords } from '../components/motion/SplitWords';
 import styles from './404.module.scss';
 
 const SUGGESTED_LINKS = [
@@ -60,11 +61,12 @@ const NotFoundPage = (): JSX.Element => {
               ERROR · 404
             </motion.span>
 
-            <motion.h1 className={styles.title} variants={blurFadeIn}>
-              This page
-              <br />
-              doesn&apos;t exist.
-            </motion.h1>
+            <SplitWords
+              as="h1"
+              className={styles.title}
+              text={"This page\ndoesn't exist."}
+              delay={0.1}
+            />
 
             <motion.p className={styles.subtitle} variants={blurFadeIn}>
               The link may be broken, renamed, or the page hasn&apos;t been built yet. Try one of

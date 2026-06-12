@@ -4,6 +4,8 @@ import { Button } from '@voxire/components';
 import { ASSETS, APP_URLS } from '@voxire/config';
 import { ManageConsentLink } from '@voxire/consent';
 import React from 'react';
+import { motion } from 'motion/react';
+import { fadeInUp, staggerContainer, viewportOnce } from '../../../lib/animations';
 import { navigateExternal } from '../../../lib/navigation';
 import styles from './Footer.module.scss';
 
@@ -82,9 +84,15 @@ const Footer: React.FC = () => {
 
   return (
     <footer className={styles.footer} role="contentinfo">
-      <div className={styles['footer-container']}>
+      <motion.div
+        className={styles['footer-container']}
+        initial="hidden"
+        whileInView="visible"
+        viewport={viewportOnce}
+        variants={staggerContainer}
+      >
         <div className={styles['footer-top']}>
-          <div className={styles['footer-logo-section']}>
+          <motion.div className={styles['footer-logo-section']} variants={fadeInUp}>
             <img
               src={ASSETS.logos.light}
               alt="Rtylr Logo"
@@ -92,11 +100,15 @@ const Footer: React.FC = () => {
               loading="lazy"
               decoding="async"
             />
-          </div>
+          </motion.div>
 
           <div className={styles['footer-nav']}>
             {footerSections.map((section) => (
-              <div key={section.title} className={styles['footer-section']}>
+              <motion.div
+                key={section.title}
+                className={styles['footer-section']}
+                variants={fadeInUp}
+              >
                 <h3 className={styles['footer-section-title']}>{section.title}</h3>
                 <nav aria-label={`${section.title} navigation`}>
                   <ul className={styles['footer-links']}>
@@ -120,11 +132,11 @@ const Footer: React.FC = () => {
                     ))}
                   </ul>
                 </nav>
-              </div>
+              </motion.div>
             ))}
           </div>
 
-          <div className={styles['footer-cta']}>
+          <motion.div className={styles['footer-cta']} variants={fadeInUp}>
             <Button
               onClick={handleSignupClick}
               variant="dark-outline"
@@ -137,10 +149,10 @@ const Footer: React.FC = () => {
                 Book a demo
               </Button>
             )}
-          </div>
+          </motion.div>
         </div>
 
-        <div className={styles['footer-bottom']}>
+        <motion.div className={styles['footer-bottom']} variants={fadeInUp}>
           <div className={styles['footer-legal']}>
             <Link href="/legal/terms" className={styles['legal-link']}>
               TERMS OF USE
@@ -167,8 +179,8 @@ const Footer: React.FC = () => {
             </a>
           </div>
           <p className={styles.copyright}>© RTYLR {new Date().getFullYear()}</p>
-        </div>
-      </div>
+        </motion.div>
+      </motion.div>
     </footer>
   );
 };

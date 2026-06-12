@@ -1,6 +1,7 @@
 import React, { useState, useEffect, useCallback } from 'react';
 import Link from 'next/link';
 import { HiMenu, HiX, HiChevronDown, HiChevronRight } from 'react-icons/hi';
+import { AnimatePresence, motion } from 'motion/react';
 import { Button } from '@voxire/components';
 import { APP_URLS, ASSETS } from '@voxire/config';
 import { selectLanguage } from '../../../../services/i18next';
@@ -147,13 +148,18 @@ const HeaderMobile: React.FC = () => {
         </div>
       </header>
 
-      {isMenuOpen && (
-        <div
-          className={styles['mobile-menu-overlay']}
-          role="dialog"
-          aria-modal="true"
-          aria-label="Navigation menu"
-        >
+      <AnimatePresence>
+        {isMenuOpen && (
+          <motion.div
+            className={styles['mobile-menu-overlay']}
+            role="dialog"
+            aria-modal="true"
+            aria-label="Navigation menu"
+            initial={{ opacity: 0, y: 14 }}
+            animate={{ opacity: 1, y: 0 }}
+            exit={{ opacity: 0, y: 10, transition: { duration: 0.18, ease: 'easeIn' } }}
+            transition={{ duration: 0.35, ease: [0.32, 0.72, 0, 1] }}
+          >
           <div className={styles['mobile-menu-header']}>
             <Link
               href="/"
@@ -386,8 +392,9 @@ const HeaderMobile: React.FC = () => {
               </span>
             </div>
           </div>
-        </div>
-      )}
+          </motion.div>
+        )}
+      </AnimatePresence>
     </>
   );
 };
