@@ -22,12 +22,13 @@ import {
   Download,
   Mail,
 } from 'lucide-react';
-import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
+import { useMutation, useQueryClient } from '@tanstack/react-query';
 import { motion, AnimatePresence } from 'motion/react';
 import { toast } from 'sonner';
 import { Input } from '../../shared/components/ui';
 import { unwrap } from '@voxire/api';
 import { safe } from '../../shared/lib/api';
+import { ADDONS_QUERY_KEY, type AddonData, useAddons } from '../../shared/hooks/queries/useAddons';
 
 const ICON_MAP: Record<
   string,
@@ -76,28 +77,16 @@ const COLOR_MAP: Record<string, { bg: string; color: string }> = {
   data_export: { bg: 'rgba(59,130,246,0.12)', color: '#3b82f6' },
 };
 
-interface AddonData {
-  id: string;
-  name: string;
-  description: string;
-  icon: string;
-  price: number;
-  isFree: boolean;
-  isEnabled: boolean;
+function getAddonManageRoute(addonId: string): '/settings/domain' | '/settings/email' | undefined {
+  switch (addonId) {
+    case 'custom_domain':
+      return '/settings/domain';
+    case 'email_marketing':
+      return '/settings/email';
+    default:
+      return undefined;
+  }
 }
-
-const useAddons = () =>
-  useQuery<AddonData[]>({
-    queryKey: ['addons'],
-    queryFn: async () => {
-      try {
-        const res = await unwrap(safe.get<{ addons?: AddonData[] }>('/addons'));
-        return res.addons ?? [];
-      } catch {
-        return [];
-      }
-    },
-  });
 
 const Addons: React.FC = () => {
   const qc = useQueryClient();
@@ -119,7 +108,7 @@ const Addons: React.FC = () => {
       setTimeout(() => {
         setShowEnableSuccess(null);
         setEnablingId(null);
-        qc.invalidateQueries({ queryKey: ['addons'] });
+        qc.invalidateQueries({ queryKey: ADDONS_QUERY_KEY });
       }, 2000);
     },
     onError: () => {
@@ -135,7 +124,7 @@ const Addons: React.FC = () => {
     onSuccess: () => {
       setDisableTarget(null);
       setConfirmText('');
-      qc.invalidateQueries({ queryKey: ['addons'] });
+      qc.invalidateQueries({ queryKey: ADDONS_QUERY_KEY });
     },
     onError: () => toast.error('Failed to disable addon'),
   });
@@ -200,6 +189,14 @@ const Addons: React.FC = () => {
               const Icon = ICON_MAP[addon.icon] ?? MessageSquare;
               const isEnabling = enablingId === addon.id;
               const justEnabled = showEnableSuccess === addon.id;
+              const manageRoute = getAddonManageRoute(addon.id);
+              const handlePaidAddonClick = () => {
+                if (addon.isEnabled && manageRoute) {
+                  void navigate({ to: manageRoute });
+                  return;
+                }
+                goToBilling();
+              };
 
               return (
                 <motion.div
@@ -265,7 +262,7 @@ const Addons: React.FC = () => {
 
                     {!addon.isFree ? (
                       <button
-                        onClick={goToBilling}
+                        onClick={handlePaidAddonClick}
                         className="px-3 py-1.5 rounded-lg text-xs font-semibold transition-all"
                         style={{
                           background: addon.isEnabled ? 'var(--dash-hover)' : '#4583C4',

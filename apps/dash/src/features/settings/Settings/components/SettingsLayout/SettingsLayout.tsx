@@ -14,13 +14,29 @@ import {
 } from 'lucide-react';
 import { cn } from '../../../../../shared/lib/utils';
 import { useUserStore } from '../../../../../shared/stores/userStore';
+import {
+  isAddonEnabled,
+  type AddonData,
+  useAddons,
+} from '../../../../../shared/hooks/queries/useAddons';
 
 type NavGroup = {
   label: string;
-  items: { label: string; path: string; icon: React.ComponentType<{ size?: number }> }[];
+  items: NavItem[];
 };
 
-function getNavGroups(isOwner: boolean): NavGroup[] {
+type NavItem = {
+  label: string;
+  path: string;
+  icon: React.ComponentType<{ size?: number }>;
+};
+
+const addonSettingsItems: Array<NavItem & { addonId: string }> = [
+  { label: 'Custom Domain', path: '/settings/domain', icon: Globe, addonId: 'custom_domain' },
+  { label: 'Email', path: '/settings/email', icon: Mail, addonId: 'email_marketing' },
+];
+
+function getNavGroups(isOwner: boolean, addons: AddonData[]): NavGroup[] {
   const groups: NavGroup[] = [
     {
       label: 'Account',
@@ -38,13 +54,16 @@ function getNavGroups(isOwner: boolean): NavGroup[] {
   ];
 
   if (isOwner) {
-    groups.push({
-      label: 'Online Presence',
-      items: [
-        { label: 'Custom Domain', path: '/settings/domain', icon: Globe },
-        { label: 'Email', path: '/settings/email', icon: Mail },
-      ],
-    });
+    const enabledAddonSettings = addonSettingsItems.filter((item) =>
+      isAddonEnabled(addons, item.addonId)
+    );
+
+    if (enabledAddonSettings.length > 0) {
+      groups.push({
+        label: 'Online Presence',
+        items: enabledAddonSettings,
+      });
+    }
 
     groups.push({
       label: 'Plans & Addons',
@@ -63,8 +82,9 @@ const SettingsLayout: React.FC = () => {
   const navigate = useNavigate();
   const pathname = useRouterState({ select: (s) => s.location.pathname });
   const { user } = useUserStore();
+  const { data: addons = [] } = useAddons();
   const isOwner = user?.isOwner !== false;
-  const navGroups = getNavGroups(isOwner);
+  const navGroups = getNavGroups(isOwner, addons);
 
   return (
     <div className="flex h-screen overflow-hidden" style={{ background: 'var(--dash-bg)' }}>
