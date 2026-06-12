@@ -46,9 +46,12 @@ func (h *StatsHandler) Serve(ctx context.Context, _ *StatsRequest) (StatsRespons
 // ── Users ─────────────────────────────────────────────────────────────────────
 
 type ListUsersRequest struct {
-	Limit  int    `json:"limit"`
-	Offset int    `json:"offset"`
-	Search string `json:"search"`
+	Limit    int    `json:"limit"`
+	Offset   int    `json:"offset"`
+	ID       int64  `json:"id"`
+	Email    string `json:"email"`
+	Name     string `json:"name"`
+	FullName string `json:"full_name"`
 }
 
 type ListUsersResponse = application.ListUsersResult
@@ -63,7 +66,11 @@ func (h *ListUsersHandler) Serve(ctx context.Context, req *ListUsersRequest) (Li
 	if limit <= 0 || limit > 200 {
 		limit = 50
 	}
-	result, err := h.Service.ListUsers(ctx, limit, req.Offset, req.Search)
+	name := req.Name
+	if name == "" {
+		name = req.FullName
+	}
+	result, err := h.Service.ListUsers(ctx, limit, req.Offset, req.ID, req.Email, name)
 	if err != nil {
 		return ListUsersResponse{}, &errorModels.ServerError{Code: http.StatusInternalServerError, Message: "Failed to list users"}
 	}

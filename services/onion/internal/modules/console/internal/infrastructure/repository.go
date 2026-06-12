@@ -479,14 +479,21 @@ func (r *Repository) GetUserByEmail(ctx context.Context, email string) (*UserRow
 
 // ── Users CRUD ────────────────────────────────────────────────────────────────
 
-func (r *Repository) ListUsers(ctx context.Context, limit, offset int, search string) ([]UserRow, int64, error) {
+func (r *Repository) ListUsers(
+	ctx context.Context,
+	limit, offset int,
+	id int64,
+	email, fullName string,
+) ([]UserRow, int64, error) {
 	conds := sq.And{}
-	if search != "" {
-		like := "%" + search + "%"
-		conds = append(conds, sq.Or{
-			sq.Like{"email": like},
-			sq.Like{"full_name": like},
-		})
+	if id > 0 {
+		conds = append(conds, sq.Eq{"id": id})
+	}
+	if email != "" {
+		conds = append(conds, sq.Eq{"email": email})
+	}
+	if fullName != "" {
+		conds = append(conds, sq.Eq{"full_name": fullName})
 	}
 
 	countSQL, countArgs, err := sq.

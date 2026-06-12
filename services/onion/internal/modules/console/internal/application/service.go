@@ -229,11 +229,18 @@ type ListUsersResult struct {
 	Total int64     `json:"total"`
 }
 
-func (s *Service) ListUsers(ctx context.Context, limit, offset int, search string) (*ListUsersResult, error) {
-	key := consoleKey(fmt.Sprintf("users|l=%d|o=%d|q=%s", limit, offset, search))
+func (s *Service) ListUsers(
+	ctx context.Context,
+	limit, offset int,
+	id int64,
+	email, fullName string,
+) (*ListUsersResult, error) {
+	email = strings.ToLower(strings.TrimSpace(email))
+	fullName = strings.TrimSpace(fullName)
+	key := consoleKey(fmt.Sprintf("users|l=%d|o=%d|id=%d|email=%s|name=%s", limit, offset, id, email, fullName))
 	return cacher.Of[*ListUsersResult]().GetOrComputeSingle(ctx, key,
 		func(ctx context.Context) (*ListUsersResult, error) {
-			users, total, err := s.repo.ListUsers(ctx, limit, offset, search)
+			users, total, err := s.repo.ListUsers(ctx, limit, offset, id, email, fullName)
 			if err != nil {
 				return nil, err
 			}

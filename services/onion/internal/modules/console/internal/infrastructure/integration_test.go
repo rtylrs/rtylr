@@ -14,7 +14,7 @@ func TestListUsers_ReturnsAtLeastTwoUsers(t *testing.T) {
 	repo := infrastructure.NewRepository(db)
 	ctx := context.Background()
 
-	users, total, err := repo.ListUsers(ctx, 100, 0, "")
+	users, total, err := repo.ListUsers(ctx, 100, 0, 0, "", "")
 	if err != nil {
 		t.Fatalf("ListUsers: %v", err)
 	}
@@ -26,18 +26,17 @@ func TestListUsers_ReturnsAtLeastTwoUsers(t *testing.T) {
 	}
 }
 
-func TestListUsers_SearchFilters(t *testing.T) {
+func TestListUsers_EmailFilterNoMatch(t *testing.T) {
 	db := testutil.OpenDB(t)
 	repo := infrastructure.NewRepository(db)
 	ctx := context.Background()
 
-	// Search for a term that should match no users.
-	users, total, err := repo.ListUsers(ctx, 100, 0, "zzznomatchzz99999")
+	users, total, err := repo.ListUsers(ctx, 100, 0, 0, "zzznomatchzz99999@example.com", "")
 	if err != nil {
-		t.Fatalf("ListUsers search: %v", err)
+		t.Fatalf("ListUsers email filter: %v", err)
 	}
 	if total != 0 || len(users) != 0 {
-		t.Errorf("expected 0 results for no-match search, got total=%d rows=%d", total, len(users))
+		t.Errorf("expected 0 results for no-match email, got total=%d rows=%d", total, len(users))
 	}
 }
 
@@ -366,7 +365,7 @@ func TestBanUser_ThenUnban(t *testing.T) {
 	}
 }
 
-func TestListUsers_SearchReturnsSubset(t *testing.T) {
+func TestListUsers_EmailFilterReturnsExactMatch(t *testing.T) {
 	db := testutil.OpenDB(t)
 	repo := infrastructure.NewRepository(db)
 	ctx := context.Background()
@@ -378,9 +377,9 @@ func TestListUsers_SearchReturnsSubset(t *testing.T) {
 	}
 	t.Cleanup(func() { repo.DeleteUser(ctx, id) })
 
-	users, total, err := repo.ListUsers(ctx, 100, 0, "searchable-unique-xkzq")
+	users, total, err := repo.ListUsers(ctx, 100, 0, 0, email, "")
 	if err != nil {
-		t.Fatalf("ListUsers with search: %v", err)
+		t.Fatalf("ListUsers with email filter: %v", err)
 	}
 	if total != 1 {
 		t.Errorf("expected total=1, got %d", total)
@@ -393,17 +392,66 @@ func TestListUsers_SearchReturnsSubset(t *testing.T) {
 	}
 }
 
+func TestListUsers_IDFilterReturnsExactMatch(t *testing.T) {
+	db := testutil.OpenDB(t)
+	repo := infrastructure.NewRepository(db)
+	ctx := context.Background()
+
+	email := "search-by-id-xkzq@example.com"
+	id, err := repo.CreateUser(ctx, email, "hash-id", "Search By ID", false)
+	if err != nil {
+		t.Fatalf("CreateUser: %v", err)
+	}
+	t.Cleanup(func() { repo.DeleteUser(ctx, id) })
+
+	users, total, err := repo.ListUsers(ctx, 100, 0, id, "", "")
+	if err != nil {
+		t.Fatalf("ListUsers with id filter: %v", err)
+	}
+	if total != 1 || len(users) != 1 {
+		t.Fatalf("expected one exact id match, got total=%d rows=%d", total, len(users))
+	}
+	if users[0].ID != id {
+		t.Errorf("expected id=%d, got %d", id, users[0].ID)
+	}
+}
+
+func TestListUsers_NameFilterReturnsExactMatch(t *testing.T) {
+	db := testutil.OpenDB(t)
+	repo := infrastructure.NewRepository(db)
+	ctx := context.Background()
+
+	name := "Exact Search Name Xkzq"
+	email := "search-by-name-xkzq@example.com"
+	id, err := repo.CreateUser(ctx, email, "hash-name", name, false)
+	if err != nil {
+		t.Fatalf("CreateUser: %v", err)
+	}
+	t.Cleanup(func() { repo.DeleteUser(ctx, id) })
+
+	users, total, err := repo.ListUsers(ctx, 100, 0, 0, "", name)
+	if err != nil {
+		t.Fatalf("ListUsers with name filter: %v", err)
+	}
+	if total != 1 || len(users) != 1 {
+		t.Fatalf("expected one exact name match, got total=%d rows=%d", total, len(users))
+	}
+	if users[0].Email != email {
+		t.Errorf("expected email=%q, got %q", email, users[0].Email)
+	}
+}
+
 func TestListUsers_OffsetSkipsUsers(t *testing.T) {
 	db := testutil.OpenDB(t)
 	repo := infrastructure.NewRepository(db)
 	ctx := context.Background()
 
-	_, total0, err := repo.ListUsers(ctx, 100, 0, "")
+	_, total0, err := repo.ListUsers(ctx, 100, 0, 0, "", "")
 	if err != nil {
 		t.Fatalf("ListUsers offset=0: %v", err)
 	}
 
-	_, total1, err := repo.ListUsers(ctx, 100, 1, "")
+	_, total1, err := repo.ListUsers(ctx, 100, 1, 0, "", "")
 	if err != nil {
 		t.Fatalf("ListUsers offset=1: %v", err)
 	}
