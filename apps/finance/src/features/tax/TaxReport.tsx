@@ -10,10 +10,21 @@ import { useTaxReport } from '../../shared/hooks/useTax';
 const TaxReport: React.FC = () => {
   const { data: taxReport, isLoading } = useTaxReport();
 
-  const rawPeriods = taxReport?.periods ?? [];
-  const totalCollected = taxReport?.vatSummary?.collected ?? 0;
-  const totalOwed = taxReport?.vatSummary?.owed ?? 0;
-  const toFile = rawPeriods.filter((p) => p.status !== 'Filed').length;
+  const totalCollected = taxReport?.taxCollected ?? 0;
+  const totalOwed = taxReport?.taxOwed ?? 0;
+  const rows = taxReport
+    ? [
+        {
+          id: taxReport.period || 'current',
+          period: taxReport.period || 'Current period',
+          collected: totalCollected,
+          owed: totalOwed,
+          status: totalOwed > 0 ? 'Pending' : 'Filed',
+          dueDate: '-',
+        },
+      ]
+    : [];
+  const toFile = rows.filter((row) => row.status !== 'Filed').length;
 
   return (
     <motion.div
@@ -65,7 +76,7 @@ const TaxReport: React.FC = () => {
           >
             Loading tax periods…
           </div>
-        ) : rawPeriods.length === 0 ? (
+        ) : rows.length === 0 ? (
           <div
             style={{
               padding: '32px 20px',
@@ -99,9 +110,8 @@ const TaxReport: React.FC = () => {
               </tr>
             </thead>
             <tbody>
-              {rawPeriods.map((p) => {
+              {rows.map((p) => {
                 const filed = p.status === 'Filed';
-                const owed = p.taxableAmount * p.taxRate;
                 return (
                   <tr key={p.id} style={{ borderBottom: '1px solid var(--hub-border)' }}>
                     <td style={{ padding: '12px 16px', fontSize: 13, fontWeight: 600 }}>
@@ -111,7 +121,7 @@ const TaxReport: React.FC = () => {
                       <MoneyDisplay amount={p.collected} />
                     </td>
                     <td style={{ padding: '12px 16px', fontSize: 13 }}>
-                      <MoneyDisplay amount={owed} />
+                      <MoneyDisplay amount={p.owed} />
                     </td>
                     <td style={{ padding: '12px 16px' }}>
                       <span

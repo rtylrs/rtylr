@@ -62,9 +62,10 @@ const Tax: React.FC = () => {
 
   const { data: taxReport } = useTaxReport();
 
-  const vatSummary = taxReport?.vatSummary ?? { collected: 0, owed: 0, paid: 0 };
-  const taxPeriods: TaxPeriod[] = taxReport?.periods ?? [];
-  const unremitted = vatSummary.owed - vatSummary.paid;
+  const taxCollected = taxReport?.taxCollected ?? 0;
+  const taxOwed = taxReport?.taxOwed ?? 0;
+  const taxPeriods: TaxPeriod[] = [];
+  const unremitted = taxOwed;
 
   return (
     <motion.div
@@ -120,10 +121,10 @@ const Tax: React.FC = () => {
             onClick={() =>
               exportTaxSummaryCsv([
                 {
-                  period: 'Year to Date',
-                  collected: vatSummary.collected,
-                  owed: vatSummary.owed,
-                  paid: vatSummary.paid,
+                  period: taxReport?.period ?? 'Current Period',
+                  collected: taxCollected,
+                  owed: taxOwed,
+                  paid: 0,
                 },
                 ...taxPeriods.map((p) => ({
                   period: p.period,
@@ -142,25 +143,19 @@ const Tax: React.FC = () => {
       </div>
 
       {/* VAT Summary cards */}
-      <div style={{ display: 'grid', gridTemplateColumns: 'repeat(3, 1fr)', gap: 16 }}>
+      <div style={{ display: 'grid', gridTemplateColumns: 'repeat(2, 1fr)', gap: 16 }}>
         {[
           {
-            label: 'Tax Collected (YTD)',
-            value: vatSummary.collected,
+            label: 'Tax Collected',
+            value: taxCollected,
             color: 'var(--finance-accent, #10b981)',
             note: 'From invoices',
           },
           {
             label: 'Tax Owed',
-            value: vatSummary.owed,
+            value: taxOwed,
             color: 'var(--finance-warning, #f59e0b)',
             note: 'Net payable',
-          },
-          {
-            label: 'Tax Paid',
-            value: vatSummary.paid,
-            color: 'var(--finance-info, #3b82f6)',
-            note: 'Remitted to authority',
           },
         ].map(({ label, value, color, note }) => (
           <div

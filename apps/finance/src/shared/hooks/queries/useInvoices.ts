@@ -151,7 +151,13 @@ export const useSendInvoice = () => {
   return useMutation({
     mutationFn: async (data: SendInvoiceRequest): Promise<SendInvoiceResponse> => {
       const res = await unwrap(
-        safe.post<SendInvoiceResponse>(`/finance/invoices/${data.invoiceId}/send`, {})
+        safe.post<SendInvoiceResponse>(`/finance/invoices/${data.invoiceId}/send`, {
+          id: Number(data.invoiceId),
+          to: data.to,
+          cc: data.cc,
+          subject: data.subject,
+          body: data.body,
+        })
       );
       return res as SendInvoiceResponse;
     },

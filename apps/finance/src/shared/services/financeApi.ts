@@ -130,9 +130,9 @@ export interface TaxPeriod {
 }
 
 export interface TaxReport {
-  vatSummary: { collected: number; owed: number; paid: number };
-  periods: TaxPeriod[];
-  configs: TaxConfig[];
+  period: string;
+  taxCollected: number;
+  taxOwed: number;
 }
 
 type ExpenseMutationPayload = Pick<

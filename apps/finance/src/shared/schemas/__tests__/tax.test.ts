@@ -21,42 +21,22 @@ describe('taxConfigSchema', () => {
 });
 
 describe('taxReportSchema', () => {
-  it('defaults vatSummary to zero values', () => {
+  it('defaults summary fields to zero values', () => {
     const result = taxReportSchema.parse({});
-    expect(result.vatSummary.collected).toBe(0);
-    expect(result.vatSummary.owed).toBe(0);
-    expect(result.vatSummary.paid).toBe(0);
+    expect(result.period).toBe('');
+    expect(result.taxCollected).toBe(0);
+    expect(result.taxOwed).toBe(0);
   });
 
-  it('defaults periods to empty array', () => {
-    const result = taxReportSchema.parse({});
-    expect(result.periods).toEqual([]);
-  });
-
-  it('parses a tax period with status', () => {
+  it('parses the backend tax report shape', () => {
     const result = taxReportSchema.parse({
-      periods: [
-        {
-          id: 1,
-          period: 'Q1 2026',
-          revenue: 10000,
-          taxableAmount: 8000,
-          taxRate: 20,
-          collected: 1600,
-          status: 'Filed',
-          dueDate: '2026-04-30',
-        },
-      ],
+      period: '2026-Q1',
+      taxCollected: 1600,
+      taxOwed: 1200,
     });
-    expect(result.periods[0]?.id).toBe('1');
-    expect(result.periods[0]?.status).toBe('Filed');
-  });
-
-  it('defaults period status to Pending when invalid', () => {
-    const result = taxReportSchema.parse({
-      periods: [{ id: '2', period: 'Q2', status: 'Unknown' }],
-    });
-    expect(result.periods[0]?.status).toBe('Pending');
+    expect(result.period).toBe('2026-Q1');
+    expect(result.taxCollected).toBe(1600);
+    expect(result.taxOwed).toBe(1200);
   });
 });
 
