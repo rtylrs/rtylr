@@ -7,9 +7,8 @@ import { z } from 'zod';
  * fields below match the Go json tags after conversion: type, audienceSegmentId,
  * sentCount, openCount, scheduledAt, sentAt, createdAt, updatedAt.
  *
- * The backend does NOT compute openRate / clickRate / revenue / a separate
- * audience count — derive those client-side from sentCount / openCount when a
- * display needs them.
+ * The backend does NOT compute openRate / clickRate / revenue — derive those
+ * client-side from sentCount / openCount when a display needs them.
  */
 export const campaignSchema = z.object({
   id: z.union([z.string(), z.number()]).transform(Number),
@@ -20,6 +19,7 @@ export const campaignSchema = z.object({
   audienceSegmentId: z.number().nullable().optional(),
   subject: z.string().nullable().optional(),
   body: z.string().nullable().optional(),
+  audienceCount: z.number().optional(),
   sentCount: z.number().default(0),
   openCount: z.number().default(0),
   scheduledAt: z.string().nullable().optional(),

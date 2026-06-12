@@ -105,7 +105,7 @@ const LeadCard: React.FC<LeadCardProps> = ({ lead, onClick }) => (
           flexShrink: 0,
         }}
       >
-        {initials(lead.assignedRep)}
+        {initials(lead.assignedTo != null ? String(lead.assignedTo) : undefined)}
       </div>
     </div>
     <div

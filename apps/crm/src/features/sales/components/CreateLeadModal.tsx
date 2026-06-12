@@ -18,7 +18,7 @@ const CreateLeadModal: React.FC<Props> = ({ open, onClose }) => {
     source: '',
     stage: 'cold' as LeadStage,
     mrrPotential: '',
-    assignedRep: '',
+    assignedTo: '',
     notes: '',
   });
 
@@ -35,7 +35,7 @@ const CreateLeadModal: React.FC<Props> = ({ open, onClose }) => {
         source: form.source,
         stage: form.stage,
         mrrPotential: Number(form.mrrPotential) || 0,
-        assignedRep: form.assignedRep,
+        assignedTo: form.assignedTo ? Number(form.assignedTo) : undefined,
         notes: form.notes,
       },
       {
@@ -47,7 +47,7 @@ const CreateLeadModal: React.FC<Props> = ({ open, onClose }) => {
             source: '',
             stage: 'cold',
             mrrPotential: '',
-            assignedRep: '',
+            assignedTo: '',
             notes: '',
           });
           onClose();
@@ -130,9 +130,10 @@ const CreateLeadModal: React.FC<Props> = ({ open, onClose }) => {
           </Select>
           <Input
             label="Assigned Rep"
-            value={form.assignedRep}
-            onChange={(e) => setForm((f) => ({ ...f, assignedRep: e.target.value }))}
-            placeholder="Your name"
+            type="number"
+            value={form.assignedTo}
+            onChange={(e) => setForm((f) => ({ ...f, assignedTo: e.target.value }))}
+            placeholder="User ID"
           />
         </div>
         <Textarea

@@ -228,8 +228,8 @@ export interface Lead {
   // API returns deal_value → dealValue; mrrPotential kept for backwards compat
   mrrPotential?: number;
   dealValue?: number;
-  // API returns assigned_rep → assignedRep (may be null)
-  assignedRep?: string | null;
+  // API returns assigned_to → assignedTo (user ID, may be null)
+  assignedTo?: number | null;
   notes?: string;
   createdAt: string;
   updatedAt: string;
@@ -285,7 +285,7 @@ export interface CreateLeadRequest {
   source: string;
   stage: LeadStage;
   mrrPotential: number;
-  assignedRep: string;
+  assignedTo?: number;
   notes?: string;
 }
 
@@ -297,7 +297,7 @@ export interface UpdateLeadRequest {
   source?: string;
   stage?: LeadStage;
   mrrPotential?: number;
-  assignedRep?: string;
+  assignedTo?: number;
   notes?: string;
 }
 
@@ -320,6 +320,7 @@ export const toLeadMutationPayload = (
   size: data.size,
   source: data.source,
   stage: data.stage,
+  assignedTo: data.assignedTo,
   mrrPotential: data.mrrPotential,
   notes: data.notes,
 });

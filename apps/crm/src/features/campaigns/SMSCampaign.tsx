@@ -1,76 +1,112 @@
-import React, { useState } from 'react';
+import React, { useEffect, useState } from 'react';
 import { HelmetContainer } from '@voxire/components';
-import { useNavigate } from '@tanstack/react-router';
+import { useNavigate, useRouterState } from '@tanstack/react-router';
 import { toast } from 'sonner';
-import { Send, Save } from 'lucide-react';
-import { useCreateCampaign } from '../../shared/hooks/queries/useCampaigns';
+import { Save, Send } from 'lucide-react';
+import {
+  useCreateCampaign,
+  useGetCampaign,
+  useUpdateCampaign,
+} from '../../shared/hooks/queries/useCampaigns';
 import { useListSegments } from '../../shared/hooks/queries/useSegments';
 import { useListCustomers } from '../../shared/hooks/queries/useCustomers';
 import { Breadcrumbs, Button, Card, Input, PageHeader, Select } from '../../shared/components/ui';
-import { SMSComposer, CustomerAvatar } from '../../shared/components/crm';
+import { CustomerAvatar, SMSComposer } from '../../shared/components/crm';
+
+const DEFAULT_SMS_BODY = 'Flash sale today! {{first_name}}, enjoy 20% off. Reply STOP to opt out.';
 
 const SMSCampaign: React.FC = () => {
   const navigate = useNavigate();
+  const searchStr = useRouterState({ select: (s) => s.location.searchStr });
+  const searchParams = new URLSearchParams(searchStr);
+  const campaignId = Number(searchParams.get('id') || 0) || undefined;
+  const isEditing = !!campaignId;
+
   const create = useCreateCampaign();
+  const update = useUpdateCampaign();
+  const { data: existingCampaign } = useGetCampaign(campaignId);
   const { data: fetchedSegments } = useListSegments();
   const { data: fetchedCustomers } = useListCustomers({ limit: 200, offset: 0 });
   const segments = fetchedSegments ?? [];
   const customers = fetchedCustomers ?? [];
 
   const [name, setName] = useState('');
-  const [segmentId, setSegmentId] = useState<number>(segments[0]?.id || 0);
-  const [body, setBody] = useState(
-    'Flash sale today! {{first_name}}, enjoy 20% off. Reply STOP to opt out.'
-  );
+  const [segmentId, setSegmentId] = useState<number>(0);
+  const [body, setBody] = useState(DEFAULT_SMS_BODY);
+  const pending = create.isPending || update.isPending;
 
-  const handleSave = (send: boolean) => {
-    create.mutate(
-      {
-        name,
-        type: 'sms',
-        status: send ? 'active' : 'draft',
-        body,
-        audienceSegmentId: segmentId,
+  useEffect(() => {
+    if (existingCampaign) {
+      setName(existingCampaign.name);
+      setSegmentId(existingCampaign.audienceSegmentId ?? 0);
+      setBody(existingCampaign.body ?? '');
+      return;
+    }
+    if (!isEditing && !segmentId && segments[0]) {
+      setSegmentId(segments[0].id);
+    }
+  }, [existingCampaign, isEditing, segmentId, segments]);
+
+  const handleSave = (send: boolean): void => {
+    const payload = {
+      name,
+      type: 'sms',
+      status: send ? 'active' : 'draft',
+      body,
+      audienceSegmentId: segmentId,
+    };
+    const callbacks = {
+      onSuccess: () => {
+        toast.success(send ? 'SMS campaign sent' : 'Draft saved');
+        navigate({ to: '/campaigns' });
       },
-      {
-        onSuccess: () => {
-          toast.success(send ? 'SMS campaign sent' : 'Draft saved');
-          navigate({ to: '/campaigns' });
-        },
-        onError: () => {
-          toast.error(send ? 'Failed to send SMS campaign' : 'Failed to save draft');
-        },
-      }
-    );
+      onError: () => {
+        toast.error(send ? 'Failed to send SMS campaign' : 'Failed to save draft');
+      },
+    };
+
+    if (campaignId) {
+      update.mutate({ id: campaignId, data: payload }, callbacks);
+      return;
+    }
+
+    create.mutate(payload, callbacks);
   };
 
-  const segment = segments.find((s) => s.id === segmentId);
-  const previewRecipients = customers.filter((c) => c.consent?.sms).slice(0, 5);
+  const segment = segments.find((item) => item.id === segmentId);
+  const previewRecipients = customers.filter((customer) => customer.consent?.sms).slice(0, 5);
 
   return (
     <>
-      <HelmetContainer title="New SMS campaign · rtylr" />
+      <HelmetContainer
+        title={isEditing ? 'Edit SMS campaign · rtylr' : 'New SMS campaign · rtylr'}
+      />
       <div style={{ maxWidth: '1100px' }}>
-        <Breadcrumbs items={[{ label: 'Campaigns', to: '/campaigns' }, { label: 'New SMS' }]} />
+        <Breadcrumbs
+          items={[
+            { label: 'Campaigns', to: '/campaigns' },
+            { label: isEditing ? 'Edit SMS' : 'New SMS' },
+          ]}
+        />
         <PageHeader
-          title="New SMS campaign"
+          title={isEditing ? 'Edit SMS campaign' : 'New SMS campaign'}
           actions={
             <>
               <Button
                 variant="outline"
                 onClick={() => handleSave(false)}
-                disabled={create.isPending || !name.trim()}
+                disabled={pending || !name.trim()}
               >
                 <Save size={13} />
-                {create.isPending ? 'Saving…' : 'Save draft'}
+                {pending ? 'Saving…' : 'Save draft'}
               </Button>
               <Button
                 variant="primary"
                 onClick={() => handleSave(true)}
-                disabled={create.isPending || !name.trim() || !body.trim()}
+                disabled={pending || !name.trim() || !body.trim()}
               >
                 <Send size={13} />
-                {create.isPending ? 'Sending…' : 'Send now'}
+                {pending ? 'Sending…' : 'Send now'}
               </Button>
             </>
           }
@@ -82,7 +118,7 @@ const SMSCampaign: React.FC = () => {
               <Input
                 label="Campaign name"
                 value={name}
-                onChange={(e) => setName(e.target.value)}
+                onChange={(event) => setName(event.target.value)}
                 placeholder="SMS Promo"
                 style={{ marginBottom: '14px' }}
               />
@@ -102,15 +138,22 @@ const SMSCampaign: React.FC = () => {
                 Recipient preview
               </h4>
               <div style={{ display: 'flex', flexDirection: 'column', gap: '10px' }}>
-                {previewRecipients.map((c) => (
-                  <div key={c.id} style={{ display: 'flex', alignItems: 'center', gap: '10px' }}>
-                    <CustomerAvatar initials={c.initials} points={c.loyaltyPoints} size={28} />
+                {previewRecipients.map((customer) => (
+                  <div
+                    key={customer.id}
+                    style={{ display: 'flex', alignItems: 'center', gap: '10px' }}
+                  >
+                    <CustomerAvatar
+                      initials={customer.initials}
+                      points={customer.loyaltyPoints}
+                      size={28}
+                    />
                     <div style={{ flex: 1 }}>
                       <div style={{ fontSize: '13px', color: 'var(--hub-text)', fontWeight: 500 }}>
-                        {c.name}
+                        {customer.name}
                       </div>
                       <div style={{ fontSize: '11px', color: 'var(--hub-text-muted)' }}>
-                        {c.phone}
+                        {customer.phone}
                       </div>
                     </div>
                     <span
@@ -145,10 +188,13 @@ const SMSCampaign: React.FC = () => {
               >
                 Audience
               </h4>
-              <Select value={segmentId} onChange={(e) => setSegmentId(Number(e.target.value))}>
-                {segments.map((s) => (
-                  <option key={s.id} value={s.id}>
-                    {s.name} ({s.customerCount})
+              <Select
+                value={segmentId}
+                onChange={(event) => setSegmentId(Number(event.target.value))}
+              >
+                {segments.map((item) => (
+                  <option key={item.id} value={item.id}>
+                    {item.name} ({item.customerCount})
                   </option>
                 ))}
               </Select>

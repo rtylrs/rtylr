@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, { useMemo, useState } from 'react';
 import { HelmetContainer } from '@voxire/components';
 import { useNavigate } from '@tanstack/react-router';
 import { motion, AnimatePresence } from 'motion/react';
@@ -19,6 +19,7 @@ import {
   useUpdateCampaignStatus,
   useDeleteCampaign,
 } from '../../shared/hooks/queries/useCampaigns';
+import { useListSegments } from '../../shared/hooks/queries/useSegments';
 import {
   calculateOpenRate,
   type Campaign as CampaignPayload,
@@ -36,6 +37,7 @@ interface Campaign {
   description: string;
   channel: Channel;
   status: CampaignStatus;
+  audienceSegmentId?: number | null;
   audience: number;
   sent: number;
   openRate: string;
@@ -59,14 +61,19 @@ const STATUS_TO_DISPLAY: Record<string, CampaignStatus> = {
 };
 
 /** Projects a backend campaign payload onto the local display shape. */
-function toDisplayCampaign(c: CampaignPayload): Campaign {
+function toDisplayCampaign(c: CampaignPayload, audienceBySegment: Map<number, number>): Campaign {
+  const segmentAudience =
+    c.audienceSegmentId !== null && c.audienceSegmentId !== undefined
+      ? audienceBySegment.get(c.audienceSegmentId)
+      : undefined;
   return {
     id: c.id,
     name: c.name,
     description: c.subject ?? '',
     channel: TYPE_TO_CHANNEL[c.type] ?? 'Email',
     status: STATUS_TO_DISPLAY[c.status] ?? 'Draft',
-    audience: c.sentCount,
+    audienceSegmentId: c.audienceSegmentId,
+    audience: segmentAudience ?? c.audienceCount ?? c.sentCount,
     sent: c.sentCount,
     openRate: `${Math.round(calculateOpenRate(c))}%`,
     clickRate: '-',
@@ -367,9 +374,18 @@ function CampaignCard({
 const Campaigns: React.FC = () => {
   const navigate = useNavigate();
   const { data: fetchedCampaigns } = useListCampaigns();
+  const { data: fetchedSegments } = useListSegments();
   const updateStatus = useUpdateCampaignStatus();
   const removeCampaign = useDeleteCampaign();
-  const campaigns: Campaign[] = (fetchedCampaigns ?? []).map(toDisplayCampaign);
+  const audienceBySegment = useMemo(
+    () => new Map((fetchedSegments ?? []).map((segment) => [segment.id, segment.customerCount])),
+    [fetchedSegments]
+  );
+  const campaigns: Campaign[] = useMemo(
+    () =>
+      (fetchedCampaigns ?? []).map((campaign) => toDisplayCampaign(campaign, audienceBySegment)),
+    [audienceBySegment, fetchedCampaigns]
+  );
   const [statusFilter, setStatusFilter] = useState<'All' | CampaignStatus>('All');
   const [confirmDeleteId, setConfirmDeleteId] = useState<number | null>(null);
 
@@ -377,7 +393,7 @@ const Campaigns: React.FC = () => {
 
   const handleLaunch = (id: number): void => {
     const campaign = campaigns.find((c) => c.id === id);
-    if ((campaign?.audience ?? 0) <= 0) {
+    if (fetchedSegments !== undefined && (campaign?.audience ?? 0) <= 0) {
       toast.error('No eligible recipients for this campaign');
       return;
     }
@@ -406,7 +422,7 @@ const Campaigns: React.FC = () => {
       return;
     }
     const target = c.channel === 'SMS' ? '/campaigns/sms' : '/campaigns/email';
-    navigate({ to: `${target}?id=${c.id}&name=${encodeURIComponent(c.name)}` });
+    navigate({ to: `${target}?id=${c.id}` });
   };
 
   const handleDelete = (id: number): void => {

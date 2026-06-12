@@ -1,9 +1,13 @@
-import React, { useState } from 'react';
+import React, { useEffect, useState } from 'react';
 import { HelmetContainer } from '@voxire/components';
 import { useNavigate, useRouterState } from '@tanstack/react-router';
 import { toast } from 'sonner';
-import { Send, Save, Eye } from 'lucide-react';
-import { useCreateCampaign } from '../../shared/hooks/queries/useCampaigns';
+import { Eye, Save, Send } from 'lucide-react';
+import {
+  useCreateCampaign,
+  useGetCampaign,
+  useUpdateCampaign,
+} from '../../shared/hooks/queries/useCampaigns';
 import { useListSegments } from '../../shared/hooks/queries/useSegments';
 import { useTemplates } from '../../shared/hooks/queries/useTemplates';
 import { Breadcrumbs, Button, Card, Input, PageHeader, Select } from '../../shared/components/ui';
@@ -12,57 +16,89 @@ import { EmailEditor } from '../../shared/components/crm';
 const EmailCampaign: React.FC = () => {
   const navigate = useNavigate();
   const searchStr = useRouterState({ select: (s) => s.location.searchStr });
+  const searchParams = new URLSearchParams(searchStr);
+  const campaignId = Number(searchParams.get('id') || 0) || undefined;
+  const isEditing = !!campaignId;
+
   const create = useCreateCampaign();
+  const update = useUpdateCampaign();
+  const { data: existingCampaign } = useGetCampaign(campaignId);
   const { data: fetchedSegments } = useListSegments();
   const { data: fetchedTemplates } = useTemplates();
   const segments = fetchedSegments ?? [];
-  const templates = (fetchedTemplates ?? []).filter((t) => t.channel === 'email');
+  const templates = (fetchedTemplates ?? []).filter((template) => template.channel === 'email');
 
-  const [name, setName] = useState(new URLSearchParams(searchStr).get('name') || '');
-  const [segmentId, setSegmentId] = useState<number>(segments[0]?.id || 0);
-  const [subject, setSubject] = useState(new URLSearchParams(searchStr).get('subject') || '');
-  const [body, setBody] = useState(new URLSearchParams(searchStr).get('body') || '');
+  const [name, setName] = useState(searchParams.get('name') || '');
+  const [segmentId, setSegmentId] = useState<number>(0);
+  const [subject, setSubject] = useState(searchParams.get('subject') || '');
+  const [body, setBody] = useState(searchParams.get('body') || '');
   const [previewOpen, setPreviewOpen] = useState(false);
+  const pending = create.isPending || update.isPending;
 
-  const applyTemplate = (templateId: string) => {
-    const t = templates.find((x) => x.id === Number(templateId));
-    if (!t) return;
-    setSubject(t.subject || '');
-    setBody(t.body);
-    toast.success(`Applied template: ${t.name}`);
+  useEffect(() => {
+    if (existingCampaign) {
+      setName(existingCampaign.name);
+      setSegmentId(existingCampaign.audienceSegmentId ?? 0);
+      setSubject(existingCampaign.subject ?? '');
+      setBody(existingCampaign.body ?? '');
+      return;
+    }
+    if (!isEditing && !segmentId && segments[0]) {
+      setSegmentId(segments[0].id);
+    }
+  }, [existingCampaign, isEditing, segmentId, segments]);
+
+  const applyTemplate = (templateId: string): void => {
+    const template = templates.find((item) => item.id === Number(templateId));
+    if (!template) return;
+    setSubject(template.subject || '');
+    setBody(template.body);
+    toast.success(`Applied template: ${template.name}`);
   };
 
-  const handleSave = (send: boolean) => {
-    create.mutate(
-      {
-        name,
-        type: 'email',
-        status: send ? 'active' : 'draft',
-        subject,
-        body,
-        audienceSegmentId: segmentId,
+  const handleSave = (send: boolean): void => {
+    const payload = {
+      name,
+      type: 'email',
+      status: send ? 'active' : 'draft',
+      subject,
+      body,
+      audienceSegmentId: segmentId,
+    };
+    const callbacks = {
+      onSuccess: () => {
+        toast.success(send ? 'Campaign sent' : 'Draft saved');
+        navigate({ to: '/campaigns' });
       },
-      {
-        onSuccess: () => {
-          toast.success(send ? 'Campaign sent' : 'Draft saved');
-          navigate({ to: '/campaigns' });
-        },
-        onError: () => {
-          toast.error(send ? 'Failed to send campaign' : 'Failed to save draft');
-        },
-      }
-    );
+      onError: () => {
+        toast.error(send ? 'Failed to send campaign' : 'Failed to save draft');
+      },
+    };
+
+    if (campaignId) {
+      update.mutate({ id: campaignId, data: payload }, callbacks);
+      return;
+    }
+
+    create.mutate(payload, callbacks);
   };
 
-  const segment = segments.find((s) => s.id === segmentId);
+  const segment = segments.find((item) => item.id === segmentId);
 
   return (
     <>
-      <HelmetContainer title="New email campaign · rtylr" />
+      <HelmetContainer
+        title={isEditing ? 'Edit email campaign · rtylr' : 'New email campaign · rtylr'}
+      />
       <div style={{ maxWidth: '1100px' }}>
-        <Breadcrumbs items={[{ label: 'Campaigns', to: '/campaigns' }, { label: 'New email' }]} />
+        <Breadcrumbs
+          items={[
+            { label: 'Campaigns', to: '/campaigns' },
+            { label: isEditing ? 'Edit email' : 'New email' },
+          ]}
+        />
         <PageHeader
-          title="New email campaign"
+          title={isEditing ? 'Edit email campaign' : 'New email campaign'}
           actions={
             <>
               <Button variant="outline" onClick={() => setPreviewOpen(true)}>
@@ -72,18 +108,18 @@ const EmailCampaign: React.FC = () => {
               <Button
                 variant="outline"
                 onClick={() => handleSave(false)}
-                disabled={create.isPending || !name.trim()}
+                disabled={pending || !name.trim()}
               >
                 <Save size={13} />
-                {create.isPending ? 'Saving…' : 'Save draft'}
+                {pending ? 'Saving…' : 'Save draft'}
               </Button>
               <Button
                 variant="primary"
                 onClick={() => handleSave(true)}
-                disabled={create.isPending || !name.trim() || !subject.trim()}
+                disabled={pending || !name.trim() || !subject.trim()}
               >
                 <Send size={13} />
-                {create.isPending ? 'Sending…' : 'Send now'}
+                {pending ? 'Sending…' : 'Send now'}
               </Button>
             </>
           }
@@ -103,14 +139,17 @@ const EmailCampaign: React.FC = () => {
                 <Input
                   label="Campaign name"
                   value={name}
-                  onChange={(e) => setName(e.target.value)}
+                  onChange={(event) => setName(event.target.value)}
                   placeholder="Spring promo"
                 />
-                <Select label="Start from template" onChange={(e) => applyTemplate(e.target.value)}>
+                <Select
+                  label="Start from template"
+                  onChange={(event) => applyTemplate(event.target.value)}
+                >
                   <option value="">Blank</option>
-                  {templates.map((t) => (
-                    <option key={t.id} value={t.id}>
-                      {t.name}
+                  {templates.map((template) => (
+                    <option key={template.id} value={template.id}>
+                      {template.name}
                     </option>
                   ))}
                 </Select>
@@ -118,9 +157,9 @@ const EmailCampaign: React.FC = () => {
               <EmailEditor
                 subject={subject}
                 body={body}
-                onChange={(s, b) => {
-                  setSubject(s);
-                  setBody(b);
+                onChange={(nextSubject, nextBody) => {
+                  setSubject(nextSubject);
+                  setBody(nextBody);
                 }}
               />
             </Card>
@@ -140,10 +179,13 @@ const EmailCampaign: React.FC = () => {
               >
                 Audience
               </h4>
-              <Select value={segmentId} onChange={(e) => setSegmentId(Number(e.target.value))}>
-                {segments.map((s) => (
-                  <option key={s.id} value={s.id}>
-                    {s.name} ({s.customerCount})
+              <Select
+                value={segmentId}
+                onChange={(event) => setSegmentId(Number(event.target.value))}
+              >
+                {segments.map((item) => (
+                  <option key={item.id} value={item.id}>
+                    {item.name} ({item.customerCount})
                   </option>
                 ))}
               </Select>
@@ -220,7 +262,7 @@ const EmailCampaign: React.FC = () => {
             }}
           >
             <div
-              onClick={(e) => e.stopPropagation()}
+              onClick={(event) => event.stopPropagation()}
               style={{
                 width: '100%',
                 maxWidth: '560px',

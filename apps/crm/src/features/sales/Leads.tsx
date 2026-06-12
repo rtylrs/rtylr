@@ -316,7 +316,7 @@ const Leads: React.FC = () => {
                       <td
                         style={{ padding: '12px 16px', fontSize: '12px', color: 'var(--hub-text)' }}
                       >
-                        {lead.assignedRep}
+                        {lead.assignedTo != null ? lead.assignedTo : '—'}
                       </td>
                       <td
                         style={{
