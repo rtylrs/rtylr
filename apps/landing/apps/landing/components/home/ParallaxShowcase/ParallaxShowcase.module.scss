@@ -1,16 +1,25 @@
+// Pinned scroll scene: tall section, sticky 100vh stage inside.
 .section {
   position: relative;
-  height: 720px;
+  height: 220vh;
+}
+
+.sticky {
+  position: sticky;
+  top: 0;
+  height: 100vh;
   overflow: hidden;
   display: flex;
   align-items: center;
   justify-content: center;
 }
 
-// Parallax image layer, extends beyond section on both sides so scroll movement never reveals gaps
-.imgWrap {
+// The expanding frame: starts as an inset rounded card (scaled down by
+// the scroll-driven transform), grows to full bleed.
+.frame {
   position: absolute;
-  inset: -120px 0;
+  inset: 0;
+  overflow: hidden;
   will-change: transform;
 }
 
@@ -21,6 +30,7 @@
   // Show the bottom portion, that's where the devices live
   object-position: center 85%;
   display: block;
+  will-change: transform;
 }
 
 // Dark overlay, layered so the illustration reads as atmosphere, not content.
@@ -137,8 +147,7 @@
 // Responsive
 @media (max-width: 768px) {
   .section {
-    height: auto;
-    padding: 80px 0;
+    height: 180vh;
   }
 
   .title {
