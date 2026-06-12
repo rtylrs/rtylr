@@ -41,6 +41,20 @@ func TestListAll_Delegates(t *testing.T) {
 	}
 }
 
+func TestListAll_HidesLegacyAIChatAddon(t *testing.T) {
+	s := &Service{repo: &mockRepo{all: []domain.Addon{
+		{ID: "menu", Name: "Digital Menu"},
+		{ID: "ai_chat", Name: "AI Chat"},
+	}}}
+	got, err := s.ListAll(context.Background())
+	if err != nil {
+		t.Fatalf("unexpected: %v", err)
+	}
+	if len(got) != 1 || got[0].ID != "menu" {
+		t.Fatalf("expected only visible addons, got %+v", got)
+	}
+}
+
 func TestListForBusiness_MergesCatalogWithEnabled(t *testing.T) {
 	all := []domain.Addon{
 		{ID: "a", Name: "Addon A", Price: 10, IsFree: false},
@@ -73,6 +87,25 @@ func TestListForBusiness_MergesCatalogWithEnabled(t *testing.T) {
 	}
 	if bGot == nil || bGot.IsEnabled {
 		t.Errorf("b should be present and disabled, got %+v", bGot)
+	}
+}
+
+func TestListForBusiness_HidesLegacyAIChatAddon(t *testing.T) {
+	s := &Service{repo: &mockRepo{
+		all: []domain.Addon{
+			{ID: "menu", Name: "Digital Menu"},
+			{ID: "ai_chat", Name: "AI Chat"},
+		},
+		enabled: []domain.BusinessAddon{
+			{AddonID: "ai_chat", Name: "AI Chat", IsEnabled: true},
+		},
+	}}
+	got, err := s.ListForBusiness(context.Background(), 1)
+	if err != nil {
+		t.Fatalf("unexpected: %v", err)
+	}
+	if len(got) != 1 || got[0].AddonID != "menu" {
+		t.Fatalf("expected hidden ai_chat to be filtered, got %+v", got)
 	}
 }
 

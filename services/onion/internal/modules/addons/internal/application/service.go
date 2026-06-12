@@ -17,6 +17,10 @@ const (
 	addonsCatalog = "cache:addons:catalog"
 )
 
+var hiddenCatalogAddons = map[string]struct{}{
+	"ai_chat": {},
+}
+
 type repository interface {
 	ListAll(ctx context.Context) ([]domain.Addon, error)
 	ListForBusiness(ctx context.Context, businessID int64) ([]domain.BusinessAddon, error)
@@ -42,19 +46,48 @@ func invalidateAddonsScope(ctx context.Context, businessID int64) {
 	}
 }
 
+func isVisibleCatalogAddon(addonID string) bool {
+	_, hidden := hiddenCatalogAddons[addonID]
+	return !hidden
+}
+
+func visibleCatalogAddons(addons []domain.Addon) []domain.Addon {
+	result := make([]domain.Addon, 0, len(addons))
+	for _, addon := range addons {
+		if isVisibleCatalogAddon(addon.ID) {
+			result = append(result, addon)
+		}
+	}
+	return result
+}
+
+func visibleBusinessAddons(addons []domain.BusinessAddon) []domain.BusinessAddon {
+	result := make([]domain.BusinessAddon, 0, len(addons))
+	for _, addon := range addons {
+		if isVisibleCatalogAddon(addon.AddonID) {
+			result = append(result, addon)
+		}
+	}
+	return result
+}
+
 // ListAll returns the addon catalog. Global, so cached under a fixed key
 // with a long TTL; invalidated only by a process restart or manual flush.
 func (s *Service) ListAll(ctx context.Context) ([]domain.Addon, error) {
-	return cacher.Of[[]domain.Addon]().GetOrComputeSingle(ctx, addonsCatalog,
+	addons, err := cacher.Of[[]domain.Addon]().GetOrComputeSingle(ctx, addonsCatalog,
 		func(ctx context.Context) ([]domain.Addon, error) {
 			return s.repo.ListAll(ctx)
 		},
 		cacher.WithExpiry(ctx, 1*time.Hour),
 	)
+	if err != nil {
+		return nil, err
+	}
+	return visibleCatalogAddons(addons), nil
 }
 
 func (s *Service) ListForBusiness(ctx context.Context, businessID int64) ([]domain.BusinessAddon, error) {
-	return cacher.Of[[]domain.BusinessAddon]().GetOrComputeSingle(ctx,
+	addons, err := cacher.Of[[]domain.BusinessAddon]().GetOrComputeSingle(ctx,
 		cacheKeys.Scoped(addonsScope, businessID, "merged"),
 		func(ctx context.Context) ([]domain.BusinessAddon, error) {
 			all, err := s.repo.ListAll(ctx)
@@ -89,6 +122,10 @@ func (s *Service) ListForBusiness(ctx context.Context, businessID int64) ([]doma
 		},
 		cacher.WithExpiry(ctx, addonsTTL),
 	)
+	if err != nil {
+		return nil, err
+	}
+	return visibleBusinessAddons(addons), nil
 }
 
 func (s *Service) Enable(ctx context.Context, businessID int64, addonID string) error {
