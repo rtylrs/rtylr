@@ -224,7 +224,7 @@ const Register: React.FC = (): React.JSX.Element => {
     plans.find((p) => p.slug === selectedPlanSlug) ??
     plans.find((p) => p.slug === 'free') ??
     plans[0];
-  const isSoloPlan = selectedPlan?.isSolo ?? false;
+  const isSoloPlan = isSoloApp || (selectedPlan?.isSolo ?? false);
 
   const handleRegister = (): void => {
     if (password !== confirmPassword) {
