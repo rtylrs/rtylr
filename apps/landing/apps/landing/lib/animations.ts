@@ -1,13 +1,49 @@
-import type { Variants } from 'motion/react';
+import type { Variants, Transition } from 'motion/react';
 
 // Reusable animation variants for landing page sections
+
+// Signature easings. EASE_OUT_EXPO for entrances (fast start, long settle),
+// EASE_SWIFT for UI state changes (sheets, tabs) - both feel like macOS.
+export const EASE_OUT_EXPO = [0.16, 1, 0.3, 1] as const;
+export const EASE_SWIFT = [0.32, 0.72, 0, 1] as const;
+
+export const SPRING_SMOOTH: Transition = {
+  type: 'spring',
+  stiffness: 260,
+  damping: 32,
+  mass: 0.9,
+};
+
+export const SPRING_SNAPPY: Transition = {
+  type: 'spring',
+  stiffness: 420,
+  damping: 34,
+  mass: 0.7,
+};
+
+// Masked rise - text climbs out of an overflow-hidden clip, the way Apple
+// reveals headlines. Pair with a wrapper that has overflow: hidden.
+export const maskRise: Variants = {
+  hidden: { y: '110%' },
+  visible: {
+    y: '0%',
+    transition: { duration: 0.9, ease: EASE_OUT_EXPO },
+  },
+};
+
+export const maskStagger: Variants = {
+  hidden: {},
+  visible: {
+    transition: { staggerChildren: 0.07, delayChildren: 0.1 },
+  },
+};
 
 export const fadeInUp: Variants = {
   hidden: { opacity: 0, y: 30 },
   visible: {
     opacity: 1,
     y: 0,
-    transition: { duration: 0.6, ease: [0.25, 0.46, 0.45, 0.94] },
+    transition: { duration: 0.6, ease: EASE_OUT_EXPO },
   },
 };
 
@@ -16,7 +52,7 @@ export const fadeInDown: Variants = {
   visible: {
     opacity: 1,
     y: 0,
-    transition: { duration: 0.6, ease: [0.25, 0.46, 0.45, 0.94] },
+    transition: { duration: 0.6, ease: EASE_OUT_EXPO },
   },
 };
 
@@ -33,7 +69,7 @@ export const scaleIn: Variants = {
   visible: {
     opacity: 1,
     scale: 1,
-    transition: { duration: 0.5, ease: [0.25, 0.46, 0.45, 0.94] },
+    transition: { duration: 0.5, ease: EASE_OUT_EXPO },
   },
 };
 
@@ -42,7 +78,7 @@ export const slideInLeft: Variants = {
   visible: {
     opacity: 1,
     x: 0,
-    transition: { duration: 0.6, ease: [0.25, 0.46, 0.45, 0.94] },
+    transition: { duration: 0.6, ease: EASE_OUT_EXPO },
   },
 };
 
@@ -51,7 +87,7 @@ export const slideInRight: Variants = {
   visible: {
     opacity: 1,
     x: 0,
-    transition: { duration: 0.6, ease: [0.25, 0.46, 0.45, 0.94] },
+    transition: { duration: 0.6, ease: EASE_OUT_EXPO },
   },
 };
 
@@ -84,7 +120,7 @@ export const blurFadeIn: Variants = {
     opacity: 1,
     y: 0,
     filter: 'blur(0px)',
-    transition: { duration: 0.75, ease: [0.25, 0.46, 0.45, 0.94] },
+    transition: { duration: 0.75, ease: EASE_OUT_EXPO },
   },
 };
 

@@ -3,6 +3,7 @@ import { injectTheme } from '@voxire/config';
 import { bootObservability } from '@voxire/observability';
 import { CookieBanner } from '@voxire/consent';
 import type { AppProps } from 'next/app';
+import { MotionConfig } from 'motion/react';
 import { QueryClient, QueryClientProvider } from '@tanstack/react-query';
 import { I18nextProvider } from 'react-i18next';
 import { CookiesProvider } from 'react-cookie';
@@ -48,7 +49,9 @@ function MyApp({ Component, pageProps }: AppProps) {
     <QueryClientProvider client={queryClient}>
       <CookiesProvider>
         <I18nextProvider i18n={i18next}>
-          <Component {...pageProps} />
+          <MotionConfig reducedMotion="user">
+            <Component {...pageProps} />
+          </MotionConfig>
           {/* Strict opt-in banner. Shows only until the visitor
               accepts or declines - then cookies-granted unlocks the
               PostHog init wired in bootObservability. */}
