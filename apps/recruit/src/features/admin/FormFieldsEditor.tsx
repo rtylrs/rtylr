@@ -233,14 +233,25 @@ const FormFieldRow: React.FC<{
             type="checkbox"
             checked={required}
             onChange={(e) => {
-              setRequired(e.target.checked);
-              setTimeout(commit, 0);
+              const next = e.target.checked;
+              setRequired(next);
+              onSave({
+                id: field.id,
+                careerId: field.careerId,
+                kind: field.kind,
+                label,
+                placeholder,
+                required: next,
+                optionsJson: hasOptions && options.length > 0 ? JSON.stringify(options) : '',
+                position: field.position,
+              });
             }}
             className="h-3.5 w-3.5"
           />
           Required
         </label>
         <button
+          type="button"
           onClick={() => {
             if (!window.confirm('Remove this field?')) return;
             onDelete();
@@ -280,10 +291,20 @@ const FormFieldRow: React.FC<{
                 placeholder={`Option ${i + 1}`}
               />
               <button
+                type="button"
                 onClick={() => {
                   const next = options.filter((_, j) => j !== i);
                   setOptions(next);
-                  setTimeout(commit, 0);
+                  onSave({
+                    id: field.id,
+                    careerId: field.careerId,
+                    kind: field.kind,
+                    label,
+                    placeholder,
+                    required,
+                    optionsJson: next.length > 0 ? JSON.stringify(next) : '',
+                    position: field.position,
+                  });
                 }}
                 className="rounded-md p-1.5 text-white/60 hover:bg-white/10 hover:text-red-400"
               >
@@ -292,6 +313,7 @@ const FormFieldRow: React.FC<{
             </div>
           ))}
           <button
+            type="button"
             onClick={() => {
               const next = [...options, ''];
               setOptions(next);

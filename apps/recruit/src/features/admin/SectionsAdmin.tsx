@@ -401,7 +401,7 @@ const SectionEditor: React.FC<{
         </>
       )}
 
-      {(section.kind === 'culture' || section.kind === 'testimonial') && (
+      {section.kind === 'culture' && (
         <Field label="Photo URL" hint="Optional - square or landscape">
           <Input value={mediaUrl} onChange={setMediaUrl} type="url" />
         </Field>
