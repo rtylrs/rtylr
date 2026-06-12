@@ -11,5 +11,6 @@ export const StatusIcon = ({ size = 44 }: { size?: number }) => (
       strokeLinejoin="round"
       fill="none"
     />
+    <circle cx="21.4" cy="12.08" r="1.7" fill="#6ee7b7" />
   </IconBase>
 );

@@ -7,6 +7,8 @@ export const SnakeIcon = ({ size = 44 }: { size?: number }) => (
       d="M4 19.6a1.6 1.6 0 0 1 0-3.2h6.2a.6.6 0 0 0 .6-.6V9.4A3.4 3.4 0 0 1 14.2 6h2.6a1.6 1.6 0 1 1 0 3.2h-2.6a.2.2 0 0 0-.2.2v6.4a3.8 3.8 0 0 1-3.8 3.8Z"
       fill="#4ade80"
     />
+    <circle cx="9.2" cy="17.9" r="0.65" fill="rgba(0,0,0,0.45)" />
     <circle cx="19" cy="17.4" r="2" fill="#f87171" />
+    <path d="M19 15.2c.2-.8.7-1.3 1.4-1.5" stroke="#4ade80" strokeWidth="1" strokeLinecap="round" fill="none" />
   </IconBase>
 );
