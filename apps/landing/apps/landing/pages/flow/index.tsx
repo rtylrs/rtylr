@@ -27,6 +27,7 @@ import { FLOW_FAQS } from '../../lib/faqs';
 import { APP_URLS } from '@voxire/config';
 import { navigateExternal } from '../../lib/navigation';
 import { blurFadeIn, staggerBlur, viewportOnce } from '../../lib/animations';
+import { SplitWords } from '../../components/motion/SplitWords';
 import styles from './flow.module.scss';
 
 // ── Board data types ───────────────────────────────────────────────────────
@@ -402,11 +403,13 @@ const FlowPage = (): JSX.Element => {
               <motion.span className={styles.heroEyebrow} variants={blurFadeIn}>
                 rtylr Flow · Work OS
               </motion.span>
-              <motion.h1 className={styles.heroTitle} variants={blurFadeIn}>
-                Work that moves.
+              <h1 className={styles.heroTitle}>
+                <SplitWords as="span" text={'Work that moves.'} delay={0.1} />
                 <br />
-                <span className={styles.heroTitleSoft}>Operations that don&apos;t slip.</span>
-              </motion.h1>
+                <span className={styles.heroTitleSoft}>
+                  <SplitWords as="span" text={'Operations that don\'t slip.'} delay={0.35} />
+                </span>
+              </h1>
               <motion.p className={styles.heroSubtitle} variants={blurFadeIn}>
                 Drag-drop kanban. Tasks linked to the actual invoice, customer, or shift they care
                 about. Automations that fire when a PO is approved or payroll closes, no Zapier, no

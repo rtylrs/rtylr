@@ -19,6 +19,7 @@ import { HR_FAQS } from '../../lib/faqs';
 import { APP_URLS } from '@voxire/config';
 import { navigateExternal } from '../../lib/navigation';
 import { blurFadeIn, staggerBlur, viewportOnce } from '../../lib/animations';
+import { SplitWords } from '../../components/motion/SplitWords';
 import styles from './hr.module.scss';
 
 // Schedule board mock, 7 days × 4 staff. State-driven so each cell is editable.
@@ -156,11 +157,13 @@ const HRPage = (): JSX.Element => {
                 <HeartHandshake size={13} strokeWidth={2} />
                 rtylr HR
               </motion.span>
-              <motion.h1 className={styles.heroTitle} variants={blurFadeIn}>
-                Your team.
+              <h1 className={styles.heroTitle}>
+                <SplitWords as="span" text={'Your team.'} delay={0.1} />
                 <br />
-                <span className={styles.heroTitleSoft}>Looked after.</span>
-              </motion.h1>
+                <span className={styles.heroTitleSoft}>
+                  <SplitWords as="span" text={'Looked after.'} delay={0.35} />
+                </span>
+              </h1>
               <motion.p className={styles.heroSubtitle} variants={blurFadeIn}>
                 Drag-to-publish schedules. Clock-in from the POS. Payroll that rolls up tips, hours,
                 and deductions on its own. Compliance flags before they become violations. Software

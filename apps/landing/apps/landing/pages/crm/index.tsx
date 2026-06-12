@@ -11,6 +11,7 @@ import { CRM_FAQS } from '../../lib/faqs';
 import { APP_URLS } from '@voxire/config';
 import { navigateExternal } from '../../lib/navigation';
 import { blurFadeIn, staggerBlur, viewportOnce } from '../../lib/animations';
+import { SplitWords } from '../../components/motion/SplitWords';
 import styles from './crm.module.scss';
 
 const VISITS = [
@@ -302,11 +303,13 @@ const CRMPage = (): JSX.Element => {
                 <Heart size={13} strokeWidth={2} fill="currentColor" />
                 rtylr CRM
               </motion.span>
-              <motion.h1 className={styles.heroTitle} variants={blurFadeIn}>
-                Every customer,
+              <h1 className={styles.heroTitle}>
+                <SplitWords as="span" text={'Every customer,'} delay={0.1} />
                 <br />
-                <span className={styles.heroTitleSoft}>remembered.</span>
-              </motion.h1>
+                <span className={styles.heroTitleSoft}>
+                  <SplitWords as="span" text={'remembered.'} delay={0.35} />
+                </span>
+              </h1>
               <motion.p className={styles.heroSubtitle} variants={blurFadeIn}>
                 Every POS sale enriches the profile on its own. Birthday, last visit, favorite dish,
                 server they love, stored, segmented, ready the moment you want to send the right

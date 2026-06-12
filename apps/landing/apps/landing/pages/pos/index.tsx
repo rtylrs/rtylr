@@ -11,6 +11,7 @@ import { POS_FAQS } from '../../lib/faqs';
 import { APP_URLS } from '@voxire/config';
 import { navigateExternal } from '../../lib/navigation';
 import { blurFadeIn, staggerBlur, viewportOnce } from '../../lib/animations';
+import { SplitWords } from '../../components/motion/SplitWords';
 import styles from './pos.module.scss';
 
 // ── Static receipt items shown in the hero mockup ──────────────────────────
@@ -88,11 +89,12 @@ const POSPage = (): JSX.Element => {
               <motion.span className={styles.heroEyebrow} variants={blurFadeIn}>
                 rtylr POS
               </motion.span>
-              <motion.h1 className={styles.heroTitle} variants={blurFadeIn}>
-                The register
-                <br />
-                that keeps up.
-              </motion.h1>
+              <SplitWords
+                as="h1"
+                className={styles.heroTitle}
+                text={'The register\nthat keeps up.'}
+                delay={0.1}
+              />
               <motion.p className={styles.heroSubtitle} variants={blurFadeIn}>
                 Fire courses to the right station. Split a check seven ways. Take Apple Pay, gift
                 cards, house accounts. Keep running when the WiFi goes down. Built for the pace of

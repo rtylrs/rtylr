@@ -19,6 +19,7 @@ import { FINANCE_FAQS } from '../../lib/faqs';
 import { APP_URLS } from '@voxire/config';
 import { navigateExternal } from '../../lib/navigation';
 import { blurFadeIn, staggerBlur, viewportOnce } from '../../lib/animations';
+import { SplitWords } from '../../components/motion/SplitWords';
 import styles from './finance.module.scss';
 
 // ── P&L data shaped per time range ────────────────────────────────────────
@@ -262,11 +263,12 @@ const FinancePage = (): JSX.Element => {
               <motion.span className={styles.heroEyebrow} variants={blurFadeIn}>
                 rtylr Finance
               </motion.span>
-              <motion.h1 className={styles.heroTitle} variants={blurFadeIn}>
-                A real P&amp;L,
-                <br />
-                in real time.
-              </motion.h1>
+              <SplitWords
+                as="h1"
+                className={styles.heroTitle}
+                text={'A real P&L,\nin real time.'}
+                delay={0.1}
+              />
               <motion.p className={styles.heroSubtitle} variants={blurFadeIn}>
                 Every POS sale, every payroll run, every paid invoice rolls into the books on its
                 own. The P&amp;L you&apos;re looking at right now? That&apos;s what the numbers

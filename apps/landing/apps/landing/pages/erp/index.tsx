@@ -22,6 +22,7 @@ import { ERP_FAQS } from '../../lib/faqs';
 import { APP_URLS } from '@voxire/config';
 import { navigateExternal } from '../../lib/navigation';
 import { blurFadeIn, staggerBlur, viewportOnce } from '../../lib/animations';
+import { SplitWords } from '../../components/motion/SplitWords';
 import styles from './erp.module.scss';
 
 // Initial inventory, stock drains each time "Simulate Friday service" fires.
@@ -152,11 +153,12 @@ const ERPPage = (): JSX.Element => {
               <motion.span className={styles.heroEyebrow} variants={blurFadeIn}>
                 rtylr ERP · Inventory
               </motion.span>
-              <motion.h1 className={styles.heroTitle} variants={blurFadeIn}>
-                Inventory that
-                <br />
-                counts itself.
-              </motion.h1>
+              <SplitWords
+                as="h1"
+                className={styles.heroTitle}
+                text={'Inventory that\ncounts itself.'}
+                delay={0.1}
+              />
               <motion.p className={styles.heroSubtitle} variants={blurFadeIn}>
                 Every margherita sold drops flour, mozzarella, and olive oil. Every PO approved
                 moves the warehouse count. Every low-stock alert fires before you actually run out.
