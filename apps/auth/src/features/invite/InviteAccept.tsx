@@ -1,7 +1,7 @@
 import React, { useState, useEffect } from 'react';
 import { useParams, useNavigate } from '@tanstack/react-router';
 import { AlertCircle } from 'lucide-react';
-import { Button } from '@voxire/components';
+import { Button, HelmetContainer } from '@voxire/components';
 import { APP_URLS } from '@voxire/config';
 import AuthShell from '../../shared/components/AuthShell';
 import { unwrap } from '@voxire/api';
@@ -127,6 +127,7 @@ const InviteAccept: React.FC = () => {
         footer={
           <Button
             variant="primary"
+            className="auth-submit-button"
             fullWidth
             height={40}
             onClick={() => (window.location.href = signInHref)}
@@ -146,78 +147,88 @@ const InviteAccept: React.FC = () => {
 
   // Set password form
   return (
-    <AuthShell
-      title="Set your password"
-      subtitle={`You've been invited to join rtylr${email ? ` as ${email}` : ''}.`}
-    >
-      <form
-        onSubmit={(e) => {
-          e.preventDefault();
-          handleSubmit();
-        }}
-        className="flex flex-col gap-4"
+    <>
+      <HelmetContainer title="Accept invite · rtylr" />
+      <AuthShell
+        title="Set your password"
+        subtitle={`You've been invited to join rtylr${email ? ` as ${email}` : ''}.`}
       >
-        {/* Password */}
-        <div className="flex flex-col gap-1.5">
-          <label htmlFor="invite-password" className="text-sm font-medium text-[#111]">
-            Password
-          </label>
-          <div className="relative">
+        <form
+          onSubmit={(e) => {
+            e.preventDefault();
+            handleSubmit();
+          }}
+          className="flex flex-col gap-4"
+        >
+          {/* Password */}
+          <div className="flex flex-col gap-1.5">
+            <label htmlFor="invite-password" className="text-sm font-medium text-[#111]">
+              Password
+            </label>
+            <div className="relative">
+              <input
+                id="invite-password"
+                type={showPassword ? 'text' : 'password'}
+                placeholder="At least 6 characters"
+                autoComplete="new-password"
+                value={password}
+                onChange={(e) => setPassword(e.target.value)}
+                autoFocus
+                required
+                className="w-full h-10 rounded-lg border border-[#e5e5e5] bg-white px-3 pr-10 text-sm text-[#111] placeholder:text-[#999] outline-none transition-colors focus:border-[#4583C4] focus:ring-2 focus:ring-[#4583C4]/20"
+              />
+              <button
+                type="button"
+                onClick={() => setShowPassword((v) => !v)}
+                className="absolute right-2.5 top-1/2 -translate-y-1/2 text-[#999] hover:text-[#666] text-xs font-medium"
+              >
+                {showPassword ? 'Hide' : 'Show'}
+              </button>
+            </div>
+          </div>
+
+          {/* Confirm password */}
+          <div className="flex flex-col gap-1.5">
+            <label htmlFor="invite-confirm" className="text-sm font-medium text-[#111]">
+              Confirm password
+            </label>
             <input
-              id="invite-password"
+              id="invite-confirm"
               type={showPassword ? 'text' : 'password'}
-              placeholder="At least 6 characters"
+              placeholder="Repeat password"
               autoComplete="new-password"
-              value={password}
-              onChange={(e) => setPassword(e.target.value)}
-              autoFocus
+              value={confirmPassword}
+              onChange={(e) => setConfirmPassword(e.target.value)}
               required
-              className="w-full h-10 rounded-lg border border-[#e5e5e5] bg-white px-3 pr-10 text-sm text-[#111] placeholder:text-[#999] outline-none transition-colors focus:border-[#4583C4] focus:ring-2 focus:ring-[#4583C4]/20"
+              className="w-full h-10 rounded-lg border border-[#e5e5e5] bg-white px-3 text-sm text-[#111] placeholder:text-[#999] outline-none transition-colors focus:border-[#4583C4] focus:ring-2 focus:ring-[#4583C4]/20"
             />
-            <button
-              type="button"
-              onClick={() => setShowPassword((v) => !v)}
-              className="absolute right-2.5 top-1/2 -translate-y-1/2 text-[#999] hover:text-[#666] text-xs font-medium"
+          </div>
+
+          {/* Error */}
+          {error && (
+            <div
+              className="flex items-start gap-2 rounded-lg border border-red-200 bg-red-50 px-3 py-2.5"
+              role="alert"
             >
-              {showPassword ? 'Hide' : 'Show'}
-            </button>
-          </div>
-        </div>
+              <AlertCircle className="h-4 w-4 text-red-500 mt-0.5 shrink-0" />
+              <p className="text-xs text-red-600 leading-relaxed">{error}</p>
+            </div>
+          )}
 
-        {/* Confirm password */}
-        <div className="flex flex-col gap-1.5">
-          <label htmlFor="invite-confirm" className="text-sm font-medium text-[#111]">
-            Confirm password
-          </label>
-          <input
-            id="invite-confirm"
-            type={showPassword ? 'text' : 'password'}
-            placeholder="Repeat password"
-            autoComplete="new-password"
-            value={confirmPassword}
-            onChange={(e) => setConfirmPassword(e.target.value)}
-            required
-            className="w-full h-10 rounded-lg border border-[#e5e5e5] bg-white px-3 text-sm text-[#111] placeholder:text-[#999] outline-none transition-colors focus:border-[#4583C4] focus:ring-2 focus:ring-[#4583C4]/20"
-          />
-        </div>
-
-        {/* Error */}
-        {error && (
-          <div
-            className="flex items-start gap-2 rounded-lg border border-red-200 bg-red-50 px-3 py-2.5"
-            role="alert"
+          {/* Submit */}
+          <Button
+            type="submit"
+            variant="primary"
+            className="auth-submit-button"
+            fullWidth
+            loading={loading}
+            height={40}
           >
-            <AlertCircle className="h-4 w-4 text-red-500 mt-0.5 shrink-0" />
-            <p className="text-xs text-red-600 leading-relaxed">{error}</p>
-          </div>
-        )}
-
-        {/* Submit */}
-        <Button type="submit" variant="primary" fullWidth loading={loading} height={40}>
-          Set password and join
-        </Button>
-      </form>
-    </AuthShell>
+            Set password and join
+          </Button>
+        </form>
+      </AuthShell>
+    </>
   );
 };
 

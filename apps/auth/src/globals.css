@@ -70,6 +70,37 @@
 }
 
 @layer components {
+  .auth-submit-button {
+    background: #0a0a0a !important;
+    color: #ffffff !important;
+    border: none !important;
+  }
+
+  .auth-submit-button:hover:not(.voxire-button-disabled) {
+    background: #222222 !important;
+    color: #ffffff !important;
+  }
+
+  .auth-submit-button:active:not(.voxire-button-disabled) {
+    background: #333333 !important;
+  }
+
+  @media (prefers-color-scheme: dark) {
+    .auth-submit-button {
+      background: #ffffff !important;
+      color: #0a0a0a !important;
+    }
+
+    .auth-submit-button:hover:not(.voxire-button-disabled) {
+      background: #f4f4f4 !important;
+      color: #0a0a0a !important;
+    }
+
+    .auth-submit-button:active:not(.voxire-button-disabled) {
+      background: #eeeeee !important;
+    }
+  }
+
   .auth-provider-button {
     border: 1px solid var(--auth-border) !important;
     background: var(--auth-card) !important;

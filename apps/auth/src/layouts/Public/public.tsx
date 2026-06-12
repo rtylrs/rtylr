@@ -1,6 +1,5 @@
 import React, { useMemo } from 'react';
 import Header from './Header';
-import { HelmetContainer } from '@voxire/components';
 
 const Public: React.FC<{
   children: React.ReactNode;
@@ -25,7 +24,6 @@ const Public: React.FC<{
 
   return (
     <div>
-      <HelmetContainer title="Rtylr Auth" />
       {hasHeader && <Header />}
       <div style={contentStyle}>{children}</div>
     </div>

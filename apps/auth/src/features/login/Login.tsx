@@ -11,7 +11,7 @@ import { startSocialLogin, type SocialProvider } from '../../shared/lib/social';
 import notify from '../../shared/lib/notify/notify';
 import { unwrap } from '@voxire/api';
 import { safe } from '../../shared/lib/api';
-import { Button } from '@voxire/components';
+import { Button, HelmetContainer } from '@voxire/components';
 import AuthShell from '../../shared/components/AuthShell';
 
 import { getEmailError } from '../../shared/lib/validation';
@@ -91,165 +91,175 @@ const Login: React.FC = (): React.JSX.Element => {
   const subtitle = t('auth.login.subtitle');
 
   return (
-    <AuthShell
-      title={title}
-      subtitle={subtitle}
-      footer={
-        <div className="text-center space-y-3">
-          <p className="text-sm text-[#666]">
-            {t('auth.login.noAccount')}{' '}
-            <button
-              type="button"
-              className="text-[#4583C4] font-medium hover:underline underline-offset-2"
-              onClick={() =>
-                navigate({
-                  to: redirectParam ? `/register?redirect=${redirectParam}` : '/register',
-                })
-              }
-            >
-              {t('auth.login.createOne')}
-            </button>
-          </p>
-        </div>
-      }
-    >
-      <form
-        onSubmit={(e) => {
-          e.preventDefault();
-          handleSubmit();
-        }}
-        className="flex flex-col gap-4"
+    <>
+      <HelmetContainer title="Sign in · rtylr" />
+      <AuthShell
+        title={title}
+        subtitle={subtitle}
+        footer={
+          <div className="text-center space-y-3">
+            <p className="text-sm text-[#666]">
+              {t('auth.login.noAccount')}{' '}
+              <button
+                type="button"
+                className="text-[#4583C4] font-medium hover:underline underline-offset-2"
+                onClick={() =>
+                  navigate({
+                    to: redirectParam ? `/register?redirect=${redirectParam}` : '/register',
+                  })
+                }
+              >
+                {t('auth.login.createOne')}
+              </button>
+            </p>
+          </div>
+        }
       >
-        {/* Email */}
-        <div className="flex flex-col gap-1.5">
-          <label htmlFor="login-email" className="text-sm font-medium text-[#111]">
-            {t('auth.common.email')}
-          </label>
-          <input
-            id="login-email"
-            type="email"
-            placeholder={t('auth.login.emailPlaceholder')}
-            autoComplete="email"
-            value={email}
-            onChange={(e) => setEmail(e.target.value)}
-            autoFocus
-            required
-            className="w-full h-10 rounded-lg border border-[#e5e5e5] bg-white px-3 text-sm text-[#111] placeholder:text-[#999] outline-none transition-colors focus:border-[#4583C4] focus:ring-2 focus:ring-[#4583C4]/20"
-          />
-          {emailError && <p className="text-xs text-red-500">{emailError}</p>}
-        </div>
-
-        {/* Password */}
-        <div className="flex flex-col gap-1.5">
-          <label htmlFor="login-password" className="text-sm font-medium text-[#111]">
-            {t('auth.common.password')}
-          </label>
-          <div className="relative">
+        <form
+          onSubmit={(e) => {
+            e.preventDefault();
+            handleSubmit();
+          }}
+          className="flex flex-col gap-4"
+        >
+          {/* Email */}
+          <div className="flex flex-col gap-1.5">
+            <label htmlFor="login-email" className="text-sm font-medium text-[#111]">
+              {t('auth.common.email')}
+            </label>
             <input
-              id="login-password"
-              type={showPassword ? 'text' : 'password'}
-              placeholder={t('auth.login.passwordPlaceholder')}
-              autoComplete="current-password"
-              value={password}
-              onChange={(e) => setPassword(e.target.value)}
+              id="login-email"
+              type="email"
+              placeholder={t('auth.login.emailPlaceholder')}
+              autoComplete="email"
+              value={email}
+              onChange={(e) => setEmail(e.target.value)}
+              autoFocus
               required
-              className="w-full h-10 rounded-lg border border-[#e5e5e5] bg-white px-3 pr-10 text-sm text-[#111] placeholder:text-[#999] outline-none transition-colors focus:border-[#4583C4] focus:ring-2 focus:ring-[#4583C4]/20"
+              className="w-full h-10 rounded-lg border border-[#e5e5e5] bg-white px-3 text-sm text-[#111] placeholder:text-[#999] outline-none transition-colors focus:border-[#4583C4] focus:ring-2 focus:ring-[#4583C4]/20"
             />
+            {emailError && <p className="text-xs text-red-500">{emailError}</p>}
+          </div>
+
+          {/* Password */}
+          <div className="flex flex-col gap-1.5">
+            <label htmlFor="login-password" className="text-sm font-medium text-[#111]">
+              {t('auth.common.password')}
+            </label>
+            <div className="relative">
+              <input
+                id="login-password"
+                type={showPassword ? 'text' : 'password'}
+                placeholder={t('auth.login.passwordPlaceholder')}
+                autoComplete="current-password"
+                value={password}
+                onChange={(e) => setPassword(e.target.value)}
+                required
+                className="w-full h-10 rounded-lg border border-[#e5e5e5] bg-white px-3 pr-10 text-sm text-[#111] placeholder:text-[#999] outline-none transition-colors focus:border-[#4583C4] focus:ring-2 focus:ring-[#4583C4]/20"
+              />
+              <button
+                type="button"
+                onClick={() => setShowPassword((v) => !v)}
+                aria-label={showPassword ? 'Hide password' : 'Show password'}
+                className="absolute right-2.5 top-1/2 -translate-y-1/2 text-[#999] hover:text-[#666] text-xs font-medium"
+              >
+                {showPassword ? 'Hide' : 'Show'}
+              </button>
+            </div>
+          </div>
+
+          {/* Forgot password */}
+          <div className="flex justify-end -mt-1">
             <button
               type="button"
-              onClick={() => setShowPassword((v) => !v)}
-              aria-label={showPassword ? 'Hide password' : 'Show password'}
-              className="absolute right-2.5 top-1/2 -translate-y-1/2 text-[#999] hover:text-[#666] text-xs font-medium"
+              className="text-xs text-[#4583C4] hover:underline underline-offset-2"
+              onClick={() => navigate({ to: '/password-reset' })}
             >
-              {showPassword ? 'Hide' : 'Show'}
+              {t('auth.login.forgotPassword')}
             </button>
           </div>
-        </div>
 
-        {/* Forgot password */}
-        <div className="flex justify-end -mt-1">
-          <button
-            type="button"
-            className="text-xs text-[#4583C4] hover:underline underline-offset-2"
-            onClick={() => navigate({ to: '/password-reset' })}
-          >
-            {t('auth.login.forgotPassword')}
-          </button>
-        </div>
+          {/* Error */}
+          {errorMessage && (
+            <div
+              className="flex items-start gap-2 rounded-lg border border-red-200 bg-red-50 px-3 py-2.5"
+              role="alert"
+            >
+              <AlertCircle className="h-4 w-4 text-red-500 mt-0.5 shrink-0" />
+              <p className="text-xs text-red-600 leading-relaxed">{errorMessage}</p>
+            </div>
+          )}
 
-        {/* Error */}
-        {errorMessage && (
-          <div
-            className="flex items-start gap-2 rounded-lg border border-red-200 bg-red-50 px-3 py-2.5"
-            role="alert"
+          {/* Sign in button */}
+          <Button
+            type="submit"
+            variant="primary"
+            className="auth-submit-button"
+            fullWidth
+            loading={loading}
+            height={40}
           >
-            <AlertCircle className="h-4 w-4 text-red-500 mt-0.5 shrink-0" />
-            <p className="text-xs text-red-600 leading-relaxed">{errorMessage}</p>
+            {t('auth.login.submit')}
+          </Button>
+
+          {/* Social sign in */}
+          <div className="grid grid-cols-2 gap-2">
+            <Button
+              type="button"
+              variant="outline"
+              className="auth-provider-button"
+              fullWidth
+              height={40}
+              onClick={() => handleSocial('google')}
+            >
+              <span className="inline-flex items-center gap-2">
+                <FaGoogle className="text-[#444]" />
+                {t('auth.common.google')}
+              </span>
+            </Button>
+            <Button
+              type="button"
+              variant="outline"
+              className="auth-provider-button"
+              fullWidth
+              height={40}
+              onClick={() => handleSocial('github')}
+            >
+              <span className="inline-flex items-center gap-2">
+                <FaGithub className="text-[#444]" />
+                {t('auth.common.github')}
+              </span>
+            </Button>
+            <Button
+              type="button"
+              variant="outline"
+              className="auth-provider-button"
+              fullWidth
+              height={40}
+              onClick={() => handleSocial('microsoft')}
+            >
+              <span className="inline-flex items-center gap-2">
+                <FaMicrosoft className="text-[#444]" />
+                {t('auth.common.microsoft')}
+              </span>
+            </Button>
+            <Button
+              type="button"
+              variant="outline"
+              className="auth-provider-button"
+              fullWidth
+              height={40}
+              onClick={() => handleSocial('apple')}
+            >
+              <span className="inline-flex items-center gap-2">
+                <FaApple className="text-[#444]" />
+                {t('auth.common.apple')}
+              </span>
+            </Button>
           </div>
-        )}
-
-        {/* Sign in button */}
-        <Button type="submit" variant="primary" fullWidth loading={loading} height={40}>
-          {t('auth.login.submit')}
-        </Button>
-
-        {/* Social sign in */}
-        <div className="grid grid-cols-2 gap-2">
-          <Button
-            type="button"
-            variant="outline"
-            className="auth-provider-button"
-            fullWidth
-            height={40}
-            onClick={() => handleSocial('google')}
-          >
-            <span className="inline-flex items-center gap-2">
-              <FaGoogle className="text-[#444]" />
-              {t('auth.common.google')}
-            </span>
-          </Button>
-          <Button
-            type="button"
-            variant="outline"
-            className="auth-provider-button"
-            fullWidth
-            height={40}
-            onClick={() => handleSocial('github')}
-          >
-            <span className="inline-flex items-center gap-2">
-              <FaGithub className="text-[#444]" />
-              {t('auth.common.github')}
-            </span>
-          </Button>
-          <Button
-            type="button"
-            variant="outline"
-            className="auth-provider-button"
-            fullWidth
-            height={40}
-            onClick={() => handleSocial('microsoft')}
-          >
-            <span className="inline-flex items-center gap-2">
-              <FaMicrosoft className="text-[#444]" />
-              {t('auth.common.microsoft')}
-            </span>
-          </Button>
-          <Button
-            type="button"
-            variant="outline"
-            className="auth-provider-button"
-            fullWidth
-            height={40}
-            onClick={() => handleSocial('apple')}
-          >
-            <span className="inline-flex items-center gap-2">
-              <FaApple className="text-[#444]" />
-              {t('auth.common.apple')}
-            </span>
-          </Button>
-        </div>
-      </form>
-    </AuthShell>
+        </form>
+      </AuthShell>
+    </>
   );
 };
 

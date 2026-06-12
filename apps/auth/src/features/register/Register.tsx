@@ -11,7 +11,7 @@ import notify from '../../shared/lib/notify/notify';
 import { useUserStore } from '../../shared/stores/userStore';
 import { useRegisterRestaurant, checkEmailExists } from '../../shared/hooks/useAuth';
 import { startSocialLogin, type SocialProvider } from '../../shared/lib/social';
-import { Button } from '@voxire/components';
+import { Button, HelmetContainer } from '@voxire/components';
 import AuthShell from '../../shared/components/AuthShell';
 import PasswordStrengthMeter, {
   scorePassword,
@@ -297,6 +297,7 @@ const Register: React.FC = (): React.JSX.Element => {
             <Button
               type="button"
               variant="primary"
+              className="auth-submit-button"
               fullWidth
               height={40}
               onClick={() => plansQuery.refetch()}
@@ -365,6 +366,7 @@ const Register: React.FC = (): React.JSX.Element => {
           <Button
             type="button"
             variant="primary"
+            className="auth-submit-button"
             fullWidth
             height={40}
             onClick={() => setStep('details')}
@@ -385,244 +387,250 @@ const Register: React.FC = (): React.JSX.Element => {
     : `You picked ${planName}. Let's set you up.`;
 
   return (
-    <AuthShell
-      title={title}
-      subtitle={subtitle}
-      footer={
-        <div className="text-center">
-          <p className="text-sm text-[#666]">
-            Already have an account?{' '}
-            <button
-              type="button"
-              className="text-[#4583C4] font-medium hover:underline underline-offset-2"
-              onClick={() => navigate({ to: redirectParam ? `/?redirect=${redirectParam}` : '/' })}
-            >
-              Sign in
-            </button>
-          </p>
-        </div>
-      }
-    >
-      {/* Back to plan selection (not shown for solo-app redirect flows) */}
-      {!isSoloApp && (
-        <button
-          type="button"
-          onClick={() => setStep('plan')}
-          className="flex items-center gap-1.5 text-[13px] text-[#666] hover:text-[#111] mb-5 -mt-2 transition-colors"
-        >
-          <ArrowLeft size={14} />
-          Change plan
-        </button>
-      )}
-
-      <form
-        onSubmit={(e) => {
-          e.preventDefault();
-          handleRegister();
-        }}
-        className="flex flex-col gap-4"
+    <>
+      <HelmetContainer title="Create account · rtylr" />
+      <AuthShell
+        title={title}
+        subtitle={subtitle}
+        footer={
+          <div className="text-center">
+            <p className="text-sm text-[#666]">
+              Already have an account?{' '}
+              <button
+                type="button"
+                className="text-[#4583C4] font-medium hover:underline underline-offset-2"
+                onClick={() =>
+                  navigate({ to: redirectParam ? `/?redirect=${redirectParam}` : '/' })
+                }
+              >
+                Sign in
+              </button>
+            </p>
+          </div>
+        }
       >
-        {/* Full name */}
-        <div className="flex flex-col gap-1.5">
-          <label htmlFor="register-name" className="text-sm font-medium text-[#111]">
-            Full name
-          </label>
-          <input
-            id="register-name"
-            type="text"
-            placeholder="Jane Doe"
-            autoComplete="name"
-            value={name}
-            onChange={(e) => setName(e.target.value)}
-            className="w-full h-10 rounded-lg border border-[#e5e5e5] bg-white px-3 text-sm text-[#111] placeholder:text-[#999] outline-none transition-colors focus:border-[#4583C4] focus:ring-2 focus:ring-[#4583C4]/20"
-          />
-        </div>
+        {/* Back to plan selection (not shown for solo-app redirect flows) */}
+        {!isSoloApp && (
+          <button
+            type="button"
+            onClick={() => setStep('plan')}
+            className="flex items-center gap-1.5 text-[13px] text-[#666] hover:text-[#111] mb-5 -mt-2 transition-colors"
+          >
+            <ArrowLeft size={14} />
+            Change plan
+          </button>
+        )}
 
-        {/* Business name, hidden for solo plans */}
-        {!isSoloPlan && (
+        <form
+          onSubmit={(e) => {
+            e.preventDefault();
+            handleRegister();
+          }}
+          className="flex flex-col gap-4"
+        >
+          {/* Full name */}
           <div className="flex flex-col gap-1.5">
-            <label htmlFor="register-business" className="text-sm font-medium text-[#111]">
-              Business name
+            <label htmlFor="register-name" className="text-sm font-medium text-[#111]">
+              Full name
             </label>
             <input
-              id="register-business"
+              id="register-name"
               type="text"
-              placeholder="My Coffee Shop"
-              value={businessName}
-              onChange={(e) => setBusinessName(e.target.value)}
+              placeholder="Jane Doe"
+              autoComplete="name"
+              value={name}
+              onChange={(e) => setName(e.target.value)}
               className="w-full h-10 rounded-lg border border-[#e5e5e5] bg-white px-3 text-sm text-[#111] placeholder:text-[#999] outline-none transition-colors focus:border-[#4583C4] focus:ring-2 focus:ring-[#4583C4]/20"
             />
           </div>
-        )}
 
-        {/* Email */}
-        <div className="flex flex-col gap-1.5">
-          <label htmlFor="register-email" className="text-sm font-medium text-[#111]">
-            Email
-          </label>
-          <input
-            id="register-email"
-            type="email"
-            placeholder="you@company.com"
-            autoComplete="email"
-            value={email}
-            onChange={(e) => {
-              setEmail(e.target.value);
-              if (emailTaken) setEmailTaken(false);
-            }}
-            onBlur={() => void checkEmailAvailable()}
-            required
-            className="w-full h-10 rounded-lg border border-[#e5e5e5] bg-white px-3 text-sm text-[#111] placeholder:text-[#999] outline-none transition-colors focus:border-[#4583C4] focus:ring-2 focus:ring-[#4583C4]/20"
-          />
-          {emailError && <p className="text-xs text-red-500">{emailError}</p>}
-          {!emailError && emailTaken && (
-            <p className="text-xs text-red-500">An account with this email already exists.</p>
+          {/* Business name, hidden for solo plans */}
+          {!isSoloPlan && (
+            <div className="flex flex-col gap-1.5">
+              <label htmlFor="register-business" className="text-sm font-medium text-[#111]">
+                Business name
+              </label>
+              <input
+                id="register-business"
+                type="text"
+                placeholder="My Coffee Shop"
+                value={businessName}
+                onChange={(e) => setBusinessName(e.target.value)}
+                className="w-full h-10 rounded-lg border border-[#e5e5e5] bg-white px-3 text-sm text-[#111] placeholder:text-[#999] outline-none transition-colors focus:border-[#4583C4] focus:ring-2 focus:ring-[#4583C4]/20"
+              />
+            </div>
           )}
-        </div>
 
-        {/* Password */}
-        <div className="flex flex-col gap-1.5">
-          <label htmlFor="register-password" className="text-sm font-medium text-[#111]">
-            Password
-          </label>
-          <div className="relative">
+          {/* Email */}
+          <div className="flex flex-col gap-1.5">
+            <label htmlFor="register-email" className="text-sm font-medium text-[#111]">
+              Email
+            </label>
             <input
-              id="register-password"
-              type={showPassword ? 'text' : 'password'}
-              placeholder="At least 8 characters"
-              autoComplete="new-password"
-              value={password}
-              onChange={(e) => setPassword(e.target.value)}
+              id="register-email"
+              type="email"
+              placeholder="you@company.com"
+              autoComplete="email"
+              value={email}
+              onChange={(e) => {
+                setEmail(e.target.value);
+                if (emailTaken) setEmailTaken(false);
+              }}
+              onBlur={() => void checkEmailAvailable()}
               required
-              className="w-full h-10 rounded-lg border border-[#e5e5e5] bg-white px-3 pr-10 text-sm text-[#111] placeholder:text-[#999] outline-none transition-colors focus:border-[#4583C4] focus:ring-2 focus:ring-[#4583C4]/20"
+              className="w-full h-10 rounded-lg border border-[#e5e5e5] bg-white px-3 text-sm text-[#111] placeholder:text-[#999] outline-none transition-colors focus:border-[#4583C4] focus:ring-2 focus:ring-[#4583C4]/20"
             />
-            <button
-              type="button"
-              onClick={() => setShowPassword((v) => !v)}
-              aria-label={showPassword ? 'Hide password' : 'Show password'}
-              className="absolute right-2.5 top-1/2 -translate-y-1/2 text-[#999] hover:text-[#666] text-xs font-medium"
+            {emailError && <p className="text-xs text-red-500">{emailError}</p>}
+            {!emailError && emailTaken && (
+              <p className="text-xs text-red-500">An account with this email already exists.</p>
+            )}
+          </div>
+
+          {/* Password */}
+          <div className="flex flex-col gap-1.5">
+            <label htmlFor="register-password" className="text-sm font-medium text-[#111]">
+              Password
+            </label>
+            <div className="relative">
+              <input
+                id="register-password"
+                type={showPassword ? 'text' : 'password'}
+                placeholder="At least 8 characters"
+                autoComplete="new-password"
+                value={password}
+                onChange={(e) => setPassword(e.target.value)}
+                required
+                className="w-full h-10 rounded-lg border border-[#e5e5e5] bg-white px-3 pr-10 text-sm text-[#111] placeholder:text-[#999] outline-none transition-colors focus:border-[#4583C4] focus:ring-2 focus:ring-[#4583C4]/20"
+              />
+              <button
+                type="button"
+                onClick={() => setShowPassword((v) => !v)}
+                aria-label={showPassword ? 'Hide password' : 'Show password'}
+                className="absolute right-2.5 top-1/2 -translate-y-1/2 text-[#999] hover:text-[#666] text-xs font-medium"
+              >
+                {showPassword ? 'Hide' : 'Show'}
+              </button>
+            </div>
+            {password && <PasswordStrengthMeter password={password} />}
+          </div>
+
+          {/* Confirm password */}
+          <div className="flex flex-col gap-1.5">
+            <label htmlFor="register-confirm" className="text-sm font-medium text-[#111]">
+              Confirm password
+            </label>
+            <div className="relative">
+              <input
+                id="register-confirm"
+                type={showConfirm ? 'text' : 'password'}
+                placeholder="Repeat password"
+                autoComplete="new-password"
+                value={confirmPassword}
+                onChange={(e) => setConfirmPassword(e.target.value)}
+                required
+                className="w-full h-10 rounded-lg border border-[#e5e5e5] bg-white px-3 pr-10 text-sm text-[#111] placeholder:text-[#999] outline-none transition-colors focus:border-[#4583C4] focus:ring-2 focus:ring-[#4583C4]/20"
+              />
+              <button
+                type="button"
+                onClick={() => setShowConfirm((v) => !v)}
+                aria-label={showConfirm ? 'Hide password' : 'Show password'}
+                className="absolute right-2.5 top-1/2 -translate-y-1/2 text-[#999] hover:text-[#666] text-xs font-medium"
+              >
+                {showConfirm ? 'Hide' : 'Show'}
+              </button>
+            </div>
+            {matchError && <p className="text-xs text-red-500">{matchError}</p>}
+          </div>
+
+          {/* Error */}
+          {errorMessage && (
+            <div
+              className="flex items-start gap-2 rounded-lg border border-red-200 bg-red-50 px-3 py-2.5"
+              role="alert"
             >
-              {showPassword ? 'Hide' : 'Show'}
-            </button>
-          </div>
-          {password && <PasswordStrengthMeter password={password} />}
-        </div>
+              <AlertCircle className="h-4 w-4 text-red-500 mt-0.5 shrink-0" />
+              <p className="text-xs text-red-600 leading-relaxed">{errorMessage}</p>
+            </div>
+          )}
 
-        {/* Confirm password */}
-        <div className="flex flex-col gap-1.5">
-          <label htmlFor="register-confirm" className="text-sm font-medium text-[#111]">
-            Confirm password
-          </label>
-          <div className="relative">
-            <input
-              id="register-confirm"
-              type={showConfirm ? 'text' : 'password'}
-              placeholder="Repeat password"
-              autoComplete="new-password"
-              value={confirmPassword}
-              onChange={(e) => setConfirmPassword(e.target.value)}
-              required
-              className="w-full h-10 rounded-lg border border-[#e5e5e5] bg-white px-3 pr-10 text-sm text-[#111] placeholder:text-[#999] outline-none transition-colors focus:border-[#4583C4] focus:ring-2 focus:ring-[#4583C4]/20"
-            />
-            <button
+          {/* Submit */}
+          <Button
+            type="submit"
+            variant="primary"
+            className="auth-submit-button"
+            fullWidth
+            loading={loading}
+            height={40}
+            disabled={
+              !email ||
+              !!emailError ||
+              emailTaken ||
+              pwScore < 2 ||
+              !!matchError ||
+              (!isSoloPlan && !businessName.trim())
+            }
+          >
+            Create account
+          </Button>
+
+          {/* Social sign up */}
+          <div className="grid grid-cols-2 gap-2">
+            <Button
               type="button"
-              onClick={() => setShowConfirm((v) => !v)}
-              aria-label={showConfirm ? 'Hide password' : 'Show password'}
-              className="absolute right-2.5 top-1/2 -translate-y-1/2 text-[#999] hover:text-[#666] text-xs font-medium"
+              variant="outline"
+              className="auth-provider-button"
+              fullWidth
+              height={40}
+              onClick={() => handleSocial('google')}
             >
-              {showConfirm ? 'Hide' : 'Show'}
-            </button>
+              <span className="inline-flex items-center gap-2">
+                <FaGoogle className="text-[#444]" />
+                Google
+              </span>
+            </Button>
+            <Button
+              type="button"
+              variant="outline"
+              className="auth-provider-button"
+              fullWidth
+              height={40}
+              onClick={() => handleSocial('github')}
+            >
+              <span className="inline-flex items-center gap-2">
+                <FaGithub className="text-[#444]" />
+                GitHub
+              </span>
+            </Button>
+            <Button
+              type="button"
+              variant="outline"
+              className="auth-provider-button"
+              fullWidth
+              height={40}
+              onClick={() => handleSocial('microsoft')}
+            >
+              <span className="inline-flex items-center gap-2">
+                <FaMicrosoft className="text-[#444]" />
+                Microsoft
+              </span>
+            </Button>
+            <Button
+              type="button"
+              variant="outline"
+              className="auth-provider-button"
+              fullWidth
+              height={40}
+              onClick={() => handleSocial('apple')}
+            >
+              <span className="inline-flex items-center gap-2">
+                <FaApple className="text-[#444]" />
+                Apple
+              </span>
+            </Button>
           </div>
-          {matchError && <p className="text-xs text-red-500">{matchError}</p>}
-        </div>
-
-        {/* Error */}
-        {errorMessage && (
-          <div
-            className="flex items-start gap-2 rounded-lg border border-red-200 bg-red-50 px-3 py-2.5"
-            role="alert"
-          >
-            <AlertCircle className="h-4 w-4 text-red-500 mt-0.5 shrink-0" />
-            <p className="text-xs text-red-600 leading-relaxed">{errorMessage}</p>
-          </div>
-        )}
-
-        {/* Submit */}
-        <Button
-          type="submit"
-          variant="primary"
-          fullWidth
-          loading={loading}
-          height={40}
-          disabled={
-            !email ||
-            !!emailError ||
-            emailTaken ||
-            pwScore < 2 ||
-            !!matchError ||
-            (!isSoloPlan && !businessName.trim())
-          }
-        >
-          Create account
-        </Button>
-
-        {/* Social sign up */}
-        <div className="grid grid-cols-2 gap-2">
-          <Button
-            type="button"
-            variant="outline"
-            className="auth-provider-button"
-            fullWidth
-            height={40}
-            onClick={() => handleSocial('google')}
-          >
-            <span className="inline-flex items-center gap-2">
-              <FaGoogle className="text-[#444]" />
-              Google
-            </span>
-          </Button>
-          <Button
-            type="button"
-            variant="outline"
-            className="auth-provider-button"
-            fullWidth
-            height={40}
-            onClick={() => handleSocial('github')}
-          >
-            <span className="inline-flex items-center gap-2">
-              <FaGithub className="text-[#444]" />
-              GitHub
-            </span>
-          </Button>
-          <Button
-            type="button"
-            variant="outline"
-            className="auth-provider-button"
-            fullWidth
-            height={40}
-            onClick={() => handleSocial('microsoft')}
-          >
-            <span className="inline-flex items-center gap-2">
-              <FaMicrosoft className="text-[#444]" />
-              Microsoft
-            </span>
-          </Button>
-          <Button
-            type="button"
-            variant="outline"
-            className="auth-provider-button"
-            fullWidth
-            height={40}
-            onClick={() => handleSocial('apple')}
-          >
-            <span className="inline-flex items-center gap-2">
-              <FaApple className="text-[#444]" />
-              Apple
-            </span>
-          </Button>
-        </div>
-      </form>
-    </AuthShell>
+        </form>
+      </AuthShell>
+    </>
   );
 };
 

@@ -3,6 +3,7 @@ import { Shield, Check } from 'lucide-react';
 import { useTranslation } from 'react-i18next';
 
 import AuthShell from '../../shared/components/AuthShell';
+import { HelmetContainer } from '@voxire/components';
 import { useLogin } from '../../shared/hooks/useAuth';
 import { useIssueAuthCode } from './useOAuth';
 import { getEmailError } from '../../shared/lib/validation';
@@ -182,51 +183,54 @@ const OAuthConsent: React.FC = (): React.JSX.Element => {
   }
 
   return (
-    <AuthShell
-      title="Authorize access"
-      subtitle="Review and confirm the permissions requested below"
-    >
-      <div className="flex flex-col gap-6">
-        {error && <p className="text-sm text-red-500 bg-red-50 px-3 py-2 rounded-lg">{error}</p>}
+    <>
+      <HelmetContainer title="Authorize · rtylr" />
+      <AuthShell
+        title="Authorize access"
+        subtitle="Review and confirm the permissions requested below"
+      >
+        <div className="flex flex-col gap-6">
+          {error && <p className="text-sm text-red-500 bg-red-50 px-3 py-2 rounded-lg">{error}</p>}
 
-        <div className="rounded-xl border border-[#e5e5e5] overflow-hidden">
-          <div className="flex items-center gap-3 px-4 py-3 bg-[#f9f9f9] border-b border-[#e5e5e5]">
-            <Shield size={16} className="text-[#4583C4] shrink-0" />
-            <span className="text-sm font-medium text-[#333]">Permissions requested</span>
+          <div className="rounded-xl border border-[#e5e5e5] overflow-hidden">
+            <div className="flex items-center gap-3 px-4 py-3 bg-[#f9f9f9] border-b border-[#e5e5e5]">
+              <Shield size={16} className="text-[#4583C4] shrink-0" />
+              <span className="text-sm font-medium text-[#333]">Permissions requested</span>
+            </div>
+            <ul className="divide-y divide-[#f0f0f0]">
+              {scopes.map((scope) => (
+                <li key={scope} className="flex items-start gap-3 px-4 py-3">
+                  <Check size={14} className="text-emerald-500 mt-0.5 shrink-0" />
+                  <span className="text-sm text-[#444]">{SCOPE_LABELS[scope] ?? scope}</span>
+                </li>
+              ))}
+            </ul>
           </div>
-          <ul className="divide-y divide-[#f0f0f0]">
-            {scopes.map((scope) => (
-              <li key={scope} className="flex items-start gap-3 px-4 py-3">
-                <Check size={14} className="text-emerald-500 mt-0.5 shrink-0" />
-                <span className="text-sm text-[#444]">{SCOPE_LABELS[scope] ?? scope}</span>
-              </li>
-            ))}
-          </ul>
-        </div>
 
-        <div className="flex flex-col gap-2">
-          <button
-            type="button"
-            onClick={handleConsent}
-            disabled={issueMutation.isPending}
-            className="w-full rounded-lg bg-[#4583C4] py-2.5 text-sm font-semibold text-white transition-opacity hover:opacity-90 disabled:opacity-50"
-          >
-            {issueMutation.isPending ? 'Authorizing…' : 'Allow access'}
-          </button>
-          <button
-            type="button"
-            onClick={handleDeny}
-            className="w-full rounded-lg border border-[#e5e5e5] py-2.5 text-sm text-[#666] hover:text-[#333] transition-colors"
-          >
-            Deny
-          </button>
-        </div>
+          <div className="flex flex-col gap-2">
+            <button
+              type="button"
+              onClick={handleConsent}
+              disabled={issueMutation.isPending}
+              className="w-full rounded-lg bg-[#4583C4] py-2.5 text-sm font-semibold text-white transition-opacity hover:opacity-90 disabled:opacity-50"
+            >
+              {issueMutation.isPending ? 'Authorizing…' : 'Allow access'}
+            </button>
+            <button
+              type="button"
+              onClick={handleDeny}
+              className="w-full rounded-lg border border-[#e5e5e5] py-2.5 text-sm text-[#666] hover:text-[#333] transition-colors"
+            >
+              Deny
+            </button>
+          </div>
 
-        <p className="text-xs text-[#999] text-center">
-          Signed in as <span className="font-medium text-[#555]">{email}</span>
-        </p>
-      </div>
-    </AuthShell>
+          <p className="text-xs text-[#999] text-center">
+            Signed in as <span className="font-medium text-[#555]">{email}</span>
+          </p>
+        </div>
+      </AuthShell>
+    </>
   );
 };
 
