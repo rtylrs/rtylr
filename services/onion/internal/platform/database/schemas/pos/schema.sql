@@ -169,14 +169,19 @@ CREATE TABLE IF NOT EXISTS pos_manager_pins (
     INDEX idx_pos_manager_pins_owner_staff (owner_id, staff_id)
 );
 
+-- pos_users is a team member's PIN credential at a single location. user_id
+-- links back to the users table (the team member identity); a person has at
+-- most one pos_users row per location. role/capability flags default from the
+-- team role at PIN setup but are editable per-user in the staff screen.
 CREATE TABLE IF NOT EXISTS pos_users (
     id BIGINT NOT NULL AUTO_INCREMENT PRIMARY KEY,
     owner_id BIGINT NOT NULL,
+    user_id BIGINT NOT NULL,
     location_id BIGINT NOT NULL,
     name VARCHAR(255) NOT NULL,
     pin VARCHAR(10) NOT NULL DEFAULT '',
     pin_hash VARCHAR(255) DEFAULT NULL,
-    role ENUM('cashier','server','bartender','kitchen') DEFAULT 'cashier',
+    role ENUM('manager','cashier','server','bartender','kitchen') DEFAULT 'cashier',
     is_active BOOLEAN DEFAULT TRUE,
     hourly_rate DECIMAL(10,2) DEFAULT 0,
     max_discount_pct DECIMAL(5,2) DEFAULT 0,
@@ -187,6 +192,7 @@ CREATE TABLE IF NOT EXISTS pos_users (
     created_by BIGINT DEFAULT NULL,
     created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
     updated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
+    UNIQUE KEY unique_pos_user_location (user_id, location_id),
     INDEX idx_pos_users_owner (owner_id),
     INDEX idx_pos_users_location (location_id)
 );
