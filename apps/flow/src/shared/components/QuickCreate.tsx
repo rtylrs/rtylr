@@ -94,8 +94,10 @@ export const QuickCreate: React.FC = () => {
         workspaceId: project.workspaceId,
         projectId,
         priority,
+        description: description.trim() || undefined,
         dueDate: dueDate || undefined,
         assigneeId: assignToMe ? (uid ?? undefined) : undefined,
+        effortMinutes,
       });
       const task = res.task;
       const taskId = String(task.id);

@@ -36,12 +36,21 @@ import {
   useAddComment,
   useAddSubtask,
   useToggleSubtask,
+  useTaskAttachments,
+  useAddAttachment,
+  useRemoveAttachment,
 } from './useTasks';
 import { useLabels, useSetTaskLabels } from './useLabels';
 import { useTaskActivity } from './useTaskActivity';
 import { useTaskRealtime } from '../../shared/lib/useTaskRealtime';
 import { useTimeLogs, useLogTime, useDeleteTimeLog } from './useTimeLogs';
-import { useFlowStore, PRIORITY_LABELS, STATUS_LABELS, Task } from '../../shared/stores/flowStore';
+import {
+  useFlowStore,
+  PRIORITY_LABELS,
+  STATUS_LABELS,
+  Attachment,
+  Task,
+} from '../../shared/stores/flowStore';
 import type { ApiTask, ApiTaskDetail, ApiTaskActivity } from '../../shared/services/flowApi';
 import { useUserStore } from '../../shared/stores/userStore';
 import Breadcrumbs from '../../shared/components/Breadcrumbs';
@@ -105,6 +114,13 @@ function parseDurationInput(raw: string): number | null {
   const minsMatch = trimmed.match(/^(\d+)m?$/);
   if (minsMatch) return parseInt(minsMatch[1], 10);
   return null;
+}
+
+function inferAttachmentMime(name: string): string {
+  if (/\.(apng|avif|gif|jpe?g|png|svg|webp)$/i.test(name)) {
+    return 'image/*';
+  }
+  return 'application/octet-stream';
 }
 
 function describeActivity(a: ApiTaskActivity): React.ReactNode {
@@ -186,8 +202,11 @@ const TaskDetail: React.FC = () => {
 
   const { data: taskActivityData = [] } = useTaskActivity(id ?? '');
   const { data: timeLogsData } = useTimeLogs(id ?? '');
+  const { data: taskAttachmentData } = useTaskAttachments(id);
   const logTimeMut = useLogTime();
   const deleteTimeLogMut = useDeleteTimeLog();
+  const addAttachmentMut = useAddAttachment();
+  const removeAttachmentMut = useRemoveAttachment();
 
   const { data: allLabels = [] } = useLabels();
   const {
@@ -285,7 +304,22 @@ const TaskDetail: React.FC = () => {
       ot.id !== task.id &&
       !task.dependencies?.includes(ot.id)
   );
-  const taskAttachments = attachments.filter((a) => a.taskId === task.id);
+  const apiAttachments: Attachment[] = (taskAttachmentData?.attachments ?? []).map(
+    (attachment) => ({
+      id: String(attachment.id),
+      taskId: String(attachment.taskId),
+      name: attachment.name,
+      size: attachment.size,
+      url: attachment.url,
+      uploadedBy: String(attachment.uploadedBy),
+      uploadedAt: attachment.createdAt,
+      mime: inferAttachmentMime(attachment.name),
+    })
+  );
+  const taskAttachments =
+    taskAttachmentData !== undefined
+      ? apiAttachments
+      : attachments.filter((a) => a.taskId === task.id);
 
   // Labels may arrive as label_ids (snake_case from API before normalization)
   // or labels (post-mapping). Accept either shape.
@@ -386,18 +420,21 @@ const TaskDetail: React.FC = () => {
             </button>
             <button
               onClick={() => {
-                // Archive is a local store action (no async API result
-                // surfaced here), so showing the toast immediately is
-                // acceptable. Keeping window.history.back() after so the user
-                // ends up where they expect even if the store rejects
-                // a duplicate archive call.
-                archiveTask(task.id);
-                toast.success(t('toasts.task.archived'));
-                window.history.back();
+                updateTaskMut.mutate(
+                  { id: task.id, data: { archived: true } },
+                  {
+                    onSuccess: () => {
+                      archiveTask(task.id);
+                      toast.success(t('toasts.task.archived'));
+                      window.history.back();
+                    },
+                  }
+                );
               }}
               className="h-7 w-7 rounded flex items-center justify-center hover:bg-[var(--flow-hover)]"
               style={{ color: 'var(--flow-text-muted)' }}
               title="Archive"
+              disabled={updateTaskMut.isPending}
             >
               <Archive size={12} />
             </button>
@@ -476,7 +513,15 @@ const TaskDetail: React.FC = () => {
               >
                 Attachments
               </h3>
-              <AttachmentUpload attachments={taskAttachments} />
+              <AttachmentUpload
+                attachments={taskAttachments}
+                onAdd={(name, size, mime) =>
+                  addAttachmentMut.mutate({ taskId: task.id, name, size, mime })
+                }
+                onRemove={(attachmentId) =>
+                  removeAttachmentMut.mutate({ taskId: task.id, attachmentId })
+                }
+              />
             </section>
 
             {/* Tabs */}

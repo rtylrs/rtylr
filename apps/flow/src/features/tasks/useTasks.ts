@@ -2,7 +2,7 @@ import { unwrap } from '@voxire/api';
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
 import { toast } from 'sonner';
 import i18next from '../../shared/services/i18next';
-import { flowApi, ApiTask } from '../../shared/services/flowApi';
+import { flowApi, ApiAttachment, ApiTask } from '../../shared/services/flowApi';
 import { useFlowStore } from '../../shared/stores/flowStore';
 import { unwrapListResponse } from '../../shared/lib/unwrapListResponse';
 
@@ -55,10 +55,13 @@ export function useCreateTask() {
       projectId?: string;
       workspaceId: string;
       title: string;
+      description?: string;
       status?: ApiTask['status'];
       priority?: ApiTask['priority'];
       assigneeId?: string;
       dueDate?: string;
+      effortMinutes?: number;
+      estimatedHours?: number;
     }) => {
       return unwrap(flowApi.createTask(data));
     },
@@ -96,6 +99,49 @@ export function useDeleteTask() {
       qc.invalidateQueries({ queryKey: ['my-tasks'] });
     },
     onError: () => toast.error(t('toasts.task.deleteFailed')),
+  });
+}
+
+export function useTaskAttachments(taskId: string | undefined) {
+  return useQuery<{ attachments: ApiAttachment[] }>({
+    queryKey: ['task-attachments', taskId],
+    queryFn: async () => unwrap(flowApi.getAttachments(taskId!)),
+    enabled: !!taskId,
+  });
+}
+
+export function useAddAttachment() {
+  const qc = useQueryClient();
+  return useMutation({
+    mutationFn: ({
+      taskId,
+      name,
+      size,
+      mime,
+    }: {
+      taskId: string;
+      name: string;
+      size: number;
+      mime: string;
+    }) => unwrap(flowApi.addAttachment(taskId, { name, size, mime })),
+    onSuccess: (_data, variables) => {
+      qc.invalidateQueries({ queryKey: ['task', variables.taskId] });
+      qc.invalidateQueries({ queryKey: ['task-attachments', variables.taskId] });
+    },
+    onError: () => toast.error(t('toasts.attachment.addFailed')),
+  });
+}
+
+export function useRemoveAttachment() {
+  const qc = useQueryClient();
+  return useMutation({
+    mutationFn: ({ taskId, attachmentId }: { taskId: string; attachmentId: string }) =>
+      unwrap(flowApi.removeAttachment(taskId, attachmentId)),
+    onSuccess: (_data, variables) => {
+      qc.invalidateQueries({ queryKey: ['task', variables.taskId] });
+      qc.invalidateQueries({ queryKey: ['task-attachments', variables.taskId] });
+    },
+    onError: () => toast.error(t('toasts.attachment.removeFailed')),
   });
 }
 

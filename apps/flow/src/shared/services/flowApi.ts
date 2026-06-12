@@ -68,6 +68,7 @@ export interface ApiTask {
   estimate?: number;
   estimatedHours?: number | null;
   actualHours?: number | null;
+  archived?: boolean;
   identifier?: string;
   createdAt?: string;
   updatedAt?: string;
@@ -177,16 +178,22 @@ const toTaskCreatePayload = (data: {
   projectId?: string;
   workspaceId: string;
   title: string;
+  description?: string;
   priority?: ApiTask['priority'];
   assigneeId?: string;
   dueDate?: string;
+  effortMinutes?: number;
+  estimatedHours?: number;
 }) => ({
   projectId: data.projectId,
   workspaceId: data.workspaceId,
   title: data.title,
+  description: data.description,
   priority: data.priority,
   assigneeId: data.assigneeId,
   dueDate: data.dueDate,
+  estimatedHours:
+    data.estimatedHours ?? (data.effortMinutes !== undefined ? data.effortMinutes / 60 : undefined),
 });
 
 const toMilestoneCreatePayload = (data: Partial<ApiMilestone>) => ({
@@ -487,10 +494,13 @@ export const flowApi = {
     projectId?: string;
     workspaceId: string;
     title: string;
+    description?: string;
     status?: ApiTask['status'];
     priority?: ApiTask['priority'];
     assigneeId?: string;
     dueDate?: string;
+    effortMinutes?: number;
+    estimatedHours?: number;
   }) => safe.post<{ task: ApiTask }>('/flow/tasks', toTaskCreatePayload(data)),
 
   // Backend: PUT /flow/tasks with id in body.
@@ -532,6 +542,19 @@ export const flowApi = {
 
   getAttachments: (id: string) =>
     safe.get<{ attachments: ApiAttachment[] }>(`/flow/tasks/${id}/attachments`),
+
+  addAttachment: (
+    taskId: string,
+    data: { name: string; size: number; mime?: string; url?: string }
+  ) =>
+    safe.post<{ attachmentId: number; message: string }>(`/flow/tasks/${taskId}/attachments`, {
+      name: data.name,
+      size: data.size,
+      url: data.url ?? `attachment://${taskId}/${encodeURIComponent(data.name)}`,
+    }),
+
+  removeAttachment: (taskId: string, attachmentId: string) =>
+    safe.delete<{ message: string }>(`/flow/tasks/${taskId}/attachments/${attachmentId}`),
 
   // -- Time Logs ----------------------------------------------------------
 
