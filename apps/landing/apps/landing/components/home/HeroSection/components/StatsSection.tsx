@@ -1,5 +1,6 @@
 import React from 'react';
 import { motion } from 'motion/react';
+import { CountUp } from '../../../motion/CountUp';
 import styles from '../HeroSection.module.scss';
 
 const StatsSection: React.FC = () => {
@@ -35,7 +36,7 @@ const StatsSection: React.FC = () => {
               animate={{ opacity: 1 }}
               transition={{ delay: 0.8 + index * 0.06, duration: 0.4 }}
             >
-              <div className={styles.statNumber}>{stat.number}</div>
+              <CountUp value={stat.number} className={styles.statNumber} />
               <div className={styles.statLabel}>{stat.label}</div>
             </motion.div>
           ))}
