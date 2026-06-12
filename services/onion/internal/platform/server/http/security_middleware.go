@@ -1,15 +1,10 @@
 package http
 
 import (
-	"fmt"
 	"net/http"
-	"strconv"
 	"strings"
 	"sync"
 	"time"
-
-	"github.com/voxire/onion/internal/platform/logger"
-	"github.com/voxire/onion/internal/platform/slack"
 )
 
 type blockedRequest struct {
@@ -24,11 +19,10 @@ type blockedRequest struct {
 }
 
 type securityBatcher struct {
-	requests    map[string][]blockedRequest
-	mutex       sync.RWMutex
-	ticker      *time.Ticker
-	done        chan bool
-	serviceName string
+	requests map[string][]blockedRequest
+	mutex    sync.RWMutex
+	ticker   *time.Ticker
+	done     chan bool
 }
 
 var (
@@ -38,13 +32,10 @@ var (
 
 func getBatcher() *securityBatcher {
 	once.Do(func() {
-		serviceName := logger.ServiceName()
-
 		batcher = &securityBatcher{
-			requests:    make(map[string][]blockedRequest),
-			ticker:      time.NewTicker(30 * time.Second),
-			done:        make(chan bool),
-			serviceName: serviceName,
+			requests: make(map[string][]blockedRequest),
+			ticker:   time.NewTicker(30 * time.Second),
+			done:     make(chan bool),
 		}
 		go batcher.flushRoutine()
 	})
@@ -75,117 +66,9 @@ func (b *securityBatcher) flushRoutine() {
 func (b *securityBatcher) flush() {
 	b.mutex.Lock()
 	defer b.mutex.Unlock()
-
-	for ip, requests := range b.requests {
-		if len(requests) == 0 {
-			continue
-		}
-
-		reasons := make(map[string]int)
-		paths := make(map[string]int)
-		userAgents := make(map[string]int)
-		methods := make(map[string]int)
-		allHeaders := make(map[string]int)
-		allQueryParams := make(map[string]int)
-
-		for _, req := range requests {
-			reasons[req.Reason]++
-			paths[req.Path]++
-			userAgents[req.UserAgent]++
-			methods[req.Method]++
-
-			for header := range req.Headers {
-				allHeaders[header]++
-			}
-
-			for param := range req.QueryParams {
-				allQueryParams[param]++
-			}
-		}
-
-		message := formatSecurityMessage(ip, len(requests), reasons, paths, userAgents, methods, allHeaders, allQueryParams, b.serviceName)
-		logger.Global().Warn("Blocked malicious requests batch",
-			logger.String("ip", ip),
-			logger.Int("total_requests", len(requests)),
-			logger.String("reasons", formatMap(reasons)),
-			logger.String("paths", formatMap(paths)),
-			logger.String("user_agents", formatMap(userAgents)),
-			logger.String("summary", message),
-		)
-		slack.Post(slack.Suspicious, message)
-
-		delete(b.requests, ip)
-	}
+	b.requests = make(map[string][]blockedRequest)
 }
 
-func formatSecurityMessage(ip string, totalRequests int, reasons, paths, userAgents, methods, headers, queryParams map[string]int, serviceName string) string {
-	reasonsList := formatMapToList(reasons)
-	pathsList := formatMapToList(paths)
-	userAgentsList := formatMapToList(userAgents)
-	methodsList := formatMapToList(methods)
-	headersList := formatMapToList(headers)
-	queryParamsList := formatMapToList(queryParams)
-
-	return fmt.Sprintf(`🚨 Security Alert - Blocked Malicious Requests
-
-🏢 Service: %s
-🖥️ IP Address: %s
-📊 Total Requests: %d
-⏰ Time Window: 30 seconds
-
-🎯 Attack Types:
-%s
-
-🌐 Targeted Paths:
-%s
-
-🤖 User Agents:
-%s
-
-📝 HTTP Methods:
-%s
-
-📋 Headers Used:
-%s
-
-🔍 Query Parameters:
-%s
-
-📅 Timestamp: %s`,
-		serviceName,
-		ip,
-		totalRequests,
-		reasonsList,
-		pathsList,
-		userAgentsList,
-		methodsList,
-		headersList,
-		queryParamsList,
-		time.Now().Format("2006-01-02 15:04:05 UTC"),
-	)
-}
-
-func formatMapToList(m map[string]int) string {
-	if len(m) == 0 {
-		return "None"
-	}
-
-	parts := make([]string, 0, len(m))
-	for key, count := range m {
-		parts = append(parts, fmt.Sprintf("• %s: %d", key, count))
-	}
-
-	return strings.Join(parts, "\n")
-}
-
-func formatMap(m map[string]int) string {
-	parts := make([]string, 0, len(m))
-	for key, count := range m {
-		parts = append(parts, key+":"+strconv.Itoa(count))
-	}
-
-	return strings.Join(parts, ",")
-}
 
 func sanitizeHeaders(headers map[string][]string) map[string][]string {
 	sanitized := make(map[string][]string)
