@@ -31,6 +31,17 @@ func invalidatePosUsersScope(ctx context.Context, ownerID int64) {
 // this into a 400.
 var ErrInvalidInput = errors.New("invalid input")
 
+// ErrForbidden signals the actor may not perform the operation on the target
+// (e.g. setting another operator's PIN without being a location manager).
+// Handlers translate this into a 403.
+var ErrForbidden = errors.New("forbidden")
+
+// ErrPINAlreadySet signals an attempt to onboard a PIN for an operator who
+// already has one at the location. Rotations go through the manager-gated
+// staff screen, never the self-service set-pin path. Handlers translate this
+// into a 409.
+var ErrPINAlreadySet = errors.New("pin already set")
+
 type Service struct {
 	repo *infrastructure.Repository
 }
@@ -130,7 +141,18 @@ func (s *Service) Deactivate(ctx context.Context, ownerID, id int64) error {
 //
 // First-time setup creates the pos_users row with role-defaulted capabilities;
 // a rotation only rewrites the PIN hash and preserves any admin overrides.
-func (s *Service) SetPIN(ctx context.Context, ownerID int64, input domain.SetPINInput) error {
+// SetPINActor identifies the authenticated device session driving a set-pin
+// call. A session may onboard its own PIN, or — if it manages the location —
+// provision a PIN for another rostered operator (the manager-provisioned-iPad
+// flow). It may never overwrite an existing PIN: rotations are a separate,
+// role-gated reset on the staff screen.
+type SetPINActor struct {
+	UserID   int64
+	IsOwner  bool
+	TeamRole string
+}
+
+func (s *Service) SetPIN(ctx context.Context, ownerID int64, actor SetPINActor, input domain.SetPINInput) error {
 	if input.UserID <= 0 || input.LocationID <= 0 {
 		return ErrInvalidInput
 	}
@@ -138,13 +160,30 @@ func (s *Service) SetPIN(ctx context.Context, ownerID int64, input domain.SetPIN
 		return ErrInvalidInput
 	}
 
+	// The target operator must be assigned to the location to hold a PIN there.
 	access, err := s.repo.GetMemberLocationAccess(ctx, ownerID, input.UserID, input.LocationID)
 	if err != nil {
 		if errors.Is(err, infrastructure.ErrUserNotFound) {
-			// Not assigned to this location — cannot hold a PIN here.
 			return ErrInvalidInput
 		}
 		return err
+	}
+
+	// Authorisation: you may set your own PIN; setting someone else's requires
+	// the actor to manage this location (owner/admin, or can_manage_pos_users).
+	if input.UserID != actor.UserID {
+		if mgrErr := s.requireLocationManager(ctx, ownerID, actor, input.LocationID); mgrErr != nil {
+			return mgrErr
+		}
+	}
+
+	// Onboarding only — never silently overwrite an existing PIN.
+	existing, err := s.repo.FindByUserAndLocation(ctx, ownerID, input.UserID, input.LocationID)
+	if err != nil && !errors.Is(err, infrastructure.ErrUserNotFound) {
+		return err
+	}
+	if existing != nil {
+		return ErrPINAlreadySet
 	}
 
 	hashed, err := passwordutils.HashPIN(input.PIN)
@@ -152,20 +191,6 @@ func (s *Service) SetPIN(ctx context.Context, ownerID int64, input domain.SetPIN
 		return err
 	}
 	input.PIN = ""
-
-	existing, err := s.repo.FindByUserAndLocation(ctx, ownerID, input.UserID, input.LocationID)
-	if err != nil && !errors.Is(err, infrastructure.ErrUserNotFound) {
-		return err
-	}
-
-	if existing != nil {
-		// Rotation — keep role + capability overrides, swap the hash only.
-		if err := s.repo.UpdatePINHash(ctx, ownerID, existing.ID, hashed); err != nil {
-			return err
-		}
-		invalidatePosUsersScope(ctx, ownerID)
-		return nil
-	}
 
 	role := roleForAccess(access)
 	caps := domain.DefaultCapabilities(role)
@@ -185,6 +210,26 @@ func (s *Service) SetPIN(ctx context.Context, ownerID int64, input domain.SetPIN
 	}
 	invalidatePosUsersScope(ctx, ownerID)
 	return nil
+}
+
+// requireLocationManager returns nil if the actor may manage POS users at the
+// location: business owner, team admin, or a member whose location assignment
+// carries can_manage_pos_users (store_manager). Otherwise ErrForbidden.
+func (s *Service) requireLocationManager(ctx context.Context, ownerID int64, actor SetPINActor, locationID int64) error {
+	if actor.IsOwner || actor.TeamRole == "owner" || actor.TeamRole == "admin" {
+		return nil
+	}
+	access, err := s.repo.GetMemberLocationAccess(ctx, ownerID, actor.UserID, locationID)
+	if err != nil {
+		if errors.Is(err, infrastructure.ErrUserNotFound) {
+			return ErrForbidden
+		}
+		return err
+	}
+	if access.CanManagePOSUsers {
+		return nil
+	}
+	return ErrForbidden
 }
 
 // roleForAccess maps a member's location management flag to a POS role. A

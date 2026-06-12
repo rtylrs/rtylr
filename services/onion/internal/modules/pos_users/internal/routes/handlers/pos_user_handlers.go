@@ -389,7 +389,11 @@ func (h *SetPINHandler) Serve(ctx context.Context, req *SetPINRequest) (SetPINRe
 	}
 	ownerID := device.User.BusinessID
 
-	err := h.Service.SetPIN(ctx, ownerID, domain.SetPINInput{
+	err := h.Service.SetPIN(ctx, ownerID, application.SetPINActor{
+		UserID:   device.User.UserID,
+		IsOwner:  device.User.UserID == ownerID,
+		TeamRole: device.User.Role,
+	}, domain.SetPINInput{
 		UserID:     req.UserID,
 		LocationID: req.LocationID,
 		Name:       req.Name,
@@ -399,6 +403,12 @@ func (h *SetPINHandler) Serve(ctx context.Context, req *SetPINRequest) (SetPINRe
 	if err != nil {
 		if errors.Is(err, application.ErrInvalidInput) {
 			return SetPINResponse{}, &errorModels.ServerError{HTTPCode: http.StatusBadRequest, Code: http.StatusBadRequest, Message: "Not assigned to this location"}
+		}
+		if errors.Is(err, application.ErrForbidden) {
+			return SetPINResponse{}, errorModels.PermissionDeniedServerError()
+		}
+		if errors.Is(err, application.ErrPINAlreadySet) {
+			return SetPINResponse{}, &errorModels.ServerError{HTTPCode: http.StatusConflict, Code: http.StatusConflict, Message: "A PIN is already set. Ask a manager to reset it."}
 		}
 		logger.Ctx(ctx).Error("pos_users set-pin failed",
 			logger.Any("owner_id", ownerID),
