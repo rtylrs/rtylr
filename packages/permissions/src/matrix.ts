@@ -31,6 +31,13 @@ const DIRECT_PERMISSIONS: PermissionMatrix = {
     'hr:time_off',
   ],
 
+  // store_manager has NO extra GLOBAL permissions: its elevated POS powers
+  // (manage staff PINs, voids, refunds, reports) are location-scoped and
+  // enforced per-location via pos_member_locations + the capability flags
+  // returned at PIN verify. Keeping this empty also prevents those powers from
+  // leaking upward to menu_manager/billing through hierarchy inheritance.
+  store_manager: [],
+
   menu_manager: ['app:menu', 'hub:design'],
 
   billing: ['hub:billing', 'finance:invoices', 'finance:expenses', 'finance:reports'],
