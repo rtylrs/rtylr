@@ -1,7 +1,7 @@
 import React, { useMemo } from 'react';
 import { useParams, useNavigate } from '@tanstack/react-router';
 import { FullScreenLoader, HelmetContainer } from '@voxire/components';
-import { GridLayout, MenuCategoryData, BusinessInfo, CartItem } from '@voxire/menu';
+import { GridLayout, MenuCategoryData, BusinessInfo } from '@voxire/menu';
 import { usePublicBusinessBySlug, usePublicMenu } from '../../../shared/hooks/usePublicMenu';
 import { useCartStore } from '../../../shared/stores/cartStore';
 
@@ -73,21 +73,8 @@ const LocationMenu: React.FC = (): React.JSX.Element => {
   }
 
   const businessInfo: BusinessInfo = {
-    id: biz.business.id,
     name: `${biz.business.name} - ${location.name}`,
-    logoUrl: biz.business.logoUrl,
-    currency: biz.business.currency,
-  };
-
-  const onAddToCart = (item: CartItem): void => {
-    if (!onlineOrderingEnabled) return;
-    setBusinessId(biz.business.id);
-    addItem(item);
-  };
-
-  const onPlaceOrder = (): void => {
-    if (!onlineOrderingEnabled) return;
-    navigate({ to: '/checkout' });
+    logo: biz.business.logoUrl || undefined,
   };
 
   return (
@@ -96,9 +83,18 @@ const LocationMenu: React.FC = (): React.JSX.Element => {
       <GridLayout
         business={businessInfo}
         categories={categories}
-        onAddToCart={onlineOrderingEnabled ? onAddToCart : undefined}
-        onPlaceOrder={onlineOrderingEnabled ? onPlaceOrder : undefined}
-        onClearCart={onlineOrderingEnabled ? clearCart : undefined}
+        onCheckout={
+          onlineOrderingEnabled
+            ? (cartItems) => {
+                clearCart();
+                setBusinessId(biz.business.id);
+                cartItems.forEach((item) =>
+                  addItem({ menuItemId: Number(item.id), name: item.name, unitPrice: item.price })
+                );
+                void navigate({ to: '/checkout' });
+              }
+            : undefined
+        }
       />
     </>
   );

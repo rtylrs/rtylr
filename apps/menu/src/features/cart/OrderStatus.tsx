@@ -9,7 +9,6 @@ type OrderStatusValue = 'received' | 'preparing' | 'ready' | 'done';
 interface OrderStatusResponse {
   order_number: string;
   status: OrderStatusValue;
-  estimated_minutes: number | null;
 }
 
 const POLL_INTERVAL_MS = 30_000;
@@ -33,7 +32,6 @@ const OrderStatus = (): React.JSX.Element => {
   const orderNumber = new URLSearchParams(searchStr).get('number') ?? '';
 
   const [status, setStatus] = useState<OrderStatusValue | null>(null);
-  const [estimatedMinutes, setEstimatedMinutes] = useState<number | null>(null);
   const [fetchError, setFetchError] = useState(false);
 
   const intervalRef = useRef<ReturnType<typeof setInterval> | null>(null);
@@ -43,7 +41,6 @@ const OrderStatus = (): React.JSX.Element => {
     try {
       const res = await api.get<OrderStatusResponse>(`/pos/public/orders/${id}/status`);
       setStatus(res.data.status);
-      setEstimatedMinutes(res.data.estimated_minutes);
       setFetchError(false);
 
       // Stop polling when order is done
@@ -111,11 +108,6 @@ const OrderStatus = (): React.JSX.Element => {
           >
             {orderNumber || `#${id ?? ''}`}
           </h1>
-          {estimatedMinutes != null && status !== 'done' && (
-            <p style={{ fontSize: '15px', color: 'rgba(0,0,0,0.55)', margin: '8px 0 0' }}>
-              Estimated wait: ~{estimatedMinutes} min
-            </p>
-          )}
         </div>
 
         {/* Progress bar */}
