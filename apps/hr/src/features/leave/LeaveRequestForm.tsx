@@ -136,104 +136,107 @@ const LeaveRequestForm = (): React.JSX.Element => {
   }
 
   return (
-    <div style={{ display: 'flex', flexDirection: 'column', gap: 20, maxWidth: 560 }}>
-      <SectionHeader title={t('leave.form.title')} subtitle={t('leave.form.subtitle')} />
+    <>
+      <HelmetContainer title="Leave request · rtylr" />
+      <div style={{ display: 'flex', flexDirection: 'column', gap: 20, maxWidth: 560 }}>
+        <SectionHeader title={t('leave.form.title')} subtitle={t('leave.form.subtitle')} />
 
-      <form onSubmit={handleSubmit}>
-        <Card style={{ display: 'flex', flexDirection: 'column', gap: 16 }}>
-          <div>
-            <Label>{t('leave.form.leaveType')}</Label>
-            <Select
-              value={form.leaveTypeId}
-              onChange={(e) => update('leaveTypeId', Number(e.target.value))}
-              style={errors.leaveTypeId ? { borderColor: 'var(--hr-error)' } : undefined}
-            >
-              <option value={0}>{t('leave.form.selectType')}</option>
-              {leaveTypes.map((lt) => (
-                <option key={lt.id} value={lt.id}>
-                  {lt.name}
-                </option>
-              ))}
-            </Select>
-            {errors.leaveTypeId && (
-              <p style={{ fontSize: 11, color: 'var(--hr-error)', margin: '4px 0 0' }}>
-                {errors.leaveTypeId}
-              </p>
+        <form onSubmit={handleSubmit}>
+          <Card style={{ display: 'flex', flexDirection: 'column', gap: 16 }}>
+            <div>
+              <Label>{t('leave.form.leaveType')}</Label>
+              <Select
+                value={form.leaveTypeId}
+                onChange={(e) => update('leaveTypeId', Number(e.target.value))}
+                style={errors.leaveTypeId ? { borderColor: 'var(--hr-error)' } : undefined}
+              >
+                <option value={0}>{t('leave.form.selectType')}</option>
+                {leaveTypes.map((lt) => (
+                  <option key={lt.id} value={lt.id}>
+                    {lt.name}
+                  </option>
+                ))}
+              </Select>
+              {errors.leaveTypeId && (
+                <p style={{ fontSize: 11, color: 'var(--hr-error)', margin: '4px 0 0' }}>
+                  {errors.leaveTypeId}
+                </p>
+              )}
+            </div>
+
+            {selectedBalance && (
+              <div
+                style={{
+                  padding: '8px 12px',
+                  borderRadius: 8,
+                  background: 'var(--hr-hover)',
+                  fontSize: 12,
+                }}
+              >
+                <span style={{ color: 'var(--hr-text-muted)' }}>
+                  {t('leave.form.remainingBalance')}:{' '}
+                </span>
+                <span style={{ fontWeight: 700, color: 'var(--hr-text)' }}>
+                  {selectedBalance.remainingDays} {t('leave.balances.daysLeft')}
+                </span>
+              </div>
             )}
-          </div>
 
-          {selectedBalance && (
-            <div
-              style={{
-                padding: '8px 12px',
-                borderRadius: 8,
-                background: 'var(--hr-hover)',
-                fontSize: 12,
-              }}
-            >
-              <span style={{ color: 'var(--hr-text-muted)' }}>
-                {t('leave.form.remainingBalance')}:{' '}
-              </span>
-              <span style={{ fontWeight: 700, color: 'var(--hr-text)' }}>
-                {selectedBalance.remainingDays} {t('leave.balances.daysLeft')}
-              </span>
+            <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: 12 }}>
+              <div>
+                <Label>{t('leave.form.startDate')}</Label>
+                <Input
+                  type="date"
+                  value={form.startDate}
+                  onChange={(e) => update('startDate', e.target.value)}
+                  min={new Date().toISOString().split('T')[0]}
+                  style={errors.startDate ? { borderColor: 'var(--hr-error)' } : undefined}
+                />
+                {errors.startDate && (
+                  <p style={{ fontSize: 11, color: 'var(--hr-error)', margin: '4px 0 0' }}>
+                    {errors.startDate}
+                  </p>
+                )}
+              </div>
+              <div>
+                <Label>{t('leave.form.endDate')}</Label>
+                <Input
+                  type="date"
+                  value={form.endDate}
+                  onChange={(e) => update('endDate', e.target.value)}
+                  min={form.startDate || new Date().toISOString().split('T')[0]}
+                  style={errors.endDate ? { borderColor: 'var(--hr-error)' } : undefined}
+                />
+                {errors.endDate && (
+                  <p style={{ fontSize: 11, color: 'var(--hr-error)', margin: '4px 0 0' }}>
+                    {errors.endDate}
+                  </p>
+                )}
+              </div>
             </div>
-          )}
 
-          <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: 12 }}>
             <div>
-              <Label>{t('leave.form.startDate')}</Label>
-              <Input
-                type="date"
-                value={form.startDate}
-                onChange={(e) => update('startDate', e.target.value)}
-                min={new Date().toISOString().split('T')[0]}
-                style={errors.startDate ? { borderColor: 'var(--hr-error)' } : undefined}
+              <Label>{t('leave.form.notes')}</Label>
+              <Textarea
+                value={form.notes}
+                onChange={(e) => update('notes', e.target.value)}
+                placeholder={t('leave.form.notesPlaceholder')}
+                style={{ minHeight: 60 }}
               />
-              {errors.startDate && (
-                <p style={{ fontSize: 11, color: 'var(--hr-error)', margin: '4px 0 0' }}>
-                  {errors.startDate}
-                </p>
-              )}
             </div>
-            <div>
-              <Label>{t('leave.form.endDate')}</Label>
-              <Input
-                type="date"
-                value={form.endDate}
-                onChange={(e) => update('endDate', e.target.value)}
-                min={form.startDate || new Date().toISOString().split('T')[0]}
-                style={errors.endDate ? { borderColor: 'var(--hr-error)' } : undefined}
-              />
-              {errors.endDate && (
-                <p style={{ fontSize: 11, color: 'var(--hr-error)', margin: '4px 0 0' }}>
-                  {errors.endDate}
-                </p>
-              )}
+
+            <div style={{ display: 'flex', justifyContent: 'flex-end', gap: 8 }}>
+              <Button type="button" variant="ghost" onClick={() => navigate({ to: '/leave' })}>
+                {t('common.cancel')}
+              </Button>
+              <Button type="submit" variant="primary" disabled={createRequest.isPending}>
+                {createRequest.isPending ? t('common.loading') : t('leave.form.submit')}
+              </Button>
             </div>
-          </div>
-
-          <div>
-            <Label>{t('leave.form.notes')}</Label>
-            <Textarea
-              value={form.notes}
-              onChange={(e) => update('notes', e.target.value)}
-              placeholder={t('leave.form.notesPlaceholder')}
-              style={{ minHeight: 60 }}
-            />
-          </div>
-
-          <div style={{ display: 'flex', justifyContent: 'flex-end', gap: 8 }}>
-            <Button type="button" variant="ghost" onClick={() => navigate({ to: '/leave' })}>
-              {t('common.cancel')}
-            </Button>
-            <Button type="submit" variant="primary" disabled={createRequest.isPending}>
-              {createRequest.isPending ? t('common.loading') : t('leave.form.submit')}
-            </Button>
-          </div>
-        </Card>
-      </form>
-    </div>
+          </Card>
+        </form>
+      </div>
+    </>
   );
 };
 

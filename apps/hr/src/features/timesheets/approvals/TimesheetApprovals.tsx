@@ -7,6 +7,7 @@ import { CheckCircle, XCircle, Clock, Users } from 'lucide-react';
 import {
   useListTimesheets,
   useApproveTimesheet,
+  useRejectTimesheet,
 } from '../../../shared/hooks/queries/useTimesheets';
 import type { TimesheetPayload } from '@voxire/contracts/hr/time_entry/v1/types';
 import {
@@ -33,6 +34,7 @@ const TimesheetApprovals = (): React.JSX.Element => {
   const { t } = useTranslation();
   const { data, isLoading } = useListTimesheets({ status: 'submitted' });
   const approveMutation = useApproveTimesheet();
+  const rejectMutation = useRejectTimesheet();
 
   const [rejectTarget, setRejectTarget] = useState<TimesheetPayload | null>(null);
   const [rejectionReason, setRejectionReason] = useState('');
@@ -49,10 +51,9 @@ const TimesheetApprovals = (): React.JSX.Element => {
 
   const handleReject = (): void => {
     if (!rejectTarget) return;
-    approveMutation.mutate(
+    rejectMutation.mutate(
       {
         timesheetId: rejectTarget.id,
-        approved: false,
         rejectionReason: rejectionReason || undefined,
       },
       {
@@ -67,156 +68,163 @@ const TimesheetApprovals = (): React.JSX.Element => {
   const timesheets = data?.timesheets ?? [];
 
   return (
-    <div style={{ display: 'flex', flexDirection: 'column', gap: 16 }}>
-      <SectionHeader
-        title={t('timesheets.approvals.title')}
-        subtitle={t('timesheets.approvals.subtitle', { count: timesheets.length })}
-      />
-
-      {isLoading ? (
-        <div style={{ display: 'flex', flexDirection: 'column', gap: 8 }}>
-          <Skeleton height={80} />
-          <Skeleton height={80} />
-        </div>
-      ) : timesheets.length === 0 ? (
-        <EmptyState
-          icon={<CheckCircle size={20} />}
-          title={t('timesheets.approvals.emptyTitle')}
-          description={t('timesheets.approvals.emptyDescription')}
+    <>
+      <HelmetContainer title="Timesheet approvals · rtylr" />
+      <div style={{ display: 'flex', flexDirection: 'column', gap: 16 }}>
+        <SectionHeader
+          title={t('timesheets.approvals.title')}
+          subtitle={t('timesheets.approvals.subtitle', { count: timesheets.length })}
         />
-      ) : (
-        <div style={{ display: 'flex', flexDirection: 'column', gap: 8 }}>
-          {timesheets.map((ts, idx) => {
-            const period = `${new Date(ts.periodStart + 'T00:00:00').toLocaleDateString(undefined, {
-              month: 'short',
-              day: 'numeric',
-            })} – ${new Date(ts.periodEnd + 'T00:00:00').toLocaleDateString(undefined, {
-              month: 'short',
-              day: 'numeric',
-            })}`;
 
-            return (
-              <motion.div
-                key={ts.id}
-                initial={{ opacity: 0, y: 6 }}
-                animate={{ opacity: 1, y: 0 }}
-                transition={{ delay: idx * 0.04 }}
-              >
-                <Card
-                  style={{
-                    display: 'flex',
-                    alignItems: 'center',
-                    gap: 12,
-                    padding: '14px 16px',
-                    flexWrap: 'wrap',
-                  }}
+        {isLoading ? (
+          <div style={{ display: 'flex', flexDirection: 'column', gap: 8 }}>
+            <Skeleton height={80} />
+            <Skeleton height={80} />
+          </div>
+        ) : timesheets.length === 0 ? (
+          <EmptyState
+            icon={<CheckCircle size={20} />}
+            title={t('timesheets.approvals.emptyTitle')}
+            description={t('timesheets.approvals.emptyDescription')}
+          />
+        ) : (
+          <div style={{ display: 'flex', flexDirection: 'column', gap: 8 }}>
+            {timesheets.map((ts, idx) => {
+              const period = `${new Date(ts.periodStart + 'T00:00:00').toLocaleDateString(
+                undefined,
+                {
+                  month: 'short',
+                  day: 'numeric',
+                }
+              )} – ${new Date(ts.periodEnd + 'T00:00:00').toLocaleDateString(undefined, {
+                month: 'short',
+                day: 'numeric',
+              })}`;
+
+              return (
+                <motion.div
+                  key={ts.id}
+                  initial={{ opacity: 0, y: 6 }}
+                  animate={{ opacity: 1, y: 0 }}
+                  transition={{ delay: idx * 0.04 }}
                 >
-                  <div
+                  <Card
                     style={{
                       display: 'flex',
                       alignItems: 'center',
-                      justifyContent: 'center',
-                      width: 32,
-                      height: 32,
-                      borderRadius: 8,
-                      background: `${ACCENT}15`,
-                      color: ACCENT,
-                      flexShrink: 0,
+                      gap: 12,
+                      padding: '14px 16px',
+                      flexWrap: 'wrap',
                     }}
                   >
-                    <Users size={15} />
-                  </div>
-                  <div style={{ flex: 1, minWidth: 140 }}>
-                    <div style={{ fontSize: 13, fontWeight: 600, color: 'var(--hr-text)' }}>
-                      {t('timesheets.approvals.employeeId', { id: ts.employeeId })}
-                    </div>
                     <div
                       style={{
                         display: 'flex',
                         alignItems: 'center',
-                        gap: 8,
-                        fontSize: 11,
-                        color: 'var(--hr-text-muted)',
-                        marginTop: 3,
+                        justifyContent: 'center',
+                        width: 32,
+                        height: 32,
+                        borderRadius: 8,
+                        background: `${ACCENT}15`,
+                        color: ACCENT,
+                        flexShrink: 0,
                       }}
                     >
-                      <span>{period}</span>
-                      <span>·</span>
-                      <span style={{ fontWeight: 600, color: ACCENT }}>
-                        {formatDuration(ts.totalMinutes)}
-                      </span>
-                      <span>·</span>
-                      <span>
-                        {ts.entries?.length ?? 0} {t('timesheets.entries')}
-                      </span>
+                      <Users size={15} />
                     </div>
-                  </div>
-                  <Pill color="var(--hr-status-submitted)">
-                    {t('timesheets.statuses.submitted')}
-                  </Pill>
-                  <div style={{ display: 'flex', gap: 6 }}>
-                    <Button
-                      variant="primary"
-                      style={{ padding: '6px 12px', fontSize: 11 }}
-                      onClick={() => handleApprove(ts.id)}
-                      disabled={approveMutation.isPending}
-                      icon={<CheckCircle size={13} />}
-                    >
-                      {t('timesheets.approvals.approve')}
-                    </Button>
-                    <Button
-                      variant="danger"
-                      style={{ padding: '6px 12px', fontSize: 11 }}
-                      onClick={() => setRejectTarget(ts)}
-                      icon={<XCircle size={13} />}
-                    >
-                      {t('timesheets.approvals.reject')}
-                    </Button>
-                  </div>
-                </Card>
-              </motion.div>
-            );
-          })}
-        </div>
-      )}
+                    <div style={{ flex: 1, minWidth: 140 }}>
+                      <div style={{ fontSize: 13, fontWeight: 600, color: 'var(--hr-text)' }}>
+                        {t('timesheets.approvals.employeeId', { id: ts.employeeId })}
+                      </div>
+                      <div
+                        style={{
+                          display: 'flex',
+                          alignItems: 'center',
+                          gap: 8,
+                          fontSize: 11,
+                          color: 'var(--hr-text-muted)',
+                          marginTop: 3,
+                        }}
+                      >
+                        <span>{period}</span>
+                        <span>·</span>
+                        <span style={{ fontWeight: 600, color: ACCENT }}>
+                          {formatDuration(ts.totalMinutes)}
+                        </span>
+                        <span>·</span>
+                        <span>
+                          {ts.entries?.length ?? 0} {t('timesheets.entries')}
+                        </span>
+                      </div>
+                    </div>
+                    <Pill color="var(--hr-status-submitted)">
+                      {t('timesheets.statuses.submitted')}
+                    </Pill>
+                    <div style={{ display: 'flex', gap: 6 }}>
+                      <Button
+                        variant="primary"
+                        style={{ padding: '6px 12px', fontSize: 11 }}
+                        onClick={() => handleApprove(ts.id)}
+                        disabled={approveMutation.isPending}
+                        icon={<CheckCircle size={13} />}
+                      >
+                        {t('timesheets.approvals.approve')}
+                      </Button>
+                      <Button
+                        variant="danger"
+                        style={{ padding: '6px 12px', fontSize: 11 }}
+                        onClick={() => setRejectTarget(ts)}
+                        disabled={rejectMutation.isPending}
+                        icon={<XCircle size={13} />}
+                      >
+                        {t('timesheets.approvals.reject')}
+                      </Button>
+                    </div>
+                  </Card>
+                </motion.div>
+              );
+            })}
+          </div>
+        )}
 
-      {/* Rejection reason modal */}
-      <Modal
-        open={!!rejectTarget}
-        onClose={() => {
-          setRejectTarget(null);
-          setRejectionReason('');
-        }}
-        title={t('timesheets.approvals.rejectTitle')}
-        width={400}
-      >
-        <div style={{ display: 'flex', flexDirection: 'column', gap: 12 }}>
-          <div>
-            <Label>{t('timesheets.approvals.reasonLabel')}</Label>
-            <Textarea
-              value={rejectionReason}
-              onChange={(e) => setRejectionReason(e.target.value)}
-              placeholder={t('timesheets.approvals.reasonPlaceholder')}
-              rows={3}
-            />
+        {/* Rejection reason modal */}
+        <Modal
+          open={!!rejectTarget}
+          onClose={() => {
+            setRejectTarget(null);
+            setRejectionReason('');
+          }}
+          title={t('timesheets.approvals.rejectTitle')}
+          width={400}
+        >
+          <div style={{ display: 'flex', flexDirection: 'column', gap: 12 }}>
+            <div>
+              <Label>{t('timesheets.approvals.reasonLabel')}</Label>
+              <Textarea
+                value={rejectionReason}
+                onChange={(e) => setRejectionReason(e.target.value)}
+                placeholder={t('timesheets.approvals.reasonPlaceholder')}
+                rows={3}
+              />
+            </div>
+            <div style={{ display: 'flex', gap: 8, justifyContent: 'flex-end' }}>
+              <Button
+                variant="ghost"
+                onClick={() => {
+                  setRejectTarget(null);
+                  setRejectionReason('');
+                }}
+              >
+                {t('common.cancel')}
+              </Button>
+              <Button variant="danger" onClick={handleReject} disabled={rejectMutation.isPending}>
+                {t('timesheets.approvals.confirmReject')}
+              </Button>
+            </div>
           </div>
-          <div style={{ display: 'flex', gap: 8, justifyContent: 'flex-end' }}>
-            <Button
-              variant="ghost"
-              onClick={() => {
-                setRejectTarget(null);
-                setRejectionReason('');
-              }}
-            >
-              {t('common.cancel')}
-            </Button>
-            <Button variant="danger" onClick={handleReject} disabled={approveMutation.isPending}>
-              {t('timesheets.approvals.confirmReject')}
-            </Button>
-          </div>
-        </div>
-      </Modal>
-    </div>
+        </Modal>
+      </div>
+    </>
   );
 };
 

@@ -104,122 +104,125 @@ const PaySlip = (): React.JSX.Element => {
   const gross = entry.basePay + entry.overtimePay + entry.bonuses;
 
   return (
-    <div style={{ display: 'flex', flexDirection: 'column', gap: 20, maxWidth: 600 }}>
-      <Breadcrumbs
-        items={[
-          { label: t('payroll.paySlip.myPaySlips'), href: '/payroll/my-payslips' },
-          { label: `${run.periodStart}, ${run.periodEnd}` },
-        ]}
-      />
+    <>
+      <HelmetContainer title="Pay slip · rtylr" />
+      <div style={{ display: 'flex', flexDirection: 'column', gap: 20, maxWidth: 600 }}>
+        <Breadcrumbs
+          items={[
+            { label: t('payroll.paySlip.myPaySlips'), href: '/payroll/my-payslips' },
+            { label: `${run.periodStart}, ${run.periodEnd}` },
+          ]}
+        />
 
-      <SectionHeader
-        title={t('payroll.paySlip.title')}
-        subtitle={`${run.periodStart}, ${run.periodEnd}`}
-      />
+        <SectionHeader
+          title={t('payroll.paySlip.title')}
+          subtitle={`${run.periodStart}, ${run.periodEnd}`}
+        />
 
-      <Card>
-        <div style={{ marginBottom: 16 }}>
-          <div style={{ fontSize: 15, fontWeight: 700, color: 'var(--hr-text)' }}>
-            {t('payroll.table.employeeId', { id: entry.employeeId })}
+        <Card>
+          <div style={{ marginBottom: 16 }}>
+            <div style={{ fontSize: 15, fontWeight: 700, color: 'var(--hr-text)' }}>
+              {t('payroll.table.employeeId', { id: entry.employeeId })}
+            </div>
+            <div style={{ fontSize: 11, color: 'var(--hr-text-muted)', marginTop: 2 }}>
+              {t('payroll.paySlip.period')}: {run.periodStart}, {run.periodEnd}
+            </div>
+            <Pill color="var(--hr-status-approved)" style={{ marginTop: 8 }}>
+              {t(`payroll.statuses.${run.status}`)}
+            </Pill>
           </div>
-          <div style={{ fontSize: 11, color: 'var(--hr-text-muted)', marginTop: 2 }}>
-            {t('payroll.paySlip.period')}: {run.periodStart}, {run.periodEnd}
-          </div>
-          <Pill color="var(--hr-status-approved)" style={{ marginTop: 8 }}>
-            {t(`payroll.statuses.${run.status}`)}
-          </Pill>
-        </div>
 
-        {/* Earnings section */}
-        <div style={{ marginBottom: 16 }}>
+          {/* Earnings section */}
+          <div style={{ marginBottom: 16 }}>
+            <div
+              style={{
+                fontSize: 11,
+                fontWeight: 600,
+                textTransform: 'uppercase',
+                letterSpacing: '0.05em',
+                color: 'var(--hr-text-muted)',
+                marginBottom: 8,
+              }}
+            >
+              {t('payroll.paySlip.earnings')}
+            </div>
+            <BreakdownRow label={t('payroll.table.basePay')} value={fmt(entry.basePay)} />
+            <BreakdownRow
+              label={t('payroll.table.overtimePay')}
+              value={fmt(entry.overtimePay)}
+              color={entry.overtimePay > 0 ? 'var(--hr-status-submitted)' : undefined}
+            />
+            <BreakdownRow
+              label={t('payroll.table.bonuses')}
+              value={fmt(entry.bonuses)}
+              color={entry.bonuses > 0 ? 'var(--hr-status-approved)' : undefined}
+            />
+            <BreakdownRow label={t('payroll.paySlip.grossPay')} value={fmt(gross)} bold />
+          </div>
+
+          {/* Deductions section */}
+          <div style={{ marginBottom: 16 }}>
+            <div
+              style={{
+                fontSize: 11,
+                fontWeight: 600,
+                textTransform: 'uppercase',
+                letterSpacing: '0.05em',
+                color: 'var(--hr-text-muted)',
+                marginBottom: 8,
+              }}
+            >
+              {t('payroll.paySlip.deductionsSection')}
+            </div>
+            <BreakdownRow
+              label={t('payroll.table.deductions')}
+              value={`-${fmt(entry.deductions)}`}
+              color="var(--hr-error)"
+            />
+          </div>
+
+          {/* Net pay */}
           <div
             style={{
-              fontSize: 11,
-              fontWeight: 600,
-              textTransform: 'uppercase',
-              letterSpacing: '0.05em',
-              color: 'var(--hr-text-muted)',
-              marginBottom: 8,
+              display: 'flex',
+              justifyContent: 'space-between',
+              alignItems: 'center',
+              padding: '14px 0',
+              borderTop: '2px solid var(--hr-border)',
             }}
           >
-            {t('payroll.paySlip.earnings')}
+            <span style={{ fontSize: 15, fontWeight: 700, color: 'var(--hr-text)' }}>
+              {t('payroll.table.netPay')}
+            </span>
+            <span
+              style={{
+                fontSize: 18,
+                fontWeight: 800,
+                color: 'var(--hr-status-approved)',
+                fontVariantNumeric: 'tabular-nums',
+              }}
+            >
+              {fmt(entry.netPay)}
+            </span>
           </div>
-          <BreakdownRow label={t('payroll.table.basePay')} value={fmt(entry.basePay)} />
-          <BreakdownRow
-            label={t('payroll.table.overtimePay')}
-            value={fmt(entry.overtimePay)}
-            color={entry.overtimePay > 0 ? 'var(--hr-status-submitted)' : undefined}
-          />
-          <BreakdownRow
-            label={t('payroll.table.bonuses')}
-            value={fmt(entry.bonuses)}
-            color={entry.bonuses > 0 ? 'var(--hr-status-approved)' : undefined}
-          />
-          <BreakdownRow label={t('payroll.paySlip.grossPay')} value={fmt(gross)} bold />
-        </div>
+        </Card>
 
-        {/* Deductions section */}
-        <div style={{ marginBottom: 16 }}>
-          <div
-            style={{
-              fontSize: 11,
-              fontWeight: 600,
-              textTransform: 'uppercase',
-              letterSpacing: '0.05em',
-              color: 'var(--hr-text-muted)',
-              marginBottom: 8,
-            }}
-          >
-            {t('payroll.paySlip.deductionsSection')}
-          </div>
-          <BreakdownRow
-            label={t('payroll.table.deductions')}
-            value={`-${fmt(entry.deductions)}`}
-            color="var(--hr-error)"
-          />
-        </div>
-
-        {/* Net pay */}
-        <div
+        <Link
+          to="/payroll/my-payslips"
           style={{
-            display: 'flex',
-            justifyContent: 'space-between',
+            display: 'inline-flex',
             alignItems: 'center',
-            padding: '14px 0',
-            borderTop: '2px solid var(--hr-border)',
+            gap: 6,
+            fontSize: 12,
+            color: 'var(--hr-text-muted)',
+            textDecoration: 'none',
           }}
         >
-          <span style={{ fontSize: 15, fontWeight: 700, color: 'var(--hr-text)' }}>
-            {t('payroll.table.netPay')}
-          </span>
-          <span
-            style={{
-              fontSize: 18,
-              fontWeight: 800,
-              color: 'var(--hr-status-approved)',
-              fontVariantNumeric: 'tabular-nums',
-            }}
-          >
-            {fmt(entry.netPay)}
-          </span>
-        </div>
-      </Card>
-
-      <Link
-        to="/payroll/my-payslips"
-        style={{
-          display: 'inline-flex',
-          alignItems: 'center',
-          gap: 6,
-          fontSize: 12,
-          color: 'var(--hr-text-muted)',
-          textDecoration: 'none',
-        }}
-      >
-        <ArrowLeft size={12} />
-        {t('payroll.paySlip.backToSlips')}
-      </Link>
-    </div>
+          <ArrowLeft size={12} />
+          {t('payroll.paySlip.backToSlips')}
+        </Link>
+      </div>
+    </>
   );
 };
 

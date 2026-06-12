@@ -27,24 +27,27 @@ const OrgChart: React.FC = () => {
   }, [data]);
 
   return (
-    <div style={{ display: 'flex', flexDirection: 'column', gap: 20 }}>
-      <SectionHeader title="Org Chart" subtitle="Reporting hierarchy visualized" />
-      {isLoading ? (
-        <Skeleton height={260} />
-      ) : !root ? (
-        <EmptyState
-          icon={<Network size={20} />}
-          title="No employees"
-          description="Add employees to see the org chart."
-        />
-      ) : (
-        <Card style={{ overflowX: 'auto', padding: 32 }}>
-          <div style={{ display: 'flex', justifyContent: 'center' }}>
-            <OrgNode node={root} />
-          </div>
-        </Card>
-      )}
-    </div>
+    <>
+      <HelmetContainer title="Org chart · rtylr" />
+      <div style={{ display: 'flex', flexDirection: 'column', gap: 20 }}>
+        <SectionHeader title="Org Chart" subtitle="Reporting hierarchy visualized" />
+        {isLoading ? (
+          <Skeleton height={260} />
+        ) : !root ? (
+          <EmptyState
+            icon={<Network size={20} />}
+            title="No employees"
+            description="Add employees to see the org chart."
+          />
+        ) : (
+          <Card style={{ overflowX: 'auto', padding: 32 }}>
+            <div style={{ display: 'flex', justifyContent: 'center' }}>
+              <OrgNode node={root} />
+            </div>
+          </Card>
+        )}
+      </div>
+    </>
   );
 };
 

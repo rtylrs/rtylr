@@ -386,9 +386,12 @@ const ShiftChip = ({ assignment }: { assignment: ShiftAssignment }): React.JSX.E
 };
 
 const RosterBuilder = (): React.JSX.Element => (
-  <ErrorBoundary>
-    <RosterBuilderInner />
-  </ErrorBoundary>
+  <>
+    <HelmetContainer title="Roster builder · rtylr" />
+    <ErrorBoundary>
+      <RosterBuilderInner />
+    </ErrorBoundary>
+  </>
 );
 
 export default RosterBuilder;

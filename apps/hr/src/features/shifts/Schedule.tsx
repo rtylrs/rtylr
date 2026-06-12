@@ -109,183 +109,187 @@ const Schedule: React.FC = () => {
   })} - ${addDays(weekStart, 6).toLocaleDateString('en-US', { month: 'short', day: 'numeric' })}`;
 
   return (
-    <div style={{ display: 'flex', flexDirection: 'column', gap: 20 }}>
-      <SectionHeader
-        title="Shift Schedule"
-        subtitle="Weekly grid view for scheduling shifts"
-        right={
-          <div style={{ display: 'flex', gap: 6, flexWrap: 'wrap' }}>
-            <Button
-              icon={<ChevronLeft size={13} />}
-              onClick={() => setWeekStart(addDays(weekStart, -7))}
-            />
-            <Button onClick={() => setWeekStart(startOfWeek(new Date()))}>Today</Button>
-            <Button
-              icon={<ChevronRight size={13} />}
-              onClick={() => setWeekStart(addDays(weekStart, 7))}
-            />
-            <Button
-              variant="primary"
-              icon={<Send size={13} />}
-              onClick={() =>
-                publish.mutate(dayStr(weekStart), {
-                  onSuccess: () => toast.success('Week published'),
-                })
-              }
-            >
-              Publish week
-            </Button>
-          </div>
-        }
-      />
-      <p style={{ margin: 0, fontSize: 12, color: 'var(--hr-text-muted)' }}>{weekLabel}</p>
-
-      <Card style={{ padding: 0, overflow: 'hidden' }}>
-        <div style={{ overflowX: 'auto' }}>
-          <div
-            style={{
-              display: 'grid',
-              gridTemplateColumns: 'repeat(7, minmax(120px, 1fr))',
-              minWidth: 840,
-            }}
-          >
-            {days.map((d) => (
-              <div key={d.toISOString()} style={{ borderRight: '1px solid var(--hr-border)' }}>
-                <div
-                  style={{
-                    padding: '10px 12px',
-                    background: 'var(--hr-hover)',
-                    borderBottom: '1px solid var(--hr-border)',
-                  }}
-                >
-                  <div
-                    style={{
-                      fontSize: 10,
-                      color: 'var(--hr-text-muted)',
-                      textTransform: 'uppercase',
-                      fontWeight: 600,
-                    }}
-                  >
-                    {d.toLocaleDateString('en-US', { weekday: 'short' })}
-                  </div>
-                  <div style={{ fontSize: 14, fontWeight: 700, color: 'var(--hr-text)' }}>
-                    {d.getDate()}
-                  </div>
-                </div>
-                <div
-                  style={{
-                    padding: 8,
-                    minHeight: 260,
-                    display: 'flex',
-                    flexDirection: 'column',
-                    gap: 6,
-                  }}
-                >
-                  {(grid.get(dayStr(d)) ?? []).map((sh) => (
-                    <ShiftCell
-                      key={sh.id}
-                      shift={sh}
-                      onClick={() => {
-                        if (confirm(`Delete shift for ${sh.staffName}?`)) {
-                          del.mutate(sh.id, { onSuccess: () => toast.success('Shift removed') });
-                        }
-                      }}
-                    />
-                  ))}
-                  <button
-                    onClick={() => openNew(dayStr(d))}
-                    style={{
-                      padding: '6px',
-                      borderRadius: 8,
-                      border: '1px dashed var(--hr-border)',
-                      background: 'transparent',
-                      color: 'var(--hr-text-muted)',
-                      fontSize: 10,
-                      cursor: 'pointer',
-                    }}
-                  >
-                    + add shift
-                  </button>
-                </div>
-              </div>
-            ))}
-          </div>
-        </div>
-      </Card>
-
-      <Modal open={modalOpen} onClose={() => setModalOpen(false)} title="New shift">
-        {editing && (
-          <div style={{ display: 'flex', flexDirection: 'column', gap: 12 }}>
-            <div>
-              <Label>Employee</Label>
-              <Select
-                value={editing.staffId ?? ''}
-                onChange={(e) => setEditing({ ...editing, staffId: Number(e.target.value) })}
+    <>
+      <HelmetContainer title="Shift schedule · rtylr" />
+      <div style={{ display: 'flex', flexDirection: 'column', gap: 20 }}>
+        <SectionHeader
+          title="Shift Schedule"
+          subtitle="Weekly grid view for scheduling shifts"
+          right={
+            <div style={{ display: 'flex', gap: 6, flexWrap: 'wrap' }}>
+              <Button
+                icon={<ChevronLeft size={13} />}
+                onClick={() => setWeekStart(addDays(weekStart, -7))}
+              />
+              <Button onClick={() => setWeekStart(startOfWeek(new Date()))}>Today</Button>
+              <Button
+                icon={<ChevronRight size={13} />}
+                onClick={() => setWeekStart(addDays(weekStart, 7))}
+              />
+              <Button
+                variant="primary"
+                icon={<Send size={13} />}
+                onClick={() =>
+                  publish.mutate(dayStr(weekStart), {
+                    onSuccess: () => toast.success('Week published'),
+                  })
+                }
               >
-                <option value="">Select</option>
-                {staff.map((s) => (
-                  <option key={s.id} value={s.id}>
-                    {s.name}
-                  </option>
-                ))}
-              </Select>
+                Publish week
+              </Button>
             </div>
+          }
+        />
+        <p style={{ margin: 0, fontSize: 12, color: 'var(--hr-text-muted)' }}>{weekLabel}</p>
+
+        <Card style={{ padding: 0, overflow: 'hidden' }}>
+          <div style={{ overflowX: 'auto' }}>
             <div
               style={{
                 display: 'grid',
-                gridTemplateColumns: isMobile ? '1fr' : '1fr 1fr',
-                gap: 10,
+                gridTemplateColumns: 'repeat(7, minmax(120px, 1fr))',
+                minWidth: 840,
               }}
             >
-              <div>
-                <Label>Start</Label>
-                <Input
-                  type="time"
-                  value={editing.start ?? ''}
-                  onChange={(e) => setEditing({ ...editing, start: e.target.value })}
-                />
-              </div>
-              <div>
-                <Label>End</Label>
-                <Input
-                  type="time"
-                  value={editing.end ?? ''}
-                  onChange={(e) => setEditing({ ...editing, end: e.target.value })}
-                />
-              </div>
-            </div>
-            <div>
-              <Label>Color</Label>
-              <div style={{ display: 'flex', gap: 6 }}>
-                {ROLE_COLORS.map((c) => (
-                  <button
-                    key={c}
-                    type="button"
-                    onClick={() => setEditing({ ...editing, color: c })}
+              {days.map((d) => (
+                <div key={d.toISOString()} style={{ borderRight: '1px solid var(--hr-border)' }}>
+                  <div
                     style={{
-                      width: 28,
-                      height: 28,
-                      borderRadius: 8,
-                      border: editing.color === c ? `2px solid ${c}` : '1px solid var(--hr-border)',
-                      background: c,
-                      cursor: 'pointer',
+                      padding: '10px 12px',
+                      background: 'var(--hr-hover)',
+                      borderBottom: '1px solid var(--hr-border)',
                     }}
-                  />
-                ))}
-              </div>
-            </div>
-            <div style={{ display: 'flex', gap: 8, justifyContent: 'flex-end' }}>
-              <Button variant="ghost" onClick={() => setModalOpen(false)}>
-                Cancel
-              </Button>
-              <Button variant="primary" onClick={saveShift}>
-                Save shift
-              </Button>
+                  >
+                    <div
+                      style={{
+                        fontSize: 10,
+                        color: 'var(--hr-text-muted)',
+                        textTransform: 'uppercase',
+                        fontWeight: 600,
+                      }}
+                    >
+                      {d.toLocaleDateString('en-US', { weekday: 'short' })}
+                    </div>
+                    <div style={{ fontSize: 14, fontWeight: 700, color: 'var(--hr-text)' }}>
+                      {d.getDate()}
+                    </div>
+                  </div>
+                  <div
+                    style={{
+                      padding: 8,
+                      minHeight: 260,
+                      display: 'flex',
+                      flexDirection: 'column',
+                      gap: 6,
+                    }}
+                  >
+                    {(grid.get(dayStr(d)) ?? []).map((sh) => (
+                      <ShiftCell
+                        key={sh.id}
+                        shift={sh}
+                        onClick={() => {
+                          if (confirm(`Delete shift for ${sh.staffName}?`)) {
+                            del.mutate(sh.id, { onSuccess: () => toast.success('Shift removed') });
+                          }
+                        }}
+                      />
+                    ))}
+                    <button
+                      onClick={() => openNew(dayStr(d))}
+                      style={{
+                        padding: '6px',
+                        borderRadius: 8,
+                        border: '1px dashed var(--hr-border)',
+                        background: 'transparent',
+                        color: 'var(--hr-text-muted)',
+                        fontSize: 10,
+                        cursor: 'pointer',
+                      }}
+                    >
+                      + add shift
+                    </button>
+                  </div>
+                </div>
+              ))}
             </div>
           </div>
-        )}
-      </Modal>
-    </div>
+        </Card>
+
+        <Modal open={modalOpen} onClose={() => setModalOpen(false)} title="New shift">
+          {editing && (
+            <div style={{ display: 'flex', flexDirection: 'column', gap: 12 }}>
+              <div>
+                <Label>Employee</Label>
+                <Select
+                  value={editing.staffId ?? ''}
+                  onChange={(e) => setEditing({ ...editing, staffId: Number(e.target.value) })}
+                >
+                  <option value="">Select</option>
+                  {staff.map((s) => (
+                    <option key={s.id} value={s.id}>
+                      {s.name}
+                    </option>
+                  ))}
+                </Select>
+              </div>
+              <div
+                style={{
+                  display: 'grid',
+                  gridTemplateColumns: isMobile ? '1fr' : '1fr 1fr',
+                  gap: 10,
+                }}
+              >
+                <div>
+                  <Label>Start</Label>
+                  <Input
+                    type="time"
+                    value={editing.start ?? ''}
+                    onChange={(e) => setEditing({ ...editing, start: e.target.value })}
+                  />
+                </div>
+                <div>
+                  <Label>End</Label>
+                  <Input
+                    type="time"
+                    value={editing.end ?? ''}
+                    onChange={(e) => setEditing({ ...editing, end: e.target.value })}
+                  />
+                </div>
+              </div>
+              <div>
+                <Label>Color</Label>
+                <div style={{ display: 'flex', gap: 6 }}>
+                  {ROLE_COLORS.map((c) => (
+                    <button
+                      key={c}
+                      type="button"
+                      onClick={() => setEditing({ ...editing, color: c })}
+                      style={{
+                        width: 28,
+                        height: 28,
+                        borderRadius: 8,
+                        border:
+                          editing.color === c ? `2px solid ${c}` : '1px solid var(--hr-border)',
+                        background: c,
+                        cursor: 'pointer',
+                      }}
+                    />
+                  ))}
+                </div>
+              </div>
+              <div style={{ display: 'flex', gap: 8, justifyContent: 'flex-end' }}>
+                <Button variant="ghost" onClick={() => setModalOpen(false)}>
+                  Cancel
+                </Button>
+                <Button variant="primary" onClick={saveShift}>
+                  Save shift
+                </Button>
+              </div>
+            </div>
+          )}
+        </Modal>
+      </div>
+    </>
   );
 };
 

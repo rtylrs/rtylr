@@ -144,9 +144,12 @@ const PerformanceInner = (): React.JSX.Element => {
 };
 
 const Performance = (): React.JSX.Element => (
-  <ErrorBoundary>
-    <PerformanceInner />
-  </ErrorBoundary>
+  <>
+    <HelmetContainer title="Performance · rtylr" />
+    <ErrorBoundary>
+      <PerformanceInner />
+    </ErrorBoundary>
+  </>
 );
 
 export default Performance;

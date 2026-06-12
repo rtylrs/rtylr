@@ -76,107 +76,110 @@ const PayrollConfigSettings = (): React.JSX.Element => {
   };
 
   return (
-    <div style={{ display: 'flex', flexDirection: 'column', gap: 20, maxWidth: 640 }}>
-      <SectionHeader title={t('payroll.config.title')} subtitle={t('payroll.config.subtitle')} />
+    <>
+      <HelmetContainer title="Payroll configuration · rtylr" />
+      <div style={{ display: 'flex', flexDirection: 'column', gap: 20, maxWidth: 640 }}>
+        <SectionHeader title={t('payroll.config.title')} subtitle={t('payroll.config.subtitle')} />
 
-      <Card>
-        <div style={{ display: 'flex', flexDirection: 'column', gap: 20 }}>
-          {/* Gross Model */}
-          <div>
-            <Label htmlFor="grossModel">{t('payroll.config.grossModel')}</Label>
-            <div style={{ display: 'flex', gap: 8, flexWrap: 'wrap' }}>
-              {GROSS_MODELS.map((model) => (
-                <label
-                  key={model}
-                  style={{
-                    display: 'flex',
-                    alignItems: 'center',
-                    gap: 8,
-                    padding: '10px 16px',
-                    borderRadius: 8,
-                    border: `1px solid ${form.grossModel === model ? 'var(--accent)' : 'var(--hr-border)'}`,
-                    background: form.grossModel === model ? 'var(--accent-muted)' : 'transparent',
-                    cursor: 'pointer',
-                    fontSize: 13,
-                    fontWeight: 500,
-                    color: form.grossModel === model ? 'var(--accent)' : 'var(--hr-text)',
-                    minHeight: 44,
-                  }}
-                >
-                  <input
-                    type="radio"
-                    name="grossModel"
-                    value={model}
-                    checked={form.grossModel === model}
-                    onChange={() => setForm({ ...form, grossModel: model })}
-                    style={{ display: 'none' }}
-                  />
-                  {t(`payroll.config.grossModels.${model}`)}
-                </label>
-              ))}
+        <Card>
+          <div style={{ display: 'flex', flexDirection: 'column', gap: 20 }}>
+            {/* Gross Model */}
+            <div>
+              <Label htmlFor="grossModel">{t('payroll.config.grossModel')}</Label>
+              <div style={{ display: 'flex', gap: 8, flexWrap: 'wrap' }}>
+                {GROSS_MODELS.map((model) => (
+                  <label
+                    key={model}
+                    style={{
+                      display: 'flex',
+                      alignItems: 'center',
+                      gap: 8,
+                      padding: '10px 16px',
+                      borderRadius: 8,
+                      border: `1px solid ${form.grossModel === model ? 'var(--accent)' : 'var(--hr-border)'}`,
+                      background: form.grossModel === model ? 'var(--accent-muted)' : 'transparent',
+                      cursor: 'pointer',
+                      fontSize: 13,
+                      fontWeight: 500,
+                      color: form.grossModel === model ? 'var(--accent)' : 'var(--hr-text)',
+                      minHeight: 44,
+                    }}
+                  >
+                    <input
+                      type="radio"
+                      name="grossModel"
+                      value={model}
+                      checked={form.grossModel === model}
+                      onChange={() => setForm({ ...form, grossModel: model })}
+                      style={{ display: 'none' }}
+                    />
+                    {t(`payroll.config.grossModels.${model}`)}
+                  </label>
+                ))}
+              </div>
+              {errors.grossModel && (
+                <span style={{ fontSize: 11, color: 'var(--hr-error)', marginTop: 4 }}>
+                  {errors.grossModel}
+                </span>
+              )}
             </div>
-            {errors.grossModel && (
-              <span style={{ fontSize: 11, color: 'var(--hr-error)', marginTop: 4 }}>
-                {errors.grossModel}
-              </span>
-            )}
+
+            {/* Pay Period */}
+            <div>
+              <Label htmlFor="period">{t('payroll.config.period')}</Label>
+              <Select
+                id="period"
+                value={form.period}
+                onChange={(e) => setForm({ ...form, period: e.target.value as FormData['period'] })}
+                style={{ maxWidth: 280 }}
+              >
+                {PAY_PERIODS.map((p) => (
+                  <option key={p} value={p}>
+                    {t(`payroll.config.periods.${p}`)}
+                  </option>
+                ))}
+              </Select>
+              {errors.period && (
+                <span style={{ fontSize: 11, color: 'var(--hr-error)', marginTop: 4 }}>
+                  {errors.period}
+                </span>
+              )}
+            </div>
+
+            {/* Toggles */}
+            <div style={{ display: 'flex', flexDirection: 'column', gap: 14 }}>
+              <Checkbox
+                checked={form.overtimeEnabled}
+                onChange={(v) => setForm({ ...form, overtimeEnabled: v })}
+                label={t('payroll.config.enableOvertime')}
+              />
+              <Checkbox
+                checked={form.deductionsEnabled}
+                onChange={(v) => setForm({ ...form, deductionsEnabled: v })}
+                label={t('payroll.config.enableDeductions')}
+              />
+              <Checkbox
+                checked={form.bonusesEnabled}
+                onChange={(v) => setForm({ ...form, bonusesEnabled: v })}
+                label={t('payroll.config.enableBonuses')}
+              />
+            </div>
           </div>
 
-          {/* Pay Period */}
-          <div>
-            <Label htmlFor="period">{t('payroll.config.period')}</Label>
-            <Select
-              id="period"
-              value={form.period}
-              onChange={(e) => setForm({ ...form, period: e.target.value as FormData['period'] })}
-              style={{ maxWidth: 280 }}
-            >
-              {PAY_PERIODS.map((p) => (
-                <option key={p} value={p}>
-                  {t(`payroll.config.periods.${p}`)}
-                </option>
-              ))}
-            </Select>
-            {errors.period && (
-              <span style={{ fontSize: 11, color: 'var(--hr-error)', marginTop: 4 }}>
-                {errors.period}
-              </span>
-            )}
+          {configNotice && (
+            <p style={{ color: 'var(--hr-status-draft)', marginBottom: 8, fontSize: 13 }}>
+              {configNotice}
+            </p>
+          )}
+
+          <div style={{ display: 'flex', justifyContent: 'flex-end', marginTop: 24 }}>
+            <Button variant="primary" onClick={handleSave} disabled={upsertConfig.isPending}>
+              {upsertConfig.isPending ? t('common.loading') : t('common.save')}
+            </Button>
           </div>
-
-          {/* Toggles */}
-          <div style={{ display: 'flex', flexDirection: 'column', gap: 14 }}>
-            <Checkbox
-              checked={form.overtimeEnabled}
-              onChange={(v) => setForm({ ...form, overtimeEnabled: v })}
-              label={t('payroll.config.enableOvertime')}
-            />
-            <Checkbox
-              checked={form.deductionsEnabled}
-              onChange={(v) => setForm({ ...form, deductionsEnabled: v })}
-              label={t('payroll.config.enableDeductions')}
-            />
-            <Checkbox
-              checked={form.bonusesEnabled}
-              onChange={(v) => setForm({ ...form, bonusesEnabled: v })}
-              label={t('payroll.config.enableBonuses')}
-            />
-          </div>
-        </div>
-
-        {configNotice && (
-          <p style={{ color: 'var(--hr-status-draft)', marginBottom: 8, fontSize: 13 }}>
-            {configNotice}
-          </p>
-        )}
-
-        <div style={{ display: 'flex', justifyContent: 'flex-end', marginTop: 24 }}>
-          <Button variant="primary" onClick={handleSave} disabled={upsertConfig.isPending}>
-            {upsertConfig.isPending ? t('common.loading') : t('common.save')}
-          </Button>
-        </div>
-      </Card>
-    </div>
+        </Card>
+      </div>
+    </>
   );
 };
 

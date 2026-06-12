@@ -80,251 +80,259 @@ const Reports: React.FC = () => {
   }, [selectedType, dateFrom, dateTo, departmentId, locationId, generateMutation, t]);
 
   return (
-    <motion.div
-      initial={{ opacity: 0, y: 8 }}
-      animate={{ opacity: 1, y: 0 }}
-      transition={{ duration: 0.2 }}
-      style={{ display: 'flex', flexDirection: 'column', gap: 24 }}
-    >
-      {/* Header */}
-      <div>
-        <h1 style={{ margin: 0, fontSize: 18, fontWeight: 700, color: 'var(--hr-text)' }}>
-          {t('reports.title')}
-        </h1>
-        <p style={{ margin: '4px 0 0', fontSize: 13, color: 'var(--hr-text-muted)' }}>
-          {t('reports.subtitle')}
-        </p>
-      </div>
-
-      {/* Main layout */}
-      <div
-        style={{
-          display: 'grid',
-          gridTemplateColumns: isMobile ? '1fr' : '240px minmax(0, 1fr)',
-          gap: 16,
-          alignItems: 'start',
-        }}
+    <>
+      <HelmetContainer title="Reports · rtylr" />
+      <motion.div
+        initial={{ opacity: 0, y: 8 }}
+        animate={{ opacity: 1, y: 0 }}
+        transition={{ duration: 0.2 }}
+        style={{ display: 'flex', flexDirection: 'column', gap: 24 }}
       >
-        {/* Sidebar: report types */}
-        <div
-          style={{
-            background: 'var(--hr-card)',
-            border: '1px solid var(--hr-border)',
-            borderRadius: 12,
-            overflow: 'hidden',
-          }}
-        >
-          <div
-            style={{
-              padding: '12px 16px',
-              borderBottom: '1px solid var(--hr-border)',
-            }}
-          >
-            <h2
-              style={{
-                margin: 0,
-                fontSize: 12,
-                fontWeight: 600,
-                color: 'var(--hr-text-muted)',
-                textTransform: 'uppercase',
-                letterSpacing: '0.05em',
-              }}
-            >
-              {t('reports.types')}
-            </h2>
-          </div>
-          <nav style={{ display: 'flex', flexDirection: 'column', padding: 6, gap: 2 }}>
-            {REPORT_TYPES.map((type) => {
-              const Icon = REPORT_ICONS[type];
-              const isActive = selectedType === type;
-              return (
-                <button
-                  key={type}
-                  onClick={() => {
-                    setSelectedType(type);
-                    setReport(null);
-                  }}
-                  style={{
-                    display: 'flex',
-                    alignItems: 'center',
-                    gap: 10,
-                    padding: '8px 12px',
-                    borderRadius: 8,
-                    fontSize: 12,
-                    fontWeight: 500,
-                    textDecoration: 'none',
-                    border: 'none',
-                    cursor: 'pointer',
-                    textAlign: 'left',
-                    background: isActive ? 'var(--hr-active)' : 'transparent',
-                    color: isActive ? 'var(--hr-text)' : 'var(--hr-text-muted)',
-                    transition: 'background 0.15s, color 0.15s',
-                    width: '100%',
-                  }}
-                >
-                  <Icon size={14} />
-                  <span>{t(`reports.reportTypes.${type}`)}</span>
-                </button>
-              );
-            })}
-          </nav>
+        {/* Header */}
+        <div>
+          <h1 style={{ margin: 0, fontSize: 18, fontWeight: 700, color: 'var(--hr-text)' }}>
+            {t('reports.title')}
+          </h1>
+          <p style={{ margin: '4px 0 0', fontSize: 13, color: 'var(--hr-text-muted)' }}>
+            {t('reports.subtitle')}
+          </p>
         </div>
 
-        {/* Main area */}
-        <div style={{ display: 'flex', flexDirection: 'column', gap: 16 }}>
-          {/* Filter panel */}
+        {/* Main layout */}
+        <div
+          style={{
+            display: 'grid',
+            gridTemplateColumns: isMobile ? '1fr' : '240px minmax(0, 1fr)',
+            gap: 16,
+            alignItems: 'start',
+          }}
+        >
+          {/* Sidebar: report types */}
           <div
             style={{
               background: 'var(--hr-card)',
               border: '1px solid var(--hr-border)',
               borderRadius: 12,
-              padding: 16,
+              overflow: 'hidden',
             }}
           >
-            <h3
-              style={{ margin: '0 0 12px', fontSize: 13, fontWeight: 600, color: 'var(--hr-text)' }}
-            >
-              {t('reports.filters')}
-            </h3>
             <div
               style={{
-                display: 'grid',
-                gridTemplateColumns: isMobile ? '1fr' : 'repeat(auto-fit, minmax(160px, 1fr))',
-                gap: 12,
-                alignItems: 'end',
+                padding: '12px 16px',
+                borderBottom: '1px solid var(--hr-border)',
               }}
             >
-              <div>
-                <Label htmlFor="report-from">{t('reports.dateFrom')}</Label>
-                <input
-                  id="report-from"
-                  type="date"
-                  value={dateFrom}
-                  onChange={(e) => setDateFrom(e.target.value)}
-                  style={{
-                    width: '100%',
-                    padding: '8px 10px',
-                    borderRadius: 8,
-                    border: '1px solid var(--hr-border)',
-                    background: 'var(--hr-input-bg)',
-                    color: 'var(--hr-text)',
-                    fontSize: 13,
-                    outline: 'none',
-                  }}
-                />
-              </div>
-              <div>
-                <Label htmlFor="report-to">{t('reports.dateTo')}</Label>
-                <input
-                  id="report-to"
-                  type="date"
-                  value={dateTo}
-                  onChange={(e) => setDateTo(e.target.value)}
-                  style={{
-                    width: '100%',
-                    padding: '8px 10px',
-                    borderRadius: 8,
-                    border: '1px solid var(--hr-border)',
-                    background: 'var(--hr-input-bg)',
-                    color: 'var(--hr-text)',
-                    fontSize: 13,
-                    outline: 'none',
-                  }}
-                />
-              </div>
-              <div>
-                <Label htmlFor="report-dept">{t('reports.department')}</Label>
-                <Select
-                  id="report-dept"
-                  value={departmentId}
-                  onChange={(e) => setDepartmentId(e.target.value)}
-                >
-                  <option value="">{t('reports.allDepartments')}</option>
-                </Select>
-              </div>
-              <div>
-                <Label htmlFor="report-loc">{t('reports.location')}</Label>
-                <Select
-                  id="report-loc"
-                  value={locationId}
-                  onChange={(e) => setLocationId(e.target.value)}
-                >
-                  <option value="">{t('reports.allLocations')}</option>
-                </Select>
-              </div>
-              <div>
-                <Button
-                  variant="primary"
-                  onClick={handleGenerate}
-                  disabled={generateMutation.isPending}
-                  style={{ width: '100%', marginTop: 4 }}
-                >
-                  {generateMutation.isPending ? t('common.loading') : t('reports.generate')}
-                </Button>
-              </div>
+              <h2
+                style={{
+                  margin: 0,
+                  fontSize: 12,
+                  fontWeight: 600,
+                  color: 'var(--hr-text-muted)',
+                  textTransform: 'uppercase',
+                  letterSpacing: '0.05em',
+                }}
+              >
+                {t('reports.types')}
+              </h2>
             </div>
+            <nav style={{ display: 'flex', flexDirection: 'column', padding: 6, gap: 2 }}>
+              {REPORT_TYPES.map((type) => {
+                const Icon = REPORT_ICONS[type];
+                const isActive = selectedType === type;
+                return (
+                  <button
+                    key={type}
+                    onClick={() => {
+                      setSelectedType(type);
+                      setReport(null);
+                    }}
+                    style={{
+                      display: 'flex',
+                      alignItems: 'center',
+                      gap: 10,
+                      padding: '8px 12px',
+                      borderRadius: 8,
+                      fontSize: 12,
+                      fontWeight: 500,
+                      textDecoration: 'none',
+                      border: 'none',
+                      cursor: 'pointer',
+                      textAlign: 'left',
+                      background: isActive ? 'var(--hr-active)' : 'transparent',
+                      color: isActive ? 'var(--hr-text)' : 'var(--hr-text-muted)',
+                      transition: 'background 0.15s, color 0.15s',
+                      width: '100%',
+                    }}
+                  >
+                    <Icon size={14} />
+                    <span>{t(`reports.reportTypes.${type}`)}</span>
+                  </button>
+                );
+              })}
+            </nav>
           </div>
 
-          {/* Loading skeleton */}
-          {generateMutation.isPending && (
+          {/* Main area */}
+          <div style={{ display: 'flex', flexDirection: 'column', gap: 16 }}>
+            {/* Filter panel */}
             <div
               style={{
                 background: 'var(--hr-card)',
                 border: '1px solid var(--hr-border)',
                 borderRadius: 12,
-                padding: 20,
-                display: 'flex',
-                flexDirection: 'column',
-                gap: 12,
+                padding: 16,
               }}
             >
-              <Skeleton height={16} width="40%" />
-              <Skeleton height={40} />
-              <Skeleton height={36} />
-              <Skeleton height={36} />
-              <Skeleton height={36} />
-            </div>
-          )}
-
-          {/* Results */}
-          {report && !generateMutation.isPending && (
-            <ReportTable report={report} dateFrom={dateFrom} dateTo={dateTo} />
-          )}
-
-          {/* Empty state */}
-          {!report && !generateMutation.isPending && (
-            <div
-              style={{
-                padding: 48,
-                textAlign: 'center',
-                background: 'var(--hr-card)',
-                border: '1px dashed var(--hr-border)',
-                borderRadius: 12,
-              }}
-            >
-              <div
+              <h3
                 style={{
-                  display: 'inline-flex',
-                  padding: 12,
-                  borderRadius: 12,
-                  background: 'var(--hr-hover)',
-                  color: 'var(--hr-text-muted)',
-                  marginBottom: 12,
+                  margin: '0 0 12px',
+                  fontSize: 13,
+                  fontWeight: 600,
+                  color: 'var(--hr-text)',
                 }}
               >
-                <FileText size={24} />
+                {t('reports.filters')}
+              </h3>
+              <div
+                style={{
+                  display: 'grid',
+                  gridTemplateColumns: isMobile ? '1fr' : 'repeat(auto-fit, minmax(160px, 1fr))',
+                  gap: 12,
+                  alignItems: 'end',
+                }}
+              >
+                <div>
+                  <Label htmlFor="report-from">{t('reports.dateFrom')}</Label>
+                  <input
+                    id="report-from"
+                    type="date"
+                    value={dateFrom}
+                    onChange={(e) => setDateFrom(e.target.value)}
+                    style={{
+                      width: '100%',
+                      padding: '8px 10px',
+                      borderRadius: 8,
+                      border: '1px solid var(--hr-border)',
+                      background: 'var(--hr-input-bg)',
+                      color: 'var(--hr-text)',
+                      fontSize: 13,
+                      outline: 'none',
+                    }}
+                  />
+                </div>
+                <div>
+                  <Label htmlFor="report-to">{t('reports.dateTo')}</Label>
+                  <input
+                    id="report-to"
+                    type="date"
+                    value={dateTo}
+                    onChange={(e) => setDateTo(e.target.value)}
+                    style={{
+                      width: '100%',
+                      padding: '8px 10px',
+                      borderRadius: 8,
+                      border: '1px solid var(--hr-border)',
+                      background: 'var(--hr-input-bg)',
+                      color: 'var(--hr-text)',
+                      fontSize: 13,
+                      outline: 'none',
+                    }}
+                  />
+                </div>
+                <div>
+                  <Label htmlFor="report-dept">{t('reports.department')}</Label>
+                  <Select
+                    id="report-dept"
+                    value={departmentId}
+                    onChange={(e) => setDepartmentId(e.target.value)}
+                  >
+                    <option value="">{t('reports.allDepartments')}</option>
+                  </Select>
+                </div>
+                <div>
+                  <Label htmlFor="report-loc">{t('reports.location')}</Label>
+                  <Select
+                    id="report-loc"
+                    value={locationId}
+                    onChange={(e) => setLocationId(e.target.value)}
+                  >
+                    <option value="">{t('reports.allLocations')}</option>
+                  </Select>
+                </div>
+                <div>
+                  <Button
+                    variant="primary"
+                    onClick={handleGenerate}
+                    disabled={generateMutation.isPending}
+                    style={{ width: '100%', marginTop: 4 }}
+                  >
+                    {generateMutation.isPending ? t('common.loading') : t('reports.generate')}
+                  </Button>
+                </div>
               </div>
-              <p style={{ margin: 0, fontSize: 14, fontWeight: 600, color: 'var(--hr-text)' }}>
-                {t('reports.emptyTitle')}
-              </p>
-              <p style={{ margin: '4px 0 0', fontSize: 12, color: 'var(--hr-text-muted)' }}>
-                {t('reports.emptyDescription')}
-              </p>
             </div>
-          )}
+
+            {/* Loading skeleton */}
+            {generateMutation.isPending && (
+              <div
+                style={{
+                  background: 'var(--hr-card)',
+                  border: '1px solid var(--hr-border)',
+                  borderRadius: 12,
+                  padding: 20,
+                  display: 'flex',
+                  flexDirection: 'column',
+                  gap: 12,
+                }}
+              >
+                <Skeleton height={16} width="40%" />
+                <Skeleton height={40} />
+                <Skeleton height={36} />
+                <Skeleton height={36} />
+                <Skeleton height={36} />
+              </div>
+            )}
+
+            {/* Results */}
+            {report && !generateMutation.isPending && (
+              <ReportTable report={report} dateFrom={dateFrom} dateTo={dateTo} />
+            )}
+
+            {/* Empty state */}
+            {!report && !generateMutation.isPending && (
+              <div
+                style={{
+                  padding: 48,
+                  textAlign: 'center',
+                  background: 'var(--hr-card)',
+                  border: '1px dashed var(--hr-border)',
+                  borderRadius: 12,
+                }}
+              >
+                <div
+                  style={{
+                    display: 'inline-flex',
+                    padding: 12,
+                    borderRadius: 12,
+                    background: 'var(--hr-hover)',
+                    color: 'var(--hr-text-muted)',
+                    marginBottom: 12,
+                  }}
+                >
+                  <FileText size={24} />
+                </div>
+                <p style={{ margin: 0, fontSize: 14, fontWeight: 600, color: 'var(--hr-text)' }}>
+                  {t('reports.emptyTitle')}
+                </p>
+                <p style={{ margin: '4px 0 0', fontSize: 12, color: 'var(--hr-text-muted)' }}>
+                  {t('reports.emptyDescription')}
+                </p>
+              </div>
+            )}
+          </div>
         </div>
-      </div>
-    </motion.div>
+      </motion.div>
+    </>
   );
 };
 

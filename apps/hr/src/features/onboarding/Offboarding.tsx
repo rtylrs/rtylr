@@ -38,77 +38,80 @@ const Offboarding: React.FC = () => {
   }, {});
 
   return (
-    <div style={{ display: 'flex', flexDirection: 'column', gap: 20 }}>
-      <SectionHeader title={t('offboarding.title')} subtitle={t('offboarding.subtitle')} />
-      {isLoading ? (
-        <Skeleton height={200} />
-      ) : !data || data.length === 0 ? (
-        <EmptyState
-          icon={<LogOut size={20} />}
-          title={t('offboarding.emptyTitle')}
-          description={t('offboarding.emptyDescription')}
-        />
-      ) : (
-        <div style={{ display: 'flex', flexDirection: 'column', gap: 16 }}>
-          {Object.entries(grouped).map(([name, tasks]) => {
-            const list = tasks as typeof data;
-            const done = list!.filter((task) => task.completed).length;
-            return (
-              <Card key={name}>
-                <div style={{ marginBottom: 10 }}>
-                  <div style={{ fontSize: 14, fontWeight: 700, color: 'var(--hr-text)' }}>
-                    {name}
+    <>
+      <HelmetContainer title="Offboarding · rtylr" />
+      <div style={{ display: 'flex', flexDirection: 'column', gap: 20 }}>
+        <SectionHeader title={t('offboarding.title')} subtitle={t('offboarding.subtitle')} />
+        {isLoading ? (
+          <Skeleton height={200} />
+        ) : !data || data.length === 0 ? (
+          <EmptyState
+            icon={<LogOut size={20} />}
+            title={t('offboarding.emptyTitle')}
+            description={t('offboarding.emptyDescription')}
+          />
+        ) : (
+          <div style={{ display: 'flex', flexDirection: 'column', gap: 16 }}>
+            {Object.entries(grouped).map(([name, tasks]) => {
+              const list = tasks as typeof data;
+              const done = list!.filter((task) => task.completed).length;
+              return (
+                <Card key={name}>
+                  <div style={{ marginBottom: 10 }}>
+                    <div style={{ fontSize: 14, fontWeight: 700, color: 'var(--hr-text)' }}>
+                      {name}
+                    </div>
+                    <div style={{ fontSize: 11, color: 'var(--hr-text-muted)' }}>
+                      {t('offboarding.tasksComplete', { done, total: list!.length })}
+                    </div>
                   </div>
-                  <div style={{ fontSize: 11, color: 'var(--hr-text-muted)' }}>
-                    {t('offboarding.tasksComplete', { done, total: list!.length })}
-                  </div>
-                </div>
-                <div style={{ display: 'flex', flexDirection: 'column', gap: 6 }}>
-                  {list!.map((task) => (
-                    <div
-                      key={task.id}
-                      style={{
-                        display: 'flex',
-                        alignItems: 'center',
-                        gap: 10,
-                        padding: 8,
-                        borderRadius: 8,
-                        background: 'var(--hr-hover)',
-                      }}
-                    >
-                      <Checkbox
-                        checked={task.completed}
-                        onChange={() =>
-                          toggle.mutate(task.id, {
-                            onSuccess: () => toast.success(t('offboarding.updated')),
-                          })
-                        }
-                      />
+                  <div style={{ display: 'flex', flexDirection: 'column', gap: 6 }}>
+                    {list!.map((task) => (
                       <div
+                        key={task.id}
                         style={{
-                          flex: 1,
-                          fontSize: 12,
-                          color: 'var(--hr-text)',
-                          textDecoration: task.completed ? 'line-through' : 'none',
-                          opacity: task.completed ? 0.6 : 1,
+                          display: 'flex',
+                          alignItems: 'center',
+                          gap: 10,
+                          padding: 8,
+                          borderRadius: 8,
+                          background: 'var(--hr-hover)',
                         }}
                       >
-                        {task.task}
+                        <Checkbox
+                          checked={task.completed}
+                          onChange={() =>
+                            toggle.mutate(task.id, {
+                              onSuccess: () => toast.success(t('offboarding.updated')),
+                            })
+                          }
+                        />
+                        <div
+                          style={{
+                            flex: 1,
+                            fontSize: 12,
+                            color: 'var(--hr-text)',
+                            textDecoration: task.completed ? 'line-through' : 'none',
+                            opacity: task.completed ? 0.6 : 1,
+                          }}
+                        >
+                          {task.task}
+                        </div>
+                        <Pill
+                          style={pillStyle(CATEGORIES[task.category] ?? 'var(--hr-status-draft)')}
+                        >
+                          {task.category}
+                        </Pill>
                       </div>
-                      <Pill
-                        style={pillStyle(CATEGORIES[task.category] ?? 'var(--hr-status-draft)')}
-                      >
-                        {task.category}
-                      </Pill>
-                    </div>
-                  ))}
-                </div>
-              </Card>
-            );
-          })}
-        </div>
-      )}
-    </div>
+                    ))}
+                  </div>
+                </Card>
+              );
+            })}
+          </div>
+        )}
+      </div>
+    </>
   );
 };
 

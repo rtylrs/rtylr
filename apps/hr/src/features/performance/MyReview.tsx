@@ -156,64 +156,73 @@ const MyReview = (): React.JSX.Element => {
     selfReview.status === 'shared';
 
   return (
-    <div>
-      <SectionHeader
-        title={t('performance.myReview.title')}
-        subtitle={t('performance.myReview.subtitle')}
-      />
+    <>
+      <HelmetContainer title="My review · rtylr" />
+      <div>
+        <SectionHeader
+          title={t('performance.myReview.title')}
+          subtitle={t('performance.myReview.subtitle')}
+        />
 
-      <GoalContext goals={goals} />
+        <GoalContext goals={goals} />
 
-      {isSubmitted ? (
-        <SubmittedView review={selfReview} />
-      ) : (
-        <Card>
-          <form
-            onSubmit={handleSubmit}
-            style={{ display: 'flex', flexDirection: 'column', gap: 14 }}
-          >
-            <div>
-              <Label htmlFor="review-rating">{t('performance.myReview.rating')}</Label>
-              <Select id="review-rating" value={rating} onChange={(e) => setRating(e.target.value)}>
-                <option value="">{t('performance.myReview.selectRating')}</option>
-                {scaleOptions.map((opt) => (
-                  <option key={opt} value={opt}>
-                    {opt}
-                  </option>
-                ))}
-              </Select>
-              {errors.overallRating && (
-                <p style={{ color: 'var(--hr-error)', fontSize: 11, marginTop: 4 }}>
-                  {t('common.required')}
-                </p>
-              )}
-            </div>
+        {isSubmitted ? (
+          <SubmittedView review={selfReview} />
+        ) : (
+          <Card>
+            <form
+              onSubmit={handleSubmit}
+              style={{ display: 'flex', flexDirection: 'column', gap: 14 }}
+            >
+              <div>
+                <Label htmlFor="review-rating">{t('performance.myReview.rating')}</Label>
+                <Select
+                  id="review-rating"
+                  value={rating}
+                  onChange={(e) => setRating(e.target.value)}
+                >
+                  <option value="">{t('performance.myReview.selectRating')}</option>
+                  {scaleOptions.map((opt) => (
+                    <option key={opt} value={opt}>
+                      {opt}
+                    </option>
+                  ))}
+                </Select>
+                {errors.overallRating && (
+                  <p style={{ color: 'var(--hr-error)', fontSize: 11, marginTop: 4 }}>
+                    {t('common.required')}
+                  </p>
+                )}
+              </div>
 
-            <div>
-              <Label htmlFor="review-narrative">{t('performance.myReview.narrative')}</Label>
-              <Textarea
-                id="review-narrative"
-                value={narrative}
-                onChange={(e) => setNarrative(e.target.value)}
-                placeholder={t('performance.myReview.narrativePlaceholder')}
-                style={{ minHeight: 140 }}
-              />
-              {errors.narrative && (
-                <p style={{ color: 'var(--hr-error)', fontSize: 11, marginTop: 4 }}>
-                  {errors.narrative}
-                </p>
-              )}
-            </div>
+              <div>
+                <Label htmlFor="review-narrative">{t('performance.myReview.narrative')}</Label>
+                <Textarea
+                  id="review-narrative"
+                  value={narrative}
+                  onChange={(e) => setNarrative(e.target.value)}
+                  placeholder={t('performance.myReview.narrativePlaceholder')}
+                  style={{ minHeight: 140 }}
+                />
+                {errors.narrative && (
+                  <p style={{ color: 'var(--hr-error)', fontSize: 11, marginTop: 4 }}>
+                    {errors.narrative}
+                  </p>
+                )}
+              </div>
 
-            <div style={{ display: 'flex', justifyContent: 'flex-end' }}>
-              <Button type="submit" variant="primary" disabled={submitMutation.isPending}>
-                {submitMutation.isPending ? t('common.loading') : t('performance.myReview.submit')}
-              </Button>
-            </div>
-          </form>
-        </Card>
-      )}
-    </div>
+              <div style={{ display: 'flex', justifyContent: 'flex-end' }}>
+                <Button type="submit" variant="primary" disabled={submitMutation.isPending}>
+                  {submitMutation.isPending
+                    ? t('common.loading')
+                    : t('performance.myReview.submit')}
+                </Button>
+              </div>
+            </form>
+          </Card>
+        )}
+      </div>
+    </>
   );
 };
 

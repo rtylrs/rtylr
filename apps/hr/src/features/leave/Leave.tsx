@@ -43,109 +43,112 @@ const Leave = (): React.JSX.Element => {
   const tabLabels = TAB_KEYS.map((key) => t(`leave.tabs.${key}`));
 
   return (
-    <div style={{ display: 'flex', flexDirection: 'column', gap: 20 }}>
-      <SectionHeader
-        title={t('leave.title')}
-        subtitle={t('leave.subtitle')}
-        right={
-          <Link to="/leave/new" style={{ textDecoration: 'none' }}>
-            <Button variant="primary" icon={<Plus size={13} />}>
-              {t('leave.newRequest')}
-            </Button>
-          </Link>
-        }
-      />
+    <>
+      <HelmetContainer title="Leave · rtylr" />
+      <div style={{ display: 'flex', flexDirection: 'column', gap: 20 }}>
+        <SectionHeader
+          title={t('leave.title')}
+          subtitle={t('leave.subtitle')}
+          right={
+            <Link to="/leave/new" style={{ textDecoration: 'none' }}>
+              <Button variant="primary" icon={<Plus size={13} />}>
+                {t('leave.newRequest')}
+              </Button>
+            </Link>
+          }
+        />
 
-      <Tabs
-        tabs={tabLabels}
-        active={t(`leave.tabs.${tab}`)}
-        onChange={(label) => {
-          const idx = tabLabels.indexOf(label);
-          if (idx >= 0) setTab(TAB_KEYS[idx]);
-        }}
-      />
+        <Tabs
+          tabs={tabLabels}
+          active={t(`leave.tabs.${tab}`)}
+          onChange={(label) => {
+            const idx = tabLabels.indexOf(label);
+            if (idx >= 0) setTab(TAB_KEYS[idx]);
+          }}
+        />
 
-      {tab === 'myLeave' && (
-        <>
-          <LeaveBalances />
+        {tab === 'myLeave' && (
+          <>
+            <LeaveBalances />
 
-          <Tabs
-            tabs={FILTER_STATUSES.map((s) => t(`leave.statuses.${s.toLowerCase()}`))}
-            active={t(`leave.statuses.${statusFilter.toLowerCase()}`)}
-            onChange={(label) => {
-              const idx = FILTER_STATUSES.findIndex(
-                (s) => t(`leave.statuses.${s.toLowerCase()}`) === label
-              );
-              if (idx >= 0) setStatusFilter(FILTER_STATUSES[idx]);
-            }}
-          />
-
-          {isLoading ? (
-            <div style={{ display: 'flex', flexDirection: 'column', gap: 8 }}>
-              {[1, 2, 3].map((i) => (
-                <Skeleton key={i} height={72} />
-              ))}
-            </div>
-          ) : filteredRequests.length === 0 ? (
-            <EmptyState
-              icon={<Clock size={20} />}
-              title={t('leave.emptyTitle')}
-              description={t('leave.emptyDescription')}
-              action={
-                <Link
-                  to="/leave/new"
-                  style={{ color: 'var(--hr-accent)', textDecoration: 'none', fontSize: 12 }}
-                >
-                  {t('leave.newRequest')}
-                </Link>
-              }
+            <Tabs
+              tabs={FILTER_STATUSES.map((s) => t(`leave.statuses.${s.toLowerCase()}`))}
+              active={t(`leave.statuses.${statusFilter.toLowerCase()}`)}
+              onChange={(label) => {
+                const idx = FILTER_STATUSES.findIndex(
+                  (s) => t(`leave.statuses.${s.toLowerCase()}`) === label
+                );
+                if (idx >= 0) setStatusFilter(FILTER_STATUSES[idx]);
+              }}
             />
-          ) : (
-            <div style={{ display: 'flex', flexDirection: 'column', gap: 8 }}>
-              {filteredRequests.map((req) => (
-                <Card key={req.id} style={{ display: 'flex', alignItems: 'center', gap: 16 }}>
-                  <div style={{ flex: 1, minWidth: 0 }}>
-                    <div
-                      style={{ display: 'flex', alignItems: 'center', gap: 8, flexWrap: 'wrap' }}
-                    >
-                      <span style={{ fontSize: 13, fontWeight: 700, color: 'var(--hr-text)' }}>
-                        {t('leave.employee')} #{req.employeeId}
-                      </span>
-                      <Pill color={STATUS_COLORS[req.status]}>
-                        {t(`leave.statuses.${req.status.toLowerCase()}`)}
-                      </Pill>
-                      <span style={{ fontSize: 10, color: 'var(--hr-text-dim)' }}>
-                        #{req.leaveTypeId}
-                      </span>
-                    </div>
-                    <div style={{ fontSize: 11, color: 'var(--hr-text-muted)', marginTop: 3 }}>
-                      {req.startDate}, {req.endDate} · {req.totalDays} {t('leave.days')}
-                    </div>
-                    {req.notes && (
-                      <div style={{ fontSize: 10, color: 'var(--hr-text-dim)', marginTop: 2 }}>
-                        {req.notes}
-                      </div>
-                    )}
-                  </div>
-                  {req.status === 'Pending' && (
-                    <ApprovalButtons
-                      onApprove={() => approveLeave.mutate({ requestId: req.id, approved: true })}
-                      onReject={() => approveLeave.mutate({ requestId: req.id, approved: false })}
-                    />
-                  )}
-                </Card>
-              ))}
-            </div>
-          )}
-        </>
-      )}
 
-      {tab === 'teamCalendar' && (
-        <React.Suspense fallback={<Skeleton height={400} />}>
-          <LeaveCalendarLazy />
-        </React.Suspense>
-      )}
-    </div>
+            {isLoading ? (
+              <div style={{ display: 'flex', flexDirection: 'column', gap: 8 }}>
+                {[1, 2, 3].map((i) => (
+                  <Skeleton key={i} height={72} />
+                ))}
+              </div>
+            ) : filteredRequests.length === 0 ? (
+              <EmptyState
+                icon={<Clock size={20} />}
+                title={t('leave.emptyTitle')}
+                description={t('leave.emptyDescription')}
+                action={
+                  <Link
+                    to="/leave/new"
+                    style={{ color: 'var(--hr-accent)', textDecoration: 'none', fontSize: 12 }}
+                  >
+                    {t('leave.newRequest')}
+                  </Link>
+                }
+              />
+            ) : (
+              <div style={{ display: 'flex', flexDirection: 'column', gap: 8 }}>
+                {filteredRequests.map((req) => (
+                  <Card key={req.id} style={{ display: 'flex', alignItems: 'center', gap: 16 }}>
+                    <div style={{ flex: 1, minWidth: 0 }}>
+                      <div
+                        style={{ display: 'flex', alignItems: 'center', gap: 8, flexWrap: 'wrap' }}
+                      >
+                        <span style={{ fontSize: 13, fontWeight: 700, color: 'var(--hr-text)' }}>
+                          {t('leave.employee')} #{req.employeeId}
+                        </span>
+                        <Pill color={STATUS_COLORS[req.status]}>
+                          {t(`leave.statuses.${req.status.toLowerCase()}`)}
+                        </Pill>
+                        <span style={{ fontSize: 10, color: 'var(--hr-text-dim)' }}>
+                          #{req.leaveTypeId}
+                        </span>
+                      </div>
+                      <div style={{ fontSize: 11, color: 'var(--hr-text-muted)', marginTop: 3 }}>
+                        {req.startDate}, {req.endDate} · {req.totalDays} {t('leave.days')}
+                      </div>
+                      {req.notes && (
+                        <div style={{ fontSize: 10, color: 'var(--hr-text-dim)', marginTop: 2 }}>
+                          {req.notes}
+                        </div>
+                      )}
+                    </div>
+                    {req.status === 'Pending' && (
+                      <ApprovalButtons
+                        onApprove={() => approveLeave.mutate({ requestId: req.id, approved: true })}
+                        onReject={() => approveLeave.mutate({ requestId: req.id, approved: false })}
+                      />
+                    )}
+                  </Card>
+                ))}
+              </div>
+            )}
+          </>
+        )}
+
+        {tab === 'teamCalendar' && (
+          <React.Suspense fallback={<Skeleton height={400} />}>
+            <LeaveCalendarLazy />
+          </React.Suspense>
+        )}
+      </div>
+    </>
   );
 };
 

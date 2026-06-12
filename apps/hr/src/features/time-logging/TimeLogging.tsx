@@ -89,198 +89,201 @@ const TimeLogging = (): React.JSX.Element => {
   }, [grouped]);
 
   return (
-    <div style={{ display: 'flex', flexDirection: 'column', gap: 16 }}>
-      <SectionHeader
-        title={t('timeLogging.title')}
-        subtitle={t('timeLogging.subtitle', {
-          start: week.start,
-          end: week.end,
-          total: formatDuration(totalMinutes),
-        })}
-        right={<FlowImportButton />}
-      />
-
-      <ActiveTimer onStop={handleTimerStop} />
-
-      {isLoading ? (
-        <div style={{ display: 'flex', flexDirection: 'column', gap: 8 }}>
-          <Skeleton height={60} />
-          <Skeleton height={60} />
-          <Skeleton height={60} />
-        </div>
-      ) : entries.length === 0 ? (
-        <EmptyState
-          icon={<Clock size={20} />}
-          title={t('timeLogging.emptyTitle')}
-          description={t('timeLogging.emptyDescription')}
-          action={
-            <Button variant="primary" onClick={handleNewEntry} icon={<Plus size={14} />}>
-              {t('timeLogging.addEntry')}
-            </Button>
-          }
+    <>
+      <HelmetContainer title="Time logging · rtylr" />
+      <div style={{ display: 'flex', flexDirection: 'column', gap: 16 }}>
+        <SectionHeader
+          title={t('timeLogging.title')}
+          subtitle={t('timeLogging.subtitle', {
+            start: week.start,
+            end: week.end,
+            total: formatDuration(totalMinutes),
+          })}
+          right={<FlowImportButton />}
         />
-      ) : (
-        <div style={{ display: 'flex', flexDirection: 'column', gap: 12 }}>
-          {sortedDates.map((date, dateIdx) => {
-            const dayEntries = grouped.get(date) ?? [];
-            const dayTotal = dayEntries.reduce((sum, e) => sum + e.durationMinutes, 0);
-            const dateLabel = new Date(date + 'T00:00:00').toLocaleDateString(undefined, {
-              weekday: 'short',
-              month: 'short',
-              day: 'numeric',
-            });
 
-            return (
-              <motion.div
-                key={date}
-                initial={{ opacity: 0, y: 8 }}
-                animate={{ opacity: 1, y: 0 }}
-                transition={{ delay: dateIdx * 0.04 }}
-              >
-                <div
-                  style={{
-                    display: 'flex',
-                    alignItems: 'center',
-                    justifyContent: 'space-between',
-                    marginBottom: 6,
-                    padding: '0 4px',
-                  }}
+        <ActiveTimer onStop={handleTimerStop} />
+
+        {isLoading ? (
+          <div style={{ display: 'flex', flexDirection: 'column', gap: 8 }}>
+            <Skeleton height={60} />
+            <Skeleton height={60} />
+            <Skeleton height={60} />
+          </div>
+        ) : entries.length === 0 ? (
+          <EmptyState
+            icon={<Clock size={20} />}
+            title={t('timeLogging.emptyTitle')}
+            description={t('timeLogging.emptyDescription')}
+            action={
+              <Button variant="primary" onClick={handleNewEntry} icon={<Plus size={14} />}>
+                {t('timeLogging.addEntry')}
+              </Button>
+            }
+          />
+        ) : (
+          <div style={{ display: 'flex', flexDirection: 'column', gap: 12 }}>
+            {sortedDates.map((date, dateIdx) => {
+              const dayEntries = grouped.get(date) ?? [];
+              const dayTotal = dayEntries.reduce((sum, e) => sum + e.durationMinutes, 0);
+              const dateLabel = new Date(date + 'T00:00:00').toLocaleDateString(undefined, {
+                weekday: 'short',
+                month: 'short',
+                day: 'numeric',
+              });
+
+              return (
+                <motion.div
+                  key={date}
+                  initial={{ opacity: 0, y: 8 }}
+                  animate={{ opacity: 1, y: 0 }}
+                  transition={{ delay: dateIdx * 0.04 }}
                 >
-                  <span
+                  <div
                     style={{
-                      fontSize: 12,
-                      fontWeight: 600,
-                      color: 'var(--hr-text-muted)',
-                      textTransform: 'uppercase',
-                      letterSpacing: '0.05em',
+                      display: 'flex',
+                      alignItems: 'center',
+                      justifyContent: 'space-between',
+                      marginBottom: 6,
+                      padding: '0 4px',
                     }}
                   >
-                    {dateLabel}
-                  </span>
-                  <span style={{ fontSize: 12, fontWeight: 700, color: ACCENT }}>
-                    {formatDuration(dayTotal)}
-                  </span>
-                </div>
-                <Card style={{ padding: 0 }}>
-                  {dayEntries.map((entry, i) => (
-                    <div
-                      key={entry.id}
+                    <span
                       style={{
-                        display: 'flex',
-                        alignItems: 'center',
-                        gap: 10,
-                        padding: '10px 14px',
-                        borderTop: i > 0 ? '1px solid var(--hr-border)' : 'none',
+                        fontSize: 12,
+                        fontWeight: 600,
+                        color: 'var(--hr-text-muted)',
+                        textTransform: 'uppercase',
+                        letterSpacing: '0.05em',
                       }}
                     >
-                      <div style={{ flex: 1, minWidth: 0 }}>
-                        <div
-                          style={{
-                            fontSize: 13,
-                            fontWeight: 500,
-                            color: 'var(--hr-text)',
-                            overflow: 'hidden',
-                            textOverflow: 'ellipsis',
-                            whiteSpace: 'nowrap',
-                          }}
-                        >
-                          {entry.description || t('timeLogging.noDescription')}
-                        </div>
-                        <div
-                          style={{
-                            display: 'flex',
-                            alignItems: 'center',
-                            gap: 8,
-                            marginTop: 3,
-                            fontSize: 11,
-                            color: 'var(--hr-text-muted)',
-                          }}
-                        >
-                          {entry.startTime && entry.endTime && (
-                            <span>
-                              {entry.startTime} – {entry.endTime}
-                            </span>
-                          )}
-                          {entry.isBillable && (
-                            <Pill color="var(--hr-status-approved)" style={{ fontSize: 9 }}>
-                              {t('timeLogging.billable')}
-                            </Pill>
-                          )}
-                          <Pill
-                            color={STATUS_COLORS[entry.status] ?? 'var(--hr-status-draft)'}
-                            style={{ fontSize: 9 }}
-                          >
-                            {t(`timeLogging.statuses.${entry.status}`)}
-                          </Pill>
-                        </div>
-                      </div>
-                      <span
+                      {dateLabel}
+                    </span>
+                    <span style={{ fontSize: 12, fontWeight: 700, color: ACCENT }}>
+                      {formatDuration(dayTotal)}
+                    </span>
+                  </div>
+                  <Card style={{ padding: 0 }}>
+                    {dayEntries.map((entry, i) => (
+                      <div
+                        key={entry.id}
                         style={{
-                          fontSize: 13,
-                          fontWeight: 700,
-                          color: 'var(--hr-text)',
-                          flexShrink: 0,
+                          display: 'flex',
+                          alignItems: 'center',
+                          gap: 10,
+                          padding: '10px 14px',
+                          borderTop: i > 0 ? '1px solid var(--hr-border)' : 'none',
                         }}
                       >
-                        {formatDuration(entry.durationMinutes)}
-                      </span>
-                      {entry.status === 'draft' && (
-                        <button
-                          onClick={() => deleteEntry.mutate(entry.id)}
+                        <div style={{ flex: 1, minWidth: 0 }}>
+                          <div
+                            style={{
+                              fontSize: 13,
+                              fontWeight: 500,
+                              color: 'var(--hr-text)',
+                              overflow: 'hidden',
+                              textOverflow: 'ellipsis',
+                              whiteSpace: 'nowrap',
+                            }}
+                          >
+                            {entry.description || t('timeLogging.noDescription')}
+                          </div>
+                          <div
+                            style={{
+                              display: 'flex',
+                              alignItems: 'center',
+                              gap: 8,
+                              marginTop: 3,
+                              fontSize: 11,
+                              color: 'var(--hr-text-muted)',
+                            }}
+                          >
+                            {entry.startTime && entry.endTime && (
+                              <span>
+                                {entry.startTime} – {entry.endTime}
+                              </span>
+                            )}
+                            {entry.isBillable && (
+                              <Pill color="var(--hr-status-approved)" style={{ fontSize: 9 }}>
+                                {t('timeLogging.billable')}
+                              </Pill>
+                            )}
+                            <Pill
+                              color={STATUS_COLORS[entry.status] ?? 'var(--hr-status-draft)'}
+                              style={{ fontSize: 9 }}
+                            >
+                              {t(`timeLogging.statuses.${entry.status}`)}
+                            </Pill>
+                          </div>
+                        </div>
+                        <span
                           style={{
-                            display: 'flex',
-                            alignItems: 'center',
-                            justifyContent: 'center',
-                            width: 28,
-                            height: 28,
-                            borderRadius: 6,
-                            border: 'none',
-                            background: 'transparent',
-                            color: 'var(--hr-text-dim)',
-                            cursor: 'pointer',
+                            fontSize: 13,
+                            fontWeight: 700,
+                            color: 'var(--hr-text)',
                             flexShrink: 0,
                           }}
-                          aria-label={t('common.delete')}
                         >
-                          <Trash2 size={13} />
-                        </button>
-                      )}
-                    </div>
-                  ))}
-                </Card>
-              </motion.div>
-            );
-          })}
-        </div>
-      )}
+                          {formatDuration(entry.durationMinutes)}
+                        </span>
+                        {entry.status === 'draft' && (
+                          <button
+                            onClick={() => deleteEntry.mutate(entry.id)}
+                            style={{
+                              display: 'flex',
+                              alignItems: 'center',
+                              justifyContent: 'center',
+                              width: 28,
+                              height: 28,
+                              borderRadius: 6,
+                              border: 'none',
+                              background: 'transparent',
+                              color: 'var(--hr-text-dim)',
+                              cursor: 'pointer',
+                              flexShrink: 0,
+                            }}
+                            aria-label={t('common.delete')}
+                          >
+                            <Trash2 size={13} />
+                          </button>
+                        )}
+                      </div>
+                    ))}
+                  </Card>
+                </motion.div>
+              );
+            })}
+          </div>
+        )}
 
-      {/* Floating add button */}
-      <button
-        onClick={handleNewEntry}
-        style={{
-          position: 'fixed',
-          bottom: 24,
-          right: 24,
-          width: 48,
-          height: 48,
-          borderRadius: '50%',
-          background: ACCENT,
-          color: 'var(--hr-on-accent, #fff)',
-          border: 'none',
-          cursor: 'pointer',
-          display: 'flex',
-          alignItems: 'center',
-          justifyContent: 'center',
-          boxShadow: '0 4px 12px var(--accent-border)',
-          zIndex: 40,
-        }}
-        aria-label={t('timeLogging.addEntry')}
-      >
-        <Plus size={22} />
-      </button>
+        {/* Floating add button */}
+        <button
+          onClick={handleNewEntry}
+          style={{
+            position: 'fixed',
+            bottom: 24,
+            right: 24,
+            width: 48,
+            height: 48,
+            borderRadius: '50%',
+            background: ACCENT,
+            color: 'var(--hr-on-accent, #fff)',
+            border: 'none',
+            cursor: 'pointer',
+            display: 'flex',
+            alignItems: 'center',
+            justifyContent: 'center',
+            boxShadow: '0 4px 12px var(--accent-border)',
+            zIndex: 40,
+          }}
+          aria-label={t('timeLogging.addEntry')}
+        >
+          <Plus size={22} />
+        </button>
 
-      <TimeEntryForm open={formOpen} onClose={() => setFormOpen(false)} prefill={prefill} />
-    </div>
+        <TimeEntryForm open={formOpen} onClose={() => setFormOpen(false)} prefill={prefill} />
+      </div>
+    </>
   );
 };
 

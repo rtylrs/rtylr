@@ -17,6 +17,11 @@ import { safe } from '../../lib/api';
 import { toast } from 'sonner';
 import { useTranslation } from 'react-i18next';
 
+interface RejectTimesheetRequest {
+  timesheetId: number;
+  rejectionReason?: string;
+}
+
 export const useGetCurrentTimesheet = () => {
   return useQuery<TimesheetPayload>({
     queryKey: ['timesheets', 'current'],
@@ -41,9 +46,7 @@ export const useGetTimesheet = (id: number | undefined) => {
   return useQuery<TimesheetPayload>({
     queryKey: ['timesheet', id],
     queryFn: async (): Promise<TimesheetPayload> => {
-      const res = await unwrap(
-        safe.get<{ timesheet: TimesheetPayload }>('/hr/timesheets/current', { params: { id } })
-      );
+      const res = await unwrap(safe.get<{ timesheet: TimesheetPayload }>(`/hr/timesheets/${id}`));
       return (res as { timesheet: TimesheetPayload }).timesheet;
     },
     enabled: !!id,
@@ -85,7 +88,31 @@ export const useApproveTimesheet = () => {
     onSuccess: (_data: ApproveTimesheetResponse, variables: ApproveTimesheetRequest) => {
       queryClient.invalidateQueries({ queryKey: ['timesheets'] });
       queryClient.invalidateQueries({ queryKey: ['timesheet', variables.timesheetId] });
-      toast.success(variables.approved ? t('timesheets.approved') : t('timesheets.rejected'));
+      toast.success(t('timesheets.approved'));
+    },
+    onError: () => {
+      toast.error(t('errors.generic'));
+    },
+  });
+};
+
+export const useRejectTimesheet = () => {
+  const queryClient = useQueryClient();
+  const { t } = useTranslation();
+
+  return useMutation({
+    mutationFn: async (data: RejectTimesheetRequest): Promise<ApproveTimesheetResponse> => {
+      const res = await unwrap(
+        safe.post<ApproveTimesheetResponse>(`/hr/timesheets/${data.timesheetId}/reject`, {
+          rejectionReason: data.rejectionReason,
+        })
+      );
+      return res as ApproveTimesheetResponse;
+    },
+    onSuccess: (_data: ApproveTimesheetResponse, variables: RejectTimesheetRequest) => {
+      queryClient.invalidateQueries({ queryKey: ['timesheets'] });
+      queryClient.invalidateQueries({ queryKey: ['timesheet', variables.timesheetId] });
+      toast.success(t('timesheets.rejected'));
     },
     onError: () => {
       toast.error(t('errors.generic'));

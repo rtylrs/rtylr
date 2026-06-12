@@ -78,6 +78,14 @@ interface ShareReviewResponse {
   review: PerformanceReviewPayload;
 }
 
+type CreateReviewCycleMutationInput = CreateReviewCycleRequest & {
+  type?: string;
+  cycleType?: string;
+  periodStart?: string;
+  periodEnd?: string;
+  reviewTypes?: string[];
+};
+
 /* ── Queries ── */
 
 export const useListReviewCycles = (params?: ListReviewCyclesParams) => {
@@ -97,7 +105,7 @@ export const useGetReviewCycle = (id: number | undefined) => {
     queryKey: ['review-cycle', id],
     queryFn: async (): Promise<ReviewCyclePayload> => {
       const res = await unwrap(
-        safe.get<{ cycle: ReviewCyclePayload }>('/hr/performance/cycles', { params: { id } })
+        safe.get<{ cycle: ReviewCyclePayload }>(`/hr/performance/cycles/${id}`)
       );
       return (res as { cycle: ReviewCyclePayload }).cycle;
     },
@@ -110,19 +118,16 @@ export const useCreateReviewCycle = () => {
   const { t } = useTranslation();
 
   return useMutation({
-    mutationFn: async (data: CreateReviewCycleRequest): Promise<ReviewCyclePayload | undefined> => {
-      const source = data as CreateReviewCycleRequest & {
-        type?: string;
-        cycleType?: string;
-        periodStart?: string;
-        periodEnd?: string;
-      };
+    mutationFn: async (
+      data: CreateReviewCycleMutationInput
+    ): Promise<ReviewCyclePayload | undefined> => {
       const res = await unwrap(
         safe.post<CreateReviewCycleResponse>('/hr/performance/cycles', {
           name: data.name,
-          cycleType: source.cycleType ?? source.type,
-          periodStart: source.periodStart,
-          periodEnd: source.periodEnd,
+          cycleType: data.cycleType ?? data.type,
+          periodStart: data.periodStart,
+          periodEnd: data.periodEnd,
+          reviewTypes: data.reviewTypes,
         })
       );
       return (res as CreateReviewCycleResponse).cycle;

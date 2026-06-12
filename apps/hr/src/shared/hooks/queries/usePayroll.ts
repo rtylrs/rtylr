@@ -45,7 +45,16 @@ export const useGetPayrollConfig = () => {
     queryKey: ['payroll-config'],
     queryFn: async (): Promise<PayrollConfigData> => {
       const res = await unwrap(safe.get<{ config: PayrollConfigData }>('/hr/payroll/config'));
-      return (res as { config: PayrollConfigData }).config;
+      const config = (
+        res as { config: Partial<PayrollConfigData> & { periodType?: PayrollConfigData['period'] } }
+      ).config;
+      return {
+        grossModel: config.grossModel ?? 'both',
+        period: config.period ?? config.periodType ?? 'monthly',
+        overtimeEnabled: config.overtimeEnabled ?? false,
+        deductionsEnabled: config.deductionsEnabled ?? false,
+        bonusesEnabled: config.bonusesEnabled ?? false,
+      };
     },
   });
 };
@@ -60,6 +69,9 @@ export const useUpsertPayrollConfig = () => {
         safe.put<{ config: PayrollConfigData }>('/hr/payroll/config', {
           periodType: data.period,
           overtimeEnabled: data.overtimeEnabled,
+          grossModel: data.grossModel,
+          deductionsEnabled: data.deductionsEnabled,
+          bonusesEnabled: data.bonusesEnabled,
         })
       );
       return (res as { config: PayrollConfigData }).config;

@@ -148,71 +148,74 @@ const GoalsList = (): React.JSX.Element => {
   const latestCycleId = goals.length > 0 ? goals[0].reviewCycleId : 0;
 
   return (
-    <div>
-      <SectionHeader
-        title={t('performance.goals.title')}
-        subtitle={t('performance.goals.subtitle')}
-        right={
-          <Button variant="primary" onClick={() => setFormOpen(true)}>
-            {t('performance.goals.addGoal')}
-          </Button>
-        }
-      />
-
-      {formOpen && (
-        <InlineGoalForm onClose={() => setFormOpen(false)} reviewCycleId={latestCycleId} />
-      )}
-
-      {isLoading ? (
-        <div style={{ display: 'flex', flexDirection: 'column', gap: 10, marginTop: 16 }}>
-          {Array.from({ length: 3 }).map((_, i) => (
-            <Skeleton key={i} height={90} />
-          ))}
-        </div>
-      ) : goals.length === 0 ? (
-        <EmptyState
-          icon={<Target size={24} />}
-          title={t('performance.goals.emptyTitle')}
-          description={t('performance.goals.emptyDescription')}
-          action={
+    <>
+      <HelmetContainer title="Goals · rtylr" />
+      <div>
+        <SectionHeader
+          title={t('performance.goals.title')}
+          subtitle={t('performance.goals.subtitle')}
+          right={
             <Button variant="primary" onClick={() => setFormOpen(true)}>
               {t('performance.goals.addGoal')}
             </Button>
           }
         />
-      ) : (
-        <div style={{ display: 'flex', flexDirection: 'column', gap: 10, marginTop: 16 }}>
-          {goals.map((goal: ReviewGoalPayload) => (
-            <Card key={goal.id}>
-              <div
-                style={{
-                  display: 'flex',
-                  alignItems: 'center',
-                  justifyContent: 'space-between',
-                }}
-              >
-                <h4 style={{ margin: 0, fontSize: 14, fontWeight: 600, color: 'var(--hr-text)' }}>
-                  {goal.title}
-                </h4>
-                <Pill color={STATUS_COLORS[goal.status] ?? 'var(--hr-status-draft)'}>
-                  {goal.status}
-                </Pill>
-              </div>
-              {goal.description && (
-                <p style={{ margin: '6px 0 0', fontSize: 12, color: 'var(--hr-text-muted)' }}>
-                  {goal.description}
-                </p>
-              )}
-              {goal.weight != null && (
-                <p style={{ margin: '4px 0 0', fontSize: 11, color: 'var(--hr-text-dim)' }}>
-                  {t('performance.goals.weight')}: {goal.weight}%
-                </p>
-              )}
-            </Card>
-          ))}
-        </div>
-      )}
-    </div>
+
+        {formOpen && (
+          <InlineGoalForm onClose={() => setFormOpen(false)} reviewCycleId={latestCycleId} />
+        )}
+
+        {isLoading ? (
+          <div style={{ display: 'flex', flexDirection: 'column', gap: 10, marginTop: 16 }}>
+            {Array.from({ length: 3 }).map((_, i) => (
+              <Skeleton key={i} height={90} />
+            ))}
+          </div>
+        ) : goals.length === 0 ? (
+          <EmptyState
+            icon={<Target size={24} />}
+            title={t('performance.goals.emptyTitle')}
+            description={t('performance.goals.emptyDescription')}
+            action={
+              <Button variant="primary" onClick={() => setFormOpen(true)}>
+                {t('performance.goals.addGoal')}
+              </Button>
+            }
+          />
+        ) : (
+          <div style={{ display: 'flex', flexDirection: 'column', gap: 10, marginTop: 16 }}>
+            {goals.map((goal: ReviewGoalPayload) => (
+              <Card key={goal.id}>
+                <div
+                  style={{
+                    display: 'flex',
+                    alignItems: 'center',
+                    justifyContent: 'space-between',
+                  }}
+                >
+                  <h4 style={{ margin: 0, fontSize: 14, fontWeight: 600, color: 'var(--hr-text)' }}>
+                    {goal.title}
+                  </h4>
+                  <Pill color={STATUS_COLORS[goal.status] ?? 'var(--hr-status-draft)'}>
+                    {goal.status}
+                  </Pill>
+                </div>
+                {goal.description && (
+                  <p style={{ margin: '6px 0 0', fontSize: 12, color: 'var(--hr-text-muted)' }}>
+                    {goal.description}
+                  </p>
+                )}
+                {goal.weight != null && (
+                  <p style={{ margin: '4px 0 0', fontSize: 11, color: 'var(--hr-text-dim)' }}>
+                    {t('performance.goals.weight')}: {goal.weight}%
+                  </p>
+                )}
+              </Card>
+            ))}
+          </div>
+        )}
+      </div>
+    </>
   );
 };
 

@@ -364,9 +364,12 @@ const PayrollRunDetailContent = (): React.JSX.Element => {
 
 const PayrollRunDetail = (): React.JSX.Element => {
   return (
-    <ErrorBoundary>
-      <PayrollRunDetailContent />
-    </ErrorBoundary>
+    <>
+      <HelmetContainer title="Payroll run · rtylr" />
+      <ErrorBoundary>
+        <PayrollRunDetailContent />
+      </ErrorBoundary>
+    </>
   );
 };
 

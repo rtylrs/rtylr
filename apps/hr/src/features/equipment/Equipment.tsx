@@ -56,123 +56,130 @@ const Equipment = (): React.JSX.Element => {
   };
 
   return (
-    <div style={{ display: 'flex', flexDirection: 'column', gap: 20 }}>
-      <SectionHeader
-        title={t('equipment.title')}
-        subtitle={t('equipment.subtitle')}
-        right={
-          <Button variant="primary" icon={<Plus size={14} />} onClick={() => setShowForm(true)}>
-            {t('equipment.newRequest')}
-          </Button>
-        }
-      />
-
-      <Tabs tabs={tabs} active={tab} onChange={setTab} />
-
-      {isLoading ? (
-        <div style={{ display: 'flex', flexDirection: 'column', gap: 12 }}>
-          <Skeleton height={80} />
-          <Skeleton height={80} />
-          <Skeleton height={80} />
-        </div>
-      ) : displayRequests.length === 0 ? (
-        <EmptyState
-          icon={<Package size={20} />}
-          title={t('equipment.emptyTitle')}
-          description={t('equipment.emptyDescription')}
-          action={
-            tab === tabs[0] ? (
-              <Button variant="primary" icon={<Plus size={14} />} onClick={() => setShowForm(true)}>
-                {t('equipment.newRequest')}
-              </Button>
-            ) : undefined
+    <>
+      <HelmetContainer title="Equipment · rtylr" />
+      <div style={{ display: 'flex', flexDirection: 'column', gap: 20 }}>
+        <SectionHeader
+          title={t('equipment.title')}
+          subtitle={t('equipment.subtitle')}
+          right={
+            <Button variant="primary" icon={<Plus size={14} />} onClick={() => setShowForm(true)}>
+              {t('equipment.newRequest')}
+            </Button>
           }
         />
-      ) : (
-        <div style={{ display: 'flex', flexDirection: 'column', gap: 10 }}>
-          {displayRequests.map((req) => {
-            const urgencyColor = URGENCY_COLORS[req.urgency] ?? 'var(--hr-status-draft)';
-            const statusColor = STATUS_COLORS[req.status] ?? 'var(--hr-status-draft)';
-            return (
-              <Card
-                key={req.id}
-                style={{
-                  display: 'flex',
-                  alignItems: 'center',
-                  gap: 12,
-                  flexWrap: 'wrap',
-                }}
-              >
-                <div
+
+        <Tabs tabs={tabs} active={tab} onChange={setTab} />
+
+        {isLoading ? (
+          <div style={{ display: 'flex', flexDirection: 'column', gap: 12 }}>
+            <Skeleton height={80} />
+            <Skeleton height={80} />
+            <Skeleton height={80} />
+          </div>
+        ) : displayRequests.length === 0 ? (
+          <EmptyState
+            icon={<Package size={20} />}
+            title={t('equipment.emptyTitle')}
+            description={t('equipment.emptyDescription')}
+            action={
+              tab === tabs[0] ? (
+                <Button
+                  variant="primary"
+                  icon={<Plus size={14} />}
+                  onClick={() => setShowForm(true)}
+                >
+                  {t('equipment.newRequest')}
+                </Button>
+              ) : undefined
+            }
+          />
+        ) : (
+          <div style={{ display: 'flex', flexDirection: 'column', gap: 10 }}>
+            {displayRequests.map((req) => {
+              const urgencyColor = URGENCY_COLORS[req.urgency] ?? 'var(--hr-status-draft)';
+              const statusColor = STATUS_COLORS[req.status] ?? 'var(--hr-status-draft)';
+              return (
+                <Card
+                  key={req.id}
                   style={{
-                    width: 36,
-                    height: 36,
-                    borderRadius: 10,
                     display: 'flex',
                     alignItems: 'center',
-                    justifyContent: 'center',
-                    background: `color-mix(in srgb, ${ACCENT} 13%, transparent)`,
-                    color: ACCENT,
-                    flexShrink: 0,
+                    gap: 12,
+                    flexWrap: 'wrap',
                   }}
                 >
-                  <Package size={16} />
-                </div>
-                <div style={{ flex: 1, minWidth: 0 }}>
-                  <div style={{ fontSize: 13, fontWeight: 600, color: 'var(--hr-text)' }}>
-                    {req.equipmentType}
-                  </div>
                   <div
                     style={{
-                      fontSize: 11,
-                      color: 'var(--hr-text-muted)',
-                      overflow: 'hidden',
-                      textOverflow: 'ellipsis',
-                      whiteSpace: 'nowrap',
+                      width: 36,
+                      height: 36,
+                      borderRadius: 10,
+                      display: 'flex',
+                      alignItems: 'center',
+                      justifyContent: 'center',
+                      background: `color-mix(in srgb, ${ACCENT} 13%, transparent)`,
+                      color: ACCENT,
+                      flexShrink: 0,
                     }}
                   >
-                    {req.description}
+                    <Package size={16} />
                   </div>
-                </div>
-                <Pill style={pillStyle(urgencyColor)}>
-                  {t(`equipment.urgencies.${req.urgency}` as const)}
-                </Pill>
-                <Pill style={pillStyle(statusColor)}>
-                  {t(`equipment.statuses.${req.status}` as const)}
-                </Pill>
-                {req.neededByDate && (
-                  <span style={{ fontSize: 10, color: 'var(--hr-text-muted)', flexShrink: 0 }}>
-                    {t('equipment.neededBy', { date: req.neededByDate })}
-                  </span>
-                )}
-                {tab === tabs[1] && req.status === 'pending' && (
-                  <div style={{ display: 'flex', gap: 6, flexShrink: 0 }}>
-                    <Button
-                      variant="primary"
-                      icon={<CheckCircle size={13} />}
-                      onClick={() => handleApproval(req.id, true)}
-                      style={{ minHeight: 30, padding: '4px 10px', fontSize: 11 }}
+                  <div style={{ flex: 1, minWidth: 0 }}>
+                    <div style={{ fontSize: 13, fontWeight: 600, color: 'var(--hr-text)' }}>
+                      {req.equipmentType}
+                    </div>
+                    <div
+                      style={{
+                        fontSize: 11,
+                        color: 'var(--hr-text-muted)',
+                        overflow: 'hidden',
+                        textOverflow: 'ellipsis',
+                        whiteSpace: 'nowrap',
+                      }}
                     >
-                      {t('equipment.approve')}
-                    </Button>
-                    <Button
-                      variant="danger"
-                      icon={<XCircle size={13} />}
-                      onClick={() => handleApproval(req.id, false)}
-                      style={{ minHeight: 30, padding: '4px 10px', fontSize: 11 }}
-                    >
-                      {t('equipment.reject')}
-                    </Button>
+                      {req.description}
+                    </div>
                   </div>
-                )}
-              </Card>
-            );
-          })}
-        </div>
-      )}
+                  <Pill style={pillStyle(urgencyColor)}>
+                    {t(`equipment.urgencies.${req.urgency}` as const)}
+                  </Pill>
+                  <Pill style={pillStyle(statusColor)}>
+                    {t(`equipment.statuses.${req.status}` as const)}
+                  </Pill>
+                  {req.neededByDate && (
+                    <span style={{ fontSize: 10, color: 'var(--hr-text-muted)', flexShrink: 0 }}>
+                      {t('equipment.neededBy', { date: req.neededByDate })}
+                    </span>
+                  )}
+                  {tab === tabs[1] && req.status === 'pending' && (
+                    <div style={{ display: 'flex', gap: 6, flexShrink: 0 }}>
+                      <Button
+                        variant="primary"
+                        icon={<CheckCircle size={13} />}
+                        onClick={() => handleApproval(req.id, true)}
+                        style={{ minHeight: 30, padding: '4px 10px', fontSize: 11 }}
+                      >
+                        {t('equipment.approve')}
+                      </Button>
+                      <Button
+                        variant="danger"
+                        icon={<XCircle size={13} />}
+                        onClick={() => handleApproval(req.id, false)}
+                        style={{ minHeight: 30, padding: '4px 10px', fontSize: 11 }}
+                      >
+                        {t('equipment.reject')}
+                      </Button>
+                    </div>
+                  )}
+                </Card>
+              );
+            })}
+          </div>
+        )}
 
-      {showForm && <EquipmentRequestForm onClose={() => setShowForm(false)} />}
-    </div>
+        {showForm && <EquipmentRequestForm onClose={() => setShowForm(false)} />}
+      </div>
+    </>
   );
 };
 

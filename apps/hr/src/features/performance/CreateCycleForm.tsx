@@ -50,6 +50,7 @@ const CreateCycleForm = ({ open, onClose }: CreateCycleFormProps): React.JSX.Ele
         type: 'adhoc',
         periodStart: result.data.periodStart,
         periodEnd: result.data.periodEnd,
+        reviewTypes: result.data.reviewTypes,
       },
       {
         onSuccess: () => {

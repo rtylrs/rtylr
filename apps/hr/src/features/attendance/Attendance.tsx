@@ -47,116 +47,119 @@ const Attendance = (): React.JSX.Element => {
   }, [records]);
 
   return (
-    <div style={{ display: 'flex', flexDirection: 'column', gap: 16 }}>
-      <SectionHeader title={t('attendance.title')} subtitle={t('attendance.subtitle')} />
+    <>
+      <HelmetContainer title="Attendance · rtylr" />
+      <div style={{ display: 'flex', flexDirection: 'column', gap: 16 }}>
+        <SectionHeader title={t('attendance.title')} subtitle={t('attendance.subtitle')} />
 
-      <ClockInWidget activeRecord={activeRecord} />
+        <ClockInWidget activeRecord={activeRecord} />
 
-      <h3
-        style={{
-          fontSize: 14,
-          fontWeight: 600,
-          color: 'var(--hr-text)',
-          margin: '8px 0 0',
-        }}
-      >
-        {t('attendance.history')}
-      </h3>
+        <h3
+          style={{
+            fontSize: 14,
+            fontWeight: 600,
+            color: 'var(--hr-text)',
+            margin: '8px 0 0',
+          }}
+        >
+          {t('attendance.history')}
+        </h3>
 
-      {isLoading ? (
-        <div style={{ display: 'flex', flexDirection: 'column', gap: 8 }}>
-          <Skeleton height={56} />
-          <Skeleton height={56} />
-          <Skeleton height={56} />
-          <Skeleton height={56} />
-        </div>
-      ) : records.length === 0 ? (
-        <EmptyState
-          icon={<CalendarCheck size={20} />}
-          title={t('attendance.emptyTitle')}
-          description={t('attendance.emptyDescription')}
-        />
-      ) : (
-        <Card style={{ padding: 0, overflow: 'hidden' }}>
-          <table style={{ width: '100%', borderCollapse: 'collapse', fontSize: 12 }}>
-            <thead>
-              <tr style={{ background: 'var(--hr-hover)' }}>
-                {[
-                  t('attendance.table.date'),
-                  t('attendance.table.clockIn'),
-                  t('attendance.table.clockOut'),
-                  t('attendance.table.duration'),
-                  t('attendance.table.method'),
-                  t('attendance.table.status'),
-                ].map((header) => (
-                  <th
-                    key={header}
-                    style={{
-                      textAlign: 'left',
-                      padding: '10px 12px',
-                      color: 'var(--hr-text-muted)',
-                      fontWeight: 600,
-                      textTransform: 'uppercase',
-                      fontSize: 10,
-                      letterSpacing: '0.05em',
-                    }}
+        {isLoading ? (
+          <div style={{ display: 'flex', flexDirection: 'column', gap: 8 }}>
+            <Skeleton height={56} />
+            <Skeleton height={56} />
+            <Skeleton height={56} />
+            <Skeleton height={56} />
+          </div>
+        ) : records.length === 0 ? (
+          <EmptyState
+            icon={<CalendarCheck size={20} />}
+            title={t('attendance.emptyTitle')}
+            description={t('attendance.emptyDescription')}
+          />
+        ) : (
+          <Card style={{ padding: 0, overflow: 'hidden' }}>
+            <table style={{ width: '100%', borderCollapse: 'collapse', fontSize: 12 }}>
+              <thead>
+                <tr style={{ background: 'var(--hr-hover)' }}>
+                  {[
+                    t('attendance.table.date'),
+                    t('attendance.table.clockIn'),
+                    t('attendance.table.clockOut'),
+                    t('attendance.table.duration'),
+                    t('attendance.table.method'),
+                    t('attendance.table.status'),
+                  ].map((header) => (
+                    <th
+                      key={header}
+                      style={{
+                        textAlign: 'left',
+                        padding: '10px 12px',
+                        color: 'var(--hr-text-muted)',
+                        fontWeight: 600,
+                        textTransform: 'uppercase',
+                        fontSize: 10,
+                        letterSpacing: '0.05em',
+                      }}
+                    >
+                      {header}
+                    </th>
+                  ))}
+                </tr>
+              </thead>
+              <tbody>
+                {records.map((record, idx) => (
+                  <motion.tr
+                    key={record.id}
+                    initial={{ opacity: 0 }}
+                    animate={{ opacity: 1 }}
+                    transition={{ delay: idx * 0.02 }}
+                    style={{ borderTop: idx > 0 ? '1px solid var(--hr-border)' : 'none' }}
                   >
-                    {header}
-                  </th>
-                ))}
-              </tr>
-            </thead>
-            <tbody>
-              {records.map((record, idx) => (
-                <motion.tr
-                  key={record.id}
-                  initial={{ opacity: 0 }}
-                  animate={{ opacity: 1 }}
-                  transition={{ delay: idx * 0.02 }}
-                  style={{ borderTop: idx > 0 ? '1px solid var(--hr-border)' : 'none' }}
-                >
-                  <td style={{ padding: '12px', color: 'var(--hr-text)', fontWeight: 500 }}>
-                    {new Date(record.date + 'T00:00:00').toLocaleDateString(undefined, {
-                      weekday: 'short',
-                      month: 'short',
-                      day: 'numeric',
-                    })}
-                  </td>
-                  <td style={{ padding: '12px', color: 'var(--hr-text)' }}>
-                    {formatTime(record.clockInAt)}
-                    {record.isLate && (
-                      <Pill color="var(--hr-error)" style={{ marginLeft: 6, fontSize: 9 }}>
-                        {t('attendance.late', { minutes: record.lateMinutes })}
+                    <td style={{ padding: '12px', color: 'var(--hr-text)', fontWeight: 500 }}>
+                      {new Date(record.date + 'T00:00:00').toLocaleDateString(undefined, {
+                        weekday: 'short',
+                        month: 'short',
+                        day: 'numeric',
+                      })}
+                    </td>
+                    <td style={{ padding: '12px', color: 'var(--hr-text)' }}>
+                      {formatTime(record.clockInAt)}
+                      {record.isLate && (
+                        <Pill color="var(--hr-error)" style={{ marginLeft: 6, fontSize: 9 }}>
+                          {t('attendance.late', { minutes: record.lateMinutes })}
+                        </Pill>
+                      )}
+                    </td>
+                    <td style={{ padding: '12px', color: 'var(--hr-text)' }}>
+                      {record.clockOutAt ? formatTime(record.clockOutAt) : '-'}
+                    </td>
+                    <td
+                      style={{
+                        padding: '12px',
+                        color: ACCENT,
+                        fontWeight: 600,
+                      }}
+                    >
+                      {record.durationMinutes ? formatDuration(record.durationMinutes) : '-'}
+                    </td>
+                    <td style={{ padding: '12px', color: 'var(--hr-text-muted)' }}>
+                      {t(`attendance.methods.${record.clockInMethod}`)}
+                    </td>
+                    <td style={{ padding: '12px' }}>
+                      <Pill color={STATUS_COLORS[record.status] ?? 'var(--hr-status-draft)'}>
+                        {t(`attendance.statuses.${record.status}`)}
                       </Pill>
-                    )}
-                  </td>
-                  <td style={{ padding: '12px', color: 'var(--hr-text)' }}>
-                    {record.clockOutAt ? formatTime(record.clockOutAt) : '-'}
-                  </td>
-                  <td
-                    style={{
-                      padding: '12px',
-                      color: ACCENT,
-                      fontWeight: 600,
-                    }}
-                  >
-                    {record.durationMinutes ? formatDuration(record.durationMinutes) : '-'}
-                  </td>
-                  <td style={{ padding: '12px', color: 'var(--hr-text-muted)' }}>
-                    {t(`attendance.methods.${record.clockInMethod}`)}
-                  </td>
-                  <td style={{ padding: '12px' }}>
-                    <Pill color={STATUS_COLORS[record.status] ?? 'var(--hr-status-draft)'}>
-                      {t(`attendance.statuses.${record.status}`)}
-                    </Pill>
-                  </td>
-                </motion.tr>
-              ))}
-            </tbody>
-          </table>
-        </Card>
-      )}
-    </div>
+                    </td>
+                  </motion.tr>
+                ))}
+              </tbody>
+            </table>
+          </Card>
+        )}
+      </div>
+    </>
   );
 };
 

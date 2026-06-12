@@ -85,140 +85,149 @@ const Payroll = (): React.JSX.Element => {
   };
 
   return (
-    <div style={{ display: 'flex', flexDirection: 'column', gap: 20 }}>
-      <SectionHeader
-        title={t('payroll.title')}
-        subtitle={t('payroll.subtitle')}
-        right={
-          <Button
-            variant="primary"
-            icon={<Play size={13} />}
-            onClick={handleTriggerRun}
-            disabled={triggerRun.isPending}
-          >
-            {t('payroll.triggerRun')}
-          </Button>
-        }
-      />
-
-      {/* Summary cards */}
-      <div
-        style={{
-          display: 'grid',
-          gridTemplateColumns: 'repeat(auto-fit, minmax(180px, 1fr))',
-          gap: 12,
-        }}
-      >
-        {[
-          {
-            label: t('payroll.stats.totalGross'),
-            value: fmt(totalGross),
-            icon: DollarSign,
-            color: 'var(--accent)',
-            bg: 'var(--accent-muted)',
-          },
-          {
-            label: t('payroll.stats.totalNet'),
-            value: fmt(totalNet),
-            icon: TrendingUp,
-            color: 'var(--hr-status-approved)',
-            bg: 'color-mix(in srgb, var(--hr-status-approved) 12%, transparent)',
-          },
-          {
-            label: t('payroll.stats.pendingRuns'),
-            value: String(pendingCount),
-            icon: Clock,
-            color: 'var(--hr-status-submitted)',
-            bg: 'color-mix(in srgb, var(--hr-status-submitted) 12%, transparent)',
-          },
-        ].map((card) => (
-          <motion.div
-            key={card.label}
-            initial={{ opacity: 0, y: 10 }}
-            animate={{ opacity: 1, y: 0 }}
-            transition={{ duration: 0.2 }}
-            style={{
-              background: card.bg,
-              border: `1px solid color-mix(in srgb, ${card.color} 30%, transparent)`,
-              borderRadius: 12,
-              padding: '16px 18px',
-              display: 'flex',
-              flexDirection: 'column',
-              gap: 10,
-            }}
-          >
-            <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between' }}>
-              <span style={{ fontSize: 12, fontWeight: 500, color: card.color }}>{card.label}</span>
-              <card.icon size={16} style={{ color: card.color }} />
-            </div>
-            <p style={{ margin: 0, fontSize: 22, fontWeight: 700, color: card.color }}>
-              {card.value}
-            </p>
-          </motion.div>
-        ))}
-      </div>
-
-      {/* Status filter tabs */}
-      <Tabs
-        tabs={FILTER_STATUSES.map((s) => t(`payroll.statuses.${s}`))}
-        active={t(`payroll.statuses.${statusFilter}`)}
-        onChange={(label) => {
-          const idx = FILTER_STATUSES.findIndex((s) => t(`payroll.statuses.${s}`) === label);
-          if (idx >= 0) setStatusFilter(FILTER_STATUSES[idx]);
-        }}
-      />
-
-      {/* Runs list */}
-      {isLoading ? (
-        <div style={{ display: 'flex', flexDirection: 'column', gap: 8 }}>
-          {[1, 2, 3].map((i) => (
-            <Skeleton key={i} height={72} />
-          ))}
-        </div>
-      ) : filteredRuns.length === 0 ? (
-        <EmptyState
-          icon={<DollarSign size={20} />}
-          title={t('payroll.emptyTitle')}
-          description={t('payroll.emptyDescription')}
-        />
-      ) : (
-        <div style={{ display: 'flex', flexDirection: 'column', gap: 8 }}>
-          {filteredRuns.map((run: PayrollRunPayload) => (
-            <Link
-              key={run.id}
-              to={`/payroll/${run.id}` as any}
-              style={{ textDecoration: 'none', color: 'inherit' }}
+    <>
+      <HelmetContainer title="Payroll · rtylr" />
+      <div style={{ display: 'flex', flexDirection: 'column', gap: 20 }}>
+        <SectionHeader
+          title={t('payroll.title')}
+          subtitle={t('payroll.subtitle')}
+          right={
+            <Button
+              variant="primary"
+              icon={<Play size={13} />}
+              onClick={handleTriggerRun}
+              disabled={triggerRun.isPending}
             >
-              <Card
-                style={{
-                  display: 'flex',
-                  alignItems: 'center',
-                  gap: 16,
-                  cursor: 'pointer',
-                  transition: 'background 0.12s',
-                }}
+              {t('payroll.triggerRun')}
+            </Button>
+          }
+        />
+
+        {/* Summary cards */}
+        <div
+          style={{
+            display: 'grid',
+            gridTemplateColumns: 'repeat(auto-fit, minmax(180px, 1fr))',
+            gap: 12,
+          }}
+        >
+          {[
+            {
+              label: t('payroll.stats.totalGross'),
+              value: fmt(totalGross),
+              icon: DollarSign,
+              color: 'var(--accent)',
+              bg: 'var(--accent-muted)',
+            },
+            {
+              label: t('payroll.stats.totalNet'),
+              value: fmt(totalNet),
+              icon: TrendingUp,
+              color: 'var(--hr-status-approved)',
+              bg: 'color-mix(in srgb, var(--hr-status-approved) 12%, transparent)',
+            },
+            {
+              label: t('payroll.stats.pendingRuns'),
+              value: String(pendingCount),
+              icon: Clock,
+              color: 'var(--hr-status-submitted)',
+              bg: 'color-mix(in srgb, var(--hr-status-submitted) 12%, transparent)',
+            },
+          ].map((card) => (
+            <motion.div
+              key={card.label}
+              initial={{ opacity: 0, y: 10 }}
+              animate={{ opacity: 1, y: 0 }}
+              transition={{ duration: 0.2 }}
+              style={{
+                background: card.bg,
+                border: `1px solid color-mix(in srgb, ${card.color} 30%, transparent)`,
+                borderRadius: 12,
+                padding: '16px 18px',
+                display: 'flex',
+                flexDirection: 'column',
+                gap: 10,
+              }}
+            >
+              <div
+                style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between' }}
               >
-                <div style={{ flex: 1, minWidth: 0 }}>
-                  <div style={{ display: 'flex', alignItems: 'center', gap: 8, flexWrap: 'wrap' }}>
-                    <span style={{ fontSize: 13, fontWeight: 700, color: 'var(--hr-text)' }}>
-                      {run.periodStart}, {run.periodEnd}
-                    </span>
-                    <Pill color={STATUS_COLORS[run.status]}>
-                      {t(`payroll.statuses.${run.status}`)}
-                    </Pill>
-                  </div>
-                  <div style={{ fontSize: 11, color: 'var(--hr-text-muted)', marginTop: 3 }}>
-                    <Users size={11} style={{ verticalAlign: 'middle', marginRight: 4 }} />
-                    {t('payroll.employeeCount', { count: run.entries?.length ?? 0 })} ·{' '}
-                    {t('payroll.netTotal')}: {fmt(run.totalNet)}
-                  </div>
-                </div>
-              </Card>
-            </Link>
+                <span style={{ fontSize: 12, fontWeight: 500, color: card.color }}>
+                  {card.label}
+                </span>
+                <card.icon size={16} style={{ color: card.color }} />
+              </div>
+              <p style={{ margin: 0, fontSize: 22, fontWeight: 700, color: card.color }}>
+                {card.value}
+              </p>
+            </motion.div>
           ))}
         </div>
-      )}
-    </div>
+
+        {/* Status filter tabs */}
+        <Tabs
+          tabs={FILTER_STATUSES.map((s) => t(`payroll.statuses.${s}`))}
+          active={t(`payroll.statuses.${statusFilter}`)}
+          onChange={(label) => {
+            const idx = FILTER_STATUSES.findIndex((s) => t(`payroll.statuses.${s}`) === label);
+            if (idx >= 0) setStatusFilter(FILTER_STATUSES[idx]);
+          }}
+        />
+
+        {/* Runs list */}
+        {isLoading ? (
+          <div style={{ display: 'flex', flexDirection: 'column', gap: 8 }}>
+            {[1, 2, 3].map((i) => (
+              <Skeleton key={i} height={72} />
+            ))}
+          </div>
+        ) : filteredRuns.length === 0 ? (
+          <EmptyState
+            icon={<DollarSign size={20} />}
+            title={t('payroll.emptyTitle')}
+            description={t('payroll.emptyDescription')}
+          />
+        ) : (
+          <div style={{ display: 'flex', flexDirection: 'column', gap: 8 }}>
+            {filteredRuns.map((run: PayrollRunPayload) => (
+              <Link
+                key={run.id}
+                to={`/payroll/${run.id}` as any}
+                style={{ textDecoration: 'none', color: 'inherit' }}
+              >
+                <Card
+                  style={{
+                    display: 'flex',
+                    alignItems: 'center',
+                    gap: 16,
+                    cursor: 'pointer',
+                    transition: 'background 0.12s',
+                  }}
+                >
+                  <div style={{ flex: 1, minWidth: 0 }}>
+                    <div
+                      style={{ display: 'flex', alignItems: 'center', gap: 8, flexWrap: 'wrap' }}
+                    >
+                      <span style={{ fontSize: 13, fontWeight: 700, color: 'var(--hr-text)' }}>
+                        {run.periodStart}, {run.periodEnd}
+                      </span>
+                      <Pill color={STATUS_COLORS[run.status]}>
+                        {t(`payroll.statuses.${run.status}`)}
+                      </Pill>
+                    </div>
+                    <div style={{ fontSize: 11, color: 'var(--hr-text-muted)', marginTop: 3 }}>
+                      <Users size={11} style={{ verticalAlign: 'middle', marginRight: 4 }} />
+                      {t('payroll.employeeCount', { count: run.entries?.length ?? 0 })} ·{' '}
+                      {t('payroll.netTotal')}: {fmt(run.totalNet)}
+                    </div>
+                  </div>
+                </Card>
+              </Link>
+            ))}
+          </div>
+        )}
+      </div>
+    </>
   );
 };
 

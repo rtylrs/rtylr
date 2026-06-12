@@ -285,25 +285,28 @@ const ReviewCycleDetail = (): React.JSX.Element => {
   }
 
   return (
-    <div>
-      <SectionHeader
-        title={cycle.name}
-        subtitle={`${cycle.periodStart}, ${cycle.periodEnd}`}
-        right={
-          <Pill color={STATUS_COLORS[cycle.status] ?? 'var(--hr-status-draft)'}>
-            {cycle.status}
-          </Pill>
-        }
-      />
+    <>
+      <HelmetContainer title="Review cycle · rtylr" />
+      <div>
+        <SectionHeader
+          title={cycle.name}
+          subtitle={`${cycle.periodStart}, ${cycle.periodEnd}`}
+          right={
+            <Pill color={STATUS_COLORS[cycle.status] ?? 'var(--hr-status-draft)'}>
+              {cycle.status}
+            </Pill>
+          }
+        />
 
-      <Tabs tabs={[reviewsLabel, goalsLabel]} active={activeTab} onChange={setActiveTab} />
+        <Tabs tabs={[reviewsLabel, goalsLabel]} active={activeTab} onChange={setActiveTab} />
 
-      {activeTab === reviewsLabel ? (
-        <ReviewsTab cycleId={cycleId ?? 0} />
-      ) : (
-        <GoalsTab cycleId={cycleId ?? 0} />
-      )}
-    </div>
+        {activeTab === reviewsLabel ? (
+          <ReviewsTab cycleId={cycleId ?? 0} />
+        ) : (
+          <GoalsTab cycleId={cycleId ?? 0} />
+        )}
+      </div>
+    </>
   );
 };
 

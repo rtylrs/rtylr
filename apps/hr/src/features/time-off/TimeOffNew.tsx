@@ -58,68 +58,79 @@ const TimeOffNew: React.FC = () => {
   };
 
   return (
-    <div style={{ display: 'flex', flexDirection: 'column', gap: 16, maxWidth: 600 }}>
-      <Breadcrumbs items={[{ label: 'Time Off', href: '/time-off' }, { label: 'New request' }]} />
-      <SectionHeader title="Request Time Off" subtitle="Submit a new PTO request for review" />
-      <Card>
-        <form onSubmit={onSubmit} style={{ display: 'flex', flexDirection: 'column', gap: 14 }}>
-          <div>
-            <Label>Employee</Label>
-            <Select value={staffId} onChange={(e) => setStaffId(Number(e.target.value))}>
-              <option value={0}>Select employee</option>
-              {(staff ?? []).map((s) => (
-                <option key={s.id} value={s.id}>
-                  {s.name} ({s.role})
-                </option>
-              ))}
-            </Select>
-          </div>
-          <div>
-            <Label>Type</Label>
-            <Select
-              value={type}
-              onChange={(e) => setType(e.target.value as (typeof TYPES)[number])}
+    <>
+      <HelmetContainer title="New time off request · rtylr" />
+      <div style={{ display: 'flex', flexDirection: 'column', gap: 16, maxWidth: 600 }}>
+        <Breadcrumbs items={[{ label: 'Time Off', href: '/time-off' }, { label: 'New request' }]} />
+        <SectionHeader title="Request Time Off" subtitle="Submit a new PTO request for review" />
+        <Card>
+          <form onSubmit={onSubmit} style={{ display: 'flex', flexDirection: 'column', gap: 14 }}>
+            <div>
+              <Label>Employee</Label>
+              <Select value={staffId} onChange={(e) => setStaffId(Number(e.target.value))}>
+                <option value={0}>Select employee</option>
+                {(staff ?? []).map((s) => (
+                  <option key={s.id} value={s.id}>
+                    {s.name} ({s.role})
+                  </option>
+                ))}
+              </Select>
+            </div>
+            <div>
+              <Label>Type</Label>
+              <Select
+                value={type}
+                onChange={(e) => setType(e.target.value as (typeof TYPES)[number])}
+              >
+                {TYPES.map((t) => (
+                  <option key={t} value={t}>
+                    {t}
+                  </option>
+                ))}
+              </Select>
+            </div>
+            <div
+              style={{
+                display: 'grid',
+                gridTemplateColumns: isMobile ? '1fr' : '1fr 1fr',
+                gap: 10,
+              }}
             >
-              {TYPES.map((t) => (
-                <option key={t} value={t}>
-                  {t}
-                </option>
-              ))}
-            </Select>
-          </div>
-          <div
-            style={{ display: 'grid', gridTemplateColumns: isMobile ? '1fr' : '1fr 1fr', gap: 10 }}
-          >
-            <div>
-              <Label>Start date</Label>
-              <Input type="date" value={startDate} onChange={(e) => setStartDate(e.target.value)} />
+              <div>
+                <Label>Start date</Label>
+                <Input
+                  type="date"
+                  value={startDate}
+                  onChange={(e) => setStartDate(e.target.value)}
+                />
+              </div>
+              <div>
+                <Label>End date</Label>
+                <Input type="date" value={endDate} onChange={(e) => setEndDate(e.target.value)} />
+              </div>
             </div>
             <div>
-              <Label>End date</Label>
-              <Input type="date" value={endDate} onChange={(e) => setEndDate(e.target.value)} />
+              <Label>Reason</Label>
+              <Textarea
+                value={reason}
+                onChange={(e) => setReason(e.target.value)}
+                placeholder="Brief reason for request"
+              />
             </div>
-          </div>
-          <div>
-            <Label>Reason</Label>
-            <Textarea
-              value={reason}
-              onChange={(e) => setReason(e.target.value)}
-              placeholder="Brief reason for request"
-            />
-          </div>
-          <div style={{ display: 'flex', gap: 8, justifyContent: 'flex-end', flexWrap: 'wrap' }}>
-            <Link to="/time-off">
-              <Button type="button" variant="ghost">
-                Cancel
+            <div style={{ display: 'flex', gap: 8, justifyContent: 'flex-end', flexWrap: 'wrap' }}>
+              <Link to="/time-off">
+                <Button type="button" variant="ghost">
+                  Cancel
+                </Button>
+              </Link>
+              <Button type="submit" variant="primary" disabled={submit.isPending}>
+                {submit.isPending ? 'Submitting...' : 'Submit request'}
               </Button>
-            </Link>
-            <Button type="submit" variant="primary" disabled={submit.isPending}>
-              {submit.isPending ? 'Submitting...' : 'Submit request'}
-            </Button>
-          </div>
-        </form>
-      </Card>
-    </div>
+            </div>
+          </form>
+        </Card>
+      </div>
+    </>
   );
 };
 

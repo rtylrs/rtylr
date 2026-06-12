@@ -57,8 +57,11 @@ export const useCreateShift = () => {
     mutationFn: async (data: CreateShiftRequest): Promise<void> => {
       await unwrap(
         safe.post('/hr/shifts', {
+          name: data.name,
+          locationId: data.locationId,
           startTime: data.startTime,
           endTime: data.endTime,
+          color: data.color,
         })
       );
     },

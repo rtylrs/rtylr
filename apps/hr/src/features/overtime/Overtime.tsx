@@ -46,93 +46,96 @@ const Overtime = (): React.JSX.Element => {
   };
 
   return (
-    <div style={{ display: 'flex', flexDirection: 'column', gap: 20 }}>
-      <SectionHeader
-        title={t('overtime.title')}
-        subtitle={t('overtime.subtitle')}
-        right={
-          <Button variant="primary" icon={<Plus size={13} />} onClick={() => setFormOpen(true)}>
-            {t('overtime.newRequest')}
-          </Button>
-        }
-      />
-
-      <Tabs
-        tabs={FILTER_STATUSES.map((s) => t(`overtime.statuses.${s.toLowerCase()}`))}
-        active={t(`overtime.statuses.${statusFilter.toLowerCase()}`)}
-        onChange={(label) => {
-          const idx = FILTER_STATUSES.findIndex(
-            (s) => t(`overtime.statuses.${s.toLowerCase()}`) === label
-          );
-          if (idx >= 0) setStatusFilter(FILTER_STATUSES[idx]);
-        }}
-      />
-
-      {isLoading ? (
-        <div style={{ display: 'flex', flexDirection: 'column', gap: 8 }}>
-          {[1, 2, 3].map((i) => (
-            <Skeleton key={i} height={72} />
-          ))}
-        </div>
-      ) : filteredRequests.length === 0 ? (
-        <EmptyState
-          icon={<Clock size={20} />}
-          title={t('overtime.emptyTitle')}
-          description={t('overtime.emptyDescription')}
-          action={
-            <button
-              onClick={() => setFormOpen(true)}
-              style={{
-                color: 'var(--hr-accent)',
-                background: 'none',
-                border: 'none',
-                cursor: 'pointer',
-                fontSize: 12,
-              }}
-            >
+    <>
+      <HelmetContainer title="Overtime · rtylr" />
+      <div style={{ display: 'flex', flexDirection: 'column', gap: 20 }}>
+        <SectionHeader
+          title={t('overtime.title')}
+          subtitle={t('overtime.subtitle')}
+          right={
+            <Button variant="primary" icon={<Plus size={13} />} onClick={() => setFormOpen(true)}>
               {t('overtime.newRequest')}
-            </button>
+            </Button>
           }
         />
-      ) : (
-        <div style={{ display: 'flex', flexDirection: 'column', gap: 8 }}>
-          {filteredRequests.map((req) => (
-            <Card key={req.id} style={{ display: 'flex', alignItems: 'center', gap: 16 }}>
-              <div style={{ flex: 1, minWidth: 0 }}>
-                <div style={{ display: 'flex', alignItems: 'center', gap: 8, flexWrap: 'wrap' }}>
-                  <span style={{ fontSize: 13, fontWeight: 700, color: 'var(--hr-text)' }}>
-                    {t('overtime.employee')} #{req.employeeId}
-                  </span>
-                  <Pill color={STATUS_COLORS[req.status]}>
-                    {t(`overtime.statuses.${req.status.toLowerCase()}`)}
-                  </Pill>
-                </div>
-                <div style={{ fontSize: 11, color: 'var(--hr-text-muted)', marginTop: 3 }}>
-                  {req.date} · {formatMinutes(req.plannedExtraMinutes)} {t('overtime.planned')}
-                </div>
-                {req.reason && (
-                  <div style={{ fontSize: 10, color: 'var(--hr-text-dim)', marginTop: 2 }}>
-                    {req.reason}
-                  </div>
-                )}
-              </div>
-              {req.status === 'Pending' && (
-                <ApprovalButtons
-                  onApprove={() =>
-                    approveOvertime.mutate({ overtimeRequestId: req.id, approved: true })
-                  }
-                  onReject={() =>
-                    approveOvertime.mutate({ overtimeRequestId: req.id, approved: false })
-                  }
-                />
-              )}
-            </Card>
-          ))}
-        </div>
-      )}
 
-      <OvertimeRequestForm open={formOpen} onClose={() => setFormOpen(false)} />
-    </div>
+        <Tabs
+          tabs={FILTER_STATUSES.map((s) => t(`overtime.statuses.${s.toLowerCase()}`))}
+          active={t(`overtime.statuses.${statusFilter.toLowerCase()}`)}
+          onChange={(label) => {
+            const idx = FILTER_STATUSES.findIndex(
+              (s) => t(`overtime.statuses.${s.toLowerCase()}`) === label
+            );
+            if (idx >= 0) setStatusFilter(FILTER_STATUSES[idx]);
+          }}
+        />
+
+        {isLoading ? (
+          <div style={{ display: 'flex', flexDirection: 'column', gap: 8 }}>
+            {[1, 2, 3].map((i) => (
+              <Skeleton key={i} height={72} />
+            ))}
+          </div>
+        ) : filteredRequests.length === 0 ? (
+          <EmptyState
+            icon={<Clock size={20} />}
+            title={t('overtime.emptyTitle')}
+            description={t('overtime.emptyDescription')}
+            action={
+              <button
+                onClick={() => setFormOpen(true)}
+                style={{
+                  color: 'var(--hr-accent)',
+                  background: 'none',
+                  border: 'none',
+                  cursor: 'pointer',
+                  fontSize: 12,
+                }}
+              >
+                {t('overtime.newRequest')}
+              </button>
+            }
+          />
+        ) : (
+          <div style={{ display: 'flex', flexDirection: 'column', gap: 8 }}>
+            {filteredRequests.map((req) => (
+              <Card key={req.id} style={{ display: 'flex', alignItems: 'center', gap: 16 }}>
+                <div style={{ flex: 1, minWidth: 0 }}>
+                  <div style={{ display: 'flex', alignItems: 'center', gap: 8, flexWrap: 'wrap' }}>
+                    <span style={{ fontSize: 13, fontWeight: 700, color: 'var(--hr-text)' }}>
+                      {t('overtime.employee')} #{req.employeeId}
+                    </span>
+                    <Pill color={STATUS_COLORS[req.status]}>
+                      {t(`overtime.statuses.${req.status.toLowerCase()}`)}
+                    </Pill>
+                  </div>
+                  <div style={{ fontSize: 11, color: 'var(--hr-text-muted)', marginTop: 3 }}>
+                    {req.date} · {formatMinutes(req.plannedExtraMinutes)} {t('overtime.planned')}
+                  </div>
+                  {req.reason && (
+                    <div style={{ fontSize: 10, color: 'var(--hr-text-dim)', marginTop: 2 }}>
+                      {req.reason}
+                    </div>
+                  )}
+                </div>
+                {req.status === 'Pending' && (
+                  <ApprovalButtons
+                    onApprove={() =>
+                      approveOvertime.mutate({ overtimeRequestId: req.id, approved: true })
+                    }
+                    onReject={() =>
+                      approveOvertime.mutate({ overtimeRequestId: req.id, approved: false })
+                    }
+                  />
+                )}
+              </Card>
+            ))}
+          </div>
+        )}
+
+        <OvertimeRequestForm open={formOpen} onClose={() => setFormOpen(false)} />
+      </div>
+    </>
   );
 };
 
