@@ -4,7 +4,8 @@ import { toast } from 'sonner';
 import ScreenLayout from '../../layouts/ScreenLayout';
 import EmptyState from '../../shared/components/EmptyState';
 import Skeleton from '../../shared/components/Skeleton';
-import { posService } from '../../shared/services/posService';
+import { posService } from '../../shared/services/api/posService';
+import { useEmployeeSessionStore } from '../../shared/stores/employeeSessionStore';
 import { useTerminalContextStore } from '../../shared/stores/terminalContextStore';
 import { buildStockAction, mapInventoryItems } from './inventoryWorkflow';
 import type { InventoryItem, StockAction } from './inventoryWorkflow';
@@ -97,6 +98,7 @@ function ActionModal({ item, action, onClose, onSubmit }: ActionModalProps) {
 
 const InventoryScreen: React.FC = () => {
   const { locationId } = useTerminalContextStore();
+  const employee = useEmployeeSessionStore((s) => s.employee);
   const [items, setItems] = useState<InventoryItem[]>([]);
   const [lowStock, setLowStock] = useState<InventoryItem[]>([]);
   const [loading, setLoading] = useState(true);
@@ -133,7 +135,14 @@ const InventoryScreen: React.FC = () => {
     reason: string,
   ) => {
     try {
-      const { payload } = buildStockAction({ itemId, action, quantityInput, reason });
+      const { payload } = buildStockAction({
+        itemId,
+        action,
+        quantityInput,
+        reason,
+        branchId,
+        employeeId: Number(employee?.id) || null,
+      });
       const call =
         action === 'receive'
           ? posService.receiveStock(payload)

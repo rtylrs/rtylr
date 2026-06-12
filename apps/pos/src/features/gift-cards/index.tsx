@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, { useEffect, useState } from 'react';
 import { toast } from 'sonner';
 import ScreenLayout from '../../layouts/ScreenLayout';
 import EmptyState from '../../shared/components/EmptyState';
@@ -8,19 +8,23 @@ import { formatCurrency, formatShortDate } from '../../shared/utils/format';
 import { issueGiftCard } from './giftCardWorkflow';
 
 const GiftCardsScreen: React.FC = () => {
-  const { cards, issue, redeem, checkBalance } = useGiftCards();
+  const { cards, issue, redeem, checkBalance, refresh } = useGiftCards();
   const [mode, setMode] = useState<'list' | 'sell' | 'redeem' | 'balance'>('list');
   const [code, setCode] = useState('');
   const [amount, setAmount] = useState('');
   const [balanceResult, setBalanceResult] = useState<string | null>(null);
   const [search, setSearch] = useState('');
 
+  useEffect(() => {
+    void refresh();
+  }, [refresh]);
+
   const filtered = cards.filter(
     (c) => !search || c.code.toLowerCase().includes(search.toLowerCase())
   );
 
-  const handleSell = () => {
-    const result = issueGiftCard({ codeInput: code, amountInput: amount, issue });
+  const handleSell = async () => {
+    const result = await issueGiftCard({ codeInput: code, amountInput: amount, issue });
     if (!result.ok) {
       toast.error(result.error);
       return;

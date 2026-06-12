@@ -34,7 +34,7 @@ export function normalizeRemoteGiftCard(response: unknown): GiftCard | null {
   if (!payload) return null;
 
   const code = asTrimmedString(payload.code);
-  const balance = asBalance(payload.balance);
+  const balance = asBalance(payload.balance ?? payload.current_balance ?? payload.currentBalance);
   if (!code || balance === undefined) return null;
 
   const id = asTrimmedString(payload.id) ?? asTrimmedString(payload.cardId) ?? code;
@@ -59,4 +59,13 @@ export function normalizeRemoteGiftCard(response: unknown): GiftCard | null {
     active: asBoolean(payload.active ?? payload.isActive ?? payload.is_active, true),
     ...(customerName ? { customerName } : {}),
   };
+}
+
+export function normalizeRemoteGiftCardList(response: unknown): GiftCard[] {
+  if (!isRecord(response)) return [];
+  const list = response.gift_cards ?? response.cards ?? response.data;
+  if (!Array.isArray(list)) return [];
+  return list
+    .map((entry) => normalizeRemoteGiftCard(entry))
+    .filter((card): card is GiftCard => card !== null);
 }

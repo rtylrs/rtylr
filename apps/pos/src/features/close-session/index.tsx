@@ -6,7 +6,7 @@ import ScreenLayout from '../../layouts/ScreenLayout';
 import { formatCurrency } from '../../shared/utils/format';
 import { useCashDrawerStore } from '../../shared/stores/cashDrawerStore';
 import { useDaySummary } from '../day-summary/useDaySummary';
-import { posService } from '../../shared/services/posService';
+import { posService } from '../../shared/services/api/posService';
 import { useSessionCloseQueueStore } from '../../shared/stores/sessionCloseQueueStore';
 import { buildCloseSessionPayload, closeSessionWithFallback } from './closeSessionWorkflow';
 
@@ -22,10 +22,9 @@ const CloseSessionScreen: React.FC = () => {
   let variance = 0;
   try {
     variance = buildCloseSessionPayload({
-      sessionId: 'current',
       expected,
       actualInput: actualCash || '0',
-    }).variance as number;
+    }).variance;
   } catch {
     variance = -expected;
   }
@@ -35,12 +34,11 @@ const CloseSessionScreen: React.FC = () => {
     try {
       const result = await closeSessionWithFallback({
         payload: buildCloseSessionPayload({
-          sessionId: 'current',
           expected,
           actualInput: actualCash,
         }),
-        closeSession: async (payload) => {
-          await unwrap(posService.closeSession(payload));
+        closeSession: async (sessionId, payload) => {
+          await unwrap(posService.closeSession(sessionId, payload));
         },
         enqueue: enqueueSessionClose,
       });

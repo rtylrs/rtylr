@@ -1,9 +1,9 @@
 import { unwrap } from '@voxire/api';
 import { useCallback, useState } from 'react';
-import { posService } from '../../shared/services/posService';
+import { posService } from '../../shared/services/api/posService';
 import { useGiftCardStore } from '../../shared/stores/giftCardStore';
 import type { GiftCard } from '../../shared/types/pos';
-import { normalizeRemoteGiftCard } from './giftCardRemote';
+import { normalizeRemoteGiftCard, normalizeRemoteGiftCardList } from './giftCardRemote';
 
 export function useGiftCards() {
   const store = useGiftCardStore();
@@ -14,7 +14,11 @@ export function useGiftCards() {
     setLoading(true);
     setError(null);
     try {
-      await unwrap(posService.getGiftCards());
+      const res = await unwrap(posService.getGiftCards());
+      const remoteCards = normalizeRemoteGiftCardList(res);
+      if (remoteCards.length > 0 || (res as { gift_cards?: unknown[] })?.gift_cards) {
+        useGiftCardStore.getState().setCards(remoteCards);
+      }
     } catch (e) {
       const err = e as { response?: { data?: { message?: string } }; message?: string };
       setError(err?.response?.data?.message ?? err?.message ?? 'Failed to load gift cards');

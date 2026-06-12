@@ -7,6 +7,8 @@ interface GiftCardState {
 }
 
 interface GiftCardActions {
+  /** Replace the list with the server's view (server wins over local). */
+  setCards: (cards: GiftCard[]) => void;
   issue: (partial: Omit<GiftCard, 'id' | 'issuedAt' | 'active'>) => GiftCard;
   redeem: (code: string, amount: number) => { ok: boolean; remaining?: number; error?: string };
   addBalance: (code: string, amount: number) => void;
@@ -24,6 +26,7 @@ export const useGiftCardStore = create<GiftCardState & GiftCardActions>()(
   persist(
     (set, get) => ({
       cards: [],
+      setCards: (cards) => set({ cards }),
       issue: (partial) => {
         assertPositiveGiftCardAmount(partial.balance);
         if (get().cards.some((card) => card.code === partial.code)) {

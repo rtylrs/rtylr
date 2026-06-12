@@ -1,9 +1,9 @@
-import type { SessionPayload } from '../../shared/services/posService';
+import type { SessionClosePayload } from './closeSessionWorkflow';
 import type { QueuedSessionClose } from '../../shared/stores/sessionCloseQueueStore';
 
 interface SyncQueuedSessionClosesParams {
   entries: QueuedSessionClose[];
-  syncClose: (payload: SessionPayload) => Promise<void>;
+  syncClose: (payload: SessionClosePayload) => Promise<void>;
   retry: (id: string) => void;
   markSynced: (id: string) => void;
   markFailed: (id: string, error: string) => void;

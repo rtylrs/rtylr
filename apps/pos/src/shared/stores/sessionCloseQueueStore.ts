@@ -1,10 +1,10 @@
 import { create } from 'zustand';
 import { persist } from 'zustand/middleware';
-import type { SessionPayload } from '../services/posService';
+import type { SessionClosePayload } from '../../features/close-session/closeSessionWorkflow';
 
 export interface QueuedSessionClose {
   id: string;
-  payload: SessionPayload;
+  payload: SessionClosePayload;
   queuedAt: string;
   retries: number;
   lastError?: string;
@@ -16,7 +16,7 @@ interface SessionCloseQueueState {
 }
 
 interface SessionCloseQueueActions {
-  enqueue: (payload: SessionPayload) => QueuedSessionClose;
+  enqueue: (payload: SessionClosePayload) => QueuedSessionClose;
   retry: (id: string) => void;
   markSynced: (id: string) => void;
   markFailed: (id: string, error: string) => void;

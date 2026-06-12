@@ -6,11 +6,17 @@ import { useCashMovementQueueStore } from '../../shared/stores/cashMovementQueue
 import { formatCurrency, formatDate } from '../../shared/utils/format';
 import { processCashDrawerAction, type CashDrawerAction } from './cashDrawerWorkflow';
 import { syncCashMovementWithApi } from './cashMovementQueueSync';
+import { useTerminalContextStore } from '../../shared/stores/terminalContextStore';
+import { useEmployeeSessionStore } from '../../shared/stores/employeeSessionStore';
+import { resolveOpenSessionId } from '../close-session/closeSessionWorkflow';
 
 const CashDropScreen: React.FC = () => {
   const { movements, openingFloat, openDrawer, cashDrop, paidOut, paidIn, expectedCash } =
     useCashDrawerStore();
   const enqueueMovement = useCashMovementQueueStore((s) => s.enqueue);
+  const branchId = useTerminalContextStore((s) => s.locationId);
+  const terminalId = useTerminalContextStore((s) => s.terminalId);
+  const employee = useEmployeeSessionStore((s) => s.employee);
   const [action, setAction] = useState<CashDrawerAction>('drop');
   const [amount, setAmount] = useState('');
   const [reason, setReason] = useState('');
@@ -22,6 +28,12 @@ const CashDropScreen: React.FC = () => {
         amountInput: amount,
         reason,
         drawer: { openDrawer, cashDrop, paidOut, paidIn },
+        context: {
+          branchId,
+          terminalId,
+          employeeId: Number(employee?.id) || null,
+          resolveSessionId: resolveOpenSessionId,
+        },
         syncMovement: syncCashMovementWithApi,
         enqueueMovement,
       });

@@ -3,7 +3,7 @@ import type {
   QueuedCashMovement,
   QueuedCashMovementAction,
 } from '../../shared/stores/cashMovementQueueStore';
-import type { CashMovementPayload } from '../../shared/services/posService';
+import type { CashMovementPayload } from '../../shared/services/api/posService';
 
 export type CashDrawerAction = 'drop' | 'paid_out' | 'paid_in' | 'float';
 
@@ -26,7 +26,15 @@ interface RecordCashDrawerActionResult {
   message: string;
 }
 
+interface CashMovementContext {
+  branchId: number | null;
+  terminalId?: number | null;
+  employeeId: number | null;
+  resolveSessionId: () => Promise<number>;
+}
+
 interface ProcessCashDrawerActionParams extends RecordCashDrawerActionParams {
+  context: CashMovementContext;
   syncMovement: (action: QueuedCashMovementAction, payload: CashMovementPayload) => Promise<void>;
   enqueueMovement: (
     movement: Pick<QueuedCashMovement, 'action' | 'payload'>
@@ -77,17 +85,40 @@ export async function processCashDrawerAction({
   amountInput,
   reason,
   drawer,
+  context,
   syncMovement,
   enqueueMovement,
 }: ProcessCashDrawerActionParams): Promise<ProcessCashDrawerActionResult> {
   const result = recordCashDrawerAction({ action, amountInput, reason, drawer });
   if (action === 'float') return { ...result, queued: false };
 
-  const payload = { amount: result.amount, reason: reason.trim() };
+  if (!context.branchId || !context.employeeId) {
+    throw new Error('Select a terminal and sign in before recording cash movements.');
+  }
+
   try {
+    const sessionId = await context.resolveSessionId();
+    const payload: CashMovementPayload = {
+      branch_id: context.branchId,
+      terminal_id: context.terminalId ?? null,
+      session_id: sessionId,
+      employee_id: context.employeeId,
+      amount: result.amount,
+      reason: reason.trim() || null,
+    };
     await syncMovement(action, payload);
     return { ...result, queued: false };
   } catch {
+    // Queue with a session_id of 0; the replay path re-resolves the open
+    // session before posting.
+    const payload: CashMovementPayload = {
+      branch_id: context.branchId,
+      terminal_id: context.terminalId ?? null,
+      session_id: 0,
+      employee_id: context.employeeId,
+      amount: result.amount,
+      reason: reason.trim() || null,
+    };
     enqueueMovement({ action, payload });
     return { ...result, queued: true };
   }

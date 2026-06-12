@@ -1,10 +1,11 @@
 import { unwrap } from '@voxire/api';
-import { posService } from '../../shared/services/posService';
-import type { CashMovementPayload } from '../../shared/services/posService';
+import { posService } from '../../shared/services/api/posService';
+import type { CashMovementPayload } from '../../shared/services/api/posService';
 import {
   useCashMovementQueueStore,
   type QueuedCashMovementAction,
 } from '../../shared/stores/cashMovementQueueStore';
+import { resolveOpenSessionId } from '../close-session/closeSessionWorkflow';
 import { syncQueuedCashMovements } from './syncCashMovementQueue';
 
 type SyncMovement = (
@@ -13,17 +14,20 @@ type SyncMovement = (
 ) => Promise<void>;
 
 export const syncCashMovementWithApi: SyncMovement = async (action, payload) => {
+  const body: CashMovementPayload =
+    payload.session_id > 0 ? payload : { ...payload, session_id: await resolveOpenSessionId() };
+
   if (action === 'drop') {
-    await unwrap(posService.cashDrop(payload));
+    await unwrap(posService.cashDrop(body));
     return;
   }
 
   if (action === 'paid_out') {
-    await unwrap(posService.cashPickup(payload));
+    await unwrap(posService.cashPickup(body));
     return;
   }
 
-  await unwrap(posService.cashAdjust(payload));
+  await unwrap(posService.cashAdjust(body));
 };
 
 export async function syncPendingCashMovements(

@@ -1,13 +1,14 @@
 import { unwrap } from '@voxire/api';
-import { posService } from '../../shared/services/posService';
-import type { SessionPayload } from '../../shared/services/posService';
+import { posService } from '../../shared/services/api/posService';
 import { useSessionCloseQueueStore } from '../../shared/stores/sessionCloseQueueStore';
+import { resolveOpenSessionId, type SessionClosePayload } from './closeSessionWorkflow';
 import { syncQueuedSessionCloses } from './syncSessionCloseQueue';
 
-type SyncClose = (payload: SessionPayload) => Promise<void>;
+type SyncClose = (payload: SessionClosePayload) => Promise<void>;
 
 const syncCloseWithApi: SyncClose = async (payload) => {
-  await unwrap(posService.closeSession(payload));
+  const sessionId = await resolveOpenSessionId();
+  await unwrap(posService.closeSession(sessionId, { closing_float: payload.closing_float }));
 };
 
 export async function syncPendingSessionCloses(

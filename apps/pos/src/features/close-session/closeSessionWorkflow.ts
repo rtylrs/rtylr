@@ -1,15 +1,21 @@
-import type { SessionPayload } from '../../shared/services/posService';
+import { unwrap } from '@voxire/api';
+import { posService } from '../../shared/services/api/posService';
+import type { CloseSessionPayload } from '../../shared/services/api/posService';
+
+export interface SessionClosePayload extends CloseSessionPayload {
+  expected: number;
+  variance: number;
+}
 
 interface BuildCloseSessionPayloadParams {
-  sessionId: string;
   expected: number;
   actualInput: string;
 }
 
 interface CloseSessionWithFallbackParams {
-  payload: SessionPayload;
-  closeSession: (payload: SessionPayload) => Promise<void>;
-  enqueue: (payload: SessionPayload) => unknown;
+  payload: SessionClosePayload;
+  closeSession: (sessionId: number, payload: CloseSessionPayload) => Promise<void>;
+  enqueue: (payload: SessionClosePayload) => unknown;
 }
 
 type CloseSessionResult = { status: 'online' } | { status: 'queued' };
@@ -20,10 +26,9 @@ function nonNegativeNumber(value: number): number {
 }
 
 export function buildCloseSessionPayload({
-  sessionId,
   expected,
   actualInput,
-}: BuildCloseSessionPayloadParams): SessionPayload {
+}: BuildCloseSessionPayloadParams): SessionClosePayload {
   const actual = Number(actualInput);
   if (!Number.isFinite(actual) || actual < 0) {
     throw new Error('Enter a valid counted cash amount.');
@@ -31,11 +36,23 @@ export function buildCloseSessionPayload({
 
   const normalizedExpected = nonNegativeNumber(expected);
   return {
-    sessionId,
+    closing_float: actual,
     expected: normalizedExpected,
-    actual,
     variance: actual - normalizedExpected,
   };
+}
+
+// The backend closes a session by id (/pos/sessions/{id}/close) and has no
+// "current" route, so the open session is resolved from the session list.
+export async function resolveOpenSessionId(): Promise<number> {
+  const res = (await unwrap(posService.getSessions())) as {
+    sessions?: Array<{ id?: number; status?: string }>;
+  };
+  const open = (res.sessions ?? []).find((s) => s.status === 'open');
+  if (!open || !open.id) {
+    throw new Error('No open register session found.');
+  }
+  return open.id;
 }
 
 export async function closeSessionWithFallback({
@@ -44,7 +61,8 @@ export async function closeSessionWithFallback({
   enqueue,
 }: CloseSessionWithFallbackParams): Promise<CloseSessionResult> {
   try {
-    await closeSession(payload);
+    const sessionId = await resolveOpenSessionId();
+    await closeSession(sessionId, { closing_float: payload.closing_float });
     return { status: 'online' };
   } catch {
     enqueue(payload);

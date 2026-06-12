@@ -1,4 +1,4 @@
-import type { StockPayload } from '../../shared/services/posService';
+import type { StockPayload } from '../../shared/services/api/posService';
 
 export type StockAction = 'receive' | 'adjust' | 'waste' | 'transfer';
 
@@ -15,6 +15,8 @@ export interface StockActionParams {
   itemId: number;
   action: StockAction;
   quantityInput: string;
+  branchId?: number | null;
+  employeeId?: number | null;
   reason?: string;
   note?: string;
 }
@@ -36,11 +38,16 @@ export function buildStockAction({
   itemId,
   action,
   quantityInput,
+  branchId,
+  employeeId,
   reason,
   note,
 }: StockActionParams): BuiltStockAction {
   if (!itemId || itemId <= 0) {
     throw new Error('Select a valid inventory item.');
+  }
+  if (!branchId || branchId <= 0) {
+    throw new Error('Select a terminal location before recording stock movements.');
   }
 
   const quantity = parsePositiveQuantity(quantityInput);
@@ -48,9 +55,11 @@ export function buildStockAction({
   return {
     action,
     payload: {
-      itemId,
+      branch_id: branchId,
+      product_id: itemId,
       quantity,
-      reason: reason?.trim() || note?.trim() || undefined,
+      note: reason?.trim() || note?.trim() || null,
+      employee_id: employeeId ?? null,
     },
   };
 }
