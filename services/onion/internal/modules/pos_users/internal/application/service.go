@@ -12,7 +12,6 @@ import (
 	"github.com/voxire/onion/internal/modules/pos_users/internal/infrastructure"
 	"github.com/voxire/onion/internal/platform/cache/cacher"
 	cacheKeys "github.com/voxire/onion/internal/platform/cache/keys"
-	"github.com/voxire/onion/internal/platform/logger"
 	"github.com/voxire/onion/internal/platform/utils/passwordutils"
 )
 
@@ -122,27 +121,92 @@ func (s *Service) Deactivate(ctx context.Context, ownerID, id int64) error {
 	return nil
 }
 
-// VerifyPIN authenticates a pos_user by (ownerID, display name, pin) and
-// returns a minimal projection that intentionally omits the PIN, the hash,
-// and any internal bookkeeping. A generic domain.ErrInvalidPIN is returned
-// for every failure mode so callers cannot distinguish "wrong name" from
-// "wrong PIN" via the API surface.
+// SetPIN is the self-service onboarding path: an operator picked from a
+// location's roster sets or rotates their own 4-digit PIN. The operator's
+// identity (userID) and the location come from the roster selection, not a
+// trusted session, so the member's assignment to the location is re-verified
+// here. Role and capabilities are resolved server-side from the member's
+// location access — never trusted from the client.
 //
-// This function implements the dual-path verify described in the security
-// overhaul: legacy rows that still hold a plaintext PIN (pin_hash IS NULL)
-// are compared against the submitted PIN in constant-ish time, then
-// transparently migrated to a bcrypt hash on success. Rows with a pin_hash
-// take the fast path and skip the plaintext comparison entirely.
-//
-// TODO(legacy-pin-cleanup): once `SELECT COUNT(*) FROM pos_users WHERE pin_hash IS NULL`
-// returns 0 in production (target: ~2026-06-01 once all clients have transacted at least
-// once and triggered transparent rehash), remove the legacy plaintext branch below.
-func (s *Service) VerifyPIN(ctx context.Context, ownerID int64, displayName, pin string) (*domain.VerifiedPOSUser, error) {
-	if displayName == "" || pin == "" {
+// First-time setup creates the pos_users row with role-defaulted capabilities;
+// a rotation only rewrites the PIN hash and preserves any admin overrides.
+func (s *Service) SetPIN(ctx context.Context, ownerID int64, input domain.SetPINInput) error {
+	if input.UserID <= 0 || input.LocationID <= 0 {
+		return ErrInvalidInput
+	}
+	if strings.TrimSpace(input.Name) == "" || strings.TrimSpace(input.PIN) == "" {
+		return ErrInvalidInput
+	}
+
+	access, err := s.repo.GetMemberLocationAccess(ctx, ownerID, input.UserID, input.LocationID)
+	if err != nil {
+		if errors.Is(err, infrastructure.ErrUserNotFound) {
+			// Not assigned to this location — cannot hold a PIN here.
+			return ErrInvalidInput
+		}
+		return err
+	}
+
+	hashed, err := passwordutils.HashPIN(input.PIN)
+	if err != nil {
+		return err
+	}
+	input.PIN = ""
+
+	existing, err := s.repo.FindByUserAndLocation(ctx, ownerID, input.UserID, input.LocationID)
+	if err != nil && !errors.Is(err, infrastructure.ErrUserNotFound) {
+		return err
+	}
+
+	if existing != nil {
+		// Rotation — keep role + capability overrides, swap the hash only.
+		if err := s.repo.UpdatePINHash(ctx, ownerID, existing.ID, hashed); err != nil {
+			return err
+		}
+		invalidatePosUsersScope(ctx, ownerID)
+		return nil
+	}
+
+	role := roleForAccess(access)
+	caps := domain.DefaultCapabilities(role)
+	_, err = s.repo.Create(ctx, ownerID, input.UserID, domain.CreatePOSUserInput{
+		UserID:           input.UserID,
+		LocationID:       input.LocationID,
+		Name:             input.Name,
+		Role:             role,
+		MaxDiscountPct:   caps.MaxDiscountPct,
+		CanVoid:          caps.CanVoid,
+		CanRefund:        caps.CanRefund,
+		CanOpenDrawer:    caps.CanOpenDrawer,
+		CanApplyDiscount: caps.CanApplyDiscount,
+	}, hashed)
+	if err != nil {
+		return err
+	}
+	invalidatePosUsersScope(ctx, ownerID)
+	return nil
+}
+
+// roleForAccess maps a member's location management flag to a POS role. A
+// member who can manage POS users at the location (owner/admin/store_manager
+// assignment) operates as a manager; everyone else defaults to cashier.
+func roleForAccess(access *infrastructure.LocationAccess) domain.POSUserRole {
+	if access != nil && access.CanManagePOSUsers {
+		return domain.RoleManager
+	}
+	return domain.RoleCashier
+}
+
+// VerifyPIN authenticates a roster operator by (ownerID, locationID, userID,
+// pin) and returns a projection carrying the effective capabilities so the POS
+// client can gate manager-only actions. A generic domain.ErrInvalidPIN is
+// returned for every failure mode so callers cannot distinguish causes.
+func (s *Service) VerifyPIN(ctx context.Context, ownerID, locationID, userID int64, pin string) (*domain.VerifiedPOSUser, error) {
+	if locationID <= 0 || userID <= 0 || pin == "" {
 		return nil, domain.ErrInvalidPIN
 	}
 
-	user, err := s.repo.FindByDisplayName(ctx, ownerID, displayName)
+	user, err := s.repo.FindForVerify(ctx, ownerID, locationID, userID)
 	if err != nil {
 		if errors.Is(err, infrastructure.ErrUserNotFound) {
 			return nil, domain.ErrInvalidPIN
@@ -150,49 +214,24 @@ func (s *Service) VerifyPIN(ctx context.Context, ownerID int64, displayName, pin
 		return nil, err
 	}
 
-	switch {
-	case user.PINHash != "":
-		if !passwordutils.CheckPINHash(pin, user.PINHash) {
-			return nil, domain.ErrInvalidPIN
-		}
-	case user.PIN != "":
-		// Legacy plaintext path. Only accept equality; never log either
-		// side of the comparison.
-		if pin != user.PIN {
-			return nil, domain.ErrInvalidPIN
-		}
-		if err := s.migrateLegacyPIN(ctx, user, pin); err != nil {
-			// Migration failure is non-fatal for the verify call itself
-			// — the PIN was correct, we just couldn't upgrade storage.
-			// Log without the PIN and continue.
-			logger.Ctx(ctx).Warn("pos_users legacy pin migration failed",
-				logger.Any("owner_id", ownerID),
-				logger.Any("pos_user_id", user.ID),
-				logger.Error(err),
-			)
-		}
-	default:
-		// No hash and no plaintext — nothing to verify against.
+	if user.PINHash == "" || !passwordutils.CheckPINHash(pin, user.PINHash) {
 		return nil, domain.ErrInvalidPIN
 	}
 
 	return &domain.VerifiedPOSUser{
-		UserID:      user.ID,
+		UserID:      user.UserID,
+		POSUserID:   user.ID,
+		LocationID:  user.LocationID,
 		Role:        user.Role,
 		DisplayName: user.Name,
+		Capabilities: domain.Capabilities{
+			CanVoid:          user.CanVoid,
+			CanRefund:        user.CanRefund,
+			CanOpenDrawer:    user.CanOpenDrawer,
+			CanApplyDiscount: user.CanApplyDiscount,
+			MaxDiscountPct:   user.MaxDiscountPct,
+		},
 	}, nil
-}
-
-// migrateLegacyPIN hashes the just-verified plaintext PIN and persists it,
-// clearing the legacy column in the same statement. It is intentionally
-// separate from VerifyPIN so the verify path can log migration failures
-// without polluting the hot path.
-func (s *Service) migrateLegacyPIN(ctx context.Context, user *domain.POSUser, pin string) error {
-	hashed, err := passwordutils.HashPIN(pin)
-	if err != nil {
-		return err
-	}
-	return s.repo.UpdatePINHash(ctx, user.OwnerID, user.ID, hashed)
 }
 
 // scrubSecrets returns the same slice with PIN and PINHash zeroed so that

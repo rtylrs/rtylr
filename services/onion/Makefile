@@ -52,6 +52,13 @@ lint:
 test:
 	./scripts/test.sh
 
+# Run the database-backed integration tests against the local-env MySQL
+# container. Resets a dedicated onion_test DB (drop → migrate → seed) each
+# run so the tests stay repeatable. Requires `make local-env-up` first.
+# Pass a package subset with PKG=, e.g. `make test-db PKG=./internal/modules/pos_users/...`
+test-db:
+	./scripts/test-db.sh $(PKG)
+
 # Default run (backwards compatibility)
 run:
 	go run ./cmd/api/main.go

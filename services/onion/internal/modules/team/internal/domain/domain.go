@@ -45,13 +45,14 @@ type MyProfile struct {
 type Role string
 
 const (
-	RoleOwner       Role = "owner"
-	RoleAdmin       Role = "admin"
-	RoleOperator    Role = "operator"
-	RoleBilling     Role = "billing"
-	RoleMenuManager Role = "menu_manager"
-	RoleStaff       Role = "staff"
-	RoleViewer      Role = "viewer"
+	RoleOwner        Role = "owner"
+	RoleAdmin        Role = "admin"
+	RoleOperator     Role = "operator"
+	RoleBilling      Role = "billing"
+	RoleMenuManager  Role = "menu_manager"
+	RoleStoreManager Role = "store_manager"
+	RoleStaff        Role = "staff"
+	RoleViewer       Role = "viewer"
 )
 
 // UserAppPermission maps a staff user to a set of app IDs and a role for a given owner.

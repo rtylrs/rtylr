@@ -41,4 +41,7 @@ func RegisterRoutes(ctx context.Context, router *chi.Mux, svc *application.Servi
 		ctx, router, handlers.POSUserVerifyPINRoutes(), &handlers.VerifyPINHandler{Service: svc},
 		http.PerRouteRateLimit(verifyPINMaxPerMinute, verifyPINWindow),
 	)
+	http.RegisterPOSTWithValidation[handlers.SetPINRequest, handlers.SetPINResponse](
+		ctx, router, handlers.POSUserSetPINRoutes(), &handlers.SetPINHandler{Service: svc},
+	)
 }

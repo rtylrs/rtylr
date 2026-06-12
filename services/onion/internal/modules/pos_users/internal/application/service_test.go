@@ -28,14 +28,18 @@ func TestCreate_RejectsBlankPIN(t *testing.T) {
 
 func TestVerifyPIN_RejectsBlankInputs(t *testing.T) {
 	s := &Service{}
-	for _, tc := range []struct{ name, pin string }{
-		{"", ""},
-		{"Bob", ""},
-		{"", "1234"},
+	for _, tc := range []struct {
+		locationID, userID int64
+		pin                string
+	}{
+		{0, 0, ""},
+		{1, 1, ""},
+		{0, 1, "1234"},
+		{1, 0, "1234"},
 	} {
-		_, err := s.VerifyPIN(context.Background(), 1, tc.name, tc.pin)
+		_, err := s.VerifyPIN(context.Background(), 1, tc.locationID, tc.userID, tc.pin)
 		if !errors.Is(err, domain.ErrInvalidPIN) {
-			t.Errorf("expected ErrInvalidPIN for (%q, %q), got %v", tc.name, tc.pin, err)
+			t.Errorf("expected ErrInvalidPIN for (loc=%d, user=%d, pin=%q), got %v", tc.locationID, tc.userID, tc.pin, err)
 		}
 	}
 }

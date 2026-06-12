@@ -164,6 +164,7 @@ func TestPOSUsers_Create_ThenListByOwnerContainsNew(t *testing.T) {
 	ctx := context.Background()
 
 	id, err := repo.Create(ctx, testutil.OwnerID, testutil.OwnerID, domain.CreatePOSUserInput{
+		UserID:     90001,
 		LocationID: fixtureLocationID,
 		Name:       "Integration Tester",
 		PIN:        "9999",
@@ -192,11 +193,11 @@ func TestPOSUsers_Create_ThenListByOwnerContainsNew(t *testing.T) {
 	}
 }
 
-func TestPOSUsers_FindByDisplayName_UnknownReturnsErrUserNotFound(t *testing.T) {
+func TestPOSUsers_FindForVerify_UnknownReturnsErrUserNotFound(t *testing.T) {
 	db := testutil.OpenDB(t)
 	repo := infrastructure.NewRepository(db)
 
-	_, err := repo.FindByDisplayName(context.Background(), testutil.OwnerID, "NonexistentUserXYZ")
+	_, err := repo.FindForVerify(context.Background(), testutil.OwnerID, fixtureLocationID, 999999)
 	if !errors.Is(err, infrastructure.ErrUserNotFound) {
 		t.Fatalf("expected ErrUserNotFound, got %v", err)
 	}
@@ -208,6 +209,7 @@ func TestPOSUsers_Deactivate_IsCallable(t *testing.T) {
 	ctx := context.Background()
 
 	id, err := repo.Create(ctx, testutil.OwnerID, testutil.OwnerID, domain.CreatePOSUserInput{
+		UserID:     90002,
 		LocationID: fixtureLocationID,
 		Name:       "To Deactivate",
 		PIN:        "1111",

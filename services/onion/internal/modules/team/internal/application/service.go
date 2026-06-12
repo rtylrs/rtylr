@@ -580,7 +580,7 @@ func (s *Service) requireTeamManager(ctx context.Context, actorID, businessID in
 
 func isAssignableRole(role domain.Role) bool {
 	switch role {
-	case domain.RoleOwner, domain.RoleAdmin, domain.RoleOperator, domain.RoleBilling, domain.RoleMenuManager, domain.RoleStaff, domain.RoleViewer:
+	case domain.RoleOwner, domain.RoleAdmin, domain.RoleOperator, domain.RoleBilling, domain.RoleMenuManager, domain.RoleStoreManager, domain.RoleStaff, domain.RoleViewer:
 		return true
 	default:
 		return false

@@ -37,8 +37,17 @@ VALUES
     (3501, 1001, 3302, 100.00, 'Customer request', 1002)
 ON DUPLICATE KEY UPDATE amount = VALUES(amount);
 
-INSERT INTO pos_users (id, owner_id, location_id, name, pin, role, is_active)
+-- POS staff are team users with a per-location PIN credential. user_id links
+-- each pos_users row back to the users table; pos_member_locations records the
+-- location assignment that authorises the PIN.
+INSERT INTO pos_member_locations (id, business_id, user_id, location_id, can_manage_pos_users, can_manage_terminals, can_view_reports)
 VALUES
-    (3601, 1001, 3001, 'Cashier A', '1234', 'cashier', TRUE),
-    (3602, 1001, 3001, 'Server B',  '5678', 'server',  TRUE)
+    (3701, 1001, 1002, 3001, FALSE, FALSE, FALSE),
+    (3702, 1001, 1003, 3001, FALSE, FALSE, FALSE)
+ON DUPLICATE KEY UPDATE location_id = VALUES(location_id);
+
+INSERT INTO pos_users (id, owner_id, user_id, location_id, name, pin, role, is_active)
+VALUES
+    (3601, 1001, 1002, 3001, 'Cashier A', '1234', 'cashier', TRUE),
+    (3602, 1001, 1003, 3001, 'Server B',  '5678', 'server',  TRUE)
 ON DUPLICATE KEY UPDATE name = VALUES(name);

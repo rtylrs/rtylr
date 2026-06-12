@@ -88,6 +88,7 @@ func POSUserCreateRoutes() []string { return []string{"/pos/users"} }
 type CreatePOSUserHandler struct{ Service *application.Service }
 
 type CreatePOSUserRequest struct {
+	UserID           int64   `json:"user_id"`
 	LocationID       int64   `json:"location_id"`
 	Name             string  `json:"name"`
 	PIN              string  `json:"pin"`
@@ -116,6 +117,9 @@ func (h *CreatePOSUserHandler) Validate(_ context.Context, req *CreatePOSUserReq
 	if req.LocationID == 0 {
 		return &errorModels.ServerError{HTTPCode: http.StatusBadRequest, Code: http.StatusBadRequest, Message: "Location is required"}
 	}
+	if req.UserID == 0 {
+		return &errorModels.ServerError{HTTPCode: http.StatusBadRequest, Code: http.StatusBadRequest, Message: "Team member is required"}
+	}
 	return nil
 }
 
@@ -127,6 +131,7 @@ func (h *CreatePOSUserHandler) Serve(ctx context.Context, req *CreatePOSUserRequ
 	ownerID := device.User.BusinessID
 
 	id, err := h.Service.Create(ctx, ownerID, device.User.UserID, domain.CreatePOSUserInput{
+		UserID:           req.UserID,
 		LocationID:       req.LocationID,
 		Name:             req.Name,
 		PIN:              req.PIN,
@@ -262,26 +267,37 @@ func POSUserVerifyPINRoutes() []string { return []string{"/pos/users/verify-pin"
 
 type VerifyPINHandler struct{ Service *application.Service }
 
-// VerifyPINRequest is the new lookup-by-display-name shape. PIN is never
-// logged, never echoed, and is zeroed on the struct as soon as the service
-// call returns.
+// VerifyPINRequest identifies the roster operator (user_id) at a location and
+// carries their PIN. PIN is never logged, never echoed, and is zeroed on the
+// struct as soon as the service call returns.
 type VerifyPINRequest struct {
-	DisplayName string `json:"display_name"`
-	PIN         string `json:"pin"`
+	LocationID int64  `json:"location_id"`
+	UserID     int64  `json:"user_id"`
+	PIN        string `json:"pin"`
 }
 
-// VerifyPINResponse is deliberately narrow: the caller learns the user's
-// id, role, and display name and nothing else. In particular, neither the
-// plaintext PIN nor the bcrypt hash can ever appear here.
+// VerifyPINResponse carries the team user id, pos_user id, role, and the
+// effective capability flags the POS client uses to gate manager-only actions.
+// Neither the plaintext PIN nor the bcrypt hash can ever appear here.
 type VerifyPINResponse struct {
-	UserID      int64  `json:"user_id"`
-	Role        string `json:"role"`
-	DisplayName string `json:"display_name"`
+	UserID           int64   `json:"user_id"`
+	POSUserID        int64   `json:"pos_user_id"`
+	LocationID       int64   `json:"location_id"`
+	Role             string  `json:"role"`
+	DisplayName      string  `json:"display_name"`
+	CanVoid          bool    `json:"can_void"`
+	CanRefund        bool    `json:"can_refund"`
+	CanOpenDrawer    bool    `json:"can_open_drawer"`
+	CanApplyDiscount bool    `json:"can_apply_discount"`
+	MaxDiscountPct   float64 `json:"max_discount_pct"`
 }
 
 func (h *VerifyPINHandler) Validate(_ context.Context, req *VerifyPINRequest) *errorModels.ServerError {
-	if req.DisplayName == "" {
-		return &errorModels.ServerError{HTTPCode: http.StatusBadRequest, Code: http.StatusBadRequest, Message: "Display name is required"}
+	if req.LocationID == 0 {
+		return &errorModels.ServerError{HTTPCode: http.StatusBadRequest, Code: http.StatusBadRequest, Message: "Location is required"}
+	}
+	if req.UserID == 0 {
+		return &errorModels.ServerError{HTTPCode: http.StatusBadRequest, Code: http.StatusBadRequest, Message: "Operator is required"}
 	}
 	if req.PIN == "" {
 		return &errorModels.ServerError{HTTPCode: http.StatusBadRequest, Code: http.StatusBadRequest, Message: "PIN is required"}
@@ -296,7 +312,7 @@ func (h *VerifyPINHandler) Serve(ctx context.Context, req *VerifyPINRequest) (Ve
 	}
 	ownerID := device.User.BusinessID
 
-	result, err := h.Service.VerifyPIN(ctx, ownerID, req.DisplayName, req.PIN)
+	result, err := h.Service.VerifyPIN(ctx, ownerID, req.LocationID, req.UserID, req.PIN)
 	// Zero the PIN immediately after the service call so any later
 	// logging of the request struct (by middleware, request loggers,
 	// crash dumps, etc.) cannot surface it.
@@ -307,15 +323,89 @@ func (h *VerifyPINHandler) Serve(ctx context.Context, req *VerifyPINRequest) (Ve
 		}
 		logger.Ctx(ctx).Error("pos_users verify-pin failed",
 			logger.Any("owner_id", ownerID),
-			logger.String("display_name", req.DisplayName),
+			logger.Any("pos_user_target", req.UserID),
 			logger.Error(err),
 		)
 		return VerifyPINResponse{}, &errorModels.ServerError{HTTPCode: http.StatusInternalServerError, Code: http.StatusInternalServerError, Message: "Failed to verify PIN"}
 	}
 
 	return VerifyPINResponse{
-		UserID:      result.UserID,
-		Role:        string(result.Role),
-		DisplayName: result.DisplayName,
+		UserID:           result.UserID,
+		POSUserID:        result.POSUserID,
+		LocationID:       result.LocationID,
+		Role:             string(result.Role),
+		DisplayName:      result.DisplayName,
+		CanVoid:          result.CanVoid,
+		CanRefund:        result.CanRefund,
+		CanOpenDrawer:    result.CanOpenDrawer,
+		CanApplyDiscount: result.CanApplyDiscount,
+		MaxDiscountPct:   result.MaxDiscountPct,
 	}, nil
+}
+
+// ── Set PIN (self-service onboarding) ───────────────────────────
+
+func POSUserSetPINRoutes() []string { return []string{"/pos/users/set-pin"} }
+
+type SetPINHandler struct{ Service *application.Service }
+
+// SetPINRequest is sent when an operator picked from the location roster sets
+// or rotates their own PIN. user_id + name come from the roster selection;
+// role and capabilities are resolved server-side from the member's location
+// access, never trusted from this payload.
+type SetPINRequest struct {
+	UserID     int64  `json:"user_id"`
+	LocationID int64  `json:"location_id"`
+	Name       string `json:"name"`
+	PIN        string `json:"pin"`
+}
+
+type SetPINResponse struct {
+	Success bool `json:"success"`
+}
+
+func (h *SetPINHandler) Validate(_ context.Context, req *SetPINRequest) *errorModels.ServerError {
+	if req.UserID == 0 {
+		return &errorModels.ServerError{HTTPCode: http.StatusBadRequest, Code: http.StatusBadRequest, Message: "Operator is required"}
+	}
+	if req.LocationID == 0 {
+		return &errorModels.ServerError{HTTPCode: http.StatusBadRequest, Code: http.StatusBadRequest, Message: "Location is required"}
+	}
+	req.Name = strings.TrimSpace(req.Name)
+	if req.Name == "" {
+		return &errorModels.ServerError{HTTPCode: http.StatusBadRequest, Code: http.StatusBadRequest, Message: "Name is required"}
+	}
+	req.PIN = strings.TrimSpace(req.PIN)
+	if req.PIN == "" {
+		return &errorModels.ServerError{HTTPCode: http.StatusBadRequest, Code: http.StatusBadRequest, Message: "PIN is required"}
+	}
+	return nil
+}
+
+func (h *SetPINHandler) Serve(ctx context.Context, req *SetPINRequest) (SetPINResponse, *errorModels.ServerError) {
+	device := authPkg.DeviceCtx(ctx)
+	if device.User == nil {
+		return SetPINResponse{}, errorModels.PermissionDeniedServerError()
+	}
+	ownerID := device.User.BusinessID
+
+	err := h.Service.SetPIN(ctx, ownerID, domain.SetPINInput{
+		UserID:     req.UserID,
+		LocationID: req.LocationID,
+		Name:       req.Name,
+		PIN:        req.PIN,
+	})
+	req.PIN = ""
+	if err != nil {
+		if errors.Is(err, application.ErrInvalidInput) {
+			return SetPINResponse{}, &errorModels.ServerError{HTTPCode: http.StatusBadRequest, Code: http.StatusBadRequest, Message: "Not assigned to this location"}
+		}
+		logger.Ctx(ctx).Error("pos_users set-pin failed",
+			logger.Any("owner_id", ownerID),
+			logger.Any("target_user", req.UserID),
+			logger.Error(err),
+		)
+		return SetPINResponse{}, &errorModels.ServerError{HTTPCode: http.StatusInternalServerError, Code: http.StatusInternalServerError, Message: "Failed to set PIN"}
+	}
+	return SetPINResponse{Success: true}, nil
 }

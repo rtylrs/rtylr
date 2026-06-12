@@ -57,6 +57,7 @@ func (r *Repository) Create(ctx context.Context, ownerID, createdBy int64, input
 	q := sqlc.New(r.pool)
 	res, err := q.CreatePOSUser(ctx, sqlc.CreatePOSUserParams{
 		OwnerID:          ownerID,
+		UserID:           input.UserID,
 		LocationID:       input.LocationID,
 		Name:             input.Name,
 		PinHash:          sql.NullString{String: hashedPIN, Valid: hashedPIN != ""},
@@ -117,13 +118,12 @@ func (r *Repository) Deactivate(ctx context.Context, ownerID, id int64) error {
 	return q.DeactivatePOSUser(ctx, sqlc.DeactivatePOSUserParams{OwnerID: ownerID, ID: id})
 }
 
-// FindByDisplayName looks up a single active pos_user by owner + display
-// name. The row carries both the legacy plaintext PIN and the hashed PIN
-// so the service layer can decide how to verify; the caller is expected to
-// zero those fields before returning anything to the transport layer.
-func (r *Repository) FindByDisplayName(ctx context.Context, ownerID int64, displayName string) (*domain.POSUser, error) {
+// FindForVerify looks up the single active pos_user PIN row for a team member
+// at a location. The row carries the hashed PIN so the service can verify it;
+// the caller zeroes secrets before returning anything to the transport layer.
+func (r *Repository) FindForVerify(ctx context.Context, ownerID, locationID, userID int64) (*domain.POSUser, error) {
 	q := sqlc.New(r.pool)
-	row, err := q.FindPOSUserForPINVerify(ctx, sqlc.FindPOSUserForPINVerifyParams{OwnerID: ownerID, Name: displayName})
+	row, err := q.FindPOSUserForPINVerify(ctx, sqlc.FindPOSUserForPINVerifyParams{OwnerID: ownerID, LocationID: locationID, UserID: userID})
 	if err != nil {
 		if errors.Is(err, sql.ErrNoRows) {
 			return nil, ErrUserNotFound
@@ -134,10 +134,54 @@ func (r *Repository) FindByDisplayName(ctx context.Context, ownerID int64, displ
 	return &u, nil
 }
 
+// FindByUserAndLocation returns a member's PIN row at a location regardless of
+// active state, used to decide whether SetPIN creates or rotates.
+func (r *Repository) FindByUserAndLocation(ctx context.Context, ownerID, userID, locationID int64) (*domain.POSUser, error) {
+	q := sqlc.New(r.pool)
+	row, err := q.FindPOSUserByUserAndLocation(ctx, sqlc.FindPOSUserByUserAndLocationParams{OwnerID: ownerID, UserID: userID, LocationID: locationID})
+	if err != nil {
+		if errors.Is(err, sql.ErrNoRows) {
+			return nil, ErrUserNotFound
+		}
+		return nil, err
+	}
+	u := fromRow(row)
+	return &u, nil
+}
+
+// LocationAccess is the subset of a member's pos_member_locations row that the
+// pos_users service needs to resolve role + authorisation.
+type LocationAccess struct {
+	CanManagePOSUsers  bool
+	CanManageTerminals bool
+	CanViewReports     bool
+}
+
+// GetMemberLocationAccess cross-reads pos_member_locations to confirm a member
+// is assigned to a location and learn their management flags. Returns
+// ErrUserNotFound when the member has no access row for the location.
+func (r *Repository) GetMemberLocationAccess(ctx context.Context, businessID, userID, locationID int64) (*LocationAccess, error) {
+	q := sqlc.New(r.pool)
+	// cross-schema read from pos_member_locations — same pos schema file
+	row, err := q.GetMemberLocationAccess(ctx, sqlc.GetMemberLocationAccessParams{BusinessID: businessID, UserID: userID, LocationID: locationID})
+	if err != nil {
+		if errors.Is(err, sql.ErrNoRows) {
+			return nil, ErrUserNotFound
+		}
+		return nil, err
+	}
+	return &LocationAccess{
+		CanManagePOSUsers:  row.CanManagePosUsers.Bool,
+		CanManageTerminals: row.CanManageTerminals.Bool,
+		CanViewReports:     row.CanViewReports.Bool,
+	}, nil
+}
+
 func fromRow(row sqlc.PosUser) domain.POSUser {
 	return domain.POSUser{
 		ID:               row.ID,
 		OwnerID:          row.OwnerID,
+		UserID:           row.UserID,
 		LocationID:       row.LocationID,
 		Name:             row.Name,
 		PIN:              row.Pin,
