@@ -20,9 +20,6 @@ export const addons = {
 <h3 id="addon-loyalty">Loyalty Program</h3>
 <p>Full loyalty engine with points, tiers, rewards catalog, and automated tier progression. Integrates with POS, CRM, and Store.</p>
 
-<h3 id="addon-ai-chat">AI Chat</h3>
-<p>AI-powered chat assistant for customer-facing support and internal team queries. Learns from your knowledge base and order data to provide contextual responses.</p>
-
 <h3 id="addon-analytics">Advanced Analytics</h3>
 <p>Extended analytics with predictive forecasting, anomaly detection, and custom dashboard builder. Adds drill-down capabilities to Insights.</p>
 
