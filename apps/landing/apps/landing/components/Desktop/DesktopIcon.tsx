@@ -1,4 +1,5 @@
-import React, { useState, useCallback } from 'react';
+import React, { useCallback } from 'react';
+import { motion } from 'motion/react';
 import { useDesktopStore, WindowType } from '../../stores/useDesktopStore';
 
 export interface DesktopIconDef {
@@ -16,7 +17,6 @@ interface DesktopIconProps {
 
 export const DesktopIcon: React.FC<DesktopIconProps> = ({ def }) => {
   const addWindow = useDesktopStore((s) => s.addWindow);
-  const [active, setActive] = useState(false);
   const SvgIcon = def.svgIcon;
 
   const handleClick = useCallback(() => {
@@ -38,9 +38,6 @@ export const DesktopIcon: React.FC<DesktopIconProps> = ({ def }) => {
           handleClick();
         }
       }}
-      onMouseDown={() => setActive(true)}
-      onMouseUp={() => setActive(false)}
-      onMouseLeave={() => setActive(false)}
       style={{
         display: 'flex',
         flexDirection: 'column',
@@ -54,15 +51,18 @@ export const DesktopIcon: React.FC<DesktopIconProps> = ({ def }) => {
         padding: '6px 4px',
       }}
     >
-      <div
+      <motion.div
+        whileHover={{ scale: 1.12, y: -3 }}
+        whileTap={{ scale: 0.88 }}
+        transition={{ type: 'spring', stiffness: 420, damping: 26, mass: 0.6 }}
         style={{
-          transform: active ? 'scale(0.92)' : 'scale(1)',
-          transition: 'transform 0.1s ease',
-          filter: 'drop-shadow(0 3px 8px rgba(0,0,0,0.4))',
+          filter:
+            'drop-shadow(0 4px 10px rgba(0,0,0,0.45)) drop-shadow(0 1px 2px rgba(0,0,0,0.3))',
+          willChange: 'transform',
         }}
       >
         <SvgIcon size={52} />
-      </div>
+      </motion.div>
 
       <span
         style={{

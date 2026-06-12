@@ -1,4 +1,5 @@
 import React from 'react';
+import { AnimatePresence, motion } from 'motion/react';
 import { useDesktopStore, WindowType } from '../../stores/useDesktopStore';
 import { POSIcon } from './icons/POSIcon';
 import { ERPIcon } from './icons/ERPIcon';
@@ -86,18 +87,28 @@ export const BottomDock: React.FC = () => {
         boxShadow: '0 8px 32px rgba(0,0,0,0.5)',
       }}
     >
-      {minimized.map((win) => {
-        const Icon = ICON_MAP[win.type];
-        return (
-          <DockItem
-            key={win.id}
-            title={win.title}
-            icon={Icon}
-            onRestore={() => restoreWindow(win.id)}
-            onClose={() => closeWindow(win.id)}
-          />
-        );
-      })}
+      <AnimatePresence initial={false}>
+        {minimized.map((win) => {
+          const Icon = ICON_MAP[win.type];
+          return (
+            <motion.div
+              key={win.id}
+              layout
+              initial={{ scale: 0.4, opacity: 0, y: 18 }}
+              animate={{ scale: 1, opacity: 1, y: 0 }}
+              exit={{ scale: 0.4, opacity: 0, y: 18 }}
+              transition={{ type: 'spring', stiffness: 380, damping: 28, mass: 0.7 }}
+            >
+              <DockItem
+                title={win.title}
+                icon={Icon}
+                onRestore={() => restoreWindow(win.id)}
+                onClose={() => closeWindow(win.id)}
+              />
+            </motion.div>
+          );
+        })}
+      </AnimatePresence>
     </div>
   );
 };
@@ -125,27 +136,33 @@ const DockItem: React.FC<DockItemProps> = ({ title, icon: Icon, onRestore, onClo
       onMouseLeave={() => setHovered(false)}
     >
       {/* Tooltip */}
-      {hovered && (
-        <div
-          style={{
-            position: 'absolute',
-            bottom: 'calc(100% + 8px)',
-            left: '50%',
-            transform: 'translateX(-50%)',
-            background: 'rgba(20,20,24,0.95)',
-            border: '1px solid rgba(255,255,255,0.1)',
-            borderRadius: 6,
-            padding: '3px 8px',
-            fontSize: 11,
-            fontWeight: 500,
-            color: 'rgba(255,255,255,0.85)',
-            whiteSpace: 'nowrap',
-            pointerEvents: 'none',
-          }}
-        >
-          {title}
-        </div>
-      )}
+      <AnimatePresence>
+        {hovered && (
+          <motion.div
+            initial={{ opacity: 0, y: 6, scale: 0.92 }}
+            animate={{ opacity: 1, y: 0, scale: 1 }}
+            exit={{ opacity: 0, y: 4, scale: 0.95 }}
+            transition={{ type: 'spring', stiffness: 480, damping: 30, mass: 0.5 }}
+            style={{
+              position: 'absolute',
+              bottom: 'calc(100% + 8px)',
+              left: '50%',
+              x: '-50%',
+              background: 'rgba(20,20,24,0.95)',
+              border: '1px solid rgba(255,255,255,0.1)',
+              borderRadius: 6,
+              padding: '3px 8px',
+              fontSize: 11,
+              fontWeight: 500,
+              color: 'rgba(255,255,255,0.85)',
+              whiteSpace: 'nowrap',
+              pointerEvents: 'none',
+            }}
+          >
+            {title}
+          </motion.div>
+        )}
+      </AnimatePresence>
 
       {/* Close button on hover */}
       {hovered && (
@@ -180,7 +197,7 @@ const DockItem: React.FC<DockItemProps> = ({ title, icon: Icon, onRestore, onClo
       )}
 
       {/* App icon */}
-      <div
+      <motion.div
         onClick={onRestore}
         onKeyDown={(e) => {
           if (e.key === 'Enter' || e.key === ' ') {
@@ -191,6 +208,13 @@ const DockItem: React.FC<DockItemProps> = ({ title, icon: Icon, onRestore, onClo
         role="button"
         tabIndex={0}
         aria-label={title}
+        animate={{
+          y: hovered ? -6 : 0,
+          scale: hovered ? 1.14 : 1,
+          boxShadow: hovered ? '0 8px 20px rgba(0,0,0,0.5)' : '0 0 0 rgba(0,0,0,0)',
+        }}
+        whileTap={{ scale: 0.92 }}
+        transition={{ type: 'spring', stiffness: 420, damping: 26, mass: 0.6 }}
         style={{
           width: 44,
           height: 44,
@@ -201,13 +225,10 @@ const DockItem: React.FC<DockItemProps> = ({ title, icon: Icon, onRestore, onClo
           alignItems: 'center',
           justifyContent: 'center',
           cursor: 'pointer',
-          transform: hovered ? 'translateY(-6px) scale(1.12)' : 'translateY(0) scale(1)',
-          transition: 'transform 0.15s ease',
-          boxShadow: hovered ? '0 8px 20px rgba(0,0,0,0.5)' : 'none',
         }}
       >
         <Icon size={28} />
-      </div>
+      </motion.div>
 
       {/* Minimized dot */}
       <div
