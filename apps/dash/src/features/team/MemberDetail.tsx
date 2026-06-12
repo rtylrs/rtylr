@@ -57,6 +57,7 @@ const ROLES = [
   { id: 'operator', label: 'Operator' },
   { id: 'billing', label: 'Billing' },
   { id: 'menu_manager', label: 'Menu Manager' },
+  { id: 'store_manager', label: 'Store Manager' },
   { id: 'staff', label: 'Staff' },
   { id: 'viewer', label: 'Viewer' },
 ];

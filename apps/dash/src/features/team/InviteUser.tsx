@@ -11,14 +11,16 @@ import {
   Users as UsersIcon,
   CreditCard,
   Layers,
+  MapPin,
   Eye,
   EyeOff,
 } from 'lucide-react';
-import { Button, Input, Label } from '../../shared/components/ui';
+import { Input, Label } from '../../shared/components/ui';
 import { unwrap } from '@voxire/api';
 import { safe } from '../../shared/lib/api';
 import { useInviteMember, type TeamMember } from '../../shared/hooks/queries/useTeam';
 import { useGroups, useBulkInvite, type BulkResult } from '../../shared/hooks/queries/useGroups';
+import { usePOSLocations, useAssignPOSLocation } from '../../shared/hooks/queries/usePOSAccess';
 import {
   useMySubscription,
   centsToDisplay,
@@ -52,9 +54,24 @@ const ROLES = [
     label: 'Billing',
     desc: 'Access to billing, invoices, and payment settings only',
   },
+  {
+    id: 'store_manager',
+    label: 'Store Manager',
+    desc: 'Manages assigned POS locations — staff PINs, voids, refunds, reports',
+  },
   { id: 'staff', label: 'Staff', desc: 'Use assigned apps only, no admin access' },
   { id: 'viewer', label: 'Viewer', desc: 'Read-only access to assigned apps' },
 ];
+
+// store_manager gets full management of its assigned POS locations; everyone
+// else is a regular operator (access only). The backend re-derives capabilities,
+// so this only seeds the pos_member_locations management flags.
+const locationFlagsForRole = (
+  role: string
+): { canManagePosUsers: boolean; canManageTerminals: boolean; canViewReports: boolean } =>
+  role === 'store_manager'
+    ? { canManagePosUsers: true, canManageTerminals: true, canViewReports: true }
+    : { canManagePosUsers: false, canManageTerminals: false, canViewReports: false };
 
 const STATUS_COLORS: Record<BulkResult['status'], string> = {
   invited: '#10b981',
@@ -66,6 +83,7 @@ const InviteUser: React.FC = (): React.JSX.Element => {
   const navigate = useNavigate();
   const invite = useInviteMember();
   const bulkInvite = useBulkInvite();
+  const assignLocation = useAssignPOSLocation();
   const { data: sub } = useMySubscription();
   const { data: groups = [] } = useGroups();
 
@@ -76,6 +94,7 @@ const InviteUser: React.FC = (): React.JSX.Element => {
   const [email, setEmail] = useState('');
   const [role, setRole] = useState<TeamMember['role']>('staff');
   const [selectedApps, setSelectedApps] = useState<string[]>(['pos']);
+  const [selectedLocations, setSelectedLocations] = useState<number[]>([]);
   const [authMethod, setAuthMethod] = useState<'invite' | 'manual'>('invite');
   const [password, setPassword] = useState('');
   const [showPassword, setShowPassword] = useState(false);
@@ -85,8 +104,14 @@ const InviteUser: React.FC = (): React.JSX.Element => {
   const [bulkEmailsRaw, setBulkEmailsRaw] = useState('');
   const [bulkRole, setBulkRole] = useState<string>('staff');
   const [bulkApps, setBulkApps] = useState<string[]>(['pos']);
+  const [bulkLocations, setBulkLocations] = useState<number[]>([]);
   const [bulkGroupId, setBulkGroupId] = useState<string>('');
   const [bulkResults, setBulkResults] = useState<BulkResult[] | null>(null);
+
+  // Location assignment only applies when the POS app is licensed.
+  const posSelectedSingle = selectedApps.includes('pos');
+  const posSelectedBulk = bulkApps.includes('pos');
+  const { data: locations = [] } = usePOSLocations(posSelectedSingle || posSelectedBulk);
 
   const { data: addonsData } = useQuery<Array<{ id: string; isEnabled: boolean }>>({
     queryKey: ['addons'],
@@ -132,6 +157,33 @@ const InviteUser: React.FC = (): React.JSX.Element => {
     setBulkApps((prev) => (prev.includes(key) ? prev.filter((k) => k !== key) : [...prev, key]));
   };
 
+  const toggleLocation = (id: number): void => {
+    setSelectedLocations((prev) =>
+      prev.includes(id) ? prev.filter((l) => l !== id) : [...prev, id]
+    );
+  };
+
+  const toggleBulkLocation = (id: number): void => {
+    setBulkLocations((prev) => (prev.includes(id) ? prev.filter((l) => l !== id) : [...prev, id]));
+  };
+
+  // Assigns the member to each chosen POS location. Best-effort per location so
+  // one failure doesn't abandon the rest; failures surface as a toast.
+  const assignLocations = async (
+    userId: number,
+    locationIds: number[],
+    memberRole: string
+  ): Promise<void> => {
+    if (!userId || locationIds.length === 0) return;
+    const flags = locationFlagsForRole(memberRole);
+    const results = await Promise.allSettled(
+      locationIds.map((locationId) => assignLocation.mutateAsync({ userId, locationId, ...flags }))
+    );
+    if (results.some((r) => r.status === 'rejected')) {
+      toast.error('Member invited, but some location assignments failed');
+    }
+  };
+
   const submitSingle = async (e: React.FormEvent): Promise<void> => {
     e.preventDefault();
     if (!email.trim() || !name.trim()) {
@@ -139,7 +191,7 @@ const InviteUser: React.FC = (): React.JSX.Element => {
       return;
     }
     try {
-      await invite.mutateAsync({
+      const res = await invite.mutateAsync({
         email,
         fullName: name,
         role,
@@ -147,6 +199,14 @@ const InviteUser: React.FC = (): React.JSX.Element => {
         ...(authMethod === 'manual' ? { password } : {}),
         ...(singleGroupId ? { groupId: Number(singleGroupId) } : {}),
       });
+      if (posSelectedSingle) {
+        const userId = Number(
+          (res as { userId?: number; user_id?: number })?.userId ??
+            (res as { user_id?: number })?.user_id ??
+            0
+        );
+        await assignLocations(userId, selectedLocations, role);
+      }
       navigate({ to: '/team' });
     } catch {
       // onError in hook handles toast
@@ -163,6 +223,13 @@ const InviteUser: React.FC = (): React.JSX.Element => {
         ...(bulkGroupId ? { groupId: Number(bulkGroupId) } : {}),
       });
       setBulkResults(res.results);
+      if (posSelectedBulk && bulkLocations.length > 0) {
+        await Promise.allSettled(
+          res.results
+            .filter((r) => r.userId && (r.status === 'invited' || r.status === 'existing'))
+            .map((r) => assignLocations(Number(r.userId), bulkLocations, bulkRole))
+        );
+      }
     } catch {
       // onError in hook handles toast
     }
@@ -247,6 +314,71 @@ const InviteUser: React.FC = (): React.JSX.Element => {
           </button>
         );
       })}
+    </div>
+  );
+
+  const renderLocationSelector = (
+    currentLocations: number[],
+    toggle: (id: number) => void,
+    currentRole: string
+  ): React.JSX.Element => (
+    <div className="space-y-2 pt-1">
+      <div>
+        <p className="text-sm font-semibold" style={{ color: 'var(--dash-text)' }}>
+          POS locations
+        </p>
+        <p className="text-[11px] mt-0.5" style={{ color: 'var(--dash-text-dim)' }}>
+          {currentRole === 'store_manager'
+            ? 'Locations this manager runs (manage staff, voids, refunds, reports)'
+            : 'Locations this member can work at'}
+        </p>
+      </div>
+      {locations.length === 0 ? (
+        <p className="text-[11px]" style={{ color: 'var(--dash-text-dim)' }}>
+          No POS locations yet. Create one in the POS app first.
+        </p>
+      ) : (
+        <div className="grid grid-cols-2 gap-2">
+          {locations.map((loc) => {
+            const checked = currentLocations.includes(loc.id);
+            return (
+              <button
+                type="button"
+                key={loc.id}
+                onClick={() => toggle(loc.id)}
+                className="flex items-center gap-2.5 px-3 py-2.5 rounded-lg text-left transition-all"
+                style={{
+                  background: checked ? 'rgba(69,131,196,0.06)' : 'var(--dash-bg)',
+                  border: `1px solid ${checked ? 'rgba(69,131,196,0.3)' : 'var(--dash-border)'}`,
+                }}
+              >
+                <div
+                  className="h-4 w-4 rounded border-2 shrink-0 flex items-center justify-center"
+                  style={{ borderColor: checked ? '#4583C4' : 'var(--dash-border)' }}
+                >
+                  {checked && (
+                    <div className="h-2 w-2 rounded-sm" style={{ background: '#4583C4' }} />
+                  )}
+                </div>
+                <MapPin size={14} style={{ color: checked ? '#4583C4' : 'var(--dash-text-dim)' }} />
+                <div className="flex-1 min-w-0">
+                  <p
+                    className="text-xs font-medium truncate"
+                    style={{ color: checked ? '#4583C4' : 'var(--dash-text)' }}
+                  >
+                    {loc.name}
+                  </p>
+                  {loc.address && (
+                    <p className="text-[10px] truncate" style={{ color: 'var(--dash-text-dim)' }}>
+                      {loc.address}
+                    </p>
+                  )}
+                </div>
+              </button>
+            );
+          })}
+        </div>
+      )}
     </div>
   );
 
@@ -463,6 +595,8 @@ const InviteUser: React.FC = (): React.JSX.Element => {
               </div>
               {renderAppSelector(selectedApps, toggleApp)}
 
+              {posSelectedSingle && renderLocationSelector(selectedLocations, toggleLocation, role)}
+
               {/* Seat cost preview */}
               {sub &&
                 sub.pricePerSeatCents > 0 &&
@@ -589,6 +723,9 @@ const InviteUser: React.FC = (): React.JSX.Element => {
                 </p>
               </div>
               {renderAppSelector(bulkApps, toggleBulkApp)}
+
+              {posSelectedBulk &&
+                renderLocationSelector(bulkLocations, toggleBulkLocation, bulkRole)}
             </div>
 
             {/* Group */}
