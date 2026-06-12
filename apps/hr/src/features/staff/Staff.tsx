@@ -68,267 +68,274 @@ const Staff: React.FC = () => {
     <>
       <HelmetContainer title="Staff · rtylr" />
       <div style={{ display: 'flex', flexDirection: 'column', gap: '20px' }}>
-      {/* Header */}
-      <div
-        style={{
-          display: 'flex',
-          alignItems: 'flex-start',
-          justifyContent: 'space-between',
-          gap: 12,
-          flexWrap: 'wrap',
-        }}
-      >
-        <div>
-          <h2 style={{ margin: 0, fontSize: '18px', fontWeight: 700, color: 'var(--hr-text)' }}>
-            {t('staff.directory')}
-          </h2>
-          <p style={{ margin: '4px 0 0', fontSize: '13px', color: 'var(--hr-text-muted)' }}>
-            {loading ? '…' : t('staff.memberCount', { count: staffData.length })}
-          </p>
-        </div>
-        <button
-          style={{
-            display: 'flex',
-            alignItems: 'center',
-            gap: '8px',
-            padding: '9px 16px',
-            borderRadius: '8px',
-            background: ACCENT,
-            border: 'none',
-            color: '#fff',
-            fontSize: '13px',
-            fontWeight: 600,
-            cursor: 'pointer',
-          }}
-        >
-          <UserPlus size={15} />
-          {t('staff.inviteStaff')}
-        </button>
-      </div>
-
-      {/* Filters + search */}
-      <div
-        style={{
-          display: 'flex',
-          alignItems: isMobile ? 'stretch' : 'center',
-          flexDirection: isMobile ? 'column' : 'row',
-          gap: '12px',
-        }}
-      >
-        {/* Tabs */}
+        {/* Header */}
         <div
           style={{
             display: 'flex',
-            gap: '4px',
-            padding: '4px',
-            background: 'var(--hr-surface)',
-            borderRadius: '10px',
-            border: '1px solid var(--hr-border)',
-            overflowX: 'auto',
-            width: isMobile ? '100%' : 'auto',
+            alignItems: 'flex-start',
+            justifyContent: 'space-between',
+            gap: 12,
+            flexWrap: 'wrap',
           }}
         >
-          {filterTabs.map((tab) => (
-            <button
-              key={tab}
-              onClick={() => setActiveTab(tab)}
-              style={{
-                padding: '6px 14px',
-                borderRadius: '7px',
-                border: 'none',
-                cursor: 'pointer',
-                fontSize: '12px',
-                fontWeight: 600,
-                background: activeTab === tab ? ACCENT : 'transparent',
-                color: activeTab === tab ? '#fff' : 'var(--hr-text-muted)',
-                transition: 'all 0.15s',
-              }}
-            >
-              {tab}
-            </button>
-          ))}
-        </div>
-
-        {/* Search */}
-        <div
-          style={{
-            position: 'relative',
-            flex: 1,
-            width: isMobile ? '100%' : undefined,
-            maxWidth: isMobile ? '100%' : '280px',
-          }}
-        >
-          <Search
-            size={13}
+          <div>
+            <h2 style={{ margin: 0, fontSize: '18px', fontWeight: 700, color: 'var(--hr-text)' }}>
+              {t('staff.directory')}
+            </h2>
+            <p style={{ margin: '4px 0 0', fontSize: '13px', color: 'var(--hr-text-muted)' }}>
+              {loading ? '…' : t('staff.memberCount', { count: staffData.length })}
+            </p>
+          </div>
+          <button
             style={{
-              position: 'absolute',
-              left: '10px',
-              top: '50%',
-              transform: 'translateY(-50%)',
-              color: 'var(--hr-text-dim)',
-            }}
-          />
-          <input
-            ref={searchRef}
-            value={search}
-            onChange={(e) => setSearch(e.target.value)}
-            placeholder={t('staff.searchPlaceholder')}
-            style={{
-              width: '100%',
-              padding: '8px 12px 8px 30px',
+              display: 'flex',
+              alignItems: 'center',
+              gap: '8px',
+              padding: '9px 16px',
               borderRadius: '8px',
-              border: '1px solid var(--hr-border)',
-              background: 'var(--hr-input-bg)',
-              color: 'var(--hr-text)',
+              background: ACCENT,
+              border: 'none',
+              color: '#fff',
               fontSize: '13px',
-              outline: 'none',
+              fontWeight: 600,
+              cursor: 'pointer',
             }}
-          />
+          >
+            <UserPlus size={15} />
+            {t('staff.inviteStaff')}
+          </button>
         </div>
-      </div>
 
-      {/* Staff cards grid */}
-      <motion.div
-        variants={container}
-        initial="hidden"
-        animate="show"
-        style={{
-          display: 'grid',
-          gridTemplateColumns: 'repeat(auto-fit, minmax(240px, 1fr))',
-          gap: '14px',
-        }}
-      >
-        {filtered.map((s, i) => {
-          const av = avatarColors[i % avatarColors.length];
-          return (
-            <motion.div key={s.id} variants={cardAnim} whileHover={{ scale: 1.015 }}>
-              <Link
-                to={`/staff/${s.id}` as any}
-                style={{ textDecoration: 'none', display: 'block' }}
+        {/* Filters + search */}
+        <div
+          style={{
+            display: 'flex',
+            alignItems: isMobile ? 'stretch' : 'center',
+            flexDirection: isMobile ? 'column' : 'row',
+            gap: '12px',
+          }}
+        >
+          {/* Tabs */}
+          <div
+            style={{
+              display: 'flex',
+              gap: '4px',
+              padding: '4px',
+              background: 'var(--hr-surface)',
+              borderRadius: '10px',
+              border: '1px solid var(--hr-border)',
+              overflowX: 'auto',
+              width: isMobile ? '100%' : 'auto',
+            }}
+          >
+            {filterTabs.map((tab) => (
+              <button
+                key={tab}
+                onClick={() => setActiveTab(tab)}
+                style={{
+                  padding: '6px 14px',
+                  borderRadius: '7px',
+                  border: 'none',
+                  cursor: 'pointer',
+                  fontSize: '12px',
+                  fontWeight: 600,
+                  background: activeTab === tab ? ACCENT : 'transparent',
+                  color: activeTab === tab ? '#fff' : 'var(--hr-text-muted)',
+                  transition: 'all 0.15s',
+                }}
               >
-                <div
-                  style={{
-                    background: 'var(--hr-card)',
-                    border: '1px solid var(--hr-border)',
-                    borderRadius: '12px',
-                    padding: '18px',
-                    display: 'flex',
-                    flexDirection: 'column',
-                    gap: '14px',
-                    cursor: 'pointer',
-                    transition: 'border-color 0.15s',
-                  }}
+                {tab}
+              </button>
+            ))}
+          </div>
+
+          {/* Search */}
+          <div
+            style={{
+              position: 'relative',
+              flex: 1,
+              width: isMobile ? '100%' : undefined,
+              maxWidth: isMobile ? '100%' : '280px',
+            }}
+          >
+            <Search
+              size={13}
+              style={{
+                position: 'absolute',
+                left: '10px',
+                top: '50%',
+                transform: 'translateY(-50%)',
+                color: 'var(--hr-text-dim)',
+              }}
+            />
+            <input
+              ref={searchRef}
+              value={search}
+              onChange={(e) => setSearch(e.target.value)}
+              placeholder={t('staff.searchPlaceholder')}
+              style={{
+                width: '100%',
+                padding: '8px 12px 8px 30px',
+                borderRadius: '8px',
+                border: '1px solid var(--hr-border)',
+                background: 'var(--hr-input-bg)',
+                color: 'var(--hr-text)',
+                fontSize: '13px',
+                outline: 'none',
+              }}
+            />
+          </div>
+        </div>
+
+        {/* Staff cards grid */}
+        <motion.div
+          variants={container}
+          initial="hidden"
+          animate="show"
+          style={{
+            display: 'grid',
+            gridTemplateColumns: 'repeat(auto-fit, minmax(240px, 1fr))',
+            gap: '14px',
+          }}
+        >
+          {filtered.map((s, i) => {
+            const av = avatarColors[i % avatarColors.length];
+            return (
+              <motion.div key={s.id} variants={cardAnim} whileHover={{ scale: 1.015 }}>
+                <Link
+                  to={`/staff/${s.id}` as any}
+                  style={{ textDecoration: 'none', display: 'block' }}
                 >
-                  {/* Top row */}
                   <div
                     style={{
+                      background: 'var(--hr-card)',
+                      border: '1px solid var(--hr-border)',
+                      borderRadius: '12px',
+                      padding: '18px',
                       display: 'flex',
-                      alignItems: 'flex-start',
-                      justifyContent: 'space-between',
+                      flexDirection: 'column',
+                      gap: '14px',
+                      cursor: 'pointer',
+                      transition: 'border-color 0.15s',
                     }}
                   >
-                    <div style={{ display: 'flex', alignItems: 'center', gap: '12px' }}>
-                      <span
-                        style={{
-                          display: 'flex',
-                          alignItems: 'center',
-                          justifyContent: 'center',
-                          height: 42,
-                          width: 42,
-                          borderRadius: '50%',
-                          background: av.bg,
-                          color: av.color,
-                          fontSize: '14px',
-                          fontWeight: 700,
-                          flexShrink: 0,
-                        }}
-                      >
-                        {getInitials(s.name)}
-                      </span>
-                      <div>
-                        <p
-                          style={{
-                            margin: 0,
-                            fontSize: '14px',
-                            fontWeight: 700,
-                            color: 'var(--hr-text)',
-                          }}
-                        >
-                          {s.name}
-                        </p>
-                        <p
-                          style={{
-                            margin: '2px 0 0',
-                            fontSize: '12px',
-                            color: 'var(--hr-text-muted)',
-                          }}
-                        >
-                          {s.role}
-                        </p>
-                      </div>
-                    </div>
-                    {/* Status badge */}
-                    <span
+                    {/* Top row */}
+                    <div
                       style={{
-                        padding: '3px 9px',
-                        borderRadius: '20px',
-                        fontSize: '11px',
-                        fontWeight: 600,
-                        background:
-                          s.status === 'Active' ? 'rgba(16,185,129,0.12)' : 'rgba(239,68,68,0.12)',
-                        color: s.status === 'Active' ? '#10b981' : '#ef4444',
+                        display: 'flex',
+                        alignItems: 'flex-start',
+                        justifyContent: 'space-between',
                       }}
                     >
-                      {s.status}
-                    </span>
-                  </div>
-
-                  {/* Meta */}
-                  <div style={{ display: 'flex', flexDirection: 'column', gap: '6px' }}>
-                    <div style={{ display: 'flex', alignItems: 'center', gap: '6px' }}>
-                      <Mail size={12} style={{ color: 'var(--hr-text-dim)', flexShrink: 0 }} />
-                      <span style={{ fontSize: '12px', color: 'var(--hr-text-muted)' }}>
-                        {s.email}
-                      </span>
-                    </div>
-                    <div style={{ display: 'flex', alignItems: 'center', gap: '6px' }}>
-                      <span style={{ fontSize: '11px', color: 'var(--hr-text-dim)' }}>Dept:</span>
-                      <span
-                        style={{ fontSize: '12px', color: 'var(--hr-text-muted)', fontWeight: 500 }}
-                      >
-                        {s.department}
-                      </span>
+                      <div style={{ display: 'flex', alignItems: 'center', gap: '12px' }}>
+                        <span
+                          style={{
+                            display: 'flex',
+                            alignItems: 'center',
+                            justifyContent: 'center',
+                            height: 42,
+                            width: 42,
+                            borderRadius: '50%',
+                            background: av.bg,
+                            color: av.color,
+                            fontSize: '14px',
+                            fontWeight: 700,
+                            flexShrink: 0,
+                          }}
+                        >
+                          {getInitials(s.name)}
+                        </span>
+                        <div>
+                          <p
+                            style={{
+                              margin: 0,
+                              fontSize: '14px',
+                              fontWeight: 700,
+                              color: 'var(--hr-text)',
+                            }}
+                          >
+                            {s.name}
+                          </p>
+                          <p
+                            style={{
+                              margin: '2px 0 0',
+                              fontSize: '12px',
+                              color: 'var(--hr-text-muted)',
+                            }}
+                          >
+                            {s.role}
+                          </p>
+                        </div>
+                      </div>
+                      {/* Status badge */}
                       <span
                         style={{
-                          marginLeft: 'auto',
-                          padding: '2px 8px',
+                          padding: '3px 9px',
                           borderRadius: '20px',
-                          fontSize: '10px',
+                          fontSize: '11px',
                           fontWeight: 600,
-                          background: 'var(--hr-hover)',
-                          color: 'var(--hr-text-muted)',
-                          border: '1px solid var(--hr-border)',
+                          background:
+                            s.status === 'Active'
+                              ? 'rgba(16,185,129,0.12)'
+                              : 'rgba(239,68,68,0.12)',
+                          color: s.status === 'Active' ? '#10b981' : '#ef4444',
                         }}
                       >
-                        {s.employmentType}
+                        {s.status}
                       </span>
                     </div>
-                  </div>
-                </div>
-              </Link>
-            </motion.div>
-          );
-        })}
-      </motion.div>
 
-      {filtered.length === 0 && !loading && (
-        <EmptyState
-          icon={<Users size={20} />}
-          title={t('staff.emptyState.title')}
-          description={t('staff.emptyState.description')}
-        />
-      )}
-    </div>
+                    {/* Meta */}
+                    <div style={{ display: 'flex', flexDirection: 'column', gap: '6px' }}>
+                      <div style={{ display: 'flex', alignItems: 'center', gap: '6px' }}>
+                        <Mail size={12} style={{ color: 'var(--hr-text-dim)', flexShrink: 0 }} />
+                        <span style={{ fontSize: '12px', color: 'var(--hr-text-muted)' }}>
+                          {s.email}
+                        </span>
+                      </div>
+                      <div style={{ display: 'flex', alignItems: 'center', gap: '6px' }}>
+                        <span style={{ fontSize: '11px', color: 'var(--hr-text-dim)' }}>Dept:</span>
+                        <span
+                          style={{
+                            fontSize: '12px',
+                            color: 'var(--hr-text-muted)',
+                            fontWeight: 500,
+                          }}
+                        >
+                          {s.department}
+                        </span>
+                        <span
+                          style={{
+                            marginLeft: 'auto',
+                            padding: '2px 8px',
+                            borderRadius: '20px',
+                            fontSize: '10px',
+                            fontWeight: 600,
+                            background: 'var(--hr-hover)',
+                            color: 'var(--hr-text-muted)',
+                            border: '1px solid var(--hr-border)',
+                          }}
+                        >
+                          {s.employmentType}
+                        </span>
+                      </div>
+                    </div>
+                  </div>
+                </Link>
+              </motion.div>
+            );
+          })}
+        </motion.div>
+
+        {filtered.length === 0 && !loading && (
+          <EmptyState
+            icon={<Users size={20} />}
+            title={t('staff.emptyState.title')}
+            description={t('staff.emptyState.description')}
+          />
+        )}
+      </div>
+    </>
   );
 };
 

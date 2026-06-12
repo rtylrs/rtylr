@@ -115,122 +115,123 @@ const NewEmployee = ({ onCancel, isWizardMode }: NewEmployeeProps): React.JSX.El
     <>
       <HelmetContainer title="New employee · rtylr" />
       <div className="flex flex-col gap-6">
-      <div className="flex items-center gap-3">
-        <button
-          type="button"
-          onClick={goBack}
-          className="rounded-lg p-2 transition-colors"
-          style={{ background: 'var(--hr-hover)', color: 'var(--hr-text-muted)' }}
-          aria-label={t('common.back')}
-        >
-          <ArrowLeft size={16} />
-        </button>
-        <h1 className="text-lg font-semibold" style={{ color: 'var(--hr-text)' }}>
-          {t('employees.form.title')}
-        </h1>
-      </div>
-
-      <form
-        onSubmit={handleSubmit}
-        className="rounded-xl p-6"
-        style={{ background: 'var(--hr-card)', border: '1px solid var(--hr-border)' }}
-      >
-        <div className="grid grid-cols-1 gap-4 sm:grid-cols-2">
-          {field(t('employees.form.firstName'), 'firstName')}
-          {field(t('employees.form.lastName'), 'lastName')}
-          {field(t('employees.form.email'), 'email')}
-          {field(t('employees.form.jobTitle'), 'jobTitle')}
-          {field(t('employees.form.userId'), 'userId', 'number')}
-          {field(t('employees.form.departmentId'), 'departmentId', 'number')}
-          {field(t('employees.form.locationId'), 'locationId', 'number')}
-          {field(t('employees.form.hireDate'), 'hireDate', 'date')}
-          {field(t('employees.form.currency'), 'currency')}
-
-          <div>
-            <label className="mb-1 block text-sm font-medium" style={{ color: 'var(--hr-text)' }}>
-              {t('employees.form.contractType')}
-            </label>
-            <select
-              value={form.contractType}
-              onChange={(e) =>
-                setForm((f) => ({
-                  ...f,
-                  contractType: e.target.value as EmployeeFormData['contractType'],
-                }))
-              }
-              style={inputStyle}
-            >
-              <option value="full_time">{t('employees.contractTypes.full_time')}</option>
-              <option value="part_time">{t('employees.contractTypes.part_time')}</option>
-              <option value="freelancer">{t('employees.contractTypes.freelancer')}</option>
-            </select>
-          </div>
-
-          <div>
-            <label className="mb-1 block text-sm font-medium" style={{ color: 'var(--hr-text)' }}>
-              {t('employees.form.status')}
-            </label>
-            <select
-              value={form.status}
-              onChange={(e) =>
-                setForm((f) => ({ ...f, status: e.target.value as EmployeeFormData['status'] }))
-              }
-              style={inputStyle}
-            >
-              <option value="active">{t('employees.statuses.active')}</option>
-              <option value="probation">{t('employees.statuses.probation')}</option>
-              <option value="inactive">{t('employees.statuses.inactive')}</option>
-              <option value="terminated">{t('employees.statuses.terminated')}</option>
-            </select>
-          </div>
-
-          <div>
-            <label className="mb-1 block text-sm font-medium" style={{ color: 'var(--hr-text)' }}>
-              {t('employees.form.accountCreationMode')}
-            </label>
-            <select
-              value={form.accountCreationMode}
-              onChange={(e) =>
-                setForm((f) => ({
-                  ...f,
-                  accountCreationMode: e.target.value as EmployeeFormData['accountCreationMode'],
-                }))
-              }
-              style={inputStyle}
-            >
-              <option value="hr_created">{t('employees.form.hrCreated')}</option>
-              <option value="invite_link">{t('employees.form.inviteLink')}</option>
-            </select>
-          </div>
-
-          {field(t('employees.form.monthlySalary'), 'monthlySalary', 'number')}
-          {field(t('employees.form.hourlyRate'), 'hourlyRate', 'number')}
-        </div>
-
-        <div className="mt-6 flex items-center justify-end gap-2">
+        <div className="flex items-center gap-3">
           <button
             type="button"
             onClick={goBack}
-            className="rounded-lg px-4 py-2 text-sm font-medium"
-            style={{
-              background: 'var(--hr-hover)',
-              color: 'var(--hr-text-muted)',
-              border: '1px solid var(--hr-border)',
-            }}
+            className="rounded-lg p-2 transition-colors"
+            style={{ background: 'var(--hr-hover)', color: 'var(--hr-text-muted)' }}
+            aria-label={t('common.back')}
           >
-            {t('common.cancel')}
+            <ArrowLeft size={16} />
           </button>
-          <button
-            type="submit"
-            disabled={createEmployee.isPending}
-            className="rounded-lg px-5 py-2 text-sm font-medium transition-opacity disabled:opacity-50"
-            style={{ background: 'var(--accent)', color: '#fff' }}
-          >
-            {createEmployee.isPending ? t('common.loading') : t('employees.form.submit')}
-          </button>
+          <h1 className="text-lg font-semibold" style={{ color: 'var(--hr-text)' }}>
+            {t('employees.form.title')}
+          </h1>
         </div>
-      </form>
-    </div>
+
+        <form
+          onSubmit={handleSubmit}
+          className="rounded-xl p-6"
+          style={{ background: 'var(--hr-card)', border: '1px solid var(--hr-border)' }}
+        >
+          <div className="grid grid-cols-1 gap-4 sm:grid-cols-2">
+            {field(t('employees.form.firstName'), 'firstName')}
+            {field(t('employees.form.lastName'), 'lastName')}
+            {field(t('employees.form.email'), 'email')}
+            {field(t('employees.form.jobTitle'), 'jobTitle')}
+            {field(t('employees.form.userId'), 'userId', 'number')}
+            {field(t('employees.form.departmentId'), 'departmentId', 'number')}
+            {field(t('employees.form.locationId'), 'locationId', 'number')}
+            {field(t('employees.form.hireDate'), 'hireDate', 'date')}
+            {field(t('employees.form.currency'), 'currency')}
+
+            <div>
+              <label className="mb-1 block text-sm font-medium" style={{ color: 'var(--hr-text)' }}>
+                {t('employees.form.contractType')}
+              </label>
+              <select
+                value={form.contractType}
+                onChange={(e) =>
+                  setForm((f) => ({
+                    ...f,
+                    contractType: e.target.value as EmployeeFormData['contractType'],
+                  }))
+                }
+                style={inputStyle}
+              >
+                <option value="full_time">{t('employees.contractTypes.full_time')}</option>
+                <option value="part_time">{t('employees.contractTypes.part_time')}</option>
+                <option value="freelancer">{t('employees.contractTypes.freelancer')}</option>
+              </select>
+            </div>
+
+            <div>
+              <label className="mb-1 block text-sm font-medium" style={{ color: 'var(--hr-text)' }}>
+                {t('employees.form.status')}
+              </label>
+              <select
+                value={form.status}
+                onChange={(e) =>
+                  setForm((f) => ({ ...f, status: e.target.value as EmployeeFormData['status'] }))
+                }
+                style={inputStyle}
+              >
+                <option value="active">{t('employees.statuses.active')}</option>
+                <option value="probation">{t('employees.statuses.probation')}</option>
+                <option value="inactive">{t('employees.statuses.inactive')}</option>
+                <option value="terminated">{t('employees.statuses.terminated')}</option>
+              </select>
+            </div>
+
+            <div>
+              <label className="mb-1 block text-sm font-medium" style={{ color: 'var(--hr-text)' }}>
+                {t('employees.form.accountCreationMode')}
+              </label>
+              <select
+                value={form.accountCreationMode}
+                onChange={(e) =>
+                  setForm((f) => ({
+                    ...f,
+                    accountCreationMode: e.target.value as EmployeeFormData['accountCreationMode'],
+                  }))
+                }
+                style={inputStyle}
+              >
+                <option value="hr_created">{t('employees.form.hrCreated')}</option>
+                <option value="invite_link">{t('employees.form.inviteLink')}</option>
+              </select>
+            </div>
+
+            {field(t('employees.form.monthlySalary'), 'monthlySalary', 'number')}
+            {field(t('employees.form.hourlyRate'), 'hourlyRate', 'number')}
+          </div>
+
+          <div className="mt-6 flex items-center justify-end gap-2">
+            <button
+              type="button"
+              onClick={goBack}
+              className="rounded-lg px-4 py-2 text-sm font-medium"
+              style={{
+                background: 'var(--hr-hover)',
+                color: 'var(--hr-text-muted)',
+                border: '1px solid var(--hr-border)',
+              }}
+            >
+              {t('common.cancel')}
+            </button>
+            <button
+              type="submit"
+              disabled={createEmployee.isPending}
+              className="rounded-lg px-5 py-2 text-sm font-medium transition-opacity disabled:opacity-50"
+              style={{ background: 'var(--accent)', color: '#fff' }}
+            >
+              {createEmployee.isPending ? t('common.loading') : t('employees.form.submit')}
+            </button>
+          </div>
+        </form>
+      </div>
+    </>
   );
 };
 
