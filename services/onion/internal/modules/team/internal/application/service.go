@@ -25,6 +25,8 @@ const (
 	teamCacheTTL = 5 * time.Minute
 )
 
+var defaultFreePlanApps = []string{"dash", "pos", "erp", "hr", "crm", "finance", "flow", "insights"}
+
 func invalidateUserScope(ctx context.Context, userID int64) {
 	if cache := cacher.GetRedisCache(); cache != nil {
 		cache.DeleteByPattern(ctx, cacheKeys.UserPrefix(userID))
@@ -187,13 +189,16 @@ func (s *Service) computeMyProfile(ctx context.Context, userID, businessID int64
 		role = "owner"
 		ownerApps, appsErr := s.GetOwnerApps(ctx, userID)
 		if appsErr != nil || len(ownerApps) == 0 {
-			apps = []string{"pos", "erp", "hr", "crm", "finance", "flow"}
+			apps = append([]string(nil), defaultFreePlanApps...)
 		} else {
 			apps = ownerApps
 		}
 		if slug, status, subErr := s.GetOwnerSubscriptionInfo(ctx, userID); subErr == nil {
 			planSlug = slug
 			subscriptionStatus = status
+		} else {
+			planSlug = "free"
+			subscriptionStatus = "active"
 		}
 	}
 

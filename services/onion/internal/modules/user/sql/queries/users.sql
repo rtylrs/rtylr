@@ -50,10 +50,14 @@ SELECT role FROM user_app_permissions WHERE business_id = ? AND user_id = ?;
 -- name: CreateBusiness :execresult
 INSERT INTO businesses (name, owner_id) VALUES (?, ?);
 
--- name: GetActivePlanIDBySlug :one
-SELECT id FROM plans WHERE slug = ? AND is_active = TRUE;
+-- name: GetActivePlanForSignup :one
+SELECT id, trial_days FROM plans WHERE slug = ? AND is_active = TRUE;
 
--- name: UpsertTrialSubscription :exec
+-- name: UpsertSignupSubscription :exec
 INSERT INTO subscriptions (owner_id, plan_id, status, trial_ends_at)
-VALUES (?, ?, 'trial', ?)
-ON DUPLICATE KEY UPDATE plan_id = VALUES(plan_id), updated_at = CURRENT_TIMESTAMP;
+VALUES (?, ?, ?, ?)
+ON DUPLICATE KEY UPDATE
+  plan_id = VALUES(plan_id),
+  status = VALUES(status),
+  trial_ends_at = VALUES(trial_ends_at),
+  updated_at = CURRENT_TIMESTAMP;

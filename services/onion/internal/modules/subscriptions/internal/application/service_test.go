@@ -15,12 +15,17 @@ import (
 type mockRepo struct {
 	plans              []domain.Plan
 	plan               *domain.Plan
+	planSlug           string
 	subscription       *domain.Subscription
+	getSubCalls        int
 	ownerApps          []string
 	billingHistory     []domain.BillingHistoryMonth
 	addonPeriods       []domain.AddonBillingPeriod
 	activePeriod       *domain.SeatPeriod
 	ownerID            int64
+	upsertOwnerID      int64
+	upsertPlanID       int64
+	upsertTrialDays    int
 	listPlansErr       error
 	planBySlugErr      error
 	getSubErr          error
@@ -41,7 +46,8 @@ func (m *mockRepo) ListPlans(_ context.Context) ([]domain.Plan, error) {
 	return m.plans, m.listPlansErr
 }
 
-func (m *mockRepo) GetPlanBySlug(_ context.Context, _ string) (*domain.Plan, error) {
+func (m *mockRepo) GetPlanBySlug(_ context.Context, slug string) (*domain.Plan, error) {
+	m.planSlug = slug
 	return m.plan, m.planBySlugErr
 }
 
@@ -50,10 +56,23 @@ func (m *mockRepo) GetPlanByID(_ context.Context, _ int64) (*domain.Plan, error)
 }
 
 func (m *mockRepo) GetSubscription(_ context.Context, _ int64) (*domain.Subscription, error) {
-	return m.subscription, m.getSubErr
+	m.getSubCalls++
+	if m.getSubErr != nil {
+		if m.getSubCalls == 1 {
+			return nil, m.getSubErr
+		}
+		if errors.Is(m.getSubErr, domain.ErrSubscriptionNotFound) {
+			return m.subscription, nil
+		}
+		return nil, m.getSubErr
+	}
+	return m.subscription, nil
 }
 
-func (m *mockRepo) UpsertSubscription(_ context.Context, _, _ int64, _ int) error {
+func (m *mockRepo) UpsertSubscription(_ context.Context, ownerID, planID int64, trialDays int) error {
+	m.upsertOwnerID = ownerID
+	m.upsertPlanID = planID
+	m.upsertTrialDays = trialDays
 	return m.upsertSubErr
 }
 
@@ -205,6 +224,32 @@ func TestGetMySubscription_ReturnsSubscription(t *testing.T) {
 	got, err := s.GetMySubscription(context.Background(), 1)
 	if err != nil || got == nil || got.PlanName != "Pro" {
 		t.Errorf("got %v err %v", got, err)
+	}
+}
+
+func TestGetMySubscription_CreatesFreeWhenMissing(t *testing.T) {
+	repo := &mockRepo{
+		plan:         &domain.Plan{ID: 42, Slug: "free", TrialDays: 0},
+		subscription: &domain.Subscription{ID: 99, PlanName: "Free", PlanSlug: "free", Status: "active"},
+		getSubErr:    domain.ErrSubscriptionNotFound,
+	}
+	s := &Service{repo: repo}
+
+	got, err := s.GetMySubscription(context.Background(), 98765)
+	if err != nil {
+		t.Fatalf("GetMySubscription: %v", err)
+	}
+	if got == nil || got.PlanSlug != "free" || got.Status != "active" {
+		t.Fatalf("expected active free subscription, got %+v", got)
+	}
+	if repo.planSlug != defaultPlanSlug {
+		t.Fatalf("expected default plan slug %q, got %q", defaultPlanSlug, repo.planSlug)
+	}
+	if repo.upsertOwnerID != 98765 || repo.upsertPlanID != 42 || repo.upsertTrialDays != 0 {
+		t.Fatalf("unexpected upsert args owner=%d plan=%d trial=%d", repo.upsertOwnerID, repo.upsertPlanID, repo.upsertTrialDays)
+	}
+	if repo.getSubCalls != 3 {
+		t.Fatalf("expected missing read, upsert verification, and read after repair, got %d calls", repo.getSubCalls)
 	}
 }
 

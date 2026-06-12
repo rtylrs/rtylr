@@ -20,7 +20,10 @@ import (
 	"github.com/voxire/onion/internal/platform/utils/passwordutils"
 )
 
-const userProfileTTL = 5 * time.Minute
+const (
+	userProfileTTL        = 5 * time.Minute
+	DefaultSignupPlanSlug = "free"
+)
 
 func invalidateUserScope(ctx context.Context, userID int64) {
 	if cache := cacher.GetRedisCache(); cache != nil {

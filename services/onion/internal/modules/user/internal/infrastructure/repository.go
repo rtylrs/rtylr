@@ -236,10 +236,10 @@ func (r *Repository) RecordLogin(ctx context.Context, userID int64, email, metho
 	})
 }
 
-// AssignSubscription looks up the plan by slug and creates a trial subscription for the owner.
+// AssignSubscription looks up the plan by slug and creates the owner's initial subscription.
 func (r *Repository) AssignSubscription(ctx context.Context, ownerID int64, planSlug string) error {
 	// cross-schema read from plans — approved for subscription assignment on registration
-	planID, err := r.queries.GetActivePlanIDBySlug(ctx, planSlug)
+	plan, err := r.queries.GetActivePlanForSignup(ctx, planSlug)
 	if err != nil {
 		if errors.Is(err, sql.ErrNoRows) {
 			return fmt.Errorf("plan not found: %s", planSlug)
@@ -248,11 +248,18 @@ func (r *Repository) AssignSubscription(ctx context.Context, ownerID int64, plan
 		return err
 	}
 
-	trialEnd := time.Now().AddDate(0, 0, 14)
-	// cross-schema write to subscriptions — approved for trial creation on registration
-	return r.queries.UpsertTrialSubscription(ctx, sqlc.UpsertTrialSubscriptionParams{
+	status := sqlc.SubscriptionsStatusActive
+	trialEnd := sql.NullTime{}
+	if plan.TrialDays > 0 {
+		status = sqlc.SubscriptionsStatusTrial
+		trialEnd = sql.NullTime{Time: time.Now().AddDate(0, 0, int(plan.TrialDays)), Valid: true}
+	}
+
+	// cross-schema write to subscriptions — approved for subscription creation on registration
+	return r.queries.UpsertSignupSubscription(ctx, sqlc.UpsertSignupSubscriptionParams{
 		OwnerID:     ownerID,
-		PlanID:      planID,
-		TrialEndsAt: sql.NullTime{Time: trialEnd, Valid: true},
+		PlanID:      plan.ID,
+		Status:      sqlc.NullSubscriptionsStatus{SubscriptionsStatus: status, Valid: true},
+		TrialEndsAt: trialEnd,
 	})
 }

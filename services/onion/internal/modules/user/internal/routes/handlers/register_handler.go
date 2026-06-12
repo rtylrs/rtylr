@@ -71,11 +71,9 @@ func (h *RegisterHandler) Serve(ctx context.Context, req *RegisterRequest) (Regi
 		)
 	}
 
-	// Assign subscription plan after registration
-	planSlug := req.PlanSlug
-	if planSlug == "" {
-		planSlug = "starter"
-	}
+	// New owner accounts always start on the free plan. Paid upgrades happen
+	// after signup through billing/checkout so registration is deterministic.
+	planSlug := application.DefaultSignupPlanSlug
 	if subErr := h.UserService.AssignSubscription(ctx, userId, planSlug); subErr != nil {
 		logger.Ctx(ctx).Warn("failed to assign subscription on registration",
 			logger.String("plan_slug", planSlug),

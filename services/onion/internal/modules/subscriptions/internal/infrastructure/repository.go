@@ -208,7 +208,12 @@ func (r *Repository) GetSubscription(ctx context.Context, ownerID int64) (*domai
 }
 
 func (r *Repository) UpsertSubscription(ctx context.Context, ownerID, planID int64, trialDays int) error {
-	trialEnd := time.Now().UTC().AddDate(0, 0, trialDays)
+	status := "active"
+	trialEnd := sql.NullTime{}
+	if trialDays > 0 {
+		status = "trial"
+		trialEnd = sql.NullTime{Time: time.Now().UTC().AddDate(0, 0, trialDays), Valid: true}
+	}
 	// next_billing_date is always the 1st of next month
 	now := time.Now().UTC()
 	nextBilling := time.Date(now.Year(), now.Month()+1, 1, 0, 0, 0, 0, time.UTC)
@@ -216,8 +221,8 @@ func (r *Repository) UpsertSubscription(ctx context.Context, ownerID, planID int
 	query, args, err := sq.
 		Insert("subscriptions").
 		Columns("owner_id", "plan_id", "status", "seat_count", "trial_ends_at", "next_billing_date").
-		Values(ownerID, planID, "trial", 1, trialEnd, nextBilling).
-		Suffix("ON DUPLICATE KEY UPDATE plan_id = VALUES(plan_id), updated_at = CURRENT_TIMESTAMP").
+		Values(ownerID, planID, status, 1, trialEnd, nextBilling).
+		Suffix("ON DUPLICATE KEY UPDATE plan_id = VALUES(plan_id), status = VALUES(status), trial_ends_at = VALUES(trial_ends_at), updated_at = CURRENT_TIMESTAMP").
 		PlaceholderFormat(sq.Question).
 		ToSql()
 	if err != nil {

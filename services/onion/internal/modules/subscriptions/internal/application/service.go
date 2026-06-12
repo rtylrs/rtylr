@@ -3,6 +3,7 @@ package application
 import (
 	"context"
 	"database/sql"
+	"errors"
 	"fmt"
 	"time"
 
@@ -14,6 +15,7 @@ import (
 )
 
 const subscriptionCacheTTL = 10 * time.Minute
+const defaultPlanSlug = "free"
 
 // invalidateSubscriptionScope clears every subscription + user-scoped cache
 // entry for the owner. Called by every mutation that changes plan/seat/state.
@@ -41,10 +43,24 @@ func (s *Service) GetMySubscription(ctx context.Context, ownerID int64) (*domain
 		ctx,
 		cacheKeys.Subscription(ownerID),
 		func(ctx context.Context) (*domain.Subscription, error) {
-			return s.repo.GetSubscription(ctx, ownerID)
+			return s.getSubscriptionOrCreateDefault(ctx, ownerID)
 		},
 		cacher.WithExpiry(ctx, subscriptionCacheTTL),
 	)
+}
+
+func (s *Service) getSubscriptionOrCreateDefault(ctx context.Context, ownerID int64) (*domain.Subscription, error) {
+	sub, err := s.repo.GetSubscription(ctx, ownerID)
+	if err == nil {
+		return sub, nil
+	}
+	if !errors.Is(err, domain.ErrSubscriptionNotFound) {
+		return nil, err
+	}
+	if upsertErr := s.UpsertSubscription(ctx, ownerID, defaultPlanSlug); upsertErr != nil {
+		return nil, upsertErr
+	}
+	return s.repo.GetSubscription(ctx, ownerID)
 }
 
 func (s *Service) UpsertSubscription(ctx context.Context, ownerID int64, planSlug string) error {
@@ -81,12 +97,22 @@ func (s *Service) UpsertSubscription(ctx context.Context, ownerID int64, planSlu
 }
 
 func (s *Service) GetOwnerApps(ctx context.Context, ownerID int64) ([]string, error) {
+	apps, err := s.repo.GetOwnerApps(ctx, ownerID)
+	if err == nil {
+		return apps, nil
+	}
+	if !errors.Is(err, domain.ErrSubscriptionNotFound) {
+		return nil, err
+	}
+	if _, createErr := s.getSubscriptionOrCreateDefault(ctx, ownerID); createErr != nil {
+		return nil, createErr
+	}
 	return s.repo.GetOwnerApps(ctx, ownerID)
 }
 
 // GetBillingDetail returns the current month's usage line items and totals.
 func (s *Service) GetBillingDetail(ctx context.Context, ownerID, businessID int64) (*domain.BillingDetail, error) {
-	sub, err := s.repo.GetSubscription(ctx, ownerID)
+	sub, err := s.getSubscriptionOrCreateDefault(ctx, ownerID)
 	if err != nil {
 		return nil, err
 	}

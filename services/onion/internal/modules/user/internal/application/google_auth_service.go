@@ -122,6 +122,14 @@ func (s *Service) GoogleAuth(
 		}
 	}
 
+	if subErr := s.AssignSubscription(ctx, userID, DefaultSignupPlanSlug); subErr != nil {
+		logger.Ctx(ctx).Warn("failed to assign subscription during google signup",
+			logger.Error(subErr),
+			logger.Any("user_id", userID),
+			logger.String("plan_slug", DefaultSignupPlanSlug),
+		)
+	}
+
 	token, tokenErr := s.GenerateToken(ctx, userID)
 	if tokenErr != nil {
 		return nil, tokenErr

@@ -2,6 +2,7 @@ package infrastructure_test
 
 import (
 	"context"
+	"database/sql"
 	"fmt"
 	"testing"
 	"time"
@@ -165,6 +166,49 @@ func TestUser_RecordLogin_NoError(t *testing.T) {
 	err := repo.RecordLogin(context.Background(), testutil.OwnerID, "owner@example.com", "password", "127.0.0.1", true)
 	if err != nil {
 		t.Fatalf("RecordLogin: %v", err)
+	}
+}
+
+func TestUser_AssignSubscription_FreeCreatesActiveSubscription(t *testing.T) {
+	db := testutil.OpenDB(t)
+	repo := infrastructure.NewRepository(db)
+	ctx := context.Background()
+	email := fmt.Sprintf("free-subscription+%d@example.com", time.Now().UnixNano())
+	id, err := repo.CreateUser(ctx, &domain.User{
+		Email:        email,
+		PasswordHash: "hash",
+		FullName:     "Free Owner",
+	})
+	if err != nil {
+		t.Fatalf("CreateUser: %v", err)
+	}
+	t.Cleanup(func() {
+		_, _ = db.ExecContext(context.Background(), "DELETE FROM subscriptions WHERE owner_id = ?", id)
+		_ = repo.DeleteUser(context.Background(), id)
+	})
+
+	if err := repo.AssignSubscription(ctx, id, "free"); err != nil {
+		t.Fatalf("AssignSubscription: %v", err)
+	}
+
+	var slug, status string
+	var trialEndsAt sql.NullTime
+	err = db.QueryRowContext(ctx, `
+SELECT p.slug, s.status, s.trial_ends_at
+FROM subscriptions s
+JOIN plans p ON p.id = s.plan_id
+WHERE s.owner_id = ?`, id).Scan(&slug, &status, &trialEndsAt)
+	if err != nil {
+		t.Fatalf("read subscription: %v", err)
+	}
+	if slug != "free" {
+		t.Fatalf("expected free plan slug, got %q", slug)
+	}
+	if status != "active" {
+		t.Fatalf("expected active status for free signup, got %q", status)
+	}
+	if trialEndsAt.Valid {
+		t.Fatalf("expected no trial end for free signup, got %v", trialEndsAt.Time)
 	}
 }
 
