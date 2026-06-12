@@ -6,6 +6,7 @@ import { safe } from '../../shared/lib/api';
 import { useUserStore } from '../../shared/stores/userStore';
 import { setCookie, getDefaultCookieDomain } from '../../shared/lib/cookies';
 import { storageGet, storageRemove } from '../../shared/lib/storage';
+import { SOCIAL_AUTH_BUSINESS_NAME_KEY, SOCIAL_AUTH_REDIRECT_KEY } from '../../shared/lib/social';
 
 type KnownAppId = keyof typeof APP_URLS;
 
@@ -37,10 +38,15 @@ const Callback: React.FC = (): React.JSX.Element => {
       return;
     }
 
-    const redirectParam = storageGet('social_auth_redirect');
-    storageRemove('social_auth_redirect');
+    const redirectParam = storageGet(SOCIAL_AUTH_REDIRECT_KEY);
+    const businessName = storageGet(SOCIAL_AUTH_BUSINESS_NAME_KEY);
+    storageRemove(SOCIAL_AUTH_REDIRECT_KEY);
+    storageRemove(SOCIAL_AUTH_BUSINESS_NAME_KEY);
 
-    const request: GoogleAuthRequest = { code };
+    const request: GoogleAuthRequest = {
+      code,
+      ...(businessName ? { businessName } : {}),
+    };
 
     unwrap(safe.post<GoogleAuthResponse>('/auth/register/google', request))
       .then((data) => {
