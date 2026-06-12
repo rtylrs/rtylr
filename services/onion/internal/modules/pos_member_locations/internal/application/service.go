@@ -49,6 +49,18 @@ func (s *Service) GetMyLocations(ctx context.Context, businessID, userID int64) 
 	)
 }
 
+// GetLocationRoster returns the POS sign-in roster for a location. Short TTL:
+// it reflects has_pin which flips as soon as an operator onboards.
+func (s *Service) GetLocationRoster(ctx context.Context, businessID, locationID int64) ([]infrastructure.RosterEntry, error) {
+	key := cacheKeys.Scoped(posMemberLocsScope, businessID, fmt.Sprintf("roster|l=%d", locationID))
+	return cacher.Of[[]infrastructure.RosterEntry]().GetOrComputeSingle(ctx, key,
+		func(ctx context.Context) ([]infrastructure.RosterEntry, error) {
+			return s.repo.GetLocationRoster(ctx, businessID, locationID)
+		},
+		cacher.WithExpiry(ctx, 30*time.Second),
+	)
+}
+
 func (s *Service) Assign(ctx context.Context, businessID, userID, locationID int64, canManagePOSUsers, canManageTerminals, canViewReports bool) (int64, error) {
 	id, err := s.repo.Assign(ctx, businessID, userID, locationID, canManagePOSUsers, canManageTerminals, canViewReports)
 	if err != nil {

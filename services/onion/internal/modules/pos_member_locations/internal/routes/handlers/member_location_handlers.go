@@ -46,6 +46,35 @@ func (h *GetMyLocationsHandler) Serve(ctx context.Context, _ *GetMyLocationsRequ
 	return GetMyLocationsResponse{Locations: out}, nil
 }
 
+// ── Location roster ─────────────────────────────────────────────
+
+func LocationRosterRoutes() []string { return []string{"/pos/access/location-roster"} }
+
+type (
+	GetLocationRosterHandler struct{ Service *application.Service }
+	GetLocationRosterRequest struct {
+		LocationID int64 `json:"location_id" schema:"location_id"`
+	}
+	GetLocationRosterResponse struct {
+		Roster []infrastructure.RosterEntry `json:"roster"`
+	}
+)
+
+func (h *GetLocationRosterHandler) Serve(ctx context.Context, req *GetLocationRosterRequest) (GetLocationRosterResponse, *errorModels.ServerError) {
+	authUser, ok := authPkg.GetAuthUser(ctx)
+	if !ok {
+		return GetLocationRosterResponse{}, errorModels.PermissionDeniedServerError()
+	}
+	if req.LocationID == 0 {
+		return GetLocationRosterResponse{}, &errorModels.ServerError{Code: http.StatusBadRequest, Message: "locationId required"}
+	}
+	roster, err := h.Service.GetLocationRoster(ctx, authUser.BusinessID, req.LocationID)
+	if err != nil {
+		return GetLocationRosterResponse{}, &errorModels.ServerError{Code: http.StatusInternalServerError, Message: err.Error()}
+	}
+	return GetLocationRosterResponse{Roster: roster}, nil
+}
+
 func AssignRoutes() []string { return []string{"/pos/access/assign"} }
 
 type (

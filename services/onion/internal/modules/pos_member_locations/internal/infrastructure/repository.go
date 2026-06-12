@@ -23,6 +23,34 @@ type MyLocation struct {
 	Phone      string `json:"phone"`
 }
 
+// RosterEntry is one team member on a location's POS sign-in roster.
+type RosterEntry struct {
+	UserID            int64  `json:"user_id"`
+	Name              string `json:"name"`
+	HasPIN            bool   `json:"has_pin"`
+	IsManager         bool   `json:"is_manager"`
+	POSRole           string `json:"pos_role"`
+}
+
+func (r *Repository) GetLocationRoster(ctx context.Context, businessID, locationID int64) ([]RosterEntry, error) {
+	q := sqlc.New(r.pool)
+	rows, err := q.GetLocationRoster(ctx, sqlc.GetLocationRosterParams{BusinessID: businessID, LocationID: locationID})
+	if err != nil {
+		return nil, err
+	}
+	out := make([]RosterEntry, 0, len(rows))
+	for _, row := range rows {
+		out = append(out, RosterEntry{
+			UserID:    row.UserID,
+			Name:      row.Name.String,
+			HasPIN:    row.HasPin,
+			IsManager: row.CanManagePosUsers.Bool,
+			POSRole:   string(row.PosRole),
+		})
+	}
+	return out, nil
+}
+
 func (r *Repository) ListForUser(ctx context.Context, businessID, userID int64) ([]domain.MemberLocation, error) {
 	q := sqlc.New(r.pool)
 	rows, err := q.ListMemberLocations(ctx, sqlc.ListMemberLocationsParams{BusinessID: businessID, UserID: userID})

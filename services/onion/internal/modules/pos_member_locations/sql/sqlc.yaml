@@ -2,7 +2,9 @@ version: "2"
 sql:
   - engine: "mysql"
     queries: "queries"
-    schema: "../../../platform/database/schemas/pos/schema.sql"
+    schema:
+      - "../../../platform/database/schemas/pos/schema.sql"
+      - "../../../platform/database/schemas/shared/users.sql"
     gen:
       go:
         package: "sqlc"
