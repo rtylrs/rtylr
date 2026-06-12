@@ -1,5 +1,6 @@
 import React, { useState } from 'react';
 import { HelmetContainer } from '@voxire/components';
+import { useNavigate } from '@tanstack/react-router';
 import {
   MonitorSpeaker,
   Heart,
@@ -100,6 +101,7 @@ const useAddons = () =>
 
 const Addons: React.FC = () => {
   const qc = useQueryClient();
+  const navigate = useNavigate();
   const { data: addons = [], isLoading } = useAddons();
   const [searchTerm, setSearchTerm] = useState('');
   const [enablingId, setEnablingId] = useState<string | null>(null);
@@ -145,6 +147,10 @@ const Addons: React.FC = () => {
   );
 
   const CONFIRM_PHRASE = 'disable this addon';
+
+  const goToBilling = () => {
+    void navigate({ to: '/settings/billing' });
+  };
 
   return (
     <>
@@ -257,7 +263,19 @@ const Addons: React.FC = () => {
                       )}
                     </span>
 
-                    {isEnabling ? (
+                    {!addon.isFree ? (
+                      <button
+                        onClick={goToBilling}
+                        className="px-3 py-1.5 rounded-lg text-xs font-semibold transition-all"
+                        style={{
+                          background: addon.isEnabled ? 'var(--dash-hover)' : '#4583C4',
+                          color: addon.isEnabled ? 'var(--dash-text-muted)' : '#fff',
+                          border: addon.isEnabled ? '1px solid var(--dash-border)' : 'none',
+                        }}
+                      >
+                        {addon.isEnabled ? 'Manage' : 'Purchase'}
+                      </button>
+                    ) : isEnabling ? (
                       <div className="flex items-center gap-2 px-3 py-1.5">
                         {justEnabled ? (
                           <motion.span
