@@ -69,7 +69,9 @@ func RequestLoggerMiddleware(ctx context.Context) func(next http.Handler) http.H
 			// Failed requests (4xx/5xx) → the Slack request-logs channel (batched).
 			// 2xx/3xx are left to Axiom to keep the channel signal-dense. Malicious
 			// requests are blocked upstream by SecurityMiddleware and never reach here.
-			if slack.Enabled() && responseWriter.statusCode >= 400 {
+			// Anonymous 401s (no token) are expected bot/scanner noise — skip them.
+			if slack.Enabled() && responseWriter.statusCode >= 400 &&
+				!(responseWriter.statusCode == http.StatusUnauthorized && r.Header.Get("Authorization") == "") {
 				slack.Post(slack.Requests, fmt.Sprintf("`%d` %s %s · %s · %s",
 					responseWriter.statusCode, r.Method, r.URL.Path, getRemoteIP(r), duration.Round(time.Millisecond)))
 			}
@@ -81,6 +83,12 @@ func RequestLoggerMiddleware(ctx context.Context) func(next http.Handler) http.H
 
 				// SecurityMiddleware already batched these.
 				if isMaliciousPath(r.URL.Path) {
+					return
+				}
+
+				// Anonymous 401s (no Authorization header) are expected bot/scanner
+				// traffic — not actionable errors. Skip them to keep logs clean.
+				if responseWriter.statusCode == http.StatusUnauthorized && r.Header.Get("Authorization") == "" {
 					return
 				}
 

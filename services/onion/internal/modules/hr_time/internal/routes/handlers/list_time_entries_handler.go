@@ -3,12 +3,14 @@ package handlers
 import (
 	"context"
 	"net/http"
+	"time"
 
 	"github.com/voxire/onion/internal/modules/hr_time/internal/application"
 	"github.com/voxire/onion/internal/modules/hr_time/internal/domain"
 	authPkg "github.com/voxire/onion/internal/platform/auth"
 	errorModels "github.com/voxire/onion/internal/platform/errors"
 	"github.com/voxire/onion/internal/platform/logger"
+	"github.com/voxire/onion/internal/platform/utils/times"
 	hrtimeentryv1 "github.com/voxire/voxie/gen/go/hr/time_entry/v1"
 )
 
@@ -18,6 +20,7 @@ type ListTimeEntriesHandler struct{ Service *application.Service }
 
 type ListTimeEntriesRequest struct {
 	EmployeeID  int64  `json:"employee_id"`
+	Date        string `json:"date"`
 	PeriodStart string `json:"period_start"`
 	PeriodEnd   string `json:"period_end"`
 	Limit       int32  `json:"limit"`
@@ -37,10 +40,21 @@ func (h *ListTimeEntriesHandler) Serve(ctx context.Context, req *ListTimeEntries
 		return ListTimeEntriesResponse{}, errorModels.PermissionDeniedServerError()
 	}
 
+	periodStart := req.PeriodStart
+	periodEnd := req.PeriodEnd
+	if req.Date != "" && periodStart == "" {
+		d, err := time.Parse(times.FormatWithDate, req.Date)
+		if err != nil {
+			return ListTimeEntriesResponse{}, &errorModels.ServerError{HTTPCode: http.StatusBadRequest, Code: http.StatusBadRequest, Message: "invalid date format"}
+		}
+		periodStart = d.Format(times.FormatWithDate)
+		periodEnd = d.AddDate(0, 0, times.DaysPerWeek-1).Format(times.FormatWithDate)
+	}
+
 	entries, total, err := h.Service.ListTimeEntries(ctx, device.User.UserID, domain.ListTimeEntriesParams{
 		EmployeeID:  req.EmployeeID,
-		PeriodStart: req.PeriodStart,
-		PeriodEnd:   req.PeriodEnd,
+		PeriodStart: periodStart,
+		PeriodEnd:   periodEnd,
 		Limit:       req.Limit,
 		Offset:      req.Offset,
 	})
