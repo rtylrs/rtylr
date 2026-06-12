@@ -84,7 +84,7 @@ func TestListBusinesses_ReturnsTestBusiness(t *testing.T) {
 	repo := infrastructure.NewRepository(db)
 	ctx := context.Background()
 
-	businesses, total, err := repo.ListBusinesses(ctx, 100, 0, "")
+	businesses, total, err := repo.ListBusinesses(ctx, 100, 0, 0, "", 0)
 	if err != nil {
 		t.Fatalf("ListBusinesses: %v", err)
 	}
@@ -101,6 +101,83 @@ func TestListBusinesses_ReturnsTestBusiness(t *testing.T) {
 	}
 	if !found {
 		t.Errorf("expected 'Test Business' in list, got %v", businesses)
+	}
+}
+
+func TestListBusinesses_NameFilterIsExact(t *testing.T) {
+	db := testutil.OpenDB(t)
+	repo := infrastructure.NewRepository(db)
+	ctx := context.Background()
+
+	name := "Exact Business Search Xkzq"
+	res, err := db.ExecContext(ctx, "INSERT INTO businesses (name, owner_id) VALUES (?, ?)", name, testutil.OwnerID)
+	if err != nil {
+		t.Fatalf("insert business: %v", err)
+	}
+	id, err := res.LastInsertId()
+	if err != nil {
+		t.Fatalf("business id: %v", err)
+	}
+	t.Cleanup(func() { repo.DeleteBusiness(ctx, id) })
+
+	businesses, total, err := repo.ListBusinesses(ctx, 100, 0, 0, name, 0)
+	if err != nil {
+		t.Fatalf("ListBusinesses exact name: %v", err)
+	}
+	if total != 1 || len(businesses) != 1 {
+		t.Fatalf("expected one exact name match, got total=%d rows=%d", total, len(businesses))
+	}
+	if businesses[0].ID != id {
+		t.Errorf("expected business id=%d, got %d", id, businesses[0].ID)
+	}
+
+	businesses, total, err = repo.ListBusinesses(ctx, 100, 0, 0, "Business Search", 0)
+	if err != nil {
+		t.Fatalf("ListBusinesses partial name: %v", err)
+	}
+	if total != 0 || len(businesses) != 0 {
+		t.Fatalf("expected partial name to return no rows, got total=%d rows=%d", total, len(businesses))
+	}
+}
+
+func TestListBusinesses_IDAndOwnerFiltersAreExact(t *testing.T) {
+	db := testutil.OpenDB(t)
+	repo := infrastructure.NewRepository(db)
+	ctx := context.Background()
+
+	name := "Exact Business ID Xkzq"
+	res, err := db.ExecContext(ctx, "INSERT INTO businesses (name, owner_id) VALUES (?, ?)", name, testutil.OwnerID)
+	if err != nil {
+		t.Fatalf("insert business: %v", err)
+	}
+	id, err := res.LastInsertId()
+	if err != nil {
+		t.Fatalf("business id: %v", err)
+	}
+	t.Cleanup(func() { repo.DeleteBusiness(ctx, id) })
+
+	businesses, total, err := repo.ListBusinesses(ctx, 100, 0, id, "", 0)
+	if err != nil {
+		t.Fatalf("ListBusinesses id filter: %v", err)
+	}
+	if total != 1 || len(businesses) != 1 || businesses[0].ID != id {
+		t.Fatalf("expected one exact id match, got total=%d rows=%d", total, len(businesses))
+	}
+
+	businesses, total, err = repo.ListBusinesses(ctx, 100, 0, id, "", testutil.OwnerID)
+	if err != nil {
+		t.Fatalf("ListBusinesses id+owner filter: %v", err)
+	}
+	if total != 1 || len(businesses) != 1 || businesses[0].ID != id {
+		t.Fatalf("expected one exact id+owner match, got total=%d rows=%d", total, len(businesses))
+	}
+
+	businesses, total, err = repo.ListBusinesses(ctx, 100, 0, id, "", testutil.OwnerID+999999)
+	if err != nil {
+		t.Fatalf("ListBusinesses wrong owner filter: %v", err)
+	}
+	if total != 0 || len(businesses) != 0 {
+		t.Fatalf("expected wrong owner to return no rows, got total=%d rows=%d", total, len(businesses))
 	}
 }
 

@@ -177,9 +177,11 @@ func (h *UnbanUserHandler) Serve(_ context.Context, _ *UnbanUserRequest) (UnbanU
 // ── Businesses ────────────────────────────────────────────────────────────────
 
 type ListBusinessesRequest struct {
-	Limit  int    `json:"limit"`
-	Offset int    `json:"offset"`
-	Search string `json:"search"`
+	Limit   int    `json:"limit"`
+	Offset  int    `json:"offset"`
+	ID      int64  `json:"id"`
+	Name    string `json:"name"`
+	OwnerID int64  `json:"owner_id"`
 }
 
 type ListBusinessesResponse = application.ListBusinessesResult
@@ -194,7 +196,7 @@ func (h *ListBusinessesHandler) Serve(ctx context.Context, req *ListBusinessesRe
 	if limit <= 0 || limit > 200 {
 		limit = 50
 	}
-	result, err := h.Service.ListBusinesses(ctx, limit, req.Offset, req.Search)
+	result, err := h.Service.ListBusinesses(ctx, limit, req.Offset, req.ID, req.Name, req.OwnerID)
 	if err != nil {
 		return ListBusinessesResponse{}, &errorModels.ServerError{Code: http.StatusInternalServerError, Message: "Failed to list businesses"}
 	}

@@ -314,11 +314,18 @@ type ListBusinessesResult struct {
 	Total      int64         `json:"total"`
 }
 
-func (s *Service) ListBusinesses(ctx context.Context, limit, offset int, search string) (*ListBusinessesResult, error) {
-	key := consoleKey(fmt.Sprintf("biz|l=%d|o=%d|q=%s", limit, offset, search))
+func (s *Service) ListBusinesses(
+	ctx context.Context,
+	limit, offset int,
+	id int64,
+	name string,
+	ownerID int64,
+) (*ListBusinessesResult, error) {
+	name = strings.TrimSpace(name)
+	key := consoleKey(fmt.Sprintf("biz|l=%d|o=%d|id=%d|name=%s|owner=%d", limit, offset, id, name, ownerID))
 	return cacher.Of[*ListBusinessesResult]().GetOrComputeSingle(ctx, key,
 		func(ctx context.Context) (*ListBusinessesResult, error) {
-			rows, total, err := s.repo.ListBusinesses(ctx, limit, offset, search)
+			rows, total, err := s.repo.ListBusinesses(ctx, limit, offset, id, name, ownerID)
 			if err != nil {
 				return nil, err
 			}

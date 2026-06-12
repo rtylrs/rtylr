@@ -664,10 +664,22 @@ func (r *Repository) SetConsoleAdmin(ctx context.Context, id int64, isAdmin bool
 
 // ── Businesses CRUD ───────────────────────────────────────────────────────────
 
-func (r *Repository) ListBusinesses(ctx context.Context, limit, offset int, search string) ([]BusinessRow, int64, error) {
+func (r *Repository) ListBusinesses(
+	ctx context.Context,
+	limit, offset int,
+	id int64,
+	name string,
+	ownerID int64,
+) ([]BusinessRow, int64, error) {
 	conds := sq.And{}
-	if search != "" {
-		conds = append(conds, sq.Like{"name": "%" + search + "%"})
+	if id > 0 {
+		conds = append(conds, sq.Eq{"id": id})
+	}
+	if name != "" {
+		conds = append(conds, sq.Eq{"name": name})
+	}
+	if ownerID > 0 {
+		conds = append(conds, sq.Eq{"owner_id": ownerID})
 	}
 
 	countSQL, countArgs, err := sq.
