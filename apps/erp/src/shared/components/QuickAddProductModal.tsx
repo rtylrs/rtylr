@@ -140,6 +140,11 @@ const QuickAddProductModal: React.FC<QuickAddProductModalProps> = ({
           ? String(editing.categoryId)
           : ''
       );
+      setSupplierId(
+        editing.supplierId !== undefined && editing.supplierId !== null
+          ? String(editing.supplierId)
+          : ''
+      );
       setBarcode(editing.barcode ?? '');
       setDescription(editing.description ?? '');
       setUnit(editing.unit ?? 'pcs');
@@ -199,7 +204,7 @@ const QuickAddProductModal: React.FC<QuickAddProductModalProps> = ({
     setAttributes((a) => a.filter((_, idx) => idx !== i));
 
   const handleSubmit = (): void => {
-    if (!name || !sku || !categoryId || !supplierId || !barcode || !description || !unit) {
+    if (!name || !sku || !categoryId || !barcode || !description || !unit) {
       toast.error(t('erp.products.validation.requiredFields'));
       return;
     }
@@ -216,7 +221,7 @@ const QuickAddProductModal: React.FC<QuickAddProductModalProps> = ({
       name,
       sku,
       categoryId: Number(categoryId),
-      supplierId: Number(supplierId),
+      supplierId: supplierId ? Number(supplierId) : undefined,
       barcode,
       description,
       unit,

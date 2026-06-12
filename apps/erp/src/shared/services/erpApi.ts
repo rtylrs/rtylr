@@ -14,6 +14,7 @@ export interface Product {
   salePrice: number;
   status: 'In Stock' | 'Low Stock' | 'Out of Stock';
   categoryId?: number;
+  supplierId?: number;
   brand?: string;
   barcode?: string;
   imageUrl?: string;
@@ -33,7 +34,7 @@ export interface CreateProductInput {
   name: string;
   sku: string;
   categoryId: number;
-  supplierId: number;
+  supplierId?: number;
   barcode: string;
   description: string;
   unit: string;
@@ -230,6 +231,8 @@ export interface ProductVariant {
 export interface PriceList {
   id: number;
   name: string;
+  currency?: string;
+  isDefault?: boolean;
   description: string;
   tier: 'Retail' | 'Wholesale' | 'VIP' | 'Custom';
   multiplier: number;
@@ -391,8 +394,8 @@ interface PriceListMutationPayload {
 function toPriceListMutationPayload(data: Partial<PriceList>): PriceListMutationPayload {
   return {
     name: data.name,
-    currency: 'USD',
-    isDefault: false,
+    currency: data.currency,
+    isDefault: data.isDefault,
   };
 }
 

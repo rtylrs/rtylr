@@ -1,6 +1,14 @@
 import React, { useState } from 'react';
 import { motion, type Variants } from 'motion/react';
-import { Plus, FileText, Send, CheckCircle, Clock as ClockIcon, ThumbsUp } from 'lucide-react';
+import {
+  Plus,
+  FileText,
+  Send,
+  CheckCircle,
+  Clock as ClockIcon,
+  ThumbsUp,
+  Trash2,
+} from 'lucide-react';
 import { HelmetContainer } from '@voxire/components';
 import { PurchaseOrder } from '../../shared/services/erpApi';
 import {
@@ -10,6 +18,7 @@ import {
   useCreatePurchaseOrder,
 } from './usePurchaseOrders';
 import { useSuppliers } from '../suppliers/useSuppliers';
+import { useProducts } from '../products/useProducts';
 import PrintPOButton from '../../shared/components/PrintPOButton';
 import ExportButton from '../../shared/components/ExportButton';
 import { toast } from 'sonner';
@@ -68,6 +77,8 @@ const Purchasing: React.FC = () => {
   const createMut = useCreatePurchaseOrder();
   const { data: supplierResult } = useSuppliers();
   const suppliers = supplierResult?.suppliers ?? [];
+  const { data: productResult } = useProducts();
+  const products = productResult?.products ?? [];
   const [filter, setFilter] = useState<PurchaseOrder['status'] | 'All'>('All');
   const [showCreate, setShowCreate] = useState(false);
   const [newSupplierId, setNewSupplierId] = useState('');
@@ -76,6 +87,9 @@ const Purchasing: React.FC = () => {
     new Date(Date.now() + 7 * 86400000).toISOString().slice(0, 10)
   );
   const [newNotes, setNewNotes] = useState('');
+  const [newItems, setNewItems] = useState<
+    Array<{ productId: string; quantityOrdered: string; unitCost: string }>
+  >([{ productId: '', quantityOrdered: '', unitCost: '' }]);
 
   const filteredOrders = filter === 'All' ? orders : orders.filter((o) => o.status === filter);
 
@@ -105,6 +119,11 @@ const Purchasing: React.FC = () => {
       toast.error('Supplier and PO number are required');
       return;
     }
+    const validItems = newItems.filter((it) => it.productId && Number(it.quantityOrdered) > 0);
+    if (validItems.length === 0) {
+      toast.error('At least one item with a product and quantity is required');
+      return;
+    }
     try {
       await createMut.mutateAsync({
         supplierId: Number(newSupplierId),
@@ -112,7 +131,11 @@ const Purchasing: React.FC = () => {
         taxAmount: 0,
         expectedDelivery: newExpectedDelivery,
         notes: newNotes.trim(),
-        items: [],
+        items: validItems.map((it) => ({
+          productId: Number(it.productId),
+          quantityOrdered: Number(it.quantityOrdered),
+          unitCost: it.unitCost ? Number(it.unitCost) : 0,
+        })),
       });
       toast.success('Purchase order draft created');
       setShowCreate(false);
@@ -120,6 +143,7 @@ const Purchasing: React.FC = () => {
       setNewPoNumber('');
       setNewExpectedDelivery(new Date(Date.now() + 7 * 86400000).toISOString().slice(0, 10));
       setNewNotes('');
+      setNewItems([{ productId: '', quantityOrdered: '', unitCost: '' }]);
     } catch {
       toast.error('Failed to create purchase order');
     }
@@ -359,6 +383,96 @@ const Purchasing: React.FC = () => {
                 color: 'var(--hub-text)',
               }}
             />
+            <p
+              className="text-[11px] font-semibold uppercase tracking-wide"
+              style={{ color: 'var(--hub-text-muted)' }}
+            >
+              Items *
+            </p>
+            {newItems.map((item, idx) => (
+              <div key={idx} className="flex gap-1 items-center">
+                <select
+                  value={item.productId}
+                  onChange={(e) =>
+                    setNewItems((prev) =>
+                      prev.map((it, i) => (i === idx ? { ...it, productId: e.target.value } : it))
+                    )
+                  }
+                  className="flex-1 px-2 py-1.5 rounded-lg text-xs outline-none"
+                  style={{
+                    background: 'var(--hub-input-bg)',
+                    border: '1px solid var(--hub-border)',
+                    color: 'var(--hub-text)',
+                  }}
+                >
+                  <option value="">Product</option>
+                  {products.map((p) => (
+                    <option key={p.id} value={p.id}>
+                      {p.name}
+                    </option>
+                  ))}
+                </select>
+                <input
+                  type="number"
+                  min="1"
+                  value={item.quantityOrdered}
+                  onChange={(e) =>
+                    setNewItems((prev) =>
+                      prev.map((it, i) =>
+                        i === idx ? { ...it, quantityOrdered: e.target.value } : it
+                      )
+                    )
+                  }
+                  placeholder="Qty"
+                  className="w-14 px-2 py-1.5 rounded-lg text-xs outline-none"
+                  style={{
+                    background: 'var(--hub-input-bg)',
+                    border: '1px solid var(--hub-border)',
+                    color: 'var(--hub-text)',
+                  }}
+                />
+                <input
+                  type="number"
+                  min="0"
+                  step="0.01"
+                  value={item.unitCost}
+                  onChange={(e) =>
+                    setNewItems((prev) =>
+                      prev.map((it, i) => (i === idx ? { ...it, unitCost: e.target.value } : it))
+                    )
+                  }
+                  placeholder="Cost"
+                  className="w-16 px-2 py-1.5 rounded-lg text-xs outline-none"
+                  style={{
+                    background: 'var(--hub-input-bg)',
+                    border: '1px solid var(--hub-border)',
+                    color: 'var(--hub-text)',
+                  }}
+                />
+                <button
+                  type="button"
+                  onClick={() => setNewItems((prev) => prev.filter((_, i) => i !== idx))}
+                  disabled={newItems.length === 1}
+                  className="p-1 rounded disabled:opacity-30"
+                  style={{ color: 'var(--hub-text-muted)' }}
+                >
+                  <Trash2 size={12} />
+                </button>
+              </div>
+            ))}
+            <button
+              type="button"
+              onClick={() =>
+                setNewItems((prev) => [
+                  ...prev,
+                  { productId: '', quantityOrdered: '', unitCost: '' },
+                ])
+              }
+              className="text-xs"
+              style={{ color: 'var(--hub-text-muted)' }}
+            >
+              + Add item
+            </button>
             <div className="flex gap-2 justify-end">
               <button
                 onClick={() => setShowCreate(false)}

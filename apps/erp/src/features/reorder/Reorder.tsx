@@ -6,7 +6,6 @@ import { useReorderSuggestions } from './useReorderSuggestions';
 import PageHeader from '../../shared/components/PageHeader';
 import { SkeletonRow } from '../../shared/components/Skeleton';
 import EmptyState from '../../shared/components/EmptyState';
-import { toast } from 'sonner';
 
 const AMBER = '#f59e0b';
 
@@ -25,16 +24,16 @@ const Reorder: React.FC = () => {
         description="Smart recommendations based on sales velocity and lead times"
         actions={
           <button
-            onClick={() => toast.info('Bulk reorder creation coming soon')}
-            disabled={suggestions.length === 0}
+            disabled
             className="flex items-center gap-2 px-3 py-2 rounded-lg text-sm font-semibold"
             style={{
               background: AMBER,
               color: '#000',
-              opacity: suggestions.length === 0 ? 0.5 : 1,
+              opacity: 0.5,
+              cursor: 'not-allowed',
             }}
           >
-            <ShoppingCart size={14} /> Create All Orders
+            <ShoppingCart size={14} /> Coming soon
           </button>
         }
       />
@@ -125,11 +124,16 @@ const Reorder: React.FC = () => {
                   </span>
                 </span>
                 <button
-                  onClick={() => toast.info('Reorder creation coming soon')}
+                  disabled
                   className="text-[10px] font-semibold px-2 py-1 rounded-md"
-                  style={{ background: 'rgba(245,158,11,0.15)', color: AMBER }}
+                  style={{
+                    background: 'rgba(245,158,11,0.15)',
+                    color: AMBER,
+                    cursor: 'not-allowed',
+                    opacity: 0.65,
+                  }}
                 >
-                  Order
+                  Coming soon
                 </button>
               </div>
             );
