@@ -77,7 +77,7 @@ body {
     a[class*='button'],
     a[class*='CTA'],
     a[class*='cta']
-  ):not([class*='FeaturesSection_tab']):not([class*='toggleOption']):not(.rtylr-desktop-shell *):not([class*='nav-link']):not([class*='mobile-nav-item'] *) {
+  ):not([class*='FeaturesSection_tab']):not([class*='toggleOption']):not([class*='faqQuestion']):not(.rtylr-desktop-shell *):not([class*='nav-link']):not([class*='mobile-nav-item'] *) {
   background: #ffffff !important;
   background-image: none !important;
   color: #0a0a0a !important;
@@ -95,7 +95,7 @@ body {
     a[class*='button'],
     a[class*='CTA'],
     a[class*='cta']
-  ):not([class*='FeaturesSection_tab']):not([class*='toggleOption']):not(.rtylr-desktop-shell *):not([class*='nav-link']):not([class*='mobile-nav-item'] *):hover {
+  ):not([class*='FeaturesSection_tab']):not([class*='toggleOption']):not([class*='faqQuestion']):not(.rtylr-desktop-shell *):not([class*='nav-link']):not([class*='mobile-nav-item'] *):hover {
   background: #f4f4f4 !important;
   background-image: none !important;
   color: #0a0a0a !important;
@@ -111,7 +111,7 @@ body {
     a[class*='button'],
     a[class*='CTA'],
     a[class*='cta']
-  ):not([class*='FeaturesSection_tab']):not([class*='toggleOption']):not(.rtylr-desktop-shell *):not([class*='nav-link']):not([class*='mobile-nav-item'] *):active {
+  ):not([class*='FeaturesSection_tab']):not([class*='toggleOption']):not([class*='faqQuestion']):not(.rtylr-desktop-shell *):not([class*='nav-link']):not([class*='mobile-nav-item'] *):active {
   background: #eeeeee !important;
   background-image: none !important;
   color: #0a0a0a !important;
@@ -130,7 +130,7 @@ body {
     a[class*='dark-outline'],
     a[class*='darkOutline'],
     a[class*='secondary']
-  ):not([class*='FeaturesSection_tab']):not([class*='toggleOption']):not(.rtylr-desktop-shell *):not([class*='nav-link']):not([class*='mobile-nav-item'] *) {
+  ):not([class*='FeaturesSection_tab']):not([class*='toggleOption']):not([class*='faqQuestion']):not(.rtylr-desktop-shell *):not([class*='nav-link']):not([class*='mobile-nav-item'] *) {
   background: var(--btn-glass-bg) !important;
   background-image: none !important;
   color: #e8e6e1 !important;
@@ -150,7 +150,7 @@ body {
     a[class*='dark-outline'],
     a[class*='darkOutline'],
     a[class*='secondary']
-  ):not([class*='FeaturesSection_tab']):not([class*='toggleOption']):not(.rtylr-desktop-shell *):not([class*='nav-link']):not([class*='mobile-nav-item'] *):hover {
+  ):not([class*='FeaturesSection_tab']):not([class*='toggleOption']):not([class*='faqQuestion']):not(.rtylr-desktop-shell *):not([class*='nav-link']):not([class*='mobile-nav-item'] *):hover {
   background: var(--btn-glass-bg-hover) !important;
   background-image: none !important;
   color: #ffffff !important;
@@ -166,7 +166,7 @@ body {
     a[class*='button'],
     a[class*='CTA'],
     a[class*='cta']
-  ):not([class*='FeaturesSection_tab']):not([class*='toggleOption']):not(.rtylr-desktop-shell *):not([class*='nav-link']):not([class*='mobile-nav-item'] *)::before,
+  ):not([class*='FeaturesSection_tab']):not([class*='toggleOption']):not([class*='faqQuestion']):not(.rtylr-desktop-shell *):not([class*='nav-link']):not([class*='mobile-nav-item'] *)::before,
 :where(
     button,
     a[class*='Btn'],
@@ -175,7 +175,7 @@ body {
     a[class*='button'],
     a[class*='CTA'],
     a[class*='cta']
-  ):not([class*='FeaturesSection_tab']):not([class*='toggleOption']):not(.rtylr-desktop-shell *):not([class*='nav-link']):not([class*='mobile-nav-item'] *)::after {
+  ):not([class*='FeaturesSection_tab']):not([class*='toggleOption']):not([class*='faqQuestion']):not(.rtylr-desktop-shell *):not([class*='nav-link']):not([class*='mobile-nav-item'] *)::after {
   background-image: none !important;
   box-shadow: none !important;
 }

@@ -15,7 +15,8 @@ import { TerminalIcon } from './icons/TerminalIcon';
 import { DoomIcon } from './icons/DoomIcon';
 import { StatusIcon } from './icons/StatusIcon';
 import { SnakeIcon } from './icons/SnakeIcon';
-import { Globe, Keyboard } from 'lucide-react';
+import { LandingIcon } from './icons/LandingIcon';
+import { Keyboard } from 'lucide-react';
 
 const ICON_MAP: Record<WindowType, React.FC<{ size?: number }>> = {
   pos: POSIcon,
@@ -28,7 +29,7 @@ const ICON_MAP: Record<WindowType, React.FC<{ size?: number }>> = {
   docs: DocsIcon,
   blog: BlogIcon,
   changelog: ChangelogIcon,
-  landing: ({ size = 28 }) => <Globe size={size} color="rgba(255,255,255,0.8)" strokeWidth={1.5} />,
+  landing: LandingIcon,
   settings: ({ size = 28 }) => (
     <svg width={size} height={size} viewBox="0 0 24 24" fill="none">
       <circle cx="12" cy="12" r="3" stroke="rgba(255,255,255,0.8)" strokeWidth="1.5" />

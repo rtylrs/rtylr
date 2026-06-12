@@ -1,5 +1,6 @@
 import React from 'react';
 import { DesktopIcon, DesktopIconDef } from './DesktopIcon';
+import { LandingIcon } from './icons/LandingIcon';
 import { POSIcon } from './icons/POSIcon';
 import { ERPIcon } from './icons/ERPIcon';
 import { CRMIcon } from './icons/CRMIcon';
@@ -16,6 +17,7 @@ import { StatusIcon } from './icons/StatusIcon';
 import { SnakeIcon } from './icons/SnakeIcon';
 
 const ICONS: DesktopIconDef[] = [
+  { key: 'landing', label: 'rtylr', svgIcon: LandingIcon, windowType: 'landing' },
   { key: 'pos', label: 'POS', svgIcon: POSIcon, href: '/pos' },
   { key: 'erp', label: 'ERP', svgIcon: ERPIcon, href: '/erp' },
   { key: 'crm', label: 'CRM', svgIcon: CRMIcon, href: '/crm' },
