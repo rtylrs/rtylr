@@ -2,8 +2,11 @@ import React from 'react';
 import { IconBase } from './IconBase';
 
 export const PricingIcon = ({ size = 44 }: { size?: number }) => (
-  <IconBase size={size} from="#fbbf24" to="#ea580c">
-    <path d="M12.586 2.586A2 2 0 0 0 11.172 2H4a2 2 0 0 0-2 2v7.172a2 2 0 0 0 .586 1.414l8.704 8.704a2.426 2.426 0 0 0 3.42 0l6.58-6.58a2.426 2.426 0 0 0 0-3.42z" />
-    <circle cx="7.5" cy="7.5" r="1" fill="#fff" stroke="none" />
+  <IconBase size={size} from="#fcc434" to="#cc4a0a">
+    <path
+      d="M12.7 2.3h6.7a1.7 1.7 0 0 1 1.7 1.7v6.7a2.1 2.1 0 0 1-.62 1.5l-8.5 8.5a2.1 2.1 0 0 1-2.97 0L3.4 15.1a2.1 2.1 0 0 1 0-2.97l8.5-8.5a2.1 2.1 0 0 1 1.5-.62Z"
+      fill="#fff"
+    />
+    <circle cx="16.4" cy="7.6" r="1.8" fill="rgba(0,0,0,0.26)" />
   </IconBase>
 );

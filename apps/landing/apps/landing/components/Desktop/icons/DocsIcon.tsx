@@ -2,11 +2,14 @@ import React from 'react';
 import { IconBase } from './IconBase';
 
 export const DocsIcon = ({ size = 44 }: { size?: number }) => (
-  <IconBase size={size} from="#46b8f5" to="#0369a1">
-    <path d="M15 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V7Z" />
-    <path d="M14 2v4a2 2 0 0 0 2 2h4" />
-    <path d="M10 9H8" />
-    <path d="M16 13H8" />
-    <path d="M16 17H8" />
+  <IconBase size={size} from="#48bbf7" to="#0359a8">
+    <path
+      d="M6.2 2.2h7.1L19 7.9v12.2a1.7 1.7 0 0 1-1.7 1.7H6.2a1.7 1.7 0 0 1-1.7-1.7V3.9a1.7 1.7 0 0 1 1.7-1.7Z"
+      fill="#fff"
+    />
+    <path d="M13.3 2.2 19 7.9h-4.3a1.4 1.4 0 0 1-1.4-1.4Z" fill="rgba(0,0,0,0.18)" />
+    <rect x="7.4" y="11.2" width="9.2" height="1.7" rx="0.85" fill="rgba(0,0,0,0.24)" />
+    <rect x="7.4" y="14.6" width="9.2" height="1.7" rx="0.85" fill="rgba(0,0,0,0.24)" />
+    <rect x="7.4" y="18" width="5.6" height="1.7" rx="0.85" fill="rgba(0,0,0,0.24)" />
   </IconBase>
 );

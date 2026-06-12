@@ -2,9 +2,9 @@ import React from 'react';
 import { IconBase } from './IconBase';
 
 export const ERPIcon = ({ size = 44 }: { size?: number }) => (
-  <IconBase size={size} from="#8c95f8" to="#4338ca">
-    <path d="M21 8a2 2 0 0 0-1-1.73l-7-4a2 2 0 0 0-2 0l-7 4A2 2 0 0 0 3 8v8a2 2 0 0 0 1 1.73l7 4a2 2 0 0 0 2 0l7-4A2 2 0 0 0 21 16Z" />
-    <path d="m3.3 7 8.7 5 8.7-5" />
-    <path d="M12 22V12" />
+  <IconBase size={size} from="#8d8df9" to="#3d2fa8">
+    <path d="M12 1.9 20.4 6.6 12 11.3 3.6 6.6Z" fill="#fff" />
+    <path d="M3.6 6.6 12 11.3v9.8l-8.4-4.7Z" fill="#fff" opacity="0.78" />
+    <path d="M20.4 6.6 12 11.3v9.8l8.4-4.7Z" fill="#fff" opacity="0.55" />
   </IconBase>
 );
