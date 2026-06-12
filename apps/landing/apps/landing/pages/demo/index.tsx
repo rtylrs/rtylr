@@ -1,4 +1,5 @@
 import React, { useState, useMemo } from 'react';
+import { motion } from 'motion/react';
 import AppLayout from '../../components/Layout/AppLayout';
 import MainLayout from '../../layouts/Main/MainLayout';
 import HelmetContainer from '../../components/HelmetContainer';
@@ -6,6 +7,8 @@ import { Input, Select, Button } from '@voxire/components';
 import countries from 'i18n-iso-countries';
 import enLocale from 'i18n-iso-countries/langs/en.json';
 import { webPageSchema } from '../../lib/structured-data';
+import { blurFadeIn, staggerBlur } from '../../lib/animations';
+import { SplitWords } from '../../components/motion/SplitWords';
 import styles from './demo.module.scss';
 
 // Register English locale for country names
@@ -134,13 +137,18 @@ const DemoPage = (): JSX.Element => {
         />
         <div className={styles.demoPage}>
           <div className={styles.container}>
-            <div className={styles.formWrapper}>
+            <motion.div
+              className={styles.formWrapper}
+              initial="hidden"
+              animate="visible"
+              variants={staggerBlur}
+            >
               {submitted ? (
                 // Inline success state - nicer than a native alert().
                 // Keeps the page branded and tells the user the exact
                 // next step so they're not left wondering.
                 <>
-                  <h1 className={styles.title}>One more step.</h1>
+                  <SplitWords as="h1" className={styles.title} text="One more step." delay={0.05} />
                   <p className={styles.subtitle}>
                     We opened a pre-filled draft in your email app — hit send and someone from the
                     rtylr team will reach out within one business day to schedule the walkthrough.
@@ -153,14 +161,14 @@ const DemoPage = (): JSX.Element => {
                 </>
               ) : (
                 <>
-                  <h1 className={styles.title}>See rtylr on your data.</h1>
-                  <p className={styles.subtitle}>
+                  <SplitWords as="h1" className={styles.title} text="See rtylr on your data." delay={0.05} />
+                  <motion.p className={styles.subtitle} variants={blurFadeIn}>
                     A 30-minute walkthrough with someone who actually built it. Bring your menu,
                     your SKU list, your PDF of invoices, we&apos;ll show you what the switch would
                     look like.
-                  </p>
+                  </motion.p>
 
-                  <form onSubmit={handleSubmit} className={styles.form}>
+                  <motion.form onSubmit={handleSubmit} className={styles.form} variants={blurFadeIn}>
                     <div className={styles.formGroup}>
                       <Input
                         type="email"
@@ -228,10 +236,10 @@ const DemoPage = (): JSX.Element => {
                     <Button type="submit" variant="soft" disabled={isSubmitting}>
                       {isSubmitting ? 'SUBMITTING...' : 'BOOK A DEMO'}
                     </Button>
-                  </form>
+                  </motion.form>
                 </>
               )}
-            </div>
+            </motion.div>
           </div>
         </div>
       </MainLayout>
