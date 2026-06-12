@@ -189,8 +189,6 @@ export default function AboutWindow(): React.JSX.Element {
       <div style={{ padding: '48px 80px', textAlign: 'center' }}>
         <a
           href={`${APP_URLS.auth}/register`}
-          target="_blank"
-          rel="noopener noreferrer"
           style={{
             display: 'inline-block',
             padding: '12px 28px',

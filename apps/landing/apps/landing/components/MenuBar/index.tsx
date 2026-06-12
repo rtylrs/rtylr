@@ -96,8 +96,6 @@ export const MenuBar: React.FC = () => {
       <div style={{ marginLeft: 'auto', display: 'flex', alignItems: 'center', gap: 8 }}>
         <a
           href={APP_URLS.auth}
-          target="_blank"
-          rel="noopener noreferrer"
           style={{
             fontSize: 12,
             fontWeight: 500,
@@ -116,8 +114,6 @@ export const MenuBar: React.FC = () => {
         </a>
         <a
           href={`${APP_URLS.auth}/register`}
-          target="_blank"
-          rel="noopener noreferrer"
           style={{
             fontSize: 12,
             fontWeight: 600,
