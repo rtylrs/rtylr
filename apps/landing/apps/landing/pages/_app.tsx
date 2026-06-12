@@ -3,7 +3,8 @@ import { injectTheme } from '@voxire/config';
 import { bootObservability } from '@voxire/observability';
 import { CookieBanner } from '@voxire/consent';
 import type { AppProps } from 'next/app';
-import { MotionConfig } from 'motion/react';
+import { useRouter } from 'next/router';
+import { AnimatePresence, MotionConfig, motion } from 'motion/react';
 import { QueryClient, QueryClientProvider } from '@tanstack/react-query';
 import { I18nextProvider } from 'react-i18next';
 import { CookiesProvider } from 'react-cookie';
@@ -16,6 +17,7 @@ import '@voxire/components/styles';
 import '../styles/index.scss';
 
 function MyApp({ Component, pageProps }: AppProps) {
+  const router = useRouter();
   const [queryClient] = useState(
     () =>
       new QueryClient({
@@ -50,7 +52,19 @@ function MyApp({ Component, pageProps }: AppProps) {
       <CookiesProvider>
         <I18nextProvider i18n={i18next}>
           <MotionConfig reducedMotion="user">
-            <Component {...pageProps} />
+            {/* Opacity-only route crossfade - no transform, so fixed headers
+                inside pages are never re-anchored mid-transition. */}
+            <AnimatePresence mode="wait" initial={false}>
+              <motion.div
+                key={router.route}
+                initial={{ opacity: 0 }}
+                animate={{ opacity: 1 }}
+                exit={{ opacity: 0, transition: { duration: 0.15, ease: 'easeIn' } }}
+                transition={{ duration: 0.35, ease: 'easeOut' }}
+              >
+                <Component {...pageProps} />
+              </motion.div>
+            </AnimatePresence>
           </MotionConfig>
           {/* Strict opt-in banner. Shows only until the visitor
               accepts or declines - then cookies-granted unlocks the

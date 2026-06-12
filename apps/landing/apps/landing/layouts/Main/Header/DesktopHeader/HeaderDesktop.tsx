@@ -1,6 +1,7 @@
 import React, { useState, useEffect, useCallback, useMemo } from 'react';
 import { cn } from '../../../../lib/cn';
 import { HiChevronDown } from 'react-icons/hi';
+import { AnimatePresence, motion } from 'motion/react';
 import Link from 'next/link';
 
 import { Button } from '@voxire/components';
@@ -52,6 +53,29 @@ const COMPANY_LINKS = [
   { href: 'https://voxire.com/careers', label: 'Careers', external: true },
   { href: '/contact', label: 'Contact' },
 ];
+
+// Sheet-style dropdown: scales out of the trigger with a spring,
+// settles fast, exits quicker than it enters.
+const DropdownPanel: React.FC<React.PropsWithChildren<{ open: boolean; className: string }>> = ({
+  open,
+  className,
+  children,
+}) => (
+  <AnimatePresence>
+    {open && (
+      <motion.div
+        className={className}
+        initial={{ opacity: 0, scale: 0.96, y: -6 }}
+        animate={{ opacity: 1, scale: 1, y: 0 }}
+        exit={{ opacity: 0, scale: 0.97, y: -4, transition: { duration: 0.15, ease: 'easeIn' } }}
+        transition={{ type: 'spring', stiffness: 480, damping: 32, mass: 0.6 }}
+        style={{ transformOrigin: 'top center' }}
+      >
+        {children}
+      </motion.div>
+    )}
+  </AnimatePresence>
+);
 
 const HeaderDesktop: React.FC = () => {
   const [scrolled, setScrolled] = useState(false);
@@ -231,24 +255,23 @@ const HeaderDesktop: React.FC = () => {
                 className={styles['dropdown-icon']}
                 style={{
                   transform: featuresDropdown ? 'rotate(180deg)' : 'rotate(0deg)',
+                  transition: 'transform 0.3s cubic-bezier(0.32, 0.72, 0, 1)',
                 }}
               />
             </button>
-            {featuresDropdown && (
-              <div className={styles['header-dropdown-wide']}>
-                {FEATURE_LINKS.map((item) => (
-                  <Link
-                    key={item.href}
-                    href={item.href}
-                    className={styles['dropdown-item']}
-                    onClick={closeDropdowns}
-                  >
-                    <div className={styles['dropdown-item-title']}>{item.title}</div>
-                    <div className={styles['dropdown-item-desc']}>{item.desc}</div>
-                  </Link>
-                ))}
-              </div>
-            )}
+            <DropdownPanel open={featuresDropdown} className={styles['header-dropdown-wide']}>
+              {FEATURE_LINKS.map((item) => (
+                <Link
+                  key={item.href}
+                  href={item.href}
+                  className={styles['dropdown-item']}
+                  onClick={closeDropdowns}
+                >
+                  <div className={styles['dropdown-item-title']}>{item.title}</div>
+                  <div className={styles['dropdown-item-desc']}>{item.desc}</div>
+                </Link>
+              ))}
+            </DropdownPanel>
           </div>
 
           <LinkWithColor to="/pricing" className={styles['nav-link']}>
@@ -268,36 +291,35 @@ const HeaderDesktop: React.FC = () => {
                 className={styles['dropdown-icon']}
                 style={{
                   transform: resourcesDropdown ? 'rotate(180deg)' : 'rotate(0deg)',
+                  transition: 'transform 0.3s cubic-bezier(0.32, 0.72, 0, 1)',
                 }}
               />
             </button>
-            {resourcesDropdown && (
-              <div className={styles['header-dropdown']}>
-                {RESOURCE_LINKS.map((item) =>
-                  item.external ? (
-                    <a
-                      key={item.label}
-                      href={item.href}
-                      className={styles['dropdown-link']}
-                      target="_blank"
-                      rel="noopener noreferrer"
-                      onClick={closeDropdowns}
-                    >
-                      {item.label}
-                    </a>
-                  ) : (
-                    <Link
-                      key={item.label}
-                      href={item.href}
-                      className={styles['dropdown-link']}
-                      onClick={closeDropdowns}
-                    >
-                      {item.label}
-                    </Link>
-                  )
-                )}
-              </div>
-            )}
+            <DropdownPanel open={resourcesDropdown} className={styles['header-dropdown']}>
+              {RESOURCE_LINKS.map((item) =>
+                item.external ? (
+                  <a
+                    key={item.label}
+                    href={item.href}
+                    className={styles['dropdown-link']}
+                    target="_blank"
+                    rel="noopener noreferrer"
+                    onClick={closeDropdowns}
+                  >
+                    {item.label}
+                  </a>
+                ) : (
+                  <Link
+                    key={item.label}
+                    href={item.href}
+                    className={styles['dropdown-link']}
+                    onClick={closeDropdowns}
+                  >
+                    {item.label}
+                  </Link>
+                )
+              )}
+            </DropdownPanel>
           </div>
 
           <div className={cn(styles['nav-item'], 'solutions-dropdown-container')}>
@@ -313,36 +335,35 @@ const HeaderDesktop: React.FC = () => {
                 className={styles['dropdown-icon']}
                 style={{
                   transform: solutionsDropdown ? 'rotate(180deg)' : 'rotate(0deg)',
+                  transition: 'transform 0.3s cubic-bezier(0.32, 0.72, 0, 1)',
                 }}
               />
             </button>
-            {solutionsDropdown && (
-              <div className={styles['header-dropdown']}>
-                {COMPANY_LINKS.map((item) =>
-                  item.external ? (
-                    <a
-                      key={item.label}
-                      href={item.href}
-                      className={styles['dropdown-link']}
-                      target="_blank"
-                      rel="noopener noreferrer"
-                      onClick={closeDropdowns}
-                    >
-                      {item.label}
-                    </a>
-                  ) : (
-                    <Link
-                      key={item.label}
-                      href={item.href}
-                      className={styles['dropdown-link']}
-                      onClick={closeDropdowns}
-                    >
-                      {item.label}
-                    </Link>
-                  )
-                )}
-              </div>
-            )}
+            <DropdownPanel open={solutionsDropdown} className={styles['header-dropdown']}>
+              {COMPANY_LINKS.map((item) =>
+                item.external ? (
+                  <a
+                    key={item.label}
+                    href={item.href}
+                    className={styles['dropdown-link']}
+                    target="_blank"
+                    rel="noopener noreferrer"
+                    onClick={closeDropdowns}
+                  >
+                    {item.label}
+                  </a>
+                ) : (
+                  <Link
+                    key={item.label}
+                    href={item.href}
+                    className={styles['dropdown-link']}
+                    onClick={closeDropdowns}
+                  >
+                    {item.label}
+                  </Link>
+                )
+              )}
+            </DropdownPanel>
           </div>
         </nav>
       </div>
