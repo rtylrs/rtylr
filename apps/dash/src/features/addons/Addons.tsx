@@ -29,6 +29,7 @@ import { Input } from '../../shared/components/ui';
 import { unwrap } from '@voxire/api';
 import { safe } from '../../shared/lib/api';
 import { ADDONS_QUERY_KEY, type AddonData, useAddons } from '../../shared/hooks/queries/useAddons';
+import { centsToDisplay, useBillingDetail } from '../../shared/hooks/queries/useSubscription';
 
 const ICON_MAP: Record<
   string,
@@ -88,12 +89,33 @@ function getAddonManageRoute(addonId: string): '/settings/domain' | '/settings/e
   }
 }
 
+function addonPriceCents(addon: AddonData): number {
+  return Math.round(addon.price * 100);
+}
+
+function proratedAddonCents(priceCents: number): {
+  amountCents: number;
+  daysRemaining: number;
+  daysInMonth: number;
+} {
+  const now = new Date();
+  const daysInMonth = new Date(now.getFullYear(), now.getMonth() + 1, 0).getDate();
+  const daysRemaining = daysInMonth - now.getDate() + 1;
+  return {
+    amountCents: Math.round((daysRemaining * priceCents) / daysInMonth),
+    daysRemaining,
+    daysInMonth,
+  };
+}
+
 const Addons: React.FC = () => {
   const qc = useQueryClient();
   const navigate = useNavigate();
   const { data: addons = [], isLoading } = useAddons();
+  const { data: billing } = useBillingDetail();
   const [searchTerm, setSearchTerm] = useState('');
   const [enablingId, setEnablingId] = useState<string | null>(null);
+  const [purchaseTarget, setPurchaseTarget] = useState<AddonData | null>(null);
   const [disableTarget, setDisableTarget] = useState<AddonData | null>(null);
   const [confirmText, setConfirmText] = useState('');
   const [showEnableSuccess, setShowEnableSuccess] = useState<string | null>(null);
@@ -129,6 +151,21 @@ const Addons: React.FC = () => {
     onError: () => toast.error('Failed to disable addon'),
   });
 
+  const purchaseMutation = useMutation({
+    mutationFn: async (addonId: string) => {
+      await unwrap(safe.post('/addons/enable', { addonId }));
+    },
+    onSuccess: (_, addonId) => {
+      const purchased = addons.find((addon) => addon.id === addonId);
+      setPurchaseTarget(null);
+      qc.invalidateQueries({ queryKey: ADDONS_QUERY_KEY });
+      qc.invalidateQueries({ queryKey: ['subscription', 'billing'] });
+      qc.invalidateQueries({ queryKey: ['subscription', 'billing', 'history'] });
+      toast.success(`${purchased?.name ?? 'Addon'} added to billing`);
+    },
+    onError: () => toast.error('Failed to purchase addon'),
+  });
+
   const filtered = addons.filter(
     (a) =>
       a.name.toLowerCase().includes(searchTerm.toLowerCase()) ||
@@ -136,10 +173,13 @@ const Addons: React.FC = () => {
   );
 
   const CONFIRM_PHRASE = 'disable this addon';
-
-  const goToBilling = () => {
-    void navigate({ to: '/settings/billing' });
-  };
+  const enabledPaidMonthlyCents = addons
+    .filter((addon) => addon.isEnabled && !addon.isFree)
+    .reduce((sum, addon) => sum + addonPriceCents(addon), 0);
+  const recurringBaseCents =
+    (billing?.currentSeatCount ?? 0) * (billing?.pricePerSeatCents ?? 0) + enabledPaidMonthlyCents;
+  const purchasePriceCents = purchaseTarget ? addonPriceCents(purchaseTarget) : 0;
+  const purchaseProration = proratedAddonCents(purchasePriceCents);
 
   return (
     <>
@@ -195,7 +235,11 @@ const Addons: React.FC = () => {
                   void navigate({ to: manageRoute });
                   return;
                 }
-                goToBilling();
+                if (addon.isEnabled) {
+                  setDisableTarget(addon);
+                  return;
+                }
+                setPurchaseTarget(addon);
               };
 
               return (
@@ -263,14 +307,19 @@ const Addons: React.FC = () => {
                     {!addon.isFree ? (
                       <button
                         onClick={handlePaidAddonClick}
-                        className="px-3 py-1.5 rounded-lg text-xs font-semibold transition-all"
+                        disabled={purchaseMutation.isPending && purchaseTarget?.id === addon.id}
+                        className="px-3 py-1.5 rounded-lg text-xs font-semibold transition-all disabled:opacity-60"
                         style={{
                           background: addon.isEnabled ? 'var(--dash-hover)' : '#4583C4',
                           color: addon.isEnabled ? 'var(--dash-text-muted)' : '#fff',
                           border: addon.isEnabled ? '1px solid var(--dash-border)' : 'none',
                         }}
                       >
-                        {addon.isEnabled ? 'Manage' : 'Purchase'}
+                        {purchaseMutation.isPending && purchaseTarget?.id === addon.id
+                          ? 'Purchasing...'
+                          : addon.isEnabled
+                            ? 'Manage'
+                            : 'Purchase'}
                       </button>
                     ) : isEnabling ? (
                       <div className="flex items-center gap-2 px-3 py-1.5">
@@ -331,6 +380,115 @@ const Addons: React.FC = () => {
             </p>
           </div>
         )}
+
+        {/* Paid addon purchase modal */}
+        <AnimatePresence>
+          {purchaseTarget && (
+            <motion.div
+              initial={{ opacity: 0 }}
+              animate={{ opacity: 1 }}
+              exit={{ opacity: 0 }}
+              className="fixed inset-0 z-50 flex items-center justify-center p-4"
+              style={{ background: 'rgba(0,0,0,0.5)' }}
+              onClick={() => {
+                if (!purchaseMutation.isPending) setPurchaseTarget(null);
+              }}
+            >
+              <motion.div
+                initial={{ scale: 0.95, opacity: 0 }}
+                animate={{ scale: 1, opacity: 1 }}
+                exit={{ scale: 0.95, opacity: 0 }}
+                onClick={(e) => e.stopPropagation()}
+                className="rounded-xl p-6 w-full max-w-md"
+                style={{
+                  background: 'var(--dash-surface)',
+                  border: '1px solid var(--dash-border)',
+                }}
+              >
+                <div className="flex items-start gap-3 mb-5">
+                  <div
+                    className="h-10 w-10 rounded-xl flex items-center justify-center shrink-0"
+                    style={{
+                      background: (
+                        COLOR_MAP[purchaseTarget.id] ?? {
+                          bg: 'var(--dash-hover)',
+                        }
+                      ).bg,
+                    }}
+                  >
+                    {React.createElement(ICON_MAP[purchaseTarget.icon] ?? ShoppingCart, {
+                      size: 19,
+                      style: {
+                        color: (
+                          COLOR_MAP[purchaseTarget.id] ?? {
+                            color: 'var(--dash-text-muted)',
+                          }
+                        ).color,
+                      },
+                    })}
+                  </div>
+                  <div className="min-w-0">
+                    <h3 className="text-base font-semibold" style={{ color: 'var(--dash-text)' }}>
+                      Purchase {purchaseTarget.name}
+                    </h3>
+                    <p className="text-xs mt-1" style={{ color: 'var(--dash-text-muted)' }}>
+                      This addon is added to your current billing month and recurring monthly total.
+                    </p>
+                  </div>
+                </div>
+
+                <div
+                  className="rounded-xl overflow-hidden mb-5"
+                  style={{ border: '1px solid var(--dash-border)' }}
+                >
+                  {[
+                    ['Addon price', `${centsToDisplay(purchasePriceCents)}/mo`],
+                    ['This month', `${centsToDisplay(purchaseProration.amountCents)} prorated`],
+                    ['Current monthly total', centsToDisplay(recurringBaseCents)],
+                    ['New monthly total', centsToDisplay(recurringBaseCents + purchasePriceCents)],
+                  ].map(([label, value]) => (
+                    <div
+                      key={label}
+                      className="flex items-center justify-between gap-4 px-4 py-3"
+                      style={{ borderBottom: '1px solid var(--dash-border)' }}
+                    >
+                      <span className="text-xs" style={{ color: 'var(--dash-text-muted)' }}>
+                        {label}
+                      </span>
+                      <span className="text-sm font-semibold" style={{ color: 'var(--dash-text)' }}>
+                        {value}
+                      </span>
+                    </div>
+                  ))}
+                </div>
+
+                <p className="text-xs mb-5" style={{ color: 'var(--dash-text-dim)' }}>
+                  Proration covers {purchaseProration.daysRemaining} of{' '}
+                  {purchaseProration.daysInMonth} days remaining in this billing month.
+                </p>
+
+                <div className="flex gap-2 justify-end">
+                  <button
+                    onClick={() => setPurchaseTarget(null)}
+                    disabled={purchaseMutation.isPending}
+                    className="px-4 py-2 rounded-lg text-sm font-medium disabled:opacity-60"
+                    style={{ background: 'var(--dash-hover)', color: 'var(--dash-text-muted)' }}
+                  >
+                    Cancel
+                  </button>
+                  <button
+                    onClick={() => purchaseMutation.mutate(purchaseTarget.id)}
+                    disabled={purchaseMutation.isPending}
+                    className="px-4 py-2 rounded-lg text-sm font-semibold transition-opacity disabled:opacity-60"
+                    style={{ background: '#4583C4', color: '#fff' }}
+                  >
+                    {purchaseMutation.isPending ? 'Purchasing...' : 'Confirm purchase'}
+                  </button>
+                </div>
+              </motion.div>
+            </motion.div>
+          )}
+        </AnimatePresence>
 
         {/* Disable confirmation modal */}
         <AnimatePresence>

@@ -43,6 +43,11 @@ export interface BillingLineItem {
   seatCount: number;
   pricePerSeatCents: number;
   amountCents: number;
+  type?: 'seat' | 'addon';
+  description?: string;
+  addonId?: string;
+  quantity?: number;
+  unitPriceCents?: number;
 }
 
 export interface BillingDetailPayload {

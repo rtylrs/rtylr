@@ -30,6 +30,7 @@ import {
   trialDaysLeft,
   type BillingDetailPayload,
   type BillingHistoryMonth,
+  type BillingLineItem,
   type PlanPayload,
   type SubscriptionPayload,
 } from '../../shared/hooks/queries/useSubscription';
@@ -637,6 +638,72 @@ const PaymentMethodsSection: React.FC<{ sub: SubscriptionPayload | null | undefi
   );
 };
 
+const CurrentChargesSection: React.FC<{
+  billing: BillingDetailPayload | null | undefined;
+  loading: boolean;
+}> = ({ billing, loading }) => (
+  <section className="space-y-3">
+    <SectionHeader title="Current charges" description="Plan seats and active paid addons." />
+    <div
+      className="rounded-xl overflow-hidden"
+      style={{ background: 'var(--dash-card)', border: '1px solid var(--dash-border)' }}
+    >
+      {loading ? (
+        <div className="p-5 space-y-3">
+          {[1, 2, 3].map((i) => (
+            <div
+              key={i}
+              className="h-12 rounded-lg animate-pulse"
+              style={{ background: 'var(--dash-hover)' }}
+            />
+          ))}
+        </div>
+      ) : !billing || billing.lineItems.length === 0 ? (
+        <div className="px-5 py-8 text-sm" style={{ color: 'var(--dash-text-muted)' }}>
+          No billable usage recorded this month.
+        </div>
+      ) : (
+        <div>
+          {billing.lineItems.map((item, index) => (
+            <div
+              key={`${item.type ?? 'seat'}-${item.addonId ?? index}-${item.periodStart}`}
+              className="grid grid-cols-1 sm:grid-cols-[1fr_auto] gap-2 sm:gap-4 px-5 py-4 items-center"
+              style={{ borderBottom: '1px solid var(--dash-border)' }}
+            >
+              <div>
+                <p className="text-sm font-medium" style={{ color: 'var(--dash-text)' }}>
+                  {item.type === 'addon'
+                    ? (item.description ?? 'Paid addon')
+                    : `${item.seatCount} seat${item.seatCount !== 1 ? 's' : ''}`}
+                </p>
+                <p className="text-xs mt-0.5" style={{ color: 'var(--dash-text-dim)' }}>
+                  {item.type === 'addon'
+                    ? `${centsToDisplay(item.unitPriceCents ?? 0)}/mo addon`
+                    : `${centsToDisplay(item.pricePerSeatCents)}/seat/mo`}
+                </p>
+              </div>
+              <p
+                className="text-sm font-semibold sm:text-right"
+                style={{ color: 'var(--dash-text)' }}
+              >
+                {centsToDisplay(item.amountCents)}
+              </p>
+            </div>
+          ))}
+          <div className="px-5 py-4 flex items-center justify-between gap-4">
+            <p className="text-sm font-semibold" style={{ color: 'var(--dash-text)' }}>
+              Estimated total
+            </p>
+            <p className="text-lg font-bold" style={{ color: 'var(--dash-text)' }}>
+              {centsToDisplay(billing.totalCents)}
+            </p>
+          </div>
+        </div>
+      )}
+    </div>
+  </section>
+);
+
 const InvoiceHistorySection: React.FC<{ history: BillingHistoryMonth[]; loading: boolean }> = ({
   history,
   loading,
@@ -681,13 +748,15 @@ const InvoiceHistorySection: React.FC<{ history: BillingHistoryMonth[]; loading:
             <span className="text-right">Total</span>
           </div>
           {history.map((month) => {
-            const periodCount = month.lineItems.length;
+            const seatItems = month.lineItems.filter(
+              (item: BillingLineItem) => item.type !== 'addon'
+            );
+            const periodCount = seatItems.length;
             const averageSeats =
               periodCount > 0
-                ? Math.round(
-                    month.lineItems.reduce((sum, item) => sum + item.seatCount, 0) / periodCount
-                  )
+                ? Math.round(seatItems.reduce((sum, item) => sum + item.seatCount, 0) / periodCount)
                 : 0;
+            const addonCount = month.lineItems.length - seatItems.length;
 
             return (
               <div
@@ -702,6 +771,7 @@ const InvoiceHistorySection: React.FC<{ history: BillingHistoryMonth[]; loading:
                   <p className="text-xs mt-0.5" style={{ color: 'var(--dash-text-dim)' }}>
                     {averageSeats} avg seat{averageSeats !== 1 ? 's' : ''} · {periodCount} period
                     {periodCount !== 1 ? 's' : ''}
+                    {addonCount > 0 ? ` · ${addonCount} addon${addonCount !== 1 ? 's' : ''}` : ''}
                   </p>
                 </div>
                 <span
@@ -764,6 +834,7 @@ const Billing: React.FC = (): React.JSX.Element => {
           <BillingSummary sub={sub} billing={billing} />
         )}
 
+        <CurrentChargesSection billing={billing} loading={billingLoading} />
         <PlansSection sub={sub} plans={plans} loading={plansLoading} />
         <PaymentMethodsSection sub={sub} />
         <InvoiceHistorySection history={history} loading={historyLoading} />
