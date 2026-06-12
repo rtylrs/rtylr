@@ -18,6 +18,7 @@ type mockRepo struct {
 	subscription       *domain.Subscription
 	ownerApps          []string
 	billingHistory     []domain.BillingHistoryMonth
+	addonPeriods       []domain.AddonBillingPeriod
 	activePeriod       *domain.SeatPeriod
 	ownerID            int64
 	listPlansErr       error
@@ -26,6 +27,7 @@ type mockRepo struct {
 	upsertSubErr       error
 	getAppsErr         error
 	getPeriodsErr      error
+	getAddonPeriodsErr error
 	getActivePeriodErr error
 	closePeriodErr     error
 	openPeriodErr      error
@@ -61,6 +63,10 @@ func (m *mockRepo) GetOwnerApps(_ context.Context, _ int64) ([]string, error) {
 
 func (m *mockRepo) GetPeriodsForMonth(_ context.Context, _ int64, _ time.Time) ([]domain.SeatPeriod, error) {
 	return nil, m.getPeriodsErr
+}
+
+func (m *mockRepo) GetAddonPeriodsForMonth(_ context.Context, _ int64, _ time.Time) ([]domain.AddonBillingPeriod, error) {
+	return m.addonPeriods, m.getAddonPeriodsErr
 }
 
 func (m *mockRepo) GetActivePeriod(_ context.Context, _ int64) (*domain.SeatPeriod, error) {
@@ -116,6 +122,29 @@ func TestComputeLineItem_PartialMonth(t *testing.T) {
 	// 10 seats x 15 days (16->30 inclusive) x $30 / 30 days = $150 = 15000 cents.
 	if li.AmountCents != 15000 {
 		t.Errorf("expected 15000 cents for half-month, got %d", li.AmountCents)
+	}
+}
+
+func TestComputeAddonLineItem_FullMonth(t *testing.T) {
+	billing := time.Date(2026, 4, 1, 0, 0, 0, 0, time.UTC)
+	end := time.Date(2026, 4, 30, 0, 0, 0, 0, time.UTC)
+	li := computeAddonLineItem(domain.AddonBillingPeriod{
+		AddonID:      "email_marketing",
+		Name:         "Email Marketing",
+		PriceCents:   1500,
+		PeriodStart:  billing,
+		PeriodEnd:    &end,
+		BillingMonth: billing,
+	})
+
+	if li.Type != "addon" || li.AddonID != "email_marketing" || li.Description != "Email Marketing" {
+		t.Fatalf("unexpected addon line metadata: %+v", li)
+	}
+	if li.AmountCents != 1500 {
+		t.Fatalf("expected full-month addon charge of 1500 cents, got %d", li.AmountCents)
+	}
+	if li.SeatCount != 0 || li.PricePerSeatCents != 0 {
+		t.Fatalf("addon line should not masquerade as seat usage: %+v", li)
 	}
 }
 
@@ -199,16 +228,43 @@ func TestGetOwnerApps_PropagatesError(t *testing.T) {
 func TestGetBillingHistory_Delegates(t *testing.T) {
 	history := []domain.BillingHistoryMonth{{TotalCents: 1000}}
 	s := &Service{repo: &mockRepo{billingHistory: history}}
-	got, err := s.GetBillingHistory(context.Background(), 1, 6)
+	got, err := s.GetBillingHistory(context.Background(), 1, 2, 6)
 	if err != nil || len(got) != 1 {
 		t.Errorf("got %v err %v", got, err)
+	}
+}
+
+func TestGetBillingHistory_IncludesAddonCharges(t *testing.T) {
+	month := time.Date(2026, 4, 1, 0, 0, 0, 0, time.UTC)
+	end := time.Date(2026, 4, 30, 0, 0, 0, 0, time.UTC)
+	s := &Service{repo: &mockRepo{
+		billingHistory: []domain.BillingHistoryMonth{{Month: month, TotalCents: 1000}},
+		addonPeriods: []domain.AddonBillingPeriod{{
+			AddonID:      "custom_domain",
+			Name:         "Custom Domain",
+			PriceCents:   900,
+			PeriodStart:  month,
+			PeriodEnd:    &end,
+			BillingMonth: month,
+		}},
+	}}
+
+	got, err := s.GetBillingHistory(context.Background(), 1, 2, 6)
+	if err != nil {
+		t.Fatalf("GetBillingHistory: %v", err)
+	}
+	if got[0].TotalCents != 1900 {
+		t.Fatalf("expected seat + addon total of 1900 cents, got %d", got[0].TotalCents)
+	}
+	if len(got[0].LineItems) != 1 || got[0].LineItems[0].Type != "addon" {
+		t.Fatalf("expected addon line item in history, got %+v", got[0].LineItems)
 	}
 }
 
 func TestGetBillingHistory_PropagatesError(t *testing.T) {
 	want := errors.New("db fail")
 	s := &Service{repo: &mockRepo{billingHistErr: want}}
-	if _, err := s.GetBillingHistory(context.Background(), 1, 6); !errors.Is(err, want) {
+	if _, err := s.GetBillingHistory(context.Background(), 1, 2, 6); !errors.Is(err, want) {
 		t.Errorf("expected sentinel, got %v", err)
 	}
 }

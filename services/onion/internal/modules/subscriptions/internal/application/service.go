@@ -85,7 +85,7 @@ func (s *Service) GetOwnerApps(ctx context.Context, ownerID int64) ([]string, er
 }
 
 // GetBillingDetail returns the current month's usage line items and totals.
-func (s *Service) GetBillingDetail(ctx context.Context, ownerID int64) (*domain.BillingDetail, error) {
+func (s *Service) GetBillingDetail(ctx context.Context, ownerID, businessID int64) (*domain.BillingDetail, error) {
 	sub, err := s.repo.GetSubscription(ctx, ownerID)
 	if err != nil {
 		return nil, err
@@ -102,6 +102,15 @@ func (s *Service) GetBillingDetail(ctx context.Context, ownerID int64) (*domain.
 	totalCents := 0
 	for _, p := range periods {
 		item := computeLineItem(p.SeatCount, p.PricePerSeatCents, p.PeriodStart, p.PeriodEnd, currentMonth)
+		lineItems = append(lineItems, item)
+		totalCents += item.AmountCents
+	}
+	addonPeriods, err := s.repo.GetAddonPeriodsForMonth(ctx, businessID, currentMonth)
+	if err != nil {
+		return nil, err
+	}
+	for _, p := range addonPeriods {
+		item := computeAddonLineItem(p)
 		lineItems = append(lineItems, item)
 		totalCents += item.AmountCents
 	}
@@ -123,8 +132,23 @@ func (s *Service) GetBillingDetail(ctx context.Context, ownerID int64) (*domain.
 }
 
 // GetBillingHistory returns the last N billing months.
-func (s *Service) GetBillingHistory(ctx context.Context, ownerID int64, limit int) ([]domain.BillingHistoryMonth, error) {
-	return s.repo.GetBillingHistory(ctx, ownerID, limit)
+func (s *Service) GetBillingHistory(ctx context.Context, ownerID, businessID int64, limit int) ([]domain.BillingHistoryMonth, error) {
+	months, err := s.repo.GetBillingHistory(ctx, ownerID, limit)
+	if err != nil {
+		return nil, err
+	}
+	for i := range months {
+		addonPeriods, err := s.repo.GetAddonPeriodsForMonth(ctx, businessID, months[i].Month)
+		if err != nil {
+			return nil, err
+		}
+		for _, p := range addonPeriods {
+			item := computeAddonLineItem(p)
+			months[i].LineItems = append(months[i].LineItems, item)
+			months[i].TotalCents += item.AmountCents
+		}
+	}
+	return months, nil
 }
 
 // RecordSeatChange is called when a team member is added or removed.
@@ -183,7 +207,23 @@ func computeLineItem(seatCount, pricePerSeatCents int, start time.Time, end *tim
 		SeatCount:         seatCount,
 		PricePerSeatCents: pricePerSeatCents,
 		AmountCents:       amount,
+		Type:              "seat",
+		Description:       "Seat usage",
+		Quantity:          seatCount,
+		UnitPriceCents:    pricePerSeatCents,
 	}
+}
+
+func computeAddonLineItem(period domain.AddonBillingPeriod) domain.BillingLineItem {
+	item := computeLineItem(1, period.PriceCents, period.PeriodStart, period.PeriodEnd, period.BillingMonth)
+	item.Type = "addon"
+	item.Description = period.Name
+	item.AddonID = period.AddonID
+	item.Quantity = 1
+	item.UnitPriceCents = period.PriceCents
+	item.SeatCount = 0
+	item.PricePerSeatCents = 0
+	return item
 }
 
 // ── Paddle ─────────────────────────────────────────────────────────────────────

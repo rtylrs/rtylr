@@ -162,6 +162,11 @@ type BillingLineItemPayload struct {
 	SeatCount         int        `json:"seat_count"`
 	PricePerSeatCents int        `json:"price_per_seat_cents"`
 	AmountCents       int        `json:"amount_cents"`
+	Type              string     `json:"type"`
+	Description       string     `json:"description"`
+	AddonID           string     `json:"addon_id,omitempty"`
+	Quantity          int        `json:"quantity"`
+	UnitPriceCents    int        `json:"unit_price_cents"`
 }
 
 type BillingDetailPayload struct {
@@ -187,7 +192,7 @@ func (h *BillingDetailHandler) Serve(ctx context.Context, _ *BillingDetailReques
 		return BillingDetailResponse{}, errorModels.PermissionDeniedServerError()
 	}
 
-	detail, err := h.Service.GetBillingDetail(ctx, device.User.UserID)
+	detail, err := h.Service.GetBillingDetail(ctx, device.User.UserID, device.User.BusinessID)
 	if err != nil {
 		if errors.Is(err, domain.ErrSubscriptionNotFound) {
 			return BillingDetailResponse{Billing: nil}, nil
@@ -207,6 +212,11 @@ func (h *BillingDetailHandler) Serve(ctx context.Context, _ *BillingDetailReques
 			SeatCount:         li.SeatCount,
 			PricePerSeatCents: li.PricePerSeatCents,
 			AmountCents:       li.AmountCents,
+			Type:              li.Type,
+			Description:       li.Description,
+			AddonID:           li.AddonID,
+			Quantity:          li.Quantity,
+			UnitPriceCents:    li.UnitPriceCents,
 		})
 	}
 
@@ -252,7 +262,7 @@ func (h *BillingHistoryHandler) Serve(ctx context.Context, _ *BillingHistoryRequ
 		return BillingHistoryResponse{}, errorModels.PermissionDeniedServerError()
 	}
 
-	months, err := h.Service.GetBillingHistory(ctx, device.User.UserID, 12)
+	months, err := h.Service.GetBillingHistory(ctx, device.User.UserID, device.User.BusinessID, 12)
 	if err != nil {
 		return BillingHistoryResponse{}, &errorModels.ServerError{
 			HTTPCode: http.StatusInternalServerError,
@@ -271,6 +281,11 @@ func (h *BillingHistoryHandler) Serve(ctx context.Context, _ *BillingHistoryRequ
 				SeatCount:         li.SeatCount,
 				PricePerSeatCents: li.PricePerSeatCents,
 				AmountCents:       li.AmountCents,
+				Type:              li.Type,
+				Description:       li.Description,
+				AddonID:           li.AddonID,
+				Quantity:          li.Quantity,
+				UnitPriceCents:    li.UnitPriceCents,
 			})
 		}
 		payloads = append(payloads, BillingMonthPayload{

@@ -5,6 +5,8 @@ import (
 	"database/sql"
 	"encoding/json"
 	"errors"
+	"math"
+	"strconv"
 	"time"
 
 	sq "github.com/Masterminds/squirrel"
@@ -376,6 +378,73 @@ func (r *Repository) GetPeriodsForMonth(ctx context.Context, ownerID int64, mont
 	return periods, rows.Err()
 }
 
+func (r *Repository) GetAddonPeriodsForMonth(ctx context.Context, businessID int64, month time.Time) ([]domain.AddonBillingPeriod, error) {
+	if businessID <= 0 {
+		return []domain.AddonBillingPeriod{}, nil
+	}
+
+	billingMonth := time.Date(month.Year(), month.Month(), 1, 0, 0, 0, 0, time.UTC)
+	firstOfNextMonth := time.Date(billingMonth.Year(), billingMonth.Month()+1, 1, 0, 0, 0, 0, time.UTC)
+
+	query, args, err := sq.
+		Select("ba.addon_id", "a.name", "a.price", "ba.enabled_at", "ba.disabled_at").
+		From("business_addons ba").
+		Join("addons a ON a.id = ba.addon_id").
+		Where(sq.Eq{"ba.business_id": businessID, "a.is_free": false}).
+		Where(sq.Gt{"a.price": 0}).
+		Where(sq.Lt{"ba.enabled_at": firstOfNextMonth}).
+		Where(sq.Or{
+			sq.Eq{"ba.disabled_at": nil},
+			sq.GtOrEq{"ba.disabled_at": billingMonth},
+		}).
+		OrderBy("ba.enabled_at ASC", "ba.addon_id ASC").
+		PlaceholderFormat(sq.Question).
+		ToSql()
+	if err != nil {
+		return nil, err
+	}
+
+	rows, err := r.db.QueryContext(ctx, query, args...)
+	if err != nil {
+		return nil, err
+	}
+	defer rows.Close()
+
+	periods := make([]domain.AddonBillingPeriod, 0)
+	for rows.Next() {
+		var addonID, name, price string
+		var enabledAt time.Time
+		var disabledAt sql.NullTime
+		if err := rows.Scan(&addonID, &name, &price, &enabledAt, &disabledAt); err != nil {
+			return nil, err
+		}
+
+		start := enabledAt.UTC()
+		if start.Before(billingMonth) {
+			start = billingMonth
+		}
+
+		var end *time.Time
+		if disabledAt.Valid {
+			disabled := disabledAt.Time.UTC()
+			if disabled.Before(firstOfNextMonth) {
+				end = &disabled
+			}
+		}
+
+		periods = append(periods, domain.AddonBillingPeriod{
+			AddonID:      addonID,
+			Name:         name,
+			PriceCents:   decimalStringToCents(price),
+			PeriodStart:  start,
+			PeriodEnd:    end,
+			BillingMonth: billingMonth,
+		})
+	}
+
+	return periods, rows.Err()
+}
+
 func (r *Repository) GetBillingHistory(ctx context.Context, ownerID int64, limit int) ([]domain.BillingHistoryMonth, error) {
 	// Get distinct billing months that have closed periods (past months)
 	now := time.Now().UTC()
@@ -480,7 +549,22 @@ func computeLineItem(seatCount, pricePerSeatCents int, start time.Time, end *tim
 		SeatCount:         seatCount,
 		PricePerSeatCents: pricePerSeatCents,
 		AmountCents:       amount,
+		Type:              "seat",
+		Description:       "Seat usage",
+		Quantity:          seatCount,
+		UnitPriceCents:    pricePerSeatCents,
 	}
+}
+
+func decimalStringToCents(value string) int {
+	if value == "" {
+		return 0
+	}
+	amount, err := strconv.ParseFloat(value, 64)
+	if err != nil {
+		return 0
+	}
+	return int(math.Round(amount * 100))
 }
 
 // ── Paddle ─────────────────────────────────────────────────────────────────────
