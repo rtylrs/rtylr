@@ -68,11 +68,32 @@ func (h *GetLocationRosterHandler) Serve(ctx context.Context, req *GetLocationRo
 	if req.LocationID == 0 {
 		return GetLocationRosterResponse{}, &errorModels.ServerError{Code: http.StatusBadRequest, Message: "locationId required"}
 	}
+
+	// The roster exposes co-worker names + PIN status, so restrict it to the
+	// location's own people: owner/admin (manage all locations) or a member
+	// assigned to this location. Prevents enumerating other locations' staff.
+	if !isOwnerOrAdmin(authUser) {
+		assigned, accessErr := h.Service.IsAssignedToLocation(ctx, authUser.BusinessID, authUser.UserID, req.LocationID)
+		if accessErr != nil {
+			return GetLocationRosterResponse{}, &errorModels.ServerError{Code: http.StatusInternalServerError, Message: accessErr.Error()}
+		}
+		if !assigned {
+			return GetLocationRosterResponse{}, errorModels.PermissionDeniedServerError()
+		}
+	}
+
 	roster, err := h.Service.GetLocationRoster(ctx, authUser.BusinessID, req.LocationID)
 	if err != nil {
 		return GetLocationRosterResponse{}, &errorModels.ServerError{Code: http.StatusInternalServerError, Message: err.Error()}
 	}
 	return GetLocationRosterResponse{Roster: roster}, nil
+}
+
+// isOwnerOrAdmin reports whether the caller manages the whole business and so
+// may view any location. The owner's user id equals the business id; admins
+// carry the team admin role.
+func isOwnerOrAdmin(u *authPkg.AuthUser) bool {
+	return u.UserID == u.BusinessID || u.Role == "owner" || u.Role == "admin"
 }
 
 func AssignRoutes() []string { return []string{"/pos/access/assign"} }

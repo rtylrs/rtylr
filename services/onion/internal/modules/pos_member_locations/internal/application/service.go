@@ -61,6 +61,22 @@ func (s *Service) GetLocationRoster(ctx context.Context, businessID, locationID 
 	)
 }
 
+// IsAssignedToLocation reports whether the user has a pos_member_locations row
+// for the location. Reuses the cached per-user list so the roster authz check
+// is cheap.
+func (s *Service) IsAssignedToLocation(ctx context.Context, businessID, userID, locationID int64) (bool, error) {
+	locs, err := s.ListForUser(ctx, businessID, userID)
+	if err != nil {
+		return false, err
+	}
+	for _, l := range locs {
+		if l.LocationID == locationID {
+			return true, nil
+		}
+	}
+	return false, nil
+}
+
 func (s *Service) Assign(ctx context.Context, businessID, userID, locationID int64, canManagePOSUsers, canManageTerminals, canViewReports bool) (int64, error) {
 	id, err := s.repo.Assign(ctx, businessID, userID, locationID, canManagePOSUsers, canManageTerminals, canViewReports)
 	if err != nil {
